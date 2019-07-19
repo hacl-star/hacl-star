@@ -9,7 +9,7 @@ open Lib.ByteSequence
 open Lib.Buffer
 open Lib.ByteBuffer
 
-module F = Hacl.Impl.Ed25519.Field56
+module F56 = Hacl.Impl.Ed25519.Field56
 
 val hstore56_le:
     out:lbuffer uint8 32ul
@@ -28,7 +28,7 @@ val store_56:
   Stack unit
     (requires fun h -> live h out /\ live h b)
     (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
-      nat_to_bytes_le 32 (F.as_nat h0 b) == as_seq h1 out
+      nat_to_bytes_le 32 (F56.fevalh h0 b) == as_seq h1 out
     )
 
 let store_56 out b =

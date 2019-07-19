@@ -8,7 +8,8 @@ open Lib.Buffer
 
 open Hacl.Bignum25519
 
-module F = Hacl.Impl.Ed25519.Field56
+module F51 = Hacl.Impl.Ed25519.Field51
+module F56 = Hacl.Impl.Ed25519.Field56
 
 inline_for_extraction noextract
 val point_double_step_1:
@@ -70,7 +71,7 @@ val point_double_:
       live h out /\ live h p /\ live h tmp /\
       disjoint out p /\ disjoint tmp p /\ disjoint tmp out)
     (ensures fun h0 _ h1 -> modifies (loc out |+| loc tmp) h0 h1 /\
-      F.point_eval h1 out == Spec.Ed25519.point_double (F.point_eval h0 p)
+      F51.point_eval h1 out == Spec.Ed25519.point_double (F51.point_eval h0 p)
     )
 let point_double_ out p tmp =
   let tmp1 = sub tmp 0ul 5ul in
@@ -97,7 +98,7 @@ val point_double:
   Stack unit
     (requires fun h -> live h out /\ live h p /\ disjoint out p)
     (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
-      F.point_eval h1 out == Spec.Ed25519.point_double (F.point_eval h0 p)
+      F51.point_eval h1 out == Spec.Ed25519.point_double (F51.point_eval h0 p)
     )
 let point_double out p =
   push_frame();

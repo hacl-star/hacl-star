@@ -9,7 +9,9 @@ open Lib.ByteSequence
 open Lib.Sequence
 open Lib.Buffer
 
-module F = Hacl.Impl.Ed25519.Field56
+module F56 = Hacl.Impl.Ed25519.Field56
+
+#set-options "--z3rlimit 10 --max_fuel 0 --max_ifuel 0"
 
 inline_for_extraction noextract
 let point = lbuffer uint64 20ul
@@ -30,7 +32,6 @@ let point_mul_compress out s p =
   Hacl.Impl.Ed25519.PointCompress.point_compress out tmp;
   pop_frame()
 
-#set-options "--z3rlimit 10 --max_fuel 0 --max_ifuel 0"
 
 val point_mul_g_compress:
     out:lbuffer uint8 32ul
@@ -81,7 +82,7 @@ val sign_step_2:
       disjoint tmp_bytes msg /\ disjoint tmp_bytes tmp_ints /\
       disjoint tmp_ints msg)
     (ensures fun h0 _ h1 -> modifies (loc tmp_ints) h0 h1 /\
-      F.as_nat h1 (gsub tmp_ints 20ul 5ul) == Spec.Ed25519.sha512_modq (32 + v len)
+      F56.fevalh h1 (gsub tmp_ints 20ul 5ul) == Spec.Ed25519.sha512_modq (32 + v len)
         (concat #uint8 #32 #(v len) (as_seq h0 (gsub tmp_bytes 256ul 32ul)) (as_seq h0 msg)))
 
 let sign_step_2 len msg tmp_bytes tmp_ints =
@@ -105,7 +106,7 @@ val sign_step_3:
       // Postcondition
       as_seq h1 (gsub tmp_bytes 160ul 32ul) ==
       Spec.Ed25519.point_compress (Spec.Ed25519.point_mul
-        (nat_to_bytes_le 32 (F.as_nat h0 (gsub tmp_ints 20ul 5ul)))
+        (nat_to_bytes_le 32 (F56.fevalh h0 (gsub tmp_ints 20ul 5ul)))
         (Spec.Ed25519.g)))
 
 let sign_step_3 tmp_bytes tmp_ints =
@@ -136,7 +137,7 @@ val sign_step_4:
       // Framing
       as_seq h0 (gsub tmp_ints 20ul 5ul) == as_seq h1 (gsub tmp_ints 20ul 5ul) /\
       // Postcondition
-      F.as_nat h1 (gsub tmp_ints 60ul 5ul) ==
+      F56.fevalh h1 (gsub tmp_ints 60ul 5ul) ==
       Spec.Ed25519.sha512_modq (64 + v len)
         (concat #uint8 #64 #(v len)
           (concat #uint8 #32 #32
@@ -167,8 +168,8 @@ val sign_step_5:
       // Framing
       as_seq h0 (gsub tmp_bytes 160ul 32ul) == as_seq h1 (gsub tmp_bytes 160ul 32ul) /\
       // Postcondition
-      (let r = F.as_nat h0 (gsub tmp_ints 20ul 5ul) in
-       let h = F.as_nat h0 (gsub tmp_ints 60ul 5ul) in
+      (let r = F56.fevalh h0 (gsub tmp_ints 20ul 5ul) in
+       let h = F56.fevalh h0 (gsub tmp_ints 60ul 5ul) in
        let a = as_seq h0 (gsub tmp_bytes 224ul 32ul) in
       nat_from_bytes_le (as_seq h1 (gsub tmp_bytes 192ul 32ul)) ==
       (r + (h * nat_from_bytes_le a) % Spec.Ed25519.q) % Spec.Ed25519.q))

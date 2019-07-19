@@ -4,10 +4,13 @@ module ST = FStar.HyperStack.ST
 open FStar.HyperStack.All
 
 open Lib.IntTypes
+open Lib.ByteSequence
 open Lib.Buffer
 
-module S = Hacl.Spec.Ed25519.Field56.Definition
-module F = Hacl.Impl.Ed25519.Field56
+module S51 = Hacl.Spec.Curve25519.Field51.Definition
+module S56 = Hacl.Spec.Ed25519.Field56.Definition
+module F51 = Hacl.Impl.Ed25519.Field51
+module F56 = Hacl.Impl.Ed25519.Field56
 
 (* Type abbreviations *)
 inline_for_extraction noextract
@@ -47,7 +50,7 @@ val make_u64_5:
   Stack unit
     (requires fun h -> live h b)
     (ensures  fun h0 _ h1 -> modifies (loc b) h0 h1 /\
-      F.as_nat h1 b == S.as_nat5 (s0, s1, s2, s3, s4)
+      F51.as_nat h1 b == S51.as_nat5 (s0, s1, s2, s3, s4)
     )
 
 inline_for_extraction noextract
@@ -74,7 +77,7 @@ val make_zero:
   Stack unit
     (requires fun h -> live h b)
     (ensures  fun h0 _ h1 -> modifies (loc b) h0 h1 /\
-      F.fevalh h1 b == Spec.Curve25519.zero
+      F51.fevalh h1 b == Spec.Curve25519.zero
     )
 
 inline_for_extraction noextract
@@ -83,7 +86,7 @@ val make_one:
   Stack unit
     (requires fun h -> live h b)
     (ensures  fun h0 _ h1 -> modifies (loc b) h0 h1 /\
-      F.fevalh h1 b == Spec.Curve25519.one
+      F51.fevalh h1 b == Spec.Curve25519.one
     )
 
 val fsum:
@@ -119,7 +122,9 @@ val fmul:
   -> b:felem ->
   Stack unit
     (requires fun h -> live h out /\ live h a /\ live h b)
-    (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1)
+    (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+      F51.fevalh h1 out == Spec.Curve25519.fmul (F51.fevalh h0 a) (F51.fevalh h0 b)
+    )
 
 val times_2:
     out:felem
@@ -169,24 +174,33 @@ val inverse:
   -> a:felem ->
   Stack unit
     (requires fun h -> live h out /\ live h a /\ disjoint a out)
-    (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1)
+    (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+      F51.fevalh h1 out == Spec.Ed25519.modp_inv (F51.fevalh h0 a)
+    )
 
 val reduce:
   out:felem ->
   Stack unit
     (requires fun h -> live h out)
-    (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1)
+    (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+      F51.fevalh h1 out == F51.as_nat h1 out /\
+      F51.fevalh h0 out == F51.as_nat h1 out
+    )
 
 val load_51:
     output:lbuffer uint64 5ul
   -> input:lbuffer uint8 32ul ->
   Stack unit
     (requires fun h -> live h output /\ live h input)
-    (ensures  fun h0 _ h1 -> modifies (loc output) h0 h1)
+    (ensures  fun h0 _ h1 -> modifies (loc output) h0 h1 /\
+      F51.as_nat h1 output == nat_from_bytes_le (as_seq h0 input)
+    )
 
 val store_51:
     output:lbuffer uint8 32ul
   -> input:lbuffer uint64 5ul ->
   Stack unit
     (requires fun h -> live h input /\ live h output)
-    (ensures fun h0 _ h1 -> modifies (loc output) h0 h1)
+    (ensures fun h0 _ h1 -> modifies (loc output) h0 h1 /\
+      as_seq h1 output == nat_to_bytes_le 32 (F51.fevalh h0 input)
+    )

@@ -288,7 +288,7 @@ let inverse out a =
   Hacl.Curve25519.Finv.Field51.finv_51 out a tmp;
   pop_frame()
 
-let reduce out = reduce_ out
+let reduce out = reduce_ out; admit()
 
 let load_51 output input =
   let i0 = uint_from_bytes_le (sub input 0ul 8ul) in
@@ -301,7 +301,8 @@ let load_51 output input =
   let output2 = (i2 >>. 6ul ) &. mask_51 in
   let output3 = (i3 >>. 1ul ) &. mask_51 in
   let output4 = (i4 >>. 12ul) &. mask_51 in
-  make_u64_5 output output0 output1 output2 output3 output4
+  make_u64_5 output output0 output1 output2 output3 output4;
+  admit() // TODO: Replace by Curve
 
 val store_4:
   output:lbuffer uint8 32ul ->
@@ -329,4 +330,5 @@ let store_51 output input =
   let o1 = (t2 <<. 38ul) |. (t1 >>. 13ul) in
   let o2 = (t3 <<. 25ul) |. (t2 >>. 26ul) in
   let o3 = (t4 <<. 12ul) |. (t3 >>. 39ul) in
-  store_4 output o0 o1 o2 o3
+  store_4 output o0 o1 o2 o3;
+  admit() // TODO: Replace by Curve25519

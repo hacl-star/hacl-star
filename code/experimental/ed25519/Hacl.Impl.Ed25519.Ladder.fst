@@ -10,7 +10,8 @@ open Lib.Buffer
 open Hacl.Bignum25519
 
 module S = Hacl.Spec.Ed25519.Field56.Definition
-module F = Hacl.Impl.Ed25519.Field56
+module F56 = Hacl.Impl.Ed25519.Field56
+module F51 = Hacl.Impl.Ed25519.Field51
 
 #set-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0"
 
@@ -20,7 +21,7 @@ val make_point_inf:
   Stack unit
     (requires fun h -> live h b)
     (ensures  fun h0 _ h1 -> modifies (loc b) h0 h1 /\
-      F.point_eval h1 b == Spec.Curve25519.(zero, one, one, zero)
+      F51.point_eval h1 b == Spec.Curve25519.(zero, one, one, zero)
     )
 let make_point_inf b =
   let x = sub b 0ul 5ul in
@@ -38,7 +39,7 @@ val make_g:
   Stack unit
     (requires fun h -> live h g)
     (ensures fun h0 _ h1 -> modifies (loc g) h0 h1 /\
-      F.point_eval h1 g == Spec.Ed25519.g
+      F51.point_eval h1 g == Spec.Ed25519.g
     )
 
 let make_g g =
@@ -50,7 +51,14 @@ let make_g g =
   make_u64_5 gy (u64 0x0006666666666658) (u64 0x0004cccccccccccc) (u64 0x0001999999999999) (u64 0x0003333333333333) (u64 0x0006666666666666);
   make_one gz;
   make_u64_5 gt (u64 0x00068ab3a5b7dda3) (u64 0x00000eea2a5eadbb) (u64 0x0002af8df483c27e) (u64 0x000332b375274732) (u64 0x00067875f0fd78b7);
-  admit()
+
+  (**) assert_norm (Spec.Ed25519.g_x ==
+    Hacl.Spec.Curve25519.Field51.Definition.as_nat5 (u64 0x00062d608f25d51a, u64 0x000412a4b4f6592a, u64 0x00075b7171a4b31d, u64 0x0001ff60527118fe, u64 0x000216936d3cd6e5) % Spec.Curve25519.prime);
+  (**) assert_norm (Spec.Ed25519.g_y ==
+    Hacl.Spec.Curve25519.Field51.Definition.as_nat5 (u64 0x0006666666666658, u64 0x0004cccccccccccc, u64 0x0001999999999999, u64 0x0003333333333333, u64 0x0006666666666666) %
+      Spec.Curve25519.prime);
+  (**) assert_norm (Mktuple4?._4 Spec.Ed25519.g ==
+    Hacl.Spec.Curve25519.Field51.Definition.as_nat5 (u64 0x00068ab3a5b7dda3, u64 0x00000eea2a5eadbb, u64 0x0002af8df483c27e, u64 0x000332b375274732, u64 0x00067875f0fd78b7) % Spec.Curve25519.prime)
 
 inline_for_extraction noextract
 val ith_bit:
@@ -81,12 +89,12 @@ val loop_step:
   Stack unit
     (requires fun h -> live h b /\ live h k /\ disjoint k b)
     (ensures  fun h0 _ h1 -> modifies (loc b) h0 h1 /\
-      (F.point_eval h1 (gsub b 0ul 20ul), F.point_eval h1 (gsub b 20ul 20ul)) ==
+      (F51.point_eval h1 (gsub b 0ul 20ul), F51.point_eval h1 (gsub b 20ul 20ul)) ==
       Spec.Ed25519.ladder_step (as_seq h0 k) (v ctr)
-       (F.point_eval h0 (gsub b 0ul 20ul), F.point_eval h0 (gsub b 20ul 20ul))
+       (F51.point_eval h0 (gsub b 0ul 20ul), F51.point_eval h0 (gsub b 20ul 20ul))
     )
 
-#set-options "--z3rlimit 60"
+#push-options "--z3rlimit 60"
 
 let lemma_to_u8_to_u64 (i:uint8) : Lemma (to_u8 (to_u64 i) == i)
   = ()
@@ -104,17 +112,19 @@ let loop_step b k ctr =
   Hacl.Impl.Ed25519.PointAdd.point_add nqpq2 nq nqpq;
   Hacl.Impl.Ed25519.SwapConditional.swap_conditional nq nqpq nq2 nqpq2 (to_u64 i)
 
+#pop-options
+
 inline_for_extraction noextract
 val point_mul_:
     b:lbuffer uint64 80ul
   -> k:lbuffer uint8 32ul ->
   Stack unit
     (requires fun h -> live h k /\ live h b /\ disjoint b k /\
-      F.point_eval h (gsub b 0ul 20ul) == Spec.Curve25519.(zero, one, one, zero)
+      F51.point_eval h (gsub b 0ul 20ul) == Spec.Curve25519.(zero, one, one, zero)
     )
     (ensures  fun h0 _ h1 -> modifies (loc b) h0 h1 /\
-       F.point_eval h1 (gsub b 0ul 20ul) ==
-       Spec.Ed25519.point_mul (as_seq h0 k) (F.point_eval h0 (gsub b 20ul 20ul))
+       F51.point_eval h1 (gsub b 0ul 20ul) ==
+       Spec.Ed25519.point_mul (as_seq h0 k) (F51.point_eval h0 (gsub b 20ul 20ul))
     )
 
 #set-options "--z3rlimit 60 --max_fuel 0 --max_ifuel 0"
@@ -127,7 +137,7 @@ let point_mul_ b k =
 
   [@inline_let]
   let acc h : GTot (Spec.Ed25519.ext_point & Spec.Ed25519.ext_point) =
-    F.point_eval h (gsub b 0ul 20ul), F.point_eval h (gsub b 20ul 20ul)
+    F51.point_eval h (gsub b 0ul 20ul), F51.point_eval h (gsub b 20ul 20ul)
   in
 
   [@inline_let]
@@ -148,7 +158,7 @@ val point_mul:
   Stack unit
     (requires fun h -> live h scalar /\ live h q /\ live h result)
     (ensures  fun h0 _ h1 -> modifies (loc result) h0 h1 /\
-      F.point_eval h1 result == Spec.Ed25519.point_mul (as_seq h0 scalar) (F.point_eval h0 q)
+      F51.point_eval h1 result == Spec.Ed25519.point_mul (as_seq h0 scalar) (F51.point_eval h0 q)
     )
 
 let point_mul result scalar q =
@@ -169,7 +179,7 @@ val point_mul_g:
     (requires fun h ->
       live h scalar /\ live h result /\ disjoint result scalar)
     (ensures  fun h0 _ h1 -> modifies (loc result) h0 h1 /\
-      F.point_eval h1 result == Spec.Ed25519.point_mul (as_seq h0 scalar) Spec.Ed25519.g
+      F51.point_eval h1 result == Spec.Ed25519.point_mul (as_seq h0 scalar) Spec.Ed25519.g
     )
 let point_mul_g result scalar =
   push_frame();

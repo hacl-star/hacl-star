@@ -26,8 +26,8 @@ noextract
 val as_nat5: f:felem5 -> GTot nat
 let as_nat5 f =
   let (s0, s1, s2, s3, s4) = f in
-   (uint_v s0 % pow56) +
-   (uint_v s1 % pow56) * pow56 +
-   (uint_v s2 % pow56) * pow56 * pow56 +
-   (uint_v s3 % pow56) * pow56 * pow56 * pow56 +
-   (uint_v s4 % pow32) * pow56 * pow56 * pow56 * pow56
+   uint_v s0 +
+   uint_v s1 * pow56 +
+   uint_v s2 * pow56 * pow56 +
+   uint_v s3 * pow56 * pow56 * pow56 +
+   uint_v s4 * pow56 * pow56 * pow56 * pow56

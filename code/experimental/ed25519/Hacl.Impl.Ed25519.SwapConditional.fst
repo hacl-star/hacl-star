@@ -9,7 +9,8 @@ open Lib.Buffer
 
 open Hacl.Bignum25519
 
-module F = Hacl.Impl.Ed25519.Field56
+module F51 = Hacl.Impl.Ed25519.Field51
+module F56 = Hacl.Impl.Ed25519.Field56
 
 val swap_conditional_step:
     out_a:felem
@@ -63,8 +64,8 @@ val swap_conditional:
       disjoint out_a out_b /\ disjoint a out_a /\disjoint a out_b /\
       disjoint b out_b /\ disjoint b out_a /\ disjoint a b)
     (ensures  fun h0 _ h1 -> modifies (loc out_a |+| loc out_b) h0 h1 /\
-      (F.point_eval h1 out_a, F.point_eval h1 out_b) ==
-      Spec.Ed25519.cswap2 (to_u8 i) (F.point_eval h0 a) (F.point_eval h0 b)
+      (F51.point_eval h1 out_a, F51.point_eval h1 out_b) ==
+      Spec.Ed25519.cswap2 (to_u8 i) (F51.point_eval h0 a) (F51.point_eval h0 b)
     )
 //      (if v i = 1 then (as_seq h1 out_a == as_seq h0 b /\ as_seq h1 out_b == as_seq h0 a)
 //         else (as_seq h1 out_a == as_seq h0 a /\ as_seq h1 out_b == as_seq h0 b))
@@ -83,8 +84,8 @@ val swap_conditional_inplace:
   Stack unit
     (requires fun h -> live h a /\ live h b /\ disjoint a b)
     (ensures  fun h0 _ h1 -> modifies (loc a |+| loc b) h0 h1 /\
-      (F.point_eval h1 a, F.point_eval h1 b) ==
-      Spec.Ed25519.cswap2 (to_u8 i) (F.point_eval h0 a) (F.point_eval h0 b)
+      (F51.point_eval h1 a, F51.point_eval h1 b) ==
+      Spec.Ed25519.cswap2 (to_u8 i) (F51.point_eval h0 a) (F51.point_eval h0 b)
     )
 let swap_conditional_inplace a b iswap =
   let swap = u64 0 -. iswap in

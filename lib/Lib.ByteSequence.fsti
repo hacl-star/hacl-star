@@ -159,7 +159,7 @@ val lemma_nat_to_from_bytes_be_preserves_value: #l:secrecy_level -> b:bytes_l l 
   (requires (True))
   (ensures  (nat_from_bytes_be (nat_to_bytes_be #l len x) == x))
 
-val lemma_nat_to_from_bytes_le_preserves_value: #l:secrecy_level -> b:bytes_l l -> len:size_nat{len == length b} -> x:size_nat{x < pow2 (8 * len)} ->
+val lemma_nat_to_from_bytes_le_preserves_value: #l:secrecy_level -> b:bytes_l l -> len:size_nat{len == length b} -> x:nat{x < pow2 (8 * len)} ->
   Lemma
   (requires (True))
   (ensures  (nat_from_bytes_le (nat_to_bytes_le #l len x) == x))
