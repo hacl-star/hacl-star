@@ -527,7 +527,66 @@ procedure GhashUnroll_n(
     lemma_to_of_quad32(reverse_bytes_quad32(ghash_incremental(h_LE, y_prev, data)));
 }
 
-procedure Ghash_incremental(
+
+// Expects input to be hashed to reside in Ii
+procedure Ghash_register(
+        ghost hkeys_b:buffer128,
+        ghost scratch_b:buffer128,
+        ghost h_LE:quad32,
+        ghost y_prev:quad32)
+    {:public}
+    {:quick}
+    lets
+        Xip @= r9; scratch_ptr @= rcx;
+        Ii @= xmm0; T1 @= xmm1; T2 @= xmm2; Hkey @= xmm3;
+        Z0 @= xmm4; Z1 @= xmm5; Z2 @= xmm6; Z3 @= xmm7;
+        Xi @= xmm8;
+        h := of_quad32(reverse_bytes_quad32(h_LE));
+        data := create(1, reverse_bytes_quad32(Ii));
+        prev := of_quad32(reverse_bytes_quad32(y_prev));
+        pdata := fun_seq_quad32_LE_poly128(data);
+    reads
+        mem; memTaint; Xip; rbp; 
+    modifies
+        efl; scratch_ptr; Ii; T1; T2; Hkey; Z0; Z1; Z2; Z3; Xi;
+    requires
+        pclmulqdq_enabled && avx_enabled;
+        hkeys_b_powers(hkeys_b, mem, memTaint, Xip - 0x20, h);
+        of_quad32(Xi) == prev;
+    ensures
+        Xi == reverse_bytes_quad32(ghash_incremental(h_LE, y_prev, old(data)));
+{
+    Load128_buffer(Z1, Xip, (-0x20), Secret, hkeys_b, 0);
+    assert of_quad32(Z1) == gf128_power(h, 1);
+
+    assert Ii == reverse_bytes_quad32(index(data, #nat(0)));
+    let data_i := #poly(pdata(0));
+    VPolyAdd(Ii, Xi, Ii);
+    VPolyMul(T1, Ii, Z1, false, false);
+    VPolyMul(T2, Ii, Z1, false, true);
+    VPolyMul(Hkey, Ii, Z1, true, false);
+    VPolyMul(Z1, Ii, Z1, true, true);
+    lemma_Mul128_accum(~~Z0, ~~Z2, ~~Z3, prev +. data_i, gf128_power(h, 1));
+    Mov128(Z0, T1);
+    lemma_Mul128(prev +. data_i, gf128_power(h, 1));
+    VPolyAdd(Z2, T2, Hkey);
+    Mov128(Z3, Z1);
+    ZeroXmm(Hkey);
+    PinsrdImm(Hkey, 0xc2000000, 3, scratch_ptr);
+    lemma_gf128_low_shift();
+    lemma_gf128_degree();
+    Reduce(gf128_modulus_low_terms);
+    assert of_quad32(Xi) == mod_rev(128, ghash_unroll_back(h, prev, pdata, 0, 1, 0), gf128_modulus);
+    lemma_ghash_unroll_back_forward(h, prev, pdata, 0, 0);
+    assert of_quad32(Xi) == mod_rev(128, ghash_unroll(h, prev, pdata, 0, 0, 0), gf128_modulus);
+    lemma_ghash_poly_of_unroll(h, prev, pdata, 0, 0);
+    assert of_quad32(Xi) == ghash_poly(h, prev, pdata, 0, 1);
+    lemma_ghash_incremental_poly(h_LE, y_prev, data);
+    assert of_quad32(Xi) == of_quad32(reverse_bytes_quad32(ghash_incremental(h_LE, y_prev, data)));
+    lemma_to_of_quad32(reverse_bytes_quad32(ghash_incremental(h_LE, y_prev, data)));
+}
+
+procedure Ghash_buffer(
         ghost hkeys_b:buffer128,
         ghost in_b:buffer128,
         ghost h_LE:quad32,
