@@ -9,6 +9,12 @@ open Lib.Buffer
 
 open Hacl.Bignum25519
 
+module F51 = Hacl.Impl.Ed25519.Field51
+module S51 = Hacl.Spec.Curve25519.Field51.Definition
+
+module SC = Spec.Curve25519
+module SE = Spec.Ed25519
+
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
 inline_for_extraction noextract
@@ -19,8 +25,16 @@ val recover_x_step_1:
     x2:elemB
   -> y:elemB ->
   Stack unit
-    (requires fun h -> live h x2 /\ live h y /\ disjoint x2 y)
-    (ensures  fun h0 _ h1 -> modifies (loc x2) h0 h1)
+    (requires fun h -> live h x2 /\ live h y /\ disjoint x2 y /\
+      F51.mul_inv_t h y
+    )
+    (ensures  fun h0 _ h1 -> modifies (loc x2) h0 h1 /\
+      F51.mul_inv_t h1 x2 /\
+      (let y = F51.fevalh h0 y in
+       let x2 = F51.fevalh h1 x2 in
+       let y2 = y `SC.fmul` y in
+       x2 == (y2 `SC.fsub` SC.one) `SC.fmul` (SE.modp_inv ((SE.d `SC.fmul` y2) `SC.fadd` SC.one)))
+    )
 let recover_x_step_1 x2 y =
   push_frame();
   let tmp = create 25ul (u64 0) in
@@ -35,15 +49,16 @@ let recover_x_step_1 x2 y =
   reduce_513 dyy;
   inverse dyyi dyy; // dyyi = modp_inv ((d `fmul` (y `fmul` y)) `fadd` one)
   fdifference one y2; // one = (y `fmul` y) `fsub` 1
-  fmul x2 dyyi one; //
-  reduce x2;
+  fmul x2 one dyyi; //
   pop_frame()
 
 val is_0:
   x:elemB ->
   Stack bool
-    (requires fun h -> live h x)
-    (ensures  fun h0 b h1 -> h0 == h1)
+    (requires fun h -> live h x /\ F51.as_nat h x == F51.fevalh h x)
+    (ensures  fun h0 b h1 -> h0 == h1 /\
+      b <==> (F51.fevalh h0 x == SC.zero)
+    )
 let is_0 x =
   let open Lib.RawIntTypes in
   let open FStar.UInt64 in
@@ -61,13 +76,18 @@ let is_0 x =
 val mul_modp_sqrt_m1:
   x:elemB ->
   Stack unit
-    (requires fun h -> live h x)
-    (ensures  fun h0 _ h1 -> modifies (loc x) h0 h1)
+    (requires fun h -> live h x /\ F51.mul_inv_t h x)
+    (ensures  fun h0 _ h1 -> modifies (loc x) h0 h1 /\
+      F51.mul_inv_t h1 x /\
+      F51.fevalh h1 x == F51.fevalh h0 x `SC.fmul` SE.modp_sqrt_m1
+    )
 let mul_modp_sqrt_m1 x =
   push_frame();
   let sqrt_m1 = create 5ul (u64 0) in
   make_u64_5 sqrt_m1
     (u64 0x00061b274a0ea0b0) (u64 0x0000d5a5fc8f189d) (u64 0x0007ef5e9cbd0c60) (u64 0x00078595a6804c9e) (u64 0x0002b8324804fc1d);
+
+  assert_norm (S51.as_nat5 (u64 0x00061b274a0ea0b0, u64 0x0000d5a5fc8f189d, u64 0x0007ef5e9cbd0c60, u64 0x00078595a6804c9e, u64 0x0002b8324804fc1d) == SE.modp_sqrt_m1);
   fmul x x sqrt_m1;
   pop_frame()
 
@@ -75,8 +95,12 @@ inline_for_extraction noextract
 val gte_q:
   x:elemB ->
   Stack bool
-    (requires fun h -> live h x)
-    (ensures  fun h0 b h1 -> h0 == h1)
+    (requires fun h -> live h x /\
+      F51.felem_fits h x (1, 1, 1, 1, 1)
+    )
+    (ensures  fun h0 b h1 -> h0 == h1 /\
+      b <==> (F51.as_nat h0 x >= SC.prime)
+    )
 let gte_q x =
   let open Lib.RawIntTypes in
   let open FStar.UInt64 in
@@ -99,6 +123,7 @@ val fdifference_norm:
     (requires fun h -> live h x /\ live h y /\ disjoint x y)
     (ensures  fun h0 _ h1 -> modifies (loc x) h0 h1)
 let fdifference_norm x y =
+  admit();
   fdifference x y;
   reduce_513 x;
   reduce x
@@ -145,6 +170,7 @@ let recover_x_step_3 tmp =
   let t0  = sub tmp 10ul 5ul in
   let t1  = sub tmp 15ul 5ul in
   Hacl.Impl.Ed25519.Pow2_252m2.pow2_252m2 x3 x2;
+  admit();
   fsquare t0 x3;
   copy t1 x2;
   fdifference_norm t1 t0;
@@ -167,6 +193,7 @@ let recover_x_step_4 tmp =
   let x3  = sub tmp 5ul 5ul in
   let t0  = sub tmp 10ul 5ul in
   let t1  = sub tmp 15ul 5ul in
+  admit();
   fsquare t0 x3;
   copy t1 x2;
   fdifference_norm t1 t0;
@@ -210,6 +237,7 @@ let recover_x_ x y sign tmp =
   let res =
   if b then false
   else (
+    admit();
     recover_x_step_1 x2 y;
     let z = recover_x_step_2 x sign x2 in
     if (u8_to_UInt8 z =^ 0uy) then false
