@@ -1609,11 +1609,17 @@ let split3 #a l i =
   let b :: c = as in
   a, b, c
 
-let rec is_empty_codes (c:codes) : bool =
+let rec is_empty_code (c:code) : bool =
+  match c with
+  | Ins _ -> false
+  | Block l -> is_empty_codes l
+  | IfElse _ t f -> is_empty_code t && is_empty_code f
+  | While _ c -> is_empty_code c
+
+and is_empty_codes (c:codes) : bool =
   match c with
   | [] -> true
-  | Block l :: xs -> is_empty_codes l && is_empty_codes xs
-  | x :: xs -> false
+  | x :: xs -> is_empty_code x && is_empty_codes xs
 
 let rec perform_reordering_with_hint (t:transformation_hint) (c:codes) : possibly codes =
   match c with
@@ -1815,15 +1821,28 @@ let rec lemma_append_single (xs:list 'a) (y:'a) (i:nat) :
   | x :: xs -> lemma_append_single xs y (i - 1)
 
 #push-options "--initial_fuel 3 --max_fuel 3 --initial_ifuel 1 --max_ifuel 1"
-let rec lemma_is_empty_codes (cs:codes) (fuel:nat) (s:machine_state) :
+let rec lemma_is_empty_code (c:code) (fuel:nat) (s:machine_state) :
+  Lemma
+    (requires (is_empty_code c))
+    (ensures (equiv_ostates (machine_eval_code c fuel s) (machine_eval_codes [] fuel s))) =
+  match c with
+  | Ins _ -> ()
+  | Block l -> lemma_is_empty_codes l fuel s
+  | IfElse _ t f -> admit (); lemma_is_empty_code t fuel s; lemma_is_empty_code f fuel s
+  | While _ c -> admit (); lemma_is_empty_code c fuel s
+and lemma_is_empty_codes (cs:codes) (fuel:nat) (s:machine_state) :
   Lemma
     (requires (is_empty_codes cs))
-    (ensures (machine_eval_codes cs fuel s == machine_eval_codes [] fuel s)) =
+    (ensures (equiv_ostates (machine_eval_codes cs fuel s) (machine_eval_codes [] fuel s))) =
   match cs with
   | [] -> ()
-  | Block l :: xs ->
-    lemma_is_empty_codes l fuel s;
-    lemma_is_empty_codes xs fuel s
+  | x :: xs ->
+    lemma_is_empty_code x fuel s;
+    lemma_is_empty_codes xs fuel s;
+    match machine_eval_code x fuel s with
+    | None -> ()
+    | Some s' ->
+      lemma_eval_codes_equiv_states xs fuel s s'
 #pop-options
 
 #push-options "--z3rlimit 20 --initial_fuel 3 --max_fuel 3 --initial_ifuel 1 --max_ifuel 1"
@@ -1844,7 +1863,11 @@ let rec lemma_perform_reordering_with_hint (t:transformation_hint) (cs:codes) (f
   let x :: xs = cs in
   if is_empty_codes [x] then (
     lemma_is_empty_codes [x] fuel s;
-    lemma_perform_reordering_with_hint t xs fuel s
+    match machine_eval_code x fuel s with
+    | None -> ()
+    | Some s' ->
+      lemma_eval_codes_equiv_states xs fuel s s';
+      lemma_perform_reordering_with_hint t xs fuel s
   ) else (
     match t with
     | MoveUpFrom i -> (
