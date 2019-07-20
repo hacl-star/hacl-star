@@ -33,6 +33,7 @@ include{:fstar}{:open} "Vale.AES.GF128_s"
 include{:fstar}{:open} "Vale.AES.GF128"
 include{:fstar}{:open} "Vale.AES.GHash"
 include "Vale.AES.X64.AESopt2.vaf"
+include "Vale.AES.X64.AESGCM_expected_code.vaf"
 
 module Vale.AES.X64.AESGCM
 
@@ -71,6 +72,7 @@ open Vale.AES.GF128_s
 open Vale.AES.GF128
 open Vale.AES.GHash
 open Vale.AES.X64.AESopt2
+open Vale.AES.X64.AESGCM_expected_code
 open Vale.Transformers.Transform
 #endverbatim
 
@@ -614,80 +616,6 @@ procedure Loop6x_preamble(
 
     Vale.Def.Opaque_s.reveal_opaque(rounds);
     commute_sub_bytes_shift_rows_forall();
-}
-
-procedure Loop6x_step1_expected_code(
-        inline alg:algorithm,  // OpenSSL includes the number of rounds (nr) as a dynamic parameter (stored with the key).  Saves code space but adds extra instructions to the fast path.  Maybe branch predictor is good enough for it not to matter
-        inline rnd:nat,
-        inline in0_offset:nat,
-        inline stack_offset:nat,
-        ghost h:poly,
-        ghost prev:poly,
-        ghost data:seq(quad32),
-        ghost in0_count:nat,
-        ghost in0_b:buffer128,
-        ghost scratch_b:buffer128,
-
-        ghost key_words:seq(nat32),
-        ghost round_keys:seq(quad32),
-        ghost keys_b:buffer128,
-        ghost hkeys_b:buffer128,
-
-        ghost init0:quad32,
-        ghost init1:quad32,
-        ghost init2:quad32,
-        ghost init3:quad32,
-        ghost init4:quad32,
-        ghost init5:quad32)
-    {:codeOnly}
-    lets
-//      inp @= rdi; outp @= rsi; len @= rdx; key @= rcx; ivp @= r8;
-        key @= rcx; Xip @= r9;
-        Ii @= xmm0; T2 @= xmm2; Hkey @= xmm3;
-        Z1 @= xmm5; Xi @= xmm8;
-        inout0 @= xmm9; inout1 @= xmm10; inout2 @= xmm11; inout3 @= xmm12;
-        inout4 @= xmm13; inout5 @= xmm14; rndkey @= xmm15;
-//      counter @= rbx; rounds @= rbp; ret @= r10; constp @= r11; in0 @= r14; end0 @= r15;
-        in0 @= r14;
-{
-    Load128_buffer(rndkey, key, (0x10 * (rnd + 1))-0x80, Secret, keys_b, rnd + 1);
-
-// vpclmulqdq \$0x01,$Hkey,$Ii,$T2
-    VPolyMul(T2, Ii, Hkey, true, false);
-
-//   vaesenc $rndkey,$inout0,$inout0
-    VAESNI_enc(inout0, inout0, rndkey);
-//  vpxor  16+8(%rbp),$Xi,$Xi # modulo-scheduled [vpxor $Z3,$Xi,$Xi]
-    VPolyAdd(Xi, Xi, Mem128(rbp, 0x10, Secret, scratch_b, 1));  // # modulo-scheduled [vpxor $Z3,$Xi,$Xi]
-// vpclmulqdq \$0x11,$Hkey,$Ii,$Hkey
-    VPolyMul(Hkey, Ii, Hkey, true, true);
-//  vmovdqu 0x40+8(%rbp),$Ii # I[3]
-    Load128_buffer(Ii, rbp, 0x40, Secret, scratch_b, 4);
-//   vaesenc $rndkey,$inout1,$inout1
-    VAESNI_enc(inout1, inout1, rndkey);
-
-
-
-// movbe  0x58($in0),%r13
-//   vaesenc $rndkey,$inout2,$inout2
-// movbe  0x50($in0),%r12
-//   vaesenc $rndkey,$inout3,$inout3
-    LoadBe64_buffer128(r13, in0, in0_offset*16+8, Secret, true,  in0_b, in0_count*6 + in0_offset);
-    VAESNI_enc(inout2, inout2, rndkey);
-    LoadBe64_buffer128(r12, in0, in0_offset*16,   Secret, false, in0_b, in0_count*6 + in0_offset);
-    VAESNI_enc(inout3, inout3, rndkey);
-
-// mov  %r13,0x20+8(%rbp)
-//   vaesenc $rndkey,$inout4,$inout4
-// mov  %r12,0x28+8(%rbp)
-    Store64_buffer128(rbp, r13, stack_offset*16,   Secret, false, scratch_b, stack_offset);  // OpenSSL is further offset by 8 (to account for return addr?)
-    VAESNI_enc(inout4, inout4, rndkey);
-    Store64_buffer128(rbp, r12, stack_offset*16+8, Secret, true,  scratch_b, stack_offset);   // OpenSSL is further offset by 8 (to account for return addr?)
-
-// vmovdqu  0x30-0x20($Xip),$Z1 # borrow $Z1 for $Hkey^3
-    Load128_buffer(Z1, Xip, 0x30-0x20, Secret, hkeys_b, 3);  // # borrow $Z1 for $Hkey^3
-//   vaesenc $rndkey,$inout5,$inout5
-    VAESNI_enc(inout5, inout5, rndkey);
 }
 
 procedure Loop6x_step1_aes(
