@@ -414,6 +414,8 @@ let spec_update_last
     (i:nat) =
     blake2_update_last a len
 
+
+// BB. This naming is just bad. Change it !
 let blake2_update a s d kk =
   let ll = length d in
   let klen = if kk = 0 then 0 else 1 in
@@ -421,7 +423,6 @@ let blake2_update a s d kk =
     (spec_update_block a ((klen + 1) * size_block a))
     (spec_update_last a (klen * (size_block a) + ll))
     s
-
 
 val blake2_finish:
     a:alg
