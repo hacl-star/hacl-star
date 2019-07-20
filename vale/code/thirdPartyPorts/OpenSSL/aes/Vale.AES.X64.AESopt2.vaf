@@ -104,7 +104,7 @@ function hkeys_b_powers(hkeys_b:buffer128, mem:vale_heap, memTaint:memtaint, ptr
 function scratch_b_data(hkeys_b:buffer128, scratch_len:int, mem:vale_heap, memTaint:memtaint, ptr:int, data:seq(quad32)):prop extern;
 
 procedure MulAdd_unroll_i(
-        inline scratch_len:nat64,
+        ghost scratch_len:nat64,
         ghost n:nat,
         ghost m:int,
         inline is_first:bool,
@@ -202,7 +202,7 @@ procedure MulAdd_unroll_i(
 }
 
 procedure MulAdd_unroll_n(
-        inline scratch_len:nat64,
+        ghost scratch_len:nat64,
         ghost hkeys_b:buffer128,
         ghost scratch_b:buffer128,
         ghost h:poly,
@@ -230,6 +230,7 @@ procedure MulAdd_unroll_n(
         rbp + 0x10 * scratch_len <= pow2_64;
         of_quad32(Xi) == prev;
         n_reg == n;
+        scratch_ptr == scratch_len;
     ensures
         1 <= n <= 6 ==> of_quad32(Z0) +. shift(of_quad32(Z2), 64) +. shift(of_quad32(Z3), 128) ==
             ghash_unroll_back(h, prev, pdata, 0, n, #nat(n - 1));
@@ -237,7 +238,6 @@ procedure MulAdd_unroll_n(
     Load128_buffer(Z1, Xip, (-0x20), Secret, hkeys_b, 0);
     // assert of_quad32(Z1) == gf128_power(h, 1);
     let scratch_index := scratch_len - n;
-    Mov64(scratch_ptr, scratch_len);
     Sub64(scratch_ptr, n_reg);
     IMul64(scratch_ptr, 0x10);
     Add64(scratch_ptr, rbp);
@@ -473,7 +473,7 @@ procedure Reduce(ghost f:poly)
 }
 
 procedure GhashUnroll_n(
-        inline scratch_len:nat64,
+        ghost scratch_len:nat64,
         ghost hkeys_b:buffer128,
         ghost scratch_b:buffer128,
         ghost h_LE:quad32,
@@ -504,6 +504,7 @@ procedure GhashUnroll_n(
         rbp + 0x10 * scratch_len <= pow2_64;
         of_quad32(Xi) == prev;
         n_reg == n;
+        scratch_ptr == scratch_len;
     ensures
         Xi == reverse_bytes_quad32(ghash_incremental(h_LE, y_prev, data));
 {
