@@ -216,6 +216,7 @@ procedure MulAdd_unroll_n(
         Xi @= xmm8;
         pdata := fun_seq_quad32_LE_poly128(data);
         n := length(data);
+        scratch_index := scratch_len - n;
     reads
         mem; memTaint; Xip; rbp; n_reg;
     modifies
@@ -230,18 +231,13 @@ procedure MulAdd_unroll_n(
         rbp + 0x10 * scratch_len <= pow2_64;
         of_quad32(Xi) == prev;
         n_reg == n;
-        scratch_ptr == scratch_len;
+        scratch_ptr == rbp + 0x10 * scratch_index;
     ensures
         1 <= n <= 6 ==> of_quad32(Z0) +. shift(of_quad32(Z2), 64) +. shift(of_quad32(Z3), 128) ==
             ghash_unroll_back(h, prev, pdata, 0, n, #nat(n - 1));
 {
     Load128_buffer(Z1, Xip, (-0x20), Secret, hkeys_b, 0);
     // assert of_quad32(Z1) == gf128_power(h, 1);
-    let scratch_index := scratch_len - n;
-    Sub64(scratch_ptr, n_reg);
-    IMul64(scratch_ptr, 0x10);
-    Add64(scratch_ptr, rbp);
-    // assert scratch_ptr == rbp + 0x10 * scratch_index;
     Load128_buffer(Ii, scratch_ptr, 0, Secret, scratch_b, scratch_index);
     // assert Ii == reverse_bytes_quad32(index(data, #nat(n - 1)));
     if (n_reg == 1)
@@ -490,6 +486,7 @@ procedure GhashUnroll_n(
         prev := of_quad32(reverse_bytes_quad32(y_prev));
         pdata := fun_seq_quad32_LE_poly128(data);
         n := length(data);
+        scratch_index := scratch_len - n;
     reads
         mem; memTaint; Xip; rbp; n_reg;
     modifies
@@ -504,7 +501,7 @@ procedure GhashUnroll_n(
         rbp + 0x10 * scratch_len <= pow2_64;
         of_quad32(Xi) == prev;
         n_reg == n;
-        scratch_ptr == scratch_len;
+        scratch_ptr == rbp + 0x10 * scratch_index;
     ensures
         Xi == reverse_bytes_quad32(ghash_incremental(h_LE, y_prev, data));
 {
