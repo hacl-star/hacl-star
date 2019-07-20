@@ -32,7 +32,7 @@ val point_double_step_1:
        F51.mul_inv_t h1 (gsub tmp 0ul 5ul) /\
        F51.mul_inv_t h1 (gsub tmp 5ul 5ul) /\
        F51.felem_fits h1 (gsub tmp 10ul 5ul) (2, 4, 2, 2, 2) /\
-       F51.mul_inv_t h1 (gsub tmp 15ul 5ul) /\
+       F51.felem_fits h1 (gsub tmp 15ul 5ul) (2, 4, 2, 2, 2) /\
        F51.fevalh h1 (gsub tmp 0ul 5ul) == a /\
        F51.fevalh h1 (gsub tmp 5ul 5ul) == b /\
        F51.fevalh h1 (gsub tmp 10ul 5ul) == h /\
@@ -67,7 +67,7 @@ val point_double_step_2:
        F51.mul_inv_t h (gsub tmp 0ul 5ul) /\
        F51.mul_inv_t h (gsub tmp 5ul 5ul) /\
        F51.felem_fits h (gsub tmp 10ul 5ul) (2, 4, 2, 2, 2) /\
-       F51.mul_inv_t h (gsub tmp 15ul 5ul)
+       F51.felem_fits h (gsub tmp 15ul 5ul) (2, 4, 2, 2, 2)
     )
     (ensures  fun h0 _ h1 -> modifies (loc tmp) h0 h1 /\
      ( let x1, y1, z1, t1 = F51.point_eval h0 p in
@@ -105,6 +105,7 @@ let point_double_step_2 p tmp =
   fdifference tmp6 tmp5;      // tmp6 = e
   fdifference tmp2 tmp1;      // tmp2 = g
   reduce_513 tmp2;
+  reduce_513 tmp4;
   fsum tmp4 tmp2             // tmp4 = f
 
 

@@ -123,7 +123,9 @@ val fdifference:
 val reduce_513:
   a:felem ->
   Stack unit
-    (requires fun h -> live h a)
+    (requires fun h -> live h a /\
+      F51.felem_fits h a (9, 10, 9, 9, 9)
+    )
     (ensures  fun h0 _ h1 -> modifies (loc a) h0 h1 /\
       F51.fevalh h1 a == F51.fevalh h0 a /\
       F51.mul_inv_t h1 a
@@ -148,9 +150,9 @@ val times_2:
     out:felem
   -> a:felem ->
   Stack unit
-    (requires fun h -> live h out /\ live h a)
+    (requires fun h -> live h out /\ live h a /\ F51.mul_inv_t h a)
     (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
-      F51.mul_inv_t h1 out /\
+      F51.felem_fits h1 out (2, 4, 2, 2, 2) /\
       F51.fevalh h1 out == 2 `SC.fmul` F51.fevalh h0 a
     )
 
@@ -158,8 +160,13 @@ val times_d:
     out:felem
   -> a:felem ->
   Stack unit
-    (requires fun h -> live h out /\ live h a)
-    (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1)
+    (requires fun h -> live h out /\ live h a /\
+      F51.mul_inv_t h a
+    )
+    (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+      F51.mul_inv_t h1 out /\
+      F51.fevalh h1 out == Spec.Ed25519.d `SC.fmul` F51.fevalh h0 a
+    )
 
 val times_2d:
     out:felem
@@ -190,22 +197,33 @@ val fsquare_times:
   -> a:felem
   -> n:size_t{v n > 0} ->
   Stack unit
-    (requires fun h -> live h out /\ live h a /\ disjoint out a)
-    (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1)
+    (requires fun h -> live h out /\ live h a /\ disjoint out a /\
+      F51.mul_inv_t h a
+    )
+    (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+      F51.felem_fits h1 out (1, 2, 1, 1, 1) /\
+      F51.fevalh h1 out == Hacl.Spec.Curve25519.Finv.pow (F51.fevalh h0 a) (pow2 (v n))
+    )
 
 val fsquare_times_inplace:
     out:felem
   -> n:size_t{v n > 0} ->
   Stack unit
-    (requires fun h -> live h out)
-    (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1)
+    (requires fun h -> live h out /\ F51.mul_inv_t h out)
+    (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+      F51.felem_fits h1 out (1, 2, 1, 1, 1) /\
+      F51.fevalh h1 out == Hacl.Spec.Curve25519.Finv.pow (F51.fevalh h0 out) (pow2 (v n))
+    )
 
 val inverse:
     out:felem
   -> a:felem ->
   Stack unit
-    (requires fun h -> live h out /\ live h a /\ disjoint a out)
+    (requires fun h -> live h out /\ live h a /\ disjoint a out /\
+      F51.felem_fits h a (1, 2, 1, 1, 1)
+    )
     (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+      F51.felem_fits h1 out (1, 2, 1, 1, 1) /\
       F51.fevalh h1 out == Spec.Ed25519.modp_inv (F51.fevalh h0 a)
     )
 
@@ -214,7 +232,7 @@ val reduce:
   Stack unit
     (requires fun h -> live h out)
     (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
-      F51.fevalh h1 out == F51.as_nat h1 out /\
+      F51.fevalh h1 out == F51.fevalh h1 out /\
       F51.fevalh h0 out == F51.as_nat h1 out
     )
 
@@ -231,7 +249,7 @@ val store_51:
     output:lbuffer uint8 32ul
   -> input:lbuffer uint64 5ul ->
   Stack unit
-    (requires fun h -> live h input /\ live h output)
+    (requires fun h -> live h input /\ live h output /\ F51.mul_inv_t h input)
     (ensures fun h0 _ h1 -> modifies (loc output) h0 h1 /\
       as_seq h1 output == nat_to_bytes_le 32 (F51.fevalh h0 input)
     )

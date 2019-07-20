@@ -10,9 +10,11 @@ open Lib.ByteBuffer
 
 module S51 = Hacl.Spec.Curve25519.Field51.Definition
 
+module SL51 = Hacl.Spec.Curve25519.Field51.Lemmas
+
 module BN = Hacl.Impl.Curve25519.Field51
 
-#reset-options "--max_fuel 0"
+#reset-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0"
 
 inline_for_extraction noextract
 let mask_51 = u64 0x7ffffffffffff
@@ -131,8 +133,8 @@ let reduce_513_ a =
   carry_0_to_1 a
 
 let reduce_513 a =
-  reduce_513_ a;
-  admit()
+  BN.fmul1 a a (u64 1)
+  // reduce_513_ a;
 
 inline_for_extraction noextract
 val fcontract_first_carry_full:
@@ -216,6 +218,7 @@ let reduce_ out =
 let fmul output input input2 = BN.fmul output input input2
 
 let times_2 out a =
+  (**) let h0 = get() in
   let a0 = a.(0ul) in
   let a1 = a.(1ul) in
   let a2 = a.(2ul) in
@@ -227,7 +230,44 @@ let times_2 out a =
   let o3 = u64 2 *. a3 in
   let o4 = u64 2 *. a4 in
   make_u64_5 out o0 o1 o2 o3 o4;
-  admit()
+
+  (**) let h1 = get() in
+  (**) assert (S51.felem_fits1 a0 1);
+  (**) assert (F51.felem_fits h1 out (2, 4, 2, 2, 2));
+
+  calc (==) {
+    (2 * (F51.fevalh h0 a)) % SC.prime;
+    (==) { calc (==) {
+           F51.fevalh h0 a;
+           (==) { }
+           S51.as_nat5 (a0, a1, a2, a3, a4) % SC.prime;
+           }
+         }
+    (2 * (S51.as_nat5 (a0, a1, a2, a3, a4) % SC.prime)) % SC.prime;
+    (==) { FStar.Math.Lemmas.lemma_mod_mul_distr_r 2 (S51.as_nat5 (a0, a1, a2, a3, a4)) SC.prime }
+    (2 * S51.as_nat5 (a0, a1, a2, a3, a4)) % SC.prime;
+    (==) { calc (==) {
+           2 * S51.as_nat5 (a0, a1, a2, a3, a4);
+           (==) { SL51.lemma_smul_felem5 (u64 2) (a0, a1, a2, a3, a4) }
+           2 * v a0 + 2 * v a1 * S51.pow51 + 2 * v a2 * S51.pow51 * S51.pow51 +
+           2 * v a3 * S51.pow51 * S51.pow51 * S51.pow51 +
+           2 * v a4 * S51.pow51 * S51.pow51 * S51.pow51 * S51.pow51;
+           (==) {
+             assert_norm (2 * S51.pow51 < pow2 64);
+             assert_norm (4 * S51.pow51 < pow2 64);
+             FStar.Math.Lemmas.small_mod (2 * v a0) (pow2 64);
+             FStar.Math.Lemmas.small_mod (2 * v a1) (pow2 64);
+             FStar.Math.Lemmas.small_mod (2 * v a2) (pow2 64);
+             FStar.Math.Lemmas.small_mod (2 * v a3) (pow2 64);
+             FStar.Math.Lemmas.small_mod (2 * v a4) (pow2 64)
+           }
+           S51.as_nat5 (u64 2 *. a0, u64 2 *. a1, u64 2 *. a2, u64 2 *. a3, u64 2 *. a4);
+           }
+         }
+    S51.as_nat5 (u64 2 *. a0, u64 2 *. a1, u64 2 *. a2, u64 2 *. a3, u64 2 *. a4) % SC.prime;
+    (==) { }
+    F51.fevalh h1 out;
+  }
 
 let times_d out a =
   push_frame();
@@ -237,7 +277,9 @@ let times_d out a =
   d.(2ul) <- u64 0x0005e7a26001c029;
   d.(3ul) <- u64 0x000739c663a03cbb;
   d.(4ul) <- u64 0x00052036cee2b6ff;
-  admit();
+  assert_norm (S51.as_nat5 (u64 0x00034dca135978a3, u64 0x0001a8283b156ebd,
+    u64 0x0005e7a26001c029, u64 0x000739c663a03cbb, u64 0x00052036cee2b6ff) %
+      Spec.Curve25519.prime == Spec.Ed25519.d);
   fmul out d a;
   pop_frame()
 
@@ -249,9 +291,11 @@ let times_2d out a =
   d2.(2ul) <- u64 0x0003cf44c0038052;
   d2.(3ul) <- u64 0x0006738cc7407977;
   d2.(4ul) <- u64 0x0002406d9dc56dff;
-  fmul out a d2;
-  pop_frame();
-  admit()
+  fmul out d2 a;
+  assert_norm (S51.as_nat5 (u64 0x00069b9426b2f159, u64 0x00035050762add7a,
+    u64  0x0003cf44c0038052, u64 0x0006738cc7407977, u64  0x0002406d9dc56dff) %
+      Spec.Curve25519.prime == 2 `SC.fmul` Spec.Ed25519.d);
+  pop_frame()
 
 let fsquare out a = BN.fsqr out a
 
@@ -264,9 +308,15 @@ val fsquare_times_:
   Stack unit
     (requires fun h ->
       live h output /\ live h input /\ live h tmp /\
-      disjoint input tmp /\ disjoint output tmp)
-    (ensures  fun h0 _ h1 -> modifies (loc output |+| loc tmp) h0 h1)
-let fsquare_times_ output input tmp count = admit();
+      (disjoint output input \/ output == input) /\
+      disjoint input tmp /\ disjoint output tmp /\
+      F51.mul_inv_t h input
+      )
+    (ensures  fun h0 _ h1 -> modifies (loc output |+| loc tmp) h0 h1 /\
+      F51.felem_fits h1 output (1, 2, 1, 1, 1) /\
+      F51.fevalh h1 output == Hacl.Spec.Curve25519.Finv.pow (F51.fevalh h0 input) (pow2 (v count))
+    )
+let fsquare_times_ output input tmp count =
   Hacl.Curve25519.Finv.Field51.fsquare_times_51 output input tmp count
 
 let fsquare_times output input count =
@@ -284,7 +334,6 @@ let fsquare_times_inplace output count =
 let inverse out a =
   push_frame();
   let tmp = create 10ul (u128 0) in
-  admit();
   Hacl.Curve25519.Finv.Field51.finv_51 out a tmp;
   pop_frame()
 

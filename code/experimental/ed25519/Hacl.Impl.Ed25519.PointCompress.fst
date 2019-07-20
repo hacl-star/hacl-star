@@ -134,11 +134,12 @@ val point_compress_:
     tmp:lbuffer uint64 15ul
   -> p:point ->
   Stack unit
-    (requires fun h -> live h tmp /\ live h p /\ disjoint tmp p)
+    (requires fun h -> live h tmp /\ live h p /\ disjoint tmp p /\ F51.point_inv_t h p)
     (ensures  fun h0 _ h1 -> modifies (loc tmp) h0 h1 /\ (
       let zinv = Spec.Ed25519.modp_inv (F51.fevalh h0 (gsub p 10ul 5ul)) in
       let x = Spec.Curve25519.fmul (F51.fevalh h0 (gsub p 0ul 5ul)) zinv in
       let y = Spec.Curve25519.fmul (F51.fevalh h0 (gsub p 5ul 5ul)) zinv in
+      F51.mul_inv_t h1 (gsub tmp 10ul 5ul) /\
       F51.fevalh h1 (gsub tmp 10ul 5ul) == y /\
       F51.as_nat h1 (gsub tmp 5ul 5ul) == x)
     )
@@ -154,13 +155,13 @@ let point_compress_ tmp p =
   fmul x px zinv;
   reduce x;
   fmul out py zinv;
-  reduce out
+  reduce_513 out
 
 val point_compress:
   out:lbuffer uint8 32ul
   -> p:point ->
   Stack unit
-    (requires fun h -> live h out /\ live h p)
+    (requires fun h -> live h out /\ live h p /\ F51.point_inv_t h p)
     (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
       as_seq h1 out == Spec.Ed25519.point_compress (F51.point_eval h0 p)
     )
