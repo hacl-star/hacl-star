@@ -1731,32 +1731,44 @@ irreducible
    reasoning about it. *)
 let rec find_transformation_hints (c1 c2:codes) :
   Tot (possibly transformation_hints)
-    (decreases %[c2]) =
-  match c1, c2 with
-  | [], [] -> return []
-  | _, [] -> if is_empty_codes c1 then return [] else Err "non empty first code"
-  | [], _ -> if is_empty_codes c2 then return [] else Err "non empty second code"
-  | _, h2 :: t2 ->
-    match find_deep_code_transform h2 c1 with
-    | Ok th -> (
-        match perform_reordering_with_hint th c1 with
-        | Ok (h1 :: t1) ->
-          t_hints2 <-- find_transformation_hints t1 t2;
-          return (th :: t_hints2)
-        | Ok [] -> Err "Impossible"
-        | Err reason ->
-          Err ("Unable to find valid movement for : " ^ fst (print_code h2 0 gcc) ^ ". Reason: " ^ reason)
-      )
-    | Err reason -> (
-        let h1 :: t1 = c1 in
-        match h1, h2 with
-        | Block l1, Block l2 ->
-          t_hints1 <-- find_transformation_hints l1 l2;
-          t_hints2 <-- find_transformation_hints t1 t2;
-          return (wrap_diveinat 0 t_hints1 `L.append` t_hints2)
-        | _ ->
-          Err reason
-      )
+    (decreases %[c2; c1]) =
+  let e1, e2 = is_empty_codes c1, is_empty_codes c2 in
+  if e1 && e2 then (
+    return []
+  ) else if e2 then (
+    Err "non empty first code"
+  ) else if e1 then (
+    Err "non empty second code"
+  ) else (
+    let h1 :: t1 = c1 in
+    let h2 :: t2 = c2 in
+    if is_empty_code h1 then (
+      find_transformation_hints t1 c2
+    ) else if is_empty_code h2 then (
+      find_transformation_hints c1 t2
+    ) else (
+      match find_deep_code_transform h2 c1 with
+      | Ok th -> (
+          match perform_reordering_with_hint th c1 with
+          | Ok (h1 :: t1) ->
+            t_hints2 <-- find_transformation_hints t1 t2;
+            return (th :: t_hints2)
+          | Ok [] -> Err "Impossible"
+          | Err reason ->
+            Err ("Unable to find valid movement for : " ^ fst (print_code h2 0 gcc) ^ ". Reason: " ^ reason)
+        )
+      | Err reason -> (
+          let h1 :: t1 = c1 in
+          match h1, h2 with
+          | Block l1, Block l2 ->
+            t_hints1 <-- find_transformation_hints l1 l2;
+            t_hints2 <-- find_transformation_hints t1 t2;
+            return (wrap_diveinat 0 t_hints1 `L.append` t_hints2)
+          | _ ->
+            Err reason
+        )
+    )
+  )
 
 /// If a transformation can be performed, then the result behaves
 /// identically as per the [equiv_states] relation.
