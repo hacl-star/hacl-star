@@ -230,7 +230,7 @@ val inverse:
 val reduce:
   out:felem ->
   Stack unit
-    (requires fun h -> live h out)
+    (requires fun h -> live h out /\ F51.mul_inv_t h out)
     (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
       F51.fevalh h1 out == F51.fevalh h1 out /\
       F51.fevalh h0 out == F51.as_nat h1 out
