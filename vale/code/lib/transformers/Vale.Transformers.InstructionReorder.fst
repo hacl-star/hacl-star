@@ -1588,6 +1588,12 @@ let rec string_of_transformation_hint (t:transformation_hint) : string =
   | MoveUpFrom p -> "(MoveUpFrom " ^ string_of_int p ^ ")"
   | DiveInAt p q -> "(DiveInAt " ^ string_of_int p ^ " " ^ string_of_transformation_hint q ^ ")"
 
+let rec aux_string_of_transformation_hints ts =
+  match ts with
+  | [] -> ""
+  | x :: xs -> string_of_transformation_hint x ^ "; " ^ aux_string_of_transformation_hints xs
+let string_of_transformation_hints ts = "[" ^ aux_string_of_transformation_hints ts ^ "]"
+
 let rec wrap_diveinat (p:nat) (l:transformation_hints) : transformation_hints =
   match l with
   | [] -> []
