@@ -73,7 +73,7 @@ let blake2_incremental_update a input state =
     let ll1 = (ll - ll0) % size_block a in
     let input1 = sub #uint8 #ll input (ll - ll1) ll1 in
     let block = update_sub block 0 ll1 input1 in
-    {state with pl = ll1; block = block}
+    {state with n = n; pl = ll1; block = block}
   )
 
 
