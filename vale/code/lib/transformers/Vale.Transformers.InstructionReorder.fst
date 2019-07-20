@@ -1650,11 +1650,25 @@ let rec is_empty_codes (c:codes) : bool =
   | x :: xs -> false
 
 let rec perform_reordering_with_hints (ts:transformation_hints) (c:codes) : possibly codes =
+  (*
+  let _ = IO.debug_print_string (
+      "-----------------------------\n" ^
+      " th : " ^ string_of_transformation_hints ts ^ "\n" ^
+      " c  :\n" ^
+      fst (print_code (Block c) 0 gcc) ^ "\n" ^
+      "-----------------------------\n" ^
+      "") in
+  *)
   match ts with
   | [] -> (
       if is_empty_codes c then (
         return []
       ) else (
+        (*
+        let _ = IO.debug_print_string (
+            "failed here!!!\n" ^
+            "\n") in
+        *)
         Err ("no more transformation hints for " ^ fst (print_code (Block c) 0 gcc))
       )
     )
@@ -1663,6 +1677,12 @@ let rec perform_reordering_with_hints (ts:transformation_hints) (c:codes) : poss
     match c' with
     | [] -> Err "impossible"
     | x :: xs ->
+      (*
+      let _ = IO.debug_print_string (
+          "dragged up: \n" ^
+          fst (print_code x 0 gcc) ^
+          "\n") in
+      *)
       xs' <-- perform_reordering_with_hints ts' xs;
       return (x :: xs')
 
