@@ -83,6 +83,7 @@ function operator(~~) (a:quad32):poly := of_quad32;
 function operator([]) #[a:Type(0)](s:FStar.Seq.Base.seq(a), i:int):a extern;
 
 #verbatim{:interface}
+
 unfold let va_subscript_FStar__Seq__Base__seq = Seq.index
 
 let hkeys_b_powers (hkeys_b:buffer128) (mem:vale_heap) (memTaint:memtaint) (ptr:int) (h:poly) =
@@ -99,13 +100,14 @@ let scratch_b_data (scratch_b:buffer128) (scratch_len:int) (mem:vale_heap) (memT
   (forall (i:nat).{:pattern (index data i)}
     i < 5 /\ i < length data ==> buffer128_read scratch_b (scratch_len - 1 - i) mem == reverse_bytes_quad32 (index data i))
 
-  let prep_data (s:seq quad32) :
-  (s':seq quad32 { length s == length s' /\
-                   (forall (i:nat) . {:pattern (index s' i)}
-                     i < length s ==>
-                     index s (length s - 1 - i) == reverse_bytes_quad32 (index s' i))})
-  =
-  Vale.Lib.Seqs_s.reverse_seq (reverse_bytes_quad32_seq s)
+let prep_data (s:seq quad32) :
+(s':seq quad32 { length s == length s' /\
+               (forall (i:nat) . {:pattern (index s' i)}
+                 i < length s ==>
+                 index s (length s - 1 - i) == reverse_bytes_quad32 (index s' i))})
+=
+Vale.Lib.Seqs_s.reverse_seq (reverse_bytes_quad32_seq s)
+
 #endverbatim
 
 function hkeys_b_powers(hkeys_b:buffer128, mem:vale_heap, memTaint:memtaint, ptr:int, h:poly):prop extern;
@@ -598,7 +600,7 @@ procedure Ghash_buffer(
         ghost y_prev:quad32
         )
     {:public}
-    //{:quick}
+    {:quick}
     lets
         Xip @= r9; len @= rbx; scratch_ptr @= rcx; in_ptr @= rbp;
         Ii @= xmm0; T1 @= xmm1; T2 @= xmm2; Hkey @= xmm3;
@@ -614,22 +616,25 @@ procedure Ghash_buffer(
         pclmulqdq_enabled && avx_enabled;
         hkeys_b_powers(hkeys_b, mem, memTaint, Xip - 0x20, h);
         validSrcAddrs128(mem, in_ptr, in_b, len, memTaint, Secret);
+        buffer_length(in_b) == len;
         buffers_disjoint128(hkeys_b, in_b);
         in_ptr + 0x10 * len <= pow2_64;
         of_quad32(Xi) == prev;
+
+        0 < len < 6;
     ensures
         Xi == reverse_bytes_quad32(ghash_incremental(h_LE, y_prev, s128(mem, in_b)));
 {
 //        pdata := fun_seq_quad32_LE_poly128(data);
 //        n := length(data);
-    assume 0 < len < 6;
 
     let data := prep_data(Seq.slice(s128(mem, in_b), 0, len));
 //    assert validSrcAddrs128(mem, rbp, in_b, length(data), memTaint, Secret); 
 //    assert forall (i:nat) i < 5 /\ i < length(data) ==> buffer128_read(in_b, (length(data) - 1 - i), mem) == reverse_bytes_quad32(index(data, i));
 //    assume false;
-    assert scratch_b_data(in_b, mem, memTaint, rbp, data);
-    GhashUnroll_n(hkeys_b, in_b, h_LE, y_prev, data);
+    //assert scratch_b_data(in_b, mem, memTaint, rbp, data);
+    Mov64(scratch_ptr, in_ptr);
+    GhashUnroll_n(len, hkeys_b, in_b, h_LE, y_prev, data);
 
 }
 
