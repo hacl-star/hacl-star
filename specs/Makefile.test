@@ -195,6 +195,13 @@ hpke.exe: $(LIBS_FILES) Spec.SHA2.Constants.fst Spec.Hash.Definitions.fst Spec.H
 	$(OCAMLOPT) -package cryptokit -I hpke-ml $(OCAML_INCLUDES) $(addprefix hpke-ml/, $(LIBS_ML)) hpke-ml/Lib_RandomSequence.ml hpke-ml/Spec_SHA2_Constants.ml hpke-ml/Spec_Hash_Definitions.ml hpke-ml/Spec_Hash_PadFinish.ml hpke-ml/Spec_MD5.ml hpke-ml/Spec_SHA1.ml hpke-ml/Spec_SHA2.ml hpke-ml/Spec_Hash.ml hpke-ml/Spec_Hash_Incremental.ml hpke-ml/Spec_Agile_Hash.ml hpke-ml/Spec_Agile_HMAC.ml hpke-ml/Spec_Agile_HKDF.ml hpke-ml/Spec_Curve25519.ml hpke-ml/Spec_Curve448.ml hpke-ml/Spec_Agile_DH.ml hpke-ml/Spec_GaloisField.ml hpke-ml/Spec_AES.ml hpke-ml/Spec_GF128.ml hpke-ml/Spec_AES128_GCM.ml hpke-ml/Spec_Chacha20.ml hpke-ml/Spec_Poly1305.ml hpke-ml/Spec_Chacha20Poly1305.ml hpke-ml/Spec_Agile_AEAD.ml hpke-ml/Spec_HPKE.ml hpke-ml/Spec_HPKE_Test.ml -o hpke.exe
 	./hpke.exe
 
+blake2inc.exe: $(LIBS_FILES) Spec.Blake2.fst Spec.Blake2.Incremental.fst tests/Spec.Blake2.Incremental.Test.fst tests/Spec.Blake2.Incremental.Test.fst
+	mkdir -p blake2inc-ml
+	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.Blake2 --extract_module Spec.Blake2.Incremental --extract_module Spec.Blake2.Incremental.Test --odir blake2inc-ml $^
+	@echo 'let _ = test()' >> blake2inc-ml/Spec_Blake2_Incremental_Test.ml
+	$(OCAMLOPT) -I blake2inc-ml $(OCAML_INCLUDES) $(addprefix blake2inc-ml/, $(LIBS_ML)) blake2inc-ml/Spec_Blake2.ml blake2inc-ml/Spec_Blake2_Incremental.ml blake2inc-ml/Spec_Blake2_Incremental_Test.ml -o blake2inc.exe
+	./blake2inc.exe
+
 sha3.exe: $(LIBS_FILES) Spec.SHA3.Constants.fst Spec.SHA3.fst tests/Spec.SHA3.Test.fst
 	mkdir -p sha3-ml
 	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.SHA3.Constants --extract_module Spec.SHA3 --extract_module Spec.SHA3.Test --odir sha3-ml $^
