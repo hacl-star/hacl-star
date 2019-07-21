@@ -100,6 +100,11 @@ let scratch_b_data (scratch_b:buffer128) (scratch_len:int) (mem:vale_heap) (memT
   (forall (i:nat).{:pattern (index data i)}
     i < 5 /\ i < length data ==> buffer128_read scratch_b (scratch_len - 1 - i) mem == reverse_bytes_quad32 (index data i))
 
+let in_b_data (scratch_b:buffer128) (scratch_len:int) (mem:vale_heap) (memTaint:memtaint) (ptr:int) (data:seq quad32) =
+  validSrcAddrs128 mem ptr scratch_b scratch_len memTaint Secret /\
+  (forall (i:nat).{:pattern (index data i)}
+    i < 5 /\ i < length data ==> buffer128_read scratch_b i mem == reverse_bytes_quad32 (index data i))
+
 let prep_data (s:seq quad32) :
 (s':seq quad32 { length s == length s' /\
                (forall (i:nat) . {:pattern (index s' i)}
@@ -112,6 +117,7 @@ Vale.Lib.Seqs_s.reverse_seq (reverse_bytes_quad32_seq s)
 
 function hkeys_b_powers(hkeys_b:buffer128, mem:vale_heap, memTaint:memtaint, ptr:int, h:poly):prop extern;
 function scratch_b_data(hkeys_b:buffer128, scratch_len:int, mem:vale_heap, memTaint:memtaint, ptr:int, data:seq(quad32)):prop extern;
+function in_b_data(hkeys_b:buffer128, scratch_len:int, mem:vale_heap, memTaint:memtaint, ptr:int, data:seq(quad32)):prop extern;
 function prep_data(data:seq(quad32)):seq(quad32) extern;
 
 procedure MulAdd_unroll_i(
@@ -133,7 +139,7 @@ procedure MulAdd_unroll_i(
         Z0 @= xmm4; Z1 @= xmm5; Z2 @= xmm6; Z3 @= xmm7;
         Xi @= xmm8;
         pdata := fun_seq_quad32_LE_poly128(data);
-        scratch_index := scratch_len + 1 - n + m;
+        scratch_index := m + 1; //scratch_len + 1 - n + m;
     reads
         mem; memTaint; Xip; rbp; Xi;
     modifies
@@ -154,7 +160,7 @@ procedure MulAdd_unroll_i(
         0 <= power_index < 8;
         !is_first ==> of_quad32(Z0) +. shift(of_quad32(Z2), 64) +. shift(of_quad32(Z3), 128) ==
             ghash_unroll_back(h, prev, pdata, 0, n, #nat(m - 1));
-        Ii == reverse_bytes_quad32(data[#nat(n - m - 1)]);
+        Ii == reverse_bytes_quad32(data[m]);
         of_quad32(Z1) == gf128_power(h, #nat(m + 1));
     ensures
         !is_last ==> Ii == buffer128_read(scratch_b, scratch_index, mem);
@@ -227,7 +233,7 @@ procedure MulAdd_unroll_n(
         Xi @= xmm8;
         pdata := fun_seq_quad32_LE_poly128(data);
         n := length(data);
-        scratch_index := scratch_len - n;
+        scratch_index := 0;
     reads
         mem; memTaint; Xip; rbp; n_reg;
     modifies
@@ -237,7 +243,7 @@ procedure MulAdd_unroll_n(
         1 <= n < 6;
         n <= scratch_len;
         hkeys_b_powers(hkeys_b, mem, memTaint, Xip - 0x20, h);
-        scratch_b_data(scratch_b, scratch_len, mem, memTaint, rbp, data);
+        in_b_data(scratch_b, scratch_len, mem, memTaint, rbp, data);
         buffers_disjoint128(hkeys_b, scratch_b);
         rbp + 0x10 * scratch_len <= pow2_64;
         of_quad32(Xi) == prev;
