@@ -383,7 +383,7 @@ let blake2_init a kk k nn =
 val blake2_update_last:
     a:alg
   -> prev:nat{prev <= max_limb a}
-  -> len:size_nat{len <= (size_block a)}
+  -> len:size_nat{len <= size_block a}
   -> last:lbytes len
   -> s:hash_ws a ->
   Tot (hash_ws a)
