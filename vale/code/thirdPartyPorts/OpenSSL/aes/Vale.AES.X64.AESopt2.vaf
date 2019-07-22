@@ -664,7 +664,8 @@ procedure Ghash_buffer(
         of_quad32(Xi) == prev;
         rev_mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
 
-        0 < len < 6;
+        //0 < len < 6;
+        len == 6;
     ensures
         Xi == reverse_bytes_quad32(ghash_incremental(h_LE, y_prev, s128(mem, in_b)));
 {
@@ -673,7 +674,17 @@ procedure Ghash_buffer(
     Sub64(scratch_ptr, 1);
     IMul64(scratch_ptr,  0x10);
     Add64(scratch_ptr, in_ptr);
+    GhashUnroll_n(false, false, true, len, hkeys_b, in_b, h_LE, y_prev, data);
+
+    /* Handles 0 < len < 6 */
+    /*
+    let data := Seq.slice(s128(mem, in_b), 0, len);
+    Mov64(scratch_ptr, len);
+    Sub64(scratch_ptr, 1);
+    IMul64(scratch_ptr,  0x10);
+    Add64(scratch_ptr, in_ptr);
     GhashUnroll_n(false, false, false, len, hkeys_b, in_b, h_LE, y_prev, data);
+    */
 
 }
 
