@@ -234,6 +234,11 @@ let test () =
   let test1_result : lbytes 32 =
     Spec.Blake2.blake2s test1_plaintext 0 (of_list []) 32
   in
+  let test1_result_incr0 : lbytes 32 =
+    match Spec.Blake2.Incremental.debug_blake2_incremental Spec.Blake2.Blake2S test1_plaintext 0 (of_list []) 32 with
+    | None -> create 32 (u8 0)
+    | Some r -> r
+  in
   let test1_result_incr1 : lbytes 32 =
     let st: Spec.Blake2.Incremental.state_r Spec.Blake2.Blake2S = Spec.Blake2.Incremental.blake2_incremental_init Spec.Blake2.Blake2S 0 (of_list []) 32 in
     match Spec.Blake2.Incremental.blake2_incremental_update Spec.Blake2.Blake2S test1_plaintext st with
@@ -252,21 +257,17 @@ let test () =
     | Some st -> Spec.Blake2.Incremental.blake2_incremental_finish Spec.Blake2.Blake2S st 32
   in
 
-  let result1 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test1_expected test1_result in
-  let result1 = result1 && for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test1_result test1_result_incr1 in
-  let result1 = result1 && for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test1_result test1_result_incr2 in
+  let result1 =
+    Lib.PrintSequence.print_label_compare_display true "Not Incremental" (length test1_expected) test1_expected test1_result in
 
-  IO.print_string "\n1. Result  : ";
-  List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a)) (to_list test1_result);
+  let result1 = result1 &&
+    Lib.PrintSequence.print_label_compare_display true "Incremental 0" (length test1_expected) test1_expected test1_result_incr0 in
 
-  IO.print_string "\n1. Result I1 : ";
-  List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a)) (to_list test1_result_incr1);
+  let result1 = result1 &&
+    Lib.PrintSequence.print_label_compare_display true "Incremental 1" (length test1_expected) test1_expected test1_result_incr1 in
 
-  IO.print_string "\n1. Result I2 : ";
-  List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a)) (to_list test1_result_incr2);
-
-  IO.print_string "\n1. Expected: ";
-  List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a)) (to_list test1_expected);
+  let result1 = result1 &&
+    Lib.PrintSequence.print_label_compare_display true "Incremental 2" (length test1_expected) test1_expected test1_result_incr2 in
 
   //
   // TEST 2
