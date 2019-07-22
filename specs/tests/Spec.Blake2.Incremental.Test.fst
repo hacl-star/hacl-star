@@ -21,6 +21,12 @@ let test1_plaintext : lbytes 3 =
   assert_norm (List.Tot.length test1_plaintext_list = 3);
   of_list test1_plaintext_list
 
+let test1_key_list = List.Tot.map u8_from_UInt8 []
+
+let test1_key : lbytes 32 =
+  assert_norm (List.Tot.length test1_key_list = 0);
+  of_list test1_key_list
+
 let test1_expected_list = List.Tot.map u8_from_UInt8 [
   0x50uy; 0x8Cuy; 0x5Euy; 0x8Cuy; 0x32uy; 0x7Cuy; 0x14uy; 0xE2uy;
   0xE1uy; 0xA7uy; 0x2Buy; 0xA3uy; 0x4Euy; 0xEBuy; 0x45uy; 0x2Fuy;
@@ -198,6 +204,12 @@ let test5_plaintext : lbytes 3 =
   assert_norm (List.Tot.length test5_plaintext_list = 3);
   of_list test5_plaintext_list
 
+let test5_key_list = List.Tot.map u8_from_UInt8 []
+
+let test5_key : lbytes 32 =
+  assert_norm (List.Tot.length test5_key_list = 0);
+  of_list test5_key_list
+
 let test5_expected_list = List.Tot.map u8_from_UInt8 [
   0xBAuy; 0x80uy; 0xA5uy; 0x3Fuy; 0x98uy; 0x1Cuy; 0x4Duy; 0x0Duy; 0x6Auy; 0x27uy; 0x97uy; 0xB6uy; 0x9Fuy; 0x12uy; 0xF6uy; 0xE9uy;
   0x4Cuy; 0x21uy; 0x2Fuy; 0x14uy; 0x68uy; 0x5Auy; 0xC4uy; 0xB7uy; 0x4Buy; 0x12uy; 0xBBuy; 0x6Fuy; 0xDBuy; 0xFFuy; 0xA2uy; 0xD1uy;
@@ -208,136 +220,73 @@ let test5_expected : lbytes 64 =
   assert_norm (List.Tot.length test5_expected_list = 64);
   of_list test5_expected_list
 
-//
-// Blah
-//
-
-    (* IO.print_string "\nA\n"; *)
-    (* let hash = Spec.Blake2.blake2_update_block Spec.Blake2.Blake2S (st.n * (Spec.Blake2.size_block Spec.Blake2.Blake2S)) test1_plaintext st.hash in *)
-    (* let hash = Spec.Blake2.blake2_update_last Spec.Blake2.Blake2S ((st.n + 1) * (Spec.Blake2.size_block Spec.Blake2.Blake2S)) 0 (of_list []) st.hash in *)
-    (* let hash = Spec.Blake2.blake2_init Spec.Blake2.Blake2S 0 (of_list []) 32 in *)
-//    let hash = Spec.Blake2.blake2_update_block Spec.Blake2.Blake2S (size_block a) test1_plaintext hash in
-    (* let hash = Spec.Blake2.blake2_update_last Spec.Blake2.Blake2S (length test1_plaintext) (length test1_plaintext) test1_plaintext st.hash in *)
-    (* let hash = Spec.Blake2.blake2_update Spec.Blake2.Blake2S st.hash test1_plaintext 0 in *)
-    (* Spec.Blake2.blake2_finish Spec.Blake2.Blake2S hash 32 *)
-      (* let hash = Spec.Blake2.blake2_update Spec.Blake2.Blake2S st.hash (sub st.block 0 st.pl) 0 in *)
-      (* Spec.Blake2.blake2_finish Spec.Blake2.Blake2S hash 32 *)
-
 
 //
 // Main
 //
 
-let test () =
+val test_blake2: label:string -> a:Spec.Blake2.alg -> expected:bytes -> d:bytes -> k:bytes -> FStar.All.ML bool
+let test_blake2 label a expected d k =
 
-  IO.print_string "\n\nTEST 1";
-  let test1_result : lbytes 32 =
-    Spec.Blake2.blake2s test1_plaintext 0 (of_list []) 32
+  IO.print_newline ();
+  IO.print_newline ();
+  IO.print_string label;
+
+  let kk = length k in
+  let nn = length expected in
+
+  let computed_simple : lbytes nn =
+    Spec.Blake2.blake2 a d kk k nn
   in
-  let test1_result_incr0 : lbytes 32 =
-    match Spec.Blake2.Incremental.debug_blake2_incremental Spec.Blake2.Blake2S test1_plaintext 0 (of_list []) 32 with
-    | None -> create 32 (u8 0)
+  let computed_incr0 : lbytes nn =
+    match Spec.Blake2.Incremental.debug_blake2_incremental a d kk k nn with
+    | None -> create nn (u8 0)
     | Some r -> r
   in
-  let test1_result_incr1 : lbytes 32 =
-    let st: Spec.Blake2.Incremental.state_r Spec.Blake2.Blake2S = Spec.Blake2.Incremental.blake2_incremental_init Spec.Blake2.Blake2S 0 (of_list []) 32 in
-    match Spec.Blake2.Incremental.blake2_incremental_update Spec.Blake2.Blake2S test1_plaintext st with
-    | None -> create 32 (u8 0)
-    | Some st -> Spec.Blake2.Incremental.blake2_incremental_finish Spec.Blake2.Blake2S st 32
+  let computed_incr1 : lbytes nn =
+    let st: Spec.Blake2.Incremental.state_r a = Spec.Blake2.Incremental.blake2_incremental_init a kk k nn in
+    match Spec.Blake2.Incremental.blake2_incremental_update a d st with
+    | None -> create nn (u8 0)
+    | Some st -> Spec.Blake2.Incremental.blake2_incremental_finish a st nn
   in
-  let test1_result_incr2 : lbytes 32 =
-    let test1_plaintext_sub1 = sub test1_plaintext 0 (length test1_plaintext / 2) in
-    let test1_plaintext_sub2 = sub test1_plaintext (length test1_plaintext / 2) (length test1_plaintext - (length test1_plaintext / 2)) in
-    let st: Spec.Blake2.Incremental.state_r Spec.Blake2.Blake2S = Spec.Blake2.Incremental.blake2_incremental_init Spec.Blake2.Blake2S 0 (of_list []) 32 in
-    match Spec.Blake2.Incremental.blake2_incremental_update Spec.Blake2.Blake2S test1_plaintext_sub1 st with
-    | None -> create 32 (u8 0)
+  let computed_incr2 : lbytes nn =
+    let d_sub1 = sub #uint8 #(length d) d 0 (length d / 2) in
+    let d_sub2 = sub #uint8 #(length d) d (length d / 2) (length d - (length d / 2)) in
+    let st: Spec.Blake2.Incremental.state_r a = Spec.Blake2.Incremental.blake2_incremental_init a kk k nn in
+    match Spec.Blake2.Incremental.blake2_incremental_update a d_sub1 st with
+    | None -> create nn (u8 0)
     | Some st ->
-    match Spec.Blake2.Incremental.blake2_incremental_update Spec.Blake2.Blake2S test1_plaintext_sub2 st with
-    | None -> create 32 (u8 0)
-    | Some st -> Spec.Blake2.Incremental.blake2_incremental_finish Spec.Blake2.Blake2S st 32
+    match Spec.Blake2.Incremental.blake2_incremental_update a d_sub2 st with
+    | None -> create nn (u8 0)
+    | Some st -> Spec.Blake2.Incremental.blake2_incremental_finish a st nn
   in
 
-  let result1 =
-    Lib.PrintSequence.print_label_compare_display true "Not Incremental" (length test1_expected) test1_expected test1_result in
+  let result =
+    Lib.PrintSequence.print_label_compare_display true "Not Incremental" nn expected computed_simple in
 
-  let result1 = result1 &&
-    Lib.PrintSequence.print_label_compare_display true "Incremental 0" (length test1_expected) test1_expected test1_result_incr0 in
+  let result = result &&
+    Lib.PrintSequence.print_label_compare_display true "Incremental 0" nn expected computed_incr0 in
 
-  let result1 = result1 &&
-    Lib.PrintSequence.print_label_compare_display true "Incremental 1" (length test1_expected) test1_expected test1_result_incr1 in
+  let result = result &&
+    Lib.PrintSequence.print_label_compare_display true "Incremental 1" nn expected computed_incr1 in
 
-  let result1 = result1 &&
-    Lib.PrintSequence.print_label_compare_display true "Incremental 2" (length test1_expected) test1_expected test1_result_incr2 in
+  let result = result &&
+    Lib.PrintSequence.print_label_compare_display true "Incremental 2" nn expected computed_incr2 in
 
-  //
-  // TEST 2
-  //
-  (* IO.print_string "\n\nTEST 2"; *)
-
-  (* let test2_result : lbytes 32 = *)
-  (*   Spec.Blake2.blake2s test2_plaintext 32 test2_key  32 *)
-  (* in *)
-  (* let result2 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test2_expected test2_result in *)
-
-  (* IO.print_string "\n2. Result  : "; *)
-  (* List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a)) (to_list test2_result); *)
-
-  (* IO.print_string "\n2. Expected: "; *)
-  (* List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a)) (to_list test2_expected); *)
-
-  (* // *)
-  (* // TEST 3 *)
-  (* // *)
-  (* IO.print_string "\n\nTEST 3"; *)
-
-  (* let test3_result : lbytes 32 = *)
-  (*   Spec.Blake2.blake2s test3_plaintext 32 test3_key  32 *)
-  (* in *)
-  (* let result3 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test3_expected test3_result in *)
-
-  (* IO.print_string "\n3. Result  : "; *)
-  (* List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a)) (to_list test3_result); *)
-
-  (* IO.print_string "\n3. Expected: "; *)
-  (* List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a)) (to_list test3_expected); *)
-
-  (* // *)
-  (* // TEST 4 *)
-  (* // *)
-  (* IO.print_string "\n\nTEST 4"; *)
-
-  (* let test4_result : lbytes 32 = *)
-  (*   Spec.Blake2.blake2s test4_plaintext 32 test4_key  32 *)
-  (* in *)
-  (* let result4 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test4_expected test4_result in *)
-
-  (* IO.print_string "\n4. Result  : "; *)
-  (* List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a)) (to_list test4_result); *)
-
-  (* IO.print_string "\n4. Expected: "; *)
-  (* List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a)) (to_list test4_expected); *)
-
-  (* // *)
-  (* // TEST 5 *)
-  (* // *)
-  (* IO.print_string "\n\nTEST 5"; *)
-
-  (* let test5_result : lbytes 64 = *)
-  (*   Spec.Blake2.blake2b test5_plaintext 0 (of_list []) 64 *)
-  (* in *)
-  (* let result5 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test5_expected test5_result in *)
-
-  (* IO.print_string "\n5. Result  : "; *)
-  (* List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a)) (to_list test5_result); *)
-
-  (* IO.print_string "\n5. Expected: "; *)
-  (* List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a)) (to_list test5_expected); *)
+  result
 
   //
   // RESULT
   //
-  if result1 (* && result2 && result3 && result4 && result5 *) then IO.print_string "\n\nSuccess !\n"
-  else IO.print_string "\n\nFailed !\n";
+
+let test () =
+  let result1 = test_blake2 "TEST 1" Spec.Blake2.Blake2S test1_expected test1_plaintext test1_key in
+  let result2 = test_blake2 "TEST 2" Spec.Blake2.Blake2S test2_expected test2_plaintext test2_key in
+  let result3 = test_blake2 "TEST 3" Spec.Blake2.Blake2S test3_expected test3_plaintext test3_key in
+  let result4 = test_blake2 "TEST 4" Spec.Blake2.Blake2S test4_expected test4_plaintext test4_key in
+  let result5 = test_blake2 "TEST 5" Spec.Blake2.Blake2B test5_expected test5_plaintext test5_key in
+  if result1 && result2 && result3 && result4 && result5 then IO.print_string "\n\nSuccess !\n"
+  else IO.print_string "\n\nFailure !\n";
 
   ()
 
