@@ -243,7 +243,8 @@ val load_51:
   Stack unit
     (requires fun h -> live h output /\ live h input)
     (ensures  fun h0 _ h1 -> modifies (loc output) h0 h1 /\
-      F51.as_nat h1 output == nat_from_bytes_le (as_seq h0 input)
+      F51.felem_fits h1 output (1, 1, 1, 1, 1) /\
+      F51.as_nat h1 output == (nat_from_bytes_le (as_seq h0 input) % pow2 255)
     )
 
 val store_51:

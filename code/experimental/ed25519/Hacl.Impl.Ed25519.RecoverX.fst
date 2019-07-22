@@ -141,9 +141,11 @@ val recover_x_step_2:
   -> x2:elemB ->
   Stack uint8
     (requires fun h -> live h x2 /\ live h x /\ disjoint x x2 /\
+      F51.mul_inv_t h x /\
       F51.fevalh h x2 == F51.as_nat h x2
     )
     (ensures  fun h0 z h1 -> modifies (loc x) h0 h1 /\
+      F51.mul_inv_t h1 x /\
       (if F51.fevalh h0 x2 = 0 then (
         if v sign = 0 then F51.fevalh h1 x = 0 /\ z == u8 1
         else h0 == h1 /\ z == u8 0
@@ -252,10 +254,9 @@ val recover_x_step_5:
              ))
     )
     (ensures  fun h0 _ h1 -> modifies (loc x |+| loc tmp) h0 h1 /\
-       F51.fevalh h1 x == Some?.v (SE.recover_x (F51.as_nat h0 y) (uint_v #U64 sign <> 0))
+      F51.felem_fits h1 x (9, 10, 9, 9, 9) /\
+      F51.fevalh h1 x == Some?.v (SE.recover_x (F51.as_nat h0 y) (uint_v #U64 sign <> 0))
     )
-
-open FStar.Calc
 
 let recover_x_step_5 x y sign tmp =
   let x3  = sub tmp 5ul 5ul in
@@ -284,9 +285,11 @@ val recover_x_:
     (requires fun h ->
       live h tmp /\ live h x /\ live h y /\
       disjoint x y /\ disjoint tmp x /\ disjoint tmp y /\
+      F51.mul_inv_t h x /\
       F51.felem_fits h y (1, 1, 1, 1, 1)
       )
     (ensures  fun h0 z h1 -> modifies (loc x |+| loc tmp) h0 h1 /\
+      (z ==> F51.felem_fits h1 x (9, 10, 9, 9, 9)) /\
       (let res = SE.recover_x (F51.as_nat h0 y) (uint_v #U64 sign <> 0) in
       (Some? res <==> z) /\
       (Some? res ==> F51.fevalh h1 x == Some?.v res))
@@ -328,9 +331,11 @@ val recover_x:
   -> sign:uint64{v sign = 0 \/ v sign = 1} ->
   Stack bool
     (requires fun h -> live h x /\ live h y /\ disjoint x y /\
+      F51.mul_inv_t h x /\
       F51.felem_fits h y (1, 1, 1, 1, 1)
     )
     (ensures  fun h0 z h1 -> modifies (loc x) h0 h1 /\
+      (z ==> F51.felem_fits h1 x (9, 10, 9, 9, 9)) /\
       (let res = SE.recover_x (F51.as_nat h0 y) (uint_v #U64 sign <> 0) in
       (Some? res <==> z) /\
       (Some? res ==> F51.fevalh h1 x == Some?.v res))
