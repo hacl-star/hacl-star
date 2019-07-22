@@ -117,7 +117,7 @@ let recover_x (y:nat) (sign:bool) : Tot (option elem) =
       let x = if ((x *% x) -% x2) <> zero then x *% modp_sqrt_m1 else x in
       if ((x *% x) -% x2) <> zero then None
       else (
-        let x = if (x % 2 = 1) <> sign then prime - x else x in
+        let x = if (x % 2 = 1) <> sign then (prime - x) % prime else x in
         Some x)))
 
 let point_compress (p:ext_point) : Tot (lbytes 32) =
