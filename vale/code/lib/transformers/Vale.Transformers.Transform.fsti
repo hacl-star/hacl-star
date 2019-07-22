@@ -60,3 +60,42 @@ val lemma_reorder :
          (equiv_states va_sM va_sM') /\
          (va_ensure_total transformed va_s0 va_sM' va_fM') /\
          (va_get_ok va_sM')))
+
+/// Check-if-same-printed-code "transform"
+///
+/// This "transformation" is a handy debugging tool. It does NOT
+/// transform your code, but simply checks if both the original code
+/// and hint code print to the same value.
+///
+/// This is useful for multiple reasons-
+///
+///   - Testing if some code you've modified is exactly the same
+///       (modulo wrapping things in procedures).
+///
+///   - Sanity-checking the stability of lemmas. The signature of the
+///       lemma here is the same as other transformations, and thus
+///       can - be used to perform a first-pass sanity check to ensure
+///       that - you'll be able to perform other transformations on
+///       your code.
+
+val check_if_same_printed_code :
+  orig:va_code ->
+  hint:va_code ->
+  va_transformation_result
+
+val lemma_check_if_same_printed_code :
+  orig:va_code ->
+  hint:va_code ->
+  transformed:va_code ->
+  va_s0:va_state -> va_sM:va_state -> va_fM:va_fuel ->
+  Ghost (va_state & va_fuel)
+    (requires (
+        (va_require_total transformed (check_if_same_printed_code orig hint).result va_s0) /\
+        (va_get_ok va_s0) /\
+        (va_ensure_total orig va_s0 va_sM va_fM) /\
+        (va_get_ok va_sM)))
+    (ensures (fun (va_sM', va_fM') ->
+         (va_fM' == va_fM) /\
+         (equiv_states va_sM va_sM') /\
+         (va_ensure_total transformed va_s0 va_sM' va_fM') /\
+         (va_get_ok va_sM')))
