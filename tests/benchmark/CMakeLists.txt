@@ -36,8 +36,8 @@ add_executable(runbenchmark
   bench_curve25519.cpp
   bench_ed25519.cpp
   bench_merkle.cpp
-#  bench_cipher.cpp
-#  bench_mac.cpp
+  bench_cipher.cpp
+  bench_mac.cpp
 )
 target_include_directories(runbenchmark PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(runbenchmark PRIVATE benchmark evercrypt)
