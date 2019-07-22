@@ -772,126 +772,131 @@ procedure Loop6x_step1(
 
 }
 
-//#reset-options " "
-//procedure Loop6x_plain(
-//        inline alg:algorithm,
-//        inline rnd:nat,
-//        ghost h:poly,
-//        ghost prev:poly,
-//        ghost data:seq(quad32),
-//        ghost scratch_b:buffer128,
-//        ghost key_words:seq(nat32),
-//        ghost round_keys:seq(quad32),
-//        ghost keys_b:buffer128,
-//        ghost hkeys_b:buffer128,
-//
-//        ghost init0:quad32,
-//        ghost init1:quad32,
-//        ghost init2:quad32,
-//        ghost init3:quad32,
-//        ghost init4:quad32,
-//        ghost init5:quad32)
-//    {:quick}
-//    lets
-////      inp @= rdi; outp @= rsi; len @= rdx; key @= rcx; ivp @= r8; Xip @= r9;
-//        key @= rcx; Xip @= r9;
-//        Ii @= xmm0; T1 @= xmm1; T2 @= xmm2; Hkey @= xmm3;
-//        Z0 @= xmm4; Z1 @= xmm5; Z2 @= xmm6; Z3 @= xmm7;
-//        inout0 @= xmm9; inout1 @= xmm10; inout2 @= xmm11; inout3 @= xmm12;
-//        inout4 @= xmm13; inout5 @= xmm14; rndkey @= xmm15;
-////      counter @= rbx; rounds @= rbp; ret @= r10; constp @= r11; in0 @= r14; end0 @= r15;
-//
-//    reads
-//        key; Xip; rbp;
-//        mem; memTaint;
-//
-//    modifies
-//        Ii; T1; T2; Hkey; Z0; Z1; Z2; Z3;
-//        inout0; inout1; inout2; inout3; inout4; inout5; rndkey;
-//        efl;
-//
-//    requires
-//        validDstAddrs128(mem, rbp, scratch_b, 8, memTaint, Secret);
-//        validSrcAddrs128(mem, Xip - 0x20, hkeys_b, 8, memTaint, Secret);
-//
-//        // AES reqs
-//        aes_reqs_offset(alg, key_words, round_keys, keys_b, key);
-//        rnd + 1 < length(round_keys);
-//
-//        // GCM reqs
-//        pclmulqdq_enabled;
-//
-//        inout0 == rounds_opaque(init0, round_keys, rnd);
-//        inout1 == rounds_opaque(init1, round_keys, rnd);
-//        inout2 == rounds_opaque(init2, round_keys, rnd);
-//        inout3 == rounds_opaque(init3, round_keys, rnd);
-//        inout4 == rounds_opaque(init4, round_keys, rnd);
-//        inout5 == rounds_opaque(init5, round_keys, rnd);
-//
-//    ensures
-//        inout0 == rounds_opaque(init0, round_keys, rnd + 1);
-//        inout1 == rounds_opaque(init1, round_keys, rnd + 1);
-//        inout2 == rounds_opaque(init2, round_keys, rnd + 1);
-//        inout3 == rounds_opaque(init3, round_keys, rnd + 1);
-//        inout4 == rounds_opaque(init4, round_keys, rnd + 1);
-//        inout5 == rounds_opaque(init5, round_keys, rnd + 1);
-//
-//        // GCM
-//        let h4 := buffer128_read(hkeys_b, 4, mem);
-//        let s1 := ~~old(buffer128_read(scratch_b, 1, mem));
-//        let s5 := old(buffer128_read(scratch_b, 5, mem));
-//        Ii == s5;
-//        T1 == h4;
-//        ~~T2 == lo(old(~~Ii)) *. hi(old(~~Z1));
-//        ~~Hkey == hi(old(~~Ii)) *. lo(old(~~Z1));
-//        ~~Z0 == old(~~Z0) +. (lo(old(~~Ii)) *. lo(old(~~Z1)));
-//        ~~Z1 == hi(old(~~Ii)) *. hi(old(~~Z1));
-//        ~~Z2 == (old(~~Z2) +. old(~~T1)) +. old(~~T2);
-//        ~~Z3 == old(~~Z3) +. old(~~Hkey);
-//{
-//
-////    vmovups 0x30-0x80($key),$rndkey
-//    Load128_buffer(rndkey, key, 16*(rnd+1)-0x80, Secret, keys_b, rnd+1);
-//
-////  vpxor  $T1,$Z2,$Z2
-//    VPolyAdd(Z2, Z2, T1);
-//// vpclmulqdq \$0x00,$Z1,$Ii,$T1
-//    VPolyMul(T1, Ii, Z1, false, false);
-////   vaesenc $rndkey,$inout0,$inout0
-//    VAESNI_enc(inout0, inout0, rndkey);
-////  vpxor  $T2,$Z2,$Z2
-//    VPolyAdd(Z2, Z2, T2);
-//// vpclmulqdq \$0x10,$Z1,$Ii,$T2
-//    VPolyMul(T2, Ii, Z1, false, true);
-////   vaesenc $rndkey,$inout1,$inout1
-//    VAESNI_enc(inout1, inout1, rndkey);
-////  vpxor  $Hkey,$Z3,$Z3
-//    VPolyAdd(Z3, Z3, Hkey);
-//// vpclmulqdq \$0x01,$Z1,$Ii,$Hkey
-//    VPolyMul(Hkey, Ii, Z1, true, false);
-////   vaesenc $rndkey,$inout2,$inout2
-//    VAESNI_enc(inout2, inout2, rndkey);
-//// vpclmulqdq \$0x11,$Z1,$Ii,$Z1
-//    VPolyMul(Z1, Ii, Z1, true, true);
-////  vmovdqu 0x50+8(%rbp),$Ii # I[2]
-//    Load128_buffer(Ii, rbp, 0x50, Secret, scratch_b, 5);
-//
-////   vaesenc $rndkey,$inout3,$inout3
-//    VAESNI_enc(inout3, inout3, rndkey);
-////   vaesenc $rndkey,$inout4,$inout4
-//    VAESNI_enc(inout4, inout4, rndkey);
-////  vpxor  $T1,$Z0,$Z0
-//    VPolyAdd(Z0, Z0, T1);
-//// vmovdqu  0x40-0x20($Xip),$T1 # borrow $T1 for $Hkey^4
-//    Load128_buffer(T1, Xip, 0x40-0x20, Secret, hkeys_b, 4);  // # borrow $T1 for $Hkey^4
-////   vaesenc $rndkey,$inout5,$inout5
-//    VAESNI_enc(inout5, inout5, rndkey);
-//
-//    Vale.Def.Opaque_s.reveal_opaque(rounds);
-//    commute_sub_bytes_shift_rows_forall();
-//}
-//
-//
+#reset-options " "
+procedure Loop6x_plain(
+        inline alg:algorithm,
+        inline rnd:nat,
+        ghost h:poly,
+        ghost prev:poly,
+        ghost data:seq(quad32),
+        ghost scratch_b_in:seq(quad32),
+        ghost key_words:seq(nat32),
+        ghost round_keys:seq(quad32),
+        ghost keys_b:seq(quad32),
+        ghost hkeys_b:seq(quad32),
+
+        ghost init0:quad32,
+        ghost init1:quad32,
+        ghost init2:quad32,
+        ghost init3:quad32,
+        ghost init4:quad32,
+        ghost init5:quad32)
+    returns(ghost scratch_b:seq(quad32))
+    {:quick}
+    lets
+//      inp @= rdi; outp @= rsi; len @= rdx; key @= rcx; ivp @= r8; Xip @= r9;
+        key @= rcx; Xip @= r9;
+        Ii @= xmm0; T1 @= xmm1; T2 @= xmm2; Hkey @= xmm3;
+        Z0 @= xmm4; Z1 @= xmm5; Z2 @= xmm6; Z3 @= xmm7;
+        inout0 @= xmm9; inout1 @= xmm10; inout2 @= xmm11; inout3 @= xmm12;
+        inout4 @= xmm13; inout5 @= xmm14; rndkey @= xmm15;
+//      counter @= rbx; rounds @= rbp; ret @= r10; constp @= r11; in0 @= r14; end0 @= r15;
+
+    reads
+        key; Xip; rbp;
+
+    modifies
+        Ii; T1; T2; Hkey; Z0; Z1; Z2; Z3;
+        inout0; inout1; inout2; inout3; inout4; inout5; rndkey;
+        efl;
+
+    requires
+        //* validDstAddrs128(mem, rbp, scratch_b, 8, memTaint, Secret);
+        //* validSrcAddrs128(mem, Xip - 0x20, hkeys_b, 8, memTaint, Secret);
+        Seq.length(scratch_b_in) >= 8;
+        Seq.length(hkeys_b) >= 8;
+
+        // AES reqs
+        aes_reqs_offset(alg, key_words, round_keys, keys_b, key);
+        rnd + 1 < length(round_keys);
+
+        // GCM reqs
+        pclmulqdq_enabled;
+
+        inout0 == rounds_opaque(init0, round_keys, rnd);
+        inout1 == rounds_opaque(init1, round_keys, rnd);
+        inout2 == rounds_opaque(init2, round_keys, rnd);
+        inout3 == rounds_opaque(init3, round_keys, rnd);
+        inout4 == rounds_opaque(init4, round_keys, rnd);
+        inout5 == rounds_opaque(init5, round_keys, rnd);
+
+    ensures
+        inout0 == rounds_opaque(init0, round_keys, rnd + 1);
+        inout1 == rounds_opaque(init1, round_keys, rnd + 1);
+        inout2 == rounds_opaque(init2, round_keys, rnd + 1);
+        inout3 == rounds_opaque(init3, round_keys, rnd + 1);
+        inout4 == rounds_opaque(init4, round_keys, rnd + 1);
+        inout5 == rounds_opaque(init5, round_keys, rnd + 1);
+
+        Seq.length(scratch_b_in) == Seq.length(scratch_b);
+
+        // GCM
+        let h4 := Seq.index(hkeys_b, 4);
+        let s1 := ~~old(Seq.index(scratch_b_in, 1));
+        let s5 := old(Seq.index(scratch_b_in, 5));
+        Ii == s5;
+        T1 == h4;
+        ~~T2 == lo(old(~~Ii)) *. hi(old(~~Z1));
+        ~~Hkey == hi(old(~~Ii)) *. lo(old(~~Z1));
+        ~~Z0 == old(~~Z0) +. (lo(old(~~Ii)) *. lo(old(~~Z1)));
+        ~~Z1 == hi(old(~~Ii)) *. hi(old(~~Z1));
+        ~~Z2 == (old(~~Z2) +. old(~~T1)) +. old(~~T2);
+        ~~Z3 == old(~~Z3) +. old(~~Hkey);
+{
+    scratch_b := scratch_b_in;
+
+//    vmovups 0x30-0x80($key),$rndkey
+    Load128_fake(rndkey, key, keys_b, rnd+1);
+
+//  vpxor  $T1,$Z2,$Z2
+    VPolyAdd(Z2, Z2, T1);
+// vpclmulqdq \$0x00,$Z1,$Ii,$T1
+    VPolyMul(T1, Ii, Z1, false, false);
+//   vaesenc $rndkey,$inout0,$inout0
+    VAESNI_enc(inout0, inout0, rndkey);
+//  vpxor  $T2,$Z2,$Z2
+    VPolyAdd(Z2, Z2, T2);
+// vpclmulqdq \$0x10,$Z1,$Ii,$T2
+    VPolyMul(T2, Ii, Z1, false, true);
+//   vaesenc $rndkey,$inout1,$inout1
+    VAESNI_enc(inout1, inout1, rndkey);
+//  vpxor  $Hkey,$Z3,$Z3
+    VPolyAdd(Z3, Z3, Hkey);
+// vpclmulqdq \$0x01,$Z1,$Ii,$Hkey
+    VPolyMul(Hkey, Ii, Z1, true, false);
+//   vaesenc $rndkey,$inout2,$inout2
+    VAESNI_enc(inout2, inout2, rndkey);
+// vpclmulqdq \$0x11,$Z1,$Ii,$Z1
+    VPolyMul(Z1, Ii, Z1, true, true);
+//  vmovdqu 0x50+8(%rbp),$Ii # I[2]
+    Load128_fake(Ii, rbp, scratch_b, 5);
+
+//   vaesenc $rndkey,$inout3,$inout3
+    VAESNI_enc(inout3, inout3, rndkey);
+//   vaesenc $rndkey,$inout4,$inout4
+    VAESNI_enc(inout4, inout4, rndkey);
+//  vpxor  $T1,$Z0,$Z0
+    VPolyAdd(Z0, Z0, T1);
+// vmovdqu  0x40-0x20($Xip),$T1 # borrow $T1 for $Hkey^4
+    Load128_fake(T1, Xip, hkeys_b, 4);  // # borrow $T1 for $Hkey^4
+//   vaesenc $rndkey,$inout5,$inout5
+    VAESNI_enc(inout5, inout5, rndkey);
+
+    Vale.Def.Opaque_s.reveal_opaque(rounds);
+    commute_sub_bytes_shift_rows_forall();
+}
+
+
 //procedure Loop6x_step2(
 //        inline alg:algorithm,
 //        inline rnd:nat,
