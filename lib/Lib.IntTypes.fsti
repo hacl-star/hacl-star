@@ -613,8 +613,10 @@ val shift_right_lemma: #t:inttype -> #l:secrecy_level
 inline_for_extraction
 val shift_left: #t:inttype -> #l:secrecy_level
   -> a:int_t t l
-  -> s:shiftval t{unsigned t \/ (0 <= v a /\ v a * pow2 (v s) <= maxint t)}
-  -> int_t t l
+  -> s:shiftval t
+  -> Pure (int_t t l)
+    (requires unsigned t \/ (0 <= v a /\ v a * pow2 (v s) <= maxint t))
+    (ensures  fun _ -> True)
 
 val shift_left_lemma:
     #t:inttype
