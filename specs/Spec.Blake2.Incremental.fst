@@ -113,14 +113,17 @@ let debug_blake2_incremental a d kk k nn =
   let size_pblock = size_block a - 7 in
   let nd = length d / size_pblock in
   let rd = length d % size_pblock in
+  let plast = sub #uint8 #(length d) d (nd * size_pblock) rd in
   let st = blake2_incremental_init a kk k nn in
-  let ost = repeati nd (fun i ost ->
+  match repeati nd (fun i ost ->
     let pinput = sub #uint8 #(length d) d (i * size_pblock) size_pblock in
     match ost with
     | None -> None
     | Some st -> blake2_incremental_update a pinput st
   ) (Some st)
-  in
-  match ost with
+  with
+  | None -> None
+  | Some st ->
+  match blake2_incremental_update a plast st with
   | None -> None
   | Some st -> Some (blake2_incremental_finish a st nn)
