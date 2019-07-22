@@ -888,7 +888,7 @@ let lemma_pow2_d_fits () : Lemma
     (ensures 1 * pow2 (v params_d) <= Int.max_int I32.n) = ()
 #pop-options
 
-#push-options "--z3rlimit 500"
+#push-options "--z3rlimit 700"
 let hash_H_inner_for v_ t index =
     let params_q = elem_to_int32 params_q in
     let hInit = ST.get () in 
@@ -1158,20 +1158,14 @@ let sparse_mul prod s pos_list sign_list =
                  encode_c_invariant h pos_list sign_list params_h /\ is_s_sk h s /\ is_poly_sparse_mul_output h prod)
 	(fun j -> 
 	    let sign_list_i:I16.t = sign_list.(i) in
-            //assume(v (j +. params_n -. pos) < v params_n);
             assert(v j < v pos);
             let h = ST.get() in 
             assert(is_sparse_elem_sk (bget h t (v j + v params_n - v pos)));
             assert(is_poly_sparse_mul_output h prod);
 	    let tVal:sparse_elem = t.(j +. params_n -. pos) in
             assert(is_sparse_elem_sk tVal);
-            //assume(v j < v params_n);
-            //assume(FStar.Int.fits (I16.v sign_list_i * I16.v tVal) I16.n);
             let hx = ST.get () in
-            //assume(FStar.Int.fits (elem_v (bget hx prod (v j)) - (I16.v sign_list_i * I16.v tVal)) elem_n);
-            //assume(is_elem ((bget hx prod (v j)) -^ (int16_to_elem I16.(sign_list_i *^ (sparse_to_int16 tVal)))));
             assert(sign_list_i == (-1s) \/ sign_list_i == 0s \/ sign_list_i == 1s);
-            //assume(I16.v tVal <> Int.min_int I16.n);
             assert(sparse_v tVal < pow2 (v params_s_bits));
             assert(sparse_v tVal >= -(pow2 (v params_s_bits)));
             assume(Int.min_int I16.n < -(pow2 (v params_s_bits)));
@@ -1184,7 +1178,6 @@ let sparse_mul prod s pos_list sign_list =
 	);
 
         let h3 = ST.get () in
-        //assume(v pos < v params_n);
 	for pos params_n
 	(fun h _ -> live h prod /\ live h t /\ live h pos_list /\ live h sign_list /\ modifies1 prod h3 h /\ is_s_sk h s /\
                  is_poly_sparse_mul_output h prod)
@@ -1194,9 +1187,6 @@ let sparse_mul prod s pos_list sign_list =
             assert(is_sparse_elem_sk (bget h t (v j - v pos)));
 	    let tVal:sparse_elem = t.(j -. pos) in
             let hx = ST.get () in
-            //assume(FStar.Int.fits (I16.v sign_list_i * I16.v tVal) I16.n);
-            //assume(FStar.Int.fits (elem_v (bget hx prod (v j)) + (I16.v sign_list_i * I16.v tVal)) elem_n);
-            //assume(is_elem ((bget hx prod (v j)) +^ (int16_to_elem I16.(sign_list_i *^ (sparse_to_int16 tVal)))));
             assert(is_sparse_elem_sk tVal);            
             assert(sparse_v tVal < pow2 (v params_s_bits));
             assert(sparse_v tVal >= -(pow2 (v params_s_bits)));

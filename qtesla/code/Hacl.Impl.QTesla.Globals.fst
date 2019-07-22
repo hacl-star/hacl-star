@@ -265,5 +265,7 @@ let shift_arithmetic_left x s =
 
 (*let frame_is_poly_sampler_output_i (h0 h1: HS.mem) (p:poly) (i:nat{i <= v params_n}) (l:B.loc) : Lemma
     (requires is_poly_sampler_output_i h0 p i /\ B.modifies l h0 h1 /\ B.loc_disjoint l (loc p))
-    (ensures is_poly_sampler_output_i h1 p i) = 
+    (ensures is_poly_sampler_output_i h1 p i)
+    [SMTPat (is_poly_sampler_output_i h1 p i); SMTPat (modifies l h0 h1)] = 
+    assert(bget h0 p 0 == bget h1 p 0);
     assert(forall (j:nat{j < i}) . {:pattern bget h1 p j} bget h0 p j == bget h1 p j)*)
