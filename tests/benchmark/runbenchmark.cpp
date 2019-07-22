@@ -55,8 +55,8 @@ BenchmarkSettings & parse_args(int argc, char const ** argv)
     r.families_to_run.push_back("curve25519");
     r.families_to_run.push_back("ed25519");
     r.families_to_run.push_back("merkle");
-   r.families_to_run.push_back("cipher");
-   r.families_to_run.push_back("mac");
+    r.families_to_run.push_back("cipher");
+    r.families_to_run.push_back("mac");
   }
   else
   {

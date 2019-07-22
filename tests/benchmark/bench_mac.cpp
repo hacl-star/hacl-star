@@ -111,8 +111,8 @@ class EverCryptPoly1305 : public MACBenchmark
 
 template<> void (*EverCryptPoly1305<32, 4>::f)(uint8_t*, uint32_t, uint8_t*, uint8_t*) = Hacl_Poly1305_32_poly1305_mac;
 template<> void (*EverCryptPoly1305<32, 16>::f)(uint8_t*, uint32_t, uint8_t*, uint8_t*) = Hacl_Poly1305_128_poly1305_mac;
-template<> void (*EverCryptPoly1305<32, 32>::f)(uint8_t*, uint32_t, uint8_t*, uint8_t*) = Hacl_Poly1305_256_poly1305_mac;
-
+// cwinter: The following line kills the Cygwin/MingGW linker. Don't ask me why.
+// template<> void (*EverCryptPoly1305<32, 32>::f)(uint8_t*, uint32_t, uint8_t*, uint8_t*) = Hacl_Poly1305_256_poly1305_mac;
 
 #ifdef HAVE_OPENSSL
 #undef HAVE_OPENSSL // TODO
@@ -159,6 +159,10 @@ template<> void (*EverCryptPoly1305<32, 32>::f)(uint8_t*, uint32_t, uint8_t*, ui
 #endif
 
 
+#ifdef WIN32
+#undef HAVE_JC
+#endif
+
 #ifdef HAVE_JC
 enum JCInstructionSet { REF, AVX, AVX2 };
 
@@ -201,7 +205,9 @@ class JCPoly1305 : public MACBenchmark
 };
 
 template<> void (*JCPoly1305<32, 16, JCInstructionSet::REF>::f)(uint64_t*, uint64_t*, uint64_t, uint64_t*) = poly1305_ref3;
+#ifndef WIN32
 template<> void (*JCPoly1305<32, 16, JCInstructionSet::AVX>::f)(uint64_t*, uint64_t*, uint64_t, uint64_t*) = libjc_avx_poly1305_avx;
+#endif
 template<> void (*JCPoly1305<32, 16, JCInstructionSet::AVX2>::f)(uint64_t*, uint64_t*, uint64_t, uint64_t*) = libjc_avx2_poly1305_avx2;
 #endif
 
@@ -240,7 +246,7 @@ void bench_mac(const BenchmarkSettings & s)
       new EverCryptPoly1305<32, 16>(ds),
 
       #ifdef HAVE_OPENSSL
-      //new OpenSSLPoly1305(ds),
+      new OpenSSLPoly1305(ds),
       #endif
 
       #ifdef HAVE_BCRYPT

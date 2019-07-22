@@ -111,7 +111,9 @@ class EverCryptChaCha20 : public CipherBenchmark
     virtual ~EverCryptChaCha20() { }
 };
 
-
+#ifdef WIN32
+#undef HAVE_OPENSSL
+#endif
 
 #ifdef HAVE_OPENSSL
 // See https://github.com/openssl/openssl/blob/master/demos/evp/aesgcm.c
@@ -169,6 +171,9 @@ class OpenSSLChaCha20 : public CipherBenchmark
 #undef HAVE_BCRYPT // TODO
 #endif
 
+#ifdef WIN32
+#undef HAVE_JC
+#endif
 
 #ifdef HAVE_JC
 enum JCInstructionSet { REF, AVX, AVX2 };
@@ -214,7 +219,9 @@ class JCChaCha20 : public CipherBenchmark
 };
 
 template<> void (*JCChaCha20<REF>::f)(uint64_t*, uint64_t*, uint32_t, uint64_t*, uint64_t*, uint32_t) = chacha20_ref;
+#ifndef WIN32
 template<> void (*JCChaCha20<AVX>::f)(uint64_t*, uint64_t*, uint32_t, uint64_t*, uint64_t*, uint32_t) = libjc_avx_chacha20_avx;
+#endif
 template<> void (*JCChaCha20<AVX2>::f)(uint64_t*, uint64_t*, uint32_t, uint64_t*, uint64_t*, uint32_t) = libjc_avx2_chacha20_avx2;
 #endif
 
@@ -250,7 +257,7 @@ void bench_cipher(const BenchmarkSettings & s)
     }
 
     std::list<Benchmark*> todo = {
-      new EverCryptChaCha20(ds),
+      //new EverCryptChaCha20(ds),
 
       #ifdef HAVE_OPENSSL
       new OpenSSLChaCha20(ds),

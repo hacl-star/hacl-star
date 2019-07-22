@@ -21,11 +21,12 @@ message("-- Using libjc at ${LIBJC_SRC_DIR}")
 add_library(jc STATIC
   ${LIBJC_SRC_DIR}/src/crypto_onetimeauth/poly1305/ref3/poly1305.s
   ${LIBJC_SRC_DIR}/src/crypto_stream/chacha20/ref/chacha20.s
-
 )
 target_compile_options(jc PRIVATE -Wno-parentheses -std=gnu11 -Wno-attributes -Wno-implicit-function-declaration)
 target_include_directories(jc PUBLIC ${LIBJC_SRC_DIR})
 
+if ("${CMAKE_SYSTEM_NAME}" STREQUAL "CYGWIN")
+else()
 add_library(jc_chacha20_avx STATIC
   ${LIBJC_SRC_DIR}/src/crypto_stream/chacha20/avx/chacha20.s
 )
@@ -63,3 +64,4 @@ add_custom_command(TARGET jc_poly1305_avx2
 )
 
 target_link_libraries(jc jc_chacha20_avx jc_chacha20_avx2 jc_poly1305_avx jc_poly1305_avx2)
+endif()
