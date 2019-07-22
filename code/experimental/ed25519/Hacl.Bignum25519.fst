@@ -310,7 +310,7 @@ val fsquare_times_:
       live h output /\ live h input /\ live h tmp /\
       (disjoint output input \/ output == input) /\
       disjoint input tmp /\ disjoint output tmp /\
-      F51.mul_inv_t h input
+      F51.felem_fits h input (1, 2, 1, 1, 1)
       )
     (ensures  fun h0 _ h1 -> modifies (loc output |+| loc tmp) h0 h1 /\
       F51.felem_fits h1 output (1, 2, 1, 1, 1) /\

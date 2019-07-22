@@ -29,7 +29,7 @@ val recover_x_step_1:
       F51.mul_inv_t h y
     )
     (ensures  fun h0 _ h1 -> modifies (loc x2) h0 h1 /\
-      F51.mul_inv_t h1 x2 /\
+      F51.fevalh h1 x2 == F51.as_nat h1 x2 /\
       (let y = F51.fevalh h0 y in
        let x2 = F51.fevalh h1 x2 in
        let y2 = y `SC.fmul` y in
@@ -50,6 +50,7 @@ let recover_x_step_1 x2 y =
   inverse dyyi dyy; // dyyi = modp_inv ((d `fmul` (y `fmul` y)) `fadd` one)
   fdifference one y2; // one = (y `fmul` y) `fsub` 1
   fmul x2 one dyyi; //
+  reduce x2;
   pop_frame()
 
 val is_0:
@@ -57,7 +58,7 @@ val is_0:
   Stack bool
     (requires fun h -> live h x /\ F51.as_nat h x == F51.fevalh h x)
     (ensures  fun h0 b h1 -> h0 == h1 /\
-      b <==> (F51.fevalh h0 x == SC.zero)
+      (b <==> (F51.fevalh h0 x == SC.zero))
     )
 let is_0 x =
   let open Lib.RawIntTypes in
@@ -99,7 +100,7 @@ val gte_q:
       F51.felem_fits h x (1, 1, 1, 1, 1)
     )
     (ensures  fun h0 b h1 -> h0 == h1 /\
-      b <==> (F51.as_nat h0 x >= SC.prime)
+      (b <==> (F51.as_nat h0 x >= SC.prime))
     )
 let gte_q x =
   let open Lib.RawIntTypes in
@@ -145,13 +146,24 @@ val recover_x_step_2:
   -> sign:uint64
   -> x2:elemB ->
   Stack uint8
-    (requires fun h -> live h x2 /\ live h x /\ disjoint x x2)
-    (ensures  fun h0 z h1 -> modifies (loc x) h0 h1)
+    (requires fun h -> live h x2 /\ live h x /\ disjoint x x2 /\
+      F51.fevalh h x2 == F51.as_nat h x2
+    )
+    (ensures  fun h0 z h1 -> modifies (loc x) h0 h1 /\
+      (if F51.fevalh h0 x2 = 0 then (
+        if v sign = 0 then F51.fevalh h1 x = 0 /\ z == u8 1
+        else h0 == h1 /\ z == u8 0
+        )
+       else h0 == h1 /\ z == u8 2)
+    )
 let recover_x_step_2 x sign x2 =
   let open Lib.RawIntTypes in
   let open FStar.UInt64 in
+  let h0 = get() in
   let x2_is_0 = is_0 x2 in
+  let h1 = get() in
   if x2_is_0 then (
+    assert (uint_v #U64 sign = Lib.IntTypes.v #U64 #SEC sign);
     if u64_to_UInt64 sign =^ 0uL then (
       make_zero x;
       u8 1
@@ -162,7 +174,7 @@ inline_for_extraction noextract
 val recover_x_step_3:
   tmp:lbuffer uint64 20ul ->
   Stack unit
-    (requires fun h -> live h tmp)
+    (requires fun h -> live h tmp /\ F51.mul_inv_t h (gsub tmp 0ul 5ul))
     (ensures  fun h0 _ h1 -> modifies (loc tmp) h0 h1)
 let recover_x_step_3 tmp =
   let x2  = sub tmp 0ul 5ul in

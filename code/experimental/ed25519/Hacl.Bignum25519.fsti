@@ -198,7 +198,7 @@ val fsquare_times:
   -> n:size_t{v n > 0} ->
   Stack unit
     (requires fun h -> live h out /\ live h a /\ disjoint out a /\
-      F51.mul_inv_t h a
+      F51.felem_fits h a (1, 2, 1, 1, 1)
     )
     (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
       F51.felem_fits h1 out (1, 2, 1, 1, 1) /\
@@ -209,7 +209,7 @@ val fsquare_times_inplace:
     out:felem
   -> n:size_t{v n > 0} ->
   Stack unit
-    (requires fun h -> live h out /\ F51.mul_inv_t h out)
+    (requires fun h -> live h out /\ F51.felem_fits h out (1, 2, 1, 1, 1))
     (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
       F51.felem_fits h1 out (1, 2, 1, 1, 1) /\
       F51.fevalh h1 out == Hacl.Spec.Curve25519.Finv.pow (F51.fevalh h0 out) (pow2 (v n))
@@ -232,8 +232,8 @@ val reduce:
   Stack unit
     (requires fun h -> live h out /\ F51.mul_inv_t h out)
     (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
-      F51.fevalh h1 out == F51.fevalh h1 out /\
-      F51.fevalh h0 out == F51.as_nat h1 out
+      F51.fevalh h0 out == F51.fevalh h1 out /\
+      F51.fevalh h1 out == F51.as_nat h1 out
     )
 
 val load_51:
