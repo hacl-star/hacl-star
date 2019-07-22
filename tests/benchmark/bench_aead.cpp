@@ -522,43 +522,25 @@ template<size_t key_size_bits, size_t tag_len>
 class JCChacha20Poly1305EncryptBM : public AEADBenchmark
 {
   protected:
-    const EVP_CIPHER *evp_cipher = EVP_chacha20_poly1305();
-    EVP_CIPHER_CTX *ctx;
-    int outlen;
-
   public:
     JCChacha20Poly1305EncryptBM(size_t msg_len) :
       AEADBenchmark(key_size_bits, tag_len, msg_len)
     {
-        set_name("libjc", "Chacha20\\nPoly1305\\n(ref)");
-        ctx = EVP_CIPHER_CTX_new();
+        set_name("libjc", "Chacha20\\nPoly1305");
     }
     virtual void bench_setup(const BenchmarkSettings & s)
     {
       AEADBenchmark::bench_setup(s);
-      EVP_EncryptInit_ex(ctx, evp_cipher, NULL, NULL, NULL);
-      if ((EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_AEAD_SET_IVLEN, 12, NULL) <= 0) ||
-          (EVP_EncryptInit_ex(ctx, NULL, NULL, key, iv)  <= 0))
-          throw std::logic_error("OpenSSL encryption initialization failed");
     }
     virtual void bench_func()
     {
-      if ((ad_len > 0 && EVP_EncryptUpdate(ctx, NULL, &outlen, ad, ad_len) <= 0) ||
-          (EVP_EncryptUpdate(ctx, cipher, &outlen, plain, msg_len) <= 0) ||
-          (EVP_EncryptFinal_ex(ctx, cipher, &outlen) <= 0) ||
-          (EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_AEAD_GET_TAG, 16, tag) <= 0))
-          throw std::logic_error("OpenSSL encryption failed");
-
       throw std::logic_error("NIY");
-
-      poly1305_ref3((uint64_t*)tag, (uint64_t*)plain, msg_len, (uint64_t*)key);
-      chacha20_ref((uint64_t*)cipher, (uint64_t*)plain, msg_len, (uint64_t*)key, (uint64_t*)ad, (uint32_t*)iv);
     }
     virtual void bench_cleanup(const BenchmarkSettings & s)
     {
       AEADBenchmark::bench_cleanup(s);
     }
-    virtual ~JCChacha20Poly1305EncryptBM() { EVP_CIPHER_CTX_free(ctx); }
+    virtual ~JCChacha20Poly1305EncryptBM() {}
 };
 #endif
 
