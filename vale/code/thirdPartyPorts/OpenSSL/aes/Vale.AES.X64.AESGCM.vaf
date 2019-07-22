@@ -842,6 +842,7 @@ procedure Loop6x_plain(
         ghost init4:quad32,
         ghost init5:quad32)
     {:quick}
+    {:transform reorder, Loop6x_plain_expected_code}
     lets
 //      inp @= rdi; outp @= rsi; len @= rdx; key @= rcx; ivp @= r8; Xip @= r9;
         key @= rcx; Xip @= r9;
@@ -966,6 +967,7 @@ procedure Loop6x_step2(
         ghost init4:quad32,
         ghost init5:quad32)
     {:quick}
+    {:transform reorder, Loop6x_step2_expected_code}
     lets
 //      inp @= rdi; outp @= rsi; len @= rdx; key @= rcx; ivp @= r8;
         key @= rcx; Xip @= r9;
@@ -1108,6 +1110,7 @@ procedure Loop6x_step3(
         ghost init4:quad32,
         ghost init5:quad32)
     {:quick}
+    {:transform reorder, Loop6x_step3_expected_code}
     lets
 //      inp @= rdi; outp @= rsi; len @= rdx; key @= rcx; ivp @= r8;
         key @= rcx; Xip @= r9;
@@ -1248,6 +1251,7 @@ procedure Loop6x_step4(
         ghost init4:quad32,
         ghost init5:quad32)
     {:quick}
+    {:transform reorder, Loop6x_step4_expected_code}
     lets
 //      inp @= rdi; outp @= rsi; len @= rdx; key @= rcx; ivp @= r8;
         key @= rcx;
@@ -1383,6 +1387,7 @@ procedure Loop6x_step5(
         ghost init4:quad32,
         ghost init5:quad32)
     {:quick}
+    {:transform reorder, Loop6x_step5_expected_code}
     lets
 //      inp @= rdi; outp @= rsi; len @= rdx; key @= rcx; ivp @= r8;
         key @= rcx;
@@ -1509,6 +1514,7 @@ procedure Loop6x_round8(
         ghost init4:quad32,
         ghost init5:quad32)
     {:quick}
+    {:transform reorder, Loop6x_round8_expected_code}
     lets
 //      inp @= rdi; outp @= rsi; len @= rdx; key @= rcx; ivp @= r8; Xip @= r9;
         key @= rcx;
@@ -1601,6 +1607,7 @@ procedure Loop6x_round9(
         ghost init4:quad32,
         ghost init5:quad32)
     {:quick}
+    {:transform reorder, Loop6x_round9_expected_code}
     lets
 //      outp @= rsi; len @= rdx; key @= rcx; ivp @= r8; Xip @= r9;
         inp @= rdi; key @= rcx;
@@ -1786,6 +1793,7 @@ procedure Loop6x_final(
         ghost plain5:quad32,
         ghost inb:quad32)
     {:quick}
+    {:transform reorder, Loop6x_final_expected_code}
     lets
 //      inp @= rdi; outp @= rsi; len @= rdx; key @= rcx; ivp @= r8; Xip @= r9;
         inp @= rdi; outp @= rsi; key @= rcx; ivp @= r8;
@@ -1920,6 +1928,7 @@ procedure Loop6x_final(
 #reset-options " "
 procedure Loop6x_save_output(ghost count:nat, ghost out_b:buffer128)
     {:quick}
+    {:transform reorder, Loop6x_save_output_expected_code}
     lets
         outp @= rsi;
         Ii @= xmm0; T1 @= xmm1; T2 @= xmm2; Hkey @= xmm3;
@@ -3434,6 +3443,7 @@ procedure AESNI_ctr32_6x_loop_recursive(
                              init0, init1, init2, init3, init4, init5);
 }
 
+#reset-options "--z3rlimit 10"
 procedure AESNI_ctr32_6x_round9(
         inline alg:algorithm,
         ghost count:nat,
@@ -3525,7 +3535,6 @@ procedure AESNI_ctr32_6x_round9(
     AddLea64(inp, inp, 0x60);
 }
 
-#reset-options " --z3rlimit 10"
 procedure AESNI_ctr32_6x_final(
         inline alg:algorithm,
         ghost count:nat,
