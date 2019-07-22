@@ -457,6 +457,12 @@ val unfold_generate_blocks:
             let (acc',s') = f i acc in
             (acc',Seq.append s s')))
 
+private
+let mult_div_lt
+  (len:size_nat{0 < len}) (max:nat) (n:pos{n <= max}) (i:nat{i < n * len}) :
+  Lemma (i / len < max)
+= ()
+
 val index_generate_blocks:
     #t:Type0
   -> len:size_nat{0 < len}
@@ -464,8 +470,9 @@ val index_generate_blocks:
   -> n:pos{n <= max}
   -> f:(i:nat{i < max} -> unit -> unit & s:seq t{length s == len})
   -> i:nat{i < n * len}
-  -> Lemma (let j:j:nat{j < max} = i / len in
+  -> Lemma (mult_div_lt len max n i;
            let a_spec (i:nat{i <= max}) = unit in
            let _,s1 = generate_blocks #t len max n a_spec f () in
-           let _,s2 = f j () in
+           let _,s2 = f (i / len) () in
            Seq.index s1 i == Seq.index s2 (i % len))
+
