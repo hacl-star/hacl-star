@@ -35,10 +35,9 @@ let encode4 (w:lbytes 64) : Tot elem4 = load_elem4 w
 let load_acc (acc:elem) (text:lbytes 64) : elem4 =
   fadd4 (create4 acc zero zero zero) (encode4 text)
 
-//fadd_mul4
 let normalize4 (acc:elem4) (pre:elem4) : elem =
   let a = fmul4 acc pre in
-  a.[0] `fadd` a.[1] `fadd` a.[2] `fadd` a.[3]
+  fadd (fadd (fadd a.[0] a.[1]) a.[2]) a.[3]
 
 let load_precompute_r (r:elem) : elem4 =
   let r2 = r `fmul_be` r in

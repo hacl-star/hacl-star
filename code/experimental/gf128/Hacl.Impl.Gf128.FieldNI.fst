@@ -303,7 +303,6 @@ let store_felem x y =
   admit()
 
 
-[@CInline]
 val fadd:
     x: felem
   -> y: felem ->
@@ -312,11 +311,11 @@ val fadd:
   (ensures  fun h0 _ h1 -> modifies1 x h0 h1 /\
     feval h1 x == GF.fadd #S.gf128 (feval h0 x) (feval h0 y))
 
+[@CInline]
 let fadd x y =
   x.(size 0) <- cl_add x.(size 0) y.(size 0)
 
 
-[@CInline]
 val fadd4:
     x:felem4
   -> y:felem4 ->
@@ -325,6 +324,7 @@ val fadd4:
   (ensures  fun h0 _ h1 -> modifies1 x h0 h1 /\
     feval4 h1 x == Vec.fadd4 (feval4 h0 x) (feval4 h0 y))
 
+[@CInline]
 let fadd4 x y =
   let (x0, x1, x2, x3) = (x.(0ul), x.(1ul), x.(2ul), x.(3ul)) in
   let (y0, y1, y2, y3) = (y.(0ul), y.(1ul), y.(2ul), y.(3ul)) in
@@ -337,7 +337,6 @@ let fadd4 x y =
   LSeq.eq_intro (feval4 h1 x) (Vec.fadd4 (feval4 h0 x) (feval4 h0 y))
 
 
-[@ CInline]
 val fmul:
     x:felem
   -> y:felem ->
@@ -346,6 +345,7 @@ val fmul:
   (ensures  fun h0 _ h1 -> modifies1 x h0 h1 /\
     feval h1 x == GF.fmul_be #S.gf128 (feval h0 x) (feval h0 y))
 
+[@ CInline]
 let fmul x y =
   let xe = x.(size 0) in
   let ye = y.(size 0) in
@@ -357,7 +357,6 @@ let fmul x y =
   assume (feval h1 x == GF.fmul_be #S.gf128 (feval h0 x) (feval h0 y))
 
 
-[@CInline]
 val load_precompute_r:
     pre:precomp
   -> key:block ->
@@ -368,6 +367,7 @@ val load_precompute_r:
     feval h1 (gsub pre 3ul 1ul) == r /\
     feval4 h1 pre == Vec.load_precompute_r r))
 
+[@CInline]
 let load_precompute_r pre key =
   let r4 = sub pre (size 0) (size 1) in
   let r3 = sub pre (size 1) (size 1) in
@@ -383,7 +383,6 @@ let load_precompute_r pre key =
   fmul r4 r3
 
 
-[@CInline]
 val fmul_pre:
     x:felem
   -> y:precomp ->
@@ -392,12 +391,12 @@ val fmul_pre:
   (ensures  fun h0 _ h1 -> modifies1 x h0 h1 /\
     feval h1 x == GF.fmul_be #S.gf128 (feval h0 x) (feval h0 (gsub y 0ul 1ul)))
 
+[@CInline]
 let fmul_pre x pre =
   let r = sub pre (size 0) (size 1) in
   fmul x r
 
 
-[@CInline]
 val fmul_r4:
     x:felem4
   -> pre:precomp ->
@@ -407,6 +406,7 @@ val fmul_r4:
     (let r4 = feval h0 (gsub pre 0ul 1ul) in
     feval4 h1 x == Vec.fmul4 (feval4 h0 x) (LSeq.create 4 r4)))
 
+[@CInline]
 let fmul_r4 x pre =
   let h0 = ST.get () in
   fmul (sub x (size 0) (size 1)) (sub pre (size 0) (size 1));
@@ -418,7 +418,6 @@ let fmul_r4 x pre =
     (Vec.fmul4 (feval4 h0 x) (LSeq.create 4 (feval h0 (gsub pre 0ul 1ul))))
 
 
-[@CInline]
 val normalize4:
     acc:felem
   -> x:felem4
@@ -429,6 +428,7 @@ val normalize4:
    (let x = Vec.fadd4 (create4 (feval h0 acc) GF.zero GF.zero GF.zero) (feval4 h0 x) in
     feval h1 acc == Vec.normalize4 x (feval4 h0 pre)))
 
+[@CInline]
 let normalize4 acc x pre =
   let x1 = x.(size 0) in
   let x2 = x.(size 1) in

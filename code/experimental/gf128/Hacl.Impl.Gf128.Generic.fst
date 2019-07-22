@@ -26,22 +26,26 @@ let as_get_acc #s h ctx = feval h (gsub ctx 0ul (felem_len s))
 let as_get_r #s h ctx = feval h (gsub ctx (felem4_len s) (felem_len s))
 
 inline_for_extraction noextract
-let get_acc #s (ctx:gcm_ctx s) = sub ctx 0ul (felem_len s)
+let get_acc #s (ctx:gcm_ctx s) : Stack (felem s)
+  (requires fun h -> live h ctx)
+  (ensures  fun h0 acc h1 -> h0 == h1 /\ live h1 acc /\ acc == gsub ctx 0ul (felem_len s))
+  = sub ctx 0ul (felem_len s)
 
 inline_for_extraction noextract
-let get_r #s (ctx:gcm_ctx s) = sub ctx (felem4_len s) (felem_len s)
+let get_r #s (ctx:gcm_ctx s) : Stack (felem s)
+  (requires fun h -> live h ctx)
+  (ensures  fun h0 acc h1 -> h0 == h1 /\ live h1 acc /\ acc == gsub ctx (felem4_len s) (felem_len s))
+  = sub ctx (felem4_len s) (felem_len s)
 
 inline_for_extraction noextract
-let get_precomp #s (ctx:gcm_ctx s) = sub ctx (felem_len s) (precomp_len s)
+let get_precomp #s (ctx:gcm_ctx s) : Stack (precomp s)
+  (requires fun h -> live h ctx)
+  (ensures  fun h0 acc h1 -> h0 == h1 /\ live h1 acc /\ acc == gsub ctx (felem_len s) (precomp_len s))
+  = sub ctx (felem_len s) (precomp_len s)
 
 let state_inv_t #s h ctx =
   let pre = gsub ctx (felem_len s) (precomp_len s) in
-  get_r4321 h pre == Vec.load_precompute_r (get_r1 h pre)
-
-noextract
-val precomp_inv_t: #s:field_spec -> h:mem -> pre:precomp s -> Type0
-let precomp_inv_t #s h pre =
-  get_r4321 h pre == Vec.load_precompute_r (get_r1 h pre)
+  precomp_inv_t h pre
 
 
 inline_for_extraction noextract
@@ -322,7 +326,7 @@ val gf128_update_multi_mul_add_f:
       (Vec.gf128_update4_mul_add (get_r4321 h0 pre)) (v nb) (v i) (feval4 h0 acc))
 
 let gf128_update_multi_mul_add_f #s pre nb len text b4 i acc4 =
-  let tb = sub text (i *. 64ul) 64ul in
+  let tb = sub text (i *! 64ul) 64ul in
   encode4 b4 tb;
   fmul_r4 acc4 pre;
   fadd4 acc4 b4
@@ -401,6 +405,8 @@ let gf128_update_multi_mul_add_loop #s pre len text acc4 b4 =
   let h1 = ST.get () in
   assert (feval4 h1 acc4 == Lib.LoopCombinators.repeati (v nb) (spec_fh h0) (feval4 h0 acc4))
 
+
+#set-options "--z3rlimit 100"
 
 //PreComp
 inline_for_extraction noextract
