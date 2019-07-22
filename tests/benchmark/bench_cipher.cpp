@@ -54,6 +54,8 @@ class CipherBenchmark : public Benchmark
       plain = new uint8_t[msg_len];
       cipher = new uint8_t[msg_len];
       iv = new uint8_t[iv_len];
+      for (size_t i = 12; i < 16; i++)
+        iv[i] = 0;
       ctr = 0;
     }
 
@@ -76,8 +78,6 @@ class CipherBenchmark : public Benchmark
       randomize((char*)key, key_sz);
       randomize((char*)plain, msg_len);
       randomize((char*)iv, iv_len);
-      for (size_t i = 12; i < 16; i++)
-        iv[i] = 0;
     }
 
     virtual void report(std::ostream & rs, const BenchmarkSettings & s) const
@@ -121,6 +121,7 @@ class OpenSSLChaCha20 : public CipherBenchmark
   protected:
     EVP_CIPHER_CTX *ctx;
     int outlen;
+    uint8_t openssl_iv[16];
 
   public:
     OpenSSLChaCha20(size_t msg_len) :
@@ -132,10 +133,10 @@ class OpenSSLChaCha20 : public CipherBenchmark
     virtual void bench_setup(const BenchmarkSettings & s)
     {
       CipherBenchmark::bench_setup(s);
-      // cwinter: something's wrong with OpenSSL's handling of the IV, but it works if it's all zero.
-      for (size_t i = 0; i < iv_len; i++)
-        iv[i] = 0;
-      if ((EVP_CipherInit_ex(ctx, EVP_chacha20(), NULL, key, iv, 1) <= 0))
+      for (size_t i = 4; i < iv_len; i++)
+        openssl_iv[i] = iv[i-4];
+      openssl_iv[0] = openssl_iv[1] = openssl_iv[2] = openssl_iv[3] = 0;
+      if ((EVP_CipherInit_ex(ctx, EVP_chacha20(), NULL, key, openssl_iv, 1) <= 0))
           throw std::logic_error("OpenSSL cipher initialization failed");
     }
     virtual void bench_func()
