@@ -18,7 +18,7 @@ type size64_nat = n:nat{n <= max_size64_t}
 
 noeq type state_r (a:alg) = {
   hash: hash_ws a; // Current hash state
-  n: n:size_nat; // Number of blocks already processed
+  n: size_nat; // Number of blocks already processed
   pl: pl:size_nat{pl <= size_block a}; // Partial length of the block
   block: block_s a; // Storage block
 }
@@ -52,7 +52,6 @@ val blake2_incremental_update:
 
 let blake2_incremental_update a input state =
   let ll = length input in
-  let tl = state.n * size_block a + state.pl + length input in
   if not (state.n + 2 + ll / size_block a <= max_size_t) then None else (
   let br = size_block a - state.pl in
   let ll0 = if ll <= br then ll else br in
@@ -63,19 +62,20 @@ let blake2_incremental_update a input state =
     (* Handle the first partial block *)
     let hash = blake2_update_block a (state.n * (size_block a)) block state.hash in
     let n = state.n + 1 in
-    let pl = 0 in
     (* Handle all full blocks available *)
-    let rn = (ll - ll0) / size_block a in
-    let hash = repeati rn (fun i ->
+    let n1 = (ll - ll0) / size_block a in
+    let ll1 = n1 * size_block a in
+    let input1 = sub #uint8 #ll input ll0 ll1 in
+    let hash = repeati n1 (fun i ->
+      let block = sub input1 (i * size_block a) (size_block a) in
       blake2_update_block a ((n + i) * size_block a) block)
       hash
     in
-    let n: size_nat = n + rn in
     (* Store the remainder *)
-    let ll1 = (ll - ll0) % size_block a in
-    let input1 = sub #uint8 #ll input (ll - ll1) ll1 in
-    let block = update_sub block 0 ll1 input1 in
-    Some ({state with n = n; pl = ll1; block = block})
+    let ll2 = (ll - ll0) % size_block a in
+    let input2 = sub #uint8 #ll input (ll - ll2) ll2 in
+    let block = update_sub block 0 ll2 input2 in
+    Some ({state with n = n + n1; pl = ll2; block = block})
   ))
 
 
