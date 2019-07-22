@@ -90,5 +90,5 @@ let blake2_incremental_finish a state nn =
   let empty = create 0 (u8 0) in
   let last = sub state.block 0 state.pl in
   // Not very efficient because a full block will be recreated from the partial input
-  let hash = blake2_update_last a (state.n * (size_block a)) state.pl last state.hash in
+  let hash = blake2_update_last a (state.n * (size_block a) + state.pl) state.pl last state.hash in
   blake2_finish a hash nn
