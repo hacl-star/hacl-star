@@ -630,11 +630,11 @@ procedure Ghash_buffer(
         Xip @= r9; len @= rbx; scratch_ptr @= rcx; in_ptr @= rbp;
         Ii @= xmm0; T1 @= xmm1; T2 @= xmm2; Hkey @= xmm3;
         Z0 @= xmm4; Z1 @= xmm5; Z2 @= xmm6; Z3 @= xmm7;
-        Xi @= xmm8;
+        Xi @= xmm8; rev_mask @= xmm9;
         h := of_quad32(reverse_bytes_quad32(h_LE));
         prev := of_quad32(reverse_bytes_quad32(y_prev));
     reads
-        mem; memTaint; Xip; in_ptr; 
+        Xip; in_ptr; rev_mask; mem; memTaint; 
     modifies
         len; scratch_ptr; efl; Ii; T1; T2; Hkey; Z0; Z1; Z2; Z3; Xi;
     requires
@@ -645,6 +645,7 @@ procedure Ghash_buffer(
         buffers_disjoint128(hkeys_b, in_b);
         in_ptr + 0x10 * len <= pow2_64;
         of_quad32(Xi) == prev;
+        rev_mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
 
         0 < len < 6;
     ensures
@@ -653,12 +654,7 @@ procedure Ghash_buffer(
 //        pdata := fun_seq_quad32_LE_poly128(data);
 //        n := length(data);
 
-    //let data := prep_data(Seq.slice(s128(mem, in_b), 0, len));
     let data := Seq.slice(s128(mem, in_b), 0, len);
-//    assert validSrcAddrs128(mem, rbp, in_b, length(data), memTaint, Secret); 
-//    assert forall (i:nat) i < 5 /\ i < length(data) ==> buffer128_read(in_b, (length(data) - 1 - i), mem) == reverse_bytes_quad32(index(data, i));
-//    assume false;
-    //assert scratch_b_data(in_b, mem, memTaint, rbp, data);
     Mov64(scratch_ptr, in_ptr);
     GhashUnroll_n(false, false, len, hkeys_b, in_b, h_LE, y_prev, data);
 
