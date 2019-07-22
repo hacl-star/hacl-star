@@ -8,6 +8,8 @@ open Lib.RawIntTypes
 open Lib.Sequence
 open Lib.ByteSequence
 
+open Spec.Blake2.Incremental
+
 //
 // Test 1
 //
@@ -207,9 +209,19 @@ let test5_expected : lbytes 64 =
   of_list test5_expected_list
 
 //
-// Main
+// Blah
 //
 
+    (* IO.print_string "\nA\n"; *)
+    (* let hash = Spec.Blake2.blake2_update_block Spec.Blake2.Blake2S (st.n * (Spec.Blake2.size_block Spec.Blake2.Blake2S)) test1_plaintext st.hash in *)
+    (* let hash = Spec.Blake2.blake2_update_last Spec.Blake2.Blake2S ((st.n + 1) * (Spec.Blake2.size_block Spec.Blake2.Blake2S)) 0 (of_list []) st.hash in *)
+    (* let hash = Spec.Blake2.blake2_init Spec.Blake2.Blake2S 0 (of_list []) 32 in *)
+//    let hash = Spec.Blake2.blake2_update_block Spec.Blake2.Blake2S (size_block a) test1_plaintext hash in
+    (* let hash = Spec.Blake2.blake2_update_last Spec.Blake2.Blake2S (length test1_plaintext) (length test1_plaintext) test1_plaintext st.hash in *)
+    (* let hash = Spec.Blake2.blake2_update Spec.Blake2.Blake2S st.hash test1_plaintext 0 in *)
+    (* Spec.Blake2.blake2_finish Spec.Blake2.Blake2S hash 32 *)
+      (* let hash = Spec.Blake2.blake2_update Spec.Blake2.Blake2S st.hash (sub st.block 0 st.pl) 0 in *)
+      (* Spec.Blake2.blake2_finish Spec.Blake2.Blake2S hash 32 *)
 
 
 //
@@ -219,14 +231,39 @@ let test5_expected : lbytes 64 =
 let test () =
 
   IO.print_string "\n\nTEST 1";
-  let test1_plaintext_len : size_nat = 32 in
   let test1_result : lbytes 32 =
     Spec.Blake2.blake2s test1_plaintext 0 (of_list []) 32
   in
+  let test1_result_incr1 : lbytes 32 =
+    let st: Spec.Blake2.Incremental.state_r Spec.Blake2.Blake2S = Spec.Blake2.Incremental.blake2_incremental_init Spec.Blake2.Blake2S 0 (of_list []) 32 in
+    match Spec.Blake2.Incremental.blake2_incremental_update Spec.Blake2.Blake2S test1_plaintext st with
+    | None -> create 32 (u8 0)
+    | Some st -> Spec.Blake2.Incremental.blake2_incremental_finish Spec.Blake2.Blake2S st 32
+  in
+  let test1_result_incr2 : lbytes 32 =
+    let test1_plaintext_sub1 = sub test1_plaintext 0 (length test1_plaintext / 2) in
+    let test1_plaintext_sub2 = sub test1_plaintext (length test1_plaintext / 2) (length test1_plaintext - (length test1_plaintext / 2)) in
+    let st: Spec.Blake2.Incremental.state_r Spec.Blake2.Blake2S = Spec.Blake2.Incremental.blake2_incremental_init Spec.Blake2.Blake2S 0 (of_list []) 32 in
+    match Spec.Blake2.Incremental.blake2_incremental_update Spec.Blake2.Blake2S test1_plaintext_sub1 st with
+    | None -> create 32 (u8 0)
+    | Some st ->
+    match Spec.Blake2.Incremental.blake2_incremental_update Spec.Blake2.Blake2S test1_plaintext_sub2 st with
+    | None -> create 32 (u8 0)
+    | Some st -> Spec.Blake2.Incremental.blake2_incremental_finish Spec.Blake2.Blake2S st 32
+  in
+
   let result1 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test1_expected test1_result in
+  let result1 = result1 && for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test1_result test1_result_incr1 in
+  let result1 = result1 && for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test1_result test1_result_incr2 in
 
   IO.print_string "\n1. Result  : ";
   List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a)) (to_list test1_result);
+
+  IO.print_string "\n1. Result I1 : ";
+  List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a)) (to_list test1_result_incr1);
+
+  IO.print_string "\n1. Result I2 : ";
+  List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a)) (to_list test1_result_incr2);
 
   IO.print_string "\n1. Expected: ";
   List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a)) (to_list test1_expected);
