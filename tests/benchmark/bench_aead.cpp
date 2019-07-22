@@ -11,6 +11,10 @@ extern "C" {
 #ifdef HAVE_VALE
 #include <EverCrypt_Vale.h>
 #endif
+#include <Hacl_Chacha20.h>
+#include <Hacl_Chacha20Poly1305.h>
+#include <Hacl_Poly1305_128.h>
+#include <EverCrypt_Chacha20Poly1305.h>
 }
 
 #ifdef HAVE_OPENSSL
@@ -93,6 +97,33 @@ class AEADBenchmark : public Benchmark
         << "," << msg_len;
       Benchmark::report(rs, s);
       rs << "," << (ctotal/(double)msg_len)/(double)s.samples << "\n";
+    }
+};
+
+class NilBenchmark : public AEADBenchmark {
+public:
+  NilBenchmark(const std::string &provider, const std::string &algorithm) :
+    AEADBenchmark(128, 0, 32)
+  {
+    set_name(provider, algorithm);
+  }
+  ~NilBenchmark () {}
+  virtual void bench_func() {}
+  virtual void report(std::ostream & rs, const BenchmarkSettings & s) const
+    {
+      rs << "\"" << name << "\""
+        << "," << "\"" << algorithm << "\""
+        << "," << msg_len;
+      rs << "," << 0.0
+        << "," << 0.0
+        << "," << 0.0
+        << "," << 0.0
+        << "," << 0.0
+        << "," << 0.0
+        << "," << 0.0
+        << "," << 0.0
+        << "," << 0.0;
+      rs << "," << 0.0 << "\n";
     }
 };
 
@@ -534,7 +565,87 @@ class JCChacha20Poly1305EncryptBM : public AEADBenchmark
     }
     virtual void bench_func()
     {
-      throw std::logic_error("NIY");
+      auto check_eq = [this](const uint8_t *x, const uint8_t *y, uint32_t sz) {
+        for (size_t i = 0; i < sz; i++)
+          if (x[i] != y[i]) {
+            print_buffer(x, sz);
+            print_buffer(y, sz);
+            throw std::logic_error("mismatch");
+          }
+      };
+
+      static uint8_t iv_zero[12] = { 0 };
+
+      // See https://tools.ietf.org/html/rfc8439#section-2.8.1
+
+      // pad16(x):
+      //    if (len(x) % 16)==0
+      //       then return NULL
+      //       else return copies(0, 16-(len(x)%16))
+      //    end
+
+      // poly1305_key_gen(key,nonce):
+      //    counter = 0
+      //    block = chacha20_block(key,counter,nonce)
+      //    return block[0..31]
+      //    end
+
+      // chacha20_aead_encrypt(aad, key, iv, constant, plaintext):
+      //    nonce = constant | iv
+      uint8_t *nonce = iv;
+      //    otk = poly1305_key_gen(key, nonce)
+      uint32_t ec_ctx[4] = { 0 };
+      uint8_t block[64];
+      libjc_avx2_chacha20_avx2((uint64_t*)block, (uint64_t*)nonce, 64, (uint64_t*)key, (uint64_t*)iv_zero, 0);
+      #ifdef _DEBUG
+      uint8_t ec_block[64];
+      Hacl_Impl_Chacha20_chacha20_encrypt(64, ec_block, nonce, key, iv_zero, 0);
+      check_eq(block, ec_block, 64);
+      #endif
+      uint8_t *otk = block; // 64 but we use only 32
+
+      //    ciphertext = chacha20_encrypt(key, 1, nonce, plaintext)
+      uint8_t ciphertext[msg_len];
+      libjc_avx2_chacha20_avx2((uint64_t*)ciphertext, (uint64_t*)plain, msg_len, (uint64_t*)key, (uint64_t*)nonce, 1);
+      #ifdef _DEBUG
+      uint8_t ec_ciphertext[msg_len];
+      Hacl_Impl_Chacha20_chacha20_encrypt(msg_len, ec_ciphertext, plain, key, nonce, 1);
+      check_eq(ciphertext, ec_ciphertext, msg_len);
+      #endif
+
+      std::vector<uint8_t> mac_data;
+      //    mac_data = aad | pad16(aad)
+      //    mac_data |= ciphertext | pad16(ciphertext)
+      //    mac_data |= num_to_8_le_bytes(aad.length)
+      //    mac_data |= num_to_8_le_bytes(ciphertext.length)
+      if (sizeof(ciphertext) % 16 != 0)
+        throw std::logic_error("unsupported message length");
+      for (size_t i = 0; i < ad_len; i++)
+        mac_data.push_back(ad[i]);
+      for (size_t pad = ad_len; pad % 16 != 0; pad++)
+        mac_data.push_back(0);
+      for (size_t i = 0; i < msg_len; i++)
+        mac_data.push_back(ciphertext[i]);
+      for (size_t pad = msg_len; pad % 16 != 0; pad++)
+        mac_data.push_back(0);
+      uint64_t ad_len64 = ad_len;
+      uint8_t *ad_len8 = (uint8_t*)&ad_len64;
+      for (size_t i = 0; i < 8; i++)
+        mac_data.push_back(ad_len8[i]);
+      uint64_t msg_len64 = msg_len;
+      uint8_t *msg_len8 = (uint8_t*)&msg_len64;
+      for (size_t i = 0; i < 8; i++)
+        mac_data.push_back(msg_len8[i]);
+
+      //    tag = poly1305_mac(mac_data, otk)
+      uint8_t tag[16];
+      libjc_avx2_poly1305_avx2((uint64_t*)tag, (uint64_t*)mac_data.data(), mac_data.size(), (uint64_t*)otk);
+      #ifdef _DEBUG
+      uint8_t ec_tag[16];
+      Hacl_Poly1305_128_poly1305_mac(ec_tag, mac_data.size(), mac_data.data(), otk);
+      check_eq(tag, ec_tag, 16);
+      #endif
+      //    return (ciphertext, tag)
     }
     virtual void bench_cleanup(const BenchmarkSettings & s)
     {
@@ -598,10 +709,13 @@ void bench_aead_encrypt(const BenchmarkSettings & s)
       #ifdef HAVE_BCRYPT
       new BCryptEncryptBM<128, 16>(ds),
       new BCryptEncryptBM<256, 16>(ds),
+      new NilBenchmark("BCrypt", "Chacha20\\nPoly1305"),
       #endif
 
       #ifdef HAVE_JC
-      // new JCChacha20Poly1305EncryptBM<256, 16>(ds),
+      new NilBenchmark("libjc", "AES128\\nGCM"),
+      new NilBenchmark("libjc", "AES256\\nGCM"),
+      new JCChacha20Poly1305EncryptBM<256, 16>(ds),
       #endif
       };
 

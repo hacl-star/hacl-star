@@ -257,7 +257,7 @@ void bench_cipher(const BenchmarkSettings & s)
     }
 
     std::list<Benchmark*> todo = {
-      //new EverCryptChaCha20(ds),
+      new EverCryptChaCha20(ds),
 
       #ifdef HAVE_OPENSSL
       new OpenSSLChaCha20(ds),
