@@ -92,3 +92,35 @@ let blake2_incremental_finish a state nn =
   // Not very efficient because a full block will be recreated from the partial input
   let hash = blake2_update_last a (state.n * (size_block a) + state.pl) state.pl last state.hash in
   blake2_finish a hash nn
+
+
+//
+// This function has an artificial bound on the size of the input
+// for technical reasons and should not be used !
+//
+// Please use Spec.Blake2.blake2 instead !
+//
+
+val debug_blake2_incremental:
+    a:alg
+  -> d:bytes{length d <= max_size_t}
+  -> kk:size_nat{kk <= max_key a /\ (if kk = 0 then length d <= max_limb a else length d + (size_block a) <= max_limb a)}
+  -> k:lbytes kk
+  -> nn:size_nat{1 <= nn /\ nn <= max_output a} ->
+  Tot (option (lbytes nn))
+
+let debug_blake2_incremental a d kk k nn =
+  let size_pblock = size_block a - 7 in
+  let nd = length d / size_pblock in
+  let rd = length d % size_pblock in
+  let st = blake2_incremental_init a kk k nn in
+  let ost = repeati nd (fun i ost ->
+    let pinput = sub #uint8 #(length d) d (i * size_pblock) size_pblock in
+    match ost with
+    | None -> None
+    | Some st -> blake2_incremental_update a pinput st
+  ) (Some st)
+  in
+  match ost with
+  | None -> None
+  | Some st -> Some (blake2_incremental_finish a st nn)
