@@ -583,7 +583,6 @@ procedure GhashUnroll_n(
 // Expects input to be hashed to reside in Ii
 procedure Ghash_register(
         ghost hkeys_b:buffer128,
-        ghost scratch_b:buffer128,
         ghost h_LE:quad32,
         ghost y_prev:quad32)
     {:public}
