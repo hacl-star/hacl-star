@@ -1,4 +1,4 @@
-module Hacl.Impl.Blake2b.Partial2
+module Hacl.Impl.Blake2b.Incremental
 
 open FStar.Mul
 open FStar.HyperStack

@@ -41,7 +41,7 @@ FSTAR = $(FSTAR_HOME)/bin/fstar.exe $(FSTAR_FLAGS)
 
 ENABLE_HINTS = --use_hints --use_hint_hashes --record_hints --query_stats
 
-ROOTS = ../Hacl.Test.Blake2b.fst Hacl.Impl.Blake2b.Partial2.fst
+ROOTS = ../Hacl.Test.Blake2b.fst Hacl.Impl.Blake2b.Incremental.fst
 
 .PRECIOUS: %.krml
 
