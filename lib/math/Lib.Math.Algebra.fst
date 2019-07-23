@@ -655,7 +655,7 @@ val add_sub_zero: #n:big -> a:fe n -> Lemma
   (a +% 0 = a /\ a -% 0 = a)
 let add_sub_zero #n a = ()
 
-val mod_prop: n:big -> a:int -> b:int -> Lemma
+val mod_prop: n:pos -> a:int -> b:int -> Lemma
   (requires (a % n = b))
   (ensures (a - b = (a / n) * n))
 let mod_prop n a b =
@@ -663,6 +663,18 @@ let mod_prop n a b =
   assert(a % n = a - n * (a / n));
   assert(b = a - n * (a / n));
   assert(a - b = (a / n) * n)
+
+val mod_prop_inv: n:big -> a:int -> b:int -> k:int -> Lemma
+  (requires (a = b + k * n))
+  (ensures (a % n = b % n))
+let mod_prop_inv n a b k =
+  assert (a % n = (b + k * n) % n);
+  modulo_distributivity b (k * n) n;
+  assert (a % n = (b % n + (k * n) % n) % n);
+  multiple_modulo_lemma k n;
+  assert (a % n = (b % n) % n);
+  modulo_modulo_lemma b n 1;
+  assert (a % n = b % n)
 
 val mod_ops_props1: #n:big -> a:fe n -> b:fe n -> c:fe n -> Lemma
   ((a +% b = c ==> (a + b) - c = ((a+b)/n) * n) /\
@@ -861,7 +873,7 @@ let rec nexp_exp #n g e1 e2 = match e2 with
   end
 
 // To subgroup
-val to_fe_nexp1: #n:big -> k:big{n % k = 0 && n / k > 1 } -> g:fe n -> e:nat -> Lemma
+val to_fe_nexp1: #n:big -> k:pos{n % k = 0 && n / k > 1 } -> g:fe n -> e:nat -> Lemma
   (to_fe #(n/k) (nexp g e) = nexp (to_fe #(n/k) g) e)
 let rec to_fe_nexp1 #n k g e = match e with
   | 0 -> ()
@@ -957,7 +969,7 @@ let fexp_exp #n g e1 e2 =
   fexp_eq_nexp g (e1 * e2);
   nexp_exp g e1 e2
 
-val to_fe_fexp1: #n:big -> k:big{n % k = 0 && n / k > 1 } -> g:fe n -> e:nat -> Lemma
+val to_fe_fexp1: #n:big -> k:pos{n % k = 0 && n / k > 1 } -> g:fe n -> e:nat -> Lemma
   (to_fe #(n/k) (fexp g e) = fexp (to_fe #(n/k) g) e)
 let rec to_fe_fexp1 #n k g e =
   to_fe_nexp1 #n k g e;
@@ -1046,6 +1058,11 @@ val zerodiv_is_nonunit: #n:big -> a:fe n -> b:fe n -> Lemma
   (ensures (~(isunit a) /\ ~(isunit b)))
 let zerodiv_is_nonunit #n a b = admit ()
 
+// In F_p there are no
+val prime_field_zerodivs: #p:prm -> a:fe p{a>0} -> b:fe p{b>0} -> Lemma
+  (a *% b <> 0)
+let prime_field_zerodivs #p a b = admit ()
+
 #reset-options "--z3rlimit 50"
 
 val finv0: #n:big -> a:fe n ->
@@ -1112,10 +1129,6 @@ val mult_order_less: #n:big -> g:fe n{isunit g} -> e:pos -> Lemma
   (fexp g e = 1 ==> mult_order g <= e)
 let mult_order_less #n g e = ()
 
-val mult_order_divides: #n:big -> g:fe n{isunit g} -> e:pos -> Lemma
-  (fexp g e = 1 ==> divides (mult_order g) e)
-let mult_order_divides #n g e = admit ()
-
 val g_pow_order_reduc: #n:big -> g:fe n{isunit g /\ g > 0} -> x:nat -> Lemma
   (ensures (fexp g x = fexp g (x % mult_order g)))
   (decreases x)
@@ -1129,6 +1142,37 @@ let rec g_pow_order_reduc #n g x =
     fexp_mul1 g (r * (x/r)) (x%r);
     fexp_one2 #n (x/r)
   end
+
+val mult_order_and_one1: #n:big -> g:fe n{isunit g} -> e:pos -> Lemma
+  (requires divides (mult_order g) e)
+  (ensures fexp g e = 1)
+let mult_order_and_one1 #n g e =
+  let r = mult_order g in
+  mod_prop r e 0;
+  swap_mul (e / r) r;
+  fexp_exp g r (e/r);
+  fexp_one2 #n (e/r)
+
+val mult_order_and_one2: #n:big -> g:fe n{isunit g} -> e:pos -> Lemma
+  (requires fexp g e = 1)
+  (ensures divides (mult_order g) e)
+let mult_order_and_one2 #n g e =
+  let r = mult_order g in
+  let l (): Lemma (requires (~(divides r e))) (ensures False) = begin
+    g_pow_order_reduc g e;
+    assert (fexp g e = fexp g (e % r));
+    assert (fexp g (e % r) = 1)
+  end in
+  move_requires l ()
+
+val mult_order_and_one: #n:big -> g:fe n{isunit g} -> e:pos -> Lemma
+  (fexp g e = 1 <==> divides (mult_order g) e)
+let mult_order_and_one #n g e =
+  let r = mult_order g in
+  let l1 (): Lemma (requires divides r e) (ensures fexp g e = 1) = mult_order_and_one1 g e in
+  let l2 (): Lemma (requires fexp g e = 1) (ensures divides r e) = mult_order_and_one2 g e in
+  move_requires l1 ();
+  move_requires l2 ()
 
 val g_pow_inverse: #n:big -> g:fe n{isunit g} -> x:nat -> Lemma
   (let r = mult_order g in
