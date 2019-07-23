@@ -19,25 +19,6 @@ module Spec = Spec.Blake2
 #set-options "--z3rlimit 50 --max_ifuel 0 --max_fuel 0"
 
 
-assume val to_size128: nat -> Tot size128_t
-
-
-val declassify_word: word_t -> Tot (Spec.pub_word_t Spec.Blake2.Blake2B)
-let declassify_word x =
-  let px = Lib.RawIntTypes.u64_to_UInt64 x in
-  let l :uint_t (Spec.wt Spec.Blake2.Blake2B) PUB = px in
-  l
-
-
-val declassify_word_to_size: word_t -> Tot size_t
-let declassify_word_to_size x =
-  let x32 = to_u32 x in
-  let y32 = Lib.RawIntTypes.u32_to_UInt32 x32 in
-  let l :size_t = Lib.RawIntTypes.size_from_UInt32 y32 in
-  l
-
-
-
 (** Define the state *)
 noeq type state_r = {
   hash: hash_wp;
@@ -49,7 +30,6 @@ noeq type state_r = {
 
 type state_inv (h:mem) (s:state_r) =
   live h s.hash /\ live h s.block /\ disjoint s.hash s.block
-
 
 
 val blake2b_init_partial:
@@ -88,8 +68,8 @@ val blake2b_update_partial:
 
 let blake2b_update_partial state ll input =
   let nll = ll /. size_block in
-  if length input = 0 then state else (
-  if not (state.n +. nll +. 2ul <= max_size_t) then state else (
+  if ll =. 0ul then state else (
+  if not (state.n +. nll +. 2ul <=. size max_size_t) then state else (
   let rb = size_block -. state.pl in
   let ll0 = if ll <. rb then ll else rb in
   let partial = sub input 0ul ll0 in
@@ -102,7 +82,6 @@ let blake2b_update_partial state ll input =
     let n1 = (ll -. ll0) /. size_block in
     let input1 = sub input ll0 (ll -. ll0) in
     let h0 = ST.get () in
-
     loop_nospec #h0 n1 state.hash
     (fun i ->
       let block = sub input1 (i *. size_block) size_block in
