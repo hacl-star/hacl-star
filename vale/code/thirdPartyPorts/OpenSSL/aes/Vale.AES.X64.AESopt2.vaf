@@ -136,14 +136,14 @@ procedure MulAdd_unroll_i(
         ghost data:seq(quad32))
     {:quick}
     lets
-        Xip @= r9; scratch_ptr @= rcx;
+        Xip @= r9; scratch_ptr @= r11; in_ptr @= rdi; 
         Ii @= xmm0; T1 @= xmm1; T2 @= xmm2; Hkey @= xmm3;
         Z0 @= xmm4; Z1 @= xmm5; Z2 @= xmm6; Z3 @= xmm7;
         Xi @= xmm8; rev_mask @= xmm9;
         pdata := fun_seq_quad32_LE_poly128(data);
         scratch_index := index_opt_rev(rev_blocks, scratch_len, n, n - (m + 2)); // index of m + 1 iteration
     reads
-        mem; memTaint; Xip; rbp; Xi; rev_mask;
+        mem; memTaint; Xip; in_ptr; Xi; rev_mask;
     modifies
         efl; scratch_ptr; Ii; T1; T2; Hkey; Z0; Z1; Z2; Z3;
     requires
@@ -154,10 +154,10 @@ procedure MulAdd_unroll_i(
         is_last <==> m == n - 1;
         buffers_disjoint128(hkeys_b, scratch_b);
         validSrcAddrs128(mem, Xip - 0x20, hkeys_b, 8, memTaint, Secret);
-        validSrcAddrs128(mem, rbp, scratch_b, scratch_len, memTaint, Secret);
-        rbp + 0x10 * scratch_len <= pow2_64;
+        validSrcAddrs128(mem, in_ptr, scratch_b, scratch_len, memTaint, Secret);
+        in_ptr + 0x10 * scratch_len <= pow2_64;
         of_quad32(Xi) == prev;
-        scratch_ptr == rbp + 0x10 * (scratch_index + (if rev_blocks then (-1) else 1));
+        scratch_ptr == in_ptr + 0x10 * (scratch_index + (if rev_blocks then (-1) else 1));
         0 <= power_index < 8;
         !is_first ==> of_quad32(Z0) +. shift(of_quad32(Z2), 64) +. shift(of_quad32(Z3), 128) ==
             ghash_unroll_back(h, prev, pdata, 0, n, #nat(m - 1));
@@ -241,7 +241,7 @@ procedure MulAdd_unroll_n(
         ghost data:seq(quad32))
     {:quick}
     lets
-        Xip @= r9; n_reg @= rbx; scratch_ptr @= rcx;
+        Xip @= r9; n_reg @= rdx; scratch_ptr @= r11; in_ptr @= rdi; 
         Ii @= xmm0; T1 @= xmm1; T2 @= xmm2; Hkey @= xmm3;
         Z0 @= xmm4; Z1 @= xmm5; Z2 @= xmm6; Z3 @= xmm7;
         Xi @= xmm8; rev_mask @= xmm9;
@@ -249,7 +249,7 @@ procedure MulAdd_unroll_n(
         n := length(data);
         scratch_index := index_opt_rev(rev_blocks, scratch_len, n, n - 1);
     reads
-        mem; memTaint; Xip; rbp; n_reg; rev_mask;
+        mem; memTaint; Xip; in_ptr; n_reg; rev_mask;
     modifies
         efl; scratch_ptr; Ii; T1; T2; Hkey; Z0; Z1; Z2; Z3; Xi;
     requires
@@ -258,12 +258,12 @@ procedure MulAdd_unroll_n(
         !exactly6 ==> 1 <= n < 6;
         n <= scratch_len;
         hkeys_b_powers(hkeys_b, mem, memTaint, Xip - 0x20, h);
-        scratch_b_data(rev_bytes, rev_blocks, scratch_b, scratch_len, 6, mem, memTaint, rbp, data);
+        scratch_b_data(rev_bytes, rev_blocks, scratch_b, scratch_len, 6, mem, memTaint, in_ptr, data);
         buffers_disjoint128(hkeys_b, scratch_b);
-        rbp + 0x10 * scratch_len <= pow2_64;
+        in_ptr + 0x10 * scratch_len <= pow2_64;
         of_quad32(Xi) == prev;
         !exactly6 ==> n_reg == n;
-        scratch_ptr == rbp + 0x10 * scratch_index;
+        scratch_ptr == in_ptr + 0x10 * scratch_index;
         !rev_bytes ==> rev_mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
     ensures
         of_quad32(Z0) +. shift(of_quad32(Z2), 64) +. shift(of_quad32(Z3), 128) ==
@@ -531,7 +531,7 @@ procedure GhashUnroll_n(
     {:public}
     {:quick}
     lets
-        Xip @= r9; n_reg @= rbx; scratch_ptr @= rcx; scratch_reg @= rdx;
+        Xip @= r9; n_reg @= rdx; scratch_ptr @= r11; in_ptr @= rdi; scratch_reg @= r10;
         Ii @= xmm0; T1 @= xmm1; T2 @= xmm2; Hkey @= xmm3;
         Z0 @= xmm4; Z1 @= xmm5; Z2 @= xmm6; Z3 @= xmm7;
         Xi @= xmm8; rev_mask @= xmm9;
@@ -541,7 +541,7 @@ procedure GhashUnroll_n(
         n := length(data);
         scratch_index := index_opt_rev(rev_blocks, scratch_len, n, n - 1);
     reads
-        mem; memTaint; Xip; n_reg; rbp; rev_mask;
+        mem; memTaint; Xip; n_reg; in_ptr; rev_mask;
     modifies
         efl; scratch_reg; scratch_ptr; Ii; T1; T2; Hkey; Z0; Z1; Z2; Z3; Xi;
     requires
@@ -550,12 +550,12 @@ procedure GhashUnroll_n(
         !exactly6 ==> 1 <= n < 6;
         n <= scratch_len;
         hkeys_b_powers(hkeys_b, mem, memTaint, Xip - 0x20, h);
-        scratch_b_data(rev_bytes, rev_blocks, scratch_b, scratch_len, 6, mem, memTaint, rbp, data);
+        scratch_b_data(rev_bytes, rev_blocks, scratch_b, scratch_len, 6, mem, memTaint, in_ptr, data);
         buffers_disjoint128(hkeys_b, scratch_b);
-        rbp + 0x10 * scratch_len <= pow2_64;
+        in_ptr + 0x10 * scratch_len <= pow2_64;
         of_quad32(Xi) == prev;
         !exactly6 ==> n_reg == n;
-        scratch_ptr == rbp + 0x10 * scratch_index;
+        scratch_ptr == in_ptr + 0x10 * scratch_index;
         !rev_bytes ==> rev_mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
     ensures
         Xi == reverse_bytes_quad32(ghash_incremental(h_LE, y_prev, data));
@@ -589,7 +589,7 @@ procedure Ghash_register(
     {:public}
     {:quick}
     lets
-        Xip @= r9; scratch_ptr @= rcx;
+        Xip @= r9; scratch_ptr @= r11;
         Ii @= xmm0; T1 @= xmm1; T2 @= xmm2; Hkey @= xmm3;
         Z0 @= xmm4; Z1 @= xmm5; Z2 @= xmm6; Z3 @= xmm7;
         Xi @= xmm8;
@@ -598,7 +598,7 @@ procedure Ghash_register(
         prev := of_quad32(reverse_bytes_quad32(y_prev));
         pdata := fun_seq_quad32_LE_poly128(data);
     reads
-        mem; memTaint; Xip; rbp; 
+        mem; memTaint; Xip;
     modifies
         efl; scratch_ptr; Ii; T1; T2; Hkey; Z0; Z1; Z2; Z3; Xi;
     requires
@@ -649,7 +649,7 @@ procedure Ghash_buffer_loop_body(
     //{:public}
     {:quick}
     lets
-        Xip @= r9; len @= rbx; scratch_ptr @= rcx; in_ptr @= rbp; scratch_reg @= rdx;
+        Xip @= r9; len @= rdx; scratch_ptr @= r11; in_ptr @= rdi; scratch_reg @= r10;
         Ii @= xmm0; T1 @= xmm1; T2 @= xmm2; Hkey @= xmm3;
         Z0 @= xmm4; Z1 @= xmm5; Z2 @= xmm6; Z3 @= xmm7;
         Xi @= xmm8; rev_mask @= xmm9;
@@ -706,6 +706,7 @@ procedure Ghash_buffer_loop_body(
     Sub64(len, 6);
 }
 
+#reset-options "--z3rlimit 40"
 procedure Ghash_buffer(
         ghost hkeys_b:buffer128,
         ghost in_b:buffer128,
@@ -713,9 +714,9 @@ procedure Ghash_buffer(
         ghost y_prev:quad32
         )
     {:public}
-    {:quick}
+    {:quick exportOnly}
     lets
-        Xip @= r9; len @= rbx; scratch_ptr @= rcx; in_ptr @= rbp; scratch_reg @= rdx;
+        Xip @= r9; len @= rdx; scratch_ptr @= r11; in_ptr @= rdi; scratch_reg @= r10;
         Ii @= xmm0; T1 @= xmm1; T2 @= xmm2; Hkey @= xmm3;
         Z0 @= xmm4; Z1 @= xmm5; Z2 @= xmm6; Z3 @= xmm7;
         Xi @= xmm8; rev_mask @= xmm9;
@@ -769,6 +770,10 @@ procedure Ghash_buffer(
 
         Mov64(scratch_reg, len);
         Sub64(scratch_reg, 1);
+//        assert scratch_reg < old(len);
+//        assert old(len) * 0x10 < pow2_64;
+        assert scratch_reg * 0x10 < pow2_64;    // OBSERVE -- Unclear why this is needed, other than general NL-arith flakiness
+        
         IMul64(scratch_reg,  0x10);
         Add64(scratch_ptr, scratch_reg);
 
