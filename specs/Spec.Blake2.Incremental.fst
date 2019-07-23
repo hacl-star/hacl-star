@@ -59,21 +59,17 @@ let blake2_incremental_update a input state =
   (* Compute the remainder space in the block *)
   let rb = size_block a - state.pl in
   (* Fill the partial block in the state *)
+  let ll0 = if ll < rb then ll else rb in
+  let partial = sub #uint8 #ll input 0 ll0 in
+  let block: block_s a = update_sub state.block state.pl ll0 partial in
   if ll < rb then (
-    let input = sub #uint8 #ll input 0 ll in
-    let block: block_s a = update_sub state.block state.pl ll input in
     Some ({state with pl = state.pl + ll; block = block}))
   else (
-    let partial = sub #uint8 #ll input 0 rb in
-    let block: block_s a = update_sub state.block state.pl rb partial in
     let hash = blake2_update_block a ((nk + state.n + 1) * size_block a) block state.hash in
     let state = {state with hash = hash; n = state.n + 1; pl = 0;} in
-
     (* Handle all full blocks available *)
-    let n1 = (ll - rb) / size_block a in
-    let ll1 = n1 * size_block a in
-    let ll2 = (ll - rb) % size_block a in
-    let input1 = sub #uint8 #ll input rb ll1 in
+    let n1 = (ll - ll0) / size_block a in
+    let input1 = sub #uint8 #ll input ll0 (ll - ll0) in
     let hash = repeati n1 (fun i ->
         let block = sub #uint8 #(length input1) input1 (i * size_block a) (size_block a) in
         blake2_update_block a ((nk + state.n + i + 1) * size_block a) block
@@ -81,6 +77,7 @@ let blake2_incremental_update a input state =
     in
     let state = {state with hash = hash; n = state.n + n1;} in
     (* Store the remainder *)
+    let ll2 = (ll - ll0) % size_block a in
     let input2 = sub #uint8 #ll input (ll - ll2) ll2 in
     let block = update_sub block 0 ll2 input2 in
     Some ({state with pl = ll2; block = block})
