@@ -32,7 +32,7 @@ type state_inv (h:mem) (s:state_r) =
   live h s.hash /\ live h s.block /\ disjoint s.hash s.block
 
 
-val blake2b_init_partial:
+val blake2b_incremental_init:
     state: state_r
   -> kk: size_t{v kk <= 64}
   -> k: lbuffer uint8 kk
@@ -44,7 +44,7 @@ val blake2b_init_partial:
   (ensures  fun h0 _ h1 ->
     modifies1 state.hash h0 h1)
 
-let blake2b_init_partial state kk k nn =
+let blake2b_incremental_init state kk k nn =
   blake2b_init state.hash kk k nn;
   [@inline_let]
   let n = if kk =. 0ul then 0ul else 1ul in
@@ -54,7 +54,7 @@ let blake2b_init_partial state kk k nn =
 
 
 inline_for_extraction
-val blake2b_update_partial:
+val blake2b_incremental_update:
     state:state_r
   -> ll:size_t
   -> input:lbuffer uint8 ll ->
@@ -66,7 +66,7 @@ val blake2b_update_partial:
   (ensures  fun h0 _ h1 ->
     modifies2 state.hash state.block h0 h1)
 
-let blake2b_update_partial state ll input =
+let blake2b_incremental_update state ll input =
   let nll = ll /. size_block in
   if ll =. 0ul then state else (
   if not (state.n +. nll +. 2ul <=. size max_size_t) then state else (
@@ -98,7 +98,7 @@ let blake2b_update_partial state ll input =
 
 
 
-val blake2b_finish_partial:
+val blake2b_incremental_finish:
     nn:size_t{1 <= v nn /\ v nn <= 64}
   -> output:lbuffer uint8 nn
   -> state:state_r ->
@@ -110,7 +110,7 @@ val blake2b_finish_partial:
       modifies1 output h0 h1 /\
       h1.[|output|] == Spec.Blake2.blake2_finish Spec.Blake2B h0.[|state.hash|] (v nn))
 
-let blake2b_finish_partial nn output state =
+let blake2b_incremental_finish nn output state =
   let empty = create 0ul (u8 0) in
   let last = sub state.block 0 state.pl in
   let prev = to_u128 (state.n *. size_block +. state.pl) in
