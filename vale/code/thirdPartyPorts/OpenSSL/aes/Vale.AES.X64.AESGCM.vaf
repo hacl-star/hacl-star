@@ -33,6 +33,7 @@ include{:fstar}{:open} "Vale.AES.GF128_s"
 include{:fstar}{:open} "Vale.AES.GF128"
 include{:fstar}{:open} "Vale.AES.GHash"
 include "Vale.AES.X64.AESopt2.vaf"
+include "Vale.AES.X64.AESGCM_expected_code.vaf"
 
 module Vale.AES.X64.AESGCM
 
@@ -71,6 +72,8 @@ open Vale.AES.GF128_s
 open Vale.AES.GF128
 open Vale.AES.GHash
 open Vale.AES.X64.AESopt2
+open Vale.AES.X64.AESGCM_expected_code
+open Vale.Transformers.Transform
 #endverbatim
 
 #verbatim{:interface}
@@ -1929,6 +1932,7 @@ procedure Loop6x_partial(
         ghost init4:quad32,
         ghost init5:quad32)
     {:quick}
+    {:transform check_if_same_printed_code, Loop6x_partial_expected_code}
     lets
 //      inp @= rdi; outp @= rsi; len @= rdx; key @= rcx; ivp @= r8; Xip @= r9;
         inp @= rdi; key @= rcx; ivp @= r8; Xip @= r9;
