@@ -99,14 +99,14 @@ let blake2_incremental_finish a state nn =
 // Please use Spec.Blake2.blake2 instead !
 //
 
-val debug_blake2_incremental:
+val blake2_incremental:
     a:alg
   -> d:bytes{length d <= max_size_t}
   -> k:bytes{length k <= max_key a /\ (if length k = 0 then length d <= max_limb a else length d + size_block a <= max_limb a)}
   -> nn:size_nat{1 <= nn /\ nn <= max_output a} ->
   Tot (option (lbytes nn))
 
-let debug_blake2_incremental a d k nn =
+let blake2_incremental a d k nn =
   let size_pblock = size_block a - 7 in
   let kk = length k in
   let nd = length d / size_pblock in
