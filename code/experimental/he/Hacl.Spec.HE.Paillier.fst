@@ -581,7 +581,7 @@ let encf_inj_raw2 p q g x10 y1' x20 y2' =
   lemma_div_mod r n;
   assert (r = alpha * n);
 
-  mult_order_divides g ((r - x1 + x2) * lambda);
+  mult_order_and_one g ((r - x1 + x2) * lambda);
   divides_prod alpha n ((r - x1 + x2) * lambda);
   assert (divides n ((r - x1 + x2) * lambda));
 
