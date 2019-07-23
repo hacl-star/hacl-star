@@ -254,7 +254,7 @@ let test_blake2 label a expected d k =
 
     let new_block = create (Spec.Blake2.size_block a) (u8 0) in
     let last_block = update_sub new_block 0 r last in
-    let st = {hash = hash; kk = (length k); n = n; pl = r; block = last_block} in
+    let st = {hash = hash; n = n + klen; pl = r; block = last_block} in
 
     Spec.Blake2.Incremental.blake2_incremental_finish a st nn
     (* let hash = Spec.Blake2.blake2_update_last a ((klen + n) * Spec.Blake2.size_block a + r) r last hash in *)

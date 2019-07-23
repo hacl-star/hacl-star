@@ -11,14 +11,8 @@ open Spec.Blake2
 
 #set-options "--z3rlimit 100"
 
-
-let max_size64_t = pow2 64 - 1
-type size64_nat = n:nat{n <= max_size64_t}
-
-
 noeq type state_r (a:alg) = {
   hash: hash_ws a; // Current hash state
-  kk: size_nat;
   n: size_nat; // Number of blocks already processed
   pl: pl:size_nat{pl <= size_block a}; // Partial length of the block
   block: block_s a; // Storage block
@@ -35,10 +29,10 @@ let blake2_incremental_init a k nn =
   let kk = length k in
   let hash = blake2_init a kk k nn in
   let block = create (size_block a) (u8 0) in
+  let n = if kk = 0 then 0 else 1 in
   {
     hash = hash;
-    kk = kk;
-    n = 0;
+    n = n;
     pl = 0;
     block = block;
   }
@@ -53,9 +47,8 @@ val blake2_incremental_update:
 let blake2_incremental_update a input state =
   let ll = length input in
   let nll = ll / size_block a in
-  let nk = if state.kk = 0 then 0 else 1 in
   if length input = 0 then Some state else (
-  if not (state.n + nk + nll + 2 <= max_size_t) then None else (
+  if not (state.n + nll + 2 <= max_size_t) then None else (
   (* Compute the remainder space in the block *)
   let rb = size_block a - state.pl in
   (* Fill the partial block in the state *)
@@ -65,14 +58,14 @@ let blake2_incremental_update a input state =
   if ll < rb then (
     Some ({state with pl = state.pl + ll; block = block}))
   else (
-    let hash = blake2_update_block a ((nk + state.n + 1) * size_block a) block state.hash in
+    let hash = blake2_update_block a ((state.n + 1) * size_block a) block state.hash in
     let state = {state with hash = hash; n = state.n + 1; pl = 0;} in
     (* Handle all full blocks available *)
     let n1 = (ll - ll0) / size_block a in
     let input1 = sub #uint8 #ll input ll0 (ll - ll0) in
     let hash = repeati n1 (fun i ->
         let block = sub #uint8 #(length input1) input1 (i * size_block a) (size_block a) in
-        blake2_update_block a ((nk + state.n + i + 1) * size_block a) block
+        blake2_update_block a ((state.n + i + 1) * size_block a) block
       ) state.hash
     in
     let state = {state with hash = hash; n = state.n + n1;} in
@@ -95,8 +88,7 @@ let blake2_incremental_finish a state nn =
   let empty = create 0 (u8 0) in
   let last = sub state.block 0 state.pl in
   // Not very efficient because a full block will be recreated from the partial input
-  let nk = if state.kk = 0 then 0 else 1 in
-  let hash = blake2_update_last a ((nk + state.n) * size_block a + state.pl) state.pl last state.hash in
+  let hash = blake2_update_last a (state.n * size_block a + state.pl) state.pl last state.hash in
   blake2_finish a hash nn
 
 
