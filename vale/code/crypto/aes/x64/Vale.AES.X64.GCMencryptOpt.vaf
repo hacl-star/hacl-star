@@ -428,7 +428,6 @@ procedure gcm_make_length_quad()
     // assert xmm2 == Mkfour(#nat32(8 * plain_num_bytes), 0, #nat32(8 * auth_num_bytes), 0);     // Passes when ghost vars above are removed
 }
 
-
 procedure compute_pad_to_128_bits()
     {:quick}
     lets io @= xmm0; num_bytes @= rsi; tmp @= rcx; mask @= r11;
@@ -490,7 +489,6 @@ procedure compute_pad_to_128_bits()
     }
 }
 
-#reset-options "--z3rlimit 10"
 procedure ghash_extra_bytes(
         ghost hkeys_b:buffer128,
         ghost total_bytes:nat,
@@ -542,8 +540,6 @@ procedure ghash_extra_bytes(
     Pshufb(Ii, rev_mask);
 
     Ghash_register(hkeys_b, h_LE, y_prev);
-    assert hash == reverse_bytes_quad32(ghash_incremental(h_LE, y_prev, old(create(1, final_quad_padded))));
- 
 
     lemma_ghash_incremental_bytes_extra_helper_alt(h_LE, old_hash, y_prev, reverse_bytes_quad32(hash), completed_quads, final_quad, final_quad_padded, total_bytes);
 }
