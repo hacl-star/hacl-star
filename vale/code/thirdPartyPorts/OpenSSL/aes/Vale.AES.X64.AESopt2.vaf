@@ -638,7 +638,7 @@ procedure Ghash_register(
     lemma_to_of_quad32(reverse_bytes_quad32(ghash_incremental(h_LE, y_prev, data)));
 }
 
-procedure Ghash_buffer_body(
+procedure Ghash_buffer_loop_body(
         ghost hkeys_b:buffer128,
         ghost in_b:buffer128,
         ghost h_LE:quad32,
@@ -706,15 +706,14 @@ procedure Ghash_buffer_body(
     Sub64(len, 6);
 }
 
-#reset-options "--z3rlimit 20"
 procedure Ghash_buffer(
         ghost hkeys_b:buffer128,
         ghost in_b:buffer128,
         ghost h_LE:quad32,
         ghost y_prev:quad32
         )
-    //{:public}
-    //{:quick}
+    {:public}
+    {:quick}
     lets
         Xip @= r9; len @= rbx; scratch_ptr @= rcx; in_ptr @= rbp; scratch_reg @= rdx;
         Ii @= xmm0; T1 @= xmm1; T2 @= xmm2; Hkey @= xmm3;
@@ -735,11 +734,8 @@ procedure Ghash_buffer(
         in_ptr + 0x10 * len < pow2_64;
         Xi == reverse_bytes_quad32(y_prev);
         rev_mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
-
-        //0 < len < 6;
-        //len == 6;
     ensures
-//        Xi == reverse_bytes_quad32(ghash_incremental(h_LE, y_prev, s128(mem, in_b)));
+        Xi == reverse_bytes_quad32(ghash_incremental0(h_LE, y_prev, s128(mem, in_b)));
 {
     Mov64(scratch_ptr, in_ptr);
 
@@ -763,19 +759,24 @@ procedure Ghash_buffer(
         decreases
             len;
     {
-        Ghash_buffer_body(hkeys_b, in_b, h_LE, y_prev, old(len), index);
+        Ghash_buffer_loop_body(hkeys_b, in_b, h_LE, y_prev, old(len), index);
         index := index + 6;
     }
 
-//    if (len > 0) {
-//        let data := Seq.slice(s128(mem, in_b), 0, len);
-////        Mov64(scratch_ptr, len);
-////        Sub64(scratch_ptr, 1);
-////        IMul64(scratch_ptr,  0x10);
-////        Add64(scratch_ptr, in_ptr);
-//        GhashUnroll_n(false, false, false, len, hkeys_b, in_b, h_LE, y_prev, data);
-//    }
+    if (len > 0) {
+        let data := Seq.slice(s128(mem, in_b), index, old(len));
+        let y_loop := reverse_bytes_quad32(Xi);
 
+        Mov64(scratch_reg, len);
+        Sub64(scratch_reg, 1);
+        IMul64(scratch_reg,  0x10);
+        Add64(scratch_ptr, scratch_reg);
+
+        GhashUnroll_n(false, false, false, old(len), hkeys_b, in_b, h_LE, y_loop, data);
+        lemma_ghash_incremental0_append(h_LE, y_prev, y_loop, reverse_bytes_quad32(Xi), 
+                                        slice(s128(mem, in_b), 0, index), data);
+        assert equal(append(slice(s128(mem, in_b), 0, index), data), s128(mem, in_b));     // OBSERVE
+    }
 }
 
 procedure GhashUnroll6x(
