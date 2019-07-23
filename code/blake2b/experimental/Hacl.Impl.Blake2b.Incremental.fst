@@ -16,7 +16,7 @@ module Seq = Lib.Sequence
 module Loops = Lib.LoopCombinators
 module Spec = Spec.Blake2
 
-#set-options "--z3rlimit 50 --max_ifuel 0 --max_fuel 0"
+#set-options "--z3rlimit 150 --max_ifuel 0 --max_fuel 0"
 
 
 (** Define the state *)
@@ -69,7 +69,7 @@ val blake2b_incremental_update:
 let blake2b_incremental_update state ll input =
   let nll = ll /. size_block in
   if ll =. 0ul then state else (
-  if not (state.n +. nll +. 2ul <=. size max_size_t) then state else (
+  if not (state.n +. nll +. 2ul <=. size 0xFFFFFFFF) then state else (
   let rb = size_block -. state.pl in
   let ll0 = if ll <. rb then ll else rb in
   let partial = sub input 0ul ll0 in
@@ -112,7 +112,7 @@ val blake2b_incremental_finish:
 
 let blake2b_incremental_finish nn output state =
   let empty = create 0ul (u8 0) in
-  let last = sub state.block 0 state.pl in
+  let last = sub state.block 0ul state.pl in
   let prev = to_u128 (state.n *. size_block +. state.pl) in
   blake2b_update_last state.hash prev state.pl last;
   blake2b_finish nn output state.hash
