@@ -1,0 +1,23 @@
+#include "crypto_core/keccakf160064bits/avx2/keccak_f1600.jazz"
+
+//
+// TODO : rewrite to match crypto_core
+//
+export fn keccak_f1600(
+  reg u64 in
+          _rhotates_left
+          _rhotates_right
+          _iotas
+)
+{
+  inline int i;
+  reg u256[7] state;
+
+  for i=0 to 7
+  { state[i] = (u256)[in + 32*i]; }
+
+  state = __keccak_f1600_avx2(state, _rhotates_left, _rhotates_right, _iotas);
+
+  for i=0 to 7
+  { (u256)[in + 32*i] = state[i]; }
+}

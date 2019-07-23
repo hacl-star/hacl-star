@@ -26,6 +26,10 @@ extern "C" {
 #endif
 #endif
 
+#ifdef HAVE_JC
+#include <jc.h>
+#endif
+
 class AEADBenchmark : public Benchmark
 {
   protected:
@@ -305,7 +309,7 @@ template<int type, size_t key_size_bits, size_t tag_len>
 class OpenSSLEncrypt : public AEADBenchmark
 {
   protected:
-  static const EVP_CIPHER *evp_cipher;
+    static const EVP_CIPHER *evp_cipher;
     EVP_CIPHER_CTX *ctx;
     int outlen;
 
@@ -330,7 +334,7 @@ class OpenSSLEncrypt : public AEADBenchmark
       if ((ad_len > 0 && EVP_EncryptUpdate(ctx, NULL, &outlen, ad, ad_len) <= 0) ||
           (EVP_EncryptUpdate(ctx, cipher, &outlen, plain, msg_len) <= 0) ||
           (EVP_EncryptFinal_ex(ctx, cipher, &outlen) <= 0))
-          throw std::logic_error("OpenSSL encryption failed E");
+          throw std::logic_error("OpenSSL encryption failed");
       #else
       if (ad_len > 0) EVP_EncryptUpdate(ctx, NULL, &outlen, ad, ad_len);
       EVP_EncryptUpdate(ctx, cipher, &outlen, plain, msg_len);
@@ -505,6 +509,59 @@ class BCryptDecryptBM : public AEADBenchmark
 
 #endif
 
+#include <iomanip>
+void showbuf(const uint8_t *buf, size_t len)
+{
+  for (size_t i = 0; i < len; i++)
+    std::cout << std::hex << std::setfill('0') << std::setw(2) << (unsigned)buf[i];
+  std::cout << std::endl;
+}
+
+#ifdef HAVE_JC
+template<size_t key_size_bits, size_t tag_len>
+class JCChacha20Poly1305EncryptBM : public AEADBenchmark
+{
+  protected:
+    const EVP_CIPHER *evp_cipher = EVP_chacha20_poly1305();
+    EVP_CIPHER_CTX *ctx;
+    int outlen;
+
+  public:
+    JCChacha20Poly1305EncryptBM(size_t msg_len) :
+      AEADBenchmark(key_size_bits, tag_len, msg_len)
+    {
+        set_name("libjc", "Chacha20\\nPoly1305\\n(ref)");
+        ctx = EVP_CIPHER_CTX_new();
+    }
+    virtual void bench_setup(const BenchmarkSettings & s)
+    {
+      AEADBenchmark::bench_setup(s);
+      EVP_EncryptInit_ex(ctx, evp_cipher, NULL, NULL, NULL);
+      if ((EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_AEAD_SET_IVLEN, 12, NULL) <= 0) ||
+          (EVP_EncryptInit_ex(ctx, NULL, NULL, key, iv)  <= 0))
+          throw std::logic_error("OpenSSL encryption initialization failed");
+    }
+    virtual void bench_func()
+    {
+      if ((ad_len > 0 && EVP_EncryptUpdate(ctx, NULL, &outlen, ad, ad_len) <= 0) ||
+          (EVP_EncryptUpdate(ctx, cipher, &outlen, plain, msg_len) <= 0) ||
+          (EVP_EncryptFinal_ex(ctx, cipher, &outlen) <= 0) ||
+          (EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_AEAD_GET_TAG, 16, tag) <= 0))
+          throw std::logic_error("OpenSSL encryption failed");
+
+      throw std::logic_error("NIY");
+
+      poly1305_ref3((uint64_t*)tag, (uint64_t*)plain, msg_len, (uint64_t*)key);
+      chacha20_ref((uint64_t*)cipher, (uint64_t*)plain, msg_len, (uint64_t*)key, (uint64_t*)ad, (uint32_t*)iv);
+    }
+    virtual void bench_cleanup(const BenchmarkSettings & s)
+    {
+      AEADBenchmark::bench_cleanup(s);
+    }
+    virtual ~JCChacha20Poly1305EncryptBM() { EVP_CIPHER_CTX_free(ctx); }
+};
+#endif
+
 static std::string filter(const std::string & data_filename, const std::string & keyword)
 {
   return "< grep -e \"^\\\"" + keyword + "\" -e \"^\\\"Provider\" " + data_filename;
@@ -560,6 +617,10 @@ void bench_aead_encrypt(const BenchmarkSettings & s)
       new BCryptEncryptBM<128, 16>(ds),
       new BCryptEncryptBM<256, 16>(ds),
       #endif
+
+      #ifdef HAVE_JC
+      // new JCChacha20Poly1305EncryptBM<256, 16>(ds),
+      #endif
       };
 
       Benchmark::run_batch(s, AEADBenchmark::column_headers(), data_filename.str(), todo);
@@ -571,6 +632,9 @@ void bench_aead_encrypt(const BenchmarkSettings & s)
       #endif
       #ifdef HAVE_BCRYPT
       plot_specs_ds_cycles += Benchmark::histogram_line(filter(data_filename.str(), "BCrypt"), "BCrypt", "Avg", "strcol('Algorithm')", 0, false);
+      #endif
+      #ifdef HAVE_JC
+      plot_specs_ds_cycles += Benchmark::histogram_line(filter(data_filename.str(), "libjc"), "libjc", "Avg", "strcol('Algorithm')", 0, false);
       #endif
       Benchmark::add_label_offsets(plot_specs_ds_cycles);
 
@@ -598,6 +662,9 @@ void bench_aead_encrypt(const BenchmarkSettings & s)
       #ifdef HAVE_BCRYPT
       plot_specs_ds_bytes += Benchmark::histogram_line(filter(data_filename.str(), "BCrypt"), "BCrypt", "Avg Cycles/Byte", "strcol('Algorithm')", 2, false);
       #endif
+      #ifdef HAVE_JC
+      plot_specs_ds_bytes += Benchmark::histogram_line(filter(data_filename.str(), "libjc"), "libjc", "Avg Cycles/Byte", "strcol('Algorithm')", 2, false);
+      #endif
       Benchmark::add_label_offsets(plot_specs_ds_bytes);
 
       Benchmark::make_plot(s,
@@ -616,6 +683,9 @@ void bench_aead_encrypt(const BenchmarkSettings & s)
       #endif
       #ifdef HAVE_BCRYPT
       plot_specs_ds_candlesticks += Benchmark::candlestick_line(filter(data_filename.str(), "BCrypt"), "BCrypt", "strcol('Algorithm')"),
+      #endif
+      #ifdef HAVE_JC
+      plot_specs_ds_candlesticks += Benchmark::candlestick_line(filter(data_filename.str(), "libjc"), "libjc", "strcol('Algorithm')"),
       #endif
 
       extras << "set boxwidth .25\n";
@@ -805,5 +875,5 @@ void bench_aead_decrypt(const BenchmarkSettings & s)
 void bench_aead(const BenchmarkSettings & s)
 {
   bench_aead_encrypt(s);
-  bench_aead_decrypt(s);
+  // bench_aead_decrypt(s);
 }

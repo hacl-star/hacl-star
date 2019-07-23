@@ -1,0 +1,182 @@
+
+
+
+/*
+
+  abbrevs: (.) <- multiplication low-part
+           (x) <- multiplication hi-part
+
+
+*/
+
+
+/** args: reg u64[4] x
+    result: reg u64[4] <- "inplace" result */
+fn sqr25519_inplace(reg u64[4] x) -> reg u64[4] {
+ reg u64[8] h;
+ reg u64 tA tC; //temps
+ reg bool cf of;
+ // clear flags
+ of, cf, _, _, _, tA = #x86_XOR(tA, tA);
+ /* 
+    # 0:     
+    # 1:     0.1
+    # 2:     0x1 0.2
+    # 3:     0.3 0x2 1.2
+    # 4:     0x3 1.3 1x2
+    # 5:     2.3 0   1x3
+    # 6:     2x3 0   of=0
+    # 7:         cf=0
+    spass1 = [0, m01l,
+              m01h + m02l,
+              m03l + m02h + m12l,
+              m03h + m13l + m12h,
+              m23l + m13h,
+              m23h]                           */
+ tC       = x[0];
+ h[2],h[1]= #x86_MULX(tC, x[1]);
+ h[3], tA = #x86_MULX(tC, x[2]);
+ cf, h[2] = #x86_ADCX(h[2], tA, cf);
+ h[4], tA = #x86_MULX(tC, x[3]);
+ cf, h[3] = #x86_ADCX(h[3], tA, cf);
+ tC       = x[1];
+ h[7], tA = #x86_MULX(tC, x[2]); // # borrow h[7]=m12h
+ of, h[3] = #x86_ADOX(h[3], tA, of);
+ h[5], tA = #x86_MULX(tC, x[3]);
+ cf, h[4] = #x86_ADCX(h[4], tA, cf);
+ of, h[4] = #x86_ADOX(h[4], h[7], of);
+ h[7]     = 0; // # borrow h[7]=0
+ of, h[5] = #x86_ADOX(h[5], h[7], of);
+ // assert of==0
+ tC       = x[2];
+ h[6], tA = #x86_MULX(tC, x[3]);
+ cf, h[5] = #x86_ADCX(h[5], tA, cf);
+ cf, h[6] = #x86_ADCX(h[6], h[7], cf);
+ // assert cf==0
+ // check("spass1", h, spass1)
+ /*
+    # 0:     0.0
+    # 1:     #1  #1  0x0
+    # 2:     #2  #2  1.1
+    # 3:     #3  #3  1x1
+    # 4:     #4  #4  2.2
+    # 5:     #5  #5  2x2
+    # 6:     #6  #6  3.3
+    # 7:     3x3 0   0
+    # 8:         cf=0 of=?
+    spass2 = addrep(addrep(h,h),[m00l,m00h,m11l,m11h,m22l,m22h,m33l,m33h])
+ */
+ tC       = x[0];
+ tC, h[0] = #x86_MULX(tC, x[0]);
+ cf, h[1] = #x86_ADCX(h[1], h[1], cf);
+ of, h[1] = #x86_ADOX(h[1], tC, of);
+ tC       = x[1];
+ tC, tA   = #x86_MULX(tC, x[1]);
+ cf, h[2] = #x86_ADCX(h[2], h[2], cf);
+ of, h[2] = #x86_ADOX(h[2], tA, of);
+ cf, h[3] = #x86_ADCX(h[3], h[3], cf);
+ of, h[3] = #x86_ADOX(h[3], tC, of);
+ tC       = x[2];
+ tC, tA   = #x86_MULX(tC, x[2]);
+ cf, h[4] = #x86_ADCX(h[4], h[4], cf);
+ of, h[4] = #x86_ADOX(h[4], tA, of);
+ cf, h[5] = #x86_ADCX(h[5], h[5], cf);
+ of, h[5] = #x86_ADOX(h[5], tC, of);
+ tC       = x[3];
+ tC, tA   = #x86_MULX(tC, x[3]);
+ cf, h[6] = #x86_ADCX(h[6], h[6], cf);
+ of, h[6] = #x86_ADOX(h[6], tA, of);
+ cf, h[7] = #x86_ADCX(h[7], h[7], cf);
+ of, h[7] = #x86_ADOX(h[7], tC, of);
+ // assert cf==0
+ // assert of==0
+ // check("spass2", h, spass2)
+ /*
+    # 2^64 ---- 2 - 4*, 8+
+    # 0:     4L  7H 
+    # 1:     4H  5L
+    # 2:     6L  5H 
+    # 3:     7L  6H               */          
+ tC       = 38;
+ tA, h[7] = #x86_MULX(tC, h[7]);
+ of, cf, _, _, _, tA = #x86_IMULtimm(tA,38);
+ // assert cf==0 and of==0
+ x[0]     = h[0];
+ cf, x[0] = #x86_ADCX(x[0], tA, cf);
+ x[1]     = h[1];
+ tA, h[4] = #x86_MULX(tC, h[4]);
+ of, x[0] = #x86_ADOX(x[0], h[4], of);
+ cf, x[1] = #x86_ADCX(x[1], tA, cf);
+ x[2]     = h[2];
+ tA, h[5] = #x86_MULX(tC, h[5]);
+ of, x[1] = #x86_ADOX(x[1], h[5], of);
+ of, x[2] = #x86_ADOX(x[2], tA, of);
+ x[3]     = h[3];
+ tA, h[6] = #x86_MULX(tC, h[6]);
+ cf, x[2] = #x86_ADCX(x[2], h[6], cf);
+ cf, x[3] = #x86_ADCX(x[3], tA, cf);
+ of, x[3] = #x86_ADOX(x[3], h[7], of);
+ //# Final reduction
+/* USING INSTEAD AN ALTERNATIVE VERSION (below)
+ tC       = 0;
+ tA       = 0;
+ cf, tA   = #x86_ADCX(tA, tC, cf);
+ // assert cf==0
+ of, tA   = #x86_ADOX(tA, tC, of);
+ // assert of==0
+ of, cf, _, _, _, tA = #x86_SHL(tA, 1); // # tA *=2
+ of, cf, _, _, _, x[3] = #x86_SHL(x[3], 1); // # cf = MSB(x[3])
+ cf, tA = #x86_ADCX(tA, tC, cf); // # tC += cf=MSB(x[3]);
+ // assert cf==0
+ of, cf, _, _, _, x[3] = #x86_SHR(x[3], 1); // #restore x[3] without MSB
+ of, cf, _, _, _, tA = #x86_IMULtimm(tA,19); // #tC *= 19;
+ // assert cf==0 and of==0
+ cf, x[0] = #x86_ADCX(x[0], tA, cf);
+*/
+ tC       = 0;
+ of, tC   = #x86_ADOX(tC, tC, of);
+ _,_,_,_,_,tA = #x86_SBB(tA, tA, cf);
+ _,_,_,_,_,tA = #x86_AND(tA, 38);
+ tC = -tC;
+ _,_,_,_,_,tC = #x86_AND(tC, 38);
+ tA += tC;
+ of,cf,_,_,_,x[3] = #x86_SHL(x[3], 1);
+ _,_,_,_,_,tC = #x86_SBB(tC, tC, cf);
+ of,cf,_,_,_,tC = #x86_AND(tC, 19);
+ tA += tC;
+ of, cf, _, _, _, x[3] = #x86_SHR(x[3], 1);
+ tC       = 0;
+ of,cf,_,_,_,x[0] = #x86_ADD(x[0], tA);
+
+ cf, x[1] = #x86_ADCX(x[1], tC, cf);
+ cf, x[2] = #x86_ADCX(x[2], tC, cf);
+ cf, x[3] = #x86_ADCX(x[3], tC, cf);
+ // assert cf==0
+ // check("sqr", x, [valrep(xold)*valrep(xold)])
+ return x;
+}
+
+//#if 1
+
+export fn x25519_fe64_sqr(reg u64 count f) {
+ reg u64[4] __R12;
+ reg u64 t;
+ stack u64 s_f;
+ inline int i;
+ for i = 0 to 4 {
+  t = [f + 8*i];
+  __R12[i] = t; 
+ }
+ //s_f = f;
+ while {
+   __R12 = sqr25519_inplace(__R12);
+   count -= 1;
+ } (count != 0)
+ //f = s_f;
+ for i = 0 to 4 {
+  t = __R12[i];
+  [f + 8*i] = t;
+ } 
+}
+
+//#endif

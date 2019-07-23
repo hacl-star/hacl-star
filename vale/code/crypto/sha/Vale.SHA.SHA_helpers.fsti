@@ -55,7 +55,8 @@ val nat8_to_byte (b:nat8) : byte
 //unfold let bytes_blocks256 = bytes_blocks SHA2_256
 unfold let repeat_range_vale (max:nat { max < size_k_w_256}) (block:block_w) (hash:hash256) =
   Spec.Loops.repeat_range 0 max (shuffle_core_opaque block) hash
-unfold let lemma_repeat_range_0_vale (block:block_w) (hash:hash256) =
+let lemma_repeat_range_0_vale (block:block_w) (hash:hash256)
+  : Lemma (Spec.Loops.repeat_range 0 0 (shuffle_core_opaque block) hash == hash) =
   Spec.Loops.repeat_range_base 0 (shuffle_core_opaque block) hash
 unfold let update_multi_opaque_vale (hash:hash256) (blocks:bytes) : hash256 =
   if length blocks % size_k_w_256 = 0 then let b:bytes_blocks = blocks in update_multi_opaque hash b else hash
