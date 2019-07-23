@@ -638,7 +638,75 @@ procedure Ghash_register(
     lemma_to_of_quad32(reverse_bytes_quad32(ghash_incremental(h_LE, y_prev, data)));
 }
 
-#reset-options "--z3rlimit 30"
+procedure Ghash_buffer_body(
+        ghost hkeys_b:buffer128,
+        ghost in_b:buffer128,
+        ghost h_LE:quad32,
+        ghost y_prev:quad32,
+        ghost old_len:nat64,
+        ghost index:nat
+        )
+    //{:public}
+    {:quick}
+    lets
+        Xip @= r9; len @= rbx; scratch_ptr @= rcx; in_ptr @= rbp; scratch_reg @= rdx;
+        Ii @= xmm0; T1 @= xmm1; T2 @= xmm2; Hkey @= xmm3;
+        Z0 @= xmm4; Z1 @= xmm5; Z2 @= xmm6; Z3 @= xmm7;
+        Xi @= xmm8; rev_mask @= xmm9;
+        h := of_quad32(reverse_bytes_quad32(h_LE));
+        prev := of_quad32(reverse_bytes_quad32(y_prev));
+    reads
+        Xip; in_ptr; rev_mask; mem; memTaint; 
+    modifies
+        len; scratch_ptr; scratch_reg; efl; Ii; T1; T2; Hkey; Z0; Z1; Z2; Z3; Xi;
+    requires
+        len >= 6;   // From the while loop condition
+
+        // Loop invariants
+        index + len == old_len;
+        scratch_ptr == in_ptr + 0x10 * index;
+
+        // Copy over preconditions
+        pclmulqdq_enabled && avx_enabled;
+        hkeys_b_powers(hkeys_b, mem, memTaint, Xip - 0x20, h);
+        validSrcAddrs128(mem, in_ptr, in_b, len, memTaint, Secret);
+        buffer_length(in_b) == old_len;
+        buffers_disjoint128(hkeys_b, in_b);
+        in_ptr + 0x10 * old_len < pow2_64;
+        Xi == reverse_bytes_quad32(ghash_incremental0(h_LE, y_prev, slice(s128(mem, in_b), 0, index)));
+        rev_mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
+    ensures
+        let index' := index + 6;
+        // Loop invariants
+        index' + len == old_len;
+        scratch_ptr == in_ptr + 0x10 * index';
+
+        // Copy over preconditions
+        pclmulqdq_enabled && avx_enabled;
+        hkeys_b_powers(hkeys_b, mem, memTaint, Xip - 0x20, h);
+        validSrcAddrs128(mem, in_ptr, in_b, len, memTaint, Secret);
+        buffer_length(in_b) == old_len;
+        buffers_disjoint128(hkeys_b, in_b);
+        in_ptr + 0x10 * old_len < pow2_64;
+        Xi == reverse_bytes_quad32(ghash_incremental0(h_LE, y_prev, slice(s128(mem, in_b), 0, index')));
+        rev_mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
+
+        // Loop updates
+        scratch_ptr == old(scratch_ptr) + 0x60;
+        len == old(len) - 6;
+{
+    let data := Seq.slice(s128(mem, in_b), index, index + 6);
+    Add64(scratch_ptr, 0x50);
+    GhashUnroll_n(false, false, true, #nat64(index+6), hkeys_b, in_b, h_LE, ghash_incremental0(h_LE, y_prev, slice(s128(mem, in_b), 0, index)), data);
+    lemma_ghash_incremental0_append(h_LE, y_prev, reverse_bytes_quad32(old(Xi)), reverse_bytes_quad32(Xi), 
+                                    slice(s128(mem, in_b), 0, index), data);
+    assert equal(append(slice(s128(mem, in_b), 0, index), data), slice(s128(mem, in_b), 0, index + 6));
+
+    Add64(scratch_ptr, 0x60);
+    Sub64(len, 6);
+}
+
+#reset-options "--z3rlimit 20"
 procedure Ghash_buffer(
         ghost hkeys_b:buffer128,
         ghost in_b:buffer128,
@@ -653,7 +721,7 @@ procedure Ghash_buffer(
         Z0 @= xmm4; Z1 @= xmm5; Z2 @= xmm6; Z3 @= xmm7;
         Xi @= xmm8; rev_mask @= xmm9;
         h := of_quad32(reverse_bytes_quad32(h_LE));
-        prev := of_quad32(reverse_bytes_quad32(y_prev));
+        
     reads
         Xip; in_ptr; rev_mask; mem; memTaint; 
     modifies
@@ -664,8 +732,8 @@ procedure Ghash_buffer(
         validSrcAddrs128(mem, in_ptr, in_b, len, memTaint, Secret);
         buffer_length(in_b) == len;
         buffers_disjoint128(hkeys_b, in_b);
-        in_ptr + 0x10 * len <= pow2_64;
-        of_quad32(Xi) == prev;
+        in_ptr + 0x10 * len < pow2_64;
+        Xi == reverse_bytes_quad32(y_prev);
         rev_mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
 
         //0 < len < 6;
@@ -673,24 +741,14 @@ procedure Ghash_buffer(
     ensures
 //        Xi == reverse_bytes_quad32(ghash_incremental(h_LE, y_prev, s128(mem, in_b)));
 {
-//    Mov64(scratch_ptr, len);
-//    Sub64(scratch_ptr, 1);
-//    IMul64(scratch_ptr,  0x10);
-//    Add64(scratch_ptr, in_ptr);
-
-    //if (len >= 6) {
-        Mov64(scratch_ptr, in_ptr);
-    //    Add64(scratch_ptr, 0x60);
-    //}
+    Mov64(scratch_ptr, in_ptr);
 
     ghost var index:nat := 0;
     while (len >= 6) 
         invariant 
             // Loop invariants
-            //index + 6 <= old(len);
-            6*index + len == old(len);
+            index + len == old(len);
             scratch_ptr == in_ptr + 0x10 * index;
-            len >= 0;
 
             // Copy over preconditions
             pclmulqdq_enabled && avx_enabled;
@@ -705,20 +763,8 @@ procedure Ghash_buffer(
         decreases
             len;
     {
-        let data := Seq.slice(s128(mem, in_b), index, index + 6);
-        Add64(scratch_ptr, 0x50);
-//        assert validSrcAddrs128(mem,rbp, in_b, 6, memTaint, Secret);
-////        assert forall (i:nat) i < 6 /\ i < length(data) ==>
-////               buffer128_read(in_b, index_opt_rev(false, 6, length(data), i), mem) ==
-////               quad32_opt_rev(false, Seq.index(data, i));
-////
-//        assert scratch_b_data(false, false, in_b, index + 6, 6, mem, memTaint, rbp, data);
-//        assume false;
-        GhashUnroll_n(false, false, true, #nat64(index+6), hkeys_b, in_b, h_LE, ghash_incremental0(h_LE, y_prev, slice(s128(mem, in_b), 0, index)), data);
-        Add64(scratch_ptr, 0x60);
-        Sub64(len, 6);
+        Ghash_buffer_body(hkeys_b, in_b, h_LE, y_prev, old(len), index);
         index := index + 6;
-        assume false;
     }
 
 //    if (len > 0) {
