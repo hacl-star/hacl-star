@@ -232,19 +232,41 @@ let test_blake2 label a expected d k =
   IO.print_newline ();
   IO.print_string label;
 
-  let kk = length k in
   let nn = length expected in
 
   let computed_simple : lbytes nn =
-    Spec.Blake2.blake2 a d kk k nn
+    Spec.Blake2.blake2 a d (length k) k nn
+  in
+  let computed_debug : lbytes nn =
+    let klen = if (length k) = 0 then 0 else 1 in
+    let n = length d / Spec.Blake2.size_block a in
+    let r = length d % Spec.Blake2.size_block a in
+    let blocks = sub #uint8 #(length d) d 0 (n * Spec.Blake2.size_block a) in
+    let last = sub #uint8 #(length d) d (n * Spec.Blake2.size_block a) r in
+    let st: Spec.Blake2.Incremental.state_r a = Spec.Blake2.Incremental.blake2_incremental_init a k nn in
+    (* let hash = Spec.Blake2.blake2_init a (length k) k nn in *)
+    (* let hash = Spec.Blake2.blake2_update_multi a hash blocks (length k) in *)
+    let hash =
+      Lib.LoopCombinators.repeati n (fun i ->
+        let block = sub #uint8 #(length d) d (i * Spec.Blake2.size_block a) (Spec.Blake2.size_block a) in
+        Spec.Blake2.blake2_update_block a ((klen + i + 1) * Spec.Blake2.size_block a) block
+      ) st.hash in
+
+    let new_block = create (Spec.Blake2.size_block a) (u8 0) in
+    let last_block = update_sub new_block 0 r last in
+    let st = {hash = hash; kk = (length k); n = n; pl = r; block = last_block} in
+
+    Spec.Blake2.Incremental.blake2_incremental_finish a st nn
+    (* let hash = Spec.Blake2.blake2_update_last a ((klen + n) * Spec.Blake2.size_block a + r) r last hash in *)
+    (* Spec.Blake2.blake2_finish a hash nn *)
   in
   let computed_incr0 : lbytes nn =
-    match Spec.Blake2.Incremental.debug_blake2_incremental a d kk k nn with
+    match Spec.Blake2.Incremental.debug_blake2_incremental a d k nn with
     | None -> create nn (u8 0)
     | Some r -> r
   in
   let computed_incr1 : lbytes nn =
-    let st: Spec.Blake2.Incremental.state_r a = Spec.Blake2.Incremental.blake2_incremental_init a kk k nn in
+    let st: Spec.Blake2.Incremental.state_r a = Spec.Blake2.Incremental.blake2_incremental_init a k nn in
     match Spec.Blake2.Incremental.blake2_incremental_update a d st with
     | None -> create nn (u8 0)
     | Some st -> Spec.Blake2.Incremental.blake2_incremental_finish a st nn
@@ -252,7 +274,7 @@ let test_blake2 label a expected d k =
   let computed_incr2 : lbytes nn =
     let d_sub1 = sub #uint8 #(length d) d 0 (length d / 2) in
     let d_sub2 = sub #uint8 #(length d) d (length d / 2) (length d - (length d / 2)) in
-    let st: Spec.Blake2.Incremental.state_r a = Spec.Blake2.Incremental.blake2_incremental_init a kk k nn in
+    let st: Spec.Blake2.Incremental.state_r a = Spec.Blake2.Incremental.blake2_incremental_init a k nn in
     match Spec.Blake2.Incremental.blake2_incremental_update a d_sub1 st with
     | None -> create nn (u8 0)
     | Some st ->
@@ -261,8 +283,13 @@ let test_blake2 label a expected d k =
     | Some st -> Spec.Blake2.Incremental.blake2_incremental_finish a st nn
   in
 
+  let (&&) = (&&) in
+
   let result =
     Lib.PrintSequence.print_label_compare_display true "Not Incremental" nn expected computed_simple in
+
+  let result = result &&
+    Lib.PrintSequence.print_label_compare_display true "Incremental D" nn expected computed_debug in
 
   let result = result &&
     Lib.PrintSequence.print_label_compare_display true "Incremental 0" nn expected computed_incr0 in
