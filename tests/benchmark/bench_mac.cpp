@@ -10,6 +10,7 @@ extern "C" {
 #include <Hacl_Poly1305_32.h>
 #include <Hacl_Poly1305_128.h>
 #include <Hacl_Poly1305_256.h>
+
 }
 
 #ifdef HAVE_OPENSSL
@@ -84,6 +85,11 @@ class MACBenchmark : public Benchmark
     }
 };
 
+#ifdef WIN32
+#undef HAVE_EVERCRYPT
+#endif
+
+#ifdef HAVE_EVERCRYPT
 template<size_t key_size, size_t mac_size>
 class EverCryptPoly1305 : public MACBenchmark
 {
@@ -100,7 +106,7 @@ class EverCryptPoly1305 : public MACBenchmark
     }
     virtual void bench_func()
     {
-      Hacl_Poly1305_128_poly1305_mac(mac, msg_len, msg, key);
+      f(mac, msg_len, msg, key);
     }
     virtual void bench_cleanup(const BenchmarkSettings & s)
     {
@@ -112,6 +118,7 @@ class EverCryptPoly1305 : public MACBenchmark
 //template<> void (*EverCryptPoly1305<32, 4>::f)(uint8_t*, uint32_t, uint8_t*, uint8_t*) = Hacl_Poly1305_32_poly1305_mac;
 template<> void (*EverCryptPoly1305<32, 16>::f)(uint8_t*, uint32_t, uint8_t*, uint8_t*) = Hacl_Poly1305_128_poly1305_mac;
 //template<> void (*EverCryptPoly1305<32, 32>::f)(uint8_t*, uint32_t, uint8_t*, uint8_t*) = Hacl_Poly1305_256_poly1305_mac;
+#endif
 
 #ifdef HAVE_OPENSSL
 #undef HAVE_OPENSSL // TODO
@@ -242,7 +249,9 @@ void bench_mac(const BenchmarkSettings & s)
     }
 
     std::list<Benchmark*> todo = {
+      #ifdef HAVE_EVERCRYPT
       new EverCryptPoly1305<32, 16>(ds),
+      #endif
 
       #ifdef HAVE_OPENSSL
       new OpenSSLPoly1305(ds),

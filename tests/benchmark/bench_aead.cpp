@@ -596,24 +596,32 @@ class JCChacha20Poly1305EncryptBM : public AEADBenchmark
 
       // chacha20_aead_encrypt(aad, key, iv, constant, plaintext):
       //    nonce = constant | iv
-      uint8_t *nonce = iv;
+      std::vector<uint8_t> nonce;
+      for (size_t i = 0; i < 32; i++)
+        nonce.push_back(((uint8_t*)Hacl_Impl_Chacha20_chacha20_constants)[i]);
+      for (size_t i = 0; i < 12; i++)
+        nonce.push_back(iv[i]);
       //    otk = poly1305_key_gen(key, nonce)
       uint32_t ec_ctx[4] = { 0 };
       uint8_t block[64];
-      libjc_avx2_chacha20_avx2((uint64_t*)block, (uint64_t*)nonce, 64, (uint64_t*)key, (uint64_t*)iv_zero, 0);
+      libjc_avx2_chacha20_avx2((uint64_t*)block, (uint64_t*)nonce.data(), 64, (uint64_t*)key, (uint64_t*)iv_zero, 0);
+
       #ifdef _DEBUG
       uint8_t ec_block[64];
-      Hacl_Impl_Chacha20_chacha20_encrypt(64, ec_block, nonce, key, iv_zero, 0);
+      Hacl_Impl_Chacha20_chacha20_encrypt(64, ec_block, nonce.data(), key, iv_zero, 0);
       check_eq(block, ec_block, 64);
+      // uint8_t ec_dk_block[64];
+      // Hacl_Impl_Chacha20Poly1305_Poly_derive_key(key, iv, ec_dk_block);
+      // check_eq(block, ec_dk_block, 64);
       #endif
       uint8_t *otk = block; // 64 but we use only 32
 
       //    ciphertext = chacha20_encrypt(key, 1, nonce, plaintext)
       uint8_t ciphertext[msg_len];
-      libjc_avx2_chacha20_avx2((uint64_t*)ciphertext, (uint64_t*)plain, msg_len, (uint64_t*)key, (uint64_t*)nonce, 1);
+      libjc_avx2_chacha20_avx2((uint64_t*)ciphertext, (uint64_t*)plain, msg_len, (uint64_t*)key, (uint64_t*)nonce.data(), 1);
       #ifdef _DEBUG
       uint8_t ec_ciphertext[msg_len];
-      Hacl_Impl_Chacha20_chacha20_encrypt(msg_len, ec_ciphertext, plain, key, nonce, 1);
+      Hacl_Impl_Chacha20_chacha20_encrypt(msg_len, ec_ciphertext, plain, key, nonce.data(), 1);
       check_eq(ciphertext, ec_ciphertext, msg_len);
       #endif
 
@@ -640,12 +648,31 @@ class JCChacha20Poly1305EncryptBM : public AEADBenchmark
         mac_data.push_back(msg_len8[i]);
 
       //    tag = poly1305_mac(mac_data, otk)
-      uint8_t tag[16];
+      uint8_t tag[tag_len];
       libjc_avx2_poly1305_avx2((uint64_t*)tag, (uint64_t*)mac_data.data(), mac_data.size(), (uint64_t*)otk);
       #ifdef _DEBUG
-      uint8_t ec_tag[16];
+      uint8_t ec_tag[tag_len];
       Hacl_Poly1305_128_poly1305_mac(ec_tag, mac_data.size(), mac_data.data(), otk);
-      check_eq(tag, ec_tag, 16);
+      check_eq(tag, ec_tag, tag_len);
+      #endif
+
+      #if 0 // def _DEBUG
+      EverCrypt_AEAD_state_s *state;
+      EverCrypt_Error_error_code ec;
+      ec = EverCrypt_AEAD_create_in(Spec_AEAD_CHACHA20_POLY1305, &state, (uint8_t*)key);
+      if (ec != EverCrypt_Error_Success)
+        throw std::logic_error("AEAD context creation failed");
+      ec = EverCrypt_AEAD_encrypt(state,
+                                  (uint8_t*)iv, 12,
+                                  (uint8_t*)ad, ad_len,
+                                  (uint8_t*)plain, msg_len,
+                                  (uint8_t*)ec_ciphertext,
+                                  (uint8_t*)ec_tag);
+      if (ec != EverCrypt_Error_Success)
+        throw std::logic_error("AEAD encryption failed");
+      EverCrypt_AEAD_free(state);
+      check_eq(ciphertext, ec_ciphertext, msg_len);
+      check_eq(tag, ec_tag, tag_len);
       #endif
       //    return (ciphertext, tag)
     }
