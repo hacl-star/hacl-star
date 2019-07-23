@@ -109,10 +109,9 @@ class EverCryptPoly1305 : public MACBenchmark
     virtual ~EverCryptPoly1305() { }
 };
 
-template<> void (*EverCryptPoly1305<32, 4>::f)(uint8_t*, uint32_t, uint8_t*, uint8_t*) = Hacl_Poly1305_32_poly1305_mac;
+//template<> void (*EverCryptPoly1305<32, 4>::f)(uint8_t*, uint32_t, uint8_t*, uint8_t*) = Hacl_Poly1305_32_poly1305_mac;
 template<> void (*EverCryptPoly1305<32, 16>::f)(uint8_t*, uint32_t, uint8_t*, uint8_t*) = Hacl_Poly1305_128_poly1305_mac;
-// cwinter: The following line kills the Cygwin/MingGW linker. Don't ask me why.
-// template<> void (*EverCryptPoly1305<32, 32>::f)(uint8_t*, uint32_t, uint8_t*, uint8_t*) = Hacl_Poly1305_256_poly1305_mac;
+//template<> void (*EverCryptPoly1305<32, 32>::f)(uint8_t*, uint32_t, uint8_t*, uint8_t*) = Hacl_Poly1305_256_poly1305_mac;
 
 #ifdef HAVE_OPENSSL
 #undef HAVE_OPENSSL // TODO

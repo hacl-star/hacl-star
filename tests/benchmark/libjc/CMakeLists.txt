@@ -25,6 +25,10 @@ add_library(jc STATIC
 target_compile_options(jc PRIVATE -Wno-parentheses -std=gnu11 -Wno-attributes -Wno-implicit-function-declaration)
 target_include_directories(jc PUBLIC ${LIBJC_SRC_DIR})
 
+
+
+if ("${CMAKE_SYSTEM_NAME}" STREQUAL "CYGWIN")
+else()
 add_library(jc_chacha20_avx2 STATIC
   ${LIBJC_SRC_DIR}/src/crypto_stream/chacha20/avx2/chacha20.s
 )
@@ -46,8 +50,6 @@ add_custom_command(TARGET jc_poly1305_avx2
 target_link_libraries(jc jc_chacha20_avx2 jc_poly1305_avx2)
 
 
-if ("${CMAKE_SYSTEM_NAME}" STREQUAL "CYGWIN")
-else()
 add_library(jc_chacha20_avx STATIC
   ${LIBJC_SRC_DIR}/src/crypto_stream/chacha20/avx/chacha20.s
 )

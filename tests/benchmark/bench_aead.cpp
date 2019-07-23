@@ -548,6 +548,10 @@ void showbuf(const uint8_t *buf, size_t len)
   std::cout << std::endl;
 }
 
+#ifdef WIN32
+#undef HAVE_JC
+#endif
+
 #ifdef HAVE_JC
 template<size_t key_size_bits, size_t tag_len>
 class JCChacha20Poly1305EncryptBM : public AEADBenchmark
@@ -618,8 +622,6 @@ class JCChacha20Poly1305EncryptBM : public AEADBenchmark
       //    mac_data |= ciphertext | pad16(ciphertext)
       //    mac_data |= num_to_8_le_bytes(aad.length)
       //    mac_data |= num_to_8_le_bytes(ciphertext.length)
-      if (sizeof(ciphertext) % 16 != 0)
-        throw std::logic_error("unsupported message length");
       for (size_t i = 0; i < ad_len; i++)
         mac_data.push_back(ad[i]);
       for (size_t pad = ad_len; pad % 16 != 0; pad++)
