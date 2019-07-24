@@ -254,7 +254,7 @@ val recover_x_step_5:
              ))
     )
     (ensures  fun h0 _ h1 -> modifies (loc x |+| loc tmp) h0 h1 /\
-      F51.felem_fits h1 x (9, 10, 9, 9, 9) /\
+      F51.mul_inv_t h1 x /\
       F51.fevalh h1 x == Some?.v (SE.recover_x (F51.as_nat h0 y) (uint_v #U64 sign <> 0))
     )
 
@@ -270,6 +270,8 @@ let recover_x_step_5 x y sign tmp =
   if not(u64_to_UInt64 x0 =^ u64_to_UInt64 sign) then (
     make_zero t0;
     fdifference x3 t0;
+    reduce_513 x3;
+    reduce x3;
     (**) assert_norm (SC.prime % SC.prime = SC.zero % SC.prime);
     (**) FStar.Math.Lemmas.mod_add_both SC.prime SC.zero (- (F51.fevalh h0 x3)) SC.prime
     );
@@ -289,7 +291,7 @@ val recover_x_:
       F51.felem_fits h y (1, 1, 1, 1, 1)
       )
     (ensures  fun h0 z h1 -> modifies (loc x |+| loc tmp) h0 h1 /\
-      (z ==> F51.felem_fits h1 x (9, 10, 9, 9, 9)) /\
+      (z ==> F51.mul_inv_t h1 x) /\
       (let res = SE.recover_x (F51.as_nat h0 y) (uint_v #U64 sign <> 0) in
       (Some? res <==> z) /\
       (Some? res ==> F51.fevalh h1 x == Some?.v res))
@@ -335,7 +337,7 @@ val recover_x:
       F51.felem_fits h y (1, 1, 1, 1, 1)
     )
     (ensures  fun h0 z h1 -> modifies (loc x) h0 h1 /\
-      (z ==> F51.felem_fits h1 x (9, 10, 9, 9, 9)) /\
+      (z ==> F51.mul_inv_t h1 x) /\
       (let res = SE.recover_x (F51.as_nat h0 y) (uint_v #U64 sign <> 0) in
       (Some? res <==> z) /\
       (Some? res ==> F51.fevalh h1 x == Some?.v res))

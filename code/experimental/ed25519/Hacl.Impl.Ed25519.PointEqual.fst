@@ -246,13 +246,6 @@ let point_equal_1 p q tmp =
   fmul pxqz (getx p) (getz q);
   reduce pxqz;
   fmul qxpz (getx q) (getz p);
-//  let h1 = get() in
-  // assert (let px, py, pz, pt = F51.point_eval h0 p in
-  //     let qx, qy, qz, qt = F51.point_eval h0 q in
-  //   F51.fevalh h1 pxqz == px `SC.fmul` qz);
-  //   assert (let px, py, pz, pt = F51.point_eval h0 p in
-  //     let qx, qy, qz, qt = F51.point_eval h0 q in
-  //   F51.fevalh h1 qxpz == qx `SC.fmul` pz);
   reduce qxpz;
   eq pxqz qxpz
 
@@ -263,8 +256,15 @@ val point_equal_2:
   Stack bool
     (requires fun h ->
       live h p /\ live h q /\live h tmp /\
-      disjoint tmp p /\ disjoint tmp q)
-    (ensures  fun h0 z h1 -> modifies (loc tmp) h0 h1)
+      disjoint tmp p /\ disjoint tmp q /\
+      F51.point_inv_t h p /\ F51.point_inv_t h q
+    )
+    (ensures  fun h0 z h1 -> modifies (loc tmp) h0 h1 /\
+      (let px, py, pz, pt = F51.point_eval h0 p in
+      let qx, qy, qz, qt = F51.point_eval h0 q in
+      z == (if ((py `SC.fmul` qz) <> (qy `SC.fmul` pz)) then false else true))
+    )
+
 let point_equal_2 p q tmp =
   let pxqz = sub tmp 0ul 5ul in
   let qxpz = sub tmp 5ul 5ul in
@@ -280,8 +280,12 @@ val point_equal:
     p:point
   -> q:point ->
   Stack bool
-    (requires fun h -> live h p /\ live h q)
-    (ensures  fun h0 z h1 -> modifies0 h0 h1)
+    (requires fun h -> live h p /\ live h q /\
+      F51.point_inv_t h p /\ F51.point_inv_t h q
+    )
+    (ensures  fun h0 z h1 -> modifies0 h0 h1 /\
+      (z <==> Spec.Ed25519.point_equal (F51.point_eval h0 p) (F51.point_eval h0 q))
+    )
 let point_equal p q =
   push_frame();
   let tmp = create 20ul (u64 0) in

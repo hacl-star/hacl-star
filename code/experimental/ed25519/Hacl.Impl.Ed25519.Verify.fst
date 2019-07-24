@@ -44,6 +44,37 @@ let verify_step_1 r msg len rs public =
   pop_frame()
 
 inline_for_extraction noextract
+val verify_step_2':
+    s:lbuffer uint8 32ul
+  -> h':lbuffer uint8 32ul
+  -> a':point
+  -> r':point
+  -> tmp:lbuffer uint64 60ul ->
+  Stack bool
+    (requires fun h ->
+      live h s  /\ live h h' /\ live h a' /\ live h r' /\ live h tmp /\
+      disjoint tmp h' /\ disjoint tmp s /\ disjoint tmp a' /\ disjoint tmp r' /\
+      disjoint a' r' /\
+      F51.point_inv_t h a' /\ F51.point_inv_t h r'
+    )
+    (ensures fun h0 z h1 -> modifies (loc tmp) h0 h1 /\
+      (z == Spec.Ed25519.(
+        let sB = point_mul (as_seq h0 s) g in
+        let hA = point_mul (as_seq h0 h') (F51.point_eval h0 a') in
+        point_equal sB (point_add (F51.point_eval h0 r') hA)))
+    )
+let verify_step_2' s h' a' r' tmp =
+  let hA   = sub tmp  0ul  20ul in
+  let rhA  = sub tmp 20ul  20ul in
+  let sB   = sub tmp 40ul  20ul in
+  Hacl.Impl.Ed25519.Ladder.point_mul_g sB s;
+  Hacl.Impl.Ed25519.Ladder.point_mul hA h' a';
+  Hacl.Impl.Ed25519.PointAdd.point_add rhA r' hA;
+  let b = Hacl.Impl.Ed25519.PointEqual.point_equal sB rhA in
+  b
+
+
+inline_for_extraction noextract
 val verify_step_2:
     s:lbuffer uint8 32ul
   -> h':lbuffer uint8 32ul
@@ -55,18 +86,16 @@ val verify_step_2:
       disjoint a' r' /\
       F51.point_inv_t h a' /\ F51.point_inv_t h r'
     )
-    (ensures fun h0 z h1 -> modifies0 h0 h1)
+    (ensures fun h0 z h1 -> modifies0 h0 h1 /\
+      (z == Spec.Ed25519.(
+        let sB = point_mul (as_seq h0 s) g in
+        let hA = point_mul (as_seq h0 h') (F51.point_eval h0 a') in
+        point_equal sB (point_add (F51.point_eval h0 r') hA)))
+    )
 let verify_step_2 s h' a' r' =
   push_frame();
   let tmp = create 60ul (u64 0) in
-  let hA   = sub tmp  0ul  20ul in
-  let rhA  = sub tmp 20ul  20ul in
-  let sB   = sub tmp 40ul  20ul in
-  Hacl.Impl.Ed25519.Ladder.point_mul_g sB s;
-  Hacl.Impl.Ed25519.Ladder.point_mul hA h' a';
-  Hacl.Impl.Ed25519.PointAdd.point_add rhA r' hA;
-  admit();
-  let b = Hacl.Impl.Ed25519.PointEqual.point_equal sB rhA in
+  let b = verify_step_2' s h' a' r' tmp in
   pop_frame();
   b
 
@@ -87,11 +116,16 @@ val verify_:
     (ensures fun h0 z h1 -> modifies (loc tmp |+| loc tmp') h0 h1 /\
       z == Spec.Ed25519.verify (as_seq h0 public) (as_seq h0 msg) (as_seq h0 signature)
     )
+
+#push-options "--z3rlimit 200"
+
 let verify_ public msg len signature tmp tmp' =
   let a' = sub tmp 0ul  20ul in
   let r' = sub tmp 20ul 20ul in
   let s  = sub tmp 40ul 5ul  in
   let h'  = tmp' in
+  admit();
+  // TODO: Probably split the innermost if then else into an auxiliary function
   let b = Hacl.Impl.Ed25519.PointDecompress.point_decompress a' public in
   let res =
   if b then (
@@ -103,11 +137,15 @@ let verify_ public msg len signature tmp tmp' =
       if b'' then false
       else (
         verify_step_1 h' msg len rs public;
+        let h = get() in
+        assume (F51.point_inv_t h a');
+        assume (F51.point_inv_t h r');
 	verify_step_2 (sub signature 32ul 32ul) h' a' r')
     ) else false
   ) else false in
-  admit();
   res
+
+#pop-options
 
 inline_for_extraction noextract
 val verify:

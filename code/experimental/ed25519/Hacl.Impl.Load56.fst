@@ -61,7 +61,14 @@ val load_32_bytes:
   Stack unit
     (requires fun h -> live h out /\ live h b)
     (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
-      F56.fevalh h1 out == nat_from_bytes_le (as_seq h0 b)
+      F56.as_nat h1 out == nat_from_bytes_le (as_seq h0 b) /\
+      (let s = as_seq h1 out in
+       let op_String_Access = Seq.index in
+       v s.[0] < 0x100000000000000 /\
+       v s.[1] < 0x100000000000000 /\
+       v s.[2] < 0x100000000000000 /\
+       v s.[3] < 0x100000000000000 /\
+       v s.[4] < 0x100000000000000)
     )
 let load_32_bytes out b =
   let b0 = hload56_le' b 0ul in

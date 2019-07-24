@@ -55,10 +55,12 @@ val point_decompress_:
     (requires fun h ->
       live h out /\ live h s /\ live h tmp /\
       disjoint s tmp /\ disjoint out tmp /\
+      F51.point_inv_t h out /\
       F51.mul_inv_t h (gsub tmp 5ul 5ul)
     )
     (ensures  fun h0 b h1 -> modifies (loc out |+| loc tmp) h0 h1 /\
       (b <==> Some? (SE.point_decompress (as_seq h0 s))) /\
+      (b ==> F51.point_inv_t h1 out) /\
       (b ==> (F51.point_eval h1 out == Some?.v (SE.point_decompress (as_seq h0 s))))
     )
 
@@ -83,6 +85,7 @@ let point_decompress_ out s tmp =
     copy outy y;
     make_one outz;
     fmul outt x y;
+    let h1 = get() in
     true
   ) in
   res
@@ -93,7 +96,8 @@ val point_decompress:
   Stack bool
     (requires fun h -> live h out /\ live h s)
     (ensures  fun h0 b h1 -> modifies (loc out) h0 h1 /\
-      (b ==> Some? (Spec.Ed25519.point_decompress (as_seq h0 s))) /\
+      (b ==> F51.point_inv_t h1 out) /\
+      (b <==> Some? (Spec.Ed25519.point_decompress (as_seq h0 s))) /\
       (b ==> (F51.point_eval h1 out == Some?.v (Spec.Ed25519.point_decompress (as_seq h0 s))))
     )
 let point_decompress out s =
