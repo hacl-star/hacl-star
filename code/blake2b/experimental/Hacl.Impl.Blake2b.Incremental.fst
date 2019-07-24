@@ -124,19 +124,34 @@ let blake2b_incremental_update_first block pl ll input =
   update_sub #MUT #uint8 #size_block block pl ll0 partial
 
 
+ (* /\ i * Spec.size_block Spec.Blake2B <= Seq.length input /\ init + (i * Spec.size_block Spec.Blake2B) <= Spec.max_limb Spec.Blake2B}) *)
+let spec_incremental_update_block
+  (init:size_nat)
+  (n:size_nat)
+  (ll:size_nat)
+  (input:LBS.lbytes ll{n * Spec.size_block Spec.Blake2B <= Seq.length input})
+  (i:size_nat{i < n})
+  (hash:Spec.hash_ws Spec.Blake2B)
+  =
+  let block: Spec.block_s Spec.Blake2B =
+    Seq.sub #uint8 #(Seq.length input) input (i * (Spec.size_block Spec.Blake2B)) (Spec.size_block Spec.Blake2B)
+  in
+  Spec.blake2_update_block Spec.Blake2B (init + (i * Spec.size_block Spec.Blake2B)) block hash
+
 
 val spec_blake2_incremental_update_loop:
-  n:size_nat
-  -> blocks:LBS.bytes{Seq.length blocks <= max_size_t /\ (n + (Seq.length blocks / (Spec.size_block Spec.Blake2B))) * (Spec.size_block Spec.Blake2B) <= pow2 128 - 1}
+  init:size_nat
+  -> blocks:LBS.bytes{Seq.length blocks <= max_size_t /\ (init + (Seq.length blocks / (Spec.size_block Spec.Blake2B))) * (Spec.size_block Spec.Blake2B) <= pow2 128 - 1}
   -> hash:Spec.hash_ws Spec.Blake2B ->
   Tot (Spec.hash_ws Spec.Blake2B)
 
-let spec_blake2_incremental_update_loop ni blocks hash =
+let spec_blake2_incremental_update_loop init blocks hash =
   let n = Seq.length blocks / Spec.size_block Spec.Blake2B in
   repeati n (fun i hash ->
     let block = Seq.sub #uint8 #(Seq.length blocks) blocks (i * Spec.size_block Spec.Blake2B) (Spec.size_block Spec.Blake2B) in
-      Spec.blake2_update_block Spec.Blake2B ((ni + i + 1) * Spec.size_block Spec.Blake2B) block hash
+      Spec.blake2_update_block Spec.Blake2B ((init + i + 1) * Spec.size_block Spec.Blake2B) block hash
     ) hash
+
 
 
 val blake2b_incremental_update_loop:
@@ -151,21 +166,24 @@ val blake2b_incremental_update_loop:
     v n * v size_block <= max_size_t /\
     v ((state.n +. n) *. size_block) <= pow2 128 - 1)
   (ensures  fun h0 _ h1 ->
-    modifies2 state.hash state.block h0 h1)
+    modifies2 state.hash state.block h0 h1
+    /\ h1.[|state.hash|] == spec_blake2_incremental_update_loop (v state.n) h0.[|blocks|] h0.[|state.hash|])
 
 let blake2b_incremental_update_loop state n blocks =
   let h0 = ST.get () in
-  (* [@inline_let] *)
-  (* let spec h = (fun i s -> ) in *)
-  loop_nospec #h0 n state.hash
+  [@inline_let]
+  let spec h = spec_incremental_update_block (v state.n) (v n) (v n * Spec.size_block Spec.Blake2B) h.[|blocks|] in
+  loop1 h0 n state.hash spec
   (fun i ->
-    (* Loops.unfold_repeati (v n) (spec h0) h0.[|state.hash|] (v i); *)
+    Loops.unfold_repeati (v n) (spec h0) h0.[|state.hash|] (v i);
     let block = sub blocks (i *. size_block) size_block in
     let n64 = to_u64 state.n in
     let i64 = to_u64 i in
     let size_block64 = to_u64 size_block in
     let prev = to_u128 ((n64 +! i64 +! (u64 1)) *! size_block64) in
-    blake2b_update_block state.hash prev block)
+    blake2b_update_block state.hash prev block;
+  admit());
+  admit()
 
 
 val spec_blake2_incremental_update_end:
