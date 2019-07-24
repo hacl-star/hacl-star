@@ -27,6 +27,7 @@ include{:fstar}{:open} "Vale.AES.GF128_s"
 include{:fstar}{:open} "Vale.AES.GF128"
 include{:fstar}{:open} "Vale.AES.GHash"
 include "Vale.AES.X64.AESopt2.vaf"
+include "Vale.AES.X64.AESGCM_expected_code.vaf"
 
 module Vale.AES.X64.AESopt
 
@@ -60,6 +61,8 @@ open Vale.AES.GF128_s
 open Vale.AES.GF128
 open Vale.AES.GHash
 open Vale.AES.X64.AESopt2
+open Vale.AES.X64.AESGCM_expected_code
+open Vale.Transformers.Transform
 #endverbatim
 
 #verbatim{:interface}
@@ -404,7 +407,7 @@ procedure Loop6x_preamble(
         let init := make_six_of(fun (n:int_range(0, 5))
             quad32_xor(reverse_bytes_quad32(inc32lite(ctr_BE, n)), rndkey));
         tuple(inout0, inout1, inout2, inout3, inout4, inout5) == rounds_opaque_6(init, round_keys, 0);
-            
+
         // Next counter
         buffer128_read(iv_b, 0, mem) == reverse_bytes_quad32(inc32lite(ctr_BE, 6));
 
