@@ -28,6 +28,7 @@ noeq type state_r = {
 }
 
 
+
 type state_inv (h:mem) (s:state_r) =
   live h s.hash /\ live h s.block /\ disjoint s.hash s.block
 
@@ -91,7 +92,7 @@ let blake2b_incremental_update state ll input =
     let state = {state with n = state.n +. n1;} in
     (* Store the remainder *)
     let ll2 = (ll -. ll0) %. size_block in
-    let input2 = sub input (ll -. ll2) ll2 in
+    let input2 = sub #MUT #uint8 #ll input (ll -. ll2) ll2 in
     let block = update_sub state.block 0ul ll2 input2 in
     ({state with pl = ll2;})
   )))
@@ -107,11 +108,10 @@ val blake2b_incremental_finish:
       state_inv h state /\ live h output
       /\ disjoint output state.hash)
     (ensures  fun h0 _ h1 ->
-      modifies1 output h0 h1 /\
-      h1.[|output|] == Spec.Blake2.blake2_finish Spec.Blake2B h0.[|state.hash|] (v nn))
+      modifies2 output state.hash h0 h1)// /\
+//      h1.[|output|] == Spec.Blake2.Incremental.blake2_incremental_finish Spec.Blake2B (spec_of h0 state) (v nn))
 
 let blake2b_incremental_finish nn output state =
-  let empty = create 0ul (u8 0) in
   let last = sub state.block 0ul state.pl in
   let prev = to_u128 (state.n *. size_block +. state.pl) in
   blake2b_update_last state.hash prev state.pl last;
