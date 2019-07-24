@@ -16,28 +16,28 @@ module BS = Lib.ByteSequence
 /// TODO: missing specifications
 
 inline_for_extraction
-val uint_to_be: #t:inttype{~(U128? t)} -> #l:secrecy_level -> uint_t t l -> uint_t t l
+val uint_to_be: #t:inttype{unsigned t /\ ~(U128? t)} -> #l:secrecy_level -> uint_t t l -> uint_t t l
 
 inline_for_extraction
-val uint_to_le: #t:inttype{~(U128? t)} -> #l:secrecy_level -> uint_t t l -> uint_t t l
+val uint_to_le: #t:inttype{unsigned t /\ ~(U128? t)} -> #l:secrecy_level -> uint_t t l -> uint_t t l
 
 inline_for_extraction
-val uint_from_be: #t:inttype{~(U128? t)} -> #l:secrecy_level -> uint_t t l -> uint_t t l
+val uint_from_be: #t:inttype{unsigned t /\ ~(U128? t)} -> #l:secrecy_level -> uint_t t l -> uint_t t l
 
 inline_for_extraction
-val uint_from_le: #t:inttype{~(U128? t)} -> #l:secrecy_level -> uint_t t l -> uint_t t l
+val uint_from_le: #t:inttype{unsigned t /\ ~(U128? t)} -> #l:secrecy_level -> uint_t t l -> uint_t t l
 
 (** Constructs the equality mask for two buffers of secret integers in constant-time *)
 inline_for_extraction noextract
 val buf_eq_mask:
-    #t:inttype{~(U1? t)}
+    #t:inttype{~(S128? t)}
   -> #len1:size_t
   -> #len2:size_t
-  -> b1:lbuffer (uint_t t SEC) len1
-  -> b2:lbuffer (uint_t t SEC) len2
+  -> b1:lbuffer (int_t t SEC) len1
+  -> b2:lbuffer (int_t t SEC) len2
   -> len:size_t{v len <= v len1 /\ v len <= v len2}
-  -> res:lbuffer (uint_t t SEC) (size 1) ->
-  Stack (uint_t t SEC)
+  -> res:lbuffer (int_t t SEC) (size 1) ->
+  Stack (int_t t SEC)
     (requires fun h ->
       live h b1 /\ live h b2 /\ live h res /\ disjoint res b1 /\ disjoint res b2 /\
       v (bget h res 0) == v (ones t SEC))
@@ -54,7 +54,7 @@ val lbytes_eq: #len:size_t -> b1:lbuffer uint8 len -> b2:lbuffer uint8 len -> St
 
 inline_for_extraction
 val uint_from_bytes_le:
-    #t:inttype{~(U1? t)}
+    #t:inttype{unsigned t /\ ~(U1? t)}
   -> #l:secrecy_level
   -> i:lbuffer (uint_t U8 l) (size (numbytes t)) ->
   Stack (uint_t t l)
@@ -65,7 +65,7 @@ val uint_from_bytes_le:
 
 inline_for_extraction
 val uint_from_bytes_be:
-    #t:inttype{~(U1? t)}
+    #t:inttype{unsigned t /\ ~(U1? t)}
   -> #l:secrecy_level
   -> i:lbuffer (uint_t U8 l) (size (numbytes t)) ->
   Stack (uint_t t l)
@@ -76,7 +76,7 @@ val uint_from_bytes_be:
 
 inline_for_extraction
 val uint_to_bytes_le:
-    #t:inttype
+    #t:inttype{unsigned t}
   -> #l:secrecy_level
   -> o:lbuffer (uint_t U8 l) (size (numbytes t))
   -> i:uint_t t l ->
@@ -88,7 +88,7 @@ val uint_to_bytes_le:
 
 inline_for_extraction
 val uint_to_bytes_be:
-    #t:inttype
+    #t:inttype{unsigned t}
   -> #l:secrecy_level
   -> o:lbuffer (uint_t U8 l) (size (numbytes t))
   -> i:uint_t t l ->
@@ -100,7 +100,7 @@ val uint_to_bytes_be:
 
 inline_for_extraction
 val uints_from_bytes_le:
-    #t:inttype{~(t == U1)}
+    #t:inttype{unsigned t /\ ~(U1? t)}
   -> #l:secrecy_level
   -> #len:size_t{v len * numbytes t <= max_size_t}
   -> o:lbuffer (uint_t t l) len
@@ -113,7 +113,7 @@ val uints_from_bytes_le:
 
 inline_for_extraction
 val uints_from_bytes_be:
-    #t:inttype{~(t == U1)}
+    #t:inttype{unsigned t /\ ~(U1? t)}
   -> #l:secrecy_level
   -> #len:size_t{v len * numbytes t <= max_size_t}
   -> o:lbuffer (uint_t t l) len
@@ -126,7 +126,7 @@ val uints_from_bytes_be:
 
 inline_for_extraction
 val uints_to_bytes_le:
-    #t:inttype
+    #t:inttype{unsigned t}
   -> #l:secrecy_level
   -> len:size_t{v len * numbytes t <= max_size_t}
   -> o:lbuffer (uint_t U8 l) (len *! size (numbytes t))
@@ -139,7 +139,7 @@ val uints_to_bytes_le:
 
 inline_for_extraction
 val uints_to_bytes_be:
-    #t:inttype
+    #t:inttype{unsigned t}
   -> #l:secrecy_level
   -> len:size_t{v len * numbytes t <= max_size_t}
   -> o:lbuffer (uint_t U8 l) (len *! size (numbytes t))
@@ -158,7 +158,7 @@ let uint32s_from_bytes_le #len = uints_from_bytes_le #U32 #SEC #len
 
 inline_for_extraction
 val uint_at_index_le:
-    #t:inttype{~(t == U1)}
+    #t:inttype{unsigned t /\ ~(U1? t)}
   -> #l:secrecy_level
   -> #len:size_t{v len * numbytes t <= max_size_t}
   -> i:lbuffer (uint_t U8 l) (len *! size (numbytes t)) 
@@ -171,7 +171,7 @@ val uint_at_index_le:
 
 inline_for_extraction
 val uint_at_index_be:
-    #t:inttype{~(t == U1)}
+    #t:inttype{unsigned t /\ ~(U1? t)}
   -> #l:secrecy_level
   -> #len:size_t{v len * numbytes t <= max_size_t}
   -> i:lbuffer (uint_t U8 l) (len *! size (numbytes t)) 

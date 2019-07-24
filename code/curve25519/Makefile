@@ -21,22 +21,13 @@ stage1: $(GENERATED_DIR)/Hacl_Curve25519_51.c \
 	$(GENERATED_DIR)/Hacl_Curve25519_64.c \
 	$(GENERATED_DIR)/Hacl_Curve25519_64_slow.c
 
-stage2: curve25519_51.exe curve25519_64.exe curve25519_64_slow.exe
+stage2: curve25519_51.exe curve25519_64.exe
 	./curve25519_51.exe
 	./curve25519_64_slow.exe
-
-curve25519_51.exe: $(GENERATED_DIR)/Hacl_Curve25519_51.c
-	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/dist/minimal -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . $(GENERATED_DIR)/Hacl_Curve25519_51.c $(KREMLIN_HOME)/kremlib/dist/generic/testlib.o $(KREMLIN_HOME)/kremlib/dist/minimal/FStar_UInt_8_16_32_64.o curve51-test.c -o curve25519_51.exe
-	./curve25519_51.exe
-
-boringssl_x25519.exe: boringssl-test.c
-#	$(CC) -march=native -mtune=native -flto -O3 -I $(HACL_HOME)/../boringssl/include boringssl-test.c -o boringssl_x25519.exe $(HACL_HOME)/../boringssl/build/crypto/libcrypto.a -lpthread
-	$(CC) -march=native -mtune=native -flto -O3 -I $(HACL_HOME)/../boringssl/include boringssl-test.c -o boringssl_x25519.exe $(HACL_HOME)/other_providers/openssl/libcrypto.a
-	./boringssl_x25519.exe
-
-curve25519_64.exe: $(GENERATED_DIR)/Hacl_Curve25519_64.c vale_25519.h
-	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/dist/minimal -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . $(GENERATED_DIR)/Hacl_Curve25519_64.c $(KREMLIN_HOME)/kremlib/dist/generic/testlib.o $(KREMLIN_HOME)/kremlib/dist/minimal/FStar_UInt_8_16_32_64.o curve64-test.c -o curve25519_64.exe
-	./curve25519_64.exe
+	./curve25519_64_vale.exe
+	./curve25519_64_v_inline.exe
+	./curve25519_64_rfc.exe
+	./curve25519_64_mixed.exe
 
 FSTAR_INCLUDE_DIRS = \
   $(HACL_KREMLIN) \
@@ -44,12 +35,14 @@ FSTAR_INCLUDE_DIRS = \
   $(HACL_HOME)/specs \
   $(HACL_HOME)/specs/lemmas \
   $(HACL_HOME)/lib \
-  ./lemmas \
+  ./lemmas
+
+FSTAR_INCLUDE = $(addprefix --include ,$(FSTAR_INCLUDE_DIRS))
 
 FSTAR_FLAGS = $(OTHERFLAGS) --cmi \
   --cache_checked_modules --cache_dir $(CACHE_DIR) --odir $(OUTPUT_DIR) \
-  --already_cached "'Prims+FStar+LowStar+C+Spec.Loops+TestLib+Lib'" \
-  $(addprefix --include ,$(FSTAR_INCLUDE_DIRS))
+  --already_cached "'Prims FStar LowStar C Spec.Loops TestLib Lib'" \
+  $(FSTAR_INCLUDE)
 
 FSTAR = $(FSTAR_HOME)/bin/fstar.exe $(FSTAR_FLAGS)
 
@@ -145,42 +138,58 @@ CFLAGS += -O3 -march=native -mtune=native -funroll-loops
 CFLAGS += $(addprefix -I ,$(INCLUDE_DIRS)) -Wall -Wextra -Werror \
   -Wno-parentheses -Wno-unused-parameter -Wno-unused-variable
 
-# GNU Make manual section 4.14
+UNAME = $(shell uname)
+ifeq ($(UNAME),Darwin)
+    VALE_SRC = curve25519-x86_64-darwin.S
+else ifeq ($(UNAME),Linux)
+    VALE_SRC = curve25519-x86_64-linux.S
+else ifeq ($(OS),Windows_NT)
+    VALE_SRC = curve25519-x86_64-mingw.S
+endif
 
-curve25519_64_vale.exe: $(GENERATED_DIR)/Hacl_Curve25519_64.c vale_25519.h vale/obj/curve25519-x86_64-darwin.S
-	$(CC) -march=native -mtune=native -flto -O3 vale/obj/curve25519-x86_64-darwin.S -c -o vale25519.o
+curve25519_51.exe: $(GENERATED_DIR)/Hacl_Curve25519_51.c
+	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/dist/minimal -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . $(GENERATED_DIR)/Hacl_Curve25519_51.c $(KREMLIN_HOME)/kremlib/dist/generic/testlib.o $(KREMLIN_HOME)/kremlib/dist/minimal/FStar_UInt_8_16_32_64.o curve51-test.c -o curve25519_51.exe
+
+boringssl_x25519.exe: boringssl-test.c
+#	$(CC) -march=native -mtune=native -flto -O3 -I $(HACL_HOME)/../boringssl/include boringssl-test.c -o boringssl_x25519.exe $(HACL_HOME)/../boringssl/build/crypto/libcrypto.a -lpthread
+	$(CC) -march=native -mtune=native -flto -O3 -I $(HACL_HOME)/../boringssl/include boringssl-test.c -o boringssl_x25519.exe $(HACL_HOME)/other_providers/openssl/libcrypto.a
+	./boringssl_x25519.exe
+
+curve25519_64.exe: 
+	$(MAKE) curve25519_64_slow.exe
+	$(MAKE) curve25519_64_vale.exe
+	$(MAKE) curve25519_64_v_inline.exe
+	$(MAKE) curve25519_64_mixed.exe
+	$(MAKE)	curve25519_64_rfc.exe
+
+curve25519_64_slow.exe: $(GENERATED_DIR)/Hacl_Curve25519_64_slow.c
+	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/dist/generic -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . $(GENERATED_DIR)/Hacl_Curve25519_64_slow.c $(KREMLIN_HOME)/kremlib/dist/generic/testlib.o $(KREMLIN_HOME)/kremlib/dist/minimal/FStar_UInt_8_16_32_64.o curve64-test.c -o curve25519_64_slow.exe
+
+curve25519_64_vale.exe: $(GENERATED_DIR)/Hacl_Curve25519_64.c rfc7748_25519.h vale/obj/$(VALE_SRC)
+	cp -f vale_25519.h tmp_25519.h
+	cp -f rfc7748_25519.h vale_25519.h
+	$(CC) -march=native -mtune=native -flto -O3 vale/obj/$(VALE_SRC) -c -o vale25519.o
 	$(CC) -march=native -mtune=native -flto -O3 -I $(KREMLIN_HOME)/kremlib/dist/minimal -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . $(GENERATED_DIR)/Hacl_Curve25519_64.c $(KREMLIN_HOME)/kremlib/dist/generic/testlib.o $(KREMLIN_HOME)/kremlib/dist/minimal/FStar_UInt_8_16_32_64.o curve64-test.c -o curve25519_64_vale.exe vale25519.o
-	./curve25519_64_vale.exe
+	cp -f tmp_25519.h vale_25519.h
 
-curve25519_64_v_inline.exe: $(GENERATED_DIR)/Hacl_Curve25519_64.c rfc7748_25519.h
+curve25519_64_v_inline.exe: $(GENERATED_DIR)/Hacl_Curve25519_64.c vale-inline.h
 	cp -f vale_25519.h tmp_25519.h
 	cp -f vale-inline.h vale_25519.h
 	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/dist/minimal -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . $(GENERATED_DIR)/Hacl_Curve25519_64.c $(KREMLIN_HOME)/kremlib/dist/generic/testlib.o $(KREMLIN_HOME)/kremlib/dist/minimal/FStar_UInt_8_16_32_64.o curve64-test.c -o curve25519_64_v_inline.exe
 	cp -f tmp_25519.h vale_25519.h
-	./curve25519_64_v_inline.exe
 
 curve25519_64_mixed.exe: $(GENERATED_DIR)/Hacl_Curve25519_64.c rfc7748_25519.h
 	cp -f vale_25519.h tmp_25519.h
 	cp -f rfc7748_25519.h vale_25519.h
 	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/dist/minimal -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . $(GENERATED_DIR)/Hacl_Curve25519_64.c $(KREMLIN_HOME)/kremlib/dist/generic/testlib.o $(KREMLIN_HOME)/kremlib/dist/minimal/FStar_UInt_8_16_32_64.o curve64-test.c -o curve25519_64_mixed.exe
 	cp -f tmp_25519.h vale_25519.h
-	./curve25519_64_mixed.exe
 
-curve25519_64_rfc.exe: $(GENERATED_DIR)/Hacl_Curve25519_64.c
+curve25519_64_rfc.exe: rfc7748_src/fp25519_x64.c rfc7748_src/x25519_x64.c
 	$(CC) -march=native -mtune=native -O3 -I rfc7748_src/ rfc7748_src/fp25519_x64.c -c -o fp25519.o
 	$(CC) -march=native -mtune=native -O3 -I rfc7748_src/ rfc7748_src/x25519_x64.c -c -o x25519.o
 	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/dist/minimal -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . $(KREMLIN_HOME)/kremlib/dist/generic/testlib.o $(KREMLIN_HOME)/kremlib/dist/minimal/FStar_UInt_8_16_32_64.o curve64-rfc-test.c -o curve25519_64_rfc.exe fp25519.o x25519.o
-	./curve25519_64_rfc.exe
 
-curve25519_64.exe: curve25519_64_vale.exe curve25519_64_mixed.exe curve25519_64_rfc.exe
-	./curve25519_64_vale.exe
-	./curve25519_64_rfc.exe
-	./curve25519_64_mixed.exe
-
-curve25519_64_slow.exe: $(GENERATED_DIR)/Hacl_Curve25519_64_slow.c
-	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/dist/generic -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . $(GENERATED_DIR)/Hacl_Curve25519_64_slow.c $(KREMLIN_HOME)/kremlib/dist/generic/testlib.o $(KREMLIN_HOME)/kremlib/dist/minimal/FStar_UInt_8_16_32_64.o curve64-test.c -o curve25519_64_slow.exe
-	./curve25519_64_slow.exe
-
+# GNU Make manual section 4.14
 
 %.d: %.c
 	@set -e; rm -f $@; \
@@ -198,11 +207,11 @@ endif # STAGE=2
 # 5. Targets for interactive mode
 
 %.fst-in:
-	@echo $(FSTAR_FLAGS) \
+	@echo $(FSTAR_INCLUDE) \
 	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(basename $@).fst.hints
 
 %.fsti-in:
-	@echo $(FSTAR_FLAGS) \
+	@echo $(FSTAR_INCLUDE) \
 	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(basename $@).fsti.hints
 
 # 6. Clean targets

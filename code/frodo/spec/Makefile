@@ -20,7 +20,8 @@ else
 endif
 
 CACHE_DIR = .cache.$(VARIANT)
-HINT_DIR  = .hints.$(VARIANT)
+#HINT_DIR  = .hints.$(VARIANT)
+HINT_DIR  = $(HACL_HOME)/.hints
 OUT_DIR   = frodo-ml.$(VARIANT)
 
 include $(HACL_HOME)/Makefile.include
@@ -42,11 +43,12 @@ verify: $(addprefix $(CACHE_DIR)/,Spec.Frodo.KEM.KeyGen.fst.checked Spec.Frodo.K
 FSTAR_INCLUDE_DIRS = \
   params-$(VARIANT) \
   $(HACL_HOME)/specs \
-  $(HACL_HOME)/lib
+  $(HACL_HOME)/lib \
+  $(HACL_HOME)/.cache
 
 FSTAR_FLAGS = $(OTHERFLAGS) --cmi \
   --cache_checked_modules --cache_dir $(CACHE_DIR) --odir $(OUT_DIR) \
-  --already_cached "'Prims+FStar+LowStar+C+Spec.Loops+TestLib+Lib'" \
+  --already_cached "'Prims FStar LowStar C Spec.Loops TestLib Lib'" \
   $(addprefix --include ,$(FSTAR_INCLUDE_DIRS))
 
 FSTAR = $(FSTAR_HOME)/bin/fstar.exe $(FSTAR_FLAGS)
@@ -99,11 +101,11 @@ test: $(OUT_DIR)/test.exe
 # 3. Targets for interactive mode
 
 %.fst-in:
-	@echo $(FSTAR_FLAGS) \
+	@echo $(addprefix --include ,$(FSTAR_INCLUDE_DIRS)) \
 	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(basename $@).fst.hints
 
 %.fsti-in:
-	@echo $(FSTAR_FLAGS) \
+	@echo $(addprefix --include ,$(FSTAR_INCLUDE_DIRS)) \
 	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(basename $@).fsti.hints
 
 # 4. Clean targets

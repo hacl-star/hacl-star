@@ -9,7 +9,7 @@ open Lib.ByteSequence
 open Lib.LoopCombinators
 
 
-#set-options "--initial_fuel 0 --max_fuel 0"
+#set-options "--initial_fuel 0 --max_fuel 0 --z3rlimit 30"
 
 (* Parameters for AES-256 *)
 inline_for_extraction let nb = 4

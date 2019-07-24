@@ -10,7 +10,7 @@ open Spec.Matrix
 module Seq = Lib.Sequence
 module Loops = Lib.LoopCombinators
 
-#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar +FStar.Pervasives -Spec +Spec.Frodo +Spec.Frodo.Params +Spec.Matrix'"
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar +FStar.Pervasives +FStar.UInt -Spec +Spec.Frodo +Spec.Frodo.Params +Spec.Matrix'"
 
 /// Pack
 

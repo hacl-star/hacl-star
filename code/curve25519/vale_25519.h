@@ -90,9 +90,9 @@ static force_inline void cselect1(uint8_t bit, uint64_t *const px,
 
 
 
-static force_inline void cselect2(uint8_t bit, uint64_t *const p0, uint64_t *const p1) {
-  cswap1(bit,p0,p1);
-  cswap1(bit,p0+4,p1+4);
-}
+//static force_inline void cselect2(uint8_t bit, uint64_t *const p0, uint64_t *const p1) {
+//  cswap1(bit,p0,p1);
+//  cswap1(bit,p0+4,p1+4);
+//}
 
 

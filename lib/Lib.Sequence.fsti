@@ -128,7 +128,7 @@ val sub:
   -> start:size_nat
   -> n:size_nat{start + n <= len} ->
   Tot (s2:lseq a n{to_seq s2 == Seq.slice (to_seq s1) start (start + n) /\
-	     (forall (k:nat{k < n}). {:pattern (index s2 k)} index s2 k == index s1 (start + k))})
+             (forall (k:nat{k < n}). {:pattern (index s2 k)} index s2 k == index s1 (start + k))})
 
 (** Selecting a subset of a fixed-length Sequence *)
 let slice
@@ -388,7 +388,7 @@ val map_blocks:
   -> g:(i:nat{i == length inp / blocksize} -> len:size_nat{len < blocksize} -> s:lseq a len -> lseq a len) ->
   Tot (out:seq a {length out == length inp})
 
-#reset-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
 // This declaration verifies fine without the calc statements when verifying the interface, // file, but they help when rechecking this declaration when verifying the implementation
 val index_map_blocks:
@@ -408,13 +408,13 @@ val index_map_blocks:
       let j = i / bs in
       let block = Seq.slice inp (j * bs) ((j + 1) * bs) in
       calc (==) {
-	length block;
-	== { Seq.lemma_len_slice inp (j * bs) ((j+1) * bs) }
-	(j + 1) * bs - j * bs;
-	== {}
-	bs * (j + 1) - bs * j;
-	== { Math.Lemmas.lemma_mul_sub_distr bs (j + 1) j }
-	bs;
+        length block;
+        == { Seq.lemma_len_slice inp (j * bs) ((j+1) * bs) }
+        (j + 1) * bs - j * bs;
+        == {}
+        bs * (j + 1) - bs * j;
+        == { Math.Lemmas.lemma_mul_sub_distr bs (j + 1) j }
+        bs;
       };
       Seq.index (map_blocks bs inp f g) i == Seq.index (f j block) (i % bs)
       end
@@ -442,7 +442,7 @@ val eq_generate_blocks0:
   -> f:(i:nat{i < n} -> a i -> a (i + 1) & s:seq t{length s == len})
   -> init:a 0 ->
   Lemma (generate_blocks #t len n 0 a f init ==
-	 (init,Seq.empty))
+         (init,Seq.empty))
 
 val unfold_generate_blocks:
     #t:Type0
@@ -453,9 +453,15 @@ val unfold_generate_blocks:
   -> init:a 0
   -> i:nat{i < n} ->
   Lemma (generate_blocks #t len n (i+1) a f init ==
-	   (let (acc,s) = generate_blocks #t len n i a f init in
-	    let (acc',s') = f i acc in
-	    (acc',Seq.append s s')))
+           (let (acc,s) = generate_blocks #t len n i a f init in
+            let (acc',s') = f i acc in
+            (acc',Seq.append s s')))
+
+private
+let mult_div_lt
+  (len:size_nat{0 < len}) (max:nat) (n:pos{n <= max}) (i:nat{i < n * len}) :
+  Lemma (i / len < max)
+= ()
 
 val index_generate_blocks:
     #t:Type0
@@ -464,8 +470,9 @@ val index_generate_blocks:
   -> n:pos{n <= max}
   -> f:(i:nat{i < max} -> unit -> unit & s:seq t{length s == len})
   -> i:nat{i < n * len}
-  -> Lemma (let j: j:nat{j < max} = i / len in
+  -> Lemma (mult_div_lt len max n i;
            let a_spec (i:nat{i <= max}) = unit in
            let _,s1 = generate_blocks #t len max n a_spec f () in
-           let _,s2 = f j () in
+           let _,s2 = f (i / len) () in
            Seq.index s1 i == Seq.index s2 (i % len))
+

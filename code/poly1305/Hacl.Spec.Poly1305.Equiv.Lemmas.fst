@@ -219,6 +219,8 @@ let poly_update_repeat_blocks_multi_lemma2 text acc_vec0 r =
   assert (normalize_2 (Loops.repeati nb_vec repeat_bf_vec acc_vec0) r == Loops.repeati nb repeat_bf_sc (normalize_2 acc_vec0 r));
   assert (normalize_2 acc_vec1 r == acc2)
 
+#set-options "--max_fuel 0"
+
 val poly_update_repeat_blocks_multi_lemma4:
     text:bytes{length text % (4 * size_block) = 0}
   -> acc:elem 4

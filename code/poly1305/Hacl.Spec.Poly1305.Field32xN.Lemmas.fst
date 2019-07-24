@@ -10,7 +10,7 @@ open Hacl.Poly1305.Field32xN.Lemmas
 open Hacl.Impl.Poly1305.Lemmas
 module Vec = Hacl.Spec.Poly1305.Vec
 
-#reset-options "--z3rlimit 100 --max_fuel 0 --using_facts_from '* -FStar.Seq'"
+#set-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 1 --using_facts_from '* -FStar.Seq'"
 
 val lemma_feval_is_fas_nat_i:
   #w:lanes
@@ -61,7 +61,7 @@ let precomp_r5_fits_lemma #w r =
     precomp_r5_as_tup64 #w r 0;
     precomp_r5_as_tup64 #w r 1;
     precomp_r5_as_tup64 #w r 2;
-    precomp_r5_as_tup64 #w r 3
+    precomp_r5_as_tup64 #w r 3  
 
 val precomp_r5_fits_lemma2:
     #w:lanes
@@ -540,7 +540,7 @@ let fmul_r2_normalize50 (a0, a1, a2, a3, a4) (r0, r1, r2, r3, r4) (r20, r21, r22
   assert (felem_fits5 a (1, 2, 1, 1, 1));
   a
 
-#push-options "--z3rlimit 400 --max_fuel 1"
+#push-options "--z3rlimit 400 --max_fuel 1 --max_ifuel 0"
 
 val fmul_r2_normalize51:
     a:felem5 2
@@ -833,21 +833,23 @@ val load_felem5_lemma:
       (fun i -> (uint64xN_v hi).[i] * pow2 64 + (uint64xN_v lo).[i]))
 let load_felem5_lemma #w lo hi =
   let f = load_felem5 #w lo hi in
-  let res = createi #Vec.pfelem w (fun i -> (uint64xN_v hi).[i] * pow2 64 + (uint64xN_v lo).[i]) in
-
   match w with
   | 1 ->
     load_felem5_lemma_i #w lo hi 0;
+    let res = createi #Vec.pfelem w (fun i -> (uint64xN_v hi).[i] * pow2 64 + (uint64xN_v lo).[i]) in
     eq_intro (feval5 f) res
   | 2 ->
     load_felem5_lemma_i #w lo hi 0;
     load_felem5_lemma_i #w lo hi 1;
+    let res = createi #Vec.pfelem w (fun i -> (uint64xN_v hi).[i] * pow2 64 + (uint64xN_v lo).[i]) in
+
     eq_intro (feval5 f) res
   | 4 ->
     load_felem5_lemma_i #w lo hi 0;
     load_felem5_lemma_i #w lo hi 1;
     load_felem5_lemma_i #w lo hi 2;
     load_felem5_lemma_i #w lo hi 3;
+    let res = createi #Vec.pfelem w (fun i -> (uint64xN_v hi).[i] * pow2 64 + (uint64xN_v lo).[i]) in
     eq_intro (feval5 f) res
 
 val load_acc5_2_lemma:

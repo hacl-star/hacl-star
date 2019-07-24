@@ -18,7 +18,7 @@ module F64 = Hacl.Impl.Curve25519.Field64
 module S = Hacl.Spec.Curve25519.Finv
 module P = Spec.Curve25519
 
-#reset-options "--using_facts_from '* -FStar.Seq'"
+#set-options "--z3rlimit 50 --max_fuel 1 --max_ifuel 1 --using_facts_from '* -FStar.Seq'"
 
 noextract
 val fsquare_times_inv: #s:field_spec -> h:mem -> f:felem s -> Type0
@@ -121,9 +121,9 @@ let fsquare_times_ #s o inp tmp n =
 
 (* WRAPPER to Prevent Inlining *)
 [@CInline]
-let fsquare_times_51 (o:F51.felem) (i:F51.felem) (tmp:felem_wide M51) (n:size_t{v n > 0}) = fsquare_times_ #M51 o i tmp n
+let fsquare_times_51 (o:F51.felem) (i:F51.felem) = fsquare_times_ #M51 o i
 [@CInline]
-let fsquare_times_64 (o:F64.felem) (i:F64.felem) (tmp:felem_wide M64) (n:size_t{v n > 0}) = fsquare_times_ #M64 o i tmp n
+let fsquare_times_64 (o:F64.felem) (i:F64.felem) = fsquare_times_ #M64 o i
 
 inline_for_extraction noextract
 val fsquare_times:
@@ -149,7 +149,7 @@ let fsquare_times #s o i tmp n =
   | M64 -> fsquare_times_64 o i tmp n
 (* WRAPPER to Prevent Inlining *)
 
-#set-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 3"
+#set-options "--z3rlimit 200 --max_fuel 0 --initial_ifuel 1 --max_ifuel 1"
 
 inline_for_extraction noextract
 val finv0:
@@ -238,9 +238,9 @@ let finv_ #s o i tmp =
 
 (* WRAPPER to Prevent Inlining *)
 [@CInline]
-let finv_51 (o:F51.felem) (i:F51.felem) (tmp:felem_wide2 M51) = finv_ #M51 o i tmp
+let finv_51 (o:F51.felem) (i:F51.felem) = finv_ #M51 o i
 [@CInline]
-let finv_64 (o:F64.felem) (i:F64.felem) (tmp:felem_wide2 M64) = finv_ #M64 o i tmp
+let finv_64 (o:F64.felem) (i:F64.felem) = finv_ #M64 o i
 
 inline_for_extraction noextract
 val finv:

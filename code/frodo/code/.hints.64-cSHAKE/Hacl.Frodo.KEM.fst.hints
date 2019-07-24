@@ -7,21 +7,22 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equality_tok_Lib.Buffer.MUT@tok",
-        "equality_tok_Lib.IntTypes.PUB@tok",
-        "equality_tok_Lib.IntTypes.U32@tok",
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "equation_Hacl.Impl.Frodo.KEM.crypto_publickeybytes",
         "equation_Hacl.Impl.Frodo.KEM.crypto_secretkeybytes",
-        "equation_Lib.Buffer.as_seq", "equation_Lib.IntTypes.uint8",
-        "equation_Lib.IntTypes.uint_v", "equation_Lib.Sequence.lseq",
-        "refinement_interpretation_Tm_refine_a4ee2d17ff73f448b01210d9b1c511ce",
-        "refinement_interpretation_Tm_refine_c23e947e8b619b6f4c05dbb7de3867f4",
-        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
+        "equation_Prims.nat",
+        "equation_Spec.Frodo.KEM.crypto_publickeybytes",
+        "function_token_typing_Prims.__cache_version_number__",
+        "refinement_interpretation_Tm_refine_36486021736efddfdda240b2e87fc030",
+        "refinement_interpretation_Tm_refine_addd6dad7d9e4b626ed3c7d12e1d3a99",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "typing_Hacl.Impl.Frodo.KEM.crypto_publickeybytes",
-        "typing_Hacl.Impl.Frodo.KEM.crypto_secretkeybytes"
+        "typing_Hacl.Impl.Frodo.KEM.crypto_secretkeybytes",
+        "typing_Spec.Frodo.KEM.crypto_publickeybytes"
       ],
       0,
-      "53878455a76edc83afd581b293117f04"
+      "4d20540cc60ec3972134ab89358590ef"
     ],
     [
       "Hacl.Frodo.KEM.crypto_kem_keypair",
@@ -30,13 +31,14 @@
       0,
       [
         "@MaxIFuel_assumption", "@query", "equality_tok_Lib.Buffer.MUT@tok",
+        "equation_FStar.Monotonic.HyperStack.mem",
         "equation_Frodo.KEM.crypto_kem_keypair",
-        "equation_Lib.Buffer.as_seq", "equation_Lib.IntTypes.uint8",
-        "refinement_interpretation_Tm_refine_7488af4a47d8b5c75476cf185c9f631c",
-        "refinement_interpretation_Tm_refine_b6af49c004aefcebc7703338f9141d36"
+        "equation_Lib.Buffer.as_seq",
+        "refinement_interpretation_Tm_refine_1580f2ba2b1fb615793d4d678382ac63",
+        "refinement_interpretation_Tm_refine_2ac1592c363c0a3911f2e74fba27b4f4"
       ],
       0,
-      "584f5a618467dc3c15021bcede5a6eb3"
+      "a1d3b2aee1de4a0a7e341630ade624d0"
     ],
     [
       "Hacl.Frodo.KEM.crypto_kem_enc",
@@ -45,16 +47,39 @@
       0,
       [
         "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "equality_tok_Lib.Buffer.MUT@tok",
+        "equality_tok_Lib.IntTypes.U32@tok",
+        "equality_tok_Lib.IntTypes.U8@tok",
         "equation_Hacl.Impl.Frodo.KEM.crypto_ciphertextbytes",
         "equation_Hacl.Impl.Frodo.KEM.crypto_publickeybytes",
-        "equation_Lib.IntTypes.uint8",
-        "refinement_interpretation_Tm_refine_82f1dc84cb567cd2dbd8043959e8b7fb",
-        "refinement_interpretation_Tm_refine_a4ee2d17ff73f448b01210d9b1c511ce",
+        "equation_Hacl.Impl.Matrix.lbytes", "equation_Lib.Buffer.lbuffer_t",
+        "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
+        "equation_Prims.nat", "equation_Spec.AES.elem",
+        "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
+        "equation_Spec.Frodo.KEM.crypto_ciphertextbytes",
+        "equation_Spec.Frodo.Params.bytes_seed_a",
+        "equation_Spec.Frodo.Params.crypto_bytes",
+        "equation_Spec.GaloisField.felem", "equation_Spec.GaloisField.gf",
+        "function_token_typing_Prims.__cache_version_number__",
+        "function_token_typing_Spec.AES.elem",
+        "proj_equation_Spec.GaloisField.GF_t",
+        "projection_inverse_Spec.GaloisField.GF_t",
+        "refinement_interpretation_Tm_refine_36486021736efddfdda240b2e87fc030",
+        "refinement_interpretation_Tm_refine_967e15af2d5e07fba8c7f5c845c06998",
+        "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
+        "refinement_interpretation_Tm_refine_addd6dad7d9e4b626ed3c7d12e1d3a99",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "typing_Hacl.Impl.Frodo.KEM.crypto_ciphertextbytes",
-        "typing_Hacl.Impl.Frodo.KEM.crypto_publickeybytes"
+        "typing_Hacl.Impl.Frodo.KEM.crypto_publickeybytes",
+        "typing_Lib.Buffer.length",
+        "typing_Spec.Frodo.KEM.crypto_ciphertextbytes",
+        "typing_Spec.Frodo.Params.bytes_seed_a",
+        "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "850dcdb2d4e8f7aaa2fb711d72ef6f19"
+      "4ed8b1b66dde695b3aeecf4b49abaa87"
     ],
     [
       "Hacl.Frodo.KEM.crypto_kem_enc",
@@ -63,13 +88,13 @@
       0,
       [
         "@MaxIFuel_assumption", "@query", "equality_tok_Lib.Buffer.MUT@tok",
+        "equation_FStar.Monotonic.HyperStack.mem",
         "equation_Frodo.KEM.crypto_kem_enc", "equation_Lib.Buffer.as_seq",
-        "equation_Lib.IntTypes.uint8",
-        "refinement_interpretation_Tm_refine_c4105c6a031fa8bd7bf1ab887053611f",
-        "refinement_interpretation_Tm_refine_ed5496ee520915132ff5323de7b2cc90"
+        "refinement_interpretation_Tm_refine_dbedb6ad33f9a1153c735c3d9a6f65be",
+        "refinement_interpretation_Tm_refine_dc429fa620925884d47289849dd7bdc2"
       ],
       0,
-      "2804382be7b973608a3e2b024b544a1c"
+      "21c7a9fff51152e6e97c9a0e3a049775"
     ],
     [
       "Hacl.Frodo.KEM.crypto_kem_dec",
@@ -77,21 +102,37 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equality_tok_Lib.Buffer.MUT@tok",
-        "equality_tok_Lib.IntTypes.PUB@tok",
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "equality_tok_Lib.Buffer.MUT@tok",
         "equality_tok_Lib.IntTypes.U32@tok",
+        "equality_tok_Lib.IntTypes.U8@tok",
         "equation_Hacl.Impl.Frodo.KEM.crypto_ciphertextbytes",
         "equation_Hacl.Impl.Frodo.KEM.crypto_secretkeybytes",
-        "equation_Lib.Buffer.as_seq", "equation_Lib.IntTypes.uint8",
-        "equation_Lib.IntTypes.uint_v", "equation_Lib.Sequence.lseq",
-        "refinement_interpretation_Tm_refine_82f1dc84cb567cd2dbd8043959e8b7fb",
-        "refinement_interpretation_Tm_refine_c23e947e8b619b6f4c05dbb7de3867f4",
+        "equation_Hacl.Impl.Matrix.lbytes", "equation_Lib.Buffer.as_seq",
+        "equation_Lib.Buffer.lbuffer_t", "equation_Lib.IntTypes.range",
+        "equation_Lib.IntTypes.unsigned", "equation_Lib.Sequence.lseq",
+        "equation_Prims.nat", "equation_Spec.AES.elem",
+        "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
+        "equation_Spec.Frodo.KEM.crypto_ciphertextbytes",
+        "equation_Spec.Frodo.Params.crypto_bytes",
+        "equation_Spec.GaloisField.felem", "equation_Spec.GaloisField.gf",
+        "function_token_typing_Prims.__cache_version_number__",
+        "function_token_typing_Spec.AES.elem",
+        "proj_equation_Spec.GaloisField.GF_t",
+        "projection_inverse_Spec.GaloisField.GF_t",
+        "refinement_interpretation_Tm_refine_36486021736efddfdda240b2e87fc030",
+        "refinement_interpretation_Tm_refine_967e15af2d5e07fba8c7f5c845c06998",
+        "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
+        "refinement_interpretation_Tm_refine_ba523126f67e00e7cd55f0b92f16681d",
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
         "typing_Hacl.Impl.Frodo.KEM.crypto_ciphertextbytes",
-        "typing_Hacl.Impl.Frodo.KEM.crypto_secretkeybytes"
+        "typing_Hacl.Impl.Frodo.KEM.crypto_secretkeybytes",
+        "typing_Lib.Buffer.length", "typing_Spec.Frodo.Params.crypto_bytes",
+        "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "dbd8ca2493426ee4361656d257b92242"
+      "90a261f760f32c15a10fc82765481967"
     ],
     [
       "Hacl.Frodo.KEM.crypto_kem_dec",
@@ -100,11 +141,10 @@
       0,
       [
         "@query", "equality_tok_Lib.Buffer.MUT@tok",
-        "equation_Frodo.KEM.crypto_kem_dec", "equation_Lib.Buffer.as_seq",
-        "equation_Lib.IntTypes.uint8"
+        "equation_Frodo.KEM.crypto_kem_dec", "equation_Lib.Buffer.as_seq"
       ],
       0,
-      "8587df264a5641c0c1ae8bf4f5d857ce"
+      "0100a7f654cfde86d9808c496add66c8"
     ]
   ]
 ]

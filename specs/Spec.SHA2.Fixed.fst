@@ -235,7 +235,7 @@ let compress (#w:lanes) (#a:D.sha2_alg) (blocks:fseq (block a) w) (hash:state_w 
   shuffle ws hash
 
 let encoded_len (#a:D.sha2_alg) (total_len:nat{total_len < D.max_input_length a}) =
-    uint_to_bytes_be (secret (nat_to_uint #(D.len_int_type a) #PUB (total_len * 8)))
+    uint_to_bytes_be (secret (mk_int #(D.len_int_type a) #PUB (total_len * 8)))
 
 let num_pad_blocks (a:D.sha2_alg) (len:size_nat{len < D.block_length a}) =
   let len' = len + D.len_length a + 1 in

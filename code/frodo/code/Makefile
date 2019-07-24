@@ -51,7 +51,8 @@ endif
 
 CACHE_DIR     = .cache.$(VARIANT)
 OUTPUT_DIR    = .output.$(VARIANT)
-HINT_DIR      = .hints.$(VARIANT)
+#HINT_DIR      = .hints.$(VARIANT)
+HINT_DIR      = $(HACL_HOME)/.hints
 GENERATED_DIR = frodo-c.$(VARIANT)
 OUT_DIR	      = frodo-c.$(VARIANT)
 
@@ -106,11 +107,12 @@ FSTAR_INCLUDE_DIRS = \
   $(KREMLIN_HOME)/kremlib \
   $(HACL_HOME)/specs \
   $(HACL_HOME)/lib \
-  $(HACL_HOME)/code/sha3
+  $(HACL_HOME)/code/sha3 \
+  $(HACL_HOME)/.cache
 
 FSTAR_FLAGS = $(OTHERFLAGS) --cmi \
   --cache_checked_modules --cache_dir $(CACHE_DIR) --odir $(OUTPUT_DIR) \
-  --already_cached "'Prims+FStar+LowStar+C+Spec.Loops+TestLib+Lib+Spec'" \
+  --already_cached 'Prims FStar LowStar C TestLib Lib Spec' \
   $(addprefix --include ,$(FSTAR_INCLUDE_DIRS))
 
 FSTAR = $(FSTAR_HOME)/bin/fstar.exe $(FSTAR_FLAGS)
@@ -125,27 +127,6 @@ ROOTS = Hacl.Test.Frodo.fst
 	$(FSTAR) --dep full $(ROOTS) --extract '* -Prims -FStar +FStar.UInt128 -LowStar -Spec -Frodo.KEM' > $@
 
 include .depend
-
-# Admit SMT queries for modules in FStar, LowStar, C, Lib, and Spec namespaces
-$(CACHE_DIR)/FStar.%.checked $(CACHE_DIR)/prims.%.checked: | .depend
-	$(FSTAR) $< --admit_smt_queries true && \
-	touch $@
-
-$(CACHE_DIR)/LowStar.%.checked: | .depend
-	$(FSTAR) $< --admit_smt_queries true && \
-	touch $@
-
-$(CACHE_DIR)/C.%.checked: | .depend
-	$(FSTAR) $< --admit_smt_queries true && \
-	touch $@
-
-$(CACHE_DIR)/Lib.%.checked: | .depend
-	$(FSTAR) $< --admit_smt_queries true && \
-	touch $@
-
-$(CACHE_DIR)/Spec.%.checked: | .depend
-	$(FSTAR) $< --admit_smt_queries true && \
-	touch $@
 
 $(CACHE_DIR)/%.checked: | .depend
 	$(FSTAR) $< $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $<).hints && \
@@ -283,11 +264,11 @@ endif # STAGE=2
 # 5. Targets for interactive mode
 
 %.fst-in:
-	@echo $(FSTAR_FLAGS) \
+	@echo $(addprefix --include ,$(FSTAR_INCLUDE_DIRS)) \
 	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(basename $@).fst.hints
 
 %.fsti-in:
-	@echo $(FSTAR_FLAGS) \
+	@echo $(addprefix --include ,$(FSTAR_INCLUDE_DIRS)) \
 	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(basename $@).fsti.hints
 
 # 6. Clean targets

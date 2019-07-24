@@ -10,8 +10,8 @@ open Lib.ByteSequence
 #set-options "--z3rlimit 50 --max_fuel 1"
 
 val uint_from_bytes_le_lemma: b:lseq uint8 16 -> Lemma
- (let lo = uint_from_bytes_le (sub b 0 8) in
-  let hi = uint_from_bytes_le (sub b 8 8) in
+ (let lo = uint_from_bytes_le #U64 (sub b 0 8) in
+  let hi = uint_from_bytes_le #U64 (sub b 8 8) in
   nat_from_bytes_le b == pow2 64 * uint_v hi + uint_v lo)
 let uint_from_bytes_le_lemma b =
   let r1 = nat_from_bytes_le b in

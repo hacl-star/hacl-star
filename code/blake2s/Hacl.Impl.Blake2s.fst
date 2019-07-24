@@ -363,7 +363,7 @@ val blake2s_update_block:
                          /\ h1.[|hash|] == Spec.blake2_update_block Spec.Blake2S (uint_v prev) h0.[|d|] h0.[|hash|]))
 
 let blake2s_update_block hash prev d =
-  uintv_extensionality prev (u64 (uint_v prev));
+  //uintv_extensionality prev (u64 (uint_v prev));
   let h0 = ST.get () in
   [@inline_let]
   let spec _ h1 = live h1 hash /\ h1.[|hash|] == Spec.blake2_update_block Spec.Blake2S (uint_v prev) h0.[|d|] h0.[|hash|] in
@@ -449,7 +449,7 @@ val blake2s_update_last:
                          /\ h1.[|hash|] == Spec.Blake2.blake2_update_last Spec.Blake2S (uint_v prev) (v len) h0.[|last|] h0.[|hash|]))
 
 let blake2s_update_last hash prev len last =
-  uintv_extensionality prev (u64 (uint_v prev));
+  //uintv_extensionality prev (u64 (uint_v prev));
   push_frame ();
   let last_block = create 64ul (u8 0) in
   let last_block_w = create 16ul (u32 0) in

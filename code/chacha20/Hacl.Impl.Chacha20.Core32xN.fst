@@ -268,11 +268,11 @@ let double_round_ #w st =
   quarter_round st (size 3) (size 4) (size 9) (size 14)
 
 [@CInline]
-let double_round1 st = double_round_ #1 st
+let double_round1 = double_round_ #1
 [@CInline]
-let double_round4 st = double_round_ #4 st
+let double_round4 = double_round_ #4
 [@CInline]
-let double_round8 st = double_round_ #8 st
+let double_round8 = double_round_ #8
 
 inline_for_extraction noextract
 val double_round:

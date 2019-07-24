@@ -80,10 +80,18 @@ let mset #n1 #n2 a i j x =
   a.(i *. n2 +. j) <- x
 
 noextract unfold
-let op_String_Access #n1 #n2 (m:matrix_t n1 n2) (i, j) = mget m i j
+val op_String_Access (#n1:size_t) (#n2:size_t{v n1 * v n2 <= max_size_t}) (m:matrix_t n1 n2) (ij:(size_t & size_t){let i, j = ij in v i < v n1 /\ v j < v n2})
+  : Stack elem
+    (requires fun h0 -> live h0 m)
+    (ensures  fun h0 x h1 -> let i, j = ij in modifies loc_none h0 h1 /\ x == M.mget (as_matrix h0 m) (v i) (v j))
+let op_String_Access #n1 #n2 m (i,j) = mget m i j
 
 noextract unfold
-let op_String_Assignment #n1 #n2 (m:matrix_t n1 n2) (i, j) x = mset m i j x
+val op_String_Assignment (#n1:size_t) (#n2:size_t{v n1 * v n2 <= max_size_t}) (m:matrix_t n1 n2) (ij:(size_t & size_t){let i, j = ij in v i < v n1 /\ v j < v n2}) (x:elem)
+  : Stack unit
+    (requires fun h0 -> live h0 m)
+    (ensures  fun h0 _ h1 -> let i, j = ij in modifies1 m h0 h1 /\ live h1 m /\ as_matrix h1 m == M.mset (as_matrix h0 m) (v i) (v j) x)
+let op_String_Assignment #n1 #n2 m (i,j) x = mset m i j x
 
 unfold
 let get #n1 #n2 h (m:matrix_t n1 n2) i j = M.mget (as_matrix h m) i j
@@ -340,7 +348,9 @@ let matrix_mul #n1 #n2 #n3 a b c =
         (fun h2 k -> mul_inner_inv h0 h1 h2 a b c (f (v i)) i k)
         (fun k -> mul_inner1 h0 h1 a b c i k (f (v i)));
       let h1 = ST.get() in
-      onemore1 #(v n1) #(v n3) (as_matrix h1 c) f (v i)
+      let q i1 = forall (k:nat{k < v n3}). get h1 c i1 k == f i1 k in
+      onemore (fun i1 -> i1 < v n1) q (v i);
+      assert (forall (i1:nat{i1 < v n1 /\ i1 <= v i}) (k:nat{k < v n3}). get h1 c i1 k == f i1 k)
     );
   let h2 = ST.get() in
   M.extensionality (as_matrix h2 c) (M.mul (as_matrix h0 a) (as_matrix h0 b))
@@ -358,7 +368,7 @@ val mget_s:
   -> Stack elem
     (requires fun h0 -> live h0 a)
     (ensures  fun h0 x h1 ->
-      modifies loc_none h0 h1 /\
+      modifies0 h0 h1 /\
       x == M.mget_s (as_matrix h0 a) (v i) (v j))
 let mget_s #n1 #n2 a i j =
   M.index_lt_s (v n1) (v n2) (v i) (v j);
@@ -389,7 +399,6 @@ let mul_inner_s #n1 #n2 #n3 a b i k =
   [@ inline_let ]
   let f l = get h0 a (v i) l *. get_s h0 b l (v k) in
   let res = create #uint16 (size 1) (u16 0) in
-
   let h1 = ST.get() in
   Lib.Loops.for (size 0) n2
     (fun h2 j -> live h1 res /\ live h2 res /\
@@ -466,7 +475,9 @@ let matrix_mul_s #n1 #n2 #n3 a b c =
         (fun h2 k -> mul_inner_inv h0 h1 h2 a b c (f (v i)) i k)
         (fun k -> mul_inner1_s h0 h1 a b c i k (f (v i)));
       let h1 = ST.get() in
-      onemore1 #(v n1) #(v n3) (as_matrix h1 c) f (v i)
+      let q i1 = forall k. get h1 c i1 k == f i1 k in
+      onemore (fun i1 -> i1 < v n1) q (v i);
+      assert (forall (i1:nat{i1 < v n1 /\ i1 <= v i}) (k:nat{k < v n3}). get h1 c i1 k == f i1 k)
     );
   let h2 = ST.get() in
   M.extensionality (as_matrix h2 c) (M.mul_s (as_matrix h0 a) (as_matrix h0 b))

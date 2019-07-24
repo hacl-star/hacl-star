@@ -29,17 +29,17 @@ let ltuple (a:Type0) (len:size_nat{2 <= len /\ len <= 14}) =
 
 
 inline_for_extraction
-val ltuple_uints_to_bytes_le: #t:inttype -> #l:secrecy_level -> #len:size_nat{2 <= len /\ len <= 14}
+val ltuple_uints_to_bytes_le: #t:inttype{unsigned t} -> #l:secrecy_level -> #len:size_nat{2 <= len /\ len <= 14}
   -> ltuple (uint_t t l) len -> Tot (lbytes_l l (len * numbytes t))
 
 inline_for_extraction
-val ltuple_uints_to_bytes_be: #t:inttype -> #l:secrecy_level -> #len:size_nat{2 <= len /\ len <= 14}
+val ltuple_uints_to_bytes_be: #t:inttype{unsigned t} -> #l:secrecy_level -> #len:size_nat{2 <= len /\ len <= 14}
   -> ltuple (uint_t t l) len -> Tot (lbytes_l l (len * numbytes t))
 
 inline_for_extraction
-val ltuple_uints_from_bytes_le: #t:inttype{~(t == U1)} -> #l:secrecy_level -> #len:size_nat{2 <= len /\ len <= 14}
+val ltuple_uints_from_bytes_le: #t:inttype{unsigned t /\ ~(t == U1)} -> #l:secrecy_level -> #len:size_nat{2 <= len /\ len <= 14}
   -> lbytes_l l (len * numbytes t) -> Tot (ltuple (uint_t t l) len)
 
 inline_for_extraction
-val ltuple_uints_from_bytes_be: #t:inttype{~(t == U1)} -> #l:secrecy_level -> #len:size_nat{2 <= len /\ len <= 14}
+val ltuple_uints_from_bytes_be: #t:inttype{unsigned t /\ ~(t == U1)} -> #l:secrecy_level -> #len:size_nat{2 <= len /\ len <= 14}
   -> lbytes_l l (len * numbytes t) -> Tot (ltuple (uint_t t l) len)
