@@ -138,14 +138,21 @@ val blake2b_incremental_finish:
   -> state:state_r ->
   Stack unit
     (requires fun h ->
-      state_inv h state /\ live h output
-      /\ disjoint output state.hash)
+      state_inv h state /\ live h output /\
+      disjoint output state.hash /\
+      state_inv h state)
     (ensures  fun h0 _ h1 ->
-      modifies2 output state.hash h0 h1)// /\
-//      h1.[|output|] == Spec.Blake2.Incremental.blake2_incremental_finish Spec.Blake2B (spec_of h0 state) (v nn))
+      modifies2 output state.hash h0 h1 /\
+      h1.[|output|] == Spec.Blake2.Incremental.blake2_incremental_finish Spec.Blake2.Blake2B (spec_of h0 state) (v nn))
+
 
 let blake2b_incremental_finish nn output state =
+  let h0 = ST.get () in
   let last = sub state.block 0ul state.pl in
-  let prev = to_u128 (state.n *. size_block +. state.pl) in
+  let n64 = to_u64 state.n in
+  let size_block64 = to_u64 size_block in
+  let pl64 = to_u64 state.pl in
+  let prev = to_u128 (n64 *! size_block64 +! pl64) in
+  assert(v prev = (spec_of h0 state).Spec.n * (Spec.Blake2.size_block Spec.Blake2.Blake2B) + (spec_of h0 state).Spec.pl);
   blake2b_update_last state.hash prev state.pl last;
   blake2b_finish nn output state.hash
