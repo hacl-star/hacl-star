@@ -1519,19 +1519,6 @@ and eq_codes (c1 c2:codes) : bool =
     eq_code x y &&
     eq_codes xs ys
 
-let rec find_code (c1:code) (cs2:codes) : possibly (i:nat{i < L.length cs2 /\ eq_code (L.index cs2 i) c1}) =
-  match cs2 with
-  | [] -> Err ("Not found: " ^ fst (print_code c1 0 gcc))
-  | h2 :: t2 ->
-    if eq_code h2 c1 then (
-      return 0
-    ) else (
-      match find_code c1 t2 with
-      | Err reason -> Err reason
-      | Ok i ->
-        return (i+1)
-    )
-
 #push-options "--initial_fuel 2 --max_fuel 2 --initial_ifuel 1 --max_ifuel 1"
 let rec bubble_to_top (cs:codes) (i:nat{i < L.length cs}) : possibly (cs':codes{
     let a, b, c = L.split3 cs i in
