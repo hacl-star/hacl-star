@@ -111,6 +111,41 @@ function aes_reqs(alg:algorithm, key:seq(nat32), round_keys:seq(quad32), keys_b:
 // GCM
 ///////////////////////////
 
+// GCTR encrypt one block
+procedure Gctr_register(
+        inline alg:algorithm,
+        ghost key:seq(nat32),
+        ghost round_keys:seq(quad32),
+        ghost keys_b:buffer128)
+    {:quick}
+    lets keys_ptr @= r8; io @= xmm8; /* rev_mask @= xmm9; */ icb @= xmm0;
+    reads keys_ptr; /* rev_mask; */ mem; memTaint;
+    modifies
+        icb; xmm1; xmm2; io; efl; r12;
+    requires
+        //rev_mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
+
+        // AES reqs
+        aes_reqs(alg, key, round_keys, keys_b, keys_ptr, mem, memTaint);
+    ensures
+        le_seq_quad32_to_bytes(create(1, io)) == gctr_encrypt_LE(reverse_bytes_quad32(old(icb)), le_quad32_to_bytes(old(io)), alg, key);
+        io == gctr_encrypt_block(reverse_bytes_quad32(old(icb)), old(io), alg, key, 0);
+{
+    assert inc32(icb, 0) == icb;
+    //Mov128(xmm0, icb);
+    //Pshufb(xmm0, rev_mask);
+    AESEncryptBlock(alg, icb, key, round_keys, keys_b);
+    reveal aes_encrypt_le;
+    assert xmm0 == aes_encrypt_LE(alg, key, old(icb));
+
+    Pxor(io, xmm0);
+    //assert io == quad32_xor(old(io), xmm0);
+
+    // Call a helpful lemma
+    gctr_encrypt_one_block(reverse_bytes_quad32(old(icb)), old(io), alg, key);
+}
+
+
 #reset-options "--z3rlimit 30"
 procedure Gctr_blocks128(
         inline alg:algorithm,
