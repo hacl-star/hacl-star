@@ -12,7 +12,7 @@ module Lemmas = Hacl.Spec.Poly1305.Equiv.Lemmas
 
 include Hacl.Spec.Poly1305.Vec
 
-#reset-options "--z3rlimit 150 --max_fuel 2 --using_facts_from '* -Hacl.Spec.*'"
+#reset-options "--z3rlimit 150 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -Hacl.Spec.*'"
 
 val poly_update_repeat_blocks_multi_lemma:
     #w:lanes
