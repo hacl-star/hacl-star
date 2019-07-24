@@ -83,24 +83,6 @@ val recursive_split_seq:
    -> pow:size_nat{pow = pow2 i}
    -> Ghost (lseq (lseq a (n/pow)) pow) (requires n % pow == 0) (ensures fun p' -> forall (k:nat{k<n}). (k/pow < n/pow) /\ index #a #(n/pow) (p'.[br i (k % pow)]) (k/pow) == p.[k]) (decreases i)
 
-val recursive_split_seq3:
-   #a:Type0
-   -> #n:size_nat
-   -> p:lseq a n
-   -> i:size_nat{i>0}
-   -> pow:size_nat{pow = pow2 i /\ n % pow == 0}
-   -> Tot (lseq (lseq a (n/pow)) pow) (decreases i)
-
-val recursive_split_seq3_lemma:
-   #a:Type0
-   -> #n:size_nat
-   -> p:lseq a n
-   -> i:size_nat{i>0}
-   -> pow:size_nat{pow = pow2 i}
-   -> p':(lseq (lseq a (n/pow)) pow)
-   -> k:size_nat{k<n}
-   -> Lemma (requires ((n % pow == 0) /\ (p' == recursive_split_seq3 p i pow))) (ensures ((k/pow < n/pow) /\ index #a #(n/pow) (p'.[br i (k % pow)]) (k/pow) == p.[k])) (decreases i)
-
 #reset-options "--z3rlimit 500 --max_fuel 0 --max_ifuel 0"
 
 val sum_n:
