@@ -5,11 +5,15 @@ open FStar.HyperStack.All
 open FStar.Mul
 
 open Lib.IntTypes
+open Lib.Sequence
+open Lib.ByteSequence
 open Lib.Buffer
 
 open Hacl.Bignum25519
 
-#reset-options "--max_fuel 0 --max_ifuel 0"
+module F51 = Hacl.Impl.Ed25519.Field51
+
+#reset-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0"
 
 inline_for_extraction noextract
 val verify_step_1:
@@ -22,7 +26,16 @@ val verify_step_1:
     (requires fun h ->
       live h r /\ live h msg /\ live h rs /\ live h public /\
       disjoint msg r /\ disjoint rs r /\ disjoint public r)
-    (ensures fun h0 _ h1 -> modifies (loc r) h0 h1)
+    (ensures fun h0 _ h1 -> modifies (loc r) h0 h1 /\
+     as_seq h1 r == nat_to_bytes_le 32 (
+      Spec.Ed25519.sha512_modq (64 + v len)
+        (concat #uint8 #64 #(v len)
+          (concat #uint8 #32 #32
+            (as_seq h0 rs)
+            (as_seq h0 public))
+          (as_seq h0 msg)
+        ))
+    )
 let verify_step_1 r msg len rs public =
   push_frame();
   let r' = create 5ul (u64 0) in
@@ -38,7 +51,10 @@ val verify_step_2:
   -> r':point ->
   Stack bool
     (requires fun h ->
-      live h s  /\ live h h' /\ live h a' /\ live h r')
+      live h s  /\ live h h' /\ live h a' /\ live h r' /\
+      disjoint a' r' /\
+      F51.point_inv_t h a' /\ F51.point_inv_t h r'
+    )
     (ensures fun h0 z h1 -> modifies0 h0 h1)
 let verify_step_2 s h' a' r' =
   push_frame();
@@ -49,6 +65,7 @@ let verify_step_2 s h' a' r' =
   Hacl.Impl.Ed25519.Ladder.point_mul_g sB s;
   Hacl.Impl.Ed25519.Ladder.point_mul hA h' a';
   Hacl.Impl.Ed25519.PointAdd.point_add rhA r' hA;
+  admit();
   let b = Hacl.Impl.Ed25519.PointEqual.point_equal sB rhA in
   pop_frame();
   b
@@ -65,7 +82,8 @@ val verify_:
     (requires fun h ->
       live h public /\ live h msg /\ live h signature /\ live h tmp /\ live h tmp' /\
       disjoint tmp public /\ disjoint tmp msg /\ disjoint tmp signature /\
-      disjoint tmp tmp' /\ disjoint tmp' signature /\ disjoint tmp' public /\ disjoint tmp' msg)
+      disjoint tmp tmp' /\ disjoint tmp' signature /\ disjoint tmp' public /\ disjoint tmp' msg
+    )
     (ensures fun h0 z h1 -> modifies (loc tmp |+| loc tmp') h0 h1 /\
       z == Spec.Ed25519.verify (as_seq h0 public) (as_seq h0 msg) (as_seq h0 signature)
     )

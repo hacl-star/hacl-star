@@ -29,3 +29,13 @@ let as_nat h e =
 noextract
 val fevalh: h:mem -> f:felem -> GTot (n:nat{n < Spec.Ed25519.q})
 let fevalh h f = (as_nat h f) % Spec.Ed25519.q
+
+noextract
+let felem_fits (h:mem) (f:felem) m =
+  let s = as_seq h f in
+  let s0 = s.[0] in
+  let s1 = s.[1] in
+  let s2 = s.[2] in
+  let s3 = s.[3] in
+  let s4 = s.[4] in
+  S.felem_fits (s0, s1, s2, s3, s4) m

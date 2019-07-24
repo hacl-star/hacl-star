@@ -232,7 +232,7 @@ val reduce:
   Stack unit
     (requires fun h -> live h out /\ F51.mul_inv_t h out)
     (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
-      F51.mul_inv_t h1 out /\
+      F51.felem_fits h1 out (1, 1, 1, 1, 1) /\
       F51.fevalh h0 out == F51.fevalh h1 out /\
       F51.fevalh h1 out == F51.as_nat h1 out
     )
