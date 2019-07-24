@@ -152,7 +152,6 @@ procedure MulAdd_unroll_i(
         0 <= m < n <= scratch_len;
         is_first <==> m == 0;
         is_last <==> m == n - 1;
-        buffers_disjoint128(hkeys_b, scratch_b);
         validSrcAddrs128(mem, Xip - 0x20, hkeys_b, 8, memTaint, Secret);
         validSrcAddrs128(mem, in_ptr, scratch_b, scratch_len, memTaint, Secret);
         in_ptr + 0x10 * scratch_len <= pow2_64;
@@ -259,7 +258,6 @@ procedure MulAdd_unroll_n(
         n <= scratch_len;
         hkeys_b_powers(hkeys_b, mem, memTaint, Xip - 0x20, h);
         scratch_b_data(rev_bytes, rev_blocks, scratch_b, scratch_len, 6, mem, memTaint, in_ptr, data);
-        buffers_disjoint128(hkeys_b, scratch_b);
         in_ptr + 0x10 * scratch_len <= pow2_64;
         of_quad32(Xi) == prev;
         !exactly6 ==> n_reg == n;
@@ -336,7 +334,6 @@ procedure MulAdd_unroll(
         hkeys_b_powers(hkeys_b, mem, memTaint, Xip - 0x20, h);
         scratch_b_data(true, true, scratch_b, 8, 5, mem, memTaint, rbp, data);
         Z3 == reverse_bytes_quad32(data[5]);
-        buffers_disjoint128(hkeys_b, scratch_b);
         of_quad32(Xi) +. of_quad32(Z0) +. of_quad32(buffer128_read(scratch_b, 1, mem)) == prev;
     ensures
         of_quad32(Z0) +. shift(of_quad32(Z2), 64) +. shift(of_quad32(Z3), 128) ==
@@ -551,7 +548,6 @@ procedure GhashUnroll_n(
         n <= scratch_len;
         hkeys_b_powers(hkeys_b, mem, memTaint, Xip - 0x20, h);
         scratch_b_data(rev_bytes, rev_blocks, scratch_b, scratch_len, 6, mem, memTaint, in_ptr, data);
-        buffers_disjoint128(hkeys_b, scratch_b);
         in_ptr + 0x10 * scratch_len <= pow2_64;
         of_quad32(Xi) == prev;
         !exactly6 ==> n_reg == n;
@@ -670,7 +666,6 @@ procedure Ghash_buffer_loop_body(
         hkeys_b_powers(hkeys_b, mem, memTaint, Xip - 0x20, h);
         validSrcAddrs128(mem, in_ptr, in_b, len, memTaint, Secret);
         buffer_length(in_b) == old_len;
-        buffers_disjoint128(hkeys_b, in_b);
         in_ptr + 0x10 * old_len < pow2_64;
         Xi == reverse_bytes_quad32(ghash_incremental0(h_LE, y_prev, slice(s128(mem, in_b), 0, index)));
         rev_mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
@@ -685,7 +680,6 @@ procedure Ghash_buffer_loop_body(
         hkeys_b_powers(hkeys_b, mem, memTaint, Xip - 0x20, h);
         validSrcAddrs128(mem, in_ptr, in_b, len, memTaint, Secret);
         buffer_length(in_b) == old_len;
-        buffers_disjoint128(hkeys_b, in_b);
         in_ptr + 0x10 * old_len < pow2_64;
         Xi == reverse_bytes_quad32(ghash_incremental0(h_LE, y_prev, slice(s128(mem, in_b), 0, index')));
         rev_mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
@@ -730,7 +724,6 @@ procedure Ghash_buffer(
         hkeys_b_powers(hkeys_b, mem, memTaint, Xip - 0x20, h);
         validSrcAddrs128(mem, in_ptr, in_b, len, memTaint, Secret);
         buffer_length(in_b) == len;
-        buffers_disjoint128(hkeys_b, in_b);
         in_ptr + 0x10 * len < pow2_64;
         Xi == reverse_bytes_quad32(y_prev);
         rev_mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
@@ -751,7 +744,6 @@ procedure Ghash_buffer(
             hkeys_b_powers(hkeys_b, mem, memTaint, Xip - 0x20, h);
             validSrcAddrs128(mem, in_ptr, in_b, len, memTaint, Secret);
             buffer_length(in_b) == old(len);
-            buffers_disjoint128(hkeys_b, in_b);
             in_ptr + 0x10 * old(len) < pow2_64;
             Xi == reverse_bytes_quad32(ghash_incremental0(h_LE, y_prev, slice(s128(mem, in_b), 0, index)));
             rev_mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
@@ -809,7 +801,6 @@ procedure GhashUnroll6x(
         hkeys_b_powers(hkeys_b, mem, memTaint, Xip - 0x20, h);
         scratch_b_data(true, true, scratch_b, 8, 5, mem, memTaint, rbp, data);
         Z3 == reverse_bytes_quad32(data[5]);
-        buffers_disjoint128(hkeys_b, scratch_b);
         of_quad32(Xi) +. of_quad32(Z0) +. of_quad32(buffer128_read(scratch_b, 1, mem)) == prev;
     ensures
         Xi == reverse_bytes_quad32(ghash_incremental(h_LE, y_prev, data));
