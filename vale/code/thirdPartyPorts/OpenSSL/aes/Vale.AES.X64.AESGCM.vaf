@@ -34,7 +34,6 @@ include{:fstar}{:open} "Vale.AES.GF128"
 include{:fstar}{:open} "Vale.AES.GHash"
 include "Vale.AES.X64.AESopt.vaf"
 include "Vale.AES.X64.AESopt2.vaf"
-include "Vale.AES.X64.AESGCM_expected_code.vaf"
 
 module Vale.AES.X64.AESGCM
 
@@ -75,8 +74,6 @@ open Vale.AES.GF128
 open Vale.AES.GHash
 open Vale.AES.X64.AESopt
 open Vale.AES.X64.AESopt2
-open Vale.AES.X64.AESGCM_expected_code
-open Vale.Transformers.Transform
 #endverbatim
 
 #verbatim{:interface}
