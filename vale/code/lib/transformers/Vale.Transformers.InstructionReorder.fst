@@ -1486,19 +1486,20 @@ let lemma_code_exchange_allowed (c1 c2:safely_bounded_code) (fuel:nat) (s:machin
 /// define a relation that tells us if some [codes] can be transformed
 /// into another using only allowed swaps.
 
-(* WARNING: We assume this function since it is not yet exposed. Once
-   exposed, we should be able to remove it from here.
+(* NOTE: We assume this function since it is not yet exposed. Once
+   exposed from the instructions module, we should be able to remove
+   it from here.
 
-   Note that we don't require any other properties from [eq_ins]. It
-   is an uninterpreted function that simply gives us a "hint" to find
-   equivalent instructions!
+   Also, note that we don't require any other properties from
+   [eq_ins]. It is an uninterpreted function that simply gives us a
+   "hint" to find equivalent instructions!
 
-   Temporarily, for testing purposes, we have it set to an
-   [irreducible] function that looks at the printed representation of
-   the instructions. Since it is irreducible, no other function should
-   be able to "look into" the definition of this function, but instead
-   should be limited only to its signature. However, the OCaml
-   extraction _should_ be able to peek inside, and be able to proceed. *)
+   For testing purposes, we have it set to an [irreducible] function
+   that looks at the printed representation of the instructions. Since
+   it is irreducible, no other function should be able to "look into"
+   the definition of this function, but instead should be limited only
+   to its signature. However, the OCaml extraction _should_ be able to
+   peek inside, and be able to proceed. *)
 irreducible
 let eq_ins (i1 i2:ins) : bool =
   print_ins i1 gcc = print_ins i2 gcc
