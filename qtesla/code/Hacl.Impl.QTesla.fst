@@ -1101,7 +1101,53 @@ let encode_c pos_list sign_list c_bin =
 
     pop_frame()
 
+#push-options "--max_fuel 8 --max_ifuel 4"
+let lemma_pow2_s_bits_fits_int16 () : Lemma
+    (ensures Int.min_int I16.n < -(pow2 (v params_s_bits)) /\
+             Int.max_int I16.n > pow2 (v params_s_bits)) = ()
+#pop-options
+
 #set-options "--z3rlimit 100 --max_fuel 1 --max_ifuel 1"
+
+// On the i'th iteration of the outer loop that ranges [0,h), since each element of t is within [-b,b),
+// where b is 2^{params_s_bits}, absolute worst-case bound for prod[i] is [-(i*b),i*b]. Very loose bound. Patrick says 
+// each element will have a length of at most params_s_bits + log2(params_h) which is even smaller, but that looks
+// harder to prove. The pessimistic bound gives us enough to prove arithmetic safety.
+private let sparse_mul_invariant_int (x:int) (i:nat{i <= v params_h}) =
+    let b = pow2 (v params_s_bits-1) in
+    -(i * b) <= x /\ x <= i * b
+
+private let sparse_mul_invariant_elem (x:elem) (i:nat{i <= v params_h}) = 
+    sparse_mul_invariant_int (elem_v x) i
+
+private let sparse_mul_invariant_i (h:HS.mem) (i:nat{i < v params_h}) (prod:poly) (j:nat{j <= v params_n}) =
+    (forall (k:nat{k < j}) . 
+    let prod_k = bget h prod k in
+    sparse_mul_invariant_elem prod_k (i + 1)) /\
+    (forall (k:nat{k >= j /\ k < v params_n}) .
+    let prod_k = bget h prod k in
+    sparse_mul_invariant_elem prod_k i)
+
+private let sparse_mul_invariant (h:HS.mem) (i:nat{i <= v params_h}) (prod:poly) =
+    (forall (k:nat{k < v params_n}) .
+    let prod_k = bget h prod k in
+    sparse_mul_invariant_elem prod_k i)
+
+private let lemma_prod_step1
+    (prod_j:elem) 
+    (sign_list_i:I16.t{sign_list_i == (-1s) \/ sign_list_i == 0s \/ sign_list_i == 1s})
+    (tVal:sparse_elem{is_sparse_elem_sk tVal})
+    (i:nat{i < v params_h}) : Lemma
+    (requires sparse_mul_invariant_elem prod_j i)
+    (ensures sparse_mul_invariant_int (elem_v prod_j - I16.v sign_list_i * sparse_v tVal) (i + 1)) = ()
+
+private let lemma_prod_step2
+    (prod_j:elem) 
+    (sign_list_i:I16.t{sign_list_i == (-1s) \/ sign_list_i == 0s \/ sign_list_i == 1s})
+    (tVal:sparse_elem{is_sparse_elem_sk tVal})
+    (i:nat{i < v params_h}) : Lemma
+    (requires sparse_mul_invariant_elem prod_j i)
+    (ensures sparse_mul_invariant_int (elem_v prod_j + I16.v sign_list_i * sparse_v tVal) (i + 1)) = ()
 
 val sparse_mul:
     prod : poly
@@ -1145,17 +1191,20 @@ let sparse_mul prod s pos_list sign_list =
     let h1 = ST.get () in
     assert(forall (i:nat{i < v params_n}) . {:pattern bget h1 prod i} bget h1 prod i == to_elem 0);
     assert(is_poly_sparse_mul_output h1 prod);
+    assert(sparse_mul_invariant h1 0 prod);
     for 0ul params_h
-    (fun h _ -> live h prod /\ live h t /\ live h pos_list /\ live h sign_list /\ modifies1 prod h1 h /\
-             encode_c_invariant h pos_list sign_list params_h /\ is_s_sk h s /\ is_poly_sparse_mul_output h prod)
+    (fun h i -> live h prod /\ live h t /\ live h pos_list /\ live h sign_list /\ modifies1 prod h1 h /\
+             encode_c_invariant h pos_list sign_list params_h /\ is_s_sk h s /\ is_poly_sparse_mul_output h prod /\
+             i <= v params_h /\ sparse_mul_invariant h i prod)
     (fun i ->
         let h = ST.get () in assert(UI32.v (bget h pos_list (v i)) < v params_n);
         let pos = pos_list.(i) in
         assert(UI32.v pos < v params_n);
         let h2 = ST.get () in
 	for 0ul pos
-	(fun h _ -> live h prod /\ live h t /\ live h pos_list /\ live h sign_list /\ modifies1 prod h2 h /\ 
-                 encode_c_invariant h pos_list sign_list params_h /\ is_s_sk h s /\ is_poly_sparse_mul_output h prod)
+	(fun h j -> live h prod /\ live h t /\ live h pos_list /\ live h sign_list /\ modifies1 prod h2 h /\ 
+                 encode_c_invariant h pos_list sign_list params_h /\ is_s_sk h s /\ is_poly_sparse_mul_output h prod /\
+                 v i <= v params_h /\ j <= v params_n /\ sparse_mul_invariant_i h (v i) prod j)
 	(fun j -> 
 	    let sign_list_i:I16.t = sign_list.(i) in
             assert(v j < v pos);
@@ -1168,19 +1217,22 @@ let sparse_mul prod s pos_list sign_list =
             assert(sign_list_i == (-1s) \/ sign_list_i == 0s \/ sign_list_i == 1s);
             assert(sparse_v tVal < pow2 (v params_s_bits));
             assert(sparse_v tVal >= -(pow2 (v params_s_bits)));
-            assume(Int.min_int I16.n < -(pow2 (v params_s_bits)));
+            lemma_pow2_s_bits_fits_int16 ();
+            assert(Int.fits ((-1) * sparse_v tVal) I16.n);
             assert(Int.fits (I16.v sign_list_i * sparse_v tVal) I16.n);
-            assume(Int.fits (elem_v (bget h prod (v j)) - (I16.v sign_list_i * sparse_v tVal)) elem_n);
+            assert(sparse_mul_invariant_i hx (v i) prod (v j));
+            assert(is_sparse_elem_sk tVal);
+            lemma_prod_step1 (bget hx prod (v j)) sign_list_i tVal (v i);
 	    prod.(j) <- prod.(j) -^ (int16_to_elem I16.(sign_list_i *^ (sparse_to_int16 tVal)));
             let hLoopEnd = ST.get () in
             assert(forall (k:nat{k < v params_n /\ k <> v j}) . {:pattern bget hLoopEnd prod k} bget h prod k == bget hLoopEnd prod k);
-            assume(is_sparse_mul_output (bget hLoopEnd prod (v j)))
+            assert(sparse_mul_invariant_elem (bget hLoopEnd prod (v j)) (v i + 1))
 	);
 
         let h3 = ST.get () in
 	for pos params_n
-	(fun h _ -> live h prod /\ live h t /\ live h pos_list /\ live h sign_list /\ modifies1 prod h3 h /\ is_s_sk h s /\
-                 is_poly_sparse_mul_output h prod)
+	(fun h j -> live h prod /\ live h t /\ live h pos_list /\ live h sign_list /\ modifies1 prod h3 h /\ is_s_sk h s /\
+                 is_poly_sparse_mul_output h prod /\ v i <= v params_h /\ j <= v params_n /\ sparse_mul_invariant_i h (v i) prod j)
 	(fun j -> 
 	    let sign_list_i:I16.t = sign_list.(i) in
             let h = ST.get() in 
@@ -1190,13 +1242,12 @@ let sparse_mul prod s pos_list sign_list =
             assert(is_sparse_elem_sk tVal);            
             assert(sparse_v tVal < pow2 (v params_s_bits));
             assert(sparse_v tVal >= -(pow2 (v params_s_bits)));
-            assume(Int.min_int I16.n < -(pow2 (v params_s_bits)));
+            lemma_pow2_s_bits_fits_int16 ();
             assert(Int.fits (I16.v sign_list_i * sparse_v tVal) I16.n);
-            assume(Int.fits (elem_v (bget h prod (v j)) + (I16.v sign_list_i * sparse_v tVal)) elem_n);
+            lemma_prod_step2 (bget hx prod (v j)) sign_list_i tVal (v i);
   	    prod.(j) <- prod.(j) +^ (int16_to_elem I16.(sign_list_i *^ (sparse_to_int16 tVal)));
             let hLoopEnd = ST.get () in
-            assert(forall (k:nat{k < v params_n /\ k <> v j}) . {:pattern bget hLoopEnd prod k} bget h prod k == bget hLoopEnd prod k);
-            assume(is_sparse_mul_output (bget hLoopEnd prod (v j)))
+            assert(forall (k:nat{k < v params_n /\ k <> v j}) . {:pattern bget hLoopEnd prod k} bget h prod k == bget hLoopEnd prod k)
 	)
     );
 

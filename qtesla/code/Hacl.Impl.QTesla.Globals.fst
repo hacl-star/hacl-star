@@ -38,11 +38,12 @@ type poly_k = lbuffer elem (params_k *! params_n)
 
 let is_montgomery (e:elem) = 0 <= elem_v e /\ elem_v e < 2 * elem_v params_q
 let is_corrected (e:elem) = -(elem_v params_q / 2) < elem_v e /\ elem_v e <= elem_v params_q / 2
-let is_sampler_output (e:elem) = let b = pow2 (v params_s_bits-1) in -b <= elem_v e /\ elem_v e < b
+let is_sampler_output (e:elem) = let s = pow2 (v params_s_bits-1) in -s <= elem_v e /\ elem_v e < s
+unfold let is_sk = is_sampler_output
+let is_sparse_elem_sk (e:sparse_elem) = let s = pow2 (v params_s_bits-1) in -s <= sparse_v e /\ sparse_v e < s
 let is_y_sampler_output (e:elem) = let b = elem_v params_B in -b <= elem_v e /\ elem_v e <= b
 let is_pk (e:elem) = 0 <= elem_v e /\ elem_v e < elem_v params_q
 //let is_sk (e:elem) = -(pow2 (v params_s_bits)) <= elem_v e /\ elem_v e < pow2 (v params_s_bits)
-unfold let is_sk = is_sampler_output
 let is_pmq (e:elem) = let q = elem_v params_q in -q < elem_v e /\ elem_v e < q
 let is_z_accepted (e:elem) = let b = elem_v params_B in let s = elem_v params_U in -(b-s) <= elem_v e /\ elem_v e <= (b-s)
 let is_sparse_mul_output (e:elem) = (-65536) <= elem_v e /\ elem_v e <= 65536 // [-2^16, 2^16]; see sparse_mul for comments
@@ -93,7 +94,6 @@ let is_poly_equal_except (h0 h1:HS.mem) (p:poly) (k:nat{k < v params_n}) =
 let is_poly_k_equal (h0 h1:HS.mem) (p:poly_k) = 
     forall (i:nat{i < v params_n * v params_k}) . {:pattern bget h1 p i} bget h0 p i == bget h1 p i
 
-let is_sparse_elem_sk (e:sparse_elem) = -(pow2 (v params_s_bits)) <= sparse_v e /\ sparse_v e < pow2 (v params_s_bits)
 let is_s_sk (h:HS.mem) (s:lbuffer sparse_elem params_n) =
     forall (i:nat{i < v params_n}) . {:pattern is_sparse_elem_sk (bget h s i)} is_sparse_elem_sk (bget h s i)
 let is_s_equal (h0 h1:HS.mem) (s:lbuffer sparse_elem params_n) =
