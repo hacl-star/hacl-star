@@ -699,7 +699,7 @@ procedure Ghash_buffer_loop_body(
     Sub64(len, 6);
 }
 
-#reset-options "--z3rlimit 40"
+#reset-options "--z3rlimit 20"
 procedure Ghash_buffer(
         ghost hkeys_b:buffer128,
         ghost in_b:buffer128,
@@ -729,6 +729,7 @@ procedure Ghash_buffer(
         rev_mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
     ensures
         Xi == reverse_bytes_quad32(ghash_incremental0(h_LE, y_prev, s128(mem, in_b)));
+        old(len) == 0 ==> Xi == old(Xi);
 {
     Mov64(scratch_ptr, in_ptr);
 
@@ -747,6 +748,7 @@ procedure Ghash_buffer(
             in_ptr + 0x10 * old(len) < pow2_64;
             Xi == reverse_bytes_quad32(ghash_incremental0(h_LE, y_prev, slice(s128(mem, in_b), 0, index)));
             rev_mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
+            old(len) == 0 ==> Xi == old(Xi);
             
         decreases
             len;

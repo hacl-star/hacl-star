@@ -208,9 +208,9 @@ procedure Gctr_blocks128(
         ghost round_keys:seq(quad32),
         ghost keys_b:buffer128)
     {:quick}
-    lets in_ptr @= rax; out_ptr @= rdi; len @= rcx; keys_ptr @= r8;
-         ctr @= rdx; tmp_in_ptr @= r9; tmp_out_ptr @= r10;
-         icb @= xmm7; mask @= xmm9; one @= xmm10; 
+    lets in_ptr @= rax; out_ptr @= rdi; len @= rdx; keys_ptr @= r8;
+         ctr @= rbx; tmp_in_ptr @= r11; tmp_out_ptr @= r10;
+         icb @= xmm11; mask @= xmm9; one @= xmm10; 
 
     reads
         keys_ptr; in_ptr; out_ptr; len; mask; memTaint;
@@ -242,6 +242,7 @@ procedure Gctr_blocks128(
         // GCTR
         gctr_partial_opaque(alg, len, old(s128(mem, in_b)), s128(mem, out_b), key, old(icb));
         icb == inc32lite(old(icb), old(len));
+        len == 0 ==> s128(mem, out_b) == old(s128(mem, out_b));
 {
     // Initialize counter increment
     ZeroXmm(one);
@@ -284,6 +285,7 @@ procedure Gctr_blocks128(
             //////////////////// Postcondition goals //////////////////////
             modifies_buffer128(out_b, old(mem), mem);
             gctr_partial(alg, ctr, plain_quads, s128(mem, out_b), key, old(icb));
+            len == 0 ==> s128(mem, out_b) == old(s128(mem, out_b));
         decreases
             len - ctr;
     {
@@ -305,9 +307,8 @@ procedure Gctr_blocks128(
     Vale.Def.Opaque_s.reveal_opaque(gctr_partial);
 }
 
-/*
-#reset-options "--z3rlimit 30"
-procedure gcm_blocks128(
+#reset-options "--z3rlimit 10"
+procedure Gcm_blocks128(
         inline alg:algorithm,
         ghost in_b:buffer128,
         ghost out_b:buffer128,
@@ -317,18 +318,21 @@ procedure gcm_blocks128(
         ghost hkeys_b:buffer128,
         ghost h_LE:quad32)
     {:quick}
-    lets in_ptr @= rax; out_ptr @= rbx; len @= rcx; keys_ptr @= r8; Xip @= r9;
-         icb @= xmm7; mask @= xmm9; hash @= xmm8; one @= xmm10; 
+    lets in_ptr @= rax; out_ptr @= rdi; len @= rdx; keys_ptr @= r8; Xip @= r9;
+         ctr @= rbx; tmp_in_ptr @= r11; tmp_out_ptr @= r10;
+         icb @= xmm11; hash @= xmm8; mask @= xmm9; one @= xmm10; 
 
     reads
-        keys_ptr; Xip; in_ptr; out_ptr; len; mask; memTaint;
+        keys_ptr; Xip; in_ptr; out_ptr; mask; memTaint;
 
     modifies
-        rdx; r10; r12; xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; icb; one; mem; efl;
+        ctr; tmp_in_ptr; tmp_out_ptr; len; 
+        xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; xmm7; hash; icb; one; mem; efl;
 
     requires
         // GCTR reqs
         buffers_disjoint128(keys_b, out_b);
+        buffers_disjoint128(hkeys_b, out_b);
         buffers_disjoint128(in_b, out_b) || in_b == out_b;
         validSrcAddrs128(mem,  in_ptr,  in_b, len, memTaint, Secret);
         validDstAddrs128(mem, out_ptr, out_b, len, memTaint, Secret);
@@ -349,30 +353,26 @@ procedure gcm_blocks128(
     ensures
         modifies_buffer128(out_b, old(mem), mem);
 
-        r9  ==  in_ptr + 16 * len;
-        r10 == out_ptr + 16 * len;
+//        r9  ==  in_ptr + 16 * len;
+//        r10 == out_ptr + 16 * len;
 
         // GCTR
-        gctr_partial_opaque(alg, len, old(s128(mem, in_b)), s128(mem, out_b), key, old(icb));
+        gctr_partial_opaque(alg, old(len), old(s128(mem, in_b)), s128(mem, out_b), key, old(icb));
         icb == inc32lite(old(icb), old(len));
 
-        // GHash
-        len == 0 ==> hash == old(hash) /\ s128(mem, out_b) == old(s128(mem, out_b));
-        len > 0 ==> (len <= length(s128(mem, out_b)) ==> length(slice(s128(mem, out_b), 0, len)) > 0) /\
+//        // GHash
+        old(len) == 0 ==> hash == old(hash) /\ s128(mem, out_b) == old(s128(mem, out_b));
+        old(len) > 0 ==> (old(len) <= length(s128(mem, out_b)) ==> length(slice(s128(mem, out_b), 0, old(len))) > 0) /\
                     reverse_bytes_quad32(hash) == ghash_incremental(h_LE, reverse_bytes_quad32(old(hash)), s128(mem, out_b));
 {
-
     Gctr_blocks128(alg, in_b, out_b, key, round_keys, keys_b);
-Need:
-  Xip = r9
-  rdx := len
-  rdi := out_ptr
-  xmm9 := mask
-
-  
-    Ghash_buffer(hkeys_b, out_b, h_LE, y_prev);
+//    Need:
+//      Xip = r9
+//      rdx := len
+//      rdi := out_ptr
+//      xmm9 := mask
+    Ghash_buffer(hkeys_b, out_b, h_LE, reverse_bytes_quad32(old(hash)));
 }
-*/
 
 procedure gcm_auth_bytes(ghost in_b:buffer128, ghost hkeys_b:buffer128, ghost h_LE:quad32)
     returns(
