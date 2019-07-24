@@ -19,6 +19,8 @@ let while inv guard test body =
 
 /// Test
 
+#set-options "--max_fuel 3 --max_ifuel 0 --z3rlimit 50"
+
 val square_while: unit -> Stack UInt32.t (fun _ -> true) (fun h0 x h1 -> x == 9ul)
 let square_while () =
   let open LowStar.Buffer in

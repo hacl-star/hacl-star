@@ -2,10 +2,11 @@ FSTAR_HOME   ?= ../../../FStar
 KREMLIN_HOME ?= ../../../kremlin
 HACL_HOME    ?= ../..
 
-OUTPUT_DIR    = .output
-HINT_DIR      = .hints
-GENERATED_DIR = chacha20poly1305-c
-OUT_DIR	      = chacha20poly1305-c
+CACHE_DIR     ?= $(HACL_HOME)/.cache
+HINT_DIR      ?= $(HACL_HOME)/.hints
+OUTPUT_DIR    ?= .output
+GENERATED_DIR ?= chacha20poly1305-c
+OUT_DIR	     ?= chacha20poly1305-c
 
 .PHONY: all test stage1 stage2 clean clean-c distclean
 
@@ -33,7 +34,7 @@ FSTAR_INCLUDE_DIRS = \
   $(HACL_HOME)/code/chacha20
 
 FSTAR_FLAGS = $(OTHERFLAGS) --cmi \
-  --cache_checked_modules --odir $(OUTPUT_DIR) \
+  --cache_checked_modules --cache_dir $(CACHE_DIR) --odir $(OUTPUT_DIR) \
   --already_cached "'Prims+FStar+LowStar+C+Spec.Loops+TestLib+Lib+Hacl.Impl.Poly1305'" \
   $(addprefix --include ,$(FSTAR_INCLUDE_DIRS))
 
@@ -53,7 +54,10 @@ include .depend
 $(HINT_DIR):
 	mkdir -p $@
 
-%.checked: | .depend $(HINT_DIR)
+$(CACHE_DIR):
+	mkdir -p $@
+
+%.checked: | .depend $(HINT_DIR) $(CACHE_DIR)
 	$(info $*)
 	$(FSTAR) $< $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $*).hints && \
 	touch -c $@

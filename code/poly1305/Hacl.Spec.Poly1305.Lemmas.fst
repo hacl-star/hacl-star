@@ -3,7 +3,7 @@ module Hacl.Spec.Poly1305.Lemmas
 open FStar.Mul
 module Scalar = Spec.Poly1305
 
-#set-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
 //[@ "opaque_to_smt"]
 let ( % ) (a:nat) (b:pos) : nat = a % b
@@ -81,7 +81,64 @@ val poly_update_repeat_blocks_multi_lemma2_simplify:
   acc0:pfelem -> acc1:pfelem -> c0:pfelem -> c1:pfelem -> r:pfelem -> Lemma
     (pfadd (pfmul (pfadd (pfmul acc0 (pfmul r r)) c0) (pfmul r r)) (pfmul (pfadd (pfmul acc1 (pfmul r r)) c1) r) ==
     pfmul (pfadd (pfmul (pfadd (pfadd (pfmul acc0 (pfmul r r)) (pfmul acc1 r)) c0) r) c1) r)
-let poly_update_repeat_blocks_multi_lemma2_simplify acc0 acc1 c0 c1 r = ()
+let poly_update_repeat_blocks_multi_lemma2_simplify acc0 acc1 c0 c1 r =
+  let mult_add (a b c:nat) : Lemma
+    (pfmul (pfadd a b) c == pfadd (pfmul a c) (pfmul b c)) = ()
+  in
+  let add_four (a b c d:nat) : Lemma
+    (pfadd (pfadd a b) (pfadd c d) == pfadd (pfadd (pfadd a c) b) d) = ()
+  in
+  let z = pfmul acc0 (pfmul r r) in
+  calc (==) {
+    pfadd (pfmul (pfadd (pfmul acc0 (pfmul r r)) c0) (pfmul r r)) (pfmul (pfadd (pfmul acc1 (pfmul r r)) c1) r);
+    == { }
+    pfadd (pfmul
+                 (pfadd z c0)
+                 (pfmul r r))
+          (pfmul (pfadd
+                    (pfmul acc1 (pfmul r r))
+                    c1)
+                 r);
+    == { mult_add (pfmul acc1 (pfmul r r)) c1 r }
+    pfadd (pfmul
+                 (pfadd z c0)
+                 (pfmul r r))
+          (pfadd (pfmul (pfmul acc1 (pfmul r r)) r)
+                 (pfmul c1 r));
+    == { }
+    pfadd (pfadd
+            (pfmul z  (pfmul r r))
+            (pfmul c0 (pfmul r r)))
+          (pfadd (pfmul (pfmul acc1 (pfmul r r)) r)
+                 (pfmul c1 r));
+    == { add_four (pfmul z (pfmul r r))
+                  (pfmul c0 (pfmul r r))
+                  (pfmul (pfmul acc1 r) (pfmul r r))
+                  (pfmul c1 r) }
+    pfadd
+      (pfadd
+        (pfadd (pfmul z (pfmul r r)) (pfmul (pfmul acc1 r) (pfmul r r)))
+        (pfmul c0 (pfmul r r)))
+      (pfmul c1 r);
+    == { }
+    pfadd
+      (pfadd (pfmul (pfadd z (pfmul acc1 r)) (pfmul r r)) (pfmul c0 (pfmul r r)))
+      (pfmul c1 r);
+    == { }
+    pfadd
+      (pfmul (pfadd (pfmul (pfadd z (pfmul acc1 r)) r) (pfmul c0 r)) r)
+      (pfmul c1 r);
+    == { }
+    pfadd
+      (pfmul (pfmul (pfadd (pfadd z (pfmul acc1 r)) c0) r) r)
+      (pfmul c1 r);
+    == { }
+    pfmul
+      (pfadd
+        (pfmul (pfadd (pfadd z (pfmul acc1 r)) c0) r)
+        c1)
+      r;
+  }
 
 private
 val add_mod4: a:nat -> b:nat -> c:nat -> d:nat -> p:pos -> Lemma
@@ -148,7 +205,7 @@ val poly_update_repeat_blocks_multi_lemma4_simplify:
      (pfmul (pfadd (pfmul a2 (pfmul (pfmul r r) (pfmul r r))) c2) (pfmul r r)))
      (pfmul (pfadd (pfmul a3 (pfmul (pfmul r r) (pfmul r r))) c3) r) ==
     pfmul (pfadd (pfmul (pfadd (pfmul (pfadd (pfmul (pfadd (pfadd (pfadd (pfadd a0r4
-	  (pfmul a1 (pfmul (pfmul r r) r))) (pfmul a2 (pfmul r r))) (pfmul a3 r)) c0) r) c1) r) c2) r) c3) r)
+          (pfmul a1 (pfmul (pfmul r r) r))) (pfmul a2 (pfmul r r))) (pfmul a3 r)) c0) r) c1) r) c2) r) c3) r)
 let poly_update_repeat_blocks_multi_lemma4_simplify a0r4 a1 a2 a3 c0 c1 c2 c3 r =
   poly_update_repeat_blocks_multi_lemma4_simplify_lp a0r4 a1 a2 a3 c0 c1 c2 c3 r;
   poly_update_repeat_blocks_multi_lemma4_simplify_rp a0r4 a1 a2 a3 c0 c1 c2 c3 r;

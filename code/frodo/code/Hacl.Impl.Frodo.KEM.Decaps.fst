@@ -143,7 +143,7 @@ val crypto_kem_dec_kp_s:
     (requires fun h ->
       live h mu_decode /\ live h bp_matrix /\ live h g /\
       live h c_matrix /\ live h sk /\ live h ct)
-    (ensures fun h0 r h1 -> 
+    (ensures fun h0 r h1 ->
       modifies0 h0 h1 /\
       r == S.crypto_kem_dec_kp_s (as_seq h0 mu_decode) (as_seq h0 g)
 	(as_matrix h0 bp_matrix) (as_matrix h0 c_matrix) (as_seq h0 sk) (as_seq h0 ct))
@@ -196,7 +196,7 @@ val crypto_kem_dec_ss:
       live h c_matrix /\ live h sk /\ live h ct /\ live h ss /\
       disjoint ss ct /\ disjoint ss sk /\ disjoint ss mu_decode /\
       disjoint ss bp_matrix /\ disjoint ss c_matrix /\ disjoint ss g)
-    (ensures fun h0 _ h1 -> 
+    (ensures fun h0 _ h1 ->
       modifies1 ss h0 h1 /\
       as_seq h1 ss == S.crypto_kem_dec_ss (as_seq h0 ct) (as_seq h0 sk)
 	(as_seq h0 g) (as_seq h0 mu_decode) (as_matrix h0 bp_matrix) (as_matrix h0 c_matrix))
@@ -216,7 +216,7 @@ val crypto_kem_dec_0:
     (requires fun h ->
       live h mu_decode /\ live h sk /\ live h g /\
       disjoint mu_decode g /\ disjoint sk g)
-    (ensures fun h0 _ h1 -> 
+    (ensures fun h0 _ h1 ->
       let pk = Seq.sub (as_seq h0 sk) (v crypto_bytes) (v crypto_publickeybytes) in
       let pk_mu_decode = Seq.concat pk (as_seq h0 mu_decode) in
       modifies1 g h0 h1 /\
@@ -245,7 +245,7 @@ val crypto_kem_dec_1:
       live h c_matrix /\ live h sk /\ live h ct /\ live h ss /\
       disjoint ss ct /\ disjoint ss sk /\ disjoint ss mu_decode /\
       disjoint ss bp_matrix /\ disjoint ss c_matrix)
-    (ensures fun h0 _ h1 -> 
+    (ensures fun h0 _ h1 ->
       let pk = Seq.sub (as_seq h0 sk) (v crypto_bytes) (v crypto_publickeybytes) in
       let pk_mu_decode = Seq.concat pk (as_seq h0 mu_decode) in
       let g = Spec.Frodo.Params.frodo_prf_spec (v crypto_publickeybytes + v bytes_mu)
@@ -272,18 +272,24 @@ val crypto_kem_dec:
     (requires fun h ->
       live h ss /\ live h ct /\ live h sk /\
       disjoint ss ct /\ disjoint ss sk /\ disjoint ct sk)
-    (ensures  fun h0 _ h1 -> 
+    (ensures  fun h0 _ h1 ->
       modifies1 ss h0 h1 /\
       as_seq h1 ss == S.crypto_kem_dec (as_seq h0 ct) (as_seq h0 sk))
 let crypto_kem_dec ss ct sk =
   Spec.Frodo.KEM.expand_crypto_secretkeybytes ();
+  let h0 = ST.get() in
   push_frame();
   let bp_matrix = matrix_create params_nbar params_n in
   let c_matrix  = matrix_create params_nbar params_nbar in
+  let mu_decode = create bytes_mu (u8 0) in
   get_bp_c_matrices ct bp_matrix c_matrix;
   let s_bytes = sub sk (crypto_bytes +! crypto_publickeybytes) (size 2 *! params_n *! params_nbar) in
   let mu_decode = create bytes_mu (u8 0) in
+  let h1 = ST.get() in
+  assert (LowStar.Buffer.modifies loc_none h0 h1);
   frodo_mu_decode s_bytes bp_matrix c_matrix mu_decode;
   crypto_kem_dec_1 mu_decode bp_matrix c_matrix sk ct ss;
   pop_frame();
+  let h1 = ST.get () in
+  assert (modifies (loc ss) h0 h1);
   u32 0

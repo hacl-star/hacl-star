@@ -66,7 +66,7 @@ let len_t (a:hash_alg) = uint_t (len_int_type a ) PUB
 
 inline_for_extraction
 let nat_to_len (a:hash_alg) (n:nat{n <= maxint (len_int_type a)}) =
-  nat_to_uint #(len_int_type a ) #PUB n
+  mk_int #(len_int_type a ) #PUB n
 
 val len_v: a:hash_alg -> len_t a -> nat
 let len_v a l = uint_v l
@@ -156,17 +156,17 @@ let pad_length (a: hash_alg) (len: nat): Tot (n:nat { (len + n) % block_length a
 
 unfold let lseq (a:Type) (l:nat) = b:Seq.seq a{Seq.length b = l}
 unfold let lbytes (l:nat) = lseq uint8 l
+
 (* Define word based operators *)
 let bytes_of_words: a:hash_alg -> Tot (#len:size_nat{FStar.Mul.(len * word_length a) <= max_size_t} -> s:lseq (word a) len -> Tot (lbytes FStar.Mul.(word_length a * len))) = function
-  | MD5 -> Lib.ByteSequence.uints_to_bytes_le #U32
-  | SHA1 | SHA2_224 | SHA2_256 -> Lib.ByteSequence.uints_to_bytes_be #U32
-  | SHA2_384 | SHA2_512 -> Lib.ByteSequence.uints_to_bytes_be #U64
+  | MD5 -> Lib.ByteSequence.uints_to_bytes_le #U32 #SEC
+  | SHA1 | SHA2_224 | SHA2_256 -> Lib.ByteSequence.uints_to_bytes_be #U32 #SEC
+  | SHA2_384 | SHA2_512 -> Lib.ByteSequence.uints_to_bytes_be #U64 #SEC
 
 let words_of_bytes: a:hash_alg -> Tot (#len:size_nat{FStar.Mul.(len * word_length a) <= max_size_t} -> b:lbytes FStar.Mul.(word_length a * len) -> Tot (lseq (word a) len)) = function
   | MD5 -> Lib.ByteSequence.uints_from_bytes_le #U32 #SEC
   | SHA1 | SHA2_224 | SHA2_256 -> Lib.ByteSequence.uints_from_bytes_be #U32 #SEC
   | SHA2_384 | SHA2_512 -> Lib.ByteSequence.uints_from_bytes_be #U64 #SEC
-
 
 (** The data format taken and returned by the hash specifications. *)
 

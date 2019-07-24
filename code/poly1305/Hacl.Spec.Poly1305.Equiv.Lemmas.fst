@@ -12,7 +12,7 @@ module Lemmas = Hacl.Spec.Poly1305.Lemmas
 
 include Hacl.Spec.Poly1305.Vec
 
-#set-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0"
 
 val poly_update_repeat_blocks_multi_lemma2_simplify:
   acc0:pfelem -> acc1:pfelem -> c0:pfelem -> c1:pfelem -> r:pfelem -> Lemma
@@ -59,7 +59,72 @@ let poly_update_multi_lemma_load4_simplify acc0 r c0 c1 c2 c3 =
 //  repeat_blocks_multi #uint8 #pfelem size_block text (Scalar.poly1305_update1 r size_block) (normalize_n #w acc r))
 //
 
-#set-options "--z3rlimit 150 --max_fuel 2 --max_ifuel 0"
+#reset-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -Hacl.Spec.Poly1305.Lemmas'"
+
+val repeat_w:
+    w:lanes
+  -> n:nat
+  -> f:(i:nat{i < w * n} -> pfelem -> pfelem)
+  -> i:nat{i < n}
+  -> acc:pfelem ->
+  Tot pfelem
+let repeat_w w n f i acc =
+  match w with
+  | 1 -> f i acc
+  | 2 -> f (2*i+1) (f (2*i) acc)
+  | 4 -> f (4*i+3) (f (4*i+2) (f (4*i+1) (f (4*i) acc)))
+
+val unfold_w:
+    w:lanes
+  -> n:pos
+  -> f:(i:nat{i < w * n} -> pfelem -> pfelem)
+  -> acc0:pfelem ->
+  Lemma (Loops.repeati (w*n) f acc0 == repeat_w w n f (n-1) (Loops.repeati (w*(n-1)) f acc0))
+let unfold_w w n f acc =
+  match w with
+  | 1 ->
+    Loops.unfold_repeati n f acc (n-1)
+  | 2 ->
+    Loops.unfold_repeati (2*n) f acc (2*n-2);
+    Loops.unfold_repeati (2*n) f acc (2*n-1)
+  | 4 ->
+    Loops.unfold_repeati (4*n) f acc (4*n-4);
+    Loops.unfold_repeati (4*n) f acc (4*n-3);
+    Loops.unfold_repeati (4*n) f acc (4*n-2);
+    Loops.unfold_repeati (4*n) f acc (4*n-1)
+
+#set-options "--z3rlimit 150 --max_fuel 2"
+
+val normalizen_repeati_extensionality:
+    w:lanes
+  -> n:nat
+  -> r:pfelem
+  -> f:(i:nat{i < n * w} -> pfelem -> pfelem)
+  -> f_vec:(i:nat{i < n} -> elem w -> elem w)
+  -> acc0_vec:elem w ->
+  Lemma
+  (requires (forall (i:nat{i < n}) (acc_vec:elem w). normalize_n (f_vec i acc_vec) r == repeat_w w n f i (normalize_n acc_vec r)))
+  (ensures (normalize_n (Loops.repeati n f_vec acc0_vec) r == Loops.repeati (w * n) f (normalize_n acc0_vec r)))
+
+let rec normalizen_repeati_extensionality w n r f f_vec acc0_vec =
+  if n = 0 then begin
+    Loops.eq_repeati0 n f_vec acc0_vec;
+    Loops.eq_repeati0 (w * n) f (normalize_n acc0_vec r) end
+  else begin
+    let acc0 = normalize_n acc0_vec r in
+    normalizen_repeati_extensionality w (n-1) r f f_vec acc0_vec;
+    let next_p = Loops.repeati (n-1) f_vec acc0_vec in
+    let next_v = Loops.repeati (w*(n-1)) f acc0 in
+    assert (normalize_n next_p r == next_v);
+
+    let res1 = Loops.repeati n f_vec acc0_vec in
+    let res2 = Loops.repeati (w*n) f acc0 in
+    Loops.unfold_repeati n f_vec acc0_vec (n-1);
+    assert (res1 == f_vec (n-1) next_p);
+    unfold_w w n f acc0;
+    assert (res2 == repeat_w w n f (n-1) next_v);
+    assert (normalize_n res1 r == res2)
+  end
 
 val poly_update_repeat_blocks_multi_lemma1:
     text:bytes{length text % Scalar.size_block = 0}
@@ -90,27 +155,13 @@ let poly_update_repeat_blocks_multi_lemma1 text acc_vec0 r =
   assert (acc2 == Loops.repeati nb repeat_bf_sc acc0);
 
   assert (nb == nb_vec);
-  let rec aux (n:nat{n <= nb_vec}) : Lemma
-    (normalize_1 (Loops.repeati n repeat_bf_vec acc_vec0) r ==
-     Loops.repeati n repeat_bf_sc acc0) =
-    if n = 0 then (
-      Loops.eq_repeati0 n repeat_bf_vec acc_vec0;
-      Loops.eq_repeati0 n repeat_bf_sc acc0;
-      assert (normalize_1 acc_vec0 r == acc0)
-    ) else (
-      Loops.unfold_repeati n repeat_bf_vec acc_vec0 (n-1);
-      Loops.unfold_repeati n repeat_bf_sc acc0 (n-1);
-      aux (n-1);
-      let next_p = Loops.repeati (n-1) repeat_bf_vec acc_vec0 in
-      let next_v = Loops.repeati (n-1) repeat_bf_sc acc0 in
-      assert (normalize_1 next_p r == next_v);
-      let res1 = Loops.repeati n repeat_bf_vec acc_vec0 in
-      let res2 = Loops.repeati n repeat_bf_sc acc0 in
-      assert (res1 == repeat_bf_vec (n-1) next_p);
-      assert (res2 == repeat_bf_sc (n-1) next_v);
-      assert (normalize_1 res1 r == res2)
-    )
-  in aux nb_vec
+  let aux_repeat_bf (i:nat{i < nb_vec}) (acc_vec0:elem 1) : Lemma
+    (normalize_1 (repeat_bf_vec i acc_vec0) r ==
+     repeat_bf_sc i (normalize_1 acc_vec0 r))
+    = () in
+
+  FStar.Classical.forall_intro_2 (aux_repeat_bf);
+  normalizen_repeati_extensionality 1 nb_vec r repeat_bf_sc repeat_bf_vec acc_vec0
 
 val poly_update_repeat_blocks_multi_lemma2:
     text:bytes{length text % (2 * size_block) = 0}
@@ -163,29 +214,12 @@ let poly_update_repeat_blocks_multi_lemma2 text acc_vec0 r =
       assert (acc2 == acc3)
   in
 
-  let rec aux (n:nat{n <= nb_vec}) : Lemma
-    (normalize_2 (Loops.repeati n repeat_bf_vec acc_vec0) r ==
-     Loops.repeati (2 * n) repeat_bf_sc acc0) =
-    if n = 0 then (
-      Loops.eq_repeati0 n repeat_bf_vec acc_vec0;
-      Loops.eq_repeati0 (2 * n) repeat_bf_sc acc0;
-      assert (normalize_2 acc_vec0 r == acc0)
-    ) else (
-      Loops.unfold_repeati n repeat_bf_vec acc_vec0 (n-1);
-      Loops.unfold_repeati (2*n) repeat_bf_sc acc0 (2*(n-1));
-      Loops.unfold_repeati (2*n) repeat_bf_sc acc0 (2*n-1);
-      aux (n-1);
-      let next_p = Loops.repeati (n-1) repeat_bf_vec acc_vec0 in
-      let next_v = Loops.repeati (2*(n-1)) repeat_bf_sc acc0 in
-      assert (normalize_2 next_p r == next_v);
-      let res1 = Loops.repeati n repeat_bf_vec acc_vec0 in
-      let res2 = Loops.repeati (2*n) repeat_bf_sc acc0 in
-      assert (res1 == repeat_bf_vec (n-1) next_p);
-      assert (res2 == repeat_bf_sc (2*n-1) (repeat_bf_sc (2*(n-1)) next_v));
-      aux_repeat_bf (n-1) next_p;
-      assert (normalize_2 res1 r == res2)
-    )
-  in aux nb_vec
+  FStar.Classical.forall_intro_2 (aux_repeat_bf);
+  normalizen_repeati_extensionality 2 nb_vec r repeat_bf_sc repeat_bf_vec acc_vec0;
+  assert (normalize_2 (Loops.repeati nb_vec repeat_bf_vec acc_vec0) r == Loops.repeati nb repeat_bf_sc (normalize_2 acc_vec0 r));
+  assert (normalize_2 acc_vec1 r == acc2)
+
+#set-options "--max_fuel 0"
 
 val poly_update_repeat_blocks_multi_lemma4:
     text:bytes{length text % (4 * size_block) = 0}
@@ -249,32 +283,11 @@ let poly_update_repeat_blocks_multi_lemma4 text acc_vec0 r =
       assert (acc5 == acc4)
   in
 
-  let rec aux (n:nat{n <= nb_vec}) : Lemma
-    (normalize_4 (Loops.repeati n repeat_bf_vec acc_vec0) r ==
-     Loops.repeati (4 * n) repeat_bf_sc acc0) =
-    if n = 0 then (
-      Loops.eq_repeati0 n repeat_bf_vec acc_vec0;
-      Loops.eq_repeati0 (4 * n) repeat_bf_sc acc0;
-      assert (normalize_4 acc_vec0 r == acc0)
-    ) else (
-      Loops.unfold_repeati n repeat_bf_vec acc_vec0 (n-1);
-      Loops.unfold_repeati (4*n) repeat_bf_sc acc0 (4*n-4);
-      Loops.unfold_repeati (4*n) repeat_bf_sc acc0 (4*n-3);
-      Loops.unfold_repeati (4*n) repeat_bf_sc acc0 (4*n-2);
-      Loops.unfold_repeati (4*n) repeat_bf_sc acc0 (4*n-1);
-      aux (n-1);
-      let next_p = Loops.repeati (n-1) repeat_bf_vec acc_vec0 in
-      let next_v = Loops.repeati (4*(n-1)) repeat_bf_sc acc0 in
-      assert (normalize_4 next_p r == next_v);
-      let res1 = Loops.repeati n repeat_bf_vec acc_vec0 in
-      let res2 = Loops.repeati (4*n) repeat_bf_sc acc0 in
-      assert (res1 == repeat_bf_vec (n-1) next_p);
-      assert (res2 == repeat_bf_sc (4*n-1) (repeat_bf_sc (4*n-2) (repeat_bf_sc (4*n-3) (repeat_bf_sc (4*n-4) next_v))));
-      aux_repeat_bf (n-1) next_p;
-      assert (normalize_4 res1 r == res2)
-    )
-  in aux nb_vec
-
+  FStar.Classical.forall_intro_2 (aux_repeat_bf);
+  normalizen_repeati_extensionality 4 nb_vec r repeat_bf_sc repeat_bf_vec acc_vec0;
+  assert (normalize_4 (Loops.repeati nb_vec repeat_bf_vec acc_vec0) r == Loops.repeati nb repeat_bf_sc (normalize_4 acc_vec0 r));
+  assert (acc1 == acc2)
+  
 val normalize_4_lemma: acc:elem 4 -> r:pfelem -> Lemma
   (normalize_4 acc r ==
     pfadd (pfadd (pfadd (pfmul acc.[0] (pfmul (pfmul r r) (pfmul r r)))

@@ -2,10 +2,11 @@ FSTAR_HOME   ?= ../../../../FStar
 KREMLIN_HOME ?= ../../../../kremlin
 HACL_HOME    ?= ../../..
 
-OUTPUT_DIR    = .output
-HINT_DIR      = .hints
+CACHE_DIR     ?= $(HACL_HOME)/.cache
+HINT_DIR      ?= $(HACL_HOME)/.hints
+OUTPUT_DIR    ?= .output
 GENERATED_DIR ?= chacha20-c
-OUT_DIR	      ?= chacha20-c
+OUT_DIR	     ?= chacha20-c
 
 .PHONY: all test stage1 stage2 clean clean-c distclean
 
@@ -19,11 +20,13 @@ test:
 stage1: $(GENERATED_DIR)/Hacl_Chacha20.c \
 	$(GENERATED_DIR)/Hacl_Chacha20_Vec32.c \
 	$(GENERATED_DIR)/Hacl_Chacha20_Vec128.c \
-	$(GENERATED_DIR)/Hacl_Chacha20_Vec256.c
+	$(GENERATED_DIR)/Hacl_Chacha20_Vec256.c \
+	$(GENERATED_DIR)/Hacl_Salsa20.c
 
-stage2: chacha20.exe chacha20-vec.exe
+stage2: chacha20.exe chacha20-vec.exe salsa20.exe
 	./chacha20-vec.exe
-	./chacha20.exe \
+	./chacha20.exe
+	./salsa20.exe
 
 FSTAR_INCLUDE_DIRS = \
   $(HACL_KREMLIN) \
@@ -33,7 +36,7 @@ FSTAR_INCLUDE_DIRS = \
   $(HACL_HOME)/lib
 
 FSTAR_FLAGS = $(OTHERFLAGS) --cmi \
-  --cache_checked_modules --odir $(OUTPUT_DIR) \
+  --cache_checked_modules --cache_dir $(CACHE_DIR) --odir $(OUTPUT_DIR) \
   --already_cached "'Prims+FStar+LowStar+C+Spec.Loops+TestLib+Lib'" \
   $(addprefix --include ,$(FSTAR_INCLUDE_DIRS))
 
@@ -41,11 +44,14 @@ FSTAR = $(FSTAR_HOME)/bin/fstar.exe $(FSTAR_FLAGS)
 
 ENABLE_HINTS = --use_hints --use_hint_hashes --record_hints --query_stats
 
-ROOTS = Hacl.Chacha20.fst Hacl.Chacha20.Vec32.fst Hacl.Chacha20.Vec128.fst Hacl.Chacha20.Vec256.fst
+ROOTS = Hacl.Chacha20.fst Hacl.Chacha20.Vec32.fst Hacl.Chacha20.Vec128.fst Hacl.Chacha20.Vec256.fst Hacl.Salsa20.fst
 
 .PRECIOUS: %.krml
 
 $(HINT_DIR):
+	mkdir -p $@
+
+$(CACHE_DIR):
 	mkdir -p $@
 
 .depend:
@@ -53,7 +59,7 @@ $(HINT_DIR):
 
 include .depend
 
-%.checked: | .depend $(HINT_DIR)
+%.checked: | .depend $(HINT_DIR) $(CACHE_DIR)
 	$(FSTAR) $< $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $*).hints && \
 	touch -c $@
 
@@ -110,6 +116,16 @@ $(GENERATED_DIR)/Hacl_Chacha20.c: $(ALL_KRML_FILES) | .depend
 	-tmpdir $(GENERATED_DIR) \
 	$^
 
+$(GENERATED_DIR)/Hacl_Salsa20.c: $(ALL_KRML_FILES) | .depend
+	$(KREMLIN) $(KREMLIN_TESTLIB) -skip-compilation \
+	-bundle 'Lib.*' \
+	-bundle 'Spec.\*' \
+	-bundle 'Hacl_Salsa20=*' \
+	-bundle 'FStar.*' \
+	-drop 'Lib.IntVector.Intrinsics,LowStar,Spec,Prims,Lib,C.Loops.*,Hacl.Spec.*,Hacl.Chacha20_Vec32,Hacl.Chacha20_Vec128,Hacl.Chacha20_Vec256,Hacl.Chacha20' \
+	-tmpdir $(GENERATED_DIR) \
+	$^
+
 # The Makefile is manually staged because GNU Make does not understand
 # dependencies between the Makefiles we include, i.e. it won't first generate
 # the .depend, parse it, then generate Makefile.include, parse it, then
@@ -162,8 +178,12 @@ CFLAGS += $(addprefix -I ,$(INCLUDE_DIRS))
 -include $(patsubst %.c,%.d,$(ALL_SOURCES))
 
 chacha20.exe:
-	$(CC) $(CFLAGS) $(GENERATED_DIR)/Hacl_Chacha20.c $(HACL_HOME)/snapshots/hacl-c/Hacl_Chacha20.c chacha20-test.c -L $(KREMLIN_HOME)/kremlib/dist/generic -lkremlib -o chacha20.exe
+	$(CC) $(CFLAGS) $(GENERATED_DIR)/Hacl_Chacha20.c chacha20-test.c -L $(KREMLIN_HOME)/kremlib/dist/generic -lkremlib -o chacha20.exe
 	./chacha20.exe
+
+salsa20.exe:
+	$(CC) $(CFLAGS) $(GENERATED_DIR)/Hacl_Salsa20.c salsa20-test.c -L $(KREMLIN_HOME)/kremlib/dist/generic -lkremlib -o salsa20.exe
+	./salsa20.exe
 
 chacha20-vec.exe:
 	$(CC) $(CFLAGS) $(ALL_SOURCES) $(HACL_HOME)/snapshots/hacl-c/Hacl_Chacha20.c $(HACL_HOME)/snapshots/hacl-c/Hacl_Chacha20_Vec128.c chacha20-vec-test.c -L $(KREMLIN_HOME)/kremlib/dist/generic -lkremlib -o chacha20-vec.exe

@@ -20,7 +20,7 @@ module SpecPoly = Spec.Poly1305
 module ChachaVec = Hacl.Impl.Chacha20.Vec
 module Poly = Hacl.Impl.Poly1305
 
-#reset-options "--z3rlimit 100 --max_fuel 1 --max_ifuel 1 --using_facts_from '* -FStar.Seq'"
+#reset-options "--z3rlimit 150 --max_fuel 2 --max_ifuel 1 --using_facts_from '* -FStar.Seq'"
 
 inline_for_extraction noextract
 val poly1305_do_:
@@ -47,6 +47,7 @@ val poly1305_do_:
       let acc = SpecPoly.poly1305_update1 r 16 block_s acc in
       Poly.as_get_acc h1 ctx == acc /\ as_seq h1 block == block_s /\
       Poly.state_inv_t h1 ctx))
+
 let poly1305_do_ #w k aadlen aad mlen m ctx block =
   Poly.poly1305_init ctx k;
   poly1305_padded ctx aadlen aad;

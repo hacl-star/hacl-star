@@ -83,7 +83,7 @@ val store_felem:
       live h f /\ live h u64s /\ disjoint u64s f)
     (ensures  fun h0 _ h1 ->
       modifies (loc u64s |+| loc f) h0 h1 /\
-      BSeq.nat_from_intseq_le (as_seq h1 u64s) == (as_nat h0 f) % P.prime)
+      as_seq h1 u64s == BSeq.nat_to_intseq_le 4 (fevalh h0 f))
 let store_felem u64s f =
   let h0 = ST.get () in
   carry_pass_store f;
@@ -106,7 +106,8 @@ let store_felem u64s f =
   u64s.(2ul) <- o2;
   u64s.(3ul) <- o3;
   let h3 = ST.get () in
-  Hacl.Impl.Curve25519.Lemmas.lemma_nat_from_uints64_le_4 (as_seq h3 u64s)
+  Hacl.Impl.Curve25519.Lemmas.lemma_nat_from_uints64_le_4 (as_seq h3 u64s);
+  BSeq.lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h3 u64s)
 
 inline_for_extraction noextract
 val set_zero:

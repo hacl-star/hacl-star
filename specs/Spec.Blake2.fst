@@ -50,7 +50,7 @@ unfold let limb_inttype (a:alg) =
   | U32 -> U64
   | U64 -> U128
 
-type word_t (a:alg) = uint_t (wt a) SEC
+unfold type word_t (a:alg) = uint_t (wt a) SEC
 type pub_word_t (a:alg) = uint_t (wt a) PUB
 type limb_t (a:alg) : Type0 = uint_t (limb_inttype a) SEC
 
@@ -383,7 +383,7 @@ let blake2_init a kk k nn =
 val blake2_update_last:
     a:alg
   -> prev:nat{prev <= max_limb a}
-  -> len:size_nat{len <= (size_block a)}
+  -> len:size_nat{len <= size_block a}
   -> last:lbytes len
   -> s:hash_ws a ->
   Tot (hash_ws a)
@@ -414,6 +414,8 @@ let spec_update_last
     (i:nat) =
     blake2_update_last a len
 
+
+// BB. This naming is just bad. Change it !
 let blake2_update a s d kk =
   let ll = length d in
   let klen = if kk = 0 then 0 else 1 in
@@ -421,7 +423,6 @@ let blake2_update a s d kk =
     (spec_update_block a ((klen + 1) * size_block a))
     (spec_update_last a (klen * (size_block a) + ll))
     s
-
 
 val blake2_finish:
     a:alg

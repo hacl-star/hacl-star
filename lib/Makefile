@@ -1,7 +1,8 @@
 FSTAR_HOME ?= ../../FStar
 HACL_HOME  ?= ..
 
-HINT_DIR  = .hints
+CACHE_DIR     ?= $(HACL_HOME)/.cache
+HINT_DIR      ?= $(HACL_HOME)/.hints
 
 include ../Makefile.include
 
@@ -17,10 +18,12 @@ FSTAR_INCLUDE_DIRS = \
   $(HACL_HOME)/lib \
   $(HACL_HOME)/specs # For Spec.AES used in Lib.IntVector
 
+FSTAR_INCLUDE = $(addprefix --include ,$(FSTAR_INCLUDE_DIRS))
+
 FSTAR_FLAGS = --cmi \
-  --cache_checked_modules \
-  --already_cached "'Prims+FStar+LowStar+C+Spec.Loops+TestLib'" \
-  $(addprefix --include ,$(FSTAR_INCLUDE_DIRS))
+  --cache_checked_modules --cache_dir $(CACHE_DIR) \
+  --already_cached "'Prims FStar LowStar C Spec.Loops TestLib'" \
+  $(FSTAR_INCLUDE)
 
 FSTAR = $(FSTAR_HOME)/bin/fstar.exe $(FSTAR_FLAGS) $(OTHERFLAGS)
 
@@ -28,7 +31,7 @@ ENABLE_HINTS = --use_hints --use_hint_hashes --record_hints --query_stats
 
 ALL_SOURCES = $(wildcard *.fst) $(wildcard *.fsti) tutorial/Tutorial.fst
 
-FIXME = 
+FIXME =
 
 ROOTS = $(filter-out $(FIXME),$(ALL_SOURCES))
 
@@ -41,20 +44,23 @@ include .depend
 $(HINT_DIR):
 	mkdir -p $@
 
-%.checked: | .depend $(HINT_DIR)
+$(CACHE_DIR):
+	mkdir -p $@
+
+$(CACHE_DIR)/%.checked: | .depend $(HINT_DIR) $(CACHE_DIR)
 	$(FSTAR) $< $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $*).hints && \
 	touch -c $@
 
-verify: $(addsuffix .checked, $(ROOTS))
+verify: $(addsuffix .checked, $(addprefix $(CACHE_DIR)/,$(notdir $(ROOTS))))
 
 # Targets for interactive mode
 
 %.fst-in:
-	@echo $(FSTAR_FLAGS) \
+	@echo $(FSTAR_INCLUDE) \
 	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(basename $@).fst.hints
 
 %.fsti-in:
-	@echo $(FSTAR_FLAGS) \
+	@echo $(FSTAR_INCLUDE) \
 	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(basename $@).fsti.hints
 
 # Clean targets

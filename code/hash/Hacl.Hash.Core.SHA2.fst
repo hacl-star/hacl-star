@@ -255,7 +255,7 @@ val shuffle_core (a: sha2_alg)
       M.(modifies (loc_buffer hash) h0 h1) /\
       B.as_seq h1 hash == Spec.shuffle_core a b (B.as_seq h0 hash) (U32.v t)))
 
-#set-options "--z3rlimit 50"
+#set-options "--max_fuel 1 --z3rlimit 100"
 inline_for_extraction
 let shuffle_core a block hash ws t =
   let a0 = hash.(0ul) in
@@ -288,6 +288,7 @@ let shuffle_core a block hash ws t =
   (**) assert_norm (List.Tot.length l = 8);
   (**) S.intro_of_list #(word a) (B.as_seq h hash) l
 
+#reset-options "--max_fuel 2 --z3rlimit 500"
 inline_for_extraction
 val shuffle: a:sha2_alg -> block:G.erased (block_b a) -> hash:words_state a -> ws:ws_w a ->
   ST.Stack unit
@@ -333,7 +334,11 @@ let shuffle a block hash ws =
   in
   (**) Spec.Loops.repeat_range_base 0 (Spec.shuffle_core a (block_words_be a h0 (G.reveal block))) (B.as_seq h0 hash);
   C.Loops.for 0ul (size_k_w a) inv f;
-  reveal_opaque (`%Spec.shuffle) Spec.shuffle
+  reveal_opaque (`%Spec.shuffle) Spec.shuffle;
+  (**) let hash = B.as_seq h0 hash in
+  (**) let block = G.reveal block in
+  (**) let block = block_words_be a h0 block in
+  Spec.shuffle_is_shuffle_pre a hash block
 
 inline_for_extraction
 let zero (a: sha2_alg): word a =
@@ -341,7 +346,7 @@ let zero (a: sha2_alg): word a =
   | SHA2_224 | SHA2_256 -> u32 0
   | SHA2_384 | SHA2_512 -> u64 0
 
-#set-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 200 --max_fuel 2 --max_ifuel 2"
 
 noextract inline_for_extraction
 val update: a:sha2_alg -> update_st a
@@ -357,9 +362,15 @@ let update a hash block =
   (**) assert (S.equal (B.as_seq h1 hash1) (B.as_seq h0 hash));
   (**) assert (S.equal (B.as_seq h1 hash) (B.as_seq h0 hash));
   shuffle a (G.hide block) hash1 computed_ws;
+  (**) let h2 = ST.get () in
+  (**) assert (let block_w = words_of_bytes a #block_word_length (B.as_seq h1 block) in
+	       S.equal (B.as_seq h2 hash1) (Spec.shuffle a (B.as_seq h1 hash1) block_w));
   C.Loops.in_place_map2 hash hash1 8ul ( +. );
-  (**) ST.pop_frame ();
+  (**) let h3 = ST.get () in
+  (**) assert (S.equal (B.as_seq h3 hash) (Spec.update_pre a (B.as_seq h1 hash1) (B.as_seq h1 block)));
+  ST.pop_frame();
   (**) reveal_opaque (`%Spec.update) Spec.update
+
 
 let update_224: update_st SHA2_224 = update SHA2_224
 let update_256: update_st SHA2_256 = update SHA2_256

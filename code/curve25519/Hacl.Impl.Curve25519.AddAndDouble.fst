@@ -191,9 +191,9 @@ let point_add_and_double_ #s q p01_tmp1 tmp2 =
 
 (* WRAPPER to Prevent Inlining *)
 [@CInline]
-let point_add_and_double_51 (q:point51) (p01_tmp1:lbuffer uint64 40ul) tmp2 = point_add_and_double_ #M51 q p01_tmp1 tmp2
+let point_add_and_double_51 (q:point51) (p01_tmp1:lbuffer uint64 40ul) = point_add_and_double_ #M51 q p01_tmp1
 [@CInline]
-let point_add_and_double_64 (q:point64) (p01_tmp1:lbuffer uint64 32ul) tmp2 = point_add_and_double_ #M64 q p01_tmp1 tmp2
+let point_add_and_double_64 (q:point64) (p01_tmp1:lbuffer uint64 32ul) = point_add_and_double_ #M64 q p01_tmp1
 
 inline_for_extraction noextract
 val point_add_and_double:
@@ -279,9 +279,9 @@ let point_double_ #s nq tmp1 tmp2 =
 
 (* WRAPPER to Prevent Inlining *)
 [@CInline]
-let point_double_51 (nq:point51) tmp1 tmp2 = point_double_ #M51 nq tmp1 tmp2
+let point_double_51 (nq:point51) = point_double_ #M51 nq
 [@CInline]
-let point_double_64 (nq:point64) tmp1 tmp2 = point_double_ #M64 nq tmp1 tmp2
+let point_double_64 (nq:point64) = point_double_ #M64 nq
 
 inline_for_extraction noextract
 val point_double:

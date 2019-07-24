@@ -2,6 +2,8 @@ KREMLIN_HOME ?= ../../../../kremlin
 HACL_HOME    ?= ../../..
 
 OUT_DIR	      = test-c
+CACHE_DIR     ?= $(HACL_HOME)/.cache
+HINT_DIR      ?= $(HACL_HOME)/.hints
 
 KREMLIN=$(KREMLIN_HOME)/krml
 
@@ -13,8 +15,13 @@ FSTAR_INCLUDE_DIRS = \
 
 FSTAR_INCLUDES = $(addprefix --include ,$(FSTAR_INCLUDE_DIRS))
 
+FSTAR_FLAGS = --cmi \
+  --cache_checked_modules --cache_dir $(CACHE_DIR) \
+  --already_cached "'Prims+FStar+LowStar+C+Spec.Loops+TestLib'" \
+  $(addprefix --include ,$(FSTAR_INCLUDE_DIRS))
+
 %.fst-in:
-	@echo $(FSTAR_INCLUDES)	
+	@echo $(FSTAR_INCLUDES)
 
 all: test
 

@@ -280,6 +280,9 @@ val fmul2:
       mul_inv_t h1 out1 /\
       fevalh h1 out0 == P.fmul (fevalh h0 f10) (fevalh h0 f20) /\
       fevalh h1 out1 == P.fmul (fevalh h0 f11) (fevalh h0 f21)))
+
+#set-options "--z3rlimit 100"
+
 [@ CInline]
 let fmul2 out f1 f2 =
   let f10 = f1.(0ul) in
@@ -439,7 +442,7 @@ let load_felem f u64s =
   let h0 = ST.get () in
   let f0l = u64s.(0ul) &. S.mask51 in
   let f0h = u64s.(0ul) >>. 51ul in
-  let f1l = (u64s.(1ul) &. u64 0x3fffffffff) <<. 13ul in
+  let f1l = ((u64s.(1ul) &. u64 0x3fffffffff)) <<. 13ul in
   let f1h = u64s.(1ul) >>. 38ul in
   let f2l = (u64s.(2ul) &. u64 0x1ffffff) <<. 26ul in
   let f2h = u64s.(2ul) >>. 25ul in
@@ -460,7 +463,7 @@ val store_felem:
       live h f /\ live h u64s /\ mul_inv_t h f)
     (ensures  fun h0 _ h1 ->
       modifies (loc u64s) h0 h1 /\
-      BSeq.nat_from_intseq_le (as_seq h1 u64s) == (as_nat h0 f) % P.prime)
+      as_seq h1 u64s == BSeq.nat_to_intseq_le 4 (fevalh h0 f))
 let store_felem u64s f =
   let f0 = f.(0ul) in
   let f1 = f.(1ul) in
@@ -473,7 +476,8 @@ let store_felem u64s f =
   u64s.(2ul) <- o2;
   u64s.(3ul) <- o3;
   let h1 = ST.get () in
-  Hacl.Impl.Curve25519.Lemmas.lemma_nat_from_uints64_le_4 (as_seq h1 u64s)
+  Hacl.Impl.Curve25519.Lemmas.lemma_nat_from_uints64_le_4 (as_seq h1 u64s);
+  BSeq.lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h1 u64s)
 
 val cswap2:
     bit:uint64{v bit <= 1}

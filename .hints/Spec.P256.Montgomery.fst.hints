@@ -1,0 +1,1065 @@
+[
+  "J\u001f#©hùŸ‚¶céØÐR:æ",
+  [
+    [
+      "Spec.P256.Montgomery.p256_prime_value",
+      1,
+      2,
+      1,
+      [ "@query" ],
+      0,
+      "1f84e2b033d23e6bce5c6899d1c7d1b6"
+    ],
+    [
+      "Spec.P256.Montgomery.p256_prime_value_inverse",
+      1,
+      2,
+      1,
+      [
+        "@query", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "58e4d607ff0c56f04da60d287ec8f492"
+    ],
+    [
+      "Spec.P256.Montgomery.op_Plus_Percent",
+      1,
+      2,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "equation_Spec.P256.Montgomery.prime",
+        "int_typing", "lemma_Spec.P256.Montgomery.p256_prime_value",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "7d54167ec0240250acf013d5d904fb8f"
+    ],
+    [
+      "Spec.P256.Montgomery.op_Subtraction_Percent",
+      1,
+      2,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "equation_Spec.P256.Montgomery.prime",
+        "int_typing", "lemma_Spec.P256.Montgomery.p256_prime_value",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "e1315e662317ed0f7662959dd46bb26f"
+    ],
+    [
+      "Spec.P256.Montgomery.op_Star_Percent",
+      1,
+      2,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "equation_Spec.P256.Montgomery.prime",
+        "int_typing", "lemma_Spec.P256.Montgomery.p256_prime_value",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "f2c795aea4901dfa9dfe5a0b06e65fa9"
+    ],
+    [
+      "Spec.P256.Montgomery.elem",
+      1,
+      0,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "equation_Spec.P256.Montgomery.prime",
+        "int_typing", "lemma_Spec.P256.Montgomery.p256_prime_value",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "8649e533bed35e1db123fb8006071dd0"
+    ],
+    [
+      "Spec.P256.Montgomery.to_elem",
+      1,
+      0,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "equation_Spec.P256.Montgomery.prime",
+        "int_typing", "lemma_Spec.P256.Montgomery.p256_prime_value",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "a91a2614aea34e986a34bdfce44952a9"
+    ],
+    [
+      "Spec.P256.Montgomery.from_elem",
+      1,
+      0,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Lib.NatMod.nat_mod",
+        "equation_Prims.nat", "equation_Spec.P256.Montgomery.prime",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
+      ],
+      0,
+      "71cc359357e75c586f361fcd46a45443"
+    ],
+    [
+      "Spec.P256.Montgomery.zero",
+      1,
+      0,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "equation_Spec.P256.Montgomery.prime",
+        "int_typing", "lemma_Spec.P256.Montgomery.p256_prime_value",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "e41dcf2525e41f72de090da905491fac"
+    ],
+    [
+      "Spec.P256.Montgomery.one",
+      1,
+      0,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "equation_Spec.P256.Montgomery.prime",
+        "int_typing", "lemma_Spec.P256.Montgomery.p256_prime_value",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "74a280faf53552d1175e30b515d8dc15"
+    ],
+    [
+      "Spec.P256.Montgomery.op_Star_Star_Percent",
+      1,
+      0,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "binder_x_bb4e1c9af0265270f8e7a5f250f730e2_0",
+        "binder_x_c9f70ab639c9ae669e58190eb4c1b5c9_1",
+        "equality_tok_Prims.LexTop@tok", "equation_Prims.nat",
+        "equation_Spec.P256.Montgomery.op_Star_Percent",
+        "equation_Spec.P256.Montgomery.prime",
+        "function_token_typing_Prims.__cache_version_number__",
+        "int_inversion", "int_typing",
+        "lemma_Spec.P256.Montgomery.p256_prime_value",
+        "primitive_Prims.op_Division", "primitive_Prims.op_Equality",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_afd51579b90d50ea23e03b743a1fa001",
+        "well-founded-ordering-on-nat"
+      ],
+      0,
+      "f86095569abded89090c71fad907008c"
+    ],
+    [
+      "Spec.P256.Montgomery.modp_inv",
+      1,
+      0,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "equation_Spec.P256.Montgomery.prime",
+        "int_typing", "lemma_Spec.P256.Montgomery.p256_prime_value",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "d07eb6bc9b809ad8db7e6250c0f87aa8"
+    ],
+    [
+      "Spec.P256.Montgomery.modp_inv2",
+      1,
+      0,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "equation_Spec.P256.Montgomery.prime",
+        "int_inversion", "int_typing",
+        "lemma_Spec.P256.Montgomery.p256_prime_value",
+        "primitive_Prims.op_Modulus", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "f13b72ddfefea7f1a66abe285d753b4e"
+    ],
+    [
+      "Spec.P256.Montgomery.scalar",
+      1,
+      0,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
+      ],
+      0,
+      "10f041d66000253c9763cc373446dd27"
+    ],
+    [
+      "Spec.P256.Montgomery.jacobianNat",
+      1,
+      0,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Lib.NatMod.nat_mod",
+        "equation_Prims.eqtype", "equation_Prims.nat",
+        "equation_Spec.P256.Montgomery.prime",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "haseqTm_refine_c1424615841f28cac7fc34e92b7ff33c",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+      ],
+      0,
+      "956bab2ecd550f76d6c7c1759b7b5ba3"
+    ],
+    [
+      "Spec.P256.Montgomery.point_compare",
+      1,
+      0,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Lib.NatMod.nat_mod",
+        "equation_Prims.eqtype", "equation_Prims.nat",
+        "equation_Spec.P256.Montgomery.prime",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "haseqTm_refine_c1424615841f28cac7fc34e92b7ff33c",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+      ],
+      0,
+      "7014a440b04a10799e7de051ab4a2b8c"
+    ],
+    [
+      "Spec.P256.Montgomery.pointAtInfinity",
+      1,
+      0,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "equation_Spec.P256.Montgomery.prime",
+        "int_typing", "lemma_Spec.P256.Montgomery.p256_prime_value",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "d5ffc9a8c9c58b70d72fb02449c59dd5"
+    ],
+    [
+      "Spec.P256.Montgomery.l",
+      1,
+      0,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "equation_Spec.P256.Montgomery.prime",
+        "int_typing", "lemma_Spec.P256.Montgomery.p256_prime_value",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "753de1df03dc19b1a29c8d7379338c16"
+    ],
+    [
+      "Spec.P256.Montgomery.s",
+      1,
+      0,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "equation_Spec.P256.Montgomery.prime",
+        "int_typing", "lemma_Spec.P256.Montgomery.p256_prime_value",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "a8d83c86a8358dfeea0c58fc7d70ed41"
+    ],
+    [
+      "Spec.P256.Montgomery.k",
+      1,
+      0,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "equation_Spec.P256.Montgomery.prime",
+        "int_typing", "lemma_Spec.P256.Montgomery.p256_prime_value",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "3c3edb49e90b07ee26e8ed98f37cfee8"
+    ],
+    [
+      "Spec.P256.Montgomery.k0",
+      1,
+      0,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "equation_Spec.P256.Montgomery.prime",
+        "int_typing", "lemma_Spec.P256.Montgomery.p256_prime_value",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "50d9a0789d96f11d8ba6c92ed2631291"
+    ],
+    [
+      "Spec.P256.Montgomery.mask",
+      1,
+      0,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "equation_Spec.P256.Montgomery.prime",
+        "int_typing", "lemma_Spec.P256.Montgomery.p256_prime_value",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "9928f4c559dcbf2f1abf2eaf76a05ec2"
+    ],
+    [
+      "Spec.P256.Montgomery.a",
+      1,
+      0,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "equation_Spec.P256.Montgomery.prime",
+        "int_typing", "lemma_Spec.P256.Montgomery.p256_prime_value",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "757217f9830388755e53e3fa9eadd6d4"
+    ],
+    [
+      "Spec.P256.Montgomery.toDomain",
+      1,
+      0,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Lib.NatMod.nat_mod",
+        "equation_Prims.nat",
+        "equation_Spec.P256.Montgomery.op_Star_Percent",
+        "equation_Spec.P256.Montgomery.prime", "int_inversion",
+        "primitive_Prims.op_Modulus", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
+      ],
+      0,
+      "616b1c0945c99242c52c06f79cdfb1e5"
+    ],
+    [
+      "Spec.P256.Montgomery.lemma1",
+      1,
+      0,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "equation_Spec.P256.Montgomery.prime",
+        "int_typing", "lemma_Spec.P256.Montgomery.p256_prime_value",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "9a9dbe32a30306aaa04ea3b17067b388"
+    ],
+    [
+      "Spec.P256.Montgomery.modulo_distributivity_mult",
+      1,
+      0,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
+      0,
+      "79b786d67ada1263c9ffc00a734a70af"
+    ],
+    [
+      "Spec.P256.Montgomery.lemma2",
+      1,
+      0,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Spec.P256.Montgomery.prime",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_847026b9036f401a1dfa01d584a160b8"
+      ],
+      0,
+      "76126a7a2870a83dfa7800256778245c"
+    ],
+    [
+      "Spec.P256.Montgomery.lemma2",
+      2,
+      0,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "equation_Prims.nonzero", "equation_Prims.pos",
+        "equation_Spec.P256.Montgomery.modp_inv",
+        "equation_Spec.P256.Montgomery.modp_inv2",
+        "equation_Spec.P256.Montgomery.prime", "int_inversion", "int_typing",
+        "lemma_FStar.UInt.pow2_values",
+        "lemma_Spec.P256.Montgomery.p256_prime_value",
+        "primitive_Prims.op_Division", "primitive_Prims.op_Modulus",
+        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_0766302b68bb44ab7aff8c4d8be0b46f",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_847026b9036f401a1dfa01d584a160b8",
+        "refinement_interpretation_Tm_refine_fed8536021b958a65a4892b081fd8059",
+        "typing_Prims.pow2"
+      ],
+      0,
+      "cb980a1c69622fc4d60093cc1022b040"
+    ],
+    [
+      "Spec.P256.Montgomery.mult_one_round2",
+      1,
+      2,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "equation_Spec.P256.Montgomery.prime",
+        "int_typing", "lemma_Spec.P256.Montgomery.p256_prime_value",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "6597e9973deabae808f6108aede25bb3"
+    ],
+    [
+      "Spec.P256.Montgomery.mult_one_round2",
+      2,
+      2,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Lib.NatMod.nat_mod", "equation_Prims.nat",
+        "equation_Prims.nonzero", "equation_Prims.pos",
+        "equation_Spec.P256.Montgomery.prime",
+        "equation_Spec.P256.Montgomery.s", "int_inversion", "int_typing",
+        "lemma_FStar.UInt.pow2_values",
+        "lemma_Spec.P256.Montgomery.p256_prime_value",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Division",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_0766302b68bb44ab7aff8c4d8be0b46f",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_7e4a810ada5b81e8eaff8392bb90813a",
+        "refinement_interpretation_Tm_refine_83ae61d4402b38854344af4aae0038e7",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
+        "typing_Lib.NatMod.nat_mod_v", "typing_Prims.pow2",
+        "typing_Spec.P256.Montgomery.prime", "typing_Spec.P256.Montgomery.s",
+        "typing_Spec.P256.Montgomery.to_elem"
+      ],
+      0,
+      "5079a88db0ecac06376cf6fd91c5c7bf"
+    ],
+    [
+      "Spec.P256.Montgomery.lemma_pow2",
+      1,
+      2,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "equation_Prims.pos",
+        "equation_with_fuel_Prims.pow2.fuel_instrumented",
+        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_2df46b71535364ed8430ab70cfa479d8",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "token_correspondence_Prims.pow2.fuel_instrumented"
+      ],
+      0,
+      "2f10a32a4610d00064faae69dd52b2f9"
+    ],
+    [
+      "Spec.P256.Montgomery.lemma_decrease_pow",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Spec.P256.Montgomery.prime",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_847026b9036f401a1dfa01d584a160b8"
+      ],
+      0,
+      "b18abd12e6de262fe2a08cc461beef46"
+    ],
+    [
+      "Spec.P256.Montgomery.lemma3",
+      1,
+      2,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "equation_Spec.P256.Montgomery.prime",
+        "int_typing", "lemma_Spec.P256.Montgomery.p256_prime_value",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "f229a5ca2bd798f4184166db62f56c34"
+    ],
+    [
+      "Spec.P256.Montgomery.lemma3",
+      2,
+      2,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "equation_Spec.P256.Montgomery.prime",
+        "int_inversion", "int_typing",
+        "lemma_Spec.P256.Montgomery.p256_prime_value",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_439f132f0bc824e375b93f07570d37f0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "f133eb19252e3cb4d739ab2b97d1bf36"
+    ],
+    [
+      "Spec.P256.Montgomery.lemma_less_than_primes",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nonzero",
+        "refinement_interpretation_Tm_refine_0766302b68bb44ab7aff8c4d8be0b46f"
+      ],
+      0,
+      "5c7ef75be58048aa3fe2cf9f689beb4e"
+    ],
+    [
+      "Spec.P256.Montgomery.mult_4",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "243465a38fc50d975a2c1e51c3b0d51d"
+    ],
+    [
+      "Spec.P256.Montgomery.mult_4",
+      2,
+      2,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "equation_Lib.NatMod.nat_mod", "equation_Prims.nat",
+        "equation_Prims.nonzero", "equation_Prims.pos",
+        "equation_Spec.P256.Montgomery.modp_inv",
+        "equation_Spec.P256.Montgomery.modp_inv2",
+        "equation_Spec.P256.Montgomery.prime",
+        "equation_Spec.P256.Montgomery.s",
+        "function_token_typing_Prims.__cache_version_number__",
+        "int_inversion", "int_typing", "lemma_FStar.UInt.pow2_values",
+        "lemma_Spec.P256.Montgomery.p256_prime_value",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Division",
+        "primitive_Prims.op_Equality",
+        "primitive_Prims.op_GreaterThanOrEqual",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_0766302b68bb44ab7aff8c4d8be0b46f",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_7e4a810ada5b81e8eaff8392bb90813a",
+        "refinement_interpretation_Tm_refine_83ae61d4402b38854344af4aae0038e7",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
+        "typing_Lib.NatMod.nat_mod_v", "typing_Prims.pow2",
+        "typing_Spec.P256.Montgomery.prime", "typing_Spec.P256.Montgomery.s",
+        "typing_Spec.P256.Montgomery.to_elem"
+      ],
+      0,
+      "f515c9f1e929fd04aa123f725def5451"
+    ],
+    [
+      "Spec.P256.Montgomery.mult1",
+      1,
+      2,
+      1,
+      [ "@query" ],
+      0,
+      "05b3008fff3db44732250689da33ddc6"
+    ],
+    [
+      "Spec.P256.Montgomery.fromDomain",
+      1,
+      2,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "equation_Spec.P256.Montgomery.prime",
+        "int_typing", "lemma_Spec.P256.Montgomery.p256_prime_value",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "8a7e9ffe3f1c977a37a71b57b125b5a8"
+    ],
+    [
+      "Spec.P256.Montgomery.square",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_Spec.P256.Montgomery.multWithoutRepeat",
+        "refinement_interpretation_Tm_refine_49eba2811c63b2ad8c9fc05ee54306d4",
+        "typing_Spec.P256.Montgomery.mult_4"
+      ],
+      0,
+      "3187bee701e08f42dd3bd36490e4ab19"
+    ],
+    [
+      "Spec.P256.Montgomery.cube",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_Spec.P256.Montgomery.multWithoutRepeat",
+        "equation_Spec.P256.Montgomery.square",
+        "refinement_interpretation_Tm_refine_49eba2811c63b2ad8c9fc05ee54306d4",
+        "typing_Spec.P256.Montgomery.mult_4",
+        "typing_Spec.P256.Montgomery.square"
+      ],
+      0,
+      "aa25923a059208d6c211dd338f919a33"
+    ],
+    [
+      "Spec.P256.Montgomery.multByTwo",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Lib.NatMod.nat_mod",
+        "equation_Prims.nat",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
+      ],
+      0,
+      "d554fe4b348dde72c150c07e5442078d"
+    ],
+    [
+      "Spec.P256.Montgomery.multByTwo",
+      2,
+      2,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "equation_FStar.Math.Lib.shift_left", "equation_Lib.NatMod.nat_mod",
+        "equation_Prims.nat", "equation_Spec.P256.Montgomery.prime",
+        "int_inversion", "int_typing", "lemma_FStar.UInt.pow2_values",
+        "lemma_Spec.P256.Montgomery.p256_prime_value",
+        "primitive_Prims.op_LessThan", "primitive_Prims.op_Modulus",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
+      ],
+      0,
+      "c33e2b8f22ec25265a121cd2808aaaab"
+    ],
+    [
+      "Spec.P256.Montgomery.multByThree",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Lib.NatMod.nat_mod",
+        "equation_Prims.nat",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
+      ],
+      0,
+      "70b9c3ef28acb65f4e4394d0256aab64"
+    ],
+    [
+      "Spec.P256.Montgomery.multByThree",
+      2,
+      2,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "equation_FStar.Math.Lib.shift_left", "equation_Lib.NatMod.nat_mod",
+        "equation_Prims.nat", "equation_Spec.P256.Montgomery.multByTwo",
+        "equation_Spec.P256.Montgomery.prime", "int_inversion", "int_typing",
+        "lemma_Lib.IntTypes.pow2_values",
+        "lemma_Spec.P256.Montgomery.p256_prime_value",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_LessThan",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_33669260e2e8ce349739437b594a4b76",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
+      ],
+      0,
+      "a2d6df76d3dc877f1bc22fdde26e0217"
+    ],
+    [
+      "Spec.P256.Montgomery.multByFour",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Lib.NatMod.nat_mod",
+        "equation_Prims.nat",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
+      ],
+      0,
+      "b51c249230aee217a9f40d8e14ac7971"
+    ],
+    [
+      "Spec.P256.Montgomery.multByFour",
+      2,
+      2,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "equation_FStar.Math.Lib.shift_left", "equation_Lib.NatMod.nat_mod",
+        "equation_Prims.nat", "equation_Spec.P256.Montgomery.prime",
+        "int_inversion", "int_typing", "lemma_Lib.IntTypes.pow2_2",
+        "lemma_Spec.P256.Montgomery.p256_prime_value",
+        "primitive_Prims.op_LessThan", "primitive_Prims.op_Modulus",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
+      ],
+      0,
+      "ce9dd40d3da654f25634821000a5e8ce"
+    ],
+    [
+      "Spec.P256.Montgomery.multByEight",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Lib.NatMod.nat_mod",
+        "equation_Prims.nat",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
+      ],
+      0,
+      "fbe31ee1b764cac86b758f0e21eb0b16"
+    ],
+    [
+      "Spec.P256.Montgomery.multByEight",
+      2,
+      2,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "equation_FStar.Math.Lib.shift_left", "equation_Lib.NatMod.nat_mod",
+        "equation_Prims.nat", "equation_Spec.P256.Montgomery.prime",
+        "int_inversion", "int_typing", "lemma_Lib.IntTypes.pow2_3",
+        "lemma_Spec.P256.Montgomery.p256_prime_value",
+        "primitive_Prims.op_LessThan", "primitive_Prims.op_Modulus",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
+      ],
+      0,
+      "fb71a2469959d9550d32d43ce83a6035"
+    ],
+    [
+      "Spec.P256.Montgomery.multByMinusThree",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Lib.NatMod.nat_mod",
+        "equation_Prims.nat",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
+      ],
+      0,
+      "d0e6ceda8a502448a01f97542b2b27fa"
+    ],
+    [
+      "Spec.P256.Montgomery.multByMinusThree",
+      2,
+      2,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "equation_FStar.Math.Lib.shift_left", "equation_Lib.NatMod.nat_mod",
+        "equation_Prims.nat", "equation_Spec.P256.Montgomery.multByThree",
+        "equation_Spec.P256.Montgomery.multByTwo",
+        "equation_Spec.P256.Montgomery.op_Subtraction_Percent",
+        "equation_Spec.P256.Montgomery.prime", "int_inversion", "int_typing",
+        "lemma_Lib.IntTypes.pow2_values",
+        "lemma_Spec.P256.Montgomery.p256_prime_value",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_LessThan",
+        "primitive_Prims.op_Minus", "primitive_Prims.op_Modulus",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_33669260e2e8ce349739437b594a4b76",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
+        "refinement_interpretation_Tm_refine_e8c3be25ee741a6e253e8bf7dba318ea",
+        "typing_Spec.P256.Montgomery.multByTwo",
+        "typing_Spec.P256.Montgomery.op_Subtraction_Percent",
+        "typing_Spec.P256.Montgomery.prime"
+      ],
+      0,
+      "dac9712288568dfd7cb610742e2d7eb4"
+    ],
+    [
+      "Spec.P256.Montgomery._point_double",
+      1,
+      2,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "assumption_Spec.P256.Montgomery.jacobianNat__uu___haseq",
+        "data_elim_Spec.P256.Montgomery.JacobianNat",
+        "equation_Lib.NatMod.nat_mod", "equation_Prims.nat",
+        "equation_Spec.P256.Montgomery.multWithoutRepeat",
+        "equation_Spec.P256.Montgomery.op_Plus_Percent",
+        "equation_Spec.P256.Montgomery.op_Subtraction_Percent",
+        "equation_Spec.P256.Montgomery.pointAtInfinity",
+        "equation_Spec.P256.Montgomery.prime",
+        "equation_Spec.P256.Montgomery.square",
+        "fuel_guarded_inversion_Spec.P256.Montgomery.jacobianNat",
+        "int_typing", "lemma_Spec.P256.Montgomery.p256_prime_value",
+        "primitive_Prims.op_Modulus",
+        "proj_equation_Spec.P256.Montgomery.JacobianNat_xN",
+        "proj_equation_Spec.P256.Montgomery.JacobianNat_yN",
+        "proj_equation_Spec.P256.Montgomery.JacobianNat_zN",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_49eba2811c63b2ad8c9fc05ee54306d4",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
+        "typing_Spec.P256.Montgomery.__proj__JacobianNat__item__xN",
+        "typing_Spec.P256.Montgomery.__proj__JacobianNat__item__yN",
+        "typing_Spec.P256.Montgomery.__proj__JacobianNat__item__zN",
+        "typing_Spec.P256.Montgomery.mult_4",
+        "typing_Spec.P256.Montgomery.pointAtInfinity",
+        "typing_Spec.P256.Montgomery.square"
+      ],
+      0,
+      "bb95338e2992aae2b1d381a0d33017f7"
+    ],
+    [
+      "Spec.P256.Montgomery._point_add",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "assumption_Spec.P256.Montgomery.jacobianNat__uu___haseq",
+        "data_elim_Spec.P256.Montgomery.JacobianNat",
+        "equation_Lib.NatMod.nat_mod", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Spec.P256.Montgomery.cube",
+        "equation_Spec.P256.Montgomery.multWithoutRepeat",
+        "equation_Spec.P256.Montgomery.op_Subtraction_Percent",
+        "equation_Spec.P256.Montgomery.pointAtInfinity",
+        "equation_Spec.P256.Montgomery.prime",
+        "equation_Spec.P256.Montgomery.square",
+        "fuel_guarded_inversion_Spec.P256.Montgomery.jacobianNat",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "primitive_Prims.op_Modulus",
+        "proj_equation_Spec.P256.Montgomery.JacobianNat_xN",
+        "proj_equation_Spec.P256.Montgomery.JacobianNat_yN",
+        "proj_equation_Spec.P256.Montgomery.JacobianNat_zN",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_49eba2811c63b2ad8c9fc05ee54306d4",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
+        "typing_Spec.P256.Montgomery.__proj__JacobianNat__item__xN",
+        "typing_Spec.P256.Montgomery.__proj__JacobianNat__item__yN",
+        "typing_Spec.P256.Montgomery.__proj__JacobianNat__item__zN",
+        "typing_Spec.P256.Montgomery.cube",
+        "typing_Spec.P256.Montgomery.multWithoutRepeat",
+        "typing_Spec.P256.Montgomery.mult_4",
+        "typing_Spec.P256.Montgomery.op_Subtraction_Percent",
+        "typing_Spec.P256.Montgomery.pointAtInfinity",
+        "typing_Spec.P256.Montgomery.square"
+      ],
+      0,
+      "2b3a703585083c62499380e9a396d0dc"
+    ],
+    [
+      "Spec.P256.Montgomery.ith_bit",
+      1,
+      0,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "constructor_distinct_Lib.IntTypes.S16",
+        "constructor_distinct_Lib.IntTypes.S8",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "equality_tok_Lib.IntTypes.PUB@tok",
+        "equality_tok_Lib.IntTypes.U32@tok",
+        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
+        "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.uint8",
+        "equation_Lib.IntTypes.unsigned", "equation_Lib.Sequence.lseq",
+        "equation_Lib.Sequence.seq", "equation_Prims.nat",
+        "equation_Spec.P256.Montgomery.scalar",
+        "function_token_typing_Lib.IntTypes.uint8", "int_inversion",
+        "int_typing", "lemma_FStar.UInt.pow2_values",
+        "lemma_Lib.IntTypes.v_mk_int", "primitive_Prims.op_Division",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_31c7d3d85d92cb942c95a78642e657c7",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
+        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
+        "typing_FStar.Seq.Base.length", "typing_Lib.IntTypes.bits",
+        "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok",
+        "typing_tok_Lib.IntTypes.U8@tok"
+      ],
+      0,
+      "5095d04b69c566c174eb29a2c87aecff"
+    ],
+    [
+      "Spec.P256.Montgomery.montgomery_ladder_",
+      1,
+      0,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "binder_x_99c476b49b206711af32ae5aedb16226_3",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "equality_tok_Lib.IntTypes.U8@tok", "equality_tok_Prims.LexTop@tok",
+        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
+        "function_token_typing_Prims.__cache_version_number__",
+        "int_inversion", "int_typing", "primitive_Prims.op_Equality",
+        "primitive_Prims.op_GreaterThan", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_31c7d3d85d92cb942c95a78642e657c7",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_a0b1c226f82a1ecf042650cfeea985f9",
+        "well-founded-ordering-on-nat"
+      ],
+      0,
+      "e82d71b6601e24d48b7c0802db81ba78"
+    ],
+    [
+      "Spec.P256.Montgomery.norm",
+      1,
+      0,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "data_elim_Spec.P256.Montgomery.JacobianNat",
+        "equation_Lib.NatMod.nat_mod", "equation_Prims.nat",
+        "equation_Spec.P256.Montgomery.op_Star_Percent",
+        "equation_Spec.P256.Montgomery.prime",
+        "fuel_guarded_inversion_Spec.P256.Montgomery.jacobianNat",
+        "int_typing", "lemma_Spec.P256.Montgomery.p256_prime_value",
+        "primitive_Prims.op_Modulus", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
+      ],
+      0,
+      "dbe06801c39a584a543dafd27145653c"
+    ]
+  ]
+]

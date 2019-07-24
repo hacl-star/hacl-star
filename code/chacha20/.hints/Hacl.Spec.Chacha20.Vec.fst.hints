@@ -32,7 +32,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "46fc830bdbf6849ce38f23531dc25486"
+      "3663da2aedeaf32386a48b69d942bbff"
     ],
     [
       "Hacl.Spec.Chacha20.Vec.block1",
@@ -241,7 +241,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "d3efc39fa97c446cd64d66dfe4fbe588"
+      "53a3f526a5e3502fa47a9adf8901c006"
     ],
     [
       "Hacl.Spec.Chacha20.Vec.quarter_round",
@@ -278,7 +278,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "690830d7d3b01fee366a51dd1bcc176c"
+      "06b119c6265bda8112687523342f0dcb"
     ],
     [
       "Hacl.Spec.Chacha20.Vec.column_round",
@@ -644,7 +644,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "24d0a56bb0039bde5736ba61973d1c5a"
+      "cbdef97ffe8e806e5ad4be9d34986feb"
     ],
     [
       "Hacl.Spec.Chacha20.Vec.transpose4",
@@ -706,7 +706,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "a699879655a6670b6a7809230698b5c7"
+      "251ab81428a4bbaec769c7b68d4d7a64"
     ],
     [
       "Hacl.Spec.Chacha20.Vec.transpose8x8",
@@ -773,7 +773,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "654218d781ea93d4dfeff73e7e63479c"
+      "ac178cb8b88bfd3d50cb3f9d32ea982f"
     ],
     [
       "Hacl.Spec.Chacha20.Vec.transpose8",
@@ -835,7 +835,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "766d6f74de3416ba65ad93ec6b4241b9"
+      "5d72ed9a8a075de2f01154be96a30cbc"
     ],
     [
       "Hacl.Spec.Chacha20.Vec.transpose",
@@ -852,7 +852,7 @@
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42"
       ],
       0,
-      "bb5390d15ba36d70e63d0a8306ef8bac"
+      "259b6bb62a82ff627439f65ec5e7adcb"
     ],
     [
       "Hacl.Spec.Chacha20.Vec.store_blocks_inner",
@@ -902,7 +902,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "39103422087fb2e535571b0920d2283f"
+      "5de13c536a99accb71f4e38801e109ef"
     ],
     [
       "Hacl.Spec.Chacha20.Vec.store_blocks",
@@ -940,7 +940,7 @@
         "typing_tok_Lib.IntTypes.U8@tok", "unit_typing"
       ],
       0,
-      "4b3b58a534ce25ef4c0bee53e408b58a"
+      "6dcc2f68fd79c716972ec3d318546a44"
     ],
     [
       "Hacl.Spec.Chacha20.Vec.load_blocks_inner",
@@ -979,7 +979,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "489029827c2b62a484fdffc9d2856149"
+      "b68b7f9af0d98692d86e2b2c93bfd88b"
     ],
     [
       "Hacl.Spec.Chacha20.Vec.load_blocks",
@@ -1050,7 +1050,7 @@
       1,
       [ "@query", "primitive_Prims.op_Multiply" ],
       0,
-      "4ac04b6d67cbf9e0d85e698ef8acdf1b"
+      "0a3869359bc6274fc324c9c02839ee11"
     ],
     [
       "Hacl.Spec.Chacha20.Vec.chacha20_encrypt_last",
@@ -1147,12 +1147,9 @@
       1,
       1,
       1,
-      [
-        "@query", "equation_Hacl.Spec.Chacha20.Vec.size_block",
-        "projection_inverse_BoxInt_proj_0"
-      ],
+      [ "@query" ],
       0,
-      "dd4da8107b0b8ae1e9c805ca4ee83549"
+      "286076aa5a82ad4aa954ff0edaf5d079"
     ]
   ]
 ]

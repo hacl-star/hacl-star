@@ -346,7 +346,7 @@ let blake2_compress s m offset flag =
   let h0 = ST.get () in
   [@inline_let]
   let spec _ h1 = live h1 s /\ h1.[|s|] == Spec.blake2_compress Spec.Blake2S h0.[|s|] h0.[|m|] offset flag in
-  salloc1_trivial h0 (size 16) (u32 0) (Ghost.hide (loc s)) spec
+  salloc1 h0 (size 16) (u32 0) (Ghost.hide (loc s)) spec
   (fun wv ->
     blake2_compress1 wv s m offset flag;
     blake2_compress2 wv m;
@@ -363,11 +363,11 @@ val blake2s_update_block:
                          /\ h1.[|hash|] == Spec.blake2_update_block Spec.Blake2S (uint_v prev) h0.[|d|] h0.[|hash|]))
 
 let blake2s_update_block hash prev d =
-  uintv_extensionality prev (u64 (uint_v prev));
+  //uintv_extensionality prev (u64 (uint_v prev));
   let h0 = ST.get () in
   [@inline_let]
   let spec _ h1 = live h1 hash /\ h1.[|hash|] == Spec.blake2_update_block Spec.Blake2S (uint_v prev) h0.[|d|] h0.[|hash|] in
-  salloc1_trivial h0 (size 16) (u32 0) (Ghost.hide (loc hash)) spec
+  salloc1 h0 (size 16) (u32 0) (Ghost.hide (loc hash)) spec
   (fun block_w ->
      uints_from_bytes_le block_w d;
      let offset = prev in
@@ -431,7 +431,7 @@ val blake2s_init:
 [@ Substitute ]
 let blake2s_init hash kk k nn =
   let h0 = ST.get () in
-  salloc1_trivial h0 (size 64) (u8 0) (Ghost.hide (loc hash))
+  salloc1 h0 (size 64) (u8 0) (Ghost.hide (loc hash))
   (fun _ h1 -> live h1 hash /\ h1.[|hash|] == Spec.blake2_init Spec.Blake2S (v kk) h0.[|k|] (v nn))
   (fun key_block ->
     blake2s_init_hash hash kk nn;
@@ -449,7 +449,7 @@ val blake2s_update_last:
                          /\ h1.[|hash|] == Spec.Blake2.blake2_update_last Spec.Blake2S (uint_v prev) (v len) h0.[|last|] h0.[|hash|]))
 
 let blake2s_update_last hash prev len last =
-  uintv_extensionality prev (u64 (uint_v prev));
+  //uintv_extensionality prev (u64 (uint_v prev));
   push_frame ();
   let last_block = create 64ul (u8 0) in
   let last_block_w = create 16ul (u32 0) in
@@ -472,7 +472,7 @@ val blake2s_finish:
 
 let blake2s_finish nn output hash =
   let h0 = ST.get () in
-  salloc1_trivial h0 (size 32) (u8 0) (Ghost.hide (loc output))
+  salloc1 h0 (size 32) (u8 0) (Ghost.hide (loc output))
   (fun _ h1 -> live h1 output /\ h1.[|output|] == Spec.Blake2.blake2_finish Spec.Blake2S h0.[|hash|] (v nn))
   (fun full ->
     uints_to_bytes_le (size 8) full hash;
@@ -551,7 +551,7 @@ val blake2s:
 
 let blake2s nn output ll d kk k =
   let h0 = ST.get () in
-  salloc1_trivial h0 (size 8) (u32 0) (Ghost.hide (loc output))
+  salloc1 h0 (size 8) (u32 0) (Ghost.hide (loc output))
   (fun _ h1 -> live h1 output /\ h1.[|output|] == Spec.Blake2.blake2s h0.[|d|] (v kk) h0.[|k|] (v nn))
   (fun hash ->
     blake2s_init hash kk k nn;

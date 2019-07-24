@@ -6,7 +6,7 @@ open FStar.HyperStack.All
 open Lib.IntTypes
 open Lib.Buffer
 open Lib.ByteBuffer
-open Lib.Vec128
+open Lib.IntVector
 
 open Hacl.AES_128.NI
 open Hacl.Gf128.NI
@@ -14,8 +14,7 @@ open Hacl.Gf128.NI
 module ST = FStar.HyperStack.ST
 
 #set-options "--z3rlimit 50"
-type aes_gcm_ctx = lbuffer vec128 22ul
-
+type aes_gcm_ctx = lbuffer (vec_t U128 1) 22ul
 
 val aes128_gcm_init:
     ctx: aes_gcm_ctx
@@ -30,14 +29,14 @@ let aes128_gcm_init ctx key nonce =
   let gcm_key = create 16ul (u8 0) in
   let tag_mix = create 16ul (u8 0) in
   let nonce0 = create 12ul (u8 0) in
-  let aes_ctx = sub ctx (size 0) (size 16) in
+  let aes_ctx = sub ctx (size 0) (size 12) in //!!before it was 16
   let gcm_ctx = sub ctx (size 16) (size 5) in
   aes128_init aes_ctx key nonce0;
   aes128_key_block gcm_key aes_ctx (size 0);
   aes128_set_nonce aes_ctx nonce;
   aes128_key_block tag_mix aes_ctx (size 1);
   gcm_init gcm_ctx gcm_key;
-  ctx.(21ul) <- vec128_load_le tag_mix;
+  ctx.(21ul) <- vec_load_le U128 1 tag_mix;
   pop_frame()
 
 #reset-options "--z3rlimit 500 --max_fuel 1"
@@ -61,7 +60,7 @@ val aes128_gcm_encrypt:
 let aes128_gcm_encrypt ctx len out text aad_len aad =
   push_frame();
   let cip = sub out (size 0) len in
-  let aes_ctx = sub ctx (size 0) (size 16) in
+  let aes_ctx = sub ctx (size 0) (size 12) in //!!before it was 16
   aes128_ctr len cip text aes_ctx (size 2);
   let gcm_ctx = sub ctx (size 16) (size 5) in
   let tag_mix = ctx.(21ul) in
@@ -72,9 +71,9 @@ let aes128_gcm_encrypt ctx len out text aad_len aad =
   uint_to_bytes_be #U64 (sub tmp (size 8) (size 8)) (to_u64 (len *. 8ul));
   gcm_update_blocks gcm_ctx (size 16) tmp;
   gcm_emit tmp gcm_ctx;
-  let tmp_vec = vec128_load_le tmp in
-  let tmp_vec = vec128_xor tmp_vec tag_mix in
-  vec128_store_le (sub out len (size 16)) tmp_vec;
+  let tmp_vec = vec_load_le U128 1 tmp in
+  let tmp_vec = vec_xor tmp_vec tag_mix in
+  vec_store_le (sub out len (size 16)) tmp_vec;
   pop_frame()
 
 
@@ -102,7 +101,7 @@ let aes128_gcm_decrypt ctx len out cipher aad_len aad =
   let result = sub scratch 17ul 1ul in
   let ciphertext = sub cipher 0ul len in
   let tag = sub cipher len (size 16) in
-  let aes_ctx = sub ctx (size 0) (size 16) in
+  let aes_ctx = sub ctx (size 0) (size 12) in //!!before it was 16
   let gcm_ctx = sub ctx (size 16) (size 5) in
   let tag_mix = ctx.(21ul) in
   let h1 = ST.get () in
@@ -112,9 +111,9 @@ let aes128_gcm_decrypt ctx len out cipher aad_len aad =
   uint_to_bytes_be #U64 (sub text (size 8) (size 8)) (to_u64 (len *. size 8));
   gcm_update_blocks gcm_ctx (size 16) text;
   gcm_emit text gcm_ctx;
-  let text_vec = vec128_load_le text in
-  let text_vec = vec128_xor text_vec tag_mix in
-  vec128_store_le text text_vec;
+  let text_vec = vec_load_le U128 1 text in
+  let text_vec = vec_xor text_vec tag_mix in
+  vec_store_le text text_vec;
   let h7 = ST.get () in
   loop_nospec #h7 (size 16) result
     (fun i -> result.(0ul) <- result.(0ul) |. (text.(i) ^. tag.(i)));

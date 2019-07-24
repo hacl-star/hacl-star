@@ -24,6 +24,7 @@ display:
 	@echo "Build"
 	@echo "- 'make build' will collect code and generate static/shared librairies"
 	@echo "- 'make build-experimental' same, with experimental code"
+	@echo "- 'make build/ml/libhacl.cmxa' will build an OCaml shared library from specs"
 
 
 #
@@ -51,16 +52,22 @@ code-verify:
 	@echo "Verifying Low* code"
 
 code-extract:
-	@echo "Extracting Low* code"
+	$(MAKE) -C code extract
 
-code-test:
-	@echo "Testing Low* code"
+code-snapshot: specs-verify
+	$(MAKE) snapshot -C code
+
+code-test: code-extract
+	$(MAKE) test-snapshot -C code
 
 build:
 	mkdir -p build && cd build && cmake .. && make
 
 build-experimental:
 	@echo "Build Experimental"
+
+build/ml/libhacl.cmxa:
+	$(MAKE) -f Makefile.OCaml
 
 #
 # Packaging helper
@@ -83,18 +90,18 @@ package: .package-banner
 
 CC = $(GCC)
 
-ci: .clean-banner .clean-git .clean-snapshots
+ci:
 	$(MAKE) lib-verify
 	$(MAKE) specs-verify
 	$(MAKE) specs-test
 # Temporary setting until code-verify, code-extract and code-test exist
 	$(MAKE) -C code/sha3
 	$(MAKE) -C code/blake2s
-	$(MAKE) -C code/chacha20 all verify
+	$(MAKE) -C code/chacha20
 	$(MAKE) -C code/poly1305
 	$(MAKE) -C code/chacha20poly1305
 	$(MAKE) -C code/curve25519
-	$(MAKE) -C code/experimental/aes-gcm
+	$(MAKE) -C code/experimental/aes-gcm || [[ "$(shell uname)" == "CYGWIN_NT"* ]]
 	$(MAKE) -C code/frodo/spec
 	$(MAKE) -C code/frodo/code TARGET=
 
@@ -115,8 +122,15 @@ clean-build:
 	rm -rf build
 	rm -rf build-experimental
 
-clean: .clean-banner clean-base clean-build
+clean-cache:
+	rm -rf .cache
+
+clean-hints:
+	rm -rf .hints
+
+clean: clean-base clean-build clean-cache
 
 # Colors
 NORMAL="\\033[0;39m"
 CYAN="\\033[1;36m"
+

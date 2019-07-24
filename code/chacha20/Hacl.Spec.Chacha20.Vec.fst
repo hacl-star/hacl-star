@@ -16,11 +16,6 @@ let size_key = 32
 let size_block = 64
 let size_nonce = 12
 
-(* TODO: Remove, left here to avoid breaking implementation *)
-let keylen = 32   (* in bytes *)
-let blocklen = 64 (* in bytes *)
-let noncelen = 12 (* in bytes *)
-
 type key = lbytes size_key
 type block1 = lbytes size_block
 type nonce = lbytes size_nonce
@@ -135,10 +130,10 @@ let transpose4x4 (vs:uint32xN 4 & uint32xN 4 & uint32xN 4 & uint32xN 4)
   let v1' = vec_interleave_high v0 v1 in
   let v2' = vec_interleave_low v2 v3 in
   let v3' = vec_interleave_high v2 v3 in
-  let v0'' = cast U32 4 (vec_interleave_low (cast U64 2 v0') (cast U64 2 v2')) in
-  let v1'' = cast U32 4 (vec_interleave_high (cast U64 2 v0') (cast U64 2 v2')) in
-  let v2'' = cast U32 4 (vec_interleave_low (cast U64 2 v1') (cast U64 2 v3')) in
-  let v3'' = cast U32 4 (vec_interleave_high (cast U64 2 v1') (cast U64 2 v3')) in
+  let v0'' = vec_interleave_low_n 2 v0' v2' in
+  let v1'' = vec_interleave_high_n 2 v0' v2' in
+  let v2'' = vec_interleave_low_n 2 v1' v3' in
+  let v3'' = vec_interleave_high_n 2 v1' v3' in
   (v0'',v1'',v2'',v3'')
 
 let transpose4 (st:state 4) : state 4 =
@@ -160,22 +155,22 @@ let transpose8x8 (vs:uint32xN 8 & uint32xN 8 & uint32xN 8 & uint32xN 8 & uint32x
   let v5' = vec_interleave_high v4 v5 in
   let v6' = vec_interleave_low v6 v7 in
   let v7' = vec_interleave_high v6 v7 in
-  let v0'' = cast U32 8 (vec_interleave_low (cast U64 4 v0') (cast U64 4 v2')) in
-  let v1'' = cast U32 8 (vec_interleave_high (cast U64 4 v0') (cast U64 4 v2')) in
-  let v2'' = cast U32 8 (vec_interleave_low (cast U64 4 v1') (cast U64 4 v3')) in
-  let v3'' = cast U32 8 (vec_interleave_high (cast U64 4 v1') (cast U64 4 v3')) in
-  let v4'' = cast U32 8 (vec_interleave_low (cast U64 4 v4') (cast U64 4 v6')) in
-  let v5'' = cast U32 8 (vec_interleave_high (cast U64 4 v4') (cast U64 4 v6')) in
-  let v6'' = cast U32 8 (vec_interleave_low (cast U64 4 v5') (cast U64 4 v7')) in
-  let v7'' = cast U32 8 (vec_interleave_high (cast U64 4 v5') (cast U64 4 v7')) in
-  let v0''' = cast U32 8 (vec_interleave_low (cast U128 2 v0'') (cast U128 2 v4'')) in
-  let v1''' = cast U32 8 (vec_interleave_high (cast U128 2 v0'') (cast U128 2 v4'')) in
-  let v2''' = cast U32 8 (vec_interleave_low (cast U128 2 v1'') (cast U128 2 v5'')) in
-  let v3''' = cast U32 8 (vec_interleave_high (cast U128 2 v1'') (cast U128 2 v5'')) in
-  let v4''' = cast U32 8 (vec_interleave_low (cast U128 2 v2'') (cast U128 2 v6'')) in
-  let v5''' = cast U32 8 (vec_interleave_high (cast U128 2 v2'') (cast U128 2 v6'')) in
-  let v6''' = cast U32 8 (vec_interleave_low (cast U128 2 v3'') (cast U128 2 v7'')) in
-  let v7''' = cast U32 8 (vec_interleave_high (cast U128 2 v3'') (cast U128 2 v7'')) in
+  let v0'' = vec_interleave_low_n 4 v0' v2' in
+  let v1'' = vec_interleave_high_n 4 v0' v2' in
+  let v2'' = vec_interleave_low_n 4 v1' v3' in
+  let v3'' = vec_interleave_high_n 4 v1' v3' in
+  let v4'' = vec_interleave_low_n 4 v4' v6' in
+  let v5'' = vec_interleave_high_n 4 v4' v6' in
+  let v6'' = vec_interleave_low_n 4 v5' v7' in
+  let v7'' = vec_interleave_high_n 4 v5' v7' in
+  let v0''' = vec_interleave_low_n 2 v0'' v4'' in
+  let v1''' = vec_interleave_high_n 2 v0'' v4'' in
+  let v2''' = vec_interleave_low_n 2 v1'' v5'' in
+  let v3''' = vec_interleave_high_n 2 v1'' v5'' in
+  let v4''' = vec_interleave_low_n 2 v2'' v6'' in
+  let v5''' = vec_interleave_high_n 2 v2'' v6'' in
+  let v6''' = vec_interleave_low_n 2 v3'' v7'' in
+  let v7''' = vec_interleave_high_n 2 v3'' v7'' in
   (v0''',v2''',v4''',v6''',v1''',v3''',v5''',v7''')
 
 let transpose8 (st:state 8) : state 8 =

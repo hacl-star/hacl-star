@@ -44,8 +44,7 @@ let rec update_multi
   (a:hash_alg)
   (hash:words_state a)
   (blocks:bytes_blocks a):
-  Tot (words_state a) (decreases (S.length blocks))
-=
+  Tot (words_state a) (decreases (S.length blocks)) = 
   if S.length blocks = 0 then
     hash
   else

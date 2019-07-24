@@ -10,7 +10,7 @@ open Hacl.Poly1305.Field32xN.Lemmas
 open Hacl.Impl.Poly1305.Lemmas
 module Vec = Hacl.Spec.Poly1305.Vec
 
-#reset-options "--z3rlimit 100 --max_fuel 0 --using_facts_from '* -FStar.Seq'"
+#set-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 1 --using_facts_from '* -FStar.Seq'"
 
 val lemma_feval_is_fas_nat_i:
   #w:lanes
@@ -61,7 +61,7 @@ let precomp_r5_fits_lemma #w r =
     precomp_r5_as_tup64 #w r 0;
     precomp_r5_as_tup64 #w r 1;
     precomp_r5_as_tup64 #w r 2;
-    precomp_r5_as_tup64 #w r 3
+    precomp_r5_as_tup64 #w r 3  
 
 val precomp_r5_fits_lemma2:
     #w:lanes
@@ -540,6 +540,8 @@ let fmul_r2_normalize50 (a0, a1, a2, a3, a4) (r0, r1, r2, r3, r4) (r20, r21, r22
   assert (felem_fits5 a (1, 2, 1, 1, 1));
   a
 
+#push-options "--z3rlimit 400 --max_fuel 1 --max_ifuel 0"
+
 val fmul_r2_normalize51:
     a:felem5 2
   -> fa1:felem5 2
@@ -579,6 +581,8 @@ let fmul_r2_normalize51 a fa1 =
     (as_nat5 (a0, a1, a2, a3, a4) % Vec.prime) (as_nat5 (a10, a11, a12, a13, a14)) Vec.prime;
   assert (felem_fits5 out (2, 4, 2, 2, 2));
   out
+
+#pop-options
 
 val fmul_r2_normalize5_lemma:
     acc:felem5 2
@@ -651,37 +655,36 @@ let fmul_r4_normalize50 acc fr fr2 fr3 fr4 =
   vec_interleave_low_lemma_uint64_4 r20 r10;
   let v34340 = vec_interleave_low r40 r30 in
   vec_interleave_low_lemma_uint64_4 r40 r30;
-  let r12340 = cast U64 4 (vec_interleave_low (cast U128 2 v34340) (cast U128 2 v12120)) in
-  lemma_vec_interleave_low_cast_64_4 v34340 v12120;
-  //assert (vec_v r12340 == create4 (vec_v r40).[0] (vec_v r30).[0] (vec_v r20).[0] (vec_v r10).[0]);
+  let r12340 = vec_interleave_low_n 2 v34340 v12120 in
+  vec_interleave_low_n_lemma_uint64_4_2 v34340 v12120;
 
   let v12121 = vec_interleave_low r21 r11 in
   vec_interleave_low_lemma_uint64_4 r21 r11;
   let v34341 = vec_interleave_low r41 r31 in
   vec_interleave_low_lemma_uint64_4 r41 r31;
-  let r12341 = cast U64 4 (vec_interleave_low (cast U128 2 v34341) (cast U128 2 v12121)) in
-  lemma_vec_interleave_low_cast_64_4 v34341 v12121;
+  let r12341 = vec_interleave_low_n 2 v34341 v12121 in
+  vec_interleave_low_n_lemma_uint64_4_2 v34341 v12121;
 
   let v12122 = vec_interleave_low r22 r12 in
   vec_interleave_low_lemma_uint64_4 r22 r12;
   let v34342 = vec_interleave_low r42 r32 in
   vec_interleave_low_lemma_uint64_4 r42 r32;
-  let r12342 = cast U64 4 (vec_interleave_low (cast U128 2 v34342) (cast U128 2 v12122)) in
-  lemma_vec_interleave_low_cast_64_4 v34342 v12122;
+  let r12342 = vec_interleave_low_n 2 v34342 v12122 in
+  vec_interleave_low_n_lemma_uint64_4_2 v34342 v12122;
 
   let v12123 = vec_interleave_low r23 r13 in
   vec_interleave_low_lemma_uint64_4 r23 r13;
   let v34343 = vec_interleave_low r43 r33 in
   vec_interleave_low_lemma_uint64_4 r43 r33;
-  let r12343 = cast U64 4 (vec_interleave_low (cast U128 2 v34343) (cast U128 2 v12123)) in
-  lemma_vec_interleave_low_cast_64_4 v34343 v12123;
+  let r12343 = vec_interleave_low_n 2 v34343 v12123 in
+  vec_interleave_low_n_lemma_uint64_4_2 v34343 v12123;
 
   let v12124 = vec_interleave_low r24 r14 in
   vec_interleave_low_lemma_uint64_4 r24 r14;
   let v34344 = vec_interleave_low r44 r34 in
   vec_interleave_low_lemma_uint64_4 r44 r34;
-  let r12344 = cast U64 4 (vec_interleave_low (cast U128 2 v34344) (cast U128 2 v12124)) in
-  lemma_vec_interleave_low_cast_64_4 v34344 v12124;
+  let r12344 = vec_interleave_low_n 2 v34344 v12124 in
+  vec_interleave_low_n_lemma_uint64_4_2 v34344 v12124;
 
   let fr1234 = (r12340, r12341, r12342, r12343, r12344) in
   eq_intro (feval5 fr1234) (create4 (feval5 fr4).[0] (feval5 fr3).[0] (feval5 fr2).[0] (feval5 fr).[0]);
@@ -696,15 +699,15 @@ val lemma_fmul_r4_normalize51:
     #m:scale32{m <= 2}
   -> o:uint64xN 4{felem_fits1 o m}
   -> Lemma
-    (let v00 = cast U64 4 (vec_interleave_high (cast U128 2 o) (cast U128 2 o)) in
+    (let v00 = vec_interleave_high_n 2 o o in
     let v10 = vec_add_mod o v00 in
     let v20 = vec_add_mod v10 (vec_permute4 v10 1ul 1ul 1ul 1ul) in
     felem_fits1 v20 (4 * m) /\
     (uint64xN_v v20).[0] ==
     (uint64xN_v o).[0] + (uint64xN_v o).[1] + (uint64xN_v o).[2] + (uint64xN_v o).[3])
 let lemma_fmul_r4_normalize51 #m o =
-  let v00 = cast U64 4 (vec_interleave_high (cast U128 2 o) (cast U128 2 o)) in
-  lemma_vec_interleave_high_cast_64_4 o o;
+  let v00 = vec_interleave_high_n 2 o o in
+  vec_interleave_high_n_lemma_uint64_4_2 o o;
   let v10 = vec_add_mod o v00 in
   FStar.Math.Lemmas.modulo_lemma ((uint64xN_v o).[0] + (uint64xN_v v00).[0]) (pow2 64);
   FStar.Math.Lemmas.modulo_lemma ((uint64xN_v o).[1] + (uint64xN_v v00).[1]) (pow2 64);
@@ -765,27 +768,27 @@ val fmul_r4_normalize51:
       Vec.pfadd (Vec.pfadd (Vec.pfadd (feval5 a).[0] (feval5 a).[1]) (feval5 a).[2]) (feval5 a).[3]))
 let fmul_r4_normalize51 fa =
   let (o0, o1, o2, o3, o4) = fa in
-  let v00 = cast U64 4 (vec_interleave_high (cast U128 2 o0) (cast U128 2 o0)) in
+  let v00 = vec_interleave_high_n 2 o0 o0 in
   let v10 = vec_add_mod o0 v00 in
   let v20 = vec_add_mod v10 (vec_permute4 v10 1ul 1ul 1ul 1ul) in
   lemma_fmul_r4_normalize51 #1 o0;
 
-  let v01 = cast U64 4 (vec_interleave_high (cast U128 2 o1) (cast U128 2 o1)) in
+  let v01 = vec_interleave_high_n 2 o1 o1 in
   let v11 = vec_add_mod o1 v01 in
   let v21 = vec_add_mod v11 (vec_permute4 v11 1ul 1ul 1ul 1ul) in
   lemma_fmul_r4_normalize51 #2 o1;
 
-  let v02 = cast U64 4 (vec_interleave_high (cast U128 2 o2) (cast U128 2 o2)) in
+  let v02 = vec_interleave_high_n 2 o2 o2 in
   let v12 = vec_add_mod o2 v02 in
   let v22 = vec_add_mod v12 (vec_permute4 v12 1ul 1ul 1ul 1ul) in
   lemma_fmul_r4_normalize51 #1 o2;
 
-  let v03 = cast U64 4 (vec_interleave_high (cast U128 2 o3) (cast U128 2 o3)) in
+  let v03 = vec_interleave_high_n 2 o3 o3 in
   let v13 = vec_add_mod o3 v03 in
   let v23 = vec_add_mod v13 (vec_permute4 v13 1ul 1ul 1ul 1ul) in
   lemma_fmul_r4_normalize51 #1 o3;
 
-  let v04 = cast U64 4 (vec_interleave_high (cast U128 2 o4) (cast U128 2 o4)) in
+  let v04 = vec_interleave_high_n 2 o4 o4 in
   let v14 = vec_add_mod o4 v04 in
   let v24 = vec_add_mod v14 (vec_permute4 v14 1ul 1ul 1ul 1ul) in
   lemma_fmul_r4_normalize51 #1 o4;
@@ -830,21 +833,23 @@ val load_felem5_lemma:
       (fun i -> (uint64xN_v hi).[i] * pow2 64 + (uint64xN_v lo).[i]))
 let load_felem5_lemma #w lo hi =
   let f = load_felem5 #w lo hi in
-  let res = createi #Vec.pfelem w (fun i -> (uint64xN_v hi).[i] * pow2 64 + (uint64xN_v lo).[i]) in
-
   match w with
   | 1 ->
     load_felem5_lemma_i #w lo hi 0;
+    let res = createi #Vec.pfelem w (fun i -> (uint64xN_v hi).[i] * pow2 64 + (uint64xN_v lo).[i]) in
     eq_intro (feval5 f) res
   | 2 ->
     load_felem5_lemma_i #w lo hi 0;
     load_felem5_lemma_i #w lo hi 1;
+    let res = createi #Vec.pfelem w (fun i -> (uint64xN_v hi).[i] * pow2 64 + (uint64xN_v lo).[i]) in
+
     eq_intro (feval5 f) res
   | 4 ->
     load_felem5_lemma_i #w lo hi 0;
     load_felem5_lemma_i #w lo hi 1;
     load_felem5_lemma_i #w lo hi 2;
     load_felem5_lemma_i #w lo hi 3;
+    let res = createi #Vec.pfelem w (fun i -> (uint64xN_v hi).[i] * pow2 64 + (uint64xN_v lo).[i]) in
     eq_intro (feval5 f) res
 
 val load_acc5_2_lemma:

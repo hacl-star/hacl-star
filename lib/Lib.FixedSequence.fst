@@ -148,7 +148,8 @@ let rec upd_ (#a:Type) (#len:flen) (s:fseq a len) (i:nat{i < len}) (x:a) : fseq_
   else fst s,upd_ #a #(len-1) (rest s) (i-1) x
 
 inline_for_extraction
-let upd (#a:Type) (#len:flen) (s:fseq a len) (i:nat{i < len}) (x:a) : fseq a len =
+val upd: #a:Type -> #len:flen -> s:fseq a len -> i:nat{i < len} -> x:a -> fseq a len
+let upd (#a:Type) (#len:flen) (s:fseq a len) (i:nat{i < len}) (x:a) : fseq a len = 
   normalize_term (upd_ s i x)
 
 inline_for_extraction noextract
@@ -195,23 +196,23 @@ unfold let op_String_Access #a #len = index #a #len
 unfold let op_String_Assignment #a #len = upd #a #len
 
 let funit (i:nat) = unit
-let fseq_to_bytes_be (#t:inttype) (#l:secrecy_level) (#len:flen) (s:fseq (uint_t t l) len) : Lib.ByteSequence.lbytes_l l (numbytes t * len) =
+let fseq_to_bytes_be (#t:inttype{unsigned t}) (#l:secrecy_level) (#len:flen) (s:fseq (uint_t t l) len) : Lib.ByteSequence.lbytes_l l (numbytes t * len) =
     assert_norm (len * numbytes t < pow2 32);
     let _, o = normalize_term (Lib.Sequence.generate_blocks (numbytes t) len len funit
 		(fun i u -> (),Lib.ByteSequence.uint_to_bytes_be #t #l s.[i]) ()) in
     o
 
-let fseq_to_bytes_le (#t:inttype) (#l:secrecy_level) (#len:flen) (s:fseq (uint_t t l) len) : Lib.ByteSequence.lbytes_l l (numbytes t * len) =
+let fseq_to_bytes_le (#t:inttype{unsigned t}) (#l:secrecy_level) (#len:flen) (s:fseq (uint_t t l) len) : Lib.ByteSequence.lbytes_l l (numbytes t * len) =
     assert_norm (len * numbytes t < pow2 32);
     let _, o = normalize_term (Lib.Sequence.generate_blocks (numbytes t) len len funit
 		(fun i u -> (),Lib.ByteSequence.uint_to_bytes_le #t #l s.[i]) ()) in
     o
 
-let fseq_from_bytes_be (#t:inttype{t <> U1}) (#l:secrecy_level) (#len:flen) (b:Lib.ByteSequence.lbytes_l l (numbytes t * len)) : (s:fseq (uint_t t l) len) =
+let fseq_from_bytes_be (#t:inttype{unsigned t /\ t <> U1}) (#l:secrecy_level) (#len:flen) (b:Lib.ByteSequence.lbytes_l l (numbytes t * len)) : (s:fseq (uint_t t l) len) =
     normalize_term (createi #(uint_t t l) len
       (fun i -> Lib.ByteSequence.uint_from_bytes_be (Lib.Sequence.sub b (i * numbytes t) (numbytes t))))
 
-let fseq_from_bytes_le (#t:inttype{t <> U1}) (#l:secrecy_level) (#len:flen) (b:Lib.ByteSequence.lbytes_l l (numbytes t * len)) : (s:fseq (uint_t t l) len) =
+let fseq_from_bytes_le (#t:inttype{unsigned t /\ t <> U1}) (#l:secrecy_level) (#len:flen) (b:Lib.ByteSequence.lbytes_l l (numbytes t * len)) : (s:fseq (uint_t t l) len) =
     normalize_term (createi #(uint_t t l) len
       (fun i -> Lib.ByteSequence.uint_from_bytes_le (Lib.Sequence.sub b (i * numbytes t) (numbytes t))))
 
@@ -219,7 +220,7 @@ inline_for_extraction
 let (+|) #t #l #len = map2 #(uint_t t l) #(uint_t t l) #(uint_t t l) #len ( +. )
 
 inline_for_extraction
-let ( *| ) (#t:inttype{t <> U128}) #l #len = map2 #(uint_t t l) #(uint_t t l) #(uint_t t l) #len ( *. )
+let ( *| ) (#t:inttype{unsigned t /\ t <> U128}) #l #len = map2 #(uint_t t l) #(uint_t t l) #(uint_t t l) #len ( *. )
 
 inline_for_extraction
 let (-|) #t #l #len = map2 #(uint_t t l) #(uint_t t l) #(uint_t t l) #len ( -. )

@@ -4,11 +4,11 @@ open FStar.Mul
 open Lib.Sequence
 open Lib.IntTypes
 
-let v_inttype = t:inttype{t <> U1}
+let v_inttype = t:inttype{unsigned t /\ ~(U1? t)}
 
 let width = n:size_nat{n == 1 \/ n == 2 \/ n == 4 \/ n == 8 \/ n == 16 \/ n == 32}
 let vec_index (w:width) = n:size_t{v n < w}
-let vec_v_t (t:v_inttype) (w:width) = lseq (uint_t t SEC) w
+let vec_v_t (t:v_inttype{unsigned t}) (w:width) = lseq (uint_t t SEC) w
 
 inline_for_extraction
 val vec_t: t:v_inttype -> w:width -> Type0
@@ -17,10 +17,10 @@ inline_for_extraction noextract
 val vec_v: #t:v_inttype -> #w:width -> vec_t t w -> vec_v_t t w
 
 inline_for_extraction noextract
-val vec_zero: t:v_inttype -> w:width -> v:vec_t t w{vec_v v == create w (nat_to_uint 0)}
+val vec_zero: t:v_inttype -> w:width -> v:vec_t t w{vec_v v == create w (mk_int 0)}
 
 inline_for_extraction noextract
-val vec_counter: t:v_inttype -> w:width -> v:vec_t t w{vec_v v == createi w nat_to_uint}
+val vec_counter: t:v_inttype -> w:width -> v:vec_t t w{vec_v v == createi w mk_int}
 
 inline_for_extraction noextract
 val create2: #a:Type
@@ -218,22 +218,73 @@ inline_for_extraction noextract
 val vec_gte_mask: #t:v_inttype -> #w:width -> v1:vec_t t w -> v2:vec_t t w -> v3:vec_t t w{vec_v v3 == map2 gte_mask (vec_v v1) (vec_v v2)}
 
 inline_for_extraction noextract
+val cast: #t:v_inttype -> #w:width -> t':v_inttype -> w':width{bits t * w == bits t' * w'} -> vec_t t w -> vec_t t' w'
+
+inline_for_extraction noextract
 val vec_interleave_low: #t:v_inttype -> #w:width -> vec_t t w -> vec_t t w -> vec_t t w
 
-val vec_interleave_low_lemma2: #t:v_inttype -> b1:vec_t t 2 -> b2:vec_t t 2 -> Lemma
-  (ensures (vec_v (vec_interleave_low b1 b2) == create2 (vec_v b1).[0] (vec_v b2).[0]))
+inline_for_extraction noextract
+val vec_interleave_low_n: #t:v_inttype -> #w:width -> n:width{w % n == 0} -> vec_t t w -> vec_t t w -> vec_t t w
 
-val vec_interleave_low_lemma_uint64_4: b1:vec_t U64 4 -> b2:vec_t U64 4 -> Lemma
-  (ensures (vec_v (vec_interleave_low b1 b2) == create4 (vec_v b1).[0] (vec_v b2).[0] (vec_v b1).[2] (vec_v b2).[2]))
+val vec_interleave_low_lemma2: #t:v_inttype -> v1:vec_t t 2 -> v2:vec_t t 2 -> Lemma
+  (ensures (vec_v (vec_interleave_low v1 v2) == create2 (vec_v v1).[0] (vec_v v2).[0]))
+
+val vec_interleave_low_lemma_uint32_4: v1:vec_t U32 4 -> v2:vec_t U32 4 -> Lemma
+  (ensures (vec_v (vec_interleave_low v1 v2) == create4 (vec_v v1).[0] (vec_v v2).[0] (vec_v v1).[1] (vec_v v2).[1]))
+
+val vec_interleave_low_lemma_uint32_8: v1:vec_t U32 8 -> v2:vec_t U32 8 -> Lemma
+  (ensures (vec_v (vec_interleave_low v1 v2) ==
+    create8 (vec_v v1).[0] (vec_v v2).[0] (vec_v v1).[1] (vec_v v2).[1] (vec_v v1).[4] (vec_v v2).[4] (vec_v v1).[5] (vec_v v2).[5]))
+
+val vec_interleave_low_lemma_uint64_4: v1:vec_t U64 4 -> v2:vec_t U64 4 -> Lemma
+  (ensures (vec_v (vec_interleave_low v1 v2) == create4 (vec_v v1).[0] (vec_v v2).[0] (vec_v v1).[2] (vec_v v2).[2]))
+
+val vec_interleave_low_n_lemma_uint32_4_2: v1:vec_t U32 4 -> v2:vec_t U32 4 -> Lemma
+  (ensures (vec_v (vec_interleave_low_n 2 v1 v2) == create4 (vec_v v1).[0] (vec_v v1).[1] (vec_v v2).[0] (vec_v v2).[1]))
+
+val vec_interleave_low_n_lemma_uint32_8_2: v1:vec_t U32 8 -> v2:vec_t U32 8 -> Lemma
+  (ensures (vec_v (vec_interleave_low_n 2 v1 v2) ==
+    create8 (vec_v v1).[0] (vec_v v1).[1] (vec_v v1).[2] (vec_v v1).[3] (vec_v v2).[0] (vec_v v2).[1] (vec_v v2).[2] (vec_v v2).[3]))
+
+val vec_interleave_low_n_lemma_uint32_8_4: v1:vec_t U32 8 -> v2:vec_t U32 8 -> Lemma
+  (ensures (vec_v (vec_interleave_low_n 4 v1 v2) ==
+    create8 (vec_v v1).[0] (vec_v v1).[1] (vec_v v2).[0] (vec_v v2).[1] (vec_v v1).[4] (vec_v v1).[5] (vec_v v2).[4] (vec_v v2).[5]))
+
+val vec_interleave_low_n_lemma_uint64_4_2: v1:vec_t U64 4 -> v2:vec_t U64 4 -> Lemma
+  (ensures (vec_v (vec_interleave_low_n 2 v1 v2) == create4 (vec_v v1).[0] (vec_v v1).[1] (vec_v v2).[0] (vec_v v2).[1]))
 
 inline_for_extraction noextract
 val vec_interleave_high: #t:v_inttype -> #w:width -> vec_t t w -> vec_t t w -> vec_t t w
 
-val vec_interleave_high_lemma2: #t:v_inttype -> b1:vec_t t 2 -> b2:vec_t t 2 -> Lemma
-  (ensures (vec_v (vec_interleave_high b1 b2) == create2 (vec_v b1).[1] (vec_v b2).[1]))
+inline_for_extraction noextract
+val vec_interleave_high_n: #t:v_inttype -> #w:width -> n:width{w % n == 0} -> vec_t t w -> vec_t t w -> vec_t t w
 
-val vec_interleave_high_lemma_uint64_4: b1:vec_t U64 4 -> b2:vec_t U64 4 -> Lemma
- (ensures (vec_v (vec_interleave_high b1 b2) == create4 (vec_v b1).[1] (vec_v b2).[1] (vec_v b1).[3] (vec_v b2).[3]))
+val vec_interleave_high_lemma2: #t:v_inttype -> v1:vec_t t 2 -> v2:vec_t t 2 -> Lemma
+  (ensures (vec_v (vec_interleave_high v1 v2) == create2 (vec_v v1).[1] (vec_v v2).[1]))
+
+val vec_interleave_high_lemma_uint32_4: v1:vec_t U32 4 -> v2:vec_t U32 4 -> Lemma
+  (ensures (vec_v (vec_interleave_high v1 v2) == create4 (vec_v v1).[2] (vec_v v2).[2] (vec_v v1).[3] (vec_v v2).[3]))
+
+val vec_interleave_high_lemma_uint32_8: v1:vec_t U32 8 -> v2:vec_t U32 8 -> Lemma
+  (ensures (vec_v (vec_interleave_high v1 v2) ==
+    create8 (vec_v v1).[2] (vec_v v2).[2] (vec_v v1).[3] (vec_v v2).[3] (vec_v v1).[6] (vec_v v2).[6] (vec_v v1).[7] (vec_v v2).[7]))
+
+val vec_interleave_high_lemma_uint64_4: v1:vec_t U64 4 -> v2:vec_t U64 4 -> Lemma
+  (ensures (vec_v (vec_interleave_high v1 v2) == create4 (vec_v v1).[1] (vec_v v2).[1] (vec_v v1).[3] (vec_v v2).[3]))
+
+val vec_interleave_high_n_lemma_uint32_4_2: v1:vec_t U32 4 -> v2:vec_t U32 4 -> Lemma
+  (ensures (vec_v (vec_interleave_high_n 2 v1 v2) == create4 (vec_v v1).[2] (vec_v v1).[3] (vec_v v2).[2] (vec_v v2).[3]))
+
+val vec_interleave_high_n_lemma_uint32_8_2: v1:vec_t U32 8 -> v2:vec_t U32 8 -> Lemma
+  (ensures (vec_v (vec_interleave_high_n 2 v1 v2) ==
+    create8 (vec_v v1).[4] (vec_v v1).[5] (vec_v v1).[6] (vec_v v1).[7] (vec_v v2).[4] (vec_v v2).[5] (vec_v v2).[6] (vec_v v2).[7]))
+
+val vec_interleave_high_n_lemma_uint32_8_4: v1:vec_t U32 8 -> v2:vec_t U32 8 -> Lemma
+  (ensures (vec_v (vec_interleave_high_n 4 v1 v2) ==
+    create8 (vec_v v1).[2] (vec_v v1).[3] (vec_v v2).[2] (vec_v v2).[3] (vec_v v1).[6] (vec_v v1).[7] (vec_v v2).[6] (vec_v v2).[7]))
+
+val vec_interleave_high_n_lemma_uint64_4_2: v1:vec_t U64 4 -> v2:vec_t U64 4 -> Lemma
+  (ensures (vec_v (vec_interleave_high_n 2 v1 v2) == create4 (vec_v v1).[2] (vec_v v1).[3] (vec_v v2).[2] (vec_v v2).[3]))
 
 inline_for_extraction noextract
 val vec_permute2: #t:v_inttype -> v1:vec_t t 2
@@ -283,17 +334,6 @@ val vec_permute32: #t:v_inttype -> v1:vec_t t 32
                          vv1.[v i21] vv1.[v i22] vv1.[v i23] vv1.[v i24]
                          vv1.[v i25] vv1.[v i26] vv1.[v i27] vv1.[v i28]
                          vv1.[v i29] vv1.[v i30] vv1.[v i31] vv1.[v i32]}
-
-inline_for_extraction noextract
-val cast: #t:v_inttype -> #w:width -> t':v_inttype -> w':width{bits t * w == bits t' * w'} -> vec_t t w -> vec_t t' w'
-
-val cast_vec_u128_to_u64_lemma: #w:width{w < 32} -> b:vec_t U128 w -> Lemma
-   (let r = vec_v (cast U64 (2 * w) b) in
-    (forall (i:nat). i < w ==> uint_v (vec_v b).[i] == uint_v r.[2 * i] + uint_v r.[2 * i + 1] * pow2 64))
-
-val cast_vec_u64_to_u128_lemma: #w:width{w < 32} -> b:vec_t U64 (2 * w) -> Lemma
-   (let r = vec_v (cast U128 w b) in
-    (forall (i:nat). i < w ==> uint_v r.[i] == uint_v (vec_v b).[2 * i] + uint_v (vec_v b).[2 * i + 1] * pow2 64))
 
 type uint128x1 = vec_t U128 1
 type uint128x2 = vec_t U128 2

@@ -129,7 +129,7 @@ let frodo_gen_matrix_cshake_4x0 n i r0 r1 r2 r3 j res =
   mset res (size 4 *! i +! size 3) j (uint_from_bytes_le resij3)
 
 // 2019.03.04: SZ this works with ifuel=0 in interactive mode but fails in batch
-#set-options "--z3rlimit 100 --initial_ifuel 1 --max_ifuel 1"
+#set-options "--z3rlimit 150 --initial_ifuel 1 --max_ifuel 1"
 
 inline_for_extraction noextract private
 val frodo_gen_matrix_cshake_4x1:
@@ -153,13 +153,13 @@ let frodo_gen_matrix_cshake_4x1 n seed_len seed r i res =
   let r2 = sub r (size 4 *! n) (size 2 *! n) in
   let r3 = sub r (size 6 *! n) (size 2 *! n) in
   let ctr0 = size_to_uint32 (size 256 +. size 4 *! i +. size 0) in
-  uintv_extensionality (to_u16 ctr0) (u16 (256 + 4 * v i + 0));
+  assert (to_u16 ctr0 == u16 (256 + 4 * v i + 0));
   let ctr1 = size_to_uint32 (size 256 +. size 4 *! i +. size 1) in
-  uintv_extensionality (to_u16 ctr1) (u16 (256 + 4 * v i + 1));
+  assert (to_u16 ctr1 == u16 (256 + 4 * v i + 1));
   let ctr2 = size_to_uint32 (size 256 +. size 4 *! i +. size 2) in
-  uintv_extensionality (to_u16 ctr2) (u16 (256 + 4 * v i + 2));
+  assert (to_u16 ctr2 == u16 (256 + 4 * v i + 2));
   let ctr3 = size_to_uint32 (size 256 +. size 4 *! i +. size 3) in
-  uintv_extensionality (to_u16 ctr3) (u16 (256 + 4 * v i + 3));
+  assert (to_u16 ctr3 == u16 (256 + 4 * v i + 3));
   Hacl.Keccak.cshake128_frodo_4x seed_len seed
     (to_u16 ctr0) (to_u16 ctr1) (to_u16 ctr2) (to_u16 ctr3)
     (size 2 *! n) r0 r1 r2 r3;
@@ -173,7 +173,7 @@ let frodo_gen_matrix_cshake_4x1 n seed_len seed r i res =
     frodo_gen_matrix_cshake_4x0 n i r0 r1 r2 r3 j res
   )
 
-#reset-options "--z3rlimit 150 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
+#reset-options "--z3rlimit 150 --max_fuel 1 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
 inline_for_extraction noextract
 val frodo_gen_matrix_cshake_4x:
@@ -207,6 +207,13 @@ let frodo_gen_matrix_cshake_4x n seed_len seed res =
     Lib.LoopCombinators.unfold_repeat_gen (v n4) (S.frodo_gen_matrix_cshake_4x_s (v n)) (spec h0) (refl h0 0) (v i);
     frodo_gen_matrix_cshake_4x1 n seed_len seed r i res
   );
+  let h1 = ST.get () in
+  assert (as_matrix h1 res ==
+    Lib.LoopCombinators.repeat_gen (v n4) (S.frodo_gen_matrix_cshake_4x_s (v n)) (spec h0) (refl h0 0));
+  S.frodo_gen_matrix_cshake_4x_lemma (v n) (v seed_len) (as_seq h0 seed);
+  assert (
+    S.frodo_gen_matrix_cshake_4x (v n) (v seed_len) (as_seq h0 seed) ==
+    Lib.LoopCombinators.repeat_gen (v n4) (S.frodo_gen_matrix_cshake_4x_s (v n)) (spec h0) (refl h0 0));
   pop_frame ();
   assert (
     S.frodo_gen_matrix_cshake_4x (v n) (v seed_len) (as_seq h0 seed) ==
@@ -256,7 +263,8 @@ let frodo_gen_matrix_aes n seed_len seed a =
           let j = j *! size 8 in
           assert (v j + 8 <= v n);
           assert (v i <= v n - 1);
-          assert_spinoff (v i * v n + v j + 8 <= (v n - 1) * v n + v n);
+          FStar.Math.Lemmas.lemma_mult_le_right (v n) (v i) (v n - 1);
+          assert (v i * v n + v j + 8 <= (v n - 1) * v n + v n);
           let b = sub a (i *! n +! j) (size 8) in
           Hacl.AES128.aes128_encrypt_block b b key
         )
