@@ -153,6 +153,7 @@ ghost procedure finish_aes_encrypt_le(ghost alg:algorithm, ghost input_LE:quad32
 
 procedure Load_two_lsb(inout dst:xmm)
     {:quick exportOnly}
+    {:public}
     lets constp @= r11;
     modifies constp; efl;
     ensures  dst == Mkfour(2, 0, 0, 0);
@@ -178,6 +179,7 @@ procedure Load_two_lsb(inout dst:xmm)
 
 procedure Load_one_lsb(inout dst:xmm)
     {:quick exportOnly}
+    {:public}
     lets constp @= r11;
     modifies constp; efl;
     ensures  dst == Mkfour(1, 0, 0, 0);
@@ -533,6 +535,7 @@ procedure Loop6x_final(
         ghost plain:quad32_6,
         ghost inb:quad32)
     {:quick}
+    {:public}
     lets
 //      inp @= rdi; outp @= rsi; len @= rdx; key @= rcx; ivp @= r8; Xip @= r9;
         inp @= rdi; outp @= rsi; key @= rcx; ivp @= r8;
@@ -639,6 +642,7 @@ procedure Loop6x_final(
 #reset-options ""
 procedure Loop6x_save_output(ghost count:nat, ghost out_b:buffer128)
     {:quick}
+    {:public}
     lets
         outp @= rsi;
         Ii @= xmm0; T1 @= xmm1; T2 @= xmm2; Hkey @= xmm3;
@@ -703,6 +707,7 @@ procedure Loop6x_partial(
         ghost ctr_BE:quad32)
     returns(ghost init:quad32_6)
     {:quick}
+    {:public}
     lets
 //      inp @= rdi; outp @= rsi; len @= rdx; key @= rcx; ivp @= r8; Xip @= r9;
         inp @= rdi; key @= rcx; ivp @= r8; Xip @= r9;
@@ -853,7 +858,10 @@ procedure Loop6x(
 
         ghost ctr_BE_orig:quad32,
         ghost ctr_BE:quad32)
+    returns( // XXX[jb]
+        ghost y_new:quad32)
     {:quick}
+    {:public}
     lets
         inp @= rdi; outp @= rsi; len @= rdx; key @= rcx; ivp @= r8; Xip @= r9;
         Ii @= xmm0; T1 @= xmm1; T2 @= xmm2; Hkey @= xmm3;
