@@ -1707,6 +1707,18 @@ let rec find_deep_code_transform (c:code) (cs:codes) : possibly transformation_h
   | [] ->
     Err ("Not found (during find_deep_code_transform): " ^ fst (print_code c 0 gcc))
   | x :: xs ->
+    (*
+    let _ = IO.debug_print_string (
+        "---------------------------------\n" ^
+        " c : \n" ^
+        fst (print_code c 0 gcc) ^ "\n" ^
+        " x : \n" ^
+        fst (print_code x 0 gcc) ^ "\n" ^
+        " xs : \n" ^
+        fst (print_code (Block xs) 0 gcc) ^ "\n" ^
+        "---------------------------------\n" ^
+        "") in
+    *)
     if eq_code x c then (
       return (MoveUpFrom 0)
     ) else (
