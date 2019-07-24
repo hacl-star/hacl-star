@@ -507,8 +507,7 @@ procedure Ghash_extra_bytes(
 
 procedure Gcm_extra_bytes(
         inline alg:algorithm,
-        ghost in_b:buffer128,
-        ghost out_b:buffer128,
+        ghost inout_b:buffer128,
         ghost key:seq(nat32),
         ghost round_keys:seq(quad32),
         ghost keys_b:buffer128,
@@ -518,27 +517,24 @@ procedure Gcm_extra_bytes(
         ghost completed_quads:seq(quad32),
         ghost h_LE:quad32)
     {:quick}
-    lets in_ptr @= rax; out_ptr @= rbx; keys_ptr @= r8; Xip @= r9; num_bytes @= r10; tmp @= rcx; extra @= r11;
+    lets io_ptr @= rax; keys_ptr @= r8; Xip @= r9; num_bytes @= r10; tmp @= rcx; extra @= r11;
          Ii @= xmm0; T1 @= xmm1; T2 @= xmm2; Hkey @= xmm3;
          Z0 @= xmm4; Z1 @= xmm5; Z2 @= xmm6; Z3 @= xmm7;
          hash @= xmm8; rev_mask @= xmm9; icb @= xmm11;
          len := 1;
     reads
-        in_ptr; keys_ptr; out_ptr; num_bytes; Xip; rev_mask; icb; memTaint; 
+        io_ptr; keys_ptr; num_bytes; Xip; rev_mask; icb; memTaint; 
     modifies
         tmp; extra; Ii; T1; T2; Hkey; Z0; Z1; Z2; Z3; hash; mem; efl; 
 
     requires
         // GCTR reqs
-        buffers_disjoint128(keys_b, out_b);
-        buffers_disjoint128(hkeys_b, out_b);
-        buffers_disjoint128(in_b, out_b) || in_b == out_b;
-        validSrcAddrs128(mem,  in_ptr,  in_b, len, memTaint, Secret);
-        validDstAddrs128(mem, out_ptr, out_b, len, memTaint, Secret);
-        in_ptr  + 16 * len < pow2_64;
-        out_ptr + 16 * len < pow2_64;
-        buffer_length(in_b) == buffer_length(out_b) /\ 256 * buffer_length(in_b) < pow2_32;
-        len == buffer_length(in_b);
+        buffers_disjoint128(keys_b, inout_b);
+        buffers_disjoint128(hkeys_b, inout_b);
+        validSrcAddrs128(mem,  io_ptr,  inout_b, len, memTaint, Secret);
+        validDstAddrs128(mem,  io_ptr,  inout_b, len, memTaint, Secret);
+        //in_ptr  + 16 * len < pow2_64;
+        len == buffer_length(inout_b);
         rev_mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
 
         // AES reqs
@@ -561,13 +557,13 @@ procedure Gcm_extra_bytes(
         16 * (bytes_to_quad_size(total_bytes) - 1) < total_bytes;
 
     ensures
-        modifies_buffer128(out_b, old(mem), mem);
+        modifies_buffer128(inout_b, old(mem), mem);
 
         // GCTR
-        gctr_partial_opaque(alg, len, old(s128(mem, in_b)), s128(mem, out_b), key, old(icb));
+        gctr_partial_opaque(alg, len, old(s128(mem, inout_b)), s128(mem, inout_b), key, old(icb));
 
         // GHash
-        let raw_quads := append(completed_quads, s128(mem, out_b));
+        let raw_quads := append(completed_quads, s128(mem, inout_b));
         let input_bytes := slice(le_seq_quad32_to_bytes(raw_quads), 0, total_bytes);
         let padded_bytes := pad_to_128_bits(input_bytes);
         let input_quads := le_bytes_to_seq_quad32(padded_bytes);
@@ -575,22 +571,22 @@ procedure Gcm_extra_bytes(
             reverse_bytes_quad32(hash) == 
             ghash_incremental(h_LE, old_hash, input_quads);
 {
-    let snap := s128(mem, in_b);
+    let snap := s128(mem, inout_b);
     Mov128(xmm0, icb);
     Pshufb(xmm0, rev_mask);
     AESEncryptBlock(alg, reverse_bytes_quad32(icb), key, round_keys, keys_b);
     reveal aes_encrypt_le;
 
-    Load128_buffer(Z0, in_ptr, 0, Secret, in_b, 0); // borrow Z0
+    Load128_buffer(Z0, io_ptr, 0, Secret, inout_b, 0); // borrow Z0
     lemma_quad32_xor_commutes(Ii, Z0);
     Pxor(Ii, Z0);
-    Store128_buffer(out_ptr, Ii, 0, Secret, out_b, 0);
+    Store128_buffer(io_ptr, Ii, 0, Secret, inout_b, 0);
 
     // Update our hash
     let hash_input := Ii;
     Ghash_extra_bytes(hkeys_b, total_bytes, old_hash, h_LE, completed_quads);
 
-    assert equal(s128(mem, out_b), create(1, hash_input));      // OBSERVE
+    assert equal(s128(mem, inout_b), create(1, hash_input));      // OBSERVE
     Vale.Def.Opaque_s.reveal_opaque(gctr_partial);
 }
 
