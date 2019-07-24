@@ -19,7 +19,7 @@ inline_for_extraction noextract
 let elem_s = lseq uint64 2
 
 let to_elem (x:elem_s) : elem =
-  nat_to_uint #U128 (v x.[0] + v x.[1] * pow2 64)
+  mk_int #U128 (v x.[0] + v x.[1] * pow2 64)
 
 let from_elem (x:elem) : elem_s =
   create2 (to_u64 x) (to_u64 (x >>. 64ul))
