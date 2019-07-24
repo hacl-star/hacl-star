@@ -217,8 +217,7 @@ val blake2b_incremental_update:
 
 let blake2b_incremental_update state ll input =
   let nll = ll /. size_block in
-  if ll =. 0ul then state else (
-  if not (state.n +. nll +. 2ul <=. size 0xFFFFFFFF) then state else (
+  if ll =. 0ul || not (state.n +. nll +. 2ul <=. size 0xFFFFFFFF) then state else (
   let rb = size_block -. state.pl in
   let ll0 = if ll <. rb then ll else rb in
   let partial = sub input 0ul ll0 in
@@ -243,7 +242,7 @@ let blake2b_incremental_update state ll input =
     let input2 = sub #MUT #uint8 #ll input (ll -. ll2) ll2 in
     let block = update_sub state.block 0ul ll2 input2 in
     ({state with pl = ll2;})
-  )))
+  ))
 
 
 
