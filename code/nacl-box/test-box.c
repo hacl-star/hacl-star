@@ -66,6 +66,16 @@ uint8_t sk2[secretbox_KEYBYTES] = {
   0x41, 0x49, 0xf5, 0x1c
 };
 
+uint8_t small_order_p[box_PUBLICKEYBYTES] = {
+  0xe0, 0xeb, 0x7a, 0x7c,
+  0x3b, 0x41, 0xb8, 0xae,
+  0x16, 0x56, 0xe3, 0xfa,
+  0xf1, 0x9f, 0xc4, 0x6a,
+  0xda, 0x09, 0x8d, 0xeb,
+  0x9c, 0x32, 0xb1, 0xfd,
+  0x86, 0x62, 0x05, 0x16,
+  0x5f, 0x49, 0xb8, 0x00
+};
 
 #define PLAINLEN (16*1024)
 #define ROUNDS 1000
@@ -74,7 +84,7 @@ int32_t test_api()
 {
   uint8_t ciphertext[CIPHERTEXT_LEN], ciphertext1[CIPHERTEXT_LEN+16], mac[16], decrypted[MESSAGE_LEN],
           pk1[box_PUBLICKEYBYTES], pk2[box_PUBLICKEYBYTES],
-	  k[box_PUBLICKEYBYTES];
+	  k[box_PUBLICKEYBYTES], k1[box_PUBLICKEYBYTES];
   uint32_t res;
   int i;
 
@@ -95,6 +105,30 @@ int32_t test_api()
   printf("Decryption of HACL box_easy was a %s.\n", res == 0 ? "success" : "failure");
   TestLib_compare_and_print("Box", msg, decrypted, MESSAGE_LEN);
   memset(decrypted,0,MESSAGE_LEN);
+
+  /* Testing the precomputed interface */
+  printf("Shared Secret computed by crypto_box_beforenm:\n");
+  res = Hacl_NaCl_crypto_box_beforenm(k, pk1, sk2);
+  res = Hacl_NaCl_crypto_box_beforenm(k1, pk2, sk1);
+  TestLib_compare_and_print("Shared Secret", k, k1, box_PUBLICKEYBYTES);
+
+  i = Hacl_NaCl_crypto_box_detached_afternm(ciphertext, mac, msg, MESSAGE_LEN, nonce, k);
+  res = Hacl_NaCl_crypto_box_open_detached_afternm(decrypted, ciphertext, mac, MESSAGE_LEN, nonce, k);
+  printf("Decryption of HACL box_afternm was a %s.\n", res == 0 ? "success" : "failure");
+  TestLib_compare_and_print("Box", msg, decrypted, MESSAGE_LEN);
+  memset(decrypted,0,MESSAGE_LEN);
+
+
+  i = Hacl_NaCl_crypto_box_easy_afternm(ciphertext1, msg, MESSAGE_LEN, nonce, k);
+  res = Hacl_NaCl_crypto_box_open_easy_afternm(decrypted, ciphertext1, CIPHERTEXT_LEN+16, nonce, k);
+  printf("Decryption of HACL box_easy_afternm was a %s.\n", res == 0 ? "success" : "failure");
+  TestLib_compare_and_print("Box", msg, decrypted, MESSAGE_LEN);
+  memset(decrypted,0,MESSAGE_LEN);
+
+  /* This should fail */
+  res = Hacl_NaCl_crypto_box_beforenm(k, small_order_p, sk2);
+  printf("HACL box_beforenm was a %s.\n", res == 0 ? "failure" : "success");
+
   return EXIT_SUCCESS;
 }
 
