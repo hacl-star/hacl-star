@@ -111,94 +111,6 @@ function aes_reqs(alg:algorithm, key:seq(nat32), round_keys:seq(quad32), keys_b:
 // GCM
 ///////////////////////////
 
-#reset-options "--z3rlimit 10"
-/*
-procedure gcm_block_bytes(
-        inline alg:algorithm,
-        ghost in_b:buffer128,
-        ghost out_b:buffer128,
-        ghost key:seq(nat32),
-        ghost round_keys:seq(quad32),
-        ghost keys_b:buffer128,
-        ghost total_bytes:nat,
-        ghost old_hash:quad32,
-        ghost completed_quads:seq(quad32))
-    {:quick}
-    lets in_ptr @= rax; out_ptr @= rbx; num_bytes @= rcx; keys_ptr @= r8;
-         icb @= xmm7; mask @= xmm8; hash @= xmm1; one @= xmm10; h @= xmm11;
-         len := 1;
-
-    reads
-        keys_ptr; out_ptr; icb; mask; h; memTaint;
-
-    modifies
-        in_ptr; num_bytes; rdx; r12; xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; one; mem; efl;
-
-    requires
-        // GCTR reqs
-        buffers_disjoint128(keys_b, out_b);
-        buffers_disjoint128(in_b, out_b) || in_b == out_b;
-        validSrcAddrs128(mem,  in_ptr,  in_b, len, memTaint, Secret);
-        validDstAddrs128(mem, out_ptr, out_b, len, memTaint, Secret);
-        in_ptr  + 16 * len < pow2_64;
-        out_ptr + 16 * len < pow2_64;
-        buffer_length(in_b) == buffer_length(out_b) /\ 256 * buffer_length(in_b) < pow2_32;
-        len == buffer_length(in_b);
-        mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
-
-        // AES reqs
-        aes_reqs(alg, key, round_keys, keys_b, keys_ptr, mem, memTaint);
-
-        // GCM
-        pclmulqdq_enabled;
-
-        // Previous work requirements
-        hash == ghash_incremental0(reverse_bytes_quad32(h), old_hash, completed_quads);
-
-        // Extra reqs
-        length(completed_quads) == total_bytes / 16;
-        total_bytes < 16 * length(completed_quads) + 16;
-        num_bytes == total_bytes % 16;
-        total_bytes % 16 != 0;        // Note: This implies total_bytes > 0
-        0 < total_bytes < 16 * bytes_to_quad_size(total_bytes);
-        16 * (bytes_to_quad_size(total_bytes) - 1) < total_bytes;
-
-    ensures
-        modifies_buffer128(out_b, old(mem), mem);
-
-        // GCTR
-        gctr_partial_opaque(alg, len, old(s128(mem, in_b)), s128(mem, out_b), key, old(icb));
-
-        // GHash
-        let raw_quads := append(completed_quads, s128(mem, out_b));
-        let input_bytes := slice(le_seq_quad32_to_bytes(raw_quads), 0, total_bytes);
-        let padded_bytes := pad_to_128_bits(input_bytes);
-        let input_quads := le_bytes_to_seq_quad32(padded_bytes);
-        length(input_quads) > 0 /\
-            hash == ghash_incremental(reverse_bytes_quad32(h), old_hash, input_quads);
-{
-    let snap := s128(mem, in_b);
-    Mov128(xmm0, icb);
-    Pshufb(xmm0, mask);
-    AESEncryptBlock(alg, reverse_bytes_quad32(icb), key, round_keys, keys_b);
-    reveal aes_encrypt_le;
-
-    Load128_buffer(xmm2, in_ptr, 0, Secret, in_b, 0);
-    Pxor(xmm2, xmm0);
-    Store128_buffer(out_ptr, xmm2, 0, Secret, out_b, 0);
-
-    // Update our hash
-    let hash_input := xmm2;
-    let hash_prev := hash;
-
-    Mov64(rax, num_bytes);
-    ghash_incremental_bytes_register(total_bytes, old_hash, completed_quads);
-    assert equal(s128(mem, out_b), create(1, hash_input));      // OBSERVE
-    Vale.Def.Opaque_s.reveal_opaque(gctr_partial);
-}
-*/
-
-
 #reset-options "--z3rlimit 30"
 procedure Gctr_blocks128(
         inline alg:algorithm,
@@ -374,7 +286,7 @@ procedure Gcm_blocks128(
     Ghash_buffer(hkeys_b, out_b, h_LE, reverse_bytes_quad32(old(hash)));
 }
 
-procedure gcm_auth_bytes(ghost in_b:buffer128, ghost hkeys_b:buffer128, ghost h_LE:quad32)
+procedure Gcm_auth_bytes(ghost in_b:buffer128, ghost hkeys_b:buffer128, ghost h_LE:quad32)
     returns(
         ghost y_0:quad32,
         ghost y_auth:quad32)
@@ -537,7 +449,7 @@ procedure compute_pad_to_128_bits()
     }
 }
 
-procedure ghash_extra_bytes(
+procedure Ghash_extra_bytes(
         ghost hkeys_b:buffer128,
         ghost total_bytes:nat,
         ghost old_hash:quad32,
@@ -591,6 +503,98 @@ procedure ghash_extra_bytes(
 
     lemma_ghash_incremental_bytes_extra_helper_alt(h_LE, old_hash, y_prev, reverse_bytes_quad32(hash), completed_quads, final_quad, final_quad_padded, total_bytes);
 }
+
+
+procedure Gcm_extra_bytes(
+        inline alg:algorithm,
+        ghost in_b:buffer128,
+        ghost out_b:buffer128,
+        ghost key:seq(nat32),
+        ghost round_keys:seq(quad32),
+        ghost keys_b:buffer128,
+        ghost hkeys_b:buffer128,
+        ghost total_bytes:nat,
+        ghost old_hash:quad32,
+        ghost completed_quads:seq(quad32),
+        ghost h_LE:quad32)
+    {:quick}
+    lets in_ptr @= rax; out_ptr @= rbx; keys_ptr @= r8; Xip @= r9; num_bytes @= r10; tmp @= rcx; extra @= r11;
+         Ii @= xmm0; T1 @= xmm1; T2 @= xmm2; Hkey @= xmm3;
+         Z0 @= xmm4; Z1 @= xmm5; Z2 @= xmm6; Z3 @= xmm7;
+         hash @= xmm8; rev_mask @= xmm9; icb @= xmm11;
+         len := 1;
+    reads
+        in_ptr; keys_ptr; out_ptr; num_bytes; Xip; rev_mask; icb; memTaint; 
+    modifies
+        tmp; extra; Ii; T1; T2; Hkey; Z0; Z1; Z2; Z3; hash; mem; efl; 
+
+    requires
+        // GCTR reqs
+        buffers_disjoint128(keys_b, out_b);
+        buffers_disjoint128(hkeys_b, out_b);
+        buffers_disjoint128(in_b, out_b) || in_b == out_b;
+        validSrcAddrs128(mem,  in_ptr,  in_b, len, memTaint, Secret);
+        validDstAddrs128(mem, out_ptr, out_b, len, memTaint, Secret);
+        in_ptr  + 16 * len < pow2_64;
+        out_ptr + 16 * len < pow2_64;
+        buffer_length(in_b) == buffer_length(out_b) /\ 256 * buffer_length(in_b) < pow2_32;
+        len == buffer_length(in_b);
+        rev_mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
+
+        // AES reqs
+        aes_reqs(alg, key, round_keys, keys_b, keys_ptr, mem, memTaint);
+
+        // GCM
+        pclmulqdq_enabled;
+        hkeys_reqs_priv(s128(mem, hkeys_b), reverse_bytes_quad32(h_LE));
+        validSrcAddrs128(mem, Xip - 0x20, hkeys_b, 8, memTaint, Secret);
+
+        // Previous work requirements
+        hash == reverse_bytes_quad32(ghash_incremental0(h_LE, old_hash, completed_quads));
+
+        // Extra reqs
+        length(completed_quads) == total_bytes / 16;
+        total_bytes < 16 * length(completed_quads) + 16;
+        num_bytes == total_bytes % 16;
+        total_bytes % 16 != 0;        // Note: This implies total_bytes > 0
+        0 < total_bytes < 16 * bytes_to_quad_size(total_bytes);
+        16 * (bytes_to_quad_size(total_bytes) - 1) < total_bytes;
+
+    ensures
+        modifies_buffer128(out_b, old(mem), mem);
+
+        // GCTR
+        gctr_partial_opaque(alg, len, old(s128(mem, in_b)), s128(mem, out_b), key, old(icb));
+
+        // GHash
+        let raw_quads := append(completed_quads, s128(mem, out_b));
+        let input_bytes := slice(le_seq_quad32_to_bytes(raw_quads), 0, total_bytes);
+        let padded_bytes := pad_to_128_bits(input_bytes);
+        let input_quads := le_bytes_to_seq_quad32(padded_bytes);
+        length(input_quads) > 0 /\
+            reverse_bytes_quad32(hash) == 
+            ghash_incremental(h_LE, old_hash, input_quads);
+{
+    let snap := s128(mem, in_b);
+    Mov128(xmm0, icb);
+    Pshufb(xmm0, rev_mask);
+    AESEncryptBlock(alg, reverse_bytes_quad32(icb), key, round_keys, keys_b);
+    reveal aes_encrypt_le;
+
+    Load128_buffer(Z0, in_ptr, 0, Secret, in_b, 0); // borrow Z0
+    lemma_quad32_xor_commutes(Ii, Z0);
+    Pxor(Ii, Z0);
+    Store128_buffer(out_ptr, Ii, 0, Secret, out_b, 0);
+
+    // Update our hash
+    let hash_input := Ii;
+    Ghash_extra_bytes(hkeys_b, total_bytes, old_hash, h_LE, completed_quads);
+
+    assert equal(s128(mem, out_b), create(1, hash_input));      // OBSERVE
+    Vale.Def.Opaque_s.reveal_opaque(gctr_partial);
+}
+
+
 
 
 procedure gcm_blocks_auth(
@@ -653,15 +657,15 @@ procedure gcm_blocks_auth(
         hash == reverse_bytes_quad32(ghash_incremental0(h_LE, Mkfour(0,0,0,0), auth_quad_seq));
 //
 {
-//    // Preserve arguments that gcm_auth_bytes will clobber
+//    // Preserve arguments that Gcm_auth_bytes will clobber
 //    Mov64(r13, r8);
 //    Mov64(r14, Xip);
 //
     
-    Mov64(auth_blocks_bytes, auth_len); // Save a copy of auth_len, since gcm_auth_bytes modifies it
+    Mov64(auth_blocks_bytes, auth_len); // Save a copy of auth_len, since Gcm_auth_bytes modifies it
     IMul64(auth_blocks_bytes, 16);     // Convert auth_len into auth bytes (16 == 128 / 8)
 
-    // Line up the arguments for gcm_auth_bytes
+    // Line up the arguments for Gcm_auth_bytes
     InitPshufbMask(rev_mask, scratch_reg);
 //    Mov64(rax, auth_ptr);
 //    Mov64(r8, rcx);
@@ -671,7 +675,7 @@ procedure gcm_blocks_auth(
 //    let h := reverse_bytes_quad32(xmm11);
 
     let h_LE := reverse_bytes_quad32(old(buffer128_read(hkeys_b, 2, mem)));
-    let (y_0, y_auth) := gcm_auth_bytes(auth_b, hkeys_b, h_LE);
+    let (y_0, y_auth) := Gcm_auth_bytes(auth_b, hkeys_b, h_LE);
 
     ghost var y_auth_bytes:quad32 := y_auth;
     let auth_quad_seq_len := if old(auth_num_bytes) <= length(le_seq_quad32_to_bytes(s128(mem, auth_b))) then old(auth_num_bytes) else 0;
@@ -697,7 +701,7 @@ procedure gcm_blocks_auth(
 
         //Ghash_register(hkeys_b, h_LE, y_auth);
         //ghash_incremental_bytes_register(auth_num_bytes, y_0, s128(mem, auth_b));
-        ghash_extra_bytes(hkeys_b, auth_num_bytes, y_0, h_LE, s128(mem, auth_b));
+        Ghash_extra_bytes(hkeys_b, auth_num_bytes, y_0, h_LE, s128(mem, auth_b));
         assert equal(create(1, buffer128_read(abytes_b, 0, mem)), s128(mem, abytes_b));
         y_auth_bytes := reverse_bytes_quad32(hash);
 
