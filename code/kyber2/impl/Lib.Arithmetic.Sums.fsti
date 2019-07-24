@@ -7,17 +7,36 @@ open Lib.Arithmetic.Group
 open Lib.Arithmetic.Ring
 
 open FStar.Mul
+open Spec.Powtwo.Lemmas
 
 open FStar.Tactics.Typeclasses
 
 module Seq = Lib.Sequence
 module Loops = Lib.LoopCombinators
 
-#reset-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
+#reset-options "--z3rlimit 200 --max_fuel 1 --max_ifuel 1"
 
 val br: i:size_nat -> x:nat{x<pow2 i} -> y:nat{y<pow2 i}
 
+val br_lemma_rec: i:size_nat{i < max_size_t} -> x:nat{x<pow2 i} ->
+  Lemma (br (i+1) x = 2 * br i x)
+
+val br_lemma_n2_1: i:size_nat{i < max_size_t} -> x:nat{x<pow2 i} ->
+  Lemma (br (i+1) (x+pow2 i) == (br (i+1) x) + 1)
+
+#reset-options "--z3rlimit 200 --max_fuel 1 --max_ifuel 1"
+
 val br_involutive: i:size_nat -> x:nat{x<pow2 i} -> Lemma (br i (br i x) = x)
+
+val br_lemma_n2_2: i:size_nat{i < max_size_t} -> x:nat{x < pow2 (i+1) /\ x%2 = 0} ->
+  Lemma (br (i+1) (x+1) == (br (i+1) x) + pow2 i)
+
+val br_lemma_mul: i:size_nat{i>0} -> x:nat{x < pow2 (i-1)} ->
+  Lemma (br i x == (2 * br i (2*x)) % pow2 i)
+
+val br_lemma_div: i:size_nat{i>0} -> x:nat{x < pow2 i} ->
+  Lemma (br i (x/2) == (2 * br i x) % pow2 i)
+
 
 val reorg: #a:Type0 -> #n:size_nat -> i:size_nat{n = pow2 i} -> p:lseq a n -> lseq a n
 
@@ -54,6 +73,35 @@ val lemma_join_split:
   -> p2:lseq a (n/2)
   -> Lemma (let peven,podd = split_seq (join_seq p1 p2) in peven == p1 /\ podd == p2)
 
+#reset-options "--z3rlimit 1000 --max_fuel 2 --max_ifuel 2 "
+
+val recursive_split_seq:
+   #a:Type0
+   -> #n:size_nat
+   -> p:lseq a n
+   -> i:size_nat{i>0}
+   -> pow:size_nat{pow = pow2 i}
+   -> Ghost (lseq (lseq a (n/pow)) pow) (requires n % pow == 0) (ensures fun p' -> forall (k:nat{k<n}). (k/pow < n/pow) /\ index #a #(n/pow) (p'.[br i (k % pow)]) (k/pow) == p.[k]) (decreases i)
+
+val recursive_split_seq3:
+   #a:Type0
+   -> #n:size_nat
+   -> p:lseq a n
+   -> i:size_nat{i>0}
+   -> pow:size_nat{pow = pow2 i /\ n % pow == 0}
+   -> Tot (lseq (lseq a (n/pow)) pow) (decreases i)
+
+val recursive_split_seq3_lemma:
+   #a:Type0
+   -> #n:size_nat
+   -> p:lseq a n
+   -> i:size_nat{i>0}
+   -> pow:size_nat{pow = pow2 i}
+   -> p':(lseq (lseq a (n/pow)) pow)
+   -> k:size_nat{k<n}
+   -> Lemma (requires ((n % pow == 0) /\ (p' == recursive_split_seq3 p i pow))) (ensures ((k/pow < n/pow) /\ index #a #(n/pow) (p'.[br i (k % pow)]) (k/pow) == p.[k])) (decreases i)
+
+#reset-options "--z3rlimit 500 --max_fuel 0 --max_ifuel 0"
 
 val sum_n:
   #a:Type0
@@ -73,7 +121,7 @@ val sum_n_simple_lemma2:
   -> #[FStar.Tactics.Typeclasses.tcresolve ()] r:monoid a
   -> #n:size_nat{n>=1}
   -> l:lseq a n
-  -> Lemma (ensures sum_n l == op (sum_n (sub l 0 (n-1))) (l.[n-1]))
+  -> Lemma (ensures sum_n l == op (sum_n (Seq.sub l 0 (n-1))) (l.[n-1]))
 	  (decreases n)
 
 
@@ -82,7 +130,7 @@ val sum_n_simple_lemma1:
   -> #[FStar.Tactics.Typeclasses.tcresolve ()] r:monoid a
   -> #n:size_nat{n>=1}
   -> l:lseq a n
-  -> Lemma (ensures sum_n l == op l.[0] (sum_n (sub l 1 (n-1))))
+  -> Lemma (ensures sum_n l == op l.[0] (sum_n (Seq.sub l 1 (n-1))))
 	  (decreases n)
 
 val sum_n_split_lemma:
