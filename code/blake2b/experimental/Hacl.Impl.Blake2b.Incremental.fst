@@ -10,13 +10,15 @@ open Lib.ByteBuffer
 open Lib.LoopCombinators
 
 open Hacl.Impl.Blake2b
+open Spec.Blake2.Incremental
 
 module ST = FStar.HyperStack.ST
 module Seq = Lib.Sequence
 module Loops = Lib.LoopCombinators
-module Spec = Spec.Blake2
 
-#set-options "--z3rlimit 150 --max_ifuel 0 --max_fuel 0"
+module Spec = Spec.Blake2.Incremental
+
+#set-options "--z3rlimit 150 --max_fuel 0"
 
 
 (** Define the state *)
@@ -28,9 +30,29 @@ noeq type state_r = {
 }
 
 
+let state_inv (h:mem) (state:state_r) =
+  live h state.hash /\ live h state.block /\ disjoint state.hash state.block
 
-type state_inv (h:mem) (s:state_r) =
-  live h s.hash /\ live h s.block /\ disjoint s.hash s.block
+let state_empty (h:mem) (state:state_r) =
+  h.[|state.hash|] == Lib.Sequence.create Spec.Blake2.size_hash_w (u64 0) /\
+  v state.n == 0 /\
+  v state.pl == 0 /\
+  h.[|state.block|] == Lib.Sequence.create (Spec.Blake2.size_block Spec.Blake2.Blake2B) (u8 0)
+
+val state_eq: h:mem -> state_r -> (Spec.state_r Spec.Blake2.Blake2B) -> prop
+let state_eq h istate sstate =
+  sstate.Spec.hash == h.[|istate.hash|] /\
+  sstate.Spec.n == v istate.n /\
+  sstate.Spec.pl == v istate.pl /\
+  sstate.Spec.block == h.[|istate.block|]
+
+val spec_of: h:mem -> state_r -> GTot (Spec.state_r Spec.Blake2.Blake2B)
+let spec_of h state =
+  let hash: Spec.Blake2.hash_ws Spec.Blake2.Blake2B = h.[|state.hash|] in
+  let n: size_nat = v state.n in
+  let pl: l:size_nat{l <= Spec.Blake2.size_block Spec.Blake2.Blake2B} = v state.pl in
+  let block: Spec.Blake2.block_s Spec.Blake2.Blake2B = h.[|state.block|] in
+  Spec.Blake2.Incremental.Mkstate_r hash n pl block
 
 
 val blake2b_incremental_init:
@@ -41,16 +63,26 @@ val blake2b_incremental_init:
   Stack state_r
   (requires fun h ->
     live h state.hash /\ live h k /\
-    disjoint state.hash k)
-  (ensures  fun h0 _ h1 ->
-    modifies1 state.hash h0 h1)
+    disjoint state.hash k /\
+    state_empty h state)
+  (ensures  fun h0 rstate h1 ->
+    modifies1 state.hash h0 h1 /\
+    spec_of h1 rstate == Spec.Blake2.Incremental.blake2_incremental_init Spec.Blake2.Blake2B h0.[|k|] (v nn))
 
 let blake2b_incremental_init state kk k nn =
+  (**) let h0 = ST.get () in
+  assert(state_empty h0 state);
+  assert(h0.[|state.block|] == Lib.Sequence.create (Spec.Blake2.size_block Spec.Blake2.Blake2B) (u8 0));
+  admit();
   blake2b_init state.hash kk k nn;
+  (**) let h1 = ST.get () in
   [@inline_let]
   let n = if kk =. 0ul then 0ul else 1ul in
-  { state with
-    n = n; }
+  let rstate = { state with n = n; } in
+  (**) let hf = ST.get () in
+  (**) assert(hf.[|rstate.hash|] == Spec.Blake2.blake2_init Spec.Blake2.Blake2B (v kk) h0.[|k|] (v nn));
+  (**) assert(hf.[|rstate.block|] == Seq.create (Spec.Blake2.size_block Spec.Blake2.Blake2B) (u8 0));
+  rstate
 
 
 
