@@ -1486,40 +1486,6 @@ let lemma_code_exchange_allowed (c1 c2:safely_bounded_code) (fuel:nat) (s:machin
 /// define a relation that tells us if some [codes] can be transformed
 /// into another using only allowed swaps.
 
-(* NOTE: We assume this function since it is not yet exposed. Once
-   exposed from the instructions module, we should be able to remove
-   it from here.
-
-   Also, note that we don't require any other properties from
-   [eq_ins]. It is an uninterpreted function that simply gives us a
-   "hint" to find equivalent instructions!
-
-   For testing purposes, we have it set to an [irreducible] function
-   that looks at the printed representation of the instructions. Since
-   it is irreducible, no other function should be able to "look into"
-   the definition of this function, but instead should be limited only
-   to its signature. However, the OCaml extraction _should_ be able to
-   peek inside, and be able to proceed. *)
-irreducible
-let eq_ins (i1 i2:ins) : bool =
-  print_ins i1 gcc = print_ins i2 gcc
-
-let rec eq_code (c1 c2:code) : bool =
-  match c1, c2 with
-  | Ins i1, Ins i2 -> eq_ins i1 i2
-  | Block l1, Block l2 -> eq_codes l1 l2
-  | IfElse c1 t1 f1, IfElse c2 t2 f2 -> c1 = c2 && eq_code t1 t2 && eq_code f1 f2
-  | While c1 b1, While c2 b2 -> c1 = c2 && eq_code b1 b2
-  | _, _ -> false
-
-and eq_codes (c1 c2:codes) : bool =
-  match c1, c2 with
-  | [], [] -> true
-  | _, [] | [], _ -> false
-  | x :: xs, y :: ys ->
-    eq_code x y &&
-    eq_codes xs ys
-
 #push-options "--initial_fuel 2 --max_fuel 2 --initial_ifuel 1 --max_ifuel 1"
 let rec bubble_to_top (cs:codes) (i:nat{i < L.length cs}) : possibly (cs':codes{
     let a, b, c = L.split3 cs i in
@@ -1685,6 +1651,53 @@ let rec perform_reordering_with_hints (ts:transformation_hints) (c:codes) : poss
         return (x :: xs')
       )
 
+(* NOTE: We assume this function since it is not yet exposed. Once
+   exposed from the instructions module, we should be able to remove
+   it from here.
+
+   Also, note that we don't require any other properties from
+   [eq_ins]. It is an uninterpreted function that simply gives us a
+   "hint" to find equivalent instructions!
+
+   For testing purposes, we have it set to an [irreducible] function
+   that looks at the printed representation of the instructions. Since
+   it is irreducible, no other function should be able to "look into"
+   the definition of this function, but instead should be limited only
+   to its signature. However, the OCaml extraction _should_ be able to
+   peek inside, and be able to proceed. *)
+irreducible
+let eq_ins (i1 i2:ins) : bool =
+  print_ins i1 gcc = print_ins i2 gcc
+
+let rec eq_code (c1 c2:code) : bool =
+  match c1, c2 with
+  | Ins i1, Ins i2 -> eq_ins i1 i2
+  | Block l1, Block l2 -> eq_codes l1 l2
+  | IfElse c1 t1 f1, IfElse c2 t2 f2 -> c1 = c2 && eq_code t1 t2 && eq_code f1 f2
+  | While c1 b1, While c2 b2 -> c1 = c2 && eq_code b1 b2
+  | _, _ -> false
+
+and eq_codes (c1 c2:codes) : bool =
+  match c1, c2 with
+  | [], [] -> true
+  | _, [] | [], _ -> false
+  | x :: xs, y :: ys ->
+    eq_code x y &&
+    eq_codes xs ys
+
+let rec fully_unblocked_code (c:code) : codes =
+  match c with
+  | Ins i -> [c]
+  | Block l -> fully_unblocked_codes l
+  | IfElse c t f -> [IfElse c (Block (fully_unblocked_code t)) (Block (fully_unblocked_code f))]
+  | While c b -> [While c (Block (fully_unblocked_code b))]
+
+and fully_unblocked_codes (c:codes) : codes =
+  match c with
+  | [] -> []
+  | x :: xs ->
+    fully_unblocked_code x `L.append` fully_unblocked_codes xs
+
 let increment_hint (th:transformation_hint) : transformation_hint =
   match th with
   | MoveUpFrom p -> MoveUpFrom (p + 1)
@@ -1707,7 +1720,7 @@ let rec find_deep_code_transform (c:code) (cs:codes) : possibly transformation_h
         "---------------------------------\n" ^
         "") in
     *)
-    if eq_code x c then (
+    if eq_codes (fully_unblocked_code x) (fully_unblocked_code c) then (
       return (MoveUpFrom 0)
     ) else (
       match x with
