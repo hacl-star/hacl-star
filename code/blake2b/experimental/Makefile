@@ -41,7 +41,7 @@ FSTAR = $(FSTAR_HOME)/bin/fstar.exe $(FSTAR_FLAGS)
 
 ENABLE_HINTS = --use_hints --use_hint_hashes --record_hints --query_stats
 
-ROOTS = ../Hacl.Test.Blake2b.fst Hacl.Impl.Blake2b.Incremental.fst
+ROOTS = Hacl.Test.Blake2b.Incremental.fst Hacl.Impl.Blake2b.Incremental.fst
 
 .PRECIOUS: %.krml
 
@@ -77,7 +77,7 @@ KREMLIN=$(KREMLIN_HOME)/krml
 # We use -drop (deprecated) only to avoid creating unnecessary .c,.h files
 $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	$(KREMLIN) -skip-compilation \
-	-no-prefix 'Hacl.Test.Blake2b' \
+	-no-prefix 'Hacl.Test.Blake2b.Incremental' \
 	-no-prefix 'Hacl.Blake2b' \
 	-bundle 'Lib.*' \
 	-bundle 'Spec.*' \
