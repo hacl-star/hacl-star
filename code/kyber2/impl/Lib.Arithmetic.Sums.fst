@@ -487,7 +487,7 @@ let recursive_split_seq2_lemma_inductive_4 #a #n i pow p1 p2 k =
 
 #reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 
-let lemma_preconditions (n:size_nat) (i:size_nat{i>1}) (pow:size_nat{pow = pow2 i /\ pow/2 == pow2 (i-1) /\ pow = 2 * (pow/2) /\ n % pow == 0 }) (k:size_nat{k<n}) : Lemma (k/pow < n/pow /\ (k/2)/(pow/2) < n/pow /\ k % 2 = (k % pow) % 2 /\ k %2 = ((k - pow/2) % pow) % 2 /\ k = 2*(k/2)+(k%2) /\ n % pow == 0 /\ (n/2) % (pow/2) = 0 /\ (n/pow == (n/2)/(pow/2))) =
+let lemma_preconditions (n:size_nat) (i:size_nat{i>1}) (pow:size_nat{pow = pow2 i /\ pow/2 == pow2 (i-1) /\ pow = 2 * (pow/2) /\ n % pow == 0 }) (k:size_nat{k<n}) : Lemma (k/pow < n/pow /\ (k/2)/(pow/2) < n/pow /\ k % 2 = (k % pow) % 2 /\ k %2 = ((k - pow/2) % pow) % 2 /\ k = 2*(k/2)+(k%2) /\ n % pow == 0 /\ (n/2) % (pow/2) = 0 /\ (k/2)/(pow/2) == k/pow /\ (n/pow == (n/2)/(pow/2))) =
   lemma_div_exact n pow;
   euclidean_div_axiom k pow;
   if (n/pow <= k/pow) then lemma_mult_le_left pow (n/pow) (k/pow);
@@ -519,21 +519,21 @@ val recursive_split_seq2_lemma_inductive:
   -> k:size_nat{k<n}
   -> Lemma (requires n % 2 = 0 /\ n % pow == 0 /\ (n/2) % (pow/2) == 0 /\ (p1,p2) == split_seq p /\ recursive_split_customprop p1 (i-1) (pow/2) p1' (k/2) /\ recursive_split_customprop p2 (i-1) (pow/2) p2' (k/2) /\ (p1,p2) == split_seq p /\ p' == Seq.concat p1' p2') (ensures recursive_split_customprop p i pow p' k)
 
-#reset-options "--z3rlimit 100 --max_fuel 1 --max_ifuel 1"
+#reset-options "--z3rlimit 3000 --max_fuel 1 --max_ifuel 1"
 
 let recursive_split_seq2_lemma_inductive #a #n p p1 p2 i pow p' p1' p2' k =
   lemma_preconditions n i pow k;
   let l:lseq a (n/pow) = p'.[br i (k%pow)] in
   if (k % pow < pow/2) then
     if (k % 2 = 0) then
-      (assert((k % pow) % 2 == 0); recursive_split_seq2_lemma_inductive_1 i pow p1' p2' k; admit(); recursive_lemma i pow p1 p1' k l; admit(); assert(l.[k/pow] == p.[k]))
+      (assert((k % pow) % 2 == 0); recursive_split_seq2_lemma_inductive_1 i pow p1' p2' k; recursive_lemma i pow p1 p1' k l; assert(l.[k/pow] == p.[k]))
     else
-      (assert((k % pow) % 2 == 1); recursive_split_seq2_lemma_inductive_2 i pow p1' p2' k; recursive_lemma i pow p2 p2' k l; admit())
+      (assert((k % pow) % 2 == 1); recursive_split_seq2_lemma_inductive_2 i pow p1' p2' k; recursive_lemma i pow p2 p2' k l; admit(); assert(l.[k/pow] == p.[k]))
   else
     if (k % 2 = 0) then
-      (assert(((k - pow/2) %pow) % 2 = 0); recursive_split_seq2_lemma_inductive_3 i pow p1' p2' k; admit(); recursive_lemma i pow p1 p1' k l; admit(); assert(k % 2 = 0); admit(); assert(l.[k/pow] == p.[k]))
+      (assert(((k - pow/2) %pow) % 2 = 0); recursive_split_seq2_lemma_inductive_3 i pow p1' p2' k; recursive_lemma i pow p1 p1' k l; admit(); assert(l.[k/pow] == p.[k]))
     else
-      (assert(((k - pow/2) %pow) % 2 = 1); recursive_split_seq2_lemma_inductive_4 i pow p1' p2' k; admit(); recursive_lemma i pow p2 p2' k l)
+      (assert(((k - pow/2) %pow) % 2 = 1); recursive_split_seq2_lemma_inductive_4 i pow p1' p2' k; recursive_lemma i pow p2 p2' k l; admit(); assert(l.[k/pow] == p.[k]))
 
 val recursive_split_seq2:
    #a:Type0
