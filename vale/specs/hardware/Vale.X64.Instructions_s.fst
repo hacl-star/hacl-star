@@ -123,3 +123,15 @@ let ins_SHA256_msg1 = make_ins (fun dst src -> print "sha256msg1" [PXmm dst; PXm
 
 let ins_SHA256_msg2 = make_ins (fun dst src -> print "sha256msg2" [PXmm dst; PXmm src])
 
+let ins_Comment s = make_ins (print (";# " ^ s) [])
+(* XXX[jb]: This syntax is a valid line comment in both GCC and
+            MASM. Unfortunately, `;` is not a valid line comment
+            starter in GCC (it is a statement separator), and `#` is
+            not a valid line comment starter in MASM. Fortunately
+            though, a semicolon on a line by itself is valid in GCC,
+            which means that we can place the MASM comment character,
+            followed by the GCC comment character, and get a valid
+            comment line on both. A cleaner approach, of course, would
+            be selectively choose the correct comment
+            character. However, that would require a larger scale
+            change to the code. *)
