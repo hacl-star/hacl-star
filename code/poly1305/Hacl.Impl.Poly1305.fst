@@ -364,7 +364,6 @@ val poly1305_update_multi:
         (feval h0 acc).[0] (feval h0 (gsub pre 0ul 5ul)).[0])
 let poly1305_update_multi #s len text pre acc =
   let bs = blocklen s in
-  assert (v bs == width s * S.size_block);
   let h0 = ST.get () in
   let text0 = sub text 0ul bs in
   let h1 = ST.get () in

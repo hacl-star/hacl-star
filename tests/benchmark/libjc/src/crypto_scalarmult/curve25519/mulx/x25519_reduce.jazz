@@ -1,0 +1,78 @@
+#ifndef X25519_REDUCE
+#define X25519_REDUCE
+
+// we need to reduce h such that (read comments from x25519_mul.jazz for context):
+//
+// h =        2**0*h0 + 2**64*h1 + 2**128*h2 + 2**192*h3 +
+//     38 * ( 2**0*h4 + 2**64*h5 + 2**128*h6 + 2**192*h7 )
+//
+// this will yield 5 limbs:
+//
+// h = 2**0*h0 + 2**64*h1 + 2**128*h2 + 2**192*h3 + 2**256*h4
+//
+// so h4 should be multiplied by 38 and we should perform an add-carry chain
+// - if it propagates a carry until the end: this last bit should be multiplied
+//   by 38 and then added to h0 (if the carry happens then, h0 has space left
+//   to hold another addition by 38)
+//
+// in summary : 
+//
+// h0 += 38*h4_l
+// h1 += 38*h4_h
+// h1 += 38*h5_l
+// h2 += 38*h5_h
+// h2 += 38*h6_l
+// h3 += 38*h6_h
+// h3 += 38*h7_l // if h7 is 2**64-1 then 2**64-1 * 38 will be 0x25_ffff_ffff_ffff_ffda
+// h4  = 38*h7_h // the highest limb of 38*h7_h is at most 0x25 which fits in 6 bits
+//
+// h0 += h4 * 38 // 0x25 is 37 decimal, multiplied by 38, 1406, which fits in 11 bits
+//               // worst case scenario: this addition causes 2**256 to be set (by carry
+//               // propagation): then h0 is at most 1405 (and has 11 bits at most: thus)
+//               // it can handle another addition by 38
+// ... 
+//
+//
+// this function returns the input array but only the first 4 limbs should be
+// considered
+
+
+fn fe64_reduce
+( reg u64[8] h,
+  reg u64 _38,
+  reg u64 z, // zero
+  reg bool cf of // cf = 0 and of = 0
+) -> reg u64[8]
+{
+  inline int i;
+  reg u64 hi lo;
+
+  //
+  for i=0 to 3
+  { ( hi, lo ) = #x86_MULX ( _38, h[4+i] );
+    of, h[i]   = #x86_ADOX ( h[i],   lo, of );
+    cf, h[i+1] = #x86_ADCX ( h[i+1], hi, cf );
+  }
+
+  ( h[4], lo ) = #x86_MULX ( _38, h[7] );
+  of, h[3]     = #x86_ADOX ( h[3], lo, of );
+
+  cf, h[4]     = #x86_ADCX ( h[4], z, cf ); 
+  of, h[4]     = #x86_ADOX ( h[4], z, of );
+
+  //
+  _,_,_,_,_,lo = #x86_IMULtimm ( h[4], 38 );
+
+  cf, h[0] += lo;
+  cf, h[1] += z + cf;
+  cf, h[2] += z + cf;
+  cf, h[3] += z + cf;
+
+  // h[0] += (z - cf) & 38;
+  _,_,_,_,_,z = #x86_SBB(z, z, cf);
+  z &= 38;
+  h[0] += z;
+
+  return h;
+}
+#endif

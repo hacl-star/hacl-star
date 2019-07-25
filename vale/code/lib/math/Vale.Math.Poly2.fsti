@@ -27,6 +27,11 @@ val ones (n:nat) : poly
 let rec power (a:poly) (n:nat) : poly =
   if n = 0 then one else a *. power a (n - 1)
 
+val lemma_degree_at_least (a:poly) : Lemma
+  (requires True)
+  (ensures degree a >= -1)
+  [SMTPat (degree a)]
+
 val lemma_equal (a b:poly) : Lemma (requires (forall (i:int). a.[i] == b.[i])) (ensures a == b)
 val lemma_index_i (a:poly) (i:int) : Lemma (a.[i] ==> 0 <= i /\ i <= degree a)
 val lemma_degree (a:poly) : Lemma (degree a == (-1) \/ a.[degree a])

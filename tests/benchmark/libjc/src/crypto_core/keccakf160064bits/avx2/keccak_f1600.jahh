@@ -1,0 +1,8 @@
+#ifndef KECCAK_AVX2_H
+#define KECCAK_AVX2_H
+
+#define B(base,x) [base + 8*(x)]
+#define B8(base,x) (u8)[base + (x)]
+#define B256(base,x,o) (u256)[base + 32*(x) - o]
+
+#endif

@@ -1,0 +1,103 @@
+[
+  "3ı‚j÷n\\›Êçf:ê6[0",
+  [
+    [
+      "EverCrypt.CTR.invariant",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_EverCrypt.CTR.state",
+        "equation_LowStar.Buffer.pointer",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_573cfed777dae20cc82e8fef9622857e"
+      ],
+      0,
+      "0df2c8d4cc55579d1288576f6517af3c"
+    ],
+    [
+      "EverCrypt.CTR.create_in_st",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "assumption_FStar.UInt32.t__uu___haseq", "b2t_def",
+        "equation_EverCrypt.CTR.uint8", "equation_FStar.UInt.fits",
+        "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
+        "equation_Lib.IntTypes.uint8", "equation_Lib.Sequence.lseq",
+        "equation_Lib.Sequence.seq", "equation_LowStar.Buffer.buffer",
+        "equation_LowStar.Buffer.pointer_or_null", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Spec.AES.aes_key",
+        "equation_Spec.Agile.Cipher.key",
+        "equation_Spec.Agile.Cipher.key_length",
+        "equation_Spec.Chacha20.key",
+        "fuel_guarded_inversion_Spec.Agile.Cipher.cipher_alg",
+        "function_token_typing_Lib.IntTypes.uint8",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "lemma_LowStar.Monotonic.Buffer.length_as_seq",
+        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_LessThanOrEqual",
+        "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_764dc2b54fa2320bf14bc0cb4a02d37d",
+        "refinement_interpretation_Tm_refine_cd18e9962a0d204005dcfcda04529ffc",
+        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
+        "typing_LowStar.Buffer.trivial_preorder"
+      ],
+      0,
+      "22c80f39a40d19bed11704461765344f"
+    ],
+    [
+      "EverCrypt.CTR.init",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "assumption_FStar.UInt32.t__uu___haseq", "b2t_def",
+        "equation_EverCrypt.CTR.uint8", "equation_FStar.UInt.fits",
+        "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
+        "equation_Lib.IntTypes.uint8", "equation_Lib.Sequence.lseq",
+        "equation_Lib.Sequence.seq", "equation_LowStar.Buffer.buffer",
+        "equation_LowStar.Buffer.trivial_preorder", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Spec.AES.aes_key",
+        "equation_Spec.Agile.Cipher.key",
+        "equation_Spec.Agile.Cipher.key_length",
+        "equation_Spec.Chacha20.key",
+        "fuel_guarded_inversion_Spec.Agile.Cipher.cipher_alg",
+        "function_token_typing_Lib.IntTypes.uint8",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "lemma_LowStar.Monotonic.Buffer.length_as_seq",
+        "lemma_LowStar.Monotonic.Buffer.modifies_buffer_elim",
+        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_LessThanOrEqual",
+        "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_Tm_refine_2e3ce49f5ae47c93e010a84fe1062b07",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_d127e0409e6398a978cf187152f34b79",
+        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
+        "typing_EverCrypt.CTR.footprint",
+        "typing_LowStar.Buffer.trivial_preorder"
+      ],
+      0,
+      "9b099bc3a6317afbb52f03db1b25a9bf"
+    ],
+    [
+      "EverCrypt.CTR.update_block_st",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_EverCrypt.CTR.uint8",
+        "equation_Lib.IntTypes.uint8", "equation_LowStar.Buffer.buffer",
+        "function_token_typing_Lib.IntTypes.uint8",
+        "lemma_LowStar.Monotonic.Buffer.length_as_seq",
+        "refinement_interpretation_Tm_refine_95c833bcb65bb030c0b462efadcd5888",
+        "typing_LowStar.Buffer.trivial_preorder"
+      ],
+      0,
+      "da9e30c962d143af1df557193541b74f"
+    ]
+  ]
+]

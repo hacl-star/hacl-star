@@ -81,9 +81,234 @@ function operator(*.) (a:poly, b:poly):poly := mul;
 function operator(%.) (a:poly, b:poly):poly := mod;
 function operator(~~) (a:quad32):poly := of_quad32;
 function operator([]) #[a:Type(0)](s:FStar.Seq.Base.seq(a), i:int):a extern;
+
 #verbatim{:interface}
-let va_subscript_FStar__Seq__Base__seq = Seq.index
+unfold let va_subscript_FStar__Seq__Base__seq = Seq.index
+
+let hkeys_b_powers (hkeys_b:buffer128) (mem:vale_heap) (memTaint:memtaint) (ptr:int) (h:poly) =
+  validSrcAddrs128 mem ptr hkeys_b 8 memTaint Secret /\
+  of_quad32 (buffer128_read hkeys_b 0 mem) == gf128_power h 1 /\
+  of_quad32 (buffer128_read hkeys_b 1 mem) == gf128_power h 2 /\
+  of_quad32 (buffer128_read hkeys_b 3 mem) == gf128_power h 3 /\
+  of_quad32 (buffer128_read hkeys_b 4 mem) == gf128_power h 4 /\
+  of_quad32 (buffer128_read hkeys_b 6 mem) == gf128_power h 5 /\
+  of_quad32 (buffer128_read hkeys_b 7 mem) == gf128_power h 6
+
+let quad32_opt_rev (b:bool) (q:quad32) : quad32 =
+  if b then reverse_bytes_quad32 q else q
+
+let index_opt_rev (b:bool) (len n i:int) : int =
+  if b then len - 1 - i else len - n + i
+
+let scratch_b_data
+    (rev_bytes:bool) (rev_blocks:bool) (scratch_b:buffer128) (scratch_len count:int) (mem:vale_heap)
+    (memTaint:memtaint) (ptr:int) (data:seq quad32)
+  =
+  validSrcAddrs128 mem ptr scratch_b scratch_len memTaint Secret /\
+  (forall (i:nat).{:pattern (index data i)}
+    i < count /\ i < length data ==>
+      buffer128_read scratch_b (index_opt_rev rev_blocks scratch_len (length data) i) mem ==
+      quad32_opt_rev rev_bytes (index data i))
 #endverbatim
+
+function hkeys_b_powers(hkeys_b:buffer128, mem:vale_heap, memTaint:memtaint, ptr:int, h:poly):prop extern;
+function index_opt_rev(b:bool, len:int, n:int, i:int):int extern;
+function quad32_opt_rev(b:bool, q:quad32):quad32 extern;
+function scratch_b_data(rev_bytes:bool, rev_blocks:bool, scratch_b:buffer128, scratch_len:int,
+    count:int, mem:vale_heap, memTaint:memtaint, ptr:int, data:seq(quad32)):prop extern;
+
+#reset-options "--z3rlimit 20"
+
+procedure MulAdd_unroll_i(
+        inline rev_bytes:bool,
+        inline rev_blocks:bool,
+        inline is_first:bool,
+        inline is_last:bool,
+        inline power_index:int,
+        ghost scratch_len:nat64,
+        ghost n:nat,
+        ghost m:int,
+        ghost hkeys_b:buffer128,
+        ghost scratch_b:buffer128,
+        ghost h:poly,
+        ghost prev:poly,
+        ghost data:seq(quad32))
+    {:quick}
+    lets
+        Xip @= r9; scratch_ptr @= rcx;
+        Ii @= xmm0; T1 @= xmm1; T2 @= xmm2; Hkey @= xmm3;
+        Z0 @= xmm4; Z1 @= xmm5; Z2 @= xmm6; Z3 @= xmm7;
+        Xi @= xmm8; rev_mask @= xmm9;
+        pdata := fun_seq_quad32_LE_poly128(data);
+        scratch_index := index_opt_rev(rev_blocks, scratch_len, n, n - (m + 2)); // index of m + 1 iteration
+    reads
+        mem; memTaint; Xip; rbp; Xi; rev_mask;
+    modifies
+        efl; scratch_ptr; Ii; T1; T2; Hkey; Z0; Z1; Z2; Z3;
+    requires
+        pclmulqdq_enabled && avx_enabled;
+        length(data) >= n;
+        0 <= m < n <= scratch_len;
+        is_first <==> m == 0;
+        is_last <==> m == n - 1;
+        buffers_disjoint128(hkeys_b, scratch_b);
+        validSrcAddrs128(mem, Xip - 0x20, hkeys_b, 8, memTaint, Secret);
+        validSrcAddrs128(mem, rbp, scratch_b, scratch_len, memTaint, Secret);
+        rbp + 0x10 * scratch_len <= pow2_64;
+        of_quad32(Xi) == prev;
+        scratch_ptr == rbp + 0x10 * (scratch_index + (if rev_blocks then (-1) else 1));
+        0 <= power_index < 8;
+        !is_first ==> of_quad32(Z0) +. shift(of_quad32(Z2), 64) +. shift(of_quad32(Z3), 128) ==
+            ghash_unroll_back(h, prev, pdata, 0, n, #nat(m - 1));
+        Ii == reverse_bytes_quad32(data[#nat(n - m - 1)]);
+        of_quad32(Z1) == gf128_power(h, #nat(m + 1));
+        !rev_bytes ==> rev_mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
+    ensures
+        !is_last ==> Ii == quad32_opt_rev(!rev_bytes, buffer128_read(scratch_b, scratch_index, mem));
+        !is_last ==> Z1 == buffer128_read(hkeys_b, power_index, mem);
+        !is_last ==> scratch_ptr == old(scratch_ptr) + (if rev_blocks then 0x10 else (-0x10));
+        of_quad32(Z0) +. shift(of_quad32(Z2), 64) +. shift(of_quad32(Z3), 128) ==
+            ghash_unroll_back(h, prev, pdata, 0, n, #nat(m));
+{
+    let data_i := #poly(pdata(n - m - 1));
+    inline if (is_last)
+    {
+        VPolyAdd(Ii, Xi, Ii);
+    }
+    else if (rev_blocks)
+    {
+        Add64(scratch_ptr, 0x10);
+    }
+    else
+    {
+        Sub64(scratch_ptr, 0x10);
+    }
+    VPolyMul(T1, Ii, Z1, false, false);
+    VPolyMul(T2, Ii, Z1, false, true);
+    VPolyMul(Hkey, Ii, Z1, true, false);
+    VPolyMul(Z1, Ii, Z1, true, true);
+    lemma_Mul128_accum(~~Z0, ~~Z2, ~~Z3, (if n = m + 1 then prev +. data_i else data_i), gf128_power(h, #nat(m + 1)));
+
+    inline if (!is_last)
+    {
+        Load128_buffer(Ii, scratch_ptr, 0, Secret, scratch_b, scratch_index);
+        inline if (!rev_bytes)
+        {
+            Pshufb(Ii, rev_mask);
+        }
+    }
+    inline if (is_first)
+    {
+        Mov128(Z0, T1);
+    }
+    else
+    {
+        VPolyAdd(Z0, Z0, T1);
+    }
+    inline if (!is_last)
+    {
+        Load128_buffer(T1, Xip, 0x10 * power_index - 0x20, Secret, hkeys_b, power_index);
+    }
+    inline if (is_first)
+    {
+        lemma_Mul128((if n = m + 1 then prev +. data_i else data_i), gf128_power(h, 1));
+        VPolyAdd(Z2, T2, Hkey);
+        Mov128(Z3, Z1);
+    }
+    else
+    {
+        VPolyAdd(Z2, Z2, T2);
+        VPolyAdd(Z2, Z2, Hkey);
+        VPolyAdd(Z3, Z3, Z1);
+    }
+    inline if (!is_last)
+    {
+        Mov128(Z1, T1);
+    }
+}
+
+procedure MulAdd_unroll_n(
+        inline rev_bytes:bool,
+        inline rev_blocks:bool,
+        inline exactly6:bool,
+        ghost scratch_len:nat64,
+        ghost hkeys_b:buffer128,
+        ghost scratch_b:buffer128,
+        ghost h:poly,
+        ghost prev:poly,
+        ghost data:seq(quad32))
+    {:quick}
+    lets
+        Xip @= r9; n_reg @= rbx; scratch_ptr @= rcx;
+        Ii @= xmm0; T1 @= xmm1; T2 @= xmm2; Hkey @= xmm3;
+        Z0 @= xmm4; Z1 @= xmm5; Z2 @= xmm6; Z3 @= xmm7;
+        Xi @= xmm8; rev_mask @= xmm9;
+        pdata := fun_seq_quad32_LE_poly128(data);
+        n := length(data);
+        scratch_index := index_opt_rev(rev_blocks, scratch_len, n, n - 1);
+    reads
+        mem; memTaint; Xip; rbp; n_reg; rev_mask;
+    modifies
+        efl; scratch_ptr; Ii; T1; T2; Hkey; Z0; Z1; Z2; Z3; Xi;
+    requires
+        pclmulqdq_enabled && avx_enabled;
+        exactly6 ==> n == 6;
+        !exactly6 ==> 1 <= n < 6;
+        n <= scratch_len;
+        hkeys_b_powers(hkeys_b, mem, memTaint, Xip - 0x20, h);
+        scratch_b_data(rev_bytes, rev_blocks, scratch_b, scratch_len, 6, mem, memTaint, rbp, data);
+        buffers_disjoint128(hkeys_b, scratch_b);
+        rbp + 0x10 * scratch_len <= pow2_64;
+        of_quad32(Xi) == prev;
+        n_reg == n;
+        scratch_ptr == rbp + 0x10 * scratch_index;
+        !rev_bytes ==> rev_mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
+    ensures
+        of_quad32(Z0) +. shift(of_quad32(Z2), 64) +. shift(of_quad32(Z3), 128) ==
+            ghash_unroll_back(h, prev, pdata, 0, n, #nat(n - 1));
+{
+    Load128_buffer(Z1, Xip, (-0x20), Secret, hkeys_b, 0);
+    // assert of_quad32(Z1) == gf128_power(h, 1);
+    Load128_buffer(Ii, scratch_ptr, 0, Secret, scratch_b, scratch_index);
+    inline if (!rev_bytes)
+    {
+        Pshufb(Ii, rev_mask);
+    }
+    // assert Ii == reverse_bytes_quad32(index(data, #nat(n - 1)));
+    inline if (exactly6)
+    {
+        MulAdd_unroll_i(rev_bytes, rev_blocks, true, false, 1, scratch_len, n, 0, hkeys_b, scratch_b, h, prev, data);
+        MulAdd_unroll_i(rev_bytes, rev_blocks, false, false, 3, scratch_len, n, 1, hkeys_b, scratch_b, h, prev, data);
+        MulAdd_unroll_i(rev_bytes, rev_blocks, false, false, 4, scratch_len, n, 2, hkeys_b, scratch_b, h, prev, data);
+        MulAdd_unroll_i(rev_bytes, rev_blocks, false, false, 6, scratch_len, n, 3, hkeys_b, scratch_b, h, prev, data);
+        MulAdd_unroll_i(rev_bytes, rev_blocks, false, false, 7, scratch_len, n, 4, hkeys_b, scratch_b, h, prev, data);
+        MulAdd_unroll_i(rev_bytes, rev_blocks, false, true, 0, scratch_len, n, 5, hkeys_b, scratch_b, h, prev, data);
+    }
+    else
+    {
+        if (n_reg == 1)
+        {
+            MulAdd_unroll_i(rev_bytes, rev_blocks, true, true, 1, scratch_len, n, 0, hkeys_b, scratch_b, h, prev, data);
+        }
+        else
+        {
+            MulAdd_unroll_i(rev_bytes, rev_blocks, true, false, 1, scratch_len, n, 0, hkeys_b, scratch_b, h, prev, data);
+            if (n_reg != 2)
+            {
+                MulAdd_unroll_i(rev_bytes, rev_blocks, false, false, 3, scratch_len, n, 1, hkeys_b, scratch_b, h, prev, data);
+                if (n_reg != 3)
+                {
+                    MulAdd_unroll_i(rev_bytes, rev_blocks, false, false, 4, scratch_len, n, 2, hkeys_b, scratch_b, h, prev, data);
+                    if (n_reg != 4)
+                    {
+                        MulAdd_unroll_i(rev_bytes, rev_blocks, false, false, 6, scratch_len, n, 3, hkeys_b, scratch_b, h, prev, data);
+                    }
+                }
+            }
+            MulAdd_unroll_i(rev_bytes, rev_blocks, false, true, 0, scratch_len, n, n - 1, hkeys_b, scratch_b, h, prev, data);
+        }
+    }
+}
 
 procedure MulAdd_unroll(
         ghost hkeys_b:buffer128,
@@ -99,31 +324,17 @@ procedure MulAdd_unroll(
         Xi @= xmm8;
         pdata := fun_seq_quad32_LE_poly128(data);
     reads
-        mem; memTaint;
-        Xip; rbp;
+        mem; memTaint; Xip; rbp;
     modifies
-        efl;
-        rax;
-        Ii; T1; T2; Hkey; Z0; Z1; Z2; Z3; Xi;
+        efl; rax; Ii; T1; T2; Hkey; Z0; Z1; Z2; Z3; Xi;
     requires
         pclmulqdq_enabled && avx_enabled;
         length(data) == 6;
+        hkeys_b_powers(hkeys_b, mem, memTaint, Xip - 0x20, h);
+        scratch_b_data(true, true, scratch_b, 8, 5, mem, memTaint, rbp, data);
         Z3 == reverse_bytes_quad32(data[5]);
         buffers_disjoint128(hkeys_b, scratch_b);
-        validSrcAddrs128(mem, Xip - 0x20, hkeys_b, 8, memTaint, Secret);
-        of_quad32(buffer128_read(hkeys_b, 0, mem)) == gf128_power(h, 1);
-        of_quad32(buffer128_read(hkeys_b, 1, mem)) == gf128_power(h, 2);
-        of_quad32(buffer128_read(hkeys_b, 3, mem)) == gf128_power(h, 3);
-        of_quad32(buffer128_read(hkeys_b, 4, mem)) == gf128_power(h, 4);
-        of_quad32(buffer128_read(hkeys_b, 6, mem)) == gf128_power(h, 5);
-        of_quad32(buffer128_read(hkeys_b, 7, mem)) == gf128_power(h, 6);
-        validSrcAddrs128(mem, rbp, scratch_b, 8, memTaint, Secret);
         of_quad32(Xi) +. of_quad32(Z0) +. of_quad32(buffer128_read(scratch_b, 1, mem)) == prev;
-        buffer128_read(scratch_b, 3, mem) == reverse_bytes_quad32(data[4]);
-        buffer128_read(scratch_b, 4, mem) == reverse_bytes_quad32(data[3]);
-        buffer128_read(scratch_b, 5, mem) == reverse_bytes_quad32(data[2]);
-        buffer128_read(scratch_b, 6, mem) == reverse_bytes_quad32(data[1]);
-        buffer128_read(scratch_b, 7, mem) == reverse_bytes_quad32(data[0]);
     ensures
         of_quad32(Z0) +. shift(of_quad32(Z2), 64) +. shift(of_quad32(Z3), 128) ==
             ghash_unroll_back(h, prev, pdata, 0, 6, 5);
@@ -279,8 +490,7 @@ procedure Reduce(ghost f:poly)
         a2 := of_quad32(Z3);
         a := a0 +. shift(a1, 64) +. shift(a2, 128);
     modifies
-        efl;
-        Ii; Hkey; Z0; Z1; Z2; Z3; Xi;
+        efl; Ii; Hkey; Z0; Z1; Z2; Z3; Xi;
     requires
         pclmulqdq_enabled && avx_enabled;
         shift(of_quad32(Hkey), (-64)) == c;
@@ -305,6 +515,64 @@ procedure Reduce(ghost f:poly)
     lemma_reduce_rev(a0, a1, a2, f, 64);
 }
 
+procedure GhashUnroll_n(
+        inline rev_bytes:bool,
+        inline rev_blocks:bool,
+        inline exactly6:bool,
+        ghost scratch_len:nat64,
+        ghost hkeys_b:buffer128,
+        ghost scratch_b:buffer128,
+        ghost h_LE:quad32,
+        ghost y_prev:quad32,
+        ghost data:seq(quad32))
+    {:public}
+    {:quick}
+    lets
+        Xip @= r9; n_reg @= rbx; scratch_ptr @= rcx;
+        Ii @= xmm0; T1 @= xmm1; T2 @= xmm2; Hkey @= xmm3;
+        Z0 @= xmm4; Z1 @= xmm5; Z2 @= xmm6; Z3 @= xmm7;
+        Xi @= xmm8; rev_mask @= xmm9;
+        h := of_quad32(reverse_bytes_quad32(h_LE));
+        prev := of_quad32(reverse_bytes_quad32(y_prev));
+        pdata := fun_seq_quad32_LE_poly128(data);
+        n := length(data);
+        scratch_index := index_opt_rev(rev_blocks, scratch_len, n, n - 1);
+    reads
+        mem; memTaint; Xip; rbp; n_reg; rev_mask;
+    modifies
+        efl; scratch_ptr; Ii; T1; T2; Hkey; Z0; Z1; Z2; Z3; Xi;
+    requires
+        pclmulqdq_enabled && avx_enabled;
+        exactly6 ==> n == 6;
+        !exactly6 ==> 1 <= n < 6;
+        n <= scratch_len;
+        hkeys_b_powers(hkeys_b, mem, memTaint, Xip - 0x20, h);
+        scratch_b_data(rev_bytes, rev_blocks, scratch_b, scratch_len, 6, mem, memTaint, rbp, data);
+        buffers_disjoint128(hkeys_b, scratch_b);
+        rbp + 0x10 * scratch_len <= pow2_64;
+        of_quad32(Xi) == prev;
+        n_reg == n;
+        scratch_ptr == rbp + 0x10 * scratch_index;
+        !rev_bytes ==> rev_mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
+    ensures
+        Xi == reverse_bytes_quad32(ghash_incremental(h_LE, y_prev, data));
+{
+    MulAdd_unroll_n(rev_bytes, rev_blocks, exactly6, scratch_len, hkeys_b, scratch_b, h, prev, data);
+    ZeroXmm(Hkey);
+    PinsrdImm(Hkey, 0xc2000000, 3, scratch_ptr);
+    lemma_gf128_low_shift();
+    lemma_gf128_degree();
+    Reduce(gf128_modulus_low_terms);
+    // assert of_quad32(Xi) == mod_rev(128, ghash_unroll_back(h, prev, pdata, 0, n, #nat(n - 1)), gf128_modulus);
+    lemma_ghash_unroll_back_forward(h, prev, pdata, 0, #nat(n - 1));
+    // assert of_quad32(Xi) == mod_rev(128, ghash_unroll(h, prev, pdata, 0, #nat(n - 1), 0), gf128_modulus);
+    lemma_ghash_poly_of_unroll(h, prev, pdata, 0, #nat(n - 1));
+    // assert of_quad32(Xi) == ghash_poly(h, prev, pdata, 0, n);
+    lemma_ghash_incremental_poly(h_LE, y_prev, data);
+    // assert of_quad32(Xi) == of_quad32(reverse_bytes_quad32(ghash_incremental(h_LE, y_prev, data)));
+    lemma_to_of_quad32(reverse_bytes_quad32(ghash_incremental(h_LE, y_prev, data)));
+}
+
 procedure GhashUnroll6x(
         ghost hkeys_b:buffer128,
         ghost scratch_b:buffer128,
@@ -322,34 +590,20 @@ procedure GhashUnroll6x(
         prev := of_quad32(reverse_bytes_quad32(y_prev));
         pdata := fun_seq_quad32_LE_poly128(data);
     reads
-        mem; memTaint;
-        Xip; rbp;
+        mem; memTaint; Xip; rbp;
     modifies
-        efl;
-        rax;
-        Ii; T1; T2; Hkey; Z0; Z1; Z2; Z3; Xi;
+        efl; rax; Ii; T1; T2; Hkey; Z0; Z1; Z2; Z3; Xi;
     requires
         pclmulqdq_enabled && avx_enabled;
         length(data) == 6;
+        hkeys_b_powers(hkeys_b, mem, memTaint, Xip - 0x20, h);
+        scratch_b_data(true, true, scratch_b, 8, 5, mem, memTaint, rbp, data);
         Z3 == reverse_bytes_quad32(data[5]);
         buffers_disjoint128(hkeys_b, scratch_b);
-        validSrcAddrs128(mem, Xip - 0x20, hkeys_b, 8, memTaint, Secret);
-        of_quad32(buffer128_read(hkeys_b, 0, mem)) == gf128_power(h, 1);
-        of_quad32(buffer128_read(hkeys_b, 1, mem)) == gf128_power(h, 2);
-        of_quad32(buffer128_read(hkeys_b, 3, mem)) == gf128_power(h, 3);
-        of_quad32(buffer128_read(hkeys_b, 4, mem)) == gf128_power(h, 4);
-        of_quad32(buffer128_read(hkeys_b, 6, mem)) == gf128_power(h, 5);
-        of_quad32(buffer128_read(hkeys_b, 7, mem)) == gf128_power(h, 6);
-        validSrcAddrs128(mem, rbp, scratch_b, 8, memTaint, Secret);
         of_quad32(Xi) +. of_quad32(Z0) +. of_quad32(buffer128_read(scratch_b, 1, mem)) == prev;
-        buffer128_read(scratch_b, 3, mem) == reverse_bytes_quad32(data[4]);
-        buffer128_read(scratch_b, 4, mem) == reverse_bytes_quad32(data[3]);
-        buffer128_read(scratch_b, 5, mem) == reverse_bytes_quad32(data[2]);
-        buffer128_read(scratch_b, 6, mem) == reverse_bytes_quad32(data[1]);
-        buffer128_read(scratch_b, 7, mem) == reverse_bytes_quad32(data[0]);
     ensures
         Xi == reverse_bytes_quad32(ghash_incremental(h_LE, y_prev, data));
-        old(buffer128_read(scratch_b, 2, mem)) == buffer128_read(scratch_b, 2, mem);
+//        old(buffer128_read(scratch_b, 2, mem)) == buffer128_read(scratch_b, 2, mem);
 {
     MulAdd_unroll(hkeys_b, scratch_b, h, prev, data);
     lemma_gf128_low_shift();
