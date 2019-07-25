@@ -89,7 +89,7 @@ let blake2b_incremental_init state kk k nn =
   rstate
 
 
-
+noextract
 val spec_blake2_incremental_update_first:
     block:Spec.block_s Spec.Blake2B
   -> pl: size_nat{pl <= Spec.size_block Spec.Blake2B}
@@ -97,6 +97,7 @@ val spec_blake2_incremental_update_first:
   -> input: Seq.lseq uint8 ll ->
   Tot (Spec.block_s Spec.Blake2B)
 
+noextract
 let spec_blake2_incremental_update_first block pl ll input =
   let rb = Spec.size_block Spec.Blake2B - pl in
   let ll0 = if ll < rb then ll else rb in
@@ -125,6 +126,7 @@ let blake2b_incremental_update_first block pl ll input =
 
 
  (* /\ i * Spec.size_block Spec.Blake2B <= Seq.length input /\ init + (i * Spec.size_block Spec.Blake2B) <= Spec.max_limb Spec.Blake2B}) *)
+noextract
 let spec_incremental_update_block
   (init:size_nat)
   (n:size_nat)
@@ -139,12 +141,14 @@ let spec_incremental_update_block
   Spec.blake2_update_block Spec.Blake2B (init + (i * Spec.size_block Spec.Blake2B)) block hash
 
 
+noextract
 val spec_blake2_incremental_update_loop:
   init:size_nat
   -> blocks:LBS.bytes{Seq.length blocks <= max_size_t /\ (init + (Seq.length blocks / (Spec.size_block Spec.Blake2B))) * (Spec.size_block Spec.Blake2B) <= pow2 128 - 1}
   -> hash:Spec.hash_ws Spec.Blake2B ->
   Tot (Spec.hash_ws Spec.Blake2B)
 
+noextract
 let spec_blake2_incremental_update_loop init blocks hash =
   let n = Seq.length blocks / Spec.size_block Spec.Blake2B in
   repeati n (fun i hash ->
@@ -186,6 +190,7 @@ let blake2b_incremental_update_loop state n blocks =
   admit()
 
 
+noextract
 val spec_blake2_incremental_update_end:
     block:Spec.block_s Spec.Blake2B
   -> ll: size_nat
@@ -193,6 +198,7 @@ val spec_blake2_incremental_update_end:
   -> input: Seq.lseq uint8 ll ->
   Tot (Spec.block_s Spec.Blake2B)
 
+noextract
 let spec_blake2_incremental_update_end block ll ll0 input =
   let ll2 = (ll - ll0) % (Spec.size_block Spec.Blake2B) in
   let input2 = Seq.sub #uint8 #ll input (ll - ll2) ll2 in
