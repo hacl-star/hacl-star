@@ -216,3 +216,32 @@ let repeat_blocks_split #a #b size_block len0 inp f l acc0 =
   assert (last == Seq.slice inp (len / size_block * size_block) len);
 
   lemma_repeat_blocks size_block inp f l acc0
+
+
+let repeat_blocks_multi_split #a #b size_block len0 inp f acc0 =
+  let len = length inp in
+  let len1 = len - len0 in
+  FStar.Math.Lemmas.lemma_div_le len0 len size_block;
+  FStar.Math.Lemmas.lemma_div_le len1 len size_block;
+  assert (len0 == len0 / size_block * size_block);
+  FStar.Math.Lemmas.modulo_addition_lemma len size_block (- len0 / size_block);
+  assert (len % size_block == len1 % size_block);
+
+  let t0 = Seq.slice inp 0 len0 in
+  let t1 = Seq.slice inp len0 len in
+  let repeat_bf_s0 = repeat_blocks_f size_block t0 f (len0 / size_block) in
+  let repeat_bf_s1 = repeat_blocks_f size_block t1 f (len1 / size_block) in
+  let repeat_bf_t  = repeat_blocks_f size_block inp f (len / size_block) in
+
+  let acc1 = repeat_blocks_multi size_block t0 f acc0 in
+  lemma_repeat_blocks_multi size_block t0 f acc0;
+  assert (acc1 == Loops.repeati (len0 / size_block) repeat_bf_s0 acc0);
+
+  let acc2 = repeat_blocks_multi size_block t1 f acc1 in
+  lemma_repeat_blocks_multi size_block t1 f acc1;
+  assert (acc2 == Loops.repeati (len1 / size_block) repeat_bf_s1 acc1);
+
+  repeat_blocks_split12 size_block len0 inp f acc0;
+  assert (acc2 == Loops.repeati (len / size_block) repeat_bf_t acc0);
+
+  lemma_repeat_blocks_multi size_block inp f acc0
