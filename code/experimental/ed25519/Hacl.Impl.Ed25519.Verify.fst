@@ -12,6 +12,7 @@ open Lib.Buffer
 open Hacl.Bignum25519
 
 module F51 = Hacl.Impl.Ed25519.Field51
+module F56 = Hacl.Impl.Ed25519.Field56
 
 #reset-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0"
 
@@ -100,6 +101,46 @@ let verify_step_2 s h' a' r' =
   b
 
 inline_for_extraction noextract
+val verify_inner_:
+    public:lbuffer uint8 32ul
+  -> len:size_t{v len + 64 <= max_size_t}
+  -> msg:lbuffer uint8 len
+  -> signature:lbuffer uint8 64ul
+  -> tmp:lbuffer uint64 45ul
+  -> tmp':lbuffer uint8 32ul ->
+  Stack bool
+    (requires fun h ->
+      live h public /\ live h msg /\ live h signature /\ live h tmp /\ live h tmp' /\
+      disjoint tmp public /\ disjoint tmp msg /\ disjoint tmp signature /\
+      disjoint tmp tmp' /\ disjoint tmp' signature /\ disjoint tmp' public /\ disjoint tmp' msg /\
+      F51.point_inv_t h (gsub tmp 0ul 20ul) /\ F51.point_inv_t h (gsub tmp 20ul 20ul) /\
+      (Some? (Spec.Ed25519.point_decompress (as_seq h public))) /\
+      (F51.point_eval h (gsub tmp 0ul 20ul) == Some?.v (Spec.Ed25519.point_decompress (as_seq h public))) /\
+      (Some? (Spec.Ed25519.point_decompress (as_seq h (gsub signature 0ul 32ul)))) /\
+      (F51.point_eval h (gsub tmp 20ul 20ul) == Some?.v (Spec.Ed25519.point_decompress (as_seq h (gsub signature 0ul 32ul))))
+    )
+    (ensures fun h0 z h1 -> modifies (loc tmp |+| loc tmp') h0 h1 /\
+      z == Spec.Ed25519.verify (as_seq h0 public) (as_seq h0 msg) (as_seq h0 signature)
+    )
+
+#push-options "--z3rlimit 200"
+
+let verify_inner_ public len msg signature tmp tmp' =
+  let rs = sub signature 0ul 32ul in
+  let a' = sub tmp 0ul  20ul in
+  let r' = sub tmp 20ul 20ul in
+  let s  = sub tmp 40ul 5ul  in
+  (**) let h0 = get() in
+  Hacl.Impl.Load56.load_32_bytes s (sub signature 32ul 32ul);
+  let b'' = Hacl.Impl.Ed25519.PointEqual.gte_q s in
+  if b'' then false
+  else (
+    verify_step_1 tmp' len msg rs public;
+    (**) lemma_nat_from_to_bytes_le_preserves_value (slice #uint8 #64 (as_seq h0 signature) 32 64) 32;
+    verify_step_2 (sub signature 32ul 32ul) tmp' a' r')
+
+
+inline_for_extraction noextract
 val verify_:
     public:lbuffer uint8 32ul
   -> len:size_t{v len + 64 <= max_size_t}
@@ -117,30 +158,18 @@ val verify_:
       z == Spec.Ed25519.verify (as_seq h0 public) (as_seq h0 msg) (as_seq h0 signature)
     )
 
-#push-options "--z3rlimit 200"
-
 let verify_ public msg len signature tmp tmp' =
   let a' = sub tmp 0ul  20ul in
   let r' = sub tmp 20ul 20ul in
   let s  = sub tmp 40ul 5ul  in
   let h'  = tmp' in
-  admit();
-  // TODO: Probably split the innermost if then else into an auxiliary function
   let b = Hacl.Impl.Ed25519.PointDecompress.point_decompress a' public in
   let res =
   if b then (
     let rs = sub signature 0ul 32ul in
     let b' = Hacl.Impl.Ed25519.PointDecompress.point_decompress r' rs in
     if b' then (
-      Hacl.Impl.Load56.load_32_bytes s (sub signature 32ul 32ul);
-      let b'' = Hacl.Impl.Ed25519.PointEqual.gte_q s in
-      if b'' then false
-      else (
-        verify_step_1 h' msg len rs public;
-        let h = get() in
-        assume (F51.point_inv_t h a');
-        assume (F51.point_inv_t h r');
-	verify_step_2 (sub signature 32ul 32ul) h' a' r')
+      verify_inner_ public msg len signature tmp tmp'
     ) else false
   ) else false in
   res
