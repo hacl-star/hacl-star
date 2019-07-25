@@ -16,159 +16,14 @@ module S = Spec.GF128
 module GF = Spec.GaloisField
 module Vec = Hacl.Spec.GF128.Vec
 
+include Hacl.Spec.Gf128.FieldNI
 
 #set-options "--z3rlimit 50 --max_fuel 1 --max_ifuel 1"
 
 inline_for_extraction noextract
-let vec128 = vec_t U128 1
-inline_for_extraction noextract
 let vec128_zero = vec_zero U128 1
 noextract
 let zero = GF.zero #S.gf128
-
-
-inline_for_extraction
-let cl_add (x:vec128) (y:vec128) : Tot vec128 = vec_xor x y
-
-inline_for_extraction
-let clmul_wide (x:vec128) (y:vec128) : Tot (vec128 & vec128) =
-  let lo = vec_clmul_lo_lo x y in
-  let m1 = vec_clmul_hi_lo x y in
-  let m2 = vec_clmul_lo_hi x y in
-  let hi = vec_clmul_hi_hi x y in
-  let m1 = cl_add m1 m2 in
-  let m2 = vec_shift_left m1 (size 64) in
-  let m1 = vec_shift_right m1 (size 64) in
-  let lo = cl_add lo m2 in
-  let hi = cl_add hi m1 in
-  (hi,lo)
-
-inline_for_extraction
-let clmul_wide4
-  (x1:vec128) (x2:vec128) (x3:vec128) (x4:vec128)
-  (y1:vec128) (y2:vec128) (y3:vec128) (y4:vec128): Tot (vec128 & vec128) =
-
-  let lo1 = vec_clmul_lo_lo x1 y1 in
-  let lo2 = vec_clmul_lo_lo x2 y2 in
-  let lo3 = vec_clmul_lo_lo x3 y3 in
-  let lo4 = vec_clmul_lo_lo x4 y4 in
-  let lo = cl_add lo1 lo2 in
-  let lo = cl_add lo lo3 in
-  let lo = cl_add lo lo4 in
-
-  let m1 = vec_clmul_hi_lo x1 y1 in
-  let m2 = vec_clmul_hi_lo x2 y2 in
-  let m3 = vec_clmul_hi_lo x3 y3 in
-  let m4 = vec_clmul_hi_lo x4 y4 in
-  let m = cl_add m1 m2 in
-  let m = cl_add m m3 in
-  let m = cl_add m m4 in
-
-  let m1 = vec_clmul_lo_hi x1 y1 in
-  let m2 = vec_clmul_lo_hi x2 y2 in
-  let m3 = vec_clmul_lo_hi x3 y3 in
-  let m4 = vec_clmul_lo_hi x4 y4 in
-  let m = cl_add m m1 in
-  let m = cl_add m m2 in
-  let m = cl_add m m3 in
-  let m = cl_add m m4 in
-
-  let hi1 = vec_clmul_hi_hi x1 y1 in
-  let hi2 = vec_clmul_hi_hi x2 y2 in
-  let hi3 = vec_clmul_hi_hi x3 y3 in
-  let hi4 = vec_clmul_hi_hi x4 y4 in
-  let hi = cl_add hi1 hi2 in
-  let hi = cl_add hi hi3 in
-  let hi = cl_add hi hi4 in
-
-  let m1 = vec_shift_left m (size 64) in
-  let m2 = vec_shift_right m (size 64) in
-  let lo = cl_add lo m1 in
-  let hi = cl_add hi m2 in
-  (hi, lo)
-
-
-// inline_for_extraction
-// let vec128_shift_left_bits (x:vec128) (y:size_t): Tot vec128 =
-//   if (y %. size 8 =. size 0) then
-//     vec128_shift_left x y
-//   else if (y <. size 64) then
-//     let x1 = vec128_shift_right64 x (size 64 -. y) in
-//     let x2 = vec128_shift_left64 x y in
-//     let x3 = vec128_shift_left x1 (size 64) in
-//     let x4 = vec128_or x3 x2 in
-//     x4
-//   else
-//     let x1 = vec128_shift_left64 x (y -. size 64) in
-//     let x2 = vec128_shift_left x1 (size 64) in
-//     x2
-
-
-// inline_for_extraction
-// let vec128_shift_right_bits (x:vec128) (y:size_t) : Tot vec128 =
-//   if (y %. size 8 =. size 0) then
-//     vec128_shift_right x y
-//   else if (y <. size 64) then
-//     let x1 = vec128_shift_left64 x (size 64 -. y) in
-//     let x2 = vec128_shift_right64 x y in
-//     let x3 = vec128_shift_right x1 (size 64) in
-//     let x4 = vec128_or x3 x2 in
-//     x4
-//   else
-//     let x1 = vec128_shift_right64 x (y -. size 64) in
-//     let x2 = vec128_shift_right x1 (size 64) in
-//     x2
-
-
-inline_for_extraction
-let gf128_reduce (hi:vec128) (lo:vec128) : Tot vec128 =
-  (* LEFT SHIFT [hi:lo] by 1 *)
-  let lo1 = cast U128 1 (vec_shift_right (cast U64 2 lo) (size 63)) in
-  let lo2 = vec_shift_left lo1 (size 64) in
-  let lo3 = cast U128 1 (vec_shift_left (cast U64 2 lo) (size 1)) in
-  let lo3 = vec_xor lo3 lo2 in
-
-  let hi1 = cast U128 1 (vec_shift_right (cast U64 2 hi) (size 63)) in
-  let hi1 = vec_shift_left hi1 (size 64) in
-  let hi2 = cast U128 1 (vec_shift_left (cast U64 2 hi) (size 1)) in
-  let hi2 = vec_xor hi2 hi1 in
-
-  let lo1 = cast U128 1 (vec_shift_right (cast U64 2 lo) (size 63)) in
-  let lo1 = vec_shift_right lo1 (size 64) in
-  let hi2 = vec_xor hi2 lo1 in
-
-  let lo = lo3 in
-  let hi = hi2 in
-(*
-    let lo1 = vec128_shift_right_bits lo (size 127) in
-    let lo = vec128_shift_left_bits lo (size 1) in
-    let hi = vec128_shift_left_bits hi (size 1) in
-    let hi = vec128_xor hi lo1 in
-*)
-  (* LEFT SHIFT [x0:0] BY 63,62,57 and xor with [x1:x0] *)
-  let lo1 = cast U128 1 (vec_shift_left (cast U64 2 lo) (size 63)) in
-  let lo2 = cast U128 1 (vec_shift_left (cast U64 2 lo) (size 62)) in
-  let lo3 = cast U128 1 (vec_shift_left (cast U64 2 lo) (size 57)) in
-  let lo1 = vec_xor lo1 lo2 in
-  let lo1 = vec_xor lo1 lo3 in
-  let lo2 = vec_shift_right lo1 (size 64) in
-  let lo3 = vec_shift_left lo1 (size 64) in
-  let lo =  vec_xor lo lo3 in
-  let lo' = lo2 in
-
-  (* RIGHT SHIFT [x1:x0] BY 1,2,7 and xor with [x1:x0] *)
-  let lo1 = cast U128 1 (vec_shift_right (cast U64 2 lo) (size 1)) in
-  let lo2 = cast U128 1 (vec_shift_right (cast U64 2 lo) (size 2)) in
-  let lo3 = cast U128 1 (vec_shift_right (cast U64 2 lo) (size 7)) in
-  let lo1 = vec_xor lo1 lo2 in
-  let lo1 = vec_xor lo1 lo3 in
-
-  let lo1 = vec_xor lo1 lo' in
-  let lo = vec_xor lo lo1 in
-
-  let lo = vec_xor lo hi in
-  lo
-
 
 let felem = lbuffer vec128 1ul
 let felem4 = lbuffer vec128 4ul
@@ -351,10 +206,8 @@ let fmul x y =
   let ye = y.(size 0) in
   let (hi,lo) = clmul_wide xe ye in
   let lo = gf128_reduce hi lo in
-  let h0 = ST.get () in
   x.(size 0) <- lo;
-  let h1 = ST.get () in
-  assume (feval h1 x == GF.fmul_be #S.gf128 (feval h0 x) (feval h0 y))
+  gf128_clmud_wide_reduce_lemma xe ye
 
 
 val load_precompute_r:
@@ -418,6 +271,21 @@ let fmul_r4 x pre =
     (Vec.fmul4 (feval4 h0 x) (LSeq.create 4 (feval h0 (gsub pre 0ul 1ul))))
 
 
+inline_for_extraction noextract
+val fadd_acc4:
+    x:felem4
+  -> acc:felem ->
+  Stack unit
+  (requires fun h ->
+    live h x /\ live h acc /\ disjoint x acc)
+  (ensures  fun h0 _ h1 -> modifies1 x h0 h1 /\
+    feval4 h1 x == Vec.fadd4 (create4 (feval h0 acc) zero zero zero) (feval4 h0 x))
+
+let fadd_acc4 x acc =
+  x.(0ul) <- cl_add acc.(0ul) x.(0ul);
+  admit()
+
+
 val normalize4:
     acc:felem
   -> x:felem4
@@ -425,8 +293,7 @@ val normalize4:
   Stack unit
   (requires fun h -> live h acc /\ live h x /\ live h pre)
   (ensures  fun h0 _ h1 -> modifies1 acc h0 h1 /\
-   (let x = Vec.fadd4 (create4 (feval h0 acc) GF.zero GF.zero GF.zero) (feval4 h0 x) in
-    feval h1 acc == Vec.normalize4 x (feval4 h0 pre)))
+    feval h1 acc == Vec.normalize4 (feval4 h0 x) (feval4 h0 pre))
 
 [@CInline]
 let normalize4 acc x pre =
@@ -438,14 +305,8 @@ let normalize4 acc x pre =
   let y2 = pre.(size 1) in
   let y3 = pre.(size 2) in
   let y4 = pre.(size 3) in
-  let acc0 = acc.(size 0) in
 
-  let acc0 = cl_add acc0 x1 in
-  let (hi,lo) = clmul_wide4 acc0 x2 x3 x4 y1 y2 y3 y4 in
+  let (hi,lo) = clmul_wide4 x1 x2 x3 x4 y1 y2 y3 y4 in
   let lo = gf128_reduce hi lo in
-  let h0 = ST.get () in
   acc.(size 0) <- lo;
-  let h1 = ST.get () in
-  assume (
-    let x = Vec.fadd4 (create4 (feval h0 acc) GF.zero GF.zero GF.zero) (feval4 h0 x) in
-    feval h1 acc == Vec.normalize4 x (feval4 h0 pre))
+  gf128_clmud_wide4_reduce_lemma x1 x2 x3 x4 y1 y2 y3 y4

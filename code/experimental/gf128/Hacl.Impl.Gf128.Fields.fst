@@ -326,6 +326,23 @@ let fmul_r4 #s x pre =
 
 
 inline_for_extraction noextract
+val fadd_acc4:
+    #s:field_spec
+  -> x:felem4 s
+  -> acc:felem s ->
+  Stack unit
+  (requires fun h ->
+    live h x /\ live h acc /\ disjoint x acc)
+  (ensures  fun h0 _ h1 -> modifies1 x h0 h1 /\
+    feval4 h1 x == Hacl.Spec.GF128.Vec.fadd4 (create4 (feval h0 acc) zero zero zero) (feval4 h0 x))
+
+let fadd_acc4 #s x acc =
+  match s with
+  | PreComp -> Hacl.Impl.Gf128.FieldPreComp.fadd_acc4 x acc
+  | NI -> Hacl.Impl.Gf128.FieldNI.fadd_acc4 x acc
+
+
+inline_for_extraction noextract
 val normalize4:
     #s:field_spec
   -> acc:felem s
@@ -334,11 +351,10 @@ val normalize4:
   Stack unit
   (requires fun h ->
     live h acc /\ live h x /\ live h y /\
-    disjoint acc x /\ disjoint acc y /\
+    disjoint acc x /\ disjoint acc y /\ disjoint x y /\
     precomp_inv_t h y)
-  (ensures  fun h0 _ h1 -> modifies1 acc h0 h1 /\
-   (let x = Hacl.Spec.GF128.Vec.fadd4 (create4 (feval h0 acc) zero zero zero) (feval4 h0 x) in
-    feval h1 acc == normalize4 x (get_r4321 h0 y)))
+  (ensures  fun h0 _ h1 -> modifies2 x acc h0 h1 /\
+    feval h1 acc == normalize4 (feval4 h0 x) (get_r4321 h0 y))
 
 let normalize4 #s acc x pre =
   match s with
