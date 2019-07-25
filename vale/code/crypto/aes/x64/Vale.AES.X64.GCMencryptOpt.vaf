@@ -118,6 +118,7 @@ procedure Gctr_register(
         ghost round_keys:seq(quad32),
         ghost keys_b:buffer128)
     {:quick}
+    {:public}
     lets keys_ptr @= r8; io @= xmm8; rev_mask @= xmm9; icb @= xmm0;
     reads keys_ptr; rev_mask; mem; memTaint;
     modifies
@@ -155,6 +156,7 @@ procedure Gctr_blocks128(
         ghost round_keys:seq(quad32),
         ghost keys_b:buffer128)
     {:quick}
+    {:public}
     lets in_ptr @= rax; out_ptr @= rdi; len @= rdx; keys_ptr @= r8;
          ctr @= rbx; tmp_in_ptr @= r11; tmp_out_ptr @= r10;
          icb @= xmm11; mask @= xmm9; one @= xmm10; 
@@ -307,7 +309,7 @@ procedure Gcm_blocks128(
         gctr_partial_opaque(alg, old(len), old(s128(mem, in_b)), s128(mem, out_b), key, old(icb));
         icb == inc32lite(old(icb), old(len));
 
-//        // GHash
+        // GHash
         old(len) == 0 ==> hash == old(hash) /\ s128(mem, out_b) == old(s128(mem, out_b));
         old(len) > 0 ==> (old(len) <= length(s128(mem, out_b)) ==> length(slice(s128(mem, out_b), 0, old(len))) > 0) /\
                     reverse_bytes_quad32(hash) == ghash_incremental(h_LE, reverse_bytes_quad32(old(hash)), s128(mem, out_b));
@@ -400,6 +402,7 @@ procedure Gcm_auth_bytes(ghost in_b:buffer128, ghost hkeys_b:buffer128, ghost h_
 #reset-options "--z3rlimit 10"
 procedure Gcm_make_length_quad()
     {:quick}
+    {:public}
     lets plain_num_bytes @= r13; auth_num_bytes @= r11; result @= xmm0;
     reads plain_num_bytes; auth_num_bytes;
     modifies result; rax; efl;
@@ -636,6 +639,7 @@ procedure Gcm_blocks_auth(
     returns(
         ghost auth_quad_seq:seq(quad32))
     {:quick}
+    {:public}
     lets
         Xip @= r9; auth_len @= rdx; scratch_ptr @= r11; auth_ptr @= rdi; auth_num_bytes @= rsi;
         scratch_reg @= r10; auth_blocks_bytes @= rcx; abytes_ptr @= rbx;
@@ -1114,7 +1118,6 @@ procedure Gcm_blocks(
     let total_bytes := length(auth_quad_seq) * 16 + old(plain_num_bytes);
 //    assert length(auth_in) == total_bytes / 16;
     if (r13 > r14) {
-        assume false;
         // Line up arguments for Gcm_extra_bytes for the 128-bit block that holds any extra bytes
         Load64_stack(rax, rsp, offset + 56);
         Mov64(r10, r13);
