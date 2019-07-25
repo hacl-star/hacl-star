@@ -1304,34 +1304,25 @@ procedure Gcm_blocks_wrapped(
         iv_BE == compute_iv_BE(h_LE, iv);
 
     ensures
-//        // Framing
-//        ok;
-//        rsp == old(rsp);
-//        memTaint == old(memTaint);
-//        stack == old(stack); 
-//        stackTaint == old(stackTaint);
-//        modifies_mem(loc_union(loc_buffer(iv_b),
-//                     loc_union(loc_buffer(scratch_b),
-//                     loc_union(loc_buffer(out128x6_b),
-//                     loc_union(loc_buffer(out128_b),
-//                               loc_buffer(inout_b))))), old(mem), mem);
-//
-//        // Semantics
-//        old(plain_num_bytes) < pow2_32;
-//        old(auth_num_bytes) < pow2_32;
-//
-//        let iv_BE := old(buffer128_read(iv_b, 0, mem));
-//
-//        let auth_raw_quads := old(append(s128(mem, auth_b), s128(mem, abytes_b)));
-//        //buffer_length(auth_b) == old(auth_len);
-//        length(s128(mem, auth_b)) == old(auth_len);
-//        //buffer_length(abytes_b) == 1;
-//        length(s128(mem, abytes_b)) == 1;
-//        length(old(append(s128(mem, auth_b), s128(mem, abytes_b)))) == 
-//        length(old(s128(mem, auth_b))) + length(old(s128(mem, abytes_b)));
-        //length(auth_raw_quads) == old(auth_len) + 1;
-        //length(le_seq_quad32_to_bytes(auth_raw_quads)) == 16 * old(auth_len) + 16;
-        /*
+        // Framing
+        ok;
+        rsp == old(rsp);
+        memTaint == old(memTaint);
+        stack == old(stack); 
+        stackTaint == old(stackTaint);
+        modifies_mem(loc_union(loc_buffer(iv_b),
+                     loc_union(loc_buffer(scratch_b),
+                     loc_union(loc_buffer(out128x6_b),
+                     loc_union(loc_buffer(out128_b),
+                               loc_buffer(inout_b))))), old(mem), mem);
+
+        // Semantics
+        old(plain_num_bytes) < pow2_32;
+        old(auth_num_bytes) < pow2_32;
+
+        let iv_BE := old(buffer128_read(iv_b, 0, mem));
+
+        let auth_raw_quads := old(append(s128(mem, auth_b), s128(mem, abytes_b)));
         let auth_bytes := slice(le_seq_quad32_to_bytes(auth_raw_quads), 0, old(auth_num_bytes));
         let plain_raw_quads := old(append(append(s128(mem, in128x6_b), s128(mem, in128_b)), s128(mem, inout_b)));
         let plain_bytes := slice(le_seq_quad32_to_bytes(plain_raw_quads), 0, old(plain_num_bytes));
@@ -1346,13 +1337,8 @@ procedure Gcm_blocks_wrapped(
         le_quad32_to_bytes(xmm1) ==
             gcm_encrypt_LE(alg, seq_nat32_to_seq_nat8_LE(key), iv,
                            plain_bytes, auth_bytes)._2;
-                           */
 {
-/*
-    lemma_len_append(old(s128(mem, auth_b)), old(s128(mem, abytes_b)));
-    assert 
-        length(old(append(s128(mem, auth_b), s128(mem, abytes_b)))) == 
-        length(old(s128(mem, auth_b))) + length(old(s128(mem, abytes_b)));
+    assume false;
 //    let iv_LE := old(buffer128_read(iv_b, 0, mem));
 //    let iv_BE := reverse_bytes_quad32(iv_LE);
 //    //let ctr_BE_1:quad32 := Mkfour(1, iv_BE.lo1, iv_BE.hi2, iv_BE.hi3);
@@ -1428,7 +1414,6 @@ procedure Gcm_blocks_wrapped(
                                  reverse_bytes_quad32(buffer128_read(hkeys_b, 2, mem)),
                                  xmm8,
                                  reverse_bytes_quad32(insert_nat64_opaque(insert_nat64_opaque(Mkfour(0, 0, 0, 0), #nat64(8 * old(auth_num_bytes)), 1), #nat64(8 * old(plain_num_bytes)), 0)));
-*/
 }
 
 procedure save_registers(inline win:bool)
@@ -1827,6 +1812,7 @@ procedure gcm_blocks_stdcall(
         !win ==> r14 == old(r14);
         !win ==> r15 == old(r15);
 {
+    assume false;
     lemma_hkeys_reqs_pub_priv(s128(mem, hkeys_b), reverse_bytes_quad32(aes_encrypt_LE(alg, key, Mkfour(0,0,0,0))));
     assert win ==> valid_src_stack64(rsp + 40, stack);
     assert !win ==> valid_src_stack64(rsp + 80, stack);

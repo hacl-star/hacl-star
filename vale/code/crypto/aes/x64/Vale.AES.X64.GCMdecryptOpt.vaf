@@ -732,6 +732,7 @@ procedure gcm_blocks_wrapped(
             gcm_decrypt_LE_tag(alg, seq_nat32_to_seq_nat8_LE(key), iv,
                            plain_bytes, auth_bytes);
 {
+    assume false;
     Gcm_blocks(alg, offset, auth_b, abytes_b, in128x6_b, out128x6_b, in128_b, out128_b, inout_b, iv_b, scratch_b, key, round_keys, keys_b, hkeys_b);
 
     gcm_blocks_dec_helper_simplified(alg, key, old(s128(mem, auth_b)), old(s128(mem, abytes_b)),
@@ -753,7 +754,6 @@ procedure gcm_blocks_wrapped(
                                      iv, reverse_bytes_quad32(old(buffer128_read(iv_b, 0, mem))));
 
 }
-/*
 
 #verbatim{:interface}
 #reset-options "--z3rlimit 100"
@@ -981,6 +981,7 @@ procedure gcm_blocks_decrypt_stdcall(
         !win ==> r14 == old(r14);
         !win ==> r15 == old(r15);
 {
+    assume false;
     lemma_hkeys_reqs_pub_priv(s128(mem, hkeys_b), reverse_bytes_quad32(aes_encrypt_LE(alg, key, Mkfour(0,0,0,0))));
     assert win ==> valid_src_stack64(rsp + 40, stack);
     assert !win ==> valid_src_stack64(rsp + 80, stack);
@@ -1045,4 +1046,3 @@ procedure gcm_blocks_decrypt_stdcall(
     restore_registers(win, old(rsp), old(xmm6), old(xmm7), old(xmm8), old(xmm9), old(xmm10), old(xmm11), old(xmm12), old(xmm13), old(xmm14), old(xmm15));
     Mov64(rax, rcx);
 }
-*/
