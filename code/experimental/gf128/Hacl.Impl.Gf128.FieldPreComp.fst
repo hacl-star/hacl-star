@@ -447,6 +447,21 @@ let fmul4 x pre =
     (Vec.fmul4 (feval4 h0 x) (feval4 h0 (gsub pre 0ul 8ul)))
 
 
+inline_for_extraction noextract
+val fadd_acc4:
+    x:felem4
+  -> acc:felem ->
+  Stack unit
+  (requires fun h ->
+    live h x /\ live h acc /\ disjoint x acc)
+  (ensures  fun h0 _ h1 -> modifies1 x h0 h1 /\
+    feval4 h1 x == Vec.fadd4 (Lib.IntVector.create4 (feval h0 acc) zero zero zero) (feval4 h0 x))
+
+let fadd_acc4 x acc =
+  fadd (sub x 0ul 2ul) acc;
+  admit()
+
+
 #set-options "--z3rlimit 100"
 
 val normalize4:
@@ -456,40 +471,21 @@ val normalize4:
   Stack unit
   (requires fun h ->
     live h acc /\ live h x /\ live h pre /\
-    disjoint acc pre /\ disjoint acc x /\
+    disjoint acc pre /\ disjoint acc x /\ disjoint x pre /\
     load_precomp_r_inv h pre)
-  (ensures  fun h0 _ h1 -> modifies1 acc h0 h1 /\
-    (let x = Vec.fadd4 (Lib.IntVector.create4 (feval h0 acc) zero zero zero) (feval4 h0 x) in
-    feval h1 acc == Vec.normalize4 x (feval4 h0 (gsub pre 0ul 8ul))))
+  (ensures  fun h0 _ h1 -> modifies2 x acc h0 h1 /\
+    feval h1 acc == Vec.normalize4 (feval4 h0 x) (feval4 h0 (gsub pre 0ul 8ul)))
 
 [@CInline]
 let normalize4 acc x pre =
-  push_frame ();
-  let y = create_felem4 () in
-  copy y x;
-  let x1 = sub y (size 0) (size 2) in
-  let x2 = sub y (size 2) (size 2) in
-  let x3 = sub y (size 4) (size 2) in
-  let x4 = sub y (size 6) (size 2) in
+  let x1 = sub x (size 0) (size 2) in
+  let x2 = sub x (size 2) (size 2) in
+  let x3 = sub x (size 4) (size 2) in
+  let x4 = sub x (size 6) (size 2) in
 
-  let h0 = ST.get () in
-  fadd x1 acc;
-  let h1 = ST.get () in
-  assume (feval4 h1 y == Vec.fadd4 (Lib.IntVector.create4 (feval h0 acc) zero zero zero) (feval4 h0 x));
-
-  fmul4 y pre;
-  let h2 = ST.get () in
-  assert (feval4 h2 y == Vec.fmul4 (feval4 h1 y) (feval4 h0 (gsub pre 0ul 8ul)));
+  fmul4 x pre;
 
   copy_felem acc x1;
   fadd acc x2;
   fadd acc x3;
-  let h3 = ST.get () in
-  assert (feval h3 acc == GF.fadd (GF.fadd #S.gf128 (feval h2 x1) (feval h2 x2)) (feval h2 x3));
-  fadd acc x4;
-  let h4 = ST.get () in
-  assert (
-    let x = Vec.fadd4 (Lib.IntVector.create4 (feval h0 acc) zero zero zero) (feval4 h0 x) in
-    feval h4 acc == Vec.normalize4 x (feval4 h0 (gsub pre 0ul 8ul)));
-  assert (modifies2 y acc h0 h4);
-  pop_frame ()
+  fadd acc x4
