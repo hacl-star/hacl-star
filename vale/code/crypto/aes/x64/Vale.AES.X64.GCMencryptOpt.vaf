@@ -1067,31 +1067,20 @@ procedure Gcm_blocks(
     Load64_stack(rsi, rsp, offset + 16);
     Load64_stack(rdx, rsp, offset + 24);
     Mov64(keys_ptr, r13);     // Restore saved copy
-    //Mov128(xmm8, xmm1); // Line up the intermediate hash value
     Mov128(xmm0, rev_mask);   // AES_GCM_encrypt_6mult expects the mask in Ii=xmm0
 
     let iv_BE := old(buffer128_read(iv_b, 0, mem));
-    //let iv_BE := reverse_bytes_quad32(iv_LE);
     let ctr_BE_1:quad32 := iv_BE;
     let ctr_BE_2:quad32 := inc32(iv_BE, 1);
 
     Load128_buffer(xmm1, iv_ptr, 0, Public, iv_b, 0);       // Load the j0 value (i.e., the result of calling compute_iv_BE)
-
-// No longer needed, since we store iv in BE form
-//    ZeroXmm(xmm0); // Limitation of the taint analysis: It will not detect that InitPshufbMask can be public otherwise
-//    InitPshufbMask(xmm0, rax);    // # borrow $Ii for .Lbswap_mask
-//    VPshufb(xmm1, xmm1, xmm0);
-//    assert xmm1 == iv_BE;
 
     Store128_buffer(rbp, xmm1, 0x00, Secret, scratch_b, 0); // Save a copy, since we'll need it at the end to encrypt the hash
     ghost var j0 := xmm1;
     Load_one_lsb(xmm10);
 
     VPaddd(xmm1, xmm1, xmm10);
-    //assert xmm1 == ctr_BE_2;
 
-    assert Xip == old(Xip) + 0x20;
-    assert validSrcAddrs128(mem, Xip - 0x20, hkeys_b, 8, memTaint, Secret);
     AES_GCM_encrypt_6mult(alg, h_LE, iv_b, in128x6_b, out128x6_b, scratch_b, key, round_keys, keys_b, hkeys_b);
     let y_cipher128x6 := reverse_bytes_quad32(xmm8);
     ghost var auth_in := auth_quad_seq;
@@ -1114,7 +1103,6 @@ procedure Gcm_blocks(
 //    assert y_cipher128 == ghash_incremental0(h_LE, y_0, auth_in);
 
     Add64(r14, Stack(rsp, offset + 24, Public));    // r14 == len128x6 + len128
-    //IMul64(r14, 128/8);  // r14 *= 128/8;   r14 == # bytes of plain
     IMul64(r14, 16);  // r14 *= 128/8;   r14 == # bytes of plain
     Load64_stack(r13, rsp, offset + 64);  // r13 := plain_num_bytes
 
@@ -1172,9 +1160,6 @@ procedure Gcm_blocks(
     assert length(plain_byte_seq)  == 0 ==> equal(append( plain128,  plain_byte_seq),  plain128);
     assert length(cipher_byte_seq) == 0 ==> equal(append(cipher128, cipher_byte_seq), cipher128);
 
-    //let ctr_BE_2:quad32 := Mkfour(2, ctr_BE.lo1, ctr_BE.hi2, ctr_BE.hi3);
-//    assert gctr_partial_opaque(alg, old(len128x6), old(s128(mem, in128x6_b)), s128(mem, out128x6_b), key, ctr_BE_2);
-//    assert gctr_partial_opaque(alg, old(len128), old(s128(mem, in128_b)), s128(mem, out128_b), key, inc32lite(ctr_BE_2, old(len128x6)));
     lemma_gctr_partial_append(alg, old(len128x6), old(len128),
                               old(s128(mem, in128x6_b)), s128(mem, out128x6_b),
                               old(s128(mem, in128_b)), s128(mem, out128_b),
