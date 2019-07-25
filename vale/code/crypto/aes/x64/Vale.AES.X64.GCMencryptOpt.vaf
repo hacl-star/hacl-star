@@ -1179,7 +1179,7 @@ procedure Gcm_blocks(
     ghash_incremental_to_ghash(h_LE, auth_in);
 }
 
-/*
+
 #reset-options "--z3rlimit 60"
 procedure gcm_blocks_wrapped(
         inline alg:algorithm,
@@ -1293,8 +1293,7 @@ procedure gcm_blocks_wrapped(
         // GCM reqs
         pclmulqdq_enabled;
         hkeys_reqs_priv(s128(mem, hkeys_b), reverse_bytes_quad32(aes_encrypt_LE(alg, key, Mkfour(0,0,0,0))));
-        let iv_LE := old(buffer128_read(iv_b, 0, mem));
-        let iv_BE := reverse_bytes_quad32(iv_LE);
+        let iv_BE := old(buffer128_read(iv_b, 0, mem));
         let h_LE  := aes_encrypt_LE(alg, key, Mkfour(0, 0, 0, 0));
         iv_BE == compute_iv_BE(h_LE, iv);
 
@@ -1335,7 +1334,7 @@ procedure gcm_blocks_wrapped(
 //    let ctr_BE_2:quad32 := Mkfour(2, iv_BE.lo1, iv_BE.hi2, iv_BE.hi3);
 //    assert ctr_BE_2 == inc32(iv_BE, 1);
 
-    gcm_blocks(alg, offset, auth_b, abytes_b, in128x6_b, out128x6_b, in128_b, out128_b, inout_b, iv_b, scratch_b, key, round_keys, keys_b, hkeys_b);
+    Gcm_blocks(alg, offset, auth_b, abytes_b, in128x6_b, out128x6_b, in128_b, out128_b, inout_b, iv_b, scratch_b, key, round_keys, keys_b, hkeys_b);
 
 /*
     let iv_LE := old(buffer128_read(iv_b, 0, mem));
@@ -1401,13 +1400,12 @@ procedure gcm_blocks_wrapped(
                                  old(s128(mem, in128x6_b)), old(s128(mem, in128_b)), old(s128(mem, inout_b)),
                                  s128(mem, out128x6_b), s128(mem, out128_b), s128(mem, inout_b),
                                  old(plain_num_bytes), old(auth_num_bytes),
-                                 iv, reverse_bytes_quad32(old(buffer128_read(iv_b, 0, mem))),
+                                 iv, old(buffer128_read(iv_b, 0, mem)),
                                  reverse_bytes_quad32(buffer128_read(hkeys_b, 2, mem)),
                                  xmm1,
                                  reverse_bytes_quad32(insert_nat64_opaque(insert_nat64_opaque(Mkfour(0, 0, 0, 0), #nat64(8 * old(auth_num_bytes)), 1), #nat64(8 * old(plain_num_bytes)), 0)));
 
 }
-*/
 
 procedure save_registers(inline win:bool)
     {:public}
