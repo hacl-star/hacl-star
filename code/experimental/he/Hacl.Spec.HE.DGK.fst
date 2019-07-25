@@ -162,7 +162,7 @@ let h_raise_v p q v h =
 #reset-options
 
 val solve_dlp: #n:comp -> u:big -> g:fe n{isunit g /\ is_mult_order g u} -> a:fe n -> x:fe u
-let solve_dlp #n u g a = admit ()
+let solve_dlp #n u g a = admit()
 
 type secret =
   | Secret: p:prm
