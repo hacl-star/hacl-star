@@ -1256,6 +1256,50 @@ let sparse_mul prod s pos_list sign_list =
     let hReturn = ST.get () in
     assert(forall (i:nat{i < v params_n}) . {:pattern bget hReturn prod i} bget hFinal prod i == bget hReturn prod i)
 
+// On the i'th iteration of the outer loop that ranges [0,h), since each element of pk is within [0,q),
+// absolute worst-case bound for prod[i] is [-(i*q),i*q]. Very loose bound. The pessimistic bound gives us enough to prove 
+// arithmetic safety.
+private let sparse_mul32_invariant_int (x:int) (i:nat{i <= v params_h}) =
+    let q = elem_v params_q in
+    -(i * q) <= x /\ x <= i * q
+
+private let sparse_mul32_invariant_elem (x:elem) (i:nat{i <= v params_h}) = 
+    sparse_mul32_invariant_int (elem_v x) i
+
+private let sparse_mul32_invariant_i (h:HS.mem) (i:nat{i < v params_h}) (prod:poly) (j:nat{j <= v params_n}) =
+    (forall (k:nat{k < j}) . 
+    let prod_k = bget h prod k in
+    sparse_mul32_invariant_elem prod_k (i + 1)) /\
+    (forall (k:nat{k >= j /\ k < v params_n}) .
+    let prod_k = bget h prod k in
+    sparse_mul32_invariant_elem prod_k i)
+
+private let sparse_mul32_invariant (h:HS.mem) (i:nat{i <= v params_h}) (prod:poly) =
+    (forall (k:nat{k < v params_n}) .
+    let prod_k = bget h prod k in
+    sparse_mul32_invariant_elem prod_k i)
+
+private let is_i32_pk (x:I32.t) = is_pk (int32_to_elem x)
+
+private let lemma_mul32_prod_step1
+    (prod_j:elem) 
+    (sign_list_i:I16.t{sign_list_i == (-1s) \/ sign_list_i == 0s \/ sign_list_i == 1s})
+    (pkVal:I32.t{is_i32_pk pkVal})
+    (i:nat{i < v params_h}) : Lemma
+    (requires sparse_mul32_invariant_elem prod_j i)
+    (ensures sparse_mul32_invariant_int (elem_v prod_j - I16.v sign_list_i * I32.v pkVal) (i + 1)) = ()
+
+private let lemma_mul32_prod_step2
+    (prod_j:elem) 
+    (sign_list_i:I16.t{sign_list_i == (-1s) \/ sign_list_i == 0s \/ sign_list_i == 1s})
+    (pkVal:I32.t{is_i32_pk pkVal})
+    (i:nat{i < v params_h}) : Lemma
+    (requires sparse_mul32_invariant_elem prod_j i)
+    (ensures sparse_mul32_invariant_int (elem_v prod_j + I16.v sign_list_i * I32.v pkVal) (i + 1)) = ()
+
+// TODO (kkane): is_poly_pk is defined on poly, which only in heuristic parameter sets is a buffer of I32.t. But elem may be
+// either I32.t or I64.t. Remains to be seen if this will be a problem when we do provable parameter sets that use I64.t,
+// but since it's just for proof code, it may just work.
 val sparse_mul32:
     prod : poly
   -> pk : lbuffer I32.t params_n
@@ -1291,10 +1335,12 @@ let sparse_mul32 prod pk pos_list sign_list =
     assert(is_poly_sparse_mul32_output h1 prod);
     assert(is_poly_equal hInit h1 pk);
     assert(is_poly_pk h1 pk);
+    assert(sparse_mul32_invariant h1 0 prod);
 
     for 0ul params_h
-    (fun h _ -> live h prod /\ live h pk /\ live h pos_list /\ live h sign_list /\ modifies1 prod h1 h /\
-             encode_c_invariant h pos_list sign_list params_h /\ is_poly_pk h pk /\ is_poly_sparse_mul32_output h prod)
+    (fun h i -> live h prod /\ live h pk /\ live h pos_list /\ live h sign_list /\ modifies1 prod h1 h /\
+             encode_c_invariant h pos_list sign_list params_h /\ is_poly_pk h pk /\
+             i <= v params_h /\ sparse_mul32_invariant h i prod)
     (fun i ->
         let hPos = ST.get () in
         assert(is_poly_pk hPos pk);
@@ -1303,35 +1349,42 @@ let sparse_mul32 prod pk pos_list sign_list =
 	let sign_list_i = sign_list.(i) in
         let h2 = ST.get () in
 	for 0ul pos
-	(fun h _ -> live h prod /\ live h pk /\ modifies1 prod h2 h /\ is_poly_pk h pk /\ is_poly_sparse_mul32_output h prod)
+	(fun h j -> live h prod /\ live h pk /\ modifies1 prod h2 h /\ is_poly_pk h pk /\
+                 v i <= v params_h /\ j <= v params_n /\ sparse_mul32_invariant_i h (v i) prod j)
 	(fun j ->
             let h = ST.get () in
 	    let pkItem = pk.(j +. params_n -. pos) in
-            assume(FStar.Int.fits (I16.v sign_list_i * I32.v pkItem) I32.n);
+            assert(is_poly_pk h pk);
+            assert(is_pk (bget h pk (v j + v params_n - v pos))); // Needed to trigger the pattern on is_poly_pk_i.
+            assert(is_pk pkItem);
+            assert(is_i32_pk pkItem);
             let hProd = ST.get () in
-            assume(FStar.Int.fits (elem_v (bget hProd prod (v j)) - (I16.v sign_list_i * I32.v pkItem)) elem_n);
-            assume(is_elem_int (elem_v (bget hProd prod (v j)) - (I16.v sign_list_i * I32.v pkItem)));
+            assert(sign_list_i == (-1s) \/ sign_list_i == 0s \/ sign_list_i == 1s);
+            assert(I32.v pkItem < elem_v params_q);
+            assert(I32.v pkItem >= 0);
+            lemma_mul32_prod_step1 (bget hProd prod (v j)) sign_list_i pkItem (v i);
 	    prod.(j) <- prod.(j) -^ int32_to_elem I32.( (int16_to_int32 sign_list_i) *^ pkItem );
             let hLoopEnd = ST.get () in
             assert(is_poly_equal h hLoopEnd pk);
-            assert(forall (k:nat{k < v params_n /\ k <> v j}) . {:pattern bget hLoopEnd prod k} bget h prod k == bget hLoopEnd prod k);
-            assume(is_sparse_mul32_output (bget hLoopEnd prod (v j)))
+            assert(forall (k:nat{k < v params_n /\ k <> v j}) . {:pattern bget hLoopEnd prod k} bget h prod k == bget hLoopEnd prod k)
 	);
         let h3 = ST.get () in
 	for pos params_n
-	(fun h _ -> live h prod /\ live h pk /\ modifies1 prod h3 h /\ is_poly_pk h pk /\ is_poly_sparse_mul32_output h prod)
+	(fun h j -> live h prod /\ live h pk /\ modifies1 prod h3 h /\ is_poly_pk h pk /\ 
+                 v i <= v params_h /\ j <= v params_n /\ sparse_mul32_invariant_i h (v i) prod j)
 	(fun j ->
             let h = ST.get () in
 	    let pkItem = pk.(j -. pos) in
-            assume(FStar.Int.fits (I16.v sign_list_i * I32.v pkItem) I32.n);
+            assert(is_poly_pk h pk);
+            assert(is_pk (bget h pk (v j - v pos))); // Needed to trigger the pattern on is_poly_pk_i.
+            assert(is_pk pkItem);
+            assert(is_i32_pk pkItem);
             let hProd = ST.get () in
-            assume(FStar.Int.fits (elem_v (bget hProd prod (v j)) + (I16.v sign_list_i * I32.v pkItem)) elem_n);
-            assume(is_elem_int (elem_v (bget hProd prod (v j)) + (I16.v sign_list_i * I32.v pkItem)));
+            lemma_mul32_prod_step2 (bget hProd prod (v j)) sign_list_i pkItem (v i);
 	    prod.(j) <- prod.(j) +^ int32_to_elem I32.( (int16_to_int32 sign_list_i) *^ pkItem );
             let hLoopEnd = ST.get () in
             assert(is_poly_equal h hLoopEnd pk);
-            assert(forall (k:nat{k < v params_n /\ k <> v j}) . {:pattern bget hLoopEnd prod k} bget h prod k == bget hLoopEnd prod k);
-            assume(is_sparse_mul32_output (bget hLoopEnd prod (v j)))
+            assert(forall (k:nat{k < v params_n /\ k <> v j}) . {:pattern bget hLoopEnd prod k} bget h prod k == bget hLoopEnd prod k)
 	);
         let hOuterLoopEnd = ST.get () in
         assert(is_poly_equal hPos hOuterLoopEnd pk);
@@ -1339,15 +1392,15 @@ let sparse_mul32 prod pk pos_list sign_list =
     );
 
     let h4 = ST.get () in
+    assert(is_poly_sparse_mul32_output_i h4 prod 0);
     for 0ul params_n
-    (fun h _ -> live h prod /\ modifies1 prod h4 h /\ is_poly_sparse_mul32_output h prod)
+    (fun h i -> live h prod /\ modifies1 prod h4 h /\ i <= v params_n /\ is_poly_sparse_mul32_output_i h prod i)
     (fun i -> 
-        let hBefore = ST.get () in
-        assert(is_poly_sparse_mul32_output hBefore prod);
+        let hStart = ST.get () in
         prod.(i) <- barr_reduce prod.(i);
-        let hAfter = ST.get () in
-        assert(forall (j:nat{j < v params_n /\ j <> v i}) . {:pattern bget hAfter prod j} bget hBefore prod j == bget hAfter prod j);
-        assume(is_sparse_mul32_output (bget hAfter prod (v i)))
+        let hAfterReduce = ST.get () in
+        assert(is_sparse_mul32_output (bget hAfterReduce prod (v i)));
+        assert(is_poly_equal_except hStart hAfterReduce prod (v i))
     );
 
     let hFinal = ST.get () in

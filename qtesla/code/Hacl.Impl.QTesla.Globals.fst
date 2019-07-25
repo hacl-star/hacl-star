@@ -180,14 +180,15 @@ let reduce a =
 
 val barr_reduce:
     a: elem_base
-  -> Tot elem
+  -> Tot (r:elem{is_sparse_mul32_output r})
 
 // Output range of barr_reduce is [-q, 2q] per Patrick
 let barr_reduce a =
     let a64:I64.t = elem_to_int64 a in
     let u:elem_base = (int64_to_elem I64.((a64 *^ params_barr_mult) >>>^ params_barr_div)) in
     assume(FStar.Int.fits (elem_v u * elem_v params_q) elem_n);
-    assume(is_elem_int (elem_v a - elem_v u * elem_v params_q));
+    assume(FStar.Int.fits (elem_v a - elem_v u * elem_v params_q) elem_n);
+    assume(is_sparse_mul32_output (to_elem (elem_v a - elem_v u * elem_v params_q)));
     a -^ u *^ params_q
 
 (** Modification four buffers -- taken from Lib.Buffer.fsti *)
