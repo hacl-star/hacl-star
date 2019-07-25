@@ -5,6 +5,8 @@ open FStar.HyperStack.All
 open FStar.Mul
 
 open Lib.IntTypes
+open Lib.RawIntTypes
+open Lib.Sequence
 open Lib.Buffer
 open Lib.ByteBuffer
 
@@ -339,6 +341,156 @@ let inverse out a =
 
 let reduce out = reduce_ out; admit()
 
+#push-options "--z3rlimit 50"
+
+let lemma_split_nat_from_bytes_le (n:size_nat) (k:lbytes n) (i:nat{i <= n}) : Lemma
+  (nat_from_bytes_le (slice k 0 i) == nat_from_bytes_le k % pow2 (i * 8) /\
+   nat_from_bytes_le (slice k i n) == nat_from_bytes_le k / pow2 (i * 8))
+  =
+  nat_from_intseq_le_slice_lemma k i;
+  assert (nat_from_bytes_le (slice k 0 i) + nat_from_bytes_le (slice k i n) * pow2 (i * 8) == nat_from_bytes_le k);
+  FStar.Math.Lemmas.cancel_mul_div (nat_from_bytes_le (slice k i n)) (pow2 (i * 8));
+  FStar.Math.Lemmas.lemma_mod_plus_distr_r (nat_from_bytes_le (slice k 0 i))
+    (nat_from_bytes_le (slice k i n) * pow2 (i * 8)) (pow2 (i * 8));
+  FStar.Math.Lemmas.cancel_mul_mod (nat_from_bytes_le (slice k i n)) (pow2 (i * 8));
+  FStar.Math.Lemmas.small_mod (nat_from_bytes_le (slice k 0 i)) (pow2 (i * 8))
+
+let lemma_partial_nat_from_bytes_le (k:lbytes 32) (i:nat) (j:nat{i <= j /\ j <= 32})
+  : Lemma (nat_from_bytes_le (slice k i j) == (nat_from_bytes_le k / pow2 (i * 8)) % pow2 ((j - i) * 8))
+  =
+  nat_from_intseq_le_slice_lemma k i;
+  lemma_split_nat_from_bytes_le 32 k i;
+  nat_from_intseq_le_slice_lemma (slice k i 32) (j - i);
+  let k' = slice k i 32 in
+  lemma_split_nat_from_bytes_le (32 - i) k' (j - i);
+  assert (Seq.equal (slice k i j) (slice (slice k i 32) 0 (j - i)))
+
+let lemma_combine_div_mod_pow2 (x:nat) (d:pos) (d':pos{d' <= 12}) : Lemma
+  ((((x / pow2 d) % pow2 64) / pow2 d') % pow2 51 == (x / pow2 (d + d')) % pow2 51)
+  =
+  Math.Lemmas.pow2_modulo_division_lemma_1 (x / pow2 d) d' 64;
+  Math.Lemmas.division_multiplication_lemma (x) (pow2 d) (pow2 d');
+  Math.Lemmas.pow2_plus d d';
+  Math.Lemmas.pow2_modulo_modulo_lemma_1 (x / pow2 (d+d')) 51 (64-d')
+
+val lemma_load_51: k:lbytes 32 -> Lemma
+  (let i0 = nat_from_bytes_le (slice k 0 8) % pow2 51 in
+   let i1 = (nat_from_bytes_le (slice k 6 14) / pow2 3) % pow2 51 in
+   let i2 = (nat_from_bytes_le (slice k 12 20) / pow2 6) % pow2 51 in
+   let i3 = (nat_from_bytes_le (slice k 19 27) / pow2 1) % pow2 51 in
+   let i4 = (nat_from_bytes_le (slice k 24 32) / pow2 12) % pow2 51 in
+   i0 + i1 * pow2 51 + i2 * pow2 51 * pow2 51 + i3 * pow2 51 * pow2 51 * pow2 51 + i4 * pow2 51 * pow2 51 * pow2 51 * pow2 51 == nat_from_bytes_le k % pow2 255)
+
+let lemma_load_51 k =
+  let i0 = nat_from_bytes_le (slice k 0 8) % pow2 51 in
+  let i1 = (nat_from_bytes_le (slice k 6 14) / pow2 3) % pow2 51 in
+  let i2 = (nat_from_bytes_le (slice k 12 20) / pow2 6) % pow2 51 in
+  let i3 = (nat_from_bytes_le (slice k 19 27) / pow2 1) % pow2 51 in
+  let i4 = (nat_from_bytes_le (slice k 24 32) / pow2 12) % pow2 51 in
+  calc (==) {
+    i0;
+    (==) { lemma_partial_nat_from_bytes_le k 0 8 }
+    (nat_from_bytes_le k % pow2 64) % pow2 51;
+    (==) { FStar.Math.Lemmas.pow2_modulo_modulo_lemma_1 (nat_from_bytes_le k) 51 64 }
+    nat_from_bytes_le k % pow2 51;
+  };
+  calc (==) {
+    i1;
+    (==) { lemma_partial_nat_from_bytes_le k 6 14 }
+    (((nat_from_bytes_le k / pow2 48) % pow2 64) / pow2 3) % pow2 51;
+    (==) { lemma_combine_div_mod_pow2 (nat_from_bytes_le k) 48 3 }
+    (nat_from_bytes_le k / pow2 51) % pow2 51;
+  };
+  calc (==) {
+    i2;
+    (==) { lemma_partial_nat_from_bytes_le k 12 20 }
+    (((nat_from_bytes_le k / pow2 96) % pow2 64) / pow2 6) % pow2 51;
+    (==) { lemma_combine_div_mod_pow2 (nat_from_bytes_le k) 96 6 }
+     (nat_from_bytes_le k / pow2 102) % pow2 51;
+  };
+  calc (==) {
+    i3;
+    (==) { lemma_partial_nat_from_bytes_le k 19 27 }
+    (((nat_from_bytes_le k / pow2 152) % pow2 64) / pow2 1) % pow2 51;
+    (==) { lemma_combine_div_mod_pow2 (nat_from_bytes_le k) 152 1 }
+    (nat_from_bytes_le k / pow2 153) % pow2 51;
+  };
+  calc (==) {
+    i4;
+    (==) { lemma_partial_nat_from_bytes_le k 24 32 }
+    (((nat_from_bytes_le k / pow2 192) % pow2 64) / pow2 12) % pow2 51;
+    (==) { lemma_combine_div_mod_pow2 (nat_from_bytes_le k) 192 12 }
+    (nat_from_bytes_le k / pow2 204) % pow2 51;
+  };
+  let n = nat_from_bytes_le k in
+  calc (==) {
+    n % pow2 255;
+    (==) {   Math.Lemmas.lemma_div_mod (n % pow2 255) (pow2 204);
+             Math.Lemmas.pow2_modulo_modulo_lemma_1 n 204 255;
+             Math.Lemmas.pow2_modulo_division_lemma_1 n 204 255
+      }
+    pow2 204 * ((n / pow2 204) % pow2 51) + (n % pow2 204);
+    (==) {   Math.Lemmas.lemma_div_mod (n % pow2 204) (pow2 153);
+             Math.Lemmas.pow2_modulo_modulo_lemma_1 n 153 204;
+             Math.Lemmas.pow2_modulo_division_lemma_1 n 153 204
+         }
+    pow2 204 * ((n / pow2 204) % pow2 51) +
+    pow2 153 * ((n / pow2 153) % pow2 51) + (n % pow2 153);
+    (==) {   Math.Lemmas.lemma_div_mod (n % pow2 153) (pow2 102);
+             Math.Lemmas.pow2_modulo_modulo_lemma_1 n 102 153;
+             Math.Lemmas.pow2_modulo_division_lemma_1 n 102 153 }
+    pow2 204 * ((n / pow2 204) % pow2 51) +
+    pow2 153 * ((n / pow2 153) % pow2 51) +
+    pow2 102 * ((n / pow2 102) % pow2 51) + (n % pow2 102);
+    (==) {   Math.Lemmas.lemma_div_mod (n % pow2 102) (pow2 51);
+             Math.Lemmas.pow2_modulo_modulo_lemma_1 n 51 102;
+             Math.Lemmas.pow2_modulo_division_lemma_1 n 51 102 }
+    pow2 204 * ((n / pow2 204) % pow2 51) +
+    pow2 153 * ((n / pow2 153) % pow2 51) +
+    pow2 102 * ((n / pow2 102) % pow2 51) +
+    pow2 51 * ((n / pow2 51) % pow2 51) +
+    n % pow2 51;
+    (==) {
+      calc (==) {
+        ((n / pow2 204) % pow2 51) * pow2 51 * pow2 51 * pow2 51 * pow2 51;
+        (==) { Classical.forall_intro_3 (FStar.Math.Lemmas.paren_mul_right) }
+        ((n / pow2 204) % pow2 51) * (pow2 51 * pow2 51 * pow2 51 * pow2 51);
+        (==) { assert_norm (pow2 51 * pow2 51 * pow2 51 * pow2 51 == pow2 204);
+               FStar.Math.Lemmas.swap_mul (pow2 204) ((n / pow2 204) % pow2 51) }
+        pow2 204 * ((n / pow2 204) % pow2 51);
+      };
+      calc (==) {
+        ((n / pow2 153) % pow2 51) * pow2 51 * pow2 51 * pow2 51;
+        (==) { Classical.forall_intro_3 (FStar.Math.Lemmas.paren_mul_right) }
+        ((n / pow2 153) % pow2 51) * (pow2 51 * pow2 51 * pow2 51);
+        (==) { assert_norm (pow2 51 * pow2 51 * pow2 51 == pow2 153);
+               FStar.Math.Lemmas.swap_mul (pow2 153) ((n / pow2 153) % pow2 51) }
+        pow2 153 * ((n / pow2 153) % pow2 51);
+      };
+      calc (==) {
+        ((n / pow2 102) % pow2 51) * pow2 51 * pow2 51;
+        (==) { FStar.Math.Lemmas.paren_mul_right  ((n / pow2 102) % pow2 51) (pow2 51) (pow2 51);
+               assert_norm (pow2 51 * pow2 51 == pow2 102);
+               FStar.Math.Lemmas.swap_mul (pow2 102) ((n / pow2 102) % pow2 51) }
+        pow2 102 * ((n / pow2 102) % pow2 51);
+      };
+      calc (==) {
+        ((n / pow2 51) % pow2 51) * pow2 51;
+        (==) { FStar.Math.Lemmas.swap_mul (pow2 51) ((n / pow2 51) % pow2 51) }
+        pow2 51 * ((n / pow2 51) % pow2 51);
+      }
+    }
+    n % pow2 51 +
+    ((n / pow2 51) % pow2 51) * pow2 51 +
+    ((n / pow2 102) % pow2 51) * pow2 51 * pow2 51 +
+    ((n / pow2 153) % pow2 51) * pow2 51 * pow2 51 * pow2 51 +
+    ((n / pow2 204) % pow2 51) * pow2 51 * pow2 51 * pow2 51 * pow2 51;
+  }
+
+#pop-options
+
+#push-options "--z3rlimit 100"
+
 let load_51 output input =
   let i0 = uint_from_bytes_le (sub input 0ul 8ul) in
   let i1 = uint_from_bytes_le (sub input 6ul 8ul) in
@@ -350,34 +502,128 @@ let load_51 output input =
   let output2 = (i2 >>. 6ul ) &. mask_51 in
   let output3 = (i3 >>. 1ul ) &. mask_51 in
   let output4 = (i4 >>. 12ul) &. mask_51 in
+  (**) assert_norm (0x7ffffffffffff == pow2 51 - 1);
+  (**) logand_spec i0 mask_51;
+  (**) logand_le i0 mask_51;
+  (**) UInt.logand_mask (UInt.to_uint_t 64 (v i0)) 51;
+  (**) logand_spec (i1 >>. 3ul) mask_51;
+  (**) logand_le (i1 >>. 3ul) mask_51;
+  (**) UInt.logand_mask (UInt.to_uint_t 64 (v (i1 >>. 3ul))) 51;
+  (**) logand_spec (i2 >>. 6ul) mask_51;
+  (**) logand_le (i2 >>. 6ul) mask_51;
+  (**) UInt.logand_mask (UInt.to_uint_t 64 (v (i2 >>. 6ul))) 51;
+  (**) logand_spec (i3 >>. 1ul) mask_51;
+  (**) logand_le (i3 >>. 1ul) mask_51;
+  (**) UInt.logand_mask (UInt.to_uint_t 64 (v (i3 >>. 1ul))) 51;
+  (**) logand_spec (i4 >>. 12ul) mask_51;
+  (**) logand_le (i4 >>. 12ul) mask_51;
+  (**) UInt.logand_mask (UInt.to_uint_t 64 (v (i4 >>. 12ul))) 51;
+  (**) let h0 = get() in
   make_u64_5 output output0 output1 output2 output3 output4;
-  admit() // TODO: Replace by Curve
+  (**) shift_right_lemma i1 3ul;
+  (**) shift_right_lemma i2 6ul;
+  (**) shift_right_lemma i3 1ul;
+  (**) shift_right_lemma i4 12ul;
+  (**) lemma_reveal_uint_to_bytes_le #U64 (slice (as_seq h0 input) 0 8);
+  (**) lemma_reveal_uint_to_bytes_le #U64 (slice (as_seq h0 input) 6 14);
+  (**) lemma_reveal_uint_to_bytes_le #U64 (slice (as_seq h0 input) 12 20);
+  (**) lemma_reveal_uint_to_bytes_le #U64 (slice (as_seq h0 input) 19 27);
+  (**) lemma_reveal_uint_to_bytes_le #U64 (slice (as_seq h0 input) 24 32);
+  (**) lemma_load_51 (as_seq h0 input)
+
+#pop-options
+
+let lemma_uints_to_bytes_le_split (v1 v2 v3 v4:uint64) : Lemma
+  (Seq.equal
+    (Lib.ByteSequence.uints_to_bytes_le #U64 #SEC #4
+                                        (Seq.append (Seq.create 1 v1)
+                                        (Seq.append (Seq.create 1 v2)
+                                        (Seq.append (Seq.create 1 v3) (Seq.create 1 v4)))))
+
+    (Seq.append
+      (Lib.ByteSequence.uint_to_bytes_le v1)
+      (Seq.append (Lib.ByteSequence.uint_to_bytes_le v2)
+        (Seq.append (Lib.ByteSequence.uint_to_bytes_le v3)
+                    (Lib.ByteSequence.uint_to_bytes_le v4))
+      )))
+  =
+  let s_uints = Seq.append (Seq.create 1 v1)
+                (Seq.append (Seq.create 1 v2)
+                (Seq.append (Seq.create 1 v3) (Seq.create 1 v4))) in
+  // Classical.forall_intro does not work here
+  index_uints_to_bytes_le #U64 #SEC #4 s_uints 0;
+  index_uints_to_bytes_le #U64 #SEC #4 s_uints 1;
+  index_uints_to_bytes_le #U64 #SEC #4 s_uints 2;
+  index_uints_to_bytes_le #U64 #SEC #4 s_uints 3;
+  index_uints_to_bytes_le #U64 #SEC #4 s_uints 4;
+  index_uints_to_bytes_le #U64 #SEC #4 s_uints 5;
+  index_uints_to_bytes_le #U64 #SEC #4 s_uints 6;
+  index_uints_to_bytes_le #U64 #SEC #4 s_uints 7;
+  index_uints_to_bytes_le #U64 #SEC #4 s_uints 8;
+  index_uints_to_bytes_le #U64 #SEC #4 s_uints 9;
+  index_uints_to_bytes_le #U64 #SEC #4 s_uints 10;
+  index_uints_to_bytes_le #U64 #SEC #4 s_uints 11;
+  index_uints_to_bytes_le #U64 #SEC #4 s_uints 12;
+  index_uints_to_bytes_le #U64 #SEC #4 s_uints 13;
+  index_uints_to_bytes_le #U64 #SEC #4 s_uints 14;
+  index_uints_to_bytes_le #U64 #SEC #4 s_uints 15;
+  index_uints_to_bytes_le #U64 #SEC #4 s_uints 16;
+  index_uints_to_bytes_le #U64 #SEC #4 s_uints 17;
+  index_uints_to_bytes_le #U64 #SEC #4 s_uints 18;
+  index_uints_to_bytes_le #U64 #SEC #4 s_uints 19;
+  index_uints_to_bytes_le #U64 #SEC #4 s_uints 20;
+  index_uints_to_bytes_le #U64 #SEC #4 s_uints 21;
+  index_uints_to_bytes_le #U64 #SEC #4 s_uints 22;
+  index_uints_to_bytes_le #U64 #SEC #4 s_uints 23;
+  index_uints_to_bytes_le #U64 #SEC #4 s_uints 24;
+  index_uints_to_bytes_le #U64 #SEC #4 s_uints 25;
+  index_uints_to_bytes_le #U64 #SEC #4 s_uints 26;
+  index_uints_to_bytes_le #U64 #SEC #4 s_uints 27;
+  index_uints_to_bytes_le #U64 #SEC #4 s_uints 28;
+  index_uints_to_bytes_le #U64 #SEC #4 s_uints 29;
+  index_uints_to_bytes_le #U64 #SEC #4 s_uints 30;
+  index_uints_to_bytes_le #U64 #SEC #4 s_uints 31
+
 
 val store_4:
   output:lbuffer uint8 32ul ->
   v1:uint64 -> v2:uint64 -> v3:uint64 -> v4:uint64 ->
   Stack unit
     (requires fun h -> live h output)
-    (ensures  fun h0 _ h1 -> modifies (loc output) h0 h1)
+    (ensures  fun h0 _ h1 -> modifies (loc output) h0 h1 /\
+      Seq.equal (as_seq h1 output)
+        (Lib.ByteSequence.uints_to_bytes_le #U64 #SEC #4
+        (Seq.append (Seq.create 1 v1)
+          (Seq.append (Seq.create 1 v2)
+            (Seq.append (Seq.create 1 v3) (Seq.create 1 v4)))))
+    )
 let store_4 output v0 v1 v2 v3 =
   let b0 = sub output 0ul  8ul in
   let b1 = sub output 8ul  8ul in
   let b2 = sub output 16ul 8ul in
   let b3 = sub output 24ul 8ul in
+  lemma_uints_to_bytes_le_split v0 v1 v2 v3;
   uint_to_bytes_le b0 v0;
   uint_to_bytes_le b1 v1;
   uint_to_bytes_le b2 v2;
   uint_to_bytes_le b3 v3
 
 let store_51 output input =
+  let h0 = get() in
   let t0 = input.(0ul) in
   let t1 = input.(1ul) in
   let t2 = input.(2ul) in
   let t3 = input.(3ul) in
   let t4 = input.(4ul) in
-  let o0 = (t1 <<. 51ul) |. t0 in
-  let o1 = (t2 <<. 38ul) |. (t1 >>. 13ul) in
-  let o2 = (t3 <<. 25ul) |. (t2 >>. 26ul) in
-  let o3 = (t4 <<. 12ul) |. (t3 >>. 39ul) in
+  let (o0, o1, o2, o3) = Hacl.Spec.Curve25519.Field51.store_felem5 (t0, t1, t2, t3, t4) in
   store_4 output o0 o1 o2 o3;
-  admit() // TODO: Replace by Curve25519
+  Hacl.Impl.Curve25519.Lemmas.lemma_nat_from_uints64_le_4
+        (Seq.append (Seq.create 1 o0)
+          (Seq.append (Seq.create 1 o1)
+            (Seq.append (Seq.create 1 o2) (Seq.create 1 o3))));
+  assert_norm (pow2 255 - 19 < pow2 (64 * 32));
+  lemma_nat_from_to_intseq_le_preserves_value 4
+    ((Seq.append (Seq.create 1 o0)
+      (Seq.append (Seq.create 1 o1)
+        (Seq.append (Seq.create 1 o2) (Seq.create 1 o3)))));
+  uints_to_bytes_le_nat_lemma #U64 #SEC 4 (F51.fevalh h0 input)

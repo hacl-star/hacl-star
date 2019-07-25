@@ -415,6 +415,10 @@ val logand_spec: #t:inttype{~(U1? t)} -> #l:secrecy_level
   -> Lemma (ensures (v (a `logand` b) == v a `UInt.logand #(8 * numbytes t)` v b))
   //[SMTPat (v (a `logand` b))]
 
+val logand_le:#t:inttype -> #l:secrecy_level -> a:uint_t t l -> b:uint_t t l ->
+  Lemma (requires True)
+        (ensures v (logand a b) <= v a /\ v (logand a b) <= v b)
+
 inline_for_extraction
 val logor: #t:inttype -> #l:secrecy_level
   -> a:uint_t t l

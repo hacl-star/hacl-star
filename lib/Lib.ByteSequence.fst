@@ -482,3 +482,5 @@ let lemma_nat_from_to_intseq_le_preserves_value #t #l len b =
 
 let lemma_nat_from_to_bytes_le_preserves_value #l b len =
   lemma_nat_from_to_intseq_le_preserves_value len b
+
+let lemma_reveal_uint_to_bytes_le #t #l b = ()
