@@ -120,7 +120,7 @@ let block_len_as_len (a: hash_alg):
   | MD5 | SHA1 | SHA2_224 | SHA2_256 -> uint32_to_uint64 (D.block_len a)
   | SHA2_384 | SHA2_512 -> uint64_to_uint128 (uint32_to_uint64 (D.block_len a))
 
-#set-options "--z3rlimit 20"
+#set-options "--z3rlimit 30"
 
 inline_for_extraction noextract
 let part1 a init update_multi update_last finish s key data len =
@@ -249,7 +249,7 @@ let part2 a init update_multi update_last finish s dst key data len =
 let block_len_positive (a: hash_alg): Lemma (D.block_len a > 0ul) = ()
 let hash_lt_block (a: hash_alg): Lemma (hash_length a < block_length a) = ()
 
-#set-options "--z3rlimit 50"
+#set-options "--z3rlimit 100"
 inline_for_extraction noextract
 let mk_compute a hash alloca init update_multi update_last finish dst key key_len data data_len =
   block_len_positive a;
