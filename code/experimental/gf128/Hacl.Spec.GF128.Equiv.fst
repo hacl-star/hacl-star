@@ -52,7 +52,7 @@ val gf128_update_multi_add_mul_lemma_aux:
   -> r:elem -> r2:elem{r2 == fmul_be r r} -> r3:elem{r3 == fmul_be r r2} -> r4:elem{r4 == fmul_be r r3} ->
   Lemma (
     fmul_be b0 r4 `fadd` fmul_be b1 r3 `fadd` fmul_be b2 r2 `fadd` fmul_be b3 r ==
-    fmul_be (fadd b3 (fmul_be (fadd b2 (fmul_be (fadd b1 (fmul_be b0 r)) r)) r)) r)
+    fmul_be (fadd (fmul_be (fadd (fmul_be (fadd (fmul_be b0 r) b1) r) b2) r) b3) r)
 let gf128_update_multi_add_mul_lemma_aux b0 b1 b2 b3 r r2 r3 r4 = admit()
 
 val gf128_add_zero: f:elem -> Lemma (fadd zero f == f)
@@ -85,6 +85,7 @@ let gf128_update4_add_mul_lemma pre b acc =
   gf128_add_zero b3;
   gf128_add_commutativity acc b0
 
+
 val gf128_update_multi_add_mul_lemma:
     text:bytes{0 < length text /\ length text % 64 = 0}
   -> acc0:elem
@@ -92,43 +93,45 @@ val gf128_update_multi_add_mul_lemma:
     Lemma
     (gf128_update_multi_add_mul text acc0 r ==
       repeat_blocks_multi #uint8 #elem 16 text (S.gf128_update1 r) acc0)
-let gf128_update_multi_add_mul_lemma text acc0 r = admit()
-  // let len = length text in
-  // let pre = load_precompute_r r in
 
-  // let f = S.gf128_update1 r in
-  // let f_vec = gf128_update4_add_mul pre in
-  // let repeat_bf_sc = repeat_blocks_f 16 text f (len / 16) in
-  // let repeat_bf_vec = repeat_blocks_f 64 text f_vec (len / 64) in
+let gf128_update_multi_add_mul_lemma text acc0 r =
+  let pre = load_precompute_r r in
+  let len = length text in
 
-  // let acc1 = repeat_blocks_multi #uint8 #elem 64 text f_vec acc0 in
-  // lemma_repeat_blocks_multi #uint8 #elem 64 text f_vec acc0;
-  // assert (acc1 == Loops.repeati (len / 64) repeat_bf_vec acc0);
+  let f = S.gf128_update1 r in
+  let f_vec = gf128_update4_add_mul pre in
+  let repeat_bf_sc = repeat_blocks_f 16 text f (len / 16) in
+  let repeat_bf_vec = repeat_blocks_f 64 text f_vec (len / 64) in
 
-  // let aux_repeat_bf (i:nat{i < len / 64}) (acc:elem) : Lemma
-  //   (repeat_bf_vec i acc ==
-  //    repeat_bf_sc (4*i+3) (repeat_bf_sc (4*i+2) (repeat_bf_sc (4*i+1) (repeat_bf_sc (4*i) acc)))) =
+  let acc1 = repeat_blocks_multi #uint8 #elem 64 text f_vec acc0 in
+  lemma_repeat_blocks_multi #uint8 #elem 64 text f_vec acc0;
+  assert (acc1 == Loops.repeati (len / 64) repeat_bf_vec acc0);
 
-  //   let acc1 = repeat_bf_vec i acc in
-  //   let b = Seq.slice text (i * 64) (i * 64 + 64) in
-  //   assert (acc1 == gf128_update4_add_mul pre b acc);
-  //   assert (acc1 == normalize4 (load_acc acc b) pre);
-  //   let b0 = S.encode (Seq.slice text (i * 64) (i * 64 + 16)) in
-  //   let b1 = S.encode (Seq.slice text (i * 64 + 16) (i * 64 + 32)) in
-  //   let b2 = S.encode (Seq.slice text (i * 64 + 32) (i * 64 + 48)) in
-  //   let b3 = S.encode (Seq.slice text (i * 64 + 48) (i * 64 + 64)) in
+  let aux_repeat_bf (i:nat{i < len / 64}) (acc:elem) : Lemma
+    (repeat_bf_vec i acc ==
+     repeat_bf_sc (4*i+3) (repeat_bf_sc (4*i+2) (repeat_bf_sc (4*i+1) (repeat_bf_sc (4*i) acc)))) =
 
-  //   gf128_update4_add_mul_lemma pre b acc;
-  //   assert (acc1 == fmul_be (fadd b0 acc) pre.[0] `fadd` fmul_be b1 pre.[1] `fadd` fmul_be b2 pre.[2] `fadd` fmul_be b3 pre.[3]);
-  //   let acc2 = repeat_bf_sc (4*i+3) (repeat_bf_sc (4*i+2) (repeat_bf_sc (4*i+1) (repeat_bf_sc (4*i) acc))) in
-  //   //assert (acc2 == fmul_be (fadd b3 (fmul_be (fadd b2 (fmul_be (fadd b1 (fmul_be (fadd acc b0) r)) r)) r)) r);
-  //   //gf128_update_multi_add_mul_lemma_aux (fadd b0 acc) b1 b2 b3 pre.[3] pre.[2] pre.[1] pre.[0];
-  //   assume (acc2 == acc1) in
+    let acc1 = repeat_bf_vec i acc in
+    let b = Seq.slice text (i * 64) (i * 64 + 64) in
+    assert (acc1 == gf128_update4_add_mul pre b acc);
+    assert (acc1 == normalize4 (load_acc acc b) pre);
+    let b0 = S.encode (Seq.slice text (i * 64) (i * 64 + 16)) in
+    let b1 = S.encode (Seq.slice text (i * 64 + 16) (i * 64 + 32)) in
+    let b2 = S.encode (Seq.slice text (i * 64 + 32) (i * 64 + 48)) in
+    let b3 = S.encode (Seq.slice text (i * 64 + 48) (i * 64 + 64)) in
 
-  // FStar.Classical.forall_intro_2 (aux_repeat_bf);
-  // gf128_ni_repeati_extensionality (len / 64) r repeat_bf_sc repeat_bf_vec acc0;
-  // assert (acc1 == Loops.repeati (len / 16) repeat_bf_sc acc0);
-  // lemma_repeat_blocks_multi #uint8 #elem 16 text (S.gf128_update1 r) acc0
+    gf128_update4_add_mul_lemma pre b acc;
+    assert (acc1 == fmul_be (fadd b0 acc) pre.[0] `fadd` fmul_be b1 pre.[1] `fadd` fmul_be b2 pre.[2] `fadd` fmul_be b3 pre.[3]);
+    let acc2 = repeat_bf_sc (4*i+3) (repeat_bf_sc (4*i+2) (repeat_bf_sc (4*i+1) (repeat_bf_sc (4*i) acc))) in
+    assert (acc2 == fmul_be (fadd (fmul_be (fadd (fmul_be (fadd (fmul_be (fadd acc b0) r) b1) r) b2) r) b3) r);
+    gf128_update_multi_add_mul_lemma_aux (fadd acc b0) b1 b2 b3 pre.[3] pre.[2] pre.[1] pre.[0];
+    gf128_add_commutativity b0 acc;
+    assert (acc2 == acc1) in
+
+  FStar.Classical.forall_intro_2 (aux_repeat_bf);
+  gf128_ni_repeati_extensionality (len / 64) r repeat_bf_sc repeat_bf_vec acc0;
+  assert (acc1 == Loops.repeati (len / 16) repeat_bf_sc acc0);
+  lemma_repeat_blocks_multi #uint8 #elem 16 text (S.gf128_update1 r) acc0
 
 val gf128_update_multi_mul_add_lemma:
     text:bytes{0 < length text /\ length text % 64 = 0}
@@ -137,36 +140,26 @@ val gf128_update_multi_mul_add_lemma:
     Lemma
     (gf128_update_multi_mul_add text acc0 r ==
       repeat_blocks_multi #uint8 #elem 16 text (S.gf128_update1 r) acc0)
-let gf128_update_multi_mul_add_lemma text acc0 r = admit()
-  // let len = length text in
-  // let f = S.gf128_update1 r in
-  // let repeat_bf_t0 = repeat_blocks_f 16 text f (len / 16) in
 
-  // let t0 = Seq.slice text 0 64 in
-  // FStar.Seq.Base.lemma_len_slice text 0 64;
-  // let t1 = Seq.slice text 64 len in
-  // FStar.Seq.Base.lemma_len_slice text 64 len;
+let gf128_update_multi_mul_add_lemma text acc0 r =
+  let pre = load_precompute_r r in
 
-  // let acc1 = load_acc acc0 t0 in
-  // let pre = load_precompute_r r in
-  // let r4 = create 4 pre.[0] in
-  // let f_vec = gf128_update4_mul_add r4 in
-  // let acc2 = repeat_blocks_multi #uint8 #elem4 64 t1 f_vec acc1 in
-  // let acc3 = normalize4 acc2 pre in
-  // //assert (acc3 == gf128_update_multi_mul_add text acc0 r);
-  // //poly_update_repeat_blocks_multi_lemma #w t1 acc1 r;
-  // assume (acc3 == repeat_blocks_multi #uint8 #elem 16 t1 f (normalize4 acc1 pre));
-  // //poly_update_multi_lemma2 #w text acc0 r;
-  // assume (acc3 == Loops.repeat_right 4 (len / 16) (Loops.fixed_a elem) repeat_bf_t0 (normalize4 acc1 pre));
+  let len = length text in
+  let t0 = Seq.slice text 0 64 in
+  let t1 = Seq.slice text 64 len in
 
-  // // poly_update_multi_lemma1 #w text acc0 r;
-  // assume (normalize4 (load_acc acc0 t0) pre == Loops.repeat_right 0 4 (Loops.fixed_a elem) repeat_bf_t0 acc0);
-  // Loops.repeat_right_plus 0 4 (len / 16) (Loops.fixed_a elem) repeat_bf_t0 acc0;
-  // assert (acc3 == Loops.repeat_right 0 (len / 16) (Loops.fixed_a elem) repeat_bf_t0 acc0);
+  let f = S.gf128_update1 r in
+  let f_vec = gf128_update4_mul_add pre in
+  let repeat_bf_t = repeat_blocks_f 16 text f (len / 16) in
 
-  // Loops.repeati_def (len / 16) repeat_bf_t0 acc0;
-  // lemma_repeat_blocks_multi #uint8 #elem 16 text f acc0;
-  // assert (acc3 == repeat_blocks_multi #uint8 #elem 16 text f acc0)
+  let acc1 = load_acc acc0 t0 in
+  let acc2 = repeat_blocks_multi #uint8 #elem4 64 t1 f_vec acc1 in
+  let acc3 = normalize4 acc2 pre in
+  assert (acc3 == gf128_update_multi_mul_add text acc0 r);
+
+  assume (acc3 == repeat_blocks_multi #uint8 #elem 16 t1 f (normalize4 acc1 pre));
+  assume (normalize4 acc1 pre == repeat_blocks_multi #uint8 #elem 16 t0 f acc0);
+  PLoops.repeat_blocks_multi_split #uint8 #elem 16 64 text f acc0
 
 
 val gf128_update_multi_lemma:
