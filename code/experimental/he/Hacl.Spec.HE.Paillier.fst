@@ -1167,7 +1167,7 @@ let encf_inj_pair #n g x1 x2 =
   let ex_pair' y1 y2 = (encf g x1 y1 = encf g x2 y2) in
 
   let goal:Type = x1 = x2 in
-  ex_pair (fenu n) ex_pair';
+  ex_pair #(fenu n) #(fenu n) ex_pair';
   let predicate (ys:y_pair):Type = ex_pair' (fst ys) (snd ys) in
 
   assert(exists (ys:y_pair #n). predicate ys);

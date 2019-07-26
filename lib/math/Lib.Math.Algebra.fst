@@ -390,25 +390,35 @@ val gcd_one_different: a:pos -> b:pos -> Lemma
   (ensures a <> b)
 let gcd_one_different a b = assert (a = b ==> is_gcd a b a)
 
-val divides_exactly_one_multiple: a:pos -> b:nat -> c:pos -> Lemma
-  (requires (divides a (b*c) /\ is_gcd a c 1))
-  (ensures (divides a b))
-let divides_exactly_one_multiple a b c = admit ()
+// n = a = 1 is the only input combination that gives a % n = 0
+val gcd_mod_reduce: n:pos -> a:pos -> Lemma
+  (requires (is_gcd a n 1))
+  (ensures ((a % n) = 0 \/ is_gcd (a % n) n 1))
+let gcd_mod_reduce n a =
+  if a % n <> 0 then
+  exists_elim (is_gcd (a % n) n 1) #pos #(fun g -> is_gcd (a % n) n g)
+    (gcd_exists (a % n) n)
+    (fun g -> if g > 1 then begin
+      assert (divides g (a % n));
+      assert (divides g n);
+      lemma_div_mod a n;
+      divides_mult g n (a/n);
+      divides_neg g (n * (a/n));
+      divides_sum_rev g a (-(n*(a/n)));
+      assert (divides g a);
+      assert (is_gcd a n g);
+      assert (False);
+      assert (is_gcd (a % n) n 1)
+     end)
 
-val ex_eucl_lemma1: a:pos -> b:pos -> g:pos -> u:int -> v:int -> Lemma
-  (requires (a * u + b * v = g))
-  (ensures (exists (k:pos). g = k * gcd a b))
-let ex_eucl_lemma1 a b g u v = admit ()
-
-val ex_eucl_lemma2: a:pos -> b:pos -> g:pos -> u:int -> v:int -> Lemma
-  (requires (a * u + b * v = g /\ divides g a /\ divides g b))
-  (ensures (gcd a b = g))
-let ex_eucl_lemma2 a b g u v = admit()
-
-val ex_eucl_lemma3: a:pos -> b:pos -> u:int -> v:int -> Lemma
-  (requires (a * u + b * v = 1))
-  (ensures (gcd a b = 1))
-let ex_eucl_lemma3 a b u v = ex_eucl_lemma2 a b 1 u v
+val gcd_mod_reduce_big: n:big -> a:pos -> Lemma
+  (requires (is_gcd a n 1))
+  (ensures (is_gcd (a % n) n 1))
+let gcd_mod_reduce_big n a =
+  gcd_mod_reduce n a;
+  gcd_one_different n a;
+  assert (a <> n);
+  gcd_mod_nonzero n a 1
 
 val gcd_with_prime: p:prm -> a:pos -> Lemma
   (requires (~(divides p a)))
@@ -420,6 +430,51 @@ let gcd_with_prime p a =
   assert (a = a % p + (a / p) * p);
   gcd_prop_multiple (a % p) p 1 (a / p);
   assert (is_gcd a p 1)
+
+#reset-options "--z3rlimit 100"
+
+val ex_eucl_lemma1: a:pos -> b:pos -> j:pos -> u:int -> v:int -> Lemma
+  (requires (a * u + b * v = j))
+  (ensures (let g = gcd a b in j = g * ((a/g)*u+(b/g)*v)))
+let ex_eucl_lemma1 a b j u v =
+  // a * u + b * v = g * (a' * u + b' * v)
+
+  let goal = (let g = gcd a b in j = gcd a b * ((a/g)*u+(b/g)*v)) in
+  let lemma (g:pos{is_gcd a b g}): Lemma goal = begin
+    lemma_div_mod a g;
+    lemma_div_mod b g;
+    assert (a = g * (a / g) /\ b = g * (b / g));
+    assert (g * (a / g) * u + g * (b / g) * v = j);
+    distributivity_add_right g ((a / g) * u) ((b / g) * v);
+    assert (g * ((a / g) * u + (b / g) * v) = j);
+    assert (j = gcd a b * ((a / g) * u + (b / g) * v))
+  end in
+
+  exists_elim goal #pos #(fun g -> is_gcd a b g) (gcd_exists a b) (fun g -> lemma g)
+
+
+val ex_eucl_lemma2: a:pos -> b:pos -> j:pos -> u:int -> v:int -> Lemma
+  (requires (a * u + b * v = j /\ divides j a /\ divides j b))
+  (ensures (gcd a b = j))
+let ex_eucl_lemma2 a b j u v =
+  ex_eucl_lemma1 a b j u v;
+  let g = gcd a b in
+  let t = (a/g)*u + (b/g)*v in
+  assert (j = g * t);
+  assert (is_gcd a b g);
+  assert (is_common_divisor a b j);
+  assert (t > 1 ==> False); // then j > g, but g is gcd
+  assert (t > 0); // because g, j are positive
+  assert (t <> 0); // because j > 0
+  assert (t = 1)
+
+
+#reset-options
+
+val ex_eucl_lemma3: a:pos -> b:pos -> u:int -> v:int -> Lemma
+  (requires (a * u + b * v = 1))
+  (ensures (gcd a b = 1))
+let ex_eucl_lemma3 a b u v = ex_eucl_lemma2 a b 1 u v
 
 type is_common_multiple (a:pos) (b:pos) (l:pos) =
   divides a l /\ divides b l
@@ -493,35 +548,6 @@ let gcd_to_factor_one n m a =
   assert (forall g'. (is_gcd a n g' ==> g' = 1));
   gcd_forall_elim a n 1
 
-// n = a = 1 is the only input combination that gives a % n = 0
-val gcd_mod_reduce: n:pos -> a:pos -> Lemma
-  (requires (is_gcd a n 1))
-  (ensures ((a % n) = 0 \/ is_gcd (a % n) n 1))
-let gcd_mod_reduce n a =
-  if a % n <> 0 then
-  exists_elim (is_gcd (a % n) n 1) #pos #(fun g -> is_gcd (a % n) n g)
-    (gcd_exists (a % n) n)
-    (fun g -> if g > 1 then begin
-      assert (divides g (a % n));
-      assert (divides g n);
-      lemma_div_mod a n;
-      divides_mult g n (a/n);
-      divides_neg g (n * (a/n));
-      divides_sum_rev g a (-(n*(a/n)));
-      assert (divides g a);
-      assert (is_gcd a n g);
-      assert (False);
-      assert (is_gcd (a % n) n 1)
-     end)
-
-val gcd_mod_reduce_big: n:big -> a:pos -> Lemma
-  (requires (is_gcd a n 1))
-  (ensures (is_gcd (a % n) n 1))
-let gcd_mod_reduce_big n a =
-  gcd_mod_reduce n a;
-  gcd_one_different n a;
-  assert (a <> n);
-  gcd_mod_nonzero n a 1
 
 (* Algebra *)
 
@@ -1219,6 +1245,24 @@ val mult_order_unique: #n:big -> g:fe n{isunit g} -> r1:pos -> r2:pos -> Lemma
   ((is_mult_order g r1 /\ is_mult_order g r2) ==> r1 = r2)
 let mult_order_unique #n g r1 r2 = ()
 
+val divides_exactly_one_multiple: a:big -> b:nat -> c:pos -> Lemma
+  (requires (divides a (b*c) /\ is_gcd a c 1))
+  (ensures (divides a b))
+let divides_exactly_one_multiple a b c =
+  assert (a == c ==> is_gcd a c a);
+  gcd_mod_reduce a c;
+  gcd_mod_nonzero a c 1;
+  assert (is_gcd (c % a) a 1);
+  gcd_symm (c % a) a 1;
+  assert ((b * c) % a = 0);
+  modulo_mul_distributivity b c a;
+  assert (((b % a) * (c % a)) % a = 0);
+  let b' = to_fe #a b in
+  let c' = to_fe #a c in
+  assert (b' *% c' = 0);
+  inv_as_gcd1 #a c';
+  mul_zero_either  c' b'
+
 // nat less or equal than
 // Same as fe n, but for nat (not for big)
 type nlet (n:nat) = x:nat{x < n}
@@ -1261,16 +1305,6 @@ val all_distinct_negation: #a:eqtype -> l:list a -> Lemma
   (~(all_distinct l) <==>
    (exists (i:nlet (L.length l)) (j:nlet (L.length l){i <> j}). L.index l i = L.index l j))
 let all_distinct_negation #a l = ()
-
-val check_all_distinct: #a:eqtype -> l:list a -> b:bool{ all_distinct l <==> b }
-let rec check_all_distinct #a l = match l with
-  | [] -> true
-  | (x::xs) -> begin
-      let current = not (L.mem x xs) in
-      let next = check_all_distinct xs in
-      admit (); // not sure if we need this function at all
-      current && next
-    end
 
 val cons_shifts_index_value: #a:eqtype -> x:a -> l:list a -> Lemma
   (ensures (forall (i:nat{i < L.length l}). L.index (x::l) (i+1) = L.index l i))
