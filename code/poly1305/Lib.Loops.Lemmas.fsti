@@ -3,6 +3,7 @@ module Lib.Loops.Lemmas
 open FStar.Mul
 open Lib.IntTypes
 open Lib.Sequence
+open Lib.IntVector
 
 module Loops = Lib.LoopCombinators
 
@@ -67,3 +68,35 @@ val repeat_blocks_multi_split:
     repeat_blocks_multi size_block inp f acc0 ==
     repeat_blocks_multi size_block (Seq.slice inp len0 len) f
       (repeat_blocks_multi size_block (Seq.slice inp 0 len0) f acc0))
+
+
+let lanes = w:width{w == 1 \/ w == 2 \/ w == 4}
+
+let repeat_w (#a:Type0) (w:lanes) (n:nat) (f:(i:nat{i < w * n} -> a -> a)) (i:nat{i < n}) (acc:a) : Tot a =
+  match w with
+  | 1 -> f i acc
+  | 2 -> f (2*i+1) (f (2*i) acc)
+  | 4 -> f (4*i+3) (f (4*i+2) (f (4*i+1) (f (4*i) acc)))
+
+
+val unfold_w:
+    #a:Type0
+  -> w:lanes
+  -> n:pos
+  -> f:(i:nat{i < w * n} -> a -> a)
+  -> acc0:a ->
+  Lemma (Loops.repeati (w*n) f acc0 == repeat_w w n f (n-1) (Loops.repeati (w*(n-1)) f acc0))
+
+
+val normalizen_repeati_extensionality:
+    #a:Type0
+  -> #a_vec:Type0
+  -> w:lanes
+  -> n:nat
+  -> normalize_n:(a_vec -> a)
+  -> f:(i:nat{i < n * w} -> a -> a)
+  -> f_vec:(i:nat{i < n} -> a_vec -> a_vec)
+  -> acc0_vec:a_vec ->
+  Lemma
+  (requires (forall (i:nat{i < n}) (acc_vec:a_vec). normalize_n (f_vec i acc_vec) == repeat_w w n f i (normalize_n acc_vec)))
+  (ensures  (normalize_n (Loops.repeati n f_vec acc0_vec) == Loops.repeati (w * n) f (normalize_n acc0_vec)))

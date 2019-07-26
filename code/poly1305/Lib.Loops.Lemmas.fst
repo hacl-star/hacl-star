@@ -3,6 +3,7 @@ module Lib.Loops.Lemmas
 open FStar.Mul
 open Lib.IntTypes
 open Lib.Sequence
+open Lib.IntVector
 
 module Loops = Lib.LoopCombinators
 
@@ -223,9 +224,6 @@ let repeat_blocks_multi_split #a #b size_block len0 inp f acc0 =
   let len1 = len - len0 in
   FStar.Math.Lemmas.lemma_div_le len0 len size_block;
   FStar.Math.Lemmas.lemma_div_le len1 len size_block;
-  assert (len0 == len0 / size_block * size_block);
-  FStar.Math.Lemmas.modulo_addition_lemma len size_block (- len0 / size_block);
-  assert (len % size_block == len1 % size_block);
 
   let t0 = Seq.slice inp 0 len0 in
   let t1 = Seq.slice inp len0 len in
@@ -237,6 +235,10 @@ let repeat_blocks_multi_split #a #b size_block len0 inp f acc0 =
   lemma_repeat_blocks_multi size_block t0 f acc0;
   assert (acc1 == Loops.repeati (len0 / size_block) repeat_bf_s0 acc0);
 
+  assert (len0 == len0 / size_block * size_block);
+  FStar.Math.Lemmas.modulo_addition_lemma len size_block (- len0 / size_block);
+  assert (len % size_block == len1 % size_block);
+
   let acc2 = repeat_blocks_multi size_block t1 f acc1 in
   lemma_repeat_blocks_multi size_block t1 f acc1;
   assert (acc2 == Loops.repeati (len1 / size_block) repeat_bf_s1 acc1);
@@ -245,3 +247,38 @@ let repeat_blocks_multi_split #a #b size_block len0 inp f acc0 =
   assert (acc2 == Loops.repeati (len / size_block) repeat_bf_t acc0);
 
   lemma_repeat_blocks_multi size_block inp f acc0
+
+
+let unfold_w #a w n f acc =
+  match w with
+  | 1 ->
+    Loops.unfold_repeati n f acc (n-1)
+  | 2 ->
+    Loops.unfold_repeati (2*n) f acc (2*n-2);
+    Loops.unfold_repeati (2*n) f acc (2*n-1)
+  | 4 ->
+    Loops.unfold_repeati (4*n) f acc (4*n-4);
+    Loops.unfold_repeati (4*n) f acc (4*n-3);
+    Loops.unfold_repeati (4*n) f acc (4*n-2);
+    Loops.unfold_repeati (4*n) f acc (4*n-1)
+
+
+let rec normalizen_repeati_extensionality #a #a_vec w n normalize_n f f_vec acc0_vec =
+  if n = 0 then begin
+    Loops.eq_repeati0 n f_vec acc0_vec;
+    Loops.eq_repeati0 (w * n) f (normalize_n acc0_vec) end
+  else begin
+    let acc0 = normalize_n acc0_vec in
+    normalizen_repeati_extensionality #a #a_vec w (n-1) normalize_n f f_vec acc0_vec;
+    let next_p = Loops.repeati (n-1) f_vec acc0_vec in
+    let next_v = Loops.repeati (w*(n-1)) f acc0 in
+    assert (normalize_n next_p == next_v);
+
+    let res1 = Loops.repeati n f_vec acc0_vec in
+    let res2 = Loops.repeati (w*n) f acc0 in
+    Loops.unfold_repeati n f_vec acc0_vec (n-1);
+    assert (res1 == f_vec (n-1) next_p);
+    unfold_w w n f acc0;
+    assert (res2 == repeat_w w n f (n-1) next_v);
+    assert (normalize_n res1 == res2)
+  end
