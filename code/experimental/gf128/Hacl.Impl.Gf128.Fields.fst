@@ -82,12 +82,14 @@ let feval4 #s h e =
 noextract
 let zero = GF.zero #S.gf128
 
+
 noextract
 val get_r1: #s:field_spec -> h:mem -> p:precomp s -> GTot S.elem
 let get_r1 #s h pre =
   match s with
   | PreComp -> feval h (gsub pre 6ul 2ul)
   | NI -> feval h (gsub pre 3ul 1ul)
+
 
 noextract
 val get_r4: #s:field_spec -> h:mem -> p:precomp s -> GTot S.elem
@@ -96,12 +98,24 @@ let get_r4 #s h pre =
   | PreComp -> feval h (gsub pre 0ul 2ul)
   | NI -> feval h (gsub pre 0ul 1ul)
 
+
 noextract
 val get_r4321: #s:field_spec -> h:mem -> p:precomp s -> GTot elem4
 let get_r4321 #s h pre =
   match s with
   | PreComp -> feval4 h (gsub pre 0ul 8ul)
   | NI -> feval4 h pre
+
+
+noextract
+val precomp_inv_t: #s:field_spec -> h:mem -> pre:precomp s -> Type0
+let precomp_inv_t #s h pre =
+  match s with
+  | PreComp ->
+    get_r4321 h pre == load_precompute_r (get_r1 h pre) /\
+    as_seq h (gsub pre 8ul 256ul) == Hacl.Spec.Gf128.FieldPreComp.precomp_s (as_seq h (gsub pre 0ul 2ul))
+  | NI -> get_r4321 h pre == load_precompute_r (get_r1 h pre)
+
 
 inline_for_extraction noextract
 val create_felem: s:field_spec ->
@@ -110,10 +124,12 @@ val create_felem: s:field_spec ->
   (ensures  fun h0 f h1 ->
     stack_allocated f h0 h1 (LSeq.create (v (felem_len s)) (elem_zero s)) /\
     feval h1 f == zero)
+
 let create_felem s =
   match s with
   | PreComp -> Hacl.Impl.Gf128.FieldPreComp.create_felem ()
   | NI -> Hacl.Impl.Gf128.FieldNI.create_felem ()
+
 
 inline_for_extraction noextract
 val copy_felem:
@@ -124,10 +140,12 @@ val copy_felem:
   (requires fun h -> live h f1 /\ live h f2 /\ disjoint f1 f2)
   (ensures  fun h0 _ h1 -> modifies1 f1 h0 h1 /\
     as_seq h1 f1 == as_seq h0 f2)
+
 let copy_felem #s f1 f2 =
   match s with
   | PreComp -> Hacl.Impl.Gf128.FieldPreComp.copy_felem f1 f2
   | NI -> Hacl.Impl.Gf128.FieldNI.copy_felem f1 f2
+
 
 inline_for_extraction noextract
 val felem_set_zero:
@@ -137,10 +155,12 @@ val felem_set_zero:
   (requires fun h -> live h f)
   (ensures  fun h0 _ h1 -> modifies1 f h0 h1 /\
     feval h1 f == zero)
+
 let felem_set_zero #s f =
   match s with
   | PreComp -> Hacl.Impl.Gf128.FieldPreComp.felem_set_zero f
   | NI -> Hacl.Impl.Gf128.FieldNI.felem_set_zero f
+
 
 inline_for_extraction noextract
 val create_felem4: s:field_spec ->
@@ -149,10 +169,12 @@ val create_felem4: s:field_spec ->
   (ensures  fun h0 f h1 ->
     stack_allocated f h0 h1 (LSeq.create (v (felem4_len s)) (elem_zero s)) /\
     feval4 h1 f == LSeq.create 4 zero)
+
 let create_felem4 s =
   match s with
   | PreComp -> Hacl.Impl.Gf128.FieldPreComp.create_felem4 ()
   | NI -> Hacl.Impl.Gf128.FieldNI.create_felem4 ()
+
 
 inline_for_extraction noextract
 val load_felem:
@@ -163,10 +185,12 @@ val load_felem:
   (requires fun h -> live h x /\ live h y)
   (ensures  fun h0 _ h1 -> modifies1 x h0 h1 /\
     feval h1 x == S.encode (as_seq h0 y))
+
 let load_felem #s x y =
   match s with
   | PreComp -> Hacl.Impl.Gf128.FieldPreComp.load_felem x y
   | NI -> Hacl.Impl.Gf128.FieldNI.load_felem x y
+
 
 inline_for_extraction noextract
 val load_felem4:
@@ -177,10 +201,12 @@ val load_felem4:
   (requires fun h -> live h x /\ live h y /\ disjoint x y)
   (ensures  fun h0 _ h1 -> modifies1 x h0 h1 /\
     feval4 h1 x == encode4 (as_seq h0 y))
+
 let load_felem4 #s x y =
   match s with
   | PreComp -> Hacl.Impl.Gf128.FieldPreComp.load_felem4 x y
   | NI -> Hacl.Impl.Gf128.FieldNI.load_felem4 x y
+
 
 inline_for_extraction noextract
 val store_felem:
@@ -191,10 +217,12 @@ val store_felem:
   (requires fun h -> live h x /\ live h y)
   (ensures  fun h0 _ h1 -> modifies1 x h0 h1 /\
     as_seq h1 x == S.store_elem (feval h0 y))
+
 let store_felem #s x y =
   match s with
   | PreComp -> Hacl.Impl.Gf128.FieldPreComp.store_felem x y
   | NI -> Hacl.Impl.Gf128.FieldNI.store_felem x y
+
 
 inline_for_extraction noextract
 val load_precompute_r:
@@ -204,11 +232,14 @@ val load_precompute_r:
   Stack unit
   (requires fun h -> live h pre /\ live h key /\ disjoint pre key)
   (ensures  fun h0 _ h1 -> modifies1 pre h0 h1 /\
-    get_r4321 h1 pre == load_precompute_r (S.load_elem (as_seq h0 key)))
+    get_r1 h1 pre == S.load_elem (as_seq h0 key) /\
+    precomp_inv_t h1 pre)
+
 let load_precompute_r #s pre key =
   match s with
   | PreComp -> Hacl.Impl.Gf128.FieldPreComp.load_precompute_r pre key
   | NI -> Hacl.Impl.Gf128.FieldNI.load_precompute_r pre key
+
 
 inline_for_extraction noextract
 val fadd:
@@ -216,13 +247,15 @@ val fadd:
   -> x:felem s
   -> y:felem s ->
   Stack unit
-  (requires fun h -> live h x /\ live h y)
+  (requires fun h -> live h x /\ live h y /\ eq_or_disjoint x y)
   (ensures  fun h0 _ h1 -> modifies1 x h0 h1 /\
     feval h1 x == GF.fadd #S.gf128 (feval h0 x) (feval h0 y))
+
 let fadd #s x y =
   match s with
   | PreComp -> Hacl.Impl.Gf128.FieldPreComp.fadd x y
   | NI -> Hacl.Impl.Gf128.FieldNI.fadd x y
+
 
 inline_for_extraction noextract
 val fadd4:
@@ -230,13 +263,15 @@ val fadd4:
   -> x:felem4 s
   -> y:felem4 s ->
   Stack unit
-  (requires fun h -> live h x /\ live h y)
+  (requires fun h -> live h x /\ live h y /\ eq_or_disjoint x y)
   (ensures  fun h0 _ h1 -> modifies1 x h0 h1 /\
     feval4 h1 x == fadd4 (feval4 h0 x) (feval4 h0 y))
+
 let fadd4 #s x y =
   match s with
   | PreComp -> Hacl.Impl.Gf128.FieldPreComp.fadd4 x y
   | NI -> Hacl.Impl.Gf128.FieldNI.fadd4 x y
+
 
 inline_for_extraction noextract
 val fmul:
@@ -244,13 +279,15 @@ val fmul:
   -> x:felem s
   -> y:felem s ->
   Stack unit
-  (requires fun h -> live h x /\ live h y)
+  (requires fun h -> live h x /\ live h y /\ eq_or_disjoint x y)
   (ensures  fun h0 _ h1 -> modifies1 x h0 h1 /\
     feval h1 x == GF.fmul_be #S.gf128 (feval h0 x) (feval h0 y))
+
 let fmul #s x y =
   match s with
   | PreComp -> Hacl.Impl.Gf128.FieldPreComp.fmul x y
   | NI -> Hacl.Impl.Gf128.FieldNI.fmul x y
+
 
 inline_for_extraction noextract
 val fmul_pre:
@@ -258,13 +295,17 @@ val fmul_pre:
   -> x:felem s
   -> y:precomp s ->
   Stack unit
-  (requires fun h -> live h x /\ live h y)
+  (requires fun h ->
+    live h x /\ live h y /\ disjoint x y /\
+    precomp_inv_t h y)
   (ensures  fun h0 _ h1 -> modifies1 x h0 h1 /\
     feval h1 x == GF.fmul_be #S.gf128 (feval h0 x) (get_r4 h0 y))
+
 let fmul_pre #s x y =
   match s with
   | PreComp -> Hacl.Impl.Gf128.FieldPreComp.fmul_pre x y
   | NI -> Hacl.Impl.Gf128.FieldNI.fmul_pre x y
+
 
 inline_for_extraction noextract
 val fmul_r4:
@@ -272,14 +313,34 @@ val fmul_r4:
   -> x:felem4 s
   -> y:precomp s ->
   Stack unit
-  (requires fun h -> live h x /\ live h y /\ disjoint x y)
+  (requires fun h ->
+    live h x /\ live h y /\ disjoint x y /\
+    precomp_inv_t h y)
   (ensures  fun h0 _ h1 -> modifies1 x h0 h1 /\
-   (let r4 = get_r4 h0 y in
-    feval4 h1 x == fmul4 (feval4 h0 x) (create4 r4 r4 r4 r4)))
+    feval4 h1 x == fmul4 (feval4 h0 x) (LSeq.create 4 (get_r4 h0 y)))
+
 let fmul_r4 #s x pre =
   match s with
   | PreComp -> Hacl.Impl.Gf128.FieldPreComp.fmul_r4 x pre
   | NI -> Hacl.Impl.Gf128.FieldNI.fmul_r4 x pre
+
+
+inline_for_extraction noextract
+val fadd_acc4:
+    #s:field_spec
+  -> x:felem4 s
+  -> acc:felem s ->
+  Stack unit
+  (requires fun h ->
+    live h x /\ live h acc /\ disjoint x acc)
+  (ensures  fun h0 _ h1 -> modifies1 x h0 h1 /\
+    feval4 h1 x == Hacl.Spec.GF128.Vec.fadd4 (create4 (feval h0 acc) zero zero zero) (feval4 h0 x))
+
+let fadd_acc4 #s x acc =
+  match s with
+  | PreComp -> Hacl.Impl.Gf128.FieldPreComp.fadd_acc4 x acc
+  | NI -> Hacl.Impl.Gf128.FieldNI.fadd_acc4 x acc
+
 
 inline_for_extraction noextract
 val normalize4:
@@ -288,10 +349,13 @@ val normalize4:
   -> x:felem4 s
   -> y:precomp s ->
   Stack unit
-  (requires fun h -> live h acc /\ live h x /\ live h y)
-  (ensures  fun h0 _ h1 -> modifies1 acc h0 h1 /\
-   (let x = Hacl.Spec.GF128.Vec.fadd4 (create4 (feval h0 acc) GF.zero GF.zero GF.zero) (feval4 h0 x) in
-    feval h1 acc == normalize4 x (get_r4321 h0 y)))
+  (requires fun h ->
+    live h acc /\ live h x /\ live h y /\
+    disjoint acc x /\ disjoint acc y /\ disjoint x y /\
+    precomp_inv_t h y)
+  (ensures  fun h0 _ h1 -> modifies2 x acc h0 h1 /\
+    feval h1 acc == normalize4 (feval4 h0 x) (get_r4321 h0 y))
+
 let normalize4 #s acc x pre =
   match s with
   | PreComp -> Hacl.Impl.Gf128.FieldPreComp.normalize4 acc x pre

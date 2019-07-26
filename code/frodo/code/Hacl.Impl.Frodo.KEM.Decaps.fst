@@ -277,13 +277,16 @@ val crypto_kem_dec:
       as_seq h1 ss == S.crypto_kem_dec (as_seq h0 ct) (as_seq h0 sk))
 let crypto_kem_dec ss ct sk =
   Spec.Frodo.KEM.expand_crypto_secretkeybytes ();
-  let h0 = ST.get () in
+  let h0 = ST.get() in
   push_frame();
   let bp_matrix = matrix_create params_nbar params_n in
   let c_matrix  = matrix_create params_nbar params_nbar in
   let mu_decode = create bytes_mu (u8 0) in
   get_bp_c_matrices ct bp_matrix c_matrix;
   let s_bytes = sub sk (crypto_bytes +! crypto_publickeybytes) (size 2 *! params_n *! params_nbar) in
+  let mu_decode = create bytes_mu (u8 0) in
+  let h1 = ST.get() in
+  assert (LowStar.Buffer.modifies loc_none h0 h1);
   frodo_mu_decode s_bytes bp_matrix c_matrix mu_decode;
   crypto_kem_dec_1 mu_decode bp_matrix c_matrix sk ct ss;
   pop_frame();

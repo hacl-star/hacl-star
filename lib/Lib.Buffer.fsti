@@ -18,7 +18,7 @@ module Seq = Lib.Sequence
 module ByteSeq = Lib.ByteSequence
 module Loop = Lib.LoopCombinators
 
-#set-options "--z3rlimit 15"
+#set-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 1"
 
 type buftype =
   | MUT
@@ -41,7 +41,6 @@ let length (#t:buftype) (#a:Type0) (b:buffer_t t a) =
   | MUT -> B.length (b <: buffer a)
   | IMMUT -> IB.length (b <: ibuffer a)
 
-
 inline_for_extraction
 let lbuffer_t (ty:buftype) (a:Type0) (len:size_t) =
   b:buffer_t ty a{length #ty #a b == v len}
@@ -59,6 +58,8 @@ let loc (#t:buftype) (#a:Type0) (b:buffer_t t a) : GTot B.loc =
   match t with
   | MUT -> B.loc_buffer (b <: buffer a)
   | IMMUT -> B.loc_buffer (b <: ibuffer a)
+
+#set-options "--max_ifuel 0"
 
 let union (l1:B.loc) (l2:B.loc) : GTot B.loc = B.loc_union l1 l2
 let ( |+| ) (l1:B.loc) (l2:B.loc) : GTot B.loc = union l1 l2
@@ -129,8 +130,6 @@ let as_seq (#t:buftype) (#a:Type0) (#len:size_t) (h:HS.mem) (b:lbuffer_t t a len
   match t with
   | MUT -> B.as_seq h (b <: buffer a)
   | IMMUT -> IB.as_seq h (b <: ibuffer a)
-
-#reset-options "--z3rlimit 100"
 
 (** Ghostly get a sub-buffer of a buffer *)
 let gsub (#t:buftype) (#a:Type0) (#len:size_t) (b:lbuffer_t t a len)
@@ -275,16 +274,16 @@ val upd:
 
 (** Operator for updating a mutable buffer: b.(i) <- x *)
 inline_for_extraction
-let op_Array_Assignment #a #len b i x = upd #a #len b i x
+let op_Array_Assignment #a #len = upd #a #len
 
 (** Operator for accessing a buffer: b.(i) *)
 inline_for_extraction
-let op_Array_Access #t #a #len b i = index #t #a #len b i
+let op_Array_Access #t #a #len = index #t #a #len
 
 (* 2018.16.11 SZ: this doesn't parse: let f a len (b:lbuffer a len) h = h.[| b |] *)
 (** Operator for getting a ghost view of a buffer as a sequence: h.[(b)] *)
 inline_for_extraction
-let op_Brack_Lens_Access #t #a #len h b = as_seq #t #a #len h b
+let op_Brack_Lens_Access #t #a #len = as_seq #t #a #len
 
 (** Ghostly read an element in a buffer *)
 let bget (#t:buftype) (#a:Type0) (#len:size_t) (h:mem) (b:lbuffer_t t a len)
@@ -326,10 +325,14 @@ let recallable (#t:buftype) (#a:Type0) (#len:size_t) (b:lbuffer_t t a len) =
   | MUT -> B.recallable (b <: buffer a)
 
 inline_for_extraction noextract
-let recall (#t:buftype) (#a:Type0) (#len:size_t) (b:lbuffer_t t a len) =
-  match t with
-  | IMMUT -> B.recall (b <: ibuffer a)
-  | MUT -> B.recall (b <: buffer a)
+val recall:
+    #t:buftype 
+  -> #a:Type0
+  -> #len:size_t
+  -> b:lbuffer_t t a len -> 
+  Stack unit
+    (requires fun _ -> recallable b)
+    (ensures  fun h0 _ h1 -> h0 == h1 /\ live h0 b)
 
 unfold private
 let cpred (#a:Type0) (s:Seq.seq a) : B.spred a = fun s1 -> FStar.Seq.equal s s1
@@ -346,6 +349,8 @@ val create:
   StackInline (lbuffer a len)
     (requires fun h0 -> v len > 0)
     (ensures  fun h0 b h1 -> live h1 b /\ stack_allocated b h0 h1 (Seq.create (v len) init))
+
+#set-options "--max_fuel 1"
 
 (** Allocate a stack fixed-length mutable buffer initialized to a list *)
 inline_for_extraction noextract
@@ -366,6 +371,8 @@ val createL_global:
     (ensures  fun h0 b h1 -> global_allocated b h0 h1 (Seq.of_list init) /\
                           recallable b /\
                           witnessed b (Seq.of_list init))
+
+#set-options "--max_fuel 0"
 
 (** Recall the liveness and contents of a global immutable buffer *)
 inline_for_extraction noextract
@@ -907,6 +914,8 @@ val fill_blocks_:
       as_seq #_ #t h1 (gsub output (size 0) (n *! len)) == o)
 *)
 
+#set-options "--z3rlimit 150"
+
 (** Fills a buffer block by block using a function with an accumulator *)
 inline_for_extraction noextract
 val fill_blocks:
@@ -1078,8 +1087,6 @@ val mapi:
       modifies1 o h h1 /\
       as_seq h1 o == Seq.mapi (spec_f h0) (as_seq h i))
 
-
-//#set-options "--z3rlimit 150 --max_fuel 1 --max_ifuel 1"
 inline_for_extraction noextract
 val map_blocks_multi:
     #t:buftype

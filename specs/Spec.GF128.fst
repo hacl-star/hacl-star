@@ -13,7 +13,7 @@ open Spec.GaloisField
 //let store_elem (e:elem) : lbytes 16 = store_felem_le #gf128 e
 //and use `fmul` instead of `fmul_be`
 
-let irred = nat_to_uint #U128 #SEC 0xE1000000000000000000000000000000
+let irred = mk_int #U128 #SEC 0xE1000000000000000000000000000000
 let gf128 = gf U128 irred
 let elem = felem gf128
 let load_elem (b:lbytes 16) : elem = load_felem_be #gf128 b

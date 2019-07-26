@@ -83,8 +83,8 @@ let crypto_kem_enc_ct pk g coins =
   let seed_e = Seq.sub g 0 crypto_bytes in
   let d = Seq.sub g (2 * crypto_bytes) crypto_bytes in
   let sp_matrix = frodo_sample_matrix params_nbar params_n crypto_bytes seed_e (u16 4) in
-  let c1 = crypto_kem_enc_ct_pack_c1 seed_a seed_e sp_matrix in
   let c2 = crypto_kem_enc_ct_pack_c2 seed_e coins b sp_matrix in
+  let c1 = crypto_kem_enc_ct_pack_c1 seed_a seed_e sp_matrix in
   expand_crypto_ciphertextbytes ();
   let ct = concat (concat c1 c2) d in
   ct

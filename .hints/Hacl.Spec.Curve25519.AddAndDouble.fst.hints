@@ -16,7 +16,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "084ab1c25f2bda7e2fde4f2fbba37fb3"
+      "aed27dd877ab15cebd2fa2a7288eb325"
     ],
     [
       "Hacl.Spec.Curve25519.AddAndDouble.lemma_add_and_double",
@@ -38,7 +38,7 @@
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__2"
       ],
       0,
-      "b0a2f364bded5caeab2839092ce59984"
+      "fe6b5fddc6ea9ab268b2401dce45d420"
     ],
     [
       "Hacl.Spec.Curve25519.AddAndDouble.montgomery_ladder1_0",
@@ -49,14 +49,24 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented",
         "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "constructor_distinct_Lib.IntTypes.S16",
+        "constructor_distinct_Lib.IntTypes.S32",
+        "constructor_distinct_Lib.IntTypes.S8",
         "constructor_distinct_Lib.IntTypes.U64",
         "equality_tok_Lib.IntTypes.U64@tok", "equation_Lib.IntTypes.bits",
-        "equation_Prims.nat", "int_typing", "lemma_Lib.IntTypes.pow2_values",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
+        "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
+        "equation_Prims.nat", "equation_Prims.pos",
+        "equation_with_fuel_Prims.pow2.fuel_instrumented", "int_typing",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "token_correspondence_Prims.pow2.fuel_instrumented",
+        "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "c5a57c171633d8b1e61ba82374ca925d"
+      "9886ca1b7209c43371fa8f437280dc0c"
     ],
     [
       "Hacl.Spec.Curve25519.AddAndDouble.lemma_montgomery_ladder",
@@ -75,7 +85,7 @@
         "projection_inverse_FStar.Pervasives.Native.Mktuple3__3"
       ],
       0,
-      "b42d72f2e41383a39ea32cb624194090"
+      "0e10c0ce66cb0328fc1e88c7237fcd7b"
     ]
   ]
 ]

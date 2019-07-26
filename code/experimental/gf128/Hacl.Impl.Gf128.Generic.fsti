@@ -20,15 +20,18 @@ noextract
 val as_get_acc: #s:field_spec -> h:mem -> ctx:gcm_ctx s -> GTot S.elem
 noextract
 val as_get_r: #s:field_spec -> h:mem -> ctx:gcm_ctx s -> GTot S.elem
-
+noextract
+val state_inv_t: #s:field_spec -> h:mem -> ctx:gcm_ctx s -> Type0
 
 inline_for_extraction noextract
 let gf128_init_st (s:field_spec) =
     ctx:gcm_ctx s
   -> key:block ->
   Stack unit
-  (requires fun h -> live h ctx /\ live h key /\ disjoint ctx key)
-  (ensures  fun h0 _ h1 -> modifies1 ctx h0 h1 /\
+  (requires fun h ->
+    live h ctx /\ live h key /\ disjoint ctx key)
+  (ensures  fun h0 _ h1 ->
+    modifies1 ctx h0 h1 /\ state_inv_t h1 ctx /\
     (as_get_acc h1 ctx, as_get_r h1 ctx) == S.gf128_init (as_seq h0 key))
 
 
@@ -42,8 +45,11 @@ let gf128_update_st (s:field_spec) =
   -> len:size_t
   -> text:lbuffer uint8 len ->
   Stack unit
-  (requires fun h -> live h ctx /\ live h text /\ disjoint ctx text)
-  (ensures  fun h0 _ h1 -> modifies1 ctx h0 h1 /\
+  (requires fun h ->
+    live h ctx /\ live h text /\ disjoint ctx text /\
+    state_inv_t h ctx)
+  (ensures  fun h0 _ h1 ->
+    modifies1 ctx h0 h1 /\ state_inv_t h1 ctx /\
     as_get_acc h1 ctx == S.gf128_update (as_seq h0 text) (as_get_acc h0 ctx) (as_get_r h0 ctx))
 //as_get_acc h1 ctx == Vec.gf128_update_vec s (as_seq h0 text) (as_get_acc h0 ctx) (as_get_r h0 ctx)
 

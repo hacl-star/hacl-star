@@ -2,6 +2,19 @@
   "èF«à¨þÂËoà\u0010±d\u0002t\t",
   [
     [
+      "Spec.Agile.HMAC.wrap_key",
+      1,
+      2,
+      1,
+      [
+        "@query", "constructor_distinct_Lib.IntTypes.U8",
+        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.unsigned",
+        "projection_inverse_BoxBool_proj_0"
+      ],
+      0,
+      "d72a6b804ff24cf0b8f2d53be773cbde"
+    ],
+    [
       "Spec.Agile.HMAC.update_last",
       1,
       2,
@@ -11,11 +24,24 @@
         "equation_Spec.Agile.Hash.size_block",
         "fuel_guarded_inversion_Spec.Agile.Hash.algorithm",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_a78e81a34494fa620ef91991a1267b1f",
+        "refinement_interpretation_Tm_refine_0ec011aea9f93256a3547ad9f0c667f1",
         "typing_Spec.Agile.Hash.size_block"
       ],
       0,
-      "b00c7839e097ed235e06d9d92c854172"
+      "c9adbbeafad958cb14560fd89f31c4be"
+    ],
+    [
+      "Spec.Agile.HMAC.hmac",
+      1,
+      2,
+      1,
+      [
+        "@query", "constructor_distinct_Lib.IntTypes.U8",
+        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.unsigned",
+        "projection_inverse_BoxBool_proj_0"
+      ],
+      0,
+      "a0673153dd1eaf9a1071d99f033d4dc2"
     ]
   ]
 ]

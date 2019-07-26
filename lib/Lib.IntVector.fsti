@@ -4,11 +4,11 @@ open FStar.Mul
 open Lib.Sequence
 open Lib.IntTypes
 
-let v_inttype = t:inttype{t <> U1}
+let v_inttype = t:inttype{unsigned t /\ ~(U1? t)}
 
 let width = n:size_nat{n == 1 \/ n == 2 \/ n == 4 \/ n == 8 \/ n == 16 \/ n == 32}
 let vec_index (w:width) = n:size_t{v n < w}
-let vec_v_t (t:v_inttype) (w:width) = lseq (uint_t t SEC) w
+let vec_v_t (t:v_inttype{unsigned t}) (w:width) = lseq (uint_t t SEC) w
 
 inline_for_extraction
 val vec_t: t:v_inttype -> w:width -> Type0
@@ -17,10 +17,10 @@ inline_for_extraction noextract
 val vec_v: #t:v_inttype -> #w:width -> vec_t t w -> vec_v_t t w
 
 inline_for_extraction noextract
-val vec_zero: t:v_inttype -> w:width -> v:vec_t t w{vec_v v == create w (nat_to_uint 0)}
+val vec_zero: t:v_inttype -> w:width -> v:vec_t t w{vec_v v == create w (mk_int 0)}
 
 inline_for_extraction noextract
-val vec_counter: t:v_inttype -> w:width -> v:vec_t t w{vec_v v == createi w nat_to_uint}
+val vec_counter: t:v_inttype -> w:width -> v:vec_t t w{vec_v v == createi w mk_int}
 
 inline_for_extraction noextract
 val create2: #a:Type

@@ -56,12 +56,16 @@ val frodo_key_encode1:
   -> Stack uint64
     (requires fun h -> live h a)
     (ensures fun h0 r h1 ->
-      modifies0 h0 h1 /\
-      r == S.frodo_key_encode1 (v b) (as_seq h0 a) (v i))
+       modifies0 h0 h1 /\
+       r == S.frodo_key_encode1 (v b) (as_seq h0 a) (v i))
 let frodo_key_encode1 b a i =
+  let h0 = ST.get() in
   push_frame();
   let v8 = create (size 8) (u8 0) in
-  update_sub v8 (size 0) b (sub a (i *! b) b);
+  let chunk = sub a (i *! b) b in
+  let h1 = ST.get() in
+  assert (as_seq h1 chunk == Seq.sub (as_seq h0 a) (v (i *! b)) (v b));
+  update_sub v8 (size 0) b chunk;
   let x = uint_from_bytes_le #U64 v8 in
   pop_frame();
   x

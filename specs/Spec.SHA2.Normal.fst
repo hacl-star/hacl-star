@@ -46,7 +46,7 @@ inline_for_extraction
 let to_limb (a:alg) (x:nat{x <= max_limb a}) : limb_t a =
   match (wt a) with
   | U32 -> u64 x
-  | U64 -> nat_to_uint x
+  | U64 -> mk_int x
 
 inline_for_extraction
 let limb_to_word (a:alg) (x:limb_t a) : word_t a =
@@ -267,7 +267,7 @@ let loop_ws1 p s = repeati (size_kTable p - 16) (fun i -> step_ws1 p (i + 16)) s
 
 (* Definition of the core scheduling function *)
 let ws (p:alg) (b:block_w p) : Tot (ws_w p) =
-  let s = create (size_kTable p) (nat_to_uint #(wt p) #SEC 0) in
+  let s = create (size_kTable p) (mk_int #(wt p) #SEC 0) in
   let s = loop_ws0 p b s in
   let s = loop_ws1 p s in
   s
@@ -334,7 +334,7 @@ let pad
   // Encode and write the total length in bits at the end of the padding
   let tlen = prev + len in
   let tlenbits = tlen * 8 in
-  let x = nat_to_uint #(limb_inttype p) #SEC tlenbits in
+  let x = mk_int #(limb_inttype p) #SEC tlenbits in
   let encodedlen = uint_to_bytes_be x in
   let padding = update_slice padding (plen - numbytes (limb_inttype p)) plen encodedlen in
   padding

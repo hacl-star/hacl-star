@@ -339,8 +339,6 @@ let sparkle512 steps input =
   let b4 = x4, y4 in
   let b5 = x5, y5 in
   let b6 = x6, y6 in
-  let b6 = x6, y6 in
-  let b7 = x7, y7 in
   let b7 = x7, y7 in
 
   let (b0,b1,b2,b3,b4,b5,b6,b7) =
@@ -355,7 +353,7 @@ let sparkle512 steps input =
       let b6 = arx rcon.[6] b6 in
       let b7 = arx rcon.[7] b7 in
       l8 (b0,b1,b2,b3,b4,b5,b6,b7)
-  ) (b0,b1,b2,b3,b4,b5,b7,b7)
+  ) (b0,b1,b2,b3,b4,b5,b6,b7)
   in
 
   let x0, y0 = b0 in

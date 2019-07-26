@@ -28,10 +28,16 @@ unfold
 let op_String_Access #a #len = LSeq.index #a #len
 
 inline_for_extraction noextract
-let get_acc #s (ctx:poly1305_ctx s) = sub ctx 0ul (nlimb s)
+let get_acc #s (ctx:poly1305_ctx s) : Stack (felem s)
+  (requires fun h -> live h ctx)
+  (ensures  fun h0 acc h1 -> h0 == h1 /\ live h1 acc /\ acc == gsub ctx 0ul (nlimb s))
+  = sub ctx 0ul (nlimb s)
 
 inline_for_extraction noextract
-let get_precomp_r #s (ctx:poly1305_ctx s) = sub ctx (nlimb s) (precomplen s)
+let get_precomp_r #s (ctx:poly1305_ctx s) : Stack (precomp_r s)
+  (requires fun h -> live h ctx)
+  (ensures  fun h0 pre h1 -> h0 == h1 /\ live h1 pre /\ pre == gsub ctx (nlimb s) (precomplen s))
+  = sub ctx (nlimb s) (precomplen s)
 
 let as_get_acc #s h ctx = (feval h (gsub ctx 0ul (nlimb s))).[0]
 let as_get_r #s h ctx = (feval h (gsub ctx (nlimb s) (nlimb s))).[0]
@@ -276,6 +282,8 @@ let update1_last_st (s:field_spec) =
       (feval h1 acc).[0] == Scalar.poly1305_update1
         (feval h0 (gsub p 0ul 5ul)).[0] (v len) (as_seq h0 b) (feval h0 acc).[0])
 
+#push-options "--z3rlimit 100"
+
 inline_for_extraction noextract
 val update1_last_: #s:field_spec -> update1_last_st s
 let update1_last_ #s pre len b acc =
@@ -284,6 +292,8 @@ let update1_last_ #s pre len b acc =
   poly1305_encode_last e len b;
   fadd_mul_r acc e pre;
   pop_frame ()
+
+#pop-options
 
 [@CInline]
 let poly1305_update1_last_32 : update1_last_st M32 = update1_last_

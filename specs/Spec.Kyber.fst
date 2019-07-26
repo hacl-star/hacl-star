@@ -117,26 +117,24 @@ let p1 : list field = [
   0xe6; 0xf8; 0xf7; 0x64; 0x7a; 0xac; 0x79; 0x57
  ]
 
-
 let test () =
   assert_norm(List.Tot.length p1 = 256);
   let test0 = create 256 zero in
   let test0 = test0.[1] <- 1 in
   IO.print_string   "NTT(test0):";
   let result1 = ntt test0 in
-  List.iter (fun a -> IO.print_string (UInt32.to_string (u32_to_UInt32 (nat_to_uint #U32 a))); IO.print_string " ; ") (to_list result1);
+  List.iter (fun (a:field) -> IO.print_string (UInt32.to_string (u32_to_UInt32 (mk_int #U32 a))); IO.print_string " ; ") (to_list result1);
   IO.print_string   "\nMul with NTT:";
   let result1 = poly_mul test0 test0 in
-  List.iter (fun a -> IO.print_string (UInt32.to_string (u32_to_UInt32 (nat_to_uint #U32 a))); IO.print_string " ; ") (to_list result1);
+  List.iter (fun (a:field) -> IO.print_string (UInt32.to_string (u32_to_UInt32 (mk_int #U32 a))); IO.print_string " ; ") (to_list result1);
   IO.print_string "\nMul with Textbook:";
   let result2 = poly_mul_textbook test0 test0 in
-  List.iter (fun a -> IO.print_string (UInt32.to_string (u32_to_UInt32 (nat_to_uint #U32 a))); IO.print_string " ; ") (to_list result2);
+  List.iter (fun (a:field) -> IO.print_string (UInt32.to_string (u32_to_UInt32 (mk_int #U32 a))); IO.print_string " ; ") (to_list result2);
 
   let test1 = of_list p1 in
   IO.print_string   "\nMul with NTT:";
   let result1 = poly_mul test1 test1 in
-  List.iter (fun a -> IO.print_string (UInt32.to_string (u32_to_UInt32 (nat_to_uint #U32 a)))) (to_list result1);
+  List.iter (fun (a:field) -> IO.print_string (UInt32.to_string (u32_to_UInt32 (mk_int #U32 a)))) (to_list result1);
   IO.print_string "\nMul with Textbook:";
   let result2 = poly_mul_textbook test1 test1 in
-  List.iter (fun a -> IO.print_string (UInt32.to_string (u32_to_UInt32 (nat_to_uint #U32 a)))) (to_list result2);
-  ()
+  List.iter (fun (a:field) -> IO.print_string (UInt32.to_string (u32_to_UInt32 (mk_int #U32 a)))) (to_list result2)

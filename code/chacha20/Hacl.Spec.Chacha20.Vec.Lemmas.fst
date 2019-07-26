@@ -9,7 +9,7 @@ open Lib.IntVector
 module Scalar = Spec.Chacha20
 open Hacl.Spec.Chacha20.Vec
 
-#reset-options "--z3rlimit 150 --max_fuel 1"
+#set-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
 
 val line_lemma_i:
     #w:lanes
@@ -159,7 +159,7 @@ val add_counter_lemma_i:
 	 Scalar.chacha20_add_counter (transpose_state st).[i] (w * ctr))
 let add_counter_lemma_i #w st ctr i =
   FStar.Math.Lemmas.modulo_lemma (w * ctr) (pow2 32);
-  uintv_extensionality (u32 w *! u32 ctr) (u32 (w * ctr));
+  assert (v (u32 w *! u32 ctr) == v (u32 (w * ctr)));
   eq_intro (transpose_state (add_counter #w ctr st)).[i]
 	   (Scalar.chacha20_add_counter (transpose_state st).[i] (w * ctr))
 
@@ -245,7 +245,6 @@ let chacha20_init_lemma_i #w k n ctr0 i =
   assert ((transpose_state st).[i] == st1);
 
   let c = vec_counter U32 w in
-  uintv_extensionality (vec_v c).[i] (u32 i);
   assert ((vec_v c).[i] == u32 i);
 
   let res = st.[12] <- st.[12] +| c in
@@ -254,7 +253,6 @@ let chacha20_init_lemma_i #w k n ctr0 i =
   assert ((transpose_state res).[i] == res1);
   assert (res1.[12] == u32 ctr0 +. u32 i);
   assert (v (u32 ctr0 +. u32 i) == v (u32 (ctr0 + i)));
-  uintv_extensionality (u32 ctr0 +. u32 i) (u32 (ctr0 + i));
   assert (res1.[12] == u32 (ctr0 + i));
 
   let res2 = Scalar.chacha20_init k n (ctr0 + i) in
@@ -275,7 +273,7 @@ let load_blocks_lemma_index #w b i =
   assert (vec_v res.[j] == uints_from_bytes_le (sub b (j * w * 4) (w * 4)));
   let j1 = i % w in
   let b_j = sub b (j * w * 4) (w * 4) in
-  index_uints_from_bytes_le b_j j1;
+  index_uints_from_bytes_le #U32 b_j j1;
   assert ((vec_v res.[j]).[j1] == uint_from_bytes_le (sub b_j (j1 * 4) 4));
   FStar.Seq.slice_slice b (j * w * 4) (j * w * 4 + w * 4) (j1 * 4) (j1 * 4 + 4);
   assert (j * w * 4 + j1 * 4 == 4 * i);
@@ -621,8 +619,6 @@ let xor_block_lemma_index #w k b i =
   assert (res1.[i % size_block] == (uint_to_bytes_le ((uint_from_bytes_le (sub b (4 * j) 4)) ^. ((transpose_state k).[i / size_block]).[j % 16])).[i % 4]);
   assert (res.[i] == res1.[i % size_block])
 
-#set-options "--max_fuel 0"
-
 val chacha20_encrypt_block_lemma_index:
     #w:lanes
   -> st0:state w
@@ -681,7 +677,7 @@ let chacha20_encrypt_last_lemma_index_aux #w len b =
   eq_intro plain1 last_plain;
   assert (plain1 == last_plain)
 
-#reset-options "--z3rlimit 150 --max_fuel 0"
+#set-options "--z3rlimit 150"
 
 val chacha20_encrypt_last_lemma_index:
     #w:lanes
@@ -759,8 +755,7 @@ let add_counter_lemma_aux ctr0 w incr i b =
   assert (v lp == ((v b + ctr0) % modulus U32 + (w * incr + i)) % modulus U32);
   assert (v rp == ((v b + ctr0 + i) % modulus U32 + (w * incr)) % modulus U32);
   FStar.Math.Lemmas.lemma_mod_plus_distr_l (v b + ctr0) (w * incr + i) (modulus U32);
-  FStar.Math.Lemmas.lemma_mod_plus_distr_l (v b + ctr0 + i) (w * incr) (modulus U32);
-  uintv_extensionality lp rp
+  FStar.Math.Lemmas.lemma_mod_plus_distr_l (v b + ctr0 + i) (w * incr) (modulus U32)
 
 val chacha20_core_equiv_lemma:
     ctr0:counter
@@ -781,7 +776,7 @@ let chacha20_core_equiv_lemma ctr0 st1 st2 w incr i =
   assert (k1.[12] == u32 ctr0 +. u32 (w * incr + i));
   let k2 = Scalar.chacha20_add_counter st2 (w * incr) in
   assert (k2.[12] == u32 (ctr0 + i) +. u32 (w * incr));
-  uintv_extensionality k1.[12] k2.[12];
+  assert (v k1.[12] == v k2.[12]);
   eq_intro k1 k2;
   let k = Scalar.rounds k1 in
   let k1 = Scalar.sum_state k st1 in

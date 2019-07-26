@@ -55,6 +55,11 @@ let upd #a #len b i v =
 
 let bget_as_seq #t #a #len h b i = ()
 
+let recall #t #a #len b =
+  match t with
+  | IMMUT -> B.recall (b <: ibuffer a)
+  | MUT -> B.recall (b <: buffer a)
+
 let create #a clen init =
   B.alloca init (normalize_term clen)
 
@@ -254,7 +259,7 @@ val loopi_blocks_f_nospec:
     (requires fun h -> live h inp /\ live h w /\ disjoint inp w)
     (ensures  fun h0 _ h1 -> modifies (loc w) h0 h1)
 
-#set-options "--z3rlimit 25 --max_fuel 0"
+#set-options "--z3rlimit 100 --max_fuel 0"
 
 let loopi_blocks_f_nospec #a #b #blen bs inpLen inp f nb i w =
   assert ((v i + 1) * v bs <= v nb * v bs);
@@ -271,7 +276,7 @@ let loopi_blocks #a #b #blen bs inpLen inp spec_f spec_l f l w =
   (fun i ->
     Loop.unfold_repeati (v nb) (spec_fh h0) (as_seq h0 w) (v i);
     loopi_blocks_f #a #b #blen bs inpLen inp spec_f f nb i w);
-  let last = sub #_ #_ #inpLen  inp (nb *! bs) rem in
+  let last = sub inp (nb *! bs) rem in
   l nb rem last w
 
 let loopi_blocks_nospec #a #b #blen bs inpLen inp f l w =
@@ -313,7 +318,7 @@ val loop_blocks_f:
 
 let loop_blocks_f #a #b #blen bs inpLen inp spec_f f nb i w =
   assert ((v i + 1) * v bs <= v nb * v bs);
-  let block = sub #_ #_ #inpLen inp (i *! bs) bs in
+  let block = sub inp (i *! bs) bs in
   f block w
 
 let loop_blocks #a #b #blen bs inpLen inp spec_f spec_l f l w =
@@ -326,7 +331,7 @@ let loop_blocks #a #b #blen bs inpLen inp spec_f spec_l f l w =
   (fun i ->
     Loop.unfold_repeati (v nb) (spec_fh h0) (as_seq h0 w) (v i);
     loop_blocks_f #a #b #blen bs inpLen inp spec_f f nb i w);
-  let last = sub #_ #_ #inpLen inp (nb *! bs) rem in
+  let last = sub inp (nb *! bs) rem in
   l rem last w
 
 #set-options "--z3rlimit 400 --max_fuel 1"
@@ -380,8 +385,7 @@ let fill_blocks #t h0 len n output a_spec refl footprint spec impl =
   B.loc_includes_union_l (footprint (v n)) (loc output) (loc (gsub output 0ul (n *! len)));
   //B.loc_includes_union_r (B.loc_union (footprint (v n)) (loc output)) (B.loc_union (footprint (v n)) (gsub output 0ul (n *! len)));
   assert(B.loc_includes (B.loc_union (footprint (v n)) (loc output)) (B.loc_union (footprint (v n)) (loc (gsub output 0ul (n *! len)))));
-  assert(B.modifies (B.loc_union (footprint (v n)) (loc output)) h0 h1);
-  ()
+  assert(B.modifies (B.loc_union (footprint (v n)) (loc output)) h0 h1)
 
 #reset-options "--z3rlimit 300 --max_fuel 1"
 
@@ -551,7 +555,8 @@ let map_blocks_multi #t #a h0 bs nb inp output spec_f impl_f =
       (v i * v bs)
   )
 
-#reset-options "--z3rlimit 500 --max_fuel 1 --max_ifuel 1"
+#reset-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 1"
+
 let map_blocks #t #a h0 len blocksize inp output spec_f spec_l impl_f impl_l =
   let nb = len /. blocksize in
   let rem = len %. blocksize in
@@ -565,6 +570,5 @@ let map_blocks #t #a h0 len blocksize inp output spec_f spec_l impl_f impl_l =
   if rem >. 0ul then
      (impl_l nb;
       let h1 = ST.get() in
-      FStar.Seq.lemma_split (as_seq h1 output) (v nb * v blocksize);
-      ())
+      FStar.Seq.lemma_split (as_seq h1 output) (v nb * v blocksize))
   else ()
