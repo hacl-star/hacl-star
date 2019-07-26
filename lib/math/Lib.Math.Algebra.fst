@@ -452,7 +452,6 @@ let ex_eucl_lemma1 a b j u v =
 
   exists_elim goal #pos #(fun g -> is_gcd a b g) (gcd_exists a b) (fun g -> lemma g)
 
-
 val ex_eucl_lemma2: a:pos -> b:pos -> j:pos -> u:int -> v:int -> Lemma
   (requires (a * u + b * v = j /\ divides j a /\ divides j b))
   (ensures (gcd a b = j))
@@ -467,7 +466,6 @@ let ex_eucl_lemma2 a b j u v =
   assert (t > 0); // because g, j are positive
   assert (t <> 0); // because j > 0
   assert (t = 1)
-
 
 #reset-options
 

@@ -67,11 +67,9 @@ let isunit_comp p q h =
   inv_as_gcd1 (to_fe #p h);
   inv_as_gcd1 (to_fe #q h)
 
-type is_h (p:prm) (q:prm) (v:pos) =
-  h:fe (p*q){isunit h /\
-            (isunit_comp p q h;
-             mult_order (to_fe #p h) = v /\
-             mult_order (to_fe #q h) = v)}
+type is_h (p:prm) (q:prm) (v:pos) (h:fe (p*q)) =
+  isunit h /\
+  (isunit_comp p q h; mult_order (to_fe #p h) = v /\ mult_order (to_fe #q h) = v)
 
 // h^v = 1 mod q, p
 // h^v = 1 + k*q
@@ -103,7 +101,7 @@ let mod_product_zero a b p =
     prime_field_zerodivs #p (a % p) (b % p)
   end in move_requires l ()
 
-val h_raise_v: p:prm -> q:prm{p <> q} -> v:pos -> h:is_h p q v -> Lemma (fexp h v = 1)
+val h_raise_v: p:prm -> q:prm{p <> q} -> v:pos -> h:fe (p*q){is_h p q v h} -> Lemma (fexp h v = 1)
 let h_raise_v p q v h =
   swap_mul p q;
 
@@ -170,7 +168,7 @@ type secret =
          -> u:big{divides u (p-1) /\ divides u (q-1)}
          -> v:big{divides v (p-1) /\ divides v (q-1)}
          -> g:fe (p*q){isunit g /\ mult_order #(p*q) g = u * v}
-         -> h:is_h p q v
+         -> h:fe (p*q){is_h p q v h}
          -> secret
 
 type public =
