@@ -165,8 +165,8 @@ let solve_dlp #n u g a = admit()
 type secret =
   | Secret: p:prm
          -> q:prm{q <> p}
-         -> u:big{divides u (p-1) /\ divides u (q-1)}
-         -> v:big{divides v (p-1) /\ divides v (q-1)}
+         -> u:fe (p*q){u > 1 /\ divides u (p-1) /\ divides u (q-1)}
+         -> v:fe (p*q){v > 1 /\ divides v (p-1) /\ divides v (q-1)}
          -> g:fe (p*q){isunit g /\ mult_order #(p*q) g = u * v}
          -> h:fe (p*q){is_h p q v h}
          -> secret
