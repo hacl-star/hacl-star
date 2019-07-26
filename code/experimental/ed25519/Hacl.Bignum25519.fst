@@ -15,6 +15,7 @@ module S51 = Hacl.Spec.Curve25519.Field51.Definition
 module SL51 = Hacl.Spec.Curve25519.Field51.Lemmas
 
 module BN = Hacl.Impl.Curve25519.Field51
+module SC = Spec.Curve25519
 
 #reset-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0"
 
@@ -73,87 +74,278 @@ let fsum a b =
 let fdifference a b =
   BN.fsub a b a
 
+private val lemma_carry_local: x:nat -> y:nat -> n:nat -> Lemma
+  (pow2 n * x + pow2 (n+51) * y = pow2 n * (x % (pow2 51)) + pow2 (n+51) * ((x / pow2 51) + y))
+private let lemma_carry_local x y n =
+  Math.Lemmas.lemma_div_mod x (pow2 51);
+  Math.Lemmas.pow2_plus n 51;
+  Math.Lemmas.distributivity_add_right (pow2 n) (pow2 51 * (x / pow2 51)) (x % pow2 51);
+  Math.Lemmas.distributivity_add_right (pow2 (n + 51)) (x / pow2 51) y
+
 inline_for_extraction noextract
 val fcontract_first_carry_pass:
   input:felem ->
   Stack unit
-    (requires fun h -> live h input)
-    (ensures  fun h0 _ h1 -> modifies (loc input) h0 h1)
+    (requires fun h -> live h input /\ F51.mul_inv_t h input)
+    (ensures  fun h0 _ h1 -> modifies (loc input) h0 h1 /\
+      F51.as_nat h0 input == F51.as_nat h1 input /\
+      (let s = as_seq h1 input in
+       let op_String_Access = Seq.index in
+       v s.[0] < pow2 51 /\
+       v s.[1] < pow2 51 /\
+       v s.[2] < pow2 51 /\
+       v s.[3] < pow2 51
+      )
+    )
+
+let lemma_change_as_nat_repr (v0 v1 v2 v3 v4:nat) : Lemma
+  (v0 + pow2 51 * v1 + pow2 102 * v2 + pow2 153 * v3 + pow2 204 * v4 ==
+  v0 + v1 * pow2 51 + v2 * pow2 51 * pow2 51 + v3 * pow2 51 * pow2 51 * pow2 51 + v4 * pow2 51 * pow2 51 * pow2 51 * pow2 51)
+  =
+  calc (==) {
+    v2 * pow2 51 * pow2 51;
+    (==) { FStar.Math.Lemmas.paren_mul_right v2 (pow2 51) (pow2 51); assert_norm (pow2 51 * pow2 51 == pow2 102) }
+    pow2 102 * v2;
+  };
+  calc (==) {
+    v3 * pow2 51 * pow2 51 * pow2 51;
+    (==) { FStar.Classical.forall_intro_3 FStar.Math.Lemmas.paren_mul_right;
+           assert_norm (pow2 51 * pow2 51 * pow2 51== pow2 153) }
+    pow2 153 * v3;
+  };
+  calc (==) {
+    v4 * pow2 51 * pow2 51 * pow2 51 * pow2 51 ;
+    (==) { FStar.Classical.forall_intro_3 FStar.Math.Lemmas.paren_mul_right;
+           assert_norm (pow2 51 * pow2 51 * pow2 51 * pow2 51 == pow2 204) }
+    pow2 204 * v4;
+  }
+
+#restart-solver
+#push-options "--z3rlimit 200"
+
+let lemma_fcontract_first_carry_pass
+  (v0 v1 v2 v3 v4 v0' v1' v2' v3' v4':nat) : Lemma
+  (requires
+    v0' == v0 % pow2 51 /\
+    v1' == (v1 + v0 / pow2 51) % pow2 51 /\
+    v2' == (v2 + (v1 + v0 / pow2 51) / pow2 51) % pow2 51 /\
+    v3' == (v3 + (v2 + (v1 + v0 / pow2 51) / pow2 51) / pow2 51) % pow2 51 /\
+    v4' == v4 + (v3 + (v2 + (v1 + v0 / pow2 51) / pow2 51) / pow2 51) / pow2 51)
+  (ensures v0 + v1 * pow2 51 + v2 * pow2 51 * pow2 51 + v3 * pow2 51 * pow2 51 * pow2 51 + v4 * pow2 51 * pow2 51 * pow2 51 * pow2 51 ==
+           v0' + v1' * pow2 51 + v2' * pow2 51 * pow2 51 + v3' * pow2 51 * pow2 51 * pow2 51 + v4' * pow2 51 * pow2 51 * pow2 51 * pow2 51)
+  =
+  assert_norm (pow2 0 == 1);
+  calc (==) {
+    v0 + v1 * pow2 51 + v2 * pow2 51 * pow2 51 + v3 * pow2 51 * pow2 51 * pow2 51 + v4 * pow2 51 * pow2 51 * pow2 51 * pow2 51;
+    (==) { lemma_change_as_nat_repr v0 v1 v2 v3 v4 }
+    v0 + pow2 51 * v1 + pow2 102 * v2 + pow2 153 * v3 + pow2 204 * v4;
+    (==) { lemma_carry_local v0 v1 0 }
+    v0' + pow2 51 * ((v0 / pow2 51) + v1) + pow2 102 * v2 + pow2 153 * v3 + pow2 204 * v4;
+    (==) { lemma_carry_local ((v0 / pow2 51) + v1) v2 51 }
+    v0' + pow2 51 * v1' + pow2 102 * (v2 + (v1 + v0 / pow2 51) / pow2 51) + pow2 153 * v3 + pow2 204 * v4;
+    (==) { lemma_carry_local (v2 + (v1 + v0 / pow2 51) / pow2 51) v3 102 }
+    v0' + pow2 51 * v1' + pow2 102 * v2' + pow2 153 * (v3 + (v2 + (v1 + v0 / pow2 51) / pow2 51) / pow2 51) + pow2 204 * v4;
+    (==) { lemma_carry_local (v3 + (v2 + (v1 + v0 / pow2 51) / pow2 51) / pow2 51) v4 153 }
+    v0' + pow2 51 * v1' + pow2 102 * v2' + pow2 153 * v3' + pow2 204 * v4';
+    (==) { lemma_change_as_nat_repr v0' v1' v2' v3' v4' }
+    v0' + v1' * pow2 51 + v2' * pow2 51 * pow2 51 + v3' * pow2 51 * pow2 51 * pow2 51 + v4' * pow2 51 * pow2 51 * pow2 51 * pow2 51;
+  }
+
+#pop-options
+
+#restart-solver
+#push-options "--z3rlimit 200"
+
 let fcontract_first_carry_pass input =
   let t0 = input.(0ul) in
   let t1 = input.(1ul) in
   let t2 = input.(2ul) in
   let t3 = input.(3ul) in
   let t4 = input.(4ul) in
-  let t1' = t1 +. (t0 >>. 51ul) in
-  let t0' = t0 &. mask_51 in
-  let t2' = t2 +. (t1' >>. 51ul) in
-  let t1'' = t1' &. mask_51 in
-  let t3' = t3 +. (t2' >>. 51ul) in
-  let t2'' = t2' &. mask_51 in
-  let t4' = t4 +. (t3' >>. 51ul) in
-  let t3'' = t3' &. mask_51 in
+  let t1':uint64 = t1 +. (t0 >>. 51ul) in
+  let t0':uint64 = t0 &. mask_51 in
+  let t2':uint64 = t2 +. (t1' >>. 51ul) in
+  let t1'':uint64 = t1' &. mask_51 in
+  let t3':uint64 = t3 +. (t2' >>. 51ul) in
+  let t2'':uint64 = t2' &. mask_51 in
+  let t4':uint64 = t4 +. (t3' >>. 51ul) in
+  let t3'':uint64 = t3' &. mask_51 in
+  assert_norm (v mask_51 == pow2 51 - 1);
+  logand_spec t0 mask_51;
+  UInt.logand_mask (UInt.to_uint_t 64 (v t0)) 51;
+  logand_spec t1' mask_51;
+  UInt.logand_mask (UInt.to_uint_t 64 (v t1')) 51;
+  logand_spec t2' mask_51;
+  UInt.logand_mask (UInt.to_uint_t 64 (v t2')) 51;
+  logand_spec t3' mask_51;
+  UInt.logand_mask (UInt.to_uint_t 64 (v t3')) 51;
+  lemma_fcontract_first_carry_pass (v t0) (v t1) (v t2) (v t3) (v t4)
+    (v t0') (v t1'') (v t2'') (v t3'') (v t4');
   make_u64_5 input  t0' t1'' t2'' t3'' t4'
+
+let lemma_change_repr4 (v:nat) : Lemma
+  (v * pow2 51 * pow2 51 * pow2 51 * pow2 51 == pow2 204 * v)
+  = FStar.Classical.forall_intro_3 Math.Lemmas.paren_mul_right;
+  assert_norm (pow2 51 * pow2 51 * pow2 51 * pow2 51 == pow2 204)
+
+let lemma_small_carry_top (v0 v4:nat) : Lemma
+  (requires v0 < pow2 51)
+  (ensures
+    (v0 + 19 * (v4 / pow2 51)) / pow2 51 <> 0 ==> v4 >= pow2 51)
+   =
+     Math.Lemmas.small_div v0 (pow2 51);
+     Classical.move_requires (Math.Lemmas.small_div v4) (pow2 51)
 
 inline_for_extraction noextract
 val carry_top:
   b:felem ->
   Stack unit
-  (requires fun h -> live h b)
-  (ensures  fun h0 _ h1 -> modifies (loc b) h0 h1)
+  (requires fun h -> live h b /\
+    (let s = as_seq h b in
+     let op_String_Access = Seq.index in
+       v s.[0] < pow2 51 /\
+       v s.[1] < pow2 51 /\
+       v s.[2] < pow2 51 /\
+       v s.[3] < pow2 51 /\
+       19 * (v s.[4] / pow2 51) + v s.[0] < pow2 64)
+  )
+  (ensures  fun h0 _ h1 -> modifies (loc b) h0 h1 /\
+    F51.fevalh h0 b == F51.fevalh h1 b /\
+    F51.felem_fits h1 b (2, 1, 1, 1, 1) /\
+    Seq.index (as_seq h0 b) 1 == Seq.index (as_seq h1 b) 1 /\
+    ((v (Seq.index (as_seq h1 b) 0) / pow2 51) <> 0 ==> v (Seq.index (as_seq h0 b) 4) >= pow2 51)
+  )
+
 let carry_top b =
   let b4 = b.(4ul) in
   let b0 = b.(0ul) in
   let b4' = b4 &. mask_51 in
   let b0' = b0 +. u64 19 *. (b4 >>. 51ul) in
+  assert_norm (pow2 51 + 19 * (pow2 64 / pow2 51) < 2 * pow2 51);
+  assert_norm (v mask_51 == pow2 51 - 1);
+  logand_spec b4 mask_51;
+  UInt.logand_mask (UInt.to_uint_t 64 (v b4)) 51;
+ calc (==) {
+              v b0';
+              (==) { }
+              v (b0 +. u64 19 *. (b4 >>. 51ul));
+              (==) { add_mod_lemma b0 (u64 19 *. (b4 >>. 51ul)) ;
+                     mul_mod_lemma (u64 19) (b4 >>. 51ul);
+                     shift_right_lemma b4 51ul
+                    }
+              (v b0 + ((19 * (v b4 / pow2 51)) % pow2 64) % pow2 64);
+              (==) { Math.Lemmas.small_mod (19 * (v b4 / pow2 51)) (pow2 64);
+                     Math.Lemmas.small_mod (v b0 + 19 * (v b4 / pow2 51)) (pow2 64) }
+              v b0 + 19 * (v b4 / pow2 51);
+         };
+  calc (==) {
+    (pow2 204 * v b4 + v b0) % Spec.Curve25519.prime;
+    (==) {Math.Lemmas.lemma_div_mod (v b4) (pow2 51);
+           Math.Lemmas.distributivity_add_right (pow2 204) (pow2 51 * (v b4 / pow2 51))
+                                                (v b4 % pow2 51);
+           Math.Lemmas.pow2_plus 204 51;
+           Math.Lemmas.paren_mul_right (pow2 204) (pow2 51) (v b4 / pow2 51)
+     }
+    (pow2 255 * (v b4 / pow2 51) + pow2 204 * (v b4 % pow2 51) + v b0) % SC.prime;
+    (==) { Math.Lemmas.lemma_mod_plus_distr_l (pow2 255 * (v b4 / pow2 51))
+         (pow2 204 * (v b4 % pow2 51) + v b0) (SC.prime);
+           Math.Lemmas.lemma_mod_mul_distr_l (pow2 255) (v b4 / pow2 51) (SC.prime);
+           assert_norm (pow2 255 % SC.prime == 19)
+           }
+    ((19 * (v b4 / pow2 51)) % SC.prime + (pow2 204 * (v b4 % pow2 51) + v b0)) % SC.prime;
+    (==) { Math.Lemmas.lemma_mod_plus_distr_l
+      (19 * (v b4 / pow2 51))
+      (pow2 204 * (v b4 % pow2 51) + v b0) SC.prime
+      }
+    (v b0 + 19 * (v b4 / pow2 51) + pow2 204 * (v b4 % pow2 51)) % SC.prime;
+    (==) {   }
+    (pow2 204 * v b4' + v b0') % SC.prime;
+  };
+  let h0 = get() in
   b.(4ul) <- b4';
-  b.(0ul) <- b0'
+  b.(0ul) <- b0';
+  let h1 = get() in
+  calc (==) {
+    F51.fevalh h0 b;
+    (==) { let s = as_seq h0 b in
+      let v0 = v (Seq.index s 0) in
+      let v1 = v (Seq.index s 1) in
+      let v2 = v (Seq.index s 2) in
+      let v3 = v (Seq.index s 3) in
+      let v4 = v (Seq.index s 4) in
+      lemma_change_as_nat_repr v0 v1 v2 v3 v4;
+      Math.Lemmas.lemma_mod_plus_distr_l
+      (v0 + pow2 204 * v4) (pow2 51 * v1 + pow2 102 * v2 + pow2 153 * v3) SC.prime;
+      Math.Lemmas.lemma_mod_plus_distr_l
+      (v b0' + pow2 204 * v b4') (pow2 51 * v1 + pow2 102 * v2 + pow2 153 * v3) SC.prime;
+      lemma_change_as_nat_repr (v b0') v1 v2 v3 (v b4')
+      }
 
-inline_for_extraction noextract
-val carry_0_to_1:
-  output:felem ->
-  Stack unit
-    (requires fun h -> live h output)
-    (ensures  fun h0 _ h1 -> modifies (loc output) h0 h1)
-let carry_0_to_1 output =
-  let i0 = output.(0ul) in
-  let i1 = output.(1ul) in
-  let i0' = i0 &. mask_51 in
-  let i1' = i1 +. (i0 >>. 51ul) in
-  output.(0ul) <- i0';
-  output.(1ul) <- i1'
+    F51.fevalh h1 b;
+  };
+  lemma_small_carry_top (v b0) (v b4)
 
-inline_for_extraction noextract
-val reduce_513_:
-  a:felem ->
-  Stack unit
-    (requires fun h -> live h a)
-    (ensures  fun h0 _ h1 -> modifies (loc a) h0 h1)
-let reduce_513_ a =
-  fcontract_first_carry_pass a;
-  carry_top a;
-  carry_0_to_1 a
+
+#pop-options
+
 
 let reduce_513 a =
   BN.fmul1 a a (u64 1)
-  // reduce_513_ a;
 
 inline_for_extraction noextract
 val fcontract_first_carry_full:
   input:felem ->
   Stack unit
-    (requires fun h -> live h input)
-    (ensures  fun h0 _ h1 -> modifies (loc input) h0 h1)
+    (requires fun h -> live h input /\ F51.mul_inv_t h input)
+    (ensures  fun h0 _ h1 -> modifies (loc input) h0 h1 /\
+      F51.fevalh h0 input == F51.fevalh h1 input /\
+      F51.felem_fits h1 input (2, 1, 1, 1, 1)
+    )
 let fcontract_first_carry_full input =
   fcontract_first_carry_pass input;
   carry_top input
+
+
+
+inline_for_extraction noextract
+val carry_0_to_1:
+  output:felem ->
+  Stack unit
+    (requires fun h -> live h output /\
+      F51.felem_fits h output (2, 1, 1, 1, 1) /\
+      (let s = as_seq h output in
+       v (Seq.index s 1) + (v (Seq.index s 0) / pow2 51) < pow2 51)
+    )
+    (ensures  fun h0 _ h1 -> modifies (loc output) h0 h1 /\
+      F51.fevalh h0 output == F51.fevalh h1 output /\
+      F51.felem_fits h1 output (1, 1, 1, 1, 1)
+    )
+
+let carry_0_to_1 output =
+  let i0 = output.(0ul) in
+  let i1 = output.(1ul) in
+  let i0' = i0 &. mask_51 in
+  let i1' = i1 +. (i0 >>. 51ul) in
+  assert_norm (v mask_51 == pow2 51 - 1);
+  logand_spec i0 mask_51;
+  UInt.logand_mask (UInt.to_uint_t 64 (v i0)) 51;
+  output.(0ul) <- i0';
+  output.(1ul) <- i1'
 
 inline_for_extraction noextract
 val fcontract_second_carry_pass:
   input:felem ->
   Stack unit
-    (requires fun h -> live h input)
-    (ensures  fun h0 _ h1 -> modifies (loc input) h0 h1)
+    (requires fun h -> live h input /\
+      F51.felem_fits h input (2, 1, 1, 1, 1) )
+    (ensures  fun h0 _ h1 -> modifies (loc input) h0 h1 /\
+      F51.as_nat h0 input == F51.as_nat h1 input /\
+      F51.felem_fits h1 input (1, 1, 1, 1, 2) /\
+      (v (Seq.index (as_seq h1 input) 4) = pow2 51 ==> v (Seq.index (as_seq h1 input) 1) < 2) /\
+      v (Seq.index (as_seq h1 input) 4) < pow2 51 + 1
+    )
+
+
 let fcontract_second_carry_pass input =
   let t0 = input.(0ul) in
   let t1 = input.(1ul) in
@@ -168,25 +360,61 @@ let fcontract_second_carry_pass input =
   let t2'' = t2' &. mask_51 in
   let t4' = t4 +. (t3' >>. 51ul) in
   let t3'' = t3' &. mask_51 in
+  assert_norm (v mask_51 == pow2 51 - 1);
+  logand_spec t0 mask_51;
+  UInt.logand_mask (UInt.to_uint_t 64 (v t0)) 51;
+  logand_spec t1' mask_51;
+  UInt.logand_mask (UInt.to_uint_t 64 (v t1')) 51;
+  logand_spec t2' mask_51;
+  UInt.logand_mask (UInt.to_uint_t 64 (v t2')) 51;
+  logand_spec t3' mask_51;
+  UInt.logand_mask (UInt.to_uint_t 64 (v t3')) 51;
+  lemma_fcontract_first_carry_pass (v t0) (v t1) (v t2) (v t3) (v t4)
+    (v t0') (v t1'') (v t2'') (v t3'') (v t4');
   make_u64_5 input t0' t1'' t2'' t3'' t4'
 
 inline_for_extraction noextract
 val fcontract_second_carry_full:
   input:felem ->
   Stack unit
-    (requires fun h -> live h input)
-    (ensures fun h0 _ h1 -> modifies (loc input) h0 h1)
+    (requires fun h -> live h input /\ F51.felem_fits h input (2, 1, 1, 1, 1))
+    (ensures fun h0 _ h1 -> modifies (loc input) h0 h1 /\
+      F51.felem_fits h1 input (1, 1, 1, 1, 1) /\
+      F51.fevalh h0 input == F51.fevalh h1 input
+    )
 let fcontract_second_carry_full input =
   fcontract_second_carry_pass input;
   carry_top input;
   carry_0_to_1 input
 
+let lemma_fcontract_trim (a0 a1 a2 a3 a4:uint64) : Lemma
+    (requires
+      v a0 < pow2 51 /\ v a1 < pow2 51 /\ v a2 < pow2 51 /\ v a3 < pow2 51 /\ v a4 < pow2 51 /\
+      (v a0 < pow2 51 - 19 \/ v a1 < pow2 51 - 1 \/ v a2 < pow2 51 - 1 \/ v a3 < pow2 51 - 1 \/ v a4 < pow2 51 - 1))
+    (ensures S51.as_nat5 (a0, a1, a2, a3, a4) < SC.prime)
+  =
+  assert_norm (pow2 51 = 0x8000000000000);
+  lemma_change_as_nat_repr (v a0) (v a1) (v a2) (v a3) (v a4);
+  assert_norm (S51.as_nat5 (u64 (pow2 51 - 20), u64 (pow2 51 - 1), u64 (pow2 51 - 1), u64 (pow2 51 - 1), u64 (pow2 51 - 1)) < SC.prime);
+  assert_norm (S51.as_nat5 (u64 (pow2 51 - 1), u64 (pow2 51 - 2), u64 (pow2 51 - 1), u64 (pow2 51 - 1), u64 (pow2 51 - 1)) < SC.prime);
+  assert_norm (S51.as_nat5 (u64 (pow2 51 - 1), u64 (pow2 51 - 1), u64 (pow2 51 - 2), u64 (pow2 51 - 1), u64 (pow2 51 - 1)) < SC.prime);
+  assert_norm (S51.as_nat5 (u64 (pow2 51 - 1), u64 (pow2 51 - 1), u64 (pow2 51 - 1), u64 (pow2 51 - 2), u64 (pow2 51 - 1)) < SC.prime);
+  assert_norm (S51.as_nat5 (u64 (pow2 51 - 1), u64 (pow2 51 - 1), u64 (pow2 51 - 1), u64 (pow2 51 - 1), u64 (pow2 51 - 2)) < SC.prime)
+
+#restart-solver
+#push-options "--z3rlimit 200"
+
+
 inline_for_extraction noextract
 val fcontract_trim:
   input:felem ->
   Stack unit
-    (requires fun h -> live h input)
-    (ensures  fun h0 _ h1 -> modifies (loc input) h0 h1)
+    (requires fun h -> live h input /\ F51.felem_fits h input (1, 1, 1, 1, 1))
+    (ensures  fun h0 _ h1 -> modifies (loc input) h0 h1 /\
+      F51.felem_fits h1 input (1, 1, 1, 1, 1) /\
+      F51.fevalh h0 input == F51.as_nat h1 input
+    )
+
 let fcontract_trim input =
   let a0 = input.(0ul) in
   let a1 = input.(1ul) in
@@ -199,23 +427,58 @@ let fcontract_trim input =
   let m3 = eq_mask a3 (u64 0x7ffffffffffff) in
   let m4 = eq_mask a4 (u64 0x7ffffffffffff) in
   let mask = m0 &. m1 &. m2 &. m3 &. m4 in
-  let a0' = a0 -. (mask &. u64 0x7ffffffffffed) in
-  let a1' = a1 -. (mask &. u64 0x7ffffffffffff) in
-  let a2' = a2 -. (mask &. u64 0x7ffffffffffff) in
-  let a3' = a3 -. (mask &. u64 0x7ffffffffffff) in
-  let a4' = a4 -. (mask &. u64 0x7ffffffffffff) in
+
+  assert (v mask == maxint U64 \/ v mask == 0);
+  UInt.logand_lemma_1 (UInt.to_uint_t 64 (v m0));
+  UInt.logand_lemma_1 (UInt.to_uint_t 64 (v m1));
+  UInt.logand_lemma_1 (UInt.to_uint_t 64 (v m2));
+  UInt.logand_lemma_1 (UInt.to_uint_t 64 (v m3));
+  UInt.logand_lemma_1 (UInt.to_uint_t 64 (v m4));
+  UInt.logand_lemma_2 (UInt.to_uint_t 64 (v m0));
+  UInt.logand_lemma_2 (UInt.to_uint_t 64 (v m1));
+  UInt.logand_lemma_2 (UInt.to_uint_t 64 (v m2));
+  UInt.logand_lemma_2 (UInt.to_uint_t 64 (v m3));
+  UInt.logand_lemma_2 (UInt.to_uint_t 64 (v m4));
+
+  assert (v mask = UInt.ones 64 ==> (v a0 >= pow2 51 - 19 /\ v a1 = pow2 51 - 1 /\ v a2 = pow2 51 - 1
+    /\ v a3 = pow2 51 - 1 /\ v a4 = pow2 51 - 1));
+  assert (v mask = UInt.zero 64 ==> (v a0 < pow2 51 - 19 \/ v a1 < pow2 51 - 1 \/ v a2 < pow2 51 - 1
+    \/ v a3 < pow2 51 - 1 \/ v a4 < pow2 51 - 1));
+  let a0' = a0 -. (u64 0x7ffffffffffed &. mask) in
+  let a1' = a1 -. (u64 0x7ffffffffffff &. mask) in
+  let a2' = a2 -. (u64 0x7ffffffffffff &. mask) in
+  let a3' = a3 -. (u64 0x7ffffffffffff &. mask) in
+  let a4' = a4 -. (u64 0x7ffffffffffff &. mask) in
+  UInt.logand_lemma_1 (UInt.to_uint_t 64 0x7ffffffffffed);
+  UInt.logand_lemma_2 (UInt.to_uint_t 64 0x7ffffffffffed);
+  UInt.logand_lemma_1 (UInt.to_uint_t 64 0x7ffffffffffff);
+  UInt.logand_lemma_2 (UInt.to_uint_t 64 0x7ffffffffffff);
+
+  assert ((v a0' <= 18 /\ v a1' = 0 /\ v a2' = 0 /\ v a3' = 0 /\ v a4' = 0) \/ (v a0' < pow2 51 - 19 \/ v a1' < pow2 51 - 1 \/ v a2' < pow2 51 - 1 \/ v a3' < pow2 51 - 1 \/ v a4' < pow2 51 - 1));
+  assert_norm (S51.as_nat5 (u64 18, u64 0, u64 0, u64 0, u64 0) < SC.prime);
+  lemma_fcontract_trim a0' a1' a2' a3' a4';
+  FStar.Math.Lemmas.small_mod (S51.as_nat5 (a0', a1', a2', a3', a4')) SC.prime;
   make_u64_5 input a0' a1' a2' a3' a4'
+
+#pop-options
+
 
 inline_for_extraction noextract
 val reduce_:
-  input:felem ->
+  out:felem ->
   Stack unit
-    (requires fun h -> live h input)
-    (ensures  fun h0 _ h1 -> modifies (loc input) h0 h1)
+    (requires fun h -> live h out /\ F51.mul_inv_t h out)
+    (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+      F51.felem_fits h1 out (1, 1, 1, 1, 1) /\
+      F51.fevalh h0 out == F51.fevalh h1 out /\
+      F51.fevalh h1 out == F51.as_nat h1 out
+    )
 let reduce_ out =
   fcontract_first_carry_full out;
   fcontract_second_carry_full out;
-  fcontract_trim out
+  fcontract_trim out;
+  let h1 = get() in
+  Math.Lemmas.small_mod (F51.as_nat h1 out) SC.prime
 
 let fmul output input input2 = BN.fmul output input input2
 
@@ -339,7 +602,7 @@ let inverse out a =
   Hacl.Curve25519.Finv.Field51.finv_51 out a tmp;
   pop_frame()
 
-let reduce out = reduce_ out; admit()
+let reduce out = reduce_ out
 
 #push-options "--z3rlimit 50"
 
