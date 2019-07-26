@@ -1272,62 +1272,8 @@ let rec check_all_distinct #a l = match l with
       current && next
     end
 
-// int in between
-type ibtw (a:int) (b:int{b >= a}) = x:int{x >= a /\ x <= b}
-
-type is_int_range a (b:int{b >= a}) (l: list (ibtw a b)) =
-  L.length l = b - a + 1 /\
-  (forall (i:int{i >= 0 /\ i <= b - a}). L.index l i = i + a)
-
-type int_range (a:int) (b:int{b >= a}) = l:list (ibtw a b) { is_int_range a b l }
-
-//val int_range_tail: a:int -> b:int{b>a} -> l:int_range a b -> Lemma
-//  (assert (L.length l > 0); is_int_range (a+1) b (L.tail l))
-//let int_range_tail a b l = admit()
-
-val int_range_cons: #a:int -> #b:int{b>a} -> int_range (a+1) b -> int_range a b
-let int_range_cons #a #b l = admit ()
-//  assert (L.index l 0 = a+1);
-//  admit ();
-//  a :: l
-
-val range_list:
-      a:int
-   -> b:int{b >= a}
-   -> Tot (l:int_range a b)
-      (decreases (b - a))
-let rec range_list a b = if b = a then [a] else int_range_cons (range_list (a+1) b)
-
-val range_list_distinct: a:int -> b:int{b >= a} -> Lemma (all_distinct (range_list a b))
-let range_list_distinct n = admit ()
-
-val dirichlet_collision: #a:int -> #b:int{b >= a} -> l:list (ibtw a b){ L.length l > b - a + 1 } ->
-        t:tuple2 (nlet (b-a+1)) (nlet (b-a+1))
-        { let (i,j) = t in i <> j /\ L.index l i = L.index l j }
-let dirichlet_collision #a #b l = admit ()
-
-val dirichlet_nondistinct:
-     #a:int
-  -> #b:int{b >= a}
-  -> l:list (ibtw a b){ L.length l > b-a+1 }
-  -> Lemma (~(all_distinct l))
-let dirichlet_nondistinct #a #b l =
-  let (i,j) = dirichlet_collision l in
-  assert (i <> j /\ L.index l i = L.index l j);
-  let k = L.length l in
-  let i':nlet k = i in
-  let j':nlet k = j in
-  assert (L.index l i' = L.index l j');
-
-  exists_intro_2_dep #(nlet k) #(fun i -> j:nlet k{i <> j}) (fun i j -> L.index l i = L.index l j) i' j';
-  assert (exists (i:nlet k) (j:nlet k{i <> j}). L.index l i = L.index l j);
-  all_distinct_negation l
-
-val dirichlet_fe1: #n:big -> l:list (x:fe n{x>0}){ L.length l >= n } -> Lemma (~(all_distinct l))
-let dirichlet_fe1 #n l = admit ()
-
 val cons_shifts_index_value: #a:eqtype -> x:a -> l:list a -> Lemma
-  (ensures (forall (i:pos{i < L.length l}). L.index (x::l) (i+1) = L.index l i))
+  (ensures (forall (i:nat{i < L.length l}). L.index (x::l) (i+1) = L.index l i))
   (decreases (L.length l))
 let rec cons_shifts_index_value #a x l = match l with
   | [] -> ()
@@ -1356,6 +1302,88 @@ let rec map_preserves_order #a #b p l = match l with
 
       forall_intro lemma2
     end
+
+// int in between
+type ibtw (a:int) (b:int{b >= a}) = x:int{x >= a /\ x <= b}
+
+type is_int_range a (b:int{b >= a}) (l: list (ibtw a b)) =
+  L.length l = b - a + 1 /\
+  (forall (i:nat{i <= b - a}). L.index l i = i + a)
+
+type int_range (a:int) (b:int{b >= a}) = l:list (ibtw a b) { is_int_range a b l }
+
+val range_list:
+      a:int
+   -> b:int{b >= a}
+   -> Tot (l:int_range a b)
+      (decreases (b - a))
+let rec range_list a b =
+  let rec create (b0:int{a <= b0 /\ b0 <= b}):
+          Tot (res:list (ibtw a b)
+               { L.length res = b - b0 + 1
+               /\ (forall (i:nat{i <= b - b0}). L.index res i = b0 + i)
+               })
+              (decreases (b - b0))
+          =
+    if b0 = b then [b] else begin
+      let l0 = create (b0 + 1) in
+      let index_l0 (i:nat{i <= b - b0 - 1}): Lemma (L.index l0 i = b0 + 1 + i) = () in
+      let index_l0_2 (i:pos{i <= b - b0}): Lemma (L.index l0 (i-1) = b0 + i) = index_l0 (i-1) in
+      let l1 = b0 :: l0 in
+      cons_shifts_index_value b0 l0;
+      assert (forall (i:nat{i < b - b0}). L.index l1 (i+1) = L.index l0 i);
+      assert (forall (i:pos{i <= b - b0}). L.index l1 i = L.index l0 (i-1));
+      forall_intro index_l0_2;
+      assert (forall (i:pos{i <= b - b0}). L.index l1 i = b0 + i);
+      assert (forall (i:nat{i <= b - b0}). L.index l1 i = b0 + i);
+      l1
+    end in
+
+  create a
+
+// Find a minimum, then find an element bigger than minimum for
+// n times, and show that the last element is bigger than
+// higher bound. ??
+val dirichlet_collision: #a:int -> #b:int{b >= a} -> l:list (ibtw a b){ L.length l > b - a + 1 } ->
+        t:tuple2 (nlet (b-a+1)) (nlet (b-a+1))
+        { let (i,j) = t in (assert (i<L.length l); i <> j /\ L.index l i = L.index l j) }
+let dirichlet_collision #a #b l = admit ()
+
+val collision_means_nondistinct:
+     #a:eqtype
+  -> l:list a
+  -> i:nlet (L.length l)
+  -> j:nlet (L.length l){j <> i}
+  -> Lemma (requires (L.index l i = L.index l j))
+           (ensures (~(all_distinct l)))
+let collision_means_nondistinct #a l i j =
+  exists_intro_2_dep #(nlet (L.length l)) #(fun i -> j:nlet (L.length l){i <> j}) (fun i j -> L.index l i = L.index l j) i j;
+  assert (exists (i:nlet (L.length l)) (j:nlet (L.length l){i <> j}). L.index l i = L.index l j);
+  all_distinct_negation l
+
+val dirichlet_nondistinct:
+     #a:int
+  -> #b:int{b >= a}
+  -> l:list (ibtw a b){ L.length l > b-a+1 }
+  -> Lemma (~(all_distinct l))
+let dirichlet_nondistinct #a #b l =
+  let (i,j) = dirichlet_collision l in
+  assert (i <> j /\ L.index l i = L.index l j);
+  let k = L.length l in
+  let i':nlet k = i in
+  let j':nlet k = j in
+  assert (L.index l i' = L.index l j');
+  collision_means_nondistinct l i' j'
+
+val dirichlet_fe1: #n:big -> l:list (x:fe n{x>0}){ L.length l >= n } -> Lemma (~(all_distinct l))
+let dirichlet_fe1 #n l =
+  let p x = x in
+  let l':(t:list (ibtw 1 (n-1)){ L.length t > (n-1) - 1 + 1 }) = L.map p l in
+  let (i,j) = dirichlet_collision #1 #(n-1) l' in
+  let i':nlet (L.length l) = i in
+  let j':nlet (L.length l) = j in
+  map_preserves_order p l;
+  collision_means_nondistinct l i' j'
 
 val equiv_foralls: #n:big -> g:fe n{isunit g /\ g > 1} -> Lemma
   (requires (forall (i:pos{i<=n}) (j:pos{j<=n/\i<>j}). fexp g i <> fexp g j))
@@ -1389,7 +1417,6 @@ val unit_powers_collide_inv: #n:big -> g:fe n{isunit g /\ g > 1} -> Lemma
   (ensures False)
 let unit_powers_collide_inv #n g =
   let l0 = range_list 1 n in
-  range_list_distinct 1 n;
   assert (forall (i:nlet n). L.index l0 i = i+1);
   let p (i:pos{i<=n}):(x:fe n{x > 0}) =
     isunit_fexp g i;
@@ -1556,6 +1583,10 @@ val mult_order:
   -> r:pos {is_mult_order g r}
 let mult_order #n g = comp_mult_order_loop g 1
 
+val mult_order_less: #n:big -> g:fe n{isunit g} -> e:pos -> Lemma
+  (fexp g e = 1 ==> mult_order g <= e)
+let mult_order_less #n g e = ()
+
 val g_pow_order_reduc_raw:
      #n:big
   -> g:fe n{isunit g /\ g > 0}
@@ -1573,6 +1604,11 @@ let rec g_pow_order_reduc_raw #n g x r =
     fexp_mul1 g (r * (x/r)) (x%r);
     fexp_one2 #n (x/r)
   end
+
+val g_pow_order_reduc: #n:big -> g:fe n{isunit g /\ g > 0} -> x:nat -> Lemma
+  (ensures (fexp g x = fexp g (x % mult_order g)))
+  (decreases x)
+let rec g_pow_order_reduc #n g x = g_pow_order_reduc_raw g x (mult_order g)
 
 val g_pow_inverse_raw: #n:big -> g:fe n{isunit g} -> x:nat -> r:pos{is_mult_order g r} -> Lemma
   (isunit (fexp g x) /\
@@ -1594,23 +1630,6 @@ let g_pow_inverse_raw #n g x r =
     assert(fexp g x' *% fexp g (r - x') = one);
     assert(fexp g x *% fexp g (r - x') = one);
     finv_unique (fexp g x) (fexp g (r - x'))
-
-
-// Could be some naive algorithm, not used in the real code.
-val mult_order:
-     #n:big
-  -> g:fe n{isunit g}
-  -> r:pos{ is_mult_order g r }
-let mult_order #n g = admit()
-
-val mult_order_less: #n:big -> g:fe n{isunit g} -> e:pos -> Lemma
-  (fexp g e = 1 ==> mult_order g <= e)
-let mult_order_less #n g e = ()
-
-val g_pow_order_reduc: #n:big -> g:fe n{isunit g /\ g > 0} -> x:nat -> Lemma
-  (ensures (fexp g x = fexp g (x % mult_order g)))
-  (decreases x)
-let rec g_pow_order_reduc #n g x = g_pow_order_reduc_raw g x (mult_order g)
 
 val mult_order_and_one1: #n:big -> g:fe n{isunit g} -> e:pos -> Lemma
   (requires divides (mult_order g) e)
