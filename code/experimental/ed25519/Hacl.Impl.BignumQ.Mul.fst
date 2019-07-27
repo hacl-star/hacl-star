@@ -7,6 +7,8 @@ open FStar.Mul
 open Lib.IntTypes
 open Lib.Buffer
 
+#reset-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0"
+
 inline_for_extraction noextract
 val make_m:
   m:qelemB ->
@@ -549,7 +551,7 @@ val add_modq_:
   Stack unit
     (requires fun h -> live h z /\ live h x /\ live h y)
     (ensures  fun h0 _ h1 -> modifies (loc z) h0 h1 /\
-      F.as_nat h1 z == (F.as_nat h0 x + F.as_nat h0 y) % Spec.Ed25519.q
+      F56.as_nat h1 z == (F56.as_nat h0 x + F56.as_nat h0 y) % Spec.Ed25519.q
     )
 let add_modq_ out x y =
   push_frame();

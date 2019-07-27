@@ -26,7 +26,7 @@ val mul_modq:
   Stack unit
     (requires fun h -> live h z /\ live h x /\ live h y)
     (ensures  fun h0 _ h1 -> modifies (loc z) h0 h1 /\
-      F56.fevalh h1 z == (F56.fevalh h0 x * F56.fevalh h0 y) % Spec.Ed25519.q
+      F56.as_nat h1 z == (F56.as_nat h0 x * F56.as_nat h0 y) % Spec.Ed25519.q
     )
 
 val add_modq:
@@ -37,5 +37,5 @@ val add_modq:
     (requires fun h ->
       live h z /\ live h x /\ live h y)
     (ensures fun h0 _ h1 -> modifies (loc z) h0 h1 /\
-      F56.fevalh h1 z == (F56.fevalh h0 x + F56.fevalh h0 y) % Spec.Ed25519.q
+      F56.as_nat h1 z == (F56.as_nat h0 x + F56.as_nat h0 y) % Spec.Ed25519.q
     )

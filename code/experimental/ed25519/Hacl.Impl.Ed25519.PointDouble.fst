@@ -57,6 +57,8 @@ let point_double_step_1 p tmp =
   copy tmp3 tmp1; // tmp3 = a
   fsum tmp3 tmp2 // tmp3 = h
 
+#push-options "--z3rlimit 50"
+
 inline_for_extraction noextract
 val point_double_step_2:
     p:point
@@ -88,6 +90,7 @@ val point_double_step_2:
        F51.fevalh h1 (gsub tmp 25ul 5ul) == e
      )
     )
+
 let point_double_step_2 p tmp =
   let tmp1 = sub tmp 0ul 5ul in
   let tmp2 = sub tmp 5ul 5ul in
@@ -107,6 +110,8 @@ let point_double_step_2 p tmp =
   reduce_513 tmp2;
   reduce_513 tmp4;
   fsum tmp4 tmp2             // tmp4 = f
+
+#pop-options
 
 
 inline_for_extraction noextract

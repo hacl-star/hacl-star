@@ -121,7 +121,7 @@ let lemma_change_as_nat_repr (v0 v1 v2 v3 v4:nat) : Lemma
   }
 
 #restart-solver
-#push-options "--z3rlimit 200"
+#push-options "--z3rlimit 400"
 
 let lemma_fcontract_first_carry_pass
   (v0 v1 v2 v3 v4 v0' v1' v2' v3' v4':nat) : Lemma

@@ -16,10 +16,11 @@ open Hacl.Hash.Definitions
 open Hacl.Hash.Lemmas
 open Spec.Hash.Definitions
 open FStar.Mul
+open FStar.Calc
 
 (** Auxiliary helpers *)
 
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+#reset-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0 "
 
 let padding_round (a: hash_alg) (len: len_t a): Lemma
   (ensures (
@@ -27,13 +28,33 @@ let padding_round (a: hash_alg) (len: len_t a): Lemma
 =
   ()
 
+#push-options "--initial_fuel 0 --max_fuel 0 --z3cliopt smt.arith.nl=false --smtencoding.elim_box true --smtencoding.l_arith_repr native --smtencoding.nl_arith_repr wrapped"
+
 let pad0_length_mod (a: hash_alg) (base_len: nat) (len: nat): Lemma
   (requires (
     base_len % block_length a = 0))
   (ensures (
-    pad0_length a (base_len + len) = pad0_length a len))
-=
-  ()
+    pad0_length a (base_len + len) == pad0_length a len))
+= let l_init = base_len + len + len_length a + 1 in
+  let l_end = len + len_length a + 1 in
+  assert (block_length a > 0);
+  let block_a:pos = block_length a in
+  calc (==) {
+    pad0_length a (base_len + len) <: nat;
+    (==) { }
+    (block_a - l_init) % block_a;
+    (==) { Math.Lemmas.lemma_mod_sub_distr (block_a)
+      l_init (block_a) }
+    (block_a - l_init % block_a) % block_a;
+    (==) { Math.Lemmas.lemma_mod_plus_distr_l base_len (len + len_length a + 1) (block_length a) }
+    (block_a - l_end % block_length a) % block_a;
+    (==) { Math.Lemmas.lemma_mod_sub_distr (block_a) l_end block_a }
+    (block_a - l_end) % block_a;
+    (==) { }
+    pad0_length a len;
+  }
+
+#pop-options
 
 let pad_length_mod (a: hash_alg) (base_len len: nat): Lemma
   (requires (
@@ -66,7 +87,7 @@ let len_add32 (a: hash_alg)
       assert_norm (pow2 125 < pow2 128);
       U128.(prev_len +^ uint64_to_uint128 (uint32_to_uint64 input_len))
 
-#push-options "--max_fuel 1 --z3rlimit 128 --using_facts_from '* -FStar.UInt8 -FStar.UInt16 -FStar.UInt32 -FStar.UInt64 -FStar.UInt128'"
+#push-options "--max_fuel 1 --z3rlimit 128"
 
 (** Iterated compression function. *)
 noextract inline_for_extraction
@@ -107,7 +128,7 @@ let mk_update_multi a update s blocks n_blocks =
   assert (B.length blocks = U32.v n_blocks * block_length a);
   C.Loops.for 0ul n_blocks inv f
 
-#push-options "--max_fuel 0 --z3rlimit 400"
+#push-options "--max_fuel 0 --z3rlimit 600"
 
 (** An arbitrary number of bytes, then padding. *)
 noextract inline_for_extraction

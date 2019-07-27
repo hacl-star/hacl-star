@@ -26,9 +26,11 @@ val store_56:
     out:lbuffer uint8 32ul
   -> b:lbuffer uint64 5ul ->
   Stack unit
-    (requires fun h -> live h out /\ live h b)
+    (requires fun h -> live h out /\ live h b /\
+      F56.as_nat h b < pow2 256
+    )
     (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
-      nat_to_bytes_le 32 (F56.fevalh h0 b) == as_seq h1 out
+      nat_to_bytes_le 32 (F56.as_nat h0 b) == as_seq h1 out
     )
 
 let store_56 out b =
