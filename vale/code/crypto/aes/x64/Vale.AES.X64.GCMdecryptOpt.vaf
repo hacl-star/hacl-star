@@ -375,7 +375,7 @@ procedure Gcm_blocks(
 
         // len128x6 is # of 128-bit blocks that come in 6-block chunks
         len128x6 % 6 == 0;
-        len128x6 > 0 ==> len128x6 >= 18;
+        len128x6 > 0 ==> len128x6 >= 6;
         12 + len128x6 + 6 < pow2_32;
 
         len128x6 * (128/8) + len128 * (128/8) <= plain_num_bytes < len128x6 * (128/8) + len128 * (128/8) + 128/8;
@@ -684,7 +684,7 @@ procedure Gcm_blocks_wrapped(
 
         // len128x6 is # of 128-bit blocks that come in 6-block chunks
         len128x6 % 6 == 0;
-        len128x6 > 0 ==> len128x6 >= 18;
+        len128x6 > 0 ==> len128x6 >= 6;
         12 + len128x6 + 6 < pow2_32;
 
         // 4096 * (len128x6 + len128 + 1) * 16 < pow2_32;
@@ -902,7 +902,7 @@ procedure gcm_blocks_decrypt_stdcall(
 
         // len128x6 is # of 128-bit blocks that come in 6-block chunks
         len128x6 % 6 == 0;
-        len128x6 > 0 ==> len128x6 >= 18;
+        len128x6 > 0 ==> len128x6 >= 6;
         12 + len128x6 + 6 < pow2_32;
 
         len128x6 * (128/8) + len128 * (128/8) <= cipher_num_bytes < len128x6 * (128/8) + len128 * (128/8) + 128/8;

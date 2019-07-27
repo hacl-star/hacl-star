@@ -2694,7 +2694,7 @@ procedure Loop6x_loop_decrypt(
         mem; efl;
 
     requires
-        6 < len && len + 6 < pow2_32;
+        6 <= len && len + 6 < pow2_32;
         len % 6 == 0;
         T2 == Mkfour(0, 0, 0, 0x1000000);
 
@@ -2790,6 +2790,10 @@ procedure Loop6x_loop_decrypt(
     let plain_quads:seq(quad32) := s128(mem, in_b);
     gctr_partial_opaque_init(alg, plain_quads, s128(mem, out_b), key_words, ctr_BE_orig);
     // ==> gctr_partial_opaque(alg, 0, plain_quads, s128(mem, out_b), key_words, ctr_BE_orig);
+
+    if (len == 6) { // Satisfy our somewhat awkward pointer invariant
+        Sub64(in0, 0x60);
+    }
     while (len > 0)
         invariant
             len == old(len) - 6*iter;
@@ -2804,7 +2808,9 @@ procedure Loop6x_loop_decrypt(
             validDstAddrs128(mem, ivp, iv_b, 1, memTaint, Public);
 
             len > 6 ==> validSrcAddrsOffset128(mem,  in0, in0_b, (iter+1)*6, old(len) - 6*(iter+1), memTaint, Secret);
-            len == 6 ==> validSrcAddrsOffset128(mem, in0, in0_b, iter*6, old(len) - 6*iter, memTaint, Secret);
+
+// Problematic case:
+             len == 6 ==> validSrcAddrsOffset128(mem, in0, in0_b, iter*6, old(len) - 6*iter, memTaint, Secret);
 
             len > 0 ==> validSrcAddrsOffset128(mem,  inp,  in_b, iter*6, old(len) - 6*iter, memTaint, Secret);
             len > 0 ==> validDstAddrsOffset128(mem, outp, out_b, iter*6, old(len) - 6*iter, memTaint, Secret);
@@ -4616,8 +4622,8 @@ procedure AES_GCM_decrypt_6mult(
 
         // Len is # of 128-bit blocks
         len % 6 == 0;
-        len > 0 ==> len >= 18;
-        len > 0 ==> len / 6 >= 3;   // Should be implied by above... :(
+        len > 0 ==> len >= 6;
+        len > 0 ==> len / 6 >= 1;   // Should be implied by above... :(
         12 + len + 6 < pow2_32;
     ensures
         // Framing
