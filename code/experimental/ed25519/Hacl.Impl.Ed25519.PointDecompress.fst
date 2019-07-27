@@ -64,6 +64,8 @@ val point_decompress_:
       (b ==> (F51.point_eval h1 out == Some?.v (SE.point_decompress (as_seq h0 s))))
     )
 
+#push-options "--z3rlimit 30"
+
 let point_decompress_ out s tmp =
   let y    = sub tmp 0ul 5ul in
   let x    = sub tmp 5ul 5ul in
@@ -94,7 +96,7 @@ val point_decompress:
     out:point
   -> s:lbuffer uint8 32ul ->
   Stack bool
-    (requires fun h -> live h out /\ live h s)
+    (requires fun h -> live h out /\ live h s /\ F51.point_inv_t h out)
     (ensures  fun h0 b h1 -> modifies (loc out) h0 h1 /\
       (b ==> F51.point_inv_t h1 out) /\
       (b <==> Some? (Spec.Ed25519.point_decompress (as_seq h0 s))) /\
@@ -106,3 +108,5 @@ let point_decompress out s =
   let res = point_decompress_ out s tmp in
   pop_frame();
   res
+
+#pop-options

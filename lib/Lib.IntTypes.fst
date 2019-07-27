@@ -543,6 +543,20 @@ let logand_le #t #l a b =
   | U64 -> UInt.logand_le (UInt.to_uint_t 64 (v a)) (UInt.to_uint_t 64 (v b))
   | U128 -> UInt.logand_le (UInt.to_uint_t 128 (v a)) (UInt.to_uint_t 128 (v b))
 
+let logand_mask #t #l a b m =
+  match t with
+  | U1 ->
+    assert_norm (UInt8.logand 0uy 0uy == 0uy);
+    assert_norm (UInt8.logand 0uy 1uy == 0uy);
+    assert_norm (UInt8.logand 1uy 0uy == 0uy);
+    assert_norm (UInt8.logand 1uy 1uy == 1uy)
+  | U8 -> UInt.logand_mask (UInt.to_uint_t 8 (v a)) m
+  | U16 -> UInt.logand_mask (UInt.to_uint_t 16 (v a)) m
+  | U32 -> UInt.logand_mask (UInt.to_uint_t 32 (v a)) m
+  | U64 -> UInt.logand_mask (UInt.to_uint_t 64 (v a)) m
+  | U128 -> UInt.logand_mask (UInt.to_uint_t 128 (v a)) m
+
+
 [@(strict_on_arguments [0])]
 let logor #t #l a b =
   match t with

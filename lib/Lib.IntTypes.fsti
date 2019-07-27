@@ -573,6 +573,11 @@ val logand_le:#t:inttype{unsigned t} -> #l:secrecy_level -> a:uint_t t l -> b:ui
   Lemma (requires True)
         (ensures v (logand a b) <= v a /\ v (logand a b) <= v b)
 
+val logand_mask: #t:inttype{unsigned t} -> #l:secrecy_level -> a:uint_t t l -> b:uint_t t l ->   m:pos{m < bits t} ->
+  Lemma
+    (requires v b == pow2 m - 1)
+    (ensures v (logand #t #l a b) == v a % pow2 m)
+
 [@(strict_on_arguments [0])]
 inline_for_extraction
 val logor: #t:inttype -> #l:secrecy_level

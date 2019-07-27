@@ -13,10 +13,10 @@ open Hacl.Impl.Ed25519.SecretExpand
 open Hacl.Impl.Ed25519.SecretToPublic
 
 type keys = lbuffer uint8 96ul
-inline_for_extraction private let pk (ks:keys) = sub ks 0ul 32ul
-inline_for_extraction private let xsk (ks:keys) = sub ks 32ul 64ul
-inline_for_extraction private let xlow (ks:keys) = sub ks 32ul 32ul
-inline_for_extraction private let xhigh (ks:keys) = sub ks 64ul 32ul
+inline_for_extraction private let pk (ks:keys) = admit(); sub ks 0ul 32ul
+inline_for_extraction private let xsk (ks:keys) = admit(); sub ks 32ul 64ul
+inline_for_extraction private let xlow (ks:keys) = admit(); sub ks 32ul 32ul
+inline_for_extraction private let xhigh (ks:keys) = admit(); sub ks 64ul 32ul
 
 inline_for_extraction
 val expand_keys:
@@ -62,6 +62,7 @@ let sign_ signature ks len msg tmp_bytes tmp_ints =
   let h    = sub tmp_ints 60ul 5ul  in
   let rs'  = sub tmp_bytes 160ul 32ul in
   let s'   = sub tmp_bytes 192ul 32ul in
+  admit();
   load_keys tmp_bytes ks;
   sign_step_2 len msg tmp_bytes tmp_ints;
   sign_step_3 tmp_bytes tmp_ints;
