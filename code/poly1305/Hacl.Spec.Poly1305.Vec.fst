@@ -29,7 +29,7 @@ let pfmul (x:pfelem) (y:pfelem) : pfelem = Scalar.fmul x y
 let lanes = w:width{w == 1 \/ w == 2 \/ w == 4}
 type elem (w:lanes) = lseq pfelem w
 
-//unfold
+
 let to_elem (w:lanes) (x:pfelem) : elem w = create w x
 let from_elem (#w:lanes) (x:elem w) : pfelem = x.[0]
 let zero (w:lanes) : elem w = to_elem w 0
@@ -68,34 +68,34 @@ let load_blocks (#w:lanes) (b:lbytes (w * size_block)) : elem w =
   let e = map (pfadd (pow2 128)) e in
   e
 
-let load_acc1 (acc:pfelem) (text:lbytes size_block) : elem 1 =
+let load_acc1 (text:lbytes size_block) (acc:pfelem) : elem 1 =
   let acc = create 1 acc in
   fadd acc (load_blocks #1 text)
 
-let load_acc2 (acc:pfelem) (text:lbytes (2 * size_block)) : elem 2 =
+let load_acc2 (text:lbytes (2 * size_block)) (acc:pfelem) : elem 2 =
   let acc = create2 acc 0 in
   fadd acc (load_blocks #2 text)
 
-let load_acc4 (acc:pfelem) (text:lbytes (4 * size_block)) : elem 4 =
+let load_acc4 (text:lbytes (4 * size_block)) (acc:pfelem) : elem 4 =
   let acc = create4 acc 0 0 0 in
   fadd acc (load_blocks #4 text)
 
-let load_acc (#w:lanes) (acc:pfelem) (text:lbytes (w * size_block)) : elem w =
+let load_acc (#w:lanes) (text:lbytes (w * size_block)) (acc:pfelem) : elem w =
   match w with
-  | 1 -> load_acc1 acc text
-  | 2 -> load_acc2 acc text
-  | 4 -> load_acc4 acc text
+  | 1 -> load_acc1 text acc
+  | 2 -> load_acc2 text acc
+  | 4 -> load_acc4 text acc
 
-let normalize_1 (acc:elem 1) (r:pfelem) : pfelem =
+let normalize_1 (r:pfelem) (acc:elem 1) : pfelem =
   pfmul acc.[0] r
 
-let normalize_2 (acc:elem 2) (r:pfelem) : pfelem =
+let normalize_2 (r:pfelem) (acc:elem 2) : pfelem =
   let r2 = pfmul r r in
   let r21 = create2 r2 r in
   let a = fmul acc r21 in
   pfadd a.[0] a.[1]
 
-let normalize_4 (acc:elem 4) (r:pfelem) : pfelem =
+let normalize_4 (r:pfelem) (acc:elem 4) : pfelem =
   let r2 = pfmul r r in
   let r3 = pfmul r2 r in
   let r4 = pfmul r2 r2 in
@@ -103,11 +103,11 @@ let normalize_4 (acc:elem 4) (r:pfelem) : pfelem =
   let a = fmul acc r4321 in
   pfadd (pfadd (pfadd a.[0] a.[1]) a.[2]) a.[3]
 
-let normalize_n (#w:lanes) (acc:elem w) (r:pfelem) : pfelem =
+let normalize_n (#w:lanes) (r:pfelem) (acc:elem w) : pfelem =
   match w with
-  | 1 -> normalize_1 acc r
-  | 2 -> normalize_2 acc r
-  | 4 -> normalize_4 acc r
+  | 1 -> normalize_1 r acc
+  | 2 -> normalize_2 r acc
+  | 4 -> normalize_4 r acc
 
 let compute_r1 (r:pfelem) : elem 1 = to_elem 1 r
 let compute_r2 (r:pfelem) : elem 2 = to_elem 2 (pfmul r r)
@@ -124,13 +124,15 @@ let poly1305_update_nblocks (#w:lanes) (r_w:elem w) (b:lbytes (w * size_block)) 
   let acc = fadd (fmul acc r_w) e in
   acc
 
+
 let poly1305_update_multi (#w:lanes) (text:bytes{0 < length text /\ length text % (w * size_block) = 0}) (acc:pfelem) (r:pfelem) : pfelem =
-  let acc = load_acc acc (Seq.slice text 0 (w * size_block)) in
-  let text = Seq.slice text (w * size_block) (length text) in
   let rw = compute_rw r in
+  let acc = load_acc (Seq.slice text 0 (w * size_block)) acc in
+  let text = Seq.slice text (w * size_block) (length text) in
   let acc = repeat_blocks_multi #uint8 #(elem w) (w * size_block) text (poly1305_update_nblocks rw) acc in
-  let acc = normalize_n acc r in
+  let acc = normalize_n r acc in
   acc
+
 
 let poly1305_update_vec (#w:lanes) (text:bytes) (acc:pfelem) (r:pfelem) : pfelem =
   let len = length text in
@@ -141,6 +143,7 @@ let poly1305_update_vec (#w:lanes) (text:bytes) (acc:pfelem) (r:pfelem) : pfelem
 
   let t1 = Seq.slice text len0 len in
   Scalar.poly1305_update t1 acc r
+
 
 let poly1305_update (#w:lanes) (text:bytes) (acc:pfelem) (r:pfelem) : pfelem =
   match w with

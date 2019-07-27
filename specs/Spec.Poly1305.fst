@@ -48,22 +48,22 @@ let poly1305_init (k:key) : Tot (felem & felem) =
   let r = poly1305_encode_r (slice k 0 16) in
   zero, r
 
-let poly1305_update1 (r:felem) (len:size_nat{len <= size_block}) (b:lbytes len) (acc:felem) : Tot felem =
+let encode (len:size_nat{len <= size_block}) (b:lbytes len) : Tot felem =
   Math.Lemmas.pow2_le_compat 128 (8 * len);
   assert_norm (pow2 128 < prime);
-  assert_norm (pow2 128 + pow2 128 < prime);
-  let n = to_felem (pow2 (8 * len) + nat_from_bytes_le b) in
-  let acc = fmul (fadd n acc) r in
-  acc
+  fadd (pow2 (8 * len)) (nat_from_bytes_le b)
+
+let poly1305_update1 (r:felem) (len:size_nat{len <= size_block}) (b:lbytes len) (acc:felem) : Tot felem =
+  (encode len b `fadd` acc) `fmul` r
 
 let poly1305_finish (k:key) (acc:felem) : Tot tag =
   let s = nat_from_bytes_le (slice k 16 32) in
   let n = (from_felem acc + s) % pow2 128 in
   nat_to_bytes_le 16 n
 
-
 let poly1305_update_last (r:felem) (l:size_nat{l < 16}) (b:lbytes l) (acc:felem) =
   if l = 0 then acc else poly1305_update1 r l b acc
+
 
 let poly1305_update (text:bytes) (acc:felem) (r:felem) : Tot felem =
   repeat_blocks #uint8 #felem size_block text

@@ -349,7 +349,7 @@ val lemma_repeat_blocks_multi_load_acc:
   -> #b_vec:Type0
   -> w:lanes
   -> size_block:size_pos{w * size_block <= max_size_t}
-  -> inp:seq a{w * size_block < length inp /\ length inp % (w * size_block) = 0 /\ length inp % size_block = 0}
+  -> inp:seq a{w * size_block <= length inp /\ length inp % (w * size_block) = 0 /\ length inp % size_block = 0}
   -> f:(lseq a size_block -> b -> b)
   -> normalize_n:(b_vec -> b)
   -> load_acc:(lseq a (w * size_block) -> b -> b_vec)

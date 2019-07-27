@@ -105,7 +105,7 @@ val lemma_repeati_vec:
 private
 val lemma_aux1: w:pos -> size_block:pos -> len:pos ->
   Lemma
-  (requires (w * size_block < len /\ len % (w * size_block) = 0 /\ len % size_block = 0))
+  (requires (w * size_block <= len /\ len % (w * size_block) = 0 /\ len % size_block = 0))
   (ensures  ((len - w * size_block) / size_block == w * ((len - w * size_block) / (w * size_block))))
 
 
@@ -115,7 +115,7 @@ val lemma_repeat_blocks_multi_vec:
   -> #b_vec:Type0
   -> w:lanes
   -> size_block:size_pos{w * size_block <= max_size_t}
-  -> inp:seq a{w * size_block < length inp /\ length inp % (w * size_block) = 0 /\ length inp % size_block = 0}
+  -> inp:seq a{w * size_block <= length inp /\ length inp % (w * size_block) = 0 /\ length inp % size_block = 0}
   -> f:(lseq a size_block -> b -> b)
   -> f_vec:(lseq a (w * size_block) -> b_vec -> b_vec)
   -> normalize_n:(b_vec -> b)

@@ -103,15 +103,10 @@ val poly1305_encode_block:
     (ensures  fun h0 _ h1 ->
       modifies (loc f) h0 h1 /\
       felem_fits h1 f (1, 1, 1, 1, 1) /\
-      (feval h1 f).[0] == pow2 128 + BSeq.nat_from_bytes_le (as_seq h0 b))
+      (feval h1 f).[0] == Scalar.encode 16 (as_seq h0 b))
 let poly1305_encode_block #s f b =
   load_felem_le f b;
-  let h0 = ST.get () in
-  set_bit128 f;
-  let h1 = ST.get () in
-  assert ((feval h1 f).[0] == Scalar.fadd (pow2 128) (BSeq.nat_from_bytes_le (as_seq h0 b)));
-  assert_norm (pow2 128 + pow2 128 < Scalar.prime);
-  FStar.Math.Lemmas.modulo_lemma (pow2 128 + BSeq.nat_from_bytes_le (as_seq h0 b)) Scalar.prime
+  set_bit128 f
 
 inline_for_extraction noextract
 val poly1305_encode_blocks:
@@ -142,7 +137,7 @@ val poly1305_encode_last:
     (ensures  fun h0 _ h1 ->
       modifies (loc f) h0 h1 /\
       felem_fits h1 f (1, 1, 1, 1, 1) /\
-      (feval h1 f).[0] == pow2 (8 * v len) + BSeq.nat_from_bytes_le (as_seq h0 b))
+      (feval h1 f).[0] == Scalar.encode (v len) (as_seq h0 b))
 let poly1305_encode_last #s f len b =
   push_frame();
   let tmp = create 16ul (u8 0) in
@@ -163,11 +158,6 @@ let poly1305_encode_last #s f len b =
 
   //assert (F32xN.felem_less #(width s) h1 f (pow2 (v len * 8)));
   set_bit f (len *! 8ul);
-  let h2 = ST.get () in
-  assert ((feval h2 f).[0] == Scalar.fadd (pow2 (v len * 8)) (BSeq.nat_from_bytes_le (as_seq h0 b)));
-  Math.Lemmas.pow2_lt_compat 128 (8 * v len);
-  assert_norm (pow2 128 + pow2 128 < Scalar.prime);
-  FStar.Math.Lemmas.modulo_lemma (pow2 (8 * v len) + BSeq.nat_from_bytes_le (as_seq h0 b)) Scalar.prime;
   pop_frame()
 #pop-options
 
@@ -404,7 +394,7 @@ val poly1305_update_multi_loop:
       F32xN.acc_inv_t #(width s) (F32xN.as_tup5 h1 acc) /\
      (let acc1 = LSeq.repeat_blocks_multi #uint8 #(Vec.elem (width s)) (v bs) (as_seq h0 text)
        (Vec.poly1305_update_nblocks (feval h0 (gsub pre 10ul 5ul))) (feval h0 acc) in
-     (feval h1 acc).[0] == Vec.normalize_n #(width s) acc1 (feval h0 (gsub pre 0ul 5ul)).[0]))
+     (feval h1 acc).[0] == Vec.normalize_n #(width s) (feval h0 (gsub pre 0ul 5ul)).[0] acc1))
 let poly1305_update_multi_loop #s bs len text pre acc =
   let nb = len /. bs in
 

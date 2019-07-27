@@ -17,6 +17,9 @@ module BSeq = Lib.ByteSequence
 module F32xN = Hacl.Impl.Poly1305.Field32xN
 open F32xN
 
+
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_fuel 0"
+
 type field_spec =
   | M32
   | M128
@@ -178,14 +181,12 @@ val load_acc:
     (ensures  fun h0 _ h1 ->
       modifies (loc acc) h0 h1 /\
       felem_fits h1 acc (2, 3, 2, 2, 2) /\
-      feval h1 acc == Vec.load_acc #(width s) (feval h0 acc).[0] (as_seq h0 b))
+      feval h1 acc == Vec.load_acc #(width s) (as_seq h0 b) (feval h0 acc).[0])
 let load_acc #s acc b =
   match s with
   | M32 -> load_acc1 acc b
   | M128 -> load_acc2 acc b
   | M256 -> load_acc4 acc b
-
-#set-options "--z3rlimit 50"
 
 inline_for_extraction noextract
 val set_bit:
@@ -291,8 +292,9 @@ val load_precompute_r:
     (ensures  fun h0 _ h1 ->
       modifies (loc p) h0 h1 /\
       load_precompute_r_post #(width s) h1 p /\
+     (assert (uint_v r1 * pow2 64 + uint_v r0 < pow2 128);
       feval h1 (gsub p 0ul 5ul) ==
-        LSeq.create (width s) (uint_v r1 * pow2 64 + uint_v r0))
+        LSeq.create (width s) (uint_v r1 * pow2 64 + uint_v r0)))
 let load_precompute_r #s p r0 r1 =
   match s with
   | M32  -> F32xN.load_precompute_r #1 p r0 r1
@@ -361,7 +363,7 @@ val fmul_rn_normalize:
       modifies (loc out) h0 h1 /\
       acc_inv_t #(width s) (as_tup5 h1 out) /\
       (feval h1 out).[0] ==
-        Vec.normalize_n #(width s) (feval h0 out) (feval h0 (gsub precomp 0ul 5ul)).[0])
+        Vec.normalize_n #(width s) (feval h0 (gsub precomp 0ul 5ul)).[0] (feval h0 out))
 let fmul_rn_normalize #s out precomp =
   match s with
   | M32  -> F32xN.fmul_rn_normalize #1 out precomp
