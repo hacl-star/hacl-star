@@ -10,16 +10,23 @@ open Lib.Buffer
 open Lib.ByteBuffer
 
 module F56 = Hacl.Impl.Ed25519.Field56
+module S56 = Hacl.Spec.Ed25519.Field56.Definition
+
+#reset-options "--z3rlimit 30 --max_fuel 0 --max_ifuel 0"
 
 val hstore56_le:
     out:lbuffer uint8 32ul
   -> off:size_t{v off <= 21}
-  -> x:uint64 -> //{v x < pow2 56} ->
+  -> x:uint64{v x < pow2 56} ->
   Stack unit
     (requires fun h -> live h out)
-    (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1)
+    (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+      nat_from_bytes_le (Seq.slice (as_seq h1 out) (v off) (v off + 8)) == v x
+    )
+
 let hstore56_le out off x =
   let b8 = sub out off 8ul in
+  lemma_uint_to_bytes_le_preserves_value x;
   uint_to_bytes_le b8 x
 
 val store_56:
@@ -27,10 +34,17 @@ val store_56:
   -> b:lbuffer uint64 5ul ->
   Stack unit
     (requires fun h -> live h out /\ live h b /\
-      F56.as_nat h b < pow2 256
+      (let s = as_seq h b in
+        v (Seq.index s 0) < pow2 56 /\
+        v (Seq.index s 1) < pow2 56 /\
+        v (Seq.index s 2) < pow2 56 /\
+        v (Seq.index s 3) < pow2 56 /\
+        v (Seq.index s 4) < pow2 32)
     )
     (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
-      nat_to_bytes_le 32 (F56.as_nat h0 b) == as_seq h1 out
+      (assert_norm (pow2 56 < pow2 64); assert_norm (pow2 32 < pow2 64);
+        assert_norm (S56.as_nat5 (u64 (pow2 56 - 1), u64 (pow2 56 - 1), u64 (pow2 56 - 1), u64 (pow2 56 - 1), u64 (pow2 32 - 1)) < pow2 256);
+      nat_to_bytes_le 32 (F56.as_nat h0 b) == as_seq h1 out)
     )
 
 let store_56 out b =

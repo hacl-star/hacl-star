@@ -67,6 +67,12 @@ val sha512_modq_pre:
       live h input /\ live h out /\ live h prefix /\
       disjoint prefix out /\  disjoint out input)
     (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+      (let s = as_seq h1 out in
+       v (Seq.index s 0) < pow2 56 /\
+       v (Seq.index s 1) < pow2 56 /\
+       v (Seq.index s 2) < pow2 56 /\
+       v (Seq.index s 3) < pow2 56 /\
+       v (Seq.index s 4) < pow2 32) /\
       F56.as_nat h1 out ==
       Spec.Ed25519.sha512_modq (32 + v len)
         (concat #uint8 #32 #(v len) (as_seq h0 prefix) (as_seq h0 input))
@@ -95,6 +101,12 @@ val sha512_modq_pre_pre2:
       live h input /\ live h out /\ live h prefix /\ live h prefix2 /\
       disjoint prefix out /\ disjoint prefix2 out /\ disjoint out input)
     (ensures  fun h0 _ h1 ->  modifies (loc out) h0 h1 /\
+      (let s = as_seq h1 out in
+       v (Seq.index s 0) < pow2 56 /\
+       v (Seq.index s 1) < pow2 56 /\
+       v (Seq.index s 2) < pow2 56 /\
+       v (Seq.index s 3) < pow2 56 /\
+       v (Seq.index s 4) < pow2 32) /\
      F56.as_nat h1 out ==
       Spec.Ed25519.sha512_modq (64 + v len)
         (concat #uint8 #64 #(v len)
