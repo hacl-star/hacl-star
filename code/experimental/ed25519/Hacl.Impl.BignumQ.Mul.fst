@@ -595,4 +595,4 @@ let add_modq_ out x y =
   admit();
   pop_frame()
 
-let add_modq out x y = add_modq_ out x y
+let add_modq out x y = admit(); add_modq_ out x y

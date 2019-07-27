@@ -155,6 +155,13 @@ val sign_step_4:
       // Framing
       as_seq h0 (gsub tmp_ints 20ul 5ul) == as_seq h1 (gsub tmp_ints 20ul 5ul) /\
       // Postcondition
+      (let s = as_seq h1 (gsub tmp_ints 60ul 5ul) in
+       let op_String_Access = Seq.index in
+       v s.[0] < 0x100000000000000 /\
+       v s.[1] < 0x100000000000000 /\
+       v s.[2] < 0x100000000000000 /\
+       v s.[3] < 0x100000000000000 /\
+       v s.[4] < 0x100000000000000) /\
       F56.as_nat h1 (gsub tmp_ints 60ul 5ul) ==
       Spec.Ed25519.sha512_modq (64 + v len)
         (concat #uint8 #64 #(v len)
@@ -174,6 +181,7 @@ let sign_step_4 len msg tmp_bytes tmp_ints =
   let rs'  = sub tmp_bytes 160ul 32ul in
   let apre = sub tmp_bytes 224ul 64ul in
   let a    = sub apre 0ul 32ul in
+  assert_norm (pow2 56 == 0x100000000000000);
   Hacl.Impl.SHA512.ModQ.sha512_modq_pre_pre2 h rs' a'' len msg
 
 val sign_step_5:
@@ -181,7 +189,22 @@ val sign_step_5:
   -> tmp_ints:lbuffer uint64 65ul ->
   Stack unit
     (requires fun h ->
-      live h tmp_bytes /\ live h tmp_ints /\ disjoint tmp_bytes tmp_ints)
+      live h tmp_bytes /\ live h tmp_ints /\ disjoint tmp_bytes tmp_ints /\
+      (let s = as_seq h (gsub tmp_ints 60ul 5ul) in
+       let op_String_Access = Seq.index in
+       v s.[0] < 0x100000000000000 /\
+       v s.[1] < 0x100000000000000 /\
+       v s.[2] < 0x100000000000000 /\
+       v s.[3] < 0x100000000000000 /\
+       v s.[4] < 0x100000000000000) /\
+      (let s = as_seq h (gsub tmp_ints 20ul 5ul) in
+       let op_String_Access = Seq.index in
+       v s.[0] < 0x100000000000000 /\
+       v s.[1] < 0x100000000000000 /\
+       v s.[2] < 0x100000000000000 /\
+       v s.[3] < 0x100000000000000 /\
+       v s.[4] < 0x100000000000000)
+    )
     (ensures fun h0 _ h1 -> modifies (loc tmp_bytes |+| loc tmp_ints) h0 h1 /\
       // Framing
       as_seq h0 (gsub tmp_bytes 160ul 32ul) == as_seq h1 (gsub tmp_bytes 160ul 32ul) /\
@@ -191,6 +214,8 @@ val sign_step_5:
        let a = as_seq h0 (gsub tmp_bytes 224ul 32ul) in
       nat_from_bytes_le (as_seq h1 (gsub tmp_bytes 192ul 32ul)) ==
       (r + (h * nat_from_bytes_le a) % Spec.Ed25519.q) % Spec.Ed25519.q))
+
+#set-options "--z3rlimit 40"
 
 let sign_step_5 tmp_bytes tmp_ints =
   let r    = sub tmp_ints 20ul 5ul  in
@@ -202,7 +227,7 @@ let sign_step_5 tmp_bytes tmp_ints =
   let rs'  = sub tmp_bytes 160ul 32ul in
   let a = sub tmp_bytes 224ul 32ul in
   Hacl.Impl.Load56.load_32_bytes aq a;
-  admit();
   Hacl.Impl.BignumQ.Mul.mul_modq ha h aq;
   Hacl.Impl.BignumQ.Mul.add_modq s r ha;
+  assert_norm (0x100000000000000 == pow2 56);
   Hacl.Impl.Store56.store_56 s' s
