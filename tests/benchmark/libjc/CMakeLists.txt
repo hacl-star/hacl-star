@@ -21,30 +21,16 @@ message("-- Using libjc at ${LIBJC_SRC_DIR}")
 add_library(jc STATIC
   ${LIBJC_SRC_DIR}/src/crypto_onetimeauth/poly1305/ref3/poly1305.s
   ${LIBJC_SRC_DIR}/src/crypto_stream/chacha20/ref/chacha20.s
-
 )
 target_compile_options(jc PRIVATE -Wno-parentheses -std=gnu11 -Wno-attributes -Wno-implicit-function-declaration)
 target_include_directories(jc PUBLIC ${LIBJC_SRC_DIR})
 
-add_library(jc_chacha20_avx STATIC
-  ${LIBJC_SRC_DIR}/src/crypto_stream/chacha20/avx/chacha20.s
-)
 
+
+if ("${CMAKE_SYSTEM_NAME}" STREQUAL "CYGWIN")
+else()
 add_library(jc_chacha20_avx2 STATIC
   ${LIBJC_SRC_DIR}/src/crypto_stream/chacha20/avx2/chacha20.s
-)
-
-add_library(jc_poly1305_avx STATIC
-  ${LIBJC_SRC_DIR}/src/crypto_onetimeauth/poly1305/avx/poly1305.s
-)
-
-add_library(jc_poly1305_avx2 STATIC
-  ${LIBJC_SRC_DIR}/src/crypto_onetimeauth/poly1305/avx2/poly1305.s
-)
-
-add_custom_command(TARGET jc_chacha20_avx
-  POST_BUILD
-  COMMAND objcopy --prefix-symbols=libjc_avx_ $<TARGET_FILE:jc_chacha20_avx>
 )
 
 add_custom_command(TARGET jc_chacha20_avx2
@@ -52,9 +38,8 @@ add_custom_command(TARGET jc_chacha20_avx2
   COMMAND objcopy --prefix-symbols=libjc_avx2_ $<TARGET_FILE:jc_chacha20_avx2>
 )
 
-add_custom_command(TARGET jc_poly1305_avx
-  POST_BUILD
-  COMMAND objcopy --prefix-symbols=libjc_avx_ $<TARGET_FILE:jc_poly1305_avx>
+add_library(jc_poly1305_avx2 STATIC
+  ${LIBJC_SRC_DIR}/src/crypto_onetimeauth/poly1305/avx2/poly1305.s
 )
 
 add_custom_command(TARGET jc_poly1305_avx2
@@ -62,4 +47,26 @@ add_custom_command(TARGET jc_poly1305_avx2
   COMMAND objcopy --prefix-symbols=libjc_avx2_ $<TARGET_FILE:jc_poly1305_avx2>
 )
 
-target_link_libraries(jc jc_chacha20_avx jc_chacha20_avx2 jc_poly1305_avx jc_poly1305_avx2)
+target_link_libraries(jc jc_chacha20_avx2 jc_poly1305_avx2)
+
+
+add_library(jc_chacha20_avx STATIC
+  ${LIBJC_SRC_DIR}/src/crypto_stream/chacha20/avx/chacha20.s
+)
+
+add_library(jc_poly1305_avx STATIC
+  ${LIBJC_SRC_DIR}/src/crypto_onetimeauth/poly1305/avx/poly1305.s
+)
+
+add_custom_command(TARGET jc_chacha20_avx
+  POST_BUILD
+  COMMAND objcopy --prefix-symbols=libjc_avx_ $<TARGET_FILE:jc_chacha20_avx>
+)
+
+add_custom_command(TARGET jc_poly1305_avx
+  POST_BUILD
+  COMMAND objcopy --prefix-symbols=libjc_avx_ $<TARGET_FILE:jc_poly1305_avx>
+)
+
+target_link_libraries(jc jc_chacha20_avx jc_poly1305_avx)
+endif()
