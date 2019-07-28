@@ -129,25 +129,27 @@ let mod_exp pow2_i modBits nLen n r2 a bBits b res =
   from_mont nLen rLen pow2_i n nInv_u64 accM tmp res;
   pop_frame ()
 
+#reset-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
 
+// TODO doesn't have bounds validation, is
+// used within bn_exp, which does have them
 val naive_exp_loop:
-     #nLen:bn_len_strict{(v nLen + v nLen) * 64 < max_size_t}
+     #aLen:bn_len_strict{(v aLen + v aLen) * 64 < max_size_t}
   -> #expLen:bn_len_strict
-  -> n:lbignum nLen
-  -> a:lbignum nLen
+  -> a:lbignum aLen
   -> b:lbignum expLen
-  -> res:lbignum nLen
+  -> res:lbignum aLen
   -> Stack unit
     (requires fun h ->
-        disjoint n b /\ disjoint n res /\
-        live h n /\ live h a /\ live h b /\ live h res /\
-        as_snat h n > 1)
-    (ensures fun h0 _ h1 -> modifies2 res b h0 h1 /\
-        live h1 n /\ live h1 a /\ live h1 b /\ live h1 res)
-let rec naive_exp_loop #nLen #expLen n a b res =
+        disjoint a b /\ disjoint a res /\
+        live h a /\ live h b /\ live h res)
+    (ensures fun h0 _ h1 ->
+        live h1 res /\ live h1 a /\ live h1 b /\
+        modifies2 res b h0 h1)
+let rec naive_exp_loop #aLen #expLen a b res =
   push_frame ();
   let tmp = create expLen (uint 0) in
-  let tmp' = create nLen (uint 0) in
+  let tmp' = create aLen (uint 0) in
   assert_norm (issnat 0);
   assert_norm (nat_bytes_num 0 =. 1ul);
   let zero:lbignum 1ul = nat_to_bignum_exact 0 in
@@ -155,42 +157,50 @@ let rec naive_exp_loop #nLen #expLen n a b res =
   if not isnull then begin
      let odd = eq_u64 (b.(0ul) &. uint 1) (uint 1) in
      bn_rshift1 b tmp; copy b tmp;
-     naive_exp_loop #nLen n a b res;
-     bn_modular_mul n res res tmp'; copy res tmp';
-     if odd then (bn_modular_mul n res a tmp'; copy res tmp')
+     naive_exp_loop #aLen a b res;
+     let h = FStar.HyperStack.ST.get () in
+     assume (issnat (as_snat h res * as_snat h res) /\
+             v (nat_bytes_num (as_snat h res * as_snat h res)) <= v aLen);
+     bn_mul_fitting res res tmp';
+     copy res tmp';
+     if odd then begin
+       let h = FStar.HyperStack.ST.get () in
+       assume (issnat (as_snat h res * as_snat h a) /\
+               v (nat_bytes_num (as_snat h res * as_snat h a)) <= v aLen);
+       bn_mul_fitting res a tmp';
+       copy res tmp'
+     end
   end;
   pop_frame ()
 
-val bn_modular_exp:
-     #nLen:bn_len_strict{v nLen * 128 < max_size_t}
+val bn_exp:
+     #aLen:bn_len_strict{v aLen * 128 < max_size_t}
   -> #expLen:bn_len_strict
-  -> n:lbignum nLen
-  -> a:lbignum nLen
+  -> a:lbignum aLen
   -> b:lbignum expLen
-  -> res:lbignum nLen
+  -> res:lbignum aLen
   -> Stack unit
     (requires fun h ->
-      live h n /\ live h a /\ live h b /\ live h res /\
-      disjoint a res /\ disjoint b res /\ disjoint n res /\
-      as_snat h n > 1)
-    (ensures  fun h0 _ h1 -> modifies1 res h0 h1 /\
-      live h1 n /\ live h1 a /\ live h1 b /\ live h1 res /\
-      (let n = as_snat h0 n in
-       as_snat h1 res = fexp (to_fe #n (as_snat h0 a)) (as_snat h0 b)))
-let bn_modular_exp #nLen #expLen n a b res =
+      live h a /\ live h b /\ live h res /\
+      disjoint a res /\ disjoint b res /\
+      issnat (exp (as_snat h a) (as_snat h b)) /\
+      v (nat_bytes_num (exp (as_snat h a) (as_snat h b))) < v aLen)
+    (ensures  fun h0 _ h1 ->
+      modifies1 res h0 h1 /\
+      live h1 a /\ live h1 b /\ live h1 res /\
+      as_snat h1 res = (exp (as_snat h0 a) (as_snat h0 b)))
+let bn_exp #aLen #expLen a b res =
   let h0 = FStar.HyperStack.ST.get () in
 
   push_frame ();
 
-  memset res (uint 0) nLen;
+  memset res (uint 0) aLen;
   res.(0ul) <- uint 1;
   let tmp_b = create expLen (uint 0) in
   copy tmp_b b;
-  naive_exp_loop n a tmp_b res;
+  naive_exp_loop a tmp_b res;
 
   pop_frame ();
 
   let h1 = FStar.HyperStack.ST.get () in
-  assume (let n' = as_snat h0 n in
-          as_snat h1 res =
-          fexp (to_fe #n' (as_snat h0 a)) (as_snat h0 b))
+  assume (as_snat h1 res = exp (as_snat h0 a) (as_snat h0 b))

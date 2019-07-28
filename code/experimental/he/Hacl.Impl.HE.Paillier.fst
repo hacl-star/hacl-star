@@ -13,6 +13,7 @@ open Lib.Math.Algebra
 open Hacl.Impl.Bignum
 
 module S = Hacl.Spec.HE.Paillier
+module A = Lib.Math.Algebra
 
 
 // max 2^30 bits
@@ -163,18 +164,18 @@ type proper_secret_raw h
         let q = as_snat h q in
         let g = as_snat h g in
         let lambda = as_snat h lambda in
-       (p > 1 /\ q > 1 /\ n > 1 /\
+       (p > 1 /\ q > 1 /\ p <> q /\ n > 1 /\
         isprm p /\ isprm q /\ n = p * q /\
 
         g < n2 /\
         S.is_g n g /\
 
-        lambda = S.carm p q /\
+        lambda = carm_pq p q /\
         lambda < n2 /\
 
         // This can be actually proven inplace, but it works slower then
-        fexp #n2 g lambda > 0 /\
-        as_snat h l2inv = S.fermat_inv_pq p q (S.bigl #n (fexp #n2 g lambda))))
+        mexp #n2 g lambda > 0 /\
+        as_snat h l2inv = S.fermat_inv_pq p q (S.bigl #n (mexp #n2 g lambda))))
 
 type proper_secret (#n2Len:bn_len_s) h (s:secret n2Len) =
   proper_secret_raw h (Sec?.p s) (Sec?.q s) (Sec?.n s) (Sec?.n2 s)
@@ -234,12 +235,13 @@ val carm:
       all_disjoint [loc p; loc q; loc n; loc n2; loc res] /\
       isprm (as_snat h p) /\
       isprm (as_snat h q) /\
+      as_snat h p <> as_snat h q /\
       as_snat h p * as_snat h q = as_snat h n /\
       as_snat h n * as_snat h n = as_snat h n2 /\
       as_snat h n > 1)
      (ensures fun h0 _ h1 ->
       modifies1 res h0 h1 /\
-      as_snat h1 res = S.carm (as_snat h0 p) (as_snat h0 q))
+      as_snat h1 res = carm_pq (as_snat h0 p) (as_snat h0 q))
 let carm #n2Len p q n n2 res =
   bn_len_s_fits n2Len;
 
@@ -285,6 +287,7 @@ val fermat_inverse:
       all_disjoint [loc p; loc q; loc n; loc n2; loc a; loc res] /\
       isprm (as_snat h p) /\
       isprm (as_snat h q) /\
+      as_snat h p <> as_snat h q /\
       as_snat h p * as_snat h q = as_snat h n /\
       as_snat h n * as_snat h n = as_snat h n2 /\
       as_snat h n > 1 /\
@@ -310,14 +313,14 @@ let fermat_inverse #n2Len p q n n2 a res =
   bn_modular_exp n a bn_carm res;
 
   let h = FStar.HyperStack.ST.get () in
-  assert (as_snat h bn_carm = S.carm (as_snat h p) (as_snat h q) - 1);
-  assert (as_snat h res = fexp #(as_snat h n) (as_snat h a)
-                               (S.carm (as_snat h p) (as_snat h q) - 1));
+  assert (as_snat h bn_carm = carm_pq (as_snat h p) (as_snat h q) - 1);
+  assert (as_snat h res = mexp #(as_snat h n) (as_snat h a)
+                               (carm_pq (as_snat h p) (as_snat h q) - 1));
 
   pop_frame ()
 
 
-#reset-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 0"
 
 val to_secret:
      #n2Len:bn_len_s
@@ -332,6 +335,7 @@ val to_secret:
       all_disjoint [loc p; loc q; loc n; loc n2; loc g] /\
       isprm (as_snat h p) /\
       isprm (as_snat h q) /\
+      as_snat h p <> as_snat h q /\
       as_snat h p * as_snat h q = as_snat h n /\
       as_snat h n * as_snat h n = as_snat h n2 /\
       as_snat h n > 1 /\
@@ -366,7 +370,7 @@ let to_secret #n2Len p q n n2 g =
   let h = FStar.HyperStack.ST.get () in
   assert (as_snat h bl_x =
            S.bigl #(as_snat h n)
-                   (fexp #(as_snat h n2) (as_snat h g) (as_snat h lambda)));
+                   (mexp #(as_snat h n2) (as_snat h g) (as_snat h lambda)));
 
   assert (as_snat h bl_x < as_snat h n);
 
@@ -376,11 +380,12 @@ let to_secret #n2Len p q n n2 g =
   assert (as_snat h x =
           S.fermat_inv_pq (as_snat h p) (as_snat h q)
           (S.bigl #(as_snat h n)
-                   (fexp #(as_snat h n2) (as_snat h g) (as_snat h lambda))));
+                   (mexp #(as_snat h n2) (as_snat h g) (as_snat h lambda))));
 
   let res_sk = Sec p q n n2 g lambda x in
 
   res_sk
+
 
 val l1_div_l2:
      #n2Len:bn_len_s
@@ -418,7 +423,7 @@ let l1_div_l2 #n2Len sec w res =
   end else begin
     let h = FStar.HyperStack.ST.get () in
     g_pow_isunit #(as_snat h n2) (as_snat h g) (as_snat h lambda);
-    isunit_nonzero #(as_snat h n2) (fexp #(as_snat h n2) (as_snat h g) (as_snat h lambda));
+    isunit_nonzero #(as_snat h n2) (mexp #(as_snat h n2) (as_snat h g) (as_snat h lambda));
     assert (S.l1_div_l2 (as_snat h p) (as_snat h q) (as_snat h w) (as_snat h g) =
             ( *% ) #(as_snat h n)
               (S.bigl #(as_snat h n) (as_snat h res))
@@ -441,6 +446,7 @@ let l1_div_l2 #n2Len sec w res =
     pop_frame ()
   end
 
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 
 val decrypt:
      #n2Len:bn_len_s

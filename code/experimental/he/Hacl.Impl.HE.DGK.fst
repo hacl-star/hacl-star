@@ -212,8 +212,8 @@ let encrypt #nLen pk r m res =
   to_fe_idemp #(as_snat hp0 n) (as_snat hp0 h);
   assert (as_snat hp res =
           ( *% ) #(as_snat hp0 n)
-          (fexp #(as_snat hp0 n) (as_snat hp0 g) (as_snat hp0 m))
-          (fexp #(as_snat hp0 n) (as_snat hp0 h) (as_snat hp0 r))
+          (mexp #(as_snat hp0 n) (as_snat hp0 g) (as_snat hp0 m))
+          (mexp #(as_snat hp0 n) (as_snat hp0 h) (as_snat hp0 r))
          );
 
   pop_frame ()
