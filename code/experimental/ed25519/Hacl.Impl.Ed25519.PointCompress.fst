@@ -19,7 +19,7 @@ let x_mod_2 x =
   let x0 = x.(0ul) in
   let z  = x0 &. u64 1 in
   mod_mask_lemma x0 1ul;
-  uintv_extensionality (u64 1) (mod_mask #U64 1ul);
+  //uintv_extensionality (u64 1) (mod_mask #U64 1ul);
   z
 
 inline_for_extraction noextract

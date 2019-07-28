@@ -52,12 +52,12 @@ let ith_bit k i =
   let q = i >>. 3ul in
   let r = i &. 7ul in
   mod_mask_lemma i 3ul;
-  uintv_extensionality 7ul (mod_mask #U32 3ul);
+  //uintv_extensionality 7ul (mod_mask #U32 3ul);
   assert (v r == v i % 8);
   let kq = k.(q) in
   let z = (kq >>. r) &. u8 1 in
   mod_mask_lemma (kq >>. r) 1ul;
-  uintv_extensionality (u8 1) (mod_mask #U8 1ul);
+  //uintv_extensionality (u8 1) (mod_mask #U8 1ul);
   z
 
 
