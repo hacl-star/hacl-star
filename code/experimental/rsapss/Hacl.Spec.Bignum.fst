@@ -113,11 +113,20 @@ val nat_bytes_num_range: x:snat -> Lemma
             v (nat_bytes_num x) > 0))
 let nat_bytes_num_range _ = ()
 
+/// Type alias for nat to be proper (snat) and fit into the provided bound.
+type nat_fits (a:nat) (bound:size_t) = issnat a /\ v (nat_bytes_num a) <= v bound
+
 /// Base64 representation on snats preserves order (specialised version).
 val nat_bytes_num_fit: a:nat -> b:snat -> Lemma
   (requires (a <= b))
-  (ensures (issnat a /\ v (nat_bytes_num a) <= v (nat_bytes_num b)))
+  (ensures (nat_fits a (nat_bytes_num b)))
 let rec nat_bytes_num_fit a b = snat_order a b; nat_to_list64_order a b
+
+/// If element b fits, then any smaller element does too.
+val nat_fits_trans: a:nat -> b:nat -> bound:size_t -> Lemma
+  (requires (a <= b /\ nat_fits b bound))
+  (ensures (nat_fits a bound))
+let rec nat_fits_trans a b bound = nat_bytes_num_fit a b
 
 /// Nat representation of bigint.
 noextract
@@ -137,7 +146,7 @@ val as_snat_prop:
      #eLen:bn_len_strict
   -> h:mem
   -> e:lbignum eLen
-  -> Lemma (issnat (as_snat h e) /\ v (nat_bytes_num (as_snat h e)) <= v eLen)
+  -> Lemma (nat_fits (as_snat h e) eLen)
 let as_snat_prop #eLen h e = admit ()
 
 /// Converts nat to the bignum, for that creates a bignum of exact length required.

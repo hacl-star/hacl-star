@@ -999,6 +999,59 @@ let exp_bigger_than_base g0 e0 =
   nexp_bigger_than_base g0 e0;
   from_naive_exp g0 e0
 
+val exp_zero: e:pos -> Lemma (exp 0 e = 0)
+let rec exp_zero e = nexp_zero e; from_naive_exp 0 e
+
+val exp_one1: g:nat -> Lemma (ensures (exp g one = g)) [SMTPat (exp g one)]
+let exp_one1 _ = ()
+
+val exp_one2: e:nat -> Lemma (ensures (exp one e = one)) [SMTPat (exp one e)]
+let rec exp_one2 e = nexp_one2 e; from_naive_exp one e
+
+val exp_mul1: g:nat -> e1:nat -> e2:nat -> Lemma
+  (exp g e1 * exp g e2 = exp g (e1 + e2))
+let exp_mul1 g e1 e2 =
+  nexp_mul1 g e1 e2;
+  from_naive_exp g e1;
+  from_naive_exp g e2;
+  from_naive_exp g (e1+e2)
+
+val exp_add: g:nat -> e1:nat -> e2:nat{e2 >= e1} -> Lemma
+  (exp g e1 + exp g e2 = exp g e1 * (1 + exp g (e2 - e1)))
+let exp_add g e1 e2 =
+  exp_mul1 g e1 (e2 - e1);
+  distributivity_add_right (exp g e1) 1 (exp g (e2 - e1))
+
+val exp_sub: g:nat -> e1:nat -> e2:nat{e2 >= e1} -> Lemma
+  (exp g e1 - exp g e2 = exp g e1 * (1 - exp g (e2 - e1)))
+let exp_sub g e1 e2 =
+  exp_mul1 g e1 (e2 - e1);
+  distributivity_sub_right (exp g e1) 1 (exp g (e2 - e1))
+
+val exp_order_lemma: g:pos -> e1:nat -> e2:nat{e1 <= e2} -> Lemma
+  (exp g e1 <= exp g e2)
+let rec exp_order_lemma g e1 e2 =
+  if e2 = e1 then () else begin
+    exp_order_lemma g e1 (e2-1);
+    from_naive_exp g e2;
+    assert (exp g e1 <= exp g (e2-1));
+    multiplication_order_lemma g 1 (exp g (e2-1));
+    assert (exp g e1 <= exp g (e2-1) * g);
+    exp_mul1 g (e2-1) 1
+  end
+
+val exp_order_lemma_strict: g:nat{g>1} -> e1:nat -> e2:nat{e1 < e2} -> Lemma
+  (exp g e1 < exp g e2)
+let rec exp_order_lemma_strict g e1 e2 =
+  if e2 = e1 then () else begin
+    exp_order_lemma g e1 (e2-1);
+    from_naive_exp g e2;
+    assert (exp g e1 <= exp g (e2-1));
+    multiplication_order_lemma g 1 (exp g (e2-1));
+    assert (exp g e1 <= exp g (e2-1) * g);
+    exp_mul1 g (e2-1) 1
+  end
+
 
 // Naive modular exp
 val nmexp: #n:big -> fe n -> e:nat -> Tot (fe n) (decreases e)
@@ -1948,12 +2001,8 @@ let pe_fact_lemma p e = ()
 
 val totient_prm: p:prm -> r:pos -> phi:nat{phi > 1}
 let totient_prm p r =
-  let res = exp p r - exp p (r-1) in
-  from_naive_exp p r;
-  from_naive_exp p (r-1);
-  multiplication_order_lemma_strict (exp p (r-1)) (exp p r) p;
-  multiplication_order_lemma_strict 1 p (exp p (r-1));
-  res
+  exp_sub p (r-1) r;
+  exp p r - exp p (r-1)
 
 val carm:
      f:factorisation{L.length f > 0}

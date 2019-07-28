@@ -183,8 +183,7 @@ val bn_exp:
     (requires fun h ->
       live h a /\ live h b /\ live h res /\
       disjoint a res /\ disjoint b res /\
-      issnat (exp (as_snat h a) (as_snat h b)) /\
-      v (nat_bytes_num (exp (as_snat h a) (as_snat h b))) < v aLen)
+      nat_fits (exp (as_snat h a) (as_snat h b)) aLen)
     (ensures  fun h0 _ h1 ->
       modifies1 res h0 h1 /\
       live h1 a /\ live h1 b /\ live h1 res /\
