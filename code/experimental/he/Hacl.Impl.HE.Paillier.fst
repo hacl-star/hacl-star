@@ -174,7 +174,7 @@ type proper_secret_raw h
 
         // This can be actually proven inplace, but it works slower then
         fexp #n2 g lambda > 0 /\
-        as_snat h l2inv = S.fermat_inverse_carm p q (S.bigl #n (fexp #n2 g lambda))))
+        as_snat h l2inv = S.fermat_inv_pq p q (S.bigl #n (fexp #n2 g lambda))))
 
 type proper_secret (#n2Len:bn_len_s) h (s:secret n2Len) =
   proper_secret_raw h (Sec?.p s) (Sec?.q s) (Sec?.n s) (Sec?.n2 s)
@@ -292,7 +292,7 @@ val fermat_inverse:
      (ensures fun h0 _ h1 ->
       modifies1 res h0 h1 /\
       as_snat h1 res =
-      S.fermat_inverse_carm (as_snat h1 p) (as_snat h1 q) (as_snat h1 a))
+      S.fermat_inv_pq (as_snat h1 p) (as_snat h1 q) (as_snat h1 a))
 let fermat_inverse #n2Len p q n n2 a res =
   bn_len_s_fits n2Len;
 
@@ -374,7 +374,7 @@ let to_secret #n2Len p q n n2 g =
 
   let h = FStar.HyperStack.ST.get () in
   assert (as_snat h x =
-          S.fermat_inverse_carm (as_snat h p) (as_snat h q)
+          S.fermat_inv_pq (as_snat h p) (as_snat h q)
           (S.bigl #(as_snat h n)
                    (fexp #(as_snat h n2) (as_snat h g) (as_snat h lambda))));
 

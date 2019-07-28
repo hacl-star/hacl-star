@@ -159,39 +159,35 @@ let roots_of_unity_mod_n #n x =
     1 + (x % n) * n;
   }
 
-// Carmichael's function
-val carm: p:prm -> q:prm -> l:fe (p*q){l <= (p-1) * (q-1) /\ l >= 1}
-let carm p q = lcm_less_mul (p-1) (q-1); lcm (p-1) (q-1)
-
-val carm_unit: p:prm -> q:prm -> Lemma
-  (isunit #(p*q) (carm p q) /\ is_gcd (carm p q) (p*q) 1)
-let carm_unit p q =
+val carm_pq_unit: p:prm -> q:prm{p <> q} -> Lemma
+  (isunit #(p*q) (carm_pq p q) /\ is_gcd (carm_pq p q) (p*q) 1)
+let carm_pq_unit p q =
   // Any divisor of p*q has form kp or kq, but (p-1)(q-1) has none
   // of this form.
   assume (gcd (p * q) ((p - 1) * (q - 1)) = 1);
 
   gcd_pq_lcm_lemma p q;
-  gcd_symm (p*q) (carm p q) 1;
-  inv_as_gcd1 #(p*q) (carm p q)
+  gcd_symm (p*q) (carm_pq p q) 1;
+  inv_as_gcd1 #(p*q) (carm_pq p q)
 
 // Elements of order nα for α = 1..λ.
-val in_base_order: p:prm -> q:prm -> g:fe ((p*q)*(p*q)){isunit g} -> Type0
+val in_base_order: p:prm -> q:prm{p <> q} -> g:fe ((p*q)*(p*q)){isunit g} -> Type0
 let in_base_order p q g =
   let r = mult_order g in
   let n = p * q in
-  r % n = 0 /\ (r / n > 0) /\ (r / n < carm p q)
+  r % n = 0 /\ (r / n > 0) /\ (r / n < carm_pq p q)
 
-val in_base: p:prm -> q:prm -> g:fe ((p*q)*(p*q)) -> Type0
+val in_base: p:prm -> q:prm{p <> q} -> g:fe ((p*q)*(p*q)) -> Type0
 let in_base p q g = g <> 0 /\ isunit g /\ in_base_order p q g
 
 // Being g ∈ B_α means being a unit in Z_{n^2} and having a proper order.
 val is_g: n:big -> g:fe (n*n) -> Type0
-let is_g n g = isunit g /\ (exists (p:prm) (q:prm). n = p * q /\ in_base p q g)
+let is_g n g = isunit g /\ (exists (p:prm) (q:prm{q<>p}). n = p * q /\ in_base p q g)
 
 type isg (n:big) = g:fe (n*n){is_g n g}
 
 // Simply move exists, though needs the fact that factorisation is unique
-val is_g_in_base: p:prm -> q:prm -> g:fe ((p*q)*(p*q)) -> Lemma
+val is_g_in_base: p:prm -> q:prm{p <> q} -> g:fe ((p*q)*(p*q)) -> Lemma
   (requires (is_g (p*q) g))
   (ensures (in_base p q g))
 let is_g_in_base p q g = admit ()
@@ -243,27 +239,26 @@ let np1_is_g #n =
   assert (r = n);
   multiple_division_lemma 1 n
 
-
-// This is a basic property of carmichael function.
-val euler_thm: p:prm -> q:prm -> w:fe (p*q) -> Lemma
-  (isunit w ==> fexp w (carm p q) = 1)
-let euler_thm _ _ _ = admit()
+// This is a basic property of carm_pqichael function.
+val euler_thm_pq: p:prm -> q:prm{p <> q} -> w:fe (p*q) -> Lemma
+  (isunit w ==> fexp w (carm_pq p q) = 1)
+let euler_thm_pq p q w = euler_thm (p * q) (pq_fact p q) (carm_pq p q) w
 
 // Slightly different version mentioned at p.224
-val euler_thm2: p:prm -> q:prm -> w:fen2 (p*q) -> Lemma
+val euler_thm_pq2: p:prm -> q:prm{p <> q} -> w:fen2 (p*q) -> Lemma
   (requires (isunit w \/ isunit (to_fe #(p*q) w)))
   (ensures (
-     fexp w (carm p q) % (p*q) = 1 /\
-     fexp w (carm p q) > 0))
-let euler_thm2 p q w =
+     fexp w (carm_pq p q) % (p*q) = 1 /\
+     fexp w (carm_pq p q) > 0))
+let euler_thm_pq2 p q w =
   let n = p * q in
 
   multiple_modulo_lemma n n;
   multiple_division_lemma n n;
   assert ((n*n)%n = 0);
   assert ((n*n)/n = n);
-  to_fe_fexp1 #(n*n) n w (carm p q);
-  assert (fexp (to_fe #n w) (carm p q) = fexp w (carm p q) % n);
+  to_fe_fexp1 #(n*n) n w (carm_pq p q);
+  assert (fexp (to_fe #n w) (carm_pq p q) = fexp w (carm_pq p q) % n);
 
   move_requires #(fen2 n) #(fun a -> isunit a)
       #(fun a -> isunit (to_fe #n a))
@@ -272,25 +267,25 @@ let euler_thm2 p q w =
 
   assert (isunit (to_fe #n w));
 
-  euler_thm p q (to_fe #n w);
-  assert (fexp w (carm p q) % (p*q) = 1)
+  euler_thm_pq p q (to_fe #n w);
+  assert (fexp w (carm_pq p q) % (p*q) = 1)
 
-// Carmichael-like thm, deals with cases modulo n^2
-val euler_thm3: p:prm -> q:prm -> w:fen2 (p*q) -> Lemma
+// Carm_Pqichael-like thm, deals with cases modulo n^2
+val euler_thm_pq3: p:prm -> q:prm{p <> q} -> w:fen2 (p*q) -> Lemma
   (requires isunit (to_fe #(p*q) w))
-  (ensures fexp w ((p*q)*carm p q) = 1)
-let euler_thm3 p q w =
+  (ensures fexp w ((p*q)*carm_pq p q) = 1)
+let euler_thm_pq3 p q w =
   let n:comp = p * q in
   let n2 = n * n in
 
-  euler_thm2 p q w;
+  euler_thm_pq2 p q w;
 
-  let f1 = fexp w (carm p q) in
+  let f1 = fexp w (carm_pq p q) in
   assert (f1 % n = 1);
   mod_prop n f1 1;
   assert (f1 = 1 + (f1 / n) * n);
-  fexp_exp w (carm p q) n;
-  assert (fexp w (n*carm p q) = fexp f1 n);
+  fexp_exp w (carm_pq p q) n;
+  assert (fexp w (n*carm_pq p q) = fexp f1 n);
   lemma_div_le_strict #n f1;
   assert (f1 / n < n);
   root_of_unity_prop #n (f1/n);
@@ -298,17 +293,17 @@ let euler_thm3 p q w =
   assert (fexp f1 n = 1)
 
 // Inverting an element of Z_n using fermat inverse theorem.
-val fermat_inverse_carm:
+val fermat_inv_pq:
      p:prm
-  -> q:prm
+  -> q:prm{p <> q}
   -> a:fe (p*q)
   -> b:fe (p*q){isunit a ==> (isunit b /\ a *% b = 1 /\ b = finv a)}
-let fermat_inverse_carm p q a =
+let fermat_inv_pq p q a =
   let n = p * q in
-  let b = fexp a (carm p q - 1) in
-  fexp_mul1 a (carm p q - 1) 1;
+  let b = fexp a (carm_pq p q - 1) in
+  fexp_mul1 a (carm_pq p q - 1) 1;
   fexp_one1 a;
-  euler_thm p q a;
+  euler_thm_pq p q a;
 
   finv_unique #n a b;
 
@@ -426,7 +421,7 @@ let encf_unit #n g x y = encf_unit_raw g x (lift y)
 
 val encf_inj_raw1:
      p:prm
-  -> q:prm
+  -> q:prm {p <> q}
   -> g:isg (p*q)
   -> x1:nat
   -> y1:fen2 (p*q) { isunit (shrink y1) }
@@ -434,7 +429,7 @@ val encf_inj_raw1:
   -> y2:fen2 (p*q)
   -> Lemma
   (requires (encf_raw g x1 y1 = encf_raw g x2 y2))
-  (ensures (let lambda = carm p q in
+  (ensures (let lambda = carm_pq p q in
             let r = mult_order g in
             let n = p * q in
        fexp g (r - x1%r + x2%r) *%
@@ -446,7 +441,7 @@ val encf_inj_raw1:
         fexp (y2 *% lift (finv (shrink y1))) (n*lambda) = 1)
    ))
 let encf_inj_raw1 p q g x1 y1' x2 y2' =
-  let lambda = carm p q in
+  let lambda = carm_pq p q in
   let n = p * q in
   let y1:fenu n = shrink y1' in
   let y2:fe n = shrink y2' in
@@ -524,7 +519,7 @@ let divides_over_higher_mod n alpha x1 x2 =
 
 val encf_inj_raw2:
      p:prm
-  -> q:prm
+  -> q:prm {p <> q}
   -> g:isg (p*q)
   -> x1:nat
   -> y1:fen2 (p*q) { isunit (shrink y1) }
@@ -534,16 +529,16 @@ val encf_inj_raw2:
   (requires (encf_raw g x1 y1 = encf_raw g x2 y2))
   (ensures (let r = mult_order g in
 
-    nat_times_nat_is_nat (r - (x1%r) + (x2%r)) (carm p q);
+    nat_times_nat_is_nat (r - (x1%r) + (x2%r)) (carm_pq p q);
 
-    fexp g ((r - (x1%r) + (x2%r)) * (carm p q)) = 1 /\
+    fexp g ((r - (x1%r) + (x2%r)) * (carm_pq p q)) = 1 /\
     (x2 - x1) % (p*q) = 0 /\
     (x2 % r - x1 % r) % (p*q) = 0))
 let encf_inj_raw2 p q g x10 y1' x20 y2' =
 
   encf_inj_raw1 p q g x10 y1' x20 y2';
 
-  let lambda = carm p q in
+  let lambda = carm_pq p q in
   let n = p * q in
   let r = mult_order g in
   g_pow_order_reduc g x10;
@@ -566,9 +561,9 @@ let encf_inj_raw2 p q g x10 y1' x20 y2' =
     fexp_mul2 y2' fy' (n*lambda);
     assert (fexp (y2' *% fy') (n*lambda) = fexp y2' (n*lambda) *% fexp fy' (n*lambda));
 
-    euler_thm3 p q y2';
+    euler_thm_pq3 p q y2';
     encf_y_unit_raw y1';
-    euler_thm3 p q fy';
+    euler_thm_pq3 p q fy';
     assert (fexp (y2' *% fy') (n*lambda) = 1);
     mul_one (fexp g ((r - x1 + x2) * lambda))
     end in
@@ -585,7 +580,7 @@ let encf_inj_raw2 p q g x10 y1' x20 y2' =
   divides_prod alpha n ((r - x1 + x2) * lambda);
   assert (divides n ((r - x1 + x2) * lambda));
 
-  carm_unit p q;
+  carm_pq_unit p q;
   divides_exactly_one_multiple n (r - x1 + x2) lambda;
   assert (divides n (r - x1 + x2));
 
@@ -884,15 +879,15 @@ let bigl_prop #n u =
   assert(u % n = 1 ==> (r = 0 <==> u = 1))
 
 // Part of the proof of Lemma 10.
-val w_lambda_representation: p:prm -> q:prm -> w:fen2u (p*q) -> Lemma
+val w_lambda_representation: p:prm -> q:prm{p <> q} -> w:fen2u (p*q) -> Lemma
   (let n = p * q in
    np1_is_g #n;
    let a = res_class np1 w in
-   let lm:fe n = carm p q in
+   let lm:fe n = carm_pq p q in
    fexp w lm = 1 + ((a*lm)%n)*n)
 let w_lambda_representation p q w =
   let n:comp = p * q in
-  let lambda:pos = carm p q in
+  let lambda:pos = carm_pq p q in
   np1_is_g #n;
   let (a,b) = encf_inv (np1 #n) w in
 
@@ -912,7 +907,7 @@ let w_lambda_representation p q w =
     (fexp (fexp np1 a) lambda) *% (fexp (fexp b' n) lambda);
   == { fexp_exp b' n lambda }
     (fexp (fexp np1 a) lambda) *% (fexp b' (n*lambda));
-  == { euler_thm3 p q b' }
+  == { euler_thm_pq3 p q b' }
     fexp (fexp np1 a) lambda *% one;
   == { mul_one (fexp (fexp (np1 #n) a) lambda) }
     fexp (fexp np1 a) lambda;
@@ -923,16 +918,16 @@ let w_lambda_representation p q w =
   }
 
 // Lemma 10 in full.
-val bigl_w_l_lemma: p:prm -> q:prm -> w:fen2u (p*q) -> Lemma
+val bigl_w_l_lemma: p:prm -> q:prm{p <> q} -> w:fen2u (p*q) -> Lemma
   (ensures (let n = p * q in
             np1_is_g #n;
             let x = res_class np1 w in
-            let lm:fe n = carm p q in
-            euler_thm2 p q w;
+            let lm:fe n = carm_pq p q in
+            euler_thm_pq2 p q w;
             bigl (fexp w lm) = lm *% x))
 let bigl_w_l_lemma p q w =
   let n:comp = p * q in
-  let lambda:fe n = carm p q in
+  let lambda:fe n = carm_pq p q in
   np1_is_g #n;
   let a:fe n = res_class (np1 #n) w in
   w_lambda_representation p q w;
@@ -956,10 +951,10 @@ let bigl_w_l_lemma p q w =
 
 // Function that implements the division L(w^lambda)/L(g^lambda), see
 // proof of the theorem 9.
-val l1_div_l2: p:prm -> q:prm -> w:fen2 (p*q) -> g:isg (p*q) -> fe (p*q)
+val l1_div_l2: p:prm -> q:prm{p <> q} -> w:fen2 (p*q) -> g:isg (p*q) -> fe (p*q)
 let l1_div_l2 p q w g =
   let n = p * q in
-  let lambda: fe n = carm p q in
+  let lambda: fe n = carm_pq p q in
   let l1arg = fexp w lambda in
   // If w is not guaranteed to be unit, then we could
   // possibly get 0, which is not a proper input to L.
@@ -971,19 +966,19 @@ let l1_div_l2 p q w g =
     g_pow_isunit g lambda; isunit_nonzero (fexp g lambda);
     let l2:fe n = bigl (fexp g lambda) in
 
-    l1 *% fermat_inverse_carm p q l2
+    l1 *% fermat_inv_pq p q l2
   end
 
 
-val l1_div_l2_of_unit_w: p:prm -> q:prm -> w:fen2u (p*q) -> g:isg (p*q) -> Lemma
-  (let lambda = carm p q in
+val l1_div_l2_of_unit_w: p:prm -> q:prm{p <> q} -> w:fen2u (p*q) -> g:isg (p*q) -> Lemma
+  (let lambda = carm_pq p q in
    isunit (fexp w lambda) /\ (fexp w lambda > 0) /\
    isunit (fexp g lambda) /\ (fexp g lambda > 0) /\
    (isunit_nonzero (fexp g lambda);
     isunit (bigl (fexp g lambda))))
 let l1_div_l2_of_unit_w p q w g =
   let n = p * q in
-  let lambda:fe n = carm p q in
+  let lambda:fe n = carm_pq p q in
   let exp_is_unit (a:fen2u n): Lemma (isunit (fexp a lambda)) =
     begin
     g_pow_isunit a lambda;
@@ -1000,7 +995,7 @@ let l1_div_l2_of_unit_w p q w g =
     np1_is_g #n;
     bigl_w_l_lemma p q g;
     assert (bigl (fexp g lambda) = lambda *% res_class np1 g);
-    carm_unit p q;
+    carm_pq_unit p q;
     res_class_inverse np1 g;
     isunit_prod lambda (res_class np1 g)
     end in
@@ -1008,12 +1003,12 @@ let l1_div_l2_of_unit_w p q w g =
   bigl_is_unit ()
 
 
-val fexp_w_lambda_is_one_mod_n: p:prm -> q:prm -> w:fen2u (p*q) -> Lemma
-  (let lambda = carm p q in fexp w lambda % (p*q) = 1)
+val fexp_w_lambda_is_one_mod_n: p:prm -> q:prm{p <> q} -> w:fen2u (p*q) -> Lemma
+  (let lambda = carm_pq p q in fexp w lambda % (p*q) = 1)
 let fexp_w_lambda_is_one_mod_n p q w =
   let n:comp = p * q in
   one_mod_n n;
-  let lambda:fe n = carm p q in
+  let lambda:fe n = carm_pq p q in
   np1_is_g #n;
   let a:fe n = res_class (np1 #n) w in
   w_lambda_representation p q w;
@@ -1027,11 +1022,11 @@ let fexp_w_lambda_is_one_mod_n p q w =
   lemma_mod_twice 1 n;
   assert (fexp w lambda % n = 1)
 
-val l1_div_l2_is_wg: p:prm -> q:prm -> w:fen2u (p*q) -> g:isg (p*q) -> Lemma
+val l1_div_l2_is_wg: p:prm -> q:prm{p <> q} -> w:fen2u (p*q) -> g:isg (p*q) -> Lemma
   (l1_div_l2 p q w g = res_class g w)
 let l1_div_l2_is_wg p q w g =
   let n = p * q in
-  let lambda: fe n = carm p q in
+  let lambda: fe n = carm_pq p q in
 
   np1_is_g #n;
   let r_w = res_class #n np1 w in
@@ -1062,7 +1057,7 @@ let l1_div_l2_is_wg p q w g =
   finv_mul r_w r_g r_z;
   assert (r_w *% finv r_g = r_z);
 
-  carm_unit p q;
+  carm_pq_unit p q;
   let lem1 (): Lemma (isunit l2 /\ finv l2 = finv lambda *% finv r_g) =
     isunit_prod lambda r_g in
 
@@ -1087,7 +1082,7 @@ let l1_div_l2_is_wg p q w g =
 
 type secret =
   | Secret: p:prm
-         -> q:prm{q <> p}
+         -> q:prm{p <> q}
          -> g:isg (p*q)
          -> secret
 
@@ -1115,7 +1110,7 @@ let encrypt pub r m = encrypt_direct (Public?.g pub) r m
 
 val decrypt_direct:
      p:prm
-  -> q:prm
+  -> q:prm{p <> q}
   -> g:isg (p * q)
   -> c:ciphertext (p * q)
   -> m:fe (p * q)

@@ -72,12 +72,12 @@ let isprm p = p >= 3 /\ p % 2 = 1 /\ (forall (x:nat{x>1&&x<p}). ~(divides x p))
 type prm = p:big{isprm p}
 
 val iscomp: n:big -> Type0
-let iscomp n = exists (p:prm) (q:prm). n = p * q
+let iscomp n = exists (p:prm) (q:prm{q<>p}). n = p * q
 
 type comp = n:big{iscomp n}
 
 // In some cases F* can't decide the existential description
-val mkcomp: p:prm -> q:prm -> comp
+val mkcomp: p:prm -> q:prm{p <> q} -> comp
 let mkcomp p q = p * q
 
 // These two functions are useful for working with pair of factors.
@@ -142,12 +142,12 @@ let exists_intro_2_dep #a #b p w1 w2 =
 val comp_elim:
      n:comp
   -> #goal:Type0
-  -> f:(p:prm -> q:prm{p*q = n} -> squash goal)
+  -> f:(p:prm -> q:prm{p <> q /\ p*q = n} -> squash goal)
   -> Lemma goal
 let comp_elim n #goal f =
   exists_elim goal #(x:(tuple2 prm prm))
-      #(fun x -> fst x * snd x = n)
-      (ex_pair #prm #prm (fun p q -> p * q = n))
+      #(fun x -> fst x <> snd x /\ fst x * snd x = n)
+      (ex_pair #prm #prm (fun p q -> p <> q && p * q = n))
       (fun x -> f (fst x) (snd x))
 
 val modulo_mul_distributivity: a:int -> b:int -> n:pos ->
@@ -885,7 +885,24 @@ let mul4_assoc #n a b c d =
   mul_assoc c b d;
   mul_assoc a c (b *% d)
 
-// Naive exp
+// Non-modular exp
+val exp: nat -> e:nat -> Tot nat (decreases e)
+let rec exp g e = match e with
+  | 0 -> 1
+  | 1 -> g
+  | _ -> g * exp g (e-1)
+
+val exp_bigger_than_base: g:nat -> e:nat -> Lemma (g > 0 /\ e > 0 ==> exp g e >= g)
+  [SMTPat (exp g e)]
+let exp_bigger_than_base g0 e0 =
+  let rec go g e: Lemma (requires (g>0/\e>0)) (ensures (exp g e >= g)) =
+      if e = 1 then () else go g (e-1) in
+  move_requires (go g0) e0
+
+val pos_exp_pos_is_pos: a:nat -> b:nat -> Lemma (a > 0 /\ b > 0 ==> exp a b > 0)
+let pos_exp_pos_is_pos a0 b0 = exp_bigger_than_base a0 b0
+
+// Naive modular exp
 val nexp: #n:big -> fe n -> e:nat -> Tot (fe n) (decreases e)
 let rec nexp #n g e = match e with
   | 0 -> 1
@@ -1062,10 +1079,6 @@ let rec to_fe_fexp1 #n k g e =
   fexp_eq_nexp g e;
   fexp_eq_nexp (to_fe #(n/k) g) e
 
-// Probably needs slightly more involved machinery to prove it
-val flt: #p:prm -> a:fe p{a>0} -> Lemma
-  (fexp a (p-1) = 1)
-let flt #p _ = admit()
 
 (* Inverses *)
 
@@ -1140,22 +1153,34 @@ let inv_as_gcd #n a =
 
 #reset-options "--z3rlimit 50"
 
-val finv0: #n:big -> a:fe n ->
-  Tot (b:fe n{ (isunit a <==> b *% a = one) /\
-               (~(isunit a) <==> b = 0)} )
+val isunit_in_prime_field: #p:prm -> a:fe p{a > 0} -> Lemma (isunit a)
+let isunit_in_prime_field #p a =
+  gcd_with_prime p a;
+  inv_as_gcd1 a
+
+val finv0: #n:big -> a:fe n -> b:fe n
 let finv0 #n a =
   if a = 0 then 0 else
   let (g,u,v) = ex_eucl a n in
+  if g <> 1 then 0 else to_fe #n u
+
+val finv0_prop: #n:big -> a:fe n -> Lemma
+  (let b = finv0 #n a in
+   (isunit a <==> b *% a = one) /\
+   (~(isunit a) <==> b = 0))
+  [SMTPat (finv0 #n a)]
+let finv0_prop #n a =
+  if a = 0 then () else
+  let (g,u,v) = ex_eucl a n in
   assert (gcd a n = g);
   inv_as_gcd a;
-  if g <> 1 then 0 else begin
+  if g <> 1 then () else begin
     modulo_distributivity (u*a) (v*n) n;
     multiple_modulo_lemma v n;
     lemma_mod_twice (u * a) n;
     to_fe_idemp #n 1;
     to_fe_idemp a;
-    to_fe_mul #n u a;
-    to_fe #n u
+    to_fe_mul #n u a
   end
 
 #reset-options
@@ -1261,48 +1286,12 @@ let divides_exactly_one_multiple a b c =
   inv_as_gcd1 #a c';
   mul_zero_either  c' b'
 
+(*** Predicate on lists, all_distinct ***)
+
 // nat less or equal than
 // Same as fe n, but for nat (not for big)
 type nlet (n:nat) = x:nat{x < n}
 
-type all_distinct (#a:eqtype) (l:list a) =
-  forall (i:nlet (L.length l)) (j:nlet (L.length l){i <> j}). L.index l i <> L.index l j
-
-type all_distinct2 (#a:eqtype) (l:list a) =
-  forall (i:nlet (L.length l)) (j:nlet (L.length l){i > j}). L.index l i <> L.index l j
-
-val distinct_defs_equiv: #a:eqtype -> l:list a -> Lemma
-  (all_distinct l <==> all_distinct2 l)
-let distinct_defs_equiv #a l =
-  let n = L.length l in
-  let l_right (): Lemma (requires (all_distinct l)) (ensures (all_distinct2 l)) = begin
-    let l1 (i:nlet n): Lemma (forall (j:nlet n{i <> j}). L.index l i <> L.index l j) = () in
-    let l2 (i:nlet n): Lemma (forall (j:nlet n{i > j}). L.index l i <> L.index l j) = l1 i in
-    forall_intro l2
-  end in
-
-  let l_left (): Lemma (requires (all_distinct2 l)) (ensures (all_distinct l)) = begin
-    let l1 (i:nlet n) (j:nlet n{i > j}): Lemma (L.index l i <> L.index l j) = () in
-    let l2 (i:nlet n): Lemma (forall (j:nlet n{i <> j}). L.index l i <> L.index l j) =
-      let l22 (j:nlet n{j <> i}): Lemma (L.index l i <> L.index l j) =
-        if i > j then l1 i j else l1 j i
-      in forall_intro l22
-    in forall_intro l2
-  end in
-
-  move_requires l_right ();
-  move_requires l_left ()
-
-// Fstar struggles to infer some basic statments sometimes.
-val all_distinct_expand: #a:eqtype -> l:list a -> Lemma
-  (all_distinct l <==>
-   (forall (i:nlet (L.length l)) (j:nlet (L.length l){i <> j}). L.index l i <> L.index l j))
-let all_distinct_expand #a l = ()
-
-val all_distinct_negation: #a:eqtype -> l:list a -> Lemma
-  (~(all_distinct l) <==>
-   (exists (i:nlet (L.length l)) (j:nlet (L.length l){i <> j}). L.index l i = L.index l j))
-let all_distinct_negation #a l = ()
 
 val cons_shifts_index_value: #a:eqtype -> x:a -> l:list a -> Lemma
   (ensures (forall (i:nat{i < L.length l}). L.index (x::l) (i+1) = L.index l i))
@@ -1334,6 +1323,77 @@ let rec map_preserves_order #a #b p l = match l with
 
       forall_intro lemma2
     end
+
+
+type forall_l (#a:eqtype) (l:list a) (p: a -> Type0) =
+  forall (i:nlet (L.length l)). p (L.index l i)
+
+type forall_l2 (#a:eqtype) (l:list a) (p: a -> a -> Type0) =
+  forall (i:nlet (L.length l)) (j:nlet (L.length l){i <> j}). p (L.index l i) (L.index l j)
+
+// Weaker definition in general, but same for the symmetric p
+type forall_l2' (#a:eqtype) (l:list a) (p: a -> a -> Type0) =
+  forall (i:nlet (L.length l)) (j:nlet (L.length l){i > j}). p (L.index l i) (L.index l j)
+
+type pred_symm (#a:eqtype) (p:a -> a -> Type0) = forall (x:a) (y:a). p x y <==> p y x
+
+// l2' is weaker than l2
+val forall_l2_to_weaker: #a:eqtype -> l:list a -> p:(a -> a -> Type0) -> Lemma
+  (forall_l2 l p ==> forall_l2' l p)
+let forall_l2_to_weaker #a l p =
+  let n = L.length l in
+
+  let l_right (): Lemma (requires (forall_l2 l p)) (ensures (forall_l2' l p)) = begin
+    let l1 (i:nlet n): Lemma (forall (j:nlet n{i <> j}). p (L.index l i) (L.index l j)) = () in
+    let l2 (i:nlet n): Lemma (forall (j:nlet n{i > j}). p (L.index l i) (L.index l j)) = l1 i in
+    forall_intro l2
+  end in
+
+  move_requires l_right ()
+
+// In case of symm function, they are equivalent
+val forall_l2_symm: #a:eqtype -> l:list a -> p:(a -> a -> Type0){pred_symm #a p} -> Lemma
+  (forall_l2 l p <==> forall_l2' l p)
+let forall_l2_symm #a l p =
+  let n = L.length l in
+
+  forall_l2_to_weaker l p;
+
+  let l_left (): Lemma (requires (forall_l2' l p)) (ensures (forall_l2 l p)) = begin
+    let l1 (i:nlet n) (j:nlet n{i > j}): Lemma (p (L.index l i) (L.index l j)) = () in
+    let l2 (i:nlet n): Lemma (forall (j:nlet n{i <> j}). p (L.index l i) (L.index l j)) =
+      let l22 (j:nlet n{j <> i}): Lemma (p (L.index l i) (L.index l j)) =
+        if i > j then l1 i j else l1 j i
+      in forall_intro l22
+    in forall_intro l2
+  end in
+
+  move_requires l_left ()
+
+val forall_l2_tail: #a:eqtype -> l:list a{L.length l > 0} -> p:(a -> a -> Type0) -> Lemma
+  (requires (forall_l2 l p))
+  (ensures (forall_l2 (L.tail l) p))
+let forall_l2_tail #a l p =
+  let (x::xs) = l in
+  cons_shifts_index_value x xs
+
+type all_distinct (#a:eqtype) (l:list a) = forall_l2 l (fun x y -> x <> y)
+type all_distinct2 (#a:eqtype) (l:list a) = forall_l2' l (fun x y -> x <> y)
+
+val distinct_defs_equiv: #a:eqtype -> l:list a -> Lemma
+  (all_distinct l <==> all_distinct2 l)
+let distinct_defs_equiv #a l = forall_l2_symm l (fun x y -> x <> y)
+
+// Fstar struggles to infer some basic statments sometimes.
+val all_distinct_expand: #a:eqtype -> l:list a -> Lemma
+  (all_distinct l <==>
+   (forall (i:nlet (L.length l)) (j:nlet (L.length l){i <> j}). L.index l i <> L.index l j))
+let all_distinct_expand #a l = ()
+
+val all_distinct_negation: #a:eqtype -> l:list a -> Lemma
+  (~(all_distinct l) <==>
+   (exists (i:nlet (L.length l)) (j:nlet (L.length l){i <> j}). L.index l i = L.index l j))
+let all_distinct_negation #a l = ()
 
 // int in between
 type ibtw (a:int) (b:int{b >= a}) = x:int{x >= a /\ x <= b}
@@ -1424,6 +1484,9 @@ let equiv_foralls #n g =
   let l0 (i:pos{i<=n}) (j:pos{j<=n/\i<>j}): Lemma (fexp g i <> fexp g j) = () in
   let l1 (i:nlet n) (j:nlet n{i<>j}): Lemma (fexp g (i+1) <> fexp g (j+1)) = l0 (i+1) (j+1) in
   forall_intro_2 l1
+
+
+(*** Unit powers collision, mult_order ***)
 
 val replace_quantor_var: #a:eqtype -> #b:eqtype -> p:(x:a -> y:a{x <> y} -> bool) -> Lemma
   (requires (a == b /\ (forall (x:a) (y:a{x <> y}).p x y)))
@@ -1745,3 +1808,97 @@ let mult_order_of_fexp #n g e1 e2 =
   forall_intro l'
 
 #reset-options
+
+
+(*** Factorisation, euler's thm ***)
+
+// Prime power factorisation
+type factorisation =
+  l:list (tuple2 prm pos)
+  { forall_l2 l (fun (p1,_) (p2,_) -> p1 <> p2) }
+
+val f_combine: factorisation -> pos
+let rec f_combine l = match l with
+  | [] -> 1
+  | ((p,e)::xs) ->
+    forall_l2_tail l (fun (p1,_) (p2,_) -> p1 <> p2);
+    exp p e * f_combine xs
+
+val p_fact: p:prm -> f:factorisation{L.length f = 1}
+let p_fact p = [(p,1)]
+
+val p_fact_lemma: p:prm -> Lemma
+  (f_combine (p_fact p) = p)
+  [SMTPat (p_fact p)]
+let p_fact_lemma p = ()
+
+val pq_fact: p:prm -> q:prm{p<>q} -> f:factorisation{L.length f = 2}
+let pq_fact p q = [(p,1);(q,1)]
+
+val pq_fact_lemma: p:prm -> q:prm{p<>q} -> Lemma
+  (f_combine (pq_fact p q) = p*q)
+  [SMTPat (pq_fact p q)]
+let pq_fact_lemma p q = ()
+
+val pe_fact: p:prm -> e:pos -> f:factorisation{L.length f = 1}
+let pe_fact p e = [(p,e)]
+
+val pe_fact_lemma: p:prm -> e:pos -> Lemma
+  (f_combine (pe_fact p e) = exp p e)
+  [SMTPat (pq_fact p e)]
+let pe_fact_lemma p e = ()
+
+val totient_prm: p:prm -> r:pos -> phi:pos{phi > 1}
+let totient_prm p r = exp p r - exp p (r-1)
+
+val carm:
+     f:factorisation{L.length f > 0}
+  -> pos
+let rec carm f =
+  forall_l2_tail f (fun (p1,_) (p2,_) -> p1 <> p2);
+  let ((p,r)::xs) = f in
+  let phi = totient_prm p r in
+  let cur =
+         if (p % 2 = 0 && p > 4)
+         then phi / 2
+         else phi
+  in if xs = [] then cur else lcm cur (carm xs)
+
+val carm_p: p:prm -> c:fe p{c >= 1 /\ carm [(p,1)] = c }
+let carm_p p = p - 1
+
+val carm_p_is_carm: p:prm -> Lemma
+  (carm_p p = carm [(p,1)])
+  [SMTPat (carm_p p)]
+let carm_p_is_carm p = ()
+
+val carm_pq: p:prm -> q:prm{p <> q} -> l:fe (p*q){l <= (p-1) * (q-1) /\ l >= 1}
+let carm_pq p q = lcm_less_mul (p-1) (q-1); lcm (p-1) (q-1)
+
+val carm_pq_is_carm: p:prm -> q:prm{p <> q} -> Lemma
+  (carm_pq p q =  carm (pq_fact p q))
+let carm_pq_is_carm p q = ()
+
+val carm_pe: p:prm -> e:pos -> l:fe (exp p e){l <= exp p e /\ l >= 1}
+let carm_pe p e =
+  let phi = exp p e - exp p (e-1) in
+  if (p % 2 = 0 && p > 4) then phi / 2 else phi
+
+val carm_pe_is_carm: p:prm -> e:pos -> Lemma
+  (carm_pe p e =  carm (pe_fact p e))
+let carm_pe_is_carm p q = ()
+
+// This is a basic property of carmichael function.
+val euler_thm:
+     n:big
+  -> f:factorisation{f_combine f = n}
+  -> cm:pos{cm = carm f}
+  -> a:fe n
+  -> Lemma
+  (isunit a ==> fexp a cm = 1)
+let euler_thm _ _ _ = admit()
+
+val flt: #p:prm -> a:fe p{a>0} -> Lemma (fexp a (p-1) = 1)
+let flt #p a =
+  isunit_in_prime_field a;
+  euler_thm p [(p,1)] (p-1) a
