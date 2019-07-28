@@ -43,10 +43,10 @@ val compute_iv
 
     is_aes_key_LE a (Ghost.reveal key) /\
     hkeys_reqs_pub (le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h hkeys_b)))
-      (reverse_bytes_quad32 (reverse_bytes_quad32 (aes_encrypt_LE a (Ghost.reveal key) (Mkfour 0 0 0 0))))
+      (reverse_bytes_quad32 (aes_encrypt_LE a (Ghost.reveal key) (Mkfour 0 0 0 0)))
   )
   (ensures fun h0 _ h1 ->
     B.modifies (B.loc_buffer j0_b `B.loc_union` B.loc_buffer extra_b) h0 h1 /\
     le_bytes_to_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h1 j0_b)) ==
-      compute_iv_BE (reverse_bytes_quad32 (aes_encrypt_LE a (Ghost.reveal key) (Mkfour 0 0 0 0)))
+      compute_iv_BE (aes_encrypt_LE a (Ghost.reveal key) (Mkfour 0 0 0 0))
                     (seq_uint8_to_seq_nat8 (B.as_seq h0 iv_b)))
