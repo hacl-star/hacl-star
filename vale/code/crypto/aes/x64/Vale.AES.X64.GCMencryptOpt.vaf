@@ -1607,7 +1607,7 @@ procedure gcm_blocks_stdcall(
         ghost tag_b:buffer128,
 
         ghost key:seq(nat32))
-    //{:public}
+    {:public}
     {:quick exportOnly}
     {:frame false}
     {:exportSpecs}
@@ -1871,8 +1871,8 @@ procedure compute_iv_stdcall(
         ghost hkeys_b:buffer128
         )
     {:quick}
-    //{:public}
-    //{:exportSpecs}
+    {:public}
+    {:exportSpecs}
     lets
         iv_ptr    :=    if win then rcx else rdi;
         bytes_reg :=    if win then rdx else rsi;
