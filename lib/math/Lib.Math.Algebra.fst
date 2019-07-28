@@ -885,199 +885,297 @@ let mul4_assoc #n a b c d =
   mul_assoc c b d;
   mul_assoc a c (b *% d)
 
-// Non-modular exp
-val exp: nat -> e:nat -> Tot nat (decreases e)
-let rec exp g e = match e with
+(*** Exponents ***)
+
+// Naive exp
+val nexp: nat -> e:nat -> Tot nat (decreases e)
+let rec nexp g e = match e with
   | 0 -> 1
   | 1 -> g
-  | _ -> g * exp g (e-1)
+  | _ -> g * nexp g (e-1)
+
+val nexp_bigger_than_base: g:nat -> e:nat -> Lemma (g > 0 /\ e > 0 ==> nexp g e >= g)
+  [SMTPat (nexp g e)]
+let nexp_bigger_than_base g0 e0 =
+  let rec go g e: Lemma (requires (g>0/\e>0)) (ensures (nexp g e >= g)) =
+      if e = 1 then () else go g (e-1) in
+  move_requires (go g0) e0
+
+val nexp_eq_arg1: g1:nat -> g2:nat -> e:nat -> Lemma
+  (requires (g1 = g2))
+  (ensures (nexp g1 e = nexp g2 e))
+let nexp_eq_arg1 _ _ _ = ()
+
+val nexp_zero: e:pos -> Lemma
+  (nexp 0 e = 0)
+let rec nexp_zero e = match e with
+  | 1 -> ()
+  | _ -> nexp_zero (e-1)
+
+val nexp_one1: g:pos -> Lemma
+  (ensures (nexp g one = g))
+  [SMTPat (nexp g one)]
+let nexp_one1 _ = ()
+
+val nexp_one2: e:nat -> Lemma
+  (ensures (nexp one e = one))
+  [SMTPat (nexp one e)]
+let rec nexp_one2 e = match e with
+  | 0 -> ()
+  | _ ->  nexp_one2 (e-1)
+
+#reset-options
+
+val nexp_mul1: g:nat -> e1:nat -> e2:nat -> Lemma
+  (nexp g e1 * nexp g e2 = nexp g (e1 + e2))
+let rec nexp_mul1 g e1 e2 = match e2 with
+  | 0 -> assert(nexp g e2 = one)
+  | 1 -> assert(nexp g e2 = g)
+  | _ -> nexp_mul1 g e1 (e2-1);
+         swap_mul (nexp g (e2 - 1)) g;
+         swap_mul (nexp g (e1 + e2 - 1)) g;
+         paren_mul_right (nexp g e1) (nexp g (e2-1)) g
+
+val mul4_assoc_nomod: a:nat -> b:nat -> c:nat -> d:nat -> Lemma
+  ((a * b) * (c * d) = (a * c) * (b * d))
+let mul4_assoc_nomod a b c d =
+  let mul_assoc_nomod x y z = paren_mul_right x y z; paren_mul_left x y z in
+  mul_assoc_nomod a b (c * d);
+  mul_assoc_nomod b c d;
+  swap_mul b c;
+  mul_assoc_nomod c b d;
+  mul_assoc_nomod a c (b * d)
+
+val nexp_mul2: g1:nat -> g2:nat -> e:nat -> Lemma
+  (ensures (nexp (g1 * g2) e = nexp g1 e * nexp g2 e))
+  (decreases e)
+let rec nexp_mul2 g1 g2 e = match e with
+  | 0 -> ()
+  | 1 -> ()
+  | _ ->
+    nexp_mul2 g1 g2 (e-1);
+    mul4_assoc_nomod g1 g2 (nexp g1 (e-1)) (nexp g2 (e-1))
+
+val nexp_exp: g:nat -> e1:nat -> e2:nat -> Lemma
+  (ensures ((nexp (nexp g e1) e2) = (nexp g (e1 * e2))))
+  (decreases e2)
+let rec nexp_exp g e1 e2 = match e2 with
+  | 0 -> if (nexp g e1) = 0 then () else nexp_zero (nexp g e1)
+  | _ -> begin
+    nexp_mul1 g e1 (e1 * e2 - e1);
+    distributivity_sub_right e1 e2 1;
+    nexp_exp g e1 (e2 - 1)
+  end
+
+val exp: nat -> e:nat -> Tot nat (decreases e)
+let rec exp g e =
+  if e = 0 then 1
+  else if e = 0 then g
+  else
+     if e % 2 = 0
+     then exp (g * g) (e / 2)
+     else exp (g * g) ((e - 1) / 2) * g
+
+val from_naive_exp: g:nat -> e:nat -> Lemma
+  (ensures (nexp g e = exp g e)) (decreases e)
+let rec from_naive_exp g e = match e with
+  | 0 -> ()
+  | 1 -> ()
+  | _ ->
+    if e % 2 = 0
+    then begin
+      from_naive_exp (g * g) (e/2);
+      nexp_exp g 2 (e/2)
+    end
+    else begin
+      from_naive_exp (g * g) ((e-1)/2);
+      nexp_exp g 2 ((e-1)/2);
+      nexp_mul1 g (((e-1)/2)*2) 1
+    end
 
 val exp_bigger_than_base: g:nat -> e:nat -> Lemma (g > 0 /\ e > 0 ==> exp g e >= g)
   [SMTPat (exp g e)]
 let exp_bigger_than_base g0 e0 =
-  let rec go g e: Lemma (requires (g>0/\e>0)) (ensures (exp g e >= g)) =
-      if e = 1 then () else go g (e-1) in
-  move_requires (go g0) e0
+  nexp_bigger_than_base g0 e0;
+  from_naive_exp g0 e0
 
-val pos_exp_pos_is_pos: a:nat -> b:nat -> Lemma (a > 0 /\ b > 0 ==> exp a b > 0)
-let pos_exp_pos_is_pos a0 b0 = exp_bigger_than_base a0 b0
 
 // Naive modular exp
-val nexp: #n:big -> fe n -> e:nat -> Tot (fe n) (decreases e)
-let rec nexp #n g e = match e with
+val nmexp: #n:big -> fe n -> e:nat -> Tot (fe n) (decreases e)
+let rec nmexp #n g e = match e with
   | 0 -> 1
   | 1 -> g
-  | _ -> g *% nexp g (e-1)
+  | _ -> g *% nmexp g (e-1)
 
-val nexp_eq_arg1: #n:big -> g1:fe n -> g2:fe n -> e:nat -> Lemma
+val nmexp_eq_arg1: #n:big -> g1:fe n -> g2:fe n -> e:nat -> Lemma
   (requires (g1 = g2))
-  (ensures (nexp g1 e = nexp g2 e))
-let nexp_eq_arg1 #n _ _ _ = ()
+  (ensures (nmexp g1 e = nmexp g2 e))
+let nmexp_eq_arg1 #n _ _ _ = ()
 
-val nexp_zero: #n:big -> e:pos -> Lemma
-  (nexp #n 0 e = 0)
-let rec nexp_zero #n e = match e with
+val nmexp_zero: #n:big -> e:pos -> Lemma
+  (nmexp #n 0 e = 0)
+let rec nmexp_zero #n e = match e with
   | 1 -> ()
-  | _ -> nexp_zero #n (e-1)
+  | _ -> nmexp_zero #n (e-1)
 
-val nexp_one1: #n:big -> g:fe n -> Lemma
-  (ensures (nexp g one = g))
-  [SMTPat (nexp g one)]
-let nexp_one1 #n _ = ()
+val nmexp_one1: #n:big -> g:fe n -> Lemma
+  (ensures (nmexp g one = g))
+  [SMTPat (nmexp g one)]
+let nmexp_one1 #n _ = ()
 
-val nexp_one2: #n:big -> e:nat -> Lemma
-  (ensures (nexp #n one e = one))
-  [SMTPat (nexp #n one e)]
-let rec nexp_one2 #n e = match e with
+val nmexp_one2: #n:big -> e:nat -> Lemma
+  (ensures (nmexp #n one e = one))
+  [SMTPat (nmexp #n one e)]
+let rec nmexp_one2 #n e = match e with
   | 0 -> ()
-  | _ ->  nexp_one2 #n (e-1)
+  | _ ->  nmexp_one2 #n (e-1)
 
-val nexp_mul1: #n:big -> g:fe n -> e1:nat -> e2:nat -> Lemma
-  (nexp g e1 *% nexp g e2 = nexp g (e1 + e2))
-let rec nexp_mul1 #n g e1 e2 = match e2 with
-  | 0 -> assert(nexp g e2 = one)
-  | 1 -> assert(nexp g e2 = g)
-  | _ -> nexp_mul1 g e1 (e2-1)
+val nmexp_mul1: #n:big -> g:fe n -> e1:nat -> e2:nat -> Lemma
+  (nmexp g e1 *% nmexp g e2 = nmexp g (e1 + e2))
+let rec nmexp_mul1 #n g e1 e2 = match e2 with
+  | 0 -> assert(nmexp g e2 = one)
+  | 1 -> assert(nmexp g e2 = g)
+  | _ -> nmexp_mul1 g e1 (e2-1)
 
-val nexp_mul2: #n:big -> g1:fe n -> g2:fe n -> e:nat -> Lemma
-  (ensures (nexp (g1 *% g2) e = nexp g1 e *% nexp g2 e))
+val nmexp_mul2: #n:big -> g1:fe n -> g2:fe n -> e:nat -> Lemma
+  (ensures (nmexp (g1 *% g2) e = nmexp g1 e *% nmexp g2 e))
   (decreases e)
-let rec nexp_mul2 #n g1 g2 e = match e with
+let rec nmexp_mul2 #n g1 g2 e = match e with
   | 0 -> ()
   | 1 -> mul_one #n one
   | _ -> begin
-    nexp_mul2 #n g1 g2 (e-1);
-    mul4_assoc g1 g2 (nexp g1 (e-1)) (nexp g2 (e-1))
+    nmexp_mul2 #n g1 g2 (e-1);
+    mul4_assoc g1 g2 (nmexp g1 (e-1)) (nmexp g2 (e-1))
   end
 
-val nexp_exp: #n:big -> g:fe n -> e1:nat -> e2:nat -> Lemma
-  (ensures ((nexp (nexp g e1) e2) = (nexp g (e1 * e2))))
+val nmexp_exp: #n:big -> g:fe n -> e1:nat -> e2:nat -> Lemma
+  (ensures ((nmexp (nmexp g e1) e2) = (nmexp g (e1 * e2))))
   (decreases e2)
-let rec nexp_exp #n g e1 e2 = match e2 with
-  | 0 -> if (nexp g e1) = 0 then () else nexp_zero #n (nexp g e1)
+let rec nmexp_exp #n g e1 e2 = match e2 with
+  | 0 -> if (nmexp g e1) = 0 then () else nmexp_zero #n (nmexp g e1)
   | _ -> begin
-    nexp_mul1 g e1 (e1 * e2 - e1);
+    nmexp_mul1 g e1 (e1 * e2 - e1);
     distributivity_sub_right e1 e2 1;
-    nexp_exp #n g e1 (e2 - 1)
+    nmexp_exp #n g e1 (e2 - 1)
   end
 
 // To subgroup
-val to_fe_nexp1: #n:big -> k:pos{n % k = 0 && n / k > 1 } -> g:fe n -> e:nat -> Lemma
-  (to_fe #(n/k) (nexp g e) = nexp (to_fe #(n/k) g) e)
-let rec to_fe_nexp1 #n k g e = match e with
+val to_fe_nmexp1: #n:big -> k:pos{n % k = 0 && n / k > 1 } -> g:fe n -> e:nat -> Lemma
+  (to_fe #(n/k) (nmexp g e) = nmexp (to_fe #(n/k) g) e)
+let rec to_fe_nmexp1 #n k g e = match e with
   | 0 -> ()
   | 1 -> ()
   | _ -> begin
     let m = n / k in
     lemma_div_mod n k;
     assert (n = k * m);
-    modulo_modulo_lemma (g * nexp g (e-1)) m k;
-    assert (((g * nexp g (e-1)) % n) % m = (g * nexp g (e-1)) % m);
-    assert ((g *% nexp g (e-1)) % m = (g * nexp g (e-1)) % m);
-    assert (to_fe #m (g *% nexp g (e-1)) = to_fe #m (g * nexp g (e-1)));
-    to_fe_nexp1 #n k g (e-1);
-    to_fe_mul #m g (nexp g (e-1))
+    modulo_modulo_lemma (g * nmexp g (e-1)) m k;
+    assert (((g * nmexp g (e-1)) % n) % m = (g * nmexp g (e-1)) % m);
+    assert ((g *% nmexp g (e-1)) % m = (g * nmexp g (e-1)) % m);
+    assert (to_fe #m (g *% nmexp g (e-1)) = to_fe #m (g * nmexp g (e-1)));
+    to_fe_nmexp1 #n k g (e-1);
+    to_fe_mul #m g (nmexp g (e-1))
   end
 
 //val to_fe_mul: #n:big -> a:nat -> b:nat -> Lemma
 //  (to_fe #n (a * b) = to_fe a *% to_fe b)
 //let to_fe_mul #n a b = modulo_mul_distributivity a b n
 
-//val to_fe_nexp2: #n:big -> k:big{ k > n } -> g:fe n -> e:nat -> Lemma
-//  (to_fe #(n/k) (nexp g e) = nexp (to_fe #(n/k) g) e)
+//val to_fe_nmexp2: #n:big -> k:big{ k > n } -> g:fe n -> e:nat -> Lemma
+//  (to_fe #(n/k) (nmexp g e) = nmexp (to_fe #(n/k) g) e)
 
-// Define fexp' for composite n and for unit g.
-val fexp: #n:big -> fe n -> e:nat -> Tot (fe n) (decreases e)
-let rec fexp #n g e =
+// Define mexp' for composite n and for unit g.
+val mexp: #n:big -> fe n -> e:nat -> Tot (fe n) (decreases e)
+let rec mexp #n g e =
   if e = 1 then g
   else if e = 0 then 1
   else
      if e % 2 = 0
-     then fexp (g *% g) (e / 2)
-     else fexp (g *% g) ((e - 1) / 2) *% g
+     then mexp (g *% g) (e / 2)
+     else mexp (g *% g) ((e - 1) / 2) *% g
 
-val fexp_eq_nexp: #n:big -> g:fe n -> e:nat -> Lemma
-  (ensures (nexp g e = fexp g e)) (decreases e)
-let rec fexp_eq_nexp #n g e = match e with
+val mexp_eq_nmexp: #n:big -> g:fe n -> e:nat -> Lemma
+  (ensures (nmexp g e = mexp g e)) (decreases e)
+let rec mexp_eq_nmexp #n g e = match e with
   | 0 -> ()
   | 1 -> ()
   | _ ->
     if e % 2 = 0
     then begin
-      fexp_eq_nexp #n (g *% g) (e/2);
-      nexp_exp #n g 2 (e/2)
+      mexp_eq_nmexp #n (g *% g) (e/2);
+      nmexp_exp #n g 2 (e/2)
     end
     else begin
-      fexp_eq_nexp #n (g *% g) ((e-1)/2);
-      nexp_exp g 2 ((e-1)/2)
+      mexp_eq_nmexp #n (g *% g) ((e-1)/2);
+      nmexp_exp g 2 ((e-1)/2)
     end
 
-val fexp_two_is_sqr: #n:big -> g:fe n -> Lemma
-  (fexp g 2 = sqr g)
-let fexp_two_is_sqr #n _ = ()
+val mexp_two_is_sqr: #n:big -> g:fe n -> Lemma
+  (mexp g 2 = sqr g)
+let mexp_two_is_sqr #n _ = ()
 
-val fexp_one1: #n:big -> g:fe n -> Lemma
-  (ensures (fexp g one = g))
-  [SMTPat (fexp g one)]
-let fexp_one1 #n _ = ()
+val mexp_one1: #n:big -> g:fe n -> Lemma
+  (ensures (mexp g one = g))
+  [SMTPat (mexp g one)]
+let mexp_one1 #n _ = ()
 
-val fexp_one2: #n:big -> e:nat -> Lemma
-  (ensures (fexp #n one e = one))
-  [SMTPat (fexp #n one e)]
-let fexp_one2 #n e = fexp_eq_nexp #n one e; nexp_one2 #n e
+val mexp_one2: #n:big -> e:nat -> Lemma
+  (ensures (mexp #n one e = one))
+  [SMTPat (mexp #n one e)]
+let mexp_one2 #n e = mexp_eq_nmexp #n one e; nmexp_one2 #n e
 
-val fexp_zero1: #n:big -> e:pos -> Lemma
-  (fexp #n 0 e = 0)
-let fexp_zero1 #n e = fexp_eq_nexp #n 0 e; nexp_zero #n e
+val mexp_zero1: #n:big -> e:pos -> Lemma
+  (mexp #n 0 e = 0)
+let mexp_zero1 #n e = mexp_eq_nmexp #n 0 e; nmexp_zero #n e
 
-val fexp_zero2: #n:big -> g:fe n{g <> 0} -> Lemma
-  (fexp #n g 0 = 1)
-let fexp_zero2 #n _ = ()
+val mexp_zero2: #n:big -> g:fe n{g <> 0} -> Lemma
+  (mexp #n g 0 = 1)
+let mexp_zero2 #n _ = ()
 
-val fexp_mul1: #n:big -> g:fe n -> e1:nat -> e2:nat -> Lemma
-  (fexp g e1 *% fexp g e2 = fexp g (e1 + e2))
-let fexp_mul1 #n g e1 e2 =
-  fexp_eq_nexp g e1;
-  fexp_eq_nexp g e2;
-  fexp_eq_nexp g (e1+e2);
-  nexp_mul1 g e1 e2
+val mexp_mul1: #n:big -> g:fe n -> e1:nat -> e2:nat -> Lemma
+  (mexp g e1 *% mexp g e2 = mexp g (e1 + e2))
+let mexp_mul1 #n g e1 e2 =
+  mexp_eq_nmexp g e1;
+  mexp_eq_nmexp g e2;
+  mexp_eq_nmexp g (e1+e2);
+  nmexp_mul1 g e1 e2
 
-val fexp_mul2: #n:big -> g1:fe n -> g2:fe n -> e:nat -> Lemma
-  (fexp (g1 *% g2) e = fexp g1 e *% fexp g2 e)
-let fexp_mul2 #n g1 g2 e =
-  fexp_eq_nexp (g1 *% g2) e;
-  fexp_eq_nexp g1 e;
-  fexp_eq_nexp g2 e;
-  nexp_mul2 g1 g2 e
+val mexp_mul2: #n:big -> g1:fe n -> g2:fe n -> e:nat -> Lemma
+  (mexp (g1 *% g2) e = mexp g1 e *% mexp g2 e)
+let mexp_mul2 #n g1 g2 e =
+  mexp_eq_nmexp (g1 *% g2) e;
+  mexp_eq_nmexp g1 e;
+  mexp_eq_nmexp g2 e;
+  nmexp_mul2 g1 g2 e
 
-val fexp_exp: #n:big -> g:fe n -> e1:nat -> e2:nat -> Lemma
-  (fexp #n (fexp #n g e1) e2 = fexp #n g (e1 * e2))
-let fexp_exp #n g e1 e2 =
-  fexp_eq_nexp g e1;
-  fexp_eq_nexp (nexp g e1) e2;
-  fexp_eq_nexp g (e1 * e2);
-  nexp_exp g e1 e2
+val mexp_exp: #n:big -> g:fe n -> e1:nat -> e2:nat -> Lemma
+  (mexp #n (mexp #n g e1) e2 = mexp #n g (e1 * e2))
+let mexp_exp #n g e1 e2 =
+  mexp_eq_nmexp g e1;
+  mexp_eq_nmexp (nmexp g e1) e2;
+  mexp_eq_nmexp g (e1 * e2);
+  nmexp_exp g e1 e2
 
-val fexp_add: #n:big -> g:fe n -> e1:nat -> e2:nat{e2 >= e1} -> Lemma
-  (fexp g e1 +% fexp g e2 = fexp g e1 *% (1 +% fexp g (e2 - e1)))
-let fexp_add #n g e1 e2 =
-  fexp_mul1 g e1 (e2 - e1);
-  mul_one (fexp g e1);
-  mul_add_distr_r (fexp g e1) 1 (fexp g (e2 - e1))
+val mexp_add: #n:big -> g:fe n -> e1:nat -> e2:nat{e2 >= e1} -> Lemma
+  (mexp g e1 +% mexp g e2 = mexp g e1 *% (1 +% mexp g (e2 - e1)))
+let mexp_add #n g e1 e2 =
+  mexp_mul1 g e1 (e2 - e1);
+  mul_one (mexp g e1);
+  mul_add_distr_r (mexp g e1) 1 (mexp g (e2 - e1))
 
-val fexp_sub: #n:big -> g:fe n -> e1:nat -> e2:nat{e2 >= e1} -> Lemma
-  (fexp g e1 -% fexp g e2 = fexp g e1 *% (1 -% fexp g (e2 - e1)))
-let fexp_sub #n g e1 e2 =
-  fexp_mul1 g e1 (e2 - e1);
-  mul_one (fexp g e1);
-  mul_sub_distr_r (fexp g e1) 1 (fexp g (e2 - e1))
+val mexp_sub: #n:big -> g:fe n -> e1:nat -> e2:nat{e2 >= e1} -> Lemma
+  (mexp g e1 -% mexp g e2 = mexp g e1 *% (1 -% mexp g (e2 - e1)))
+let mexp_sub #n g e1 e2 =
+  mexp_mul1 g e1 (e2 - e1);
+  mul_one (mexp g e1);
+  mul_sub_distr_r (mexp g e1) 1 (mexp g (e2 - e1))
 
-val to_fe_fexp1: #n:big -> k:pos{n % k = 0 && n / k > 1 } -> g:fe n -> e:nat -> Lemma
-  (to_fe #(n/k) (fexp g e) = fexp (to_fe #(n/k) g) e)
-let rec to_fe_fexp1 #n k g e =
-  to_fe_nexp1 #n k g e;
-  fexp_eq_nexp g e;
-  fexp_eq_nexp (to_fe #(n/k) g) e
+val to_fe_mexp1: #n:big -> k:pos{n % k = 0 && n / k > 1 } -> g:fe n -> e:nat -> Lemma
+  (to_fe #(n/k) (mexp g e) = mexp (to_fe #(n/k) g) e)
+let rec to_fe_mexp1 #n k g e =
+  to_fe_nmexp1 #n k g e;
+  mexp_eq_nmexp g e;
+  mexp_eq_nmexp (to_fe #(n/k) g) e
 
 
 (* Inverses *)
@@ -1212,17 +1310,17 @@ let isunit_prod #n a b =
   finv_unique (a *% b) (finv a *% finv b)
 
 // Unit to any power is still a unit
-val isunit_fexp: #n:big -> g:fe n -> x:nat -> Lemma
+val isunit_mexp: #n:big -> g:fe n -> x:nat -> Lemma
   (requires (isunit g))
-  (ensures (isunit (fexp g x)))
-let rec isunit_fexp #n g x =
+  (ensures (isunit (mexp g x)))
+let rec isunit_mexp #n g x =
   isunit_nonzero g;
-  if x = 0 then (fexp_zero2 #n g; one_isunit n) else
-  if x = 1 then fexp_one1 g else begin
-    isunit_fexp #n g (x-1);
-    mul4_assoc (fexp g (x-1)) (finv (fexp g (x-1))) g (finv g);
-    fexp_one1 #n g;
-    fexp_mul1 g (x-1) 1
+  if x = 0 then (mexp_zero2 #n g; one_isunit n) else
+  if x = 1 then mexp_one1 g else begin
+    isunit_mexp #n g (x-1);
+    mul4_assoc (mexp g (x-1)) (finv (mexp g (x-1))) g (finv g);
+    mexp_one1 #n g;
+    mexp_mul1 g (x-1) 1
   end
 
 val zerodiv_is_nonunit: #n:big -> a:fe n -> b:fe n -> Lemma
@@ -1258,7 +1356,7 @@ let prime_field_zerodivs #p a b =
   assert (a *% b <> 0)
 
 type is_mult_order (#n:big) (g:fe n{isunit g}) (r:pos) =
-    fexp g r = one /\ (forall (x:pos{x<r}). fexp g x <> one)
+    mexp g r = one /\ (forall (x:pos{x<r}). mexp g x <> one)
 
 val mul_zero_either: #n:big -> a:fe n -> b:fe n -> Lemma
   (isunit a /\ a *% b = 0 ==> b = 0)
@@ -1478,11 +1576,11 @@ let dirichlet_fe1 #n l =
   collision_means_nondistinct l i' j'
 
 val equiv_foralls: #n:big -> g:fe n{isunit g /\ g > 1} -> Lemma
-  (requires (forall (i:pos{i<=n}) (j:pos{j<=n/\i<>j}). fexp g i <> fexp g j))
-  (ensures (forall (i:nlet n) (j:nlet n{i<>j}). fexp g (i+1) <> fexp g (j+1)))
+  (requires (forall (i:pos{i<=n}) (j:pos{j<=n/\i<>j}). mexp g i <> mexp g j))
+  (ensures (forall (i:nlet n) (j:nlet n{i<>j}). mexp g (i+1) <> mexp g (j+1)))
 let equiv_foralls #n g =
-  let l0 (i:pos{i<=n}) (j:pos{j<=n/\i<>j}): Lemma (fexp g i <> fexp g j) = () in
-  let l1 (i:nlet n) (j:nlet n{i<>j}): Lemma (fexp g (i+1) <> fexp g (j+1)) = l0 (i+1) (j+1) in
+  let l0 (i:pos{i<=n}) (j:pos{j<=n/\i<>j}): Lemma (mexp g i <> mexp g j) = () in
+  let l1 (i:nlet n) (j:nlet n{i<>j}): Lemma (mexp g (i+1) <> mexp g (j+1)) = l0 (i+1) (j+1) in
   forall_intro_2 l1
 
 
@@ -1508,69 +1606,69 @@ let conclude_distinct #n l =
   assert (forall (i:nlet (L.length l)) (j:nlet (L.length l){i <> j}). L.index l i <> L.index l j)
 
 val unit_powers_collide_inv: #n:big -> g:fe n{isunit g /\ g > 1} -> Lemma
-  (requires (forall (i:pos{i<=n}) (j:pos{j<=n/\i<>j}). fexp g i <> fexp g j))
+  (requires (forall (i:pos{i<=n}) (j:pos{j<=n/\i<>j}). mexp g i <> mexp g j))
   (ensures False)
 let unit_powers_collide_inv #n g =
   let l0 = range_list 1 n in
   assert (forall (i:nlet n). L.index l0 i = i+1);
   let p (i:pos{i<=n}):(x:fe n{x > 0}) =
-    isunit_fexp g i;
-    isunit_nonzero (fexp g i);
-    fexp g i in
+    isunit_mexp g i;
+    isunit_nonzero (mexp g i);
+    mexp g i in
   let l: list (x:fe n{x > 0}) = L.map p l0 in
   assert (L.length l = n);
   map_preserves_order p l0;
-  assert (forall (i:nlet n). L.index l i = fexp g (i+1));
+  assert (forall (i:nlet n). L.index l i = mexp g (i+1));
 
   equiv_foralls g;
-  assert (forall (i:nlet n) (j:nlet n{i <> j}). fexp g (i+1) <> fexp g (j+1));
+  assert (forall (i:nlet n) (j:nlet n{i <> j}). mexp g (i+1) <> mexp g (j+1));
   assert (forall (i:nlet n) (j:nlet n{i <> j}). L.index l i <> L.index l j);
   conclude_distinct l;
   assert (all_distinct l);
   dirichlet_fe1 l
 
 val unit_powers_collide: #n:big -> g:fe n{isunit g /\ g > 1} -> Lemma
-  (exists (i:pos{i <= n}) (j:pos{j <= n /\ i <> j}). fexp g i = fexp g j)
+  (exists (i:pos{i <= n}) (j:pos{j <= n /\ i <> j}). mexp g i = mexp g j)
 let unit_powers_collide #n g = move_requires unit_powers_collide_inv g
 
 val unit_powers_collide_strict: #n:big -> g:fe n{isunit g /\ g > 1} -> Lemma
-  (exists (i:pos{i <= n}) (j:pos{j <= n /\ i < j}). fexp g i = fexp g j)
+  (exists (i:pos{i <= n}) (j:pos{j <= n /\ i < j}). mexp g i = mexp g j)
 let unit_powers_collide_strict #n g =
 
   unit_powers_collide g;
 
-  let ex1: squash (exists (i:pos{i <= n}) (j:pos{j <= n /\ i <> j}). fexp g i = fexp g j) = () in
+  let ex1: squash (exists (i:pos{i <= n}) (j:pos{j <= n /\ i <> j}). mexp g i = mexp g j) = () in
 
-  let p_less (i:pos{i <= n}) (j:pos{j <= n /\ i < j}): Type = fexp g i = fexp g j in
-  let goal = exists (i:pos{i <= n}) (j:pos{j <= n /\ i < j}). fexp g i = fexp g j in
+  let p_less (i:pos{i <= n}) (j:pos{j <= n /\ i < j}): Type = mexp g i = mexp g j in
+  let goal = exists (i:pos{i <= n}) (j:pos{j <= n /\ i < j}). mexp g i = mexp g j in
 
-  let l'' (i:pos{i <= n}) (j:pos{j <= n /\ i <> j /\ fexp g i = fexp g j}):
-          squash (exists (i:pos{i <= n}) (j:pos{j <= n /\ i < j}). fexp g i = fexp g j) = begin
+  let l'' (i:pos{i <= n}) (j:pos{j <= n /\ i <> j /\ mexp g i = mexp g j}):
+          squash (exists (i:pos{i <= n}) (j:pos{j <= n /\ i < j}). mexp g i = mexp g j) = begin
     if i < j then exists_intro_2_dep p_less i j else exists_intro_2_dep p_less j i
   end in
   exists_elim_pair_dep goal ex1 l''
 
 val unit_powers_collide_strict_inv: #n:big -> g:fe n{isunit g /\ g > 1} -> Lemma
-  (requires (forall (i:pos{i <= n}) (j:pos{j <= n /\ i < j}). fexp g i <> fexp g j))
+  (requires (forall (i:pos{i <= n}) (j:pos{j <= n /\ i < j}). mexp g i <> mexp g j))
   (ensures False)
 let unit_powers_collide_strict_inv #n g = move_requires unit_powers_collide_strict g
 
 val find_unit_colliding_powers: #n:big -> g:fe n{isunit g /\ g > 1} ->
-  res:(tuple2 pos pos){ let (i,j) = res in j <= n /\ i < j /\ fexp g i = fexp g j }
+  res:(tuple2 pos pos){ let (i,j) = res in j <= n /\ i < j /\ mexp g i = mexp g j }
 let find_unit_colliding_powers #n g =
 
-  let goalcond ((i,j):(tuple2 pos pos)) = (j <= n /\ i < j /\ fexp g i = fexp g j) in
+  let goalcond ((i,j):(tuple2 pos pos)) = (j <= n /\ i < j /\ mexp g i = mexp g j) in
   let goal = res:(tuple2 pos pos){ goalcond res } in
 
   let rec look1 (i:pos{i<n /\ (forall (i':pos{i'<=n/\i'>i}) (j':pos{j'<=n /\ i'<j'}).
-                                       (fexp g i' <> fexp g j'))}):
+                                       (mexp g i' <> mexp g j'))}):
                 goal = begin
 
-    let rec look2 (j:pos{j > i /\ j <= n /\ (forall (j':pos{j'<=n /\ j'>j}). fexp g j' <> fexp g i)}):
+    let rec look2 (j:pos{j > i /\ j <= n /\ (forall (j':pos{j'<=n /\ j'>j}). mexp g j' <> mexp g i)}):
                   k:option pos{ match k with
-                                | None -> (forall (j':pos{j'<=n/\j'>i}). fexp g j' <> fexp g i)
-                                | Some j' -> j' > i /\ j' <= n /\ fexp g j' = fexp g i } = begin
-      if fexp g j = fexp g i
+                                | None -> (forall (j':pos{j'<=n/\j'>i}). mexp g j' <> mexp g i)
+                                | Some j' -> j' > i /\ j' <= n /\ mexp g j' = mexp g i } = begin
+      if mexp g j = mexp g i
       then Some j
       else (if j = i+1 then None else look2 (j-1))
     end in
@@ -1584,7 +1682,7 @@ let find_unit_colliding_powers #n g =
         end
       | None -> begin
           if i > 1 then look1 (i-1) else begin
-            assert (forall (i':pos{i'<=n}) (j':pos{j'<=n /\ i' < j'}). fexp g i' <> fexp g j');
+            assert (forall (i':pos{i'<=n}) (j':pos{j'<=n /\ i' < j'}). mexp g i' <> mexp g j');
             unit_powers_collide_strict_inv g
           end
         end
@@ -1594,43 +1692,43 @@ let find_unit_colliding_powers #n g =
 
 
 val power_leading_to_one_exists: #n:big -> g:fe n{isunit g} -> Lemma
-  (exists (r':pos{r'<=n}). fexp g r' = 1)
+  (exists (r':pos{r'<=n}). mexp g r' = 1)
 let power_leading_to_one_exists #n g =
 
-  let l (): Lemma (requires (g > 1 /\ (forall (r':pos{r' <= n}). fexp g r' <> 1))) (ensures False) = begin
-    assert (forall (r':pos{r' <= n}). fexp g r' <> 1);
+  let l (): Lemma (requires (g > 1 /\ (forall (r':pos{r' <= n}). mexp g r' <> 1))) (ensures False) = begin
+    assert (forall (r':pos{r' <= n}). mexp g r' <> 1);
 
-    let l11 (i:pos) (j:pos): Lemma (requires j < i /\ i <= n /\ fexp g i = fexp g j)
+    let l11 (i:pos) (j:pos): Lemma (requires j < i /\ i <= n /\ mexp g i = mexp g j)
                                    (ensures False) = begin
         // g ^ i - g^j = g^i (1 - g^(j-1)) = 0
         // g^i /= 0, so g^(j-i) = 1
         // which contradicts that no element is zero
-        isunit_fexp g i;
+        isunit_mexp g i;
         if i <> 1 then begin
-          fexp_sub g j i;
-          assert (fexp g i *% (1 -% fexp g (i - j)) = 0);
-          isunit_nonzero (fexp g i);
-          mul_zero_either (fexp g i) (1 -% fexp g (i-j));
-          assert (1 -% fexp g (i-j) = 0);
-          add_move_to_right 1 (fexp g (i-j)) 0;
-          add_sub_zero (fexp g (i-j));
-          assert (1 = fexp g (i-j))
+          mexp_sub g j i;
+          assert (mexp g i *% (1 -% mexp g (i - j)) = 0);
+          isunit_nonzero (mexp g i);
+          mul_zero_either (mexp g i) (1 -% mexp g (i-j));
+          assert (1 -% mexp g (i-j) = 0);
+          add_move_to_right 1 (mexp g (i-j)) 0;
+          add_sub_zero (mexp g (i-j));
+          assert (1 = mexp g (i-j))
         end
     end in
 
-    let ltype i j = ((j<i/\i<=n/\fexp g i = fexp g j) ==> False) in
+    let ltype i j = ((j<i/\i<=n/\mexp g i = mexp g j) ==> False) in
     let l12 (i:pos): (j:pos) -> Lemma (ltype i j) = fun j -> move_requires (l11 i) j in
     let l13 (): (i:pos) -> Lemma (forall (j:pos). ltype i j) =
       fun i -> forall_intro #pos #_ (l12 i) in
     forall_intro #pos #_ (l13 ());
 
     assert (forall (i:pos) (j:pos). ltype i j);
-    assert (forall (i:pos{i <= n}) (j:pos{j<i}). fexp g i = fexp g j ==> False);
+    assert (forall (i:pos{i <= n}) (j:pos{j<i}). mexp g i = mexp g j ==> False);
     unit_powers_collide_strict g
   end in move_requires l ();
 
   isunit_nonzero g;
-  fexp_one1 g
+  mexp_one1 g
 
 
 val mult_order_exists: #n:big -> g:fe n{isunit g} -> Lemma
@@ -1638,35 +1736,35 @@ val mult_order_exists: #n:big -> g:fe n{isunit g} -> Lemma
 let mult_order_exists #n g =
   let goal = (exists (r:pos). r <= n /\ is_mult_order g r) in
 
-  let rec test_possible (r:pos{r<=n /\ fexp g r = one}): Lemma goal = begin
-    assert ((forall (x:pos{x<r}). fexp g x <> one) ==> goal);
-    assert (~(forall (x:pos{x<r}). fexp g x <> one) ==> (exists (x:pos{x<r}). fexp g x = one));
+  let rec test_possible (r:pos{r<=n /\ mexp g r = one}): Lemma goal = begin
+    assert ((forall (x:pos{x<r}). mexp g x <> one) ==> goal);
+    assert (~(forall (x:pos{x<r}). mexp g x <> one) ==> (exists (x:pos{x<r}). mexp g x = one));
 
-    let l (): Lemma (requires (~(forall (x:pos{x<r}). fexp g x <> one)))
+    let l (): Lemma (requires (~(forall (x:pos{x<r}). mexp g x <> one)))
                     (ensures goal) = begin
-      let ex_internal: squash (exists (x:pos{x<r}). fexp g x = one) = () in
-      let elim_statement (x:pos{x<r /\ fexp g x = one}): GTot (squash goal) = test_possible x in
+      let ex_internal: squash (exists (x:pos{x<r}). mexp g x = one) = () in
+      let elim_statement (x:pos{x<r /\ mexp g x = one}): GTot (squash goal) = test_possible x in
       exists_elim goal ex_internal elim_statement
     end in
     move_requires l ()
   end in
 
-  let exprev: squash (exists (r':pos). r' <= n /\ fexp g r' = 1) = power_leading_to_one_exists g in
+  let exprev: squash (exists (r':pos). r' <= n /\ mexp g r' = 1) = power_leading_to_one_exists g in
 
   exists_elim goal exprev (fun x -> test_possible x; assert (goal))
 
 val comp_mult_order_loop:
      #n:big
   -> g:fe n{isunit g}
-  -> r_test:pos{ r_test <= n /\ (forall (r':pos{r' < r_test}). fexp g r' <> 1) }
+  -> r_test:pos{ r_test <= n /\ (forall (r':pos{r' < r_test}). mexp g r' <> 1) }
   -> Tot (r:pos {is_mult_order g r})
          (decreases (n - r_test))
 let rec comp_mult_order_loop #n g r_test =
-  if fexp g r_test = 1 then r_test
+  if mexp g r_test = 1 then r_test
   else begin
     if r_test < n then comp_mult_order_loop g (r_test + 1) else begin
       mult_order_exists g;
-      assert (forall (r':pos{r' <= n}). fexp g r' <> 1);
+      assert (forall (r':pos{r' <= n}). mexp g r' <> 1);
       assert (False);
       0
     end
@@ -1679,7 +1777,7 @@ val mult_order:
 let mult_order #n g = comp_mult_order_loop g 1
 
 val mult_order_less: #n:big -> g:fe n{isunit g} -> e:pos -> Lemma
-  (fexp g e = 1 ==> mult_order g <= e)
+  (mexp g e = 1 ==> mult_order g <= e)
 let mult_order_less #n g e = ()
 
 val g_pow_order_reduc_raw:
@@ -1688,120 +1786,120 @@ val g_pow_order_reduc_raw:
   -> x:nat
   -> r:pos{is_mult_order g r}
   -> Lemma
-  (ensures (fexp g x = fexp g (x % r)))
+  (ensures (mexp g x = mexp g (x % r)))
   (decreases x)
 let rec g_pow_order_reduc_raw #n g x r =
   if x < r
   then modulo_lemma x r
   else begin
     lemma_div_mod x r;
-    fexp_exp g r (x/r);
-    fexp_mul1 g (r * (x/r)) (x%r);
-    fexp_one2 #n (x/r)
+    mexp_exp g r (x/r);
+    mexp_mul1 g (r * (x/r)) (x%r);
+    mexp_one2 #n (x/r)
   end
 
 val g_pow_order_reduc: #n:big -> g:fe n{isunit g /\ g > 0} -> x:nat -> Lemma
-  (ensures (fexp g x = fexp g (x % mult_order g)))
+  (ensures (mexp g x = mexp g (x % mult_order g)))
   (decreases x)
 let rec g_pow_order_reduc #n g x = g_pow_order_reduc_raw g x (mult_order g)
 
 val g_pow_inverse_raw: #n:big -> g:fe n{isunit g} -> x:nat -> r:pos{is_mult_order g r} -> Lemma
-  (isunit (fexp g x) /\
-   finv (fexp g x) = fexp g (r - (x % r)))
+  (isunit (mexp g x) /\
+   finv (mexp g x) = mexp g (r - (x % r)))
 let g_pow_inverse_raw #n g x r =
   isunit_nonzero #n g;
   if x = 0
   then begin
-    fexp_zero2 g;
+    mexp_zero2 g;
     zero_mod_n r
   end else
     let x' = x % r in
     modulo_range_lemma x r;
     let inv_e = r - x' in
     assert(inv_e >= 0 && inv_e <= r);
-    assert(fexp g r = one);
+    assert(mexp g r = one);
     g_pow_order_reduc_raw g x r;
-    fexp_mul1 g x' inv_e;
-    assert(fexp g x' *% fexp g (r - x') = one);
-    assert(fexp g x *% fexp g (r - x') = one);
-    finv_unique (fexp g x) (fexp g (r - x'))
+    mexp_mul1 g x' inv_e;
+    assert(mexp g x' *% mexp g (r - x') = one);
+    assert(mexp g x *% mexp g (r - x') = one);
+    finv_unique (mexp g x) (mexp g (r - x'))
 
 val mult_order_and_one1: #n:big -> g:fe n{isunit g} -> e:pos -> Lemma
   (requires divides (mult_order g) e)
-  (ensures fexp g e = 1)
+  (ensures mexp g e = 1)
 let mult_order_and_one1 #n g e =
   let r = mult_order g in
   mod_prop r e 0;
   swap_mul (e / r) r;
-  fexp_exp g r (e/r);
-  fexp_one2 #n (e/r)
+  mexp_exp g r (e/r);
+  mexp_one2 #n (e/r)
 
 val mult_order_and_one2: #n:big -> g:fe n{isunit g} -> e:pos -> Lemma
-  (requires fexp g e = 1)
+  (requires mexp g e = 1)
   (ensures divides (mult_order g) e)
 let mult_order_and_one2 #n g e =
   let r = mult_order g in
   let l (): Lemma (requires (~(divides r e))) (ensures False) = begin
     g_pow_order_reduc g e;
-    assert (fexp g e = fexp g (e % r));
-    assert (fexp g (e % r) = 1)
+    assert (mexp g e = mexp g (e % r));
+    assert (mexp g (e % r) = 1)
   end in
   move_requires l ()
 
 val mult_order_and_one: #n:big -> g:fe n{isunit g} -> e:pos -> Lemma
-  (fexp g e = 1 <==> divides (mult_order g) e)
+  (mexp g e = 1 <==> divides (mult_order g) e)
 let mult_order_and_one #n g e =
   let r = mult_order g in
-  let l1 (): Lemma (requires divides r e) (ensures fexp g e = 1) = mult_order_and_one1 g e in
-  let l2 (): Lemma (requires fexp g e = 1) (ensures divides r e) = mult_order_and_one2 g e in
+  let l1 (): Lemma (requires divides r e) (ensures mexp g e = 1) = mult_order_and_one1 g e in
+  let l2 (): Lemma (requires mexp g e = 1) (ensures divides r e) = mult_order_and_one2 g e in
   move_requires l1 ();
   move_requires l2 ()
 
 
 val g_pow_inverse: #n:big -> g:fe n{isunit g} -> x:nat -> Lemma
   (let r = mult_order g in
-   isunit (fexp g x) /\
-   finv (fexp g x) = fexp g (r - (x % r)))
+   isunit (mexp g x) /\
+   finv (mexp g x) = mexp g (r - (x % r)))
 let g_pow_inverse #n g x = g_pow_inverse_raw g x (mult_order g)
 
 val g_pow_isunit: #n:big -> g:fe n -> x:nat -> Lemma
   (requires (isunit g))
-  (ensures (isunit (fexp g x)))
+  (ensures (isunit (mexp g x)))
 let g_pow_isunit #n g x = g_pow_inverse g x
 
 val g_pow_isunit_rev: #n:big -> g:fe n -> x:pos -> Lemma
-  (requires (isunit (fexp g x)))
+  (requires (isunit (mexp g x)))
   (ensures (isunit g))
 let g_pow_isunit_rev #n g x =
-  fexp_one1 g;
+  mexp_one1 g;
   if x > 1 then begin
-    let y = finv (fexp g x) in
-    assert (fexp g x *% y = 1);
-    fexp_mul1 g (x-1) 1;
-    assert (g *% (fexp g (x-1) *% y) = 1)
+    let y = finv (mexp g x) in
+    assert (mexp g x *% y = 1);
+    mexp_mul1 g (x-1) 1;
+    assert (g *% (mexp g (x-1) *% y) = 1)
   end
 
 #reset-options "--z3rlimit 50"
 
-val mult_order_of_fexp: #n:big -> g:fe n{isunit g} -> e1:pos -> e2:pos -> Lemma
+val mult_order_of_mexp: #n:big -> g:fe n{isunit g} -> e1:pos -> e2:pos -> Lemma
   (requires is_mult_order g (e1 * e2))
-  (ensures (g_pow_isunit g e1; is_mult_order (fexp g e1) e2))
-let mult_order_of_fexp #n g e1 e2 =
+  (ensures (g_pow_isunit g e1; is_mult_order (mexp g e1) e2))
+let mult_order_of_mexp #n g e1 e2 =
   g_pow_isunit g e1;
-  fexp_exp g e1 e2;
-  assert (fexp (fexp g e1) e2 = one);
+  mexp_exp g e1 e2;
+  assert (mexp (mexp g e1) e2 = one);
 
-  let l (e3:pos{e3 < e2}): Lemma (requires (fexp (fexp g e1) e3 = one))
+  let l (e3:pos{e3 < e2}): Lemma (requires (mexp (mexp g e1) e3 = one))
                                  (ensures False) = begin
-      fexp_exp g e1 e3;
-      assert (fexp g (e1 * e3) = one);
+      mexp_exp g e1 e3;
+      assert (mexp g (e1 * e3) = one);
       multiplication_order_lemma_strict e3 e2 e1;
       assert (e1 * e3 < e1 * e2);
       assert (~(is_mult_order g (e1 * e2)));
       assert (False)
     end in
 
-  let l' (e3:pos{e3 < e2}): Lemma (fexp (fexp g e1) e3 = one ==> False) = begin
+  let l' (e3:pos{e3 < e2}): Lemma (mexp (mexp g e1) e3 = one ==> False) = begin
       move_requires l e3
     end in
 
@@ -1848,8 +1946,14 @@ val pe_fact_lemma: p:prm -> e:pos -> Lemma
   [SMTPat (pq_fact p e)]
 let pe_fact_lemma p e = ()
 
-val totient_prm: p:prm -> r:pos -> phi:pos{phi > 1}
-let totient_prm p r = exp p r - exp p (r-1)
+val totient_prm: p:prm -> r:pos -> phi:nat{phi > 1}
+let totient_prm p r =
+  let res = exp p r - exp p (r-1) in
+  from_naive_exp p r;
+  from_naive_exp p (r-1);
+  multiplication_order_lemma_strict (exp p (r-1)) (exp p r) p;
+  multiplication_order_lemma_strict 1 p (exp p (r-1));
+  res
 
 val carm:
      f:factorisation{L.length f > 0}
@@ -1881,7 +1985,7 @@ let carm_pq_is_carm p q = ()
 
 val carm_pe: p:prm -> e:pos -> l:fe (exp p e){l <= exp p e /\ l >= 1}
 let carm_pe p e =
-  let phi = exp p e - exp p (e-1) in
+  let phi = totient_prm p e in
   if (p % 2 = 0 && p > 4) then phi / 2 else phi
 
 val carm_pe_is_carm: p:prm -> e:pos -> Lemma
@@ -1895,10 +1999,10 @@ val euler_thm:
   -> cm:pos{cm = carm f}
   -> a:fe n
   -> Lemma
-  (isunit a ==> fexp a cm = 1)
+  (isunit a ==> mexp a cm = 1)
 let euler_thm _ _ _ = admit()
 
-val flt: #p:prm -> a:fe p{a>0} -> Lemma (fexp a (p-1) = 1)
+val flt: #p:prm -> a:fe p{a>0} -> Lemma (mexp a (p-1) = 1)
 let flt #p a =
   isunit_in_prime_field a;
   euler_thm p [(p,1)] (p-1) a

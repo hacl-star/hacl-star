@@ -145,11 +145,11 @@ val bn_mul_fitting:
   -> Stack unit
     (requires fun h ->
       live h a /\ live h b /\ live h res /\
-      all_disjoint [loc a; loc b; loc res] /\
+      disjoint res a /\ disjoint res b /\
       issnat (as_snat h a * as_snat h b) /\
       v (nat_bytes_num (as_snat h a * as_snat h b)) <= v resLen)
     (ensures  fun h0 _ h1 ->
-     modifies (loc res) h0 h1 /\ as_snat h1 res == as_snat h0 a * as_snat h0 b)
+     modifies1 res h0 h1 /\ as_snat h1 res == as_snat h0 a * as_snat h0 b)
 let bn_mul_fitting #aLen #bLen #resLen a b res =
   push_frame ();
   let tmp = create (aLen +. bLen) (u64 0) in

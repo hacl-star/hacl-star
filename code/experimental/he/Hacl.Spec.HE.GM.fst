@@ -45,7 +45,7 @@ let sq_mul_comp _ _ _ = admit()
 
 val leg_symbol: a:nat -> p:prm -> res:int
 let leg_symbol a p =
-  let res = fexp (to_fe #p a) ((p-1)/2) in
+  let res = mexp (to_fe #p a) ((p-1)/2) in
   if res = p-1 then -1 else res
 
 val leg_symbol_modulo: a:nat -> p:prm -> Lemma
@@ -63,16 +63,16 @@ let leg_symbol_range_raw #p a =
   to_fe_idemp #p a;
   if a = 0
   then begin
-    fexp_zero1 #p ((p-1)/2);
+    mexp_zero1 #p ((p-1)/2);
     lemma_mod_twice a p;
     assert (l = 0)
   end else begin
     flt #p a;
     lemma_div_exact (p-1) 2;
-    fexp_exp a ((p-1)/2) 2;
-    fexp_two_is_sqr #p (fexp a ((p-1)/2));
-    assert (sqr (fexp a ((p-1)/2)) = 1);
-    squares_of_one #p (fexp a ((p-1)/2));
+    mexp_exp a ((p-1)/2) 2;
+    mexp_two_is_sqr #p (mexp a ((p-1)/2));
+    assert (sqr (mexp a ((p-1)/2)) = 1);
+    squares_of_one #p (mexp a ((p-1)/2));
     assert (l = 1 \/ l = -1)
   end
 
@@ -81,8 +81,8 @@ val leg_symbol_range: #p:prm -> a:fe p -> Lemma
 let leg_symbol_range #p a = leg_symbol_range_raw a
 
 val leg_symbol_range_exp: #p:prm -> a:fe p -> Lemma
-  (requires (fexp (to_fe #p a) ((p-1)/2) <> p-1))
-  (ensures (let res = fexp (to_fe #p a) ((p-1)/2) in res = 0 \/ res = 1))
+  (requires (mexp (to_fe #p a) ((p-1)/2) <> p-1))
+  (ensures (let res = mexp (to_fe #p a) ((p-1)/2) in res = 0 \/ res = 1))
 let leg_symbol_range_exp #p a = leg_symbol_range a
 
 val is_leg_symbol_raw: p:prm -> a:nat -> Lemma
@@ -119,9 +119,9 @@ let leg_symbol_mul1 #p a b =
   to_fe_idemp a;
   to_fe_idemp b;
   to_fe_idemp (a *% b);
-  fexp_mul2 a b ((p-1)/2);
+  mexp_mul2 a b ((p-1)/2);
 
-  assert (fexp (a *% b) ((p-1)/2) = fexp a ((p-1)/2) *% fexp b ((p-1)/2));
+  assert (mexp (a *% b) ((p-1)/2) = mexp a ((p-1)/2) *% mexp b ((p-1)/2));
 
   let l1 = leg_symbol a p in
   let l2 = leg_symbol b p in
@@ -131,16 +131,16 @@ let leg_symbol_mul1 #p a b =
 
   // conceptually easy, though we must check all the cases
 
-  if l1 = 0 then mul_zero (fexp b ((p-1)/2)) else
-  if l2 = 0 then mul_zero (fexp a ((p-1)/2)) else
+  if l1 = 0 then mul_zero (mexp b ((p-1)/2)) else
+  if l2 = 0 then mul_zero (mexp a ((p-1)/2)) else
   if l1 = -1 && l2 = -1 then begin
     to_fe_idemp #p (p-1);
     minus_one_square p;
-    assert (fexp (a *% b) ((p-1)/2) = 1)
+    assert (mexp (a *% b) ((p-1)/2) = 1)
   end
-  else if l1 = 1 && l2 = -1 then mul_one #p (fexp b ((p-1)/2))
-  else if l1 = -1 && l2 = 1 then mul_one #p (fexp a ((p-1)/2))
-  else mul_one #p (fexp a ((p-1)/2))
+  else if l1 = 1 && l2 = -1 then mul_one #p (mexp b ((p-1)/2))
+  else if l1 = -1 && l2 = 1 then mul_one #p (mexp a ((p-1)/2))
+  else mul_one #p (mexp a ((p-1)/2))
 
 val leg_symbol_mul2: p:prm -> a:nat -> b:nat -> Lemma
   (ensures (leg_symbol (a * b) p = leg_symbol a p * leg_symbol b p))
@@ -299,11 +299,11 @@ val enc_as_exp:
      p:public
   -> r:fe (Public?.n p){sqr r <> 0 /\ sqr r *% (Public?.y p) <> 0}
   -> m:bool
-  -> Lemma (encrypt p r m = fexp (Public?.y p) (bti m) *% sqr r)
+  -> Lemma (encrypt p r m = mexp (Public?.y p) (bti m) *% sqr r)
 let enc_as_exp p r m =
   let y = Public?.y p in
   let c = encrypt p r m in
-  if m then fexp_one1 y else (fexp_zero2 y; mul_one (sqr r))
+  if m then mexp_one1 y else (mexp_zero2 y; mul_one (sqr r))
 
 val hom_xor_prop:
      s:secret
@@ -327,13 +327,13 @@ let hom_xor_prop s r1 r2 m1 m2 =
   let c2 = encrypt (s2p s) r2 m2 in
   enc_as_exp p r1 m1;
   enc_as_exp p r2 m2;
-  mul4_assoc (fexp y (bti m1)) (sqr r1) (fexp y (bti m2)) (sqr r2);
+  mul4_assoc (mexp y (bti m1)) (sqr r1) (mexp y (bti m2)) (sqr r2);
   mul4_assoc r1 r1 r2 r2;
-  fexp_mul1 y (bti m1) (bti m2);
-  assert (hom_xor c1 c2 = fexp y (bti m1 + bti m2) *% sqr (r1 *% r2));
+  mexp_mul1 y (bti m1) (bti m2);
+  assert (hom_xor c1 c2 = mexp y (bti m1 + bti m2) *% sqr (r1 *% r2));
 
   if (m1 && m2) then begin
-    assert (is_sqr (fexp y 2));
+    assert (is_sqr (mexp y 2));
     assert (is_sqr (sqr (r1 *% r2)));
     assert (hom_xor c1 c2 = y *% y *% sqr (r1 *% r2));
     mul4_assoc y y (r1 *% r2) (r1 *% r2);
