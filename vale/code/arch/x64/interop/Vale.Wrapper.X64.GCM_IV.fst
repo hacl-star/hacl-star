@@ -243,41 +243,55 @@ let compute_iv a key full_iv_b num_bytes j0_b extra_b hkeys_b =
   lemma_slice_sub full_iv_b iv_b extra_b h1;
   lemma_slice_uv_extra full_iv_b iv_b extra_b h1;
 
+
+  let lemma_uv_key () : Lemma
+    (let db = get_downview hkeys_b in
+      length_aux5 hkeys_b;
+      let ub = UV.mk_buffer db Vale.Interop.Views.up_view128 in
+      Seq.length (le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h1 hkeys_b))) == 8 /\
+      Seq.equal (UV.as_seq h1 ub) (le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h1 hkeys_b))))
+    = length_aux5 hkeys_b;
+      let db = get_downview hkeys_b in
+      let ub = UV.mk_buffer db Vale.Interop.Views.up_view128 in
+      DV.length_eq db;
+      UV.length_eq ub;
+      calc (==) {
+        le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h1 hkeys_b));
+        (==) { lemma_seq_nat8_le_seq_quad32_to_bytes_uint32 hkeys_b h1 }
+        le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (seq_nat8_to_seq_uint8 (le_seq_quad32_to_bytes (UV.as_seq h1 ub))));
+        (==) { le_bytes_to_seq_quad32_to_bytes (UV.as_seq h1 ub) }
+        UV.as_seq h1 ub;
+      }
+
+  in lemma_uv_key ();
+
+  reveal_hkeys_reqs_h_BE (le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h1 hkeys_b)))
+    (reverse_bytes_quad32 (reverse_bytes_quad32 (aes_encrypt_LE a (Ghost.reveal key) (Mkfour 0 0 0 0))));
+
+
+  length_aux5 hkeys_b;
+  DV.length_eq (get_downview hkeys_b);
+  calc (==) {
+     low_buffer_read TUInt8 TUInt128 h1 hkeys_b 2;
+     (==) {
+       (let b_d = get_downview hkeys_b in
+       DV.length_eq b_d;
+       let b_u = UV.mk_buffer b_d Vale.Interop.Views.up_view128 in
+       UV.length_eq b_u;
+       UV.as_seq_sel h1 b_u 2) }
+     aes_encrypt_LE a (Ghost.reveal key) (Mkfour 0 0 0 0);
+  };
+
   compute_iv_stdcall' (Ghost.hide (seq_uint8_to_seq_nat8 (B.as_seq h0 full_iv_b)))
     iv_b (uint32_to_uint64 num_bytes) (uint32_to_uint64 len)
      j0_b  extra_b hkeys_b;
   let h2 = get() in
 
-  admit();
+
 
   DV.length_eq (get_downview hkeys_b); DV.length_eq (get_downview j0_b);
 
-  let aux () : Lemma
-    (aes_encrypt_LE a (Ghost.reveal key) (Mkfour 0 0 0 0) ==
-      reverse_bytes_quad32 (low_buffer_read TUInt8 TUInt128 h0 hkeys_b 2))
-  = let keys_quad = le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h0 hkeys_b)) in
-    let h_BE = low_buffer_read TUInt8 TUInt128 h0 hkeys_b 2 in
-    lemma_hkeys_reqs_pub_priv
-       keys_quad
-       (reverse_bytes_quad32 (aes_encrypt_LE a (Ghost.reveal key) (Mkfour 0 0 0 0)));
+  gcm_simplify2 j0_b h2;
 
-    let db = get_downview hkeys_b in
-    let ub = UV.mk_buffer db Vale.Interop.Views.up_view128 in
-
-    calc (==) {
-      le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h0 hkeys_b));
-      (==) { lemma_seq_nat8_le_seq_quad32_to_bytes_uint32 hkeys_b h0 }
-      le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (seq_nat8_to_seq_uint8 (le_seq_quad32_to_bytes (UV.as_seq h0 ub))));
-      (==) { le_bytes_to_seq_quad32_to_bytes (UV.as_seq h0 ub) }
-      UV.as_seq h0 ub;
-    };
-
-      UV.as_seq_sel h0 ub 2;
-      reveal_reverse_bytes_quad32 h_BE;
-      reveal_reverse_bytes_quad32 (reverse_bytes_quad32 h_BE)
-
-  in aux();
-
-  lemma_same_seq_same_buffer_read h0 h1 hkeys_b;
-
-  gcm_simplify2 j0_b h2
+  le_bytes_to_quad32_to_bytes (compute_iv_BE (reverse_bytes_quad32 (aes_encrypt_LE a (Ghost.reveal key) (Mkfour 0 0 0 0)))
+    (seq_uint8_to_seq_nat8 (B.as_seq h0 full_iv_b)))

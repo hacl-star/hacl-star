@@ -81,3 +81,5 @@ let get_hkeys_reqs_injective h_BE s1 s2 =
   lemma_of_quad32_inj (Seq.index s1 6) (Seq.index s2 6);
   lemma_of_quad32_inj (Seq.index s1 7) (Seq.index s2 7);
   assert (Seq.equal s1 s2)
+
+let reveal_hkeys_reqs_h_BE hkeys h_BE = ()
