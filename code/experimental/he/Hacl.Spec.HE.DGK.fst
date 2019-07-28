@@ -6,6 +6,8 @@ open FStar.Classical
 
 open Lib.Math.Algebra
 
+module S = FStar.Seq
+
 
 val gcd_split_comp: p:prm -> q:prm -> h:pos{is_gcd (p*q) h 1} -> Lemma
   (is_gcd p h 1 /\ is_gcd q h 1)
@@ -71,16 +73,6 @@ type is_h (p:prm) (q:prm) (v:pos) (h:fe (p*q)) =
   isunit h /\
   (isunit_comp p q h; mult_order (to_fe #p h) = v /\ mult_order (to_fe #q h) = v)
 
-// h^v = 1 mod q, p
-// h^v = 1 + k*q
-// h^v = 1 + m*p
-// k * q - m * p = 0
-// k * q = 0 mod p
-// q /= 0 mod p, so k = 0 mod p,
-// so k = s * p,
-// so h^v = 1 + s*p*q
-
-
 #reset-options "--z3rlimit 200"
 
 val prm_mod_prm: a:prm -> b:prm{b <> a} -> Lemma (a % b <> 0)
@@ -101,6 +93,14 @@ let mod_product_zero a b p =
     prime_field_zerodivs #p (a % p) (b % p)
   end in move_requires l ()
 
+// h^v = 1 mod q, p
+// h^v = 1 + k*q
+// h^v = 1 + m*p
+// k * q - m * p = 0
+// k * q = 0 mod p
+// q /= 0 mod p, so k = 0 mod p,
+// so k = s * p,
+// so h^v = 1 + s*p*q
 val h_raise_v: p:prm -> q:prm{p <> q} -> v:pos -> h:fe (p*q){is_h p q v h} -> Lemma (fexp h v = 1)
 let h_raise_v p q v h =
   swap_mul p q;
@@ -159,8 +159,127 @@ let h_raise_v p q v h =
 
 #reset-options
 
+(*** Decryption ***)
+
+val solve_dlp_power:
+     #n:comp
+  -> p:big
+  -> s:big{exp p s < n}
+  -> g:fe n{isunit g /\ is_mult_order g (exp p s)}
+  -> a:fe n
+  -> x:fe (exp p s)
+let solve_dlp_power #n u g a = admit()
+
+// Inverting an element of Z_p using fermat inverse theorem.
+val fermat_inverse_unit:
+     p:prm
+  -> a:fe p{isunit a}
+  -> b:fe p{isunit b /\ a *% b = 1 /\ b = finv a}
+let fermat_inverse_unit p a =
+  let b = fexp a (p - 2) in
+
+  fexp_mul1 a (p - 2) 1;
+  fexp_one1 a;
+  flt a;
+  finv_unique #p a b;
+
+  b
+
+
+type is_crt_base (base:S.seq (tuple2 prm pos)) =
+  forall (i:nat{i < S.length base}) (j:nat{j < S.length base}).
+    fst (S.index base i) <> fst (S.index base j)
+
+type crtbase = base:S.seq (tuple2 prm pos){ is_crt_base base }
+
+type is_crt_values
+  (l:pos)
+  (base:crtbase{S.length base = l})
+  (values:S.seq pos{S.length values = l}) =
+  forall (i:nat{i < l}). let (p,e) = S.index base i in S.index values i < exp p e
+
+type is_crt_sol
+  (l:pos)
+  (base:crtbase{S.length base = l})
+  (values:S.seq pos{S.length values = l /\ is_crt_values l base values})
+  (sol:pos)
+  =
+  forall (i:nat{i<l}). sol % exp (fst (S.index base i)) (snd (S.index base i)) = S.index values i
+
+val tailprod: s:S.seq (tuple2 prm pos) -> i:pos{i <= S.length s} -> pos
+let tailprod s i =
+  let rec go (j:nat{j <= i}) (m:pos): Tot pos (decreases (i-j)) =
+    if j = i then m else
+    let (p,e) = S.index s j in go (j+1) (m * exp p e) in
+  go 0 1
+
+val fermat_inv_pe:
+     p:prm
+  -> e:pos
+  -> a:fe (exp p e)
+  -> b:fe (exp p e) {isunit a ==> (isunit b /\ a *% b = 1 /\ b = finv a)}
+let fermat_inv_pe p e a =
+  let b = fexp a (carm_pe p e - 1) in
+
+  fexp_mul1 a (carm_pe p e - 1) 1;
+  fexp_one1 a;
+  euler_thm (exp p e) (pe_fact p e) (carm_pe p e) a;
+  finv_unique #(exp p e) a b;
+
+  b
+
+val crtgo:
+     l:pos
+  -> base:crtbase{S.length base = l}
+  -> values:S.seq pos{S.length values = l /\ is_crt_values l base values}
+  -> lcur:pos{lcur < l}
+  -> mprod:big{mprod = tailprod base lcur}
+  -> acc:pos
+  -> Tot (res:pos)
+         (decreases (l - lcur))
+let rec crtgo l base values lcur mprod acc =
+
+  let (p,e) = S.index base lcur in
+  let m = exp p e in
+  let a = S.index values lcur in
+
+  assume (is_gcd mprod m 1);
+  inv_as_gcd #m (mprod % m);
+
+  let m' = fermat_inv_pe p e (mprod % m) in
+  let y = (m' * (a - acc)) % m in
+  let next_acc = acc + mprod * y in
+
+  if lcur = l - 1 then next_acc else begin
+    let mprod' = mprod * m in
+    assume (mprod' = tailprod base (lcur+1));
+    crtgo l base values (lcur+1) mprod' next_acc
+  end
+
+val crt:
+     l:pos{l>1}
+  -> base:crtbase{S.length base = l}
+  -> values:S.seq pos{S.length values = l /\ is_crt_values l base values}
+  -> res:pos
+let crt l base values =
+  let (p0,e0) = S.index base 0 in
+  let a0 = S.index values 0 in
+  admit(); // TODO prove that initial values work
+  crtgo l base values 1 (exp p0 e0) a0
+
+val crt_proof:
+     l:pos{l>1}
+  -> base:crtbase{S.length base = l}
+  -> values:S.seq pos{S.length values = l /\ is_crt_values l base values}
+  -> Lemma
+  (is_crt_sol l base values (crt l base values))
+  [SMTPat (crt l base values)]
+let crt_proof _ _ _ = admit()
+
 val solve_dlp: #n:comp -> u:big -> g:fe n{isunit g /\ is_mult_order g u} -> a:fe n -> x:fe u
 let solve_dlp #n u g a = admit()
+
+(*** Keys, functions, proofs ***)
 
 type secret =
   | Secret: p:prm
