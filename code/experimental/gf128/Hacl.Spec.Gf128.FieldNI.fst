@@ -179,5 +179,5 @@ val gf128_clmud_wide4_reduce_lemma:
     x1:vec128 -> x2:vec128 -> x3:vec128 -> x4:vec128
   -> y1:vec128 -> y2:vec128 -> y3:vec128 -> y4:vec128 -> Lemma
   (let (hi, lo) = clmul_wide4 x1 x2 x3 x4 y1 y2 y3 y4 in
-   to_elem (gf128_reduce hi lo) == Vec.normalize4 (to_elem4 x1 x2 x3 x4) (to_elem4 y1 y2 y3 y4))
+   to_elem (gf128_reduce hi lo) == Vec.normalize4 (to_elem4 y1 y2 y3 y4) (to_elem4 x1 x2 x3 x4))
 let gf128_clmud_wide4_reduce_lemma x1 x2 x3 x4 y1 y2 y3 y4 = admit()

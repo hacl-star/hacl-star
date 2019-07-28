@@ -474,7 +474,7 @@ val normalize4:
     disjoint acc pre /\ disjoint acc x /\ disjoint x pre /\
     load_precomp_r_inv h pre)
   (ensures  fun h0 _ h1 -> modifies2 x acc h0 h1 /\
-    feval h1 acc == Vec.normalize4 (feval4 h0 x) (feval4 h0 (gsub pre 0ul 8ul)))
+    feval h1 acc == Vec.normalize4 (feval4 h0 (gsub pre 0ul 8ul)) (feval4 h0 x))
 
 [@CInline]
 let normalize4 acc x pre =
