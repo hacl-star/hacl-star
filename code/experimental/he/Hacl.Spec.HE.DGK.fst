@@ -202,17 +202,30 @@ val fermat_inv_pe:
      p:prm
   -> e:pos
   -> a:fe (exp p e)
-  -> b:fe (exp p e) {isunit a ==> (isunit b /\ a *% b = 1 /\ b = finv a)}
+  -> b:fe (exp p e)
 let fermat_inv_pe p e a =
   let lam = carm_pe p e in
-  let b = mexp a (lam - 1) in
+  mexp a (lam - 1)
 
+#reset-options "--z3rlimit 100"
+
+val fermat_inv_pe_lemma:
+     p:prm
+  -> e:pos
+  -> a:fe (exp p e)
+  -> Lemma
+     (let b = fermat_inv_pe p e a in
+      (isunit a ==> (isunit b /\ a *% b = 1 /\ b = finv a)))
+     [SMTPat (fermat_inv_pe p e a)]
+let fermat_inv_pe_lemma p e a =
+  let lam = carm_pe p e in
+  let b = mexp a (lam - 1) in
   mexp_mul1 a (lam - 1) 1;
   mexp_one1 a;
   euler_thm (exp p e) (pe_fact p e) lam a;
-  finv_unique #(exp p e) a b;
+  finv_unique #(exp p e) a b
 
-  b
+#reset-options
 
 val crtgo:
      l:pos

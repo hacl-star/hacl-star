@@ -247,3 +247,43 @@ let check_is_zero #nLen sk c =
 
   pop_frame ();
   b
+
+val carm_pe:
+     #nLen:bn_len_s
+  -> p:lbignum nLen
+  -> e:lbignum nLen
+  -> res:lbignum nLen
+  -> Stack unit
+     (requires fun h ->
+      live h p /\ live h e /\ live h res /\
+      disjoint p res /\ disjoint e res /\
+      isprm (as_snat h p) /\
+      as_snat h e > 0 /\
+      nat_fits (as_snat h e) nLen /\
+      nat_fits (exp (as_snat h p) (as_snat h e)) nLen)
+     (ensures fun h0 _ h1 ->
+      modifies1 res h0 h1 /\
+      as_snat h1 res = carm_pe (as_snat h0 p) (as_snat h0 e))
+let carm_pe #nLen p e res =
+  bn_len_s_fits nLen;
+
+  push_frame ();
+
+  let e' = bn_copy e in
+  let one:lbignum 1ul = bn_one #1ul in
+  bn_sub_exact e' one e';
+
+  let tmp = create nLen (u64 0) in
+
+  let hp = FStar.HyperStack.ST.get () in
+  exp_sub (as_snat hp p) (as_snat hp e') (as_snat hp e);
+  nat_fits_trans (exp (as_snat hp p) (as_snat hp e'))
+                 (exp (as_snat hp p) (as_snat hp e))
+                 nLen;
+
+  bn_exp p e res;
+  bn_exp p e' tmp;
+
+  bn_sub_exact res tmp res;
+
+  pop_frame ()
