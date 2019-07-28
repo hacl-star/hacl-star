@@ -967,6 +967,11 @@ let rec nexp_exp g e1 e2 = match e2 with
     nexp_exp g e1 (e2 - 1)
   end
 
+val nexp_greater_than_power: g:pos{g>1} -> e:nat -> Lemma
+  (nexp g e > e)
+let rec nexp_greater_than_power g e =
+  if e = 0 then () else nexp_greater_than_power g (e-1)
+
 val exp: nat -> e:nat -> Tot nat (decreases e)
 let rec exp g e =
   if e = 0 then 1
@@ -1052,6 +1057,9 @@ let rec exp_order_lemma_strict g e1 e2 =
     exp_mul1 g (e2-1) 1
   end
 
+val exp_greater_than_power: g:pos{g>1} -> e:nat -> Lemma (exp g e > e)
+let exp_greater_than_power g e =
+  nexp_greater_than_power g e; from_naive_exp g e
 
 // Naive modular exp
 val nmexp: #n:big -> fe n -> e:nat -> Tot (fe n) (decreases e)
@@ -1130,12 +1138,6 @@ let rec to_fe_nmexp1 #n k g e = match e with
     to_fe_mul #m g (nmexp g (e-1))
   end
 
-//val to_fe_mul: #n:big -> a:nat -> b:nat -> Lemma
-//  (to_fe #n (a * b) = to_fe a *% to_fe b)
-//let to_fe_mul #n a b = modulo_mul_distributivity a b n
-
-//val to_fe_nmexp2: #n:big -> k:big{ k > n } -> g:fe n -> e:nat -> Lemma
-//  (to_fe #(n/k) (nmexp g e) = nmexp (to_fe #(n/k) g) e)
 
 // Define mexp' for composite n and for unit g.
 val mexp: #n:big -> fe n -> e:nat -> Tot (fe n) (decreases e)
