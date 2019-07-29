@@ -880,8 +880,8 @@ let add_modq_ out x y =
   let t     = x &. u64 0xffffffffffffff in
   let x3 = t in let x4 = y +. carry in
   Hacl.Bignum25519.make_u64_5 tmp x0 x1 x2 x3 x4;
-  subm_conditional out tmp;
   admit();
+  subm_conditional out tmp;
   pop_frame()
 
 let add_modq out x y = admit(); add_modq_ out x y
