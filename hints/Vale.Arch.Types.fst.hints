@@ -1,5 +1,5 @@
 [
-  "∏Ãk`\u000eiC\u0002ÉPW\nsõ•ˆ",
+  "a£z5C¯Ã\u0019ù˙L\"\\&îI",
   [
     [
       "Vale.Arch.Types.lemma_BitwiseXorCommutative",
@@ -34,7 +34,7 @@
         "typing_Vale.Def.Types_s.ixor"
       ],
       0,
-      "7302aac8d84163382ae2ff1eacea71fc"
+      "ce9344aa92b07807d640438fbaf1b5f5"
     ],
     [
       "Vale.Arch.Types.lemma_BitwiseXorWithZero",
@@ -75,7 +75,7 @@
         "typing_FStar.UInt.to_vec", "typing_Vale.Def.Types_s.ixor"
       ],
       0,
-      "834d702485ff7fb1d1bc5f0b629d4518"
+      "373163c40f3f77f59bd1940eeca5d7b4"
     ],
     [
       "Vale.Arch.Types.lemma_BitwiseXorCancel",
@@ -115,7 +115,7 @@
         "typing_FStar.UInt.to_vec", "typing_Prims.pow2"
       ],
       0,
-      "b02deed2d4d157fb3eba129ac0edaedb"
+      "ab453833cb5ecf2bda6cc21fbf09f7a6"
     ],
     [
       "Vale.Arch.Types.lemma_BitwiseXorCancel64",
@@ -155,7 +155,7 @@
         "typing_FStar.UInt.to_vec", "typing_Prims.pow2"
       ],
       0,
-      "e74065da8f550291f83855c2b657307c"
+      "a7d54f62ba84a7b136287a7c38161e61"
     ],
     [
       "Vale.Arch.Types.lemma_BitwiseXorAssociative",
@@ -193,7 +193,7 @@
         "typing_FStar.UInt.to_vec", "typing_Vale.Def.Types_s.ixor"
       ],
       0,
-      "3d30f3bc78110885df12687a6eea27ee"
+      "a8f9b905553aaf4ae6cd3a1886521c7f"
     ],
     [
       "Vale.Arch.Types.xor_lemmas",
@@ -202,7 +202,7 @@
       0,
       [ "@query" ],
       0,
-      "abe778e4c0cfefd36c99675dc602a8b7"
+      "61127a20a438e8e1c3f9af0764be0f37"
     ],
     [
       "Vale.Arch.Types.lemma_quad32_xor",
@@ -221,7 +221,7 @@
         "token_correspondence_Vale.Def.Types_s.quad32_xor_def"
       ],
       0,
-      "14e5295f4c384eb59bd6d9914d84b091"
+      "74f71bfa376dd7d654862313bdcc6964"
     ],
     [
       "Vale.Arch.Types.lemma_reverse_reverse_bytes_nat32",
@@ -256,7 +256,7 @@
         "typing_Vale.Def.Types_s.nat32_to_be_bytes"
       ],
       0,
-      "aacccf9dc38c707cab114a66f2e48d32"
+      "652c125c2980dacda5ac2cf731b2bc12"
     ],
     [
       "Vale.Arch.Types.lemma_reverse_bytes_quad32",
@@ -279,7 +279,77 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "1cd2fbeea05367531d44f6f4e0456ecb"
+      "93ae7a8e9ab17601d5d8ed06eda5d8d7"
+    ],
+    [
+      "Vale.Arch.Types.lemma_reverse_bytes_nat32",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "FStar.Seq.Base_interpretation_Tm_arrow_44bb45ed5c2534b346e0f58ea5033251",
+        "Vale.Lib.Seqs_s_interpretation_Tm_arrow_5ead088aae36f5466dc4f492316985f2",
+        "equation_Prims.nat", "equation_Prims.pos",
+        "equation_Vale.Def.Types_s.be_bytes_to_nat32",
+        "equation_Vale.Def.Types_s.nat32_to_be_bytes",
+        "equation_Vale.Def.Types_s.reverse_bytes_nat32",
+        "equation_Vale.Def.Types_s.reverse_bytes_nat32_def",
+        "equation_Vale.Def.Words.Seq_s.seq4",
+        "equation_Vale.Def.Words.Seq_s.seq_to_four_BE",
+        "equation_Vale.Def.Words.Seq_s.seqn",
+        "equation_Vale.Def.Words_s.nat32", "equation_Vale.Def.Words_s.nat8",
+        "equation_Vale.Def.Words_s.natN",
+        "equation_Vale.Lib.Seqs_s.reverse_seq",
+        "function_token_typing_Vale.Def.Opaque_s.make_opaque",
+        "function_token_typing_Vale.Def.Words_s.nat8", "int_typing",
+        "interpretation_Tm_abs_e33894a065c7d8cf9373282d9aa6a27c",
+        "lemma_FStar.Seq.Base.init_index_",
+        "lemma_Vale.Def.Words.Seq.nat_to_four_to_nat",
+        "proj_equation_Vale.Def.Words_s.Mkfour_hi2",
+        "proj_equation_Vale.Def.Words_s.Mkfour_hi3",
+        "proj_equation_Vale.Def.Words_s.Mkfour_lo0",
+        "proj_equation_Vale.Def.Words_s.Mkfour_lo1",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_Vale.Def.Words_s.Mkfour_a",
+        "projection_inverse_Vale.Def.Words_s.Mkfour_hi2",
+        "projection_inverse_Vale.Def.Words_s.Mkfour_hi3",
+        "projection_inverse_Vale.Def.Words_s.Mkfour_lo0",
+        "projection_inverse_Vale.Def.Words_s.Mkfour_lo1",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_5834f17226f258d10f6cc5e617bb0da1",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
+        "refinement_interpretation_Tm_refine_d83f8da8ef6c1cb9f71d1465c1bb1c55",
+        "refinement_interpretation_Tm_refine_fae547c0c57b476075b6de4468df2cfa",
+        "token_correspondence_Vale.Def.Types_s.reverse_bytes_nat32_def",
+        "typing_FStar.Seq.Base.length", "typing_Prims.pow2",
+        "typing_Tm_abs_e33894a065c7d8cf9373282d9aa6a27c",
+        "typing_Vale.Def.Types_s.nat32_to_be_bytes",
+        "typing_Vale.Def.Words.Seq_s.four_to_seq_BE",
+        "typing_Vale.Def.Words.Seq_s.seq_to_four_BE",
+        "typing_Vale.Def.Words_s.__proj__Mkfour__item__hi3"
+      ],
+      0,
+      "8f34ab92a27b11138777ee6c55deb40a"
+    ],
+    [
+      "Vale.Arch.Types.lemma_reverse_bytes_quad32_zero",
+      1,
+      1,
+      0,
+      [
+        "@query", "equation_Vale.Def.Words.Four_s.four_reverse",
+        "equation_Vale.Def.Words_s.nat32",
+        "projection_inverse_Vale.Def.Words_s.Mkfour_hi2",
+        "projection_inverse_Vale.Def.Words_s.Mkfour_hi3",
+        "projection_inverse_Vale.Def.Words_s.Mkfour_lo0",
+        "projection_inverse_Vale.Def.Words_s.Mkfour_lo1"
+      ],
+      0,
+      "cceaf7132c2cdea3595d5649b617c6a0"
     ],
     [
       "Vale.Arch.Types.lemma_reverse_reverse_bytes_nat32_seq",
@@ -311,7 +381,7 @@
         "typing_Vale.Def.Types_s.reverse_bytes_nat32_seq"
       ],
       0,
-      "43c9087ec53983f44e527d5f9dcfe248"
+      "f5296294031c45419cc8d6d802efb6f7"
     ],
     [
       "Vale.Arch.Types.lemma_insert_nat64_properties",
@@ -349,7 +419,7 @@
         "token_correspondence_Vale.Def.Types_s.insert_nat64"
       ],
       0,
-      "4e58da35ea3d25baaee1d4e034677f1f"
+      "e0e2e7e42bb8ebbafaa7ec0d31c9b5ea"
     ],
     [
       "Vale.Arch.Types.lemma_insert_nat64_nat32s",
@@ -391,7 +461,7 @@
         "token_correspondence_Vale.Def.Types_s.insert_nat64"
       ],
       0,
-      "039687437d509b6a9636328dbc381afa"
+      "2e8596eb74bbd2fafde48e9d2a9a0687"
     ],
     [
       "Vale.Arch.Types.lemma_lo64_properties",
@@ -423,7 +493,7 @@
         "token_correspondence_Vale.Arch.Types.lo64_def"
       ],
       0,
-      "1cc149dfe4a4bc521c16ab9ff483fd90"
+      "ceff23a498947614c4a634be3fa5f4bc"
     ],
     [
       "Vale.Arch.Types.lemma_hi64_properties",
@@ -456,7 +526,7 @@
         "token_correspondence_Vale.Arch.Types.hi64_def", "typing_Prims.pow2"
       ],
       0,
-      "4e380f2a0c47ccaf3797fb1eb2ff2d6f"
+      "4cb74d2aed1f06fbf0bd25f5746238fe"
     ],
     [
       "Vale.Arch.Types.lemma_reverse_bytes_nat64_32",
@@ -487,7 +557,7 @@
         "typing_Prims.pow2"
       ],
       0,
-      "656c08e401d71d900b194da5adc2e763"
+      "5648106947130175455a1b6d55a45a39"
     ],
     [
       "Vale.Arch.Types.lemma_reverse_bytes_quad32_64",
@@ -535,7 +605,7 @@
         "typing_Vale.Def.Types_s.reverse_bytes_nat64"
       ],
       0,
-      "72160a280e0452ac5c69e66888bcc599"
+      "ed9e3971c461e06a4f1644bd3d659751"
     ],
     [
       "Vale.Arch.Types.lemma_equality_check_helper",
@@ -586,7 +656,7 @@
         "typing_Vale.Def.Words_s.int_to_natN"
       ],
       0,
-      "967f7f0fdac83fb973d266068383d72e"
+      "c0ab76ffeb52af2bee1272bfe8711556"
     ],
     [
       "Vale.Arch.Types.lemma_equality_check_helper_2",
@@ -621,7 +691,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "c82abf319bab6cd5e79918b97c46c5d7"
+      "a225ab67a4ffdbb6e323eabe5b28a60c"
     ],
     [
       "Vale.Arch.Types.push_pop_xmm",
@@ -688,7 +758,7 @@
         "typing_Vale.Def.Words_s.int_to_natN"
       ],
       0,
-      "8e5ccc5ff85898be03f5dc4ae0ae518a"
+      "48dfb68d4a298d0d5c2729a669c67378"
     ],
     [
       "Vale.Arch.Types.lemma_insrq_extrq_relations",
@@ -744,7 +814,7 @@
         "typing_Vale.Arch.Types.lo64_def"
       ],
       0,
-      "0eacdd07022b5e5cccea1c21264ab821"
+      "71f6b0840c78280f6fd7134efc94449b"
     ],
     [
       "Vale.Arch.Types.le_bytes_to_nat64_to_bytes",
@@ -753,7 +823,7 @@
       3,
       [ "@query" ],
       0,
-      "b496323bffa59d46051015246f3c2a2b"
+      "cc043d80818dac5d073edcddfeee0672"
     ],
     [
       "Vale.Arch.Types.le_bytes_to_nat64_to_bytes",
@@ -803,7 +873,7 @@
         "typing_Vale.Def.Words_s.natN"
       ],
       0,
-      "cabab4633e851a88b4eada9123e77c38"
+      "b439be0ffc5cfee58bf79087a5329057"
     ],
     [
       "Vale.Arch.Types.le_nat64_to_bytes_to_nat64",
@@ -815,7 +885,7 @@
         "refinement_interpretation_Tm_refine_8333610bdce3cc23e40345e003cba619"
       ],
       0,
-      "868c88f3726d0241e01777204b91cc8d"
+      "915fe5cd806a6d0228d817769aae369f"
     ],
     [
       "Vale.Arch.Types.le_nat64_to_bytes_to_nat64",
@@ -874,7 +944,7 @@
         "typing_Vale.Def.Words.Seq_s.seq_to_seq_four_LE"
       ],
       0,
-      "7f5a8eebb4e60a939e2c631569e524c0"
+      "0319c3bde6638a75ac40df74ac21509c"
     ],
     [
       "Vale.Arch.Types.le_bytes_to_seq_quad32_empty",
@@ -883,7 +953,7 @@
       3,
       [ "@query", "projection_inverse_BoxInt_proj_0" ],
       0,
-      "754db4272ed2f5dd23287a1c55a37085"
+      "035c779ff6659cafa06c706927405718"
     ],
     [
       "Vale.Arch.Types.le_bytes_to_seq_quad32_empty",
@@ -916,7 +986,7 @@
         "typing_Vale.Def.Words.Seq_s.seq_to_seq_four_LE"
       ],
       0,
-      "a2ed07fce6448f786e96c809a7e36191"
+      "7806f1c3070644283d71287167716b57"
     ],
     [
       "Vale.Arch.Types.le_bytes_to_seq_quad32_to_bytes_one_quad",
@@ -925,7 +995,7 @@
       0,
       [ "@query", "projection_inverse_BoxInt_proj_0" ],
       0,
-      "17210466d4d1147f7143dc0d18c4d3d6"
+      "d19f6f17c4f62c65277375c192f96f19"
     ],
     [
       "Vale.Arch.Types.le_bytes_to_seq_quad32_to_bytes_one_quad",
@@ -976,7 +1046,7 @@
         "typing_Vale.Def.Words.Seq_s.seq_to_seq_four_LE"
       ],
       0,
-      "ebb23fb738e0d05c46eb3862d6814391"
+      "32b058e907b4451e9dd692b7b5fed920"
     ],
     [
       "Vale.Arch.Types.le_bytes_to_seq_quad32_to_bytes",
@@ -988,7 +1058,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "35090beb8be9634785f53eb61dce44eb"
+      "08ad3f6a0141032a41902c4510c99d72"
     ],
     [
       "Vale.Arch.Types.le_bytes_to_seq_quad32_to_bytes",
@@ -1015,7 +1085,7 @@
         "typing_Vale.Def.Words.Seq_s.seq_four_to_seq_LE"
       ],
       0,
-      "2f8d0b2efe0fa74939a9132afc4bf6e1"
+      "d2a35e02ddb93f228540ff6a7e8f7599"
     ],
     [
       "Vale.Arch.Types.le_seq_quad32_to_bytes_to_seq_quad32",
@@ -1027,7 +1097,7 @@
         "refinement_interpretation_Tm_refine_d5e9774270c731544d7c87dd4dd7c2a0"
       ],
       0,
-      "42b8c71ab662913f7181580075e48b94"
+      "948b62648f931d06ab26f814f71e30ef"
     ],
     [
       "Vale.Arch.Types.le_seq_quad32_to_bytes_to_seq_quad32",
@@ -1073,7 +1143,7 @@
         "typing_Vale.Lib.Seqs_s.seq_map"
       ],
       0,
-      "ea7a8932c07e77896bfd748ef42cbe79"
+      "597d1ad02cd165c8dba55ca0f8883293"
     ],
     [
       "Vale.Arch.Types.le_quad32_to_bytes_to_quad32",
@@ -1085,7 +1155,7 @@
         "refinement_interpretation_Tm_refine_b31e3a3ba71ee334e7dd15a53b9eadcc"
       ],
       0,
-      "e7b83a39e546a0bfecc80e513cce3af0"
+      "35ae3baff5d595ba0fb61946168808d3"
     ],
     [
       "Vale.Arch.Types.le_quad32_to_bytes_to_quad32",
@@ -1125,7 +1195,7 @@
         "typing_Tm_abs_12f0bbc5cd2aeb167bc7e771b588a4ca"
       ],
       0,
-      "322f8b2520ccd22f3ce1cd3f75619028"
+      "16ab942b368634fd4e0a344430922f73"
     ],
     [
       "Vale.Arch.Types.le_seq_quad32_to_bytes_of_singleton",
@@ -1143,7 +1213,7 @@
         "token_correspondence_Vale.Def.Types_s.le_seq_quad32_to_bytes_def"
       ],
       0,
-      "29bb6b4cbd2bb769c94984599779e7c9"
+      "e57990e5701eb5eacf5071b78e37a8f4"
     ],
     [
       "Vale.Arch.Types.le_quad32_to_bytes_injective",
@@ -1178,7 +1248,7 @@
         "typing_Vale.Def.Words.Seq_s.four_to_seq_LE"
       ],
       0,
-      "fb43bcee92b1d1415518804ec48719f9"
+      "335541141fb67be206d13853b0448e88"
     ],
     [
       "Vale.Arch.Types.le_quad32_to_bytes_injective_specific",
@@ -1187,7 +1257,7 @@
       0,
       [ "@query" ],
       0,
-      "828e84cbda2fe027cc1ec2598e741bd0"
+      "3bd074c8026f742a92dd7efd87dd4e23"
     ],
     [
       "Vale.Arch.Types.le_seq_quad32_to_bytes_injective",
@@ -1229,7 +1299,7 @@
         "typing_Vale.Def.Words.Seq_s.seq_four_to_seq_LE"
       ],
       0,
-      "f62bbb996571640a7ab18051a299eb4c"
+      "d809150a1b24103ac5000e0976e20a28"
     ],
     [
       "Vale.Arch.Types.seq_to_four_LE_is_seq_to_seq_four_LE",
@@ -1244,7 +1314,7 @@
         "refinement_interpretation_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e"
       ],
       0,
-      "292b00a3788487043e0c04890aee7f6c"
+      "0683bceb83a4c4eaeeccce11595040b1"
     ],
     [
       "Vale.Arch.Types.seq_to_four_LE_is_seq_to_seq_four_LE",
@@ -1280,7 +1350,7 @@
         "typing_Vale.Def.Words.Seq_s.seq_to_four_LE"
       ],
       0,
-      "7129e5f49372e57a3ab8c76eb1062d10"
+      "a92f5e5ca934a77b7978f7fdd7aeab37"
     ],
     [
       "Vale.Arch.Types.le_bytes_to_seq_quad_of_singleton",
@@ -1292,7 +1362,7 @@
         "refinement_interpretation_Tm_refine_b31e3a3ba71ee334e7dd15a53b9eadcc"
       ],
       0,
-      "bece430aa013e03576327d1e7b77e243"
+      "805374e8ede34d2b19ef2dbc27dfe5b7"
     ],
     [
       "Vale.Arch.Types.le_bytes_to_seq_quad_of_singleton",
@@ -1334,7 +1404,7 @@
         "typing_Tm_abs_12f0bbc5cd2aeb167bc7e771b588a4ca"
       ],
       0,
-      "77518050e7959884429480e18e967bfb"
+      "463623d4270b6bbd8b705f2d93a0f0da"
     ],
     [
       "Vale.Arch.Types.le_bytes_to_quad32_to_bytes",
@@ -1343,7 +1413,7 @@
       0,
       [ "@query" ],
       0,
-      "f4b1ea8395a206faf42cdc5711d4bfca"
+      "c16e6d8d2b700157a4a9ba1a56c8407c"
     ],
     [
       "Vale.Arch.Types.le_bytes_to_quad32_to_bytes",
@@ -1365,7 +1435,7 @@
         "typing_FStar.Seq.Base.create"
       ],
       0,
-      "0bb0885f5cc7cfcefb921ed1f142990e"
+      "efe35db9d08dc67aa74c0b9a9320d79f"
     ],
     [
       "Vale.Arch.Types.be_quad32_to_bytes",
@@ -1398,7 +1468,7 @@
         "typing_Vale.Def.Words.Seq_s.four_to_seq_BE"
       ],
       0,
-      "9817bc224d76720276db86c79c1ee673"
+      "d2b338c1f250f442da54746049bdbccd"
     ],
     [
       "Vale.Arch.Types.be_bytes_to_quad32_to_bytes",
@@ -1415,7 +1485,7 @@
         "typing_Vale.Arch.Types.be_quad32_to_bytes"
       ],
       0,
-      "504c602f3c233d9f56c2d75af3ef1456"
+      "f8ca012145a949973788349078a40230"
     ],
     [
       "Vale.Arch.Types.be_bytes_to_quad32_to_bytes",
@@ -1471,7 +1541,7 @@
         "typing_Vale.Def.Words_s.__proj__Mkfour__item__lo1"
       ],
       0,
-      "55a645096869a6e011891d1b00dbc97f"
+      "3d8ce406e98bace8f2d2610d543f158a"
     ],
     [
       "Vale.Arch.Types.lemma_reverse_reverse_bytes_nat32_quad32",
@@ -1501,7 +1571,7 @@
         "typing_Vale.Def.Words_s.__proj__Mkfour__item__lo1"
       ],
       0,
-      "5caf4b0c84796dd9d481de1ed009400e"
+      "5e24cedff9f3f5b79db0f2b17e28d6ca"
     ],
     [
       "Vale.Arch.Types.lemma_reverse_reverse_bytes_nat32_quad32_seq",
@@ -1513,7 +1583,7 @@
         "lemma_Vale.Arch.Types.lemma_reverse_reverse_bytes_nat32_quad32"
       ],
       0,
-      "0799cab04bfcd9b67f4c6589e146ecb3"
+      "4d44bd94f4cf052afcf56f68e439da46"
     ],
     [
       "Vale.Arch.Types.lemma_reverse_reverse_bytes_quad32_seq",
@@ -1525,7 +1595,7 @@
         "lemma_Vale.Arch.Types.lemma_reverse_bytes_quad32"
       ],
       0,
-      "49490af6466dd3e8ca912ace9e394b9f"
+      "426382067241e7e24f334695af8cca3e"
     ],
     [
       "Vale.Arch.Types.lemma_le_seq_quad32_to_bytes_length",
@@ -1534,7 +1604,7 @@
       0,
       [ "@query", "lemma_Vale.Def.Types_s.le_seq_quad32_to_bytes_length" ],
       0,
-      "fcb5ed6f05b0beb7cf68481dae51efff"
+      "8717d39166e250adb404750379479a94"
     ],
     [
       "Vale.Arch.Types.slice_commutes_seq_four_to_seq_LE",
@@ -1555,7 +1625,7 @@
         "typing_Vale.Def.Words.Seq_s.seq_four_to_seq_LE"
       ],
       0,
-      "756d1e855aea2700cf0d5797f04451ea"
+      "fb6f277c230a65782c28d912ffe827f2"
     ],
     [
       "Vale.Arch.Types.slice_commutes_seq_four_to_seq_LE",
@@ -1598,7 +1668,7 @@
         "typing_Vale.Def.Words.Seq_s.seq_four_to_seq_LE"
       ],
       0,
-      "cc8ba36b35403f54706725ae1d1e062c"
+      "3af4d1b072b10eefd25aa732391736d3"
     ],
     [
       "Vale.Arch.Types.slice_commutes_le_seq_quad32_to_bytes",
@@ -1617,7 +1687,7 @@
         "refinement_interpretation_Tm_refine_c064a9ee86fe2a45597a2563ec269cee"
       ],
       0,
-      "a27bc119c9d108908d7cf42e30800c08"
+      "452b8e304fc647737d7c4c49748b153d"
     ],
     [
       "Vale.Arch.Types.slice_commutes_le_seq_quad32_to_bytes",
@@ -1657,7 +1727,7 @@
         "typing_Vale.Def.Words.Seq_s.seq_four_to_seq_LE"
       ],
       0,
-      "cac00583586d5c44539154372c2b93c3"
+      "2d11bfea1bd2e3b2c57b6ad81a113d70"
     ],
     [
       "Vale.Arch.Types.slice_commutes_le_seq_quad32_to_bytes0",
@@ -1675,7 +1745,7 @@
         "refinement_interpretation_Tm_refine_c064a9ee86fe2a45597a2563ec269cee"
       ],
       0,
-      "3722762dc690d2db0bfc60324861d09e"
+      "ee0809ef42dd0008621809b720042903"
     ],
     [
       "Vale.Arch.Types.slice_commutes_le_seq_quad32_to_bytes0",
@@ -1697,7 +1767,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "821ae87c9f80d2a08dadd8c6a6d3cbb2"
+      "c45ef4426d338581ba3849319ed145dc"
     ],
     [
       "Vale.Arch.Types.append_distributes_le_bytes_to_seq_quad32",
@@ -1714,7 +1784,7 @@
         "refinement_interpretation_Tm_refine_d5e9774270c731544d7c87dd4dd7c2a0"
       ],
       0,
-      "dbd436013284945efa238df3454ace7f"
+      "aa7d1039e83369a109d15c6dd1226e19"
     ],
     [
       "Vale.Arch.Types.append_distributes_le_bytes_to_seq_quad32",
@@ -1752,7 +1822,7 @@
         "typing_Vale.Def.Words.Seq_s.seq_to_seq_four_LE"
       ],
       0,
-      "f1e3f63e972e7735ae83c399fa206094"
+      "70051f6c3d9c14fb3dd85cb670b4e941"
     ],
     [
       "Vale.Arch.Types.append_distributes_le_seq_quad32_to_bytes",
@@ -1774,7 +1844,7 @@
         "token_correspondence_Vale.Def.Types_s.le_seq_quad32_to_bytes_def"
       ],
       0,
-      "4928f6888ce0ee0c2aaab2b196246c00"
+      "5a25d1cdf154cb86274a79c37814ffda"
     ]
   ]
 ]
