@@ -604,7 +604,7 @@ procedure Gcm_blocks_wrapped(
     {:quick exportOnly}
     lets
         auth_ptr @= rdi; auth_num_bytes @= rsi; auth_len @= rdx; keys_ptr @= rcx; scratch_ptr @= rbp;
-        iv_ptr @= r8; Xip @= r9;
+        iv_ptr @= r8; Xip @= r9; hash @= xmm8;
 
         abytes_ptr      := load_stack64(rsp + offset +  0, stack);
         in128x6_ptr     := load_stack64(rsp + offset + 8, stack);
@@ -728,11 +728,10 @@ procedure Gcm_blocks_wrapped(
         cipher_bytes ==
             gcm_decrypt_LE(alg, seq_nat32_to_seq_nat8_LE(key), iv,
                            plain_bytes, auth_bytes, expected_tag)._1 /\
-        le_quad32_to_bytes(xmm1) ==
+        le_quad32_to_bytes(hash) ==
             gcm_decrypt_LE_tag(alg, seq_nat32_to_seq_nat8_LE(key), iv,
                            plain_bytes, auth_bytes);
 {
-    assume false;
     Gcm_blocks(alg, offset, auth_b, abytes_b, in128x6_b, out128x6_b, in128_b, out128_b, inout_b, iv_b, scratch_b, key, round_keys, keys_b, hkeys_b);
 
     gcm_blocks_dec_helper_simplified(alg, key, old(s128(mem, auth_b)), old(s128(mem, abytes_b)),
@@ -741,7 +740,7 @@ procedure Gcm_blocks_wrapped(
                                      old(plain_num_bytes), old(auth_num_bytes),
                                      iv, old(buffer128_read(iv_b, 0, mem)),
                                      reverse_bytes_quad32(buffer128_read(hkeys_b, 2, mem)),
-                                     xmm1,
+                                     hash,
                                      reverse_bytes_quad32(insert_nat64_opaque(insert_nat64_opaque(Mkfour(0, 0, 0, 0), #nat64(8 * old(auth_num_bytes)), 1), #nat64(8 * old(plain_num_bytes)), 0)));
 
     let auth_raw_quads := old(append(s128(mem, auth_b), s128(mem, abytes_b)));
@@ -751,7 +750,7 @@ procedure Gcm_blocks_wrapped(
                                      s128(mem, out128x6_b), s128(mem, out128_b), s128(mem, inout_b),
                                      auth_bytes, expected_tag,
                                      old(plain_num_bytes),
-                                     iv, reverse_bytes_quad32(old(buffer128_read(iv_b, 0, mem))));
+                                     iv, old(buffer128_read(iv_b, 0, mem)));
 
 }
 
@@ -810,6 +809,8 @@ procedure gcm_blocks_decrypt_stdcall(
         cipher_num_bytes := if win then load_stack64(rsp + 40 + 80, stack) else load_stack64(rsp + 8 + 64, stack);
         scratch_ptr     := if win then load_stack64(rsp + 40 + 88, stack) else load_stack64(rsp + 8 + 72, stack);
         tag_ptr         := if win then load_stack64(rsp + 40 + 96, stack) else load_stack64(rsp + 8 + 80, stack);
+
+        hash @= xmm8;
 
     reads memTaint;
     modifies
@@ -981,7 +982,6 @@ procedure gcm_blocks_decrypt_stdcall(
         !win ==> r14 == old(r14);
         !win ==> r15 == old(r15);
 {
-    assume false;
     lemma_hkeys_reqs_pub_priv(s128(mem, hkeys_b), reverse_bytes_quad32(aes_encrypt_LE(alg, key, Mkfour(0,0,0,0))));
     assert win ==> valid_src_stack64(rsp + 40, stack);
     assert !win ==> valid_src_stack64(rsp + 80, stack);
@@ -1023,14 +1023,14 @@ procedure gcm_blocks_decrypt_stdcall(
                old(le_quad32_to_bytes(buffer128_read(tag_b, 0, mem)))
                );
 
-    // Auth tag is still in xmm1, so load it for comparison purposes
+    // Auth tag is still in hash (xmm8), so load it for comparison purposes
     Load64_stack(r15, rsp, if win then 224 + 40 + 96 else 64 + 8 + 80);
     Load128_buffer(xmm0, r15, 0, Secret, tag_b, 0);
     assert xmm0 == buffer128_read(tag_b, 0, mem);       // OBSERVE?
     assert xmm0 == buffer128_read(tag_b, 0, old(mem));  // OBSERVE?
     let alleged_tag_quad := xmm0;
-    let computed_tag := xmm1;
-    XmmEqual();
+    let computed_tag := hash;
+    XmmEqual(xmm0, hash);
 
     let auth_raw_quads := old(append(s128(mem, auth_b), s128(mem, abytes_b)));
     let auth_bytes := slice(le_seq_quad32_to_bytes(auth_raw_quads), 0, old(auth_num_bytes));

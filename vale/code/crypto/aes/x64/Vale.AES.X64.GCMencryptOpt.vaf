@@ -1206,7 +1206,7 @@ procedure Gcm_blocks_wrapped(
     {:quick}
     lets
         auth_ptr @= rdi; auth_num_bytes @= rsi; auth_len @= rdx; keys_ptr @= rcx; scratch_ptr @= rbp;
-        iv_ptr @= r8; Xip @= r9;
+        iv_ptr @= r8; Xip @= r9; hash @= xmm8;
 
         abytes_ptr      := load_stack64(rsp + offset +  0, stack);
         in128x6_ptr     := load_stack64(rsp + offset + 8, stack);
@@ -1334,11 +1334,10 @@ procedure Gcm_blocks_wrapped(
         cipher_bytes ==
             gcm_encrypt_LE(alg, seq_nat32_to_seq_nat8_LE(key), iv,
                            plain_bytes, auth_bytes)._1 /\
-        le_quad32_to_bytes(xmm1) ==
+        le_quad32_to_bytes(hash) ==
             gcm_encrypt_LE(alg, seq_nat32_to_seq_nat8_LE(key), iv,
                            plain_bytes, auth_bytes)._2;
 {
-    assume false;
 //    let iv_LE := old(buffer128_read(iv_b, 0, mem));
 //    let iv_BE := reverse_bytes_quad32(iv_LE);
 //    //let ctr_BE_1:quad32 := Mkfour(1, iv_BE.lo1, iv_BE.hi2, iv_BE.hi3);
@@ -1404,7 +1403,7 @@ procedure Gcm_blocks_wrapped(
             raw_quad_seq;
     let auth_quad_seq' := append(raw_quad_seq, create(1, length_quad));
     assert test == auth_quad_seq';
-    assert xmm1 == gctr_encrypt_block(ctr_BE_1, ghash_LE(h, #ghash_plain_LE(auth_quad_seq')), alg, key, 0);
+    assert hash == gctr_encrypt_block(ctr_BE_1, ghash_LE(h, #ghash_plain_LE(auth_quad_seq')), alg, key, 0);
 */
     gcm_blocks_helper_simplified(alg, key, old(s128(mem, auth_b)), old(s128(mem, abytes_b)),
                                  old(s128(mem, in128x6_b)), old(s128(mem, in128_b)), old(s128(mem, inout_b)),
@@ -1412,7 +1411,7 @@ procedure Gcm_blocks_wrapped(
                                  old(plain_num_bytes), old(auth_num_bytes),
                                  iv, old(buffer128_read(iv_b, 0, mem)),
                                  reverse_bytes_quad32(buffer128_read(hkeys_b, 2, mem)),
-                                 xmm8,
+                                 hash,
                                  reverse_bytes_quad32(insert_nat64_opaque(insert_nat64_opaque(Mkfour(0, 0, 0, 0), #nat64(8 * old(auth_num_bytes)), 1), #nat64(8 * old(plain_num_bytes)), 0)));
 }
 
@@ -1631,7 +1630,8 @@ procedure gcm_blocks_stdcall(
         plain_num_bytes := if win then load_stack64(rsp + 40 + 80, stack) else load_stack64(rsp + 8 + 64, stack);
         scratch_ptr     := if win then load_stack64(rsp + 40 + 88, stack) else load_stack64(rsp + 8 + 72, stack);
         tag_ptr         := if win then load_stack64(rsp + 40 + 96, stack) else load_stack64(rsp + 8 + 80, stack);
-
+        
+        hash @= xmm8;
     reads memTaint;
     modifies
         rax; rbx; rcx; rdx; rdi; rsi; rsp; rbp; r8; r9; r10; r11; r12; r13; r14; r15;
@@ -1812,7 +1812,6 @@ procedure gcm_blocks_stdcall(
         !win ==> r14 == old(r14);
         !win ==> r15 == old(r15);
 {
-    assume false;
     lemma_hkeys_reqs_pub_priv(s128(mem, hkeys_b), reverse_bytes_quad32(aes_encrypt_LE(alg, key, Mkfour(0,0,0,0))));
     assert win ==> valid_src_stack64(rsp + 40, stack);
     assert !win ==> valid_src_stack64(rsp + 80, stack);
@@ -1852,9 +1851,9 @@ procedure gcm_blocks_stdcall(
                keys_b,
                hkeys_b);
 
-    // Auth tag is still in xmm1, so save it to memory
+    // Auth tag is still in hash (xmm8), so save it to memory
     Load64_stack(r15, rsp, if win then 224 + 40 + 96 else 64 + 8 + 80);
-    Store128_buffer(r15, xmm1, 0, Secret, tag_b, 0);
+    Store128_buffer(r15, hash, 0, Secret, tag_b, 0);
 
     restore_registers(win, old(rsp), old(xmm6), old(xmm7), old(xmm8), old(xmm9), old(xmm10), old(xmm11), old(xmm12), old(xmm13), old(xmm14), old(xmm15));
 }
