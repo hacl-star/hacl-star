@@ -15,8 +15,8 @@ module U32 = FStar.UInt32
 
 open MPFR.Maths
 open MPFR.Dyadic
-open MPFR.Lib.Spec
-open MPFR.Round.Spec
+open MPFR.Spec.Lib
+open MPFR.Spec.Round
 
 include MPFR.RoundingMode
 
@@ -65,36 +65,43 @@ val mpfr_PREC_MAX: p:i64{I64.v p = mpfr_PREC_MAX_spec}
 let mpfr_PREC_MAX = 0x7ffffffffffffeffL
 
 (* exponent *)
+inline_for_extraction
 val mpfr_EXP_MAX:  x:i64{I64.v x = pow2 63 - 1}
 let mpfr_EXP_MAX =
     assert_norm(0x7fffffffffffffff = pow2 63 - 1);
     0x7fffffffffffffffL
 
+inline_for_extraction
 val mpfr_EXP_ZERO: x:i64{I64.v x = 0 - I64.v mpfr_EXP_MAX}
 let mpfr_EXP_ZERO = 
     assert_norm(-0x7fffffffffffffff = 1 - pow2 63);
     -0x7fffffffffffffffL
 
+inline_for_extraction
 val mpfr_EXP_NAN:  x:i64{I64.v x = 1 - I64.v mpfr_EXP_MAX}
 let mpfr_EXP_NAN  = 
     assert_norm(-0x7ffffffffffffffe = 2 - pow2 63);
     -0x7ffffffffffffffeL
 
+inline_for_extraction
 val mpfr_EXP_INF:  x:i64{I64.v x = 2 - I64.v mpfr_EXP_MAX}
 let mpfr_EXP_INF  =
     assert_norm(-0x7ffffffffffffffd = 3 - pow2 63);
     -0x7ffffffffffffffdL
 
+inline_for_extraction
 val mpfr_EXP_INVALID: x:i64{I64.v x = pow2 62}
 let mpfr_EXP_INVALID =
     assert_norm(0x4000000000000000 = pow2 62);
     0x4000000000000000L
 
+inline_for_extraction
 val mpfr_EMIN: x:i64{I64.v x = mpfr_EMIN_spec}
 let mpfr_EMIN = 
     assert_norm(-0x000000003fffffff = 1 - pow2 30);
     -0x000000003fffffffL
 
+inline_for_extraction
 val mpfr_EMAX: x:i64{I64.v x = mpfr_EMAX_spec}
 let mpfr_EMAX = 
     assert_norm(0x000000003fffffff = pow2 30 - 1);

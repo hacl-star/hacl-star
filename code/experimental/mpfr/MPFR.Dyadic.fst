@@ -232,6 +232,30 @@ let dyadic_le_trans_lemma a b c =
     lemma_pow2_mul (c.exponent - elbac) (elbac - elb);
     lemma_pow2_mul (c.exponent - elbbc) (elbbc - elb)
 
+val dyadic_lt_exp_lemma: a:int -> b:int -> Lemma
+    (requires (a<b))
+    (ensures (mk_dyadic 1 a <. mk_dyadic 1 b ))
+
+let dyadic_lt_exp_lemma a b=()
+
+val dyadic_le_exp_lemma: a:int -> b:int -> Lemma
+    (requires (a<=b))
+    (ensures (mk_dyadic 1 a <=. mk_dyadic 1 b ))
+
+let dyadic_le_exp_lemma a b=()
+
+val dyadic_lt_limb_lemma: a:int -> b:int -> e:int -> Lemma
+    (requires (a<b))
+    (ensures (mk_dyadic a e <. mk_dyadic b e ))
+
+let dyadic_lt_limb_lemma a b e=()
+
+val dyadic_le_limb_lemma: a:int -> b:int -> e:int -> Lemma
+    (requires (a<=b))
+    (ensures (mk_dyadic a e <=. mk_dyadic b e ))
+
+let dyadic_le_limb_lemma a b e=()
+
 val fadd_eq_lemma: a:dyadic -> b:dyadic -> c:dyadic -> Lemma
     (requires (b =. c))
     (ensures  (a +. b =. a +. c))

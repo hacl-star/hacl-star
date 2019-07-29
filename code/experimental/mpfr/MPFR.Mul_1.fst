@@ -7,9 +7,9 @@ open FStar.Buffer
 open FStar.UInt64
 open FStar.Int.Cast
 open MPFR.Dyadic
-open MPFR.Lib.Spec
-open MPFR.Mul.Spec
-open MPFR.Round.Spec
+open MPFR.Spec.Lib
+open MPFR.Spec.Mul
+open MPFR.Spec.Round
 open MPFR.Maths
 
 open MPFR.Umul_ppmm
@@ -137,7 +137,6 @@ let mpfr_mul_1 a b c rnd_mode p =
     let c0 = cp.(0ul) in
     let sh = I64.(gmp_NUMB_BITS -^ p) in
     let mask = mpfr_LIMB_MASK (int64_to_uint32 sh) in
-    admit();
     let ax = I64.(mpfr_EXP b +^ mpfr_EXP c) in
     let a0, sb = umul_ppmm b0 c0 in
     let ax, a0, sb =

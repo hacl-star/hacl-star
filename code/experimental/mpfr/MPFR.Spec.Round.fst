@@ -1,12 +1,12 @@
-module MPFR.Round.Spec
+module MPFR.Spec.Round
 
 open FStar.Mul
 open FStar.UInt
 open MPFR.Dyadic
-open MPFR.Lib.Spec
+open MPFR.Spec.Lib
 open MPFR.Maths
 
-#set-options "--z3refresh --z3rlimit 100 --max_fuel 1 --initial_fuel 0 --max_ifuel 1 --initial_ifuel 0"
+#set-options "--z3refresh --z3rlimit 40 --max_fuel 1 --initial_fuel 0 --max_ifuel 1 --initial_ifuel 0"
    
 (* ulp definition *)
 let ulp_p (a:normal_fp) (p:pos) = unit_dyadic (a.exp - p)
@@ -164,7 +164,6 @@ val rndu_def: a:normal_fp -> p:pos ->
         eval r >=. eval a /\ eval a >. eval r -. ulp_p a p})
 
 let rndu_def a p =
-    admit();
     if eval a =. eval (rndz_def a p) || eval a <. zero_dyadic then rndz_def a p
     else add_one_ulp (rndz_def a p)
 
@@ -305,7 +304,6 @@ val mpfr_round2_cond_refl_lemma: a:mpfr_fp{valid_fp_cond a /\ normal_fp_cond a} 
     [SMTPat (mpfr_round2_cond a rnd_mode a)]
 
 let mpfr_round2_cond_refl_lemma a rnd_mode =
-    admit();
     exp_impl_no_overflow_lemma a;
     exp_impl_no_underflow_lemma a;
     assert(a:normal_fp)

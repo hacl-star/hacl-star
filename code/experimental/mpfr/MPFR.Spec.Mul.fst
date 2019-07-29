@@ -1,8 +1,8 @@
-module MPFR.Mul.Spec
+module MPFR.Spec.Mul
 
 open FStar.Mul
 open MPFR.Dyadic
-open MPFR.Lib.Spec
+open MPFR.Spec.Lib
 open MPFR.Maths
 
 #set-options "--z3refresh --z3rlimit 15 --max_fuel 1 --initial_fuel 0 --max_ifuel 1 --initial_ifuel 0"

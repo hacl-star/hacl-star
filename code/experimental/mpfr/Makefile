@@ -72,23 +72,25 @@ KREMLIN=$(KREMLIN_HOME)/krml
 # We use -drop (deprecated) only to avoid creating unnecessary .c,.h files
 $(GENERATED_DIR)/MPFR.c: $(ALL_KRML_FILES) | .depend
 	$(KREMLIN) $(KREMLIN_TESTLIB) -skip-compilation \
+	-library 'MPRF.Lib.Clz' \
 	-bundle 'Lib.*' \
 	-bundle 'Spec.\*' \
-	-bundle 'MPFR=*' \
+	-bundle 'MPFR=MPFR.*' \
 	-bundle 'FStar.*' \
-	-drop 'Lib.IntVector.Intrinsics,LowStar,Spec,Prims,Lib,C.Loops.*,Hacl.Spec.*' \
+	-drop 'FStar.*,Lib.IntVector.Intrinsics,LowStar,Spec,Prims,Lib,C.Loops.*,Hacl.Spec.*,MPFR.Spec.*,MPFR.Lib.Clz,Test.MPFR' \
 	-tmpdir $(GENERATED_DIR) \
 	$^
 
 $(GENERATED_DIR)/Test_MPFR.c: $(ALL_KRML_FILES) | .depend
 	$(KREMLIN) $(KREMLIN_TESTLIB) -skip-compilation \
 	-no-prefix 'Test.MPFR' \
+	-add-include '"MPFR.h"' \
 	-library MPFR \
 	-bundle 'Lib.*' \
 	-bundle 'Spec.\*' \
-	-bundle 'Test.MPFR=*' \
+	-bundle 'Test.MPFR=Test.MPFR' \
 	-bundle 'FStar.*' \
-	-drop 'Lib.IntVector.Intrinsics,LowStar,Spec,Prims,Lib,C.Loops.*,Hacl.Spec.*' \
+	-drop 'FStar.*,Lib.IntVector.Intrinsics,LowStar,Spec,Prims,Lib,C.Loops.*,Hacl.Spec.*,MPFR,MPFR.*' \
 	-tmpdir $(GENERATED_DIR) \
 	$^
 
@@ -143,7 +145,7 @@ CFLAGS += $(addprefix -I ,$(INCLUDE_DIRS))
 -include $(patsubst %.c,%.d,$(ALL_SOURCES))
 
 mpfr.exe:
-	$(CC) $(CFLAGS) $(GENERATED_DIR)/MPFR.c $(GENERATED_DIR)/Test_MPFR.c -L $(KREMLIN_HOME)/kremlib/dist/generic -lkremlib -o mpfr.exe
+	$(CC) $(CFLAGS) $(GENERATED_DIR)/MPFR.c $(GENERATED_DIR)/Test_MPFR.c include/MPFR_Lib_Clz.c -L $(KREMLIN_HOME)/kremlib/dist/generic -lkremlib -o mpfr.exe
 	./mpfr.exe
 
 .PRECIOUS: %.o

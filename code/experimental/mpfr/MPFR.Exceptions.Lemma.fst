@@ -5,8 +5,8 @@ open FStar.UInt64
 
 open MPFR.Maths
 open MPFR.Dyadic
-open MPFR.Lib.Spec
-open MPFR.Round.Spec
+open MPFR.Spec.Lib
+open MPFR.Spec.Round
 open MPFR.RoundingMode
 
 #set-options "--z3refresh --z3rlimit 120 --max_fuel 1 --initial_fuel 0 --max_ifuel 1 --initial_ifuel 0"
@@ -54,12 +54,14 @@ val mpfr_underflow_post_cond_lemma_branch_else: a:normal_fp{a.exp < mpfr_EMIN_sp
                t = mpfr_underflow_ternary_spec a p rnd_mode) /\
 	       eval_abs (round_def a p rnd_mode) <. mpfr_underflow_bound p /\
 	       (MPFR_RNDN? rnd_mode ==>
-	        eval_abs (rndn_def a p) >. fdiv_pow2 (mpfr_underflow_bound p) 1) /\
+	        eval_abs (round_def a p MPFR_RNDN) >. fdiv_pow2 (mpfr_underflow_bound p) 1) /\
                 not (mpfr_IS_LIKE_RNDZ rnd_mode (a.sign < 0))))
     (ensures  (mpfr_round_cond a p rnd_mode r /\
                mpfr_ternary_cond t a r))
 
-let mpfr_underflow_post_cond_lemma_branch_else a p rnd_mode f r =
+#set-options "--z3rlimit 400"
+
+let mpfr_underflow_post_cond_lemma_branch_else a p rnd_mode t r =
     let rnd = round_def a p rnd_mode in
     exp_impl_no_overflow_lemma rnd;
     eval_abs_lt_intro_lemma a r;
@@ -69,6 +71,8 @@ let mpfr_underflow_post_cond_lemma_branch_else a p rnd_mode f r =
 	 eval_lt_intro_lemma r a
     end
 
+#set-options "--z3rlimit 120"
+
 val mpfr_underflow_post_cond_lemma: a:normal_fp{a.exp < mpfr_EMIN_spec} ->
     p:pos{mpfr_PREC_COND p} -> rnd_mode:mpfr_rnd_t ->
     t:int -> r:mpfr_fp{r.prec = p} -> Lemma
@@ -76,7 +80,7 @@ val mpfr_underflow_post_cond_lemma: a:normal_fp{a.exp < mpfr_EMIN_spec} ->
                t = mpfr_underflow_ternary_spec a p rnd_mode) /\
 	       eval_abs (round_def a p rnd_mode) <. mpfr_underflow_bound p /\
 	       (MPFR_RNDN? rnd_mode ==>
-	        eval_abs (rndn_def a p) >. fdiv_pow2 (mpfr_underflow_bound p) 1)))
+	        eval_abs (round_def a p MPFR_RNDN) >. fdiv_pow2 (mpfr_underflow_bound p) 1)))
     (ensures  (mpfr_round_cond a p rnd_mode r /\
                mpfr_ternary_cond t a r))
 
@@ -86,5 +90,5 @@ let mpfr_underflow_post_cond_lemma a p rnd_mode f r =
     if mpfr_IS_LIKE_RNDZ rnd_mode (a.sign < 0) then begin 
         if a.sign > 0 then eval_lt_intro_lemma r rnd
 	else eval_lt_intro_lemma rnd r
-    end else
+    end else 
       mpfr_underflow_post_cond_lemma_branch_else a p rnd_mode f r

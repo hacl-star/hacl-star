@@ -14,8 +14,8 @@ module I64 = FStar.Int64
 open MPFR.Maths
 open MPFR.Dyadic
 open MPFR.Lib
-open MPFR.Lib.Spec
-open MPFR.Round.Spec
+open MPFR.Spec.Lib
+open MPFR.Spec.Round
 
 open MPFR.Exceptions.Lemma
 
@@ -47,13 +47,6 @@ let mpfr_overflow x rnd_mode sign =
 	sign
     end
 
-let test_cond x rnd_mode sign h0 t h1=let p = (as_struct h1 x).mpfr_prec in
-        mpfr_live h1 x /\ mpfr_modifies x h0 h1 /\
-        mpfr_valid_cond h1 x /\ (as_struct h1 x).mpfr_sign = sign /\
-	(forall (exact:normal_fp{exact.sign = I32.v sign /\ exact.exp < mpfr_EMIN_spec}).
-	as_fp h1 x == mpfr_underflow_spec exact (I64.v p) rnd_mode /\
-	I32.v t = mpfr_underflow_ternary_spec exact (I64.v p) rnd_mode)
-
 val mpfr_underflow: x:mpfr_ptr -> rnd_mode:mpfr_rnd_t -> sign:mpfr_sign_t ->
     Stack i32
     (requires (fun h -> 
@@ -61,7 +54,13 @@ val mpfr_underflow: x:mpfr_ptr -> rnd_mode:mpfr_rnd_t -> sign:mpfr_sign_t ->
         let l = (I64.v p - 1) / 64 + 1 in
         mpfr_live h x /\ mpfr_PREC_COND (I64.v p) /\
 	length (as_struct h x).mpfr_d = l))
-    (ensures  (fun h0 t h1 ->test_cond x rnd_mode sign h0 t h1))
+    (ensures  (fun h0 t h1 ->
+        let p = (as_struct h1 x).mpfr_prec in
+        mpfr_live h1 x /\ mpfr_modifies x h0 h1 /\
+        mpfr_valid_cond h1 x /\ (as_struct h1 x).mpfr_sign = sign /\
+	(forall (exact:normal_fp{exact.sign = I32.v sign /\ exact.exp < mpfr_EMIN_spec}).
+	as_fp h1 x == mpfr_underflow_spec exact (I64.v p) rnd_mode /\
+	I32.v t = mpfr_underflow_ternary_spec exact (I64.v p) rnd_mode)))
 
 let mpfr_underflow x rnd_mode sign =
     mpfr_SET_SIGN x sign;

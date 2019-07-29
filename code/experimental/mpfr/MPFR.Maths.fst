@@ -501,6 +501,13 @@ let lemma_mod_pow2_imp_tl_zero #n x sh =
 	assert(forall (i:nat{n - sh <= i /\ i < n}). index (to_vec x) i = index (slice (to_vec x) (n - sh) n) (i + sh - n))
     end
 
+val lemma_nth_top_bit: #n:pos -> x:uint_t n -> Lemma
+    (nth x 0=(x>=pow2 (n-1)))
+let lemma_nth_top_bit #n x=
+    if x<pow2 (n-1) then
+      lemma_lt_pow2_imp_hd_zero #n x 1
+    else (if nth x 0=false then lemma_hd_zero_imp_lt_pow2 #n x 1)
+      
 (* UInt64 lemmas *)
 open FStar.UInt64
 
@@ -533,7 +540,7 @@ let lemma_lognot_mask_mod a mask sh =
         lemma_eq_intro (slice (to_vec (v (a &^ (lognot mask)))) (64 - sh) 64) (zero_vec #sh);
 	lemma_tl_zero_imp_mod_pow2 (v (a &^ (lognot mask))) sh
     end
-    
+
 val lemma_bit_mask: mask:u64 -> p:nat{p < 64} -> Lemma
     (requires (v mask = pow2 (63 - p)))
     (ensures  (forall (i:nat{0 <= i /\ i < 64}). (i = p ==> nth (v mask) i = true) /\
@@ -633,4 +640,90 @@ val lemma_pow2_add : a:int -> b:int -> x:nat -> y:nat -> Lemma
 
 let lemma_pow2_add a b x y=
     lemma_pow2_mul (x - y) y
- 
+
+val lemma_pow2_shift: a:int -> b:int -> x:nat -> y:nat -> s:int -> Lemma
+    (requires (a * pow2 x=b * pow2 y /\ x+s>=0 /\ y+s>=0))
+    (ensures (a * pow2 (x+s)=b * pow2 (y+s)))
+
+let lemma_pow2_shift a b x y s=
+    if x>=y then begin
+      lemma_pow2_sub a b x y;
+      lemma_pow2_add a b (x+s) (y+s)
+    end else begin
+      lemma_pow2_sub b a y x;
+      lemma_pow2_add b a (y+s) (x+s)
+    end
+
+val lemma_nbits_pow2_add: a:pos -> b:nat -> c:nat -> Lemma
+    (requires (c<pow2 b))
+    (ensures (nbits (a*(pow2 b)+c)=(nbits a)+b))
+let rec lemma_nbits_pow2_add a b c=match b with
+    |0->()
+    |n->lemma_multiple_div (pow2 (b-1)) 2;
+       lemma_nbits_pow2_add a (b-1) (c/2) 
+
+val lemma_nbits_pow2_mul: a:pos -> b:nat -> Lemma
+    (nbits (a*pow2 b)=nbits a+b)
+let lemma_nbits_pow2_mul a b=lemma_nbits_pow2_add a b 0
+
+open FStar.UInt
+
+val lemma_shift_left_dp: a:uint_t 64 -> b:uint_t 64 -> cnt:nat -> Lemma
+    (requires (cnt<64 /\ a*pow2 cnt<pow2 64))
+    (ensures (
+      let al=logor (shift_left #64 a cnt) (shift_right #64 b (64-cnt)) in
+      let bl=shift_left #64 b cnt in
+      (al*pow2 64+bl)=(a*pow2 64+b)*pow2 cnt))
+    
+let lemma_shift_left_dp a b cnt=
+    let al=logor (shift_left #64 a cnt) (shift_right #64 b (64-cnt)) in
+    let bl=shift_left #64 b cnt in
+    shift_left_value_lemma #64 a cnt;
+    shift_right_value_lemma #64 b (64-cnt);
+    lemma_logor_disjoint (shift_left #64 a cnt) (shift_right #64 b (64-cnt));
+    shift_left_value_lemma #64 b cnt;
+    lemma_pow2_mul_div b cnt 64;
+    lemma_euclidean (b*pow2 cnt) (pow2 64)
+
+val lemma_nth_pow2: #n:nat -> d:pos -> a:uint_t n -> b:uint_t d -> i:nat{i<n} -> Lemma
+    (ensures (
+    lemma_add_div b a (pow2 d); 
+    lemma_pow2_mul n d;
+    nth #(n+d) (a*pow2 d+b) i=nth #n a i))
+
+let lemma_nth_pow2 #n d a b i=
+    lemma_add_div b a (pow2 d); 
+    lemma_pow2_mul n d;
+    slice_left_nth_lemma #(n+d) (a*pow2 d+b) n 
+
+open FStar.Math.Lemmas
+
+(*This is exactly the same thing as logor_disjoint (with xor instead of or), which is part of the standard library*)
+
+val logxor_disjoint: #n:pos -> a:uint_t n -> b:uint_t n -> m:pos{m < n} ->
+  Lemma (requires (a % pow2 m == 0 /\ b < pow2 m))
+        (ensures  (logxor #n a b == a + b))
+let logxor_disjoint #n a b m =
+  assert (a % pow2 m == 0); // To trigger pattern above
+  assert (forall (i:nat{n - m <= i /\ i < n}).{:pattern (index (to_vec a) i)}
+    index (to_vec a) i == false);
+  assert (b < pow2 m); // To trigger pattern above
+  assert (forall (i:nat{i < n - m}).{:pattern (index (to_vec b) i)}
+    index (to_vec b) i == false);
+  Seq.lemma_split (logxor_vec (to_vec a) (to_vec b)) (n - m);
+  Seq.lemma_eq_intro
+    (logxor_vec (to_vec a) (to_vec b))
+    (append (slice (to_vec a) 0 (n - m)) (slice (to_vec b) (n - m) n));
+  append_lemma #(n - m) #m (slice (to_vec a) 0 (n - m)) (slice (to_vec b) (n - m) n);
+  slice_left_lemma #n (to_vec a) (n - m);
+  div_exact_r a (pow2 m);
+  assert (from_vec #(n - m) (slice (to_vec a) 0 (n - m)) * pow2 m == a);
+  slice_right_lemma #n (to_vec b) m;
+  small_modulo_lemma_1 b (pow2 m);
+  assert (from_vec #m (slice (to_vec b) (n - m) n) == b)
+
+val logxor_disjoint_zero: #n:pos -> a:uint_t n -> b:uint_t n -> m:nat{m < n} ->
+  Lemma (requires (a % pow2 m == 0 /\ b < pow2 m))
+        (ensures  (logxor #n a b == a + b))
+let logxor_disjoint_zero #n a b m =
+  if m=0 then logxor_lemma_1 a else logxor_disjoint #n a b m

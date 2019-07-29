@@ -1,4 +1,4 @@
-module MPFR.Lib.Spec
+module MPFR.Spec.Lib
 
 open FStar.Mul
 open MPFR.Dyadic
