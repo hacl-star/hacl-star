@@ -31,13 +31,25 @@ let transformation_result_of_possibly_codes (c:possibly codes) (if_fail:code) =
       result = if_fail;
     }
 
+let prints_to_same_code (c1 c2:code) : pbool =
+  let open Vale.X64.Print_s in
+  ((print_code c1 0 gcc) = (print_code c2 0 gcc)) /-
+  ("Not matching codes: \n" ^
+   "\tCode:\n" ^
+   fst (print_code c1 0 gcc) ^
+   "\tExpected code:\n" ^
+   fst (print_code c2 0 gcc) ^
+   "\n")
+
 /// Reordering transformation
 
 (* See fsti *)
 let reorder orig hint =
   transformation_result_of_possibly_codes (
     ts <-- IR.find_transformation_hints [orig] [hint];
-    IR.perform_reordering_with_hints ts [orig]
+    transformed <-- IR.perform_reordering_with_hints ts [orig];
+    prints_to_same_code (Block transformed) hint;;
+    return transformed
   ) orig
 
 #push-options "--max_fuel 2 --max_ifuel 1"
@@ -89,16 +101,6 @@ let lemma_reorder orig hint transformed va_s0 va_sM va_fM =
       va_sM', va_fM
 
 /// Check-if-same-printed-code "transformation"
-
-let prints_to_same_code (c1 c2:code) : pbool =
-  let open Vale.X64.Print_s in
-  ((print_code c1 0 gcc) = (print_code c2 0 gcc)) /-
-  ("Not matching codes: \n" ^
-   "\tFirst code:\n" ^
-   fst (print_code c1 0 gcc) ^
-   "\tSecond code:\n" ^
-   fst (print_code c2 0 gcc) ^
-   "\n")
 
 (* See fsti *)
 let check_if_same_printed_code orig hint =
