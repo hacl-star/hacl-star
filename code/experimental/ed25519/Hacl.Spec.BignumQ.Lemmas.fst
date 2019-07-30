@@ -111,7 +111,7 @@ let lemma_div224 x =
     }
 
 
-#set-options "--z3rlimit 100"
+#set-options "--z3rlimit 200"
 
 val lemma_div248_aux: x:qelem_wide5 ->
   Lemma
@@ -179,7 +179,7 @@ let lemma_div248_x8 x8 =
     (v x8 % pow2 24) * pow2 200 + v x8 / pow2 24 * pow2 224;
     (==) { assert_norm (pow2 224 == pow2 200 * pow2 24) }
     (v x8 % pow2 24) * pow2 200 + v x8 / pow2 24 * pow2 24 * pow2 200;
-    (==) { }
+    (==) { FStar.Math.Lemmas.euclidean_division_definition (v x8) (pow2 24) }
     v x8 * pow2 200;
     }
 
@@ -438,3 +438,82 @@ let lemma_div264 x =
   (==) { lemma_div264_aux x }
     wide_as_nat5 x / pow2 264;
   }
+
+
+val lemma_mod_264_aux: t:qelem_wide5 ->
+  Lemma
+  (requires
+    qelem_wide_fits5 t (1, 1, 1, 1, 1, 1, 1, 1, 1, 1))
+  (ensures
+   (let (t0, t1, t2, t3, t4, t5, t6, t7, t8, t9) = t in
+   (wide_as_nat5 t) % pow2 264 ==
+   (v t0 + v t1 * pow2 56 + v t2 * pow2 112 + v t3 * pow2 168 + v t4 * pow2 224) % pow2 264))
+
+let lemma_mod_264_aux t =
+  let (t0, t1, t2, t3, t4, t5, t6, t7, t8, t9) = t in
+  let res = (t0, t1, t2, t3, t4 &. u64 0xffffffffff) in
+
+  assert_norm (pow2 16 * pow2 264 == pow2 280);
+  assert_norm (pow2 72 * pow2 264 == pow2 336);
+  assert_norm (pow2 128 * pow2 264 == pow2 392);
+  assert_norm (pow2 184 * pow2 264 == pow2 448);
+  assert_norm (pow2 240 * pow2 264 == pow2 504);
+
+  calc (==) {
+    (wide_as_nat5 t) % pow2 264;
+  (==) { }
+    (v t0 + v t1 * pow2 56 + v t2 * pow2 112 + v t3 * pow2 168 + v t4 * pow2 224 +
+     (v t5 * pow2 16 + v t6 * pow2 72 + v t7 * pow2 128 + v t8 * pow2 184 + v t9 * pow2 240) * pow2 264) % pow2 264;
+  (==) { FStar.Math.Lemmas.lemma_mod_add_distr (v t0 + v t1 * pow2 56 + v t2 * pow2 112 + v t3 * pow2 168 + v t4 * pow2 224)
+    ((v t5 * pow2 16 + v t6 * pow2 72 + v t7 * pow2 128 + v t8 * pow2 184 + v t9 * pow2 240) * pow2 264) (pow2 264)}
+    ((v t0 + v t1 * pow2 56 + v t2 * pow2 112 + v t3 * pow2 168 + v t4 * pow2 224) +
+     ((v t5 * pow2 16 + v t6 * pow2 72 + v t7 * pow2 128 + v t8 * pow2 184 + v t9 * pow2 240) * pow2 264) % pow2 264) % pow2 264;
+  (==) { FStar.Math.Lemmas.cancel_mul_mod (v t5 * pow2 16 + v t6 * pow2 72 + v t7 * pow2 128 + v t8 * pow2 184 + v t9 * pow2 240) (pow2 264) }
+    (v t0 + v t1 * pow2 56 + v t2 * pow2 112 + v t3 * pow2 168 + v t4 * pow2 224) % pow2 264;
+  }
+
+
+val lemma_as_nat_pow264: x:qelem5 ->
+  Lemma
+  (requires
+   (let (x0, x1, x2, x3, x4) = x in
+    qelem_fits5 x (1, 1, 1, 1, 1) /\
+    v x4 < pow2 40))
+  (ensures as_nat5 x < pow2 264)
+
+let lemma_as_nat_pow264 x =
+  let (x0, x1, x2, x3, x4) = x in
+  assert_norm (pow2 40 * pow2 224 = pow2 264)
+
+
+val lemma_mod_264: t:qelem_wide5 ->
+  Lemma
+  (requires
+    qelem_wide_fits5 t (1, 1, 1, 1, 1, 1, 1, 1, 1, 1))
+  (ensures
+   (let (t0, t1, t2, t3, t4, t5, t6, t7, t8, t9) = t in
+    let res = (t0, t1, t2, t3, t4 &. u64 0xffffffffff) in
+    qelem_fits5 res (1, 1, 1, 1, 1) /\
+    as_nat5 res == (wide_as_nat5 t) % pow2 264))
+
+let lemma_mod_264 t =
+  let (t0, t1, t2, t3, t4, t5, t6, t7, t8, t9) = t in
+  let t4' = t4 &. u64 0xffffffffff in
+  let res = (t0, t1, t2, t3, t4') in
+  assert_norm (pow2 40 < pow2 64);
+  assert_norm (pow2 40 - 1 == 0xffffffffff);
+  mod_mask_lemma t4 40ul;
+  assert (v (mod_mask #U64 #SEC 40ul) == 0xffffffffff);
+  assert (v (t4 &. u64 0xffffffffff) == v t4 % pow2 40);
+
+  calc (==) {
+    (wide_as_nat5 t) % pow2 264;
+    (==) { lemma_mod_264_aux t }
+    (v t0 + v t1 * pow2 56 + v t2 * pow2 112 + v t3 * pow2 168 + v t4 * pow2 224) % pow2 264;
+    (==) { FStar.Math.Lemmas.lemma_mod_add_distr (v t0 + v t1 * pow2 56 + v t2 * pow2 112 + v t3 * pow2 168) (v t4 * pow2 224) (pow2 264) }
+    (v t0 + v t1 * pow2 56 + v t2 * pow2 112 + v t3 * pow2 168 + (v t4 * pow2 224) % pow2 264) % pow2 264;
+    (==) { FStar.Math.Lemmas.pow2_multiplication_modulo_lemma_2 (v t4) 264 224 }
+    (v t0 + v t1 * pow2 56 + v t2 * pow2 112 + v t3 * pow2 168 + (v t4 % pow2 40) * pow2 224) % pow2 264;
+    (==) { lemma_as_nat_pow264 res; FStar.Math.Lemmas.modulo_lemma (as_nat5 res) (pow2 264) }
+    v t0 + v t1 * pow2 56 + v t2 * pow2 112 + v t3 * pow2 168 + (v t4 % pow2 40) * pow2 224;
+    }

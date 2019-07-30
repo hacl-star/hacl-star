@@ -408,7 +408,7 @@ val mod_264: t:qelem_wide5 ->
     as_nat5 r == (wide_as_nat5 t) % pow2 264)
 
 let mod_264 (t0, t1, t2, t3, t4, t5, t6, t7, t8, t9) =
-  admit();
+  Lemmas.lemma_mod_264 (t0, t1, t2, t3, t4, t5, t6, t7, t8, t9);
   (t0, t1, t2, t3, t4 &. mask40)
 
 
