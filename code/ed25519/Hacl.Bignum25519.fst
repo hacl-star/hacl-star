@@ -861,7 +861,7 @@ let lemma_load_51 k =
 
 #pop-options
 
-#push-options "--z3rlimit 400"
+#push-options "--z3rlimit 800"
 
 let load_51 output input =
   let i0 = uint_from_bytes_le (sub input 0ul 8ul) in
