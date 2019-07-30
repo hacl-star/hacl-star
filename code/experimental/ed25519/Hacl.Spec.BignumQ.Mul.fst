@@ -380,19 +380,21 @@ inline_for_extraction noextract
 val div_264: x:qelem_wide5 ->
   Pure qelem5
   (requires
-    qelem_wide_fits5 x (1, 1, 1, 1, 1, 1, 1, 1, 1, 1))
+    qelem_wide_fits5 x (1, 1, 1, 1, 1, 1, 1, 1, 1, 1) /\
+    wide_as_nat5 x < pow2 528)
   (ensures fun z ->
     qelem_fits5 z (1, 1, 1, 1, 1) /\
     as_nat5 z == (wide_as_nat5 x) / pow2 264)
 
 let div_264 (x0, x1, x2, x3, x4, x5, x6, x7, x8, x9) =
+  // x / pow2 264 == (x / pow2 224) / pow2 40
   let z0 = div_2_40_step x4 x5 in
   let z1 = div_2_40_step x5 x6 in
   let z2 = div_2_40_step x6 x7 in
   let z3 = div_2_40_step x7 x8 in
   let z4 = div_2_40_step x8 x9 in
   assert (qelem_fits5 (z0, z1, z2, z3, z4) (1, 1, 1, 1, 1));
-  admit();
+  Lemmas.lemma_div264 (x0, x1, x2, x3, x4, x5, x6, x7, x8, x9);
   (z0, z1, z2, z3, z4)
 
 
@@ -464,7 +466,15 @@ let barrett_reduction5 (t0, t1, t2, t3, t4, t5, t6, t7, t8, t9) =
   let (mu0, mu1, mu2, mu3, mu4) = make_mu () in
 
   let (q0, q1, q2, q3, q4) = div_248 (t0, t1, t2, t3, t4, t5, t6, t7, t8, t9) in
+  assert (as_nat5 (q0, q1, q2, q3, q4) == wide_as_nat5 (t0, t1, t2, t3, t4, t5, t6, t7, t8, t9) / pow2 248);
+  FStar.Math.Lemmas.lemma_div_lt_nat (wide_as_nat5 (t0, t1, t2, t3, t4, t5, t6, t7, t8, t9)) 512 248;
+  assert (as_nat5 (q0, q1, q2, q3, q4) < pow2 264);
+
   let (qmu0', qmu1', qmu2', qmu3', qmu4', qmu5', qmu6', qmu7', qmu8', qmu9') = mul_5 (q0, q1, q2, q3, q4) (mu0, mu1, mu2, mu3, mu4) in
+  FStar.Math.Lemmas.lemma_mult_lt_right (pow2 512 / S.q) (as_nat5 (q0, q1, q2, q3, q4)) (pow2 264);
+  assert (wide_as_nat5 (qmu0', qmu1', qmu2', qmu3', qmu4', qmu5', qmu6', qmu7', qmu8', qmu9') <= pow2 512 / S.q * pow2 264);
+  assert_norm (pow2 512 / S.q * pow2 264 < pow2 528);
+
   let (qdiv0, qdiv1, qdiv2, qdiv3, qdiv4) = div_264 (qmu0', qmu1', qmu2', qmu3', qmu4', qmu5', qmu6', qmu7', qmu8', qmu9') in
   //u = qdiv == (A / b^{k-1}) * mu / b^{k+1} == ((A / 2^248) * mu) / 2^264
 

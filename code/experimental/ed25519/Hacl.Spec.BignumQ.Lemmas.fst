@@ -77,8 +77,7 @@ let lemma_subm_conditional x0 x1 x2 x3 x4 y0 y1 y2 y3 y4 b0 b1 b2 b3 b4 =
 val lemma_div224: x:qelem_wide5 ->
   Lemma
   (requires
-    qelem_wide_fits5 x (1, 1, 1, 1, 1, 1, 1, 1, 1, 1) /\
-    wide_as_nat5 x < pow2 512)
+    qelem_wide_fits5 x (1, 1, 1, 1, 1, 1, 1, 1, 1, 1))
   (ensures
    (let (x0, x1, x2, x3, x4, x5, x6, x7, x8, x9) = x in
     wide_as_nat5 x / pow2 224 ==
@@ -161,7 +160,7 @@ let lemma_div248_x6 x6 =
     (v x6 % pow2 24) * pow2 88 + v x6 / pow2 24 * pow2 112;
     (==) { assert_norm (pow2 112 == pow2 88 * pow2 24) }
     (v x6 % pow2 24) * pow2 88 + v x6 / pow2 24 * pow2 24 * pow2 88;
-    (==) { }
+    (==) { FStar.Math.Lemmas.euclidean_division_definition (v x6) (pow2 24) }
     v x6 * pow2 88;
     }
 
@@ -174,8 +173,15 @@ let lemma_div248_x7 x7 =
 val lemma_div248_x8: x8:uint64 ->
   Lemma (pow2 32 * (v x8 % pow2 24) * pow2 168 + v x8 / pow2 24 * pow2 224 == v x8 * pow2 200)
 let lemma_div248_x8 x8 =
-  assert_norm (pow2 32 * pow2 168 = pow2 200);
-  assert_norm (pow2 224 == pow2 200 * pow2 24)
+  calc (==) {
+    pow2 32 * (v x8 % pow2 24) * pow2 168 + v x8 / pow2 24 * pow2 224;
+    (==) { assert_norm (pow2 32 * pow2 168 = pow2 200) }
+    (v x8 % pow2 24) * pow2 200 + v x8 / pow2 24 * pow2 224;
+    (==) { assert_norm (pow2 224 == pow2 200 * pow2 24) }
+    (v x8 % pow2 24) * pow2 200 + v x8 / pow2 24 * pow2 24 * pow2 200;
+    (==) { }
+    v x8 * pow2 200;
+    }
 
 val lemma_div248_x9: x9:uint64{v x9 < pow2 24} ->
   Lemma (pow2 32 * (v x9 % pow2 24) * pow2 224 == v x9 * pow2 256)
@@ -273,3 +279,162 @@ let lemma_add_modq5 x y t =
   else
     assert (res % S.q == as_nat5 t % S.q);
   FStar.Math.Lemmas.small_mod res S.q
+
+
+val lemma_wide_as_nat_pow528: x:qelem_wide5 ->
+  Lemma
+  (requires
+    qelem_wide_fits5 x (1, 1, 1, 1, 1, 1, 1, 1, 1, 1) /\
+    wide_as_nat5 x < pow2 528)
+  (ensures
+   (let (x0, x1, x2, x3, x4, x5, x6, x7, x8, x9) = x in
+    v x9 < pow2 40))
+
+let lemma_wide_as_nat_pow528 x =
+  let (x0, x1, x2, x3, x4, x5, x6, x7, x8, x9) = x in
+  assert_norm (pow2 504 * pow2 24 = pow2 528);
+  FStar.Math.Lemmas.pow2_minus 528 504;
+  assert (v x9 < pow2 24);
+  assert_norm (pow2 24 < pow2 40)
+
+#push-options "--z3rlimit 200"
+val lemma_div264_aux: x:qelem_wide5 ->
+  Lemma
+  (requires
+    qelem_wide_fits5 x (1, 1, 1, 1, 1, 1, 1, 1, 1, 1) /\
+    wide_as_nat5 x < pow2 528)
+  (ensures
+   (let (x0, x1, x2, x3, x4, x5, x6, x7, x8, x9) = x in
+    wide_as_nat5 x / pow2 264 ==
+      v x4 / pow2 40 + v x5 * pow2 16 + v x6 * pow2 72 + v x7 * pow2 128 + v x8 * pow2 184 + v x9 * pow2 240))
+
+let lemma_div264_aux x =
+  let (x0, x1, x2, x3, x4, x5, x6, x7, x8, x9) = x in
+  assert_norm (pow2 264 == pow2 224 * pow2 40);
+  assert_norm (pow2 56 == pow2 16 * pow2 40);
+  assert_norm (pow2 112 == pow2 72 * pow2 40);
+  assert_norm (pow2 168 == pow2 128 * pow2 40);
+  assert_norm (pow2 224 == pow2 184 * pow2 40);
+  assert_norm (pow2 280 == pow2 240 * pow2 40);
+  assert_norm (0 < pow2 40);
+
+  calc (==) {
+    wide_as_nat5 x / pow2 264;
+  (==) { FStar.Math.Lemmas.division_multiplication_lemma (wide_as_nat5 x) (pow2 224) (pow2 40) }
+    (wide_as_nat5 x / pow2 224) / pow2 40;
+  (==) { lemma_div224 x }
+    (v x4 + v x5 * pow2 56 + v x6 * pow2 112 + v x7 * pow2 168 + v x8 * pow2 224 + v x9 * pow2 280) / pow2 40;
+  (==) { }
+    (v x4 + (v x5 * pow2 16 + v x6 * pow2 72 + v x7 * pow2 128 + v x8 * pow2 184 + v x9 * pow2 240) * pow2 40) / pow2 40;
+  (==) { FStar.Math.Lemmas.lemma_div_plus (v x4) (v x5 * pow2 16 + v x6 * pow2 72 + v x7 * pow2 128 + v x8 * pow2 184 + v x9 * pow2 240) (pow2 40) }
+    v x4 / pow2 40 + v x5 * pow2 16 + v x6 * pow2 72 + v x7 * pow2 128 + v x8 * pow2 184 + v x9 * pow2 240;
+  }
+#pop-options
+
+
+val lemma_div264_x5: x5:uint64 ->
+  Lemma (pow2 16 * (v x5 % pow2 40) + v x5 / pow2 40 * pow2 56 == v x5 * pow2 16)
+let lemma_div264_x5 x5 =
+  calc (==) {
+    pow2 16 * (v x5 % pow2 40) + v x5 / pow2 40 * pow2 56;
+    (==) { assert_norm (pow2 16 * pow2 40 = pow2 56) }
+    pow2 16 * (v x5 % pow2 40) + v x5 / pow2 40 * pow2 40 * pow2 16;
+    (==) { }
+    v x5 * pow2 16;
+    }
+
+
+val lemma_div264_x6: x6:uint64 ->
+  Lemma (pow2 16 * (v x6 % pow2 40) * pow2 56 + v x6 / pow2 40 * pow2 112 == v x6 * pow2 72)
+let lemma_div264_x6 x6 =
+  calc (==) {
+    pow2 16 * (v x6 % pow2 40) * pow2 56 + v x6 / pow2 40 * pow2 112;
+    (==) { assert_norm (pow2 16 * pow2 56 = pow2 72) }
+    pow2 72 * (v x6 % pow2 40) + v x6 / pow2 40 * pow2 112;
+    (==) { assert_norm (pow2 72 * pow2 40 = pow2 112) }
+    pow2 72 * (v x6 % pow2 40) + v x6 / pow2 40 * pow2 72 * pow2 40;
+    (==) { FStar.Math.Lemmas.euclidean_division_definition (v x6) (pow2 40) }
+    v x6 * pow2 72;
+    }
+
+
+val lemma_div264_x7: x7:uint64 ->
+  Lemma (pow2 16 * (v x7 % pow2 40) * pow2 112 + v x7 / pow2 40 * pow2 168 == v x7 * pow2 128)
+let lemma_div264_x7 x7 =
+  calc (==) {
+    pow2 16 * (v x7 % pow2 40) * pow2 112 + v x7 / pow2 40 * pow2 168;
+    (==) { assert_norm (pow2 16 * pow2 112 = pow2 128) }
+    pow2 128 * (v x7 % pow2 40) + v x7 / pow2 40 * pow2 168;
+    (==) { assert_norm (pow2 128 * pow2 40 = pow2 168) }
+    pow2 128 * (v x7 % pow2 40) + v x7 / pow2 40 * pow2 128 * pow2 40;
+    (==) { }
+    v x7 * pow2 128;
+    }
+
+
+val lemma_div264_x8: x8:uint64 ->
+  Lemma (pow2 16 * (v x8 % pow2 40) * pow2 168 + v x8 / pow2 40 * pow2 224 == v x8 * pow2 184)
+let lemma_div264_x8 x8 =
+  calc (==) {
+    pow2 16 * (v x8 % pow2 40) * pow2 168 + v x8 / pow2 40 * pow2 224;
+    (==) { assert_norm (pow2 16 * pow2 168 = pow2 184) }
+    pow2 184 * (v x8 % pow2 40) + v x8 / pow2 40 * pow2 224;
+    (==) { assert_norm (pow2 184 * pow2 40 = pow2 224) }
+    pow2 184 * (v x8 % pow2 40) + v x8 / pow2 40 * pow2 184 * pow2 40;
+    (==) { }
+    v x8 * pow2 184;
+    }
+
+
+val lemma_div264_x9: x9:uint64{v x9 < pow2 40} ->
+  Lemma (pow2 16 * (v x9 % pow2 40) * pow2 224 == v x9 * pow2 240)
+let lemma_div264_x9 x9 =
+  assert_norm (pow2 16 * pow2 224 = pow2 240)
+
+
+val lemma_div264: x:qelem_wide5 ->
+  Lemma
+  (requires
+    qelem_wide_fits5 x (1, 1, 1, 1, 1, 1, 1, 1, 1, 1) /\
+    wide_as_nat5 x < pow2 528)
+  (ensures
+   (let (x0, x1, x2, x3, x4, x5, x6, x7, x8, x9) = x in
+    let z0 = v x4 / pow2 40 + pow2 16 * (v x5 % pow2 40) in
+    let z1 = v x5 / pow2 40 + pow2 16 * (v x6 % pow2 40) in
+    let z2 = v x6 / pow2 40 + pow2 16 * (v x7 % pow2 40) in
+    let z3 = v x7 / pow2 40 + pow2 16 * (v x8 % pow2 40) in
+    let z4 = v x8 / pow2 40 + pow2 16 * (v x9 % pow2 40) in
+
+    wide_as_nat5 x / pow2 264 == z0 + z1 * pow2 56 + z2 * pow2 112 + z3 * pow2 168 + z4 * pow2 224))
+
+let lemma_div264 x =
+  let (x0, x1, x2, x3, x4, x5, x6, x7, x8, x9) = x in
+  lemma_wide_as_nat_pow528 x;
+  assert (v x9 < pow2 40);
+  let z0 = v x4 / pow2 40 + pow2 16 * (v x5 % pow2 40) in
+  let z1 = v x5 / pow2 40 + pow2 16 * (v x6 % pow2 40) in
+  let z2 = v x6 / pow2 40 + pow2 16 * (v x7 % pow2 40) in
+  let z3 = v x7 / pow2 40 + pow2 16 * (v x8 % pow2 40) in
+  let z4 = v x8 / pow2 40 + pow2 16 * (v x9 % pow2 40) in
+
+  calc (==) {
+    z0 + z1 * pow2 56 + z2 * pow2 112 + z3 * pow2 168 + z4 * pow2 224;
+  (==) { }
+    v x4 / pow2 40 + pow2 16 * (v x5 % pow2 40) +
+    v x5 / pow2 40 * pow2 56 + pow2 16 * (v x6 % pow2 40) * pow2 56 +
+    v x6 / pow2 40 * pow2 112 + pow2 16 * (v x7 % pow2 40) * pow2 112 +
+    v x7 / pow2 40 * pow2 168 + pow2 16 * (v x8 % pow2 40) * pow2 168 +
+    v x8 / pow2 40 * pow2 224 + pow2 16 * (v x9 % pow2 40) * pow2 224;
+  (==) { lemma_div264_x5 x5; lemma_div264_x6 x6 }
+    v x4 / pow2 40 + v x5 * pow2 16 + v x6 * pow2 72 +
+    pow2 16 * (v x7 % pow2 40) * pow2 112 +
+    v x7 / pow2 40 * pow2 168 + pow2 16 * (v x8 % pow2 40) * pow2 168 +
+    v x8 / pow2 40 * pow2 224 + pow2 16 * (v x9 % pow2 40) * pow2 224;
+  (==) { lemma_div264_x7 x7; lemma_div264_x8 x8 }
+    v x4 / pow2 40 + v x5 * pow2 16 + v x6 * pow2 72 + v x7 * pow2 128 + v x8 * pow2 184 +
+    pow2 16 * (v x9 % pow2 40) * pow2 224;
+  (==) { lemma_div264_x9 x9 }
+    v x4 / pow2 40 + v x5 * pow2 16 + v x6 * pow2 72 + v x7 * pow2 128 + v x8 * pow2 184 + v x9 * pow2 240;
+  (==) { lemma_div264_aux x }
+    wide_as_nat5 x / pow2 264;
+  }
