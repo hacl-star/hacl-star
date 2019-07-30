@@ -172,7 +172,7 @@ val add_modq5:
       as_nat5 x < S.q /\ as_nat5 y < S.q)
     (ensures fun z ->
       qelem_fits5 z (1, 1, 1, 1, 1) /\
-      as_nat5 z % S.q == (as_nat5 x + as_nat5 y) % S.q)
+      as_nat5 z == (as_nat5 x + as_nat5 y) % S.q)
 
 let add_modq5 (x0, x1, x2, x3, x4) (y0, y1, y2, y3, y4) =
   assert_norm (pow56 - 1 + pow56 - 1 == pow2 57 - 2);
@@ -183,12 +183,7 @@ let add_modq5 (x0, x1, x2, x3, x4) (y0, y1, y2, y3, y4) =
   let t4 = x4 +! y4 +! c3 in
   assert (as_nat5 (t0, t1, t2, t3, t4) == as_nat5 (x0, x1, x2, x3, x4) + as_nat5 (y0, y1, y2, y3, y4));
   let (o0, o1, o2, o3, o4) = subm_conditional (t0, t1, t2, t3, t4) in
-  assert (
-    if as_nat5 (t0, t1, t2, t3, t4) >= S.q
-    then (
-      FStar.Math.Lemmas.sub_div_mod_1 (as_nat5 (t0, t1, t2, t3, t4)) S.q;
-      as_nat5 (o0, o1, o2, o3, o4) % S.q == as_nat5 (t0, t1, t2, t3, t4) % S.q)
-    else as_nat5 (o0, o1, o2, o3, o4) == as_nat5 (t0, t1, t2, t3, t4));
+  Lemmas.lemma_add_modq5 (x0, x1, x2, x3, x4) (y0, y1, y2, y3, y4) (t0, t1, t2, t3, t4);
   (o0, o1, o2, o3, o4)
 
 

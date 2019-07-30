@@ -3,7 +3,10 @@ module Hacl.Spec.BignumQ.Lemmas
 open FStar.Mul
 open Lib.IntTypes
 
+module S = Spec.Ed25519
+
 include Hacl.Spec.BignumQ.Definitions
+
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
@@ -242,3 +245,31 @@ let lemma_div248 x =
   (==) { lemma_div248_aux x }
     wide_as_nat5 x / pow2 248;
   }
+
+
+val lemma_add_modq5:
+    x:qelem5
+  -> y:qelem5
+  -> t:qelem5 ->
+  Lemma
+  (requires
+    qelem_fits5 x (1, 1, 1, 1, 1) /\
+    qelem_fits5 y (1, 1, 1, 1, 1) /\
+    qelem_fits5 t (1, 1, 1, 1, 1) /\
+    as_nat5 x < S.q /\ as_nat5 y < S.q /\
+    as_nat5 t == as_nat5 x + as_nat5 y)
+  (ensures
+   (let res = if as_nat5 t >= S.q then as_nat5 t - S.q else as_nat5 t in
+    res < S.q /\ res == (as_nat5 x + as_nat5 y) % S.q))
+
+let lemma_add_modq5 x y t =
+  assert (as_nat5 t == as_nat5 x + as_nat5 y);
+  let res = if as_nat5 t >= S.q then as_nat5 t - S.q else as_nat5 t in
+  assert (res < S.q);
+
+  if as_nat5 t >= S.q then (
+    FStar.Math.Lemmas.sub_div_mod_1 (as_nat5 t) S.q;
+    assert (res % S.q == as_nat5 t % S.q))
+  else
+    assert (res % S.q == as_nat5 t % S.q);
+  FStar.Math.Lemmas.small_mod res S.q
