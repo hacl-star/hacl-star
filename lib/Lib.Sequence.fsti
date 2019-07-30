@@ -388,7 +388,7 @@ val map_blocks:
   -> g:(i:nat{i == length inp / blocksize} -> len:size_nat{len < blocksize} -> s:lseq a len -> lseq a len) ->
   Tot (out:seq a {length out == length inp})
 
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 
 // This declaration verifies fine without the calc statements when verifying the interface, // file, but they help when rechecking this declaration when verifying the implementation
 val index_map_blocks:
@@ -475,4 +475,3 @@ val index_generate_blocks:
            let _,s1 = generate_blocks #t len max n a_spec f () in
            let _,s2 = f (i / len) () in
            Seq.index s1 i == Seq.index s2 (i % len))
-
