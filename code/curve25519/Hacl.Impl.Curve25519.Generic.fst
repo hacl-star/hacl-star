@@ -26,7 +26,7 @@ module Lemmas = Hacl.Spec.Curve25519.Field64.Lemmas
 
 friend Lib.LoopCombinators
 
-#reset-options "--z3rlimit 50 --max_fuel 2 --using_facts_from '* -FStar.Seq -Hacl.Spec.*'"
+#reset-options "--z3rlimit 200 --max_fuel 2 --using_facts_from '* -FStar.Seq -Hacl.Spec.*'"
 //#set-options "--debug Hacl.Impl.Curve25519.Generic --debug_level ExtractNorm"
 
 inline_for_extraction noextract
@@ -44,7 +44,7 @@ let scalar_bit s n =
   let h0 = ST.get () in
   mod_mask_lemma ((LSeq.index (as_seq h0 s) (v n / 8)) >>. (n %. 8ul)) 1ul;
   assert_norm (1 = pow2 1 - 1);
-  uintv_extensionality (mod_mask #U8 1ul) (u8 1);
+  assert (v (mod_mask #U8 #SEC 1ul) == v (u8 1));
   to_u64 ((s.(n /. 8ul) >>. (n %. 8ul)) &. u8 1)
 
 inline_for_extraction noextract
@@ -69,7 +69,7 @@ let decode_point_ #s o i =
   tmp.(3ul) <- tmp3 &. u64 0x7fffffffffffffff;
   mod_mask_lemma tmp3 63ul;
   assert_norm (0x7fffffffffffffff = pow2 63 - 1);
-  uintv_extensionality (mod_mask #U64 63ul) (u64 0x7fffffffffffffff);
+  assert (v (mod_mask #U64 #SEC 63ul) == v (u64 0x7fffffffffffffff));
   let h2 = ST.get () in
   assert (v (LSeq.index (as_seq h2 tmp) 3) < pow2 63);
   Lemmas.lemma_felem64_mod255 (as_seq h1 tmp);
@@ -233,7 +233,7 @@ let ladder_step #s k q i p01_tmp1_swap tmp2 =
 
   let h0 = ST.get () in
   let bit = scalar_bit k (253ul -. i) in
-  uintv_extensionality bit (S.ith_bit (as_seq h0 k) (253 - v i));
+  assert (v bit == v (S.ith_bit (as_seq h0 k) (253 - v i)));
   let sw = swap.(0ul) ^. bit in
   logxor_lemma1 (LSeq.index (as_seq h0 swap) 0) bit;
   cswap2 #s sw nq nq_p1;

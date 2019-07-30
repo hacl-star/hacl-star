@@ -32,6 +32,28 @@ let uints_from_bytes_le_lemma64_2 b =
   uint_from_bytes_le_lemma (sub b 0 16);
   uint_from_bytes_le_lemma (sub b 16 16)
 
+let uints_from_bytes_le_lemma64_4 b =
+  Classical.forall_intro (index_uints_from_bytes_le #U64 #SEC #4 (sub b 0 32));
+  Classical.forall_intro (index_uints_from_bytes_le #U64 #SEC #4 (sub b 32 32));
+  uint_from_bytes_le_lemma (sub b 0 16);
+  uint_from_bytes_le_lemma (sub b 16 16);
+  uint_from_bytes_le_lemma (sub b 32 16);
+  uint_from_bytes_le_lemma (sub b 48 16)
+
+
+let uints64_to_bytes_le_lemma lo hi =
+  let lp = nat_to_bytes_le #SEC 16 (v hi * pow2 64 + v lo) in
+  let rp = concat (uint_to_bytes_le lo) (uint_to_bytes_le hi) in
+  assert (nat_from_bytes_le lp == v hi * pow2 64 + v lo);
+  Seq.append_slices (uint_to_bytes_le lo) (uint_to_bytes_le hi);
+  nat_from_intseq_le_slice_lemma #U8 #SEC #16 rp 8;
+  assert (nat_from_bytes_le rp == nat_from_bytes_le (Seq.slice rp 0 8) + pow2 (8 * 8) * nat_from_bytes_le (Seq.slice rp 8 16));
+  assert (nat_from_bytes_le rp == nat_from_bytes_le (uint_to_bytes_le lo) + pow2 64 * nat_from_bytes_le (uint_to_bytes_le hi));
+  lemma_uint_to_bytes_le_preserves_value lo;
+  lemma_uint_to_bytes_le_preserves_value hi;
+  nat_from_intseq_le_inj lp rp
+
+
 module BF = Vale.Arch.BufferFriend
 
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"

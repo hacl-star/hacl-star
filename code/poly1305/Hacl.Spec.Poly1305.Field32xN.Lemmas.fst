@@ -572,14 +572,20 @@ let fmul_r2_normalize51 a fa1 =
   FStar.Math.Lemmas.modulo_lemma (v a2 + v a12) (pow2 64);
   FStar.Math.Lemmas.modulo_lemma (v a3 + v a13) (pow2 64);
   FStar.Math.Lemmas.modulo_lemma (v a4 + v a14) (pow2 64);
-  assert (
-    as_nat5 (o0, o1, o2, o3, o4) ==
-    as_nat5 (a0, a1, a2, a3, a4) + as_nat5 (a10, a11, a12, a13, a14));
-  FStar.Math.Lemmas.lemma_mod_plus_distr_l
+  assert (felem_fits5 out (2, 4, 2, 2, 2));
+
+  calc (==) {
+    ((feval5 a).[0] + (feval5 a).[1]) % Vec.prime;
+    (==) { }
+    (as_nat5 (a0, a1, a2, a3, a4) % Vec.prime + as_nat5 (a10, a11, a12, a13, a14) % Vec.prime) % Vec.prime;
+    (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_l
     (as_nat5 (a0, a1, a2, a3, a4)) (as_nat5 (a10, a11, a12, a13, a14)) Vec.prime;
   FStar.Math.Lemmas.lemma_mod_plus_distr_r
-    (as_nat5 (a0, a1, a2, a3, a4) % Vec.prime) (as_nat5 (a10, a11, a12, a13, a14)) Vec.prime;
-  assert (felem_fits5 out (2, 4, 2, 2, 2));
+    (as_nat5 (a0, a1, a2, a3, a4) % Vec.prime) (as_nat5 (a10, a11, a12, a13, a14)) Vec.prime }
+    (as_nat5 (a0, a1, a2, a3, a4) + as_nat5 (a10, a11, a12, a13, a14)) % Vec.prime;
+    (==) { }
+    (feval5 out).[0];
+  };
   out
 
 #pop-options

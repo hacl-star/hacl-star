@@ -17,7 +17,7 @@ module SL51 = Hacl.Spec.Curve25519.Field51.Lemmas
 module BN = Hacl.Impl.Curve25519.Field51
 module SC = Spec.Curve25519
 
-#reset-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
 inline_for_extraction noextract
 let mask_51 = u64 0x7ffffffffffff
@@ -506,7 +506,7 @@ let lemma_fcontract_trim (a0 a1 a2 a3 a4:uint64) : Lemma
   assert_norm (S51.as_nat5 (u64 (pow2 51 - 1), u64 (pow2 51 - 1), u64 (pow2 51 - 1), u64 (pow2 51 - 1), u64 (pow2 51 - 2)) < SC.prime)
 
 #restart-solver
-#push-options "--z3rlimit 200"
+#push-options "--z3rlimit 600"
 
 
 inline_for_extraction noextract
@@ -861,7 +861,7 @@ let lemma_load_51 k =
 
 #pop-options
 
-#push-options "--z3rlimit 200"
+#push-options "--z3rlimit 400"
 
 let load_51 output input =
   let i0 = uint_from_bytes_le (sub input 0ul 8ul) in

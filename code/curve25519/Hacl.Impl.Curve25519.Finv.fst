@@ -18,7 +18,7 @@ module F64 = Hacl.Impl.Curve25519.Field64
 module S = Hacl.Spec.Curve25519.Finv
 module P = Spec.Curve25519
 
-#reset-options "--using_facts_from '* -FStar.Seq'"
+#reset-options "--z3rlimit 50 --using_facts_from '* -FStar.Seq'"
 
 noextract
 val fsquare_times_inv: #s:field_spec -> h:mem -> f:felem s -> Type0

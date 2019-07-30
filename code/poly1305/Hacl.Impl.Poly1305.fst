@@ -25,13 +25,20 @@ unfold
 let op_String_Access #a #len = LSeq.index #a #len
 
 inline_for_extraction noextract
-let get_acc #s (ctx:poly1305_ctx s) = sub ctx 0ul (nlimb s)
+let get_acc #s (ctx:poly1305_ctx s) : Stack (felem s)
+  (requires fun h -> live h ctx)
+  (ensures  fun h0 acc h1 -> h0 == h1 /\ live h1 acc /\ acc == gsub ctx 0ul (nlimb s))
+  = sub ctx 0ul (nlimb s)
 
 inline_for_extraction noextract
-let get_precomp_r #s (ctx:poly1305_ctx s) = sub ctx (nlimb s) (precomplen s)
+let get_precomp_r #s (ctx:poly1305_ctx s) : Stack (precomp_r s)
+  (requires fun h -> live h ctx)
+  (ensures  fun h0 pre h1 -> h0 == h1 /\ live h1 pre /\ pre == gsub ctx (nlimb s) (precomplen s))
+  = sub ctx (nlimb s) (precomplen s)
 
 let as_get_acc #s h ctx = (feval h (gsub ctx 0ul (nlimb s))).[0]
 let as_get_r #s h ctx = (feval h (gsub ctx (nlimb s) (nlimb s))).[0]
+
 let state_inv_t #s h ctx =
   F32xN.acc_inv_t #(width s) (F32xN.as_tup5 h (gsub ctx 0ul (nlimb s))) /\
   F32xN.load_precompute_r_post #(width s) h (gsub ctx (nlimb s) (precomplen s))
@@ -538,7 +545,8 @@ let poly1305_update #s =
   | _ -> poly1305_update_128_256 #s
 
 inline_for_extraction noextract
-let poly1305_finish #s tag key ctx =
+val poly1305_finish_: #s:field_spec -> poly1305_finish_st s
+let poly1305_finish_ #s tag key ctx =
   let acc = get_acc ctx in
   let ks = sub key 16ul 16ul in
 
@@ -546,15 +554,28 @@ let poly1305_finish #s tag key ctx =
   reduce_felem acc;
   let h1 = ST.get () in
   assert ((fas_nat h1 acc).[0] == (feval h0 acc).[0]);
-  let (f10, f11) = felem_to_limbs acc in
-  assert ((limb_v f11).[0] * pow2 64 + (limb_v f10).[0] == (fas_nat h1 acc).[0] % pow2 128);
-  let (f20, f21) = bytes_to_limbs #s ks in
-  assert ((limb_v f21).[0] * pow2 64 + (limb_v f20).[0] == BSeq.nat_from_bytes_le (as_seq h0 ks));
+  let (f10, f11) = uints64_from_felem_le acc in
+  assert (v f11 * pow2 64 + v f10 == (fas_nat h1 acc).[0] % pow2 128);
+  let (f20, f21) = uints64_from_bytes_le ks in
+  assert (v f21 * pow2 64 + v f20 == BSeq.nat_from_bytes_le (as_seq h0 ks));
   let (f30, f31) = mod_add128 (f10, f11) (f20, f21) in
-  assert ((limb_v f31).[0] * pow2 64 + (limb_v f30).[0] ==
+  assert (v f31 * pow2 64 + v f30 ==
     ((fas_nat h1 acc).[0] % pow2 128 + BSeq.nat_from_bytes_le (as_seq h0 ks)) % pow2 128);
   FStar.Math.Lemmas.lemma_mod_plus_distr_l (fas_nat h1 acc).[0] (BSeq.nat_from_bytes_le (as_seq h0 ks)) (pow2 128);
-  store_felem_le tag f30 f31
+  uints64_to_bytes_le tag f30 f31
+
+[@CInline]
+let poly1305_finish_32 : poly1305_finish_st M32 = poly1305_finish_ #M32
+[@CInline]
+let poly1305_finish_128 : poly1305_finish_st M128 = poly1305_finish_ #M128
+[@CInline]
+let poly1305_finish_256 : poly1305_finish_st M256 = poly1305_finish_ #M256
+
+let poly1305_finish #s tag key ctx =
+  match s with
+  | M32 -> poly1305_finish_32 tag key ctx
+  | M128 -> poly1305_finish_128 tag key ctx
+  | M256 -> poly1305_finish_256 tag key ctx
 
 #set-options "--z3rlimit 150"
 
