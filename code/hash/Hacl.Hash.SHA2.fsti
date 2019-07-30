@@ -27,6 +27,8 @@ open Lib.IntTypes
 open Lib.Sequence
 open Lib.Buffer
 
+#set-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 2"
+
 noextract inline_for_extraction
 val hash_512_lib:
   input_len:size_t ->

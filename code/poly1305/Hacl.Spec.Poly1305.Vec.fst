@@ -181,6 +181,7 @@ let encode_r (rb:block) : pfelem =
   let mask1 = u64 0x0ffffffc0ffffffc in
   let lo = lo &. mask0 in
   let hi = hi &. mask1 in
+  assert_norm (pow2 64 * pow2 64 + pow2 64 < prime);
   uint_v hi * pow2 64 + uint_v lo
 
 let poly1305_init (k:key) : pfelem & pfelem =

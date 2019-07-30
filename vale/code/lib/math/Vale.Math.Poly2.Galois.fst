@@ -18,7 +18,7 @@ let to_felem f p =
   let G.GF t irred = f in
   let n = I.bits t in
   let p = reverse p (n - 1) in
-  I.nat_to_uint (U.from_vec #n (to_seq p n))
+  Lib.IntTypes.Compatibility.nat_to_uint (U.from_vec #n (to_seq p n))
 
 let lemma_to_poly_degree #f e =
   reveal_defs ()
@@ -38,7 +38,7 @@ let lemma_poly_felem f p =
   let r = reverse p (n - 1) in
   let s = to_seq r n in
   let u = U.from_vec #n s in
-  let e = I.nat_to_uint u in
+  let e = Lib.IntTypes.Compatibility.nat_to_uint u in
   let u' = I.v #t #I.SEC e in
   let s' = U.to_vec #n u' in
   let r' = of_seq s' in
@@ -59,12 +59,12 @@ let lemma_felem_poly #f e =
   let r' = reverse p (n - 1) in
   let s' = to_seq r' n in
   let u' = U.from_vec #n s' in
-  let e' = I.nat_to_uint #t #I.SEC u' in
+  let e' = Lib.IntTypes.Compatibility.nat_to_uint #t #I.SEC u' in
   PL.lemma_index_all ();
   PL.lemma_reverse_define_all ();
   lemma_equal r r';
   assert (equal s s');
-  I.uintv_extensionality e e';
+  Lib.IntTypes.Compatibility.uintv_extensionality e e';
   ()
 
 let lemma_zero f =
@@ -448,7 +448,7 @@ let lemma_mmul_smul (a b m:poly) (n:nat) : Lemma
   =
   lemma_mmul_smul_rec a b m n
 
-let lemma_eqmask_and (t:I.inttype) (a b c:I.uint_t t I.SEC) : Lemma
+let lemma_eqmask_and (t:I.inttype{Lib.IntTypes.unsigned t}) (a b c:I.uint_t t I.SEC) : Lemma
   (requires t =!= Lib.IntTypes.U1)
   (ensures I.v (I.logand (I.eq_mask a b) c) == (if I.v a = I.v b then I.v c else 0))
   =
@@ -588,4 +588,3 @@ let lemma_mul f a b =
   lemma_fmul_fmul f a b;
   PL.lemma_mod_small (to_poly (G.fmul a b)) m;
   ()
-

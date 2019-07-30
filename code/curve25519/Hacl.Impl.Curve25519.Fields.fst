@@ -213,6 +213,8 @@ let fsub_post #s h out =
   | M51 -> F51.felem_fits h out (9, 10, 9, 9, 9)
   | M64 -> True
 
+#reset-options "--z3rlimit 50 --max_fuel 2"
+
 inline_for_extraction noextract
 val fsub:
     #s:field_spec
@@ -423,7 +425,7 @@ val cswap2:
   -> p2:felem2 s
   -> Stack unit
     (requires fun h0 ->
-      (s = M64 ==> Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\    
+      (s = M64 ==> Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
       live h0 p1 /\ live h0 p2 /\
       (disjoint p1 p2 \/ p1 == p2))
     (ensures  fun h0 _ h1 ->

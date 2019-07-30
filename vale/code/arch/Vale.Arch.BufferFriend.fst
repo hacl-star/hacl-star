@@ -139,7 +139,7 @@ let nat_from_bytes_le_is_le_bytes_to_nat64 b =
     index s01 0 + pow2 32 * index s01 1;
     == {}
     BS.nat_from_bytes_le (slice b 0 4) + pow2 32 * BS.nat_from_bytes_le (slice b 4 8) <: int;
-    == {BS.nat_from_bytes_le_slice_lemma #LI.SEC #8 b 4}
+    == {BS.nat_from_intseq_le_slice_lemma #LI.U8 #LI.SEC #8 b 4}
     BS.nat_from_bytes_le b <: int;
   }
 

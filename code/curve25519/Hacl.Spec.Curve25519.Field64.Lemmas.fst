@@ -320,7 +320,7 @@ let lemma_mul4 r f0 f1 f2 f3 c0 c1 c2 c3 o01 o02 o03 o12 o13 o14 o23 o24 o25 o34
   assert_norm (pow2 256 * pow2 64 * pow2 64 * pow2 64 == pow2 448);
   assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 448)
 
-#set-options "--z3rlimit 100"
+#set-options "--z3rlimit 200"
 
 val lemma_mul4_expand:
     f:felem4
@@ -363,7 +363,7 @@ let lemma_felem64_mod255 a =
     (v a3 % pow2 63) * pow2 64 * pow2 64 * pow2 64);
   let a3' = a3 &. u64 0x7fffffffffffffff in
   assert_norm (0x7fffffffffffffff = pow2 63 - 1);
-  uintv_extensionality (mod_mask #U64 63ul) (u64 0x7fffffffffffffff);
+  assert (v (mod_mask #U64 #SEC 63ul) == v (u64 0x7fffffffffffffff));
   let r = a.[3] <- a3' in
   Hacl.Impl.Curve25519.Lemmas.lemma_nat_from_uints64_le_4 r
 
