@@ -426,7 +426,7 @@ let subm_last_step x y =
   let t = ((b <<. 40ul) +! x) -! y in
   b, t
 
-
+#push-options "--z3rlimit 300"
 inline_for_extraction noextract
 val sub_mod_264: x:qelem5 -> y:qelem5 ->
   Pure qelem5
@@ -437,16 +437,45 @@ val sub_mod_264: x:qelem5 -> y:qelem5 ->
     as_nat5 y < pow2 264)
   (ensures fun z ->
     qelem_fits5 z (1, 1, 1, 1, 1) /\
-    as_nat5 z == (as_nat5 x - as_nat5 y) % pow2 264)
+   (if as_nat5 x >= as_nat5 y then
+      as_nat5 z == as_nat5 x - as_nat5 y
+    else
+      as_nat5 z == as_nat5 x - as_nat5 y + pow2 264))
 
 let sub_mod_264 (x0, x1, x2, x3, x4) (y0, y1, y2, y3, y4) =
   let (c1, t0) = subm_step x0 y0 in
+  assert (v x0 - v y0 == v t0 - v c1 * pow56);
   let (c2, t1) = subm_step x1 (y1 +! c1) in
+  assert (v x1 - v y1 - v c1 == v t1 - v c2 * pow56);
   let (c3, t2) = subm_step x2 (y2 +! c2) in
+  assert (v x2 - v y2 - v c2 == v t2 - v c3 * pow56);
   let (c4, t3) = subm_step x3 (y3 +! c3) in
-  admit();
+  assert (v x3 - v y3 - v c3 == v t3 - v c4 * pow56);
+  Lemmas.lemma_as_nat_pow264_x4 (x0, x1, x2, x3, x4);
+  Lemmas.lemma_as_nat_pow264_x4 (y0, y1, y2, y3, y4);
   let (c5, t4) = subm_last_step x4 (y4 +! c4) in
+  assert (v x4 - v y4 - v c4 == v t4 - pow2 40 * v c5);
+  assert (
+    if v c5 = 0 then as_nat5 (x0, x1, x2, x3, x4) >= as_nat5 (y0, y1, y2, y3, y4)
+    else as_nat5 (x0, x1, x2, x3, x4) < as_nat5 (y0, y1, y2, y3, y4));
+
+  assert_norm (pow2 40 < pow2 56);
+  assert (qelem_fits5 (t0, t1, t2, t3, t4) (1, 1, 1, 1, 1));
+  assert
+   (as_nat5 (t0, t1, t2, t3, t4) ==
+    v x0 - v y0 + v c1 * pow56 +
+    (v x1 - v y1 - v c1 + v c2 * pow56) * pow56 +
+    (v x2 - v y2 - v c2 + v c3 * pow56) * pow112 +
+    (v x3 - v y3 - v c3 + v c4 * pow56) * pow168 +
+    (v x4 - v y4 - v c4 + pow2 40 * v c5) * pow224);
+  Lemmas.lemma_sub_mod_264_aux (v x0) (v x1) (v x2) (v x3) (v x4)
+    (v y0) (v y1) (v y2) (v y3) (v y4) (v c1) (v c2) (v c3) (v c4) (v c5);
+
+  assert (as_nat5 (t0, t1, t2, t3, t4) ==
+    as_nat5 (x0, x1, x2, x3, x4) - as_nat5 (y0, y1, y2, y3, y4) + v c5 * pow2 264);
+  Lemmas.lemma_sub_mod_264 (x0, x1, x2, x3, x4) (y0, y1, y2, y3, y4) (t0, t1, t2, t3, t4) c5;
   (t0, t1, t2, t3, t4)
+#pop-options
 
 
 // A = t, L = make_m()

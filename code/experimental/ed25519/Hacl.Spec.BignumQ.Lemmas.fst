@@ -517,3 +517,64 @@ let lemma_mod_264 t =
     (==) { lemma_as_nat_pow264 res; FStar.Math.Lemmas.modulo_lemma (as_nat5 res) (pow2 264) }
     v t0 + v t1 * pow2 56 + v t2 * pow2 112 + v t3 * pow2 168 + (v t4 % pow2 40) * pow2 224;
     }
+
+
+val lemma_as_nat_pow264_x4: x:qelem5 ->
+  Lemma
+  (requires
+    qelem_fits5 x (1, 1, 1, 1, 1) /\
+    as_nat5 x < pow2 264)
+  (ensures
+   (let (x0, x1, x2, x3, x4) = x in
+    v x4 < pow2 40))
+
+let lemma_as_nat_pow264_x4 x =
+  let (x0, x1, x2, x3, x4) = x in
+  assert_norm (pow2 40 * pow2 224 = pow2 264)
+
+
+val lemma_sub_mod_264_aux:
+    x0:nat -> x1:nat -> x2:nat -> x3:nat -> x4:nat
+  -> y0:nat -> y1:nat -> y2:nat -> y3:nat -> y4:nat
+  -> c1:nat -> c2:nat -> c3:nat -> c4:nat -> c5:nat ->
+  Lemma (
+    x0 - y0 + c1 * pow56 +
+    (x1 - y1 - c1 + c2 * pow56) * pow56 +
+    (x2 - y2 - c2 + c3 * pow56) * pow112 +
+    (x3 - y3 - c3 + c4 * pow56) * pow168 +
+    (x4 - y4 - c4 + pow2 40 * c5) * pow224 ==
+    (x0 + x1 * pow2 56 + x2 * pow2 112 + x3 * pow2 168 + x4 * pow2 224) -
+    (y0 + y1 * pow2 56 + y2 * pow2 112 + y3 * pow2 168 + y4 * pow2 224) + c5 * pow2 264)
+
+let lemma_sub_mod_264_aux x0 x1 x2 x3 x4 y0 y1 y2 y3 y4 b0 b1 b2 b3 b4 =
+  assert_norm (pow2 56 * pow2 56 = pow2 112);
+  assert_norm (pow2 56 * pow2 112 = pow2 168);
+  assert_norm (pow2 56 * pow2 168 = pow2 224);
+  assert_norm (pow2 40 * pow2 224 = pow2 264)
+
+val lemma_sub_mod_264:
+    x:qelem5
+  -> y:qelem5
+  -> t:qelem5
+  -> c5:uint64 ->
+  Lemma
+  (requires
+    qelem_fits5 x (1, 1, 1, 1, 1) /\
+    qelem_fits5 y (1, 1, 1, 1, 1) /\
+    qelem_fits5 t (1, 1, 1, 1, 1) /\
+    as_nat5 x < pow2 264 /\
+    as_nat5 y < pow2 264 /\
+    as_nat5 t == as_nat5 x - as_nat5 y + v c5 * pow2 264 /\ v c5 <= 1 /\
+   (if v c5 = 0 then as_nat5 x >= as_nat5 y else as_nat5 x < as_nat5 y))
+  (ensures
+   (if as_nat5 x >= as_nat5 y then
+     as_nat5 t == as_nat5 x - as_nat5 y
+    else as_nat5 t == as_nat5 x - as_nat5 y + pow2 264))
+
+let lemma_sub_mod_264 x y t c5 =
+  assert (if v c5 = 0 then as_nat5 x >= as_nat5 y else as_nat5 x < as_nat5 y);
+  assert (as_nat5 t == as_nat5 x - as_nat5 y + v c5 * pow2 264);
+  if as_nat5 x >= as_nat5 y then
+    assert (v c5 == 0 /\ as_nat5 t == as_nat5 x - as_nat5 y)
+  else
+    assert (v c5 == 1 /\ as_nat5 t == as_nat5 x - as_nat5 y + pow2 264)
