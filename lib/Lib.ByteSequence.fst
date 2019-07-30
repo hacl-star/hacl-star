@@ -406,6 +406,8 @@ let modulo_pow2_prop r a b c =
     (a / pow2 (r * c)) % pow2 r;
   }
 
+#set-options "--z3rlimit 200"
+
 val index_nat_to_intseq_to_bytes_le:
     #t:inttype{unsigned t /\ ~(U1? t)}
   -> #l:secrecy_level
