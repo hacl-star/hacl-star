@@ -30,13 +30,13 @@ private
 val mod_sub_add: a:int -> b:int -> c:int -> d:int -> p:pos -> Lemma
   (requires b % p = 0)
   (ensures  (a - ((b + c) + d)) % p == (a - (c + d)) % p)
-let mod_sub_add a b c d p = 
+let mod_sub_add a b c d p =
   calc (==) {
     (a - ((b + c) + d)) % p;
     == { Math.Lemmas.lemma_mod_sub_distr a ((b + c) + d) p }
     (a - ((b + c) + d) % p) % p;
     == { Math.Lemmas.lemma_mod_plus_distr_l (b + c) d p }
-    (a - ((b + c) % p + d) % p) % p;  
+    (a - ((b + c) % p + d) % p) % p;
     == { Math.Lemmas.lemma_mod_plus_distr_l b c p }
     (a - ((b % p + c) % p + d) % p) % p;
     == { }
@@ -50,7 +50,7 @@ let mod_sub_add a b c d p =
 let pad0_length_mod (a: hash_alg) (base_len: nat) (len: nat): Lemma
   (requires base_len % block_length a = 0)
   (ensures  pad0_length a (base_len + len) = pad0_length a len)
-= 
+=
   mod_sub_add (block_length a) base_len len (len_length a + 1) (block_length a)
 
 let pad_length_mod (a: hash_alg) (base_len len: nat): Lemma
