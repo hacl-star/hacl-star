@@ -379,6 +379,8 @@ let subm_conditional z x =
   choose z tmp z b;
   pop_frame()
 
+#set-options "--z3rlimit 50"
+
 inline_for_extraction noextract
 val mod_40: x:uint128 -> (c:uint64{v c == v x % pow2 40})
 let mod_40 x =
@@ -386,6 +388,7 @@ let mod_40 x =
   assert_norm (pow2 40 - 1  == 0xffffffffff);
   logand_mask x' (u64 0xffffffffff) 40;
   let x'' = x' &. u64 0xffffffffff in
+  Math.Lemmas.pow2_modulo_modulo_lemma_1 (v x) 40 64;
   x''
 
 inline_for_extraction noextract

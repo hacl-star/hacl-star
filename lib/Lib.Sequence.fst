@@ -274,7 +274,7 @@ let map_blocks #a blocksize inp f g =
     Seq.append bs (g nb rem last)
   else bs
 
-#reset-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 400 --max_fuel 0 --max_ifuel 0"
 
 let index_map_blocks #a bs inp f g i =
   let len = length inp in
