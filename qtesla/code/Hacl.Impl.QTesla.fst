@@ -1666,6 +1666,18 @@ private let lemma_disjoint
     (requires disjoint ec e /\ ec_k == gsub ec (k *! params_n) params_n /\ e_k == gsub e (k *! params_n) params_n)
     (ensures disjoint ec_k e_k) = ()
 
+private let lemma_disjoint_2
+    (#t1 #t2: Type0)
+    (#n1: size_t)
+    (#n1s: size_t)
+    (#n2: size_t)
+    (k: size_t{v k + v n1s <= v n1})
+    (buf: lbuffer t1 n1)
+    (subbuf: lbuffer t1 n1s{subbuf == gsub buf k n1s})
+    (other: lbuffer t2 n2) : Lemma
+    (requires disjoint buf other)
+    (ensures disjoint subbuf other) = ()
+
 private inline_for_extraction noextract
 val qtesla_sign_update_v:
     v_: poly_k
@@ -1688,8 +1700,8 @@ let qtesla_sign_update_v v_ e pos_list sign_list =
     assert(forall (i:nat{i < v params_n * v params_k}) . bget hInit e i == bget h0 e i);
     let _, _ =
     interruptible_for (size 0) params_k
-         (fun h _ _ -> live h v_ /\ live h e /\ live h rsp /\ (bget h rsp 0 == 0l \/ bget h rsp 0 == 1l) /\
-                    modifies2 v_ rsp h0 h /\ is_e_sk h e)
+         (fun h k _ -> live h v_ /\ live h e /\ live h rsp /\ (bget h rsp 0 == 0l \/ bget h rsp 0 == 1l) /\
+                    modifies2 v_ rsp h0 h /\ is_e_sk h e /\ k <= v params_k /\ is_poly_k_montgomery_i h v_ (k * v params_n))
          (fun k ->
              let hStart = ST.get () in
              push_frame();
@@ -1703,20 +1715,23 @@ let qtesla_sign_update_v v_ e pos_list sign_list =
              assert(is_e_sk h e);
              lemma_sub_poly_is_sk h e e_k k;
              assert(is_s_sk h e_k);
-             //NS: Not sure why this is not provable
              lemma_disjoint ec e ec_k e_k k;
              assert(disjoint ec_k e_k);
-             assume(disjoint e_k pos_list);
-             assume(disjoint e_k sign_list);
+             lemma_disjoint_2 (k *! params_n) e e_k pos_list;
+             lemma_disjoint_2 (k *! params_n) e e_k sign_list;
+             assert(disjoint e_k pos_list);
+             assert(disjoint e_k sign_list);
              sparse_mul ec_k e_k pos_list sign_list;
              poly_sub_correct (index_poly v_ k) (index_poly v_ k) (index_poly ec k);
              let hSub = ST.get () in
-             assume(is_poly_k_montgomery hSub v_);
-             lemma_sub_poly_is_montgomery hSub v_ (gsub v_ (k *! params_n) params_n) k;
+             assert(is_poly_montgomery hSub (get_poly v_ k));
              rsp.(size 0) <- test_correctness (index_poly v_ k);
              let rspVal = rsp.(size 0) in 
              pop_frame(); 
              let hLoopEnd = ST.get () in
+             assert(is_poly_equal hSub hLoopEnd (get_poly v_ k));
+             assert(forall (i:nat{i < v params_n}) . is_montgomery (bget hLoopEnd (get_poly v_ k) i));
+             assert(forall (i:nat{i >= v k * v params_n /\ i < v k * v params_n + v params_n}) . bget hLoopEnd v_ i == bget hLoopEnd (get_poly v_ k) (i - v k * v params_n));
              rspVal <> 0l
          ) in
    let rspVal = rsp.(size 0) in
