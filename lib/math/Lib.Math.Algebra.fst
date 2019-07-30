@@ -1053,6 +1053,8 @@ let rec exp_order_lemma g e1 e2 =
     exp_mul1 g (e2-1) 1
   end
 
+#reset-options "--z3rlimit 50"
+
 val exp_order_lemma_strict: g:nat{g>1} -> e1:nat -> e2:nat{e1 < e2} -> Lemma
   (exp g e1 < exp g e2)
 let rec exp_order_lemma_strict g e1 e2 =
@@ -1064,6 +1066,8 @@ let rec exp_order_lemma_strict g e1 e2 =
     assert (exp g e1 <= exp g (e2-1) * g);
     exp_mul1 g (e2-1) 1
   end
+
+#reset-options
 
 val exp_greater_than_power: g:pos{g>1} -> e:nat -> Lemma (exp g e > e)
 let exp_greater_than_power g e =
@@ -1292,7 +1296,6 @@ let inv_as_gcd1 #n a =
   modulo_lemma a n;
   assert ((to_fe #n u *% a) = 1)
 
-#reset-options
 
 val inv_as_gcd2: #n:big -> a:fe n{a>0} -> Lemma
   (requires (isunit a))
@@ -1305,6 +1308,8 @@ let inv_as_gcd2 #n a =
     neg_mul_left ((u*a)/n) n;
     ex_eucl_lemma3 a n u (-(u*a)/n)
   end)
+
+#reset-options
 
 val inv_as_gcd: #n:big -> a:fe n{a>0} -> Lemma
   (isunit a <==> gcd a n = 1)

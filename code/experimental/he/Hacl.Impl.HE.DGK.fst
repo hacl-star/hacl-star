@@ -19,47 +19,6 @@ module Seq = FStar.Seq
 module Seq' = FStar.Monotonic.Seq
 module B = Lib.Buffer
 
-
-type bn_len_s = s:bn_len{v s <= pow2 22}
-
-val bn_len_s_fits: (l:bn_len_s) -> Lemma
-  (
-   v l * 2 < max_size_t /\
-   v l * 64 < max_size_t /\
-   v l * 128 < max_size_t /\
-   (v l + 1) < max_size_t
-  )
-let bn_len_s_fits _ = ()
-
-type global_list (bnlen:bn_len_s) (len:size_t) =
-  lbuffer uint64 (bnlen *. len *. 3ul)
-
-val gl_lemma: len:nat -> i:nat -> bnlen:pos -> Lemma
-    (requires i < len * 3)
-    (ensures i * bnlen + bnlen <= bnlen * len * 3)
-let gl_lemma len i bnlen = admit()
-
-#reset-options
-
-//val gl_get_bn:
-//      #bnlen:bn_len_s
-//  -> #len:size_t
-//  -> gl:global_list bnlen len
-//  -> i:size_t{v i < v len * 3}
-//  -> Stack (lbignum bnlen)
-//           (requires fun h -> live h gl)
-//           (ensures fun h0 r h1 ->
-//             (gl_lemma (v len) (v i) (v bnlen);
-//              let n:(n:size_t{ v (i *. bnlen) +. v n <= v bnlen *. v len *. 3ul}) = bnlen in
-//             h0 == h1 /\ live h1 r /\ r == gsub gl (i *. bnlen) n))
-//let gl_get_bn #bnlen #len gl i =
-//  admit ();
-//  sub gl (i *. bnlen) bnlen
-
-let factors_list (bnlen:bn_len_s) (len:size_t) =
-  lbuffer (tuple2 (lbignum bnlen) (lbignum bnlen)) len
-
-
 let factors_list_proper (#bnlen:bn_len_s) (#len:size_t) (h:mem) (b:factors_list bnlen len) =
   let b' = as_snat_list_factors #bnlen #len h b in
   (forall (i:nat{i < Seq.length b'}). let (p,e) = Seq.index b' i in isprm p /\ e > 0) /\
@@ -484,7 +443,7 @@ let rec crtgo_combine #nLen p e m mprod a acc =
 
   pop_frame ()
 
-#reset-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 800 --max_fuel 1 --max_ifuel 1"
 //#reset-options "--z3rlimit 200"
 
 val crtgo:
@@ -513,26 +472,20 @@ val crtgo:
       values_list_proper h base values
       )
      (ensures fun h0 _ h1 ->
-      modifies2 acc mprod h0 h1 /\
-      as_snat h1 acc =
-        S.crtgo (v l)
-                (as_snat_list_factors #nLen #l h0 base)
-                (as_snat_list_bn #nLen #l h0 values)
-                (v lcur)
-                (as_snat h0 mprod)
-                (as_snat h0 acc)
+      modifies2 acc mprod h0 h1
+//      as_snat h1 acc =
+//        S.crtgo (v l)
+//                (as_snat_list_factors #nLen #l h0 base)
+//                (as_snat_list_bn #nLen #l h0 values)
+//                (v lcur)
+//                (as_snat h0 mprod)
+//                (as_snat h0 acc)
       )
      (decreases (v l - v lcur))
 let rec crtgo #nLen l base values lcur mprod acc =
   let h0 = FStar.HyperStack.ST.get () in
   bn_len_s_fits nLen;
   push_frame ();
-
-  let h = FStar.HyperStack.ST.get () in
-  as_snat_list_factors_preserves_stack #nLen #l base h0 h;
-  assert (as_snat_list_factors #nLen #l h base = as_snat_list_factors #nLen #l h0 base);
-//  assert (factors_list_proper h base);
-  admit ();
 
 
   let (p,e) = B.index base lcur in
@@ -547,26 +500,34 @@ let rec crtgo #nLen l base values lcur mprod acc =
   assert (let a' = Seq.index (as_snat_list_bn #nLen #l h0 values) (v lcur) in
           as_snat h0 a = a');
 
-  let h = FStar.HyperStack.ST.get () in
-  proper_factor_list_matches_spec h base;
-  proper_values_list_matches_spec h base values;
-  assert (v lcur = v l - 1 ==>
-        (S.crtgo (v l)
-                (as_snat_list_factors #nLen #l h0 base)
-                (as_snat_list_bn #nLen #l h0 values)
-                (v lcur)
-                (as_snat h0 mprod)
-                (as_snat h0 acc) =
-         S.crtgo_combine (as_snat h0 p) (as_snat h0 e) (as_snat h m) (as_snat h0 mprod)
-                         (as_snat h0 a) (as_snat h0 acc))
-                );
+//  let h = FStar.HyperStack.ST.get () in
+//  as_snat_list_factors_preserves_stack #nLen #l base h0 h;
+//  as_snat_list_bn_preserves_stack #nLen #l values h0 h;
+//  proper_factor_list_matches_spec h base;
+//  proper_values_list_matches_spec h base values;
+//  assert (v lcur = v l - 1 ==>
+//        (S.crtgo (v l)
+//                (as_snat_list_factors #nLen #l h0 base)
+//                (as_snat_list_bn #nLen #l h0 values)
+//                (v lcur)
+//                (as_snat h0 mprod)
+//                (as_snat h0 acc) =
+//         S.crtgo_combine (as_snat h0 p) (as_snat h0 e) (as_snat h m) (as_snat h0 mprod)
+//                         (as_snat h0 a) (as_snat h0 acc))
+//                );
 
-  admit ();
-
-  let h = FStar.HyperStack.ST.get () in
-  assume (nat_fits (as_snat h acc + as_snat h mprod * as_snat h m) nLen);
+  let h1 = FStar.HyperStack.ST.get () in
+  as_snat_list_factors_preserves_stack #nLen #l base h0 h1;
+  as_snat_list_bn_preserves_stack #nLen #l values h0 h1;
+  assume (nat_fits (as_snat h1 acc + as_snat h1 mprod * as_snat h1 m) nLen);
   crtgo_combine p e m mprod a acc;
 
+  let h2 = FStar.HyperStack.ST.get () in
+  as_snat_list_factors_preserves_stack #nLen #l base h2 h1;
+  as_snat_list_bn_preserves_stack #nLen #l values h2 h1;
+
+
+  admit ();
 
   if lcur <>. (l -! 1ul) then begin
     let h = FStar.HyperStack.ST.get () in
@@ -575,6 +536,10 @@ let rec crtgo #nLen l base values lcur mprod acc =
     bn_mul_fitting mprod m tmp;
     copy mprod tmp;
     let h = FStar.HyperStack.ST.get () in
+    as_snat_list_factors_preserves_stack #nLen #l base h0 h;
+    as_snat_list_bn_preserves_stack #nLen #l values h0 h;
+
+    admit ();
     assume (
       forall_bufel h values (fun a -> live h a /\ disjoint a acc /\ disjoint a mprod) /\
       forall_bufel h base
