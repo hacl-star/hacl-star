@@ -445,9 +445,9 @@ let test_pow2_gen a p =
 
   let bn_a:lbignum aLen = nat_to_bignum a in
   let bn_res:lbignum aLen = create aLen (uint 0) in
-  snat_order (fexp #a 2 p) a;
-  nat_bytes_num_fit (fexp #a 2 p) a;
-  let bn_expected:lbignum aLen = nat_to_bignum (normalize_term (fexp #a 2 p)) in
+  snat_order (mexp #a 2 p) a;
+  nat_bytes_num_fit (mexp #a 2 p) a;
+  let bn_expected:lbignum aLen = nat_to_bignum (normalize_term (mexp #a 2 p)) in
 
   assume (v aBits / 64 <= v aLen);
 
@@ -719,9 +719,9 @@ let test_exp_gen n a exp =
   let bn_exp:lbignum expLen = nat_to_bignum exp in
   let bn_res:lbignum nLen = create nLen (uint 0) in
 
-  snat_order (fexp #n a exp) n;
-  nat_bytes_num_fit (fexp #n a exp) n;
-  let bn_expected:lbignum nLen = nat_to_bignum (normalize_term (fexp #n a exp)) in
+  snat_order (mexp #n a exp) n;
+  nat_bytes_num_fit (mexp #n a exp) n;
+  let bn_expected:lbignum nLen = nat_to_bignum (normalize_term (mexp #n a exp)) in
 
   nat_bytes_num_range n;
   bn_modular_exp bn_n bn_a bn_exp bn_res;

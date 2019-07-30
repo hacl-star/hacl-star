@@ -239,6 +239,59 @@ let bn_modular_add #len n a b res =
   trace "modular_add done\n";
   pop_frame()
 
+
+noextract
+val sub_indifferent_zero: a:nat -> b:nat -> n:big -> Lemma
+  (requires (a - b) % n = 0)
+  (ensures (b - a) % n = 0)
+let sub_indifferent_zero a b n =
+  to_fe_sub #n a b;
+  add_move_to_right #n (to_fe #n a) (to_fe #n b) 0;
+  add_sub_zero #n (to_fe #n b);
+  add_move_to_left #n (to_fe #n b) (to_fe #n a) 0;
+  to_fe_sub #n b a
+
+val bn_modular_sub:
+     #len:bn_len{ (v len + 1) * 64 <= max_size_t}
+  -> n:lbignum len
+  -> a:lbignum len
+  -> b:lbignum len
+  -> res:lbignum len
+  -> Stack unit
+    (requires fun h ->
+       live h n /\ live h a /\ live h b /\ live h res /\
+       disjoint res a /\ disjoint res b /\ disjoint res n /\
+       as_snat h n > 1)
+    (ensures  fun h0 _ h1 ->
+       live h1 n /\ live h1 a /\ live h1 b /\ live h1 res /\
+       modifies (loc res) h0 h1 /\
+       as_snat h1 res = (as_snat h0 a - as_snat h0 b) % as_snat h0 n)
+let rec bn_modular_sub #len n a b res =
+  push_frame();
+
+  if bn_is_geq a b then begin
+    let res' = create len (uint 0) in
+    let c = bn_sub a b res' in
+    assert (v c = 0);
+    bn_remainder res' n res
+  end else begin
+    bn_modular_sub n b a res;
+    if not (bn_is_zero res) then begin
+      bn_sub_exact n res res;
+      let h = FStar.HyperStack.ST.get () in
+      assert (as_snat h res = as_snat h n - (as_snat h b - as_snat h a) % as_snat h n);
+      to_fe_neg #(as_snat h n) (as_snat h b - as_snat h a);
+      assert (as_snat h res = (as_snat h a - as_snat h b) % as_snat h n)
+    end else begin
+      let h = FStar.HyperStack.ST.get () in
+      sub_indifferent_zero (as_snat h b) (as_snat h a) (as_snat h n);
+      assert ((as_snat h a - as_snat h b) % as_snat h n = 0)
+    end
+  end;
+
+  pop_frame()
+
+
 val bn_modular_mul:
      #len:bn_len_strict{v len * 128 < max_size_t}
   -> n:lbignum len
