@@ -192,8 +192,8 @@ val poly_ntt:
     x_ntt: poly
   -> x: poly
   -> Stack unit
-    (requires fun h -> live h x_ntt /\ live h x /\ disjoint x_ntt x)
-    (ensures fun h0 _ h1 -> modifies1 x_ntt h0 h1)
+    (requires fun h -> live h x_ntt /\ live h x /\ disjoint x_ntt x /\ is_poly_pmq h x)
+    (ensures fun h0 _ h1 -> modifies1 x_ntt h0 h1 /\ is_poly_montgomery h1 x_ntt)
 
 let poly_ntt x_ntt x =
     push_frame();
@@ -215,7 +215,10 @@ let poly_ntt x_ntt x =
     );
 
     ntt x_ntt zeta;
-    pop_frame()
+    let hNtt = ST.get () in
+    pop_frame();
+    let hReturn = ST.get () in
+    assert(is_poly_equal hNtt hReturn x_ntt)
 
 inline_for_extraction noextract
 let poly_pointwise = Hacl.Impl.QTesla.Heuristic.Poly.poly_pointwise
@@ -226,8 +229,8 @@ val poly_mul:
   -> x: poly
   -> y: poly
   -> Stack unit
-    (requires fun h -> live h result /\ live h x /\ live h y)
-    (ensures fun h0 _ h1 -> modifies1 result h0 h1)
+    (requires fun h -> live h result /\ live h x /\ live h y /\ is_poly_montgomery h x /\ is_poly_montgomery h y)
+    (ensures fun h0 _ h1 -> modifies1 result h0 h1 /\ is_poly_montgomery h1 result)
 
 let poly_mul result x y =
     push_frame(); 
@@ -236,7 +239,9 @@ let poly_mul result x y =
     let zetainv : poly = createL zetainv_list_elem in
     poly_pointwise result x y;
     nttinv result zetainv;
-    pop_frame()
+    pop_frame();
+    let h1 = ST.get () in
+    assume(is_poly_montgomery h1 result)
 
 inline_for_extraction noextract
 let poly_add = Hacl.Impl.QTesla.Heuristic.Poly.poly_add

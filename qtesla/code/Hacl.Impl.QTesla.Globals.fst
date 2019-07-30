@@ -245,6 +245,13 @@ let shift_arithmetic_left x s =
     //assert(I32.v r == I32.v x * pow2 (UI32.v s));
     //r
 
+(*val shift_arithmetic_left_value_lemma: a:elem -> s:UI32.t{UI32.v s < elem_n} ->
+  Lemma (requires True)
+        (ensures elem_v (shift_arithmetic_left a s) = (elem_v a * pow2 (UI32.v s)) `Int.op_At_Percent` pow2 I32.n)
+let shift_arithmetic_left_value_lemma a s =
+  UInt.shift_left_value_lemma #UI32.n (uelem_v (elem_to_uelem a)) (UI32.v s)*)
+
+
 (*let frame_is_poly_sampler_output_i (h0 h1: HS.mem) (p: poly) (i:nat{i <= v params_n}) (l:B.loc) : Lemma
     (requires is_poly_sampler_output_i h0 p i /\ modifies l h0 h1 /\ disjoint l (gsub p (size 0) (size i)))
     (ensures is_poly_sampler_output_i h1 p i)

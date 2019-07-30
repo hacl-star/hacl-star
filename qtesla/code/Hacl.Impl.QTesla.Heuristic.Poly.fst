@@ -394,7 +394,7 @@ val poly_sub_correct:
   -> y: poly
   -> Stack unit
     (requires fun h -> live h result /\ live h x /\ live h y)
-    (ensures fun h0 _ h1 -> modifies1 result h0 h1)
+    (ensures fun h0 _ h1 -> modifies1 result h0 h1 /\ is_poly_montgomery h1 result)
 
 let poly_sub_correct result x y =
     push_frame();
@@ -412,7 +412,9 @@ let poly_sub_correct result x y =
         assume(is_elem temp);
         result.(i) <- temp
     );
-    pop_frame()
+    pop_frame();
+    let hReturn = ST.get () in
+    assume(is_poly_montgomery hReturn result)
 
 // This function is sometimes used with result and x the same, so we can't assume they are disjoint.
 val poly_sub_reduce:
