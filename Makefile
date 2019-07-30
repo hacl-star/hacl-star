@@ -938,6 +938,7 @@ dist/test/ml/%_AutoTest.ml:
 
 # Relying on the --extract argument of fstar --dep to have a reasonable
 # over-approximation.
+.PRECIOUS: dist/test/ml/%.exe
 dist/test/ml/%.exe: $(ALL_CMX_FILES) dist/test/ml/%_AutoTest.ml
 	$(OCAMLOPT) $^ -o $@
 
