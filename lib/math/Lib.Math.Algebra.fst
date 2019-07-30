@@ -585,6 +585,19 @@ let ( *% ) #n n1 n2 = (n1 * n2) % n
 val sqr: #n:big -> fe n -> fe n
 let sqr #n a = a *% a
 
+val neg_zero: #n:big -> Lemma
+  (neg (to_fe #n 0) = 0)
+let neg_zero #n = ()
+
+val add_sub_zero: #n:big -> a:fe n -> Lemma
+  (a +% 0 = a /\ a -% 0 = a)
+let add_sub_zero #n a = ()
+
+val add_neg: #n:big -> a:fe n -> Lemma
+  (a -% a = 0 /\ neg a +% a = 0)
+  [SMTPat (a -% a); SMTPat (neg a +% a)]
+let add_neg #n a = ()
+
 val minus_is_neg: a:nat -> n:big -> Lemma
   ((-(a % n)) % n = neg (to_fe #n a))
 let minus_is_neg a n = ()
@@ -658,18 +671,6 @@ let minus_one_square n =
 
 #reset-options
 
-val add_move_to_right: #n:big -> a:fe n -> b:fe n -> c:fe n -> Lemma
-  (requires (a -% b = c))
-  (ensures (a = c +% b))
-let add_move_to_right #n a b c =
-  to_fe_sub' a b;
-  assert (to_fe #n (a - b) = a -% b);
-  assert ((a - b) % n = c % n);
-  modulo_add n b (a-b) c;
-  assert ((a - b + b) % n = (c + b) % n);
-  assert (a % n = (c + b) % n);
-  to_fe_idemp a;
-  to_fe_add' c b
 
 val add_comm: #n:big -> a:fe n -> b:fe n -> Lemma
   (a +% b = b +% a)
@@ -717,14 +718,21 @@ let add_assoc #n a b c =
     (a +% (b +% c));
   }
 
+val add_move_to_right: #n:big -> a:fe n -> b:fe n -> c:fe n -> Lemma
+  (requires (a -% b = c))
+  (ensures (a = c +% b))
+let add_move_to_right #n a b c =
+  assert ((a -% b) +% b = c +% b);
+  add_assoc a (neg b) b;
+  assert (a +% (neg b +% b) = c +% b)
 
-val neg_zero: #n:big -> Lemma
-  (neg (to_fe #n 0) = 0)
-let neg_zero #n = ()
-
-val add_sub_zero: #n:big -> a:fe n -> Lemma
-  (a +% 0 = a /\ a -% 0 = a)
-let add_sub_zero #n a = ()
+val add_move_to_left: #n:big -> a:fe n -> b:fe n -> c:fe n -> Lemma
+  (requires (a = c +% b))
+  (ensures (a -% b = c))
+let add_move_to_left #n a b c =
+  assert (a -% b = (c +% b) -% b);
+  add_assoc c b (neg b);
+  assert (a -% b = c +% (b -% b))
 
 val mod_prop: n:pos -> a:int -> b:int -> Lemma
   (requires (a % n = b))

@@ -69,6 +69,8 @@ let bn_sub_ #aLen #bLen a b carry res =
     res.(i) <- res_i
   )
 
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
+
 inline_for_extraction noextract
 val bn_sub:
      #aLen:bn_len
@@ -78,14 +80,30 @@ val bn_sub:
   -> res:lbignum aLen
   -> Stack uint64
     (requires fun h -> live h a /\ live h b /\ live h res)
-    (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1)
+    (ensures  fun h0 c h1 ->
+     modifies1 res h0 h1 /\
+     (if as_snat h0 a >= as_snat h0 b
+      then (v c = 0 /\ as_snat h1 res = as_snat h0 a - as_snat h0 b)
+      else (v c <> 0 /\ as_snat h1 res =
+            v c * pow2 (64 * v aLen) + as_snat h0 a - as_snat h0 b))
+     )
+
 let bn_sub #aLen #bLen a b res =
+  let h0 = FStar.HyperStack.ST.get () in
+
   push_frame ();
   let carry = create 1ul (u64 0) in
   bn_sub_ a b carry res;
-  let res = carry.(0ul) in
+  let carry0 = carry.(0ul) in
   pop_frame ();
-  res
+
+  let h = FStar.HyperStack.ST.get () in
+  assume (if as_snat h0 a >= as_snat h0 b
+          then (v carry0 = 0 /\ as_snat h res = as_snat h0 a - as_snat h0 b)
+          else (v carry0 <> 0 /\ as_snat h res =
+                v carry0 * pow2 (64 * v aLen) + as_snat h0 a - as_snat h0 b));
+
+  carry0
 
 inline_for_extraction noextract
 val bn_sub_exact:
@@ -137,16 +155,40 @@ val bn_add:
   -> Stack uint64
     (requires fun h -> live h a /\ live h b /\ live h res)
     (ensures  fun h0 _ h1 ->
-         modifies (loc res) h0 h1 /\
-         as_snat h1 res = as_snat h0 a + as_snat h0 b)
+         modifies1 res h0 h1 /\
+         as_snat h1 res = (as_snat h0 a + as_snat h0 b) % pow2 (64 * v aLen))
 let bn_add #aLen #bLen a b res =
+  let h0 = FStar.HyperStack.ST.get () in
   push_frame ();
   let carry = create 1ul (u64 0) in
   bn_add_ a b carry res;
-  let res = carry.(0ul) in
+  let carry0 = carry.(0ul) in
   pop_frame ();
-  admit();
-  res
+  let h1 = FStar.HyperStack.ST.get () in
+  assume (as_snat h1 res = (as_snat h0 a + as_snat h0 b) % pow2 (64 * v aLen));
+  carry0
+
+inline_for_extraction noextract
+val bn_add_fitting:
+     #aLen:bn_len
+  -> #bLen:bn_len{v bLen <= v aLen}
+  -> a:lbignum aLen
+  -> b:lbignum bLen
+  -> res:lbignum aLen
+  -> Stack unit
+    (requires fun h ->
+      live h a /\ live h b /\ live h res /\
+      nat_fits (as_snat h a + as_snat h b) aLen)
+    (ensures  fun h0 _ h1 ->
+         modifies1 res h0 h1 /\
+         as_snat h1 res = as_snat h0 a + as_snat h0 b)
+let bn_add_fitting #aLen #bLen a b res =
+  let h0 = FStar.HyperStack.ST.get () in
+  push_frame ();
+  nat_fits_less_pow (as_snat h0 a + as_snat h0 b) aLen;
+  let _ = bn_add a b res in
+  pop_frame ()
+
 
 inline_for_extraction noextract
 val bn_add_exact:
@@ -161,9 +203,11 @@ val bn_add_exact:
          modifies (loc res) h0 h1 /\
          as_snat h1 res = as_snat h0 a + as_snat h0 b)
 let bn_add_exact #aLen #bLen a b res =
+  let h0 = FStar.HyperStack.ST.get () in
   push_frame ();
   let carry = sub res aLen 1ul in
   let res_prefix = sub res 0ul aLen in
   bn_add_ a b carry res_prefix;
   pop_frame ();
-  admit()
+  let h1 = FStar.HyperStack.ST.get () in
+  assume (as_snat h1 res = as_snat h0 a + as_snat h0 b)

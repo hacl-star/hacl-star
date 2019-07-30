@@ -146,8 +146,7 @@ val bn_mul_fitting:
     (requires fun h ->
       live h a /\ live h b /\ live h res /\
       disjoint res a /\ disjoint res b /\
-      issnat (as_snat h a * as_snat h b) /\
-      v (nat_bytes_num (as_snat h a * as_snat h b)) <= v resLen)
+      nat_fits (as_snat h a * as_snat h b) resLen)
     (ensures  fun h0 _ h1 ->
      modifies1 res h0 h1 /\ as_snat h1 res == as_snat h0 a * as_snat h0 b)
 let bn_mul_fitting #aLen #bLen #resLen a b res =

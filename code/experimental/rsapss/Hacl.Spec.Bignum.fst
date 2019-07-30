@@ -128,6 +128,12 @@ val nat_fits_trans: a:nat -> b:nat -> bound:size_t -> Lemma
   (ensures (nat_fits a bound))
 let rec nat_fits_trans a b bound = nat_bytes_num_fit a b
 
+/// Fitting nat is smaller than (2^64)^bound.
+val nat_fits_less_pow: a:nat -> bound:size_t -> Lemma
+  (requires nat_fits a bound)
+  (ensures a < pow2 (64 * v bound))
+let nat_fits_less_pow a bound = admit ()
+
 /// Nat representation of bigint.
 noextract
 val as_snat:
@@ -148,6 +154,15 @@ val as_snat_prop:
   -> e:lbignum eLen
   -> Lemma (nat_fits (as_snat h e) eLen)
 let as_snat_prop #eLen h e = admit ()
+
+val as_snat_preserves_stack:
+     #eLen:bn_len
+  -> e:lbignum eLen
+  -> h0:mem
+  -> h1:mem
+  -> Lemma (requires (as_seq h0 e == as_seq h1 e))
+           (ensures (as_snat h0 e = as_snat h1 e))
+let as_snat_preserves_stack #eLen e h0 h1 = ()
 
 /// Converts nat to the bignum, for that creates a bignum of exact length required.
 inline_for_extraction noextract

@@ -171,29 +171,46 @@ val solve_dlp_power:
 let solve_dlp_power #n u g a = admit()
 
 
-type is_crt_base (base:S.seq (tuple2 prm pos)) =
-  forall (i:nat{i < S.length base}) (j:nat{j < S.length base /\ j <> i}).
-    fst (S.index base i) <> fst (S.index base j)
+type crtbase0 = s:S.seq (tuple2 nat nat){S.length s > 0}
 
-type crtbase = base:S.seq (tuple2 prm pos){ is_crt_base base }
+type is_crt_base0 (base:crtbase0) =
+  forall (i:nat{i < S.length base}).
+  isprm (fst (S.index base i)) /\ snd (S.index base i) > 0
+
+type is_crt_base (base:crtbase0) =
+  is_crt_base0 base /\
+  (forall (i:nat{i < S.length base}) (j:nat{j < S.length base /\ j <> i}).
+    fst (S.index base i) <> fst (S.index base j))
+
+type crtbase = base:crtbase0{ is_crt_base base }
+
+type crtvalues0 = S.seq nat
+
+type is_crt_values0 (values:crtvalues0) =
+  forall (i:nat{i < S.length values}). S.index values i > 0
 
 type is_crt_values
-  (l:pos)
-  (base:crtbase{S.length base = l})
-  (values:S.seq pos{S.length values = l}) =
-  forall (i:nat{i < l}). let (p,e) = S.index base i in S.index values i < exp p e
+  (base:crtbase)
+  (values:crtvalues0{S.length values = S.length base}) =
+  is_crt_values0 values /\
+  (forall (i:nat{i < S.length values}).
+   let (p,e) = S.index base i in S.index values i < exp p e)
+
+type crtvalues base =
+  values:crtvalues0{S.length values = S.length base /\
+                    is_crt_values base values}
 
 type is_crt_sol
-  (l:pos)
-  (base:crtbase{S.length base = l})
-  (values:S.seq pos{S.length values = l /\ is_crt_values l base values})
+  (base:crtbase)
+  (values:crtvalues base)
   (sol:pos)
   =
-  forall (i:nat{i<l}). sol % exp (fst (S.index base i)) (snd (S.index base i)) = S.index values i
-
+  forall (i:nat{i<S.length base}).
+  let (p,e) = S.index base i in
+  sol % exp p e = S.index values i
 
 val tailprod_go:
-     s:S.seq (tuple2 prm pos)
+     s:crtbase
   -> i:pos{i <= S.length s}
   -> j:nat{j <= i}
   -> m:big
@@ -202,15 +219,15 @@ let rec tailprod_go s i j m =
     if j = i then m else
     let (p,e) = S.index s j in tailprod_go s i (j+1) (m * exp p e)
 
-val tailprod: s:S.seq (tuple2 prm pos){S.length s > 0} -> i:pos{i <= S.length s} -> big
+val tailprod: s:crtbase -> i:pos{i <= S.length s} -> big
 let tailprod s i =
   let (p,e) = S.index s 0 in
   tailprod_go s i 1 (exp p e)
 
-val fullprod: s:S.seq (tuple2 prm pos){S.length s > 0} -> big
+val fullprod: s:crtbase -> big
 let fullprod s = tailprod s (S.length s)
 
-val tailprod_first: s:S.seq (tuple2 prm pos){S.length s > 0} -> Lemma
+val tailprod_first: s:crtbase -> Lemma
   (let (p,e) = S.index s 0 in tailprod s 1 = exp p e)
 let tailprod_first s = ()
 
@@ -241,12 +258,26 @@ let fermat_inv_pe_lemma p e a =
   euler_thm (exp p e) (pe_fact p e) lam a;
   finv_unique #(exp p e) a b
 
+val crtgo_combine:
+     p:prm
+  -> e:pos
+  -> m:big {m = exp p e}
+  -> mprod:big
+  -> a:nat
+  -> acc:pos
+  -> acc':pos
+let crtgo_combine p e m mprod a acc =
+  let m' = fermat_inv_pe p e (mprod % m) in
+  let y = (m' * ((a - acc) % m)) % m in
+  let next_acc = acc + mprod * y in
+  next_acc
+
 val crtgo:
      l:pos
   -> base:crtbase{S.length base = l}
-  -> values:S.seq pos{S.length values = l /\ is_crt_values l base values}
+  -> values:crtvalues base
   -> lcur:pos{lcur < l}
-  -> mprod:big{mprod = tailprod base lcur}
+  -> mprod:big
   -> acc:pos
   -> Tot (res:pos)
          (decreases (l - lcur))
@@ -256,24 +287,15 @@ let rec crtgo l base values lcur mprod acc =
   let m = exp p e in
   let a = S.index values lcur in
 
-  assume (is_gcd mprod m 1);
-  assume (mprod % m <> 0);
-  inv_as_gcd #m (mprod % m);
+  let next_acc = crtgo_combine p e m mprod a acc in
 
-  let m' = fermat_inv_pe p e (mprod % m) in
-  let y = (m' * (a - acc)) % m in
-  let next_acc = acc + mprod * y in
-
-  if lcur = l - 1 then next_acc else begin
-    let mprod' = mprod * m in
-    assume (mprod' = tailprod base (lcur+1));
-    crtgo l base values (lcur+1) mprod' next_acc
-  end
+  if lcur = l - 1 then next_acc else
+    crtgo l base values (lcur+1) (mprod * m) next_acc
 
 val crt:
      l:nat{l>1}
   -> base:crtbase{S.length base = l}
-  -> values:S.seq pos{S.length values = l /\ is_crt_values l base values}
+  -> values:crtvalues base
   -> res:pos
 let crt l base values =
   let (p0,e0) = S.index base 0 in
@@ -284,9 +306,9 @@ let crt l base values =
 val crt_proof:
      l:pos{l>1}
   -> base:crtbase{S.length base = l}
-  -> values:S.seq pos{S.length values = l /\ is_crt_values l base values}
+  -> values:crtvalues base
   -> Lemma
-  (is_crt_sol l base values (crt l base values))
+  (is_crt_sol base values (crt l base values))
   [SMTPat (crt l base values)]
 let crt_proof _ _ _ = admit()
 
@@ -304,11 +326,20 @@ let solve_dlp_pe #n u g a = admit()
 // Pohlig-Hellman
 val solve_dlp:
      #n:comp
-  -> base:crtbase{S.length base > 0}
+  -> base:crtbase
   -> g:fe n{isunit g /\ is_mult_order g (fullprod base)}
   -> a:fe n
   -> x:fe (fullprod base)
-let solve_dlp #n u g a = admit()
+let solve_dlp #n base g a = admit()
+
+val solve_dlp_proof:
+     #n:comp
+  -> base:crtbase
+  -> g:fe n{isunit g /\ is_mult_order g (fullprod base)}
+  -> a:fe n
+  -> Lemma
+  (mexp g (solve_dlp base g a) = a)
+let solve_dlp_proof #n base g a = admit ()
 
 (*** Keys, functions, proofs ***)
 
@@ -397,6 +428,8 @@ let check_is_zero_prop s r m =
 
   move_requires m_neq_zero ()
 
+#reset-options
+
 val decrypt:
      s:secret
   -> c:ciphertext (Public?.n (s2p s))
@@ -408,4 +441,5 @@ let decrypt s c =
   let gv = mexp g v in
   g_pow_isunit g v;
   mult_order_of_mexp g v u;
-  solve_dlp (Secret?.u s) gv (mexp c (Secret?.v s))
+  admit ()
+//  solve_dlp (Secret?.u s) gv (mexp c (Secret?.v s))
