@@ -243,7 +243,7 @@ let mod_prop n a b =
   FStar.Math.Lemmas.modulo_lemma (b - a * n) n;
   FStar.Math.Lemmas.lemma_mod_sub b n a
 
-#push-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
+#push-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 0"
 
 let rec index_map_blocks_multi #a bs max n inp f i =
   let map_blocks_a = map_blocks_a a bs max in
@@ -252,9 +252,9 @@ let rec index_map_blocks_multi #a bs max n inp f i =
   let s1 = repeat_gen n map_blocks_a map_blocks_f acc0 in
   unfold_repeat_gen n map_blocks_a map_blocks_f acc0 (n-1);
   let s = repeat_gen (n-1) map_blocks_a map_blocks_f acc0 in
-  //assert (s1 == map_blocks_f (n-1) s);
+  assert (s1 == map_blocks_f (n-1) s);
   let s' = f (n-1) (Seq.slice inp ((n-1)*bs) (n*bs)) in
-  //assert (s1 == Seq.append s s');
+  assert (s1 == Seq.append s s');
   if i < (n-1)*bs then begin
     Seq.lemma_index_app1 s s' i;
     index_map_blocks_multi #a bs max (n-1) inp f i end
