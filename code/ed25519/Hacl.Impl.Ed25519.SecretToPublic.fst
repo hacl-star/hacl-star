@@ -11,7 +11,7 @@ open Hacl.Impl.Ed25519.SecretExpand
 open Hacl.Impl.Ed25519.PointCompress
 open Hacl.Impl.Ed25519.Ladder
 
-#set-options "--z3rlimit 10 --max_fuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0"
 
 val secret_to_public:
     out:lbuffer uint8 32ul

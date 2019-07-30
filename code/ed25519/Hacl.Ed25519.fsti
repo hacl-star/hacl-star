@@ -41,7 +41,12 @@ val expand_keys:
   -> secret:lbuffer uint8 32ul ->
   Stack unit
     (requires fun h -> live h ks /\ live h secret /\ disjoint ks secret)
-    (ensures  fun h0 _ h1 -> modifies (loc ks) h0 h1)
+    (ensures  fun h0 _ h1 -> modifies (loc ks) h0 h1 /\
+      (let pub, s, prefix = Spec.Ed25519.expand_keys (as_seq h0 secret) in
+      as_seq h1 (gsub ks 0ul 32ul) == pub /\
+      as_seq h1 (gsub ks 32ul 32ul) == s /\
+      as_seq h1 (gsub ks 64ul 32ul) == prefix)
+    )
 
 val sign_expanded:
     signature:lbuffer uint8 64ul
@@ -50,4 +55,10 @@ val sign_expanded:
   -> msg:lbuffer uint8 len ->
   Stack unit
     (requires fun h -> live h signature /\ live h msg /\ live h ks)
-    (ensures  fun h0 _ h1 -> modifies (loc signature) h0 h1)
+    (ensures  fun h0 _ h1 -> modifies (loc signature) h0 h1 /\
+      as_seq h1 signature == Spec.Ed25519.sign_expanded
+        (as_seq h0 (gsub ks 0ul 32ul))
+        (as_seq h0 (gsub ks 32ul 32ul))
+        (as_seq h0 (gsub ks 64ul 32ul))
+        (as_seq h0 msg)
+    )

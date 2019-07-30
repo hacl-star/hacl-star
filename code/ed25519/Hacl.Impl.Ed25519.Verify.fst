@@ -151,6 +151,7 @@ val verify_:
   Stack bool
     (requires fun h ->
       live h public /\ live h msg /\ live h signature /\ live h tmp /\ live h tmp' /\
+      F51.point_inv_t h (gsub tmp 0ul 20ul) /\ F51.point_inv_t h (gsub tmp 20ul 20ul) /\
       disjoint tmp public /\ disjoint tmp msg /\ disjoint tmp signature /\
       disjoint tmp tmp' /\ disjoint tmp' signature /\ disjoint tmp' public /\ disjoint tmp' msg
     )
@@ -175,6 +176,8 @@ let verify_ public msg len signature tmp tmp' =
   res
 
 #pop-options
+
+#set-options "--z3rlimit 40"
 
 inline_for_extraction noextract
 val verify:

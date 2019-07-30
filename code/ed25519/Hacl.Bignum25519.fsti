@@ -63,7 +63,19 @@ val make_u64_10:
   -> s5:uint64 -> s6:uint64 -> s7:uint64 -> s8:uint64 -> s9:uint64 ->
   Stack unit
     (requires fun h -> live h b)
-    (ensures  fun h0 _ h1 -> modifies (loc b) h0 h1)
+    (ensures  fun h0 _ h1 -> modifies (loc b) h0 h1 /\
+      (let s = as_seq h1 b in
+       Seq.index s 0 == s0 /\
+       Seq.index s 1 == s1 /\
+       Seq.index s 2 == s2 /\
+       Seq.index s 3 == s3 /\
+       Seq.index s 4 == s4 /\
+       Seq.index s 5 == s5 /\
+       Seq.index s 6 == s6 /\
+       Seq.index s 7 == s7 /\
+       Seq.index s 8 == s8 /\
+       Seq.index s 9 == s9)
+    )
 
 inline_for_extraction noextract
 val make_u128_9:

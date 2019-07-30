@@ -74,29 +74,13 @@ let fsum a b =
 let fdifference a b =
   BN.fsub a b a
 
-private val lemma_carry_local: x:nat -> y:nat -> n:nat -> Lemma
+private val lemma_carry_local: x:int -> y:int -> n:nat -> Lemma
   (pow2 n * x + pow2 (n+51) * y = pow2 n * (x % (pow2 51)) + pow2 (n+51) * ((x / pow2 51) + y))
 private let lemma_carry_local x y n =
   Math.Lemmas.lemma_div_mod x (pow2 51);
   Math.Lemmas.pow2_plus n 51;
   Math.Lemmas.distributivity_add_right (pow2 n) (pow2 51 * (x / pow2 51)) (x % pow2 51);
   Math.Lemmas.distributivity_add_right (pow2 (n + 51)) (x / pow2 51) y
-
-inline_for_extraction noextract
-val fcontract_first_carry_pass:
-  input:felem ->
-  Stack unit
-    (requires fun h -> live h input /\ F51.mul_inv_t h input)
-    (ensures  fun h0 _ h1 -> modifies (loc input) h0 h1 /\
-      F51.as_nat h0 input == F51.as_nat h1 input /\
-      (let s = as_seq h1 input in
-       let op_String_Access = Seq.index in
-       v s.[0] < pow2 51 /\
-       v s.[1] < pow2 51 /\
-       v s.[2] < pow2 51 /\
-       v s.[3] < pow2 51
-      )
-    )
 
 let lemma_change_as_nat_repr (v0 v1 v2 v3 v4:nat) : Lemma
   (v0 + pow2 51 * v1 + pow2 102 * v2 + pow2 153 * v3 + pow2 204 * v4 ==
@@ -121,7 +105,7 @@ let lemma_change_as_nat_repr (v0 v1 v2 v3 v4:nat) : Lemma
   }
 
 #restart-solver
-#push-options "--z3rlimit 200"
+#push-options "--z3rlimit 400 --z3cliopt smt.arith.nl=false"
 
 let lemma_fcontract_first_carry_pass
   (v0 v1 v2 v3 v4 v0' v1' v2' v3' v4':nat) : Lemma
@@ -153,8 +137,23 @@ let lemma_fcontract_first_carry_pass
 
 #pop-options
 
-#restart-solver
-#push-options "--z3rlimit 200"
+inline_for_extraction noextract
+val fcontract_first_carry_pass:
+  input:felem ->
+  Stack unit
+    (requires fun h -> live h input /\ F51.mul_inv_t h input)
+    (ensures  fun h0 _ h1 -> modifies (loc input) h0 h1 /\
+      F51.as_nat h0 input == F51.as_nat h1 input /\
+      (let s = as_seq h1 input in
+       let op_String_Access = Seq.index in
+       v s.[0] < pow2 51 /\
+       v s.[1] < pow2 51 /\
+       v s.[2] < pow2 51 /\
+       v s.[3] < pow2 51
+      )
+    )
+
+#push-options "--initial_fuel 0 --max_fuel 0 --z3cliopt smt.arith.nl=false"
 
 let fcontract_first_carry_pass input =
   let t0 = input.(0ul) in
@@ -162,26 +161,47 @@ let fcontract_first_carry_pass input =
   let t2 = input.(2ul) in
   let t3 = input.(3ul) in
   let t4 = input.(4ul) in
-  let t1':uint64 = t1 +. (t0 >>. 51ul) in
-  let t0':uint64 = t0 &. mask_51 in
-  let t2':uint64 = t2 +. (t1' >>. 51ul) in
-  let t1'':uint64 = t1' &. mask_51 in
+  let t2':uint64 = t2 +. (t1 >>. 51ul) in
+  let t1'':uint64 = t1 &. mask_51 in
   let t3':uint64 = t3 +. (t2' >>. 51ul) in
   let t2'':uint64 = t2' &. mask_51 in
   let t4':uint64 = t4 +. (t3' >>. 51ul) in
   let t3'':uint64 = t3' &. mask_51 in
   assert_norm (v mask_51 == pow2 51 - 1);
   logand_spec t0 mask_51;
-  UInt.logand_mask (UInt.to_uint_t 64 (v t0)) 51;
-  logand_spec t1' mask_51;
-  UInt.logand_mask (UInt.to_uint_t 64 (v t1')) 51;
+  logand_mask t0 mask_51 51;
+  logand_spec t1 mask_51;
+  logand_mask t1 mask_51 51;
   logand_spec t2' mask_51;
-  UInt.logand_mask (UInt.to_uint_t 64 (v t2')) 51;
+  logand_mask t2' mask_51 51;
   logand_spec t3' mask_51;
-  UInt.logand_mask (UInt.to_uint_t 64 (v t3')) 51;
+  logand_mask t3' mask_51 51;
+  shift_right_lemma t0 51ul;
+  Math.Lemmas.pow2_modulo_modulo_lemma_1 (v t2 + v t1 / pow2 51) 51 64;
+  shift_right_lemma t1 51ul;
+  Math.Lemmas.pow2_modulo_modulo_lemma_1 (v t3 + v t2' / pow2 51) 51 64;
+  shift_right_lemma t2' 51ul;
+  shift_right_lemma t3' 51ul;
+  Math.Lemmas.pow2_modulo_modulo_lemma_1 (v t4 + v t3' / pow2 51) 51 64;
+  assert_norm (2 * S51.max51 < pow2 52);
+  Math.Lemmas.lemma_div_lt_nat (v t1) 52 51;
+  Math.Lemmas.small_mod (v t2 + (v t1 / pow2 51)) (pow2 64);
+  assert (v t2' <= pow2 51);
+  assert (v t2' == (v t2 + (v t1 / pow2 51)));
+  Math.Lemmas.lemma_div_lt_nat (v t2') 52 51;
+  Math.Lemmas.small_mod (v t3 + (v t2' / pow2 51)) (pow2 64);
+  assert (v t3' <= pow2 51);
+  assert (v t3' == (v t3 + ((v t2 + (v t1 / pow2 51)) / pow2 51)));
+  Math.Lemmas.lemma_div_lt_nat (v t3') 52 51;
+  Math.Lemmas.small_mod (v t4 + (v t3' / pow2 51)) (pow2 64);
+  Math.Lemmas.small_div (v t0) (pow2 51);
+  Math.Lemmas.small_mod (v t0) (pow2 51);
+  Math.Lemmas.small_mod (v t1) (pow2 64);
   lemma_fcontract_first_carry_pass (v t0) (v t1) (v t2) (v t3) (v t4)
-    (v t0') (v t1'') (v t2'') (v t3'') (v t4');
-  make_u64_5 input  t0' t1'' t2'' t3'' t4'
+    (v t0) (v t1'') (v t2'') (v t3'') (v t4');
+  make_u64_5 input  t0 t1'' t2'' t3'' t4'
+
+#pop-options
 
 let lemma_change_repr4 (v:nat) : Lemma
   (v * pow2 51 * pow2 51 * pow2 51 * pow2 51 == pow2 204 * v)
@@ -216,28 +236,42 @@ val carry_top:
     ((v (Seq.index (as_seq h1 b) 0) / pow2 51) <> 0 ==> v (Seq.index (as_seq h0 b) 4) >= pow2 51)
   )
 
+#push-options "--initial_fuel 0 --max_fuel 0 --z3cliopt smt.arith.nl=false"
+
 let carry_top b =
   let b4 = b.(4ul) in
   let b0 = b.(0ul) in
   let b4' = b4 &. mask_51 in
   let b0' = b0 +. u64 19 *. (b4 >>. 51ul) in
-  assert_norm (pow2 51 + 19 * (pow2 64 / pow2 51) < 2 * pow2 51);
+  assert_norm (pow2 51 + 19 * (pow2 64 / pow2 51) <= 2 * S51.max51);
   assert_norm (v mask_51 == pow2 51 - 1);
+
   logand_spec b4 mask_51;
-  UInt.logand_mask (UInt.to_uint_t 64 (v b4)) 51;
- calc (==) {
-              v b0';
+  logand_mask b4 mask_51 51;
+  assert_norm (1 * S51.max51 < pow2 51);
+  assert (v b4' <= 1 * S51.max51);
+  calc (==) {
+              v b0' <: nat;
               (==) { }
               v (b0 +. u64 19 *. (b4 >>. 51ul));
-              (==) { add_mod_lemma b0 (u64 19 *. (b4 >>. 51ul)) ;
+              (==) { add_mod_lemma b0 (u64 19 *. (b4 >>. 51ul));
                      mul_mod_lemma (u64 19) (b4 >>. 51ul);
-                     shift_right_lemma b4 51ul
-                    }
-              (v b0 + ((19 * (v b4 / pow2 51)) % pow2 64) % pow2 64);
-              (==) { Math.Lemmas.small_mod (19 * (v b4 / pow2 51)) (pow2 64);
-                     Math.Lemmas.small_mod (v b0 + 19 * (v b4 / pow2 51)) (pow2 64) }
+                     Math.Lemmas.lemma_mod_plus_distr_r (v b0) (19 * v (b4 >>. 51ul)) (pow2 64)}
+              (v b0 + (19 * (v (b4 >>. 51ul)))) % pow2 64;
+              (==) { shift_right_lemma b4 51ul }
+              (v b0 + (19 * (v b4 / pow2 51))) % pow2 64;
+              (==) { Math.Lemmas.small_mod (v b0 + 19 * (v b4 / pow2 51)) (pow2 64) }
               v b0 + 19 * (v b4 / pow2 51);
          };
+  calc (<) {
+    v b0 + 19 * (v b4 / pow2 51);
+    (<) { Math.Lemmas.lemma_div_lt_nat (v b4) 64 51 }
+    v b0 + 19 * (pow2 13);
+    (<=) { }
+    pow2 51 + 19 * pow2 13;
+    (<=) {assert_norm (pow2 51 + 19 * pow2 13 <= 2 * S51.max51) }
+    2 * S51.max51;
+  };
   calc (==) {
     (pow2 204 * v b4 + v b0) % Spec.Curve25519.prime;
     (==) {Math.Lemmas.lemma_div_mod (v b4) (pow2 51);
@@ -259,6 +293,8 @@ let carry_top b =
       }
     (v b0 + 19 * (v b4 / pow2 51) + pow2 204 * (v b4 % pow2 51)) % SC.prime;
     (==) {   }
+    (v b0' + pow2 204 * (v b4 % pow2 51)) % SC.prime;
+    (==) { logand_mask b4 mask_51 51 }
     (pow2 204 * v b4' + v b0') % SC.prime;
   };
   let h0 = get() in
@@ -285,9 +321,7 @@ let carry_top b =
   };
   lemma_small_carry_top (v b0) (v b4)
 
-
 #pop-options
-
 
 let reduce_513 a =
   BN.fmul1 a a (u64 1)
@@ -305,7 +339,7 @@ let fcontract_first_carry_full input =
   fcontract_first_carry_pass input;
   carry_top input
 
-
+#push-options "--z3cliopt smt.arith.nl=false --z3rlimit 300"
 
 inline_for_extraction noextract
 val carry_0_to_1:
@@ -328,7 +362,20 @@ let carry_0_to_1 output =
   let i1' = i1 +. (i0 >>. 51ul) in
   assert_norm (v mask_51 == pow2 51 - 1);
   logand_spec i0 mask_51;
-  UInt.logand_mask (UInt.to_uint_t 64 (v i0)) 51;
+  logand_mask i0 mask_51 51;
+  assert_norm (2 * S51.max51 < pow2 52);
+  Math.Lemmas.lemma_div_lt_nat (v i0) 52 51;
+  assert (v (i0 >>. 51ul) <= 1);
+  Math.Lemmas.small_mod (v i1 + (v i0 / pow2 51)) (pow2 64);
+  calc (==) {
+    v i0' + v i1' * pow2 51;
+    (==) { }
+    v i0 % pow2 51 + (v i1 + (v i0 / pow2 51)) * pow2 51;
+    (==) { Math.Lemmas.distributivity_add_left (v i1) (v i0 / pow2 51) (pow2 51) }
+    v i0 % pow2 51 + v i1 * pow2 51 + (v i0 / pow2 51) * pow2 51;
+    (==) { Math.Lemmas.euclidean_division_definition (v i0) (pow2 51) }
+    v i0 + v i1 * pow2 51;
+  };
   output.(0ul) <- i0';
   output.(1ul) <- i1'
 
@@ -362,16 +409,73 @@ let fcontract_second_carry_pass input =
   let t3'' = t3' &. mask_51 in
   assert_norm (v mask_51 == pow2 51 - 1);
   logand_spec t0 mask_51;
-  UInt.logand_mask (UInt.to_uint_t 64 (v t0)) 51;
+  logand_mask t0 mask_51 51;
   logand_spec t1' mask_51;
-  UInt.logand_mask (UInt.to_uint_t 64 (v t1')) 51;
+  logand_mask t1' mask_51 51;
   logand_spec t2' mask_51;
-  UInt.logand_mask (UInt.to_uint_t 64 (v t2')) 51;
+  logand_mask t2' mask_51 51;
   logand_spec t3' mask_51;
-  UInt.logand_mask (UInt.to_uint_t 64 (v t3')) 51;
+  logand_mask t3' mask_51 51;
+  shift_right_lemma t0 51ul;
+  Math.Lemmas.pow2_modulo_modulo_lemma_1 (v t2 + v t1' / pow2 51) 51 64;
+  shift_right_lemma t1' 51ul;
+  Math.Lemmas.pow2_modulo_modulo_lemma_1 (v t3 + v t2' / pow2 51) 51 64;
+  shift_right_lemma t2' 51ul;
+  shift_right_lemma t3' 51ul;
+  Math.Lemmas.pow2_modulo_modulo_lemma_1 (v t4 + v t3' / pow2 51) 51 64;
+  assert_norm (2 * S51.max51 < pow2 52);
+  calc (==) {
+    v t1' <: nat;
+    (==) { }
+    (v t1 + (v (t0 >>. 51ul))) % pow2 64;
+    (==) { shift_right_lemma t0 51ul }
+    (v t1 + (v t0 / pow2 51)) % pow2 64;
+    (==) { calc (<) {
+             v t0 / pow2 51;
+             (<) { Math.Lemmas.lemma_div_lt_nat (v t0) 52 51; assert_norm (pow2 1 == 2)}
+             2;
+             };
+             assert ( v t0 / pow2 51 <= 1);
+             assert_norm (pow2 51 < pow2 64);
+             Math.Lemmas.small_mod (v t1 + (v t0 / pow2 51)) (pow2 64) }
+    v t1 + (v t0 / pow2 51);
+  };
+  Math.Lemmas.lemma_div_lt_nat (v t0) 52 51; assert_norm (pow2 1 == 2);
+  assert_norm (pow2 51 < pow2 64);
+  Math.Lemmas.small_mod (v t1 + (v t0 / pow2 51)) (pow2 64);
+  assert (v t1' == (v t1 + v t0 / pow2 51));
+  Math.Lemmas.lemma_div_lt_nat (v t1') 52 51;
+  Math.Lemmas.small_mod (v t2 + (v t1' / pow2 51)) (pow2 64);
+  assert (v t2' <= pow2 51);
+  assert (v t2' == (v t2 + (v t1 + (v t0 / pow2 51)) / pow2 51));
+  Math.Lemmas.lemma_div_lt_nat (v t2') 52 51;
+  Math.Lemmas.small_mod (v t3 + (v t2' / pow2 51)) (pow2 64);
+  assert (v t3' <= pow2 51);
+  assert (v t3' == (v t3 + ((v t2 + ((v t1 + (v t0 / pow2 51)) / pow2 51)) / pow2 51)));
+  Math.Lemmas.lemma_div_lt_nat (v t3') 52 51;
+  Math.Lemmas.small_mod (v t4 + (v t3' / pow2 51)) (pow2 64);
+  assert (v t4' == (v t4 + (v t3 + ((v t2 + ((v t1 + (v t0 / pow2 51)) / pow2 51)) / pow2 51)) / pow2 51));
   lemma_fcontract_first_carry_pass (v t0) (v t1) (v t2) (v t3) (v t4)
     (v t0') (v t1'') (v t2'') (v t3'') (v t4');
+  let lemma_imp () : Lemma
+    (requires v t4' == pow2 51)
+    (ensures v t1'' < 2)
+    =
+    Classical.move_requires (Math.Lemmas.small_div (v t3')) (pow2 51);
+    assert (v t3' / pow2 51 == 1);
+    assert ((v t3 + v t2' / pow2 51) / pow2 51 == 1);
+    Classical.move_requires (Math.Lemmas.small_div (v t2')) (pow2 51);
+    assert (v t3 + v t2' / pow2 51 == pow2 51);
+    assert (v t2' / pow2 51 == 1);
+    Classical.move_requires (Math.Lemmas.small_div (v t1')) (pow2 51);
+    assert ((v t2 + v t1' / pow2 51) / pow2 51 == 1);
+    assert (v t1' / pow2 51 == 1);
+    assert (v t1' == pow2 51);
+    assert_norm (pow2 51 % pow2 51 == 0)
+  in Classical.move_requires lemma_imp ();
   make_u64_5 input t0' t1'' t2'' t3'' t4'
+
+#pop-options
 
 inline_for_extraction noextract
 val fcontract_second_carry_full:
@@ -604,7 +708,7 @@ let inverse out a =
 
 let reduce out = reduce_ out
 
-#push-options "--z3rlimit 50"
+#push-options "--z3rlimit 100"
 
 let lemma_split_nat_from_bytes_le (n:size_nat) (k:lbytes n) (i:nat{i <= n}) : Lemma
   (nat_from_bytes_le (slice k 0 i) == nat_from_bytes_le k % pow2 (i * 8) /\
@@ -644,6 +748,11 @@ val lemma_load_51: k:lbytes 32 -> Lemma
    let i4 = (nat_from_bytes_le (slice k 24 32) / pow2 12) % pow2 51 in
    i0 + i1 * pow2 51 + i2 * pow2 51 * pow2 51 + i3 * pow2 51 * pow2 51 * pow2 51 + i4 * pow2 51 * pow2 51 * pow2 51 * pow2 51 == nat_from_bytes_le k % pow2 255)
 
+#pop-options
+
+#push-options "--z3cliopt smt.arith.nl=false --z3rlimit 200"
+
+
 let lemma_load_51 k =
   let i0 = nat_from_bytes_le (slice k 0 8) % pow2 51 in
   let i1 = (nat_from_bytes_le (slice k 6 14) / pow2 3) % pow2 51 in
@@ -652,7 +761,7 @@ let lemma_load_51 k =
   let i4 = (nat_from_bytes_le (slice k 24 32) / pow2 12) % pow2 51 in
   calc (==) {
     i0;
-    (==) { lemma_partial_nat_from_bytes_le k 0 8 }
+    (==) { assert_norm (pow2 (0 * 8) == 1); lemma_partial_nat_from_bytes_le k 0 8 }
     (nat_from_bytes_le k % pow2 64) % pow2 51;
     (==) { FStar.Math.Lemmas.pow2_modulo_modulo_lemma_1 (nat_from_bytes_le k) 51 64 }
     nat_from_bytes_le k % pow2 51;
@@ -752,7 +861,7 @@ let lemma_load_51 k =
 
 #pop-options
 
-#push-options "--z3rlimit 100"
+#push-options "--z3rlimit 200"
 
 let load_51 output input =
   let i0 = uint_from_bytes_le (sub input 0ul 8ul) in
@@ -796,6 +905,8 @@ let load_51 output input =
 
 #pop-options
 
+#push-options "--z3rlimit 500"
+
 let lemma_uints_to_bytes_le_split (v1 v2 v3 v4:uint64) : Lemma
   (Seq.equal
     (Lib.ByteSequence.uints_to_bytes_le #U64 #SEC #4
@@ -810,9 +921,16 @@ let lemma_uints_to_bytes_le_split (v1 v2 v3 v4:uint64) : Lemma
                     (Lib.ByteSequence.uint_to_bytes_le v4))
       )))
   =
-  let s_uints = Seq.append (Seq.create 1 v1)
+  let s_uints:lseq uint64 4 = Seq.append (Seq.create 1 v1)
                 (Seq.append (Seq.create 1 v2)
                 (Seq.append (Seq.create 1 v3) (Seq.create 1 v4))) in
+  let s1 = Lib.ByteSequence.uints_to_bytes_le #U64 #SEC #4 s_uints in
+  let s2 =     (Seq.append
+      (Lib.ByteSequence.uint_to_bytes_le v1)
+      (Seq.append (Lib.ByteSequence.uint_to_bytes_le v2)
+        (Seq.append (Lib.ByteSequence.uint_to_bytes_le v3)
+                    (Lib.ByteSequence.uint_to_bytes_le v4))
+      )) in
   // Classical.forall_intro does not work here
   index_uints_to_bytes_le #U64 #SEC #4 s_uints 0;
   index_uints_to_bytes_le #U64 #SEC #4 s_uints 1;
@@ -847,6 +965,7 @@ let lemma_uints_to_bytes_le_split (v1 v2 v3 v4:uint64) : Lemma
   index_uints_to_bytes_le #U64 #SEC #4 s_uints 30;
   index_uints_to_bytes_le #U64 #SEC #4 s_uints 31
 
+#pop-options
 
 val store_4:
   output:lbuffer uint8 32ul ->

@@ -29,7 +29,7 @@ val sign_:
     (ensures fun h0 _ h1 -> modifies (loc signature |+| loc tmp_bytes |+| loc tmp_ints) h0 h1 /\
       as_seq h1 signature == Spec.Ed25519.sign (as_seq h0 secret) (as_seq h0 msg))
 
-#set-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
 let sign_ signature secret len msg tmp_bytes tmp_ints =
   let r    = sub tmp_ints 20ul 5ul  in
@@ -41,6 +41,7 @@ let sign_ signature secret len msg tmp_bytes tmp_ints =
   sign_step_2 len msg tmp_bytes tmp_ints;
   sign_step_3 tmp_bytes tmp_ints;
   sign_step_4 len msg tmp_bytes tmp_ints;
+  assert_norm (pow2 56 == 0x100000000000000);
   sign_step_5 tmp_bytes tmp_ints;
 
   (**) let h5 = ST.get() in

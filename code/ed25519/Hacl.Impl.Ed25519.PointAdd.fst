@@ -98,6 +98,8 @@ val point_add_step_2:
        F51.fevalh h1 (gsub tmp 15ul 5ul) == h)
     )
 
+#push-options "--z3rlimit 50"
+
 let point_add_step_2 p q tmp =
   let tmp1 = sub tmp 0ul 5ul in
   let tmp2 = sub tmp 5ul 5ul in
@@ -119,6 +121,8 @@ let point_add_step_2 p q tmp =
   fdifference tmp6 tmp5; // tmp6 = f
   fsum tmp5 tmp2;                // tmp5 = g
   fsum tmp4 tmp3                // tmp4 = h
+
+#pop-options
 
 inline_for_extraction noextract
 val point_add_:
