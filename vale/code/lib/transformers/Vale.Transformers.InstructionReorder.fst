@@ -1749,9 +1749,9 @@ let rec find_transformation_hints (c1 c2:codes) :
   if e1 && e2 then (
     return []
   ) else if e2 then (
-    Err "non empty first code"
+    Err ("non empty first code: " ^ fst (print_code (Block c1) 0 gcc))
   ) else if e1 then (
-    Err "non empty second code"
+    Err ("non empty second code: " ^ fst (print_code (Block c2) 0 gcc))
   ) else (
     let h1 :: t1 = c1 in
     let h2 :: t2 = c2 in
