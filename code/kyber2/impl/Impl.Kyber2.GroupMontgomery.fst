@@ -62,7 +62,12 @@ let int32_to_t (x:int32) : Pure Group.t (requires (- params_q * pow2 (params_log
   let mr = montgomery_reduce_int32 x in
   csubq_int16 (mr +! i16 params_q)
 
+#reset-options "--z3rlimit 500 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
+
 let to_t_lemma (x:montgomery_t) : Lemma (ensures (sint_v x % params_q = (SpecGroup.v (to_t x) * pow2 params_logr) % params_q /\ to_t x == MGroup.to_t #(to_t x) x)) =
+  FStar.Math.Lemmas.pow2_lt_compat 31 15;
+  assert_norm(range (sint_v x) S32);
+  assert_norm(params_q < pow2 15);
   let mr = montgomery_reduce_int32 (to_i32 x) in
   let r = to_t x in
   assert((sint_v mr * pow2 params_logr) % params_q = sint_v x % params_q);
@@ -218,7 +223,7 @@ let mul_m (x:montgomery_t) (y:montgomery_t) : Pure montgomery_t (requires True) 
   modulo_lemma (SpecGroup.v (mr' ())) params_q;
   montgomery_reduce_int32 ((to_i32 x) *! (to_i32 y))
 
-let mul_m_int16 (x:int16{sint_v x > pow2 15}) (y:montgomery_t) : Pure montgomery_t (requires True) (ensures fun r -> to_t r == Group.mul_t (int16_to_t x) (to_t y)) =
+let mul_m_int16 (x:int16{sint_v x > - pow2 15}) (y:montgomery_t) : Pure montgomery_t (requires True) (ensures fun r -> to_t r == Group.mul_t (int16_to_t x) (to_t y)) =
   assert_norm(-pow2 15 < - params_q);
   mul_range_lemma_m x y;
   let mr () : GTot montgomery_t = montgomery_reduce_int32 ((to_i32 x) *! (to_i32 y)) in
@@ -226,7 +231,7 @@ let mul_m_int16 (x:int16{sint_v x > pow2 15}) (y:montgomery_t) : Pure montgomery
   assert((sint_v (mr ()) * pow2 params_logr) % params_q = (sint_v x * sint_v y) % params_q);
   lemma_mod_mul_distr_l (sint_v x) (sint_v y) params_q;
   let x' () : GTot Group.t = int16_to_t x in
-  to_t_lemma x;
+  int16_to_t_lemma x;
   lemma_mod_mul_distr_l (SpecGroup.v (x' ()) * pow2 params_logr) (sint_v y) params_q;
   paren_mul_right (SpecGroup.v (x' ())) (pow2 params_logr) (sint_v y);
   swap_mul (pow2 params_logr) (sint_v y);

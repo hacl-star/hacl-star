@@ -89,6 +89,14 @@ val lib_ntt_lemma:
   -> p':lib_poly a n{p' == lib_ntt omega psi p}
   -> Lemma (forall (k:nat{k<n}). p'.[k] == sum_n #a #add_ag.g.m (mapi (fun j g -> mul (exp psi j) (mul g (exp omega (k*j)))) p))
 
+val lib_ntt_length_one_is_id:
+  #a:Type0
+  -> #[tcresolve ()] r:ring a
+  -> omega:a
+  -> psi:a
+  -> p:lib_poly a 1
+  -> Lemma (lib_ntt omega psi p == p)
+
 val lib_nttinv_sequence:
   #a: Type0
   -> #[tcresolve ()] r: ring a
@@ -142,6 +150,15 @@ val lib_nttinv_lemma:
   -> p':lib_poly a n{p' == lib_nttinv ninv omegainv psiinv p}
   -> Lemma (forall (k:nat{k<n}). p'.[k] == mul #a ninv (mul (exp psiinv k) (sum_n #a #add_ag.g.m (lib_nttinv_sequence omegainv p k))))
 
+val lib_nttinv_length_one_is_id_times_ninv:
+  #a:Type0
+  -> #[tcresolve ()] r:ring a
+  -> ninv:a
+  -> omegainv:a
+  -> psiinv:a
+  -> p:lib_poly a 1
+  -> Lemma (lib_nttinv ninv omegainv psiinv p == Seq.map (fun x -> mul ninv x) p)
+
 val lib_ntt_inversion_lemma1:
   #a:Type0
   -> #[tcresolve ()] r:ring a
@@ -166,3 +183,29 @@ val lib_ntt_inversion_lemma2:
   -> psiinv:a{mul psi psiinv == one}
   -> p:lib_poly a n
   -> Lemma(lib_ntt omega psi (lib_nttinv ninv omegainv psiinv p) == p)
+
+val lemma_ntt_split1:
+  #a:Type0
+  -> #[tcresolve ()] r:ring a
+  -> #n:size_nat{n%2 = 0}
+  -> omega:a
+  -> psi:a
+  -> p:lib_poly a n
+  -> peven:lib_poly a (n/2)
+  -> podd:lib_poly a (n/2)
+  -> k:size_nat{k<n/2}
+  -> Lemma (requires (peven,podd) == split_seq p)
+    (ensures (lib_ntt omega psi p).[k] == plus #a (lib_ntt (exp omega 2) (exp psi 2) peven).[k] (mul psi (mul (lib_ntt (exp omega 2) (exp psi 2) podd).[k] (exp omega k))))
+
+val lemma_ntt_split2:
+  #a:Type0
+  -> #[tcresolve ()] r:ring a
+  -> #n:size_nat{n%2 = 0}
+  -> omega:a
+  -> psi:a
+  -> p:lib_poly a n
+  -> peven:lib_poly a (n/2)
+  -> podd:lib_poly a (n/2)
+  -> k:size_nat{k<n/2}
+  -> Lemma (requires exp omega n == one #a /\ (peven,podd) == split_seq p)
+    (ensures (lib_ntt omega psi p).[k+n/2] == plus #a (lib_ntt (exp omega 2) (exp psi 2) peven).[k] (mul psi (mul (lib_ntt (exp omega 2) (exp psi 2) podd).[k] (exp omega (k+n/2)))))

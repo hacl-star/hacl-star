@@ -202,3 +202,33 @@ let rec lemma_repeat_plus_swap_mul (#a:Type0) [| ring a |] (x:a) (y:a) (n:nat) :
     lemma_distr_left y x (repeat_plus x (n-1));
     lemma_repeat_op_succ1 x (n-1)
     end
+
+
+let lemma_mul_swap_inverse_ (#a:Type0) [| ring a |] (x:a) (y:a) (z:a) : Lemma (requires (forall (b:a). mul x b == mul b x) /\ (mul y x == one \/ mul x y == one)) (ensures mul y z == mul z y) =
+  assert(mul x y == one /\ mul y x == one);
+  assert(is_invertible x);
+  lemma_one1 z;
+  lemma_one2 z;
+  assert(mul z (mul y x) == mul (mul x y) z);
+  lemma_mul_assoc z y x;
+  lemma_mul_assoc x y z;
+  assert(mul (mul z y) x == mul x (mul y z));
+  assert(mul (mul z y) x == mul (mul y z) x);
+  lemma_mul_eq2_m x (mul z y) (mul y z)
+
+let lemma_mul_swap_inverse (#a:Type0) [| ring a |] (x:a) (y:a) : Lemma (requires (forall (b:a). mul x b == mul b x) /\ (mul y x == one \/ mul x y == one)) (ensures (forall (b:a). mul y b == mul b y)) =
+  let customprop (b:a) : GTot Type0 = (mul y b == mul b y) in
+  let customlemma (b:a) : Lemma (customprop b) = lemma_mul_swap_inverse_ x y b in
+  FStar.Classical.forall_intro customlemma
+
+let lemma_mul_swap_repeat_plus_one (#a:Type0) [| ring a |] (n:nat) : Lemma (forall (b:a). mul (repeat_plus one n) b == mul b (repeat_plus one n)) =
+  let customprop (b:a) : GTot Type0 = (mul (repeat_plus one n) b == mul b (repeat_plus one n)) in
+  let customlemma (b:a) : Lemma (customprop b) =
+    lemma_one1 b;
+    lemma_one2 b;
+    lemma_repeat_plus_swap_mul one b n
+  in FStar.Classical.forall_intro customlemma
+
+let lemma_mul_swap_inverse_repeat_plus_one (#a:Type0) [| ring a |] (n:nat) (x:a) : Lemma(requires (mul #a x (repeat_plus one n) == one \/ mul (repeat_plus one n) x == one)) (ensures forall (b:a). mul x b == mul b x) =
+  lemma_mul_swap_repeat_plus_one #a n;
+  lemma_mul_swap_inverse (repeat_plus one n) x

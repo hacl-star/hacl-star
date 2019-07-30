@@ -70,6 +70,15 @@ let br_lemma_rec i x =
   eq_intro v1br (Seq.sub v2br 0 i)
   end
 
+let rec br_lemma_rec_p i p x =
+  if p = 0 then ()
+  else begin
+    br_lemma_rec_p i (p-1) x;
+    pow2_le_compat (i+p) (i+p-1);
+    br_lemma_rec (i+p-1) x;
+    pow2_double_mult (p-1)
+    end
+
 let rec br_lemma_zero i : Lemma (ensures br i 0 = 0) (decreases i) =
   if i = 0 then ()
   else (br_lemma_zero (i-1); br_lemma_rec (i-1) 0)
@@ -205,6 +214,10 @@ let br_lemma_div i x : Lemma (br i (x/2) = (2 * br i x) % pow2 i) =
 let reorg #a #n i p =
   Seq.createi n (fun x -> p.[br i x])
 
+#reset-options "--z3rlimit 200 --max_fuel 1 --max_ifuel 1"
+
+let reorg_lemma #a #n i p k =
+  br_involutive i k
 
 let reorg_involutive #a #n i p =
   let p1 = reorg i p in
@@ -299,7 +312,7 @@ let lemma_join_split #a [| ring a |] #n p1 p2 =
 #reset-options "--z3rlimit 1000 --max_fuel 2 --max_ifuel 2"
 
 unfold
-let recursive_split_customprop #a (#n:size_nat) (p:lseq a n) (i:size_nat{i>0}) (pow:size_nat{pow == pow2 i /\ n % pow == 0}) (p':lseq (lseq a (n/pow)) pow) (k:size_nat{k<n}) : GTot Type0 = ((k/pow < n/pow) /\ p'.[br i (k%pow)].[k/pow] == p.[k]) //l == (p'.[br i (k % pow)]) /\ l.[(k/pow)] == p.[k])
+let recursive_split_customprop #a (#n:size_nat) (p:lseq a n) (i:size_nat) (pow:size_nat{pow == pow2 i /\ n % pow == 0}) (p':lseq (lseq a (n/pow)) pow) (k:size_nat{k<n}) : GTot Type0 = ((k/pow < n/pow) /\ p'.[br i (k%pow)].[k/pow] == p.[k]) //l == (p'.[br i (k % pow)]) /\ l.[(k/pow)] == p.[k])
 
 #reset-options "--z3rlimit 1000 --max_fuel 1 --max_ifuel 1"
 
@@ -310,7 +323,7 @@ let index_lemma #a (#n:size_nat) (pow:size_nat{pow > 0 /\ pow=2*(pow/2)}) (l1:ls
 
 #reset-options "--z3rlimit 2000 --max_fuel 1 --max_ifuel 1"
 
-let recursive_lemma #a (#n:size_nat) (i:size_nat{i>1}) (pow:size_nat{pow == pow2 i /\ pow/2 == pow2 (i-1) /\ pow == 2*(pow/2) /\ n % pow == 0 /\ (n/2) % (pow/2) = 0 /\ (n/pow == (n/2)/(pow/2))}) (p:lseq a (n/2)) (p':lseq (lseq a (n/pow)) (pow/2)) (k:size_nat{k<n}) (l:lseq a (n/pow)) : Lemma (requires recursive_split_customprop p (i-1) (pow/2) p' (k/2) /\ p'.[br (i-1) ((k/2)%(pow/2))] == l /\ (k/pow == (k/2)/(pow/2))) (ensures l.[k/pow] == p.[k/2]) = index_lemma pow l (p'.[br (i-1) ((k/2)%(pow/2))]) k
+let recursive_lemma #a (#n:size_nat) (i:size_nat{i>0}) (pow:size_nat{pow == pow2 i /\ pow/2 == pow2 (i-1) /\ pow == 2*(pow/2) /\ n % pow == 0 /\ (n/2) % (pow/2) = 0 /\ (n/pow == (n/2)/(pow/2))}) (p:lseq a (n/2)) (p':lseq (lseq a (n/pow)) (pow/2)) (k:size_nat{k<n}) (l:lseq a (n/pow)) : Lemma (requires recursive_split_customprop p (i-1) (pow/2) p' (k/2) /\ p'.[br (i-1) ((k/2)%(pow/2))] == l /\ (k/pow == (k/2)/(pow/2))) (ensures l.[k/pow] == p.[k/2]) = index_lemma pow l (p'.[br (i-1) ((k/2)%(pow/2))]) k
 
 let recursive_lemma2 #a (#n:size_nat) (i:size_nat{i>0}) (pow:size_nat{pow == pow2 i /\ n % pow == 0}) (p:lseq a n) (p':lseq (lseq a (n/pow)) pow) (k:size_nat{k<n}) (l:lseq a (n/pow)) : Lemma (requires (k/pow < n/pow /\ l == p'.[br i (k % pow)] /\ l.[k/pow] == p.[k])) (ensures recursive_split_customprop p i pow p' k) = ()
 
@@ -354,12 +367,12 @@ let recursive_split_seq_lemma_base #a #n p p' =
 val recursive_split_seq_lemma_inductive_1:
   #a:Type0
   -> #n:size_nat
-  -> i:size_nat{i>1}
+  -> i:size_nat{i>0}
   -> pow:size_nat {pow = pow2 i /\ pow/2 = pow2 (i-1) /\ pow = 2*(pow/2)}
   -> p1:lseq (lseq a (n/pow)) (pow/2)
   -> p2:lseq (lseq a (n/pow)) (pow/2)
   -> k:size_nat{k<n}
-  -> Lemma (requires k % pow < pow2 (i-1) /\ (k % pow) % 2 = 0 /\ k/pow < n/pow /\ k/2 < n/2 /\ (n/2)/(pow/2) == n/pow) (ensures (let p':lseq (lseq a (n/pow)) pow = Seq.concat p1 p2 in p'.[br i (k % pow)] == p1.[br (i-1) ((k/2) % (pow/2))] ))
+  -> Lemma (requires (k % pow) % 2 = 0 /\ k/pow < n/pow /\ k/2 < n/2 /\ (n/2)/(pow/2) == n/pow) (ensures (let p':lseq (lseq a (n/pow)) pow = Seq.concat p1 p2 in p'.[br i (k % pow)] == p1.[br (i-1) ((k/2) % (pow/2))] ))
 
 #reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 
@@ -367,16 +380,14 @@ val recursive_split_seq_lemma_inductive_1:
 let recursive_split_seq_lemma_inductive_1 #a #n i pow p1 p2 k =
   let p' = Seq.concat p1 p2 in
   pow2_modulo_division_lemma_1 k 1 i;
-  modulo_lemma (k % pow) (pow2 (i-1));
-  br_lemma_rec (i-1) (k % pow);
-  let m = br i (k % pow) in
-  br_lemma_div (i-1) (k % pow);
-  assert( m % pow2 (i-1) == br (i-1) ((k/2) % (pow/2)));
-  pow2_lt_compat i (i-1);
-  br_lemma_n2_2 (i-1) (k%pow);
+  assert((k % pow) / 2 == (k/2) % (pow/2));
+  br_lemma_rec (i-1) ((k/2) % (pow/2));
+  br_lemma_div i (k % pow);
+  br_lemma_n2_2 (i-1) (k % pow);
   pow2_double_sum (i-1);
-  assert(m < pow2 (i-1));
-  modulo_lemma m (pow2 (i-1));
+  assert(br i (k % pow) < pow2 (i-1));
+  modulo_lemma (2 * (br i (k % pow))) (pow2 i);
+  let m = br i (k % pow) in
   Seq.Base.lemma_index_app1 p1 p2 m;
   assert (m == br (i-1) ((k/2) % (pow/2)));
   assert (p'.[br i (k%pow)] == p1.[br (i-1) ((k/2)%(pow/2))])
@@ -384,114 +395,35 @@ let recursive_split_seq_lemma_inductive_1 #a #n i pow p1 p2 k =
 val recursive_split_seq_lemma_inductive_2:
   #a:Type0
   -> #n:size_nat
-  -> i:size_nat{i>1}
+  -> i:size_nat{i>0}
   -> pow:size_nat {pow = pow2 i /\ pow/2 = pow2 (i-1) /\ pow = 2*(pow/2)}
   -> p1:lseq (lseq a (n/pow)) (pow/2)
   -> p2:lseq (lseq a (n/pow)) (pow/2)
   -> k:size_nat{k<n}
-  -> Lemma (requires k % pow < pow2 (i-1) /\ (k % pow) % 2 = 1 /\ k/pow < n/pow /\ (k/2)/(pow/2) < n/pow) (ensures (let p':lseq (lseq a (n/pow)) pow = Seq.concat p1 p2 in p'.[br i (k % pow)] == p2.[br (i-1) ((k/2) % (pow/2))] ))
+  -> Lemma (requires (k % pow) % 2 = 1 /\ k/pow < n/pow /\ (k/2)/(pow/2) < n/pow) (ensures (let p':lseq (lseq a (n/pow)) pow = Seq.concat p1 p2 in p'.[br i (k % pow)] == p2.[br (i-1) ((k/2) % (pow/2))] ))
 
 let recursive_split_seq_lemma_inductive_2 #a #n i pow p1 p2 k =
   let p' = Seq.concat p1 p2 in
-  modulo_lemma (k % pow) (pow2 (i-1));
   pow2_modulo_division_lemma_1 k 1 i;
-  br_lemma_rec (i-1) (k % pow);
-  let m = br i (k % pow) in
-  br_lemma_div (i-1) (k % pow);
-  assert( m % pow2 (i-1) == br (i-1) ((k/2) % (pow/2)));
-  pow2_lt_compat i (i-1);
-  br_lemma_n2_2 (i-1) (k%pow - 1);
-  assert(m >= pow2 (i-1) /\ m < pow2 i);
+  assert((k % pow) / 2 == (k/2) % (pow/2));
+  br_lemma_rec (i-1) ((k/2) % (pow/2));
+  assert((k%pow)/2 == ((k%pow)-1)/2);
+  br_lemma_div i ((k % pow)-1);
+  br_lemma_n2_2 (i-1) ((k % pow)-1);
   pow2_double_sum (i-1);
-  lemma_mod_sub m (pow/2) 1;
-  modulo_lemma (m - (pow/2)) (pow/2);
-  assert(m = pow2 (i-1) + br (i-1) ((k/2) % (pow/2)));
-  Seq.Base.lemma_index_app2 p1 p2 m;
-  assert (p'.[br i (k%pow)] == p2.[br (i-1) ((k/2)%(pow/2))])
-
-val recursive_split_seq_lemma_inductive_3:
-  #a:Type0
-  -> #n:size_nat
-  -> i:size_nat{i>1}
-  -> pow:size_nat {pow = pow2 i /\ pow/2 = pow2 (i-1) /\ pow = 2*(pow/2)}
-  -> p1:lseq (lseq a (n/pow)) (pow/2)
-  -> p2:lseq (lseq a (n/pow)) (pow/2)
-  -> k:size_nat{k<n}
-  -> Lemma (requires k % pow >= pow2 (i-1) /\ ((k-pow/2) % pow) % 2 = 0 /\ k/pow < n/pow /\ (k/2)/(pow/2) < n/pow) (ensures (let p':lseq (lseq a (n/pow)) pow = Seq.concat p1 p2 in p'.[br i (k % pow)] == p1.[br (i-1) ((k/2) % (pow/2))] ))
-
-let recursive_split_seq_lemma_inductive_3 #a #n i pow p1 p2 k =
-  let p' = Seq.concat p1 p2 in
-  UInt.lemma_mod_sub_distr_l k (pow/2) pow;
-  modulo_lemma ((k % pow) - pow/2) pow;
-  assert((k % pow - (pow/2)) == (k - pow/2) % pow);
-  br_lemma_rec (i-1) (k % pow - pow/2);
-  br_lemma_n2_1 (i-1) (k % pow - pow/2);
-  assert(br i (k % pow) == 2 * br (i-1) ((k - pow/2) % pow) + 1);
+  assert(br i (k % pow) - pow2 (i-1) < pow2 (i-1));
+  pow2_double_mult (i-1);
+  lemma_mult_le_left 2 (br i (k % pow) - pow2 (i-1)) (pow2 (i-1));
+  modulo_lemma (2 * ((br i (k % pow)) - pow2 (i-1))) (pow2 i);
+  distributivity_add_right 2 (br i (k % pow)) (pow2 (i-1));
+  lemma_mod_sub (2 * (br i (k % pow))) (pow2 i) 1;
   let m = br i (k % pow) in
-  pow2_double_mult (i-2);
-  assert(pow/2 = 2*pow2 (i-2));
-  assert(((k-pow/2) % pow) /2 = (k % pow - 2*pow2 (i-2)) /2);
-  lemma_div_plus (k % pow) (- pow2 (i-2)) 2;
-  assert(((k-pow/2) % pow) /2 = (k % pow) /2  - pow2 (i-2));
-  pow2_modulo_division_lemma_1 k 1 i;
-  br_lemma_div (i-1) ((k - pow/2) % pow);
-  assert( (m-1) % pow2 (i-1) == br (i-1) ((k/2)%(pow/2) - pow2 (i-2)));
-  br_lemma_n2_1 (i-2) ((k/2)%(pow/2) - pow2 (i-2));
-  assert ((m-1) % pow2 (i-1) == br (i-1) ((k/2)%(pow/2)) - 1);
-  let m2 = br i ((k - pow/2) % pow) in
-  assert (m2 % pow2 (i-1) == br (i-1) ((k/2)%(pow/2)) - 1);
-  pow2_lt_compat i (i-1);
-  br_lemma_n2_2 (i-1) ((k-pow/2)%pow);
-  assert(m2 < pow2 (i-1));
-  modulo_lemma m2 (pow/2);
-  assert(m = br (i-1) ((k/2) % (pow/2)));
-  Seq.Base.lemma_index_app1 p1 p2 m;
-  assert (p'.[br i (k%pow)] == p1.[br (i-1) ((k/2)%(pow/2))])
-
-val recursive_split_seq_lemma_inductive_4:
-  #a:Type0
-  -> #n:size_nat
-  -> i:size_nat{i>1}
-  -> pow:size_nat {pow = pow2 i /\ pow/2 = pow2 (i-1) /\ pow = 2*(pow/2)}
-  -> p1:lseq (lseq a (n/pow)) (pow/2)
-  -> p2:lseq (lseq a (n/pow)) (pow/2)
-  -> k:size_nat{k<n}
-  -> Lemma (requires k % pow >= pow2 (i-1) /\ ((k-pow/2) % pow) % 2 = 1 /\ k/pow < n/pow /\ (k/2)/(pow/2) < n/pow) (ensures (let p':lseq (lseq a (n/pow)) pow = Seq.concat p1 p2 in p'.[br i (k % pow)] == p2.[br (i-1) ((k/2) % (pow/2))] ))
-
-let recursive_split_seq_lemma_inductive_4 #a #n i pow p1 p2 k =
-  let p' = Seq.concat p1 p2 in
-  UInt.lemma_mod_sub_distr_l k (pow/2) pow;
-  modulo_lemma ((k % pow) - pow/2) pow;
-  assert((k % pow - (pow/2)) == (k - pow/2) % pow);
-  br_lemma_rec (i-1) (k % pow - pow/2);
-  br_lemma_n2_1 (i-1) (k % pow - pow/2);
-  assert(br i (k % pow) == 2 * br (i-1) ((k - pow/2) % pow) + 1);
-  let m = br i (k % pow) in
-  pow2_double_mult (i-2);
-  assert(pow/2 = 2*pow2 (i-2));
-  assert(((k-pow/2) % pow) /2 = (k % pow - 2*pow2 (i-2)) /2);
-  lemma_div_plus (k % pow) (- pow2 (i-2)) 2;
-  assert(((k-pow/2) % pow) /2 = (k % pow) /2  - pow2 (i-2));
-  pow2_modulo_division_lemma_1 k 1 i;
-  br_lemma_div (i-1) ((k - pow/2) % pow);
-  assert( (m-1) % pow2 (i-1) == br (i-1) ((k/2)%(pow/2) - pow2 (i-2)));
-  br_lemma_n2_1 (i-2) ((k/2)%(pow/2) - pow2 (i-2));
-  assert ((m-1) % pow2 (i-1) == br (i-1) ((k/2)%(pow/2)) - 1);
-  let m2 = br i ((k - pow/2) % pow) in
-  assert (m2 % pow2 (i-1) == br (i-1) ((k/2)%(pow/2)) - 1);
-  pow2_lt_compat i (i-1);
-  br_lemma_n2_2 (i-1) ((k-pow/2)%pow - 1);
-  assert(m2 >= pow2 (i-1) /\ m2 < pow2 i);
-  pow2_double_sum (i-1);
-  lemma_mod_sub m2 (pow/2) 1;
-  modulo_lemma (m2 - (pow/2)) (pow/2);
-  assert(m = pow2 (i-1) + br (i-1) ((k/2) % (pow/2)));
   Seq.Base.lemma_index_app2 p1 p2 m;
-  assert (p'.[br i (k%pow)] == p2.[br (i-1) ((k/2)%(pow/2))])
+  assert (m == br (i-1) ((k/2) % (pow/2)) + pow2 (i-1))
 
 #reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 
-let lemma_preconditions (n:size_nat) (i:size_nat{i>1}) (pow:size_nat{pow = pow2 i /\ pow/2 == pow2 (i-1) /\ pow = 2 * (pow/2) /\ n % pow == 0 }) (k:size_nat{k<n}) : Lemma (k/pow < n/pow /\ (k/2)/(pow/2) < n/pow /\ k % 2 = (k % pow) % 2 /\ k %2 = ((k - pow/2) % pow) % 2 /\ k = 2*(k/2)+(k%2) /\ n % pow == 0 /\ (n/2) % (pow/2) = 0 /\ (k/2)/(pow/2) == k/pow /\ (n/pow == (n/2)/(pow/2))) =
+let lemma_preconditions (n:size_nat) (i:size_nat{i>0}) (pow:size_nat{pow = pow2 i /\ pow/2 == pow2 (i-1) /\ pow = 2 * (pow/2) /\ n % pow == 0 }) (k:size_nat{k<n}) : Lemma (k/pow < n/pow /\ (k/2)/(pow/2) < n/pow /\ k % 2 = (k % pow) % 2 /\ k = 2*(k/2)+(k%2) /\ n % pow == 0 /\ (n/2) % (pow/2) = 0 /\ (k/2)/(pow/2) == k/pow /\ (n/pow == (n/2)/(pow/2))) =
   lemma_div_exact n pow;
   euclidean_div_axiom k pow;
   if (n/pow <= k/pow) then lemma_mult_le_left pow (n/pow) (k/pow);
@@ -501,11 +433,6 @@ let lemma_preconditions (n:size_nat) (i:size_nat{i>1}) (pow:size_nat{pow = pow2 
   pow2_modulo_modulo_lemma_1 k 1 i;
   pow2_modulo_division_lemma_1 n 1 i;
   assert(((k % pow) %2) == k % 2);
-  lemma_mod_sub_distr k (pow/2) 2;
-  pow2_double_mult (i-2);
-  assert((pow/2) % 2 == 0);
-  modulo_modulo_lemma (k-pow/2) 2 (pow/2);
-  assert((((k - pow/2) % pow) %2) == k % 2);
   euclidean_division_definition k 2
 
 
@@ -515,7 +442,7 @@ val recursive_split_seq_lemma_inductive:
   -> p:lseq a n
   -> p1:lseq a (n/2)
   -> p2:lseq a (n/2)
-  -> i:size_nat{i>1}
+  -> i:size_nat{i>0}
   -> pow:size_nat {pow = pow2 i /\ pow/2 = pow2 (i-1) /\ pow = 2*(pow/2)}
   -> p':lseq (lseq a (n/pow)) pow
   -> p1':lseq (lseq a (n/pow)) (pow/2)
@@ -523,23 +450,16 @@ val recursive_split_seq_lemma_inductive:
   -> k:size_nat{k<n}
   -> Lemma (requires n % 2 = 0 /\ n % pow == 0 /\ (n/2) % (pow/2) == 0 /\ (p1,p2) == split_seq p /\ recursive_split_customprop p1 (i-1) (pow/2) p1' (k/2) /\ recursive_split_customprop p2 (i-1) (pow/2) p2' (k/2) /\ (p1,p2) == split_seq p /\ p' == Seq.concat p1' p2') (ensures recursive_split_customprop p i pow p' k)
 
-#reset-options "--z3rlimit 3000 --max_fuel 2 --max_ifuel 1"
+#reset-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
 
 let recursive_split_seq_lemma_inductive #a #n p p1 p2 i pow p' p1' p2' k =
   lemma_preconditions n i pow k;
   let l:lseq a (n/pow) = p'.[br i (k%pow)] in
-  if (k % pow < pow/2) then
-    if (k % 2 = 0) then
-      (assert((k % pow) % 2 == 0); recursive_split_seq_lemma_inductive_1 i pow p1' p2' k; recursive_lemma i pow p1 p1' k l; admit(); assert(l.[k/pow] == p.[k]))
-    else
-      (assert((k % pow) % 2 == 1); recursive_split_seq_lemma_inductive_2 i pow p1' p2' k; recursive_lemma i pow p2 p2' k l; admit(); assert(l.[k/pow] == p.[k]))
+  if (k % 2 = 0) then
+    (assert((k % pow) % 2 == 0); recursive_split_seq_lemma_inductive_1 i pow p1' p2' k; recursive_lemma i pow p1 p1' k l; assert(l.[k/pow] == p.[k]))
   else
-    if (k % 2 = 0) then
-      (assert(((k - pow/2) %pow) % 2 = 0); recursive_split_seq_lemma_inductive_3 i pow p1' p2' k; recursive_lemma i pow p1 p1' k l; admit(); assert(l.[k/pow] == p.[k]))
-    else
-      (assert(((k - pow/2) %pow) % 2 = 1); recursive_split_seq_lemma_inductive_4 i pow p1' p2' k; recursive_lemma i pow p2 p2' k l; admit(); assert(l.[k/pow] == p.[k]));
+    (assert((k % pow) % 2 == 1); recursive_split_seq_lemma_inductive_2 i pow p1' p2' k; recursive_lemma i pow p2 p2' k l; assert(l.[k/pow] == p.[k]));
   recursive_lemma2 i pow p p' k l
-
 
 val recursive_split_seq2:
    #a:Type0
@@ -549,26 +469,31 @@ val recursive_split_seq2:
    -> pow:size_nat{pow = pow2 i}
    -> Ghost (lseq (lseq a (n/pow)) pow) (requires n % pow == 0) (ensures fun p' -> forall (k:nat{k<n}). recursive_split_customprop p i pow p' k) (decreases i)
 
+#reset-options "--z3rlimit 200 --max_fuel 1 --max_ifuel 1"
+
 let rec recursive_split_seq #a #n p i pow =
-  pow2_modulo_modulo_lemma_1 n 1 i;
-  assert(pow2 1 = 2);
-  let (p1,p2) = split_seq p in
-  if (i=1) then
+  //let (p1,p2) = split_seq p in
+  if (i=0) then (br_lemma_zero 0; Seq.create 1 p)
+  (*else if (i=1) then
+     let (p1,p2) = split_seq p in
      let p':lseq (lseq a (n/2)) 2 = Seq.concat (Seq.create 1 p1) (Seq.create 1 p2) in
      recursive_split_seq_lemma_base p p';
-     p'
+     p' *)
   else
     begin
       pow2_minus i 1;
       pow2_modulo_division_lemma_1 n 1 i;
       assert(pow2 1 == 2);
+      pow2_modulo_modulo_lemma_1 n 1 i;
+      assert(n % 2 == 0);
+      let (p1,p2) = split_seq p in
       pow2_double_mult (i-1);
       division_multiplication_lemma n 2 (pow2 (i-1));
       assert(n/2 % (pow/2) = 0);
-      pow2_lt_compat i 1;
-      pow2_le_compat (i-1) 1;
+      pow2_lt_compat i 0;
+      pow2_le_compat (i-1) 0;
       div_exact_r n 2;
-      assert(i-1>0 /\ i-1 <= max_size_t);
+      assert(i-1>=0 /\ i-1 <= max_size_t);
       assert(pow = 2*(pow/2) /\ (n/2)/(pow2 (i-1)) == n / pow);
       pow2_lt_compat i (i-1);
       division_multiplication_lemma n 2 (pow/2);
@@ -579,6 +504,76 @@ let rec recursive_split_seq #a #n p i pow =
         recursive_split_seq_lemma_inductive p p1 p2 i pow p' p1' p2' k
       in FStar.Classical.forall_intro customlemma; p'
     end
+
+#reset-options "--z3rlimit 1000 --max_fuel 0 --max_ifuel 0"
+
+let recursive_split_seq_step_lemma #a #n i pow p p1 p2 k =
+  let (l,l') = split_seq (p1.[br i k]) in
+  let l0:lseq a (n/pow) = p1.[br i k] in
+  let l1:lseq a ((n/pow)/2) = p2.[br (i+1) k] in
+  let l2:lseq a ((n/pow)/2) = p2.[br (i+1) (k+pow)] in
+  let customprop (t:size_nat{t<(n/(2*pow))}) : GTot Type0 = (l.[t] == l1.[t]) in
+  let customlemma (t:size_nat{t<(n/(2*pow))}) : Lemma (customprop t) =
+    assert(l.[t] == l0.[2*t]);
+    let m1 = (2*pow)*t + k in
+    assert(m1 == (2*t)*pow +k);
+    div_exact_r n (2*pow);
+    lemma_mult_le_left (2*pow) t (n/(2*pow) - 1);
+    distributivity_sub_right (2*pow) (n/(2*pow)) 1;
+    assert(m1 <= n - (2*pow) + k);
+    assert(m1 < n);
+    lemma_mod_plus k t (2*pow);
+    modulo_lemma k (2*pow);
+    lemma_div_mod k (2*pow);
+    assert(k/(2*pow) = 0);
+    assert(m1 % (2*pow) == k);
+    lemma_div_plus k t (2*pow);
+    assert(m1 / (2*pow) == t);
+    assert(l1.[t] == p.[m1]);
+    lemma_mod_plus k (2*t) pow;
+    modulo_lemma k pow;
+    lemma_div_mod k pow;
+    assert(m1 % pow == k);
+    lemma_div_plus k (2*t) pow;
+    assert(m1 / pow == (2*t));
+    assert(l0.[2*t] == p.[m1])
+  in FStar.Classical.forall_intro customlemma;
+   eq_intro l l1;
+  let customprop2 (t:size_nat{t<(n/(2*pow))}) : GTot Type0 = (l'.[t] == l2.[t]) in
+  let customlemma2 (t:size_nat{t<(n/(2*pow))}) : Lemma (customprop2 t) =
+    assert(l'.[t] == l0.[2*t+1]);
+    let m1 = (2*pow)*t + (k+pow) in
+    assert(m1 == (2*t+1)*pow +k);
+    div_exact_r n (2*pow);
+    lemma_mult_le_left (2*pow) t (n/(2*pow) - 1);
+    distributivity_sub_right (2*pow) (n/(2*pow)) 1;
+    assert(m1 <= n - (2*pow) + k+pow);
+    assert(m1 < n);
+    lemma_mod_plus (k+pow) t (2*pow);
+    modulo_lemma (k+pow) (2*pow);
+    lemma_div_mod (k+pow) (2*pow);
+    assert((k+pow)/(2*pow) = 0);
+    assert(m1 % (2*pow) == k+pow);
+    lemma_div_plus (k+pow) t (2*pow);
+    assert(m1 / (2*pow) == t);
+    assert(l2.[t] == p.[m1]);
+    lemma_mod_plus k (2*t+1) pow;
+    modulo_lemma k pow;
+    lemma_div_mod k pow;
+    assert(m1 % pow == k);
+    lemma_div_plus k (2*t+1) pow;
+    assert(m1 / pow == (2*t+1));
+    assert(l0.[2*t+1] == p.[m1])
+  in FStar.Classical.forall_intro customlemma2;
+  eq_intro l' l2
+
+let recursive_split_seq_base_lemma #a #n p p' =
+  let p0:lseq (lseq a (n/1)) 1 = recursive_split_seq p 0 1 in
+  br_lemma_zero 0;
+  eq_intro p0.[0] p;
+  recursive_split_seq_step_lemma 0 1 p p0 p' 0;
+  br_lemma_zero 1;
+  br_lemma_one 1
 
 let rec sum_n_spec #a [|monoid a|] #n (l:lseq a n) =
   if n=0 then id

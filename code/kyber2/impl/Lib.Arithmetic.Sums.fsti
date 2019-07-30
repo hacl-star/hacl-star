@@ -21,6 +21,10 @@ val br: i:size_nat -> x:nat{x<pow2 i} -> y:nat{y<pow2 i}
 val br_lemma_rec: i:size_nat{i < max_size_t} -> x:nat{x<pow2 i} ->
   Lemma (br (i+1) x = 2 * br i x)
 
+val br_lemma_rec_p: i:size_nat -> p:nat{i+p <= max_size_t} -> x:nat{x<pow2 i} ->
+  Lemma (ensures x < pow2 (i+p) /\ br (i+p) x = (pow2 p) * br i x) (decreases p)
+
+
 val br_lemma_n2_1: i:size_nat{i < max_size_t} -> x:nat{x<pow2 i} ->
   Lemma (br (i+1) (x+pow2 i) == (br (i+1) x) + 1)
 
@@ -39,6 +43,8 @@ val br_lemma_div: i:size_nat{i>0} -> x:nat{x < pow2 i} ->
 
 
 val reorg: #a:Type0 -> #n:size_nat -> i:size_nat{n = pow2 i} -> p:lseq a n -> lseq a n
+
+val reorg_lemma: #a:Type0 -> #n:size_nat -> i:size_nat{n = pow2 i} -> p:lseq a n -> k:size_nat{k<n} -> Lemma ((reorg i p).[k] == p.[br i k] /\ (reorg i p).[br i k] == p.[k])
 
 val reorg_involutive: #a:Type0 -> #n:size_nat -> i:size_nat{n = pow2 i} -> p:lseq a n -> Lemma (reorg i (reorg i p) == p)
 
@@ -79,9 +85,27 @@ val recursive_split_seq:
    #a:Type0
    -> #n:size_nat
    -> p:lseq a n
-   -> i:size_nat{i>0}
+   -> i:size_nat
    -> pow:size_nat{pow = pow2 i}
    -> Ghost (lseq (lseq a (n/pow)) pow) (requires n % pow == 0) (ensures fun p' -> forall (k:nat{k<n}). (k/pow < n/pow) /\ index #a #(n/pow) (p'.[br i (k % pow)]) (k/pow) == p.[k]) (decreases i)
+
+val recursive_split_seq_step_lemma:
+  #a:Type0
+  -> #n:size_nat
+  -> i:size_nat{i < max_size_t}
+  -> pow:size_nat{pow = pow2 i /\ 2 * pow = pow2 (i+1) /\ n % pow == 0 /\ n % (2 * pow) = 0 /\ (n / (2*pow) == (n/pow)/2) /\ 2 * pow <= max_size_t}
+  -> p:lseq a n
+  -> p1:lseq (lseq a (n/pow)) pow
+  -> p2:lseq (lseq a (n/(2*pow))) (2*pow)
+  -> k:size_nat{k<pow}
+  -> Lemma (requires p1 == recursive_split_seq p i pow /\ p2 == recursive_split_seq p (i+1) (2*pow)) (ensures (let l1:lseq a ((n/pow)/2) = p2.[br (i+1) k] in let l2 = p2.[br (i+1) (k + pow)] in (l1, l2) == split_seq (p1.[br i k])))
+
+val recursive_split_seq_base_lemma:
+  #a:Type0
+  -> #n:size_nat{n % 2 == 0}
+  -> p:lseq a n
+  -> p':lseq (lseq a (n/2)) 2
+  -> Lemma (requires p' == recursive_split_seq p 1 2) (ensures (let l1:lseq a (n/2) = p'.[0] in let l2 = p'.[1] in (l1,l2) == split_seq p))
 
 #reset-options "--z3rlimit 500 --max_fuel 0 --max_ifuel 0"
 

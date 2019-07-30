@@ -3,6 +3,7 @@ module Spec.Kyber2.NTT
 open Lib.IntTypes
 open Lib.Sequence
 open Lib.ByteSequence
+open Lib.Arithmetic.Sums
 
 open FStar.Mul
 open FStar.Math.Lemmas
@@ -19,6 +20,7 @@ open Lib.Poly.NTT2
 
 module Seq = Lib.Sequence
 module Loops = Lib.LoopCombinators
+module NTT =  Lib.Poly.NTT
 
 type zq = field params_q
 let ring_zq = Lib.Arithmetic.Ring.ring_mod #params_q
@@ -220,3 +222,295 @@ let ntt_inversion_lemma2 p =
   assert_norm(Lib.Poly.NTT.lib_poly Group.t params_n == poly);
   let coerce #a #b (x:a) : Pure b (requires a == b) (ensures fun _ -> True) = x in
   lib_ntt_inversion_lemma2 #Group.t #Ring.ring_t #params_n 7 (Group.mk_t params_halfninv) (Group.mk_t params_zeta) (Group.mk_t params_zetainv) (coerce p)
+
+val ntt1: lseq (Group.t) (params_n/2) -> GTot (lseq (Group.t) (params_n/2))
+
+let ntt1 p =
+  NTT.lib_ntt #Group.t #Ring.ring_t (exp_t (Group.mk_t params_zeta) 2) (Group.mk_t params_zeta) p
+
+noextract inline_for_extraction
+let coerce_poly (x:poly) : Tot (lseq num params_n) = assert_norm(Lib.Poly.NTT.lib_poly Group.t params_n == poly); x
+
+
+#reset-options "--z3rlimit 200 --max_fuel 1 --max_ifuel 1"
+
+val lemma_ntt1_ntt:
+  p:poly
+  -> k:size_nat{k<params_n / 2}
+  -> Lemma (let (p1,p2) = Lib.Arithmetic.Sums.split_seq #Group.t #params_n (coerce_poly p) in let p' = ntt p in let p1' = ntt1 p1 in let p2' = ntt1 p2 in Seq.index #Group.t #params_n p' (2*(br 7 k)) == p1'.[k] /\ Seq.index #Group.t #params_n p' (2*(br 7 k) + 1) == p2'.[k])
+
+let lemma_ntt1_ntt p k =
+  let (p1,p2) = Lib.Arithmetic.Sums.split_seq (coerce_poly p) in
+  let p1' = ntt1 p1 in let p2' = ntt1 p2 in
+  reorg_lemma 7 p1' k; reorg_lemma 7 p2' k
+
+val ntt1_rec:
+  i:size_nat{pow2 i <= params_n/2}
+  -> p:lseq num (params_n/(pow2 (i+1)))
+  -> GTot (lseq num (params_n/(pow2 (i+1))))
+
+let ntt1_rec i p =
+  NTT.lib_ntt #Group.t #Ring.ring_t (exp_t (Group.mk_t params_zeta) (pow2 (i+1))) (exp_t (Group.mk_t params_zeta) (pow2 i)) p
+
+val lemma_ntt1_rec_zero:
+  p:lseq num (params_n/2)
+  -> Lemma (ntt1 p == ntt1_rec 0 p)
+
+let lemma_ntt1_rec_zero p =
+  assert(pow2 1 = 2);
+  assert(exp_t (Group.mk_t params_zeta) (pow2 1) == exp_t (Group.mk_t params_zeta) 2);
+  Lib.Arithmetic.Ring.lemma_exp_succ1 #num #Ring.ring_t (Group.mk_t params_zeta) 0;
+  Lib.Arithmetic.Ring.lemma_exp_zero #num #Ring.ring_t (Group.mk_t params_zeta);
+  Lib.Arithmetic.Ring.lemma_one2 #num #Ring.ring_t (Group.mk_t params_zeta)
+
+val ntt1_reorg_rec:
+  i:size_nat{pow2 i <= params_n/2}
+  -> p:lseq num (params_n/(pow2 (i+1)))
+  -> GTot (lseq num (params_n/(pow2 (i+1))))
+
+let ntt1_reorg_rec i p =
+  assert_norm(params_n == pow2 8);
+  assert_norm(params_n/2 == pow2 7);
+  if (i > 7) then pow2_lt_compat i 7;
+  pow2_minus 8 (i+1);
+  reorg (8-i-1) (ntt1_rec i p)
+
+val lemma_ntt1_reorg_rec_seven_id:
+  p:lseq num (params_n/(pow2 8))
+  -> Lemma (ntt1_reorg_rec 7 p == p)
+
+let lemma_ntt1_reorg_rec_seven_id p =
+  assert_norm (params_n/(pow2 8) == 1);
+  assert_norm(br 0 0 = 0);
+  reorg_lemma 0 (ntt1_rec 7 p) 0;
+  eq_intro (ntt1_reorg_rec 7 p) (ntt1_rec 7 p);
+  NTT.lib_ntt_length_one_is_id (exp_t (Group.mk_t params_zeta) (pow2 8)) (exp_t (Group.mk_t params_zeta) (pow2 7)) p
+
+val lemma_ntt1_reorg_rec_ntt_instantiate:
+  p:poly
+  -> k:size_nat{k<params_n / 2}
+  -> Lemma (let (p1,p2) = Lib.Arithmetic.Sums.split_seq #Group.t #params_n p in let p' = ntt p in let p1' = ntt1_reorg_rec 0 p1 in let p2' = ntt1_reorg_rec 0 p2 in Seq.index #Group.t #params_n p' (2*k) == p1'.[k] /\ Seq.index #Group.t #params_n p' (2*k + 1) == p2'.[k])
+
+let lemma_ntt1_reorg_rec_ntt_instantiate p k =
+  let (p1,p2) = Lib.Arithmetic.Sums.split_seq p in
+  lemma_ntt1_rec_zero p1; lemma_ntt1_rec_zero p2
+
+val lemma_ntt1_reorg_rec_ntt:
+  p:poly
+  -> Lemma (let (p1,p2) = Lib.Arithmetic.Sums.split_seq #Group.t #params_n p in let p1' = ntt1_reorg_rec 0 p1 in let p2' = ntt1_reorg_rec 0 p2 in ntt p == join_seq p1' p2')
+
+let lemma_ntt1_reorg_rec_ntt p =
+  let (p1,p2) = Lib.Arithmetic.Sums.split_seq #Group.t #params_n p in let p' = ntt p in let p1' = ntt1_reorg_rec 0 p1 in let p2' = ntt1_reorg_rec 0 p2 in let j = join_seq p1' p2' in
+  let customprop (k:size_nat{k<params_n}) : GTot Type0 = (Seq.index #Group.t #params_n p' k == j.[k]) in
+  let customlemma (k:size_nat{k<params_n}) : Lemma (customprop k) =
+    lemma_ntt1_reorg_rec_ntt_instantiate p (k/2)
+  in FStar.Classical.forall_intro customlemma;
+  eq_intro p' j
+
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
+
+val lemma_ntt1_rec_split1:
+  i:size_nat{i<max_size_t /\ pow2 i < params_n/2}
+  -> p:lseq num (params_n/(pow2 (i+1)))
+  -> peven:lseq num (params_n/(pow2 (i+2)))
+  -> podd:lseq num (params_n/(pow2 (i+2)))
+  -> k:size_nat{k<(params_n/(pow2 (i+2)))}
+  -> Lemma (requires pow2 (i+1) <= params_n/2 /\ (params_n/(pow2(i+1)) == 2*(params_n/(pow2(i+2)))) /\ (peven,podd) == split_seq p)
+    (ensures (ntt1_rec i p).[k] == Group.plus_t (ntt1_rec (i+1) peven).[k] (Group.mul_t (exp_t (Group.mk_t params_zeta) ((2*k+1)*pow2 i)) (ntt1_rec (i+1) podd).[k]))
+
+let lemma_ntt1_rec_split1 i p peven podd k =
+  NTT.lemma_ntt_split1 #num #Ring.ring_t #(params_n/(pow2 (i+1))) (exp_t (Group.mk_t params_zeta) (pow2 (i+1))) (exp_t (Group.mk_t params_zeta) (pow2 i)) p peven podd k;
+  Lib.Arithmetic.Ring.lemma_exp_exp (Group.mk_t params_zeta) (pow2 (i+1)) 2;
+  Lib.Arithmetic.Ring.lemma_exp_exp (Group.mk_t params_zeta) (pow2 i) 2;
+  Lib.Arithmetic.Ring.lemma_exp_exp (Group.mk_t params_zeta) (pow2 (i+1)) k;
+  pow2_double_mult i;
+  pow2_double_mult (i+1);
+  assert((ntt1_rec i p).[k] == Group.plus_t (ntt1_rec (i+1) peven).[k] (Group.mul_t (exp_t (Group.mk_t params_zeta) (pow2 i)) (Group.mul_t (ntt1_rec (i+1) podd).[k] (exp_t (Group.mk_t params_zeta) ((pow2 (i+1))*k)))));
+  Ring.lemma_mul_swap_t (ntt1_rec (i+1) podd).[k] (exp_t (Group.mk_t params_zeta) ((pow2 (i+1))*k));
+  Group.lemma_mul_assoc_t (exp_t (Group.mk_t params_zeta) (pow2 i)) (exp_t (Group.mk_t params_zeta) ((pow2 (i+1))*k)) (ntt1_rec (i+1) podd).[k];
+  Lib.Arithmetic.Ring.lemma_exp_morphism (Group.mk_t params_zeta) (pow2 i) ((pow2 (i+1)) * k);
+  assert (pow2 i + ((pow2 (i+1)) * k) == (2*k+1)*pow2 i);
+  assert (exp_t (Group.mk_t params_zeta) (pow2 i + ((pow2 (i+1)) * k)) == exp_t (Group.mk_t params_zeta) ((2*k+1)*pow2 i))
+
+val lemma_ntt1_rec_split2:
+  i:size_nat{i<max_size_t /\ pow2 i < params_n/2}
+  -> p:lseq num (params_n/(pow2 (i+1)))
+  -> peven:lseq num (params_n/(pow2 (i+2)))
+  -> podd:lseq num (params_n/(pow2 (i+2)))
+  -> k:size_nat{k<(params_n/(pow2 (i+2)))}
+  -> Lemma (requires pow2 (i+1) <= params_n/2 /\ (params_n/(pow2(i+1)) == 2*(params_n/(pow2(i+2)))) /\ (peven,podd) == split_seq p)
+    (ensures (ntt1_rec i p).[k+(params_n/(pow2 (i+2)))] == Lib.Arithmetic.Ring.minus #num #Ring.ring_t (ntt1_rec (i+1) peven).[k] (Group.mul_t (exp_t (Group.mk_t params_zeta) ((2*k+1)*pow2 i)) (ntt1_rec (i+1) podd).[k]))
+
+#reset-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
+
+let lemma_ntt1_rec_split2 i p peven podd k =
+  Lib.Arithmetic.Ring.lemma_exp_exp (Group.mk_t params_zeta) (pow2 (i+1)) (params_n/pow2 (i+1));
+  assert_norm(params_n = pow2 8);
+  if (i >= 8) then pow2_le_compat i 8;
+  assert(i<8);
+  pow2_minus 8 (i+1);
+  pow2_plus (i+1) (8-(i+1));
+  //assert (exp_t (exp_t (Group.mk_t params_zeta) (pow2 (i+1))) (params_n/pow2 (i+1)) == exp_t (Group.mk_t params_zeta) params_n);
+  exp_correspondancy (Group.mk_t params_zeta) params_n;
+  assert_norm(order_zeta () == params_n);
+  assert(exp_t (exp_t (Group.mk_t params_zeta) (pow2 (i+1))) (params_n/pow2 (i+1)) == Group.one_t);
+  NTT.lemma_ntt_split2 #num #Ring.ring_t #(params_n/(pow2 (i+1))) (exp_t (Group.mk_t params_zeta) (pow2 (i+1))) (exp_t (Group.mk_t params_zeta) (pow2 i)) p peven podd k;
+  Lib.Arithmetic.Ring.lemma_exp_exp (Group.mk_t params_zeta) (pow2 (i+1)) 2;
+  Lib.Arithmetic.Ring.lemma_exp_exp (Group.mk_t params_zeta) (pow2 i) 2;
+  Lib.Arithmetic.Ring.lemma_exp_exp (Group.mk_t params_zeta) (pow2 (i+1)) (k+(params_n/(pow2 (i+2))));
+  pow2_double_mult i;
+  pow2_double_mult (i+1);
+  assert((ntt1_rec i p).[k+(params_n/(pow2 (i+2)))] == Group.plus_t (ntt1_rec (i+1) peven).[k] (Group.mul_t (exp_t (Group.mk_t params_zeta) (pow2 i)) (Group.mul_t (ntt1_rec (i+1) podd).[k] (exp_t (Group.mk_t params_zeta) ((pow2 (i+1))*(k+(params_n/(pow2 (i+2)))))))));
+  Ring.lemma_mul_swap_t (ntt1_rec (i+1) podd).[k] (exp_t (Group.mk_t params_zeta) ((pow2 (i+1))*(k+(params_n/(pow2 (i+2))))));
+  Group.lemma_mul_assoc_t (exp_t (Group.mk_t params_zeta) (pow2 i)) (exp_t (Group.mk_t params_zeta) ((pow2 (i+1))*(k+(params_n/(pow2 (i+2)))))) (ntt1_rec (i+1) podd).[k];
+  Ring.lemma_mul_swap_t (exp_t (Group.mk_t params_zeta) (pow2 i)) (exp_t (Group.mk_t params_zeta) ((pow2 (i+1))*(k+(params_n/(pow2 (i+2))))));
+  pow2_minus 8 (i+2);
+  pow2_plus (i+1) (8-(i+2));
+  pow2_minus 8 1;
+  assert((pow2 (i+1)) * (k + (params_n/(pow2 (i+2)))) == pow2 (i+1) * k + pow2 7);
+  assert(exp_t (Group.mk_t params_zeta) ((pow2 (i+1))*(k+(params_n/(pow2 (i+2))))) == exp_t (Group.mk_t params_zeta) ((pow2 (i+1) * k + pow2 7)));
+  Lib.Arithmetic.Ring.lemma_exp_morphism (Group.mk_t params_zeta) (pow2 (i+1) * k) (pow2 7);
+  Ring.lemma_mul_swap_t (exp_t (Group.mk_t params_zeta) (pow2 (i+1) * k)) (exp_t (Group.mk_t params_zeta) (pow2 7));
+  Group.lemma_mul_assoc_t (exp_t (Group.mk_t params_zeta) (pow2 7)) (exp_t (Group.mk_t params_zeta) (pow2 (i+1) * k)) (exp_t (Group.mk_t params_zeta) (pow2 i));
+  Lib.Arithmetic.Ring.lemma_exp_morphism (Group.mk_t params_zeta) ((pow2 (i+1)) * k) (pow2 i);
+  assert (((pow2 (i+1)) * k) + pow2 i == (2*k+1)*pow2 i);
+  assert (exp_t (Group.mk_t params_zeta) (((pow2 (i+1)) * k) + pow2 i) == exp_t (Group.mk_t params_zeta) ((2*k+1)*pow2 i));
+  Group.lemma_mul_assoc_t (exp_t (Group.mk_t params_zeta) (pow2 7)) (exp_t (Group.mk_t params_zeta) ((2*k+1)*(pow2 i))) (ntt1_rec (i+1) podd).[k];
+  let g1 = (ntt1_rec (i+1) peven).[k] in
+  let g2 = Group.mul_t (exp_t (Group.mk_t params_zeta) ((2*k+1)*(pow2 i))) (ntt1_rec (i+1) podd).[k] in
+  assert_norm(pow2 7 = 128);
+  exp_correspondancy (Group.mk_t params_zeta) 128;
+  assert_norm (params_zeta ^% 128 == (-1) % params_q);
+  assert((ntt1_rec i p).[k+(params_n/(pow2 (i+2)))] == Group.plus_t g1 (Group.mul_t (exp_t (Group.mk_t params_zeta) 128) g2));
+  Group.plus_lemma_t g1 (Group.mul_t (exp_t (Group.mk_t params_zeta) 128) g2);
+  Group.mul_lemma_t (exp_t (Group.mk_t params_zeta) 128) g2;
+  assert(Group.v (ntt1_rec i p).[k+(params_n/(pow2 (i+2)))] == (Group.v g1 + ((((-1)%params_q)*Group.v g2) % params_q)) %params_q);
+  lemma_mod_mul_distr_l (-1) (Group.v g2) params_q;
+  assert(Group.v (ntt1_rec i p).[k+(params_n/(pow2 (i+2)))] == (Group.v g1 + (((-1)*Group.v g2) % params_q)) %params_q);
+  lemma_mod_plus_distr_r (Group.v g1) (- Group.v g2) params_q;
+  assert(Group.v (ntt1_rec i p).[k+(params_n/(pow2 (i+2)))] == (Group.v g1 + (- Group.v g2)) %params_q);
+  assert(Group.v (ntt1_rec i p).[k+(params_n/(pow2 (i+2)))] == (Group.v g1 - Group.v g2) %params_q);
+  Ring.minus_lemma_t g1 g2
+
+val lemma_ntt1_rec_br_split1:
+  i:size_nat{i<max_size_t /\ pow2 i < params_n/2}
+  -> p:lseq num (params_n/(pow2 (i+1)))
+  -> peven:lseq num (params_n/(pow2 (i+2)))
+  -> podd:lseq num (params_n/(pow2 (i+2)))
+  -> k:size_nat{k<(params_n/(pow2 (i+1))) /\ k%2 = 0}
+  -> Lemma (requires (params_n/(pow2(i+1)) == 2*(params_n/(pow2(i+2)))) /\ (peven,podd) == split_seq p)
+    (ensures i < 7 /\ pow2 (i+1) <= params_n/2 /\ k < pow2 (8-i-1) /\ br (8 - i - 1) k < (params_n/(pow2 (i+2))) /\ pow2 (8-i-1) = (params_n/(pow2 (i+1))) /\ (params_n/(pow2(i+2))) <= params_n / (pow2 (i+1)) /\ (ntt1_rec i p).[br (8-i-1) k] == Group.plus_t (ntt1_rec (i+1) peven).[br (8-i-2) (k/2)] (Group.mul_t (exp_t (Group.mk_t params_zeta) (br 8 (k + pow2 (8-i-1)))) (ntt1_rec (i+1) podd).[br (8-i-2) (k/2)]))
+
+let lemma_ntt1_rec_br_split1 i p peven podd k =
+  assert_norm(params_n/2 = pow2 7);
+  if (i>=7) then pow2_le_compat i 7;
+  pow2_le_compat 7 (i+1);
+  assert_norm(params_n = pow2 8);
+  pow2_minus 8 (i+1);
+  br_lemma_n2_2 (8 - i - 2) k;
+  pow2_double_sum (8 - i - 2);
+  pow2_minus 8 (i+2);
+  assert(br (8-i-1) k < params_n/(pow2(i+2)));
+  br_lemma_n2_1 (8-i-1) k;
+  br_lemma_rec (8-i-1) k;
+  br_lemma_rec_p (8-i) i (k+pow2 (8-i-1));
+  assert (br 8 (k+ pow2 (8-i-1)) == (2*(br (8-i-1) k)+1) * pow2 i);
+  assert((params_n/(pow2(i+1)) == 2*(params_n/(pow2(i+2)))));
+  lemma_ntt1_rec_split1 i p peven podd (br (8-i-1) k);
+  br_lemma_div (8-i-1) k;
+  lemma_mult_le_left 2 (br (8-i-1) k) (pow2 (8-i-2));
+  modulo_lemma (2*br (8-i-1) k) (pow2 (8-i-1));
+  assert(br (8-i-1) (k/2) == 2 * br (8-i-1) k);
+  lemma_div_lt k (8-i-1) 1;
+  br_lemma_rec (8-i-2) (k/2)
+
+val lemma_ntt1_rec_br_split2:
+  i:size_nat{i<max_size_t /\ pow2 i < params_n/2}
+  -> p:lseq num (params_n/(pow2 (i+1)))
+  -> peven:lseq num (params_n/(pow2 (i+2)))
+  -> podd:lseq num (params_n/(pow2 (i+2)))
+  -> k:size_nat{k<(params_n/(pow2 (i+1))) /\ k%2 = 0}
+  -> Lemma (requires (params_n/(pow2(i+1)) == 2*(params_n/(pow2(i+2)))) /\ (peven,podd) == split_seq p)
+    (ensures i < 7 /\ pow2 (i+1) <= params_n/2 /\ k < pow2 (8-i-1) /\ br (8 - i - 1) k < (params_n/(pow2 (i+2))) /\ pow2 (8-i-1) = (params_n/(pow2 (i+1))) /\ (params_n/(pow2(i+2))) <= params_n / (pow2 (i+1)) /\ (ntt1_rec i p).[br (8-i-1) (k+1)] == Lib.Arithmetic.Ring.minus (ntt1_rec (i+1) peven).[br (8-i-2) (k/2)] (Group.mul_t (exp_t (Group.mk_t params_zeta) (br 8 (k + pow2 (8-i-1)))) (ntt1_rec (i+1) podd).[br (8-i-2) (k/2)]))
+
+let lemma_ntt1_rec_br_split2 i p peven podd k =
+  assert_norm(params_n/2 = pow2 7);
+  if (i>=7) then pow2_le_compat i 7;
+  pow2_le_compat 7 (i+1);
+  assert_norm(params_n = pow2 8);
+  pow2_minus 8 (i+1);
+  br_lemma_n2_2 (8 - i - 2) k;
+  pow2_double_sum (8 - i - 2);
+  pow2_minus 8 (i+2);
+  assert(br (8-i-1) k < params_n/(pow2(i+2)));
+  br_lemma_n2_1 (8-i-1) k;
+  br_lemma_rec (8-i-1) k;
+  br_lemma_rec_p (8-i) i (k+pow2 (8-i-1));
+  assert (br 8 (k+ pow2 (8-i-1)) == (2*(br (8-i-1) k)+1) * pow2 i);
+  assert((params_n/(pow2(i+1)) == 2*(params_n/(pow2(i+2)))));
+  lemma_ntt1_rec_split2 i p peven podd (br (8-i-1) k);
+  br_lemma_div (8-i-1) k;
+  lemma_mult_le_left 2 (br (8-i-1) k) (pow2 (8-i-2));
+  modulo_lemma (2*br (8-i-1) k) (pow2 (8-i-1));
+  assert(br (8-i-1) (k/2) == 2 * br (8-i-1) k);
+  lemma_div_lt k (8-i-1) 1;
+  br_lemma_rec (8-i-2) (k/2);
+  br_lemma_n2_2 (8-i-2) k
+
+val lemma_ntt1_rec_reorg_split1:
+  i:size_nat{i<7}
+  -> p:lseq num (params_n/(pow2 (i+1)))
+  -> peven:lseq num (params_n/(pow2 (i+2)))
+  -> podd:lseq num (params_n/(pow2 (i+2)))
+  -> k:size_nat{k<(params_n/(pow2 (i+2)))}
+  -> Lemma (requires (params_n/(pow2(i+1)) == 2*(params_n/(pow2(i+2)))) /\ (peven,podd) == split_seq p)
+    (ensures pow2 (8-i-1) = (params_n/(pow2 (i+1))) /\ pow2 (8-i-2) = (params_n/(pow2 (i+2))) /\ (ntt1_reorg_rec i p).[2*k] == Group.plus_t (ntt1_reorg_rec (i+1) peven).[k] (Group.mul_t (exp_t (Group.mk_t params_zeta) (br 7 (k + pow2 (6-i)))) (ntt1_reorg_rec (i+1) podd).[k]))
+
+let lemma_ntt1_rec_reorg_split1 i p peven podd k =
+  pow2_lt_compat 7 i;
+  assert_norm(params_n/2 = pow2 7);
+  lemma_ntt1_rec_br_split1 i p peven podd (2*k);
+  assert_norm(params_n == pow2 8);
+  pow2_minus 8 (i+2);
+  multiple_division_lemma k 2;
+  reorg_lemma (8-i-1) (ntt1_rec i p) (2*k);
+  reorg_lemma (8-i-2) (ntt1_rec (i+1) peven) (k);
+  reorg_lemma (8-i-2) (ntt1_rec (i+1) podd) (k);
+  pow2_double_mult (6-i);
+  distributivity_add_right 2 k (pow2 (6-i));
+  pow2_double_sum (7-i);
+  assert(2*k + pow2 (7-i) < pow2 (8-i));
+  multiple_division_lemma (k + pow2 (6-i)) 2;
+  br_lemma_div 8 (2*k + pow2 (7-i));
+  br_lemma_n2_2 7 (2*k + pow2 (7-i));
+  cancel_mul_div (br 8 (2*k + pow2 (7-i))) 2;
+  br_lemma_rec 7 (k + pow2 (6-i))
+
+val lemma_ntt1_rec_reorg_split2:
+  i:size_nat{i<7}
+  -> p:lseq num (params_n/(pow2 (i+1)))
+  -> peven:lseq num (params_n/(pow2 (i+2)))
+  -> podd:lseq num (params_n/(pow2 (i+2)))
+  -> k:size_nat{k<(params_n/(pow2 (i+2)))}
+  -> Lemma (requires (params_n/(pow2(i+1)) == 2*(params_n/(pow2(i+2)))) /\ (peven,podd) == split_seq p)
+    (ensures pow2 (8-i-1) = (params_n/(pow2 (i+1))) /\ pow2 (8-i-2) = (params_n/(pow2 (i+2))) /\ (ntt1_reorg_rec i p).[2*k+1] == Lib.Arithmetic.Ring.minus (ntt1_reorg_rec (i+1) peven).[k] (Group.mul_t (exp_t (Group.mk_t params_zeta) (br 7 (k + pow2 (6-i)))) (ntt1_reorg_rec (i+1) podd).[k]))
+
+let lemma_ntt1_rec_reorg_split2 i p peven podd k =
+  pow2_lt_compat 7 i;
+  assert_norm(params_n/2 = pow2 7);
+  lemma_ntt1_rec_br_split2 i p peven podd (2*k);
+  assert_norm(params_n == pow2 8);
+  pow2_minus 8 (i+2);
+  reorg_lemma (8-i-1) (ntt1_rec i p) (2*k+1);
+  reorg_lemma (8-i-2) (ntt1_rec (i+1) peven) k;
+  reorg_lemma (8-i-2) (ntt1_rec (i+1) podd) k;
+  pow2_double_mult (6-i);
+  distributivity_add_right 2 k (pow2 (6-i));
+  pow2_double_sum (7-i);
+  assert(2*k + pow2 (7-i) < pow2 (8-i));
+  multiple_division_lemma (k + pow2 (6-i)) 2;
+  br_lemma_div 8 (2*k + pow2 (7-i));
+  br_lemma_n2_2 7 (2*k + pow2 (7-i));
+  cancel_mul_div (br 8 (2*k + pow2 (7-i))) 2;
+  br_lemma_rec 7 (k + pow2 (6-i))
+
