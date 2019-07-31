@@ -805,3 +805,108 @@ let lemma_mul_5_low_264 x1 x2 x3 x4 x5 y1 y2 y3 y4 y5 =
   lemma_div_nat_is_nat (x4 * y1 + x3 * y2 + x2 * y3 + x1 * y4 + ((x3 * y1 + x2 * y2 + x1 * y3 + ((x2 * y1 + x1 * y2 + ((x1 * y1) / pow2 56)) / pow2 56)) / pow2 56)) (pow2 56);
   lemma_mul_5''' x1 x2 x3 x4 x5 y1 y2 y3 y4 y5;
   lemma_mod_264_ (x1 * y1) (x2 * y1 + x1 * y2) (x3 * y1 + x2 * y2 + x1 * y3) (x4 * y1 + x3 * y2 + x2 * y3 + x1 * y4) (x5 * y1 + x4 * y2 + x3 * y3 + x2 * y4 + x1 * y5)
+
+private
+val lemma_optimized_barrett_reduce:
+  a:nat{a < pow2 512} ->
+  Lemma (a - (((a / pow2 248) * (pow2 512 / S.q)) / pow2 264) * S.q < 2 * S.q
+    /\ a - (((a / pow2 248) * (pow2 512 / S.q)) / pow2 264) * S.q >= 0)
+let lemma_optimized_barrett_reduce a =
+  assert_norm (pow2 248 = 0x100000000000000000000000000000000000000000000000000000000000000);
+  assert_norm (pow2 264 = 0x1000000000000000000000000000000000000000000000000000000000000000000);
+  assert_norm (S.q == 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed);
+  assert_norm (0x100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000 == pow2 512)
+
+#push-options "--initial_fuel 0 --max_fuel 0 --z3cliopt smt.arith.nl=true --smtencoding.elim_box true --smtencoding.l_arith_repr native --smtencoding.nl_arith_repr native --z3rlimit 30"
+
+
+private
+val lemma_optimized_barrett_reduce2:
+  a:nat{a < pow2 512} ->
+  Lemma (a - ((a * (pow2 512 / S.q)) / pow2 512) * S.q < pow2 264 /\
+         a - ((a * (pow2 512 / S.q)) / pow2 512) * S.q >= 0)
+let lemma_optimized_barrett_reduce2 a =
+  assert_norm (pow2 248 = 0x100000000000000000000000000000000000000000000000000000000000000);
+  assert_norm (pow2 264 = 0x1000000000000000000000000000000000000000000000000000000000000000000);
+  assert_norm (S.q == 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed);
+  assert_norm (0x100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000 == pow2 512)
+
+#pop-options
+
+private
+let lemma_0 (x:nat) (y:nat) (c:pos) : Lemma
+  (requires (x >= y /\ x - y < c))
+  (ensures (x / c - y / c <= 1))
+  = if x / c - y / c > 1 then (
+      Math.Lemmas.lemma_div_mod x c;
+      Math.Lemmas.lemma_div_mod y c;
+      Math.Lemmas.distributivity_sub_right c (x / c) (y / c))
+
+#set-options "--z3rlimit 500"
+
+private
+let lemma_1 (x:nat) (y:nat) (c:pos) : Lemma
+  (requires (x - y < c /\ x >= y))
+  (ensures  (x - y = (if (x % c) - (y % c) < 0 then c + (x % c) - (y % c)
+             else (x % c) - (y % c))))
+  = Math.Lemmas.lemma_div_mod x c;
+    Math.Lemmas.lemma_div_mod y c;
+    Math.Lemmas.distributivity_sub_right c (y/c) (x/c);
+    assert( (x%c) - (y%c) = x - y - c*((x/c) - (y/c)));
+    lemma_0 x y c
+
+val lemma_barrett_reduce':
+  x:nat{x < pow2 512} ->
+  Lemma (let r = x % pow2 264 in
+         let qml = (((((x / pow2 248) * (pow2 512 / S.q)) / pow2 264) * S.q) % pow2 264) in
+         let u = if r < qml then pow2 264 + r - qml else r - qml in
+         let z = if u < S.q then u else u - S.q in
+         z = x % S.q)
+
+let lemma_barrett_reduce' x =
+  assert_norm (S.q == 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed);
+  assert_norm (0x100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000 == pow2 512);
+  assert_norm (pow2 248 = 0x100000000000000000000000000000000000000000000000000000000000000);
+
+  let m = pow2 512 / S.q in
+  let l = S.q in
+  assert_norm (pow2 264 = 0x1000000000000000000000000000000000000000000000000000000000000000000);
+  let q = ((x / pow2 248) * m) / pow2 264 in
+  let a' = (x % pow2 264) - (q * l) % pow2 264 in
+  assert_norm (2 * l < pow2 264);
+  calc (<) {
+    x - q * l;
+    (<) { lemma_optimized_barrett_reduce x }
+    2 * S.q;
+    (<) { assert_norm (2 * S.q < pow2 264) }
+    pow2 264;
+  };
+  calc (>=) {
+    x - q * l;
+    (>=) { lemma_optimized_barrett_reduce x}
+    0;
+  };
+  Math.Lemmas.modulo_lemma (x - q * l) (pow2 264);
+  calc (<) {
+    x - ((x * m) / pow2 512) * l;
+    (<) { lemma_optimized_barrett_reduce2 x }
+    pow2 264;
+  };
+  calc (>=) {
+    x - ((x * m) / pow2 512) * l;
+    (>=) { lemma_optimized_barrett_reduce2 x }
+    0;
+  };
+  Math.Lemmas.modulo_lemma (x - ((x * m) / pow2 512) * l) (pow2 264);
+  Math.Lemmas.lemma_mod_sub x l ((x*m)/pow2 512);
+  lemma_1 x (q*l) (pow2 264);
+  let r = x % pow2 264 in
+  let qml = (((((x / pow2 248) * m) / pow2 264) * l) % pow2 264) in
+  let u = if r < qml then pow2 264 + r - qml else r - qml in
+  let z = if u < l then u else u - l in
+  assert (u < 2 * l);
+  assert (u = x - q * l);
+  Math.Lemmas.distributivity_add_left 1 q l;
+  if u >= l then Math.Lemmas.lemma_mod_sub x l (q+1)
+  else Math.Lemmas.lemma_mod_sub x l (q);
+  Math.Lemmas.modulo_lemma z l

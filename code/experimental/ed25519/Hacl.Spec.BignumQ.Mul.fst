@@ -834,9 +834,9 @@ let barrett_reduction5 (t0, t1, t2, t3, t4, t5, t6, t7, t8, t9) =
   //u == s == (r - v) mod b^{k+1} == (r - v) mod 2^264
 
   let (o0, o1, o2, o3, o4) = subm_conditional (s0, s1, s2, s3, s4) in
-  admit();
-  (o0, o1, o2, o3, o4)
+  Lemmas.lemma_barrett_reduce' (wide_as_nat5 (t0, t1, t2, t3, t4, t5, t6, t7, t8, t9));
 
+  (o0, o1, o2, o3, o4)
 
 inline_for_extraction noextract
 val mul_modq5: x:qelem5 -> y:qelem5 ->
