@@ -11,7 +11,7 @@ open Lib.Buffer
 module F56 = Hacl.Impl.Ed25519.Field56
 module BF = Vale.Arch.BufferFriend
 
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 
 //FIX
 val sha512_pre_msg:
