@@ -103,7 +103,7 @@ private let lemma_pow2_div (a:nat) (b:nat) (k:nat)
   pow2_minus b k;
   pow2_minus a k
 
-#push-options "--z3rlimit 30"
+#push-options "--z3rlimit 40"
 private let lemma_divrem3 (k:nat) (a:nat) (b:nat) (n:nat)
   : Lemma (requires a >= k /\ b >= k /\ n < pow2 k)
   (ensures (pow2 a + pow2 b + n) % pow2 k == n /\ (pow2 a + pow2 b + n) / pow2 k == pow2 (a - k) + pow2 (b - k))
@@ -133,7 +133,7 @@ private let lemma_div_sub_small (l:nat) (n:nat) (x:nat)
   lemma_mod_spec n (pow2 8);
   lemma_pow2_div2 n 8 (8*(l-2));
   lemma_pow2_div2 (n - n % pow2 8) 8 (8*(l-2))
-  
+
 #push-options "--z3rlimit 20"
 private let rec lemma_be_index (l:pos) (n:nat{n < pow2 (8 `op_Multiply` l)})
   : Lemma (ensures U8.v (S.index (FStar.Endianness.n_to_be l n) 0)
@@ -400,7 +400,7 @@ let parse_header b cid_len =
     | [pn0; pn1; false; false; typ0; typ1; true; true] ->
       let pn_len : nat2 = of_bitfield2 (pn0, pn1) in
       let typ = of_bitfield2 (typ0, typ1) in
-      if S.length b >= 10 then
+      if S.length b >= 6 then
         let _ = lemma_be_to_n_is_bounded (S.slice b 1 5) in
         let version : nat32 = be_to_n (S.slice b 1 5) in
 	let cl = U8.v (S.index b 5) in
@@ -566,18 +566,6 @@ let lemma_slice_long_header6 (u1 u2 u3 u4 u5 u6 u7:bytes) : Lemma
   append_slices3 u1 S.(u2 @| u3 @| u4 @| u5 @| u6 @| u7)
 
 
-let lemma_slice_long_header67 (u1 u2 u3 u4 u5 u6 u7:bytes) : Lemma
-  (requires True)
-  (ensures (
-    let b = S.(u1 @| u2 @| u3 @| u4 @| u5 @| u6 @| u7) in
-    S.(u6 = S.slice b (S.length u1+S.length u2+S.length u3+S.length u4+S.length u5) (S.length u1+S.length u2+S.length u3+S.length u4+S.length u5+S.length u6)))) =
-  append_slices1 u6 u7;
-  append_slices3 u5 S.(u6 @| u7);
-  append_slices3 u4 S.(u5 @| u6 @| u7);
-  append_slices3 u3 S.(u4 @| u5 @| u6 @| u7);
-  append_slices3 u2 S.(u3 @| u4 @| u5 @| u6 @| u7);
-  append_slices3 u1 S.(u2 @| u3 @| u4 @| u5 @| u6 @| u7)
-
 // not so sure why, but the last iteration is much less automatable
 // than the others. Had to decompose it into 7 sublemmas
 let lemma_slice_long_header7_step7 (u7:bytes) : Lemma
@@ -624,8 +612,16 @@ let lemma_slice_long_header7 (u1 u2 u3 u4 u5 u6 u7:bytes) : Lemma
   S.append_slices u1 S.(u2 @| u3 @| u4 @| u5 @| u6 @| u7)
 
 
+let lemma_slice_long_header67 (u1 u2 u3 u4 u5 u6:bytes) : Lemma
+  (requires True)
+  (ensures (
+    let b = S.(u1 @| u2 @|u3 @| u4 @| u5 @| u6) in
+    u6 = S.slice b (S.length u1+S.length u2+S.length u3+S.length u4+S.length u5) (S.length b))) =
+  assert (S.equal S.(u1 @| u2 @|u3 @| u4 @| u5 @| u6) S.(u1 @| u2 @|u3 @| u4 @| u5 @| u6 @| empty));
+  lemma_slice_long_header6 u1 u2 u3 u4 u5 u6 S.empty
 
 
+#push-options "--z3rlimit 20"
 let lemma_long_header_parsing_correct h pn_len npn : Lemma
   (requires (Long? h))
   (ensures (parsing_correct h pn_len npn)) =
@@ -645,48 +641,49 @@ let lemma_long_header_parsing_correct h pn_len npn : Lemma
       let cl8 = U8.(16uy *^ uint_to_t dcil +^ uint_to_t scil) in
       let (u1,u2,u3,u4,u5,u6,u7) = (S.create 1 flag, n_to_be 4 version, S.create 1 cl8, dcid, scid, encode_varint (assert_norm(max_plain_length <= pow2 62); plain_len), npn) in
       assert (b = S.(u1 @| u2 @| u3 @| u4 @| u5 @| u6 @| u7));
-      if S.length b >= 10 then begin
+      if S.length b >= 6 then begin
         // extracting the flag
         lemma_slice_long_header1 u1 u2 u3 u4 u5 u6 u7;
-        //assert (S.length u1 = 1);
         assert (S.slice b 0 1 = u1);
-
         // extracting the version
-        //assert (be_to_n u2 = version);
-        //assert (S.length u2 = 4);
         lemma_slice_long_header2 u1 u2 u3 u4 u5 u6 u7;
-        //assert (S.slice b 1 5 = u2);
         assert (be_to_n (S.slice b 1 5) = version);
-
         // extracting clen
-        //assert (S.length u3 = 1);
         lemma_slice_long_header3 u1 u2 u3 u4 u5 u6 u7;
-        //assert (S.slice b 5 6 = u3);
-        //S.cons_index_slice b 5 6;
         assert (S.index b 5 = cl8);
         let cl = U8.v cl8 in
-
         // extracting dci, scil
         extract_dcil_scil dcil scil cl;
-
         // extracting cid
         let pos_length = 6 + add3 dcil + add3 scil in
         size_long_header_bound_cid h pn_len npn;
         if S.length b >= pos_length + 1 then begin
+          // dcid
           lemma_slice_long_header4 u1 u2 u3 u4 u5 u6 u7;
-          //assert (S.length u4 = add3 dcil);
           assert (u4 = S.slice b 6 (6+add3 dcil));
-
+          // scid
           lemma_slice_long_header5 u1 u2 u3 u4 u5 u6 u7;
-          //assert (S.length u5 = add3 scil);
           assert (u5 = S.slice b (6+add3 dcil) (6+add3 dcil+add3 scil));
-          admit()
+          // extracting plain_len
+          lemma_slice_long_header67 u1 u2 u3 u4 u5 S.(u6 @| u7);
+          assert (S.(u6 @| u7) = S.slice b pos_length (S.length b));
+          lemma_varint u7 plain_len;
+          assert (parse_varint (S.slice b pos_length (S.length b)) = Some (plain_len, vlen plain_len));
+          match parse_varint (S.slice b pos_length (S.length b)) with
+          | Some (l, vll) ->
+	    let pos_pn = pos_length + vll in
+	    if S.length b = pos_pn + pn_len + 1 && l <= max_plain_length then begin
+              assert (l = plain_len /\ vll = S.length u6);
+              // extracting npn
+              lemma_slice_long_header7 u1 u2 u3 u4 u5 u6 u7;
+              assert (u7 = S.slice b pos_pn (pos_pn + pn_len + 1));
+              assert (parse_header b (cid_len h) = H_Success pn_len npn h)
+            end
         end
       end
-      else admit()
-    | _ -> ()
 
 
+#pop-options
 
 
 let lemma_header_parsing_correct h pn_len npn =
@@ -708,7 +705,9 @@ let lemma_header_parsing_correct h pn_len npn =
 
 let lemma_header_parsing_safe b1 b2 =
   admit()
-  
+
+
+
 let rec xor_inplace (b1 b2:bytes) (pos:nat)
   : Pure bytes
   (requires S.length b2 + pos <= S.length b1)
