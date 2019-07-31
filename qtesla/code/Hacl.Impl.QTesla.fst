@@ -1967,12 +1967,12 @@ val test_z:
     z : poly
   -> Stack (r:I32.t{r == 0l \/ r == 1l})
     (requires fun h -> live h z)
-    (ensures fun h0 _ h1 -> h0 == h1)
+    (ensures fun h0 r h1 -> h0 == h1 /\ ((r == 0l) ==> (is_poly_pmq h1 z)))
 
 let test_z z =
     let h0 = ST.get () in
     let _ , res = interruptible_for 0ul params_n
-    (fun h _ _ -> live h z /\ h0 == h)
+    (fun h i b -> live h z /\ h0 == h /\ i <= v params_n /\ (~b ==> is_poly_pmq_i h z i))
     (fun i ->
         let zi = z.(i) in
         zi <^ to_elem (-1) *^ (params_B -^ params_U) || zi >^ (params_B -^ params_U)
@@ -1991,6 +1991,16 @@ private let lemma_subpoly_of_pk_is_pk (h: HS.mem) (pk: poly_k) (p: poly) (k: siz
     assert(forall (i:nat{i < v params_n}) . is_pk (bget h p i))
 //#pop-options
 
+#push-options "--print_z3_statistics"
+let lemma_remap_subbuf_indices (w: poly_k) (k: size_t{v k < v params_k}) (h: HS.mem) : Lemma
+    (ensures forall (i:nat{i >= v k * v params_n /\ i < v k * v params_n + v params_n}) . bget h w i == bget h (get_poly w k) (i - v k * v params_n)) =
+    assert(get_poly w k == gsub w (k *! params_n) params_n);
+    assert(forall (i:nat{i >= v k * v params_n /\ i < v k * v params_n + v params_n}) . bget h w i == bget h (get_poly w k) (i - v k * v params_n))
+#pop-options
+
+
+
+
 private inline_for_extraction noextract
 val qtesla_verify_decode_pk_compute_w:
     pk: lbuffer uint8 crypto_publickeybytes
@@ -1999,7 +2009,8 @@ val qtesla_verify_decode_pk_compute_w:
   -> w: poly_k
   -> Stack unit
     (requires fun h -> let bufs = [bb pk; bb c; bb z; bb w] in
-                    BigOps.big_and (live_buf h) bufs /\ BigOps.pairwise_and disjoint_buf bufs)
+                    BigOps.big_and (live_buf h) bufs /\ BigOps.pairwise_and disjoint_buf bufs /\
+                    is_poly_pmq h z)
     (ensures fun h0 _ h1 -> modifies1 w h0 h1 /\ is_poly_k_montgomery h1 w)
 
 //  --log_queries --query_stats --print_z3_statistics 
@@ -2007,6 +2018,7 @@ val qtesla_verify_decode_pk_compute_w:
                 --using_facts_from '* -LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2'"
 
 let qtesla_verify_decode_pk_compute_w pk c z w =
+    let hInit = ST.get () in
     push_frame();
     let seed = create crypto_seedbytes (u8 0) in
     let pos_list = create params_h 0ul in
@@ -2042,14 +2054,15 @@ let qtesla_verify_decode_pk_compute_w pk c z w =
     assert(is_poly_k_montgomery hAfterPolyUniform a);
     encode_c pos_list sign_list c;
     let hAfterEncodeC = ST.get () in
-    assume(is_poly_pmq hAfterEncodeC z);
+    assert(is_poly_equal hInit hAfterEncodeC z);
     poly_ntt z_ntt z; 
 
     let h1 = ST.get () in
     // All buffers in this stack frame.
     assert(modifies (loc pk_t |+| loc seed |+| loc a |+| loc pos_list |+| loc sign_list |+| loc z_ntt) h0 h1);
-    assert(forall (i:nat{i < v params_n * v params_k}) . bget hAfterDecode pk_t i == bget h1 pk_t i);
-    assert(is_poly_k_pk h1 pk_t);
+    assert(is_poly_k_equal hAfterDecode h1 pk_t);
+    //assert(forall (i:nat{i < v params_n * v params_k}) . bget hAfterDecode pk_t i == bget h1 pk_t i);
+    //assert(is_poly_k_pk h1 pk_t);
     assert(is_poly_k_equal hAfterPolyUniform h1 a);
 
     for 0ul params_k
@@ -2062,7 +2075,7 @@ let qtesla_verify_decode_pk_compute_w pk c z w =
         lemma_sub_poly_is_montgomery hBegin a (get_poly a k) k;
         poly_mul (index_poly w k) (index_poly a k) z_ntt;
         let hAfterMul = ST.get () in
-        assume(is_poly_montgomery hAfterMul (get_poly w k));
+        assert(is_poly_montgomery hAfterMul (get_poly w k));
         let tc_k = index_poly tc k in
         let pk_t_k = sub pk_t (k *! params_n) params_n in
         assert(disjoint tc pk_t);
@@ -2088,11 +2101,16 @@ let qtesla_verify_decode_pk_compute_w pk c z w =
         // Pattern on this line to help establish the line after?
         assert(get_poly w k == gsub w (k *! params_n) params_n);
         assert(forall (i:nat{i < v params_n}) . is_montgomery (bget hEnd (gsub w (k *! params_n) params_n) i));
-        assert(forall (i:nat{i >= v k * v params_n /\ i < v k * v params_n + v params_n}) . {:pattern bget hEnd w i} bget hEnd w i == bget hEnd (gsub w (k *! params_n) params_n) (i - (v k * v params_n)));
-        assert(forall (i:nat{i >= v k * v params_n /\ i < v k * v params_n + v params_n}) . is_montgomery (bget hEnd w i)); 
+        //assert(bget hEnd w (v k * v params_n) == bget hEnd (get_poly w k) 0);
+        assert(get_poly w k == gsub w (k *! params_n) params_n);
+        // For some reason, this fact doesn't prove in this context, but works as its own lemma.
+        lemma_remap_subbuf_indices w k hEnd;
+        assert(forall (i:nat{i >= v k * v params_n /\ i < v k * v params_n + v params_n}) . bget hEnd w i == bget hEnd (get_poly w k) (i - v k * v params_n));
+        //assert(forall (i:nat{i >= v k * v params_n /\ i < v k * v params_n + v params_n}) . is_montgomery (bget hEnd w i)); 
         let pTest = get_poly w k in
         assert(is_montgomery (bget hEnd pTest 0));
         assert(forall (i:nat{i < v k * v params_n}) . is_montgomery (bget hEnd w i));
+        assert(forall (i:nat{i < v params_n}) . is_montgomery (bget hEnd (get_poly w k) i));
         assert(forall (i:nat{i >= v k * v params_n /\ i < v k * v params_n + v params_n}) . is_montgomery (bget hEnd w i));
         assert(is_poly_k_montgomery_i hEnd w (((v k) + 1) * v params_n));
         assert(is_poly_k_equal hBegin hEnd a);
@@ -2120,10 +2138,12 @@ val qtesla_verify_valid_z:
   -> z : poly
   -> Stack bool
     (requires fun h -> let bufs = [bb sm; bb pk; bb c; bb z] in
-                    FStar.BigOps.big_and (live_buf h) bufs /\ FStar.BigOps.pairwise_and disjoint_buf bufs)
+                    FStar.BigOps.big_and (live_buf h) bufs /\ FStar.BigOps.pairwise_and disjoint_buf bufs /\
+                    is_poly_pmq h z)
     (ensures fun h0 _ h1 -> modifies0 h0 h1)
 
 let qtesla_verify_valid_z smlen sm pk c z =
+    let hInit = ST.get () in
     push_frame();
 
     let hm = create crypto_hmbytes (u8 0) in
@@ -2133,6 +2153,7 @@ let qtesla_verify_valid_z smlen sm pk c z =
 
     let h0 = ST.get () in
     assert(modifies0 h0 h0);
+    assert(is_poly_equal hInit h0 z);
     
     qtesla_verify_decode_pk_compute_w pk c z w;
     let h1 = ST.get () in
