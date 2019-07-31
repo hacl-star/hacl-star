@@ -710,6 +710,7 @@ procedure Loop6x_partial(
         ghost ctr_BE:quad32)
     returns(ghost init:quad32_6)
     {:quick}
+    {:transform reorder, Loop6x_partial_expected_code}
     {:public}
     lets
 //      inp @= rdi; outp @= rsi; len @= rdx; key @= rcx; ivp @= r8; Xip @= r9;
@@ -808,8 +809,8 @@ procedure Loop6x_partial(
         quad32_xor(reverse_bytes_quad32(inc32lite(ctr_BE, n)), rndkey));
     let start := #nat(count - 2) * 6;
 
-    Load128_buffer(Hkey, Xip, 0x00-0x20, Secret, hkeys_b, 0);   // # $Hkey^1
-    Loop6x_preamble(alg, iv_b, key_words, round_keys, keys_b, ctr_BE);
+    /* Load128_buffer(Hkey, Xip, 0x00-0x20, Secret, hkeys_b, 0);   // # $Hkey^1 */
+    /* Loop6x_preamble(alg, iv_b, key_words, round_keys, keys_b, ctr_BE); */
     Loop6x_plain(alg, 0, key_words, round_keys, keys_b, init, T2);
     MulAdd_step(0, 0, T1, Z1, Z2, Z3, Z3, Hkey, hkeys_b, stack_b, h, prev, data);
     MulAdd_step(1, 1, Z1, T1, T2, Hkey, Ii, Hkey, hkeys_b, stack_b, h, prev, data);
@@ -827,7 +828,7 @@ procedure Loop6x_partial(
     Loop6x_plain(alg, 5, key_words, round_keys, keys_b, init, rndkey);
     Loop6x_reverse128(2, 5, start, in0_b, stack_b);
     ZeroXmm(Hkey);
-    PinsrdImm(Hkey, 0xc2000000, 3, r12);
+    PinsrqImm(Hkey, 0xc200000000000000, 1, constp); /* XXX[jb]: Changed from PinsrdImm(Hkey, 0xc2000000, 3, r12). */
     ReduceLast(false, hkeys_b, stack_b, h_LE, y_prev, data);
     Loop6x_plain(alg, 6, key_words, round_keys, keys_b, init, rndkey);
     Loop6x_reverse128(1, 6, start, in0_b, stack_b);
