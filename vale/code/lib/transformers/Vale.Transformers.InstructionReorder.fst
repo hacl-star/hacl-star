@@ -1534,19 +1534,31 @@ let rec lemma_num_blocks_in_codes_append (c1 c2:codes) :
 type transformation_hint =
   | MoveUpFrom : p:nat -> transformation_hint
   | DiveInAt : p:nat -> q:transformation_hint -> transformation_hint
+  | InPlaceIfElse : ifTrue:transformation_hints -> ifFalse:transformation_hints -> transformation_hint
+  | InPlaceWhile : whileBody:transformation_hints -> transformation_hint
 
-type transformation_hints = list transformation_hint
+and transformation_hints = list transformation_hint
 
-let rec string_of_transformation_hint (t:transformation_hint) : string =
-  match t with
+let rec string_of_transformation_hint (th:transformation_hint) :
+  Tot string
+    (decreases %[th]) =
+  match th with
   | MoveUpFrom p -> "(MoveUpFrom " ^ string_of_int p ^ ")"
   | DiveInAt p q -> "(DiveInAt " ^ string_of_int p ^ " " ^ string_of_transformation_hint q ^ ")"
+  | InPlaceIfElse tr fa -> "(InPlaceIfElse " ^ string_of_transformation_hints tr ^ " " ^ string_of_transformation_hints fa ^ ")"
+  | InPlaceWhile bo -> "(InPlaceWhile " ^ string_of_transformation_hints bo ^ ")"
 
-let rec aux_string_of_transformation_hints ts =
+and aux_string_of_transformation_hints (ts:transformation_hints) :
+  Tot string
+    (decreases %[ts; 0]) =
   match ts with
   | [] -> ""
   | x :: xs -> string_of_transformation_hint x ^ "; " ^ aux_string_of_transformation_hints xs
-let string_of_transformation_hints ts = "[" ^ aux_string_of_transformation_hints ts ^ "]"
+
+and string_of_transformation_hints (ts:transformation_hints) :
+  Tot string
+    (decreases %[ts; 1]) =
+  "[" ^ aux_string_of_transformation_hints ts ^ "]"
 
 let rec wrap_diveinat (p:nat) (l:transformation_hints) : transformation_hints =
   match l with
@@ -1608,9 +1620,26 @@ let rec perform_reordering_with_hint (t:transformation_hint) (c:codes) : possibl
         ) else (
           Err ("invalid hint : " ^ string_of_transformation_hint t)
         )
+      | InPlaceIfElse tht thf -> (
+          match x with
+          | IfElse c (Block t) (Block f) ->
+            tt <-- perform_reordering_with_hints tht t;
+            ff <-- perform_reordering_with_hints thf f;
+            return (IfElse c (Block tt) (Block ff) :: xs)
+          | _ ->
+            Err ("Invalid hint : " ^ string_of_transformation_hint t ^ " for codes " ^ fst (print_code (Block c) 0 gcc))
+        )
+      | InPlaceWhile thb -> (
+          match x with
+          | While c (Block b) ->
+            bb <-- perform_reordering_with_hints thb b;
+            return (While c (Block bb) :: xs)
+          | _ ->
+            Err ("Invalid hint : " ^ string_of_transformation_hint t ^ " for codes " ^ fst (print_code (Block c) 0 gcc))
+        )
     )
 
-let rec perform_reordering_with_hints (ts:transformation_hints) (c:codes) : possibly codes =
+and perform_reordering_with_hints (ts:transformation_hints) (c:codes) : possibly codes =
   (*
   let _ = IO.debug_print_string (
       "-----------------------------\n" ^
@@ -1870,7 +1899,7 @@ and lemma_is_empty_codes (cs:codes) (fuel:nat) (s:machine_state) :
       lemma_eval_codes_equiv_states xs fuel s s'
 #pop-options
 
-#push-options "--z3rlimit 20 --initial_fuel 3 --max_fuel 3 --initial_ifuel 1 --max_ifuel 1"
+#push-options "--z3rlimit 50 --initial_fuel 3 --max_fuel 3 --initial_ifuel 1 --max_ifuel 1"
 let rec lemma_perform_reordering_with_hint (t:transformation_hint) (cs:codes) (fuel:nat) (s:machine_state) :
   Lemma
     (requires (
@@ -1881,7 +1910,8 @@ let rec lemma_perform_reordering_with_hint (t:transformation_hint) (cs:codes) (f
         let Ok cs' = perform_reordering_with_hint t cs in
         equiv_ostates
           (machine_eval_codes cs fuel s)
-          (machine_eval_codes cs' fuel s))) =
+          (machine_eval_codes cs' fuel s)))
+    (decreases %[t; fuel; cs]) =
   let c = cs in
   let Ok cs' = perform_reordering_with_hint t cs in
   let Some s' = machine_eval_codes cs fuel s in
@@ -1951,10 +1981,64 @@ let rec lemma_perform_reordering_with_hint (t:transformation_hint) (cs:codes) (f
         assert (Some s_00 == machine_eval_codes (Block ys :: right) fuel s_3);
         lemma_machine_eval_codes_block_to_append (y :: left') (Block ys :: right) fuel s
       )
+    | InPlaceIfElse tht thf -> (
+        let IfElse cond c_ift c_iff :: xs = cs in
+        let Block cs_ift, Block cs_iff = c_ift, c_iff in
+        let (st, b) = machine_eval_ocmp s cond in
+        let s1 = {st with ms_trace = (BranchPredicate b)::s.ms_trace} in
+        if b then (
+          assert (Some s' == machine_eval_codes (c_ift :: xs) fuel s1);
+          let Some s'' = machine_eval_code c_ift fuel s1 in
+          if not s''.ms_ok then (lemma_not_ok_propagate_codes xs fuel s'') else ();
+          lemma_perform_reordering_with_hints tht cs_ift fuel s1;
+          let Some s''' = machine_eval_code (IfElse cond c_ift c_iff) fuel s in
+          let x' :: _ = cs' in
+          let Some s'''' = machine_eval_code x' fuel s in
+          assert (equiv_states s''' s'''');
+          lemma_eval_codes_equiv_states xs fuel s''' s''''
+        ) else (
+          let Some s'' = machine_eval_code c_iff fuel s1 in
+          if not s''.ms_ok then (lemma_not_ok_propagate_codes xs fuel s'') else ();
+          lemma_perform_reordering_with_hints thf cs_iff fuel s1;
+          let Some s''' = machine_eval_code (IfElse cond c_ift c_iff) fuel s in
+          let x' :: _ = cs' in
+          let Some s'''' = machine_eval_code x' fuel s in
+          lemma_eval_codes_equiv_states xs fuel s''' s''''
+        )
+      )
+    | InPlaceWhile thb -> (
+        assert (fuel <> 0);
+        let While cond body :: xs = cs in
+        let Block cs_body = body in
+        let (s0, b) = machine_eval_ocmp s cond in
+        if not b then () else (
+          let s0 = {s0 with ms_trace = (BranchPredicate true)::s0.ms_trace} in
+          let Some s1 = machine_eval_code body (fuel - 1) s0 in
+          if s1.ms_ok then () else lemma_not_ok_propagate_codes xs fuel s1;
+          lemma_perform_reordering_with_hints thb cs_body (fuel - 1) s0;
+          let x' :: xs' = cs' in
+          assert (xs' == xs);
+          let While cond' body' = x' in
+          let cs_body' = body' in
+          let Some s11 = machine_eval_code (While cond body) (fuel - 1) s1 in
+          if s11.ms_ok then () else lemma_not_ok_propagate_codes xs fuel s11;
+          assert (Some s' == machine_eval_codes xs fuel s11);
+          lemma_perform_reordering_with_hint t [While cond body] (fuel - 1) s1;
+          let Some s11' = machine_eval_code x' (fuel - 1) s1 in
+          lemma_eval_codes_equiv_states xs fuel s11 s11';
+          let Some s'' = machine_eval_codes xs fuel s11' in
+          assert (machine_eval_codes cs fuel s == Some s');
+          assert (equiv_states s' s'');
+          let Some s1' = machine_eval_code body' (fuel - 1) s0 in
+          lemma_eval_code_equiv_states x' (fuel-1) s1 s1';
+          let Some s11'' = machine_eval_code x' (fuel-1) s1' in
+          assert (machine_eval_codes cs' fuel s == machine_eval_codes xs fuel s11'');
+          lemma_eval_codes_equiv_states xs fuel s11' s11''
+        )
+      )
   )
-#pop-options
 
-let rec lemma_perform_reordering_with_hints (ts:transformation_hints) (cs:codes) (fuel:nat) (s:machine_state) :
+and lemma_perform_reordering_with_hints (ts:transformation_hints) (cs:codes) (fuel:nat) (s:machine_state) :
   Lemma
     (requires (
         (Ok? (perform_reordering_with_hints ts cs)) /\
@@ -1976,3 +2060,4 @@ let rec lemma_perform_reordering_with_hints (ts:transformation_hints) (cs:codes)
     let Ok xs' = perform_reordering_with_hints ts' xs in
     let Some s1 = machine_eval_code x fuel s in
     lemma_perform_reordering_with_hints ts' xs fuel s1
+#pop-options
