@@ -141,8 +141,8 @@ val gcm256_encrypt_opt':
        hkeys_reqs_pub (UV.as_seq h0 ub) (reverse_bytes_quad32 (aes_encrypt_LE AES_256 (Ghost.reveal key) (Mkfour 0 0 0 0)))) /\
 
       (length_div iv_b;
-       (reverse_bytes_quad32 (low_buffer_read TUInt8 TUInt128 h0 iv_b 0) ==
-         compute_iv_BE (aes_encrypt_LE AES_256 (Ghost.reveal key) (Mkfour 0 0 0 0)) (Ghost.reveal iv))
+       (low_buffer_read TUInt8 TUInt128 h0 iv_b 0) ==
+         compute_iv_BE (aes_encrypt_LE AES_256 (Ghost.reveal key) (Mkfour 0 0 0 0)) (Ghost.reveal iv)
       )
     )
     (ensures fun h0 _ h1 ->
@@ -212,7 +212,7 @@ let gcm256_encrypt_opt' key iv auth_b auth_bytes auth_num keys_b iv_b hkeys_b ab
   B.disjoint_neq iv_b out128_b;
   B.disjoint_neq iv_b inout_b;
   B.disjoint_neq iv_b scratch_b;
-  B.disjoint_neq iv_b tag_b; 
+  B.disjoint_neq iv_b tag_b;
 
   DV.length_eq (get_downview auth_b);
   DV.length_eq (get_downview keys_b);
@@ -365,7 +365,7 @@ val gcm256_encrypt_opt_alloca:
       hkeys_reqs_pub (le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h0 hkeys_b)))
         (reverse_bytes_quad32 (aes_encrypt_LE AES_256 (Ghost.reveal key) (Mkfour 0 0 0 0))) /\
 
-      (be_bytes_to_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h0 iv_b))) ==
+      (le_bytes_to_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h0 iv_b))) ==
          compute_iv_BE (aes_encrypt_LE AES_256 (Ghost.reveal key) (Mkfour 0 0 0 0)) (Ghost.reveal iv)
     )
     (ensures fun h0 _ h1 ->
@@ -518,6 +518,21 @@ let gcm256_encrypt_opt_alloca key iv plain_b plain_len auth_b auth_bytes iv_b
 
   let h0 = get() in
 
+  // Simplify the expression for the iv
+  DV.length_eq (get_downview iv_b);
+  length_aux4 iv_b;
+  calc (==) {
+    compute_iv_BE (aes_encrypt_LE AES_256 (Ghost.reveal key) (Mkfour 0 0 0 0))
+                  (Ghost.reveal iv);
+    (==) { }
+    le_bytes_to_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h0 iv_b));
+    (==) { gcm_simplify2 iv_b h0 }
+    le_bytes_to_quad32 (le_quad32_to_bytes (low_buffer_read TUInt8 TUInt128 h0 iv_b 0));
+    (==) { le_bytes_to_quad32_to_bytes (low_buffer_read TUInt8 TUInt128 h0 iv_b 0) }
+    low_buffer_read TUInt8 TUInt128 h0 iv_b 0;
+  };
+
+
   let lemma_uv_key () : Lemma
     (let db = get_downview keys_b in
       length_aux2 keys_b;
@@ -557,11 +572,6 @@ let gcm256_encrypt_opt_alloca key iv plain_b plain_len auth_b auth_bytes iv_b
       }
 
   in lemma_uv_hkey ();
-
-  // Simplify the expression for the iv
-  DV.length_eq (get_downview iv_b);
-  length_aux4 iv_b;
-  gcm_simplify3 iv_b h0;
 
   // Compute length of biggest blocks of 6 * 128-bit blocks
   let len128x6 = UInt64.mul (plain_len / 96uL) 96uL in

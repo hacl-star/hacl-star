@@ -136,6 +136,7 @@ ci:
 	FSTAR_DEPEND_FLAGS="--warn_error +285" NOSHORTLOG=1 $(MAKE) all-unstaged test-unstaged
 	NOSHORTLOG=1 $(MAKE) wasm
 	$(MAKE) -C providers/quic_provider # needs a checkout of miTLS, only valid on CI
+	./tools/sloccount.sh
 
 wasm:
 	tools/blast-staticconfig.sh wasm
@@ -939,6 +940,7 @@ dist/test/ml/%_AutoTest.ml:
 
 # Relying on the --extract argument of fstar --dep to have a reasonable
 # over-approximation.
+.PRECIOUS: dist/test/ml/%.exe
 dist/test/ml/%.exe: $(ALL_CMX_FILES) dist/test/ml/%_AutoTest.ml
 	$(OCAMLOPT) $^ -o $@
 

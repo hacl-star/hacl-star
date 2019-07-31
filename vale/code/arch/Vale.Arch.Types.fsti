@@ -80,6 +80,10 @@ val lemma_reverse_bytes_quad32 (q:quad32) :
   Lemma (reverse_bytes_quad32 (reverse_bytes_quad32 q) == q)
   [SMTPat (reverse_bytes_quad32 (reverse_bytes_quad32 q))]
 
+val lemma_reverse_bytes_quad32_zero (_:unit) : Lemma
+  (let z = Mkfour 0 0 0 0 in
+   reverse_bytes_quad32 z == z)
+
 val lemma_reverse_reverse_bytes_nat32_seq (s:seq nat32) :
   Lemma (reverse_bytes_nat32_seq (reverse_bytes_nat32_seq s) == s)
   [SMTPat (reverse_bytes_nat32_seq (reverse_bytes_nat32_seq s))]

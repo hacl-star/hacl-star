@@ -265,6 +265,9 @@ void bench_mac(const BenchmarkSettings & s)
       #endif
       };
 
+      if (todo.empty())
+        return;
+
       Benchmark::run_batch(s, MACBenchmark::column_headers(), data_filename.str(), todo);
 
       Benchmark::PlotSpec plot_specs_ds_cycles;
