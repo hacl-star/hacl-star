@@ -686,11 +686,11 @@ TEST_FLAGS = -bundle Test,Test.*,Hacl.Test.*
 HAND_WRITTEN_LIB_FLAGS = -bundle Lib.RandomBuffer= -bundle Lib.PrintBuffer=
 
 DEFAULT_FLAGS = \
+  $(HAND_WRITTEN_LIB_FLAGS) \
   $(DEFAULT_FLAGS_NO_TESTS) \
   $(TEST_FLAGS) \
   $(OPT_FLAGS) \
-  $(INTRINSIC_FLAGS) \
-  $(HAND_WRITTEN_LIB_FLAGS)
+  $(INTRINSIC_FLAGS)
 
 # Should be fixed by having KreMLin better handle imported names
 WASM_STANDALONE=Prims LowStar.Endianness C.Endianness \
