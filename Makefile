@@ -654,6 +654,8 @@ DEFAULT_FLAGS_NO_TESTS	=\
   $(addprefix -library ,$(HACL_HAND_WRITTEN_C)) \
   -bundle Hacl.Spec.*,Spec.*[rename=Hacl_Spec] \
   -bundle Hacl.Poly1305.Field32xN.Lemmas[rename=Hacl_Lemmas] \
+  -bundle Lib.RandomBuffer= \
+  -bundle Lib.PrintBuffer= \
   -bundle Lib.*[rename=Hacl_Lib] \
   -drop Lib.IntVector.Intrinsics \
   -add-include '"evercrypt_targetconfig.h"' \
@@ -811,11 +813,11 @@ dist/compact/Makefile.basic: \
 endif
 
 .PRECIOUS: dist/%/Makefile.basic
-dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/hacl-internal-headers/Makefile.basic \
+dist/%/Makefile.basic: $(ALL_KRML_FILES) \
   $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_H_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) $(VALE_ASMS) | old-extract-c
 	mkdir -p $(dir $@)
 	[ x"$(HACL_OLD_FILES)" != x ] && cp $(HACL_OLD_FILES) $(patsubst %.c,%.h,$(HACL_OLD_FILES)) $(dir $@) || true
-	cp $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_H_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) dist/hacl-internal-headers/*.h $(dir $@)
+	cp $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_H_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) $(dir $@)
 	[ x"$(VALE_ASMS)" != x ] && cp $(VALE_ASMS) $(dir $@) || true
 	$(KRML) $(DEFAULT_FLAGS) $(KRML_EXTRA) \
 	  -tmpdir $(dir $@) -skip-compilation \
@@ -827,18 +829,6 @@ dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/hacl-internal-headers/Makefile.bas
 	  $(notdir $(HACL_OLD_FILES)) \
 	  $(notdir $(HAND_WRITTEN_FILES)) \
 	  -o libevercrypt.a
-
-# Auto-generates headers for the hand-written C files. If a signature changes on
-# the F* side, hopefully this will ensure the C file breaks. Note that there is
-# no conflict between the headers because this generates
-# Lib_Foobar while the run above generates a single Hacl_Lib.
-dist/hacl-internal-headers/Makefile.basic: $(ALL_KRML_FILES)
-	$(KRML) -silent \
-	  -tmpdir $(dir $@) -skip-compilation \
-	  $(patsubst %,-bundle %=,$(HAND_WRITTEN_C)) \
-	  $(patsubst %,-library %,$(HAND_WRITTEN_C)) \
-	  -minimal -add-include '"kremlib.h"' \
-	  -bundle '\*,WindowsBug' $^
 
 dist/evercrypt-external-headers/Makefile.basic: $(ALL_KRML_FILES)
 	$(KRML) -silent \
