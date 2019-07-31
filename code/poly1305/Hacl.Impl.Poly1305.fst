@@ -544,9 +544,7 @@ let poly1305_update #s =
   | M32 -> poly1305_update32
   | _ -> poly1305_update_128_256 #s
 
-inline_for_extraction noextract
-val poly1305_finish_: #s:field_spec -> poly1305_finish_st s
-let poly1305_finish_ #s tag key ctx =
+let poly1305_finish #s tag key ctx =
   let acc = get_acc ctx in
   let ks = sub key 16ul 16ul in
 
@@ -563,19 +561,6 @@ let poly1305_finish_ #s tag key ctx =
     ((fas_nat h1 acc).[0] % pow2 128 + BSeq.nat_from_bytes_le (as_seq h0 ks)) % pow2 128);
   FStar.Math.Lemmas.lemma_mod_plus_distr_l (fas_nat h1 acc).[0] (BSeq.nat_from_bytes_le (as_seq h0 ks)) (pow2 128);
   uints64_to_bytes_le tag f30 f31
-
-[@CInline]
-let poly1305_finish_32 : poly1305_finish_st M32 = poly1305_finish_ #M32
-[@CInline]
-let poly1305_finish_128 : poly1305_finish_st M128 = poly1305_finish_ #M128
-[@CInline]
-let poly1305_finish_256 : poly1305_finish_st M256 = poly1305_finish_ #M256
-
-let poly1305_finish #s tag key ctx =
-  match s with
-  | M32 -> poly1305_finish_32 tag key ctx
-  | M128 -> poly1305_finish_128 tag key ctx
-  | M256 -> poly1305_finish_256 tag key ctx
 
 #set-options "--z3rlimit 150"
 

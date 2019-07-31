@@ -709,6 +709,9 @@ CHACHA20_BUNDLE=-bundle Hacl.Impl.Chacha20=Hacl.Impl.Chacha20.*[rename=Hacl_Chac
 CURVE_BUNDLE=-bundle Hacl.Curve25519_51+Hacl.Curve25519_64=Hacl.Impl.Curve25519.*[rename=Hacl_Curve25519]
 CHACHAPOLY_BUNDLE=-bundle Hacl.Impl.Chacha20Poly1305=Hacl.Impl.Chacha20Poly1305.*[rename=Hacl_Chacha20Poly1305]
 ED_BUNDLE=-bundle 'Hacl.Ed25519=Hacl.Impl.Ed25519.*,Hacl.Impl.BignumQ.Mul,Hacl.Impl.Load56,Hacl.Impl.SHA512.ModQ,Hacl.Impl.Store56,Hacl.Bignum25519'
+POLY_BUNDLE=-bundle 'Hacl.Poly1305_32=Hacl.Impl.Poly1305.Field32xN_32' \
+  -bundle 'Hacl.Poly1305_128=Hacl.Impl.Poly1305.Field32xN_128' \
+  -bundle 'Hacl.Poly1305_256=Hacl.Impl.Poly1305.Field32xN_256'
 
 COMPACT_FLAGS	=\
   $(HASH_BUNDLE) \
@@ -717,6 +720,7 @@ COMPACT_FLAGS	=\
   $(CURVE_BUNDLE) \
   $(CHACHAPOLY_BUNDLE) \
   $(ED_BUNDLE) \
+  $(POLY_BUNDLE) \
   -bundle Hacl.Impl.Poly1305.*[rename=Unused_Poly1305] \
   -bundle LowStar.* \
   -bundle Prims,C.Failure,C,C.String,C.Loops,Spec.Loops,C.Endianness,FStar.*[rename=Hacl_Kremlib] \
@@ -774,7 +778,7 @@ dist/ccf/Makefile.basic: \
   KRML_EXTRA=$(COMPACT_FLAGS) \
     -fbuiltin-uint128 \
     -bundle EverCrypt.AutoConfig2= \
-    -bundle Hacl.Poly1305_32[rename=Hacl_Poly1305] \
+    -bundle Hacl.Poly1305_32,Hacl.Poly1305_128,Hacl.Poly1305_256,Hacl.Impl.Poly1305.Field32xN_32,Hacl.Impl.Poly1305.Field32xN_128,Hacl.Impl.Poly1305.Field32xN_256[rename=Hacl_Poly1305] \
     -bundle Hacl.*[rename=Hacl_Leftovers] \
     -bundle EverCrypt \
     -bundle EverCrypt.Hacl \
@@ -787,6 +791,7 @@ dist/ccf/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES =
 dist/ccf/Makefile.basic: HAND_WRITTEN_FILES := $(filter-out %/Lib_PrintBuffer.c %_vale_stubs.c,$(HAND_WRITTEN_FILES))
 dist/ccf/Makefile.basic: HAND_WRITTEN_H_FILES := $(filter-out %/libintvector.h,$(HAND_WRITTEN_H_FILES))
 dist/ccf/Makefile.basic: HACL_OLD_FILES =
+dist/ccf/Makefile.basic: POLY_BUNDLE =
 
 # Customizations for WASM.
 # - only keep definitions reachable from Test.NoHeap -- this indicates what we
@@ -794,8 +799,10 @@ dist/ccf/Makefile.basic: HACL_OLD_FILES =
 dist/wasm/Makefile.basic: KRML_EXTRA=$(WASM_FLAGS)
 dist/wasm/Makefile.basic: TEST_FLAGS=
 
-# ?
+# Binary objects not optimized for the host (possiblye CI) machine, meaning that
+# someone can download them onto their machine for debugging.
 dist/portable/Makefile.basic: OPT_FLAGS=-ccopts -mtune=generic
+dist/portable/Makefile.basic: KRML_EXTRA=$(COMPACT_FLAGS)
 
 # This will eventually go. OpenSSL and BCrypt disabled
 ifeq ($(EVERCRYPT_CONFIG),everest)

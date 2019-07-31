@@ -751,7 +751,7 @@ let eq_mask_lemma_unsigned #t a b =
       lognot (u1 1) == u1 0 /\ lognot (u1 0) == u1 1)
   | U8 | U16 | U32 | U64 | U128 -> ()
 
-#push-options "--z3rlimit 100"
+#push-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
 
 val eq_mask_lemma_signed: #t:inttype{signed t /\ ~(S128? t)} -> a:int_t t SEC -> b:int_t t SEC -> Lemma
   (if v a = v b then v (eq_mask a b) == ones_v t

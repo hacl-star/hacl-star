@@ -15,6 +15,9 @@ module S = Hacl.Spec.Poly1305.Vec
 module LSeq = Lib.Sequence
 module BSeq = Lib.ByteSequence
 module F32xN = Hacl.Impl.Poly1305.Field32xN
+open Hacl.Impl.Poly1305.Field32xN_32
+open Hacl.Impl.Poly1305.Field32xN_128
+open Hacl.Impl.Poly1305.Field32xN_256
 open Hacl.Impl.Poly1305.Field32xN
 
 type field_spec =
@@ -372,9 +375,9 @@ val fmul_rn_normalize:
         S.normalize_n #(width s) (feval h0 out) (feval h0 (gsub precomp 0ul 5ul)).[0])
 let fmul_rn_normalize #s out precomp =
   match s with
-  | M32  -> F32xN.fmul_rn_normalize #1 out precomp
-  | M128 -> F32xN.fmul_rn_normalize #2 out precomp
-  | M256 -> F32xN.fmul_rn_normalize #4 out precomp
+  | M32  -> Field32xN_32.fmul_r1_normalize out precomp
+  | M128 -> Field32xN_128.fmul_r2_normalize out precomp
+  | M256 -> Field32xN_256.fmul_r4_normalize out precomp
 
 inline_for_extraction noextract
 val fadd:
