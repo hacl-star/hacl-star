@@ -1731,6 +1731,7 @@ let increment_hint (th:transformation_hint) : transformation_hint =
   match th with
   | MoveUpFrom p -> MoveUpFrom (p + 1)
   | DiveInAt p q -> DiveInAt (p + 1) q
+  | _ -> th
 
 let rec find_deep_code_transform (c:code) (cs:codes) : possibly transformation_hint =
   match cs with
@@ -1828,7 +1829,7 @@ let rec find_transformation_hints (c1 c2:codes) :
 /// If a transformation can be performed, then the result behaves
 /// identically as per the [equiv_states] relation.
 
-#push-options "--initial_fuel 3 --max_fuel 3 --initial_ifuel 1 --max_ifuel 1"
+#push-options "--z3rlimit 10 --initial_fuel 3 --max_fuel 3 --initial_ifuel 1 --max_ifuel 1"
 let rec lemma_bubble_to_top (cs : codes) (i:nat{i < L.length cs}) (fuel:nat) (s s' : machine_state) :
   Lemma
     (requires (
