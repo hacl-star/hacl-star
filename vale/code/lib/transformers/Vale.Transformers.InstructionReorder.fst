@@ -1806,6 +1806,19 @@ let rec find_transformation_hints (c1 c2:codes) :
             t_hints1 <-- find_transformation_hints l1 l2;
             t_hints2 <-- find_transformation_hints t1 t2;
             return (wrap_diveinat 0 t_hints1 `L.append` t_hints2)
+          | IfElse co1 (Block tr1) (Block fa1), IfElse co2 (Block tr2) (Block fa2) ->
+            (co1 = co2) /- ("Non-same conditions for IfElse: (" ^
+                            print_cmp co1 0 gcc ^ ") and (" ^ print_cmp co2 0 gcc ^ ")");;
+            tr_hints <-- find_transformation_hints tr1 tr2;
+            fa_hints <-- find_transformation_hints fa1 fa2;
+            t_hints2 <-- find_transformation_hints t1 t2;
+            return (InPlaceIfElse tr_hints fa_hints :: t_hints2)
+          | While co1 (Block bo1), While co2 (Block bo2) ->
+            (co1 = co2) /- ("Non-same conditions for While: (" ^
+                            print_cmp co1 0 gcc ^ ") and (" ^ print_cmp co2 0 gcc ^ ")");;
+            bo_hints <-- find_transformation_hints bo1 bo2;
+            t_hints2 <-- find_transformation_hints t1 t2;
+            return (InPlaceWhile bo_hints :: t_hints2)
           | _ ->
             Err reason
         )
