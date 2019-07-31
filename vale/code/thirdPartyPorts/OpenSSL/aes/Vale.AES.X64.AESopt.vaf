@@ -194,10 +194,12 @@ procedure Load_one_lsb(inout dst:xmm)
 }
 
 #reset-options "--z3rlimit 20"
-procedure Handle_ctr32(ghost ctr_BE:quad32)
+procedure Handle_ctr32(ghost hkeys_b:buffer128,
+                       ghost ctr_BE:quad32)
     {:quick}
     lets
-        Ii @= xmm0; T1 @= xmm1; T2 @= xmm2;
+        Xip @= r9;
+        Ii @= xmm0; T1 @= xmm1; T2 @= xmm2; Hkey @= xmm3;
         Z1 @= xmm5; Z2 @= xmm6;
         inout1 @= xmm10; inout2 @= xmm11; inout3 @= xmm12;
         inout4 @= xmm13; inout5 @= xmm14; rndkey @= xmm15;
@@ -225,6 +227,7 @@ procedure Handle_ctr32(ghost ctr_BE:quad32)
     VPaddd(inout1, Z2, Z1);
     Load_two_lsb(Z1);
     VPaddd(inout2, Z2, Z1);
+    Load128_buffer(Hkey, Xip, 0x00-0x20, Secret, hkeys_b, 0);   // # $Hkey^1 /* XXX[jb] */
     VPaddd(inout3, inout1, Z1);
     VPshufb(inout1, inout1, Ii);
     VPaddd(inout4, inout2, Z1);
@@ -245,13 +248,14 @@ procedure Loop6x_ctr_update(
         ghost key_words:seq(nat32),
         ghost round_keys:seq(quad32),
         ghost keys_b:buffer128,
+        ghost hkeys_b:buffer128,
         ghost ctr_BE:quad32)
     {:quick}
     lets
 //      inp @= rdi; outp @= rsi; len @= rdx; key @= rcx; ivp @= r8; Xip @= r9;
         key @= rcx;
-        Ii @= xmm0; T1 @= xmm1; T2 @= xmm2;
-        Z1 @= xmm5; Z2 @= xmm6;
+        Ii @= xmm0; T1 @= xmm1; T2 @= xmm2; Xip @= r9;
+        Z1 @= xmm5; Z2 @= xmm6; Hkey @= xmm3;
         inout0 @= xmm9; inout1 @= xmm10; inout2 @= xmm11; inout3 @= xmm12;
         inout4 @= xmm13; inout5 @= xmm14; rndkey @= xmm15;
 //      counter @= rbx; rounds @= rbp; ret @= r10; constp @= r11; in0 @= r14; end0 @= r15;
@@ -292,9 +296,10 @@ procedure Loop6x_ctr_update(
     // which handles wrap and control flow more efficiently
     Add64(counter, 6);
     if (counter >= 256) {
-        Handle_ctr32(ctr_BE); //, counter);
+        Handle_ctr32(hkeys_b, ctr_BE); //, counter);
         Sub64(counter, 256);
     } else {
+        Load128_buffer(Hkey, Xip, 0x00-0x20, Secret, hkeys_b, 0);   // # $Hkey^1 /* XXX[jb] */
         VPaddd(T1, T2, inout5); // OpenSSL uses VPaddb
         VPxor(inout1, inout1, rndkey);
         VPxor(inout2, inout2, rndkey);
@@ -353,10 +358,12 @@ procedure Loop6x_plain(
 procedure Loop6x_preamble(
         inline alg:algorithm,  // OpenSSL includes the number of rounds (nr) as a dynamic parameter (stored with the key).  Saves code space but adds extra instructions to the fast path.  Maybe branch predictor is good enough for it not to matter
         ghost iv_b:buffer128,
+        ghost stack_b:buffer128,
 
         ghost key_words:seq(nat32),
         ghost round_keys:seq(quad32),
         ghost keys_b:buffer128,
+        ghost hkeys_b:buffer128,
 
         ghost ctr_BE:quad32)
     {:quick}
@@ -415,7 +422,7 @@ procedure Loop6x_preamble(
         0 <= counter < 256;
         counter == inc32lite(ctr_BE, 6).lo0 % 256;
 {
-    Loop6x_ctr_update(alg, key_words, round_keys, keys_b, ctr_BE);
+    /* Loop6x_ctr_update(alg, key_words, round_keys, keys_b, hkeys_b, ctr_BE); */
 
     init_rounds_opaque(inout0, round_keys);
     init_rounds_opaque(inout1, round_keys);
@@ -436,7 +443,7 @@ procedure Loop6x_preamble(
     init_rounds_opaque(inout2, round_keys);
     */
 
-    Store128_buffer(ivp, T1, 0, Secret, iv_b, 0);   // # save next counter value
+    Store128_buffer(rbp, T1, 0x80, Secret, stack_b, 8);   // # save next counter value /* XXX[jb]: Changed from Store128_buffer(ivp, T1, 0, Secret, iv_b, 0); */
     VPxor(inout3, inout3, rndkey); init_rounds_opaque(inout3, round_keys);
     VPxor(inout4, inout4, rndkey); init_rounds_opaque(inout4, round_keys);
     VPxor(inout5, inout5, rndkey); init_rounds_opaque(inout5, round_keys);
@@ -809,8 +816,7 @@ procedure Loop6x_partial(
         quad32_xor(reverse_bytes_quad32(inc32lite(ctr_BE, n)), rndkey));
     let start := #nat(count - 2) * 6;
 
-    /* Load128_buffer(Hkey, Xip, 0x00-0x20, Secret, hkeys_b, 0);   // # $Hkey^1 */
-    /* Loop6x_preamble(alg, iv_b, key_words, round_keys, keys_b, ctr_BE); */
+    Loop6x_preamble(alg, iv_b, stack_b, key_words, round_keys, keys_b, hkeys_b, ctr_BE);
     Loop6x_plain(alg, 0, key_words, round_keys, keys_b, init, T2);
     MulAdd_step(0, 0, T1, Z1, Z2, Z3, Z3, Hkey, hkeys_b, stack_b, h, prev, data);
     MulAdd_step(1, 1, Z1, T1, T2, Hkey, Ii, Hkey, hkeys_b, stack_b, h, prev, data);
