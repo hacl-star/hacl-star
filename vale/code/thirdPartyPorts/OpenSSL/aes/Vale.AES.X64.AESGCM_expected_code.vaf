@@ -121,7 +121,7 @@ procedure Loop6x_partial_expected_code(
     init4 := quad32_xor(reverse_bytes_quad32(inc32lite(ctr_BE, 4)), rndkey);
     init5 := quad32_xor(reverse_bytes_quad32(inc32lite(ctr_BE, 5)), rndkey);
 
-    /* /\* Loop6x_preamble *\/ */
+    /* Loop6x_preamble */
 
     /* // OpenSSL does this with "add `6<<24`,counter", followed by jc, */
     /* // which handles wrap and control flow more efficiently */
@@ -160,17 +160,17 @@ procedure Loop6x_partial_expected_code(
     /*     VPxor(inout2, inout2, rndkey); */
     /* } */
 
-    /* Store128_buffer(rbp, T1, 0x80, Secret, scratch_b, 8);   // # save next counter value */
+    Store128_buffer(rbp, T1, 0x80, Secret, scratch_b, 8);   // # save next counter value
     VPolyMul(Z1, Z3, Hkey, false, true);
-    /* VPxor(inout3, inout3, rndkey); */
+    VPxor(inout3, inout3, rndkey);
     Load128_buffer(T2, key, 0x10-0x80, Secret, keys_b, 1); // # borrow $T2 for $rndkey
     VPolyMul(Z2, Z3, Hkey, true, false);
     VAESNI_enc(inout0, inout0, T2);
     Load128_buffer(Ii, rbp, 0x30, Secret, scratch_b, 3);     // # I[4]
-    /* VPxor(inout4, inout4, rndkey); */
+    VPxor(inout4, inout4, rndkey);
     VPolyMul(T1, Z3, Hkey, false, false);
     VAESNI_enc(inout1, inout1, T2);
-    /* VPxor(inout5, inout5, rndkey); */
+    VPxor(inout5, inout5, rndkey);
     VPolyMul(Z3, Z3, Hkey, true, true);
     VAESNI_enc(inout2, inout2, T2);
     Load128_buffer(Hkey, Xip, 0x10-0x20, Secret, hkeys_b, 1);   // # $Hkey^2
