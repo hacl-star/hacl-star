@@ -130,7 +130,7 @@ let encode_pk_loopBody pk t i j =
     // like the integer assignment in the reference code, and it extracts down to store32_le in C.
     [@inline_let] let pt = encode_pk_ptSet h0 pk in
     [@inline_let] let op_Greater_Greater_Hat = op_Greater_Greater_Greater_Hat in
-    [@inline_let] let op_Less_Less_Hat = shift_arithmetic_left in
+    [@inline_let] let op_Less_Less_Hat = op_Less_Less_Less_Hat in
     pt i (size 0)  (tj0              |^ (tj1  <<^ 23ul)); 
     pt i (size 1)  ((tj1  >>^ 9ul)   |^ (tj2  <<^ 14ul)); pt i (size 2)   ((tj2  >>^ 18ul)  |^ (tj3  <<^  5ul) |^ (tj4 <<^ 28ul)); 
     pt i (size 3)  ((tj4  >>^  4ul)  |^ (tj5  <<^ 19ul));

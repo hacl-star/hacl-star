@@ -230,27 +230,8 @@ private let shift_arithmetic_left_value_check (x:elem) (s:UI32.t{UI32.v s < elem
     elem_v x * pow2 (UI32.v s) >= Int.min_int elem_n /\
     elem_v x * pow2 (UI32.v s) <= Int.max_int elem_n
 
-inline_for_extraction noextract
-val shift_arithmetic_left:
-    x : elem
-  -> s : UI32.t{v s < elem_n}// /\ shift_arithmetic_left_value_check x s}
-  -> Tot I32.t // (r:I32.t{I32.v r == I32.v x * pow2 (UI32.v s)})
-
-#reset-options "--z3rlimit 100 --max_fuel 2 --max_ifuel 2"
-
-let shift_arithmetic_left x s =
-    uelem_to_elem ((elem_to_uelem x) `uelem_sl` s)
-    //let r = FStar.Int.Cast.uint32_to_int32 UI32.((FStar.Int.Cast.int32_to_uint32 x) <<^ s) in
-    //Int.shift_left_value_lemma (I32.v x) (UI32.v s);
-    //assert(I32.v r == I32.v x * pow2 (UI32.v s));
-    //r
-
-(*val shift_arithmetic_left_value_lemma: a:elem -> s:UI32.t{UI32.v s < elem_n} ->
-  Lemma (requires True)
-        (ensures elem_v (shift_arithmetic_left a s) = (elem_v a * pow2 (UI32.v s)) `Int.op_At_Percent` pow2 I32.n)
-let shift_arithmetic_left_value_lemma a s =
-  UInt.shift_left_value_lemma #UI32.n (uelem_v (elem_to_uelem a)) (UI32.v s)*)
-
+unfold let shift_arithmetic_left_i32 = Hacl.Impl.QTesla.Lemmas.Sal.shift_arithmetic_left_i32
+unfold let shift_arithmetic_left_i32_value_lemma = Hacl.Impl.QTesla.Lemmas.Sal.shift_arithmetic_left_i32_value_lemma
 
 (*let frame_is_poly_sampler_output_i (h0 h1: HS.mem) (p: poly) (i:nat{i <= v params_n}) (l:B.loc) : Lemma
     (requires is_poly_sampler_output_i h0 p i /\ modifies l h0 h1 /\ disjoint l (gsub p (size 0) (size i)))

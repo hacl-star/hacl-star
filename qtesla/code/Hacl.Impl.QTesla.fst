@@ -1529,8 +1529,11 @@ let test_correctness v_ =
         lemma_val_plus_pow2_d_fits val_;
         let val_:I32.t = I32.((val_ +^ (1l <<^ (params_d -. (size 1))) -^ 1l) >>>^ params_d) in
         // val is always -1, 0, or 1 it looks like
-        assume(FStar.Int.fits (I32.v left - I32.v (val_ `shift_arithmetic_left` params_d)) I32.n);
-        let val_:I32.t = I32.(left -^ (val_ `shift_arithmetic_left` params_d)) in
+        [@inline_let] let op_Less_Less_Less_Hat = shift_arithmetic_left_i32 in
+        assume(Int.fits (I32.v val_ * pow2 (v params_d)) I32.n);
+        shift_arithmetic_left_i32_value_lemma val_ params_d;
+        assume(Int.fits (I32.v left - I32.v (val_ <<<^ params_d)) I32.n);
+        let val_:I32.t = I32.(left -^ (val_ <<<^ params_d)) in
         assume(I32.v val_ > Int.min_int I32.n);
         assume(FStar.Int.fits (I32.v (abs_ val_) - (I32.v (1l <<^ (params_d -. (size 1))) - elem_v params_rejection)) I32.n);
         let t1:UI32.t = UI32.(int32_to_uint32 I32.(((lognot ((abs_ val_) -^ ((1l <<^ (params_d -. (size 1))) -^ params_rejection))))) >>^ (_RADIX32 -. size 1)) in
