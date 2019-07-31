@@ -1,5 +1,5 @@
 [
-  "\"g蓎簝僖eG袸猏u000b",
+  "S媦A񙒃鱉羐蚛u0004獼",
   [
     [
       "Spec.GaloisField.field",
@@ -8,7 +8,7 @@
       1,
       [ "@query", "assumption_Lib.IntTypes.inttype__uu___haseq" ],
       0,
-      "ff84ca6ba5d50978d202c95d51e097b0"
+      "e6ef7b0ed2f3c562f703d1689d7a0848"
     ],
     [
       "Spec.GaloisField.__proj__GF__item__t",
@@ -17,7 +17,7 @@
       1,
       [ "@query", "assumption_Lib.IntTypes.inttype__uu___haseq" ],
       0,
-      "99e4206a2f24cfc6e61ec74677606ce3"
+      "23dc3ea2456f980bb34aa335e849fbc9"
     ],
     [
       "Spec.GaloisField.__proj__GF__item__t",
@@ -26,7 +26,7 @@
       1,
       [ "@query", "assumption_Lib.IntTypes.inttype__uu___haseq" ],
       0,
-      "3a04f53444e4c874b51ac3a0fd7c2ee0"
+      "322a6a9b93fd6baf00b442a676095605"
     ],
     [
       "Spec.GaloisField.__proj__GF__item__irred",
@@ -38,7 +38,19 @@
         "projection_inverse_Spec.GaloisField.GF_t"
       ],
       0,
-      "312cba565ad193ef883811c621046111"
+      "64fe48ee313101acf74e1de7aee890d3"
+    ],
+    [
+      "Spec.GaloisField.__proj__GF__item__irred",
+      2,
+      2,
+      1,
+      [
+        "@query", "proj_equation_Spec.GaloisField.GF_t",
+        "projection_inverse_Spec.GaloisField.GF_t"
+      ],
+      0,
+      "d5454ebc75cca72d46623f09b17189c1"
     ],
     [
       "Spec.GaloisField.gf",
@@ -47,7 +59,46 @@
       1,
       [ "@query", "assumption_Lib.IntTypes.inttype__uu___haseq" ],
       0,
-      "baf4e7d369f0780a95a0fd683a252cea"
+      "4282195c1f5952f8cc5b1a202e8c06b7"
+    ],
+    [
+      "Spec.GaloisField.felem",
+      1,
+      2,
+      1,
+      [ "@query" ],
+      0,
+      "708438a8dd33f65237a40683bdddb41e"
+    ],
+    [
+      "Spec.GaloisField.to_felem",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "bool_inversion",
+        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.range",
+        "equation_Lib.IntTypes.unsigned",
+        "refinement_interpretation_Tm_refine_387e6d282145573240ab7b8a4b94cce5",
+        "typing_Lib.IntTypes.unsigned"
+      ],
+      0,
+      "af96c59780327d9e76b311ece51507c3"
+    ],
+    [
+      "Spec.GaloisField.from_felem",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "bool_inversion",
+        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.range",
+        "equation_Lib.IntTypes.unsigned",
+        "refinement_interpretation_Tm_refine_387e6d282145573240ab7b8a4b94cce5",
+        "typing_Lib.IntTypes.unsigned"
+      ],
+      0,
+      "f39c4f7051fccb951afe11bb0fbe241a"
     ],
     [
       "Spec.GaloisField.zero",
@@ -57,20 +108,21 @@
       [
         "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "equality_tok_Lib.IntTypes.U1@tok", "equation_Lib.IntTypes.bits",
-        "equation_Prims.nat", "equation_Prims.pos",
-        "fuel_guarded_inversion_Lib.IntTypes.inttype",
+        "bool_inversion", "equality_tok_Lib.IntTypes.U1@tok",
+        "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.maxint",
+        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
+        "equation_Prims.pos", "fuel_guarded_inversion_Lib.IntTypes.inttype",
         "primitive_Prims.op_Subtraction",
         "proj_equation_Spec.GaloisField.GF_t",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_70597463dd221580f371f83615527f81",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
-        "typing_Lib.IntTypes.bits", "typing_Prims.pow2",
-        "typing_Spec.GaloisField.__proj__GF__item__t"
+        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
+        "typing_Lib.IntTypes.bits", "typing_Lib.IntTypes.unsigned",
+        "typing_Prims.pow2", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "fc05ba95167dbab2b43b9e05fe3cb6f1"
+      "135a3598167ea79fe28799d43b69d47b"
     ],
     [
       "Spec.GaloisField.one",
@@ -81,18 +133,25 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented",
         "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
-        "equality_tok_Lib.IntTypes.U1@tok", "equation_Lib.IntTypes.bits",
-        "equation_Prims.nat", "fuel_guarded_inversion_Lib.IntTypes.inttype",
-        "lemma_Lib.IntTypes.pow2_values", "primitive_Prims.op_Subtraction",
+        "bool_inversion", "equality_tok_Lib.IntTypes.U1@tok",
+        "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.maxint",
+        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
+        "equation_Prims.pos",
+        "equation_with_fuel_Prims.pow2.fuel_instrumented",
+        "fuel_guarded_inversion_Lib.IntTypes.inttype", "int_typing",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction",
         "proj_equation_Spec.GaloisField.GF_t",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_70597463dd221580f371f83615527f81",
-        "typing_Lib.IntTypes.bits",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
+        "token_correspondence_Prims.pow2.fuel_instrumented",
+        "typing_Lib.IntTypes.bits", "typing_Lib.IntTypes.unsigned",
         "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "4153717945796a9179d90e6ad5d5d617"
+      "3dbf191b2dd21e5de5ec68bde02ed1ab"
     ],
     [
       "Spec.GaloisField.load_felem_be",
@@ -103,32 +162,43 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented",
         "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "constructor_distinct_Lib.IntTypes.S16",
+        "constructor_distinct_Lib.IntTypes.S8",
         "constructor_distinct_Lib.IntTypes.U32",
         "constructor_distinct_Tm_unit", "data_elim_Spec.GaloisField.GF",
         "equality_tok_Lib.IntTypes.U1@tok",
         "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.numbytes", "equation_Prims.nat",
+        "equation_Lib.IntTypes.numbytes", "equation_Lib.IntTypes.unsigned",
+        "equation_Prims.nat", "equation_Prims.pos",
+        "equation_with_fuel_Prims.pow2.fuel_instrumented",
         "fuel_guarded_inversion_Spec.GaloisField.field", "int_inversion",
-        "lemma_Lib.IntTypes.pow2_values", "primitive_Prims.op_Subtraction",
+        "int_typing", "lemma_FStar.UInt.pow2_values",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
         "proj_equation_Spec.GaloisField.GF_t",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_70597463dd221580f371f83615527f81",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
+        "token_correspondence_Prims.pow2.fuel_instrumented",
         "typing_Lib.IntTypes.bits", "typing_Lib.IntTypes.numbytes",
         "typing_Spec.GaloisField.__proj__GF__item__t",
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "a00fd9f767add6a686e3d1898d3e792d"
+      "a2e850050779f2a8c6b9f3282d1b561e"
     ],
     [
       "Spec.GaloisField.load_felem_be",
       2,
       2,
       1,
-      [ "@query" ],
+      [
+        "@query", "disc_equation_Lib.IntTypes.U1",
+        "equality_tok_Lib.IntTypes.U1@tok",
+        "projection_inverse_BoxBool_proj_0"
+      ],
       0,
-      "e909fb351d7df2da7bf9bd37443b8d45"
+      "69e8a47a1cc08e35c1ca5037eb7d7548"
     ],
     [
       "Spec.GaloisField.store_felem_be",
@@ -142,19 +212,24 @@
         "constructor_distinct_Lib.IntTypes.U32",
         "equality_tok_Lib.IntTypes.U1@tok",
         "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.numbytes", "equation_Prims.nat",
-        "fuel_guarded_inversion_Lib.IntTypes.inttype",
-        "lemma_Lib.IntTypes.pow2_values", "primitive_Prims.op_Subtraction",
+        "equation_Lib.IntTypes.numbytes", "equation_Lib.IntTypes.unsigned",
+        "equation_Prims.nat", "equation_Prims.pos",
+        "equation_with_fuel_Prims.pow2.fuel_instrumented",
+        "fuel_guarded_inversion_Lib.IntTypes.inttype", "int_typing",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction",
         "proj_equation_Spec.GaloisField.GF_t",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_70597463dd221580f371f83615527f81",
-        "typing_Lib.IntTypes.bits",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
+        "token_correspondence_Prims.pow2.fuel_instrumented",
+        "typing_Lib.IntTypes.bits", "typing_Prims.pow2",
         "typing_Spec.GaloisField.__proj__GF__item__t",
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "fab6e7e6f89fba7523cebd08e9702080"
+      "41ac802c9e8f01b19b7a34e72b34514f"
     ],
     [
       "Spec.GaloisField.reverse",
@@ -165,24 +240,39 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented",
         "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "bool_inversion", "constructor_distinct_Lib.IntTypes.S16",
+        "constructor_distinct_Lib.IntTypes.S32",
+        "constructor_distinct_Lib.IntTypes.S64",
+        "constructor_distinct_Lib.IntTypes.S8",
+        "constructor_distinct_Lib.IntTypes.U128",
         "constructor_distinct_Lib.IntTypes.U32",
         "equality_tok_Lib.IntTypes.PUB@tok",
+        "equality_tok_Lib.IntTypes.SEC@tok",
         "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
-        "equation_Prims.nat", "equation_Prims.pos",
+        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
+        "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
+        "equation_Lib.IntTypes.v", "equation_Prims.nat",
+        "equation_Prims.pos",
+        "equation_with_fuel_Prims.pow2.fuel_instrumented",
         "fuel_guarded_inversion_Lib.IntTypes.inttype", "int_inversion",
-        "lemma_Lib.IntTypes.pow2_values",
-        "lemma_Lib.IntTypes.size_v_size_lemma",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "int_typing", "lemma_FStar.UInt.pow2_values",
+        "lemma_Lib.IntTypes.pow2_127", "lemma_Lib.IntTypes.v_mk_int",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_109d2a9ccd4332dff61c833081ab9011",
+        "refinement_interpretation_Tm_refine_387e6d282145573240ab7b8a4b94cce5",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
-        "refinement_interpretation_Tm_refine_7d0f3b61869adb67e3e483dfaf5225aa",
-        "refinement_interpretation_Tm_refine_a78e81a34494fa620ef91991a1267b1f",
+        "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
         "refinement_interpretation_Tm_refine_cecf201f457930d46567706d55683323",
-        "typing_Lib.IntTypes.bits", "typing_Prims.pow2",
-        "typing_tok_Lib.IntTypes.U32@tok"
+        "token_correspondence_Prims.pow2.fuel_instrumented",
+        "typing_Lib.IntTypes.bits", "typing_Lib.IntTypes.unsigned",
+        "typing_Lib.IntTypes.v", "typing_Prims.pow2",
+        "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "d04a701e97d0e096165e90cba679a292"
+      "2cbd8f753d04c05f51ee6744f764ae08"
     ],
     [
       "Spec.GaloisField.load_felem_le",
@@ -193,23 +283,39 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented",
         "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "constructor_distinct_Lib.IntTypes.S16",
+        "constructor_distinct_Lib.IntTypes.S8",
         "constructor_distinct_Lib.IntTypes.U32",
         "constructor_distinct_Tm_unit", "data_elim_Spec.GaloisField.GF",
         "equality_tok_Lib.IntTypes.U1@tok",
         "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.numbytes", "equation_Prims.nat",
+        "equation_Lib.IntTypes.numbytes", "equation_Lib.IntTypes.unsigned",
+        "equation_Prims.nat", "equation_Prims.pos",
+        "equation_with_fuel_Prims.pow2.fuel_instrumented",
         "fuel_guarded_inversion_Spec.GaloisField.field", "int_inversion",
-        "lemma_Lib.IntTypes.pow2_values", "primitive_Prims.op_Subtraction",
+        "int_typing", "lemma_FStar.UInt.pow2_values",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
         "proj_equation_Spec.GaloisField.GF_t",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_70597463dd221580f371f83615527f81",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
+        "token_correspondence_Prims.pow2.fuel_instrumented",
         "typing_Lib.IntTypes.bits", "typing_Lib.IntTypes.numbytes",
         "typing_Spec.GaloisField.__proj__GF__item__t",
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "8da5a930b5e7bdd07ed1902f31690316"
+      "f88d018441b3632298430d7e87d4117b"
+    ],
+    [
+      "Spec.GaloisField.load_felem_le",
+      2,
+      2,
+      1,
+      [ "@query" ],
+      0,
+      "2e920af501e91ede3c5801499887cd18"
     ],
     [
       "Spec.GaloisField.store_felem_le",
@@ -223,19 +329,24 @@
         "constructor_distinct_Lib.IntTypes.U32",
         "equality_tok_Lib.IntTypes.U1@tok",
         "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.numbytes", "equation_Prims.nat",
-        "fuel_guarded_inversion_Lib.IntTypes.inttype",
-        "lemma_Lib.IntTypes.pow2_values", "primitive_Prims.op_Subtraction",
+        "equation_Lib.IntTypes.numbytes", "equation_Lib.IntTypes.unsigned",
+        "equation_Prims.nat", "equation_Prims.pos",
+        "equation_with_fuel_Prims.pow2.fuel_instrumented",
+        "fuel_guarded_inversion_Lib.IntTypes.inttype", "int_typing",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction",
         "proj_equation_Spec.GaloisField.GF_t",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_70597463dd221580f371f83615527f81",
-        "typing_Lib.IntTypes.bits",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
+        "token_correspondence_Prims.pow2.fuel_instrumented",
+        "typing_Lib.IntTypes.bits", "typing_Prims.pow2",
         "typing_Spec.GaloisField.__proj__GF__item__t",
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "635afd0a9a3493e48adbf0d955ff1901"
+      "7828c022c2de2debea789f79fc7c3592"
     ],
     [
       "Spec.GaloisField.fmul",
@@ -246,25 +357,44 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented",
         "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "bool_inversion", "constructor_distinct_Lib.IntTypes.S16",
+        "constructor_distinct_Lib.IntTypes.S32",
+        "constructor_distinct_Lib.IntTypes.S64",
+        "constructor_distinct_Lib.IntTypes.S8",
+        "constructor_distinct_Lib.IntTypes.U128",
         "constructor_distinct_Lib.IntTypes.U32",
+        "disc_equation_Lib.IntTypes.S128",
         "equality_tok_Lib.IntTypes.PUB@tok",
+        "equality_tok_Lib.IntTypes.SEC@tok",
         "equality_tok_Lib.IntTypes.U1@tok",
         "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.size", "equation_Prims.nat",
-        "fuel_guarded_inversion_Lib.IntTypes.inttype", "int_typing",
-        "lemma_Lib.IntTypes.pow2_values", "primitive_Prims.op_Subtraction",
+        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
+        "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
+        "equation_Lib.IntTypes.v", "equation_Prims.nat",
+        "equation_Prims.pos", "equation_Spec.GaloisField.felem",
+        "equation_Spec.GaloisField.one",
+        "equation_Spec.GaloisField.to_felem",
+        "equation_with_fuel_Prims.pow2.fuel_instrumented",
+        "fuel_guarded_inversion_Lib.IntTypes.inttype",
+        "fuel_guarded_inversion_Spec.GaloisField.field", "int_typing",
+        "lemma_FStar.UInt.pow2_values", "lemma_Lib.IntTypes.v_mk_int",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
         "proj_equation_Spec.GaloisField.GF_t",
+        "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_70597463dd221580f371f83615527f81",
-        "refinement_interpretation_Tm_refine_82f721d8dd9e5848515478ce5fa16da9",
-        "refinement_interpretation_Tm_refine_e7baecf1446b738b3604b097069629a3",
-        "typing_Lib.IntTypes.bits", "typing_Lib.IntTypes.uint",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
+        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
+        "token_correspondence_Prims.pow2.fuel_instrumented",
+        "typing_Lib.IntTypes.bits", "typing_Lib.IntTypes.unsigned",
+        "typing_Lib.IntTypes.v",
         "typing_Spec.GaloisField.__proj__GF__item__t",
-        "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
+        "typing_Spec.GaloisField.one", "typing_tok_Lib.IntTypes.PUB@tok",
+        "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "79f9384fd27d58c97a3bf60d29163a3a"
+      "c612d3194b19db40abe340aceb6becd2"
     ],
     [
       "Spec.GaloisField.fexp",
@@ -284,7 +414,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "e76eec7eb482c6e5d621015fa3f8944a"
+      "c5affac7f3eba51021cf21f4e3fd6a01"
     ],
     [
       "Spec.GaloisField.finv",
@@ -295,18 +425,31 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented",
         "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "bool_inversion", "constructor_distinct_Lib.IntTypes.S16",
+        "constructor_distinct_Lib.IntTypes.S32",
+        "constructor_distinct_Lib.IntTypes.S64",
+        "constructor_distinct_Lib.IntTypes.S8",
+        "constructor_distinct_Lib.IntTypes.U128",
+        "constructor_distinct_Lib.IntTypes.U32",
         "equality_tok_Lib.IntTypes.U1@tok", "equation_Lib.IntTypes.bits",
-        "equation_Prims.nat", "fuel_guarded_inversion_Lib.IntTypes.inttype",
-        "lemma_Lib.IntTypes.pow2_values", "primitive_Prims.op_Subtraction",
+        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.unsigned",
+        "equation_Prims.nat", "equation_Prims.pos",
+        "equation_with_fuel_Prims.pow2.fuel_instrumented",
+        "fuel_guarded_inversion_Lib.IntTypes.inttype", "int_typing",
+        "lemma_FStar.UInt.pow2_values", "lemma_Lib.IntTypes.pow2_127",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
         "proj_equation_Spec.GaloisField.GF_t",
+        "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_70597463dd221580f371f83615527f81",
-        "typing_Lib.IntTypes.bits",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
+        "token_correspondence_Prims.pow2.fuel_instrumented",
+        "typing_Lib.IntTypes.bits", "typing_Lib.IntTypes.unsigned",
         "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "65afce6328a97579a6eceb66637baea0"
+      "52ddad06e16c2428fea98217a0773189"
     ]
   ]
 ]
