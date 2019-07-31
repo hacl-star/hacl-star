@@ -654,8 +654,6 @@ DEFAULT_FLAGS_NO_TESTS	=\
   $(addprefix -library ,$(HACL_HAND_WRITTEN_C)) \
   -bundle Hacl.Spec.*,Spec.*[rename=Hacl_Spec] \
   -bundle Hacl.Poly1305.Field32xN.Lemmas[rename=Hacl_Lemmas] \
-  -bundle Lib.RandomBuffer= \
-  -bundle Lib.PrintBuffer= \
   -bundle Lib.*[rename=Hacl_Lib] \
   -drop Lib.IntVector.Intrinsics \
   -add-include '"evercrypt_targetconfig.h"' \
@@ -685,8 +683,14 @@ DEFAULT_FLAGS_NO_TESTS	=\
 INTRINSIC_FLAGS = -add-include '"libintvector.h"'
 OPT_FLAGS = -ccopts -march=native,-mtune=native
 TEST_FLAGS = -bundle Test,Test.*,Hacl.Test.*
+HAND_WRITTEN_LIB_FLAGS = -bundle Lib.RandomBuffer= -bundle Lib.PrintBuffer=
 
-DEFAULT_FLAGS = $(DEFAULT_FLAGS_NO_TESTS) $(TEST_FLAGS) $(OPT_FLAGS) $(INTRINSIC_FLAGS)
+DEFAULT_FLAGS = \
+  $(DEFAULT_FLAGS_NO_TESTS) \
+  $(TEST_FLAGS) \
+  $(OPT_FLAGS) \
+  $(INTRINSIC_FLAGS) \
+  $(HAND_WRITTEN_LIB_FLAGS)
 
 # Should be fixed by having KreMLin better handle imported names
 WASM_STANDALONE=Prims LowStar.Endianness C.Endianness \
@@ -798,6 +802,7 @@ dist/ccf/Makefile.basic: POLY_BUNDLE =
 #   should retain for the WASM distribution.
 dist/wasm/Makefile.basic: KRML_EXTRA=$(WASM_FLAGS)
 dist/wasm/Makefile.basic: TEST_FLAGS=
+dist/wasm/Makefile.basic: HAND_WRITTEN_LIB_FLAGS=
 
 # Binary objects not optimized for the host (possiblye CI) machine, meaning that
 # someone can download them onto their machine for debugging.
