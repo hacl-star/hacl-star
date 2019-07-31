@@ -1579,8 +1579,8 @@ let rec is_empty_code (c:code) : bool =
   match c with
   | Ins _ -> false
   | Block l -> is_empty_codes l
-  | IfElse _ t f -> is_empty_code t && is_empty_code f
-  | While _ c -> is_empty_code c
+  | IfElse _ t f -> false
+  | While _ c -> false
 
 and is_empty_codes (c:codes) : bool =
   match c with
@@ -1896,8 +1896,8 @@ let rec lemma_is_empty_code (c:code) (fuel:nat) (s:machine_state) :
   match c with
   | Ins _ -> ()
   | Block l -> lemma_is_empty_codes l fuel s
-  | IfElse _ t f -> admit (); lemma_is_empty_code t fuel s; lemma_is_empty_code f fuel s
-  | While _ c -> admit (); lemma_is_empty_code c fuel s
+  | IfElse _ t f -> ()
+  | While _ c -> ()
 and lemma_is_empty_codes (cs:codes) (fuel:nat) (s:machine_state) :
   Lemma
     (requires (is_empty_codes cs))
