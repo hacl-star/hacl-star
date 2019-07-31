@@ -623,7 +623,7 @@ procedure Reduce(inline last_adds:bool, ghost f:poly)
     VPolyMul(Z0, Z0, Hkey, false, true);
     VHigh64ToLow(Z2, Z2);
     VPolyAdd(Z3, Z3, Z2);
-    VPolyAdd(Z0, Ii, Z0);
+    VPolyAdd(Z0, Z0, Ii); /* XXX[jb] */
     // TODO: save Z3 in memory
     VSwap(Xi, Z0);
     VPolyMul(Z0, Z0, Hkey, false, true);
