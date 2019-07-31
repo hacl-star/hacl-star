@@ -160,16 +160,16 @@ typedef __m128i Lib_IntVector_Intrinsics_vec128;
   ((__m128i)x)
 
 #define Lib_IntVector_Intrinsics_vec128_load64(x) \
-  (_mm_set1_epi64x(x)) // hi lo
+  (_mm_set1_epi64x(x)) /* hi lo */
 
 #define Lib_IntVector_Intrinsics_vec128_load64s(x1, x2) \
-  (_mm_set_epi64x(x1, x2)) // hi lo
+  (_mm_set_epi64x(x1, x2)) /* hi lo */
 
 #define Lib_IntVector_Intrinsics_vec128_load32(x) \
   (_mm_set1_epi32(x)) 
 
 #define Lib_IntVector_Intrinsics_vec128_load32s(x3, x2, x1, x0) \
-  (_mm_set_epi32(x3, x2, x1, x0)) // hi lo
+  (_mm_set_epi32(x3, x2, x1, x0)) /* hi lo */
 
 #define Lib_IntVector_Intrinsics_vec128_interleave_low32(x1, x2) \
   (_mm_unpacklo_epi32(x1, x2)) 
@@ -305,16 +305,16 @@ typedef __m256i Lib_IntVector_Intrinsics_vec256;
 
 
 #define Lib_IntVector_Intrinsics_vec256_load64(x1) \
-  (_mm256_set1_epi64x(x1)) // hi lo
+  (_mm256_set1_epi64x(x1)) /* hi lo */
 
 #define Lib_IntVector_Intrinsics_vec256_load64s(x1, x2, x3, x4) \
-  (_mm256_set_epi64x(x1,x2,x3,x4)) // hi lo
+  (_mm256_set_epi64x(x1,x2,x3,x4)) /* hi lo */
 
 #define Lib_IntVector_Intrinsics_vec256_load32(x) \
   (_mm256_set1_epi32(x)) 
 
 #define Lib_IntVector_Intrinsics_vec256_load32s(x7,x6,x5,x4,x3, x2, x1, x0) \
-  (_mm256_set_epi32(x7, x6, x5, x4, x3, x2, x1, x0)) // hi lo
+  (_mm256_set_epi32(x7, x6, x5, x4, x3, x2, x1, x0)) /* hi lo */
 
 
 #define Lib_IntVector_Intrinsics_vec256_load128(x) \
