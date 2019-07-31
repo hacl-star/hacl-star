@@ -578,3 +578,230 @@ let lemma_sub_mod_264 x y t c5 =
     assert (v c5 == 0 /\ as_nat5 t == as_nat5 x - as_nat5 y)
   else
     assert (v c5 == 1 /\ as_nat5 t == as_nat5 x - as_nat5 y + pow2 264)
+
+
+let lemma_mul_qelem5 (x0 x1 x2 x3 x4 y0 y1 y2 y3 y4:nat) : Lemma
+  ((x0 + x1 * pow2 56 + x2 * pow2 112 + x3 * pow2 168 + x4 * pow2 224) *
+    (y0 + y1 * pow2 56 + y2 * pow2 112 + y3 * pow2 168 + y4 * pow2 224) ==
+    x0 * y0 +
+    (x0 * y1 + x1 * y0) * pow56 +
+    (x0 * y2 + x1 * y1 + x2 * y0) * pow112 +
+    (x0 * y3 + x1 * y2 + x2 * y1 + x3 * y0) * pow168 +
+    (x0 * y4 + x1 * y3 + x2 * y2 + x3 * y1 + x4 * y0) * pow224 +
+    (x1 * y4 + x2 * y3 + x3 * y2 + x4 * y1) * pow280 +
+    (x2 * y4 + x3 * y3 + x4 * y2) * pow336 +
+    (x3 * y4 + x4 * y3) * pow392 +
+    (x4 * y4) * pow448)
+  = ()
+
+#set-options "--z3rlimit 400"
+
+val lemma_mul_5_low_264:
+  x1:nat -> x2:nat -> x3:nat -> x4:nat -> x5:nat ->
+  y1:nat -> y2:nat -> y3:nat -> y4:nat -> y5:nat ->
+  Lemma (
+    (x1 * y1) >= 0
+    /\ (x2 * y1 + x1 * y2 + ((x1 * y1) / pow2 56)) >= 0
+    /\ (x3 * y1 + x2 * y2 + x1 * y3 + ((x2 * y1 + x1 * y2 + ((x1 * y1) / pow2 56)) / pow2 56)) >= 0
+    /\ (x4 * y1 + x3 * y2 + x2 * y3 + x1 * y4 + ((x3 * y1 + x2 * y2 + x1 * y3 + ((x2 * y1 + x1 * y2 + ((x1 * y1) / pow2 56)) / pow2 56)) / pow2 56)) >= 0
+    /\ (
+    let a0 = (x1 * y1) % pow2 56 in
+    let a1 = ((x2 * y1 + x1 * y2 + ((x1 * y1) / pow2 56)) % pow2 56) in
+    let a2 = ((x3 * y1 + x2 * y2 + x1 * y3 + ((x2 * y1 + x1 * y2 + ((x1 * y1) / pow2 56)) / pow2 56)) % pow2 56) in
+    let a3 = ((x4 * y1 + x3 * y2 + x2 * y3 + x1 * y4 + ((x3 * y1 + x2 * y2 + x1 * y3 + ((x2 * y1 + x1 * y2 + ((x1 * y1) / pow2 56)) / pow2 56)) / pow2 56)) % pow2 56) in
+    let a4 = (x5 * y1 + x4 * y2 + x3 * y3 + x2 * y4 + x1 * y5 + ((x4 * y1 + x3 * y2 + x2 * y3 + x1 * y4 + ((x3 * y1 + x2 * y2 + x1 * y3 + ((x2 * y1 + x1 * y2 + ((x1 * y1) / pow2 56)) / pow2 56)) / pow2 56)) / pow2 56)) in
+    ((x1 + pow2 56 * x2 + pow2 112 * x3 + pow2 168 * x4 + pow2 224 * x5)
+         * (y1 + pow2 56 * y2 + pow2 112 * y3 + pow2 168 * y4 + pow2 224 * y5)) % pow2 264
+    == a0 + pow2 56 * a1 + pow2 112 * a2 + pow2 168 * a3 + pow2 224 * (a4 % pow2 40)))
+
+private let lemma_div_nat_is_nat (a:nat) (b:pos) : Lemma (a/b >= 0) = ()
+
+private
+val lemma_mul_5''':
+  x1:nat -> x2:nat -> x3:nat -> x4:nat -> x5:nat ->
+  y1:nat -> y2:nat -> y3:nat -> y4:nat -> y5:nat ->
+  Lemma (((x1 + pow2 56 * x2 + pow2 112 * x3 + pow2 168 * x4 + pow2 224 * x5)
+         * (y1 + pow2 56 * y2 + pow2 112 * y3 + pow2 168 * y4 + pow2 224 * y5)) % pow2 264
+         ==
+       (x1 * y1
+       + pow2 56 * (x2 * y1 + x1 * y2)
+       + pow2 112 * (x3 * y1 + x2 * y2 + x1 * y3)
+       + pow2 168 * (x4 * y1 + x3 * y2 + x2 * y3 + x1 * y4)
+       + pow2 224 * (x5 * y1 + x4 * y2 + x3 * y3 + x2 * y4 + x1 * y5)) % pow2 264)
+
+let lemma_mul_5''' x0 x1 x2 x3 x4 y0 y1 y2 y3 y4 =
+  calc (==) {
+    ((x0 + pow2 56 * x1 + pow2 112 * x2 + pow2 168 * x3 + pow2 224 * x4)
+         * (y0 + pow2 56 * y1 + pow2 112 * y2 + pow2 168 * y3 + pow2 224 * y4)) % pow2 264;
+
+    (==) { lemma_mul_qelem5 x0 x1 x2 x3 x4 y0 y1 y2 y3 y4 }
+    (x0 * y0 +
+    (x0 * y1 + x1 * y0) * pow56 +
+    (x0 * y2 + x1 * y1 + x2 * y0) * pow112 +
+    (x0 * y3 + x1 * y2 + x2 * y1 + x3 * y0) * pow168 +
+    (x0 * y4 + x1 * y3 + x2 * y2 + x3 * y1 + x4 * y0) * pow224 +
+    (x1 * y4 + x2 * y3 + x3 * y2 + x4 * y1) * pow280 +
+    (x2 * y4 + x3 * y3 + x4 * y2) * pow336 +
+    (x3 * y4 + x4 * y3) * pow392 +
+    (x4 * y4) * pow448) % pow2 264;
+    (==) { Math.Lemmas.lemma_mod_add_distr (x0 * y0 +
+    (x0 * y1 + x1 * y0) * pow56 +
+    (x0 * y2 + x1 * y1 + x2 * y0) * pow112 +
+    (x0 * y3 + x1 * y2 + x2 * y1 + x3 * y0) * pow168 +
+    (x0 * y4 + x1 * y3 + x2 * y2 + x3 * y1 + x4 * y0) * pow224 +
+    (x1 * y4 + x2 * y3 + x3 * y2 + x4 * y1) * pow280 +
+    (x2 * y4 + x3 * y3 + x4 * y2) * pow336 +
+    (x3 * y4 + x4 * y3) * pow392) ((x4 * y4) * pow448) (pow2 264);
+          Math.Lemmas.pow2_multiplication_modulo_lemma_1 (x4 * y4) 264 448 }
+    (x0 * y0 +
+    (x0 * y1 + x1 * y0) * pow56 +
+    (x0 * y2 + x1 * y1 + x2 * y0) * pow112 +
+    (x0 * y3 + x1 * y2 + x2 * y1 + x3 * y0) * pow168 +
+    (x0 * y4 + x1 * y3 + x2 * y2 + x3 * y1 + x4 * y0) * pow224 +
+    (x1 * y4 + x2 * y3 + x3 * y2 + x4 * y1) * pow280 +
+    (x2 * y4 + x3 * y3 + x4 * y2) * pow336 +
+    (x3 * y4 + x4 * y3) * pow392) % pow2 264;
+    (==) { Math.Lemmas.lemma_mod_add_distr (x0 * y0 +
+    (x0 * y1 + x1 * y0) * pow56 +
+    (x0 * y2 + x1 * y1 + x2 * y0) * pow112 +
+    (x0 * y3 + x1 * y2 + x2 * y1 + x3 * y0) * pow168 +
+    (x0 * y4 + x1 * y3 + x2 * y2 + x3 * y1 + x4 * y0) * pow224 +
+    (x1 * y4 + x2 * y3 + x3 * y2 + x4 * y1) * pow280 +
+    (x2 * y4 + x3 * y3 + x4 * y2) * pow336)
+    ((x3 * y4 + x4 * y3) * pow392) (pow2 264);
+          Math.Lemmas.pow2_multiplication_modulo_lemma_1 (x3 * y4 + x4 * y3) 264 392 }
+    (x0 * y0 +
+    (x0 * y1 + x1 * y0) * pow56 +
+    (x0 * y2 + x1 * y1 + x2 * y0) * pow112 +
+    (x0 * y3 + x1 * y2 + x2 * y1 + x3 * y0) * pow168 +
+    (x0 * y4 + x1 * y3 + x2 * y2 + x3 * y1 + x4 * y0) * pow224 +
+    (x1 * y4 + x2 * y3 + x3 * y2 + x4 * y1) * pow280 +
+    (x2 * y4 + x3 * y3 + x4 * y2) * pow336) % pow2 264;
+    (==) { Math.Lemmas.lemma_mod_add_distr (x0 * y0 +
+    (x0 * y1 + x1 * y0) * pow56 +
+    (x0 * y2 + x1 * y1 + x2 * y0) * pow112 +
+    (x0 * y3 + x1 * y2 + x2 * y1 + x3 * y0) * pow168 +
+    (x0 * y4 + x1 * y3 + x2 * y2 + x3 * y1 + x4 * y0) * pow224 +
+    (x1 * y4 + x2 * y3 + x3 * y2 + x4 * y1) * pow280)
+    ((x2 * y4 + x3 * y3 + x4 * y2) * pow336)
+    (pow2 264);
+          Math.Lemmas.pow2_multiplication_modulo_lemma_1 (x2 * y4 + x3 * y3 + x4 * y2) 264 336 }
+    (x0 * y0 +
+    (x0 * y1 + x1 * y0) * pow56 +
+    (x0 * y2 + x1 * y1 + x2 * y0) * pow112 +
+    (x0 * y3 + x1 * y2 + x2 * y1 + x3 * y0) * pow168 +
+    (x0 * y4 + x1 * y3 + x2 * y2 + x3 * y1 + x4 * y0) * pow224 +
+    (x1 * y4 + x2 * y3 + x3 * y2 + x4 * y1) * pow280) % pow2 264;
+    (==) { Math.Lemmas.lemma_mod_add_distr (x0 * y0 +
+    (x0 * y1 + x1 * y0) * pow56 +
+    (x0 * y2 + x1 * y1 + x2 * y0) * pow112 +
+    (x0 * y3 + x1 * y2 + x2 * y1 + x3 * y0) * pow168 +
+    (x0 * y4 + x1 * y3 + x2 * y2 + x3 * y1 + x4 * y0) * pow224)
+    ((x1 * y4 + x2 * y3 + x3 * y2 + x4 * y1) * pow280)
+    (pow2 264);
+          Math.Lemmas.pow2_multiplication_modulo_lemma_1 (x1 * y4 + x2 * y3 + x3 * y2 + x4 * y1) 264 280 }
+    (x0 * y0 +
+    (x0 * y1 + x1 * y0) * pow56 +
+    (x0 * y2 + x1 * y1 + x2 * y0) * pow112 +
+    (x0 * y3 + x1 * y2 + x2 * y1 + x3 * y0) * pow168 +
+    (x0 * y4 + x1 * y3 + x2 * y2 + x3 * y1 + x4 * y0) * pow224) % pow2 264;
+  }
+
+private val lemma_mod_264'':
+  a0:nat -> a1:nat-> a2:nat -> a3:nat -> a4:nat ->
+  Lemma
+    (requires a0 < pow56 /\ a1 < pow56 /\ a2 < pow56 /\ a3 < pow56)
+    (ensures a0 + pow2 56 * a1 + pow2 112 * a2 + pow2 168 * a3 + pow2 224 * (a4 % pow2 40) < pow2 264)
+let lemma_mod_264'' a0 a1 a2 a3 a4 =
+  assert_norm(pow2 40 = 0x10000000000);
+  assert_norm(pow2 56 = 0x100000000000000);
+  assert_norm(pow2 112 = 0x10000000000000000000000000000);
+  assert_norm(pow2 168 = 0x1000000000000000000000000000000000000000000);
+  assert_norm(pow2 224 = 0x100000000000000000000000000000000000000000000000000000000);
+  assert_norm(pow2 264 = 0x1000000000000000000000000000000000000000000000000000000000000000000)
+
+
+private val lemma_mod_264':
+  a0:nat -> a1:nat-> a2:nat -> a3:nat -> a4:nat ->
+  Lemma
+    (requires a0 < pow56 /\ a1 < pow56 /\ a2 < pow56 /\ a3 < pow56)
+    (ensures (a0
+       + pow2 56 * a1
+       + pow2 112 * a2
+       + pow2 168 * a3
+       + pow2 224 * a4) % pow2 264 =
+       a0
+       + pow2 56 * a1
+       + pow2 112 * a2
+       + pow2 168 * a3
+       + pow2 224 * (a4 % pow2 40) )
+let lemma_mod_264' a0 a1 a2 a3 a4 =
+  assert_norm(pow2 56 = 0x100000000000000);
+  assert_norm(pow2 112 = 0x10000000000000000000000000000);
+  assert_norm(pow2 168 = 0x1000000000000000000000000000000000000000000);
+  assert_norm(pow2 224 = 0x100000000000000000000000000000000000000000000000000000000);
+  Math.Lemmas.lemma_mod_plus_distr_l (pow2 224 * a4) (a0 + pow2 56 * a1 + pow2 112 * a2 + pow2 168 * a3) (pow2 264);
+  Math.Lemmas.pow2_multiplication_modulo_lemma_2 a4 264 224;
+  lemma_mod_264'' a0 a1 a2 a3 a4;
+  Math.Lemmas.modulo_lemma (a0 + pow2 56 * a1 + pow2 112 * a2 + pow2 168 * a3 + pow2 224 * (a4 % pow2 40)) (pow2 264)
+
+private let lemma_aux_0 (a:nat) (b:nat) (n:nat) : Lemma
+  (pow2 n * a + pow2 (n+56) * b = pow2 n * (a % pow2 56) + pow2 (n+56) * (b + a / pow2 56))
+  = Math.Lemmas.lemma_div_mod a (pow2 56);
+    Math.Lemmas.pow2_plus n 56;
+    assert(a = pow2 56 * (a / pow2 56) + (a % pow2 56));
+    Math.Lemmas.distributivity_add_right (pow2 n) (pow2 56 * (a / pow2 56)) (a % pow2 56);
+    Math.Lemmas.paren_mul_right (pow2 n) (pow2 56) (a / pow2 56);
+    Math.Lemmas.distributivity_add_right (pow2 (n+56)) b (a / pow2 56)
+
+private
+val lemma_mod_264_small:
+  a0:nat -> a1:nat -> a2:nat -> a3:nat -> a4:nat ->
+  Lemma ( (a0 + pow2 56 * a1 + pow2 112 * a2 + pow2 168 * a3 + pow2 224 * a4)
+     = (a0 % pow2 56)
+       + pow2 56 * ((a1 + (a0 / pow2 56)) % pow2 56)
+       + pow2 112 * ((a2 + ((a1 + (a0 / pow2 56)) / pow2 56)) % pow2 56)
+       + pow2 168 * ((a3 + ((a2 + ((a1 + (a0 / pow2 56)) / pow2 56)) / pow2 56)) % pow2 56)
+       + pow2 224 * (a4 + ((a3 + ((a2 + ((a1 + (a0 / pow2 56)) / pow2 56)) / pow2 56)) / pow2 56)))
+let lemma_mod_264_small a0 a1 a2 a3 a4 =
+  Math.Lemmas.lemma_div_mod a0 (pow2 56);
+  Math.Lemmas.distributivity_add_right (pow2 56) a1 (a0 / pow2 56);
+  let a1':nat = (a1 + (a0 / pow2 56)) in
+  let a2':nat = (a2 + (a1' / pow2 56)) in
+  let a3':nat = (a3 + (a2' / pow2 56)) in
+  lemma_aux_0 a1' a2 56;
+  lemma_aux_0 a2' a3 112;
+  lemma_aux_0 a3' a4 168
+
+
+
+private
+val lemma_mod_264_:
+  a0:nat -> a1:nat -> a2:nat -> a3:nat -> a4:nat ->
+  Lemma ((a0 + pow2 56 * a1 + pow2 112 * a2 + pow2 168 * a3 + pow2 224 * a4) % pow2 264 =
+       (a0 % pow2 56)
+       + pow2 56 * ((a1 + (a0 / pow2 56)) % pow2 56)
+       + pow2 112 * ((a2 + ((a1 + (a0 / pow2 56)) / pow2 56)) % pow2 56)
+       + pow2 168 * ((a3 + ((a2 + ((a1 + (a0 / pow2 56)) / pow2 56)) / pow2 56)) % pow2 56)
+       + pow2 224 * ((a4 + ((a3 + ((a2 + ((a1 + (a0 / pow2 56)) / pow2 56)) / pow2 56)) / pow2 56)) % pow2 40))
+
+let lemma_mod_264_ a0 a1 a2 a3 a4 =
+  lemma_mod_264_small a0 a1 a2 a3 a4;
+  let x0 = a0 % pow2 56 in
+  assert (x0 < pow56);
+  let x1 = ((a1 + (a0 / pow2 56)) % pow2 56) in
+  assert (x1 < pow56);
+  let x2 = ((a2 + ((a1 + (a0 / pow2 56)) / pow2 56)) % pow2 56) in
+  assert (x2 < pow56);
+  let x3 =  ((a3 + ((a2 + ((a1 + (a0 / pow2 56)) / pow2 56)) / pow2 56)) % pow2 56) in
+  assert (x3 < pow56);
+  lemma_mod_264' x0 x1 x2 x3 (a4 + ((a3 + ((a2 + ((a1 + (a0 / pow2 56)) / pow2 56)) / pow2 56)) / pow2 56))
+
+
+let lemma_mul_5_low_264 x1 x2 x3 x4 x5 y1 y2 y3 y4 y5 =
+  lemma_div_nat_is_nat (x1 * y1) (pow2 56);
+  lemma_div_nat_is_nat (x2 * y1 + x1 * y2 + ((x1 * y1) / pow2 56)) (pow2 56);
+  lemma_div_nat_is_nat (x3 * y1 + x2 * y2 + x1 * y3 + ((x2 * y1 + x1 * y2 + ((x1 * y1) / pow2 56)) / pow2 56)) (pow2 56);
+  lemma_div_nat_is_nat (x4 * y1 + x3 * y2 + x2 * y3 + x1 * y4 + ((x3 * y1 + x2 * y2 + x1 * y3 + ((x2 * y1 + x1 * y2 + ((x1 * y1) / pow2 56)) / pow2 56)) / pow2 56)) (pow2 56);
+  lemma_mul_5''' x1 x2 x3 x4 x5 y1 y2 y3 y4 y5;
+  lemma_mod_264_ (x1 * y1) (x2 * y1 + x1 * y2) (x3 * y1 + x2 * y2 + x1 * y3) (x4 * y1 + x3 * y2 + x2 * y3 + x1 * y4) (x5 * y1 + x4 * y2 + x3 * y3 + x2 * y4 + x1 * y5)
