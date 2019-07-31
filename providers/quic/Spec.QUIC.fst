@@ -57,6 +57,24 @@ let parse_varint b =
   | 2 -> Some (n % 0x40000000, 4)
   | 3 -> Some (n % 0x4000000000000000, 8))
 
+
+let parse_varint_bis (b:bytes{S.length b > 0}) : option (n:nat{n < pow2 62} * vlsize) =
+  let open FStar.Endianness in
+  assert_norm(pow2 0 == 1 /\ pow2 1 == 2 /\ pow2 2 == 4 /\ pow2 3 == 8 /\ pow2 8 == 256);
+  assert_norm(pow2 8 / 0x40 == 4);
+  assert_norm(0x4000 < pow2 62 /\ 0x40000000 < pow2 62 /\ 0x4000000000000000 == pow2 62);
+  // b0 is the integer interpretation of the first 2 bits of b
+  let b0 = U8.v (S.index b 0) / 0x40 in
+  let n = be_to_n b in
+  if S.length b < pow2 b0 then None else
+  let real_n = n / pow2 (S.length b - pow2 b0) in
+  (match b0 with
+  | 0 -> Some (real_n % 0x40, 1)
+  | 1 -> Some (real_n % 0x4000, 2)
+  | 2 -> Some (real_n % 0x40000000, 4)
+  | 3 -> Some (real_n % 0x4000000000000000, 8))
+
+
 // Move to FStar.Math.Lemmas?
 private let lemma_mod_pow2 (a:nat) (b:nat) : Lemma
   (requires a >= b) (ensures pow2 a % pow2 b == 0)
@@ -223,7 +241,7 @@ let lemma_varint n =
   assert_norm(pow2 0 == 1 /\ pow2 1 == 2 /\ pow2 2 == 4 /\ pow2 3 == 8 /\ pow2 8 == 256);
   assert_norm(pow2 8 / 0x40 == 4);
   assert_norm(0x4000 < pow2 62 /\ 0x40000000 < pow2 62 /\ 0x4000000000000000 == pow2 62);
-  assert_norm(pow2 6 == 0x40 /\ pow2 14 == 0x4000 /\ pow2 30 == 0x40000000 /\ pow2 62 == 0x4000000000000000);  
+  assert_norm(pow2 6 == 0x40 /\ pow2 14 == 0x4000 /\ pow2 30 == 0x40000000 /\ pow2 62 == 0x4000000000000000);
   assert_norm(pow2 (8 * 0) == 1 /\ pow2 (8 * 1) == 0x100 /\ pow2 (8 * 3) == 0x1000000 /\ pow2 (8 * 7) == 0x100000000000000);
   assert_norm(0x100 * 0x40 == 0x4000 /\ 0x1000000 * 0x40 == 0x40000000);
   let b = encode_varint n in
@@ -241,6 +259,36 @@ let lemma_varint n =
   else if n < pow2 14 then lemma_varint_case1 n
   else if n < pow2 30 then lemma_varint_case2 n
   else lemma_varint_case3 n
+
+
+let lemma_varint_bis (suff:bytes) (n:nat62) : Lemma
+  (parse_varint_bis S.(encode_varint n @| suff) == Some (n, vlen n)) =
+  let open FStar.Endianness in
+  let open FStar.Math.Lemmas in
+  let open FStar.Mul in
+  assert_norm(pow2 0 == 1 /\ pow2 1 == 2 /\ pow2 2 == 4 /\ pow2 3 == 8 /\ pow2 8 == 256);
+  assert_norm(pow2 8 / 0x40 == 4);
+  assert_norm(0x4000 < pow2 62 /\ 0x40000000 < pow2 62 /\ 0x4000000000000000 == pow2 62);
+  assert_norm(pow2 6 == 0x40 /\ pow2 14 == 0x4000 /\ pow2 30 == 0x40000000 /\ pow2 62 == 0x4000000000000000);
+  assert_norm(pow2 (8 * 0) == 1 /\ pow2 (8 * 1) == 0x100 /\ pow2 (8 * 3) == 0x1000000 /\ pow2 (8 * 7) == 0x100000000000000);
+  assert_norm(0x100 * 0x40 == 0x4000 /\ 0x1000000 * 0x40 == 0x40000000);
+  let b = encode_varint n in
+  let b0 = U8.v (S.index b 0) / 0x40 in
+  let n' = be_to_n b in
+  let k = S.length b in
+  if n < pow2 6 then
+   begin
+    lemma_be_index 1 n;
+    small_div n (pow2 6); small_mod n (pow2 6);
+    S.lemma_empty (suffix b 1);
+    match b0 with
+    | 0 -> assert(parse_varint b == Some (n' % 0x40, 1))
+   end
+  else if n < pow2 14 then lemma_varint_case1 n
+  else if n < pow2 30 then lemma_varint_case2 n
+  else lemma_varint_case3 n;
+  admit()
+  
 #pop-options
 
 (*
@@ -286,17 +334,40 @@ let rec of_bitfield (l:list bool) : (n:nat{n < pow2 (List.Tot.length l)}) =
   | [] -> 0
   | b :: t -> 2 * (of_bitfield t) + (if b then 1 else 0)
 
-let rec lemma_bitfield (k:nat) (n:nat{n < pow2 k}) 
+let rec lemma_bitfield (k:nat) (n:nat{n < pow2 k})
   : Lemma (of_bitfield (to_bitfield k n) == n)
   =
   if k = 0 then ()
   else lemma_bitfield (k-1) (n/2)
 
+let rec lemma_bitfield_inv (l:list bool)
+  : Lemma (to_bitfield (List.Tot.length l) (of_bitfield l) == l)
+  =
+  match l with
+  | [] -> ()
+  | _ :: t -> lemma_bitfield_inv t
+
+
 let to_bitfield8 (b:byte) = to_bitfield 8 (U8.v b)
 let of_bitfield8 (l:list bool{List.Tot.length l == 8}) : byte = U8.uint_to_t (of_bitfield l)
 
+
+let lemma_bitfield8 (l:list bool{List.Tot.length l == 8}) : Lemma
+  (requires True)
+  (ensures to_bitfield8 (of_bitfield8 l) == l) =
+  lemma_bitfield_inv l
+
+
+
 let to_bitfield2 (n:nat2) = let b0::b1::[] = to_bitfield 2 n in (b0, b1)
 let of_bitfield2 (b0, b1) : nat2 = of_bitfield [b0; b1]
+
+let lemma_bitfield2 (n:nat2) : Lemma
+  (requires True)
+  (ensures of_bitfield2 (to_bitfield2 n) = n) =
+  lemma_bitfield 2 n
+
+
 
 let format_header p pn_len npn =
   let open FStar.Endianness in
@@ -315,6 +386,9 @@ let format_header p pn_len npn =
     S.((S.create 1 flag) @| (n_to_be 4 version) @| clen
       @| dcid @| scid @| (encode_varint plain_len) @| npn)
 
+
+
+
 let parse_header b cid_len =
   let open FStar.Endianness in
   let open FStar.Math.Lemmas in
@@ -327,7 +401,7 @@ let parse_header b cid_len =
       if S.length b = len then
         let npn = S.slice b (1 + add3 cid_len) len in
 	let cid = S.slice b 1 (1 + add3 cid_len) in
-        H_Success pn_len npn (Short phase spin cid)
+        H_Success pn_len npn (Short spin phase cid)
       else H_Failure
     | [pn0; pn1; false; false; typ0; typ1; true; true] ->
       let pn_len : nat2 = of_bitfield2 (pn0, pn1) in
@@ -354,8 +428,289 @@ let parse_header b cid_len =
       else H_Failure
     | _ -> H_Failure
 
+
+
+
+/// Todo HERE
+
+let extract_dcil_scil (dcil:nat4) (scil:nat4) (cl:nat) : Lemma
+  (requires (let open FStar.Mul in cl = 0x10 * dcil + scil))
+  (ensures (cl % 0x10 = scil /\ cl / 0x10 = dcil)) =
+  ()
+
+
+let size_long_header_bound_cid p pn_len npn : Lemma
+  (requires True)
+  (ensures S.length (format_header p pn_len npn) >= 1 + add3 (Long?.dcil p) + add3 (Long?.scil p)) =
+  ()
+
+
+type parsing_correct h pn_len npn =
+  parse_header (format_header h pn_len npn) (cid_len h) == H_Success pn_len npn h
+
+let lemma_short_header_parsing_correct h pn_len npn : Lemma
+  (requires (Short? h))
+  (ensures (parsing_correct h pn_len npn)) =
+  let b = format_header h pn_len npn in
+  let (pnb0, pnb1) = to_bitfield2 pn_len in
+  lemma_bitfield2 pn_len;
+  if S.length b <> 0 then
+    match h with
+    | Short spin phase cid ->
+      let l = [pnb0;pnb1; phase; false; false; spin; true; false] in
+      assert_norm(List.Tot.length l == 8);
+      lemma_bitfield8 l;
+      assert (to_bitfield8 (S.index b 0) == l);
+      let flag = of_bitfield8 l in
+      let len = 1 + (add3 (cid_len h)) + 1 + pn_len in
+      if S.length b = len then begin
+        S.append_slices (S.create 1 flag) (S.append cid npn);
+        S.append_slices cid npn;
+        assert (S.slice b (1+add3 (cid_len h)) len = npn);
+        assert (S.slice b 1 (1 + add3 (cid_len h)) = cid);
+        assert (parse_header b (cid_len h) = H_Success pn_len npn h)
+      end
+    | _ -> ()
+
+
+
+#push-options "--z3rlimit 20"
+
+let lemma_long_header_parsing_correct_flag h pn_len npn : Lemma
+  (requires Long? h)
+  (ensures (
+    let b = format_header h pn_len npn in
+    let (pnb0, pnb1) = to_bitfield2 pn_len in
+    let (typ0, typ1) = to_bitfield2 (Long?.typ h) in
+    let l = [pnb0; pnb1; false; false; typ0; typ1; true; true] in
+    to_bitfield8 (S.index b 0) = l)) =
+  let (pnb0, pnb1) = to_bitfield2 pn_len in
+  lemma_bitfield2 pn_len;
+  match h with
+  | Long typ _ _ _ _ _ _ ->
+    let (typ0, typ1) = to_bitfield2 typ in
+    let l = [pnb0; pnb1; false; false; typ0; typ1; true; true] in
+    assert_norm(List.Tot.length l == 8);
+    lemma_bitfield8 l
+
+#pop-options
+
+
+
+// Splitting the lemma S.append_slices in several parts. This is
+// dirty, but otherwise the SMT solver is lost after ~4 applications
+// of the lemma (and here we need 7)
+let append_slices1 (s1:bytes) (s2:bytes) : Lemma
+  (S.equal s1 (S.slice (S.append s1 s2) 0 (S.length s1))) =
+  ()
+
+let append_slices3 (s1:bytes) (s2:bytes) : Lemma
+  ( (forall (i:nat) (j:nat).
+                i <= j /\ j <= Seq.length s2 ==>
+                Seq.equal (Seq.slice s2 i j)
+                          (Seq.slice (Seq.append s1 s2) (Seq.length s1 + i) (Seq.length s1 + j)))) =
+  ()
+
+
+// lemmas about recovery of appended components using S.slice
+let lemma_slice_long_header1 (u1 u2 u3 u4 u5 u6 u7:bytes) : Lemma
+  (requires True)
+  (ensures (
+    let b = S.(u1 @| u2 @| u3 @| u4 @| u5 @| u6 @| u7) in
+    u1 = S.slice b 0 (S.length u1))) =
+  append_slices1 u1 S.(u2 @| u3 @| u4 @| u5 @| u6 @| u7)
+
+let lemma_slice_long_header2 (u1 u2 u3 u4 u5 u6 u7:bytes) : Lemma
+  (requires True)
+  (ensures (
+    let b = S.(u1 @| u2 @| u3 @| u4 @| u5 @| u6 @| u7) in
+    u2 = S.slice b (S.length u1) (S.length u1+S.length u2))) =
+  append_slices1 u2 S.(u3 @| u4 @| u5 @| u6 @| u7);
+  append_slices3 u1 S.(u2 @| u3 @| u4 @| u5 @| u6 @| u7)
+
+
+let lemma_slice_long_header3 (u1 u2 u3 u4 u5 u6 u7:bytes) : Lemma
+  (requires True)
+  (ensures (
+    let b = S.(u1 @| u2 @| u3 @| u4 @| u5 @| u6 @| u7) in
+    u3 = S.slice b (S.length u1+S.length u2) (S.length u1+S.length u2+S.length u3))) =
+  append_slices1 u3 S.(u4 @| u5 @| u6 @| u7);
+  append_slices3 u2 S.(u3 @| u4 @| u5 @| u6 @| u7);
+  append_slices3 u1 S.(u2 @| u3 @| u4 @| u5 @| u6 @| u7)
+
+let lemma_slice_long_header4 (u1 u2 u3 u4 u5 u6 u7:bytes) : Lemma
+  (requires True)
+  (ensures (
+    let b = S.(u1 @| u2 @| u3 @| u4 @| u5 @| u6 @| u7) in
+    u4 = S.slice b (S.length u1+S.length u2+S.length u3) (S.length u1+S.length u2+S.length u3+S.length u4))) =
+  append_slices1 u4 S.(u5 @| u6 @| u7);
+  append_slices3 u3 S.(u4 @| u5 @| u6 @| u7);
+  append_slices3 u2 S.(u3 @| u4 @| u5 @| u6 @| u7);
+  append_slices3 u1 S.(u2 @| u3 @| u4 @| u5 @| u6 @| u7)
+
+let lemma_slice_long_header5 (u1 u2 u3 u4 u5 u6 u7:bytes) : Lemma
+  (requires True)
+  (ensures (
+    let b = S.(u1 @| u2 @| u3 @| u4 @| u5 @| u6 @| u7) in
+    u5 = S.slice b (S.length u1+S.length u2+S.length u3+S.length u4) (S.length u1+S.length u2+S.length u3+S.length u4+S.length u5))) =
+  append_slices1 u5 S.(u6 @| u7);
+  append_slices3 u4 S.(u5 @| u6 @| u7);
+  append_slices3 u3 S.(u4 @| u5 @| u6 @| u7);
+  append_slices3 u2 S.(u3 @| u4 @| u5 @| u6 @| u7);
+  append_slices3 u1 S.(u2 @| u3 @| u4 @| u5 @| u6 @| u7)
+
+let lemma_slice_long_header6 (u1 u2 u3 u4 u5 u6 u7:bytes) : Lemma
+  (requires True)
+  (ensures (
+    let b = S.(u1 @| u2 @| u3 @| u4 @| u5 @| u6 @| u7) in
+    u6 = S.slice b (S.length u1+S.length u2+S.length u3+S.length u4+S.length u5) (S.length u1+S.length u2+S.length u3+S.length u4+S.length u5+S.length u6))) =
+  append_slices1 u6 u7;
+  append_slices3 u5 S.(u6 @| u7);
+  append_slices3 u4 S.(u5 @| u6 @| u7);
+  append_slices3 u3 S.(u4 @| u5 @| u6 @| u7);
+  append_slices3 u2 S.(u3 @| u4 @| u5 @| u6 @| u7);
+  append_slices3 u1 S.(u2 @| u3 @| u4 @| u5 @| u6 @| u7)
+
+
+let lemma_slice_long_header67 (u1 u2 u3 u4 u5 u6 u7:bytes) : Lemma
+  (requires True)
+  (ensures (
+    let b = S.(u1 @| u2 @| u3 @| u4 @| u5 @| u6 @| u7) in
+    S.(u6 = S.slice b (S.length u1+S.length u2+S.length u3+S.length u4+S.length u5) (S.length u1+S.length u2+S.length u3+S.length u4+S.length u5+S.length u6)))) =
+  append_slices1 u6 u7;
+  append_slices3 u5 S.(u6 @| u7);
+  append_slices3 u4 S.(u5 @| u6 @| u7);
+  append_slices3 u3 S.(u4 @| u5 @| u6 @| u7);
+  append_slices3 u2 S.(u3 @| u4 @| u5 @| u6 @| u7);
+  append_slices3 u1 S.(u2 @| u3 @| u4 @| u5 @| u6 @| u7)
+
+// not so sure why, but the last iteration is much less automatable
+// than the others. Had to decompose it into 7 sublemmas
+let lemma_slice_long_header7_step7 (u7:bytes) : Lemma
+  (requires True)
+  (ensures u7 = S.slice u7 0 (S.length u7)) =
+  ()
+
+let lemma_slice_long_header7_step6 (u6 u7:bytes) : Lemma
+  (requires True)
+  (ensures u7 = S.slice S.(u6 @| u7) (S.length u6) (S.length u6+S.length u7)) =
+  lemma_slice_long_header7_step7 u7;
+  S.append_slices u6 u7
+
+let lemma_slice_long_header7_step5 (u5 u6 u7:bytes) : Lemma
+  (requires True)
+  (ensures u7 = S.slice S.(u5 @| u6 @| u7) (S.length u5+S.length u6) (S.length u5+S.length u6+S.length u7)) =
+  lemma_slice_long_header7_step6 u6 u7;
+  S.append_slices u5 S.(u6 @| u7)
+
+let lemma_slice_long_header7_step4 (u4 u5 u6 u7:bytes) : Lemma
+  (requires True)
+  (ensures u7 = S.slice S.(u4 @| u5 @| u6 @| u7) (S.length u4+S.length u5+S.length u6) (S.length u4+S.length u5+S.length u6+S.length u7)) =
+  lemma_slice_long_header7_step5 u5 u6 u7;
+  S.append_slices u4 S.(u5 @| u6 @| u7)
+
+let lemma_slice_long_header7_step3 (u3 u4 u5 u6 u7:bytes) : Lemma
+  (requires True)
+  (ensures u7 = S.slice S.(u3 @| u4 @| u5 @| u6 @| u7) (S.length u3+S.length u4+S.length u5+S.length u6) (S.length u3+S.length u4+S.length u5+S.length u6+S.length u7)) =
+  lemma_slice_long_header7_step4 u4 u5 u6 u7;
+  S.append_slices u3 S.(u4 @| u5 @| u6 @| u7)
+
+let lemma_slice_long_header7_step2 (u2 u3 u4 u5 u6 u7:bytes) : Lemma
+  (requires True)
+  (ensures u7 = S.slice S.(u2 @|u3 @| u4 @| u5 @| u6 @| u7) (S.length u2+S.length u3+S.length u4+S.length u5+S.length u6) (S.length u2+S.length u3+S.length u4+S.length u5+S.length u6+S.length u7)) =
+  lemma_slice_long_header7_step3 u3 u4 u5 u6 u7;
+  S.append_slices u2 S.(u3 @| u4 @| u5 @| u6 @| u7)
+
+let lemma_slice_long_header7 (u1 u2 u3 u4 u5 u6 u7:bytes) : Lemma
+  (requires True)
+  (ensures (
+    let b = S.(u1 @| u2 @|u3 @| u4 @| u5 @| u6 @| u7) in
+    u7 = S.slice b (S.length u1+S.length u2+S.length u3+S.length u4+S.length u5+S.length u6) (S.length u1+S.length u2+S.length u3+S.length u4+S.length u5+S.length u6+S.length u7))) =
+  lemma_slice_long_header7_step2 u2 u3 u4 u5 u6 u7;
+  S.append_slices u1 S.(u2 @| u3 @| u4 @| u5 @| u6 @| u7)
+
+
+
+
+let lemma_long_header_parsing_correct h pn_len npn : Lemma
+  (requires (Long? h))
+  (ensures (parsing_correct h pn_len npn)) =
+  let b = format_header h pn_len npn in
+  let (pnb0, pnb1) = to_bitfield2 pn_len in
+  lemma_bitfield2 pn_len;
+  if S.length b <> 0 then
+    match h with
+    | Long typ version dcil scil dcid scid plain_len ->
+      let open FStar.Endianness in
+      let (typ0, typ1) = to_bitfield2 typ in
+      let l = [pnb0; pnb1; false; false; typ0; typ1; true; true] in
+      lemma_long_header_parsing_correct_flag h pn_len npn;
+      // assert (to_bitfield8 (S.index b 0) = l);
+      let flag = of_bitfield8 (assert_norm (List.Tot.length l == 8); l) in
+      lemma_bitfield2 typ;
+      let cl8 = U8.(16uy *^ uint_to_t dcil +^ uint_to_t scil) in
+      let (u1,u2,u3,u4,u5,u6,u7) = (S.create 1 flag, n_to_be 4 version, S.create 1 cl8, dcid, scid, encode_varint (assert_norm(max_plain_length <= pow2 62); plain_len), npn) in
+      assert (b = S.(u1 @| u2 @| u3 @| u4 @| u5 @| u6 @| u7));
+      if S.length b >= 10 then begin
+        // extracting the flag
+        lemma_slice_long_header1 u1 u2 u3 u4 u5 u6 u7;
+        //assert (S.length u1 = 1);
+        assert (S.slice b 0 1 = u1);
+
+        // extracting the version
+        //assert (be_to_n u2 = version);
+        //assert (S.length u2 = 4);
+        lemma_slice_long_header2 u1 u2 u3 u4 u5 u6 u7;
+        //assert (S.slice b 1 5 = u2);
+        assert (be_to_n (S.slice b 1 5) = version);
+
+        // extracting clen
+        //assert (S.length u3 = 1);
+        lemma_slice_long_header3 u1 u2 u3 u4 u5 u6 u7;
+        //assert (S.slice b 5 6 = u3);
+        //S.cons_index_slice b 5 6;
+        assert (S.index b 5 = cl8);
+        let cl = U8.v cl8 in
+
+        // extracting dci, scil
+        extract_dcil_scil dcil scil cl;
+
+        // extracting cid
+        let pos_length = 6 + add3 dcil + add3 scil in
+        size_long_header_bound_cid h pn_len npn;
+        if S.length b >= pos_length + 1 then begin
+          lemma_slice_long_header4 u1 u2 u3 u4 u5 u6 u7;
+          //assert (S.length u4 = add3 dcil);
+          assert (u4 = S.slice b 6 (6+add3 dcil));
+
+          lemma_slice_long_header5 u1 u2 u3 u4 u5 u6 u7;
+          //assert (S.length u5 = add3 scil);
+          assert (u5 = S.slice b (6+add3 dcil) (6+add3 dcil+add3 scil));
+          admit()
+        end
+      end
+      else admit()
+    | _ -> ()
+
+
+
+
 let lemma_header_parsing_correct h pn_len npn =
-  admit()
+  let b = format_header h pn_len npn in
+  let (pnb0, pnb1) = to_bitfield2 pn_len in
+  lemma_bitfield2 pn_len;
+  if S.length b <> 0 then
+    match h with
+    | Short spin phase cid ->
+      lemma_short_header_parsing_correct h pn_len npn
+    | Long typ version dcil scil dcid scid plain_len ->
+      lemma_long_header_parsing_correct h pn_len npn
+
+
+
+
+
+
 
 let lemma_header_parsing_safe b1 b2 =
   admit()
@@ -405,6 +760,8 @@ let pn_sizemask (pn_len:nat2) : lbytes 4 =
   let open FStar.Endianness in
   n_to_be 4 (pow2 32 - pow2 (24 - (8 `op_Multiply` pn_len)))
 
+
+/// @irakoton rewrite code before, so that the code is not inlined
 #push-options "--z3rlimit 20"
 let encrypt a k siv hpk pn_len seqn plain =
   let open FStar.Endianness in
@@ -528,4 +885,4 @@ let decrypt a k siv hpk last cid packet =
     | Some plain ->
       admit()
       //Success pn_len npn
-#pop-options
+#pop-options*)
