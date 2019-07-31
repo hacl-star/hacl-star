@@ -203,7 +203,9 @@ val sign_step_5:
        v s.[1] < 0x100000000000000 /\
        v s.[2] < 0x100000000000000 /\
        v s.[3] < 0x100000000000000 /\
-       v s.[4] < 0x100000000000000)
+       v s.[4] < 0x100000000000000) /\
+       F56.as_nat h (gsub tmp_ints 20ul 5ul) < Spec.Ed25519.q /\
+       F56.as_nat h (gsub tmp_ints 60ul 5ul) < pow2 256
     )
     (ensures fun h0 _ h1 -> modifies (loc tmp_bytes |+| loc tmp_ints) h0 h1 /\
       // Framing

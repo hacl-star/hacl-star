@@ -293,7 +293,7 @@ val normalize4:
   Stack unit
   (requires fun h -> live h acc /\ live h x /\ live h pre)
   (ensures  fun h0 _ h1 -> modifies1 acc h0 h1 /\
-    feval h1 acc == Vec.normalize4 (feval4 h0 x) (feval4 h0 pre))
+    feval h1 acc == Vec.normalize4 (feval4 h0 pre) (feval4 h0 x))
 
 [@CInline]
 let normalize4 acc x pre =

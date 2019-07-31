@@ -354,7 +354,7 @@ val normalize4:
     disjoint acc x /\ disjoint acc y /\ disjoint x y /\
     precomp_inv_t h y)
   (ensures  fun h0 _ h1 -> modifies2 x acc h0 h1 /\
-    feval h1 acc == normalize4 (feval4 h0 x) (get_r4321 h0 y))
+    feval h1 acc == normalize4 (get_r4321 h0 y) (feval4 h0 x))
 
 let normalize4 #s acc x pre =
   match s with

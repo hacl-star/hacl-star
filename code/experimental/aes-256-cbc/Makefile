@@ -41,6 +41,9 @@ ROOTS = Hacl.Test.AES_256_CBC.fst
 
 .PRECIOUS: %.krml
 
+$(HINT_DIR):
+	mkdir -p $@
+
 .depend:
 	$(FSTAR) --dep full $(ROOTS) --extract '* -Prims -FStar +FStar.UInt128 -LowStar -Spec' > $@
 
@@ -63,7 +66,7 @@ $(CACHE_DIR)/Lib.%.checked: | .depend
 	$(FSTAR) $< --admit_smt_queries true && \
 	touch $@
 
-$(CACHE_DIR)/%.checked: | .depend
+$(CACHE_DIR)/%.checked: | .depend $(HINT_DIR)
 	$(FSTAR) $< $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $<).hints && \
 	touch $@
 

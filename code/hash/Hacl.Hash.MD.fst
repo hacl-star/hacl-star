@@ -16,60 +16,53 @@ open Hacl.Hash.Definitions
 open Hacl.Hash.Lemmas
 open Spec.Hash.Definitions
 open FStar.Mul
-open FStar.Calc
 
 (** Auxiliary helpers *)
 
-#reset-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0 "
+#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 
 let padding_round (a: hash_alg) (len: len_t a): Lemma
-  (ensures (
-    (len_v a len + pad_length a (len_v a len)) % block_length a = 0))
+  ((len_v a len + pad_length a (len_v a len)) % block_length a = 0)
 =
   ()
 
-#push-options "--initial_fuel 0 --max_fuel 0 --z3cliopt smt.arith.nl=false --smtencoding.elim_box true --smtencoding.l_arith_repr native --smtencoding.nl_arith_repr wrapped"
-
-let pad0_length_mod (a: hash_alg) (base_len: nat) (len: nat): Lemma
-  (requires (
-    base_len % block_length a = 0))
-  (ensures (
-    pad0_length a (base_len + len) == pad0_length a len))
-= let l_init = base_len + len + len_length a + 1 in
-  let l_end = len + len_length a + 1 in
-  assert (block_length a > 0);
-  let block_a:pos = block_length a in
+private
+val mod_sub_add: a:int -> b:int -> c:int -> d:int -> p:pos -> Lemma
+  (requires b % p = 0)
+  (ensures  (a - ((b + c) + d)) % p == (a - (c + d)) % p)
+let mod_sub_add a b c d p =
   calc (==) {
-    pad0_length a (base_len + len) <: nat;
-    (==) { }
-    (block_a - l_init) % block_a;
-    (==) { Math.Lemmas.lemma_mod_sub_distr (block_a)
-      l_init (block_a) }
-    (block_a - l_init % block_a) % block_a;
-    (==) { Math.Lemmas.lemma_mod_plus_distr_l base_len (len + len_length a + 1) (block_length a) }
-    (block_a - l_end % block_length a) % block_a;
-    (==) { Math.Lemmas.lemma_mod_sub_distr (block_a) l_end block_a }
-    (block_a - l_end) % block_a;
-    (==) { }
-    pad0_length a len;
+    (a - ((b + c) + d)) % p;
+    == { Math.Lemmas.lemma_mod_sub_distr a ((b + c) + d) p }
+    (a - ((b + c) + d) % p) % p;
+    == { Math.Lemmas.lemma_mod_plus_distr_l (b + c) d p }
+    (a - ((b + c) % p + d) % p) % p;
+    == { Math.Lemmas.lemma_mod_plus_distr_l b c p }
+    (a - ((b % p + c) % p + d) % p) % p;
+    == { }
+    (a - (c % p + d) % p) % p;
+    == { Math.Lemmas.lemma_mod_plus_distr_l c d p }
+    (a - (c + d) % p) % p;
+    == { Math.Lemmas.lemma_mod_sub_distr a (c + d) p }
+    (a - (c + d)) % p;
   }
 
-#pop-options
+let pad0_length_mod (a: hash_alg) (base_len: nat) (len: nat): Lemma
+  (requires base_len % block_length a = 0)
+  (ensures  pad0_length a (base_len + len) = pad0_length a len)
+=
+  mod_sub_add (block_length a) base_len len (len_length a + 1) (block_length a)
 
 let pad_length_mod (a: hash_alg) (base_len len: nat): Lemma
-  (requires (
-    base_len % block_length a = 0))
-  (ensures (
-    pad_length a (base_len + len) = pad_length a len))
+  (requires base_len % block_length a = 0)
+  (ensures  pad_length a (base_len + len) = pad_length a len)
 =
   pad0_length_mod a base_len len
 
 let pad_length_bound (a: hash_alg) (len: len_t a): Lemma
-  (ensures (pad_length a (len_v a len) <= 2 * block_length a))
+  (pad_length a (len_v a len) <= 2 * block_length a)
 =
   ()
-
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 200"
 
 (* Avoiding an ill-formed pattern error... *)
 noextract inline_for_extraction
@@ -86,8 +79,6 @@ let len_add32 (a: hash_alg)
   | SHA2_384 | SHA2_512 ->
       assert_norm (pow2 125 < pow2 128);
       U128.(prev_len +^ uint64_to_uint128 (uint32_to_uint64 input_len))
-
-#push-options "--max_fuel 1 --z3rlimit 128"
 
 (** Iterated compression function. *)
 noextract inline_for_extraction
@@ -128,7 +119,7 @@ let mk_update_multi a update s blocks n_blocks =
   assert (B.length blocks = U32.v n_blocks * block_length a);
   C.Loops.for 0ul n_blocks inv f
 
-#push-options "--max_fuel 0 --z3rlimit 600"
+#set-options "--z3rlimit 400"
 
 (** An arbitrary number of bytes, then padding. *)
 noextract inline_for_extraction
@@ -197,17 +188,12 @@ let mk_update_last a update_multi pad s prev_len input input_len =
   ST.pop_frame ()
 
 
-#push-options "--max_ifuel 1"
-
 noextract inline_for_extraction
 let u32_to_len (a: hash_alg) (l: U32.t): l':len_t a { len_v a l' = U32.v l } =
   match a with
   | SHA2_384 | SHA2_512 ->
-      FStar.Int.Cast.Full.(uint64_to_uint128 (uint32_to_uint64 l))
-  | _ ->
-      FStar.Int.Cast.Full.(uint32_to_uint64 l)
-
-#pop-options
+    FStar.Int.Cast.Full.(uint64_to_uint128 (uint32_to_uint64 l))
+  | _ -> FStar.Int.Cast.Full.uint32_to_uint64 l
 
 
 (** Complete hash. *)

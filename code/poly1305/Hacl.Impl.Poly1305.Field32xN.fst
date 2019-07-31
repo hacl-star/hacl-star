@@ -686,7 +686,7 @@ val load_acc1:
     (ensures  fun h0 _ h1 ->
       modifies (loc acc) h0 h1 /\
       felem_fits h1 acc (2, 3, 2, 2, 2) /\
-      feval h1 acc == Vec.load_acc1 (feval h0 acc).[0] (as_seq h0 b))
+      feval h1 acc == Vec.load_acc1 (as_seq h0 b) (feval h0 acc).[0])
 let load_acc1 acc b =
   push_frame();
   let h0 = ST.get () in
@@ -708,7 +708,7 @@ val load_acc2:
     (ensures  fun h0 _ h1 ->
       modifies (loc acc) h0 h1 /\
       felem_fits h1 acc (2, 3, 2, 2, 2) /\
-      feval h1 acc == Vec.load_acc2 (feval h0 acc).[0] (as_seq h0 b))
+      feval h1 acc == Vec.load_acc2 (as_seq h0 b) (feval h0 acc).[0])
 let load_acc2 acc b =
   push_frame();
   let e = create 5ul (zero 2) in
@@ -746,7 +746,7 @@ val load_acc4:
     (ensures  fun h0 _ h1 ->
       modifies (loc acc) h0 h1 /\
       felem_fits h1 acc (2, 3, 2, 2, 2) /\
-      feval h1 acc == Vec.load_acc4 (feval h0 acc).[0] (as_seq h0 b))
+      feval h1 acc == Vec.load_acc4 (as_seq h0 b) (feval h0 acc).[0])
 let load_acc4 acc b =
   push_frame();
   let e = create 5ul (zero 4) in
@@ -862,7 +862,7 @@ val fmul_r1_normalize:
       modifies (loc out) h0 h1 /\
       acc_inv_t (as_tup5 h1 out) /\
      (let r = feval h0 (gsub p 0ul 5ul) in
-      (feval h1 out).[0] == Vec.normalize_1 (feval h0 out) r.[0]))
+      (feval h1 out).[0] == Vec.normalize_1 r.[0] (feval h0 out)))
 let fmul_r1_normalize out p =
   let r = sub p 0ul 5ul in
   let r5 = sub p 5ul 5ul in
@@ -882,7 +882,7 @@ val fmul_r2_normalize:
       modifies (loc out) h0 h1 /\
       acc_inv_t (as_tup5 h1 out) /\
      (let r = feval h0 (gsub p 0ul 5ul) in
-      (feval h1 out).[0] == Vec.normalize_2 (feval h0 out) r.[0]))
+      (feval h1 out).[0] == Vec.normalize_2 r.[0] (feval h0 out)))
 let fmul_r2_normalize out p =
   let r = sub p 0ul 5ul in
   let r2 = sub p 10ul 5ul in
@@ -927,7 +927,7 @@ val fmul_r4_normalize:
       modifies (loc out) h0 h1 /\
       acc_inv_t (as_tup5 h1 out) /\
      (let r = feval h0 (gsub p 0ul 5ul) in
-      (feval h1 out).[0] == Vec.normalize_4 (feval h0 out) r.[0]))
+      (feval h1 out).[0] == Vec.normalize_4 r.[0] (feval h0 out)))
 let fmul_r4_normalize out p =
   let r = sub p 0ul 5ul in
   let r_5 = sub p 5ul 5ul in
@@ -980,7 +980,7 @@ val fmul_rn_normalize:
       modifies (loc out) h0 h1 /\
       acc_inv_t (as_tup5 h1 out) /\
      (let r = feval h0 (gsub p 0ul 5ul) in
-      (feval h1 out).[0] == Vec.normalize_n (feval h0 out) r.[0]))
+      (feval h1 out).[0] == Vec.normalize_n r.[0] (feval h0 out)))
 let fmul_rn_normalize #w out p =
   match w with
   | 1 -> fmul_r1_normalize out p
