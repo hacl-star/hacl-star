@@ -15,6 +15,9 @@ module L = FStar.List.Tot
 
 type big = x:int{x > 1}
 
+val big_times_pos_is_big: a:big -> b:pos -> Lemma (a * b > 1)
+let big_times_pos_is_big a b = ()
+
 val one: pos
 let one = 1
 
