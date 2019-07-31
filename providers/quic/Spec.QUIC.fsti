@@ -1,5 +1,6 @@
 module Spec.QUIC
 
+
 module S = FStar.Seq
 module H = Spec.Hash
 module HD = Spec.Hash.Definitions
@@ -65,7 +66,8 @@ let vlen (n:nat62) : vlsize =
 
 val encode_varint: n:nat62 -> lbytes (vlen n)
 val parse_varint: b:bytes{S.length b > 0} -> option (n:nat{n < pow2 62} * vlsize)
-val lemma_varint: (n:nat62) -> Lemma (parse_varint (encode_varint n) == Some (n, vlen n))
+
+val lemma_varint: (suff:bytes) -> (n:nat62) -> Lemma (parse_varint S.(encode_varint n @| suff) == Some (n, vlen n))
 
 let max_plain_length : n:nat{forall a. n <= AEAD.max_length a} = pow2 32 - 17
   

@@ -42,7 +42,7 @@ let encode_varint n =
 
 let suffix (b:bytes) (n:nat{n <= S.length b}) = S.slice b n (S.length b)
 
-let parse_varint b =
+let parse_varint_suffixless (b:bytes{S.length b > 0}) : option (n:nat{n < pow2 62} * vlsize) =
   let open FStar.Endianness in
   assert_norm(pow2 0 == 1 /\ pow2 1 == 2 /\ pow2 2 == 4 /\ pow2 3 == 8 /\ pow2 8 == 256);
   assert_norm(pow2 8 / 0x40 == 4);
@@ -58,21 +58,12 @@ let parse_varint b =
   | 3 -> Some (n % 0x4000000000000000, 8))
 
 
-let parse_varint_bis (b:bytes{S.length b > 0}) : option (n:nat{n < pow2 62} * vlsize) =
+let parse_varint (b:bytes{S.length b > 0}) : option (n:nat{n < pow2 62} * vlsize) =
   let open FStar.Endianness in
-  assert_norm(pow2 0 == 1 /\ pow2 1 == 2 /\ pow2 2 == 4 /\ pow2 3 == 8 /\ pow2 8 == 256);
-  assert_norm(pow2 8 / 0x40 == 4);
-  assert_norm(0x4000 < pow2 62 /\ 0x40000000 < pow2 62 /\ 0x4000000000000000 == pow2 62);
   // b0 is the integer interpretation of the first 2 bits of b
   let b0 = U8.v (S.index b 0) / 0x40 in
-  let n = be_to_n b in
-  if S.length b < pow2 b0 then None else
-  let real_n = n / pow2 (S.length b - pow2 b0) in
-  (match b0 with
-  | 0 -> Some (real_n % 0x40, 1)
-  | 1 -> Some (real_n % 0x4000, 2)
-  | 2 -> Some (real_n % 0x40000000, 4)
-  | 3 -> Some (real_n % 0x4000000000000000, 8))
+  if S.length b < pow2 b0 then None
+  else parse_varint_suffixless (S.slice b 0 (pow2 b0))
 
 
 // Move to FStar.Math.Lemmas?
@@ -173,7 +164,7 @@ private let mod_case1 (n:nat) : n:nat{n < pow2 62} =
   modulo_range_lemma n 0x4000; n % 0x4000
 
 private let lemma_varint_case1 (n:nat{n < pow2 14})
-  : Lemma (parse_varint (FStar.Endianness.n_to_be 2 (pow2 14 + n)) ==
+  : Lemma (parse_varint_suffixless (FStar.Endianness.n_to_be 2 (pow2 14 + n)) ==
     Some (mod_case1 n, 2))
   =
   let open FStar.Endianness in
@@ -195,7 +186,7 @@ private let mod_case2 (n:nat) : n:nat{n < pow2 62} =
   modulo_range_lemma n 0x40000000; n % 0x40000000
 
 private let lemma_varint_case2 (n:nat{n < pow2 30})
-  : Lemma (parse_varint (FStar.Endianness.n_to_be 4 (pow2 31 + n)) ==
+  : Lemma (parse_varint_suffixless (FStar.Endianness.n_to_be 4 (pow2 31 + n)) ==
     Some (mod_case2 n, 4)) =
   let open FStar.Endianness in
   let open FStar.Math.Lemmas in
@@ -234,7 +225,9 @@ let lemma_varint_case3 (n:nat{n < pow2 62})
   | 3 -> assert(parse_varint b == Some (n % 0x4000000000000000, 8))
 
 #push-options "--z3rlimit 20"
-let lemma_varint n =
+
+let lemma_varint_suffixless (n:nat62) : Lemma
+  (parse_varint (encode_varint n) == Some (n, vlen n)) =
   let open FStar.Endianness in
   let open FStar.Math.Lemmas in
   let open FStar.Mul in
@@ -261,35 +254,36 @@ let lemma_varint n =
   else lemma_varint_case3 n
 
 
-let lemma_varint_bis (suff:bytes) (n:nat62) : Lemma
-  (parse_varint_bis S.(encode_varint n @| suff) == Some (n, vlen n)) =
-  let open FStar.Endianness in
-  let open FStar.Math.Lemmas in
-  let open FStar.Mul in
-  assert_norm(pow2 0 == 1 /\ pow2 1 == 2 /\ pow2 2 == 4 /\ pow2 3 == 8 /\ pow2 8 == 256);
-  assert_norm(pow2 8 / 0x40 == 4);
-  assert_norm(0x4000 < pow2 62 /\ 0x40000000 < pow2 62 /\ 0x4000000000000000 == pow2 62);
-  assert_norm(pow2 6 == 0x40 /\ pow2 14 == 0x4000 /\ pow2 30 == 0x40000000 /\ pow2 62 == 0x4000000000000000);
-  assert_norm(pow2 (8 * 0) == 1 /\ pow2 (8 * 1) == 0x100 /\ pow2 (8 * 3) == 0x1000000 /\ pow2 (8 * 7) == 0x100000000000000);
-  assert_norm(0x100 * 0x40 == 0x4000 /\ 0x1000000 * 0x40 == 0x40000000);
+let length_encode (n:nat62) : Lemma
+  (let b = encode_varint n in
+   let b0 = U8.v (S.index b 0) / 0x40 in
+   S.length b == pow2 b0) =
   let b = encode_varint n in
   let b0 = U8.v (S.index b 0) / 0x40 in
-  let n' = be_to_n b in
-  let k = S.length b in
-  if n < pow2 6 then
-   begin
-    lemma_be_index 1 n;
-    small_div n (pow2 6); small_mod n (pow2 6);
-    S.lemma_empty (suffix b 1);
-    match b0 with
-    | 0 -> assert(parse_varint b == Some (n' % 0x40, 1))
-   end
-  else if n < pow2 14 then lemma_varint_case1 n
-  else if n < pow2 30 then lemma_varint_case2 n
-  else lemma_varint_case3 n;
-  admit()
-  
+  if n < pow2 6 then lemma_be_index 1 n
+  else if n < pow2 14 then lemma_be_index 2 (pow2 14+n)
+  else if n < pow2 30 then lemma_be_index 4 (pow2 31+n)
+  else lemma_be_index 8 (pow2 63+pow2 62+n)
+
+
 #pop-options
+
+
+let lemma_varint (suff:bytes) (n:nat62) : Lemma
+  (parse_varint S.(encode_varint n @| suff) == Some (n, vlen n)) =
+  let b = encode_varint n in
+  let b0 = U8.v (S.index b 0) / 0x40 in
+  length_encode n;
+  assert (S.length b = pow2 b0);
+  assert (parse_varint S.(b @| suff) = parse_varint_suffixless (S.slice S.(b @| suff) 0 (pow2 b0)));
+  S.append_slices b suff;
+  assert (S.slice S.(b @| suff) 0 (S.length b) = b);
+  assert (parse_varint S.(b @| suff) = parse_varint_suffixless b);
+  lemma_varint_suffixless n
+
+
+
+
 
 (*
    +-+-+-+-+-+-+-+-+
@@ -885,4 +879,6 @@ let decrypt a k siv hpk last cid packet =
     | Some plain ->
       admit()
       //Success pn_len npn
-#pop-options*)
+#pop-options
+
+
