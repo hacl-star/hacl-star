@@ -1750,20 +1750,23 @@ let rec find_deep_code_transform (c:code) (cs:codes) : possibly transformation_h
         "---------------------------------\n" ^
         "") in
     *)
-    if eq_codes (fully_unblocked_code x) (fully_unblocked_code c) then (
-      return (MoveUpFrom 0)
-    ) else (
-      match x with
-      | Block l -> (
-          match find_deep_code_transform c l with
-          | Ok t -> return (DiveInAt 0 t)
-          | Err reason ->
-            th <-- find_deep_code_transform c xs;
-            return (increment_hint th)
-        )
-      | _ ->
-        th <-- find_deep_code_transform c xs;
-        return (increment_hint th)
+    if is_empty_code x then find_deep_code_transform c xs else (
+      if eq_codes (fully_unblocked_code x) (fully_unblocked_code c) then (
+        return (MoveUpFrom 0)
+      ) else (
+        match x with
+        | Block l -> (
+            match find_deep_code_transform c l with
+            | Ok t ->
+              return (DiveInAt 0 t)
+            | Err reason ->
+              th <-- find_deep_code_transform c xs;
+              return (increment_hint th)
+          )
+        | _ ->
+          th <-- find_deep_code_transform c xs;
+          return (increment_hint th)
+      )
     )
 
 let rec metric_for_code (c:code) : GTot nat =
@@ -1780,6 +1783,14 @@ and metric_for_codes (c:codes) : GTot nat =
   | [] -> 0
   | x :: xs -> 1 + metric_for_code x + metric_for_codes xs
 
+let rec lemma_metric_for_codes_append (c1 c2:codes) :
+  Lemma
+    (ensures (metric_for_codes (c1 `L.append` c2) == metric_for_codes c1 + metric_for_codes c2))
+    [SMTPat (metric_for_codes (c1 `L.append` c2))] =
+  match c1 with
+  | [] -> ()
+  | x :: xs -> lemma_metric_for_codes_append xs c2
+
 irreducible
 (* Our proofs do not depend on how the hints are found. As long as
    some hints are provided, we validate the hints to perform the
@@ -1788,7 +1799,7 @@ irreducible
    reasoning about it. *)
 let rec find_transformation_hints (c1 c2:codes) :
   Tot (possibly transformation_hints)
-    (decreases %[metric_for_codes c2; c1]) =
+    (decreases %[metric_for_codes c2; metric_for_codes c1]) =
   let e1, e2 = is_empty_codes c1, is_empty_codes c2 in
   if e1 && e2 then (
     return []
@@ -1840,10 +1851,22 @@ let rec find_transformation_hints (c1 c2:codes) :
             return (InPlaceWhile bo_hints :: t_hints2)
           | Block l1, IfElse _ _ _
           | Block l1, While _ _ ->
-            assert_norm (metric_for_codes c2 >= metric_for_codes [h2]); (* OBSERVE *)
-            t_hints1 <-- find_transformation_hints l1 [h2];
-            t_hints2 <-- find_transformation_hints t1 t2;
-            return (wrap_diveinat 0 t_hints1 `L.append` t_hints2)
+            assert (metric_for_codes (l1 `L.append` t1) == metric_for_codes l1 + metric_for_codes t1); (* OBSERVE *)
+            assert_norm (metric_for_codes c1 == 2 + metric_for_codes l1 + metric_for_codes t1); (* OBSERVE *)
+            t_hints1 <-- find_transformation_hints (l1 `L.append` t1) c2;
+            (
+              match t_hints1 with
+              | [] -> Err "Impossible"
+              | th :: _ ->
+                let th = DiveInAt 0 th in
+                match perform_reordering_with_hint th c1 with
+                | Ok (h1 :: t1) ->
+                  t_hints2 <-- find_transformation_hints t1 t2;
+                  return (th :: t_hints2)
+                | Ok [] -> Err "Impossible"
+                | Err reason ->
+                  Err ("Failed during left-unblock for " ^ fst (print_code h2 0 gcc) ^ ". Reason: " ^ reason)
+            )
           | IfElse _ _ _, Block l2
           | While _ _, Block l2 ->
             find_transformation_hints c1 l2
