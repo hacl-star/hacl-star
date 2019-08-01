@@ -44,7 +44,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "e84522aea7bcf0e6ec3cc2b0bd971491"
+      "2d3b19db588fb95e58c1d9636e0a29fa"
     ],
     [
       "Spec.Frodo.KEM.crypto_publickeybytes",
@@ -86,7 +86,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "6dbcf100f9e375e229a56928401099a5"
+      "721714c9050bbf7ed638a28f195bc6b2"
     ],
     [
       "Spec.Frodo.KEM.crypto_secretkeybytes",
@@ -134,7 +134,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "9ede162ec8c03ed1263f5e0db7ff8b9d"
+      "b3401bd57ce8776c375b6f7bd7669beb"
     ],
     [
       "Spec.Frodo.KEM.crypto_ciphertextbytes",
@@ -155,9 +155,8 @@
         "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
         "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
-        "equation_Lib.IntTypes.v", "equation_Prims.nat",
-        "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
-        "equation_Spec.Frodo.Params.crypto_bytes",
+        "equation_Prims.nat", "equation_Spec.AES.gf8",
+        "equation_Spec.AES.irred", "equation_Spec.Frodo.Params.crypto_bytes",
         "equation_Spec.Frodo.Params.params_logq",
         "equation_Spec.Frodo.Params.params_n",
         "equation_Spec.Frodo.Params.params_nbar",
@@ -177,7 +176,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "9d7e7feb3627b7ba61457b8b9df54eef"
+      "d5e83344973c871354384ea70f7d4e01"
     ],
     [
       "Spec.Frodo.KEM.expand_crypto_publickeybytes",
@@ -186,7 +185,7 @@
       1,
       [ "@query", "equation_Spec.Frodo.KEM.crypto_publickeybytes" ],
       0,
-      "0e458f13745e2b270ceb67a5c6dd5d73"
+      "7eb47e5572cf3da18a7a5a0907c9dab8"
     ],
     [
       "Spec.Frodo.KEM.expand_crypto_secretkeybytes",
@@ -195,7 +194,7 @@
       1,
       [ "@query", "equation_Spec.Frodo.KEM.crypto_secretkeybytes" ],
       0,
-      "61e4655a5c0381e6175a9f2e362a33f3"
+      "8dc6964c481093419933b8e85f757d65"
     ],
     [
       "Spec.Frodo.KEM.expand_crypto_ciphertextbytes",
@@ -216,8 +215,8 @@
         "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
         "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
-        "equation_Lib.IntTypes.v", "equation_Prims.nat",
-        "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
+        "equation_Prims.nat", "equation_Spec.AES.gf8",
+        "equation_Spec.AES.irred",
         "equation_Spec.Frodo.KEM.crypto_ciphertextbytes",
         "equation_Spec.Frodo.Params.crypto_bytes",
         "equation_Spec.Frodo.Params.params_logq",
@@ -239,7 +238,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "a72a9d39e01eb43d1ccd346d66b48573"
+      "1eea3d2b5cc7fa2984bdb405e6441ce0"
     ]
   ]
 ]

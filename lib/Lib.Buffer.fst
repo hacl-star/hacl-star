@@ -565,10 +565,12 @@ let map_blocks #t #a h0 len blocksize inp output spec_f spec_l impl_f impl_l =
   let ob = sub output 0ul blen in
   let il = sub inp blen rem in
   let ol = sub inp blen rem in
+  Math.Lemmas.lemma_div_mod (v len) (v blocksize);
   Math.Lemmas.multiple_division_lemma (v nb) (v blocksize);
   map_blocks_multi #t #a h0 blocksize nb ib ob spec_f impl_f;
   if rem >. 0ul then
-     (impl_l nb;
+     (assert (v nb * v blocksize <= v len);
+      impl_l nb;
       let h1 = ST.get() in
       FStar.Seq.lemma_split (as_seq h1 output) (v nb * v blocksize))
   else ()

@@ -100,6 +100,7 @@ val xor_block:
   (ensures  fun h0 _ h1 -> modifies (loc o) h0 h1 /\
     as_seq h1 o == Spec.xor_block (as_seq h0 st) (as_seq h0 b))
 
+#set-options "--z3rlimit 100"
 let xor_block o st b =
   push_frame();
   let bl = create_state() in

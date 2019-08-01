@@ -961,6 +961,8 @@ val carry_wide_felem5_eval_lemma_i_0:
       (feval5 inp).[i] ==
 	(v t0 + vc4 * 5 + v t1 * pow26 + v t2 * pow26 * pow26 +
 	v t3 * pow26 * pow26 * pow26 + v t4 * pow26 * pow26 * pow26 * pow26) % prime))
+
+#set-options "--z3rlimit 150"
 let carry_wide_felem5_eval_lemma_i_0 #w inp i =
   let (i0, i1, i2, i3, i4) = inp in
   let tmp0,c0 = carry26_wide i0 (zero w) in

@@ -13,7 +13,6 @@
         "constructor_distinct_Lib.IntTypes.S16",
         "constructor_distinct_Lib.IntTypes.S32",
         "constructor_distinct_Lib.IntTypes.S64",
-        "constructor_distinct_Lib.IntTypes.S8",
         "constructor_distinct_Lib.IntTypes.U128",
         "equality_tok_Lib.IntTypes.U128@tok", "equation_Lib.IntTypes.bits",
         "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
@@ -26,7 +25,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U128@tok"
       ],
       0,
-      "014291df4c9612954fa67f5a4e333eb5"
+      "5a889c3623a138127227f35bf5fd955a"
     ],
     [
       "Spec.GF128.gf128",
@@ -39,7 +38,7 @@
         "equation_Lib.IntTypes.unsigned", "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "f98e4179981a4296e36e4b1c1373c16b"
+      "4c0a2e28bf9c900a4f383ba4a9b52bb4"
     ],
     [
       "Spec.GF128.load_elem",
@@ -53,10 +52,10 @@
         "bool_inversion", "constructor_distinct_Lib.IntTypes.U32",
         "equality_tok_Lib.IntTypes.U128@tok",
         "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
-        "equation_Spec.GF128.gf128", "equation_Spec.GF128.irred",
-        "equation_Spec.GaloisField.gf", "lemma_FStar.UInt.pow2_values",
-        "primitive_Prims.op_Subtraction",
+        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.unsigned",
+        "equation_Prims.nat", "equation_Spec.GF128.gf128",
+        "equation_Spec.GF128.irred", "equation_Spec.GaloisField.gf",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
         "proj_equation_Spec.GaloisField.GF_t",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_Spec.GaloisField.GF_t",
@@ -68,7 +67,7 @@
         "typing_tok_Lib.IntTypes.U128@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "322cc697ae7a9794c54835d6cd5511a1"
+      "2c22623da093e714f99707b8e49f95af"
     ],
     [
       "Spec.GF128.load_elem",
@@ -77,13 +76,8 @@
       1,
       [
         "@MaxIFuel_assumption", "@query",
-        "constructor_distinct_Lib.IntTypes.S16",
-        "constructor_distinct_Lib.IntTypes.S32",
-        "constructor_distinct_Lib.IntTypes.S64",
         "constructor_distinct_Lib.IntTypes.U128",
-        "constructor_distinct_Lib.IntTypes.U16",
         "constructor_distinct_Lib.IntTypes.U32",
-        "constructor_distinct_Lib.IntTypes.U64",
         "equality_tok_Lib.IntTypes.U128@tok",
         "equality_tok_Lib.IntTypes.U1@tok", "equation_Lib.IntTypes.numbytes",
         "equation_Spec.GF128.gf128", "equation_Spec.GF128.irred",
@@ -95,7 +89,7 @@
         "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "594d7f3964d92c4dc78a7eb7e46a8b42"
+      "249495da54a343d2d3f05b0471f135bd"
     ],
     [
       "Spec.GF128.store_elem",
@@ -109,9 +103,7 @@
         "bool_inversion", "constructor_distinct_Lib.IntTypes.S16",
         "constructor_distinct_Lib.IntTypes.S8",
         "constructor_distinct_Lib.IntTypes.U128",
-        "constructor_distinct_Lib.IntTypes.U16",
         "constructor_distinct_Lib.IntTypes.U32",
-        "constructor_distinct_Lib.IntTypes.U64",
         "constructor_distinct_Lib.IntTypes.U8",
         "equality_tok_Lib.IntTypes.U128@tok",
         "equality_tok_Lib.IntTypes.U1@tok",
@@ -132,7 +124,7 @@
         "typing_tok_Lib.IntTypes.U128@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "15b958033a85d670cd7fa194ab089b77"
+      "4b50ac217e9e7ff2fb2acf85176a6110"
     ],
     [
       "Spec.GF128.size_block",
@@ -148,10 +140,10 @@
         "constructor_distinct_Lib.IntTypes.U32",
         "equality_tok_Lib.IntTypes.U128@tok",
         "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
-        "equation_Spec.GF128.gf128", "equation_Spec.GF128.irred",
-        "equation_Spec.GaloisField.gf", "lemma_FStar.UInt.pow2_values",
-        "primitive_Prims.op_Subtraction",
+        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.unsigned",
+        "equation_Prims.nat", "equation_Spec.GF128.gf128",
+        "equation_Spec.GF128.irred", "equation_Spec.GaloisField.gf",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
         "proj_equation_Spec.GaloisField.GF_t",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_Spec.GaloisField.GF_t",
@@ -163,7 +155,7 @@
         "typing_tok_Lib.IntTypes.U128@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "bf16649cb85c35303e62d4a205cb4569"
+      "3012e065e2c2adab945478b6307ebe16"
     ],
     [
       "Spec.GF128.size_key",
@@ -179,10 +171,10 @@
         "constructor_distinct_Lib.IntTypes.U32",
         "equality_tok_Lib.IntTypes.U128@tok",
         "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
-        "equation_Spec.GF128.gf128", "equation_Spec.GF128.irred",
-        "equation_Spec.GaloisField.gf", "lemma_FStar.UInt.pow2_values",
-        "primitive_Prims.op_Subtraction",
+        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.unsigned",
+        "equation_Prims.nat", "equation_Spec.GF128.gf128",
+        "equation_Spec.GF128.irred", "equation_Spec.GaloisField.gf",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
         "proj_equation_Spec.GaloisField.GF_t",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_Spec.GaloisField.GF_t",
@@ -194,7 +186,7 @@
         "typing_tok_Lib.IntTypes.U128@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "5c1cc4d6c7bb6141e440ad9c88de5266"
+      "c0ce5d410e411ef9cced62cffdb470fe"
     ],
     [
       "Spec.GF128.encode_last",
@@ -233,7 +225,7 @@
         "typing_tok_Lib.IntTypes.U128@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "1678fc489d4300715e10e6e22c420ba9"
+      "ff9a13833d8f4e7ada90b212d04fab09"
     ],
     [
       "Spec.GF128.gf128_update",
@@ -247,7 +239,7 @@
         "typing_Spec.GF128.size_block"
       ],
       0,
-      "1307be8b4fb10c8af9967b43f5160429"
+      "4e68712b1ebcbbf965b3008a4d15ef74"
     ]
   ]
 ]

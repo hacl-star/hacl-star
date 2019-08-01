@@ -10,7 +10,7 @@ module Seq = Lib.Sequence
 module Lemmas = Spec.Frodo.Lemmas
 module Loops = Lib.LoopCombinators
 
-#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
 
 /// Auxiliary lemmas
 

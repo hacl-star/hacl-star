@@ -17,7 +17,7 @@ module Chacha20Equiv = Hacl.Spec.Chacha20.Equiv
 module Loop = Lib.LoopCombinators
 
 
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 200"
 //#set-options "--debug Hacl.Impl.Chacha20.Vec --debug_level ExtractNorm"
 
 inline_for_extraction

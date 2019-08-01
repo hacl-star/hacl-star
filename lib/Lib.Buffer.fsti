@@ -1113,6 +1113,7 @@ val map_blocks_multi:
     (ensures  fun _ _ h1 -> modifies1 output h0 h1 /\
 	as_seq h1 output == Seq.map_blocks_multi (v blocksize) (v nb) (v nb) (as_seq h0 inp) (spec_f h0))
 
+#set-options "--z3rlimit 50"
 inline_for_extraction noextract
 val map_blocks:
     #t:buftype
@@ -1137,6 +1138,7 @@ val map_blocks:
         as_seq h2 oblock == ob))
   -> impl_l:(i:size_t{v i == v len / v blocksize} -> Stack unit
       (requires fun h1 ->
+	v i * v blocksize <= v len /\
         modifies (loc (gsub output 0ul (i *! blocksize))) h0 h1)
       (ensures  fun h1 _ h2 ->
 	let iblock = gsub inp (i *! blocksize) (len %. blocksize)  in
