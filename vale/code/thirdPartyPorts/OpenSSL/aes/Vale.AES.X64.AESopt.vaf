@@ -194,12 +194,10 @@ procedure Load_one_lsb(inout dst:xmm)
 }
 
 #reset-options "--z3rlimit 20"
-procedure Handle_ctr32(ghost hkeys_b:buffer128,
-                       ghost ctr_BE:quad32)
+procedure Handle_ctr32(ghost ctr_BE:quad32)
     {:quick}
     lets
-        Xip @= r9;
-        Ii @= xmm0; T1 @= xmm1; T2 @= xmm2; Hkey @= xmm3;
+        Ii @= xmm0; T1 @= xmm1; T2 @= xmm2;
         Z1 @= xmm5; Z2 @= xmm6;
         inout1 @= xmm10; inout2 @= xmm11; inout3 @= xmm12;
         inout4 @= xmm13; inout5 @= xmm14; rndkey @= xmm15;
@@ -227,7 +225,6 @@ procedure Handle_ctr32(ghost hkeys_b:buffer128,
     VPaddd(inout1, Z2, Z1);
     Load_two_lsb(Z1);
     VPaddd(inout2, Z2, Z1);
-    Load128_buffer(Hkey, Xip, 0x00-0x20, Secret, hkeys_b, 0);   // # $Hkey^1 /* XXX[jb] */
     VPaddd(inout3, inout1, Z1);
     VPshufb(inout1, inout1, Ii);
     VPaddd(inout4, inout2, Z1);
@@ -296,7 +293,8 @@ procedure Loop6x_ctr_update(
     // which handles wrap and control flow more efficiently
     Add64(counter, 6);
     if (counter >= 256) {
-        Handle_ctr32(hkeys_b, ctr_BE); //, counter);
+        Load128_buffer(Hkey, Xip, 0x00-0x20, Secret, hkeys_b, 0);   // # $Hkey^1 /* XXX[jb] */
+        Handle_ctr32(ctr_BE); //, counter);
         Sub64(counter, 256);
     } else {
         Load128_buffer(Hkey, Xip, 0x00-0x20, Secret, hkeys_b, 0);   // # $Hkey^1 /* XXX[jb] */
