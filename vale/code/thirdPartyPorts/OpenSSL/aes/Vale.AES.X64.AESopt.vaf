@@ -353,6 +353,7 @@ procedure Loop6x_plain(
 procedure Loop6x_preamble(
         inline alg:algorithm,  // OpenSSL includes the number of rounds (nr) as a dynamic parameter (stored with the key).  Saves code space but adds extra instructions to the fast path.  Maybe branch predictor is good enough for it not to matter
         ghost iv_b:buffer128,
+        ghost stack_b:buffer128,
 
         ghost key_words:seq(nat32),
         ghost round_keys:seq(quad32),
@@ -436,7 +437,7 @@ procedure Loop6x_preamble(
     init_rounds_opaque(inout2, round_keys);
     */
 
-    Store128_buffer(ivp, T1, 0, Secret, iv_b, 0);   // # save next counter value
+    Store128_buffer(rbp, T1, 0x80, Secret, stack_b, 8); // # save next counter value /* XXX[jb]: Changed from Store128_buffer(ivp, T1, 0, Secret, iv_b, 0); */
     VPxor(inout3, inout3, rndkey); init_rounds_opaque(inout3, round_keys);
     VPxor(inout4, inout4, rndkey); init_rounds_opaque(inout4, round_keys);
     VPxor(inout5, inout5, rndkey); init_rounds_opaque(inout5, round_keys);
@@ -810,7 +811,7 @@ procedure Loop6x_partial(
     let start := #nat(count - 2) * 6;
 
     /* Load128_buffer(Hkey, Xip, 0x00-0x20, Secret, hkeys_b, 0);   // # $Hkey^1 */
-    /* Loop6x_preamble(alg, iv_b, key_words, round_keys, keys_b, ctr_BE); */
+    Loop6x_preamble(alg, iv_b, stack_b, key_words, round_keys, keys_b, ctr_BE);
     Loop6x_plain(alg, 0, key_words, round_keys, keys_b, init, T2);
     MulAdd_step(0, 0, T1, Z1, Z2, Z3, Z3, Hkey, hkeys_b, stack_b, h, prev, data);
     MulAdd_step(1, 1, Z1, T1, T2, Hkey, Ii, Hkey, hkeys_b, stack_b, h, prev, data);
