@@ -555,9 +555,11 @@ let rec crtgo #nLen #l ps es as lcur mprod acc =
   if lcur <>. (l -! 1ul) then begin
     let h = FStar.HyperStack.ST.get () in
     crtgo_constraint_trans ps es as mprod acc h0 h;
+    push_frame ();
     let tmp = create nLen (u64 0) in
     bn_mul_fitting mprod m tmp;
     copy mprod tmp;
+    pop_frame ();
 
     let h = FStar.HyperStack.ST.get () in
     big_times_pos_is_big (as_snat h mprod) (as_snat h m);
@@ -754,29 +756,37 @@ val solve_dlp_single:
       )
   (ensures fun h0 _ h1 -> modifies1 res h0 h1)
 let solve_dlp_single #nLen n p e g a res =
-  admit ();
 
   push_frame ();
 
   let one:lbignum 1ul = bn_one #1ul in
-  let tmp:lbignum 1ul = bn_one #nLen in
+  let tmp = create nLen (u64 0) in
+
+  admit ();
 
   let p_e = create nLen (u64 0) in
   bn_exp p e p_e;
 
-  let exp_try = create nLen (u64 1) in
+  let exp_try = create nLen (u64 0) in
+  bn_assign_uint64 #nLen exp_try (u64 1);
   let current_g = bn_copy g in
 
-  let whilecond () = begin
-     let b1 = bn_is_leq exp_try p_e in
-     let b2 = bn_is_equal current_g a in
-     b1 && b2
-  end in
+  let boolvar = create 1ul 0uy in
 
-  Lib.Loops.while (fun _ -> true) (fun _ -> true) whilecond (fun _ ->
+  let test (): Stack bool (requires fun _ -> True) (ensures fun _ _ _ -> True) = begin
+     boolvar.(0) =. 1uy
+    end in
+
+  Lib.Loops.while (fun _ -> true) (fun _ -> true) test (fun _ ->
     bn_add_fitting exp_try one exp_try;
     bn_modular_mul n current_g g tmp;
-    copy g tmp);
+    copy g tmp;
+    let b1 = bn_is_leq exp_try p_e in
+    let b2 = bn_is_equal current_g a in
+
+    if b1 && b2 then boolvar.(0) <- 1uy
+
+    );
 
   pop_frame ()
 
