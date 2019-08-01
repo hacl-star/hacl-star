@@ -94,6 +94,7 @@ Benchmarking experiments to see impact of heap representation on verification ti
 */
 
 procedure Load64_fake(out dst:dst_opr64, in src:reg_opr64, ghost b:Seq.seq(nat64), ghost index:nat)
+    {:public}
     {:quick exportOnly}
     requires
         0 <= index < Seq.length(b);
@@ -105,6 +106,7 @@ procedure Load64_fake(out dst:dst_opr64, in src:reg_opr64, ghost b:Seq.seq(nat64
 
 procedure Store64_fake(in dst:reg_opr64, in src:reg_opr64, ghost b_in:Seq.seq(nat64), ghost index:nat)
     returns(ghost b:Seq.seq(nat64))
+    {:public}
     {:quick exportOnly}
     requires
         0 <= index < Seq.length(b_in);
