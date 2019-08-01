@@ -94,6 +94,16 @@ let hkeys_b_powers (hkeys_b:buffer128) (mem:vale_heap) (memTaint:memtaint) (ptr:
   of_quad32 (buffer128_read hkeys_b 6 mem) == gf128_power h 5 /\
   of_quad32 (buffer128_read hkeys_b 7 mem) == gf128_power h 6
 
+let hkeys_b_powers_fake (hkeys_b:seq quad32) (ptr:int) (h:poly) =
+  //validSrcAddrs128 mem ptr hkeys_b 8 memTaint Secret /\
+  length hkeys_b >= 8 /\
+  of_quad32 (Seq.index hkeys_b 0) == gf128_power h 1 /\
+  of_quad32 (Seq.index hkeys_b 1) == gf128_power h 2 /\
+  of_quad32 (Seq.index hkeys_b 3) == gf128_power h 3 /\
+  of_quad32 (Seq.index hkeys_b 4) == gf128_power h 4 /\
+  of_quad32 (Seq.index hkeys_b 6) == gf128_power h 5 /\
+  of_quad32 (Seq.index hkeys_b 7) == gf128_power h 6
+    
 let quad32_opt_rev (b:bool) (q:quad32) : quad32 =
   if b then reverse_bytes_quad32 q else q
 
@@ -118,6 +128,7 @@ let scratch_b_data
 #endverbatim
 
 function hkeys_b_powers(hkeys_b:buffer128, mem:vale_heap, memTaint:memtaint, ptr:int, h:poly):prop extern;
+function hkeys_b_powers_fake(hkeys_b:seq(quad32), ptr:int, h:poly):prop extern;
 function index_opt_rev(b:bool, len:int, n:int, i:int):int extern;
 function quad32_opt_rev(b:bool, q:quad32):quad32 extern;
 function scratch_b_data(rev_bytes:bool, rev_blocks:bool, scratch_b:buffer128, scratch_len:int,

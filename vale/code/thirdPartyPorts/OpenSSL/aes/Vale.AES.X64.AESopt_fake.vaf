@@ -146,6 +146,14 @@ let scratch_reqs_fake (scratch_b:seq quad32) (count:nat) (s:seq quad32) (z3:quad
     length scratch_b < 8)
 #endverbatim
 
+#verbatim{:implementation}
+open FStar.Seq
+let index_q32 (s: seq quad32) (i: int): quad32
+  = if i >= 0 && i < length s then index s i else Mkfour 0 0 0 0
+#endverbatim
+     
+function index_q32(s: seq(quad32), i: int):quad32 extern;
+
 type six_of(a:Type(0)):Type(0) := tuple(a, a, a, a, a, a);
 type quad32_6:Type(0) := six_of(quad32);
 
@@ -926,12 +934,6 @@ procedure Loop6x_partial(
     Loop6x_round9(alg, count, in_b, stack_b, key_words, round_keys, keys_b);
 }
 
-// #verbatim{:implementation}
-//     let foobar = Seq.index
-// #endverbatim
-//     
-// function foobar(x: seq(quad32), i: nat):quad32 extern;
-
 #reset-options "--z3rlimit 50"
 procedure Loop6x(
         inline alg:algorithm,
@@ -1086,7 +1088,7 @@ procedure Loop6x(
     let init := Loop6x_partial_fake(alg, h_LE, y_prev, data, count, iv_b, in0_b, in_b, stack_b,
         key_words, round_keys, keys_b, hkeys_b, ctr_BE);
     let ctrs := make_six_of(fun(i:int_range(0, 5)) reverse_bytes_quad32(inc32lite(ctr_BE, i)));
-    let plains := make_six_of(fun(j:int_range(0, 5)) Seq.index(in_b, #nat(count*6 + j)));
+    let plains := make_six_of(fun(j:int_range(0, 5)) index_q32(in_b, count*6 + j));
 
     Loop6x_final_fake(alg, iv_b, stack_b, key_words, round_keys, keys_b, inc32lite(ctr_BE, 6), init,
         ctrs, plains, Seq.index(in0_b, #nat(count-2)*6 + 0));
