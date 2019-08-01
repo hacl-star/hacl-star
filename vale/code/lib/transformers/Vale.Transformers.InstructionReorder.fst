@@ -1766,6 +1766,20 @@ let rec find_deep_code_transform (c:code) (cs:codes) : possibly transformation_h
         return (increment_hint th)
     )
 
+let rec metric_for_code (c:code) : GTot nat =
+  1 + (
+    match c with
+    | Ins _ -> 0
+    | Block l -> metric_for_codes l
+    | IfElse _ t f -> metric_for_code t + metric_for_code f
+    | While _ b -> metric_for_code b
+  )
+
+and metric_for_codes (c:codes) : GTot nat =
+  match c with
+  | [] -> 0
+  | x :: xs -> 1 + metric_for_code x + metric_for_codes xs
+
 irreducible
 (* Our proofs do not depend on how the hints are found. As long as
    some hints are provided, we validate the hints to perform the
@@ -1774,7 +1788,7 @@ irreducible
    reasoning about it. *)
 let rec find_transformation_hints (c1 c2:codes) :
   Tot (possibly transformation_hints)
-    (decreases %[c2; c1]) =
+    (decreases %[metric_for_codes c2; c1]) =
   let e1, e2 = is_empty_codes c1, is_empty_codes c2 in
   if e1 && e2 then (
     return []
@@ -1785,6 +1799,7 @@ let rec find_transformation_hints (c1 c2:codes) :
   ) else (
     let h1 :: t1 = c1 in
     let h2 :: t2 = c2 in
+    assert (metric_for_codes c2 >= metric_for_code h2); (* OBSERVE *)
     if is_empty_code h1 then (
       find_transformation_hints t1 c2
     ) else if is_empty_code h2 then (
@@ -1810,6 +1825,8 @@ let rec find_transformation_hints (c1 c2:codes) :
           | IfElse co1 (Block tr1) (Block fa1), IfElse co2 (Block tr2) (Block fa2) ->
             (co1 = co2) /- ("Non-same conditions for IfElse: (" ^
                             print_cmp co1 0 gcc ^ ") and (" ^ print_cmp co2 0 gcc ^ ")");;
+            assert (metric_for_code h2 > metric_for_code (Block tr2)); (* OBSERVE *)
+            assert (metric_for_code h2 > metric_for_code (Block fa2)); (* OBSERVE *)
             tr_hints <-- find_transformation_hints tr1 tr2;
             fa_hints <-- find_transformation_hints fa1 fa2;
             t_hints2 <-- find_transformation_hints t1 t2;
@@ -1817,9 +1834,22 @@ let rec find_transformation_hints (c1 c2:codes) :
           | While co1 (Block bo1), While co2 (Block bo2) ->
             (co1 = co2) /- ("Non-same conditions for While: (" ^
                             print_cmp co1 0 gcc ^ ") and (" ^ print_cmp co2 0 gcc ^ ")");;
+            assert (metric_for_code h2 > metric_for_code (Block bo2)); (* OBSERVE *)
             bo_hints <-- find_transformation_hints bo1 bo2;
             t_hints2 <-- find_transformation_hints t1 t2;
             return (InPlaceWhile bo_hints :: t_hints2)
+          | Block l1, IfElse _ _ _
+          | Block l1, While _ _ ->
+            assert_norm (metric_for_codes c2 >= metric_for_codes [h2]); (* OBSERVE *)
+            t_hints1 <-- find_transformation_hints l1 [h2];
+            t_hints2 <-- find_transformation_hints t1 t2;
+            return (wrap_diveinat 0 t_hints1 `L.append` t_hints2)
+          | IfElse _ _ _, Block l2
+          | While _ _, Block l2 ->
+            find_transformation_hints c1 l2
+          | IfElse _ _ _, IfElse _ _ _
+          | While _ _, While _ _ ->
+            Err ("Found weird non-standard code: " ^ fst (print_code h1 0 gcc))
           | _ ->
             Err reason
         )
