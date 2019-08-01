@@ -138,7 +138,7 @@ procedure Loop6x_partial_expected_code(
         ZeroXmm(Z1);
         PinsrqImm(Z1, 2, 0, constp);
         VPaddd(inout2, Z2, Z1);
-        /* Load128_buffer(Hkey, Xip, 0x00-0x20, Secret, hkeys_b, 0);   // # $Hkey^1 */
+        Load128_buffer(Hkey, Xip, 0x00-0x20, Secret, hkeys_b, 0);   // # $Hkey^1
         VPaddd(inout3, inout1, Z1);
         VPshufb(inout1, inout1, Ii);
         VPaddd(inout4, inout2, Z1);
@@ -154,7 +154,7 @@ procedure Loop6x_partial_expected_code(
 
         Sub64(counter, 256);
     } else {
-        /* Load128_buffer(Hkey, Xip, 0x00-0x20, Secret, hkeys_b, 0);   // # $Hkey^1 */
+        Load128_buffer(Hkey, Xip, 0x00-0x20, Secret, hkeys_b, 0);   // # $Hkey^1
         VPaddd(T1, T2, inout5); // OpenSSL uses VPaddb
         VPxor(inout1, inout1, rndkey);
         VPxor(inout2, inout2, rndkey);
