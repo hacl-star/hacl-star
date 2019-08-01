@@ -246,12 +246,13 @@ procedure Loop6x_ctr_update(
         ghost key_words:seq(nat32),
         ghost round_keys:seq(quad32),
         ghost keys_b:buffer128,
+        ghost hkeys_b:buffer128,
         ghost ctr_BE:quad32)
     {:quick}
     lets
 //      inp @= rdi; outp @= rsi; len @= rdx; key @= rcx; ivp @= r8; Xip @= r9;
-        key @= rcx;
-        Ii @= xmm0; T1 @= xmm1; T2 @= xmm2;
+        key @= rcx; Xip @= r9;
+        Ii @= xmm0; T1 @= xmm1; T2 @= xmm2; Hkey @= xmm3;
         Z1 @= xmm5; Z2 @= xmm6;
         inout0 @= xmm9; inout1 @= xmm10; inout2 @= xmm11; inout3 @= xmm12;
         inout4 @= xmm13; inout5 @= xmm14; rndkey @= xmm15;
@@ -293,9 +294,11 @@ procedure Loop6x_ctr_update(
     // which handles wrap and control flow more efficiently
     Add64(counter, 6);
     if (counter >= 256) {
+        Load128_buffer(Hkey, Xip, 0x00-0x20, Secret, hkeys_b, 0);   // # $Hkey^1
         Handle_ctr32(ctr_BE); //, counter);
         Sub64(counter, 256);
     } else {
+        Load128_buffer(Hkey, Xip, 0x00-0x20, Secret, hkeys_b, 0);   // # $Hkey^1
         VPaddd(T1, T2, inout5); // OpenSSL uses VPaddb
         VPxor(inout1, inout1, rndkey);
         VPxor(inout2, inout2, rndkey);
@@ -359,6 +362,7 @@ procedure Loop6x_preamble(
         ghost key_words:seq(nat32),
         ghost round_keys:seq(quad32),
         ghost keys_b:buffer128,
+        ghost hkeys_b:buffer128,
 
         ghost ctr_BE:quad32)
     {:quick}
@@ -417,7 +421,7 @@ procedure Loop6x_preamble(
         0 <= counter < 256;
         counter == inc32lite(ctr_BE, 6).lo0 % 256;
 {
-    Loop6x_ctr_update(alg, key_words, round_keys, keys_b, ctr_BE);
+    Loop6x_ctr_update(alg, key_words, round_keys, keys_b, hkeys_b, ctr_BE);
 
     init_rounds_opaque(inout0, round_keys);
     init_rounds_opaque(inout1, round_keys);
@@ -811,8 +815,7 @@ procedure Loop6x_partial(
         quad32_xor(reverse_bytes_quad32(inc32lite(ctr_BE, n)), rndkey));
     let start := #nat(count - 2) * 6;
 
-    /* Load128_buffer(Hkey, Xip, 0x00-0x20, Secret, hkeys_b, 0);   // # $Hkey^1 */
-    Loop6x_preamble(alg, iv_b, stack_b, key_words, round_keys, keys_b, ctr_BE);
+    Loop6x_preamble(alg, iv_b, stack_b, key_words, round_keys, keys_b, hkeys_b, ctr_BE);
     Loop6x_plain(alg, 0, key_words, round_keys, keys_b, init, T2);
     MulAdd_step(0, 0, T1, Z1, Z2, Z3, Z3, Hkey, hkeys_b, stack_b, h, prev, data);
     MulAdd_step(1, 1, Z1, T1, T2, Hkey, Ii, Hkey, hkeys_b, stack_b, h, prev, data);
