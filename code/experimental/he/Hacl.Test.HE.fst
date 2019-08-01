@@ -17,6 +17,10 @@ module GMS = Hacl.Spec.HE.GM
 module P = Hacl.Impl.HE.Paillier
 module PS = Hacl.Spec.HE.Paillier
 
+
+module DGK = Hacl.Impl.HE.DGK
+module DGKS = Hacl.Spec.HE.DGK
+
 open Hacl.Impl.Bignum
 
 module B = FStar.Bytes

@@ -158,7 +158,23 @@ $(OUT_DIR)/test.exe: $(ALL_OBJS) | $(OUT_DIR)
 
 endif # STAGE=2
 
+INCLUDE_DIRS = \
+  $(KREMLIN_HOME)/include \
+  $(KREMLIN_HOME)/kremlib \
+  $(KREMLIN_HOME)/kremlib/c \
+  $(KREMLIN_HOME)/kremlib/dist/generic \
+  $(HACL_HOME)/lib \
+  $(HACL_HOME)/code/experimental/rsapss
 
+# TODO: remove -Wno-incompatible-pointer-types when issue with --cmi is fixed
+CXXFLAGS += -O2 $(addprefix -I ,$(INCLUDE_DIRS)) -Wall -Wextra -Werror
+#  -Wno-parentheses -Wno-unused-parameter -Wno-unused-variable \
+#  -Wno-incompatible-pointer-types
+
+argmax:
+	$(CXX) $(CXXFLAGS) -o argmax/argmax.exe argmax/argmax.c \
+		-L $(KREMLIN_HOME)/kremlib/dist/generic -lkremlib \
+		-I $(OUT_DIR) -L $(OUT_DIR)
 
 
 # Targets for interactive mode
