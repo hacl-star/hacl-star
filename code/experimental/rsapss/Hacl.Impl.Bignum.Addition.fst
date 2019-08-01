@@ -186,9 +186,9 @@ let bn_add_fitting #aLen #bLen a b res =
   let h0 = FStar.HyperStack.ST.get () in
   push_frame ();
   nat_fits_less_pow (as_snat h0 a + as_snat h0 b) aLen;
+  Math.Lemmas.modulo_lemma (as_snat h0 a + as_snat h0 b) (pow2 (64 * v aLen));
   let _ = bn_add a b res in
   pop_frame ()
-
 
 inline_for_extraction noextract
 val bn_add_exact:

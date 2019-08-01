@@ -4,7 +4,7 @@ open FStar.HyperStack
 open FStar.HyperStack.ST
 open FStar.Mul
 
-open LowStar.Buffer
+module L = LowStar.Buffer
 
 open Lib.IntTypes
 open Lib.Buffer
@@ -37,7 +37,7 @@ val mul_mod_mont:
     (requires fun h ->
       live h aM /\ live h bM /\ live h resM /\ live h n /\ live h st_kara /\
       disjoint st_kara aM /\ disjoint st_kara bM /\ disjoint st_kara n /\ disjoint resM st_kara)
-    (ensures  fun h0 _ h1 -> modifies (loc_union (loc resM) (loc st_kara)) h0 h1)
+    (ensures  fun h0 _ h1 -> modifies (L.loc_union (loc resM) (loc st_kara)) h0 h1)
 [@"c_inline"]
 let mul_mod_mont nLen rLen pow2_i n nInv_u64 st_kara aM bM resM =
   let cLen = nLen +. nLen in
@@ -62,14 +62,14 @@ val mod_exp_:
     (requires fun h ->
       live h n /\ live h b /\ live h st_kara /\ live h st_exp /\
       disjoint st_exp st_kara /\ disjoint st_kara n /\ disjoint st_kara st_exp)
-    (ensures  fun h0 _ h1 -> modifies (loc_union (loc st_exp) (loc st_kara)) h0 h1)
+    (ensures  fun h0 _ h1 -> modifies (L.loc_union (loc st_exp) (loc st_kara)) h0 h1)
 [@"c_inline"]
 let mod_exp_ nLen rLen pow2_i n nInv_u64 st_kara st_exp bBits bLen b =
   let aM = sub st_exp 0ul nLen in
   let accM = sub st_exp nLen nLen in
 
   let h0 = ST.get () in
-  let inv h1 i = modifies (loc_union (loc st_exp) (loc st_kara)) h0 h1 in
+  let inv h1 i = modifies (L.loc_union (loc st_exp) (loc st_kara)) h0 h1 in
   Lib.Loops.for 0ul bBits inv
   (fun i ->
     (if (bn_is_bit_set b i) then
@@ -129,7 +129,7 @@ let mod_exp pow2_i modBits nLen n r2 a bBits b res =
   from_mont nLen rLen pow2_i n nInv_u64 accM tmp res;
   pop_frame ()
 
-#reset-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 400 --max_fuel 2 --max_ifuel 1"
 
 // TODO doesn't have bounds validation, is
 // used within bn_exp, which does have them
@@ -148,8 +148,9 @@ val naive_exp_loop:
         modifies2 res b h0 h1)
 let rec naive_exp_loop #aLen #expLen a b res =
   push_frame ();
-  let tmp = create expLen (uint 0) in
-  let tmp' = create aLen (uint 0) in
+  let z:uint64 = zeros U64 SEC in
+  let tmp:lbignum expLen = create expLen z in
+  let tmp' = create aLen (u64 0) in
   assert_norm (issnat 0);
   assert_norm (nat_bytes_num 0 =. 1ul);
   let zero:lbignum 1ul = nat_to_bignum_exact 0 in

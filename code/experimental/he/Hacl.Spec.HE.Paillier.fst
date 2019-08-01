@@ -26,6 +26,8 @@ let shrink #n a = to_fe #n a
 val lift: #n:comp -> a:fe n -> b:fen2 n{b = a /\ shrink b = a}
 let lift #n a = a
 
+#reset-options "--z3rlimit 100"
+
 val shrink_unit: #n:comp -> a:fen2 n -> Lemma
   (requires (isunit a))
   (ensures (isunit (shrink a)))
@@ -1173,6 +1175,7 @@ let encf_inj_pair #n g x1 x2 =
 
   exists_elim goal #(y_pair #n) #predicate ex proof
 
+
 val enc_dec_id:
      s:secret
   -> r:fenu (Public?.n (s2p s))
@@ -1238,6 +1241,8 @@ let hom_add_lemma s r1 m1 r2 m2 =
   assert (decrypt s (hom_add c1 c2) = (m1 + m2)%n);
   to_fe_add' m1 m2;
   assert (decrypt s (hom_add c1 c2) = m1 +% m2)
+
+#reset-options "--z3rlimit 200"
 
 val hom_mul_plain_lemma:
      s:secret

@@ -267,13 +267,13 @@ val bn_modular_sub:
        modifies (loc res) h0 h1 /\
        as_snat h1 res = (as_snat h0 a - as_snat h0 b) % as_snat h0 n)
 let rec bn_modular_sub #len n a b res =
-  push_frame();
-
   if bn_is_geq a b then begin
+    push_frame();
     let res' = create len (uint 0) in
     let c = bn_sub a b res' in
     assert (v c = 0);
-    bn_remainder res' n res
+    bn_remainder res' n res;
+    pop_frame()
   end else begin
     bn_modular_sub n b a res;
     if not (bn_is_zero res) then begin
@@ -287,9 +287,8 @@ let rec bn_modular_sub #len n a b res =
       sub_indifferent_zero (as_snat h b) (as_snat h a) (as_snat h n);
       assert ((as_snat h a - as_snat h b) % as_snat h n = 0)
     end
-  end;
+  end
 
-  pop_frame()
 
 
 val bn_modular_mul:

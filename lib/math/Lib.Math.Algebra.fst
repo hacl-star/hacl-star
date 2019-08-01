@@ -1275,7 +1275,7 @@ let inv_unique #n a b c =
 
   move_requires l ()
 
-#reset-options "--z3rlimit 50"
+#reset-options "--z3rlimit 100"
 
 val inv_as_gcd1: #n:big -> a:fe n{a>0} -> Lemma
   (requires (is_gcd a n 1))
