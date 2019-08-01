@@ -148,6 +148,38 @@ let plus_lemma_int16_2 (x:int16) (y:montgomery_t) (z:int16): Lemma (requires (ra
 
 let plus_lemma_int32_2 (x:int32) (y:montgomery_t) (z:int32) : Lemma (requires (range (sint_v x + sint_v y) S32 /\ - params_q * pow2 (params_logr-1) <= sint_v x /\ sint_v x < params_q * pow2 (params_logr -1)) /\ (- params_q * pow2 (params_logr-1) <= sint_v x + sint_v y /\ sint_v x + sint_v y < params_q * pow2 (params_logr -1) /\ sint_v z == sint_v x + sint_v y)) (ensures (int32_to_t (x +! to_i32 y) == Group.plus_t (int32_to_t x) (to_t y))) = plus_lemma_int32 x (to_i32 y) z
 
+let sub_lemma_int32 (x:int32) (y:int32) (z:int32) : Lemma (requires (range (sint_v x - sint_v y) S32 /\ - params_q * pow2 (params_logr-1) <= sint_v x /\ sint_v x < params_q * pow2 (params_logr -1)) /\ (- params_q * pow2 (params_logr-1) <= sint_v y /\ sint_v y < params_q * pow2 (params_logr -1)) /\ (- params_q * pow2 (params_logr-1) <= sint_v x - sint_v y /\ sint_v x - sint_v y < params_q * pow2 (params_logr -1)) /\ sint_v z == sint_v x - sint_v y) (ensures (int32_to_t z == Ring.minus_t (int32_to_t x) (int32_to_t y))) =
+  lemma_mod_sub_distr (sint_v x) (sint_v y) params_q;
+  lemma_mod_plus_distr_l (sint_v x) (- sint_v y % params_q) params_q;
+  int32_to_t_lemma z;
+  int32_to_t_lemma x;
+  int32_to_t_lemma y;
+  lemma_mod_sub_distr (SpecGroup.v (int32_to_t x) * pow2 params_logr) (SpecGroup.v (int32_to_t y) * pow2 params_logr) params_q;
+  lemma_mod_plus_distr_l (SpecGroup.v (int32_to_t x) * pow2 params_logr) ( - (SpecGroup.v (int32_to_t y) * pow2 params_logr) % params_q) params_q;
+  assert((SpecGroup.v (int32_to_t z) * pow2 params_logr) % params_q = ((SpecGroup.v (int32_to_t x) * pow2 params_logr) - (SpecGroup.v (int32_to_t y) * pow2 params_logr)) % params_q);
+  distributivity_sub_left (SpecGroup.v (int32_to_t x)) (SpecGroup.v (int32_to_t y)) (pow2 params_logr);
+  MGroup.lemma_equality1 (SpecGroup.v (int32_to_t z)) (SpecGroup.v (int32_to_t x) - SpecGroup.v (int32_to_t y));
+  modulo_lemma (SpecGroup.v (int32_to_t z)) params_q;
+  Spec.Kyber2.Ring.minus_lemma_t (int32_to_t x) (int32_to_t y)
+
+let sub_lemma_int16 (x:int16) (y:int16) (z:int16): Lemma (requires (range (sint_v x - sint_v y) S16 /\ sint_v z == sint_v x - sint_v y)) (ensures (int16_to_t (x -! y) == Ring.minus_t (int16_to_t x) (int16_to_t y))) =
+  lemma_mod_sub_distr (sint_v x) (sint_v y) params_q;
+  lemma_mod_plus_distr_l (sint_v x) (- sint_v y % params_q) params_q;
+  int16_to_t_lemma z;
+  int16_to_t_lemma x;
+  int16_to_t_lemma y;
+  lemma_mod_sub_distr (SpecGroup.v (int16_to_t x) * pow2 params_logr) (SpecGroup.v (int16_to_t y) * pow2 params_logr) params_q;
+  lemma_mod_plus_distr_l (SpecGroup.v (int16_to_t x) * pow2 params_logr) ( - (SpecGroup.v (int16_to_t y) * pow2 params_logr) % params_q) params_q;
+  assert((SpecGroup.v (int16_to_t z) * pow2 params_logr) % params_q = ((SpecGroup.v (int16_to_t x) * pow2 params_logr) - (SpecGroup.v (int16_to_t y) * pow2 params_logr)) % params_q);
+  distributivity_sub_left (SpecGroup.v (int16_to_t x)) (SpecGroup.v (int16_to_t y)) (pow2 params_logr);
+  MGroup.lemma_equality1 (SpecGroup.v (int16_to_t z)) (SpecGroup.v (int16_to_t x) - SpecGroup.v (int16_to_t y));
+  modulo_lemma (SpecGroup.v (int16_to_t z)) params_q;
+  Spec.Kyber2.Ring.minus_lemma_t (int16_to_t x) (int16_to_t y)
+
+let sub_lemma_int16_2 (x:int16) (y:montgomery_t) (z:int16): Lemma (requires (range (sint_v x - sint_v y) S16 /\ sint_v z == sint_v x - sint_v y)) (ensures (int16_to_t (x -! y) == Ring.minus_t (int16_to_t x) (to_t y))) = sub_lemma_int16 x y z
+
+let sub_lemma_int32_2 (x:int32) (y:montgomery_t) (z:int32) : Lemma (requires (range (sint_v x - sint_v y) S32 /\ - params_q * pow2 (params_logr-1) <= sint_v x /\ sint_v x < params_q * pow2 (params_logr -1)) /\ (- params_q * pow2 (params_logr-1) <= sint_v x - sint_v y /\ sint_v x - sint_v y < params_q * pow2 (params_logr -1) /\ sint_v z == sint_v x - sint_v y)) (ensures (int32_to_t (x -! to_i32 y) == Ring.minus_t (int32_to_t x) (to_t y))) = sub_lemma_int32 x (to_i32 y) z
+
 #reset-options "--z3rlimit 2000 --max_fuel 1 --max_ifuel 1 --using_facts_from '* -FStar.Seq'"
 
 let mul_range_lemma_m (x:int16{sint_v x > - pow2 15}) (y:montgomery_t) : Lemma (range (sint_v x * sint_v y) S32 /\  - params_q * pow2 (params_logr-1) <= sint_v x * sint_v y /\ sint_v x * sint_v y < params_q * pow2 (params_logr -1) ) =
