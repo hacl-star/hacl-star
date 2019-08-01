@@ -707,8 +707,8 @@ let lemma_header_parsing_correct h pn_len npn =
       lemma_long_header_parsing_correct h pn_len npn
 
 
-let success_parse (b:bytes) (cl:nat4) =
-  H_Success? (parse_header b cl)
+let failure_parse (b:bytes) (cl:nat4) =
+  H_Failure? (parse_header b cl)
 
 let maybe_short_header (b:bytes{S.length b<>0}) =
   match to_bitfield8 (S.index b 0) with
@@ -722,20 +722,22 @@ let maybe_long_header (b:bytes{S.length b<>0}) =
 
 
 
-let lemma_maybe_short_header (b:bytes) (cl:nat4) : Lemma
+let lemma_res_short_header (b:bytes) (cl:nat4) : Lemma
   (requires
     S.length b <> 0 /\
-    maybe_short_header b /\
-    success_parse b cl)
-  (ensures Short? (H_Success?.h (parse_header b cl))) =
+    maybe_short_header b)
+  (ensures
+    failure_parse b cl \/
+    Short? (H_Success?.h (parse_header b cl))) =
   ()
 
-let lemma_maybe_long_header (b:bytes) (cl:nat4) : Lemma
+let lemma_res_long_header (b:bytes) (cl:nat4) : Lemma
   (requires
     S.length b <> 0 /\
-    maybe_long_header b /\
-    success_parse b cl)
-  (ensures Long? (H_Success?.h (parse_header b cl))) =
+    maybe_long_header b)
+  (ensures
+    failure_parse b cl \/
+    Long? (H_Success?.h (parse_header b cl))) =
   ()
 
 let lemma_incompatibility_short_long (b1 b2:bytes) (cl:nat4) : Lemma
@@ -743,12 +745,13 @@ let lemma_incompatibility_short_long (b1 b2:bytes) (cl:nat4) : Lemma
     S.length b1 <> 0 /\
     S.length b2 <> 0 /\
     maybe_short_header b1 /\
-    maybe_long_header b2 /\
-    success_parse b1 cl /\
-    success_parse b2 cl)
-  (ensures parse_header b1 cl <> parse_header b2 cl) =
-  lemma_maybe_short_header b1 cl;
-  lemma_maybe_long_header b2 cl
+    maybe_long_header b2)
+  (ensures
+    failure_parse b1 cl \/
+    failure_parse b2 cl \/
+    parse_header b1 cl <> parse_header b2 cl) =
+  lemma_res_short_header b1 cl;
+  lemma_res_long_header b2 cl
 
 
 let lemma_recompose_short_header (b:bytes) (i:nat) : Lemma
@@ -763,10 +766,8 @@ let lemma_short_header_parsing_safe (b1 b2:bytes) (cl:nat4) : Lemma
     S.length b2 <> 0 /\
     maybe_short_header b1 /\
     maybe_short_header b2 /\
-    success_parse b1 cl /\
-    success_parse b2 cl /\
     parse_header b1 cl == parse_header b2 cl)
-  (ensures b1 == b2) =
+  (ensures b1 == b2 \/ failure_parse b1 cl) =
   let res1 =  parse_header b1 cl in
   let res2 =  parse_header b2 cl in
   if S.length b1 <> 0 && S.length b2 <> 0 then
@@ -792,7 +793,28 @@ let lemma_short_header_parsing_safe (b1 b2:bytes) (cl:nat4) : Lemma
     end
 
 
-
+let lemma_long_header_parsing_safe (b1 b2:bytes) (cl:nat4) : Lemma
+  (requires
+    S.length b1 <> 0 /\
+    S.length b2 <> 0 /\
+    maybe_long_header b1 /\
+    maybe_long_header b2 /\
+    parse_header b1 cl == parse_header b2 cl)
+  (ensures b1 == b2 \/ failure_parse b1 cl) =
+  let res1 =  parse_header b1 cl in
+  let res2 =  parse_header b2 cl in
+  if S.length b1 <> 0 && S.length b2 <> 0 then
+  match to_bitfield8 (S.index b1 0),to_bitfield8 (S.index b2 0) with
+  | [pn0 ; pn1 ; false; false; typ0 ; typ1 ; true; true],
+    [pn0'; pn1'; false; false; typ0'; typ1'; true; true] ->
+     let pn_len  : nat2 = of_bitfield2 (pn0 , pn1 ) in
+     let pn_len' : nat2 = of_bitfield2 (pn0', pn1') in
+     let typ  = of_bitfield2 (typ0 , typ1 ) in
+     let typ' = of_bitfield2 (typ0', typ1') in
+     if S.length b1 >= 6 && S.length b2 >=6 then begin
+       
+       admit()
+     end
 
 
 
