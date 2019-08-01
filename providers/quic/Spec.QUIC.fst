@@ -351,6 +351,12 @@ let lemma_bitfield8 (l:list bool{List.Tot.length l == 8}) : Lemma
   (ensures to_bitfield8 (of_bitfield8 l) == l) =
   lemma_bitfield_inv l
 
+let lemma_to_bitfield8_inj (b1 b2:byte) : Lemma
+  (requires to_bitfield8 b1 = to_bitfield8 b2)
+  (ensures b1 = b2) =
+  lemma_bitfield 8 (U8.v b1);
+  lemma_bitfield 8 (U8.v b2)
+
 
 
 let to_bitfield2 (n:nat2) = let b0::b1::[] = to_bitfield 2 n in (b0, b1)
@@ -361,6 +367,11 @@ let lemma_bitfield2 (n:nat2) : Lemma
   (ensures of_bitfield2 (to_bitfield2 n) = n) =
   lemma_bitfield 2 n
 
+let lemma_of_bitfield2_inj (b0 b1 b2 b3:bool) : Lemma
+  (requires of_bitfield2 (b0,b1) = of_bitfield2 (b2,b3))
+  (ensures b0 == b2 /\ b1 == b3) =
+  lemma_bitfield_inv [b0;b1];
+  lemma_bitfield_inv [b2;b3]
 
 
 let format_header p pn_len npn =
@@ -424,8 +435,6 @@ let parse_header b cid_len =
 
 
 
-
-/// Todo HERE
 
 let extract_dcil_scil (dcil:nat4) (scil:nat4) (cl:nat) : Lemma
   (requires (let open FStar.Mul in cl = 0x10 * dcil + scil))
@@ -698,13 +707,99 @@ let lemma_header_parsing_correct h pn_len npn =
       lemma_long_header_parsing_correct h pn_len npn
 
 
+let success_parse (b:bytes) (cl:nat4) =
+  H_Success? (parse_header b cl)
+
+let maybe_short_header (b:bytes{S.length b<>0}) =
+  match to_bitfield8 (S.index b 0) with
+  | [_;_;_;false;false;_;true;false] -> True
+  | _ -> False
+
+let maybe_long_header (b:bytes{S.length b<>0}) =
+  match to_bitfield8 (S.index b 0) with
+  |[_;_;false;false;_;_;true;true] -> True
+  | _ -> False
+
+
+
+let lemma_maybe_short_header (b:bytes) (cl:nat4) : Lemma
+  (requires
+    S.length b <> 0 /\
+    maybe_short_header b /\
+    success_parse b cl)
+  (ensures Short? (H_Success?.h (parse_header b cl))) =
+  ()
+
+let lemma_maybe_long_header (b:bytes) (cl:nat4) : Lemma
+  (requires
+    S.length b <> 0 /\
+    maybe_long_header b /\
+    success_parse b cl)
+  (ensures Long? (H_Success?.h (parse_header b cl))) =
+  ()
+
+let lemma_incompatibility_short_long (b1 b2:bytes) (cl:nat4) : Lemma
+  (requires
+    S.length b1 <> 0 /\
+    S.length b2 <> 0 /\
+    maybe_short_header b1 /\
+    maybe_long_header b2 /\
+    success_parse b1 cl /\
+    success_parse b2 cl)
+  (ensures parse_header b1 cl <> parse_header b2 cl) =
+  lemma_maybe_short_header b1 cl;
+  lemma_maybe_long_header b2 cl
+
+
+let lemma_recompose_short_header (b:bytes) (i:nat) : Lemma
+  (requires 0 < i /\ i <= S.length b)
+  (ensures S.equal b S.(S.create 1 (S.index b 0) @| S.slice b 1 i @| S.slice b i (S.length b))) =
+  ()
+
+
+let lemma_short_header_parsing_safe (b1 b2:bytes) (cl:nat4) : Lemma
+  (requires
+    S.length b1 <> 0 /\
+    S.length b2 <> 0 /\
+    maybe_short_header b1 /\
+    maybe_short_header b2 /\
+    success_parse b1 cl /\
+    success_parse b2 cl /\
+    parse_header b1 cl == parse_header b2 cl)
+  (ensures b1 == b2) =
+  let res1 =  parse_header b1 cl in
+  let res2 =  parse_header b2 cl in
+  if S.length b1 <> 0 && S.length b2 <> 0 then
+  match to_bitfield8 (S.index b1 0),to_bitfield8 (S.index b2 0) with
+  | [pn0 ; pn1 ; phase ; false; false; spin ; true; false],
+    [pn0'; pn1'; phase'; false; false; spin'; true; false] ->
+    let pn_len  : nat2 = of_bitfield2 (pn0 , pn1 ) in
+    let pn_len' : nat2 = of_bitfield2 (pn0', pn1') in
+    let len  = 1 + (add3 cl) + 1 + pn_len  in
+    let len' = 1 + (add3 cl) + 1 + pn_len' in
+    if S.length b1 = len && S.length b2 = len' then begin
+       let cid  = S.slice b1 1 (1 + add3 cl) in
+       let cid' = S.slice b2 1 (1 + add3 cl) in
+       let npn  = S.slice b1 (1 + add3 cl) len  in
+       let npn' = S.slice b2 (1 + add3 cl) len' in
+       assert (H_Success?.pn_len res1 = H_Success?.pn_len res2);
+       lemma_of_bitfield2_inj pn0 pn1 pn0' pn1';
+       lemma_to_bitfield8_inj (S.index b1 0) (S.index b2 0);
+       assert (len = len');
+       assert (S.slice b1 1 (1+add3 cl) = S.slice b2 1 (1+add3 cl) /\ S.slice b1 (1+add3 cl) len = S.slice b2 (1+add3 cl) len);
+       lemma_recompose_short_header b1 (1+add3 cl);
+       lemma_recompose_short_header b2 (1+add3 cl)
+    end
 
 
 
 
 
-let lemma_header_parsing_safe b1 b2 =
-  admit()
+
+let lemma_header_parsing_safe b1 b2 cl =
+  if S.length b1 <> 0 && S.length b2 <> 0 then begin
+    admit()
+  end
 
 
 
