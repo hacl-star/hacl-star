@@ -1750,20 +1750,23 @@ let rec find_deep_code_transform (c:code) (cs:codes) : possibly transformation_h
         "---------------------------------\n" ^
         "") in
     *)
-    if eq_codes (fully_unblocked_code x) (fully_unblocked_code c) then (
-      return (MoveUpFrom 0)
-    ) else (
-      match x with
-      | Block l -> (
-          match find_deep_code_transform c l with
-          | Ok t -> return (DiveInAt 0 t)
-          | Err reason ->
-            th <-- find_deep_code_transform c xs;
-            return (increment_hint th)
-        )
-      | _ ->
-        th <-- find_deep_code_transform c xs;
-        return (increment_hint th)
+    if is_empty_code x then find_deep_code_transform c xs else (
+      if eq_codes (fully_unblocked_code x) (fully_unblocked_code c) then (
+        return (MoveUpFrom 0)
+      ) else (
+        match x with
+        | Block l -> (
+            match find_deep_code_transform c l with
+            | Ok t ->
+              return (DiveInAt 0 t)
+            | Err reason ->
+              th <-- find_deep_code_transform c xs;
+              return (increment_hint th)
+          )
+        | _ ->
+          th <-- find_deep_code_transform c xs;
+          return (increment_hint th)
+      )
     )
 
 let rec metric_for_code (c:code) : GTot nat =
