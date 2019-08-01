@@ -1495,15 +1495,15 @@ let rec bubble_to_top (cs:codes) (i:nat{i < L.length cs}) : possibly (cs':codes{
   match cs with
   | [_] -> return []
   | h :: t ->
-    let x = L.index cs i in
-    if not (safely_bounded_code_p x) then (
-      Err ("Cannot safely move " ^ fst (print_code x 0 gcc))
+    if i = 0 then (
+      return t
     ) else (
-      if not (safely_bounded_code_p h) then (
-        Err ("Cannot safely move beyond " ^ fst (print_code h 0 gcc))
+      let x = L.index cs i in
+      if not (safely_bounded_code_p x) then (
+        Err ("Cannot safely move " ^ fst (print_code x 0 gcc))
       ) else (
-        if i = 0 then (
-          return t
+        if not (safely_bounded_code_p h) then (
+          Err ("Cannot safely move beyond " ^ fst (print_code h 0 gcc))
         ) else (
           match bubble_to_top t (i - 1) with
           | Err reason -> Err reason
