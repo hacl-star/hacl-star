@@ -619,3 +619,228 @@ let rec crt #nLen #l ps es as acc =
   crtgo ps es as 1ul mprod acc;
 
   pop_frame ()
+
+
+#reset-options "--z3rlimit 800 --max_fuel 1 --max_ifuel 0"
+
+val tailprod_go:
+     #nLen:bn_len_s
+  -> #l:ssize_t{ v l > 1 }
+  -> ps:bnlist nLen l
+  -> es:bnlist nLen l
+  -> i:size_t{v i > 0 /\ v i <= v l}
+  -> j:size_t{v j <= v i}
+  -> m:lbignum nLen
+  -> Stack unit
+  (requires fun h ->
+      live h m /\ live h ps /\ live h es /\
+      disjoint ps es /\ disjoint ps m /\ disjoint es m /\
+      Seq.length (as_snat_bnlist #nLen #l h ps) = v l /\
+      Seq.length (as_snat_bnlist #nLen #l h es) = v l /\
+      crtps_proper h ps /\
+      crtes_proper h es /\
+      as_snat h m > 1
+      )
+  (ensures fun h0 _ h1 ->
+   modifies1 m h0 h1 /\
+   as_snat h1 m =
+   S.tailprod_go (as_snat_bnlist h0 ps)
+                 (as_snat_bnlist h0 es)
+                 (v i)
+                 (v j)
+                 (as_snat h0 m)
+   )
+  (decreases (v i - v j))
+let rec tailprod_go #nLen #l ps es i j m =
+  admit ();
+  if j =. i then () else begin
+    let h0 = FStar.HyperStack.ST.get () in
+    bn_len_s_fits nLen;
+    push_frame ();
+
+    let p = bnlist_ix ps 0ul in
+    let e = bnlist_ix es 0ul in
+
+    let tmp1 = create nLen (u64 0) in
+    let tmp2 = create nLen (u64 0) in
+    let h = FStar.HyperStack.ST.get () in
+    assume (nat_fits (as_snat h m * exp (as_snat h p) (as_snat h e)) nLen);
+    assume (nat_fits (exp (as_snat h p) (as_snat h e)) nLen);
+    bn_exp p e tmp1;
+    bn_mul_fitting m tmp1 tmp2;
+    copy m tmp2;
+
+    let h = FStar.HyperStack.ST.get () in
+    as_snat_bnlist_preserves_h h0 h ps;
+    as_snat_bnlist_preserves_h h0 h es;
+
+    tailprod_go ps es i (j +! 1ul) tmp2;
+
+    pop_frame ()
+  end
+
+val tailprod:
+     #nLen:bn_len_s
+  -> #l:ssize_t{ v l > 1 }
+  -> ps:bnlist nLen l
+  -> es:bnlist nLen l
+  -> i:size_t{v i > 0 /\ v i <= v l}
+  -> m:lbignum nLen
+  -> Stack unit
+  (requires fun h ->
+      live h m /\ live h ps /\ live h es /\
+      disjoint ps es /\ disjoint ps m /\ disjoint es m /\
+      Seq.length (as_snat_bnlist #nLen #l h ps) = v l /\
+      Seq.length (as_snat_bnlist #nLen #l h es) = v l /\
+      crtps_proper h ps /\
+      crtes_proper h es
+      )
+  (ensures fun h0 _ h1 ->
+   modifies1 m h0 h1 /\
+   as_snat h1 m =
+   S.tailprod (as_snat_bnlist h0 ps)
+              (as_snat_bnlist h0 es)
+              (v i)
+   )
+let tailprod #nLen #l ps es i m =
+  admit ();
+  push_frame ();
+
+  let p = bnlist_ix ps 0ul in
+  let e = bnlist_ix es 0ul in
+  bn_exp p e m;
+
+  tailprod_go ps es i 1ul m;
+
+  pop_frame ()
+
+val fullprod:
+     #nLen:bn_len_s
+  -> #l:ssize_t{ v l > 1 }
+  -> ps:bnlist nLen l
+  -> es:bnlist nLen l
+  -> m:lbignum nLen
+  -> Stack unit
+  (requires fun h ->
+      live h m /\ live h ps /\ live h es /\
+      disjoint ps es /\ disjoint ps m /\ disjoint es m /\
+      Seq.length (as_snat_bnlist #nLen #l h ps) = v l /\
+      Seq.length (as_snat_bnlist #nLen #l h es) = v l /\
+      crtps_proper h ps /\
+      crtes_proper h es
+      )
+  (ensures fun h0 _ h1 ->
+   modifies1 m h0 h1 /\
+   as_snat h1 m =
+   S.fullprod (as_snat_bnlist h0 ps) (as_snat_bnlist h0 es))
+let fullprod #nLen #l ps es m = tailprod ps es l m
+
+
+val solve_dlp_single:
+     #nLen:bn_len_s
+  -> n:lbignum nLen
+  -> p:lbignum nLen
+  -> e:lbignum nLen
+  -> g:lbignum nLen
+  -> a:lbignum nLen
+  -> res:lbignum nLen
+  -> Stack unit
+  (requires fun h ->
+      live h n /\ live h p /\ live h e /\ live h g /\ live h a /\ live h res /\
+      all_disjoint [loc n; loc p; loc e; loc g; loc a; loc res] /\
+      exp (as_snat h p) (as_snat h e) < as_snat h n /\
+      as_snat h g < as_snat h n /\
+      as_snat h a < as_snat h n
+      )
+  (ensures fun h0 _ h1 -> modifies1 res h0 h1)
+let solve_dlp_single #nLen n p e g a res =
+  admit ();
+
+  push_frame ();
+
+  let one:lbignum 1ul = bn_one #1ul in
+  let tmp:lbignum 1ul = bn_one #nLen in
+
+  let p_e = create nLen (u64 0) in
+  bn_exp p e p_e;
+
+  let exp_try = create nLen (u64 1) in
+  let current_g = bn_copy g in
+
+  let whilecond () = begin
+     let b1 = bn_is_leq exp_try p_e in
+     let b2 = bn_is_equal current_g a in
+     b1 && b2
+  end in
+
+  Lib.Loops.while (fun _ -> true) (fun _ -> true) whilecond (fun _ ->
+    bn_add_fitting exp_try one exp_try;
+    bn_modular_mul n current_g g tmp;
+    copy g tmp);
+
+  pop_frame ()
+
+val pohlig_hellman:
+     #nLen:bn_len_s
+  -> #l:ssize_t{ v l > 1 }
+  -> n:lbignum nLen
+  -> ps:bnlist nLen l
+  -> es:bnlist nLen l
+  -> g:lbignum nLen
+  -> a:lbignum nLen
+  -> res:lbignum nLen
+  -> Stack unit
+  (requires fun h ->
+      live h g /\ live h a /\ live h ps /\ live h es /\
+      disjoint ps es /\
+      disjoint ps g /\ disjoint es g /\
+      disjoint ps a /\ disjoint es a /\
+      Seq.length (as_snat_bnlist #nLen #l h ps) = v l /\
+      Seq.length (as_snat_bnlist #nLen #l h es) = v l /\
+      as_snat h g < as_snat h n /\
+      as_snat h a < as_snat h n /\
+      //iscomp (as_snat h n) /\
+      // g is unit and its mult order is prod p^e
+      crtps_proper h ps /\
+      crtes_proper h es
+      )
+  (ensures fun h0 _ h1 ->
+     modifies1 res h0 h1
+//     as_snat h1 res = S.solve_dlp #(as_snat h0 n)
+//                                  (as_snat_bnlist #nLen #l h0 ps)
+//                                  (as_snat_bnlist #nLen #l h0 ps)
+//                                  (as_snat h0 g)
+//                                  (as_snat h0 a)
+     )
+let pohlig_hellman #nLen #l n ps es g a res =
+  admit ();
+  push_frame ();
+
+  let u = create nLen (u64 0) in
+  fullprod ps es u;
+
+  let as = create (nLen *! l) (u64 0) in
+  let p_e = create nLen (u64 0) in
+  let pow = create nLen (u64 0) in
+  let div_r = create nLen (u64 0) in
+  let gi = create nLen (u64 0) in
+  let ai = create nLen (u64 0) in
+
+  Lib.Loops.for 0ul (l -! 1) (fun _ _ -> True) (fun i ->
+    let curA = sub as (i *! nLen) nLen in
+
+    let p = bnlist_ix ps 0ul in
+    let e = bnlist_ix es 0ul in
+    bn_exp p e p_e;
+
+    bn_divide u p_e pow div_r;
+
+    bn_modular_exp n g pow gi;
+    bn_modular_exp n a pow ai;
+
+    solve_dlp_single n p e gi ai curA
+  );
+
+  crt ps es as res;
+
+  pop_frame ()

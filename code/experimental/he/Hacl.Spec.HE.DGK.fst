@@ -300,10 +300,11 @@ val tailprod_go:
   -> m:big
   -> Tot big (decreases (i-j))
 let rec tailprod_go ps es i j m =
-    if j = i then m else
+  if j = i then m else begin
     let p = S.index ps j in
     let e = S.index es j in
     tailprod_go ps es i (j+1) (m * exp p e)
+  end
 
 val tailprod:
      ps:crtps
@@ -349,9 +350,9 @@ val solve_dlp:
   -> ps:crtps
   -> es:crtes{S.length es = S.length ps}
   -> g:fe n{isunit g /\ is_mult_order g (fullprod ps es)}
-  -> a:fe n
+  -> h:fe n
   -> x:fe (fullprod ps es)
-let solve_dlp #n base g a = admit()
+let solve_dlp #n base g h = admit ()
 
 val solve_dlp_proof:
      #n:comp
