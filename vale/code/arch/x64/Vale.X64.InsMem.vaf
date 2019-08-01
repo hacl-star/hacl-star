@@ -40,7 +40,31 @@ friend Vale.X64.Decls
 //function operator([]) (m:mem, b:Vale.X64.Memory.buffer64):fun(int) -> nat64 extern;
 
 #reset-options "--initial_fuel 2 --max_fuel 4 --max_ifuel 2 --z3rlimit 20"
-
+    
+var heap0:vale_heap {:state heap(0)};
+var heap1:vale_heap {:state heap(1)};
+var heap2:vale_heap {:state heap(2)};
+var heap3:vale_heap {:state heap(3)};
+var heap4:vale_heap {:state heap(4)};
+var heap5:vale_heap {:state heap(5)};
+var heap6:vale_heap {:state heap(6)};
+var heap7:vale_heap {:state heap(7)};
+var heap8:vale_heap {:state heap(8)};
+var heap9:vale_heap {:state heap(9)};
+var heap10:vale_heap {:state heap(10)};
+var heap11:vale_heap {:state heap(11)};
+var heap12:vale_heap {:state heap(12)};
+var heap13:vale_heap {:state heap(13)};
+var heap14:vale_heap {:state heap(14)};
+var heap15:vale_heap {:state heap(15)};
+    
+operand_type heap:quad32 @ nat4 :=
+| inout heap0 | inout heap1 | inout heap2 | inout heap3
+| inout heap4 | inout heap5 | inout heap6 | inout heap7
+| inout heap8 | inout heap9 | inout heap10 | inout heap11
+| inout heap12 | inout heap13 | inout heap14 | inout heap15
+;
+    
 procedure Mem_in(in base:reg64, inline offset:int, ghost b:buffer64, ghost index:int, inline t:taint)
     returns(o:opr)
     {:operand}

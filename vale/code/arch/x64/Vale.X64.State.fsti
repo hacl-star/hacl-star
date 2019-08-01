@@ -7,13 +7,14 @@ open Vale.X64.Machine_s
 open Vale.X64.Memory
 open Vale.X64.Stack_i
 module Flags = Vale.X64.Flags
-module Regs = Vale.X64.Regs
+module Regs = Vale.X64.Regs 
+module Map = FStar.Map
 
 noeq type vale_state = {
   vs_ok: bool;
   vs_regs: Regs.t;
   vs_flags: Flags.t;
-  vs_heap: vale_heap;
+  vs_heap: Map.t (key:nat4) (value:vale_heap);
   vs_stack: vale_stack;
   vs_memTaint: memtaint;
   vs_stackTaint: memtaint;
