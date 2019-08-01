@@ -8,7 +8,7 @@ module S = Spec.Ed25519
 include Hacl.Spec.BignumQ.Definitions
 
 
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 
 val lemma_mul_lt:a:nat -> b:nat -> c:nat -> d:nat ->
   Lemma
@@ -164,11 +164,15 @@ let lemma_div248_x6 x6 =
     v x6 * pow2 88;
     }
 
+#push-options "--z3rlimit 200"
+
 val lemma_div248_x7: x7:uint64 ->
   Lemma (pow2 32 * (v x7 % pow2 24) * pow2 112 + v x7 / pow2 24 * pow2 168 == v x7 * pow2 144)
 let lemma_div248_x7 x7 =
   assert_norm (pow2 32 * pow2 112 = pow2 144);
   assert_norm (pow2 168 == pow2 144 * pow2 24)
+
+#pop-options
 
 val lemma_div248_x8: x8:uint64 ->
   Lemma (pow2 32 * (v x8 % pow2 24) * pow2 168 + v x8 / pow2 24 * pow2 224 == v x8 * pow2 200)
@@ -344,18 +348,34 @@ let lemma_div264_x5 x5 =
     }
 
 
+#push-options "--z3rlimit 200 --z3cliopt smt.arith.nl=false"
+
 val lemma_div264_x6: x6:uint64 ->
   Lemma (pow2 16 * (v x6 % pow2 40) * pow2 56 + v x6 / pow2 40 * pow2 112 == v x6 * pow2 72)
 let lemma_div264_x6 x6 =
   calc (==) {
     pow2 16 * (v x6 % pow2 40) * pow2 56 + v x6 / pow2 40 * pow2 112;
+    (==) { Math.Lemmas.paren_mul_right (pow2 16)(v x6 % pow2 40) (pow2 56);
+           Math.Lemmas.swap_mul (v x6 % pow2 40) (pow2 56);
+           Math.Lemmas.paren_mul_right (pow2 16) (pow2 56) (v x6 % pow2 40);
+           Math.Lemmas.paren_mul_left(pow2 16) (pow2 56) (v x6 % pow2 40)
+    }
+    (pow2 16 * pow2 56) * (v x6 % pow2 40) + v x6 / pow2 40 * pow2 112;
     (==) { assert_norm (pow2 16 * pow2 56 = pow2 72) }
     pow2 72 * (v x6 % pow2 40) + v x6 / pow2 40 * pow2 112;
     (==) { assert_norm (pow2 72 * pow2 40 = pow2 112) }
-    pow2 72 * (v x6 % pow2 40) + v x6 / pow2 40 * pow2 72 * pow2 40;
-    (==) { FStar.Math.Lemmas.euclidean_division_definition (v x6) (pow2 40) }
+    pow2 72 * (v x6 % pow2 40) + v x6 / pow2 40 * (pow2 72 * pow2 40);
+    (==) { Math.Lemmas.paren_mul_right ( v x6 / pow2 40) (pow2 72) (pow2 40);
+           Math.Lemmas.swap_mul ( v x6 / pow2 40) (pow2 72);
+           Math.Lemmas.paren_mul_right (pow2 72) ( v x6 / pow2 40) (pow2 40) }
+    pow2 72 * (v x6 % pow2 40) + pow2 72 * ((v x6 / pow2 40) * pow2 40);
+    (==) { Math.Lemmas.distributivity_add_right (pow2 72) (v x6 % pow2 40)((v x6 / pow2 40) * pow2 40);
+           FStar.Math.Lemmas.euclidean_division_definition (v x6) (pow2 40);
+           Math.Lemmas.swap_mul (pow2 72) (v x6) }
     v x6 * pow2 72;
     }
+
+#pop-options
 
 
 val lemma_div264_x7: x7:uint64 ->
@@ -385,12 +405,21 @@ let lemma_div264_x8 x8 =
     v x8 * pow2 184;
     }
 
+#push-options "--z3cliopt smt.arith.nl=false"
 
 val lemma_div264_x9: x9:uint64{v x9 < pow2 40} ->
   Lemma (pow2 16 * (v x9 % pow2 40) * pow2 224 == v x9 * pow2 240)
 let lemma_div264_x9 x9 =
-  assert_norm (pow2 16 * pow2 224 = pow2 240)
+  calc (==) {
+    pow2 16 * (v x9 % pow2 40) * pow2 224;
+    (==) { Math.Lemmas.small_mod (v x9) (pow2 40);
+           Math.Lemmas.swap_mul (pow2 16) (v x9);
+           Math.Lemmas.paren_mul_right (v x9) (pow2 16) (pow2 224);
+           assert_norm (pow2 16 * pow2 224 = pow2 240) }
+    v x9 * pow2 240;
+  }
 
+#pop-options
 
 val lemma_div264: x:qelem_wide5 ->
   Lemma
@@ -614,6 +643,7 @@ val lemma_mul_5_low_264:
          * (y1 + pow2 56 * y2 + pow2 112 * y3 + pow2 168 * y4 + pow2 224 * y5)) % pow2 264
     == a0 + pow2 56 * a1 + pow2 112 * a2 + pow2 168 * a3 + pow2 224 * (a4 % pow2 40)))
 
+private let lemma_mul_nat_is_nat (a:nat) (b:nat) : Lemma (a*b >= 0) = ()
 private let lemma_div_nat_is_nat (a:nat) (b:pos) : Lemma (a/b >= 0) = ()
 
 private
@@ -842,7 +872,7 @@ let lemma_0 (x:nat) (y:nat) (c:pos) : Lemma
       Math.Lemmas.lemma_div_mod y c;
       Math.Lemmas.distributivity_sub_right c (x / c) (y / c))
 
-#set-options "--z3rlimit 500"
+#set-options "--z3rlimit 700"
 
 private
 let lemma_1 (x:nat) (y:nat) (c:pos) : Lemma
@@ -863,6 +893,38 @@ val lemma_barrett_reduce':
          let z = if u < S.q then u else u - S.q in
          z = x % S.q)
 
+let lemma_barrett_reduce'' (u:nat) (z:nat) (x:nat) (q:nat) : Lemma
+  (requires u < 2 * S.q /\ u = x - q * S.q /\ z == (if u < S.q then u else u - S.q))
+  (ensures z == x % S.q)
+  =
+  if u >= S.q then (
+    calc (==) {
+    z;
+    (==) { Math.Lemmas.small_mod z S.q }
+    (u - S.q) % S.q;
+    (==) { }
+    (x - (q * S.q + S.q)) % S.q;
+    (==) { Math.Lemmas.distributivity_add_left q 1 S.q; assert_norm (1 * S.q == S.q) }
+    (x - (q + 1) * S.q) % S.q;
+    (==) { Math.Lemmas.lemma_mod_sub x S.q (q+1) }
+    x % S.q;
+    }
+  ) else (
+    calc (==) {
+    z;
+    (==) { Math.Lemmas.small_mod z S.q }
+    u % S.q;
+    (==) { }
+    (x - (q * S.q)) % S.q;
+    (==) { Math.Lemmas.lemma_mod_sub x S.q q }
+    x % S.q;
+    }
+  )
+
+
+
+#reset-options "--z3rlimit 600 --max_fuel 0 --max_ifuel 0"
+
 let lemma_barrett_reduce' x =
   assert_norm (S.q == 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed);
   assert_norm (0x100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000 == pow2 512);
@@ -871,7 +933,7 @@ let lemma_barrett_reduce' x =
   let m = pow2 512 / S.q in
   let l = S.q in
   assert_norm (pow2 264 = 0x1000000000000000000000000000000000000000000000000000000000000000000);
-  let q = ((x / pow2 248) * m) / pow2 264 in
+  let q:nat = ((x / pow2 248) * m) / pow2 264 in
   let a' = (x % pow2 264) - (q * l) % pow2 264 in
   assert_norm (2 * l < pow2 264);
   calc (<) {
@@ -906,7 +968,4 @@ let lemma_barrett_reduce' x =
   let z = if u < l then u else u - l in
   assert (u < 2 * l);
   assert (u = x - q * l);
-  Math.Lemmas.distributivity_add_left 1 q l;
-  if u >= l then Math.Lemmas.lemma_mod_sub x l (q+1)
-  else Math.Lemmas.lemma_mod_sub x l (q);
-  Math.Lemmas.modulo_lemma z l
+  lemma_barrett_reduce'' u z x q
