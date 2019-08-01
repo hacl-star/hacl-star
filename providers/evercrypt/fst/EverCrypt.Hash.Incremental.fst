@@ -176,7 +176,9 @@ let init a s =
   assert (invariant #a h3 s);
   assert B.(modifies (footprint #a h1 s) h1 h3);
   // This seems to cause insurmountable difficulties. Puzzled.
-  assert (equal_domains h2 h3)
+  ST.lemma_equal_domains_trans h1 h2 h3;
+  // AR: 07/22: same old `Seq.equal` and `==` story
+  assert (Seq.equal (hashed #a h3 s) Seq.empty)
 #pop-options
 
 /// We keep the total length at run-time, on 64 bits, but require that it abides

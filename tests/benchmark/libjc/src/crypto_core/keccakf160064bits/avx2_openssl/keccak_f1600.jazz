@@ -1,0 +1,172 @@
+fn __keccak_f1600_avx2_openssl(
+  reg u256 a00 a01 a20 a31
+           a21 a41 a11,
+  reg u64 _rhotates_left
+          _rhotates_right
+          _iotas
+) -> reg u256, reg u256, reg u256, reg u256,
+     reg u256, reg u256, reg u256
+{
+  reg u32 i;
+  reg u256 c00, c14; 
+  reg u256 d00, d14;
+  reg u256[9] t;
+  reg bool zf;
+  reg u64 rhotates_left rhotates_right iotas;
+
+  rhotates_left = _rhotates_left + 96;
+  rhotates_right = _rhotates_right + 96;
+  iotas = _iotas;
+
+  i = 24;
+  while
+  {
+    /* ######################################### Theta */
+    c00  = #x86_VPSHUFD_256(a20, 0x4e /*0b01001110 */);
+    c14  = a41 ^4u64 a31;
+    t[2] = a21 ^4u64 a11;
+    c14  = c14 ^4u64 a01;
+    c14  = c14 ^4u64 t[2];
+
+    t[4] = #x86_VPERMQ(c14, 0x93 /* 0b10010011 */);
+    c00 = c00 ^4u64 a20;
+    t[0] = #x86_VPERMQ(c00, 0x4e /* 0b01001110 */);
+
+    t[1] = c14 >>4u64 63; 
+    t[2] = c14 +4u64 c14;
+    t[1] = t[1] |4u64 t[2];
+
+    d14 = #x86_VPERMQ(t[1], 0x39 /*0b00111001 */);
+    d00 = t[1] ^4u64 t[4];
+    d00 = #x86_VPERMQ(d00, 0x00 /*0b00000000 */);
+
+    c00 = c00 ^4u64 a00;
+    c00 = c00 ^4u64 t[0];
+
+    t[0] = c00 >>4u64 63; 
+    t[1] = c00 +4u64 c00;
+    t[1] = t[1] |4u64 t[0];
+
+    a20 = a20 ^4u64 d00;
+    a00 = a00 ^4u64 d00;
+
+    d14  = #x86_VPBLENDD_256(d14,t[1], (4u2)[3,0,0,0] /* 0b11000000 */);
+    t[4] = #x86_VPBLENDD_256(t[4],c00, (4u2)[0,0,0,3] /* 0b00000011 */);
+    d14 = d14 ^4u64 t[4];
+
+    /* ######################################### Rho + Pi + pre-Chi shuffle */
+
+    t[3] = #x86_VPSLLV_4u64(a20,(u256)[rhotates_left + 0*32-96]); //vpsllvq 0*32-96(%r8),$a20,@t[3]
+    a20  = #x86_VPSRLV_4u64(a20,(u256)[rhotates_right+ 0*32-96]); //vpsrlvq  0*32-96(%r9),$a20,$a20
+    a20 = a20 |4u64 t[3];
+
+    a31 = a31 ^4u64 d14;
+    t[4] = #x86_VPSLLV_4u64(a31,(u256)[rhotates_left + 2*32-96]); //vpsllvq 2*32-96(%r8),$a31,@t[4]
+    a31  = #x86_VPSRLV_4u64(a31,(u256)[rhotates_right+ 2*32-96]); //vpsllvq 2*32-96(%r9),$a31,$a31
+    a31 = a31 |4u64 t[4];
+
+    a21 = a21 ^4u64 d14;
+    t[5] = #x86_VPSLLV_4u64(a21,(u256)[rhotates_left + 3*32-96]); //vpsllvq 3*32-96(%r8),$a21,@t[5]
+    a21  = #x86_VPSRLV_4u64(a21,(u256)[rhotates_right+ 3*32-96]); //vpsrlvq 3*32-96(%r9),$a21,$a21
+    a21 = a21 |4u64 t[5];
+
+
+    a41 = a41 ^4u64 d14;
+    t[6] = #x86_VPSLLV_4u64(a41,(u256)[rhotates_left + 4*32-96]); //vpsllvq 4*32-96(%r8),$a41,@t[6]
+    a41  = #x86_VPSRLV_4u64(a41,(u256)[rhotates_right+ 4*32-96]); //vpsrlvq 4*32-96(%r9),$a41,$a41
+    a41 = a41 |4u64 t[6];
+
+    a11 = a11 ^4u64 d14;
+    t[3] = #x86_VPERMQ(a20, 0x8d /*0b10001101 */);
+    t[4] = #x86_VPERMQ(a31, 0x8d /*0b10001101 */);
+    t[7] = #x86_VPSLLV_4u64(a11,(u256)[rhotates_left + 5*32-96]); //vpsllvq 5*32-96(%r8),$a11,@t[7]
+    t[1] = #x86_VPSRLV_4u64(a11,(u256)[rhotates_right+ 5*32-96]); //vpsrlvq 5*32-96(%r9),$a11,@t[1]
+    t[1] = t[1] |4u64 t[7];
+
+    a01 = a01 ^4u64 d14;
+    t[5] = #x86_VPERMQ(a21, 0x1b /*0b00011011 */);
+    t[6] = #x86_VPERMQ(a41, 0x72 /*0b01110010 */);
+    t[8] = #x86_VPSLLV_4u64(a01,(u256)[rhotates_left + 1*32-96]); //vpsllvq 1*32-96(%r8),$a01,@t[8]
+    t[2] = #x86_VPSRLV_4u64(a01,(u256)[rhotates_right+ 1*32-96]); //vpsrlvq 1*32-96(%r9),$a01,@t[2]
+    t[2] = t[2] |4u64 t[8];
+
+
+    /* ######################################### Chi */
+    t[7] = #x86_VPSRLDQ_256(t[1], 8); // >>2u128 vpsrldq
+    t[0] = !t[1] & t[7]; // #x86_VPANDN_256(t[1],t[7]);  
+
+    a31  = #x86_VPBLENDD_256(t[2],t[6], (4u2)[0,0,3,0] );
+    t[8] = #x86_VPBLENDD_256(t[4],t[2], (4u2)[0,0,3,0] );
+    a41  = #x86_VPBLENDD_256(t[3],t[4], (4u2)[0,0,3,0] );
+    t[7] = #x86_VPBLENDD_256(t[2],t[3], (4u2)[0,0,3,0] );
+
+    a31  = #x86_VPBLENDD_256(a31, t[4], (4u2)[0,3,0,0] );
+    t[8] = #x86_VPBLENDD_256(t[8],t[5], (4u2)[0,3,0,0] );
+    a41  = #x86_VPBLENDD_256(a41, t[2], (4u2)[0,3,0,0] );
+    t[7] = #x86_VPBLENDD_256(t[7],t[6], (4u2)[0,3,0,0] );
+
+    a31  = #x86_VPBLENDD_256(a31, t[5], (4u2)[3,0,0,0] );
+    t[8] = #x86_VPBLENDD_256(t[8],t[6], (4u2)[3,0,0,0] );
+    a41  = #x86_VPBLENDD_256(a41, t[6], (4u2)[3,0,0,0] );
+    t[7] = #x86_VPBLENDD_256(t[7],t[4], (4u2)[3,0,0,0] );
+
+    a31 = #x86_VPANDN_256(a31,t[8]);
+    a41 = #x86_VPANDN_256(a41,t[7]);
+
+    a11  = #x86_VPBLENDD_256(t[5],t[2], (4u2)[0,0,3,0] );
+    t[8] = #x86_VPBLENDD_256(t[3],t[5], (4u2)[0,0,3,0] ); 
+    a31 = a31 ^4u64 t[3];
+
+    a11  = #x86_VPBLENDD_256(a11,t[3],  (4u2)[0,3,0,0] );
+    t[8] = #x86_VPBLENDD_256(t[8],t[4], (4u2)[0,3,0,0] );
+    a41 = a41 ^4u64 t[5];
+
+    a11  = #x86_VPBLENDD_256(a11,t[4],  (4u2)[3,0,0,0] );
+    t[8] = #x86_VPBLENDD_256(t[8],t[2], (4u2)[3,0,0,0] );
+    a11 = #x86_VPANDN_256(a11,t[8]);
+    a11 = a11 ^4u64 t[6];
+
+    a21 = #x86_VPERMQ(t[1], 0x1e /*0b00011110 */);
+    t[8] = #x86_VPBLENDD_256(a21,a00, (4u2)[0,3,0,0] );
+    a01 = #x86_VPERMQ(t[1], 0x39 /*0b00111001 */);
+    a01 = #x86_VPBLENDD_256(a01,a00, (4u2)[3,0,0,0] );
+    a01 = #x86_VPANDN_256(a01,t[8]);
+
+    a20  = #x86_VPBLENDD_256(t[4],t[5], (4u2)[0,0,3,0] );
+    t[7] = #x86_VPBLENDD_256(t[6],t[4], (4u2)[0,0,3,0] );
+    a20  = #x86_VPBLENDD_256(a20, t[6], (4u2)[0,3,0,0] );
+    t[7] = #x86_VPBLENDD_256(t[7],t[3], (4u2)[0,3,0,0] );
+    a20  = #x86_VPBLENDD_256(a20, t[3], (4u2)[3,0,0,0] );
+    t[7] = #x86_VPBLENDD_256(t[7],t[5], (4u2)[3,0,0,0] );
+
+    a20 = #x86_VPANDN_256(a20,t[7]);
+    a20 = a20 ^4u64 t[2];
+
+    t[0] = #x86_VPERMQ(t[0], 0x00/*0b00000000 */);
+    a31  = #x86_VPERMQ(a31, 0x1b/*0b00011011 */);
+    a41  = #x86_VPERMQ(a41, 0x8d/*0b10001101 */);
+    a11  = #x86_VPERMQ(a11, 0x72/*0b01110010 */);
+
+    a21  = #x86_VPBLENDD_256(t[6],t[3], (4u2)[0,0,3,0] );
+    t[7] = #x86_VPBLENDD_256(t[5],t[6], (4u2)[0,0,3,0] );
+    a21  = #x86_VPBLENDD_256(a21, t[5], (4u2)[0,3,0,0] );
+    t[7] = #x86_VPBLENDD_256(t[7],t[2], (4u2)[0,3,0,0] );
+    a21  = #x86_VPBLENDD_256(a21, t[2], (4u2)[3,0,0,0] );
+    t[7] = #x86_VPBLENDD_256(t[7],t[3], (4u2)[3,0,0,0] );
+
+    a21 = #x86_VPANDN_256(a21,t[7]);
+
+    a00 = a00 ^4u64 t[0];
+    a01 = a01 ^4u64 t[1];
+    a21 = a21 ^4u64 t[4];
+
+    /*  ######################################### Iota */
+    a00 = a00 ^4u64 (u256)[iotas + 0];
+    iotas = iotas + 32;
+
+    (_,_,_,zf,i) = #x86_DEC_32(i); // dec = decl?
+  } (!zf)
+
+  return a00, a01, a20, a31, a21, a41, a11;
+}
+

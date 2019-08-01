@@ -27,6 +27,8 @@ let mask a n = of_fun n (fun (i:nat) -> a.[i])
 
 let ones n = of_fun n (fun (i:nat) -> true)
 
+let lemma_degree_at_least a = ()
+
 let lemma_equal a b = I.lemma_poly_equal_elim (to_poly a) (to_poly b)
 let lemma_index_i a i = ()
 let lemma_degree a = ()

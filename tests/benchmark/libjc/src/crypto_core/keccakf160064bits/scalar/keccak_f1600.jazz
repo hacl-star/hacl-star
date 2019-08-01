@@ -1,0 +1,187 @@
+#include "crypto_core/keccakf160064bits/scalar/keccak_f1600.jahh"
+
+
+
+fn index(inline int x, inline int y) -> inline int {
+  inline int r;
+  r = 5*(x % 5) + (y % 5);
+  return r;
+}
+
+
+
+fn keccak_rho_offsets(inline int i) -> inline int
+{
+  inline int r, x, y, z, t;
+  r = 0;
+  x = 1;
+  y = 0;
+  for t = 0 to 24
+  { if ( i == x + 5 * y )
+    { r = ((t + 1) * (t + 2) / 2) % 64;
+    }
+    z = (2 * x + 3 * y) % 5;
+    x = y;
+    y = z;
+  }
+
+  return r;
+}
+
+
+
+fn rhotates(inline int x y) -> inline int
+{
+  inline int i r;
+  i = index(x, y);
+  r = keccak_rho_offsets(i);
+  return r;
+}
+
+
+
+fn ROL64(reg u64 x, inline int c) -> reg u64
+{
+  reg u64 y;
+  if (c == 0)
+  { y = x; }
+  else
+  { _, _, y = #x86_ROL_64(x, c); }
+  return y;
+}
+
+
+fn theta_sum(_state_t a) -> reg u64[5]
+{
+  inline int i j;
+  reg u64[5] c;
+
+  for i=0 to 5
+  { c[i] = S(a, 0, i); }
+
+  for j=1 to 5
+  { for i=0 to 5
+    { c[i] ^= S(a, j, i); }
+  }
+
+  return c;
+}
+
+
+
+fn theta_rol(reg u64[5] c) -> reg u64[5]
+{
+  inline int i;
+  reg u64[5] d;
+  reg u64 t r;
+
+  for i = 0 to 5
+  { d[i] = c[(i+1)%5];
+    _, _, d[i] = #x86_ROL_64(d[i], 1);
+    d[i] ^= c[(i+4)%5];
+  }
+
+  return d;
+}
+
+
+
+fn rol_sum(
+  reg u64[5] d,
+  _state_t a,
+  inline int offset
+) -> reg u64[5]
+{
+  inline int j j1 k;
+  reg u64[5] c;
+  reg u64 t;
+
+  for j = 0 to 5
+  {
+    j1 = (j+offset) % 5;
+    k = rhotates(j, j1);
+    t = S(a,j,j1);
+    t ^= d[j1];
+    t = ROL64(t, k);
+    c[j] = t;
+  }
+
+  return c;
+}
+
+
+
+fn set_row(
+  _state_t r,
+  inline int row,
+  reg u64[5] c,
+  stack u64 iota
+) -> _state_t
+{
+  inline int j j1 j2;
+  reg u64 t;
+
+  for j= 0 to 5
+  {
+    j1 = (j+1) % 5;
+    j2 = (j+2) % 5;
+    t = !c[j1] & c[j2];
+    if row==0 && j==0 { t ^= iota; }
+    t ^= c[j];
+    S(r, row, j) = t;
+  }
+
+  return r;
+}
+
+
+
+fn round2x(
+  _state_t a,
+  _state_t r,
+  reg u64 iotas,
+  inline int o
+) -> _state_t, _state_t
+{
+  reg u64[5] c d;
+  stack u64 iota;
+
+  iota = [iotas + o];
+  c = theta_sum(a);
+  d = theta_rol(c);
+  c = rol_sum(d, a, 0);
+  r = set_row(r, 0, c, iota);
+  c = rol_sum(d, a, 3);
+  r = set_row(r, 1, c, iota);
+  c = rol_sum(d, a, 1);
+  r = set_row(r, 2, c, iota);
+  c = rol_sum(d, a, 4);
+  r = set_row(r, 3, c, iota);
+  c = rol_sum(d, a, 2);
+  r = set_row(r, 4, c, iota);
+
+  return a, r;
+}
+
+
+
+fn __keccak_f1600_scalar(
+  _state_t a,
+  reg u64 iotas
+) -> _state_t, reg u64
+{
+  reg bool zf;
+  _state_t r;
+
+  while
+  {
+    a, r = round2x(a, r, iotas, 0);
+    r, a = round2x(r, a, iotas, 8);
+    iotas += 16;
+    _, _, _, _, zf = #x86_TEST_8(iotas,255);
+  } (!zf)
+
+  iotas -= 192;
+
+  return a, iotas;
+}

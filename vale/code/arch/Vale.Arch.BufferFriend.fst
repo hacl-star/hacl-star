@@ -67,6 +67,17 @@ let rec lemma_n_to_le_is_nat_to_bytes (len:nat) (n:nat) =
     ()
   );
   assert (equal (FE.n_to_le len n) (of_bytes (BS.nat_to_bytes_le len n)))
+
+let rec lemma_be_to_n_is_nat_from_bytes (s:FE.bytes) =
+  if length s > 0 then lemma_be_to_n_is_nat_from_bytes (Seq.slice s 0 (length s - 1))
+
+let rec lemma_n_to_be_is_nat_to_bytes (len: nat) (n: nat) =
+  if len > 0 then (
+    FStar.Math.Lemmas.pow2_plus 8 (8 * (len - 1));
+    lemma_n_to_be_is_nat_to_bytes (len - 1) (n / 256)
+  );
+  assert (equal (FE.n_to_be len n) (of_bytes (BS.nat_to_bytes_be len n)))
+
 #reset-options
 
 let nat_from_bytes_le_is_four_to_nat b =

@@ -4,7 +4,10 @@ open Vale.Math.Poly2
 open FStar.Seq
 module List = FStar.List.Tot
 
-// Derived lemmas (see Math.Poly2_i for fundamental lemmas)
+// Derived lemmas (see Vale.Math.Poly2_i for fundamental lemmas)
+
+val lemma_pointwise_equal (a b:poly) (pf:(i:int -> Lemma (a.[i] == b.[i]))) : Lemma
+  (a == b)
 
 val lemma_index (a:poly) : Lemma (forall (i:int).{:pattern a.[i]} a.[i] ==> 0 <= i /\ i <= degree a)
 val lemma_index_all (_:unit) : Lemma
@@ -27,13 +30,15 @@ val lemma_shift_define_forward (p:poly) (n:int) : Lemma
 val lemma_shift_define_all (_:unit) : Lemma
   (forall (p:poly) (n:int) (i:int).{:pattern (shift p n).[i]} (shift p n).[i] == (p.[i - n] && i >= 0))
 val lemma_and_define (a b:poly) : Lemma
-  (forall (i:int).{:pattern (poly_and a b).[i]} (poly_and a b).[i] == (a.[i] && b.[i]))
+  (forall (i:int).{:pattern (poly_and a b).[i] \/ a.[i] \/ b.[i]} (poly_and a b).[i] == (a.[i] && b.[i]))
 val lemma_and_define_all (_:unit) : Lemma
-  (forall (a b:poly) (i:int).{:pattern (poly_and a b).[i]} (poly_and a b).[i] == (a.[i] && b.[i]))
+  (forall (a b:poly).{:pattern (poly_and a b)}
+    forall (i:int).{:pattern (poly_and a b).[i] \/ a.[i] \/ b.[i]} (poly_and a b).[i] == (a.[i] && b.[i]))
 val lemma_or_define (a b:poly) : Lemma
-  (forall (i:int).{:pattern (poly_or a b).[i]} (poly_or a b).[i] == (a.[i] || b.[i]))
+  (forall (i:int).{:pattern (poly_or a b).[i] \/ a.[i] \/ b.[i]} (poly_or a b).[i] == (a.[i] || b.[i]))
 val lemma_or_define_all (_:unit) : Lemma
-  (forall (a b:poly) (i:int).{:pattern (poly_or a b).[i]} (poly_or a b).[i] == (a.[i] || b.[i]))
+  (forall (a b:poly).{:pattern (poly_or a b)}
+    forall (i:int).{:pattern (poly_or a b).[i] \/ a.[i] \/ b.[i]} (poly_or a b).[i] == (a.[i] || b.[i]))
 val lemma_mask_define (p:poly) (n:nat) : Lemma
   (forall (i:int).{:pattern p.[i] \/ (mask p n).[i]} (mask p n).[i] == (p.[i] && i < n))
 val lemma_mask_define_all (_:unit) : Lemma
@@ -185,6 +190,10 @@ val lemma_mul_reverse_shift_1 (a b:poly) (n:nat) : Lemma
 val lemma_shift_is_mul_right (a:poly) (n:nat) : Lemma (shift a n == a *. monomial n)
 val lemma_shift_is_mul_left (a:poly) (n:nat) : Lemma (shift a n == monomial n *. a)
 
+val lemma_shift_shift (a:poly) (m n:int) : Lemma
+  (requires m >= 0 \/ n <= 0)
+  (ensures shift a (m + n) == shift (shift a m) n)
+
 val lemma_mul_all (_:unit) : Lemma
   (ensures
     (forall (a:poly).{:pattern (a *. zero)} (a *. zero) == zero) /\
@@ -233,6 +242,10 @@ val lemma_mod_mul_mod_right (a b c:poly) : Lemma
   (requires degree c >= 0)
   (ensures (a *. (b %. c)) %. c == (a *. b) %. c)
 
+val lemma_shift_mod (a b:poly) (n:nat) : Lemma
+  (requires degree b >= 0)
+  (ensures shift (a %. b) n %. b == shift a n %. b)
+
 val lemma_mod_reduce (a b c:poly) : Lemma
   (requires degree (b +. c) >= 0)
   (ensures (a *. b) %. (b +. c) == (a *. c) %. (b +. c))
@@ -270,3 +283,7 @@ val lemma_mask_is_mod (a:poly) (n:nat) : Lemma
 
 val lemma_shift_is_div (a:poly) (n:nat) : Lemma
   (shift a (-n) == a /. monomial n)
+
+val lemma_mod_monomial (a:poly) (n:nat) : Lemma
+  (forall (i:int).{:pattern (a %. monomial n).[i]} (a %. monomial n).[i] <==> i < n && a.[i])
+
