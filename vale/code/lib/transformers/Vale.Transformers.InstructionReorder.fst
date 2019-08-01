@@ -1851,7 +1851,7 @@ let rec find_transformation_hints (c1 c2:codes) :
           | While _ _, While _ _ ->
             Err ("Found weird non-standard code: " ^ fst (print_code h1 0 gcc))
           | _ ->
-            Err reason
+            Err ("Find deep code failure. Reason: " ^ reason)
         )
     )
   )
