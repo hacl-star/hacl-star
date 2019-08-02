@@ -14,7 +14,8 @@ noeq type vale_state = {
   vs_ok: bool;
   vs_regs: Regs.t;
   vs_flags: Flags.t;
-  vs_heap: Map.t (key:nat4) (value:vale_heap);
+  vs_heap: vale_heap;
+  vs_heaplets: Map.t (key:nat) (value:vale_heap);
   vs_stack: vale_stack;
   vs_memTaint: memtaint;
   vs_stackTaint: memtaint;
@@ -126,6 +127,7 @@ let state_eq (s0:vale_state) (s1:vale_state) : prop0 =
   Regs.equal s0.vs_regs s1.vs_regs /\
   Flags.equal s0.vs_flags s1.vs_flags /\
   s0.vs_heap == s1.vs_heap /\
+  s0.vs_heaplets == s1.vs_heaplets /\ //TODO: Check contents of heaplets?
   s0.vs_stack == s1.vs_stack /\
   s0.vs_memTaint == s1.vs_memTaint /\
   s0.vs_stackTaint == s1.vs_stackTaint
