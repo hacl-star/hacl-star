@@ -46,8 +46,9 @@ let prints_to_same_code (c1 c2:code) : pbool =
 (* See fsti *)
 let reorder orig hint =
   transformation_result_of_possibly_codes (
-    ts <-- IR.find_transformation_hints [orig] [hint];
-    transformed <-- IR.perform_reordering_with_hints ts [orig];
+    let orig' = IR.purge_empty_codes [orig] in
+    ts <-- IR.find_transformation_hints orig' [hint];
+    transformed <-- IR.perform_reordering_with_hints ts orig';
     prints_to_same_code (Block transformed) hint;;
     return transformed
   ) orig
@@ -75,14 +76,16 @@ let lemma_IR_equiv_states_to_equiv_states (vs0:vale_state) (s1 s2:machine_state)
 
 (* See fsti *)
 let lemma_reorder orig hint transformed va_s0 va_sM va_fM =
-  match IR.find_transformation_hints [orig] [hint] with
+  let orig' = IR.purge_empty_codes [orig] in
+  match IR.find_transformation_hints orig' [hint] with
   | Err _ -> va_sM, va_fM
   | Ok ts ->
-    match IR.perform_reordering_with_hints ts [orig] with
+    match IR.perform_reordering_with_hints ts orig' with
     | Err _ -> va_sM, va_fM
     | Ok tr ->
       lemma_code_codes orig va_fM (state_to_S va_s0);
-      IR.lemma_perform_reordering_with_hints ts [orig] va_fM (state_to_S va_s0);
+      IR.lemma_purge_empty_codes [orig] va_fM (state_to_S va_s0);
+      IR.lemma_perform_reordering_with_hints ts orig' va_fM (state_to_S va_s0);
       lemma_codes_code tr va_fM (state_to_S va_s0);
       let Some s = machine_eval_code orig va_fM (state_to_S va_s0) in
       let Some s' = machine_eval_code transformed va_fM (state_to_S va_s0) in

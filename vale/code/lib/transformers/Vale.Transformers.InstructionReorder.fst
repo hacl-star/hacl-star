@@ -1945,7 +1945,7 @@ let rec lemma_append_single (xs:list 'a) (y:'a) (i:nat) :
 let rec lemma_is_empty_code (c:code) (fuel:nat) (s:machine_state) :
   Lemma
     (requires (is_empty_code c))
-    (ensures (equiv_ostates (machine_eval_code c fuel s) (machine_eval_codes [] fuel s))) =
+    (ensures ((machine_eval_code c fuel s) == (machine_eval_codes [] fuel s))) =
   match c with
   | Ins _ -> ()
   | Block l -> lemma_is_empty_codes l fuel s
@@ -1954,16 +1954,12 @@ let rec lemma_is_empty_code (c:code) (fuel:nat) (s:machine_state) :
 and lemma_is_empty_codes (cs:codes) (fuel:nat) (s:machine_state) :
   Lemma
     (requires (is_empty_codes cs))
-    (ensures (equiv_ostates (machine_eval_codes cs fuel s) (machine_eval_codes [] fuel s))) =
+    (ensures ((machine_eval_codes cs fuel s) == (machine_eval_codes [] fuel s))) =
   match cs with
   | [] -> ()
   | x :: xs ->
     lemma_is_empty_code x fuel s;
-    lemma_is_empty_codes xs fuel s;
-    match machine_eval_code x fuel s with
-    | None -> ()
-    | Some s' ->
-      lemma_eval_codes_equiv_states xs fuel s s'
+    lemma_is_empty_codes xs fuel s
 #pop-options
 
 #push-options "--z3rlimit 50 --initial_fuel 3 --max_fuel 3 --initial_ifuel 1 --max_ifuel 1"
@@ -2127,4 +2123,81 @@ and lemma_perform_reordering_with_hints (ts:transformation_hints) (cs:codes) (fu
     let Ok xs' = perform_reordering_with_hints ts' xs in
     let Some s1 = machine_eval_code x fuel s in
     lemma_perform_reordering_with_hints ts' xs fuel s1
+#pop-options
+
+/// Some convenience functions to be run before the pass, to ensure
+/// that we don't have miscounting due to empty code.
+
+let rec purge_empty_code (c:code) : code =
+  match c with
+  | Block l ->
+    Block (purge_empty_codes l)
+  | IfElse c t f ->
+    IfElse c (purge_empty_code t) (purge_empty_code f)
+  | While c b ->
+    While c (purge_empty_code b)
+  | _ ->
+    c
+
+and purge_empty_codes (cs:codes) : codes =
+  match cs with
+  | [] -> []
+  | x :: xs ->
+    if is_empty_code x then (
+      purge_empty_codes xs
+    ) else (
+      purge_empty_code x :: purge_empty_codes xs
+    )
+
+#push-options "--initial_fuel 2 --max_fuel 2 --initial_ifuel 0 --initial_ifuel 0"
+let rec lemma_purge_empty_code (c:code) (fuel:nat) (s:machine_state) :
+  Lemma
+    (ensures (machine_eval_code c fuel s == machine_eval_code (purge_empty_code c) fuel s))
+    (decreases %[fuel; c; 1]) =
+  match c with
+  | Block l -> lemma_purge_empty_codes l fuel s
+  | IfElse c t f ->
+    let (st, b) = machine_eval_ocmp s c in
+    let s' = {st with ms_trace = (BranchPredicate b)::s.ms_trace} in
+    if b then lemma_purge_empty_code t fuel s' else lemma_purge_empty_code f fuel s'
+  | While _ _ ->
+    lemma_purge_empty_while c fuel s
+  | _ -> ()
+
+and lemma_purge_empty_codes (cs:codes) (fuel:nat) (s:machine_state) :
+  Lemma
+    (ensures (machine_eval_codes cs fuel s == machine_eval_codes (purge_empty_codes cs) fuel s))
+    (decreases %[fuel; cs]) =
+  match cs with
+  | [] -> ()
+  | x :: xs ->
+    if is_empty_code x then (
+      lemma_is_empty_code x fuel s;
+      lemma_purge_empty_codes xs fuel s
+    ) else (
+      lemma_purge_empty_code x fuel s;
+      match machine_eval_code x fuel s with
+      | None -> ()
+      | Some s' ->
+        lemma_purge_empty_codes xs fuel s'
+    )
+
+and lemma_purge_empty_while (c:code{While? c}) (fuel:nat) (s0:machine_state) :
+  Lemma
+    (ensures (machine_eval_code c fuel s0 == machine_eval_code (purge_empty_code c) fuel s0))
+    (decreases %[fuel; c; 0]) =
+  if fuel = 0 then () else (
+    let While cond body = c in
+    let (s0, b) = machine_eval_ocmp s0 cond in
+    if not b then ()
+    else
+      let s0 = {s0 with ms_trace = (BranchPredicate true)::s0.ms_trace} in
+      let s_opt = machine_eval_code body (fuel - 1) s0 in
+      lemma_purge_empty_code body (fuel - 1) s0;
+      match s_opt with
+      | None -> ()
+      | Some s1 ->
+        if s1.ms_ok then lemma_purge_empty_while c (fuel - 1) s1
+        else ()
+  )
 #pop-options
