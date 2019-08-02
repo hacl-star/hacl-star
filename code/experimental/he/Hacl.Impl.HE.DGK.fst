@@ -774,7 +774,7 @@ let solve_dlp_single #nLen n p e g a res =
   let boolvar = create 1ul 0uy in
 
   let test (): Stack bool (requires fun _ -> True) (ensures fun _ _ _ -> True) = begin
-     boolvar.(0) =. 1uy
+     boolvar.(0ul) =. 1uy
     end in
 
   Lib.Loops.while (fun _ -> true) (fun _ -> true) test (fun _ ->
@@ -784,7 +784,7 @@ let solve_dlp_single #nLen n p e g a res =
     let b1 = bn_is_leq exp_try p_e in
     let b2 = bn_is_equal current_g a in
 
-    if b1 && b2 then boolvar.(0) <- 1uy
+    if b1 && b2 then boolvar.(0ul) <- 1uy
 
     );
 

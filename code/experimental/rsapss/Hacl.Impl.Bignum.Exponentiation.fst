@@ -23,6 +23,7 @@ module ST = FStar.HyperStack.ST
 
 #reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
+inline_for_extraction noextract
 val mul_mod_mont:
      nLen:bn_len
   -> rLen:bn_len{v nLen < v rLen /\ v nLen + v rLen < max_size_t}
@@ -38,7 +39,6 @@ val mul_mod_mont:
       live h aM /\ live h bM /\ live h resM /\ live h n /\ live h st_kara /\
       disjoint st_kara aM /\ disjoint st_kara bM /\ disjoint st_kara n /\ disjoint resM st_kara)
     (ensures  fun h0 _ h1 -> modifies (L.loc_union (loc resM) (loc st_kara)) h0 h1)
-[@"c_inline"]
 let mul_mod_mont nLen rLen pow2_i n nInv_u64 st_kara aM bM resM =
   let cLen = nLen +. nLen in
   let stLen = cLen +. 4ul *. pow2_i in
@@ -47,6 +47,7 @@ let mul_mod_mont nLen rLen pow2_i n nInv_u64 st_kara aM bM resM =
   karatsuba pow2_i nLen aM bM st_kara; // c = aM * bM
   mont_reduction nLen rLen n nInv_u64 c tmp resM // resM = c % n
 
+inline_for_extraction noextract
 val mod_exp_:
      nLen:bn_len
   -> rLen:bn_len{v nLen < v rLen /\ v nLen + v rLen < max_size_t}
@@ -79,6 +80,7 @@ let mod_exp_ nLen rLen pow2_i n nInv_u64 st_kara st_exp bBits bLen b =
 
 //128 * (v nLen + 1) < max_size_t
 // res = a ^^ b mod n
+inline_for_extraction noextract
 val mod_exp:
      pow2_i:size_t{v pow2_i > 0}
   -> modBits:size_t{v modBits > 0}

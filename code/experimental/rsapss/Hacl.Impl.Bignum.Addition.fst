@@ -71,7 +71,6 @@ let bn_sub_ #aLen #bLen a b carry res =
 
 #reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 
-inline_for_extraction noextract
 val bn_sub:
      #aLen:bn_len
   -> #bLen:bn_len{v bLen <= v aLen}
@@ -105,7 +104,6 @@ let bn_sub #aLen #bLen a b res =
 
   carry0
 
-inline_for_extraction noextract
 val bn_sub_exact:
      #aLen:bn_len
   -> #bLen:bn_len{v bLen <= v aLen}
@@ -145,7 +143,6 @@ let bn_add_ #aLen #bLen a b carry res =
     res.(i) <- res_i
   )
 
-inline_for_extraction noextract
 val bn_add:
      #aLen:bn_len
   -> #bLen:bn_len{v bLen <= v aLen}
@@ -168,7 +165,6 @@ let bn_add #aLen #bLen a b res =
   assume (as_snat h1 res = (as_snat h0 a + as_snat h0 b) % pow2 (64 * v aLen));
   carry0
 
-inline_for_extraction noextract
 val bn_add_fitting:
      #aLen:bn_len
   -> #bLen:bn_len{v bLen <= v aLen}
@@ -190,7 +186,6 @@ let bn_add_fitting #aLen #bLen a b res =
   let _ = bn_add a b res in
   pop_frame ()
 
-inline_for_extraction noextract
 val bn_add_exact:
      #aLen:bn_len{v aLen + 1 <= maxint U32}
   -> #bLen:bn_len{v bLen <= v aLen}
