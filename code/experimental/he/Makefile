@@ -82,19 +82,23 @@ KREMLIN_TESTLIB=-add-include '"TestLib.h"' $(KREMLIB)/dist/generic/testlib.c
 # No extra flags by default
 KREMLIN=$(KREMLIN_EXE)
 
+#	-drop 'LowStar,Spec,Prims,Lib,C.Loops.*,Hacl.Spec.*' \
 # We use -drop (deprecated) only to avoid creating unnecessary .c,.h files
 $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	$(KREMLIN) $(KREMLIN_TESTLIB) -skip-compilation \
 	-no-prefix 'Hacl.Test.HE' \
 	-bundle 'Lib.*' \
 	-bundle 'Spec.*' \
+	-bundle 'Hacl.Impl.Bignum.Core+Hacl.Impl.Bignum.Addition+Hacl.Impl.Bignum.Convert+Hacl.Impl.Bignum.Comparison+Hacl.Impl.Bignum.Division+Hacl.Impl.Bignum.Exponentiation+Hacl.Impl.Bignum.Gcd+Hacl.Impl.Bignum.Misc+Hacl.Impl.Bignum.Modular+Hacl.Impl.Bignum.Multiplication+Hacl.Impl.Bignum.Shift=[rename=Hacl_Impl_Bignum]' \
+	-bundle 'Hacl.Impl.HE.Paillier=[rename=Hacl_Impl_Paillier]' \
+	-bundle 'Hacl.Impl.HE.GM=[rename=Hacl_Impl_GM]' \
+	-bundle 'Hacl.Impl.HE.DGK=[rename=Hacl_Impl_DGK]' \
 	-bundle 'C=C.Endianness' \
 	-library 'C,FStar' \
-	-drop 'LowStar,Spec,Prims,Lib,C.Loops.*,Hacl.Spec.*' \
+	-drop 'Spec,Prims,Hacl.Spec.*' \
 	-add-include '"c/Lib_PrintBuffer.h"' \
 	-tmpdir $(GENERATED_DIR) \
 	$^
-
 # The Makefile is manually staged because GNU Make does not understand
 # dependencies between the Makefiles we include, i.e. it won't first generate
 # the .depend, parse it, then generate Makefile.include, parse it, then
@@ -153,29 +157,34 @@ $(OUT_DIR):
 $(OUT_DIR)/test.exe: $(ALL_OBJS) | $(OUT_DIR)
 	$(info ALL_SOURCES is $(ALL_SOURCES))
 	$(CC) $(CFLAGS) -o $@ $^ -L $(KREMLIN_HOME)/kremlib/dist/generic -lkremlib
+	ar rcs he-c/libhe.a $(OUT_DIR)/Hacl_Impl*.o ../../../lib/c/Lib_PrintBuffer.o
+
 
 .PRECIOUS: %.o
 
 endif # STAGE=2
 
-INCLUDE_DIRS = \
+CXX_INCLUDE_DIRS = \
   $(KREMLIN_HOME)/include \
   $(KREMLIN_HOME)/kremlib \
   $(KREMLIN_HOME)/kremlib/c \
   $(KREMLIN_HOME)/kremlib/dist/generic \
   $(HACL_HOME)/lib \
-  $(HACL_HOME)/code/experimental/rsapss
+  $(HACL_HOME)/code/experimental/rsapss \
+  $(OUT_DIR)
 
 # TODO: remove -Wno-incompatible-pointer-types when issue with --cmi is fixed
-CXXFLAGS += -O2 $(addprefix -I ,$(INCLUDE_DIRS)) -Wall -Wextra -Werror
+CXXFLAGS += -O2 $(addprefix -I ,$(CXX_INCLUDE_DIRS)) -Wall -Wextra -Werror
 #  -Wno-parentheses -Wno-unused-parameter -Wno-unused-variable \
 #  -Wno-incompatible-pointer-types
 
-argmax:
-	$(CXX) $(CXXFLAGS) -o argmax/argmax.exe argmax/argmax.c \
-		-L $(KREMLIN_HOME)/kremlib/dist/generic -lkremlib \
-		-I $(OUT_DIR) -L $(OUT_DIR)
+argmax: argmax/argmax.exe
 
+argmax/argmax.exe: argmax/argmax.c
+	$(CXX) $(CXXFLAGS) \
+		-o argmax/argmax.exe argmax/argmax.c \
+		he-c/libhe.a \
+		-L $(KREMLIN_HOME)/kremlib/dist/generic -lkremlib
 
 # Targets for interactive mode
 
