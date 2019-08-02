@@ -2,4 +2,5 @@ resolver: lts-13.29
 packages:
 - '.'
 nix:
-  packages: [git openssl gmp]
+  shell-file: shell.nix
+#  packages: [git openssl gmp]
