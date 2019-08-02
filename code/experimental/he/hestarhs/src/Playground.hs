@@ -54,7 +54,7 @@ testFindPrimRoot = do
                -- && isPrime (lam `div` s)
                 then pure (p,q,i) else genPrimes (i+1)
     (p,q,i) <- genPrimes 0
-    putText $ "Iteration: " <> show i
+    putTextLn $ "Iteration: " <> show i
     let n = p * q
     let lam = lcm (p-1) (q-1)
     let lamFactors = ordNub $ 1024 : primeFactors (lam `div` 1024)
@@ -71,7 +71,7 @@ testFindPrimRoot = do
 
     tryGen 10 >>= \case
         Nothing -> testFindPrimRoot
-        Just mroot -> putText $ show mroot
+        Just mroot -> putTextLn $ show mroot
 
 carm :: Integer -> Integer
 carm x =
@@ -113,7 +113,7 @@ genDataGM bits = do
     print y
     print r
 
-genDataPaillier :: Int -> IO ()
+genDataPaillier :: Int -> IO (Integer,Integer,Integer,Integer)
 genDataPaillier bits = do
     let genPrimes = do
             p <- genPrime (bits `div` 2)
@@ -129,7 +129,8 @@ genDataPaillier bits = do
             m <- genPrime (bits-1)
             if m < n then pure m else genM
     m <- genM
-    putText (show p <> " " <> show q <> " " <> show r <> " " <> show m)
+    putTextLn (show p <> " " <> show q <> " " <> show r <> " " <> show m)
+    return (p,q,r,m)
 
 ----------------------------------------------------------------------------
 -- Inspecting FFT domain automorhisms
@@ -179,7 +180,7 @@ discoverAllElems = do
 
     print (length saturated)
     forM_ saturated print
-    putText "\nFiltered:"
+    putTextLn "\nFiltered:"
     let filtered = filter ofShifts saturated
     print (length filtered)
     forM_ filtered print
@@ -706,7 +707,7 @@ testEqSolve = do
                   if y == y' then y else solve y'
 
     print $ solve 1
-    putText "mda"
+    putTextLn "mda"
 
 
 crt3 :: [Integer] -> [Integer] -> Integer
@@ -729,7 +730,7 @@ testCrt3 = do
     print $ crtInv base $ crt3 base m1 * crt3 base [5,5,5,5]
     print $ crtInv base $ crt3 base m1 * crt3 base [0,0,1,0]
 
-    putText "-----"
+    putTextLn "-----"
 
     let p i = base !! i
     let b i = product base `div` p i
@@ -753,7 +754,7 @@ testCrt3 = do
     print $ crtInv base $ switch2 2 1 $
         crt3 base m1 * (crt3 base [0,0,1,0] + product base * product base)
 
-    putText "*****"
+    putTextLn "*****"
 
     print $ crtInv base $ switch2 2 1 $ crt3 base [0,0,1,0]
     print $ crtInv base $ switch2 2 1 $ crt3 base [0,0,1,0] + crt3 base [0,0,5,0]
@@ -762,7 +763,7 @@ testCrt3 = do
     print $ crtInv base $ switch2 2 2 $ crt3 base m1 * crt3 base [0,0,1,0]
     print $ crtInv base $ switch2 2 3 $ crt3 base m1 * crt3 base [0,0,1,0]
 
-    putText "*****"
+    putTextLn "*****"
 
     print $ crtInv base $ switch3 2 1 1 $ crt3 base [0,0,1,0]
     print $ crtInv base $ switch3 2 1 1 $ crt3 base [0,0,1,0] + crt3 base [0,0,5,0]
@@ -778,8 +779,3 @@ foo n = (2 * n - 2 + sqrt ((2 - 2 * n) ^ 2 - 4 * (n-2)* (n-1) )) / (2 * (n-2))
 ----------------------------------------------------------------------------
 -- WOW
 ----------------------------------------------------------------------------
-
-
-inbase :: Integer -> Integer -> [Integer]
-inbase _ 0    = []
-inbase base i = i `mod` base : inbase base (i `div` base)
