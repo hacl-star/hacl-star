@@ -1,0 +1,5 @@
+resolver: lts-13.29
+packages:
+- '.'
+nix:
+  packages: [git openssl gmp]

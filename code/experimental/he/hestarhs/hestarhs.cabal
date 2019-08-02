@@ -1,0 +1,54 @@
+name:                hestarhs
+version:             0.1.0.0
+license:             GPL-3
+license-file:        LICENSE
+author:              Mikhail Volkhov
+maintainer:          volhovm.cs@gmail.com
+category:            Cryptography
+build-type:          Simple
+cabal-version:       >=1.10
+
+library
+  exposed-modules:     Lib
+                       Playground
+  build-depends:       base >=4.12 && <4.13
+                     , bytestring >=0.10
+                     , containers >= 0.5.7.1
+                     , lens >= 4.14
+                     , mtl
+                     , primes >=0.2
+                     , random >= 1.1
+                     , reflection
+                     , text >= 1.2.2.2
+                     , universum >= 1.5.0
+                     , unordered-containers >= 0.2.8.0
+  hs-source-dirs:      src
+  default-language:    Haskell2010
+  ghc-options:         -threaded -Wall
+                       -pgml gcc "-optl-Wl,--allow-multiple-definition"
+                       "-optl-Wl,--whole-archive" "-optl-Wl,-Bstatic" "-optl-Wl,-lmylib"
+                       "-optl-Wl,-Bdynamic" "-optl-Wl,--no-whole-archive"
+  default-extensions:   AllowAmbiguousTypes
+                        DeriveDataTypeable
+                        DeriveGeneric
+                        DataKinds
+                        GeneralizedNewtypeDeriving
+                        StandaloneDeriving
+                        FlexibleContexts
+                        FlexibleInstances
+                        MultiParamTypeClasses
+                        FunctionalDependencies
+                        NoImplicitPrelude
+                        OverloadedStrings
+                        RecordWildCards
+                        TypeApplications
+                        TupleSections
+                        ViewPatterns
+                        LambdaCase
+                        MultiWayIf
+                        KindSignatures
+                        ConstraintKinds
+                        UndecidableInstances
+                        BangPatterns
+                        TemplateHaskell
+                        ScopedTypeVariables
