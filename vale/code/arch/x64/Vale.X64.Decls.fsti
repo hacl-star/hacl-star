@@ -64,6 +64,7 @@ unfold let va_state = vale_state
 val va_fuel : Type0
 unfold let va_operand = operand64
 unfold let va_operand_opr64 = va_operand
+unfold let va_operand_heap = nat
 let va_reg_operand = o:va_operand{OReg? o}
 let va_operand_reg_opr64 = o:va_operand{OReg? o}
 unfold let va_dst_operand = va_operand
@@ -249,6 +250,7 @@ val taint_at (memTaint:M.memtaint) (addr:int) : taint
 [@va_qattr] unfold let va_is_dst_dst_opr64 (o:va_dst_operand) (s:va_state) = va_is_dst_opr64 o s
 [@va_qattr] unfold let va_is_src_reg (r:reg_64) (s:va_state) = True
 [@va_qattr] unfold let va_is_dst_reg (r:reg_64) (s:va_state) = True
+[@va_qattr] unfold let va_is_src_heap (h:heap) (s:va_state) = True
 [@va_qattr] unfold let va_is_src_shift_amt64 (o:va_operand) (s:va_state) = valid_operand o s /\ (va_eval_shift_amt64 s o) < 64
 [@va_qattr] unfold let va_is_src_reg_opr64 (o:va_operand) (s:va_state) = OReg? o
 [@va_qattr] unfold let va_is_dst_reg_opr64 (o:va_operand) (s:va_state) = OReg? o /\ not (rRsp = (OReg?.r o))
@@ -263,6 +265,7 @@ val taint_at (memTaint:M.memtaint) (addr:int) : taint
 [@va_qattr] unfold let va_get_reg64 (r:reg_64) (s:va_state) : nat64 = eval_reg_64 r s
 [@va_qattr] unfold let va_get_xmm (x:reg_xmm) (s:va_state) : quad32 = eval_reg_xmm x s
 [@va_qattr] unfold let va_get_mem (s:va_state) : vale_heap = s.vs_heap
+[@va_qattr] unfold let va_get_mem (s:va_state) : S.vale_heap = s.vs_hpls
 [@va_qattr] unfold let va_get_stack (s:va_state) : S.vale_stack = s.vs_stack
 [@va_qattr] unfold let va_get_memTaint (s:va_state) : M.memtaint = s.vs_memTaint
 [@va_qattr] unfold let va_get_stackTaint (s:va_state) : M.memtaint = s.vs_stackTaint
@@ -273,7 +276,7 @@ val taint_at (memTaint:M.memtaint) (addr:int) : taint
 [@va_qattr] let va_upd_reg64 (r:reg_64) (v:nat64) (s:vale_state) : vale_state = update_reg_64 r v s
 [@va_qattr] let va_upd_xmm (x:reg_xmm) (v:quad32) (s:vale_state) : vale_state = update_reg_xmm x v s
 [@va_qattr] let va_upd_mem (mem:vale_heap) (s:vale_state) : vale_state = { s with vs_heap = mem }
-[@va_qattr] let va_upd_stack (stack:S.vale_stack) (s:vale_state) : vale_state = { s with vs_stack = stack }
+[@va_qattr] let va_upd_stack (stack:S.vale_stack) (s:vale_state) : vale_state = { s with vs_stack = stack } //TODO
 [@va_qattr] let va_upd_memTaint (memTaint:M.memtaint) (s:vale_state) : vale_state = { s with vs_memTaint = memTaint }
 [@va_qattr] let va_upd_stackTaint (stackTaint:M.memtaint) (s:vale_state) : vale_state = { s with vs_stackTaint = stackTaint }
 
