@@ -65,12 +65,20 @@ let vlen (n:nat62) : vlsize =
   else 8
 
 val encode_varint: n:nat62 -> lbytes (vlen n)
-val parse_varint: b:bytes{S.length b > 0} -> option (n:nat{n < pow2 62} * vlsize)
+val parse_varint: b:bytes{S.length b > 0} -> option (n:nat{n < pow2 62} * vlsize * bytes)
 
-val lemma_varint: (suff:bytes) -> (n:nat62) -> Lemma (parse_varint S.(encode_varint n @| suff) == Some (n, vlen n))
+val lemma_varint: (n:nat62) -> (suff:bytes) -> Lemma (parse_varint S.(encode_varint n @| suff) == Some (n, vlen n,suff))
+
+val lemma_varint_safe : (b1:bytes) -> (b2:bytes) -> Lemma
+  (requires
+    S.length b1 <> 0 /\
+    S.length b2 <> 0 /\
+    parse_varint b1 = parse_varint b2)
+  (ensures parse_varint b1 = None \/ b1 = b2)
+
 
 let max_plain_length : n:nat{forall a. n <= AEAD.max_length a} = pow2 32 - 17
-  
+
 type header =
   | Short:
     spin: bool ->
@@ -91,7 +99,7 @@ type h_result =
 | H_Success:
   pn_len: nat2 ->
   npn: lbytes (1 + pn_len) ->
-  header ->
+  h:header ->
   h_result
 | H_Failure
 
