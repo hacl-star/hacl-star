@@ -137,7 +137,7 @@ INCLUDE_DIRS = \
   $(HACL_HOME)/code/experimental/rsapss
 
 # TODO: remove -Wno-incompatible-pointer-types when issue with --cmi is fixed
-CFLAGS += -O3 -march=native -mtune=native -funroll-loops
+CFLAGS += -O3 -march=native -mtune=native -funroll-loops -fPIC
 CFLAGS += $(addprefix -I ,$(INCLUDE_DIRS)) -Wall -Wextra -Werror \
   -Wno-parentheses -Wno-unused-parameter -Wno-unused-variable \
   -Wno-incompatible-pointer-types
@@ -157,7 +157,8 @@ $(OUT_DIR):
 $(OUT_DIR)/test.exe: $(ALL_OBJS) | $(OUT_DIR)
 	$(info ALL_SOURCES is $(ALL_SOURCES))
 	$(CC) $(CFLAGS) -o $@ $^ -L $(KREMLIN_HOME)/kremlib/dist/generic -lkremlib
-	ar rcs he-c/libhe.a $(OUT_DIR)/Hacl_Impl*.o ../../../lib/c/Lib_PrintBuffer.o
+#	ar rcs he-c/libhelib.a $(OUT_DIR)/Hacl_Impl*.o ../../../lib/c/Lib_PrintBuffer.o
+	gcc -shared -o ./lib/libhelib.so $(OUT_DIR)/Hacl_Impl*.o ../../../lib/c/Lib_PrintBuffer.o -L $(KREMLIN_HOME)/lib -lkremlib
 
 
 .PRECIOUS: %.o
@@ -204,6 +205,7 @@ SHELL=/bin/bash
 clean:
 	rm -rf $(GENERATED_DIR) $(OCAML_DIR) $(OUT_DIR)/*.exe $(OUT_DIR)/*.a
 	rm -rf include/*.o include/*.d
+	rm -rf lib/
 
 clean-c:
 	rm -rf $(GENERATED_DIR)/{*.{c,h},Makefile.include}

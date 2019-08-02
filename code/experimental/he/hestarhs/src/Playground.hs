@@ -774,3 +774,12 @@ testCrt3 = do
 
 foo :: Double -> Double
 foo n = (2 * n - 2 + sqrt ((2 - 2 * n) ^ 2 - 4 * (n-2)* (n-1) )) / (2 * (n-2))
+
+----------------------------------------------------------------------------
+-- WOW
+----------------------------------------------------------------------------
+
+
+inbase :: Integer -> Integer -> [Integer]
+inbase _ 0    = []
+inbase base i = i `mod` base : inbase base (i `div` base)
