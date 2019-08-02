@@ -2124,3 +2124,47 @@ and lemma_perform_reordering_with_hints (ts:transformation_hints) (cs:codes) (fu
     let Some s1 = machine_eval_code x fuel s in
     lemma_perform_reordering_with_hints ts' xs fuel s1
 #pop-options
+
+/// Some convenience functions to be run before the pass, to ensure
+/// that we don't have miscounting due to empty code.
+
+let rec purge_empty_code (c:code) : code =
+  match c with
+  | Block l ->
+    Block (purge_empty_codes l)
+  | _ ->
+    c
+
+and purge_empty_codes (cs:codes) : codes =
+  match cs with
+  | [] -> []
+  | x :: xs ->
+    if is_empty_code x then (
+      purge_empty_codes xs
+    ) else (
+      purge_empty_code x :: purge_empty_codes xs
+    )
+
+let rec lemma_purge_empty_code (c:code) (fuel:nat) (s:machine_state) :
+  Lemma
+    (ensures (machine_eval_code c fuel s == machine_eval_code (purge_empty_code c) fuel s)) =
+  match c with
+  | Block l -> lemma_purge_empty_codes l fuel s
+  | _ -> ()
+
+and lemma_purge_empty_codes (cs:codes) (fuel:nat) (s:machine_state) :
+  Lemma
+    (ensures (machine_eval_codes cs fuel s == machine_eval_codes (purge_empty_codes cs) fuel s)) =
+  match cs with
+  | [] -> ()
+  | x :: xs ->
+    if is_empty_code x then (
+      lemma_is_empty_code x fuel s;
+      lemma_purge_empty_codes xs fuel s
+    ) else (
+      lemma_purge_empty_code x fuel s;
+      match machine_eval_code x fuel s with
+      | None -> ()
+      | Some s' ->
+        lemma_purge_empty_codes xs fuel s'
+    )
