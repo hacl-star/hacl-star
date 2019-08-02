@@ -1945,7 +1945,7 @@ let rec lemma_append_single (xs:list 'a) (y:'a) (i:nat) :
 let rec lemma_is_empty_code (c:code) (fuel:nat) (s:machine_state) :
   Lemma
     (requires (is_empty_code c))
-    (ensures (equiv_ostates (machine_eval_code c fuel s) (machine_eval_codes [] fuel s))) =
+    (ensures ((machine_eval_code c fuel s) == (machine_eval_codes [] fuel s))) =
   match c with
   | Ins _ -> ()
   | Block l -> lemma_is_empty_codes l fuel s
@@ -1954,16 +1954,12 @@ let rec lemma_is_empty_code (c:code) (fuel:nat) (s:machine_state) :
 and lemma_is_empty_codes (cs:codes) (fuel:nat) (s:machine_state) :
   Lemma
     (requires (is_empty_codes cs))
-    (ensures (equiv_ostates (machine_eval_codes cs fuel s) (machine_eval_codes [] fuel s))) =
+    (ensures ((machine_eval_codes cs fuel s) == (machine_eval_codes [] fuel s))) =
   match cs with
   | [] -> ()
   | x :: xs ->
     lemma_is_empty_code x fuel s;
-    lemma_is_empty_codes xs fuel s;
-    match machine_eval_code x fuel s with
-    | None -> ()
-    | Some s' ->
-      lemma_eval_codes_equiv_states xs fuel s s'
+    lemma_is_empty_codes xs fuel s
 #pop-options
 
 #push-options "--z3rlimit 50 --initial_fuel 3 --max_fuel 3 --initial_ifuel 1 --max_ifuel 1"
