@@ -2132,6 +2132,10 @@ let rec purge_empty_code (c:code) : code =
   match c with
   | Block l ->
     Block (purge_empty_codes l)
+  | IfElse c t f ->
+    IfElse c (purge_empty_code t) (purge_empty_code f)
+  | While c b ->
+    While c (purge_empty_code b)
   | _ ->
     c
 
@@ -2145,16 +2149,25 @@ and purge_empty_codes (cs:codes) : codes =
       purge_empty_code x :: purge_empty_codes xs
     )
 
+#push-options "--initial_fuel 2 --max_fuel 2 --initial_ifuel 0 --initial_ifuel 0"
 let rec lemma_purge_empty_code (c:code) (fuel:nat) (s:machine_state) :
   Lemma
-    (ensures (machine_eval_code c fuel s == machine_eval_code (purge_empty_code c) fuel s)) =
+    (ensures (machine_eval_code c fuel s == machine_eval_code (purge_empty_code c) fuel s))
+    (decreases %[fuel; c; 1]) =
   match c with
   | Block l -> lemma_purge_empty_codes l fuel s
+  | IfElse c t f ->
+    let (st, b) = machine_eval_ocmp s c in
+    let s' = {st with ms_trace = (BranchPredicate b)::s.ms_trace} in
+    if b then lemma_purge_empty_code t fuel s' else lemma_purge_empty_code f fuel s'
+  | While _ _ ->
+    lemma_purge_empty_while c fuel s
   | _ -> ()
 
 and lemma_purge_empty_codes (cs:codes) (fuel:nat) (s:machine_state) :
   Lemma
-    (ensures (machine_eval_codes cs fuel s == machine_eval_codes (purge_empty_codes cs) fuel s)) =
+    (ensures (machine_eval_codes cs fuel s == machine_eval_codes (purge_empty_codes cs) fuel s))
+    (decreases %[fuel; cs]) =
   match cs with
   | [] -> ()
   | x :: xs ->
@@ -2168,3 +2181,23 @@ and lemma_purge_empty_codes (cs:codes) (fuel:nat) (s:machine_state) :
       | Some s' ->
         lemma_purge_empty_codes xs fuel s'
     )
+
+and lemma_purge_empty_while (c:code{While? c}) (fuel:nat) (s0:machine_state) :
+  Lemma
+    (ensures (machine_eval_code c fuel s0 == machine_eval_code (purge_empty_code c) fuel s0))
+    (decreases %[fuel; c; 0]) =
+  if fuel = 0 then () else (
+    let While cond body = c in
+    let (s0, b) = machine_eval_ocmp s0 cond in
+    if not b then ()
+    else
+      let s0 = {s0 with ms_trace = (BranchPredicate true)::s0.ms_trace} in
+      let s_opt = machine_eval_code body (fuel - 1) s0 in
+      lemma_purge_empty_code body (fuel - 1) s0;
+      match s_opt with
+      | None -> ()
+      | Some s1 ->
+        if s1.ms_ok then lemma_purge_empty_while c (fuel - 1) s1
+        else ()
+  )
+#pop-options
