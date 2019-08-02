@@ -14,6 +14,7 @@ open Hacl.Impl.Bignum
 
 module S = Hacl.Spec.HE.Paillier
 module A = Lib.Math.Algebra
+module B = LowStar.Buffer
 
 
 // max 2^30 bits
@@ -139,24 +140,26 @@ let bigl #n2Len n n2 u res =
 
 #reset-options "--z3rlimit 200 --max_fuel 2 --max_ifuel 0"
 
-noeq
-type secret (n2Len:bn_len_s) =
-  | Sec:
-     p:lbignum n2Len
-  -> q:lbignum n2Len
-  -> n:lbignum n2Len
-  -> n2:lbignum n2Len
-  -> g:lbignum n2Len
-  -> lambda:lbignum n2Len
-  -> l2inv:lbignum n2Len
-  -> secret n2Len
+//noeq
+//type secret (n2Len:bn_len_s) = {
+//    p:lbignum n2Len
+//  ; q:lbignum n2Len
+//  ; n:lbignum n2Len
+//  ; n2:lbignum n2Len
+//  ; g:lbignum n2Len
+//  ; lambda:lbignum n2Len
+//  ; l2inv:lbignum n2Len }
 
 
-type proper_secret_raw h
-     (#n2Len:bn_len_s) (p:lbignum n2Len) (q:lbignum n2Len)
-     (n:lbignum n2Len) (n2:lbignum n2Len)
+type proper_secret h
+     (#n2Len:bn_len_s)
+     (p:lbignum n2Len)
+     (q:lbignum n2Len)
+     (n:lbignum n2Len)
+     (n2:lbignum n2Len)
      (g:lbignum n2Len)
-     (lambda:lbignum n2Len) (l2inv:lbignum n2Len) =
+     (lambda:lbignum n2Len)
+     (l2inv:lbignum n2Len) =
        n_cond h n n2 /\
        (let n = as_snat h n in
         let n2 = as_snat h n2 in
@@ -177,32 +180,43 @@ type proper_secret_raw h
         mexp #n2 g lambda > 0 /\
         as_snat h l2inv = S.fermat_inv_pq p q (S.bigl #n (mexp #n2 g lambda))))
 
-type proper_secret (#n2Len:bn_len_s) h (s:secret n2Len) =
-  proper_secret_raw h (Sec?.p s) (Sec?.q s) (Sec?.n s) (Sec?.n2 s)
-                      (Sec?.g s) (Sec?.lambda s) (Sec?.l2inv s)
+type secret_mem h
+     (#n2Len:bn_len_s)
+     (p:lbignum n2Len)
+     (q:lbignum n2Len)
+     (n:lbignum n2Len)
+     (n2:lbignum n2Len)
+     (g:lbignum n2Len)
+     (lambda:lbignum n2Len)
+     (l2inv:lbignum n2Len) =
+  live h p /\
+  live h q /\
+  live h n /\
+  live h n2 /\
+  live h g /\
+  live h lambda /\
+  live h l2inv /\
+  all_disjoint [loc p; loc q; loc n;
+                loc n2; loc g; loc lambda;
+                loc l2inv]
 
-type secret_mem (#n2Len:bn_len_s) h (s:secret n2Len) =
-  live h (Sec?.p s) /\
-  live h (Sec?.q s) /\
-  live h (Sec?.n s) /\
-  live h (Sec?.n2 s) /\
-  live h (Sec?.g s) /\
-  live h (Sec?.lambda s) /\
-  live h (Sec?.l2inv s) /\
-  all_disjoint [loc (Sec?.p s); loc (Sec?.q s); loc (Sec?.n s);
-                loc (Sec?.n2 s); loc (Sec?.g s); loc (Sec?.lambda s);
-                loc (Sec?.l2inv s)]
-
-type secret_disjoint_with (#n2Len:bn_len_s) h (s:secret n2Len) (a:lbignum n2Len) =
-  disjoint (Sec?.p s) a /\
-  disjoint (Sec?.q s) a /\
-  disjoint (Sec?.n s) a /\
-  disjoint (Sec?.n2 s) a /\
-  disjoint (Sec?.g s) a /\
-  disjoint (Sec?.lambda s) a /\
-  disjoint (Sec?.l2inv s) a
-
-
+type secret_disjoint_with h
+     (#n2Len:bn_len_s)
+     (p:lbignum n2Len)
+     (q:lbignum n2Len)
+     (n:lbignum n2Len)
+     (n2:lbignum n2Len)
+     (g:lbignum n2Len)
+     (lambda:lbignum n2Len)
+     (l2inv:lbignum n2Len)
+     (a:lbignum n2Len) =
+  disjoint p a /\
+  disjoint q a /\
+  disjoint n a /\
+  disjoint n2 a /\
+  disjoint g a /\
+  disjoint lambda a /\
+  disjoint l2inv a
 
 val mul_order_lemma2: a:pos -> b:pos -> c:pos -> d:pos -> Lemma
   (requires (a >= c /\ b >= d))
@@ -329,10 +343,12 @@ val to_secret:
   -> n:lbignum n2Len
   -> n2:lbignum n2Len
   -> g:lbignum n2Len
-  -> StackInline (secret n2Len)
+  -> lambda:lbignum n2Len
+  -> l2inv: lbignum n2Len
+  -> Stack unit
      (requires fun h ->
-      live h p /\ live h q /\ live h n /\ live h n2 /\ live h g /\
-      all_disjoint [loc p; loc q; loc n; loc n2; loc g] /\
+      live h p /\ live h q /\ live h n /\ live h n2 /\ live h g /\ live h lambda /\ live h l2inv /\
+      all_disjoint [loc p; loc q; loc n; loc n2; loc g; loc lambda; loc l2inv] /\
       isprm (as_snat h p) /\
       isprm (as_snat h q) /\
       as_snat h p <> as_snat h q /\
@@ -341,75 +357,71 @@ val to_secret:
       as_snat h n > 1 /\
       as_snat h g < as_snat h n2 /\
       S.is_g (as_snat h n) (as_snat h g))
-     (ensures fun h0 s h1 ->
+     (ensures fun h0 _ h1 ->
       live h1 p /\ live h1 q /\ live h1 n /\ live h1 n2 /\ live h1 g /\
-      secret_mem h1 s /\ proper_secret h1 s)
-let to_secret #n2Len p q n n2 g =
+
+      secret_mem h1 p q n n2 g lambda l2inv /\
+      proper_secret h1 p q n n2 g lambda l2inv
+      )
+let to_secret #n2Len p q n n2 g lambda l2inv =
   bn_len_s_fits n2Len;
 
-  let lambda:lbignum n2Len = create n2Len (uint 0) in
+  push_frame ();
+
   carm p q n n2 lambda;
 
-  let x:lbignum n2Len = create n2Len (uint 0) in
   let h = FStar.HyperStack.ST.get () in
   to_fe_idemp #(as_snat h n2) (as_snat h g);
-  bn_modular_exp n2 g lambda x;
-
+  bn_modular_exp n2 g lambda l2inv;
 
   let h = FStar.HyperStack.ST.get () in
   assert (isunit #(as_snat h n2) (as_snat h g));
   g_pow_isunit #(as_snat h n2) (as_snat h g) (as_snat h lambda);
-  isunit_nonzero #(as_snat h n2) (as_snat h x);
+  isunit_nonzero #(as_snat h n2) (as_snat h l2inv);
 
   // TODO this variable is temporary.
   // Putting push_frame before this call and pop_frame right
   // after the last one doesn't work for some reason.
-  let bl_x:lbignum n2Len = create n2Len (uint 0) in
-  bigl n n2 x bl_x;
+  let bl_inv:lbignum n2Len = create n2Len (uint 0) in
+  bigl n n2 l2inv bl_inv;
 
   let h = FStar.HyperStack.ST.get () in
-  assert (as_snat h bl_x =
+  assert (as_snat h bl_inv =
            S.bigl #(as_snat h n)
                    (mexp #(as_snat h n2) (as_snat h g) (as_snat h lambda)));
 
-  assert (as_snat h bl_x < as_snat h n);
+  assert (as_snat h bl_inv < as_snat h n);
 
-  fermat_inverse p q n n2 bl_x x;
-
-  let h = FStar.HyperStack.ST.get () in
-  assert (as_snat h x =
-          S.fermat_inv_pq (as_snat h p) (as_snat h q)
-          (S.bigl #(as_snat h n)
-                   (mexp #(as_snat h n2) (as_snat h g) (as_snat h lambda))));
-
-  let res_sk = Sec p q n n2 g lambda x in
-
-  res_sk
-
+  fermat_inverse p q n n2 bl_inv l2inv;
+  pop_frame ()
 
 val l1_div_l2:
      #n2Len:bn_len_s
-  -> sec:secret n2Len
+  -> p:lbignum n2Len
+  -> q:lbignum n2Len
+  -> n:lbignum n2Len
+  -> n2:lbignum n2Len
+  -> g:lbignum n2Len
+  -> lambda:lbignum n2Len
+  -> l2inv:lbignum n2Len
   -> w:lbignum n2Len
   -> res:lbignum n2Len
   -> Stack unit
     (requires fun h ->
-       secret_mem h sec /\ live h w /\ live h res /\
-       secret_disjoint_with h sec w /\
-       secret_disjoint_with h sec res /\
+       secret_mem h p q n n2 g lambda l2inv /\ live h w /\ live h res /\
+       secret_disjoint_with h p q n n2 g lambda l2inv w /\
+       secret_disjoint_with h p q n n2 g lambda l2inv res /\
        disjoint w res /\
 
-       proper_secret h sec /\
-       as_snat h w < as_snat h (Sec?.n2 sec))
+       proper_secret h p q n n2 g lambda l2inv /\
+       as_snat h w < as_snat h n2)
     (ensures fun h0 _ h1 ->
        modifies1 res h0 h1 /\
        as_snat h1 res =
-       S.l1_div_l2 (as_snat h0 (Sec?.p sec)) (as_snat h0 (Sec?.q sec))
-                   (as_snat h0 w) (as_snat h0 (Sec?.g sec)))
+       S.l1_div_l2 (as_snat h0 p) (as_snat h0 q)
+                   (as_snat h0 w) (as_snat h0 g))
 
-let l1_div_l2 #n2Len sec w res =
-
-  let (Sec p q n n2 g lambda l2inv) = sec in
+let l1_div_l2 #n2Len p q n n2 g lambda l2inv w res =
 
   bn_len_s_fits n2Len;
 
@@ -450,24 +462,31 @@ let l1_div_l2 #n2Len sec w res =
 
 val decrypt:
      #n2Len:bn_len_s
-  -> sec:secret n2Len
+  -> p:lbignum n2Len
+  -> q:lbignum n2Len
+  -> n:lbignum n2Len
+  -> n2:lbignum n2Len
+  -> g:lbignum n2Len
+  -> lambda:lbignum n2Len
+  -> l2inv:lbignum n2Len
   -> c:lbignum n2Len
   -> res:lbignum n2Len
   -> Stack unit
     (requires fun h ->
-       secret_mem h sec /\ live h c /\ live h res /\
-       secret_disjoint_with h sec c /\
-       secret_disjoint_with h sec res /\
+       secret_mem h p q n n2 g lambda l2inv /\
+       live h c /\ live h res /\
+       secret_disjoint_with h p q n n2 g lambda l2inv c /\
+       secret_disjoint_with h p q n n2 g lambda l2inv res /\
        disjoint c res /\
 
-       proper_secret h sec /\
-       as_snat h c < as_snat h (Sec?.n sec)
+       proper_secret h p q n n2 g lambda l2inv /\
+       as_snat h c < as_snat h n
        )
     (ensures fun h0 _ h1 ->
        modifies1 res h0 h1 /\
        as_snat h1 res =
-         S.decrypt_direct (as_snat h0 (Sec?.p sec))
-           (as_snat h0 (Sec?.q sec)) (as_snat h0 (Sec?.g sec)) (as_snat h0 c)
+         S.decrypt_direct (as_snat h0 p)
+           (as_snat h0 q) (as_snat h0 g) (as_snat h0 c)
     )
 let decrypt #n2Len sec c res = l1_div_l2 sec c res
 

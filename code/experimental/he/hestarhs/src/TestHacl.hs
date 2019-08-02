@@ -5,7 +5,7 @@ import Universum
 import qualified Foreign.Marshal as A
 
 import Hacl
-
+import Playground
 
 inbase :: Integer -> Integer -> [Integer]
 inbase base i = i `mod` base : (case (i `div` base) of
@@ -33,9 +33,38 @@ fromBignum n x = do
 testHacl :: IO ()
 testHacl = do
     a <- createBignum 500
+    print =<< fromBignum 1 a
     b <- createBignum 100
+    print =<< fromBignum 1 b
+
     c <- createBignum 0
-    bn_sub 2 2 a b c
-    res <- fromBignum 2 c
-    print res
+    bnSub 1 1 a b c
+    print =<< fromBignum 1 c
+
+    d <- createBignum 0
+    bnMulFitting 1 1 1 a b d
+    print =<< fromBignum 1 d
+
     putText "mda\n"
+
+testPaillier :: IO ()
+testPaillier = do
+    (p,q,r,m) <- genDataPaillier 30
+    let n = p * q
+    let n2 = n * n
+    when (n2 >= b64) $ error "hz bratan"
+
+data PaillierSec =
+    PaillierSec
+        { ps_p      :: !Bignum
+        , ps_q      :: !Bignum
+        , ps_n      :: !Bignum
+        , ps_n2     :: !Bignum
+        , ps_g      :: !Bignum
+        , ps_lambda :: !Bignum
+        , ps_l2inv  :: !Bignum
+        }
+
+
+
+    putTextLn "mda"
