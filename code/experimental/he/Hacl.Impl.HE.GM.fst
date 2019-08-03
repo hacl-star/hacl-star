@@ -20,6 +20,7 @@ type bn_len_s = s:bn_len{v s <= 256}
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
+noextract inline_for_extraction
 val to_fe_:
      #nLen:bn_len_s
   -> n:lbignum nLen
@@ -36,7 +37,7 @@ val to_fe_:
 let to_fe_ #nLen n a res = bn_remainder a n res
 
 
-inline_for_extraction
+inline_for_extraction noextract
 val conv_one_zero_to_int:
      #nLen:bn_len_s
   -> x:lbignum nLen
@@ -49,6 +50,7 @@ let conv_one_zero_to_int #nLen x =
   bignum_of_uL x h (uint 0);
   if eq_u64 (x.(0ul)) (uint 0) then 0l else 1l
 
+noextract inline_for_extraction
 val leg_symbol:
      #nLen:bn_len_s
   -> p:lbignum nLen

@@ -12,7 +12,7 @@ import Universum hiding (exp, last, (<*>))
 import Data.List (delete, last, (!!))
 import Data.Numbers.Primes (isPrime, primeFactors, primes)
 import Data.Reflection (reifyNat)
-import System.Random (randomRIO)
+import System.Random (randomIO, randomRIO)
 
 import Lib hiding (crt)
 import qualified Lib as Lib
@@ -90,7 +90,7 @@ legendreSymbol p a = let res = exp p a ((p-1) `div` 2) in if res == p-1 then (-1
 
 -- -> y:snat{y < p * q} // /\ GMS.is_nonsqr (to_fe #p y) /\ GMS.is_nonsqr (to_fe #q y)}
 -- -> r:snat{r < p * q} // /\ sqr r > 0 /\ sqr r *% y > 0}
-genDataGM :: Int -> IO ()
+genDataGM :: Int -> IO (Integer,Integer,Integer,Integer,Bool,Bool)
 genDataGM bits = do
     let genPrimes = do
             p <- genPrime (bits `div` 2)
@@ -108,12 +108,11 @@ genDataGM bits = do
             r <- randomRIO (2^(bits-2), n-1)
             if (r * r) `mod` n > 0 && (r * r * y) `mod` n > 0 then pure r else genR
     r <- genR
-    print p
-    print q
-    print y
-    print r
+    m1 <- randomIO
+    m2 <- randomIO
+    return (p,q,y,r,m1,m2)
 
-genDataPaillier :: Int -> IO (Integer,Integer,Integer,Integer)
+genDataPaillier :: Int -> IO (Integer,Integer,Integer,Integer,Integer)
 genDataPaillier bits = do
     let genPrimes = do
             p <- genPrime (bits `div` 2)
@@ -122,15 +121,17 @@ genDataPaillier bits = do
     (p,q) <- genPrimes
     let n = p * q
     let genR = do
-            r <- genPrime (bits-1)
+            r <- genPrime (bits-2)
+            --when (r >= n) $ putTextLn "what?"
             if r < n && gcd r n == 1 then pure r else genR
     r <- genR
     let genM = do
-            m <- genPrime (bits-1)
+            m <- genPrime (bits-2)
             if m < n then pure m else genM
-    m <- genM
-    putTextLn (show p <> " " <> show q <> " " <> show r <> " " <> show m)
-    return (p,q,r,m)
+    m1 <- genM
+    m2 <- genM
+    --putTextLn (show p <> " " <> show q <> " " <> show r <> " " <> show m)
+    return (p,q,r,m1,m2)
 
 ----------------------------------------------------------------------------
 -- Inspecting FFT domain automorhisms

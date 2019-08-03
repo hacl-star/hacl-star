@@ -15,6 +15,7 @@ library
                        Lib
                        Playground
                        Hacl
+                       Hacl.Raw
                        TestHacl
   build-depends:       base >=4.12 && <4.13
                      , bytestring >=0.10
@@ -25,12 +26,13 @@ library
                      , random >= 1.1
                      , reflection
                      , text >= 1.2.2.2
+                     , time >= 1.8.0.2
                      , universum >= 1.5.0
                      , unordered-containers >= 0.2.8.0
   hs-source-dirs:      src
   default-language:    Haskell2010
-  ghc-options:         -threaded -Wall
-  extra-lib-dirs:      /home/volhovm/code/hacl-star/code/experimental/he/he-c
+  ghc-options:         -Wall -O2
+  extra-lib-dirs:      /home/volhovm/code/hacl-star/code/experimental/he/lib
   extra-libraries:     helib
          -- kremlib
   default-extensions:   AllowAmbiguousTypes
@@ -74,6 +76,6 @@ executable runhestar
                        OverloadedStrings
                        RecordWildCards
                        TypeApplications
-  extra-lib-dirs:      /home/volhovm/code/hacl-star/code/experimental/he/he-c
+  extra-lib-dirs:      /home/volhovm/code/hacl-star/code/experimental/he/lib
   extra-libraries:
                        helib
