@@ -1829,10 +1829,16 @@ let rec find_transformation_hints (c1 c2:codes) :
       | Err reason -> (
           let h1 :: t1 = c1 in
           match h1, h2 with
-          | Block l1, Block l2 ->
-            t_hints1 <-- find_transformation_hints l1 l2;
-            t_hints2 <-- find_transformation_hints t1 t2;
-            return (wrap_diveinat 0 t_hints1 `L.append` t_hints2)
+          | Block l1, Block l2 -> (
+              match (
+                t_hints1 <-- find_transformation_hints l1 l2;
+                t_hints2 <-- find_transformation_hints t1 t2;
+                return (wrap_diveinat 0 t_hints1 `L.append` t_hints2)
+              ) with
+              | Ok ths -> return ths
+              | Err reason ->
+                find_transformation_hints c1 (l2 `L.append` t2)
+            )
           | IfElse co1 (Block tr1) (Block fa1), IfElse co2 (Block tr2) (Block fa2) ->
             (co1 = co2) /- ("Non-same conditions for IfElse: (" ^
                             print_cmp co1 0 gcc ^ ") and (" ^ print_cmp co2 0 gcc ^ ")");;
@@ -1867,9 +1873,8 @@ let rec find_transformation_hints (c1 c2:codes) :
                 | Err reason ->
                   Err ("Failed during left-unblock for " ^ fst (print_code h2 0 gcc) ^ ". Reason: " ^ reason)
             )
-          | IfElse _ _ _, Block l2
-          | While _ _, Block l2 ->
-            find_transformation_hints c1 l2
+          | _, Block l2 ->
+            find_transformation_hints c1 (l2 `L.append` t2)
           | IfElse _ _ _, IfElse _ _ _
           | While _ _, While _ _ ->
             Err ("Found weird non-standard code: " ^ fst (print_code h1 0 gcc))
