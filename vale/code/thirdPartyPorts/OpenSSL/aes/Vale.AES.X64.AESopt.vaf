@@ -506,6 +506,7 @@ procedure Loop6x_round9(
             quad32_xor(index(round_keys, 10), buffer128_read(in_b, count * 6 + i, mem)));
         buffer128_read(stack_b, 1, mem) == old(Z3);
 {
+    /* XXX[jb]: The Load128_buffer(T1, key, 0xa0-0x80, Secret, keys_b, 10); has been removed from here to allow for even cleaner code to verify :) */
     Store128_buffer(rbp, Z3, 0x10, Secret, stack_b, 1);  // # postpone vpxor $Z3,$Xi,$Xi
     VPxor(T2, T1, Mem128(inp, 0x00, Secret, in_b, count*6 + 0));
     VPxor(Ii, T1, Mem128(inp, 0x10, Secret, in_b, count*6 + 1));
@@ -841,7 +842,7 @@ procedure Loop6x_partial(
     LoadBe64_buffer128(r12, in0, 0 * 16,     Secret, false, in0_b, (count - 2) * 6 + 0);
     Loop6x_plain(alg, 8, key_words, round_keys, keys_b, init, rndkey);
 
-    Load128_buffer(T1, key, 0xa0-0x80, Secret, keys_b, 10); /* XXX[jb] Moved from Loop6x_round9 */
+     /* XXX[jb] Moved from Loop6x_round9 */
 
     inline if (alg = AES_256) {
 
@@ -854,6 +855,8 @@ procedure Loop6x_partial(
                 performed _some_ cleaning up of the code. To reuse
                 things we already have in this file :) */
 
+        /* XXX[jb]: This chunk of code could be made part of Loop6x_plain. The only difference is rndkey<-->T1. */
+        Load128_buffer(T1, key, 0xa0-0x80, Secret, keys_b, 10);
         VAESNI_enc(inout0, inout0, T1);
         VAESNI_enc(inout1, inout1, T1);
         VAESNI_enc(inout2, inout2, T1);
@@ -863,6 +866,7 @@ procedure Loop6x_partial(
 
         Loop6x_plain(alg, 10, key_words, round_keys, keys_b, init, rndkey);
 
+        /* XXX[jb]: This chunk of code could be made part of Loop6x_plain. The only difference is rndkey<-->T1. */
         Load128_buffer(T1, key, 0xc0-0x80, Secret, keys_b, 12);
         VAESNI_enc(inout0, inout0, T1);
         VAESNI_enc(inout1, inout1, T1);
@@ -872,8 +876,12 @@ procedure Loop6x_partial(
         VAESNI_enc(inout5, inout5, T1);
 
         Loop6x_plain(alg, 12, key_words, round_keys, keys_b, init, rndkey);
+    }
 
+    inline if (alg = AES_256) {
         Load128_buffer(T1, key, 0xe0-0x80, Secret, keys_b, 14);
+    } else {
+        Load128_buffer(T1, key, 0xa0-0x80, Secret, keys_b, 10);
     }
 
     Loop6x_round9(alg, count, in_b, stack_b, key_words, round_keys, keys_b);
