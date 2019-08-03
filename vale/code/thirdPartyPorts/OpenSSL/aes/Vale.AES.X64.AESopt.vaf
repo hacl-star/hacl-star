@@ -858,32 +858,21 @@ procedure Loop6x_partial(
         VAESNI_enc(inout2, inout2, T1);
         VAESNI_enc(inout3, inout3, T1);
         VAESNI_enc(inout4, inout4, T1);
-        Load128_buffer(rndkey, key, 0xb0-0x80, Secret, keys_b, 11);
         VAESNI_enc(inout5, inout5, T1);
-        Load128_buffer(T1, key, 0xc0-0x80, Secret, keys_b, 12); // # Stop here for AES_196
 
-        VAESNI_enc(inout0, inout0, rndkey);
-        VAESNI_enc(inout1, inout1, rndkey);
-        VAESNI_enc(inout2, inout2, rndkey);
-        VAESNI_enc(inout3, inout3, rndkey);
-        VAESNI_enc(inout4, inout4, rndkey);
-        VAESNI_enc(inout5, inout5, rndkey);
+        Loop6x_plain(alg, 10, key_words, round_keys, keys_b, init, rndkey);
 
+        Load128_buffer(T1, key, 0xc0-0x80, Secret, keys_b, 12);
         VAESNI_enc(inout0, inout0, T1);
         VAESNI_enc(inout1, inout1, T1);
         VAESNI_enc(inout2, inout2, T1);
         VAESNI_enc(inout3, inout3, T1);
         VAESNI_enc(inout4, inout4, T1);
-        Load128_buffer(rndkey, key, 0xd0-0x80, Secret, keys_b, 13);
         VAESNI_enc(inout5, inout5, T1);
-        Load128_buffer(T1, key, 0xe0-0x80, Secret, keys_b, 14); // # 256-bit key
 
-        VAESNI_enc(inout0, inout0, rndkey);
-        VAESNI_enc(inout1, inout1, rndkey);
-        VAESNI_enc(inout2, inout2, rndkey);
-        VAESNI_enc(inout3, inout3, rndkey);
-        VAESNI_enc(inout4, inout4, rndkey);
-        VAESNI_enc(inout5, inout5, rndkey);
+        Loop6x_plain(alg, 12, key_words, round_keys, keys_b, init, rndkey);
+
+        Load128_buffer(T1, key, 0xe0-0x80, Secret, keys_b, 14);
     }
 
     Loop6x_round9(alg, count, in_b, stack_b, key_words, round_keys, keys_b);
