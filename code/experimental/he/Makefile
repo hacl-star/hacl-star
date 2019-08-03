@@ -97,6 +97,7 @@ $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	-library 'C,FStar' \
 	-drop 'Spec,Prims,Hacl.Spec.*' \
 	-add-include '"c/Lib_PrintBuffer.h"' \
+	-fnostruct-passing \
 	-tmpdir $(GENERATED_DIR) \
 	$^
 # The Makefile is manually staged because GNU Make does not understand
@@ -158,7 +159,9 @@ $(OUT_DIR)/test.exe: $(ALL_OBJS) | $(OUT_DIR)
 	$(info ALL_SOURCES is $(ALL_SOURCES))
 	$(CC) $(CFLAGS) -o $@ $^ -L $(KREMLIN_HOME)/kremlib/dist/generic -lkremlib
 #	ar rcs he-c/libhelib.a $(OUT_DIR)/Hacl_Impl*.o ../../../lib/c/Lib_PrintBuffer.o
-	gcc -shared -o ./lib/libhelib.so $(OUT_DIR)/Hacl_Impl*.o ../../../lib/c/Lib_PrintBuffer.o -L $(KREMLIN_HOME)/lib -lkremlib
+	mkdir -p lib/
+	gcc -shared -o ./lib/libhelib.so $(OUT_DIR)/Hacl_Impl*.o \
+		../../../lib/c/Lib_PrintBuffer.o -L $(KREMLIN_HOME)/lib -lkremlib
 
 
 .PRECIOUS: %.o

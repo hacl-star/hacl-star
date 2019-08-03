@@ -54,7 +54,7 @@ type encf_cond h (#n2Len:bn_len_s) (n:lbignum n2Len) (n2:lbignum n2Len)
        as_snat h y < as_snat h n /\
        isunit #(as_snat h n) (as_snat h y)
 
-
+noextract inline_for_extraction
 val encf:
      #n2Len:bn_len_s
   -> n:lbignum n2Len
@@ -109,6 +109,7 @@ val encrypt:
     )
 let encrypt #n2Len n n2 g r m res = encf n n2 g m r res
 
+noextract inline_for_extraction
 val bigl:
      #n2Len:bn_len_s
   -> n:lbignum n2Len
@@ -236,6 +237,7 @@ let mul_order_lemma4 p q = ()
 
 #reset-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
 
+noextract inline_for_extraction
 val carm:
      #n2Len:bn_len_s
   -> p:lbignum n2Len
@@ -287,6 +289,7 @@ let carm #n2Len p q n n2 res =
   pop_frame ()
 
 
+noextract inline_for_extraction
 val fermat_inverse:
      #n2Len:bn_len_s
   -> p:lbignum n2Len
@@ -395,6 +398,7 @@ let to_secret #n2Len p q n n2 g lambda l2inv =
   fermat_inverse p q n n2 bl_inv l2inv;
   pop_frame ()
 
+noextract inline_for_extraction
 val l1_div_l2:
      #n2Len:bn_len_s
   -> p:lbignum n2Len
@@ -488,7 +492,7 @@ val decrypt:
          S.decrypt_direct (as_snat h0 p)
            (as_snat h0 q) (as_snat h0 g) (as_snat h0 c)
     )
-let decrypt #n2Len sec c res = l1_div_l2 sec c res
+let decrypt #n2Len p q n n2 g lambda l2inv c res = l1_div_l2 p q n n2 g lambda l2inv c res
 
 val hom_add:
      #n2Len:bn_len_s

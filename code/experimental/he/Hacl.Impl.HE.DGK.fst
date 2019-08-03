@@ -56,19 +56,7 @@ let forall_bufel (#len:size_t) (#a:Type) (h:mem) (bufl:lbuffer a len) (p:a -> Ty
 
 type n_cond (h:mem) (#nLen:bn_len_s) (n:lbignum nLen) = as_snat h n > 1 /\ iscomp (as_snat h n)
 
-noeq
-type secret (nLen:bn_len_s) =
-  | Sec:
-     p:lbignum nLen
-  -> q:lbignum nLen
-  -> n:lbignum nLen
-  -> u:lbignum nLen
-  -> v:lbignum nLen
-  -> g:lbignum nLen
-  -> h:lbignum nLen
-  -> secret nLen
-
-type proper_secret_raw
+type proper_secret
   (hp:mem)
   (#nLen:bn_len_s)
   (p:lbignum nLen)
@@ -95,56 +83,46 @@ type proper_secret_raw
 
          h < n /\ S.is_h p q v h))
 
-type proper_secret h (#nLen:bn_len_s) (s:secret nLen) =
-  proper_secret_raw h
-    (Sec?.p s)
-    (Sec?.q s)
-    (Sec?.n s)
-    (Sec?.u s)
-    (Sec?.v s)
-    (Sec?.g s)
-    (Sec?.h s)
-
-type secret_mem h (#nLen:bn_len_s) (s:secret nLen) =
-    live h (Sec?.p s) /\
-    live h (Sec?.q s) /\
-    live h (Sec?.n s) /\
-    live h (Sec?.u s) /\
-    live h (Sec?.v s) /\
-    live h (Sec?.g s) /\
-    live h (Sec?.h s) /\
-    all_disjoint [loc (Sec?.p s);
-                  loc (Sec?.q s);
-                  loc (Sec?.n s);
-                  loc (Sec?.u s);
-                  loc (Sec?.v s);
-                  loc (Sec?.g s);
-                  loc (Sec?.h s)]
-
+type secret_mem
+  (hp:mem)
+  (#nLen:bn_len_s)
+  (p:lbignum nLen)
+  (q:lbignum nLen)
+  (n:lbignum nLen)
+  (u:lbignum nLen)
+  (v:lbignum nLen)
+  (g:lbignum nLen)
+  (h:lbignum nLen) =
+    live hp p /\
+    live hp q /\
+    live hp n /\
+    live hp u /\
+    live hp v /\
+    live hp g /\
+    live hp h /\
+    all_disjoint [loc p; loc q; loc n; loc u; loc v; loc g; loc h]
 
 val as_spec_sk:
-     #nLen:bn_len_s
-  -> hp:mem
-  -> s:secret nLen{secret_mem hp s /\ proper_secret hp s}
-  -> GTot (s':S.secret)
-let as_spec_sk #nLen hp s =
-  S.Secret (as_snat hp (Sec?.p s))
-           (as_snat hp (Sec?.q s))
-           (as_snat hp (Sec?.u s))
-           (as_snat hp (Sec?.v s))
-           (as_snat hp (Sec?.g s))
-           (as_snat hp (Sec?.h s))
-
-noeq
-type public (nLen:bn_len_s) =
-  | Pub:
-     n:lbignum nLen
+     hp:mem
+  -> #nLen:bn_len_s
+  -> p:lbignum nLen
+  -> q:lbignum nLen
+  -> n:lbignum nLen
   -> u:lbignum nLen
+  -> v:lbignum nLen
   -> g:lbignum nLen
-  -> h:lbignum nLen
-  -> public nLen
+  -> h:lbignum nLen{proper_secret hp p q n u v g h}
+  -> GTot (s':S.secret)
+let as_spec_sk hp #nLen p q n u v g h =
+  S.Secret (as_snat hp p)
+           (as_snat hp q)
+           (as_snat hp u)
+           (as_snat hp v)
+           (as_snat hp g)
+           (as_snat hp h)
 
-type proper_public_raw
+
+type proper_public
   (hp:mem)
   (#nLen:bn_len_s)
   (n:lbignum nLen)
@@ -159,66 +137,58 @@ type proper_public_raw
 
         (u > 1 /\ u < n /\ g < n /\ h < n /\ isunit #n g /\ isunit #n h))
 
-type proper_public h (#nLen:bn_len_s) (p:public nLen) =
-  proper_public_raw h
-    (Pub?.n p)
-    (Pub?.u p)
-    (Pub?.g p)
-    (Pub?.h p)
-
-type public_mem h (#nLen:bn_len_s) (p:public nLen) =
-    live h (Pub?.n p) /\
-    live h (Pub?.u p) /\
-    live h (Pub?.g p) /\
-    live h (Pub?.h p) /\
-    all_disjoint [loc (Pub?.n p);
-                  loc (Pub?.u p);
-                  loc (Pub?.g p);
-                  loc (Pub?.h p)]
+type public_mem
+  (hp:mem)
+  (#nLen:bn_len_s)
+  (n:lbignum nLen)
+  (u:lbignum nLen)
+  (g:lbignum nLen)
+  (h:lbignum nLen) =
+    live hp n /\
+    live hp u /\
+    live hp g /\
+    live hp h /\
+    all_disjoint [loc n; loc u; loc g; loc h]
 
 val as_spec_pk:
-     #nLen:bn_len_s
-  -> hp:mem
-  -> p:public nLen{public_mem hp p /\ proper_public hp p}
+     hp:mem
+  -> #nLen:bn_len_s
+  -> n:lbignum nLen
+  -> u:lbignum nLen
+  -> g:lbignum nLen
+  -> h:lbignum nLen{proper_public hp n u g h}
   -> GTot (p':S.public)
-let as_spec_pk #nLen hp p =
-  S.Public (as_snat hp (Pub?.n p))
-           (as_snat hp (Pub?.u p))
-           (as_snat hp (Pub?.g p))
-           (as_snat hp (Pub?.h p))
-
-val s2p: #nLen:bn_len_s -> s:secret nLen ->
-  Stack (public nLen)
-        (requires fun h -> proper_secret h s /\ secret_mem h s)
-        (ensures fun h0 p h1 ->
-         h0 == h1 /\
-         proper_public h1 p /\
-         public_mem h1 p /\
-         as_spec_pk h1 p = S.s2p (as_spec_sk h0 s))
-let s2p #nLen s = Pub (Sec?.n s) (Sec?.u s) (Sec?.g s) (Sec?.h s)
+let as_spec_pk hp #nLen n u g h =
+  S.Public (as_snat hp n)
+           (as_snat hp u)
+           (as_snat hp g)
+           (as_snat hp h)
 
 #reset-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
 
 val encrypt:
      #nLen:bn_len_s
-  -> pk:public nLen
+  -> n:lbignum nLen
+  -> u:lbignum nLen
+  -> g:lbignum nLen
+  -> h:lbignum nLen
   -> r:lbignum nLen
   -> m:lbignum nLen
   -> res:lbignum nLen
   -> Stack unit
-     (requires fun h ->
-      proper_public h pk /\ public_mem h pk /\
-      as_snat h r > 1 /\
-      as_snat h m < as_snat h (Pub?.u pk) /\
-      live h r /\ live h m /\ live h res /\
-      disjoint m (Pub?.g pk) /\
-      disjoint (Pub?.h pk) r /\
-      disjoint (Pub?.n pk) res)
+     (requires fun hp ->
+      proper_public hp n u g h /\ public_mem hp n u g h /\
+      as_snat hp r > 1 /\
+      as_snat hp m < as_snat hp u /\
+      live hp r /\ live hp m /\ live hp res /\
+      disjoint m g /\
+      disjoint h r /\
+      disjoint n res)
      (ensures fun h0 _ h1 ->
       modifies1 res h0 h1 /\
-      as_snat h1 res = S.encrypt (as_spec_pk h0 pk) (as_snat h0 r) (as_snat h0 m)
+      as_snat h1 res = S.encrypt (as_spec_pk h0 n u g h) (as_snat h0 r) (as_snat h0 m)
       )
-let encrypt #nLen pk r m res =
+let encrypt #nLen n u g h r m res =
   bn_len_s_fits nLen;
 
   push_frame ();
@@ -226,10 +196,6 @@ let encrypt #nLen pk r m res =
 
   let tmp1 = create nLen (u64 0) in
   let tmp2 = create nLen (u64 0) in
-
-  let n = Pub?.n pk in
-  let g = Pub?.g pk in
-  let h = Pub?.h pk in
 
   bn_modular_exp n g m tmp1;
   bn_modular_exp n h r tmp2;
@@ -248,26 +214,33 @@ let encrypt #nLen pk r m res =
 
 val check_is_zero:
      #nLen:bn_len_s
-  -> sk:secret nLen
+  -> p:lbignum nLen
+  -> q:lbignum nLen
+  -> n:lbignum nLen
+  -> u:lbignum nLen
+  -> v:lbignum nLen
+  -> g:lbignum nLen
+  -> h:lbignum nLen
   -> c:lbignum nLen
   -> Stack bool
-     (requires fun h ->
-      proper_secret h sk /\ secret_mem h sk /\
-      as_snat h c < as_snat h (Sec?.u sk) /\
-      live h c /\
-      disjoint (Sec?.v sk) c)
+     (requires fun hp ->
+      proper_secret hp p q n u v g h /\
+      secret_mem hp p q n u v g h /\
+      as_snat hp c < as_snat hp u /\
+      live hp c /\
+      disjoint v c)
      (ensures fun h0 b h1 ->
       modifies0 h0 h1 /\
-      b = S.check_is_zero (as_spec_sk h0 sk) (as_snat h0 c)
+      b = S.check_is_zero (as_spec_sk h0 p q n u v g h) (as_snat h0 c)
       )
-let check_is_zero #nLen sk c =
+let check_is_zero #nLen p q n u v g h c =
   bn_len_s_fits nLen;
   push_frame ();
   let hp0 = FStar.HyperStack.ST.get () in
 
   let tmp = create nLen (u64 0) in
-  to_fe_idemp #(as_snat hp0 (Sec?.n sk)) (as_snat hp0 c);
-  bn_modular_exp (Sec?.n sk) c (Sec?.v sk) tmp;
+  to_fe_idemp #(as_snat hp0 n) (as_snat hp0 c);
+  bn_modular_exp n c v tmp;
 
   let one:lbignum 1ul = bn_one #1ul in
 
@@ -276,6 +249,52 @@ let check_is_zero #nLen sk c =
   pop_frame ();
   b
 
+val hom_add:
+     #nLen:bn_len_s
+  -> n:lbignum nLen
+  -> c1:lbignum nLen
+  -> c2:lbignum nLen
+  -> res:lbignum nLen
+  -> Stack unit
+     (requires fun hp ->
+      live hp n /\ live hp c1 /\ live hp c2 /\ live hp res /\
+      disjoint c1 res /\ disjoint c2 res /\ disjoint n res /\
+      as_snat hp c1 < as_snat hp n /\
+      as_snat hp c2 < as_snat hp n /\
+      as_snat hp n > 1 /\ iscomp (as_snat hp n)
+      )
+     (ensures fun h0 _ h1 ->
+      modifies1 res h0 h1 /\
+
+      as_snat h1 res = S.hom_add #(as_snat h0 n) (as_snat h0 c1) (as_snat h0 c2)
+      )
+let hom_add #nLen n c1 c2 res =
+  bn_len_s_fits nLen;
+  bn_modular_mul n c1 c2 res
+
+val hom_mul_plain:
+     #nLen:bn_len_s
+  -> n:lbignum nLen
+  -> c:lbignum nLen
+  -> k:lbignum nLen
+  -> res:lbignum nLen
+  -> Stack unit
+     (requires fun h ->
+       live h n /\ live h c /\ live h k /\ live h res /\
+       all_disjoint [loc n; loc c; loc k; loc res] /\
+       as_snat h n > 1 /\
+       iscomp (as_snat h n) /\
+       as_snat h c < as_snat h n /\
+       as_snat h k < as_snat h n)
+     (ensures fun h0 _ h1 ->
+       modifies1 res h0 h1 /\
+       as_snat h1 res = S.hom_mul_plain #(as_snat h0 n) (as_snat h0 c) (as_snat h0 k))
+let hom_mul_plain #nLen n c k res =
+  bn_len_s_fits nLen;
+  bn_modular_exp n c k res
+
+
+noextract inline_for_extraction
 val carm_pe_impl:
      #nLen:bn_len_s
   -> p:lbignum nLen
@@ -319,6 +338,7 @@ let carm_pe_impl #nLen p e res =
 
   pop_frame ()
 
+noextract inline_for_extraction
 val fermat_inv_pe:
      #nLen:bn_len_s
   -> p:lbignum nLen
@@ -364,7 +384,6 @@ let fermat_inv_pe #nLen p e a res =
 
 #reset-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
 
-inline_for_extraction
 val crtgo_combine:
      #nLen:bn_len_s
   -> p:lbignum nLen
@@ -852,5 +871,62 @@ let pohlig_hellman #nLen #l n ps es g a res =
   );
 
   crt ps es as res;
+
+  pop_frame ()
+
+val decrypt:
+     #nLen:bn_len_s
+  -> #l:ssize_t{ v l > 1 }
+  -> p:lbignum nLen
+  -> q:lbignum nLen
+  -> n:lbignum nLen
+  -> u:lbignum nLen
+  -> u_ps:bnlist nLen l
+  -> u_es:bnlist nLen l
+  -> sec_v:lbignum nLen
+  -> g:lbignum nLen
+  -> h:lbignum nLen
+  -> c:lbignum nLen
+  -> res:lbignum nLen
+  -> Stack unit
+  (requires fun hp ->
+      live hp c /\ live hp res /\ live hp u_ps /\ live hp u_es /\
+
+      disjoint u_ps u_es /\
+
+      proper_secret hp p q n u sec_v g h /\
+      secret_mem hp p q n u sec_v g h /\
+
+      as_snat hp c < as_snat hp n /\
+
+      Seq.length (as_snat_bnlist hp u_ps) = v l /\
+      Seq.length (as_snat_bnlist hp u_es) = v l /\
+      crtps_proper hp u_ps /\
+      crtes_proper hp u_es /\
+      S.fullprod (as_snat_bnlist #nLen #l hp u_ps)
+                 (as_snat_bnlist #nLen #l hp u_es) = as_snat hp u
+      )
+  (ensures fun h0 _ h1 ->
+     modifies1 res h0 h1 /\
+     as_snat h1 res < as_snat h0 u /\
+     as_snat h1 res = S.decrypt (as_spec_sk h0 #nLen p q n u sec_v g h)
+                                (as_snat_bnlist #nLen #l h0 u_ps)
+                                (as_snat_bnlist #nLen #l h0 u_es)
+                                (as_snat h0 c)
+     )
+let decrypt #nLen #l p q n u u_ps u_es sec_v g h c res =
+  bn_len_s_fits nLen;
+  push_frame ();
+  let hp0 = FStar.HyperStack.ST.get () in
+
+  to_fe_idemp #(as_snat hp0 n) (as_snat hp0 c);
+  let gv = create nLen (u64 0) in
+  bn_modular_exp n g sec_v gv;
+  let cv = create nLen (u64 0) in
+  bn_modular_exp n c sec_v cv;
+
+  admit ();
+
+  pohlig_hellman n u_ps u_es gv cv res;
 
   pop_frame ()

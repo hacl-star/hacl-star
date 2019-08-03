@@ -362,6 +362,7 @@ val solve_dlp_proof:
   -> a:fe n
   -> Lemma
   (mexp g (solve_dlp ps es g a) = a)
+  [SMTPat (mexp g (solve_dlp ps es g a))]
 let solve_dlp_proof #n base g a = admit ()
 
 (*** Keys, functions, proofs ***)
@@ -405,6 +406,33 @@ val check_is_zero:
   -> c:ciphertext (Public?.n (s2p s))
   -> bool
 let check_is_zero s c = mexp c (Secret?.v s) = 1
+
+val hom_add: #n:comp -> c1:ciphertext n -> c2:ciphertext n -> c:ciphertext n
+let hom_add #n c1 c2 = c1 *% c2
+
+val hom_mul_plain: #n:comp -> c1:ciphertext n -> k:fe n -> c:ciphertext n
+let hom_mul_plain #n c1 k = mexp c1 k
+
+val decrypt:
+     sec:secret
+  -> ps:crtps
+  -> es:crtes{S.length es = S.length ps /\ fullprod ps es = Secret?.u sec}
+  -> c:ciphertext (Public?.n (s2p sec))
+  -> m:fe (Secret?.u sec)
+let decrypt sec ps es c =
+  let g = Secret?.g sec in
+  let v = Secret?.v sec in
+  let u = Secret?.u sec in
+  let gv = mexp g v in
+  g_pow_isunit g v;
+  mult_order_of_mexp g v u;
+  solve_dlp ps es gv (mexp c v)
+
+
+#reset-options "--z3rlimit 100"
+
+
+(* Lemmas *)
 
 val check_is_zero_prop:
      s:secret
@@ -450,19 +478,3 @@ let check_is_zero_prop s r m =
   end in
 
   move_requires m_neq_zero ()
-
-#reset-options
-
-val decrypt:
-     s:secret
-  -> c:ciphertext (Public?.n (s2p s))
-  -> m:fe (Secret?.u s)
-let decrypt s c =
-  let g = Secret?.g s in
-  let v = Secret?.v s in
-  let u = Secret?.u s in
-  let gv = mexp g v in
-  g_pow_isunit g v;
-  mult_order_of_mexp g v u;
-  admit ()
-//  solve_dlp (Secret?.u s) gv (mexp c (Secret?.v s))

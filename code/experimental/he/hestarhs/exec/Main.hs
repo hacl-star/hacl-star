@@ -5,4 +5,4 @@ import Universum
 import TestHacl
 
 main :: IO ()
-main = testHacl
+main = testPaillier

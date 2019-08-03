@@ -219,14 +219,17 @@ let test_gm _ =
 noextract inline_for_extraction
 val run_test_paillier0:
      #n2Len:P.bn_len_s
-  -> sec:P.secret n2Len
+  -> p:lbignum n2Len
+  -> q:lbignum n2Len
   -> n:lbignum n2Len
   -> n2:lbignum n2Len
   -> g:lbignum n2Len
+  -> lambda:lbignum n2Len
+  -> l2inv:lbignum n2Len
   -> r:lbignum n2Len
   -> m:nat
   -> Stack unit (requires fun _ -> true) (ensures fun _ _ _ -> true)
-let run_test_paillier0 #n2Len sec n n2 g r m =
+let run_test_paillier0 #n2Len p q n n2 g lambda l2inv r m =
   push_frame ();
   admit();
   print_str "* Testing paillier ... ";
@@ -241,7 +244,7 @@ let run_test_paillier0 #n2Len sec n n2 g r m =
 //  print_lbignum bn_res;
 
 //  print_str " --dec-> \n";
-  P.decrypt sec bn_res bn_m';
+  P.decrypt p q n n2 g lambda l2inv bn_res bn_m';
 
   let success = bn_is_equal bn_m bn_m' in
   if success
@@ -312,9 +315,12 @@ let run_test_paillier p q r m =
   //assert (as_snat h bn_g < as_snat h bn_n2);
   //assert (PS.is_g (as_snat h bn_n) (as_snat h bn_g));
   admit ();
-  let secret = P.to_secret bn_p bn_q bn_n bn_n2 bn_g in
 
-  run_test_paillier0 #n2Len secret bn_n bn_n2 bn_g bn_r m;
+  let bn_lambda = create n2Len (u64 0) in
+  let bn_l2inv = create n2Len (u64 0) in
+  P.to_secret bn_p bn_q bn_n bn_n2 bn_g bn_lambda bn_l2inv;
+
+  run_test_paillier0 #n2Len bn_p bn_q bn_n bn_n2 bn_g bn_lambda bn_l2inv bn_r m;
 
   pop_frame ()
 
