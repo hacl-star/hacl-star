@@ -593,7 +593,7 @@ let qtesla_keygen_do_while nonce e randomness_extended k =
     assert(is_poly_sampler_output hAfterSample ek);            
     let res = not (check_ES ek params_Le) in
     let hLoopEnd = ST.get () in
-    assert(is_poly_equal hAfterSample hLoopEnd ek);
+    //assert(is_poly_equal hAfterSample hLoopEnd ek);
     assert(is_poly_sampler_output hLoopEnd ek);
     assert(ek == gsub e (k *! params_n) params_n);
     assert(forall (i:nat{i < v params_n}) . is_sampler_output (bget hLoopEnd ek i));
@@ -665,11 +665,11 @@ let qtesla_keygen_ randomness pk sk =
                (b ==> is_poly_sampler_output h s))
       (fun _ ->
         qtesla_keygen_sample_gauss_poly randomness_extended nonce s params_k;
-        let hAfterSample = ST.get () in
-        assert(is_poly_sampler_output hAfterSample s);
+        //let hAfterSample = ST.get () in
+        //assert(is_poly_sampler_output hAfterSample s);
         let res = not (check_ES s params_Ls) in
-        let hLoopEnd = ST.get () in
-        assert(is_poly_equal hAfterSample hLoopEnd s);
+        //let hLoopEnd = ST.get () in
+        //assert(is_poly_equal hAfterSample hLoopEnd s);
         res
       );
   let h2 = ST.get () in
@@ -678,35 +678,35 @@ let qtesla_keygen_ randomness pk sk =
   poly_uniform a (sub rndsubbuffer (size 0) crypto_randombytes);
   let h3 = ST.get () in
   assert(modifies4 nonce e s a h0 h3);
-  assert(is_poly_equal h2 h3 s);
+  //assert(is_poly_equal h2 h3 s);
   assert(is_poly_sampler_output h3 s);
   lemma_sampler_output_is_pmq h3 s;
   poly_ntt s_ntt s;
   let h4 = ST.get () in
   assert(modifies (loc nonce |+| loc e |+| loc s |+| loc a |+| loc s_ntt) h0 h4);
-  assert(is_poly_k_equal h3 h4 a);
-  assert(is_poly_k_equal h1 h4 e);
+  //assert(is_poly_k_equal h3 h4 a);
+  //assert(is_poly_k_equal h1 h4 e);
   for (size 0) params_k
       (fun h k -> live h t /\ live h a /\ live h s_ntt /\ live h e /\ modifies1 t h4 h /\ k <= v params_k /\
                is_poly_k_montgomery h a /\ is_poly_k_sk h e /\ is_poly_montgomery h s_ntt /\
                is_poly_k_pk_i h t (k * v params_n))
       (fun k ->
           let hLoopStart = ST.get () in
-          qtesla_keygen_compute_tk t a e s_ntt k;
-          let hLoopEnd = ST.get () in
-          assert(is_poly_k_equal hLoopStart hLoopEnd a);
-          assert(is_poly_k_equal hLoopStart hLoopEnd e);
-          assert(is_poly_equal hLoopStart hLoopEnd s_ntt)
+          qtesla_keygen_compute_tk t a e s_ntt k
+          //let hLoopEnd = ST.get () in
+          //assert(is_poly_k_equal hLoopStart hLoopEnd a);
+          //assert(is_poly_k_equal hLoopStart hLoopEnd e);
+          //assert(is_poly_equal hLoopStart hLoopEnd s_ntt)
       );
 
   let h5 = ST.get () in
   assert(modifies (loc nonce |+| loc e |+| loc s |+| loc a |+| loc s_ntt |+| loc t) h0 h5);
-  assert(is_poly_equal h2 h5 s);
-  assert(is_poly_k_equal h4 h5 e);
+  //assert(is_poly_equal h2 h5 s);
+  //assert(is_poly_k_equal h4 h5 e);
   encode_or_pack_sk sk s e rndsubbuffer;
   let h6 = ST.get () in
   assert(modifies (loc nonce |+| loc e |+| loc s |+| loc a |+| loc s_ntt |+| loc t |+| loc sk) h0 h6);
-  assert(is_poly_k_equal h5 h6 t);
+  //assert(is_poly_k_equal h5 h6 t);
   assert(is_poly_k_pk h6 t);
   encode_pk pk t (sub rndsubbuffer (size 0) crypto_seedbytes);
   let h7 = ST.get () in
@@ -1475,6 +1475,11 @@ val test_correctness:
     (requires fun h -> live h v_ /\ is_poly_montgomery h v_)
     (ensures fun h0 _ h1 -> modifies0 h0 h1)
 
+#push-options "--max_fuel 8"
+let lemma_val_times_pow2d_fits (val_:I32.t{I32.v val_ == -1 \/ I32.v val_ == 0 \/ I32.v val_ == 1}) : Lemma
+    (ensures Int.fits (I32.v val_ * pow2 (v params_d)) I32.n) = ()
+#pop-options
+
 let test_correctness v_ =
     let hInit = ST.get () in
     push_frame();
@@ -1528,11 +1533,14 @@ let test_correctness v_ =
         assert(I32.v (1l <<^ (params_d -. size 1)) == 1 * pow2 (v (params_d -. size 1)) @% pow2 I32.n);
         lemma_val_plus_pow2_d_fits val_;
         let val_:I32.t = I32.((val_ +^ (1l <<^ (params_d -. (size 1))) -^ 1l) >>>^ params_d) in
+        assume(I32.v val_ == -1 \/ I32.v val_ == 0 \/ I32.v val_ == 1);
+        lemma_val_times_pow2d_fits val_;
         // val is always -1, 0, or 1 it looks like
         [@inline_let] let op_Less_Less_Less_Hat = shift_arithmetic_left_i32 in
-        assume(Int.fits (I32.v val_ * pow2 (v params_d)) I32.n);
         shift_arithmetic_left_i32_value_lemma val_ params_d;
         assume(Int.fits (I32.v left - I32.v (val_ <<<^ params_d)) I32.n);
+        assert(I32.v left >= -(2 * elem_v params_q));
+        assert(I32.v left <= 2 * elem_v params_q);
         let val_:I32.t = I32.(left -^ (val_ <<<^ params_d)) in
         assume(I32.v val_ > Int.min_int I32.n);
         assume(FStar.Int.fits (I32.v (abs_ val_) - (I32.v (1l <<^ (params_d -. (size 1))) - elem_v params_rejection)) I32.n);
@@ -1995,10 +2003,10 @@ private let lemma_subpoly_of_pk_is_pk (h: HS.mem) (pk: poly_k) (p: poly) (k: siz
 //#pop-options
 
 #push-options "--print_z3_statistics"
-let lemma_remap_subbuf_indices (w: poly_k) (k: size_t{v k < v params_k}) (h: HS.mem) : Lemma
-    (ensures forall (i:nat{i >= v k * v params_n /\ i < v k * v params_n + v params_n}) . bget h w i == bget h (get_poly w k) (i - v k * v params_n)) =
-    assert(get_poly w k == gsub w (k *! params_n) params_n);
-    assert(forall (i:nat{i >= v k * v params_n /\ i < v k * v params_n + v params_n}) . bget h w i == bget h (get_poly w k) (i - v k * v params_n))
+let lemma_remap_subbuf_indices (w: poly_k) (k: size_t{k <. params_k}) (h: HS.mem) : Lemma
+    (ensures forall (i:nat{i >= v k * v params_n /\ i < v k * v params_n + v params_n}) . bget h w i == bget h (get_poly w k) (i - v k * v params_n)) = 
+    assert(get_poly w k == gsub w (k *! params_n) params_n)
+    //assert(forall (i:nat{i >= v k * v params_n /\ i < v k * v params_n + v params_n}) . bget h w i == bget h (get_poly w k) (i - v k * v params_n))
 #pop-options
 
 

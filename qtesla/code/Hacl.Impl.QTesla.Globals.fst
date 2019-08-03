@@ -115,13 +115,55 @@ let is_e_equal (h0 h1:HS.mem) (e:lbuffer sparse_elem (params_n *! params_k)) =
     [SMTPat (is_poly_sampler_output_i h1 p i); SMTPat (B.modifies l h0 h1)] = 
     assert(forall (j:nat{j < i}) . {:pattern B.get h1 p j} B.get h0 p j == B.get h1 p j)*)
 
-(*let frame_is_poly_sampler_output_i (h0 h1: HS.mem) (p: poly) (i:nat{i <= v params_n}) (l:B.loc) : Lemma
-    (requires is_poly_sampler_output_i h0 p i /\ B.modifies l h0 h1 /\ B.loc_disjoint l (loc ((gsub p (size 0) (size i)))))
+let frame_is_poly_sampler_output_i (h0 h1: HS.mem) (p: poly) (i:nat{i <= v params_n}) (l:B.loc) : Lemma
+    (requires is_poly_sampler_output_i h0 p i /\ live h0 p /\ B.modifies l h0 h1 /\ B.loc_disjoint l (loc ((gsub p (size 0) (size i)))))
     (ensures is_poly_sampler_output_i h1 p i)
-    [SMTPat (is_poly_sampler_output_i h1 p i); SMTPat (modifies l h0 h1)] = admit()
-    //assert(forall (j:nat{j < i}) . {:pattern bget h1 p j} bget h0 p j == bget h1 p j)
-    //assert(is_poly_equal h0 h1 p)*)
-    
+    [SMTPat (is_poly_sampler_output_i h1 p i); SMTPat (modifies l h0 h1)] =
+    assert(forall (j:nat{j < i}) . {:pattern bget h1 p j} bget h0 (gsub p (size 0) (size i)) j == bget h1 p j);
+    assert(forall (j:nat{j < i}) . {:pattern bget h1 p j} bget h0 p j == bget h1 p j)
+
+let frame_is_poly_sampler_output (h0 h1: HS.mem) (p: poly) (l:B.loc) : Lemma
+    (requires is_poly_sampler_output h0 p /\ live h0 p /\ B.modifies l h0 h1 /\ B.loc_disjoint l (loc p))
+    (ensures is_poly_sampler_output h1 p)
+    [SMTPat (is_poly_sampler_output h1 p); SMTPat (modifies l h0 h1)] =
+    assert(forall (j:nat{j < v params_n}) . {:pattern bget h1 p j} bget h0 p j == bget h1 p j);
+    assert(forall (j:nat{j < v params_n}) . {:pattern bget h1 p j} bget h0 p j == bget h1 p j)
+
+let frame_is_poly_k_sampler_output_i (h0 h1: HS.mem) (p: poly_k) (i:nat{i <= v params_n * v params_k}) (l:B.loc) : Lemma
+    (requires is_poly_k_sampler_output_i h0 p i /\ live h0 p /\ B.modifies l h0 h1 /\ B.loc_disjoint l (loc ((gsub p (size 0) (size i)))))
+    (ensures is_poly_k_sampler_output_i h1 p i)
+    [SMTPat (is_poly_k_sampler_output_i h1 p i); SMTPat (modifies l h0 h1)] =
+    assert(forall (j:nat{j < i}) . {:pattern bget h1 p j} bget h0 (gsub p (size 0) (size i)) j == bget h1 p j);
+    assert(forall (j:nat{j < i}) . {:pattern bget h1 p j} bget h0 p j == bget h1 p j)
+
+let frame_is_poly_k_montgomery_i (h0 h1: HS.mem) (p: poly_k) (i:nat{i <= v params_n * v params_k}) (l:B.loc) : Lemma
+    (requires is_poly_k_montgomery_i h0 p i /\ live h0 p /\ B.modifies l h0 h1 /\ B.loc_disjoint l (loc ((gsub p (size 0) (size i)))))
+    (ensures is_poly_k_montgomery_i h1 p i)
+    [SMTPat (is_poly_k_montgomery_i h1 p i); SMTPat (modifies l h0 h1)] =
+    assert(forall (j:nat{j < i}) . {:pattern bget h1 p j} bget h0 (gsub p (size 0) (size i)) j == bget h1 p j);
+    assert(forall (j:nat{j < i}) . {:pattern bget h1 p j} bget h0 p j == bget h1 p j)
+
+let frame_is_poly_montgomery_i (h0 h1: HS.mem) (p: poly_k) (i:nat{i <= v params_n}) (l:B.loc) : Lemma
+    (requires is_poly_montgomery_i h0 p i /\ live h0 p /\ B.modifies l h0 h1 /\ B.loc_disjoint l (loc ((gsub p (size 0) (size i)))))
+    (ensures is_poly_montgomery_i h1 p i)
+    [SMTPat (is_poly_montgomery_i h1 p i); SMTPat (modifies l h0 h1)] =
+    assert(forall (j:nat{j < i}) . {:pattern bget h1 p j} bget h0 (gsub p (size 0) (size i)) j == bget h1 p j);
+    assert(forall (j:nat{j < i}) . {:pattern bget h1 p j} bget h0 p j == bget h1 p j)
+
+let frame_is_poly_k_pk (h0 h1: HS.mem) (p: poly_k) (l:B.loc) : Lemma
+    (requires is_poly_k_pk h0 p /\ live h0 p /\ B.modifies l h0 h1 /\ B.loc_disjoint l (loc p))
+    (ensures is_poly_k_pk h1 p)
+    [SMTPat (is_poly_k_pk h1 p); SMTPat (modifies l h0 h1)] =
+    assert(forall (j:nat{j < v params_n * v params_k}) . {:pattern bget h1 p j} bget h0 p j == bget h1 p j);
+    assert(forall (j:nat{j < v params_n * v params_k}) . {:pattern bget h1 p j} bget h0 p j == bget h1 p j)
+
+let frame_is_poly_y_sampler_output_i (h0 h1: HS.mem) (p: poly_k) (i:nat{i <= v params_n}) (l:B.loc) : Lemma
+    (requires is_poly_y_sampler_output_i h0 p i /\ live h0 p /\ B.modifies l h0 h1 /\ B.loc_disjoint l (loc ((gsub p (size 0) (size i)))))
+    (ensures is_poly_y_sampler_output_i h1 p i)
+    [SMTPat (is_poly_y_sampler_output_i h1 p i); SMTPat (modifies l h0 h1)] =
+    assert(forall (j:nat{j < i}) . {:pattern bget h1 p j} bget h0 (gsub p (size 0) (size i)) j == bget h1 p j);
+    assert(forall (j:nat{j < i}) . {:pattern bget h1 p j} bget h0 p j == bget h1 p j)
+
 val poly_create:
     unit
   -> StackInline poly
@@ -233,28 +275,3 @@ private let shift_arithmetic_left_value_check (x:elem) (s:UI32.t{UI32.v s < elem
 unfold let shift_arithmetic_left_i32 = Hacl.Impl.QTesla.Lemmas.Sal.shift_arithmetic_left_i32
 unfold let shift_arithmetic_left_i32_value_lemma = Hacl.Impl.QTesla.Lemmas.Sal.shift_arithmetic_left_i32_value_lemma
 
-(*let frame_is_poly_sampler_output_i (h0 h1: HS.mem) (p: poly) (i:nat{i <= v params_n}) (l:B.loc) : Lemma
-    (requires is_poly_sampler_output_i h0 p i /\ modifies l h0 h1 /\ disjoint l (gsub p (size 0) (size i)))
-    (ensures is_poly_sampler_output_i h1 p i)
-    [SMTPat (is_poly_sampler_output_i h1 p i); SMTPat (modifies l h0 h1)] =
-    assert(is_poly_equal h0 h1 p)*)
-
-(*let frame_is_poly_sampler_output_i (h0 h1: HS.mem) (p: B.lbuffer elem (v params_n)) (i:nat{i <= v params_n}) (l:B.loc) : Lemma
-    (requires is_poly_sampler_output_i h0 p i /\ B.modifies l h0 h1 /\ B.loc_disjoint l (B.loc_buffer p)) //(B.loc_buffer (B.gsub p 0ul (UI32.uint_to_t i))))
-    (ensures is_poly_sampler_output_i h1 p i)
-    [SMTPat (is_poly_sampler_output_i h1 p i); SMTPat (B.modifies l h0 h1)] = 
-    assert(forall (j:nat{j < i}) . {:pattern B.get h1 p j} B.get h0 p j == B.get h1 p j)*)
-
-(*let frame_is_poly_sampler_output_i (h0 h1: HS.mem) (p: poly) (i:nat{i <= v params_n}) (l:B.loc) : Lemma
-    (requires is_poly_sampler_output_i h0 p i /\ B.modifies l h0 h1 /\ B.loc_disjoint l (loc ((gsub p (size 0) (size i)))))
-    (ensures is_poly_sampler_output_i h1 p i)
-    [SMTPat (is_poly_sampler_output_i h1 p i); SMTPat (modifies l h0 h1)] = admit()
-    //assert(forall (j:nat{j < i}) . {:pattern bget h1 p j} bget h0 p j == bget h1 p j)
-    //assert(is_poly_equal h0 h1 p)*)
-
-(*let frame_is_poly_sampler_output_i (h0 h1: HS.mem) (p:poly) (i:nat{i <= v params_n}) (l:B.loc) : Lemma
-    (requires is_poly_sampler_output_i h0 p i /\ B.modifies l h0 h1 /\ B.loc_disjoint l (loc p))
-    (ensures is_poly_sampler_output_i h1 p i)
-    [SMTPat (is_poly_sampler_output_i h1 p i); SMTPat (modifies l h0 h1)] = 
-    assert(bget h0 p 0 == bget h1 p 0);
-    assert(forall (j:nat{j < i}) . {:pattern bget h1 p j} bget h0 p j == bget h1 p j)*)
