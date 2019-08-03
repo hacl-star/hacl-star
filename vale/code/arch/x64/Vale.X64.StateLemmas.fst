@@ -20,29 +20,30 @@ let same_domain_eval_ins c f s0 sv =
     Vale.X64.Bytes_Semantics.eval_ins_domains ins ({s0 with BS.ms_trace = []});
     MS.lemma_same_domains sv.vs_heap s0.BS.ms_heap s1.BS.ms_heap
 
-let state_to_S (s:vale_state) : GTot BS.machine_state =
-  {
-    BS.ms_ok = s.vs_ok;
-    BS.ms_regs = F.on_dom reg (fun r -> Regs.sel r s.vs_regs);
-    BS.ms_flags = F.on_dom flag (fun f -> Flags.sel f s.vs_flags);
-    BS.ms_heap = MS.get_heap s.vs_heap;
-    BS.ms_memTaint = s.vs_memTaint;
-    BS.ms_stack = VSS.stack_to_s s.vs_stack;
-    BS.ms_stackTaint = s.vs_stackTaint;
-    BS.ms_trace = [];
-  }
+let state_to_S (s:vale_state) : GTot BS.machine_state = admit()
+ // {
+ //   BS.ms_ok = s.vs_ok;
+ //   BS.ms_regs = F.on_dom reg (fun r -> Regs.sel r s.vs_regs);
+ //   BS.ms_flags = F.on_dom flag (fun f -> Flags.sel f s.vs_flags);
+ //   BS.ms_heap = MS.get_heap s.vs_heap;
+ //   BS.ms_memTaint = s.vs_memTaint;
+ //   BS.ms_stack = VSS.stack_to_s s.vs_stack;
+ //   BS.ms_stackTaint = s.vs_stackTaint;
+ //   BS.ms_trace = [];
+ // }
 
-let state_of_S (sv:vale_state) (s:BS.machine_state{same_domain sv s}) : GTot vale_state =
-  let { BS.ms_ok = ok; BS.ms_regs = regs; BS.ms_flags = flags; BS.ms_heap = mem; BS.ms_stack = stack} = s in
-  {
-    vs_ok = ok;
-    vs_regs = Regs.of_fun regs;
-    vs_flags = Flags.of_fun flags;
-    vs_heap = MS.get_hs sv.vs_heap mem;
-    vs_memTaint = s.BS.ms_memTaint;
-    vs_stack = VSS.stack_from_s stack;
-    vs_stackTaint = s.BS.ms_stackTaint;
-  }
+let state_of_S (sv:vale_state) (s:BS.machine_state{same_domain sv s}) : GTot vale_state = admit()
+// let { BS.ms_ok = ok; BS.ms_regs = regs; BS.ms_flags = flags; BS.ms_heap = mem; BS.ms_stack = stack} =
+//  s in
+//  {
+//    vs_ok = ok;
+//    vs_regs = Regs.of_fun regs;
+//    vs_flags = Flags.of_fun flags;
+//    vs_heap = MS.get_hs sv.vs_heap mem;
+//    vs_memTaint = s.BS.ms_memTaint;
+//    vs_stack = VSS.stack_from_s stack;
+//    vs_stackTaint = s.BS.ms_stackTaint;
+//  }
 
 let lemma_to_ok s = ()
 let lemma_to_flags s f = ()

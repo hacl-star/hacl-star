@@ -346,6 +346,7 @@ let state_match (s0:vale_state) (s1:vale_state) : Type0 =
   all_regs_match s0.vs_regs s1.vs_regs /\
   s0.vs_flags == s1.vs_flags /\
   s0.vs_heap == s1.vs_heap /\
+  s0.vs_hpls == s1.vs_hpls /\
   s0.vs_stack == s1.vs_stack /\
   s0.vs_memTaint == s1.vs_memTaint /\
   s0.vs_stackTaint == s1.vs_stackTaint
@@ -364,8 +365,8 @@ let va_state_match (s0:vale_state) (s1:vale_state) : Pure Type0
 
 [@va_qattr]
 unfold let wp_sound_code_pre (#a:Type0) (#c:code) (qc:quickCode a c) (s0:vale_state) (k:(s0':vale_state{s0 == s0'}) -> vale_state -> a -> Type0) : Type0 =
-  forall (ok:bool) (regs:Regs.t) (flags:Flags.t) (mem:vale_heap) (stack:vale_stack) (memTaint:memtaint) (stackTaint:memtaint).
-    let s0' = {vs_ok = ok; vs_regs = regs; vs_flags = flags; vs_heap = mem; vs_stack = stack; vs_memTaint = memTaint; vs_stackTaint = stackTaint} in
+  forall (ok:bool) (regs:Regs.t) (flags:Flags.t) (mem:vale_heap) (hpls:(Map.t (key:nat) (value:vale_heap))) (stack:vale_stack) (memTaint:memtaint) (stackTaint:memtaint).
+    let s0' = {vs_ok = ok; vs_regs = regs; vs_flags = flags; vs_heap = mem; vs_hpls = hpls; vs_stack = stack; vs_memTaint = memTaint; vs_stackTaint = stackTaint} in
     s0 == s0' ==> QProc?.wp qc (state_eta s0') (k (state_eta s0'))
 
 unfold let wp_sound_code_post (#a:Type0) (#c:code) (qc:quickCode a c) (s0:vale_state) (k:(s0':vale_state{s0 == s0'}) -> vale_state -> a -> Type0) ((sN:vale_state), (fN:fuel), (gN:a)) : Type0 =
@@ -379,6 +380,7 @@ unfold let normal_steps : list string =
     `%Mkvale_state?.vs_regs;
     `%Mkvale_state?.vs_flags;
     `%Mkvale_state?.vs_heap;
+    `%Mkvale_state?.vs_hpls;
     `%Mkvale_state?.vs_stack;
     `%Mkvale_state?.vs_memTaint;
     `%Mkvale_state?.vs_stackTaint;

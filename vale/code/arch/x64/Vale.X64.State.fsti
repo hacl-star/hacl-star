@@ -7,13 +7,15 @@ open Vale.X64.Machine_s
 open Vale.X64.Memory
 open Vale.X64.Stack_i
 module Flags = Vale.X64.Flags
-module Regs = Vale.X64.Regs
+module Regs = Vale.X64.Regs 
+module Map = FStar.Map
 
 noeq type vale_state = {
   vs_ok: bool;
   vs_regs: Regs.t;
   vs_flags: Flags.t;
   vs_heap: vale_heap;
+  vs_hpls: Map.t (key:nat) (value:vale_heap);
   vs_stack: vale_stack;
   vs_memTaint: memtaint;
   vs_stackTaint: memtaint;
@@ -29,6 +31,8 @@ unfold let eval_flag (f:flag) (s:vale_state) : Flags.flag_val_t = Flags.sel f s.
 unfold let eval_mem (ptr:int) (s:vale_state) : GTot nat64 = load_mem64 ptr s.vs_heap
 [@va_qattr]
 unfold let eval_mem128 (ptr:int) (s:vale_state) : GTot Vale.Def.Types_s.quad32 = load_mem128 ptr s.vs_heap
+[@va_qattr]
+unfold let eval_hpls (hp:nat) (ptr:int) (s:vale_state) : GTot Vale.Def.Types_s.quad32 = load_mem128 ptr (Map.sel s.vs_hpls hp)
 [@va_qattr]
 unfold let eval_stack (ptr:int) (s:vale_state) : GTot nat64 = load_stack64 ptr s.vs_stack
 [@va_qattr]
@@ -83,6 +87,11 @@ let update_reg_xmm (r:reg_xmm) (v:quad32) (s:vale_state) : vale_state =
 let update_mem (ptr:int) (v:nat64) (s:vale_state) : GTot vale_state = {s with vs_heap = store_mem64 ptr v s.vs_heap}
 
 [@va_qattr]
+let update_hpls (hp: nat) (ptr:int) (v:nat64) (s:vale_state) : GTot vale_state =
+  let heap = Map.sel s.vs_hpls hp in
+  {s with vs_hpls = Map.upd s.vs_hpls hp (store_mem64 ptr v heap)}
+  
+[@va_qattr]
 let update_stack64 (ptr:int) (v:nat64) (s:vale_state) : GTot vale_state = {s with vs_stack = store_stack64 ptr v s.vs_stack}
 
 //[@va_qattr]
@@ -125,6 +134,7 @@ let state_eq (s0:vale_state) (s1:vale_state) : prop0 =
   Regs.equal s0.vs_regs s1.vs_regs /\
   Flags.equal s0.vs_flags s1.vs_flags /\
   s0.vs_heap == s1.vs_heap /\
+  s0.vs_hpls == s1.vs_hpls /\ //TODO: Check contents of heaplets?
   s0.vs_stack == s1.vs_stack /\
   s0.vs_memTaint == s1.vs_memTaint /\
   s0.vs_stackTaint == s1.vs_stackTaint
