@@ -505,7 +505,6 @@ procedure Loop6x_round9(
             quad32_xor(index(round_keys, 10), buffer128_read(in_b, count * 6 + i, mem)));
         buffer128_read(stack_b, 1, mem) == old(Z3);
 {
-    Load128_buffer(T1, key, 0xa0-0x80, Secret, keys_b, 10);
     Store128_buffer(rbp, Z3, 0x10, Secret, stack_b, 1);  // # postpone vpxor $Z3,$Xi,$Xi
     VPxor(T2, T1, Mem128(inp, 0x00, Secret, in_b, count*6 + 0));
     VPxor(Ii, T1, Mem128(inp, 0x10, Secret, in_b, count*6 + 1));
@@ -840,7 +839,53 @@ procedure Loop6x_partial(
     LoadBe64_buffer128(r13, in0, 0 * 16 + 8, Secret, true,  in0_b, (count - 2) * 6 + 0);
     LoadBe64_buffer128(r12, in0, 0 * 16,     Secret, false, in0_b, (count - 2) * 6 + 0);
     Loop6x_plain(alg, 8, key_words, round_keys, keys_b, init, rndkey);
-    // Would do more rounds here for AES-192 or 256
+
+    Load128_buffer(T1, key, 0xa0-0x80, Secret, keys_b, 10); /* XXX[jb] Moved from Loop6x_round9 */
+
+    inline if (alg = AES_256) {
+
+    /* XXX[jb]: Note that this is placed _after_ round8, unlike what
+                existed in the older AESGCM.vaf. Thus, this code
+                couldn't _directly_ be copied over from what existed
+                in AESGCM.vaf. Instead, I've reordered it, so that
+                this is _strictly_ the last few rounds, rather than
+                being then (n-1)..(n-x)th rounds. Additionally, I've
+                performed _some_ cleaning up of the code. To reuse
+                things we already have in this file :) */
+
+        VAESNI_enc(inout0, inout0, T1);
+        VAESNI_enc(inout1, inout1, T1);
+        VAESNI_enc(inout2, inout2, T1);
+        VAESNI_enc(inout3, inout3, T1);
+        VAESNI_enc(inout4, inout4, T1);
+        Load128_buffer(rndkey, key, 0xb0-0x80, Secret, keys_b, 11);
+        VAESNI_enc(inout5, inout5, T1);
+        Load128_buffer(T1, key, 0xc0-0x80, Secret, keys_b, 12); // # Stop here for AES_196
+
+        VAESNI_enc(inout0, inout0, rndkey);
+        VAESNI_enc(inout1, inout1, rndkey);
+        VAESNI_enc(inout2, inout2, rndkey);
+        VAESNI_enc(inout3, inout3, rndkey);
+        VAESNI_enc(inout4, inout4, rndkey);
+        VAESNI_enc(inout5, inout5, rndkey);
+
+        VAESNI_enc(inout0, inout0, T1);
+        VAESNI_enc(inout1, inout1, T1);
+        VAESNI_enc(inout2, inout2, T1);
+        VAESNI_enc(inout3, inout3, T1);
+        VAESNI_enc(inout4, inout4, T1);
+        Load128_buffer(rndkey, key, 0xd0-0x80, Secret, keys_b, 13);
+        VAESNI_enc(inout5, inout5, T1);
+        Load128_buffer(T1, key, 0xe0-0x80, Secret, keys_b, 14); // # 256-bit key
+
+        VAESNI_enc(inout0, inout0, rndkey);
+        VAESNI_enc(inout1, inout1, rndkey);
+        VAESNI_enc(inout2, inout2, rndkey);
+        VAESNI_enc(inout3, inout3, rndkey);
+        VAESNI_enc(inout4, inout4, rndkey);
+        VAESNI_enc(inout5, inout5, rndkey);
+    }
+
     Loop6x_round9(alg, count, in_b, stack_b, key_words, round_keys, keys_b);
 }
 
