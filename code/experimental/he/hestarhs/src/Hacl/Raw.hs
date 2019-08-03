@@ -118,7 +118,7 @@ foreign import ccall "Hacl_Impl_HE_GM_hom_xor" gmXor
 -- DGK
 ----------------------------------------------------------------------------
 
-foreign import ccall "Hacl_Impl_HE_DGK_encrypt" dgkEncrypt
+foreign import ccall "Hacl_Impl_HE_DGK_encrypt" dgkEnc
     :: Word32
     -> Bignum -> Bignum -> Bignum -> Bignum -> Bignum -> Bignum -> Bignum
     -> IO ()
@@ -135,13 +135,13 @@ foreign import ccall "Hacl_Impl_HE_DGK_hom_add" dgkHomAdd
     -> Bignum
     -> IO Bool
 
-foreign import ccall "Hacl_Impl_HE_DGK_hom_mul_plain" dgkHomMulPlain
+foreign import ccall "Hacl_Impl_HE_DGK_hom_mul_plain" dgkHomMulScal
     :: Word32
     -> Bignum -> Bignum -> Bignum
     -> Bignum
     -> IO Bool
 
-foreign import ccall "Hacl_Impl_HE_DGK_decrypt" dgkDecrypt
+foreign import ccall "Hacl_Impl_HE_DGK_decrypt" dgkDec
     :: Word32
     -> Bignum -> Bignum -> Bignum -> Bignum
     -> BignumList -> BignumList
