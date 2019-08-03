@@ -342,39 +342,39 @@ procedure Loop6x_partial_expected_code(
 
     Load128_buffer(T1, key, 0xa0-0x80, Secret, keys_b, 10);
 
-    /* inline if (alg = AES_256) { */
-    /*     VAESNI_enc(inout0, inout0, rndkey); */
-    /*     VAESNI_enc(inout1, inout1, rndkey); */
-    /*     VAESNI_enc(inout2, inout2, rndkey); */
-    /*     VAESNI_enc(inout3, inout3, rndkey); */
-    /*     VAESNI_enc(inout4, inout4, rndkey); */
-    /*     VAESNI_enc(inout5, inout5, rndkey); */
+    inline if (alg = AES_256) {
+        VAESNI_enc(inout0, inout0, rndkey);
+        VAESNI_enc(inout1, inout1, rndkey);
+        VAESNI_enc(inout2, inout2, rndkey);
+        VAESNI_enc(inout3, inout3, rndkey);
+        VAESNI_enc(inout4, inout4, rndkey);
+        VAESNI_enc(inout5, inout5, rndkey);
 
-    /*     VAESNI_enc(inout0, inout0, T1); */
-    /*     VAESNI_enc(inout1, inout1, T1); */
-    /*     VAESNI_enc(inout2, inout2, T1); */
-    /*     VAESNI_enc(inout3, inout3, T1); */
-    /*     VAESNI_enc(inout4, inout4, T1); */
-    /*     Load128_buffer(rndkey, key, 0xb0-0x80, Secret, keys_b, 11); */
-    /*     VAESNI_enc(inout5, inout5, T1); */
-    /*     Load128_buffer(T1, key, 0xc0-0x80, Secret, keys_b, 12); // # Stop here for AES_196 */
+        VAESNI_enc(inout0, inout0, T1);
+        VAESNI_enc(inout1, inout1, T1);
+        VAESNI_enc(inout2, inout2, T1);
+        VAESNI_enc(inout3, inout3, T1);
+        VAESNI_enc(inout4, inout4, T1);
+        Load128_buffer(rndkey, key, 0xb0-0x80, Secret, keys_b, 11);
+        VAESNI_enc(inout5, inout5, T1);
+        Load128_buffer(T1, key, 0xc0-0x80, Secret, keys_b, 12); // # Stop here for AES_196
 
-    /*     VAESNI_enc(inout0, inout0, rndkey); */
-    /*     VAESNI_enc(inout1, inout1, rndkey); */
-    /*     VAESNI_enc(inout2, inout2, rndkey); */
-    /*     VAESNI_enc(inout3, inout3, rndkey); */
-    /*     VAESNI_enc(inout4, inout4, rndkey); */
-    /*     VAESNI_enc(inout5, inout5, rndkey); */
+        VAESNI_enc(inout0, inout0, rndkey);
+        VAESNI_enc(inout1, inout1, rndkey);
+        VAESNI_enc(inout2, inout2, rndkey);
+        VAESNI_enc(inout3, inout3, rndkey);
+        VAESNI_enc(inout4, inout4, rndkey);
+        VAESNI_enc(inout5, inout5, rndkey);
 
-    /*     VAESNI_enc(inout0, inout0, T1); */
-    /*     VAESNI_enc(inout1, inout1, T1); */
-    /*     VAESNI_enc(inout2, inout2, T1); */
-    /*     VAESNI_enc(inout3, inout3, T1); */
-    /*     VAESNI_enc(inout4, inout4, T1); */
-    /*     Load128_buffer(rndkey, key, 0xd0-0x80, Secret, keys_b, 13); */
-    /*     VAESNI_enc(inout5, inout5, T1); */
-    /*     Load128_buffer(T1, key, 0xe0-0x80, Secret, keys_b, 14); // # 256-bit key */
-    /* } */
+        VAESNI_enc(inout0, inout0, T1);
+        VAESNI_enc(inout1, inout1, T1);
+        VAESNI_enc(inout2, inout2, T1);
+        VAESNI_enc(inout3, inout3, T1);
+        VAESNI_enc(inout4, inout4, T1);
+        Load128_buffer(rndkey, key, 0xd0-0x80, Secret, keys_b, 13);
+        VAESNI_enc(inout5, inout5, T1);
+        Load128_buffer(T1, key, 0xe0-0x80, Secret, keys_b, 14); // # 256-bit key
+    }
 
     VAESNI_enc(inout0, inout0, rndkey);
     Store128_buffer(rbp, Z3, 0x10, Secret, scratch_b, 1);  // # postpone vpxor $Z3,$Xi,$Xi
