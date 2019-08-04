@@ -13,11 +13,15 @@ library
                        Lib.Field
                        Lib.Misc
                        Lib
-                       Playground
                        Hacl
                        Hacl.Raw
+                       Hacl.Bignum
+                       Hacl.Pahe
+                       Hacl.Support
                        TestHacl
-  build-depends:       base >=4.12 && <4.13
+                       Playground
+  build-depends:       async
+                     , base >=4.12 && <4.13
                      , bytestring >=0.10
                      , containers >= 0.5.7.1
                      , lens >= 4.14
@@ -29,9 +33,10 @@ library
                      , time >= 1.8.0.2
                      , universum >= 1.5.0
                      , unordered-containers >= 0.2.8.0
+                     , zeromq4-haskell
   hs-source-dirs:      src
   default-language:    Haskell2010
-  ghc-options:         -Wall -O3
+  ghc-options:         -Wall -O2
   extra-lib-dirs:      /home/volhovm/code/hacl-star/code/experimental/he/lib
   extra-libraries:     helib
          -- kremlib
@@ -71,7 +76,7 @@ executable runhestar
                      , universum
   hs-source-dirs:      exec
   default-language:    Haskell2010
-  ghc-options:         -threaded  -Wall -O3
+  ghc-options:         -threaded  -Wall -O2
   default-extensions:  NoImplicitPrelude
                        OverloadedStrings
                        RecordWildCards
