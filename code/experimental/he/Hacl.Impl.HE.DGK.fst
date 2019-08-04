@@ -695,7 +695,7 @@ let rec tailprod_go #nLen #l ps es i j m =
     as_snat_bnlist_preserves_h h0 h ps;
     as_snat_bnlist_preserves_h h0 h es;
 
-    tailprod_go ps es i (j +! 1ul) tmp2;
+    tailprod_go ps es i (j +! 1ul) m;
 
     pop_frame ()
   end
@@ -786,24 +786,24 @@ let solve_dlp_single #nLen n p e g a res =
   let p_e = create nLen (u64 0) in
   bn_exp p e p_e;
 
-  let exp_try = create nLen (u64 0) in
-  bn_assign_uint64 #nLen exp_try (u64 1);
-  let current_g = bn_copy g in
+  bn_assign_uint64 res (u64 0);
+  let current_g = bn_one #nLen in
 
   let boolvar = create 1ul 0uy in
 
-  let test (): Stack bool (requires fun _ -> True) (ensures fun _ _ _ -> True) = begin
-     boolvar.(0ul) =. 1uy
-    end in
+  let b_init = bn_is_equal current_g a in
+  if b_init then boolvar.(0ul) <- 1uy;
+
+  let test () = boolvar.(0ul) =. 0uy in
 
   Lib.Loops.while (fun _ -> true) (fun _ -> true) test (fun _ ->
-    bn_add_fitting exp_try one exp_try;
+    bn_add_fitting res one res;
     bn_modular_mul n current_g g tmp;
-    copy g tmp;
-    let b1 = bn_is_leq exp_try p_e in
-    let b2 = bn_is_equal current_g a in
+    copy current_g tmp;
 
-    if b1 && b2 then boolvar.(0ul) <- 1uy
+    let b1 = bn_is_geq res p_e in
+    let b2 = bn_is_equal current_g a in
+    if b1 || b2 then boolvar.(0ul) <- 1uy
 
     );
 
@@ -843,36 +843,43 @@ val pohlig_hellman:
      )
 let pohlig_hellman #nLen #l n ps es g a res =
   admit ();
-  push_frame ();
 
-  let u = create nLen (u64 0) in
-  fullprod ps es u;
-
-  let as = create (nLen *! l) (u64 0) in
-  let p_e = create nLen (u64 0) in
-  let pow = create nLen (u64 0) in
-  let div_r = create nLen (u64 0) in
-  let gi = create nLen (u64 0) in
-  let ai = create nLen (u64 0) in
-
-  Lib.Loops.for 0ul (l -! 1) (fun _ _ -> True) (fun i ->
-    let curA = sub as (i *! nLen) nLen in
-
+  if l =. 1ul then begin
+    push_frame ();
     let p = bnlist_ix ps 0ul in
     let e = bnlist_ix es 0ul in
-    bn_exp p e p_e;
+    solve_dlp_single n p e g a res;
+    pop_frame ()
+  end else begin
+    push_frame ();
+    let u = create nLen (u64 0) in
+    fullprod ps es u;
 
-    bn_divide u p_e pow div_r;
+    let as = create (nLen *! l) (u64 0) in
+    let p_e = create nLen (u64 0) in
+    let pow = create nLen (u64 0) in
+    let div_r = create nLen (u64 0) in
+    let gi = create nLen (u64 0) in
+    let ai = create nLen (u64 0) in
 
-    bn_modular_exp n g pow gi;
-    bn_modular_exp n a pow ai;
+    Lib.Loops.for 0ul l (fun _ _ -> True) (fun i ->
+      let curA = sub as (i *! nLen) nLen in
 
-    solve_dlp_single n p e gi ai curA
-  );
+      let p = bnlist_ix ps i in
+      let e = bnlist_ix es i in
+      bn_exp p e p_e;
 
-  crt ps es as res;
+      bn_divide u p_e pow div_r;
 
-  pop_frame ()
+      bn_modular_exp n g pow gi;
+      bn_modular_exp n a pow ai;
+
+      solve_dlp_single n p e gi ai curA
+    );
+
+    crt ps es as res;
+    pop_frame ()
+  end
 
 val decrypt:
      #nLen:bn_len_s

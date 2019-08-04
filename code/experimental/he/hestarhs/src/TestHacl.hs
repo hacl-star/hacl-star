@@ -7,6 +7,7 @@ import qualified Foreign.Marshal as A
 import System.Random (randomIO, randomRIO)
 
 import Hacl
+import qualified Lib as L
 import Playground
 
 inbase :: Integer -> Integer -> [Integer]
@@ -188,28 +189,46 @@ testDGK :: IO ()
 testDGK = do
     putTextLn "Testing DGK"
 
-    let ufact = [(37,1)]
+    let ufact = [(37,1),(41,1)]
     (p,q,u,v,g,h) <- genDataDGK ufact 512
+    unless (L.exp (p*q) h v == 1) $ error "generated params are broken"
+    unless (L.exp (p*q) g (u*v) == 1) $ error "generated params are broken"
     let n = p * q
     let bN = fromIntegral $ length $ inbase b64 n
 
     putTextLn "Params generated!"
+
+
+    p' <- toBignum bN p
+    q' <- toBignum bN q
+    n' <- toBignum bN n
+    u' <- toBignum bN u
+    g' <- toBignum bN g
+    h' <- toBignum bN h
+    u_ps <- toBignumList bN $ map fst ufact
+    u_es <- toBignumList bN $ map snd ufact
+    v' <- toBignum bN v
+
+--    one' <- toBignum bN 1
+--    m0 <- randomRIO (0,u-1)
+--    let gv = L.exp n g v
+--    let cv = L.exp n ((L.exp n g m0 * L.exp n h 12345) `mod` n) v
+--    unless (L.exp n gv m0 == cv) $ error "would be really weird"
+--    gv' <- toBignum bN gv
+--    cv' <- toBignum bN cv
+--    dlpres <- toBignum bN 0
+--
+--    dgkDlpSingle bN n' u' one' gv' cv' dlpres
+--    print =<< fromBignum bN dlpres
+--
+--    error "hvatit"
 
     let test = do
           m1 <- randomRIO (0,u-1)
           m2 <- randomRIO (0,u-1)
           r <- randomRIO (0,n-1)
 
-          p' <- toBignum bN p
-          q' <- toBignum bN q
-          n' <- toBignum bN n
-          u' <- toBignum bN u
-          g' <- toBignum bN g
-          h' <- toBignum bN h
           r' <- toBignum bN r
-          u_ps <- toBignumList bN $ map fst ufact
-          u_es <- toBignumList bN $ map snd ufact
-          v' <- toBignum bN v
           m1' <- toBignum bN m1
           m2' <- toBignum bN m2
 
@@ -226,7 +245,8 @@ testDGK = do
           putTextLn "Pass1"
           time2 <- P.getPOSIXTime
 
-          replicateM 100 $ dgkDec bN p' q' n' u' u_ps u_es v' g' h' c1 d
+          replicateM 100 $
+              dgkDec bN (fromIntegral $ length ufact) p' q' n' u' u_ps u_es v' g' h' c1 d
 
           putTextLn "Pass2"
           time3 <- P.getPOSIXTime
@@ -241,9 +261,12 @@ testDGK = do
           putTextLn "Pass4"
           time5 <- P.getPOSIXTime
 
+          c'' <- fromBignum bN c1
+          unless (c'' == (L.exp n g m1 * L.exp n h r) `mod` n) $
+              error "encryption is broken"
 
           m'' <- fromBignum bN d
-          when (m1 /= m'') $ error $ "DGK failed: " <> show (p,q,r,m1)
+          when (m1 /= m'') $ error $ "DGK failed: " <> show (p,q,r,m1, m'')
 
           pure (time2 - time1, time3 - time2, time4 - time3, time5 - time4)
 
