@@ -18,6 +18,7 @@ open Hacl.Spec.Bignum
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
 /// Creates a new bignum from a given one.
+inline_for_extraction
 val bn_copy:
      #len:bn_len
   -> a:lbignum len
@@ -33,6 +34,7 @@ let bn_copy #len a =
   b
 
 /// Assigns a uint64 number to the bignum.
+inline_for_extraction
 val bn_assign_uint64:
      #len:bn_len
   -> a:lbignum len
@@ -47,6 +49,7 @@ let bn_assign_uint64 #len a x =
   assume (as_snat h a = v x)
 
 /// Copies a bignum into another bignum. Basically, copy with functional correctness.
+inline_for_extraction
 val bn_assign_bn:
      #oLen:bn_len
   -> #iLen:bn_len{v iLen <= v oLen}
@@ -63,6 +66,7 @@ let bn_assign_bn #oLen #iLen o i =
   let h = FStar.HyperStack.ST.get () in
   assume (as_snat h o = as_snat h i)
 
+inline_for_extraction
 val bn_one:
      #len:bn_len
   -> StackInline (lbignum len)

@@ -48,6 +48,7 @@ let gl_lemma bnlen len i =
 
 #reset-options "--z3rlimit 100"
 
+noextract
 val bnlist_ix_g:
      #bnlen:bn_len_s
   -> #len:ssize_t
@@ -59,6 +60,7 @@ let bnlist_ix_g #bnlen #len h x i =
   gl_lemma bnlen len i;
   as_snat h (gsub x (bnlen *! i) bnlen)
 
+noextract
 val bnlist_ix_g_preserves_h:
      #bnlen:bn_len_s
   -> #len:ssize_t
@@ -73,6 +75,7 @@ let bnlist_ix_g_preserves_h #bnlen #len h0 h1 x i =
   gl_lemma bnlen len i
 
 
+inline_for_extraction
 val bnlist_ix:
      #bnlen:bn_len_s
   -> #len:ssize_t
@@ -101,6 +104,7 @@ let rec seq_cons_shifts_index_value #a x l =
 
 #reset-options "--z3rlimit 100"
 
+noextract
 val as_snat_bnlist_go:
      #nlen:bn_len_s
   -> #l:ssize_t
@@ -134,6 +138,7 @@ let rec as_snat_bnlist_go #nlen #l h x i =
   end
 
 
+noextract
 val as_snat_bnlist:
      #nlen:bn_len_s
   -> #l:ssize_t

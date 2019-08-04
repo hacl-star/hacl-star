@@ -123,6 +123,8 @@ foreign import ccall "Hacl_Impl_HE_DGK_encrypt" dgkEnc
     -> Bignum -> Bignum -> Bignum -> Bignum -> Bignum -> Bignum -> Bignum
     -> IO ()
 
+
+
 foreign import ccall "Hacl_Impl_HE_DGK_check_is_zero" dgkCheckZero
     :: Word32
     -> Bignum -> Bignum -> Bignum -> Bignum -> Bignum -> Bignum -> Bignum
@@ -141,8 +143,15 @@ foreign import ccall "Hacl_Impl_HE_DGK_hom_mul_plain" dgkHomMulScal
     -> Bignum
     -> IO Bool
 
+foreign import ccall "Hacl_Impl_HE_DGK_solve_dlp_single" dgkDlpSingle
+    :: Word32
+    -> Bignum -> Bignum -> Bignum -> Bignum -> Bignum
+    -> Bignum
+    -> IO Bool
+
 foreign import ccall "Hacl_Impl_HE_DGK_decrypt" dgkDec
     :: Word32
+    -> Word32
     -> Bignum -> Bignum -> Bignum -> Bignum
     -> BignumList -> BignumList
     -> Bignum -> Bignum -> Bignum -> Bignum
