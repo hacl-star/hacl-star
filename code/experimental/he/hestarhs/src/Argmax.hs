@@ -72,7 +72,9 @@ dgkClient sock pk l rs = do
         paheSIMDAdd pk a c
 
     log "Client: computing xors/zeroes"
-    s0 <- replicateM k (randomRIO (-1::Integer,1) `L.suchThat` (/= 0))
+    delta <- replicateM k (randomRIO (0,1))
+    deltaEnc <- paheEnc pk delta
+    let s0 = map (\i -> 1 - 2 * i) delta
     log $ "Client: s = " <> show s0
     s <- paheEnc pk s0
 
@@ -84,11 +86,14 @@ dgkClient sock pk l rs = do
         if i == l-1 then pure b else do
             xorsum <- foldrM (paheSIMDAdd pk) enczero $ map (xors !!) [i+1..l-1]
             paheSIMDAdd pk b xorsum
-    -- TODO the last element for equality
+
+
+    xorsumFull <- foldrM (paheSIMDAdd pk) enczero xors
+    cLast <- paheSIMDAdd pk deltaEnc xorsumFull
 
     -- TODO multiplicative blinding
 
-    ciShuffled <- shuffle ci
+    ciShuffled <- shuffle $ cLast : ci
     log "Client: sending permuted data"
     sendMulti sock =<< (NE.fromList <$> mapM (paheToBS pk) ciShuffled)
 
@@ -151,16 +156,12 @@ runProtocol =
       let pk = paheToPublic sk
 
       let l = 8 -- 8 bytes
---      let cs = [30,30,30,30,30,30]
---      let rs = [29,30,31,32,33,254]
-
       let cs = [30,30,30,30,30,30]
-      let rs = [30,30,30,30,30,30]
+      let rs = [29,30,31,32,33,254]
 
       putTextLn "Starting the protocol"
       -- Compute r <= c jointly. Client has r, server has c
       -- or r < c.
-      -- TODO fix this. Returns 1 on equality iff s = -1.
       (eps,()) <- concurrently
         (dgkClient req pk l rs)
         (dgkServer rep sk l cs)
