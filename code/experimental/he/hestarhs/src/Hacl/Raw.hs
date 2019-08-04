@@ -143,6 +143,12 @@ foreign import ccall "Hacl_Impl_HE_DGK_hom_mul_plain" dgkHomMulScal
     -> Bignum
     -> IO Bool
 
+foreign import ccall "Hacl_Impl_HE_DGK_fullprod" dgkFullprod
+    :: Word32
+    -> Word32
+    -> BignumList -> BignumList -> Bignum
+    -> IO Bool
+
 foreign import ccall "Hacl_Impl_HE_DGK_solve_dlp_single" dgkDlpSingle
     :: Word32
     -> Bignum -> Bignum -> Bignum -> Bignum -> Bignum
