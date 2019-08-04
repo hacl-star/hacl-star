@@ -35,6 +35,7 @@ class Pahe s where
 
     paheSIMDAdd     :: PahePk s -> PaheCiph s -> PaheCiph s -> IO (PaheCiph s)
     paheSIMDMulScal :: PahePk s -> PaheCiph s -> [Integer] -> IO (PaheCiph s)
+    paheMultBlind   :: PahePk s -> PaheCiph s -> IO (PaheCiph s)
 
     paheToBS        :: PahePk s -> PaheCiph s -> IO ByteString
     paheFromBS      :: PahePk s -> ByteString -> IO (PaheCiph s)
@@ -45,6 +46,8 @@ paheNeg pk ciph = paheSIMDMulScal pk ciph $ replicate (paheK pk) (-1)
 paheSIMDSub :: Pahe s => PahePk s -> PaheCiph s -> PaheCiph s -> IO (PaheCiph s)
 paheSIMDSub pk c1 c2 = paheSIMDAdd pk c1 =<< paheNeg pk c2
 
+paheRerand :: Pahe s => PahePk s -> PaheCiph s -> IO (PaheCiph s)
+paheRerand pk c = paheSIMDAdd pk c =<< paheEnc pk (replicate (paheK pk) 0)
 
 ----------------------------------------------------------------------------
 -- Paillier
@@ -142,6 +145,10 @@ instance Pahe PailSep where
             p <- toBignum psp_bn $ p0 `mod` psp_n_raw
             paillierHomMulScal psp_bn psp_n psp_n2 m1 p mi
             pure mi
+
+    paheMultBlind pk@PailSepPk{..} ms = do
+        vals <- replicateM psp_simdn $ randomRIO (0,psp_n_raw-1)
+        paheSIMDMulScal pk ms vals
 
     paheToBS PailSepPk{..} (PailCiph ms) = do
         when (length ms /= psp_simdn) $
