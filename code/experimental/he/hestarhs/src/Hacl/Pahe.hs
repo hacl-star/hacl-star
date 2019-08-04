@@ -6,6 +6,7 @@ module Hacl.Pahe where
 
 import Universum
 
+import qualified Data.ByteString as BS
 import Data.List ((!!))
 import System.Random (randomRIO)
 
@@ -25,11 +26,25 @@ class Pahe s where
     data PahePk s :: *
 
     paheKeyGen      :: Int -> IO (PaheSk s)
+    -- The length of vector inside
+    paheK           :: PahePk s -> Int
     paheToPublic    :: PaheSk s -> PahePk s
+
     paheEnc         :: PahePk s -> [Integer] -> IO (PaheCiph s)
     paheDec         :: PaheSk s -> PaheCiph s -> IO [Integer]
+
     paheSIMDAdd     :: PahePk s -> PaheCiph s -> PaheCiph s -> IO (PaheCiph s)
     paheSIMDMulScal :: PahePk s -> PaheCiph s -> [Integer] -> IO (PaheCiph s)
+
+    paheToBS        :: PahePk s -> PaheCiph s -> IO ByteString
+    paheFromBS      :: PahePk s -> ByteString -> IO (PaheCiph s)
+
+paheNeg :: Pahe s => PahePk s -> PaheCiph s -> IO (PaheCiph s)
+paheNeg pk ciph = paheSIMDMulScal pk ciph $ replicate (paheK pk) (-1)
+
+paheSIMDSub :: Pahe s => PahePk s -> PaheCiph s -> PaheCiph s -> IO (PaheCiph s)
+paheSIMDSub pk c1 c2 = paheSIMDAdd pk c1 =<< paheNeg pk c2
+
 
 ----------------------------------------------------------------------------
 -- Paillier
@@ -60,8 +75,9 @@ instance Pahe PailSep where
                      , psp_g :: Bignum
                      }
 
+
     paheKeyGen pss_simdn = do
-        (p,q,_,_,_) <- genDataPaillier 1024
+        (p,q,_,_,_) <- genDataPaillier 512
         let n = p * q
         let pss_n_raw = n
         let pss_bn = fromIntegral $ length $ inbase b64 (n*n)
@@ -78,20 +94,29 @@ instance Pahe PailSep where
 
         pure PailSepSk{..}
 
+    paheK PailSepPk{..} = psp_simdn
+
     paheToPublic PailSepSk{..} =
-        PailSepPk pss_simdn pss_bn pss_n pss_n_raw pss_n2 pss_g
+        PailSepPk {
+            psp_simdn = pss_simdn
+          , psp_bn    = pss_bn
+          , psp_n     = pss_n
+          , psp_n_raw = pss_n_raw
+          , psp_n2    = pss_n2
+          , psp_g     = pss_g }
 
     paheEnc PailSepPk{..} m = do
-        let l = length m
-        when (l /= psp_simdn) $ error "Paillier encrypt: length mismatch"
-        fmap PailCiph $ forM [0..l-1] $ \i -> do
+        when (length m /= psp_simdn) $ error "Paillier encrypt: length mismatch"
+        vals <- forM [0..psp_simdn-1] $ \i -> do
             r0 <- randomRIO (0, psp_n_raw - 1) `suchThat`
                      (\x -> gcd x psp_n_raw == 1)
             r <- toBignum psp_bn r0
-            mi <- toBignum psp_bn $ m !! i
+            mi <- toBignum psp_bn $ (m !! i) `mod` psp_n_raw
             c <- toBignum psp_bn 0
             paillierEnc psp_bn psp_n psp_n2 psp_g r mi c
+
             pure c
+        pure $ PailCiph vals
 
     paheDec PailSepSk{..} (PailCiph ms) = do
         let l = length ms
@@ -114,6 +139,20 @@ instance Pahe PailSep where
             error "Paillier simd mul: length mismatch"
         fmap PailCiph $ forM (ms1 `zip` m2) $ \(m1,p0) -> do
             mi <- toBignum psp_bn 0
-            p <- toBignum psp_bn p0
+            p <- toBignum psp_bn $ p0 `mod` psp_n_raw
             paillierHomMulScal psp_bn psp_n psp_n2 m1 p mi
             pure mi
+
+    paheToBS PailSepPk{..} (PailCiph ms) = do
+        when (length ms /= psp_simdn) $
+            error "Paillier paheToBS failed length"
+        fmap BS.concat $ forM ms $ fromBignumBS psp_bn
+
+    paheFromBS PailSepPk{..} bsl = do
+        let parse bs = do
+                let (a,b) = BS.splitAt (8 * fromIntegral psp_bn) bs
+                x <- toBignumBS psp_bn a
+                if BS.null b then pure [x] else do
+                  y <- parse b
+                  pure $ x : y
+        fmap PailCiph $ parse bsl

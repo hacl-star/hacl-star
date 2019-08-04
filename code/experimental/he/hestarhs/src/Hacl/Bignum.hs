@@ -4,6 +4,7 @@ module Hacl.Bignum where
 
 import Universum
 
+import qualified Data.ByteString as BS
 import qualified Foreign.Marshal as A
 
 import Hacl.Raw
@@ -35,8 +36,22 @@ toBignumExact x = A.newArray $ map fromInteger $ inbase b64 x
 toBignumList :: Word32 -> [Integer] -> IO BignumList
 toBignumList l xs = A.newArray $ concatMap (toBignumRaw l) xs
 
+toBignumBS :: Word32 -> ByteString -> IO Bignum
+toBignumBS n s = toBignum n $ conv $ BS.unpack s
+  where
+    conv :: [Word8] -> Integer
+    conv = frombase 256 . map fromIntegral
+
+fromBignumRaw :: Word32 -> Bignum -> IO [Word64]
+fromBignumRaw n x = A.peekArray (fromIntegral n) x
+
+fromBignumBS :: Word32 -> Bignum -> IO ByteString
+fromBignumBS n x = BS.pack . concatMap (pad . split) <$> fromBignumRaw n x
+  where
+    pad :: [Word8] -> [Word8]
+    pad y = y ++ replicate (8 - length y) 0
+    split :: Word64 -> [Word8]
+    split = map fromIntegral . inbase 256 . fromIntegral
 
 fromBignum :: Word32 -> Bignum -> IO Integer
-fromBignum n x = do
-    els <- A.peekArray (fromIntegral n) x
-    pure $ frombase b64 $ map toInteger els
+fromBignum n x = fmap (frombase b64 . map toInteger) $ fromBignumRaw n x
