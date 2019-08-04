@@ -93,7 +93,9 @@ dgkClient sock pk l rs = do
 
     -- TODO multiplicative blinding
 
-    ciShuffled <- shuffle $ cLast : ci
+    ciShuffled <- shuffle =<< mapM (paheMultBlind pk) (cLast : ci)
+
+
     log "Client: sending permuted data"
     sendMulti sock =<< (NE.fromList <$> mapM (paheToBS pk) ciShuffled)
 
@@ -151,21 +153,29 @@ runProtocol =
       connect req "inproc://argmax"
 
       putTextLn "Keygen..."
-      let k = 6
+      let k = 8
       sk <- paheKeyGen @PailSep k
       let pk = paheToPublic sk
 
-      let l = 8 -- 8 bytes
-      let cs = [30,30,30,30,30,30]
-      let rs = [29,30,31,32,33,254]
+      replicateM_ 10 $ do
+          let l = 5
+          cs <- replicateM k $ randomRIO (0,2^l-1)
+          rs <- replicateM k $ randomRIO (0,2^l-1)
+          let expected = map (\(c,r) -> r <= c) $ zip cs rs
 
-      putTextLn "Starting the protocol"
-      -- Compute r <= c jointly. Client has r, server has c
-      -- or r < c.
-      (eps,()) <- concurrently
-        (dgkClient req pk l rs)
-        (dgkServer rep sk l cs)
+          putTextLn "Starting the protocol"
+          -- Compute r <= c jointly. Client has r, server has c
+          -- or r < c.
+          (eps,()) <- concurrently
+            (dgkClient req pk l rs)
+            (dgkServer rep sk l cs)
 
-      print =<< paheDec sk eps
+          result <- map (== 1) <$> paheDec sk eps
+          unless (result == expected) $ do
+              print cs
+              print rs
+              putTextLn $ "Expected: " <> show expected
+              putTextLn $ "Got:      " <> show result
+              error "Mismatch"
 
       putTextLn "Protocol exited"
