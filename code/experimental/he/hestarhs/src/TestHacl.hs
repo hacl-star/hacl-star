@@ -3,49 +3,15 @@ module TestHacl where
 import Universum
 
 import qualified Data.Time.Clock.POSIX as P
-import qualified Foreign.Marshal as A
-import System.Random (randomIO, randomRIO)
+import System.Random (randomRIO)
 
 import Hacl
 import qualified Lib as L
 import Playground
 
-inbase :: Integer -> Integer -> [Integer]
-inbase base i = i `mod` base : (case (i `div` base) of
-                                  0  -> []
-                                  i' -> inbase base i')
 
-frombase :: Integer -> [Integer] -> Integer
-frombase base is = sum $ map (\(i,a) -> a * (base^i)) $ zip [(0::Integer)..] is
-
-b64 :: Integer
-b64 = 2^(64::Integer)
-
-toBignumRaw :: Word32 -> Integer -> [Word64]
-toBignumRaw l x =
-    let els = map fromInteger $ inbase b64 x in
-    if fromIntegral l < length els
-      then error "toBignum: length requested is too small"
-      else els ++ replicate (fromIntegral l - length els) 0
-
-toBignum :: Word32 -> Integer -> IO Bignum
-toBignum l x = A.newArray $ toBignumRaw l x
-
-toBignumExact :: Integer -> IO Bignum
-toBignumExact x = A.newArray $ map fromInteger $ inbase b64 x
-
-toBignumList :: Word32 -> [Integer] -> IO BignumList
-toBignumList l xs = A.newArray $ concatMap (toBignumRaw l) xs
-
-
-fromBignum :: Word32 -> Bignum -> IO Integer
-fromBignum n x = do
-    els <- A.peekArray (fromIntegral n) x
-    pure $ frombase b64 $ map toInteger els
-
-
-testHacl :: IO ()
-testHacl = do
+testBNs :: IO ()
+testBNs = do
     a <- toBignumExact 500
     print =<< fromBignum 1 a
     b <- toBignumExact 100
@@ -85,17 +51,17 @@ testGM bits = do
 
           time1 <- P.getPOSIXTime
 
-          replicateM 99 $ gmEnc bN n' y' r' m1 c1
+          replicateM_ 99 $ gmEnc bN n' y' r' m1 c1
           gmEnc bN n' y' r' m2 c2
 
           time2 <- P.getPOSIXTime
 
-          replicateM 99 $ gmDec bN p' pmin1 pmin1half c1
+          replicateM_ 99 $ gmDec bN p' pmin1 pmin1half c1
           m1' <- gmDec bN p' pmin1 pmin1half c1
 
           time3 <- P.getPOSIXTime
 
-          replicateM 100 $ gmXor bN n' c1 c2 c3
+          replicateM_ 100 $ gmXor bN n' c1 c2 c3
 
           time4 <- P.getPOSIXTime
 
@@ -103,11 +69,10 @@ testGM bits = do
           when (m1 /= m1') $ error $ "GM failed: " <> show (p,q,y,r,m1,m2)
           pure (time2 - time1, time3 - time2, time4 - time3)
 
-    let n = 10
+    let tries = 10
+    timings <- replicateM tries test
 
-    timings <- replicateM n test
-
-    let average xs = foldr1 (+) xs / fromIntegral n
+    let average xs = foldr1 (+) xs / fromIntegral tries
     let avg1 = average $ map (view _1) timings
     let avg2 = average $ map (view _2) timings
     let avg3 = average $ map (view _3) timings
@@ -147,20 +112,20 @@ testPaillier bits = do
 
           time1 <- P.getPOSIXTime
 
-          replicateM 99 $ paillierEnc bN n' n2' g' r' m1' c1
+          replicateM_ 99 $ paillierEnc bN n' n2' g' r' m1' c1
           paillierEnc bN n' n2' g' r' m2' c2
 
           time2 <- P.getPOSIXTime
 
-          replicateM 100 $ paillierDec bN p' q' n' n2' g' lambda' l2inv' c1 d
+          replicateM_ 100 $ paillierDec bN p' q' n' n2' g' lambda' l2inv' c1 d
 
           time3 <- P.getPOSIXTime
 
-          replicateM 100 $ paillierHomAdd bN n' n2' c1 c2 c3
+          replicateM_ 100 $ paillierHomAdd bN n' n2' c1 c2 c3
 
           time4 <- P.getPOSIXTime
 
-          replicateM 100 $ paillierHomMulScal bN n' n2' c1 m2' c3
+          replicateM_ 100 $ paillierHomMulScal bN n' n2' c1 m2' c3
 
           time5 <- P.getPOSIXTime
 
@@ -170,11 +135,10 @@ testPaillier bits = do
 
           pure (time2 - time1, time3 - time2, time4 - time3, time5 - time4)
 
-    let n = 100
+    let tries = 100
+    timings <- replicateM tries test
 
-    timings <- replicateM n test
-
-    let average xs = foldr1 (+) xs / fromIntegral n
+    let average xs = foldr1 (+) xs / fromIntegral tries
     let avg1 = average $ map (view _1) timings
     let avg2 = average $ map (view _2) timings
     let avg3 = average $ map (view _3) timings
@@ -184,6 +148,26 @@ testPaillier bits = do
     putTextLn $ "Dec: " <> show (avg2 * 100) <> " ms"
     putTextLn $ "Hom_add: " <> show (avg3 * 100) <> " ms"
     putTextLn $ "Hom_mul_scal: " <> show (avg4 * 100) <> " ms"
+
+testPaillierPahe :: IO ()
+testPaillierPahe = do
+    putTextLn "Testing paillier PAHE"
+
+    let n = 5
+    sk <- paheKeyGen @PailSep n
+    let pk = paheToPublic sk
+
+    ms1 <- replicateM n $ randomRIO (0, 1000)
+    ms2 <- replicateM n $ randomRIO (0, 1000)
+
+    c1 <- paheEnc pk ms1
+    c2 <- paheEnc pk ms2
+    c3 <- paheSIMDAdd pk c1 c2
+    d <- paheDec sk c3
+
+    print $ d == map (uncurry (+)) (zip ms1 ms2)
+
+
 
 testDGK :: IO ()
 testDGK = do
@@ -209,25 +193,6 @@ testDGK = do
     u_es <- toBignumList bN $ map snd ufact
     v' <- toBignum bN v
 
---    fprd <- toBignum bN 0
---    dgkFullprod bN (fromIntegral $ length ufact) u_ps u_es fprd
---    print =<< fromBignum bN fprd
---
---    error "End"
---    one' <- toBignum bN 1
---    m0 <- randomRIO (0,u-1)
---    let gv = L.exp n g v
---    let cv = L.exp n ((L.exp n g m0 * L.exp n h 12345) `mod` n) v
---    unless (L.exp n gv m0 == cv) $ error "would be really weird"
---    gv' <- toBignum bN gv
---    cv' <- toBignum bN cv
---    dlpres <- toBignum bN 0
---
---    dgkDlpSingle bN n' u' one' gv' cv' dlpres
---    print =<< fromBignum bN dlpres
---
---    error "hvatit"
-
     let test = do
           m1 <- randomRIO (0,u-1)
           m2 <- randomRIO (0,u-1)
@@ -249,23 +214,23 @@ testDGK = do
 
           time1 <- P.getPOSIXTime
 
-          replicateM 99 $ dgkEnc bN n' u' g' h' r' m1' c1
+          replicateM_ 99 $ dgkEnc bN n' u' g' h' r' m1' c1
           dgkEnc bN n' u' g' h' r' m2' c2
 
           putTextLn "Pass1"
           time2 <- P.getPOSIXTime
 
-          replicateM 100 $ decrypt c1
+          replicateM_ 100 $ decrypt c1
 
           putTextLn "Pass2"
           time3 <- P.getPOSIXTime
 
-          replicateM 100 $ dgkHomAdd bN n' c1 c2 c3
+          replicateM_ 100 $ dgkHomAdd bN n' c1 c2 c3
 
           putTextLn "Pass3"
           time4 <- P.getPOSIXTime
 
-          replicateM 100 $ dgkHomMulScal bN n' c1 m2' c4
+          replicateM_ 100 $ dgkHomMulScal bN n' c1 m2' c4
 
           putTextLn "Pass4"
           time5 <- P.getPOSIXTime
@@ -287,11 +252,11 @@ testDGK = do
 
           pure (time2 - time1, time3 - time2, time4 - time3, time5 - time4)
 
-    let n = 5
+    let tries = 5
 
-    timings <- replicateM n test
+    timings <- replicateM tries test
 
-    let average xs = foldr1 (+) xs / fromIntegral n
+    let average xs = foldr1 (+) xs / fromIntegral tries
     let avg1 = average $ map (view _1) timings
     let avg2 = average $ map (view _2) timings
     let avg3 = average $ map (view _3) timings

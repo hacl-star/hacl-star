@@ -10,13 +10,12 @@ module Playground where
 import Universum hiding (exp, last, (<*>))
 
 import Data.List (delete, last, (!!))
-import Data.Numbers.Primes (isPrime, primeFactors, primes)
-import Data.Reflection (reifyNat)
+import Data.Numbers.Primes (primeFactors, primes)
 import Numeric (log)
 import System.Random (randomIO, randomRIO)
 
+import Hacl
 import Lib hiding (crt)
-import qualified Lib as Lib
 
 
 allEvenOrders :: Integer -> Bool
@@ -35,14 +34,7 @@ isMthPrimRoot n m w = go w m
     go acc pow = if pow == 1 then acc == 1 else acc /= 1 && go ((acc * w) `mod` n) (pow-1)
 
 findMthPrimRoot :: Integer -> Integer -> Maybe Integer
-findMthPrimRoot n m = find (\w -> trace ("Checking " <> show w) $ isMthPrimRoot n m w) [0..n-1]
-
-genPrime :: Int -> IO Integer
-genPrime bits = do
-    p <- randomRIO (2 ^ (bits - 1),2 ^ bits)
-    --if isPrime p
-    if isPrimeMR 40 p
-      then pure p else genPrime bits
+findMthPrimRoot n m = find (isMthPrimRoot n m) [0..n-1]
 
 testFindPrimRoot :: IO ()
 testFindPrimRoot = do
@@ -65,10 +57,10 @@ testFindPrimRoot = do
             all (\factor -> exp n g factor /= 1) lamFactors &&
             exp n g lam == 1
 
-    let tryGen i = if i == 0 then pure Nothing else do
+    let tryGen j = if i == 0 then pure Nothing else do
             let lroot :: Integer = fromMaybe (error "should work") $ find isGen [1..]
             let mroot = exp n lroot (lam `div` s)
-            if isMthPrimRoot n 4 mroot then pure (Just mroot) else tryGen (i-1)
+            if isMthPrimRoot n 4 mroot then pure (Just mroot) else tryGen (j-1)
 
     tryGen 10 >>= \case
         Nothing -> testFindPrimRoot
@@ -79,56 +71,15 @@ carm x =
     let fs = primeFactors x in
     let fsn = ordNub fs in
     case fsn of
-      [p] -> fromIntegral $
+      [_] -> fromIntegral $
           if (length fs > 2) then eulerPhiFast x `div` 2 else eulerPhiFast x
       xs  -> foldr1 lcm $ map carm xs
 
 type Nt = Z 323 -- 19 * 17
 type Nst = Z 3515706497843 -- n ^ 5
 
-legendreSymbol :: Integer -> Integer -> Integer
-legendreSymbol p a = let res = exp p a ((p-1) `div` 2) in if res == p-1 then (-1) else res
 
--- -> y:snat{y < p * q} // /\ GMS.is_nonsqr (to_fe #p y) /\ GMS.is_nonsqr (to_fe #q y)}
--- -> r:snat{r < p * q} // /\ sqr r > 0 /\ sqr r *% y > 0}
-genDataGM :: Int -> IO (Integer,Integer,Integer,Integer,Bool,Bool)
-genDataGM bits = do
-    let genPrimes = do
-            p <- genPrime (bits `div` 2)
-            q <- genPrime (bits `div` 2)
-            if p == q then genPrimes else pure (p,q)
-    (p,q) <- genPrimes
-    let n = p * q
-    let genY = do
-            y <- randomRIO (2^(bits-2), n-1)
-            if legendreSymbol p y == -1 && legendreSymbol q y == -1
-               then pure y
-               else genY
-    y <- genY
-    let genR = do
-            r <- randomRIO (2^(bits-2), n-1)
-            if (r * r) `mod` n > 0 && (r * r * y) `mod` n > 0 then pure r else genR
-    r <- genR
-    m1 <- randomIO
-    m2 <- randomIO
-    return (p,q,y,r,m1,m2)
 
-genDataPaillier :: Int -> IO (Integer,Integer,Integer,Integer,Integer)
-genDataPaillier bits = do
-    let genPrimes = do
-            p <- genPrime (bits `div` 2)
-            q <- genPrime (bits `div` 2)
-            if p == q then genPrimes else pure (p,q)
-    (p,q) <- genPrimes
-    let n = p * q
-    let genR = do
-            r <- randomRIO (0,n-1)
-            if gcd r n == 1 then pure r else genR
-    r <- genR
-    m1 <- randomRIO (0,n-1)
-    m2 <- randomRIO (0,n-1)
-    --putTextLn (show p <> " " <> show q <> " " <> show r <> " " <> show m)
-    return (p,q,r,m1,m2)
 
 -- (uvr_p + 1)(uvr_q + 1)
 -- + find g / h
@@ -149,7 +100,6 @@ flattenFacts = concatMap (\(p,j) -> replicate (fromIntegral j) p)
 
 factToOrders :: [(Integer,Integer)] -> [Integer]
 factToOrders facts  =
-    let maxval = fromFacts facts in
     sort $ ordNub $ map product $ allCombinations $ flattenFacts facts
 
 orderFact :: [Integer] -> Integer -> Integer -> Integer
@@ -460,9 +410,7 @@ fftTest4 = do
     let params@DJParams{..} = genDJParams n m 100
     print djN
     let a = [5,6,0,0,0,0,0,0]
-    let b = replicate (fromIntegral n) dju
     let a' = fft params a
-    let b' = fft params b
 
     -- With psi
     let d' = (psi dju a' + dju * 2) `mod` djU
@@ -664,9 +612,7 @@ crtSame = do
     let n = 3
     let m = 1024
     let base = take n $ filter (> m) primes
-    let baseprod = product base
     let base' = take (n-2) base ++ [base !! (n-1)] ++ [base !! (n-2)]
-    let baseprod' = product base
 
     print $ crt base [0,3,4]
     print $ crt base' [0,4,3]
