@@ -679,8 +679,8 @@ let rec tailprod_go #nLen #l ps es i j m =
     bn_len_s_fits nLen;
     push_frame ();
 
-    let p = bnlist_ix ps 0ul in
-    let e = bnlist_ix es 0ul in
+    let p = bnlist_ix ps j in
+    let e = bnlist_ix es j in
 
     let tmp1 = create nLen (u64 0) in
     let tmp2 = create nLen (u64 0) in

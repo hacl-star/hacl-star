@@ -189,7 +189,7 @@ testDGK :: IO ()
 testDGK = do
     putTextLn "Testing DGK"
 
-    let ufact = [(37,1),(41,1)]
+    let ufact = [(7,2),(5,1),(37,1),(41,1)]
     (p,q,u,v,g,h) <- genDataDGK ufact 512
     unless (L.exp (p*q) h v == 1) $ error "generated params are broken"
     unless (L.exp (p*q) g (u*v) == 1) $ error "generated params are broken"
@@ -209,6 +209,11 @@ testDGK = do
     u_es <- toBignumList bN $ map snd ufact
     v' <- toBignum bN v
 
+--    fprd <- toBignum bN 0
+--    dgkFullprod bN (fromIntegral $ length ufact) u_ps u_es fprd
+--    print =<< fromBignum bN fprd
+--
+--    error "End"
 --    one' <- toBignum bN 1
 --    m0 <- randomRIO (0,u-1)
 --    let gv = L.exp n g v
@@ -235,7 +240,12 @@ testDGK = do
           c1 <- toBignum bN 0
           c2 <- toBignum bN 0
           c3 <- toBignum bN 0
+          c4 <- toBignum bN 0
           d <- toBignum bN 0
+
+          let decrypt ciph =
+                  dgkDec bN (fromIntegral $ length ufact)
+                    p' q' n' u' u_ps u_es v' g' h' ciph d
 
           time1 <- P.getPOSIXTime
 
@@ -245,8 +255,7 @@ testDGK = do
           putTextLn "Pass1"
           time2 <- P.getPOSIXTime
 
-          replicateM 100 $
-              dgkDec bN (fromIntegral $ length ufact) p' q' n' u' u_ps u_es v' g' h' c1 d
+          replicateM 100 $ decrypt c1
 
           putTextLn "Pass2"
           time3 <- P.getPOSIXTime
@@ -256,7 +265,7 @@ testDGK = do
           putTextLn "Pass3"
           time4 <- P.getPOSIXTime
 
-          replicateM 100 $ dgkHomMulScal bN n' c1 m2' c3
+          replicateM 100 $ dgkHomMulScal bN n' c1 m2' c4
 
           putTextLn "Pass4"
           time5 <- P.getPOSIXTime
@@ -267,6 +276,14 @@ testDGK = do
 
           m'' <- fromBignum bN d
           when (m1 /= m'') $ error $ "DGK failed: " <> show (p,q,r,m1, m'')
+
+          decrypt c3
+          m3 <- fromBignum bN d
+          when (m3 /= (m1 + m2) `mod` u) $ error "DGK hom add failed"
+
+          decrypt c4
+          m4 <- fromBignum bN d
+          when (m4 /= (m1 * m2) `mod` u) $ error "DGK hom mul failed"
 
           pure (time2 - time1, time3 - time2, time4 - time3, time5 - time4)
 
