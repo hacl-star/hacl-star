@@ -58,16 +58,6 @@ let parse_varint (b:bytes{S.length b > 0}) : option (n:nat{n < pow2 62} * vlsize
   | 2 -> Some (n % 0x40000000, 4, suff)
   | 3 -> Some (n % 0x4000000000000000, 8, suff))
 
-(*
-let parse_varint (b:bytes{S.length b > 0}) : option (n:nat{n < pow2 62} * vlsize * bytes) =
-  let open FStar.Endianness in
-  // b0 is the integer interpretation of the first 2 bits of b
-  let b0 = U8.v (S.index b 0) / 0x40 in
-  if S.length b < pow2 b0 then None
-  else
-    match parse_varint_suffixless (S.slice b 0 (pow2 b0)) with
-    | None -> None
-    | Some (n,len) -> Some (n,len,S.slice b (pow2 b0) (S.length b))*)
 
 // Move to FStar.Math.Lemmas?
 private let lemma_mod_pow2 (a:nat) (b:nat) : Lemma
@@ -270,16 +260,86 @@ let lemma_varint (n:nat62) (suff:bytes) : Lemma
     else if n < pow2 14 then lemma_varint_case1 n suff
     else if n < pow2 30 then lemma_varint_case2 n suff
     else lemma_varint_case3 n suff
-  else ()
 
 
-let lemma_parse_varint_safe (b1 b2:bytes) : Lemma
+let lemma_be_to_n_singleton (b:bytes{S.length b = 1}) : Lemma
+  (FStar.Endianness.be_to_n b = U8.v (S.index b 0)) =
+  assert (S.last b = S.index b 0);
+  assert (S.length (S.slice b 0 0) = 0);
+  FStar.Endianness.reveal_be_to_n (S.slice b 0 0);
+  FStar.Endianness.reveal_be_to_n b
+
+
+let lemma_be_to_n_head (b:bytes{S.length b <> 0}) : Lemma
+  (FStar.Endianness.be_to_n (S.slice b 0 1) = U8.v (S.index b 0)) =
+  lemma_be_to_n_singleton (S.slice b 0 1)
+
+
+let missing_lemma (b:bytes) (x:pos) : Lemma
+  (requires S.length b >= x)
+  (ensures FStar.Endianness.be_to_n (S.slice b 0 x) / pow2 (8 `op_Multiply` (x-1)) = U8.v (S.index b 0)) =
+  admit()
+
+
+let lemma_varint_safe (b1:bytes) (b2:bytes) : Lemma
   (requires
     S.length b1 <> 0 /\
     S.length b2 <> 0 /\
     parse_varint b1 = parse_varint b2)
   (ensures parse_varint b1 = None \/ b1 = b2) =
-  admit()
+  let open FStar.Endianness in
+  let open FStar.Mul in
+  let b01 = U8.v (S.index b1 0) / 0x40 in
+  let b02 = U8.v (S.index b2 0) / 0x40 in
+  if S.length b1 >= pow2 b01 && S.length b2 >= pow2 b02 then
+  let n1 = be_to_n (S.slice b1 0 (pow2 b01)) in
+  let n2 = be_to_n (S.slice b2 0 (pow2 b02)) in
+  let suff1 = S.slice b1 (pow2 b01) (S.length b1) in
+  let suff2 = S.slice b2 (pow2 b02) (S.length b2) in
+  assert (S.equal suff1 (S.slice b1 (pow2 b01) (S.length b1)));
+  assert (S.equal suff2 (S.slice b2 (pow2 b02) (S.length b2)));
+  match b01,b02 with
+  | 0,0 ->
+    //assert (suff1 = suff2);
+    //lemma_be_to_n_head b1;
+    //lemma_be_to_n_head b2;
+    missing_lemma b1 (pow2 b01);
+    missing_lemma b2 (pow2 b02);
+    assert (S.equal (S.slice b1 0 1) (S.slice b2 0 1));
+    assert (S.equal (S.slice b1 1 (S.length b1)) (S.slice b2 1 (S.length b2)));
+    assert (S.equal b1 S.(S.slice b1 0 1 @| S.slice b1 1 (S.length b1)));
+    assert (S.equal b2 S.(S.slice b2 0 1 @| S.slice b2 1 (S.length b2)))
+  | 1,1 -> admit()
+  | 2,2 -> admit()
+  | 3,3 -> admit()
+
+
+let lemma_varint_inv (b:bytes) (n:nat62) (len:vlsize) (suff:bytes) : Lemma
+  (requires S.length b <> 0 /\ parse_varint b = Some (n,len,suff))
+  (ensures S.equal b S.(encode_varint n @| suff)) =
+  let open FStar.Endianness in
+  let open FStar.Mul in
+  let b0 = U8.v (S.index b 0) / 0x40 in
+  if S.length b >= pow2 b0 then
+    lemma_be_to_n_is_bounded (S.slice b 0 (pow2 b0));
+    let n' : n:nat{n <= pow2 (8*len)} = be_to_n (S.slice b 0 (pow2 b0)) in
+    let suff' = S.slice b (pow2 b0) (S.length b) in
+    assert (suff' = suff);
+    (match b0 with
+    | 0 ->
+      assert (n = n' % 0x40 /\ len = 1);
+      assert (encode_varint n = n_to_be 1 n);
+      FStar.Math.Lemmas.lemma_div_mod n' 0x40;
+      lemma_be_to_n_singleton (S.slice b 0 1)
+    | 1 ->
+      assert (n = n' % 0x4000 /\ len = 2);
+      assert (n >= pow2 6 /\ n < pow2 14);
+      // assert (encode_varint n = n_to_be 2 (pow2 14 + n));
+      admit()
+    | 2 -> assert (n = n' % 0x40000000 /\ len = 4); admit()
+    | 3 -> assert (n = n' % 0x4000000000000000 /\ len = 8); admit())
+
+
 
 
 
