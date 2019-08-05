@@ -261,23 +261,14 @@ let lemma_varint (n:nat62) (suff:bytes) : Lemma
     else lemma_varint_case3 n suff
 
 
-let lemma_be_to_n_singleton (b:bytes{S.length b = 1}) : Lemma
-  (FStar.Endianness.be_to_n b = U8.v (S.index b 0)) =
-  assert (S.last b = S.index b 0);
-  assert (S.length (S.slice b 0 0) = 0);
-  FStar.Endianness.reveal_be_to_n (S.slice b 0 0);
-  FStar.Endianness.reveal_be_to_n b
-
-
-let lemma_be_to_n_head (b:bytes{S.length b <> 0}) : Lemma
-  (FStar.Endianness.be_to_n (S.slice b 0 1) = U8.v (S.index b 0)) =
-  lemma_be_to_n_singleton (S.slice b 0 1)
-
-
-let missing_lemma (b:bytes) (x:pos) : Lemma
-  (requires S.length b >= x)
-  (ensures FStar.Endianness.be_to_n (S.slice b 0 x) / pow2 (8 `op_Multiply` (x-1)) = U8.v (S.index b 0)) =
-  admit()
+let lemma_be_index_bytes (l:pos) (b:bytes) : Lemma
+  (requires S.length b >= l)
+  (ensures FStar.Endianness.be_to_n (S.slice b 0 l) / pow2 (8 `op_Multiply` (l-1)) = U8.v (S.index b 0)) =
+  let open FStar.Endianness in
+  let n = be_to_n (S.slice b 0 l) in
+  lemma_be_to_n_is_bounded (S.slice b 0 l);
+  lemma_be_index l n;
+  n_to_be_be_to_n l (S.slice b 0 l)
 
 
 let lemma_varint_safe (b1:bytes) (b2:bytes) : Lemma
@@ -298,83 +289,39 @@ let lemma_varint_safe (b1:bytes) (b2:bytes) : Lemma
   let suff2 = S.slice b2 (pow2 b02) (S.length b2) in
   assert (S.equal suff1 (S.slice b1 (pow2 b01) (S.length b1)));
   assert (S.equal suff2 (S.slice b2 (pow2 b02) (S.length b2)));
+  lemma_be_index_bytes (pow2 b01) b1;
+  lemma_be_index_bytes (pow2 b02) b2;
+  division_multiplication_lemma n1 (pow2 (8 * (pow2 b01-1))) 0x40;
+  division_multiplication_lemma n2 (pow2 (8 * (pow2 b02-1))) 0x40;
+  n_to_be_be_to_n (pow2 b01) (S.slice b1 0 (pow2 b01));
+  n_to_be_be_to_n (pow2 b02) (S.slice b2 0 (pow2 b02));
   match b01,b02 with
   | 0,0 ->
-    missing_lemma b1 (pow2 b01);
-    missing_lemma b2 (pow2 b02);
     assert (S.equal (S.slice b1 0 1) (S.slice b2 0 1));
     assert (S.equal (S.slice b1 1 (S.length b1)) (S.slice b2 1 (S.length b2)));
     assert (S.equal b1 S.(S.slice b1 0 1 @| S.slice b1 1 (S.length b1)));
     assert (S.equal b2 S.(S.slice b2 0 1 @| S.slice b2 1 (S.length b2)))
   | 1,1 ->
-    missing_lemma b1 (pow2 b01);
-    missing_lemma b2 (pow2 b02);
     assert (n1 % 0x4000 = n2 % 0x4000);
-    division_multiplication_lemma n1 (pow2 (8 * (pow2 b01-1))) 0x40;
-    division_multiplication_lemma n2 (pow2 (8 * (pow2 b02-1))) 0x40;
-    assert_norm (pow2 (8 * (pow2 1-1)) * 0x40 = 0x4000);
     assert_norm (pow2 (8 * (pow2 1-1)) * 0x40 = 0x4000);
     assert (n1 / 0x4000 = n2 / 0x4000);
-    n_to_be_be_to_n 2 (S.slice b1 0 2);
-    n_to_be_be_to_n 2 (S.slice b2 0 2);
     assert (S.equal (S.slice b1 0 2) (S.slice b2 0 2));
     assert (S.equal b1 S.(S.slice b1 0 2 @| S.slice b1 2 (S.length b1)));
     assert (S.equal b2 S.(S.slice b2 0 2 @| S.slice b2 2 (S.length b2)))
   | 2,2 ->
-    missing_lemma b1 (pow2 b01);
-    missing_lemma b2 (pow2 b02);
     assert (n1 % 0x40000000 = n2 % 0x40000000);
-    division_multiplication_lemma n1 (pow2 (8 * (pow2 b01-1))) 0x40;
-    division_multiplication_lemma n2 (pow2 (8 * (pow2 b02-1))) 0x40;
-    assert_norm (pow2 (8 * (pow2 2-1)) * 0x40 = 0x40000000);
     assert_norm (pow2 (8 * (pow2 2-1)) * 0x40 = 0x40000000);
     assert (n1 / 0x40000000 = n2 / 0x40000000);
-    n_to_be_be_to_n 4 (S.slice b1 0 4);
-    n_to_be_be_to_n 4 (S.slice b2 0 4);
     assert (S.equal (S.slice b1 0 4) (S.slice b2 0 4));
     assert (S.equal b1 S.(S.slice b1 0 4 @| S.slice b1 4 (S.length b1)));
     assert (S.equal b2 S.(S.slice b2 0 4 @| S.slice b2 4 (S.length b2)))
   | 3,3 ->
-    missing_lemma b1 (pow2 b01);
-    missing_lemma b2 (pow2 b02);
     assert (n1 % 0x4000000000000000 = n2 % 0x4000000000000000);
-    division_multiplication_lemma n1 (pow2 (8 * (pow2 b01-1))) 0x40;
-    division_multiplication_lemma n2 (pow2 (8 * (pow2 b02-1))) 0x40;
-    assert_norm (pow2 (8 * (pow2 3-1)) * 0x40 = 0x4000000000000000);
     assert_norm (pow2 (8 * (pow2 3-1)) * 0x40 = 0x4000000000000000);
     assert (n1 / 0x4000000000000000 = n2 / 0x4000000000000000);
-    n_to_be_be_to_n 8 (S.slice b1 0 8);
-    n_to_be_be_to_n 8 (S.slice b2 0 8);
     assert (S.equal (S.slice b1 0 8) (S.slice b2 0 8));
     assert (S.equal b1 S.(S.slice b1 0 8 @| S.slice b1 8 (S.length b1)));
     assert (S.equal b2 S.(S.slice b2 0 8 @| S.slice b2 8 (S.length b2)))
-
-
-let lemma_varint_inv (b:bytes) (n:nat62) (len:vlsize) (suff:bytes) : Lemma
-  (requires S.length b <> 0 /\ parse_varint b = Some (n,len,suff))
-  (ensures S.equal b S.(encode_varint n @| suff)) =
-  let open FStar.Endianness in
-  let open FStar.Mul in
-  let b0 = U8.v (S.index b 0) / 0x40 in
-  if S.length b >= pow2 b0 then
-    lemma_be_to_n_is_bounded (S.slice b 0 (pow2 b0));
-    let n' : n:nat{n <= pow2 (8*len)} = be_to_n (S.slice b 0 (pow2 b0)) in
-    let suff' = S.slice b (pow2 b0) (S.length b) in
-    assert (suff' = suff);
-    (match b0 with
-    | 0 ->
-      assert (n = n' % 0x40 /\ len = 1);
-      assert (encode_varint n = n_to_be 1 n);
-      FStar.Math.Lemmas.lemma_div_mod n' 0x40;
-      lemma_be_to_n_singleton (S.slice b 0 1)
-    | 1 ->
-      assert (n = n' % 0x4000 /\ len = 2);
-      assert (n >= pow2 6 /\ n < pow2 14);
-      // assert (encode_varint n = n_to_be 2 (pow2 14 + n));
-      admit()
-    | 2 -> assert (n = n' % 0x40000000 /\ len = 4); admit()
-    | 3 -> assert (n = n' % 0x4000000000000000 /\ len = 8); admit())
-
 
 
 
