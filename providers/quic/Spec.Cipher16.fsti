@@ -22,12 +22,12 @@ type bytes = s:S.seq U8.t
 type lbytes (n:nat) = b:bytes{S.length b = n}
 type key a = lbytes (keylen a)
 
-val expand: a:alg -> k:key a -> Ghost (lbytes (slen a))
+val expand: a:alg -> k:key a -> Pure (lbytes (slen a))
   (requires True)
   (ensures fun b ->
     (match a with
     | CHACHA20 -> b == k
     | _ -> True))
 
-val block: a:alg -> k:key a -> p:lbytes 16 -> GTot (lbytes 16)
+val block: a:alg -> k:key a -> p:lbytes 16 -> Tot (lbytes 16)
 

@@ -59,6 +59,8 @@ let parse_varint (b:bytes{S.length b > 0}) : option (n:nat{n < pow2 62} * vlsize
   | 3 -> Some (n % 0x4000000000000000, 8, suff))
 
 
+let parse_varint b = admit()
+
 // Move to FStar.Math.Lemmas?
 private let lemma_mod_pow2 (a:nat) (b:nat) : Lemma
   (requires a >= b) (ensures pow2 a % pow2 b == 0)
@@ -96,8 +98,7 @@ private let lemma_pow2_div (a:nat) (b:nat) (k:nat)
   pow2_minus b k;
   pow2_minus a k
 
-#push-options "--z3rlimit 50"
-
+#push-options "--z3rlimit 60"
 private let lemma_divrem3 (k:nat) (a:nat) (b:nat) (n:nat)
   : Lemma (requires a >= k /\ b >= k /\ n < pow2 k)
   (ensures (pow2 a + pow2 b + n) % pow2 k == n /\ (pow2 a + pow2 b + n) / pow2 k == pow2 (a - k) + pow2 (b - k))
@@ -441,7 +442,7 @@ let format_header p pn_len npn =
     let flag = of_bitfield8 (assert_norm(List.Tot.length l == 8); l) in
     S.((S.create 1 flag) @| cid @| npn)
   | Long typ version dcil scil dcid scid plain_len ->
-    let _ = assert_norm (max_plain_length < pow2 62) in
+    let _ = assert_norm (max_cipher_length < pow2 62) in
     let (typ0, typ1) = to_bitfield2 typ in
     let l = [pnb0; pnb1; false; false; typ0; typ1; true; true] in
     let flag = of_bitfield8 (assert_norm(List.Tot.length l == 8); l) in
@@ -461,10 +462,11 @@ let parse_header b cid_len =
     | [pn0; pn1; phase; false; false; spin; true; false] ->
       let pn_len : nat2 = of_bitfield2 (pn0, pn1) in
       let len = 1 + (add3 cid_len) + 1 + pn_len in
-      if S.length b = len then
+      if S.length b = len && S.length b - (add3 cid_len) >= 19 then
         let npn = S.slice b (1 + add3 cid_len) len in
 	let cid = S.slice b 1 (1 + add3 cid_len) in
-        H_Success pn_len npn (Short spin phase cid)
+	let rest = S.slice b (1 + add3 cid_len) (S.length b) in
+        H_Success pn_len npn (Short phase spin cid) rest
       else H_Failure
     | [pn0; pn1; false; false; typ0; typ1; true; true] ->
       let pn_len : nat2 = of_bitfield2 (pn0, pn1) in
@@ -480,9 +482,13 @@ let parse_header b cid_len =
 	  let dcid = S.slice b 6 (6 + add3 dcil) in
 	  let scid = S.slice b (6 + add3 dcil) (6 + add3 dcil + add3 scil) in
 	  match parse_varint (S.slice b pos_length (S.length b)) with
-	  | Some (l, vll, npn) ->
-	    if S.length b = pos_length + vll + pn_len + 1 && l <= max_plain_length then
-	      H_Success pn_len npn (Long typ version dcil scil dcid scid l)
+	  | Some (l, vll, _) ->
+	    let pos_pn = pos_length + vll in
+	    if S.length b - pos_pn - pn_len - 1 = l &&
+	       19 <= l && l < max_cipher_length then
+	      let npn = S.slice b pos_pn (pos_pn + pn_len + 1) in
+	      let rest : lbytes l = S.slice b (pos_pn + pn_len + 1) (S.length b) in
+	      H_Success pn_len npn (Long typ version dcil scil dcid scid l) rest
 	    else H_Failure
 	  | None -> H_Failure
 	else H_Failure
@@ -827,7 +833,6 @@ let lemma_header_parsing_safe b1 b2 cl =
   end
 
 
-
 let rec xor_inplace (b1 b2:bytes) (pos:nat)
   : Pure bytes
   (requires S.length b2 + pos <= S.length b1)
@@ -855,9 +860,9 @@ let calg_of_ae (a:ea) = match a with
 | AEAD.AES256_GCM -> C16.AES256
 | AEAD.CHACHA20_POLY1305 -> C16.CHACHA20
 
-let lemma_format_len (h:header) (pn_len:nat2) (npn:lbytes (1+pn_len))
-  : Lemma (S.length (format_header h pn_len npn) < pow2 20 - 17)
-  = assert_norm(54 < pow2 20 - 17)
+let lemma_format_len (a:ea) (h:header) (pn_len:nat2) (npn:lbytes (1+pn_len))
+  : Lemma (S.length (format_header h pn_len npn) <= AEAD.max_length a)
+  = assert_norm(54 < pow2 32 - 70)
 
 (*
 Constant time decryption of packet number (without branching on pn_len)
@@ -873,36 +878,86 @@ let pn_sizemask (pn_len:nat2) : lbytes 4 =
   let open FStar.Endianness in
   n_to_be 4 (pow2 32 - pow2 (24 - (8 `op_Multiply` pn_len)))
 
-
-/// @irakoton rewrite code before, so that the code is not inlined
-#push-options "--z3rlimit 20"
-let encrypt a k siv hpk pn_len seqn plain =
-  let open FStar.Endianness in
-  assert_norm(8 `op_Multiply` 12 == 96);
-  assert_norm(pow2 62 < pow2 96 /\ pow2 16 < pow2 62 /\ pow2 16 < pow2 20 - 17);
-  let pnb = n_to_be 12 seqn in
-  let npn : lbytes (1+pn_len) = S.slice pnb (11 - pn_len) 12 in
-  let header = format_header plain pn_len npn in
-  lemma_aead_maxlen a;
-  lemma_format_len plain pn_len npn;
-  let payload : AEAD.plain a =
-    match plain with
-    | Short _ _ _ p -> p
-    | Long _ _ _ _ _ _ p -> p in
-  let iv = xor_inplace pnb siv 0 in
-  let cipher = AEAD.encrypt #a k iv header payload in
-  let pn_offset =
-    match plain with
-    | Short _ _ cid _ -> 1 + S.length cid
-    | Long _ _ dcil scil _ _ p -> 6 + add3 dcil + add3 scil + vlen (S.length p) in
-  let sample = S.slice cipher (3-pn_len) (19-pn_len) in
+let header_encrypt a hpk h pn_len npn c =
+  assert_norm(max_cipher_length < pow2 62);
+  let pn_offset = match h with
+    | Short _ _ cid -> 1 + S.length cid
+    | Long _ _ dcil scil _ _ pl -> 6 + add3 dcil + add3 scil + vlen pl in
+  let sample = S.slice c (3-pn_len) (19-pn_len) in
   let mask = C16.block (calg_of_ae a) hpk sample in
   let pnmask = and_inplace (S.slice mask 1 5) (pn_sizemask pn_len) 0 in
-  let sflags = if Short? plain then 0x1fuy else 0x0fuy in
+  let sflags = if Short? h then 0x1fuy else 0x0fuy in
   let fmask = S.create 1 U8.(S.index mask 0 `logand` sflags) in
-  let r = xor_inplace S.(header @| cipher) fmask 0 in
+  let r = S.(format_header h pn_len npn @| c) in
+  let r = xor_inplace r fmask 0 in
   let r = xor_inplace r pnmask pn_offset in
-  assert_norm(54 + pow2 20 < pow2 32); r
+  r
+
+let header_decrypt a hpk cid_len packet =
+  let open FStar.Math.Lemmas in
+  let f = S.index packet 0 in
+  let is_short = U8.(f <^ 128uy) in
+  (* See https://tools.ietf.org/html/draft-ietf-quic-tls-19#section-5.4.2 *)
+  let sample_offset : option (n:nat{n + 16 <= S.length packet}) =
+    if is_short then
+      let offset = 5 + cid_len in
+      (if offset + 16 <= S.length packet then Some offset else None)
+    else
+      let dcb = U8.v (S.index packet 5) in
+      let dcil, scil = dcb / 0x10, dcb % 0x10 in
+      let _ = modulo_range_lemma dcb 0x10 in
+      let l_offset = 6 + add3 dcil + add3 scil in
+      (if l_offset >= S.length packet then None else
+      match parse_varint (S.slice packet l_offset (S.length packet)) with
+      | None -> None
+      | Some (l, vls, _) ->
+        let offset = l_offset + vls + 4 in
+        if offset + 16 <= S.length packet then Some offset else None)
+    in
+  match sample_offset with
+  | None -> H_Failure
+  | Some so ->
+    let sample = S.slice packet so (so + 16) in
+    let mask = C16.block (calg_of_ae a) hpk sample in
+    let sflags = if is_short then 0x1fuy else 0x0fuy in
+    let fmask = S.create 1 U8.(S.index mask 0 `logand` sflags) in    
+    let packet' = xor_inplace packet fmask 0 in
+    let flags = U8.v (S.index packet' 0) in
+    let pn_len : nat2 = modulo_range_lemma flags 4; flags % 4 in
+    let pnmask = and_inplace (S.slice mask 1 5) (pn_sizemask pn_len) 0 in
+    let pn_offset = so - 3 + pn_len in
+    let packet'' = xor_inplace packet' pnmask pn_offset in
+    parse_header packet'' cid_len
+
+let lemma_header_encryption_correct a k h pn_len npn c = admit()
+
+let lemma_header_encryption_malleable a k c spin phase cid x npn = admit()
+
+let coerce (#a:Type) (x:a) (b:Type) : Pure b
+  (requires a == b) (ensures fun y -> y == x) = x
+
+inline_for_extraction private
+let hide (x:bytes) : Pure (S.seq Lib.IntTypes.uint8)
+  (requires True) (ensures fun r -> S.length x == S.length r)
+  = S.init (S.length x) (fun i -> Lib.IntTypes.secret #Lib.IntTypes.U8 (S.index x i))
+
+inline_for_extraction private
+let reveal (x:S.seq Lib.IntTypes.uint8) : Pure bytes
+  (requires True) (ensures fun r -> S.length x == S.length r)
+  = S.init (S.length x) (fun i -> U8.uint_to_t (Lib.IntTypes.uint_v (S.index x i)))
+
+#push-options "--z3rlimit 30"
+let encrypt a k siv hpk pn_len seqn h plain =
+  let open FStar.Endianness in
+  assert_norm(8 `op_Multiply` 12 == 96);
+  assert_norm(pow2 62 < pow2 96 /\ pow2 16 < pow2 62 /\ 54 < max_plain_length);
+  let pnb = n_to_be 12 seqn in
+  let npn : lbytes (1+pn_len) = S.slice pnb (11 - pn_len) 12 in
+  let header = format_header h pn_len npn in 
+  lemma_format_len a h pn_len npn;
+  let iv = xor_inplace pnb siv 0 in
+  let cipher = AEAD.encrypt #a (hide k) (hide iv) (hide header) (hide plain) in
+  header_encrypt a hpk h pn_len npn (reveal cipher)
 #pop-options
 
 #push-options "--z3rlimit 20"
@@ -949,55 +1004,20 @@ let expand_npn (last:nat{last + 1 < pow2 62}) (pn_len:nat2) (npn:nat{npn < pow2 
   else candidate
 #pop-options
 
-
 #push-options "--z3rlimit 30 --admit_smt_queries true"
-let decrypt a k siv hpk last cid packet =
+let decrypt a k siv hpk last cid_len packet =
   let open FStar.Math.Lemmas in
   let open FStar.Endianness in
-  let f = S.index packet 0 in
-  let is_short = U8.(f <^ 128uy) in
-  (* See https://tools.ietf.org/html/draft-ietf-quic-tls-19#section-5.4.2 *)
-  let sample_offset : option (n:nat{n + 16 <= S.length packet}) =
-    if is_short then
-      let offset = 5 + S.length cid in
-      (if offset + 16 <= S.length packet then Some offset else None)
-    else
-      let dcb = U8.v (S.index packet 5) in
-      let dcil, scil = dcb / 0x10, dcb % 0x10 in
-      let _ = modulo_range_lemma dcb 0x10 in
-      let l_offset = 6 + add3 dcil + add3 scil in
-      (if l_offset >= S.length packet then None else
-
-      match parse_varint (S.slice packet l_offset (S.length packet)) with
-      | None -> None
-      | Some (l, vls) ->
-        let offset = l_offset + vls + 4 in
-        if offset + 16 <= S.length packet then Some offset else None)
-    in
-  match sample_offset with
-  | None -> Failure
-  | Some so ->
-    let sample = S.slice packet so (so + 16) in
-    let mask = C16.block (calg_of_ae a) hpk sample in
-    let sflags = if is_short then 0x1fuy else 0x0fuy in
-    let fmask = S.create 1 U8.(S.index mask 0 `logand` sflags) in    
-    let packet' = xor_inplace packet fmask 0 in
-    let flags = U8.v (S.index packet' 0) in
-    let pn_len : nat2 = modulo_range_lemma flags 4; flags % 4 in
-    let pnmask = and_inplace (S.slice mask 1 5) (pn_sizemask pn_len) 0 in
-    let pn_offset = so - 3 + pn_len in
-    let packet'' = xor_inplace packet' pnmask pn_offset in
-    let npn = be_to_n (S.slice packet'' pn_offset (pn_offset + pn_len + 1)) in
-    let pn = expand_npn last pn_len npn in
+  match header_decrypt a hpk cid_len packet with 
+  | H_Failure -> Failure
+  | H_Success pn_len npn h c ->
+    let pn = expand_npn last pn_len (be_to_n npn) in
     let pnb = n_to_be 12 pn in
     let iv = xor_inplace pnb siv 0 in
-    let aad = Seq.slice packet'' 0 (pn_offset + pn_len + 1) in
-    let cipher = Seq.slice packet'' (pn_offset + pn_len + 1) (S.length packet'') in
-    match AEAD.decrypt #a k pnb aad cipher with
+    let aad = format_header h pn_len npn in
+    match AEAD.decrypt #a (hide k) (hide pnb) (hide aad) (hide c) with
     | None -> Failure
-    | Some plain ->
-      admit()
-      //Success pn_len npn
+    | Some plain -> Success pn_len pn h (reveal plain)
 #pop-options
 
-
+let lemma_encrypt_correct a k siv hpk pn_len pn h p = admit()
