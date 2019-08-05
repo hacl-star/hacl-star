@@ -5,16 +5,16 @@
 #
 #            merkle_tree
 #                |
-#             evercrypt                secure_api
-#               /  \                      |
-#           code   vale                code/old
-#           /   \  /                      |
-#         lib   specs                  specs/old
+#             evercrypt
+#               /  \
+#           code   vale
+#           /   \  /
+#         lib   specs
 #
 # This Makefile honors the following variables:
 # - NOSHORTLOG=1 disables pretty (short) logs
 # - NODEPEND=1 disables .depend re-generation (use for debugging only)
-# - SKIPDEPEND=1 disables even *including* .depend files (use for debugging only)
+# - SKIPDEPEND=1 disables even *including* .depend files (not meant for end users)
 # - NOOPENSSLCHECK=1 disables OpenSSL libcrypto.a checks (useful for verifying files
 #   only, or for non-OpenSSL configurations)
 # - EVERCRYPT_CONFIG allows switching EverCrypt static configurations; when
@@ -755,7 +755,8 @@ HACL_OLD_FILES=\
   code/old/experimental/aesgcm/aesgcm-c/Hacl_AES.c
 
 # Customizations for regular, msvc and gcc flavors.
-dist/compact/Makefile.basic: KRML_EXTRA=$(COMPACT_FLAGS)
+dist/compact/Makefile.basic: KRML_EXTRA=$(COMPACT_FLAGS) \
+  -ctypes EverCrypt.Hash,EverCrypt.AEAD
 
 dist/compact-msvc/Makefile.basic: KRML_EXTRA=$(COMPACT_FLAGS) -falloca -ftail-calls
 

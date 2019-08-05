@@ -35,6 +35,7 @@ unfold noextract
 let e_alg = Hash.e_alg
 
 // Similar to: Spec.Hash.Definitions.bytes_hash
+noextract
 let bytes_any_hash = s:S.seq UInt8.t { S.length s = 64 }
 // Similar to: Hacl.Hash.Definitions.hash_t
 let any_hash_t = b:B.buffer UInt8.t { B.length b = 64 }
