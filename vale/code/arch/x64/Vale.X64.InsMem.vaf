@@ -58,7 +58,7 @@ var heap13:vale_heap {:state heap(13)};
 var heap14:vale_heap {:state heap(14)};
 var heap15:vale_heap {:state heap(15)};
     
-operand_type heap:vale_heap :=
+operand_type heap:vale_heap @ nat4 :=
 | inout heap0 | inout heap1 | inout heap2 | inout heap3
 | inout heap4 | inout heap5 | inout heap6 | inout heap7
 | inout heap8 | inout heap9 | inout heap10 | inout heap11
@@ -95,25 +95,16 @@ procedure Load64_buffer(
 }
 
 procedure hLoad64_buffer(
-        out dst:dst_opr64, in hp:heap, in src:reg_opr64, inline offset:int, inline t:taint,
+        out dst:dst_opr64, in hp: heap, in src:reg_opr64, inline offset:int, inline t:taint,
         ghost b:buffer64, ghost index:int)
     {:public}
-//    {:instruction mk_ins(make_instr(I.ins_Mov64, dst, OMem(tuple(MReg(get_reg(src), offset), t))))}
-    reads
-        //memTaint;
+    //{:instruction mk_ins(make_instr(I.ins_Mov64, dst, OMem(tuple(MReg(get_reg(src), offset), t))))}
     requires
-        //valid_src_addr(hp, b, index);
-        //valid_taint_buf64(b, hp, memTaint, t);
         src + offset == buffer_addr(b, hp) + 8 * index;
     ensures
         dst == buffer64_read(b, index, hp);
-        //dst == mem[b](index);
-        //valid_taint_buf64(b, hp, memTaint, t);
 {
     assume false;
-    //low_lemma_valid_mem64(b, #nat(index), hp);
-    //low_lemma_load_mem64(b, #nat(index), hp);
-    //lemma_valid_taint64(b, #memTaint_t(memTaint), hp, #nat(index), t);
 }
     
 procedure Store64_buffer(
