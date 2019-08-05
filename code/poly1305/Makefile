@@ -77,7 +77,7 @@ KREMLIN=$(KREMLIN_HOME)/krml
 # We use -drop (deprecated) only to avoid creating unnecessary .c,.h files
 $(GENERATED_DIR)/Hacl_Poly1305_32.c: $(ALL_KRML_FILES) | .depend
 	$(KREMLIN) $(KREMLIN_TESTLIB) -skip-compilation \
-	-bundle 'Lib.*' \
+	-bundle 'Lib.\*' \
 	-bundle 'Spec.\*' \
 	-bundle 'Hacl.Poly1305_32=Hacl.Impl.*' \
 	-bundle 'FStar.*' \
@@ -87,7 +87,7 @@ $(GENERATED_DIR)/Hacl_Poly1305_32.c: $(ALL_KRML_FILES) | .depend
 
 $(GENERATED_DIR)/Hacl_Poly1305_128.c: $(ALL_KRML_FILES) | .depend
 	$(KREMLIN) $(KREMLIN_TESTLIB) -skip-compilation \
-	-bundle 'Lib.*' \
+	-bundle 'Lib.\*' \
 	-bundle 'Spec.\*' \
 	-bundle 'Hacl.Poly1305_128=Hacl.Impl.*' \
 	-bundle 'FStar.*' \
@@ -97,7 +97,7 @@ $(GENERATED_DIR)/Hacl_Poly1305_128.c: $(ALL_KRML_FILES) | .depend
 
 $(GENERATED_DIR)/Hacl_Poly1305_256.c: $(ALL_KRML_FILES) | .depend
 	$(KREMLIN) $(KREMLIN_TESTLIB) -skip-compilation \
-	-bundle 'Lib.*' \
+	-bundle 'Lib.\*' \
 	-bundle 'Spec.\*' \
 	-bundle 'Hacl.Poly1305_256=Hacl.Impl.*' \
 	-bundle 'FStar.*' \

@@ -80,7 +80,7 @@ KREMLIN=$(KREMLIN_HOME)/krml
 $(GENERATED_DIR)/Hacl_Chacha20Poly1305_32.c: $(ALL_KRML_FILES) | .depend
 	$(KREMLIN) $(KREMLIN_TESTLIB) -skip-compilation \
 	-no-prefix 'Hacl.Impl.Chacha20Poly1305' \
-	-bundle 'Lib.*' \
+	-bundle 'Lib.\*' \
 	-bundle 'Spec.*' \
 	-bundle 'Hacl.Chacha20Poly1305_32=Hacl.Impl.*' \
 	-drop 'C,FStar,LowStar,Spec,Prims,Lib,C.Loops.*,C.*,Hacl.Spec.*,Hacl.Poly1305.Field32xN.Lemmas,Hacl.Chacha20Poly1305_128,Hacl.Chacha20Poly1305_256' \
@@ -92,7 +92,7 @@ $(GENERATED_DIR)/Hacl_Chacha20Poly1305_32.c: $(ALL_KRML_FILES) | .depend
 $(GENERATED_DIR)/Hacl_Chacha20Poly1305_128.c: $(ALL_KRML_FILES) | .depend
 	$(KREMLIN) $(KREMLIN_TESTLIB) -skip-compilation \
 	-no-prefix 'Hacl.Impl.Chacha20Poly1305' \
-	-bundle 'Lib.*' \
+	-bundle 'Lib.\*' \
 	-bundle 'Spec.*' \
 	-bundle 'Hacl.Chacha20Poly1305_128=Hacl.Impl.*' \
 	-drop 'C,FStar,LowStar,Spec,Prims,Lib,C.Loops.*,C.*,Hacl.Spec.*,Hacl.Poly1305.Field32xN.Lemmas,Hacl.Chacha20Poly1305_32,Hacl.Chacha20Poly1305_256' \
@@ -105,7 +105,7 @@ $(GENERATED_DIR)/Hacl_Chacha20Poly1305_128.c: $(ALL_KRML_FILES) | .depend
 $(GENERATED_DIR)/Hacl_Chacha20Poly1305_256.c: $(ALL_KRML_FILES) | .depend
 	$(KREMLIN) $(KREMLIN_TESTLIB) -skip-compilation \
 	-no-prefix 'Hacl.Impl.Chacha20Poly1305' \
-	-bundle 'Lib.*' \
+	-bundle 'Lib.\*' \
 	-bundle 'Spec.*' \
 	-bundle 'Hacl.Chacha20Poly1305_256=Hacl.Impl.*' \
 	-drop 'C,FStar,LowStar,Spec,Prims,Lib,C.Loops.*,C.*,Hacl.Spec.*,Hacl.Poly1305.Field32xN.Lemmas,Hacl.Chacha20Poly1305_32,Hacl.Chacha20Poly1305_128' \

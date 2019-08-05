@@ -79,7 +79,7 @@ KREMLIN=$(KREMLIN_HOME)/krml
 # We use -drop (deprecated) only to avoid creating unnecessary .c,.h files
 $(GENERATED_DIR)/Hacl_NaCl.c: $(ALL_KRML_FILES) | .depend
 	$(KREMLIN) $(KREMLIN_TESTLIB) -skip-compilation \
-	-bundle 'Lib.*' \
+	-bundle 'Lib.\*' \
 	-bundle 'Spec.*' \
 	-bundle 'Hacl.Salsa20=Hacl.Impl.HSalsa20,Hacl.Impl.Salsa20,Hacl.Impl.Salsa20.Core32' \
 	-bundle 'Hacl.Poly1305_32=Hacl.Impl.Poly1305,Hacl.Impl.Poly1305.*' \
