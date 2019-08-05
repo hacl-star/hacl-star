@@ -444,11 +444,11 @@ let parse_header b cid_len =
     | [pn0; pn1; phase; false; false; spin; true; false] ->
       let pn_len : nat2 = of_bitfield2 (pn0, pn1) in
       let len = 1 + (add3 cid_len) + 1 + pn_len in
-      if S.length b = len && S.length b - (add3 cid_len) >= 19 then
+      if S.length b - len < max_cipher_length && S.length b - len >= 19 then
+        let cid = S.slice b 1 (1 + add3 cid_len) in
         let npn = S.slice b (1 + add3 cid_len) len in
-	let cid = S.slice b 1 (1 + add3 cid_len) in
-	let rest = S.slice b (1 + add3 cid_len) (S.length b) in
-        H_Success pn_len npn (Short phase spin cid) rest
+	let rest = S.slice b len (S.length b) in
+        H_Success pn_len npn (Short spin phase cid) rest
       else H_Failure
     | [pn0; pn1; false; false; typ0; typ1; true; true] ->
       let pn_len : nat2 = of_bitfield2 (pn0, pn1) in
@@ -479,6 +479,19 @@ let parse_header b cid_len =
 
 
 
+// Splitting the lemma S.append_slices in several parts. This is
+// dirty, but otherwise the SMT solver is lost after ~4 applications
+// of the lemma (and here we need 7)
+let append_slices1 (s1:bytes) (s2:bytes) : Lemma
+  (S.equal s1 (S.slice (S.append s1 s2) 0 (S.length s1))) =
+  ()
+
+let append_slices3 (s1:bytes) (s2:bytes) : Lemma
+  ( (forall (i:nat) (j:nat).
+                i <= j /\ j <= Seq.length s2 ==>
+                Seq.equal (Seq.slice s2 i j)
+                          (Seq.slice (Seq.append s1 s2) (Seq.length s1 + i) (Seq.length s1 + j)))) =
+  ()
 
 let extract_dcil_scil (dcil:nat4) (scil:nat4) (cl:nat) : Lemma
   (requires (let open FStar.Mul in cl = 0x10 * dcil + scil))
@@ -492,36 +505,58 @@ let size_long_header_bound_cid p pn_len npn : Lemma
   ()
 
 
-type parsing_correct h pn_len npn =
-  parse_header (format_header h pn_len npn) (cid_len h) == H_Success pn_len npn h
+type parsing_correct h pn_len npn suff =
+  parse_header S.(format_header h pn_len npn @| suff) (cid_len h) == H_Success pn_len npn h suff
 
-let lemma_short_header_parsing_correct h pn_len npn : Lemma
+
+let lemma_slice_short_header (u1 u2 u3 u4:bytes) (l1 l2 l3 l4:nat) : Lemma
+  (requires
+    S.length u1 = l1 /\
+    S.length u2 = l2 /\
+    S.length u3 = l3 /\
+    S.length u4 = l4)
+  (ensures (
+    let b = S.(u1 @| u2 @| u3 @| u4) in
+    S.equal u1 (S.slice b 0 l1) /\
+    S.equal u2 (S.slice b l1 (l1+l2)) /\
+    S.equal u3 (S.slice b (l1+l2) (l1+l2+l3)) /\
+    S.equal u4 (S.slice b (l1+l2+l3) (l1+l2+l3+l4)))) =
+  append_slices3 u1 u2;
+  append_slices3 u1 S.(u2 @| u3);
+  append_slices3 u1 S.(u2 @| u3 @| u4)
+
+
+#push-options "--z3rlimit 20"
+
+let lemma_short_header_parsing_correct h pn_len npn rest : Lemma
   (requires (Short? h))
-  (ensures (parsing_correct h pn_len npn)) =
-  let b = format_header h pn_len npn in
-  let (pnb0, pnb1) = to_bitfield2 pn_len in
+  (ensures (parsing_correct h pn_len npn rest)) =
+  let b = S.(format_header h pn_len npn @| rest) in
+  let (pn0, pn1) = to_bitfield2 pn_len in
   lemma_bitfield2 pn_len;
   if S.length b <> 0 then
     match h with
     | Short spin phase cid ->
-      let l = [pnb0;pnb1; phase; false; false; spin; true; false] in
+      let l = [pn0;pn1; phase; false; false; spin; true; false] in
       assert_norm(List.Tot.length l == 8);
       lemma_bitfield8 l;
       assert (to_bitfield8 (S.index b 0) == l);
       let flag = of_bitfield8 l in
       let len = 1 + (add3 (cid_len h)) + 1 + pn_len in
-      if S.length b = len then begin
-        S.append_slices (S.create 1 flag) (S.append cid npn);
-        S.append_slices cid npn;
-        assert (S.slice b (1+add3 (cid_len h)) len = npn);
-        assert (S.slice b 1 (1 + add3 (cid_len h)) = cid);
-        assert (parse_header b (cid_len h) = H_Success pn_len npn h)
+      let len_suff = S.length b - len in
+      if len_suff >= 19 && len_suff < max_cipher_length then begin
+        assert (S.equal b S.(S.create 1 flag @| cid @| npn @| rest));
+        lemma_slice_short_header (S.create 1 flag) cid npn rest 1 (add3 (cid_len h)) (1+pn_len) len_suff;
+        assert (S.equal cid (S.slice b 1 (1 + add3 (cid_len h))));
+        assert (S.equal npn (S.slice b (1+add3 (cid_len h)) len));
+        assert (S.equal rest (S.slice b len (S.length b)));
+        assert (parse_header b (cid_len h) = H_Success pn_len npn h rest)
       end
     | _ -> ()
 
 
 
-#push-options "--z3rlimit 20"
+
 
 let lemma_long_header_parsing_correct_flag h pn_len npn : Lemma
   (requires Long? h)
@@ -542,21 +577,6 @@ let lemma_long_header_parsing_correct_flag h pn_len npn : Lemma
 
 #pop-options
 
-
-
-// Splitting the lemma S.append_slices in several parts. This is
-// dirty, but otherwise the SMT solver is lost after ~4 applications
-// of the lemma (and here we need 7)
-let append_slices1 (s1:bytes) (s2:bytes) : Lemma
-  (S.equal s1 (S.slice (S.append s1 s2) 0 (S.length s1))) =
-  ()
-
-let append_slices3 (s1:bytes) (s2:bytes) : Lemma
-  ( (forall (i:nat) (j:nat).
-                i <= j /\ j <= Seq.length s2 ==>
-                Seq.equal (Seq.slice s2 i j)
-                          (Seq.slice (Seq.append s1 s2) (Seq.length s1 + i) (Seq.length s1 + j)))) =
-  ()
 
 
 // lemmas about recovery of appended components using S.slice
