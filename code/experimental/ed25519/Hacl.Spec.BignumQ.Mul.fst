@@ -743,7 +743,7 @@ let subm_last_step x y =
   let t = ((b <<. 40ul) +! x) -! y in
   b, t
 
-#push-options "--z3rlimit 300"
+#push-options "--z3rlimit 400 --max_fuel 0 --max_ifuel 0"
 inline_for_extraction noextract
 val sub_mod_264: x:qelem5 -> y:qelem5 ->
   Pure qelem5
