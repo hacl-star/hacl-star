@@ -89,12 +89,12 @@ $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	-no-prefix 'Hacl.Test.HE' \
 	-bundle 'Lib.*' \
 	-bundle 'Spec.*' \
-	-bundle 'Hacl.Impl.Bignum.Core+Hacl.Impl.Bignum.Addition+Hacl.Impl.Bignum.Convert+Hacl.Impl.Bignum.Comparison+Hacl.Impl.Bignum.Division+Hacl.Impl.Bignum.Exponentiation+Hacl.Impl.Bignum.Gcd+Hacl.Impl.Bignum.Misc+Hacl.Impl.Bignum.Modular+Hacl.Impl.Bignum.Multiplication+Hacl.Impl.Bignum.Shift=[rename=Hacl_Impl_Bignum]' \
+	-bundle 'Hacl.Impl.Bignum.Core+Hacl.Impl.Bignum.Addition+Hacl.Impl.Bignum.Convert+Hacl.Impl.Bignum.Comparison+Hacl.Impl.Bignum.Division+Hacl.Impl.Bignum.Exponentiation+Hacl.Impl.Bignum.Gcd+Hacl.Impl.Bignum.Misc+Hacl.Impl.Bignum.Modular+Hacl.Impl.Bignum.Multiplication+Hacl.Impl.Bignum.Shift+Hacl.Impl.Bignum.Montgomery+Hacl.Impl.Bignum.Openssl=[rename=Hacl_Impl_Bignum]' \
 	-bundle 'Hacl.Impl.HE.Paillier=[rename=Hacl_Impl_Paillier]' \
 	-bundle 'Hacl.Impl.HE.GM=[rename=Hacl_Impl_GM]' \
 	-bundle 'Hacl.Impl.HE.DGK=[rename=Hacl_Impl_DGK]' \
 	-bundle 'C=C.Endianness' \
-	-library 'C,FStar' \
+	-library 'C,FStar,Hacl.Impl.Bignum.Openssl' \
 	-drop 'Spec,Prims,Hacl.Spec.*' \
 	-add-include '"c/Lib_PrintBuffer.h"' \
 	-fnostruct-passing \
@@ -125,6 +125,7 @@ ALL_GENERATED_FILES = $(addprefix $(GENERATED_DIR)/,$(ALL_OUR_FILES))
 
 ALL_SOURCES = \
   $(ALL_GENERATED_FILES) \
+  $(HACL_HOME)/code/experimental/rsapss/include/Hacl_Impl_Bignum_Openssl.c \
   $(HACL_HOME)/lib/c/Lib_PrintBuffer.c
 
 ALL_OBJS = $(patsubst %.c,%.o,$(ALL_SOURCES))
@@ -135,7 +136,8 @@ INCLUDE_DIRS = \
   $(KREMLIN_HOME)/kremlib/c \
   $(KREMLIN_HOME)/kremlib/dist/generic \
   $(HACL_HOME)/lib \
-  $(HACL_HOME)/code/experimental/rsapss
+  $(HACL_HOME)/code/experimental/rsapss \
+  $(HACL_HOME)/code/experimental/rsapss/include
 
 # TODO: remove -Wno-incompatible-pointer-types when issue with --cmi is fixed
 CFLAGS += -O3 -march=native -mtune=native -funroll-loops -fPIC
@@ -157,11 +159,14 @@ $(OUT_DIR):
 
 $(OUT_DIR)/test.exe: $(ALL_OBJS) | $(OUT_DIR)
 	$(info ALL_SOURCES is $(ALL_SOURCES))
-	$(CC) $(CFLAGS) -o $@ $^ -L $(KREMLIN_HOME)/kremlib/dist/generic -lkremlib
-#	ar rcs he-c/libhelib.a $(OUT_DIR)/Hacl_Impl*.o ../../../lib/c/Lib_PrintBuffer.o
+	$(CC) $(CFLAGS) -o $@ $^ -L $(KREMLIN_HOME)/kremlib/dist/generic -lkremlib -lssl -lcrypto
 	mkdir -p lib/
 	gcc -shared -o ./lib/libhelib.so $(OUT_DIR)/Hacl_Impl*.o \
-		../../../lib/c/Lib_PrintBuffer.o -L $(KREMLIN_HOME)/lib -lkremlib
+		$(HACL_HOME)/lib/c/Lib_PrintBuffer.o \
+		$(HACL_HOME)/code/experimental/rsapss/include/Hacl_Impl_Bignum_Openssl.o \
+		-L $(HACL_HOME)/code/experimental/rsapss/include/ \
+		-L $(KREMLIN_HOME)/lib -lkremlib -lssl -lcrypto
+
 
 
 .PRECIOUS: %.o

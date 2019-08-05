@@ -13,6 +13,7 @@ open Lib.Math.Algebra
 open Hacl.Impl.Bignum.Core
 open Hacl.Impl.Bignum.Convert
 open Hacl.Impl.Bignum.Comparison
+open Hacl.Impl.Bignum.Misc
 open Hacl.Impl.Bignum.Modular
 open Hacl.Impl.Bignum.Montgomery
 open Hacl.Impl.Bignum.Multiplication
@@ -80,7 +81,6 @@ let mod_exp_ nLen rLen pow2_i n nInv_u64 st_kara st_exp bBits bLen b =
 
 //128 * (v nLen + 1) < max_size_t
 // res = a ^^ b mod n
-inline_for_extraction noextract
 val mod_exp:
      pow2_i:size_t{v pow2_i > 0}
   -> modBits:size_t{v modBits > 0}
@@ -131,6 +131,7 @@ let mod_exp pow2_i modBits nLen n r2 a bBits b res =
   from_mont nLen rLen pow2_i n nInv_u64 accM tmp res;
   pop_frame ()
 
+
 #reset-options "--z3rlimit 400 --max_fuel 2 --max_ifuel 1"
 
 // TODO doesn't have bounds validation, is
@@ -138,40 +139,38 @@ let mod_exp pow2_i modBits nLen n r2 a bBits b res =
 val naive_exp_loop:
      #aLen:bn_len_strict{(v aLen + v aLen) * 64 < max_size_t}
   -> #expLen:bn_len_strict
+  -> tmp1:lbignum aLen
+  -> tmp2:lbignum expLen
   -> a:lbignum aLen
   -> b:lbignum expLen
   -> res:lbignum aLen
   -> Stack unit
     (requires fun h ->
         disjoint a b /\ disjoint a res /\
-        live h a /\ live h b /\ live h res)
+        live h a /\ live h b /\ live h res /\
+        live h tmp1 /\ live h tmp2 /\
+        disjoint tmp2 b /\ disjoint tmp1 a /\ disjoint tmp1 res)
     (ensures fun h0 _ h1 ->
         live h1 res /\ live h1 a /\ live h1 b /\
-        modifies2 res b h0 h1)
-let rec naive_exp_loop #aLen #expLen a b res =
+        modifies4 res b tmp1 tmp2 h0 h1)
+let rec naive_exp_loop #aLen #expLen tmp1 tmp2 a b res =
   push_frame ();
-  let z:uint64 = zeros U64 SEC in
-  let tmp:lbignum expLen = create expLen z in
-  let tmp' = create aLen (u64 0) in
   assert_norm (issnat 0);
   assert_norm (nat_bytes_num 0 =. 1ul);
-  let zero:lbignum 1ul = nat_to_bignum_exact 0 in
-  let isnull = bn_is_equal b zero in
+  let isnull = bn_is_zero b in
   if not isnull then begin
      let odd = eq_u64 (b.(0ul) &. uint 1) (uint 1) in
-     bn_rshift1 b tmp; copy b tmp;
-     naive_exp_loop #aLen a b res;
+     bn_rshift1 b tmp2; copy b tmp2;
+     naive_exp_loop #aLen tmp1 tmp2 a b res;
      let h = FStar.HyperStack.ST.get () in
      assume (issnat (as_snat h res * as_snat h res) /\
              v (nat_bytes_num (as_snat h res * as_snat h res)) <= v aLen);
-     bn_mul_fitting res res tmp';
-     copy res tmp';
+     bn_mul_fitting res res tmp1; copy res tmp1;
      if odd then begin
        let h = FStar.HyperStack.ST.get () in
        assume (issnat (as_snat h res * as_snat h a) /\
                v (nat_bytes_num (as_snat h res * as_snat h a)) <= v aLen);
-       bn_mul_fitting res a tmp';
-       copy res tmp'
+       bn_mul_fitting res a tmp1; copy res tmp1
      end
   end;
   pop_frame ()
@@ -200,7 +199,11 @@ let bn_exp #aLen #expLen a b res =
   res.(0ul) <- uint 1;
   let tmp_b = create expLen (uint 0) in
   copy tmp_b b;
-  naive_exp_loop a tmp_b res;
+
+  let tmp1 = bn_zero #aLen in
+  let tmp2 = bn_zero #expLen in
+
+  naive_exp_loop tmp1 tmp2 a tmp_b res;
 
   pop_frame ();
 

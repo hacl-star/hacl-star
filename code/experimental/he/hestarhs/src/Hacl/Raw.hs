@@ -62,8 +62,17 @@ foreign import ccall "Hacl_Impl_Bignum_Modular_bn_modular_sub" bnModSub
 foreign import ccall "Hacl_Impl_Bignum_Modular_bn_modular_mul" bnModMul
     :: Word32 -> Bignum -> Bignum -> Bignum -> Bignum -> IO ()
 
+foreign import ccall "Hacl_Impl_Bignum_Modular_bn_modular_karatsuba" bnModKara
+    :: Word32 -> Word32 -> Bignum -> Bignum -> Bignum -> Bignum -> IO ()
+
 foreign import ccall "Hacl_Impl_Bignum_Modular_bn_modular_exp" bnModExp
     :: Word32 -> Word32 -> Bignum -> Bignum -> Bignum -> Bignum -> IO ()
+
+-- probably broken
+foreign import ccall "Hacl_Impl_Bignum_Exponentiation_mod_exp" bnModExpFast
+    :: Word32 -> Word32 -> Word32 ->
+       Bignum -> Bignum -> Bignum ->
+       Word32 -> Bignum -> Bignum -> IO ()
 
 ----------------------------------------------------------------------------
 -- Paillier

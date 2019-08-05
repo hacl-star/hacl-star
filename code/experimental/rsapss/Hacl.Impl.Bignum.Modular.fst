@@ -14,6 +14,7 @@ open Hacl.Impl.Bignum.Core
 open Hacl.Impl.Bignum.Convert
 open Hacl.Impl.Bignum.Shift
 open Hacl.Impl.Bignum.Comparison
+open Hacl.Impl.Bignum.Openssl
 open Hacl.Impl.Bignum.Misc
 open Hacl.Impl.Bignum.Multiplication
 open Hacl.Impl.Bignum.Addition
@@ -314,7 +315,83 @@ let bn_modular_mul #len n a b res =
   pop_frame ()
 
 
-#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
+#reset-options "--z3rlimit 200 --max_fuel 1 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
+
+val bn_modular_karatsuba:
+     #nLen:bn_len_strict{v nLen * 128 < max_size_t}
+  -> pow2_i:size_t{v nLen + v nLen + 4 * v pow2_i < max_size_t}
+  -> n:lbignum nLen
+  -> a:lbignum nLen
+  -> b:lbignum nLen
+  -> res:lbignum nLen
+  -> Stack unit
+    (requires fun h ->
+      live h a /\ live h b /\ live h res /\ live h n /\
+      disjoint res a /\ disjoint res b /\ disjoint res n /\
+      as_snat h n > 1)
+    (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1)
+let bn_modular_karatsuba #nLen pow2_i n a b res =
+  if pow2_i <>. nLen
+  then (bn_modular_mul n a b res)
+  else begin
+    push_frame ();
+    let res' = bn_zero #(nLen +. nLen +. 4ul *. pow2_i) in
+    assume (v (nLen +. nLen +. 4ul *. pow2_i) * 64 < max_size_t);
+    karatsuba pow2_i nLen a b res';
+    bn_remainder res' n res;
+    pop_frame ()
+  end
+
+
+// // Iterative version which does not work
+//val naive_mod_exp_loop:
+//     #nLen:bn_len_strict{(v nLen + v nLen) * 64 < max_size_t}
+//  -> #expLen:bn_len_strict
+//  -> n:lbignum nLen
+//  -> a:lbignum nLen
+//  -> b:lbignum expLen
+//  -> res:lbignum nLen
+//  -> Stack unit
+//    (requires fun h ->
+//        disjoint n b /\ disjoint n res /\
+//        live h n /\ live h a /\ live h b /\ live h res /\
+//        disjoint res a /\ disjoint res b /\ disjoint n res /\
+//        as_snat h n > 1)
+//    (ensures fun h0 _ h1 -> modifies2 res b h0 h1 /\
+//        live h1 n /\ live h1 a /\ live h1 b /\ live h1 res)
+//let naive_mod_exp_loop #nLen #expLen n a b res =
+//
+//  let ctr = calc_bits b in
+//
+//  let b_is_zero = bn_is_zero b in
+//  let b_is_one = calc_bits b =. 0ul in
+//
+//  if b_is_zero then bn_assign_uint64 res (u64 1) else
+//  if b_is_one then bn_assign_bn res a else begin
+//    push_frame ();
+//
+//    let tmp1 = create nLen (uint 0) in
+//    let tmp2 = create expLen (uint 0) in
+//
+//    let one = bn_one #1ul in
+//    let y = bn_one #nLen in
+//
+//    let h0 = FStar.HyperStack.ST.get () in
+//    let inv h1 _ =
+//          modifies (loc res |+| loc b |+| loc tmp1 |+| loc tmp2 |+| loc y) h0 h1 in
+//    Lib.Loops.for 0ul ctr inv (fun i ->
+//      let odd = eq_u64 (b.(0ul) &. uint 1) (uint 1) in
+//      if not odd then begin
+//        bn_modular_mul n res res tmp1; copy res tmp1
+//      end else begin
+//        bn_modular_mul n res y tmp1; copy y tmp1;
+//        bn_modular_mul n res res tmp1; copy res tmp1
+//      end;
+//      bn_rshift1 b tmp2; copy b tmp2
+//    );
+//    bn_modular_mul n res y tmp1; copy res tmp1;
+//    pop_frame ()
+//  end
 
 val naive_mod_exp_loop:
      #nLen:bn_len_strict{(v nLen + v nLen) * 64 < max_size_t}
@@ -347,7 +424,7 @@ let rec naive_mod_exp_loop #nLen #expLen n a b res =
   end;
   pop_frame ()
 
-val bn_modular_exp:
+val bn_modular_exp_slow:
      #nLen:bn_len_strict{v nLen * 128 < max_size_t}
   -> #expLen:bn_len_strict
   -> n:lbignum nLen
@@ -363,7 +440,7 @@ val bn_modular_exp:
       live h1 n /\ live h1 a /\ live h1 b /\ live h1 res /\
       (let n = as_snat h0 n in
        as_snat h1 res = mexp (to_fe #n (as_snat h0 a)) (as_snat h0 b)))
-let bn_modular_exp #nLen #expLen n a b res =
+let bn_modular_exp_slow #nLen #expLen n a b res =
   let h0 = FStar.HyperStack.ST.get () in
 
   push_frame ();
@@ -380,3 +457,21 @@ let bn_modular_exp #nLen #expLen n a b res =
   assume (let n' = as_snat h0 n in
           as_snat h1 res =
           mexp (to_fe #n' (as_snat h0 a)) (as_snat h0 b))
+
+val bn_modular_exp:
+     #nLen:bn_len_strict{v nLen * 128 < max_size_t}
+  -> #expLen:bn_len_strict
+  -> n:lbignum nLen
+  -> a:lbignum nLen
+  -> b:lbignum expLen
+  -> res:lbignum nLen
+  -> Stack unit
+    (requires fun h ->
+      live h n /\ live h a /\ live h b /\ live h res /\
+      disjoint a res /\ disjoint b res /\ disjoint n res /\
+      as_snat h n > 1)
+    (ensures  fun h0 _ h1 -> modifies1 res h0 h1 /\
+      live h1 n /\ live h1 a /\ live h1 b /\ live h1 res /\
+      (let n = as_snat h0 n in
+       as_snat h1 res = mexp (to_fe #n (as_snat h0 a)) (as_snat h0 b)))
+let bn_modular_exp #nLen #expLen n a b res = ossl_mod_exp n a b res

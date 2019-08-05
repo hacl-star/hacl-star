@@ -12,7 +12,7 @@ import Lib hiding (crt)
 
 genPrime :: Int -> IO Integer
 genPrime bits = do
-    p <- randomRIO (2 ^ (bits - 1),2 ^ bits)
+    p <- randomRIO (2 ^ (bits - 4),2 ^ bits)
     --if isPrime p
     if isPrimeMR 40 p
       then pure p else genPrime bits
