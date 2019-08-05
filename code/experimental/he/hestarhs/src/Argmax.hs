@@ -48,18 +48,18 @@ dgkClient sock pk l rs = do
     threadDelay 100000
 
     let k = paheK pk
-    log "Client: starting"
+    log "Client: dgk started"
     send sock [] "init"
 
     let rbits = map (\i -> map (\c -> bool 0 1 $ testBit c i) rs) [0..l-1]
+   -- log $ "Client rbits: " <> show rbits
     encRBits <- mapM (paheEnc pk) rbits
 
     cs <- mapM (paheFromBS pk) =<< receiveMulti sock
-    log "Client: computing the values"
+    log "Client: dgk main body"
 
     enczero <- paheEnc pk $ replicate k 0
     encone <- paheEnc pk $ replicate k 1
-    log "Client: step 1"
 
     xors <- forM (cs `zip` [0..]) $ \(ci,i) -> do
         let bitmask = rbits !! i
@@ -71,11 +71,10 @@ dgkClient sock pk l rs = do
         c <- paheSIMDMulScal pk oneMinCi bitmask
         paheSIMDAdd pk a c
 
-    log "Client: computing xors/zeroes"
     delta <- replicateM k (randomRIO (0,1))
     deltaEnc <- paheEnc pk delta
     let s0 = map (\i -> 1 - 2 * i) delta
-    log $ "Client: s = " <> show s0
+    --log $ "Client: s = " <> show s0
     s <- paheEnc pk s0
 
 
@@ -85,22 +84,18 @@ dgkClient sock pk l rs = do
 
         if i == l-1 then pure b else do
             xorsum <- foldrM (paheSIMDAdd pk) enczero $ map (xors !!) [i+1..l-1]
-            paheSIMDAdd pk b xorsum
-
+            xorsum3 <- paheSIMDMulScal pk xorsum $ replicate k 3
+            paheSIMDAdd pk b xorsum3
 
     xorsumFull <- foldrM (paheSIMDAdd pk) enczero xors
-    cLast <- paheSIMDAdd pk deltaEnc xorsumFull
-
-    -- TODO multiplicative blinding
+    xorsumFull3 <- paheSIMDMulScal pk xorsumFull $ replicate k 3
+    cLast <- paheSIMDAdd pk deltaEnc xorsumFull3
 
     ciShuffled <- shuffle =<< mapM (paheMultBlind pk) (cLast : ci)
 
-
-    log "Client: sending permuted data"
     sendMulti sock =<< (NE.fromList <$> mapM (paheToBS pk) ciShuffled)
 
     zs <- paheFromBS pk =<< receive sock
-    log "Client: received zeroes"
 
     let compeps = do
           let sMask = map (bool 1 0 . (== 1)) s0
@@ -113,7 +108,7 @@ dgkClient sock pk l rs = do
 
     eps <- compeps
 
-    log "Client: exiting"
+    log "Client: dgk ended"
     pure eps
 
 dgkServer :: Pahe s => Socket Rep -> PaheSk s -> Int -> [Integer] -> IO ()
@@ -122,15 +117,15 @@ dgkServer sock sk l cs = do
     let k = paheK pk
 
     let cbits = map (\i -> map (\c -> bool 0 1 $ testBit c i) cs) [0..l-1]
+--    log $ "Server cbits: " <> show cbits
 
     _ <- receive sock
-    log "Server: step1"
+    log "Server: dgk started"
 
     sendMulti sock =<< (NE.fromList <$> mapM (paheToBS pk <=< paheEnc pk) cbits)
-    log "Server: step1 end"
 
     es <- mapM (paheFromBS pk) =<< receiveMulti sock
-    log "Server: step2"
+    log "Server: dgk computing zeroes"
     esDecr <- mapM (paheDec sk) es
     let zeroes = map (bool 1 0 . (== 0)) $
                  foldr (\e acc -> map (uncurry (*)) $ zip e acc)
@@ -138,10 +133,9 @@ dgkServer sock sk l cs = do
     log $ "Server: zeroes " <> show zeroes
 
     enczeroes <- paheEnc pk zeroes
-    log $ "Server: sent zeroes"
     send sock [] =<< paheToBS pk enczeroes
 
-    log "Server: exiting"
+    log "Server: dgk exited"
 
 runProtocol :: IO ()
 runProtocol =
