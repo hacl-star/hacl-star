@@ -59,8 +59,6 @@ let parse_varint (b:bytes{S.length b > 0}) : option (n:nat{n < pow2 62} * vlsize
   | 3 -> Some (n % 0x4000000000000000, 8, suff))
 
 
-let parse_varint b = admit()
-
 // Move to FStar.Math.Lemmas?
 private let lemma_mod_pow2 (a:nat) (b:nat) : Lemma
   (requires a >= b) (ensures pow2 a % pow2 b == 0)
@@ -289,6 +287,7 @@ let lemma_varint_safe (b1:bytes) (b2:bytes) : Lemma
     parse_varint b1 = parse_varint b2)
   (ensures parse_varint b1 = None \/ b1 = b2) =
   let open FStar.Endianness in
+  let open FStar.Math.Lemmas in
   let open FStar.Mul in
   let b01 = U8.v (S.index b1 0) / 0x40 in
   let b02 = U8.v (S.index b2 0) / 0x40 in
@@ -301,18 +300,54 @@ let lemma_varint_safe (b1:bytes) (b2:bytes) : Lemma
   assert (S.equal suff2 (S.slice b2 (pow2 b02) (S.length b2)));
   match b01,b02 with
   | 0,0 ->
-    //assert (suff1 = suff2);
-    //lemma_be_to_n_head b1;
-    //lemma_be_to_n_head b2;
     missing_lemma b1 (pow2 b01);
     missing_lemma b2 (pow2 b02);
     assert (S.equal (S.slice b1 0 1) (S.slice b2 0 1));
     assert (S.equal (S.slice b1 1 (S.length b1)) (S.slice b2 1 (S.length b2)));
     assert (S.equal b1 S.(S.slice b1 0 1 @| S.slice b1 1 (S.length b1)));
     assert (S.equal b2 S.(S.slice b2 0 1 @| S.slice b2 1 (S.length b2)))
-  | 1,1 -> admit()
-  | 2,2 -> admit()
-  | 3,3 -> admit()
+  | 1,1 ->
+    missing_lemma b1 (pow2 b01);
+    missing_lemma b2 (pow2 b02);
+    assert (n1 % 0x4000 = n2 % 0x4000);
+    division_multiplication_lemma n1 (pow2 (8 * (pow2 b01-1))) 0x40;
+    division_multiplication_lemma n2 (pow2 (8 * (pow2 b02-1))) 0x40;
+    assert_norm (pow2 (8 * (pow2 1-1)) * 0x40 = 0x4000);
+    assert_norm (pow2 (8 * (pow2 1-1)) * 0x40 = 0x4000);
+    assert (n1 / 0x4000 = n2 / 0x4000);
+    n_to_be_be_to_n 2 (S.slice b1 0 2);
+    n_to_be_be_to_n 2 (S.slice b2 0 2);
+    assert (S.equal (S.slice b1 0 2) (S.slice b2 0 2));
+    assert (S.equal b1 S.(S.slice b1 0 2 @| S.slice b1 2 (S.length b1)));
+    assert (S.equal b2 S.(S.slice b2 0 2 @| S.slice b2 2 (S.length b2)))
+  | 2,2 ->
+    missing_lemma b1 (pow2 b01);
+    missing_lemma b2 (pow2 b02);
+    assert (n1 % 0x40000000 = n2 % 0x40000000);
+    division_multiplication_lemma n1 (pow2 (8 * (pow2 b01-1))) 0x40;
+    division_multiplication_lemma n2 (pow2 (8 * (pow2 b02-1))) 0x40;
+    assert_norm (pow2 (8 * (pow2 2-1)) * 0x40 = 0x40000000);
+    assert_norm (pow2 (8 * (pow2 2-1)) * 0x40 = 0x40000000);
+    assert (n1 / 0x40000000 = n2 / 0x40000000);
+    n_to_be_be_to_n 4 (S.slice b1 0 4);
+    n_to_be_be_to_n 4 (S.slice b2 0 4);
+    assert (S.equal (S.slice b1 0 4) (S.slice b2 0 4));
+    assert (S.equal b1 S.(S.slice b1 0 4 @| S.slice b1 4 (S.length b1)));
+    assert (S.equal b2 S.(S.slice b2 0 4 @| S.slice b2 4 (S.length b2)))
+  | 3,3 ->
+    missing_lemma b1 (pow2 b01);
+    missing_lemma b2 (pow2 b02);
+    assert (n1 % 0x4000000000000000 = n2 % 0x4000000000000000);
+    division_multiplication_lemma n1 (pow2 (8 * (pow2 b01-1))) 0x40;
+    division_multiplication_lemma n2 (pow2 (8 * (pow2 b02-1))) 0x40;
+    assert_norm (pow2 (8 * (pow2 3-1)) * 0x40 = 0x4000000000000000);
+    assert_norm (pow2 (8 * (pow2 3-1)) * 0x40 = 0x4000000000000000);
+    assert (n1 / 0x4000000000000000 = n2 / 0x4000000000000000);
+    n_to_be_be_to_n 8 (S.slice b1 0 8);
+    n_to_be_be_to_n 8 (S.slice b2 0 8);
+    assert (S.equal (S.slice b1 0 8) (S.slice b2 0 8));
+    assert (S.equal b1 S.(S.slice b1 0 8 @| S.slice b1 8 (S.length b1)));
+    assert (S.equal b2 S.(S.slice b2 0 8 @| S.slice b2 8 (S.length b2)))
 
 
 let lemma_varint_inv (b:bytes) (n:nat62) (len:vlsize) (suff:bytes) : Lemma

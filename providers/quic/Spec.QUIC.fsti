@@ -74,8 +74,6 @@ val parse_varint: b:bytes{S.length b > 0} -> option (n:nat{n < pow2 62} * vlsize
 val lemma_varint: (n:nat62) -> (suff:bytes) -> Lemma (parse_varint S.(encode_varint n @| suff) == Some (n, vlen n,suff))
 
 
-let max_plain_length : n:nat{forall a. n <= AEAD.max_length a} = pow2 32 - 17
-
 type header =
   | Short:
     spin: bool ->
