@@ -378,14 +378,14 @@ let poly_update_multi_lemma #w text acc0 r =
     w size_block text f f_vec (normalize_n r) (load_acc #w) acc0
 
 
-val poly_eq_lemma:
+val poly1305_update_vec_lemma:
     #w:lanes
   -> text:bytes
   -> acc0:pfelem
   -> r:pfelem ->
   Lemma (poly1305_update #w text acc0 r == S.poly1305_update text acc0 r)
 
-let poly_eq_lemma #w text acc0 r =
+let poly1305_update_vec_lemma #w text acc0 r =
   let len = length text in
   let sz_block = w * size_block in
   let len0 = len / sz_block * sz_block in
@@ -402,12 +402,12 @@ let poly_eq_lemma #w text acc0 r =
   else ()
 
 
-val poly1305_vec_is_poly1305:
+val poly1305_vec_lemma:
     #w:lanes
   -> msg:bytes
   -> k:S.key ->
   Lemma (poly1305_mac #w msg k == S.poly1305_mac msg k)
 
-let poly1305_vec_is_poly1305 #w msg k =
+let poly1305_vec_lemma #w msg k =
   let acc0, r = S.poly1305_init k in
-  poly_eq_lemma #w msg acc0 r
+  poly1305_update_vec_lemma #w msg acc0 r

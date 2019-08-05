@@ -237,23 +237,53 @@ let lemma_aux4 sb len len0 =
     len / sb * sb;
     }
 
-#set-options "--z3rlimit 150"
 
-let repeat_blocks_split #a #b size_block len0 inp f l acc0 =
+let repeat_blocks_multi_split #a #b size_block len0 inp f acc0 =
   let len = length inp in
   let len1 = len - len0 in
-  FStar.Math.Lemmas.lemma_div_le len0 len size_block;
-  FStar.Math.Lemmas.lemma_div_le len1 len size_block;
-
+  FStar.Math.Lemmas.modulo_addition_lemma len size_block (- len0 / size_block);
+  assert (len % size_block == len1 % size_block);
   let t0 = Seq.slice inp 0 len0 in
   let t1 = Seq.slice inp len0 len in
+
+  FStar.Math.Lemmas.lemma_div_le len0 len size_block;
+  FStar.Math.Lemmas.lemma_div_le len1 len size_block;
   let repeat_bf_s0 = repeat_blocks_f size_block t0 f (len0 / size_block) in
   let repeat_bf_s1 = repeat_blocks_f size_block t1 f (len1 / size_block) in
   let repeat_bf_t  = repeat_blocks_f size_block inp f (len / size_block) in
 
   let acc1 = repeat_blocks_multi size_block t0 f acc0 in
+  let acc2 = repeat_blocks_multi size_block t1 f acc1 in
+
+  calc (==) {
+    repeat_blocks_multi size_block t1 f acc1;
+    (==) { lemma_repeat_blocks_multi size_block t1 f acc1 }
+    Loops.repeati (len1 / size_block) repeat_bf_s1 acc1;
+    (==) { lemma_repeat_blocks_multi size_block t0 f acc0 }
+    Loops.repeati (len1 / size_block) repeat_bf_s1 (Loops.repeati (len0 / size_block) repeat_bf_s0 acc0);
+    (==) { repeat_blocks_split12 size_block len0 inp f acc0 }
+    Loops.repeati (len / size_block) repeat_bf_t acc0;
+    (==) { lemma_repeat_blocks_multi size_block inp f acc0 }
+    repeat_blocks_multi size_block inp f acc0;
+  };
+  assert (repeat_blocks_multi size_block t1 f acc1 == repeat_blocks_multi size_block inp f acc0)
+
+
+let repeat_blocks_split #a #b size_block len0 inp f l acc0 =
+  let len = length inp in
+  let len1 = len - len0 in
   FStar.Math.Lemmas.modulo_addition_lemma len size_block (- len0 / size_block);
   assert (len % size_block == len1 % size_block);
+  let t0 = Seq.slice inp 0 len0 in
+  let t1 = Seq.slice inp len0 len in
+
+  FStar.Math.Lemmas.lemma_div_le len0 len size_block;
+  FStar.Math.Lemmas.lemma_div_le len1 len size_block;
+  let repeat_bf_s0 = repeat_blocks_f size_block t0 f (len0 / size_block) in
+  let repeat_bf_s1 = repeat_blocks_f size_block t1 f (len1 / size_block) in
+  let repeat_bf_t  = repeat_blocks_f size_block inp f (len / size_block) in
+
+  let acc1 = repeat_blocks_multi size_block t0 f acc0 in
   let acc2 = repeat_blocks size_block t1 f l acc1 in
 
   let acc3 = Loops.repeati (len1 / size_block) repeat_bf_s1 acc1 in
@@ -273,37 +303,8 @@ let repeat_blocks_split #a #b size_block len0 inp f l acc0 =
     l (len % size_block) (Seq.slice inp (len / size_block * size_block) len) (Loops.repeati (len / size_block) repeat_bf_t acc0);
     (==) { lemma_repeat_blocks size_block inp f l acc0 }
     repeat_blocks size_block inp f l acc0;
-  }
-
-
-let repeat_blocks_multi_split #a #b size_block len0 inp f acc0 =
-  let len = length inp in
-  let len1 = len - len0 in
-  FStar.Math.Lemmas.lemma_div_le len0 len size_block;
-  FStar.Math.Lemmas.lemma_div_le len1 len size_block;
-
-  let t0 = Seq.slice inp 0 len0 in
-  let t1 = Seq.slice inp len0 len in
-  let repeat_bf_s0 = repeat_blocks_f size_block t0 f (len0 / size_block) in
-  let repeat_bf_s1 = repeat_blocks_f size_block t1 f (len1 / size_block) in
-  let repeat_bf_t  = repeat_blocks_f size_block inp f (len / size_block) in
-
-  let acc1 = repeat_blocks_multi size_block t0 f acc0 in
-  FStar.Math.Lemmas.modulo_addition_lemma len size_block (- len0 / size_block);
-  assert (len % size_block == len1 % size_block);
-  let acc2 = repeat_blocks_multi size_block t1 f acc1 in
-
-  calc (==) {
-    repeat_blocks_multi size_block t1 f acc1;
-    (==) { lemma_repeat_blocks_multi size_block t1 f acc1 }
-    Loops.repeati (len1 / size_block) repeat_bf_s1 acc1;
-    (==) { lemma_repeat_blocks_multi size_block t0 f acc0 }
-    Loops.repeati (len1 / size_block) repeat_bf_s1 (Loops.repeati (len0 / size_block) repeat_bf_s0 acc0);
-    (==) { repeat_blocks_split12 size_block len0 inp f acc0 }
-    Loops.repeati (len / size_block) repeat_bf_t acc0;
-    (==) { lemma_repeat_blocks_multi size_block inp f acc0 }
-    repeat_blocks_multi size_block inp f acc0;
-  }
+  };
+  assert (repeat_blocks size_block t1 f l acc1 == repeat_blocks size_block inp f l acc0)
 
 
 let unfold_repeatw #a w n f acc =
@@ -341,8 +342,6 @@ let rec lemma_repeati_vec #a #a_vec w n normalize_n f f_vec acc0_vec =
   end
 
 
-#reset-options "--z3rlimit 150 --max_fuel 0 --max_ifuel 0"
-
 val lemma_repeat_blocks_multi_load_acc:
     #a:Type0
   -> #b:Type0
@@ -378,26 +377,31 @@ let lemma_repeat_blocks_multi_load_acc #a #b #b_vec w size_block inp f normalize
     Loops.repeati w repeat_bf_t0 acc0;
     (==) { lemma_repeat_blocks_multi #a #b size_block t0 f acc0 }
     repeat_blocks_multi #a #b size_block t0 f acc0;
-  }
+  };
+  assert (normalize_n acc1 == repeat_blocks_multi #a #b size_block t0 f acc0)
 
+
+#reset-options "--z3refresh --z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 
 let lemma_aux1 w size_block len =
+  let sb = w * size_block in
   let len1 = len - w * size_block in
-  FStar.Math.Lemmas.modulo_addition_lemma len (w * size_block) (- 1);
-  assert (len % (w * size_block) == len1 % (w * size_block));
-  FStar.Math.Lemmas.modulo_addition_lemma len size_block (- w);
-  assert (len % size_block == len1 % size_block);
+  FStar.Math.Lemmas.modulo_addition_lemma len sb (- 1);
+  assert (len % sb == len1 % sb);
 
-  assert (len1 == (len1 / (w * size_block)) * (w * size_block));
-  assert (len1 == len1 / size_block * size_block);
-  assert ((len1 / (w * size_block)) * (w * size_block) == len1 / size_block * size_block);
-  FStar.Math.Lemmas.paren_mul_right (len1 / (w * size_block)) w size_block;
-  FStar.Math.Lemmas.multiple_division_lemma (len1 / size_block) size_block;
-  FStar.Math.Lemmas.multiple_division_lemma ((len1 / (w * size_block)) * w) size_block;
-  assert ((len1 / (w * size_block)) * w == len1 / size_block)
+  calc (==) {
+    len1 / size_block;
+    (==) { FStar.Math.Lemmas.lemma_div_exact len1 sb }
+    (len1 / sb * sb) / size_block;
+    (==) { FStar.Math.Lemmas.paren_mul_right (len1 / sb) w sb }
+    ((len1 / sb * w) * size_block) / size_block;
+    (==) { FStar.Math.Lemmas.multiple_division_lemma (len1 / sb * w) size_block }
+    len1 / sb * w;
+    (==) { FStar.Math.Lemmas.swap_mul (len1 / sb) w}
+    w * (len1 / sb);
+  };
+  assert (len1 / size_block == w * (len1 / sb))
 
-
-#reset-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
 
 let lemma_repeat_blocks_multi_vec #a #b #b_vec w size_block inp f f_vec normalize_n load_acc acc0 =
   let len = length inp in
@@ -405,8 +409,8 @@ let lemma_repeat_blocks_multi_vec #a #b #b_vec w size_block inp f f_vec normaliz
   let len1 = len - len0 in
   FStar.Math.Lemmas.modulo_addition_lemma len len0 (- 1);
   assert (len % len0 == len1 % len0);
-  FStar.Math.Lemmas.modulo_addition_lemma len size_block (- w);
-  assert (len % size_block == len1 % size_block);
+  //FStar.Math.Lemmas.modulo_addition_lemma len size_block (- w);
+  //assert (len % size_block == len1 % size_block);
 
   let t0 = Seq.slice inp 0 len0 in
   let t1 = Seq.slice inp len0 len in

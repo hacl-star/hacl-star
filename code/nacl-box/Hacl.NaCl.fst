@@ -77,6 +77,8 @@ let crypto_secretbox_easy c m mlen n k =
   0ul
 
 
+#set-options "--z3rlimit 100"
+
 val crypto_secretbox_open_easy:
     m:buffer uint8
   -> c:buffer uint8
@@ -239,8 +241,6 @@ val crypto_box_easy:
 let crypto_box_easy c m mlen n pk sk =
   Hacl.Impl.Box.box_easy mlen c sk pk n m
 
-
-#set-options "--z3rlimit 100"
 
 val crypto_box_open_easy_afternm:
     m:buffer uint8
