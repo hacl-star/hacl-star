@@ -711,7 +711,7 @@ let poly_update_repeat_blocks_multi_lemma2 text acc_vec0 r =
     )
   in aux nb_vec
 
-#reset-options "--z3rlimit 150 --max_fuel 2"
+#reset-options "--z3rlimit 200 --max_fuel 2 --max_ifuel 0"
 
 val poly_update_repeat_blocks_multi_lemma4:
     text:bytes{length text % (4 * size_block) = 0}
