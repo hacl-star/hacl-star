@@ -17,7 +17,7 @@ module Spec = Spec.Blake2
 #set-options "--z3rlimit 50 --max_ifuel 0 --max_fuel 0"
 
 (* Define algorithm parameters *)
-type word_t = Spec.word_t Spec.Blake2B
+type word_t = normalize_term (Spec.word_t Spec.Blake2B)
 type vector_wp = lbuffer word_t (size Spec.size_block_w)
 type block_wp = lbuffer word_t (size Spec.size_block_w)
 type block_p = lbuffer uint8 (size (Spec.size_block Spec.Blake2B))
@@ -25,16 +25,16 @@ type hash_wp = lbuffer word_t (size Spec.size_hash_w)
 type index_t = n:size_t{size_v n < 16}
 
 inline_for_extraction
-let size_word : size_t = size (Spec.size_word Spec.Blake2B)
+let size_word : size_t = size 8
 
 inline_for_extraction
 let size_block : x:size_t{v x = Spec.size_block Spec.Blake2B /\ v x <= Spec.max_limb Spec.Blake2B} = (size Spec.size_block_w) *. size_word
 
 noextract inline_for_extraction
-let rounds_nat: size_nat = Spec.rounds Spec.Blake2.Blake2B
+let rounds_nat: x:size_nat{x == Spec.rounds Spec.Blake2.Blake2B} = 12
 
 noextract inline_for_extraction
-let rounds_t:x:size_t{x == size rounds_nat} = size (Spec.rounds Spec.Blake2.Blake2B)
+let rounds_t: x:size_t{x == size rounds_nat} = 12ul
 
 
 /// Constants

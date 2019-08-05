@@ -555,7 +555,7 @@ let map_blocks_multi #t #a h0 bs nb inp output spec_f impl_f =
       (v i * v bs)
   )
 
-#reset-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 1"
+#reset-options "--z3rlimit 1000 --max_fuel 0 --max_ifuel 0 --z3cliopt smt.QI.EAGER_THRESHOLD=5"
 
 let map_blocks #t #a h0 len blocksize inp output spec_f spec_l impl_f impl_l =
   let nb = len /. blocksize in
@@ -565,10 +565,12 @@ let map_blocks #t #a h0 len blocksize inp output spec_f spec_l impl_f impl_l =
   let ob = sub output 0ul blen in
   let il = sub inp blen rem in
   let ol = sub inp blen rem in
+  Math.Lemmas.lemma_div_mod (v len) (v blocksize);
   Math.Lemmas.multiple_division_lemma (v nb) (v blocksize);
   map_blocks_multi #t #a h0 blocksize nb ib ob spec_f impl_f;
   if rem >. 0ul then
-     (impl_l nb;
+     (assert (v nb * v blocksize <= v len);
+      impl_l nb;
       let h1 = ST.get() in
       FStar.Seq.lemma_split (as_seq h1 output) (v nb * v blocksize))
   else ()

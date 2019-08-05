@@ -7,523 +7,407 @@ open Lib.ByteSequence
 open Lib.IntVector
 
 module Loops = Lib.LoopCombinators
+module PLoops = Lib.Loops.Lemmas
+module Lemmas = Hacl.Spec.Poly1305.Lemmas
 module S = Spec.Poly1305
-module Lemmas = Hacl.Spec.Poly1305.Equiv.Lemmas
 
 include Hacl.Spec.Poly1305.Vec
 
-#reset-options "--z3rlimit 150 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -Hacl.Spec.*'"
 
-val poly_update_repeat_blocks_multi_lemma:
-    #w:lanes
-  -> text:bytes{length text % (w * size_block) = 0}
-  -> acc:elem w
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
+
+val poly_update_repeat_blocks_multi_lemma2_simplify:
+  acc0:pfelem -> acc1:pfelem -> c0:pfelem -> c1:pfelem -> r:pfelem -> Lemma
+    (pfadd (pfmul (pfadd (pfmul acc0 (pfmul r r)) c0) (pfmul r r)) (pfmul (pfadd (pfmul acc1 (pfmul r r)) c1) r) ==
+    pfmul (pfadd (pfmul (pfadd (pfadd (pfmul acc0 (pfmul r r)) (pfmul acc1 r)) c0) r) c1) r)
+
+let poly_update_repeat_blocks_multi_lemma2_simplify acc0 acc1 c0 c1 r =
+  Lemmas.poly_update_repeat_blocks_multi_lemma2_simplify acc0 acc1 c0 c1 r
+
+
+val poly_update_repeat_blocks_multi_lemma4_simplify:
+    a0r4:pfelem -> a1:pfelem -> a2:pfelem -> a3:pfelem
+  -> c0:pfelem -> c1:pfelem -> c2:pfelem -> c3:pfelem
   -> r:pfelem ->
   Lemma
-    (normalize_n #w (repeat_blocks_multi #uint8 #(elem w) (w * size_block) text (poly1305_update_nblocks #w (compute_rw #w r)) acc) r ==
-      repeat_blocks_multi #uint8 #pfelem size_block text (S.poly1305_update1 r size_block) (normalize_n #w acc r))
-let poly_update_repeat_blocks_multi_lemma #w text acc r =
-  match w with
-  | 1 -> Lemmas.poly_update_repeat_blocks_multi_lemma1 text acc r
-  | 2 -> Lemmas.poly_update_repeat_blocks_multi_lemma2 text acc r
-  | 4 -> Lemmas.poly_update_repeat_blocks_multi_lemma4 text acc r
+   (pfadd (pfadd (pfadd
+     (pfmul (pfadd a0r4 c0) (pfmul (pfmul r r) (pfmul r r)))
+     (pfmul (pfadd (pfmul a1 (pfmul (pfmul r r) (pfmul r r))) c1) (pfmul (pfmul r r) r)))
+     (pfmul (pfadd (pfmul a2 (pfmul (pfmul r r) (pfmul r r))) c2) (pfmul r r)))
+     (pfmul (pfadd (pfmul a3 (pfmul (pfmul r r) (pfmul r r))) c3) r) ==
+    pfmul (pfadd (pfmul (pfadd (pfmul (pfadd (pfmul (pfadd (pfadd (pfadd (pfadd a0r4
+	  (pfmul a1 (pfmul (pfmul r r) r))) (pfmul a2 (pfmul r r))) (pfmul a3 r)) c0) r) c1) r) c2) r) c3) r)
 
-val poly_update_multi_lemma_load:
+let poly_update_repeat_blocks_multi_lemma4_simplify a0r4 a1 a2 a3 c0 c1 c2 c3 r =
+  Lemmas.poly_update_repeat_blocks_multi_lemma4_simplify a0r4 a1 a2 a3 c0 c1 c2 c3 r
+
+
+val poly_update_multi_lemma_load2_simplify:
+  acc0:pfelem -> r:pfelem -> c0:pfelem -> c1:pfelem ->
+  Lemma
+    (pfmul (pfadd (pfmul (pfadd acc0 c0) r) c1) r ==
+     pfadd (pfmul (pfadd acc0 c0) (pfmul r r)) (pfmul c1 r))
+
+let poly_update_multi_lemma_load2_simplify acc0 r c0 c1 =
+  Lemmas.poly_update_multi_lemma_load2_simplify acc0 r c0 c1
+
+
+val poly_update_multi_lemma_load4_simplify:
+  acc0:pfelem -> r:pfelem -> c0:pfelem -> c1:pfelem -> c2:pfelem -> c3:pfelem ->
+  Lemma
+   (pfmul (pfadd (pfmul (pfadd (pfmul (pfadd (pfmul (pfadd acc0 c0) r) c1) r) c2) r) c3) r ==
+     pfadd (pfadd (pfadd (pfmul (pfadd acc0 c0) (pfmul (pfmul r r) (pfmul r r)))
+      (pfmul c1 (pfmul (pfmul r r) r))) (pfmul c2 (pfmul r r))) (pfmul c3 r))
+
+let poly_update_multi_lemma_load4_simplify acc0 r c0 c1 c2 c3 =
+  Lemmas.poly_update_multi_lemma_load4_simplify acc0 r c0 c1 c2 c3
+
+
+val poly_update_multi_lemma_load_acc1:
+    r:pfelem
+  -> text:bytes{size_block <= length text /\ length text % size_block = 0}
+  -> acc0:pfelem ->
+  Lemma
+   (let t0 = Seq.slice text 0 size_block in
+    let f = S.poly1305_update1 r size_block in
+    let repeat_bf_t0 = repeat_blocks_f size_block t0 f 1 in
+    normalize_n r (load_acc1 t0 acc0) == PLoops.repeat_w #pfelem 1 1 repeat_bf_t0 0 acc0)
+
+let poly_update_multi_lemma_load_acc1 r text acc0 = ()
+
+
+val poly_update_multi_lemma_load_acc2:
+    r:pfelem
+  -> text:bytes{2 * size_block <= length text /\ length text % (2 * size_block) = 0 /\ length text % size_block = 0}
+  -> acc0:pfelem ->
+  Lemma
+   (let t0 = Seq.slice text 0 (2 * size_block) in
+    let f = S.poly1305_update1 r size_block in
+    let repeat_bf_t0 = repeat_blocks_f size_block t0 f 2 in
+    normalize_n r (load_acc2 t0 acc0) == PLoops.repeat_w #pfelem 2 1 repeat_bf_t0 0 acc0)
+
+let poly_update_multi_lemma_load_acc2 r text acc0 =
+  let t0 = Seq.slice text 0 (2 * size_block) in
+  let f = S.poly1305_update1 r size_block in
+  let repeat_bf_t0 = repeat_blocks_f size_block t0 f 2 in
+  assert (PLoops.repeat_w #pfelem 2 1 repeat_bf_t0 0 acc0 == repeat_bf_t0 1 (repeat_bf_t0 0 acc0));
+
+  let b0 = Seq.slice text 0 size_block in
+  let b1 = Seq.slice text size_block (2 * size_block) in
+
+  let c0 = pfadd (pow2 128) (nat_from_bytes_le b0) in
+  let c1 = pfadd (pow2 128) (nat_from_bytes_le b1) in
+  assert (repeat_bf_t0 1 (repeat_bf_t0 0 acc0) == pfmul (pfadd (pfmul (pfadd acc0 c0) r) c1) r);
+
+  let acc1 = load_acc2 t0 acc0 in
+  let acc2 = normalize_n r acc1 in
+  assert (acc2 == pfadd (pfmul acc1.[0] (pfmul r r)) (pfmul acc1.[1] r));
+  assert (acc1.[0] == pfadd acc0 c0);
+  assert (acc1.[1] == pfadd 0 c1);
+  FStar.Math.Lemmas.modulo_lemma c1 prime;
+  assert (acc1.[1] == c1);
+  assert (acc2 == pfadd (pfmul (pfadd acc0 c0) (pfmul r r)) (pfmul c1 r));
+  poly_update_multi_lemma_load2_simplify acc0 r c0 c1
+
+
+val poly_update_multi_lemma_load_acc4:
+    r:pfelem
+  -> text:bytes{4 * size_block <= length text /\ length text % (4 * size_block) = 0 /\ length text % size_block = 0}
+  -> acc0:pfelem ->
+  Lemma
+   (let t0 = Seq.slice text 0 (4 * size_block) in
+    let f = S.poly1305_update1 r size_block in
+    let repeat_bf_t0 = repeat_blocks_f size_block t0 f 4 in
+    normalize_n r (load_acc4 t0 acc0) == PLoops.repeat_w #pfelem 4 1 repeat_bf_t0 0 acc0)
+
+let poly_update_multi_lemma_load_acc4 r text acc0 =
+  let t0 = Seq.slice text 0 (4 * size_block) in
+  let f = S.poly1305_update1 r size_block in
+  let repeat_bf_t0 = repeat_blocks_f size_block t0 f 4 in
+
+  let acc1 = PLoops.repeat_w #pfelem 4 1 repeat_bf_t0 0 acc0 in
+  assert (acc1 == repeat_bf_t0 3 (repeat_bf_t0 2 (repeat_bf_t0 1 (repeat_bf_t0 0 acc0))));
+
+  let b0 = Seq.slice text 0 size_block in
+  let b1 = Seq.slice text size_block (2 * size_block) in
+  let b2 = Seq.slice text (2 * size_block) (3 * size_block) in
+  let b3 = Seq.slice text (3 * size_block) (4 * size_block) in
+
+  let c0 = pfadd (pow2 128) (nat_from_bytes_le b0) in
+  let c1 = pfadd (pow2 128) (nat_from_bytes_le b1) in
+  let c2 = pfadd (pow2 128) (nat_from_bytes_le b2) in
+  let c3 = pfadd (pow2 128) (nat_from_bytes_le b3) in
+  assert (acc1 == pfmul (pfadd (pfmul (pfadd (pfmul (pfadd (pfmul (pfadd acc0 c0) r) c1) r) c2) r) c3) r);
+
+  let acc2 = load_acc4 t0 acc0 in
+  let acc3 = normalize_4 r acc2 in
+  assert (acc2.[0] == pfadd acc0 c0);
+  FStar.Math.Lemmas.modulo_lemma c1 prime;
+  FStar.Math.Lemmas.modulo_lemma c2 prime;
+  FStar.Math.Lemmas.modulo_lemma c3 prime;
+  assert (acc2.[1] == c1);
+  assert (acc2.[2] == c2);
+  assert (acc2.[3] == c3);
+  assert (acc3 ==
+    pfadd (pfadd (pfadd (pfmul (pfadd acc0 c0) (pfmul (pfmul r r) (pfmul r r)))
+      (pfmul c1 (pfmul (pfmul r r) r))) (pfmul c2 (pfmul r r))) (pfmul c3 r));
+  poly_update_multi_lemma_load4_simplify acc0 r c0 c1 c2 c3;
+  assert (acc1 == acc3)
+
+
+val poly_update_multi_lemma_load_acc:
     #w:lanes
-  -> text:bytes{0 < length text /\ length text % (w * size_block) = 0}
-  -> acc0:pfelem
-  -> r:pfelem ->
+  -> r:pfelem
+  -> text:bytes{w * size_block <= length text /\ length text % (w * size_block) = 0 /\ length text % size_block = 0}
+  -> acc0:pfelem ->
   Lemma
    (let t0 = Seq.slice text 0 (w * size_block) in
-    normalize_n #w (load_acc #w acc0 t0) r ==
-      repeat_blocks_multi #uint8 #pfelem size_block t0 (S.poly1305_update1 r size_block) acc0)
-let poly_update_multi_lemma_load #w text acc0 r =
+    let f = S.poly1305_update1 r size_block in
+    let repeat_bf_t0 = repeat_blocks_f size_block t0 f w in
+    normalize_n r (load_acc #w t0 acc0) == PLoops.repeat_w #pfelem w 1 repeat_bf_t0 0 acc0)
+
+let poly_update_multi_lemma_load_acc #w r text acc0 =
   match w with
-  | 1 -> Lemmas.poly_update_multi_lemma_load1 text acc0 r
-  | 2 -> Lemmas.poly_update_multi_lemma_load2 text acc0 r
-  | 4 -> Lemmas.poly_update_multi_lemma_load4 text acc0 r
+  | 1 -> poly_update_multi_lemma_load_acc1 r text acc0
+  | 2 -> poly_update_multi_lemma_load_acc2 r text acc0
+  | 4 -> poly_update_multi_lemma_load_acc4 r text acc0
 
-val repeati_extensionality:
-    #a:Type
-  -> n:nat
-  -> f:(i:nat{i < n} -> a -> a)
-  -> g:(i:nat{i < n} -> a -> a)
-  -> acc0:a ->
+
+val poly_update_multi_lemma_loop1:
+    r:pfelem
+  -> text:bytes{size_block <= length text /\ length text % size_block = 0}
+  -> i:nat{i < (length text - size_block) / size_block}
+  -> acc_vec:elem 1 ->
   Lemma
-  (requires (forall (i:nat{i < n}) (acc:a). f i acc == g i acc))
-  (ensures (Loops.repeati n f acc0 == Loops.repeati n g acc0))
-let rec repeati_extensionality #a n f g acc0 =
-  if n = 0 then begin
-    Loops.eq_repeati0 n f acc0;
-    Loops.eq_repeati0 n g acc0 end
-  else begin
-    Loops.unfold_repeati n f acc0 (n-1);
-    Loops.unfold_repeati n g acc0 (n-1);
-    repeati_extensionality #a (n-1) f g acc0 end
-
-val repeati_right_extensionality:
-    #a:Type
-  -> n:nat
-  -> lo_g:nat
-  -> hi_g:nat{lo_g + n <= hi_g}
-  -> f:(i:nat{i < n} -> a -> a)
-  -> g:(i:nat{lo_g <= i /\ i < hi_g} -> a -> a)
-  -> acc0:a ->
-  Lemma
-  (requires (forall (i:nat{i < n}) (acc:a). f i acc == g (lo_g + i) acc))
-  (ensures (Loops.repeat_right 0 n (Loops.fixed_a a) f acc0 ==
-    Loops.repeat_right lo_g (lo_g + n) (Loops.fixed_a a) g acc0))
-let rec repeati_right_extensionality #a n lo_g hi_g f g acc0 =
-  if n = 0 then begin
-    Loops.eq_repeat_right 0 n (Loops.fixed_a a) f acc0;
-    Loops.eq_repeat_right lo_g (lo_g+n) (Loops.fixed_a a) g acc0 end
-  else begin
-    Loops.unfold_repeat_right 0 n (Loops.fixed_a a) f acc0 (n-1);
-    Loops.unfold_repeat_right lo_g (lo_g+n) (Loops.fixed_a a) g acc0 (lo_g+n-1);
-    repeati_right_extensionality #a (n-1) lo_g hi_g f g acc0 end
-
-//
-// Lemma
-//   (poly_update_multi #w text acc0 r ==
-//      repeat_blocks_multi #uint8 #pfelem size_block text (update1 r size_block) acc0)
-//
-
-#set-options "--max_fuel 0"
-
-val poly_update_multi_lemma1:
-    #w:lanes
-  -> text:bytes{0 < length text /\ length text % (w * size_block) = 0}
-  -> acc0:pfelem
-  -> r:pfelem ->
-  Lemma
-   (let rw = compute_rw #w r in
+   (let rw = compute_rw #1 r in
     let len = length text in
-    let len0 = w * size_block in
-    let t0 = Seq.slice text 0 len0 in
+    let len1 = len - size_block in
+
+    let nb_vec = len1 / size_block in
+    let nb = len1 / size_block in
+    assert (nb == nb_vec);
+
+    let t1 = Seq.slice text size_block len in
     let f = S.poly1305_update1 r size_block in
-    let repeat_bf_t0 = repeat_blocks_f size_block text f (len / size_block) in
-    normalize_n #w (load_acc #w acc0 t0) r ==
-      Loops.repeat_right 0 (len0 / size_block) (Loops.fixed_a pfelem) repeat_bf_t0 acc0)
-let poly_update_multi_lemma1 #w text acc0 r =
-  let rw = compute_rw #w r in
-  let len = length text in
-  let len0 = w * size_block in
-  let t0 = Seq.slice text 0 len0 in
-  FStar.Seq.Base.lemma_len_slice text 0 len0;
+    let f_vec = Vec.poly1305_update_nblocks rw in
+    let repeat_bf_vec = repeat_blocks_f size_block t1 f_vec nb_vec in
+    let repeat_bf_t1 = repeat_blocks_f size_block t1 f nb in
+    normalize_n r (repeat_bf_vec i acc_vec) == PLoops.repeat_w #pfelem 1 nb_vec repeat_bf_t1 i (normalize_n r acc_vec))
 
-  let f = S.poly1305_update1 r size_block in
-  let repeat_bf_s0 = repeat_blocks_f size_block t0 f (len0 / size_block) in
-  let repeat_bf_t0 = repeat_blocks_f size_block text f (len / size_block) in
+let poly_update_multi_lemma_loop1 r text i acc_vec = ()
 
-  let aux_repeat_bf (i:nat{i < len0 / size_block}) (acc:pfelem) : Lemma
-    (repeat_bf_s0 i acc == repeat_bf_t0 i acc)
-    = let nb = len0 / size_block in
-      assert ((i+1) * size_block <= nb * size_block);
-      let block = Seq.slice text (i*size_block) (i*size_block+size_block) in
-      FStar.Seq.lemma_len_slice text (i*size_block) (i*size_block+size_block);
-      assert (repeat_bf_s0 i acc == f block acc);
-      assert (repeat_bf_t0 i acc == f block acc)
-  in
 
-  let acc1 = load_acc #w acc0 t0 in
-  poly_update_multi_lemma_load #w text acc0 r;
-  //assert (normalize_n #w acc1 r == repeat_blocks_multi #uint8 #pfelem size_block t0 (S.poly1305_update1 r size_block) acc0);
-  lemma_repeat_blocks_multi #uint8 #pfelem size_block t0 (S.poly1305_update1 r size_block) acc0;
-  //assert (normalize_n #w acc1 r == Loops.repeati (len0 / size_block) repeat_bf_s0 acc0);
-
-  FStar.Classical.forall_intro_2 (aux_repeat_bf);
-  repeati_extensionality #pfelem (len0 / size_block) repeat_bf_s0 repeat_bf_t0 acc0;
-  assert (Loops.repeati (len0 / size_block) repeat_bf_s0 acc0 == Loops.repeati (len0 / size_block) repeat_bf_t0 acc0);
-
-  assert (normalize_n #w acc1 r == Loops.repeati (len0 / size_block) repeat_bf_t0 acc0);
-  Loops.repeati_def (len0 / size_block) repeat_bf_t0 acc0
-
-val poly_update_multi_lemma2:
-    #w:lanes
-  -> text:bytes{0 < length text /\ length text % (w * size_block) = 0}
-  -> acc0:pfelem
-  -> r:pfelem ->
+val poly_update_multi_lemma_loop2:
+    r:pfelem
+  -> text:bytes{2 * size_block <= length text /\ length text % (2 * size_block) = 0 /\ length text % size_block = 0}
+  -> i:nat{i < (length text - 2 * size_block) / (2 * size_block)}
+  -> acc_vec:elem 2 ->
   Lemma
-   (let rw = compute_rw #w r in
+   (let rw = compute_rw #2 r in
     let len = length text in
-    let len0 = w * size_block in
-    let t0 = Seq.slice text 0 len0 in
-    let t1 = Seq.slice text len0 len in
+    let len1 = len - 2 * size_block in
+
+    let nb_vec = len1 / (2 * size_block) in
+    let nb = len1 / size_block in
+    assert (nb == 2 * nb_vec);
+
+    let t1 = Seq.slice text (2 * size_block) len in
     let f = S.poly1305_update1 r size_block in
-    let repeat_bf_t1 = repeat_blocks_f size_block text f (len / size_block) in
+    let f_vec = Vec.poly1305_update_nblocks rw in
+    let repeat_bf_vec = repeat_blocks_f (2 * size_block) t1 f_vec nb_vec in
+    let repeat_bf_t1 = repeat_blocks_f size_block t1 f nb in
+    normalize_n r (repeat_bf_vec i acc_vec) == PLoops.repeat_w #pfelem 2 nb_vec repeat_bf_t1 i (normalize_n r acc_vec))
 
-    let acc1 = load_acc #w acc0 t0 in
-    let acc2 = repeat_blocks_multi #uint8 #(elem w) (w * size_block) t1 (poly1305_update_nblocks #w rw) acc1 in
-    normalize_n #w acc2 r ==
-      Loops.repeat_right (len0 / size_block) (len / size_block)
-        (Loops.fixed_a pfelem) repeat_bf_t1 (normalize_n #w acc1 r))
-let poly_update_multi_lemma2 #w text acc0 r =
-  let rw = compute_rw #w r in
+let poly_update_multi_lemma_loop2 r text i acc_vec0 =
+  let rw = compute_rw #2 r in
   let len = length text in
-  let len0 = w * size_block in
-  let len1 = len - len0 in
-  let t0 = Seq.slice text 0 len0 in
-  FStar.Seq.Base.lemma_len_slice text 0 len0;
-  let t1 = Seq.slice text len0 len in
-  FStar.Seq.Base.lemma_len_slice text len0 len;
+  let len1 = len - 2 * size_block in
 
-  let f = S.poly1305_update1 r size_block in
-  let repeat_bf_s1 = repeat_blocks_f size_block t1 f (len1 / size_block) in
-  let repeat_bf_t1 = repeat_blocks_f size_block text f (len / size_block) in
-
-  let i_start = len0 / size_block in
+  let nb_vec = len1 / (2 * size_block) in
   let nb = len1 / size_block in
-  assert (i_start + nb = len / size_block);
+  assert (nb == 2 * nb_vec);
 
-  let aux_repeat_bf (i:nat{i < nb}) (acc:pfelem) : Lemma
-    (repeat_bf_s1 i acc == repeat_bf_t1 (i_start + i) acc)
-    =
-      let start = i_start * size_block in
-      assert (start + (i+1) * size_block <= start + nb * size_block);
-      let block = Seq.slice text (start+i*size_block) (start+i*size_block+size_block) in
-      FStar.Seq.lemma_len_slice text (start+i*size_block) (start+i*size_block+size_block);
-      assert (repeat_bf_s1 i acc == f block acc);
-      assert (repeat_bf_t1 (len0 / size_block + i) acc == f block acc)
-  in
+  let t1 = Seq.slice text (2 * size_block) len in
+  let f = S.poly1305_update1 r size_block in
+  let f_vec = Vec.poly1305_update_nblocks rw in
+  let repeat_bf_vec = repeat_blocks_f (2 * size_block) t1 f_vec nb_vec in
+  let repeat_bf_t1 = repeat_blocks_f size_block t1 f nb in
 
-  let acc1 = load_acc #w acc0 t0 in
-  let acc2 = repeat_blocks_multi #uint8 #(elem w) (w * size_block) t1 (poly1305_update_nblocks #w rw) acc1 in
-  let acc3 = normalize_n #w acc2 r in
-  assert (acc3 == poly1305_update_multi #w text acc0 r);
-  poly_update_repeat_blocks_multi_lemma #w t1 acc1 r;
-  //assert (acc3 == repeat_blocks_multi #uint8 #pfelem size_block t1 (S.poly1305_update1 r size_block) (normalize_n #w acc1 r));
-  lemma_repeat_blocks_multi #uint8 #pfelem size_block t1 (S.poly1305_update1 r size_block) (normalize_n #w acc1 r);
-  //assert (acc3 == Loops.repeati (len1 / size_block) repeat_bf_s1 (normalize_n #w acc1 r));
-  let acc1_s = normalize_n #w acc1 r in
-  Loops.repeati_def (len1 / size_block) repeat_bf_s1 acc1_s;
-  //assert (acc3 == Loops.repeat_right 0 (len1 / size_block) (Loops.fixed_a pfelem) repeat_bf_s1 acc1_s);
+  let acc1 = PLoops.repeat_w #pfelem 2 nb_vec repeat_bf_t1 i (normalize_n r acc_vec0) in
+  assert (acc1 == repeat_bf_t1 (2*i+1) (repeat_bf_t1 (2*i) (normalize_2 r acc_vec0)));
 
-  FStar.Classical.forall_intro_2 (aux_repeat_bf);
-  repeati_right_extensionality nb i_start (nb+i_start) repeat_bf_s1 repeat_bf_t1 acc1_s;
-  assert (
-    Loops.repeat_right 0 nb (Loops.fixed_a pfelem) repeat_bf_s1 acc1_s ==
-    Loops.repeat_right i_start (i_start+nb) (Loops.fixed_a pfelem) repeat_bf_t1 acc1_s);
+  let b0 = Seq.slice t1 (i * 32) (i * 32 + 16) in
+  let b1 = Seq.slice t1 (i * 32 + 16) (i * 32 + 32) in
+  let c0 = pfadd (pow2 128) (nat_from_bytes_le b0) in
+  let c1 = pfadd (pow2 128) (nat_from_bytes_le b1) in
 
-  assert (acc3 ==
-    Loops.repeat_right (len0 / size_block) (len / size_block)
-    (Loops.fixed_a pfelem)
-    repeat_bf_t1 acc1_s)
+  let acc_vec1 = repeat_bf_vec i acc_vec0 in
+  poly_update_repeat_blocks_multi_lemma2_simplify acc_vec0.[0] acc_vec0.[1] c0 c1 r;
+  assert (normalize_2 r acc_vec1 == PLoops.repeat_w #pfelem 2 nb_vec repeat_bf_t1 i (normalize_n r acc_vec0))
+
+
+val poly_update_multi_lemma_loop4:
+    r:pfelem
+  -> text:bytes{4 * size_block <= length text /\ length text % (4 * size_block) = 0 /\ length text % size_block = 0}
+  -> i:nat{i < (length text - 4 * size_block) / (4 * size_block)}
+  -> acc_vec:elem 4 ->
+  Lemma
+   (let rw = compute_rw #4 r in
+    let len = length text in
+    let len1 = len - 4 * size_block in
+
+    let nb_vec = len1 / (4 * size_block) in
+    let nb = len1 / size_block in
+    assert (nb == 4 * nb_vec);
+
+    let t1 = Seq.slice text (4 * size_block) len in
+    let f = S.poly1305_update1 r size_block in
+    let f_vec = Vec.poly1305_update_nblocks rw in
+    let repeat_bf_vec = repeat_blocks_f (4 * size_block) t1 f_vec nb_vec in
+    let repeat_bf_t1 = repeat_blocks_f size_block t1 f nb in
+    normalize_n r (repeat_bf_vec i acc_vec) == PLoops.repeat_w #pfelem 4 nb_vec repeat_bf_t1 i (normalize_n r acc_vec))
+
+let poly_update_multi_lemma_loop4 r text i acc_vec0 =
+  let rw = compute_rw #4 r in
+  let len = length text in
+  let len1 = len - 4 * size_block in
+
+  let nb_vec = len1 / (4 * size_block) in
+  let nb = len1 / size_block in
+  assert (nb == 4 * nb_vec);
+
+  let t1 = Seq.slice text (4 * size_block) len in
+  let f = S.poly1305_update1 r size_block in
+  let f_vec = Vec.poly1305_update_nblocks rw in
+  let repeat_bf_vec = repeat_blocks_f (4 * size_block) t1 f_vec nb_vec in
+  let repeat_bf_t1 = repeat_blocks_f size_block t1 f nb in
+
+  let acc1 = PLoops.repeat_w #pfelem 4 nb_vec repeat_bf_t1 i (normalize_n r acc_vec0) in
+  assert (acc1 == repeat_bf_t1 (4*i+3) (repeat_bf_t1 (4*i+2)
+    (repeat_bf_t1 (4*i+1) (repeat_bf_t1 (4*i) (normalize_4 r acc_vec0)))));
+
+  let b0 = Seq.slice t1 (i * 64) (i * 64 + 16) in
+  let b1 = Seq.slice t1 (i * 64 + 16) (i * 64 + 32) in
+  let b2 = Seq.slice t1 (i * 64 + 32) (i * 64 + 48) in
+  let b3 = Seq.slice t1 (i * 64 + 48) (i * 64 + 64) in
+  let c0 = pfadd (pow2 128) (nat_from_bytes_le b0) in
+  let c1 = pfadd (pow2 128) (nat_from_bytes_le b1) in
+  let c2 = pfadd (pow2 128) (nat_from_bytes_le b2) in
+  let c3 = pfadd (pow2 128) (nat_from_bytes_le b3) in
+  let r2 = pfmul r r in
+  let r4 = pfmul r2 r2 in
+
+  let acc_vec1 = repeat_bf_vec i acc_vec0 in
+  poly_update_repeat_blocks_multi_lemma4_simplify
+    (pfmul acc_vec0.[0] r4) acc_vec0.[1] acc_vec0.[2] acc_vec0.[3] c0 c1 c2 c3 r;
+  assert (normalize_n r acc_vec1 == PLoops.repeat_w #pfelem 4 nb_vec repeat_bf_t1 i (normalize_n r acc_vec0))
+
+
+val poly_update_multi_lemma_loop:
+    #w:lanes
+  -> r:pfelem
+  -> text:bytes{w * size_block <= length text /\ length text % (w * size_block) = 0 /\ length text % size_block = 0}
+  -> i:nat{i < (length text - w * size_block) / (w * size_block)}
+  -> acc_vec:elem w ->
+  Lemma
+   (let rw = compute_rw #w r in
+    let len = length text in
+    let len1 = len - w * size_block in
+
+    let nb_vec = len1 / (w * size_block) in
+    let nb = len1 / size_block in
+    assert (nb == w * nb_vec);
+
+    let t1 = Seq.slice text (w * size_block) len in
+    let f = S.poly1305_update1 r size_block in
+    let f_vec = Vec.poly1305_update_nblocks rw in
+    let repeat_bf_vec = repeat_blocks_f (w * size_block) t1 f_vec nb_vec in
+    let repeat_bf_t1 = repeat_blocks_f size_block t1 f nb in
+    normalize_n r (repeat_bf_vec i acc_vec) == PLoops.repeat_w #pfelem w nb_vec repeat_bf_t1 i (normalize_n r acc_vec))
+
+let poly_update_multi_lemma_loop #w r text i acc_vec =
+  match w with
+  | 1 -> poly_update_multi_lemma_loop1 r text i acc_vec
+  | 2 -> poly_update_multi_lemma_loop2 r text i acc_vec
+  | 4 -> poly_update_multi_lemma_loop4 r text i acc_vec
+
 
 val poly_update_multi_lemma:
     #w:lanes
-  -> text:bytes{0 < length text /\ length text % (w * size_block) = 0}
+  -> text:bytes{w * size_block <= length text /\ length text % (w * size_block) = 0 /\ length text % size_block = 0}
   -> acc0:pfelem
   -> r:pfelem ->
-    Lemma
-    (poly1305_update_multi #w text acc0 r ==
-      repeat_blocks_multi #uint8 #pfelem size_block text (S.poly1305_update1 r size_block) acc0)
+  Lemma
+  (poly1305_update_multi #w text acc0 r ==
+    repeat_blocks_multi #uint8 #pfelem size_block text (S.poly1305_update1 r size_block) acc0)
+
 let poly_update_multi_lemma #w text acc0 r =
   let rw = compute_rw #w r in
   let len = length text in
-  let f = S.poly1305_update1 r size_block in
-  let repeat_bf_t0 = repeat_blocks_f size_block text f (len / size_block) in
-
   let len0 = w * size_block in
-  let t0 = Seq.slice text 0 len0 in
-  FStar.Seq.Base.lemma_len_slice text 0 len0;
-  let t1 = Seq.slice text len0 len in
-  FStar.Seq.Base.lemma_len_slice text len0 len;
+  let len1 = len - len0 in
+  FStar.Math.Lemmas.modulo_addition_lemma len len0 (- 1);
+  assert (len % len0 == len1 % len0);
 
-  let acc1 = load_acc #w acc0 t0 in
+  let t0 = Seq.slice text 0 len0 in
+  let t1 = Seq.slice text len0 len in
+
+  let acc1 = load_acc #w t0 acc0 in
   let acc2 = repeat_blocks_multi #uint8 #(elem w) (w * size_block) t1 (poly1305_update_nblocks #w rw) acc1 in
-  let acc3 = normalize_n #w acc2 r in
+  let acc3 = normalize_n #w r acc2 in
   assert (acc3 == poly1305_update_multi #w text acc0 r);
-  poly_update_repeat_blocks_multi_lemma #w t1 acc1 r;
-  assert (acc3 == repeat_blocks_multi #uint8 #pfelem size_block t1 (S.poly1305_update1 r size_block) (normalize_n acc1 r));
-  poly_update_multi_lemma2 #w text acc0 r;
-  assert (acc3 ==
-   Loops.repeat_right (len0 / size_block) (len / size_block)
-     (Loops.fixed_a pfelem) repeat_bf_t0 (normalize_n #w acc1 r));
 
-  poly_update_multi_lemma1 #w text acc0 r;
-
-  Loops.repeat_right_plus
-    0 (len0 / size_block) (len / size_block)
-    (Loops.fixed_a pfelem)
-    repeat_bf_t0 acc0;
-  assert (acc3 ==
-    Loops.repeat_right 0 (len / size_block)
-    (Loops.fixed_a pfelem)
-    repeat_bf_t0 acc0);
-  Loops.repeati_def (len / size_block) repeat_bf_t0 acc0;
-  lemma_repeat_blocks_multi #uint8 #pfelem size_block text (S.poly1305_update1 r size_block) acc0;
-  assert (acc3 == repeat_blocks_multi #uint8 #pfelem size_block text (S.poly1305_update1 r size_block) acc0)
-
-//
-// Lemma
-//   (poly #w text acc0 r == S.poly1305_update1 text acc0 r)
-//
-
-val poly_eq_lemma1:
-    #w:lanes
-  -> text:bytes
-  -> acc0:pfelem
-  -> r:pfelem ->
-  Lemma
-  (requires (
-    let len = length text in
-    let sz_block = w * size_block in
-    len / sz_block * sz_block > 0))
-  (ensures (
-    let len = length text in
-    let sz_block = w * size_block in
-    let len0 = len / sz_block * sz_block in
-    let f = S.poly1305_update1 r size_block in
-    let t0 = Seq.slice text 0 len0 in
-    let repeat_bf_s0 = repeat_blocks_f size_block t0 f (len0 / size_block) in
-    let repeat_bf_t0 = repeat_blocks_f size_block text f (len / size_block) in
-    Loops.repeati (len0 / size_block) repeat_bf_s0 acc0 ==
-      Loops.repeat_right 0 (len0 / size_block) (Loops.fixed_a pfelem) repeat_bf_t0 acc0))
-let poly_eq_lemma1 #w text acc0 r =
-  let len = length text in
-  let sz_block = w * size_block in
-  let len0 = len / sz_block * sz_block in
-  let t0 = Seq.slice text 0 len0 in
-  FStar.Seq.Base.lemma_len_slice text 0 len0;
-
-  let f = S.poly1305_update1 r size_block in
-  let repeat_bf_s0 = repeat_blocks_f size_block t0 f (len0 / size_block) in
-  let repeat_bf_t0 = repeat_blocks_f size_block text f (len / size_block) in
-
-  let aux_repeat_bf (i:nat{i < len0 / size_block}) (acc:pfelem) : Lemma
-    (repeat_bf_s0 i acc == repeat_bf_t0 i acc)
-    = let nb = len0 / size_block in
-      assert ((i+1) * size_block <= nb * size_block);
-      let block = Seq.slice text (i*size_block) (i*size_block+size_block) in
-      FStar.Seq.lemma_len_slice text (i*size_block) (i*size_block+size_block);
-      assert (repeat_bf_s0 i acc == f block acc);
-      assert (repeat_bf_t0 i acc == f block acc)
-  in
-
-  let acc1 = poly1305_update_multi #w t0 acc0 r in
-  poly_update_multi_lemma #w t0 acc0 r;
-  lemma_repeat_blocks_multi #uint8 #pfelem size_block t0 (S.poly1305_update1 r size_block) acc0;
-
-  FStar.Classical.forall_intro_2 (aux_repeat_bf);
-  repeati_extensionality #pfelem (len0 / size_block) repeat_bf_s0 repeat_bf_t0 acc0;
-  assert (Loops.repeati (len0 / size_block) repeat_bf_s0 acc0 == Loops.repeati (len0 / size_block) repeat_bf_t0 acc0);
-
-  assert (acc1 == Loops.repeati (len0 / size_block) repeat_bf_t0 acc0);
-  Loops.repeati_def (len0 / size_block) repeat_bf_t0 acc0
-
-val poly_eq_lemma2:
-    #w:lanes
-  -> text:bytes
-  -> acc0:pfelem
-  -> r:pfelem ->
-  Lemma
-  (requires (
-    let len = length text in
-    let sz_block = w * size_block in
-    len / sz_block * sz_block > 0))
-  (ensures (
-    let len = length text in
-    let sz_block = w * size_block in
-    let len0 = len / sz_block * sz_block in
-    let len1 = len - len0 in
-    let t0 = Seq.slice text 0 len0 in
-    let t1 = Seq.slice text len0 len in
-
-    let f = S.poly1305_update1 r size_block in
-    let repeat_bf_s1 = repeat_blocks_f size_block t1 f (len1 / size_block) in
-    let repeat_bf_t1 = repeat_blocks_f size_block text f (len / size_block) in
-
-    let acc1 = poly1305_update_multi #w t0 acc0 r in
-    Loops.repeati (len1 / size_block) repeat_bf_s1 acc1 ==
-      Loops.repeat_right (len0 / size_block) (len / size_block) (Loops.fixed_a pfelem) repeat_bf_t1 acc1))
-let poly_eq_lemma2 #w text acc0 r =
-  let len = length text in
-  let sz_block = w * size_block in
-  let len0 = len / sz_block * sz_block in
-  FStar.Math.Lemmas.multiple_modulo_lemma len0 size_block;
-  assert (len0 % size_block = 0);
-  let len1 = len - len0 in
-  let t0 = Seq.slice text 0 len0 in
-  FStar.Seq.Base.lemma_len_slice text 0 len0;
-  let t1 = Seq.slice text len0 len in
-  FStar.Seq.Base.lemma_len_slice text len0 len;
-
-  let f = S.poly1305_update1 r size_block in
-  let repeat_bf_s1 = repeat_blocks_f size_block t1 f (len1 / size_block) in
-  let repeat_bf_t1 = repeat_blocks_f size_block text f (len / size_block) in
-
-  let i_start = len0 / size_block in
+  let nb_vec = len1 / (w * size_block) in
   let nb = len1 / size_block in
-  assert (i_start + nb = len / size_block);
-
-  let aux_repeat_bf (i:nat{i < nb}) (acc:pfelem) : Lemma
-    (repeat_bf_s1 i acc == repeat_bf_t1 (i_start + i) acc)
-    =
-      let start = i_start * size_block in
-      assert (start + (i+1) * size_block <= start + nb * size_block);
-      let block = Seq.slice text (start+i*size_block) (start+i*size_block+size_block) in
-      FStar.Seq.lemma_len_slice text (start+i*size_block) (start+i*size_block+size_block);
-      assert (repeat_bf_s1 i acc == f block acc);
-      assert (repeat_bf_t1 (i_start + i) acc == f block acc)
-  in
-
-  let acc1 = poly1305_update_multi #w t0 acc0 r in
-  let acc3 = Loops.repeati (len1 / size_block) repeat_bf_s1 acc1 in
-  Loops.repeati_def (len1 / size_block) repeat_bf_s1 acc1;
-
-  FStar.Classical.forall_intro_2 (aux_repeat_bf);
-  repeati_right_extensionality nb i_start (nb+i_start) repeat_bf_s1 repeat_bf_t1 acc1;
-  assert (
-    Loops.repeat_right 0 nb (Loops.fixed_a pfelem) repeat_bf_s1 acc1 ==
-    Loops.repeat_right i_start (i_start+nb) (Loops.fixed_a pfelem) repeat_bf_t1 acc1);
-
-  assert (
-    acc3 == Loops.repeat_right (len0 / size_block) (len / size_block) (Loops.fixed_a pfelem) repeat_bf_t1 acc1)
-
-val poly_eq_lemma12:
-    #w:lanes
-  -> text:bytes
-  -> acc0:pfelem
-  -> r:pfelem ->
-  Lemma
-  (requires (
-    let len = length text in
-    let sz_block = w * size_block in
-    len / sz_block * sz_block > 0))
-  (ensures (
-    let len = length text in
-    let sz_block = w * size_block in
-    let len0 = len / sz_block * sz_block in
-    let len1 = len - len0 in
-    let f = S.poly1305_update1 r size_block in
-    let repeat_bf_s1 = repeat_blocks_f size_block (Seq.slice text len0 len) f (len1 / size_block) in
-    let repeat_bf_t1 = repeat_blocks_f size_block text f (len / size_block) in
-
-    let acc1 = poly1305_update_multi #w (Seq.slice text 0 len0) acc0 r in
-    Loops.repeati (len1 / size_block) repeat_bf_s1 acc1 ==
-      Loops.repeati (len / size_block) repeat_bf_t1 acc0))
-let poly_eq_lemma12 #w text acc0 r =
-  let len = length text in
-  let sz_block = w * size_block in
-  let len0 = len / sz_block * sz_block in
-  assert (len0 % size_block = 0);
-  let t0 = Seq.slice text 0 len0 in
-  FStar.Seq.Base.lemma_len_slice text 0 len0;
-  let acc1 = poly1305_update_multi #w t0 acc0 r in
-  poly_update_multi_lemma #w t0 acc0 r;
-  lemma_repeat_blocks_multi #uint8 #pfelem size_block t0 (S.poly1305_update1 r size_block) acc0;
+  assert (nb == w * nb_vec);
 
   let f = S.poly1305_update1 r size_block in
-  let repeat_bf_s0 = repeat_blocks_f size_block (Seq.slice text 0 len0) f (len0 / size_block) in
-  let repeat_bf_t0 = repeat_blocks_f size_block text f (len / size_block) in
-  assert (acc1 == Loops.repeati (len0 / size_block) repeat_bf_s0 acc0);
-  poly_eq_lemma1 #w text acc0 r;
-  assert (acc1 ==
-    Loops.repeat_right 0 (len0 / size_block)
-    (Loops.fixed_a pfelem) repeat_bf_t0 acc0);
+  let f_vec = Vec.poly1305_update_nblocks rw in
 
-  let t1 = Seq.slice text len0 len in
-  let len1 = len - len0 in
-  FStar.Seq.Base.lemma_len_slice text len0 len;
-  let acc2 = S.poly1305_update t1 acc1 r in
-  lemma_repeat_blocks #uint8 #pfelem size_block t1 f (S.poly1305_update_last r) acc1;
+  let repeat_bf_vec = repeat_blocks_f (w * size_block) t1 f_vec nb_vec in
+  let repeat_bf_t0 = repeat_blocks_f size_block t0 f w in
+  let repeat_bf_t1 = repeat_blocks_f size_block t1 f nb in
 
-  let repeat_bf_s1 = repeat_blocks_f size_block (Seq.slice text len0 len) f (len1 / size_block) in
-  let repeat_bf_t1 = repeat_blocks_f size_block text f (len / size_block) in
-  let acc3 = Loops.repeati (len1 / size_block) repeat_bf_s1 acc1 in
-  poly_eq_lemma2 #w text acc0 r;
-  assert (acc3 ==
-    Loops.repeat_right (len0 / size_block) (len / size_block)
-    (Loops.fixed_a pfelem)
-    repeat_bf_t1 acc1);
+  poly_update_multi_lemma_load_acc #w r text acc0;
+  //assert (normalize_n r (load_acc #w t0 acc0) == PLoops.repeat_w #pfelem w 1 repeat_bf_t0 0 acc0);
+  FStar.Classical.forall_intro_2 (poly_update_multi_lemma_loop #w r text);
+  //assert (forall (i:nat{i < nb_vec}) (acc_vec:elem w).
+    //  normalize_n r (repeat_bf_vec i acc_vec) == PLoops.repeat_w #pfelem w nb_vec repeat_bf_t1 i (normalize_n r acc_vec));
 
-  Loops.repeat_right_plus
-    0 (len0 / size_block) (len / size_block)
-    (Loops.fixed_a pfelem)
-    (repeat_blocks_f size_block text (S.poly1305_update1 r size_block) (len / size_block)) acc0;
-  assert (acc3 ==
-    Loops.repeat_right 0 (len / size_block)
-    (Loops.fixed_a pfelem)
-    repeat_bf_t1 acc0);
-  Loops.repeati_def (len / size_block) repeat_bf_t1 acc0
+  PLoops.lemma_repeat_blocks_multi_vec #uint8 #pfelem #(elem w)
+    w size_block text f f_vec (normalize_n r) (load_acc #w) acc0
 
-val poly_eq_lemma_pos:
+
+val poly1305_update_vec_lemma:
     #w:lanes
   -> text:bytes
   -> acc0:pfelem
   -> r:pfelem ->
-  Lemma
-  (requires (
-    let len = length text in
-    let sz_block = w * size_block in
-    len / sz_block * sz_block > 0))
-  (ensures poly1305_update #w text acc0 r == S.poly1305_update text acc0 r)
-let poly_eq_lemma_pos #w text acc0 r =
+  Lemma (poly1305_update #w text acc0 r == S.poly1305_update text acc0 r)
+
+let poly1305_update_vec_lemma #w text acc0 r =
   let len = length text in
   let sz_block = w * size_block in
   let len0 = len / sz_block * sz_block in
+  FStar.Math.Lemmas.cancel_mul_mod (len / sz_block) sz_block;
+  assert (len0 % sz_block = 0);
   assert (len0 % size_block = 0);
   let t0 = Seq.slice text 0 len0 in
-  FStar.Seq.Base.lemma_len_slice text 0 len0;
-  let acc1 = poly1305_update_multi #w t0 acc0 r in
-
-  let t1 = Seq.slice text len0 len in
-  let len1 = len - len0 in
-  FStar.Seq.Base.lemma_len_slice text len0 len;
-  let acc2 = S.poly1305_update t1 acc1 r in
-
   let f = S.poly1305_update1 r size_block in
-  lemma_repeat_blocks #uint8 #pfelem size_block t1 f (S.poly1305_update_last r) acc1;
+  let l = S.poly1305_update_last r in
 
-  let repeat_bf_s1 = repeat_blocks_f size_block (Seq.slice text len0 len) f (len1 / size_block) in
-  let repeat_bf_t1 = repeat_blocks_f size_block text f (len / size_block) in
-  let acc3 = Loops.repeati (len1 / size_block) repeat_bf_s1 acc1 in
-  let last = Seq.slice t1 (len1 / size_block * size_block) len1 in
-  let acc4 = S.poly1305_update_last r (len1 % size_block) last acc3 in
-  assert (acc2 == acc4);
-
-  poly_eq_lemma12 #w text acc0 r;
-  assert (acc3 == Loops.repeati (len / size_block) repeat_bf_t1 acc0);
-
-  assert (last == Seq.slice (Seq.slice text len0 len) (len1 / size_block * size_block) len1);
-  FStar.Seq.Properties.slice_slice text len0 len (len1 / size_block * size_block) len1;
-  assert (last == Seq.slice text (len / size_block * size_block) len);
-
-  lemma_repeat_blocks #uint8 #pfelem size_block text f (S.poly1305_update_last r) acc0
+  if len0 > 0 then begin
+    poly_update_multi_lemma #w t0 acc0 r;
+    PLoops.repeat_blocks_split #uint8 #pfelem size_block len0 text f l acc0 end
+  else ()
 
 
-val poly_eq_lemma_zero:
-    #w:lanes
-  -> text:bytes
-  -> acc0:pfelem
-  -> r:pfelem ->
-  Lemma
-  (requires length text < w*size_block)
-  (ensures poly1305_update #w text acc0 r == S.poly1305_update text acc0 r)
-let poly_eq_lemma_zero #w text acc0 r = ()
-
-val poly_eq_lemma:
-    #w:lanes
-  -> text:bytes
-  -> acc0:pfelem
-  -> r:pfelem ->
-  Lemma
-    (poly1305_update #w text acc0 r == S.poly1305_update text acc0 r)
-let poly_eq_lemma #w text acc0 r =
-  let len = length text in
-  let sz_block = w * size_block in
-  let len0 = len / sz_block * sz_block in
-  if len0 > 0 then
-    poly_eq_lemma_pos #w text acc0 r
-  else
-    poly_eq_lemma_zero #w text acc0 r
-
-val poly1305_vec_is_poly1305:
+val poly1305_vec_lemma:
     #w:lanes
   -> msg:bytes
   -> k:S.key ->
-  Lemma
-    (poly1305_mac #w msg k == S.poly1305_mac msg k)
-let poly1305_vec_is_poly1305 #w msg k =
+  Lemma (poly1305_mac #w msg k == S.poly1305_mac msg k)
+
+let poly1305_vec_lemma #w msg k =
   let acc0, r = S.poly1305_init k in
-  poly_eq_lemma #w msg acc0 r
+  poly1305_update_vec_lemma #w msg acc0 r

@@ -47,8 +47,7 @@ val blake2_incremental_update:
 let blake2_incremental_update a input state =
   let ll = length input in
   let nll = ll / size_block a in
-  if length input = 0 then Some state else (
-  if not (state.n + nll + 2 <= max_size_t) then None else (
+  if length input = 0 || not (state.n + nll + 2 <= max_size_t) then None else (
   (* Compute the remainder space in the block *)
   let rb = size_block a - state.pl in
   (* Fill the partial block in the state *)
@@ -74,7 +73,7 @@ let blake2_incremental_update a input state =
     let input2 = sub #uint8 #ll input (ll - ll2) ll2 in
     let block = update_sub block 0 ll2 input2 in
     Some ({state with pl = ll2; block = block})
-  )))
+  ))
 
 
 
@@ -85,7 +84,6 @@ val blake2_incremental_finish:
   Tot (lbytes nn)
 
 let blake2_incremental_finish a state nn =
-  let empty = create 0 (u8 0) in
   let last = sub state.block 0 state.pl in
   // Not very efficient because a full block will be recreated from the partial input
   let hash = blake2_update_last a (state.n * size_block a + state.pl) state.pl last state.hash in

@@ -18,7 +18,7 @@ module Vec = Hacl.Spec.GF128.Vec
 friend Lib.LoopCombinators
 
 
-#set-options "--z3rlimit 50 --max_fuel 0"
+#set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 1"
 
 
 let as_get_acc #s h ctx = feval h (gsub ctx 0ul (felem_len s))
@@ -173,7 +173,7 @@ let gf128_update_scalar_f #s r nb len text i acc =
   gf128_update1 #s acc tb r
 
 
-#set-options "--max_fuel 1"
+#push-options "--max_fuel 1"
 
 inline_for_extraction noextract
 val gf128_update_scalar:
@@ -224,7 +224,7 @@ let gf128_update_scalar #s acc r len text =
     as_seq_gsub h1 text (nb *! 16ul) rem;
     assert (disjoint acc last);
     gf128_update_last #s acc rem last r)
-
+#pop-options
 
 inline_for_extraction noextract
 val gf128_update_multi_add_mul_f:
@@ -250,10 +250,12 @@ val gf128_update_multi_add_mul_f:
 let gf128_update_multi_add_mul_f #s pre nb len text b4 i acc =
   let tb = sub text (i *! 64ul) 64ul in
   encode4 b4 tb;
+  fadd_acc4 b4 acc;
   normalize4 acc b4 pre
 
 
 //NI
+#push-options "--max_fuel 1"
 inline_for_extraction noextract
 val gf128_update_multi_add_mul:
     #s:field_spec
@@ -302,7 +304,7 @@ let gf128_update_multi_add_mul #s acc pre len text =
   let h1 = ST.get () in
   assert (feval h1 acc == Lib.LoopCombinators.repeati (v nb) (spec_fh h0) (feval h0 acc));
   pop_frame ()
-
+#pop-options
 
 inline_for_extraction noextract
 val gf128_update_multi_mul_add_f:
@@ -346,7 +348,7 @@ val load_acc:
     disjoint b4 text /\ disjoint b4 acc /\
     feval4 h acc4 == LSeq.create 4 zero)
   (ensures  fun h0 _ h1 -> modifies2 acc4 b4 h0 h1 /\
-    feval4 h1 acc4 == Vec.load_acc (feval h0 acc) (as_seq h0 text))
+    feval4 h1 acc4 == Vec.load_acc (as_seq h0 text) (feval h0 acc))
 
 let load_acc #s acc tb acc4 b4 =
   let h0 = ST.get () in
@@ -357,6 +359,7 @@ let load_acc #s acc tb acc4 b4 =
   fadd4 acc4 b4
 
 
+#push-options "--max_fuel 1"
 inline_for_extraction noextract
 val gf128_update_multi_mul_add_loop:
     #s:field_spec
@@ -404,6 +407,7 @@ let gf128_update_multi_mul_add_loop #s pre len text acc4 b4 =
 
   let h1 = ST.get () in
   assert (feval4 h1 acc4 == Lib.LoopCombinators.repeati (v nb) (spec_fh h0) (feval4 h0 acc4))
+#pop-options
 
 
 #set-options "--z3rlimit 100"
@@ -436,10 +440,7 @@ let gf128_update_multi_mul_add #s acc pre len text =
   let text1 = sub text 64ul len1 in
   gf128_update_multi_mul_add_loop #s pre len1 text1 acc4 b4;
 
-  felem_set_zero acc;
-  let h0 = ST.get () in
   normalize4 acc acc4 pre;
-  assume (Vec.fadd4 (Lib.IntVector.create4 (feval h0 acc) zero zero zero) (feval4 h0 acc4) == feval4 h0 acc4);
   pop_frame ()
 
 

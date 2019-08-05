@@ -67,7 +67,7 @@ $(OUTPUT_DIR)/%.krml: | .depend
 
 # 2. Generation of .c files
 
-KREMLIN_TESTLIB=-fbuiltin-uint128 -add-include '"TestLib.h"' -add-include '"C_Endianness.h"' -add-include '"C_String.h"' -add-include '"FStar_UInt_8_16_32_64.h"' $(KREMLIB)/dist/generic/testlib.c
+KREMLIN_TESTLIB=-fbuiltin-uint128 -add-include '"TestLib.h"' -add-include '"lowstar_endianness.h"' -add-include '"C_String.h"' -add-include '"FStar_UInt_8_16_32_64.h"' $(KREMLIB)/dist/generic/testlib.c
 
 KREMLIN=$(KREMLIN_HOME)/krml
 
@@ -83,7 +83,7 @@ $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	-bundle 'C=C.Endianness' \
 	-bundle 'Hacl.Hash.SHA2=Hacl.Impl.*,Hacl.Hash.*,Spec.Hash.*' \
 	-library 'C,FStar' \
-	-drop 'LowStar,Spec,Prims,Lib,C.Loops.*,FStar,C,C.String' \
+	-drop 'LowStar,Spec,Prims,Lib,C.Loops.*,FStar,C.String' \
 	-add-include '"c/Lib_PrintBuffer.h"' \
 	-tmpdir $(GENERATED_DIR) \
 	$^

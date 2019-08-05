@@ -101,7 +101,7 @@ val sum_state:
 
 let sum_state st ost =  map2T #MUT #uint32 #uint32 #uint32 (size 16) st ( +. ) st ost
 
-
+#set-options "--z3rlimit 100"
 inline_for_extraction
 val xor_block:
     o:lbuffer uint8 64ul

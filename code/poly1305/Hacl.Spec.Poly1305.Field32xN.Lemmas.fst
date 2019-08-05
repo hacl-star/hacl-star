@@ -61,7 +61,7 @@ let precomp_r5_fits_lemma #w r =
     precomp_r5_as_tup64 #w r 0;
     precomp_r5_as_tup64 #w r 1;
     precomp_r5_as_tup64 #w r 2;
-    precomp_r5_as_tup64 #w r 3  
+    precomp_r5_as_tup64 #w r 3
 
 val precomp_r5_fits_lemma2:
     #w:lanes
@@ -540,7 +540,7 @@ let fmul_r2_normalize50 (a0, a1, a2, a3, a4) (r0, r1, r2, r3, r4) (r20, r21, r22
   assert (felem_fits5 a (1, 2, 1, 1, 1));
   a
 
-#push-options "--z3rlimit 400 --max_fuel 1 --max_ifuel 0"
+#push-options "--z3rlimit 150 --max_fuel 0 --max_ifuel 0"
 
 val fmul_r2_normalize51:
     a:felem5 2
@@ -572,6 +572,8 @@ let fmul_r2_normalize51 a fa1 =
   FStar.Math.Lemmas.modulo_lemma (v a2 + v a12) (pow2 64);
   FStar.Math.Lemmas.modulo_lemma (v a3 + v a13) (pow2 64);
   FStar.Math.Lemmas.modulo_lemma (v a4 + v a14) (pow2 64);
+  assert (felem_fits5 out (2, 4, 2, 2, 2));
+
   assert (
     as_nat5 (o0, o1, o2, o3, o4) ==
     as_nat5 (a0, a1, a2, a3, a4) + as_nat5 (a10, a11, a12, a13, a14));
@@ -579,7 +581,6 @@ let fmul_r2_normalize51 a fa1 =
     (as_nat5 (a0, a1, a2, a3, a4)) (as_nat5 (a10, a11, a12, a13, a14)) Vec.prime;
   FStar.Math.Lemmas.lemma_mod_plus_distr_r
     (as_nat5 (a0, a1, a2, a3, a4) % Vec.prime) (as_nat5 (a10, a11, a12, a13, a14)) Vec.prime;
-  assert (felem_fits5 out (2, 4, 2, 2, 2));
   out
 
 #pop-options
@@ -597,7 +598,7 @@ val fmul_r2_normalize5_lemma:
     (ensures (
       let out = fmul_r2_normalize5 acc r r2 in
       acc_inv_t out /\
-      (feval5 out).[0] == Vec.normalize_2 (feval5 acc) (feval5 r).[0]))
+      (feval5 out).[0] == Vec.normalize_2 (feval5 r).[0] (feval5 acc)))
   [SMTPat (fmul_r2_normalize5 acc r r2)]
 let fmul_r2_normalize5_lemma acc r r2 =
   let a = fmul_r2_normalize50 acc r r2 in
@@ -811,7 +812,7 @@ val fmul_r4_normalize5_lemma:
     (ensures (
       let out = fmul_r4_normalize5 acc r r_5 r4 in
       acc_inv_t out /\
-      (feval5 out).[0] == Vec.normalize_4 (feval5 acc) (feval5 r).[0]))
+      (feval5 out).[0] == Vec.normalize_4 (feval5 r).[0] (feval5 acc)))
   [SMTPat (fmul_r4_normalize5 acc r r_5 r4)]
 let fmul_r4_normalize5_lemma acc fr fr_5 fr4 =
   let fr2 = fmul_r5 fr fr fr_5 in

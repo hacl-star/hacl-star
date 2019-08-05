@@ -91,7 +91,7 @@ let ith_bit (k:lbytes 32) (i:size_nat{i < 256}) =
 let cswap2 (sw:uint8) (x:ext_point) (xp1:ext_point) =
   if uint_to_nat sw = 1 then (xp1, x) else (x, xp1)
 
-let ladder_step (k:lbytes 32) (i:nat{i <= 255}) (x, xp1) =
+let ladder_step (k:lbytes 32) (i:nat{i < 256}) (x, xp1) =
   let bit = ith_bit k (255 - i) in
   let x, xp1 = cswap2 bit x xp1 in
   let xx = point_double x in
@@ -117,7 +117,7 @@ let recover_x (y:nat) (sign:bool) : Tot (option elem) =
       let x = if ((x *% x) -% x2) <> zero then x *% modp_sqrt_m1 else x in
       if ((x *% x) -% x2) <> zero then None
       else (
-        let x = if (x % 2 = 1) <> sign then prime - x else x in
+        let x = if (x % 2 = 1) <> sign then (prime - x) % prime else x in
         Some x)))
 
 let point_compress (p:ext_point) : Tot (lbytes 32) =
@@ -161,23 +161,36 @@ let point_equal (p:ext_point) (q:ext_point) =
 /// Ed25519 API
 ///
 
+let expand_keys (secret: lbytes 32) : (lbytes 32 & lbytes 32 & lbytes 32) =
+  let s, prefix = secret_expand secret in
+  let pub = secret_to_public secret in
+  pub, s, prefix
+
+val sign_expanded:
+  pub:lbytes 32 ->
+  s:lbytes 32 ->
+  prefix:lbytes 32 ->
+  msg: bytes{64 + length msg <= max_size_t} ->
+  Tot (lbytes 64)
+let sign_expanded pub s prefix msg =
+  let len = length msg in
+  let r = sha512_modq (32 + len) (concat #uint8 #32 #(length msg) prefix msg) in
+  let r' = point_mul (nat_to_bytes_le 32 r) g in
+  let rs = point_compress r' in
+  let h = sha512_modq (64 + len)
+    (concat #uint8 #64 #(length msg) (concat #uint8 #32 #32 rs pub) msg)
+  in
+  let s = (r + (h * nat_from_bytes_le s) % q) % q in
+  concat #uint8 #32 #32 rs (nat_to_bytes_le 32 s)
+
 val sign:
     secret: lbytes 32
   -> msg: bytes{64 + length msg <= max_size_t} ->
   Tot (lbytes 64)
 
 let sign secret msg =
-  let len = length msg in
-  let a, prefix = secret_expand secret in
-  let a' = point_compress (point_mul a g) in
-  let r = sha512_modq (32 + len) (concat #uint8 #32 #(length msg) prefix msg) in
-  let r' = point_mul (nat_to_bytes_le 32 r) g in
-  let rs = point_compress r' in
-  let h = sha512_modq (64 + len)
-    (concat #uint8 #64 #(length msg) (concat #uint8 #32 #32 rs a') msg)
-  in
-  let s = (r + (h * nat_from_bytes_le a) % q) % q in
-  concat #uint8 #32 #32 rs (nat_to_bytes_le 32 s)
+  let pub, s, prefix = expand_keys secret in
+  sign_expanded pub s prefix msg
 
 val verify:
     public: lbytes 32

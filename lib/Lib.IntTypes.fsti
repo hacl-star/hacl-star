@@ -205,7 +205,7 @@ unfold
 type size_t = uint_t U32 PUB
 
 // 2019.7.19: Used only by experimental Blake2b; remove?
-unfold 
+unfold
 type size128_t = uint_t U128 PUB
 
 unfold
@@ -568,6 +568,15 @@ val logand_spec: #t:inttype -> #l:secrecy_level
   -> b:int_t t l
   -> Lemma (v (a `logand` b) == v a `logand_v` v b)
   //[SMTPat (v (a `logand` b))]
+
+val logand_le:#t:inttype{unsigned t} -> #l:secrecy_level -> a:uint_t t l -> b:uint_t t l ->
+  Lemma (requires True)
+        (ensures v (logand a b) <= v a /\ v (logand a b) <= v b)
+
+val logand_mask: #t:inttype{unsigned t} -> #l:secrecy_level -> a:uint_t t l -> b:uint_t t l ->   m:pos{m < bits t} ->
+  Lemma
+    (requires v b == pow2 m - 1)
+    (ensures v (logand #t #l a b) == v a % pow2 m)
 
 [@(strict_on_arguments [0])]
 inline_for_extraction

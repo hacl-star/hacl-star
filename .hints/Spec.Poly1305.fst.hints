@@ -1,5 +1,5 @@
 [
-  "„€Ð¹vïìê\u0012ÌQ †p`\u001d",
+  "œ™jX’\u0002ŽO@òæ¯³>ÐB",
   [
     [
       "Spec.Poly1305.prime",
@@ -8,7 +8,7 @@
       0,
       [ "@query" ],
       0,
-      "e81123107431852fa8739619a16a56dc"
+      "13dfb80497fb6cd63848e4004f093bd4"
     ],
     [
       "Spec.Poly1305.fadd",
@@ -26,7 +26,7 @@
         "typing_Spec.Poly1305.prime"
       ],
       0,
-      "d30d2e544d692104572278d75d454f86"
+      "02bd66119c2e649c70d471492c9871af"
     ],
     [
       "Spec.Poly1305.fmul",
@@ -44,7 +44,7 @@
         "typing_Spec.Poly1305.prime"
       ],
       0,
-      "6419fec2bb8bea624c89a3e99bea2e09"
+      "2e16da988423d4aff17f916d6a366387"
     ],
     [
       "Spec.Poly1305.zero",
@@ -58,7 +58,7 @@
         "typing_Spec.Poly1305.prime"
       ],
       0,
-      "2a28b5a1eda54788a55a665924e2cddf"
+      "daa2830eef9c8b46d695046f6bc8ce81"
     ],
     [
       "Spec.Poly1305.size_block",
@@ -79,7 +79,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "9722105bffafc101ba471ef9936491f7"
+      "b430a92d7e041664d63d4575f8889007"
     ],
     [
       "Spec.Poly1305.size_key",
@@ -100,7 +100,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "113e70f3bf7a768157bb2155be2fab93"
+      "80e7932c14496aba5918952b89887c5f"
     ],
     [
       "Spec.Poly1305.poly1305_encode_r",
@@ -135,7 +135,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "d5b36310f0df24a0a688ff2e3ef1ebfe"
+      "cb7d944b91552db42ac7165beb1d2b8e"
     ],
     [
       "Spec.Poly1305.poly1305_init",
@@ -151,23 +151,20 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "d1499ef29e49874bd010e84ef41d4d68"
+      "ff2836f1528ef47f168d705e1ab8342e"
     ],
     [
-      "Spec.Poly1305.poly1305_update1",
+      "Spec.Poly1305.encode",
       1,
       0,
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "constructor_distinct_Lib.IntTypes.U8",
         "equality_tok_Lib.IntTypes.SEC@tok",
-        "equality_tok_Lib.IntTypes.U8@tok",
         "equation_Lib.ByteSequence.nat_from_bytes_le",
-        "equation_Lib.IntTypes.bits", "equation_Lib.Sequence.length",
-        "equation_Lib.Sequence.lseq", "equation_Prims.nat",
-        "equation_Prims.pos", "equation_Spec.Poly1305.size_block",
-        "int_inversion", "primitive_Prims.op_Addition",
+        "equation_Lib.Sequence.length", "equation_Lib.Sequence.lseq",
+        "equation_Prims.nat", "equation_Prims.pos",
+        "equation_Spec.Poly1305.size_block", "int_inversion",
         "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
@@ -178,7 +175,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok"
       ],
       0,
-      "246db639a14d4c2b849af5f586e553a5"
+      "d85c6a9259d22531de7713e5da5e048b"
     ],
     [
       "Spec.Poly1305.poly1305_finish",
@@ -204,7 +201,7 @@
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42"
       ],
       0,
-      "45acfe3ab4f50833b6012a00b51c4f67"
+      "c75f35aa7aa49e466a52913847fd20f0"
     ],
     [
       "Spec.Poly1305.poly1305_update_last",
@@ -213,7 +210,7 @@
       0,
       [ "@query", "equation_Spec.Poly1305.size_block" ],
       0,
-      "2951f170facb55a3447ec7a0ff596f7e"
+      "f35a4a43972c16ba4cd3e52192e4e472"
     ],
     [
       "Spec.Poly1305.poly1305_update",
@@ -229,7 +226,7 @@
         "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "63db11c1456b97e79801732959a5031b"
+      "dd68d3f222bf65c2b784cf44f352a201"
     ]
   ]
 ]
