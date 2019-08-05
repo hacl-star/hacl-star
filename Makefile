@@ -756,7 +756,7 @@ HACL_OLD_FILES=\
 
 # Customizations for regular, msvc and gcc flavors.
 dist/compact/Makefile.basic: KRML_EXTRA=$(COMPACT_FLAGS) \
-  -ctypes EverCrypt.Hash,EverCrypt.AEAD
+  -ctypes EverCrypt.Ed25519
 
 dist/compact-msvc/Makefile.basic: KRML_EXTRA=$(COMPACT_FLAGS) -falloca -ftail-calls
 
