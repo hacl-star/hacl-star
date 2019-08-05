@@ -67,6 +67,16 @@ let bn_assign_bn #oLen #iLen o i =
   assume (as_snat h o = as_snat h i)
 
 inline_for_extraction
+val bn_zero:
+     #len:bn_len
+  -> StackInline (lbignum len)
+    (requires fun h -> true)
+    (ensures fun h0 b h1 ->
+      stack_allocated b h0 h1 (Seq.create (v len) (u64 0)) /\
+      issnat 1 /\ as_snat h1 b = 0)
+let bn_zero #len = admit(); create len (u64 0)
+
+inline_for_extraction
 val bn_one:
      #len:bn_len
   -> StackInline (lbignum len)

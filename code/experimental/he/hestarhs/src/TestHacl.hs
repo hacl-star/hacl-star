@@ -2,6 +2,7 @@ module TestHacl where
 
 import Universum
 
+import Control.Concurrent (threadDelay)
 import qualified Data.Time.Clock.POSIX as P
 import System.Random (randomRIO)
 
@@ -9,21 +10,80 @@ import Hacl
 import qualified Lib as L
 import Playground
 
-
 testBNs :: IO ()
 testBNs = do
-    a <- toBignumExact 500
-    print =<< fromBignum 1 a
-    b <- toBignumExact 100
-    print =<< fromBignum 1 b
+    let bitl = 128
+    n <- genPrime bitl
+    let bn0 = fromIntegral $ length $ inbase b64 n
+    let bn = bn0 + 1
 
-    c <- toBignumExact 0
-    bnSub 1 1 a b c
-    print =<< fromBignum 1 c
+    a <- randomRIO (0,n-1)
+    b <- randomRIO (0,n-1)
+    c <- randomRIO (0,a-1)
 
-    d <- toBignumExact 0
-    bnMulFitting 1 1 1 a b d
-    print =<< fromBignum 1 d
+    bnN <- toBignum bn n
+    bnA <- toBignum bn a
+    bnB <- toBignum bn b
+    res <- toBignum bn 0
+
+    bnModExp bn bn bnN bnA bnB res
+    expRes <- fromBignum bn res
+    print expRes
+    print $ expRes == ((a ^ b) `mod` n)
+
+    error "no more"
+
+
+benchBNs :: IO ()
+benchBNs = do
+    let bitl = 1024
+    n <- genPrime bitl
+    let bn0 = fromIntegral $ length $ inbase b64 n
+    let bn = bn0 + 1
+
+    a <- randomRIO (0,n-1)
+    b <- randomRIO (0,n-1)
+    c <- randomRIO (0,a-1)
+
+    s1 <- randomRIO (0,2^(bitl`div`3))
+    s2 <- randomRIO (0,2^(bitl`div`3))
+
+    bnN <- toBignum bn n
+    bnA <- toBignum bn a
+    bnB <- toBignum bn b
+    bnC <- toBignum bn c
+    res <- toBignum bn 0
+    bnS1 <- toBignum bn s1
+    bnS2 <- toBignum bn s2
+
+    time0 <- P.getPOSIXTime
+
+    replicateM_ 10000 $ bnRemainder bn bn bnA bnC res
+
+    time1 <- P.getPOSIXTime
+
+    replicateM_ 10000 $ bnModAdd bn bnN bnA bnB res
+    --replicateM_ 10000 $ bnModKara bn 16 bnN bnA bnB res
+
+    time2 <- P.getPOSIXTime
+
+    replicateM_ 10000 $ bnModMul bn bnN bnA bnB res
+
+    time3 <- P.getPOSIXTime
+
+    replicateM_ 10000 $ bnMulFitting bn bn bn bnS1 bnS2 res
+
+    time4 <- P.getPOSIXTime
+
+    bnModExp bn bn bnN bnA bnB res
+
+    time5 <- P.getPOSIXTime
+
+    putTextLn $ "Mod: " <> show ((time1 - time0) / 10000)
+    putTextLn $ "Add: " <> show ((time2 - time1) / 10000)
+    putTextLn $ "Mul: " <> show ((time3 - time2) / 10000)
+    putTextLn $ "MulNonmod: " <> show ((time3 - time2) / 10000)
+    putTextLn $ "Exp: " <> show (time5 - time4)
 
     putText "mda\n"
 
