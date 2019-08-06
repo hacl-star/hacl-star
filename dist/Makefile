@@ -141,7 +141,7 @@ lib_gen/%_gen.exe: lib/%_bindings.cmx lib_gen/%_gen.cmx
 lib/%_stubs.ml lib/%_c_stubs.c: lib_gen/%_gen.exe
 	$<
 
-libocamlevercrypt.cmxa: $(ALL_BINDINGS) $(ALL_ML_STUBS) $(ALL_C_STUBS) libevercrypt.so
+libocamlevercrypt.cmxa: $(ALL_BINDINGS) $(ALL_ML_STUBS) $(ALL_C_STUBS) libevercrypt.$(SO)
 	ocamlfind mklib -o ocamlevercrypt $(filter-out %.so,$^) -L. -levercrypt
 
 endif
