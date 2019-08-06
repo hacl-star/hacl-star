@@ -21,7 +21,8 @@ library
                        Hacl.Support
                        TestHacl
                        Playground
-  build-depends:       async
+  build-depends:       array >= 0.5.3.0
+                     , async
                      , base >=4.12 && <4.13
                      , bytestring >=0.10
                      , containers >= 0.5.7.1

@@ -9,7 +9,6 @@ import System.Random (randomIO, randomRIO)
 import Lib hiding (crt)
 
 
-
 genPrime :: Int -> IO Integer
 genPrime bits = do
     p <- randomRIO (2 ^ (bits - 4),2 ^ bits)
