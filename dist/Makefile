@@ -97,7 +97,7 @@ ifneq (,$(wildcard lib_gen))
 OCAMLOPT=ocamlfind opt -package ctypes,ctypes.foreign,ctypes.stubs -linkpkg -I lib
 OCAMLDEP=ocamlfind dep -I lib
 
-CFLAGS += -I "$(shell ocamlfind query ctypes)"
+CFLAGS += -I "$(shell ocamlfind query ctypes)" -I "$(shell ocamlfind c -where)"
 
 # Just names.
 ALL_OCAML=$(patsubst lib_gen/%_gen.ml,%,$(wildcard lib_gen/*_gen.ml))
@@ -141,7 +141,7 @@ lib_gen/%_gen.exe: lib/%_bindings.cmx lib_gen/%_gen.cmx
 lib/%_stubs.ml lib/%_c_stubs.c: lib_gen/%_gen.exe
 	$<
 
-libocamlevercrypt.cmxa: $(ALL_BINDINGS) $(ALL_ML_STUBS) $(ALL_C_STUBS) libevercrypt.so
+libocamlevercrypt.cmxa: $(ALL_BINDINGS) $(ALL_ML_STUBS) $(ALL_C_STUBS) libevercrypt.$(SO)
 	ocamlfind mklib -o ocamlevercrypt $(filter-out %.so,$^) -L. -levercrypt
 
 endif
