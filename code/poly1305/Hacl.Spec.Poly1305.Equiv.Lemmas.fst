@@ -746,7 +746,7 @@ let poly_update_repeat_blocks_multi_lemma4 text acc_vec0 r =
 
   let f_vec = updaten #4 (compute_rw #4 r) in
   let f = update1 r size_block in
-  let repeat_bf_vec: (i:nat { i < nb_vec }) -> _ -> _ = repeat_blocks_f (4 * size_block) text f_vec nb_vec in
+  let repeat_bf_vec: (i:nat { i < nb_vec }) -> elem 4 -> elem 4 = repeat_blocks_f (4 * size_block) text f_vec nb_vec in
   let repeat_bf_sc = repeat_blocks_f size_block text f nb in
 
   let acc_vec1 = repeat_blocks_multi #uint8 #(elem 4) (4 * size_block) text f_vec acc_vec0 in
@@ -789,8 +789,14 @@ let poly_update_repeat_blocks_multi_lemma4 text acc_vec0 r =
       assert (acc5 == acc4)
   in
 
+  let cast (n: nat{n <= nb_vec}) (f: (i:nat { i < nb_vec } -> elem 4 -> elem 4)):
+    Tot (f':(i:nat { i < n } -> elem 4 -> elem 4){ f == f' })
+  =
+    f
+  in
+
   let rec aux (n:nat{n <= nb_vec}) : Lemma
-    (normalize_4 (Loops.repeati n repeat_bf_vec acc_vec0) r ==
+    (normalize_4 (Loops.repeati n (cast n repeat_bf_vec) acc_vec0) r ==
      Loops.repeati (4 * n) repeat_bf_sc acc0) =
     if n = 0 then (
       Loops.eq_repeati0 n repeat_bf_vec acc_vec0;
