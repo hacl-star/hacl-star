@@ -746,7 +746,7 @@ let poly_update_repeat_blocks_multi_lemma4 text acc_vec0 r =
 
   let f_vec = updaten #4 (compute_rw #4 r) in
   let f = update1 r size_block in
-  let repeat_bf_vec = repeat_blocks_f (4 * size_block) text f_vec nb_vec in
+  let repeat_bf_vec: (i:nat { i < nb_vec }) -> _ -> _ = repeat_blocks_f (4 * size_block) text f_vec nb_vec in
   let repeat_bf_sc = repeat_blocks_f size_block text f nb in
 
   let acc_vec1 = repeat_blocks_multi #uint8 #(elem 4) (4 * size_block) text f_vec acc_vec0 in
@@ -814,9 +814,8 @@ let poly_update_repeat_blocks_multi_lemma4 text acc_vec0 r =
       assert (normalize_4 res1 r == res2)
     )
   in
-  let n:n:nat{n <= nb_vec} = nb_vec in
 
-  aux n
+  aux nb_vec
 
 val normalize_4_lemma: acc:elem 4 -> r:pfelem -> Lemma
   (normalize_4 acc r ==
