@@ -12,14 +12,17 @@ import Playground
 
 testBNs :: IO ()
 testBNs = do
-    let bitl = 128
+    let bitl = 1024
     n <- genPrime bitl
-    let bn0 = fromIntegral $ length $ inbase b64 n
-    let bn = bn0 + 1
-
-    a <- randomRIO (0,n-1)
-    b <- randomRIO (0,n-1)
-    c <- randomRIO (0,a-1)
+    let bn = fromIntegral $ length $ inbase b64 n
+    a <- randomRIO (0,n`div`2)
+    b <- randomRIO (0,n`div`2)
+    putTextLn $ "n: " <> show n
+    putTextLn $ "a: " <> show a
+    putTextLn $ "a2: " <> show (a*a)
+    putTextLn $ "b: " <> show b
+    putTextLn $ "(a+b) mod n: " <> show (a+b)
+    putTextLn $ "a^b mod n: " <> show (L.exp n a b)
 
     bnN <- toBignum bn n
     bnA <- toBignum bn a
@@ -28,10 +31,9 @@ testBNs = do
 
     bnModExp bn bn bnN bnA bnB res
     expRes <- fromBignum bn res
-    print expRes
-    print $ expRes == ((a ^ b) `mod` n)
 
-    error "no more"
+    putTextLn $ "expRes: " <> show expRes
+    print $ expRes == (L.exp n a b)
 
 
 benchBNs :: IO ()
@@ -63,7 +65,6 @@ benchBNs = do
     time1 <- P.getPOSIXTime
 
     replicateM_ 10000 $ bnModAdd bn bnN bnA bnB res
-    --replicateM_ 10000 $ bnModKara bn 16 bnN bnA bnB res
 
     time2 <- P.getPOSIXTime
 
@@ -75,17 +76,15 @@ benchBNs = do
 
     time4 <- P.getPOSIXTime
 
-    bnModExp bn bn bnN bnA bnB res
+    replicateM_ 10000 $ bnModExp bn bn bnN bnA bnB res
 
     time5 <- P.getPOSIXTime
 
     putTextLn $ "Mod: " <> show ((time1 - time0) / 10000)
     putTextLn $ "Add: " <> show ((time2 - time1) / 10000)
     putTextLn $ "Mul: " <> show ((time3 - time2) / 10000)
-    putTextLn $ "MulNonmod: " <> show ((time3 - time2) / 10000)
-    putTextLn $ "Exp: " <> show (time5 - time4)
-
-    putText "mda\n"
+    putTextLn $ "MulFit: " <> show ((time3 - time2) / 10000)
+    putTextLn $ "Exp(ssl): " <> show ((time5 - time4) / 10000)
 
 
 testGM :: Int -> IO ()
