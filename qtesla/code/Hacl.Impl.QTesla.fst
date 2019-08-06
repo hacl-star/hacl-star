@@ -1648,7 +1648,7 @@ let qtesla_sign_compute_v v_ y a =
         (fun k ->
             let hInLoop = ST.get () in
             assert(v k < v params_k);
-            lemma_sub_poly_is_montgomery hInLoop a (index_poly a k) k;
+            lemma_sub_poly_is_montgomery hInLoop a (get_poly a k) k;
             poly_mul (index_poly v_ k) (index_poly a k) y_ntt;
             let hOutLoop = ST.get () in
             assert(is_poly_k_equal hInLoop hOutLoop a);
@@ -2293,6 +2293,14 @@ let qtesla_verify mlen smlen m sm pk =
 
 // API is identical here. Although defining "let crypto_sign_keypair = qtesla_keygen" causes KreMLin to extract
 // crypto_sign_keypair as a function pointer pointing to qtesla_keygen; this way gives us an actual wrapper.
+val crypto_sign_keypair:
+    pk: lbuffer uint8 crypto_publickeybytes
+  -> sk: lbuffer uint8 crypto_secretkeybytes
+  -> Stack (r:I32.t{r == 0l})
+    (requires fun h -> live h pk /\ live h sk /\
+                    disjoint R.state pk /\ disjoint R.state sk /\ disjoint pk sk)
+    (ensures fun h0 _ h1 -> modifies3 R.state pk sk h0 h1)
+
 let crypto_sign_keypair pk sk = qtesla_keygen pk sk
 
 val crypto_sign:
