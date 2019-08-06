@@ -42,10 +42,22 @@ shuffle xs = do
           accum (S.insert ix used) ((xs !! ix):current) (j+1)
     accum S.empty [] 0
 
+data EncContext s =
+    EncContext
+        { encZero :: PaheCiph s
+        , encOne  :: PaheCiph s
+        }
+
+newEncContext :: Pahe s => PahePk s -> IO (EncContext s)
+newEncContext pk = do
+    let k = paheK pk
+    encZero <- paheEnc pk $ replicate k 0
+    encOne <- paheEnc pk $ replicate k 1
+    pure EncContext{..}
 
 -- Compute r <= c jointly. Client has r, server has c.
-dgkClient :: Pahe s => Socket Req -> PahePk s -> Int -> [Integer] -> IO (PaheCiph s)
-dgkClient sock pk l rs = do
+dgkClient :: Pahe s => Socket Req -> PahePk s -> EncContext s -> Int -> [Integer] -> IO (PaheCiph s)
+dgkClient sock pk EncContext{..} l rs = do
     threadDelay 100000
 
     let k = paheK pk
@@ -59,16 +71,15 @@ dgkClient sock pk l rs = do
     cs <- mapM (paheFromBS pk) =<< receiveMulti sock
     log "Client: dgk main body"
 
-    enczero <- paheEnc pk $ replicate k 0
-    encone <- paheEnc pk $ replicate k 1
 
+    log "Client: computing xors"
     xors <- forM (cs `zip` [0..]) $ \(ci,i) -> do
         let bitmask = rbits !! i
         let bitmaskNeg = map (\x -> 1 - x) bitmask
 
         -- ci * maskNeg + (1-ci) * mask
         a <- paheSIMDMulScal pk ci bitmaskNeg
-        oneMinCi <- paheSIMDSub pk encone ci
+        oneMinCi <- paheSIMDSub pk encOne ci
         c <- paheSIMDMulScal pk oneMinCi bitmask
         paheSIMDAdd pk a c
 
@@ -78,24 +89,29 @@ dgkClient sock pk l rs = do
     --log $ "Client: s = " <> show s0
     s <- paheEnc pk s0
 
+    let computeXorSums i prev = do
+            nextXorSum <- paheSIMDAdd pk prev (xors !! i)
+            xorsTail <- if i == 0 then pure [] else computeXorSums (i-1) nextXorSum
+            pure $ nextXorSum : xorsTail
+    xorsums <- reverse <$> computeXorSums (l-1) encZero
 
+    log "Client: computing cis"
     ci <- forM [0..l-1] $ \i -> do
         a <- paheSIMDAdd pk s (encRBits !! i)
         b <- paheSIMDSub pk a (cs !! i)
 
         if i == l-1 then pure b else do
-            xorsum <- foldrM (paheSIMDAdd pk) enczero $ map (xors !!) [i+1..l-1]
-            xorsum3 <- paheSIMDMulScal pk xorsum $ replicate k 3
+            xorsum3 <- paheSIMDMulScal pk (xorsums !! (i+1)) $ replicate k 3
             paheSIMDAdd pk b xorsum3
 
-    xorsumFull <- foldrM (paheSIMDAdd pk) enczero xors
-    xorsumFull3 <- paheSIMDMulScal pk xorsumFull $ replicate k 3
+    xorsumFull3 <- paheSIMDMulScal pk (xorsums !! 0) $ replicate k 3
     cLast <- paheSIMDAdd pk deltaEnc xorsumFull3
 
+    log "Client: shuffling"
     ciShuffled <- shuffle =<< mapM (paheMultBlind pk) (cLast : ci)
 
     sendMulti sock =<< (NE.fromList <$> mapM (paheToBS pk) ciShuffled)
-
+    log "Client: send,waiting"
     zs <- paheFromBS pk =<< receive sock
 
     let compeps = do
@@ -103,7 +119,7 @@ dgkClient sock pk l rs = do
           let sMaskNeg = map (\x -> 1 - x) sMask
           -- zs * s + (1-zs) * neg s
           a <- paheSIMDMulScal pk zs sMask
-          oneMinZs <- paheSIMDSub pk encone zs
+          oneMinZs <- paheSIMDSub pk encOne zs
           c <- paheSIMDMulScal pk oneMinZs sMaskNeg
           paheSIMDAdd pk a c
 
@@ -144,11 +160,12 @@ secureCompareClient ::
        Pahe s
     => Socket Req
     -> PahePk s
+    -> EncContext s
     -> Int
     -> PaheCiph s
     -> PaheCiph s
     -> IO (PaheCiph s)
-secureCompareClient sock pk l x y = do
+secureCompareClient sock pk ctx@EncContext{..} l x y = do
     log "Client: secureCompare started"
     let k = paheK pk
 
@@ -163,27 +180,13 @@ secureCompareClient sock pk l x y = do
     cDiv2l <- paheFromBS pk =<< receive sock
 
     log "Client: secureCompare, running dgk"
-    eps <- dgkClient sock pk l $ map (`mod` (2^l)) rhos
+    eps <- dgkClient sock pk ctx l $ map (`mod` (2^l)) rhos
 
-    oneEnc <- paheEnc pk $ replicate k 1
-    epsNeg <- paheSIMDSub pk oneEnc eps
+    epsNeg <- paheSIMDSub pk encOne eps
 
     rDiv2 <- paheEnc pk $ map (`div` (2^l)) rhos
     rPlusEpsNeg <- paheSIMDAdd pk rDiv2 epsNeg
     delta <- paheSIMDSub pk cDiv2l rPlusEpsNeg
-
-    --deltaDec <- paheDec sk delta
-    --xDec <- (!! 0) <$> paheDec sk x
-    --yDec <- (!! 0) <$> paheDec sk y
-    --unless (deltaDec !! 0 == ((2^l) + xDec - yDec) `div` (2^l)) $ do
-    --    print xDec
-    --    print yDec
-    --    print =<< paheDec sk eps
-    --    print =<< paheDec sk epsNeg
-    --    print =<< paheDec sk cDiv2l
-    --    print deltaDec
-    --    print $ map (`div` (2^l)) rhos
-    --    error "SecureCompare is broken"
 
     log "Client: secureCompare exited"
 
@@ -211,12 +214,12 @@ w64FromBs = fromIntegral . frombase 256 . map fromIntegral . BS.unpack
 argmaxClient ::
        Pahe s
     => Socket Req
-    -> PaheSk s
     -> PahePk s
+    -> EncContext s
     -> Int
     -> [PaheCiph s]
     -> IO (PaheCiph s, [Word64])
-argmaxClient sock sk pk l vals = do
+argmaxClient sock pk ctx@EncContext{..} l vals = do
     let k = paheK pk
     let m = length vals
     perm <- shuffle [0..m-1]
@@ -225,7 +228,7 @@ argmaxClient sock sk pk l vals = do
     oneEnc <- paheEnc pk $ replicate k 1
     let loop curMax i = if i == m then pure curMax else do
             log $ "Client loop index " <> show i
-            bi <- secureCompareClient sock pk l
+            bi <- secureCompareClient sock pk ctx l
                 (vals !! (perm !! i)) curMax
             ri <- replicateM k $ randomRIO (0, 2^(l + 80))
             si <- replicateM k $ randomRIO (0, 2^(l + 80))
@@ -242,13 +245,8 @@ argmaxClient sock sk pk l vals = do
                 tmp3 <- paheSIMDAdd pk vi tmp1
                 paheSIMDSub pk tmp3 tmp2
 
-            newMaxDec <- paheDec sk newMax
-            log $ "Client, new max: " <> show newMaxDec
-
             loop newMax (i+1)
 
-    startMaxVal <- paheDec sk (vals !!(perm !! 0))
-    log $ "Client, start max: " <> show startMaxVal
     maxval <- loop (vals !!(perm !! 0)) 1
     log "Client: argmax loop ended"
 
@@ -306,20 +304,22 @@ runProtocol =
       connect req "inproc://argmax"
 
       putTextLn "Keygen..."
-      let k = 8
+      let k = 16
       sk <- paheKeyGen @PailSep k
       let pk = paheToPublic sk
+      eCtx <- newEncContext pk
 
       let testArgmax = replicateM_ 1 $ do
-              let l = 5
+              let l = 64
               let m = 6
               vals <- replicateM m $ replicateM k $ randomRIO (0,2^l-1)
               print vals
               let expected = foldr1 (\l1 l2 -> map (uncurry max) $ zip l1 l2) vals
               encVals <- mapM (paheEnc pk) vals
 
+
               ((maxes,indices),()) <- concurrently
-                  (argmaxClient req sk pk l encVals)
+                  (argmaxClient req pk eCtx l encVals)
                   (argmaxServer rep sk l m)
 
               putTextLn "Maxes/indices"
@@ -345,7 +345,7 @@ runProtocol =
 
 
               (gamma,()) <- concurrently
-                  (secureCompareClient req pk l csEnc rsEnc)
+                  (secureCompareClient req pk eCtx l csEnc rsEnc)
                   (secureCompareServer rep sk l)
 
               result <- paheDec sk gamma
