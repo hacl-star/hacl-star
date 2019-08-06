@@ -80,7 +80,7 @@ instance Pahe PailSep where
 
 
     paheKeyGen pss_simdn = do
-        (p,q,_,_,_) <- genDataPaillier 512
+        (p,q,_,_,_) <- genDataPaillier 1024
         let n = p * q
         let pss_n_raw = n
         let pss_bn = fromIntegral $ length $ inbase b64 (n*n)

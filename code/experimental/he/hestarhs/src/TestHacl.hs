@@ -10,6 +10,14 @@ import Hacl
 import qualified Lib as L
 import Playground
 
+measureTimeSingle :: Text -> IO a -> IO a
+measureTimeSingle label action = do
+    time0 <- P.getPOSIXTime
+    r <- action
+    time1 <- P.getPOSIXTime
+    putTextLn $ label <> " took : " <> show (round ((time1-time0) * 1000) :: Integer) <> "ms"
+    pure r
+
 testBNs :: IO ()
 testBNs = do
     let bitl = 1024
