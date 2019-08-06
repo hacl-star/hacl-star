@@ -711,8 +711,6 @@ let poly_update_repeat_blocks_multi_lemma2 text acc_vec0 r =
     )
   in aux nb_vec
 
-#reset-options "--z3rlimit 200 --max_fuel 2 --max_ifuel 0"
-
 val poly_update_repeat_blocks_multi_lemma4:
     text:bytes{length text % (4 * size_block) = 0}
   -> acc:elem 4
@@ -720,10 +718,30 @@ val poly_update_repeat_blocks_multi_lemma4:
   Lemma
     (normalize_4 (repeat_blocks_multi #uint8 #(elem 4) (4 * size_block) text (updaten #4 (compute_rw #4 r)) acc) r ==
     repeat_blocks_multi #uint8 #pfelem size_block text (update1 r size_block) (normalize_4 acc r))
+
+// Note: this proof has been extremely hard to debug for failures... it seems
+// that z3 was extremely sensitive to minute variations. Here's what AF and JP
+// did to diagnose it.
+//
+// - Reproduce the build exactly "as-is" using the container *AND* a previous
+//   call to `git checkout hints` to make sure we can reproduce the conditions
+//   for failure.
+// - Once we could ascertain the failure, we tweaked the random seed until it
+//   would allow us to reproduce the failure.
+// - CAVEAT: the failure would go away after one attempt and reset-options does
+//   not restart the solver if it induces no state change in the options, hence
+//   why we combine reset-options with restart-solver to be triple sure that we
+//   get a fresh z3 for every attempt.
+#reset-options "--z3rlimit 250 --max_fuel 2 --max_ifuel 0"
+
+private let lemma_div_nat_is_nat (a:nat) (b:pos) : Lemma (a/b >= 0) = ()
+
+#restart-solver
 let poly_update_repeat_blocks_multi_lemma4 text acc_vec0 r =
   let len = length text in
 
-  let nb_vec = len / (4 * size_block) in
+  lemma_div_nat_is_nat len (4 * size_block);
+  let nb_vec: nat = len / (4 * size_block) in
   let nb = len / size_block in
 
   let f_vec = updaten #4 (compute_rw #4 r) in
@@ -767,7 +785,7 @@ let poly_update_repeat_blocks_multi_lemma4 text acc_vec0 r =
       let acc3 = repeat_bf_sc (4*i+2) acc2 in
       let acc4 = repeat_bf_sc (4*i+3) acc3 in
       poly_update_repeat_blocks_multi_lemma4_simplify
-	acc_vec0.[0] acc_vec0.[1] acc_vec0.[2] acc_vec0.[3] c0 c1 c2 c3 r r2 r4;
+        acc_vec0.[0] acc_vec0.[1] acc_vec0.[2] acc_vec0.[3] c0 c1 c2 c3 r r2 r4;
       assert (acc5 == acc4)
   in
 
@@ -795,7 +813,10 @@ let poly_update_repeat_blocks_multi_lemma4 text acc_vec0 r =
       aux_repeat_bf (n-1) next_p;
       assert (normalize_4 res1 r == res2)
     )
-  in aux nb_vec
+  in
+  let n:n:nat{n <= nb_vec} = nb_vec in
+
+  aux n
 
 val normalize_4_lemma: acc:elem 4 -> r:pfelem -> Lemma
   (normalize_4 acc r ==
