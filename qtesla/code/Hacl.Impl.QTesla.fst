@@ -54,14 +54,14 @@ private let _RADIX32 = size params_radix32
     (requires FStar.Int.fits (I32.v (I32.(mask ^^ value)) - I32.v mask) I32.n /\
               ((mask == 0l) <==> (I32.v value >= 0)) /\
               ((mask == (-1l)) <==> (I32.v value < 0)))
-    (ensures I32.v I32.((mask ^^ value) -^ mask) == FStar.Math.Lib.abs (I32.v value)) = 
+    (ensures I32.v I32.((mask ^^ value) -^ mask) == FStar.Math.Lib.abs (I32.v value)) =
     [@inline_let] let op_Plus_Hat = I32.op_Plus_Hat in
     [@inline_let] let op_Subtraction_Hat = I32.op_Subtraction_Hat in
     [@inline_let] let op_Greater_Greater_Hat = I32.op_Greater_Greater_Hat in
     [@inline_let] let op_Amp_Hat = I32.op_Amp_Hat in
     [@inline_let] let op_Bar_Hat = I32.op_Bar_Hat in
     [@inline_let] let op_Star_Hat = I32.op_Star_Hat in
-    [@inline_let] let lognot = I32.lognot in  
+    [@inline_let] let lognot = I32.lognot in
     lemma_int32_logxor_identities value;
     Int.logxor_commutative (I32.v mask) (I32.v value);
     assert((mask == 0l) ==> ( (mask ^^ value) == value ));
@@ -100,7 +100,7 @@ let abs_ value = I32.ct_abs value
     I32.((mask ^^ value) -^ mask)*)
 
 private unfold let check_ES_list_bound (h:HS.mem) (list: lbuffer I32.t params_n) (i:nat{i < v params_n}) =
-    let e = I32.v (bget h list i) in e >= 0 /\ e <= pow2 (v params_s_bits - 1) 
+    let e = I32.v (bget h list i) in e >= 0 /\ e <= pow2 (v params_s_bits - 1)
 
 // {:pattern check_ES_list_bound h list i}
 private unfold let check_ES_list_bound_buffer (h:HS.mem) (list: lbuffer I32.t params_n) =
@@ -126,7 +126,7 @@ private let lemma_mask (a:I32.t) (mask:I32.t) : Lemma
         Int.lognot_negative (v a);
         UInt.lemma_lognot_value #I32.n (Int.to_uint (v a))
         end
-    
+
 
 private inline_for_extraction noextract
 let check_ES_ordered_exchange_ct (list: lbuffer I32.t params_n) (i: size_t{v i + 1 < v params_n}) : Stack unit
@@ -158,12 +158,12 @@ let check_ES_ordered_exchange_ct (list: lbuffer I32.t params_n) (i: size_t{v i +
     // 5b. list[i+1] & ~mask == 0
     // 5c. list[i+1] <- list[i] & mask | list[i+1] & ~mask == list[i] | 0 == list[i]
     // 6. list[i] <- temp == list[i+1] (previous value)
-    // 
+    //
     // Similarly for list[i+1] >= list[i], mask is 0, and so the quantities ANDed with ~mask instead survive
     // and each element is reassigned its own value and nothing changes.
     let a = ((list.(i +. size 1)) -^ (list.(i))) in
     let mask = a >>>^ (_RADIX32 -. size 1) in
-    lemma_mask a mask;  
+    lemma_mask a mask;
     let temp = ((list.(i +. size 1)) &^ mask) |^
                           ((list.(i)) &^ (lognot mask)) in
     list.(i +. size 1) <- (list.(i)) &^ mask |^
@@ -183,7 +183,7 @@ let check_ES_ordered_exchange_ct (list: lbuffer I32.t params_n) (i: size_t{v i +
     lemma_int32_lognot_zero mask;
     assert((mask == 0l) ==> (lognot mask == (-1l)));
     assert((mask == (-1l)) ==> (lognot mask == 0l));
-    assert((mask == (-1l)) ==> ( (temp == (bget h3 list (v i + 1))) /\ 
+    assert((mask == (-1l)) ==> ( (temp == (bget h3 list (v i + 1))) /\
                                  ((bget h3end list (v i + 1)) == (bget h3 list (v i))) /\
                                  ((bget h3end list (v i)) == (bget h3 list (v i + 1))) ));
 
@@ -199,7 +199,7 @@ let check_ES_ordered_exchange_ct (list: lbuffer I32.t params_n) (i: size_t{v i +
     assert( (0l |^ (bget h3 list (v i))) == (bget h3 list (v i)) );
     //assert((mask == 0l) ==> ( ( ((bget h3 list (v i + 1)) &^ mask)  |^
     //                             ((bget h3 list (v i)) &^ (lognot mask))) == (bget h3 list (v i)) ));
-    assert((mask == 0l) ==> ( (temp == (bget h3 list (v i))) /\ 
+    assert((mask == 0l) ==> ( (temp == (bget h3 list (v i))) /\
                               ((bget h3end list (v i + 1)) == (bget h3 list (v i + 1))) /\
                               ((bget h3end list (v i)) == (bget h3 list (v i))) ));
     //assert((mask == 0l) ==> (bget h3end list (v i + 1)) == (bget h3 list (v i + 1)));
@@ -239,7 +239,7 @@ let check_ES p bound =
   [@inline_let] let op_Amp_Hat = I32.op_Amp_Hat in
   [@inline_let] let op_Bar_Hat = I32.op_Bar_Hat in
   [@inline_let] let lognot = I32.lognot in
-  
+
   let h0 = ST.get () in
   // Nik says push_frame should give us (modifies B.loc_none hInit h0) but it doesn't.
   // Will talk to Tahina.
@@ -252,7 +252,7 @@ let check_ES p bound =
   assert(forall (i:nat{i < v params_n}). {:pattern bget h0 p i} bget hInit p i == bget h0 p i);
   assert(is_poly_sampler_output h0 p);
   for (size 0) params_n
-      (fun h _ -> live h p /\ live h list /\ modifies1 list h0 h /\ 
+      (fun h _ -> live h p /\ live h list /\ modifies1 list h0 h /\
                (forall (i:nat{i < v params_n}). {:pattern bget h0 p i} bget h0 p i == bget h p i) /\
                is_poly_sampler_output h p /\
                (forall i . check_ES_list_bound h list i))
@@ -263,8 +263,8 @@ let check_ES p bound =
         let abspj = abs_ (elem_to_int32 pj) in
         assert(I32.v abspj >= 0 /\ I32.v abspj <= pow2 (v params_s_bits) - 1);
         list.(j) <- abspj;
-        let h = ST.get() in 
-        assert(check_ES_list_bound h list (v j)); 
+        let h = ST.get() in
+        assert(check_ES_list_bound h list (v j));
         assert(forall (i:nat{i < v params_n}). {:pattern bget h p i} bget hx p i == bget h p i);
         assert(is_poly_sampler_output h p)
       );
@@ -356,10 +356,10 @@ val poly_uniform_setA:
   -> value: pub_uint32
   -> Stack unit
     (requires fun h -> live h a /\ live h iBuf /\ disjoint a iBuf /\ v (bget h iBuf 0) <= v params_n * v params_k /\
-                    is_poly_k_montgomery_i h a (v (bget h iBuf 0))) 
+                    is_poly_k_montgomery_i h a (v (bget h iBuf 0)))
     (ensures fun h0 _ h1 -> modifies2 a iBuf h0 h1 /\ v (bget h1 iBuf 0) <= v params_n * v params_k /\
                          ((v value < elem_v params_q /\ v (bget h0 iBuf 0) < (v params_k * v params_n)) ==>
-                          v (bget h1 iBuf 0) = v (bget h0 iBuf 0) + 1) /\ 
+                          v (bget h1 iBuf 0) = v (bget h0 iBuf 0) + 1) /\
                           is_poly_k_montgomery_i h1 a (v (bget h1 iBuf 0)))
 
 let poly_uniform_setA a iBuf value =
@@ -367,11 +367,11 @@ let poly_uniform_setA a iBuf value =
     let i = iBuf.(size 0) in
     let h = ST.get () in assert(is_poly_k_montgomery_i h a (v i)); assert(modifies0 h h);
     if (value <. params_q && i <. (params_k *! params_n))
-    then ( let h0 = ST.get () in assert(is_poly_k_montgomery_i h0 a (v i)); 
+    then ( let h0 = ST.get () in assert(is_poly_k_montgomery_i h0 a (v i));
            [@inline_let] let reduction = reduce I64.((uint32_to_int64 value) *^ params_r2_invn) in
            assert(is_montgomery reduction);
            a.(i) <- reduction; // reduce I64.((uint32_to_int64 value) *^ params_r2_invn);
-           let h1 = ST.get () in 
+           let h1 = ST.get () in
            assert(is_montgomery (bget h1 a (v i)));
            assert(forall (j:nat{j < v i}). {:pattern bget h1 a j} bget h0 a j == bget h1 a j);
            assert(is_poly_k_montgomery_i h1 a (v i));
@@ -420,7 +420,7 @@ let poly_uniform_do_while a seed pos i nblocks buf dmsp =
          pos.(size 0) <- size 0 )
     else ();
 
-    let h1 = ST.get () in 
+    let h1 = ST.get () in
     assert(modifies4 nblocks buf dmsp pos h0 h1);
 
     let pos0 = pos.(size 0) in
@@ -458,7 +458,7 @@ let poly_uniform_do_while a seed pos i nblocks buf dmsp =
 
     let h3 = ST.get () in
     assert(modifies (loc nblocks |+| loc buf |+| loc dmsp |+| loc pos |+| loc a |+| loc i) h0 h3)
-    
+
 #set-options "--z3rlimit 100"
 
 val poly_uniform:
@@ -467,7 +467,7 @@ val poly_uniform:
   -> Stack unit
     (requires fun h -> live h a /\ live h seed /\ disjoint a seed)
     (ensures fun h0 _ h1 -> modifies1 a h0 h1 /\ is_poly_k_montgomery h1 a)
-    
+
 let poly_uniform a seed =
     push_frame();
     let pos = create (size 1) (size 0) in
@@ -476,8 +476,8 @@ let poly_uniform a seed =
     let nblocks = create (size 1) params_genA in
     // BUG (kkane): If nbytes is 3 and 1 isn't added to the size of buf, then there is a one byte overrun read
     // when extracting val4 above. Since buf is a stack-allocated variable the read should be into something else
-    // on the stack (so it won't crash), which then gets masked out (so it doesn't affect the result). 
-    // This may be one of the few memory safety violations in the history of the world that doesn't cause a problem. 
+    // on the stack (so it won't crash), which then gets masked out (so it doesn't affect the result).
+    // This may be one of the few memory safety violations in the history of the world that doesn't cause a problem.
     // But F* sees the violation and so we allocate an extra byte of space which we can safely read into.
     let buf = create (shake128_rate *! params_genA +. size 1) (u8 0) in
     let dmsp = create (size 1) (u16 0) in
@@ -496,8 +496,8 @@ let poly_uniform a seed =
         (fun _ -> poly_uniform_do_while a seed pos i nblocks buf dmsp);
 
     let h1 = ST.get () in
-    assert(v (bget h1 i 0) == v params_k * v params_n); 
-    assert(is_poly_k_montgomery_i h1 a (v params_k * v params_n)); 
+    assert(v (bget h1 i 0) == v params_k * v params_n);
+    assert(is_poly_k_montgomery_i h1 a (v params_k * v params_n));
     assert(is_poly_k_montgomery h1 a);
     pop_frame();
     let h2 = ST.get () in
@@ -514,7 +514,7 @@ val qtesla_keygen_sample_gauss_poly:
   -> p: poly
   -> k: size_t{v k <= v params_k}
   -> Stack unit
-    (requires fun h -> live h randomness_extended /\ live h nonce /\ live h p /\ 
+    (requires fun h -> live h randomness_extended /\ live h nonce /\ live h p /\
                     disjoint randomness_extended nonce /\ disjoint randomness_extended p /\ disjoint nonce p)
     (ensures fun h0 _ h1 -> modifies2 nonce p h0 h1 /\ is_poly_sampler_output h1 p)
 
@@ -532,13 +532,13 @@ let qtesla_keygen_sample_gauss_poly randomness_extended nonce p k =
     assert(loc_includes (loc e) (loc ek2))*)
 
 private let lemma_sub_poly_is_montgomery
-    (h: HS.mem) 
+    (h: HS.mem)
     (p: poly_k)
     (sp: poly)
     (k: size_t{v k < v params_k}) : Lemma
     //(requires is_poly_k_montgomery h p /\ sp == get_poly p k)
     (requires is_poly_k_montgomery h p /\ sp == gsub p (k *! params_n) params_n)
-    (ensures is_poly_montgomery h sp) = 
+    (ensures is_poly_montgomery h sp) =
     assert(forall (i:nat{i < v params_k * v params_n}) . is_montgomery (bget h p i));
     assert(sp == gsub p (k *! params_n) params_n);
     assert(forall (i:nat{i >= v k * v params_n /\ i < v k * v params_n + v params_n}) . bget h p i == bget h sp (i - v k * v params_n));
@@ -553,7 +553,7 @@ val qtesla_keygen_compute_tk:
   -> s_ntt : poly
   -> k : UI32.t{UI32.v k < v params_k}
   -> Stack unit
-    (requires fun h -> let bufs = [bb t; bb a; bb e; bb s_ntt] in 
+    (requires fun h -> let bufs = [bb t; bb a; bb e; bb s_ntt] in
                     FStar.BigOps.big_and (live_buf h) bufs /\ FStar.BigOps.pairwise_and disjoint_buf bufs /\
                     is_poly_k_montgomery h a /\ is_poly_k_sk h e /\ is_poly_montgomery h s_ntt /\
                     is_poly_k_pk_i h t (UI32.v k * v params_n))
@@ -590,16 +590,16 @@ let qtesla_keygen_do_while nonce e randomness_extended k =
     let ek = index_poly e k in
     qtesla_keygen_sample_gauss_poly randomness_extended nonce ek k;
     let hAfterSample = ST.get () in
-    assert(is_poly_sampler_output hAfterSample ek);            
+    assert(is_poly_sampler_output hAfterSample ek);
     let res = not (check_ES ek params_Le) in
     let hLoopEnd = ST.get () in
     //assert(is_poly_equal hAfterSample hLoopEnd ek);
     assert(is_poly_sampler_output hLoopEnd ek);
     assert(ek == gsub e (k *! params_n) params_n);
     assert(forall (i:nat{i < v params_n}) . is_sampler_output (bget hLoopEnd ek i));
-    assert(forall (i:nat{i >= UI32.v k * v params_n /\ i < UI32.v k * v params_n + v params_n}) . 
+    assert(forall (i:nat{i >= UI32.v k * v params_n /\ i < UI32.v k * v params_n + v params_n}) .
            bget hLoopEnd e i == bget hLoopEnd ek (i - UI32.v k * v params_n));
-    assert(forall (i:nat{i >= UI32.v k * v params_n /\ i < UI32.v k * v params_n + v params_n}) . 
+    assert(forall (i:nat{i >= UI32.v k * v params_n /\ i < UI32.v k * v params_n + v params_n}) .
            is_sampler_output (bget hLoopEnd e i));
     assert(forall (i:nat{i < UI32.v k * v params_n + v params_n}) . is_sampler_output (bget hLoopEnd e i));
     assert(is_poly_k_sampler_output_i hLoopEnd e (UI32.v k * v params_n));
@@ -613,7 +613,7 @@ let lemma_poly_k_sampler_output_sk (h:HS.mem) (e:poly_k) : Lemma
 
 let lemma_sampler_output_is_pmq (h:HS.mem) (p:poly) : Lemma
     (requires is_poly_sampler_output h p)
-    (ensures is_poly_pmq h p) = 
+    (ensures is_poly_pmq h p) =
     assert(forall (i:nat{i < v params_n}) . is_sampler_output (bget h p i));
     assert(forall (i:nat{i < v params_n}) . is_pmq (bget h p i))
 
@@ -623,7 +623,7 @@ val qtesla_keygen_:
   -> pk: lbuffer uint8 crypto_publickeybytes
   -> sk: lbuffer uint8 crypto_secretkeybytes
   -> Stack (r:I32.t{r == 0l})
-    (requires fun h -> live h randomness /\ live h pk /\ live h sk /\ 
+    (requires fun h -> live h randomness /\ live h pk /\ live h sk /\
                     disjoint randomness pk /\ disjoint randomness sk /\ disjoint pk sk)
     (ensures fun h0 _ h1 -> modifies2 pk sk h0 h1)
 
@@ -637,7 +637,7 @@ let qtesla_keygen_ randomness pk sk =
   let s:poly = poly_create () in
   let s_ntt:poly = poly_create () in
   let a:poly_k = poly_k_create () in
-  let t:poly_k = poly_k_create () in 
+  let t:poly_k = poly_k_create () in
   let nonce = create (size 1) (u32 0) in
   params_SHAKE crypto_randombytes randomness randomness_extended_size randomness_extended;
   let h0 = ST.get () in
@@ -721,7 +721,7 @@ val qtesla_keygen:
     pk: lbuffer uint8 crypto_publickeybytes
   -> sk: lbuffer uint8 crypto_secretkeybytes
   -> Stack (r:I32.t{r == 0l})
-    (requires fun h -> live h pk /\ live h sk /\ 
+    (requires fun h -> live h pk /\ live h sk /\
                     disjoint R.state pk /\ disjoint R.state sk /\ disjoint pk sk)
     (ensures fun h0 _ h1 -> modifies3 R.state pk sk h0 h1)
 
@@ -788,7 +788,7 @@ val sample_y_while_body:
                          v (bget h1 pos 0) % v bplus1bytes == 0 /\
 
                          (v (bget h1 pos 0) + numbytes U32 <= length buf \/ v (bget h1 pos 0) >= v params_n * v bplus1bytes) /\
-    
+
                          is_poly_y_sampler_output_i h1 y (v (bget h1 i 0)))
 
 #push-options "--z3rlimit 300"
@@ -819,14 +819,14 @@ let sample_y_while_body y seed nblocks buf dmsp pos i =
     assert(1 * pow2 (v params_b_bits + 1) < Int.max_int elem_n);
     assert(elem_v (to_elem 1 <<^ (params_b_bits +! size 1)) = 1 * (pow2 (v (params_b_bits +! size 1))) @% (pow2 elem_n));
     assert(1 * (pow2 (v (params_b_bits +! size 1))) @% (pow2 elem_n) >= 0);
-    assert(elem_v (to_elem 1 <<^ (params_b_bits +! size 1)) >= 0); 
+    assert(elem_v (to_elem 1 <<^ (params_b_bits +! size 1)) >= 0);
     y.(i0) <- bufPosAsElem &^ ((to_elem 1 <<^ (params_b_bits +! size 1)) -^ to_elem 1);
     let h2 = ST.get () in
     lemma_logand_with_one_pos (elem_v bufPosAsElem) (elem_v ((to_elem 1 <<^ (params_b_bits +! size 1)) -^ to_elem 1));
     assert(elem_v (bget h2 y (v i0)) >= 0);
     lemma_logand_le_one_pos (elem_v bufPosAsElem) (elem_v ((to_elem 1 <<^ (params_b_bits +! size 1)) -^ to_elem 1));
     lemma_b_equals_pow2_b_bits ();
-    
+
     assert(elem_v (bget h2 y (v i0)) <= elem_v (((to_elem 1 <<^ (params_b_bits +! size 1)) -^ to_elem 1)));
     assert(elem_v (((to_elem 1 <<^ (params_b_bits +! size 1)) -^ to_elem 1)) == pow2 (v params_b_bits + 1) - 1);
     assert(pow2 (v params_b_bits + 1) == 2 * pow2 (v params_b_bits));
@@ -845,7 +845,7 @@ let sample_y_while_body y seed nblocks buf dmsp pos i =
     //assert(elem_v (bget h3 y (v i0)) >= -(elem_v params_B));
     assert((bget h3 y (v i0)) == (to_elem 1 <<^ params_b_bits) \/ is_y_sampler_output (bget h3 y (v i0)));
     let hFinal = ST.get () in
-    assert(v (bget h3 pos 0) % v nbytes == 0); 
+    assert(v (bget h3 pos 0) % v nbytes == 0);
     assert(v (bget hFinal pos 0) % v nbytes == 0);
     assert(v (bget hFinal pos 0) + numbytes U32 <= length buf \/ v (bget hFinal pos 0) >= v params_n * v bplus1bytes);
     assert(is_poly_equal_except hInitial hFinal y (v i0));
@@ -861,7 +861,7 @@ val sample_y:
     (requires fun h -> live h y /\ live h seed /\ disjoint y seed)
     (ensures fun h0 _ h1 -> modifies1 y h0 h1 /\ is_poly_y_sampler_output h1 y)
 
-let sample_y y seed nonce = 
+let sample_y y seed nonce =
     push_frame();
 
     let i = create (size 1) (size 0) in
@@ -916,7 +916,7 @@ let lemma_pow2_d_fits () : Lemma
 #push-options "--z3rlimit 700"
 let hash_H_inner_for v_ t index =
     let params_q = elem_to_int32 params_q in
-    let hInit = ST.get () in 
+    let hInit = ST.get () in
     assert(is_poly_k_montgomery hInit v_);
     assert(is_montgomery (bget hInit v_ (v index)));
     let vindex:elem = v_.(index) in
@@ -934,7 +934,7 @@ let hash_H_inner_for v_ t index =
     assert(I32.v temp <= 2 * (I32.v params_q));
     assert(temp == temp_prev \/ temp == I32.(temp_prev -^ params_q));
     lemma_pow2_d_fits ();
-    assert_norm(FStar.Int.fits (I32.v (1l <<^ params_d)) I32.n); 
+    assert_norm(FStar.Int.fits (I32.v (1l <<^ params_d)) I32.n);
     Int.shift_left_value_lemma (I32.v 1l) (v params_d);
     assert_norm(pow2 (v params_d) > 0);
     assert_norm(pow2 S.params_d < pow2 (I32.n - 1));
@@ -955,7 +955,7 @@ let hash_H_inner_for v_ t index =
     let cL = I32.(((cL -^ (1l <<^ params_d)) &^ mask) |^ (cL &^ (lognot mask))) in
     lemma_mask_logor I32.(cL_prev -^ (1l <<^ params_d)) cL_prev mask cL;
     t.(index) <- Lib.RawIntTypes.u8_from_UInt8 (int32_to_uint8 I32.((temp -^ cL) >>>^ params_d));
-    let hFinal = ST.get () in 
+    let hFinal = ST.get () in
     assert(is_poly_k_equal hInit hFinal v_)
 #pop-options
 
@@ -990,7 +990,7 @@ val hash_H:
 let hash_H c_bin v_ hm =
     let hInit = ST.get () in
     push_frame();
-    let hFrame = ST.get () in 
+    let hFrame = ST.get () in
     assert(is_poly_k_equal hInit hFrame v_);
 
     [@inline_let] let params_q = elem_to_int32 params_q in
@@ -1012,8 +1012,8 @@ let hash_H c_bin v_ hm =
 
     pop_frame()
 
-private let encode_c_invariant (h:HS.mem) (pos_list : lbuffer UI32.t params_h) (sign_list : lbuffer I16.t params_h) (i : size_t) = 
-    forall (j:nat{j < v i /\ j < v params_h}) . 
+private let encode_c_invariant (h:HS.mem) (pos_list : lbuffer UI32.t params_h) (sign_list : lbuffer I16.t params_h) (i : size_t) =
+    forall (j:nat{j < v i /\ j < v params_h}) .
         v (bget h pos_list j) < v params_n /\
         (bget h sign_list j == (-1s) \/ bget h sign_list j == 0s \/ bget h sign_list j == 1s)
 
@@ -1038,7 +1038,7 @@ val encode_c_while_body:
 let encode_c_while_body pos_list sign_list c_bin c r dmsp cnt i =
     let h0 = ST.get () in
     assert(encode_c_invariant h0 pos_list sign_list (bget h0 i 0));
-    
+
     let iVal:size_t = i.(size 0) in
     if cnt.(size 0) >. (shake128_rate -. (size 3))
     then ( cshake128_qtesla crypto_randombytes c_bin (dmsp.(size 0)) shake128_rate r;
@@ -1063,8 +1063,8 @@ let encode_c_while_body pos_list sign_list c_bin c r dmsp cnt i =
     assert(forall (j:nat{j < v params_h}) . {:pattern bget h1 pos_list j} bget h0 pos_list j == bget h1 pos_list j);
     assert(forall (j:nat{j < v params_h}) . {:pattern bget h1 sign_list j} bget h0 sign_list j == bget h1 sign_list j);
     assert(bget h0 i 0 == bget h1 i 0);
-    assert(encode_c_invariant h1 pos_list sign_list (bget h1 i 0)); 
-    
+    assert(encode_c_invariant h1 pos_list sign_list (bget h1 i 0));
+
     if (c.(pos)) = 0s
     then ( let rCntVal2:uint8 = r.(cntVal +. size 2) in
            [@inline_let] let rCntVal2:UI8.t = Lib.RawIntTypes.u8_to_UInt8 rCntVal2 in
@@ -1135,18 +1135,18 @@ let lemma_pow2_s_bits_fits_int16 () : Lemma
 #set-options "--z3rlimit 100 --max_fuel 1 --max_ifuel 1"
 
 // On the i'th iteration of the outer loop that ranges [0,h), since each element of t is within [-b,b),
-// where b is 2^{params_s_bits}, absolute worst-case bound for prod[i] is [-(i*b),i*b]. Very loose bound. Patrick says 
+// where b is 2^{params_s_bits}, absolute worst-case bound for prod[i] is [-(i*b),i*b]. Very loose bound. Patrick says
 // each element will have a length of at most params_s_bits + log2(params_h) which is even smaller, but that looks
 // harder to prove. The pessimistic bound gives us enough to prove arithmetic safety.
 private let sparse_mul_invariant_int (x:int) (i:nat{i <= v params_h}) =
     let b = pow2 (v params_s_bits-1) in
     -(i * b) <= x /\ x <= i * b
 
-private let sparse_mul_invariant_elem (x:elem) (i:nat{i <= v params_h}) = 
+private let sparse_mul_invariant_elem (x:elem) (i:nat{i <= v params_h}) =
     sparse_mul_invariant_int (elem_v x) i
 
 private let sparse_mul_invariant_i (h:HS.mem) (i:nat{i < v params_h}) (prod:poly) (j:nat{j <= v params_n}) =
-    (forall (k:nat{k < j}) . 
+    (forall (k:nat{k < j}) .
     let prod_k = bget h prod k in
     sparse_mul_invariant_elem prod_k (i + 1)) /\
     (forall (k:nat{k >= j /\ k < v params_n}) .
@@ -1159,7 +1159,7 @@ private let sparse_mul_invariant (h:HS.mem) (i:nat{i <= v params_h}) (prod:poly)
     sparse_mul_invariant_elem prod_k i)
 
 private let lemma_prod_step1
-    (prod_j:elem) 
+    (prod_j:elem)
     (sign_list_i:I16.t{sign_list_i == (-1s) \/ sign_list_i == 0s \/ sign_list_i == 1s})
     (tVal:sparse_elem{is_sparse_elem_sk tVal})
     (i:nat{i < v params_h}) : Lemma
@@ -1167,7 +1167,7 @@ private let lemma_prod_step1
     (ensures sparse_mul_invariant_int (elem_v prod_j - I16.v sign_list_i * sparse_v tVal) (i + 1)) = ()
 
 private let lemma_prod_step2
-    (prod_j:elem) 
+    (prod_j:elem)
     (sign_list_i:I16.t{sign_list_i == (-1s) \/ sign_list_i == 0s \/ sign_list_i == 1s})
     (tVal:sparse_elem{is_sparse_elem_sk tVal})
     (i:nat{i < v params_h}) : Lemma
@@ -1180,7 +1180,7 @@ val sparse_mul:
   -> pos_list : lbuffer UI32.t params_h
   -> sign_list : lbuffer I16.t params_h
   -> Stack unit
-    (requires fun h -> live h prod /\ live h s /\ live h pos_list /\ live h sign_list /\ 
+    (requires fun h -> live h prod /\ live h s /\ live h pos_list /\ live h sign_list /\
                     disjoint prod s /\ disjoint prod pos_list /\ disjoint prod sign_list /\
                     disjoint s pos_list /\ disjoint s sign_list /\ disjoint pos_list sign_list /\
                     encode_c_invariant h pos_list sign_list params_h /\
@@ -1203,7 +1203,7 @@ let sparse_mul prod s pos_list sign_list =
     assert(is_s_sk h0 s);
     for 0ul params_n
     (fun h i -> live h prod /\ modifies1 prod h0 h /\ i <= v params_n /\ (forall (j:nat{j < i}) . elem_v (bget h prod j) == 0))
-    (fun i -> 
+    (fun i ->
         let hStart = ST.get () in
         assert(forall (j:nat{j < v i}) . elem_v (bget hStart prod j) == 0);
         prod.(i) <- to_elem 0;
@@ -1226,17 +1226,17 @@ let sparse_mul prod s pos_list sign_list =
         let pos = pos_list.(i) in
         assert(UI32.v pos < v params_n);
         let h2 = ST.get () in
-	for 0ul pos
-	(fun h j -> live h prod /\ live h t /\ live h pos_list /\ live h sign_list /\ modifies1 prod h2 h /\ 
+        for 0ul pos
+        (fun h j -> live h prod /\ live h t /\ live h pos_list /\ live h sign_list /\ modifies1 prod h2 h /\
                  encode_c_invariant h pos_list sign_list params_h /\ is_s_sk h s /\ is_poly_sparse_mul_output h prod /\
                  v i <= v params_h /\ j <= v params_n /\ sparse_mul_invariant_i h (v i) prod j)
-	(fun j -> 
-	    let sign_list_i:I16.t = sign_list.(i) in
+        (fun j ->
+            let sign_list_i:I16.t = sign_list.(i) in
             assert(v j < v pos);
-            let h = ST.get() in 
+            let h = ST.get() in
             assert(is_sparse_elem_sk (bget h t (v j + v params_n - v pos)));
             assert(is_poly_sparse_mul_output h prod);
-	    let tVal:sparse_elem = t.(j +. params_n -. pos) in
+            let tVal:sparse_elem = t.(j +. params_n -. pos) in
             assert(is_sparse_elem_sk tVal);
             let hx = ST.get () in
             assert(sign_list_i == (-1s) \/ sign_list_i == 0s \/ sign_list_i == 1s);
@@ -1248,32 +1248,32 @@ let sparse_mul prod s pos_list sign_list =
             assert(sparse_mul_invariant_i hx (v i) prod (v j));
             assert(is_sparse_elem_sk tVal);
             lemma_prod_step1 (bget hx prod (v j)) sign_list_i tVal (v i);
-	    prod.(j) <- prod.(j) -^ (int16_to_elem I16.(sign_list_i *^ (sparse_to_int16 tVal)));
+            prod.(j) <- prod.(j) -^ (int16_to_elem I16.(sign_list_i *^ (sparse_to_int16 tVal)));
             let hLoopEnd = ST.get () in
             assert(forall (k:nat{k < v params_n /\ k <> v j}) . {:pattern bget hLoopEnd prod k} bget h prod k == bget hLoopEnd prod k);
             assert(sparse_mul_invariant_elem (bget hLoopEnd prod (v j)) (v i + 1))
-	);
+        );
 
         let h3 = ST.get () in
-	for pos params_n
-	(fun h j -> live h prod /\ live h t /\ live h pos_list /\ live h sign_list /\ modifies1 prod h3 h /\ is_s_sk h s /\
+        for pos params_n
+        (fun h j -> live h prod /\ live h t /\ live h pos_list /\ live h sign_list /\ modifies1 prod h3 h /\ is_s_sk h s /\
                  is_poly_sparse_mul_output h prod /\ v i <= v params_h /\ j <= v params_n /\ sparse_mul_invariant_i h (v i) prod j)
-	(fun j -> 
-	    let sign_list_i:I16.t = sign_list.(i) in
-            let h = ST.get() in 
+        (fun j ->
+            let sign_list_i:I16.t = sign_list.(i) in
+            let h = ST.get() in
             assert(is_sparse_elem_sk (bget h t (v j - v pos)));
-	    let tVal:sparse_elem = t.(j -. pos) in
+            let tVal:sparse_elem = t.(j -. pos) in
             let hx = ST.get () in
-            assert(is_sparse_elem_sk tVal);            
+            assert(is_sparse_elem_sk tVal);
             assert(sparse_v tVal < pow2 (v params_s_bits));
             assert(sparse_v tVal >= -(pow2 (v params_s_bits)));
             lemma_pow2_s_bits_fits_int16 ();
             assert(Int.fits (I16.v sign_list_i * sparse_v tVal) I16.n);
             lemma_prod_step2 (bget hx prod (v j)) sign_list_i tVal (v i);
-  	    prod.(j) <- prod.(j) +^ (int16_to_elem I16.(sign_list_i *^ (sparse_to_int16 tVal)));
+            prod.(j) <- prod.(j) +^ (int16_to_elem I16.(sign_list_i *^ (sparse_to_int16 tVal)));
             let hLoopEnd = ST.get () in
             assert(forall (k:nat{k < v params_n /\ k <> v j}) . {:pattern bget hLoopEnd prod k} bget h prod k == bget hLoopEnd prod k)
-	)
+        )
     );
 
     let hFinal = ST.get () in
@@ -1282,17 +1282,17 @@ let sparse_mul prod s pos_list sign_list =
     assert(forall (i:nat{i < v params_n}) . {:pattern bget hReturn prod i} bget hFinal prod i == bget hReturn prod i)
 
 // On the i'th iteration of the outer loop that ranges [0,h), since each element of pk is within [0,q),
-// absolute worst-case bound for prod[i] is [-(i*q),i*q]. Very loose bound. The pessimistic bound gives us enough to prove 
+// absolute worst-case bound for prod[i] is [-(i*q),i*q]. Very loose bound. The pessimistic bound gives us enough to prove
 // arithmetic safety.
 private let sparse_mul32_invariant_int (x:int) (i:nat{i <= v params_h}) =
     let q = elem_v params_q in
     -(i * q) <= x /\ x <= i * q
 
-private let sparse_mul32_invariant_elem (x:elem) (i:nat{i <= v params_h}) = 
+private let sparse_mul32_invariant_elem (x:elem) (i:nat{i <= v params_h}) =
     sparse_mul32_invariant_int (elem_v x) i
 
 private let sparse_mul32_invariant_i (h:HS.mem) (i:nat{i < v params_h}) (prod:poly) (j:nat{j <= v params_n}) =
-    (forall (k:nat{k < j}) . 
+    (forall (k:nat{k < j}) .
     let prod_k = bget h prod k in
     sparse_mul32_invariant_elem prod_k (i + 1)) /\
     (forall (k:nat{k >= j /\ k < v params_n}) .
@@ -1307,7 +1307,7 @@ private let sparse_mul32_invariant (h:HS.mem) (i:nat{i <= v params_h}) (prod:pol
 private let is_i32_pk (x:I32.t) = is_pk (int32_to_elem x)
 
 private let lemma_mul32_prod_step1
-    (prod_j:elem) 
+    (prod_j:elem)
     (sign_list_i:I16.t{sign_list_i == (-1s) \/ sign_list_i == 0s \/ sign_list_i == 1s})
     (pkVal:I32.t{is_i32_pk pkVal})
     (i:nat{i < v params_h}) : Lemma
@@ -1315,7 +1315,7 @@ private let lemma_mul32_prod_step1
     (ensures sparse_mul32_invariant_int (elem_v prod_j - I16.v sign_list_i * I32.v pkVal) (i + 1)) = ()
 
 private let lemma_mul32_prod_step2
-    (prod_j:elem) 
+    (prod_j:elem)
     (sign_list_i:I16.t{sign_list_i == (-1s) \/ sign_list_i == 0s \/ sign_list_i == 1s})
     (pkVal:I32.t{is_i32_pk pkVal})
     (i:nat{i < v params_h}) : Lemma
@@ -1345,7 +1345,7 @@ let sparse_mul32 prod pk pos_list sign_list =
     let h0 = ST.get () in
     for 0ul params_n
     (fun h i -> live h prod /\ modifies1 prod h0 h /\ i <= v params_n /\ (forall (j:nat{j < i}) . elem_v (bget h prod j) == 0))
-    (fun i -> 
+    (fun i ->
         let hStart = ST.get () in
         assert(forall (j:nat{j < v i}) . elem_v (bget hStart prod j) == 0);
         prod.(i) <- to_elem 0;
@@ -1371,14 +1371,14 @@ let sparse_mul32 prod pk pos_list sign_list =
         assert(is_poly_pk hPos pk);
         assert(v (bget hPos pos_list (v i)) < v params_n);
         let pos = pos_list.(i) in
-	let sign_list_i = sign_list.(i) in
+        let sign_list_i = sign_list.(i) in
         let h2 = ST.get () in
-	for 0ul pos
-	(fun h j -> live h prod /\ live h pk /\ modifies1 prod h2 h /\ is_poly_pk h pk /\
+        for 0ul pos
+        (fun h j -> live h prod /\ live h pk /\ modifies1 prod h2 h /\ is_poly_pk h pk /\
                  v i <= v params_h /\ j <= v params_n /\ sparse_mul32_invariant_i h (v i) prod j)
-	(fun j ->
+        (fun j ->
             let h = ST.get () in
-	    let pkItem = pk.(j +. params_n -. pos) in
+            let pkItem = pk.(j +. params_n -. pos) in
             assert(is_poly_pk h pk);
             assert(is_pk (bget h pk (v j + v params_n - v pos))); // Needed to trigger the pattern on is_poly_pk_i.
             assert(is_pk pkItem);
@@ -1388,29 +1388,29 @@ let sparse_mul32 prod pk pos_list sign_list =
             assert(I32.v pkItem < elem_v params_q);
             assert(I32.v pkItem >= 0);
             lemma_mul32_prod_step1 (bget hProd prod (v j)) sign_list_i pkItem (v i);
-	    prod.(j) <- prod.(j) -^ int32_to_elem I32.( (int16_to_int32 sign_list_i) *^ pkItem );
+            prod.(j) <- prod.(j) -^ int32_to_elem I32.( (int16_to_int32 sign_list_i) *^ pkItem );
             let hLoopEnd = ST.get () in
             assert(is_poly_equal h hLoopEnd pk);
             assert(forall (k:nat{k < v params_n /\ k <> v j}) . {:pattern bget hLoopEnd prod k} bget h prod k == bget hLoopEnd prod k)
-	);
+        );
         let h3 = ST.get () in
-	for pos params_n
-	(fun h j -> live h prod /\ live h pk /\ modifies1 prod h3 h /\ is_poly_pk h pk /\ 
+        for pos params_n
+        (fun h j -> live h prod /\ live h pk /\ modifies1 prod h3 h /\ is_poly_pk h pk /\
                  v i <= v params_h /\ j <= v params_n /\ sparse_mul32_invariant_i h (v i) prod j)
-	(fun j ->
+        (fun j ->
             let h = ST.get () in
-	    let pkItem = pk.(j -. pos) in
+            let pkItem = pk.(j -. pos) in
             assert(is_poly_pk h pk);
             assert(is_pk (bget h pk (v j - v pos))); // Needed to trigger the pattern on is_poly_pk_i.
             assert(is_pk pkItem);
             assert(is_i32_pk pkItem);
             let hProd = ST.get () in
             lemma_mul32_prod_step2 (bget hProd prod (v j)) sign_list_i pkItem (v i);
-	    prod.(j) <- prod.(j) +^ int32_to_elem I32.( (int16_to_int32 sign_list_i) *^ pkItem );
+            prod.(j) <- prod.(j) +^ int32_to_elem I32.( (int16_to_int32 sign_list_i) *^ pkItem );
             let hLoopEnd = ST.get () in
             assert(is_poly_equal h hLoopEnd pk);
             assert(forall (k:nat{k < v params_n /\ k <> v j}) . {:pattern bget hLoopEnd prod k} bget h prod k == bget hLoopEnd prod k)
-	);
+        );
         let hOuterLoopEnd = ST.get () in
         assert(is_poly_equal hPos hOuterLoopEnd pk);
         assert(is_poly_pk hOuterLoopEnd pk)
@@ -1420,7 +1420,7 @@ let sparse_mul32 prod pk pos_list sign_list =
     assert(is_poly_sparse_mul32_output_i h4 prod 0);
     for 0ul params_n
     (fun h i -> live h prod /\ modifies1 prod h4 h /\ i <= v params_n /\ is_poly_sparse_mul32_output_i h prod i)
-    (fun i -> 
+    (fun i ->
         let hStart = ST.get () in
         prod.(i) <- barr_reduce prod.(i);
         let hAfterReduce = ST.get () in
@@ -1455,7 +1455,7 @@ let test_rejection z =
         assert(is_pmq (bget h z (v i)));
         let zi:elem = z.(i) in
         let zVal:I32.t = elem_to_int32 zi in
-	abs_ zVal >^ params_B -^ params_U
+        abs_ zVal >^ params_B -^ params_U
     ) in
 
     res
@@ -1469,16 +1469,65 @@ let lemma_val_plus_pow2_d_fits (val_:I32.t{I32.v val_ >= -(2 * elem_v params_q) 
 
 #set-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 0"
 
+let lemma_val_times_pow2d_fits (val_:I32.t{-4 <= I32.v val_ /\ I32.v val_ <= 4})
+ : Lemma (Int.fits (I32.v val_ * pow2 (v params_d)) I32.n)
+=
+  Math.Lemmas.pow2_le_compat (I32.n - 4) (v params_d);
+  assert_norm (Int.fits ((-4) * pow2 (I32.n - 4)) I32.n);
+  assert_norm (Int.fits ((-3) * pow2 (I32.n - 4)) I32.n);
+  assert_norm (Int.fits ((-2) * pow2 (I32.n - 4)) I32.n);
+  assert_norm (Int.fits ((-1) * pow2 (I32.n - 4)) I32.n);
+  assert_norm (Int.fits (0 * pow2 (I32.n - 4)) I32.n);
+  assert_norm (Int.fits (1 * pow2 (I32.n - 4)) I32.n);
+  assert_norm (Int.fits (2 * pow2 (I32.n - 4)) I32.n);
+  assert_norm (Int.fits (3 * pow2 (I32.n - 4)) I32.n);
+  assert_norm (Int.fits (4 * pow2 (I32.n - 4)) I32.n)
+
+let lemma_fits (val_:I32.t{-4 <= I32.v val_ /\ I32.v val_ <= 4})
+  (left:I32.t{-2 * I32.v params_q <= I32.v left /\ I32.v left <= 2 * I32.v params_q})
+  : Lemma (Int.fits (I32.v left - I32.v (val_ <<<^ params_d)) I32.n /\
+          Int.min_int I32.n < (I32.v left - I32.v (val_ <<<^ params_d)))
+=
+  lemma_val_times_pow2d_fits val_;
+  shift_arithmetic_left_i32_value_lemma val_ params_d;
+  assert (I32.v (val_ <<<^ params_d) = (I32.v val_ * pow2 (v params_d)) @% pow2 32);
+  Math.Lemmas.pow2_le_compat 24 (v params_d);
+  assert_norm (pow2 2 * pow2 24 <= pow2 26);
+  assert (I32.v (val_ <<<^ params_d) @% pow2 32 <= pow2 26);
+  assert (-pow2 26 <= I32.v (val_ <<<^ params_d) @% pow2 32);
+  assert (I32.v left - I32.v (val_ <<<^ params_d) <= 2 * I32.v params_q + pow2 26);
+  assert (-2 * I32.v params_q - pow2 26 <= I32.v left - I32.v (val_ <<<^ params_d));
+  assert_norm (2 * I32.v params_q <= pow2 24);
+  assert_norm (-pow2 24 <= 2 * I32.v params_q);
+  assert_norm (pow2 24 + pow2 26 <= pow2 27);
+  assert_norm (-pow2 27 <= -pow2 24 - pow2 26);
+  assert_norm (-pow2 31 <= -pow2 27);
+  assert_norm (-pow2 27 <= pow2 31 - 1)
+
+val lemma_bound (val_ val_':I32.t) : Lemma
+  (requires
+    -2 * I32.v params_q <= I32.v val_ /\ I32.v val_ <= 2 * I32.v params_q /\
+    I32.v val_' = (I32.v val_ + pow2 20 - 1) / pow2 21)
+  (ensures -4 <= I32.v val_' /\ I32.v val_' <= 4)
+let lemma_bound val_ val_' =
+  assert_norm (-4 <= ((-2 * I32.v params_q) + pow2 20 - 1) / pow2 21);
+  assert_norm ((2 * I32.v params_q + pow2 20 - 1) / pow2 21 <= 4);
+  Math.Lemmas.lemma_div_le
+    ((-2 * I32.v params_q) + pow2 20 - 1) (I32.v val_ + pow2 20 - 1) (pow2 21);
+  Math.Lemmas.lemma_div_le
+    (I32.v val_ + pow2 20 - 1) (2 * I32.v params_q + pow2 20 - 1) (pow2 21)
+
+assume
+val shift_arithmetic_right_lemma_i32:
+    a:I32.t
+  -> b:UI32.t{v b < I32.n}
+  -> Lemma (I32.v (I32.shift_arithmetic_right a b) = I32.v a / pow2 (v b))
+
 val test_correctness:
     v_ : poly
   -> Stack (r:I32.t{r == 0l \/ r == 1l})
     (requires fun h -> live h v_ /\ is_poly_montgomery h v_)
-    (ensures fun h0 _ h1 -> modifies0 h0 h1)
-
-#push-options "--max_fuel 8"
-let lemma_val_times_pow2d_fits (val_:I32.t{I32.v val_ == -1 \/ I32.v val_ == 0 \/ I32.v val_ == 1}) : Lemma
-    (ensures Int.fits (I32.v val_ * pow2 (v params_d)) I32.n) = ()
-#pop-options
+    (ensures  fun h0 _ h1 -> modifies0 h0 h1)
 
 let test_correctness v_ =
     let hInit = ST.get () in
@@ -1532,18 +1581,19 @@ let test_correctness v_ =
         Int.shift_left_value_lemma #I32.n 1 (v (params_d -. size 1));
         assert(I32.v (1l <<^ (params_d -. size 1)) == 1 * pow2 (v (params_d -. size 1)) @% pow2 I32.n);
         lemma_val_plus_pow2_d_fits val_;
-        let val_:I32.t = I32.((val_ +^ (1l <<^ (params_d -. (size 1))) -^ 1l) >>>^ params_d) in
-        assume(I32.v val_ == -1 \/ I32.v val_ == 0 \/ I32.v val_ == 1);
-        lemma_val_times_pow2d_fits val_;
-        // val is always -1, 0, or 1 it looks like
-        [@inline_let] let op_Less_Less_Less_Hat = shift_arithmetic_left_i32 in
-        shift_arithmetic_left_i32_value_lemma val_ params_d;
-        assume(Int.fits (I32.v left - I32.v (val_ <<<^ params_d)) I32.n);
-        assert(I32.v left >= -(2 * elem_v params_q));
-        assert(I32.v left <= 2 * elem_v params_q);
-        let val_:I32.t = I32.(left -^ (val_ <<<^ params_d)) in
-        assume(I32.v val_ > Int.min_int I32.n);
-        assume(FStar.Int.fits (I32.v (abs_ val_) - (I32.v (1l <<^ (params_d -. (size 1))) - elem_v params_rejection)) I32.n);
+        assert (I32.(v (val_ +^ (1l <<^ (params_d -. 1ul)) -^ 1l) ==
+                I32.v val_ + pow2 20 - 1));
+        shift_arithmetic_right_lemma_i32
+          I32.(val_ +^ (1l <<^ (params_d -. 1ul)) -^ 1l) params_d;
+        let val_' = I32.((val_ +^ (1l <<^ (params_d -. 1ul)) -^ 1l) >>>^ params_d) in
+        assert (I32.v val_' = (I32.v val_ + pow2 20 - 1) / pow2 21);
+        lemma_bound val_ val_';
+        lemma_val_times_pow2d_fits val_';
+        shift_arithmetic_left_i32_value_lemma val_' params_d;
+        lemma_fits val_' left;
+        let val_:I32.t = I32.(left -^ (val_' <<<^ params_d)) in
+        assert (I32.v val_ > Int.min_int I32.n);
+        assume (FStar.Int.fits (I32.v (abs_ val_) - (I32.v (1l <<^ (params_d -. (size 1))) - elem_v params_rejection)) I32.n);
         let t1:UI32.t = UI32.(int32_to_uint32 I32.(((lognot ((abs_ val_) -^ ((1l <<^ (params_d -. (size 1))) -^ params_rejection))))) >>^ (_RADIX32 -. size 1)) in
         let r = if UI32.((t0 |^ t1) = 1ul)
         then ( res.(size 0) <- 1l; true )
@@ -1558,11 +1608,12 @@ let test_correctness v_ =
     pop_frame();
     resVal
 
+
 #set-options "--z3rlimit 100 --max_fuel 1 --max_ifuel 1"
 
 let lemma_y_sampler_output_is_pmq (h:HS.mem) (p:poly) : Lemma
     (requires is_poly_y_sampler_output h p)
-    (ensures is_poly_pmq h p) = 
+    (ensures is_poly_pmq h p) =
     assert(forall (i:nat{i < v params_n}) . is_y_sampler_output (bget h p i));
     assert(forall (i:nat{i < v params_n}) . is_pmq (bget h p i))
 
@@ -1572,7 +1623,7 @@ val qtesla_sign_compute_v:
   -> y: poly
   -> a: poly_k
   -> Stack unit
-    (requires fun h -> let bufs = [bb v_; bb y; bb a] in 
+    (requires fun h -> let bufs = [bb v_; bb y; bb a] in
                     BigOps.big_and (live_buf h) bufs /\ BigOps.pairwise_and disjoint_buf bufs /\
                     is_poly_k_montgomery h a /\ is_poly_y_sampler_output h y)
     (ensures fun h0 _ h1 -> modifies1 v_ h0 h1 /\ is_poly_k_montgomery h1 v_)
@@ -1592,7 +1643,7 @@ let qtesla_sign_compute_v v_ y a =
     let h1 = ST.get () in
     assert(is_poly_k_equal hInit h1 a);
     for 0ul params_k
-        (fun h k -> live h v_ /\ live h a /\ live h y_ntt /\ modifies1 v_ h1 h /\ is_poly_k_montgomery h a /\ 
+        (fun h k -> live h v_ /\ live h a /\ live h y_ntt /\ modifies1 v_ h1 h /\ is_poly_k_montgomery h a /\
                  is_poly_montgomery h y_ntt /\ k <= v params_k /\ is_poly_k_montgomery_i h v_ (k * v params_n))
         (fun k ->
             let hInLoop = ST.get () in
@@ -1612,7 +1663,7 @@ let qtesla_sign_compute_v v_ y a =
 
 private let lemma_poly_add_in_bounds (h: HS.mem) (y sc: poly) : Lemma
     (requires is_poly_y_sampler_output h y /\ is_poly_sparse_mul_output h sc)
-    (ensures (forall (i:nat{i < v params_n}) . is_elem_int (elem_v (bget h y i) + elem_v (bget h sc i)))) = 
+    (ensures (forall (i:nat{i < v params_n}) . is_elem_int (elem_v (bget h y i) + elem_v (bget h sc i)))) =
     assert(forall (i:nat{i < v params_n}) . is_y_sampler_output(bget h y i) /\ is_sparse_mul_output(bget h sc i))
 
 private inline_for_extraction noextract
@@ -1657,19 +1708,19 @@ let qtesla_sign_compute_c_z v_ randomness_input s y c z pos_list sign_list =
     let hReturn = ST.get () in
     assert(is_poly_equal hFinal hReturn z)
 
-private let lemma_sub_poly_is_sk 
-    (h: HS.mem) 
-    (e: lbuffer sparse_elem (params_n *! params_k)) 
+private let lemma_sub_poly_is_sk
+    (h: HS.mem)
+    (e: lbuffer sparse_elem (params_n *! params_k))
     (s: lbuffer sparse_elem params_n)
     (k: size_t{v k < v params_k}) : Lemma
     (requires is_e_sk h e /\ s == gsub e (k *! params_n) params_n)
-    (ensures is_s_sk h s) = 
+    (ensures is_s_sk h s) =
     assert(forall (i:nat{i < v params_k * v params_n}) . is_sparse_elem_sk (bget h e i));
     assert(forall (i:nat{i < v params_n}) . bget h s i == bget h e (v k * v params_n + i));
     assert(forall (i:nat{i < v params_n}) . is_sparse_elem_sk (bget h s i))
 
-private let lemma_disjoint 
-    (ec: poly_k) 
+private let lemma_disjoint
+    (ec: poly_k)
     (e: lbuffer sparse_elem (params_n *! params_k))
     (ec_k: poly)
     (e_k: lbuffer sparse_elem params_n)
@@ -1737,8 +1788,8 @@ let qtesla_sign_update_v v_ e pos_list sign_list =
              let hSub = ST.get () in
              assert(is_poly_montgomery hSub (get_poly v_ k));
              rsp.(size 0) <- test_correctness (index_poly v_ k);
-             let rspVal = rsp.(size 0) in 
-             pop_frame(); 
+             let rspVal = rsp.(size 0) in
+             pop_frame();
              let hLoopEnd = ST.get () in
              assert(is_poly_equal hSub hLoopEnd (get_poly v_ k));
              assert(forall (i:nat{i < v params_n}) . is_montgomery (bget hLoopEnd (get_poly v_ k) i));
@@ -1764,9 +1815,9 @@ val qtesla_sign_do_while:
   -> m : lbuffer uint8 mlen
   -> sm: lbuffer uint8 (crypto_bytes +. mlen)
   -> Stack bool
-    (requires fun h -> 
+    (requires fun h ->
       let bufs =
-        [bb randomness; 
+        [bb randomness;
          bb randomness_input;
          bb nonce;
          bb a;
@@ -1774,7 +1825,7 @@ val qtesla_sign_do_while:
          bb e;
          bb smlen;
          bb m;
-         bb sm]      
+         bb sm]
       in
       BigOps.big_and (live_buf h) bufs /\
       BigOps.pairwise_and disjoint_buf bufs /\
@@ -1787,7 +1838,7 @@ val qtesla_sign_do_while:
                 --using_facts_from '*  -FStar.Monotonic.Heap.equal_dom -LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2'"
 //                --using_facts_from '*  -FStar.Monotonic.Heap.equal_dom'"
 //                --using_facts_from '* -LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2'"
-// --log_queries --query_stats --print_z3_statistics 
+// --log_queries --query_stats --print_z3_statistics
 
 let qtesla_sign_do_while randomness randomness_input nonce a s e smlen mlen m sm =
     let hInit = ST.get () in
@@ -1795,18 +1846,18 @@ let qtesla_sign_do_while randomness randomness_input nonce a s e smlen mlen m sm
     let c = create crypto_c_bytes (u8 0) in
     let z:poly = poly_create () in
     let y:poly = poly_create () in
-    let v_:poly_k = poly_k_create () in 
+    let v_:poly_k = poly_k_create () in
     let rsp = create (size 1) 0l in
     let pos_list = create params_h 0ul in
     let sign_list = create params_h 0s in
 
-    //TODO NS: to prove the assume below, we need to use 
+    //TODO NS: to prove the assume below, we need to use
     // LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2
     //but that's really expensive in this context
     //It's probably worth factoring out a proof of this fact below
     //until we can improve that lemma
-    assume (FStar.BigOps.pairwise_and 
-                  disjoint_buf 
+    assume (FStar.BigOps.pairwise_and
+                  disjoint_buf
                   [bb randomness;
                    bb randomness_input;
                    bb nonce;
@@ -1826,7 +1877,7 @@ let qtesla_sign_do_while randomness randomness_input nonce a s e smlen mlen m sm
 
     let h0 = ST.get () in
     assert(modifies0 h0 h0);
-    
+
     nonce.(size 0) <- UI32.(nonce.(size 0) +%^ 1ul);
     sample_y y randomness nonce.(size 0);
 
@@ -1846,7 +1897,7 @@ let qtesla_sign_do_while randomness randomness_input nonce a s e smlen mlen m sm
     assert(modifies (loc c |+| loc z |+| loc v_ |+| loc y |+| loc nonce |+| loc pos_list |+| loc sign_list) h0 h3);
     assert(forall (i:nat{i < v params_n * v params_k}) . bget h3 e i == bget hInit e i); // for is_e_sk h3 e
 
-    let res = 
+    let res =
     if test_rejection z
     then (false)
     else (
@@ -1868,7 +1919,7 @@ let qtesla_sign_do_while randomness randomness_input nonce a s e smlen mlen m sm
               smlen.(size 0) <- crypto_bytes +. mlen;
               let h6 = ST.get () in
               assert(modifies (loc smlen |+| loc sm |+| loc c |+| loc z |+| loc v_ |+| loc y |+| loc nonce |+| loc pos_list |+| loc sign_list) h0 h6);
-              
+
               encode_sig (sub sm (size 0) crypto_bytes) c z;
               let h7 = ST.get () in
               assert(modifies (loc smlen |+| loc sm |+| loc c |+| loc z |+| loc v_ |+| loc y |+| loc nonce |+| loc pos_list |+| loc sign_list) h0 h7);
@@ -1878,7 +1929,7 @@ let qtesla_sign_do_while randomness randomness_input nonce a s e smlen mlen m sm
         ) in
     let h8 = ST.get () in
     assert(modifies (loc smlen |+| loc sm |+| loc c |+| loc z |+| loc v_ |+| loc y |+| loc nonce |+| loc pos_list |+| loc sign_list) h0 h8);
-    pop_frame(); 
+    pop_frame();
     let hn = ST.get() in
     // TODO: Asserting this requires FStar.Monotonic.Heap.equal_dom to be included, but this lemma really slows the
     // proof down.
@@ -1915,8 +1966,8 @@ let qtesla_sign smlen mlen m sm sk =
     let nonce = create (size 1) 0ul in
 
     // TODO: requires expensive LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2 lemma
-    assume (FStar.BigOps.pairwise_and 
-                  disjoint_buf 
+    assume (FStar.BigOps.pairwise_and
+                  disjoint_buf
                   [bb smlen;
                    bb m;
                    bb sm;
@@ -1936,7 +1987,7 @@ let qtesla_sign smlen mlen m sm sk =
 
     let h1 = ST.get () in
     assert(modifies3 seeds s e h0 h1);
-    
+
     R.randombytes_ crypto_randombytes (sub randomness_input crypto_randombytes crypto_randombytes);
     update_sub randomness_input (size 0) crypto_seedbytes (sub seeds crypto_seedbytes crypto_seedbytes);
     params_SHAKE mlen m crypto_hmbytes (sub randomness_input (crypto_randombytes +. crypto_seedbytes) crypto_hmbytes);
@@ -1951,12 +2002,12 @@ let qtesla_sign smlen mlen m sm sk =
     assert(modifies (loc seeds |+| loc s |+| loc e |+| loc randomness |+| loc randomness_input |+| loc R.state |+| loc a) h0 h3);
     assert(forall (i:nat{i < v params_n}) . {:pattern bget h3 s i} bget h1 s i == bget h3 s i);
     assert(forall (i:nat{i < v params_n * v params_k}) . {:pattern bget h3 e i} bget h1 e i == bget h3 e i);
-    
+
     do_while
         (fun h _ -> let bufs = [bb smlen; bb m; bb sm; bb s; bb e; bb randomness; bb randomness_input; bb a; bb nonce] in
                  FStar.BigOps.big_and (live_buf h) bufs /\ modifies3 nonce smlen sm h3 h /\ is_poly_k_montgomery h a /\
                  is_s_sk h s /\ is_e_sk h e)
-        (fun _ -> 
+        (fun _ ->
             let h4 = ST.get () in
             let res = qtesla_sign_do_while randomness randomness_input nonce a s e smlen mlen m sm in
             let hLoopEnd = ST.get () in
@@ -1969,7 +2020,7 @@ let qtesla_sign smlen mlen m sm sk =
     let h5 = ST.get () in
     assert(modifies (loc seeds |+| loc s |+| loc e |+| loc randomness |+| loc randomness_input |+| loc R.state |+| loc a |+|
                      loc nonce |+| loc smlen |+| loc sm) h0 h5);
-    
+
     pop_frame()
 
 #reset-options "--z3rlimit 100 --max_fuel 1 --max_ifuel 1 --query_stats"
@@ -1995,7 +2046,7 @@ let test_z z =
 //#push-options "--print_z3_statistics"
 private let lemma_subpoly_of_pk_is_pk (h: HS.mem) (pk: poly_k) (p: poly) (k: size_t{v k < v params_k}) : Lemma
     (requires is_poly_k_pk h pk /\ p == get_poly pk k)
-    (ensures is_poly_pk h p) = 
+    (ensures is_poly_pk h p) =
     assert(forall (i:nat{i < v params_n * v params_k}) . is_pk (bget h pk i));
     assert(p == gsub pk (k *! params_n) params_n);
     assert(forall (i:nat{i < v params_n}) . bget h p i == bget h pk (v k * v params_n + i));
@@ -2004,7 +2055,7 @@ private let lemma_subpoly_of_pk_is_pk (h: HS.mem) (pk: poly_k) (p: poly) (k: siz
 
 #push-options "--print_z3_statistics"
 let lemma_remap_subbuf_indices (w: poly_k) (k: size_t{k <. params_k}) (h: HS.mem) : Lemma
-    (ensures forall (i:nat{i >= v k * v params_n /\ i < v k * v params_n + v params_n}) . bget h w i == bget h (get_poly w k) (i - v k * v params_n)) = 
+    (ensures forall (i:nat{i >= v k * v params_n /\ i < v k * v params_n + v params_n}) . bget h w i == bget h (get_poly w k) (i - v k * v params_n)) =
     assert(get_poly w k == gsub w (k *! params_n) params_n)
     //assert(forall (i:nat{i >= v k * v params_n /\ i < v k * v params_n + v params_n}) . bget h w i == bget h (get_poly w k) (i - v k * v params_n))
 #pop-options
@@ -2024,7 +2075,7 @@ val qtesla_verify_decode_pk_compute_w:
                     is_poly_pmq h z)
     (ensures fun h0 _ h1 -> modifies1 w h0 h1 /\ is_poly_k_montgomery h1 w)
 
-//  --log_queries --query_stats --print_z3_statistics 
+//  --log_queries --query_stats --print_z3_statistics
 #push-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 1 \
                 --using_facts_from '* -LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2'"
 
@@ -2043,7 +2094,7 @@ let qtesla_verify_decode_pk_compute_w pk c z w =
     assert(modifies0 h0 h0);
 
     // TODO: requires expensive LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2 lemma
-    assume (FStar.BigOps.pairwise_and 
+    assume (FStar.BigOps.pairwise_and
                   disjoint_buf
                   [bb pk;
                    bb c;
@@ -2066,7 +2117,7 @@ let qtesla_verify_decode_pk_compute_w pk c z w =
     encode_c pos_list sign_list c;
     let hAfterEncodeC = ST.get () in
     assert(is_poly_equal hInit hAfterEncodeC z);
-    poly_ntt z_ntt z; 
+    poly_ntt z_ntt z;
 
     let h1 = ST.get () in
     // All buffers in this stack frame.
@@ -2117,7 +2168,7 @@ let qtesla_verify_decode_pk_compute_w pk c z w =
         // For some reason, this fact doesn't prove in this context, but works as its own lemma.
         lemma_remap_subbuf_indices w k hEnd;
         assert(forall (i:nat{i >= v k * v params_n /\ i < v k * v params_n + v params_n}) . bget hEnd w i == bget hEnd (get_poly w k) (i - v k * v params_n));
-        //assert(forall (i:nat{i >= v k * v params_n /\ i < v k * v params_n + v params_n}) . is_montgomery (bget hEnd w i)); 
+        //assert(forall (i:nat{i >= v k * v params_n /\ i < v k * v params_n + v params_n}) . is_montgomery (bget hEnd w i));
         let pTest = get_poly w k in
         assert(is_montgomery (bget hEnd pTest 0));
         assert(forall (i:nat{i < v k * v params_n}) . is_montgomery (bget hEnd w i));
@@ -2165,7 +2216,7 @@ let qtesla_verify_valid_z smlen sm pk c z =
     let h0 = ST.get () in
     assert(modifies0 h0 h0);
     assert(is_poly_equal hInit h0 z);
-    
+
     qtesla_verify_decode_pk_compute_w pk c z w;
     let h1 = ST.get () in
     assert(modifies3 c z w h0 h1);
@@ -2210,8 +2261,8 @@ let qtesla_verify mlen smlen m sm pk =
 
     let h0 = ST.get () in
     assert(modifies0 h0 h0);
-    
-    decode_sig c z (sub sm (size 0) crypto_bytes); 
+
+    decode_sig c z (sub sm (size 0) crypto_bytes);
     let h1 = ST.get () in
     assert(modifies2 c z h0 h1);
     if test_z z <> 0l then ( pop_frame(); -2l ) else (
@@ -2222,7 +2273,7 @@ let qtesla_verify mlen smlen m sm pk =
     assert(modifies3 mlen c z h0 h5);
     for 0ul mlenVal
     (fun h _ -> live h m /\ live h sm /\ modifies1 m h5 h)
-    (fun i -> 
+    (fun i ->
         assert(v mlenVal <= v smlen);
         assert(FStar.Int.fits (v crypto_bytes + v i) I32.n);
         [@inline_let] let smIndex = crypto_bytes +. i in
@@ -2233,7 +2284,7 @@ let qtesla_verify mlen smlen m sm pk =
 
     let h6 = ST.get () in
     assert(modifies4 m mlen c z h0 h6);
-    
+
     pop_frame();
     0l
     )))
@@ -2254,7 +2305,7 @@ val crypto_sign:
     (requires fun h -> live h sm /\ live h smlen /\ live h m /\ live h sk /\
                     disjoint R.state sm /\ disjoint R.state smlen /\ disjoint R.state m /\ disjoint R.state sk /\
                     disjoint sm smlen /\ disjoint sm m /\ disjoint sm sk /\
-                    disjoint smlen m /\ disjoint smlen sk /\ 
+                    disjoint smlen m /\ disjoint smlen sk /\
                     disjoint m sk)
     (ensures fun h0 _ h1 -> modifies3 R.state sm smlen h0 h1)
 
@@ -2273,7 +2324,7 @@ val crypto_sign_open:
     m : buffer uint8
   -> mlen : lbuffer UI64.t 1ul
   -> sm : buffer uint8
-  -> smlen : UI64.t{length sm = v smlen /\ length m = UI64.v smlen - v crypto_bytes /\ 
+  -> smlen : UI64.t{length sm = v smlen /\ length m = UI64.v smlen - v crypto_bytes /\
                    FStar.Int.fits (v crypto_bytes + v smlen) Int32.n}
   -> pk : lbuffer uint8 crypto_publickeybytes
   -> Stack (r:I32.t{r == 0l \/ r == (-1l) \/ r == (-2l) \/ r == (-3l)})
