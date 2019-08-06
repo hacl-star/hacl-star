@@ -242,7 +242,7 @@ val taint_at (memTaint:M.memtaint) (addr:int) : taint
 //[@va_qattr] unfold let va_eval_reg64        (s:va_state) (r:va_register)    : GTot nat64 = eval_reg_64 r s
 [@va_qattr] unfold let va_eval_reg_opr64    (s:va_state) (o:va_operand)     : GTot nat64 = eval_operand o s
 [@va_qattr] unfold let va_eval_xmm          (s:va_state) (x:reg_xmm)        : GTot quad32 = eval_reg_xmm x s
-[@va_qattr] unfold let va_eval_heap         (s:va_state) (hp:nat) (ptr:int)     : GTot quad32 = eval_heap hp ptr s
+[@va_qattr] unfold let va_eval_heap         (s:va_state) (hp:nat)             : GTot vale_heap = eval_heap hp s
 [@va_qattr] unfold let va_eval_opr128       (s:va_state) (o:va_operand128)  : GTot quad32 = eval_operand128 o s
 
 (* Predicates *)
@@ -277,7 +277,7 @@ val taint_at (memTaint:M.memtaint) (addr:int) : taint
 [@va_qattr] let va_upd_reg64 (r:reg_64) (v:nat64) (s:vale_state) : vale_state = update_reg_64 r v s
 [@va_qattr] let va_upd_xmm (x:reg_xmm) (v:quad32) (s:vale_state) : vale_state = update_reg_xmm x v s
 [@va_qattr] let va_upd_mem (mem:vale_heap) (s:vale_state) : vale_state = { s with vs_heap = mem }
-[@va_qattr] let va_upd_heap (hp:nat) (heap:vale_heap) (s:vale_state) : vale_state = { s with vs_hpls = Map.upd s.vs_hpls hp heap }
+[@va_qattr] let va_upd_heap (hp:nat) (h:vale_heap) (s:vale_state) : vale_state = { s with vs_hpls = Map.upd s.vs_hpls hp h }
 [@va_qattr] let va_upd_stack (stack:S.vale_stack) (s:vale_state) : vale_state = { s with vs_stack = stack }
 [@va_qattr] let va_upd_memTaint (memTaint:M.memtaint) (s:vale_state) : vale_state = { s with vs_memTaint = memTaint }
 [@va_qattr] let va_upd_stackTaint (stackTaint:M.memtaint) (s:vale_state) : vale_state = { s with vs_stackTaint = stackTaint }
@@ -293,6 +293,7 @@ val taint_at (memTaint:M.memtaint) (addr:int) : taint
 [@va_qattr] unfold let va_update_xmm (x:reg_xmm) (sM:va_state) (sK:va_state) : va_state =
   va_upd_xmm x (eval_reg_xmm x sM) sK
 [@va_qattr] unfold let va_update_mem (sM:va_state) (sK:va_state) : va_state = va_upd_mem sM.vs_heap sK
+[@va_qattr] unfold let va_update_heap (hp:nat) (sM:va_state) (sK:va_state) : va_state = va_upd_heap hp (eval_heap hp sM) sK
 [@va_qattr] unfold let va_update_stack (sM:va_state) (sK:va_state) : va_state = va_upd_stack sM.vs_stack sK
 [@va_qattr] unfold let va_update_memTaint (sM:va_state) (sK:va_state) : va_state = va_upd_memTaint sM.vs_memTaint sK
 [@va_qattr] unfold let va_update_stackTaint (sM:va_state) (sK:va_state) : va_state = va_upd_stackTaint sM.vs_stackTaint sK
