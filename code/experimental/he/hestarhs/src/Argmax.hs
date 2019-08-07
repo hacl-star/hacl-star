@@ -526,11 +526,11 @@ runProtocol =
       connect req "inproc://argmax"
 
       putTextLn "Keygen..."
-      let k = 16
-      sk <- paheKeyGen @PailSep k
+      let k = 8
+      let l = 5
+      sk <- paheKeyGen @DgkCrt k (2^10)
       let pk = paheToPublic sk
       eCtx <- newEncContext pk
-      let l = 7
 
       let testLogArgmax = do
               let m = fromIntegral $ log2 (fromIntegral k) - 1
@@ -588,7 +588,7 @@ runProtocol =
               print =<< paheDec sk f1
               print =<< paheDec sk f2
 
-      let testArgmax = replicateM_ 1 $ do
+      let testArgmax = do
               let m = 6
               vals <- replicateM m $ replicateM k $ randomRIO (0,2^l-1)
               print vals
@@ -611,7 +611,7 @@ runProtocol =
                   then error "Argmax failed" else putTextLn "OK"
 
 
-      let testCompare = replicateM_ 10 $ do
+      let testCompare = do
               cs <- replicateM k $ randomRIO (0,2^l-1)
               rs <- replicateM k $ randomRIO (0,2^l-1)
               print cs
@@ -651,4 +651,4 @@ runProtocol =
                   putTextLn $ "Got:      " <> show result
                   error "Mismatch"
 
-      testLogArgmax
+      testCompare

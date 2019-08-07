@@ -18,3 +18,12 @@ measureTimeSingle label action = do
     time1 <- P.getPOSIXTime
     putTextLn $ label <> " took : " <> show (round ((time1-time0) * 1000) :: Integer) <> "ms"
     pure r
+
+simdadd :: Num a => [a] -> [a] -> [a]
+simdadd x y = map (uncurry (+)) (zip x y)
+
+simdmul :: Num a => [a] -> [a] -> [a]
+simdmul x y = map (uncurry (*)) (zip x y)
+
+dotprod :: [Integer] -> [Integer] -> Integer
+dotprod x y = sum $ simdmul x y

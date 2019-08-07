@@ -6,6 +6,7 @@ import Universum hiding (exp, last, (<*>))
 
 import Data.List (splitAt)
 import Numeric (log)
+import System.IO.Unsafe (unsafePerformIO)
 import System.Random (randomIO, randomRIO)
 
 import Hacl.Bignum
@@ -13,12 +14,18 @@ import Hacl.Raw
 import Lib hiding (crt)
 import Utils
 
+testPrime :: Integer -> Bool
+testPrime i = unsafePerformIO $ do
+    (p,sz) <- toBignumExact i
+    r <- bnIsPrime sz p
+    freeBignum p
+    pure r
 
 -- https://stackoverflow.com/questions/6325576/how-many-iterations-of-rabin-miller-should-i-use-for-cryptographic-safe-primes
 genPrime :: Int -> IO Integer
 genPrime bits = do
     p <- randomRIO (2 ^ (bits - 4),2 ^ bits) `suchThat` odd
-    if isPrimeMR 40 p
+    if testPrime p
       then pure p else genPrime bits
 
 legendreSymbol :: Integer -> Integer -> Integer
@@ -173,7 +180,7 @@ genDataDGK uFacts bits = do
     let genR (i::Integer) = do
           r <- genPrime rbits
           let p = 2 * u * v * r + 1
-          if isPrimeMR 40 p then pure (r,p) else genR (i+1)
+          if testPrime p then pure (r,p) else genR (i+1)
 
     putTextLn "Generating p"
     (r_p,p) <- genR 0
@@ -181,15 +188,13 @@ genDataDGK uFacts bits = do
     (r_q,q) <- genR 0
     when (p == q) $ error "p = q"
     let n = p * q
+    putTextLn "Generated n"
 
     let phinFacts =
             recombineFacts $
             [(2,2),(r_p,1),(r_q,1),(v,2)] <> uFacts <> uFacts
-    let flatFacts = flattenFacts phinFacts
-
-    a <- randomRIO (0,n-1)
-    unless (exp n a ((p-1)*(q-1)) == 1) $ error "er1"
     unless (fromFacts phinFacts == (p-1)*(q-1)) $ error "er2"
+    let flatFacts = flattenFacts phinFacts
 
     let findWithOrd reqO = do
             g <- randomRIO (0, (p-1)*(q-1))
@@ -214,7 +219,7 @@ genConsecutivePrms n bound =
     reverse $ go 0 [] (if even bound then bound+1 else bound+2)
   where
     go l xs toTest = if l >= n then xs else
-        if isPrimeMR 40 toTest
+        if testPrime toTest
         then go (l+1) (toTest:xs) (toTest+2)
         else go l xs (toTest+2)
 

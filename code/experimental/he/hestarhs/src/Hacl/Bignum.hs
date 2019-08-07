@@ -30,8 +30,11 @@ toBignumRaw l x =
 toBignum :: Word32 -> Integer -> IO Bignum
 toBignum l x = A.newArray $ toBignumRaw l x
 
-toBignumExact :: Integer -> IO Bignum
-toBignumExact x = A.newArray $ map fromInteger $ inbase b64 x
+toBignumExact :: Integer -> IO (Bignum, Word32)
+toBignumExact x = do
+    let vals = map fromInteger $ inbase b64 x
+    bn <- A.newArray vals
+    pure (bn, fromIntegral $ length vals)
 
 toBignumList :: Word32 -> [Integer] -> IO BignumList
 toBignumList l xs = A.newArray $ concatMap (toBignumRaw l) xs
@@ -55,3 +58,6 @@ fromBignumBS n x = BS.pack . concatMap (pad . split) <$> fromBignumRaw n x
 
 fromBignum :: Word32 -> Bignum -> IO Integer
 fromBignum n x = fmap (frombase b64 . map toInteger) $ fromBignumRaw n x
+
+freeBignum :: Bignum -> IO ()
+freeBignum = A.free
