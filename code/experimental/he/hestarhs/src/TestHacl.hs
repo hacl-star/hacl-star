@@ -213,11 +213,12 @@ testPaillierPahe = do
     putTextLn "Testing paillier PAHE"
 
     let n = 5
-    sk <- paheKeyGen @PailSep n
+    let l::Integer = 8
+    sk <- paheKeyGen @PailSep n (2^l)
     let pk = paheToPublic sk
 
-    ms1 <- replicateM n $ randomRIO (0, 1000)
-    ms2 <- replicateM n $ randomRIO (0, 1000)
+    ms1 <- replicateM n $ randomRIO (0, 2^l)
+    ms2 <- replicateM n $ randomRIO (0, 2^l)
 
     c1 <- paheEnc pk ms1
     c2 <- paheEnc pk ms2
