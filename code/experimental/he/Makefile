@@ -140,7 +140,7 @@ INCLUDE_DIRS = \
   $(HACL_HOME)/code/experimental/rsapss/include
 
 # TODO: remove -Wno-incompatible-pointer-types when issue with --cmi is fixed
-CFLAGS += -O3 -march=native -mtune=native -funroll-loops -fPIC
+CFLAGS += -O2 -march=native -mtune=native -funroll-loops -fPIC
 CFLAGS += $(addprefix -I ,$(INCLUDE_DIRS)) -Wall -Wextra \
   -Wno-parentheses -Wno-unused-parameter -Wno-unused-variable \
   -Wno-incompatible-pointer-types

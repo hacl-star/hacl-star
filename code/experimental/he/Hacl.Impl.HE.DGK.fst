@@ -12,6 +12,7 @@ open Lib.Buffer
 open Lib.Math.Algebra
 
 open Hacl.Impl.Bignum
+open Hacl.Impl.Bignum.Openssl
 open Hacl.Impl.HE.Other
 
 module S = Hacl.Spec.HE.DGK
@@ -758,7 +759,7 @@ let fullprod #nLen #l ps es m = tailprod ps es l m
 
 
 val solve_dlp_single:
-     #nLen:bn_len_s
+     #nLen:bn_len_s {v nLen * 128 < max_size_t}
   -> n:lbignum nLen
   -> p:lbignum nLen
   -> e:lbignum nLen
@@ -775,39 +776,41 @@ val solve_dlp_single:
       )
   (ensures fun h0 _ h1 -> modifies1 res h0 h1)
 let solve_dlp_single #nLen n p e g a res =
+  if enable_ossl then solve_dlp_single_external n p e g a res else begin
 
-  push_frame ();
+    push_frame ();
 
-  let one:lbignum 1ul = bn_one #1ul in
-  let tmp = create nLen (u64 0) in
+    let one:lbignum 1ul = bn_one #1ul in
+    let tmp = create nLen (u64 0) in
 
-  admit ();
+    admit ();
 
-  let p_e = create nLen (u64 0) in
-  bn_exp p e p_e;
+    let p_e = create nLen (u64 0) in
+    bn_exp p e p_e;
 
-  bn_assign_uint64 res (u64 0);
-  let current_g = bn_one #nLen in
+    bn_assign_uint64 res (u64 0);
+    let current_g = bn_one #nLen in
 
-  let boolvar = create 1ul 0uy in
+    let boolvar = create 1ul 0uy in
 
-  let b_init = bn_is_equal current_g a in
-  if b_init then boolvar.(0ul) <- 1uy;
+    let b_init = bn_is_equal current_g a in
+    if b_init then boolvar.(0ul) <- 1uy;
 
-  let test () = boolvar.(0ul) =. 0uy in
+    let test () = boolvar.(0ul) =. 0uy in
 
-  Lib.Loops.while (fun _ -> true) (fun _ -> true) test (fun _ ->
-    bn_add_fitting res one res;
-    bn_modular_mul n current_g g tmp;
-    copy current_g tmp;
+    Lib.Loops.while (fun _ -> true) (fun _ -> true) test (fun _ ->
+      bn_add_fitting res one res;
+      bn_modular_mul n current_g g tmp;
+      copy current_g tmp;
 
-    let b1 = bn_is_geq res p_e in
-    let b2 = bn_is_equal current_g a in
-    if b1 || b2 then boolvar.(0ul) <- 1uy
+      let b1 = bn_is_geq res p_e in
+      let b2 = bn_is_equal current_g a in
+      if b1 || b2 then boolvar.(0ul) <- 1uy
 
-    );
+      );
 
-  pop_frame ()
+    pop_frame ()
+  end
 
 val pohlig_hellman:
      #nLen:bn_len_s

@@ -4,7 +4,7 @@ module Hacl.Support where
 
 import Universum hiding (exp, last, (<*>))
 
-import Data.List (splitAt)
+import Data.List (splitAt, (!!))
 import Numeric (log)
 import System.IO.Unsafe (unsafePerformIO)
 import System.Random (randomIO, randomRIO)
@@ -96,14 +96,12 @@ orderFact possibleOrders n g =
 fastFindOrder :: Integer -> Integer -> [Integer] -> IO Integer
 fastFindOrder n g flatFactors = do
 
-    let checkProduct :: [Integer] -> IO Bool
-        checkProduct listPrimes = pure $ exp n g (product listPrimes) == 1
-
     let loop extraPrms = do
             if extraPrms == [] then pure []
             else do
+                let extraPrmsProd = product extraPrms
                 resIndex <-
-                    findM (\i -> checkProduct (listRem extraPrms i))
+                    findM (\i -> pure $ exp n g (extraPrmsProd `div` (extraPrms !! i)) == 1)
                           [0..length extraPrms-1]
                 case resIndex of
                     Nothing -> pure extraPrms
@@ -199,6 +197,7 @@ genDataDGK uFacts bits = do
     let findWithOrd reqO = do
             g <- randomRIO (0, (p-1)*(q-1))
             o <- fastFindOrder n g flatFacts
+            putTextLn "Testing order"
             if o `mod` reqO == 0 then do
                 let cand = exp n g (o `div` reqO)
                 o1 <- fastFindOrder p (cand `mod` p) flatFacts
