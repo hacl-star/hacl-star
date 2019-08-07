@@ -231,6 +231,8 @@ let length_encode (n:nat62) : Lemma
 #pop-options
 
 
+
+
 let lemma_varint (n:nat62) (suff:bytes) : Lemma
   (parse_varint S.(encode_varint n @| suff) == Some (n, vlen n, suff)) =
   let open FStar.Endianness in
@@ -259,6 +261,7 @@ let lemma_varint (n:nat62) (suff:bytes) : Lemma
     else if n < pow2 14 then lemma_varint_case1 n suff
     else if n < pow2 30 then lemma_varint_case2 n suff
     else lemma_varint_case3 n suff
+
 
 
 let lemma_be_index_bytes (l:pos) (b:bytes) : Lemma
@@ -463,14 +466,14 @@ let parse_header b cid_len =
 	if S.length b >= pos_length + 1 then
 	  let dcid = S.slice b 6 (6 + add3 dcil) in
 	  let scid = S.slice b (6 + add3 dcil) (6 + add3 dcil + add3 scil) in
-	  match parse_varint (S.slice b pos_length (S.length b)) with
-	  | Some (l, vll, _) ->
-	    let pos_pn = pos_length + vll in
-	    if S.length b - pos_pn - pn_len - 1 = l &&
+          let rest = S.slice b pos_length (S.length b) in
+	  match parse_varint rest with
+	  | Some (l, vll, npn_and_suff) ->
+            if S.length npn_and_suff - pn_len - 1 = l &&
 	       19 <= l && l < max_cipher_length then
-	      let npn = S.slice b pos_pn (pos_pn + pn_len + 1) in
-	      let rest : lbytes l = S.slice b (pos_pn + pn_len + 1) (S.length b) in
-	      H_Success pn_len npn (Long typ version dcil scil dcid scid l) rest
+	      let npn = S.slice npn_and_suff 0 (pn_len + 1) in
+	      let suff : lbytes l = S.slice npn_and_suff (pn_len + 1) (S.length npn_and_suff) in
+	      H_Success pn_len npn (Long typ version dcil scil dcid scid l) suff
 	    else H_Failure
 	  | None -> H_Failure
 	else H_Failure
@@ -524,6 +527,10 @@ let lemma_slice_short_header (u1 u2 u3 u4:bytes) (l1 l2 l3 l4:nat) : Lemma
   append_slices3 u1 u2;
   append_slices3 u1 S.(u2 @| u3);
   append_slices3 u1 S.(u2 @| u3 @| u4)
+
+let lemma_append_assoc (u v w:bytes) : Lemma
+  (S.equal S.(u @| v @| w) S.((u @| v) @| w)) =
+  ()
 
 
 #push-options "--z3rlimit 20"
@@ -647,12 +654,16 @@ let lemma_slice_long_header67 (u1 u2 u3 u4 u5 u6:bytes) : Lemma
   assert (S.equal S.(u1 @| u2 @|u3 @| u4 @| u5 @| u6) S.(u1 @| u2 @|u3 @| u4 @| u5 @| u6 @| empty));
   lemma_slice_long_header6 u1 u2 u3 u4 u5 u6 S.empty
 
+let add_suffix_long_header (h u1 u2 u3 u4 u5 u6 u7 u8:bytes) : Lemma
+  (requires S.equal h S.(u1 @| u2 @| u3 @| u4 @| u5 @| u6 @| u7))
+  (ensures S.equal S.(h @| u8) S.(u1 @| u2 @| u3 @| u4 @| u5 @| u6 @| u7 @| u8)) =
+  ()
 
-#push-options "--z3rlimit 20"
-let lemma_long_header_parsing_correct h pn_len npn : Lemma
-  (requires (Long? h))
-  (ensures (parsing_correct h pn_len npn)) =
-  let b = format_header h pn_len npn in
+#push-options "--z3rlimit 30"
+let lemma_long_header_parsing_correct h pn_len npn suff : Lemma
+  (requires Long? h /\ S.length suff = Long?.len h)
+  (ensures (parsing_correct h pn_len npn suff)) =
+  let b = S.(format_header h pn_len npn @| suff) in
   let (pnb0, pnb1) = to_bitfield2 pn_len in
   lemma_bitfield2 pn_len;
   if S.length b <> 0 then
@@ -665,12 +676,13 @@ let lemma_long_header_parsing_correct h pn_len npn : Lemma
       let flag = of_bitfield8 (assert_norm (List.Tot.length l == 8); l) in
       lemma_bitfield2 typ;
       let cl8 = U8.(16uy *^ uint_to_t dcil +^ uint_to_t scil) in
-      let (u1,u2,u3,u4,u5,u6,u7) = (S.create 1 flag, n_to_be 4 version, S.create 1 cl8, dcid, scid, encode_varint (assert_norm(max_plain_length <= pow2 62); plain_len), npn) in
-      assert (b = S.(u1 @| u2 @| u3 @| u4 @| u5 @| u6 @| u7));
+      let (u1,u2,u3,u4,u5,u6,u7) = (S.create 1 flag, n_to_be 4 version, S.create 1 cl8, dcid, scid, encode_varint (assert_norm(max_plain_length <= pow2 62); plain_len), S.(npn @| suff)) in
+      add_suffix_long_header (format_header h pn_len npn) u1 u2 u3 u4 u5 u6 npn suff;
+      assert (S.equal b S.(u1 @| u2 @| u3 @| u4 @| u5 @| u6 @| u7));
       if S.length b >= 6 then begin
         // extracting the flag
         lemma_slice_long_header1 u1 u2 u3 u4 u5 u6 u7;
-        assert (S.slice b 0 1 = u1);
+        assert (S.equal u1 (S.slice b 0 1));
         // extracting the version
         lemma_slice_long_header2 u1 u2 u3 u4 u5 u6 u7;
         assert (be_to_n (S.slice b 1 5) = version);
@@ -686,19 +698,24 @@ let lemma_long_header_parsing_correct h pn_len npn : Lemma
         if S.length b >= pos_length + 1 then begin
           // dcid
           lemma_slice_long_header4 u1 u2 u3 u4 u5 u6 u7;
-          assert (u4 = S.slice b 6 (6+add3 dcil));
+          assert (S.equal u4 (S.slice b 6 (6+add3 dcil)));
           // scid
           lemma_slice_long_header5 u1 u2 u3 u4 u5 u6 u7;
-          assert (u5 = S.slice b (6+add3 dcil) (6+add3 dcil+add3 scil));
+          assert (S.equal u5 (S.slice b (6+add3 dcil) (6+add3 dcil+add3 scil)));
           // extracting plain_len and npn
+          let rest = S.slice b pos_length (S.length b) in
           lemma_slice_long_header67 u1 u2 u3 u4 u5 S.(u6 @| u7);
-          assert (S.(u6 @| u7) = S.slice b pos_length (S.length b));
-          lemma_varint u7 plain_len;
-          assert (parse_varint (S.slice b pos_length (S.length b)) = Some (plain_len, vlen plain_len,u7));
-          match parse_varint (S.slice b pos_length (S.length b)) with
-          | Some (l, vll,npn) ->
-	    if S.length b = pos_length + vll + pn_len + 1 && l <= max_plain_length then
-              assert (parse_header b (cid_len h) = H_Success pn_len npn h)
+          assert (S.equal S.(u6 @| u7) rest);
+          lemma_varint plain_len u7;
+          assert (parse_varint rest = Some (plain_len, vlen plain_len,u7));
+          match parse_varint rest with
+          | Some (l, vll,npn_and_suff) ->
+            assert ((plain_len, vlen plain_len,u7) = (l, vll,npn_and_suff));
+            S.append_slices npn suff;
+            assert (S.equal npn (S.slice npn_and_suff 0 (pn_len+1)));
+            assert (S.equal suff (S.slice npn_and_suff (pn_len+1) (S.length npn_and_suff)));
+            if S.length npn_and_suff - pn_len - 1 = l &&
+	      19 <= l && l < max_cipher_length then ()
         end
       end
 
@@ -706,34 +723,34 @@ let lemma_long_header_parsing_correct h pn_len npn : Lemma
 #pop-options
 
 
-let lemma_header_parsing_correct h pn_len npn =
+let lemma_header_parsing_correct h pn_len npn c =
   let b = format_header h pn_len npn in
   let (pnb0, pnb1) = to_bitfield2 pn_len in
   lemma_bitfield2 pn_len;
   if S.length b <> 0 then
     match h with
     | Short spin phase cid ->
-      lemma_short_header_parsing_correct h pn_len npn
+      lemma_short_header_parsing_correct h pn_len npn c
     | Long typ version dcil scil dcid scid plain_len ->
-      lemma_long_header_parsing_correct h pn_len npn
+      lemma_long_header_parsing_correct h pn_len npn c
 
 
-let failure_parse (b:bytes) (cl:nat4) =
+let failure_parse (b:packet) (cl:nat4) =
   H_Failure? (parse_header b cl)
 
 let maybe_short_header (b:bytes{S.length b<>0}) =
   match to_bitfield8 (S.index b 0) with
-  | [_;_;_;false;false;_;true;false] -> True
-  | _ -> False
+  | [_;_;_;false;false;_;true;false] -> true
+  | _ -> false
 
 let maybe_long_header (b:bytes{S.length b<>0}) =
   match to_bitfield8 (S.index b 0) with
-  |[_;_;false;false;_;_;true;true] -> True
-  | _ -> False
+  |[_;_;false;false;_;_;true;true] -> true
+  | _ -> false
 
 
 
-let lemma_res_short_header (b:bytes) (cl:nat4) : Lemma
+let lemma_res_short_header (b:packet) (cl:nat4) : Lemma
   (requires
     S.length b <> 0 /\
     maybe_short_header b)
@@ -742,7 +759,7 @@ let lemma_res_short_header (b:bytes) (cl:nat4) : Lemma
     Short? (H_Success?.h (parse_header b cl))) =
   ()
 
-let lemma_res_long_header (b:bytes) (cl:nat4) : Lemma
+let lemma_res_long_header (b:packet) (cl:nat4) : Lemma
   (requires
     S.length b <> 0 /\
     maybe_long_header b)
@@ -751,7 +768,7 @@ let lemma_res_long_header (b:bytes) (cl:nat4) : Lemma
     Long? (H_Success?.h (parse_header b cl))) =
   ()
 
-let lemma_incompatibility_short_long (b1 b2:bytes) (cl:nat4) : Lemma
+let lemma_incompatibility_short_long (b1 b2:packet) (cl:nat4) : Lemma
   (requires
     S.length b1 <> 0 /\
     S.length b2 <> 0 /\
@@ -764,14 +781,22 @@ let lemma_incompatibility_short_long (b1 b2:bytes) (cl:nat4) : Lemma
   lemma_res_short_header b1 cl;
   lemma_res_long_header b2 cl
 
-
-let lemma_recompose_short_header (b:bytes) (i:nat) : Lemma
-  (requires 0 < i /\ i <= S.length b)
-  (ensures S.equal b S.(S.create 1 (S.index b 0) @| S.slice b 1 i @| S.slice b i (S.length b))) =
+let lemma_not_short_not_long_failure (b:packet) (cl:nat4) : Lemma
+  (requires
+    S.length b <> 0 /\
+    ~ (maybe_short_header b) /\
+    ~ (maybe_long_header b))
+  (ensures parse_header b cl = H_Failure) =
   ()
 
 
-let lemma_short_header_parsing_safe (b1 b2:bytes) (cl:nat4) : Lemma
+let lemma_recompose_short_header (b:packet) (i j:nat) : Lemma
+  (requires 0 < i /\ i <= j /\ j <= S.length b)
+  (ensures S.equal b S.(S.create 1 (S.index b 0) @| S.slice b 1 i @| S.slice b i j @| S.slice b j(S.length b))) =
+  ()
+
+
+let lemma_short_header_parsing_safe (b1 b2:packet) (cl:nat4) : Lemma
   (requires
     S.length b1 <> 0 /\
     S.length b2 <> 0 /\
@@ -779,8 +804,8 @@ let lemma_short_header_parsing_safe (b1 b2:bytes) (cl:nat4) : Lemma
     maybe_short_header b2 /\
     parse_header b1 cl == parse_header b2 cl)
   (ensures b1 == b2 \/ failure_parse b1 cl) =
-  let res1 =  parse_header b1 cl in
-  let res2 =  parse_header b2 cl in
+  let res1 = parse_header b1 cl in
+  let res2 = parse_header b2 cl in
   if S.length b1 <> 0 && S.length b2 <> 0 then
   match to_bitfield8 (S.index b1 0),to_bitfield8 (S.index b2 0) with
   | [pn0 ; pn1 ; phase ; false; false; spin ; true; false],
@@ -789,22 +814,58 @@ let lemma_short_header_parsing_safe (b1 b2:bytes) (cl:nat4) : Lemma
     let pn_len' : nat2 = of_bitfield2 (pn0', pn1') in
     let len  = 1 + (add3 cl) + 1 + pn_len  in
     let len' = 1 + (add3 cl) + 1 + pn_len' in
-    if S.length b1 = len && S.length b2 = len' then begin
-       let cid  = S.slice b1 1 (1 + add3 cl) in
-       let cid' = S.slice b2 1 (1 + add3 cl) in
-       let npn  = S.slice b1 (1 + add3 cl) len  in
-       let npn' = S.slice b2 (1 + add3 cl) len' in
-       assert (H_Success?.pn_len res1 = H_Success?.pn_len res2);
-       lemma_of_bitfield2_inj pn0 pn1 pn0' pn1';
-       lemma_to_bitfield8_inj (S.index b1 0) (S.index b2 0);
-       assert (len = len');
-       assert (S.slice b1 1 (1+add3 cl) = S.slice b2 1 (1+add3 cl) /\ S.slice b1 (1+add3 cl) len = S.slice b2 (1+add3 cl) len);
-       lemma_recompose_short_header b1 (1+add3 cl);
-       lemma_recompose_short_header b2 (1+add3 cl)
+    if S.length b1 - len < max_cipher_length &&
+       S.length b1 - len >= 19 &&
+       S.length b2 - len < max_cipher_length &&
+       S.length b2 - len >= 19 then begin
+      let cid  = S.slice b1 1 (1 + add3 cl) in
+      let cid' = S.slice b2 1 (1 + add3 cl) in
+      let npn  = S.slice b1 (1 + add3 cl) len  in
+      let npn' = S.slice b2 (1 + add3 cl) len' in
+      assert (H_Success?.pn_len res1 = H_Success?.pn_len res2);
+      lemma_of_bitfield2_inj pn0 pn1 pn0' pn1';
+      lemma_to_bitfield8_inj (S.index b1 0) (S.index b2 0);
+      assert (len = len');
+      assert (S.slice b1 1 (1+add3 cl) = S.slice b2 1 (1+add3 cl) /\ S.slice b1 (1+add3 cl) len = S.slice b2 (1+add3 cl) len);
+      lemma_recompose_short_header b1 (1+add3 cl) len;
+      lemma_recompose_short_header b2 (1+add3 cl) len'
     end
 
 
-let lemma_long_header_parsing_safe (b1 b2:bytes) (cl:nat4) : Lemma
+
+
+(*
+let lemma_recompose_long_header (b1 b2:packet) : Lemma
+  (requires (
+    let open FStar.Endianness in
+    let version1 = be_to_n (S.slice b1 1 5) in
+    let version2 = be_to_n (S.slice b2 1 5) in
+    let dcil1 = U8.v (S.index b1 5) / 0x10 in
+    let dcil2 = U8.v (S.index b2 5) / 0x10 in
+    let scil1 = U8.v (S.index b1 5) % 0x10 in
+    let scil2 = U8.v (S.index b2 5) % 0x10 in
+    let pos_length1 = 6 + add3 dcil1 + add3 scil1 in
+    let pos_length2 = 6 + add3 dcil2 + add3 scil2 in
+    S.length b1 >= pos_length1 + 1 /\
+    S.length b2 >= pos_length2 + 1 /\ (
+    let dcid1 = S.slice b1 6 (6 + add3 dcil1) in
+    let dcid2 = S.slice b2 6 (6 + add3 dcil2) in
+    let scid1 = S.slice b1 (6 + add3 dcil1) pos_length1 in
+    let scid2 = S.slice b2 (6 + add3 dcil2) pos_length2 in
+    let rest1 = S.slice b1 pos_length1 (S.length b1) in
+    let rest2 = S.slice b2 pos_length2 (S.length b2) in
+    match 
+    // TODO
+    S.index b1 0 = S.index b2 0 /\
+    version1 = version2 /\
+    True))) // TODO
+  (ensures S.equal b1 b2) =
+  admit() *)
+
+
+#push-options "--z3rlimit 20"
+
+let lemma_long_header_parsing_safe (b1 b2:packet) (cl:nat4) : Lemma
   (requires
     S.length b1 <> 0 /\
     S.length b2 <> 0 /\
@@ -812,8 +873,10 @@ let lemma_long_header_parsing_safe (b1 b2:bytes) (cl:nat4) : Lemma
     maybe_long_header b2 /\
     parse_header b1 cl == parse_header b2 cl)
   (ensures b1 == b2 \/ failure_parse b1 cl) =
-  let res1 =  parse_header b1 cl in
-  let res2 =  parse_header b2 cl in
+  let open FStar.Endianness in
+  let open FStar.Math.Lemmas in
+  let res1 = parse_header b1 cl in
+  let res2 = parse_header b2 cl in
   if S.length b1 <> 0 && S.length b2 <> 0 then
   match to_bitfield8 (S.index b1 0),to_bitfield8 (S.index b2 0) with
   | [pn0 ; pn1 ; false; false; typ0 ; typ1 ; true; true],
@@ -822,17 +885,65 @@ let lemma_long_header_parsing_safe (b1 b2:bytes) (cl:nat4) : Lemma
      let pn_len' : nat2 = of_bitfield2 (pn0', pn1') in
      let typ  = of_bitfield2 (typ0 , typ1 ) in
      let typ' = of_bitfield2 (typ0', typ1') in
-     if S.length b1 >= 6 && S.length b2 >=6 then begin
-       
-       admit()
+     if S.length b1 >= 6 && S.length b2 >= 6 then begin
+       //lemma_be_to_n_is_bounded (S.slice b1 1 5);
+       //lemma_be_to_n_is_bounded (S.slice b2 1 5);
+       let version1 = be_to_n (S.slice b1 1 5) in
+       let version2 = be_to_n (S.slice b2 1 5) in
+       let cl1 = U8.v (S.index b1 5) in
+       let cl2 = U8.v (S.index b2 5) in
+       //modulo_range_lemma cl1 0x10;
+       //modulo_range_lemma cl2 0x10;
+       let dcil1,scil1 = cl1 / 0x10, cl1 % 0x10 in
+       let dcil2,scil2 = cl2 / 0x10, cl2 % 0x10 in
+       let pos_length1 = 6 + add3 dcil1 + add3 scil1 in
+       let pos_length2 = 6 + add3 dcil2 + add3 scil2 in
+       if S.length b1 >= pos_length1 + 1 && S.length b2 >= pos_length2 + 1 then begin
+         let dcid1 = S.slice b1 6 (6+add3 dcil1) in
+         let dcid2 = S.slice b2 6 (6+add3 dcil2) in
+         let scid1 = S.slice b1 (6+add3 dcil1) (6+add3 dcil1+add3 scil1) in
+         let scid2 = S.slice b2 (6+add3 dcil2) (6+add3 dcil2+add3 scil2) in
+         let rest1 = S.slice b1 pos_length1 (S.length b1) in
+         let rest2 = S.slice b2 pos_length2 (S.length b2) in
+         match parse_varint rest1,parse_varint rest2 with
+         | None, _
+         | _, None -> ()
+         | Some (l1,vll1,npn_and_suff1),
+           Some (l2,vll2,npn_and_suff2) ->
+           if S.length npn_and_suff1 - pn_len - 1 = l1 &&
+              19 <= l1 && l1 < max_cipher_length then
+           if S.length npn_and_suff2 - pn_len' - 1 = l2 &&
+              19 <= l2 && l2 < max_cipher_length then
+             let npn1 = S.slice npn_and_suff1 0 (pn_len +1) in
+             let npn2 = S.slice npn_and_suff2 0 (pn_len'+1) in
+             let suff1 = S.slice npn_and_suff1 (pn_len +1) (S.length npn_and_suff1) in
+             let suff2 = S.slice npn_and_suff2 (pn_len'+1) (S.length npn_and_suff2) in
+             assert(pn_len = pn_len' /\ npn1 = npn2 /\ typ = typ' /\ version1 = version2 /\ dcil1 = dcil2 /\ scil1 = scil2 /\ dcid1 = dcid2 /\ scid1 = scid2 /\ l1 = l2 /\ suff1 = suff2);
+             assert (pn0 = pn0' /\ pn1 = pn1' /\ typ0 = typ0' /\ typ1 = typ1');
+             lemma_bitfield 8 (U8.v (S.index b1 0));
+             lemma_bitfield 8 (U8.v (S.index b2 0));
+             assert (S.index b1 0 = S.index b2 0);
+             admit()
+       end
      end
 
 
+#pop-options
 
 let lemma_header_parsing_safe b1 b2 cl =
-  if S.length b1 <> 0 && S.length b2 <> 0 then begin
-    admit()
-  end
+  if S.length b1 <> 0 && S.length b2 <> 0 then
+    match maybe_short_header b1,
+          maybe_short_header b2,
+          maybe_long_header b1,
+          maybe_long_header b2 with
+    | true, true, _, _ -> lemma_short_header_parsing_safe b1 b2 cl
+    | _, _, true, true -> lemma_long_header_parsing_safe b1 b2 cl
+    | true, _, _, true -> lemma_incompatibility_short_long b1 b2 cl
+    | _, true, true, _ -> lemma_incompatibility_short_long b2 b1 cl
+    | false, _, false, _ -> lemma_not_short_not_long_failure b1 cl
+    | _, false, _, false -> lemma_not_short_not_long_failure b2 cl
+
+
 
 
 let rec xor_inplace (b1 b2:bytes) (pos:nat)

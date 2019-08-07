@@ -120,12 +120,12 @@ val lemma_header_parsing_correct:
   h: header ->
   pn_len: nat2 ->
   npn: lbytes (1+pn_len) ->
-  c: cbytes ->
+  c: cbytes{Long? h ==> S.length c = Long?.len h} ->
   Lemma (parse_header S.(format_header h pn_len npn @| c) (cid_len h)
     == H_Success pn_len npn h c)
 
 // N.B. this is only true for a given DCID len
-val lemma_header_parsing_safe: b1:bytes -> b2:bytes -> cl:nat4 -> Lemma
+val lemma_header_parsing_safe: b1:packet -> b2:packet -> cl:nat4 -> Lemma
   (requires
     H_Success? (parse_header b1 cl) /\
     H_Success? (parse_header b2 cl) /\
