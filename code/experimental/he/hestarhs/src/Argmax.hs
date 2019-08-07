@@ -23,6 +23,7 @@ import Hacl
 import qualified Lib as L
 import Playground
 import TestHacl
+import Utils
 
 getCurrentTimeMs :: IO Integer
 getCurrentTimeMs = floor . (*1000) <$> getPOSIXTime

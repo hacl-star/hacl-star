@@ -10,14 +10,6 @@ import Hacl
 import qualified Lib as L
 import Playground
 
-measureTimeSingle :: Text -> IO a -> IO a
-measureTimeSingle label action = do
-    time0 <- P.getPOSIXTime
-    r <- action
-    time1 <- P.getPOSIXTime
-    putTextLn $ label <> " took : " <> show (round ((time1-time0) * 1000) :: Integer) <> "ms"
-    pure r
-
 testBNs :: IO ()
 testBNs = do
     let bitl = 1024
@@ -240,8 +232,8 @@ testDGK :: IO ()
 testDGK = do
     putTextLn "Testing DGK"
 
-    let ufact = [(7,2),(5,1),(37,1),(41,1)]
-    (p,q,u,v,g,h) <- genDataDGK ufact 512
+    (uprimes,p,q,u,v,g,h) <- genDataDGKWithPrimes 32 (2^8) 2048
+    let ufact = map (,1) uprimes
     unless (L.exp (p*q) h v == 1) $ error "generated params are broken"
     unless (L.exp (p*q) g (u*v) == 1) $ error "generated params are broken"
     let n = p * q
@@ -284,22 +276,18 @@ testDGK = do
           replicateM_ 99 $ dgkEnc bN n' u' g' h' r' m1' c1
           dgkEnc bN n' u' g' h' r' m2' c2
 
-          putTextLn "Pass1"
           time2 <- P.getPOSIXTime
 
           replicateM_ 100 $ decrypt c1
 
-          putTextLn "Pass2"
           time3 <- P.getPOSIXTime
 
           replicateM_ 100 $ dgkHomAdd bN n' c1 c2 c3
 
-          putTextLn "Pass3"
           time4 <- P.getPOSIXTime
 
           replicateM_ 100 $ dgkHomMulScal bN n' c1 m2' c4
 
-          putTextLn "Pass4"
           time5 <- P.getPOSIXTime
 
           c'' <- fromBignum bN c1
