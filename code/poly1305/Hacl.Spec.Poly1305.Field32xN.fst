@@ -3,13 +3,16 @@ module Hacl.Spec.Poly1305.Field32xN
 open Lib.IntTypes
 open Lib.IntVector
 open Lib.Sequence
+open FStar.Mul
 
 open Hacl.Spec.Poly1305.Vec
 
-(* low-level spec *)
+#reset-options "--z3rlimit 100 --using_facts_from '* -FStar.Seq'"
+
+
 let scale32 = s:nat{s <= 64}
 let scale64 = s:nat{s <= 4096}
-let nat5 = (nat * nat * nat * nat * nat)
+let nat5 = (nat & nat & nat & nat & nat)
 
 let scale32_5 = x:nat5{let (x1,x2,x3,x4,x5) = x in
 		       x1 <= 64 /\ x2 <= 64 /\ x3 <= 64 /\ x4 <= 64 /\ x5 <= 64}
@@ -17,10 +20,6 @@ let scale64_5 = x:nat5{let (x1,x2,x3,x4,x5) = x in
 		       x1 <= 4096 /\ x2 <= 4096 /\ x3 <= 4096 /\ x4 <= 4096 /\ x5 <= 4096}
 
 let s64x5 (x:scale64) : scale64_5 = (x,x,x,x,x)
-
-open FStar.Mul
-
-#reset-options "--z3rlimit 100 --using_facts_from '* -FStar.Seq'"
 
 noextract
 let ( *^ ) (x:scale32) (y:scale32_5) : scale64_5 =
@@ -52,12 +51,16 @@ let ( <=* ) (x:nat5) (y:nat5) : Type =
   (x4 <= y4) /\
   (x5 <= y5)
 
-abstract
+//abstract
 let pow26: (pow26: pos { pow2 32 == 64 * pow26 /\ pow2 64 == 4096 * pow26 * pow26 /\ pow26 == pow2 26 }) =
   let pow26: pos = pow2 26 in
   assert_norm (pow2 32 == 64 * pow26);
   assert_norm (pow2 64 == 4096 * pow26 * pow26);
   pow26
+
+let pow52: (pow52:pos {pow52 == pow2 52}) = normalize_term (pow2 52)
+let pow78: (pow78:pos {pow78 == pow2 78}) = normalize_term (pow2 78)
+let pow104: (pow104:pos {pow104 == pow2 104}) = normalize_term (pow2 104)
 
 inline_for_extraction
 let max26 = pow26 - 1
@@ -68,6 +71,9 @@ let tup64_5 = (uint64 & uint64 & uint64 & uint64 & uint64)
 let tup64_fits1 (f:uint64) (m:scale32) =
   uint_v f <= m * max26
 
+let tup64_wide_fits1 (f:uint64) (m:scale64) =
+  uint_v f <= m * max26 * max26
+
 let tup64_fits5 (f:tup64_5) (m:scale32_5) =
   let (x0, x1, x2, x3, x4) = f in
   let (m0, m1, m2, m3, m4) = m in
@@ -77,12 +83,20 @@ let tup64_fits5 (f:tup64_5) (m:scale32_5) =
   tup64_fits1 x3 m3 /\
   tup64_fits1 x4 m4
 
+let tup64_wide_fits5 (f:tup64_5) (m:scale64_5) =
+  let (x0, x1, x2, x3, x4) = f in
+  let (m0, m1, m2, m3, m4) = m in
+  tup64_wide_fits1 x0 m0 /\
+  tup64_wide_fits1 x1 m1 /\
+  tup64_wide_fits1 x2 m2 /\
+  tup64_wide_fits1 x3 m3 /\
+  tup64_wide_fits1 x4 m4
+
 noextract
 val as_nat5: f:tup64_5 -> nat
 let as_nat5  f =
-  let (s0,s1,s2,s3,s4) = f in
-  uint_v s0 + (uint_v s1 * pow26) + (uint_v s2 * pow26 * pow26) +
-    (uint_v s3 * pow26 * pow26 * pow26) + (uint_v s4 * pow26 * pow26 * pow26 * pow26)
+  let (s0, s1, s2, s3, s4) = f in
+  v s0 + v s1 * pow26 + v s2 * pow52 + v s3 * pow78 + v s4 * pow104
 
 noextract
 let as_pfelem5 (f:tup64_5) : pfelem =

@@ -436,8 +436,6 @@ let load_felem #w f lo hi =
   f.(3ul) <- f3;
   f.(4ul) <- f4
 
-#push-options "--max_fuel 2"
-
 inline_for_extraction noextract
 val load_precompute_r1:
     p:precomp_r 1
@@ -448,8 +446,9 @@ val load_precompute_r1:
     (ensures  fun h0 _ h1 ->
       modifies (loc p) h0 h1 /\
       load_precompute_r_post h1 p /\
+     (assert_norm (pow2 64 * pow2 64 = pow2 128);
       feval h1 (gsub p 0ul 5ul) ==
-        LSeq.create 1 (uint_v r1 * pow2 64 + uint_v r0))
+        LSeq.create 1 (uint_v r1 * pow2 64 + uint_v r0)))
 let load_precompute_r1 p r0 r1 =
   let r = sub p 0ul 5ul in
   let r5 = sub p 5ul 5ul in
@@ -481,8 +480,9 @@ val load_precompute_r2:
     (ensures  fun h0 _ h1 ->
       modifies (loc p) h0 h1 /\
       load_precompute_r_post h1 p /\
+     (assert_norm (pow2 64 * pow2 64 = pow2 128);
       feval h1 (gsub p 0ul 5ul) ==
-        LSeq.create 2 (uint_v r1 * pow2 64 + uint_v r0))
+        LSeq.create 2 (uint_v r1 * pow2 64 + uint_v r0)))
 let load_precompute_r2 p r0 r1 =
   let r = sub p 0ul 5ul in
   let r5 = sub p 5ul 5ul in
@@ -517,8 +517,9 @@ val load_precompute_r4:
     (ensures  fun h0 _ h1 ->
       modifies (loc p) h0 h1 /\
       load_precompute_r_post h1 p /\
+     (assert_norm (pow2 64 * pow2 64 = pow2 128);
       feval h1 (gsub p 0ul 5ul) ==
-        LSeq.create 4 (uint_v r1 * pow2 64 + uint_v r0))
+        LSeq.create 4 (uint_v r1 * pow2 64 + uint_v r0)))
 let load_precompute_r4 p r0 r1 =
   let r = sub p 0ul 5ul in
   let r5 = sub p 5ul 5ul in
@@ -555,15 +556,15 @@ val load_precompute_r:
     (ensures  fun h0 _ h1 ->
       modifies (loc p) h0 h1 /\
       load_precompute_r_post #w h1 p /\
+      (assert_norm (pow2 64 * pow2 64 = pow2 128);
       feval h1 (gsub p 0ul 5ul) ==
-        LSeq.create w (uint_v r1 * pow2 64 + uint_v r0))
+        LSeq.create w (uint_v r1 * pow2 64 + uint_v r0)))
 let load_precompute_r #w p r0 r1 =
   match w with
   | 1 -> load_precompute_r1 p r0 r1
   | 2 -> load_precompute_r2 p r0 r1
   | 4 -> load_precompute_r4 p r0 r1
 
-#pop-options
 
 inline_for_extraction noextract
 val load_felem1_le:

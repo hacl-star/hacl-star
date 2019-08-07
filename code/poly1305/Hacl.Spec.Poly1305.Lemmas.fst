@@ -180,11 +180,24 @@ val poly_update_repeat_blocks_multi_lemma4_simplify_rp:
    (a0r4 * r * r * r * r + a1 * r * r * r * r * r * r * r + a2 * r * r * r * r * r * r + a3 * r * r * r * r * r +
     c0 * r * r * r * r + c1 * r * r * r + c2 * r * r + c3 * r) % prime)
 let poly_update_repeat_blocks_multi_lemma4_simplify_rp a0r4 a1 a2 a3 c0 c1 c2 c3 r =
-  assert (
+  calc (==) {
     pfmul (pfadd (pfmul (pfadd (pfmul (pfadd (pfmul (pfadd (pfadd (pfadd (pfadd a0r4
-     (pfmul a1 (pfmul (pfmul r r) r))) (pfmul a2 (pfmul r r))) (pfmul a3 r)) c0) r) c1) r) c2) r) c3) r ==
-    (a0r4 * r * r * r * r + a1 * r * r * r * r * r * r * r + a2 * r * r * r * r * r * r +
-     a3 * r * r * r * r * r + c0 * r * r * r * r + c1 * r * r * r + c2 * r * r + c3 * r) % prime)
+    (pfmul a1 (pfmul (pfmul r r) r))) (pfmul a2 (pfmul r r))) (pfmul a3 r)) c0) r) c1) r) c2) r) c3) r;
+    (==) { }
+    pfmul (pfadd (pfmul (pfadd (pfmul (pfadd (pfmul (pfadd (pfadd (pfadd (pfadd a0r4
+    (a1 * r * r * r)) (a2 * r * r)) (a3 * r)) c0) r) c1) r) c2) r) c3) r;
+    (==) { }
+    pfmul (pfadd (pfmul (pfadd (pfmul (pfadd (pfmul (a0r4 + a1 * r * r * r + a2 * r * r + a3 * r + c0) r) c1) r) c2) r) c3) r;
+    (==) { }
+    pfmul (pfadd (pfmul (pfadd (pfmul (a0r4 * r + a1 * r * r * r * r + a2 * r * r * r + a3 * r * r + c0 * r + c1) r) c2) r) c3) r;
+    (==) { }
+    pfmul (pfadd (pfmul (a0r4 * r * r + a1 * r * r * r * r * r + a2 * r * r * r * r + a3 * r * r * r + c0 * r * r + c1 * r + c2) r) c3) r;
+    (==) { }
+    pfmul (a0r4 * r * r * r + a1 * r * r * r * r * r * r + a2 * r * r * r * r * r + a3 * r * r * r * r + c0 * r * r * r + c1 * r * r + c2 * r + c3) r;
+    (==) { }
+    (a0r4 * r * r * r * r + a1 * r * r * r * r * r * r * r + a2 * r * r * r * r * r * r + a3 * r * r * r * r * r +
+      c0 * r * r * r * r + c1 * r * r * r + c2 * r * r + c3 * r) % prime;
+  }
 
 val poly_update_repeat_blocks_multi_lemma4_simplify_aux:
     a0:nat -> a1:nat -> a2:nat -> a3:nat
