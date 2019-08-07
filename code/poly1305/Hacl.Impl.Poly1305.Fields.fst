@@ -59,7 +59,7 @@ let nlimb (s:field_spec) : size_t =
   | M256 -> 5ul
 
 unfold noextract
-let blocklen (s:field_spec) : r:size_t{v r == width s * S.size_block} =
+let blocklen (s:field_spec) : r:size_t{0 < v r /\ v r == width s * S.size_block} =
   match s with
   | M32  -> 16ul
   | M128 -> 32ul
