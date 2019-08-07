@@ -17,6 +17,14 @@ noextract inline_for_extraction
 val enable_ossl : bool
 let enable_ossl = true
 
+val ossl_is_prm:
+     #pLen:bn_len
+  -> p:lbignum pLen
+  -> Stack bool
+    (requires fun h -> live h p)
+    (ensures fun h0 _ h1 -> h0 == h1)
+
+
 val ossl_divide:
      #aLen:bn_len
   -> a:lbignum aLen
@@ -110,3 +118,25 @@ val ossl_mod_exp:
       live h1 n /\ live h1 a /\ live h1 b /\ live h1 res /\
       (let n = as_snat h0 n in
        as_snat h1 res = mexp (to_fe #n (as_snat h0 a)) (as_snat h0 b)))
+
+val solve_dlp_single_external:
+     #nLen:bn_len_strict{v nLen * 128 < max_size_t}
+  -> n:lbignum nLen
+  -> p:lbignum nLen
+  -> e:lbignum nLen
+  -> g:lbignum nLen
+  -> a:lbignum nLen
+  -> res:lbignum nLen
+  -> Stack unit
+  (requires fun h ->
+      live h n /\ live h p /\ live h e /\ live h g /\ live h a /\ live h res /\
+      all_disjoint [loc n; loc p; loc e; loc g; loc a; loc res] /\
+      exp (as_snat h p) (as_snat h e) < as_snat h n /\
+      as_snat h g < as_snat h n /\
+      as_snat h a < as_snat h n
+      )
+  (ensures fun h0 _ h1 ->
+      modifies1 res h0 h1 /\
+      as_snat h1 res < exp (as_snat h0 p) (as_snat h0 e) /\
+      (let n = as_snat h0 n in
+       mexp #n (as_snat h0 g) (as_snat h1 res) = as_snat h0 a))

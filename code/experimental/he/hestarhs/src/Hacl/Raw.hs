@@ -14,6 +14,10 @@ type Bignum = Ptr Word64
 
 type BignumList = Ptr Word64
 
+
+foreign import ccall "Hacl_Impl_Bignum_Openssl_solve_dlp_single_external" bnPollardRho
+    :: Word32 -> Bignum -> Bignum -> Bignum -> Bignum -> Bignum -> Bignum -> IO ()
+
 foreign import ccall "Hacl_Impl_Bignum_Openssl_ossl_is_prm" bnIsPrime
     :: Word32 -> Bignum -> IO Bool
 

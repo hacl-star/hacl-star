@@ -126,7 +126,9 @@ testGM bits = do
 
 
           when (m1 /= m1') $ error $ "GM failed: " <> show (p,q,y,r,m1,m2)
-          pure (time2 - time1, time3 - time2, time4 - time3)
+          pure ( (time2 - time1) / 100
+               , (time3 - time2) / 100
+               , (time4 - time3) / 100)
 
     let tries = 10
     timings <- replicateM tries test
@@ -136,9 +138,9 @@ testGM bits = do
     let avg2 = average $ map (view _2) timings
     let avg3 = average $ map (view _3) timings
 
-    putTextLn $ "Enc: " <> show (avg1 * 100) <> " ms"
-    putTextLn $ "Dec: " <> show (avg2 * 100) <> " ms"
-    putTextLn $ "Xor: " <> show (avg3 * 100) <> " ms"
+    putTextLn $ "Enc: " <> show (avg1 * 1000) <> " ms"
+    putTextLn $ "Dec: " <> show (avg2 * 1000) <> " ms"
+    putTextLn $ "Xor: " <> show (avg3 * 1000) <> " ms"
 
 
 testPaillier :: Int -> IO ()
@@ -192,7 +194,10 @@ testPaillier bits = do
           m'' <- fromBignum bN d
           when (m1 /= m'') $ error $ "Paillier failed: " <> show (p,q,r,m1)
 
-          pure (time2 - time1, time3 - time2, time4 - time3, time5 - time4)
+          pure ( (time2 - time1) / 100
+               , (time3 - time2) / 100
+               , (time4 - time3) / 100
+               , (time5 - time4) / 100)
 
     let tries = 100
     timings <- replicateM tries test
@@ -203,10 +208,10 @@ testPaillier bits = do
     let avg3 = average $ map (view _3) timings
     let avg4 = average $ map (view _4) timings
 
-    putTextLn $ "Enc: " <> show (avg1 * 100) <> " ms"
-    putTextLn $ "Dec: " <> show (avg2 * 100) <> " ms"
-    putTextLn $ "Hom_add: " <> show (avg3 * 100) <> " ms"
-    putTextLn $ "Hom_mul_scal: " <> show (avg4 * 100) <> " ms"
+    putTextLn $ "Enc: " <> show (avg1 * 1000) <> " ms"
+    putTextLn $ "Dec: " <> show (avg2 * 1000) <> " ms"
+    putTextLn $ "Hom_add: " <> show (avg3 * 1000) <> " ms"
+    putTextLn $ "Hom_mul_scal: " <> show (avg4 * 1000) <> " ms"
 
 testPaillierPahe :: IO ()
 testPaillierPahe = do
@@ -233,7 +238,11 @@ testDGK :: IO ()
 testDGK = do
     putTextLn "Testing DGK"
 
-    (uprimes,p,q,u,v,g,h) <- genDataDGKWithPrimes 32 (2^8) 2048
+    -- genDataDGKWithPrimes 2 (2^20) 700
+    let (uprimes,p,q,u,v,g,h) =
+          ([1048583,1048589],1895089596695635987044392085844392979345094436303371616593800702072823833377343780663139692699220309214467,1233650831883099230153849542876191261913580924454571036409560025644937233018208400997158133586030949795059,1099532599387,1426476897108638371825766716642800048506732913643,1656538870108677916077033972037100235170746303410383531631175515688417525915790037496147585782798401746528225873757261702451073191397227907472359036081702994394585493896112852303850272946094029353544515902429963,1109134116557813645666153083598642098863534434376690627045137653790218908038050002143975865840590196552485698017229738578393420525943325790374596246808527264216261339249706287872874469197014263981049460345253999)
+    --params@(uprimes,p,q,u,v,g,h) <- genDataDGKWithPrimes 2 (2^20) 700
+    --print params
     let ufact = map (,1) uprimes
     unless (L.exp (p*q) h v == 1) $ error "generated params are broken"
     unless (L.exp (p*q) g (u*v) == 1) $ error "generated params are broken"
@@ -274,20 +283,20 @@ testDGK = do
 
           time1 <- P.getPOSIXTime
 
-          replicateM_ 99 $ dgkEnc bN n' u' g' h' r' m1' c1
+          replicateM_ 999 $ dgkEnc bN n' u' g' h' r' m1' c1
           dgkEnc bN n' u' g' h' r' m2' c2
 
           time2 <- P.getPOSIXTime
 
-          replicateM_ 100 $ decrypt c1
+          replicateM_ 1000 $ decrypt c1
 
           time3 <- P.getPOSIXTime
 
-          replicateM_ 100 $ dgkHomAdd bN n' c1 c2 c3
+          replicateM_ 1000 $ dgkHomAdd bN n' c1 c2 c3
 
           time4 <- P.getPOSIXTime
 
-          replicateM_ 100 $ dgkHomMulScal bN n' c1 m2' c4
+          replicateM_ 1000 $ dgkHomMulScal bN n' c1 m2' c4
 
           time5 <- P.getPOSIXTime
 
@@ -306,7 +315,11 @@ testDGK = do
           m4 <- fromBignum bN d
           when (m4 /= (m1 * m2) `mod` u) $ error "DGK hom mul failed"
 
-          pure (time2 - time1, time3 - time2, time4 - time3, time5 - time4)
+          pure ( (time2 - time1) / 1000
+               , (time3 - time2) / 1000
+               , (time4 - time3) / 1000
+               , (time5 - time4) / 1000
+               )
 
     let tries = 5
 
@@ -318,7 +331,7 @@ testDGK = do
     let avg3 = average $ map (view _3) timings
     let avg4 = average $ map (view _4) timings
 
-    putTextLn $ "Enc: " <> show (avg1 * 100) <> " ms"
-    putTextLn $ "Dec: " <> show (avg2 * 100) <> " ms"
-    putTextLn $ "Hom_add: " <> show (avg3 * 100) <> " ms"
-    putTextLn $ "Hom_mul_scal: " <> show (avg4 * 100) <> " ms"
+    putTextLn $ "Enc: "          <> show (avg1 * 1000) <> " ms"
+    putTextLn $ "Dec: "          <> show (avg2 * 1000) <> " ms"
+    putTextLn $ "Hom_add: "      <> show (avg3 * 1000) <> " ms"
+    putTextLn $ "Hom_mul_scal: " <> show (avg4 * 1000) <> " ms"
