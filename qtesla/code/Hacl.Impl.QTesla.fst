@@ -1484,7 +1484,7 @@ let lemma_val_times_pow2d_fits (val_:I32.t{-4 <= I32.v val_ /\ I32.v val_ <= 4})
   assert_norm (Int.fits (4 * pow2 (I32.n - 4)) I32.n)
 
 let lemma_fits (val_:I32.t{-4 <= I32.v val_ /\ I32.v val_ <= 4})
-  (left:I32.t{-2 * I32.v params_q <= I32.v left /\ I32.v left <= 2 * I32.v params_q})
+  (left:I32.t{-2 * elem_v params_q <= I32.v left /\ I32.v left <= 2 * elem_v params_q})
   : Lemma (Int.fits (I32.v left - I32.v (val_ <<<^ params_d)) I32.n /\
           Int.min_int I32.n < (I32.v left - I32.v (val_ <<<^ params_d)))
 =
@@ -1495,10 +1495,10 @@ let lemma_fits (val_:I32.t{-4 <= I32.v val_ /\ I32.v val_ <= 4})
   assert_norm (pow2 2 * pow2 24 <= pow2 26);
   assert (I32.v (val_ <<<^ params_d) @% pow2 32 <= pow2 26);
   assert (-pow2 26 <= I32.v (val_ <<<^ params_d) @% pow2 32);
-  assert (I32.v left - I32.v (val_ <<<^ params_d) <= 2 * I32.v params_q + pow2 26);
-  assert (-2 * I32.v params_q - pow2 26 <= I32.v left - I32.v (val_ <<<^ params_d));
-  assert_norm (2 * I32.v params_q <= pow2 24);
-  assert_norm (-pow2 24 <= 2 * I32.v params_q);
+  assert (I32.v left - I32.v (val_ <<<^ params_d) <= 2 * elem_v params_q + pow2 26);
+  assert (-2 * elem_v params_q - pow2 26 <= I32.v left - I32.v (val_ <<<^ params_d));
+  assert_norm (2 * elem_v params_q <= pow2 24);
+  assert_norm (-pow2 24 <= 2 * elem_v params_q);
   assert_norm (pow2 24 + pow2 26 <= pow2 27);
   assert_norm (-pow2 27 <= -pow2 24 - pow2 26);
   assert_norm (-pow2 31 <= -pow2 27);
@@ -1506,16 +1506,16 @@ let lemma_fits (val_:I32.t{-4 <= I32.v val_ /\ I32.v val_ <= 4})
 
 val lemma_bound (val_ val_':I32.t) : Lemma
   (requires
-    -2 * I32.v params_q <= I32.v val_ /\ I32.v val_ <= 2 * I32.v params_q /\
+    -2 * elem_v params_q <= I32.v val_ /\ I32.v val_ <= 2 * elem_v params_q /\
     I32.v val_' = (I32.v val_ + pow2 20 - 1) / pow2 21)
   (ensures -4 <= I32.v val_' /\ I32.v val_' <= 4)
 let lemma_bound val_ val_' =
-  assert_norm (-4 <= ((-2 * I32.v params_q) + pow2 20 - 1) / pow2 21);
-  assert_norm ((2 * I32.v params_q + pow2 20 - 1) / pow2 21 <= 4);
+  assert_norm (-4 <= ((-2 * elem_v params_q) + pow2 20 - 1) / pow2 21);
+  assert_norm ((2 * elem_v params_q + pow2 20 - 1) / pow2 21 <= 4);
   Math.Lemmas.lemma_div_le
-    ((-2 * I32.v params_q) + pow2 20 - 1) (I32.v val_ + pow2 20 - 1) (pow2 21);
+    ((-2 * elem_v params_q) + pow2 20 - 1) (I32.v val_ + pow2 20 - 1) (pow2 21);
   Math.Lemmas.lemma_div_le
-    (I32.v val_ + pow2 20 - 1) (2 * I32.v params_q + pow2 20 - 1) (pow2 21)
+    (I32.v val_ + pow2 20 - 1) (2 * elem_v params_q + pow2 20 - 1) (pow2 21)
 
 assume
 val shift_arithmetic_right_lemma_i32:

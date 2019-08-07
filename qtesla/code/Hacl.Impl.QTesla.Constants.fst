@@ -15,7 +15,7 @@ unfold let shake256_rate = size 136
 
 // Implementation of cSHAKE gets inlined for extraction. To make things easier to compare to the
 // reference code, we enclose it in our own wrapper so it appears as a function call in callers.
-val cshake128_qtesla:
+(*val cshake128_qtesla:
     input_len:size_t
   -> input:lbuffer uint8 input_len
   -> cstm:uint16
@@ -43,4 +43,6 @@ val cshake256_qtesla:
       as_seq h1 output ==
       S.cshake256_frodo (v input_len) (as_seq h0 input) cstm (v output_len))
 
-let cshake256_qtesla input_len input cstm output_len output = cshake256_frodo input_len input cstm output_len output
+let cshake256_qtesla input_len input cstm output_len output = cshake256_frodo input_len input cstm output_len output*)
+let cshake128_qtesla = cshake128_frodo
+let cshake256_qtesla = cshake256_frodo
