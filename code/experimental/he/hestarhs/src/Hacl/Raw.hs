@@ -45,7 +45,7 @@ foreign import ccall "Hacl_Impl_Bignum_Multiplication_bn_mul_fitting" bnMulFitti
     :: Word32 -> Word32 -> Word32 -> Bignum -> Bignum -> Bignum -> IO ()
 
 foreign import ccall "Hacl_Impl_Bignum_Division_bn_divide" bnDivide
-    :: Word32 -> Bignum -> Bignum -> Bignum -> IO ()
+    :: Word32 -> Bignum -> Bignum -> Bignum -> Bignum -> IO ()
 
 foreign import ccall "Hacl_Impl_Bignum_Exponentiation_bn_exp" bnExp
     :: Word32 -> Word32 -> Bignum -> Bignum -> Bignum -> IO ()

@@ -21,8 +21,6 @@ open Hacl.Impl.Bignum.Addition
 open Hacl.Spec.Bignum
 
 
-val enable_ossl : bool
-let enable_ossl = true
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
@@ -157,57 +155,58 @@ val bn_remainder:
        live h1 a /\ live h1 mod /\ live h1 res /\ modifies1 res h0 h1 /\
        as_snat h1 res = as_snat h0 a % as_snat h0 mod)
 let bn_remainder #aLen #modLen a mod res =
-  let h0 = FStar.HyperStack.ST.get () in
+  if enable_ossl then ossl_mod a mod res else begin
+    let h0 = FStar.HyperStack.ST.get () in
 
-  push_frame();
+    push_frame();
 
-  let modBits = calc_bits mod in
-  let aBits = calc_bits a in
+    let modBits = calc_bits mod in
+    let aBits = calc_bits a in
 
-  if aBits =. 0ul then begin
-    trace "aBits = 0\n";
-    memset res (uint 0) modLen
-  end else if modBits >. aBits then copy_fit res a
-  else begin
-    trace "remainder reduction branch\n";
-    ne_lemma aBits 0ul;
-    assert (v aBits > 0);
+    if aBits =. 0ul then begin
+      trace "aBits = 0\n";
+      memset res (uint 0) modLen
+    end else if modBits >. aBits then copy_fit res a
+    else begin
+      trace "remainder reduction branch\n";
+      ne_lemma aBits 0ul;
+      assert (v aBits > 0);
 
-    let realALen = blocks aBits 64ul in
-    assume (v realALen <= v aLen); // always true
+      let realALen = blocks aBits 64ul in
+      assume (v realALen <= v aLen); // always true
 
-    [@inline_let]
-    let maxLen:bn_len_strict = if aLen >=. modLen then aLen else modLen in
+      [@inline_let]
+      let maxLen:bn_len_strict = if aLen >=. modLen then aLen else modLen in
 
-    let diffBits = aBits -! modBits in
-    assume (v diffBits < 64 * v maxLen); // always true
+      let diffBits = aBits -! modBits in
+      assume (v diffBits < 64 * v maxLen); // always true
 
-    let mod1Len:bn_len = begin
-        let modk = diffBits /. 64ul in
-        assert (v modLen + v modk + 1 <= 3 * v maxLen);
-        assert (3 * v maxLen <= max_size_t);
-        assert (v modLen + v modk + 1 <= max_size_t);
-        modLen +! modk +! 1ul
+      let mod1Len:bn_len = begin
+          let modk = diffBits /. 64ul in
+          assert (v modLen + v modk + 1 <= 3 * v maxLen);
+          assert (3 * v maxLen <= max_size_t);
+          assert (v modLen + v modk + 1 <= max_size_t);
+          modLen +! modk +! 1ul
+        end in
+
+      let count:size_t = begin
+          assert (v diffBits + 1 <= 64 * v maxLen);
+          assert (64 * v maxLen <= max_size_t);
+          assert (v diffBits + 1 <= max_size_t);
+          (diffBits +! 1ul)
       end in
 
-    let count:size_t = begin
-        assert (v diffBits + 1 <= 64 * v maxLen);
-        assert (64 * v maxLen <= max_size_t);
-        assert (v diffBits + 1 <= max_size_t);
-        (diffBits +! 1ul)
-    end in
+      // They are equal if modLen < realALen
+      assume (v mod1Len >= v realALen);
 
-    // They are equal if modLen < realALen
-    assume (v mod1Len >= v realALen);
+      bn_remainder_reduce a mod res realALen diffBits mod1Len count
+    end;
 
-    bn_remainder_reduce a mod res realALen diffBits mod1Len count
-  end;
+    pop_frame();
 
-  pop_frame();
-
-  let h1 = FStar.HyperStack.ST.get () in
-  assume (as_snat h1 res = as_snat h0 a % as_snat h0 mod)
-
+    let h1 = FStar.HyperStack.ST.get () in
+    assume (as_snat h1 res = as_snat h0 a % as_snat h0 mod)
+  end
 
 #reset-options "--z3rlimit 50 --max_fuel 1 --max_ifuel 0"
 
