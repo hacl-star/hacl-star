@@ -470,7 +470,7 @@ let parse_header b cid_len =
 	  match parse_varint rest with
 	  | Some (l, vll, npn_and_suff) ->
             if S.length npn_and_suff - pn_len - 1 = l &&
-	       19 <= l && l < max_cipher_length then
+	       19 <= l && l < max_cipher_length && vll = vlen l then
 	      let npn = S.slice npn_and_suff 0 (pn_len + 1) in
 	      let suff : lbytes l = S.slice npn_and_suff (pn_len + 1) (S.length npn_and_suff) in
 	      H_Success pn_len npn (Long typ version dcil scil dcid scid l) suff
@@ -715,7 +715,8 @@ let lemma_long_header_parsing_correct h pn_len npn suff : Lemma
             assert (S.equal npn (S.slice npn_and_suff 0 (pn_len+1)));
             assert (S.equal suff (S.slice npn_and_suff (pn_len+1) (S.length npn_and_suff)));
             if S.length npn_and_suff - pn_len - 1 = l &&
-	      19 <= l && l < max_cipher_length then ()
+	      19 <= l && l < max_cipher_length && vll = vlen l then
+              ()
         end
       end
 
@@ -911,14 +912,16 @@ let lemma_long_header_parsing_safe (b1 b2:packet) (cl:nat4) : Lemma
          | Some (l1,vll1,npn_and_suff1),
            Some (l2,vll2,npn_and_suff2) ->
            if S.length npn_and_suff1 - pn_len - 1 = l1 &&
-              19 <= l1 && l1 < max_cipher_length then
+              19 <= l1 && l1 < max_cipher_length &&
+              vll1 = vlen l1 then
            if S.length npn_and_suff2 - pn_len' - 1 = l2 &&
-              19 <= l2 && l2 < max_cipher_length then
+              19 <= l2 && l2 < max_cipher_length &&
+              vll2 = vlen l2 then
              let npn1 = S.slice npn_and_suff1 0 (pn_len +1) in
              let npn2 = S.slice npn_and_suff2 0 (pn_len'+1) in
              let suff1 = S.slice npn_and_suff1 (pn_len +1) (S.length npn_and_suff1) in
              let suff2 = S.slice npn_and_suff2 (pn_len'+1) (S.length npn_and_suff2) in
-             assert(pn_len = pn_len' /\ npn1 = npn2 /\ typ = typ' /\ version1 = version2 /\ dcil1 = dcil2 /\ scil1 = scil2 /\ dcid1 = dcid2 /\ scid1 = scid2 /\ l1 = l2 /\ suff1 = suff2);
+             //assert(pn_len = pn_len' /\ npn1 = npn2 /\ typ = typ' /\ version1 = version2 /\ dcil1 = dcil2 /\ scil1 = scil2 /\ dcid1 = dcid2 /\ scid1 = scid2 /\ l1 = l2 /\ vll1 = vll2 /\ suff1 = suff2);
              assert (pn0 = pn0' /\ pn1 = pn1' /\ typ0 = typ0' /\ typ1 = typ1');
              lemma_bitfield 8 (U8.v (S.index b1 0));
              lemma_bitfield 8 (U8.v (S.index b2 0));
