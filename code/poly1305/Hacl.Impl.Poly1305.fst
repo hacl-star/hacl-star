@@ -536,7 +536,6 @@ let poly1305_update_multi #s len text pre acc =
   let text1 = sub text bs len1 in
   poly1305_update_multi_loop #s bs len1 text1 pre acc;
   fmul_rn_normalize acc pre
-#pop-options
 
 
 inline_for_extraction noextract
@@ -567,6 +566,7 @@ let poly1305_update_vec #s len text pre acc =
   let len1 = len -! len0 in
   let t1 = sub text len0 len1 in
   poly1305_update_scalar #s len1 t1 pre acc
+#pop-options
 
 
 inline_for_extraction noextract
