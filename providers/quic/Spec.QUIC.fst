@@ -834,37 +834,73 @@ let lemma_short_header_parsing_safe (b1 b2:packet) (cl:nat4) : Lemma
 
 
 
+let lemma_recompose_long_header_aux (b1 b2:packet) (p1 p2 p3:nat) : Lemma
+  (requires
+    S.length b1 = S.length b2 /\
+    1 <= p1 /\ p1 < p2 /\ p2 <= p3 /\ p3 < S.length b1 /\
+    S.index b1 0 = S.index b2 0 /\
+    S.equal (S.slice b1 1 p1) (S.slice b2 1 p1) /\
+    S.index b1 p1 = S.index b2 p1 /\
+    S.equal (S.slice b1 (p1+1) p2) (S.slice b2 (p1+1) p2) /\
+    S.equal (S.slice b1 p2 p3) (S.slice b2 p2 p3) /\
+    S.equal (S.slice b1 p3 (S.length b1)) (S.slice b2 p3 (S.length b2)))
+  (ensures S.equal b1 b2) =
+  assert (S.equal b1 S.(S.slice b1 0 1 @| S.slice b1 1 p1 @| S.slice b1 p1 (p1+1) @| S.slice b1 (p1+1) p2 @| S.slice b1 p2 p3 @| S.slice b1 p3 (S.length b1)));
+  assert (S.equal b2 S.(S.slice b2 0 1 @| S.slice b2 1 p1 @| S.slice b2 p1 (p1+1) @| S.slice b2 (p1+1) p2 @| S.slice b2 p2 p3 @| S.slice b2 p3 (S.length b2)))
 
-(*
-let lemma_recompose_long_header (b1 b2:packet) : Lemma
+
+let lemma_recompose_long_header (b1 b2:packet) (version dcil scil pos_length:nat) (dcid scid rest:bytes) : Lemma
   (requires (
     let open FStar.Endianness in
-    let version1 = be_to_n (S.slice b1 1 5) in
-    let version2 = be_to_n (S.slice b2 1 5) in
-    let dcil1 = U8.v (S.index b1 5) / 0x10 in
-    let dcil2 = U8.v (S.index b2 5) / 0x10 in
-    let scil1 = U8.v (S.index b1 5) % 0x10 in
-    let scil2 = U8.v (S.index b2 5) % 0x10 in
-    let pos_length1 = 6 + add3 dcil1 + add3 scil1 in
-    let pos_length2 = 6 + add3 dcil2 + add3 scil2 in
-    S.length b1 >= pos_length1 + 1 /\
-    S.length b2 >= pos_length2 + 1 /\ (
-    let dcid1 = S.slice b1 6 (6 + add3 dcil1) in
-    let dcid2 = S.slice b2 6 (6 + add3 dcil2) in
-    let scid1 = S.slice b1 (6 + add3 dcil1) pos_length1 in
-    let scid2 = S.slice b2 (6 + add3 dcil2) pos_length2 in
-    let rest1 = S.slice b1 pos_length1 (S.length b1) in
-    let rest2 = S.slice b2 pos_length2 (S.length b2) in
-    match 
-    // TODO
-    S.index b1 0 = S.index b2 0 /\
-    version1 = version2 /\
-    True))) // TODO
+    version = be_to_n (S.slice b1 1 5) /\
+    version = be_to_n (S.slice b2 1 5) /\
+    dcil = U8.v (S.index b1 5) / 0x10 /\
+    dcil = U8.v (S.index b2 5) / 0x10 /\
+    scil = U8.v (S.index b1 5) % 0x10 /\
+    scil = U8.v (S.index b2 5) % 0x10 /\
+    pos_length = 6 + add3 dcil + add3 scil /\
+    pos_length = 6 + add3 dcil + add3 scil /\
+    S.length b1 >= pos_length + 1 /\
+    S.length b2 >= pos_length + 1 /\ (
+    S.equal dcid (S.slice b1 6 (6 + add3 dcil)) /\
+    S.equal dcid (S.slice b2 6 (6 + add3 dcil)) /\
+    S.equal scid (S.slice b1 (6 + add3 dcil) pos_length) /\
+    S.equal scid (S.slice b2 (6 + add3 dcil) pos_length) /\
+    S.equal rest (S.slice b1 pos_length (S.length b1)) /\
+    S.equal rest (S.slice b2 pos_length (S.length b2)) /\
+    S.index b1 0 = S.index b2 0)))
   (ensures S.equal b1 b2) =
-  admit() *)
+  let open FStar.Endianness in
+  let open FStar.Math.Lemmas in
+  let version1 = be_to_n (S.slice b1 1 5) in
+  let version2 = be_to_n (S.slice b2 1 5) in
+  let dcil1 = U8.v (S.index b1 5) / 0x10 in
+  let dcil2 = U8.v (S.index b2 5) / 0x10 in
+  let scil1 = U8.v (S.index b1 5) % 0x10 in
+  let scil2 = U8.v (S.index b2 5) % 0x10 in
+  let pos_length1 = 6 + add3 dcil1 + add3 scil1 in
+  let pos_length2 = 6 + add3 dcil2 + add3 scil2 in
+  let dcid1 = S.slice b1 6 (6 + add3 dcil1) in
+  let dcid2 = S.slice b2 6 (6 + add3 dcil2) in
+  let scid1 = S.slice b1 (6 + add3 dcil1) pos_length1 in
+  let scid2 = S.slice b2 (6 + add3 dcil2) pos_length2 in
+  let rest1 = S.slice b1 pos_length1 (S.length b1) in
+  let rest2 = S.slice b2 pos_length2 (S.length b2) in
+
+  n_to_be_be_to_n 4 (S.slice b1 1 5);
+  n_to_be_be_to_n 4 (S.slice b2 1 5);
+  assert (S.equal (S.slice b1 1 5) (S.slice b2 1 5));
+  lemma_div_mod (U8.v (S.index b1 5)) 0x10;
+  lemma_div_mod (U8.v (S.index b1 5)) 0x10;
+  assert (S.length dcid1 = S.length dcid2);
+  assert (S.length scid1 = S.length scid2);
+  assert (S.index b1 5 = S.index b2 5);
+  assert (pos_length1 = pos_length2);
+  assert (S.length rest1 = S.length rest2);
+  lemma_recompose_long_header_aux b1 b2 5 (6+add3 dcil1) pos_length1
 
 
-#push-options "--z3rlimit 20"
+#push-options "--z3rlimit 30"
 
 let lemma_long_header_parsing_safe (b1 b2:packet) (cl:nat4) : Lemma
   (requires
@@ -873,7 +909,7 @@ let lemma_long_header_parsing_safe (b1 b2:packet) (cl:nat4) : Lemma
     maybe_long_header b1 /\
     maybe_long_header b2 /\
     parse_header b1 cl == parse_header b2 cl)
-  (ensures b1 == b2 \/ failure_parse b1 cl) =
+  (ensures S.equal b1 b2 \/ failure_parse b1 cl) =
   let open FStar.Endianness in
   let open FStar.Math.Lemmas in
   let res1 = parse_header b1 cl in
@@ -921,17 +957,22 @@ let lemma_long_header_parsing_safe (b1 b2:packet) (cl:nat4) : Lemma
              let npn2 = S.slice npn_and_suff2 0 (pn_len'+1) in
              let suff1 = S.slice npn_and_suff1 (pn_len +1) (S.length npn_and_suff1) in
              let suff2 = S.slice npn_and_suff2 (pn_len'+1) (S.length npn_and_suff2) in
-             //assert(pn_len = pn_len' /\ npn1 = npn2 /\ typ = typ' /\ version1 = version2 /\ dcil1 = dcil2 /\ scil1 = scil2 /\ dcid1 = dcid2 /\ scid1 = scid2 /\ l1 = l2 /\ vll1 = vll2 /\ suff1 = suff2);
+             assert(pn_len = pn_len' /\ npn1 = npn2 /\ typ = typ' /\ version1 = version2 /\ dcil1 = dcil2 /\ scil1 = scil2 /\ dcid1 = dcid2 /\ scid1 = scid2 /\ l1 = l2 /\ vll1 = vll2 /\ suff1 = suff2);
              assert (pn0 = pn0' /\ pn1 = pn1' /\ typ0 = typ0' /\ typ1 = typ1');
              lemma_bitfield 8 (U8.v (S.index b1 0));
              lemma_bitfield 8 (U8.v (S.index b2 0));
              assert (S.index b1 0 = S.index b2 0);
-             admit()
+             S.lemma_split npn_and_suff1 (pn_len+1);
+             S.lemma_split npn_and_suff2 (pn_len'+1);
+             assert (parse_varint rest1 = parse_varint rest2);
+             lemma_varint_safe rest1 rest2;
+             //assert (S.equal rest1 rest2);
+             lemma_recompose_long_header b1 b2 version1 dcil1 scil1 pos_length1 dcid1 scid1 rest1
        end
      end
 
-
 #pop-options
+
 
 let lemma_header_parsing_safe b1 b2 cl =
   if S.length b1 <> 0 && S.length b2 <> 0 then
