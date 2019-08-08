@@ -268,7 +268,8 @@ testDGK :: IO ()
 testDGK = do
     putTextLn "Testing DGK"
 
-    (uprimes,p,q,u,v,g,h) <- dgkKeyGenWithLookup 2 (2^20) 700
+    (uprimes,p,q,u,v,g,h) <- dgkKeyGenWithLookup 1 256 1024
+    --(uprimes,p,q,u,v,g,h) <- dgkKeyGenWithLookup 1 3900 1024
     let ufact = map (,1) uprimes
     unless (L.exp (p*q) h v == 1) $ error "generated params are broken"
     unless (L.exp (p*q) g (u*v) == 1) $ error "generated params are broken"
@@ -303,26 +304,31 @@ testDGK = do
           c4 <- toBignum bN 0
           d <- toBignum bN 0
 
+
           let decrypt ciph =
                   dgkDec bN (fromIntegral $ length ufact)
                     p' q' n' u' u_ps u_es v' g' h' ciph d
 
           time1 <- P.getPOSIXTime
 
-          replicateM_ 999 $ dgkEnc bN n' u' g' h' r' m1' c1
+          putTextLn "* Enc"
+          replicateM_ 9990 $ dgkEnc bN n' u' g' h' r' m1' c1
           dgkEnc bN n' u' g' h' r' m2' c2
 
           time2 <- P.getPOSIXTime
 
-          replicateM_ 1000 $ decrypt c1
+          putTextLn "* Dec"
+          replicateM_ 10000 $ decrypt c1
 
           time3 <- P.getPOSIXTime
 
-          replicateM_ 1000 $ dgkHomAdd bN n' c1 c2 c3
+          putTextLn "* HomAdd"
+          replicateM_ 10000 $ dgkHomAdd bN n' c1 c2 c3
 
           time4 <- P.getPOSIXTime
 
-          replicateM_ 1000 $ dgkHomMulScal bN n' c1 m2' c4
+          putTextLn "* HomMul"
+          replicateM_ 10000 $ dgkHomMulScal bN n' c1 m2' c4
 
           time5 <- P.getPOSIXTime
 
@@ -341,13 +347,13 @@ testDGK = do
           m4 <- fromBignum bN d
           when (m4 /= (m1 * m2) `mod` u) $ error "DGK hom mul failed"
 
-          pure ( (time2 - time1) / 1000
-               , (time3 - time2) / 1000
-               , (time4 - time3) / 1000
-               , (time5 - time4) / 1000
+          pure ( (time2 - time1) / 10000
+               , (time3 - time2) / 10000
+               , (time4 - time3) / 10000
+               , (time5 - time4) / 10000
                )
 
-    let tries = 5
+    let tries = 1
 
     timings <- replicateM tries test
 
