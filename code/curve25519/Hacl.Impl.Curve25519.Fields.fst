@@ -15,6 +15,9 @@ module P = Spec.Curve25519
 module F51 = Hacl.Impl.Curve25519.Field51
 module F64 = Hacl.Impl.Curve25519.Field64
 
+
+#set-options "--z3rlimit 50 --max_fuel 0 --initial_ifuel 1 --max_ifuel 1"
+
 type field_spec =
   | M51
   | M64
@@ -122,7 +125,7 @@ val store_felem:
       live h f /\ live h b /\ disjoint f b /\ state_inv_t h f)
     (ensures  fun h0 _ h1 ->
       modifies (loc b |+| loc f) h0 h1 /\
-      BSeq.nat_from_intseq_le (as_seq h1 b) == feval h0 f)
+      as_seq h1 b == BSeq.nat_to_intseq_le 4 (feval h0 f))
 let store_felem #s b f =
   match s with
   | M51 -> F51.store_felem b f
@@ -213,8 +216,6 @@ let fsub_post #s h out =
   | M51 -> F51.felem_fits h out (9, 10, 9, 9, 9)
   | M64 -> True
 
-#reset-options "--z3rlimit 50 --max_fuel 2"
-
 inline_for_extraction noextract
 val fsub:
     #s:field_spec
@@ -294,7 +295,6 @@ let fmul2_fsqr2_post #s h out =
       F51.mul_inv_t h out1
   | M64 -> True
 
-#reset-options "--z3rlimit 50 --max_fuel 2"
 
 inline_for_extraction noextract
 val fmul2:
