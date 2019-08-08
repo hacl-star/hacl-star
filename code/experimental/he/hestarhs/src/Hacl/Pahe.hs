@@ -274,7 +274,7 @@ instance Pahe PailSep where
             pure mi
 
     paheMultBlind pk@PailSepPk{..} ms = do
-        vals <- replicateM psp_simdn $ randomRIO (0,psp_nRaw`div`2)
+        vals <- replicateM psp_simdn $ randomRIO (1,psp_nRaw`div`2)
         paheSIMDMulScal pk ms vals
 
     paheToBS PailSepPk{..} (PailCiph ms) = do
@@ -368,11 +368,12 @@ instance Pahe DgkCrt where
         r0 <- randomRIO (0, dcp_nRaw - 1) `suchThat`
                  (\x -> gcd x dcp_nRaw == 1)
         r <- toBignum dcp_bn r0
-        -- TODO HANDLE NEGATIVES
         mPacked <- toBignum dcp_bn $ P.crt dcp_uFactsRaw (P.crtToBase dcp_uFactsRaw m)
         c <- toBignum dcp_bn 0
 
         dgkEnc dcp_bn dcp_n dcp_u dcp_g dcp_h r mPacked c
+
+        freeBignum r
 
         pure $ DgkCiph c
 
@@ -391,18 +392,14 @@ instance Pahe DgkCrt where
 
     paheSIMDMulScal DgkCrtPk{..} (DgkCiph c1) coeffs = do
         c3 <- toBignum dcp_bn 0
-        -- TODO HANDLE NEGATIVES
         bn_coeffs <- toBignum dcp_bn $ P.crt dcp_uFactsRaw (P.crtToBase dcp_uFactsRaw coeffs)
         dgkHomMulScal dcp_bn dcp_n c1 bn_coeffs c3
         freeBignum bn_coeffs
         pure $ DgkCiph c3
 
-    paheMultBlind DgkCrtPk{..} (DgkCiph c1) = do
-        c3 <- toBignum dcp_bn 0
-        blindVal <- toBignum dcp_bn =<< randomRIO (0,dcp_nRaw`div`2)
-        dgkHomMulScal dcp_bn dcp_n c1 blindVal c3
-        freeBignum blindVal
-        pure $ DgkCiph c3
+    paheMultBlind pk@DgkCrtPk{..} c = do
+        scal <- replicateM dcp_simdn $ randomRIO (1, dcp_uFactsRaw !! 0 - 1)
+        paheSIMDMulScal pk c scal
 
     paheToBS DgkCrtPk{..} (DgkCiph ms) = fromBignumBS dcp_bn ms
 
