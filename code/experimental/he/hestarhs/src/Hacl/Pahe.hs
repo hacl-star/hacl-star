@@ -52,6 +52,115 @@ paheRerand :: Pahe s => PahePk s -> PaheCiph s -> IO (PaheCiph s)
 paheRerand pk c = paheSIMDAdd pk c =<< paheEnc pk (replicate (paheK pk) 0)
 
 ----------------------------------------------------------------------------
+-- GM
+----------------------------------------------------------------------------
+
+data GMSep
+
+instance Pahe GMSep where
+    data PaheCiph GMSep = GMCiph [Bignum]
+    data PaheSk GMSep =
+           GMSepSk { gms_simdn :: Int
+                   , gms_bn :: Word32
+                   , gms_p :: Bignum
+                   , gms_pMin1 :: Bignum
+                   , gms_pMin1Half :: Bignum
+                   , gms_q :: Bignum
+                   , gms_n :: Bignum
+                   , gms_nRaw :: Integer
+                   , gms_y :: Bignum
+                   }
+    data PahePk GMSep =
+           GMSepPk { gmp_simdn :: Int
+                   , gmp_bn :: Word32
+                   , gmp_n :: Bignum
+                   , gmp_nRaw :: Integer
+                   , gmp_y :: Bignum
+                   }
+
+
+    paheKeyGen gms_simdn numsMod = do
+        let roundUpPow2 x = 2 ^ log2 x
+        (p,q,y,_,_,_) <- genDataGM $ max (roundUpPow2 $ log2 numsMod) 1024
+        let n = p * q
+        let gms_nRaw = n
+        let gms_bn = fromIntegral $ length $ inbase b64 n
+
+        gms_p <- toBignum gms_bn p
+        gms_q <- toBignum gms_bn q
+        gms_n <- toBignum gms_bn n
+        gms_y <- toBignum gms_bn y
+
+        gms_pMin1 <- toBignum gms_bn (p-1)
+        gms_pMin1Half <- toBignum gms_bn ((p-1)`div`2)
+
+        pure GMSepSk{..}
+
+    paheK GMSepPk{..} = gmp_simdn
+
+    paheToPublic GMSepSk{..} =
+        GMSepPk {
+            gmp_simdn = gms_simdn
+          , gmp_bn    = gms_bn
+          , gmp_n     = gms_n
+          , gmp_nRaw = gms_nRaw
+          , gmp_y     = gms_y }
+
+    paheEnc GMSepPk{..} m = do
+        when (length m /= gmp_simdn) $ error "GM encrypt: length mismatch"
+        vals <- forM [0..gmp_simdn-1] $ \i -> do
+            r0 <- randomRIO (0, gmp_nRaw - 1) `suchThat`
+                     (\x -> gcd x gmp_nRaw == 1)
+            r <- toBignum gmp_bn r0
+            let mi = (== 1) . (`mod` 2) $ (m !! i)
+            c <- toBignum gmp_bn 0
+            gmEnc gmp_bn gmp_n gmp_y r mi c
+
+            freeBignum r
+
+            pure c
+        pure $ GMCiph vals
+
+    paheDec GMSepSk{..} (GMCiph ms) = do
+        when (length ms /= gms_simdn) $ error "GM decrypt: length mismatch"
+        fmap (map (bool 0 1)) $ forM ms $ gmDec gms_bn gms_p gms_pMin1 gms_pMin1Half
+
+    paheSIMDAdd GMSepPk{..} (GMCiph ms1) (GMCiph ms2) = do
+        when (length ms1 /= gmp_simdn || length ms2 /= gmp_simdn) $
+            error "GMlier simd add: length mismatch"
+        fmap GMCiph $ forM (ms1 `zip` ms2) $ \(m1,m2) -> do
+            mi <- toBignum gmp_bn 0
+            gmXor gmp_bn gmp_n m1 m2 mi
+            pure mi
+
+    paheSIMDMulScal GMSepPk{..} (GMCiph ms1) m2 = do
+        when (length ms1 /= gmp_simdn || length m2 /= gmp_simdn) $
+            error "GMlier simd mul: length mismatch"
+        fmap GMCiph $ forM (ms1 `zip` m2) $ \(m1,p0) ->
+            if (p0 `mod` 2) == 1 then pure m1 else do
+                res <- toBignum gmp_bn 0
+                gmXor gmp_bn gmp_n m1 m1 res
+                pure res
+
+    -- This function should "keep 0 as 0" and "make other values seem
+    -- like random, but not zero". This is exactly ID for the GM.
+    paheMultBlind _ ms = pure ms
+
+    paheToBS GMSepPk{..} (GMCiph ms) = do
+        when (length ms /= gmp_simdn) $ error "GM paheToBS failed length"
+        fmap BS.concat $ forM ms $ fromBignumBS gmp_bn
+
+    paheFromBS GMSepPk{..} bsl = do
+        let parse bs = do
+                let (a,b) = BS.splitAt (8 * fromIntegral gmp_bn) bs
+                x <- toBignumBS gmp_bn a
+                if BS.null b then pure [x] else do
+                  y <- parse b
+                  pure $ x : y
+        fmap GMCiph $ parse bsl
+
+
+----------------------------------------------------------------------------
 -- Paillier
 ----------------------------------------------------------------------------
 
@@ -209,7 +318,8 @@ instance Pahe DgkCrt where
 
 
     paheKeyGen dcs_simdn numsMod = do
-        (dcs_uFactsRaw,p,q,u,v,g,h) <- genDataDGKWithPrimes dcs_simdn numsMod 1024
+        let bits = 1024
+        (dcs_uFactsRaw,p,q,u,v,g,h) <- dgkKeyGenWithLookup dcs_simdn numsMod bits
         let n = p * q
         let dcs_nRaw = n
         let dcs_bn = fromIntegral $ length $ inbase b64 (n*n)
@@ -249,7 +359,7 @@ instance Pahe DgkCrt where
                  (\x -> gcd x dcp_nRaw == 1)
         r <- toBignum dcp_bn r0
         -- TODO HANDLE NEGATIVES
-        mPacked <- toBignum dcp_bn $ P.crt dcp_uFactsRaw m
+        mPacked <- toBignum dcp_bn $ P.crt dcp_uFactsRaw (P.crtToBase dcp_uFactsRaw m)
         c <- toBignum dcp_bn 0
 
         dgkEnc dcp_bn dcp_n dcp_u dcp_g dcp_h r mPacked c
@@ -272,7 +382,7 @@ instance Pahe DgkCrt where
     paheSIMDMulScal DgkCrtPk{..} (DgkCiph c1) coeffs = do
         c3 <- toBignum dcp_bn 0
         -- TODO HANDLE NEGATIVES
-        bn_coeffs <- toBignum dcp_bn $ P.crt dcp_uFactsRaw coeffs
+        bn_coeffs <- toBignum dcp_bn $ P.crt dcp_uFactsRaw (P.crtToBase dcp_uFactsRaw coeffs)
         dgkHomMulScal dcp_bn dcp_n c1 bn_coeffs c3
         freeBignum bn_coeffs
         pure $ DgkCiph c3

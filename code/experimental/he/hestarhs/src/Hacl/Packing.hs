@@ -22,6 +22,8 @@ crt base vals = L.crt $ vals `zip` base
 crtInv :: [Integer] -> Integer -> [Integer]
 crtInv base v = map (v `mod`) base
 
+crtToBase :: [Integer] -> [Integer] -> [Integer]
+crtToBase base vals = map (\(b,p) -> b `mod` p) $ vals `zip` base
 
 ----------------------------------------------------------------------------
 -- Inspecting FFT domain automorhisms

@@ -147,7 +147,7 @@ val hom_xor:
   -> Stack unit
     (requires fun h ->
        live h n /\ live h c1 /\ live h c2 /\ live h res /\
-       all_disjoint [loc n; loc c1; loc c2; loc res] /\
+       disjoint c1 res /\ disjoint c2 res /\ disjoint n res /\
        (let n' = as_snat h n in
         let c1' = as_snat h c1 in
         let c2' = as_snat h c2 in
