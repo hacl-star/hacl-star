@@ -1,5 +1,5 @@
 [
-  "‹ýÞ×tpFÌ”Bb\u001aðÿqO",
+  "\"Üÿö¯Q¦f:ô™¼=a»\u000e",
   [
     [
       "Hacl.Impl.Chacha20Poly1305.Poly.derive_key",
@@ -58,7 +58,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "af26014e5a32921bcb97f9c84971d4e4"
+      "468a37acfeb7932703aebef906b7fbae"
     ],
     [
       "Hacl.Impl.Chacha20Poly1305.Poly.derive_key",
@@ -97,8 +97,6 @@
         "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
         "equation_FStar.UInt.uint_t",
         "equation_Hacl.Impl.Chacha20.Core32.state",
-        "equation_Hacl.Spec.Poly1305.Vec.size_block",
-        "equation_Hacl.Spec.Poly1305.Vec.size_key",
         "equation_Lib.Buffer.as_seq", "equation_Lib.Buffer.buffer_t",
         "equation_Lib.Buffer.disjoint", "equation_Lib.Buffer.lbuffer_t",
         "equation_Lib.Buffer.length", "equation_Lib.Buffer.live",
@@ -122,6 +120,8 @@
         "equation_Spec.Chacha20.size_key",
         "equation_Spec.Chacha20.size_nonce", "equation_Spec.Chacha20.state",
         "equation_Spec.GaloisField.felem", "equation_Spec.GaloisField.gf",
+        "equation_Spec.Poly1305.size_block",
+        "equation_Spec.Poly1305.size_key",
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Lib.Buffer.as_seq",
         "function_token_typing_Lib.IntTypes.uint32",
@@ -214,8 +214,7 @@
         "typing_FStar.Monotonic.HyperStack.remove_elt",
         "typing_FStar.Set.complement", "typing_FStar.Set.mem",
         "typing_FStar.Set.singleton", "typing_FStar.Set.union",
-        "typing_FStar.UInt.fits", "typing_Hacl.Spec.Poly1305.Vec.size_block",
-        "typing_Hacl.Spec.Poly1305.Vec.size_key", "typing_Lib.Buffer.as_seq",
+        "typing_FStar.UInt.fits", "typing_Lib.Buffer.as_seq",
         "typing_Lib.Buffer.length", "typing_Lib.Buffer.loc",
         "typing_Lib.IntTypes.minint", "typing_Lib.IntTypes.mk_int",
         "typing_Lib.IntTypes.unsigned", "typing_Lib.IntTypes.v",
@@ -233,11 +232,12 @@
         "typing_LowStar.Monotonic.Buffer.loc_union", "typing_Spec.AES.gf8",
         "typing_Spec.AES.irred", "typing_Spec.Chacha20.chacha20_key_block0",
         "typing_Spec.GaloisField.__proj__GF__item__t",
+        "typing_Spec.Poly1305.size_block", "typing_Spec.Poly1305.size_key",
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.SEC@tok",
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "8dfbff69ea24777428e29dfd1e23d880"
+      "c015f0777ce76e4520c31c3051d6c232"
     ],
     [
       "Hacl.Impl.Chacha20Poly1305.Poly.poly1305_do_core_padded",
@@ -285,7 +285,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "a39287dafe5a9c9ed57d30b61fb5ed76"
+      "b09918efa07649337a2857e4889491ab"
     ],
     [
       "Hacl.Impl.Chacha20Poly1305.Poly.poly1305_do_core_padded",
@@ -464,7 +464,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "92cbf77f83a82b634141eb17c9a7c93c"
+      "926b973c68be8f29db04ceff730a40cf"
     ],
     [
       "Hacl.Impl.Chacha20Poly1305.Poly.poly1305_do_core_to_bytes",
@@ -490,7 +490,6 @@
         "equality_tok_Lib.IntTypes.U8@tok", "equation_FStar.UInt.fits",
         "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
         "equation_FStar.UInt.size", "equation_FStar.UInt.uint_t",
-        "equation_Hacl.Spec.Poly1305.Vec.size_key",
         "equation_Lib.Buffer.as_seq", "equation_Lib.Buffer.buffer_t",
         "equation_Lib.Buffer.lbuffer_t", "equation_Lib.Buffer.length",
         "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.maxint",
@@ -504,6 +503,7 @@
         "equation_LowStar.Monotonic.Buffer.length", "equation_Spec.AES.elem",
         "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
         "equation_Spec.GaloisField.felem", "equation_Spec.GaloisField.gf",
+        "equation_Spec.Poly1305.size_key",
         "function_token_typing_Lib.IntTypes.uint8",
         "function_token_typing_Spec.AES.elem", "int_typing",
         "lemma_FStar.UInt32.uv_inv", "lemma_FStar.UInt32.vu_inv",
@@ -526,14 +526,14 @@
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
         "refinement_interpretation_Tm_refine_f5f31a1fc19340e2a0377dbd7f2a4a12",
         "refinement_interpretation_Tm_refine_fc9cf024f95052c2418a2bf088d6c755",
-        "typing_Hacl.Spec.Poly1305.Vec.size_key", "typing_Lib.IntTypes.v",
-        "typing_LowStar.Buffer.trivial_preorder",
+        "typing_Lib.IntTypes.v", "typing_LowStar.Buffer.trivial_preorder",
         "typing_LowStar.Monotonic.Buffer.len", "typing_Spec.AES.gf8",
         "typing_Spec.GaloisField.__proj__GF__item__t",
-        "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
+        "typing_Spec.Poly1305.size_key", "typing_tok_Lib.IntTypes.PUB@tok",
+        "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "faa40092043c680d23e51a75fb2d2a5a"
+      "b1db8dafe3ea65915034f1fe9aef4b82"
     ],
     [
       "Hacl.Impl.Chacha20Poly1305.Poly.poly1305_do_core_to_bytes",
@@ -664,7 +664,7 @@
         "typing_tok_Lib.IntTypes.U64@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "9f085c8dc8079bec687a0911516c68dd"
+      "0e6237719e1d1fc017484291819bfc8a"
     ],
     [
       "Hacl.Impl.Chacha20Poly1305.Poly.poly1305_do_core_finish",
@@ -686,10 +686,6 @@
         "equality_tok_Lib.IntTypes.U8@tok", "equation_FStar.UInt.fits",
         "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
         "equation_FStar.UInt.size", "equation_FStar.UInt.uint_t",
-        "equation_Hacl.Spec.Poly1305.Vec.pfelem",
-        "equation_Hacl.Spec.Poly1305.Vec.prime",
-        "equation_Hacl.Spec.Poly1305.Vec.size_block",
-        "equation_Hacl.Spec.Poly1305.Vec.size_key",
         "equation_Lib.Buffer.lbuffer_t", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.pub_int_v", "equation_Lib.IntTypes.range",
         "equation_Lib.IntTypes.unsigned", "equation_Lib.IntTypes.v",
@@ -697,7 +693,7 @@
         "equation_Spec.AES.elem", "equation_Spec.AES.gf8",
         "equation_Spec.AES.irred", "equation_Spec.Chacha20.size_key",
         "equation_Spec.GaloisField.felem", "equation_Spec.GaloisField.gf",
-        "equation_Spec.Poly1305.prime", "equation_Spec.Poly1305.size_block",
+        "equation_Spec.Poly1305.size_block",
         "equation_Spec.Poly1305.size_key",
         "function_token_typing_Spec.AES.elem", "int_typing",
         "lemma_FStar.UInt32.vu_inv",
@@ -713,20 +709,19 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
-        "refinement_interpretation_Tm_refine_b7e7e236a3beba992e8741bf2b5c0052",
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
         "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
-        "typing_FStar.UInt.fits", "typing_Hacl.Spec.Poly1305.Vec.size_block",
-        "typing_Hacl.Spec.Poly1305.Vec.size_key", "typing_Lib.Buffer.length",
+        "typing_FStar.UInt.fits", "typing_Lib.Buffer.length",
         "typing_Lib.IntTypes.v", "typing_Spec.AES.gf8",
         "typing_Spec.AES.irred",
         "typing_Spec.GaloisField.__proj__GF__item__t",
+        "typing_Spec.Poly1305.size_block", "typing_Spec.Poly1305.size_key",
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.SEC@tok",
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "c43ff81f7b869d0819919ca673113d89"
+      "42e529e696ea1575a74b4f0de1d417ce"
     ],
     [
       "Hacl.Impl.Chacha20Poly1305.Poly.poly1305_do_core_finish",
@@ -830,7 +825,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "c532dc69064906a57d87f6e1d34cb790"
+      "7623f52629d4b4fb2ddf4b44a863d327"
     ],
     [
       "Hacl.Impl.Chacha20Poly1305.Poly.poly1305_do_core_",
@@ -893,7 +888,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "f6edd66bca17b37182e3a25e6e67080e"
+      "75b0e53f4645cfee2384a8753cfb0acb"
     ],
     [
       "Hacl.Impl.Chacha20Poly1305.Poly.poly1305_do_core_",
@@ -1014,7 +1009,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "6c4608a7a49237defe97fbdfc4eb20c7"
+      "955bf314f9932c2e25a84139742f481c"
     ],
     [
       "Hacl.Impl.Chacha20Poly1305.Poly.poly1305_do_core",
@@ -1071,7 +1066,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "eda9ff6f527c4c3c265d9c93ccca0254"
+      "776e818fe9bc95e39fdd658bde18ffcc"
     ],
     [
       "Hacl.Impl.Chacha20Poly1305.Poly.poly1305_do_core",
@@ -1111,8 +1106,6 @@
         "equation_FStar.UInt.uint_t",
         "equation_Hacl.Spec.Poly1305.Field32xN.lanes",
         "equation_Hacl.Spec.Poly1305.Field32xN.uint64xN",
-        "equation_Hacl.Spec.Poly1305.Vec.size_block",
-        "equation_Hacl.Spec.Poly1305.Vec.size_key",
         "equation_Lib.Buffer.as_seq", "equation_Lib.Buffer.buffer_t",
         "equation_Lib.Buffer.disjoint", "equation_Lib.Buffer.lbuffer_t",
         "equation_Lib.Buffer.length", "equation_Lib.Buffer.live",
@@ -1132,6 +1125,8 @@
         "equation_Prims.nat", "equation_Spec.AES.elem",
         "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
         "equation_Spec.GaloisField.felem", "equation_Spec.GaloisField.gf",
+        "equation_Spec.Poly1305.size_block",
+        "equation_Spec.Poly1305.size_key",
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Lib.IntTypes.uint8",
         "function_token_typing_Prims.int",
@@ -1156,7 +1151,8 @@
         "lemma_FStar.UInt32.vu_inv",
         "lemma_Lib.Buffer.modifies_preserves_live",
         "lemma_Lib.IntTypes.Compatibility.pow2_values",
-        "lemma_Lib.IntTypes.add_mod_lemma", "lemma_Lib.Sequence.eq_intro",
+        "lemma_Lib.IntTypes.add_lemma", "lemma_Lib.IntTypes.add_mod_lemma",
+        "lemma_Lib.Sequence.eq_intro",
         "lemma_LowStar.Monotonic.Buffer.fresh_frame_loc_not_unused_in_disjoint",
         "lemma_LowStar.Monotonic.Buffer.fresh_frame_modifies",
         "lemma_LowStar.Monotonic.Buffer.length_null_1",
@@ -1213,6 +1209,7 @@
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
         "refinement_interpretation_Tm_refine_fc1f69e4229a94f85b0de30f1747a8d3",
         "refinement_interpretation_Tm_refine_fd1789c18be6c361e18d184039598778",
+        "refinement_interpretation_Tm_refine_feb9bb9f35b4e580b5c2b388310d192a",
         "refinement_kinding_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "typing_FStar.Map.contains", "typing_FStar.Map.domain",
         "typing_FStar.Map.restrict", "typing_FStar.Monotonic.Heap.emp",
@@ -1228,11 +1225,9 @@
         "typing_FStar.Set.singleton", "typing_FStar.Set.union",
         "typing_FStar.UInt.fits", "typing_FStar.UInt32.uint_to_t",
         "typing_Hacl.Spec.Poly1305.Field32xN.uint64xN",
-        "typing_Hacl.Spec.Poly1305.Vec.size_block",
-        "typing_Hacl.Spec.Poly1305.Vec.size_key", "typing_Lib.Buffer.length",
-        "typing_Lib.Buffer.loc", "typing_Lib.Buffer.op_Bar_Plus_Bar",
-        "typing_Lib.IntTypes.unsigned", "typing_Lib.IntTypes.v",
-        "typing_Lib.Sequence.create",
+        "typing_Lib.Buffer.length", "typing_Lib.Buffer.loc",
+        "typing_Lib.Buffer.op_Bar_Plus_Bar", "typing_Lib.IntTypes.unsigned",
+        "typing_Lib.IntTypes.v", "typing_Lib.Sequence.create",
         "typing_LowStar.Buffer.trivial_preorder",
         "typing_LowStar.Monotonic.Buffer.address_liveness_insensitive_locs",
         "typing_LowStar.Monotonic.Buffer.as_addr",
@@ -1246,12 +1241,13 @@
         "typing_LowStar.Monotonic.Buffer.loc_union", "typing_Spec.AES.gf8",
         "typing_Spec.AES.irred",
         "typing_Spec.GaloisField.__proj__GF__item__t",
+        "typing_Spec.Poly1305.size_block", "typing_Spec.Poly1305.size_key",
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.PUB@tok",
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U32@tok",
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "9d275d584bf36d0a36a5e157d70f7d22"
+      "d22963c39f39d038ce0a6cfc3b0b5d54"
     ],
     [
       "Hacl.Impl.Chacha20Poly1305.Poly.poly1305_do",
@@ -1323,7 +1319,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "d8ad87c561599910225b60b6da7d2170"
+      "5a80da62d992996b53a70b576b26e87b"
     ],
     [
       "Hacl.Impl.Chacha20Poly1305.Poly.poly1305_do",
@@ -1359,22 +1355,19 @@
         "equation_FStar.Monotonic.HyperStack.remove_elt",
         "equation_FStar.UInt.fits", "equation_FStar.UInt.max_int",
         "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
-        "equation_FStar.UInt.uint_t",
-        "equation_Hacl.Spec.Poly1305.Vec.size_block",
-        "equation_Hacl.Spec.Poly1305.Vec.size_key",
-        "equation_Lib.Buffer.as_seq", "equation_Lib.Buffer.buffer_t",
-        "equation_Lib.Buffer.disjoint", "equation_Lib.Buffer.gsub",
-        "equation_Lib.Buffer.lbuffer_t", "equation_Lib.Buffer.length",
-        "equation_Lib.Buffer.live", "equation_Lib.Buffer.loc",
-        "equation_Lib.Buffer.modifies",
+        "equation_FStar.UInt.uint_t", "equation_Lib.Buffer.as_seq",
+        "equation_Lib.Buffer.buffer_t", "equation_Lib.Buffer.disjoint",
+        "equation_Lib.Buffer.gsub", "equation_Lib.Buffer.lbuffer_t",
+        "equation_Lib.Buffer.length", "equation_Lib.Buffer.live",
+        "equation_Lib.Buffer.loc", "equation_Lib.Buffer.modifies",
         "equation_Lib.Buffer.stack_allocated", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.int_t", "equation_Lib.IntTypes.maxint",
-        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.pub_int_t",
-        "equation_Lib.IntTypes.pub_int_v", "equation_Lib.IntTypes.range",
-        "equation_Lib.IntTypes.uint8", "equation_Lib.IntTypes.unsigned",
-        "equation_Lib.IntTypes.v", "equation_Lib.Sequence.length",
-        "equation_Lib.Sequence.lseq", "equation_Lib.Sequence.seq",
-        "equation_Lib.Sequence.to_seq", "equation_LowStar.Buffer.buffer",
+        "equation_Lib.IntTypes.int_t", "equation_Lib.IntTypes.minint",
+        "equation_Lib.IntTypes.pub_int_t", "equation_Lib.IntTypes.pub_int_v",
+        "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.uint8",
+        "equation_Lib.IntTypes.unsigned", "equation_Lib.IntTypes.v",
+        "equation_Lib.Sequence.length", "equation_Lib.Sequence.lseq",
+        "equation_Lib.Sequence.seq", "equation_Lib.Sequence.to_seq",
+        "equation_LowStar.Buffer.buffer",
         "equation_LowStar.Buffer.trivial_preorder",
         "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.eqtype",
         "equation_Prims.nat", "equation_Spec.AES.elem",
@@ -1386,8 +1379,9 @@
         "equation_Spec.Chacha20.size_nonce",
         "equation_Spec.Chacha20Poly1305.poly1305_do",
         "equation_Spec.GaloisField.felem", "equation_Spec.GaloisField.gf",
-        "equation_Spec.Poly1305.finish", "equation_Spec.Poly1305.size_block",
-        "equation_Spec.Poly1305.tag",
+        "equation_Spec.Poly1305.poly1305_finish",
+        "equation_Spec.Poly1305.size_block",
+        "equation_Spec.Poly1305.size_key", "equation_Spec.Poly1305.tag",
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Lib.IntTypes.uint8",
         "function_token_typing_Prims.int",
@@ -1485,9 +1479,8 @@
         "typing_FStar.Set.complement", "typing_FStar.Set.mem",
         "typing_FStar.Set.singleton", "typing_FStar.Set.union",
         "typing_FStar.UInt.fits", "typing_FStar.UInt32.uint_to_t",
-        "typing_Hacl.Spec.Poly1305.Vec.size_key", "typing_Lib.Buffer.as_seq",
-        "typing_Lib.Buffer.length", "typing_Lib.Buffer.loc",
-        "typing_Lib.ByteSequence.nat_to_bytes_le",
+        "typing_Lib.Buffer.as_seq", "typing_Lib.Buffer.length",
+        "typing_Lib.Buffer.loc", "typing_Lib.ByteSequence.nat_to_bytes_le",
         "typing_Lib.IntTypes.minint", "typing_Lib.IntTypes.unsigned",
         "typing_Lib.IntTypes.v", "typing_Lib.Sequence.sub",
         "typing_LowStar.Buffer.trivial_preorder",
@@ -1504,11 +1497,11 @@
         "typing_Spec.AES.irred", "typing_Spec.Chacha20.chacha20_key_block0",
         "typing_Spec.Chacha20.size_block",
         "typing_Spec.GaloisField.__proj__GF__item__t",
-        "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.SEC@tok",
-        "typing_tok_Lib.IntTypes.U8@tok"
+        "typing_Spec.Poly1305.size_key", "typing_tok_Lib.Buffer.MUT@tok",
+        "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "6dedcbaab6e9d05a73baee187b74f326"
+      "8605ab10801159e2b80d32f5412da552"
     ]
   ]
 ]
