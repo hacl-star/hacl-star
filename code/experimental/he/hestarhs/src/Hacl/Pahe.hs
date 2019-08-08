@@ -1,4 +1,5 @@
-{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE DefaultSignatures #-}
+{-# LANGUAGE TypeFamilies      #-}
 
 -- | Class wrapper for packed AHE
 
@@ -36,17 +37,23 @@ class Pahe s where
     paheDec         :: PaheSk s -> PaheCiph s -> IO [Integer]
 
     paheSIMDAdd     :: PahePk s -> PaheCiph s -> PaheCiph s -> IO (PaheCiph s)
+
+    paheSIMDSub     :: PahePk s -> PaheCiph s -> PaheCiph s -> IO (PaheCiph s)
+    default paheSIMDSub :: Pahe s => PahePk s -> PaheCiph s -> PaheCiph s -> IO (PaheCiph s)
+    paheSIMDSub pk c1 c2 = paheSIMDAdd pk c1 =<< paheNeg pk c2
+
+
     paheSIMDMulScal :: PahePk s -> PaheCiph s -> [Integer] -> IO (PaheCiph s)
+
     paheMultBlind   :: PahePk s -> PaheCiph s -> IO (PaheCiph s)
+
+    paheNeg         :: PahePk s -> PaheCiph s -> IO (PaheCiph s)
+    default paheNeg :: Pahe s => PahePk s -> PaheCiph s -> IO (PaheCiph s)
+    paheNeg pk ciph = paheSIMDMulScal pk ciph $ replicate (paheK pk) (-1)
 
     paheToBS        :: PahePk s -> PaheCiph s -> IO ByteString
     paheFromBS      :: PahePk s -> ByteString -> IO (PaheCiph s)
 
-paheNeg :: Pahe s => PahePk s -> PaheCiph s -> IO (PaheCiph s)
-paheNeg pk ciph = paheSIMDMulScal pk ciph $ replicate (paheK pk) (-1)
-
-paheSIMDSub :: Pahe s => PahePk s -> PaheCiph s -> PaheCiph s -> IO (PaheCiph s)
-paheSIMDSub pk c1 c2 = paheSIMDAdd pk c1 =<< paheNeg pk c2
 
 paheRerand :: Pahe s => PahePk s -> PaheCiph s -> IO (PaheCiph s)
 paheRerand pk c = paheSIMDAdd pk c =<< paheEnc pk (replicate (paheK pk) 0)
@@ -132,6 +139,9 @@ instance Pahe GMSep where
             mi <- toBignum gmp_bn 0
             gmXor gmp_bn gmp_n m1 m2 mi
             pure mi
+
+    paheSIMDSub pk m1 m2 = paheSIMDAdd pk m1 m2
+    paheNeg pk m = paheSIMDAdd pk m =<< paheEnc pk (replicate (paheK pk) 1)
 
     paheSIMDMulScal GMSepPk{..} (GMCiph ms1) m2 = do
         when (length ms1 /= gmp_simdn || length m2 /= gmp_simdn) $
