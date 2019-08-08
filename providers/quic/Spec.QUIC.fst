@@ -42,7 +42,7 @@ let encode_varint n =
 
 let suffix (b:bytes) (n:nat{n <= S.length b}) = S.slice b n (S.length b)
 
-let parse_varint (b:bytes{S.length b > 0}) : option (n:nat{n < pow2 62} * vlsize * bytes) =
+let parse_varint_weak (b:bytes{S.length b > 0}) : option (n:nat{n < pow2 62} * vlsize * bytes) =
   let open FStar.Endianness in
   assert_norm(pow2 0 == 1 /\ pow2 1 == 2 /\ pow2 2 == 4 /\ pow2 3 == 8 /\ pow2 8 == 256);
   assert_norm(pow2 8 / 0x40 == 4);
@@ -58,6 +58,12 @@ let parse_varint (b:bytes{S.length b > 0}) : option (n:nat{n < pow2 62} * vlsize
   | 2 -> Some (n % 0x40000000, 4, suff)
   | 3 -> Some (n % 0x4000000000000000, 8, suff))
 
+
+let parse_varint b =
+  match parse_varint_weak b with
+  | None -> None
+  | Some(l,vll,suff) ->
+    if vlen l <> vll then None else Some(l,suff)
 
 // Move to FStar.Math.Lemmas?
 private let lemma_mod_pow2 (a:nat) (b:nat) : Lemma
@@ -158,7 +164,7 @@ private let mod_case1 (n:nat) : n:nat{n < pow2 62} =
   modulo_range_lemma n 0x4000; n % 0x4000
 
 private let lemma_varint_case1 (n:nat{n < pow2 14}) (suff:bytes)
-  : Lemma (parse_varint S.(FStar.Endianness.n_to_be 2 (pow2 14 + n) @| suff) ==
+  : Lemma (parse_varint_weak S.(FStar.Endianness.n_to_be 2 (pow2 14 + n) @| suff) ==
     Some (mod_case1 n, 2, suff))
   =
   let open FStar.Endianness in
@@ -171,7 +177,7 @@ private let lemma_varint_case1 (n:nat{n < pow2 14}) (suff:bytes)
   lemma_divrem2 14 14 n;
   S.append_slices (n_to_be 2 (pow2 14 + n)) suff;
   match b0 with
-  | 1 -> assert(parse_varint b == Some (mod_case1 n, 2, suff))
+  | 1 -> assert(parse_varint_weak b == Some (mod_case1 n, 2, suff))
 
 private let mod_case2 (n:nat) : n:nat{n < pow2 62} =
   let open FStar.Math.Lemmas in
@@ -179,7 +185,7 @@ private let mod_case2 (n:nat) : n:nat{n < pow2 62} =
   modulo_range_lemma n 0x40000000; n % 0x40000000
 
 private let lemma_varint_case2 (n:nat{n < pow2 30}) (suff:bytes)
-  : Lemma (parse_varint S.(FStar.Endianness.n_to_be 4 (pow2 31 + n) @| suff) ==
+  : Lemma (parse_varint_weak S.(FStar.Endianness.n_to_be 4 (pow2 31 + n) @| suff) ==
     Some (mod_case2 n, 4, suff)) =
   let open FStar.Endianness in
   let open FStar.Math.Lemmas in
@@ -193,7 +199,7 @@ private let lemma_varint_case2 (n:nat{n < pow2 30}) (suff:bytes)
   assert(S.length b == 4 + S.length suff /\ b0 == 2 /\ n % 0x40000000 == n);
   S.append_slices (n_to_be 4 (pow2 31 + n)) suff;
   match b0 with
-  | 2 -> assert(parse_varint b == Some (n % 0x40000000, 4, suff))
+  | 2 -> assert(parse_varint_weak b == Some (n % 0x40000000, 4, suff))
 
 private let mod_case3 (n:nat) : n:nat{n < pow2 62} =
   let open FStar.Math.Lemmas in
@@ -201,7 +207,7 @@ private let mod_case3 (n:nat) : n:nat{n < pow2 62} =
   modulo_range_lemma n 0x4000000000000000; n % 0x4000000000000000
 
 let lemma_varint_case3 (n:nat{n < pow2 62}) (suff:bytes)
-  : Lemma (parse_varint S.(FStar.Endianness.n_to_be 8 (pow2 63 + pow2 62 + n) @| suff) ==
+  : Lemma (parse_varint_weak S.(FStar.Endianness.n_to_be 8 (pow2 63 + pow2 62 + n) @| suff) ==
     Some (mod_case3 n, 8, suff)) =
   let open FStar.Endianness in
   let open FStar.Math.Lemmas in
@@ -215,7 +221,7 @@ let lemma_varint_case3 (n:nat{n < pow2 62}) (suff:bytes)
   lemma_divrem3 62 63 62 n;
   S.append_slices (n_to_be 8 (pow2 63 + pow2 62 + n)) suff;
   match b0 with
-  | 3 -> assert(parse_varint b == Some (n % 0x4000000000000000, 8, suff))
+  | 3 -> assert(parse_varint_weak b == Some (n % 0x4000000000000000, 8, suff))
 
 #push-options "--z3rlimit 30"
 let length_encode (n:nat62) : Lemma
@@ -233,8 +239,8 @@ let length_encode (n:nat62) : Lemma
 
 
 
-let lemma_varint (n:nat62) (suff:bytes) : Lemma
-  (parse_varint S.(encode_varint n @| suff) == Some (n, vlen n, suff)) =
+let lemma_varint_weak (n:nat62) (suff:bytes) : Lemma
+  (parse_varint_weak S.(encode_varint n @| suff) == Some (n, vlen n, suff)) =
   let open FStar.Endianness in
   let open FStar.Math.Lemmas in
   let open FStar.Mul in
@@ -256,12 +262,15 @@ let lemma_varint (n:nat62) (suff:bytes) : Lemma
       S.lemma_empty (suffix b 1);
       S.append_slices (encode_varint n) suff;
       match b0 with
-      | 0 -> assert(parse_varint b == Some (n' % 0x40, 1, suff))
+      | 0 -> assert(parse_varint_weak b == Some (n' % 0x40, 1, suff))
     end
     else if n < pow2 14 then lemma_varint_case1 n suff
     else if n < pow2 30 then lemma_varint_case2 n suff
     else lemma_varint_case3 n suff
 
+
+let lemma_varint n suff =
+  lemma_varint_weak n suff
 
 
 let lemma_be_index_bytes (l:pos) (b:bytes) : Lemma
@@ -274,12 +283,12 @@ let lemma_be_index_bytes (l:pos) (b:bytes) : Lemma
   n_to_be_be_to_n l (S.slice b 0 l)
 
 
-let lemma_varint_safe (b1:bytes) (b2:bytes) : Lemma
+let lemma_varint_weak_safe (b1:bytes) (b2:bytes) : Lemma
   (requires
     S.length b1 <> 0 /\
     S.length b2 <> 0 /\
-    parse_varint b1 = parse_varint b2)
-  (ensures parse_varint b1 = None \/ b1 = b2) =
+    parse_varint_weak b1 = parse_varint_weak b2)
+  (ensures parse_varint b1 = None \/ S.equal b1 b2) =
   let open FStar.Endianness in
   let open FStar.Math.Lemmas in
   let open FStar.Mul in
@@ -327,7 +336,18 @@ let lemma_varint_safe (b1:bytes) (b2:bytes) : Lemma
     assert (S.equal b2 S.(S.slice b2 0 8 @| S.slice b2 8 (S.length b2)))
 
 
-
+let lemma_varint_safe (b1:bytes) (b2:bytes) : Lemma
+  (requires
+    S.length b1 <> 0 /\
+    S.length b2 <> 0 /\
+    parse_varint b1 = parse_varint b2)
+  (ensures parse_varint b1 = None \/ S.equal b1 b2) =
+  match parse_varint_weak b1, parse_varint_weak b2 with
+  | None, _
+  | _, None -> ()
+  | Some (l1,vll1,suff1), Some (l2,vll2,suff2) ->
+    if vll1 = vlen l1 && vll2 = vlen l2 then
+      lemma_varint_weak_safe b1 b2
 
 (*
    +-+-+-+-+-+-+-+-+
@@ -468,9 +488,9 @@ let parse_header b cid_len =
 	  let scid = S.slice b (6 + add3 dcil) (6 + add3 dcil + add3 scil) in
           let rest = S.slice b pos_length (S.length b) in
 	  match parse_varint rest with
-	  | Some (l, vll, npn_and_suff) ->
+	  | Some (l, npn_and_suff) ->
             if S.length npn_and_suff - pn_len - 1 = l &&
-	       19 <= l && l < max_cipher_length && vll = vlen l then
+	       19 <= l && l < max_cipher_length then
 	      let npn = S.slice npn_and_suff 0 (pn_len + 1) in
 	      let suff : lbytes l = S.slice npn_and_suff (pn_len + 1) (S.length npn_and_suff) in
 	      H_Success pn_len npn (Long typ version dcil scil dcid scid l) suff
@@ -707,16 +727,15 @@ let lemma_long_header_parsing_correct h pn_len npn suff : Lemma
           lemma_slice_long_header67 u1 u2 u3 u4 u5 S.(u6 @| u7);
           assert (S.equal S.(u6 @| u7) rest);
           lemma_varint plain_len u7;
-          assert (parse_varint rest = Some (plain_len, vlen plain_len,u7));
+          assert (parse_varint rest = Some (plain_len,u7));
           match parse_varint rest with
-          | Some (l, vll,npn_and_suff) ->
-            assert ((plain_len, vlen plain_len,u7) = (l, vll,npn_and_suff));
+          | Some (l, npn_and_suff) ->
+            assert ((plain_len,u7) = (l,npn_and_suff));
             S.append_slices npn suff;
             assert (S.equal npn (S.slice npn_and_suff 0 (pn_len+1)));
             assert (S.equal suff (S.slice npn_and_suff (pn_len+1) (S.length npn_and_suff)));
             if S.length npn_and_suff - pn_len - 1 = l &&
-	      19 <= l && l < max_cipher_length && vll = vlen l then
-              ()
+	      19 <= l && l < max_cipher_length then ()
         end
       end
 
@@ -945,19 +964,17 @@ let lemma_long_header_parsing_safe (b1 b2:packet) (cl:nat4) : Lemma
          match parse_varint rest1,parse_varint rest2 with
          | None, _
          | _, None -> ()
-         | Some (l1,vll1,npn_and_suff1),
-           Some (l2,vll2,npn_and_suff2) ->
+         | Some (l1,npn_and_suff1),
+           Some (l2,npn_and_suff2) ->
            if S.length npn_and_suff1 - pn_len - 1 = l1 &&
-              19 <= l1 && l1 < max_cipher_length &&
-              vll1 = vlen l1 then
+              19 <= l1 && l1 < max_cipher_length then
            if S.length npn_and_suff2 - pn_len' - 1 = l2 &&
-              19 <= l2 && l2 < max_cipher_length &&
-              vll2 = vlen l2 then
+              19 <= l2 && l2 < max_cipher_length then
              let npn1 = S.slice npn_and_suff1 0 (pn_len +1) in
              let npn2 = S.slice npn_and_suff2 0 (pn_len'+1) in
              let suff1 = S.slice npn_and_suff1 (pn_len +1) (S.length npn_and_suff1) in
              let suff2 = S.slice npn_and_suff2 (pn_len'+1) (S.length npn_and_suff2) in
-             assert(pn_len = pn_len' /\ npn1 = npn2 /\ typ = typ' /\ version1 = version2 /\ dcil1 = dcil2 /\ scil1 = scil2 /\ dcid1 = dcid2 /\ scid1 = scid2 /\ l1 = l2 /\ vll1 = vll2 /\ suff1 = suff2);
+             assert(pn_len = pn_len' /\ npn1 = npn2 /\ typ = typ' /\ version1 = version2 /\ dcil1 = dcil2 /\ scil1 = scil2 /\ dcid1 = dcid2 /\ scid1 = scid2 /\ l1 = l2 /\ suff1 = suff2);
              assert (pn0 = pn0' /\ pn1 = pn1' /\ typ0 = typ0' /\ typ1 = typ1');
              lemma_bitfield 8 (U8.v (S.index b1 0));
              lemma_bitfield 8 (U8.v (S.index b2 0));
