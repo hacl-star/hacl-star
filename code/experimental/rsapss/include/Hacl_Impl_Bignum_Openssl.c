@@ -2,19 +2,20 @@
 #include <openssl/bn.h>
 #include <sys/time.h>
 
-bool Hacl_Impl_Bignum_Openssl_ossl_is_prm(
+size_t Hacl_Impl_Bignum_Openssl_ossl_is_prm(
   uint32_t pLen,
+  uint32_t tries,
   uint64_t *p) {
     BN_CTX *ctx = BN_CTX_new();
 
     int pLenBytes = ((int)pLen)*8;
     BIGNUM *bn_p = BN_lebin2bn((unsigned char*) p,pLenBytes,NULL);
 
-    bool res = BN_is_prime_ex(bn_p, BN_prime_checks, ctx, NULL) == 1;
+    int t = BN_is_prime_ex(bn_p, tries, ctx, NULL);
 
     BN_CTX_free(ctx);
 
-    return res;
+    return t;
 }
 
 void Hacl_Impl_Bignum_Openssl_ossl_divide(

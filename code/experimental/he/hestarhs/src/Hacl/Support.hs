@@ -14,19 +14,44 @@ import Hacl.Raw
 import Lib hiding (crt)
 import Utils
 
-testPrime :: Integer -> Bool
-testPrime i = unsafePerformIO $ do
+
+-- number of MR iterations given the number of limbs
+-- from openssl BN_prime_checks_for_size
+mrIters :: Word32 -> Word32
+mrIters lm =
+    if lm >= 55 then 3 else
+    if lm >= 21 then 4 else
+    if lm >= 7 then 5 else
+    if lm >= 5 then 8 else
+    if lm >= 1 then 27 else
+    40
+
+testPrime :: Integer -> IO Bool
+testPrime i = do
     (p,sz) <- toBignumExact i
-    r <- bnIsPrime sz p
+    r <- bnIsPrime sz 0 p
     freeBignum p
-    pure r
+    pure $ r == 1
+
+-- CB0EEA4A249C3A3C02F7E6E4AF6444C4F68AA5EE7FB676F6002BC8FC23FDC1623AD580C75244C1BF5D4A1B309297556BAA2D9D91AD0F25BC42767F5218A8CCE9
+ttPrime = replicateM_ 5 $ do
+    print =<< testPrime 10635024147909566416140599671674429005755303252598161859729148401199127240856978988690173740916103428272796028915327183568661188513792102349407973645274345
+--testPrime i = isPrimeMR 40 i
+
+compareToMR :: IO ()
+compareToMR = replicateM_ 10000 $ do
+    x <- randomRIO (0,2^128)
+    b1 <- testPrime x
+    let b2 = isPrimeMR 40 x
+    when (b1 /= b2) $ error $
+        "Mismatch: " <> show x <> " " <> show (b1,b2)
 
 -- https://stackoverflow.com/questions/6325576/how-many-iterations-of-rabin-miller-should-i-use-for-cryptographic-safe-primes
 genPrime :: Int -> IO Integer
 genPrime bits = do
     p <- randomRIO (2 ^ (bits - 4),2 ^ bits) `suchThat` odd
-    if testPrime p
-      then pure p else genPrime bits
+    b <- testPrime p
+    if b then pure p else genPrime bits
 
 legendreSymbol :: Integer -> Integer -> Integer
 legendreSymbol p a = let res = exp p a ((p-1) `div` 2) in if res == p-1 then (-1) else res
@@ -178,7 +203,8 @@ genDataDGK uFacts bits = do
     let genR (i::Integer) = do
           r <- genPrime rbits
           let p = 2 * u * v * r + 1
-          if testPrime p then pure (r,p) else genR (i+1)
+          b <- testPrime p
+          if b then pure (r,p) else genR (i+1)
 
     putTextLn "Generating p"
     (r_p,p) <- genR 0
@@ -218,7 +244,7 @@ genConsecutivePrms n bound =
     reverse $ go 0 [] (if even bound then bound+1 else bound+2)
   where
     go l xs toTest = if l >= n then xs else
-        if testPrime toTest
+        if isPrimeMR 40 toTest
         then go (l+1) (toTest:xs) (toTest+2)
         else go l xs (toTest+2)
 

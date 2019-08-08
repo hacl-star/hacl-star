@@ -19,8 +19,9 @@ let enable_ossl = true
 
 val ossl_is_prm:
      #pLen:bn_len
+  -> tries:size_t
   -> p:lbignum pLen
-  -> Stack bool
+  -> Stack size_t
     (requires fun h -> live h p)
     (ensures fun h0 _ h1 -> h0 == h1)
 
