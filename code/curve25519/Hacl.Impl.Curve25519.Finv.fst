@@ -121,9 +121,9 @@ let fsquare_times_ #s o inp tmp n =
 
 (* WRAPPER to Prevent Inlining *)
 [@CInline]
-let fsquare_times_51 (o:F51.felem) (i:F51.felem) (tmp:felem_wide M51) (n:size_t{v n > 0}) = fsquare_times_ #M51 o i tmp n
+let fsquare_times_51 (o:F51.felem) (i:F51.felem) = fsquare_times_ #M51 o i
 [@CInline]
-let fsquare_times_64 (o:F64.felem) (i:F64.felem) (tmp:felem_wide M64) (n:size_t{v n > 0}) = fsquare_times_ #M64 o i tmp n
+let fsquare_times_64 (o:F64.felem) (i:F64.felem) = fsquare_times_ #M64 o i
 
 inline_for_extraction noextract
 val fsquare_times:
@@ -238,9 +238,9 @@ let finv_ #s o i tmp =
 
 (* WRAPPER to Prevent Inlining *)
 [@CInline]
-let finv_51 (o:F51.felem) (i:F51.felem) (tmp:felem_wide2 M51) = finv_ #M51 o i tmp
+let finv_51 (o:F51.felem) (i:F51.felem) = finv_ #M51 o i
 [@CInline]
-let finv_64 (o:F64.felem) (i:F64.felem) (tmp:felem_wide2 M64) = finv_ #M64 o i tmp
+let finv_64 (o:F64.felem) (i:F64.felem) = finv_ #M64 o i
 
 inline_for_extraction noextract
 val finv:

@@ -21,6 +21,15 @@ let secret_to_public pub priv =
   else
     Hacl.Curve25519_51.secret_to_public pub priv
 
+
+let scalarmult shared my_priv their_pub =
+  let uu__has_adx_bmi2 = has_adx_bmi2 () in
+  if EverCrypt.TargetConfig.x64 && uu__has_adx_bmi2 then
+    Hacl.Curve25519_64.scalarmult shared my_priv their_pub
+  else
+    Hacl.Curve25519_51.scalarmult shared my_priv their_pub
+
+
 let ecdh shared my_priv their_pub =
   let uu__has_adx_bmi2 = has_adx_bmi2 () in
   if EverCrypt.TargetConfig.x64 && uu__has_adx_bmi2 then
