@@ -19,7 +19,7 @@ foreign import ccall "Hacl_Impl_Bignum_Openssl_solve_dlp_single_external" bnPoll
     :: Word32 -> Bignum -> Bignum -> Bignum -> Bignum -> Bignum -> Bignum -> IO ()
 
 foreign import ccall "Hacl_Impl_Bignum_Openssl_ossl_is_prm" bnIsPrime
-    :: Word32 -> Bignum -> IO Bool
+    :: Word32 -> Word32 -> Bignum -> IO Word32
 
 foreign import ccall "Hacl_Impl_Bignum_Comparison_bn_is_less" bnIsLess
     :: Word32 -> Word32 -> Bignum -> Bignum -> IO Bool

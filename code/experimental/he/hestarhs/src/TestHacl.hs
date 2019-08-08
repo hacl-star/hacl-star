@@ -199,7 +199,7 @@ testPaillier bits = do
                , (time4 - time3) / 100
                , (time5 - time4) / 100)
 
-    let tries = 100
+    let tries = 20
     timings <- replicateM tries test
 
     let average xs = foldr1 (+) xs / fromIntegral tries
