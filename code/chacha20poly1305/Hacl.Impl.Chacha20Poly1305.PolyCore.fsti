@@ -52,8 +52,7 @@ val poly1305_init:
 
 val update1:
   ctx:Poly.poly1305_ctx M32 ->
-  len:size_t{0 < v len /\ v len <= 16} ->
-  text:lbuffer uint8 len ->
+  text:lbuffer uint8 16ul ->
   Stack unit
     (requires fun h -> live h ctx /\ live h text /\ disjoint ctx text /\
       Poly.state_inv_t h ctx)
@@ -64,9 +63,9 @@ val update1:
       Poly.as_get_r h0 ctx == Poly.as_get_r h1 ctx /\    
       // Functional spec
       Poly.as_get_acc h1 ctx == 
-      SpecPoly.update1
+      SpecPoly.poly1305_update1
         (Poly.as_get_r h0 ctx)
-        (v len)
+        16
         (as_seq h0 text)
         (Poly.as_get_acc h0 ctx)
         )
@@ -80,4 +79,4 @@ val finish:
       disjoint out k /\ disjoint out ctx /\ disjoint k ctx /\
       Poly.state_inv_t h ctx)
     (ensures fun h0 _ h1 -> modifies (loc out |+| loc ctx) h0 h1 /\
-      as_seq h1 out == SpecPoly.finish (as_seq h0 k) (Poly.as_get_acc h0 ctx))
+      as_seq h1 out == SpecPoly.poly1305_finish (as_seq h0 k) (Poly.as_get_acc h0 ctx))

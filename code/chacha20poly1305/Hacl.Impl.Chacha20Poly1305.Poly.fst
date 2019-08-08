@@ -147,12 +147,12 @@ val poly1305_do_core_finish:
     (ensures (fun h0 _ h1 -> modifies (loc out |+| loc ctx) h0 h1 /\
       (let r = Poly.as_get_r h0 ctx in
        let acc = Poly.as_get_acc h0 ctx in
-       let acc = SpecPoly.update1 r 16 (as_seq h0 block) acc in
-       let tag = SpecPoly.finish (as_seq h0 k) acc in
+       let acc = SpecPoly.poly1305_update1 r 16 (as_seq h0 block) acc in
+       let tag = SpecPoly.poly1305_finish (as_seq h0 k) acc in
        Seq.equal (as_seq h1 out) tag)))
 
 let poly1305_do_core_finish k out ctx block =
-  update1 ctx 16ul block;
+  update1 ctx block;
   finish ctx k out
 
 val poly1305_do_core_:

@@ -6,17 +6,12 @@ open FStar.Mul
 
 open Lib.IntTypes
 open Lib.Buffer
-open Lib.ByteBuffer
-open Lib.IntVector
 
 include Hacl.Spec.Poly1305.Field32xN
 open Hacl.Spec.Poly1305.Field32xN.Lemmas
-open Hacl.Impl.Poly1305.Lemmas
 
 module Vec = Hacl.Spec.Poly1305.Vec
 module ST = FStar.HyperStack.ST
-module LSeq = Lib.Sequence
-module BSeq = Lib.ByteSequence
 
 open Hacl.Impl.Poly1305.Field32xN
 
@@ -24,8 +19,7 @@ open Hacl.Impl.Poly1305.Field32xN
 
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50 --using_facts_from '* -FStar.Seq'"
 
-//inline_for_extraction noextract
-[@CInline]
+
 val load_acc2:
     acc:felem 2
   -> b:lbuffer uint8 32ul
@@ -36,7 +30,8 @@ val load_acc2:
     (ensures  fun h0 _ h1 ->
       modifies (loc acc) h0 h1 /\
       felem_fits h1 acc (2, 3, 2, 2, 2) /\
-      feval h1 acc == Vec.load_acc2 (feval h0 acc).[0] (as_seq h0 b))
+      feval h1 acc == Vec.load_acc2 (as_seq h0 b) (feval h0 acc).[0])
+
 let load_acc2 acc b =
   push_frame();
   let e = create 5ul (zero 2) in
@@ -63,8 +58,6 @@ let load_acc2 acc b =
   pop_frame()
 
 
-//inline_for_extraction noextract
-[@CInline]
 val fmul_r2_normalize:
     out:felem 2
   -> p:precomp_r 2
@@ -77,7 +70,8 @@ val fmul_r2_normalize:
       modifies (loc out) h0 h1 /\
       acc_inv_t (as_tup5 h1 out) /\
      (let r = feval h0 (gsub p 0ul 5ul) in
-      (feval h1 out).[0] == Vec.normalize_2 (feval h0 out) r.[0]))
+      (feval h1 out).[0] == Vec.normalize_2 r.[0] (feval h0 out)))
+
 let fmul_r2_normalize out p =
   let r = sub p 0ul 5ul in
   let r2 = sub p 10ul 5ul in

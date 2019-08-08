@@ -116,6 +116,7 @@ let create_felem w =
   LSeq.eq_intro (feval h1 r) (LSeq.create w 0);
   r
 
+#push-options "--z3rlimit 100"
 inline_for_extraction noextract
 val set_bit:
     #w:lanes
@@ -138,6 +139,7 @@ let set_bit #w f i =
   let h0 = ST.get () in
   f.(i /. 26ul) <- vec_or fi mask;
   set_bit5_lemma (as_seq h0 f) (v i)
+#pop-options
 
 inline_for_extraction noextract
 val set_bit128:
