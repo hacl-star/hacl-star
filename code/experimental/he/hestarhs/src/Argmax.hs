@@ -33,7 +33,7 @@ lMVar = unsafePerformIO $ newMVar ()
 
 
 log :: MonadIO m => Text -> m ()
-log x = if False then pass else do
+log x = if True then pass else do
     t <- liftIO getCurrentTimeMs
     liftIO $ withMVar lMVar $ \() ->
       putTextLn (show (t`div`1000) <> "." <> show (t`mod`1000) <> " " <> x) >> pure ()
@@ -108,13 +108,13 @@ dgkClient sock skDGK pkDGK pkGM ctxDGK ctxGM l rs = do
         c <- paheSIMDMulScal pkDGK oneMinCi bitmask
         paheSIMDAdd pkDGK a c
 
-    putTextLn "XORS: "
-    print =<< mapM (paheDec skDGK) xors
+    --log "XORS: "
+    -- print =<< mapM (paheDec skDGK) xors
 
     delta <- replicateM k (randomRIO (0,1))
     deltaEnc <- paheEnc pkDGK delta
     let s0 = map (\i -> 1 - 2 * i) delta
-    --log $ "Client: s = " <> show s0
+    log $ "Client: s = " <> show s0
     s <- paheEnc pkDGK s0
 
     let computeXorSums i prev = do
@@ -123,8 +123,8 @@ dgkClient sock skDGK pkDGK pkGM ctxDGK ctxGM l rs = do
             pure $ nextXorSum : xorsTail
     xorsums <- reverse <$> computeXorSums (l-1) (encZero ctxDGK)
 
-    putTextLn "XOR SUBS: "
-    print =<< mapM (paheDec skDGK) xorsums
+    -- log "XOR SUBS: "
+    -- print =<< mapM (paheDec skDGK) xorsums
 
     log "Client: computing cis"
     ci <- forM [0..l-1] $ \i -> do
@@ -138,11 +138,14 @@ dgkClient sock skDGK pkDGK pkGM ctxDGK ctxGM l rs = do
     xorsumFull3 <- paheSIMDMulScal pkDGK (xorsums !! 0) $ replicate k 3
     cLast <- paheSIMDAdd pkDGK deltaEnc xorsumFull3
 
-    putTextLn "CIs: "
-    print =<< mapM (paheDec skDGK) (cLast : ci)
-    putTextLn "CIs were computed"
+   -- log "CIs: "
+   -- print =<< mapM (paheDec skDGK) (cLast : ci)
+    log "CIs were computed"
 
     ciShuffled <- shuffle =<< mapM (paheMultBlind pkDGK) (cLast : ci)
+
+    --log "CIs shuffled/blinded: "
+    --print =<< mapM (paheDec skDGK) ciShuffled
 
     sendMulti sock =<< (NE.fromList <$> mapM (paheToBS pkDGK) ciShuffled)
     log "Client: send,waiting"
@@ -586,7 +589,7 @@ runProtocol =
       connect req "inproc://argmax"
 
       putTextLn "Keygen..."
-      let k = 1
+      let k = 8
       let l = 5
       -- plaintext space size
       --let margin = 2^(lambda + l)
@@ -708,7 +711,7 @@ runProtocol =
       --            putTextLn $ "Got:      " <> show secCompRes
       --            error "Mismatch"
 
-      let testDGK = replicateM_ 100 $ do
+      let testDGK = replicateM_ 1000 $ do
               cs <- replicateM k $ randomRIO (0,2^l-1)
               rs <- replicateM k $ randomRIO (0,2^l-1)
               let expected = map (\(c,r) -> r <= c) $ zip cs rs
