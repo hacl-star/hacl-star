@@ -526,11 +526,13 @@ runProtocol =
       connect req "inproc://argmax"
 
       putTextLn "Keygen..."
-      let k = 8
+      let k = 1
       let l = 5
-      sk <- paheKeyGen @DgkCrt k (2^10)
+      sk <- paheKeyGen @DgkCrt k (2^(lambda+l))
+      putTextLn "Key generated"
       let pk = paheToPublic sk
       eCtx <- newEncContext pk
+      putTextLn "Enc context generated"
 
       let testLogArgmax = do
               let m = fromIntegral $ log2 (fromIntegral k) - 1
@@ -612,29 +614,36 @@ runProtocol =
 
 
       let testCompare = do
+              --xs <- replicateM k $ randomRIO (2^(l-1)+1,2^l-1)
+              --ys <- replicateM k $ randomRIO (0,2^(l-1))
+              let xs = [30]
+              let ys = [10]
+              print xs
+              print ys
+              let expected = map (\(x,y) -> x >= y) $ zip xs ys
+              putTextLn $ "Expecting: " <> show expected
+
+              xsEnc <- paheEnc pk xs
+              ysEnc <- paheEnc pk ys
+
+              (gamma,()) <-
+                  measureTimeSingle "SecureCompare" $
+                  concurrently
+                  (secureCompareClient req pk eCtx l xsEnc ysEnc)
+                  (secureCompareServer rep sk l)
+
+              secCompRes <- paheDec sk gamma
+              unless (map (==1) secCompRes == expected) $ do
+                  putTextLn $ "Expected: " <> show expected
+                  putTextLn $ "Got:      " <> show secCompRes
+                  error "Mismatch"
+
+      let testDGK = replicateM_ 10 $ do
               cs <- replicateM k $ randomRIO (0,2^l-1)
               rs <- replicateM k $ randomRIO (0,2^l-1)
               print cs
               print rs
               let expected = map (\(c,r) -> r <= c) $ zip cs rs
-
-              csEnc <- paheEnc pk cs
-              rsEnc <- paheEnc pk rs
-
-
-              (gamma,()) <-
-                  measureTimeSingle "SecureCompare" $
-                  concurrently
-                  (secureCompareClient req pk eCtx l csEnc rsEnc)
-                  (secureCompareServer rep sk l)
-
-              result <- paheDec sk gamma
-              unless (map (==1) result == expected) $ do
-                  print cs
-                  print rs
-                  putTextLn $ "Expected: " <> show expected
-                  putTextLn $ "Got:      " <> show result
-                  error "Mismatch"
 
               putTextLn "Starting the protocol"
               (eps,()) <-
@@ -643,12 +652,13 @@ runProtocol =
                   (dgkClient req pk eCtx l rs)
                   (dgkServer rep sk l cs)
 
-              res <- map (== 1) <$> paheDec sk eps
-              unless (res == expected) $ do
+              dgkRes <- map (== 1) <$> paheDec sk eps
+              unless (dgkRes == expected) $ do
                   print cs
                   print rs
                   putTextLn $ "Expected: " <> show expected
-                  putTextLn $ "Got:      " <> show result
+                  putTextLn $ "Got:      " <> show dgkRes
                   error "Mismatch"
 
       testCompare
+      --testDGK

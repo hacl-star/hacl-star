@@ -142,6 +142,36 @@ testGM bits = do
     putTextLn $ "Dec: " <> show (avg2 * 1000) <> " ms"
     putTextLn $ "Xor: " <> show (avg3 * 1000) <> " ms"
 
+testGMPahe :: IO ()
+testGMPahe = do
+    putTextLn "Testing GM PAHE"
+
+    let n = 16
+    let l::Integer = 8
+    sk <- paheKeyGen @GMSep n (2^l)
+    let pk = paheToPublic sk
+
+    replicateM_ 100 $ do
+        ms1 <- replicateM n $ randomRIO (0, 2^l-1)
+        ms2 <- replicateM n $ randomRIO (0, 2^l-1)
+        scal <- replicateM n $ randomRIO (0, 2^l-1)
+
+        c1 <- paheEnc pk ms1
+        c2 <- paheEnc pk ms2
+
+        c3 <- paheSIMDAdd pk c1 c2
+        d1 <- paheDec sk c3
+        unless (d1 == map (\(a, b) -> (a + b) `mod` 2) (zip ms1 ms2)) $ error "Simd add is broken"
+
+        c4 <- paheSIMDMulScal pk c1 scal
+        d2 <- paheDec sk c4
+        --putTextLn $ "M1:       " <> show (map (`mod` 2) ms1)
+        --putTextLn $ "Scal:     " <> show (map (`mod` 2) scal)
+        --putTextLn $ "Got:      " <> show d2
+        --putTextLn $ "Expected: " <> show expected
+        let expected = map (\(a, b) -> (a * b) `mod` 2) (zip ms1 scal)
+        unless (d2 == expected) $ error "Simd mul is broken"
+
 
 testPaillier :: Int -> IO ()
 testPaillier bits = do
@@ -238,11 +268,7 @@ testDGK :: IO ()
 testDGK = do
     putTextLn "Testing DGK"
 
-    -- genDataDGKWithPrimes 2 (2^20) 700
-    let (uprimes,p,q,u,v,g,h) =
-          ([1048583,1048589],1895089596695635987044392085844392979345094436303371616593800702072823833377343780663139692699220309214467,1233650831883099230153849542876191261913580924454571036409560025644937233018208400997158133586030949795059,1099532599387,1426476897108638371825766716642800048506732913643,1656538870108677916077033972037100235170746303410383531631175515688417525915790037496147585782798401746528225873757261702451073191397227907472359036081702994394585493896112852303850272946094029353544515902429963,1109134116557813645666153083598642098863534434376690627045137653790218908038050002143975865840590196552485698017229738578393420525943325790374596246808527264216261339249706287872874469197014263981049460345253999)
-    --params@(uprimes,p,q,u,v,g,h) <- genDataDGKWithPrimes 2 (2^20) 700
-    --print params
+    (uprimes,p,q,u,v,g,h) <- dgkKeyGenWithLookup 2 (2^20) 700
     let ufact = map (,1) uprimes
     unless (L.exp (p*q) h v == 1) $ error "generated params are broken"
     unless (L.exp (p*q) g (u*v) == 1) $ error "generated params are broken"
