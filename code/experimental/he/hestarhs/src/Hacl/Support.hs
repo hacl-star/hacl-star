@@ -5,8 +5,7 @@ module Hacl.Support where
 import Universum hiding (exp, last, (<*>))
 
 import Data.List (splitAt, (!!))
-import Numeric (log)
-import System.IO.Unsafe (unsafePerformIO)
+import qualified Numeric as N
 import System.Random (randomIO, randomRIO)
 
 import Hacl.Bignum
@@ -55,7 +54,6 @@ legendreSymbol p a = let res = exp p a ((p-1) `div` 2) in if res == p-1 then (-1
 boolToInt :: Bool -> Int
 boolToInt = bool 0 1
 
-intToBool = (== 1) . (`mod` 2)
 
 genDataGM :: Int -> IO (Integer,Integer,Integer,Integer,Bool,Bool)
 genDataGM bits = do
@@ -98,7 +96,7 @@ genDataPaillier bits = do
 
 
 log2 :: Integer -> Integer
-log2 x = ceiling $ log (fromIntegral (x+1)) / log 2
+log2 x = ceiling $ (N.log (fromIntegral (x+1)) / N.log 2 :: Double)
 
 fromFacts :: [(Integer,Integer)] -> Integer
 fromFacts = product . map (\(p,i) -> p ^ i)
@@ -187,7 +185,7 @@ findWithOrder p q n (sort -> posOrders) reqO = do
                 else go (i+1)
             else go (i+1)
 
-    fromBignum bn =<< go 0
+    fromBignum bn =<< go (0::Integer)
 
 genDataDGK ::
        [(Integer, Integer)]
@@ -256,7 +254,6 @@ genDataDGKWithPrimes ::
     -> IO ([Integer], Integer, Integer, Integer, Integer, Integer, Integer)
 genDataDGKWithPrimes primeN primeBound bits = do
     let prms = genConsecutivePrms primeN primeBound
-    let ulog = sum $ map log2 prms
     (p,q,u,v,g,h) <- genDataDGK (map (,1) prms) bits
     pure (prms,p,q,u,v,g,h)
 

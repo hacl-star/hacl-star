@@ -2,7 +2,7 @@
 
 module Argmax where
 
-import Universum
+import Universum hiding (log)
 
 import Control.Concurrent (threadDelay, withMVar)
 import Control.Concurrent.Async (concurrently)
@@ -12,7 +12,6 @@ import qualified Data.ByteString as BS
 import Data.List (findIndex, (!!))
 import qualified Data.List.NonEmpty as NE
 import qualified Data.Set as S
-import Data.Time.Clock.POSIX (getPOSIXTime)
 import qualified Data.Time.Clock.POSIX as P
 import qualified Foreign.Marshal as A
 import System.IO.Unsafe (unsafePerformIO)
@@ -24,19 +23,6 @@ import qualified Lib as L
 import Playground
 import TestHacl
 import Utils
-
-getCurrentTimeMs :: IO Integer
-getCurrentTimeMs = floor . (*1000) <$> getPOSIXTime
-
-lMVar :: MVar ()
-lMVar = unsafePerformIO $ newMVar ()
-
-
-log :: MonadIO m => Text -> m ()
-log x = if True then pass else do
-    t <- liftIO getCurrentTimeMs
-    liftIO $ withMVar lMVar $ \() ->
-      putTextLn (show (t`div`1000) <> "." <> show (t`mod`1000) <> " " <> x) >> pure ()
 
 lambda :: Integral a => a
 lambda = 80
@@ -76,7 +62,6 @@ newEncContext pk = do
 dgkClient ::
        (Pahe sDGK, Pahe sGM)
     => Socket Req
-    -> PaheSk sDGK
     -> PahePk sDGK
     -> PahePk sGM
     -> EncContext sDGK
@@ -84,7 +69,7 @@ dgkClient ::
     -> Int
     -> [Integer]
     -> IO (PaheCiph sGM)
-dgkClient sock skDGK pkDGK pkGM ctxDGK ctxGM l rs = do
+dgkClient sock pkDGK pkGM ctxDGK ctxGM l rs = do
 
     let k = paheK pkDGK -- they should be similar between two schemes
     log "Client: dgk started"
@@ -201,80 +186,63 @@ dgkServer sock skDGK skGM l cs = do
     log "Server: dgk exited"
 
 
----- | Compute y <= x jointly with secret inputs. Client has r, server has c.
---secureCompareClient ::
---       (Pahe sDGK, Pahe sGM)
---    => Socket Req
---    -> PahePk sDGK
---    -> PahePk sGM
---    -> PahePk PailSep
---    -> EncContext sDGK
---    -> EncContext sGM
---    -> Int
---    -> PaheCiph sDGK
---    -> PaheCiph sDGK
---    -> IO (PaheCiph sGM)
---secureCompareClient sock pkDGK pkGM pkPail ctxDGK ctxGM l x y = do
---    log "Client: secureCompare started"
---    let k = paheK pkDGK
---
---    -- TODO it seems that we can save up one round here by blinding
---    -- and encrypting paillier at the same time.
---    --
---    -- don't do that if sDGK = paillier
---    maskX <- replicateM k $ randomRIO (0, 2^(l + lambda) - 1)
---    maskY <- replicateM k $ randomRIO (0, 2^(l + lambda) - 1)
---    x' <- paheSIMDAdd pkDGK x =<< paheEnc pkDGK maskX
---    y' <- paheSIMDAdd pkDGK y =<< paheEnc pkDGK maskY
---    sendMulti sock =<< NE.fromList <$> mapM (paheToBS pkDGK) [x',y']
---
---    [xPail, yPail] <- mapM (paheFromBS pkPail) =<< receiveMulti sock
---
---    rhos::[Integer] <- replicateM k $ randomRIO (0, 2^(l + lambda) - 1)
---    s0 <- paheEnc pkPail (map (+(2^l)) rhos)
---    s1 <- paheSIMDAdd pkPail s0 xPail
---    gamma <- paheSIMDSub pkPail s1 yPail
---
---    send sock [] =<< paheToBS pkPail gamma
---
---    cDiv2l <- paheFromBS pkGM =<< receive sock
---
---    eps <- dgkClient sock pkDGK pkGM ctxDGK ctxGM l $ map (`mod` (2^l)) rhos
---    epsNeg <- paheNeg pkGM eps
---
---    rDiv2l <- paheEnc pkGM $ map (`div` (2^l)) rhos
---    rPlusEpsNeg <- paheSIMDAdd pkGM rDiv2l epsNeg
---    delta <- paheSIMDSub pkGM cDiv2l rPlusEpsNeg
---
---    log "Client: secureCompare exited"
---    pure delta
---
---secureCompareServer ::
---       (Pahe sDGK, Pahe sGM)
---    => Socket Rep
---    -> PaheSk sDGK
---    -> PaheSk sGM
---    -> PaheSk PailSep
---    -> Int
---    -> IO ()
---secureCompareServer sock skDGK skGM skPail l = do
---    let pkDGK = paheToPublic skDGK
---    let pkGM = paheToPublic skGM
---    let pkPail = paheToPublic skPail
---    log "Server: securecompare started"
---
---    [xDGK, yDGK] <- mapM (paheDec skDGK <=< paheFromBS pkDGK) =<< receiveMulti sock
---    xPail <- paheEnc pkPail xDGK
---    yPail <- paheEnc pkPail yDGK
---    sendMulti sock =<< NE.fromList <$> mapM (paheToBS pkPail) [xPail,yPail]
---
---    gamma <- (paheDec skDGK <=< paheFromBS pkDGK) =<< receive sock
---    let cMod2 = map (`mod` (2^l)) gamma
---    let cDiv2 = map (`div` (2^l)) gamma
---    send sock [] =<< (paheToBS pkGM =<< paheEnc pkGM cDiv2)
---
---    dgkServer sock skDGK skGM l cMod2
---    log "Server: securecompare exited"
+-- | Compute y <= x jointly with secret inputs. Client has r, server has c.
+secureCompareClient ::
+       (Pahe sTop, Pahe sDGK, Pahe sGM)
+    => Socket Req
+    -> PahePk sTop
+    -> PahePk sDGK
+    -> PahePk sGM
+    -> EncContext sDGK
+    -> EncContext sGM
+    -> Int
+    -> PaheCiph sTop
+    -> PaheCiph sTop
+    -> IO (PaheCiph sGM)
+secureCompareClient sock pkTop pkDGK pkGM ctxDGK ctxGM l x y = do
+    log "Client: secureCompare started"
+    let k = paheK pkDGK
+
+    rhos::[Integer] <- replicateM k $ randomRIO (0, 2^(l + lambda) - 1)
+    s1 <- paheSIMDAdd pkTop x =<< paheEnc pkTop (map (+(2^l)) rhos)
+    gamma <- paheSIMDSub pkTop s1 y
+
+    send sock [] =<< paheToBS pkTop gamma
+
+    cDiv2l <- paheFromBS pkGM =<< receive sock
+
+    eps <-
+        dgkClient sock pkDGK pkGM ctxDGK ctxGM l $ map (`mod` (2^l)) rhos
+    epsNeg <- paheNeg pkGM eps
+
+    rDiv2l <- paheEnc pkGM $ map (`div` (2^l)) rhos
+    rPlusEpsNeg <- paheSIMDAdd pkGM rDiv2l epsNeg
+    delta <- paheSIMDSub pkGM cDiv2l rPlusEpsNeg
+
+    log "Client: secureCompare exited"
+    pure delta
+
+secureCompareServer ::
+       (Pahe sTop, Pahe sDGK, Pahe sGM)
+    => Socket Rep
+    -> PaheSk sTop
+    -> PaheSk sDGK
+    -> PaheSk sGM
+    -> Int
+    -> IO ()
+secureCompareServer sock skTop skDGK skGM l = do
+    let pkTop = paheToPublic skTop
+    let pkGM = paheToPublic skGM
+    log "Server: securecompare started"
+
+    gamma <- (paheDec skTop <=< paheFromBS pkTop) =<< receive sock
+    let cMod2 = map (`mod` (2^l)) gamma
+    let cDiv2 = map (`div` (2^l)) gamma
+    send sock [] =<< (paheToBS pkGM =<< paheEnc pkGM cDiv2)
+
+
+    dgkServer sock skDGK skGM l cMod2
+    log "Server: securecompare exited"
 
 --w64ToBs :: Word64 -> ByteString
 --w64ToBs = BS.pack . map fromIntegral . inbase 256 . fromIntegral
@@ -590,14 +558,20 @@ runProtocol =
 
       putTextLn "Keygen..."
       let k = 8
-      let l = 5
+      let l = 6
       -- plaintext space size
       --let margin = 2^(lambda + l)
       let margin = 2^(l+3)
 
+      -- system used to carry long secureCompare results
+      skTop <- paheKeyGen @PailSep k (2^(lambda + l + 100))
+      --let skTop = skDGK
+      let pkTop = paheToPublic skTop
+      ctxTop <- newEncContext pkTop
+
       -- system used for DGK comparison
       --skDGK <- paheKeyGen @PailSep k (2^(lambda+l))
-      skDGK <- paheKeyGen @DgkCrt k margin
+      skDGK <- paheKeyGen @DgkCrt k (3 + 3 * fromIntegral l)
       let pkDGK = paheToPublic skDGK
       ctxDGK <- newEncContext pkDGK
 
@@ -606,6 +580,7 @@ runProtocol =
       --let skGM = skDGK
       let pkGM = paheToPublic skGM
       ctxGM <- newEncContext pkGM
+
 
       --let testLogArgmax = do
       --        let m = fromIntegral $ log2 (fromIntegral k) - 1
@@ -686,32 +661,30 @@ runProtocol =
       --            then error "Argmax failed" else putTextLn "OK"
 
 
-      --let testCompare = do
-      --        --xs <- replicateM k $ randomRIO (2^(l-1)+1,2^l-1)
-      --        --ys <- replicateM k $ randomRIO (0,2^(l-1))
-      --        let xs = [30]
-      --        let ys = [10]
-      --        print xs
-      --        print ys
-      --        let expected = map (\(x,y) -> x >= y) $ zip xs ys
-      --        putTextLn $ "Expecting: " <> show expected
+      let testCompare = replicateM_ 100 $ do
+              xs <- replicateM k $ randomRIO (0,2^l-1)
+              ys <- replicateM k $ randomRIO (0,2^l-1)
+              let expected = map (\(x,y) -> x >= y) $ zip xs ys
 
-      --        xsEnc <- paheEnc pk xs
-      --        ysEnc <- paheEnc pk ys
+              xsEnc <- paheEnc pkTop xs
+              ysEnc <- paheEnc pkTop ys
 
-      --        (gamma,()) <-
-      --            measureTimeSingle "SecureCompare" $
-      --            concurrently
-      --            (secureCompareClient req pk eCtx l xsEnc ysEnc)
-      --            (secureCompareServer rep sk l)
+              (gamma,()) <-
+                  measureTimeSingle "SecureCompare" $
+                  concurrently
+                  (secureCompareClient req pkTop pkDGK pkGM ctxDGK ctxGM l xsEnc ysEnc)
+                  (secureCompareServer rep skTop skDGK skGM l)
 
-      --        secCompRes <- paheDec sk gamma
-      --        unless (map (==1) secCompRes == expected) $ do
-      --            putTextLn $ "Expected: " <> show expected
-      --            putTextLn $ "Got:      " <> show secCompRes
-      --            error "Mismatch"
+              secCompRes <- paheDec skGM gamma
+              unless (map (==1) secCompRes == expected) $ do
+                  print xs
+                  print ys
+                  putTextLn $ "Expected: " <> show expected
+                  putTextLn $ "Got:      " <> show secCompRes
+                  putTextLn $ "          " <> show (map (==1) secCompRes)
+                  error "Mismatch"
 
-      let testDGK = replicateM_ 1000 $ do
+      let testDGK = replicateM_ 100 $ do
               cs <- replicateM k $ randomRIO (0,2^l-1)
               rs <- replicateM k $ randomRIO (0,2^l-1)
               let expected = map (\(c,r) -> r <= c) $ zip cs rs
@@ -720,7 +693,7 @@ runProtocol =
               (eps,()) <-
                   measureTimeSingle "DGKcomp" $
                   concurrently
-                  (dgkClient req skDGK pkDGK pkGM ctxDGK ctxGM l rs)
+                  (dgkClient req pkDGK pkGM ctxDGK ctxGM l rs)
                   (dgkServer rep skDGK skGM l cs)
 
               dgkRes <- map (== 1) <$> paheDec skGM eps
@@ -732,3 +705,4 @@ runProtocol =
                   error "Mismatch"
 
       testDGK
+      testCompare
