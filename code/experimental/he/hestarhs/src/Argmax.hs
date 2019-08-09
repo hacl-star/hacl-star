@@ -63,11 +63,10 @@ dgkClient sock pkDGK pkGM l rs = do
     send sock [] "init"
 
     let rbits = map (\i -> map (\c -> bool 0 1 $ testBit c i) rs) [0..l-1]
-    --log $ "Client rbits: " <> show rbits
+    log $ "Client rbits: " <> show rbits
     encRBits <- mapM (paheEnc pkDGK) rbits
 
     cs <- mapM (paheFromBS pkDGK) =<< receiveMulti sock
-
 
     log "Client: computing xors"
     xors <- forM (cs `zip` [0..]) $ \(ci,i) -> do
@@ -81,7 +80,7 @@ dgkClient sock pkDGK pkGM l rs = do
         paheSIMDAdd pkDGK a c
 
     --log "XORS: "
-    -- print =<< mapM (paheDec skDGK) xors
+    --print =<< mapM (paheDec skDGK) xors
 
     delta <- replicateM k (randomRIO (0,1))
     deltaEnc <- paheEnc pkDGK delta
@@ -95,8 +94,8 @@ dgkClient sock pkDGK pkGM l rs = do
             pure $ nextXorSum : xorsTail
     xorsums <- reverse <$> computeXorSums (l-1) (paheZero pkDGK)
 
-    -- log "XOR SUBS: "
-    -- print =<< mapM (paheDec skDGK) xorsums
+    --log "XOR SUBS: "
+    --print =<< mapM (paheDec skDGK) xorsums
 
     log "Client: computing cis"
     ci <- forM [0..l-1] $ \i -> do
@@ -110,8 +109,8 @@ dgkClient sock pkDGK pkGM l rs = do
     xorsumFull3 <- paheSIMDMulScal pkDGK (xorsums !! 0) $ replicate k 3
     cLast <- paheSIMDAdd pkDGK deltaEnc xorsumFull3
 
-   -- log "CIs: "
-   -- print =<< mapM (paheDec skDGK) (cLast : ci)
+    --log "CIs: "
+    --print =<< mapM (paheDec skDGK) (cLast : ci)
     log "CIs were computed"
 
     ciShuffled <- shuffle =<< mapM (paheMultBlind pkDGK) (cLast : ci)
@@ -160,11 +159,13 @@ dgkServer sock skDGK skGM l cs = do
     sendMulti sock =<< (NE.fromList <$> mapM (paheToBS pkDGK <=< paheEnc pkDGK) cbits)
 
     es <- mapM (paheFromBS pkDGK) =<< receiveMulti sock
-    esDecr <- mapM (paheDec skDGK) es
-    log $ "Server decrypted:" <> show esDecr
-    let zeroes = map (bool 1 0 . (== 0)) $
-                 foldr (\e acc -> map (uncurry (*)) $ zip e acc)
-                       (replicate k 1) esDecr
+    esZeroes <-
+        measureTimeSingle "DGK Server side fromZeroes" $
+        mapM (paheIsZero skDGK) es
+    let zeroes = map (bool 0 1) $
+                 foldr (\e acc -> map (uncurry (&&)) $ zip e acc)
+                       (replicate k True)
+                       (map not <$> esZeroes)
 
     log $ "Server zeroes: " <> show zeroes
 
@@ -764,9 +765,9 @@ runProtocol =
 
       putTextLn "Keygen..."
       -- SIMD parameter
-      let k = 16
+      let k = 8
       -- bit size of numbers we compare
-      let l = 64
+      let l = 32
       -- Number of argmax input elements
       let m::Int = 2 ^ (log2 (fromIntegral k) - 1 :: Integer)
       let mlog::Int = log2 (m-1)
@@ -783,7 +784,7 @@ runProtocol =
 
       -- system used for DGK comparison
       --skDGK <- paheKeyGen @PailSep k (2^(lambda+l))
-      skDGK <- paheKeyGen @DgkCrt k (3 + 3 * fromIntegral l)
+      skDGK <- paheKeyGen @DgkCrt k (5 + 3 * fromIntegral l)
       let pkDGK = paheToPublic skDGK
 
       -- system used to carry QR results

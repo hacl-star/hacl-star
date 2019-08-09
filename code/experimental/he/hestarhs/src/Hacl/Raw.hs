@@ -15,6 +15,9 @@ type Bignum = Ptr Word64
 type BignumList = Ptr Word64
 
 
+foreign import ccall "Hacl_Impl_Bignum_Misc_bn_assign_bn" bnCopy
+    :: Word32 -> Word32 -> Bignum -> Bignum -> IO ()
+
 foreign import ccall "Hacl_Impl_Bignum_Openssl_solve_dlp_single_external" bnPollardRho
     :: Word32 -> Bignum -> Bignum -> Bignum -> Bignum -> Bignum -> Bignum -> IO ()
 
@@ -31,7 +34,10 @@ foreign import ccall "Hacl_Impl_Bignum_Comparison_bn_is_greater" bnIsGreater
     :: Word32 -> Word32 -> Bignum -> Bignum -> IO Bool
 
 foreign import ccall "Hacl_Impl_Bignum_Comparison_bn_is_zero" bnIsZero
-    :: Word32 -> Word32 -> Bignum -> Bignum -> IO Bool
+    :: Word32 -> Bignum -> IO Bool
+
+foreign import ccall "Hacl_Impl_Bignum_Comparison_bn_is_one" bnIsOne
+    :: Word32 -> Bignum -> IO Bool
 
 foreign import ccall "Hacl_Impl_Bignum_Addition_bn_sub" bnSub
     :: Word32 -> Word32 -> Bignum -> Bignum -> Bignum -> IO ()

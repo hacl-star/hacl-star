@@ -7,6 +7,7 @@ import System.Random (randomRIO)
 
 import Hacl
 import qualified Lib as L
+import Utils
 
 testBNs :: IO ()
 testBNs = do
@@ -365,3 +366,31 @@ testDGK = do
     putTextLn $ "Dec: "          <> show (avg2 * 1000) <> " ms"
     putTextLn $ "Hom_add: "      <> show (avg3 * 1000) <> " ms"
     putTextLn $ "Hom_mul_scal: " <> show (avg4 * 1000) <> " ms"
+
+testDGKPahe :: IO ()
+testDGKPahe = do
+    putTextLn "Testing DGK PAHE"
+
+    let n = 5
+    let l::Integer = 3
+    sk <- paheKeyGen @DgkCrt n (3 + 3 * l)
+    let pk = paheToPublic sk
+    putTextLn "Keygen done, running tests"
+
+    replicateM_ 1000 $ do
+
+        zMask <- replicateM n $ randomRIO (0, 1)
+        zMaskReals <- replicateM n $ randomRIO (1, 2^l-1)
+        let values = simdmul zMask zMaskReals
+
+        c <- paheEnc pk values
+        zs <- paheIsZero sk c
+        d <- paheDec sk c
+
+        when (zs /= map (== 0) d) $ do
+            print zMask
+            print zMaskReals
+            print values
+            print zs
+            print d
+            error "Zeroes failed"
