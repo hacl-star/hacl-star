@@ -2,13 +2,11 @@ module TestHacl where
 
 import Universum
 
-import Control.Concurrent (threadDelay)
 import qualified Data.Time.Clock.POSIX as P
 import System.Random (randomRIO)
 
 import Hacl
 import qualified Lib as L
-import Playground
 
 testBNs :: IO ()
 testBNs = do

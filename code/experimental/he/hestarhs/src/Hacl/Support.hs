@@ -95,7 +95,7 @@ genDataPaillier bits = do
     return (p,q,r,m1,m2)
 
 
-log2 :: Integer -> Integer
+log2 :: Integral a => a -> a
 log2 x = ceiling $ (N.log (fromIntegral (x+1)) / N.log 2 :: Double)
 
 fromFacts :: [(Integer,Integer)] -> Integer
