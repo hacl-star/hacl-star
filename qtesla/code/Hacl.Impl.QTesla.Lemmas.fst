@@ -20,7 +20,7 @@ module I64 = FStar.Int64
 
 #reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 
-val my_logand_pos_le: #n:pos{1 < n} -> a:int_t n -> b:int_t n{0 <= b} ->
+val my_logand_pos_le: #n:pos{1 < n} -> a:Int.int_t n -> b:Int.int_t n{0 <= b} ->
   Lemma (0 <= Int.logand a b /\ Int.logand a b <= b)
 let my_logand_pos_le #n a b =
   UInt.logand_le (to_uint a) (to_uint b)

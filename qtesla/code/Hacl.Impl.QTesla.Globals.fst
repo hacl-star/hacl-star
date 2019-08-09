@@ -242,7 +242,7 @@ let modifies4 (#a0:Type0) (#a1:Type0) (#a2:Type0) (#a3:Type0)
 
 inline_for_extraction noextract
 val unsafe_declassify:
-    #t:inttype
+    #t:inttype{unsigned t}
   -> us: uint_t t SEC
   -> Tot (up:uint_t t PUB{uint_v us == uint_v up})
 

@@ -331,7 +331,7 @@ let poly_uniform_valFromBuffer subbuff =
     assert(v mask == v ((u32 1 <<. params_q_log) -. u32 1));
     assert(v mask == pow2 (v params_q_log) - 1);
     assert(v mask == v (uint_pow2_minus_one (v params_q_log)));
-    uintv_extensionality mask (uint_pow2_minus_one (v params_q_log));
+    //uintv_extensionality mask (uint_pow2_minus_one (v params_q_log));
     assert(mask == uint_pow2_minus_one (v params_q_log));
     let bufPosAsUint:uint32 = uint_from_bytes_le subbuff in
     let val1:uint32 = bufPosAsUint &. mask in

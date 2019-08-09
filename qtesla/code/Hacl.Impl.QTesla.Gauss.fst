@@ -305,6 +305,7 @@ private val knuthMergeExchangeKG:
     (requires fun h -> live h a /\ live h g /\ disjoint a g)
     (ensures fun h0 _ h1 -> modifies2 a g h0 h1)
 
+#push-options "--z3rlimit 500"
 // TODO: This proof takes quite a while to go through. Investigate.
 let knuthMergeExchangeKG n a g =
     push_frame();
@@ -362,6 +363,7 @@ let knuthMergeExchangeKG n a g =
     );
 
     pop_frame()
+#pop-options
 
 private val _MINMAXG:
     a_u: lbuffer I32.t (size 1)

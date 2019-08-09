@@ -349,7 +349,7 @@ let decode_pk_loopBody pk pk_in mask23 i j =
 private let let_mask23_left_minus_1_fits () : Lemma
     (ensures UInt.fits (UI32.v UI32.(1ul <<^ params_q_log) - 1) UI32.n) = 
     UInt.shift_left_value_lemma #UI32.n 1 (v params_q_log);
-    assert_norm(UInt.fits (UI32.v UI32.(1ul <<^ params_q_log) - 1) UI32.n)
+    normalize_term_spec (pow2 params_q_log_int)
 #pop-options
 
 val decode_pk:
