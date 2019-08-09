@@ -332,7 +332,7 @@ djFFT params@DJParams{..} w msg =
 
 
 djRotate :: DJParams -> DJMsg -> Integer -> DJMsg
-djRotate params@DJParams{..} m s = do
+djRotate params@DJParams{..} m _ = do
     let m1 = djFFT params djw m
 
 --    let m2 = djHomSIMDProd params m1 (wrow djw s)

@@ -34,6 +34,10 @@ class Pahe s where
     paheToPlaintext :: PahePk s -> [Integer] -> [Integer]
     paheToPublic    :: PaheSk s -> PahePk s
 
+    paheZero        :: PahePk s -> PaheCiph s
+    paheOne         :: PahePk s -> PaheCiph s
+    paheMinOne      :: PahePk s -> PaheCiph s
+
     paheEnc         :: PahePk s -> [Integer] -> IO (PaheCiph s)
     paheDec         :: PaheSk s -> PaheCiph s -> IO [Integer]
 
@@ -65,6 +69,23 @@ paheRerand pk c = paheSIMDAdd pk c =<< paheEnc pk (replicate (paheK pk) 0)
 
 data GMSep
 
+gmEncRaw :: Int -> Word32 -> Bignum -> Integer -> Bignum -> [Integer] -> IO [Bignum]
+gmEncRaw simdn bn n nRaw y m = do
+    when (length m /= simdn) $ error "GM encrypt: length mismatch"
+    vals <- forM [0..simdn-1] $ \i -> do
+        r0 <- randomRIO (0, nRaw - 1) `suchThat`
+                 (\x -> gcd x nRaw == 1)
+        r <- toBignum bn r0
+        let mi = (== 1) . (`mod` 2) $ (m !! i)
+        c <- toBignum bn 0
+        gmEnc bn n y r mi c
+
+        freeBignum r
+
+        pure c
+    pure vals
+
+
 instance Pahe GMSep where
     data PaheCiph GMSep = GMCiph [Bignum]
     data PaheSk GMSep =
@@ -77,6 +98,8 @@ instance Pahe GMSep where
                    , gms_n :: Bignum
                    , gms_nRaw :: Integer
                    , gms_y :: Bignum
+                   , gms_zero :: PaheCiph GMSep
+                   , gms_one :: PaheCiph GMSep
                    }
     data PahePk GMSep =
            GMSepPk { gmp_simdn :: Int
@@ -84,6 +107,8 @@ instance Pahe GMSep where
                    , gmp_n :: Bignum
                    , gmp_nRaw :: Integer
                    , gmp_y :: Bignum
+                   , gmp_zero :: PaheCiph GMSep
+                   , gmp_one :: PaheCiph GMSep
                    }
 
 
@@ -102,34 +127,37 @@ instance Pahe GMSep where
         gms_pMin1 <- toBignum gms_bn (p-1)
         gms_pMin1Half <- toBignum gms_bn ((p-1)`div`2)
 
+
+        gms_zero <-
+            GMCiph <$>
+            gmEncRaw gms_simdn gms_bn gms_n gms_nRaw gms_y (replicate gms_simdn 0)
+        gms_one <-
+            GMCiph <$>
+            gmEncRaw gms_simdn gms_bn gms_n gms_nRaw gms_y (replicate gms_simdn 1)
+
         pure GMSepSk{..}
 
     paheK GMSepPk{..} = gmp_simdn
 
     paheToPlaintext GMSepPk{..} vals = map (`mod` 2) vals
 
-    paheToPublic GMSepSk{..} =
+    paheToPublic GMSepSk{..} = do
         GMSepPk {
             gmp_simdn = gms_simdn
           , gmp_bn    = gms_bn
           , gmp_n     = gms_n
           , gmp_nRaw = gms_nRaw
-          , gmp_y     = gms_y }
+          , gmp_y     = gms_y
+          , gmp_zero = gms_zero
+          , gmp_one = gms_one
+          }
 
-    paheEnc GMSepPk{..} m = do
-        when (length m /= gmp_simdn) $ error "GM encrypt: length mismatch"
-        vals <- forM [0..gmp_simdn-1] $ \i -> do
-            r0 <- randomRIO (0, gmp_nRaw - 1) `suchThat`
-                     (\x -> gcd x gmp_nRaw == 1)
-            r <- toBignum gmp_bn r0
-            let mi = (== 1) . (`mod` 2) $ (m !! i)
-            c <- toBignum gmp_bn 0
-            gmEnc gmp_bn gmp_n gmp_y r mi c
+    paheZero pk = gmp_zero pk
+    paheOne pk = gmp_one pk
+    paheMinOne = paheOne
 
-            freeBignum r
-
-            pure c
-        pure $ GMCiph vals
+    paheEnc GMSepPk{..} m =
+        GMCiph <$> gmEncRaw gmp_simdn gmp_bn  gmp_n gmp_nRaw gmp_y m
 
     paheDec GMSepSk{..} (GMCiph ms) = do
         when (length ms /= gms_simdn) $ error "GM decrypt: length mismatch"
@@ -179,6 +207,31 @@ instance Pahe GMSep where
 
 data PailSep
 
+pailEncRaw ::
+       Int
+    -> Word32
+    -> Bignum
+    -> Integer
+    -> Bignum
+    -> Bignum
+    -> [Integer]
+    -> IO [Bignum]
+pailEncRaw simdn bn n nRaw n2 g m = do
+    when (length m /= simdn) $ error "Paillier encrypt: length mismatch"
+    vals <- forM [0..simdn-1] $ \i -> do
+        r0 <- randomRIO (0, nRaw - 1) `suchThat`
+                 (\x -> gcd x nRaw == 1)
+        r <- toBignum bn r0
+        mi <- toBignum bn $ (m !! i) `mod` nRaw
+        c <- toBignum bn 0
+        paillierEnc bn n n2 g r mi c
+
+        mapM_ freeBignum [r,mi]
+
+        pure c
+    pure vals
+
+
 instance Pahe PailSep where
     data PaheCiph PailSep = PailCiph [Bignum]
     data PaheSk PailSep =
@@ -192,6 +245,9 @@ instance Pahe PailSep where
                      , pss_g :: Bignum
                      , pss_lambda :: Bignum
                      , pss_l2inv :: Bignum
+                     , pss_zero :: PaheCiph PailSep
+                     , pss_one :: PaheCiph PailSep
+                     , pss_minOne :: PaheCiph PailSep
                      }
     data PahePk PailSep =
            PailSepPk { psp_simdn :: Int
@@ -200,6 +256,10 @@ instance Pahe PailSep where
                      , psp_nRaw :: Integer
                      , psp_n2 :: Bignum
                      , psp_g :: Bignum
+                     , psp_zero :: PaheCiph PailSep
+                     , psp_one :: PaheCiph PailSep
+                     , psp_minOne :: PaheCiph PailSep
+
                      }
 
 
@@ -220,6 +280,18 @@ instance Pahe PailSep where
 
         paillierToSec pss_bn pss_p pss_q pss_n pss_n2 pss_g pss_lambda pss_l2inv
 
+        pss_zero <-
+            PailCiph <$>
+            pailEncRaw pss_simdn pss_bn pss_n pss_nRaw pss_n2 pss_g (replicate pss_simdn 0)
+
+        pss_one <-
+            PailCiph <$>
+            pailEncRaw pss_simdn pss_bn pss_n pss_nRaw pss_n2 pss_g (replicate pss_simdn 1)
+
+        pss_minOne <-
+            PailCiph <$>
+            pailEncRaw pss_simdn pss_bn pss_n pss_nRaw pss_n2 pss_g (replicate pss_simdn (-1))
+
         pure PailSepSk{..}
 
     paheK PailSepPk{..} = psp_simdn
@@ -228,27 +300,23 @@ instance Pahe PailSep where
 
     paheToPublic PailSepSk{..} =
         PailSepPk {
-            psp_simdn = pss_simdn
-          , psp_bn    = pss_bn
-          , psp_n     = pss_n
-          , psp_nRaw = pss_nRaw
-          , psp_n2    = pss_n2
-          , psp_g     = pss_g }
+            psp_simdn  = pss_simdn
+          , psp_bn     = pss_bn
+          , psp_n      = pss_n
+          , psp_nRaw   = pss_nRaw
+          , psp_n2     = pss_n2
+          , psp_g      = pss_g
+          , psp_zero   = pss_zero
+          , psp_one    = pss_one
+          , psp_minOne = pss_minOne
+          }
 
-    paheEnc PailSepPk{..} m = do
-        when (length m /= psp_simdn) $ error "Paillier encrypt: length mismatch"
-        vals <- forM [0..psp_simdn-1] $ \i -> do
-            r0 <- randomRIO (0, psp_nRaw - 1) `suchThat`
-                     (\x -> gcd x psp_nRaw == 1)
-            r <- toBignum psp_bn r0
-            mi <- toBignum psp_bn $ (m !! i) `mod` psp_nRaw
-            c <- toBignum psp_bn 0
-            paillierEnc psp_bn psp_n psp_n2 psp_g r mi c
+    paheZero pk = psp_zero pk
+    paheOne pk = psp_one pk
+    paheMinOne pk = psp_minOne pk
 
-            mapM_ freeBignum [r,mi]
-
-            pure c
-        pure $ PailCiph vals
+    paheEnc PailSepPk{..} m =
+        PailCiph <$> pailEncRaw psp_simdn psp_bn psp_n psp_nRaw psp_n2 psp_g m
 
     paheDec PailSepSk{..} (PailCiph ms) = do
         let l = length ms
@@ -302,6 +370,33 @@ instance Pahe PailSep where
 
 data DgkCrt
 
+dgkEncRaw ::
+       Int
+    -> Word32
+    -> Bignum
+    -> Integer
+    -> Bignum
+    -> [Integer]
+    -> Bignum
+    -> Bignum
+    -> [Integer]
+    -> IO Bignum
+dgkEncRaw simdn bn n nRaw u uFactsRaw g h m = do
+    when (length m /= simdn) $ error "DGK encrypt: length mismatch"
+
+    r0 <- randomRIO (0, nRaw - 1) `suchThat`
+             (\x -> gcd x nRaw == 1)
+    r <- toBignum bn r0
+    mPacked <- toBignum bn $ P.crt uFactsRaw (P.crtToBase uFactsRaw m)
+    c <- toBignum bn 0
+
+    dgkEnc bn n u g h r mPacked c
+
+    freeBignum r
+
+    pure c
+
+
 instance Pahe DgkCrt where
     data PaheCiph DgkCrt = DgkCiph Bignum
     data PaheSk DgkCrt =
@@ -319,6 +414,9 @@ instance Pahe DgkCrt where
                     , dcs_v :: Bignum
                     , dcs_g :: Bignum
                     , dcs_h :: Bignum
+                    , dcs_zero :: PaheCiph DgkCrt
+                    , dcs_one :: PaheCiph DgkCrt
+                    , dcs_minOne :: PaheCiph DgkCrt
                     }
     data PahePk DgkCrt =
            DgkCrtPk { dcp_simdn :: Int
@@ -329,6 +427,9 @@ instance Pahe DgkCrt where
                     , dcp_uFactsRaw :: [Integer]
                     , dcp_g :: Bignum
                     , dcp_h :: Bignum
+                    , dcp_zero :: PaheCiph DgkCrt
+                    , dcp_one :: PaheCiph DgkCrt
+                    , dcp_minOne :: PaheCiph DgkCrt
                     }
 
 
@@ -351,6 +452,18 @@ instance Pahe DgkCrt where
         dcs_uFactsPs <- toBignumList dcs_bn dcs_uFactsRaw
         dcs_uFactsEs <- toBignumList dcs_bn $ replicate (length dcs_uFactsRaw) 1
 
+        dcs_zero <- DgkCiph <$>
+            dgkEncRaw dcs_simdn dcs_bn dcs_n dcs_nRaw dcs_u dcs_uFactsRaw dcs_g dcs_h
+            (replicate dcs_simdn 0)
+
+        dcs_one <- DgkCiph <$>
+            dgkEncRaw dcs_simdn dcs_bn dcs_n dcs_nRaw dcs_u dcs_uFactsRaw dcs_g dcs_h
+            (replicate dcs_simdn 1)
+
+        dcs_minOne <- DgkCiph <$>
+            dgkEncRaw dcs_simdn dcs_bn dcs_n dcs_nRaw dcs_u dcs_uFactsRaw dcs_g dcs_h
+            (replicate dcs_simdn (-1))
+
         pure DgkCrtSk{..}
 
     paheK DgkCrtPk{..} = dcp_simdn
@@ -367,22 +480,18 @@ instance Pahe DgkCrt where
           , dcp_uFactsRaw     = dcs_uFactsRaw
           , dcp_g     = dcs_g
           , dcp_h     = dcs_h
+          , dcp_zero   = dcs_zero
+          , dcp_one    = dcs_one
+          , dcp_minOne = dcs_minOne
           }
 
-    paheEnc DgkCrtPk{..} m = do
-        when (length m /= dcp_simdn) $ error "DGK encrypt: length mismatch"
+    paheZero pk = dcp_zero pk
+    paheOne pk = dcp_one pk
+    paheMinOne pk = dcp_minOne pk
 
-        r0 <- randomRIO (0, dcp_nRaw - 1) `suchThat`
-                 (\x -> gcd x dcp_nRaw == 1)
-        r <- toBignum dcp_bn r0
-        mPacked <- toBignum dcp_bn $ P.crt dcp_uFactsRaw (P.crtToBase dcp_uFactsRaw m)
-        c <- toBignum dcp_bn 0
-
-        dgkEnc dcp_bn dcp_n dcp_u dcp_g dcp_h r mPacked c
-
-        freeBignum r
-
-        pure $ DgkCiph c
+    paheEnc DgkCrtPk{..} m =
+        DgkCiph <$>
+        dgkEncRaw dcp_simdn dcp_bn dcp_n dcp_nRaw dcp_u dcp_uFactsRaw dcp_g dcp_h m
 
     paheDec DgkCrtSk{..} (DgkCiph cPacked) = do
         m <- toBignum dcs_bn 0
