@@ -1,14 +1,10 @@
 module Hacl.Hash.PadFinish
 
-module U8 = FStar.UInt8
-module U32 = FStar.UInt32
-module U64 = FStar.UInt64
-module U128 = FStar.UInt128
+open Lib.IntTypes
 
 module Cast = FStar.Int.Cast.Full
 module Constants = Spec.SHA2.Constants
 module Helpers = Spec.Hash.Definitions
-module Endianness = FStar.Kremlin.Endianness
 module Math = FStar.Math.Lemmas
 module Helpers = Spec.Hash.Definitions
 
@@ -29,7 +25,7 @@ open Spec.Hash.Lemmas0
 
 #set-options "--z3rlimit 50"
 inline_for_extraction
-val store_len: a:hash_alg -> len:len_t a -> b:B.buffer U8.t ->
+val store_len: a:hash_alg -> len:len_t a -> b:B.buffer uint8 ->
   ST.Stack unit
     (requires (fun h ->
       B.live h b /\
@@ -37,24 +33,19 @@ val store_len: a:hash_alg -> len:len_t a -> b:B.buffer U8.t ->
     (ensures (fun h0 _ h1 ->
       M.(modifies (loc_buffer b) h0 h1) /\ (
       match a with
-      | MD5 -> B.as_seq h1 b == Endianness.n_to_le (len_len a) (len_v a len)
-      | _ -> B.as_seq h1 b == Endianness.n_to_be (len_len a) (len_v a len))))
+      | MD5 -> B.as_seq h1 b == Lib.ByteSequence.uint_to_bytes_le #U64 (secret len)
+      | SHA1 | SHA2_224 | SHA2_256 -> B.as_seq h1 b == Lib.ByteSequence.uint_to_bytes_be #U64 (secret len)
+      | _ -> B.as_seq h1 b == Lib.ByteSequence.uint_to_bytes_be #U128 (secret len))))
 
 inline_for_extraction
 let store_len a len b =
   match a with
   | MD5 ->
-      C.Endianness.store64_le b len;
-      let h = ST.get () in
-      Endianness.n_to_le_le_to_n 8ul (B.as_seq h b)
+    Lib.ByteBuffer.uint_to_bytes_le b (secret #U64 len)
   | SHA1 | SHA2_224 | SHA2_256 ->
-      C.Endianness.store64_be b len;
-      let h = ST.get () in
-      Endianness.n_to_be_be_to_n 8ul (B.as_seq h b)
+    Lib.ByteBuffer.uint_to_bytes_be b (secret #U64 len)
   | SHA2_384 | SHA2_512 ->
-      C.Endianness.store128_be b len;
-      let h = ST.get () in
-      Endianness.n_to_be_be_to_n 16ul (B.as_seq h b)
+    Lib.ByteBuffer.uint_to_bytes_be b (secret #U128 len)
 
 #set-options "--z3rlimit 20"
 
@@ -280,4 +271,3 @@ let finish a s dst =
           (S.slice (B.as_seq h2 s) (U32.v i) (U32.v i + 1))
   in
   C.Loops.for 0ul (hash_word_len a) inv f
-
