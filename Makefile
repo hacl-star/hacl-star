@@ -508,6 +508,7 @@ spec-verify-unstaged: $(call only-for,$(HACL_HOME)/specs/%)
 curve25519-verify-unstaged: $(call only-for,$(HACL_HOME)/code/curve25519/%)
 poly1305-verify-unstaged: $(call only-for,$(HACL_HOME)/code/poly1305/%)
 chacha20-verify-unstaged: $(call only-for,$(HACL_HOME)/code/chacha20/%)
+salsa20-verify-unstaged: $(call only-for,$(HACL_HOME)/code/salsa20/%)
 
 ############
 # min-test #
@@ -711,6 +712,7 @@ WASM_FLAGS	=\
 HASH_BUNDLE=-bundle Hacl.Hash.MD5+Hacl.Hash.Core.MD5+Hacl.Hash.SHA1+Hacl.Hash.Core.SHA1+Hacl.Hash.SHA2+Hacl.Hash.Core.SHA2+Hacl.Hash.Core.SHA2.Constants=Hacl.Hash.*[rename=Hacl_Hash]
 SHA3_BUNDLE=-bundle Hacl.Impl.SHA3+Hacl.SHA3=[rename=Hacl_SHA3]
 CHACHA20_BUNDLE=-bundle Hacl.Impl.Chacha20=Hacl.Impl.Chacha20.*[rename=Hacl_Chacha20]
+SALSA20_BUNDLE=-bundle Hacl.Impl.Salsa20+Hacl.Impl.HSalsa20=Hacl.Impl.Salsa20.*[rename=Hacl_Salsa20]
 CURVE_BUNDLE=-bundle Hacl.Curve25519_51+Hacl.Curve25519_64=Hacl.Impl.Curve25519.*[rename=Hacl_Curve25519]
 CHACHAPOLY_BUNDLE=-bundle Hacl.Impl.Chacha20Poly1305=Hacl.Impl.Chacha20Poly1305.*[rename=Hacl_Chacha20Poly1305]
 ED_BUNDLE=-bundle 'Hacl.Ed25519=Hacl.Impl.Ed25519.*,Hacl.Impl.BignumQ.Mul,Hacl.Impl.Load56,Hacl.Impl.SHA512.ModQ,Hacl.Impl.Store56,Hacl.Bignum25519'
@@ -722,6 +724,7 @@ COMPACT_FLAGS	=\
   $(HASH_BUNDLE) \
   $(SHA3_BUNDLE) \
   $(CHACHA20_BUNDLE) \
+  $(SALSA20_BUNDLE) \
   $(CURVE_BUNDLE) \
   $(CHACHAPOLY_BUNDLE) \
   $(ED_BUNDLE) \
