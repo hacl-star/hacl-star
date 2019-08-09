@@ -43,33 +43,16 @@ shuffle xs = do
     newArray' n' xs' =  newListArray (1,n') xs'
 
 
-data EncContext s =
-    EncContext
-        { encZero   :: PaheCiph s
-        , encOne    :: PaheCiph s
-        , encMinOne :: PaheCiph s
-        }
-
-newEncContext :: Pahe s => PahePk s -> IO (EncContext s)
-newEncContext pk = do
-    let k = paheK pk
-    encZero <- paheEnc pk $ replicate k 0
-    encOne <- paheEnc pk $ replicate k 1
-    encMinOne <- paheEnc pk $ replicate k (-1)
-    pure EncContext{..}
-
 -- | Compute r <= c jointly. Client has r, server has c.
 dgkClient ::
        (Pahe sDGK, Pahe sGM)
     => Socket Req
     -> PahePk sDGK
     -> PahePk sGM
-    -> EncContext sDGK
-    -> EncContext sGM
     -> Int
     -> [Integer]
     -> IO (PaheCiph sGM)
-dgkClient sock pkDGK pkGM ctxDGK ctxGM l rs = do
+dgkClient sock pkDGK pkGM l rs = do
 
     let k = paheK pkDGK -- they should be similar between two schemes
     log "Client: dgk started"
@@ -89,7 +72,7 @@ dgkClient sock pkDGK pkGM ctxDGK ctxGM l rs = do
 
         -- ci * maskNeg + (1-ci) * mask
         a <- paheSIMDMulScal pkDGK ci bitmaskNeg
-        oneMinCi <- paheSIMDSub pkDGK (encOne ctxDGK) ci
+        oneMinCi <- paheSIMDSub pkDGK (paheOne pkDGK) ci
         c <- paheSIMDMulScal pkDGK oneMinCi bitmask
         paheSIMDAdd pkDGK a c
 
@@ -106,7 +89,7 @@ dgkClient sock pkDGK pkGM ctxDGK ctxGM l rs = do
             nextXorSum <- paheSIMDAdd pkDGK prev (xors !! i)
             xorsTail <- if i == 0 then pure [] else computeXorSums (i-1) nextXorSum
             pure $ nextXorSum : xorsTail
-    xorsums <- reverse <$> computeXorSums (l-1) (encZero ctxDGK)
+    xorsums <- reverse <$> computeXorSums (l-1) (paheZero pkDGK)
 
     -- log "XOR SUBS: "
     -- print =<< mapM (paheDec skDGK) xorsums
@@ -141,7 +124,7 @@ dgkClient sock pkDGK pkGM ctxDGK ctxGM l rs = do
           let sMaskNeg = map (\x -> 1 - x) sMask
           -- zs * s + (1-zs) * neg s
           a <- paheSIMDMulScal pkGM zs sMask
-          oneMinZs <- paheSIMDSub pkGM (encOne ctxGM) zs
+          oneMinZs <- paheSIMDSub pkGM (paheOne pkGM) zs
           c <- paheSIMDMulScal pkGM oneMinZs sMaskNeg
           paheSIMDAdd pkGM a c
 
@@ -193,13 +176,11 @@ secureCompareClient ::
     -> PahePk sTop
     -> PahePk sDGK
     -> PahePk sGM
-    -> EncContext sDGK
-    -> EncContext sGM
     -> Int
     -> PaheCiph sTop
     -> PaheCiph sTop
     -> IO (PaheCiph sGM)
-secureCompareClient sock pkTop pkDGK pkGM ctxDGK ctxGM l x y = do
+secureCompareClient sock pkTop pkDGK pkGM l x y = do
     log "Client: secureCompare started"
     let k = paheK pkDGK
 
@@ -212,7 +193,7 @@ secureCompareClient sock pkTop pkDGK pkGM ctxDGK ctxGM l x y = do
     cDiv2l <- paheFromBS pkGM =<< receive sock
 
     eps <-
-        dgkClient sock pkDGK pkGM ctxDGK ctxGM l $ map (`mod` (2^l)) rhos
+        dgkClient sock pkDGK pkGM l $ map (`mod` (2^l)) rhos
     epsNeg <- paheNeg pkGM eps
 
     rDiv2l <- paheEnc pkGM $ map (`div` (2^l)) rhos
@@ -244,21 +225,22 @@ secureCompareServer sock skTop skDGK skGM l = do
     dgkServer sock skDGK skGM l cMod2
     log "Server: securecompare exited"
 
---w64ToBs :: Word64 -> ByteString
---w64ToBs = BS.pack . map fromIntegral . inbase 256 . fromIntegral
---
---w64FromBs :: ByteString -> Word64
---w64FromBs = fromIntegral . frombase 256 . map fromIntegral . BS.unpack
---
+w64ToBs :: Word64 -> ByteString
+w64ToBs = BS.pack . map fromIntegral . inbase 256 . fromIntegral
+
+w64FromBs :: ByteString -> Word64
+w64FromBs = fromIntegral . frombase 256 . map fromIntegral . BS.unpack
+
 --argmaxClient ::
---       Pahe s
+--       (Pahe sTop, Pahe sDGK, Pahe sGM)
 --    => Socket Req
---    -> PahePk s
---    -> EncContext s
+--    -> PahePk sTop
+--    -> PahePk sDGK
+--    -> PahePk sGM
 --    -> Int
 --    -> [PaheCiph s]
 --    -> IO (PaheCiph s, [Word64])
---argmaxClient sock pk ctx@EncContext{..} l vals = do
+--argmaxClient sock pkTop pkDGK pkGM ctx@EncContext{..} l vals = do
 --    let k = paheK pk
 --    let m = length vals
 --    perm <- shuffle [0..m-1]
@@ -267,7 +249,7 @@ secureCompareServer sock skTop skDGK skGM l = do
 --    oneEnc <- paheEnc pk $ replicate k 1
 --    let loop curMax i = if i == m then pure curMax else do
 --            log $ "Client loop index " <> show i
---            bi <- secureCompareClient sock pk ctx l
+--            bi <- secureCompareClient sock pkTop pkDGK pkGM ctx l
 --                (vals !! (perm !! i)) curMax
 --            ri <- replicateM k $ randomRIO (0, 2^(l + lambda) - 1)
 --            si <- replicateM k $ randomRIO (0, 2^(l + lambda) - 1)
@@ -296,7 +278,7 @@ secureCompareServer sock skTop skDGK skGM l = do
 --
 --    pure (maxval, indices')
 --
---
+
 --argmaxServer :: Pahe s => Socket Rep -> PaheSk s -> Int -> Int -> IO ()
 --argmaxServer sock sk l m = do
 --    let pk = paheToPublic sk
@@ -567,19 +549,16 @@ runProtocol =
       skTop <- paheKeyGen @PailSep k (2^(lambda + l + 100))
       --let skTop = skDGK
       let pkTop = paheToPublic skTop
-      ctxTop <- newEncContext pkTop
 
       -- system used for DGK comparison
       --skDGK <- paheKeyGen @PailSep k (2^(lambda+l))
       skDGK <- paheKeyGen @DgkCrt k (3 + 3 * fromIntegral l)
       let pkDGK = paheToPublic skDGK
-      ctxDGK <- newEncContext pkDGK
 
       -- system used to carry QR results
       skGM <- paheKeyGen @GMSep k margin
       --let skGM = skDGK
       let pkGM = paheToPublic skGM
-      ctxGM <- newEncContext pkGM
 
 
       --let testLogArgmax = do
@@ -672,7 +651,7 @@ runProtocol =
               (gamma,()) <-
                   measureTimeSingle "SecureCompare" $
                   concurrently
-                  (secureCompareClient req pkTop pkDGK pkGM ctxDGK ctxGM l xsEnc ysEnc)
+                  (secureCompareClient req pkTop pkDGK pkGM l xsEnc ysEnc)
                   (secureCompareServer rep skTop skDGK skGM l)
 
               secCompRes <- paheDec skGM gamma
@@ -693,7 +672,7 @@ runProtocol =
               (eps,()) <-
                   measureTimeSingle "DGKcomp" $
                   concurrently
-                  (dgkClient req pkDGK pkGM ctxDGK ctxGM l rs)
+                  (dgkClient req pkDGK pkGM l rs)
                   (dgkServer rep skDGK skGM l cs)
 
               dgkRes <- map (== 1) <$> paheDec skGM eps
