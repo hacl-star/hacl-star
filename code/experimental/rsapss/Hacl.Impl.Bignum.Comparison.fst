@@ -140,10 +140,10 @@ val bn_is_zero_:
     (requires fun h -> live h a)
     (ensures  fun h0 _ h1 -> h0 == h1)
 let rec bn_is_zero_ #aLen a i =
-  if i =. 0ul then true else begin
-    let i = i -. 1ul in
-    if not (eq_u64 (a.(i)) (uint 0)) then false
-    else bn_is_zero_ a i
+  if i =. aLen then true else begin
+    if not (eq_u64 (a.(i)) (uint 0))
+    then false
+    else bn_is_zero_ a (i +. 1ul)
   end
 
 val bn_is_zero:
@@ -154,7 +154,22 @@ val bn_is_zero:
     (ensures fun h0 r h1 ->
      h0 == h1 /\ r == (as_snat h0 a = 0))
 let bn_is_zero #aLen a =
-  let res = bn_is_zero_ a aLen in
+  let res = bn_is_zero_ a 0ul in
   let h = FStar.HyperStack.ST.get () in
   assume (res == (as_snat h a = 0));
+  res
+
+val bn_is_one:
+     #aLen:bn_len
+  -> a:lbignum aLen
+  -> Stack bool
+    (requires fun h -> live h a)
+    (ensures fun h0 r h1 ->
+     h0 == h1 /\ r == (as_snat h0 a = 1))
+let bn_is_one #aLen a =
+  let res = if eq_u64 (a.(0ul)) (uint 1)
+            then bn_is_zero_ #aLen a 1ul
+            else false in
+  let h = FStar.HyperStack.ST.get () in
+  assume (res == (as_snat h a = 1));
   res

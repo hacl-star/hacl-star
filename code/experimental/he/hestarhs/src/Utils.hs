@@ -21,7 +21,7 @@ logRaw x = do
       putTextLn (show (t`div`1000) <> "." <> show (t`mod`1000) <> " " <> x) >> pure ()
 
 log :: MonadIO m => Text -> m ()
-log x = if False then pass else logRaw x
+log x = if True then pass else logRaw x
 
 
 findM :: Monad m => (a -> m Bool) -> [a] -> m (Maybe a)

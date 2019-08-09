@@ -34,7 +34,6 @@ let bn_copy #len a =
   b
 
 /// Assigns a uint64 number to the bignum.
-inline_for_extraction
 val bn_assign_uint64:
      #len:bn_len
   -> a:lbignum len

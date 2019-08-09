@@ -56,6 +56,10 @@ class Pahe s where
     default paheNeg :: Pahe s => PahePk s -> PaheCiph s -> IO (PaheCiph s)
     paheNeg pk ciph = paheSIMDMulScal pk ciph $ replicate (paheK pk) (-1)
 
+    paheIsZero      :: PaheSk s -> PaheCiph s -> IO [Bool]
+    default paheIsZero :: Pahe s => PaheSk s -> PaheCiph s -> IO [Bool]
+    paheIsZero sk ciph = map (== 0) <$> paheDec sk ciph
+
     paheToBS        :: PahePk s -> PaheCiph s -> IO ByteString
     paheFromBS      :: PahePk s -> ByteString -> IO (PaheCiph s)
 
@@ -417,6 +421,7 @@ instance Pahe DgkCrt where
                     , dcs_zero :: PaheCiph DgkCrt
                     , dcs_one :: PaheCiph DgkCrt
                     , dcs_minOne :: PaheCiph DgkCrt
+                    , dcs_vbis :: [Bignum]
                     }
     data PahePk DgkCrt =
            DgkCrtPk { dcp_simdn :: Int
@@ -463,6 +468,10 @@ instance Pahe DgkCrt where
         dcs_minOne <- DgkCiph <$>
             dgkEncRaw dcs_simdn dcs_bn dcs_n dcs_nRaw dcs_u dcs_uFactsRaw dcs_g dcs_h
             (replicate dcs_simdn (-1))
+
+        dcs_vbis <-
+            mapM (toBignum dcs_bn) $
+            map ((product dcs_uFactsRaw * v) `div`) dcs_uFactsRaw
 
         pure DgkCrtSk{..}
 
@@ -516,6 +525,14 @@ instance Pahe DgkCrt where
     paheMultBlind pk@DgkCrtPk{..} c = do
         scal <- replicateM dcp_simdn $ randomRIO (1, dcp_uFactsRaw !! 0 - 1)
         paheSIMDMulScal pk c scal
+
+    paheIsZero DgkCrtSk{..} (DgkCiph ciph) = do
+        tmp <- toBignum dcs_bn 0
+        res <- forM dcs_vbis $ \vBi -> do
+            bnModExp dcs_bn dcs_bn dcs_n ciph vBi tmp
+            bnIsOne dcs_bn tmp
+        freeBignum tmp
+        pure res
 
     paheToBS DgkCrtPk{..} (DgkCiph ms) = fromBignumBS dcp_bn ms
 
