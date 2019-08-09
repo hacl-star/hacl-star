@@ -4,6 +4,7 @@ open Lib.IntTypes
 module H = Spec.Hash.Definitions
 module Seq = FStar.Seq
 
+open Spec.Hash.Definitions
 (* Source: https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf *)
 
 (* Section 5.3.1 *)
@@ -161,7 +162,7 @@ let step3_body'_aux
   let c = stb <<<. 30ul in
   let b = sta in
   let a = _T in
-  let l:list uint32 = [
+  let l : list uint32 = [
     a;
     b;
     c;
@@ -170,10 +171,11 @@ let step3_body'_aux
   ] in
   assert_norm (List.Tot.length l = 5);
   Seq.seq_of_list l
-
+  
 [@"opaque_to_smt"]
 let step3_body' = step3_body'_aux
 
+#reset-options "--z3rlimit 50"
 [@unifier_hint_injective]
 inline_for_extraction
 let step3_body_w_t
@@ -250,4 +252,4 @@ let pad = Spec.Hash.PadFinish.pad SHA1
 
 (* Section 6.1.2: no truncation needed *)
 
-let finish = Spec.Hash.PadFinish.finish _
+let finish = Spec.Hash.PadFinish.finish SHA1

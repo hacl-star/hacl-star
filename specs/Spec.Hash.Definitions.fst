@@ -73,7 +73,7 @@ let len_length: hash_alg -> Tot nat = function
 
 (* Same thing, as a machine integer *)
 inline_for_extraction
-let len_len: a:hash_alg -> Tot (n:UInt32.t{UInt32.v n = len_length a}) = function
+let len_len: a:hash_alg -> Tot (n:size_t{v n = len_length a}) = function
   | MD5 | SHA1 | SHA2_224 | SHA2_256 -> 8ul
   | SHA2_384 | SHA2_512 -> 16ul
 
@@ -81,10 +81,14 @@ let len_len: a:hash_alg -> Tot (n:UInt32.t{UInt32.v n = len_length a}) = functio
 
 (* Internally, hash functions operate on a series of machine words. *)
 inline_for_extraction
-let word: hash_alg -> Tot Type0 = function
+let word_t: hash_alg -> Tot inttype = function
   | MD5 | SHA1
-  | SHA2_224 | SHA2_256 -> uint32
-  | SHA2_384 | SHA2_512 -> uint64
+  | SHA2_224 | SHA2_256 -> U32
+  | SHA2_384 | SHA2_512 -> U64
+
+inline_for_extraction
+let word (a: hash_alg) = uint_t (word_t a) SEC
+
 
 (* In bytes *)
 let word_length: hash_alg -> Tot nat = function
@@ -144,21 +148,19 @@ let pad_length (a: hash_alg) (len: nat): Tot (n:nat { (len + n) % block_length a
 
 (* Define word based operators *)
 let bytes_of_words: a:hash_alg -> Tot (#len:size_nat{FStar.Mul.(len * word_length a) <= max_size_t} -> s:lseq (word a) len -> Tot (lbytes FStar.Mul.(word_length a * len))) = function
-  | MD5 -> uints_to_bytes_le #U32 #SEC
-  | SHA1 | SHA2_224 | SHA2_256 -> uints_to_bytes_be #U32 #SEC
-  | SHA2_384 | SHA2_512 -> uints_to_bytes_be #U64 #SEC
+  | MD5 -> Lib.ByteSequence.uints_to_bytes_le #U32 #SEC
+  | SHA1 | SHA2_224 | SHA2_256 -> Lib.ByteSequence.uints_to_bytes_be #U32 #SEC
+  | SHA2_384 | SHA2_512 -> Lib.ByteSequence.uints_to_bytes_be #U64 #SEC
 
 let words_of_bytes: a:hash_alg -> Tot (#len:size_nat{FStar.Mul.(len * word_length a) <= max_size_t} -> b:lbytes FStar.Mul.(word_length a * len) -> Tot (lseq (word a) len)) = function
-  | MD5 -> uints_from_bytes_le #U32 #SEC
-  | SHA1 | SHA2_224 | SHA2_256 -> uints_from_bytes_be #U32 #SEC
-  | SHA2_384 | SHA2_512 -> uints_from_bytes_be #U64 #SEC
-
+  | MD5 -> Lib.ByteSequence.uints_from_bytes_le #U32 #SEC
+  | SHA1 | SHA2_224 | SHA2_256 -> Lib.ByteSequence.uints_from_bytes_be #U32 #SEC
+  | SHA2_384 | SHA2_512 -> Lib.ByteSequence.uints_from_bytes_be #U64 #SEC
 
 (** The data format taken and returned by the hash specifications. *)
 
 (* Input data. *)
-type bytes =
-  m:Seq.seq uint8
+type bytes =  m:Seq.seq uint8
 
 (* Input data, multiple of a block length. *)
 let bytes_block a =
