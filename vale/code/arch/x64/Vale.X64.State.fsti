@@ -133,7 +133,7 @@ let state_eq (s0:vale_state) (s1:vale_state) : prop0 =
   Regs.equal s0.vs_regs s1.vs_regs /\
   Flags.equal s0.vs_flags s1.vs_flags /\
   s0.vs_heap == s1.vs_heap /\
-  s0.vs_hpls == s1.vs_hpls /\ //TODO: Check contents of heaplets?
+  Map.equal s0.vs_hpls s1.vs_hpls /\
   s0.vs_stack == s1.vs_stack /\
   s0.vs_memTaint == s1.vs_memTaint /\
   s0.vs_stackTaint == s1.vs_stackTaint

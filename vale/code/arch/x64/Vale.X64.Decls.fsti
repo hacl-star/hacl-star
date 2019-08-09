@@ -151,6 +151,7 @@ let valid_operand128 (o:operand128) (s:vale_state) : prop0 =
 val va_fuel_default : unit -> va_fuel
 [@va_qattr] unfold let va_op_operand_reg64 (r:reg_64) : va_operand = OReg r
 [@va_qattr] unfold let va_op_xmm_xmm (x:reg_xmm) : va_operand_xmm = x
+[@va_qattr] unfold let va_op_heap_heap (hp:nat) : va_operand_heap = hp
 [@va_qattr] unfold let va_op_opr_reg (r:reg_64) : va_operand = OReg r
 [@va_qattr] unfold let va_op_opr64_reg64 (r:reg_64) : va_operand = OReg r
 [@va_qattr] unfold let va_op_reg64_reg64 (r:reg_64) : va_operand = OReg r
