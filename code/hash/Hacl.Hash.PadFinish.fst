@@ -8,6 +8,10 @@ module Helpers = Spec.Hash.Definitions
 module Math = FStar.Math.Lemmas
 module Helpers = Spec.Hash.Definitions
 
+module U32=FStar.UInt32
+module U64=FStar.UInt64
+module U128=FStar.UInt128
+
 module M = LowStar.Modifies
 module S = FStar.Seq
 module B = LowStar.Buffer
@@ -112,45 +116,45 @@ let pad0_len (a: hash_alg) (len: len_t a):
 #reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 20"
 
 inline_for_extraction
-let pad_1 (a: hash_alg) (dst: B.buffer U8.t):
+let pad_1 (a: hash_alg) (dst: B.buffer uint8):
   ST.Stack unit
     (requires (fun h ->
       B.live h dst /\ B.length dst = 1))
     (ensures (fun h0 _ h1 ->
       B.(modifies (loc_buffer dst) h0 h1) /\
-      S.equal (B.as_seq h1 dst) (S.create 1 0x80uy)))
+      S.equal (B.as_seq h1 dst) (S.create 1 (u8 0x80))))
 =
-  dst.(0ul) <- 0x80uy
+  dst.(0ul) <- u8 0x80
 
 inline_for_extraction
-let pad_2 (a: hash_alg) (len: len_t a) (dst: B.buffer U8.t):
+let pad_2 (a: hash_alg) (len: len_t a) (dst: B.buffer uint8):
   ST.Stack unit
     (requires (fun h ->
       B.live h dst /\ B.length dst = pad0_length a (len_v a len)))
     (ensures (fun h0 _ h1 ->
       B.(modifies (loc_buffer dst) h0 h1) /\
-      S.equal (B.as_seq h1 dst) (S.create (pad0_length a (len_v a len)) 0uy)))
+      S.equal (B.as_seq h1 dst) (S.create (pad0_length a (len_v a len)) (u8 0))))
 =
   let h0 = ST.get () in
   let len_zero = pad0_len a len in
   let inv h1 (i: nat) =
     M.(modifies (loc_buffer dst) h0 h1) /\
     i <= U32.v len_zero /\
-    S.equal (S.slice (B.as_seq h1 dst) 0 i) (S.slice (S.create (U32.v len_zero) 0uy) 0 i)
+    S.equal (S.slice (B.as_seq h1 dst) 0 i) (S.slice (S.create (U32.v len_zero) (u8 0)) 0 i)
   in
   let f (i:U32.t { U32.(0 <= v i /\ v i < U32.v len_zero)}):
     ST.Stack unit
       (requires (fun h -> inv h (U32.v i)))
       (ensures (fun h0 _ h1 -> inv h0 (U32.v i) /\ inv h1 U32.(v i + 1)))
     =
-    dst.(i) <- 0uy;
+    dst.(i) <- u8 0;
     (**) let h' = ST.get () in
-    (**) create_next (B.as_seq h' dst) 0uy (U32.v i)
+    (**) create_next (B.as_seq h' dst) (u8 0) (U32.v i)
   in
   C.Loops.for 0ul (pad0_len a len) inv f
 
 inline_for_extraction
-let pad_3 (a: hash_alg) (len: len_t a) (dst: B.buffer U8.t):
+let pad_3 (a: hash_alg) (len: len_t a) (dst: B.buffer uint8):
   ST.Stack unit
     (requires (fun h ->
       len_v a len < max_input_length a /\
@@ -160,8 +164,8 @@ let pad_3 (a: hash_alg) (len: len_t a) (dst: B.buffer U8.t):
       B.(modifies (loc_buffer dst) h0 h1) /\
       S.equal (B.as_seq h1 dst)
         (match a with
-        | MD5 -> Endianness.n_to_le (len_len a) FStar.Mul.(len_v a len * 8)
-        | _ -> Endianness.n_to_be (len_len a) FStar.Mul.(len_v a len * 8))))
+	| MD5 -> Lib.ByteSequence.uint_to_bytes_le (secret (nat_to_len a FStar.Mul.(len_v a len * 8)))
+	| _ -> Lib.ByteSequence.uint_to_bytes_be (secret (nat_to_len a FStar.Mul.(len_v a len * 8))))))
 =
   begin match a with
   | MD5 | SHA1 | SHA2_224 | SHA2_256 ->
@@ -181,8 +185,12 @@ let pad_3 (a: hash_alg) (len: len_t a) (dst: B.buffer U8.t):
       (**) assert FStar.Mul.(U128.v len * 8 < pow2 128);
       (**) assert FStar.Mul.(FStar.UInt.shift_left #128 (len_v a len) 3 < pow2 128);
       (**) assert FStar.Mul.(U128.(v (shift_left len 3ul)) = U128.v len * 8);
-      store_len a U128.(shift_left len 3ul) dst
+      (**) assert FStar.Mul.(U128.(v (shift_left len 3ul)) = U128.v len * 8);
+      let len' = U128.(len <<^ 3ul) in
+      store_len a len' dst
   end
+
+#push-options "--max_fuel 1 --max_ifuel 1 --z3rlimit 200"
 
 noextract inline_for_extraction
 let pad a len dst =
@@ -229,45 +237,6 @@ let hash_word_len (a: hash_alg): n:U32.t { U32.v n = hash_word_length a } =
 
 noextract inline_for_extraction
 let finish a s dst =
-  let open FStar.Mul in
-  let h0 = ST.get () in
-  let inv (h: HS.mem) (i: nat) =
-    let words_state = B.as_seq h s in
-    let hash = B.as_seq h dst in
-    i <= hash_word_length a /\
-    B.live h dst /\ B.live h s /\
-    M.(modifies (loc_buffer dst) h0 h) /\
-    S.equal (S.slice hash 0 (i * Helpers.word_length a))
-      (bytes_of_words a (S.slice words_state 0 i))
-  in
-  let f (i: U32.t { U32.(0 <= v i /\ v i < hash_word_length a) }): ST.Stack unit
-    (requires (fun h -> inv h (U32.v i)))
-    (ensures (fun h0 _ h1 -> inv h0 (U32.v i) /\ inv h1 (U32.v i + 1)))
-  =
-    match a with
-    | MD5 ->
-        let dst0 = B.sub dst 0ul U32.(4ul *^ i) in
-        let dsti = B.sub dst U32.(4ul *^ i) 4ul in
-        C.Endianness.store32_le dsti s.(i);
-        let h2 = ST.get () in
-        Endianness.le_of_seq_uint32_base (S.slice (B.as_seq h2 s) (U32.v i) (U32.v i + 1)) (B.as_seq h2 dsti);
-        Endianness.le_of_seq_uint32_append (S.slice (B.as_seq h2 s) 0 (U32.v i))
-          (S.slice (B.as_seq h2 s) (U32.v i) (U32.v i + 1))
-    | SHA1 | SHA2_224 | SHA2_256 ->
-        let dst0 = B.sub dst 0ul U32.(4ul *^ i) in
-        let dsti = B.sub dst U32.(4ul *^ i) 4ul in
-        C.Endianness.store32_be dsti s.(i);
-        let h2 = ST.get () in
-        Endianness.be_of_seq_uint32_base (S.slice (B.as_seq h2 s) (U32.v i) (U32.v i + 1)) (B.as_seq h2 dsti);
-        Endianness.be_of_seq_uint32_append (S.slice (B.as_seq h2 s) 0 (U32.v i))
-          (S.slice (B.as_seq h2 s) (U32.v i) (U32.v i + 1))
-    | SHA2_384 | SHA2_512 ->
-        let dst0 = B.sub dst 0ul U32.(8ul *^ i) in
-        let dsti = B.sub dst U32.(8ul *^ i) 8ul in
-        C.Endianness.store64_be dsti s.(i);
-        let h2 = ST.get () in
-        Endianness.be_of_seq_uint64_base (S.slice (B.as_seq h2 s) (U32.v i) (U32.v i + 1)) (B.as_seq h2 dsti);
-        Endianness.be_of_seq_uint64_append (S.slice (B.as_seq h2 s) 0 (U32.v i))
-          (S.slice (B.as_seq h2 s) (U32.v i) (U32.v i + 1))
-  in
-  C.Loops.for 0ul (hash_word_len a) inv f
+  match a with
+  | MD5 -> Lib.ByteBuffer.uints_to_bytes_le #U32 #SEC (hash_word_len a) dst (B.sub s 0ul (hash_word_len a))
+  | _ -> Lib.ByteBuffer.uints_to_bytes_be #(word_t a) #SEC (hash_word_len a) dst (B.sub s 0ul (hash_word_len a))
