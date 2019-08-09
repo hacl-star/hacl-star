@@ -34,4 +34,4 @@ inline_for_extraction
 val size_to_UInt32: (u:size_t) -> n:UInt32.t{uint_v  u = UInt32.v n}
 
 inline_for_extraction
-val uint_to_nat: #t:inttype -> #l:secrecy_level -> u:uint_t t l -> n:nat{n = uint_v #t u}
+val uint_to_nat: #t:inttype{unsigned t} -> #l:secrecy_level -> u:uint_t t l -> n:nat{n = uint_v #t u}

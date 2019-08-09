@@ -102,17 +102,19 @@ let alg_of_state a s =
 let as_kv #a (Ek _ kv _) =
   G.reveal kv
 
+#push-options "--z3rlimit 10 --max_fuel 0 --max_ifuel 0 --z3cliopt smt.QI.EAGER_THRESHOLD=5"
+
 let create_in_chacha20_poly1305: create_in_st CHACHA20_POLY1305 = fun r dst k ->
-  let open LowStar.BufferOps in
   let h0 = ST.get () in
   let ek = B.malloc r 0uy 32ul in
   let p = B.malloc r (Ek Hacl_CHACHA20 (G.hide (B.as_seq h0 k)) ek) 1ul in
   B.blit k 0ul ek 0ul 32ul;
-  let h1 = ST.get () in
-  dst *= p;
-  B.modifies_only_not_unused_in B.(loc_buffer dst) h0 h1;
+  B.upd dst 0ul p;
+  let h2 = ST.get() in
+  B.modifies_only_not_unused_in B.(loc_buffer dst) h0 h2;
   Success
 
+#pop-options
 
 inline_for_extraction noextract
 let create_in_aes_gcm (i: vale_impl):

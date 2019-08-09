@@ -77,6 +77,27 @@ let lemma_reverse_bytes_quad32 (q:quad32) =
   ()
 #pop-options
 
+let lemma_reverse_bytes_nat32 (_:unit) : Lemma
+  (reverse_bytes_nat32 0 == 0)
+  =
+  reveal_opaque reverse_bytes_nat32_def;
+  assert_norm (nat_to_four 8 0 == Mkfour 0 0 0 0);
+  ()
+
+let lemma_reverse_bytes_quad32_zero (_:unit) : Lemma
+  (let z = Mkfour 0 0 0 0 in
+   reverse_bytes_quad32 z == z)
+  =
+  let z = Mkfour 0 0 0 0 in
+  calc (==) {
+    reverse_bytes_quad32 z;
+    == { reveal_reverse_bytes_quad32 z }
+    four_reverse (four_map reverse_bytes_nat32 z);
+    == { lemma_reverse_bytes_nat32() }
+    z;
+  };
+  ()
+
 let lemma_reverse_reverse_bytes_nat32_seq (s:seq nat32) :
   Lemma (ensures reverse_bytes_nat32_seq (reverse_bytes_nat32_seq s) == s)
   =

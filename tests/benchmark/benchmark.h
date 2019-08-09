@@ -7,6 +7,7 @@
 
 #include <string>
 #include <iostream>
+#include <iomanip>
 #include <list>
 #include <vector>
 #include <chrono>
@@ -65,7 +66,7 @@ class Benchmark
     void set_name(const std::string & name);
     std::string get_name() const { return name; }
 
-    static std::string column_headers() { return ",\"CPUincl\",\"CPUexcl\",\"Min\",\"Q25\",\"Avg\",\"Med\",\"Q75\",\"Max\",\"StdDev\""; }
+    static std::string column_headers() { return ",\"CPUincl\",\"CPUexcl\",\"Min\",\"Q25\",\"Avg\",\"Med\",\"Q75\",\"Max\",\"StdDev\",\"#Samples\",\"#Samples/Sec\""; }
 
     // Global tools, just in here for the namespace
 
@@ -118,7 +119,7 @@ class Benchmark
                                    unsigned label_digits,
                                    bool label_rotate = false);
 
-    static void add_label_offsets(PlotSpec & ps, double label_offset_y = 0.5);
+    static void add_label_offsets(PlotSpec & ps, double label_offset_y = 0.5, double scale = 1.0);
 
     static PlotSpec candlestick_line(const std::string & data_filename,
                                      const std::string & title,
@@ -135,6 +136,14 @@ class Benchmark
                           const std::vector<std::string> & sub_histo_titles = {},
                           size_t num_in_sub_histo = 0,
                           bool add_key = false);
+
+
+    void print_buffer(const uint8_t *buf, size_t len)
+    {
+      for (size_t i = 0; i < len; i++)
+        std::cout << std::hex << std::setfill('0') << std::setw(2) << (unsigned)buf[i];
+      std::cout << std::endl;
+    }
 };
 
 #endif

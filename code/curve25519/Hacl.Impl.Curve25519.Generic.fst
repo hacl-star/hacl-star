@@ -26,7 +26,7 @@ module Lemmas = Hacl.Spec.Curve25519.Field64.Lemmas
 
 friend Lib.LoopCombinators
 
-#reset-options "--z3rlimit 50 --max_fuel 2 --using_facts_from '* -FStar.Seq -Hacl.Spec.*'"
+#reset-options "--z3rlimit 200 --max_fuel 2 --using_facts_from '* -FStar.Seq -Hacl.Spec.*'"
 //#set-options "--debug Hacl.Impl.Curve25519.Generic --debug_level ExtractNorm"
 
 inline_for_extraction noextract
@@ -44,7 +44,7 @@ let scalar_bit s n =
   let h0 = ST.get () in
   mod_mask_lemma ((LSeq.index (as_seq h0 s) (v n / 8)) >>. (n %. 8ul)) 1ul;
   assert_norm (1 = pow2 1 - 1);
-  uintv_extensionality (mod_mask #U8 1ul) (u8 1);
+  assert (v (mod_mask #U8 #SEC 1ul) == v (u8 1));
   to_u64 ((s.(n /. 8ul) >>. (n %. 8ul)) &. u8 1)
 
 inline_for_extraction noextract
@@ -69,7 +69,7 @@ let decode_point_ #s o i =
   tmp.(3ul) <- tmp3 &. u64 0x7fffffffffffffff;
   mod_mask_lemma tmp3 63ul;
   assert_norm (0x7fffffffffffffff = pow2 63 - 1);
-  uintv_extensionality (mod_mask #U64 63ul) (u64 0x7fffffffffffffff);
+  assert (v (mod_mask #U64 #SEC 63ul) == v (u64 0x7fffffffffffffff));
   let h2 = ST.get () in
   assert (v (LSeq.index (as_seq h2 tmp) 3) < pow2 63);
   Lemmas.lemma_felem64_mod255 (as_seq h1 tmp);
@@ -82,9 +82,9 @@ let decode_point_ #s o i =
 
 (* WRAPPER to Prevent Inlining *)
 inline_for_extraction noextract
-let decode_point_51 (o:point51) i = decode_point_ #M51 o i
+let decode_point_51 (o:point51) = decode_point_ #M51 o
 inline_for_extraction noextract
-let decode_point_64 (o:point64) i = decode_point_ #M64 o i
+let decode_point_64 (o:point64) = decode_point_ #M64 o
 
 inline_for_extraction noextract
 val decode_point:
@@ -130,8 +130,6 @@ let encode_point_ #s o i =
   assert (feval h1 tmp == S.fmul (feval h0 x) (S.fpow (feval h0 z) (pow2 255 - 21)));
   store_felem u64s tmp;
   let h2 = ST.get () in
-  assert (BSeq.nat_from_intseq_le (as_seq h2 u64s) == feval h1 tmp);
-  Hacl.Impl.Curve25519.Lemmas.lemma_nat_to_uints64_le_4 (as_seq h2 u64s) (feval h1 tmp);
   assert (as_seq h2 u64s == BSeq.nat_to_intseq_le 4 (feval h1 tmp));
   uints_to_bytes_le #U64 4ul o u64s;
   let h3 = ST.get () in
@@ -141,9 +139,9 @@ let encode_point_ #s o i =
 
 (* WRAPPER to Prevent Inlining *)
 inline_for_extraction noextract
-let encode_point_51 o (i:point51) = encode_point_ #M51 o i
+let encode_point_51 = encode_point_ #M51
 inline_for_extraction noextract
-let encode_point_64 o (i:point64) = encode_point_ #M64 o i
+let encode_point_64 = encode_point_ #M64
 
 inline_for_extraction noextract
 val encode_point:
@@ -233,7 +231,7 @@ let ladder_step #s k q i p01_tmp1_swap tmp2 =
 
   let h0 = ST.get () in
   let bit = scalar_bit k (253ul -. i) in
-  uintv_extensionality bit (S.ith_bit (as_seq h0 k) (253 - v i));
+  assert (v bit == v (S.ith_bit (as_seq h0 k) (253 - v i)));
   let sw = swap.(0ul) ^. bit in
   logxor_lemma1 (LSeq.index (as_seq h0 swap) 0) bit;
   cswap2 #s sw nq nq_p1;
@@ -524,9 +522,9 @@ let montgomery_ladder_ #s out key init =
 
 (* WRAPPER to Prevent Inlining *)
 [@CInline]
-let montgomery_ladder_51 (out:point51) key (init:point51) = montgomery_ladder_ #M51 out key init
+let montgomery_ladder_51 = montgomery_ladder_ #M51
 [@CInline]
-let montgomery_ladder_64 (out:point64) key (init:point64) = montgomery_ladder_ #M64 out key init
+let montgomery_ladder_64 = montgomery_ladder_ #M64
 
 inline_for_extraction noextract
 val montgomery_ladder:
@@ -568,3 +566,12 @@ let secret_to_public #s pub priv =
   mapT 32ul basepoint secret g25519;
   scalarmult #s pub priv basepoint;
   pop_frame()
+
+
+let ecdh #s out priv pub =
+  push_frame ();
+  let zeros = create 32ul (u8 0) in
+  scalarmult #s out priv pub;
+  let r = lbytes_eq #32ul out zeros in
+  pop_frame();
+  not r

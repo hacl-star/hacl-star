@@ -29,8 +29,8 @@ inline_for_extraction
 val while:
     inv: (mem -> Type0)
   -> guard: (h:mem{inv h} -> GTot bool)
-  -> test: (unit -> Stack bool
-                    (requires inv)
+  -> test: (unit -> Stack bool 
+                    (requires inv) 
                     (ensures  fun h0 b h1 -> b == guard h0 /\ h0 == h1))
   -> body: (unit -> Stack unit
                     (requires fun h -> inv h /\ guard h)

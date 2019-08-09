@@ -45,7 +45,7 @@ let derive_key k n out =
 
 val poly1305_do_core_padded:
   aadlen:size_t ->
-  aad:lbuffer uint8 aadlen -> // authenticated additional data  
+  aad:lbuffer uint8 aadlen -> // authenticated additional data
   (mlen:size_t{v mlen + 16 <= max_size_t /\ v aadlen + v mlen / 64 <= max_size_t}) ->
   m:lbuffer uint8 mlen -> // plaintext
   ctx:Poly.poly1305_ctx M32 ->
@@ -102,7 +102,7 @@ val poly1305_do_core_to_bytes:
       Seq.equal (as_seq h1 block) gblock)))
 
 let poly1305_do_core_to_bytes aadlen mlen block =
-  // Encode the length of the aad into bytes, 
+  // Encode the length of the aad into bytes,
   // and store it in the first eight bytes of the temporary block
   let h0 = ST.get() in
   let aad_len8 = sub block 0ul 8ul in
@@ -112,18 +112,18 @@ let poly1305_do_core_to_bytes aadlen mlen block =
   let cipher_len8 = sub block 8ul 8ul in
   uint_to_bytes_le #U64 cipher_len8 (to_u64 mlen);
   let h2 = ST.get() in
-  let aux (i:nat{i < 16}) : Lemma 
+  let aux (i:nat{i < 16}) : Lemma
     (let gaad_len8 = Lib.ByteSequence.uint_to_bytes_le #U64 (u64 (v aadlen)) in
      let gciphertext_len8 = Lib.ByteSequence.uint_to_bytes_le #U64 (u64 (v mlen)) in
      let gblock = Seq.update_sub (as_seq h0 block) 0 8 gaad_len8 in
-     let gblock = Seq.update_sub gblock 8 8 gciphertext_len8 in 
+     let gblock = Seq.update_sub gblock 8 8 gciphertext_len8 in
      Seq.index (as_seq h2 block) i == Seq.index gblock i)
-  = uintv_extensionality (to_u64 aadlen) (u64 (v aadlen));
-    uintv_extensionality (to_u64 mlen) (u64 (v mlen));
+  = Lib.IntTypes.Compatibility.uintv_extensionality (to_u64 aadlen) (u64 (v aadlen));
+    Lib.IntTypes.Compatibility.uintv_extensionality (to_u64 mlen) (u64 (v mlen));
     let gaad_len8 = Lib.ByteSequence.uint_to_bytes_le #U64 (to_u64 aadlen) in
     let gciphertext_len8 = Lib.ByteSequence.uint_to_bytes_le #U64 (to_u64 mlen) in
     let s1 = Seq.update_sub (as_seq h0 block) 0 8 gaad_len8 in
-    let s2 = Seq.update_sub s1 8 8 gciphertext_len8 in 
+    let s2 = Seq.update_sub s1 8 8 gciphertext_len8 in
     let s_final = Seq.index (as_seq h2 block) in
     if i < 8 then
        assert (Seq.index s2 i == Seq.index gaad_len8 i)
@@ -147,18 +147,18 @@ val poly1305_do_core_finish:
     (ensures (fun h0 _ h1 -> modifies (loc out |+| loc ctx) h0 h1 /\
       (let r = Poly.as_get_r h0 ctx in
        let acc = Poly.as_get_acc h0 ctx in
-       let acc = SpecPoly.update1 r 16 (as_seq h0 block) acc in
-       let tag = SpecPoly.finish (as_seq h0 k) acc in
+       let acc = SpecPoly.poly1305_update1 r 16 (as_seq h0 block) acc in
+       let tag = SpecPoly.poly1305_finish (as_seq h0 k) acc in
        Seq.equal (as_seq h1 out) tag)))
 
 let poly1305_do_core_finish k out ctx block =
-  update1 ctx 16ul block;
+  update1 ctx block;
   finish ctx k out
 
 val poly1305_do_core_:
   k:lbuffer uint8 32ul -> // key
   aadlen:size_t ->
-  aad:lbuffer uint8 aadlen -> // authenticated additional data  
+  aad:lbuffer uint8 aadlen -> // authenticated additional data
   (mlen:size_t{v mlen + 16 <= max_size_t /\ v aadlen + v mlen / 64 <= max_size_t}) ->
   m:lbuffer uint8 mlen -> // plaintext
   out:lbuffer uint8 16ul -> // output: tag
@@ -172,7 +172,7 @@ val poly1305_do_core_:
       disjoint ctx k /\ disjoint ctx aad /\ disjoint ctx m /\ disjoint ctx out /\ disjoint ctx block /\
       disjoint block k /\ disjoint block aad /\ disjoint block m /\ disjoint block out)
     (ensures (fun h0 _ h1 -> modifies (loc out |+| loc ctx |+| loc block) h0 h1 /\
-      Seq.equal (as_seq h1 out) 
+      Seq.equal (as_seq h1 out)
         (Spec.poly1305_do (as_seq h0 k) (v mlen) (as_seq h0 m) (v aadlen) (as_seq h0 aad))))
 
 let poly1305_do_core_ k aadlen aad mlen m out ctx block =
@@ -184,14 +184,14 @@ let poly1305_do_core_ k aadlen aad mlen m out ctx block =
   poly1305_do_core_to_bytes aadlen mlen block;
   let h4 = ST.get () in
   Poly.reveal_ctx_inv ctx h3 h4;
-  
+
   poly1305_do_core_finish k out ctx block
 
 // Implements the actual poly1305_do operation
 val poly1305_do_core:
   k:lbuffer uint8 32ul -> // key
   aadlen:size_t ->
-  aad:lbuffer uint8 aadlen -> // authenticated additional data  
+  aad:lbuffer uint8 aadlen -> // authenticated additional data
   (mlen:size_t{v mlen + 16 <= max_size_t /\ v aadlen + v mlen / 64 <= max_size_t}) ->
   m:lbuffer uint8 mlen -> // plaintext
   out:lbuffer uint8 16ul -> // output: tag
@@ -200,7 +200,7 @@ val poly1305_do_core:
       disjoint k out /\
       live h k /\ live h aad /\ live h m /\ live h out)
     (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1 /\
-      Seq.equal (as_seq h1 out) 
+      Seq.equal (as_seq h1 out)
         (Spec.poly1305_do (as_seq h0 k) (v mlen) (as_seq h0 m) (v aadlen) (as_seq h0 aad))))
 
 #set-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 1"
@@ -240,4 +240,3 @@ let poly1305_do k n aadlen aad mlen m out =
   // M32 can be abstracted away for a vectorized AEAD
   poly1305_do_core key aadlen aad mlen m out;
   pop_frame()
-

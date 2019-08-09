@@ -18,8 +18,7 @@ val carry_pass_store:
 let carry_pass_store (f0, f1, f2, f3) =
   let top_bit = f3 >>. 63ul in
   let f3' = f3 &. u64 0x7fffffffffffffff in
-  let f' = (f0, f1, f2, f3') in
-  let c, r = SC.add1 f' (u64 19 *! top_bit) in
+  let (c, r) = SC.add1 (f0, f1, f2, f3') (u64 19 *! top_bit) in
   r
 
 val lemma_carry_pass_store0: f:felem4 ->
@@ -33,7 +32,7 @@ let lemma_carry_pass_store0 f =
   let f3' = f3 &. u64 0x7fffffffffffffff in
   mod_mask_lemma f3 63ul;
   assert_norm (0x7fffffffffffffff = pow2 63 - 1);
-  uintv_extensionality (mod_mask #U64 63ul) (u64 0x7fffffffffffffff);
+  assert (v (mod_mask #U64 #SEC 63ul) == v (u64 0x7fffffffffffffff));
   FStar.Math.Lemmas.euclidean_division_definition (v f3) (pow2 63);
   assert (v f3 == v top_bit * pow2 63 + v f3');
   assert (v top_bit <= 1);
@@ -76,7 +75,7 @@ let lemma_carry_pass_store1_0 f =
   let f3' = f3 &. u64 0x7fffffffffffffff in
   mod_mask_lemma f3 63ul;
   assert_norm (0x7fffffffffffffff = pow2 63 - 1);
-  uintv_extensionality (mod_mask #U64 63ul) (u64 0x7fffffffffffffff);
+  assert (v (mod_mask #U64 #SEC 63ul) == v (u64 0x7fffffffffffffff));
   FStar.Math.Lemmas.euclidean_division_definition (v f3) (pow2 63);
   assert (v top_bit = 0);
   assert (v f3 == v f3');
@@ -110,7 +109,7 @@ let lemma_carry_pass_store1_1 f =
   let f3' = f3 &. u64 0x7fffffffffffffff in
   mod_mask_lemma f3 63ul;
   assert_norm (0x7fffffffffffffff = pow2 63 - 1);
-  uintv_extensionality (mod_mask #U64 63ul) (u64 0x7fffffffffffffff);
+  assert (v (mod_mask #U64 #SEC 63ul) == v (u64 0x7fffffffffffffff));
   FStar.Math.Lemmas.euclidean_division_definition (v f3) (pow2 63);
   assert (v f3 == pow2 63 + v f3');
 

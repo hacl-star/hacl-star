@@ -113,11 +113,17 @@ let quarter_round st a b c d =
     line st a b d (size 8);
     line st c d b (size 7)
 
+
+#reset-options "--z3rlimit 50"
+
 [@ CInline]
-val double_round: st:state -> Stack unit
-		  (requires (fun h -> live h st))
-		  (ensures (fun h0 _ h1 -> modifies (loc st) h0 h1 /\
-		    as_seq h1 st == Spec.double_round (as_seq h0 st)))
+val double_round:
+  st:state ->
+  Stack unit
+  (requires fun h -> live h st)
+  (ensures  fun h0 _ h1 -> modifies (loc st) h0 h1 /\
+    as_seq h1 st == Spec.double_round (as_seq h0 st))
+
 [@ CInline]
 let double_round st =
   quarter_round st (size 0) (size 4) (size 8) (size 12);

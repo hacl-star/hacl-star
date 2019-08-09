@@ -2,14 +2,14 @@ project(evercrypt LANGUAGES C ASM)
 cmake_minimum_required(VERSION 3.5)
 
 if (NOT EVERCRYPT_SRC_DIR)
-  set(EVERCRYPT_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../dist/compact-gcc CACHE PATH "Where to find the EverCrypt sources.")
+  set(EVERCRYPT_SRC_DIR $ENV{HACL_HOME}/dist/compact-gcc CACHE PATH "Where to find the EverCrypt sources.")
 endif()
 get_filename_component(EVERCRYPT_SRC_DIR ${EVERCRYPT_SRC_DIR} ABSOLUTE)
 message("-- Using EverCrypt at ${EVERCRYPT_SRC_DIR}")
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/../libkremlib/CMakeLists.txt)
 
-add_library(evercrypt SHARED STATIC
+add_library(evercrypt STATIC
   ${EVERCRYPT_SRC_DIR}/EverCrypt_AEAD.c
   ${EVERCRYPT_SRC_DIR}/EverCrypt_AutoConfig2.c
   ${EVERCRYPT_SRC_DIR}/EverCrypt_Chacha20Poly1305.c

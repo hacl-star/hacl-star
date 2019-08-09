@@ -57,6 +57,8 @@ let length_aux5 (b:uint8_p) : Lemma
     let db = get_downview b in
     DV.length_eq db
 
+#set-options "--z3rlimit 30 --max_fuel 0 --max_ifuel 0"
+
 inline_for_extraction noextract
 let decrypt_opt_stdcall_st (a: algorithm { a = AES_128 \/ a = AES_256 }) =
   key:Ghost.erased (Seq.seq nat32) ->
@@ -118,7 +120,7 @@ let decrypt_opt_stdcall_st (a: algorithm { a = AES_128 \/ a = AES_256 }) =
       hkeys_reqs_pub (le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h0 hkeys_b)))
         (reverse_bytes_quad32 (aes_encrypt_LE a (Ghost.reveal key) (Mkfour 0 0 0 0))) /\
 
-      (be_bytes_to_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h0 iv_b)) ==
+      (le_bytes_to_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h0 iv_b)) ==
         compute_iv_BE (aes_encrypt_LE a (Ghost.reveal key) (Mkfour 0 0 0 0)) (Ghost.reveal iv))
     )
     (ensures fun h0 c h1 ->

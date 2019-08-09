@@ -7,17 +7,40 @@
       0,
       1,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
-        "equation_Prims.nat", "function_token_typing_Prims.int",
+        "@MaxIFuel_assumption", "@query", "equality_tok_Lib.IntTypes.U8@tok",
+        "equation_Prims.eqtype", "equation_Prims.nat",
+        "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
+        "equation_Spec.GaloisField.gf", "function_token_typing_Prims.int",
         "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+        "proj_equation_Spec.GaloisField.GF_t",
+        "projection_inverse_Spec.GaloisField.GF_t",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
+        "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "aeecc757b84d0c47692ba65466bfa3ec"
+      "11bf71152e7183f690af8faddc14ed6b"
     ],
     [
       "Spec.Agile.CTR.counter_mode",
       2,
+      0,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "data_elim_Spec.GaloisField.GF",
+        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.unsigned",
+        "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
+        "equation_Spec.GaloisField.gf",
+        "projection_inverse_Spec.GaloisField.GF_t",
+        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
+        "typing_Spec.AES.gf8"
+      ],
+      0,
+      "5d910319220c4ee6d969f9801a08a111"
+    ],
+    [
+      "Spec.Agile.CTR.counter_mode",
+      3,
       0,
       1,
       [
@@ -29,12 +52,14 @@
         "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "proj_equation_Spec.GaloisField.GF_t",
         "projection_inverse_Spec.GaloisField.GF_t",
-        "refinement_interpretation_Tm_refine_10d31b89009c0ffda80d750d82dea92d",
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
-        "refinement_interpretation_Tm_refine_dd6ec363012506c5f7020d78942776c5"
+        "refinement_interpretation_Tm_refine_6ea782d20d3a5b4d53411900c5408b2a",
+        "refinement_interpretation_Tm_refine_c5579466c1fcb6457bba4b009a86e2ac",
+        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
+        "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "514a1ffbd8ae3d6ddaf71677cfa8d3c7"
+      "c7d38cd64e5d9189fb6979bb22a669ef"
     ]
   ]
 ]

@@ -229,7 +229,9 @@ void Benchmark::report(std::ostream & rs, const BenchmarkSettings & s) const
     << "," << median
     << "," << q75
     << "," << cmax
-    << "," << stddev;
+    << "," << stddev
+    << "," << n
+    << "," << (n/(std::chrono::duration_cast<std::chrono::nanoseconds>(texcl).count() / 1000000000.0));
 }
 
 static const char time_fmt[] = "%b %d %Y %H:%M:%S";
@@ -286,7 +288,7 @@ Benchmark::PlotSpec Benchmark::histogram_line(const std::string & data_filename,
     };
 }
 
-void Benchmark::add_label_offsets(Benchmark::PlotSpec & ps, double label_offset_y)
+void Benchmark::add_label_offsets(Benchmark::PlotSpec & ps, double label_offset_y, double scale)
 {
   std::vector<double> x;
   x.resize(ps.size(), 0.0);
@@ -296,8 +298,8 @@ void Benchmark::add_label_offsets(Benchmark::PlotSpec & ps, double label_offset_
 
   switch (ps.size())
   {
-  case 4: x[1] = -2.0; x[3] = +2.0; break;
-  case 6: x[1] = -1.3; x[3] = +0.0; x[5] = +1.3; break;
+  case 4: x[1] = -2.0 * scale; x[3] = +2.0 * scale; break;
+  case 6: x[1] = -1.3 * scale; x[3] = +0.0; x[5] = +1.3 * scale; break;
   default: break;
   }
 

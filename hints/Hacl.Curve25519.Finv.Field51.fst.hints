@@ -6,9 +6,12 @@
       1,
       0,
       1,
-      [ "@query" ],
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_cfc41488cee641ca406ae764563b3947"
+      ],
       0,
-      "25c5f0fea1bfea15cd3b1a6bb2fbd506"
+      "0141b3db37763e5b0380dd6364a5f2cf"
     ],
     [
       "Hacl.Curve25519.Finv.Field51.fsquare_times_51",
@@ -17,7 +20,7 @@
       1,
       [ "@query" ],
       0,
-      "ca1f5d630e4d6acaaa5992ad1be63ca7"
+      "41044c452d50d9d5d076035af659a745"
     ],
     [
       "Hacl.Curve25519.Finv.Field51.finv_51",
@@ -33,7 +36,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "064a776b0e0da3a149afa20d47034c9d"
+      "4c7dc497f1eaa52abf80878577abac2a"
     ],
     [
       "Hacl.Curve25519.Finv.Field51.finv_51",
@@ -45,6 +48,8 @@
         "constructor_distinct_Hacl.Impl.Curve25519.Fields.M51",
         "equality_tok_Hacl.Impl.Curve25519.Fields.M51@tok",
         "equality_tok_Lib.Buffer.MUT@tok",
+        "equality_tok_Lib.IntTypes.PUB@tok",
+        "equality_tok_Lib.IntTypes.U32@tok",
         "equation_Hacl.Impl.Curve25519.Fields.felem",
         "equation_Hacl.Impl.Curve25519.Fields.felem_wide2",
         "equation_Lib.Buffer.disjoint", "equation_Lib.Buffer.lbuffer_t",
@@ -52,13 +57,13 @@
         "function_token_typing_Lib.IntTypes.uint128",
         "function_token_typing_Lib.IntTypes.uint64",
         "lemma_LowStar.Monotonic.Buffer.loc_disjoint_sym_",
-        "refinement_interpretation_Tm_refine_8ab33ce4b035b730ef91d7c534aefe9b",
-        "refinement_interpretation_Tm_refine_c2215b703b2340e9e4551c4e8820d7c8",
-        "refinement_interpretation_Tm_refine_eb8ffbddc49a6ac554a4cdbc0bd28b1f",
+        "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
+        "refinement_interpretation_Tm_refine_cffe23865fc9ed31024dd97f26f44e17",
+        "refinement_interpretation_Tm_refine_e6e1c078674886479eb7ce9e7e64b0b9",
         "typing_Lib.Buffer.loc", "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "0a94e0ea8838e7b830bcd7125b8de4a3"
+      "7cf2adfd54d7ccf593c8f7d7b697ece5"
     ]
   ]
 ]

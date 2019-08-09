@@ -11,7 +11,7 @@ module Lib.LoopCombinators
 *
 * A simpler variant with a non-dependent accumuator used to be called [repeat_range]
 *)
-inline_for_extraction
+
 val repeat_left:
     lo:nat
   -> hi:nat{lo <= hi}
@@ -20,7 +20,7 @@ val repeat_left:
   -> acc:a lo
   -> Tot (a hi) (decreases (hi - lo))
 
-inline_for_extraction
+
 val repeat_left_all_ml:
     lo:nat
   -> hi:nat{lo <= hi}
@@ -45,6 +45,14 @@ val repeat_right:
   -> f:(i:nat{lo <= i /\ i < hi} -> a i -> a (i + 1))
   -> acc:a lo
   -> Tot (a hi) (decreases (hi - lo))
+
+val repeat_right_all_ml:
+    lo:nat
+  -> hi:nat{lo <= hi}
+  -> a:(i:nat{lo <= i /\ i <= hi} -> Type)
+  -> f:(i:nat{lo <= i /\ i < hi} -> a i -> FStar.All.ML (a (i + 1)))
+  -> acc:a lo
+  -> FStar.All.ML (a hi) (decreases (hi - lo))
 
 (** Splitting a repetition *)
 val repeat_right_plus:
@@ -108,6 +116,13 @@ val repeat_gen:
   -> acc0:a 0
   -> a n
 
+val repeat_gen_all_ml:
+    n:nat
+  -> a:(i:nat{i <= n} -> Type)
+  -> f:(i:nat{i < n} -> a i -> FStar.All.ML (a (i + 1)))
+  -> acc0:a 0
+  -> FStar.All.ML (a n)
+
 (** Unfolding one iteration *)
 val unfold_repeat_gen:
     n:nat
@@ -124,6 +139,7 @@ val eq_repeat_gen0:
   -> acc0:a 0
   -> Lemma (repeat_gen 0 a f acc0 == acc0)
 
+
 (**
 * Repetition with a fixed accumulator type
 *)
@@ -137,6 +153,20 @@ val repeati:
   -> acc0:a
   -> a
 
+val repeati_all_ml:
+    #a:Type
+  -> n:nat
+  -> f:(i:nat{i < n} -> a -> FStar.All.ML a)
+  -> acc0:a
+  -> FStar.All.ML a
+
+val eq_repeati0:
+    #a:Type
+  -> n:nat
+  -> f:(i:nat{i < n} -> a -> a)
+  -> acc0:a
+  -> Lemma (repeati #a 0 f acc0 == acc0)
+
 (** Unfolding one iteration *)
 val unfold_repeati:
     #a:Type
@@ -145,13 +175,6 @@ val unfold_repeati:
   -> acc0:a
   -> i:nat{i < n}
   -> Lemma (repeati #a (i + 1) f acc0 == f i (repeati #a i f acc0))
-
-val eq_repeati0:
-    #a:Type
-  -> n:nat
-  -> f:(i:nat{i < n} -> a -> a)
-  -> acc0:a
-  -> Lemma (repeati #a 0 f acc0 == acc0)
 
 val repeati_def:
     #a:Type

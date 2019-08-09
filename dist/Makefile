@@ -86,3 +86,62 @@ all: libevercrypt.$(SO)
 
 libevercrypt.$(SO): $(OBJS) $(KREMLIB_A)
 	$(CC) $(CFLAGS) -shared -o $@ $^ $(LDFLAGS)
+
+# 4. Compilation of OCaml bindings; conditional on the presence of the lib_gen
+# folder.
+
+ifneq (,$(wildcard lib_gen))
+
+.PRECIOUS: %.cmx
+
+OCAMLOPT=ocamlfind opt -package ctypes,ctypes.foreign,ctypes.stubs -linkpkg -I lib
+OCAMLDEP=ocamlfind dep -I lib
+
+CFLAGS += -I "$(shell ocamlfind query ctypes)" -I "$(shell ocamlfind c -where)"
+
+# Just names.
+ALL_OCAML=$(patsubst lib_gen/%_gen.ml,%,$(wildcard lib_gen/*_gen.ml))
+
+ALL_BINDINGS=$(patsubst %,lib/%_bindings.cmx,$(ALL_OCAML))
+ALL_GENERATORS=$(patsubst %.ml,%.exe,$(wildcard lib_gen/*_gen.ml))
+ALL_ML_STUBS=$(patsubst %,lib/%_stubs.cmx,$(ALL_OCAML))
+ALL_C_STUBS=$(patsubst %,lib/%_c_stubs.o,$(ALL_OCAML))
+
+include .depend.ocaml
+
+.depend.ocaml:
+	$(OCAMLDEP) $(wildcard lib/*.ml) $(wildcard lib_gen/*.ml) > $@
+
+# Note: for some reason, this minimal Makefile doesn't apply the shortest stem
+# rule.
+#
+# %.exe:
+# 	echo long stem
+#
+# %_foo.exe: %.b
+# 	cat $<
+#
+# %.b:
+# 	echo $@ > $@
+#
+# Which really puzzles me (e.g. make foo_foo.exe always echoes "long stem"),
+# even though the shortest stem rule should apply. However, we can cancel a
+# previous pattern rule, thanks to
+# https://www.gnu.org/software/make/manual/html_node/Canceling-Rules.html
+%.exe:
+
+all: libocamlevercrypt.cmxa
+
+lib_gen/%_gen.exe: lib/%_bindings.cmx lib_gen/%_gen.cmx
+	$(OCAMLOPT) $^ -o $@
+
+%.cmx: %.ml
+	$(OCAMLOPT) -c $< -o $@
+
+lib/%_stubs.ml lib/%_c_stubs.c: lib_gen/%_gen.exe
+	$<
+
+libocamlevercrypt.cmxa: $(ALL_BINDINGS) $(ALL_ML_STUBS) $(ALL_C_STUBS) libevercrypt.$(SO)
+	ocamlfind mklib -o ocamlevercrypt $(filter-out %.so,$^) -L. -levercrypt
+
+endif
