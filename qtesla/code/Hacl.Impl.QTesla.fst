@@ -43,6 +43,7 @@ module LibSeq = Lib.Sequence
 
 module SHA3 = Hacl.SHA3
 //module S    = Spec.QTesla
+module SP = QTesla.Params
 
 module R    = Hacl.QTesla.Random
 
@@ -737,10 +738,14 @@ let qtesla_keygen pk sk =
 private let nblocks_shake = shake_rate /. (((params_b_bits +! (size 1)) +! (size 7)) /. (size 8))
 private let bplus1bytes = ((params_b_bits +! size 1) +! (size 7)) /. (size 8)
 
-// This lemma needs to unroll pow2 some number of times, so it needs more fuel.
-#push-options "--max_fuel 8 --max_ifuel 0"
-let lemma_pow2_b_bits_1 () : Lemma (ensures 1 * pow2 (v params_b_bits + 1) < Int.max_int elem_n) = ()
-let lemma_b_equals_pow2_b_bits () : Lemma (ensures elem_v params_B == pow2 (v params_b_bits) - 1) = ()
+#push-options "--max_fuel 0 --max_ifuel 0"
+let lemma_pow2_b_bits_1 () : 
+  Lemma (ensures 1 * pow2 (v params_b_bits + 1) < Int.max_int elem_n) = 
+  assert_norm(1 * pow2 (params_b_bits_int + 1) < Int.max_int elem_n)
+  //Pervasives.normalize_term_spec (pow2 params_b_bits_int)
+let lemma_b_equals_pow2_b_bits () : 
+  Lemma (ensures elem_v params_B == pow2 (v params_b_bits) - 1) = 
+  Pervasives.normalize_term_spec (pow2 params_b_bits_int)
 #pop-options
 
 let lemma_logand_with_pos (x:I32.t) (y:I32.t{I32.v y >= 0}) : Lemma (ensures I32.v (I32.logand x y) >= 0) =
@@ -906,11 +911,10 @@ val hash_H_inner_for:
     (requires fun h -> live h v_ /\ live h t /\ disjoint v_ t /\ is_poly_k_montgomery h v_)
     (ensures fun h0 _ h1 -> modifies1 t h0 h1 /\ is_poly_k_montgomery h1 v_)
 
-module S = QTesla.Params
-
-#push-options "--max_fuel 8"
+#push-options "--max_fuel 0"
 let lemma_pow2_d_fits () : Lemma
-    (ensures 1 * pow2 (v params_d) <= Int.max_int I32.n) = ()
+    (ensures 1 * pow2 (v params_d) <= Int.max_int I32.n) = 
+    assert_norm(1 * pow2 SP.params_d <= Int.max_int I32.n)
 #pop-options
 
 #push-options "--z3rlimit 700"
@@ -937,7 +941,7 @@ let hash_H_inner_for v_ t index =
     assert_norm(FStar.Int.fits (I32.v (1l <<^ params_d)) I32.n);
     Int.shift_left_value_lemma (I32.v 1l) (v params_d);
     assert_norm(pow2 (v params_d) > 0);
-    assert_norm(pow2 S.params_d < pow2 (I32.n - 1));
+    assert_norm(pow2 SP.params_d < pow2 (I32.n - 1));
     assert_norm(pow2 (v params_d) < pow2 (I32.n - 1));
     assert(I32.v (1l <<^ params_d) == pow2 (v params_d));
     assert(FStar.Int.fits (I32.v (1l <<^ params_d) - 1) I32.n);
@@ -1126,11 +1130,12 @@ let encode_c pos_list sign_list c_bin =
 
     pop_frame()
 
-#push-options "--max_fuel 8 --max_ifuel 4"
 let lemma_pow2_s_bits_fits_int16 () : Lemma
     (ensures Int.min_int I16.n < -(pow2 (v params_s_bits)) /\
-             Int.max_int I16.n > pow2 (v params_s_bits)) = ()
-#pop-options
+             Int.max_int I16.n > pow2 (v params_s_bits)) = 
+    assert_norm(Int.min_int I16.n < -(pow2 params_s_bits_int));
+    assert_norm(Int.max_int I16.n > pow2 params_s_bits_int)
+
 
 #set-options "--z3rlimit 100 --max_fuel 1 --max_ifuel 1"
 
@@ -1460,12 +1465,13 @@ let test_rejection z =
 
     res
 
-#push-options "--max_fuel 8"
+
 let lemma_pow2_d_fits_32 () : Lemma
-  (ensures 1 * pow2 (v params_d - 1) <= Int.max_int I32.n) = ()
+ (ensures 1 * pow2 (v params_d - 1) <= Int.max_int I32.n) = 
+ Pervasives.normalize_term_spec (pow2 (SP.params_d - 1))
 let lemma_val_plus_pow2_d_fits (val_:I32.t{I32.v val_ >= -(2 * elem_v params_q) /\ I32.v val_ <= (2 * elem_v params_q)}) : Lemma
-  (ensures Int.fits (I32.v val_ + (pow2 (v (params_d -. size 1)) @% pow2 I32.n)) I32.n) = ()
-#pop-options
+  (ensures Int.fits (I32.v val_ + (pow2 (v (params_d -. size 1)) @% pow2 I32.n)) I32.n) = 
+  Pervasives.normalize_term_spec (pow2 SP.params_d - 1)
 
 #set-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 0"
 
@@ -1582,11 +1588,11 @@ let test_correctness v_ =
         assert(I32.v (1l <<^ (params_d -. size 1)) == 1 * pow2 (v (params_d -. size 1)) @% pow2 I32.n);
         lemma_val_plus_pow2_d_fits val_;
         assert (I32.(v (val_ +^ (1l <<^ (params_d -. 1ul)) -^ 1l) ==
-                I32.v val_ + pow2 20 - 1));
+                I32.v val_ + pow2 (Lib.IntTypes.v params_d - 1) - 1));
         shift_arithmetic_right_lemma_i32
           I32.(val_ +^ (1l <<^ (params_d -. 1ul)) -^ 1l) params_d;
         let val_' = I32.((val_ +^ (1l <<^ (params_d -. 1ul)) -^ 1l) >>>^ params_d) in
-        assert (I32.v val_' = (I32.v val_ + pow2 20 - 1) / pow2 21);
+        assert (I32.v val_' = (I32.v val_ + pow2 (Lib.IntTypes.v params_d - 1) - 1) / pow2 (Lib.IntTypes.v params_d));
         lemma_bound val_ val_';
         lemma_val_times_pow2d_fits val_';
         shift_arithmetic_left_i32_value_lemma val_' params_d;
@@ -1594,6 +1600,8 @@ let test_correctness v_ =
         let val_:I32.t = I32.(left -^ (val_' <<<^ params_d)) in
         assert (I32.v val_ > Int.min_int I32.n);
         assume (FStar.Int.fits (I32.v (abs_ val_) - (I32.v (1l <<^ (params_d -. (size 1))) - elem_v params_rejection)) I32.n);
+        assert(Int.fits (I32.v (1l <<^ (params_d -. (size 1))) - elem_v params_rejection) I32.n);
+        //assert(Int.fits (Math.Lib.abs (I32.v val_) - (I32.v (1l <<^ (params_d -. (size 1))) - elem_v params_rejection)) I32.n);
         let t1:UI32.t = UI32.(int32_to_uint32 I32.(((lognot ((abs_ val_) -^ ((1l <<^ (params_d -. (size 1))) -^ params_rejection))))) >>^ (_RADIX32 -. size 1)) in
         let r = if UI32.((t0 |^ t1) = 1ul)
         then ( res.(size 0) <- 1l; true )
@@ -1607,7 +1615,6 @@ let test_correctness v_ =
     let resVal:I32.t = res.(size 0) in
     pop_frame();
     resVal
-
 
 #set-options "--z3rlimit 100 --max_fuel 1 --max_ifuel 1"
 
@@ -2053,12 +2060,12 @@ private let lemma_subpoly_of_pk_is_pk (h: HS.mem) (pk: poly_k) (p: poly) (k: siz
     assert(forall (i:nat{i < v params_n}) . is_pk (bget h p i))
 //#pop-options
 
-#push-options "--print_z3_statistics"
+//#push-options "--print_z3_statistics"
 let lemma_remap_subbuf_indices (w: poly_k) (k: size_t{k <. params_k}) (h: HS.mem) : Lemma
     (ensures forall (i:nat{i >= v k * v params_n /\ i < v k * v params_n + v params_n}) . bget h w i == bget h (get_poly w k) (i - v k * v params_n)) =
     assert(get_poly w k == gsub w (k *! params_n) params_n)
     //assert(forall (i:nat{i >= v k * v params_n /\ i < v k * v params_n + v params_n}) . bget h w i == bget h (get_poly w k) (i - v k * v params_n))
-#pop-options
+//#pop-options
 
 
 

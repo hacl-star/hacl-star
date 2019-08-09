@@ -29,7 +29,7 @@ let mod_op_At_Percent v s p =
   Math.Lemmas.pow2_modulo_modulo_lemma_1 v p (p + s)
 
 
-/// Shift arithmetic left for uint32_t
+/// Shift arithmetic left for int32_t
 
 inline_for_extraction noextract
 val shift_arithmetic_left_i32:
@@ -76,7 +76,7 @@ let shift_arithmetic_left_value_lemma a s =
   }
 
 
-/// Shift arithmetic left for uint64_t
+/// Shift arithmetic left for int64_t
 
 inline_for_extraction noextract
 val shift_arithmetic_left_i64:

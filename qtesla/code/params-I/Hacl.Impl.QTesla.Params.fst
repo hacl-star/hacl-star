@@ -30,16 +30,28 @@ let params_U = to_elem S.params_Ls
 let params_d = size S.params_d
 let params_genA = size S.params_bGenA
 
-/// Parameters specific to the implementation and not in the spec
-let params_barr_mult = I64.int_to_t 1021
-let params_barr_div = UI32.uint_to_t 32
-let params_qinv = I64.int_to_t 3098553343
-let params_q_log = size 23 // TODO: this can be computed
-let params_r2_invn = I64.int_to_t 113307
-let params_s_bits = size 10
-unfold let params_b_bits = size 20
-let params_rejection = to_elem S.params_Le
-let params_r = I64.int_to_t 1081347
+/// Parameters specific to the implementation and not in the spec.
+/// Pure integer values first for proof use, boxed machine integer versions to follow.
+
+inline_for_extraction let params_barr_mult_int = 1021
+inline_for_extraction let params_barr_div_int = 32
+inline_for_extraction let params_qinv_int = 3098553343
+inline_for_extraction let params_q_log_int = 23 // TODO: this can be computed
+inline_for_extraction let params_r2_invn_int = 113307
+inline_for_extraction let params_s_bits_int = 10
+inline_for_extraction let params_b_bits_int = 20
+unfold let params_rejection_int = S.params_Le
+inline_for_extraction let params_r_int = 1081347
+
+let params_barr_mult = I64.int_to_t params_barr_mult_int
+let params_barr_div = UI32.uint_to_t params_barr_div_int
+let params_qinv = I64.int_to_t params_qinv_int
+let params_q_log = size params_q_log_int // TODO: this can be computed
+let params_r2_invn = I64.int_to_t params_r2_invn_int
+let params_s_bits = size params_s_bits_int
+unfold let params_b_bits = size params_b_bits_int
+let params_rejection = to_elem params_rejection_int
+let params_r = I64.int_to_t params_r_int
 
 inline_for_extraction noextract
 let params_SHAKE = SHA3.shake128_hacl

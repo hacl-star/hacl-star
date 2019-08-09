@@ -160,6 +160,11 @@ val encode_pk:
                     disjoint pk t /\ disjoint pk seedA /\ disjoint t seedA /\
                     is_poly_k_pk h t)
     (ensures fun h0 _ h1 -> modifies1 pk h0 h1)
+(*    let looptest h = live h pk /\ live h t /\ live h i /\ live h j /\ modifies3 pk i j h0 h /\ is_poly_k_pk h t in
+    while
+    #(fun h -> looptest h)
+    #(fun b h -> looptest h /\ 
+              (b ==> (v (bget h j 0) + 31 < v params_n /\ v (bget h i 0) + 22 < v crypto_publickeybytes / numbytes U32)))*)
 
 let encode_pk pk t seedA =
     let hInit = ST.get () in
@@ -171,26 +176,34 @@ let encode_pk pk t seedA =
     assert(v params_k = 1);
 
     let h0 = ST.get () in
-    assert(forall (i:nat{i < v params_n * v params_k}) . {:pattern bget h0 t i} bget hInit t i == bget h0 t i);
+    assert(is_poly_k_equal hInit h0 t);
     assert(is_poly_k_pk h0 t);
     LL.while
-    (fun h -> live h pk /\ live h t /\ live h i /\ live h j /\ modifies3 pk i j h0 h /\ is_poly_k_pk h t)
+    (fun h -> live h pk /\ live h t /\ live h i /\ live h j /\ modifies3 pk i j h0 h /\ is_poly_k_pk h t)// /\
+           //((v (bget h j 0) + 31 < v params_n /\ v (bget h i 0) + 22 < v crypto_publickeybytes / numbytes U32) \/
+           // (v (bget h i 0) >= v params_n * v params_q_log / 32)))
     (fun h -> v (bget h i 0) < v params_n * v params_q_log / 32)
     (fun _ -> i.(size 0) <. params_n *. params_q_log /. size 32)
+(*    for 0ul (params_n /. size 32)
+    (fun h k -> live h pk /\ live h t /\ modifies1 pk h0 h /\ is_poly_k_pk h t)// /\
+             //k * 32 + 22 < v crypto_publickeybytes / numbytes U32 /\
+             //k * v params_q_log < v params_n)*)
     (fun _ ->
+        //let j = k *. size 32 in
+        //let i = k *. params_q_log in
         let h1 = ST.get () in
         assert(is_poly_k_pk h1 t);
         assume(v (bget h1 j 0) + 31 < v params_n);
         assume(v (bget h1 i 0) + 22 < v (crypto_publickeybytes /. size (numbytes U32)));
         encode_pk_loopBody pk t i.(size 0) j.(size 0);
         let h2 = ST.get () in
-        assert(forall (i:nat{i < v params_n * v params_k}) . {:pattern bget h2 t i} bget h1 t i == bget h2 t i);
+        assert(is_poly_k_equal h1 h2 t);
         assert(is_poly_k_pk h2 t);
         assume(v (bget h2 j 0) + 32 + 31 < v params_n);
         j.(size 0) <- j.(size 0) +. size 32;
 	i.(size 0) <- i.(size 0) +. params_q_log;
         let h3 = ST.get () in
-        assert(forall (i:nat{i < v params_n * v params_k}) . {:pattern bget h3 t i} bget h2 t i == bget h3 t i);
+        assert(is_poly_k_equal h2 h3 t);
         assert(is_poly_k_pk h3 t)
     );
 
@@ -250,17 +263,26 @@ let decode_pk_set_pk snapshot pk_in pk i j value =
     let h1 = ST.get () in
     reveal_valid_decode_pk pk_in pk snapshot h1
 
+private let lemma_decode_pk_extend 
+    (pk : lbuffer I32.t (params_n *. params_k))
+    (i : size_t{v i + 31 < v params_n * v params_k})
+    (h : HS.mem) : Lemma
+    (requires is_poly_k_pk_i h pk (v i) /\
+              (forall (k:nat{k >= v i /\ k < v i + 32}) . is_pk (bget h pk k)))
+    (ensures is_poly_pk_i h pk (v i + 32)) = ()
+
 private inline_for_extraction noextract
 val decode_pk_loopBody:
     pk : lbuffer I32.t (params_n *. params_k)
   -> pk_in : lbuffer uint8 crypto_publickeybytes
-  -> mask23 : UI32.t
+  -> mask23 : UI32.t{UI32.v mask23 == UI32.v UI32.(1ul <<^ params_q_log) - 1}
   -> i : size_t{v i + 31 < v params_n * v params_k}
   -> j : size_t{v j + 22 < v crypto_publickeybytes / 4}
   -> Stack unit
-    (requires fun h -> live h pk /\ live h pk_in /\ disjoint pk pk_in)
-    (ensures fun h0 _ h1 -> modifies1 pk h0 h1)
+    (requires fun h -> live h pk /\ live h pk_in /\ disjoint pk pk_in /\ is_poly_k_pk_i h pk (v i))
+    (ensures fun h0 _ h1 -> modifies1 pk h0 h1 /\ is_poly_k_pk_i h1 pk (v i + 32))
 
+#push-options "--z3rlimit 500"
 let decode_pk_loopBody pk pk_in mask23 i j =
     let h0 = ST.get () in
     reveal_valid_decode_pk pk_in pk h0 h0;
@@ -317,7 +339,18 @@ let decode_pk_loopBody pk pk_in mask23 i j =
 
     let h1 = ST.get () in
     reveal_valid_decode_pk pk_in pk h0 h1;
-    assert(valid_decode_pk pk_in pk h0 h1)
+    assert(valid_decode_pk pk_in pk h0 h1);
+    //assume(forall (k:nat{k >= v i /\ k < v i + 32}) . is_pk (bget h1 pk k));
+    //lemma_decode_pk_extend pk i h1;
+    assume(is_poly_k_pk_i h1 pk (v i + 32))
+#pop-options
+
+#push-options "--max_fuel 0"
+private let let_mask23_left_minus_1_fits () : Lemma
+    (ensures UInt.fits (UI32.v UI32.(1ul <<^ params_q_log) - 1) UI32.n) = 
+    UInt.shift_left_value_lemma #UI32.n 1 (v params_q_log);
+    assert_norm(UInt.fits (UI32.v UI32.(1ul <<^ params_q_log) - 1) UI32.n)
+#pop-options
 
 val decode_pk:
     pk : lbuffer I32.t (params_n *. params_k)
@@ -328,34 +361,18 @@ val decode_pk:
     (ensures fun h0 _ h1 -> modifies2 pk seedA h0 h1 /\ is_poly_k_pk h1 pk)
 
 let decode_pk pk seedA pk_in =
-    push_frame();
-
     //let iBuf = create (size 1) (size 0) in
     //let jBuf = create (size 1) (size 0) in
     // In the reference implementation, pp is a uint32_t view into pk. We can't do that in F*, so we operate
     // directly on pk, doing a cast from int32 to uint32 in-line. pt is a uint32_t view into pk, and the
     // function pt above takes care of doing that conversion.
-    [@inline_let] let mask23_left:UI32.t = UI32.(1ul <<^ params_q_log) in
-    assume(FStar.UInt.fits (UI32.v mask23_left - 1) UI32.n);
+    let mask23_left:UI32.t = UI32.(1ul <<^ params_q_log) in
+    let_mask23_left_minus_1_fits ();
     let mask23:UI32.t = UI32.(mask23_left -^ 1ul) in
 
     let h0 = ST.get () in
-(*    LL.while
-    (fun h -> live h pk /\ live h pk_in /\ live h iBuf /\ live h jBuf /\ modifies3 pk iBuf jBuf h0 h)
-    (fun h -> v (bget h iBuf 0) < v params_n)
-    (fun _ -> iBuf.(size 0) <. params_n)
-    (fun _ ->
-        let i = iBuf.(size 0) in
-	let j = jBuf.(size 0) in
-        assume(v i + 31 < v params_n * v params_k);
-        assume(v j + 22 < v crypto_publickeybytes / 4);
-        decode_pk_loopBody pk pk_in mask23 i j;
-        jBuf.(size 0) <- j +. size 23;
-	iBuf.(size 0) <- i +. size 32
-    );*)
-
     for (size 0) (params_n /. size 32)
-    (fun h _ -> live h pk /\ live h pk_in /\ modifies1 pk h0 h)
+    (fun h k -> live h pk /\ live h pk_in /\ modifies1 pk h0 h /\ k <= v params_n / 32 /\ is_poly_k_pk_i h pk (k * 32))
     (fun k ->
         let j = k *. size 23 in
         let i = k *. size 32 in
@@ -363,12 +380,12 @@ let decode_pk pk seedA pk_in =
         decode_pk_loopBody pk pk_in mask23 i j
     );
 
-    assert(v params_k = 1);
-    copy seedA (sub pk_in (params_n *. params_q_log /. size 8) crypto_seedbytes);
+    // Actually have to point this fact out to the prover to prove the post-condition.
+    let h1 = ST.get () in
+    assert(is_poly_k_pk_i h1 pk (v (params_n /. size 32) * 32));
 
-    pop_frame();
-    let hReturn = ST.get () in
-    assume(is_poly_k_pk hReturn pk)
+    assert(v params_k = 1);
+    copy seedA (sub pk_in (params_n *. params_q_log /. size 8) crypto_seedbytes)
 
 [@"opaque_to_smt"]
 private let valid_encode_sig (z: poly) (sm: lbuffer uint8 crypto_bytes) (h0 h1: HS.mem) =
@@ -532,7 +549,6 @@ let decode_sig_setz snapshot sm z i k value =
     let h0 = ST.get () in
     reveal_valid_decode_sig z sm snapshot h0;
     assert(valid_decode_sig z sm snapshot h0);
-    assume(is_elem value);
     z.(i +. k) <- value;
     let h1 = ST.get () in
     reveal_valid_decode_sig z sm snapshot h1;

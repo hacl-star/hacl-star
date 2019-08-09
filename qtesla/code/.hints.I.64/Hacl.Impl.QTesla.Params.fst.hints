@@ -1,5 +1,5 @@
 [
-  "Á˜u\u0019∆\fØ7^O∑öÉb÷ì",
+  "\u0011\u000f\\x:»¬hçÑ\u001dÄlŒ≠\u0003",
   [
     [
       "Hacl.Impl.QTesla.Params.params_n",
@@ -220,8 +220,9 @@
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "b2t_def", "equation_FStar.Int.fits", "equation_FStar.Int.max_int",
         "equation_FStar.Int.min_int", "equation_FStar.Int.size",
+        "equation_Hacl.Impl.QTesla.Params.params_barr_mult_int",
         "equation_Prims.nat", "equation_Prims.pos", "int_typing",
-        "lemma_FStar.Int.pow2_values", "primitive_Prims.op_AmpAmp",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Minus",
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
@@ -231,7 +232,7 @@
         "typing_Prims.pow2"
       ],
       0,
-      "6ce81e519ea20a038fe014563bda4f40"
+      "3a83da4d30c1a296f4720a172a07c64e"
     ],
     [
       "Hacl.Impl.QTesla.Params.params_barr_div",
@@ -243,6 +244,7 @@
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "b2t_def", "equation_FStar.UInt.fits", "equation_FStar.UInt.max_int",
         "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
+        "equation_Hacl.Impl.QTesla.Params.params_barr_div_int",
         "equation_Prims.nat", "int_typing", "lemma_Lib.IntTypes.pow2_values",
         "primitive_Prims.op_AmpAmp", "primitive_Prims.op_LessThanOrEqual",
         "primitive_Prims.op_Subtraction",
@@ -251,7 +253,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "34c38d64d2003d1f26c1887edb81bf09"
+      "732de23403a1fc28d5cd1c0e395b508e"
     ],
     [
       "Hacl.Impl.QTesla.Params.params_qinv",
@@ -263,8 +265,9 @@
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "b2t_def", "equation_FStar.Int.fits", "equation_FStar.Int.max_int",
         "equation_FStar.Int.min_int", "equation_FStar.Int.size",
+        "equation_Hacl.Impl.QTesla.Params.params_qinv_int",
         "equation_Prims.nat", "equation_Prims.pos", "int_typing",
-        "lemma_FStar.Int.pow2_values", "primitive_Prims.op_AmpAmp",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Minus",
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
@@ -274,7 +277,7 @@
         "typing_Prims.pow2"
       ],
       0,
-      "426a9864ffa1d4ebbcc2ac46d94fecb8"
+      "d4a3f7f869e9e6016b1908ee1bea8e52"
     ],
     [
       "Hacl.Impl.QTesla.Params.params_q_log",
@@ -285,14 +288,16 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "constructor_distinct_Lib.IntTypes.U32",
-        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
-        "equation_Prims.nat", "lemma_Lib.IntTypes.pow2_values",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "equality_tok_Lib.IntTypes.U32@tok",
+        "equation_Hacl.Impl.QTesla.Params.params_q_log_int",
+        "equation_Lib.IntTypes.bits", "equation_Prims.nat",
+        "lemma_Lib.IntTypes.pow2_values", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "223986a18c8c3f57ce7ef03a7cdd564e"
+      "423b1820df7da4f4a2766cbecdd1c0c9"
     ],
     [
       "Hacl.Impl.QTesla.Params.params_r2_invn",
@@ -304,8 +309,9 @@
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "b2t_def", "equation_FStar.Int.fits", "equation_FStar.Int.max_int",
         "equation_FStar.Int.min_int", "equation_FStar.Int.size",
+        "equation_Hacl.Impl.QTesla.Params.params_r2_invn_int",
         "equation_Prims.nat", "equation_Prims.pos", "int_typing",
-        "lemma_FStar.Int.pow2_values", "primitive_Prims.op_AmpAmp",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Minus",
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
@@ -315,7 +321,7 @@
         "typing_Prims.pow2"
       ],
       0,
-      "9f5f0c2a841905516c38c384d01fc801"
+      "c47fd0a9669706eb504831d88eae40dc"
     ],
     [
       "Hacl.Impl.QTesla.Params.params_s_bits",
@@ -326,14 +332,16 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "constructor_distinct_Lib.IntTypes.U32",
-        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
-        "equation_Prims.nat", "lemma_Lib.IntTypes.pow2_values",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "equality_tok_Lib.IntTypes.U32@tok",
+        "equation_Hacl.Impl.QTesla.Params.params_s_bits_int",
+        "equation_Lib.IntTypes.bits", "equation_Prims.nat",
+        "lemma_Lib.IntTypes.pow2_values", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "603ed3dd7b0a967954086afa9bfecd46"
+      "ea211c085014dde9a9961edf567c587c"
     ],
     [
       "Hacl.Impl.QTesla.Params.params_b_bits",
@@ -344,14 +352,16 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "constructor_distinct_Lib.IntTypes.U32",
-        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
-        "equation_Prims.nat", "lemma_Lib.IntTypes.pow2_values",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "equality_tok_Lib.IntTypes.U32@tok",
+        "equation_Hacl.Impl.QTesla.Params.params_b_bits_int",
+        "equation_Lib.IntTypes.bits", "equation_Prims.nat",
+        "lemma_Lib.IntTypes.pow2_values", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "d969372717d667f7300593ec304da22f"
+      "b9ab3b5f16e50e76333df116ccdcd02c"
     ],
     [
       "Hacl.Impl.QTesla.Params.params_rejection",
@@ -375,7 +385,7 @@
         "typing_Prims.pow2"
       ],
       0,
-      "55c882a607ce28a0eee36e276e3d9dbb"
+      "702484589eaefcbdef186e4adc296824"
     ],
     [
       "Hacl.Impl.QTesla.Params.params_r",
@@ -387,8 +397,9 @@
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "b2t_def", "equation_FStar.Int.fits", "equation_FStar.Int.max_int",
         "equation_FStar.Int.min_int", "equation_FStar.Int.size",
+        "equation_Hacl.Impl.QTesla.Params.params_r_int",
         "equation_Prims.nat", "equation_Prims.pos", "int_typing",
-        "lemma_FStar.Int.pow2_values", "primitive_Prims.op_AmpAmp",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Minus",
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
@@ -398,7 +409,7 @@
         "typing_Prims.pow2"
       ],
       0,
-      "c6fa54508943b50fa7e61f0d7dba3d6e"
+      "4744ded4ff01c9583e6c00178b68862a"
     ],
     [
       "Hacl.Impl.QTesla.Params.crypto_hmbytes",
@@ -416,7 +427,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "b5aeba2386c4b70846b61a31aee2faf8"
+      "565aa24e992a8e29179cf42899fe41aa"
     ],
     [
       "Hacl.Impl.QTesla.Params.crypto_randombytes",
@@ -434,7 +445,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "aae5a221f60081ba47047f6978f79903"
+      "5edd8edb5906970fbd5a7ace3f4c1910"
     ],
     [
       "Hacl.Impl.QTesla.Params.crypto_seedbytes",
@@ -452,7 +463,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "1c4b7749148e42cd2c7999e69d21267e"
+      "e76800cc56651f1029c322367e180a67"
     ],
     [
       "Hacl.Impl.QTesla.Params.crypto_c_bytes",
@@ -470,7 +481,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "2247b8aa65b6a808b434d1d19f64453c"
+      "bfefcdf2a0a64b613a5fe06ebf5631cd"
     ],
     [
       "Hacl.Impl.QTesla.Params.crypto_secretkeybytes",
@@ -490,7 +501,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "a1d1a0759f9e8b9c05958beed9b131af"
+      "bde009cf98d570d30958bc47e7f44467"
     ],
     [
       "Hacl.Impl.QTesla.Params.crypto_publickeybytes",
@@ -510,7 +521,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "887d75dc51bca4db96a67224c7f75fc7"
+      "a1dc42a4474f09d4a83b79227db4cbcc"
     ],
     [
       "Hacl.Impl.QTesla.Params.crypto_bytes",
@@ -530,7 +541,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "c394b03fbe66fb754068fe0035a23d4c"
+      "3daf7f93d721ee92da2f0d720e1c2a8f"
     ],
     [
       "Hacl.Impl.QTesla.Params.params_cdt32_rows",
@@ -548,7 +559,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "615083dc57f97a8e09486c4b66719957"
+      "71fbc72dd091b9fb248807b500429a07"
     ],
     [
       "Hacl.Impl.QTesla.Params.params_cdt32_cols",
@@ -566,7 +577,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "ff6203afb50f7df324199343e7bc8da0"
+      "cccb5f8770796965a04a09e174abe7d5"
     ],
     [
       "Hacl.Impl.QTesla.Params.params_cdt64_rows",
@@ -584,7 +595,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "88b94658f894f5e9dc4363becba45c87"
+      "67476127499d2dba6252d46b92e17f60"
     ],
     [
       "Hacl.Impl.QTesla.Params.params_cdt64_cols",
@@ -602,7 +613,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "b2f4bbadda4c8c77342dcf032acbeae7"
+      "1a2a2e11331afb730410311c76f0844f"
     ]
   ]
 ]
