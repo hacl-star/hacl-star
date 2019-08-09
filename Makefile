@@ -719,6 +719,7 @@ ED_BUNDLE=-bundle 'Hacl.Ed25519=Hacl.Impl.Ed25519.*,Hacl.Impl.BignumQ.Mul,Hacl.I
 POLY_BUNDLE=-bundle 'Hacl.Poly1305_32=Hacl.Impl.Poly1305.Field32xN_32' \
   -bundle 'Hacl.Poly1305_128=Hacl.Impl.Poly1305.Field32xN_128' \
   -bundle 'Hacl.Poly1305_256=Hacl.Impl.Poly1305.Field32xN_256'
+NACLBOX_BUNDLE=-bundle Hacl.NaCl=Hacl.Impl.SecretBox,Hacl.Impl.Box
 
 COMPACT_FLAGS	=\
   $(HASH_BUNDLE) \
@@ -729,6 +730,7 @@ COMPACT_FLAGS	=\
   $(CHACHAPOLY_BUNDLE) \
   $(ED_BUNDLE) \
   $(POLY_BUNDLE) \
+  $(NACLBOX_BUNDLE) \
   -bundle Hacl.Impl.Poly1305.*[rename=Unused_Poly1305] \
   -bundle LowStar.* \
   -bundle Prims,C.Failure,C,C.String,C.Loops,Spec.Loops,C.Endianness,FStar.*[rename=Hacl_Kremlib] \
