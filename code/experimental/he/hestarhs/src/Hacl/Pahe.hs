@@ -31,6 +31,7 @@ class Pahe s where
     paheKeyGen      :: Int -> Integer -> IO (PaheSk s)
     -- The length of vector inside
     paheK           :: PahePk s -> Int
+    paheToPlaintext :: PahePk s -> [Integer] -> [Integer]
     paheToPublic    :: PaheSk s -> PahePk s
 
     paheEnc         :: PahePk s -> [Integer] -> IO (PaheCiph s)
@@ -104,6 +105,8 @@ instance Pahe GMSep where
         pure GMSepSk{..}
 
     paheK GMSepPk{..} = gmp_simdn
+
+    paheToPlaintext GMSepPk{..} vals = map (`mod` 2) vals
 
     paheToPublic GMSepSk{..} =
         GMSepPk {
@@ -220,6 +223,8 @@ instance Pahe PailSep where
         pure PailSepSk{..}
 
     paheK PailSepPk{..} = psp_simdn
+
+    paheToPlaintext PailSepPk{..} vals = map (`mod` psp_nRaw) vals
 
     paheToPublic PailSepSk{..} =
         PailSepPk {
@@ -349,6 +354,8 @@ instance Pahe DgkCrt where
         pure DgkCrtSk{..}
 
     paheK DgkCrtPk{..} = dcp_simdn
+
+    paheToPlaintext DgkCrtPk{..} vals = P.crtToBase dcp_uFactsRaw vals
 
     paheToPublic DgkCrtSk{..} =
         DgkCrtPk {

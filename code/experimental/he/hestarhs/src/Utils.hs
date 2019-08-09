@@ -4,7 +4,24 @@ module Utils where
 
 import Universum
 
+import Control.Concurrent (withMVar)
 import qualified Data.Time.Clock.POSIX as P
+import System.IO.Unsafe (unsafePerformIO)
+
+getCurrentTimeMs :: IO Integer
+getCurrentTimeMs = floor . (*1000) <$> P.getPOSIXTime
+
+lMVar :: MVar ()
+lMVar = unsafePerformIO $ newMVar ()
+
+logRaw :: MonadIO m => Text -> m ()
+logRaw x = do
+    t <- liftIO getCurrentTimeMs
+    liftIO $ withMVar lMVar $ \() ->
+      putTextLn (show (t`div`1000) <> "." <> show (t`mod`1000) <> " " <> x) >> pure ()
+
+log :: MonadIO m => Text -> m ()
+log x = if True then pass else logRaw x
 
 
 findM :: Monad m => (a -> m Bool) -> [a] -> m (Maybe a)
@@ -16,7 +33,7 @@ measureTimeSingle label action = do
     time0 <- P.getPOSIXTime
     r <- action
     time1 <- P.getPOSIXTime
-    putTextLn $ label <> " took : " <> show (round ((time1-time0) * 1000) :: Integer) <> "ms"
+    logRaw $ label <> " took : " <> show (round ((time1-time0) * 1000) :: Integer) <> "ms"
     pure r
 
 simdadd :: Num a => [a] -> [a] -> [a]
