@@ -5,8 +5,11 @@ module Utils where
 import Universum
 
 import Control.Concurrent (withMVar)
+import qualified Data.Array.IO as AIO
 import qualified Data.Time.Clock.POSIX as P
 import System.IO.Unsafe (unsafePerformIO)
+import System.Random (randomRIO)
+
 
 getCurrentTimeMs :: IO Integer
 getCurrentTimeMs = floor . (*1000) <$> P.getPOSIXTime
@@ -44,3 +47,18 @@ simdmul x y = map (uncurry (*)) (zip x y)
 
 dotprod :: [Integer] -> [Integer] -> Integer
 dotprod x y = sum $ simdmul x y
+
+-- taken from https://wiki.haskell.org/Random_shuffle
+shuffle :: [a] -> IO [a]
+shuffle xs = do
+        ar <- newArray' n xs
+        forM [1..n] $ \i -> do
+            j <- randomRIO (i,n)
+            vi <- AIO.readArray ar i
+            vj <- AIO.readArray ar j
+            AIO.writeArray ar j vi
+            return vj
+  where
+    n = length xs
+    newArray' :: Int -> [a] -> IO (AIO.IOArray Int a)
+    newArray' n' xs' =  AIO.newListArray (1,n') xs'

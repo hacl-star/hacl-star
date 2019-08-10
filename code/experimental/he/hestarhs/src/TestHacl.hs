@@ -171,6 +171,31 @@ testGMPahe = do
         let expected = map (\(a, b) -> (a * b) `mod` 2) (zip ms1 scal)
         unless (d2 == expected) $ error "Simd mul is broken"
 
+    replicateM_ 1000 $ do
+        m1Len <- randomRIO (0,n)
+        m2Len <- randomRIO (0,n)
+        scalLen <- randomRIO (0,n)
+        ms1 <- replicateM m1Len $ randomRIO (0, 2^l-1)
+        ms2 <- replicateM m2Len $ randomRIO (0, 2^l-1)
+        scal <- replicateM scalLen $ randomRIO (0, 2^l-1)
+
+        c1 <- paheEnc pk ms1
+        d0 <- paheDec sk c1
+        let expectedDec = paheToPlaintext pk ms1
+        unless (expectedDec `isPrefixOf` d0) $ error "Simd dec is broken"
+
+        c2 <- paheEnc pk ms2
+
+        c3 <- paheSIMDAdd pk c1 c2
+        d1 <- paheDec sk c3
+        let expectedSum = paheToPlaintext pk $ map (uncurry (+)) (zip ms1 ms2)
+        unless (expectedSum `isPrefixOf` d1) $ error "Simd add is broken"
+
+        c4 <- paheSIMDMulScal pk c1 scal
+        d2 <- paheDec sk c4
+        let expectedProd = paheToPlaintext pk $ map (uncurry (*)) (zip ms1 scal)
+        unless (expectedProd `isPrefixOf` d2) $ error "Simd mul is broken"
+
 
 testPaillier :: Int -> IO ()
 testPaillier bits = do
