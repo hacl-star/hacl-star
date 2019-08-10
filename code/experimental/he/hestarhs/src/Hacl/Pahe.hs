@@ -206,7 +206,7 @@ instance Pahe GMSep where
     paheMultBlind _ ms = pure ms
 
     paheToBS GMSepPk{..} (GMCiph ms) = do
-        when (length ms /= gmp_simdn) $ error "GM paheToBS failed length"
+        when (length ms > gmp_simdn) $ error "GM paheToBS failed length"
         fmap BS.concat $ forM ms $ fromBignumBS gmp_bn
 
     paheFromBS GMSepPk{..} bsl = do
@@ -376,7 +376,7 @@ instance Pahe PailSep where
         paheSIMDMulScal pk c vals
 
     paheToBS PailSepPk{..} (PailCiph cs) = do
-        when (length cs /= psp_simdn) $
+        when (length cs > psp_simdn) $
             error "Paillier paheToBS failed length"
         fmap BS.concat $ forM cs $ fromBignumBS psp_bn
 
