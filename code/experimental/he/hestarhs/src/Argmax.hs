@@ -34,9 +34,10 @@ argmaxClient ::
     -> PahePk sDGK
     -> PahePk sGM
     -> Int
+    -> Int
     -> [PaheCiph sTop]
     -> IO (PaheCiph sTop, [Word64])
-argmaxClient sock pkTop pkDGK pkGM l vals = do
+argmaxClient sock pkTop pkDGK pkGM l r vals = do
     let k = paheK pkTop
     let m = length vals
     perm <- shuffle [0..m-1]
@@ -46,10 +47,10 @@ argmaxClient sock pkTop pkDGK pkGM l vals = do
             log $ "Client loop index " <> show i
             bi <-
                 measureTimeSingle "Client argmax SC" $
-                secureCompareClient sock pkTop pkDGK pkGM l
+                secureCompareClient sock pkTop pkDGK pkGM l r
                 (vals !! (perm !! i)) curMax
-            ri <- replicateM k $ randomRIO (0, 2^(l + lambda) - 1)
-            si <- replicateM k $ randomRIO (0, 2^(l + lambda) - 1)
+            ri <- replicateM r $ randomRIO (0, 2^(l + lambda) - 1)
+            si <- replicateM r $ randomRIO (0, 2^(l + lambda) - 1)
             mMasked <- paheSIMDAdd pkTop curMax =<< paheEnc pkTop ri
             aMasked <- paheSIMDAdd pkTop (vals !! (perm !! i)) =<< paheEnc pkTop si
 
@@ -85,15 +86,16 @@ argmaxServer ::
     -> PaheSk sGM
     -> Int
     -> Int
+    -> Int
     -> IO ()
-argmaxServer sock skTop skDGK skGM l m = do
+argmaxServer sock skTop skDGK skGM l m r = do
     let pkTop = paheToPublic skTop
     let pkGM = paheToPublic skGM
     let k = paheK pkTop
 
     let loop ixs i = if i == m then pure ixs else do
             log $ "Server loop ixs " <> show i
-            secureCompareServer sock skTop skDGK skGM l
+            secureCompareServer sock skTop skDGK skGM l r
             [bsBi,bsM,bsA] <- receiveMulti sock
             [mMasked,aMasked] <- mapM (paheFromBS pkTop) [bsM,bsA]
             log $ "Server loop: got values from client"
@@ -122,220 +124,9 @@ argmaxServer sock skTop skDGK skGM l m = do
 
     log "Server: exiting"
 
-----------------------------------------------------------------------------
--- Log argmax
-----------------------------------------------------------------------------
-
-foldCiphClient ::
-       Pahe sTop
-    => Socket Req
-    -> PahePk sTop
-    -> Int
-    -> Int -- m such that list has 2^m values
-    -> PaheCiph sTop
-    -> IO (PaheCiph sTop, PaheCiph sTop)
-foldCiphClient sock pk l m values = do
-    log "Client: fold start"
-    when (2^m > paheK pk) $ error $ "fold client: m is too big: " <> show (m,paheK pk)
-    when (m == 0) $ error "foldCiphClient can't fold list of 1"
-
-    let k = paheK pk
-
-    mask1 <- replicateM (2^(m-1)) $ randomRIO (0,2 ^ (l + lambda) - 1)
-    mask2 <- replicateM (2^(m-1)) $ randomRIO (0,2 ^ (l + lambda) - 1)
-    let mask3::[Integer] = mask1 <> mask2
-    mask3Enc <- paheEnc pk $ mask3 <> replicate (paheK pk - (2^m)) 0
-    valuesMasked <- paheSIMDAdd pk values mask3Enc
-
-    log "Client: masked, sent"
-    send sock [] =<< paheToBS pk valuesMasked
-
-    mask1Enc <- paheEnc pk $ map negate mask1 <> replicate (k - 2^(m-1)) 0
-    mask2Enc <- paheEnc pk $ map negate mask2 <> replicate (k - 2^(m-1)) 0
-
-    [rho1Enc,rho2Enc] <- mapM (paheFromBS pk) =<< receiveMulti sock
-    log "Client: received, unmasking"
-
-    values1 <- paheSIMDAdd pk rho1Enc mask1Enc
-    values2 <- paheSIMDAdd pk rho2Enc mask2Enc
-
-    log "Client: fold end"
-    pure (values1,values2)
-
-foldCiphServer ::
-       Pahe sTop
-    => Socket Rep
-    -> PaheSk sTop
-    -> Int -- m such that list has 2^m values
-    -> IO ()
-foldCiphServer sock sk m = do
-    let pk = paheToPublic sk
-    let k = paheK pk
-
-    rho <- (paheDec sk <=< paheFromBS pk) =<< receive sock
-    log "Server: received, splitting"
-    let (rho1,rho2) = splitAt (2^(m-1)) $ take (2^m) $ rho
-
-    rho1Enc <- paheEnc pk $ rho1 <> replicate (k - 2^(m-1)) 0
-    rho2Enc <- paheEnc pk $ rho2 <> replicate (k - 2^(m-1)) 0
-
-    log "Server: sent back"
-    sendMulti sock =<< (NE.fromList <$> mapM (paheToBS pk) [rho1Enc,rho2Enc])
-
--- Permutes the given ciphertext with a given permutation, returns the perumted list
-permuteClient ::
-       Pahe sTop
-    => Socket Req
-    -> PahePk sTop
-    -> Int
-    -> [Int]
-    -> PaheCiph sTop
-    -> IO (PaheCiph sTop)
-permuteClient sock pk l perm values = do
-    let k = paheK pk
-    let perminv j = fromMaybe (error "permuteClient perminv") $ findIndex (==j) perm
-
-    maskRaw :: [Integer] <- replicateM k $ randomRIO (0, 2 ^ l - 1)
-    maskEnc <- paheEnc pk maskRaw
-    valuesMasked <- paheSIMDAdd pk values maskEnc
-    send sock [] =<< paheToBS pk valuesMasked
-
-    -- k ciphertexts containing valuesMasked_i in all slots
-    replElems <- mapM (paheFromBS pk) =<< receiveMulti sock
-
-    -- combine these k values into one ciphertext
-    -- loop i fills [i..k-1] values of the permuted result
-    let loop j = if j == k then pure (paheZero pk) else do
-            next <- loop (j+1)
-            let i = perminv j
-            -- We select jth element from (perm^-1 j)
-            let selMask = replicate j 0 ++ [1] ++ replicate (k - j - 1) 0
-            cur <- paheSIMDMulScal pk (replElems !! i) selMask
-            paheSIMDAdd pk cur next
-
-
-    let permutedMaskNeg = map (\i -> negate (maskRaw !! (perminv i))) [0..k-1]
-
-    permuted <- loop 0
-
-    paheSIMDAdd pk permuted =<< paheEnc pk permutedMaskNeg
-
-permuteServer ::
-       Pahe sTop
-    => Socket Rep
-    -> PaheSk sTop
-    -> IO ()
-permuteServer sock sk = do
-    let pk = paheToPublic sk
-    prev <- (paheDec sk <=< paheFromBS pk) =<< receive sock
-    let dups = map (\e -> replicate (paheK pk) e) prev
-    encDups <- mapM (paheEnc pk) dups
-    sendMulti sock =<< (NE.fromList <$> mapM (paheToBS pk) encDups)
-
-
-argmaxLogClient ::
-       (Pahe sTop, Pahe sDGK, Pahe sGM)
-    => Socket Req
-    -> PahePk sTop
-    -> PahePk sDGK
-    -> PahePk sGM
-    -> Int
-    -> Int
-    -> PaheCiph sTop
-    -> IO (Int, PaheCiph sTop)
-argmaxLogClient sock pkTop pkDGK pkGM l m vals = do
-    let k = paheK pkTop
-    when (2^m > k) $ error "argmaxLogClient m is too big"
-
-    perm <- shuffle [0..k-1]
-    log $ "Client: perm " <> show perm
-    let perminv j = fromMaybe (error "argmaxLogCli perminv") $ findIndex (==j) perm
-    valsPerm <- measureTimeSingle "perm" $ permuteClient sock pkTop l perm vals
-    log "Client: perm done"
-
-    let loop acc i = if i == 0 then pure acc else do
-            (p1,p2) <- foldCiphClient sock pkTop l i acc
-            -- delta is p2 <= p1
-            delta <- secureCompareClient sock pkTop pkDGK pkGM l p1 p2
-            -- we only care about first 2^(i-1) bits of this mask though
-            p1mask <- replicateM k $ randomRIO (0, 2 ^ l - 1)
-            p2mask <- replicateM k $ randomRIO (0, 2 ^ l - 1)
-            p1masked <- paheSIMDAdd pkTop p1 =<< paheEnc pkTop p1mask
-            p2masked <- paheSIMDAdd pkTop p2 =<< paheEnc pkTop p2mask
-
-            pXMaskedBS <- mapM (paheToBS pkTop) [p1masked,p2masked]
-            deltaBS <- paheToBS pkGM delta
-            sendMulti sock $ NE.fromList (deltaBS:pXMaskedBS)
-
-            [deltaTop,combinedMasked] <-
-                mapM (paheFromBS pkTop) =<< receiveMulti sock
-            deltaTopNeg <- paheSIMDSub pkTop (paheOne pkTop) deltaTop
-
-            -- unmask by doing combinedMasked - delta*p1 - deltaNeg*p2
-            combined <- do
-                tmp1 <- paheSIMDMulScal pkTop deltaTop (map negate p1mask)
-                tmp2 <- paheSIMDMulScal pkTop deltaTopNeg (map negate p2mask)
-                paheSIMDAdd pkTop combinedMasked =<< paheSIMDAdd pkTop tmp1 tmp2
-
-            loop combined (i-1)
-
-    maxEl <- loop valsPerm m
-
-    send sock [] ""
-    maxIndex <- fromIntegral . w64FromBs <$> receive sock
-
-    pure (perminv maxIndex, maxEl)
-
-argmaxLogServer ::
-       (Pahe sTop, Pahe sDGK, Pahe sGM)
-    => Socket Rep
-    -> PaheSk sTop
-    -> PaheSk sDGK
-    -> PaheSk sGM
-    -> Int
-    -> Int
-    -> IO ()
-argmaxLogServer sock skTop skDGK skGM l m = do
-    let pkTop = paheToPublic skTop
-    let pkGM = paheToPublic skGM
-
-    permuteServer sock skTop
-
-    let loop (ixs::[Integer]) i = if i == 0 then pure ixs else do
-            log $ "Server, ixs: " <> show ixs
-            foldCiphServer sock skTop i
-            secureCompareServer sock skTop skDGK skGM l
-
-            [deltaBS,p1bs,p2bs] <- receiveMulti sock
-            delta <- paheDec skGM =<< paheFromBS pkGM deltaBS
-            [p1,p2] <-
-                mapM (paheDec skTop <=< paheFromBS pkTop) [p1bs,p2bs]
-            let pCombined = simdadd (simdmul p1 delta)
-                                    (simdmul p2 (map (\x -> 1 - x) delta))
-            sendMulti sock =<<
-                NE.fromList <$>
-                mapM (paheToBS pkTop <=< paheEnc pkTop) [delta,pCombined]
-            let ixs' =
-                    let delta' = take (2^(i-1)) delta in
-                    let (ixs0, ixs1) = splitAt (2^(i-1)) ixs in
-                    simdadd (simdmul ixs0 delta')
-                            (simdmul ixs1 (map (\x -> 1 - x) delta'))
-            loop ixs' (i-1)
-
-    ixs <- loop [0..(2^m - 1)] m
-    log $ "Server, ixs: " <> show ixs
-    let maxIx = ixs !! 0
-    log $ "Server: argmax loop ended, indices: " <> show maxIx
-
-    _ <- receive sock
-    send sock [] $ w64ToBs $ fromIntegral maxIx
-
-    log "Server: exiting"
-
-
-----------------------------------------------------------------------------
--- Argmax Log 2
-----------------------------------------------------------------------------
+------------------------------------------------------------------------------
+---- Log argmax
+--------------------------------------------------------------------------------
 
 -- Permutes list of 2k elements (passed as 2 ciphertexts) into 2
 -- another ciphertexts.
@@ -430,7 +221,7 @@ argmaxLog2Client sock pkTop pkDGK pkGM l m v1 v2 = do
             log $ "Client loop index " <> show i
             let curLen = 2^i
             -- delta is p2 <= p1
-            delta <- secureCompareClient sock pkTop pkDGK pkGM l p1 p2
+            delta <- secureCompareClient sock pkTop pkDGK pkGM l (2^i) p1 p2
             -- we only care about first 2^(i-1) bits of this mask though
             p1mask <- replicateM curLen $ randomRIO (0, 2 ^ l - 1)
             p2mask <- replicateM curLen $ randomRIO (0, 2 ^ l - 1)
@@ -488,7 +279,6 @@ argmaxLog2Server ::
 argmaxLog2Server sock skTop skDGK skGM l m = do
     let pkTop = paheToPublic skTop
     let pkGM = paheToPublic skGM
-    let k = paheK pkTop
 
     permuteFoldServer sock skTop
 
@@ -496,7 +286,7 @@ argmaxLog2Server sock skTop skDGK skGM l m = do
     -- so the first step has index m-1
     let loop (ixs::[Integer]) i = do
             log $ "Server loop index " <> show i
-            secureCompareServer sock skTop skDGK skGM l
+            secureCompareServer sock skTop skDGK skGM l (2^i)
 
             let curLen = 2^i
 
@@ -543,8 +333,8 @@ argmaxLog2Server sock skTop skDGK skGM l m = do
 -- Runner
 ----------------------------------------------------------------------------
 
-runProtocol :: IO ()
-runProtocol =
+_testArgmax :: IO ()
+_testArgmax =
     withContext $ \ctx ->
     withSocket ctx Req $ \req ->
     withSocket ctx Rep $ \rep -> do
@@ -555,10 +345,13 @@ runProtocol =
       putTextLn "Keygen..."
       -- SIMD parameter
       let k = 16
+      -- Parallelism level used in linear argmax, should be less than k
+      let r = 1
       -- bit size of numbers we compare
       let l = 64
       -- Number of argmax input elements
       let m::Int = 2 ^ (log2 (fromIntegral k) - 1 :: Integer)
+      --let m::Int = 20
       let mlog::Int = log2 (m-1)
       -- plaintext space size
       --let margin = 2^(lambda + l)
@@ -582,7 +375,7 @@ runProtocol =
       let pkGM = paheToPublic skGM
 
 
-      let testLog2Argmax = do
+      let testLogArgmax = do
             v1 <- replicateM k $ randomRIO (0,2^l-1)
             v2 <- replicateM k $ randomRIO (0,2^l-1)
             let vals = v1 ++ v2
@@ -601,147 +394,69 @@ runProtocol =
                 putTextLn $ "vals: " <> show vals
                 error $ "logArgmax broken, ix: " <> show ix
 
-      let testPermFold = do
-            perm <- shuffle [0..2*k-1]
-            putTextLn $ "perm " <> show perm
-
-            f1 <- replicateM k $ randomRIO (0,2^l-1)
-            f2 <- replicateM k $ randomRIO (0,2^l-1)
-            putTextLn $ "Elements to shufle: " <> show (f1,f2)
-            f1Enc <- paheEnc pkTop f1
-            f2Enc <- paheEnc pkTop f2
-
-            ((v1,v2),()) <-
-                concurrently
-                (permuteFoldClient req pkTop l perm f1Enc f2Enc)
-                (permuteFoldServer rep skTop)
-
-            print =<< paheDec skTop v1
-            print =<< paheDec skTop v2
-
-      let testLogArgmax = do
-            vals <- replicateM k $ randomRIO (0,2^l-1)
-            let expectedMax = foldr1 max vals
-            let expectedMaxIx =
-                    fromMaybe (error "") $ findIndex (==expectedMax) vals
-            encVals <- paheEnc pkTop $ vals <> replicate (k - m) 0
-
-            ((ix,el),()) <-
-                measureTimeSingle "log Argmax" $
-                concurrently
-                (argmaxLogClient req pkTop pkDGK pkGM l mlog encVals)
-                (argmaxLogServer rep skTop skDGK skGM l mlog)
-
-            decEl <- paheDec skTop el
-            unless (ix == fromIntegral expectedMaxIx) $ do
-                putTextLn $ "vals: " <> show vals
-                error $ "logArgmax broken, ix: " <> show (ix,expectedMaxIx)
-            unless (decEl !! 0 == expectedMax) $ do
-                putTextLn $ "vals: " <> show vals
-                error $ "logArgmax broken, el: " <> show (decEl !! 0, expectedMax)
-
-      let testPerm = do
-            perm <- shuffle [0..k-1]
-            putTextLn $ "perm " <> show perm
-
-            f <- replicateM k $ randomRIO (0,2^l-1)
-            print f
-            fEnc <- paheEnc pkTop f
-
-            (valsPerm,()) <-
-                concurrently
-                (permuteClient req pkTop l perm fEnc)
-                (permuteServer rep skTop)
-
-            valsDec <- paheDec skTop valsPerm
-            print valsDec
-
-      let testFold = do
-              f <- replicateM (2^m) $ randomRIO (0,2^l-1)
-              putTextLn $ "m: " <> show m
-              putTextLn $ "f: " <> show f
-              fEnc <- paheEnc pkTop $ f <> replicate (k-2^m) 5
-
-              ((f1,f2),()) <-
-                  measureTimeSingle "fold" $
-                  concurrently
-                  (foldCiphClient req pkTop l m fEnc)
-                  (foldCiphServer rep skTop m)
-
-              print f
-              print =<< paheDec skTop f1
-              print =<< paheDec skTop f2
+--      let testPermFold = do
+--            perm <- shuffle [0..2*k-1]
+--            putTextLn $ "perm " <> show perm
+--
+--            f1 <- replicateM k $ randomRIO (0,2^l-1)
+--            f2 <- replicateM k $ randomRIO (0,2^l-1)
+--            putTextLn $ "Elements to shufle: " <> show (f1,f2)
+--            f1Enc <- paheEnc pkTop f1
+--            f2Enc <- paheEnc pkTop f2
+--
+--            ((v1,v2),()) <-
+--                concurrently
+--                (permuteFoldClient req pkTop l perm f1Enc f2Enc)
+--                (permuteFoldServer rep skTop)
+--
+--            print =<< paheDec skTop v1
+--            print =<< paheDec skTop v2
+--
+--      let testPerm = do
+--            perm <- shuffle [0..k-1]
+--            putTextLn $ "perm " <> show perm
+--
+--            f <- replicateM k $ randomRIO (0,2^l-1)
+--            print f
+--            fEnc <- paheEnc pkTop f
+--
+--            (valsPerm,()) <-
+--                concurrently
+--                (permuteClient req pkTop l perm fEnc)
+--                (permuteServer rep skTop)
+--
+--            valsDec <- paheDec skTop valsPerm
+--            print valsDec
 
       let testArgmax = do
-              vals <- replicateM m $ replicateM k $ randomRIO (0,2^l-1)
+              putTextLn "Starting argmax"
+              vals <- replicateM m $ replicateM r $ randomRIO (0,2^l-1)
               --print vals
-              let expected = foldr1 (\l1 l2 -> map (uncurry max) $ zip l1 l2) vals
+              let expectedMaxs = foldr1 (\l1 l2 -> map (uncurry max) $ zip l1 l2) vals
               encVals <- mapM (paheEnc pkTop) vals
+              putTextLn "Launching"
 
               ((maxes,indices),()) <-
                   measureTimeSingle "Argmax" $
                   concurrently
-                  (argmaxClient req pkTop pkDGK pkGM l encVals)
-                  (argmaxServer rep skTop skDGK skGM l m)
+                  (argmaxClient req pkTop pkDGK pkGM l r encVals)
+                  (argmaxServer rep skTop skDGK skGM l m r)
 
               putTextLn "Maxes/indices"
               decMaxes <- paheDec skTop maxes
-              print decMaxes
-              print indices
 
-              if (decMaxes /= expected)
-                  then error "Argmax failed" else putTextLn "OK"
+              unless (expectedMaxs `isPrefixOf` decMaxes) $ do
+                  print expectedMaxs
+                  print decMaxes
+                  print indices
+                  error "Argmax failed"
+
+              putTextLn "OK"
 
 
-      let testCompare = do
-              xs <- replicateM k $ randomRIO (0,2^l-1)
-              ys <- replicateM k $ randomRIO (0,2^l-1)
-              let expected = map (\(x,y) -> x >= y) $ zip xs ys
-
-              xsEnc <- paheEnc pkTop xs
-              ysEnc <- paheEnc pkTop ys
-
-              (gamma,()) <-
-                  measureTimeSingle "SecureCompare" $
-                  concurrently
-                  (secureCompareClient req pkTop pkDGK pkGM l xsEnc ysEnc)
-                  (secureCompareServer rep skTop skDGK skGM l)
-
-              secCompRes <- paheDec skGM gamma
-              unless (map (==1) secCompRes == expected) $ do
-                  print xs
-                  print ys
-                  putTextLn $ "Expected: " <> show expected
-                  putTextLn $ "Got:      " <> show secCompRes
-                  putTextLn $ "          " <> show (map (==1) secCompRes)
-                  error "Mismatch"
-
-      let testDGK = replicateM_ 100 $ do
-              cs <- replicateM k $ randomRIO (0,2^l-1)
-              rs <- replicateM k $ randomRIO (0,2^l-1)
-              let expected = map (\(c,r) -> r <= c) $ zip cs rs
-
-              putTextLn "Starting the protocol"
-              (eps,()) <-
-                  concurrently
-                  (dgkClient req pkDGK pkGM l rs)
-                  (dgkServer rep skDGK skGM l cs)
-
-              dgkRes <- map (== 1) <$> paheDec skGM eps
-              unless (dgkRes == expected) $ do
-                  print cs
-                  print rs
-                  putTextLn $ "Expected: " <> show expected
-                  putTextLn $ "Got:      " <> show dgkRes
-                  error "Mismatch"
-
-      testLog2Argmax
-      --testLogArgmax
-      --testArgmax
+      testLogArgmax
+      testArgmax
 
       --testPermFold
       --testPerm
       --testFold
-
-      --testDGK
-      --testCompare
