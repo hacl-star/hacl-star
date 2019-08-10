@@ -230,8 +230,8 @@ secureCompareServer sock skTop skDGK skGM l = do
 -- Tests
 ----------------------------------------------------------------------------
 
-runProtocol :: IO ()
-runProtocol =
+testCmp :: IO ()
+testCmp =
     withContext $ \ctx ->
     withSocket ctx Req $ \req ->
     withSocket ctx Rep $ \rep -> do
@@ -303,7 +303,7 @@ runProtocol =
                   (dgkServer rep skDGK skGM l cs)
 
               dgkRes <- map (== 1) <$> paheDec skGM eps
-              unless (dgkRes == expected) $ do
+              unless (expected `isPrefixOf` dgkRes) $ do
                   print cs
                   print rs
                   putTextLn $ "Expected: " <> show expected

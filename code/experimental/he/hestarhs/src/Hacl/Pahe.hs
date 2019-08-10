@@ -72,23 +72,20 @@ paheRerand pk c = paheSIMDAdd pk c =<< paheEnc pk (replicate (paheK pk) 0)
 
 data GMSep
 
-gmEncOne :: Word32 -> Bignum -> Integer -> Bignum -> Integer -> IO Bignum
-gmEncOne bn n nRaw y m = do
-    r0 <- randomRIO (0, nRaw - 1) `suchThat`
-             (\x -> gcd x nRaw == 1)
-    r <- toBignum bn r0
-    let mi = (== 1) . (`mod` 2) $ m
-    c <- toBignum bn 0
-    gmEnc bn n y r mi c
-
-    freeBignum r
-    pure c
-
 gmEncRaw ::
        Int -> Word32 -> Bignum -> Integer -> Bignum -> [Integer] -> IO [Bignum]
-gmEncRaw simdn bn n nRaw y m = do
-    when (length m > simdn) $ error "GM encrypt: length mismatch"
-    forM m $ gmEncOne bn n nRaw y
+gmEncRaw simdn bn n nRaw y ms = do
+    when (length ms > simdn) $ error "GM encrypt: length mismatch"
+    forM ms $ \m -> do
+        r0 <- randomRIO (0, nRaw - 1) `suchThat`
+                 (\x -> gcd x nRaw == 1)
+        r <- toBignum bn r0
+        let mi = (== 1) . (`mod` 2) $ m
+        c <- toBignum bn 0
+        gmEnc bn n y r mi c
+
+        freeBignum r
+        pure c
 
 
 instance Pahe GMSep where
@@ -237,20 +234,19 @@ pailEncRaw ::
     -> Bignum
     -> [Integer]
     -> IO [Bignum]
-pailEncRaw simdn bn n nRaw n2 g m = do
-    -- when (length m /= simdn) $ error "Paillier encrypt: length mismatch"
-    vals <- forM [0..simdn-1] $ \i -> do
+pailEncRaw simdn bn n nRaw n2 g ms = do
+    when (length ms > simdn) $ error "Paillier encrypt: length mismatch"
+    forM ms $ \m -> do
         r0 <- randomRIO (0, nRaw - 1) `suchThat`
                  (\x -> gcd x nRaw == 1)
         r <- toBignum bn r0
-        mi <- toBignum bn $ (m !! i) `mod` nRaw
+        mi <- toBignum bn $ m `mod` nRaw
         c <- toBignum bn 0
         paillierEnc bn n n2 g r mi c
 
         mapM_ freeBignum [r,mi]
 
         pure c
-    pure vals
 
 
 instance Pahe PailSep where
@@ -339,41 +335,50 @@ instance Pahe PailSep where
     paheEnc PailSepPk{..} m =
         PailCiph <$> pailEncRaw psp_simdn psp_bn psp_n psp_nRaw psp_n2 psp_g m
 
-    paheDec PailSepSk{..} (PailCiph ms) = do
-        --when (length ms /= pss_simdn) $ error "Paillier decrypt: length mismatch"
-        forM ms $ \ci -> do
+    paheDec PailSepSk{..} (PailCiph cs) = do
+        when (length cs > pss_simdn) $ error "Paillier decrypt: length mismatch"
+        decrypted <- forM cs $ \ci -> do
             mi <- toBignum pss_bn 0
             paillierDec pss_bn pss_p pss_q pss_n pss_n2 pss_g pss_lambda pss_l2inv ci mi
             res <- fromBignum pss_bn mi
             freeBignum mi
             pure res
+        pure $ decrypted ++ replicate (pss_simdn - length cs) 0
 
-    paheSIMDAdd PailSepPk{..} (PailCiph ms1) (PailCiph ms2) = do
-        --when (length ms1 /= psp_simdn || length ms2 /= psp_simdn) $
-        --    error "Paillier simd add: length mismatch"
-        fmap PailCiph $ forM (ms1 `zip` ms2) $ \(m1,m2) -> do
-            mi <- toBignum psp_bn 0
-            paillierHomAdd psp_bn psp_n psp_n2 m1 m2 mi
-            pure mi
+    paheSIMDAdd PailSepPk{..} (PailCiph c1) (PailCiph c2) = do
+        when (length c1 > psp_simdn || length c2 > psp_simdn) $
+            error "Paillier simd add: length mismatch"
 
-    paheSIMDMulScal PailSepPk{..} (PailCiph ms1) m2 = do
-        --when (length ms1 /= psp_simdn || length m2 /= psp_simdn) $
-        --    error "Paillier simd mul: length mismatch"
-        fmap PailCiph $ forM (ms1 `zip` m2) $ \(m1,p0) -> do
-            mi <- toBignum psp_bn 0
-            p <- toBignum psp_bn $ p0 `mod` psp_nRaw
-            paillierHomMulScal psp_bn psp_n psp_n2 m1 p mi
-            freeBignum p
-            pure mi
+        let delta = case compare (length c1) (length c2) of
+              EQ -> []
+              LT -> drop (length c1) c2
+              GT -> drop (length c2) c1
 
-    paheMultBlind pk@PailSepPk{..} ms = do
-        vals <- replicateM psp_simdn $ randomRIO (1,psp_nRaw`div`2)
-        paheSIMDMulScal pk ms vals
+        commonSum <- forM (c1 `zip` c2) $ \(c1i,c2i) -> do
+            ci <- toBignum psp_bn 0
+            paillierHomAdd psp_bn psp_n psp_n2 c1i c2i ci
+            pure ci
 
-    paheToBS PailSepPk{..} (PailCiph ms) = do
-        when (length ms /= psp_simdn) $
+        pure $ PailCiph $ commonSum ++ delta
+
+    paheSIMDMulScal PailSepPk{..} (PailCiph c) scal = do
+        when (length c > psp_simdn || length scal > psp_simdn) $
+            error "Paillier simd mul: length mismatch"
+        fmap PailCiph $ forM (c `zip` scal) $ \(ci,s) -> do
+            cRes <- toBignum psp_bn 0
+            sBn <- toBignum psp_bn $ s `mod` psp_nRaw
+            paillierHomMulScal psp_bn psp_n psp_n2 ci sBn cRes
+            freeBignum sBn
+            pure cRes
+
+    paheMultBlind pk@PailSepPk{..} c@(PailCiph cs) = do
+        vals <- replicateM (length cs) $ randomRIO (1,psp_nRaw`div`2)
+        paheSIMDMulScal pk c vals
+
+    paheToBS PailSepPk{..} (PailCiph cs) = do
+        when (length cs /= psp_simdn) $
             error "Paillier paheToBS failed length"
-        fmap BS.concat $ forM ms $ fromBignumBS psp_bn
+        fmap BS.concat $ forM cs $ fromBignumBS psp_bn
 
     paheFromBS PailSepPk{..} bsl = do
         let parse bs = do
@@ -401,13 +406,14 @@ dgkEncRaw ::
     -> Bignum
     -> [Integer]
     -> IO Bignum
-dgkEncRaw simdn bn n nRaw u uFactsRaw g h m = do
-    when (length m /= simdn) $ error "DGK encrypt: length mismatch"
+dgkEncRaw simdn bn n nRaw u uFactsRaw g h ms0 = do
+    when (length ms0 > simdn) $ error "DGK encrypt: length mismatch"
+    let ms = ms0 ++ replicate (simdn - length ms0) 0
 
     r0 <- randomRIO (0, nRaw - 1) `suchThat`
              (\x -> gcd x nRaw == 1)
     r <- toBignum bn r0
-    mPacked <- toBignum bn $ P.crt uFactsRaw (P.crtToBase uFactsRaw m)
+    mPacked <- toBignum bn $ P.crt uFactsRaw (P.crtToBase uFactsRaw ms)
     c <- toBignum bn 0
 
     dgkEnc bn n u g h r mPacked c
@@ -531,9 +537,13 @@ instance Pahe DgkCrt where
         dgkHomAdd dcp_bn dcp_n c1 c2 c3
         pure $ DgkCiph c3
 
-    paheSIMDMulScal DgkCrtPk{..} (DgkCiph c1) coeffs = do
+    paheSIMDMulScal DgkCrtPk{..} (DgkCiph c1) scal0 = do
+        when (length scal0 > dcp_simdn) $
+            error "Paillier simd mul: length mismatch"
+        let scal = scal0 ++ replicate (dcp_simdn - length scal0) 0
+
         c3 <- toBignum dcp_bn 0
-        bn_coeffs <- toBignum dcp_bn $ P.crt dcp_uFactsRaw (P.crtToBase dcp_uFactsRaw coeffs)
+        bn_coeffs <- toBignum dcp_bn $ P.crt dcp_uFactsRaw (P.crtToBase dcp_uFactsRaw scal)
         dgkHomMulScal dcp_bn dcp_n c1 bn_coeffs c3
         freeBignum bn_coeffs
         pure $ DgkCiph c3
