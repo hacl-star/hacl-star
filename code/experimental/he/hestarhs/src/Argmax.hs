@@ -5,236 +5,23 @@ module Argmax where
 import Universum
 
 import Control.Concurrent.Async (concurrently)
-import Data.Array.IO
-import Data.Bits (testBit)
 import qualified Data.ByteString as BS
 import Data.List (findIndex, (!!))
 import qualified Data.List.NonEmpty as NE
 import System.Random (randomRIO)
 import System.ZMQ4
 
+import Comparison
 import Hacl
 import Utils
 
 
-
-lambda :: Integral a => a
-lambda = 80
 
 w64ToBs :: Word64 -> ByteString
 w64ToBs = BS.pack . map fromIntegral . inbase 256 . fromIntegral
 
 w64FromBs :: ByteString -> Word64
 w64FromBs = fromIntegral . frombase 256 . map fromIntegral . BS.unpack
-
-----------------------------------------------------------------------------
--- DGK
-----------------------------------------------------------------------------
-
--- taken from https://wiki.haskell.org/Random_shuffle
-shuffle :: [a] -> IO [a]
-shuffle xs = do
-        ar <- newArray' n xs
-        forM [1..n] $ \i -> do
-            j <- randomRIO (i,n)
-            vi <- readArray ar i
-            vj <- readArray ar j
-            writeArray ar j vi
-            return vj
-  where
-    n = length xs
-    newArray' :: Int -> [a] -> IO (IOArray Int a)
-    newArray' n' xs' =  newListArray (1,n') xs'
-
-
--- | Compute r <= c jointly. Client has r, server has c.
-dgkClient ::
-       (Pahe sDGK, Pahe sGM)
-    => Socket Req
-    -> PahePk sDGK
-    -> PahePk sGM
-    -> Int
-    -> [Integer]
-    -> IO (PaheCiph sGM)
-dgkClient sock pkDGK pkGM l rs = do
-
-    let k = paheK pkDGK -- they should be similar between two schemes
-    log "Client: dgk started"
-    send sock [] "init"
-
-    let rbits = map (\i -> map (\c -> bool 0 1 $ testBit c i) rs) [0..l-1]
-    log $ "Client rbits: " <> show rbits
-    encRBits <- mapM (paheEnc pkDGK) rbits
-
-    cs <- mapM (paheFromBS pkDGK) =<< receiveMulti sock
-
-    log "Client: computing xors"
-    xors <- forM (cs `zip` [0..]) $ \(ci,i) -> do
-        let bitmask = rbits !! i
-        let bitmaskNeg = map (\x -> 1 - x) bitmask
-
-        -- ci * maskNeg + (1-ci) * mask
-        a <- paheSIMDMulScal pkDGK ci bitmaskNeg
-        oneMinCi <- paheSIMDSub pkDGK (paheOne pkDGK) ci
-        c <- paheSIMDMulScal pkDGK oneMinCi bitmask
-        paheSIMDAdd pkDGK a c
-
-    --log "XORS: "
-    --print =<< mapM (paheDec skDGK) xors
-
-    delta <- replicateM k (randomRIO (0,1))
-    deltaEnc <- paheEnc pkDGK delta
-    let s0 = map (\i -> 1 - 2 * i) delta
-    log $ "Client: s = " <> show s0
-    s <- paheEnc pkDGK s0
-
-    let computeXorSums i prev = do
-            nextXorSum <- paheSIMDAdd pkDGK prev (xors !! i)
-            xorsTail <- if i == 0 then pure [] else computeXorSums (i-1) nextXorSum
-            pure $ nextXorSum : xorsTail
-    xorsums <- reverse <$> computeXorSums (l-1) (paheZero pkDGK)
-
-    --log "XOR SUBS: "
-    --print =<< mapM (paheDec skDGK) xorsums
-
-    log "Client: computing cis"
-    ci <- forM [0..l-1] $ \i -> do
-        a <- paheSIMDAdd pkDGK s (encRBits !! i)
-        b <- paheSIMDSub pkDGK a (cs !! i)
-
-        if i == l-1 then pure b else do
-            xorsum3 <- paheSIMDMulScal pkDGK (xorsums !! (i+1)) $ replicate k 3
-            paheSIMDAdd pkDGK b xorsum3
-
-    xorsumFull3 <- paheSIMDMulScal pkDGK (xorsums !! 0) $ replicate k 3
-    cLast <- paheSIMDAdd pkDGK deltaEnc xorsumFull3
-
-    --log "CIs: "
-    --print =<< mapM (paheDec skDGK) (cLast : ci)
-    log "CIs were computed"
-
-    ciShuffled <- shuffle =<< mapM (paheMultBlind pkDGK) (cLast : ci)
-
-    --log "CIs shuffled/blinded: "
-    --print =<< mapM (paheDec skDGK) ciShuffled
-
-    sendMulti sock =<< (NE.fromList <$> mapM (paheToBS pkDGK) ciShuffled)
-    log "Client: send,waiting"
-    zs <- paheFromBS pkGM =<< receive sock
-    log "Client: computing eps"
-
-    let compeps = do
-          let sMask = map (bool 1 0 . (== 1)) s0
-          let sMaskNeg = map (\x -> 1 - x) sMask
-          -- zs * s + (1-zs) * neg s
-          a <- paheSIMDMulScal pkGM zs sMask
-          oneMinZs <- paheSIMDSub pkGM (paheOne pkGM) zs
-          c <- paheSIMDMulScal pkGM oneMinZs sMaskNeg
-          paheSIMDAdd pkGM a c
-
-    eps <- compeps
-
-    log "Client: dgk ended"
-    pure eps
-
-dgkServer ::
-       (Pahe sDGK, Pahe sGM)
-    => Socket Rep
-    -> PaheSk sDGK
-    -> PaheSk sGM
-    -> Int
-    -> [Integer]
-    -> IO ()
-dgkServer sock skDGK skGM l cs = do
-    log "Server: dgk started"
-    let pkDGK = paheToPublic skDGK
-    let pkGM = paheToPublic skGM
-    let k = paheK pkDGK
-
-    let cbits = map (\i -> map (\c -> bool 0 1 $ testBit c i) cs) [0..l-1]
-    --log $ "Server cbits: " <> show cbits
-
-    _ <- receive sock
-
-    sendMulti sock =<< (NE.fromList <$> mapM (paheToBS pkDGK <=< paheEnc pkDGK) cbits)
-
-    es <- mapM (paheFromBS pkDGK) =<< receiveMulti sock
-    esZeroes <-
-        measureTimeSingle "DGK Server side fromZeroes" $
-        mapM (paheIsZero skDGK) es
-    let zeroes = map (bool 0 1) $
-                 foldr (\e acc -> map (uncurry (&&)) $ zip e acc)
-                       (replicate k True)
-                       (map not <$> esZeroes)
-
-    log $ "Server zeroes: " <> show zeroes
-
-    enczeroes <- paheEnc pkGM zeroes
-    send sock [] =<< paheToBS pkGM enczeroes
-
-    log "Server: dgk exited"
-
-
-----------------------------------------------------------------------------
--- Secure Comparison
-----------------------------------------------------------------------------
-
--- | Compute y <= x jointly with secret inputs. Client has r, server has c.
-secureCompareClient ::
-       (Pahe sTop, Pahe sDGK, Pahe sGM)
-    => Socket Req
-    -> PahePk sTop
-    -> PahePk sDGK
-    -> PahePk sGM
-    -> Int
-    -> PaheCiph sTop
-    -> PaheCiph sTop
-    -> IO (PaheCiph sGM)
-secureCompareClient sock pkTop pkDGK pkGM l x y = do
-    log "Client: secureCompare started"
-    let k = paheK pkDGK
-
-    rhos::[Integer] <- replicateM k $ randomRIO (0, 2^(l + lambda) - 1)
-    s1 <- paheSIMDAdd pkTop x =<< paheEnc pkTop (map (+(2^l)) rhos)
-    gamma <- paheSIMDSub pkTop s1 y
-
-    send sock [] =<< paheToBS pkTop gamma
-
-    cDiv2l <- paheFromBS pkGM =<< receive sock
-
-    eps <-
-        measureTimeSingle "SC DGK took: " $
-        dgkClient sock pkDGK pkGM l $ map (`mod` (2^l)) rhos
-    epsNeg <- paheNeg pkGM eps
-
-    rDiv2l <- paheEnc pkGM $ map (`div` (2^l)) rhos
-    rPlusEpsNeg <- paheSIMDAdd pkGM rDiv2l epsNeg
-    delta <- paheSIMDSub pkGM cDiv2l rPlusEpsNeg
-
-    log "Client: secureCompare exited"
-    pure delta
-
-secureCompareServer ::
-       (Pahe sTop, Pahe sDGK, Pahe sGM)
-    => Socket Rep
-    -> PaheSk sTop
-    -> PaheSk sDGK
-    -> PaheSk sGM
-    -> Int
-    -> IO ()
-secureCompareServer sock skTop skDGK skGM l = do
-    let pkTop = paheToPublic skTop
-    let pkGM = paheToPublic skGM
-    log "Server: securecompare started"
-
-    gamma <- (paheDec skTop <=< paheFromBS pkTop) =<< receive sock
-    let cMod2 = map (`mod` (2^l)) gamma
-    let cDiv2 = map (`div` (2^l)) gamma
-    send sock [] =<< (paheToBS pkGM =<< paheEnc pkGM cDiv2)
-
-
-    dgkServer sock skDGK skGM l cMod2
-    log "Server: securecompare exited"
 
 ----------------------------------------------------------------------------
 -- Argmax #0
@@ -647,8 +434,8 @@ argmaxLog2Client sock pkTop pkDGK pkGM l m v1 v2 = do
             -- we only care about first 2^(i-1) bits of this mask though
             p1mask <- replicateM curLen $ randomRIO (0, 2 ^ l - 1)
             p2mask <- replicateM curLen $ randomRIO (0, 2 ^ l - 1)
-            p1masked <- paheSIMDAdd pkTop p1 =<< paheEnc pkTop (p1mask ++ replicate (k-curLen) 0)
-            p2masked <- paheSIMDAdd pkTop p2 =<< paheEnc pkTop (p2mask ++ replicate (k-curLen) 0)
+            p1masked <- paheSIMDAdd pkTop p1 =<< paheEnc pkTop p1mask
+            p2masked <- paheSIMDAdd pkTop p2 =<< paheEnc pkTop p2mask
 
             pXMaskedBS <- mapM (paheToBS pkTop) [p1masked,p2masked]
             deltaBS <- paheToBS pkGM delta
@@ -661,24 +448,26 @@ argmaxLog2Client sock pkTop pkDGK pkGM l m v1 v2 = do
                 -- each of these is of size 2^(i-1)
                 [delta1,delta2,combM1,combM2] <-
                     mapM (paheFromBS pkTop) =<< receiveMulti sock
-                delta1Neg <- paheSIMDSub pkTop (paheOne pkTop) delta1
-                delta2Neg <- paheSIMDSub pkTop (paheOne pkTop) delta2
 
-                let nextLen = curLen`div`2
-                let getlow xs = take nextLen xs ++ replicate (k-nextLen) 0
-                let gethigh xs = take nextLen (drop nextLen xs) ++ replicate (k-nextLen) 0
 
-                -- unmask by doing combinedMasked - delta*p1 - deltaNeg*p2
-                comb1 <- do
-                    tmp1 <- paheSIMDMulScal pkTop delta1 $ getlow p1maskNeg
-                    tmp2 <- paheSIMDMulScal pkTop delta1Neg $ getlow p2maskNeg
-                    paheSIMDAdd pkTop combM1 =<< paheSIMDAdd pkTop tmp1 tmp2
+                (comb1,comb2) <- measureTimeSingle "argmax log2 client combine" $ do
+                  delta1Neg <- paheSIMDSub pkTop (paheOne pkTop) delta1
+                  delta2Neg <- paheSIMDSub pkTop (paheOne pkTop) delta2
 
-                comb2 <- do
-                    tmp1 <- paheSIMDMulScal pkTop delta2 $ gethigh p1maskNeg
-                    tmp2 <- paheSIMDMulScal pkTop delta2Neg $ gethigh p2maskNeg
-                    paheSIMDAdd pkTop combM2 =<< paheSIMDAdd pkTop tmp1 tmp2
+                  let nextLen = curLen`div`2
+                  let getlow xs = take nextLen xs
+                  let gethigh xs = take nextLen (drop nextLen xs)
+                  -- unmask by doing combinedMasked - delta*p1 - deltaNeg*p2
+                  comb1 <- do
+                      tmp1 <- paheSIMDMulScal pkTop delta1 $ getlow p1maskNeg
+                      tmp2 <- paheSIMDMulScal pkTop delta1Neg $ getlow p2maskNeg
+                      paheSIMDAdd pkTop combM1 =<< paheSIMDAdd pkTop tmp1 tmp2
 
+                  comb2 <- do
+                      tmp1 <- paheSIMDMulScal pkTop delta2 $ gethigh p1maskNeg
+                      tmp2 <- paheSIMDMulScal pkTop delta2Neg $ gethigh p2maskNeg
+                      paheSIMDAdd pkTop combM2 =<< paheSIMDAdd pkTop tmp1 tmp2
+                  pure (comb1,comb2)
                 loop comb1 comb2 (i-1)
 
     loop v1Perm v2Perm m
@@ -727,8 +516,8 @@ argmaxLog2Server sock skTop skDGK skGM l m = do
 
             if i == 0 then pure ixs' else do
                 let nextLen = 2^(i-1)
-                let getlow xs = take nextLen xs ++ replicate (k-nextLen) 0
-                let gethigh xs = take nextLen (drop nextLen xs) ++ replicate (k-nextLen) 0
+                let getlow xs = take nextLen xs
+                let gethigh xs = take nextLen (drop nextLen xs)
 
                 let delta1 = getlow delta
                 let delta2 = gethigh delta
@@ -765,9 +554,9 @@ runProtocol =
 
       putTextLn "Keygen..."
       -- SIMD parameter
-      let k = 8
+      let k = 16
       -- bit size of numbers we compare
-      let l = 32
+      let l = 64
       -- Number of argmax input elements
       let m::Int = 2 ^ (log2 (fromIntegral k) - 1 :: Integer)
       let mlog::Int = log2 (m-1)
@@ -831,7 +620,7 @@ runProtocol =
             print =<< paheDec skTop v2
 
       let testLogArgmax = do
-            vals <- replicateM m $ randomRIO (0,2^l-1)
+            vals <- replicateM k $ randomRIO (0,2^l-1)
             let expectedMax = foldr1 max vals
             let expectedMaxIx =
                     fromMaybe (error "") $ findIndex (==expectedMax) vals
@@ -885,10 +674,9 @@ runProtocol =
 
       let testArgmax = do
               vals <- replicateM m $ replicateM k $ randomRIO (0,2^l-1)
-              print vals
+              --print vals
               let expected = foldr1 (\l1 l2 -> map (uncurry max) $ zip l1 l2) vals
               encVals <- mapM (paheEnc pkTop) vals
-
 
               ((maxes,indices),()) <-
                   measureTimeSingle "Argmax" $
@@ -905,7 +693,7 @@ runProtocol =
                   then error "Argmax failed" else putTextLn "OK"
 
 
-      let testCompare = replicateM_ 100 $ do
+      let testCompare = do
               xs <- replicateM k $ randomRIO (0,2^l-1)
               ys <- replicateM k $ randomRIO (0,2^l-1)
               let expected = map (\(x,y) -> x >= y) $ zip xs ys
@@ -935,7 +723,6 @@ runProtocol =
 
               putTextLn "Starting the protocol"
               (eps,()) <-
-                  measureTimeSingle "DGKcomp" $
                   concurrently
                   (dgkClient req pkDGK pkGM l rs)
                   (dgkServer rep skDGK skGM l cs)
@@ -949,11 +736,12 @@ runProtocol =
                   error "Mismatch"
 
       testLog2Argmax
-      --testPermFold
       --testLogArgmax
       --testArgmax
+
+      --testPermFold
       --testPerm
       --testFold
-      --testArgmax
+
       --testDGK
       --testCompare
