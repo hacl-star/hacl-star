@@ -40,10 +40,11 @@ dgkClient ::
     -> IO (PaheCiph sGM)
 dgkClient sock pkDGK pkGM l rs =
   measureTimeSingle "dgk client" $ do
-
-    let k = paheK pkDGK -- they should be similar between two schemes
     log "Client: dgk started"
     send sock [] "init"
+
+    let rsLen = length rs
+    when (rsLen > paheK pkDGK) $ error "dgk rsLen is too big"
 
     log "Client: encoding rbits"
     let !rbits = map (\i -> map (\c -> bool 0 1 $ testBit c i) rs) [0..l-1]
@@ -68,7 +69,7 @@ dgkClient sock pkDGK pkGM l rs =
     --log "XORS: "
     --print =<< mapM (paheDec skDGK) xors
 
-    delta <- replicateM k (randomRIO (0,1))
+    delta <- replicateM rsLen (randomRIO (0,1))
     deltaEnc <- paheEnc pkDGK delta
     let s0 = map (\i -> 1 - 2 * i) delta
     log $ "Client: s = " <> show s0
@@ -90,10 +91,10 @@ dgkClient sock pkDGK pkGM l rs =
         b <- paheSIMDSub pkDGK a (cs !! i)
 
         if i == l-1 then pure b else do
-            xorsum3 <- paheSIMDMulScal pkDGK (xorsums !! (i+1)) $ replicate k 3
+            xorsum3 <- paheSIMDMulScal pkDGK (xorsums !! (i+1)) $ replicate rsLen 3
             paheSIMDAdd pkDGK b xorsum3
 
-    xorsumFull3 <- paheSIMDMulScal pkDGK (xorsums !! 0) $ replicate k 3
+    xorsumFull3 <- paheSIMDMulScal pkDGK (xorsums !! 0) $ replicate rsLen 3
     cLast <- paheSIMDAdd pkDGK deltaEnc xorsumFull3
 
     --log "CIs: "
@@ -136,7 +137,7 @@ dgkServer sock skDGK skGM l cs = do
     log "Server: dgk started"
     let pkDGK = paheToPublic skDGK
     let pkGM = paheToPublic skGM
-    let k = paheK pkDGK
+    let csLen = length cs
 
     let cbits = map (\i -> map (\c -> bool 0 1 $ testBit c i) cs) [0..l-1]
     --log $ "Server cbits: " <> show cbits
@@ -150,10 +151,10 @@ dgkServer sock skDGK skGM l cs = do
     log $ "Server: computing zeroes"
     es <- mapM (paheFromBS pkDGK) =<< receiveMulti sock
     esZeroes <-
-        mapM (paheIsZero skDGK) es
+        mapM (fmap (take csLen) . paheIsZero skDGK) es
     let zeroes = map (bool 0 1) $
                  foldr (\e acc -> map (uncurry (&&)) $ zip e acc)
-                       (replicate k True)
+                       (replicate csLen True)
                        (map not <$> esZeroes)
 
     log $ "Server zeroes: " <> show zeroes
@@ -176,16 +177,17 @@ secureCompareClient ::
     -> PahePk sDGK
     -> PahePk sGM
     -> Int
+    -> Int -- how many to SIMD compare
     -> PaheCiph sTop
     -> PaheCiph sTop
     -> IO (PaheCiph sGM)
-secureCompareClient sock pkTop pkDGK pkGM l x y =
+secureCompareClient sock pkTop pkDGK pkGM l m x y =
   measureTimeSingle "secure compare client" $ do
 
     log "Client: secureCompare started"
-    let k = paheK pkDGK
+    when (m > paheK pkDGK) $ error "Secure compare: m is too big"
 
-    rhos::[Integer] <- replicateM k $ randomRIO (0, 2^(l + lambda) - 1)
+    rhos::[Integer] <- replicateM m $ randomRIO (0, 2^(l + lambda) - 1)
     s1 <- paheSIMDAdd pkTop x =<< paheEnc pkTop (map (+(2^l)) rhos)
     gamma <- paheSIMDSub pkTop s1 y
 
@@ -193,8 +195,7 @@ secureCompareClient sock pkTop pkDGK pkGM l x y =
 
     cDiv2l <- paheFromBS pkGM =<< receive sock
 
-    eps <-
-        dgkClient sock pkDGK pkGM l $ map (`mod` (2^l)) rhos
+    eps <- dgkClient sock pkDGK pkGM l $ map (`mod` (2^l)) rhos
     epsNeg <- paheNeg pkGM eps
 
     rDiv2l <- paheEnc pkGM $ map (`div` (2^l)) rhos
@@ -211,15 +212,16 @@ secureCompareServer ::
     -> PaheSk sDGK
     -> PaheSk sGM
     -> Int
+    -> Int
     -> IO ()
-secureCompareServer sock skTop skDGK skGM l = do
+secureCompareServer sock skTop skDGK skGM l m = do
     let pkTop = paheToPublic skTop
     let pkGM = paheToPublic skGM
     log "Server: securecompare started"
 
     gamma <- (paheDec skTop <=< paheFromBS pkTop) =<< receive sock
-    let cMod2 = map (`mod` (2^l)) gamma
-    let cDiv2 = map (`div` (2^l)) gamma
+    let cMod2 = map (`mod` (2^l)) $ take m gamma
+    let cDiv2 = map (`div` (2^l)) $ take m gamma
     send sock [] =<< (paheToBS pkGM =<< paheEnc pkGM cDiv2)
 
 
@@ -230,8 +232,8 @@ secureCompareServer sock skTop skDGK skGM l = do
 -- Tests
 ----------------------------------------------------------------------------
 
-testCmp :: IO ()
-testCmp =
+_testCmp :: IO ()
+_testCmp =
     withContext $ \ctx ->
     withSocket ctx Req $ \req ->
     withSocket ctx Rep $ \rep -> do
@@ -244,14 +246,7 @@ testCmp =
       let k = 16
       -- bit size of numbers we compare
       let l = 64
-      -- Number of argmax input elements
-      let m::Int = 2 ^ (log2 (fromIntegral k) - 1 :: Integer)
-      let mlog::Int = log2 (m-1)
-      -- plaintext space size
-      --let margin = 2^(lambda + l)
-      let margin = 2^(l+3)
-
-      putTextLn $ "mlog,m: " <> show (mlog,m)
+      m <- randomRIO (1,k)
 
       -- system used to carry long secureCompare results
       skTop <- paheKeyGen @PailSep k (2^(lambda + l + 100))
@@ -264,13 +259,13 @@ testCmp =
       let pkDGK = paheToPublic skDGK
 
       -- system used to carry QR results
-      skGM <- paheKeyGen @GMSep k margin
+      skGM <- paheKeyGen @GMSep k (2^(l+5))
       --let skGM = skDGK
       let pkGM = paheToPublic skGM
 
-      let testCompare = do
-              xs <- replicateM k $ randomRIO (0,2^l-1)
-              ys <- replicateM k $ randomRIO (0,2^l-1)
+      let testCompare = replicateM_ 10 $ do
+              xs <- replicateM m $ randomRIO (0,2^l-1)
+              ys <- replicateM m $ randomRIO (0,2^l-1)
               let expected = map (\(x,y) -> x >= y) $ zip xs ys
 
               xsEnc <- paheEnc pkTop xs
@@ -279,11 +274,11 @@ testCmp =
               (gamma,()) <-
                   measureTimeSingle "SecureCompare" $
                   concurrently
-                  (secureCompareClient req pkTop pkDGK pkGM l xsEnc ysEnc)
-                  (secureCompareServer rep skTop skDGK skGM l)
+                  (secureCompareClient req pkTop pkDGK pkGM l m xsEnc ysEnc)
+                  (secureCompareServer rep skTop skDGK skGM l m)
 
               secCompRes <- paheDec skGM gamma
-              unless (map (==1) secCompRes == expected) $ do
+              unless (expected `isPrefixOf` map (==1) secCompRes) $ do
                   print xs
                   print ys
                   putTextLn $ "Expected: " <> show expected
@@ -310,5 +305,5 @@ testCmp =
                   putTextLn $ "Got:      " <> show dgkRes
                   error "Mismatch"
 
-      testDGK
-      --testCompare
+      --testDGK
+      testCompare
