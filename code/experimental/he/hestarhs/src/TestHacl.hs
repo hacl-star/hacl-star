@@ -147,7 +147,7 @@ testGMPahe = do
 
     let n = 16
     let l::Integer = 8
-    sk <- paheKeyGen @GMSep n (2^l)
+    sk <- paheKeyGen @PailSep n (2^l)
     let pk = paheToPublic sk
 
     replicateM_ 100 $ do
