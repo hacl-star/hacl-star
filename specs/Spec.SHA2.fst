@@ -67,38 +67,38 @@ let op0: a:sha2_alg -> Tot ops = function
   | SHA2_512 -> op384_512
 
 inline_for_extraction
-let ( +. ) (#a:sha2_alg): word a -> word a -> word a =  
+let ( +. ) (#a:sha2_alg): word a -> word a -> word a =
   match a with
   | SHA2_224 | SHA2_256 -> ( +. ) #U32 #SEC
   | SHA2_384 | SHA2_512 -> ( +. ) #U64 #SEC
 
 inline_for_extraction
-let ( ^. ) (#a:sha2_alg): word a -> word a -> word a = 
+let ( ^. ) (#a:sha2_alg): word a -> word a -> word a =
   match a with
   | SHA2_224 | SHA2_256 -> ( ^. ) #U32 #SEC
   | SHA2_384 | SHA2_512 -> ( ^. ) #U64 #SEC
 
 
 inline_for_extraction
-let ( &. ) (#a:sha2_alg): word a -> word a -> word a = 
+let ( &. ) (#a:sha2_alg): word a -> word a -> word a =
   match a with
   | SHA2_224 | SHA2_256 -> ( &. ) #U32 #SEC
   | SHA2_384 | SHA2_512 -> ( &. ) #U64 #SEC
 
 inline_for_extraction
-let ( ~. ) (#a:sha2_alg): word a -> word a = 
+let ( ~. ) (#a:sha2_alg): word a -> word a =
   match a with
   | SHA2_224 | SHA2_256 -> ( ~. ) #U32 #SEC
   | SHA2_384 | SHA2_512 -> ( ~. ) #U64 #SEC
 
 inline_for_extraction
-let ( >>>. ) (#a:sha2_alg): word a -> rotval (word_t a) -> word a =  
+let ( >>>. ) (#a:sha2_alg): word a -> rotval (word_t a) -> word a =
   match a with
   | SHA2_224 | SHA2_256 -> ( >>>. ) #U32 #SEC
   | SHA2_384 | SHA2_512 -> ( >>>. ) #U64 #SEC
 
 inline_for_extraction
-let ( >>. ) (#a:sha2_alg): word a -> shiftval (word_t a) ->  word a =  
+let ( >>. ) (#a:sha2_alg): word a -> shiftval (word_t a) ->  word a =
   match a with
   | SHA2_224 | SHA2_256 -> ( >>. ) #U32 #SEC
   | SHA2_384 | SHA2_512 -> ( >>. ) #U64 #SEC
@@ -202,7 +202,7 @@ let init = h0
 let update_aux (a:sha2_alg) (hash:words_state a) (block:bytes{S.length block = block_length a}): Tot (words_state a) =
   let block_w = words_of_bytes a #block_word_length block in
   let hash_1 = shuffle_aux a hash block_w in
-  Lib.Sequence.map2 ( +. ) (hash <: Lib.Sequence.lseq (word a) (state_word_length a)) hash_1
+  Spec.Loops.seq_map2 ( +. ) (hash <: Lib.Sequence.lseq (word a) (state_word_length a)) hash_1
 
 [@"opaque_to_smt"]
 let update = update_aux
