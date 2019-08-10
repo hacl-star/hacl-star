@@ -26,6 +26,8 @@ logRaw x = do
 log :: MonadIO m => Text -> m ()
 log x = if True then pass else logRaw x
 
+lambda :: Integral a => a
+lambda = 80
 
 findM :: Monad m => (a -> m Bool) -> [a] -> m (Maybe a)
 findM _ []     = return Nothing

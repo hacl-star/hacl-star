@@ -11,6 +11,8 @@ cabal-version:       >=1.10
 library
   exposed-modules:
                        Argmax
+                       Comparison
+                       PermuteFold
                        Lib.Field
                        Lib.Misc
                        Lib
@@ -19,6 +21,7 @@ library
                        Hacl.Bignum
                        Hacl.Packing
                        Hacl.Pahe
+                       Hacl.PaheImpl
                        Hacl.Support
                        TestHacl
                        Playground

@@ -20,14 +20,9 @@ import System.ZMQ4
 import Hacl
 import Utils
 
-
-lambda :: Integral a => a
-lambda = 80
-
 ----------------------------------------------------------------------------
 -- DGK
 ----------------------------------------------------------------------------
-
 
 -- | Compute r <= c jointly. Client has r, server has c.
 dgkClient ::
