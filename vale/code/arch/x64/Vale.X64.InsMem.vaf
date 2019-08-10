@@ -58,7 +58,7 @@ var heap13:vale_heap {:state heap(13)};
 var heap14:vale_heap {:state heap(14)};
 var heap15:vale_heap {:state heap(15)};
     
-operand_type heap:vale_heap @ nat4 :=
+operand_type heap:vale_heap :=
 | inout heap0 | inout heap1 | inout heap2 | inout heap3
 | inout heap4 | inout heap5 | inout heap6 | inout heap7
 | inout heap8 | inout heap9 | inout heap10 | inout heap11
