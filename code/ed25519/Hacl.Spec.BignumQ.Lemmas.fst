@@ -301,7 +301,7 @@ let lemma_wide_as_nat_pow528 x =
   assert (v x9 < pow2 24);
   assert_norm (pow2 24 < pow2 40)
 
-#push-options "--z3rlimit 200"
+#push-options "--z3rlimit 200 --z3cliopt smt.arith.nl=false"
 val lemma_div264_aux: x:qelem_wide5 ->
   Lemma
   (requires
@@ -311,6 +311,8 @@ val lemma_div264_aux: x:qelem_wide5 ->
    (let (x0, x1, x2, x3, x4, x5, x6, x7, x8, x9) = x in
     wide_as_nat5 x / pow2 264 ==
       v x4 / pow2 40 + v x5 * pow2 16 + v x6 * pow2 72 + v x7 * pow2 128 + v x8 * pow2 184 + v x9 * pow2 240))
+
+open FStar.Tactics.CanonCommSemiring
 
 let lemma_div264_aux x =
   let (x0, x1, x2, x3, x4, x5, x6, x7, x8, x9) = x in
@@ -328,7 +330,7 @@ let lemma_div264_aux x =
     (wide_as_nat5 x / pow2 224) / pow2 40;
   (==) { lemma_div224 x }
     (v x4 + v x5 * pow2 56 + v x6 * pow2 112 + v x7 * pow2 168 + v x8 * pow2 224 + v x9 * pow2 280) / pow2 40;
-  (==) { }
+  (==) { _ by (canon_semiring int_cr) }
     (v x4 + (v x5 * pow2 16 + v x6 * pow2 72 + v x7 * pow2 128 + v x8 * pow2 184 + v x9 * pow2 240) * pow2 40) / pow2 40;
   (==) { FStar.Math.Lemmas.lemma_div_plus (v x4) (v x5 * pow2 16 + v x6 * pow2 72 + v x7 * pow2 128 + v x8 * pow2 184 + v x9 * pow2 240) (pow2 40) }
     v x4 / pow2 40 + v x5 * pow2 16 + v x6 * pow2 72 + v x7 * pow2 128 + v x8 * pow2 184 + v x9 * pow2 240;
@@ -391,21 +393,22 @@ let lemma_div264_x7 x7 =
     v x7 * pow2 128;
     }
 
+#push-options "--z3cliopt smt.arith.nl=false"
+
 
 val lemma_div264_x8: x8:uint64 ->
   Lemma (pow2 16 * (v x8 % pow2 40) * pow2 168 + v x8 / pow2 40 * pow2 224 == v x8 * pow2 184)
 let lemma_div264_x8 x8 =
   calc (==) {
     pow2 16 * (v x8 % pow2 40) * pow2 168 + v x8 / pow2 40 * pow2 224;
-    (==) { assert_norm (pow2 16 * pow2 168 = pow2 184) }
+    (==) { assert_norm (pow2 16 * pow2 168 = pow2 184); _ by (canon_semiring int_cr) }
     pow2 184 * (v x8 % pow2 40) + v x8 / pow2 40 * pow2 224;
-    (==) { assert_norm (pow2 184 * pow2 40 = pow2 224) }
+    (==) { assert_norm (pow2 184 * pow2 40 = pow2 224); _ by (canon_semiring int_cr) }
     pow2 184 * (v x8 % pow2 40) + v x8 / pow2 40 * pow2 184 * pow2 40;
-    (==) { }
+    (==) { _ by (canon_semiring int_cr) }
     v x8 * pow2 184;
     }
 
-#push-options "--z3cliopt smt.arith.nl=false"
 
 val lemma_div264_x9: x9:uint64{v x9 < pow2 40} ->
   Lemma (pow2 16 * (v x9 % pow2 40) * pow2 224 == v x9 * pow2 240)
