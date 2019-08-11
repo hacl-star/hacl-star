@@ -11,24 +11,11 @@ open Lib.Buffer
 open Lib.Math.Algebra
 
 open Hacl.Impl.Bignum
+open Hacl.Impl.HE.Other
 
 module S = Hacl.Spec.HE.Paillier
 module A = Lib.Math.Algebra
 module B = LowStar.Buffer
-
-
-// max 2^30 bits
-type bn_len_s = s:bn_len{v s <= pow2 22}
-
-val bn_len_s_fits: (l:bn_len_s) -> Lemma
-  (
-   v l * 2 < max_size_t /\
-   v l * 64 < max_size_t /\
-   v l * 128 < max_size_t /\
-   (v l + 1) < max_size_t
-  )
-let bn_len_s_fits _ = ()
-
 
 
 
@@ -140,16 +127,6 @@ let bigl #n2Len n n2 u res =
 
 
 #reset-options "--z3rlimit 200 --max_fuel 2 --max_ifuel 0"
-
-//noeq
-//type secret (n2Len:bn_len_s) = {
-//    p:lbignum n2Len
-//  ; q:lbignum n2Len
-//  ; n:lbignum n2Len
-//  ; n2:lbignum n2Len
-//  ; g:lbignum n2Len
-//  ; lambda:lbignum n2Len
-//  ; l2inv:lbignum n2Len }
 
 
 type proper_secret h

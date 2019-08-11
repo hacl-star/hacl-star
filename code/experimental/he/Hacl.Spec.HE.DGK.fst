@@ -9,6 +9,8 @@ open Lib.Math.Algebra
 module S = FStar.Seq
 
 
+(*** General lemmas ***)
+
 val gcd_split_comp: p:prm -> q:prm -> h:pos{is_gcd (p*q) h 1} -> Lemma
   (is_gcd p h 1 /\ is_gcd q h 1)
 let gcd_split_comp p q h =
@@ -160,6 +162,7 @@ let h_raise_v p q v h =
 #reset-options
 
 (*** Decryption ***)
+(* Partially proven *)
 
 val solve_dlp_power:
      #n:comp
@@ -291,6 +294,15 @@ let crt l ps es as =
   let a0 = S.index as 0 in
   crtgo l ps es as 1 (exp p0 e0) a0
 
+val crt_proof:
+     l:nat{l>1}
+  -> ps:crtps{S.length ps = l}
+  -> es:crtes{S.length es = l}
+  -> as:crtas ps es
+  -> Lemma
+  (is_crtsol ps es as (crt l ps es as))
+  [SMTPat (crt l ps es as)]
+let crt_proof _ _ _ = admit()
 
 val tailprod_go:
      ps:crtps
@@ -323,26 +335,6 @@ val tailprod_first: ps:crtps -> es:crtes{S.length es = S.length ps} -> Lemma
   (let p = S.index ps 0 in let e = S.index es 0 in tailprod ps es 1 = exp p e)
 let tailprod_first ps es = ()
 
-val crt_proof:
-     l:nat{l>1}
-  -> ps:crtps{S.length ps = l}
-  -> es:crtes{S.length es = l}
-  -> as:crtas ps es
-  -> Lemma
-  (is_crtsol ps es as (crt l ps es as))
-  [SMTPat (crt l ps es as)]
-let crt_proof _ _ _ = admit()
-
-// O(S_{q^e}) -> O(eS_q) reduction.
-// Or just shank.
-val solve_dlp_pe:
-     #n:comp
-  -> p:prm
-  -> e:pos
-  -> g:fe n{isunit g /\ is_mult_order g (exp p e)}
-  -> a:fe n
-  -> x:fe (exp p e)
-let solve_dlp_pe #n u g a = admit()
 
 // Pohlig-Hellman
 val solve_dlp:
@@ -351,19 +343,8 @@ val solve_dlp:
   -> es:crtes{S.length es = S.length ps}
   -> g:fe n{isunit g /\ is_mult_order g (fullprod ps es)}
   -> h:fe n
-  -> x:fe (fullprod ps es)
+  -> x:fe (fullprod ps es) { mexp g x = h }
 let solve_dlp #n base g h = admit ()
-
-val solve_dlp_proof:
-     #n:comp
-  -> ps:crtps
-  -> es:crtes{S.length es = S.length ps}
-  -> g:fe n{isunit g /\ is_mult_order g (fullprod ps es)}
-  -> a:fe n
-  -> Lemma
-  (mexp g (solve_dlp ps es g a) = a)
-  [SMTPat (mexp g (solve_dlp ps es g a))]
-let solve_dlp_proof #n base g a = admit ()
 
 (*** Keys, functions, proofs ***)
 
@@ -432,7 +413,7 @@ let decrypt sec ps es c =
 #reset-options "--z3rlimit 100"
 
 
-(* Lemmas *)
+(*** Lemmas ***)
 
 val check_is_zero_prop:
      s:secret
