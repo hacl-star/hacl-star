@@ -1,12 +1,16 @@
 {-# LANGUAGE NamedFieldPuns #-}
--- |
+{-# OPTIONS_GHC -fno-warn-unused-top-binds #-}
+{-# OPTIONS_GHC -fno-warn-missing-signatures #-}
+{-# OPTIONS_GHC -fno-warn-type-defaults #-}
 
 module Experimental where
 
 import Universum hiding (exp, last, (<*>))
 
 import Data.List (last, (!!))
+import Data.Numbers.Primes (primeFactors)
 
+import Hacl.Packing
 import Lib hiding (crt)
 import Utils
 
@@ -68,58 +72,8 @@ discoverAllElems = do
 -- FFT packing (TODO brush up)
 ----------------------------------------------------------------------------
 
-data DJParams =
-    DJParams
-        {
-          djm    :: Integer
-        , djN    :: Integer
-        , djw    :: Integer
-        , djwInv :: Integer -- modulo N
-        , djn    :: Integer
-        , djnInv :: Integer -- modulo N
-        , djU    :: Integer
-        , dju    :: Integer -- slot size, such that U = u ^ n -1
-        } deriving (Show)
-
--- finds prime k * n + 1 that it's more than m
-genFFTModulus :: Integer -> Integer -> (Integer,Integer)
-genFFTModulus n m = go (m `div` n + 1)
-  where
-    go k = if isPrimeMR 40 (k*n + 1) then (k, k*n+1) else go (k + 1)
-
--- Finds generator of multiplicative group of Z_n
-findGen :: Integer -> Integer
-findGen n =
-    fromMaybe (error $ "findGenerator: didn't manage to, the group is not cyclic") $
-    find (\g -> order n g == Just (n-1)) [1..n-1]
-
-findFFTRoot :: Integer -> Integer -> Integer
-findFFTRoot k djN = exp djN (findGen djN) k
-
-genDJParams :: Integer -> Integer -> Integer -> DJParams
-genDJParams djn djm slotBits =
-    let (k, djN) = genFFTModulus djn djm in
-    let djw = findFFTRoot k djN in
-    let djwInv = inverse djw djN in
-    let djnInv = inverse djn djN in
-    let dju = djN * (2 ^ slotBits) in -- N + extra bits required
-    let djU = dju ^ djn - 1 in
-    DJParams {..}
-
-fftRaw :: Integer -> Integer -> Integer -> [Integer] -> [Integer]
-fftRaw djN n w ax = map (\j -> dotprod (row j) ax) [0..n-1]
-  where
-    row1 = map (\i -> exp djN w i) [0..n-1]
-    row :: Integer -> [Integer]
-    row i = map (\wi -> exp djN wi i) row1
-
-fft :: DJParams -> [Integer] -> [Integer]
-fft DJParams{..} = fftRaw djN djn djw
-
-fftinv :: DJParams -> [Integer] -> [Integer]
-fftinv DJParams {..} =
-    map (\x -> (djnInv * x) `mod` djN) .
-    fftRaw djN djn djwInv
+dftinvNored :: DFTParams -> [Integer] -> [Integer]
+dftinvNored DFTParams {..} = map (djnInv *) . dftRaw djN djn djwInv
 
 -- standard poly conv
 conv :: [Integer] -> [Integer] -> [Integer]
@@ -149,95 +103,117 @@ convRound a b = if length a /= length b then error "mda" else
 evalCircularShift :: IO ()
 evalCircularShift = do
     let n = 4
-    let params@DJParams{..} = genDJParams n 1024 20
-    let a = fft params [5,6,7,8]
+    let params@DFTParams{..} = genDFTParams n 1024 20
+    let a = dft params [5,6,7,8]
     let shft1 (x:xs) = xs ++ [x]
-    let shft n l = if n == 0 then l else shft (n-1) (shft1 l)
+    let shft m l = if m == 0 then l else shft (m-1) (shft1 l)
 
-    print $ fftinv params a
-    print $ fftinv params $ shft 1 a
-    print $ fftinv params $ shft 2 a
-    print $ fftinv params $ shft 3 a
-    print $ fftinv params $ shft 4 a
+    print $ dftinv params a
+    print $ dftinv params $ shft 1 a
+    print $ dftinv params $ shft 2 a
+    print $ dftinv params $ shft 3 a
+    print $ dftinv params $ shft 4 a
 
 
-    print $ fftinv params $ foldr1 simdadd [a, shft 1 a, shft 2 a, shft 3 a]
+    print $ dftinv params $ foldr1 simdadd [a, shft 1 a, shft 2 a, shft 3 a]
 
-fftTest1 :: IO ()
-fftTest1 = do
+dftTest1 :: IO ()
+dftTest1 = do
     let n = 4
-    let n2 = 2 * n
-    let params@DJParams{..} = genDJParams n2 1024 20
+    let params@DFTParams{..} = genDFTParams n 1024 20
     let a = [3..(n+2)]
     let b = [2..(n+1)]
     let red = map (`mod` djN)
-    let a' = red $ fft params a
-    let b' = red $ fft params b
+    let a' = red $ dft params a
+    let b' = red $ dft params b
     let c' = red $ simdmul a' b'
-    let d = fftinv params c'
+    let d = dftinv params c'
     print d
-    print $ conv a b
+    print $ convRound a b
 
-fftTest2 :: IO ()
-fftTest2 = do
+dftTest2 :: IO ()
+dftTest2 = do
     let n = 16
     let m = 1024
-    let params@DJParams{..} = genDJParams n m 100
+    let params@DFTParams{..} = genDFTParams n m 100
     print djN
-    let a = replicate (fromIntegral n) 2
+    let a = replicate (fromIntegral n) 500
     let b = replicate (fromIntegral n) 100
-    let a' = fft params a
-    let b' = fft params b
+    let a' = dft params a
+    let b' = dft params b
 
     -- Without psi
     print (simdmul a b)
     print (convRound a' b')
     let c' = map (* inverse n djN) $ map (`mod` djN) $ convRound a' b'
-    let c = fftinv params c'
-    print (c == simdmul a b)
+    let c = dftinv params c'
+    print $ c == map (`mod` djN) (simdmul a b)
 
     -- With psi
     let d' = (psi dju a' * psi dju b') `mod` djU
     print (d' == psi dju (convRound a' b'))
-    let d = fftinv params $ psiinv dju $ d' * inverse n djN
-    print $ d == simdmul a b
+    let d = dftinv params $ psiinv dju $ d' * inverse n djN
+    print $ d == map (`mod` djN) (simdmul a b)
 
 -- modular
-fftTest3 :: IO ()
-fftTest3 = do
+dftTest3 :: IO ()
+dftTest3 = do
     let n = 16
     let m = 1024
-    let params@DJParams{..} = genDJParams n m 100
+    let params@DFTParams{..} = genDFTParams n m 100
     print djN
     let a = replicate (fromIntegral n) 1023
     let b = replicate (fromIntegral n) 1023
-    let a' = fft params a
-    let b' = fft params b
+    let a' = dft params a
+    let b' = dft params b
 
     -- Without psi
     let c' = map (* inverse n djN) $ map (`mod` djN) $ convRound a' b'
-    let c = fftinv params c'
+    let c = dftinv params c'
     print (c == (map (`mod` djN) $ simdmul a b))
 
     -- With psi
     let d' = (psi dju a' * psi dju b') `mod` djU
     print (d' == psi dju (convRound a' b'))
-    let d = fftinv params $ psiinv dju $ d' * inverse n djN
+    let d = dftinv params $ psiinv dju $ d' * inverse n djN
     print $ d == map (`mod` djN) (simdmul a b)
 
-fftTest4 :: IO ()
-fftTest4 = do
+dftTest4 :: IO ()
+dftTest4 = do
     let n = 8
     let m = 1024
-    let params@DJParams{..} = genDJParams n m 100
+    let params@DFTParams{..} = genDFTParams n m 100
     print djN
     let a = [5,6,0,0,0,0,0,0]
-    let a' = fft params a
+    let a' = dft params a
 
     -- With psi
     let d' = (psi dju a' + dju * 2) `mod` djU
-    let d = fftinv params $ psiinv dju $ d' * inverse n djN
+    let d = dftinv params $ psiinv dju $ d' * inverse n djN
     print d
+
+dftTestBlind :: IO ()
+dftTestBlind = do
+    let n = 16
+    let m = 256
+    let params@DFTParams{..} = genDFTParams n m 100
+    print djN
+    let a = replicate (fromIntegral n) 13
+    let b = replicate (fromIntegral n) 7
+    let a' = dft params a
+    let b' = dft params b
+
+    -- Without psi
+    print (simdmul a b)
+    print (convRound a' b')
+    let c' = map (* inverse n djN) $ map (`mod` djN) $ convRound a' b'
+    let c = dftinvNored params c'
+    print $ map (`mod` djN) c == map (`mod` djN) (simdmul a b)
+    print $ map (`mod` djN) c == simdmul a b
+
+    print c
+    print $ primeFactors (c !! 0)
+
 
 psi :: Integer -> [Integer] -> Integer
 psi m ax = dotprod (map (m ^) [0..(length ax - 1)]) ax
@@ -291,25 +267,25 @@ findU att u0 s = do
 -- purpuses only
 data DJMsg = DJMsg { unDJMsg :: Integer } deriving Show
 
-djHomAdd :: DJParams -> DJMsg -> DJMsg -> DJMsg
-djHomAdd DJParams{djU} (DJMsg a) (DJMsg b) = DJMsg ((a+b) `mod` djU)
+djHomAdd :: DFTParams -> DJMsg -> DJMsg -> DJMsg
+djHomAdd DFTParams{djU} (DJMsg a) (DJMsg b) = DJMsg ((a+b) `mod` djU)
 
-djHomMulScal :: DJParams -> DJMsg -> Integer -> DJMsg
-djHomMulScal DJParams{djU} (DJMsg a) k = DJMsg ((a*k) `mod` djU)
+djHomMulScal :: DFTParams -> DJMsg -> Integer -> DJMsg
+djHomMulScal DFTParams{djU} (DJMsg a) k = DJMsg ((a*k) `mod` djU)
 
-djHomSIMDProd :: DJParams -> DJMsg -> [Integer] -> DJMsg
-djHomSIMDProd params@DJParams{..} m vec =
-    let (DJMsg m') = djHomMulScal params m (psi dju $ fft params vec) in
+djHomSIMDProd :: DFTParams -> DJMsg -> [Integer] -> DJMsg
+djHomSIMDProd params@DFTParams{..} m vec =
+    let (DJMsg m') = djHomMulScal params m (psi dju $ dft params vec) in
     DJMsg (m' * djnInv)
 
 
-djFFT params@DJParams{..} w msg =
-    -- mul by fft matrix
+djDFT params@DFTParams{..} w msg =
+    -- mul by dft matrix
 --    traceShow msg $
     let m1 = map (\i -> djHomSIMDProd params msg (wrow i)) [0..djn-1] in
 --    traceShow (map (\(DJMsg x) -> x `mod` djN) m1) $
 --    traceShow (map (\(DJMsg x) -> x) m1) $
-    -- sum them all completing fft
+    -- sum them all completing dft
     let m2 = foldr1 (djHomAdd params) m1 in
     m2
   where
@@ -317,20 +293,20 @@ djFFT params@DJParams{..} w msg =
 --    wrow i = map (^ i) (map (w ^) [0..djn-1])
 
 
-djRotate :: DJParams -> DJMsg -> Integer -> DJMsg
-djRotate params@DJParams{..} m _ = do
-    let m1 = djFFT params djw m
+djRotate :: DFTParams -> DJMsg -> Integer -> DJMsg
+djRotate params@DFTParams{..} m _ = do
+    let m1 = djDFT params djw m
 
 --    let m2 = djHomSIMDProd params m1 (wrow djw s)
 
-    let m3 = djHomMulScal params (djFFT params djwInv m1) djnInv
+    let m3 = djHomMulScal params (djDFT params djwInv m1) djnInv
 
     m3
 
 testSIMDAddMul :: IO ()
 testSIMDAddMul = do
     let n = 4
-    let params@DJParams{..} = genDJParams n 1024 100
+    let params@DFTParams{..} = genDFTParams n 1024 100
     let m1 = [5,6,7,8]
     let m2 = [2,3,4,5]
 
@@ -340,10 +316,10 @@ testSIMDAddMul = do
     print (msg3 == simdadd m1 m2)
 
 
-    let dec = fftinv params . psiinv dju . unDJMsg
+    let dec = dftinv params . psiinv dju . unDJMsg
 
-    let msg4 = DJMsg (psi dju $ fft params m1)
-    let msg5 = DJMsg (psi dju $ fft params m2)
+    let msg4 = DJMsg (psi dju $ dft params m1)
+    let msg5 = DJMsg (psi dju $ dft params m2)
     let msg6 = djHomAdd params msg4 msg5
     print (dec msg6 == simdadd m1 m2)
     let msg7 = djHomSIMDProd params msg4 m2
@@ -353,22 +329,22 @@ testSIMDAddMul = do
 testRotate :: IO ()
 testRotate = do
     let n = 4
-    let params@DJParams{..} = genDJParams n 1024 1000
+    let params@DFTParams{..} = genDFTParams n 1024 1000
     print djN
     let m = [3,6,4,9]
---    let msg = DJMsg (psi dju (fft params m))
---    let msg2 = fftinv params $ psiinv dju $ unDJMsg $ djFFT params djw msg
---    --let msg2 = fftinv params $ psiinv dju $ unDJMsg $ djRotate params msg 1
---    print (map (`mod` djN) msg2 == map (`mod` djN) (fft params m))
+--    let msg = DJMsg (psi dju (dft params m))
+--    let msg2 = dftinv params $ psiinv dju $ unDJMsg $ djDFT params djw msg
+--    --let msg2 = dftinv params $ psiinv dju $ unDJMsg $ djRotate params msg 1
+--    print (map (`mod` djN) msg2 == map (`mod` djN) (dft params m))
 --    print msg2
---    print $ fft params m
+--    print $ dft params m
 
-    let msg = fft params m
-    let dec = fftinv params
+    let msg = dft params m
+    let dec = dftinv params
 
     let djHomSIMDProd' :: [Integer] -> [Integer] -> [Integer]
         djHomSIMDProd' m0 vec =
-          let m' = convRound m0 (fft params vec) in
+          let m' = convRound m0 (dft params vec) in
           map (* djnInv) m'
 
 
@@ -377,7 +353,7 @@ testRotate = do
     let testMul vec = do
             let m' = djHomSIMDProd' msg vec
             print vec
-            print $ fft params vec
+            print $ dft params vec
             print (dec m' == (map (`mod` djN) $ simdmul m vec))
 
     testMul (wrow djw 0)

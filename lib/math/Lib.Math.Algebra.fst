@@ -11,7 +11,7 @@ open FStar.Squash
 module L = FStar.List.Tot
 
 
-(* Divisibisity *)
+(*** Divisibisity, GCD/LCM ***)
 
 type big = x:int{x > 1}
 
@@ -550,7 +550,7 @@ let gcd_to_factor_one n m a =
   gcd_forall_elim a n 1
 
 
-(* Algebra *)
+(*** Algebra, add/mul ***)
 
 val field_el: #n:big -> a:int -> bool
 let field_el #n a = a >= 0 && a < n
@@ -1248,7 +1248,7 @@ let rec to_fe_mexp1 #n k g e =
   mexp_eq_nmexp (to_fe #(n/k) g) e
 
 
-(* Inverses *)
+(*** Inverses ***)
 
 val isunit: #n:big -> a:fe n -> Type0
 let isunit #n a = exists (b:fe n). a *% b = 1

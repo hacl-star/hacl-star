@@ -10,6 +10,7 @@ open Lib.IntTypes
 open Lib.Math.Algebra
 open Lib.Buffer
 
+open Hacl.Impl.HE.Other
 
 module GM = Hacl.Impl.HE.GM
 module GMS = Hacl.Spec.HE.GM
@@ -218,7 +219,7 @@ let test_gm _ =
 
 noextract inline_for_extraction
 val run_test_paillier0:
-     #n2Len:P.bn_len_s
+     #n2Len:bn_len_s
   -> p:lbignum n2Len
   -> q:lbignum n2Len
   -> n:lbignum n2Len
