@@ -1,5 +1,5 @@
 [
-  "=¸e=ç(\u0006.ßcÅ‡\u001dé\u0003N",
+  "NG\u0017\u0013ö’‰\u001c»w∑VÊîπ∑",
   [
     [
       "Spec.Hash.PadFinish.pad",
@@ -9,21 +9,36 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "Lib.IntTypes_pretyping_d450aafb6f125538d0e96425faddef55",
+        "Prims_pretyping_f8666440faa91836cc5a13998af863fc", "bool_inversion",
+        "constructor_distinct_BoxInt",
         "constructor_distinct_Lib.IntTypes.S16",
+        "constructor_distinct_Lib.IntTypes.S32",
+        "constructor_distinct_Lib.IntTypes.S64",
         "constructor_distinct_Lib.IntTypes.S8",
+        "constructor_distinct_Lib.IntTypes.U1",
+        "constructor_distinct_Lib.IntTypes.U128",
+        "constructor_distinct_Lib.IntTypes.U16",
         "constructor_distinct_Lib.IntTypes.U32",
+        "constructor_distinct_Lib.IntTypes.U64",
         "constructor_distinct_Lib.IntTypes.U8",
+        "constructor_distinct_Lib.IntTypes.inttype",
+        "constructor_distinct_Prims.unit",
+        "constructor_distinct_Spec.Hash.Definitions.MD5",
         "constructor_distinct_Tm_unit",
         "disc_equation_Spec.Hash.Definitions.MD5",
+        "equality_tok_Lib.IntTypes.U128@tok",
         "equality_tok_Lib.IntTypes.U32@tok",
+        "equality_tok_Lib.IntTypes.U64@tok",
         "equality_tok_Lib.IntTypes.U8@tok",
         "equation_FStar.Seq.Base.op_At_Bar", "equation_Lib.IntTypes.bits",
         "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
-        "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.uint8",
-        "equation_Lib.IntTypes.unsigned", "equation_Lib.Sequence.length",
-        "equation_Lib.Sequence.seq", "equation_Prims.nat",
-        "equation_Spec.Hash.Definitions.block_length",
+        "equation_Lib.IntTypes.numbytes", "equation_Lib.IntTypes.range",
+        "equation_Lib.IntTypes.uint8", "equation_Lib.IntTypes.unsigned",
+        "equation_Lib.Sequence.lseq", "equation_Lib.Sequence.seq",
+        "equation_Prims.nat", "equation_Spec.Hash.Definitions.block_length",
         "equation_Spec.Hash.Definitions.block_word_length",
+        "equation_Spec.Hash.Definitions.len_int_type",
         "equation_Spec.Hash.Definitions.len_length",
         "equation_Spec.Hash.Definitions.max_input_length",
         "equation_Spec.Hash.Definitions.pad0_length",
@@ -38,20 +53,23 @@
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_2043fe1d818aaeaa104a717402baf403",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_63100c8b9517430bdecc69837c115658",
         "refinement_interpretation_Tm_refine_64007e4a8c187c3787ce4f8705e9db35",
         "refinement_interpretation_Tm_refine_88eb6f21ed51186ae42a33e69169c215",
-        "refinement_interpretation_Tm_refine_a01519efaa5b7b7b0aa1db352a16e969",
         "refinement_interpretation_Tm_refine_a6c361553bfab4ef9fe544869ecebf9f",
-        "typing_FStar.Seq.Base.append", "typing_Lib.IntTypes.bits",
+        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
+        "typing_FStar.Seq.Base.append", "typing_FStar.Seq.Base.op_At_Bar",
+        "typing_Lib.IntTypes.bits", "typing_Lib.IntTypes.numbytes",
+        "typing_Lib.IntTypes.unsigned",
         "typing_Spec.Hash.Definitions.block_length",
+        "typing_Spec.Hash.Definitions.len_int_type",
         "typing_Spec.Hash.Definitions.len_length",
         "typing_Spec.Hash.Definitions.pad0_length",
         "typing_Spec.Hash.Definitions.word_length",
-        "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
+        "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok",
+        "unit_typing"
       ],
       0,
-      "0aaba69559bdba5a61c70304dee3a62d"
+      "120faadded44f940b604d5bed644c2cc"
     ],
     [
       "Spec.Hash.PadFinish.finish",
@@ -87,7 +105,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "348705e3f12e6c2d50a3bee960ca7689"
+      "eb82306c49c86c4111eb332347d884a3"
     ]
   ]
 ]
