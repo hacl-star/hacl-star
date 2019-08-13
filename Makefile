@@ -446,7 +446,8 @@ obj/Vale.AsLowStar.Test.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
 obj/Vale.Wrapper.X64.Sha.fst.checked: \
-  FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
+  FSTAR_FLAGS=$(shell echo $(VALE_FSTAR_FLAGS_NOSMT) | \
+    sed 's/--z3cliopt smt.arith.nl=false//;')
 
 obj/Vale.SHA.Simplify_Sha.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
