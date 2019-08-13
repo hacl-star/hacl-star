@@ -20,12 +20,17 @@ friend Vale.X64.CryptoInstructions_s
 
 // Define these specific converters here, so that F* only reasons about
 // the correctness of the conversion once, rather that at every call site
-let vv (u:UInt32.t) : nat32 = v u
-let to_uint32 (n:nat32) : UInt32.t = uint_to_t n
-let word = UInt32.t
+let vv (u:Lib.IntTypes.uint32) : nat32 = Lib.IntTypes.v u
+let to_uint32 (n:nat32) : Lib.IntTypes.uint32 = Lib.IntTypes.u32 n
+let word = Lib.IntTypes.uint32
 let k = (Spec.SHA2.k0 SHA2_256)
 
 let reveal_word () = ()
+
+val add_mod_lemma:x:Lib.IntTypes.uint32 -> y:Lib.IntTypes.uint32 ->
+		  Lemma (add_mod x y == Lib.IntTypes.(x +. y))
+			[SMTPat (Lib.IntTypes.(x +. y))]
+let add_mod_lemma x y = ()
 
 unfold let ws_opaque_aux = ws
 let ws_opaque (b:block_w) (t:counter{t < size_k_w_256}) : nat32 =
@@ -108,6 +113,7 @@ let make_ordered_hash = make_opaque make_ordered_hash_def
 
 let shuffle_core_properties (block:block_w) (hash:hash256) (t:counter{t < size_k_w_256}) :
     Lemma(let h = shuffle_core_opaque block hash t in
+          let open Lib.IntTypes in
           let a0 = hash.[0] in
           let b0 = hash.[1] in
           let c0 = hash.[2] in
@@ -116,13 +122,13 @@ let shuffle_core_properties (block:block_w) (hash:hash256) (t:counter{t < size_k
           let f0 = hash.[5] in
           let g0 = hash.[6] in
           let h0 = hash.[7] in
-          let t1 = word_add_mod SHA2_256 h0 (word_add_mod SHA2_256 (_Sigma1 SHA2_256 e0) (word_add_mod SHA2_256 (_Ch SHA2_256 e0 f0 g0) (word_add_mod SHA2_256 (k0 SHA2_256).[t] (ws SHA2_256 block t)))) in
-          let t2 = word_add_mod SHA2_256 (_Sigma0 SHA2_256 a0) (_Maj SHA2_256 a0 b0 c0) in
-          h.[0] == word_add_mod SHA2_256 t1 t2 /\
+          let t1 = h0 +. (_Sigma1 SHA2_256 e0) +. (_Ch SHA2_256 e0 f0 g0) +. (k0 SHA2_256).[t] +. (ws SHA2_256 block t) in
+          let t2 = (_Sigma0 SHA2_256 a0) +. (_Maj SHA2_256 a0 b0 c0) in
+          h.[0] == t1 +. t2 /\
           h.[1] == a0 /\
           h.[2] == b0 /\
           h.[3] == c0 /\
-          h.[4] == word_add_mod SHA2_256 d0 t1 /\
+          h.[4] == d0 +. t1 /\
           h.[5] == e0 /\
           h.[6] == f0 /\
           h.[7] == g0)
@@ -137,9 +143,9 @@ let shuffle_core_properties (block:block_w) (hash:hash256) (t:counter{t < size_k
   let f0 = hash.[5] in
   let g0 = hash.[6] in
   let h0 = hash.[7] in
-  let t1 = word_add_mod SHA2_256 h0 (word_add_mod SHA2_256 (_Sigma1 SHA2_256 e0) (word_add_mod SHA2_256 (_Ch SHA2_256 e0 f0 g0) (word_add_mod SHA2_256 (k0 SHA2_256).[t] (ws SHA2_256 block t)))) in
-  let t2 = word_add_mod SHA2_256 (_Sigma0 SHA2_256 a0) (_Maj SHA2_256 a0 b0 c0) in
-  let l = [ word_add_mod SHA2_256 t1 t2; a0; b0; c0; word_add_mod SHA2_256 d0 t1; e0; f0; g0 ] in
+  let t1 = h0 +. (_Sigma1 SHA2_256 e0) +. (_Ch SHA2_256 e0 f0 g0) +. (k0 SHA2_256).[t] +. (ws SHA2_256 block t) in
+  let t2 = (_Sigma0 SHA2_256 a0) +. (_Maj SHA2_256 a0 b0 c0) in
+  let l = [ t1 +. t2; a0; b0; c0; d0 +. t1; e0; f0; g0 ] in
   assert (h == seq_of_list l);
   elim_of_list l;
   ()
@@ -174,12 +180,22 @@ let lemma_add_mod32_associates (x y z:int) :
   ()
 *)
 
-#reset-options "--using_facts_from ''"
 let lemma_add_mod_associates_U32 (x y z:UInt32.t) :
   Lemma (add_mod x (add_mod y z) == add_mod (add_mod x y) z)
   =
-  assert_norm (FStar.UInt.add_mod (v x) (FStar.UInt.add_mod (v y) (v z)) == FStar.UInt.add_mod (FStar.UInt.add_mod (v x) (v y)) (v z));
-  v_inj (add_mod x (add_mod y z)) (add_mod (add_mod x y) z)
+  let open Lib.IntTypes in
+  calc (==) {
+    v (x +. (y +. z));
+    (==) { }
+    (v x + (v y + v z) % pow2 32) % pow2 32;
+    (==) { FStar.Math.Lemmas.lemma_mod_add_distr (v x) (v y + v z) (pow2 32) }
+    ((v x + v y) + v z) % pow2 32;
+    (==) { FStar.Math.Lemmas.lemma_mod_add_distr (v z) (v x + v y) (pow2 32) }
+    ((v x + v y) % pow2 32 + v z) % pow2 32;
+    (==) { }
+    v ((x +. y) +. z);
+  };
+  v_inj (x +. (y +. z)) ((x +. y) +. z)
 (*
   assert_norm (pow2 32 == pow2_32);
   //assert (add_mod y z == to_uint32 ((vv y + vv z) % pow2_32));
@@ -188,7 +204,9 @@ let lemma_add_mod_associates_U32 (x y z:UInt32.t) :
   //assert (to_uint32 ((vv x + vv (to_uint32 ((vv y + vv z) % pow2_32))) % pow2_32) ==
   //        to_uint32 (((vv x + vv y % pow2_32) + vv z) % pow2_32));
 *)
+
 #reset-options "--max_fuel 0 --max_ifuel 0"
+
 
 let lemma_add_wrap_is_add_mod (n0 n1:nat32) :
   Lemma (add_wrap n0 n1 == vv (add_mod (to_uint32 n0) (to_uint32 n1)))
@@ -270,16 +288,17 @@ let lemma_sha256_rnds2_spec_update_is_shuffle_core (hash:hash256) (wk:UInt32.t) 
   let a', b', c', d', e', f', g', h' =
                  sha256_rnds2_spec_update hash.[0] hash.[1] hash.[2] hash.[3]
                                           hash.[4] hash.[5] hash.[6] hash.[7] wk in
-  let l = [a'; b'; c'; d'; e'; f'; g'; h'] in
-  let u = seq_of_list l in
+  let l:list Lib.IntTypes.uint32 = [a'; b'; c'; d'; e'; f'; g'; h'] in
+  let u:Seq.seq UInt32.t = seq_of_list l in
+  assert_norm (List.length l == 8);
   let c = shuffle_core_opaque block hash t in
   Pervasives.reveal_opaque (`%shuffle_core) shuffle_core;
   Pervasives.reveal_opaque (`%ws) ws;
   shuffle_core_properties block hash t;
   elim_of_list l;
+  Classical.forall_intro_3 lemma_add_mod_associates_U32;
   lemma_add_mod_a hash.[0] hash.[1] hash.[2] hash.[3] hash.[4] hash.[5] hash.[6] hash.[7] wk;
-  lemma_add_mod_e hash.[0] hash.[1] hash.[2] hash.[3] hash.[4] hash.[5] hash.[6] hash.[7] wk;
-  ()
+  lemma_add_mod_e hash.[0] hash.[1] hash.[2] hash.[3] hash.[4] hash.[5] hash.[6] hash.[7] wk
 
 let sha256_rnds2_spec_update_core_quad32 (abef cdgh:quad32) (wk:UInt32.t) (block:block_w) (t:counter{t < size_k_w_256}) : (quad32*quad32) =
   let hash0 = make_hash abef cdgh in
@@ -302,7 +321,8 @@ let lemma_rnds_quad32 (abef cdgh:quad32) (wk:UInt32.t) (block:block_w) (t:counte
   lemma_sha256_rnds2_spec_update_is_shuffle_core hash0 wk t block;
   ()
 
-#push-options "--z3rlimit 10"
+
+#push-options "--z3rlimit 30"
 let lemma_rnds2_spec_quad32_is_shuffle_core_x2 (abef cdgh:quad32) (wk0 wk1:UInt32.t) (block:block_w) (t:counter{t < size_k_w_256 - 1}) : Lemma
   (requires vv wk0 == add_mod32 (k0 SHA2_256).[t] (ws_opaque block t) /\
             vv wk1 == add_mod32 (k0 SHA2_256).[t+1] (ws_opaque block (t+1)))
@@ -433,15 +453,23 @@ let lemma_sha256_msg1 (dst src:quad32) (t:counter) (block:block_w) : Lemma
 
 
 let lemma_add_mod_ws_rearrangement (a b c d:UInt32.t) :
-  Lemma (add_mod a (add_mod b (add_mod c d)) == add_mod (add_mod (add_mod d c) b) a)
+  Lemma (let open Lib.IntTypes in
+    a +. b +. c +. d == d +. c +. b +. a)
   =
-  lemma_add_mod_commutes (add_mod (add_mod d c) b) a;
-  assert (add_mod (add_mod (add_mod d c) b) a == add_mod a (add_mod (add_mod d c) b));
-  lemma_add_mod_commutes (add_mod d c) b;
-  assert (add_mod a (add_mod (add_mod d c) b) == add_mod a (add_mod b (add_mod d c)));
-  lemma_add_mod_commutes d c;
-  assert (add_mod a (add_mod b (add_mod d c)) == add_mod a (add_mod b (add_mod c d)));
-  ()
+  let open Lib.IntTypes in
+  calc (==) {
+    a +. b +. c +. d;
+    (==) {}
+    (((a +. b) +. c) +. d);
+    (==) {   lemma_add_mod_commutes ((a +. b) +. c) d;
+             lemma_add_mod_commutes (a +. b) c;
+             lemma_add_mod_commutes a b
+         }
+    d +. (c +. (b +. a));
+    (==) { lemma_add_mod_associates_U32 d c (b +. a);
+           lemma_add_mod_associates_U32 (d +. c) b a}
+    (((d +. c) +. b) +. a);
+  }
 
 let ws_computed (b:block_w) (t:counter{t < size_k_w_256}): Tot (UInt32.t) =
   if t < block_word_length then to_uint32 (ws_opaque b t)
@@ -452,7 +480,8 @@ let ws_computed (b:block_w) (t:counter{t < size_k_w_256}): Tot (UInt32.t) =
     let t2  = to_uint32 (ws_opaque b (t - 2)) in
     let s1 = _sigma1 SHA2_256 t2 in
     let s0 = _sigma0 SHA2_256 t15 in
-    (word_add_mod SHA2_256 (word_add_mod SHA2_256 (word_add_mod SHA2_256 t16 s0) t7) s1)
+    let open Lib.IntTypes in
+    (t16 +. s0 +. t7 +. s1)
 
 #push-options "--max_fuel 1"
 let lemma_ws_computed_is_ws (b:block_w) (t:counter{t < size_k_w_256}) :
@@ -594,13 +623,15 @@ let translate_hash_update (h0 h1 h0' h1' a0 a1:quad32) : Lemma
          let h = make_hash h0 h1 in
          let a = make_hash a0 a1 in
          let h' = make_hash h0' h1' in
-         let mapped = Spec.Loops.seq_map2 (fun x y -> word_add_mod SHA2_256 x y) h a in
+         let open Lib.IntTypes in
+         let mapped = Spec.Loops.seq_map2 ( +. ) h a in
          mapped == h'))
   =
   let h = make_hash h0 h1 in
   let a = make_hash a0 a1 in
   let h' = make_hash h0' h1' in
-  let mapped = Spec.Loops.seq_map2 (fun x y -> word_add_mod SHA2_256 x y) h a in
+  let open Lib.IntTypes in
+  let mapped = Spec.Loops.seq_map2 ( +. ) h a in
   FStar.Classical.forall_intro_2 lemma_add_wrap_is_add_mod;
   assert (equal mapped h');
   ()
@@ -609,13 +640,15 @@ unfold let shuffle_opaque = shuffle
 
 let update_block (hash:hash256) (block:block_w): Tot (hash256) =
   let hash_1 = shuffle_opaque SHA2_256 hash block in
-  Spec.Loops.seq_map2 (fun x y -> word_add_mod SHA2_256 x y) hash hash_1
+  let open Lib.IntTypes in
+  Spec.Loops.seq_map2 ( +. ) hash hash_1
 
 let lemma_update_block_equiv (hash:hash256) (block:bytes{length block = block_length}) :
-  Lemma (update_block hash (words_of_bytes SHA2_256 block_word_length block) == update SHA2_256 hash block)
+  Lemma (update_block hash (words_of_bytes SHA2_256 #block_word_length block) == update SHA2_256 hash block)
   =
   Pervasives.reveal_opaque (`%Spec.SHA2.update) Spec.SHA2.update;
-  assert (equal (update_block hash (words_of_bytes SHA2_256 block_word_length block)) (update SHA2_256 hash block));
+  Pervasives.reveal_opaque (`%Spec.SHA2.shuffle) Spec.SHA2.shuffle;
+  assert (equal (update_block hash (words_of_bytes SHA2_256 #block_word_length block)) (update SHA2_256 hash block));
   ()
 
 let update_lemma (src1 src2 src1' src2' h0 h1:quad32) (block:block_w) : Lemma
@@ -748,23 +781,24 @@ let lemma_be_to_n_4 (s:seq4 nat8) : Lemma
     == {FStar.Pervasives.reveal_opaque (`%four_to_nat) four_to_nat}
     be_bytes_to_nat32 s;
   }
-#reset-options "--max_fuel 0 --max_ifuel 0"
+
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 20"
 
 let lemma_endian_relation (quads qs:seq quad32) (input2:seq UInt8.t) : Lemma
   (requires length qs == 4 /\ length input2 == 64 /\
             qs == reverse_bytes_nat32_quad32_seq quads /\
             input2 == seq_nat8_to_seq_uint8 (le_seq_quad32_to_bytes quads))
-  (ensures  quads_to_block qs == words_of_bytes SHA2_256 block_word_length input2)
+  (ensures  quads_to_block qs == words_of_bytes SHA2_256 #block_word_length input2)
   =
   let fi (i:nat{i < length (quads_to_block qs)}) : Lemma
-    ((quads_to_block qs).[i] == (words_of_bytes SHA2_256 block_word_length input2).[i])
+    ((quads_to_block qs).[i] == (words_of_bytes SHA2_256 #block_word_length input2).[i])
     =
     let open FStar.Mul in
     let open Vale.Def.Words.Four_s in
     let open Vale.Lib.Seqs_s in
     let ni = (seq_four_to_seq_LE quads).[i] in
     let b = slice input2 (4 * i) (4 * i + 4) in
-    FStar.Kremlin.Endianness.lemma_be_to_n_is_bounded b;
+//    FStar.Kremlin.Endianness.lemma_be_to_n_is_bounded b;
     calc (==) {
       b;
       == {}
@@ -782,19 +816,32 @@ let lemma_endian_relation (quads qs:seq quad32) (input2:seq UInt8.t) : Lemma
       equal {FStar.Pervasives.reveal_opaque (`%seq_four_to_seq_LE) (seq_four_to_seq_LE #nat8)}
       seq_nat8_to_seq_uint8 (four_to_seq_LE (nat_to_four 8 (seq_four_to_seq_LE quads).[i]));
     };
+    let open Lib.IntTypes in
     calc (==) {
-      (words_of_bytes SHA2_256 block_word_length input2).[i];
-      == {}
-      (FStar.Kremlin.Endianness.seq_uint32_of_be block_word_length input2).[i];
-      == {FStar.Kremlin.Endianness.offset_uint32_be input2 block_word_length i}
-      FStar.Kremlin.Endianness.uint32_of_be b;
-      == {}
-      UInt32.uint_to_t (FStar.Kremlin.Endianness.be_to_n b);
-      == {} // see calc above
-      UInt32.uint_to_t (FStar.Kremlin.Endianness.be_to_n (seq_nat8_to_seq_uint8 (four_to_seq_LE (nat_to_four 8 ni))));
-      == {}
-      nat32_to_word (FStar.Kremlin.Endianness.be_to_n (seq_nat8_to_seq_uint8 (four_to_seq_LE (nat_to_four 8 ni))));
-      == {lemma_be_to_n_4 (four_to_seq_LE (nat_to_four 8 ni))}
+      (words_of_bytes SHA2_256 #block_word_length input2).[i];
+      == { }
+      (Lib.ByteSequence.uints_from_bytes_be #U32 #SEC #block_word_length input2).[i];
+      == { Lib.ByteSequence.index_uints_from_bytes_be #U32 #SEC #block_word_length input2 i }
+      Lib.ByteSequence.uint_from_bytes_be (Lib.Sequence.sub #uint8 #64 input2 (i * 4) 4);
+      == { let open Lib.Sequence in
+           calc (==) {
+             sub #uint8 #64 input2 (i * 4) 4;
+             == {  }
+             Seq.slice input2 (4 * i) (4 * i + 4);
+           }
+         }
+      Lib.ByteSequence.uint_from_bytes_be #U32 #SEC b;
+      == { admit () }
+      // (FStar.Kremlin.Endianness.seq_uint32_of_be block_word_length input2).[i];
+      // == {FStar.Kremlin.Endianness.offset_uint32_be input2 block_word_length i}
+      // FStar.Kremlin.Endianness.uint32_of_be b;
+      // == {}
+      // UInt32.uint_to_t (FStar.Kremlin.Endianness.be_to_n b);
+      // == {} // see calc above
+      // UInt32.uint_to_t (FStar.Kremlin.Endianness.be_to_n (seq_nat8_to_seq_uint8 (four_to_seq_LE (nat_to_four 8 ni))));
+      // == {}
+      // nat32_to_word (FStar.Kremlin.Endianness.be_to_n (seq_nat8_to_seq_uint8 (four_to_seq_LE (nat_to_four 8 ni))));
+      // == {lemma_be_to_n_4 (four_to_seq_LE (nat_to_four 8 ni))}
       nat32_to_word (be_bytes_to_nat32 (four_to_seq_LE (nat_to_four 8 ni)));
       == {}
       nat32_to_word (be_bytes_to_nat32 (reverse_seq (nat32_to_be_bytes ni)));
@@ -809,7 +856,7 @@ let lemma_endian_relation (quads qs:seq quad32) (input2:seq UInt8.t) : Lemma
     }
     in
   FStar.Classical.forall_intro fi;
-  assert (equal (quads_to_block qs) (words_of_bytes SHA2_256 block_word_length input2))
+  assert (equal (quads_to_block qs) (words_of_bytes SHA2_256 #block_word_length input2))
 
 let lemma_mod_transform (quads:seq quad32) : Lemma
   (requires length quads % 4 == 0)
@@ -830,6 +877,7 @@ let rec lemma_update_multi_equiv_vale (hash hash':hash256) (quads:seq quad32) (r
            hash' == update_multi_opaque_vale hash blocks)
         (decreases (length quads))
   =
+  admit();
   let open FStar.Mul in
   lemma_mod_transform quads;
   assert (length blocks % 64 == 0);

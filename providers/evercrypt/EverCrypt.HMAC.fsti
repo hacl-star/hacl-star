@@ -18,10 +18,10 @@ open EverCrypt.Helpers
 
 inline_for_extraction
 let compute_st (a: hash_alg) =
-  tag: uint8_pl (hash_length a) ->
-  key: uint8_p{ keysized a (B.length key) /\ B.disjoint key tag } ->
+  tag: B.buffer Lib.IntTypes.uint8 {B.length tag == hash_length a} ->
+  key: B.buffer Lib.IntTypes.uint8{ keysized a (B.length key) /\ B.disjoint key tag } ->
   keylen: UInt32.t{ UInt32.v keylen = B.length key } ->
-  data: uint8_p{ B.length data + block_length a < pow2 32 } ->
+  data: B.buffer Lib.IntTypes.uint8{ B.length data + block_length a < pow2 32 - 1 } ->
   datalen: UInt32.t{ UInt32.v datalen = B.length data } ->
   Stack unit
   (requires fun h0 -> B.live h0 tag /\ B.live h0 key /\ B.live h0 data)

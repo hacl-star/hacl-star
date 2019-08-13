@@ -28,7 +28,7 @@ let counter = nat
 val k : (s:seq word {length s = size_k_w_256})
 let hash256 = m:Seq.seq word {Seq.length m = 8}
 
-val reveal_word (u:unit) : Lemma (word == UInt32.t)
+val reveal_word (u:unit) : Lemma (word == Lib.IntTypes.uint32)
 
 (* Input data. *)
 type byte = UInt8.t
