@@ -150,7 +150,7 @@ let valid_operand128 (o:operand128) (s:vale_state) : prop0 =
 (* Constructors *)
 val va_fuel_default : unit -> va_fuel
 [@va_qattr] unfold let va_op_operand_reg64 (r:reg_64) : va_operand = OReg r
-[@va_qattr] unfold let va_op_xmm_xmm (x:reg_xmm) : va_operand_xmm = x
+[@va_qattr] unfold let va_op_xmm_xmm (x:reg_xmm) : va_operand_xmm = x //reg_xmm = nat < 16
 [@va_qattr] unfold let va_op_heap_heap (hp:nat) : va_operand_heap = hp
 [@va_qattr] unfold let va_op_opr_reg (r:reg_64) : va_operand = OReg r
 [@va_qattr] unfold let va_op_opr64_reg64 (r:reg_64) : va_operand = OReg r
@@ -521,9 +521,11 @@ val eval_while_inv (c:va_code) (s0:va_state) (fW:va_fuel) (sW:va_state) : prop0
 let va_state_eq (s0:va_state) (s1:va_state) : prop0 = state_eq s0 s1
 
 let va_require_total (c0:va_code) (c1:va_code) (s0:va_state) : prop0 =
+  (forall(i:nat{i<16}). Map.contains s0.vs_hpls i) /\
   c0 == c1
 
 let va_ensure_total (c0:va_code) (s0:va_state) (s1:va_state) (f1:va_fuel) : prop0 =
+  (forall(i:nat{i<16}). (Map.contains s0.vs_hpls i == Map.contains s1.vs_hpls i)) /\
   eval_code c0 s0 f1 s1
 
 val eval_ocmp : s:va_state -> c:ocmp -> GTot bool

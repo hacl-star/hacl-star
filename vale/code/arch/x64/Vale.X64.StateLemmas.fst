@@ -12,13 +12,13 @@ module F = FStar.FunctionalExtensionality
 
 let same_domain sv s = MS.same_domain sv.vs_heap s.BS.ms_heap
 
-let same_domain_eval_ins c f s0 sv =
-  match c with
-  | Ins ins ->
-    let obs = BS.ins_obs ins s0 in
-    let s1 = {BS.machine_eval_ins ins ({s0 with BS.ms_trace = []}) with BS.ms_trace = obs @ s0.BS.ms_trace} in
-    Vale.X64.Bytes_Semantics.eval_ins_domains ins ({s0 with BS.ms_trace = []});
-    MS.lemma_same_domains sv.vs_heap s0.BS.ms_heap s1.BS.ms_heap
+let same_domain_eval_ins c f s0 sv = admit()
+//  match c with
+//  | Ins ins ->
+//    let obs = BS.ins_obs ins s0 in
+//    let s1 = {BS.machine_eval_ins ins ({s0 with BS.ms_trace = []}) with BS.ms_trace = obs @ s0.BS.ms_trace} in
+//    Vale.X64.Bytes_Semantics.eval_ins_domains ins ({s0 with BS.ms_trace = []});
+//    MS.lemma_same_domains sv.vs_heap s0.BS.ms_heap s1.BS.ms_heap
 
 let state_to_S (s:vale_state) : GTot BS.machine_state = admit()
  // {
@@ -98,21 +98,21 @@ let lemma_of_to s = admit()
 //  assert (state_eq s (state_of_S s (state_to_S s)));
 //  ()
 
-let lemma_to_of_eval_ins c s0 =
-  let s0' = state_to_S s0 in
-  let Ins ins = c in
-  let Some sM = BS.machine_eval_code c 0 s0' in
-  same_domain_eval_ins c 0 s0' s0;
-  let s' = state_of_S s0 sM in
-  let s'' = state_to_S s' in
-  let {BS.ms_ok = ok; BS.ms_regs = regs; BS.ms_flags = flags; BS.ms_heap = heap; BS.ms_stack = stack} = sM in
-  let {BS.ms_ok = ok''; BS.ms_regs = regs''; BS.ms_flags = flags''; BS.ms_heap = heap''; BS.ms_stack = stack''} = s'' in
-  assert (feq regs regs'');
-  assert (feq flags flags'');
-  Vale.X64.Bytes_Semantics.eval_ins_same_unspecified ins s0';
-  Vale.X64.Bytes_Semantics.eval_ins_domains ins s0';
-  VSS.lemma_stack_to_from stack;
-  MS.get_heap_hs heap s0.vs_heap
+let lemma_to_of_eval_ins c s0 = admit()
+//  let s0' = state_to_S s0 in
+//  let Ins ins = c in
+//  let Some sM = BS.machine_eval_code c 0 s0' in
+//  same_domain_eval_ins c 0 s0' s0;
+//  let s' = state_of_S s0 sM in
+//  let s'' = state_to_S s' in
+//  let {BS.ms_ok = ok; BS.ms_regs = regs; BS.ms_flags = flags; BS.ms_heap = heap; BS.ms_stack = stack} = sM in
+//  let {BS.ms_ok = ok''; BS.ms_regs = regs''; BS.ms_flags = flags''; BS.ms_heap = heap''; BS.ms_stack = stack''} = s'' in
+//  assert (feq regs regs'');
+//  assert (feq flags flags'');
+//  Vale.X64.Bytes_Semantics.eval_ins_same_unspecified ins s0';
+//  Vale.X64.Bytes_Semantics.eval_ins_domains ins s0';
+//  VSS.lemma_stack_to_from stack;
+//  MS.get_heap_hs heap s0.vs_heap
 
 val lemma_valid_taint64: (b:ME.buffer64) ->
                          (memTaint:ME.memtaint) ->
