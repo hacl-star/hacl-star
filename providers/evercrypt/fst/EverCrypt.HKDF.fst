@@ -20,18 +20,21 @@ open Spec.Hash.Definitions
 open Spec.HKDF
 friend Spec.HKDF
 
+// TODO: Is this safe here? Can we safely break abstraction at this level?
+friend Lib.IntTypes
+
 // [hashed] holds the HMAC text,
 // of the form | Spec.Hash.Definitions.hash_len a | infolen | 1 |;
 // its prefix is overwritten by HMAC at each iteration.
 
 val hkdf_expand_loop:
   a       : EverCrypt.HMAC.supported_alg -> (
-  okm     : uint8_p ->
-  prk     : uint8_p ->
-  prklen  : uint8_l prk ->
+  okm     : B.buffer Lib.IntTypes.uint8 ->
+  prk     : B.buffer Lib.IntTypes.uint8 ->
+  prklen  : UInt32.t { UInt32.v prklen == B.length prk } ->
   infolen : UInt32.t ->
-  len     : uint8_l okm  ->
-  hashed  : uint8_pl (Spec.Hash.Definitions.hash_length a + v infolen + 1) ->
+  len     : UInt32.t { UInt32.v len == B.length okm } ->
+  hashed  : B.buffer Lib.IntTypes.uint8 { B.length hashed == Spec.Hash.Definitions.hash_length a + v infolen + 1} ->
   i       : UInt8.t {
     Spec.HMAC.keysized a (length prk) /\
     disjoint okm prk /\
