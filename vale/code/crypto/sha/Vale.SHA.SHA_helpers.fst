@@ -751,20 +751,23 @@ let update_multi_one (h:hash256) (b:bytes_blocks {length b = block_length}) : Le
 
 #pop-options
 
+friend Lib.ByteSequence
+
 #reset-options "--z3rlimit 50 --max_fuel 1 --max_ifuel 0 --z3cliopt smt.arith.nl=true"
 let lemma_be_to_n_4 (s:seq4 nat8) : Lemma
-  (FStar.Kremlin.Endianness.be_to_n (seq_nat8_to_seq_uint8 s) == be_bytes_to_nat32 s)
+  (Lib.ByteSequence.nat_from_bytes_be #Lib.IntTypes.SEC (seq_nat8_to_seq_uint8 s) == be_bytes_to_nat32 s)
   =
   let open FStar.Mul in
+  let open Lib.IntTypes in
   let open Vale.Def.Words.Four_s in
   assert (pow2 8 = 0x100);
   assert (pow2 16 = 0x10000);
   assert_norm (pow2 24 = 0x1000000);
   let x = seq_nat8_to_seq_uint8 s in
-  let f = FStar.Kremlin.Endianness.be_to_n in
+  let f = Lib.ByteSequence.nat_from_intseq_be_ #U8 #SEC in
   calc (==) {
-    f x;
-    == {}
+    f x <: nat ;
+    == { }
     FStar.UInt8.v (last x) + pow2 8 * f (slice x 0 3);
     == {}
     index s 3 + pow2 8 * f (slice x 0 3);
@@ -782,7 +785,7 @@ let lemma_be_to_n_4 (s:seq4 nat8) : Lemma
     be_bytes_to_nat32 s;
   }
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 20"
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 40"
 
 let lemma_endian_relation (quads qs:seq quad32) (input2:seq UInt8.t) : Lemma
   (requires length qs == 4 /\ length input2 == 64 /\
@@ -831,17 +834,16 @@ let lemma_endian_relation (quads qs:seq quad32) (input2:seq UInt8.t) : Lemma
            }
          }
       Lib.ByteSequence.uint_from_bytes_be #U32 #SEC b;
-      == { admit () }
-      // (FStar.Kremlin.Endianness.seq_uint32_of_be block_word_length input2).[i];
-      // == {FStar.Kremlin.Endianness.offset_uint32_be input2 block_word_length i}
-      // FStar.Kremlin.Endianness.uint32_of_be b;
-      // == {}
-      // UInt32.uint_to_t (FStar.Kremlin.Endianness.be_to_n b);
-      // == {} // see calc above
-      // UInt32.uint_to_t (FStar.Kremlin.Endianness.be_to_n (seq_nat8_to_seq_uint8 (four_to_seq_LE (nat_to_four 8 ni))));
-      // == {}
-      // nat32_to_word (FStar.Kremlin.Endianness.be_to_n (seq_nat8_to_seq_uint8 (four_to_seq_LE (nat_to_four 8 ni))));
-      // == {lemma_be_to_n_4 (four_to_seq_LE (nat_to_four 8 ni))}
+      == { calc (==) {
+             Lib.ByteSequence.nat_from_bytes_be #SEC b;
+             (==) { }
+             Lib.ByteSequence.nat_from_bytes_be #SEC (seq_nat8_to_seq_uint8 (four_to_seq_LE (nat_to_four 8 ni)));
+             (==) { lemma_be_to_n_4 (four_to_seq_LE (nat_to_four 8 ni)) }
+             be_bytes_to_nat32 (four_to_seq_LE (nat_to_four 8 ni));
+           };
+           v_inj (Lib.ByteSequence.uint_from_bytes_be #U32 #SEC b)
+             (u32 (be_bytes_to_nat32 (four_to_seq_LE (nat_to_four 8 ni))))
+         }
       nat32_to_word (be_bytes_to_nat32 (four_to_seq_LE (nat_to_four 8 ni)));
       == {}
       nat32_to_word (be_bytes_to_nat32 (reverse_seq (nat32_to_be_bytes ni)));
@@ -864,7 +866,7 @@ let lemma_mod_transform (quads:seq quad32) : Lemma
   =
   ()
 
-#reset-options "--max_fuel 0 --max_ifuel 0"
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 20"
 let rec lemma_update_multi_equiv_vale (hash hash':hash256) (quads:seq quad32) (r_quads:seq quad32)
   (nat8s:seq nat8) (blocks:seq UInt8.t) :
   Lemma (requires length quads % 4 == 0 /\
@@ -877,7 +879,6 @@ let rec lemma_update_multi_equiv_vale (hash hash':hash256) (quads:seq quad32) (r
            hash' == update_multi_opaque_vale hash blocks)
         (decreases (length quads))
   =
-  admit();
   let open FStar.Mul in
   lemma_mod_transform quads;
   assert (length blocks % 64 == 0);
