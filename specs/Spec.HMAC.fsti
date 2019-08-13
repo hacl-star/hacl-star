@@ -17,5 +17,5 @@ let keysized (a:hash_alg) (l:nat) =
 val hmac:
   a: hash_alg -> //18-07-09 can't mix refinements and erasure??
   key: bytes{ keysized a (Seq.length key) } ->
-  data: bytes{ Seq.length data + block_length a < max_size_t } ->
+  data: bytes{ Seq.length data + block_length a <= max_size_t } ->
   Tot (lbytes (hash_length a))
