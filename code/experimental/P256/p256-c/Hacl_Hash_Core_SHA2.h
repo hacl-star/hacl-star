@@ -6,49 +6,47 @@
  */
 
 #include "kremlib.h"
-#ifndef __Hacl_Impl_ECDSA_P256SHA256_Verification_H
-#define __Hacl_Impl_ECDSA_P256SHA256_Verification_H
+#ifndef __Hacl_Hash_Core_SHA2_H
+#define __Hacl_Hash_Core_SHA2_H
 
 #include "C_Endianness.h"
-#include "Hacl_Impl_P256.h"
-#include "Hacl_Hash_SHA2.h"
+#include "Hacl_Hash_Core_SHA2_Constants.h"
 #include "FStar.h"
 #include "TestLib.h"
 #include "c/Lib_PrintBuffer.h"
 #include "FStar_UInt_8_16_32_64.h"
 
-void Hacl_Impl_ECDSA_P256SHA256_Verification_bufferToJac(uint64_t *p, uint64_t *result);
+void Hacl_Hash_Core_SHA2_init_224(uint32_t *s);
 
-bool Hacl_Impl_ECDSA_P256SHA256_Verification_isCoordinateValid(uint64_t *p);
+void Hacl_Hash_Core_SHA2_init_256(uint32_t *s);
 
-bool Hacl_Impl_ECDSA_P256SHA256_Verification_isMoreThanZeroLessThanOrderMinusOne(uint64_t *f);
+void Hacl_Hash_Core_SHA2_init_384(uint64_t *s);
 
-bool Hacl_Impl_ECDSA_P256SHA256_Verification_isOrderCorrect(uint64_t *p, uint64_t *tempBuffer);
+void Hacl_Hash_Core_SHA2_init_512(uint64_t *s);
 
-void Hacl_Impl_ECDSA_P256SHA256_Verification_toUint64(uint8_t *i, uint64_t *o);
+void Hacl_Hash_Core_SHA2_update_224(uint32_t *hash1, uint8_t *block);
 
-void Hacl_Impl_ECDSA_P256SHA256_Verification_toUint8(uint64_t *i, uint8_t *o);
+void Hacl_Hash_Core_SHA2_update_256(uint32_t *hash1, uint8_t *block);
 
-extern uint32_t Hacl_Impl_ECDSA_P256SHA256_Verification_hLen;
+void Hacl_Hash_Core_SHA2_update_384(uint64_t *hash1, uint8_t *block);
 
-extern void
-Hacl_Impl_ECDSA_P256SHA256_Verification_hash(uint8_t *mHash, uint32_t len, uint8_t *m);
+void Hacl_Hash_Core_SHA2_update_512(uint64_t *hash1, uint8_t *block);
 
-bool
-Hacl_Impl_ECDSA_P256SHA256_Verification_verifyQValidCurvePoint(
-  uint64_t *pubKey,
-  uint64_t *pubKeyAsPoint,
-  uint64_t *tempBuffer
-);
+void Hacl_Hash_Core_SHA2_pad_224(uint64_t len, uint8_t *dst);
 
-bool
-Hacl_Impl_ECDSA_P256SHA256_Verification_ecdsa_verification(
-  uint64_t *pubKey,
-  uint64_t *r,
-  uint64_t *s1,
-  uint32_t mLen,
-  uint8_t *m
-);
+void Hacl_Hash_Core_SHA2_pad_256(uint64_t len, uint8_t *dst);
 
-#define __Hacl_Impl_ECDSA_P256SHA256_Verification_H_DEFINED
+void Hacl_Hash_Core_SHA2_pad_384(uint128_t len, uint8_t *dst);
+
+void Hacl_Hash_Core_SHA2_pad_512(uint128_t len, uint8_t *dst);
+
+void Hacl_Hash_Core_SHA2_finish_224(uint32_t *s, uint8_t *dst);
+
+void Hacl_Hash_Core_SHA2_finish_256(uint32_t *s, uint8_t *dst);
+
+void Hacl_Hash_Core_SHA2_finish_384(uint64_t *s, uint8_t *dst);
+
+void Hacl_Hash_Core_SHA2_finish_512(uint64_t *s, uint8_t *dst);
+
+#define __Hacl_Hash_Core_SHA2_H_DEFINED
 #endif

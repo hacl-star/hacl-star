@@ -24,14 +24,17 @@ stage2: $(OUT_DIR)/test.exe
 
 FSTAR_INCLUDE_DIRS = \
   $(HACL_KREMLIN) \
+  $(KREMLIN_HOME)/include/kremlin \
   $(KREMLIN_HOME)/kremlib \
   $(HACL_HOME)/specs \
-  $(HACL_HOME)/specs/lemmas \
   $(HACL_HOME)/lib \
-  $(HACL_HOME)/lib/fst \
   $(HACL_HOME)/lib/c \
+  $(HACL_HOME)/specs/lemmas \
   $(HACL_HOME)/code/curve25519/lemmas \
-  $(HACL_HOME)/code/curve25519/ 
+  $(HACL_HOME)/code/curve25519/ \
+  $(HACL_HOME)/code/hash/
+
+
 
 
 FSTAR_FLAGS = $(OTHERFLAGS) --cmi \

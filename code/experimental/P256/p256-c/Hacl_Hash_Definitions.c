@@ -5,50 +5,149 @@
   KreMLin version: 27ce15c8
  */
 
-#include "kremlib.h"
-#ifndef __Hacl_Impl_ECDSA_P256SHA256_Verification_H
-#define __Hacl_Impl_ECDSA_P256SHA256_Verification_H
+#include "Hacl_Hash_Definitions.h"
 
-#include "C_Endianness.h"
-#include "Hacl_Impl_P256.h"
-#include "Hacl_Hash_SHA2.h"
-#include "FStar.h"
-#include "TestLib.h"
-#include "c/Lib_PrintBuffer.h"
-#include "FStar_UInt_8_16_32_64.h"
+uint32_t Hacl_Hash_Definitions_word_len(Spec_Hash_Definitions_hash_alg a)
+{
+  switch (a)
+  {
+    case Spec_Hash_Definitions_MD5:
+      {
+        return (uint32_t)4U;
+      }
+    case Spec_Hash_Definitions_SHA1:
+      {
+        return (uint32_t)4U;
+      }
+    case Spec_Hash_Definitions_SHA2_224:
+      {
+        return (uint32_t)4U;
+      }
+    case Spec_Hash_Definitions_SHA2_256:
+      {
+        return (uint32_t)4U;
+      }
+    case Spec_Hash_Definitions_SHA2_384:
+      {
+        return (uint32_t)8U;
+      }
+    case Spec_Hash_Definitions_SHA2_512:
+      {
+        return (uint32_t)8U;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
+}
 
-void Hacl_Impl_ECDSA_P256SHA256_Verification_bufferToJac(uint64_t *p, uint64_t *result);
+uint32_t Hacl_Hash_Definitions_block_len(Spec_Hash_Definitions_hash_alg a)
+{
+  switch (a)
+  {
+    case Spec_Hash_Definitions_MD5:
+      {
+        return (uint32_t)64U;
+      }
+    case Spec_Hash_Definitions_SHA1:
+      {
+        return (uint32_t)64U;
+      }
+    case Spec_Hash_Definitions_SHA2_224:
+      {
+        return (uint32_t)64U;
+      }
+    case Spec_Hash_Definitions_SHA2_256:
+      {
+        return (uint32_t)64U;
+      }
+    case Spec_Hash_Definitions_SHA2_384:
+      {
+        return (uint32_t)128U;
+      }
+    case Spec_Hash_Definitions_SHA2_512:
+      {
+        return (uint32_t)128U;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
+}
 
-bool Hacl_Impl_ECDSA_P256SHA256_Verification_isCoordinateValid(uint64_t *p);
+uint32_t Hacl_Hash_Definitions_hash_word_len(Spec_Hash_Definitions_hash_alg a)
+{
+  switch (a)
+  {
+    case Spec_Hash_Definitions_MD5:
+      {
+        return (uint32_t)4U;
+      }
+    case Spec_Hash_Definitions_SHA1:
+      {
+        return (uint32_t)5U;
+      }
+    case Spec_Hash_Definitions_SHA2_224:
+      {
+        return (uint32_t)7U;
+      }
+    case Spec_Hash_Definitions_SHA2_256:
+      {
+        return (uint32_t)8U;
+      }
+    case Spec_Hash_Definitions_SHA2_384:
+      {
+        return (uint32_t)6U;
+      }
+    case Spec_Hash_Definitions_SHA2_512:
+      {
+        return (uint32_t)8U;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
+}
 
-bool Hacl_Impl_ECDSA_P256SHA256_Verification_isMoreThanZeroLessThanOrderMinusOne(uint64_t *f);
+uint32_t Hacl_Hash_Definitions_hash_len(Spec_Hash_Definitions_hash_alg a)
+{
+  switch (a)
+  {
+    case Spec_Hash_Definitions_MD5:
+      {
+        return (uint32_t)16U;
+      }
+    case Spec_Hash_Definitions_SHA1:
+      {
+        return (uint32_t)20U;
+      }
+    case Spec_Hash_Definitions_SHA2_224:
+      {
+        return (uint32_t)28U;
+      }
+    case Spec_Hash_Definitions_SHA2_256:
+      {
+        return (uint32_t)32U;
+      }
+    case Spec_Hash_Definitions_SHA2_384:
+      {
+        return (uint32_t)48U;
+      }
+    case Spec_Hash_Definitions_SHA2_512:
+      {
+        return (uint32_t)64U;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
+}
 
-bool Hacl_Impl_ECDSA_P256SHA256_Verification_isOrderCorrect(uint64_t *p, uint64_t *tempBuffer);
-
-void Hacl_Impl_ECDSA_P256SHA256_Verification_toUint64(uint8_t *i, uint64_t *o);
-
-void Hacl_Impl_ECDSA_P256SHA256_Verification_toUint8(uint64_t *i, uint8_t *o);
-
-extern uint32_t Hacl_Impl_ECDSA_P256SHA256_Verification_hLen;
-
-extern void
-Hacl_Impl_ECDSA_P256SHA256_Verification_hash(uint8_t *mHash, uint32_t len, uint8_t *m);
-
-bool
-Hacl_Impl_ECDSA_P256SHA256_Verification_verifyQValidCurvePoint(
-  uint64_t *pubKey,
-  uint64_t *pubKeyAsPoint,
-  uint64_t *tempBuffer
-);
-
-bool
-Hacl_Impl_ECDSA_P256SHA256_Verification_ecdsa_verification(
-  uint64_t *pubKey,
-  uint64_t *r,
-  uint64_t *s1,
-  uint32_t mLen,
-  uint8_t *m
-);
-
-#define __Hacl_Impl_ECDSA_P256SHA256_Verification_H_DEFINED
-#endif

@@ -36,7 +36,7 @@ AR ?= ar
 	$(AR) cr $@ $^
 
 %.exe:
-	$(CC) $(CFLAGS) -o $@ $^
+	$(CC) $(CFLAGS) -o $@ $^ $(KREMLIN_HOME)/kremlib/dist/generic/libkremlib.a
 
 %.so:
 	$(CC) $(CFLAGS) -shared -o $@ $^

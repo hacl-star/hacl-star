@@ -286,10 +286,6 @@ val reduction_prime256_2prime256_with_carry_impl: cin: uint64 -> x: felem -> res
       )
     )  
 
-val lemma_r1: a: nat -> Lemma (if a < prime256 then a % prime256 == a else True)
-
-let lemma_r1 a = ()
-
 
 let reduction_prime256_2prime256_with_carry_impl cin x result = 
   push_frame();
@@ -307,8 +303,7 @@ let reduction_prime256_2prime256_with_carry_impl cin x result =
       let h3 = ST.get() in 
       modulo_addition_lemma (felem_seq_as_nat (as_seq h3 result)) prime256 1;
       assert((felem_seq_as_nat (as_seq h3 result) + prime256) % prime256 = (felem_seq_as_nat (as_seq h3 result)) % prime256);
-      lemma_r1 (felem_seq_as_nat (as_seq h3 result));
-      
+      small_modulo_lemma_1 (as_nat h3 result) prime256;
       assert(let resultN = felem_seq_as_nat (as_seq h3 result) in 
 	if uint_v cin = 1 then 
 	  if uint_v c = 0 then 

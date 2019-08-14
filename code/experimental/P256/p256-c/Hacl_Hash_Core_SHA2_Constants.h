@@ -6,49 +6,17 @@
  */
 
 #include "kremlib.h"
-#ifndef __Hacl_Impl_ECDSA_P256SHA256_Verification_H
-#define __Hacl_Impl_ECDSA_P256SHA256_Verification_H
+#ifndef __Hacl_Hash_Core_SHA2_Constants_H
+#define __Hacl_Hash_Core_SHA2_Constants_H
 
-#include "C_Endianness.h"
-#include "Hacl_Impl_P256.h"
-#include "Hacl_Hash_SHA2.h"
-#include "FStar.h"
+
 #include "TestLib.h"
 #include "c/Lib_PrintBuffer.h"
 #include "FStar_UInt_8_16_32_64.h"
 
-void Hacl_Impl_ECDSA_P256SHA256_Verification_bufferToJac(uint64_t *p, uint64_t *result);
+extern uint32_t Hacl_Hash_Core_SHA2_Constants_k224_256[64U];
 
-bool Hacl_Impl_ECDSA_P256SHA256_Verification_isCoordinateValid(uint64_t *p);
+extern uint64_t Hacl_Hash_Core_SHA2_Constants_k384_512[80U];
 
-bool Hacl_Impl_ECDSA_P256SHA256_Verification_isMoreThanZeroLessThanOrderMinusOne(uint64_t *f);
-
-bool Hacl_Impl_ECDSA_P256SHA256_Verification_isOrderCorrect(uint64_t *p, uint64_t *tempBuffer);
-
-void Hacl_Impl_ECDSA_P256SHA256_Verification_toUint64(uint8_t *i, uint64_t *o);
-
-void Hacl_Impl_ECDSA_P256SHA256_Verification_toUint8(uint64_t *i, uint8_t *o);
-
-extern uint32_t Hacl_Impl_ECDSA_P256SHA256_Verification_hLen;
-
-extern void
-Hacl_Impl_ECDSA_P256SHA256_Verification_hash(uint8_t *mHash, uint32_t len, uint8_t *m);
-
-bool
-Hacl_Impl_ECDSA_P256SHA256_Verification_verifyQValidCurvePoint(
-  uint64_t *pubKey,
-  uint64_t *pubKeyAsPoint,
-  uint64_t *tempBuffer
-);
-
-bool
-Hacl_Impl_ECDSA_P256SHA256_Verification_ecdsa_verification(
-  uint64_t *pubKey,
-  uint64_t *r,
-  uint64_t *s1,
-  uint32_t mLen,
-  uint8_t *m
-);
-
-#define __Hacl_Impl_ECDSA_P256SHA256_Verification_H_DEFINED
+#define __Hacl_Hash_Core_SHA2_Constants_H_DEFINED
 #endif
