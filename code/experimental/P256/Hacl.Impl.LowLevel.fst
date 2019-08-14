@@ -18,7 +18,8 @@ open FStar.Mul
 
 inline_for_extraction
 let prime256_buffer: x: ilbuffer uint64 (size 4) {witnessed #uint64 #(size 4) x (Lib.Sequence.of_list p256_prime_list) /\ recallable x /\ felem_seq_as_nat (Lib.Sequence.of_list (p256_prime_list)) == prime256} = 
-createL_global p256_prime_list
+  assert_norm (felem_seq_as_nat (Lib.Sequence.of_list (p256_prime_list)) == prime256);
+  createL_global p256_prime_list
 
 open FStar.Mul
 
