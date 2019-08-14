@@ -507,7 +507,8 @@ let gf128_update #s ctx len text =
   let h0 = ST.get () in
   gf128_update_vec #s acc pre len text;
   let h1 = ST.get () in
-  assume (as_get_acc h1 ctx == S.gf128_update (as_seq h0 text) (as_get_acc h0 ctx) (as_get_r h0 ctx))
+  Hacl.Spec.GF128.Equiv.gf128_update_vec_eq_lemma s (as_seq h0 text) (as_get_acc h0 ctx) (as_get_r h0 ctx);
+  assert (as_get_acc h1 ctx == S.gf128_update (as_seq h0 text) (as_get_acc h0 ctx) (as_get_r h0 ctx))
 
 
 let gf128_emit #s tag ctx =
