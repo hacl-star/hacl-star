@@ -120,7 +120,7 @@ let lemma_cswap2_step bit p1 p2 =
   assert (v bit == 1 ==> v dummy == v (p1 ^. p2));
   assert (v bit == 0 ==> v dummy == 0);
   let p1' = p1 ^. dummy in
-  uintv_extensionality dummy (if v bit = 1 then (p1 ^. p2) else u64 0);
+  (* uintv_extensionality dummy (if v bit = 1 then (p1 ^. p2) else u64 0); *)
   logxor_lemma p1 p2;
   let p2' = p2 ^. dummy in
   logxor_lemma p2 p1

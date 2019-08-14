@@ -110,7 +110,7 @@ let scalar_bit s n =
  let h0 = ST.get () in
   mod_mask_lemma ((Lib.Sequence.index (as_seq h0 s) (v n / 8)) >>. (n %. 8ul)) 1ul;
   assert_norm (1 = pow2 1 - 1);
-  uintv_extensionality (mod_mask #U8 1ul) (u8 1);
+  (* uintv_extensionality (mod_mask #U8 1ul) (u8 1); *)
   to_u64 ((s.(n /. 8ul) >>. (n %. 8ul)) &. u8 1)
 
 #reset-options "--z3refresh --z3rlimit 300"

@@ -18,7 +18,7 @@ open Hacl.Spec.ECDSA
 open Hacl.Spec.P256
 open Hacl.Spec.P256.Ladder
 
-open Hacl.SHA2_256
+open Hacl.Hash.SHA2
 
 val bufferToJac: p: lbuffer uint64 (size 8) -> result: point -> Stack unit 
   (requires fun h -> live h p /\ live h result /\ disjoint p result)
@@ -324,7 +324,7 @@ val ecdsa_verification_step23: mLen: size_t -> m: lbuffer uint8 mLen -> hashAsFe
 let ecdsa_verification_step23 mLen m hashAsFelem = 
   push_frame(); 
     let mHash = create (size 32) (u8 0) in  
-    hash mHash mLen m;
+    hash_256 mHash mLen m;
     toUint64 mHash hashAsFelem;
     reduction_prime_2prime_order hashAsFelem hashAsFelem;
   pop_frame()
