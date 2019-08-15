@@ -1,12 +1,12 @@
 FSTAR_HOME   ?= ../../../FStar
 KREMLIN_HOME ?= ../../../kremlin
-HACL_HOME ?= ../../../
+HACL_HOME    ?= ../..
 
-CACHE_DIR     = .cache
 OUTPUT_DIR    = .output
-HINT_DIR      = .hints
-GENERATED_DIR = p256-c
-OUT_DIR	      = p256-c
+CACHE_DIR     ?= $(HACL_HOME)/.cache
+HINT_DIR      ?= $(HACL_HOME)/.hints
+GENERATED_DIR = ecdsap256-c
+OUT_DIR	      = ecdsap256-c
 
 .PHONY: all test stage1 stage2 clean clean-c distclean
 
@@ -24,21 +24,18 @@ stage2: $(OUT_DIR)/test.exe
 
 FSTAR_INCLUDE_DIRS = \
   $(HACL_KREMLIN) \
-  $(KREMLIN_HOME)/include/kremlin \
   $(KREMLIN_HOME)/kremlib \
   $(HACL_HOME)/specs \
   $(HACL_HOME)/lib \
   $(HACL_HOME)/lib/c \
-  $(HACL_HOME)/specs/lemmas \
+  $(HACL_HOME)/code/curve25519 \
   $(HACL_HOME)/code/curve25519/lemmas \
-  $(HACL_HOME)/code/curve25519/ \
-  $(HACL_HOME)/code/hash/
-
-
-
+  $(HACL_HOME)/specs/lemmas \
+  $(HACL_HOME)/code/hash
 
 FSTAR_FLAGS = $(OTHERFLAGS) --cmi \
-  --cache_checked_modules --cache_dir $(CACHE_DIR) --odir $(OUTPUT_DIR) \
+  --cache_checked_modules --odir $(OUTPUT_DIR) \
+  --already_cached "'Prims+FStar+LowStar+C+TestLib+Lib'" \
   $(addprefix --include ,$(FSTAR_INCLUDE_DIRS))
 
 FSTAR = $(FSTAR_HOME)/bin/fstar.exe $(FSTAR_FLAGS)
@@ -55,28 +52,20 @@ ROOTS = Hacl.Impl.ECDSA.P256SHA256.Verification.fst
 .depend:
 	$(FSTAR) --dep full $(ROOTS) --extract '* -Prims -FStar +FStar.UInt128 -LowStar -Spec' > $@
 
+$(HINT_DIR):
+	mkdir -p $@
+
+$(CACHE_DIR):
+	mkdir -p $@
+
+.depend:
+	$(FSTAR) --dep full $(ROOTS) --extract '* -Prims -FStar +FStar.UInt128 -LowStar -Spec' > $@
+
 include .depend
 
-# Admit SMT queries for modules in FStar, LowStar, C, and Lib
-$(CACHE_DIR)/FStar.%.checked: | .depend
-	$(FSTAR) $< --admit_smt_queries true && \
-	touch $@
-
-$(CACHE_DIR)/LowStar.%.checked: | .depend
-	$(FSTAR) $< --admit_smt_queries true && \
-	touch $@
-
-$(CACHE_DIR)/C.%.checked: | .depend
-	$(FSTAR) $< --admit_smt_queries true && \
-	touch $@
-
-$(CACHE_DIR)/Lib.%.checked: | .depend
-	$(FSTAR) $< --admit_smt_queries true && \
-	touch $@
-
-$(CACHE_DIR)/%.checked: | .depend
-	$(FSTAR) $<  && \
-	touch $@
+%.checked: | .depend $(HINT_DIR) $(CACHE_DIR)
+	$(FSTAR) $< $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $*).hints && \
+	touch -c $@
 
 $(OUTPUT_DIR)/%.krml: | .depend
 	$(FSTAR) --codegen Kremlin \
@@ -84,23 +73,22 @@ $(OUTPUT_DIR)/%.krml: | .depend
 	  $(notdir $(subst .checked,,$<)) && \
 	touch $@
 
+
 # 2. Generation of .c files
 
-KREMLIN_TESTLIB=-fbuiltin-uint128 -funroll-loops 8 -add-include '"TestLib.h"' $(KREMLIB)/dist/generic/testlib.c
+KREMLIN_TESTLIB=-fbuiltin-uint128 -fnocompound-literals -fc89-scope -fparentheses -fcurly-braces \
+	-funroll-loops 4 -warn-error +9 -add-include '"kremlib.h"' -add-include '"FStar_UInt_8_16_32_64.h"' $(KREMLIB)/dist/minimal/testlib.c
 
 KREMLIN=$(KREMLIN_HOME)/krml
 
 # 2. Generation of .c files
-
-	# -bundle 'Hacl.Impl.P256=Hacl.Impl.P256,Hacl.Impl.LowLevel,Hacl.Impl.SolinasReduction,Hacl.Spec.P256.*,Hacl.Spec.Curve25519.*,Hacl.Impl.Curve25519.*' \
-	# -bundle 'Hacl.Impl.ECDSA.P256SHA256.Verification=Hacl.Impl.ECDSA.P256SHA256.Verification' \
-
 
 $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	$(KREMLIN) $(KREMLIN_TESTLIB) -skip-compilation \
 	-no-prefix 'Hacl.Impl.P256' \
 	-bundle 'Lib.*' \
 	-bundle 'Spec.*' \
+	-bundle 'C=C.Endianness' \
 	-bundle 'Hacl.Hash.SHA2=Hacl.Hash.*,Spec.Hash.*' \
 	-bundle 'Hacl.Impl.P256=Hacl.Impl.P256,Hacl.Impl.LowLevel,Hacl.Impl.SolinasReduction,Hacl.Spec.P256.*,Hacl.Spec.Curve25519.*,Hacl.Impl.Curve25519.*' \
 	-bundle 'Hacl.Impl.ECDSA.P256SHA256.Verification=Hacl.Impl.MontgomeryMultiplication,Hacl.Impl.ECDSA.P256SHA256.Verification,Hacl.Impl.MM.Exponent' \
@@ -137,12 +125,13 @@ ALL_GENERATED_FILES = $(addprefix $(GENERATED_DIR)/,$(ALL_OUR_FILES))
 ALL_SOURCES = \
   $(ALL_GENERATED_FILES) \
   $(HACL_HOME)/lib/c/Lib_PrintBuffer.c \
-  testMMECDSA.c
+  testECDSAVerification.c
 
 ALL_OBJS = $(patsubst %.c,%.o,$(ALL_SOURCES))
 
 INCLUDE_DIRS = \
   $(KREMLIN_HOME)/include \
+  $(KREMLIN_HOME)/include/kremlin \
   $(KREMLIN_HOME)/kremlib \
   $(KREMLIN_HOME)/kremlib/dist/generic \
   $(HACL_HOME)/lib
@@ -151,8 +140,9 @@ INCLUDE_DIRS = \
 CFLAGS += -O3 -march=native -mtune=native -funroll-loops
 CFLAGS += $(addprefix -I ,$(INCLUDE_DIRS)) -Wall -Wextra -Werror \
   -Wno-parentheses -Wno-unused-parameter -Wno-unused-variable \
-  -Wno-unknown-warning-option \
-  -Wno-incompatible-pointer-types
+  -Wno-incompatible-pointer-types -Wno-deprecated-declarations \
+  -Wno-unused-but-set-variable
+
 
 # GNU Make manual section 4.14
 %.d: %.c
@@ -196,4 +186,4 @@ clean-c:
 	rm -rf $(GENERATED_DIR)/{*.{c,h},Makefile.include}
 
 distclean: clean
-	rm -rf $(OUT_DIR) $(CACHE_DIR) $(OUTPUT_DIR)
+	rm -rf $(OUT_DIR) $(OUTPUT_DIR) *.checked
