@@ -19,7 +19,6 @@ module Lib.Misc
        , logD
        , logDTrialAndError
        , logDShank
-       , crt
        , bsmooth
        , generator
        , isSquareRoot
@@ -157,23 +156,6 @@ logDShank p g h
     list1 = take (fromIntegral $ n + 1) $ iterate (bimap (ml g) (+ 1)) (1, 0)
     gMinN = exp p g (_N - n) -- g^(-n)
     list2 = take (fromIntegral $ n + 1) $ iterate (bimap (ml gMinN) (+ 1)) (h, 0)
-
--- TODO returns trivial solutions if exist. is it correct?
--- | Chinese remainder theorem, accepts list of (a_i,m_i) where x =
--- a_i (mod mi) is a pattern for equations.
-crt :: [(Integer,Integer)] -> Integer
-crt [] = error "chinese called with empty list"
-crt xs | not (coprimes $ map snd xs) =
-             error $ "not relative primes: " <> show (map snd xs)
-crt ((a₁,m₁):xs0) = chineseGo xs0 (a₁ `mod` m₁) m₁
-  where
-    chineseGo [] c _              = c
-    chineseGo ((a, m):xs) c mprod =
-        chineseGo xs c' (mprod * m)
-        where
-          m' = inverse mprod m
-          y = (m' * ((a - c) `mod` m)) `mod` m
-          c' = c + mprod * y
 
 -- | Checks if given numebr is b-smooth.
 bsmooth :: Integer -> Integer -> Bool

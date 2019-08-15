@@ -5,16 +5,30 @@ module Hacl.Packing where
 
 import Universum hiding (exp, last, (<*>))
 
-import Lib hiding (crt)
-import qualified Lib as L
+import System.Random (randomRIO)
+
+import Lib
 import Utils
 
 ----------------------------------------------------------------------------
 -- CRT packing
 ----------------------------------------------------------------------------
 
+
 crt :: [Integer] -> [Integer] -> Integer
-crt base vals = L.crt $ vals `zip` base
+crt (m1:base) (a1:vals) = chineseGo base vals (a1 `mod` m1) m1
+  where
+    chineseGo :: [Integer] -> [Integer] -> Integer -> Integer -> Integer
+    chineseGo [] _ c _ = c
+    chineseGo bleft [] c mprod = chineseGo [product bleft] [0] c mprod
+    chineseGo (m:xs1) (a:xs2) c mprod =
+        chineseGo xs1 xs2 c' (mprod * m)
+        where
+          m' = inverse mprod m
+          y = (m' * ((a - c) `mod` m)) `mod` m
+          c' = c + mprod * y
+crt _ _ = error "crt lists are too empty"
+
 
 crtInv :: [Integer] -> Integer -> [Integer]
 crtInv base v = map (v `mod`) base
@@ -30,6 +44,22 @@ genConsecutivePrms n bound =
         if isPrimeMR 40 toTest
         then go (l+1) (toTest:xs) (toTest+2)
         else go l xs (toTest+2)
+
+testCRT :: IO ()
+testCRT = do
+    let n = 8
+    let bound = 32
+    let prms = genConsecutivePrms n bound
+
+    measureTimeSingle "crt" $ replicateM_ 1000 $ do
+        m <- randomRIO (1,n-1)
+        vs <- replicateM m $ randomRIO (0,bound-1)
+        let enc = crt prms vs
+        let dec = crtInv prms enc
+        unless (dec == vs ++ replicate (n-m) 0) $ do
+            print vs
+            print dec
+            error "crt is broken"
 
 ----------------------------------------------------------------------------
 -- DFT Packing is in the playground.hs
