@@ -473,6 +473,10 @@ obj/Vale.Inline.X64.Fsqr_inline.fst.checked: \
 obj/Vale.Stdcalls.X64.GCMencryptOpt.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
+obj/Vale.Wrapper.X64.GCMencryptOpt.fst.checked: \
+  FSTAR_FLAGS=$(shell echo $(VALE_FSTAR_FLAGS_NOSMT) | \
+    sed 's/--max_fuel 1/--max_fuel 0/;')
+
 obj/Vale.Stdcalls.X64.GCMdecryptOpt.fst.checked: \
   FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 
