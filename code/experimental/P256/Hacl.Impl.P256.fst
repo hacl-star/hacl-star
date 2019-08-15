@@ -696,6 +696,30 @@ let uploadOneImpl f =
   upd f (size 3) (u64 0)
 
 
+let toJ p resultPoint tempBuffer = 
+  let xf = sub p (size 0) (size 4) in
+  let yf = sub p (size 4) (size 4) in 
+  let zf = sub p (size 8) (size 4) in 
+
+  let resultX = sub resultPoint (size 0) (size 4) in 
+  let resultY = sub resultPoint (size 4) (size 4) in 
+  let resultZ = sub resultPoint (size 8) (size 4) in 
+  
+  let z2f = sub tempBuffer (size 4) (size 4) in 
+  let z3f = sub tempBuffer (size 8) (size 4) in
+  let tempBuffer20 = sub tempBuffer (size 12) (size 20) in 
+
+  Hacl.Spec.P256.MontgomeryMultiplication.montgomery_multiplication_buffer zf zf z2f;
+  Hacl.Spec.P256.MontgomeryMultiplication.montgomery_multiplication_buffer z2f zf z3f;
+
+  Hacl.Spec.P256.MontgomeryMultiplication.exponent z2f z2f tempBuffer20;
+  Hacl.Spec.P256.MontgomeryMultiplication.exponent z3f z3f tempBuffer20;
+     
+  Hacl.Spec.P256.MontgomeryMultiplication.montgomery_multiplication_buffer xf z2f z2f;
+  Hacl.Spec.P256.MontgomeryMultiplication.montgomery_multiplication_buffer yf z3f z3f
+
+
+
 #reset-options "--z3refresh --z3rlimit 500" 
 let norm p resultPoint tempBuffer = 
   let xf = sub p (size 0) (size 4) in
@@ -1315,8 +1339,25 @@ let uploadBasePoint p =
   assert_norm (1 + pow2 64 * 18446744069414584320 + pow2 64 * pow2 64 * 18446744073709551615 + pow2 64 * pow2 64 * pow2 64 * 4294967294 < prime256)
 
 
+let scalarMultiplicationWithoutNorm p result scalar tempBuffer  = 
+    let h0 = ST.get() in 
+  let q = sub tempBuffer (size 0) (size 12) in 
+  zero_buffer q;
+    let h1 = ST.get() in 
+    modifies1_is_modifies3 p result tempBuffer h0 h1;
+    assert(modifies3 p result tempBuffer h0 h1); 
+  let buff = sub tempBuffer (size 12) (size 88) in 
+  pointToDomain p result;
+    let h2 = ST.get() in 
+      modifies2_is_modifies3 p result tempBuffer h1 h2;
+      assert(modifies3 p result tempBuffer h1 h2); 
+  montgomery_ladder q result scalar buff;
+  copy_point q result  
 
-let secretToPublic result scalar tempBuffer = 
+
+
+
+let secretToPublicWithoutNorm result scalar tempBuffer = 
   push_frame(); 
     let basePoint = create (size 12) (u64 0) in 
     uploadBasePoint basePoint;
@@ -1326,7 +1367,8 @@ let secretToPublic result scalar tempBuffer =
     
     zero_buffer q; 
     montgomery_ladder q basePoint scalar buff; 
-    norm q result buff;  
+    copy_point q result;
+    (*norm q result buff;  *)
   pop_frame()  
 
 

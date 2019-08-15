@@ -964,22 +964,57 @@ bool Hacl_Impl_ECDSA_P256SHA256_Verification_isOrderCorrect(uint64_t *p, uint64_
     bool result;
     scalarMultiplicationI(pBuffer, multResult, Hacl_Impl_MM_Exponent_order_buffer, tempBuffer);
     result = isPointAtInfinity(multResult);
-    return result;
+    return !result;
   }
+}
+
+void Hacl_Impl_ECDSA_P256SHA256_Verification_changeEndian(uint64_t *i)
+{
+  uint64_t zero1 = i[0U];
+  uint64_t one1 = i[1U];
+  uint64_t two = i[2U];
+  uint64_t three = i[3U];
+  i[0U] = three;
+  i[1U] = two;
+  i[2U] = one1;
+  i[3U] = zero1;
 }
 
 void Hacl_Impl_ECDSA_P256SHA256_Verification_toUint64(uint8_t *i, uint64_t *o)
 {
-  uint32_t i0;
-  for (i0 = (uint32_t)0U; i0 < (uint32_t)4U; i0 = i0 + (uint32_t)1U)
   {
     uint64_t *os = o;
-    uint8_t *bj = i + i0 * (uint32_t)8U;
-    uint64_t u = load64_le(bj);
+    uint8_t *bj = i + (uint32_t)0U * (uint32_t)8U;
+    uint64_t u = load64_be(bj);
     uint64_t r = u;
     uint64_t x = r;
-    os[i0] = x;
+    os[0U] = x;
   }
+  {
+    uint64_t *os = o;
+    uint8_t *bj = i + (uint32_t)1U * (uint32_t)8U;
+    uint64_t u = load64_be(bj);
+    uint64_t r = u;
+    uint64_t x = r;
+    os[1U] = x;
+  }
+  {
+    uint64_t *os = o;
+    uint8_t *bj = i + (uint32_t)2U * (uint32_t)8U;
+    uint64_t u = load64_be(bj);
+    uint64_t r = u;
+    uint64_t x = r;
+    os[2U] = x;
+  }
+  {
+    uint64_t *os = o;
+    uint8_t *bj = i + (uint32_t)3U * (uint32_t)8U;
+    uint64_t u = load64_be(bj);
+    uint64_t r = u;
+    uint64_t x = r;
+    os[3U] = x;
+  }
+  Hacl_Impl_ECDSA_P256SHA256_Verification_changeEndian(o);
 }
 
 void Hacl_Impl_ECDSA_P256SHA256_Verification_toUint8(uint64_t *i, uint8_t *o)
@@ -990,8 +1025,6 @@ void Hacl_Impl_ECDSA_P256SHA256_Verification_toUint8(uint64_t *i, uint8_t *o)
     store64_le(o + i0 * (uint32_t)8U, i[i0]);
   }
 }
-
-uint32_t Hacl_Impl_ECDSA_P256SHA256_Verification_hLen = (uint32_t)32U;
 
 bool
 Hacl_Impl_ECDSA_P256SHA256_Verification_verifyQValidCurvePoint(
@@ -1056,7 +1089,6 @@ Hacl_Impl_ECDSA_P256SHA256_Verification_ecdsa_verification(
     Hacl_Impl_ECDSA_P256SHA256_Verification_verifyQValidCurvePoint(pubKey,
       publicKeyBuffer,
       tempBuffer);
-
   if (publicKeyCorrect == false)
   {
     return (bool)(void *)false;
@@ -1084,7 +1116,7 @@ Hacl_Impl_ECDSA_P256SHA256_Verification_ecdsa_verification(
         uint64_t *inverseS = tempBuffer1;
         uint64_t *u11 = tempBuffer1 + (uint32_t)4U;
         uint64_t *u2 = tempBuffer1 + (uint32_t)8U;
-        memcpy(inverseS, s1, (uint32_t)4U * sizeof s1[0U]);
+        Hacl_Impl_MM_Exponent_fromDomainImpl(s1, inverseS);
         Hacl_Impl_MM_Exponent_montgomery_ladder_exponent(inverseS);
         Hacl_Impl_MM_Exponent_multPowerPartial(inverseS, hashAsFelem, u11);
         Hacl_Impl_MM_Exponent_multPowerPartial(inverseS, r, u2);
@@ -1096,21 +1128,19 @@ Hacl_Impl_ECDSA_P256SHA256_Verification_ecdsa_verification(
           uint64_t *buff = tempBuffer + (uint32_t)12U;
           uint64_t *pointU1G = points;
           uint64_t *pointU2Q0 = points + (uint32_t)12U;
-          secretToPublic(pointU1G, bufferU1, tempBuffer);
-          scalarMultiplicationL(publicKeyBuffer, pointU2Q0, bufferU2, tempBuffer);
+          secretToPublicWithoutNorm(pointU1G, bufferU1, tempBuffer);
+          scalarMultiplicationWithoutNorm(publicKeyBuffer, pointU2Q0, bufferU2, tempBuffer);
           {
             uint64_t *pointU1G0 = points;
             uint64_t *pointU2Q = points + (uint32_t)12U;
             point_add(pointU1G0, pointU2Q, pointSum, buff);
+            norm(pointSum, pointSum, buff);
             {
               bool resultIsPAI = isPointAtInfinity(pointSum);
               uint64_t *xCoordinateSum = pointSum;
               memcpy(xBuffer, xCoordinateSum, (uint32_t)4U * sizeof xCoordinateSum[0U]);
               {
                 bool state = !resultIsPAI;
-                
-                printf("%s\n", "I am here");
-                
                 void *ite;
                 if (state == false)
                 {

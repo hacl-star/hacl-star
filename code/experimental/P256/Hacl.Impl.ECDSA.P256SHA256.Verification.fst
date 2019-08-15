@@ -217,13 +217,31 @@ let isOrderCorrect p tempBuffer =
 
 open Lib.ByteBuffer 
 
+
+val changeEndian: i: felem -> Stack unit 
+  (requires fun h -> True)
+  (ensures fun h0 _ h1 -> True)
+
+let changeEndian i = 
+  let zero = index i (size 0) in 
+  let one = index i (size 1) in 
+  let two = index i (size 2) in 
+  let three = index i (size 3) in 
+  upd i (size 0) three;
+  upd i (size 1) two; 
+  upd i (size 2) one;
+  upd i (size 3) zero
+
+
 val toUint64: i: lbuffer uint8 (32ul) -> o: felem ->  Stack unit
   (requires fun h -> live h i /\ live h o /\ disjoint i o)
   (ensures fun h0 _ h1 -> modifies (loc o) h0 h1 /\
      as_seq h1 o == Lib.ByteSequence.uints_from_bytes_le #_ #_ #4 (as_seq h0 i))
 
 let toUint64 i o = 
-  uints_from_bytes_le o i
+  uints_from_bytes_be o i;
+  changeEndian o
+
 
 
 val toUint8: i: felem ->  o: lbuffer uint8 (32ul) -> Stack unit
@@ -233,18 +251,6 @@ val toUint8: i: felem ->  o: lbuffer uint8 (32ul) -> Stack unit
 
 let toUint8 i o = 
   uints_to_bytes_le (size 4) o i
-
-
-inline_for_extraction
-let hLen = 32ul
-
-assume val hash:
-    mHash:lbuffer uint8 (size 32) 
-  -> len:size_t
-  -> m:lbuffer uint8 len
-  -> Stack unit
-    (requires fun h -> live h mHash /\ live h m /\ disjoint m mHash)
-    (ensures  fun h0 _ h1 -> modifies (loc mHash) h0 h1)
 
 
 (*
@@ -347,7 +353,8 @@ let ecdsa_verification_step4 r s hash bufferU1 bufferU2 =
       let u1 = sub tempBuffer (size 4) (size 4) in 
       let u2 = sub tempBuffer (size 8) (size 4) in 
     let h0 = ST.get() in 
-  copy inverseS s; 
+  (* copy inverseS s;  *)
+  fromDomainImpl s inverseS;
   montgomery_ladder_exponent inverseS; 
   multPowerPartial inverseS hash u1; 
   multPowerPartial inverseS r u2; 
@@ -389,11 +396,11 @@ let ecdsa_verification_step5_0 pubKeyAsPoint u1 u2 tempBuffer points  =
     let pointU1G = sub points (size 0) (size 12) in 
     let pointU2Q = sub points (size 12) (size 12) in
       let h0 = ST.get() in 
-    secretToPublic pointU1G u1 tempBuffer; 
+    secretToPublicWithoutNorm pointU1G u1 tempBuffer; 
       let h1 = ST.get() in 
       (*assert(modifies2 points tempBuffer h0 h1);
       modifies2_is_modifies3 pubKeyAsPoint points tempBuffer h0 h1; *)
-    scalarMultiplication #MUT pubKeyAsPoint pointU2Q u2 tempBuffer
+    scalarMultiplicationWithoutNorm pubKeyAsPoint pointU2Q u2 tempBuffer
       (*let h2 = ST.get() in 
       assert(modifies3 pubKeyAsPoint points tempBuffer h1 h2);
       assert(modifies3 pubKeyAsPoint points tempBuffer h0 h2) *)
@@ -428,6 +435,8 @@ let ecdsa_verification_step5_1 pubKeyAsPoint u1 u2 pointSum tempBuffer =
     let pointU2Q = sub points (size 12) (size 12) in
 
     point_add pointU1G pointU2Q pointSum buff; 
+    norm pointSum pointSum buff;
+    
       let h2 = ST.get() in 
       assert(modifies2 pointSum tempBuffer h1 h2);
       modifies2_is_modifies4 pubKeyAsPoint points pointSum tempBuffer h1 h2;

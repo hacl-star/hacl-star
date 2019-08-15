@@ -26,14 +26,11 @@ bool Hacl_Impl_ECDSA_P256SHA256_Verification_isMoreThanZeroLessThanOrderMinusOne
 
 bool Hacl_Impl_ECDSA_P256SHA256_Verification_isOrderCorrect(uint64_t *p, uint64_t *tempBuffer);
 
+void Hacl_Impl_ECDSA_P256SHA256_Verification_changeEndian(uint64_t *i);
+
 void Hacl_Impl_ECDSA_P256SHA256_Verification_toUint64(uint8_t *i, uint64_t *o);
 
 void Hacl_Impl_ECDSA_P256SHA256_Verification_toUint8(uint64_t *i, uint8_t *o);
-
-extern uint32_t Hacl_Impl_ECDSA_P256SHA256_Verification_hLen;
-
-extern void
-Hacl_Impl_ECDSA_P256SHA256_Verification_hash(uint8_t *mHash, uint32_t len, uint8_t *m);
 
 bool
 Hacl_Impl_ECDSA_P256SHA256_Verification_verifyQValidCurvePoint(

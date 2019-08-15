@@ -87,15 +87,24 @@ uint64_t compare_felem(uint64_t *a, uint64_t *b);
 
 void point_add(uint64_t *p, uint64_t *q, uint64_t *result, uint64_t *tempBuffer);
 
+void toJ(uint64_t *p, uint64_t *resultPoint, uint64_t *tempBuffer);
+
 void norm(uint64_t *p, uint64_t *resultPoint, uint64_t *tempBuffer);
 
-void
-scalarMultiplicationL(uint64_t *p, uint64_t *result, uint8_t *scalar, uint64_t *tempBuffer);
+uint64_t isPointAtInfinityPrivate(uint64_t *p);
 
 void
 scalarMultiplicationI(uint64_t *p, uint64_t *result, uint8_t *scalar, uint64_t *tempBuffer);
 
-void secretToPublic(uint64_t *result, uint8_t *scalar, uint64_t *tempBuffer);
+void
+scalarMultiplicationWithoutNorm(
+  uint64_t *p,
+  uint64_t *result,
+  uint8_t *scalar,
+  uint64_t *tempBuffer
+);
+
+void secretToPublicWithoutNorm(uint64_t *result, uint8_t *scalar, uint64_t *tempBuffer);
 
 bool isPointAtInfinity(uint64_t *p);
 
