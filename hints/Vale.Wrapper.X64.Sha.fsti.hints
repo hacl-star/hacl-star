@@ -1,39 +1,29 @@
 [
-  "\u0010Q³@HlfýCÞo¿ì”\u001dÆ",
+  "¦\u0012‘‘?‹\u0014\u0011¿ò@ÚÏ¨†b",
   [
-    [
-      "Vale.Wrapper.X64.Sha.uint64",
-      1,
-      1,
-      0,
-      [
-        "@query", "constructor_distinct_Lib.IntTypes.U64",
-        "equality_tok_Lib.IntTypes.U64@tok",
-        "equation_Lib.IntTypes.unsigned", "projection_inverse_BoxBool_proj_0"
-      ],
-      0,
-      "dca851e461ed021ceacc769d1fb812fb"
-    ],
     [
       "Vale.Wrapper.X64.Sha.sha256_update",
       1,
       1,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Lib.IntTypes.uint32",
+        "@MaxIFuel_assumption", "@query",
+        "FStar.UInt32_pretyping_041e3a67a2d2b51fd702f1f88cfc3b44",
         "equation_LowStar.Buffer.buffer",
         "equation_LowStar.Buffer.trivial_preorder",
         "equation_Vale.SHA.SHA_helpers.block_length",
         "equation_Vale.SHA.SHA_helpers.byte",
         "equation_Vale.SHA.SHA_helpers.size_block_w_256",
-        "function_token_typing_Lib.IntTypes.uint32",
+        "function_token_typing_FStar.UInt32.t",
+        "function_token_typing_FStar.UInt8.t",
         "lemma_LowStar.Monotonic.Buffer.length_as_seq",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_d8c8d5378329c1422697886385085566",
-        "typing_LowStar.Buffer.trivial_preorder"
+        "refinement_interpretation_Tm_refine_0241be2b849c3002e80c7918352e1d01",
+        "typing_LowStar.Buffer.trivial_preorder",
+        "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "87c93dea96ae84af32943b5004d48dce"
+      "35ac293a6cdbbb68f566a6c0dfdcb54e"
     ]
   ]
 ]

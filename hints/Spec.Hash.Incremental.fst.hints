@@ -17,7 +17,7 @@
         "typing_Spec.Hash.Definitions.word_length"
       ],
       0,
-      "e809f3057ea8826f244e6ce2d13f90b9"
+      "3ff7ffd5c3d5ec6b310d8f31e63f07e1"
     ],
     [
       "Spec.Hash.Incremental.update_last",
@@ -26,27 +26,30 @@
       0,
       [
         "@MaxIFuel_assumption", "@query", "constructor_distinct_Tm_unit",
-        "equation_FStar.Seq.Base.op_At_Bar", "equation_Lib.IntTypes.uint8",
-        "equation_Prims.nat", "equation_Spec.Hash.Definitions.block_length",
+        "equation_FStar.Seq.Base.op_At_Bar", "equation_Prims.nat",
+        "equation_Spec.Hash.Definitions.block_length",
         "equation_Spec.Hash.Definitions.block_word_length",
         "equation_Spec.Hash.Definitions.bytes",
+        "equation_Spec.Hash.Definitions.len_len",
         "equation_Spec.Hash.Definitions.len_length",
         "equation_Spec.Hash.Definitions.state_word_length",
         "equation_Spec.Hash.Definitions.word_length",
-        "function_token_typing_Lib.IntTypes.uint8", "int_inversion",
+        "function_token_typing_FStar.UInt8.t", "int_inversion",
         "lemma_FStar.Seq.Base.lemma_len_append",
         "primitive_Prims.op_Addition", "primitive_Prims.op_Modulus",
         "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_0dd7d82d89ad57ee72279b3caed814b3",
-        "refinement_interpretation_Tm_refine_422c2869ebae5b3d7328a98714ce88bc",
+        "refinement_interpretation_Tm_refine_1187a86b3094c271e5b01b1a2a73ec21",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_d16f60cd99dd3b96b5129ac51427f5e4",
+        "refinement_interpretation_Tm_refine_6346cfed8ff7200754c093d0fff21184",
+        "refinement_interpretation_Tm_refine_a802703e4e71b117a83d7ebccc186acd",
         "typing_FStar.Seq.Base.length",
+        "typing_Spec.Hash.Definitions.len_len",
         "typing_Spec.Hash.Definitions.len_length",
         "typing_Spec.Hash.Definitions.word_length"
       ],
       0,
-      "eefd9bbf9e28fe0d849656cb07d9aea8"
+      "f50cb3d524dc5358fcd8034d252dda2c"
     ],
     [
       "Spec.Hash.Incremental.hash_incremental",
@@ -55,13 +58,14 @@
       0,
       [
         "@MaxIFuel_assumption", "@query", "constructor_distinct_Tm_unit",
-        "equation_FStar.Seq.Properties.split", "equation_Lib.IntTypes.uint8",
-        "equation_Prims.nat", "equation_Spec.Hash.Definitions.block_length",
+        "equation_FStar.Seq.Properties.split", "equation_Prims.nat",
+        "equation_Spec.Hash.Definitions.block_length",
         "equation_Spec.Hash.Definitions.block_word_length",
         "equation_Spec.Hash.Definitions.bytes",
+        "equation_Spec.Hash.Definitions.max_input_length",
         "equation_Spec.Hash.Definitions.word_length",
-        "function_token_typing_Lib.IntTypes.uint8", "int_inversion",
-        "int_typing", "lemma_FStar.Seq.Base.lemma_len_slice",
+        "function_token_typing_FStar.UInt8.t", "int_inversion", "int_typing",
+        "lemma_FStar.Seq.Base.lemma_len_slice",
         "primitive_Prims.op_Addition", "primitive_Prims.op_Division",
         "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Modulus",
         "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
@@ -69,16 +73,16 @@
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
-        "refinement_interpretation_Tm_refine_076defedcc784372ac2411e8a227ef46",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_6ac5296ff6ce710484f1fc6319b49ab7",
         "refinement_interpretation_Tm_refine_81407705a0828c2c1b1976675443f647",
-        "refinement_interpretation_Tm_refine_a7afd8af4f8e7624192f32bbf57706e3",
+        "refinement_interpretation_Tm_refine_ce9f9c6290826e2b3773a31268b10983",
         "typing_FStar.Seq.Base.length",
         "typing_Spec.Hash.Definitions.block_length",
         "typing_Spec.Hash.Definitions.word_length"
       ],
       0,
-      "e7899100aff3093192a4320077bee535"
+      "c72c27f37fee828f2ca298c4156964cf"
     ]
   ]
 ]

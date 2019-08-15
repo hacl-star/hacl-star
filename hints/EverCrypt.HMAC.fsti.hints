@@ -1,5 +1,5 @@
 [
-  "úQFŒ\u0010zÝÖ§I\bþ5\u0005\u0013µ",
+  "Žr\n‚Dš‰6]\t/y)I4ð",
   [
     [
       "EverCrypt.HMAC.compute_st",
@@ -8,20 +8,24 @@
       1,
       [
         "@MaxIFuel_assumption", "@query",
-        "constructor_distinct_Lib.IntTypes.U32",
-        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.uint8", "equation_Lib.IntTypes.unsigned",
+        "equation_EverCrypt.Helpers.uint8_p",
+        "equation_EverCrypt.Helpers.uint8_t",
         "equation_LowStar.Buffer.buffer",
-        "equation_LowStar.Buffer.trivial_preorder",
-        "function_token_typing_Lib.IntTypes.uint8",
+        "equation_Spec.Hash.Definitions.hash_length",
+        "equation_Spec.Hash.Definitions.hash_word_length",
+        "equation_Spec.Hash.Definitions.max_input_length",
+        "equation_Spec.Hash.Definitions.word_length",
+        "fuel_guarded_inversion_Spec.Hash.Definitions.hash_alg",
+        "function_token_typing_FStar.UInt8.t",
         "lemma_LowStar.Monotonic.Buffer.length_as_seq",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_64928596402596f22115bab5e8e91cc1",
-        "refinement_interpretation_Tm_refine_dd0acc6b0a6d213c976d90b31ff4bbf0",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_3dfd3330fc61b88d7a3a14dcc4fe2c4a",
+        "refinement_interpretation_Tm_refine_5f19b0d76fe346627d14a9a9d6c74eb4",
         "typing_LowStar.Buffer.trivial_preorder"
       ],
       0,
-      "0ea9c032ec40525f14a52d86d16772d1"
+      "601f371d05cdc78ae3e8f8a17d1ee1e9"
     ]
   ]
 ]

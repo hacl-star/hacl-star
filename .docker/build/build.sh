@@ -160,7 +160,7 @@ function refresh_hints() {
     local hints_dir="$4"
 
     # Figure out the branch
-    CI_BRANCH=$branchname
+    CI_BRANCH=${branchname##refs/heads/}
     echo "Current branch_name=$CI_BRANCH"
 
     # Add all the hints, even those not under version control
@@ -185,8 +185,16 @@ function refresh_hints() {
     # Silent, always-successful merge
     export GIT_MERGE_AUTOEDIT=no
     git merge $commit -Xtheirs
+
+    # If build hints branch exists on remote, remove it
+    exists=$(git branch -r -l "origin/BuildHints-$CI_BRANCH")
+    if [ ! -z $exists ]; then
+        git push $remote :BuildHints-$CI_BRANCH
+    fi
+
     # Push.
-    git push $remote $CI_BRANCH
+    git checkout -b BuildHints-$CI_BRANCH
+    git push $remote BuildHints-$CI_BRANCH
 }
 
 function exec_build() {
