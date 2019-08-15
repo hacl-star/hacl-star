@@ -79,11 +79,11 @@ benchBNs = do
 
     time5 <- P.getPOSIXTime
 
-    putTextLn $ "Mod: " <> show ((time1 - time0) / 10000)
-    putTextLn $ "Add: " <> show ((time2 - time1) / 10000)
-    putTextLn $ "Mul: " <> show ((time3 - time2) / 10000)
-    putTextLn $ "MulFit: " <> show ((time3 - time2) / 10000)
-    putTextLn $ "Exp(ssl): " <> show ((time5 - time4) / 10000)
+    putTextLn $ "Mod: "      <> show ((time1 - time0) / 10) <> "ms"
+    putTextLn $ "Add: "      <> show ((time2 - time1) / 10) <> "ms"
+    putTextLn $ "Mul: "      <> show ((time3 - time2) / 10) <> "ms"
+    putTextLn $ "MulFit: "   <> show ((time3 - time2) / 10) <> "ms"
+    putTextLn $ "Exp(ssl): " <> show ((time5 - time4) / 10) <> "ms"
 
 
 testGM :: Int -> IO ()
@@ -381,11 +381,11 @@ testDGK = do
 
     timings <- replicateM tries test
 
-    let average xs = foldr1 (+) xs / fromIntegral tries
-    let avg1 = average $ map (view _1) timings
-    let avg2 = average $ map (view _2) timings
-    let avg3 = average $ map (view _3) timings
-    let avg4 = average $ map (view _4) timings
+    let average' xs = foldr1 (+) xs / fromIntegral tries
+    let avg1 = average' $ map (view _1) timings
+    let avg2 = average' $ map (view _2) timings
+    let avg3 = average' $ map (view _3) timings
+    let avg4 = average' $ map (view _4) timings
 
     putTextLn $ "Enc: "          <> show (avg1 * 1000) <> " ms"
     putTextLn $ "Dec: "          <> show (avg2 * 1000) <> " ms"
@@ -396,26 +396,25 @@ testDGKPahe :: IO ()
 testDGKPahe = do
     putTextLn "Testing DGK PAHE"
 
-    let n = 5
-    let l::Integer = 3
-    sk <- paheKeyGen @DgkCrt n (3 + 3 * l)
+    let n = 1
+    let bound = 64
+    sk <- paheKeyGen @DgkCrt n bound
     let pk = paheToPublic sk
     putTextLn "Keygen done, running tests"
+    let m = 1
+    values <- replicateM m $ randomRIO (0, bound-1)
+    values2 <- replicateM n $ randomRIO (0, bound-1)
 
-    replicateM_ 1000 $ do
+    time1 <- P.getPOSIXTime
 
-        zMask <- replicateM n $ randomRIO (0, 1)
-        zMaskReals <- replicateM n $ randomRIO (1, 2^l-1)
-        let values = simdmul zMask zMaskReals
+    replicateM_ 1000 $ void $ paheEnc pk values
 
-        c <- paheEnc pk values
-        zs <- paheIsZero sk c
-        d <- paheDec sk c
+    time2 <- P.getPOSIXTime
 
-        when (zs /= map (== 0) d) $ do
-            print zMask
-            print zMaskReals
-            print values
-            print zs
-            print d
-            error "Zeroes failed"
+    replicateM_ 1000 $ void $ paheEnc pk values2
+
+    time3 <- P.getPOSIXTime
+
+
+    putTextLn $ "Enc 1: " <> show ((time2-time1)) <> " ms"
+    putTextLn $ "Enc 32: "<> show ((time3-time2)) <> " ms"

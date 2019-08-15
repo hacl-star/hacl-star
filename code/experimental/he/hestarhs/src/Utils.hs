@@ -6,6 +6,7 @@ import Universum
 
 import Control.Concurrent (withMVar)
 import qualified Data.Array.IO as AIO
+import qualified Data.ByteString as BS
 import qualified Data.Time.Clock.POSIX as P
 import System.IO.Unsafe (unsafePerformIO)
 import System.Random (randomRIO)
@@ -29,17 +30,24 @@ log x = if True then pass else logRaw x
 lambda :: Integral a => a
 lambda = 80
 
+average :: Integral a => [a] -> a
+average xs = foldr1 (+) xs `div` fromIntegral (length xs)
+
 findM :: Monad m => (a -> m Bool) -> [a] -> m (Maybe a)
 findM _ []     = return Nothing
 findM p (x:xs) = ifM (p x) (return $ Just x) (findM p xs)
 
-measureTimeSingle :: Text -> IO a -> IO a
-measureTimeSingle label action = do
+measureTimeRet :: Text -> IO a -> IO (a,Integer)
+measureTimeRet label action = do
     time0 <- P.getPOSIXTime
     r <- action
     time1 <- P.getPOSIXTime
-    logRaw $ label <> " took : " <> show (round ((time1-time0) * 1000) :: Integer) <> "ms"
-    pure r
+    let delta = round ((time1-time0) * 1000)
+    logRaw $ label <> " took : " <> show delta <> "ms"
+    pure (r, delta)
+
+measureTimeSingle :: Text -> IO a -> IO a
+measureTimeSingle label action = fst <$> measureTimeRet label action
 
 simdadd :: Num a => [a] -> [a] -> [a]
 simdadd x y = map (uncurry (+)) (zip x y)

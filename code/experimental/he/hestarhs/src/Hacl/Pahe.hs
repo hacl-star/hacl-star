@@ -10,6 +10,8 @@ module Hacl.Pahe
 
 import Universum
 
+import System.ZMQ4
+
 
 -- TODO variable security level
 class Pahe s where
@@ -62,8 +64,12 @@ class Pahe s where
     --
     -- The permutation acts on two ciphertexts passed and produces two
     -- (permuted) ciphertexts.
-    pahePermute     :: PahePk s -> PaheCiph s -> PaheCiph s -> [Int] -> IO (PaheCiph s, PaheCiph s)
-    pahePermuteServ :: PaheSk s -> IO ()
+    pahePermute     :: Socket Req -> PahePk s -> PaheCiph s -> PaheCiph s -> [Int] -> IO (PaheCiph s, PaheCiph s)
+    pahePermuteServ :: Socket Rep -> PaheSk s -> IO ()
+
+    -- This permutes n ciphertexts row-by-row, each row
+    -- using each separate permutation.
+    pahePermuteHor  :: PahePk s -> [PaheCiph s] -> [[Int]] -> IO [PaheCiph s]
 
 
 paheRerand :: Pahe s => PahePk s -> PaheCiph s -> IO (PaheCiph s)
