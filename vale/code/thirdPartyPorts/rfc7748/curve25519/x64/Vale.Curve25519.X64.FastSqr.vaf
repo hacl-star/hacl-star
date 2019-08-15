@@ -121,11 +121,14 @@ procedure fast_sqr_part1(inline offset:nat, ghost inA_b:buffer64)
 
 }
 
-#reset-options "--z3rlimit 2000000"
+#reset-options "--z3rlimit 10000 --initial_fuel 1 --max_fuel 1 --max_ifuel 0"
 procedure fast_sqr_part2()
     {:quick}
+    reads
+        rax; rcx;
+
     modifies
-        rax; rcx; rdx; r8; r9; r10; r11; r12; r13; r14; r15;
+        r8; r9; r10; r11; r12; r13; r14; r15;
         efl;
 
     requires
