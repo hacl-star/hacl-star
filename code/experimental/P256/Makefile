@@ -101,6 +101,7 @@ $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	-no-prefix 'Hacl.Impl.P256' \
 	-bundle 'Lib.*' \
 	-bundle 'Spec.*' \
+	-bundle 'Hacl.Hash.SHA2=Hacl.Hash.*,Spec.Hash.*' \
 	-bundle 'Hacl.Impl.P256=Hacl.Impl.P256,Hacl.Impl.LowLevel,Hacl.Impl.SolinasReduction,Hacl.Spec.P256.*,Hacl.Spec.Curve25519.*,Hacl.Impl.Curve25519.*' \
 	-bundle 'Hacl.Impl.ECDSA.P256SHA256.Verification=Hacl.Impl.MontgomeryMultiplication,Hacl.Impl.ECDSA.P256SHA256.Verification,Hacl.Impl.MM.Exponent' \
 	-library 'C,FStar' \

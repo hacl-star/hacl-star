@@ -15,7 +15,7 @@ open Hacl.Impl.MM.Exponent
 open Hacl.Spec.P256.Core
 open Hacl.Spec.ECDSAP256.Definition
 open Hacl.Spec.ECDSA
-open Hacl.Spec.P256
+open Hacl.Spec.P256 
 open Hacl.Spec.P256.Ladder
 
 open Hacl.Hash.SHA2
@@ -317,14 +317,14 @@ let ecdsa_verification_step1 r s =
   isRCorrect && isSCorrect
 
 inline_for_extraction noextract
-val ecdsa_verification_step23: mLen: size_t -> m: lbuffer uint8 mLen -> hashAsFelem : felem ->  Stack unit
+val ecdsa_verification_step23: mLen: size_t -> m: lbuffer uint8 mLen{uint_v mLen < pow2 61} -> hashAsFelem : felem ->  Stack unit
   (requires fun h -> live h m /\ live h hashAsFelem)
   (ensures fun h0 _ h1 -> modifies (loc hashAsFelem) h0 h1 /\ as_nat h1 hashAsFelem < prime_p256_order)
 
 let ecdsa_verification_step23 mLen m hashAsFelem = 
   push_frame(); 
     let mHash = create (size 32) (u8 0) in  
-    hash_256 mHash mLen m;
+    hash_256 m mLen mHash;
     toUint64 mHash hashAsFelem;
     reduction_prime_2prime_order hashAsFelem hashAsFelem;
   pop_frame()
@@ -411,7 +411,7 @@ val ecdsa_verification_step5_1: pubKeyAsPoint: point ->
     as_nat h (gsub pubKeyAsPoint (size 0) (size 4)) < prime256 /\
     as_nat h (gsub pubKeyAsPoint (size 4) (size 4)) < prime256 /\
     as_nat h (gsub pubKeyAsPoint (size 8) (size 4)) < prime256 )
-    (ensures fun h0 _ h1 -> modifies (loc pointSum |+| loc tempBuffer |+| loc pubKeyAsPoint) h0 h1 /\
+    (ensures fun h0 _ h1 -> modifies (loc pointSum |+| loc tempBuffer |+| loc pubKeyAsPoint) h0 h1 /\ 
       as_nat h1 (gsub pointSum (size 0) (size 4)) < prime256)
 
 let ecdsa_verification_step5_1 pubKeyAsPoint u1 u2 pointSum tempBuffer = 
@@ -420,19 +420,19 @@ let ecdsa_verification_step5_1 pubKeyAsPoint u1 u2 pointSum tempBuffer =
     let buff = sub tempBuffer (size 12) (size 88) in 
 	let h0 = ST.get() in 
     ecdsa_verification_step5_0 pubKeyAsPoint u1 u2 tempBuffer points; 
-      (*let h1 = ST.get() in 
+      let h1 = ST.get() in 
       assert(modifies3 pubKeyAsPoint tempBuffer points h0 h1);
       modifies3_is_modifies4 pointSum pubKeyAsPoint tempBuffer points h0 h1;
-      assert(modifies4 pointSum pubKeyAsPoint tempBuffer points h0 h1); *)
+      assert(modifies4 pointSum pubKeyAsPoint tempBuffer points h0 h1); 
     let pointU1G = sub points (size 0) (size 12) in 
     let pointU2Q = sub points (size 12) (size 12) in
 
     point_add pointU1G pointU2Q pointSum buff; 
       let h2 = ST.get() in 
-      (*assert(modifies2 pointSum tempBuffer h1 h2);
+      assert(modifies2 pointSum tempBuffer h1 h2);
       modifies2_is_modifies4 pubKeyAsPoint points pointSum tempBuffer h1 h2;
       assert(modifies4 pubKeyAsPoint points pointSum tempBuffer h1 h2);
-      assert(modifies4 pubKeyAsPoint points pointSum tempBuffer h0 h2); *)
+      assert(modifies4 pubKeyAsPoint points pointSum tempBuffer h0 h2); 
   pop_frame()
 
 
@@ -478,7 +478,7 @@ val ecdsa_verification:
   pubKey: lbuffer uint64 (size 8)-> 
   r: lbuffer uint64 (size 4) ->
   s: lbuffer uint64 (size 4) ->
-  mLen: size_t ->
+  mLen: size_t{uint_v mLen < pow2 61} ->
   m: lbuffer uint8 mLen -> 
   Stack bool
     (requires fun h -> live h pubKey /\ live h r /\ live h s /\ live h m /\
