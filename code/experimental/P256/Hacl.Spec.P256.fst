@@ -144,6 +144,6 @@ val isPointOnCurve: p: point_nat -> Tot bool
 
 let isPointOnCurve p = 
   let (x, y, z) = p in 
-  if (y * y) % prime = (x * x * x - 3 * x - 41058363725152142129326129780047268409114441015993725554835256314039467401291) % prime then 
+  if (y * y) % prime = (x * x * x - 3 * x + 41058363725152142129326129780047268409114441015993725554835256314039467401291) % prime then 
   true
   else false

@@ -349,7 +349,6 @@ let inverse_mod_prime value result tempBuffer =
     fromDomain result result
 
 
-inline_for_extraction noextract 
 val copy_conditional: out: felem -> x: felem -> mask: uint64{uint_v mask = 0 \/ uint_v mask = pow2 64 - 1} -> Stack unit 
   (requires fun h -> live h out /\ live h x /\ as_nat h out < prime /\ as_nat h x < prime)
   (ensures fun h0 _ h1 -> modifies1 out h0 h1 /\ as_nat h1 out < prime /\ 
@@ -684,8 +683,6 @@ let point_add p q result tempBuffer =
    let hend = ST.get() in   
    assert(modifies2 tempBuffer result h0 hend);
    assert(Lib.Sequence.equal (as_seq hend result) (point_add_seq (as_seq h0 p) (as_seq h0 q)))
-
-(* 4 minutes *)
 
 inline_for_extraction noextract 
 val uploadOneImpl: f: felem -> Stack unit
@@ -1154,6 +1151,17 @@ val lemma_modifies3_ : h0: mem -> h1: mem -> p: point -> result: point ->  tempB
 let lemma_modifies3_ h0 h1 p result tempBuffer = ()
 
 
+let isPointAtInfinityPrivate p =  
+  let z0 = index p (size 8) in 
+  let z1 = index p (size 9) in 
+  let z2 = index p (size 10) in 
+  let z3 = index p (size 11) in 
+  let z0_zero = eq_mask z0 (u64 0) in 
+  let z1_zero = eq_mask z1 (u64 0) in 
+  let z2_zero = eq_mask z2 (u64 0) in 
+  let z3_zero = eq_mask z3 (u64 0) in 
+  lognot(logand(logand z0_zero z1_zero) (logand z2_zero z3_zero))
+
 
 val scalarMultiplicationL: p: point -> result: point -> 
   scalar: lbuffer uint8 (size 32) -> 
@@ -1194,7 +1202,14 @@ let scalarMultiplicationL p result scalar tempBuffer  =
     lemma_point_to_domain h0 h2 p result;
     lemma_pif_to_domain h2 q;
     assert(modifies3 p result tempBuffer h2 h3); 
+  
+  let bit = isPointAtInfinityPrivate q in 
+  let zeroTB = sub tempBuffer (size 12) (size 4) in 
+  
   norm q result buff; 
+  
+  let q_z = sub result (size 8) (size 4) in 
+  copy_conditional q_z zeroTB bit;
     let h4 = ST.get() in 
       lemma_coord h3 q;
     let h4 = ST.get() in 
@@ -1230,7 +1245,7 @@ val scalarMultiplicationI: p: point -> result: point ->
 
 
 let scalarMultiplicationI p result scalar tempBuffer  = 
-    let h0 = ST.get() in 
+  let h0 = ST.get() in 
   let q = sub tempBuffer (size 0) (size 12) in 
   zero_buffer q;
     let h1 = ST.get() in 
@@ -1246,7 +1261,14 @@ let scalarMultiplicationI p result scalar tempBuffer  =
     lemma_point_to_domain h0 h2 p result;
     lemma_pif_to_domain h2 q;
     assert(modifies3 p result tempBuffer h2 h3); 
+  
+  let bit = isPointAtInfinityPrivate q in 
+  let zeroTB = sub tempBuffer (size 12) (size 4) in 
+  
   norm q result buff; 
+  
+  let q_z = sub result (size 8) (size 4) in 
+  copy_conditional q_z zeroTB bit;
     let h4 = ST.get() in 
       lemma_coord h3 q;
     let h4 = ST.get() in 
@@ -1257,6 +1279,7 @@ let scalarMultiplicationI p result scalar tempBuffer  =
     assert(modifies3 p result tempBuffer h2 h4);
     assert(modifies3 p result tempBuffer h0 h4);
     lemma_modifies3_ h0 h4 p result tempBuffer
+
 
 let scalarMultiplication #buf_type p result scalar tempBuffer = 
   match buf_type with 
@@ -1308,18 +1331,6 @@ let secretToPublic result scalar tempBuffer =
 
 
 
-let isPointAtInfinity p =  
-  let z0 = index p (size 8) in 
-  let z1 = index p (size 9) in 
-  let z2 = index p (size 10) in 
-  let z3 = index p (size 11) in 
-  let z0_zero = eq_0_u64 z0 in 
-  let z1_zero = eq_0_u64 z1 in 
-  let z2_zero = eq_0_u64 z2 in 
-  let z3_zero = eq_0_u64 z3 in 
-  z0_zero && z1_zero && z2_zero && z3_zero
-
-
 inline_for_extraction noextract
 val y_2: y: felem -> r: felem -> Stack unit
   (requires fun h -> as_nat h y < prime /\  live h y /\ live h r /\ eq_or_disjoint y r)
@@ -1331,7 +1342,7 @@ let y_2 y r =
     let h1 = ST.get() in 
     assert(as_nat h1 r == toDomain_ (as_nat h0 y));
   montgomery_multiplication_buffer r r r;
-    let h2 = ST.get() in 
+    let h2 = ST.get() in  
     assert(as_nat h2 r == toDomain_ ((as_nat h0 y) *  (as_nat h0 y) % prime))
 
 inline_for_extraction noextract
@@ -1362,12 +1373,12 @@ let lemma_xcube x_ =
   lemma_mod_sub_distr (x_ * x_ * x_ ) (3 * x_) prime
 
 val lemma_xcube2: x_ : nat {x_ < prime} -> Lemma 
-  (toDomain_ ((((((x_ * x_ * x_) - (3 * x_)) % prime)) - 41058363725152142129326129780047268409114441015993725554835256314039467401291) % prime) == 
-    toDomain_ ((x_ * x_ * x_ - 3 * x_ - 41058363725152142129326129780047268409114441015993725554835256314039467401291) % prime))
+  (toDomain_ ((((((x_ * x_ * x_) - (3 * x_)) % prime)) + 41058363725152142129326129780047268409114441015993725554835256314039467401291) % prime) == 
+    toDomain_ ((x_ * x_ * x_ - 3 * x_ + 41058363725152142129326129780047268409114441015993725554835256314039467401291) % prime))
 
 let lemma_xcube2 x_ = 
-  lemma_mod_add_distr (-41058363725152142129326129780047268409114441015993725554835256314039467401291) ((x_ * x_ * x_) - (3 * x_)) prime;
-  assert(((((x_ * x_ * x_) - (3 * x_)) % prime) - 41058363725152142129326129780047268409114441015993725554835256314039467401291) % prime == (x_ * x_ * x_ - 3 * x_ - 41058363725152142129326129780047268409114441015993725554835256314039467401291) % prime)
+  lemma_mod_add_distr 41058363725152142129326129780047268409114441015993725554835256314039467401291 ((x_ * x_ * x_) - (3 * x_)) prime;
+  assert(((((x_ * x_ * x_) - (3 * x_)) % prime) + 41058363725152142129326129780047268409114441015993725554835256314039467401291) % prime == (x_ * x_ * x_ - 3 * x_ + 41058363725152142129326129780047268409114441015993725554835256314039467401291) % prime)
 
 inline_for_extraction noextract
 val xcube_minus_x: x: felem ->r: felem -> Stack unit 
@@ -1376,7 +1387,7 @@ val xcube_minus_x: x: felem ->r: felem -> Stack unit
     modifies1 r h0 h1 /\
     (
       let x_ = as_nat h0 x in 
-      as_nat h1 r =  toDomain_((x_ * x_ * x_ - 3 * x_ - 41058363725152142129326129780047268409114441015993725554835256314039467401291) % prime))
+      as_nat h1 r =  toDomain_((x_ * x_ * x_ - 3 * x_ + 41058363725152142129326129780047268409114441015993725554835256314039467401291) % prime))
   )
 
 let xcube_minus_x x r = 
@@ -1402,7 +1413,7 @@ let xcube_minus_x x r =
     let h5 = ST.get() in 
   upload_p256_point_on_curve_constant p256_constant;
     let h6 = ST.get() in 
-  p256_sub r p256_constant r;
+  p256_add r p256_constant r;
     let h7 = ST.get() in 
   pop_frame(); 
   
@@ -1440,6 +1451,16 @@ let lemma_modular_multiplication_p256_2_d a b =
      assert(toDomain_ a = toDomain_ b ==> a == b)
 
 
+let isPointAtInfinity p =  
+  let z0 = index p (size 8) in 
+  let z1 = index p (size 9) in 
+  let z2 = index p (size 10) in 
+  let z3 = index p (size 11) in 
+  let z0_zero = eq_0_u64 z0 in 
+  let z1_zero = eq_0_u64 z1 in 
+  let z2_zero = eq_0_u64 z2 in 
+  let z3_zero = eq_0_u64 z3 in 
+  z0_zero && z1_zero && z2_zero && z3_zero
 
 
 let isPointOnCurve p = 
@@ -1454,14 +1475,15 @@ let isPointOnCurve p =
        let h1 = ST.get() in 
      let r = compare_felem y2Buffer xBuffer in 
      let z = eq_0_u64 r in 
-
      assert(if uint_v r = pow2 64 -1 then as_nat h1 y2Buffer == as_nat h1 xBuffer else as_nat h1 y2Buffer <> as_nat h1 xBuffer);
+       admit();
+
      lemma_modular_multiplication_p256_2_d ((as_nat h0 y) * (as_nat h0 y) % prime) 
-       (let x_ = as_nat h0 x in (x_ * x_ * x_ - 3 * x_ - 41058363725152142129326129780047268409114441015993725554835256314039467401291) % prime);
+       (let x_ = as_nat h0 x in (x_ * x_ * x_ - 3 * x_ + 41058363725152142129326129780047268409114441015993725554835256314039467401291) % prime);
      assert(let x_ = as_nat h0 x in 
        if uint_v r = pow2 64 - 1 then   
-	  (as_nat h0 y) * (as_nat h0 y) % prime ==  (x_ * x_ * x_ - 3 * x_ - 41058363725152142129326129780047268409114441015993725554835256314039467401291) % prime else 	  
-	  (as_nat h0 y) * (as_nat h0 y) % prime <>  (x_ * x_ * x_ - 3 * x_ - 41058363725152142129326129780047268409114441015993725554835256314039467401291) % prime);
+	  (as_nat h0 y) * (as_nat h0 y) % prime ==  (x_ * x_ * x_ - 3 * x_ + 41058363725152142129326129780047268409114441015993725554835256314039467401291) % prime else 	  
+	  (as_nat h0 y) * (as_nat h0 y) % prime <>  (x_ * x_ * x_ - 3 * x_ + 41058363725152142129326129780047268409114441015993725554835256314039467401291) % prime);
        	
      let z = not(eq_0_u64 r) in 
      pop_frame();

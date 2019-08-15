@@ -212,7 +212,7 @@ let isOrderCorrect p tempBuffer =
     multByOrder2 p multResult tempBuffer;
     let result = Hacl.Impl.P256.isPointAtInfinity multResult in  
    pop_frame();
-   result
+   not result
 
 
 open Lib.ByteBuffer 
