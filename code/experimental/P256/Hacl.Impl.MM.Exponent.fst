@@ -98,20 +98,23 @@ let montgomery_ladder_exponent_step0 a b =
 
 
 (* this piece of code is taken from Hacl.Curve25519 *)
-inline_for_extraction noextract 
+inline_for_extraction noextract
 val scalar_bit:
-  s:ilbuffer uint8 (size 32)
+    #buf_type: buftype -> 
+    s:lbuffer_t buf_type uint8 (size 32)
   -> n:size_t{v n < 256}
   -> Stack uint64
     (requires fun h0 -> live h0 s)
-    (ensures  fun h0 r h1 -> h0 == h1 /\ r == Hacl.Spec.ECDSA.ith_bit (as_seq h0 s) (v n) /\ v r <= 1)
-
-let scalar_bit s n =
- let h0 = ST.get () in
+    (ensures  fun h0 r h1 -> h0 == h1 /\
+      r == ith_bit (as_seq h0 s) (v n) /\ v r <= 1)
+      
+let scalar_bit #buf_type s n =
+  let h0 = ST.get () in
   mod_mask_lemma ((Lib.Sequence.index (as_seq h0 s) (v n / 8)) >>. (n %. 8ul)) 1ul;
   assert_norm (1 = pow2 1 - 1);
-  (* uintv_extensionality (mod_mask #U8 1ul) (u8 1); *)
+  assert (v (mod_mask #U8 #SEC 1ul) == v (u8 1));
   to_u64 ((s.(n /. 8ul) >>. (n %. 8ul)) &. u8 1)
+
 
 #reset-options "--z3refresh --z3rlimit 300"
 

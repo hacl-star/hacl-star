@@ -88,7 +88,7 @@ let add0carry x y =
   let c = if lt_u64 res x then u64 1 else u64 0 in
   res, c
 
-
+#set-options "--z3rlimit 150"
 val add1:
     f:felem4
   -> cin:uint64

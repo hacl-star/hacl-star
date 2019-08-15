@@ -5,6 +5,7 @@ open FStar.HyperStack
 module ST = FStar.HyperStack.ST
 
 open Lib.IntTypes
+open Lib.IntTypes.Compatibility
 open Lib.Buffer
 
 open Hacl.Spec.P256.Core
@@ -18,13 +19,15 @@ open Hacl.Spec.P256.MontgomeryMultiplication.PointAdd
 open Hacl.Spec.P256.Normalisation 
 open Hacl.Impl.LowLevel
 open Hacl.Spec.P256
+
  
 open FStar.Math.Lemmas
 
 friend Hacl.Spec.P256.MontgomeryMultiplication
 open FStar.Mul
 
- 
+#reset-options "--z3rlimit 300" 
+
 inline_for_extraction noextract 
 val toDomain: value: felem -> result: felem ->  Stack unit 
   (requires fun h ->  as_nat h value < prime /\ live h value /\live h result /\ eq_or_disjoint value result)
@@ -37,7 +40,7 @@ let toDomain value result =
     solinas_reduction_impl multBuffer result;
   pop_frame()  
 
-
+(*to prove *)
 let pointToDomain p result = 
     let p_x = sub p (size 0) (size 4) in 
     let p_y = sub p (size 4) (size 4) in 
@@ -744,22 +747,22 @@ let norm p resultPoint tempBuffer =
 
 
 (* this piece of code is taken from Hacl.Curve25519 *)
-inline_for_extraction noextract 
+inline_for_extraction noextract
 val scalar_bit:
-  #buf_type: buftype -> 
-  s:lbuffer_t buf_type uint8 (size 32)
+    #buf_type: buftype -> 
+    s:lbuffer_t buf_type uint8 (size 32)
   -> n:size_t{v n < 256}
   -> Stack uint64
     (requires fun h0 -> live h0 s)
-    (ensures  fun h0 r h1 -> h0 == h1 /\ r == ith_bit (as_seq h0 s) (v n) /\ v r <= 1)
-
+    (ensures  fun h0 r h1 -> h0 == h1 /\
+      r == ith_bit (as_seq h0 s) (v n) /\ v r <= 1)
+      
 let scalar_bit #buf_type s n =
- let h0 = ST.get () in
+  let h0 = ST.get () in
   mod_mask_lemma ((Lib.Sequence.index (as_seq h0 s) (v n / 8)) >>. (n %. 8ul)) 1ul;
   assert_norm (1 = pow2 1 - 1);
-  (*uintv_extensionality (mod_mask #U8 1ul) (u8 1); *)
+  assert (v (mod_mask #U8 #SEC 1ul) == v (u8 1));
   to_u64 ((s.(n /. 8ul) >>. (n %. 8ul)) &. u8 1)
-
 
 
 val lemma_modifies3: a: LowStar.Monotonic.Buffer.loc -> b: LowStar.Monotonic.Buffer.loc -> c: LowStar.Monotonic.Buffer.loc -> 
