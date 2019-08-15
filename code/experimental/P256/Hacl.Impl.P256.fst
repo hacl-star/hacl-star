@@ -670,10 +670,11 @@ let point_add p q result tempBuffer =
    assert(modifies2 tempBuffer result h0 hend);
    assert(Lib.Sequence.equal (as_seq hend result) (point_add_seq (as_seq h0 p) (as_seq h0 q)))
 
+
 inline_for_extraction noextract 
 val uploadOneImpl: f: felem -> Stack unit
   (requires fun h -> live h f)
-  (ensures fun h0 _ h1 -> as_nat h1 f == 1 /\ modifies1 f h0 h1)
+  (ensures fun h0 _ h1 -> as_nat h1 f == 1 /\ modifies (loc f) h0 h1)
   
 let uploadOneImpl f = 
   upd f (size 0) (u64 1);
@@ -706,16 +707,11 @@ let norm p resultPoint tempBuffer =
      
   Hacl.Spec.P256.MontgomeryMultiplication.montgomery_multiplication_buffer xf z2f z2f;
   Hacl.Spec.P256.MontgomeryMultiplication.montgomery_multiplication_buffer yf z3f z3f;
-     (*let h1 = ST.get() in 
-    assert(modifies1 tempBuffer h0 h1); *)
+
   fromDomain z2f resultX;
   fromDomain z3f resultY;
-    (*let h2 = ST.get() in 
-    assert(modifies1 resultPoint h1 h2); *)
   uploadOneImpl resultZ;
     let h3 = ST.get() in 
-    (*assert(modifies1 resultPoint h2 h3);
-    assert(modifies2 tempBuffer resultPoint h0 h3);  *)
 
     lemmaEraseToDomainFromDomain (fromDomain_ (as_nat h0 zf));
     power_distributivity (fromDomain_ (as_nat h0 zf) * fromDomain_ (as_nat h0 zf)) (prime -2) prime;
@@ -738,8 +734,7 @@ val scalar_bit:
   -> n:size_t{v n < 256}
   -> Stack uint64
     (requires fun h0 -> live h0 s)
-    (ensures  fun h0 r h1 -> h0 == h1 /\
-      r == ith_bit (as_seq h0 s) (v n) /\ v r <= 1)
+    (ensures  fun h0 r h1 -> h0 == h1 /\ r == ith_bit (as_seq h0 s) (v n) /\ v r <= 1)
       
 let scalar_bit #buf_type s n =
   let h0 = ST.get () in
@@ -800,12 +795,10 @@ val montgomery_ladder_step1: p: point -> q: point ->tempBuffer: lbuffer uint64 (
   )
   (ensures fun h0 _ h1 -> modifies (loc p |+| loc q |+|  loc tempBuffer) h0 h1 /\ 
     (
-      let p1 = as_seq h1 p in 
-      let q1 = as_seq h1 q in 
+      let p1 = as_seq h1 p in let q1 = as_seq h1 q in 
       let pN, qN = Hacl.Spec.P256.Ladder.montgomery_ladder_step1_seq (as_seq h0 p) (as_seq h0 q) in 
-      pN == p1 /\ qN == q1
-  ) 
-  )
+      pN == p1 /\ qN == q1 ) 
+    )
 
 
 let montgomery_ladder_step1 r0 r1 tempBuffer = 
@@ -821,12 +814,11 @@ let montgomery_ladder_step1 r0 r1 tempBuffer =
   assert(modifies3 r0 r1 tempBuffer h0 h2);
   assert(let pN, qN = Hacl.Spec.P256.Ladder.montgomery_ladder_step1_seq (as_seq h0 r0) (as_seq h0 r1) in 
       Lib.Sequence.equal (as_seq h2 r0) pN /\ Lib.Sequence.equal (as_seq h2 r1) qN)
-(*
+      
+
 val lemma_step: i: size_t {uint_v i < 256} -> Lemma  (uint_v ((size 255) -. i) == 255 - (uint_v i))
 let lemma_step i = ()
-*)
 
-(*
 val lemma_to_point_buffer: h: mem -> b: lbuffer uint64 (size 12) {
     as_nat h (gsub b (size 0) (size 4)) < prime /\ 
     as_nat h (gsub b (size 4) (size 4)) < prime /\
@@ -838,11 +830,9 @@ val lemma_to_point_buffer: h: mem -> b: lbuffer uint64 (size 12) {
       felem_seq_as_nat x < prime /\ felem_seq_as_nat y < prime /\ felem_seq_as_nat z < prime))
 
 let lemma_to_point_buffer h b = ()
-*)
 
 
 #reset-options "--z3refresh --z3rlimit 100" 
-
 inline_for_extraction noextract 
 val montgomery_ladder_step: #buf_type: buftype-> 
   p: point -> q: point ->tempBuffer: lbuffer uint64 (size 88) -> 
@@ -862,8 +852,7 @@ val montgomery_ladder_step: #buf_type: buftype->
   )
   (ensures fun h0 _ h1 -> modifies3 p q tempBuffer h0 h1 /\ 
     (
-      let p1 = as_seq h1 p in 
-      let q1 = as_seq h1 q in 
+      let p1 = as_seq h1 p in let q1 = as_seq h1 q in 
       let pN, qN = Hacl.Spec.P256.Ladder.montgomery_ladder_step_swap (as_seq h0 p) (as_seq h0 q) (as_seq h0 scalar) (uint_v i) in 
       pN == p1 /\ qN == q1 /\
 
@@ -877,7 +866,7 @@ val montgomery_ladder_step: #buf_type: buftype->
     )
   )
 
-(*val lemma_test: h: mem -> r0: point -> 
+val lemma_test: h: mem -> r0: point -> 
   Lemma 
   (requires (
      let x = Lib.Sequence.sub (as_seq h r0) 0 4 in 
@@ -892,7 +881,7 @@ val montgomery_ladder_step: #buf_type: buftype->
   )
 
 let lemma_test h r0 = ()
-*)
+
 
 let montgomery_ladder_step #buf_type r0 r1 tempBuffer scalar i = 
     let h0 = ST.get() in 
@@ -907,9 +896,9 @@ let montgomery_ladder_step #buf_type r0 r1 tempBuffer scalar i =
   cswap bit r0 r1; 
   let h3 = ST.get() in 
 
-  (*lemma_to_point_buffer h0 r0;
+  lemma_to_point_buffer h0 r0;
   lemma_to_point_buffer h0 r1;
-  lemma_step i; *)
+  lemma_step i; 
 
   assert(let pN, qN = Hacl.Spec.P256.Ladder.montgomery_ladder_step_swap (as_seq h0 r0) (as_seq h0 r1) (as_seq h0 scalar) (uint_v i) in Lib.Sequence.equal pN (as_seq h3 r0));
 
@@ -920,7 +909,7 @@ let montgomery_ladder_step #buf_type r0 r1 tempBuffer scalar i =
     felem_seq_as_nat x < prime /\ felem_seq_as_nat y < prime /\ felem_seq_as_nat z < prime
  );
 
-   (*lemma_test h3 r0; *)
+   lemma_test h3 r0; 
    
    assert(let pN, qN = 
      Hacl.Spec.P256.Ladder.montgomery_ladder_step_swap (as_seq h0 r0) (as_seq h0 r1) (as_seq h0 scalar) (uint_v i) in Lib.Sequence.equal qN (as_seq h3 r1));
@@ -931,7 +920,7 @@ let montgomery_ladder_step #buf_type r0 r1 tempBuffer scalar i =
       felem_seq_as_nat x < prime /\ felem_seq_as_nat y < prime /\ felem_seq_as_nat z < prime
  );
 
-   (*lemma_test h3 r1; *)
+   lemma_test h3 r1; 
 
    assert(
       as_nat h3 (gsub r0 (size 0) (size 4)) < prime /\ 
@@ -941,15 +930,14 @@ let montgomery_ladder_step #buf_type r0 r1 tempBuffer scalar i =
       as_nat h3 (gsub r1 (size 0) (size 4)) < prime /\  
       as_nat h3 (gsub r1 (size 4) (size 4)) < prime /\
       as_nat h3 (gsub r1 (size 8) (size 4)) < prime);
-
-
   modifies2_is_modifies3 r0 r1 tempBuffer h0 h1;
   modifies2_is_modifies3 r0 r1 tempBuffer h2 h3;
   assert(modifies3 r0 r1 tempBuffer h0 h1);
   assert(modifies3 r0 r1 tempBuffer h1 h2);
   assert(modifies3 r0 r1 tempBuffer h2 h3);
   assert(modifies3 r0 r1 tempBuffer h0 h2);
-  assert(modifies3 r0 r1 tempBuffer h0 h3)
+  assert(modifies3 r0 r1 tempBuffer h0 h3) 
+
 
 inline_for_extraction noextract
 val montgomery_ladder: #buf_type: buftype->  p: point -> q: point ->
@@ -1033,15 +1021,13 @@ let montgomery_ladder #a p q scalar tempBuffer =
 	pN == p1 /\ qN == q1);
 
        assert(acc h3 == _ml_step (as_seq h2 scalar) (uint_v i) (acc h2));
-       Lib.LoopCombinators.unfold_repeati 256 (spec_ml h0) (acc h0) (uint_v i)
-
- )
+       Lib.LoopCombinators.unfold_repeati 256 (spec_ml h0) (acc h0) (uint_v i))
 
 val zero_buffer: p: point -> 
   Stack unit
     (requires fun h -> live h p)
     (ensures fun h0 _ h1 ->     
-      modifies1 p h0 h1 /\
+      modifies (loc p) h0 h1 /\
       (
 	let k = Lib.Sequence.create 12 (u64 0) in 
 	as_nat h1 (gsub p (size 0) (size 4)) == 0 /\ 
@@ -1053,7 +1039,6 @@ val zero_buffer: p: point ->
 
 let zero_buffer p = 
     let h0 = ST.get() in 
-
   upd p (size 0) (u64 0);
   upd p (size 1) (u64 0);
   upd p (size 2) (u64 0);
@@ -1067,26 +1052,17 @@ let zero_buffer p =
   upd p (size 10) (u64 0);
   upd p (size 11) (u64 0);
     let h1 = ST.get() in 
-  
   assert(Lib.Sequence.equal (as_seq h1 p) (Lib.Sequence.create 12 (u64 0)))
 
 
-
-
 val lemma_point_to_domain: h0: mem -> h1: mem ->  p: point -> result: point ->  Lemma
-   (requires 
-     (
-       point_x_as_nat h0 p < prime /\
-       point_y_as_nat h0 p < prime /\
-       point_z_as_nat h0 p < prime /\
+   (requires (point_x_as_nat h0 p < prime /\ point_y_as_nat h0 p < prime /\ point_z_as_nat h0 p < prime /\
        point_x_as_nat h1 result == toDomain_ (point_x_as_nat h0 p) /\
        point_y_as_nat h1 result == toDomain_ (point_y_as_nat h0 p) /\
        point_z_as_nat h1 result == toDomain_ (point_z_as_nat h0 p) 
      )
    )
-   (ensures (
-     fromDomainPoint(point_prime_to_coordinates (as_seq h1 result)) == point_prime_to_coordinates (as_seq h0 p))
-   )
+   (ensures (fromDomainPoint(point_prime_to_coordinates (as_seq h1 result)) == point_prime_to_coordinates (as_seq h0 p)))
 
 let lemma_point_to_domain h0 h1 p result = 
   let x0, y0, z0 = point_x_as_nat h0 p, point_y_as_nat h0 p, point_z_as_nat h0 p in 
@@ -1100,16 +1076,8 @@ let lemma_point_to_domain h0 h1 p result =
   assert(x3 == fromDomain_ (toDomain_ x0) /\ y3 == fromDomain_ (toDomain_ y0) /\ z3 == fromDomain_ (toDomain_ z0))
 
 val lemma_pif_to_domain: h: mem ->  p: point -> Lemma
-  (
-  requires 
-    (
-      point_x_as_nat h p == 0 /\
-      point_y_as_nat h p == 0 /\
-      point_z_as_nat h p == 0
-    )  
-  )
-  (ensures 
-    (fromDomainPoint (point_prime_to_coordinates (as_seq h p)) == point_prime_to_coordinates (as_seq h p)))
+  (requires (point_x_as_nat h p == 0 /\ point_y_as_nat h p == 0 /\ point_z_as_nat h p == 0))
+  (ensures (fromDomainPoint (point_prime_to_coordinates (as_seq h p)) == point_prime_to_coordinates (as_seq h p)))
 
 let lemma_pif_to_domain h p = 
   let (x, y, z) = point_prime_to_coordinates (as_seq h p) in 
@@ -1118,7 +1086,8 @@ let lemma_pif_to_domain h p =
   assert(x3 == fromDomain_ x /\ y3 == fromDomain_ y /\ z3 == fromDomain_ z);
   lemmaFromDomain x;
   lemmaFromDomain y;
-  lemmaFromDomain z
+  lemmaFromDomain z;
+  admit()
 
 
 val lemma_coord: h3: mem -> q: point -> Lemma (
@@ -1135,6 +1104,11 @@ val lemma_modifies3_ : h0: mem -> h1: mem -> p: point -> result: point ->  tempB
 
 let lemma_modifies3_ h0 h1 p result tempBuffer = ()
 
+val lemma_log_not: a: uint64 -> Lemma
+  (requires v a = 0 \/ v a = maxint U64)
+  (ensures (if v a = 0 then v (lognot a) == maxint U64 else v (lognot a) == 0))
+
+let lemma_log_not a = admit()
 
 let isPointAtInfinityPrivate p =  
   let z0 = index p (size 8) in 
@@ -1145,8 +1119,14 @@ let isPointAtInfinityPrivate p =
   let z1_zero = eq_mask z1 (u64 0) in 
   let z2_zero = eq_mask z2 (u64 0) in 
   let z3_zero = eq_mask z3 (u64 0) in 
-  lognot(logand(logand z0_zero z1_zero) (logand z2_zero z3_zero))
-
+     eq_mask_lemma z0 (u64 0);
+     eq_mask_lemma z1 (u64 0);
+     eq_mask_lemma z2 (u64 0);
+     eq_mask_lemma z3 (u64 0);
+  let r = lognot(logand(logand z0_zero z1_zero) (logand z2_zero z3_zero)) in 
+    lemma_log_not (logand(logand (eq_mask z0 (u64 0)) (eq_mask z1 (u64 0))) (logand (eq_mask z2 (u64 0)) (eq_mask z3 (u64 0))));
+    r
+  
 
 val scalarMultiplicationL: p: point -> result: point -> 
   scalar: lbuffer uint8 (size 32) -> 

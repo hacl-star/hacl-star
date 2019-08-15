@@ -144,7 +144,13 @@ val norm: p: point -> resultPoint: point -> tempBuffer: lbuffer uint64 (size 88)
 
 val isPointAtInfinityPrivate: p: point -> Stack uint64
   (requires fun h -> live h p)
-  (ensures fun h0 r h1 -> modifies0 h0 h1) 
+  (ensures fun h0 r h1 -> modifies0 h0 h1 /\          
+    (
+      let x = as_nat h0 (gsub p (size 0) (size 4)) in 
+      let y = as_nat h0 (gsub p (size 4) (size 4)) in 
+      let z = as_nat h0 (gsub p (size 8) (size 4)) in 
+      let rr =  Hacl.Spec.P256.isPointAtInfinity (x, y, z) in 
+      if uint_v r = 0 then rr = true else rr = false))
 
 
 
