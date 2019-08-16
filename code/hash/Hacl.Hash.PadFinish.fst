@@ -185,7 +185,6 @@ let pad_3 (a: hash_alg) (len: len_t a) (dst: B.buffer uint8):
       (**) assert FStar.Mul.(U128.v len * 8 < pow2 128);
       (**) assert FStar.Mul.(FStar.UInt.shift_left #128 (len_v a len) 3 < pow2 128);
       (**) assert FStar.Mul.(U128.(v (shift_left len 3ul)) = U128.v len * 8);
-      (**) assert FStar.Mul.(U128.(v (shift_left len 3ul)) = U128.v len * 8);
       let len' = U128.(len <<^ 3ul) in
       store_len a len' dst
   end

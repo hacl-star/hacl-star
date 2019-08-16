@@ -20,7 +20,6 @@ open Spec.Hash.Definitions
 open Spec.HKDF
 friend Spec.HKDF
 
-// TODO: Is this safe here? Can we safely break abstraction at this level?
 friend Lib.IntTypes
 
 // [hashed] holds the HMAC text,

@@ -341,7 +341,7 @@ let zero (a: sha2_alg): word a =
   | SHA2_224 | SHA2_256 -> u32 0
   | SHA2_384 | SHA2_512 -> u64 0
 
-#set-options "--z3rlimit 200 --max_fuel 2 --max_ifuel 2"
+#set-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
 
 noextract inline_for_extraction
 val update: a:sha2_alg -> update_st a

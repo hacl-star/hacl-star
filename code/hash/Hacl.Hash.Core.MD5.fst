@@ -100,12 +100,12 @@ val round_op_gen
     B.modifies (B.loc_buffer abcd) h h' /\
     B.live h' abcd /\
     B.live h' x /\ // better to add this here also to ease chaining
-    B.as_seq h' abcd == Spec.round_op_gen f (B.as_seq h abcd) 
-			(Lib.ByteSequence.uints_from_bytes_le #_ #_ #16 (B.as_seq h x)) 
+    B.as_seq h' abcd == Spec.round_op_gen f (B.as_seq h abcd)
+			(Lib.ByteSequence.uints_from_bytes_le #_ #_ #16 (B.as_seq h x))
 			(U32.v a) (U32.v b) (U32.v c) (U32.v d) (U32.v k) s (U32.v i)
   ))
 
-#reset-options "--z3rlimit 200 --max_fuel 1 --max_ifuel 1"
+#reset-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
 
 let round_op_gen f abcd x a b c d k s i =
   let h = HST.get () in
@@ -146,8 +146,8 @@ let round1
     B.modifies (B.loc_buffer abcd) h h' /\
     B.live h' abcd /\
     B.live h' x /\
-    B.as_seq h' abcd == Spec.round1 (B.as_seq h abcd) 
-    			(Lib.ByteSequence.uints_from_bytes_le #_ #_ #16 (B.as_seq h x)) 
+    B.as_seq h' abcd == Spec.round1 (B.as_seq h abcd)
+    			(Lib.ByteSequence.uints_from_bytes_le #_ #_ #16 (B.as_seq h x))
   ))
 =
   let h = HST.get () in
@@ -173,7 +173,7 @@ let round1
   let h' = HST.get () in
 
   reveal_opaque (`%Spec.round1) Spec.round1;
-  assert (Seq.equal (B.as_seq h' abcd) (Spec.round1 (B.as_seq h abcd) 
+  assert (Seq.equal (B.as_seq h' abcd) (Spec.round1 (B.as_seq h abcd)
   		    (Lib.ByteSequence.uints_from_bytes_le #_ #_ #16 (B.as_seq h x))))
 
 
@@ -194,8 +194,8 @@ let round2
     B.modifies (B.loc_buffer abcd) h h' /\
     B.live h' abcd /\
     B.live h' x /\
-    B.as_seq h' abcd == Spec.round2 (B.as_seq h abcd) 
-    			(Lib.ByteSequence.uints_from_bytes_le #_ #_ #16 (B.as_seq h x)))) 
+    B.as_seq h' abcd == Spec.round2 (B.as_seq h abcd)
+    			(Lib.ByteSequence.uints_from_bytes_le #_ #_ #16 (B.as_seq h x))))
 =
   let h = HST.get () in
   let _ = round2_op abcd x ia ib ic id 1ul 5ul 17ul in
@@ -220,7 +220,7 @@ let round2
   let h' = HST.get () in
 
   reveal_opaque (`%Spec.round2) Spec.round2;
-  assert (Seq.equal (B.as_seq h' abcd) (Spec.round2 (B.as_seq h abcd) 
+  assert (Seq.equal (B.as_seq h' abcd) (Spec.round2 (B.as_seq h abcd)
          (Lib.ByteSequence.uints_from_bytes_le #_ #_ #16 (B.as_seq h x))))
 
 inline_for_extraction
@@ -241,7 +241,7 @@ let round3
     B.modifies (B.loc_buffer abcd) h h' /\
     B.live h' abcd /\
     B.live h' x /\
-    B.as_seq h' abcd == Spec.round3 (B.as_seq h abcd) 
+    B.as_seq h' abcd == Spec.round3 (B.as_seq h abcd)
       (Lib.ByteSequence.uints_from_bytes_le #_ #_ #16 (B.as_seq h x))))
 =
   let h = HST.get () in
@@ -267,7 +267,7 @@ let round3
   let h' = HST.get () in
 
   reveal_opaque (`%Spec.round3) Spec.round3;
-  assert (Seq.equal (B.as_seq h' abcd) (Spec.round3 (B.as_seq h abcd) 
+  assert (Seq.equal (B.as_seq h' abcd) (Spec.round3 (B.as_seq h abcd)
       (Lib.ByteSequence.uints_from_bytes_le #_ #_ #16 (B.as_seq h x))))
 
 inline_for_extraction
@@ -287,7 +287,7 @@ let round4
     B.modifies (B.loc_buffer abcd) h h' /\
     B.live h' abcd /\
     B.live h' x /\
-    B.as_seq h' abcd == Spec.round4 (B.as_seq h abcd) 
+    B.as_seq h' abcd == Spec.round4 (B.as_seq h abcd)
           (Lib.ByteSequence.uints_from_bytes_le #_ #_ #16 (B.as_seq h x))))
 =
   let h = HST.get () in
@@ -313,7 +313,7 @@ let round4
   let h' = HST.get () in
 
   reveal_opaque (`%Spec.round4) Spec.round4;
-  assert (Seq.equal (B.as_seq h' abcd) (Spec.round4 (B.as_seq h abcd) 
+  assert (Seq.equal (B.as_seq h' abcd) (Spec.round4 (B.as_seq h abcd)
             (Lib.ByteSequence.uints_from_bytes_le #_ #_ #16 (B.as_seq h x))))
 
 inline_for_extraction
@@ -330,7 +330,7 @@ let rounds
     B.modifies (B.loc_buffer abcd) h h' /\
     B.live h' abcd /\
     B.live h' x /\
-    B.as_seq h' abcd == Spec.rounds (B.as_seq h abcd) 
+    B.as_seq h' abcd == Spec.rounds (B.as_seq h abcd)
                 (Lib.ByteSequence.uints_from_bytes_le #_ #_ #16 (B.as_seq h x))))
 =
   let h = HST.get () in
@@ -340,7 +340,7 @@ let rounds
   round4 abcd x;
   let h' = HST.get () in
   reveal_opaque (`%Spec.rounds) Spec.rounds;
-  assert (Seq.equal (B.as_seq h' abcd) (Spec.rounds (B.as_seq h abcd) 
+  assert (Seq.equal (B.as_seq h' abcd) (Spec.rounds (B.as_seq h abcd)
                   (Lib.ByteSequence.uints_from_bytes_le #_ #_ #16 (B.as_seq h x))))
 
 inline_for_extraction
@@ -354,7 +354,7 @@ let overwrite
       B.(modifies (loc_buffer abcd) h0 h1) /\
       B.live h1 abcd /\
       B.as_seq h1 abcd == Spec.overwrite (B.as_seq h0 abcd) a' b' c' d'))
-= 
+=
   let h0 = HST.get () in
   B.upd abcd ia a';
   B.upd abcd ib b';

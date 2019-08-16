@@ -31,7 +31,7 @@ let compute_st (a: hash_alg) =
   tag: B.buffer uint8 {B.length tag == hash_length a} ->
   key: B.buffer uint8{ keysized a (B.length key) /\ B.disjoint key tag } ->
   keylen: UInt32.t{ UInt32.v keylen = B.length key } ->
-  data: B.buffer uint8{ B.length data + block_length a < pow2 32 - 1 } ->
+  data: B.buffer uint8{ B.length data + block_length a < pow2 32 } ->
   datalen: UInt32.t{ UInt32.v datalen = B.length data } ->
   Stack unit
   (requires fun h0 -> B.live h0 tag /\ B.live h0 key /\ B.live h0 data)
