@@ -234,8 +234,13 @@ val secretToPublicWithoutNorm: result: point -> scalar: lbuffer uint8 (size 32) 
     ensures fun h0 _ h1 -> modifies2 result tempBuffer h0 h1 /\
       as_nat h1 (gsub result (size 0) (size 4)) < prime /\ 
       as_nat h1 (gsub result (size 4) (size 4)) < prime /\ 
-      as_nat h1 (gsub result (size 8) (size 4)) < prime  
-  )  
+      as_nat h1 (gsub result (size 8) (size 4)) < prime /\
+      (
+	let p1 = fromDomainPoint(point_prime_to_coordinates (as_seq h1 result)) in 
+	let basePoint = (0x6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296, 0x4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5, 1) in 
+
+	let rN, _ = montgomery_ladder_spec (as_seq h0 scalar) ((0, 0, 0), basePoint) in 
+	rN == p1))  
 
 
 val isPointAtInfinity: p: point -> Stack bool
@@ -262,10 +267,11 @@ val isPointOnCurve: p: point -> Stack bool
     (
       let x = gsub p (size 0) (size 4) in 
       let y = gsub p (size 4) (size 4) in 
-      let x_ = as_nat h0 x in  if r = false then (as_nat h0 y) * (as_nat h0 y) % prime <>  (x_ * x_ * x_ - 3 * x_ - 41058363725152142129326129780047268409114441015993725554835256314039467401291) % prime
-       else
-       (as_nat h0 y) * (as_nat h0 y) % prime == (x_ * x_ * x_ - 3 * x_ + 41058363725152142129326129780047268409114441015993725554835256314039467401291) % prime) /\
-  r == isPointOnCurve (
-  as_nat h1 (gsub p (size 0) (size 4)), as_nat h1 (gsub p (size 4) (size 4)), as_nat h1 (gsub p (size 8) (size 4))
+      let x_ = as_nat h0 x in  
+      if r = false 
+	then (as_nat h0 y) * (as_nat h0 y) % prime <>  (x_ * x_ * x_ - 3 * x_ + 41058363725152142129326129780047268409114441015993725554835256314039467401291) % prime
+       else (as_nat h0 y) * (as_nat h0 y) % prime == (x_ * x_ * x_ - 3 * x_ + 41058363725152142129326129780047268409114441015993725554835256314039467401291) % prime) /\
+      r == isPointOnCurve (
+      as_nat h1 (gsub p (size 0) (size 4)), as_nat h1 (gsub p (size 4) (size 4)), as_nat h1 (gsub p (size 8) (size 4))
   ) 
 )

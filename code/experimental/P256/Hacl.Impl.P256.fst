@@ -1366,22 +1366,18 @@ let secretToPublic result scalar tempBuffer =
   pop_frame()
 
 
-
-
-
-
 let secretToPublicWithoutNorm result scalar tempBuffer = 
-  push_frame(); 
-    let basePoint = create (size 12) (u64 0) in 
+    push_frame(); 
+      let basePoint = create (size 12) (u64 0) in 
+      let h0 = ST.get() in 
     uploadBasePoint basePoint;
-    
-    let q = sub tempBuffer (size 0) (size 12) in 
-    let buff = sub tempBuffer (size 12) (size 88) in 
-    
+      let q = sub tempBuffer (size 0) (size 12) in 
+      let buff = sub tempBuffer (size 12) (size 88) in 
     zero_buffer q; 
+      let h1 = ST.get() in 
+      lemma_pif_to_domain h1 q; 
     montgomery_ladder q basePoint scalar buff; 
     copy_point q result;
-    (*norm q result buff;  *)
   pop_frame()  
 
 
@@ -1531,15 +1527,12 @@ let isPointOnCurve p =
      let r = compare_felem y2Buffer xBuffer in 
      let z = eq_0_u64 r in 
      assert(if uint_v r = pow2 64 -1 then as_nat h1 y2Buffer == as_nat h1 xBuffer else as_nat h1 y2Buffer <> as_nat h1 xBuffer);
-       admit();
-
      lemma_modular_multiplication_p256_2_d ((as_nat h0 y) * (as_nat h0 y) % prime) 
        (let x_ = as_nat h0 x in (x_ * x_ * x_ - 3 * x_ + 41058363725152142129326129780047268409114441015993725554835256314039467401291) % prime);
      assert(let x_ = as_nat h0 x in 
        if uint_v r = pow2 64 - 1 then   
 	  (as_nat h0 y) * (as_nat h0 y) % prime ==  (x_ * x_ * x_ - 3 * x_ + 41058363725152142129326129780047268409114441015993725554835256314039467401291) % prime else 	  
 	  (as_nat h0 y) * (as_nat h0 y) % prime <>  (x_ * x_ * x_ - 3 * x_ + 41058363725152142129326129780047268409114441015993725554835256314039467401291) % prime);
-       	
      let z = not(eq_0_u64 r) in 
      pop_frame();
      z
