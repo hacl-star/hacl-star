@@ -72,6 +72,14 @@ let _point_add (p:point_nat) (q:point_nat) : point_nat =
   (x3, y3, z3)
     end 
 
+
+val isPointAtInfinity: p: point_nat -> Tot bool
+
+let isPointAtInfinity p = 
+    let (x, y, z) = p in 
+    z = 0
+
+
 let _norm (p:point_nat): (point_nat) =
   let (x, y, z) = p in 
   let z2 = z * z in 
@@ -80,7 +88,7 @@ let _norm (p:point_nat): (point_nat) =
   let z3i = modp_inv2_pow z3 in 
   let x3 = (z2i * x) % prime256 in 
   let y3 = (z3i * y) % prime256 in 
-  let z3 = 1 in 
+  let z3 = if isPointAtInfinity p then 0 else 1 in 
   assert(x3 == (x * (pow (z * z) (prime256 -2) % prime256) % prime256));
   assert(y3 == (y * (pow (z * z * z) (prime256 - 2) % prime256) % prime256));
   assert(z3 == 1);
@@ -131,13 +139,6 @@ let scalar_multiplication k p =
   let pai = (0, 0, 0) in 
   let q, f = montgomery_ladder_spec k (pai, p) in 
   _norm q
-
-
-val isPointAtInfinity: p: point_nat -> Tot bool
-
-let isPointAtInfinity p = 
-    let (x, y, z) = p in 
-    z = 0
 
 
 val isPointOnCurve: p: point_nat -> Tot bool

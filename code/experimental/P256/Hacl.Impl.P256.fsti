@@ -124,9 +124,9 @@ val isPointAtInfinityPrivate: p: point -> Stack uint64
     (
       (uint_v r == 0 \/ uint_v r == maxint U64) /\ 
       (
-	let x = as_nat h0 (gsub p (size 0) (size 4)) in 
-	let y = as_nat h0 (gsub p (size 4) (size 4)) in 
-	let z = as_nat h0 (gsub p (size 8) (size 4)) in 
+	let x = fromDomain_(as_nat h0 (gsub p (size 0) (size 4))) in 
+	let y = fromDomain_(as_nat h0 (gsub p (size 4) (size 4))) in 
+	let z = fromDomain_(as_nat h0 (gsub p (size 8) (size 4))) in 
 	let rr =  Hacl.Spec.P256.isPointAtInfinity (x, y, z) in 
 	if uint_v r = 0 then rr = false else rr = true))
     )
@@ -150,8 +150,7 @@ val norm: p: point -> resultPoint: point -> tempBuffer: lbuffer uint64 (size 88)
       let zD = fromDomain_ (point_z_as_nat h0 p) in 
 
       let (xN, yN, zN) = _norm (xD, yD, zD) in 
-      x3 == xN /\ y3 == yN /\ z3 == zN /\
-      z3 == 1 
+      x3 == xN /\ y3 == yN /\ z3 == zN 
    )   
   )
 
