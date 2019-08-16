@@ -1,0 +1,3 @@
+module MetaAttribute
+
+let specialize = ()
