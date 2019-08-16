@@ -332,7 +332,7 @@ let poly_add result x y =
     for 0ul params_n
     (fun h i -> live h result /\ live h x /\ live h y /\ modifies1 result h0 h /\ i <= v params_n /\ is_poly_pmq_i h result i /\
              (forall (i:nat{i < v params_n}) . is_elem_int (elem_v (bget h x i) + elem_v (bget h y i))))
-    (fun i ->
+    (fun i -
         let h = ST.get () in assert(is_elem_int (elem_v (bget h x (v i)) + elem_v (bget h y (v i))));
         result.(i) <- x.(i) +^ y.(i);
         let hLoopEnd = ST.get () in

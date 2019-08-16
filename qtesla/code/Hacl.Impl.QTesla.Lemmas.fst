@@ -134,4 +134,17 @@ let lemma_mask_logor a b mask r =
       Int.logand_lemma_2 #I32.n (I32.v a);
       lemma_int32_logor_zero a
       end
-      
+
+// TODO (kkane): Proofs of these two lemmas are in incoming work Santiago has, so for now we assume them.
+assume
+val shift_arithmetic_right_lemma_i32:
+    a:I32.t
+  -> b:UI32.t{UI32.v b < I32.n}
+  -> Lemma (I32.v (I32.shift_arithmetic_right a b) = I32.v a / pow2 (UI32.v b))
+
+assume
+val shift_arithmetic_right_lemma_i64:
+    a:I64.t
+  -> b:UI32.t{UI32.v b < I64.n}
+  -> Lemma (I64.v (I64.shift_arithmetic_right a b) = I64.v a / pow2 (UI32.v b))
+

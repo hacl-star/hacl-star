@@ -202,8 +202,8 @@ let reduce a =
     // According to Jonathan, overflow on signed integer types is undefined behavior, even if we know the contents are
     // nonnegative. But since we know the contents are nonnegative, we instead cast to unsigned types and do the
     // multiplication which, if it overflows, has a well-defined behavior.
-    [@inline_let] let aUnsigned = FStar.Int.Cast.int64_to_uint64 a in
-    [@inline_let] let params_qinv_unsigned = FStar.Int.Cast.int64_to_uint64 params_qinv in
+    (*[@inline_let]*) let aUnsigned = FStar.Int.Cast.int64_to_uint64 a in
+    (*[@inline_let]*) let params_qinv_unsigned = FStar.Int.Cast.int64_to_uint64 params_qinv in
     let u:I64.t = FStar.Int.Cast.uint64_to_int64 UI64.((aUnsigned *%^ params_qinv_unsigned) &^ 0xFFFFFFFFuL) in
     lemma_logand32_value_max UI64.(aUnsigned *%^ params_qinv_unsigned);
     lemma_logand32_value_min UI64.(aUnsigned *%^ params_qinv_unsigned);
@@ -214,11 +214,12 @@ let reduce a =
     //assume(I64.v I64.(a >>^ 32ul) == I64.v a / pow2 32); 
     //assume(let result = I64.v I64.(a >>^ 32ul) in let q = elem_v params_q in -q < result /\ result < q);
     //assume(let result = I64.(a >>^ 32ul) in is_montgomery (int64_to_elem result));
-    assume(0 <= I64.v a);
-    shift_right_value_lemma_int64 a 32ul;
-    assert(is_montgomery (int64_to_elem (I64.(a >>^ 32ul))));
+    //assume(0 <= I64.v a);
+    shift_arithmetic_right_lemma_i64 a 32ul;
+    normalize_term_spec (pow2 32);
+    //assert(I64.v I64.(a `I64.shift_arithmetic_right` 32ul) == I64.v a / pow2 32); admit();
+    assert(is_montgomery (int64_to_elem (I64.shift_arithmetic_right a 32ul)));
     int64_to_elem I64.(a >>^ 32ul)
-
 
 val barr_reduce:
     a: elem_base

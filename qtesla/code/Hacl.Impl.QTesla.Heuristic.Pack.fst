@@ -21,6 +21,7 @@ open LowStar.Buffer
 open Lib.IntTypes
 open Lib.Buffer
 open Lib.ByteBuffer
+module B = LowStar.Buffer
 
 open C.Loops
 module LL = Lib.Loops
@@ -28,6 +29,7 @@ module LL = Lib.Loops
 open Hacl.Impl.QTesla.Params
 open Hacl.Impl.QTesla.Constants
 open Hacl.Impl.QTesla.Globals
+module SP = QTesla.Params
 
 #reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 
@@ -151,6 +153,11 @@ let encode_pk_loopBody pk t i j =
 
 #reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 
+//private let crypto_publickeybytes = (params_n *. params_q_log +. size 7) /. size 8 +. crypto_seedbytes
+
+private let lemma_encode_pk_bound_i (k: size_t{v k < v params_n / 32}) : Lemma
+    (ensures v k * v params_q_log + 22 < v crypto_publickeybytes / numbytes U32) = ()
+
 val encode_pk:
     pk: lbuffer uint8 crypto_publickeybytes
   -> t: poly_k
@@ -178,33 +185,17 @@ let encode_pk pk t seedA =
     let h0 = ST.get () in
     assert(is_poly_k_equal hInit h0 t);
     assert(is_poly_k_pk h0 t);
-    LL.while
-    (fun h -> live h pk /\ live h t /\ live h i /\ live h j /\ modifies3 pk i j h0 h /\ is_poly_k_pk h t)// /\
-           //((v (bget h j 0) + 31 < v params_n /\ v (bget h i 0) + 22 < v crypto_publickeybytes / numbytes U32) \/
-           // (v (bget h i 0) >= v params_n * v params_q_log / 32)))
-    (fun h -> v (bget h i 0) < v params_n * v params_q_log / 32)
-    (fun _ -> i.(size 0) <. params_n *. params_q_log /. size 32)
-(*    for 0ul (params_n /. size 32)
-    (fun h k -> live h pk /\ live h t /\ modifies1 pk h0 h /\ is_poly_k_pk h t)// /\
-             //k * 32 + 22 < v crypto_publickeybytes / numbytes U32 /\
-             //k * v params_q_log < v params_n)*)
-    (fun _ ->
-        //let j = k *. size 32 in
-        //let i = k *. params_q_log in
+    for 0ul (params_n /. size 32)
+    (fun h k -> live h pk /\ live h t /\ modifies1 pk h0 h /\ is_poly_k_pk h t)
+    (fun k ->
+        let j = k *. size 32 in
+        let i = k *. params_q_log in
         let h1 = ST.get () in
-        assert(is_poly_k_pk h1 t);
-        assume(v (bget h1 j 0) + 31 < v params_n);
-        assume(v (bget h1 i 0) + 22 < v (crypto_publickeybytes /. size (numbytes U32)));
-        encode_pk_loopBody pk t i.(size 0) j.(size 0);
-        let h2 = ST.get () in
-        assert(is_poly_k_equal h1 h2 t);
-        assert(is_poly_k_pk h2 t);
-        assume(v (bget h2 j 0) + 32 + 31 < v params_n);
-        j.(size 0) <- j.(size 0) +. size 32;
-	i.(size 0) <- i.(size 0) +. params_q_log;
-        let h3 = ST.get () in
-        assert(is_poly_k_equal h2 h3 t);
-        assert(is_poly_k_pk h3 t)
+        // This assertion is necessary for bounds calculation to succeed for encode_pk_loopBody. Curiously, I have
+        // to first prove this in terms of machine integers (k <. params_n /. size 32). Attempting to prove
+        // (v k < v params_n / 32) fails, unless I assert the machine integer version first.
+        assert(k <. params_n /. size 32);
+        encode_pk_loopBody pk t i j
     );
 
     update_sub #MUT #_ #_ pk (params_n *. params_q_log /. size 8) crypto_seedbytes seedA;
@@ -216,12 +207,12 @@ let encode_pk pk t seedA =
 // and then only at the beginning and the end do we have to ask it to prove all these underlying stateful facts. The
 // opaque_to_smt annotation allows us to choose when the solver digs into the predicate's definition.
 [@"opaque_to_smt"]
-private let valid_decode_pk (pk_in: lbuffer uint8 crypto_publickeybytes) (pk: lbuffer I32.t (params_n *. params_k)) (h0 h1: HS.mem) = 
-    live h0 pk_in /\ live h0 pk /\ live h1 pk_in /\ live h1 pk /\ modifies1 pk h0 h1 /\ equal_domains h0 h1
+private let valid_decode_pk (pk_in: lbuffer uint8 crypto_publickeybytes) (pk: lbuffer I32.t (params_n *. params_k)) (h0 h1: HS.mem) (i:size_t{v i + 31 < v params_n * v params_k}) = 
+    live h0 pk_in /\ live h0 pk /\ live h1 pk_in /\ live h1 pk /\ modifies1 (gsub pk i (size 32)) h0 h1 /\ equal_domains h0 h1
 
-private let reveal_valid_decode_pk (pk_in: lbuffer uint8 crypto_publickeybytes) (pk: lbuffer I32.t (params_n *. params_k)) (h0 h1: HS.mem) : 
-    Lemma (ensures (valid_decode_pk pk_in pk h0 h1) <==> 
-                   (live h0 pk_in /\ live h0 pk /\ live h1 pk_in /\ live h1 pk /\ modifies1 pk h0 h1 /\ equal_domains h0 h1)) =
+private let reveal_valid_decode_pk (pk_in: lbuffer uint8 crypto_publickeybytes) (pk: lbuffer I32.t (params_n *. params_k)) (h0 h1: HS.mem) (i:size_t{v i + 31 < v params_n * v params_k}) : 
+    Lemma (ensures (valid_decode_pk pk_in pk h0 h1 i) <==> 
+                   (live h0 pk_in /\ live h0 pk /\ live h1 pk_in /\ live h1 pk /\ modifies1 (gsub pk i (size 32)) h0 h1 /\ equal_domains h0 h1)) =
     reveal_opaque (`%valid_decode_pk) valid_decode_pk
 
 private inline_for_extraction noextract
@@ -229,15 +220,16 @@ val decode_pk_pt:
     snapshot : HS.mem
   -> pk : lbuffer I32.t (params_n *. params_k)
   -> pk_in : lbuffer uint8 crypto_publickeybytes
+  -> i : size_t{v i + 31 < v params_n * v params_k}
   -> j : size_t
   -> k : size_t{v j + v k < v crypto_publickeybytes / 4}
   -> Stack UI32.t
-    (requires fun h -> valid_decode_pk pk_in pk snapshot h)
-    (ensures fun h0 _ h1 -> h0 == h1 /\ valid_decode_pk pk_in pk snapshot h1)
+    (requires fun h -> valid_decode_pk pk_in pk snapshot h i)
+    (ensures fun h0 _ h1 -> h0 == h1 /\ valid_decode_pk pk_in pk snapshot h1 i)
 
-let decode_pk_pt snapshot pk pk_in j k =
+let decode_pk_pt snapshot pk pk_in i j k =
     let h0 = ST.get () in
-    reveal_valid_decode_pk pk_in pk snapshot h0;
+    reveal_valid_decode_pk pk_in pk snapshot h0 i;
     assert(live h0 pk_in);
     let u = uint_from_bytes_le #U32 #_ (sub pk_in ((j +. k) *. size (numbytes U32)) (size (numbytes U32))) in
     Lib.RawIntTypes.u32_to_UInt32 u
@@ -249,19 +241,30 @@ val decode_pk_set_pk:
     snapshot : HS.mem
   -> pk_in : lbuffer uint8 crypto_publickeybytes
   -> pk : lbuffer I32.t (params_n *. params_k)
-  -> i : size_t
-  -> j : size_t{v i + v j < v params_n * v params_k}
+  -> i : size_t{v i + 31 < v params_n * v params_k}
+  -> j : size_t{v j < 32} // {v i + v j < v params_n * v params_k}
   -> value : I32.t
   -> Unsafe unit
-    (requires fun h -> valid_decode_pk pk_in pk snapshot h)
-    (ensures fun _ _ h1 -> valid_decode_pk pk_in pk snapshot h1 /\ (bget h1 pk (v i + v j)) = value)
+    (requires fun h -> valid_decode_pk pk_in pk snapshot h i)
+    (ensures fun _ _ h1 -> valid_decode_pk pk_in pk snapshot h1 i /\ (bget h1 pk (v i + v j)) = value)
 
 let decode_pk_set_pk snapshot pk_in pk i j value =
     let h0 = ST.get () in
-    reveal_valid_decode_pk pk_in pk snapshot h0;
+    reveal_valid_decode_pk pk_in pk snapshot h0 i;
+    // We used to just have "modifies1 pk h0 h1" as the post-condition for this function, but this messes us up
+    // at the top level because we need to use the fact that in each loop of decode_pk_loopBody, all elements of pk
+    // before index i are unchanged. We need "modifies1 (gsub pk i (size 32)) h0 h1" to prove this. We used to
+    // set this element with "pk.(i +. j) <- value", but the prover has issues bridging the gap between this and the
+    // subbuffer.
+    //let subPk = sub pk i (size 32) in
+    //subPk.(j) <- value;
     pk.(i +. j) <- value;
     let h1 = ST.get () in
-    reveal_valid_decode_pk pk_in pk snapshot h1
+    assert(j <. size 32);
+    assert(B.get h1 (pk <: B.buffer elem) (v i + v j) == B.get h1 (B.gsub (pk <: B.buffer elem) i (size 32)) (v j));
+    assert(forall (k:nat{k < 32}) (h:HS.mem) . {:pattern bget h pk (v i + k) \/ bget h (gsub pk i (size 32)) k} bget h pk (v i + k) == bget h (gsub pk i (size 32)) k);
+    reveal_valid_decode_pk pk_in pk snapshot h1 i;
+    assume(modifies1 (gsub pk i (size 32)) h0 h1)
 
 private let lemma_decode_pk_extend 
     (pk : lbuffer I32.t (params_n *. params_k))
@@ -282,25 +285,27 @@ val decode_pk_loopBody:
     (requires fun h -> live h pk /\ live h pk_in /\ disjoint pk pk_in /\ is_poly_k_pk_i h pk (v i))
     (ensures fun h0 _ h1 -> modifies1 pk h0 h1 /\ is_poly_k_pk_i h1 pk (v i + 32))
 
-#push-options "--z3rlimit 500"
+#push-options "--z3rlimit 800"
 let decode_pk_loopBody pk pk_in mask23 i j =
     let h0 = ST.get () in
-    reveal_valid_decode_pk pk_in pk h0 h0;
-    assert(valid_decode_pk pk_in pk h0 h0);
+    reveal_valid_decode_pk pk_in pk h0 h0 i;
+    assert(modifies1 (gsub pk i (size 32)) h0 h0); 
+    assert(valid_decode_pk pk_in pk h0 h0 i);
 
     // In the reference code, "pt = (uint32_t*)pk_in" where pk_in is (unsigned char *). We can't recast buffers to have
     // different element types in F*. (BufferView does this, but only as ghost predicates for proving theorems.)
     // Instead, we curry decode_pk_pt above with pk_in as its first parameter to provide a function that looks a lot
     // like the array dereference in the reference code, and extracts down to load32_le.
-    [@inline_let] let pt = decode_pk_pt h0 pk pk_in in
+    (*[@inline_let]*) let pt = decode_pk_pt h0 pk pk_in i in
 
     // Helper function to set elements of pk just to spread the work of the prover out.
-    [@inline_let] let pks = decode_pk_set_pk h0 pk_in pk in
+    assert(v i < v (params_n *. params_k));
+    (*[@inline_let]*) let pks = decode_pk_set_pk h0 pk_in pk in
 
     // Doing these statements in the form of "pk.(i+.size #) <- UI32.(expression)" causes typechecking problems.
     // Lifting the calculation into a let of time UI32.t and then passing it to uint32_to_int32 works at the
     // expense of junking up the code.
-    [@inline_let] let u2i = uint32_to_int32 in
+    (*[@inline_let]*) let u2i = uint32_to_int32 in
 
     // In the reference code, assignment is done to pp, and "pp = (uint32_t*)pk". Here instead we inline the
     // cast of the reuslt from uint32_t to int32_t in each assignment and then assign directly to elements of pk.
@@ -338,11 +343,20 @@ let decode_pk_loopBody pk pk_in mask23 i j =
     let ppi31 = UI32.( (pt j (size 22)) >>^  9ul ) in pks i (size 31) (u2i ppi31);
 
     let h1 = ST.get () in
-    reveal_valid_decode_pk pk_in pk h0 h1;
-    assert(valid_decode_pk pk_in pk h0 h1);
-    //assume(forall (k:nat{k >= v i /\ k < v i + 32}) . is_pk (bget h1 pk k));
-    //lemma_decode_pk_extend pk i h1;
-    assume(is_poly_k_pk_i h1 pk (v i + 32))
+    reveal_valid_decode_pk pk_in pk h0 h1 i;
+    assert(valid_decode_pk pk_in pk h0 h1 i);
+    // Can't easily prove is_pk for all k < i because we need to articulate somehow that the above
+    // sets don't modify those parts of the buffer.
+    assert(modifies1 (gsub pk i (size 32)) h0 h1);
+    //assume(v i > 0);
+    //assert(disjoint (gsub pk (size 0) i) (gsub pk i (size 32)));
+    //assert(forall (k:nat{k < v i}) . B.get h0 ((gsub pk (size 0) i) <: B.buffer elem) k == B.get h1 ((gsub pk (size 0) i) <: B.buffer elem) k);
+    assert(forall (k:nat{k < v i}) . bget h0 (gsub pk (size 0) i) k == bget h1 (gsub pk (size 0) i) k);
+    assume(forall (k:nat{k >= v i /\ k < v i + 32}) . is_pk (bget h1 pk k));
+    // index reassignment assertion
+    assert(forall (k:nat{k < v i}) (h:HS.mem) . {:pattern bget h pk k \/ bget h (gsub pk (size 0) i) k} bget h pk k == bget h (gsub pk (size 0) i) k);
+    assert(is_poly_k_pk_i h1 pk (v i));
+    lemma_decode_pk_extend pk i h1
 #pop-options
 
 #push-options "--max_fuel 0"

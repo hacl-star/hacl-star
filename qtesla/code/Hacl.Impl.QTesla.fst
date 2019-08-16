@@ -1525,12 +1525,6 @@ let lemma_bound val_ val_' =
   Math.Lemmas.lemma_div_le
     (I32.v val_ + pow2 (SP.params_d - 1) - 1) (2 * elem_v params_q + pow2 (SP.params_d - 1) - 1) (pow2 SP.params_d)
 
-assume
-val shift_arithmetic_right_lemma_i32:
-    a:I32.t
-  -> b:UI32.t{v b < I32.n}
-  -> Lemma (I32.v (I32.shift_arithmetic_right a b) = I32.v a / pow2 (v b))
-
 val test_correctness:
     v_ : poly
   -> Stack (r:I32.t{r == 0l \/ r == 1l})
