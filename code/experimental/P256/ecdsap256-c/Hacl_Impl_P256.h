@@ -102,6 +102,8 @@ scalarMultiplicationWithoutNorm(
   uint64_t *tempBuffer
 );
 
+void secretToPublic(uint64_t *result, uint8_t *scalar, uint64_t *tempBuffer);
+
 void secretToPublicWithoutNorm(uint64_t *result, uint8_t *scalar, uint64_t *tempBuffer);
 
 bool isPointAtInfinity(uint64_t *p);

@@ -201,6 +201,27 @@ val scalarMultiplicationWithoutNorm: p: point -> result: point ->
 ) 
 
 
+val secretToPublic: result: point -> scalar: lbuffer uint8 (size 32) -> tempBuffer: lbuffer uint64 (size 100) ->
+  Stack unit
+    (requires fun h -> 
+      live h result /\ live h scalar /\ live h tempBuffer /\
+      LowStar.Monotonic.Buffer.all_disjoint [loc tempBuffer; loc scalar; loc result]
+    )
+  (
+    ensures fun h0 _ h1 -> modifies2 result tempBuffer h0 h1 /\
+    as_nat h1 (gsub result (size 0) (size 4)) < prime /\ 
+    as_nat h1 (gsub result (size 4) (size 4)) < prime /\ 
+    as_nat h1 (gsub result (size 8) (size 4)) < prime /\
+
+    (
+      let x3, y3, z3 = point_x_as_nat h1 result, point_y_as_nat h1 result, point_z_as_nat h1 result in 
+      let (xN, yN, zN) = secret_to_public (as_seq h0 scalar)  in 
+      x3 == xN /\ y3 == yN /\ z3 == zN 
+    )
+  )
+
+
+
 
 val secretToPublicWithoutNorm: result: point -> scalar: lbuffer uint8 (size 32) -> 
  tempBuffer: lbuffer uint64 (size 100) ->

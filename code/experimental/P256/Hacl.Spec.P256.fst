@@ -141,6 +141,14 @@ let scalar_multiplication k p =
   _norm q
 
 
+val secret_to_public: k: scalar -> Tot point_nat
+
+let secret_to_public k = 
+  let pai = (0, 0, 0) in 
+  let basePoint = (0x6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296, 0x4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5, 1) in 
+  let q, f = montgomery_ladder_spec k (pai, basePoint) in 
+  _norm q
+
 val isPointOnCurve: p: point_nat -> Tot bool
 
 let isPointOnCurve p = 

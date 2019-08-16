@@ -3199,6 +3199,30 @@ scalarMultiplicationWithoutNorm(
   copy_point(q, result);
 }
 
+void secretToPublic(uint64_t *result, uint8_t *scalar, uint64_t *tempBuffer)
+{
+  uint64_t basePoint[12U] = { 0U };
+  uint64_t *q;
+  uint64_t *buff;
+  uploadBasePoint(basePoint);
+  q = tempBuffer;
+  buff = tempBuffer + (uint32_t)12U;
+  zero_buffer(q);
+  {
+    uint32_t i;
+    for (i = (uint32_t)0U; i < (uint32_t)256U; i = i + (uint32_t)1U)
+    {
+      uint32_t bit0 = (uint32_t)255U - i;
+      uint64_t bit = (uint64_t)(scalar[bit0 / (uint32_t)8U] >> bit0 % (uint32_t)8U & (uint8_t)1U);
+      Hacl_Spec_P256_Ladder_cswap(bit, q, basePoint);
+      point_add(q, basePoint, basePoint, buff);
+      point_double(q, q, buff);
+      Hacl_Spec_P256_Ladder_cswap(bit, q, basePoint);
+    }
+  }
+  norm(q, result, buff);
+}
+
 void secretToPublicWithoutNorm(uint64_t *result, uint8_t *scalar, uint64_t *tempBuffer)
 {
   uint64_t basePoint[12U] = { 0U };

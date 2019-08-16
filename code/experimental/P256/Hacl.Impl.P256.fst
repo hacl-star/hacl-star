@@ -1288,7 +1288,7 @@ val uploadBasePoint: p: point -> Stack unit
 	let bpX = 0x6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296 in 
 	let bpY = 0x4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5 in 
 
-	fromDomain_ x1 == bpX
+	fromDomain_ x1 == bpX /\ fromDomain_ y1 == bpY /\ fromDomain_ z1 ==  1
     )
 )
 
@@ -1348,6 +1348,26 @@ let scalarMultiplicationWithoutNorm p result scalar tempBuffer =
     assert(	
       let p1 = fromDomainPoint(point_prime_to_coordinates (as_seq h3 q)) in 
       let rN, _ = montgomery_ladder_spec (as_seq h0 scalar) ((0, 0, 0),  point_prime_to_coordinates (as_seq h0 p)) in rN == p1)
+
+
+let secretToPublic result scalar tempBuffer = 
+  push_frame(); 
+       let basePoint = create (size 12) (u64 0) in 
+       let h0 = ST.get() in 
+    uploadBasePoint basePoint;
+      let q = sub tempBuffer (size 0) (size 12) in 
+      let buff = sub tempBuffer (size 12) (size 88) in 
+    zero_buffer q; 
+      let h1 = ST.get() in 
+      lemma_pif_to_domain h1 q;
+      
+    montgomery_ladder q basePoint scalar buff; 
+    norm q result buff;  
+  pop_frame()
+
+
+
+
 
 
 let secretToPublicWithoutNorm result scalar tempBuffer = 
