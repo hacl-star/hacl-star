@@ -734,8 +734,6 @@ TEST_FLAGS = -bundle Test,Test.*,Hacl.Test.*
 HAND_WRITTEN_LIB_FLAGS = -bundle Lib.RandomBuffer= -bundle Lib.PrintBuffer=
 # Disabling by pure-HACL distributions
 TARGETCONFIG_FLAGS = -add-include '"evercrypt_targetconfig.h"'
-# Disabled by default, overridden for wasm
-WASMSUPPORT_BUNDLE = -bundle WasmSupport
 
 # By default, we strive to do one file per algorithm for HACL, and one file for
 # logical unit for EverCrypt (e.g. E_HASH_BUNDLE).
@@ -757,6 +755,8 @@ POLY_BUNDLE=-bundle 'Hacl.Poly1305_32=Hacl.Impl.Poly1305.Field32xN_32' \
 NACLBOX_BUNDLE=-bundle Hacl.NaCl=Hacl.Impl.SecretBox,Hacl.Impl.Box
 MERKLE_BUNDLE=-bundle 'MerkleTree.New.Low+MerkleTree.New.Low.Serialization=[rename=MerkleTree]'
 CTR_BUNDLE=-bundle EverCrypt.CTR=EverCrypt.CTR.*
+# Disabled by default, overridden for wasm
+WASMSUPPORT_BUNDLE = -bundle WasmSupport
 
 BUNDLE_FLAGS	=\
   $(HASH_BUNDLE) \
@@ -770,6 +770,7 @@ BUNDLE_FLAGS	=\
   $(POLY_BUNDLE) \
   $(NACLBOX_BUNDLE) \
   $(MERKLE_BUNDLE) \
+  $(WASMSUPPORT_BUNDLE) \
   $(CTR_BUNDLE)
 
 DEFAULT_FLAGS = \
