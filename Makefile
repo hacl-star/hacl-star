@@ -879,7 +879,8 @@ dist/mozilla/Makefile.basic: \
   DEFAULT_FLAGS += \
     -bundle EverCrypt.* \
     -bundle MerkleTree.* \
-    -bundle Hacl.*
+    -bundle Hacl.* \
+    -bundle WasmSupport
 dist/mozilla/Makefile.basic: VALE_ASMS := $(filter dist/vale/curve25519-%,$(VALE_ASMS))
 dist/mozilla/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES =
 dist/mozilla/Makefile.basic: HAND_WRITTEN_H_FILES := $(filter %/libintvector.h,$(HAND_WRITTEN_H_FILES))
