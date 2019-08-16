@@ -112,7 +112,7 @@ let pfelem_cr : cr pfelem = CR pfelem_add_cm pfelem_mul_cm mul_add_distr mul_zer
 
 open FStar.Tactics
 
-let poly_semiring () : Tac unit = canon_semiring_with pfelem_cr ( +% ) ( *% )
+let poly_semiring () : Tac unit = canon_semiring pfelem_cr
 
 
 /// Lemmas
