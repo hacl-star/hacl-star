@@ -36,8 +36,8 @@ type old_hashes (mt: merkle_tree) =
   olds:hash_ss{S.length olds = 32 /\ mt_olds_inv 0 (MT?.i mt) olds}
 
 noeq type mt_olds =
-| MTO: mt:merkle_tree{mt_wf_elts mt} -> 
-       olds: old_hashes mt -> 
+| MTO: mt:merkle_tree{mt_wf_elts mt} ->
+       olds: old_hashes mt ->
        mt_olds
 
 val mto_inv: mt_olds -> GTot Type0
@@ -48,7 +48,7 @@ val mto_base: mto:mt_olds -> GTot (hs:hash_seq{S.length hs = MT?.j (MTO?.mt mto)
 let mto_base mto =
   mt_base (MTO?.mt mto) (MTO?.olds mto)
 
-val mto_spec: 
+val mto_spec:
   mto:mt_olds{MT?.j (MTO?.mt mto) > 0} ->
   GTot (smt:Spec.merkle_tree (log2c (MT?.j (MTO?.mt mto))))
 let mto_spec mto =
@@ -83,12 +83,12 @@ val mt_flush_to_ok:
                                  (MTO?.olds mto) (MT?.hs (MTO?.mt mto))))))
 let mt_flush_to_ok mto idx =
   Flushing.mt_flush_to_inv_preserved (MTO?.mt mto) (MTO?.olds mto) idx
-  
+
 val mt_flush_ok:
   mto:mt_olds ->
   Lemma (requires (mto_inv mto /\ MT?.j (MTO?.mt mto) > MT?.i (MTO?.mt mto)))
         (ensures (mto_inv (MTO (mt_flush_to (MTO?.mt mto) (MT?.j (MTO?.mt mto) - 1))
-                               (mt_flush_to_olds 0 (MT?.i (MTO?.mt mto)) 
+                               (mt_flush_to_olds 0 (MT?.i (MTO?.mt mto))
                                  (MT?.j (MTO?.mt mto) - 1) (MT?.j (MTO?.mt mto))
                                  (MTO?.olds mto) (MT?.hs (MTO?.mt mto))))))
 let mt_flush_ok mto =
@@ -115,7 +115,7 @@ let mt_get_root_ok mto drt =
 
 #set-options "--z3rlimit 20"
 val mt_get_path_ok:
-  mto:mt_olds -> 
+  mto:mt_olds ->
   idx:nat{MT?.i (MTO?.mt mto) <= idx && idx < MT?.j (MTO?.mt mto)} ->
   drt:hash ->
   Lemma (requires (mto_inv mto /\ MT?.j (MTO?.mt mto) > 0))
@@ -136,9 +136,8 @@ val mt_verify_ok:
   j:nat{k < j} ->
   p:path{S.length p = 1 + mt_path_length k j false} ->
   rt:hash ->
-  Lemma (mt_verify k j p rt ==
-        Spec.mt_verify #(log2c j) 
+  Lemma (mt_verify k j p rt <==>
+        Spec.mt_verify #(log2c j)
           (path_spec k j false (S.tail p)) k (HRaw (S.head p)) (HRaw rt))
 let mt_verify_ok k j p rt =
   Path.mt_verify_ok k j p rt
-

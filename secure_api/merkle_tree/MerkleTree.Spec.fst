@@ -10,7 +10,7 @@ open EverCrypt.Helpers
 module List = FStar.List.Tot
 module S = FStar.Seq
 
-module EHS = EverCrypt.Hash // EverCrypt includes EverCrypt.Hash, so no need for this? 
+module EHS = EverCrypt.Hash // EverCrypt includes EverCrypt.Hash, so no need for this?
 
 inline_for_extraction noextract
 let hash_alg = Spec.Hash.Definitions.SHA2_256
@@ -28,7 +28,6 @@ let hash_size = 32
 
 // fournet: [tag] is a better name than [hash] for this
 // Thus `hash_raw` is bytes of length 32
-val hash_raw: eqtype
 let hash_raw = b:Spec.Hash.Definitions.bytes_hash hash_alg
 
 // joonwonc: Spec.Hash.Definitions.block_length SHA2_256 = 64
@@ -45,7 +44,7 @@ let hash2_raw src1 src2 =
 /// requires extending the definitions of tags and hashes. Our
 /// extended definition of hash justifies skipping any concrete
 /// computation on dummies.
-
+noeq
 type hash =
 | HRaw: hr:hash_raw -> hash
 | HPad // right padding to make the size of a Merkle tree be a power of 2
@@ -59,7 +58,7 @@ let hash2 lh rh =
     | HPad -> lh
     | HRaw rhr -> HRaw (hash2_raw lhr rhr)
 
-// fournet: [tags] a better name? 
+// fournet: [tags] a better name?
 noextract
 val hash_seq: Type0
 let hash_seq = S.seq hash
@@ -70,8 +69,8 @@ type merkle_tree n = hs:Seq.seq hash{Seq.length hs = pow2 n}
 val mt_get: #n:nat -> mt:merkle_tree n -> idx:nat{idx < pow2 n} -> GTot hash
 let mt_get #n mt idx = Seq.index mt idx
 
-// fournet: tempting, at least as a private notation? 
-unfold let op_String_Access = Seq.index #hash 
+// fournet: tempting, at least as a private notation?
+unfold let op_String_Access = Seq.index #hash
 
 val mt_left: #n:nat{n > 0} -> mt:merkle_tree n -> merkle_tree (n-1)
 let mt_left #n mt = Seq.slice mt 0 (pow2 (n-1))
@@ -84,12 +83,12 @@ val mt_left_right:
   Lemma (Seq.equal mt (mt_left mt @| mt_right mt))
 let mt_left_right #n mt = ()
 
-val hs_next_lv: 
+val hs_next_lv:
   #n:nat -> hs:Seq.seq hash{Seq.length hs = 2 * n} ->
   GTot (nhs:Seq.seq hash{Seq.length nhs = n})
 let rec hs_next_lv #n hs =
   if n = 0 then Seq.empty
-  else Seq.cons 
+  else Seq.cons
     (hash2 hs.[0] hs.[1])
     (hs_next_lv #(n-1) (Seq.slice hs 2 (Seq.length hs)))
 
@@ -111,7 +110,7 @@ val hs_next_lv_slice:
 let rec hs_next_lv_slice #n hs i j =
   if i = j then ()
   else begin
-    let x = Seq.slice hs (2 * i) (2 * j) in 
+    let x = Seq.slice hs (2 * i) (2 * j) in
     assert (Seq.equal (hs_next_lv #(j - i) x)
                     (Seq.cons (hash2 x.[0] x.[1])
                             (hs_next_lv #(j - i - 1) (Seq.slice x 2 (Seq.length x)))));
@@ -127,14 +126,14 @@ val mt_next_lv_mt_left:
   #n:nat{n>1} -> mt:merkle_tree n ->
   Lemma (Seq.equal (mt_next_lv (mt_left mt))
                  (mt_left (mt_next_lv mt)))
-let mt_next_lv_mt_left #n mt = 
+let mt_next_lv_mt_left #n mt =
   hs_next_lv_slice #(pow2 (n-1)) mt 0 (pow2 (n-2))
 
 val mt_next_lv_mt_right:
   #n:nat{n>1} -> mt:merkle_tree n ->
   Lemma (Seq.equal (mt_next_lv (mt_right mt))
                  (mt_right (mt_next_lv mt)))
-let mt_next_lv_mt_right #n mt = 
+let mt_next_lv_mt_right #n mt =
   hs_next_lv_slice #(pow2 (n-1)) mt (pow2 (n-2)) (pow2 (n-1))
 
 val hs_next_lv_equiv:
@@ -147,8 +146,8 @@ val hs_next_lv_equiv:
 let hs_next_lv_equiv j n hs1 hs2 =
   forall_intro (hs_next_lv_index #n hs1);
   forall_intro (hs_next_lv_index #n hs2);
-  let hs1' = hs_next_lv #n hs1 in 
-  let hs2' = hs_next_lv #n hs2 in 
+  let hs1' = hs_next_lv #n hs1 in
+  let hs2' = hs_next_lv #n hs2 in
   assert (forall (i:nat{i < j / 2}). hs1'.[i] == hash2 hs1.[2 * i] hs1.[2 * i + 1]);
   assert (forall (i:nat{i < j / 2}). hs2'.[i] == hash2 hs2.[2 * i] hs2.[2 * i + 1]);
   assert (forall (i:nat{i < j}).     (Seq.slice hs1 0 j).[i] == (Seq.slice hs2 0 j).[i]);
@@ -239,7 +238,7 @@ val mt_next_rel_upd_odd:
                    (S.upd nmt i (hash2 (S.index mt (2 * i)) v))))
 let mt_next_rel_upd_odd n mt nmt i v = ()
 
-// fournet: just [root]? 
+// fournet: just [root]?
 val mt_get_root: #n:nat -> mt:merkle_tree n -> GTot hash
 let rec mt_get_root #n mt =
   if n = 0 then mt.[0]
@@ -247,7 +246,7 @@ let rec mt_get_root #n mt =
 
 val mt_get_root_step:
   #n:nat{n > 0} -> mt:merkle_tree n ->
-  Lemma (mt_get_root mt =
+  Lemma (mt_get_root mt ==
         hash2 (mt_get_root (mt_left mt)) (mt_get_root (mt_right mt)))
 let rec mt_get_root_step #n mt =
   if n = 1 then ()
@@ -265,7 +264,7 @@ val mt_get_path:
   #n:nat -> mt:merkle_tree n -> i:nat{i < pow2 n} -> GTot (merkle_path n)
 let rec mt_get_path #n t i =
   if n = 0 then Seq.empty
-  else Seq.cons 
+  else Seq.cons
     (if i % 2 = 0 then t.[i + 1] else t.[i - 1])
     (mt_get_path (mt_next_lv t) (i / 2))
 
@@ -274,14 +273,14 @@ val mt_verify_:
 let rec mt_verify_ #n p idx h =
   if n = 0 then h
   else mt_verify_ #(n-1) (Seq.tail p) (idx / 2)
-                  (if idx % 2 = 0 
+                  (if idx % 2 = 0
                   then hash2 h (Seq.head p)
                   else hash2 (Seq.head p) h)
 
 val mt_verify:
-  #n:nat -> p:merkle_path n -> idx:nat{idx < pow2 n} -> hash -> hash -> GTot bool
+  #n:nat -> p:merkle_path n -> idx:nat{idx < pow2 n} -> hash -> hash -> GTot prop
 let mt_verify #n p idx h rt =
-  rt = mt_verify_ p idx h
+  rt == mt_verify_ p idx h
 
 
 /// Correctness: the root of a tree is correctly recomputed from any of its paths
@@ -291,13 +290,13 @@ val hs_next_lv_get:
   Lemma ((hs_next_lv #n hs).[idx / 2] ==
         (if idx % 2 = 0
         then hash2 hs.[idx] hs.[idx + 1]
-        else hash2 hs.[idx - 1] hs.[idx])) 
+        else hash2 hs.[idx - 1] hs.[idx]))
 let rec hs_next_lv_get #n hs idx =
   if idx < 2 then ()
   else hs_next_lv_get #(n-1) (Seq.slice hs 2 (Seq.length hs)) (idx - 2)
 
 val mt_next_lv_get:
-  #n:nat{n>0} -> mt:merkle_tree n -> idx:nat{idx < pow2 n} -> 
+  #n:nat{n>0} -> mt:merkle_tree n -> idx:nat{idx < pow2 n} ->
   Lemma (
     (mt_next_lv mt).[idx / 2] ==
     ( if idx % 2 = 0
@@ -313,7 +312,7 @@ let rec mt_get_path_ok_ #n mt idx =
   if n = 0 then ()
   else begin
     assert (Seq.head (mt_get_path mt idx) == (if idx % 2 = 0 then mt.[idx + 1] else mt.[idx - 1]));
-    assert (Seq.equal (Seq.tail (mt_get_path mt idx)) 
+    assert (Seq.equal (Seq.tail (mt_get_path mt idx))
                     (mt_get_path (mt_next_lv mt) (idx / 2)));
     mt_get_path_ok_ (mt_next_lv mt) (idx / 2);
     mt_next_lv_get mt idx
@@ -333,8 +332,8 @@ let rec raw_hashes hs =
   if Seq.length hs = 0 then True
   else (HRaw? (Seq.head hs) /\ raw_hashes (Seq.tail hs))
 
-val raw_hashes_raws: 
-  hs:Seq.seq hash{raw_hashes hs} -> 
+val raw_hashes_raws:
+  hs:Seq.seq hash{raw_hashes hs} ->
   Tot (Seq.seq hash_raw) (decreases (Seq.length hs))
 let rec raw_hashes_raws hs =
   if Seq.length hs = 0 then Seq.empty
@@ -375,8 +374,8 @@ let rec pad_hashes_slice hs i j =
 
 /// Right-padded Merkle tree, a tree refinement
 
-let rpmt (n:nat) (i:nat{i <= pow2 n}) = 
-  mt:merkle_tree n { 
+let rpmt (n:nat) (i:nat{i <= pow2 n}) =
+  mt:merkle_tree n {
     raw_hashes (Seq.slice mt 0 i) /\
     pad_hashes (Seq.slice mt i (Seq.length mt)) }
 
@@ -384,47 +383,48 @@ val rpmt_raws: #n:nat -> #i:nat{i <= pow2 n} -> mt:rpmt n i -> Seq.seq hash_raw
 let rpmt_raws #n #i mt = raw_hashes_raws (Seq.slice mt 0 i)
 
 val rpmt_i_0:
-  #n:nat -> 
+  #n:nat ->
   mt:rpmt n 0 ->
   Lemma (Seq.equal mt (Seq.create (pow2 n) HPad))
 let rpmt_i_0 #n mt = ()
 
-val rpmt_left: 
-  #n:nat{n > 0} -> #i:nat{i <= pow2 n} -> rpmt n i -> 
+val rpmt_left:
+  #n:nat{n > 0} -> #i:nat{i <= pow2 n} -> rpmt n i ->
   rpmt (n-1) (if i <= pow2 (n-1) then i else pow2 (n-1))
-let rpmt_left #n #i mt = 
-  if i <= pow2 (n-1) 
+let rpmt_left #n #i mt =
+  if i <= pow2 (n-1)
   then pad_hashes_slice (Seq.slice mt i (Seq.length mt)) 0 (pow2 (n-1) - i)
-  else raw_hashes_slice (Seq.slice mt 0 i) 0 (pow2 (n-1)); 
+  else raw_hashes_slice (Seq.slice mt 0 i) 0 (pow2 (n-1));
   mt_left mt
-  
-#reset-options "--z3rlimit 40"
-val rpmt_right: 
-  #n:nat{n > 0} -> #i:nat{i <= pow2 n} -> rpmt n i -> 
-  rpmt (n-1) (if i <= pow2 (n-1) then 0 else i - pow2 (n-1))
-let rpmt_right #n #i mt = 
-  if i <= pow2 (n-1) 
-  then pad_hashes_slice (Seq.slice mt i (Seq.length mt)) (pow2 (n-1) - i) (pow2 n - i)
-  else raw_hashes_slice (Seq.slice mt 0 i) (pow2 (n-1)) i; 
-  mt_right mt 
 
-/// Two right-padded merkle trees collide when 
+#reset-options "--z3rlimit 40 --max_fuel 1 --max_ifuel 0"
+val rpmt_right:
+  #n:nat{n > 0} -> #i:nat{i <= pow2 n} -> rpmt n i ->
+  rpmt (n-1) (if i <= pow2 (n-1) then 0 else i - pow2 (n-1))
+let rpmt_right #n #i mt =
+  if i <= pow2 (n-1)
+  then pad_hashes_slice (Seq.slice mt i (Seq.length mt)) (pow2 (n-1) - i) (pow2 n - i)
+  else raw_hashes_slice (Seq.slice mt 0 i) (pow2 (n-1)) i;
+  mt_right mt
+
+/// Two right-padded merkle trees collide when
 /// 1) they have the same height (`n`) and number of raw hashes (`i`),
 /// 2) their contents differ, and
 /// 3) their roots are same.
 
 // fournet: we may want to work towards removing 1) using a hash prefix
-
-type mt_collide (n:nat) (i:nat{i <= pow2 n}) = | Collision: 
+noeq
+type mt_collide (n:nat) (i:nat{i <= pow2 n}) = | Collision:
   mt1:rpmt n i -> mt2:rpmt n i {
-    mt1 <> mt2 && 
-    mt_get_root mt1 = mt_get_root mt2 } -> mt_collide n i
+    mt1 =!= mt2 /\
+    mt_get_root mt1 == mt_get_root mt2 } -> mt_collide n i
 
+noeq
 type hash2_raw_collide = | Collision2:
-  lh1:hash_raw -> rh1:hash_raw -> 
-  lh2:hash_raw -> rh2:hash_raw { 
-    (lh1 <> lh2 \/ rh1 <> rh2) /\
-    hash2_raw lh1 rh1 = hash2_raw lh2 rh2 } -> hash2_raw_collide
+  lh1:hash_raw -> rh1:hash_raw ->
+  lh2:hash_raw -> rh2:hash_raw {
+    (lh1 =!= lh2 \/ rh1 =!= rh2) /\
+    hash2_raw lh1 rh1 == hash2_raw lh2 rh2 } -> hash2_raw_collide
 
 /// Auxiliary lemmas for the proof
 
@@ -438,21 +438,21 @@ val rpmt_pad_hashes_index_0:
   mt:rpmt n i ->
   Lemma (pad_hashes mt <==> HPad? mt.[0])
 let rec rpmt_pad_hashes_index_0 #n #i mt = ()
- 
+
 val mt_get_root_pad_index_0:
   #n:nat -> mt:merkle_tree n ->
-  Lemma (HPad? mt.[0] <==> HPad? (mt_get_root mt)) 
+  Lemma (HPad? mt.[0] <==> HPad? (mt_get_root mt))
 let rec mt_get_root_pad_index_0 #n (mt:merkle_tree n) =
   if n = 0 then ()
-  else 
-    let mt:merkle_tree (n-1) = mt_next_lv #n mt in 
+  else
+    let mt:merkle_tree (n-1) = mt_next_lv #n mt in
     mt_get_root_pad_index_0 #(n-1) mt
 #reset-options
 
 val rpmt_get_root_pad_hashes:
   #n:nat -> #i:nat{i <= pow2 n} -> mt:rpmt n i ->
   Lemma (pad_hashes mt <==> HPad? (mt_get_root mt))
-let rpmt_get_root_pad_hashes #n #i mt = 
+let rpmt_get_root_pad_hashes #n #i mt =
   rpmt_pad_hashes_index_0 mt;
   mt_get_root_pad_index_0 mt
 
@@ -475,14 +475,14 @@ val extract:
 let rec extract #n #i (Collision t1 t2) =
   assert(n = 0 ==> Seq.equal t1 t2); // excludes n = 0
   mt_left_right t1; mt_left_right t2;
-  mt_get_root_step t1; 
+  mt_get_root_step t1;
   mt_get_root_step t2;
   rpmt_get_root_pad t1;
   assert(i <> 0);
-  let l1 = rpmt_left t1 in 
-  let l2 = rpmt_left t2 in 
-  let r1 = rpmt_right t1 in 
-  let r2 = rpmt_right t2 in 
+  let l1 = rpmt_left t1 in
+  let l2 = rpmt_left t2 in
+  let r1 = rpmt_right t1 in
+  let r2 = rpmt_right t2 in
   if i <= pow2 (n-1)
   then (
     rpmt_get_root_pad r1; rpmt_get_root_pad r2;
@@ -495,9 +495,8 @@ let rec extract #n #i (Collision t1 t2) =
     let HRaw lh2 = mt_get_root l2 in
     let HRaw rh1 = mt_get_root r1 in
     let HRaw rh2 = mt_get_root r2 in
-    if lh1 <> lh2 || rh1 <> rh2 
-    then Collision2 lh1 rh1 lh2 rh2  
-    else if l1 = l2 
+    if StrongExcludedMiddle.strong_excluded_middle (lh1 =!= lh2) || StrongExcludedMiddle.strong_excluded_middle (rh1 =!= rh2)
+    then Collision2 lh1 rh1 lh2 rh2
+    else if StrongExcludedMiddle.strong_excluded_middle (l1 == l2)
       then extract (Collision r1 r2)
       else extract (Collision l1 l2))
-
