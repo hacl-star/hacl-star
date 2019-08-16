@@ -28,7 +28,7 @@ let rec xor_lemma (x: uint8) (v: bytes{S.length v <= max_size_t}) : Lemma
     xor_lemma x (S.sub #uint8 #l v 1 (l - 1)))
 
 #pop-options
-#push-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
+#push-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 70"
 
 let hmac a key data =
   let k = wrap a key in

@@ -567,7 +567,7 @@ let lemma_sha256_msg1_spec_t (src1 src2:quad32) (t:counter) (block:block_w) : Le
   reveal_opaque sha256_msg1_spec_def;
   ()
 
-#push-options "--z3rlimit 50"
+#push-options "--z3rlimit 70"
 let lemma_sha256_step2 (src1 src2:quad32) (t:counter) (block:block_w) : Lemma
   (requires 16 <= t /\ t < size_k_w(SHA2_256) - 3 /\
             src2.hi2 == ws_opaque block (t-2) /\
