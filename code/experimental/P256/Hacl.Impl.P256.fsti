@@ -194,9 +194,9 @@ val scalarMultiplicationWithoutNorm: p: point -> result: point ->
     modifies3 p result tempBuffer h0 h1 /\ 
     modifies (loc p |+| loc result |+| loc tempBuffer) h0 h1 /\
     (
-      let x3, y3, z3 = point_x_as_nat h1 result, point_y_as_nat h1 result, point_z_as_nat h1 result in 
-      let (xN, yN, zN) = scalar_multiplication (as_seq h0 scalar) (point_prime_to_coordinates (as_seq h0 p)) in 
-      x3 == xN /\ y3 == yN /\ z3 == zN 
+      let p1 = fromDomainPoint(point_prime_to_coordinates (as_seq h1 result)) in 
+      let rN, _ = montgomery_ladder_spec (as_seq h0 scalar) ((0, 0, 0),  point_prime_to_coordinates (as_seq h0 p)) in 
+      rN == p1
   )
 ) 
 
