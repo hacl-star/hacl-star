@@ -282,12 +282,20 @@ let multPower a b result =
   push_frame();
     let tempB1 = create (size 4) (u64 0) in 
     let buffFromDB = create (size 4) (u64 0) in 
+	let h0 = ST.get() in 
       fromDomainImpl a tempB1;
       fromDomainImpl b buffFromDB;
       fromDomainImpl buffFromDB buffFromDB;
-   
+	let h1 = ST.get() in 
+	assert(as_nat h1 tempB1 == fromDomain_ (as_nat h0 a));
+	assert(as_nat h1 buffFromDB == fromDomain_ (fromDomain_ (as_nat h0 b)));
       montgomery_ladder_exponent tempB1;
+	let h2 = ST.get() in 
+	assert(let r0D = exponent_spec (fromDomain_ (fromDomain_ (as_nat h0 a))) in fromDomain_ (as_nat h2 tempB1) == r0D);
       montgomery_multiplication_ecdsa_module tempB1 buffFromDB result;
+	let h3 = ST.get() in 
+	assert(as_nat h3 result = toDomain_ (exponent_spec (fromDomain_ (fromDomain_ (as_nat h0 a))) * fromDomain_ (fromDomain_ (fromDomain_ (as_nat h0 b))) % prime_p256_order));
+	admit();
   pop_frame()
 
 
