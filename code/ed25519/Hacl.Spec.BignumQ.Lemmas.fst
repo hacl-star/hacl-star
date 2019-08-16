@@ -129,6 +129,10 @@ val lemma_div248_aux: x:qelem_wide5 ->
     wide_as_nat5 x / pow2 248 ==
       v x4 / pow2 24 + v x5 * pow2 32 + v x6 * pow2 88 + v x7 * pow2 144 + v x8 * pow2 200 + v x9 * pow2 256))
 
+open FStar.Tactics.CanonCommSemiring
+
+#push-options "--z3cliopt smt.arith.nl=false"
+
 let lemma_div248_aux x =
   let (x0, x1, x2, x3, x4, x5, x6, x7, x8, x9) = x in
   assert_norm (pow2 248 == pow2 224 * pow2 24);
@@ -150,6 +154,7 @@ let lemma_div248_aux x =
     v x4 / pow2 24 + v x5 * pow2 32 + v x6 * pow2 88 + v x7 * pow2 144 + v x8 * pow2 200 + v x9 * pow2 256;
   }
 
+#pop-options
 
 val lemma_div248_x5: x5:uint64 ->
   Lemma ( pow2 32 * (v x5 % pow2 24) + v x5 / pow2 24 * pow2 56 == v x5 * pow2 32)
@@ -885,6 +890,8 @@ let lemma_barrett_reduce' x =
 
   let m = pow2 512 / S.q in
   let l = S.q in
+  assert_norm (2 * l < pow2 264);
+
   assert_norm (pow2 264 = 0x1000000000000000000000000000000000000000000000000000000000000000000);
   let q:nat = ((x / pow2 248) * m) / pow2 264 in
   let a' = (x % pow2 264) - (q * l) % pow2 264 in
@@ -919,6 +926,8 @@ let lemma_barrett_reduce' x =
   let qml = (((((x / pow2 248) * m) / pow2 264) * l) % pow2 264) in
   let u = if r < qml then pow2 264 + r - qml else r - qml in
   let z = if u < l then u else u - l in
+
   assert (u < 2 * l);
-  assert (u = x - q * l);
+  Math.Lemmas.modulo_lemma u (pow2 264);
+  assert (u == x - q * l);
   lemma_barrett_reduce'' u z x q
