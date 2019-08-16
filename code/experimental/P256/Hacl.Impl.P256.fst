@@ -683,16 +683,75 @@ let uploadOneImpl f =
   upd f (size 3) (u64 0)
 
 
+let isPointAtInfinityPrivate p =  
+  let z0 = index p (size 8) in 
+  let z1 = index p (size 9) in 
+  let z2 = index p (size 10) in 
+  let z3 = index p (size 11) in 
+  let z0_zero = eq_mask z0 (u64 0) in 
+  let z1_zero = eq_mask z1 (u64 0) in 
+  let z2_zero = eq_mask z2 (u64 0) in 
+  let z3_zero = eq_mask z3 (u64 0) in 
+     eq_mask_lemma z0 (u64 0);
+     eq_mask_lemma z1 (u64 0);
+     eq_mask_lemma z2 (u64 0);
+     eq_mask_lemma z3 (u64 0);
+  logand(logand z0_zero z1_zero) (logand z2_zero z3_zero)
 
-#reset-options "--z3refresh --z3rlimit 500" 
-let norm p resultPoint tempBuffer = 
-  let xf = sub p (size 0) (size 4) in
-  let yf = sub p (size 4) (size 4) in 
-  let zf = sub p (size 8) (size 4) in 
 
+inline_for_extraction noextract
+val normalisation_update: z2x: felem -> z3y: felem -> resultPoint: point -> Stack unit 
+  (requires fun h -> live h z2x /\ live h z3y /\ live h resultPoint /\ 
+    as_nat h z2x < prime256 /\ as_nat h z3y < prime /\
+    disjoint z2x z3y /\ disjoint z2x resultPoint /\ disjoint z3y resultPoint)
+  (ensures fun h0 _ h1 -> modifies (loc resultPoint) h0 h1 /\
+    (
+      let x0 = as_nat h0 (gsub resultPoint (size 0) (size 4)) in 
+      let y0 = as_nat h0 (gsub resultPoint (size 4) (size 4)) in 
+      let z0 = as_nat h0 (gsub resultPoint (size 8) (size 4)) in 
+
+      let x1 = as_nat h1 (gsub resultPoint (size 0) (size 4)) in 
+      let y1 = as_nat h1 (gsub resultPoint (size 4) (size 4)) in 
+      let z1 = as_nat h1 (gsub resultPoint (size 8) (size 4)) in 
+
+      x1 == fromDomain_(as_nat h0 z2x) /\ y1 == fromDomain_(as_nat h0 z3y)  /\ 
+      (
+	if Hacl.Spec.P256.isPointAtInfinity (x0, y0, z0) then  z1 == 0 else z1 == 1
+      ))
+  )
+
+#reset-options "--z3rlimit 400"
+
+let normalisation_update z2x z3y resultPoint = 
+  push_frame(); 
+    let zeroBuffer = create (size 4) (u64 0) in 
+    
   let resultX = sub resultPoint (size 0) (size 4) in 
   let resultY = sub resultPoint (size 4) (size 4) in 
   let resultZ = sub resultPoint (size 8) (size 4) in 
+    let h0 = ST.get() in 
+  let bit = isPointAtInfinityPrivate resultPoint in
+  fromDomain z2x resultX;
+  fromDomain z3y resultY;
+  uploadOneImpl resultZ;
+    let h1 = ST.get() in 
+  copy_conditional resultZ zeroBuffer bit;
+    let h2 = ST.get() in 
+  assert(
+      let x0 = as_nat h0 (gsub resultPoint (size 0) (size 4)) in 
+      let y0 = as_nat h0 (gsub resultPoint (size 4) (size 4)) in 
+      let z0 = as_nat h0 (gsub resultPoint (size 8) (size 4)) in 
+      let rr = Hacl.Spec.P256.isPointAtInfinity (x0, y0, z0) in 
+      if rr = false then as_nat h2 resultZ == 1 else as_nat h2 resultZ == 0);
+  pop_frame()
+  
+ 
+#reset-options "--z3refresh --z3rlimit 500" 
+let norm p resultPoint tempBuffer = 
+  let xf = sub p (size 0) (size 4) in 
+  let yf = sub p (size 4) (size 4) in 
+  let zf = sub p (size 8) (size 4) in 
+
   
   let z2f = sub tempBuffer (size 4) (size 4) in 
   let z3f = sub tempBuffer (size 8) (size 4) in
@@ -708,9 +767,8 @@ let norm p resultPoint tempBuffer =
   Hacl.Spec.P256.MontgomeryMultiplication.montgomery_multiplication_buffer xf z2f z2f;
   Hacl.Spec.P256.MontgomeryMultiplication.montgomery_multiplication_buffer yf z3f z3f;
 
-  fromDomain z2f resultX;
-  fromDomain z3f resultY;
-  uploadOneImpl resultZ;
+  normalisation_update z2f z3f resultPoint;
+
     let h3 = ST.get() in 
 
     lemmaEraseToDomainFromDomain (fromDomain_ (as_nat h0 zf));
@@ -1104,30 +1162,6 @@ val lemma_modifies3_ : h0: mem -> h1: mem -> p: point -> result: point ->  tempB
 
 let lemma_modifies3_ h0 h1 p result tempBuffer = ()
 
-val lemma_log_not: a: uint64 -> Lemma
-  (requires v a = 0 \/ v a = maxint U64)
-  (ensures (if v a = 0 then v (lognot a) == maxint U64 else v (lognot a) == 0))
-
-let lemma_log_not a = admit()
-
-let isPointAtInfinityPrivate p =  
-  let z0 = index p (size 8) in 
-  let z1 = index p (size 9) in 
-  let z2 = index p (size 10) in 
-  let z3 = index p (size 11) in 
-  let z0_zero = eq_mask z0 (u64 0) in 
-  let z1_zero = eq_mask z1 (u64 0) in 
-  let z2_zero = eq_mask z2 (u64 0) in 
-  let z3_zero = eq_mask z3 (u64 0) in 
-     eq_mask_lemma z0 (u64 0);
-     eq_mask_lemma z1 (u64 0);
-     eq_mask_lemma z2 (u64 0);
-     eq_mask_lemma z3 (u64 0);
-  let r = lognot(logand(logand z0_zero z1_zero) (logand z2_zero z3_zero)) in 
-    lemma_log_not (logand(logand (eq_mask z0 (u64 0)) (eq_mask z1 (u64 0))) (logand (eq_mask z2 (u64 0)) (eq_mask z3 (u64 0))));
-    r
-  
-
 val scalarMultiplicationL: p: point -> result: point -> 
   scalar: lbuffer uint8 (size 32) -> 
   tempBuffer: lbuffer uint64 (size 100) ->
@@ -1168,13 +1202,13 @@ let scalarMultiplicationL p result scalar tempBuffer  =
     lemma_pif_to_domain h2 q;
     assert(modifies3 p result tempBuffer h2 h3); 
   
-  let bit = isPointAtInfinityPrivate q in 
-  let zeroTB = sub tempBuffer (size 12) (size 4) in 
+  (*let bit = isPointAtInfinityPrivate q in 
+  let zeroTB = sub tempBuffer (size 12) (size 4) in  *)
   
   norm q result buff; 
   
-  let q_z = sub result (size 8) (size 4) in 
-  copy_conditional q_z zeroTB bit;
+  (*let q_z = sub result (size 8) (size 4) in 
+  copy_conditional q_z zeroTB bit; *)
     let h4 = ST.get() in 
       lemma_coord h3 q;
     let h4 = ST.get() in 
@@ -1227,13 +1261,13 @@ let scalarMultiplicationI p result scalar tempBuffer  =
     lemma_pif_to_domain h2 q;
     assert(modifies3 p result tempBuffer h2 h3); 
   
-  let bit = isPointAtInfinityPrivate q in 
-  let zeroTB = sub tempBuffer (size 12) (size 4) in 
+  (*let bit = isPointAtInfinityPrivate q in 
+  let zeroTB = sub tempBuffer (size 12) (size 4) in  *)
   
   norm q result buff; 
   
-  let q_z = sub result (size 8) (size 4) in 
-  copy_conditional q_z zeroTB bit;
+  (*let q_z = sub result (size 8) (size 4) in 
+  copy_conditional q_z zeroTB bit; *)
     let h4 = ST.get() in 
       lemma_coord h3 q;
     let h4 = ST.get() in 

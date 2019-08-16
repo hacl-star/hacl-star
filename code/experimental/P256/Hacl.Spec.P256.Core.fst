@@ -519,7 +519,7 @@ let montgomery_multiplication_one_round_proof t result co =
     lemma_div_lt (wide_as_nat4 t3) 513 64;
     mult_one_round (wide_as_nat4 t) co
 
-inline_for_extraction noextract
+
 val montgomery_multiplication_one_round: t: felem8{wide_as_nat4 t < pow2 449} -> 
   prime256U: felem4 {as_nat4 prime256U == prime256} -> 
 Tot (result: felem8 { wide_as_nat4 result = (wide_as_nat4 t + (wide_as_nat4 t % pow2 64) * prime256) / pow2 64 /\wide_as_nat4 result < pow2 449})

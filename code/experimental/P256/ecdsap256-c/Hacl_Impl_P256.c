@@ -202,6 +202,301 @@ Hacl_Spec_P256_Core_reduction_prime_2prime_with_carry(
   }
 }
 
+typedef struct
+K___K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t_s
+{
+  K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t fst;
+  K___uint64_t_uint64_t_uint64_t_uint64_t snd;
+}
+K___K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t;
+
+static K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t
+Hacl_Spec_P256_Core_montgomery_multiplication_one_round(
+  K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t uu____3146,
+  K___uint64_t_uint64_t_uint64_t_uint64_t uu____3147
+)
+{
+  K___K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t
+  scrut0;
+  uint64_t prim3;
+  uint64_t prim2;
+  uint64_t prim1;
+  uint64_t prim0;
+  uint64_t a7;
+  uint64_t a6;
+  uint64_t a5;
+  uint64_t a4;
+  uint64_t a3;
+  uint64_t a2;
+  uint64_t a1;
+  uint64_t a0;
+  uint64_t t1;
+  uint128_t res0;
+  uint64_t l0;
+  uint64_t h0;
+  uint128_t res1;
+  uint64_t l1;
+  uint64_t h1;
+  uint128_t res2;
+  uint64_t l2;
+  uint64_t h2;
+  uint128_t res;
+  uint64_t l3;
+  uint64_t h3;
+  uint64_t o00;
+  K___uint64_t_uint64_t scrut1;
+  uint64_t o10;
+  uint64_t c00;
+  K___uint64_t_uint64_t scrut2;
+  uint64_t o20;
+  uint64_t c10;
+  K___uint64_t_uint64_t scrut3;
+  uint64_t o30;
+  uint64_t c20;
+  uint64_t c30;
+  scrut0.fst = uu____3146;
+  scrut0.snd = uu____3147;
+  prim3 = scrut0.snd.f3;
+  prim2 = scrut0.snd.thd;
+  prim1 = scrut0.snd.snd;
+  prim0 = scrut0.snd.fst;
+  a7 = scrut0.fst.f7;
+  a6 = scrut0.fst.f6;
+  a5 = scrut0.fst.f5;
+  a4 = scrut0.fst.f4;
+  a3 = scrut0.fst.f3;
+  a2 = scrut0.fst.thd;
+  a1 = scrut0.fst.snd;
+  a0 = scrut0.fst.fst;
+  t1 = a0;
+  res0 = (uint128_t)prim0 * t1;
+  l0 = (uint64_t)res0;
+  h0 = (uint64_t)(res0 >> (uint32_t)64U);
+  res1 = (uint128_t)prim1 * t1;
+  l1 = (uint64_t)res1;
+  h1 = (uint64_t)(res1 >> (uint32_t)64U);
+  res2 = (uint128_t)prim2 * t1;
+  l2 = (uint64_t)res2;
+  h2 = (uint64_t)(res2 >> (uint32_t)64U);
+  res = (uint128_t)prim3 * t1;
+  l3 = (uint64_t)res;
+  h3 = (uint64_t)(res >> (uint32_t)64U);
+  o00 = l0;
+  scrut1 = Hacl_Spec_P256_Basic_addcarry(l1, h0, (uint64_t)0U);
+  o10 = scrut1.fst;
+  c00 = scrut1.snd;
+  scrut2 = Hacl_Spec_P256_Basic_addcarry(l2, h1, c00);
+  o20 = scrut2.fst;
+  c10 = scrut2.snd;
+  scrut3 = Hacl_Spec_P256_Basic_addcarry(l3, h2, c10);
+  o30 = scrut3.fst;
+  c20 = scrut3.snd;
+  c30 = h3 + c20;
+  {
+    K___uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t lit0;
+    K___uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t scrut4;
+    uint64_t f3;
+    uint64_t f2;
+    uint64_t f1;
+    uint64_t f0;
+    uint64_t c;
+    lit0.fst = c30;
+    lit0.snd.fst = o00;
+    lit0.snd.snd = o10;
+    lit0.snd.thd = o20;
+    lit0.snd.f3 = o30;
+    scrut4 = lit0;
+    f3 = scrut4.snd.f3;
+    f2 = scrut4.snd.thd;
+    f1 = scrut4.snd.snd;
+    f0 = scrut4.snd.fst;
+    c = scrut4.fst;
+    {
+      K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t lit1;
+      K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t scrut5;
+      uint64_t t2_0;
+      uint64_t t2_1;
+      uint64_t t2_2;
+      uint64_t t2_3;
+      uint64_t t2_4;
+      uint64_t t2_5;
+      uint64_t t2_6;
+      uint64_t t2_7;
+      K___uint64_t_uint64_t scrut6;
+      uint64_t o01;
+      uint64_t c0;
+      K___uint64_t_uint64_t scrut7;
+      uint64_t o11;
+      uint64_t c1;
+      K___uint64_t_uint64_t scrut8;
+      uint64_t o21;
+      uint64_t c2;
+      K___uint64_t_uint64_t scrut9;
+      uint64_t o31;
+      uint64_t c31;
+      lit1.fst = f0;
+      lit1.snd = f1;
+      lit1.thd = f2;
+      lit1.f3 = f3;
+      lit1.f4 = c;
+      lit1.f5 = (uint64_t)0U;
+      lit1.f6 = (uint64_t)0U;
+      lit1.f7 = (uint64_t)0U;
+      scrut5 = lit1;
+      t2_0 = scrut5.fst;
+      t2_1 = scrut5.snd;
+      t2_2 = scrut5.thd;
+      t2_3 = scrut5.f3;
+      t2_4 = scrut5.f4;
+      t2_5 = scrut5.f5;
+      t2_6 = scrut5.f6;
+      t2_7 = scrut5.f7;
+      scrut6 = Hacl_Spec_P256_Basic_addcarry(a0, t2_0, (uint64_t)0U);
+      o01 = scrut6.fst;
+      c0 = scrut6.snd;
+      scrut7 = Hacl_Spec_P256_Basic_addcarry(a1, t2_1, c0);
+      o11 = scrut7.fst;
+      c1 = scrut7.snd;
+      scrut8 = Hacl_Spec_P256_Basic_addcarry(a2, t2_2, c1);
+      o21 = scrut8.fst;
+      c2 = scrut8.snd;
+      scrut9 = Hacl_Spec_P256_Basic_addcarry(a3, t2_3, c2);
+      o31 = scrut9.fst;
+      c31 = scrut9.snd;
+      {
+        K___uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t lit2;
+        K___uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t scrut10;
+        uint64_t o3;
+        uint64_t o2;
+        uint64_t o1;
+        uint64_t o0;
+        uint64_t c3;
+        K___uint64_t_uint64_t scrut11;
+        uint64_t o4;
+        uint64_t c4;
+        K___uint64_t_uint64_t scrut12;
+        uint64_t o5;
+        uint64_t c5;
+        K___uint64_t_uint64_t scrut13;
+        uint64_t o6;
+        uint64_t c6;
+        K___uint64_t_uint64_t scrut14;
+        uint64_t o7;
+        uint64_t c7;
+        lit2.fst = c31;
+        lit2.snd.fst = o01;
+        lit2.snd.snd = o11;
+        lit2.snd.thd = o21;
+        lit2.snd.f3 = o31;
+        scrut10 = lit2;
+        o3 = scrut10.snd.f3;
+        o2 = scrut10.snd.thd;
+        o1 = scrut10.snd.snd;
+        o0 = scrut10.snd.fst;
+        c3 = scrut10.fst;
+        scrut11 = Hacl_Spec_P256_Basic_addcarry(a4, t2_4, c3);
+        o4 = scrut11.fst;
+        c4 = scrut11.snd;
+        scrut12 = Hacl_Spec_P256_Basic_addcarry(a5, t2_5, c4);
+        o5 = scrut12.fst;
+        c5 = scrut12.snd;
+        scrut13 = Hacl_Spec_P256_Basic_addcarry(a6, t2_6, c5);
+        o6 = scrut13.fst;
+        c6 = scrut13.snd;
+        scrut14 = Hacl_Spec_P256_Basic_addcarry(a7, t2_7, c6);
+        o7 = scrut14.fst;
+        c7 = scrut14.snd;
+        {
+          K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t lit3;
+          K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t
+          scrut15;
+          uint64_t r0;
+          uint64_t r1;
+          uint64_t r2;
+          uint64_t r3;
+          uint64_t r4;
+          uint64_t r5;
+          uint64_t r6;
+          uint64_t r7;
+          lit3.fst = c7;
+          lit3.snd = o0;
+          lit3.thd = o1;
+          lit3.f3 = o2;
+          lit3.f4 = o3;
+          lit3.f5 = o4;
+          lit3.f6 = o5;
+          lit3.f7 = o6;
+          lit3.f8 = o7;
+          scrut15 = lit3;
+          r0 = scrut15.snd;
+          r1 = scrut15.thd;
+          r2 = scrut15.f3;
+          r3 = scrut15.f4;
+          r4 = scrut15.f5;
+          r5 = scrut15.f6;
+          r6 = scrut15.f7;
+          r7 = scrut15.f8;
+          {
+            K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t lit4;
+            K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t scrut;
+            uint64_t t3_1;
+            uint64_t t3_2;
+            uint64_t t3_3;
+            uint64_t t3_4;
+            uint64_t t3_5;
+            uint64_t t3_6;
+            uint64_t t3_7;
+            uint64_t r_0;
+            uint64_t r_1;
+            uint64_t r_2;
+            uint64_t r_3;
+            uint64_t r_4;
+            uint64_t r_5;
+            uint64_t r_6;
+            uint64_t r_7;
+            lit4.fst = r0;
+            lit4.snd = r1;
+            lit4.thd = r2;
+            lit4.f3 = r3;
+            lit4.f4 = r4;
+            lit4.f5 = r5;
+            lit4.f6 = r6;
+            lit4.f7 = r7;
+            scrut = lit4;
+            t3_1 = scrut.snd;
+            t3_2 = scrut.thd;
+            t3_3 = scrut.f3;
+            t3_4 = scrut.f4;
+            t3_5 = scrut.f5;
+            t3_6 = scrut.f6;
+            t3_7 = scrut.f7;
+            r_0 = t3_1;
+            r_1 = t3_2;
+            r_2 = t3_3;
+            r_3 = t3_4;
+            r_4 = t3_5;
+            r_5 = t3_6;
+            r_6 = t3_7;
+            r_7 = (uint64_t)0U;
+            {
+              K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t lit;
+              lit.fst = r_0;
+              lit.snd = r_1;
+              lit.thd = r_2;
+              lit.f3 = r_3;
+              lit.f4 = r_4;
+              lit.f5 = r_5;
+              lit.f6 = r_6;
+              lit.f7 = r_7;
+              return lit;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
 static void
 Hacl_Spec_P256_MontgomeryMultiplication_montgomery_multiplication_buffer(
   uint64_t *a,
@@ -646,17 +941,17 @@ Hacl_Spec_P256_MontgomeryMultiplication_montgomery_multiplication_buffer(
                       uint64_t t_7;
                       uint64_t t1;
                       uint128_t res16;
-                      uint64_t l04;
-                      uint64_t h014;
+                      uint64_t l0;
+                      uint64_t h01;
                       uint128_t res17;
-                      uint64_t l14;
-                      uint64_t h14;
+                      uint64_t l1;
+                      uint64_t h1;
                       uint128_t res18;
-                      uint64_t l24;
-                      uint64_t h24;
-                      uint128_t res19;
-                      uint64_t l34;
-                      uint64_t h34;
+                      uint64_t l2;
+                      uint64_t h2;
+                      uint128_t res;
+                      uint64_t l3;
+                      uint64_t h3;
                       uint64_t o011;
                       K___uint64_t_uint64_t scrut32;
                       uint64_t o111;
@@ -687,47 +982,47 @@ Hacl_Spec_P256_MontgomeryMultiplication_montgomery_multiplication_buffer(
                       t_7 = scrut31.f7;
                       t1 = t_0;
                       res16 = (uint128_t)prim0 * t1;
-                      l04 = (uint64_t)res16;
-                      h014 = (uint64_t)(res16 >> (uint32_t)64U);
+                      l0 = (uint64_t)res16;
+                      h01 = (uint64_t)(res16 >> (uint32_t)64U);
                       res17 = (uint128_t)prim1 * t1;
-                      l14 = (uint64_t)res17;
-                      h14 = (uint64_t)(res17 >> (uint32_t)64U);
+                      l1 = (uint64_t)res17;
+                      h1 = (uint64_t)(res17 >> (uint32_t)64U);
                       res18 = (uint128_t)prim2 * t1;
-                      l24 = (uint64_t)res18;
-                      h24 = (uint64_t)(res18 >> (uint32_t)64U);
-                      res19 = (uint128_t)prim3 * t1;
-                      l34 = (uint64_t)res19;
-                      h34 = (uint64_t)(res19 >> (uint32_t)64U);
-                      o011 = l04;
-                      scrut32 = Hacl_Spec_P256_Basic_addcarry(l14, h014, (uint64_t)0U);
+                      l2 = (uint64_t)res18;
+                      h2 = (uint64_t)(res18 >> (uint32_t)64U);
+                      res = (uint128_t)prim3 * t1;
+                      l3 = (uint64_t)res;
+                      h3 = (uint64_t)(res >> (uint32_t)64U);
+                      o011 = l0;
+                      scrut32 = Hacl_Spec_P256_Basic_addcarry(l1, h01, (uint64_t)0U);
                       o111 = scrut32.fst;
                       c03 = scrut32.snd;
-                      scrut33 = Hacl_Spec_P256_Basic_addcarry(l24, h14, c03);
+                      scrut33 = Hacl_Spec_P256_Basic_addcarry(l2, h1, c03);
                       o211 = scrut33.fst;
                       c16 = scrut33.snd;
-                      scrut34 = Hacl_Spec_P256_Basic_addcarry(l34, h24, c16);
+                      scrut34 = Hacl_Spec_P256_Basic_addcarry(l3, h2, c16);
                       o311 = scrut34.fst;
                       c27 = scrut34.snd;
-                      c38 = h34 + c27;
+                      c38 = h3 + c27;
                       {
                         K___uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t lit8;
                         K___uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t scrut35;
-                        uint64_t f34;
-                        uint64_t f20;
-                        uint64_t f10;
-                        uint64_t f00;
-                        uint64_t c17;
+                        uint64_t f3;
+                        uint64_t f2;
+                        uint64_t f1;
+                        uint64_t f0;
+                        uint64_t c;
                         lit8.fst = c38;
                         lit8.snd.fst = o011;
                         lit8.snd.snd = o111;
                         lit8.snd.thd = o211;
                         lit8.snd.f3 = o311;
                         scrut35 = lit8;
-                        f34 = scrut35.snd.f3;
-                        f20 = scrut35.snd.thd;
-                        f10 = scrut35.snd.snd;
-                        f00 = scrut35.snd.fst;
-                        c17 = scrut35.fst;
+                        f3 = scrut35.snd.f3;
+                        f2 = scrut35.snd.thd;
+                        f1 = scrut35.snd.snd;
+                        f0 = scrut35.snd.fst;
+                        c = scrut35.fst;
                         {
                           K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t
                           lit9;
@@ -743,21 +1038,21 @@ Hacl_Spec_P256_MontgomeryMultiplication_montgomery_multiplication_buffer(
                           uint64_t t2_7;
                           K___uint64_t_uint64_t scrut37;
                           uint64_t o012;
-                          uint64_t c04;
+                          uint64_t c0;
                           K___uint64_t_uint64_t scrut38;
                           uint64_t o112;
-                          uint64_t c18;
+                          uint64_t c1;
                           K___uint64_t_uint64_t scrut39;
                           uint64_t o212;
-                          uint64_t c28;
+                          uint64_t c2;
                           K___uint64_t_uint64_t scrut40;
                           uint64_t o312;
                           uint64_t c39;
-                          lit9.fst = f00;
-                          lit9.snd = f10;
-                          lit9.thd = f20;
-                          lit9.f3 = f34;
-                          lit9.f4 = c17;
+                          lit9.fst = f0;
+                          lit9.snd = f1;
+                          lit9.thd = f2;
+                          lit9.f3 = f3;
+                          lit9.f4 = c;
                           lit9.f5 = (uint64_t)0U;
                           lit9.f6 = (uint64_t)0U;
                           lit9.f7 = (uint64_t)0U;
@@ -772,59 +1067,59 @@ Hacl_Spec_P256_MontgomeryMultiplication_montgomery_multiplication_buffer(
                           t2_7 = scrut36.f7;
                           scrut37 = Hacl_Spec_P256_Basic_addcarry(t_0, t2_0, (uint64_t)0U);
                           o012 = scrut37.fst;
-                          c04 = scrut37.snd;
-                          scrut38 = Hacl_Spec_P256_Basic_addcarry(t_1, t2_1, c04);
+                          c0 = scrut37.snd;
+                          scrut38 = Hacl_Spec_P256_Basic_addcarry(t_1, t2_1, c0);
                           o112 = scrut38.fst;
-                          c18 = scrut38.snd;
-                          scrut39 = Hacl_Spec_P256_Basic_addcarry(t_2, t2_2, c18);
+                          c1 = scrut38.snd;
+                          scrut39 = Hacl_Spec_P256_Basic_addcarry(t_2, t2_2, c1);
                           o212 = scrut39.fst;
-                          c28 = scrut39.snd;
-                          scrut40 = Hacl_Spec_P256_Basic_addcarry(t_3, t2_3, c28);
+                          c2 = scrut39.snd;
+                          scrut40 = Hacl_Spec_P256_Basic_addcarry(t_3, t2_3, c2);
                           o312 = scrut40.fst;
                           c39 = scrut40.snd;
                           {
                             K___uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t lit10;
                             K___uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t scrut41;
-                            uint64_t o313;
-                            uint64_t o213;
-                            uint64_t o113;
-                            uint64_t o013;
-                            uint64_t c310;
+                            uint64_t o3;
+                            uint64_t o2;
+                            uint64_t o1;
+                            uint64_t o0;
+                            uint64_t c3;
                             K___uint64_t_uint64_t scrut42;
-                            uint64_t o40;
-                            uint64_t c43;
+                            uint64_t o4;
+                            uint64_t c4;
                             K___uint64_t_uint64_t scrut43;
-                            uint64_t o50;
-                            uint64_t c50;
+                            uint64_t o5;
+                            uint64_t c5;
                             K___uint64_t_uint64_t scrut44;
-                            uint64_t o60;
-                            uint64_t c60;
+                            uint64_t o6;
+                            uint64_t c6;
                             K___uint64_t_uint64_t scrut45;
-                            uint64_t o70;
-                            uint64_t c70;
+                            uint64_t o7;
+                            uint64_t c7;
                             lit10.fst = c39;
                             lit10.snd.fst = o012;
                             lit10.snd.snd = o112;
                             lit10.snd.thd = o212;
                             lit10.snd.f3 = o312;
                             scrut41 = lit10;
-                            o313 = scrut41.snd.f3;
-                            o213 = scrut41.snd.thd;
-                            o113 = scrut41.snd.snd;
-                            o013 = scrut41.snd.fst;
-                            c310 = scrut41.fst;
-                            scrut42 = Hacl_Spec_P256_Basic_addcarry(t_4, t2_4, c310);
-                            o40 = scrut42.fst;
-                            c43 = scrut42.snd;
-                            scrut43 = Hacl_Spec_P256_Basic_addcarry(t_5, t2_5, c43);
-                            o50 = scrut43.fst;
-                            c50 = scrut43.snd;
-                            scrut44 = Hacl_Spec_P256_Basic_addcarry(t_6, t2_6, c50);
-                            o60 = scrut44.fst;
-                            c60 = scrut44.snd;
-                            scrut45 = Hacl_Spec_P256_Basic_addcarry(t_7, t2_7, c60);
-                            o70 = scrut45.fst;
-                            c70 = scrut45.snd;
+                            o3 = scrut41.snd.f3;
+                            o2 = scrut41.snd.thd;
+                            o1 = scrut41.snd.snd;
+                            o0 = scrut41.snd.fst;
+                            c3 = scrut41.fst;
+                            scrut42 = Hacl_Spec_P256_Basic_addcarry(t_4, t2_4, c3);
+                            o4 = scrut42.fst;
+                            c4 = scrut42.snd;
+                            scrut43 = Hacl_Spec_P256_Basic_addcarry(t_5, t2_5, c4);
+                            o5 = scrut43.fst;
+                            c5 = scrut43.snd;
+                            scrut44 = Hacl_Spec_P256_Basic_addcarry(t_6, t2_6, c5);
+                            o6 = scrut44.fst;
+                            c6 = scrut44.snd;
+                            scrut45 = Hacl_Spec_P256_Basic_addcarry(t_7, t2_7, c6);
+                            o7 = scrut45.fst;
+                            c7 = scrut45.snd;
                             {
                               K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t
                               lit11;
@@ -834,28 +1129,28 @@ Hacl_Spec_P256_MontgomeryMultiplication_montgomery_multiplication_buffer(
                               uint64_t r10;
                               uint64_t r20;
                               uint64_t r30;
-                              uint64_t r40;
-                              uint64_t r50;
-                              uint64_t r60;
-                              uint64_t r70;
-                              lit11.fst = c70;
-                              lit11.snd = o013;
-                              lit11.thd = o113;
-                              lit11.f3 = o213;
-                              lit11.f4 = o313;
-                              lit11.f5 = o40;
-                              lit11.f6 = o50;
-                              lit11.f7 = o60;
-                              lit11.f8 = o70;
+                              uint64_t r4;
+                              uint64_t r5;
+                              uint64_t r6;
+                              uint64_t r7;
+                              lit11.fst = c7;
+                              lit11.snd = o0;
+                              lit11.thd = o1;
+                              lit11.f3 = o2;
+                              lit11.f4 = o3;
+                              lit11.f5 = o4;
+                              lit11.f6 = o5;
+                              lit11.f7 = o6;
+                              lit11.f8 = o7;
                               scrut46 = lit11;
                               r00 = scrut46.snd;
                               r10 = scrut46.thd;
                               r20 = scrut46.f3;
                               r30 = scrut46.f4;
-                              r40 = scrut46.f5;
-                              r50 = scrut46.f6;
-                              r60 = scrut46.f7;
-                              r70 = scrut46.f8;
+                              r4 = scrut46.f5;
+                              r5 = scrut46.f6;
+                              r6 = scrut46.f7;
+                              r7 = scrut46.f8;
                               {
                                 K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t
                                 lit12;
@@ -876,38 +1171,14 @@ Hacl_Spec_P256_MontgomeryMultiplication_montgomery_multiplication_buffer(
                                 uint64_t st5;
                                 uint64_t st6;
                                 uint64_t st7;
-                                uint64_t t110;
-                                uint128_t res20;
-                                uint64_t l05;
-                                uint64_t h015;
-                                uint128_t res21;
-                                uint64_t l15;
-                                uint64_t h15;
-                                uint128_t res22;
-                                uint64_t l25;
-                                uint64_t h25;
-                                uint128_t res23;
-                                uint64_t l35;
-                                uint64_t h35;
-                                uint64_t o014;
-                                K___uint64_t_uint64_t scrut48;
-                                uint64_t o114;
-                                uint64_t c05;
-                                K___uint64_t_uint64_t scrut49;
-                                uint64_t o214;
-                                uint64_t c19;
-                                K___uint64_t_uint64_t scrut50;
-                                uint64_t o314;
-                                uint64_t c29;
-                                uint64_t c311;
                                 lit12.fst = r00;
                                 lit12.snd = r10;
                                 lit12.thd = r20;
                                 lit12.f3 = r30;
-                                lit12.f4 = r40;
-                                lit12.f5 = r50;
-                                lit12.f6 = r60;
-                                lit12.f7 = r70;
+                                lit12.f4 = r4;
+                                lit12.f5 = r5;
+                                lit12.f6 = r6;
+                                lit12.f7 = r7;
                                 scrut47 = lit12;
                                 t3_1 = scrut47.snd;
                                 t3_2 = scrut47.thd;
@@ -924,890 +1195,136 @@ Hacl_Spec_P256_MontgomeryMultiplication_montgomery_multiplication_buffer(
                                 st5 = t3_6;
                                 st6 = t3_7;
                                 st7 = (uint64_t)0U;
-                                t110 = st0;
-                                res20 = (uint128_t)prim0 * t110;
-                                l05 = (uint64_t)res20;
-                                h015 = (uint64_t)(res20 >> (uint32_t)64U);
-                                res21 = (uint128_t)prim1 * t110;
-                                l15 = (uint64_t)res21;
-                                h15 = (uint64_t)(res21 >> (uint32_t)64U);
-                                res22 = (uint128_t)prim2 * t110;
-                                l25 = (uint64_t)res22;
-                                h25 = (uint64_t)(res22 >> (uint32_t)64U);
-                                res23 = (uint128_t)prim3 * t110;
-                                l35 = (uint64_t)res23;
-                                h35 = (uint64_t)(res23 >> (uint32_t)64U);
-                                o014 = l05;
-                                scrut48 = Hacl_Spec_P256_Basic_addcarry(l15, h015, (uint64_t)0U);
-                                o114 = scrut48.fst;
-                                c05 = scrut48.snd;
-                                scrut49 = Hacl_Spec_P256_Basic_addcarry(l25, h15, c05);
-                                o214 = scrut49.fst;
-                                c19 = scrut49.snd;
-                                scrut50 = Hacl_Spec_P256_Basic_addcarry(l35, h25, c19);
-                                o314 = scrut50.fst;
-                                c29 = scrut50.snd;
-                                c311 = h35 + c29;
                                 {
-                                  K___uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t lit13;
-                                  K___uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t scrut51;
-                                  uint64_t f35;
-                                  uint64_t f21;
-                                  uint64_t f11;
-                                  uint64_t f01;
-                                  uint64_t c44;
-                                  lit13.fst = c311;
-                                  lit13.snd.fst = o014;
-                                  lit13.snd.snd = o114;
-                                  lit13.snd.thd = o214;
-                                  lit13.snd.f3 = o314;
-                                  scrut51 = lit13;
-                                  f35 = scrut51.snd.f3;
-                                  f21 = scrut51.snd.thd;
-                                  f11 = scrut51.snd.snd;
-                                  f01 = scrut51.snd.fst;
-                                  c44 = scrut51.fst;
+                                  K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t
+                                  lit13;
+                                  lit13.fst = st0;
+                                  lit13.snd = st1;
+                                  lit13.thd = st2;
+                                  lit13.f3 = st3;
+                                  lit13.f4 = st4;
+                                  lit13.f5 = st5;
+                                  lit13.f6 = st6;
+                                  lit13.f7 = st7;
                                   {
+                                    K___uint64_t_uint64_t_uint64_t_uint64_t lit14;
                                     K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t
-                                    lit14;
-                                    K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t
-                                    scrut52;
-                                    uint64_t t2_010;
-                                    uint64_t t2_110;
-                                    uint64_t t2_210;
-                                    uint64_t t2_310;
-                                    uint64_t t2_410;
-                                    uint64_t t2_510;
-                                    uint64_t t2_610;
-                                    uint64_t t2_710;
-                                    K___uint64_t_uint64_t scrut53;
-                                    uint64_t o015;
-                                    uint64_t c06;
-                                    K___uint64_t_uint64_t scrut54;
-                                    uint64_t o115;
-                                    uint64_t c113;
-                                    K___uint64_t_uint64_t scrut55;
-                                    uint64_t o215;
-                                    uint64_t c211;
-                                    K___uint64_t_uint64_t scrut56;
-                                    uint64_t o315;
-                                    uint64_t c312;
-                                    lit14.fst = f01;
-                                    lit14.snd = f11;
-                                    lit14.thd = f21;
-                                    lit14.f3 = f35;
-                                    lit14.f4 = c44;
-                                    lit14.f5 = (uint64_t)0U;
-                                    lit14.f6 = (uint64_t)0U;
-                                    lit14.f7 = (uint64_t)0U;
-                                    scrut52 = lit14;
-                                    t2_010 = scrut52.fst;
-                                    t2_110 = scrut52.snd;
-                                    t2_210 = scrut52.thd;
-                                    t2_310 = scrut52.f3;
-                                    t2_410 = scrut52.f4;
-                                    t2_510 = scrut52.f5;
-                                    t2_610 = scrut52.f6;
-                                    t2_710 = scrut52.f7;
-                                    scrut53 =
-                                      Hacl_Spec_P256_Basic_addcarry(st0,
-                                        t2_010,
-                                        (uint64_t)0U);
-                                    o015 = scrut53.fst;
-                                    c06 = scrut53.snd;
-                                    scrut54 = Hacl_Spec_P256_Basic_addcarry(st1, t2_110, c06);
-                                    o115 = scrut54.fst;
-                                    c113 = scrut54.snd;
-                                    scrut55 = Hacl_Spec_P256_Basic_addcarry(st2, t2_210, c113);
-                                    o215 = scrut55.fst;
-                                    c211 = scrut55.snd;
-                                    scrut56 = Hacl_Spec_P256_Basic_addcarry(st3, t2_310, c211);
-                                    o315 = scrut56.fst;
-                                    c312 = scrut56.snd;
+                                    scrut48;
+                                    uint64_t st10;
+                                    uint64_t st11;
+                                    uint64_t st12;
+                                    uint64_t st13;
+                                    uint64_t st14;
+                                    uint64_t st15;
+                                    uint64_t st16;
+                                    uint64_t st17;
+                                    lit14.fst = prim0;
+                                    lit14.snd = prim1;
+                                    lit14.thd = prim2;
+                                    lit14.f3 = prim3;
+                                    scrut48 =
+                                      Hacl_Spec_P256_Core_montgomery_multiplication_one_round(lit13,
+                                        lit14);
+                                    st10 = scrut48.fst;
+                                    st11 = scrut48.snd;
+                                    st12 = scrut48.thd;
+                                    st13 = scrut48.f3;
+                                    st14 = scrut48.f4;
+                                    st15 = scrut48.f5;
+                                    st16 = scrut48.f6;
+                                    st17 = scrut48.f7;
                                     {
-                                      K___uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t lit15;
-                                      K___uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t scrut57;
-                                      uint64_t o316;
-                                      uint64_t o216;
-                                      uint64_t o116;
-                                      uint64_t o016;
-                                      uint64_t c313;
-                                      K___uint64_t_uint64_t scrut58;
-                                      uint64_t o41;
-                                      uint64_t c45;
-                                      K___uint64_t_uint64_t scrut59;
-                                      uint64_t o51;
-                                      uint64_t c51;
-                                      K___uint64_t_uint64_t scrut60;
-                                      uint64_t o61;
-                                      uint64_t c61;
-                                      K___uint64_t_uint64_t scrut61;
-                                      uint64_t o71;
-                                      uint64_t c71;
-                                      lit15.fst = c312;
-                                      lit15.snd.fst = o015;
-                                      lit15.snd.snd = o115;
-                                      lit15.snd.thd = o215;
-                                      lit15.snd.f3 = o315;
-                                      scrut57 = lit15;
-                                      o316 = scrut57.snd.f3;
-                                      o216 = scrut57.snd.thd;
-                                      o116 = scrut57.snd.snd;
-                                      o016 = scrut57.snd.fst;
-                                      c313 = scrut57.fst;
-                                      scrut58 = Hacl_Spec_P256_Basic_addcarry(st4, t2_410, c313);
-                                      o41 = scrut58.fst;
-                                      c45 = scrut58.snd;
-                                      scrut59 = Hacl_Spec_P256_Basic_addcarry(st5, t2_510, c45);
-                                      o51 = scrut59.fst;
-                                      c51 = scrut59.snd;
-                                      scrut60 = Hacl_Spec_P256_Basic_addcarry(st6, t2_610, c51);
-                                      o61 = scrut60.fst;
-                                      c61 = scrut60.snd;
-                                      scrut61 = Hacl_Spec_P256_Basic_addcarry(st7, t2_710, c61);
-                                      o71 = scrut61.fst;
-                                      c71 = scrut61.snd;
+                                      K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t
+                                      lit15;
+                                      lit15.fst = st10;
+                                      lit15.snd = st11;
+                                      lit15.thd = st12;
+                                      lit15.f3 = st13;
+                                      lit15.f4 = st14;
+                                      lit15.f5 = st15;
+                                      lit15.f6 = st16;
+                                      lit15.f7 = st17;
                                       {
-                                        K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t
-                                        lit16;
-                                        K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t
-                                        scrut62;
-                                        uint64_t r01;
-                                        uint64_t r11;
-                                        uint64_t r21;
-                                        uint64_t r31;
-                                        uint64_t r41;
-                                        uint64_t r51;
-                                        uint64_t r61;
-                                        uint64_t r71;
-                                        lit16.fst = c71;
-                                        lit16.snd = o016;
-                                        lit16.thd = o116;
-                                        lit16.f3 = o216;
-                                        lit16.f4 = o316;
-                                        lit16.f5 = o41;
-                                        lit16.f6 = o51;
-                                        lit16.f7 = o61;
-                                        lit16.f8 = o71;
-                                        scrut62 = lit16;
-                                        r01 = scrut62.snd;
-                                        r11 = scrut62.thd;
-                                        r21 = scrut62.f3;
-                                        r31 = scrut62.f4;
-                                        r41 = scrut62.f5;
-                                        r51 = scrut62.f6;
-                                        r61 = scrut62.f7;
-                                        r71 = scrut62.f8;
+                                        K___uint64_t_uint64_t_uint64_t_uint64_t lit16;
+                                        K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t
+                                        scrut49;
+                                        uint64_t st20;
+                                        uint64_t st21;
+                                        uint64_t st22;
+                                        uint64_t st23;
+                                        uint64_t st24;
+                                        uint64_t st25;
+                                        uint64_t st26;
+                                        uint64_t st27;
+                                        lit16.fst = prim0;
+                                        lit16.snd = prim1;
+                                        lit16.thd = prim2;
+                                        lit16.f3 = prim3;
+                                        scrut49 =
+                                          Hacl_Spec_P256_Core_montgomery_multiplication_one_round(lit15,
+                                            lit16);
+                                        st20 = scrut49.fst;
+                                        st21 = scrut49.snd;
+                                        st22 = scrut49.thd;
+                                        st23 = scrut49.f3;
+                                        st24 = scrut49.f4;
+                                        st25 = scrut49.f5;
+                                        st26 = scrut49.f6;
+                                        st27 = scrut49.f7;
                                         {
                                           K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t
                                           lit17;
-                                          K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t
-                                          scrut63;
-                                          uint64_t t3_110;
-                                          uint64_t t3_210;
-                                          uint64_t t3_310;
-                                          uint64_t t3_410;
-                                          uint64_t t3_510;
-                                          uint64_t t3_610;
-                                          uint64_t t3_710;
-                                          uint64_t r_00;
-                                          uint64_t r_10;
-                                          uint64_t r_20;
-                                          uint64_t r_30;
-                                          uint64_t r_40;
-                                          uint64_t r_50;
-                                          uint64_t r_60;
-                                          uint64_t r_70;
-                                          lit17.fst = r01;
-                                          lit17.snd = r11;
-                                          lit17.thd = r21;
-                                          lit17.f3 = r31;
-                                          lit17.f4 = r41;
-                                          lit17.f5 = r51;
-                                          lit17.f6 = r61;
-                                          lit17.f7 = r71;
-                                          scrut63 = lit17;
-                                          t3_110 = scrut63.snd;
-                                          t3_210 = scrut63.thd;
-                                          t3_310 = scrut63.f3;
-                                          t3_410 = scrut63.f4;
-                                          t3_510 = scrut63.f5;
-                                          t3_610 = scrut63.f6;
-                                          t3_710 = scrut63.f7;
-                                          r_00 = t3_110;
-                                          r_10 = t3_210;
-                                          r_20 = t3_310;
-                                          r_30 = t3_410;
-                                          r_40 = t3_510;
-                                          r_50 = t3_610;
-                                          r_60 = t3_710;
-                                          r_70 = (uint64_t)0U;
+                                          lit17.fst = st20;
+                                          lit17.snd = st21;
+                                          lit17.thd = st22;
+                                          lit17.f3 = st23;
+                                          lit17.f4 = st24;
+                                          lit17.f5 = st25;
+                                          lit17.f6 = st26;
+                                          lit17.f7 = st27;
                                           {
+                                            K___uint64_t_uint64_t_uint64_t_uint64_t lit18;
                                             K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t
-                                            lit18;
-                                            K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t
-                                            scrut64;
-                                            uint64_t st10;
-                                            uint64_t st11;
-                                            uint64_t st12;
-                                            uint64_t st13;
-                                            uint64_t st14;
-                                            uint64_t st15;
-                                            uint64_t st16;
-                                            uint64_t st17;
-                                            uint64_t t111;
-                                            uint128_t res24;
-                                            uint64_t l06;
-                                            uint64_t h016;
-                                            uint128_t res25;
-                                            uint64_t l16;
-                                            uint64_t h16;
-                                            uint128_t res26;
-                                            uint64_t l26;
-                                            uint64_t h26;
-                                            uint128_t res27;
-                                            uint64_t l36;
-                                            uint64_t h36;
-                                            uint64_t o017;
-                                            K___uint64_t_uint64_t scrut65;
-                                            uint64_t o117;
-                                            uint64_t c07;
-                                            K___uint64_t_uint64_t scrut66;
-                                            uint64_t o217;
-                                            uint64_t c114;
-                                            K___uint64_t_uint64_t scrut67;
-                                            uint64_t o317;
-                                            uint64_t c212;
-                                            uint64_t c314;
-                                            lit18.fst = r_00;
-                                            lit18.snd = r_10;
-                                            lit18.thd = r_20;
-                                            lit18.f3 = r_30;
-                                            lit18.f4 = r_40;
-                                            lit18.f5 = r_50;
-                                            lit18.f6 = r_60;
-                                            lit18.f7 = r_70;
-                                            scrut64 = lit18;
-                                            st10 = scrut64.fst;
-                                            st11 = scrut64.snd;
-                                            st12 = scrut64.thd;
-                                            st13 = scrut64.f3;
-                                            st14 = scrut64.f4;
-                                            st15 = scrut64.f5;
-                                            st16 = scrut64.f6;
-                                            st17 = scrut64.f7;
-                                            t111 = st10;
-                                            res24 = (uint128_t)prim0 * t111;
-                                            l06 = (uint64_t)res24;
-                                            h016 = (uint64_t)(res24 >> (uint32_t)64U);
-                                            res25 = (uint128_t)prim1 * t111;
-                                            l16 = (uint64_t)res25;
-                                            h16 = (uint64_t)(res25 >> (uint32_t)64U);
-                                            res26 = (uint128_t)prim2 * t111;
-                                            l26 = (uint64_t)res26;
-                                            h26 = (uint64_t)(res26 >> (uint32_t)64U);
-                                            res27 = (uint128_t)prim3 * t111;
-                                            l36 = (uint64_t)res27;
-                                            h36 = (uint64_t)(res27 >> (uint32_t)64U);
-                                            o017 = l06;
-                                            scrut65 =
-                                              Hacl_Spec_P256_Basic_addcarry(l16,
-                                                h016,
-                                                (uint64_t)0U);
-                                            o117 = scrut65.fst;
-                                            c07 = scrut65.snd;
-                                            scrut66 = Hacl_Spec_P256_Basic_addcarry(l26, h16, c07);
-                                            o217 = scrut66.fst;
-                                            c114 = scrut66.snd;
-                                            scrut67 = Hacl_Spec_P256_Basic_addcarry(l36, h26, c114);
-                                            o317 = scrut67.fst;
-                                            c212 = scrut67.snd;
-                                            c314 = h36 + c212;
+                                            scrut50;
+                                            uint64_t st30;
+                                            uint64_t st31;
+                                            uint64_t st32;
+                                            uint64_t st33;
+                                            uint64_t st34;
+                                            lit18.fst = prim0;
+                                            lit18.snd = prim1;
+                                            lit18.thd = prim2;
+                                            lit18.f3 = prim3;
+                                            scrut50 =
+                                              Hacl_Spec_P256_Core_montgomery_multiplication_one_round(lit17,
+                                                lit18);
+                                            st30 = scrut50.fst;
+                                            st31 = scrut50.snd;
+                                            st32 = scrut50.thd;
+                                            st33 = scrut50.f3;
+                                            st34 = scrut50.f4;
                                             {
-                                              K___uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t
-                                              lit19;
-                                              K___uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t
-                                              scrut68;
-                                              uint64_t f36;
-                                              uint64_t f22;
-                                              uint64_t f12;
-                                              uint64_t f02;
-                                              uint64_t c46;
-                                              lit19.fst = c314;
-                                              lit19.snd.fst = o017;
-                                              lit19.snd.snd = o117;
-                                              lit19.snd.thd = o217;
-                                              lit19.snd.f3 = o317;
-                                              scrut68 = lit19;
-                                              f36 = scrut68.snd.f3;
-                                              f22 = scrut68.snd.thd;
-                                              f12 = scrut68.snd.snd;
-                                              f02 = scrut68.snd.fst;
-                                              c46 = scrut68.fst;
-                                              {
-                                                K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t
-                                                lit20;
-                                                K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t
-                                                scrut69;
-                                                uint64_t t2_011;
-                                                uint64_t t2_111;
-                                                uint64_t t2_211;
-                                                uint64_t t2_311;
-                                                uint64_t t2_411;
-                                                uint64_t t2_511;
-                                                uint64_t t2_611;
-                                                uint64_t t2_711;
-                                                K___uint64_t_uint64_t scrut70;
-                                                uint64_t o018;
-                                                uint64_t c08;
-                                                K___uint64_t_uint64_t scrut71;
-                                                uint64_t o118;
-                                                uint64_t c115;
-                                                K___uint64_t_uint64_t scrut72;
-                                                uint64_t o218;
-                                                uint64_t c213;
-                                                K___uint64_t_uint64_t scrut73;
-                                                uint64_t o318;
-                                                uint64_t c315;
-                                                lit20.fst = f02;
-                                                lit20.snd = f12;
-                                                lit20.thd = f22;
-                                                lit20.f3 = f36;
-                                                lit20.f4 = c46;
-                                                lit20.f5 = (uint64_t)0U;
-                                                lit20.f6 = (uint64_t)0U;
-                                                lit20.f7 = (uint64_t)0U;
-                                                scrut69 = lit20;
-                                                t2_011 = scrut69.fst;
-                                                t2_111 = scrut69.snd;
-                                                t2_211 = scrut69.thd;
-                                                t2_311 = scrut69.f3;
-                                                t2_411 = scrut69.f4;
-                                                t2_511 = scrut69.f5;
-                                                t2_611 = scrut69.f6;
-                                                t2_711 = scrut69.f7;
-                                                scrut70 =
-                                                  Hacl_Spec_P256_Basic_addcarry(st10,
-                                                    t2_011,
-                                                    (uint64_t)0U);
-                                                o018 = scrut70.fst;
-                                                c08 = scrut70.snd;
-                                                scrut71 =
-                                                  Hacl_Spec_P256_Basic_addcarry(st11,
-                                                    t2_111,
-                                                    c08);
-                                                o118 = scrut71.fst;
-                                                c115 = scrut71.snd;
-                                                scrut72 =
-                                                  Hacl_Spec_P256_Basic_addcarry(st12,
-                                                    t2_211,
-                                                    c115);
-                                                o218 = scrut72.fst;
-                                                c213 = scrut72.snd;
-                                                scrut73 =
-                                                  Hacl_Spec_P256_Basic_addcarry(st13,
-                                                    t2_311,
-                                                    c213);
-                                                o318 = scrut73.fst;
-                                                c315 = scrut73.snd;
-                                                {
-                                                  K___uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t
-                                                  lit21;
-                                                  K___uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t
-                                                  scrut74;
-                                                  uint64_t o319;
-                                                  uint64_t o219;
-                                                  uint64_t o119;
-                                                  uint64_t o019;
-                                                  uint64_t c316;
-                                                  K___uint64_t_uint64_t scrut75;
-                                                  uint64_t o42;
-                                                  uint64_t c47;
-                                                  K___uint64_t_uint64_t scrut76;
-                                                  uint64_t o52;
-                                                  uint64_t c52;
-                                                  K___uint64_t_uint64_t scrut77;
-                                                  uint64_t o62;
-                                                  uint64_t c62;
-                                                  K___uint64_t_uint64_t scrut78;
-                                                  uint64_t o72;
-                                                  uint64_t c72;
-                                                  lit21.fst = c315;
-                                                  lit21.snd.fst = o018;
-                                                  lit21.snd.snd = o118;
-                                                  lit21.snd.thd = o218;
-                                                  lit21.snd.f3 = o318;
-                                                  scrut74 = lit21;
-                                                  o319 = scrut74.snd.f3;
-                                                  o219 = scrut74.snd.thd;
-                                                  o119 = scrut74.snd.snd;
-                                                  o019 = scrut74.snd.fst;
-                                                  c316 = scrut74.fst;
-                                                  scrut75 =
-                                                    Hacl_Spec_P256_Basic_addcarry(st14,
-                                                      t2_411,
-                                                      c316);
-                                                  o42 = scrut75.fst;
-                                                  c47 = scrut75.snd;
-                                                  scrut76 =
-                                                    Hacl_Spec_P256_Basic_addcarry(st15,
-                                                      t2_511,
-                                                      c47);
-                                                  o52 = scrut76.fst;
-                                                  c52 = scrut76.snd;
-                                                  scrut77 =
-                                                    Hacl_Spec_P256_Basic_addcarry(st16,
-                                                      t2_611,
-                                                      c52);
-                                                  o62 = scrut77.fst;
-                                                  c62 = scrut77.snd;
-                                                  scrut78 =
-                                                    Hacl_Spec_P256_Basic_addcarry(st17,
-                                                      t2_711,
-                                                      c62);
-                                                  o72 = scrut78.fst;
-                                                  c72 = scrut78.snd;
-                                                  {
-                                                    K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t
-                                                    lit22;
-                                                    K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t
-                                                    scrut79;
-                                                    uint64_t r02;
-                                                    uint64_t r12;
-                                                    uint64_t r22;
-                                                    uint64_t r32;
-                                                    uint64_t r42;
-                                                    uint64_t r52;
-                                                    uint64_t r62;
-                                                    uint64_t r72;
-                                                    lit22.fst = c72;
-                                                    lit22.snd = o019;
-                                                    lit22.thd = o119;
-                                                    lit22.f3 = o219;
-                                                    lit22.f4 = o319;
-                                                    lit22.f5 = o42;
-                                                    lit22.f6 = o52;
-                                                    lit22.f7 = o62;
-                                                    lit22.f8 = o72;
-                                                    scrut79 = lit22;
-                                                    r02 = scrut79.snd;
-                                                    r12 = scrut79.thd;
-                                                    r22 = scrut79.f3;
-                                                    r32 = scrut79.f4;
-                                                    r42 = scrut79.f5;
-                                                    r52 = scrut79.f6;
-                                                    r62 = scrut79.f7;
-                                                    r72 = scrut79.f8;
-                                                    {
-                                                      K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t
-                                                      lit23;
-                                                      K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t
-                                                      scrut80;
-                                                      uint64_t t3_111;
-                                                      uint64_t t3_211;
-                                                      uint64_t t3_311;
-                                                      uint64_t t3_411;
-                                                      uint64_t t3_511;
-                                                      uint64_t t3_611;
-                                                      uint64_t t3_711;
-                                                      uint64_t r_01;
-                                                      uint64_t r_11;
-                                                      uint64_t r_21;
-                                                      uint64_t r_31;
-                                                      uint64_t r_41;
-                                                      uint64_t r_51;
-                                                      uint64_t r_61;
-                                                      uint64_t r_71;
-                                                      lit23.fst = r02;
-                                                      lit23.snd = r12;
-                                                      lit23.thd = r22;
-                                                      lit23.f3 = r32;
-                                                      lit23.f4 = r42;
-                                                      lit23.f5 = r52;
-                                                      lit23.f6 = r62;
-                                                      lit23.f7 = r72;
-                                                      scrut80 = lit23;
-                                                      t3_111 = scrut80.snd;
-                                                      t3_211 = scrut80.thd;
-                                                      t3_311 = scrut80.f3;
-                                                      t3_411 = scrut80.f4;
-                                                      t3_511 = scrut80.f5;
-                                                      t3_611 = scrut80.f6;
-                                                      t3_711 = scrut80.f7;
-                                                      r_01 = t3_111;
-                                                      r_11 = t3_211;
-                                                      r_21 = t3_311;
-                                                      r_31 = t3_411;
-                                                      r_41 = t3_511;
-                                                      r_51 = t3_611;
-                                                      r_61 = t3_711;
-                                                      r_71 = (uint64_t)0U;
-                                                      {
-                                                        K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t
-                                                        lit24;
-                                                        K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t
-                                                        scrut81;
-                                                        uint64_t st20;
-                                                        uint64_t st21;
-                                                        uint64_t st22;
-                                                        uint64_t st23;
-                                                        uint64_t st24;
-                                                        uint64_t st25;
-                                                        uint64_t st26;
-                                                        uint64_t st27;
-                                                        uint64_t t11;
-                                                        uint128_t res28;
-                                                        uint64_t l0;
-                                                        uint64_t h01;
-                                                        uint128_t res29;
-                                                        uint64_t l1;
-                                                        uint64_t h1;
-                                                        uint128_t res30;
-                                                        uint64_t l2;
-                                                        uint64_t h2;
-                                                        uint128_t res;
-                                                        uint64_t l3;
-                                                        uint64_t h3;
-                                                        uint64_t o020;
-                                                        K___uint64_t_uint64_t scrut82;
-                                                        uint64_t o120;
-                                                        uint64_t c09;
-                                                        K___uint64_t_uint64_t scrut83;
-                                                        uint64_t o220;
-                                                        uint64_t c116;
-                                                        K___uint64_t_uint64_t scrut84;
-                                                        uint64_t o320;
-                                                        uint64_t c214;
-                                                        uint64_t c317;
-                                                        lit24.fst = r_01;
-                                                        lit24.snd = r_11;
-                                                        lit24.thd = r_21;
-                                                        lit24.f3 = r_31;
-                                                        lit24.f4 = r_41;
-                                                        lit24.f5 = r_51;
-                                                        lit24.f6 = r_61;
-                                                        lit24.f7 = r_71;
-                                                        scrut81 = lit24;
-                                                        st20 = scrut81.fst;
-                                                        st21 = scrut81.snd;
-                                                        st22 = scrut81.thd;
-                                                        st23 = scrut81.f3;
-                                                        st24 = scrut81.f4;
-                                                        st25 = scrut81.f5;
-                                                        st26 = scrut81.f6;
-                                                        st27 = scrut81.f7;
-                                                        t11 = st20;
-                                                        res28 = (uint128_t)prim0 * t11;
-                                                        l0 = (uint64_t)res28;
-                                                        h01 = (uint64_t)(res28 >> (uint32_t)64U);
-                                                        res29 = (uint128_t)prim1 * t11;
-                                                        l1 = (uint64_t)res29;
-                                                        h1 = (uint64_t)(res29 >> (uint32_t)64U);
-                                                        res30 = (uint128_t)prim2 * t11;
-                                                        l2 = (uint64_t)res30;
-                                                        h2 = (uint64_t)(res30 >> (uint32_t)64U);
-                                                        res = (uint128_t)prim3 * t11;
-                                                        l3 = (uint64_t)res;
-                                                        h3 = (uint64_t)(res >> (uint32_t)64U);
-                                                        o020 = l0;
-                                                        scrut82 =
-                                                          Hacl_Spec_P256_Basic_addcarry(l1,
-                                                            h01,
-                                                            (uint64_t)0U);
-                                                        o120 = scrut82.fst;
-                                                        c09 = scrut82.snd;
-                                                        scrut83 =
-                                                          Hacl_Spec_P256_Basic_addcarry(l2,
-                                                            h1,
-                                                            c09);
-                                                        o220 = scrut83.fst;
-                                                        c116 = scrut83.snd;
-                                                        scrut84 =
-                                                          Hacl_Spec_P256_Basic_addcarry(l3,
-                                                            h2,
-                                                            c116);
-                                                        o320 = scrut84.fst;
-                                                        c214 = scrut84.snd;
-                                                        c317 = h3 + c214;
-                                                        {
-                                                          K___uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t
-                                                          lit25;
-                                                          K___uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t
-                                                          scrut85;
-                                                          uint64_t f3;
-                                                          uint64_t f2;
-                                                          uint64_t f1;
-                                                          uint64_t f0;
-                                                          uint64_t c;
-                                                          lit25.fst = c317;
-                                                          lit25.snd.fst = o020;
-                                                          lit25.snd.snd = o120;
-                                                          lit25.snd.thd = o220;
-                                                          lit25.snd.f3 = o320;
-                                                          scrut85 = lit25;
-                                                          f3 = scrut85.snd.f3;
-                                                          f2 = scrut85.snd.thd;
-                                                          f1 = scrut85.snd.snd;
-                                                          f0 = scrut85.snd.fst;
-                                                          c = scrut85.fst;
-                                                          {
-                                                            K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t
-                                                            lit26;
-                                                            K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t
-                                                            scrut86;
-                                                            uint64_t t2_01;
-                                                            uint64_t t2_11;
-                                                            uint64_t t2_21;
-                                                            uint64_t t2_31;
-                                                            uint64_t t2_41;
-                                                            uint64_t t2_51;
-                                                            uint64_t t2_61;
-                                                            uint64_t t2_71;
-                                                            K___uint64_t_uint64_t scrut87;
-                                                            uint64_t o021;
-                                                            uint64_t c0;
-                                                            K___uint64_t_uint64_t scrut88;
-                                                            uint64_t o121;
-                                                            uint64_t c1;
-                                                            K___uint64_t_uint64_t scrut89;
-                                                            uint64_t o221;
-                                                            uint64_t c2;
-                                                            K___uint64_t_uint64_t scrut90;
-                                                            uint64_t o321;
-                                                            uint64_t c318;
-                                                            lit26.fst = f0;
-                                                            lit26.snd = f1;
-                                                            lit26.thd = f2;
-                                                            lit26.f3 = f3;
-                                                            lit26.f4 = c;
-                                                            lit26.f5 = (uint64_t)0U;
-                                                            lit26.f6 = (uint64_t)0U;
-                                                            lit26.f7 = (uint64_t)0U;
-                                                            scrut86 = lit26;
-                                                            t2_01 = scrut86.fst;
-                                                            t2_11 = scrut86.snd;
-                                                            t2_21 = scrut86.thd;
-                                                            t2_31 = scrut86.f3;
-                                                            t2_41 = scrut86.f4;
-                                                            t2_51 = scrut86.f5;
-                                                            t2_61 = scrut86.f6;
-                                                            t2_71 = scrut86.f7;
-                                                            scrut87 =
-                                                              Hacl_Spec_P256_Basic_addcarry(st20,
-                                                                t2_01,
-                                                                (uint64_t)0U);
-                                                            o021 = scrut87.fst;
-                                                            c0 = scrut87.snd;
-                                                            scrut88 =
-                                                              Hacl_Spec_P256_Basic_addcarry(st21,
-                                                                t2_11,
-                                                                c0);
-                                                            o121 = scrut88.fst;
-                                                            c1 = scrut88.snd;
-                                                            scrut89 =
-                                                              Hacl_Spec_P256_Basic_addcarry(st22,
-                                                                t2_21,
-                                                                c1);
-                                                            o221 = scrut89.fst;
-                                                            c2 = scrut89.snd;
-                                                            scrut90 =
-                                                              Hacl_Spec_P256_Basic_addcarry(st23,
-                                                                t2_31,
-                                                                c2);
-                                                            o321 = scrut90.fst;
-                                                            c318 = scrut90.snd;
-                                                            {
-                                                              K___uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t
-                                                              lit27;
-                                                              K___uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t
-                                                              scrut91;
-                                                              uint64_t o3;
-                                                              uint64_t o2;
-                                                              uint64_t o1;
-                                                              uint64_t o0;
-                                                              uint64_t c3;
-                                                              K___uint64_t_uint64_t scrut92;
-                                                              uint64_t o4;
-                                                              uint64_t c4;
-                                                              K___uint64_t_uint64_t scrut93;
-                                                              uint64_t o5;
-                                                              uint64_t c5;
-                                                              K___uint64_t_uint64_t scrut94;
-                                                              uint64_t o6;
-                                                              uint64_t c6;
-                                                              K___uint64_t_uint64_t scrut95;
-                                                              uint64_t o7;
-                                                              uint64_t c7;
-                                                              lit27.fst = c318;
-                                                              lit27.snd.fst = o021;
-                                                              lit27.snd.snd = o121;
-                                                              lit27.snd.thd = o221;
-                                                              lit27.snd.f3 = o321;
-                                                              scrut91 = lit27;
-                                                              o3 = scrut91.snd.f3;
-                                                              o2 = scrut91.snd.thd;
-                                                              o1 = scrut91.snd.snd;
-                                                              o0 = scrut91.snd.fst;
-                                                              c3 = scrut91.fst;
-                                                              scrut92 =
-                                                                Hacl_Spec_P256_Basic_addcarry(st24,
-                                                                  t2_41,
-                                                                  c3);
-                                                              o4 = scrut92.fst;
-                                                              c4 = scrut92.snd;
-                                                              scrut93 =
-                                                                Hacl_Spec_P256_Basic_addcarry(st25,
-                                                                  t2_51,
-                                                                  c4);
-                                                              o5 = scrut93.fst;
-                                                              c5 = scrut93.snd;
-                                                              scrut94 =
-                                                                Hacl_Spec_P256_Basic_addcarry(st26,
-                                                                  t2_61,
-                                                                  c5);
-                                                              o6 = scrut94.fst;
-                                                              c6 = scrut94.snd;
-                                                              scrut95 =
-                                                                Hacl_Spec_P256_Basic_addcarry(st27,
-                                                                  t2_71,
-                                                                  c6);
-                                                              o7 = scrut95.fst;
-                                                              c7 = scrut95.snd;
-                                                              {
-                                                                K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t
-                                                                lit28;
-                                                                K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t
-                                                                scrut96;
-                                                                uint64_t r03;
-                                                                uint64_t r13;
-                                                                uint64_t r23;
-                                                                uint64_t r33;
-                                                                uint64_t r4;
-                                                                uint64_t r5;
-                                                                uint64_t r6;
-                                                                uint64_t r7;
-                                                                lit28.fst = c7;
-                                                                lit28.snd = o0;
-                                                                lit28.thd = o1;
-                                                                lit28.f3 = o2;
-                                                                lit28.f4 = o3;
-                                                                lit28.f5 = o4;
-                                                                lit28.f6 = o5;
-                                                                lit28.f7 = o6;
-                                                                lit28.f8 = o7;
-                                                                scrut96 = lit28;
-                                                                r03 = scrut96.snd;
-                                                                r13 = scrut96.thd;
-                                                                r23 = scrut96.f3;
-                                                                r33 = scrut96.f4;
-                                                                r4 = scrut96.f5;
-                                                                r5 = scrut96.f6;
-                                                                r6 = scrut96.f7;
-                                                                r7 = scrut96.f8;
-                                                                {
-                                                                  K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t
-                                                                  lit29;
-                                                                  K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t
-                                                                  scrut97;
-                                                                  uint64_t t3_11;
-                                                                  uint64_t t3_21;
-                                                                  uint64_t t3_31;
-                                                                  uint64_t t3_41;
-                                                                  uint64_t t3_51;
-                                                                  uint64_t t3_61;
-                                                                  uint64_t t3_71;
-                                                                  uint64_t r_0;
-                                                                  uint64_t r_1;
-                                                                  uint64_t r_2;
-                                                                  uint64_t r_3;
-                                                                  uint64_t r_4;
-                                                                  uint64_t r_5;
-                                                                  uint64_t r_6;
-                                                                  uint64_t r_7;
-                                                                  lit29.fst = r03;
-                                                                  lit29.snd = r13;
-                                                                  lit29.thd = r23;
-                                                                  lit29.f3 = r33;
-                                                                  lit29.f4 = r4;
-                                                                  lit29.f5 = r5;
-                                                                  lit29.f6 = r6;
-                                                                  lit29.f7 = r7;
-                                                                  scrut97 = lit29;
-                                                                  t3_11 = scrut97.snd;
-                                                                  t3_21 = scrut97.thd;
-                                                                  t3_31 = scrut97.f3;
-                                                                  t3_41 = scrut97.f4;
-                                                                  t3_51 = scrut97.f5;
-                                                                  t3_61 = scrut97.f6;
-                                                                  t3_71 = scrut97.f7;
-                                                                  r_0 = t3_11;
-                                                                  r_1 = t3_21;
-                                                                  r_2 = t3_31;
-                                                                  r_3 = t3_41;
-                                                                  r_4 = t3_51;
-                                                                  r_5 = t3_61;
-                                                                  r_6 = t3_71;
-                                                                  r_7 = (uint64_t)0U;
-                                                                  {
-                                                                    K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t
-                                                                    lit30;
-                                                                    K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t
-                                                                    scrut98;
-                                                                    uint64_t st30;
-                                                                    uint64_t st31;
-                                                                    uint64_t st32;
-                                                                    uint64_t st33;
-                                                                    uint64_t st34;
-                                                                    lit30.fst = r_0;
-                                                                    lit30.snd = r_1;
-                                                                    lit30.thd = r_2;
-                                                                    lit30.f3 = r_3;
-                                                                    lit30.f4 = r_4;
-                                                                    lit30.f5 = r_5;
-                                                                    lit30.f6 = r_6;
-                                                                    lit30.f7 = r_7;
-                                                                    scrut98 = lit30;
-                                                                    st30 = scrut98.fst;
-                                                                    st31 = scrut98.snd;
-                                                                    st32 = scrut98.thd;
-                                                                    st33 = scrut98.f3;
-                                                                    st34 = scrut98.f4;
-                                                                    {
-                                                                      K___uint64_t_uint64_t_uint64_t_uint64_t
-                                                                      lit;
-                                                                      K___uint64_t_uint64_t_uint64_t_uint64_t
-                                                                      scrut;
-                                                                      uint64_t r0;
-                                                                      uint64_t r1;
-                                                                      uint64_t r2;
-                                                                      uint64_t r3;
-                                                                      lit.fst = st30;
-                                                                      lit.snd = st31;
-                                                                      lit.thd = st32;
-                                                                      lit.f3 = st33;
-                                                                      scrut =
-                                                                        Hacl_Spec_P256_Core_reduction_prime_2prime_with_carry(st34,
-                                                                          lit);
-                                                                      r0 = scrut.fst;
-                                                                      r1 = scrut.snd;
-                                                                      r2 = scrut.thd;
-                                                                      r3 = scrut.f3;
-                                                                      r[0U] = r0;
-                                                                      r[1U] = r1;
-                                                                      r[2U] = r2;
-                                                                      r[3U] = r3;
-                                                                    }
-                                                                  }
-                                                                }
-                                                              }
-                                                            }
-                                                          }
-                                                        }
-                                                      }
-                                                    }
-                                                  }
-                                                }
-                                              }
+                                              K___uint64_t_uint64_t_uint64_t_uint64_t lit;
+                                              K___uint64_t_uint64_t_uint64_t_uint64_t scrut;
+                                              uint64_t r0;
+                                              uint64_t r1;
+                                              uint64_t r2;
+                                              uint64_t r3;
+                                              lit.fst = st30;
+                                              lit.snd = st31;
+                                              lit.thd = st32;
+                                              lit.f3 = st33;
+                                              scrut =
+                                                Hacl_Spec_P256_Core_reduction_prime_2prime_with_carry(st34,
+                                                  lit);
+                                              r0 = scrut.fst;
+                                              r1 = scrut.snd;
+                                              r2 = scrut.thd;
+                                              r3 = scrut.f3;
+                                              r[0U] = r0;
+                                              r[1U] = r1;
+                                              r[2U] = r2;
+                                              r[3U] = r3;
                                             }
                                           }
                                         }
@@ -2839,17 +2356,17 @@ static void fromDomain(uint64_t *f, uint64_t *result)
                       uint64_t t_7;
                       uint64_t t1;
                       uint128_t res16;
-                      uint64_t l04;
-                      uint64_t h04;
+                      uint64_t l0;
+                      uint64_t h0;
                       uint128_t res17;
-                      uint64_t l14;
-                      uint64_t h14;
+                      uint64_t l1;
+                      uint64_t h1;
                       uint128_t res18;
-                      uint64_t l24;
-                      uint64_t h24;
-                      uint128_t res19;
-                      uint64_t l34;
-                      uint64_t h34;
+                      uint64_t l2;
+                      uint64_t h2;
+                      uint128_t res;
+                      uint64_t l3;
+                      uint64_t h3;
                       uint64_t o011;
                       K___uint64_t_uint64_t scrut32;
                       uint64_t o111;
@@ -2880,47 +2397,47 @@ static void fromDomain(uint64_t *f, uint64_t *result)
                       t_7 = scrut31.f7;
                       t1 = t_0;
                       res16 = (uint128_t)prim0 * t1;
-                      l04 = (uint64_t)res16;
-                      h04 = (uint64_t)(res16 >> (uint32_t)64U);
+                      l0 = (uint64_t)res16;
+                      h0 = (uint64_t)(res16 >> (uint32_t)64U);
                       res17 = (uint128_t)prim1 * t1;
-                      l14 = (uint64_t)res17;
-                      h14 = (uint64_t)(res17 >> (uint32_t)64U);
+                      l1 = (uint64_t)res17;
+                      h1 = (uint64_t)(res17 >> (uint32_t)64U);
                       res18 = (uint128_t)prim2 * t1;
-                      l24 = (uint64_t)res18;
-                      h24 = (uint64_t)(res18 >> (uint32_t)64U);
-                      res19 = (uint128_t)prim3 * t1;
-                      l34 = (uint64_t)res19;
-                      h34 = (uint64_t)(res19 >> (uint32_t)64U);
-                      o011 = l04;
-                      scrut32 = Hacl_Spec_P256_Basic_addcarry(l14, h04, (uint64_t)0U);
+                      l2 = (uint64_t)res18;
+                      h2 = (uint64_t)(res18 >> (uint32_t)64U);
+                      res = (uint128_t)prim3 * t1;
+                      l3 = (uint64_t)res;
+                      h3 = (uint64_t)(res >> (uint32_t)64U);
+                      o011 = l0;
+                      scrut32 = Hacl_Spec_P256_Basic_addcarry(l1, h0, (uint64_t)0U);
                       o111 = scrut32.fst;
                       c03 = scrut32.snd;
-                      scrut33 = Hacl_Spec_P256_Basic_addcarry(l24, h14, c03);
+                      scrut33 = Hacl_Spec_P256_Basic_addcarry(l2, h1, c03);
                       o211 = scrut33.fst;
                       c16 = scrut33.snd;
-                      scrut34 = Hacl_Spec_P256_Basic_addcarry(l34, h24, c16);
+                      scrut34 = Hacl_Spec_P256_Basic_addcarry(l3, h2, c16);
                       o311 = scrut34.fst;
                       c27 = scrut34.snd;
-                      c38 = h34 + c27;
+                      c38 = h3 + c27;
                       {
                         K___uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t lit8;
                         K___uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t scrut35;
-                        uint64_t f34;
-                        uint64_t f20;
-                        uint64_t f10;
-                        uint64_t f00;
-                        uint64_t c17;
+                        uint64_t f3;
+                        uint64_t f2;
+                        uint64_t f1;
+                        uint64_t f0;
+                        uint64_t c;
                         lit8.fst = c38;
                         lit8.snd.fst = o011;
                         lit8.snd.snd = o111;
                         lit8.snd.thd = o211;
                         lit8.snd.f3 = o311;
                         scrut35 = lit8;
-                        f34 = scrut35.snd.f3;
-                        f20 = scrut35.snd.thd;
-                        f10 = scrut35.snd.snd;
-                        f00 = scrut35.snd.fst;
-                        c17 = scrut35.fst;
+                        f3 = scrut35.snd.f3;
+                        f2 = scrut35.snd.thd;
+                        f1 = scrut35.snd.snd;
+                        f0 = scrut35.snd.fst;
+                        c = scrut35.fst;
                         {
                           K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t
                           lit9;
@@ -2936,21 +2453,21 @@ static void fromDomain(uint64_t *f, uint64_t *result)
                           uint64_t t2_7;
                           K___uint64_t_uint64_t scrut37;
                           uint64_t o012;
-                          uint64_t c04;
+                          uint64_t c0;
                           K___uint64_t_uint64_t scrut38;
                           uint64_t o112;
-                          uint64_t c18;
+                          uint64_t c1;
                           K___uint64_t_uint64_t scrut39;
                           uint64_t o212;
-                          uint64_t c28;
+                          uint64_t c2;
                           K___uint64_t_uint64_t scrut40;
                           uint64_t o312;
                           uint64_t c39;
-                          lit9.fst = f00;
-                          lit9.snd = f10;
-                          lit9.thd = f20;
-                          lit9.f3 = f34;
-                          lit9.f4 = c17;
+                          lit9.fst = f0;
+                          lit9.snd = f1;
+                          lit9.thd = f2;
+                          lit9.f3 = f3;
+                          lit9.f4 = c;
                           lit9.f5 = (uint64_t)0U;
                           lit9.f6 = (uint64_t)0U;
                           lit9.f7 = (uint64_t)0U;
@@ -2965,59 +2482,59 @@ static void fromDomain(uint64_t *f, uint64_t *result)
                           t2_7 = scrut36.f7;
                           scrut37 = Hacl_Spec_P256_Basic_addcarry(t_0, t2_0, (uint64_t)0U);
                           o012 = scrut37.fst;
-                          c04 = scrut37.snd;
-                          scrut38 = Hacl_Spec_P256_Basic_addcarry(t_1, t2_1, c04);
+                          c0 = scrut37.snd;
+                          scrut38 = Hacl_Spec_P256_Basic_addcarry(t_1, t2_1, c0);
                           o112 = scrut38.fst;
-                          c18 = scrut38.snd;
-                          scrut39 = Hacl_Spec_P256_Basic_addcarry(t_2, t2_2, c18);
+                          c1 = scrut38.snd;
+                          scrut39 = Hacl_Spec_P256_Basic_addcarry(t_2, t2_2, c1);
                           o212 = scrut39.fst;
-                          c28 = scrut39.snd;
-                          scrut40 = Hacl_Spec_P256_Basic_addcarry(t_3, t2_3, c28);
+                          c2 = scrut39.snd;
+                          scrut40 = Hacl_Spec_P256_Basic_addcarry(t_3, t2_3, c2);
                           o312 = scrut40.fst;
                           c39 = scrut40.snd;
                           {
                             K___uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t lit10;
                             K___uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t scrut41;
-                            uint64_t o313;
-                            uint64_t o213;
-                            uint64_t o113;
-                            uint64_t o013;
-                            uint64_t c310;
+                            uint64_t o3;
+                            uint64_t o2;
+                            uint64_t o1;
+                            uint64_t o0;
+                            uint64_t c3;
                             K___uint64_t_uint64_t scrut42;
-                            uint64_t o40;
-                            uint64_t c43;
+                            uint64_t o4;
+                            uint64_t c4;
                             K___uint64_t_uint64_t scrut43;
-                            uint64_t o50;
-                            uint64_t c50;
+                            uint64_t o5;
+                            uint64_t c5;
                             K___uint64_t_uint64_t scrut44;
-                            uint64_t o60;
-                            uint64_t c60;
+                            uint64_t o6;
+                            uint64_t c6;
                             K___uint64_t_uint64_t scrut45;
-                            uint64_t o70;
-                            uint64_t c70;
+                            uint64_t o7;
+                            uint64_t c7;
                             lit10.fst = c39;
                             lit10.snd.fst = o012;
                             lit10.snd.snd = o112;
                             lit10.snd.thd = o212;
                             lit10.snd.f3 = o312;
                             scrut41 = lit10;
-                            o313 = scrut41.snd.f3;
-                            o213 = scrut41.snd.thd;
-                            o113 = scrut41.snd.snd;
-                            o013 = scrut41.snd.fst;
-                            c310 = scrut41.fst;
-                            scrut42 = Hacl_Spec_P256_Basic_addcarry(t_4, t2_4, c310);
-                            o40 = scrut42.fst;
-                            c43 = scrut42.snd;
-                            scrut43 = Hacl_Spec_P256_Basic_addcarry(t_5, t2_5, c43);
-                            o50 = scrut43.fst;
-                            c50 = scrut43.snd;
-                            scrut44 = Hacl_Spec_P256_Basic_addcarry(t_6, t2_6, c50);
-                            o60 = scrut44.fst;
-                            c60 = scrut44.snd;
-                            scrut45 = Hacl_Spec_P256_Basic_addcarry(t_7, t2_7, c60);
-                            o70 = scrut45.fst;
-                            c70 = scrut45.snd;
+                            o3 = scrut41.snd.f3;
+                            o2 = scrut41.snd.thd;
+                            o1 = scrut41.snd.snd;
+                            o0 = scrut41.snd.fst;
+                            c3 = scrut41.fst;
+                            scrut42 = Hacl_Spec_P256_Basic_addcarry(t_4, t2_4, c3);
+                            o4 = scrut42.fst;
+                            c4 = scrut42.snd;
+                            scrut43 = Hacl_Spec_P256_Basic_addcarry(t_5, t2_5, c4);
+                            o5 = scrut43.fst;
+                            c5 = scrut43.snd;
+                            scrut44 = Hacl_Spec_P256_Basic_addcarry(t_6, t2_6, c5);
+                            o6 = scrut44.fst;
+                            c6 = scrut44.snd;
+                            scrut45 = Hacl_Spec_P256_Basic_addcarry(t_7, t2_7, c6);
+                            o7 = scrut45.fst;
+                            c7 = scrut45.snd;
                             {
                               K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t
                               lit11;
@@ -3027,28 +2544,28 @@ static void fromDomain(uint64_t *f, uint64_t *result)
                               uint64_t r10;
                               uint64_t r20;
                               uint64_t r30;
-                              uint64_t r40;
-                              uint64_t r50;
-                              uint64_t r60;
-                              uint64_t r70;
-                              lit11.fst = c70;
-                              lit11.snd = o013;
-                              lit11.thd = o113;
-                              lit11.f3 = o213;
-                              lit11.f4 = o313;
-                              lit11.f5 = o40;
-                              lit11.f6 = o50;
-                              lit11.f7 = o60;
-                              lit11.f8 = o70;
+                              uint64_t r4;
+                              uint64_t r5;
+                              uint64_t r6;
+                              uint64_t r7;
+                              lit11.fst = c7;
+                              lit11.snd = o0;
+                              lit11.thd = o1;
+                              lit11.f3 = o2;
+                              lit11.f4 = o3;
+                              lit11.f5 = o4;
+                              lit11.f6 = o5;
+                              lit11.f7 = o6;
+                              lit11.f8 = o7;
                               scrut46 = lit11;
                               r00 = scrut46.snd;
                               r10 = scrut46.thd;
                               r20 = scrut46.f3;
                               r30 = scrut46.f4;
-                              r40 = scrut46.f5;
-                              r50 = scrut46.f6;
-                              r60 = scrut46.f7;
-                              r70 = scrut46.f8;
+                              r4 = scrut46.f5;
+                              r5 = scrut46.f6;
+                              r6 = scrut46.f7;
+                              r7 = scrut46.f8;
                               {
                                 K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t
                                 lit12;
@@ -3069,38 +2586,14 @@ static void fromDomain(uint64_t *f, uint64_t *result)
                                 uint64_t st5;
                                 uint64_t st6;
                                 uint64_t st7;
-                                uint64_t t110;
-                                uint128_t res20;
-                                uint64_t l05;
-                                uint64_t h05;
-                                uint128_t res21;
-                                uint64_t l15;
-                                uint64_t h15;
-                                uint128_t res22;
-                                uint64_t l25;
-                                uint64_t h25;
-                                uint128_t res23;
-                                uint64_t l35;
-                                uint64_t h35;
-                                uint64_t o014;
-                                K___uint64_t_uint64_t scrut48;
-                                uint64_t o114;
-                                uint64_t c05;
-                                K___uint64_t_uint64_t scrut49;
-                                uint64_t o214;
-                                uint64_t c19;
-                                K___uint64_t_uint64_t scrut50;
-                                uint64_t o314;
-                                uint64_t c29;
-                                uint64_t c311;
                                 lit12.fst = r00;
                                 lit12.snd = r10;
                                 lit12.thd = r20;
                                 lit12.f3 = r30;
-                                lit12.f4 = r40;
-                                lit12.f5 = r50;
-                                lit12.f6 = r60;
-                                lit12.f7 = r70;
+                                lit12.f4 = r4;
+                                lit12.f5 = r5;
+                                lit12.f6 = r6;
+                                lit12.f7 = r7;
                                 scrut47 = lit12;
                                 t3_1 = scrut47.snd;
                                 t3_2 = scrut47.thd;
@@ -3117,890 +2610,136 @@ static void fromDomain(uint64_t *f, uint64_t *result)
                                 st5 = t3_6;
                                 st6 = t3_7;
                                 st7 = (uint64_t)0U;
-                                t110 = st0;
-                                res20 = (uint128_t)prim0 * t110;
-                                l05 = (uint64_t)res20;
-                                h05 = (uint64_t)(res20 >> (uint32_t)64U);
-                                res21 = (uint128_t)prim1 * t110;
-                                l15 = (uint64_t)res21;
-                                h15 = (uint64_t)(res21 >> (uint32_t)64U);
-                                res22 = (uint128_t)prim2 * t110;
-                                l25 = (uint64_t)res22;
-                                h25 = (uint64_t)(res22 >> (uint32_t)64U);
-                                res23 = (uint128_t)prim3 * t110;
-                                l35 = (uint64_t)res23;
-                                h35 = (uint64_t)(res23 >> (uint32_t)64U);
-                                o014 = l05;
-                                scrut48 = Hacl_Spec_P256_Basic_addcarry(l15, h05, (uint64_t)0U);
-                                o114 = scrut48.fst;
-                                c05 = scrut48.snd;
-                                scrut49 = Hacl_Spec_P256_Basic_addcarry(l25, h15, c05);
-                                o214 = scrut49.fst;
-                                c19 = scrut49.snd;
-                                scrut50 = Hacl_Spec_P256_Basic_addcarry(l35, h25, c19);
-                                o314 = scrut50.fst;
-                                c29 = scrut50.snd;
-                                c311 = h35 + c29;
                                 {
-                                  K___uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t lit13;
-                                  K___uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t scrut51;
-                                  uint64_t f35;
-                                  uint64_t f21;
-                                  uint64_t f11;
-                                  uint64_t f01;
-                                  uint64_t c44;
-                                  lit13.fst = c311;
-                                  lit13.snd.fst = o014;
-                                  lit13.snd.snd = o114;
-                                  lit13.snd.thd = o214;
-                                  lit13.snd.f3 = o314;
-                                  scrut51 = lit13;
-                                  f35 = scrut51.snd.f3;
-                                  f21 = scrut51.snd.thd;
-                                  f11 = scrut51.snd.snd;
-                                  f01 = scrut51.snd.fst;
-                                  c44 = scrut51.fst;
+                                  K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t
+                                  lit13;
+                                  lit13.fst = st0;
+                                  lit13.snd = st1;
+                                  lit13.thd = st2;
+                                  lit13.f3 = st3;
+                                  lit13.f4 = st4;
+                                  lit13.f5 = st5;
+                                  lit13.f6 = st6;
+                                  lit13.f7 = st7;
                                   {
+                                    K___uint64_t_uint64_t_uint64_t_uint64_t lit14;
                                     K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t
-                                    lit14;
-                                    K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t
-                                    scrut52;
-                                    uint64_t t2_010;
-                                    uint64_t t2_110;
-                                    uint64_t t2_210;
-                                    uint64_t t2_310;
-                                    uint64_t t2_410;
-                                    uint64_t t2_510;
-                                    uint64_t t2_610;
-                                    uint64_t t2_710;
-                                    K___uint64_t_uint64_t scrut53;
-                                    uint64_t o015;
-                                    uint64_t c06;
-                                    K___uint64_t_uint64_t scrut54;
-                                    uint64_t o115;
-                                    uint64_t c113;
-                                    K___uint64_t_uint64_t scrut55;
-                                    uint64_t o215;
-                                    uint64_t c211;
-                                    K___uint64_t_uint64_t scrut56;
-                                    uint64_t o315;
-                                    uint64_t c312;
-                                    lit14.fst = f01;
-                                    lit14.snd = f11;
-                                    lit14.thd = f21;
-                                    lit14.f3 = f35;
-                                    lit14.f4 = c44;
-                                    lit14.f5 = (uint64_t)0U;
-                                    lit14.f6 = (uint64_t)0U;
-                                    lit14.f7 = (uint64_t)0U;
-                                    scrut52 = lit14;
-                                    t2_010 = scrut52.fst;
-                                    t2_110 = scrut52.snd;
-                                    t2_210 = scrut52.thd;
-                                    t2_310 = scrut52.f3;
-                                    t2_410 = scrut52.f4;
-                                    t2_510 = scrut52.f5;
-                                    t2_610 = scrut52.f6;
-                                    t2_710 = scrut52.f7;
-                                    scrut53 =
-                                      Hacl_Spec_P256_Basic_addcarry(st0,
-                                        t2_010,
-                                        (uint64_t)0U);
-                                    o015 = scrut53.fst;
-                                    c06 = scrut53.snd;
-                                    scrut54 = Hacl_Spec_P256_Basic_addcarry(st1, t2_110, c06);
-                                    o115 = scrut54.fst;
-                                    c113 = scrut54.snd;
-                                    scrut55 = Hacl_Spec_P256_Basic_addcarry(st2, t2_210, c113);
-                                    o215 = scrut55.fst;
-                                    c211 = scrut55.snd;
-                                    scrut56 = Hacl_Spec_P256_Basic_addcarry(st3, t2_310, c211);
-                                    o315 = scrut56.fst;
-                                    c312 = scrut56.snd;
+                                    scrut48;
+                                    uint64_t st10;
+                                    uint64_t st11;
+                                    uint64_t st12;
+                                    uint64_t st13;
+                                    uint64_t st14;
+                                    uint64_t st15;
+                                    uint64_t st16;
+                                    uint64_t st17;
+                                    lit14.fst = prim0;
+                                    lit14.snd = prim1;
+                                    lit14.thd = prim2;
+                                    lit14.f3 = prim3;
+                                    scrut48 =
+                                      Hacl_Spec_P256_Core_montgomery_multiplication_one_round(lit13,
+                                        lit14);
+                                    st10 = scrut48.fst;
+                                    st11 = scrut48.snd;
+                                    st12 = scrut48.thd;
+                                    st13 = scrut48.f3;
+                                    st14 = scrut48.f4;
+                                    st15 = scrut48.f5;
+                                    st16 = scrut48.f6;
+                                    st17 = scrut48.f7;
                                     {
-                                      K___uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t lit15;
-                                      K___uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t scrut57;
-                                      uint64_t o316;
-                                      uint64_t o216;
-                                      uint64_t o116;
-                                      uint64_t o016;
-                                      uint64_t c313;
-                                      K___uint64_t_uint64_t scrut58;
-                                      uint64_t o41;
-                                      uint64_t c45;
-                                      K___uint64_t_uint64_t scrut59;
-                                      uint64_t o51;
-                                      uint64_t c51;
-                                      K___uint64_t_uint64_t scrut60;
-                                      uint64_t o61;
-                                      uint64_t c61;
-                                      K___uint64_t_uint64_t scrut61;
-                                      uint64_t o71;
-                                      uint64_t c71;
-                                      lit15.fst = c312;
-                                      lit15.snd.fst = o015;
-                                      lit15.snd.snd = o115;
-                                      lit15.snd.thd = o215;
-                                      lit15.snd.f3 = o315;
-                                      scrut57 = lit15;
-                                      o316 = scrut57.snd.f3;
-                                      o216 = scrut57.snd.thd;
-                                      o116 = scrut57.snd.snd;
-                                      o016 = scrut57.snd.fst;
-                                      c313 = scrut57.fst;
-                                      scrut58 = Hacl_Spec_P256_Basic_addcarry(st4, t2_410, c313);
-                                      o41 = scrut58.fst;
-                                      c45 = scrut58.snd;
-                                      scrut59 = Hacl_Spec_P256_Basic_addcarry(st5, t2_510, c45);
-                                      o51 = scrut59.fst;
-                                      c51 = scrut59.snd;
-                                      scrut60 = Hacl_Spec_P256_Basic_addcarry(st6, t2_610, c51);
-                                      o61 = scrut60.fst;
-                                      c61 = scrut60.snd;
-                                      scrut61 = Hacl_Spec_P256_Basic_addcarry(st7, t2_710, c61);
-                                      o71 = scrut61.fst;
-                                      c71 = scrut61.snd;
+                                      K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t
+                                      lit15;
+                                      lit15.fst = st10;
+                                      lit15.snd = st11;
+                                      lit15.thd = st12;
+                                      lit15.f3 = st13;
+                                      lit15.f4 = st14;
+                                      lit15.f5 = st15;
+                                      lit15.f6 = st16;
+                                      lit15.f7 = st17;
                                       {
-                                        K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t
-                                        lit16;
-                                        K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t
-                                        scrut62;
-                                        uint64_t r01;
-                                        uint64_t r11;
-                                        uint64_t r21;
-                                        uint64_t r31;
-                                        uint64_t r41;
-                                        uint64_t r51;
-                                        uint64_t r61;
-                                        uint64_t r71;
-                                        lit16.fst = c71;
-                                        lit16.snd = o016;
-                                        lit16.thd = o116;
-                                        lit16.f3 = o216;
-                                        lit16.f4 = o316;
-                                        lit16.f5 = o41;
-                                        lit16.f6 = o51;
-                                        lit16.f7 = o61;
-                                        lit16.f8 = o71;
-                                        scrut62 = lit16;
-                                        r01 = scrut62.snd;
-                                        r11 = scrut62.thd;
-                                        r21 = scrut62.f3;
-                                        r31 = scrut62.f4;
-                                        r41 = scrut62.f5;
-                                        r51 = scrut62.f6;
-                                        r61 = scrut62.f7;
-                                        r71 = scrut62.f8;
+                                        K___uint64_t_uint64_t_uint64_t_uint64_t lit16;
+                                        K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t
+                                        scrut49;
+                                        uint64_t st20;
+                                        uint64_t st21;
+                                        uint64_t st22;
+                                        uint64_t st23;
+                                        uint64_t st24;
+                                        uint64_t st25;
+                                        uint64_t st26;
+                                        uint64_t st27;
+                                        lit16.fst = prim0;
+                                        lit16.snd = prim1;
+                                        lit16.thd = prim2;
+                                        lit16.f3 = prim3;
+                                        scrut49 =
+                                          Hacl_Spec_P256_Core_montgomery_multiplication_one_round(lit15,
+                                            lit16);
+                                        st20 = scrut49.fst;
+                                        st21 = scrut49.snd;
+                                        st22 = scrut49.thd;
+                                        st23 = scrut49.f3;
+                                        st24 = scrut49.f4;
+                                        st25 = scrut49.f5;
+                                        st26 = scrut49.f6;
+                                        st27 = scrut49.f7;
                                         {
                                           K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t
                                           lit17;
-                                          K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t
-                                          scrut63;
-                                          uint64_t t3_110;
-                                          uint64_t t3_210;
-                                          uint64_t t3_310;
-                                          uint64_t t3_410;
-                                          uint64_t t3_510;
-                                          uint64_t t3_610;
-                                          uint64_t t3_710;
-                                          uint64_t r_00;
-                                          uint64_t r_10;
-                                          uint64_t r_20;
-                                          uint64_t r_30;
-                                          uint64_t r_40;
-                                          uint64_t r_50;
-                                          uint64_t r_60;
-                                          uint64_t r_70;
-                                          lit17.fst = r01;
-                                          lit17.snd = r11;
-                                          lit17.thd = r21;
-                                          lit17.f3 = r31;
-                                          lit17.f4 = r41;
-                                          lit17.f5 = r51;
-                                          lit17.f6 = r61;
-                                          lit17.f7 = r71;
-                                          scrut63 = lit17;
-                                          t3_110 = scrut63.snd;
-                                          t3_210 = scrut63.thd;
-                                          t3_310 = scrut63.f3;
-                                          t3_410 = scrut63.f4;
-                                          t3_510 = scrut63.f5;
-                                          t3_610 = scrut63.f6;
-                                          t3_710 = scrut63.f7;
-                                          r_00 = t3_110;
-                                          r_10 = t3_210;
-                                          r_20 = t3_310;
-                                          r_30 = t3_410;
-                                          r_40 = t3_510;
-                                          r_50 = t3_610;
-                                          r_60 = t3_710;
-                                          r_70 = (uint64_t)0U;
+                                          lit17.fst = st20;
+                                          lit17.snd = st21;
+                                          lit17.thd = st22;
+                                          lit17.f3 = st23;
+                                          lit17.f4 = st24;
+                                          lit17.f5 = st25;
+                                          lit17.f6 = st26;
+                                          lit17.f7 = st27;
                                           {
+                                            K___uint64_t_uint64_t_uint64_t_uint64_t lit18;
                                             K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t
-                                            lit18;
-                                            K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t
-                                            scrut64;
-                                            uint64_t st10;
-                                            uint64_t st11;
-                                            uint64_t st12;
-                                            uint64_t st13;
-                                            uint64_t st14;
-                                            uint64_t st15;
-                                            uint64_t st16;
-                                            uint64_t st17;
-                                            uint64_t t111;
-                                            uint128_t res24;
-                                            uint64_t l06;
-                                            uint64_t h06;
-                                            uint128_t res25;
-                                            uint64_t l16;
-                                            uint64_t h16;
-                                            uint128_t res26;
-                                            uint64_t l26;
-                                            uint64_t h26;
-                                            uint128_t res27;
-                                            uint64_t l36;
-                                            uint64_t h36;
-                                            uint64_t o017;
-                                            K___uint64_t_uint64_t scrut65;
-                                            uint64_t o117;
-                                            uint64_t c07;
-                                            K___uint64_t_uint64_t scrut66;
-                                            uint64_t o217;
-                                            uint64_t c114;
-                                            K___uint64_t_uint64_t scrut67;
-                                            uint64_t o317;
-                                            uint64_t c212;
-                                            uint64_t c314;
-                                            lit18.fst = r_00;
-                                            lit18.snd = r_10;
-                                            lit18.thd = r_20;
-                                            lit18.f3 = r_30;
-                                            lit18.f4 = r_40;
-                                            lit18.f5 = r_50;
-                                            lit18.f6 = r_60;
-                                            lit18.f7 = r_70;
-                                            scrut64 = lit18;
-                                            st10 = scrut64.fst;
-                                            st11 = scrut64.snd;
-                                            st12 = scrut64.thd;
-                                            st13 = scrut64.f3;
-                                            st14 = scrut64.f4;
-                                            st15 = scrut64.f5;
-                                            st16 = scrut64.f6;
-                                            st17 = scrut64.f7;
-                                            t111 = st10;
-                                            res24 = (uint128_t)prim0 * t111;
-                                            l06 = (uint64_t)res24;
-                                            h06 = (uint64_t)(res24 >> (uint32_t)64U);
-                                            res25 = (uint128_t)prim1 * t111;
-                                            l16 = (uint64_t)res25;
-                                            h16 = (uint64_t)(res25 >> (uint32_t)64U);
-                                            res26 = (uint128_t)prim2 * t111;
-                                            l26 = (uint64_t)res26;
-                                            h26 = (uint64_t)(res26 >> (uint32_t)64U);
-                                            res27 = (uint128_t)prim3 * t111;
-                                            l36 = (uint64_t)res27;
-                                            h36 = (uint64_t)(res27 >> (uint32_t)64U);
-                                            o017 = l06;
-                                            scrut65 =
-                                              Hacl_Spec_P256_Basic_addcarry(l16,
-                                                h06,
-                                                (uint64_t)0U);
-                                            o117 = scrut65.fst;
-                                            c07 = scrut65.snd;
-                                            scrut66 = Hacl_Spec_P256_Basic_addcarry(l26, h16, c07);
-                                            o217 = scrut66.fst;
-                                            c114 = scrut66.snd;
-                                            scrut67 = Hacl_Spec_P256_Basic_addcarry(l36, h26, c114);
-                                            o317 = scrut67.fst;
-                                            c212 = scrut67.snd;
-                                            c314 = h36 + c212;
+                                            scrut50;
+                                            uint64_t st30;
+                                            uint64_t st31;
+                                            uint64_t st32;
+                                            uint64_t st33;
+                                            uint64_t st34;
+                                            lit18.fst = prim0;
+                                            lit18.snd = prim1;
+                                            lit18.thd = prim2;
+                                            lit18.f3 = prim3;
+                                            scrut50 =
+                                              Hacl_Spec_P256_Core_montgomery_multiplication_one_round(lit17,
+                                                lit18);
+                                            st30 = scrut50.fst;
+                                            st31 = scrut50.snd;
+                                            st32 = scrut50.thd;
+                                            st33 = scrut50.f3;
+                                            st34 = scrut50.f4;
                                             {
-                                              K___uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t
-                                              lit19;
-                                              K___uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t
-                                              scrut68;
-                                              uint64_t f36;
-                                              uint64_t f22;
-                                              uint64_t f12;
-                                              uint64_t f02;
-                                              uint64_t c46;
-                                              lit19.fst = c314;
-                                              lit19.snd.fst = o017;
-                                              lit19.snd.snd = o117;
-                                              lit19.snd.thd = o217;
-                                              lit19.snd.f3 = o317;
-                                              scrut68 = lit19;
-                                              f36 = scrut68.snd.f3;
-                                              f22 = scrut68.snd.thd;
-                                              f12 = scrut68.snd.snd;
-                                              f02 = scrut68.snd.fst;
-                                              c46 = scrut68.fst;
-                                              {
-                                                K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t
-                                                lit20;
-                                                K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t
-                                                scrut69;
-                                                uint64_t t2_011;
-                                                uint64_t t2_111;
-                                                uint64_t t2_211;
-                                                uint64_t t2_311;
-                                                uint64_t t2_411;
-                                                uint64_t t2_511;
-                                                uint64_t t2_611;
-                                                uint64_t t2_711;
-                                                K___uint64_t_uint64_t scrut70;
-                                                uint64_t o018;
-                                                uint64_t c08;
-                                                K___uint64_t_uint64_t scrut71;
-                                                uint64_t o118;
-                                                uint64_t c115;
-                                                K___uint64_t_uint64_t scrut72;
-                                                uint64_t o218;
-                                                uint64_t c213;
-                                                K___uint64_t_uint64_t scrut73;
-                                                uint64_t o318;
-                                                uint64_t c315;
-                                                lit20.fst = f02;
-                                                lit20.snd = f12;
-                                                lit20.thd = f22;
-                                                lit20.f3 = f36;
-                                                lit20.f4 = c46;
-                                                lit20.f5 = (uint64_t)0U;
-                                                lit20.f6 = (uint64_t)0U;
-                                                lit20.f7 = (uint64_t)0U;
-                                                scrut69 = lit20;
-                                                t2_011 = scrut69.fst;
-                                                t2_111 = scrut69.snd;
-                                                t2_211 = scrut69.thd;
-                                                t2_311 = scrut69.f3;
-                                                t2_411 = scrut69.f4;
-                                                t2_511 = scrut69.f5;
-                                                t2_611 = scrut69.f6;
-                                                t2_711 = scrut69.f7;
-                                                scrut70 =
-                                                  Hacl_Spec_P256_Basic_addcarry(st10,
-                                                    t2_011,
-                                                    (uint64_t)0U);
-                                                o018 = scrut70.fst;
-                                                c08 = scrut70.snd;
-                                                scrut71 =
-                                                  Hacl_Spec_P256_Basic_addcarry(st11,
-                                                    t2_111,
-                                                    c08);
-                                                o118 = scrut71.fst;
-                                                c115 = scrut71.snd;
-                                                scrut72 =
-                                                  Hacl_Spec_P256_Basic_addcarry(st12,
-                                                    t2_211,
-                                                    c115);
-                                                o218 = scrut72.fst;
-                                                c213 = scrut72.snd;
-                                                scrut73 =
-                                                  Hacl_Spec_P256_Basic_addcarry(st13,
-                                                    t2_311,
-                                                    c213);
-                                                o318 = scrut73.fst;
-                                                c315 = scrut73.snd;
-                                                {
-                                                  K___uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t
-                                                  lit21;
-                                                  K___uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t
-                                                  scrut74;
-                                                  uint64_t o319;
-                                                  uint64_t o219;
-                                                  uint64_t o119;
-                                                  uint64_t o019;
-                                                  uint64_t c316;
-                                                  K___uint64_t_uint64_t scrut75;
-                                                  uint64_t o42;
-                                                  uint64_t c47;
-                                                  K___uint64_t_uint64_t scrut76;
-                                                  uint64_t o52;
-                                                  uint64_t c52;
-                                                  K___uint64_t_uint64_t scrut77;
-                                                  uint64_t o62;
-                                                  uint64_t c62;
-                                                  K___uint64_t_uint64_t scrut78;
-                                                  uint64_t o72;
-                                                  uint64_t c72;
-                                                  lit21.fst = c315;
-                                                  lit21.snd.fst = o018;
-                                                  lit21.snd.snd = o118;
-                                                  lit21.snd.thd = o218;
-                                                  lit21.snd.f3 = o318;
-                                                  scrut74 = lit21;
-                                                  o319 = scrut74.snd.f3;
-                                                  o219 = scrut74.snd.thd;
-                                                  o119 = scrut74.snd.snd;
-                                                  o019 = scrut74.snd.fst;
-                                                  c316 = scrut74.fst;
-                                                  scrut75 =
-                                                    Hacl_Spec_P256_Basic_addcarry(st14,
-                                                      t2_411,
-                                                      c316);
-                                                  o42 = scrut75.fst;
-                                                  c47 = scrut75.snd;
-                                                  scrut76 =
-                                                    Hacl_Spec_P256_Basic_addcarry(st15,
-                                                      t2_511,
-                                                      c47);
-                                                  o52 = scrut76.fst;
-                                                  c52 = scrut76.snd;
-                                                  scrut77 =
-                                                    Hacl_Spec_P256_Basic_addcarry(st16,
-                                                      t2_611,
-                                                      c52);
-                                                  o62 = scrut77.fst;
-                                                  c62 = scrut77.snd;
-                                                  scrut78 =
-                                                    Hacl_Spec_P256_Basic_addcarry(st17,
-                                                      t2_711,
-                                                      c62);
-                                                  o72 = scrut78.fst;
-                                                  c72 = scrut78.snd;
-                                                  {
-                                                    K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t
-                                                    lit22;
-                                                    K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t
-                                                    scrut79;
-                                                    uint64_t r02;
-                                                    uint64_t r12;
-                                                    uint64_t r22;
-                                                    uint64_t r32;
-                                                    uint64_t r42;
-                                                    uint64_t r52;
-                                                    uint64_t r62;
-                                                    uint64_t r72;
-                                                    lit22.fst = c72;
-                                                    lit22.snd = o019;
-                                                    lit22.thd = o119;
-                                                    lit22.f3 = o219;
-                                                    lit22.f4 = o319;
-                                                    lit22.f5 = o42;
-                                                    lit22.f6 = o52;
-                                                    lit22.f7 = o62;
-                                                    lit22.f8 = o72;
-                                                    scrut79 = lit22;
-                                                    r02 = scrut79.snd;
-                                                    r12 = scrut79.thd;
-                                                    r22 = scrut79.f3;
-                                                    r32 = scrut79.f4;
-                                                    r42 = scrut79.f5;
-                                                    r52 = scrut79.f6;
-                                                    r62 = scrut79.f7;
-                                                    r72 = scrut79.f8;
-                                                    {
-                                                      K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t
-                                                      lit23;
-                                                      K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t
-                                                      scrut80;
-                                                      uint64_t t3_111;
-                                                      uint64_t t3_211;
-                                                      uint64_t t3_311;
-                                                      uint64_t t3_411;
-                                                      uint64_t t3_511;
-                                                      uint64_t t3_611;
-                                                      uint64_t t3_711;
-                                                      uint64_t r_01;
-                                                      uint64_t r_11;
-                                                      uint64_t r_21;
-                                                      uint64_t r_31;
-                                                      uint64_t r_41;
-                                                      uint64_t r_51;
-                                                      uint64_t r_61;
-                                                      uint64_t r_71;
-                                                      lit23.fst = r02;
-                                                      lit23.snd = r12;
-                                                      lit23.thd = r22;
-                                                      lit23.f3 = r32;
-                                                      lit23.f4 = r42;
-                                                      lit23.f5 = r52;
-                                                      lit23.f6 = r62;
-                                                      lit23.f7 = r72;
-                                                      scrut80 = lit23;
-                                                      t3_111 = scrut80.snd;
-                                                      t3_211 = scrut80.thd;
-                                                      t3_311 = scrut80.f3;
-                                                      t3_411 = scrut80.f4;
-                                                      t3_511 = scrut80.f5;
-                                                      t3_611 = scrut80.f6;
-                                                      t3_711 = scrut80.f7;
-                                                      r_01 = t3_111;
-                                                      r_11 = t3_211;
-                                                      r_21 = t3_311;
-                                                      r_31 = t3_411;
-                                                      r_41 = t3_511;
-                                                      r_51 = t3_611;
-                                                      r_61 = t3_711;
-                                                      r_71 = (uint64_t)0U;
-                                                      {
-                                                        K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t
-                                                        lit24;
-                                                        K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t
-                                                        scrut81;
-                                                        uint64_t st20;
-                                                        uint64_t st21;
-                                                        uint64_t st22;
-                                                        uint64_t st23;
-                                                        uint64_t st24;
-                                                        uint64_t st25;
-                                                        uint64_t st26;
-                                                        uint64_t st27;
-                                                        uint64_t t11;
-                                                        uint128_t res28;
-                                                        uint64_t l0;
-                                                        uint64_t h0;
-                                                        uint128_t res29;
-                                                        uint64_t l1;
-                                                        uint64_t h1;
-                                                        uint128_t res30;
-                                                        uint64_t l2;
-                                                        uint64_t h2;
-                                                        uint128_t res;
-                                                        uint64_t l3;
-                                                        uint64_t h3;
-                                                        uint64_t o020;
-                                                        K___uint64_t_uint64_t scrut82;
-                                                        uint64_t o120;
-                                                        uint64_t c09;
-                                                        K___uint64_t_uint64_t scrut83;
-                                                        uint64_t o220;
-                                                        uint64_t c116;
-                                                        K___uint64_t_uint64_t scrut84;
-                                                        uint64_t o320;
-                                                        uint64_t c214;
-                                                        uint64_t c317;
-                                                        lit24.fst = r_01;
-                                                        lit24.snd = r_11;
-                                                        lit24.thd = r_21;
-                                                        lit24.f3 = r_31;
-                                                        lit24.f4 = r_41;
-                                                        lit24.f5 = r_51;
-                                                        lit24.f6 = r_61;
-                                                        lit24.f7 = r_71;
-                                                        scrut81 = lit24;
-                                                        st20 = scrut81.fst;
-                                                        st21 = scrut81.snd;
-                                                        st22 = scrut81.thd;
-                                                        st23 = scrut81.f3;
-                                                        st24 = scrut81.f4;
-                                                        st25 = scrut81.f5;
-                                                        st26 = scrut81.f6;
-                                                        st27 = scrut81.f7;
-                                                        t11 = st20;
-                                                        res28 = (uint128_t)prim0 * t11;
-                                                        l0 = (uint64_t)res28;
-                                                        h0 = (uint64_t)(res28 >> (uint32_t)64U);
-                                                        res29 = (uint128_t)prim1 * t11;
-                                                        l1 = (uint64_t)res29;
-                                                        h1 = (uint64_t)(res29 >> (uint32_t)64U);
-                                                        res30 = (uint128_t)prim2 * t11;
-                                                        l2 = (uint64_t)res30;
-                                                        h2 = (uint64_t)(res30 >> (uint32_t)64U);
-                                                        res = (uint128_t)prim3 * t11;
-                                                        l3 = (uint64_t)res;
-                                                        h3 = (uint64_t)(res >> (uint32_t)64U);
-                                                        o020 = l0;
-                                                        scrut82 =
-                                                          Hacl_Spec_P256_Basic_addcarry(l1,
-                                                            h0,
-                                                            (uint64_t)0U);
-                                                        o120 = scrut82.fst;
-                                                        c09 = scrut82.snd;
-                                                        scrut83 =
-                                                          Hacl_Spec_P256_Basic_addcarry(l2,
-                                                            h1,
-                                                            c09);
-                                                        o220 = scrut83.fst;
-                                                        c116 = scrut83.snd;
-                                                        scrut84 =
-                                                          Hacl_Spec_P256_Basic_addcarry(l3,
-                                                            h2,
-                                                            c116);
-                                                        o320 = scrut84.fst;
-                                                        c214 = scrut84.snd;
-                                                        c317 = h3 + c214;
-                                                        {
-                                                          K___uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t
-                                                          lit25;
-                                                          K___uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t
-                                                          scrut85;
-                                                          uint64_t f3;
-                                                          uint64_t f2;
-                                                          uint64_t f1;
-                                                          uint64_t f0;
-                                                          uint64_t c;
-                                                          lit25.fst = c317;
-                                                          lit25.snd.fst = o020;
-                                                          lit25.snd.snd = o120;
-                                                          lit25.snd.thd = o220;
-                                                          lit25.snd.f3 = o320;
-                                                          scrut85 = lit25;
-                                                          f3 = scrut85.snd.f3;
-                                                          f2 = scrut85.snd.thd;
-                                                          f1 = scrut85.snd.snd;
-                                                          f0 = scrut85.snd.fst;
-                                                          c = scrut85.fst;
-                                                          {
-                                                            K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t
-                                                            lit26;
-                                                            K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t
-                                                            scrut86;
-                                                            uint64_t t2_01;
-                                                            uint64_t t2_11;
-                                                            uint64_t t2_21;
-                                                            uint64_t t2_31;
-                                                            uint64_t t2_41;
-                                                            uint64_t t2_51;
-                                                            uint64_t t2_61;
-                                                            uint64_t t2_71;
-                                                            K___uint64_t_uint64_t scrut87;
-                                                            uint64_t o021;
-                                                            uint64_t c0;
-                                                            K___uint64_t_uint64_t scrut88;
-                                                            uint64_t o121;
-                                                            uint64_t c1;
-                                                            K___uint64_t_uint64_t scrut89;
-                                                            uint64_t o221;
-                                                            uint64_t c2;
-                                                            K___uint64_t_uint64_t scrut90;
-                                                            uint64_t o321;
-                                                            uint64_t c318;
-                                                            lit26.fst = f0;
-                                                            lit26.snd = f1;
-                                                            lit26.thd = f2;
-                                                            lit26.f3 = f3;
-                                                            lit26.f4 = c;
-                                                            lit26.f5 = (uint64_t)0U;
-                                                            lit26.f6 = (uint64_t)0U;
-                                                            lit26.f7 = (uint64_t)0U;
-                                                            scrut86 = lit26;
-                                                            t2_01 = scrut86.fst;
-                                                            t2_11 = scrut86.snd;
-                                                            t2_21 = scrut86.thd;
-                                                            t2_31 = scrut86.f3;
-                                                            t2_41 = scrut86.f4;
-                                                            t2_51 = scrut86.f5;
-                                                            t2_61 = scrut86.f6;
-                                                            t2_71 = scrut86.f7;
-                                                            scrut87 =
-                                                              Hacl_Spec_P256_Basic_addcarry(st20,
-                                                                t2_01,
-                                                                (uint64_t)0U);
-                                                            o021 = scrut87.fst;
-                                                            c0 = scrut87.snd;
-                                                            scrut88 =
-                                                              Hacl_Spec_P256_Basic_addcarry(st21,
-                                                                t2_11,
-                                                                c0);
-                                                            o121 = scrut88.fst;
-                                                            c1 = scrut88.snd;
-                                                            scrut89 =
-                                                              Hacl_Spec_P256_Basic_addcarry(st22,
-                                                                t2_21,
-                                                                c1);
-                                                            o221 = scrut89.fst;
-                                                            c2 = scrut89.snd;
-                                                            scrut90 =
-                                                              Hacl_Spec_P256_Basic_addcarry(st23,
-                                                                t2_31,
-                                                                c2);
-                                                            o321 = scrut90.fst;
-                                                            c318 = scrut90.snd;
-                                                            {
-                                                              K___uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t
-                                                              lit27;
-                                                              K___uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t
-                                                              scrut91;
-                                                              uint64_t o3;
-                                                              uint64_t o2;
-                                                              uint64_t o1;
-                                                              uint64_t o0;
-                                                              uint64_t c3;
-                                                              K___uint64_t_uint64_t scrut92;
-                                                              uint64_t o4;
-                                                              uint64_t c4;
-                                                              K___uint64_t_uint64_t scrut93;
-                                                              uint64_t o5;
-                                                              uint64_t c5;
-                                                              K___uint64_t_uint64_t scrut94;
-                                                              uint64_t o6;
-                                                              uint64_t c6;
-                                                              K___uint64_t_uint64_t scrut95;
-                                                              uint64_t o7;
-                                                              uint64_t c7;
-                                                              lit27.fst = c318;
-                                                              lit27.snd.fst = o021;
-                                                              lit27.snd.snd = o121;
-                                                              lit27.snd.thd = o221;
-                                                              lit27.snd.f3 = o321;
-                                                              scrut91 = lit27;
-                                                              o3 = scrut91.snd.f3;
-                                                              o2 = scrut91.snd.thd;
-                                                              o1 = scrut91.snd.snd;
-                                                              o0 = scrut91.snd.fst;
-                                                              c3 = scrut91.fst;
-                                                              scrut92 =
-                                                                Hacl_Spec_P256_Basic_addcarry(st24,
-                                                                  t2_41,
-                                                                  c3);
-                                                              o4 = scrut92.fst;
-                                                              c4 = scrut92.snd;
-                                                              scrut93 =
-                                                                Hacl_Spec_P256_Basic_addcarry(st25,
-                                                                  t2_51,
-                                                                  c4);
-                                                              o5 = scrut93.fst;
-                                                              c5 = scrut93.snd;
-                                                              scrut94 =
-                                                                Hacl_Spec_P256_Basic_addcarry(st26,
-                                                                  t2_61,
-                                                                  c5);
-                                                              o6 = scrut94.fst;
-                                                              c6 = scrut94.snd;
-                                                              scrut95 =
-                                                                Hacl_Spec_P256_Basic_addcarry(st27,
-                                                                  t2_71,
-                                                                  c6);
-                                                              o7 = scrut95.fst;
-                                                              c7 = scrut95.snd;
-                                                              {
-                                                                K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t
-                                                                lit28;
-                                                                K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t
-                                                                scrut96;
-                                                                uint64_t r03;
-                                                                uint64_t r13;
-                                                                uint64_t r23;
-                                                                uint64_t r33;
-                                                                uint64_t r4;
-                                                                uint64_t r5;
-                                                                uint64_t r6;
-                                                                uint64_t r7;
-                                                                lit28.fst = c7;
-                                                                lit28.snd = o0;
-                                                                lit28.thd = o1;
-                                                                lit28.f3 = o2;
-                                                                lit28.f4 = o3;
-                                                                lit28.f5 = o4;
-                                                                lit28.f6 = o5;
-                                                                lit28.f7 = o6;
-                                                                lit28.f8 = o7;
-                                                                scrut96 = lit28;
-                                                                r03 = scrut96.snd;
-                                                                r13 = scrut96.thd;
-                                                                r23 = scrut96.f3;
-                                                                r33 = scrut96.f4;
-                                                                r4 = scrut96.f5;
-                                                                r5 = scrut96.f6;
-                                                                r6 = scrut96.f7;
-                                                                r7 = scrut96.f8;
-                                                                {
-                                                                  K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t
-                                                                  lit29;
-                                                                  K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t
-                                                                  scrut97;
-                                                                  uint64_t t3_11;
-                                                                  uint64_t t3_21;
-                                                                  uint64_t t3_31;
-                                                                  uint64_t t3_41;
-                                                                  uint64_t t3_51;
-                                                                  uint64_t t3_61;
-                                                                  uint64_t t3_71;
-                                                                  uint64_t r_0;
-                                                                  uint64_t r_1;
-                                                                  uint64_t r_2;
-                                                                  uint64_t r_3;
-                                                                  uint64_t r_4;
-                                                                  uint64_t r_5;
-                                                                  uint64_t r_6;
-                                                                  uint64_t r_7;
-                                                                  lit29.fst = r03;
-                                                                  lit29.snd = r13;
-                                                                  lit29.thd = r23;
-                                                                  lit29.f3 = r33;
-                                                                  lit29.f4 = r4;
-                                                                  lit29.f5 = r5;
-                                                                  lit29.f6 = r6;
-                                                                  lit29.f7 = r7;
-                                                                  scrut97 = lit29;
-                                                                  t3_11 = scrut97.snd;
-                                                                  t3_21 = scrut97.thd;
-                                                                  t3_31 = scrut97.f3;
-                                                                  t3_41 = scrut97.f4;
-                                                                  t3_51 = scrut97.f5;
-                                                                  t3_61 = scrut97.f6;
-                                                                  t3_71 = scrut97.f7;
-                                                                  r_0 = t3_11;
-                                                                  r_1 = t3_21;
-                                                                  r_2 = t3_31;
-                                                                  r_3 = t3_41;
-                                                                  r_4 = t3_51;
-                                                                  r_5 = t3_61;
-                                                                  r_6 = t3_71;
-                                                                  r_7 = (uint64_t)0U;
-                                                                  {
-                                                                    K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t
-                                                                    lit30;
-                                                                    K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t
-                                                                    scrut98;
-                                                                    uint64_t st30;
-                                                                    uint64_t st31;
-                                                                    uint64_t st32;
-                                                                    uint64_t st33;
-                                                                    uint64_t st34;
-                                                                    lit30.fst = r_0;
-                                                                    lit30.snd = r_1;
-                                                                    lit30.thd = r_2;
-                                                                    lit30.f3 = r_3;
-                                                                    lit30.f4 = r_4;
-                                                                    lit30.f5 = r_5;
-                                                                    lit30.f6 = r_6;
-                                                                    lit30.f7 = r_7;
-                                                                    scrut98 = lit30;
-                                                                    st30 = scrut98.fst;
-                                                                    st31 = scrut98.snd;
-                                                                    st32 = scrut98.thd;
-                                                                    st33 = scrut98.f3;
-                                                                    st34 = scrut98.f4;
-                                                                    {
-                                                                      K___uint64_t_uint64_t_uint64_t_uint64_t
-                                                                      lit;
-                                                                      K___uint64_t_uint64_t_uint64_t_uint64_t
-                                                                      scrut;
-                                                                      uint64_t r0;
-                                                                      uint64_t r1;
-                                                                      uint64_t r2;
-                                                                      uint64_t r3;
-                                                                      lit.fst = st30;
-                                                                      lit.snd = st31;
-                                                                      lit.thd = st32;
-                                                                      lit.f3 = st33;
-                                                                      scrut =
-                                                                        Hacl_Spec_P256_Core_reduction_prime_2prime_with_carry(st34,
-                                                                          lit);
-                                                                      r0 = scrut.fst;
-                                                                      r1 = scrut.snd;
-                                                                      r2 = scrut.thd;
-                                                                      r3 = scrut.f3;
-                                                                      result[0U] = r0;
-                                                                      result[1U] = r1;
-                                                                      result[2U] = r2;
-                                                                      result[3U] = r3;
-                                                                    }
-                                                                  }
-                                                                }
-                                                              }
-                                                            }
-                                                          }
-                                                        }
-                                                      }
-                                                    }
-                                                  }
-                                                }
-                                              }
+                                              K___uint64_t_uint64_t_uint64_t_uint64_t lit;
+                                              K___uint64_t_uint64_t_uint64_t_uint64_t scrut;
+                                              uint64_t r0;
+                                              uint64_t r1;
+                                              uint64_t r2;
+                                              uint64_t r3;
+                                              lit.fst = st30;
+                                              lit.snd = st31;
+                                              lit.thd = st32;
+                                              lit.f3 = st33;
+                                              scrut =
+                                                Hacl_Spec_P256_Core_reduction_prime_2prime_with_carry(st34,
+                                                  lit);
+                                              r0 = scrut.fst;
+                                              r1 = scrut.snd;
+                                              r2 = scrut.thd;
+                                              r3 = scrut.f3;
+                                              result[0U] = r0;
+                                              result[1U] = r1;
+                                              result[2U] = r2;
+                                              result[3U] = r3;
                                             }
                                           }
                                         }
@@ -4334,20 +3073,17 @@ void point_add(uint64_t *p, uint64_t *q, uint64_t *result, uint64_t *tempBuffer)
   }
 }
 
-void toJ(uint64_t *p, uint64_t *resultPoint, uint64_t *tempBuffer)
+uint64_t isPointAtInfinityPrivate(uint64_t *p)
 {
-  uint64_t *xf = p;
-  uint64_t *yf = p + (uint32_t)4U;
-  uint64_t *zf = p + (uint32_t)8U;
-  uint64_t *z2f = tempBuffer + (uint32_t)4U;
-  uint64_t *z3f = tempBuffer + (uint32_t)8U;
-  uint64_t *tempBuffer20 = tempBuffer + (uint32_t)12U;
-  Hacl_Spec_P256_MontgomeryMultiplication_montgomery_multiplication_buffer(zf, zf, z2f);
-  Hacl_Spec_P256_MontgomeryMultiplication_montgomery_multiplication_buffer(z2f, zf, z3f);
-  Hacl_Spec_P256_MontgomeryMultiplication_exponent(z2f, z2f, tempBuffer20);
-  Hacl_Spec_P256_MontgomeryMultiplication_exponent(z3f, z3f, tempBuffer20);
-  Hacl_Spec_P256_MontgomeryMultiplication_montgomery_multiplication_buffer(xf, z2f, z2f);
-  Hacl_Spec_P256_MontgomeryMultiplication_montgomery_multiplication_buffer(yf, z3f, z3f);
+  uint64_t z0 = p[8U];
+  uint64_t z1 = p[9U];
+  uint64_t z2 = p[10U];
+  uint64_t z3 = p[11U];
+  uint64_t z0_zero = FStar_UInt64_eq_mask(z0, (uint64_t)0U);
+  uint64_t z1_zero = FStar_UInt64_eq_mask(z1, (uint64_t)0U);
+  uint64_t z2_zero = FStar_UInt64_eq_mask(z2, (uint64_t)0U);
+  uint64_t z3_zero = FStar_UInt64_eq_mask(z3, (uint64_t)0U);
+  return (z0_zero & z1_zero) & (z2_zero & z3_zero);
 }
 
 void norm(uint64_t *p, uint64_t *resultPoint, uint64_t *tempBuffer)
@@ -4355,9 +3091,6 @@ void norm(uint64_t *p, uint64_t *resultPoint, uint64_t *tempBuffer)
   uint64_t *xf = p;
   uint64_t *yf = p + (uint32_t)4U;
   uint64_t *zf = p + (uint32_t)8U;
-  uint64_t *resultX = resultPoint;
-  uint64_t *resultY = resultPoint + (uint32_t)4U;
-  uint64_t *resultZ = resultPoint + (uint32_t)8U;
   uint64_t *z2f = tempBuffer + (uint32_t)4U;
   uint64_t *z3f = tempBuffer + (uint32_t)8U;
   uint64_t *tempBuffer20 = tempBuffer + (uint32_t)12U;
@@ -4367,12 +3100,20 @@ void norm(uint64_t *p, uint64_t *resultPoint, uint64_t *tempBuffer)
   Hacl_Spec_P256_MontgomeryMultiplication_exponent(z3f, z3f, tempBuffer20);
   Hacl_Spec_P256_MontgomeryMultiplication_montgomery_multiplication_buffer(xf, z2f, z2f);
   Hacl_Spec_P256_MontgomeryMultiplication_montgomery_multiplication_buffer(yf, z3f, z3f);
-  fromDomain(z2f, resultX);
-  fromDomain(z3f, resultY);
-  resultZ[0U] = (uint64_t)1U;
-  resultZ[1U] = (uint64_t)0U;
-  resultZ[2U] = (uint64_t)0U;
-  resultZ[3U] = (uint64_t)0U;
+  {
+    uint64_t zeroBuffer[4U] = { 0U };
+    uint64_t *resultX = resultPoint;
+    uint64_t *resultY = resultPoint + (uint32_t)4U;
+    uint64_t *resultZ = resultPoint + (uint32_t)8U;
+    uint64_t bit = isPointAtInfinityPrivate(resultPoint);
+    fromDomain(z2f, resultX);
+    fromDomain(z3f, resultY);
+    resultZ[0U] = (uint64_t)1U;
+    resultZ[1U] = (uint64_t)0U;
+    resultZ[2U] = (uint64_t)0U;
+    resultZ[3U] = (uint64_t)0U;
+    copy_conditional(resultZ, zeroBuffer, bit);
+  }
 }
 
 static void zero_buffer(uint64_t *p)
@@ -4391,27 +3132,11 @@ static void zero_buffer(uint64_t *p)
   p[11U] = (uint64_t)0U;
 }
 
-uint64_t isPointAtInfinityPrivate(uint64_t *p)
-{
-  uint64_t z0 = p[8U];
-  uint64_t z1 = p[9U];
-  uint64_t z2 = p[10U];
-  uint64_t z3 = p[11U];
-  uint64_t z0_zero = FStar_UInt64_eq_mask(z0, (uint64_t)0U);
-  uint64_t z1_zero = FStar_UInt64_eq_mask(z1, (uint64_t)0U);
-  uint64_t z2_zero = FStar_UInt64_eq_mask(z2, (uint64_t)0U);
-  uint64_t z3_zero = FStar_UInt64_eq_mask(z3, (uint64_t)0U);
-  return ~((z0_zero & z1_zero) & (z2_zero & z3_zero));
-}
-
 void
 scalarMultiplicationI(uint64_t *p, uint64_t *result, uint8_t *scalar, uint64_t *tempBuffer)
 {
   uint64_t *q = tempBuffer;
   uint64_t *buff;
-  uint64_t bit;
-  uint64_t *zeroTB;
-  uint64_t *q_z;
   zero_buffer(q);
   buff = tempBuffer + (uint32_t)12U;
   pointToDomain(p, result);
@@ -4427,11 +3152,7 @@ scalarMultiplicationI(uint64_t *p, uint64_t *result, uint8_t *scalar, uint64_t *
       Hacl_Spec_P256_Ladder_cswap(bit, q, result);
     }
   }
-  bit = isPointAtInfinityPrivate(q);
-  zeroTB = tempBuffer + (uint32_t)12U;
   norm(q, result, buff);
-  q_z = result + (uint32_t)8U;
-  copy_conditional(q_z, zeroTB, bit);
 }
 
 static void uploadBasePoint(uint64_t *p)
