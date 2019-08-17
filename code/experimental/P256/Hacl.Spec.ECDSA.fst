@@ -125,24 +125,3 @@ let exponent_spec a =
     admit();
     let a0, _ = _exponent_spec prime_p256_order_inverse_seq (1, a) in
     a0
-
-val power_distributivity_2: a: nat -> b: nat -> c: pos -> 
-  Lemma (pow (a * b) c == pow a c * pow b c)
-
-let rec power_distributivity_2 a b c = 
-  match c with 
-  |0 -> ()
-  |1 -> ()
-  | _ ->
-    let open FStar.Tactics in 
-    let open FStar.Tactics.Canon in
-    power_distributivity_2 a b (c - 1);
-    assert(pow (a * b) (c - 1) == pow a (c - 1) * pow b (c - 1));
-    assert(pow (a * b) (c - 1) * pow (a * b) 1 == pow a (c - 1) * pow b (c - 1) * pow (a * b) 1);
-    
-    assert(pow (a * b) (c - 1) * pow (a * b) 1 == pow (a * b) c);
-    assert(pow (a * b) 1 == a * b);
-    assert(pow a (c - 1) * pow b (c - 1) * pow (a * b) 1 == pow a (c - 1) * pow b (c - 1) * a * b);
-    assert_by_tactic (pow a (c - 1) * pow b (c - 1) * a * b == (pow a c * pow b c)) canon;
-    assert(pow a (c - 1) * pow b (c - 1) * pow (a * b) 1 == (pow a c * pow b c));
-    assert(pow a c * pow b c == pow (a * b) c)
