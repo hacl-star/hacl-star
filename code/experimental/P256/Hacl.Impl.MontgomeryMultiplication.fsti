@@ -42,7 +42,7 @@ val reduction_prime_2prime_order: x: felem -> result: felem ->
 
 
 noextract
-val fromDomain_: a: nat -> Tot nat 
+val fromDomain_: a: nat -> Tot (r: nat { r < prime})
 
 noextract
 val toDomain_: a: nat -> Tot nat

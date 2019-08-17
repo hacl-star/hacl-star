@@ -336,6 +336,7 @@ let ecdsa_verification_step23 mLen m hashAsFelem =
   pop_frame()
 
 
+#reset-options "--z3refresh --z3rlimit 300"
 inline_for_extraction noextract
 val ecdsa_verification_step4: r: felem -> s: felem -> hash: felem -> bufferU1: lbuffer uint8 (size 32) -> 
   bufferU2: lbuffer uint8 (size 32) ->
@@ -353,22 +354,18 @@ let ecdsa_verification_step4 r s hash bufferU1 bufferU2 =
       let u1 = sub tempBuffer (size 4) (size 4) in 
       let u2 = sub tempBuffer (size 8) (size 4) in 
     let h0 = ST.get() in 
-  (* copy inverseS s;  *)
   fromDomainImpl s inverseS;
   montgomery_ladder_exponent inverseS; 
-  multPowerPartial inverseS hash u1; 
-  multPowerPartial inverseS r u2; 
-    (*let h2 = ST.get() in 
-    assert(modifies1 tempBuffer h0 h2); *)
+    let h2 = ST.get() in 
+    assert(
+      let a_ = fromDomain_  (fromDomain_ (as_nat h0 s)) in 
+      let r0D = exponent_spec a_ in 
+      fromDomain_ (as_nat h2 inverseS) == r0D);
+
+  multPowerPartial s inverseS hash u1; 
+  multPowerPartial s inverseS r u2; 
   toUint8 u1 bufferU1;
   toUint8 u2 bufferU2;
-    (*let h3 = ST.get() in 
-    assert(modifies2 bufferU1 bufferU2 h2 h3);
-    modifies2_is_modifies3 tempBuffer bufferU1 bufferU2 h2 h3;
-    modifies1_is_modifies3 bufferU1 bufferU2 tempBuffer h0 h2;
-    assert(modifies3 bufferU1 bufferU2 tempBuffer h0 h2);
-    assert(modifies3 bufferU1 bufferU2 tempBuffer h2 h3);
-    assert(modifies3 bufferU1 bufferU2 tempBuffer h0 h3); *)
   pop_frame()
 
 

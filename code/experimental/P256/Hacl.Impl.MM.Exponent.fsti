@@ -50,7 +50,8 @@ val montgomery_ladder_exponent: a: felem -> Stack unit
 
 val fromDomainImpl: a: felem -> result: felem -> Stack unit
   (requires fun h -> live h a /\ live h result /\ as_nat h a < prime)
-  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ as_nat h1 result == fromDomain_ (as_nat h0 a))
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
+     as_nat h1 result < prime /\ as_nat h1 result == fromDomain_ (as_nat h0 a))
 
 val multPower: a: felem -> b: felem ->  result: felem -> Stack unit 
   (requires fun h -> live h a /\ live h b /\ live h result /\ as_nat h a < prime /\ as_nat h b < prime)
@@ -58,6 +59,11 @@ val multPower: a: felem -> b: felem ->  result: felem -> Stack unit
     as_nat h1 result = (Hacl.Spec.P256.Definitions.pow (as_nat h0 a) (prime_p256_order - 2)  * (as_nat h0 b)) % prime_p256_order)
 
 
-val multPowerPartial: a: felem -> b: felem -> result: felem -> Stack unit 
-  (requires fun h -> live h a /\ live h b /\ live h result /\ as_nat h a < prime /\ as_nat h b < prime)
+val multPowerPartial: s: felem -> a: felem -> b: felem -> result: felem -> Stack unit 
+  (requires fun h -> live h a /\ live h b /\ live h result /\ as_nat h a < prime /\ as_nat h b < prime /\ 
+  (
+      let a_ = fromDomain_  (fromDomain_ (as_nat h s)) in 
+      let r0D = exponent_spec a_ in 
+      fromDomain_ (as_nat h a) == r0D)
+  )
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1)

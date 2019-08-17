@@ -890,7 +890,13 @@ static void Hacl_Impl_MM_Exponent_fromDomainImpl(uint64_t *a, uint64_t *result)
   Hacl_Impl_MontgomeryMultiplication_montgomery_multiplication_ecdsa_module(one1, a, result);
 }
 
-static void Hacl_Impl_MM_Exponent_multPowerPartial(uint64_t *a, uint64_t *b, uint64_t *result)
+static void
+Hacl_Impl_MM_Exponent_multPowerPartial(
+  uint64_t *s1,
+  uint64_t *a,
+  uint64_t *b,
+  uint64_t *result
+)
 {
   uint64_t buffFromDB[4U] = { 0U };
   Hacl_Impl_MM_Exponent_fromDomainImpl(b, buffFromDB);
@@ -1118,8 +1124,8 @@ Hacl_Impl_ECDSA_P256SHA256_Verification_ecdsa_verification(
         uint64_t *u2 = tempBuffer1 + (uint32_t)8U;
         Hacl_Impl_MM_Exponent_fromDomainImpl(s1, inverseS);
         Hacl_Impl_MM_Exponent_montgomery_ladder_exponent(inverseS);
-        Hacl_Impl_MM_Exponent_multPowerPartial(inverseS, hashAsFelem, u11);
-        Hacl_Impl_MM_Exponent_multPowerPartial(inverseS, r, u2);
+        Hacl_Impl_MM_Exponent_multPowerPartial(s1, inverseS, hashAsFelem, u11);
+        Hacl_Impl_MM_Exponent_multPowerPartial(s1, inverseS, r, u2);
         Hacl_Impl_ECDSA_P256SHA256_Verification_toUint8(u11, bufferU1);
         Hacl_Impl_ECDSA_P256SHA256_Verification_toUint8(u2, bufferU2);
         {
