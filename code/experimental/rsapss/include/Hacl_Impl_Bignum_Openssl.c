@@ -562,3 +562,44 @@ void Hacl_Impl_Bignum_Openssl_solve_dlp_single_external(
     //    fprintf(stderr, "Rho ended\n");
 
 }
+
+void Hacl_Impl_Bignum_Openssl_crt(
+  uint32_t nLen,
+  uint32_t l,
+  uint64_t *raw_ps,
+  uint64_t *raw_as,
+  uint64_t *res) {
+    BN_CTX *ctx = BN_CTX_new();
+
+    int nLenBytes = ((int)nLen)*8;
+
+
+    BIGNUM *bn_res = BN_lebin2bn((unsigned char*) raw_as,nLenBytes,NULL);
+    BIGNUM *pprod = BN_lebin2bn((unsigned char*) raw_ps,nLenBytes,NULL);
+
+    BIGNUM *tmp1 = BN_new ();
+    BIGNUM *tmp2 = BN_new ();
+    BIGNUM *tmp3 = BN_new ();
+
+    for (int i = 1; i < l; i++) {
+        BIGNUM *ai = BN_lebin2bn((unsigned char*) (raw_as + nLen * i),nLenBytes,NULL);
+        BIGNUM *pi = BN_lebin2bn((unsigned char*) (raw_ps + nLen * i),nLenBytes,NULL);
+
+        BN_mod_inverse(tmp1,pprod,pi,ctx); // pprod^{-1} mod p
+        BN_sub(tmp2,ai,bn_res); // a - c
+        BN_mod_mul(tmp3,tmp1,tmp2,pi,ctx); // y
+        BN_mul(tmp3,tmp3,pprod,ctx); // y * mprod
+        BN_add(bn_res,bn_res,tmp3);
+        BN_mul(pprod,pprod,pi,ctx);
+    }
+
+    BN_bn2lebinpad(bn_res,(unsigned char*)res,nLenBytes);
+    BN_free (bn_res);
+    BN_free (pprod);
+
+    BN_free (tmp1);
+    BN_free (tmp2);
+    BN_free (tmp3);
+
+    BN_CTX_free(ctx);
+}

@@ -193,6 +193,7 @@ genDataDGK ::
     -> Int
     -> IO (Integer, Integer, Integer, Integer, Integer, Integer)
 genDataDGK uFacts bits = do
+    putTextLn "Dgk keygen running"
     let u = fromFacts uFacts
     let vbits = 160
     let ubits = fromIntegral $ log2 u
@@ -223,7 +224,6 @@ genDataDGK uFacts bits = do
     let findWithOrd reqO = do
             g <- randomRIO (0, (p-1)*(q-1))
             o <- fastFindOrder n g flatFacts
-            putTextLn "Testing order"
             if o `mod` reqO == 0 then do
                 let cand = exp n g (o `div` reqO)
                 o1 <- fastFindOrder p (cand `mod` p) flatFacts

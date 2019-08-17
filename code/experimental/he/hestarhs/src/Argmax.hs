@@ -290,6 +290,10 @@ argmaxLog2Server sock skTop skDGK skGM l m = do
 -- LAN usb:
 -- Log argmax k = 16, 32 numbers of 64 bits: 1.4s
 -- Linear argmax: k = 1, r = 1, 4.18s
+--
+-- WAN delay 51.6 ms:
+-- Linear argmax: 13.67
+-- Log argmax: 3.064
 
 _testArgmax :: Socket Req -> Socket Rep -> IO ()
 _testArgmax req rep = do
@@ -297,7 +301,7 @@ _testArgmax req rep = do
 
     putTextLn "Keygen..."
     -- SIMD parameter
-    let k = 1
+    let k = 16
     -- bit size of numbers we compare
     let l = 64
     -- plaintext space size
@@ -336,7 +340,7 @@ _testArgmax req rep = do
           e2 <- paheEnc pkTop v2
 
           ((ix,()),timing) <-
-              measureTimeRet "log Argmax" $
+              measureTimeRet $
               concurrently
               (argmaxLog2Client req pkTop pkDGK pkGM l mlog e1 e2)
               (argmaxLog2Server rep skTop skDGK skGM l mlog)
@@ -389,7 +393,7 @@ _testArgmax req rep = do
             putTextLn "Launching"
 
             (((maxes,indices),()),timing) <-
-                measureTimeRet "Argmax" $
+                measureTimeRet $
                 concurrently
                 (argmaxClient req pkTop pkDGK pkGM l r encVals)
                 (argmaxServer rep skTop skDGK skGM l m r)
@@ -406,8 +410,8 @@ _testArgmax req rep = do
             putTextLn "OK"
             pure timing
 
-    --timings <- replicateM 10 $ testLogArgmax
-    timings <- replicateM 10 $ testArgmax 32 1
+    timings <- replicateM 10 $ testLogArgmax
+    --timings <- replicateM 10 $ testArgmax 32 1
     print $ average timings
 
 --    --testLogArgmax

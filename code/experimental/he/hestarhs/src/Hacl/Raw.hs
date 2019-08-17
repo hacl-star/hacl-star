@@ -163,23 +163,44 @@ foreign import ccall "Hacl_Impl_HE_DGK_hom_mul_plain" dgkHomMulScal
     -> Bignum
     -> IO ()
 
-foreign import ccall "Hacl_Impl_HE_DGK_fullprod" dgkFullprod
+foreign import ccall "Hacl_Impl_HE_DGK_Extra_fullprod" dgkFullprod
     :: Word32
     -> Word32
     -> BignumList -> BignumList -> Bignum
     -> IO ()
 
-foreign import ccall "Hacl_Impl_HE_DGK_solve_dlp_single" dgkDlpSingle
+foreign import ccall "Hacl_Impl_HE_DGK_Extra_solve_dlp_single" dgkDlpSingle
     :: Word32
     -> Bignum -> Bignum -> Bignum -> Bignum -> Bignum
     -> Bignum
     -> IO ()
 
-foreign import ccall "Hacl_Impl_HE_DGK_decrypt" dgkDec
+foreign import ccall "Hacl_Impl_HE_DGK_Extra_decrypt" dgkDec
     :: Word32
     -> Word32
     -> Bignum -> Bignum -> Bignum -> Bignum
     -> BignumList -> BignumList
     -> Bignum -> Bignum -> Bignum -> Bignum
+    -> Bignum
+    -> IO ()
+
+----------------------------------------------------------------------------
+-- Helpers
+----------------------------------------------------------------------------
+
+foreign import ccall "Hacl_Impl_HE_DGK_Extra_crt" dgkCRT
+    :: Word32
+    -> Word32
+    -> BignumList
+    -> BignumList
+    -> BignumList
+    -> Bignum
+    -> IO ()
+
+foreign import ccall "Hacl_Impl_Bignum_Openssl_crt" osslCRT
+    :: Word32
+    -> Word32
+    -> BignumList
+    -> BignumList
     -> Bignum
     -> IO ()

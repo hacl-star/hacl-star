@@ -11,6 +11,8 @@ import qualified Data.Time.Clock.POSIX as P
 import System.IO.Unsafe (unsafePerformIO)
 import System.Random (randomRIO)
 
+getCurrentTimeMcs :: IO Integer
+getCurrentTimeMcs = floor . (*1000000) <$> P.getPOSIXTime
 
 getCurrentTimeMs :: IO Integer
 getCurrentTimeMs = floor . (*1000) <$> P.getPOSIXTime
@@ -37,17 +39,19 @@ findM :: Monad m => (a -> m Bool) -> [a] -> m (Maybe a)
 findM _ []     = return Nothing
 findM p (x:xs) = ifM (p x) (return $ Just x) (findM p xs)
 
-measureTimeRet :: Text -> IO a -> IO (a,Integer)
-measureTimeRet label action = do
-    time0 <- P.getPOSIXTime
+measureTimeRet :: IO a -> IO (a,Integer)
+measureTimeRet action = do
+    time0 <- getCurrentTimeMcs
     r <- action
-    time1 <- P.getPOSIXTime
-    let delta = round ((time1-time0) * 1000)
-    logRaw $ label <> " took : " <> show delta <> "ms"
+    time1 <- getCurrentTimeMcs
+    let delta = time1-time0
     pure (r, delta)
 
 measureTimeSingle :: Text -> IO a -> IO a
-measureTimeSingle label action = fst <$> measureTimeRet label action
+measureTimeSingle label action = do
+    (a,delta) <- measureTimeRet action
+    logRaw $ label <> " took : " <> show delta <> "mcs"
+    pure a
 
 simdadd :: Num a => [a] -> [a] -> [a]
 simdadd x y = map (uncurry (+)) (zip x y)
