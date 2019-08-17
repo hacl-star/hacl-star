@@ -23,7 +23,17 @@ open Hacl.Hash.SHA2
 val bufferToJac: p: lbuffer uint64 (size 8) -> result: point -> Stack unit 
   (requires fun h -> live h p /\ live h result /\ disjoint p result)
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ as_nat h1 (gsub result (size 8) (size 4)) == 1 /\ 
-    as_seq h0 (gsub p (size 0) (size 8)) == as_seq h1 (gsub result (size 0) (size 8))) 
+    as_seq h0 (gsub p (size 0) (size 8)) == as_seq h1 (gsub result (size 0) (size 8)) /\
+    (
+      let x = as_nat h0 (gsub p (size 0) (size 4)) in 
+      let y = as_nat h0 (gsub p (size 4) (size 4)) in 
+
+      let xJ, yJ, zJ = toJacobianCoordinates (x, y) in 
+      xJ == as_nat h1 (gsub result (size 0) (size 4)) /\ 
+      yJ == as_nat h1 (gsub result (size 4) (size 4)) /\ 
+      zJ == as_nat h1 (gsub result (size 8) (size 4)) 
+    )
+)    
     
 let bufferToJac p result = 
   let partPoint = sub result (size 0) (size 8) in 

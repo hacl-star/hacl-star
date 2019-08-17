@@ -8,6 +8,42 @@ open Lib.ByteSequence
 open Lib.IntTypes
 open Lib.Sequence
 
+open Spec.Hash
+
+(*
+def toB(x):
+    for i in range(4):
+        print(((x >> i * 64) % (2 ** 64)))
+
+qx = 0xe424dc61d4bb3cb7ef4344a7f8957a0c5134e16f7a67c074f82e6e12f49abf3c
+qy = 0x970eed7aa2bc48651545949de1dddaf0127e5965ac85d1243d6f60e7dfaee927
+
+primeOrder = 115792089210356248762697446949407573529996955224135760342422259061068512044369
+
+R = 0xbf96b99aa49c705c910be33142017c642ff540c76349b9dab72f981fd9347f4f
+S = 0x17c55095819089c2e03b9cd415abdf12444e323075d98f31920b9e0f57ec871c
+z = 18096356966075357844 + 13937533974375268201 * 2**64 + 2811996616035378163 * 2**128 + 15112091478601597678 * 2**192
+
+u1 = (inverse_mod(S, primeOrder) * z) % primeOrder
+u2 = (inverse_mod(S, primeOrder) * R) % primeOrder
+
+prime = Zmod(Integer(115792089210356248762697446949407573530086143415290314195533631308867097853951))
+p2 = 41058363725152142129326129780047268409114441015993725554835256314039467401291
+
+c = EllipticCurve(prime, [-3, p2])
+basePoint = c(0x6b17d1f2e12c4247f8bce6e563a440f277037d812deb33a0f4a13945d898c296, 0x4fe342e2fe1a7f9b8ee7eb4a7c0f9e162bce33576b315ececbb6406837bf51f5)
+pk = c(qx, qy)
+
+u1g = basePoint * u1
+u2Q = pk * u2
+x1 = (u1g + u2Q).xy()[0]
+print(x1 == R)
+print(Integer(x1) % primeOrder)
+print(Integer(R) % primeOrder)
+
+
+
+*)
 
 let prime = prime_p256_order 
 let nat_prime = (n: nat {n < prime})
@@ -15,7 +51,7 @@ let nat_prime = (n: nat {n < prime})
 
 let ith_bit (k:lbytes 32) (i:nat{i < 256}) : (t: uint64 {uint_v t == 0 \/ uint_v t == 1}) =
   let q = i / 8 in let r = size (i % 8) in
-  admit();
+    admit();
   to_u64 ((index k q >>. r) &. u8 1)
 
 let ( *% ) a b = (a * b) % prime
@@ -125,3 +161,13 @@ let exponent_spec a =
     admit();
     let a0, _ = _exponent_spec prime_p256_order_inverse_seq (1, a) in
     a0
+
+val toJacobianCoordinates: tuple2 nat nat -> Tot (tuple3 nat nat nat)
+
+let toJacobianCoordinates (r0, r1) = (r0, r1, 1)
+
+val ecdsa_verification: publicKey: tuple2 nat nat -> r: nat -> s: nat -> 
+  mLen: size_nat{mLen < Spec.Hash.Definitions.max_input_length Spec.Hash.Definitions.SHA2_256} -> input: lseq uint8 mLen -> Tot bool
+(*
+let ecdsa_verification publicKey r s mLen input = 
+  let isPublicKeyIdentity = 
