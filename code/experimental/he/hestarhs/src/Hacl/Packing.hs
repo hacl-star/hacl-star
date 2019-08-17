@@ -6,6 +6,7 @@ module Hacl.Packing where
 import Universum hiding (exp, last, (<*>))
 
 import Criterion.Main
+import Data.List ((!!))
 import Data.Vector (Vector, (!))
 import qualified Data.Vector as V
 import System.Random (randomRIO)
@@ -19,10 +20,21 @@ import Utils
 -- CRT packing
 ----------------------------------------------------------------------------
 
+singlesOut :: [Integer] -> Int -> Maybe Int
+singlesOut [1] i    = Just i
+singlesOut (0:xs) i = singlesOut xs (i+1)
+singlesOut _ _      = Nothing
 
 crt :: [Integer] -> [Integer] -> [Integer] -> Integer
-crt (m1:base) tailProds (a1:vals) =
-    chineseGo base tailProds  vals (a1 `mod` m1) m1
+crt _ _ [] = 0
+crt allbase@(m1:base) (tp0:tailProds) el@(a1:vals) =
+
+    case singlesOut el 0 of
+      Nothing -> chineseGo base tailProds  vals (a1 `mod` m1) m1
+      Just i ->
+          let mi = allbase !! i in
+          let bi = tp0 `div` mi in
+          bi * (inverse bi mi)
   where
     chineseGo :: [Integer] -> [Integer] -> [Integer] -> Integer -> Integer -> Integer
     chineseGo [] _ _ c _ = c
@@ -38,13 +50,12 @@ crt (m1:base) tailProds (a1:vals) =
           y = (m' * (a - c)) `mod` m
           c' = c + mprod * y
     chineseGo _ _ _ _ _ = error "chineseGo pattern match failed"
-crt _ _ [] = 0
 crt [] _ _ = error "crt base is empty"
+crt _ [] _ = error "crt tailprods is empty"
 
 compTailProds :: [Integer] -> [Integer]
 compTailProds [] = error "compTailProds empty"
-compTailProds [x] = [x]
-compTailProds (_:xs) = go xs
+compTailProds xs = go xs
   where
     go []     = []
     go (a:as) = product (a:as) : go as
@@ -142,7 +153,7 @@ testCRT = do
 
     measureTimeSingle "crt" $ replicateM_ 10000 $ do
         m <- randomRIO (1,n)
-        vs <- replicateM m $ randomRIO (0,bound-1)
+        vs <- (++ [1]) <$> replicateM (m-1) (pure 0) --  $ randomRIO (0,bound-1)
         let tprods = compTailProds prms
         let enc = crt prms tprods vs
         let dec = crtInv prms enc
