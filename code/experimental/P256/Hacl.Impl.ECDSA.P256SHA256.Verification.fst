@@ -363,7 +363,10 @@ val ecdsa_verification_step4: r: felem -> s: felem -> hash: felem -> bufferU1: l
     as_nat h s < prime_p256_order /\ as_nat h hash < prime_p256_order /\ as_nat h r < prime_p256_order /\
     LowStar.Monotonic.Buffer.all_disjoint [loc r; loc s; loc hash; loc bufferU1; loc bufferU2] 
   )
-  (ensures fun h0 _ h1 -> modifies (loc bufferU1 |+| loc  bufferU2) h0 h1)
+  (ensures fun h0 _ h1 -> modifies (loc bufferU1 |+| loc  bufferU2) h0 h1 /\
+    as_seq h1 bufferU1 == Lib.ByteSequence.uints_to_bytes_le (nat_as_seq((Hacl.Spec.P256.Definitions.pow (as_nat h0 s) (prime_p256_order - 2)  * (as_nat h0 hash)) % prime_p256_order)) /\ 
+    as_seq h1 bufferU2 == Lib.ByteSequence.uints_to_bytes_le (nat_as_seq((Hacl.Spec.P256.Definitions.pow (as_nat h0 s) (prime_p256_order - 2)  * (as_nat h0 r)) % prime_p256_order))  
+  )
 
 let ecdsa_verification_step4 r s hash bufferU1 bufferU2 = 
   push_frame();
@@ -381,10 +384,21 @@ let ecdsa_verification_step4 r s hash bufferU1 bufferU2 =
       fromDomain_ (as_nat h2 inverseS) == r0D);
 
   multPowerPartial s inverseS hash u1; 
-    let h3 = ST.get() in 
   multPowerPartial s inverseS r u2; 
+    
+    let h3 = ST.get() in 
+    assert(as_nat h3 u1 = (Hacl.Spec.P256.Definitions.pow (as_nat h0 s) (prime_p256_order - 2)  * (as_nat h0 hash)) % prime_p256_order);
+    lemmaSeq2Nat (as_seq h3 u1);
+    lemmaSeq2Nat (as_seq h3 u2);
+
+    assert(as_seq h3 u1 == nat_as_seq((Hacl.Spec.P256.Definitions.pow (as_nat h0 s) (prime_p256_order - 2)  * (as_nat h0 hash)) % prime_p256_order));
+    assert(as_seq h3 u2 == nat_as_seq((Hacl.Spec.P256.Definitions.pow (as_nat h0 s) (prime_p256_order - 2)  * (as_nat h0 r)) % prime_p256_order));
+
   toUint8 u1 bufferU1;
   toUint8 u2 bufferU2;
+    let h4 = ST.get() in 
+    assert(as_seq h4 bufferU1 == Lib.ByteSequence.uints_to_bytes_le (nat_as_seq((Hacl.Spec.P256.Definitions.pow (as_nat h0 s) (prime_p256_order - 2)  * (as_nat h0 hash)) % prime_p256_order)));
+    assert(as_seq h4 bufferU2 == Lib.ByteSequence.uints_to_bytes_le (nat_as_seq((Hacl.Spec.P256.Definitions.pow (as_nat h0 s) (prime_p256_order - 2)  * (as_nat h0 r)) % prime_p256_order)));
   pop_frame()
 
 

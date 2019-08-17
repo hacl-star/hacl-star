@@ -111,11 +111,93 @@ noextract
 let felem_seq = lseq uint64 4
 
 noextract
-let felem_seq_as_nat (a: felem_seq) : Tot nat  = 
+let felem_seq_as_nat (a: felem_seq) : Tot (n: nat {n < pow2 256})  = 
   let open FStar.Mul in 
   let a0 = Lib.Sequence.index a 0 in 
   let a1 =  Lib.Sequence.index a 1 in 
   let a2 =  Lib.Sequence.index  a 2 in 
   let a3 =  Lib.Sequence.index a 3 in 
+  assert_norm( uint_v a0 + uint_v a1 * pow2 64 + uint_v a2 * pow2 64 * pow2 64 + uint_v a3 * pow2 64 * pow2 64 * pow2 64 < pow2 256);
   uint_v a0 + uint_v a1 * pow2 64 + uint_v a2 * pow2 64 * pow2 64 + uint_v a3 * pow2 64 * pow2 64 * pow2 64
 
+noextract 
+let nat_as_seq (a: nat { a < pow2 256}) : lseq uint64 4 = 
+  let a0 = a % pow2 64 in 
+  let a1 = (arithmetic_shift_right a 64) % pow2 64 in 
+  let a2 = (arithmetic_shift_right a 128) % pow2 64 in 
+  let a3 = (arithmetic_shift_right a 192) % pow2 64 in 
+  let s = Lib.Sequence.create 4 (u64 0) in 
+  let s = Lib.Sequence.upd s 0 (u64 a0) in 
+  let s = Lib.Sequence.upd s 1 (u64 a1) in 
+  let s = Lib.Sequence.upd s 2 (u64 a2) in 
+  Lib.Sequence.upd s 3 (u64 a3)
+
+#reset-options "--z3refresh --z3rlimit 200"
+
+val lemma1: a0: uint64 -> a1: uint64 -> a2: uint64 -> a3: uint64 -> Lemma (arithmetic_shift_right (uint_v a0 + uint_v a1 * pow2 64 + uint_v a2 * pow2 64 * pow2 64 + uint_v a3 * pow2 64 * pow2 64 * pow2 64) 192 ==  uint_v a3)
+
+let lemma1 a0 a1 a2 a3 = 
+  assert_norm (pow2 64 * pow2 64 * pow2 64 = pow2 192)
+
+
+val lemma2: a0: uint64 -> a1: uint64 -> a2: uint64 -> a3: uint64 -> Lemma
+    (
+      let k_s = uint_v a0 + uint_v a1 * pow2 64 + uint_v a2 * pow2 64 * pow2 64 + uint_v a3 * pow2 64 * pow2 64 * pow2 64 in
+      let k0 = k_s % pow2 64 in
+      let k1 = (arithmetic_shift_right k_s 64) % pow2 64 in 
+      let k2 = (arithmetic_shift_right k_s 128) % pow2 64 in 
+      let k3 = (arithmetic_shift_right k_s 192) % pow2 64 in
+      k0 == uint_v a0 /\ k1 == uint_v a1 /\ k2 == uint_v a2 /\k3 == uint_v a3)
+
+let lemma2 a0 a1 a2 a3 = 
+  let k_s = uint_v a0 + uint_v a1 * pow2 64 + uint_v a2 * pow2 64 * pow2 64 + uint_v a3 * pow2 64 * pow2 64 * pow2 64 in
+
+  let k0 = k_s % pow2 64 in
+  let k1 = (arithmetic_shift_right k_s 64) % pow2 64 in 
+  let k2 = (arithmetic_shift_right k_s 128) % pow2 64 in 
+  let k3 = (arithmetic_shift_right k_s 192) % pow2 64 in 
+
+  assert(k1 == (arithmetic_shift_right (uint_v a0 + uint_v a1 * pow2 64 + uint_v a2 * pow2 64 * pow2 64 + uint_v a3 * pow2 64 * pow2 64 * pow2 64) 64) % pow2 64);
+  assert(arithmetic_shift_right (uint_v a0 + uint_v a1 * pow2 64 + uint_v a2 * pow2 64 * pow2 64 + uint_v a3 * pow2 64 * pow2 64 * pow2 64) 64 = uint_v a1 + uint_v a2 * pow2 64 + uint_v a3 * pow2 64 * pow2 64);
+  assert((arithmetic_shift_right (uint_v a0 + uint_v a1 * pow2 64 + uint_v a2 * pow2 64 * pow2 64 + uint_v a3 * pow2 64 * pow2 64 * pow2 64) 64) % pow2 64 = uint_v a1); 
+
+  assert(k1 == uint_v a1);
+
+  assert(arithmetic_shift_right (uint_v a0 + uint_v a1 * pow2 64 + uint_v a2 * pow2 64 * pow2 64 + uint_v a3 * pow2 64 * pow2 64 * pow2 64) 128 = uint_v a2  + uint_v a3 * pow2 64 );
+
+  assert(k2 == uint_v a2); 
+
+  lemma1 a0 a1 a2 a3;
+    assert(arithmetic_shift_right (uint_v a0 + uint_v a1 * pow2 64 + uint_v a2 * pow2 64 * pow2 64 + uint_v a3 * pow2 64 * pow2 64 * pow2 64) 192 ==  uint_v a3);
+    assert(k3 == uint_v a3);
+    assert(k0 == uint_v a0)
+
+
+val lemmaSeq2Nat: k: felem_seq -> Lemma(nat_as_seq(felem_seq_as_nat k) == k)
+
+let lemmaSeq2Nat k =  
+  let a0 = Lib.Sequence.index k 0 in 
+  let a1 = Lib.Sequence.index k 1 in 
+  let a2 = Lib.Sequence.index k 2 in 
+  let a3 = Lib.Sequence.index k 3 in 
+  let k_s = uint_v a0 + uint_v a1 * pow2 64 + uint_v a2 * pow2 64 * pow2 64 + uint_v a3 * pow2 64 * pow2 64 * pow2 64 in
+
+  let k0 = k_s % pow2 64 in
+  let k1 = (arithmetic_shift_right k_s 64) % pow2 64 in 
+  let k2 = (arithmetic_shift_right k_s 128) % pow2 64 in 
+  let k3 = (arithmetic_shift_right k_s 192) % pow2 64 in 
+
+  lemma2 a0 a1 a2 a3;
+
+  let s = Lib.Sequence.create 4 (u64 0) in 
+  let s = Lib.Sequence.upd s 0 (u64 k0) in 
+  let s = Lib.Sequence.upd s 1 (u64 k1) in 
+  let s = Lib.Sequence.upd s 2 (u64 k2) in 
+  let s = Lib.Sequence.upd s 3 (u64 k3) in 
+
+  assert(Lib.Sequence.index s 0 ==  a0);
+  assert(Lib.Sequence.index s 1 ==  a1);
+  assert(Lib.Sequence.index s 2 ==  a2);
+  assert(Lib.Sequence.index s 3 ==  a3);
+
+  assert(Lib.Sequence.equal s k)

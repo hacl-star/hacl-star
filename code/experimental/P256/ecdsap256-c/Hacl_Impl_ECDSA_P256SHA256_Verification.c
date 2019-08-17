@@ -1043,31 +1043,24 @@ Hacl_Impl_ECDSA_P256SHA256_Verification_verifyQValidCurvePoint(
   bool ite;
   Hacl_Impl_ECDSA_P256SHA256_Verification_bufferToJac(pubKey, pubKeyAsPoint);
   coordinatesValid = Hacl_Impl_ECDSA_P256SHA256_Verification_isCoordinateValid(pubKeyAsPoint);
-  if (coordinatesValid == false)
+  if (!coordinatesValid)
   {
     ite = false;
   }
   else
   {
     bool belongsToCurve = isPointOnCurve(pubKeyAsPoint);
-    if (belongsToCurve == false)
+    bool
+    orderCorrect =
+      Hacl_Impl_ECDSA_P256SHA256_Verification_isOrderCorrect(pubKeyAsPoint,
+        tempBuffer);
+    if (coordinatesValid && belongsToCurve && orderCorrect)
     {
-      ite = false;
+      ite = true;
     }
     else
     {
-      bool
-      orderCorrect =
-        Hacl_Impl_ECDSA_P256SHA256_Verification_isOrderCorrect(pubKeyAsPoint,
-          tempBuffer);
-      if (orderCorrect == false)
-      {
-        ite = false;
-      }
-      else
-      {
-        ite = true;
-      }
+      ite = false;
     }
   }
   return ite;
