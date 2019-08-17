@@ -46,7 +46,7 @@ dgkClient sock pkDGK pkGM l rs = do
     let !rbits = map (\i -> map (\c -> bool 0 1 $ testBit c i) rs) [0..l-1]
     --log $ "Client rbits: " <> show rbits
     encRBits <-
-        --measureTimeSingle "enc rBits" $
+        measureTimeSingle "enc rBits" $
         mapM (paheEnc pkDGK) rbits
 
 
@@ -58,10 +58,10 @@ dgkClient sock pkDGK pkGM l rs = do
     log "Client: decoded"
 
     (ciRaw,s0) <- do
-      --measureTimeSingle "DGK client heavy part" $ do
+      measureTimeSingle "DGK client heavy part" $ do
         log "Client: computing xors"
         xors <-
-         --measureTimeSingle "Computing XORs" $
+         measureTimeSingle "Computing XORs" $
           forM (cs `zip` bitmaskNeg `zip` rbits) $ \((ci,bmNegI),rbitsI) -> do
 
             -- ci * maskNeg + (1-ci) * mask
@@ -111,18 +111,25 @@ dgkClient sock pkDGK pkGM l rs = do
 
     --ciShuffled <- shuffle blinded
     ciShuffled <-
-      --measureTimeSingle "client shuffling" $
+      measureTimeSingle "client shuffling" $
       if rsLen == 1 then shuffle =<< mapM (paheMultBlind pkDGK) ciRaw else do
         blinded <- mapM (paheMultBlind pkDGK) ciRaw
         let oneMasks = map (\i -> replicate i 0 ++ [1]) [0..rsLen - 1]
         shortZero <- paheEnc pkDGK $ replicate rsLen 0
 
-        rowShuffled :: [[PaheCiph sDGK]] <-
+        rows :: [[PaheCiph sDGK]] <-
+            measureTimeSingle "client shuffling mults" $
             forM oneMasks $ \curMask ->
-                shuffle =<< mapM (\x -> paheSIMDMulScal pkDGK x curMask) blinded
+                mapM (\x -> paheSIMDMulScal pkDGK x curMask) blinded
 
-        foldrM (\acc b -> mapM (uncurry $ paheSIMDAdd pkDGK) $ zip acc b)
-          (replicate (l+1) shortZero) rowShuffled
+        rowsShuffled <-
+            measureTimeSingle "client shuffling shuffling" $
+            forM rows shuffle
+
+
+        measureTimeSingle "client shuffling additions" $
+          foldrM (\acc b -> mapM (uncurry $ paheSIMDAdd pkDGK) $ zip acc b)
+            (replicate (l+1) shortZero) rowsShuffled
 
     --log "CIs shuffled/blinded: "
     --print =<< mapM (paheDec skDGK) ciShuffled
@@ -132,7 +139,7 @@ dgkClient sock pkDGK pkGM l rs = do
     zs <- paheFromBS pkGM =<< receive sock
     log "Client: computing eps"
 
-    let compeps = do -- measureTimeSingle "DGK client compeps" $ do
+    let compeps = measureTimeSingle "DGK client compeps" $ do
           let sMask = map (bool 1 0 . (== 1)) s0
           let sMaskNeg = map (\x -> 1 - x) sMask
           -- zs * s + (1-zs) * neg s
@@ -264,7 +271,7 @@ _testCmp req rep = do
 
     putTextLn "Keygen..."
     -- SIMD parameter
-    let k = 1
+    let k = 32
     -- bit size of numbers we compare
     let l = 64
 --    m <- randomRIO (1,k)
@@ -331,11 +338,11 @@ _testCmp req rep = do
 
     let finTestDGK :: Int -> IO ()
         finTestDGK m = do
-            dgkTimings <- replicateM 30 $ testDGK m
+            dgkTimings <- replicateM 5 $ testDGK m
             putTextLn $ "------------- Average DGK with m = " <> show m
                 <> " is " <> show (average dgkTimings) <> " mcs"
 
-    finTestDGK 1
+--    finTestDGK 1
 --    finTestDGK 2
 --    finTestDGK 3
 --    finTestDGK 4
@@ -347,7 +354,7 @@ _testCmp req rep = do
 --    finTestDGK 16
 --    finTestDGK 24
 --    finTestDGK 28
---    finTestDGK 32
+    finTestDGK 32
 
 _testCmpFull :: IO ()
 _testCmpFull =
