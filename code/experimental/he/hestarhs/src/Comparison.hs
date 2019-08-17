@@ -7,6 +7,7 @@ module Comparison
     , secureCompareClient
     , secureCompareServer
     , _testCmp
+    , _testCmpFull
     ) where
 
 import Universum
@@ -44,22 +45,29 @@ dgkClient sock pkDGK pkGM l rs = do
     log "Client: encoding rbits"
     let !rbits = map (\i -> map (\c -> bool 0 1 $ testBit c i) rs) [0..l-1]
     --log $ "Client rbits: " <> show rbits
-    encRBits <- measureTimeSingle "enc rBits" $ mapM (paheEnc pkDGK) rbits
+    encRBits <-
+        --measureTimeSingle "enc rBits" $
+        mapM (paheEnc pkDGK) rbits
 
 
     let !bitmaskNeg = map (\x -> 1 - x) <$> rbits
     log "Client: receiving"
-    cs <- mapM (paheFromBS pkDGK) =<< receiveMulti sock
+    csRaw <- receiveMulti sock
+    log "Client: received"
+    cs <- mapM (paheFromBS pkDGK) csRaw
+    log "Client: decoded"
 
-    (ciRaw,s0) <-
-      measureTimeSingle "DGK client heavy part" $ do
+    (ciRaw,s0) <- do
+      --measureTimeSingle "DGK client heavy part" $ do
         log "Client: computing xors"
-        xors <- forM (cs `zip` [0..]) $ \(ci,i) -> do
+        xors <-
+         --measureTimeSingle "Computing XORs" $
+          forM (cs `zip` bitmaskNeg `zip` rbits) $ \((ci,bmNegI),rbitsI) -> do
 
             -- ci * maskNeg + (1-ci) * mask
-            a <- paheSIMDMulScal pkDGK ci (bitmaskNeg !! i)
+            a <- paheSIMDMulScal pkDGK ci bmNegI
             oneMinCi <- paheSIMDSub pkDGK (paheOne pkDGK) ci
-            c <- paheSIMDMulScal pkDGK oneMinCi (rbits !! i)
+            c <- paheSIMDMulScal pkDGK oneMinCi rbitsI
             paheSIMDAdd pkDGK a c
         log "Client: computed xors"
 
@@ -103,7 +111,7 @@ dgkClient sock pkDGK pkGM l rs = do
 
     --ciShuffled <- shuffle blinded
     ciShuffled <-
-      measureTimeSingle "client shuffling" $
+      --measureTimeSingle "client shuffling" $
       if rsLen == 1 then shuffle =<< mapM (paheMultBlind pkDGK) ciRaw else do
         blinded <- mapM (paheMultBlind pkDGK) ciRaw
         let oneMasks = map (\i -> replicate i 0 ++ [1]) [0..rsLen - 1]
@@ -124,7 +132,7 @@ dgkClient sock pkDGK pkGM l rs = do
     zs <- paheFromBS pkGM =<< receive sock
     log "Client: computing eps"
 
-    let compeps = measureTimeSingle "DGK client compeps" $ do
+    let compeps = do -- measureTimeSingle "DGK client compeps" $ do
           let sMask = map (bool 1 0 . (== 1)) s0
           let sMaskNeg = map (\x -> 1 - x) sMask
           -- zs * s + (1-zs) * neg s
@@ -155,16 +163,18 @@ dgkServer sock skDGK skGM l cs = do
     let cbits = map (\i -> map (\c -> bool 0 1 $ testBit c i) cs) [0..l-1]
     --log $ "Server cbits: " <> show cbits
 
+    log "Server: encrypting/encoding cbits"
     cbitsToSend <- mapM (paheToBS pkDGK <=< paheEnc pkDGK) cbits
 
-    log $ "Server received, sending to client"
+    log $ "Sending cbits to client"
     _ <- receive sock
     sendMulti sock $ NE.fromList cbitsToSend
+    log $ "Server sent"
 
-    log $ "Server: computing zeroes"
     es <- mapM (paheFromBS pkDGK) =<< receiveMulti sock
+    log $ "Server: computing zeroes"
     esZeroes <-
-        measureTimeSingle "DGK isZero testing" $
+        --measureTimeSingle "DGK isZero testing" $
         mapM (fmap (take csLen) . paheIsZero skDGK) es
     let zeroes = map (bool 0 1) $
                  foldr (\e acc -> map (uncurry (&&)) $ zip e acc)
@@ -195,8 +205,8 @@ secureCompareClient ::
     -> PaheCiph sTop
     -> PaheCiph sTop
     -> IO (PaheCiph sGM)
-secureCompareClient sock pkTop pkDGK pkGM l m x y =
-  measureTimeSingle "secure compare client" $ do
+secureCompareClient sock pkTop pkDGK pkGM l m x y = do
+  --measureTimeSingle "secure compare client" $ do
 
     log "Client: secureCompare started"
     when (m > paheK pkDGK) $ error "Secure compare: m is too big"
@@ -246,90 +256,101 @@ secureCompareServer sock skTop skDGK skGM l m = do
 -- Tests
 ----------------------------------------------------------------------------
 
-_testCmp :: IO ()
-_testCmp =
+_testCmp :: Socket Req -> Socket Rep -> IO ()
+_testCmp req rep = do
+    putTextLn "Initialised the context, generating params"
+    bind rep "inproc://argmax"
+    connect req "inproc://argmax"
+
+    putTextLn "Keygen..."
+    -- SIMD parameter
+    let k = 1
+    -- bit size of numbers we compare
+    let l = 64
+--    m <- randomRIO (1,k)
+
+    -- system used to carry long secureCompare results
+    skTop <- paheKeyGen @PailSep k (2^(lambda + l + 100))
+    --let skTop = skDGK
+    let pkTop = paheToPublic skTop
+
+    -- system used for DGK comparison
+    --skDGK <- paheKeyGen @PailSep k (2^(lambda+l))
+    skDGK <- paheKeyGen @DgkCrt k (5 + 3 * fromIntegral l)
+    let pkDGK = paheToPublic skDGK
+
+    -- system used to carry QR results
+    --skGM <- paheKeyGen @DgkCrt k 5 -- (2^(l+5))
+    skGM <- paheKeyGen @GMSep k 5 -- (2^(l+5))
+    --let skGM = skDGK
+    let pkGM = paheToPublic skGM
+
+    let testCompare m = replicateM_ 10 $ do
+            xs <- replicateM m $ randomRIO (0,2^l-1)
+            ys <- replicateM m $ randomRIO (0,2^l-1)
+            let expected = map (\(x,y) -> x >= y) $ zip xs ys
+
+            xsEnc <- paheEnc pkTop xs
+            ysEnc <- paheEnc pkTop ys
+
+            (gamma,()) <-
+--                measureTimeSingle "SecureCompare" $
+                concurrently
+                (secureCompareClient req pkTop pkDGK pkGM l m xsEnc ysEnc)
+                (secureCompareServer rep skTop skDGK skGM l m)
+
+            secCompRes <- paheDec skGM gamma
+            unless (map (bool 0 1) expected `isPrefixOf` secCompRes) $ do
+                print xs
+                print ys
+                putTextLn $ "Expected: " <> show expected
+                putTextLn $ "Got:      " <> show secCompRes
+                putTextLn $ "          " <> show (map (==1) secCompRes)
+                error "Mismatch"
+
+    let testDGK m = do
+            cs <- replicateM m $ randomRIO (0,2^l-1)
+            rs <- replicateM m $ randomRIO (0,2^l-1)
+            let expected = map (\(c,r) -> r <= c) $ zip cs rs
+
+            ((eps,()),timing) <-
+                --measureTimeSingle "dgk" $
+                measureTimeRet $
+                concurrently
+                (dgkClient req pkDGK pkGM l rs)
+                (dgkServer rep skDGK skGM l cs)
+
+            dgkRes <- map (== 1) <$> paheDec skGM eps
+            unless (expected `isPrefixOf` dgkRes) $ do
+                print cs
+                print rs
+                putTextLn $ "Expected: " <> show expected
+                putTextLn $ "Got:      " <> show dgkRes
+                error "Mismatch"
+            pure timing
+
+    let finTestDGK :: Int -> IO ()
+        finTestDGK m = do
+            dgkTimings <- replicateM 30 $ testDGK m
+            putTextLn $ "------------- Average DGK with m = " <> show m
+                <> " is " <> show (average dgkTimings) <> " mcs"
+
+    finTestDGK 1
+--    finTestDGK 2
+--    finTestDGK 3
+--    finTestDGK 4
+--    finTestDGK 6
+--    finTestDGK 8
+--    finTestDGK 10
+--    finTestDGK 12
+--    finTestDGK 14
+--    finTestDGK 16
+--    finTestDGK 24
+--    finTestDGK 28
+--    finTestDGK 32
+
+_testCmpFull :: IO ()
+_testCmpFull =
     withContext $ \ctx ->
     withSocket ctx Req $ \req ->
-    withSocket ctx Rep $ \rep -> do
-      putTextLn "Initialised the context, generating params"
-      bind rep "inproc://argmax"
-      connect req "inproc://argmax"
-
-      putTextLn "Keygen..."
-      -- SIMD parameter
-      let k = 32
-      -- bit size of numbers we compare
-      let l = 64
---      m <- randomRIO (1,k)
-
-      -- system used to carry long secureCompare results
-      skTop <- paheKeyGen @PailSep k (2^(lambda + l + 100))
-      --let skTop = skDGK
-      let pkTop = paheToPublic skTop
-
-      -- system used for DGK comparison
-      --skDGK <- paheKeyGen @PailSep k (2^(lambda+l))
-      skDGK <- paheKeyGen @DgkCrt k (5 + 3 * fromIntegral l)
-      let pkDGK = paheToPublic skDGK
-
-      -- system used to carry QR results
-      --skGM <- paheKeyGen @DgkCrt k 5 -- (2^(l+5))
-      skGM <- paheKeyGen @GMSep k 5 -- (2^(l+5))
-      --let skGM = skDGK
-      let pkGM = paheToPublic skGM
-
-      let testCompare m = replicateM_ 10 $ do
-              xs <- replicateM m $ randomRIO (0,2^l-1)
-              ys <- replicateM m $ randomRIO (0,2^l-1)
-              let expected = map (\(x,y) -> x >= y) $ zip xs ys
-
-              xsEnc <- paheEnc pkTop xs
-              ysEnc <- paheEnc pkTop ys
-
-              (gamma,()) <-
-                  measureTimeSingle "SecureCompare" $
-                  concurrently
-                  (secureCompareClient req pkTop pkDGK pkGM l m xsEnc ysEnc)
-                  (secureCompareServer rep skTop skDGK skGM l m)
-
-              secCompRes <- paheDec skGM gamma
-              unless (map (bool 0 1) expected `isPrefixOf` secCompRes) $ do
-                  print xs
-                  print ys
-                  putTextLn $ "Expected: " <> show expected
-                  putTextLn $ "Got:      " <> show secCompRes
-                  putTextLn $ "          " <> show (map (==1) secCompRes)
-                  error "Mismatch"
-
-      let testDGK m = do
-              cs <- replicateM m $ randomRIO (0,2^l-1)
-              rs <- replicateM m $ randomRIO (0,2^l-1)
-              let expected = map (\(c,r) -> r <= c) $ zip cs rs
-
-              ((eps,()),timing) <-
-                  measureTimeRet "dgk" $
-                  concurrently
-                  (dgkClient req pkDGK pkGM l rs)
-                  (dgkServer rep skDGK skGM l cs)
-
-              dgkRes <- map (== 1) <$> paheDec skGM eps
-              unless (expected `isPrefixOf` dgkRes) $ do
-                  print cs
-                  print rs
-                  putTextLn $ "Expected: " <> show expected
-                  putTextLn $ "Got:      " <> show dgkRes
-                  error "Mismatch"
-              pure timing
-
-      let finTestDGK :: Int -> IO ()
-          finTestDGK m = do
-              dgkTimings <- replicateM 100 $ testDGK m
-              putTextLn $ "------------- Average DGK with m = " <> show m
-                  <> " is " <> show (average dgkTimings) <> "ms"
-
-      finTestDGK 1
---      finTestDGK 2
---      finTestDGK 4
---      finTestDGK 8
---      finTestDGK 16
---      finTestDGK 32
+    withSocket ctx Rep $ \rep -> _testCmp req rep

@@ -188,11 +188,13 @@ let is_g n g = isunit g /\ (exists (p:prm) (q:prm{q<>p}). n = p * q /\ in_base p
 
 type isg (n:big) = g:fe (n*n){is_g n g}
 
+
 // Simply move exists, though needs the fact that factorisation is unique
 val is_g_in_base: p:prm -> q:prm{p <> q} -> g:fe ((p*q)*(p*q)) -> Lemma
   (requires (is_g (p*q) g))
   (ensures (in_base p q g))
 let is_g_in_base p q g = admit ()
+
 
 // n+1 is a first n-th root of unity.
 val np1_is_unit: #n:comp -> Lemma (isunit (np1 #n)) [SMTPat (np1 #n)]

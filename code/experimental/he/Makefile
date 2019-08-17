@@ -92,7 +92,7 @@ $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	-bundle 'Hacl.Impl.Bignum.Core+Hacl.Impl.Bignum.Addition+Hacl.Impl.Bignum.Convert+Hacl.Impl.Bignum.Comparison+Hacl.Impl.Bignum.Division+Hacl.Impl.Bignum.Exponentiation+Hacl.Impl.Bignum.Gcd+Hacl.Impl.Bignum.Misc+Hacl.Impl.Bignum.Modular+Hacl.Impl.Bignum.Multiplication+Hacl.Impl.Bignum.Shift+Hacl.Impl.Bignum.Montgomery+Hacl.Impl.Bignum.Openssl=[rename=Hacl_Impl_Bignum]' \
 	-bundle 'Hacl.Impl.HE.Paillier=[rename=Hacl_Impl_Paillier]' \
 	-bundle 'Hacl.Impl.HE.GM=[rename=Hacl_Impl_GM]' \
-	-bundle 'Hacl.Impl.HE.DGK=[rename=Hacl_Impl_DGK]' \
+	-bundle 'Hacl.Impl.HE.DGK+Hacl.Impl.HE.DGK.Extra=[rename=Hacl_Impl_DGK]' \
 	-bundle 'C=C.Endianness' \
 	-library 'C,FStar,Hacl.Impl.Bignum.Openssl' \
 	-drop 'Spec,Prims,Hacl.Spec.*' \

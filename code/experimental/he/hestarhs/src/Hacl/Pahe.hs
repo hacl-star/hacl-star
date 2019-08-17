@@ -13,7 +13,6 @@ import Universum
 import System.ZMQ4
 
 
--- TODO variable security level
 class Pahe s where
     data PaheCiph s :: *
     data PaheSk s :: *

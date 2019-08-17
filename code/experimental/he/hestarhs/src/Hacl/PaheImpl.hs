@@ -414,16 +414,17 @@ dgkEncRaw ::
     -> Integer
     -> Bignum
     -> [Integer]
+    -> [Integer]
     -> Bignum
     -> Bignum
     -> [Integer]
     -> IO Bignum
-dgkEncRaw simdn bn n nRaw u uFactsRaw g h ms = do
+dgkEncRaw simdn bn n nRaw u uFactsRaw uFactsTailProd g h ms = do
     when (length ms > simdn) $ error "DGK encrypt: length mismatch"
 
     r0 <- randomRIO (0, nRaw - 1) -- `suchThat` (\x -> gcd x nRaw == 1)
     r <- toBignum bn r0
-    mPacked <- toBignum bn $ P.crt uFactsRaw ms -- (P.crtToBase uFactsRaw ms)
+    mPacked <- toBignum bn $ P.crt uFactsRaw uFactsTailProd ms -- (P.crtToBase uFactsRaw ms)
     c <- toBignum bn 0
 
     dgkEnc bn n u g h r mPacked c
@@ -435,7 +436,7 @@ dgkEncRaw simdn bn n nRaw u uFactsRaw g h ms = do
 
 
 instance Pahe DgkCrt where
-    data PaheCiph DgkCrt = DgkCiph Word8 Bignum
+    data PaheCiph DgkCrt = DgkCiph Word8 Bignum deriving (Generic)
     data PaheSk DgkCrt =
            DgkCrtSk { dcs_simdn :: Int
                     , dcs_bn :: Word32
@@ -448,6 +449,7 @@ instance Pahe DgkCrt where
                     , dcs_uFactsEs :: BignumList
                     , dcs_uFactsLen :: Word32
                     , dcs_uFactsRaw :: [Integer]
+                    , dcs_uFactsRawTProds :: [Integer]
                     , dcs_v :: Bignum
                     , dcs_g :: Bignum
                     , dcs_h :: Bignum
@@ -457,13 +459,17 @@ instance Pahe DgkCrt where
                     , dcs_vbis :: [Bignum]
                     , dcs_tmp :: Bignum
                     }
+           deriving (Generic)
     data PahePk DgkCrt =
            DgkCrtPk { dcp_simdn :: Int
                     , dcp_bn :: Word32
                     , dcp_n :: Bignum
                     , dcp_nRaw :: Integer
                     , dcp_u :: Bignum
+                    , dcp_uFactsPs :: BignumList
+                    , dcp_uFactsEs :: BignumList
                     , dcp_uFactsRaw :: [Integer]
+                    , dcp_uFactsRawTProds :: [Integer]
                     , dcp_g :: Bignum
                     , dcp_h :: Bignum
                     , dcp_zero :: PaheCiph DgkCrt
@@ -471,6 +477,7 @@ instance Pahe DgkCrt where
                     , dcp_minOne :: PaheCiph DgkCrt
                     , dcp_tmp :: Bignum
                     }
+           deriving (Generic)
 
 
     paheKeyGen dcs_simdn numsMod = do
@@ -481,6 +488,7 @@ instance Pahe DgkCrt where
         let dcs_nRaw = n
         let dcs_bn = fromIntegral $ length $ inbase b64 (n*n)
         let dcs_uFactsLen = fromIntegral $ length dcs_uFactsRaw
+        let dcs_uFactsRawTProds = P.compTailProds dcs_uFactsRaw
 
         dcs_p <- toBignum dcs_bn p
         dcs_q <- toBignum dcs_bn q
@@ -490,19 +498,22 @@ instance Pahe DgkCrt where
         dcs_g <- toBignum dcs_bn g
         dcs_h <- toBignum dcs_bn h
 
-        dcs_uFactsPs <- toBignumList dcs_bn dcs_uFactsRaw
-        dcs_uFactsEs <- toBignumList dcs_bn $ replicate (length dcs_uFactsRaw) 1
+        dcs_uFactsPs <- toBignumList dcs_bn dcs_simdn dcs_uFactsRaw
+        dcs_uFactsEs <- toBignumList dcs_bn dcs_simdn $ replicate (length dcs_uFactsRaw) 1
 
         dcs_zero <- DgkCiph (fromIntegral dcs_simdn) <$>
-            dgkEncRaw dcs_simdn dcs_bn dcs_n dcs_nRaw dcs_u dcs_uFactsRaw dcs_g dcs_h
+            dgkEncRaw dcs_simdn dcs_bn dcs_n dcs_nRaw dcs_u dcs_uFactsRaw
+            dcs_uFactsRawTProds dcs_g dcs_h
             (replicate dcs_simdn 0)
 
         dcs_one <- DgkCiph (fromIntegral dcs_simdn) <$>
-            dgkEncRaw dcs_simdn dcs_bn dcs_n dcs_nRaw dcs_u dcs_uFactsRaw dcs_g dcs_h
+            dgkEncRaw dcs_simdn dcs_bn dcs_n dcs_nRaw dcs_u dcs_uFactsRaw
+            dcs_uFactsRawTProds dcs_g dcs_h
             (replicate dcs_simdn 1)
 
         dcs_minOne <- DgkCiph (fromIntegral dcs_simdn) <$>
-            dgkEncRaw dcs_simdn dcs_bn dcs_n dcs_nRaw dcs_u dcs_uFactsRaw dcs_g dcs_h
+            dgkEncRaw dcs_simdn dcs_bn dcs_n dcs_nRaw dcs_u dcs_uFactsRaw
+            dcs_uFactsRawTProds dcs_g dcs_h
             (replicate dcs_simdn (-1))
 
         dcs_vbis <-
@@ -524,7 +535,10 @@ instance Pahe DgkCrt where
           , dcp_n     = dcs_n
           , dcp_nRaw = dcs_nRaw
           , dcp_u     = dcs_u
+          , dcp_uFactsPs = dcs_uFactsPs
+          , dcp_uFactsEs = dcs_uFactsEs
           , dcp_uFactsRaw     = dcs_uFactsRaw
+          , dcp_uFactsRawTProds = dcs_uFactsRawTProds
           , dcp_g     = dcs_g
           , dcp_h     = dcs_h
           , dcp_zero   = dcs_zero
@@ -539,7 +553,8 @@ instance Pahe DgkCrt where
 
     paheEnc DgkCrtPk{..} m =
         DgkCiph (fromIntegral $ length m) <$>
-        dgkEncRaw dcp_simdn dcp_bn dcp_n dcp_nRaw dcp_u dcp_uFactsRaw dcp_g dcp_h m
+        dgkEncRaw dcp_simdn dcp_bn dcp_n dcp_nRaw dcp_u dcp_uFactsRaw
+        dcp_uFactsRawTProds dcp_g dcp_h m
 
     paheDec DgkCrtSk{..} (DgkCiph _ cPacked) = do
         dgkDec dcs_bn dcs_uFactsLen
@@ -547,20 +562,26 @@ instance Pahe DgkCrt where
         res <- fromBignum dcs_bn dcs_tmp
         pure $ P.crtInv dcs_uFactsRaw res
 
+    paheNeg pk ciph@(DgkCiph len _) =
+        paheSIMDMulScal pk ciph $ replicate (fromIntegral len) (-1)
+
     paheSIMDAdd DgkCrtPk{..} (DgkCiph prefLen1 c1) (DgkCiph prefLen2 c2) = do
         c3 <- toBignum dcp_bn 0
         dgkHomAdd dcp_bn dcp_n c1 c2 c3
         pure $ DgkCiph (max prefLen1 prefLen2) c3
 
     paheSIMDMulScal DgkCrtPk{..} (DgkCiph prefLen c1) scal = do
---        when (length scal0 > dcp_simdn) $
---            error "Paillier simd mul: length mismatch"
+        --when (length scal > dcp_simdn) $
+        --    error "Paillier simd mul: length mismatch"
 
-        c3 <- toBignum dcp_bn 0
-        bn_coeffs <- toBignum dcp_bn $ P.crt dcp_uFactsRaw scal
+        c3 <- toBignumZero dcp_bn
+        bn_coeffs <-
+            toBignum dcp_bn $
+            P.crt dcp_uFactsRaw dcp_uFactsRawTProds scal
+
         dgkHomMulScal dcp_bn dcp_n c1 bn_coeffs c3
         freeBignum bn_coeffs
-        pure $ DgkCiph (fromIntegral $ min (fromIntegral prefLen) (length scal)) c3
+        pure $ DgkCiph (min prefLen (fromIntegral $ length scal)) c3
 
     paheMultBlind pk@DgkCrtPk{..} c = do
         scal <- replicateM dcp_simdn $ randomRIO (1, dcp_uFactsRaw !! 0 - 1)
@@ -581,3 +602,6 @@ instance Pahe DgkCrt where
     pahePermute = error "DGK pahePermute -- implement using PermuteFold"
     pahePermuteServ = error "DGK pahePermute -- implement using PermuteFold"
     pahePermuteHor _ _ _ = error "DGK permuteHor -- implement as in DGK comp"
+
+instance NFData (PaheCiph DgkCrt)
+instance NFData (PahePk DgkCrt)
