@@ -61,7 +61,7 @@ val isCoordinateValid: p: lbuffer uint64 (size 12) -> Stack bool
       let x = gsub p (size 0) (size 4) in 
       let y = gsub p (size 4) (size 4) in 
       let z = gsub p (size 8) (size 4) in 
-      r = true ==> as_nat h0 x < prime256 /\ as_nat h0 y < prime256 /\ as_nat h0 z < prime256 /\ as_nat h0 z == 1
+      if (as_nat h0 x < prime256 &&  as_nat h0 y < prime256 && as_nat h0 z < prime256) then r == true else r == false
   )  
 )
 
@@ -101,7 +101,7 @@ open FStar.Mul
 inline_for_extraction noextract
 val equalZeroBuffer: f: felem -> Stack bool
   (requires fun h -> live h f)
-  (ensures fun h0 r h1 -> modifies0 h0 h1 /\ (if r = true then  as_nat h0 f == 0 else as_nat h0 f > 0))
+  (ensures fun h0 r h1 -> modifies0 h0 h1 /\ (if as_nat h0 f = 0 then r == true else r == false ))
 
 let equalZeroBuffer f =        
     let f0 = index f (size 0) in  
@@ -124,7 +124,7 @@ val isMoreThanZeroLessThanOrderMinusOne: f: felem -> Stack bool
   (requires fun h -> live h f)
   (ensures fun h0 result h1 -> modifies0 h0 h1 /\
     (
-      if result = true then as_nat h0 f > 0 /\ as_nat h0 f < prime_p256_order else True
+      if as_nat h0 f > 0 && as_nat h0 f < prime_p256_order then result == true else result == false
     )  
   )
 
@@ -270,6 +270,8 @@ Check that {\displaystyle Q_{A}} Q_{A} is not equal to the identity element {\di
 Check that {\displaystyle Q_{A}} Q_{A} lies on the curve
 Check that {\displaystyle n\times Q_{A}=O} n\times Q_{A}=O
  *)
+
+
 val verifyQValidCurvePoint: pubKey: lbuffer uint64 (size 8) -> pubKeyAsPoint: point -> tempBuffer: lbuffer uint64 (size 100) ->  Stack bool
   (requires fun h -> live h pubKey /\ live h tempBuffer /\ live h pubKeyAsPoint /\
     LowStar.Monotonic.Buffer.all_disjoint [loc pubKey; loc tempBuffer; loc pubKeyAsPoint]
@@ -282,35 +284,28 @@ val verifyQValidCurvePoint: pubKey: lbuffer uint64 (size 8) -> pubKeyAsPoint: po
 
       let x = gsub pubKey (size 0) (size 4) in 
       let y = gsub pubKey (size 4) (size 4) in 
-    (* affine respresentation *)
+ 
       as_seq h0 pubKey == as_seq h1 (gsub pubKeyAsPoint (size 0) (size 8)) /\
       as_nat h1 zA == 1 /\ 
-	(
-	  if r = true then 
-	  as_nat h0 (gsub pubKeyAsPoint (size 0) (size 4)) < prime256 /\ 
-	  as_nat h0 (gsub pubKeyAsPoint (size 4) (size 4)) < prime256 /\
-	  as_nat h1 xA < prime256 /\
-	  as_nat h1 yA < prime256 /\
-	  as_nat h1 zA < prime256 /\
-	  Hacl.Spec.P256.isPointOnCurve (as_nat h1 xA, as_nat h1 yA, as_nat h1 zA) /\
-	  Hacl.Spec.P256.isPointOnCurve (as_nat h0 x, as_nat h0 y, 1) /\
-	  Hacl.Spec.P256.isPointAtInfinity (scalar_multiplication prime_p256_order_seq (point_prime_to_coordinates (as_seq h1 pubKeyAsPoint))) else True
-	  )
-	  
-	  
-      )
-)
+(
+      if (as_nat h1 xA < prime256 && as_nat h1 yA < prime256 &&  as_nat h1 zA < prime256 &&
+	  Hacl.Spec.P256.isPointOnCurve (as_nat h1 xA, as_nat h1 yA, as_nat h1 zA) &&
+	  Hacl.Spec.P256.isPointOnCurve (as_nat h0 x, as_nat h0 y, 1) &&
+	  Hacl.Spec.P256.isPointAtInfinity (scalar_multiplication prime_p256_order_seq (point_prime_to_coordinates (as_seq h1 pubKeyAsPoint))))
+	  then r == true else r == false)
+     /\ 
+	r == verifyQValidCurvePointSpec (as_nat h1 xA, as_nat h1 yA, as_nat h1 zA))
+) 
 
 let verifyQValidCurvePoint pubKey pubKeyAsPoint tempBuffer = 
     bufferToJac pubKey pubKeyAsPoint;
     let coordinatesValid = isCoordinateValid pubKeyAsPoint in 
-    if coordinatesValid = false then false else 
-      (*Check that {\displaystyle Q_{A}} Q_{A} lies on the curve *)
+      if not coordinatesValid then false else
     let belongsToCurve =  Hacl.Impl.P256.isPointOnCurve pubKeyAsPoint in 
-    if belongsToCurve = false then false else 
-      (* Check that {\displaystyle n\times Q_{A}=O} n\times Q_{A}=O *)
     let orderCorrect = isOrderCorrect pubKeyAsPoint tempBuffer in 
-    if orderCorrect = false then false else true
+    if coordinatesValid && belongsToCurve && orderCorrect 
+      then true 
+    else false  
 
 
 #reset-options "--z3refresh --z3rlimit 100"
@@ -321,9 +316,10 @@ val ecdsa_verification_step1: r: lbuffer uint64 (size 4) -> s: lbuffer uint64 (s
   (ensures fun h0 result h1 -> modifies0 h0 h1 
    /\ 
      (
-       if result = true  then 
-	 as_nat h0 r > 0 && as_nat h0 r < prime_p256_order /\ as_nat h0 s > 0 && as_nat h0 s < prime_p256_order 
-       else True
+       if  as_nat h0 r > 0 && as_nat h0 r < prime_p256_order && as_nat h0 s > 0 && as_nat h0 s < prime_p256_order 
+	 then result == true else result == false /\
+	 result == checkCoordinates (as_nat h0 r) (as_nat h0 s)
+      
      )
   )
 
@@ -332,17 +328,29 @@ let ecdsa_verification_step1 r s =
   let isSCorrect = isMoreThanZeroLessThanOrderMinusOne s in 
   isRCorrect && isSCorrect
 
+
 inline_for_extraction noextract
 val ecdsa_verification_step23: mLen: size_t -> m: lbuffer uint8 mLen{uint_v mLen < pow2 61} -> hashAsFelem : felem ->  Stack unit
   (requires fun h -> live h m /\ live h hashAsFelem)
-  (ensures fun h0 _ h1 -> modifies (loc hashAsFelem) h0 h1 /\ as_nat h1 hashAsFelem < prime_p256_order)
+  (ensures fun h0 _ h1 -> modifies (loc hashAsFelem) h0 h1 /\ as_nat h1 hashAsFelem < prime_p256_order /\
+    (
+      as_nat h1 hashAsFelem = (felem_seq_as_nat (Lib.ByteSequence.uints_from_bytes_le (Spec.Hash.hash Spec.Hash.Definitions.SHA2_256 (as_seq h0 m)))) % prime_p256_order
+ ) 
+)
 
 let ecdsa_verification_step23 mLen m hashAsFelem = 
   push_frame(); 
     let mHash = create (size 32) (u8 0) in  
+      let h0 = ST.get() in 
     hash_256 m mLen mHash;
+      let h1 = ST.get() in 
+      assert(Seq.equal (as_seq h1 mHash) (Spec.Hash.hash Spec.Hash.Definitions.SHA2_256 (as_seq h0 m)));
     toUint64 mHash hashAsFelem;
+      let h2 = ST.get() in 
     reduction_prime_2prime_order hashAsFelem hashAsFelem;
+      let h3 = ST.get() in 
+      assert(as_nat h3 hashAsFelem = (felem_seq_as_nat (Lib.ByteSequence.uints_from_bytes_le (Spec.Hash.hash Spec.Hash.Definitions.SHA2_256 (as_seq h0 m)))) % prime_p256_order);
+      
   pop_frame()
 
 
@@ -373,6 +381,7 @@ let ecdsa_verification_step4 r s hash bufferU1 bufferU2 =
       fromDomain_ (as_nat h2 inverseS) == r0D);
 
   multPowerPartial s inverseS hash u1; 
+    let h3 = ST.get() in 
   multPowerPartial s inverseS r u2; 
   toUint8 u1 bufferU1;
   toUint8 u2 bufferU2;

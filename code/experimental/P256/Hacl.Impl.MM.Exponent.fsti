@@ -66,4 +66,5 @@ val multPowerPartial: s: felem -> a: felem -> b: felem -> result: felem -> Stack
       let r0D = exponent_spec a_ in 
       fromDomain_ (as_nat h a) == r0D)
   )
-  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1)
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ 
+    as_nat h1 result = (Hacl.Spec.P256.Definitions.pow (as_nat h0 s) (prime_p256_order - 2)  * (as_nat h0 b)) % prime_p256_order)

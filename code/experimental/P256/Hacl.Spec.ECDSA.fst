@@ -9,6 +9,7 @@ open Lib.IntTypes
 open Lib.Sequence
 
 open Spec.Hash
+open Hacl.Spec.P256 
 
 (*
 def toB(x):
@@ -166,8 +167,31 @@ val toJacobianCoordinates: tuple2 nat nat -> Tot (tuple3 nat nat nat)
 
 let toJacobianCoordinates (r0, r1) = (r0, r1, 1)
 
+
+val verifyQValidCurvePointSpec: publicKey: tuple3 nat nat nat -> bool
+
+let verifyQValidCurvePointSpec publicKey = 
+  let (x, y, z) = publicKey in 
+  if x < prime256 && y < prime256 && z < prime256 && isPointOnCurve (x,y, z) &&
+    isPointAtInfinity (scalar_multiplication prime_p256_order_seq publicKey) then true else false
+
+val checkCoordinates: r: nat -> s: nat -> bool
+
+let checkCoordinates r s = 
+  if r > 0 && r < prime_p256_order && s > 0 && s < prime_p256_order then true else false
+
+
 val ecdsa_verification: publicKey: tuple2 nat nat -> r: nat -> s: nat -> 
   mLen: size_nat{mLen < Spec.Hash.Definitions.max_input_length Spec.Hash.Definitions.SHA2_256} -> input: lseq uint8 mLen -> Tot bool
-(*
+
+
 let ecdsa_verification publicKey r s mLen input = 
-  let isPublicKeyIdentity = 
+  let publicJacobian = toJacobianCoordinates publicKey in 
+  let qValid = verifyQValidCurvePointSpec publicJacobian in 
+    if qValid = false then false else begin
+  let step1 = checkCoordinates r s in if step1 = false then false else begin
+
+  let hashResult = Spec.Hash.hash Spec.Hash.Definitions.SHA2_256 input in 
+  let hashAsFelem = (felem_seq_as_nat (Lib.ByteSequence.uints_from_bytes_le hashResult)) % prime_p256_order in 
+  true
+end end   
