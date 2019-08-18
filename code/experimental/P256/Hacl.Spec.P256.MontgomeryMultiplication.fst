@@ -597,11 +597,13 @@ let lemmaDistributivityInDomain a b =
   lemma_mod_mul_distr_r a b prime
 
 
+
+#reset-options "--z3refresh --z3rlimit 500" 
+
 val fsquarePowN: n: size_t -> a: felem -> Stack unit 
   (requires (fun h -> live h a /\ as_nat h a < prime)) 
   (ensures (fun h0 _ h1 -> modifies1 a h0 h1 /\  as_nat h1 a < prime /\ (let k = fromDomain_(as_nat h0 a) in as_nat h1 a = toDomain_ (pow k (pow2 (v n))))))
 
-(*to prove *)
 let fsquarePowN n a = 
   let h0 = ST.get() in  
   lemmaFromDomainToDomain (as_nat h0 a);
