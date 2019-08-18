@@ -63,8 +63,8 @@ class Pahe s where
     --
     -- The permutation acts on two ciphertexts passed and produces two
     -- (permuted) ciphertexts.
-    pahePermute     :: Socket Req -> PahePk s -> PaheCiph s -> PaheCiph s -> [Int] -> IO (PaheCiph s, PaheCiph s)
-    pahePermuteServ :: Socket Rep -> PaheSk s -> IO ()
+    pahePermute     :: Socket Dealer -> PahePk s -> PaheCiph s -> PaheCiph s -> [Int] -> IO (PaheCiph s, PaheCiph s)
+    pahePermuteServ :: Socket Dealer -> PaheSk s -> IO ()
 
     -- This permutes n ciphertexts row-by-row, each row
     -- using each separate permutation.
