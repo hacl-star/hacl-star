@@ -8,6 +8,7 @@ import Control.Concurrent.Async (concurrently)
 import qualified Data.ByteString as BS
 import Data.List (findIndex, (!!))
 import qualified Data.List.NonEmpty as NE
+import System.IO (hFlush, stdout)
 import System.Random (randomRIO)
 import System.ZMQ4
 
@@ -29,7 +30,7 @@ w64FromBs = fromIntegral . frombase 256 . map fromIntegral . BS.unpack
 
 argmaxClient ::
        (Pahe sTop, Pahe sDGK, Pahe sGM)
-    => Socket Req
+    => Socket Dealer
     -> PahePk sTop
     -> PahePk sDGK
     -> PahePk sGM
@@ -52,7 +53,7 @@ argmaxClient sock pkTop pkDGK pkGM l r vals = do
     let loop curMax i = if i == m then pure curMax else do
             log $ "Client loop index " <> show i
             bi <-
-                measureTimeSingle "Client argmax SC" $
+                measureTimeSingle' "Client argmax SC" $
                 secureCompareClient sock pkTop pkDGK pkGM l r
                 (valsPerm !! i) curMax
             ri <- replicateM r $ randomRIO (0, 2^(l + lambda) - 1)
@@ -62,9 +63,9 @@ argmaxClient sock pkTop pkDGK pkGM l r vals = do
 
             biBS <- paheToBS pkGM bi
             toSend <- (biBS :) <$> mapM (paheToBS pkTop) [mMasked, aMasked]
-            sendMulti sock $ NE.fromList toSend
+            zsendMulti sock toSend
 
-            [biTop,vi] <- mapM (paheFromBS pkTop) =<< receiveMulti sock
+            [biTop,vi] <- mapM (paheFromBS pkTop) =<< zreceiveMulti sock
             newMax <- do
                 biTopNeg <- paheSIMDSub pkTop biTop (paheOne pkTop)
                 tmp1 <- paheSIMDMulScal pkTop biTopNeg ri
@@ -77,8 +78,7 @@ argmaxClient sock pkTop pkDGK pkGM l r vals = do
     maxval <- loop (valsPerm !! 0) 1
     log "Client: argmax loop ended"
 
-    send sock [] ""
-    indices <- map w64FromBs <$> receiveMulti sock
+    indices <- map w64FromBs <$> zreceiveMulti sock
 
     let indices' = map (\(resI,permI) ->
                           fromIntegral $ (permsInv !! permI) !! (fromIntegral resI))
@@ -88,7 +88,7 @@ argmaxClient sock pkTop pkDGK pkGM l r vals = do
 
 argmaxServer ::
        (Pahe sTop, Pahe sDGK, Pahe sGM)
-    => Socket Rep
+    => Socket Dealer
     -> PaheSk sTop
     -> PaheSk sDGK
     -> PaheSk sGM
@@ -104,10 +104,10 @@ argmaxServer sock skTop skDGK skGM l m r = do
     let loop ixs i = if i == m then pure ixs else do
             log $ "Server loop ixs " <> show i
             secureCompareServer sock skTop skDGK skGM l r
-            [bsBi,bsM,bsA] <- receiveMulti sock
+            [bsBi,bsM,bsA] <- zreceiveMulti sock
             [mMasked,aMasked] <- mapM (paheFromBS pkTop) [bsM,bsA]
             log $ "Server loop: got values from client"
-            bi <- paheDec skGM =<< paheFromBS pkGM bsBi
+            bi <- map (bool 1 0) <$> (paheIsZero skGM =<< paheFromBS pkGM bsBi)
             let biNeg = map (\x -> 1 - x) bi
 
             vi <- do
@@ -117,7 +117,7 @@ argmaxServer sock skTop skDGK skGM l m r = do
                 paheSIMDAdd pkTop tmp1 tmp2
 
             reencBi <- paheEnc pkTop bi
-            sendMulti sock =<< NE.fromList <$> mapM (paheToBS pkTop) [reencBi,vi]
+            zsendMulti sock =<< mapM (paheToBS pkTop) [reencBi,vi]
 
             let ixs' =
                     map (\j -> if bi !! j == 1 then i else ixs !! j) [0..k-1]
@@ -127,8 +127,7 @@ argmaxServer sock skTop skDGK skGM l m r = do
     indices <- loop (replicate k 0) 1
     log $ "Server: argmax loop ended, indices: " <> show indices
 
-    _ <- receive sock
-    sendMulti sock $ NE.fromList $ map (w64ToBs . fromIntegral) indices
+    zsendMulti sock $ map (w64ToBs . fromIntegral) indices
 
     log "Server: exiting"
 
@@ -141,7 +140,7 @@ argmaxServer sock skTop skDGK skGM l m r = do
 -- comparison uses 2^(m-1) slots only.
 argmaxLog2Client ::
        (Pahe sTop, Pahe sDGK, Pahe sGM)
-    => Socket Req
+    => Socket Dealer
     -> PahePk sTop
     -> PahePk sDGK
     -> PahePk sGM
@@ -159,7 +158,7 @@ argmaxLog2Client sock pkTop pkDGK pkGM l m v1 v2 = do
     log $ "Client: perm " <> show perm
     let perminv j = fromMaybe (error "argmaxLogCli perminv") $ findIndex (==j) perm
     (v1Perm,v2Perm) <-
-        measureTimeSingle "perm" $ pahePermute sock pkTop v1 v2 perm
+        measureTimeSingle' "perm" $ pahePermute sock pkTop v1 v2 perm
     log "Client: perm done"
 
     -- p1 and p2 are of length 2^i each
@@ -176,7 +175,7 @@ argmaxLog2Client sock pkTop pkDGK pkGM l m v1 v2 = do
 
             pXMaskedBS <- mapM (paheToBS pkTop) [p1masked,p2masked]
             deltaBS <- paheToBS pkGM delta
-            sendMulti sock $ NE.fromList (deltaBS:pXMaskedBS)
+            zsendMulti sock (deltaBS:pXMaskedBS)
 
             let p1maskNeg = map negate p1mask
             let p2maskNeg = map negate p2mask
@@ -184,10 +183,10 @@ argmaxLog2Client sock pkTop pkDGK pkGM l m v1 v2 = do
             when (i > 0) $ do
                 -- each of these is of size 2^(i-1)
                 [delta1,delta2,combM1,combM2] <-
-                    mapM (paheFromBS pkTop) =<< receiveMulti sock
+                    mapM (paheFromBS pkTop) =<< zreceiveMulti sock
 
 
-                (comb1,comb2) <- measureTimeSingle "argmax log2 client combine" $ do
+                (comb1,comb2) <- measureTimeSingle' "argmax log2 client combine" $ do
                   delta1Neg <- paheSIMDSub pkTop (paheOne pkTop) delta1
                   delta2Neg <- paheSIMDSub pkTop (paheOne pkTop) delta2
 
@@ -209,13 +208,13 @@ argmaxLog2Client sock pkTop pkDGK pkGM l m v1 v2 = do
 
     loop v1Perm v2Perm m
 
-    maxIndex <- fromIntegral . w64FromBs <$> receive sock
+    maxIndex <- fromIntegral . w64FromBs <$> zreceive sock
 
     pure $ perm !! maxIndex
 
 argmaxLog2Server ::
        (Pahe sTop, Pahe sDGK, Pahe sGM)
-    => Socket Rep
+    => Socket Dealer
     -> PaheSk sTop
     -> PaheSk sDGK
     -> PaheSk sGM
@@ -236,7 +235,7 @@ argmaxLog2Server sock skTop skDGK skGM l m = do
 
             let curLen = 2^i
 
-            [deltaBS,p1bs,p2bs] <- receiveMulti sock
+            [deltaBS,p1bs,p2bs] <- zreceiveMulti sock
             delta <- (fmap (map (bool 1 0)) . paheIsZero skGM) =<<
                 paheFromBS pkGM deltaBS
             [p1,p2] <-
@@ -260,8 +259,7 @@ argmaxLog2Server sock skTop skDGK skGM l m = do
                 let delta2 = gethigh delta
                 let pComb1 = getlow pCombined
                 let pComb2 = gethigh pCombined
-                sendMulti sock =<<
-                    NE.fromList <$>
+                zsendMulti sock =<<
                     mapM (paheToBS pkTop <=< paheEnc pkTop) [delta1,delta2,pComb1,pComb2]
                 loop ixs' (i-1)
 
@@ -269,7 +267,7 @@ argmaxLog2Server sock skTop skDGK skGM l m = do
     let maxIx = ixs !! 0
     log $ "Server: argmax loop ended, indices: " <> show maxIx
 
-    send sock [] $ w64ToBs $ fromIntegral maxIx
+    zsend sock $ w64ToBs $ fromIntegral maxIx
 
     log "Server: exiting"
 
@@ -295,13 +293,10 @@ argmaxLog2Server sock skTop skDGK skGM l m = do
 -- Linear argmax: 13.67
 -- Log argmax: 3.064
 
-_testArgmax :: Socket Req -> Socket Rep -> IO ()
-_testArgmax req rep = do
-    putTextLn "Initialised the context, generating params"
+_testArgmax :: Int ->Socket Dealer -> Socket Dealer -> IO ()
+_testArgmax k req rep = do
+    putTextLn $ "testArgmax, k: " <> show k
 
-    putTextLn "Keygen..."
-    -- SIMD parameter
-    let k = 16
     -- bit size of numbers we compare
     let l = 64
     -- plaintext space size
@@ -319,7 +314,7 @@ _testArgmax req rep = do
     let pkDGK = paheToPublic skDGK
 
     -- system used to carry QR results
-    skGM <- paheKeyGen @GMSep k margin
+    skGM <- paheKeyGen @DgkCrt k 5
     --skGM <- paheKeyGen @DgkCrt k margin
     --let skGM = skDGK
     let pkGM = paheToPublic skGM
@@ -334,16 +329,19 @@ _testArgmax req rep = do
           v1 <- replicateM k $ randomRIO (0,2^l-1)
           v2 <- replicateM k $ randomRIO (0,2^l-1)
           let vals = v1 ++ v2
-          putTextLn $ "Values for argmax: " <> show vals
           let expectedMax = foldr1 max vals
           e1 <- paheEnc pkTop v1
           e2 <- paheEnc pkTop v2
 
+          putText ">."
+          hFlush stdout
           ((ix,()),timing) <-
               measureTimeRet $
               concurrently
               (argmaxLog2Client req pkTop pkDGK pkGM l mlog e1 e2)
               (argmaxLog2Server rep skTop skDGK skGM l mlog)
+          putText "< "
+          hFlush stdout
 
           unless (vals !! ix == expectedMax) $ do
               putTextLn $ "vals: " <> show vals
@@ -385,20 +383,19 @@ _testArgmax req rep = do
 --          print valsDec
 
     let testArgmax m r = do
-            putTextLn "Starting argmax"
             vals <- replicateM m $ replicateM r $ randomRIO (0,2^l-1)
             --print vals
             let expectedMaxs = foldr1 (\l1 l2 -> map (uncurry max) $ zip l1 l2) vals
             encVals <- mapM (paheEnc pkTop) vals
-            putTextLn "Launching"
 
+            putText ">."
+            hFlush stdout
             (((maxes,indices),()),timing) <-
                 measureTimeRet $
                 concurrently
                 (argmaxClient req pkTop pkDGK pkGM l r encVals)
                 (argmaxServer rep skTop skDGK skGM l m r)
 
-            putTextLn "Maxes/indices"
             decMaxes <- paheDec skTop maxes
 
             unless (expectedMaxs `isPrefixOf` decMaxes) $ do
@@ -407,12 +404,32 @@ _testArgmax req rep = do
                 print indices
                 error "Argmax failed"
 
-            putTextLn "OK"
+            putText "< "
+            hFlush stdout
             pure timing
 
-    timings <- replicateM 10 $ testLogArgmax
-    --timings <- replicateM 10 $ testArgmax 32 1
-    print $ average timings
+    let performArgmaxTest m r = do
+           timings <- replicateM 50 $ testArgmax m r
+           --timings <- replicateM 10 $ testArgmax 32 1
+           putTextLn $ "Argmax with m,r " <> show (m,r) <> ", time: " <>
+               show (average timings) <> "ms, per argmax: " <> show (average timings `div` fromIntegral r)
+
+    let performLogArgmaxTest = do
+           timings <- replicateM 100 $ testLogArgmax
+           --timings <- replicateM 10 $ testArgmax 32 1
+           putTextLn $ "LogArgmax time: " <> show (average timings) <> "ms"
+
+
+    performLogArgmaxTest
+    --performArgmaxTest 8 1
+    --performArgmaxTest 16 1
+    --performArgmaxTest 32 1
+
+    --when (k /= 1) $ do
+    --  performArgmaxTest 8 k
+    --  performArgmaxTest 16 k
+    --  performArgmaxTest 32 k
+
 
 --    --testLogArgmax
 --    let average xs = foldr1 (+) xs `div` (fromIntegral $ length xs)
@@ -423,3 +440,12 @@ _testArgmax req rep = do
     --testPermFold
     --testPerm
     --testFold
+
+_testArgmaxInproc :: Int -> IO ()
+_testArgmaxInproc k =
+    withContext $ \ctx ->
+    withSocket ctx Dealer $ \req ->
+    withSocket ctx Dealer $ \rep -> do
+       bind rep "inproc://argmax"
+       connect req "inproc://argmax"
+       _testArgmax k req rep

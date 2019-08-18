@@ -1,14 +1,6 @@
 -- | Comparison protocols
 
-module Comparison
-    ( lambda
-    , dgkClient
-    , dgkServer
-    , secureCompareClient
-    , secureCompareServer
-    , _testCmp
-    , _testCmpFull
-    ) where
+module Comparison where
 
 import Universum
 
@@ -22,14 +14,34 @@ import System.ZMQ4
 import Hacl
 import Utils
 
+zsend :: Socket Dealer -> ByteString -> IO ()
+zsend sock bs = send sock [] bs
+
+zsendMulti :: Socket Dealer -> [ByteString] -> IO ()
+zsendMulti sock bs = sendMulti sock $ NE.fromList bs
+
+zreceive :: Socket Dealer -> IO ByteString
+zreceive = receive
+
+zreceiveMulti :: Socket Dealer -> IO [ByteString]
+zreceiveMulti sock = receiveMulti sock
+
 ----------------------------------------------------------------------------
 -- DGK
 ----------------------------------------------------------------------------
 
+measureTimeSingle' :: Text -> IO x -> IO x
+measureTimeSingle' l a = a
+--    measureTimeSingle l a
+
+-- do
+--   send sock [] "init"
+-- before calling it
+-- Server talks to us first
 -- | Compute r <= c jointly. Client has r, server has c.
 dgkClient ::
        (Pahe sDGK, Pahe sGM)
-    => Socket Req
+    => Socket Dealer
     -> PahePk sDGK
     -> PahePk sGM
     -> Int
@@ -37,7 +49,6 @@ dgkClient ::
     -> IO (PaheCiph sGM)
 dgkClient sock pkDGK pkGM l rs = do
     log "Client: dgk started"
-    send sock [] "init"
 
     let rsLen = length rs
     when (rsLen > paheK pkDGK) $ error "dgk rsLen is too big"
@@ -46,22 +57,22 @@ dgkClient sock pkDGK pkGM l rs = do
     let !rbits = map (\i -> map (\c -> bool 0 1 $ testBit c i) rs) [0..l-1]
     --log $ "Client rbits: " <> show rbits
     encRBits <-
-        measureTimeSingle "enc rBits" $
+        measureTimeSingle' "enc rBits" $
         mapM (paheEnc pkDGK) rbits
 
 
     let !bitmaskNeg = map (\x -> 1 - x) <$> rbits
     log "Client: receiving"
-    csRaw <- receiveMulti sock
-    log "Client: received"
+    csRaw <- zreceiveMulti sock
+    log $ "Client: received: " <> show (length csRaw)
     cs <- mapM (paheFromBS pkDGK) csRaw
     log "Client: decoded"
 
     (ciRaw,s0) <- do
-      measureTimeSingle "DGK client heavy part" $ do
+      measureTimeSingle' "DGK client heavy part" $ do
         log "Client: computing xors"
         xors <-
-         measureTimeSingle "Computing XORs" $
+         measureTimeSingle' "Computing XORs" $
           forM (cs `zip` bitmaskNeg `zip` rbits) $ \((ci,bmNegI),rbitsI) -> do
 
             -- ci * maskNeg + (1-ci) * mask
@@ -111,35 +122,35 @@ dgkClient sock pkDGK pkGM l rs = do
 
     --ciShuffled <- shuffle blinded
     ciShuffled <-
-      measureTimeSingle "client shuffling" $
+      measureTimeSingle' "client shuffling" $
       if rsLen == 1 then shuffle =<< mapM (paheMultBlind pkDGK) ciRaw else do
         blinded <- mapM (paheMultBlind pkDGK) ciRaw
         let oneMasks = map (\i -> replicate i 0 ++ [1]) [0..rsLen - 1]
         shortZero <- paheEnc pkDGK $ replicate rsLen 0
 
         rows :: [[PaheCiph sDGK]] <-
-            measureTimeSingle "client shuffling mults" $
+            measureTimeSingle' "client shuffling mults" $
             forM oneMasks $ \curMask ->
                 mapM (\x -> paheSIMDMulScal pkDGK x curMask) blinded
 
         rowsShuffled <-
-            measureTimeSingle "client shuffling shuffling" $
+            measureTimeSingle' "client shuffling shuffling" $
             forM rows shuffle
 
 
-        measureTimeSingle "client shuffling additions" $
+        measureTimeSingle' "client shuffling additions" $
           foldrM (\acc b -> mapM (uncurry $ paheSIMDAdd pkDGK) $ zip acc b)
             (replicate (l+1) shortZero) rowsShuffled
 
     --log "CIs shuffled/blinded: "
     --print =<< mapM (paheDec skDGK) ciShuffled
 
-    sendMulti sock =<< (NE.fromList <$> mapM (paheToBS pkDGK) ciShuffled)
+    zsendMulti sock =<< mapM (paheToBS pkDGK) ciShuffled
     log "Client: sent, waiting"
-    zs <- paheFromBS pkGM =<< receive sock
+    zs <- paheFromBS pkGM =<< zreceive sock
     log "Client: computing eps"
 
-    let compeps = measureTimeSingle "DGK client compeps" $ do
+    let compeps = measureTimeSingle' "DGK client compeps" $ do
           let sMask = map (bool 1 0 . (== 1)) s0
           let sMaskNeg = map (\x -> 1 - x) sMask
           -- zs * s + (1-zs) * neg s
@@ -155,7 +166,7 @@ dgkClient sock pkDGK pkGM l rs = do
 
 dgkServer ::
        (Pahe sDGK, Pahe sGM)
-    => Socket Rep
+    => Socket Dealer
     -> PaheSk sDGK
     -> PaheSk sGM
     -> Int
@@ -174,14 +185,13 @@ dgkServer sock skDGK skGM l cs = do
     cbitsToSend <- mapM (paheToBS pkDGK <=< paheEnc pkDGK) cbits
 
     log $ "Sending cbits to client"
-    _ <- receive sock
-    sendMulti sock $ NE.fromList cbitsToSend
+    zsendMulti sock cbitsToSend
     log $ "Server sent"
 
-    es <- mapM (paheFromBS pkDGK) =<< receiveMulti sock
+    es <- mapM (paheFromBS pkDGK) =<< zreceiveMulti sock
     log $ "Server: computing zeroes"
     esZeroes <-
-        --measureTimeSingle "DGK isZero testing" $
+        measureTimeSingle' "DGK isZero testing" $
         mapM (fmap (take csLen) . paheIsZero skDGK) es
     let zeroes = map (bool 0 1) $
                  foldr (\e acc -> map (uncurry (&&)) $ zip e acc)
@@ -191,7 +201,7 @@ dgkServer sock skDGK skGM l cs = do
     log $ "Server zeroes: " <> show zeroes
 
     enczeroes <- paheEnc pkGM zeroes
-    send sock [] =<< paheToBS pkGM enczeroes
+    zsend sock =<< paheToBS pkGM enczeroes
 
     log "Server: dgk exited"
 
@@ -203,7 +213,7 @@ dgkServer sock skDGK skGM l cs = do
 -- | Compute y <= x jointly with secret inputs. Client has r, server has c.
 secureCompareClient ::
        (Pahe sTop, Pahe sDGK, Pahe sGM)
-    => Socket Req
+    => Socket Dealer
     -> PahePk sTop
     -> PahePk sDGK
     -> PahePk sGM
@@ -213,7 +223,7 @@ secureCompareClient ::
     -> PaheCiph sTop
     -> IO (PaheCiph sGM)
 secureCompareClient sock pkTop pkDGK pkGM l m x y = do
-  --measureTimeSingle "secure compare client" $ do
+  measureTimeSingle' "secure compare client" $ do
 
     log "Client: secureCompare started"
     when (m > paheK pkDGK) $ error "Secure compare: m is too big"
@@ -222,9 +232,9 @@ secureCompareClient sock pkTop pkDGK pkGM l m x y = do
     s1 <- paheSIMDAdd pkTop x =<< paheEnc pkTop (map (+(2^l)) rhos)
     gamma <- paheSIMDSub pkTop s1 y
 
-    send sock [] =<< paheToBS pkTop gamma
+    zsend sock =<< paheToBS pkTop gamma
 
-    cDiv2l <- paheFromBS pkGM =<< receive sock
+    cDiv2l <- paheFromBS pkGM =<< zreceive sock
 
     eps <- dgkClient sock pkDGK pkGM l $ map (`mod` (2^l)) rhos
     epsNeg <- paheSIMDSub pkGM (paheOne pkGM) eps
@@ -238,7 +248,7 @@ secureCompareClient sock pkTop pkDGK pkGM l m x y = do
 
 secureCompareServer ::
        (Pahe sTop, Pahe sDGK, Pahe sGM)
-    => Socket Rep
+    => Socket Dealer
     -> PaheSk sTop
     -> PaheSk sDGK
     -> PaheSk sGM
@@ -250,10 +260,10 @@ secureCompareServer sock skTop skDGK skGM l m = do
     let pkGM = paheToPublic skGM
     log "Server: securecompare started"
 
-    gamma <- (paheDec skTop <=< paheFromBS pkTop) =<< receive sock
+    gamma <- (paheDec skTop <=< paheFromBS pkTop) =<< zreceive sock
     let cMod2 = map (`mod` (2^l)) $ take m gamma
     let cDiv2 = map (`div` (2^l)) $ take m gamma
-    send sock [] =<< (paheToBS pkGM =<< paheEnc pkGM cDiv2)
+    zsend sock =<< (paheToBS pkGM =<< paheEnc pkGM cDiv2)
 
 
     dgkServer sock skDGK skGM l cMod2
@@ -263,15 +273,10 @@ secureCompareServer sock skTop skDGK skGM l m = do
 -- Tests
 ----------------------------------------------------------------------------
 
-_testCmp :: Socket Req -> Socket Rep -> IO ()
-_testCmp req rep = do
-    putTextLn "Initialised the context, generating params"
-    bind rep "inproc://argmax"
-    connect req "inproc://argmax"
+_testCmp :: Int -> Socket Dealer -> Socket Dealer -> IO ()
+_testCmp k req rep = do
+    putTextLn $ "_testCMP, k = " <> show k
 
-    putTextLn "Keygen..."
-    -- SIMD parameter
-    let k = 32
     -- bit size of numbers we compare
     let l = 64
 --    m <- randomRIO (1,k)
@@ -288,11 +293,11 @@ _testCmp req rep = do
 
     -- system used to carry QR results
     --skGM <- paheKeyGen @DgkCrt k 5 -- (2^(l+5))
-    skGM <- paheKeyGen @GMSep k 5 -- (2^(l+5))
+    skGM <- paheKeyGen @DgkCrt k 5 -- (2^(l+5))
     --let skGM = skDGK
     let pkGM = paheToPublic skGM
 
-    let testCompare m = replicateM_ 10 $ do
+    let testCompare m = do
             xs <- replicateM m $ randomRIO (0,2^l-1)
             ys <- replicateM m $ randomRIO (0,2^l-1)
             let expected = map (\(x,y) -> x >= y) $ zip xs ys
@@ -300,8 +305,9 @@ _testCmp req rep = do
             xsEnc <- paheEnc pkTop xs
             ysEnc <- paheEnc pkTop ys
 
-            (gamma,()) <-
---                measureTimeSingle "SecureCompare" $
+            ((gamma,()),timing) <-
+                measureTimeSingle' "SecureCompare" $
+                measureTimeRet $
                 concurrently
                 (secureCompareClient req pkTop pkDGK pkGM l m xsEnc ysEnc)
                 (secureCompareServer rep skTop skDGK skGM l m)
@@ -315,13 +321,15 @@ _testCmp req rep = do
                 putTextLn $ "          " <> show (map (==1) secCompRes)
                 error "Mismatch"
 
+            pure timing
+
     let testDGK m = do
             cs <- replicateM m $ randomRIO (0,2^l-1)
             rs <- replicateM m $ randomRIO (0,2^l-1)
             let expected = map (\(c,r) -> r <= c) $ zip cs rs
 
             ((eps,()),timing) <-
-                --measureTimeSingle "dgk" $
+                measureTimeSingle' "dgk" $
                 measureTimeRet $
                 concurrently
                 (dgkClient req pkDGK pkGM l rs)
@@ -336,28 +344,34 @@ _testCmp req rep = do
                 error "Mismatch"
             pure timing
 
-    let finTestDGK :: Int -> IO ()
-        finTestDGK m = do
-            dgkTimings <- replicateM 5 $ testDGK m
-            putTextLn $ "------------- Average DGK with m = " <> show m
-                <> " is " <> show (average dgkTimings) <> " mcs"
 
---    finTestDGK 1
---    finTestDGK 2
---    finTestDGK 3
---    finTestDGK 4
---    finTestDGK 6
---    finTestDGK 8
---    finTestDGK 10
---    finTestDGK 12
---    finTestDGK 14
---    finTestDGK 16
---    finTestDGK 24
---    finTestDGK 28
-    finTestDGK 32
+    let finTest :: Int -> IO ()
+        finTest m = do
+            --timings <- replicateM 50 $ testDGK m
+            timings <- replicateM 300 $ testCompare m
+            putTextLn $ "------------- Average comp with m = " <> show m
+                <> " is " <> show (average timings) <> " mcs"
 
-_testCmpFull :: IO ()
-_testCmpFull =
+    finTest 1
+--    finTest 2
+--    finTest 3
+--    finTest 4
+--    finTest 6
+--    finTest 8
+--    finTest 10
+--    finTest 12
+--    finTest 14
+--    finTest 16
+    finTest k
+--    finTest 24
+--    finTest 28
+--    finTest 32
+
+_testCmpInproc :: Int -> IO ()
+_testCmpInproc k =
     withContext $ \ctx ->
-    withSocket ctx Req $ \req ->
-    withSocket ctx Rep $ \rep -> _testCmp req rep
+    withSocket ctx Dealer $ \req ->
+    withSocket ctx Dealer $ \rep -> do
+       bind rep "inproc://argmax"
+       connect req "inproc://argmax"
+       _testCmp k req rep

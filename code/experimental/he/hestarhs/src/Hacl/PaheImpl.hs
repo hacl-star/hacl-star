@@ -373,8 +373,6 @@ instance Pahe PailSep where
         unless (length perm == psp_simdn * 2) $
             error "paillier pahePermute permutation is too short"
 
-        putTextLn $ "pahePermute: " <> show (length c1) <> " " <> show (length c2)
-
         c1Tail <-
             replicateM (psp_simdn - length c1) $
             pailEncOne psp_bn psp_n psp_nRaw psp_n2 psp_g 0
@@ -604,4 +602,5 @@ instance Pahe DgkCrt where
     pahePermuteHor _ _ _ = error "DGK permuteHor -- implement as in DGK comp"
 
 instance NFData (PaheCiph DgkCrt)
+instance NFData (PaheSk DgkCrt)
 instance NFData (PahePk DgkCrt)

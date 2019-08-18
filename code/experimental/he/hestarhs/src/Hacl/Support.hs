@@ -207,13 +207,13 @@ genDataDGK uFacts bits = do
           b <- testPrime p
           if b then pure (r,p) else genR (i+1)
 
-    putTextLn "Generating p"
+    --putTextLn "Generating p"
     (r_p,p) <- genR 0
-    putTextLn "Generating q"
+    --putTextLn "Generating q"
     (r_q,q) <- genR 0
     when (p == q) $ error "p = q"
     let n = p * q
-    putTextLn "Generated n"
+    --putTextLn "Generated n"
 
     let phinFacts =
             recombineFacts $
@@ -232,9 +232,9 @@ genDataDGK uFacts bits = do
                 else findWithOrd reqO
             else findWithOrd reqO
 
-    putTextLn "Generating g"
+    --putTextLn "Generating g"
     g <- findWithOrd (u * v)
-    putTextLn "Generating h"
+    --putTextLn "Generating h"
     h <- findWithOrd v
 
     pure (p,q,u,v,g,h)
@@ -276,6 +276,6 @@ dgkKeyGenWithLookup primeN primeBound bits =
         Just x -> pure x
         Nothing -> do
           res <- genDataDGKWithPrimes primeN primeBound bits
-          print (primeN,primeBound,bits)
-          print res
+          --print (primeN,primeBound,bits)
+          --print res
           pure res

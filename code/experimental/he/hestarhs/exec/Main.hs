@@ -4,6 +4,7 @@ import Universum
 
 import Control.Concurrent (threadDelay)
 import qualified Control.Concurrent.Async as A
+import System.IO (hFlush, stdout)
 import System.ZMQ4
 
 import Argmax
@@ -15,24 +16,25 @@ import TestHacl
 import Utils
 
 
-measureDelay :: Socket Req -> Socket Rep -> IO ()
+measureDelay :: Socket Dealer -> Socket Dealer -> IO ()
 measureDelay req rep = do
     putTextLn "Measuring delay"
 
-    let tries = 100
+    let tries = 300
 
     let server = replicateM tries $ do
-            e <- receive rep
-            send rep [] ""
+            e <- zreceive rep
+            zsend rep ""
             mcstime2 <- getCurrentTimeMcs
-            putTextLn "."
             let delta =(mcstime2 - fromIntegral (w64FromBs e))
+            putText "."
+            hFlush stdout
             pure delta
 
     let client = replicateM_ tries $ do
             mcstime <- getCurrentTimeMcs
-            send req [] (w64ToBs $ fromIntegral mcstime)
-            void $ receive req
+            zsend req (w64ToBs $ fromIntegral mcstime)
+            void $ zreceive req
 
 
     ((),xs) <- A.concurrently client server
@@ -42,8 +44,8 @@ measureDelay req rep = do
 lanLoopback :: IO ()
 lanLoopback =
     withContext $ \ctx ->
-    withSocket ctx Req $ \req ->
-    withSocket ctx Rep $ \rep -> do
+    withSocket ctx Dealer $ \req ->
+    withSocket ctx Dealer $ \rep -> do
       putTextLn "Initialised the context, generating params"
       -- USB
       --bind rep "tcp://192.168.42.86:8875"
@@ -59,9 +61,15 @@ lanLoopback =
 
       measureDelay req rep
 
-      putTextLn "waiting..."
+      --_testCmp 1 req rep
+      --_testCmp 8 req rep
+      --_testCmp 16 req rep
 
-      _testArgmax req rep
+      _testArgmax 4 req rep
+      measureDelay req rep
+      _testArgmax 8 req rep
+      measureDelay req rep
+      _testArgmax 16 req rep
 
 
 benchCrypto :: IO ()
@@ -89,8 +97,14 @@ main = do
     --_testArgmax
     --_testCmp
     --testDGKPahe
-    --lanLoopback
-    _testCmpFull
+    lanLoopback
     --benchCrypto
     --benchCRTs
     --testDGKPaheCriterion
+    --_testCmpInproc 1
+    --_testCmpInproc 8
+    --_testCmpInproc 16
+    --_testArgmaxInproc 4
+    --_testArgmaxInproc 8
+    --_testArgmaxInproc 16
+    --_testArgmaxInproc 16

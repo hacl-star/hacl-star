@@ -503,7 +503,8 @@ testDGKPahe = do
 testDGKPaheCriterion :: IO ()
 testDGKPaheCriterion = defaultMain [
       env (genEnv 1) benches
---    , env (genEnv 16) benches
+    , env (genEnv 8) benches
+    , env (genEnv 16) benches
     , env (genEnv 32) benches
     ]
   where
@@ -519,17 +520,17 @@ testDGKPaheCriterion = defaultMain [
       c1' <- paheEnc pk values1'
       c2 <- paheEnc pk values2
       c2' <- paheEnc pk values2'
-      pure (n, pk, values1, values2, c1, c1', c2, c2')
+      pure (n, sk, pk, values1, values2, c1, c1', c2, c2')
 
-    benches ~(n, pk, values1, values2, c1, c1', c2, c2') =
+    benches ~(n, sk, pk, values1, values2, c1, c1', c2, c2') =
       bgroup ("n = " <> show n) $
       [ bench "Enc 1" $ whnfIO $ void $ paheEnc pk values1
       , bench "Add 1" $ whnfIO $ void $ paheSIMDAdd pk c1 c1'
       , bench "Mul 1" $ whnfIO $ void $ paheSIMDMulScal pk c1 values1
-      , bench "Sub 1" $ whnfIO $ void $ paheSIMDSub pk c1 c1'
+      , bench "Isz 1" $ whnfIO $ void $ paheIsZero sk c1
       ] ++ if n == 1 then [] else
-      [ bench "Enc k" $ whnfIO $ void $ paheEnc pk values2
-      , bench "Add k" $ whnfIO $ void $ paheSIMDAdd pk c2 c2'
-      , bench "Mul k" $ whnfIO $ void $ paheSIMDMulScal pk c2 values2
-      , bench "Sub k" $ whnfIO $ void $ paheSIMDSub pk c2 c2'
+      [ bench "Enc n" $ whnfIO $ void $ paheEnc pk values2
+      , bench "Add n" $ whnfIO $ void $ paheSIMDAdd pk c2 c2'
+      , bench "Mul n" $ whnfIO $ void $ paheSIMDMulScal pk c2 values2
+      , bench "Isz n" $ whnfIO $ void $ paheIsZero sk c2
       ]
