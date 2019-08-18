@@ -11,6 +11,7 @@ open Hacl.Spec.P256.Definitions
 open Hacl.Impl.LowLevel
 open Hacl.Impl.P256
 open Hacl.Impl.MontgomeryMultiplication
+open Hacl.Spec.P256.MontgomeryMultiplication
 open Hacl.Impl.MM.Exponent
 open Hacl.Spec.P256.Core
 open Hacl.Spec.ECDSAP256.Definition
@@ -402,6 +403,8 @@ let ecdsa_verification_step4 r s hash bufferU1 bufferU2 =
   pop_frame()
 
 
+#reset-options "--z3refresh --z3rlimit 300" 
+
 inline_for_extraction noextract
 val ecdsa_verification_step5_0: pubKeyAsPoint: point -> u1: lbuffer uint8 (size 32) -> u2: lbuffer uint8 (size 32) -> 
   tempBuffer: lbuffer uint64 (size 100) -> points: lbuffer uint64 (size 24) ->
@@ -412,28 +415,36 @@ val ecdsa_verification_step5_0: pubKeyAsPoint: point -> u1: lbuffer uint8 (size 
 	as_nat h (gsub pubKeyAsPoint (size 4) (size 4)) < prime256 /\
 	as_nat h (gsub pubKeyAsPoint (size 8) (size 4)) < prime256 
 )
-  (ensures fun h0 _ h1 -> modifies (loc pubKeyAsPoint |+| loc  tempBuffer |+| loc points) h0 h1 /\
+  (ensures fun h0 _ h1 -> modifies (loc pubKeyAsPoint |+| loc  tempBuffer |+| loc points) h0 h1 /\ 
+  
     	as_nat h1 (gsub points (size 0) (size 4)) < prime256 /\
 	as_nat h1 (gsub points (size 4) (size 4)) < prime256 /\
-	as_nat h1 (gsub points (size 8) (size 4)) < prime256  /\
+	as_nat h1 (gsub points (size 8) (size 4)) < prime256 /\
 	as_nat h1 (gsub points (size 12) (size 4)) < prime256 /\
 	as_nat h1 (gsub points (size 16) (size 4)) < prime256 /\
-	as_nat h1 (gsub points (size 20) (size 4)) < prime256   
+	as_nat h1 (gsub points (size 20) (size 4)) < prime256 /\ 
+  (
+    let pointU1 = gsub points (size 0) (size 12) in 
+    let pointU2 = gsub points (size 12) (size 12) in  
+  
+    let fromDomainPointU1 = fromDomainPoint (point_prime_to_coordinates (as_seq h1 pointU1)) in 
+    let fromDomainPointU2 = fromDomainPoint (point_prime_to_coordinates (as_seq h1 pointU2)) in 
+    
+    let basePoint = (0x6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296, 0x4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5, 1) in 
+    let pointAtInfinity = (0, 0, 0) in 
+    let u1D, _ = montgomery_ladder_spec (as_seq h0 u1) (pointAtInfinity, basePoint) in 
+    let u2D, _ = montgomery_ladder_spec (as_seq h0 u2) (pointAtInfinity, point_prime_to_coordinates (as_seq h0 pubKeyAsPoint)) in 
+    fromDomainPointU1 == u1D /\ fromDomainPointU2 == u2D
   )
+)
 
-(*ilbuffer versus lbuffer *)
+
 let ecdsa_verification_step5_0 pubKeyAsPoint u1 u2 tempBuffer points  = 
-    let pointU1G = sub points (size 0) (size 12) in 
+    let pointU1G = sub points (size 0) (size 12) in  
     let pointU2Q = sub points (size 12) (size 12) in
-      let h0 = ST.get() in 
     secretToPublicWithoutNorm pointU1G u1 tempBuffer; 
-      let h1 = ST.get() in 
-      (*assert(modifies2 points tempBuffer h0 h1);
-      modifies2_is_modifies3 pubKeyAsPoint points tempBuffer h0 h1; *)
     scalarMultiplicationWithoutNorm pubKeyAsPoint pointU2Q u2 tempBuffer
-      (*let h2 = ST.get() in 
-      assert(modifies3 pubKeyAsPoint points tempBuffer h1 h2);
-      assert(modifies3 pubKeyAsPoint points tempBuffer h0 h2) *)
+
 
 
 inline_for_extraction noextract

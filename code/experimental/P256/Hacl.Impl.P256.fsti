@@ -10,7 +10,7 @@ module HS = FStar.HyperStack
 open Lib.IntTypes
 open Lib.Buffer
 
-open  Hacl.Spec.P256.Core
+open Hacl.Spec.P256.Core
 open Hacl.Spec.P256.Lemmas
 open Hacl.Spec.P256.Definitions
 open Hacl.Spec.P256.SolinasReduction
@@ -171,6 +171,9 @@ val scalarMultiplication: #buf_type: buftype->  p: point -> result: point ->
   (ensures fun h0 _ h1 -> 
     modifies3 p result tempBuffer h0 h1 /\ 
     modifies (loc p |+| loc result |+| loc tempBuffer) h0 h1 /\
+    as_nat h1 (gsub result (size 0) (size 4)) < prime256 /\ 
+    as_nat h1 (gsub result (size 4) (size 4)) < prime256 /\
+    as_nat h1 (gsub result (size 8) (size 4)) < prime256 /\
     (
       let x3, y3, z3 = point_x_as_nat h1 result, point_y_as_nat h1 result, point_z_as_nat h1 result in 
       let (xN, yN, zN) = scalar_multiplication (as_seq h0 scalar) (point_prime_to_coordinates (as_seq h0 p)) in 
@@ -192,6 +195,11 @@ val scalarMultiplicationWithoutNorm: p: point -> result: point ->
     )
   (ensures fun h0 _ h1 -> 
     modifies3 p result tempBuffer h0 h1 /\ 
+    
+    as_nat h1 (gsub result (size 0) (size 4)) < prime256 /\ 
+    as_nat h1 (gsub result (size 4) (size 4)) < prime256 /\
+    as_nat h1 (gsub result (size 8) (size 4)) < prime256 /\
+    
     modifies (loc p |+| loc result |+| loc tempBuffer) h0 h1 /\
     (
       let p1 = fromDomainPoint(point_prime_to_coordinates (as_seq h1 result)) in 
