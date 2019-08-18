@@ -230,8 +230,8 @@ open Lib.ByteBuffer
 
 
 val changeEndian: i: felem -> Stack unit 
-  (requires fun h -> True)
-  (ensures fun h0 _ h1 -> True)
+  (requires fun h -> live h i)
+  (ensures fun h0 _ h1 -> modifies1 i h0 h1 /\ as_seq h1 i == Hacl.Spec.ECDSA.changeEndian (as_seq h0 i)) 
 
 let changeEndian i = 
   let zero = index i (size 0) in 
@@ -243,16 +243,15 @@ let changeEndian i =
   upd i (size 2) one;
   upd i (size 3) zero
 
-
 val toUint64: i: lbuffer uint8 (32ul) -> o: felem ->  Stack unit
   (requires fun h -> live h i /\ live h o /\ disjoint i o)
-  (ensures fun h0 _ h1 -> modifies (loc o) h0 h1 /\
-     as_seq h1 o == Lib.ByteSequence.uints_from_bytes_le #_ #_ #4 (as_seq h0 i))
+  (ensures fun h0 _ h1 -> modifies (loc o) h0 h1 
+    /\ as_seq h1 o == Hacl.Spec.ECDSA.changeEndian(Lib.ByteSequence.uints_from_bytes_be #_ #_ #4 (as_seq h0 i))
+   )
 
 let toUint64 i o = 
   uints_from_bytes_be o i;
   changeEndian o
-
 
 
 val toUint8: i: felem ->  o: lbuffer uint8 (32ul) -> Stack unit
@@ -271,8 +270,6 @@ Check that {\displaystyle Q_{A}} Q_{A} is not equal to the identity element {\di
 Check that {\displaystyle Q_{A}} Q_{A} lies on the curve
 Check that {\displaystyle n\times Q_{A}=O} n\times Q_{A}=O
  *)
-
-
 val verifyQValidCurvePoint: pubKey: lbuffer uint64 (size 8) -> pubKeyAsPoint: point -> tempBuffer: lbuffer uint64 (size 100) ->  Stack bool
   (requires fun h -> live h pubKey /\ live h tempBuffer /\ live h pubKeyAsPoint /\
     LowStar.Monotonic.Buffer.all_disjoint [loc pubKey; loc tempBuffer; loc pubKeyAsPoint]
@@ -563,8 +560,13 @@ val ecdsa_verification:
   Stack bool
     (requires fun h -> live h pubKey /\ live h r /\ live h s /\ live h m /\
       LowStar.Monotonic.Buffer.all_disjoint [loc pubKey; loc r; loc s; loc m] )  
-    (ensures fun h0 _ h1 -> modifies0 h0 h1)
-
+    (ensures fun h0 result h1 -> modifies0 h0 h1 /\
+	(
+	  let pubKeyX = as_nat h0 (gsub pubKey (size 0) (size 4)) in 
+	  let pubKeyY = as_nat h0 (gsub pubKey (size 4) (size 4)) in 
+	  result == ecdsa_verification (pubKeyX, pubKeyY) (as_nat h0 r) (as_nat h0 s) (v mLen) (as_seq h0 m)
+    )
+)
 
 let ecdsa_verification pubKey r s mLen m = 
   push_frame();
@@ -580,7 +582,11 @@ let ecdsa_verification pubKey r s mLen m =
     let xBuffer =  sub tempBufferU64 (size 116) (size 4) in 
 
     let publicKeyCorrect = verifyQValidCurvePoint pubKey publicKeyBuffer tempBuffer in 
-    if publicKeyCorrect = false then 
+      let h1 = ST.get() in 
+    (*assert(as_seq h1 publicKeyBuffer == *)
+
+
+    if publicKeyCorrect = false then  
       begin pop_frame(); false end
     else 
 

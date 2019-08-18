@@ -167,6 +167,20 @@ val toJacobianCoordinates: tuple2 nat nat -> Tot (tuple3 nat nat nat)
 
 let toJacobianCoordinates (r0, r1) = (r0, r1, 1)
 
+val changeEndian: i: felem_seq -> Tot felem_seq
+
+let changeEndian i = 
+  let zero =  Lib.Sequence.index i 0 in 
+  let one =   Lib.Sequence.index i 1 in 
+  let two =   Lib.Sequence.index i 2 in 
+  let three = Lib.Sequence.index i 3 in 
+
+  let o = Lib.Sequence.upd i 0 three in 
+  let o = Lib.Sequence.upd o 1 two in 
+  let o = Lib.Sequence.upd o 2 one in 
+	  Lib.Sequence.upd o 3 zero
+
+
 
 val verifyQValidCurvePointSpec: publicKey: tuple3 nat nat nat -> bool
 
@@ -192,6 +206,22 @@ let ecdsa_verification publicKey r s mLen input =
   let step1 = checkCoordinates r s in if step1 = false then false else begin
 
   let hashResult = Spec.Hash.hash Spec.Hash.Definitions.SHA2_256 input in 
-  let hashAsFelem = (felem_seq_as_nat (Lib.ByteSequence.uints_from_bytes_le hashResult)) % prime_p256_order in 
-  true
+  let hashNat = (felem_seq_as_nat (Lib.ByteSequence.uints_from_bytes_le hashResult)) % prime_p256_order in 
+
+  let u1 = (Hacl.Spec.P256.Definitions.pow s (prime_p256_order - 2) * hashNat) % prime_p256_order in 
+  let u2 = (Hacl.Spec.P256.Definitions.pow s (prime_p256_order - 2) * r) % prime_p256_order in 
+
+  let u1Buffer = Lib.ByteSequence.uints_to_bytes_le (Hacl.Spec.ECDSAP256.Definition.nat_as_seq u1) in
+  let u2Buffer = Lib.ByteSequence.uints_to_bytes_le (Hacl.Spec.ECDSAP256.Definition.nat_as_seq u2) in 
+  
+  let basePoint = (0x6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296, 0x4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5, 1) in 
+  let pointAtInfinity = (0, 0, 0) in 
+
+   let u1D, _ = montgomery_ladder_spec u1Buffer (pointAtInfinity, basePoint) in 
+   let u2D, _ = montgomery_ladder_spec u2Buffer (pointAtInfinity, publicJacobian) in 
+   let sumPoints = _point_add u1D u2D in 
+   let pointNorm = _norm sumPoints in 
+   let (xResult, yResult, zResult) = pointNorm in 
+   if Hacl.Spec.P256.isPointAtInfinity pointNorm then false else 
+   xResult = r
 end end   
