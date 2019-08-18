@@ -600,7 +600,8 @@ let lemmaDistributivityInDomain a b =
 val fsquarePowN: n: size_t -> a: felem -> Stack unit 
   (requires (fun h -> live h a /\ as_nat h a < prime)) 
   (ensures (fun h0 _ h1 -> modifies1 a h0 h1 /\  as_nat h1 a < prime /\ (let k = fromDomain_(as_nat h0 a) in as_nat h1 a = toDomain_ (pow k (pow2 (v n))))))
-  
+
+(*to prove *)
 let fsquarePowN n a = 
   let h0 = ST.get() in  
   lemmaFromDomainToDomain (as_nat h0 a);
@@ -783,14 +784,3 @@ let exponent a result tempBuffer =
   lemma_mod_mul_distr_l (power1 * power2 * power3) power4 prime;
   big_power k ((pow2 32 - 1) * pow2 224) (pow2 192) ((pow2 94 -1 ) * pow2 2) 1;
   assert_norm(((pow2 32 - 1) * pow2 224 + pow2 192 + (pow2 94 -1 ) * pow2 2 + 1) = prime - 2)
-
-
-let clean_exponent a result tempBuffer = 
-  push_frame();
-    let temp1 = Lib.Buffer.create (size 4) (u64 0) in 
-    let one = Lib.Buffer.create (size 4) (u64 0) in 
-      Lib.Buffer.upd #_ #(size 4)  one (size 0) (u64 1);
-    montgomery_multiplication_buffer one a temp1;
-    exponent temp1 result tempBuffer; 
-
-  pop_frame()  
