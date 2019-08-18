@@ -460,7 +460,22 @@ val ecdsa_verification_step5_1: pubKeyAsPoint: point ->
     as_nat h (gsub pubKeyAsPoint (size 4) (size 4)) < prime256 /\
     as_nat h (gsub pubKeyAsPoint (size 8) (size 4)) < prime256 )
     (ensures fun h0 _ h1 -> modifies (loc pointSum |+| loc tempBuffer |+| loc pubKeyAsPoint) h0 h1 /\ 
-      as_nat h1 (gsub pointSum (size 0) (size 4)) < prime256)
+      as_nat h1 (gsub pointSum (size 0) (size 4)) < prime256 /\
+      	(
+	  let basePoint = (0x6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296, 0x4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5, 1) in 
+	  let pointAtInfinity = (0, 0, 0) in 
+	
+	  let u1D, _ = montgomery_ladder_spec (as_seq h0 u1) (pointAtInfinity, basePoint) in 
+	  let u2D, _ = montgomery_ladder_spec (as_seq h0 u2) (pointAtInfinity, point_prime_to_coordinates (as_seq h0 pubKeyAsPoint)) in 
+
+	  let sumD = _point_add u1D u2D in 
+	
+	  let pointNorm = _norm sumD in 
+	  let resultPoint =  point_prime_to_coordinates (as_seq h1 pointSum) in 
+	  pointNorm == resultPoint    
+      )
+   )   
+
 
 let ecdsa_verification_step5_1 pubKeyAsPoint u1 u2 pointSum tempBuffer = 
   push_frame();
@@ -472,13 +487,25 @@ let ecdsa_verification_step5_1 pubKeyAsPoint u1 u2 pointSum tempBuffer =
       assert(modifies3 pubKeyAsPoint tempBuffer points h0 h1);
       modifies3_is_modifies4 pointSum pubKeyAsPoint tempBuffer points h0 h1;
       assert(modifies4 pointSum pubKeyAsPoint tempBuffer points h0 h1); 
+  
     let pointU1G = sub points (size 0) (size 12) in 
-    let pointU2Q = sub points (size 12) (size 12) in
-
+    let pointU2Q = sub points (size 12) (size 12) in 
     point_add pointU1G pointU2Q pointSum buff; 
     norm pointSum pointSum buff;
-    
       let h2 = ST.get() in 
+      assert(      
+	let basePoint = (0x6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296, 0x4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5, 1) in 
+	let pointAtInfinity = (0, 0, 0) in 
+	
+	let u1D, _ = montgomery_ladder_spec (as_seq h0 u1) (pointAtInfinity, basePoint) in 
+	let u2D, _ = montgomery_ladder_spec (as_seq h0 u2) (pointAtInfinity, point_prime_to_coordinates (as_seq h0 pubKeyAsPoint)) in 
+
+	let sumD = _point_add u1D u2D in 
+	
+	let pointNorm = _norm sumD in 
+	let resultPoint =  point_prime_to_coordinates (as_seq h2 pointSum) in 
+	pointNorm == resultPoint);
+
       assert(modifies2 pointSum tempBuffer h1 h2);
       modifies2_is_modifies4 pubKeyAsPoint points pointSum tempBuffer h1 h2;
       assert(modifies4 pubKeyAsPoint points pointSum tempBuffer h1 h2);

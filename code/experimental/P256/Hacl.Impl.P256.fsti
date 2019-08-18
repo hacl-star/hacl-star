@@ -141,16 +141,20 @@ val norm: p: point -> resultPoint: point -> tempBuffer: lbuffer uint64 (size 88)
   (ensures fun h0 _ h1 -> 
       modifies (loc tempBuffer |+| loc resultPoint) h0 h1 /\
       (
-      let x3 = point_x_as_nat h1 resultPoint in  
+      let resultPoint =  point_prime_to_coordinates (as_seq h1 resultPoint) in 
+      
+      (* let x3 = point_x_as_nat h1 resultPoint in  
       let y3 = point_y_as_nat h1 resultPoint in 
-      let z3 = point_z_as_nat h1 resultPoint in 
+      let z3 = point_z_as_nat h1 resultPoint in  *)
 
+      let pointD = fromDomainPoint (point_prime_to_coordinates (as_seq h0 p)) in 
+(*
       let xD = fromDomain_ (point_x_as_nat h0 p) in 
       let yD = fromDomain_ (point_y_as_nat h0 p) in 
       let zD = fromDomain_ (point_z_as_nat h0 p) in 
-
-      let (xN, yN, zN) = _norm (xD, yD, zD) in 
-      x3 == xN /\ y3 == yN /\ z3 == zN 
+*)
+      let pointNorm = _norm pointD in 
+      pointNorm == resultPoint
    )   
   )
 
