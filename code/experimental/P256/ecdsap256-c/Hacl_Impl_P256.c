@@ -1596,7 +1596,7 @@ static void Hacl_Impl_LowLevel_p256_sub(uint64_t *arg1, uint64_t *arg2, uint64_t
   uint64_t c = cc2;
 }
 
-static uint64_t Hacl_Spec_P256_SolinasReduction_store_high_low_u(uint32_t high, uint32_t low)
+static uint64_t Hacl_Impl_SolinasReduction_store_high_low_u(uint32_t high, uint32_t low)
 {
   uint64_t as_uint64_high = (uint64_t)high;
   uint64_t as_uint64_high1 = as_uint64_high << (uint32_t)32U;
@@ -1618,10 +1618,10 @@ Hacl_Impl_SolinasReduction_upl_zer_buffer(
   uint64_t *o
 )
 {
-  uint64_t b0 = Hacl_Spec_P256_SolinasReduction_store_high_low_u(c1, c0);
-  uint64_t b1 = Hacl_Spec_P256_SolinasReduction_store_high_low_u(c3, c2);
-  uint64_t b2 = Hacl_Spec_P256_SolinasReduction_store_high_low_u(c5, c4);
-  uint64_t b3 = Hacl_Spec_P256_SolinasReduction_store_high_low_u(c7, c6);
+  uint64_t b0 = Hacl_Impl_SolinasReduction_store_high_low_u(c1, c0);
+  uint64_t b1 = Hacl_Impl_SolinasReduction_store_high_low_u(c3, c2);
+  uint64_t b2 = Hacl_Impl_SolinasReduction_store_high_low_u(c5, c4);
+  uint64_t b3 = Hacl_Impl_SolinasReduction_store_high_low_u(c7, c6);
   temp[0U] = b0;
   temp[1U] = b1;
   temp[2U] = b2;
@@ -1641,9 +1641,9 @@ Hacl_Impl_SolinasReduction_upl_fir_buffer(
 )
 {
   uint64_t b0 = (uint64_t)0U;
-  uint64_t b1 = Hacl_Spec_P256_SolinasReduction_store_high_low_u(c11, (uint32_t)0U);
-  uint64_t b2 = Hacl_Spec_P256_SolinasReduction_store_high_low_u(c13, c12);
-  uint64_t b3 = Hacl_Spec_P256_SolinasReduction_store_high_low_u(c15, c14);
+  uint64_t b1 = Hacl_Impl_SolinasReduction_store_high_low_u(c11, (uint32_t)0U);
+  uint64_t b2 = Hacl_Impl_SolinasReduction_store_high_low_u(c13, c12);
+  uint64_t b3 = Hacl_Impl_SolinasReduction_store_high_low_u(c15, c14);
   temp[0U] = b0;
   temp[1U] = b1;
   temp[2U] = b2;
@@ -1662,9 +1662,9 @@ Hacl_Impl_SolinasReduction_upl_sec_buffer(
 )
 {
   uint64_t b0 = (uint64_t)0U;
-  uint64_t b1 = Hacl_Spec_P256_SolinasReduction_store_high_low_u(c12, (uint32_t)0U);
-  uint64_t b2 = Hacl_Spec_P256_SolinasReduction_store_high_low_u(c14, c13);
-  uint64_t b3 = Hacl_Spec_P256_SolinasReduction_store_high_low_u((uint32_t)0U, c15);
+  uint64_t b1 = Hacl_Impl_SolinasReduction_store_high_low_u(c12, (uint32_t)0U);
+  uint64_t b2 = Hacl_Impl_SolinasReduction_store_high_low_u(c14, c13);
+  uint64_t b3 = Hacl_Impl_SolinasReduction_store_high_low_u((uint32_t)0U, c15);
   o[0U] = b0;
   o[1U] = b1;
   o[2U] = b2;
@@ -1682,10 +1682,10 @@ Hacl_Impl_SolinasReduction_upl_thi_buffer(
   uint64_t *o
 )
 {
-  uint64_t b0 = Hacl_Spec_P256_SolinasReduction_store_high_low_u(c9, c8);
-  uint64_t b1 = Hacl_Spec_P256_SolinasReduction_store_high_low_u((uint32_t)0U, c10);
+  uint64_t b0 = Hacl_Impl_SolinasReduction_store_high_low_u(c9, c8);
+  uint64_t b1 = Hacl_Impl_SolinasReduction_store_high_low_u((uint32_t)0U, c10);
   uint64_t b2 = (uint64_t)0U;
-  uint64_t b3 = Hacl_Spec_P256_SolinasReduction_store_high_low_u(c15, c14);
+  uint64_t b3 = Hacl_Impl_SolinasReduction_store_high_low_u(c15, c14);
   temp[0U] = b0;
   temp[1U] = b1;
   temp[2U] = b2;
@@ -1706,10 +1706,10 @@ Hacl_Impl_SolinasReduction_upl_for_buffer(
   uint64_t *o
 )
 {
-  uint64_t b0 = Hacl_Spec_P256_SolinasReduction_store_high_low_u(c10, c9);
-  uint64_t b1 = Hacl_Spec_P256_SolinasReduction_store_high_low_u(c13, c11);
-  uint64_t b2 = Hacl_Spec_P256_SolinasReduction_store_high_low_u(c15, c14);
-  uint64_t b3 = Hacl_Spec_P256_SolinasReduction_store_high_low_u(c8, c13);
+  uint64_t b0 = Hacl_Impl_SolinasReduction_store_high_low_u(c10, c9);
+  uint64_t b1 = Hacl_Impl_SolinasReduction_store_high_low_u(c13, c11);
+  uint64_t b2 = Hacl_Impl_SolinasReduction_store_high_low_u(c15, c14);
+  uint64_t b3 = Hacl_Impl_SolinasReduction_store_high_low_u(c8, c13);
   temp[0U] = b0;
   temp[1U] = b1;
   temp[2U] = b2;
@@ -1728,10 +1728,10 @@ Hacl_Impl_SolinasReduction_upl_fif_buffer(
   uint64_t *o
 )
 {
-  uint64_t b0 = Hacl_Spec_P256_SolinasReduction_store_high_low_u(c12, c11);
-  uint64_t b1 = Hacl_Spec_P256_SolinasReduction_store_high_low_u((uint32_t)0U, c13);
+  uint64_t b0 = Hacl_Impl_SolinasReduction_store_high_low_u(c12, c11);
+  uint64_t b1 = Hacl_Impl_SolinasReduction_store_high_low_u((uint32_t)0U, c13);
   uint64_t b2 = (uint64_t)0U;
-  uint64_t b3 = Hacl_Spec_P256_SolinasReduction_store_high_low_u(c10, c8);
+  uint64_t b3 = Hacl_Impl_SolinasReduction_store_high_low_u(c10, c8);
   temp[0U] = b0;
   temp[1U] = b1;
   temp[2U] = b2;
@@ -1751,10 +1751,10 @@ Hacl_Impl_SolinasReduction_upl_six_buffer(
   uint64_t *o
 )
 {
-  uint64_t b0 = Hacl_Spec_P256_SolinasReduction_store_high_low_u(c13, c12);
-  uint64_t b1 = Hacl_Spec_P256_SolinasReduction_store_high_low_u(c15, c14);
+  uint64_t b0 = Hacl_Impl_SolinasReduction_store_high_low_u(c13, c12);
+  uint64_t b1 = Hacl_Impl_SolinasReduction_store_high_low_u(c15, c14);
   uint64_t b2 = (uint64_t)0U;
-  uint64_t b3 = Hacl_Spec_P256_SolinasReduction_store_high_low_u(c11, c9);
+  uint64_t b3 = Hacl_Impl_SolinasReduction_store_high_low_u(c11, c9);
   temp[0U] = b0;
   temp[1U] = b1;
   temp[2U] = b2;
@@ -1775,10 +1775,10 @@ Hacl_Impl_SolinasReduction_upl_sev_buffer(
   uint64_t *o
 )
 {
-  uint64_t b0 = Hacl_Spec_P256_SolinasReduction_store_high_low_u(c14, c13);
-  uint64_t b1 = Hacl_Spec_P256_SolinasReduction_store_high_low_u(c8, c15);
-  uint64_t b2 = Hacl_Spec_P256_SolinasReduction_store_high_low_u(c10, c9);
-  uint64_t b3 = Hacl_Spec_P256_SolinasReduction_store_high_low_u(c12, (uint32_t)0U);
+  uint64_t b0 = Hacl_Impl_SolinasReduction_store_high_low_u(c14, c13);
+  uint64_t b1 = Hacl_Impl_SolinasReduction_store_high_low_u(c8, c15);
+  uint64_t b2 = Hacl_Impl_SolinasReduction_store_high_low_u(c10, c9);
+  uint64_t b3 = Hacl_Impl_SolinasReduction_store_high_low_u(c12, (uint32_t)0U);
   temp[0U] = b0;
   temp[1U] = b1;
   temp[2U] = b2;
@@ -1799,10 +1799,10 @@ Hacl_Impl_SolinasReduction_upl_eig_buffer(
   uint64_t *o
 )
 {
-  uint64_t b0 = Hacl_Spec_P256_SolinasReduction_store_high_low_u(c15, c14);
-  uint64_t b1 = Hacl_Spec_P256_SolinasReduction_store_high_low_u(c9, (uint32_t)0U);
-  uint64_t b2 = Hacl_Spec_P256_SolinasReduction_store_high_low_u(c11, c10);
-  uint64_t b3 = Hacl_Spec_P256_SolinasReduction_store_high_low_u(c13, (uint32_t)0U);
+  uint64_t b0 = Hacl_Impl_SolinasReduction_store_high_low_u(c15, c14);
+  uint64_t b1 = Hacl_Impl_SolinasReduction_store_high_low_u(c9, (uint32_t)0U);
+  uint64_t b2 = Hacl_Impl_SolinasReduction_store_high_low_u(c11, c10);
+  uint64_t b3 = Hacl_Impl_SolinasReduction_store_high_low_u(c13, (uint32_t)0U);
   temp[0U] = b0;
   temp[1U] = b1;
   temp[2U] = b2;

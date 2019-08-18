@@ -222,6 +222,6 @@ let ecdsa_verification publicKey r s mLen input =
    let sumPoints = _point_add u1D u2D in 
    let pointNorm = _norm sumPoints in 
    let (xResult, yResult, zResult) = pointNorm in 
-   if not(Hacl.Spec.P256.isPointAtInfinity pointNorm) = false then false else 
+   if Hacl.Spec.P256.isPointAtInfinity pointNorm = true then false else 
    xResult = r
 end end   

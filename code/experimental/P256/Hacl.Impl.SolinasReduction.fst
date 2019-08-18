@@ -18,6 +18,34 @@ open FStar.Mul
 
 module Seq = Lib.Sequence
 
+inline_for_extraction noextract
+val get_high_part: a: uint64 -> Tot (r: uint32{uint_v r == uint_v a / (pow2 32)})
+
+let get_high_part a = 
+  to_u32(shift_right a (size 32))
+
+inline_for_extraction noextract
+val get_low_part: a: uint64 -> Tot (r: uint32{uint_v r == uint_v a % (pow2 32)}) 
+
+let get_low_part a = to_u32 a
+
+val lemma_xor_zero: low: uint64{uint_v (get_high_part low) ==  0} -> high: uint64{uint_v (get_low_part high) == 0} ->  Lemma (uint_v (logxor low high) = uint_v high * pow2 32 + uint_v low)
+
+let lemma_xor_zero low high = 
+  assert(uint_v low = uint_v (get_low_part low));
+  assert(uint_v high = uint_v (get_high_part high) * pow2 32);
+  admit()
+
+val store_high_low_u: high: uint32 -> low: uint32 -> Tot (r: uint64 {uint_v r = uint_v high * pow2 32 + uint_v low})
+
+let store_high_low_u high low = 
+  let as_uint64_high = to_u64 high in 
+  let as_uint64_high = Lib.IntTypes.shift_left as_uint64_high (size 32) in 
+  let as_uint64_low = to_u64 low in
+  lemma_xor_zero as_uint64_low as_uint64_high;
+  logxor as_uint64_low as_uint64_high
+
+
 #reset-options "--z3refresh --z3rlimit  100"
 
 inline_for_extraction noextract
