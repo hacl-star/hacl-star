@@ -292,7 +292,12 @@ val verifyQValidCurvePoint: pubKey: lbuffer uint64 (size 8) -> pubKeyAsPoint: po
 	  Hacl.Spec.P256.isPointAtInfinity (scalar_multiplication prime_p256_order_seq (point_prime_to_coordinates (as_seq h1 pubKeyAsPoint))))
 	  then r == true else r == false)
      /\ 
-	r == verifyQValidCurvePointSpec (as_nat h1 xA, as_nat h1 yA, as_nat h1 zA))
+	r == verifyQValidCurvePointSpec (as_nat h1 xA, as_nat h1 yA, as_nat h1 zA) /\
+	(
+	  let xJ, yJ, zJ = toJacobianCoordinates (as_nat h0 x, as_nat h0 y) in 
+	  as_nat h1 xA == xJ /\ as_nat h1 yA == yJ /\ as_nat h1 zA == zJ
+	)
+     )
 ) 
 
 let verifyQValidCurvePoint pubKey pubKeyAsPoint tempBuffer = 
