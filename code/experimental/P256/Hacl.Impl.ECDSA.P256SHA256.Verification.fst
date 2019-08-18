@@ -526,26 +526,29 @@ val ecdsa_verification_step5: pubKeyAsPoint: point ->
     as_nat h (gsub pubKeyAsPoint (size 4) (size 4)) < prime256 /\
     as_nat h (gsub pubKeyAsPoint (size 8) (size 4)) < prime256 
   )
-  (ensures fun h0 _ h1 -> modifies (loc x |+| loc pubKeyAsPoint |+| loc tempBuffer) h0 h1 /\ as_nat h1 x < prime256)
-
+  (ensures fun h0 result h1 -> modifies (loc x |+| loc pubKeyAsPoint |+| loc tempBuffer) h0 h1 /\ as_nat h1 x < prime256 /\
+    (
+      let basePoint = (0x6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296, 0x4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5, 1) in 
+      let pointAtInfinity = (0, 0, 0) in 
+	
+      let u1D, _ = montgomery_ladder_spec (as_seq h0 u1) (pointAtInfinity, basePoint) in 
+      let u2D, _ = montgomery_ladder_spec (as_seq h0 u2) (pointAtInfinity, point_prime_to_coordinates (as_seq h0 pubKeyAsPoint)) in 
+      let sumD = _point_add u1D u2D in 
+      let pointNorm = _norm sumD in 
+      let (xResult, yResult, zResult) = pointNorm in 
+      if Hacl.Spec.P256.isPointAtInfinity pointNorm then result = false else result = true  /\
+      as_nat h1 x == xResult
+  )
+)
 
 let ecdsa_verification_step5 pubKeyAsPoint u1 u2 tempBuffer x = 
   push_frame();
     let pointSum = create (size 12) (u64 0) in
       let h0 = ST.get() in 
     ecdsa_verification_step5_1 pubKeyAsPoint u1 u2 pointSum tempBuffer;
-      (*let h1 = ST.get() in 
-      assert(modifies3 pubKeyAsPoint pointSum tempBuffer h0 h1);
-      modifies3_is_modifies4 x pubKeyAsPoint pointSum tempBuffer h0 h1;
-      assert(modifies4 x pubKeyAsPoint pointSum tempBuffer h0 h1); *)
     let resultIsPAI = Hacl.Impl.P256.isPointAtInfinity pointSum in 
     let xCoordinateSum = sub pointSum (size 0) (size 4) in 
     copy x xCoordinateSum;
-      (*let h2 = ST.get() in 
-      assert(modifies1 x h1 h2);
-      modifies1_is_modifies4 pubKeyAsPoint pointSum tempBuffer x h1 h2;
-      assert(modifies4 pubKeyAsPoint pointSum tempBuffer x h1 h2);
-      assert(modifies4 pubKeyAsPoint pointSum tempBuffer x h0 h2); *)
     pop_frame(); 
     not resultIsPAI
 
