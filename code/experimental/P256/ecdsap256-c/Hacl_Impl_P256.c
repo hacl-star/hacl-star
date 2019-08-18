@@ -3105,7 +3105,7 @@ void norm(uint64_t *p, uint64_t *resultPoint, uint64_t *tempBuffer)
     uint64_t *resultX = resultPoint;
     uint64_t *resultY = resultPoint + (uint32_t)4U;
     uint64_t *resultZ = resultPoint + (uint32_t)8U;
-    uint64_t bit = isPointAtInfinityPrivate(resultPoint);
+    uint64_t bit = isPointAtInfinityPrivate(p);
     fromDomain(z2f, resultX);
     fromDomain(z3f, resultY);
     resultZ[0U] = (uint64_t)1U;

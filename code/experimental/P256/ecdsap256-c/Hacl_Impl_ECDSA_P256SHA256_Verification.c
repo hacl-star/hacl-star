@@ -970,7 +970,7 @@ bool Hacl_Impl_ECDSA_P256SHA256_Verification_isOrderCorrect(uint64_t *p, uint64_
     bool result;
     scalarMultiplicationI(pBuffer, multResult, Hacl_Impl_MM_Exponent_order_buffer, tempBuffer);
     result = isPointAtInfinity(multResult);
-    return !result;
+    return result;
   }
 }
 

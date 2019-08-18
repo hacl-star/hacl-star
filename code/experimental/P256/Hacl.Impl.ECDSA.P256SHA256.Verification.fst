@@ -214,8 +214,10 @@ val isOrderCorrect: p: point -> tempBuffer: lbuffer uint64 (size 100) ->  Stack 
     disjoint p tempBuffer)
   (ensures fun h0 r h1 -> modifies(loc tempBuffer) h0 h1 /\ (
       let (xN, yN, zN) = scalar_multiplication prime_p256_order_seq (point_prime_to_coordinates (as_seq h0 p)) in 
-      r == Hacl.Spec.P256.isPointAtInfinity (xN, yN, zN)
-  ))
+      if Hacl.Spec.P256.isPointAtInfinity (xN, yN, zN) then 
+	r == true else r == false
+  )
+)
 
 let isOrderCorrect p tempBuffer = 
   push_frame(); 
@@ -223,7 +225,7 @@ let isOrderCorrect p tempBuffer =
     multByOrder2 p multResult tempBuffer;
     let result = Hacl.Impl.P256.isPointAtInfinity multResult in  
    pop_frame();
-   not result
+   result
 
 
 open Lib.ByteBuffer 

@@ -739,7 +739,7 @@ let normalisation_update z2x z3y p resultPoint =
   let resultY = sub resultPoint (size 4) (size 4) in 
   let resultZ = sub resultPoint (size 8) (size 4) in 
     let h0 = ST.get() in 
-  let bit = isPointAtInfinityPrivate resultPoint in
+  let bit = isPointAtInfinityPrivate p in
   fromDomain z2x resultX;
   fromDomain z3y resultY;
   uploadOneImpl resultZ;
