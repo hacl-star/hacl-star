@@ -10,8 +10,8 @@ open Lib.Buffer
 open Hacl.Spec.P256.Definitions
 open Hacl.Impl.LowLevel
 open Hacl.Impl.P256
-open Hacl.Impl.MontgomeryMultiplication
 open Hacl.Spec.P256.MontgomeryMultiplication
+open Hacl.Impl.MontgomeryMultiplication
 open Hacl.Impl.MM.Exponent
 open Hacl.Spec.P256.Core
 open Hacl.Spec.ECDSAP256.Definition
@@ -384,7 +384,7 @@ let ecdsa_verification_step4 r s hash bufferU1 bufferU2 =
       let a_ = fromDomain_  (fromDomain_ (as_nat h0 s)) in 
       let r0D = exponent_spec a_ in 
       fromDomain_ (as_nat h2 inverseS) == r0D);
-
+      
   multPowerPartial s inverseS hash u1; 
   multPowerPartial s inverseS r u2; 
     
@@ -585,26 +585,25 @@ let ecdsa_verification pubKey r s mLen m =
     let bufferU1 =  sub tempBufferU8 (size 0) (size 32) in 
     let bufferU2 = sub tempBufferU8 (size 32) (size 32) in 
     let xBuffer =  sub tempBufferU64 (size 116) (size 4) in 
-
+      let h0 = ST.get() in 
     let publicKeyCorrect = verifyQValidCurvePoint pubKey publicKeyBuffer tempBuffer in 
-      let h1 = ST.get() in 
-    (*assert(as_seq h1 publicKeyBuffer == *)
 
+    if publicKeyCorrect = false then   begin pop_frame(); false end else 
 
-    if publicKeyCorrect = false then  
-      begin pop_frame(); false end
+    let step1 = ecdsa_verification_step1 r s in  if step1 = false then begin pop_frame(); false  end 
     else 
+      begin 
+	let h2 = ST.get() in 
+      ecdsa_verification_step23 mLen m hashAsFelem;
+	let h3 = ST.get() in 
+	assert(
+	  let hash = (Spec.Hash.hash Spec.Hash.Definitions.SHA2_256 (as_seq h0 m)) in 
+	  let hashNat = felem_seq_as_nat (Hacl.Spec.ECDSA.changeEndian(Lib.ByteSequence.uints_from_bytes_be hash)) % prime_p256_order in as_nat h3 hashAsFelem == hashNat);
+	
+      ecdsa_verification_step4 r s hashAsFelem bufferU1 bufferU2;
+	let h4 = ST.get() in admit();
 
-    let step1 = ecdsa_verification_step1 r s in 
-    if step1 = false then 
-      begin
-	pop_frame(); false 
-      end 
-      else 
-	begin 
-	  ecdsa_verification_step23 mLen m hashAsFelem;
-	  ecdsa_verification_step4 r s hashAsFelem bufferU1 bufferU2;
-	  let state = ecdsa_verification_step5 publicKeyBuffer bufferU1 bufferU2 tempBuffer xBuffer in 
+	let state = ecdsa_verification_step5 publicKeyBuffer bufferU1 bufferU2 tempBuffer xBuffer in 
 	    if state = false then begin pop_frame(); false end else begin
 	  let r = compare_felem xBuffer r in 
 	  pop_frame();
