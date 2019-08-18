@@ -337,7 +337,7 @@ val ecdsa_verification_step23: mLen: size_t -> m: lbuffer uint8 mLen{uint_v mLen
   (requires fun h -> live h m /\ live h hashAsFelem)
   (ensures fun h0 _ h1 -> modifies (loc hashAsFelem) h0 h1 /\ as_nat h1 hashAsFelem < prime_p256_order /\
     (
-      as_nat h1 hashAsFelem = (felem_seq_as_nat (Lib.ByteSequence.uints_from_bytes_le (Spec.Hash.hash Spec.Hash.Definitions.SHA2_256 (as_seq h0 m)))) % prime_p256_order
+      as_nat h1 hashAsFelem = (felem_seq_as_nat (Hacl.Spec.ECDSA.changeEndian(Lib.ByteSequence.uints_from_bytes_be (Spec.Hash.hash Spec.Hash.Definitions.SHA2_256 (as_seq h0 m))))) % prime_p256_order
  ) 
 )
 
@@ -349,11 +349,7 @@ let ecdsa_verification_step23 mLen m hashAsFelem =
       let h1 = ST.get() in 
       assert(Seq.equal (as_seq h1 mHash) (Spec.Hash.hash Spec.Hash.Definitions.SHA2_256 (as_seq h0 m)));
     toUint64 mHash hashAsFelem;
-      let h2 = ST.get() in 
     reduction_prime_2prime_order hashAsFelem hashAsFelem;
-      let h3 = ST.get() in 
-      assert(as_nat h3 hashAsFelem = (felem_seq_as_nat (Lib.ByteSequence.uints_from_bytes_le (Spec.Hash.hash Spec.Hash.Definitions.SHA2_256 (as_seq h0 m)))) % prime_p256_order);
-      
   pop_frame()
 
 
@@ -572,6 +568,7 @@ val ecdsa_verification:
 	  result == ecdsa_verification (pubKeyX, pubKeyY) (as_nat h0 r) (as_nat h0 s) (v mLen) (as_seq h0 m)
     )
 )
+
 
 let ecdsa_verification pubKey r s mLen m = 
   push_frame();
