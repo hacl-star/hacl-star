@@ -1034,18 +1034,15 @@ void Hacl_Impl_ECDSA_P256SHA256_Verification_toUint8(uint64_t *i, uint8_t *o)
 
 bool
 Hacl_Impl_ECDSA_P256SHA256_Verification_verifyQValidCurvePoint(
-  uint64_t *pubKey,
   uint64_t *pubKeyAsPoint,
   uint64_t *tempBuffer
 )
 {
-  bool coordinatesValid;
-  bool ite;
-  Hacl_Impl_ECDSA_P256SHA256_Verification_bufferToJac(pubKey, pubKeyAsPoint);
+  bool
   coordinatesValid = Hacl_Impl_ECDSA_P256SHA256_Verification_isCoordinateValid(pubKeyAsPoint);
   if (!coordinatesValid)
   {
-    ite = false;
+    return false;
   }
   else
   {
@@ -1056,14 +1053,69 @@ Hacl_Impl_ECDSA_P256SHA256_Verification_verifyQValidCurvePoint(
         tempBuffer);
     if (coordinatesValid && belongsToCurve && orderCorrect)
     {
-      ite = true;
+      return true;
     }
     else
     {
-      ite = false;
+      return false;
     }
   }
-  return ite;
+}
+
+bool
+Hacl_Impl_ECDSA_P256SHA256_Verification_ecdsa_verification_core(
+  uint64_t *publicKeyBuffer,
+  uint64_t *hashAsFelem,
+  uint64_t *r,
+  uint64_t *s1,
+  uint32_t mLen,
+  uint8_t *m,
+  uint64_t *xBuffer,
+  uint64_t *tempBuffer
+)
+{
+  uint8_t tempBufferU8[64U] = { 0U };
+  uint8_t *bufferU1 = tempBufferU8;
+  uint8_t *bufferU2 = tempBufferU8 + (uint32_t)32U;
+  uint8_t mHash[32U] = { 0U };
+  Hacl_Hash_SHA2_hash_256(m, mLen, mHash);
+  Hacl_Impl_ECDSA_P256SHA256_Verification_toUint64(mHash, hashAsFelem);
+  Hacl_Impl_MontgomeryMultiplication_reduction_prime_2prime_order(hashAsFelem, hashAsFelem);
+  {
+    uint64_t tempBuffer1[12U] = { 0U };
+    uint64_t *inverseS = tempBuffer1;
+    uint64_t *u11 = tempBuffer1 + (uint32_t)4U;
+    uint64_t *u2 = tempBuffer1 + (uint32_t)8U;
+    Hacl_Impl_MM_Exponent_fromDomainImpl(s1, inverseS);
+    Hacl_Impl_MM_Exponent_montgomery_ladder_exponent(inverseS);
+    Hacl_Impl_MM_Exponent_multPowerPartial(s1, inverseS, hashAsFelem, u11);
+    Hacl_Impl_MM_Exponent_multPowerPartial(s1, inverseS, r, u2);
+    Hacl_Impl_ECDSA_P256SHA256_Verification_toUint8(u11, bufferU1);
+    Hacl_Impl_ECDSA_P256SHA256_Verification_toUint8(u2, bufferU2);
+    {
+      uint64_t pointSum[12U] = { 0U };
+      uint64_t points[24U] = { 0U };
+      uint64_t *buff = tempBuffer + (uint32_t)12U;
+      uint64_t *pointU1G0 = points;
+      uint64_t *pointU2Q0 = points + (uint32_t)12U;
+      uint64_t *pointU1G;
+      uint64_t *pointU2Q;
+      bool resultIsPAI;
+      uint64_t *xCoordinateSum;
+      bool r1;
+      secretToPublicWithoutNorm(pointU1G0, bufferU1, tempBuffer);
+      scalarMultiplicationWithoutNorm(publicKeyBuffer, pointU2Q0, bufferU2, tempBuffer);
+      pointU1G = points;
+      pointU2Q = points + (uint32_t)12U;
+      point_add(pointU1G, pointU2Q, pointSum, buff);
+      norm(pointSum, pointSum, buff);
+      resultIsPAI = isPointAtInfinity(pointSum);
+      xCoordinateSum = pointSum;
+      memcpy(xBuffer, xCoordinateSum, (uint32_t)4U * sizeof xCoordinateSum[0U]);
+      r1 = !resultIsPAI;
+      return r1;
+    }
+  }
 }
 
 bool
@@ -1076,21 +1128,19 @@ Hacl_Impl_ECDSA_P256SHA256_Verification_ecdsa_verification(
 )
 {
   uint64_t tempBufferU64[120U] = { 0U };
-  uint8_t tempBufferU8[64U] = { 0U };
   uint64_t *publicKeyBuffer = tempBufferU64;
   uint64_t *hashAsFelem = tempBufferU64 + (uint32_t)12U;
   uint64_t *tempBuffer = tempBufferU64 + (uint32_t)16U;
-  uint8_t *bufferU1 = tempBufferU8;
-  uint8_t *bufferU2 = tempBufferU8 + (uint32_t)32U;
   uint64_t *xBuffer = tempBufferU64 + (uint32_t)116U;
-  bool
+  bool publicKeyCorrect;
+  bool ite;
+  Hacl_Impl_ECDSA_P256SHA256_Verification_bufferToJac(pubKey, publicKeyBuffer);
   publicKeyCorrect =
-    Hacl_Impl_ECDSA_P256SHA256_Verification_verifyQValidCurvePoint(pubKey,
-      publicKeyBuffer,
+    Hacl_Impl_ECDSA_P256SHA256_Verification_verifyQValidCurvePoint(publicKeyBuffer,
       tempBuffer);
   if (publicKeyCorrect == false)
   {
-    return (bool)(void *)false;
+    ite = false;
   }
   else
   {
@@ -1099,65 +1149,41 @@ Hacl_Impl_ECDSA_P256SHA256_Verification_ecdsa_verification(
     bool
     isSCorrect = Hacl_Impl_ECDSA_P256SHA256_Verification_isMoreThanZeroLessThanOrderMinusOne(s1);
     bool step1 = isRCorrect && isSCorrect;
-    void *ite0;
     if (step1 == false)
     {
-      ite0 = (void *)false;
+      ite = false;
     }
     else
     {
-      uint8_t mHash[32U] = { 0U };
-      Hacl_Hash_SHA2_hash_256(m, mLen, mHash);
-      Hacl_Impl_ECDSA_P256SHA256_Verification_toUint64(mHash, hashAsFelem);
-      Hacl_Impl_MontgomeryMultiplication_reduction_prime_2prime_order(hashAsFelem, hashAsFelem);
+      bool
+      state =
+        Hacl_Impl_ECDSA_P256SHA256_Verification_ecdsa_verification_core(publicKeyBuffer,
+          hashAsFelem,
+          r,
+          s1,
+          mLen,
+          m,
+          xBuffer,
+          tempBuffer);
+      if (state == false)
       {
-        uint64_t tempBuffer1[12U] = { 0U };
-        uint64_t *inverseS = tempBuffer1;
-        uint64_t *u11 = tempBuffer1 + (uint32_t)4U;
-        uint64_t *u2 = tempBuffer1 + (uint32_t)8U;
-        Hacl_Impl_MM_Exponent_fromDomainImpl(s1, inverseS);
-        Hacl_Impl_MM_Exponent_montgomery_ladder_exponent(inverseS);
-        Hacl_Impl_MM_Exponent_multPowerPartial(s1, inverseS, hashAsFelem, u11);
-        Hacl_Impl_MM_Exponent_multPowerPartial(s1, inverseS, r, u2);
-        Hacl_Impl_ECDSA_P256SHA256_Verification_toUint8(u11, bufferU1);
-        Hacl_Impl_ECDSA_P256SHA256_Verification_toUint8(u2, bufferU2);
-        {
-          uint64_t pointSum[12U] = { 0U };
-          uint64_t points[24U] = { 0U };
-          uint64_t *buff = tempBuffer + (uint32_t)12U;
-          uint64_t *pointU1G = points;
-          uint64_t *pointU2Q0 = points + (uint32_t)12U;
-          secretToPublicWithoutNorm(pointU1G, bufferU1, tempBuffer);
-          scalarMultiplicationWithoutNorm(publicKeyBuffer, pointU2Q0, bufferU2, tempBuffer);
-          {
-            uint64_t *pointU1G0 = points;
-            uint64_t *pointU2Q = points + (uint32_t)12U;
-            point_add(pointU1G0, pointU2Q, pointSum, buff);
-            norm(pointSum, pointSum, buff);
-            {
-              bool resultIsPAI = isPointAtInfinity(pointSum);
-              uint64_t *xCoordinateSum = pointSum;
-              memcpy(xBuffer, xCoordinateSum, (uint32_t)4U * sizeof xCoordinateSum[0U]);
-              {
-                bool state = !resultIsPAI;
-                void *ite;
-                if (state == false)
-                {
-                  ite = (void *)false;
-                }
-                else
-                {
-                  uint64_t r1 = compare_felem(xBuffer, r);
-                  ite = (void *)r1;
-                }
-                ite0 = (void *)ite;
-              }
-            }
-          }
-        }
+        ite = false;
+      }
+      else
+      {
+        uint64_t a_0 = xBuffer[0U];
+        uint64_t a_1 = xBuffer[1U];
+        uint64_t a_2 = xBuffer[2U];
+        uint64_t a_3 = xBuffer[3U];
+        uint64_t b_0 = r[0U];
+        uint64_t b_1 = r[1U];
+        uint64_t b_2 = r[2U];
+        uint64_t b_3 = r[3U];
+        bool result = a_0 == b_0 && a_1 == b_1 && a_2 == b_2 && a_3 == b_3;
+        ite = result;
       }
     }
-    return (bool)(void *)ite0;
   }
+  return ite;
 }
 

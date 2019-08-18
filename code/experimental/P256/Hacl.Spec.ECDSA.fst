@@ -206,7 +206,7 @@ let ecdsa_verification publicKey r s mLen input =
   let step1 = checkCoordinates r s in if step1 = false then false else begin
 
   let hashResult = Spec.Hash.hash Spec.Hash.Definitions.SHA2_256 input in 
-  let hashNat = (felem_seq_as_nat (Lib.ByteSequence.uints_from_bytes_le hashResult)) % prime_p256_order in 
+  let hashNat = felem_seq_as_nat (changeEndian(Lib.ByteSequence.uints_from_bytes_be hashResult)) % prime_p256_order in 
 
   let u1 = (Hacl.Spec.P256.Definitions.pow s (prime_p256_order - 2) * hashNat) % prime_p256_order in 
   let u2 = (Hacl.Spec.P256.Definitions.pow s (prime_p256_order - 2) * r) % prime_p256_order in 
@@ -222,6 +222,6 @@ let ecdsa_verification publicKey r s mLen input =
    let sumPoints = _point_add u1D u2D in 
    let pointNorm = _norm sumPoints in 
    let (xResult, yResult, zResult) = pointNorm in 
-   if Hacl.Spec.P256.isPointAtInfinity pointNorm then false else 
+   if not(Hacl.Spec.P256.isPointAtInfinity pointNorm) = false then false else 
    xResult = r
 end end   
