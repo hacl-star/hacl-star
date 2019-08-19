@@ -33,7 +33,7 @@ let h (x y z: uint32) : Tot uint32 =
 
 inline_for_extraction
 let i (x y z: uint32) : Tot uint32 =
-  y ^. (x ^. ~. z)
+  y ^. (x |. ~. z)
 
 (* Table T: specified in 3.4, defined in Appendix A.3, function MD5Transform *)
 
