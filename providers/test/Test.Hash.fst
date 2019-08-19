@@ -16,7 +16,7 @@ open Spec.Hash.Definitions
 open Spec.Hash.Lemmas
 open Lib.IntTypes
 
-open ST
+open FStar.HyperStack.ST
 
 
 #set-options "--max_fuel 0 --max_ifuel 0"
