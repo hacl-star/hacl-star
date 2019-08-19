@@ -18,8 +18,8 @@ let rec check_if_consumes_fixed_time_args
     (args:list instr_operand) (oprs:instr_operands_t_args args) (ts:analysis_taints)
   : Pure bool
     (requires True)
-    (ensures fun b -> b ==> (forall (s1 s2:S.machine_state).{:pattern (constTimeInvariant ts s1 s2)}
-      constTimeInvariant ts s1 s2 ==> obs_args args oprs s1 == obs_args args oprs s2))
+    (ensures fun b -> b ==> (forall (s1 s2:S.machine_state).{:pattern (constTimeInvariant ts.lts s1 s2)}
+      constTimeInvariant ts.lts s1 s2 ==> obs_args args oprs s1 == obs_args args oprs s2))
   =
   allow_inversion maddr;
   allow_inversion tmaddr;
@@ -69,8 +69,8 @@ let rec check_if_consumes_fixed_time_outs
     (ts:analysis_taints) (t_out:taint)
   : Pure bool
     (requires True)
-    (ensures fun b -> b ==> (forall (s1 s2:S.machine_state).{:pattern (constTimeInvariant ts s1 s2)}
-      constTimeInvariant ts s1 s2 ==> obs_inouts outs args oprs s1 == obs_inouts outs args oprs s2))
+    (ensures fun b -> b ==> (forall (s1 s2:S.machine_state).{:pattern (constTimeInvariant ts.lts s1 s2)}
+      constTimeInvariant ts.lts s1 s2 ==> obs_inouts outs args oprs s1 == obs_inouts outs args oprs s2))
   =
   allow_inversion maddr;
   allow_inversion tmaddr;
@@ -96,7 +96,7 @@ let rec lemma_args_taint
     (ts:analysis_taints) (s1 s2:S.machine_state)
   : Lemma
     (requires
-      constTimeInvariant ts s1 s2 /\
+      constTimeInvariant ts.lts s1 s2 /\
       Some? (S.instr_apply_eval_args outs args f oprs s1) /\
       Some? (S.instr_apply_eval_args outs args f oprs s2) /\
       check_if_consumes_fixed_time_args args oprs ts /\
@@ -141,7 +141,7 @@ let rec lemma_inouts_taint
     (ts:analysis_taints) (s1 s2:S.machine_state)
   : Lemma
     (requires
-      constTimeInvariant ts s1 s2 /\
+      constTimeInvariant ts.lts s1 s2 /\
       Some? (S.instr_apply_eval_inouts outs inouts args f oprs s1) /\
       Some? (S.instr_apply_eval_inouts outs inouts args f oprs s2) /\
       check_if_consumes_fixed_time_outs inouts args oprs ts Public /\
@@ -378,8 +378,8 @@ let lemma_instr_set_taints_explicit
       Set.equal (Map.domain s1_orig.S.ms_heap) (Map.domain s1.S.ms_heap) /\
       Set.equal (Map.domain s2_orig.S.ms_heap) (Map.domain s2.S.ms_heap) /\
       check_if_consumes_fixed_time_outs_explicit i o ts_orig t_out /\
-      publicValuesAreSame ts_orig s1_orig s2_orig /\
-      publicValuesAreSame ts s1 s2
+      publicValuesAreSame ts_orig.lts s1_orig s2_orig /\
+      publicValuesAreSame ts.lts s1 s2
     ))
     (ensures (
       let s1' = S.instr_write_output_explicit i v1 o s1_orig s1 in
@@ -387,7 +387,7 @@ let lemma_instr_set_taints_explicit
       let ts' = instr_set_taint_explicit i o ts t_out in
       Set.equal (Map.domain s1_orig.S.ms_heap) (Map.domain s1'.S.ms_heap) /\
       Set.equal (Map.domain s2_orig.S.ms_heap) (Map.domain s2'.S.ms_heap) /\
-      publicValuesAreSame ts' s1' s2'
+      publicValuesAreSame ts'.lts s1' s2'
     ))
   =
   allow_inversion maddr;
@@ -412,8 +412,8 @@ let lemma_instr_set_taints_implicit
       Set.equal (Map.domain s1_orig.S.ms_heap) (Map.domain s1.S.ms_heap) /\
       Set.equal (Map.domain s2_orig.S.ms_heap) (Map.domain s2.S.ms_heap) /\
       check_if_consumes_fixed_time_outs_implicit i ts_orig t_out /\
-      publicValuesAreSame ts_orig s1_orig s2_orig /\
-      publicValuesAreSame ts s1 s2
+      publicValuesAreSame ts_orig.lts s1_orig s2_orig /\
+      publicValuesAreSame ts.lts s1 s2
     ))
     (ensures (
       let s1' = S.instr_write_output_implicit i v1 s1_orig s1 in
@@ -421,7 +421,7 @@ let lemma_instr_set_taints_implicit
       let ts' = instr_set_taint_implicit i ts t_out in
       Set.equal (Map.domain s1_orig.S.ms_heap) (Map.domain s1'.S.ms_heap) /\
       Set.equal (Map.domain s2_orig.S.ms_heap) (Map.domain s2'.S.ms_heap) /\
-      publicValuesAreSame ts' s1' s2'
+      publicValuesAreSame ts'.lts s1' s2'
     ))
   =
   allow_inversion maddr;
@@ -450,14 +450,14 @@ let rec lemma_instr_set_taints
       Set.equal (Map.domain s1_orig.S.ms_heap) (Map.domain s1.S.ms_heap) /\
       Set.equal (Map.domain s2_orig.S.ms_heap) (Map.domain s2.S.ms_heap) /\
       check_if_consumes_fixed_time_outs outs args oprs ts_orig t_out /\
-      publicValuesAreSame ts_orig s1_orig s2_orig /\
-      publicValuesAreSame ts s1 s2
+      publicValuesAreSame ts_orig.lts s1_orig s2_orig /\
+      publicValuesAreSame ts.lts s1 s2
     ))
     (ensures (
       let s1' = S.instr_write_outputs outs args vs1 oprs s1_orig s1 in
       let s2' = S.instr_write_outputs outs args vs2 oprs s2_orig s2 in
       let ts' = instr_set_taints outs args oprs ts t_out in
-      publicValuesAreSame ts' s1' s2'
+      publicValuesAreSame ts'.lts s1' s2'
     ))
   =
   match outs with
@@ -501,11 +501,11 @@ let check_if_instr_consumes_fixed_time (ins:S.ins) (ts:analysis_taints) : Pure (
   let BC.Instr (InstrTypeRecord #outs #args #havoc_flags iins) oprs _ = ins in
   let t = inouts_taint outs args oprs ts in
   let b = check_if_consumes_fixed_time_outs outs args oprs ts t in
-  let AnalysisTaints rs flags cf ovf = ts in
+  let AnalysisTaints (LeakageTaints rs flags cf ovf) rts = ts in
   let flags = match havoc_flags with | HavocFlags -> Secret | PreserveFlags -> flags in
   let cf = match havoc_flags with | HavocFlags -> Secret | PreserveFlags -> cf in
   let ovf = match havoc_flags with | HavocFlags -> Secret | PreserveFlags -> ovf in
-  let ts = AnalysisTaints rs flags cf ovf in
+  let ts = AnalysisTaints (LeakageTaints rs flags cf ovf) rts in
   (b, instr_set_taints outs args oprs ts t)
 
 let coerce_to_normal (#a:Type0) (x:a) : y:(normal a){x == y} = x
@@ -521,8 +521,8 @@ let check_if_xor_consumes_fixed_time (ins:S.ins) (ts:analysis_taints) : Pure (bo
   if o1 = o2 then
     let t = Public in
     let b = check_if_consumes_fixed_time_outs outs args oprs ts t in
-    let AnalysisTaints rs _ _ _ = ts in
-    let ts = AnalysisTaints rs Secret Public Public in
+    let AnalysisTaints (LeakageTaints rs _ _ _) rts = ts in
+    let ts = AnalysisTaints (LeakageTaints rs Secret Public Public) rts in
     (b, instr_set_taints outs args oprs ts t)
   else
     check_if_instr_consumes_fixed_time ins ts
@@ -538,8 +538,8 @@ let check_if_pxor_consumes_fixed_time (ins:S.ins) (ts:analysis_taints) : Pure (b
   if o1 = o2 then
     let t = Public in
     let b = check_if_consumes_fixed_time_outs outs args oprs ts t in
-    let AnalysisTaints rs ft cft oft = ts in
-    let ts = AnalysisTaints rs ft cft oft in
+    let AnalysisTaints (LeakageTaints rs ft cft oft) rts = ts in
+    let ts = AnalysisTaints (LeakageTaints rs ft cft oft) rts in
     (b, instr_set_taints outs args oprs ts t)
   else
     check_if_instr_consumes_fixed_time ins ts
@@ -555,8 +555,8 @@ let check_if_vpxor_consumes_fixed_time (ins:S.ins) (ts:analysis_taints) : Pure (
   if o2 = o3 then
     let t = Public in
     let b = check_if_consumes_fixed_time_outs outs args oprs ts t in
-    let AnalysisTaints rs ft cft oft = ts in
-    let ts = AnalysisTaints rs ft cft oft in
+    let AnalysisTaints (LeakageTaints rs ft cft oft) rts = ts in
+    let ts = AnalysisTaints (LeakageTaints rs ft cft oft) rts in
     (b, instr_set_taints outs args oprs ts t)
   else
     check_if_instr_consumes_fixed_time ins ts
@@ -581,7 +581,7 @@ let check_if_push_consumes_fixed_time (ins:S.ins) (ts:analysis_taints) : Pure (b
   =
   let BC.Push src t_stk = ins in
   let t_out = operand_taint 0 src ts in
-  (Public? (ts.regTaint reg_Rsp) && operand_does_not_use_secrets src ts && (t_out = Public || t_stk = Secret), ts)
+  (Public? (Vale.Lib.MapTree.sel ts.rts reg_Rsp) && operand_does_not_use_secrets src ts && (t_out = Public || t_stk = Secret), ts)
 
 let check_if_pop_consumes_fixed_time (ins:S.ins) (ts:analysis_taints) : Pure (bool & analysis_taints)
   (requires BC.Pop? ins)
@@ -589,7 +589,7 @@ let check_if_pop_consumes_fixed_time (ins:S.ins) (ts:analysis_taints) : Pure (bo
   =
   let BC.Pop dst t_stk = ins in
   let allowed = operand_taint_allowed dst t_stk in
-  (Public? (ts.regTaint reg_Rsp) && operand_does_not_use_secrets dst ts && allowed, set_taint 0 dst ts t_stk)
+  (Public? (Vale.Lib.MapTree.sel ts.rts reg_Rsp) && operand_does_not_use_secrets dst ts && allowed, set_taint 0 dst ts t_stk)
 
 let check_if_ins_consumes_fixed_time ins ts =
   match ins with
@@ -607,7 +607,7 @@ let lemma_instr_leakage_free (ts:analysis_taints) (ins:S.ins) : Lemma
   (requires BC.Instr? ins)
   (ensures (
     let (b, ts') = check_if_instr_consumes_fixed_time ins ts in
-    b2t b ==> isConstantTime (Ins ins) ts /\ isLeakageFree (Ins ins) ts ts'
+    b2t b ==> isConstantTime (Ins ins) ts.lts /\ isLeakageFree (Ins ins) ts.lts ts'.lts
   ))
   =
   let (b, ts') = check_if_instr_consumes_fixed_time ins ts in
@@ -615,9 +615,9 @@ let lemma_instr_leakage_free (ts:analysis_taints) (ins:S.ins) : Lemma
   (
     let code = Ins ins in
     let lem (s1 s2:S.machine_state) (fuel:nat) : Lemma
-      (requires is_explicit_leakage_free_lhs code fuel ts ts' s1 s2)
-      (ensures is_explicit_leakage_free_rhs code fuel ts ts' s1 s2)
-      [SMTPat (is_explicit_leakage_free_rhs code fuel ts ts' s1 s2)]
+      (requires is_explicit_leakage_free_lhs code fuel ts.lts ts'.lts s1 s2)
+      (ensures is_explicit_leakage_free_rhs code fuel ts.lts ts'.lts s1 s2)
+      [SMTPat (is_explicit_leakage_free_rhs code fuel ts.lts ts'.lts s1 s2)]
       =
       let BC.Instr (InstrTypeRecord #outs #args #havoc_flags i) oprs _ = ins in
       let t_out = inouts_taint outs args oprs ts in
@@ -635,11 +635,11 @@ let lemma_instr_leakage_free (ts:analysis_taints) (ins:S.ins) : Lemma
         | HavocFlags -> {s2 with S.ms_flags = S.havoc_flags}
         | PreserveFlags -> s2
         in
-      let AnalysisTaints rs flags cf ovf = ts in
+      let AnalysisTaints (LeakageTaints rs flags cf ovf) rts = ts in
       let flags = match havoc_flags with | HavocFlags -> Secret | PreserveFlags -> flags in
       let cf = match havoc_flags with | HavocFlags -> Secret | PreserveFlags -> cf in
       let ovf = match havoc_flags with | HavocFlags -> Secret | PreserveFlags -> ovf in
-      let ts_havoc = AnalysisTaints rs flags cf ovf in
+      let ts_havoc = AnalysisTaints (LeakageTaints rs flags cf ovf) rts in
 
       if t_out = Secret then
       (
@@ -662,7 +662,7 @@ let lemma_dealloc_leakage_free (ts:analysis_taints) (ins:S.ins) : Lemma
   (requires BC.Dealloc? ins)
   (ensures (
     let (b, ts') = check_if_dealloc_consumes_fixed_time ins ts in
-    b2t b ==> isConstantTime (Ins ins) ts /\ isLeakageFree (Ins ins) ts ts'
+    b2t b ==> isConstantTime (Ins ins) ts.lts /\ isLeakageFree (Ins ins) ts.lts ts'.lts
   ))
   =
   let (b, ts') = check_if_dealloc_consumes_fixed_time ins ts in
@@ -670,9 +670,9 @@ let lemma_dealloc_leakage_free (ts:analysis_taints) (ins:S.ins) : Lemma
   (
     let code = Ins ins in
     let lem (s1 s2:S.machine_state) (fuel:nat) : Lemma
-      (requires is_explicit_leakage_free_lhs code fuel ts ts' s1 s2)
-      (ensures is_explicit_leakage_free_rhs code fuel ts ts' s1 s2)
-      [SMTPat (is_explicit_leakage_free_rhs code fuel ts ts' s1 s2)]
+      (requires is_explicit_leakage_free_lhs code fuel ts.lts ts'.lts s1 s2)
+      (ensures is_explicit_leakage_free_rhs code fuel ts.lts ts'.lts s1 s2)
+      [SMTPat (is_explicit_leakage_free_rhs code fuel ts.lts ts'.lts s1 s2)]
       =
       let BC.Dealloc n = ins in
       let s1' = Some?.v (machine_eval_code code fuel s1) in
@@ -696,7 +696,7 @@ let lemma_push_leakage_free (ts:analysis_taints) (ins:S.ins) : Lemma
   (requires BC.Push? ins)
   (ensures (
     let (b, ts') = check_if_push_consumes_fixed_time ins ts in
-    b2t b ==> isConstantTime (Ins ins) ts /\ isLeakageFree (Ins ins) ts ts'
+    b2t b ==> isConstantTime (Ins ins) ts.lts /\ isLeakageFree (Ins ins) ts.lts ts'.lts
   ))
   =
   let (b, ts') = check_if_push_consumes_fixed_time ins ts in
@@ -704,9 +704,9 @@ let lemma_push_leakage_free (ts:analysis_taints) (ins:S.ins) : Lemma
   (
     let code = Ins ins in
     let lem (s1 s2:S.machine_state) (fuel:nat) : Lemma
-      (requires is_explicit_leakage_free_lhs code fuel ts ts' s1 s2)
-      (ensures is_explicit_leakage_free_rhs code fuel ts ts' s1 s2)
-      [SMTPat (is_explicit_leakage_free_rhs code fuel ts ts' s1 s2)]
+      (requires is_explicit_leakage_free_lhs code fuel ts.lts ts'.lts s1 s2)
+      (ensures is_explicit_leakage_free_rhs code fuel ts.lts ts'.lts s1 s2)
+      [SMTPat (is_explicit_leakage_free_rhs code fuel ts.lts ts'.lts s1 s2)]
       =
       let BC.Push src t_stk = ins in
       let t_out = operand_taint 0 src ts in
@@ -739,7 +739,7 @@ let lemma_pop_leakage_free (ts:analysis_taints) (ins:S.ins) : Lemma
   (requires BC.Pop? ins)
   (ensures (
     let (b, ts') = check_if_pop_consumes_fixed_time ins ts in
-    b2t b ==> isConstantTime (Ins ins) ts /\ isLeakageFree (Ins ins) ts ts'
+    b2t b ==> isConstantTime (Ins ins) ts.lts /\ isLeakageFree (Ins ins) ts.lts ts'.lts
   ))
   =
   let (b, ts') = check_if_pop_consumes_fixed_time ins ts in
@@ -747,9 +747,9 @@ let lemma_pop_leakage_free (ts:analysis_taints) (ins:S.ins) : Lemma
   (
     let code = Ins ins in
     let lem (s1 s2:S.machine_state) (fuel:nat) : Lemma
-      (requires is_explicit_leakage_free_lhs code fuel ts ts' s1 s2)
-      (ensures is_explicit_leakage_free_rhs code fuel ts ts' s1 s2)
-      [SMTPat (is_explicit_leakage_free_rhs code fuel ts ts' s1 s2)]
+      (requires is_explicit_leakage_free_lhs code fuel ts.lts ts'.lts s1 s2)
+      (ensures is_explicit_leakage_free_rhs code fuel ts.lts ts'.lts s1 s2)
+      [SMTPat (is_explicit_leakage_free_rhs code fuel ts.lts ts'.lts s1 s2)]
       =
       allow_inversion maddr;
       allow_inversion tmaddr;
@@ -774,7 +774,7 @@ let lemma_xor_leakage_free (ts:analysis_taints) (ins:S.ins) : Lemma
   (requires BC.Instr? ins /\ S.AnnotateXor64? (BC.Instr?.annotation ins))
   (ensures (
     let (b, ts') = check_if_xor_consumes_fixed_time ins ts in
-    b2t b ==> isConstantTime (Ins ins) ts /\ isLeakageFree (Ins ins) ts ts'
+    b2t b ==> isConstantTime (Ins ins) ts.lts /\ isLeakageFree (Ins ins) ts.lts ts'.lts
   ))
   =
   let BC.Instr (InstrTypeRecord #outs #args #havoc_flags iins) oprs (S.AnnotateXor64 eq) = ins in
@@ -790,7 +790,7 @@ let lemma_pxor_leakage_free (ts:analysis_taints) (ins:S.ins) : Lemma
   (requires BC.Instr? ins /\ S.AnnotatePxor? (BC.Instr?.annotation ins))
   (ensures (
     let (b, ts') = check_if_pxor_consumes_fixed_time ins ts in
-    b2t b ==> isConstantTime (Ins ins) ts /\ isLeakageFree (Ins ins) ts ts'
+    b2t b ==> isConstantTime (Ins ins) ts.lts /\ isLeakageFree (Ins ins) ts.lts ts'.lts
   ))
   =
   let BC.Instr (InstrTypeRecord #outs #args #havoc_flags iins) oprs (S.AnnotatePxor eq) = ins in
@@ -806,7 +806,7 @@ let lemma_vpxor_leakage_free (ts:analysis_taints) (ins:S.ins) : Lemma
   (requires BC.Instr? ins /\ S.AnnotateVPxor? (BC.Instr?.annotation ins))
   (ensures (
     let (b, ts') = check_if_vpxor_consumes_fixed_time ins ts in
-    b2t b ==> isConstantTime (Ins ins) ts /\ isLeakageFree (Ins ins) ts ts'
+    b2t b ==> isConstantTime (Ins ins) ts.lts /\ isLeakageFree (Ins ins) ts.lts ts'.lts
   ))
   =
   let BC.Instr (InstrTypeRecord #outs #args #havoc_flags iins) oprs (S.AnnotateVPxor eq) = ins in
