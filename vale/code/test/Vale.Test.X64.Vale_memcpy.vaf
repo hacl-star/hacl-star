@@ -20,7 +20,6 @@ open Vale.X64.QuickCodes
 procedure Memcpy(inline win:bool, ghost dst:buffer64, ghost src:buffer64)
     {:public}
     {:exportSpecs}
-    {:quick}
     requires
         locs_disjoint(list(loc_buffer(dst), loc_buffer(src)));
         buffer_readable(mem, dst);
@@ -95,7 +94,6 @@ Benchmarking experiments to see impact of heap representation on verification ti
 
 procedure Load64_fake(out dst:dst_opr64, in src:reg_opr64, ghost b:Seq.seq(nat64), ghost index:nat)
     {:public}
-    {:quick exportOnly}
     requires
         0 <= index < Seq.length(b);
     ensures
@@ -107,7 +105,6 @@ procedure Load64_fake(out dst:dst_opr64, in src:reg_opr64, ghost b:Seq.seq(nat64
 procedure Store64_fake(in dst:reg_opr64, in src:reg_opr64, ghost b_in:Seq.seq(nat64), ghost index:nat)
     returns(ghost b:Seq.seq(nat64))
     {:public}
-    {:quick exportOnly}
     requires
         0 <= index < Seq.length(b_in);
     ensures
@@ -116,9 +113,9 @@ procedure Store64_fake(in dst:reg_opr64, in src:reg_opr64, ghost b_in:Seq.seq(na
     b := Seq.upd(b_in, index, src);
 }
 
+#reset-options "--z3rlimit 300"
 procedure Benchmark_fake_memcpy(inline win:bool, ghost dst_in:Seq.seq(nat64), ghost src_in:Seq.seq(nat64))
     returns(ghost dst:Seq.seq(nat64), ghost src:Seq.seq(nat64))
-    {:quick}
     requires
         Seq.length(src_in) == 2;
         Seq.length(dst_in) == 2;
@@ -182,7 +179,6 @@ procedure Benchmark_fake_memcpy(inline win:bool, ghost dst_in:Seq.seq(nat64), gh
 procedure Load128_fake(
         out dst:xmm, in src:reg_opr64, ghost b:Seq.seq(quad32), ghost index:nat)
     {:public}
-    {:quick exportOnly}
     requires
         0 <= index < Seq.length(b);
     ensures
@@ -196,7 +192,6 @@ procedure Store128_fake(
         in dst:reg_opr64, in src:xmm, ghost b_in:Seq.seq(quad32), ghost index:nat)
     returns(ghost b:Seq.seq(quad32))
     {:public}
-    {:quick exportOnly}
     requires
         0 <= index < Seq.length(b_in);
     ensures
@@ -210,7 +205,6 @@ procedure LoadBe64_fake128(
         out dst:reg_opr64, in src:reg_opr64, inline upper:bool,
         ghost b:Seq.seq(quad32), ghost index:nat)
     {:public}
-    {:quick exportOnly}
     requires
         0 <= index < Seq.length(b);
     ensures
@@ -224,11 +218,284 @@ procedure Store64_fake128(
         ghost b_in:Seq.seq(quad32), ghost index:nat)
     returns(ghost b:Seq.seq(quad32))
     {:public}
-    {:quick exportOnly}
     requires
         0 <= index < Seq.length(b_in);
     ensures
         b == old(Seq.upd(b_in, index, insert_nat64_opaque(old(Seq.index(b_in, index)), src, if upper then 1 else 0)));
 {
     b := old(Seq.upd(b_in, index, insert_nat64_opaque(old(Seq.index(b_in, index)), src, if upper then 1 else 0)));
+}
+
+///
+///
+///
+
+procedure hLoad64_buffer(
+        out dst:dst_opr64, in hp:heap, in src:reg_opr64, inline offset:int, inline t:taint,
+        ghost b:buffer64, ghost index:int)
+    {:public}
+    //{:instruction mk_ins(make_instr(I.ins_Mov64, dst, OMem(tuple(MReg(get_reg(src), offset), t))))}
+    reads
+        memTaint;
+    requires
+        valid_src_addr(hp, b, index);
+        valid_taint_buf64(b, hp, memTaint, t);
+        src + offset == buffer_addr(b, hp) + 8 * index;
+    ensures
+        dst == buffer64_read(b, index, hp);
+        //dst == mem[b](index);
+        valid_taint_buf64(b, hp, memTaint, t);
+{
+    assume false;
+}
+
+procedure hStore64_buffer(
+        in dst:reg_opr64, in hp:heap, in src:reg_opr64, inline offset:int, inline t:taint,
+        ghost b:buffer64, ghost index:int)
+    {:public}
+    //{:instruction mk_ins(make_instr(I.ins_Mov64, OMem(tuple(MReg(get_reg(dst), offset), t)), src))}
+    reads
+        memTaint;
+    requires
+        valid_dst_addr(hp, b, index);
+        valid_taint_buf64(b, hp, memTaint, t);
+        dst + offset == buffer_addr(b, hp) + 8 * index;
+    ensures
+        modifies_mem(loc_buffer(b), old(hp), hp);
+        hp == old(buffer64_write(b, index, src, hp));
+        valid_taint_buf64(b, hp, memTaint, t);
+{
+    assume false;
+}
+
+#reset-options "--z3rlimit 300"
+procedure mem_store(ghost dst:buffer64, ghost src:buffer64)
+    {:public}
+    {:exportSpecs}
+    requires
+        locs_disjoint(list(loc_buffer(dst), loc_buffer(src)));
+        buffer_readable(mem, dst);
+        buffer_readable(mem, src);
+        valid_taint_buf64(dst, mem, memTaint, Secret);
+        valid_taint_buf64(src, mem, memTaint, Secret);
+        buffer_writeable(dst);
+        buffer_length(src) == 2;
+        buffer_length(dst) == 2;
+        rcx == buffer_addr(dst, mem);
+        rdx == buffer_addr(src, mem);
+    reads
+        memTaint;
+    ensures
+        buffer_as_seq(mem, dst) == buffer_as_seq(mem, src);
+        modifies_mem(loc_buffer(dst), old(mem), mem);
+    modifies
+        rax; rcx; rdx; r9;
+        efl; mem;
+    {
+            Load64_buffer(rax, rdx, 0, Secret, src, 0);
+            Load64_buffer(r9, rdx, 8, Secret, src, 1);
+            Store64_buffer(rcx, rax, 0, Secret, dst, 0);
+            Store64_buffer(rcx, r9, 8, Secret, dst, 1);
+            assert(Seq.equal(buffer_as_seq(mem, dst), buffer_as_seq(mem, src)));
+            assert(modifies_mem(loc_buffer(dst), old(mem), mem));
+    }
+
+procedure heaplet_store(ghost dst:buffer64, ghost src:buffer64)
+    {:public}
+    {:exportSpecs}
+    requires
+        locs_disjoint(list(loc_buffer(dst), loc_buffer(src)));
+        buffer_readable(heap1, dst);
+        buffer_readable(heap1, src);
+        valid_taint_buf64(dst, heap1, memTaint, Secret);
+        valid_taint_buf64(src, heap1, memTaint, Secret);
+        buffer_writeable(dst);
+        buffer_length(src) == 2;
+        buffer_length(dst) == 2;
+        rcx == buffer_addr(dst, heap1);
+        rdx == buffer_addr(src, heap1);
+    reads
+       memTaint;
+    ensures
+        buffer_as_seq(heap1, dst) == buffer_as_seq(heap1, src);
+        modifies_mem(loc_buffer(dst), old(heap1), heap1);
+    modifies
+        rax; rcx; rdx; r9;
+        efl; heap1;
+    {
+            hLoad64_buffer(rax, heap1, rdx, 0, Secret, src, 0);
+            hLoad64_buffer(r9, heap1, rdx, 8, Secret, src, 1);
+            hStore64_buffer(rcx, heap1, rax, 0, Secret, dst, 0);
+            hStore64_buffer(rcx, heap1, r9, 8, Secret, dst, 1);
+            assert(Seq.equal(buffer_as_seq(heap1, dst), buffer_as_seq(heap1, src)));
+            assert(modifies_mem(loc_buffer(dst), old(heap1), heap1));
+    }
+    
+procedure heaplet_store2(ghost dst:buffer64, ghost src:buffer64)
+    {:public}
+    {:exportSpecs}
+    requires
+        buffer_readable(heap2, dst);
+        buffer_readable(heap1, src);
+        valid_taint_buf64(dst, heap2, memTaint, Secret);
+        valid_taint_buf64(src, heap1, memTaint, Secret);
+        buffer_writeable(dst);
+        buffer_length(src) == 2;
+        buffer_length(dst) == 2;
+        rcx == buffer_addr(dst, heap2);
+        rdx == buffer_addr(src, heap1);
+    reads
+       memTaint;
+    ensures
+        buffer_as_seq(heap2, dst) == buffer_as_seq(heap1, src);
+        modifies_mem(loc_buffer(dst), old(heap2), heap2);
+    modifies
+        rax; rcx; rdx; r9;
+        efl; heap1; heap2;
+    {
+            hLoad64_buffer(rax, heap1, rdx, 0, Secret, src, 0);
+            hLoad64_buffer(r9, heap1, rdx, 8, Secret, src, 1);
+            hStore64_buffer(rcx, heap2, rax, 0, Secret, dst, 0);
+            hStore64_buffer(rcx, heap2, r9, 8, Secret, dst, 1);
+            assert(Seq.equal(buffer_as_seq(heap2, dst), buffer_as_seq(heap1, src)));
+            assert(modifies_mem(loc_buffer(dst), old(heap2), heap2));
+    }
+
+#reset-options "--z3rlimit 50"
+procedure Memcpy_1heap(inline win:bool, ghost dst:buffer64, ghost src:buffer64)
+    {:public}
+    {:exportSpecs}
+    requires
+        locs_disjoint(list(loc_buffer(dst), loc_buffer(src)));
+        buffer_readable(heap1, dst);
+        buffer_readable(heap1, src);
+        valid_taint_buf64(dst, heap1, memTaint, Secret);
+        valid_taint_buf64(src, heap1, memTaint, Secret);
+        buffer_writeable(dst);
+        buffer_length(src) == 2;
+        buffer_length(dst) == 2;
+        win ==> rcx == buffer_addr(dst, heap1);
+        win ==> rdx == buffer_addr(src, heap1);
+        !win ==> rdi == buffer_addr(dst, heap1);
+        !win ==> rsi == buffer_addr(src, heap1);
+    ensures
+        rsp == old(rsp);
+
+        win ==>  rbx == old(rbx);
+        win ==>  rbp == old(rbp);
+        win ==>  rdi == old(rdi);
+        win ==>  rsi == old(rsi);
+        win ==>  rsp == old(rsp);
+        win ==>  r12 == old(r12);
+        win ==>  r13 == old(r13);
+        win ==>  r14 == old(r14);
+        win ==>  r15 == old(r15);
+        !win ==>  rbx == old(rbx);
+        !win ==>  rbp == old(rbp);
+        !win ==>  r12 == old(r12);
+        !win ==>  r13 == old(r13);
+        !win ==>  r14 == old(r14);
+        !win ==>  r15 == old(r15);
+        win ==>  xmm6 == old(xmm6);
+        win ==>  xmm7 == old(xmm7);
+        win ==>  xmm8 == old(xmm8);
+        win ==>  xmm9 == old(xmm9);
+        win ==>  xmm10 == old(xmm10);
+        win ==>  xmm11 == old(xmm11);
+        win ==>  xmm12 == old(xmm12);
+        win ==>  xmm13 == old(xmm13);
+        win ==>  xmm14 == old(xmm14);
+        win ==>  xmm15 == old(xmm15);
+
+        buffer_as_seq(heap1, dst) == buffer_as_seq(heap1, src);
+        modifies_mem(loc_buffer(dst), old(heap1), heap1);
+    modifies
+        rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
+        xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; xmm7; xmm8; xmm9; xmm10; xmm11; xmm12; xmm13; xmm14; xmm15;
+        efl; heap1; memTaint;
+{
+    inline if (win)
+    {
+        hLoad64_buffer(rax, heap1, rdx, 0, Secret, src, 0);
+        hLoad64_buffer(r9, heap1, rdx, 8, Secret, src, 1);
+        hStore64_buffer(rcx, heap1, rax, 0, Secret, dst, 0);
+        hStore64_buffer(rcx, heap1, r9, 8, Secret, dst, 1);
+    }
+    else
+    {
+        hLoad64_buffer(rax, heap1, rsi, 0, Secret, src, 0);
+        hLoad64_buffer(rcx, heap1, rsi, 8, Secret, src, 1);
+        hStore64_buffer(rdi, heap1, rax, 0, Secret, dst, 0);
+        hStore64_buffer(rdi, heap1, rcx, 8, Secret, dst, 1);
+    }
+    assert(Seq.equal(buffer_as_seq(heap1, dst), buffer_as_seq(heap1, src)));
+}
+    
+#reset-options "--z3rlimit 50"
+procedure Memcpy_2heap(inline win:bool, ghost dst:buffer64, ghost src:buffer64)
+    {:public}
+    {:exportSpecs}
+    requires
+        buffer_readable(heap1, dst);
+        buffer_readable(heap2, src);
+        buffer_writeable(dst);
+        valid_taint_buf64(dst, heap1, memTaint, Secret);
+        valid_taint_buf64(src, heap2, memTaint, Secret);
+        buffer_length(src) == 2;
+        buffer_length(dst) == 2;
+        win ==> rcx == buffer_addr(dst, heap1);
+        win ==> rdx == buffer_addr(src, heap2);
+        !win ==> rdi == buffer_addr(dst, heap1);
+        !win ==> rsi == buffer_addr(src, heap2);
+    ensures
+        rsp == old(rsp);
+
+        win ==>  rbx == old(rbx);
+        win ==>  rbp == old(rbp);
+        win ==>  rdi == old(rdi);
+        win ==>  rsi == old(rsi);
+        win ==>  rsp == old(rsp);
+        win ==>  r12 == old(r12);
+        win ==>  r13 == old(r13);
+        win ==>  r14 == old(r14);
+        win ==>  r15 == old(r15);
+        !win ==>  rbx == old(rbx);
+        !win ==>  rbp == old(rbp);
+        !win ==>  r12 == old(r12);
+        !win ==>  r13 == old(r13);
+        !win ==>  r14 == old(r14);
+        !win ==>  r15 == old(r15);
+        win ==>  xmm6 == old(xmm6);
+        win ==>  xmm7 == old(xmm7);
+        win ==>  xmm8 == old(xmm8);
+        win ==>  xmm9 == old(xmm9);
+        win ==>  xmm10 == old(xmm10);
+        win ==>  xmm11 == old(xmm11);
+        win ==>  xmm12 == old(xmm12);
+        win ==>  xmm13 == old(xmm13);
+        win ==>  xmm14 == old(xmm14);
+        win ==>  xmm15 == old(xmm15);
+
+        buffer_as_seq(heap1, dst) == buffer_as_seq(heap2, src);
+        modifies_mem(loc_buffer(dst), old(heap1), heap1);
+    modifies
+        rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
+        xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; xmm7; xmm8; xmm9; xmm10; xmm11; xmm12; xmm13; xmm14; xmm15;
+        efl; heap1; heap2; memTaint;
+{
+    inline if (win)
+    {
+        hLoad64_buffer(rax, heap2, rdx, 0, Secret, src, 0);
+        hLoad64_buffer(r9, heap2, rdx, 8, Secret, src, 1);
+        hStore64_buffer(rcx, heap1, rax, 0, Secret, dst, 0);
+        hStore64_buffer(rcx, heap1, r9, 8, Secret, dst, 1);
+    }
+    else
+    {
+        hLoad64_buffer(rax, heap2, rsi, 0, Secret, src, 0);
+        hLoad64_buffer(rcx, heap2, rsi, 8, Secret, src, 1);
+        hStore64_buffer(rdi, heap1, rax, 0, Secret, dst, 0);
+        hStore64_buffer(rdi, heap1, rcx, 8, Secret, dst, 1);
+    }
+    assert(Seq.equal(buffer_as_seq(heap1, dst), buffer_as_seq(heap2, src)));
 }

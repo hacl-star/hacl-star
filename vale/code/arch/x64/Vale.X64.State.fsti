@@ -15,7 +15,8 @@ noeq type vale_state = {
   vs_regs: Regs.t;
   vs_flags: Flags.t;
   vs_heap: vale_heap;
-  vs_hpls: Map.t (key:nat) (value:vale_heap);
+  vs_hpls: Map.t (key:nat) (value:vale_heap); //heaplets
+  vs_hmap: Map.t (key:int) (value:nat); //ptr -> heaplet map
   vs_stack: vale_stack;
   vs_memTaint: memtaint;
   vs_stackTaint: memtaint;
@@ -32,15 +33,15 @@ unfold let eval_mem (ptr:int) (s:vale_state) : GTot nat64 = load_mem64 ptr s.vs_
 [@va_qattr]
 unfold let eval_mem128 (ptr:int) (s:vale_state) : GTot Vale.Def.Types_s.quad32 = load_mem128 ptr s.vs_heap
 [@va_qattr]
-unfold let eval_hpls (hp:nat) (ptr:int) (s:vale_state) : GTot Vale.Def.Types_s.quad32 = load_mem128 ptr (Map.sel s.vs_hpls hp)
+unfold let eval_heap (hp:nat) (s:vale_state) : vale_heap = Map.sel s.vs_hpls hp
+[@va_qattr]
+unfold let eval_hmap (ptr:int) (s:vale_state) : nat = Map.sel s.vs_hmap ptr
 [@va_qattr]
 unfold let eval_stack (ptr:int) (s:vale_state) : GTot nat64 = load_stack64 ptr s.vs_stack
 [@va_qattr]
 unfold let eval_stack128 (ptr:int) (s:vale_state) : GTot quad32 = load_stack128 ptr s.vs_stack
-
 [@va_qattr]
 unfold let eval_reg_64 (r:reg_64) (s:vale_state) : nat64 = eval_reg (Reg 0 r) s
-
 [@va_qattr]
 unfold let eval_reg_xmm (r:reg_xmm) (s:vale_state) : quad32 = eval_reg (Reg 1 r) s
 
@@ -87,9 +88,10 @@ let update_reg_xmm (r:reg_xmm) (v:quad32) (s:vale_state) : vale_state =
 let update_mem (ptr:int) (v:nat64) (s:vale_state) : GTot vale_state = {s with vs_heap = store_mem64 ptr v s.vs_heap}
 
 [@va_qattr]
-let update_hpls (hp: nat) (ptr:int) (v:nat64) (s:vale_state) : GTot vale_state =
-  let heap = Map.sel s.vs_hpls hp in
-  {s with vs_hpls = Map.upd s.vs_hpls hp (store_mem64 ptr v heap)}
+let update_heap (hp:nat) (h:vale_heap) (s:vale_state) : vale_state = {s with vs_hpls = Map.upd s.vs_hpls hp h }
+
+[@va_qattr]
+let update_hmap (ptr:int) (hp:nat) (m: Map.t int nat) (s:vale_state) : vale_state = {s with vs_hmap = Map.upd s.vs_hmap ptr hp}
   
 [@va_qattr]
 let update_stack64 (ptr:int) (v:nat64) (s:vale_state) : GTot vale_state = {s with vs_stack = store_stack64 ptr v s.vs_stack}
@@ -107,7 +109,7 @@ let valid_maddr (m:maddr) (s:vale_state) : prop0 = valid_mem64 (eval_maddr m s) 
 
 [@va_qattr]
 let valid_maddr128 (m:maddr) (s:vale_state) : prop0 = valid_mem128 (eval_maddr m s) s.vs_heap
-
+  
 [@va_qattr]
 let valid_src_operand (o:operand64) (s:vale_state) : prop0 =
   match o with
@@ -134,7 +136,8 @@ let state_eq (s0:vale_state) (s1:vale_state) : prop0 =
   Regs.equal s0.vs_regs s1.vs_regs /\
   Flags.equal s0.vs_flags s1.vs_flags /\
   s0.vs_heap == s1.vs_heap /\
-  s0.vs_hpls == s1.vs_hpls /\ //TODO: Check contents of heaplets?
+  Map.equal s0.vs_hpls s1.vs_hpls /\
+  Map.equal s0.vs_hmap s1.vs_hmap /\
   s0.vs_stack == s1.vs_stack /\
   s0.vs_memTaint == s1.vs_memTaint /\
   s0.vs_stackTaint == s1.vs_stackTaint
