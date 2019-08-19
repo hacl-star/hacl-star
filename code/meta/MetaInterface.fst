@@ -103,16 +103,21 @@ let rec visit_function (st: state) (f_name: name): Tac (state & list sigelt) =
               pack (Tv_Abs (mk_binder bv) acc)
             ) new_args new_body
           in
-          let new_args, _ = List.Tot.split new_args in
+          let new_args, new_bvs = List.Tot.split new_args in
 
           // Update the state with a mapping and which extra arguments are needed.
           let m = if has_attr f (`MetaAttribute.specialize) then Specialize else Inline new_name in
           let st = { st with seen = (f_name, (f_typ, m, new_args)) :: st.seen } in
 
-          // Declaration for the new resulting function
-          let se = pack_sigelt (Sg_Let false (pack_fv new_name) [] f_typ new_body) in
+          // Declaration for the new resulting function.
+          // BUG: without the eta-expansion around mk_binder, "tactic got stuck".
+          let new_typ = mk_tot_arr (List.Tot.map (fun x -> mk_binder x) new_bvs) f_typ in
+          let se = pack_sigelt (Sg_Let false (pack_fv new_name) [] new_typ new_body) in
           let _ = print (st.indent ^ "New body for " ^ string_of_name new_name ^ ":\n" ^
             st.indent ^ term_to_string new_body) in
+          let _ = print (st.indent ^ "New type for " ^ string_of_name new_name ^ ":\n" ^
+            st.indent ^ term_to_string new_typ) in
+
           st, new_sigelts @ [ se ]
 
       | _ ->
@@ -178,24 +183,24 @@ and visit_body (st: state) (bvs: list (name & bv)) (e: term):
                   (pack (Tv_Var bv), Q_Explicit), (name, bv) :: bvs
             in
 
-            // fv has been rewritten to take fns as extra arguments for the
-            //   specialize nodes reachable through the body of fv; we need
-            //   ourselves to take a dependency on those nodes
-            let extra_args, bvs = fold_left (fun (extra_args, bvs) name ->
-              let term, bvs = allocate_bv_for name bvs in
-              term :: extra_args, bvs
-            ) ([], bvs) fns in
-            let extra_args = List.rev extra_args in
-
             match map with
             | Inline fv ->
+                // fv has been rewritten to take fns as extra arguments for the
+                //   specialize nodes reachable through the body of fv; we need
+                //   ourselves to take a dependency on those nodes
+                let extra_args, bvs = fold_left (fun (extra_args, bvs) name ->
+                  let term, bvs = allocate_bv_for name bvs in
+                  term :: extra_args, bvs
+                ) ([], bvs) fns in
+                let extra_args = List.rev extra_args in
+
                 let e = mk_app (pack (Tv_FVar (pack_fv fv))) (extra_args @ es) in
                 st, e, bvs, ses
 
             | Specialize ->
                 // Base case: we just found an application of a function from the interface.
                 let e, bvs = allocate_bv_for fv bvs in
-                let e = mk_app (fst e) (extra_args @ es) in
+                let e = mk_app (fst e) es in
                 st, e, bvs, ses
           with
           | _ ->
