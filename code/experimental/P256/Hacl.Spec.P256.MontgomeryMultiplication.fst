@@ -753,7 +753,7 @@ let big_power a b c d e =
 #reset-options "--z3refresh --z3rlimit 500"
 let exponent a result tempBuffer = 
   let h0 = ST.get () in 
-
+admit();
   let buffer_norm_1 = Lib.Buffer.sub  tempBuffer (size 0) (size 8) in 
     let buffer_result1 = Lib.Buffer.sub tempBuffer (size 4) (size 4) in 
   let buffer_result2 = Lib.Buffer.sub tempBuffer (size 8) (size 4) in 
