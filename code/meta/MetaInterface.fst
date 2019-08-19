@@ -36,8 +36,8 @@ let rec string_of_name (n: name): Tac string =
 
 let rec suffix_name (n: name) (s: string): Tac name =
   match n with
-  | [ n ] -> [ n ^ s ]
-  | n :: ns -> n :: suffix_name ns s
+  | [ n ] -> cur_module () @ [ n ^ s ]
+  | n :: ns -> suffix_name ns s
   | [] -> fail "impossible: empty name"
 
 let assoc (#a: eqtype) #b (x: a) (l: list (a & b)): Tac b =
