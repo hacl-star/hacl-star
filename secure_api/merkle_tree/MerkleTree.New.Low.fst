@@ -3051,8 +3051,6 @@ let mt_verify mt k j mtr p rt =
          High.mt_verify_ (U32.v k) (U32.v j) (lift_path hh1 mtr p)
            1 (Rgl?.r_repr hreg hh1 ih) false);
   let r = Lib.ByteBuffer.lbytes_eq #hash_size ih rt in
-  assert (if r
-         then S.equal (Rgl?.r_repr hreg hh2 ih) (Rgl?.r_repr hreg hh2 rt)
-         else True);
+  //let r = Lib.RawBuffer.lbytes_eq #hash_size ih rt in
   Rgl?.r_free hreg ih;
   r

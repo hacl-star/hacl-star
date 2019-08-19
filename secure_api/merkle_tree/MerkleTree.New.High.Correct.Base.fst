@@ -11,7 +11,7 @@ module S = FStar.Seq
 
 module MTS = MerkleTree.Spec
 
-#set-options "--z3rlimit 40 --max_fuel 0 --max_ifuel 0 --query_stats"
+#set-options "--z3rlimit 40 --max_fuel 0 --max_ifuel 0"
 
 /// Sequence helpers
 
