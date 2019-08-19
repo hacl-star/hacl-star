@@ -26,3 +26,4 @@ val lemma_norm_as_specification: xD: nat -> yD: nat -> zD: nat ->
 let lemma_norm_as_specification xD yD zD x3 y3 z3 = 
   power_distributivity (zD * zD * zD) (prime - 2) prime;
   power_distributivity (zD * zD) (prime -2) prime
+ 
