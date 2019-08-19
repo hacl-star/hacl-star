@@ -16,6 +16,7 @@ module S = Spec.GF128
 module GF = Spec.GaloisField
 module Vec = Hacl.Spec.GF128.Vec
 module SPreComp = Hacl.Spec.Gf128.FieldPreComp
+module Lemmas = Hacl.Spec.GF128.Lemmas
 
 #set-options "--z3rlimit 25 --max_fuel 1 --max_ifuel 1"
 
@@ -28,6 +29,7 @@ let bit_mask64 (u:uint64) = u64 0 -. (u &. u64 1)
 type felem = lbuffer uint64 2ul
 type felem4 = lbuffer uint64 8ul
 type table = lbuffer uint64 256ul // r4(8) + table(256)
+type table1 = lbuffer uint64 128ul
 type precomp = lbuffer uint64 264ul // r4(8) + table(256)
 
 type block = lbuffer uint8 16ul
@@ -344,7 +346,6 @@ let load_precompute_r pre key =
   fmul r4 r3;
   prepare table r4
 
-type table1 = lbuffer uint64 128ul
 
 inline_for_extraction
 val fmul_pre_f:
@@ -458,8 +459,15 @@ val fadd_acc4:
     feval4 h1 x == Vec.fadd4 (Lib.IntVector.create4 (feval h0 acc) zero zero zero) (feval4 h0 x))
 
 let fadd_acc4 x acc =
+  let h0 = ST.get () in
   fadd (sub x 0ul 2ul) acc;
-  admit()
+  let h1 = ST.get () in
+  assert (feval h1 (gsub x 0ul 2ul) == GF.fadd #S.gf128 (feval h0 (gsub x 0ul 2ul)) (feval h0 acc));
+  Lemmas.add_commutativity (feval h0 (gsub x 0ul 2ul)) (feval h0 acc);
+  Lemmas.add_identity (feval h0 (gsub x 2ul 2ul));
+  Lemmas.add_identity (feval h0 (gsub x 4ul 2ul));
+  Lemmas.add_identity (feval h0 (gsub x 6ul 2ul));
+  LSeq.eq_intro (feval4 h1 x) (Vec.fadd4 (Lib.IntVector.create4 (feval h0 acc) zero zero zero) (feval4 h0 x))
 
 
 #set-options "--z3rlimit 100"
