@@ -1,23 +1,21 @@
 module MerkleTree.New.High
 
-open EverCrypt
-open EverCrypt.Helpers
-
-open MerkleTree.Spec
-
 open FStar.Ghost
 open FStar.Seq
 
-module List = FStar.List.Tot
+open MerkleTree.Spec
+
 module S = FStar.Seq
 
 module U32 = FStar.UInt32
 module U8 = FStar.UInt8
+
+module MTS = MerkleTree.Spec
+
+#set-options "--z3rlimit 10 --max_fuel 0 --max_ifuel 0"
+
 type uint32_t = U32.t
 type uint8_t = U8.t
-
-module EHS = EverCrypt.Hash
-module MTS = MerkleTree.Spec
 
 val hash: Type0
 let hash = MTS.hash_raw
@@ -35,18 +33,17 @@ let hash_init: hash =
 val hash_2: src1:hash -> src2:hash -> GTot hash
 let hash_2 = MTS.hash2_raw
 
-#reset-options "--z3rlimit 10" // default for this file
 
-/// Facts about sequence
+/// Facts about sequences
 
 val seq_slice_equal_index:
   #a:Type -> s1:S.seq a -> s2:S.seq a ->
   i:nat -> j:nat{i <= j && j <= S.length s1 && j <= S.length s2} ->
   k:nat{i <= k && k < j} ->
-  Lemma (requires (S.equal (S.slice s1 i j) (S.slice s2 i j)))
-        (ensures (S.index s1 k == S.index s2 k))
+  Lemma (requires S.equal (S.slice s1 i j) (S.slice s2 i j))
+        (ensures  S.index s1 k == S.index s2 k)
         [SMTPat (S.equal (S.slice s1 i j) (S.slice s2 i j));
-        SMTPat (S.index s1 k)]
+         SMTPat (S.index s1 k)]
 let seq_slice_equal_index #a s1 s2 i j k =
   assert (S.index (S.slice s1 i j) (k - i) == S.index (S.slice s2 i j) (k - i))
 
@@ -54,34 +51,34 @@ private val seq_slice_more_equal:
   #a:Type -> s1:S.seq a -> s2:S.seq a ->
   n:nat -> m:nat{n <= m && m <= S.length s1 && m <= S.length s2} ->
   k:nat{n <= k} -> l:nat{k <= l && l <= m} ->
-  Lemma (requires (S.equal (S.slice s1 n m) (S.slice s2 n m)))
-        (ensures (S.equal (S.slice s1 k l) (S.slice s2 k l)))
+  Lemma (requires S.equal (S.slice s1 n m) (S.slice s2 n m))
+        (ensures  S.equal (S.slice s1 k l) (S.slice s2 k l))
         [SMTPat (S.equal (S.slice s1 n m) (S.slice s2 n m));
-        SMTPat (S.equal (S.slice s1 k l) (S.slice s2 k l))]
+         SMTPat (S.equal (S.slice s1 k l) (S.slice s2 k l))]
 private let seq_slice_more_equal #a s1 s2 n m k l =
   slice_slice s1 n m (k - n) (l - n);
   slice_slice s2 n m (k - n) (l - n)
 
 /// Facts about "2"
 
-val remainder_2_not_1_div:
-  n:nat ->
-  Lemma (requires (n % 2 <> 1))
-        (ensures (n / 2 = (n + 1) / 2))
+val remainder_2_not_1_div: n:nat ->
+  Lemma (requires n % 2 <> 1)
+        (ensures  n / 2 = (n + 1) / 2)
 let remainder_2_not_1_div n = ()
 
-val remainder_2_1_div:
-  n:nat ->
-  Lemma (requires (n % 2 = 1))
-        (ensures (n / 2 + 1 = (n + 1) / 2))
+val remainder_2_1_div: n:nat ->
+  Lemma (requires n % 2 = 1)
+        (ensures  n / 2 + 1 = (n + 1) / 2)
 let remainder_2_1_div n = ()
 
 /// High-level Merkle tree data structure
 
 noeq type merkle_tree =
-| MT: i:nat -> j:nat{i <= j && j < pow2 32} ->
-      hs:S.seq hash_seq{S.length hs = 32} ->
-      rhs_ok:bool -> rhs:hash_seq{S.length rhs = 32} ->
+| MT: i:nat -> 
+      j:nat{i <= j && j < pow2 32} ->
+      hs:hash_ss{S.length hs = 32} ->
+      rhs_ok:bool -> 
+      rhs:hash_seq{S.length rhs = 32} -> // Rightmost hashes
       mroot:hash ->
       merkle_tree
 
@@ -115,14 +112,17 @@ let rec hs_wf_elts lv hs i j =
        S.length (S.index hs lv) == j - ofs /\
        hs_wf_elts (lv + 1) hs (i / 2) (j / 2))
 
+#push-options "--max_fuel 1"
+
 val hs_wf_elts_equal:
   lv:nat{lv <= 32} ->
   hs1:hash_ss{S.length hs1 = 32} ->
   hs2:hash_ss{S.length hs2 = 32} ->
-  i:nat -> j:nat{j >= i} ->
-  Lemma (requires (hs_wf_elts lv hs1 i j /\
-		  S.equal (S.slice hs1 lv 32) (S.slice hs2 lv 32)))
-	(ensures (hs_wf_elts lv hs2 i j))
+  i:nat -> 
+  j:nat{j >= i} ->
+  Lemma (requires hs_wf_elts lv hs1 i j /\
+		  S.equal (S.slice hs1 lv 32) (S.slice hs2 lv 32))
+	(ensures  hs_wf_elts lv hs2 i j)
 	(decreases (32 - lv))
 let rec hs_wf_elts_equal lv hs1 hs2 i j =
   if lv = 32 then ()
@@ -136,15 +136,15 @@ let rec hs_wf_elts_equal lv hs1 hs2 i j =
        hs_wf_elts_equal (lv + 1) hs1 hs2 (i / 2) (j / 2))
 
 val mt_wf_elts: merkle_tree -> GTot Type0
-let mt_wf_elts mt =
-  hs_wf_elts 0 (MT?.hs mt) (MT?.i mt) (MT?.j mt)
+let mt_wf_elts (MT i j hs _ _ _)  =
+  hs_wf_elts 0 hs i j
 
 /// Construction
 
 val hs_wf_elts_empty:
   lv:nat{lv <= 32} ->
   Lemma (requires True)
-	(ensures (hs_wf_elts lv (S.create 32 S.empty) 0 0))
+	(ensures  hs_wf_elts lv (S.create 32 S.empty) 0 0)
 	(decreases (32 - lv))
 let rec hs_wf_elts_empty lv =
   if lv = 32 then ()
@@ -202,27 +202,27 @@ let rec insert_ lv i j hs acc =
 
 val insert_base:
   lv:nat -> i:nat -> j:nat -> hs:hash_ss -> acc:hash ->
-  Lemma (requires (
+  Lemma (requires 
 	  lv < 32 /\ i <= j /\ j < pow2 (32 - lv) - 1 /\
 	  S.length hs = 32 /\ hs_wf_elts lv hs i j /\
-	  j % 2 <> 1))
-	(ensures (S.equal (insert_ lv i j hs acc)
-			  (hash_ss_insert lv i j hs acc)))
+	  j % 2 <> 1)
+	(ensures S.equal (insert_ lv i j hs acc)
+		         (hash_ss_insert lv i j hs acc))
 let insert_base lv i j hs acc = ()
 
 val insert_rec:
   lv:nat -> i:nat -> j:nat -> hs:hash_ss -> acc:hash ->
-  Lemma (requires (
+  Lemma (requires
 	  lv < 32 /\ i <= j /\ j < pow2 (32 - lv) - 1 /\
 	  S.length hs = 32 /\ hs_wf_elts lv hs i j /\
-	  j % 2 == 1))
-	(ensures (
+	  j % 2 == 1)
+	(ensures 
 	  (hs_wf_elts_equal (lv + 1) hs
 	    (hash_ss_insert lv i j hs acc) (i / 2) (j / 2);
 	  S.equal (insert_ lv i j hs acc)
 		  (insert_ (lv + 1) (i / 2) (j / 2)
 			   (hash_ss_insert lv i j hs acc)
-			   (hash_2 (S.last (S.index hs lv)) acc)))))
+			   (hash_2 (S.last (S.index hs lv)) acc))))
 let insert_rec lv i j hs acc = ()
 
 val mt_insert:
@@ -282,8 +282,8 @@ val construct_rhs_unchanged:
   acc:hash ->
   actd:bool ->
   Lemma (requires True)
-        (ensures (S.equal (S.slice rhs 0 lv)
-                          (S.slice (fst (construct_rhs lv hs rhs i j acc actd)) 0 lv)))
+        (ensures  S.equal (S.slice rhs 0 lv)
+                          (S.slice (fst (construct_rhs lv hs rhs i j acc actd)) 0 lv))
         (decreases j)
 let rec construct_rhs_unchanged lv hs rhs i j acc actd =
   let ofs = offset_of i in
@@ -311,9 +311,9 @@ val construct_rhs_even:
     hs_wf_elts lv hs i j} ->
   acc:hash ->
   actd:bool ->
-  Lemma (requires (j <> 0 /\ j % 2 = 0))
-        (ensures (construct_rhs lv hs rhs i j acc actd ==
-                 construct_rhs (lv + 1) hs rhs (i / 2) (j / 2) acc actd))
+  Lemma (requires j <> 0 /\ j % 2 = 0)
+        (ensures  construct_rhs lv hs rhs i j acc actd ==
+                  construct_rhs (lv + 1) hs rhs (i / 2) (j / 2) acc actd)
 let construct_rhs_even lv hs rhs i j acc actd = ()
 
 val construct_rhs_odd:
@@ -326,14 +326,14 @@ val construct_rhs_odd:
     hs_wf_elts lv hs i j} ->
   acc:hash ->
   actd:bool ->
-  Lemma (requires (j % 2 = 1))
-        (ensures (construct_rhs lv hs rhs i j acc actd ==
+  Lemma (requires j % 2 = 1)
+        (ensures construct_rhs lv hs rhs i j acc actd ==
                  (let ofs = offset_of i in
                  let nrhs = if actd then S.upd rhs lv acc else rhs in
                  let nacc = if actd
                             then hash_2 (S.index (S.index hs lv) (j - 1 - ofs)) acc
                             else S.index (S.index hs lv) (j - 1 - ofs) in
-                 construct_rhs (lv + 1) hs nrhs (i / 2) (j / 2) nacc true)))
+                 construct_rhs (lv + 1) hs nrhs (i / 2) (j / 2) nacc true))
 let construct_rhs_odd lv hs rhs i j acc actd = ()
 
 val mt_get_root:
@@ -351,19 +351,19 @@ let mt_get_root mt drt =
 
 val mt_get_root_rhs_ok_true:
   mt:merkle_tree{mt_wf_elts mt} -> drt:hash ->
-  Lemma (requires (MT?.rhs_ok mt == true))
-        (ensures (mt_get_root mt drt == (mt, MT?.mroot mt)))
+  Lemma (requires MT?.rhs_ok mt == true)
+        (ensures  mt_get_root mt drt == (mt, MT?.mroot mt))
 let mt_get_root_rhs_ok_true mt drt = ()
 
 val mt_get_root_rhs_ok_false:
   mt:merkle_tree{mt_wf_elts mt} -> drt:hash ->
-  Lemma (requires (MT?.rhs_ok mt == false))
-        (ensures (mt_get_root mt drt ==
-                 (let (nrhs, rt) =
+  Lemma (requires MT?.rhs_ok mt == false)
+        (ensures  mt_get_root mt drt ==
+                  (let (nrhs, rt) =
                    construct_rhs
                      0 (MT?.hs mt) (MT?.rhs mt) (MT?.i mt) (MT?.j mt)
 	             drt false in
-                   (MT (MT?.i mt) (MT?.j mt) (MT?.hs mt) true nrhs rt, rt))))
+                   (MT (MT?.i mt) (MT?.j mt) (MT?.hs mt) true nrhs rt, rt)))
 let mt_get_root_rhs_ok_false mt drt = ()
 
 val path_insert: p:path -> hp:hash -> GTot path
@@ -443,8 +443,8 @@ val mt_get_path_unchanged:
   p:path ->
   actd:bool ->
   Lemma (requires True)
-        (ensures (S.equal p (S.slice (mt_get_path_ lv hs rhs i j k p actd)
-                                     0 (S.length p))))
+        (ensures S.equal p (S.slice (mt_get_path_ lv hs rhs i j k p actd)
+                                     0 (S.length p)))
         (decreases (32 - lv))
 let rec mt_get_path_unchanged lv hs rhs i j k p actd =
   let ofs = offset_of i in
@@ -454,6 +454,8 @@ let rec mt_get_path_unchanged lv hs rhs i j k p actd =
     assert (S.equal p (S.slice np 0 (S.length p)));
     mt_get_path_unchanged (lv + 1) hs rhs (i / 2) (j / 2) (k / 2) np
       (if j % 2 = 0 then actd else true))
+
+#push-options "--z3rlimit 20"
 
 val mt_get_path_pull:
   lv:nat{lv <= 32} ->
@@ -467,10 +469,9 @@ val mt_get_path_pull:
   p:path ->
   actd:bool ->
   Lemma (requires True)
-        (ensures (S.equal (mt_get_path_ lv hs rhs i j k p actd)
-                          (S.append p (mt_get_path_ lv hs rhs i j k S.empty actd))))
+        (ensures  S.equal (mt_get_path_ lv hs rhs i j k p actd)
+                          (S.append p (mt_get_path_ lv hs rhs i j k S.empty actd)))
         (decreases (32 - lv))
-#reset-options "--z3rlimit 20 --max_fuel 1"
 let rec mt_get_path_pull lv hs rhs i j k p actd =
   let ofs = offset_of i in
   if j = 0 then ()
@@ -480,7 +481,8 @@ let rec mt_get_path_pull lv hs rhs i j k p actd =
     mt_get_path_pull (lv + 1) hs rhs (i / 2) (j / 2) (k / 2) np nactd;
     mt_get_path_pull (lv + 1) hs rhs (i / 2) (j / 2) (k / 2)
       (mt_get_path_step lv hs rhs i j k S.empty actd) nactd)
-#reset-options "--z3rlimit 10"
+
+#pop-options
 
 val mt_get_path_slice:
   lv:nat{lv <= 32} ->
@@ -494,9 +496,9 @@ val mt_get_path_slice:
   p:path ->
   actd:bool ->
   Lemma (requires True)
-        (ensures (S.equal (S.slice (mt_get_path_ lv hs rhs i j k p actd)
+        (ensures  S.equal (S.slice (mt_get_path_ lv hs rhs i j k p actd)
                             (S.length p) (S.length p + mt_path_length k j actd))
-                          (mt_get_path_ lv hs rhs i j k S.empty actd)))
+                          (mt_get_path_ lv hs rhs i j k S.empty actd))
         (decreases (32 - lv))
 let rec mt_get_path_slice lv hs rhs i j k p actd =
   mt_get_path_pull lv hs rhs i j k p actd
@@ -512,10 +514,10 @@ let mt_get_path mt idx drt =
   let (umt, root) = mt_get_root mt drt in
   let ofs = offset_of (MT?.i umt) in
   let np = path_insert S.empty (S.index (S.index (MT?.hs umt) 0) (idx - ofs)) in
-  (MT?.j umt,
+  MT?.j umt,
   mt_get_path_ 0 (MT?.hs umt) (MT?.rhs umt)
     (MT?.i umt) (MT?.j umt) idx np false,
-  root)
+  root
 
 /// Flushing
 
@@ -530,7 +532,8 @@ val mt_flush_to_:
   GTot (fhs:hash_ss{
          S.length fhs = 32 /\
          S.equal (S.slice hs 0 lv) (S.slice fhs 0 lv) /\
-         hs_wf_elts lv fhs i j}) (decreases i)
+         hs_wf_elts lv fhs i j}) 
+  (decreases i)
 let rec mt_flush_to_ lv hs pi i j =
   let oi = offset_of i in
   let opi = offset_of pi in
@@ -550,14 +553,14 @@ val mt_flush_to_rec:
   j:nat{
     j >= i /\ j < pow2 (32 - lv) /\
     hs_wf_elts lv hs pi j} ->
-  Lemma (requires (offset_of i <> offset_of pi))
-        (ensures (mt_flush_to_ lv hs pi i j ==
+  Lemma (requires offset_of i <> offset_of pi)
+        (ensures mt_flush_to_ lv hs pi i j ==
                  (let ofs = offset_of i - offset_of pi in
                  let hvec = S.index hs lv in
                  let flushed = S.slice hvec ofs (S.length hvec) in
                  let nhs = S.upd hs lv flushed in
                  hs_wf_elts_equal (lv + 1) hs nhs (pi / 2) (j / 2);
-                 mt_flush_to_ (lv + 1) nhs (pi / 2) (i / 2) (j / 2))))
+                 mt_flush_to_ (lv + 1) nhs (pi / 2) (i / 2) (j / 2)))
 let mt_flush_to_rec lv hs pi i j = ()
 
 val mt_flush_to:
@@ -574,6 +577,7 @@ val mt_flush:
 let mt_flush mt =
   mt_flush_to mt (MT?.j mt - 1)
 
+#push-options "--max_fuel 2"
 
 /// Retraction
 
@@ -607,6 +611,8 @@ let rec mt_retract_to_ hs lv i s j =
       mt_retract_to_ nhs (lv + 1) (i / 2) (s / 2) (j / 2)
     end
   end
+
+#pop-options
 
 val mt_retract_to:
   mt:merkle_tree{mt_wf_elts mt} ->
