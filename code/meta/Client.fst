@@ -16,10 +16,10 @@ let times_four (x: int) =
 let times_four' (x: int) =
   I.mul 4 x
 
-[@ MetaAttribute.inline_ ]
+[@ MetaAttribute.specialize ]
 let times_sixteen (x: int) =
   times_four (times_four x)
 
-[@ MetaAttribute.inline_ ]
+[@ MetaAttribute.specialize ]
 let times_sixteen' (x: int) =
   times_four (times_four' x)

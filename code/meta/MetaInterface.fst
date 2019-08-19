@@ -31,7 +31,7 @@ type state = {
 let rec string_of_name (n: name): Tac string =
   match n with
   | [ n ] -> n
-  | n :: ns -> n ^ "." ^ string_of_name ns
+  | n :: ns -> n ^ "_" ^ string_of_name ns
   | [] -> fail "impossible: empty name"
 
 let rec suffix_name (n: name) (s: string): Tac name =
