@@ -1379,12 +1379,11 @@ let test_vectors: list vec =
   ]
 
 let print_and_compare (str1:string) (str2:string) (len:Lib.IntTypes.size_nat) (test_expected:Lib.ByteSequence.lbytes len) (test_result:Lib.ByteSequence.lbytes len) =
-//  IO.print_string str1;
-//  List.iter (fun a -> IO.print_string (UInt8.to_string (Lib.RawIntTypes.u8_to_UInt8 a))) (Lib.Sequence.to_list test_expected);
-//  IO.print_string str2;
-//  List.iter (fun a -> IO.print_string (UInt8.to_string (Lib.RawIntTypes.u8_to_UInt8 a))) (Lib.Sequence.to_list test_result);
-  Lib.Sequence.for_all2 (fun a b -> Lib.RawIntTypes.uint_to_nat #Lib.IntTypes.U8 a = Lib.RawIntTypes.uint_to_nat #Lib.IntTypes.U8 b) test_expected test_result
-
+  IO.print_string str1;
+  List.iter (fun a -> IO.print_string (UInt8.to_string (Lib.RawIntTypes.u8_to_UInt8 a))) (Lib.Sequence.to_list test_expected);
+  IO.print_string str2;
+  List.iter (fun a -> IO.print_string (UInt8.to_string (Lib.RawIntTypes.u8_to_UInt8 a))) (Lib.Sequence.to_list test_result);
+  Lib.ByteSequence.lbytes_eq test_expected test_result
 
 let test_one (v: vec) =
   let Vec a plain tag = v in
@@ -1392,4 +1391,4 @@ let test_one (v: vec) =
   let computed = hash a (Seq.seq_of_list (List.Tot.map Lib.RawIntTypes.u8_from_UInt8 plain)) in
   print_and_compare "\nExpected: " "\nComputed: "(hash_length a) expected computed
 
-let test () = List.Tot.for_all test_one test_vectors
+let test () = List.for_all test_one test_vectors
