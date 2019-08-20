@@ -6,8 +6,8 @@ import Universum
 
 import Control.Concurrent (withMVar)
 import qualified Data.Array.IO as AIO
-import qualified Data.ByteString as BS
 import qualified Data.Time.Clock.POSIX as P
+import qualified Numeric as N
 import System.IO.Unsafe (unsafePerformIO)
 import System.Random (randomRIO)
 
@@ -31,6 +31,9 @@ log x = if True then pass else logRaw x
 
 lambda :: Integral a => a
 lambda = 80
+
+log2 :: Integral a => a -> a
+log2 x = ceiling $ (N.log (fromIntegral (x+1)) / N.log 2 :: Double)
 
 average :: Integral a => [a] -> a
 average xs = foldr1 (+) xs `div` fromIntegral (length xs)

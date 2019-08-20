@@ -5,6 +5,7 @@
 
 module Hacl.Pahe
     ( Pahe(..)
+    , paheFree'
     , paheRerand
     ) where
 
@@ -40,7 +41,11 @@ class Pahe s where
 
     paheSIMDSub     :: PahePk s -> PaheCiph s -> PaheCiph s -> IO (PaheCiph s)
     default paheSIMDSub :: Pahe s => PahePk s -> PaheCiph s -> PaheCiph s -> IO (PaheCiph s)
-    paheSIMDSub pk c1 c2 = paheSIMDAdd pk c1 =<< paheNeg pk c2
+    paheSIMDSub pk c1 c2 = do
+        c2neg <- paheNeg pk c2
+        res <- paheSIMDAdd pk c1 c2neg
+        paheFree c2neg
+        pure res
 
     paheSIMDMulScal :: PahePk s -> PaheCiph s -> [Integer] -> IO (PaheCiph s)
 
@@ -70,6 +75,10 @@ class Pahe s where
     -- using each separate permutation.
     pahePermuteHor  :: PahePk s -> [PaheCiph s] -> [[Int]] -> IO [PaheCiph s]
 
+    paheFree :: PaheCiph s -> IO ()
+
+paheFree' :: Pahe s => [PaheCiph s] -> IO ()
+paheFree' = mapM_ paheFree
 
 paheRerand :: Pahe s => PahePk s -> PaheCiph s -> IO (PaheCiph s)
 paheRerand pk c = paheSIMDAdd pk c =<< paheEnc pk (replicate (paheK pk) 0)

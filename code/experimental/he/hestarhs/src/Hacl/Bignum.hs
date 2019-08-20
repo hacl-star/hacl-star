@@ -7,7 +7,7 @@ import Universum
 import Data.Bits (shiftR, (.&.))
 import qualified Data.ByteString as BS
 import qualified Foreign.Marshal as A
-import Foreign.Ptr (castPtr, plusPtr)
+import Foreign.Ptr (castPtr)
 
 import Hacl.Raw
 
@@ -89,3 +89,9 @@ fromBignum n x = fmap (frombase b64 . map toInteger) $ fromBignumRaw n x
 
 freeBignum :: Bignum -> IO ()
 freeBignum = A.free
+
+copyBignum :: Word32 -> Bignum -> IO Bignum
+copyBignum n b = do
+    ret <- toBignumZero n
+    A.copyArray ret b (fromIntegral n)
+    pure ret

@@ -9,12 +9,10 @@ module Playground where
 
 import Universum hiding (exp, last, (<*>))
 
-import Data.List (delete, last, (!!))
-import Data.Numbers.Primes (primeFactors, primes)
-import System.Random (randomIO, randomRIO)
+import Data.Numbers.Primes (primeFactors)
 
 import Hacl
-import Lib hiding (crt)
+import Lib
 
 
 isMthPrimRoot :: Integer -> Integer -> Integer -> Bool

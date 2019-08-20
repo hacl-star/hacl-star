@@ -5,13 +5,12 @@ module Hacl.Support where
 import Universum hiding (exp, last, (<*>))
 
 import Data.List (splitAt, (!!))
-import qualified Numeric as N
 import System.Random (randomIO, randomRIO)
 
 import Hacl.Bignum
 import Hacl.Packing
 import Hacl.Raw
-import Lib hiding (crt)
+import Lib
 import Utils
 
 
@@ -96,8 +95,6 @@ genDataPaillier bits = do
     return (p,q,r,m1,m2)
 
 
-log2 :: Integral a => a -> a
-log2 x = ceiling $ (N.log (fromIntegral (x+1)) / N.log 2 :: Double)
 
 fromFacts :: [(Integer,Integer)] -> Integer
 fromFacts = product . map (\(p,i) -> p ^ i)
@@ -193,7 +190,6 @@ genDataDGK ::
     -> Int
     -> IO (Integer, Integer, Integer, Integer, Integer, Integer)
 genDataDGK uFacts bits = do
-    putTextLn "Dgk keygen running"
     let u = fromFacts uFacts
     let vbits = 160
     let ubits = fromIntegral $ log2 u

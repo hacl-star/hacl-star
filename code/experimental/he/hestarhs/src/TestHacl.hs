@@ -2,14 +2,12 @@ module TestHacl where
 
 import Universum
 
-import Control.DeepSeq (rnf2)
 import Criterion.Main
 import qualified Data.Time.Clock.POSIX as P
 import System.Random (randomIO, randomRIO)
 
 import Hacl
 import qualified Lib as L
-import Utils
 
 testBNs :: IO ()
 testBNs = do
@@ -350,7 +348,7 @@ testDGK primeN primeBound bits = do
     let test = do
           m1 <- randomRIO (0,u-1)
           m2 <- randomRIO (0,u-1)
-          r <- randomRIO (0,n-1)
+          r <- randomRIO (0,2^320)
 
           let attempts = 20
 
