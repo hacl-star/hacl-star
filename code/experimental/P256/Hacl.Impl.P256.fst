@@ -1141,16 +1141,14 @@ let lemma_pif_to_domain h p =
   lemmaFromDomain x;
   lemmaFromDomain y;
   lemmaFromDomain z;
-  assert_norm (modp_inv2 (pow2 256) % prime256 = 0);
+  assert_norm (modp_inv2 (pow2 256) % prime256 <> 0);
   assert_norm (modp_inv2 (pow2 256) > 0);
   lemma_multiplication_not_mod_prime x (modp_inv2 (pow2 256)); 
-  assert_norm (0 < prime256);
+  assert_norm(pow2 256 > 0);
   assert_norm (modp_inv2 (pow2 256) > 0);
-
-  assert((x * modp_inv2 (pow2 256)) % prime256 == 0 <==> x == 0); admit();
+  assert((x * modp_inv2 (pow2 256)) % prime256 == 0 <==> x == 0);
   assert(x * modp_inv2 (pow2 256) % prime256 == 0);
   assert(fromDomain_ x == 0);
-  
   lemma_multiplication_not_mod_prime y (modp_inv2 (pow2 256));
   lemma_multiplication_not_mod_prime z (modp_inv2 (pow2 256));
   
