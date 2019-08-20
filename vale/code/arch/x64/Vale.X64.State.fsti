@@ -33,7 +33,7 @@ unfold let eval_mem (ptr:int) (s:vale_state) : GTot nat64 = load_mem64 ptr s.vs_
 [@va_qattr]
 unfold let eval_mem128 (ptr:int) (s:vale_state) : GTot Vale.Def.Types_s.quad32 = load_mem128 ptr s.vs_heap
 [@va_qattr]
-unfold let eval_heap (hp:nat) (s:vale_state) : vale_heap = Map.sel s.vs_hpls hp
+unfold let eval_hpls (hp:nat) (s:vale_state) : vale_heap = Map.sel s.vs_hpls hp
 [@va_qattr]
 unfold let eval_hmap (ptr:int) (s:vale_state) : nat = Map.sel s.vs_hmap ptr
 [@va_qattr]
@@ -88,7 +88,7 @@ let update_reg_xmm (r:reg_xmm) (v:quad32) (s:vale_state) : vale_state =
 let update_mem (ptr:int) (v:nat64) (s:vale_state) : GTot vale_state = {s with vs_heap = store_mem64 ptr v s.vs_heap}
 
 [@va_qattr]
-let update_heap (hp:nat) (h:vale_heap) (s:vale_state) : vale_state = {s with vs_hpls = Map.upd s.vs_hpls hp h }
+let update_hpls (hp:nat) (h:vale_heap) (s:vale_state) : vale_state = {s with vs_hpls = Map.upd s.vs_hpls hp h }
 
 [@va_qattr]
 let update_hmap (ptr:int) (hp:nat) (m: Map.t int nat) (s:vale_state) : vale_state = {s with vs_hmap = Map.upd s.vs_hmap ptr hp}
