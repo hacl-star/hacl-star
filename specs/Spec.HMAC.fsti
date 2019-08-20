@@ -1,6 +1,7 @@
 module Spec.HMAC
 
 open Spec.Hash.Definitions
+open Lib.IntTypes
 
 let is_supported_alg = function
   | SHA1 | SHA2_256 | SHA2_384 | SHA2_512 -> true
@@ -16,5 +17,5 @@ let keysized (a:hash_alg) (l:nat) =
 val hmac:
   a: hash_alg -> //18-07-09 can't mix refinements and erasure??
   key: bytes{ keysized a (Seq.length key) } ->
-  data: bytes{ Seq.length data + block_length a < max_input_length a } ->
+  data: bytes{ Seq.length data + block_length a <= max_size_t } ->
   Tot (lbytes (hash_length a))
