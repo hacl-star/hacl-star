@@ -59,30 +59,46 @@ lanLoopback =
       connect req "tcp://192.168.88.249:8875"
 
 
-      measureDelay req rep
-
       --_testCmp 1 req rep
       --_testCmp 8 req rep
       --_testCmp 16 req rep
 
-      _testArgmax 4 req rep
+      --measureDelay req rep
+      --_testCmp @PailSep @DgkCrt @GMSep 100 1 rep req
+      --measureDelay req rep
+      --_testCmp @PailSep @DgkCrt @GMSep 100 8 rep req
+      --measureDelay req rep
+      --_testCmp @PailSep @DgkCrt @GMSep 100 16 rep req
+
+      --measureDelay req rep
+      --_testCmp @PailSep @DgkCrt @DgkCrt 100 1 rep req
+      --measureDelay req rep
+      --_testCmp @PailSep @DgkCrt @DgkCrt 100 8 rep req
+      --measureDelay req rep
+      --_testCmp @PailSep @DgkCrt @DgkCrt 100 16 rep req
+
+
+      --measureDelay req rep
+      --_testArgmax @PailSep @DgkCrt @GMSep 100 0 rep req
+--      measureDelay req rep
+--      _testArgmax @PailSep @DgkCrt @GMSep 100 1 rep req
       measureDelay req rep
-      _testArgmax 8 req rep
+      _testArgmax @PailSep @DgkCrt @GMSep 100 8 rep req
       measureDelay req rep
-      _testArgmax 16 req rep
+      _testArgmax @PailSep @DgkCrt @GMSep 100 16 rep req
 
 
 benchCrypto :: IO ()
 benchCrypto = do
-    benchBNs 512
-    benchBNs 1024
-    benchBNs 2048
-    testGM 512
-    testGM 1024
-    testGM 2048
-    testPaillier 512
-    testPaillier 1024
-    testPaillier 2048
+    --benchBNs 512
+    --benchBNs 1024
+    --benchBNs 2048
+    --testGM 512
+    --testGM 1024
+    --testGM 2048
+    --testPaillier 512
+    --testPaillier 1024
+    --testPaillier 2048
     testDGK 1 193 512
     testDGK 1 193 1024
     testDGK 1 193 2048
@@ -97,13 +113,36 @@ main = do
     --_testArgmax
     --_testCmp
     --testDGKPahe
-    lanLoopback
-    --benchCrypto
+    testDGKPaheCriterion
+    benchCrypto
     --benchCRTs
-    --testDGKPaheCriterion
-    --_testCmpInproc 1
-    --_testCmpInproc 8
-    --_testCmpInproc 16
+
+    --lanLoopback
+
+    --_testCmpInproc @PailSep @DgkCrt @GMSep 200 1
+    --_testCmpInproc @PailSep @DgkCrt @GMSep 200 8
+    --_testCmpInproc @PailSep @DgkCrt @GMSep 200 16
+
+    --_testCmpInproc @PailSep @DgkCrt @DgkCrt 200 1
+    --_testCmpInproc @PailSep @DgkCrt @DgkCrt 200 8
+    --_testCmpInproc @PailSep @DgkCrt @DgkCrt 200 16
+
+    --_testCmpInproc @PailSep @PailSep @DgkCrt 100 1
+    --_testCmpInproc @PailSep @PailSep @DgkCrt 100 8
+    --_testCmpInproc @PailSep @PailSep @DgkCrt 100 16
+
+    --putTextLn "DGK / GM"
+    --_testArgmaxInproc @PailSep @DgkCrt @GMSep 100 0
+    --_testArgmaxInproc @PailSep @DgkCrt @GMSep 100 1
+    --_testArgmaxInproc @PailSep @DgkCrt @GMSep 100 8
+    --_testArgmaxInproc @PailSep @DgkCrt @GMSep 100 16
+
+    --putTextLn "DGK / DGK"
+    --_testArgmaxInproc @PailSep @DgkCrt @DgkCrt 50 0
+    --_testArgmaxInproc @PailSep @DgkCrt @DgkCrt 50 1
+    --_testArgmaxInproc @PailSep @DgkCrt @DgkCrt 50 8
+    --_testArgmaxInproc @PailSep @DgkCrt @DgkCrt 50 16
+
     --_testArgmaxInproc 4
     --_testArgmaxInproc 8
     --_testArgmaxInproc 16

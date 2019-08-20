@@ -131,7 +131,9 @@ instance Pahe GMSep where
         when (length c1 > gmp_simdn || length c2 > gmp_simdn) $
             error "GM simd add: length mismatch"
 
-        let delta = case compare (length c1) (length c2) of
+        delta <-
+            mapM (copyBignum gmp_bn) $
+            case compare (length c1) (length c2) of
               EQ -> []
               LT -> drop (length c1) c2
               GT -> drop (length c2) c1
@@ -153,11 +155,12 @@ instance Pahe GMSep where
 
         -- Only common length values are considered useful, others are
         -- zeroes anyway.
-        fmap GMCiph $ forM (c `zip` scal) $ \(ci,s) ->
-            if (s `mod` 2) == 1 then pure ci else do
-                res <- toBignum gmp_bn 0
-                gmXor gmp_bn gmp_n ci ci res
-                pure res
+        fmap GMCiph $ forM (c `zip` scal) $ \(ci,s) -> do
+            res <- toBignumZero gmp_bn
+            if (s `mod` 2) == 1
+                then bnCopy gmp_bn gmp_bn res ci
+                else gmXor gmp_bn gmp_n ci ci res
+            pure res
 
     -- This function should "keep 0 as 0" and "make other values seem
     -- like random, but not zero". This is exactly ID for the GM.
@@ -194,6 +197,8 @@ instance Pahe GMSep where
         pure (GMCiph (take gmp_simdn permuted), GMCiph (drop gmp_simdn permuted))
     pahePermuteServ _ _ = pass
     pahePermuteHor _ _ _ = error "GM pahePermuteHor -- implement as in paillier"
+
+    paheFree (GMCiph xs) = mapM_ freeBignum xs
 
 ----------------------------------------------------------------------------
 -- Paillier
@@ -329,7 +334,9 @@ instance Pahe PailSep where
         when (length c1 > psp_simdn || length c2 > psp_simdn) $
             error "Paillier simd add: length mismatch"
 
-        let delta = case compare (length c1) (length c2) of
+        delta <-
+            mapM (copyBignum psp_bn) $
+            case compare (length c1) (length c2) of
               EQ -> []
               LT -> drop (length c1) c2
               GT -> drop (length c2) c1
@@ -398,6 +405,8 @@ instance Pahe PailSep where
                       (permsinv `zip` [0..])
         pure $ map PailCiph $ L.transpose rows
 
+    paheFree (PailCiph xs) = mapM_ freeBignum xs
+
 ----------------------------------------------------------------------------
 -- DGK with CRT packing
 ----------------------------------------------------------------------------
@@ -409,7 +418,6 @@ dgkEncRaw ::
        Int
     -> Word32
     -> Bignum
-    -> Integer
     -> Bignum
     -> [Integer]
     -> [Integer]
@@ -417,11 +425,11 @@ dgkEncRaw ::
     -> Bignum
     -> [Integer]
     -> IO Bignum
-dgkEncRaw simdn bn n nRaw u uFactsRaw uFactsTailProd g h ms = do
+dgkEncRaw simdn bn n u uFactsRaw uFactsTailProd g h ms = do
     when (length ms > simdn) $ error "DGK encrypt: length mismatch"
 
-    r0 <- randomRIO (0, nRaw - 1) -- `suchThat` (\x -> gcd x nRaw == 1)
-    r <- toBignum bn r0
+    -- This can be much smaller
+    r <- toBignum bn =<< randomRIO (2^(320::Integer), 2^(340::Integer) - 1)
     mPacked <- toBignum bn $ P.crt uFactsRaw uFactsTailProd ms -- (P.crtToBase uFactsRaw ms)
     c <- toBignum bn 0
 
@@ -500,17 +508,17 @@ instance Pahe DgkCrt where
         dcs_uFactsEs <- toBignumList dcs_bn dcs_simdn $ replicate (length dcs_uFactsRaw) 1
 
         dcs_zero <- DgkCiph (fromIntegral dcs_simdn) <$>
-            dgkEncRaw dcs_simdn dcs_bn dcs_n dcs_nRaw dcs_u dcs_uFactsRaw
+            dgkEncRaw dcs_simdn dcs_bn dcs_n dcs_u dcs_uFactsRaw
             dcs_uFactsRawTProds dcs_g dcs_h
             (replicate dcs_simdn 0)
 
         dcs_one <- DgkCiph (fromIntegral dcs_simdn) <$>
-            dgkEncRaw dcs_simdn dcs_bn dcs_n dcs_nRaw dcs_u dcs_uFactsRaw
+            dgkEncRaw dcs_simdn dcs_bn dcs_n dcs_u dcs_uFactsRaw
             dcs_uFactsRawTProds dcs_g dcs_h
             (replicate dcs_simdn 1)
 
         dcs_minOne <- DgkCiph (fromIntegral dcs_simdn) <$>
-            dgkEncRaw dcs_simdn dcs_bn dcs_n dcs_nRaw dcs_u dcs_uFactsRaw
+            dgkEncRaw dcs_simdn dcs_bn dcs_n dcs_u dcs_uFactsRaw
             dcs_uFactsRawTProds dcs_g dcs_h
             (replicate dcs_simdn (-1))
 
@@ -551,7 +559,7 @@ instance Pahe DgkCrt where
 
     paheEnc DgkCrtPk{..} m =
         DgkCiph (fromIntegral $ length m) <$>
-        dgkEncRaw dcp_simdn dcp_bn dcp_n dcp_nRaw dcp_u dcp_uFactsRaw
+        dgkEncRaw dcp_simdn dcp_bn dcp_n dcp_u dcp_uFactsRaw
         dcp_uFactsRawTProds dcp_g dcp_h m
 
     paheDec DgkCrtSk{..} (DgkCiph _ cPacked) = do
@@ -600,6 +608,7 @@ instance Pahe DgkCrt where
     pahePermute = error "DGK pahePermute -- implement using PermuteFold"
     pahePermuteServ = error "DGK pahePermute -- implement using PermuteFold"
     pahePermuteHor _ _ _ = error "DGK permuteHor -- implement as in DGK comp"
+    paheFree (DgkCiph _ x) = freeBignum x
 
 instance NFData (PaheCiph DgkCrt)
 instance NFData (PaheSk DgkCrt)

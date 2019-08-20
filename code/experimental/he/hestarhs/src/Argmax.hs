@@ -7,7 +7,6 @@ import Universum
 import Control.Concurrent.Async (concurrently)
 import qualified Data.ByteString as BS
 import Data.List (findIndex, (!!))
-import qualified Data.List.NonEmpty as NE
 import System.IO (hFlush, stdout)
 import System.Random (randomRIO)
 import System.ZMQ4
@@ -39,7 +38,6 @@ argmaxClient ::
     -> [PaheCiph sTop]
     -> IO (PaheCiph sTop, [Word64])
 argmaxClient sock pkTop pkDGK pkGM l r vals = do
-    let k = paheK pkTop
     let m = length vals
     perms <- replicateM r $ shuffle [0..m-1]
     let permsInv =
@@ -71,7 +69,11 @@ argmaxClient sock pkTop pkDGK pkGM l r vals = do
                 tmp1 <- paheSIMDMulScal pkTop biTopNeg ri
                 tmp2 <- paheSIMDMulScal pkTop biTop si
                 tmp3 <- paheSIMDAdd pkTop vi tmp1
-                paheSIMDSub pkTop tmp3 tmp2
+                res <- paheSIMDSub pkTop tmp3 tmp2
+                paheFree' [biTopNeg, tmp1, tmp2, tmp3]
+                pure res
+
+            paheFree' [aMasked, mMasked, biTop, vi]
 
             loop newMax (i+1)
 
@@ -114,7 +116,9 @@ argmaxServer sock skTop skDGK skGM l m r = do
                 -- bi * ai + (1-bi) * mi
                 tmp1 <- paheSIMDMulScal pkTop aMasked bi
                 tmp2 <- paheSIMDMulScal pkTop mMasked biNeg
-                paheSIMDAdd pkTop tmp1 tmp2
+                ret <- paheSIMDAdd pkTop tmp1 tmp2
+                paheFree' [tmp1,tmp2]
+                pure ret
 
             reencBi <- paheEnc pkTop bi
             zsendMulti sock =<< mapM (paheToBS pkTop) [reencBi,vi]
@@ -122,6 +126,10 @@ argmaxServer sock skTop skDGK skGM l m r = do
             let ixs' =
                     map (\j -> if bi !! j == 1 then i else ixs !! j) [0..k-1]
             log "Server loop end"
+
+
+            paheFree' [mMasked,aMasked,reencBi,vi]
+
             loop ixs' (i+1)
 
     indices <- loop (replicate k 0) 1
@@ -156,7 +164,6 @@ argmaxLog2Client sock pkTop pkDGK pkGM l m v1 v2 = do
 
     perm <- shuffle [0..2*k-1]
     log $ "Client: perm " <> show perm
-    let perminv j = fromMaybe (error "argmaxLogCli perminv") $ findIndex (==j) perm
     (v1Perm,v2Perm) <-
         measureTimeSingle' "perm" $ pahePermute sock pkTop v1 v2 perm
     log "Client: perm done"
@@ -170,12 +177,17 @@ argmaxLog2Client sock pkTop pkDGK pkGM l m v1 v2 = do
             -- we only care about first 2^(i-1) bits of this mask though
             p1mask <- replicateM curLen $ randomRIO (0, 2 ^ l - 1)
             p2mask <- replicateM curLen $ randomRIO (0, 2 ^ l - 1)
-            p1masked <- paheSIMDAdd pkTop p1 =<< paheEnc pkTop p1mask
-            p2masked <- paheSIMDAdd pkTop p2 =<< paheEnc pkTop p2mask
+            p1maskEnc <- paheEnc pkTop p1mask
+            p2maskEnc <- paheEnc pkTop p2mask
+            p1masked <- paheSIMDAdd pkTop p1 p1maskEnc
+            p2masked <- paheSIMDAdd pkTop p2 p2maskEnc
 
             pXMaskedBS <- mapM (paheToBS pkTop) [p1masked,p2masked]
             deltaBS <- paheToBS pkGM delta
             zsendMulti sock (deltaBS:pXMaskedBS)
+
+            paheFree' [p1maskEnc,p2maskEnc,p1masked,p2masked]
+            paheFree delta
 
             let p1maskNeg = map negate p1mask
             let p2maskNeg = map negate p2mask
@@ -197,13 +209,24 @@ argmaxLog2Client sock pkTop pkDGK pkGM l m v1 v2 = do
                   comb1 <- do
                       tmp1 <- paheSIMDMulScal pkTop delta1 $ getlow p1maskNeg
                       tmp2 <- paheSIMDMulScal pkTop delta1Neg $ getlow p2maskNeg
-                      paheSIMDAdd pkTop combM1 =<< paheSIMDAdd pkTop tmp1 tmp2
+                      tmp3 <- paheSIMDAdd pkTop tmp1 tmp2
+                      ret <- paheSIMDAdd pkTop combM1 tmp3
+                      paheFree' [tmp1,tmp2,tmp3]
+                      pure ret
 
                   comb2 <- do
                       tmp1 <- paheSIMDMulScal pkTop delta2 $ gethigh p1maskNeg
                       tmp2 <- paheSIMDMulScal pkTop delta2Neg $ gethigh p2maskNeg
-                      paheSIMDAdd pkTop combM2 =<< paheSIMDAdd pkTop tmp1 tmp2
+                      tmp3 <- paheSIMDAdd pkTop tmp1 tmp2
+                      ret <- paheSIMDAdd pkTop combM2 tmp3
+                      paheFree' [tmp1,tmp2,tmp3]
+                      pure ret
+
+                  paheFree' [delta1,delta2,combM1,combM2,delta1Neg, delta2Neg]
+
                   pure (comb1,comb2)
+
+
                 loop comb1 comb2 (i-1)
 
     loop v1Perm v2Perm m
@@ -293,143 +316,109 @@ argmaxLog2Server sock skTop skDGK skGM l m = do
 -- Linear argmax: 13.67
 -- Log argmax: 3.064
 
-_testArgmax :: Int ->Socket Dealer -> Socket Dealer -> IO ()
-_testArgmax k req rep = do
+_testArgmax ::
+    forall sTop sDGK sGM.
+    (Pahe sTop, Pahe sDGK, Pahe sGM) =>
+    Int -> Int -> Socket Dealer -> Socket Dealer -> IO ()
+_testArgmax tries k req rep = do
     putTextLn $ "testArgmax, k: " <> show k
 
     -- bit size of numbers we compare
     let l = 64
-    -- plaintext space size
-    --let margin = 2^(lambda + l)
-    let margin = 2^(l+3)
-
-    -- system used to carry long secureCompare results
-    skTop <- paheKeyGen @PailSep k (2^(lambda + l + 100))
-    --let skTop = skDGK
-    let pkTop = paheToPublic skTop
-
-    -- system used for DGK comparison
-    --skDGK <- paheKeyGen @PailSep k (2^(lambda+l))
-    skDGK <- paheKeyGen @DgkCrt k (5 + 3 * fromIntegral l)
-    let pkDGK = paheToPublic skDGK
-
-    -- system used to carry QR results
-    skGM <- paheKeyGen @DgkCrt k 5
-    --skGM <- paheKeyGen @DgkCrt k margin
-    --let skGM = skDGK
-    let pkGM = paheToPublic skGM
 
 
-    let testLogArgmax = do
+    let performLogArgmaxTest k = do
           -- Number of argmax input elements
           let m::Int = 2 ^ (log2 (fromIntegral k) - 1 :: Integer)
           --let m::Int = 20
           let mlog::Int = log2 (m-1)
 
-          v1 <- replicateM k $ randomRIO (0,2^l-1)
-          v2 <- replicateM k $ randomRIO (0,2^l-1)
-          let vals = v1 ++ v2
-          let expectedMax = foldr1 max vals
-          e1 <- paheEnc pkTop v1
-          e2 <- paheEnc pkTop v2
+          skTop <- paheKeyGen @sTop k (2^(lambda + l + 100))
+          let pkTop = paheToPublic skTop
+          skDGK <- paheKeyGen @sDGK k (5 + 3 * fromIntegral l)
+          let pkDGK = paheToPublic skDGK
+          skGM <- paheKeyGen @sGM k 5
+          let pkGM = paheToPublic skGM
 
-          putText ">."
-          hFlush stdout
-          ((ix,()),timing) <-
-              measureTimeRet $
-              concurrently
-              (argmaxLog2Client req pkTop pkDGK pkGM l mlog e1 e2)
-              (argmaxLog2Server rep skTop skDGK skGM l mlog)
-          putText "< "
-          hFlush stdout
 
-          unless (vals !! ix == expectedMax) $ do
-              putTextLn $ "vals: " <> show vals
-              error $ "logArgmax broken, ix: " <> show ix
-          pure timing
+          timings <- replicateM tries $ do
+            v1 <- replicateM k $ randomRIO (0,2^l-1)
+            v2 <- replicateM k $ randomRIO (0,2^l-1)
+            let vals = v1 ++ v2
+            let expectedMax = foldr1 max vals
+            e1 <- paheEnc pkTop v1
+            e2 <- paheEnc pkTop v2
 
---    let testPermFold = do
---          perm <- shuffle [0..2*k-1]
---          putTextLn $ "perm " <> show perm
---
---          f1 <- replicateM k $ randomRIO (0,2^l-1)
---          f2 <- replicateM k $ randomRIO (0,2^l-1)
---          putTextLn $ "Elements to shufle: " <> show (f1,f2)
---          f1Enc <- paheEnc pkTop f1
---          f2Enc <- paheEnc pkTop f2
---
---          ((v1,v2),()) <-
---              concurrently
---              (permuteFoldClient req pkTop l perm f1Enc f2Enc)
---              (permuteFoldServer rep skTop)
---
---          print =<< paheDec skTop v1
---          print =<< paheDec skTop v2
---
---    let testPerm = do
---          perm <- shuffle [0..k-1]
---          putTextLn $ "perm " <> show perm
---
---          f <- replicateM k $ randomRIO (0,2^l-1)
---          print f
---          fEnc <- paheEnc pkTop f
---
---          (valsPerm,()) <-
---              concurrently
---              (permuteClient req pkTop l perm fEnc)
---              (permuteServer rep skTop)
---
---          valsDec <- paheDec skTop valsPerm
---          print valsDec
-
-    let testArgmax m r = do
-            vals <- replicateM m $ replicateM r $ randomRIO (0,2^l-1)
-            --print vals
-            let expectedMaxs = foldr1 (\l1 l2 -> map (uncurry max) $ zip l1 l2) vals
-            encVals <- mapM (paheEnc pkTop) vals
-
-            putText ">."
-            hFlush stdout
-            (((maxes,indices),()),timing) <-
+            ((ix,()),timing) <-
                 measureTimeRet $
                 concurrently
-                (argmaxClient req pkTop pkDGK pkGM l r encVals)
-                (argmaxServer rep skTop skDGK skGM l m r)
+                (argmaxLog2Client req pkTop pkDGK pkGM l mlog e1 e2)
+                (argmaxLog2Server rep skTop skDGK skGM l mlog)
+            putText "." >> hFlush stdout
 
-            decMaxes <- paheDec skTop maxes
+            unless (vals !! ix == expectedMax) $ do
+                putTextLn $ "vals: " <> show vals
+                error $ "logArgmax broken, ix: " <> show ix
 
-            unless (expectedMaxs `isPrefixOf` decMaxes) $ do
-                print expectedMaxs
-                print decMaxes
-                print indices
-                error "Argmax failed"
+            paheFree' [e1,e2]
 
-            putText "< "
-            hFlush stdout
             pure timing
 
-    let performArgmaxTest m r = do
-           timings <- replicateM 50 $ testArgmax m r
-           --timings <- replicateM 10 $ testArgmax 32 1
-           putTextLn $ "Argmax with m,r " <> show (m,r) <> ", time: " <>
-               show (average timings) <> "ms, per argmax: " <> show (average timings `div` fromIntegral r)
+          putTextLn $ "\nLogArgmax with m" <> show (2 * k) <>
+              ": " <> show (average timings) <> "ms"
 
-    let performLogArgmaxTest = do
-           timings <- replicateM 100 $ testLogArgmax
-           --timings <- replicateM 10 $ testArgmax 32 1
-           putTextLn $ "LogArgmax time: " <> show (average timings) <> "ms"
+    if k == 0 then do
+        performLogArgmaxTest 4
+        performLogArgmaxTest 8
+        performLogArgmaxTest 16
+    else do
 
+      skTop <- paheKeyGen @sTop k (2^(lambda + l + 100))
+      let pkTop = paheToPublic skTop
+      skDGK <- paheKeyGen @sDGK k (5 + 3 * fromIntegral l)
+      let pkDGK = paheToPublic skDGK
+      skGM <- paheKeyGen @sGM k 5
+      let pkGM = paheToPublic skGM
 
-    performLogArgmaxTest
-    --performArgmaxTest 8 1
-    --performArgmaxTest 16 1
-    --performArgmaxTest 32 1
+      let testArgmax m r = do
+              vals <- replicateM m $ replicateM r $ randomRIO (0,2^l-1)
+              --print vals
+              let expectedMaxs = foldr1 (\l1 l2 -> map (uncurry max) $ zip l1 l2) vals
+              encVals <- mapM (paheEnc pkTop) vals
 
-    --when (k /= 1) $ do
-    --  performArgmaxTest 8 k
-    --  performArgmaxTest 16 k
-    --  performArgmaxTest 32 k
+              (((maxes,indices),()),timing) <-
+                  measureTimeRet $
+                  concurrently
+                  (argmaxClient req pkTop pkDGK pkGM l r encVals)
+                  (argmaxServer rep skTop skDGK skGM l m r)
+              putText "." >> hFlush stdout
 
+              decMaxes <- paheDec skTop maxes
+
+              unless (expectedMaxs `isPrefixOf` decMaxes) $ do
+                  print expectedMaxs
+                  print decMaxes
+                  print indices
+                  error "Argmax failed"
+
+              paheFree' $ maxes : encVals
+
+              pure timing
+
+      let performArgmaxTest m r = do
+             timings <- replicateM tries $ testArgmax m r
+             --timings <- replicateM 10 $ testArgmax 32 1
+             putTextLn $ "\nArgmax with m,r " <> show (m,r) <> ", time: " <>
+                 show (average timings) <> "ms, per argmax: " <> show (average timings `div` fromIntegral r)
+
+      performArgmaxTest 8 1
+      performArgmaxTest 16 1
+      performArgmaxTest 32 1
+
+      when (k /= 1) $ do
+        performArgmaxTest 8 k
+        performArgmaxTest 16 k
+        performArgmaxTest 32 k
 
 --    --testLogArgmax
 --    let average xs = foldr1 (+) xs `div` (fromIntegral $ length xs)
@@ -441,11 +430,14 @@ _testArgmax k req rep = do
     --testPerm
     --testFold
 
-_testArgmaxInproc :: Int -> IO ()
-_testArgmaxInproc k =
+_testArgmaxInproc ::
+    forall sTop sDGK sGM.
+    (Pahe sTop, Pahe sDGK, Pahe sGM) =>
+    Int -> Int -> IO ()
+_testArgmaxInproc tries k =
     withContext $ \ctx ->
     withSocket ctx Dealer $ \req ->
     withSocket ctx Dealer $ \rep -> do
        bind rep "inproc://argmax"
        connect req "inproc://argmax"
-       _testArgmax k req rep
+       _testArgmax @sTop @sDGK @sGM tries k req rep
