@@ -1499,7 +1499,7 @@ let xcube_minus_x x r =
 
 
 
-val lemma_modular_multiplication_p256_2: a: nat{a < prime} -> b: nat{b < prime} -> 
+val lemma_modular_multiplication_p256_2: a: nat{a < prime256} -> b: nat{b < prime256} -> 
   Lemma 
   (a * pow2 256 % prime = b * pow2 256 % prime  <==> a == b)
 
@@ -1512,7 +1512,7 @@ gcd(2^256, p) = 1*)
 let lemma_modular_multiplication_p256_2 a b = admit()
 
 
-val lemma_modular_multiplication_p256_2_d: a: nat{a < prime} -> b: nat {b < prime} -> 
+val lemma_modular_multiplication_p256_2_d: a: nat{a < prime256} -> b: nat {b < prime256} -> 
   Lemma 
     (toDomain_ a = toDomain_ b <==> a == b)
 

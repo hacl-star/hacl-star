@@ -52,8 +52,9 @@ let nat_prime = (n: nat {n < prime})
 
 let ith_bit (k:lbytes 32) (i:nat{i < 256}) : (t: uint64 {uint_v t == 0 \/ uint_v t == 1}) =
   let q = i / 8 in let r = size (i % 8) in
-    admit();
-  to_u64 ((index k q >>. r) &. u8 1)
+  let res = to_u64 ((index k q >>. r) &. u8 1) in 
+  logand_le ((index k q >>. r)) (u8 1);
+  res
 
 let ( *% ) a b = (a * b) % prime
 
