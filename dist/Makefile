@@ -95,7 +95,7 @@ ifneq (,$(wildcard lib_gen))
 .PRECIOUS: %.cmx
 
 OCAMLOPT=ocamlfind opt -package ctypes,ctypes.foreign,ctypes.stubs -linkpkg -I lib
-OCAMLDEP=ocamlfind dep -I lib
+OCAMLDEP=ocamlfind dep -I lib -slash
 
 CFLAGS += -I "$(shell ocamlfind query ctypes)" -I "$(shell ocamlfind c -where)"
 
