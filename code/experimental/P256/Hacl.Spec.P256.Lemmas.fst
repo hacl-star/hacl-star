@@ -55,7 +55,7 @@ let lemma_enough_to_carry a b =
   else
   ()
 
-#reset-options "--max_fuel 0 --z3rlimit 100" 
+#reset-options " --z3rlimit 100" 
 
 
 noextract   
@@ -99,11 +99,6 @@ let modp_inv2 (x: nat) : Tot (r: nat {r < prime256}) =
   modp_inv2_prime x prime256
 
 
-
-
-
-
-
 noextract
 val modulo_distributivity_mult: a: int -> b: int -> c: pos -> Lemma ((a * b) % c = ((a % c) * (b % c)) % c)
 
@@ -111,7 +106,14 @@ let modulo_distributivity_mult a b c =
   lemma_mod_mul_distr_l a b c;
   lemma_mod_mul_distr_r (a%c) b c
 
-assume val power_one: a: int -> Lemma (pow 1 a == 1)
+val power_one: a: nat -> Lemma (pow 1 a == 1) 
+
+let rec power_one a = 
+  match a with 
+  | 0 -> assert_norm (pow 1 0 == 1)
+  | _ -> power_one (a - 1);
+    assert(pow 1 (a - 1) == 1)
+
 
 noextract
 val pow_plus: a: nat -> b: nat -> c: nat -> Lemma (ensures (pow a b * pow a c = pow a (b +c)))
@@ -136,7 +138,9 @@ let rec power_distributivity a b c =
      lemma_mod_twice a c;
      modulo_distributivity_mult (pow (a % c) (b -1)) (a % c) c
 
+val lemma_power_one: a: nat -> Lemma (pow a 1 == a)
 
+let lemma_power_one a = ()
 
 noextract
 val power_mult: a: nat -> b: nat -> c: nat -> Lemma (pow (pow a b) c == pow a (b * c))

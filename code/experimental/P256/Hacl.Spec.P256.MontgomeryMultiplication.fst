@@ -606,18 +606,20 @@ val fsquarePowN: n: size_t -> a: felem -> Stack unit
 
 let fsquarePowN n a = 
   let h0 = ST.get() in  
-  lemmaFromDomainToDomain (as_nat h0 a);
+  lemmaFromDomainToDomain (as_nat h0 a); 
+  assert_norm (pow2 0 == 1); 
   let inv (h0: HyperStack.mem) (h1: HyperStack.mem) (i: nat) : Type0 =
     let k_before_d = as_nat h0 a in let k = fromDomain_ k_before_d in 
     as_nat h1 a = toDomain_ (pow k (pow2 i)) /\ 
     as_nat h1 a < prime /\ live h1 a /\ modifies1 a h0 h1 in 
+  lemma_power_one (fromDomain_ (as_nat h0 a));
   for (size 0) n (inv h0) (fun x -> 
     let h0_ = ST.get() in 
      montgomery_multiplication_buffer a a a; 
      let k = fromDomain_ (as_nat h0 a) in  
-     inDomain_mod_is_not_mod (fromDomain_ (as_nat h0_ a) * fromDomain_ (as_nat h0_ a));
+     inDomain_mod_is_not_mod (fromDomain_ (as_nat h0_ a) * fromDomain_ (as_nat h0_ a)); 
      lemmaFromDomainToDomainModuloPrime (let k = fromDomain_ (as_nat h0 a) in pow k (pow2 (v x)));
-     modulo_distributivity_mult (pow k (pow2 (v x))) (pow k (pow2 (v x))) prime;
+     modulo_distributivity_mult (pow k (pow2 (v x))) (pow k (pow2 (v x))) prime; 
      pow_plus k  (pow2 (v x)) (pow2 (v x )); 
      pow2_double_sum (v x);
      inDomain_mod_is_not_mod (pow k (pow2 (v x + 1)))
@@ -749,11 +751,13 @@ let big_power a b c d e =
   pow_plus a d e;
   pow_plus a (b + c) (d + e)
 
+val lemma_mul_nat: a: nat -> b: nat -> Lemma (a * b >= 0)
+
+let lemma_mul_nat a b = ()
 
 #reset-options "--z3refresh --z3rlimit 200"
 let exponent a result tempBuffer = 
   let h0 = ST.get () in 
-admit();
   let buffer_norm_1 = Lib.Buffer.sub  tempBuffer (size 0) (size 8) in 
     let buffer_result1 = Lib.Buffer.sub tempBuffer (size 4) (size 4) in 
   let buffer_result2 = Lib.Buffer.sub tempBuffer (size 8) (size 4) in 
@@ -773,12 +777,18 @@ admit();
     let h4 = ST.get() in 
   copy result buffer_result1; 
     let h5 = ST.get() in 
+  assert_norm ((pow2 32 - 1) * pow2 224 >= 0);
+  assert_norm (pow2 192 >= 0);
+  assert_norm ((pow2 94 - 1) * pow2 2 >= 0);
+
   
   let k = fromDomain_ (as_nat h0 a) in 
   let power1 = pow k ((pow2 32 - 1) * pow2 224) in 
   let power2 = pow k (pow2 192) in 
   let power3 = pow k ((pow2 94 - 1) * pow2 2) in 
   let power4 = pow k 1 in 
+
+  lemma_mul_nat power1 power2;
 
   lemma_inDomainModulo power1 power2;
   lemma_inDomainModulo (power1 * power2) power3;
