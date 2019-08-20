@@ -233,13 +233,7 @@ let cmovznz4 cin x y r =
 val reduction_prime_2prime_impl: x: felem -> result: felem -> 
   Stack unit
     (requires fun h -> live h x /\ live h result /\ eq_or_disjoint x result)
-    (ensures fun h0 _ h1 -> modifies1 result h0 h1 /\ 
-      (
-  let r = as_seq h1 result in 
-  let x = as_seq h0 x in 
-  felem_seq_as_nat r == felem_seq_as_nat x % prime256
-      )
-    )
+    (ensures fun h0 _ h1 -> modifies1 result h0 h1 /\ as_nat h1 result == as_nat h0 x % prime256)
 
 #reset-options "--z3refresh --z3rlimit 300"
 

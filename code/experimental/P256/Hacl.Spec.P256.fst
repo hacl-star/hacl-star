@@ -91,7 +91,6 @@ let _norm (p:point_nat): (point_nat) =
   let z3 = if isPointAtInfinity p then 0 else 1 in 
   assert(x3 == (x * (pow (z * z) (prime256 -2) % prime256) % prime256));
   assert(y3 == (y * (pow (z * z * z) (prime256 - 2) % prime256) % prime256));
-  assert(z3 == 1);
   (x3, y3, z3)
 
 
