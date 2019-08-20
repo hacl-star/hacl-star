@@ -119,7 +119,7 @@ val point_add: p: point -> q: point -> result: point -> tempBuffer: lbuffer uint
 
 
 val isPointAtInfinityPrivate: p: point -> Stack uint64
-  (requires fun h -> live h p)
+  (requires fun h -> live h p /\ as_nat h (gsub p (size 8) (size 4)) < prime)
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\          
     (
       (uint_v r == 0 \/ uint_v r == maxint U64) /\ 

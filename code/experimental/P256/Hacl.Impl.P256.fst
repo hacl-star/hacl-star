@@ -682,10 +682,19 @@ let uploadOneImpl f =
   upd f (size 2) (u64 0);
   upd f (size 3) (u64 0)
 
-val lemma_pointAtInfInDomain: x: nat -> y: nat -> z: nat -> 
-  Lemma (isPointAtInfinity (x, y, z)== isPointAtInfinity ((fromDomain_ x), (fromDomain_ y), (fromDomain_ z)))
+val lemma_pointAtInfInDomain: x: nat -> y: nat -> z: nat {z < prime256} -> 
+  Lemma (isPointAtInfinity (x, y, z) == isPointAtInfinity ((fromDomain_ x), (fromDomain_ y), (fromDomain_ z)))
 
-let lemma_pointAtInfInDomain x y z = admit()
+let lemma_pointAtInfInDomain x y z =
+  assert(if isPointAtInfinity (x, y, z) then z == 0 else z <> 0);
+  assert_norm (modp_inv2 (pow2 256) % prime256 <> 0);
+  lemmaFromDomain z;
+  assert(fromDomain_ z == (z * modp_inv2 (pow2 256) % prime256));
+  assert_norm((0 * modp_inv2 (pow2 256)) % prime256 == 0);
+  assert(if z = 0 then (z * modp_inv2 (pow2 256)) % prime256  == 0 else 
+    begin   lemma_multiplication_not_mod_prime z (modp_inv2 (pow2 256)); 
+    fromDomain_ z <> 0 end)
+
 
 let isPointAtInfinityPrivate p =  
     let h0 = ST.get() in 
@@ -710,8 +719,9 @@ let isPointAtInfinityPrivate p =
 
 inline_for_extraction noextract
 val normalisation_update: z2x: felem -> z3y: felem ->p: point ->  resultPoint: point -> Stack unit 
-  (requires fun h -> live h z2x /\ live h z3y /\ live h resultPoint /\ 
+  (requires fun h -> live h z2x /\ live h z3y /\ live h resultPoint /\ live h p /\ 
     as_nat h z2x < prime256 /\ as_nat h z3y < prime /\
+
     disjoint z2x z3y /\ disjoint z2x resultPoint /\ disjoint z3y resultPoint)
   (ensures fun h0 _ h1 -> modifies (loc resultPoint) h0 h1 /\
     (
@@ -856,7 +866,16 @@ val montgomery_ladder_step1: p: point -> q: point ->tempBuffer: lbuffer uint64 (
     (
       let p1 = as_seq h1 p in let q1 = as_seq h1 q in 
       let pN, qN = Hacl.Spec.P256.Ladder.montgomery_ladder_step1_seq (as_seq h0 p) (as_seq h0 q) in 
-      pN == p1 /\ qN == q1 ) 
+      pN == p1 /\ qN == q1 /\
+
+    as_nat h1 (gsub p (size 0) (size 4)) < prime /\ 
+    as_nat h1 (gsub p (size 4) (size 4)) < prime /\
+    as_nat h1 (gsub p (size 8) (size 4)) < prime /\
+	
+    as_nat h1 (gsub q (size 0) (size 4)) < prime /\  
+    as_nat h1 (gsub q (size 4) (size 4)) < prime /\
+    as_nat h1 (gsub q (size 8) (size 4)) < prime
+      ) 
     )
 
 
@@ -891,7 +910,7 @@ val lemma_to_point_buffer: h: mem -> b: lbuffer uint64 (size 12) {
 let lemma_to_point_buffer h b = ()
 
 
-#reset-options "--z3refresh --z3rlimit 100" 
+
 inline_for_extraction noextract 
 val montgomery_ladder_step: #buf_type: buftype-> 
   p: point -> q: point ->tempBuffer: lbuffer uint64 (size 88) -> 
@@ -941,47 +960,26 @@ val lemma_test: h: mem -> r0: point ->
 
 let lemma_test h r0 = ()
 
-
+#reset-options "--z3refresh --z3rlimit 200" 
 let montgomery_ladder_step #buf_type r0 r1 tempBuffer scalar i = 
     let h0 = ST.get() in 
-    
   let bit0 = (size 255) -. i in 
   let bit = scalar_bit scalar bit0 in 
 
   cswap bit r0 r1; 
-    let h1 = ST.get () in 
   montgomery_ladder_step1 r0 r1 tempBuffer; 
-   let h2 = ST.get() in 
   cswap bit r0 r1; 
   let h3 = ST.get() in 
-
   lemma_to_point_buffer h0 r0;
   lemma_to_point_buffer h0 r1;
-  lemma_step i; 
-
+  lemma_step i;
+ 
   assert(let pN, qN = Hacl.Spec.P256.Ladder.montgomery_ladder_step_swap (as_seq h0 r0) (as_seq h0 r1) (as_seq h0 scalar) (uint_v i) in Lib.Sequence.equal pN (as_seq h3 r0));
+  lemma_test h3 r0;  
+  assert(let pN, qN = 
+     Hacl.Spec.P256.Ladder.montgomery_ladder_step_swap (as_seq h0 r0) (as_seq h0 r1) (as_seq h0 scalar) (uint_v i) in Lib.Sequence.equal qN (as_seq h3 r1));
 
   assert(
-    let x = Lib.Sequence.sub (as_seq h3 r0) 0 4 in 
-    let y = Lib.Sequence.sub (as_seq h3 r0) 4 4 in
-    let z = Lib.Sequence.sub (as_seq h3 r0) 8 4 in 
-    felem_seq_as_nat x < prime /\ felem_seq_as_nat y < prime /\ felem_seq_as_nat z < prime
- );
-
-   lemma_test h3 r0; 
-   
-   assert(let pN, qN = 
-     Hacl.Spec.P256.Ladder.montgomery_ladder_step_swap (as_seq h0 r0) (as_seq h0 r1) (as_seq h0 scalar) (uint_v i) in Lib.Sequence.equal qN (as_seq h3 r1));
-   assert(
-       let x = Lib.Sequence.sub (as_seq h3 r1) 0 4 in 
-       let y = Lib.Sequence.sub (as_seq h3 r1) 4 4 in
-       let z = Lib.Sequence.sub (as_seq h3 r1) 8 4 in 
-      felem_seq_as_nat x < prime /\ felem_seq_as_nat y < prime /\ felem_seq_as_nat z < prime
- );
-
-   lemma_test h3 r1; 
-
-   assert(
       as_nat h3 (gsub r0 (size 0) (size 4)) < prime /\ 
       as_nat h3 (gsub r0 (size 4) (size 4)) < prime /\
       as_nat h3 (gsub r0 (size 8) (size 4)) < prime /\
@@ -989,13 +987,8 @@ let montgomery_ladder_step #buf_type r0 r1 tempBuffer scalar i =
       as_nat h3 (gsub r1 (size 0) (size 4)) < prime /\  
       as_nat h3 (gsub r1 (size 4) (size 4)) < prime /\
       as_nat h3 (gsub r1 (size 8) (size 4)) < prime);
-  modifies2_is_modifies3 r0 r1 tempBuffer h0 h1;
-  modifies2_is_modifies3 r0 r1 tempBuffer h2 h3;
-  assert(modifies3 r0 r1 tempBuffer h0 h1);
-  assert(modifies3 r0 r1 tempBuffer h1 h2);
-  assert(modifies3 r0 r1 tempBuffer h2 h3);
-  assert(modifies3 r0 r1 tempBuffer h0 h2);
-  assert(modifies3 r0 r1 tempBuffer h0 h3) 
+
+  admit()
 
 
 inline_for_extraction noextract
@@ -1134,6 +1127,8 @@ let lemma_point_to_domain h0 h1 p result =
   assert(x3 == fromDomain_ x /\ y3 == fromDomain_ y /\ z3 == fromDomain_ z);
   assert(x3 == fromDomain_ (toDomain_ x0) /\ y3 == fromDomain_ (toDomain_ y0) /\ z3 == fromDomain_ (toDomain_ z0))
 
+#reset-options "--z3refresh --z3rlimit 300" 
+
 val lemma_pif_to_domain: h: mem ->  p: point -> Lemma
   (requires (point_x_as_nat h p == 0 /\ point_y_as_nat h p == 0 /\ point_z_as_nat h p == 0))
   (ensures (fromDomainPoint (point_prime_to_coordinates (as_seq h p)) == point_prime_to_coordinates (as_seq h p)))
@@ -1146,7 +1141,26 @@ let lemma_pif_to_domain h p =
   lemmaFromDomain x;
   lemmaFromDomain y;
   lemmaFromDomain z;
-  admit()
+  assert_norm (modp_inv2 (pow2 256) % prime256 = 0);
+  assert_norm (modp_inv2 (pow2 256) > 0);
+  lemma_multiplication_not_mod_prime x (modp_inv2 (pow2 256)); 
+  assert_norm (0 < prime256);
+  assert_norm (modp_inv2 (pow2 256) > 0);
+
+  assert((x * modp_inv2 (pow2 256)) % prime256 == 0 <==> x == 0); admit();
+  assert(x * modp_inv2 (pow2 256) % prime256 == 0);
+  assert(fromDomain_ x == 0);
+  
+  lemma_multiplication_not_mod_prime y (modp_inv2 (pow2 256));
+  lemma_multiplication_not_mod_prime z (modp_inv2 (pow2 256));
+  
+  assert(y * modp_inv2 (pow2 256) % prime256 == 0 <==> y == 0);
+  assert(y * modp_inv2 (pow2 256) % prime256 == 0);
+  assert(fromDomain_ y == 0);
+
+  assert(z * modp_inv2 (pow2 256) % prime256 == 0 <==> z == 0);
+  assert(z * modp_inv2 (pow2 256) % prime256 == 0);
+  assert(fromDomain_ z == 0)
 
 
 val lemma_coord: h3: mem -> q: point -> Lemma (
