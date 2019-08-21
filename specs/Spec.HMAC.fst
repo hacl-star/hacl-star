@@ -17,27 +17,23 @@ let xor (x: uint8) (v: bytes): Tot (lbytes (S.length v)) =
 
 #push-options "--max_fuel 1"
 
-let rec xor_lemma (x: uint8) (v: bytes{S.length v <= max_size_t}) : Lemma
-  (ensures (xor x v == Spec.Loops.seq_map2 logxor (S.create (S.length v) x) v))
-  (decreases (S.length v)) =
-  let l = S.length v in
+let rec xor_lemma (x: uint8) (v: bytes) : Lemma
+  (ensures (xor x v == Spec.Loops.seq_map2 logxor (Seq.create (Seq.length v) x) v))
+  (decreases (Seq.length v)) =
+  let l = Seq.length v in
   if l = 0 then () else (
-    let xs  = S.create #uint8 l x in
-    let xs' = S.create (l-1) x in
-    S.eq_intro (S.sub xs 1 (l - 1)) xs';
-    xor_lemma x (S.sub #uint8 #l v 1 (l - 1)))
+    let xs  = Seq.create l x in
+    let xs' = Seq.create (l-1) x in
+    Seq.lemma_eq_intro (Seq.slice xs 1 l) xs';
+    xor_lemma x (Seq.slice v 1 l))
 
 #pop-options
 #push-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 70"
 
 let hmac a key data =
   let k = wrap a key in
-  assert_norm(max_size_t + block_length a < pow2 61);
-  assert_norm(max_size_t + block_length a < pow2 125);
-  let h1 =
-    Spec.Hash.hash a (S.concat #uint8 #(S.length k) #(S.length data) (xor (u8 0x36) k) data)
-  in
+  let h1 = Spec.Hash.hash a (Seq.append (xor (u8 0x36) k) data) in
   assert_norm (pow2 32 < pow2 61);
   assert_norm (pow2 32 < pow2 125);
-  let h2 = Spec.Hash.hash a (S.concat #uint8 #(S.length k) #(S.length h1) (xor (u8 0x5c) k) h1) in
+  let h2 = Spec.Hash.hash a (Seq.append (xor (u8 0x5c) k) h1) in
   h2
