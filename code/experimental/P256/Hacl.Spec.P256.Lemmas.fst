@@ -10,9 +10,17 @@ open FStar.Mul
 open Hacl.Spec.P256.Definitions
 
 
+#reset-options " --z3rlimit 100" 
+
 noextract
 val log_and: a: uint64 -> b: uint64{uint_v b == 0 \/ uint_v b == pow2 64 - 1} -> 
 Lemma (if uint_v b = 0 then uint_v (logand a b) == 0 else uint_v (logand a b) == uint_v a)
+
+let log_and a b = 
+  logand_lemma b a;
+  logand_spec a b;
+  logand_spec b a;
+  UInt.logand_commutative #(bits U64) (v a) (v b)
 
 noextract
 val log_or: a: uint64 -> b: uint64 {uint_v b == 0 \/ uint_v a == 0} -> 
@@ -22,7 +30,6 @@ noextract
 val log_not_lemma: b: uint64{uint_v b == 0 \/ uint_v b == pow2 64 - 1} -> 
 Lemma(if uint_v b = 0 then uint_v (lognot (b)) == pow2 64 -1 else uint_v (lognot b) == 0)
 
-let log_and a b = admit()
 let log_or a b = admit()
 let log_not_lemma a = admit()
 
