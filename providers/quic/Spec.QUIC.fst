@@ -1155,6 +1155,23 @@ let header_encrypt a hpk h pn_len npn c =
   let r = xor_inplace r pnmask pn_offset in
   r
 
+
+
+let lemma_header_encrypt_type_short a hpk h pn_len npn c : Lemma
+  (requires (
+    let packet = header_encrypt a hpk h pn_len npn c in
+    U8.(S.index packet 0 <^ 128uy)))
+  (ensures (Short? h)) =
+  admit()
+
+let lemma_header_encrypt_type_long a hpk h pn_len npn c : Lemma
+  (requires (
+    let packet = header_encrypt a hpk h pn_len npn c in
+    U8.(S.index packet 0 >=^ 128uy)))
+  (ensures (Long? h)) =
+  admit()
+
+
 let header_decrypt a hpk cid_len packet =
   let open FStar.Math.Lemmas in
   let f = S.index packet 0 in
