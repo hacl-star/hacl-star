@@ -1006,28 +1006,116 @@ let lemma_header_parsing_safe b1 b2 cl =
 
 
 
-
-let rec xor_inplace (b1 b2:bytes) (pos:nat)
-  : Pure bytes
+// application of a byte operation at a subposition
+let rec bitwise_op (f:byte->byte->byte) (b1 b2:bytes) (pos:nat) : Pure bytes
   (requires S.length b2 + pos <= S.length b1)
   (ensures fun b -> S.length b == S.length b1)
   (decreases (S.length b2)) =
   if b2 = S.empty then b1
   else
     let _ = S.lemma_empty b2 in
-    let x = S.index b2 0 `U8.logxor` S.index b1 pos in
-    xor_inplace (S.upd b1 pos x) (S.slice b2 1 (S.length b2)) (pos + 1)
+    let x = f (S.index b1 pos) (S.index b2 0) in
+    bitwise_op f (S.upd b1 pos x) (S.slice b2 1 (S.length b2)) (pos + 1)
+
+
+// three lemmas to recover indexes after application of bitwise_op
+let rec bitwise_index1 (f:byte->byte->byte) (b1 b2:bytes) (i pos:nat) : Lemma
+  (requires (S.length b2 + pos <= S.length b1 /\ i < pos))
+  (ensures (S.index (bitwise_op f b1 b2 pos) i = S.index b1 i))
+  (decreases (S.length b2)) =
+  if b2 = S.empty then ()
+  else begin
+    S.lemma_empty b2;
+    let x = f (S.index b1 pos) (S.index b2 0) in
+    assert (bitwise_op f b1 b2 pos = bitwise_op f (S.upd b1 pos x) (S.slice b2 1 (S.length b2)) (pos + 1));
+    S.lemma_index_upd2 b1 pos x i;
+    assert (S.index (S.upd b1 pos x) i = S.index b1 i);
+    bitwise_index1 f (S.upd b1 pos x) (S.slice b2 1 (S.length b2)) i (pos + 1)
+  end
+
+
+let rec bitwise_index2 (f:byte->byte->byte) (b1 b2:bytes) (i pos:nat) : Lemma
+  (requires (S.length b2 + pos <= S.length b1 /\ pos <= i /\ i < S.length b2 + pos))
+  (ensures (S.index (bitwise_op f b1 b2 pos) i = f (S.index b1 i) (S.index b2 (i-pos))))
+  (decreases (S.length b2)) =
+  if S.empty = b2 then ()
+  else begin
+    let x = f (S.index b1 pos) (S.index b2 0) in
+    assert (bitwise_op f b1 b2 pos = bitwise_op f (S.upd b1 pos x) (S.slice b2 1 (S.length b2)) (pos+1));
+    if i = pos then begin
+      bitwise_index1 f (S.upd b1 pos x) (S.slice b2 1 (S.length b2)) pos (pos+1);
+      S.lemma_index_upd1 b1 pos x
+    end
+    else
+      bitwise_index2 f (S.upd b1 pos x) (S.slice b2 1 (S.length b2)) i (pos+1)
+  end
+
+
+let rec bitwise_index3 (f:byte->byte->byte) (b1 b2:bytes) (i pos:nat) : Lemma
+  (requires (S.length b2 + pos <= i /\ i < S.length b1))
+  (ensures (S.index (bitwise_op f b1 b2 pos) i = S.index b1 i))
+  (decreases (S.length b2)) =
+  if S.empty = b2 then ()
+  else begin
+    S.lemma_empty b2;
+    let x = f (S.index b1 pos) (S.index b2 0) in
+    bitwise_index3 f (S.upd b1 pos x) (S.slice b2 1 (S.length b2)) i (pos+1)
+  end
+
+
+
+
+
+// application: byte-wise xor
+let rec xor_inplace (b1 b2:bytes) (pos:nat)
+  : Pure bytes
+  (requires S.length b2 + pos <= S.length b1)
+  (ensures fun b -> S.length b == S.length b1)
+  (decreases (S.length b2)) =
+  bitwise_op U8.logxor b1 b2 pos
+
+
+// proof of involution of the operator (uses extensionality for the
+// byte-wise variant)
+let xor_involutive (b1 b2:byte) : Lemma
+  (requires True)
+  (ensures (b1 `U8.logxor` b2) `U8.logxor` b2 = b1) =
+  FStar.UInt.logxor_associative (U8.v b1) (U8.v b2) (U8.v b2);
+  FStar.UInt.logxor_self (U8.v b2);
+  FStar.UInt.logxor_commutative (FStar.UInt.zero 8) (U8.v b1);
+  FStar.UInt.logxor_lemma_1 (U8.v b1)
+
+
+let rec xor_inplace_involutive (b1 b2:bytes) (pos:nat) : Lemma
+  (requires S.length b2 + pos <= S.length b1)
+  (ensures S.equal (xor_inplace (xor_inplace b1 b2 pos) b2 pos) b1)
+  (decreases (S.length b2)) =
+  let xor = xor_inplace (xor_inplace b1 b2 pos) b2 pos in
+  let step (i:nat{i < S.length b1}) : Lemma (S.index xor i = S.index b1 i) =
+    if i < pos then begin
+      bitwise_index1 U8.logxor b1 b2 i pos;
+      bitwise_index1 U8.logxor (xor_inplace b1 b2 pos) b2 i pos
+    end else if i >= pos+S.length b2 then begin
+      bitwise_index3 U8.logxor b1 b2 i pos;
+      bitwise_index3 U8.logxor (xor_inplace b1 b2 pos) b2 i pos
+    end else begin
+      bitwise_index2 U8.logxor b1 b2 i pos;
+      bitwise_index2 U8.logxor (xor_inplace b1 b2 pos) b2 i pos;
+      xor_involutive  (S.index b1 i) (S.index b2 (i-pos))
+    end in
+
+  FStar.Classical.forall_intro step
+
+
 
 let rec and_inplace (b1 b2:bytes) (pos:nat)
   : Pure bytes
   (requires S.length b2 + pos <= S.length b1)
   (ensures fun b -> S.length b == S.length b1)
   (decreases (S.length b2)) =
-  if b2 = S.empty then b1
-  else
-    let _ = S.lemma_empty b2 in
-    let x = S.index b2 0 `U8.logand` S.index b1 pos in
-    and_inplace (S.upd b1 pos x) (S.slice b2 1 (S.length b2)) (pos + 1)
+  bitwise_op U8.logand b1 b2 pos
+
+
 
 let calg_of_ae (a:ea) = match a with
 | AEAD.AES128_GCM -> C16.AES128
@@ -1084,8 +1172,8 @@ let header_decrypt a hpk cid_len packet =
       (if l_offset >= S.length packet then None else
       match parse_varint (S.slice packet l_offset (S.length packet)) with
       | None -> None
-      | Some (l, vls, _) ->
-        let offset = l_offset + vls + 4 in
+      | Some (l, _) ->
+        let offset = l_offset + vlen l + 4 in
         if offset + 16 <= S.length packet then Some offset else None)
     in
   match sample_offset with
@@ -1094,7 +1182,7 @@ let header_decrypt a hpk cid_len packet =
     let sample = S.slice packet so (so + 16) in
     let mask = C16.block (calg_of_ae a) hpk sample in
     let sflags = if is_short then 0x1fuy else 0x0fuy in
-    let fmask = S.create 1 U8.(S.index mask 0 `logand` sflags) in    
+    let fmask = S.create 1 U8.(S.index mask 0 `logand` sflags) in
     let packet' = xor_inplace packet fmask 0 in
     let flags = U8.v (S.index packet' 0) in
     let pn_len : nat2 = modulo_range_lemma flags 4; flags % 4 in
@@ -1103,7 +1191,26 @@ let header_decrypt a hpk cid_len packet =
     let packet'' = xor_inplace packet' pnmask pn_offset in
     parse_header packet'' cid_len
 
-let lemma_header_encryption_correct a k h pn_len npn c = admit()
+
+
+let lemma_header_encryption_correct a k h pn_len npn c =
+  let packet = header_encrypt a k h pn_len npn c in
+  let f = S.index packet 0 in
+  let is_short = U8.(f <^ 128uy) in
+
+  let sample_offset : option (n:nat{n + 16 <= S.length packet}) =
+    if is_short then begin
+      assert(Short? h);
+      None
+    end
+    else None in
+
+  admit()
+
+
+
+
+
 
 let lemma_header_encryption_malleable a k c spin phase cid x npn = admit()
 
@@ -1170,7 +1277,7 @@ let expand_npn (last:nat{last + 1 < pow2 62}) (pn_len:nat2) (npn:nat{npn < pow2 
   assert(high % pow2 bits == 0);
   let candidate = npn + high in
   lemma_disjoint_sum 62 high npn bits;
-  assert(candidate < pow2 62);  
+  assert(candidate < pow2 62);
   if candidate + pow2 wbits <= last + 1  then
     candidate + pow2 wbits
   else if candidate - pow2 wbits > last + 1 && candidate > pow2 bits then
