@@ -405,8 +405,7 @@ val poly_uniform_do_while:
                          v (bget h1 i 0) <= v params_k * v params_n /\
                          is_poly_k_montgomery_i h1 a (v (bget h1 i 0)))
 
-#set-options "--z3rlimit 300"
-
+#push-options "--z3rlimit 300"
 let poly_uniform_do_while a seed pos i nblocks buf dmsp =
     let h0 = ST.get () in
     assert(is_poly_k_montgomery_i h0 a (v (bget h0 i 0)));
@@ -459,8 +458,7 @@ let poly_uniform_do_while a seed pos i nblocks buf dmsp =
 
     let h3 = ST.get () in
     assert(modifies (loc nblocks |+| loc buf |+| loc dmsp |+| loc pos |+| loc a |+| loc i) h0 h3)
-
-#set-options "--z3rlimit 100"
+#pop-options
 
 val poly_uniform:
     a: poly_k
@@ -629,7 +627,6 @@ val qtesla_keygen_:
     (ensures fun h0 _ h1 -> modifies2 pk sk h0 h1)
 
 #push-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 0 --z3cliopt 'smt.qi.eager_threshold=100'"
-
 let qtesla_keygen_ randomness pk sk =
   push_frame();
   assert(v randomness_extended_size > 0);
@@ -715,8 +712,6 @@ let qtesla_keygen_ randomness pk sk =
   pop_frame();
   0l
 #pop-options
-
-#set-options "--z3rlimit 100 --max_fuel 1 --max_ifuel 1 --query_stats"
 
 val qtesla_keygen:
     pk: lbuffer uint8 crypto_publickeybytes
@@ -989,8 +984,7 @@ val hash_H:
                     is_poly_k_montgomery h v_)
     (ensures fun h0 _ h1 -> modifies1 c_bin h0 h1)
 
-#set-options "--z3rlimit 400"
-
+#push-options "--z3rlimit 400"
 let hash_H c_bin v_ hm =
     let hInit = ST.get () in
     push_frame();
@@ -1015,6 +1009,7 @@ let hash_H c_bin v_ hm =
     params_SHAKE (params_k *! params_n +. crypto_hmbytes) t crypto_c_bytes c_bin;
 
     pop_frame()
+#pop-options
 
 private let encode_c_invariant (h:HS.mem) (pos_list : lbuffer UI32.t params_h) (sign_list : lbuffer I16.t params_h) (i : size_t) =
     forall (j:nat{j < v i /\ j < v params_h}) .
@@ -1096,8 +1091,7 @@ val encode_c:
                     disjoint pos_list c_bin /\ disjoint sign_list c_bin)
     (ensures fun h0 _ h1 -> modifies2 pos_list sign_list h0 h1 /\ encode_c_invariant h1 pos_list sign_list params_h)
 
-#set-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 0"
-
+#push-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 0"
 // This function looks identical between the I and p-III sets.
 let encode_c pos_list sign_list c_bin =
     push_frame();
@@ -1129,15 +1123,13 @@ let encode_c pos_list sign_list c_bin =
     assert(encode_c_invariant h1 pos_list sign_list params_h);
 
     pop_frame()
+#pop-options
 
 let lemma_pow2_s_bits_fits_int16 () : Lemma
     (ensures Int.min_int I16.n < -(pow2 (v params_s_bits)) /\
              Int.max_int I16.n > pow2 (v params_s_bits)) = 
     assert_norm(Int.min_int I16.n < -(pow2 params_s_bits_int));
     assert_norm(Int.max_int I16.n > pow2 params_s_bits_int)
-
-
-#set-options "--z3rlimit 100 --max_fuel 1 --max_ifuel 1"
 
 // On the i'th iteration of the outer loop that ranges [0,h), since each element of t is within [-b,b),
 // where b is 2^{params_s_bits}, absolute worst-case bound for prod[i] is [-(i*b),i*b]. Very loose bound. Patrick says
@@ -1465,15 +1457,13 @@ let test_rejection z =
 
     res
 
-
+#push-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 0"
 let lemma_pow2_d_fits_32 () : Lemma
  (ensures 1 * pow2 (v params_d - 1) <= Int.max_int I32.n) = 
  Pervasives.normalize_term_spec (pow2 (SP.params_d - 1))
 let lemma_val_plus_pow2_d_fits (val_:I32.t{I32.v val_ >= -(2 * elem_v params_q) /\ I32.v val_ <= (2 * elem_v params_q)}) : Lemma
   (ensures Int.fits (I32.v val_ + (pow2 (v (params_d -. size 1)) @% pow2 I32.n)) I32.n) = 
   Pervasives.normalize_term_spec (pow2 SP.params_d - 1)
-
-#set-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 0"
 
 let lemma_val_times_pow2d_fits (val_:I32.t{-4 <= I32.v val_ /\ I32.v val_ <= 4})
  : Lemma (Int.fits (I32.v val_ * pow2 (v params_d)) I32.n)
@@ -1613,8 +1603,7 @@ let test_correctness v_ =
     let resVal:I32.t = res.(size 0) in
     pop_frame();
     resVal
-
-#set-options "--z3rlimit 100 --max_fuel 1 --max_ifuel 1"
+#pop-options
 
 let lemma_y_sampler_output_is_pmq (h:HS.mem) (p:poly) : Lemma
     (requires is_poly_y_sampler_output h p)
@@ -1805,8 +1794,6 @@ let qtesla_sign_update_v v_ e pos_list sign_list =
    pop_frame();
    rspVal
 
-#set-options "--z3rlimit 500 --max_fuel 0 --max_ifuel 0"
-
 private inline_for_extraction noextract
 val qtesla_sign_do_while:
     randomness: lbuffer uint8 crypto_seedbytes
@@ -1845,6 +1832,7 @@ val qtesla_sign_do_while:
 //                --using_facts_from '* -LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2'"
 // --log_queries --query_stats --print_z3_statistics
 
+#push-options "--z3rlimit 500 --max_fuel 0 --max_ifuel 0"
 let qtesla_sign_do_while randomness randomness_input nonce a s e smlen mlen m sm =
     let hInit = ST.get () in
     push_frame();
@@ -2027,8 +2015,6 @@ let qtesla_sign smlen mlen m sm sk =
                      loc nonce |+| loc smlen |+| loc sm) h0 h5);
 
     pop_frame()
-
-#reset-options "--z3rlimit 100 --max_fuel 1 --max_ifuel 1 --query_stats"
 
 val test_z:
     z : poly
