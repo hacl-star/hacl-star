@@ -3,259 +3,256 @@ module Lib.Loops.Lemmas
 open FStar.Mul
 open Lib.IntTypes
 open Lib.Sequence
-open Lib.IntVector
+
+///
+/// Equivalence of (map_blocks blocksize) and (mapblocks (w * blocksize))
+///
+
+#set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --z3refresh \
+              --using_facts_from '-* +Prims +Lib.Loops.Lemmas +Lib.Sequence'"
 
 
-noextract
-let lanes = w:width{w == 1 \/ w == 2 \/ w == 4}
+val div_interval: b:pos -> n:int -> i:int -> Lemma
+  (requires n * b <= i /\ i < (n + 1) * b)
+  (ensures  i / b = n)
 
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
-
-
-inline_for_extraction noextract
-val get_block_s:
-    #a:Type0
-  -> size_block:size_pos
-  -> inp:Seq.seq a
-  -> len:nat{len == length inp}
-  -> f:(i:nat{i < len / size_block} -> lseq a size_block -> lseq a size_block)
-  -> i:nat{i < len / size_block * size_block} ->
-  lseq a size_block
-
-let get_block_s #a sb inp len f i =
-  let j_s = i / sb in
-  FStar.Math.Lemmas.cancel_mul_div (len / sb) sb;
-  assert ((j_s + 1) * sb <= len);
-
-  FStar.Seq.lemma_len_slice inp (j_s * sb) ((j_s + 1) * sb);
-  let b_s : lseq a sb = Seq.slice inp (j_s * sb) ((j_s + 1) * sb) in
-  f j_s b_s
+let div_interval b n i =
+  Math.Lemmas.lemma_div_le (n * b) i b;
+  Math.Lemmas.cancel_mul_div n b
 
 
-inline_for_extraction noextract
-val get_block_s_last:
-    #a:Type0
-  -> size_block:size_pos
-  -> inp:Seq.seq a
-  -> len:nat{len == length inp}
-  -> g:(i:nat{i == len / size_block} -> rem:nat{rem < size_block} -> lseq a rem -> lseq a rem)
-  -> i:nat{len / size_block * size_block <= i /\ i < len} ->
-  lseq a (len % size_block)
+val mod_interval_lt: b:pos -> n:int -> i:int -> j:int -> Lemma
+  (requires n * b <= i /\ i < j /\ j < (n + 1) * b)
+  (ensures  i % b < j % b)
 
-let get_block_s_last #a sb inp len g i =
-  let rem = len % sb in
-  FStar.Seq.lemma_len_slice inp (len - rem) len;
-  let b_last : lseq a rem = Seq.slice inp (len - rem) len in
-  g (len / sb) rem b_last
+let mod_interval_lt b n i j =
+  div_interval b n i;
+  div_interval b n j
 
 
-inline_for_extraction noextract
-val get_block_vec:
-    #a:Type0
-  -> w:lanes
-  -> size_block:size_pos{w * size_block <= max_size_t}
-  -> inp:seq a
-  -> len:nat{len == length inp}
-  -> f_vec:(i:nat{i < len / (w * size_block)} -> lseq a (w * size_block) -> lseq a (w * size_block))
-  -> i:nat{i < len / (w * size_block) * (w * size_block)} ->
-  lseq a (w * size_block)
+val div_mul_lt: b:pos -> a:int -> n:int -> Lemma
+  (requires a < n * b)
+  (ensures  a / b < n)
 
-let get_block_vec #a w size_block inp len f_vec i =
-  let bs = w * size_block in
-  let j_vec = i / bs in
-  FStar.Math.Lemmas.lemma_div_le (i + 1) (len / bs * bs) bs;
-  FStar.Math.Lemmas.cancel_mul_div (len / bs) bs;
-  assert ((i + 1) / bs <= len / bs);
-  assert (j_vec <= len / bs);
-  assert ((j_vec + 1) * bs <= len);
-  FStar.Seq.lemma_len_slice inp (j_vec * bs) ((j_vec + 1) * bs);
-  let b_vec : lseq a bs = Seq.slice inp (j_vec * bs) ((j_vec + 1) * bs) in
-  f_vec j_vec b_vec
+let div_mul_lt b a n = ()
 
 
-inline_for_extraction noextract
-val get_block_vec_last:
-    #a:Type0
-  -> w:lanes
-  -> size_block:size_pos{w * size_block <= max_size_t}
-  -> inp:seq a
-  -> len:nat{len == length inp}
-  -> g_vec:(i:nat{i == len / (w * size_block)} -> rem:nat{rem < w * size_block} -> lseq a rem -> lseq a rem)
-  -> i:nat{len / (w * size_block) * (w * size_block) <= i /\ i < len} ->
-  lseq a (len % (w * size_block))
+val mod_div_lt: b:pos -> i:int -> j:int -> Lemma
+  (requires (j / b) * b <= i /\ i < j)
+  (ensures  i % b < j % b)
 
-let get_block_vec_last #a w size_block inp len g_vec i =
-  let bs = w * size_block in
-  let rem = len % bs in
-  FStar.Seq.lemma_len_slice inp (len - rem) len;
-  let b_last : lseq a rem = Seq.slice inp (len - rem) len in
-  g_vec (len / bs) rem b_last
+let mod_div_lt b i j =
+  mod_interval_lt b (j / b) i j
 
 
-val lemma_map_blocks_s_i:
-    #a:Type0
-  -> size_block:size_pos
-  -> inp:seq a
-  -> len:nat{len == length inp}
-  -> f:(i:nat{i < len / size_block} -> lseq a size_block -> lseq a size_block)
-  -> g:(i:nat{i == len / size_block} -> rem:nat{rem < size_block} -> lseq a rem -> lseq a rem)
+val div_mul_l: a:int -> b:int -> c:pos -> d:pos -> Lemma
+  (requires a / d = b / d)
+  (ensures  a / (c * d) = b / (c * d))
+
+let div_mul_l a b c d =
+  calc (==) {
+    a / (c * d);
+    == { }
+    a / (d * c);
+    == { Math.Lemmas.division_multiplication_lemma a d c }
+    (a / d) / c;
+    == { }
+    (b / d) / c;
+    == { Math.Lemmas.division_multiplication_lemma b d c }
+    b / (d * c);
+    == { }
+    b / (c * d);
+  }
+
+(* A full block index *)
+let block (len:nat) (blocksize:size_pos) = i:nat{i < len / blocksize}
+
+
+(* Index of last (incomplete) block *)
+let last  (len:nat) (blocksize:size_pos) = i:nat{i = len / blocksize}
+
+
+(* Computes the block of the i-th element of (map_blocks blocksize input f g) *)
+val get_block:
+    #a:Type
+  -> #len:size_nat
+  -> blocksize:size_pos
+  -> input:lseq a len
+  -> f:(block len blocksize -> lseq a blocksize -> lseq a blocksize)
+  -> i:nat{i < (len / blocksize) * blocksize} ->
+  Tot (lseq a blocksize)
+
+let get_block #a #len blocksize input f i =
+  let j: block len blocksize = i / blocksize in
+  let b: lseq a blocksize = slice input (j * blocksize) ((j + 1) * blocksize) in
+  f j b
+
+
+(* Computes the last block of (map_blocks blocksize input f g) *)
+val get_last:
+    #a:Type
+  -> #len:size_nat
+  -> blocksize:size_pos
+  -> input:lseq a len
+  -> g:(last len blocksize -> rem:size_nat{rem < blocksize} -> lseq a rem -> lseq a rem) ->
+  Tot (lseq a (len % blocksize))
+
+let get_last #a #len blocksize input g =
+  let rem = len % blocksize in
+  let b: lseq a rem = slice input (len - rem) len in
+  g (len / blocksize) rem b
+
+
+(* This is a more reasonable type for Lib.Sequence.map_blocks, using lseq *)
+val map_blocks:
+    #a:Type
+  -> #len:size_nat
+  -> blocksize:size_pos
+  -> inp:lseq a len
+  -> f:(block len blocksize -> lseq a blocksize -> lseq a blocksize)
+  -> g:(last len blocksize -> rem:size_nat{rem < blocksize} -> lseq a rem -> lseq a rem) ->
+  Tot (lseq a len)
+
+let map_blocks #a #len blocksize inp f g =
+  map_blocks blocksize inp f g
+
+
+(* An specialization of Lib.Sequence.index_map_blocks *)
+val lemma_map_blocks_i:
+    #a:Type
+  -> #len:size_nat
+  -> blocksize:size_pos
+  -> input:lseq a len
+  -> f:(block len blocksize -> lseq a blocksize -> lseq a blocksize)
+  -> g:(last len blocksize -> rem:size_nat{rem < blocksize} -> lseq a rem -> lseq a rem)
   -> i:nat{i < len} ->
-  Lemma
-  (if i < len / size_block * size_block then
-    Seq.index (map_blocks size_block inp f g) i ==
-    Seq.index (get_block_s #a size_block inp len f i) (i % size_block)
-   else begin
-    FStar.Math.Lemmas.modulo_lemma (i - len / size_block * size_block) size_block;
-    FStar.Math.Lemmas.lemma_mod_sub i size_block (len / size_block);
-    Seq.index (map_blocks size_block inp f g) i ==
-    Seq.index (get_block_s_last #a size_block inp len g i) (i % size_block) end)
+  Lemma (
+    let output = map_blocks blocksize input f g in
+    let j = i % blocksize in
+    if i < (len / blocksize) * blocksize
+    then
+      let block_i = get_block blocksize input f i in
+      div_mul_lt blocksize i (len / blocksize);
+      output.[i] == block_i.[j]
+    else
+      let block_i = get_last blocksize input g in
+      mod_div_lt blocksize i len;
+      output.[i] == block_i.[j]
+  )
 
-let lemma_map_blocks_s_i #a size_block inp len f g i =
-  index_map_blocks size_block inp f g i
+let lemma_map_blocks_i #a #len blocksize input f g i =
+  index_map_blocks blocksize input f g i;
+   let output = map_blocks blocksize input f g in
+  if i < (len / blocksize) * blocksize then
+    begin
+    let block_i = get_block blocksize input f i in
+    div_mul_lt blocksize i (len / blocksize);
+    assert (output.[i] == block_i.[i % blocksize])
+    end
+  else
+    begin
+    let block_i = get_last blocksize input g in
+    mod_div_lt blocksize i len;
+    assert (output.[i] == block_i.[i % blocksize])
+    end
 
 
-val lemma_map_blocks_vec_i:
-    #a:Type0
-  -> w:lanes
-  -> size_block:size_pos{w * size_block <= max_size_t}
-  -> inp:seq a
-  -> len:nat{len == length inp}
-  -> f_vec:(i:nat{i < len / (w * size_block)} -> lseq a (w * size_block) -> lseq a (w * size_block))
-  -> g_vec:(i:nat{i == len / (w * size_block)} -> rem:nat{rem < w * size_block} -> lseq a rem -> lseq a rem)
+(*
+   Conditions for (map_blocks blocksize len input f g)
+   to be equivalent to (map_blocks (w * blocksize) len input f_v g_v)
+*)
+val map_blocks_vec_equiv_pre:
+    #a:Type
+  -> #len:size_nat
+  -> w:size_pos
+  -> blocksize:size_pos{w * blocksize <= max_size_t}
+  -> input:lseq a len
+  -> f:(block len blocksize -> lseq a blocksize -> lseq a blocksize)
+  -> g:(last len blocksize -> rem:size_nat{rem < blocksize} -> lseq a rem -> lseq a rem)
+  -> f_v:(block len (w * blocksize) -> lseq a (w * blocksize) -> lseq a (w * blocksize))
+  -> g_v:(last len (w * blocksize) -> rem:size_nat{rem < w * blocksize} -> lseq a rem -> lseq a rem)
   -> i:nat{i < len} ->
-  Lemma
- (let bs = w * size_block in
-  if i < len / bs * bs then
-    Seq.index (map_blocks bs inp f_vec g_vec) i ==
-    Seq.index (get_block_vec #a w size_block inp len f_vec i) (i % bs)
-   else begin
-    FStar.Math.Lemmas.modulo_lemma (i - len / bs * bs) bs;
-    FStar.Math.Lemmas.lemma_mod_sub i bs (len / bs);
-    Seq.index (map_blocks bs inp f_vec g_vec) i ==
-    Seq.index (get_block_vec_last #a w size_block inp len g_vec i) (i % bs) end)
+  prop
 
-let lemma_map_blocks_vec_i #a w size_block inp len f_vec g_vec i =
-  index_map_blocks (w * size_block) inp f_vec g_vec i
+let map_blocks_vec_equiv_pre #a #len w blocksize input f g f_v g_v i =
+  let blocksize_v = w * blocksize in
+  if i < (len / blocksize) * blocksize then
+    begin
+    if i < (len / blocksize_v) * blocksize_v then
+      (get_block (w * blocksize) input f_v i).[i % blocksize_v] ==
+      (get_block blocksize input f i).[i % blocksize]
+    else
+      begin
+      mod_div_lt blocksize_v i len;
+      (get_last (w * blocksize) input g_v).[i % blocksize_v] ==
+      (get_block blocksize input f i).[i % blocksize]
+      end
+    end
+  else
+    begin
+    div_interval blocksize (len / blocksize) i;
+    div_mul_l i len w blocksize;
+    mod_interval_lt blocksize_v (i / blocksize_v) i len;
+    let lp = get_last (w * blocksize) input g_v in
+    let rp = get_last blocksize input g in
+    lp.[i % blocksize_v] == rp.[i % blocksize]
+    end
 
 
-val map_blocks_vec_equiv_t:
-    #a:Type0
-  -> w:lanes
-  -> sb:size_pos{w * sb <= max_size_t}
-  -> inp:seq a
-  -> len:nat{len == length inp}
-  -> f:(i:nat{i < len / sb} -> lseq a sb -> lseq a sb)
-  -> g:(i:nat{i == len / sb} -> rem:nat{rem < sb} -> lseq a rem -> lseq a rem)
-  -> f_vec:(i:nat{i < len / (w * sb)} -> lseq a (w * sb) -> lseq a (w * sb))
-  -> g_vec:(i:nat{i == len / (w * sb)} -> rem:nat{rem < w * sb} -> lseq a rem -> lseq a rem)
+val lemma_map_blocks_vec_aux:
+    #a:Type
+  -> #len:size_nat
+  -> w:size_pos
+  -> blocksize:size_pos{w * blocksize <= max_size_t}
+  -> input:lseq a len
+  -> f:(block len blocksize -> lseq a blocksize -> lseq a blocksize)
+  -> g:(last len blocksize -> rem:size_nat{rem < blocksize} -> lseq a rem -> lseq a rem)
+  -> f_v:(block len (w * blocksize) -> lseq a (w * blocksize) -> lseq a (w * blocksize))
+  -> g_v:(last len (w * blocksize) -> rem:size_nat{rem < w * blocksize} -> lseq a rem -> lseq a rem)
+  -> pre:squash (forall (i:nat{i < len}). map_blocks_vec_equiv_pre w blocksize input f g f_v g_v i)
   -> i:nat{i < len} ->
-  Type0
+  Lemma (
+    let s = map_blocks blocksize input f g in
+    let v = map_blocks (w * blocksize) input f_v g_v in
+    v.[i] == s.[i]
+  )
 
-let map_blocks_vec_equiv_t #a w sb inp len f g f_vec g_vec i =
-  let sb_v = w * sb in
-  if i < len / sb * sb then begin
-    if i < len / sb_v * sb_v then
-      Seq.index (get_block_vec #a w sb inp len f_vec i) (i % sb_v) ==
-      Seq.index (get_block_s #a sb inp len f i) (i % sb)
-    else begin
-      FStar.Math.Lemmas.modulo_lemma (i - len / sb_v * sb_v) sb_v;
-      FStar.Math.Lemmas.lemma_mod_sub i sb_v (len / sb_v);
-      Seq.index (get_block_vec_last #a w sb inp len g_vec i) (i % sb_v) ==
-      Seq.index (get_block_s #a sb inp len f i) (i % sb) end end
-  else begin
-    assert (i / sb_v * sb_v <= i /\ i < len);
-
-    let lp = get_block_vec_last w sb inp len g_vec i in
-    let rp = get_block_s_last sb inp len g i in
-    Seq.index lp (i % sb_v) == Seq.index rp (i % sb) end
-
-
-val lemma_map_blocks_vec_i_aux0:
-    #a:Type0
-  -> w:lanes
-  -> size_block:size_pos{w * size_block <= max_size_t}
-  -> inp:seq a
-  -> len:nat{len == length inp}
-  -> f:(i:nat{i < len / size_block} -> lseq a size_block -> lseq a size_block)
-  -> g:(i:nat{i == len / size_block} -> rem:nat{rem < size_block} -> lseq a rem -> lseq a rem)
-  -> f_vec:(i:nat{i < len / (w * size_block)} -> lseq a (w * size_block) -> lseq a (w * size_block))
-  -> g_vec:(i:nat{i == len / (w * size_block)} -> rem:nat{rem < w * size_block} -> lseq a rem -> lseq a rem)
-  -> i:nat{i < len / size_block * size_block} ->
-  Lemma
-  (requires
-    map_blocks_vec_equiv_t #a w size_block inp len f g f_vec g_vec i)
-  (ensures
-    Seq.index (map_blocks (w * size_block) inp f_vec g_vec) i ==
-    Seq.index (get_block_s #a size_block inp len f i) (i % size_block))
-
-let lemma_map_blocks_vec_i_aux0 #a w size_block inp len f g f_vec g_vec i =
-  lemma_map_blocks_vec_i #a w size_block inp len f_vec g_vec i
-
-
-val lemma_map_blocks_vec_i_aux1:
-    #a:Type0
-  -> w:lanes
-  -> size_block:size_pos{w * size_block <= max_size_t}
-  -> inp:seq a
-  -> len:nat{len == length inp}
-  -> f:(i:nat{i < len / size_block} -> lseq a size_block -> lseq a size_block)
-  -> g:(i:nat{i == len / size_block} -> rem:nat{rem < size_block} -> lseq a rem -> lseq a rem)
-  -> f_vec:(i:nat{i < len / (w * size_block)} -> lseq a (w * size_block) -> lseq a (w * size_block))
-  -> g_vec:(i:nat{i == len / (w * size_block)} -> rem:nat{rem < w * size_block} -> lseq a rem -> lseq a rem)
-  -> i:nat{i < len /\ map_blocks_vec_equiv_t #a w size_block inp len f g f_vec g_vec i} ->
-  Lemma
-  (if i < len / size_block * size_block then
-    Seq.index (map_blocks (w * size_block) inp f_vec g_vec) i ==
-    Seq.index (get_block_s #a size_block inp len f i) (i % size_block)
-  else begin
-    FStar.Math.Lemmas.modulo_lemma (i - len / size_block * size_block) size_block;
-    FStar.Math.Lemmas.lemma_mod_sub i size_block (len / size_block);
-    Seq.index (map_blocks (w * size_block) inp f_vec g_vec) i ==
-    Seq.index (get_block_s_last #a size_block inp len g i) (i % size_block) end)
-
-let lemma_map_blocks_vec_i_aux1 #a w size_block inp len f g f_vec g_vec i =
-  lemma_map_blocks_vec_i #a w size_block inp len f_vec g_vec i;
-  if i < len / size_block * size_block then
-    lemma_map_blocks_vec_i_aux0 #a w size_block inp len f g f_vec g_vec i
-  else admit()
-
-
-val lemma_map_blocks_vec_i_aux:
-    #a:Type0
-  -> w:lanes
-  -> size_block:size_pos{w * size_block <= max_size_t}
-  -> inp:seq a
-  -> len:nat{len == length inp}
-  -> f:(i:nat{i < len / size_block} -> lseq a size_block -> lseq a size_block)
-  -> g:(i:nat{i == len / size_block} -> rem:nat{rem < size_block} -> lseq a rem -> lseq a rem)
-  -> f_vec:(i:nat{i < len / (w * size_block)} -> lseq a (w * size_block) -> lseq a (w * size_block))
-  -> g_vec:(i:nat{i == len / (w * size_block)} -> rem:nat{rem < w * size_block} -> lseq a rem -> lseq a rem)
-  -> i:nat{i < len /\ map_blocks_vec_equiv_t #a w size_block inp len f g f_vec g_vec i} ->
-  Lemma
-  (Seq.index (map_blocks (w * size_block) inp f_vec g_vec) i ==
-   Seq.index (map_blocks size_block inp f g) i)
-
-let lemma_map_blocks_vec_i_aux #a w size_block inp len f g f_vec g_vec i =
-  lemma_map_blocks_s_i #a size_block inp len f g i;
-  lemma_map_blocks_vec_i_aux1 #a w size_block inp len f g f_vec g_vec i
+let lemma_map_blocks_vec_aux #a #len w blocksize input f g f_v g_v pre i =
+  let blocksize_v = w * blocksize in
+  lemma_map_blocks_i blocksize input f g i;
+  lemma_map_blocks_i blocksize_v input f_v g_v i;
+  let s = map_blocks blocksize input f g in
+  let v = map_blocks (w * blocksize) input f_v g_v in
+  if i < (len / blocksize) * blocksize then
+    begin
+    div_mul_lt blocksize i (len / blocksize);
+    assert (v.[i] == s.[i])
+    end
+  else
+    begin
+    div_interval blocksize (len / blocksize) i;
+    div_mul_l i len w blocksize;
+    mod_interval_lt blocksize_v (i / blocksize_v) i len;
+    assert (v.[i] == s.[i])
+    end
 
 
 val lemma_map_blocks_vec:
-    #a:Type0
-  -> w:lanes
-  -> size_block:size_pos{w * size_block <= max_size_t}
-  -> inp:seq a
-  -> len:nat{len == length inp}
-  -> f:(i:nat{i < len / size_block} -> lseq a size_block -> lseq a size_block)
-  -> g:(i:nat{i == len / size_block} -> rem:nat{rem < size_block} -> lseq a rem -> lseq a rem)
-  -> f_vec:(i:nat{i < len / (w * size_block)} -> lseq a (w * size_block) -> lseq a (w * size_block))
-  -> g_vec:(i:nat{i == len / (w * size_block)} -> rem:nat{rem < w * size_block} -> lseq a rem -> lseq a rem) ->
+    #a:Type
+  -> #len:size_nat
+  -> w:size_pos
+  -> blocksize:size_pos{w * blocksize <= max_size_t}
+  -> input:lseq a len
+  -> f:(block len blocksize -> lseq a blocksize -> lseq a blocksize)
+  -> g:(last len blocksize -> rem:size_nat{rem < blocksize} -> lseq a rem -> lseq a rem)
+  -> f_v:(block len (w * blocksize) -> lseq a (w * blocksize) -> lseq a (w * blocksize))
+  -> g_v:(last len (w * blocksize) -> rem:size_nat{rem < w * blocksize} -> lseq a rem -> lseq a rem) ->
   Lemma
   (requires
-    (forall (i:nat{i < len}). map_blocks_vec_equiv_t #a w size_block inp len f g f_vec g_vec i))
+    forall (i:nat{i < len}). map_blocks_vec_equiv_pre w blocksize input f g f_v g_v i)
   (ensures
-    Seq.equal (map_blocks (w * size_block) inp f_vec g_vec) (map_blocks size_block inp f g))
+     map_blocks (w * blocksize) input f_v g_v `equal`
+     map_blocks blocksize input f g)
 
-let lemma_map_blocks_vec #a w size_block inp len f g f_vec g_vec =
-  Classical.forall_intro (lemma_map_blocks_vec_i_aux #a w size_block inp len f g f_vec g_vec);
-  Seq.lemma_eq_intro (map_blocks (w * size_block) inp f_vec g_vec) (map_blocks size_block inp f g)
+let lemma_map_blocks_vec #a #len w blocksize input f g f_v g_v =
+  Classical.forall_intro (lemma_map_blocks_vec_aux w blocksize input f g f_v g_v ())
