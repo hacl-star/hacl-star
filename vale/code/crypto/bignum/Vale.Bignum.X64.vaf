@@ -1,0 +1,140 @@
+include "../../arch/x64/Vale.X64.InsBasic.vaf"
+include "../../arch/x64/Vale.X64.InsMem.vaf"
+include "../../arch/x64/Vale.X64.InsStack.vaf"
+include{:/*TODO*/fstar}{:open} "FStar.Seq.Base"
+include{:fstar}{:open} "Vale.Def.Words_s"
+include{:fstar}{:open} "Vale.Def.Types_s"
+include{:fstar}{:open} "Vale.Arch.Types"
+include{:fstar}{:open} "Vale.X64.Machine_s"
+include{:fstar}{:open} "Vale.X64.Memory"
+include{:fstar}{:open} "Vale.X64.Stack_i"
+include{:fstar}{:open} "Vale.X64.State"
+include{:fstar}{:open} "Vale.X64.Decls"
+include{:fstar}{:open} "Vale.X64.QuickCode"
+include{:fstar}{:open} "Vale.Bignum.Defs"
+
+module Vale.Bignum.X64
+
+#verbatim{:interface}{:implementation}
+open Vale.Def.Words_s
+open Vale.Def.Types_s
+open Vale.Arch.Types
+open Vale.X64.Machine_s
+open Vale.X64.Memory
+open Vale.X64.Stack_i
+open Vale.X64.State
+open Vale.X64.Decls
+open Vale.X64.InsBasic
+open Vale.X64.InsMem
+open Vale.X64.InsStack
+open Vale.X64.QuickCode
+open Vale.X64.QuickCodes
+open Vale.X64.CPU_Features_s
+open Vale.Bignum.Defs
+#endverbatim
+
+#verbatim{:interface}
+let flags_t = Vale.X64.Flags.t
+val flag_cf (f:flags_t) : nat1
+val flag_of (f:flags_t) : nat1
+let update_cf (f':flags_t) (c:nat1) = flag_cf f' == c /\ valid_cf f'
+let update_of (f':flags_t) (o:nat1) = flag_of f' == o /\ valid_of f'
+let maintain_cf (f':flags_t) (f:flags_t) = flag_cf f' == flag_cf f /\ valid_cf f' == valid_cf f
+let maintain_of (f':flags_t) (f:flags_t) = flag_of f' == flag_of f /\ valid_of f' == valid_of f
+#endverbatim
+
+#verbatim
+open FStar.Mul
+open FStar.Seq
+open Vale.Def.Words_s
+let bool_to_nat1 (b:bool) : nat1 = if b then 1 else 0
+let flag_cf f = bool_to_nat1 (cf f)
+let flag_of f = bool_to_nat1 (overflow f)
+#endverbatim
+
+// Declare 64-bit interfaces to add, mul operations
+function Vale.Bignum.Defs.add_hi(a:nat64, b:nat64, c:nat1):nat1 extern;
+function Vale.Bignum.Defs.add_lo(a:nat64, b:nat64, c:nat1):nat64 extern;
+function Vale.Bignum.Defs.mul_hi(a:nat64, b:nat64):nat64 extern;
+function Vale.Bignum.Defs.mul_lo(a:nat64, b:nat64):nat64 extern;
+
+// Define flags in terms of nat1 rather than bool (leads to faster verification)
+type flags_t:Type(0) := Vale.X64.Flags.t;
+function flag_cf(f:flags_t):nat1 extern;
+function flag_of(f:flags_t):nat1 extern;
+function update_cf(f':flags_t, c:nat1):prop extern;
+function update_of(f':flags_t, c:nat1):prop extern;
+function maintain_cf(f':flags_t, f:flags_t):prop extern;
+function maintain_of(f':flags_t, f:flags_t):prop extern;
+
+ghost procedure reveal_flags(ghost f:flags_t)
+    {:public}
+    ensures
+        (flag_cf(f) = 1) == cf(f);
+        (flag_of(f) = 1) == overflow(f);
+{
+}
+
+ghost procedure lemma_add_hi_lo64(ghost dummy:int) // TODO: get rid of dummy
+    {:public}
+    ensures
+        forall(a:nat64, b:nat64, c:nat1){add_lo(a, b, c), add_hi(a, b, c)}
+            add_lo(a, b, c) + pow2_64 * add_hi(a, b, c) == a + b + c;
+{
+    reveal_add_hi_all();
+    reveal_add_lo_all();
+}
+
+procedure Adcx_64(inout dst:dst_opr64, in src:opr64)
+    {:public}
+    {:quick exportOnly}
+    requires adx_enabled;
+    modifies
+        efl;
+    requires
+        valid_cf(efl);
+    ensures
+        dst == old(add_lo(dst, src, flag_cf(efl)));
+        update_cf(efl, old(add_hi(dst, src, flag_cf(efl))));
+        maintain_of(efl, old(efl));
+{
+    reveal_add_hi_all();
+    reveal_add_lo_all();
+    Adcx64Wrap(dst, src);
+}
+
+procedure Adox_64(inout dst:dst_opr64, in src:opr64)
+    {:public}
+    {:quick exportOnly}
+    requires adx_enabled;
+    modifies
+        efl;
+    requires
+        valid_of(efl);
+    ensures
+        dst == old(add_lo(dst, src, flag_of(efl)));
+        update_of(efl, old(add_hi(dst, src, flag_of(efl))));
+        maintain_cf(efl, old(efl));
+{
+    reveal_add_hi_all();
+    reveal_add_lo_all();
+    Adox64Wrap(dst, src);
+}
+
+procedure Mulx_64(out dst_hi:dst_opr64, out dst_lo:dst_opr64, in src:opr64)
+    {:public}
+//    {:quick exportOnly} // TODO: change update_state_mods_norm to delta_only [`%update_state_mods]
+    requires
+        bmi2_enabled;
+        @dst_hi != @dst_lo;
+    reads
+        rdx;
+    ensures
+        dst_hi == old(mul_hi(rdx, src));
+        dst_lo == old(mul_lo(rdx, src));
+{
+    reveal_mul_hi_all();
+    reveal_mul_lo_all();
+    Mulx64(dst_hi, dst_lo, src);
+}
+

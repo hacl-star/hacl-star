@@ -67,9 +67,8 @@ let lemma_poly_multiply (n:int) (p:int) (r:int) (h:int) (r0:int) (r1:int) (h0:in
   //assert (hh == hh_expand);
   let b = ((h2 * n + h1) * r1_4) in
   modulo_addition_lemma hh_expand p b;
-  assert_by_tactic (h_r_expand == hh_expand + b * (n * n * 4 + (-5)))
-    (fun _ -> canon_semiring int_cr);
-  ()
+  assert (h_r_expand == hh_expand + b * (n * n * 4 + (-5)))
+  by (int_semiring ())
 
 
 let lemma_poly_reduce (n:int) (p:int) (h:int) (h2:int) (h10:int) (c:int) (hh:int) =
@@ -79,9 +78,9 @@ let lemma_poly_reduce (n:int) (p:int) (h:int) (h2:int) (h10:int) (c:int) (hh:int
    let hh_expand = h10 + (h2_m) * (n * n) + h2_4 * 5 in
    lemma_div_mod h (n * n);
    modulo_addition_lemma hh_expand p h2_4;
-   assert_by_tactic (h_expand == hh_expand + h2_4 * (n * n * 4 + (-5)))
-     (fun _ -> canon_semiring int_cr);
-   ()
+   assert (h_expand == hh_expand + h2_4 * (n * n * 4 + (-5)))
+   by (int_semiring ())
+
 
 (* These lemmas go through because of SMT patterns,
    is that the right style to use here?*)
@@ -423,4 +422,3 @@ let lemma_lowerUpper128_and (x:nat128) (x0:nat64) (x1:nat64) (y:nat128) (y0:nat6
 
 let lemma_add_mod128 (x y :int) =
   FStar.Pervasives.reveal_opaque (`%mod2_128) mod2_128
-

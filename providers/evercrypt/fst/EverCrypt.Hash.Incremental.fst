@@ -27,7 +27,7 @@ noeq
 type state_s a =
 | State:
     hash_state: Hash.state a ->
-    buf: B.buffer UInt8.t { B.length buf = block_length a } ->
+    buf: B.buffer Lib.IntTypes.uint8 { B.length buf = block_length a } ->
     total_len: UInt64.t ->
     seen: G.erased bytes ->
     state_s a
@@ -122,7 +122,7 @@ let split_at_last_empty (a: Hash.alg): Lemma
 let create_in a r =
   (**) let h0 = ST.get () in
 
-  let buf = B.malloc r 0uy (Hacl.Hash.Definitions.block_len a) in
+  let buf = B.malloc r (Lib.IntTypes.u8 0) (Hacl.Hash.Definitions.block_len a) in
   (**) let h1 = ST.get () in
   (**) assert (B.fresh_loc (B.loc_buffer buf) h0 h1);
 
@@ -293,7 +293,7 @@ val update_small:
   a:e_alg -> (
   let a = G.reveal a in
   s:state a ->
-  data: B.buffer UInt8.t ->
+  data: B.buffer Lib.IntTypes.uint8 ->
   len: UInt32.t ->
   Stack unit
     (requires fun h0 ->
@@ -424,7 +424,7 @@ val update_empty_buf:
   a:e_alg -> (
   let a = G.reveal a in
   s:state a ->
-  data: B.buffer UInt8.t ->
+  data: B.buffer Lib.IntTypes.uint8 ->
   len: UInt32.t ->
   Stack unit
     (requires fun h0 ->
@@ -497,7 +497,7 @@ val update_round:
   a:e_alg -> (
   let a = G.reveal a in
   s:state a ->
-  data: B.buffer UInt8.t ->
+  data: B.buffer Lib.IntTypes.uint8 ->
   len: UInt32.t ->
   Stack unit
     (requires fun h0 ->

@@ -1,8 +1,5 @@
 module MerkleTree.New.High.Correct.Rhs
 
-open EverCrypt
-open EverCrypt.Helpers
-
 open MerkleTree.Spec
 open MerkleTree.New.High
 open MerkleTree.New.High.Correct.Base
@@ -11,20 +8,17 @@ open FStar.Classical
 open FStar.Ghost
 open FStar.Seq
 
-module List = FStar.List.Tot
 module S = FStar.Seq
 
-module U32 = FStar.UInt32
-module U8 = FStar.UInt8
-type uint32_t = U32.t
-type uint8_t = U8.t
-
-module EHS = EverCrypt.Hash
 module MTS = MerkleTree.Spec
+
+#set-options "--z3rlimit 40 --max_fuel 0 --max_ifuel 0"
 
 /// Correctness of rightmost hashes
 
-// Another version of `construct_rhs` that recursively 
+#push-options "--max_fuel 1"
+
+// Another version of `construct_rhs` that recursively
 // accumulates rightmost hashes.
 val construct_rhs_acc:
   j:nat ->
@@ -34,7 +28,6 @@ val construct_rhs_acc:
   acc:hash ->
   actd:bool ->
   GTot (rhs:hash_seq{S.length rhs = log2c j} * hash) (decreases j)
-#reset-options "--z3rlimit 10"
 let rec construct_rhs_acc j fhs acc actd =
   if j = 0 then (S.empty, acc)
   else begin
@@ -42,12 +35,14 @@ let rec construct_rhs_acc j fhs acc actd =
     then (let nrhsh = construct_rhs_acc (j / 2) (S.tail fhs) acc actd in
          (S.cons hash_init (fst nrhsh), snd nrhsh))
     else (let rhd = if actd then acc else hash_init in
-         let nacc = if actd 
+         let nacc = if actd
                     then hash_2 (S.last (S.head fhs)) acc
                     else S.last (S.head fhs) in
          let nrhsh = construct_rhs_acc (j / 2) (S.tail fhs) nacc true in
          (S.cons rhd (fst nrhsh), snd nrhsh))
   end
+
+#push-options "--max_ifuel 1"
 
 val construct_rhs_acc_odd:
   j:nat ->
@@ -58,13 +53,17 @@ val construct_rhs_acc_odd:
   actd:bool ->
   Lemma (requires (j % 2 <> 0))
         (ensures (let rrf = construct_rhs_acc j fhs acc actd in
-                 let nacc = if actd 
+                 let nacc = if actd
                             then hash_2 (S.last (S.head fhs)) acc
                             else S.last (S.head fhs) in
                  let nrrf = construct_rhs_acc (j / 2) (S.tail fhs) nacc true in
                  S.equal (S.tail (fst rrf)) (fst nrrf) /\
                  snd rrf == snd nrrf))
-let construct_rhs_acc_odd j fhs acc actd = ()  
+let construct_rhs_acc_odd j fhs acc actd = ()
+
+#pop-options
+
+#push-options "--max_fuel 2"
 
 val construct_rhs_acc_inv_ok_0:
   fhs:hash_ss{
@@ -83,6 +82,10 @@ val construct_rhs_acc_inv_ok_0:
                  HRaw (snd crhs)))
 let construct_rhs_acc_inv_ok_0 fhs acc actd = ()
 
+#pop-options
+
+#push-options "--z3rlimit 240 --initial_fuel 1 --max_fuel 1"
+
 val construct_rhs_acc_inv_ok:
   j:nat{j > 0} ->
   fhs:hash_ss{
@@ -97,10 +100,9 @@ val construct_rhs_acc_inv_ok:
                    (hash_seq_spec_full (S.head fhs) acc actd)
                    (fst crhs) actd /\
                  MTS.mt_get_root #(log2c j)
-                   (hash_seq_spec_full (S.head fhs) acc actd) == 
+                   (hash_seq_spec_full (S.head fhs) acc actd) ==
                  HRaw (snd crhs)))
         (decreases j)
-#reset-options "--z3rlimit 240 --initial_fuel 2 --max_fuel 2 --max_ifuel 0"
 let rec construct_rhs_acc_inv_ok j fhs acc actd =
   if j = 1 then construct_rhs_acc_inv_ok_0 fhs acc actd
 
@@ -133,7 +135,7 @@ let rec construct_rhs_acc_inv_ok j fhs acc actd =
 
   else begin
     let rhd = if actd then acc else hash_init in
-    let nacc = if actd 
+    let nacc = if actd
                then hash_2 (S.last (S.head fhs)) acc
                else S.last (S.head fhs) in
     construct_rhs_acc_inv_ok (j / 2) (S.tail fhs) nacc true;
@@ -163,10 +165,11 @@ let rec construct_rhs_acc_inv_ok j fhs acc actd =
              (hash_seq_spec_full (S.head fhs) acc actd)
              (fst crhs) actd);
     assert (MTS.mt_get_root #(log2c j)
-             (hash_seq_spec_full (S.head fhs) acc actd) == 
+             (hash_seq_spec_full (S.head fhs) acc actd) ==
            HRaw (snd crhs))
   end
-#reset-options
+
+#pop-options
 
 val rhs_equiv:
   j:nat ->
@@ -176,7 +179,7 @@ val rhs_equiv:
   GTot Type0 (decreases j)
 let rec rhs_equiv j rhs1 rhs2 actd =
   if j = 0 then true
-  else if j % 2 = 0 
+  else if j % 2 = 0
   then rhs_equiv (j / 2) (S.tail rhs1) (S.tail rhs2) actd
   else ((if actd then S.head rhs1 == S.head rhs2 else true) /\
        rhs_equiv (j / 2) (S.tail rhs1) (S.tail rhs2) true)
@@ -191,10 +194,9 @@ val rhs_equiv_inv_preserved:
                   rhs_equiv j rhs1 rhs2 actd))
         (ensures (mt_rhs_inv j smt rhs2 actd))
         (decreases j)
-#reset-options "--z3rlimit 10 --max_fuel 1"
 let rec rhs_equiv_inv_preserved j smt rhs1 rhs2 actd =
   if j = 0 then ()
-  else if j % 2 = 0 
+  else if j % 2 = 0
   then rhs_equiv_inv_preserved (j / 2) (mt_next_lv #(log2c j) smt)
          (S.tail rhs1) (S.tail rhs2) actd
   else begin
@@ -205,9 +207,9 @@ let rec rhs_equiv_inv_preserved j smt rhs1 rhs2 actd =
     rhs_equiv_inv_preserved (j / 2) (mt_next_lv #(log2c j) smt)
       (S.tail rhs1) (S.tail rhs2) true
   end
-#reset-options
 
-#reset-options "--z3rlimit 20"
+#push-options "--z3rlimit 500 --initial_fuel 1 --max_fuel 1 --max_ifuel 1"
+
 val construct_rhs_acc_consistent:
   lv:nat{lv <= 32} ->
   i:nat ->
@@ -228,7 +230,6 @@ val construct_rhs_acc_consistent:
           rhs_equiv j (fst rrf) (S.slice (fst rr) lv (lv + log2c j)) actd /\
           snd rrf == snd rr)))
         (decreases j)
-#reset-options "--z3rlimit 500 --initial_fuel 1 --max_fuel 1 --initial_ifuel 1 --max_ifuel 1"
 let rec construct_rhs_acc_consistent lv i j olds hs rhs acc actd =
   assert (j < pow2 (32 - lv));
   log2c_bound j (32 - lv);
@@ -245,18 +246,19 @@ let rec construct_rhs_acc_consistent lv i j olds hs rhs acc actd =
     log2c_div j; log2c_bound (j / 2) (32 - (lv + 1));
     mt_olds_hs_lth_inv_ok (lv + 1) (i / 2) (j / 2) olds hs;
     mt_hashes_lth_inv_log_converted_ (lv + 1) (j / 2) (merge_hs olds hs);
-    
+
     if j % 2 = 0 then begin
       construct_rhs_acc_consistent (lv + 1) (i / 2) (j / 2)
         olds hs rhs acc actd
     end
-    else begin
+    else
+    begin
       let rhd = if actd then acc else hash_init in
       let nacc = if actd
                  then hash_2 (S.last (S.index hs lv)) acc
                  else S.last (S.index hs lv) in
       assert (S.equal (S.tail (S.slice (merge_hs olds hs) lv (lv + log2c j)))
-                      (S.slice (merge_hs olds hs) 
+                      (S.slice (merge_hs olds hs)
                         (lv + 1) (lv + 1 + log2c (j / 2))));
 
       // Recursion step for `construct_rhs_acc`
@@ -297,9 +299,9 @@ let rec construct_rhs_acc_consistent lv i j olds hs rhs acc actd =
       assert (snd rrf == snd rr)
     end
   end
-#reset-options
 
-#reset-options "--z3rlimit 20"
+#pop-options
+
 val construct_rhs_inv_ok:
   lv:nat{lv <= 32} ->
   i:nat ->
@@ -318,9 +320,8 @@ val construct_rhs_inv_ok:
                    (hash_seq_spec_full (S.index (merge_hs olds hs) lv) acc actd)
                    (S.slice (fst crhs) lv (lv + log2c j)) actd /\
                  MTS.mt_get_root #(log2c j)
-                   (hash_seq_spec_full (S.index (merge_hs olds hs) lv) acc actd) == 
+                   (hash_seq_spec_full (S.index (merge_hs olds hs) lv) acc actd) ==
                  HRaw (snd crhs))))
-#reset-options "--z3rlimit 40"
 let construct_rhs_inv_ok lv i j olds hs rhs acc actd =
   log2c_div j; log2c_bound j (32 - lv);
   mt_olds_hs_lth_inv_ok lv i j olds hs;
@@ -335,9 +336,7 @@ let construct_rhs_inv_ok lv i j olds hs rhs acc actd =
   rhs_equiv_inv_preserved j
     (hash_seq_spec_full (S.index (merge_hs olds hs) lv) acc actd)
     (fst crhsf) (S.slice (fst crhs) lv (lv + log2c j)) actd
-#reset-options
 
-#reset-options "--z3rlimit 10"
 val construct_rhs_base_inv_ok:
   i:nat -> j:nat{j > 0 /\ i <= j /\ j < pow2 32} ->
   olds:hash_ss{S.length olds = 32 /\ mt_olds_inv 0 i olds} ->
@@ -354,18 +353,17 @@ val construct_rhs_base_inv_ok:
                    (hash_seq_spec_full (S.head (merge_hs olds hs)) acc actd)
                    (S.slice (fst crhs) 0 (log2c j)) actd /\
                  MTS.mt_get_root #(log2c j)
-                   (hash_seq_spec_full (S.head (merge_hs olds hs)) acc actd) == 
+                   (hash_seq_spec_full (S.head (merge_hs olds hs)) acc actd) ==
                  HRaw (snd crhs))))
 let construct_rhs_base_inv_ok i j olds hs rhs acc actd =
   construct_rhs_inv_ok 0 i j olds hs rhs acc actd
-#reset-options
 
 val construct_rhs_init_ignored:
   lv:nat{lv <= 32} ->
   hs:hash_ss{S.length hs = 32} ->
   rhs:hash_seq{S.length rhs = 32} ->
   i:nat ->
-  j:nat{  
+  j:nat{
     i <= j /\ j < pow2 (32 - lv) /\
     hs_wf_elts lv hs i j} ->
   acc1:hash -> acc2:hash ->
@@ -403,4 +401,3 @@ let mt_get_root_inv_ok mt drt olds =
       0 (MT?.hs mt) (MT?.rhs mt) (MT?.i mt) (MT?.j mt)
       hash_init drt
   end
-

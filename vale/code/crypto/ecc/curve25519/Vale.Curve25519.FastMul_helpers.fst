@@ -271,14 +271,6 @@ val lemma_sqr (a:int) (a0 a1 a2 a3
   : Lemma
     (requires
       a = pow2_four a0 a1 a2 a3 /\
-      a*a ==
-        pow2_seven (mul_nats a0 a0)
-                   (2*(mul_nats a0 a1))
-                   (2*(mul_nats a0 a2) + (mul_nats a1 a1))
-                   (2*((mul_nats a0 a3) + (mul_nats a1 a2)))
-                   (2*(mul_nats a1 a3) + (mul_nats a2 a2))
-                   (2*(mul_nats a2 a3))
-                   (mul_nats a3 a3) /\
       pow2_six r8 r9 r10 r11 r12 r13 ==
         pow2_five (mul_nats a0 a1)
                   (mul_nats a0 a2)
@@ -316,9 +308,9 @@ let lemma_sqr a a0 a1 a2 a3
   lemma_mul_pow2_bound 256 a a;
   assert (a*a < pow2_256 * pow2_256); // PASSES
   assert (cf = 1 ==> pow2_nine d0 d1 d2 d3 d4 d5 d6 d7 cf >= pow2_512);
-  // Fails here, but succeeds in Vale!?
-  //assert_by_tactic (a*a == pow2_seven (mul_nats a0 a0) (2*(mul_nats a0 a1)) (2*(mul_nats a0 a2) + (mul_nats a1 a1))
-  //                                    (2*((mul_nats a0 a3) + (mul_nats a1 a2))) (2*(mul_nats a1 a3) + (mul_nats a2 a2)) (2*(mul_nats a2 a3)) (mul_nats a3 a3)) int_canon;
+  assert_by_tactic ((pow2_four a0 a1 a2 a3) * (pow2_four a0 a1 a2 a3) == pow2_seven (mul_nats a0 a0) (2*(mul_nats a0 a1)) (2*(mul_nats a0 a2) + (mul_nats a1 a1))
+                                      (2*((mul_nats a0 a3) + (mul_nats a1 a2))) (2*(mul_nats a1 a3) + (mul_nats a2 a2)) (2*(mul_nats a2 a3)) (mul_nats a3 a3))
+    (fun _ -> int_canon (); trefl(); qed ());
   let lhs:int = pow2_eight (mul_nats a0 a0) r8' ((mul_nats a1 a1) + r9') r10' ((mul_nats a2 a2) + r11') r12' ((mul_nats a3 a3) + r13') r14' in
   let squares = pow2_eight (mul_nats a0 a0) 0 (mul_nats a1 a1) 0 (mul_nats a2 a2) 0 (mul_nats a3 a3) 0 in
   let regs = pow2_eight 0 r8' r9' r10' r11' r12' r13' r14' in

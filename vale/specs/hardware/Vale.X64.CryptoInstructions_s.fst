@@ -7,6 +7,7 @@ open Vale.Def.Words.Four_s
 open Spec.Hash.Definitions
 open Spec.SHA2
 
+friend Lib.IntTypes
 friend Spec.SHA2
 
 let sha256_rnds2_spec_update (a b c d e f g h wk : word SHA2_256) =

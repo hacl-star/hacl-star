@@ -10,7 +10,7 @@ open Vale.Curve25519.Fast_defs
 
 open FStar.Math.Lemmas
 
-let int_canon = fun _ -> canon_semiring int_cr //; dump "Final"
+let int_canon = fun _ -> norm [delta]; int_semiring () //; dump "Final"
 
 val lemma_sqr_part3
       (a:nat) (a0 a1 a2 a3:nat64)

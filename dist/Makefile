@@ -95,7 +95,7 @@ ifneq (,$(wildcard lib_gen))
 .PRECIOUS: %.cmx
 
 OCAMLOPT=ocamlfind opt -package ctypes,ctypes.foreign,ctypes.stubs -linkpkg -I lib
-OCAMLDEP=ocamlfind dep -I lib
+OCAMLDEP=ocamlfind dep -I lib -slash
 
 CFLAGS += -I "$(shell ocamlfind query ctypes)" -I "$(shell ocamlfind c -where)"
 
@@ -142,6 +142,6 @@ lib/%_stubs.ml lib/%_c_stubs.c: lib_gen/%_gen.exe
 	$<
 
 libocamlevercrypt.cmxa: $(ALL_BINDINGS) $(ALL_ML_STUBS) $(ALL_C_STUBS) libevercrypt.$(SO)
-	ocamlfind mklib -o ocamlevercrypt $(filter-out %.so,$^) -L. -levercrypt
+	ocamlfind mklib -o ocamlevercrypt $(filter-out %.so,$^) -L. -levercrypt -L$(OPENSSL_HOME) -lcrypto
 
 endif

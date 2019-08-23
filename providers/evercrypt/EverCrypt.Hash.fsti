@@ -236,7 +236,7 @@ val update:
   #a:e_alg -> (
   let a = Ghost.reveal a in
   s:state a ->
-  block:uint8_p { B.length block = block_length a } ->
+  block:B.buffer Lib.IntTypes.uint8 { B.length block = block_length a } ->
   Stack unit
   (requires fun h0 ->
     invariant s h0 /\
@@ -256,7 +256,7 @@ val update_multi:
   #a:e_alg -> (
   let a = Ghost.reveal a in
   s:state a ->
-  blocks:uint8_p { B.length blocks % block_length a = 0 } ->
+  blocks:B.buffer Lib.IntTypes.uint8 { B.length blocks % block_length a = 0 } ->
   len: UInt32.t { v len = B.length blocks } ->
   Stack unit
   (requires fun h0 ->
@@ -289,7 +289,7 @@ val update_last:
   #a:e_alg -> (
   let a = Ghost.reveal a in
   s:state a ->
-  last:uint8_p { B.length last < block_length a } ->
+  last:B.buffer Lib.IntTypes.uint8 { B.length last < block_length a } ->
   total_len:uint64_t {
     v total_len < max_input_length a /\
     (v total_len - B.length last) % block_length a = 0 } ->
@@ -314,7 +314,7 @@ val finish:
   #a:e_alg -> (
   let a = Ghost.reveal a in
   s:state a ->
-  dst:uint8_p { B.length dst = hash_length a } ->
+  dst:B.buffer Lib.IntTypes.uint8 { B.length dst = hash_length a } ->
   Stack unit
   (requires fun h0 ->
     invariant s h0 /\
@@ -365,8 +365,8 @@ val hash_224: Hacl.Hash.Definitions.hash_st SHA2_224
 *)
 val hash:
   a:alg ->
-  dst:uint8_p {B.length dst = hash_length a} ->
-  input:uint8_p ->
+  dst:B.buffer Lib.IntTypes.uint8 {B.length dst = hash_length a} ->
+  input:B.buffer Lib.IntTypes.uint8 ->
   len:uint32_t {B.length input = v len /\ v len < max_input_length a} ->
   Stack unit
   (requires fun h0 ->
