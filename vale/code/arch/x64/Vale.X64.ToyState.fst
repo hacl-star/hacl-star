@@ -28,33 +28,31 @@ let store_mem (ptr:ta) (v:tv) (h:toy_heap) = Map.upd h ptr v
 val valid_hmem : (ptr:ta) -> (hp:nat) -> (hm:toy_hpls) -> GTot bool //does heaplet hp have a key ptr?
 let valid_hmem (ptr:ta) (hp:nat) (hm:toy_hpls) = Map.contains (Map.sel hm hp) ptr
 
+val load_hmem : (ptr:ta) -> (hp:nat) -> (hm:toy_hpls) -> GTot tv
 let load_hmem (ptr:ta) (hp:nat) (hm:toy_hpls) = 
   if not (valid_hmem ptr hp hm) then 0
   else Map.sel (Map.sel hm hp) ptr 
 
-let store_hmem (ptr:ta) (v:tv) (hp:nat) (hm:toy_hpls) = Map.upd (Map.sel hm hp) ptr v
-
-//get which heap a pointer belongs to
-let get_heaplet_loc (ptr:ta) (m:Map.t ta nat) = 
-  if not (Map.contains m ptr) then None
-  else Some (Map.sel m ptr)
-
-let mem_invariant (s:toy_state) =
+val store_hmem : (ptr:ta) -> (v:tv) -> (hp:nat) -> (hm:toy_hpls) -> GTot toy_hpls
+let store_hmem (ptr:ta) (v:tv) (hp:nat) (hm:toy_hpls) = 
+  let h = Map.upd (Map.sel hm hp) ptr v in
+  Map.upd hm hp h
+  
+let mem_ok (s:toy_state) =
    Map.domain s.ts_heap == Map.domain s.ts_hmap /\
-   (forall (ptr:ta{Map.contains s.ts_heap ptr}). {:pattern (Map.contains s.ts_heap ptr)} //for every pointer in the heap...
+   (forall (ptr:ta{Map.contains s.ts_heap ptr}). {:pattern (Map.contains s.ts_heap ptr)}
    (Map.contains s.ts_hmap ptr /\ //ptr has a heaplet number
-   (let hp = (Map.sel s.ts_hmap ptr) in //heaplet number
+   (let hp = (Map.sel s.ts_hmap ptr) in
    Map.contains s.ts_hpls hp /\ //heaplet exists
-   (let heaplet = Map.sel s.ts_hpls hp in //heaplet map
+   (let heaplet = Map.sel s.ts_hpls hp in
    Map.sel heaplet ptr == Map.sel s.ts_heap ptr))))  //value in heaplet same as value in heap
 
-#reset-options "--query_stats"
 let toy_load (ptr:ta) (hp:nat) (s:toy_state) : Ghost tv
   (requires (
     valid_mem ptr s.ts_heap /\
     valid_hmem ptr hp s.ts_hpls /\
     Map.sel s.ts_hmap ptr == hp /\
-    mem_invariant s))
+    mem_ok s))
   (ensures
     fun _ -> let hp = Map.sel s.ts_hmap ptr in
     load_mem ptr s.ts_heap == load_hmem ptr hp s.ts_hpls
@@ -64,28 +62,23 @@ let toy_load (ptr:ta) (hp:nat) (s:toy_state) : Ghost tv
 
 let toy_store (ptr:ta) (v:tv) (hp:nat) (s:toy_state) : Ghost toy_state
   (requires
-    // heaplet and heap ptrs aligned
-    Map.domain s.ts_heap == Map.domain s.ts_hmap /\
-    // ptr in the heap (and so also in a heaplet)
-    Map.contains s.ts_heap ptr)
+    Map.sel s.ts_hmap ptr == hp /\
+    mem_ok s)
   (ensures
   fun s' ->
     Map.domain s'.ts_heap == Map.domain s'.ts_hmap /\
     valid_mem ptr s'.ts_heap /\
     valid_hmem ptr hp s'.ts_hpls /\
-    get_heaplet_loc ptr s'.ts_hmap == Some hp
+    Map.sel s'.ts_hmap ptr == hp /\
+    mem_ok s'
   )
   =  
-  Map.upd s.ts_hmap ptr hp;
-  store_hmem ptr v hp s.ts_hpls;
-  store_mem ptr s.ts_heap
-
-  
-    
-
-
-
-
-
-
-
+  let hmap': Map.t (key:ta) (value:nat) = Map.upd s.ts_hmap ptr hp in 
+  let hmem' = store_hmem ptr v hp s.ts_hpls in
+  let mem' : toy_heap = store_mem ptr v s.ts_heap in
+  {
+  s with
+      ts_heap = mem';
+      ts_hpls = hmem';
+      ts_hmap = hmap';
+   }
