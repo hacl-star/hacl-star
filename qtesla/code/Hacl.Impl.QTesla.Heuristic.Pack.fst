@@ -296,16 +296,16 @@ let decode_pk_loopBody pk pk_in mask23 i j =
     // different element types in F*. (BufferView does this, but only as ghost predicates for proving theorems.)
     // Instead, we curry decode_pk_pt above with pk_in as its first parameter to provide a function that looks a lot
     // like the array dereference in the reference code, and extracts down to load32_le.
-    (*[@inline_let]*) let pt = decode_pk_pt h0 pk pk_in i in
+    [@inline_let] let pt = decode_pk_pt h0 pk pk_in i in
 
     // Helper function to set elements of pk just to spread the work of the prover out.
     assert(v i < v (params_n *. params_k));
-    (*[@inline_let]*) let pks = decode_pk_set_pk h0 pk_in pk in
+    [@inline_let] let pks = decode_pk_set_pk h0 pk_in pk in
 
     // Doing these statements in the form of "pk.(i+.size #) <- UI32.(expression)" causes typechecking problems.
     // Lifting the calculation into a let of time UI32.t and then passing it to uint32_to_int32 works at the
     // expense of junking up the code.
-    (*[@inline_let]*) let u2i = uint32_to_int32 in
+    [@inline_let] let u2i = uint32_to_int32 in
 
     // In the reference code, assignment is done to pp, and "pp = (uint32_t*)pk". Here instead we inline the
     // cast of the reuslt from uint32_t to int32_t in each assignment and then assign directly to elements of pk.

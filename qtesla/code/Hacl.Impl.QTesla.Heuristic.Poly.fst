@@ -31,7 +31,7 @@ open Hacl.Impl.QTesla.Constants
 open Hacl.Impl.QTesla.Globals
 open Hacl.Impl.QTesla.Lemmas
 
-#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --query_stats"
 
 inline_for_extraction noextract private
 val ntt_innerfor:
@@ -293,29 +293,45 @@ let nttinv a w =
 
     pop_frame()
 
+#push-options "--z3rlimit 300 --z3cliopt 'smt.arith.nl=false'" // --z3seed 2"  
+private let lemma_product_fits (x:elem{is_montgomery x}) (y:elem{is_montgomery y}) : Lemma
+    (ensures Int.fits ((elem_v x) * (elem_v y)) I64.n) = 
+    lemma_mul_nat_bound (elem_v x) 0x7FFFFFFF (elem_v y) 0x7FFFFFFF
+#pop-options
+
 val poly_pointwise:
     result: poly
   -> x: poly
   -> y: poly
   -> Stack unit
-    (requires fun h -> live h result /\ live h x /\ live h y)
-    (ensures fun h0 _ h1 -> modifies1 result h0 h1)
+    (requires fun h -> live h result /\ live h x /\ live h y /\ disjoint result x /\ disjoint result y /\ disjoint x y /\
+                    is_poly_montgomery h x /\ is_poly_montgomery h y)
+    (ensures fun h0 _ h1 -> modifies1 result h0 h1 /\ is_poly_montgomery h1 result)
 
+#push-options "--z3rlimit 300 --z3cliopt 'smt.arith.nl=false'"
 let poly_pointwise result x y =
-    push_frame();
     let h0 = ST.get() in
     for (size 0) params_n
-    (fun h _ -> live h result /\ live h x /\ live h y /\ modifies1 result h0 h)
+    (fun h i -> live h result /\ live h x /\ live h y /\ modifies1 result h0 h /\ 
+             is_poly_montgomery h x /\ is_poly_montgomery h y /\ i <= v params_n /\
+             is_poly_montgomery_i h result i)
     (fun i ->
+        let hLoop = ST.get () in
+        assert(is_montgomery (bget hLoop x (v i))); // Have to explicitly assert here and for y.(i) below.
         let xi:elem = x.(i) in
+        let hLoopY = ST.get () in
+        assert(is_montgomery (bget hLoopY y (v i)));
         let yi:elem = y.(i) in
-        assume(FStar.Int.fits (elem_v xi * elem_v yi) I64.n);
-        assume(let q = elem_v params_q in let r = elem_v xi * elem_v yi in r >= 0 /\ r <= (q-1)*(q-1));
-        result.(i) <- reduce I64.( (elem_to_int64 xi) *^ (elem_to_int64 yi) )
-    );
-    pop_frame()
-
-//#reset-options "--z3rlimit 100 --max_fuel 1 --max_ifuel 1"
+        lemma_mul_nat_bound (elem_v xi) (2 * (elem_v params_q)) (elem_v yi) (2 * (elem_v params_q));
+        lemma_mul_nat_bound (elem_v xi) 0x7FFFFFFF (elem_v yi) 0x7FFFFFFF;
+        result.(i) <- reduce I64.( (elem_to_int64 xi) *^ (elem_to_int64 yi) );
+        let hFinal = ST.get () in
+        assert(is_poly_equal hLoop hFinal x);
+        assert(is_poly_equal hLoop hFinal y);
+        assert(is_poly_equal_except hLoop hFinal result (v i));
+        assert(is_montgomery (bget hFinal result (v i)))
+    )
+#pop-options
 
 val poly_add:
     result: poly
@@ -332,7 +348,7 @@ let poly_add result x y =
     for 0ul params_n
     (fun h i -> live h result /\ live h x /\ live h y /\ modifies1 result h0 h /\ i <= v params_n /\ is_poly_pmq_i h result i /\
              (forall (i:nat{i < v params_n}) . is_elem_int (elem_v (bget h x i) + elem_v (bget h y i))))
-    (fun i -
+    (fun i ->
         let h = ST.get () in assert(is_elem_int (elem_v (bget h x (v i)) + elem_v (bget h y (v i))));
         result.(i) <- x.(i) +^ y.(i);
         let hLoopEnd = ST.get () in

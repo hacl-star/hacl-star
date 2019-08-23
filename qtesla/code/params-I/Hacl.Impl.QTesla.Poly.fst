@@ -229,14 +229,19 @@ val poly_mul:
   -> x: poly
   -> y: poly
   -> Stack unit
-    (requires fun h -> live h result /\ live h x /\ live h y /\ is_poly_montgomery h x /\ is_poly_montgomery h y)
+    (requires fun h -> live h result /\ live h x /\ live h y /\ disjoint result x /\ disjoint result y /\ disjoint x y /\
+                    is_poly_montgomery h x /\ is_poly_montgomery h y)
     (ensures fun h0 _ h1 -> modifies1 result h0 h1 /\ is_poly_montgomery h1 result)
 
 let poly_mul result x y =
+    let hInit = ST.get () in
     push_frame(); 
     assert_norm(list_of_elem zetainv_list);
     [@inline_let] let (zetainv_list_elem:list elem) = coerce zetainv_list in
     let zetainv : poly = createL zetainv_list_elem in
+    let hPointwise = ST.get () in
+    assert(is_poly_equal hInit hPointwise x);
+    assert(is_poly_equal hInit hPointwise y);
     poly_pointwise result x y;
     nttinv result zetainv;
     pop_frame();

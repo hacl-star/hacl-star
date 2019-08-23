@@ -191,7 +191,7 @@ val index_poly: p: poly_k -> k: size_t{k <. params_k} -> Stack poly
 let index_poly p k = sub p (k *! params_n) params_n
 
 val reduce:
-    a: I64.t{let q = elem_v params_q in let va = I64.v a in va <= (q-1)*(q-1)}
+    a: I64.t{let q = elem_v params_q in let va = I64.v a in va <= (2*q)*(2*q)} // (q-1)*(q-1)}
   -> Tot (r:elem{is_montgomery r})
 
 let reduce a =
@@ -211,15 +211,18 @@ let reduce a =
     let u:I64.t = I64.(u *^ (elem_to_int64 params_q)) in
     assert(I64.v u <= (pow2 32 - 1) * elem_v params_q);
     let a:I64.t = I64.(a +^ u) in
+    assert(let q = elem_v params_q in I64.v a <= (2*q)*(2*q) + (pow2 32 - 1) * q);
     //assume(I64.v I64.(a >>^ 32ul) == I64.v a / pow2 32); 
     //assume(let result = I64.v I64.(a >>^ 32ul) in let q = elem_v params_q in -q < result /\ result < q);
     //assume(let result = I64.(a >>^ 32ul) in is_montgomery (int64_to_elem result));
     //assume(0 <= I64.v a);
     shift_arithmetic_right_lemma_i64 a 32ul;
     normalize_term_spec (pow2 32);
-    //assert(I64.v I64.(a `I64.shift_arithmetic_right` 32ul) == I64.v a / pow2 32); admit();
-    assert(is_montgomery (int64_to_elem (I64.shift_arithmetic_right a 32ul)));
-    int64_to_elem I64.(a >>^ 32ul)
+    let result:I64.t = I64.(a >>>^ 32ul) in
+    assume(I64.v (I64.shift_arithmetic_right a 32ul) = I64.v a / pow2 32);
+    assume(is_montgomery (int64_to_elem (I64.shift_arithmetic_right a 32ul)));
+    //int64_to_elem I64.(a >>>^ 32ul)
+    int64_to_elem result
 
 val barr_reduce:
     a: elem_base

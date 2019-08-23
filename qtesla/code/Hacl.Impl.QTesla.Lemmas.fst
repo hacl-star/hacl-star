@@ -148,3 +148,16 @@ val shift_arithmetic_right_lemma_i64:
   -> b:UI32.t{UI32.v b < I64.n}
   -> Lemma (I64.v (I64.shift_arithmetic_right a b) = I64.v a / pow2 (UI32.v b))
 
+#push-options "--z3cliopt 'smt.arith.nl=false'"
+// Generously borrowed from Vale.
+val lemma_mul_nat_bound (a a' b b':nat) : Lemma
+  (requires a <= a' /\ b <= b')
+  (ensures 0 <= a * b /\ a * b <= a' * b')
+  
+let lemma_mul_nat_bound a a' b b' =
+  let open FStar.Math.Lemmas in
+  nat_times_nat_is_nat a b;
+  lemma_mult_le_left a b b'; // a * b <= a * b'
+  lemma_mult_le_right b' a a'; // a * b' <= a' * b'
+  ()
+#pop-options

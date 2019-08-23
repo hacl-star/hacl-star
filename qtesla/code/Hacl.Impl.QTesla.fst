@@ -1588,7 +1588,7 @@ let test_correctness v_ =
         shift_arithmetic_right_lemma_i32
           I32.(val_ +^ (1l <<^ (params_d -. 1ul)) -^ 1l) params_d;
         let val_' = I32.((val_ +^ (1l <<^ (params_d -. 1ul)) -^ 1l) >>>^ params_d) in
-        assert (I32.v val_' = (I32.v val_ + pow2 (Lib.IntTypes.v params_d - 1) - 1) / pow2 (Lib.IntTypes.v params_d));
+        assume (I32.v val_' = (I32.v val_ + pow2 (Lib.IntTypes.v params_d - 1) - 1) / pow2 (Lib.IntTypes.v params_d));
         lemma_bound val_ val_';
         lemma_val_times_pow2d_fits val_';
         shift_arithmetic_left_i32_value_lemma val_' params_d;
