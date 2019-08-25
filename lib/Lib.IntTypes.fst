@@ -593,6 +593,39 @@ let logor_disjoint #t #l a b m =
 
 #pop-options
 
+let logor_zeros #t #l a = 
+  match t with 
+  |U1 -> assert_norm(u1 0 `logor` zeros U1 l == u1 0 /\ u1 1 `logor` zeros U1 l == u1 1)
+  | U8 | U16 | U32 | U64 | U128 -> UInt.logor_lemma_1 #(bits t) (v a)
+  | S8 | S16 | S32 | S64 | S128 -> Int.nth_lemma #(bits t) (Int.logor #(bits t) (v a) (Int.zero (bits t))) (v a)
+
+
+let logor_ones #t #l a = 
+  match t with 
+  |U1 -> assert_norm(u1 0 `logor` ones U1 l == u1 1 /\ u1 1 `logor` ones U1 l == u1 1)
+  | U8 | U16 | U32 | U64 | U128 -> UInt.logor_lemma_2 #(bits t) (v a)
+  | S8 | S16 | S32 | S64 | S128 -> Int.nth_lemma (Int.logor #(bits t) (v a) (Int.ones (bits t))) (Int.ones (bits t))
+
+let logor_lemma #t #l a b = 
+  logor_zeros #t #l b;
+  logor_ones #t #l b;
+  match t with 
+  | U1 -> 
+    assert_norm(u1 0 `logor` ones U1 l == u1 1 /\ u1 1 `logor` ones U1 l == u1 1);
+    assert_norm(u1 0 `logor` zeros U1 l == u1 0 /\ u1 1 `logor` zeros U1 l == u1 1)
+  | U8 | U16 | U32 | U64 | U128 -> UInt.logor_commutative #(bits t) (v a) (v b)
+  | S8 | S16 | S32 | S64 | S128 -> Int.nth_lemma #(bits t) (Int.logor #(bits t) (v a) (v b)) (Int.logor #(bits t) (v b) (v a))
+
+let logor_spec #t #l a b =
+  match t with
+  | U1 ->
+    assert_norm(u1 0 `logor` ones U1 l == u1 1 /\ u1 1 `logor` ones U1 l == u1 1);
+    assert_norm(u1 0 `logor` zeros U1 l == u1 0 /\ u1 1 `logor` zeros U1 l == u1 1);
+    assert_norm (0 `logor_v #U1` 0 == 0 /\ 0 `logor_v #U1` 1 == 1);
+    assert_norm (1 `logor_v #U1` 0 == 1 /\ 1 `logor_v #U1` 1 == 1)
+  | _ -> ()
+  
+
 [@(strict_on_arguments [0])]
 let lognot #t #l a =
   match t with

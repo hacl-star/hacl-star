@@ -594,6 +594,31 @@ val logor_disjoint: #t:inttype{unsigned t} -> #l:secrecy_level
     (ensures  v (a `logor` b) == v a + v b)
   //[SMTPat (v (a `logor` b))]
 
+val logor_zeros: #t: inttype -> #l: secrecy_level -> a: int_t t l ->
+  Lemma (v (a `logor` zeros t l) == v a)
+
+val logor_ones: #t: inttype -> #l: secrecy_level -> a: int_t t l ->
+  Lemma (v (a `logor` ones t l) == ones_v t)
+
+// For backwards compatibility
+val logor_lemma: #t:inttype -> #l:secrecy_level
+  -> a:int_t t l
+  -> b:int_t t l
+  -> Lemma
+    (requires v a = 0 \/ v a = ones_v t)
+    (ensures  (if v a = ones_v t then v (a `logor` b) == ones_v t else v (a `logor` b) == v b))
+
+let logor_v (#t:inttype) (a:range_t t) (b:range_t t) : range_t t =
+  match t with
+  | S8 | S16 | S32 | S64 | S128 -> Int.logor #(bits t) a b
+  | _ -> UInt.logor #(bits t) a b
+
+val logor_spec: #t:inttype -> #l:secrecy_level
+  -> a:int_t t l
+  -> b:int_t t l
+  -> Lemma (v (a `logor` b) == v a `logor_v` v b)
+
+
 [@(strict_on_arguments [0])]
 inline_for_extraction
 val lognot: #t:inttype -> #l:secrecy_level -> int_t t l -> int_t t l
