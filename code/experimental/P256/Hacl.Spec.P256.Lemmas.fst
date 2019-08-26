@@ -21,19 +21,30 @@ let log_and a b =
   logand_spec b a;
   UInt.logand_commutative #(bits U64) (v a) (v b)
 
+val logor_commutative: a: uint64 -> b: uint64 -> 
+  Lemma (logor a b == logor b a)
+
+let logor_commutative a b = 
+  logor_spec a b;
+  logor_spec b a;
+  UInt.logor_commutative #(bits U64) (v a) (v b)
+  
+
 noextract
 val log_or: a: uint64 -> b: uint64 {uint_v b == 0 \/ uint_v a == 0} -> 
 Lemma (if uint_v b = 0 then uint_v (logor a b) == uint_v a else uint_v (logor a b) == uint_v b)
 
-let log_or a b = admit()
-
-
-noextract
-val log_not_lemma: b: uint64{uint_v b == 0 \/ uint_v b == pow2 64 - 1} -> 
-Lemma(if uint_v b = 0 then uint_v (lognot (b)) == pow2 64 -1 else uint_v (lognot b) == 0)
-
-let log_not_lemma a = admit()
-
+let log_or a b = 
+    if uint_v b = 0 then 
+       begin
+	 logor_lemma b a;
+	 logor_commutative a b
+       end
+    else 
+      begin
+	assert(uint_v a == 0);
+	logor_lemma a b
+      end
 
 noextract
 val lemma_nat_4: f: felem4 -> Lemma (as_nat4 f < pow2 256)
@@ -274,9 +285,9 @@ val lemma_reduce_mod_by_sub2: t: nat ->
   Lemma ((prime256 * (t % pow2 64)) % pow2 64 == (-t)  % pow2 64)
 
 let lemma_reduce_mod_by_sub2 t = 
+  admit();
   let t_ = t % pow2 64 in   
   let f = (pow2 256 - pow2 224 + pow2 192 + pow2 96 -1) * (t % pow2 64) in 
-  assume(f > 0);
   assert(f == pow2 256 * t_ - pow2 224 * t_ + pow2 192 * t_ + pow2 96 * t_ - t_);
   lemma_add_mod (pow2 256 * t_) (pow2 224 * t_) (pow2 192 * t_) (pow2 96 * t_) t_ f (pow2 64);
   assert(f % (pow2 64) ==  ((pow2 256 * t_) % pow2 64 -  (pow2 224 * t_) % pow2 64 +  (pow2 192 * t_) % pow2 64 +  (pow2 96 * t_) % pow2 64 -  t_) % pow2 64);
@@ -516,6 +527,16 @@ val cmovznz4_lemma: cin: uint64 -> x: uint64 -> y: uint64 -> Lemma (
   let r = logor (logand y mask) (logand x (lognot mask)) in 
   if uint_v cin = 0 then uint_v r == uint_v x else uint_v r == uint_v y)
 
+let cmovznz4_lemma cin x y = 
+  let x2 = neq_mask cin (u64 0) in 
+      neq_mask_lemma cin (u64 0);
+  let x3 = logor (logand y x2) (logand x (lognot x2)) in
+  let ln = lognot (neq_mask cin (u64 0)) in 
+    log_and y x2; 
+    lognot_lemma x2;
+    log_and x ln;
+    log_or (logand y x2) (logand x (lognot x2))
+
 
 val lemma_equ_felem: a: nat{ a < pow2 64} -> b: nat {b < pow2 64} -> c: nat {c < pow2 64} -> d: nat {d < pow2 64} ->
    a1: nat{a1 < pow2 64} -> b1: nat {b1 < pow2 64} -> c1: nat {c1 < pow2 64} -> d1: nat {d1 < pow2 64} ->
@@ -623,17 +644,6 @@ let lemma_xor_copy_cond a b mask =
 let lognot_lemma a = admit()
 
 let lemma_equality a b = ()
-
-let cmovznz4_lemma cin x y = 
-  let x2 = neq_mask cin (u64 0) in 
-      neq_mask_lemma cin (u64 0);
-  let x3 = logor (logand y x2) (logand x (lognot x2)) in
-  let ln = lognot (neq_mask cin (u64 0)) in 
-    log_and y x2; 
-    log_not_lemma x2;
-    log_and x ln;
-    log_or (logand y x2) (logand x (lognot (x2)))
-
 
   
 let lemma_equ_felem a b c d  a1 b1 c1 d1  = 

@@ -623,6 +623,12 @@ val logor_spec: #t:inttype -> #l:secrecy_level
 inline_for_extraction
 val lognot: #t:inttype -> #l:secrecy_level -> int_t t l -> int_t t l
 
+val lognot_lemma: #t: inttype -> #l: secrecy_level ->
+  a: int_t t l -> 
+  Lemma 
+    (requires v a = 0 \/ v a = ones_v t)
+    (ensures (if v a = ones_v t then v (lognot a) == 0 else v (lognot a) == ones_v t))
+
 inline_for_extraction
 type shiftval (t:inttype) = u:size_t{v u < bits t}
 

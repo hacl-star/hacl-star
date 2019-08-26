@@ -641,6 +641,9 @@ let lognot #t #l a =
   | S64  -> Int64.lognot a
   | S128 -> Int128.lognot a
 
+let lognot_lemma #t #l a = ()
+  
+
 [@(strict_on_arguments [0])]
 let shift_right #t #l a b =
   match t with
