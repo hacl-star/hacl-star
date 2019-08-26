@@ -230,7 +230,7 @@ let lemma_division_is_multiplication t3 prime_ =
     inverse_mod ((2 ** 64), prime) * 2 ** 64 % prime
   
   *)
-  assert_norm(prime256 > 3);
+  assert_norm(prime256 > 3); 
   let prime2 = 115792089210356248762697446949407573529996955224135760342422259061068512044369 in 
   assume(modp_inv2_prime (pow2 64) prime256 * pow2 64 % prime256 = 1); 
   assume(modp_inv2_prime (pow2 64) prime2 * pow2 64 % prime2 = 1);
@@ -274,9 +274,9 @@ val lemma_reduce_mod_by_sub2: t: nat ->
   Lemma ((prime256 * (t % pow2 64)) % pow2 64 == (-t)  % pow2 64)
 
 let lemma_reduce_mod_by_sub2 t = 
-  admit();
   let t_ = t % pow2 64 in   
   let f = (pow2 256 - pow2 224 + pow2 192 + pow2 96 -1) * (t % pow2 64) in 
+  assume(f > 0);
   assert(f == pow2 256 * t_ - pow2 224 * t_ + pow2 192 * t_ + pow2 96 * t_ - t_);
   lemma_add_mod (pow2 256 * t_) (pow2 224 * t_) (pow2 192 * t_) (pow2 96 * t_) t_ f (pow2 64);
   assert(f % (pow2 64) ==  ((pow2 256 * t_) % pow2 64 -  (pow2 224 * t_) % pow2 64 +  (pow2 192 * t_) % pow2 64 +  (pow2 96 * t_) % pow2 64 -  t_) % pow2 64);
@@ -319,8 +319,7 @@ val mult_one_round: t: nat -> co: nat{t % prime256 == co% prime256}  -> Lemma
 
 
 let mult_one_round t co = 
-  admit();
-    let t1 = t % pow2 64 in 
+let t1 = t % pow2 64 in 
     let t2 = t1 * prime256 in 
     let t3 = t + t2 in 
       modulo_addition_lemma t prime256 (t % pow2 64);
@@ -333,6 +332,7 @@ let mult_one_round t co =
       assert_norm (prime256 > 3);
       lemma_division_is_multiplication t3 prime256;
       lemma_multiplication_to_same_number t3 co (modp_inv2 (pow2 64)) prime256
+
 
 val lemma_reduce_mod_ecdsa_prime:
   prime : nat {prime = 115792089210356248762697446949407573529996955224135760342422259061068512044369} ->
