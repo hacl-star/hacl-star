@@ -25,13 +25,14 @@ noextract
 val log_or: a: uint64 -> b: uint64 {uint_v b == 0 \/ uint_v a == 0} -> 
 Lemma (if uint_v b = 0 then uint_v (logor a b) == uint_v a else uint_v (logor a b) == uint_v b)
 
+let log_or a b = admit()
+
+
 noextract
 val log_not_lemma: b: uint64{uint_v b == 0 \/ uint_v b == pow2 64 - 1} -> 
 Lemma(if uint_v b = 0 then uint_v (lognot (b)) == pow2 64 -1 else uint_v (lognot b) == 0)
 
-let log_or a b = admit()
 let log_not_lemma a = admit()
-
 
 
 noextract
@@ -318,6 +319,7 @@ val mult_one_round: t: nat -> co: nat{t % prime256 == co% prime256}  -> Lemma
 
 
 let mult_one_round t co = 
+  admit();
     let t1 = t % pow2 64 in 
     let t2 = t1 * prime256 in 
     let t3 = t + t2 in 
