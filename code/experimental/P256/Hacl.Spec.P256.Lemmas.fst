@@ -207,10 +207,6 @@ let modp_inv2_pow (x: nat) : Tot (r: nat {r < prime256}) =
    pow x (prime256 - 2) % prime256
   
 
-
-#reset-options "--max_fuel 0 --z3rlimit 100" 
-
-
 val lemma_mod_twice : a:int -> p:pos -> Lemma ((a % p) % p == a % p)
 
 let lemma_mod_twice a p = lemma_mod_mod (a % p) a p
@@ -234,43 +230,21 @@ let lemma_division_is_multiplication t3 prime_ =
   let open FStar.Tactics in 
   let open FStar.Tactics.Canon in 
   let remainder = t3 / pow2 64 in 
-  (*
-  SAGE: 
-    prime = 2** 256 - 2** 224 + 2** 192 + 2** 96 -1
-    inverse_mod ((2 ** 64), prime) * 2 ** 64 % prime
-    1;
-
-    prime = 115792089210356248762697446949407573529996955224135760342422259061068512044369
-    inverse_mod ((2 ** 64), prime) * 2 ** 64 % prime
-  
-  *)
-  assert_norm(prime256 > 3); 
+    assert_norm(prime256 > 3); 
   let prime2 = 115792089210356248762697446949407573529996955224135760342422259061068512044369 in 
-  assume(modp_inv2_prime (pow2 64) prime256 * pow2 64 % prime256 = 1); 
-  assume(modp_inv2_prime (pow2 64) prime2 * pow2 64 % prime2 = 1);
-
+  assert_norm((modp_inv2_prime (pow2 64) prime256 * pow2 64) % prime256 = 1);
+  assert_norm ((modp_inv2_prime (pow2 64) prime2 * pow2 64) % prime2 = 1);
   let k =  (modp_inv2_prime (pow2 64) prime_ * pow2 64) in 
-  
   modulo_distributivity_mult remainder k prime_;
-  assert((remainder * k) % prime_ = ((remainder % prime_)) % prime_);
+    assert((remainder * k) % prime_ = ((remainder % prime_)) % prime_);
   lemma_mod_twice remainder prime_;
-    assert_by_tactic (t3 / pow2 64 * (modp_inv2_prime (pow2 64) prime_ * pow2 64) == t3/ pow2 64 * pow2 64 * modp_inv2_prime (pow2 64) prime_) canon;
-  assert((t3 / pow2 64 * (modp_inv2_prime (pow2 64) prime_ * pow2 64)) % prime_ = remainder % prime_);
-  assert((t3  * modp_inv2_prime (pow2 64) prime_) % prime_ = remainder % prime_)
-
-
-#reset-options " --z3rlimit 300 --z3refresh" 
-
-
-val lemma_reduce_mod_by_sub: t: nat -> Lemma
-    ((t - t % pow2 64) % pow2 64 == 0)
-
-let lemma_reduce_mod_by_sub t = ()
+  assert_by_tactic (t3 / pow2 64 * (modp_inv2_prime (pow2 64) prime_ * pow2 64) == t3/ pow2 64 * pow2 64 * modp_inv2_prime (pow2 64) prime_) canon;
+    assert((t3 / pow2 64 * (modp_inv2_prime (pow2 64) prime_ * pow2 64)) % prime_ = remainder % prime_);
+    assert((t3  * modp_inv2_prime (pow2 64) prime_) % prime_ = remainder % prime_)
 
 
 val lemma_multiplication_same_number2: a: int -> b: int -> c: int{a * b = c} -> d: int -> Lemma
-    (a * b * d == c* d) 
-
+    (a * b * d == c * d) 
 
 let lemma_multiplication_same_number2 a b c d = ()
 
