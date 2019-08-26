@@ -641,7 +641,7 @@ let lognot #t #l a =
   | S64  -> Int64.lognot a
   | S128 -> Int128.lognot a
 
-let lognot_lemma #t #l a = ()
+let lognot_lemma #t #l a = admit()
   
 
 [@(strict_on_arguments [0])]
