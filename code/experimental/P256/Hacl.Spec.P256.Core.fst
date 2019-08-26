@@ -539,8 +539,7 @@ let montgomery_multiplication_one_round (a0, a1, a2, a3, a4, a5, a6, a7) (prim0,
 
 
 #reset-options "--z3refresh --z3rlimit  500" 
-(*to reprove *)
-let montgomery_multiplication (a0, a1, a2, a3) (b0, b1, b2, b3) = 
+let montgomery_multiplication (a0, a1, a2, a3) (b0, b1, b2, b3) =  
   let (prim0, prim1, prim2, prim3) = upload_prime () in 
   assert_norm(as_nat4 (prim0, prim1, prim2, prim3) == prime256);
   assert_norm(prime256 < pow2 256);
