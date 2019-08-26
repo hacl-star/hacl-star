@@ -641,8 +641,16 @@ let lognot #t #l a =
   | S64  -> Int64.lognot a
   | S128 -> Int128.lognot a
 
-let lognot_lemma #t #l a = admit()
-  
+let lognot_lemma #t #l a = 
+  match t with 
+  |U1 -> assert_norm(lognot (u1 0) == u1 1 /\ lognot (u1 1)  == u1 0)
+  | U8 | U16 | U32 | U64 | U128 -> 
+    FStar.UInt.lognot_lemma_1 #(bits t); 
+    UInt.nth_lemma (FStar.UInt.lognot #(bits t) (UInt.ones (bits t))) (UInt.zero (bits t))
+  | S8 | S16 | S32 | S64 | S128 -> 
+    Int.nth_lemma (FStar.Int.lognot #(bits t) (Int.zero (bits t))) (Int.ones (bits t));
+    Int.nth_lemma (FStar.Int.lognot #(bits t) (Int.ones (bits t))) (Int.zero (bits t))
+
 
 [@(strict_on_arguments [0])]
 let shift_right #t #l a b =
