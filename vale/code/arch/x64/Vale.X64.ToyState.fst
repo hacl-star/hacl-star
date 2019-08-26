@@ -5,16 +5,16 @@ module Map = FStar.Map
 
 type ta = nat
 type tv = nat
-type toy_heap = Map.t (key: ta) (value: tv) //map of toy addrs to values
+type toy_heap = Map.t (key: ta) (value: tv) // main heap
 type toy_hpls = Map.t (key:nat) (value:toy_heap) //heaplet map
 
 noeq type toy_state = {
   ts_heap: toy_heap;
   ts_hpls: toy_hpls;
-  ts_hmap: Map.t (key:ta) (value:nat) //maps toy pointers to the heaplet they're in
+  ts_hmap: Map.t (key:ta) (value:nat) // ptr -> hp map
 }
 
-val valid_mem : (ptr:ta) -> (h:toy_heap) -> GTot bool //does mem contain a value at ptr?
+val valid_mem : (ptr:ta) -> (h:toy_heap) -> GTot bool
 let valid_mem (ptr:ta) (h:toy_heap) = Map.contains h ptr
 
 val load_mem : (ptr:ta) -> (h:toy_heap) -> GTot tv
@@ -25,7 +25,7 @@ let load_mem (ptr:ta) (h:toy_heap) =
 val store_mem : (ptr:ta) -> (v:tv) -> (h:toy_heap) -> GTot toy_heap
 let store_mem (ptr:ta) (v:tv) (h:toy_heap) = Map.upd h ptr v
 
-val valid_hmem : (ptr:ta) -> (hp:nat) -> (hm:toy_hpls) -> GTot bool //does heaplet hp have a key ptr?
+val valid_hmem : (ptr:ta) -> (hp:nat) -> (hm:toy_hpls) -> GTot bool
 let valid_hmem (ptr:ta) (hp:nat) (hm:toy_hpls) = Map.contains (Map.sel hm hp) ptr
 
 val load_hmem : (ptr:ta) -> (hp:nat) -> (hm:toy_hpls) -> GTot tv
@@ -37,15 +37,20 @@ val store_hmem : (ptr:ta) -> (v:tv) -> (hp:nat) -> (hm:toy_hpls) -> GTot toy_hpl
 let store_hmem (ptr:ta) (v:tv) (hp:nat) (hm:toy_hpls) = 
   let h = Map.upd (Map.sel hm hp) ptr v in
   Map.upd hm hp h
-  
+
+// for every heaplet hp:
+//     for every pointer ptr in heaplet hp:
+//         hmap contains (ptr, hp)
+//         (hpls, hp) contains (ptr, v)
+//         value at ptr in hp == value at ptr in heap
 let mem_ok (s:toy_state) =
    Map.domain s.ts_heap == Map.domain s.ts_hmap /\
    (forall (hp:nat{hp < 16}). //for ever heaplet
-     Map.contains s.ts_hpls hp /\ //heaplet exists and
-     (forall (ptr:ta{Map.contains (Map.sel s.ts_hpls hp) ptr}). //for every pointer ptr in that heaplet
-       Map.contains s.ts_hmap ptr /\ //ptr has a heaplet number and
-       Map.sel s.ts_hmap ptr == hp /\ //ptr had the RIGHT heaplet number
-       Map.sel (Map.sel s.ts_hpls hp) ptr == Map.sel s.ts_heap ptr))  //value in heaplet same as value in heap
+     Map.contains s.ts_hpls hp /\
+     (forall (ptr:ta{Map.contains (Map.sel s.ts_hpls hp) ptr}).
+       Map.contains s.ts_hmap ptr /\
+       Map.sel s.ts_hmap ptr == hp /\
+       Map.sel (Map.sel s.ts_hpls hp) ptr == Map.sel s.ts_heap ptr))
 
 let toy_load (ptr:ta) (hp:nat{hp < 16}) (s:toy_state) : Ghost tv
   (requires (
@@ -82,6 +87,7 @@ let toy_store (ptr:ta) (v:tv) (hp:nat{hp < 16}) (s:toy_state) : Ghost toy_state
       ts_hmap = hmap';
    }
 
+#set-options "--z3rlimit 100"
 let switch_hp (ptr:ta) (ohp:nat{ohp<16}) (nhp:nat{nhp<16}) (s:toy_state) : Ghost toy_state
   (requires
     ohp <> nhp /\
@@ -93,48 +99,43 @@ let switch_hp (ptr:ta) (ohp:nat{ohp<16}) (nhp:nat{nhp<16}) (s:toy_state) : Ghost
   (ensures
     fun s' ->
     Map.sel s'.ts_hmap ptr == nhp /\
-    valid_mem ptr s'.ts_heap /\
     valid_hmem ptr nhp s'.ts_hpls /\
-    //mem_ok s' /\
-    //Map.domain s'.ts_heap == Map.domain s'.ts_hmap /\
+    mem_ok s' /\
     (Map.sel (Map.sel s.ts_hpls ohp)) ptr == (Map.sel (Map.sel s'.ts_hpls nhp) ptr) /\
     Map.sel s'.ts_heap ptr == (Map.sel (Map.sel s'.ts_hpls nhp) ptr)
   ) =
-  assert((Map.sel s.ts_hmap ptr =!= nhp));
-  
-  let nh = Map.sel s.ts_hpls nhp in
-  assert(not (Map.contains nh ptr));
-  
-  //update the heaplet that ptr belongs to
-  let hmap' = Map.upd s.ts_hmap ptr nhp in //update expectd heaplet
-  
-  assert(Map.domain s.ts_heap == Map.domain s.ts_hmap);
-  
-  // remote ptr from heaplet #ohp
-  let oh = Map.sel s.ts_hpls ohp in //old heaplet
-  assert(Map.contains oh ptr);
-  let no_ptr = Set.complement(Set.singleton ptr) in
-  let ohd' = Set.intersect (Map.domain oh) no_ptr in
-  let oh' = Map.restrict ohd' oh in //oh without ptr
-  assert(not (Map.contains oh' ptr));
-  
-  // update heaplets map so that ohp contains heaplet without ptr
-  let ts_hpls' = Map.upd s.ts_hpls ohp oh' in
 
-  // move (ptr, value) pair to new heaplet
+  // s' is:
+  // s with ts_hmap = hmap'                         <-- updated hmap
+  //   with ts_hpls with (ohp, oh') and (nhp, nh')  <-- updated heaplets
+  //   where
+  //       nh' contains (ptr, v)
+  //       oh' does not contain ptr
+  //  and ts_heap is unchanged
+
+  // updated hmap
+  let hmap' = Map.upd s.ts_hmap ptr nhp in //update expectd heaplet
+  assert(Set.equal (Map.domain s.ts_heap) (Map.domain hmap'));
+
+  // get value to move from oh to nh
   let v = load_mem ptr s.ts_heap in
-  let hmem' = store_hmem ptr v nhp ts_hpls' in
-  
+
+  // remote ptr from heaplet ohp
+  let oh = Map.sel s.ts_hpls ohp in //old heaplet
+  let no_ptr = Set.complement(Set.singleton ptr) in
+  let ohd' = Set.intersect (Map.domain oh) no_ptr in //new domain
+  let oh' = Map.restrict ohd' oh in //oh without ptr
+
+  // add ptr and value to new heaplet
+  let nh = Map.sel s.ts_hpls nhp in
+  let nh' = Map.upd nh ptr v in
+
+  // update heaplets map
+  let ts_hpls' = Map.upd s.ts_hpls ohp oh' in
+  let ts_hpls' = Map.upd ts_hpls' nhp nh' in
+
   {
   s with
-      ts_hpls = hmem';
+      ts_hpls = ts_hpls';
       ts_hmap = hmap';
-   } 
-  
-//Map.domain s.ts_heap == Map.domain s.ts_hmap /\
-//   (forall (hp:nat{hp < 16}). //for ever heaplet
-//     Map.contains s.ts_hpls hp /\ //heaplet exists and
-//     (forall (ptr:ta{Map.contains (Map.sel s.ts_hpls hp) ptr}). //for every pointer ptr in that heaplet
-//       Map.contains s.ts_hmap ptr /\ //ptr has a heaplet number and
-//       Map.sel s.ts_hmap ptr == hp /\ //ptr had the RIGHT heaplet number
-//       Map.sel (Map.sel s.ts_hpls hp) ptr == Map.sel s.ts_heap ptr))  //value in heaplet same as value in heap
+   }
