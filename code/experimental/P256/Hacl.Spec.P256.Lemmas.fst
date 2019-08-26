@@ -122,7 +122,7 @@ val modulo_distributivity_mult: a: int -> b: int -> c: pos -> Lemma ((a * b) % c
 
 let modulo_distributivity_mult a b c = 
   lemma_mod_mul_distr_l a b c;
-  lemma_mod_mul_distr_r (a%c) b c
+  lemma_mod_mul_distr_r (a % c) b c
 
 val power_one: a: nat -> Lemma (pow 1 a == 1) 
 
@@ -134,7 +134,7 @@ let rec power_one a =
 
 
 noextract
-val pow_plus: a: nat -> b: nat -> c: nat -> Lemma (ensures (pow a b * pow a c = pow a (b +c)))
+val pow_plus: a: nat -> b: nat -> c: nat -> Lemma (ensures (pow a b * pow a c = pow a (b + c)))
 (decreases b)
 
 let rec pow_plus a b c = 
@@ -169,7 +169,6 @@ let rec power_mult a b c =
   |_ ->  power_mult a b (c -1); pow_plus a (b * (c -1)) b
 
 
-
 val power_distributivity_2: a: nat -> b: nat -> c: pos -> 
   Lemma (pow (a * b) c == pow a c * pow b c)
 
@@ -195,8 +194,12 @@ let rec power_distributivity_2 a b c =
 val modulo_distributivity_mult_last_two: a: int -> b: int -> c: int -> d: int -> e: int -> f: pos -> 
 Lemma ((a * b * c * d * e) % f = (a * b * c * ((d * e) % f)) % f)
 
-let modulo_distributivity_mult_last_two a b c d e f = admit()
+let modulo_distributivity_mult_last_two a b c d e f =
+  let open FStar.Tactics in 
+  let open FStar.Tactics.Canon in 
 
+  assert_by_tactic (a * b * c * d * e == a * b * c * (d * e)) canon;
+  lemma_mod_mul_distr_r (a * b * c) (d * e) f
 
 noextract
 let modp_inv2_pow (x: nat) : Tot (r: nat {r < prime256}) = 
