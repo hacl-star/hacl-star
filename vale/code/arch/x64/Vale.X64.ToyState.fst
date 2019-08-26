@@ -90,9 +90,9 @@ let toy_store (ptr:ta) (v:tv) (hp:nat{hp < 16}) (s:toy_state) : Ghost toy_state
 #set-options "--z3rlimit 100"
 let switch_hp (ptr:ta) (ohp:nat{ohp<16}) (nhp:nat{nhp<16}) (s:toy_state) : Ghost toy_state
   (requires
-    ohp <> nhp /\
+    //ohp <> nhp /\
     Map.sel s.ts_hmap ptr == ohp /\
-    valid_mem ptr s.ts_heap /\
+    //valid_mem ptr s.ts_heap /\
     valid_hmem ptr ohp s.ts_hpls /\
     mem_ok s
   )

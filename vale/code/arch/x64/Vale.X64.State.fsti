@@ -10,13 +10,20 @@ module Flags = Vale.X64.Flags
 module Regs = Vale.X64.Regs 
 module Map = FStar.Map
 
+type vale_hpls = Map.t (key:nat{key<16}) (value:vale_heap)
+
+noeq type vale_memory = {
+  vm_heap : vale_heap;
+  vm_hpls : vale_hpls;
+  vm_hmap : Map.t (key:int) (value:nat{value<16});
+}
+
 noeq type vale_state = {
   vs_ok: bool;
   vs_regs: Regs.t;
   vs_flags: Flags.t;
   vs_heap: vale_heap;
-  vs_hpls: Map.t (key:nat) (value:vale_heap); //heaplets
-  vs_hmap: Map.t (key:int) (value:nat); //ptr -> heaplet map
+  vs_memory: vale_memory;
   vs_stack: vale_stack;
   vs_memTaint: memtaint;
   vs_stackTaint: memtaint;

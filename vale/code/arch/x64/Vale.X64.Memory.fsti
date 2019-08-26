@@ -191,6 +191,11 @@ val writeable_mem64 : ptr:int -> h:vale_heap -> GTot bool // can we write a 64-b
 val load_mem64 : ptr:int -> h:vale_heap -> GTot nat64 // the 64-bit word at ptr (if valid_mem64 holds)
 val store_mem64 : ptr:int -> v:nat64 -> h:vale_heap -> GTot vale_heap
 
+//val valid_hmem64 : ptr:int -> hp:nat -> h:vale_hpls -> GTot bool // is there a 64-bit word at address ptr in heaplet hp?
+//val writeable_hmem64 : ptr:int -> hp:nat -> h:vale_hpls -> GTot bool // can we write a 64-bit word at address ptr?
+//val load_hmem64 : ptr:int -> hp:nat -> h:vale_hpls -> GTot nat64 // the 64-bit word at ptr (if valid_hmem64 holds)
+//val store_hmem64 : ptr:int -> v:nat64 -> hp:nat -> h:vale_hpls -> GTot vale_hpls
+
 val valid_mem128 (ptr:int) (h:vale_heap) : GTot bool
 val writeable_mem128 (ptr:int) (h:vale_heap) : GTot bool
 val load_mem128  (ptr:int) (h:vale_heap) : GTot quad32
