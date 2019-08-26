@@ -9,29 +9,17 @@ open Hacl.Spec.GF128.Vec
 
 module GF = Spec.GaloisField
 
-
-#reset-options "--z3rlimit 50 --max_fuel 1"
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
 type table = lseq uint64 256
 type table1 = lseq uint64 128
-
-inline_for_extraction noextract
 let elem_s = lseq uint64 2
 
 let to_elem (x:elem_s) : elem =
   mk_int #U128 (v x.[0] + v x.[1] * pow2 64)
 
-let from_elem (x:elem) : elem_s =
-  create2 (to_u64 x) (to_u64 (x >>. 64ul))
-
-val lemma_to_from_elem: x:elem ->
-  Lemma (to_elem (from_elem x) == x)
-let lemma_to_from_elem x = ()
-
-val lemma_from_to_elem: x:elem_s ->
-  Lemma (from_elem (to_elem x) == x)
-let lemma_from_to_elem x =
-  eq_intro (from_elem (to_elem x)) x
+let zero = GF.zero #gf128
+let bit_mask64 (u:uint64) = u64 0 -. (u &. u64 1)
 
 
 let fadd_s (x:elem_s) (y:elem_s) : elem_s =
@@ -43,8 +31,6 @@ val fadd_lemma: x:elem_s -> y:elem_s -> Lemma
   (to_elem (fadd_s x y) == GF.fadd (to_elem x) (to_elem y))
 let fadd_lemma x y = admit()
 
-
-let bit_mask64 (u:uint64) = u64 0 -. (u &. u64 1)
 
 let fmul_be_s_f (x:uint64) (i:nat{i < 64}) (tmp_sh:elem_s & elem_s) : (elem_s & elem_s) =
   let (tmp, sh) = tmp_sh in
@@ -70,6 +56,7 @@ val fmul_be_lemma: x:elem_s -> y:elem_s -> Lemma
   (to_elem (fmul_be_s x y) == GF.fmul_be (to_elem x) (to_elem y))
 let fmul_be_lemma x y = admit()
 
+
 let precomp_s_f (i:nat{i < 128}) (pre_sh:table & elem_s) : (table & elem_s) =
   let (pre, sh) = pre_sh in
   let (s0, s1) = (sh.[0], sh.[1]) in
@@ -90,7 +77,6 @@ let fmul_pre_s_f (x:uint64) (tab:table1) (i:nat{i < 64}) (tmp:elem_s) : elem_s =
   let m = bit_mask64 (x >>. (63ul -. size i)) in
   let tmp = tmp.[0] <- tmp.[0] ^. (m &. tab.[i * 2]) in
   let tmp = tmp.[1] <- tmp.[1] ^. (m &. tab.[i * 2 + 1]) in
-
   tmp
 
 
@@ -102,13 +88,9 @@ let fmul_pre_s (x:elem_s) (tab:table) : elem_s =
     Lib.LoopCombinators.repeati 64 (fmul_pre_s_f x.[0] (sub tab 128 128)) tmp in
   tmp
 
-
 val fmul_pre_lemma: x:elem_s -> y:elem_s -> Lemma
   (to_elem (fmul_pre_s x (precomp_s y)) == GF.fmul_be (to_elem x) (to_elem y))
 let fmul_pre_lemma x y = admit()
-
-
-
 
 
 (*

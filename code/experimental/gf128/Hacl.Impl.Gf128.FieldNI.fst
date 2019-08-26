@@ -15,6 +15,7 @@ module BSeq = Lib.ByteSequence
 module S = Spec.GF128
 module GF = Spec.GaloisField
 module Vec = Hacl.Spec.GF128.Vec
+module Lemmas = Hacl.Spec.GF128.Lemmas
 
 include Hacl.Spec.Gf128.FieldNI
 
@@ -282,8 +283,13 @@ val fadd_acc4:
     feval4 h1 x == Vec.fadd4 (create4 (feval h0 acc) zero zero zero) (feval4 h0 x))
 
 let fadd_acc4 x acc =
+  let h0 = ST.get () in
   x.(0ul) <- cl_add acc.(0ul) x.(0ul);
-  admit()
+  let h1 = ST.get () in
+  Lemmas.add_identity (feval h0 (gsub x 1ul 1ul));
+  Lemmas.add_identity (feval h0 (gsub x 2ul 1ul));
+  Lemmas.add_identity (feval h0 (gsub x 3ul 1ul));
+  LSeq.eq_intro (feval4 h1 x) (Vec.fadd4 (create4 (feval h0 acc) zero zero zero) (feval4 h0 x))
 
 
 val normalize4:
