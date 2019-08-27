@@ -244,13 +244,13 @@ let num_pad_blocks (a:D.sha2_alg) (len:size_nat{len < D.block_length a}) =
 let prepare_last (#a:D.sha2_alg) (nblocks:nat)
 		 (len:size_nat{len < D.block_length a /\
 			       nblocks * D.block_length a + len < D.max_input_length a})
-		 (last:lbytes len):
+		 (lastb:lbytes len):
 		 block a & block a  =
     let open Lib.Sequence in
     let total_len = ((nblocks * D.block_length a) + len)  in
     let nb = num_pad_blocks a len in
     let blocks = create (2 * D.block_length a) (u8 0) in
-    let blocks = update_sub blocks 0 len last in
+    let blocks = update_sub blocks 0 len lastb in
     let blocks = blocks.[len] <- (u8 0x80) in
     let blocks = update_sub blocks ((nb * D.block_length a) - D.len_length a)
 			    (D.len_length a) (encoded_len #a total_len) in
