@@ -1,5 +1,7 @@
-module Hacl.Impl.QTesla.Lemmas.Sal
+module Hacl.Impl.QTesla.ShiftArithmeticLeft
 
+module U16 = FStar.UInt16
+module I16 = FStar.Int16
 module U32 = FStar.UInt32
 module I32 = FStar.Int32
 module U64 = FStar.UInt64
@@ -28,6 +30,51 @@ let mod_op_At_Percent v s p =
   Math.Lemmas.pow2_le_compat (p + s) p;
   Math.Lemmas.pow2_modulo_modulo_lemma_1 v p (p + s)
 
+/// Shift arithmetic left for int16_t
+inline_for_extraction noextract
+val shift_arithmetic_left_i16:
+    a:I16.t
+  -> s:U32.t{U32.v s < I16.n}
+  -> I16.t
+
+let shift_arithmetic_left_i16 a s =
+  let open FStar.Int.Cast in
+  uint16_to_int16 ((int16_to_uint16 a) `U16.shift_left` s)
+
+val shift_arithmetic_left_i16_value_lemma:
+    a:I16.t
+  -> s:U32.t{U32.v s < U16.n /\ Int.fits (I16.v a * pow2 (U32.v s)) I16.n}
+  -> Lemma (I16.v (shift_arithmetic_left_i16 a s) = (I16.v a * pow2 (U32.v s)) @% pow2 I16.n)
+
+#push-options "--z3rlimit 1500 --initial_fuel 1 --max_fuel 1"
+let shift_arithmetic_left_i16_value_lemma a s =
+  let open FStar.Int.Cast in
+  calc (==) {
+    I16.v (shift_arithmetic_left_i16 a s);
+    == { } // shift_arithmetic_left definition
+    I16.v (uint16_to_int16 U16.(int16_to_uint16 a <<^ s));
+    == { } // U16.shift_left definition; U16.uint_to_t definition
+    I16.v (uint16_to_int16 (U16.uint_to_t
+      (UInt.shift_left (U16.v (int16_to_uint16 a)) (U32.v s))));
+    == { UInt.shift_left_value_lemma (U16.v (int16_to_uint16 a)) (U32.v s) }
+    I16.v (uint16_to_int16 (U16.uint_to_t
+      ((U16.v (int16_to_uint16 a) * pow2 (U32.v s)) % pow2 U16.n)));
+    == { } // Int.Cast.int16_to_uint16 definition
+    I16.v (uint16_to_int16 (U16.uint_to_t
+      (((I16.v a % pow2 U16.n) * pow2 (U32.v s)) % pow2 U16.n)));
+    == { } // Int.Cast.uint16_to_int16 definition
+    U16.v ((U16.uint_to_t
+      (((I16.v a % pow2 16) * pow2 (U32.v s)) % pow2 U16.n))) @% pow2 U16.n;
+    == { UInt16.vu_inv (((I16.v a @% pow2 16) * pow2 (U32.v s)) % pow2 U16.n) }
+    (((I16.v a % pow2 16) * pow2 (U32.v s)) % pow2 U16.n) @% pow2 U16.n;
+    == { mod_op_At_Percent (I16.v a * pow2 (U32.v s)) 0 (pow2 U16.n) }
+    ((I16.v a % pow2 16) * pow2 (U32.v s)) @% pow2 U16.n;
+    == { Math.Lemmas.pow2_multiplication_modulo_lemma_2 (I16.v a) (U16.n + U32.v s) (U32.v s) }
+    ((I16.v a * pow2 (U32.v s)) % pow2 (U16.n + U32.v s)) @% pow2 U16.n;
+    == { mod_op_At_Percent (I16.v a * pow2 (U32.v s)) (U32.v s) U16.n }
+    (I16.v a * pow2 (U32.v s)) @% pow2 U16.n;
+  }
+#pop-options
 
 /// Shift arithmetic left for int32_t
 
@@ -41,13 +88,12 @@ let shift_arithmetic_left_i32 a s =
   let open FStar.Int.Cast in
   uint32_to_int32 ((int32_to_uint32 a) `U32.shift_left` s)
 
-
 val shift_arithmetic_left_i32_value_lemma:
     a:I32.t
   -> s:U32.t{U32.v s < U32.n /\ Int.fits (I32.v a * pow2 (U32.v s)) I32.n}
   -> Lemma (I32.v (shift_arithmetic_left_i32 a s) = (I32.v a * pow2 (U32.v s)) @% pow2 I32.n)
 
-let shift_arithmetic_left_value_lemma a s =
+let shift_arithmetic_left_i32_value_lemma a s =
   let open FStar.Int.Cast in
   calc (==) {
     I32.v (shift_arithmetic_left_i32 a s);

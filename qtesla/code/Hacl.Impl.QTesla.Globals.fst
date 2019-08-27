@@ -276,6 +276,6 @@ private let shift_arithmetic_left_value_check (x:elem) (s:UI32.t{UI32.v s < elem
     elem_v x * pow2 (UI32.v s) >= Int.min_int elem_n /\
     elem_v x * pow2 (UI32.v s) <= Int.max_int elem_n
 
-unfold let shift_arithmetic_left_i32 = Hacl.Impl.QTesla.Lemmas.Sal.shift_arithmetic_left_i32
-unfold let shift_arithmetic_left_i32_value_lemma = Hacl.Impl.QTesla.Lemmas.Sal.shift_arithmetic_left_i32_value_lemma
+unfold let shift_arithmetic_left_i32 = Hacl.Impl.QTesla.ShiftArithmeticLeft.shift_arithmetic_left_i32
+unfold let shift_arithmetic_left_i32_value_lemma = Hacl.Impl.QTesla.ShiftArithmeticLeft.shift_arithmetic_left_i32_value_lemma
 
