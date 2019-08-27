@@ -3,7 +3,6 @@ module Hacl.Impl.QTesla.Lemmas
 open FStar.HyperStack
 open FStar.HyperStack.ST
 open FStar.Mul
-open FStar.Int
 
 open LowStar.Buffer
 
@@ -23,7 +22,7 @@ module I64 = FStar.Int64
 val my_logand_pos_le: #n:pos{1 < n} -> a:Int.int_t n -> b:Int.int_t n{0 <= b} ->
   Lemma (0 <= Int.logand a b /\ Int.logand a b <= b)
 let my_logand_pos_le #n a b =
-  UInt.logand_le (to_uint a) (to_uint b)
+  UInt.logand_le (Int.to_uint a) (Int.to_uint b)
 
 val lemma_logand32_value_max: x:UI64.t -> Lemma
 //  (ensures (I64.v I64.(x &^ 0xFFFFFFFFL) <= pow2 32 - 1))
@@ -68,7 +67,7 @@ val lemma_int32_logxor_identities: x:I32.t -> Lemma
            I32.v (I32.logxor x (-1l)) == (-1) * (I32.v x) - 1)
 
 let lemma_int32_logxor_identities x = 
-    nth_lemma (Int.logxor (I32.v x) (Int.zero I32.n)) (I32.v x);
+    Int.nth_lemma (Int.logxor (I32.v x) (Int.zero I32.n)) (I32.v x);
     assume(I32.v (I32.logxor x (-1l)) == (-1) * (I32.v x) - 1)
 
     
@@ -76,16 +75,16 @@ val lemma_int32_logor_zero: x:I32.t -> Lemma
   (ensures I32.logor x 0l == x /\ I32.logor 0l x == x)
 
 let lemma_int32_logor_zero x = 
-  nth_lemma #I32.n (I32.v (I32.logor x (I32.int_to_t (zero I32.n)))) (I32.v x);
-  nth_lemma #I32.n (I32.v (I32.logor (I32.int_to_t (zero I32.n)) x)) (I32.v x)
+  Int.nth_lemma #I32.n (I32.v (I32.logor x (I32.int_to_t (Int.zero I32.n)))) (I32.v x);
+  Int.nth_lemma #I32.n (I32.v (I32.logor (I32.int_to_t (Int.zero I32.n)) x)) (I32.v x)
 
 val lemma_int32_lognot_zero: x:I32.t -> Lemma
   (ensures ((x == 0l) ==> (lognot x == (-1l))) /\
            ((x == (-1l)) ==> (lognot x == 0l)))
 
 let lemma_int32_lognot_zero x = 
-    nth_lemma (Int.lognot (Int.zero I32.n)) (Int.ones I32.n);
-    nth_lemma (Int.lognot (Int.ones I32.n)) (Int.zero I32.n)
+    Int.nth_lemma (Int.lognot (Int.zero I32.n)) (Int.ones I32.n);
+    Int.nth_lemma (Int.lognot (Int.ones I32.n)) (Int.zero I32.n)
 
 open FStar.UInt
 

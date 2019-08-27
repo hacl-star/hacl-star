@@ -4,7 +4,6 @@ open FStar.HyperStack
 open FStar.HyperStack.ST
 open FStar.Mul
 
-module I = FStar.Int
 module I8 = FStar.Int8
 module I16 = FStar.Int16
 module I32 = FStar.Int32
@@ -1457,7 +1456,7 @@ let test_rejection z =
 
     res
 
-#push-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 0"
+#push-options "--z3rlimit 1000 --max_fuel 1 --max_ifuel 1"
 let lemma_pow2_d_fits_32 () : Lemma
  (ensures 1 * pow2 (v params_d - 1) <= Int.max_int I32.n) = 
  Pervasives.normalize_term_spec (pow2 (SP.params_d - 1))
@@ -1479,6 +1478,16 @@ let lemma_val_times_pow2d_fits (val_:I32.t{-4 <= I32.v val_ /\ I32.v val_ <= 4})
   assert_norm (Int.fits (3 * pow2 (I32.n - 4)) I32.n);
   assert_norm (Int.fits (4 * pow2 (I32.n - 4)) I32.n)
 
+// lemma_fits was running out of resources somewhat unpredictably. Split into two pieces.
+private let lemma_fits_part1 (val_:I32.t{-4 <= I32.v val_ /\ I32.v val_ <= 4}) : Lemma
+  (ensures I32.v (val_ <<<^ params_d) @% pow2 32 <= pow2 26 /\
+           -pow2 26 <= I32.v (val_ <<<^ params_d) @% pow2 32) = 
+  lemma_val_times_pow2d_fits val_;
+  shift_arithmetic_left_i32_value_lemma val_ params_d;
+  assert (I32.v (val_ <<<^ params_d) = (I32.v val_ * pow2 (v params_d)) @% pow2 32);
+  Math.Lemmas.pow2_le_compat 24 (v params_d);
+  assert_norm (pow2 2 * pow2 24 <= pow2 26)
+           
 let lemma_fits (val_:I32.t{-4 <= I32.v val_ /\ I32.v val_ <= 4})
   (left:I32.t{-2 * elem_v params_q <= I32.v left /\ I32.v left <= 2 * elem_v params_q})
   : Lemma (Int.fits (I32.v left - I32.v (val_ <<<^ params_d)) I32.n /\
@@ -1486,13 +1495,14 @@ let lemma_fits (val_:I32.t{-4 <= I32.v val_ /\ I32.v val_ <= 4})
           -pow2 27 <= (I32.v left - I32.v (val_ <<<^ params_d)) /\
           (I32.v left - I32.v (val_ <<<^ params_d)) <= pow2 27)
 =
-  lemma_val_times_pow2d_fits val_;
-  shift_arithmetic_left_i32_value_lemma val_ params_d;
-  assert (I32.v (val_ <<<^ params_d) = (I32.v val_ * pow2 (v params_d)) @% pow2 32);
-  Math.Lemmas.pow2_le_compat 24 (v params_d);
-  assert_norm (pow2 2 * pow2 24 <= pow2 26);
-  assert (I32.v (val_ <<<^ params_d) @% pow2 32 <= pow2 26);
-  assert (-pow2 26 <= I32.v (val_ <<<^ params_d) @% pow2 32);
+  //lemma_val_times_pow2d_fits val_;
+  //shift_arithmetic_left_i32_value_lemma val_ params_d;
+  //assert (I32.v (val_ <<<^ params_d) = (I32.v val_ * pow2 (v params_d)) @% pow2 32);
+  //Math.Lemmas.pow2_le_compat 24 (v params_d);
+  //assert_norm (pow2 2 * pow2 24 <= pow2 26);
+  //assert (I32.v (val_ <<<^ params_d) @% pow2 32 <= pow2 26);
+  //assert (-pow2 26 <= I32.v (val_ <<<^ params_d) @% pow2 32);
+  lemma_fits_part1 val_;
   assert (I32.v left - I32.v (val_ <<<^ params_d) <= 2 * elem_v params_q + pow2 26);
   assert (-2 * elem_v params_q - pow2 26 <= I32.v left - I32.v (val_ <<<^ params_d));
   assert_norm (2 * elem_v params_q <= pow2 24);
@@ -1578,7 +1588,7 @@ let test_correctness v_ =
         shift_arithmetic_right_lemma_i32
           I32.(val_ +^ (1l <<^ (params_d -. 1ul)) -^ 1l) params_d;
         let val_' = I32.((val_ +^ (1l <<^ (params_d -. 1ul)) -^ 1l) >>>^ params_d) in
-        assume (I32.v val_' = (I32.v val_ + pow2 (Lib.IntTypes.v params_d - 1) - 1) / pow2 (Lib.IntTypes.v params_d));
+        assert (I32.v val_' = (I32.v val_ + 1 * pow2 (Lib.IntTypes.v params_d - 1) - 1) / pow2 (Lib.IntTypes.v params_d)); 
         lemma_bound val_ val_';
         lemma_val_times_pow2d_fits val_';
         shift_arithmetic_left_i32_value_lemma val_' params_d;
@@ -1586,7 +1596,8 @@ let test_correctness v_ =
         let val_:I32.t = I32.(left -^ (val_' <<<^ params_d)) in
         assert (I32.v val_ > Int.min_int I32.n);
         assert(I32.v (abs_ val_) >= 0); 
-        shift_arithmetic_left_i32_value_lemma 1l (params_d -. size 1);
+        normalize_term_spec (SP.params_d - 1);
+        shift_arithmetic_left_i32_value_lemma 1l (params_d -. (Lib.IntTypes.size 1));
         normalize_term_spec (pow2 (SP.params_d - 1));
         assert (FStar.Int.fits (I32.v (abs_ val_) - (I32.v (1l <<^ (params_d -. (size 1))) - elem_v params_rejection)) I32.n);
         assert(Int.fits (I32.v (1l <<^ (params_d -. (size 1))) - elem_v params_rejection) I32.n);
