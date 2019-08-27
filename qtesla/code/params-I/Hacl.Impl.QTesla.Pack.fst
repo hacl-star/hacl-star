@@ -104,18 +104,19 @@ let encode_or_pack_sk = encode_sk
 
 private inline_for_extraction noextract
 val decode_sk_s:
-    j_in : size_t{v j_in + 5 * v params_n < v crypto_secretkeybytes}
+    j_in : size_t{v j_in + 5 * (v params_n `FStar.Int.op_Slash` 4) <= v crypto_secretkeybytes}
   -> s : lbuffer I16.t params_n
   -> sk : lbuffer uint8 crypto_secretkeybytes
   -> Stack size_t
     (requires fun h -> live h s /\ live h sk /\ disjoint s sk)
-    (ensures fun h0 r h1 -> modifies1 s h0 h1 /\ is_s_sk h1 s /\ r = v j_in + (v params_n `FStar.Int.op_Slash` 4) * 5)
+    (ensures fun h0 r h1 -> modifies1 s h0 h1 /\ is_s_sk h1 s /\ v r = v j_in + (v params_n `FStar.Int.op_Slash` 4) * 5)
 
 let decode_sk_s j_in s sk =
     let h0 = ST.get () in
     for 0ul (params_n /. size 4)
     (fun h _ -> live h s /\ live h sk /\ modifies1 s h0 h)
     (fun k ->
+        assert(k <. params_n /. size 4);
         let i = k *. size 4 in
 	let j = j_in +. k *. size 5 in
 
@@ -150,22 +151,20 @@ val decode_sk:
 		    disjoint s e /\ disjoint s sk /\ disjoint e sk)
     (ensures fun h0 _ h1 -> modifies3 seeds s e h0 h1 /\ is_s_sk h1 s /\ is_e_sk h1 e)
 
-//#push-options "--initial_fuel 1 --max_fuel 1"
 let decode_sk seeds s e sk =
     let h0 = ST.get () in
-    assume(0 + 5 * SP.params_n < v crypto_secretkeybytes);
     let j = decode_sk_s (size 0) s sk in
     let h1 = ST.get () in
     assert(modifies1 s h0 h1);
     let _ = decode_sk_s j e sk in
     let h2 = ST.get () in
     assert(modifies2 s e h0 h2);
-    assert_norm(v (size 2 *. params_s_bits *. params_n /. size 8) + v (size 2 *. crypto_seedbytes) < v crypto_secretkeybytes);
     copy seeds (sub sk (size 2 *. params_s_bits *. params_n /. size 8) (size 2 *. crypto_seedbytes));  
 
     let h3 = ST.get () in
+    assert(forall (i:nat{i < v params_n}) . bget h1 s i == bget h3 s i);
+    assert(forall (i:nat{i < v params_n}) . bget h2 e i == bget h3 e i);
     assert(modifies3 s e seeds h0 h3)
-//#pop-options
 
 // These four functions have the same implementation as III-size, so we share its code.
 inline_for_extraction noextract
