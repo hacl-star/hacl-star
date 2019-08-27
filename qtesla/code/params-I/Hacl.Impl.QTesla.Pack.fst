@@ -35,49 +35,36 @@ private inline_for_extraction noextract
 val encode_sk_s:
     sk: lbuffer uint8 crypto_secretkeybytes
   -> s: poly
-  -> j: size_t
+  -> j_in: size_t{v j_in + (v params_n `FStar.Int.op_Slash` 4) * 5 < v crypto_secretkeybytes}
   -> Stack size_t
     (requires fun h -> live h sk /\ live h s /\ disjoint sk s /\ is_poly_sk h s)
-    (ensures fun h0 _ h1 -> modifies1 sk h0 h1)
+    (ensures fun h0 r h1 -> modifies1 sk h0 h1 /\ v r = v j_in + (v params_n `FStar.Int.op_Slash` 4) * 5)
 
-let encode_sk_s sk s j =
-    admit();
-    push_frame();
-    let iBuf = create (size 1) (size 0) in
-    let jBuf = create (size 1) j in
-
+let encode_sk_s sk s j_in =
     let h0 = ST.get () in
     assert_norm(v crypto_secretkeybytes > 0); 
-    LL.while
-    (fun h -> live h iBuf /\ live h jBuf /\ live h sk /\ live h s /\ modifies3 sk iBuf jBuf h0 h /\ is_poly_sk h s)
-    (fun h -> v (bget h iBuf 0) < v params_n)
-    (fun _ -> iBuf.(size 0) <. params_n)
-    (fun _ ->
-        let i = iBuf.(size 0) in
-	let j = jBuf.(size 0) in
+    for 0ul (params_n /. size 4)
+    (fun h _ -> live h sk /\ live h s /\ modifies1 sk h0 h /\ is_poly_sk h s)
+    (fun k ->
+        let i = k *. size 4 in
+	let j = j_in +. k *. size 5 in
+        let (/) = FStar.Int.op_Slash in
 
-        assume(v i + 3 < v params_n);
+        assert(k <. params_n /. size 4);
+
+        assert(v j_in + v k * 5 < v crypto_secretkeybytes); 
+
         let si0 = s.(i+.size 0) in    let si1 = s.(i+.size 1) in
 	let si2 = s.(i+.size 2) in    let si3 = s.(i+.size 3) in
 	
-        assume(v j + 4 < v crypto_secretkeybytes);
-        assume(elem_v si1 >= 0);
-        assume(elem_v si2 >= 0);
-        assume(elem_v si3 >= 0);
-        
 	sk.(j+.size 0) <- elem_to_uint8 si0;
-	sk.(j+.size 1) <- elem_to_uint8 (((si0 >>>^ 8ul) &^ 0x03l) |^ (si1 <<^ 2ul));
-	sk.(j+.size 2) <- elem_to_uint8 (((si1 >>>^ 6ul) &^ 0x0Fl) |^ (si2 <<^ 4ul));
-	sk.(j+.size 3) <- elem_to_uint8 (((si2 >>>^ 4ul) &^ 0x3Fl) |^ (si3 <<^ 6ul));
-	sk.(j+.size 4) <- elem_to_uint8 (si3 >>>^ 2ul);
-
-        jBuf.(size 0) <- j +. size 5;
-	iBuf.(size 0) <- i +. size 4
+	sk.(j+.size 1) <- elem_to_uint8 (((si0 >>>^ 8ul) &^ 0x03l) |^ (si1 <<<^ 2ul));
+	sk.(j+.size 2) <- elem_to_uint8 (((si1 >>>^ 6ul) &^ 0x0Fl) |^ (si2 <<<^ 4ul));
+	sk.(j+.size 3) <- elem_to_uint8 (((si2 >>>^ 4ul) &^ 0x3Fl) |^ (si3 <<<^ 6ul));
+	sk.(j+.size 4) <- elem_to_uint8 (si3 >>>^ 2ul)
     );
 
-    let j = jBuf.(size 0) in
-    pop_frame();
-    j
+    j_in +. (params_n /. size 4) *. size 5
 
 let lemma_sk_when_k_one (h:HS.mem) (p:poly_k) : Lemma
     (requires is_poly_k_sk h p /\ v params_k == 1)
@@ -96,14 +83,9 @@ val encode_sk:
     (ensures fun h0 _ h1 -> modifies1 sk h0 h1)
 
 let encode_sk sk s e seeds =
-    let hInit = ST.get () in
-    push_frame();
     let hFrame = ST.get () in
-    assert(is_poly_equal hInit hFrame s);
-    assert(is_poly_sk hFrame s);
-    assert(is_poly_k_equal hInit hFrame e);
-    assert(is_poly_k_sk hFrame e);
-
+    
+    assert_norm(0 + (v params_n `FStar.Int.op_Slash` 4) * 5 < v crypto_secretkeybytes);
     let j = encode_sk_s sk s (size 0) in
     let h0 = ST.get () in
     assert(is_poly_k_equal hFrame h0 e);
@@ -111,11 +93,9 @@ let encode_sk sk s e seeds =
     assert(is_poly_sk h0 e);
     let _ = encode_sk_s sk e j in
     
-    assume(v (size 2 *. params_s_bits *. params_n /. size 8) + v (size 2 *. crypto_seedbytes) < v crypto_secretkeybytes);
+    assert_norm(v (size 2 *. params_s_bits *. params_n /. size 8) + v (size 2 *. crypto_seedbytes) <= v crypto_secretkeybytes);
 
-    update_sub #MUT #_ #_ sk (size 2 *. params_s_bits *. params_n /. size 8) (size 2 *. crypto_seedbytes) seeds;
-
-    pop_frame()
+    update_sub #MUT #_ #_ sk (size 2 *. params_s_bits *. params_n /. size 8) (size 2 *. crypto_seedbytes) seeds
 
 inline_for_extraction noextract
 let encode_or_pack_sk = encode_sk

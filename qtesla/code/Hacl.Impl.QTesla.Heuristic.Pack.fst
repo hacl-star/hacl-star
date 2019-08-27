@@ -255,16 +255,16 @@ let decode_pk_set_pk snapshot pk_in pk i j value =
     // at the top level because we need to use the fact that in each loop of decode_pk_loopBody, all elements of pk
     // before index i are unchanged. We need "modifies1 (gsub pk i (size 32)) h0 h1" to prove this. We used to
     // set this element with "pk.(i +. j) <- value", but the prover has issues bridging the gap between this and the
-    // subbuffer.
-    //let subPk = sub pk i (size 32) in
-    //subPk.(j) <- value;
-    pk.(i +. j) <- value;
+    // subbuffer because Lib.Buffer.upd (which is what the <- operator is bound to) has a postcondition that has the entire
+    // subbuffer in the modifies clause.
+    let subPk = sub pk i (size 32) in
+    subPk.(j) <- value;
+    //pk.(i +. j) <- value;
     let h1 = ST.get () in
     assert(j <. size 32);
     assert(B.get h1 (pk <: B.buffer elem) (v i + v j) == B.get h1 (B.gsub (pk <: B.buffer elem) i (size 32)) (v j));
     assert(forall (k:nat{k < 32}) (h:HS.mem) . {:pattern bget h pk (v i + k) \/ bget h (gsub pk i (size 32)) k} bget h pk (v i + k) == bget h (gsub pk i (size 32)) k);
-    reveal_valid_decode_pk pk_in pk snapshot h1 i;
-    assume(modifies1 (gsub pk i (size 32)) h0 h1)
+    reveal_valid_decode_pk pk_in pk snapshot h1 i
 
 private let lemma_decode_pk_extend 
     (pk : lbuffer I32.t (params_n *. params_k))
@@ -352,6 +352,7 @@ let decode_pk_loopBody pk pk_in mask23 i j =
     //assert(disjoint (gsub pk (size 0) i) (gsub pk i (size 32)));
     //assert(forall (k:nat{k < v i}) . B.get h0 ((gsub pk (size 0) i) <: B.buffer elem) k == B.get h1 ((gsub pk (size 0) i) <: B.buffer elem) k);
     assert(forall (k:nat{k < v i}) . bget h0 (gsub pk (size 0) i) k == bget h1 (gsub pk (size 0) i) k);
+    // TODO (kkane): Need to prove the values set in the buffer are in the pk range.
     assume(forall (k:nat{k >= v i /\ k < v i + 32}) . is_pk (bget h1 pk k));
     // index reassignment assertion
     assert(forall (k:nat{k < v i}) (h:HS.mem) . {:pattern bget h pk k \/ bget h (gsub pk (size 0) i) k} bget h pk k == bget h (gsub pk (size 0) i) k);
