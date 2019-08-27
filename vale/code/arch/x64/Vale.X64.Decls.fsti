@@ -268,7 +268,7 @@ val taint_at (memTaint:M.memtaint) (addr:int) : taint
 [@va_qattr] unfold let va_get_reg64 (r:reg_64) (s:va_state) : nat64 = eval_reg_64 r s
 [@va_qattr] unfold let va_get_xmm (x:reg_xmm) (s:va_state) : quad32 = eval_reg_xmm x s
 [@va_qattr] unfold let va_get_mem (s:va_state) : vale_heap = s.vs_heap
-[@va_qattr] unfold let va_get_hpls (hp:nat) (s:va_state) : vale_heap = Map.sel s.vs_hpls hp
+[@va_qattr] unfold let va_get_hpls (hp:nat) (s:va_state) : vale_heap = Map.sel s.vs_memory.vm_hpls hp
 [@va_qattr] unfold let va_get_stack (s:va_state) : S.vale_stack = s.vs_stack
 [@va_qattr] unfold let va_get_memTaint (s:va_state) : M.memtaint = s.vs_memTaint
 [@va_qattr] unfold let va_get_stackTaint (s:va_state) : M.memtaint = s.vs_stackTaint
@@ -521,11 +521,11 @@ val eval_while_inv (c:va_code) (s0:va_state) (fW:va_fuel) (sW:va_state) : prop0
 let va_state_eq (s0:va_state) (s1:va_state) : prop0 = state_eq s0 s1
 
 let va_require_total (c0:va_code) (c1:va_code) (s0:va_state) : prop0 =
-  (forall(i:nat{i<16}). Map.contains s0.vs_hpls i) /\
+  (forall(i:nat{i<16}). Map.contains s0.vs_memory.vm_hpls i) /\
   c0 == c1
 
 let va_ensure_total (c0:va_code) (s0:va_state) (s1:va_state) (f1:va_fuel) : prop0 =
-  (forall(i:nat{i<16}). (Map.contains s0.vs_hpls i == Map.contains s1.vs_hpls i)) /\
+  (forall(i:nat{i<16}). (Map.contains s0.vs_memory.vm_hpls i == Map.contains s1.vs_memory.vm_hpls i)) /\
   eval_code c0 s0 f1 s1
 
 val eval_ocmp : s:va_state -> c:ocmp -> GTot bool

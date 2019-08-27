@@ -10,12 +10,12 @@ module Flags = Vale.X64.Flags
 module Regs = Vale.X64.Regs 
 module Map = FStar.Map
 
-type vale_hpls = Map.t (key:nat{key<16}) (value:vale_heap)
+type vale_hpls = Map.t (key:nat) (value:vale_heap)
 
 noeq type vale_memory = {
   vm_heap : vale_heap;
   vm_hpls : vale_hpls;
-  vm_hmap : Map.t (key:int) (value:nat{value<16});
+  vm_hmap : Map.t (key:int) (value:nat);
 }
 
 noeq type vale_state = {
@@ -40,9 +40,9 @@ unfold let eval_mem (ptr:int) (s:vale_state) : GTot nat64 = load_mem64 ptr s.vs_
 [@va_qattr]
 unfold let eval_mem128 (ptr:int) (s:vale_state) : GTot Vale.Def.Types_s.quad32 = load_mem128 ptr s.vs_heap
 [@va_qattr]
-unfold let eval_hpls (hp:nat) (s:vale_state) : vale_heap = Map.sel s.vs_hpls hp
+unfold let eval_hpls (hp:nat) (s:vale_state) : vale_heap = Map.sel s.vs_memory.vm_hpls hp
 [@va_qattr]
-unfold let eval_hmap (ptr:int) (s:vale_state) : nat = Map.sel s.vs_hmap ptr
+unfold let eval_hmap (ptr:int) (s:vale_state) : nat = Map.sel s.vs_memory.vm_hmap ptr
 [@va_qattr]
 unfold let eval_stack (ptr:int) (s:vale_state) : GTot nat64 = load_stack64 ptr s.vs_stack
 [@va_qattr]
@@ -95,21 +95,25 @@ let update_reg_xmm (r:reg_xmm) (v:quad32) (s:vale_state) : vale_state =
 let update_mem (ptr:int) (v:nat64) (s:vale_state) : GTot vale_state = {s with vs_heap = store_mem64 ptr v s.vs_heap}
 
 [@va_qattr]
-let update_hpls (hp:nat) (h:vale_heap) (s:vale_state) : vale_state = {s with vs_hpls = Map.upd s.vs_hpls hp h }
+let update_hpls (hp:nat) (h:vale_heap) (s:vale_state) : vale_state = 
+  let memory' = {s.vs_memory with vm_hpls = Map.upd s.vs_memory.vm_hpls hp h} in
+  {s with vs_memory = memory'}
 
 [@va_qattr]
-let update_hmap (ptr:int) (hp:nat) (m: Map.t int nat) (s:vale_state) : vale_state = {s with vs_hmap = Map.upd s.vs_hmap ptr hp}
+let update_hmap (ptr:int) (hp:nat) (m: Map.t int nat) (s:vale_state) : vale_state =
+  let memory' = {s.vs_memory with vm_hmap = Map.upd s.vs_memory.vm_hmap ptr hp} in
+  {s with vs_memory = memory'}
   
 [@va_qattr]
 let update_stack64 (ptr:int) (v:nat64) (s:vale_state) : GTot vale_state = {s with vs_stack = store_stack64 ptr v s.vs_stack}
 
-//[@va_qattr]
-//let update_operand64 (o:operand64) (v:nat64) (sM:vale_state) : GTot vale_state =
-//  match o with
-//  | OConst n -> sM
-//  | OReg r -> update_reg (Reg 0 r) v sM
-//  | OMem (m, _) -> update_mem (eval_maddr m sM) v sM
-//  | OStack (m, _) -> update_stack64 (eval_maddr m sM) v sM
+[@va_qattr]
+let update_operand64 (o:operand64) (v:nat64) (sM:vale_state) : GTot vale_state =
+  match o with
+  | OConst n -> sM
+  | OReg r -> update_reg (Reg 0 r) v sM
+  | OMem (m, _) -> update_mem (eval_maddr m sM) v sM
+  | OStack (m, _) -> update_stack64 (eval_maddr m sM) v sM
 
 [@va_qattr]
 let valid_maddr (m:maddr) (s:vale_state) : prop0 = valid_mem64 (eval_maddr m s) s.vs_heap
@@ -137,14 +141,18 @@ let valid_src_operand128 (o:operand128) (s:vale_state) : prop0 =
 let state_eta (s:vale_state) : vale_state =
   {s with vs_regs = Regs.eta s.vs_regs}
 
+let memory_eq (m0:vale_memory) (m1:vale_memory) : prop0 =
+  m0.vm_heap == m1.vm_heap /\
+  Map.equal m0.vm_hpls m1.vm_hpls /\
+  Map.equal m0.vm_hmap m1.vm_hmap
+
 [@va_qattr]
 let state_eq (s0:vale_state) (s1:vale_state) : prop0 =
   s0.vs_ok == s1.vs_ok /\
   Regs.equal s0.vs_regs s1.vs_regs /\
   Flags.equal s0.vs_flags s1.vs_flags /\
   s0.vs_heap == s1.vs_heap /\
-  Map.equal s0.vs_hpls s1.vs_hpls /\
-  Map.equal s0.vs_hmap s1.vs_hmap /\
+  memory_eq s0.vs_memory s1.vs_memory /\
   s0.vs_stack == s1.vs_stack /\
   s0.vs_memTaint == s1.vs_memTaint /\
   s0.vs_stackTaint == s1.vs_stackTaint
