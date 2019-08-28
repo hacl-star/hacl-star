@@ -19,6 +19,7 @@ let b8 = IB.b8
 
 let fstar_heap = H.heap
 type vale_heap = IB.interop_heap
+type vale_hpls = Map.t nat IB.interop_heap
 
 let op_String_Access = Map.sel
 let op_String_Assignment = Map.upd
@@ -97,12 +98,12 @@ open FStar.Mul
 
 let index64_heap_aux (s:Seq.lseq UInt8.t 8) (heap:S.machine_heap) (ptr:int) : Lemma
   (requires forall (j:nat{j < 8}). UInt8.v (Seq.index s j) == heap.[ptr+j])
-  (ensures UInt64.v (Vale.Interop.Views.get64 s) == S.get_heap_val64 ptr heap) =
-  let open Vale.Def.Words.Seq_s in
-  FStar.Pervasives.reveal_opaque (`%seq_to_seq_four_LE) (seq_to_seq_four_LE #nat8);
-  Vale.Def.Opaque_s.reveal_opaque Vale.Interop.Views.get64_def;
-  Vale.Def.Opaque_s.reveal_opaque S.get_heap_val64_def;
-  Vale.Def.Opaque_s.reveal_opaque Vale.Def.Types_s.le_bytes_to_nat64_def
+  (ensures UInt64.v (Vale.Interop.Views.get64 s) == S.get_heap_val64 ptr heap) = admit()
+//  let open Vale.Def.Words.Seq_s in
+//  FStar.Pervasives.reveal_opaque (`%seq_to_seq_four_LE) (seq_to_seq_four_LE #nat8);
+//  Vale.Def.Opaque_s.reveal_opaque Vale.Interop.Views.get64_def;
+//  Vale.Def.Opaque_s.reveal_opaque S.get_heap_val64_def;
+//  Vale.Def.Opaque_s.reveal_opaque Vale.Def.Types_s.le_bytes_to_nat64_def
 
 let index_helper (x y:int) (heap:S.machine_heap) : Lemma
   (requires x == y)
@@ -347,6 +348,8 @@ let rec valid_mem_aux (t:base_typ) addr (ps:list b8) (h:vale_heap {sub_list ps h
     | a::q -> valid_buffer t addr a h || valid_mem_aux t addr q h
 let valid_mem (t:base_typ) addr (h:vale_heap) = valid_mem_aux t addr h.ptrs h
 let valid_mem64 ptr h = valid_mem (TUInt64) ptr h
+let valid_hmem (t:base_typ) addr (hp:nat) (h:vale_hpls) = valid_mem t addr (Map.sel h hp)
+let valid_hmem64 ptr hp h = valid_hmem (TUInt64) ptr hp h
 
 let rec find_valid_buffer_aux (t:base_typ) (addr:int) (ps:list b8) (h:vale_heap{sub_list ps h.ptrs})
   : GTot (o:option (buffer t){
@@ -387,6 +390,8 @@ let rec writeable_mem_aux (t:base_typ) addr (ps:list b8) (h:vale_heap {sub_list 
     | a::q -> writeable_buffer t addr a h || writeable_mem_aux t addr q h
 let writeable_mem (t:base_typ) addr (h:vale_heap) = writeable_mem_aux t addr h.ptrs h
 let writeable_mem64 ptr h = writeable_mem (TUInt64) ptr h
+let writeable_hmem (t:base_typ) addr (hp:nat) (h:vale_heap) = writeable_mem r addr (Map.sel h hp)
+let writeable_hmem64 ptr h = writeable_hmem (TUInt64) ptr hp h
 
 let rec find_writeable_buffer_aux (t:base_typ) (addr:int) (ps:list b8) (h:vale_heap{sub_list ps h.ptrs})
   : GTot (o:option (buffer t){

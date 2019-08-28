@@ -5,6 +5,7 @@ open Vale.X64.Machine_s
 
 val fstar_heap : Type u#1
 val vale_heap : Type u#1
+val vale_hpls : Type u#1
 
 unfold let nat8 = Vale.Def.Words_s.nat8
 unfold let nat16 = Vale.Def.Words_s.nat16
@@ -187,19 +188,28 @@ val buffer_write (#t:base_typ) (b:buffer t) (i:int) (v:base_typ_as_vale_type t) 
 
 
 val valid_mem64 : ptr:int -> h:vale_heap -> GTot bool // is there a 64-bit word at address ptr?
+val valid_hmem64 : ptr:int -> hp:nat -> h:vale_hpls -> GTot bool // is there a 64-bit word at address ptr in heaplet hp?
+  
 val writeable_mem64 : ptr:int -> h:vale_heap -> GTot bool // can we write a 64-bit word at address ptr?
+val writeable_hmem64 : ptr:int -> hp:nat -> h:vale_hpls -> GTot bool // can we write a 64-bit word at address ptr?
+  
 val load_mem64 : ptr:int -> h:vale_heap -> GTot nat64 // the 64-bit word at ptr (if valid_mem64 holds)
+val load_hmem64 : ptr:int -> hp:nat -> h:vale_hpls -> GTot nat64 // the 64-bit word at ptr (if valid_hmem64 holds)
+  
 val store_mem64 : ptr:int -> v:nat64 -> h:vale_heap -> GTot vale_heap
-
-//val valid_hmem64 : ptr:int -> hp:nat -> h:vale_hpls -> GTot bool // is there a 64-bit word at address ptr in heaplet hp?
-//val writeable_hmem64 : ptr:int -> hp:nat -> h:vale_hpls -> GTot bool // can we write a 64-bit word at address ptr?
-//val load_hmem64 : ptr:int -> hp:nat -> h:vale_hpls -> GTot nat64 // the 64-bit word at ptr (if valid_hmem64 holds)
-//val store_hmem64 : ptr:int -> v:nat64 -> hp:nat -> h:vale_hpls -> GTot vale_hpls
+val store_hmem64 : ptr:int -> v:nat64 -> hp:nat -> h:vale_hpls -> GTot vale_hpls
 
 val valid_mem128 (ptr:int) (h:vale_heap) : GTot bool
+val valid_hmem128 (ptr:int) (hp:nat) (h:vale_hpls) : GTot bool
+
 val writeable_mem128 (ptr:int) (h:vale_heap) : GTot bool
+val writeable_hmem128 (ptr:int) (hp:nat) (h:vale_hpls) : GTot bool
+  
 val load_mem128  (ptr:int) (h:vale_heap) : GTot quad32
+val load_hmem128  (ptr:int) (hp:nat) (h:vale_hpls) : GTot quad32
+  
 val store_mem128 (ptr:int) (v:quad32) (h:vale_heap) : GTot vale_heap
+val store_hmem128 (ptr:int) (v:quad32) (hp:nat) (h:vale_hpls) : GTot vale_hpls
 
 // TODO: We can probably remove the following lemmas from at least this interface
 val lemma_valid_mem64 : b:buffer64 -> i:nat -> h:vale_heap -> Lemma
