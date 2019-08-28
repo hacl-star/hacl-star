@@ -381,7 +381,7 @@ let lemma_varint_safe (b1:bytes) (b2:bytes) : Lemma
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 *)
 
-let rec to_bitfield (k:nat) (n:nat{n < pow2 k}) =
+let rec to_bitfield (k:nat) (n:nat{n < pow2 k}) : Tot (l:(list bool){List.Tot.length l = k})=
   if k = 0 then [] else
   let b0 = (n % 2) = 1 in
   b0 :: (to_bitfield (k - 1) (n / 2))
@@ -406,11 +406,45 @@ let rec lemma_bitfield_inv (l:list bool)
   | _ :: t -> lemma_bitfield_inv t
 
 
-let to_bitfield8 (b:byte) = to_bitfield 8 (U8.v b)
-let of_bitfield8 (l:list bool{List.Tot.length l == 8}) : byte = U8.uint_to_t (of_bitfield l)
+let rec lemma_bitfield_lower_bound (n:nat) (l:list bool) : Lemma
+  (requires n < List.Tot.length l /\ List.Tot.index l n)
+  (ensures of_bitfield l >= pow2 n) =
+  if n = 0 then ()
+  else
+  match l with
+  | [] -> ()
+  | _ :: tl -> lemma_bitfield_lower_bound (n-1) tl
+
+let rec lemma_bitfield_zero (l:list bool) : Lemma
+  (requires (forall i. ~(List.Tot.index l i)))
+  (ensures of_bitfield l = 0) =
+  match l with
+  | [] -> ()
+  | false :: t ->
+    assert (forall i. List.Tot.index t i = List.Tot.index l (i+1));
+    lemma_bitfield_zero t
+  | true :: _ -> assert (List.Tot.index l 0 = true)
 
 
-let lemma_bitfield8 (l:list bool{List.Tot.length l == 8}) : Lemma
+let rec lemma_bitfield_upper_bound (n:nat) (l:list bool) : Lemma
+  (requires
+    n < List.Tot.length l /\
+    (forall i. i >= n ==> ~(List.Tot.index l i)))
+  (ensures of_bitfield l <= pow2 n - 1) =
+  if n = 0 then lemma_bitfield_zero l
+  else match l with
+  | [] -> ()
+  | h :: t ->
+    assert (forall i. List.Tot.index t i = List.Tot.index l (i+1));
+    lemma_bitfield_upper_bound (n-1) t
+
+
+type bitfield8 = l:list bool{List.Tot.length l = 8}
+let to_bitfield8 (b:byte) : bitfield8 = to_bitfield 8 (U8.v b)
+let of_bitfield8 (l:bitfield8) : byte = U8.uint_to_t (of_bitfield l)
+
+
+let lemma_bitfield8 (l:bitfield8) : Lemma
   (requires True)
   (ensures to_bitfield8 (of_bitfield8 l) == l) =
   lemma_bitfield_inv l
@@ -555,6 +589,22 @@ let lemma_append_assoc (u v w:bytes) : Lemma
 
 #push-options "--z3rlimit 20"
 
+let lemma_short_header_parsing_correct_flag h pn_len npn : Lemma
+  (requires Short? h)
+  (ensures (
+    let b = format_header h pn_len npn in
+    let (pnb0, pnb1) = to_bitfield2 pn_len in
+    let l = [pnb0; pnb1; Short?.phase h; false; false; Short?.spin h; true; false] in
+   to_bitfield8 (S.index b 0) = l)) =
+  let (pnb0, pnb1) = to_bitfield2 pn_len in
+  lemma_bitfield2 pn_len;
+  match h with
+  | Short spin phase _ ->
+     let l = [pnb0; pnb1; phase; false; false; spin; true; false] in
+    assert_norm(List.Tot.length l == 8);
+    lemma_bitfield8 l
+
+
 let lemma_short_header_parsing_correct h pn_len npn rest : Lemma
   (requires (Short? h))
   (ensures (parsing_correct h pn_len npn rest)) =
@@ -565,9 +615,8 @@ let lemma_short_header_parsing_correct h pn_len npn rest : Lemma
     match h with
     | Short spin phase cid ->
       let l = [pn0;pn1; phase; false; false; spin; true; false] in
-      assert_norm(List.Tot.length l == 8);
-      lemma_bitfield8 l;
-      assert (to_bitfield8 (S.index b 0) == l);
+      lemma_short_header_parsing_correct_flag h pn_len npn;
+      //assert (to_bitfield8 (S.index b 0) == l);
       let flag = of_bitfield8 l in
       let len = 1 + (add3 (cid_len h)) + 1 + pn_len in
       let len_suff = S.length b - len in
@@ -1007,7 +1056,7 @@ let lemma_header_parsing_safe b1 b2 cl =
 
 
 // application of a byte operation at a subposition
-let rec bitwise_op (f:byte->byte->byte) (b1 b2:bytes) (pos:nat) : Pure bytes
+let rec pointwise_op (#a:eqtype) (f:a->a->a) (b1 b2:S.seq a) (pos:nat) : Pure (S.seq a)
   (requires S.length b2 + pos <= S.length b1)
   (ensures fun b -> S.length b == S.length b1)
   (decreases (S.length b2)) =
@@ -1015,51 +1064,51 @@ let rec bitwise_op (f:byte->byte->byte) (b1 b2:bytes) (pos:nat) : Pure bytes
   else
     let _ = S.lemma_empty b2 in
     let x = f (S.index b1 pos) (S.index b2 0) in
-    bitwise_op f (S.upd b1 pos x) (S.slice b2 1 (S.length b2)) (pos + 1)
+    pointwise_op f (S.upd b1 pos x) (S.slice b2 1 (S.length b2)) (pos + 1)
 
 
 // three lemmas to recover indexes after application of bitwise_op
-let rec bitwise_index1 (f:byte->byte->byte) (b1 b2:bytes) (i pos:nat) : Lemma
+let rec pointwise_index1 (#a:eqtype) (f:a->a->a) (b1 b2:S.seq a) (i pos:nat) : Lemma
   (requires (S.length b2 + pos <= S.length b1 /\ i < pos))
-  (ensures (S.index (bitwise_op f b1 b2 pos) i = S.index b1 i))
+  (ensures (S.index (pointwise_op f b1 b2 pos) i = S.index b1 i))
   (decreases (S.length b2)) =
   if b2 = S.empty then ()
   else begin
     S.lemma_empty b2;
     let x = f (S.index b1 pos) (S.index b2 0) in
-    assert (bitwise_op f b1 b2 pos = bitwise_op f (S.upd b1 pos x) (S.slice b2 1 (S.length b2)) (pos + 1));
+    assert (pointwise_op f b1 b2 pos = pointwise_op f (S.upd b1 pos x) (S.slice b2 1 (S.length b2)) (pos + 1));
     S.lemma_index_upd2 b1 pos x i;
     assert (S.index (S.upd b1 pos x) i = S.index b1 i);
-    bitwise_index1 f (S.upd b1 pos x) (S.slice b2 1 (S.length b2)) i (pos + 1)
+    pointwise_index1 f (S.upd b1 pos x) (S.slice b2 1 (S.length b2)) i (pos + 1)
   end
 
 
-let rec bitwise_index2 (f:byte->byte->byte) (b1 b2:bytes) (i pos:nat) : Lemma
+let rec pointwise_index2 (#a:eqtype) (f:a->a->a) (b1 b2:S.seq a) (i pos:nat) : Lemma
   (requires (S.length b2 + pos <= S.length b1 /\ pos <= i /\ i < S.length b2 + pos))
-  (ensures (S.index (bitwise_op f b1 b2 pos) i = f (S.index b1 i) (S.index b2 (i-pos))))
+  (ensures (S.index (pointwise_op f b1 b2 pos) i = f (S.index b1 i) (S.index b2 (i-pos))))
   (decreases (S.length b2)) =
   if S.empty = b2 then ()
   else begin
     let x = f (S.index b1 pos) (S.index b2 0) in
-    assert (bitwise_op f b1 b2 pos = bitwise_op f (S.upd b1 pos x) (S.slice b2 1 (S.length b2)) (pos+1));
+    assert (pointwise_op f b1 b2 pos = pointwise_op f (S.upd b1 pos x) (S.slice b2 1 (S.length b2)) (pos+1));
     if i = pos then begin
-      bitwise_index1 f (S.upd b1 pos x) (S.slice b2 1 (S.length b2)) pos (pos+1);
+      pointwise_index1 f (S.upd b1 pos x) (S.slice b2 1 (S.length b2)) pos (pos+1);
       S.lemma_index_upd1 b1 pos x
     end
     else
-      bitwise_index2 f (S.upd b1 pos x) (S.slice b2 1 (S.length b2)) i (pos+1)
+      pointwise_index2 f (S.upd b1 pos x) (S.slice b2 1 (S.length b2)) i (pos+1)
   end
 
 
-let rec bitwise_index3 (f:byte->byte->byte) (b1 b2:bytes) (i pos:nat) : Lemma
+let rec pointwise_index3 (#a:eqtype) (f:a->a->a) (b1 b2:S.seq a) (i pos:nat) : Lemma
   (requires (S.length b2 + pos <= i /\ i < S.length b1))
-  (ensures (S.index (bitwise_op f b1 b2 pos) i = S.index b1 i))
+  (ensures (S.index (pointwise_op f b1 b2 pos) i = S.index b1 i))
   (decreases (S.length b2)) =
   if S.empty = b2 then ()
   else begin
     S.lemma_empty b2;
     let x = f (S.index b1 pos) (S.index b2 0) in
-    bitwise_index3 f (S.upd b1 pos x) (S.slice b2 1 (S.length b2)) i (pos+1)
+    pointwise_index3 f (S.upd b1 pos x) (S.slice b2 1 (S.length b2)) i (pos+1)
   end
 
 
@@ -1072,7 +1121,7 @@ let rec xor_inplace (b1 b2:bytes) (pos:nat)
   (requires S.length b2 + pos <= S.length b1)
   (ensures fun b -> S.length b == S.length b1)
   (decreases (S.length b2)) =
-  bitwise_op U8.logxor b1 b2 pos
+  pointwise_op U8.logxor b1 b2 pos
 
 
 // proof of involution of the operator (uses extensionality for the
@@ -1093,14 +1142,14 @@ let rec xor_inplace_involutive (b1 b2:bytes) (pos:nat) : Lemma
   let xor = xor_inplace (xor_inplace b1 b2 pos) b2 pos in
   let step (i:nat{i < S.length b1}) : Lemma (S.index xor i = S.index b1 i) =
     if i < pos then begin
-      bitwise_index1 U8.logxor b1 b2 i pos;
-      bitwise_index1 U8.logxor (xor_inplace b1 b2 pos) b2 i pos
+      pointwise_index1 U8.logxor b1 b2 i pos;
+      pointwise_index1 U8.logxor (xor_inplace b1 b2 pos) b2 i pos
     end else if i >= pos+S.length b2 then begin
-      bitwise_index3 U8.logxor b1 b2 i pos;
-      bitwise_index3 U8.logxor (xor_inplace b1 b2 pos) b2 i pos
+      pointwise_index3 U8.logxor b1 b2 i pos;
+      pointwise_index3 U8.logxor (xor_inplace b1 b2 pos) b2 i pos
     end else begin
-      bitwise_index2 U8.logxor b1 b2 i pos;
-      bitwise_index2 U8.logxor (xor_inplace b1 b2 pos) b2 i pos;
+      pointwise_index2 U8.logxor b1 b2 i pos;
+      pointwise_index2 U8.logxor (xor_inplace b1 b2 pos) b2 i pos;
       xor_involutive  (S.index b1 i) (S.index b2 (i-pos))
     end in
 
@@ -1113,7 +1162,7 @@ let rec and_inplace (b1 b2:bytes) (pos:nat)
   (requires S.length b2 + pos <= S.length b1)
   (ensures fun b -> S.length b == S.length b1)
   (decreases (S.length b2)) =
-  bitwise_op U8.logand b1 b2 pos
+  pointwise_op U8.logand b1 b2 pos
 
 
 
@@ -1157,20 +1206,6 @@ let header_encrypt a hpk h pn_len npn c =
 
 
 
-let lemma_header_encrypt_type_short a hpk h pn_len npn c : Lemma
-  (requires (
-    let packet = header_encrypt a hpk h pn_len npn c in
-    U8.(S.index packet 0 <^ 128uy)))
-  (ensures (Short? h)) =
-  admit()
-
-let lemma_header_encrypt_type_long a hpk h pn_len npn c : Lemma
-  (requires (
-    let packet = header_encrypt a hpk h pn_len npn c in
-    U8.(S.index packet 0 >=^ 128uy)))
-  (ensures (Long? h)) =
-  admit()
-
 
 let header_decrypt a hpk cid_len packet =
   let open FStar.Math.Lemmas in
@@ -1207,6 +1242,105 @@ let header_decrypt a hpk cid_len packet =
     let pn_offset = so - 3 + pn_len in
     let packet'' = xor_inplace packet' pnmask pn_offset in
     parse_header packet'' cid_len
+
+
+
+
+
+// manipulation of bitfield as lists
+let lemma_bitfield8_128 (l:bitfield8) : Lemma
+  (U8.(of_bitfield8 l >=^ 128uy) <==> List.Tot.index l 7) =
+  if List.Tot.index l 7 then lemma_bitfield_lower_bound 7 l
+  else lemma_bitfield_upper_bound 7 l
+
+
+let max (a b:nat) : Tot (n:nat{n >= a /\ n >= b}) =
+  if a > b then a else b // this must exist somewhere...
+
+
+let rec bitwise_op (f:bool->bool->bool) (l1 l2:list bool) : Pure (list bool)
+  (requires List.Tot.length l1 = List.Tot.length l2)
+  (ensures fun l -> List.Tot.length l = List.Tot.length l1) =
+  match l1,l2 with
+  | [],[] -> []
+  | x1::t1,x2::t2 -> f x1 x2 :: bitwise_op f t1 t2
+
+
+
+let lemma_charac_logand (n:pos) (b1 b2:FStar.UInt.uint_t n) : Lemma
+  (requires True)
+  (ensures (
+    let open FStar.BitVector in
+    let open FStar.UInt in
+    let l1 = to_bitfield n b1 in
+    let l2 = to_bitfield n b2 in
+    let vb1 = to_vec #n b1 in
+    let vb2 = to_vec #n b2 in
+    S.equal (logand_vec vb1 vb2)
+    (to_vec #n (of_bitfield (bitwise_op (fun x y -> x && y) l1 l2))))) =
+  let open FStar.BitVector in
+  let open FStar.UInt in
+  let l1 = to_bitfield n b1 in
+  let l2 = to_bitfield n b2 in
+  let vb1 = to_vec #n b1 in
+  let vb2 = to_vec #n b2 in
+  let right = to_vec #n (of_bitfield (bitwise_op (fun x y -> x && y) l1 l2)) in
+
+  let index_right i : Lemma
+    (S.index right i = (S.index vb1 i && S.index vb2 i)) =
+    admit() in
+
+  FStar.Classical.forall_intro index_right
+
+
+
+
+
+// extraction of a type of a header
+let lemma_index_list_7 (l:bitfield8) : Lemma
+  (match l with _ :: _ :: _ :: _ :: _ :: _ :: _ :: x :: _ ->
+    List.Tot.index l 7 = x) =
+  ()
+
+
+
+let lemma_header_type_128 p pn_len npn : Lemma
+  (Short? p <==> U8.(S.index (format_header p pn_len npn) 0 <^ 128uy)) =
+  let b = format_header p pn_len npn in
+  if Short? p then begin
+    lemma_short_header_parsing_correct_flag p pn_len npn;
+    let l = to_bitfield8 (S.index b 0) in
+    assert_norm (List.Tot.length l = 8);
+    lemma_bitfield8_128 l;
+    lemma_index_list_7 l;
+    assert (List.Tot.index l 7 = false)
+  end
+  else begin
+    lemma_long_header_parsing_correct_flag p pn_len npn;
+    let l = to_bitfield8 (S.index b 0) in
+    assert_norm (List.Tot.length l = 8);
+    lemma_bitfield8_128 l;
+    lemma_index_list_7 l;
+    assert (List.Tot.index l 7 = true)
+  end
+
+
+let lemma_header_encrypt_type_short a hpk h pn_len npn c : Lemma
+  (requires (
+    let packet = header_encrypt a hpk h pn_len npn c in
+    U8.(S.index packet 0 <^ 128uy)))
+  (ensures (Short? h)) =
+  admit()
+
+let lemma_header_encrypt_type_long a hpk h pn_len npn c : Lemma
+  (requires (
+    let packet = header_encrypt a hpk h pn_len npn c in
+    U8.(S.index packet 0 >=^ 128uy)))
+  (ensures (Long? h)) =
+  admit()
+
+
+
 
 
 
