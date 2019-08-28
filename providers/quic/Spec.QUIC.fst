@@ -1248,10 +1248,15 @@ let header_decrypt a hpk cid_len packet =
 
 
 // manipulation of bitfield as lists
-let lemma_bitfield8_128 (l:bitfield8) : Lemma
+let lemma_bitfield8_128_aux (l:bitfield8) : Lemma
   (U8.(of_bitfield8 l >=^ 128uy) <==> List.Tot.index l 7) =
   if List.Tot.index l 7 then lemma_bitfield_lower_bound 7 l
   else lemma_bitfield_upper_bound 7 l
+
+let lemma_bitfield8_128 (b:byte) : Lemma
+  (U8.(b >=^ 128uy) <==> List.Tot.index (to_bitfield8 b) 7) =
+  lemma_bitfield8_128_aux (to_bitfield8 b);
+  lemma_bitfield 8 (U8.v b)
 
 
 let max (a b:nat) : Tot (n:nat{n >= a /\ n >= b}) =
@@ -1266,7 +1271,19 @@ let rec bitwise_op (f:bool->bool->bool) (l1 l2:list bool) : Pure (list bool)
   | x1::t1,x2::t2 -> f x1 x2 :: bitwise_op f t1 t2
 
 
+let rec lemma_bitwise_op_index (f:bool->bool->bool) (l1 l2:list bool) (n:nat) : Lemma
+  (requires List.Tot.length l1 = List.Tot.length l2 /\ n < List.Tot.length l1)
+  (ensures List.Tot.index (bitwise_op f l1 l2) n = f (List.Tot.index l1 n) (List.Tot.index l2 n)) =
+  match l1,l2 with
+  | [],[] -> ()
+  | x1::t1,x2::t2 ->
+    if n = 0 then ()
+    else lemma_bitwise_op_index f t1 t2 (n-1)
 
+
+
+
+// characterisation of logand in terms of bitfields
 let lemma_charac_logand (n:pos) (b1 b2:FStar.UInt.uint_t n) : Lemma
   (requires True)
   (ensures (
@@ -1293,6 +1310,67 @@ let lemma_charac_logand (n:pos) (b1 b2:FStar.UInt.uint_t n) : Lemma
   FStar.Classical.forall_intro index_right
 
 
+let lemma_charac_logand_byte (b1 b2:byte) : Lemma
+  (requires True)
+  (ensures (
+    let l1 = to_bitfield8 b1 in
+    let l2 = to_bitfield8 b2 in
+    to_bitfield8 U8.(b1 `logand` b2) =
+    bitwise_op (fun x y -> x && y) l1 l2)) =
+  let l1 = to_bitfield8 b1 in
+  let l2 = to_bitfield8 b2 in
+  let l = bitwise_op (fun x y -> x && y) l1 l2 in
+  lemma_charac_logand 8 (U8.v b1) (U8.v b2);
+  assert (of_bitfield8 l = U8.(b1 `logand` b2));
+  lemma_bitfield_inv (bitwise_op (fun x y -> x && y) l1 l2)
+
+
+
+// characterisation of logxor as bitfields. Code duplication from
+// the logxor characterisation.
+let lemma_charac_logxor (n:pos) (b1 b2:FStar.UInt.uint_t n) : Lemma
+  (requires True)
+  (ensures (
+    let open FStar.BitVector in
+    let open FStar.UInt in
+    let l1 = to_bitfield n b1 in
+    let l2 = to_bitfield n b2 in
+    let vb1 = to_vec #n b1 in
+    let vb2 = to_vec #n b2 in
+    S.equal (logxor_vec vb1 vb2)
+    (to_vec #n (of_bitfield (bitwise_op (fun x y -> x <> y) l1 l2))))) =
+  let open FStar.BitVector in
+  let open FStar.UInt in
+  let l1 = to_bitfield n b1 in
+  let l2 = to_bitfield n b2 in
+  let vb1 = to_vec #n b1 in
+  let vb2 = to_vec #n b2 in
+  let right = to_vec #n (of_bitfield (bitwise_op (fun x y -> x <> y) l1 l2)) in
+
+  let index_right i : Lemma
+    (S.index right i = (S.index vb1 i <> S.index vb2 i)) =
+    admit() in
+
+  FStar.Classical.forall_intro index_right
+
+
+
+let lemma_charac_logxor_byte (b1 b2:byte) : Lemma
+  (requires True)
+  (ensures (
+    let l1 = to_bitfield8 b1 in
+    let l2 = to_bitfield8 b2 in
+    to_bitfield8 U8.(b1 `logxor` b2) =
+    bitwise_op (fun x y -> x <> y) l1 l2)) =
+  let l1 = to_bitfield8 b1 in
+  let l2 = to_bitfield8 b2 in
+  let l = bitwise_op (fun x y -> x <> y) l1 l2 in
+  lemma_charac_logxor 8 (U8.v b1) (U8.v b2);
+  assert (of_bitfield8 l = U8.(b1 `logxor` b2));
+  lemma_bitfield_inv (bitwise_op (fun x y -> x <> y) l1 l2)
+
+
+
 
 
 
@@ -1311,7 +1389,7 @@ let lemma_header_type_128 p pn_len npn : Lemma
     lemma_short_header_parsing_correct_flag p pn_len npn;
     let l = to_bitfield8 (S.index b 0) in
     assert_norm (List.Tot.length l = 8);
-    lemma_bitfield8_128 l;
+    lemma_bitfield8_128 (S.index b 0);
     lemma_index_list_7 l;
     assert (List.Tot.index l 7 = false)
   end
@@ -1319,25 +1397,102 @@ let lemma_header_type_128 p pn_len npn : Lemma
     lemma_long_header_parsing_correct_flag p pn_len npn;
     let l = to_bitfield8 (S.index b 0) in
     assert_norm (List.Tot.length l = 8);
-    lemma_bitfield8_128 l;
+    lemma_bitfield8_128 (S.index b 0);
     lemma_index_list_7 l;
     assert (List.Tot.index l 7 = true)
   end
 
 
+
+
+// correctness of the condition to check whether a header is short
 let lemma_header_encrypt_type_short a hpk h pn_len npn c : Lemma
   (requires (
     let packet = header_encrypt a hpk h pn_len npn c in
     U8.(S.index packet 0 <^ 128uy)))
-  (ensures (Short? h)) =
-  admit()
+  (ensures Short? h) =
+  if Short? h then ()
+  else begin
 
+    // notations
+    assert_norm(max_cipher_length < pow2 62);
+    let pn_offset =
+      match h with
+      | Long _ _ dcil scil _ _ pl -> 6 + add3 dcil + add3 scil + vlen pl in
+    let sample = S.slice c (3-pn_len) (19-pn_len) in
+    let mask = C16.block (calg_of_ae a) hpk sample in
+    let pnmask = and_inplace (S.slice mask 1 5) (pn_sizemask pn_len) 0 in
+    let sflags = 0x0fuy in
+    let fmask = S.create 1 U8.(S.index mask 0 `logand` sflags) in
+    let r1 = S.(format_header h pn_len npn @| c) in
+    let r2 = xor_inplace r1 fmask 0 in
+    let packet = xor_inplace r2 pnmask pn_offset in
+
+    // proving that the most significant bit of fmask is 0
+    let sflags_bitfield = to_bitfield8 sflags in
+    assert_norm (~(List.Tot.index sflags_bitfield 7));
+    let fmask_bitfield = to_bitfield8 (S.index fmask 0) in
+    lemma_charac_logand_byte (S.index mask 0) sflags;
+    lemma_bitwise_op_index (fun x y -> x && y) (to_bitfield8 (S.index mask 0)) (to_bitfield8 sflags) 7;
+
+    // extracting the flags from the cipher
+    pointwise_index2 U8.logxor r1 fmask 0 0;
+    pointwise_index1 U8.logxor r2 pnmask 0 pn_offset;
+    lemma_charac_logxor_byte (S.index r1 0) (S.index fmask 0);
+    let r1_bitfield = to_bitfield8 (S.index (format_header h pn_len npn) 0) in
+
+    // extracting the last bit
+    lemma_bitwise_op_index (fun x y -> x <> y) r1_bitfield fmask_bitfield 7;
+    lemma_bitfield8_128 (S.index packet 0);
+    lemma_bitfield8_128 (S.index (format_header h pn_len npn) 0);
+    lemma_header_type_128 h pn_len npn
+  end
+
+
+
+// same, for the long header. Proof is duplicated, except for the
+// definition of pn_offset and sflags
 let lemma_header_encrypt_type_long a hpk h pn_len npn c : Lemma
   (requires (
     let packet = header_encrypt a hpk h pn_len npn c in
     U8.(S.index packet 0 >=^ 128uy)))
   (ensures (Long? h)) =
-  admit()
+  if Long? h then ()
+  else begin
+
+    // notations
+    assert_norm(max_cipher_length < pow2 62);
+    let pn_offset =
+      match h with
+      | Short _ _ cid -> 1 + S.length cid in
+    let sample = S.slice c (3-pn_len) (19-pn_len) in
+    let mask = C16.block (calg_of_ae a) hpk sample in
+    let pnmask = and_inplace (S.slice mask 1 5) (pn_sizemask pn_len) 0 in
+    let sflags = 0x1fuy in
+    let fmask = S.create 1 U8.(S.index mask 0 `logand` sflags) in
+    let r1 = S.(format_header h pn_len npn @| c) in
+    let r2 = xor_inplace r1 fmask 0 in
+    let packet = xor_inplace r2 pnmask pn_offset in
+
+    // proving that the most significant bit of fmask is 0
+    let sflags_bitfield = to_bitfield8 sflags in
+    assert_norm (~(List.Tot.index sflags_bitfield 7));
+    let fmask_bitfield = to_bitfield8 (S.index fmask 0) in
+    lemma_charac_logand_byte (S.index mask 0) sflags;
+    lemma_bitwise_op_index (fun x y -> x && y) (to_bitfield8 (S.index mask 0)) (to_bitfield8 sflags) 7;
+
+    // extracting the flags from the cipher
+    pointwise_index2 U8.logxor r1 fmask 0 0;
+    pointwise_index1 U8.logxor r2 pnmask 0 pn_offset;
+    lemma_charac_logxor_byte (S.index r1 0) (S.index fmask 0);
+    let r1_bitfield = to_bitfield8 (S.index (format_header h pn_len npn) 0) in
+
+    // extracting the last bit
+    lemma_bitwise_op_index (fun x y -> x <> y) r1_bitfield fmask_bitfield 7;
+    lemma_bitfield8_128 (S.index packet 0);
+    lemma_bitfield8_128 (S.index (format_header h pn_len npn) 0);
+    lemma_header_type_128 h pn_len npn
+  end
 
 
 
