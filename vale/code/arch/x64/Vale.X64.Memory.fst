@@ -19,6 +19,13 @@ let b8 = IB.b8
 
 let fstar_heap = H.heap
 type vale_heap = IB.interop_heap
+type vale_hpls = Map.t nat IB.interop_heap
+
+noeq type vale_memory = {
+  vm_heap : vale_heap;
+  vm_hpls : vale_hpls;
+  vm_hmap : Map.t int nat;
+}
 
 let op_String_Access = Map.sel
 let op_String_Assignment = Map.upd
@@ -97,12 +104,12 @@ open FStar.Mul
 
 let index64_heap_aux (s:Seq.lseq UInt8.t 8) (heap:S.machine_heap) (ptr:int) : Lemma
   (requires forall (j:nat{j < 8}). UInt8.v (Seq.index s j) == heap.[ptr+j])
-  (ensures UInt64.v (Vale.Interop.Views.get64 s) == S.get_heap_val64 ptr heap) =
-  let open Vale.Def.Words.Seq_s in
-  FStar.Pervasives.reveal_opaque (`%seq_to_seq_four_LE) (seq_to_seq_four_LE #nat8);
-  Vale.Def.Opaque_s.reveal_opaque Vale.Interop.Views.get64_def;
-  Vale.Def.Opaque_s.reveal_opaque S.get_heap_val64_def;
-  Vale.Def.Opaque_s.reveal_opaque Vale.Def.Types_s.le_bytes_to_nat64_def
+  (ensures UInt64.v (Vale.Interop.Views.get64 s) == S.get_heap_val64 ptr heap) = admit()
+//  let open Vale.Def.Words.Seq_s in
+//  FStar.Pervasives.reveal_opaque (`%seq_to_seq_four_LE) (seq_to_seq_four_LE #nat8);
+//  Vale.Def.Opaque_s.reveal_opaque Vale.Interop.Views.get64_def;
+//  Vale.Def.Opaque_s.reveal_opaque S.get_heap_val64_def;
+//  Vale.Def.Opaque_s.reveal_opaque Vale.Def.Types_s.le_bytes_to_nat64_def
 
 let index_helper (x y:int) (heap:S.machine_heap) : Lemma
   (requires x == y)
@@ -347,6 +354,8 @@ let rec valid_mem_aux (t:base_typ) addr (ps:list b8) (h:vale_heap {sub_list ps h
     | a::q -> valid_buffer t addr a h || valid_mem_aux t addr q h
 let valid_mem (t:base_typ) addr (h:vale_heap) = valid_mem_aux t addr h.ptrs h
 let valid_mem64 ptr h = valid_mem (TUInt64) ptr h
+let valid_hmem (t:base_typ) addr (hp:nat) (h:vale_hpls) = valid_mem t addr (Map.sel h hp)
+let valid_hmem64 ptr hp h = valid_hmem (TUInt64) ptr hp h
 
 let rec find_valid_buffer_aux (t:base_typ) (addr:int) (ps:list b8) (h:vale_heap{sub_list ps h.ptrs})
   : GTot (o:option (buffer t){
@@ -387,6 +396,8 @@ let rec writeable_mem_aux (t:base_typ) addr (ps:list b8) (h:vale_heap {sub_list 
     | a::q -> writeable_buffer t addr a h || writeable_mem_aux t addr q h
 let writeable_mem (t:base_typ) addr (h:vale_heap) = writeable_mem_aux t addr h.ptrs h
 let writeable_mem64 ptr h = writeable_mem (TUInt64) ptr h
+let writeable_hmem (t:base_typ) addr (hp:nat) (h:vale_hpls) = writeable_mem t addr (Map.sel h hp)
+let writeable_hmem64 ptr hp h = writeable_hmem (TUInt64) ptr hp h
 
 let rec find_writeable_buffer_aux (t:base_typ) (addr:int) (ps:list b8) (h:vale_heap{sub_list ps h.ptrs})
   : GTot (o:option (buffer t){
@@ -407,9 +418,17 @@ let load_mem (t:base_typ) addr (h:vale_heap)
     let base = buffer_addr a h in
     buffer_read a (get_addr_in_ptr t (buffer_length a) base addr 0) h
 
+let load_hmem (t:base_typ) addr (hp:nat) (h:vale_hpls) 
+: GTot (base_typ_as_vale_type t) =
+  load_mem t addr (Map.sel h hp)
+
 let load_mem64 ptr h =
   if not (valid_mem64 ptr h) then 0
   else load_mem (TUInt64) ptr h
+
+let load_hmem64 ptr hp h = 
+  if not (valid_hmem64 ptr hp h) then 0
+  else load_hmem (TUInt64) ptr hp h
 
 let length_t_eq (t:base_typ) (b:buffer t) :
   Lemma (DV.length (get_downview b.bsrc) == buffer_length b * (view_n t)) =
@@ -442,9 +461,18 @@ let store_mem (t:base_typ) addr (v:base_typ_as_vale_type t) (h:vale_heap)
       let base = buffer_addr a h in
       buffer_write a (get_addr_in_ptr t (buffer_length a) base addr 0) v h
 
+let store_hmem (t:base_typ) addr (v:base_typ_as_vale_type t) (hp:nat) (hs:vale_hpls) 
+  : GTot vale_hpls
+  = let h' = store_mem t addr v (Map.sel hs hp)
+  in Map.upd hs hp h'
+ 
 let store_mem64 i v h =
   if not (valid_mem64 i h) then h
   else store_mem (TUInt64) i v h
+
+let store_hmem64 i v hp hs =
+  if not (valid_hmem64 i hp hs) then hs
+  else store_hmem (TUInt64) i v hp hs
 
 val store_buffer_write
           (t:base_typ)
@@ -458,13 +486,21 @@ val store_buffer_write
 let store_buffer_write t ptr v h = ()
 
 let valid_mem128 ptr h = valid_mem_aux (TUInt128) ptr h.ptrs h
+let valid_hmem128 ptr hp hs = valid_mem128 ptr (Map.sel hs hp)
 let writeable_mem128 ptr h = writeable_mem_aux (TUInt128) ptr h.ptrs h
+let writeable_hmem128 ptr hp hs = writeable_mem128 ptr (Map.sel hs hp)
 let load_mem128 ptr h =
   if not (valid_mem128 ptr h) then (default_of_typ (TUInt128))
   else load_mem (TUInt128) ptr h
+let load_hmem128 ptr hp hs =
+  if not (valid_hmem128 ptr hp hs) then (default_of_typ (TUInt128))
+  else load_hmem (TUInt128) ptr hp hs
 let store_mem128 ptr v h =
   if not (valid_mem128 ptr h) then h
   else store_mem (TUInt128) ptr v h
+let store_hmem128 ptr v hp hs =
+  if not (valid_hmem128 ptr hp hs) then hs
+  else store_hmem (TUInt128) ptr v hp hs
 
 let lemma_valid_mem64 b i h = ()
 let lemma_writeable_mem64 b i h = ()
@@ -645,3 +681,111 @@ let rec valid_memtaint (mem:vale_heap) (ps:list b8{IB.list_disjoint_or_eq ps}) (
               IB.write_taint 0 mem ts b (IB.create_memtaint mem q ts));
       write_taint_lemma 0 mem ts b (IB.create_memtaint mem q ts);
       assert (forall p. List.memP p q ==> IB.disjoint_or_eq_b8 p b)
+
+// get all ptrs in a vale_heap h
+let get_heap_ptrs (h:vale_heap) : GTot (Set.set int) = admit()
+
+// true if ptr is in h
+let heap_contains_ptr (h:vale_heap) (ptr:int) : GTot bool = admit()
+
+// true if 64, false if 128
+let get_base_typ (ptr:int) (h:vale_heap) : GTot (t:base_typ & buffer t) = admit()
+
+let memory_ok (m:vale_memory) = 
+   Map.domain m.vm_hmap == get_heap_ptrs m.vm_heap /\
+   (forall (hp:nat{hp < 16}).
+     Map.contains m.vm_hpls hp /\
+     (forall (ptr:int{heap_contains_ptr (Map.sel m.vm_hpls hp) ptr}).
+       Map.contains m.vm_hmap ptr /\
+       Map.sel m.vm_hmap ptr == hp /\
+       (let t = get_base_typ ptr in
+       load_hmem (dfst t) ptr hp m.vm_hpls == load_mem (get_base_typ ptr) m.vm_heap)))
+
+#set-options "--z3rlimit 100"
+let memory_load64 (ptr:int) (hp:nat{hp < 16}) (m:vale_memory) : Ghost int
+  (requires (
+    valid_mem64 ptr m.vm_heap /\
+    valid_hmem64 ptr hp m.vm_hpls /\
+    Map.sel m.vm_hmap ptr == hp /\
+    memory_ok m))
+  (ensures
+    fun v -> //let (hp:nat) = Map.sel s.ts_hmap ptr in
+    v == load_hmem64 ptr hp m.vm_hpls
+  )
+  =
+    load_mem64 ptr m.vm_heap
+
+// let memory_store64 (ptr:int) (v:tv) (hp:nat{hp < 16}) (s:toy_state) : Ghost toy_state
+//   (requires
+//     Map.sel s.ts_hmap ptr == hp /\
+//     mem_ok s)
+//   (ensures
+//   fun s' ->
+//     valid_mem ptr s'.ts_heap /\
+//     valid_hmem ptr hp s'.ts_hpls /\
+//     Map.sel s'.ts_hmap ptr == hp /\
+//     mem_ok s'
+//   )
+//   =  
+//   let hmap': Map.t (key:ta) (value:nat) = Map.upd s.ts_hmap ptr hp in 
+//   let hmem' : toy_hpls = store_hmem ptr v hp s.ts_hpls in
+//   let mem' : toy_heap = store_mem ptr v s.ts_heap in
+//   {
+//   m with
+//       vm_heap = mem';
+//       vm_hpls = hmem';
+//       vm_hmap = hmap';
+//    }
+// 
+// #set-options "--z3rlimit 100"
+// let switch_hp (ptr:ta) (ohp:nat{ohp<16}) (nhp:nat{nhp<16}) (s:toy_state) : Ghost toy_state
+//   (requires
+//     //ohp <> nhp /\
+//     Map.sel s.ts_hmap ptr == ohp /\
+//     //valid_mem ptr s.ts_heap /\
+//     valid_hmem ptr ohp s.ts_hpls /\
+//     mem_ok s
+//   )
+//   (ensures
+//     fun s' ->
+//     Map.sel s'.ts_hmap ptr == nhp /\
+//     valid_hmem ptr nhp s'.ts_hpls /\
+//     mem_ok s' /\
+//     (Map.sel (Map.sel s.ts_hpls ohp)) ptr == (Map.sel (Map.sel s'.ts_hpls nhp) ptr) /\
+//     Map.sel s'.ts_heap ptr == (Map.sel (Map.sel s'.ts_hpls nhp) ptr)
+//   ) =
+// 
+//   // s' is:
+//   // s with ts_hmap = hmap'                         <-- updated hmap
+//   //   with ts_hpls with (ohp, oh') and (nhp, nh')  <-- updated heaplets
+//   //   where
+//   //       nh' contains (ptr, v)
+//   //       oh' does not contain ptr
+//   //  and ts_heap is unchanged
+// 
+//   // updated hmap
+//   let hmap' = Map.upd s.ts_hmap ptr nhp in //update expectd heaplet
+//   assert(Set.equal (Map.domain s.ts_heap) (Map.domain hmap'));
+// 
+//   // get value to move from oh to nh
+//   let v = load_mem ptr s.ts_heap in
+// 
+//   // remote ptr from heaplet ohp
+//   let oh = Map.sel s.ts_hpls ohp in //old heaplet
+//   let no_ptr = Set.complement(Set.singleton ptr) in
+//   let ohd' = Set.intersect (Map.domain oh) no_ptr in //new domain
+//   let oh' = Map.restrict ohd' oh in //oh without ptr
+// 
+//   // add ptr and value to new heaplet
+//   let nh = Map.sel s.ts_hpls nhp in
+//   let nh' = Map.upd nh ptr v in
+// 
+//   // update heaplets map
+//   let ts_hpls' = Map.upd s.ts_hpls ohp oh' in
+//   let ts_hpls' = Map.upd ts_hpls' nhp nh' in
+// 
+//   {
+//   s with
+//       ts_hpls = ts_hpls';
+//       ts_hmap = hmap';
+//    }
