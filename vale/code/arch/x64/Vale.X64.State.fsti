@@ -10,14 +10,6 @@ module Flags = Vale.X64.Flags
 module Regs = Vale.X64.Regs 
 module Map = FStar.Map
 
-type vale_hpls = Map.t (key:nat) (value:vale_heap)
-
-noeq type vale_memory = {
-  vm_heap : vale_heap;
-  vm_hpls : vale_hpls;
-  vm_hmap : Map.t (key:int) (value:nat);
-}
-
 noeq type vale_state = {
   vs_ok: bool;
   vs_regs: Regs.t;
@@ -149,3 +141,4 @@ let state_eq (s0:vale_state) (s1:vale_state) : prop0 =
   s0.vs_stack == s1.vs_stack /\
   s0.vs_memTaint == s1.vs_memTaint /\
   s0.vs_stackTaint == s1.vs_stackTaint
+  
