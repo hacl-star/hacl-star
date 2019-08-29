@@ -1496,25 +1496,90 @@ let lemma_header_encrypt_type_long a hpk h pn_len npn c : Lemma
 
 
 
+let lemma_header_encrypt_type a hpk h pn_len npn c : Lemma
+  (let packet = header_encrypt a hpk h pn_len npn c in
+  U8.(S.index packet 0 <^ 128uy) <==> Short? h) =
+  let packet = header_encrypt a hpk h pn_len npn c in
+  if U8.(S.index packet 0 <^ 128uy) then
+    lemma_header_encrypt_type_short a hpk h pn_len npn c
+  else lemma_header_encrypt_type_long a hpk h pn_len npn c
 
 
 
-let lemma_header_encryption_correct a k h pn_len npn c =
+type header_encryption_correct
+  (a:ea)
+  (k:lbytes (ae_keysize a))
+  (h: header)
+  (pn_len: nat2)
+  (npn: lbytes (1+pn_len))
+  (c: cbytes)
+  = (header_decrypt a k (cid_len h)
+    (header_encrypt a k h pn_len npn c)
+    == H_Success pn_len npn h c)
+
+
+
+(*
+let lemma_header_encryption_short_sample a k h pn_len npn c : Lemma
+  (requires Short? h)
+  (ensures (
+    let sample = S.slice c (3-pn_len) (19-pn_len) in
+    let packet = header_encrypt a k h pn_len npn c in
+    let sample_offset = 5 + *)
+
+let lemma_header_encryption_correct_short a k h pn_len npn c : Lemma
+  (requires Short? h)
+  (ensures header_encryption_correct a k h pn_len npn c) =
+
+  // computing the result of header_encrypt
+  let pn_offset = 1 + S.length (Short?.cid h) in
+  let sample = S.slice c (3-pn_len) (19-pn_len) in
+  let mask = C16.block (calg_of_ae a) k sample in
+  let pnmask = and_inplace (S.slice mask 1 5) (pn_sizemask pn_len) 0 in
+  let sflags = 0x1fuy in
+  let fmask = S.create 1 U8.(S.index mask 0 `logand` sflags) in
+  let r1 = S.(format_header h pn_len npn @| c) in
+  let r2 = xor_inplace r1 fmask 0 in
+  let packet = xor_inplace r2 pnmask pn_offset in
+  assert (packet = header_encrypt a k h pn_len npn c);
+  admit();
+
+  // proving that the decryption extracts correctly the header type
+  let f = S.index packet 0 in
+  lemma_header_encrypt_type a k h pn_len npn c;
+  let is_short = U8.(f <^ 128uy) in
+  assert (is_short);
+
+  // extraction of the sample
+  let sample_offset : option (n:nat{n+16 <= S.length packet}) =
+    let offset = 5 + cid_len h in
+    if offset + 16 <= S.length packet then Some offset else None in
+
+  match sample_offset with
+  | None -> ()
+  | Some so ->
+    let pn_offset = 1 + cid_len h in
+    assert (pn_offset + 4 <= so);
+
+    admit()
+
+
+let lemma_header_encryption_correct_long a k h pn_len npn c : Lemma
+  (requires Long? h)
+  (ensures header_encryption_correct a k h pn_len npn c) =
   let packet = header_encrypt a k h pn_len npn c in
   let f = S.index packet 0 in
+  lemma_header_encrypt_type a k h pn_len npn c;
   let is_short = U8.(f <^ 128uy) in
-
-  let sample_offset : option (n:nat{n + 16 <= S.length packet}) =
-    if is_short then begin
-      assert(Short? h);
-      None
-    end
-    else None in
-
+  assert (~ is_short);
   admit()
 
 
-
+let lemma_header_encryption_correct a k h pn_len npn c : Lemma
+  (header_encryption_correct a k h pn_len npn c) =
+  if Short? h then
+    lemma_header_encryption_correct_short a k h pn_len npn c
+  else lemma_header_encryption_correct_long a k h pn_len npn c
 
 
 
