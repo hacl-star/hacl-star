@@ -4,7 +4,7 @@ open FStar.Mul
 open Lib.IntTypes
 open Lib.LoopCombinators
 
-#set-options "--z3rlimit 30 --max_ifuel 0 --max_fuel 0"
+#set-options "--z3rlimit 30 --max_fuel 0 --max_ifuel 0 --using_facts_from '-* +Prims +FStar.Pervasives +FStar.Math.Lemmas +FStar.Seq +Lib.IntTypes +Lib.Sequence'"
 
 let index #a #len s n = Seq.index s n
 
@@ -45,21 +45,24 @@ let update_sub #a #len s start n x =
 
 let lemma_update_sub #a #len dst start n src res =
   let res1 = update_sub dst start n src in
-  FStar.Seq.lemma_split (sub res 0 (start + n)) start;
-  FStar.Seq.lemma_split (sub res1 0 (start + n)) start;
-  FStar.Seq.lemma_split res (start + n);
-  FStar.Seq.lemma_split res1 (start + n)
+  Seq.lemma_split (sub res 0 (start + n)) start;
+  Seq.lemma_split (sub res1 0 (start + n)) start;
+  Seq.lemma_split res (start + n);
+  Seq.lemma_split res1 (start + n);
+  Seq.lemma_eq_intro res (update_sub dst start n src)
 
 let lemma_concat2 #a len0 s0 len1 s1 s =
-  FStar.Seq.Properties.lemma_split s len0;
-  FStar.Seq.Properties.lemma_split (concat s0 s1) len0
+  Seq.Properties.lemma_split s len0;
+  Seq.Properties.lemma_split (concat s0 s1) len0;
+  Seq.lemma_eq_intro s (concat s0 s1)
 
 let lemma_concat3 #a len0 s0 len1 s1 len2 s2 s =
   let s' = concat (concat s0 s1) s2 in
-  FStar.Seq.Properties.lemma_split (sub s 0 (len0 + len1)) len0;
-  FStar.Seq.Properties.lemma_split (sub s' 0 (len0 + len1)) len0;
-  FStar.Seq.Properties.lemma_split s (len0 + len1);
-  FStar.Seq.Properties.lemma_split s' (len0 + len1)
+  Seq.Properties.lemma_split (sub s 0 (len0 + len1)) len0;
+  Seq.Properties.lemma_split (sub s' 0 (len0 + len1)) len0;
+  Seq.Properties.lemma_split s (len0 + len1);
+  Seq.Properties.lemma_split s' (len0 + len1);
+  Seq.lemma_eq_intro s (concat (concat s0 s1) s2)
 
 let createi_a (a:Type) (len:size_nat) (init:(i:nat{i < len} -> a)) (k:nat{k <= len}) =
   lseq a k
@@ -69,14 +72,14 @@ let createi_pred (a:Type) (len:size_nat) (init:(i:nat{i < len} -> a)) (k:nat{k <
   forall (i:nat).{:pattern (index s i)} i < k ==> index s i == init i
 
 let createi_step (a:Type) (len:size_nat) (init:(i:nat{i < len} -> a)) (i:nat{i < len})
-	         (si:createi_a a len init i)
+                 (si:createi_a a len init i)
   : r:createi_a a len init (i + 1)
       {createi_pred a len init i si ==> createi_pred a len init (i + 1) r}
   =
   assert (createi_pred a len init i si ==> (forall (j:nat). j < i ==> index si j == init j));
   Seq.snoc si (init i)
 
-#push-options "--max_fuel 1"
+#push-options "--max_fuel 1 --using_facts_from '+Lib.LoopCombinators +FStar.List'"
 
 let createi #a len init_f =
   repeat_gen_inductive len
@@ -149,7 +152,6 @@ let seq_update_sub #a s start n x =
   Seq.lemma_eq_intro (Seq.slice o start (start + n)) x;
   o
 
-#push-options "--max_ifuel 1"
 val repeati_blocks_f:
     #a:Type0
   -> #b:Type0
@@ -164,7 +166,6 @@ let repeati_blocks_f #a #b bs inp f nb i acc =
   assert ((i+1) * bs <= nb * bs);
   let block = seq_sub inp (i * bs) bs in
   f i block acc
-#pop-options
 
 let repeati_blocks #a #b bs inp f g init =
   let len = length inp in
@@ -219,6 +220,34 @@ let generate_blocks_simple #a bs max nb f =
  repeat_gen nb (map_blocks_a a bs max)
    (generate_blocks_simple_f #a bs max f) Seq.empty
 
+let div_interval b n i =
+  Math.Lemmas.lemma_div_le (n * b) i b;
+  Math.Lemmas.cancel_mul_div n b
+
+let mod_interval_lt b n i j =
+  div_interval b n i;
+  div_interval b n j
+
+let div_mul_lt b a n = ()
+
+let mod_div_lt b i j =
+  mod_interval_lt b (j / b) i j
+
+let div_mul_l a b c d =
+  calc (==) {
+    a / (c * d);
+    == { }
+    a / (d * c);
+    == { Math.Lemmas.division_multiplication_lemma a d c }
+    (a / d) / c;
+    == { }
+    (b / d) / c;
+    == { Math.Lemmas.division_multiplication_lemma b d c }
+    b / (d * c);
+    == { }
+    b / (c * d);
+  }
+
 let map_blocks_f
   (#a:Type)
   (bs:size_nat{bs > 0})
@@ -240,10 +269,10 @@ private
 val mod_prop: n:pos -> a:nat -> b:nat{a * n <= b /\ b < (a + 1) * n} ->
   Lemma (b - a * n == b % n)
 let mod_prop n a b =
-  FStar.Math.Lemmas.modulo_lemma (b - a * n) n;
-  FStar.Math.Lemmas.lemma_mod_sub b n a
+  Math.Lemmas.modulo_lemma (b - a * n) n;
+  Math.Lemmas.lemma_mod_sub b n a
 
-#push-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
+#push-options "--z3rlimit 200"
 
 let rec index_map_blocks_multi #a bs max n inp f i =
   let map_blocks_a = map_blocks_a a bs max in
@@ -274,8 +303,6 @@ let map_blocks #a blocksize inp f g =
     Seq.append bs (g nb rem last)
   else bs
 
-#reset-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
-
 let index_map_blocks #a bs inp f g i =
   let len = length inp in
   let nb  = len / bs in
@@ -298,7 +325,7 @@ let index_map_blocks #a bs inp f g i =
     assert (Seq.equal (map_blocks bs inp f g) (Seq.append s1 s2));
     if i < nb * bs then
       begin
-      div_mul_lt i nb bs;
+      div_mul_lt bs i nb;
       Seq.lemma_index_app1 s1 s2 i;
       index_map_blocks_multi bs nb nb blocks f i
       end
@@ -313,16 +340,14 @@ let index_map_blocks #a bs inp f g i =
 let eq_generate_blocks0 #t len n a f acc0 =
   let a0  = (acc0, (Seq.empty <: s:seq t{length s == 0 * len}))  in
   assert (generate_blocks #t len n 0 a f acc0 ==
-	  repeat_gen 0 (generate_blocks_a t len n a) (generate_blocks_inner t len n a f) a0);
+          repeat_gen 0 (generate_blocks_a t len n a) (generate_blocks_inner t len n a f) a0);
   eq_repeat_gen0 0 (generate_blocks_a t len n a) (generate_blocks_inner t len n a f) a0
 
 let unfold_generate_blocks #t len n a f acc0 i =
   let a0  = (acc0, (Seq.empty <: s:seq t{length s == 0 * len}))  in
   assert (generate_blocks #t len n (i+1) a f acc0 ==
-	  repeat_gen (i+1) (generate_blocks_a t len n a) (generate_blocks_inner t len n a f) a0);
+          repeat_gen (i+1) (generate_blocks_a t len n a) (generate_blocks_inner t len n a f) a0);
   unfold_repeat_gen (i+1) (generate_blocks_a t len n a) (generate_blocks_inner t len n a f) a0 i
-
-#reset-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 0"
 
 let rec index_generate_blocks #t len max n f i =
   assert (0 < n);
@@ -330,12 +355,14 @@ let rec index_generate_blocks #t len max n f i =
   let _,s = generate_blocks #t len max (n-1) a_spec f () in
   let _,s' = f (n-1) () in
   let _,s1 = generate_blocks #t len max n a_spec f () in
-  unfold_generate_blocks #t len max a_spec f () (n-1);
-  assert (s1 == Seq.append s s');
+  unfold_generate_blocks #t len max a_spec f () (n-1); 
+  Seq.Properties.lemma_split s1 (n * len - len);
+  Seq.Properties.lemma_split (Seq.append s s') (n * len - len);
+  Seq.lemma_eq_intro s1 (Seq.append s s');
   if i < (n-1) * len then
     begin
     Seq.lemma_index_app1 s s' i;
-    index_generate_blocks #t len max (n-1) f i
+    index_generate_blocks len max (n-1) f i
     end
   else
     begin

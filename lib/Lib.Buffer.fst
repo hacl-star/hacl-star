@@ -63,10 +63,10 @@ let recall #t #a #len b =
 let create #a clen init =
   B.alloca init (normalize_term clen)
 
+#set-options "--max_fuel 1"
+
 let createL #a init =
   B.alloca_of_list init
-
-#set-options "--max_fuel 1"
 
 let createL_global #a init =
   IB.igcmalloc_of_list #a root init
@@ -529,7 +529,6 @@ let mapi #a #b h0 clen out spec_f f inp =
       lemma_eq_disjoint clen clen out inp i h0 h1;
       let xi = inp.(i) in f i xi)
 
-//#reset-options "--z3rlimit 500 --max_fuel 2"
 let map_blocks_multi #t #a h0 bs nb inp output spec_f impl_f =
   Math.Lemmas.multiple_division_lemma (v nb) (v bs);
   [@inline_let]
@@ -555,9 +554,14 @@ let map_blocks_multi #t #a h0 bs nb inp output spec_f impl_f =
       (v i * v bs)
   )
 
-#reset-options "--z3rlimit 1000 --max_fuel 0 --max_ifuel 0 --z3cliopt smt.QI.EAGER_THRESHOLD=5"
+val div_mul_le: b:pos -> a:nat -> Lemma
+  ((a / b) * b <= a)
+let div_mul_le b a = ()
+
+#reset-options "--z3rlimit 500 --max_fuel 0 --max_ifuel 0"
 
 let map_blocks #t #a h0 len blocksize inp output spec_f spec_l impl_f impl_l =
+  div_mul_le (v blocksize) (v len);
   let nb = len /. blocksize in
   let rem = len %. blocksize in
   let blen = nb *! blocksize in
@@ -569,8 +573,7 @@ let map_blocks #t #a h0 len blocksize inp output spec_f spec_l impl_f impl_l =
   Math.Lemmas.multiple_division_lemma (v nb) (v blocksize);
   map_blocks_multi #t #a h0 blocksize nb ib ob spec_f impl_f;
   if rem >. 0ul then
-     (assert (v nb * v blocksize <= v len);
-      impl_l nb;
+     (impl_l nb;
       let h1 = ST.get() in
       FStar.Seq.lemma_split (as_seq h1 output) (v nb * v blocksize))
   else ()
