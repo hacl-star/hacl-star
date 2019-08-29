@@ -164,14 +164,6 @@ let h_raise_v p q v h =
 (*** Decryption ***)
 (* Partially proven *)
 
-val solve_dlp_power:
-     #n:comp
-  -> p:big
-  -> s:big{exp p s < n}
-  -> g:fe n{isunit g /\ is_mult_order g (exp p s)}
-  -> a:fe n
-  -> x:fe (exp p s)
-let solve_dlp_power #n u g a = admit()
 
 type natseq = S.seq nat
 
