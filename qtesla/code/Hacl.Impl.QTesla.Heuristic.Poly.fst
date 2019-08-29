@@ -132,7 +132,7 @@ val ntt:
     a: poly
   -> w: poly
   -> Stack unit
-    (requires fun h -> live h a /\ live h w /\ disjoint a w)
+    (requires fun h -> live h a /\ live h w /\ disjoint a w /\ is_poly_pmq h a)
     (ensures fun h0 _ h1 -> modifies1 a h0 h1 /\ is_poly_montgomery h1 a)
 
 let ntt a w =
@@ -193,6 +193,7 @@ let nttinv_innerfor numoProblems jFirst a wj =
            let temp:elem = a.(j) in
            let ajNumo:elem = a.(jNumo) in
            assume(FStar.Int.fits (elem_v temp + elem_v ajNumo) elem_n);
+           assume(is_barr_reduce_input (temp +^ ajNumo));
 	   if numoProblems = size 16
 	   then ( a.(j) <- barr_reduce ( temp +^ ajNumo ) )
 	   else ( a.(j) <- temp +^ ajNumo );
@@ -252,8 +253,8 @@ val nttinv:
     a: poly
   -> w: poly
   -> Stack unit
-    (requires fun h -> live h a /\ live h w /\ disjoint a w)
-    (ensures fun h0 _ h1 -> modifies1 a h0 h1)
+    (requires fun h -> live h a /\ live h w /\ disjoint a w /\ is_poly_montgomery h a)
+    (ensures fun h0 _ h1 -> modifies1 a h0 h1 /\ is_poly_montgomery h1 a)
 
 let nttinv a w =
     push_frame();
@@ -291,7 +292,9 @@ let nttinv a w =
 	a.(i) <- reduce I64.(params_r *^ (elem_to_int64 ai))
     );
 
-    pop_frame()
+    pop_frame();
+    let hReturn = ST.get () in
+    assume(is_poly_montgomery hReturn a)
 
 #push-options "--z3rlimit 300 --z3cliopt 'smt.arith.nl=false'" // --z3seed 2"  
 private let lemma_product_fits (x:elem{is_montgomery x}) (y:elem{is_montgomery y}) : Lemma
@@ -339,7 +342,7 @@ val poly_add:
   -> y: poly
   -> Stack unit
     (requires fun h -> live h result /\ live h x /\ live h y /\ disjoint result x /\ disjoint result y /\ disjoint x y /\
-                    (forall (i:nat{i < v params_n}) . is_elem_int (elem_v (bget h x i) + elem_v (bget h y i))))
+                    (forall (i:nat{i < v params_n}) . is_pmq_int (elem_v (bget h x i) + elem_v (bget h y i))))
     (ensures fun h0 _ h1 -> modifies1 result h0 h1 /\ is_poly_pmq h1 result)
 
 let poly_add result x y =
@@ -347,9 +350,9 @@ let poly_add result x y =
     let h0 = ST.get() in
     for 0ul params_n
     (fun h i -> live h result /\ live h x /\ live h y /\ modifies1 result h0 h /\ i <= v params_n /\ is_poly_pmq_i h result i /\
-             (forall (i:nat{i < v params_n}) . is_elem_int (elem_v (bget h x i) + elem_v (bget h y i))))
+             (forall (i:nat{i < v params_n}) . is_pmq_int (elem_v (bget h x i) + elem_v (bget h y i))))
     (fun i ->
-        let h = ST.get () in assert(is_elem_int (elem_v (bget h x (v i)) + elem_v (bget h y (v i))));
+        let h = ST.get () in assert(is_pmq_int (elem_v (bget h x (v i)) + elem_v (bget h y (v i))));
         result.(i) <- x.(i) +^ y.(i);
         let hLoopEnd = ST.get () in
         assert(forall (j:nat{j < v params_n /\ j <> v i}) . bget h result j == bget hLoopEnd result j);
@@ -366,7 +369,7 @@ val poly_add_correct:
   -> x: poly
   -> y: poly
   -> Stack unit
-    (requires fun h -> live h result /\ live h x /\ live h y)
+    (requires fun h -> live h result /\ live h x /\ live h y /\ is_poly_montgomery h x /\ is_poly_pmq h y)
     (ensures fun h0 _ h1 -> modifies1 result h0 h1 /\ is_poly_pk h1 result)
 
 let poly_add_correct result x y =
@@ -409,7 +412,7 @@ val poly_sub_correct:
   -> x: poly
   -> y: poly
   -> Stack unit
-    (requires fun h -> live h result /\ live h x /\ live h y)
+    (requires fun h -> live h result /\ live h x /\ live h y /\ is_poly_montgomery h x /\ is_poly_pmq h y)
     (ensures fun h0 _ h1 -> modifies1 result h0 h1 /\ is_poly_montgomery h1 result)
 
 let poly_sub_correct result x y =

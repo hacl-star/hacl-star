@@ -22,14 +22,6 @@ module B = LowStar.Buffer
 
 #reset-options "--z3rlimit 100 --max_fuel 1 --max_ifuel 1"
 
-let is_elem_int (e:int) : GTot bool =
-  let q = elem_v params_q in
-  -q < e && e < q
-
-let is_elem (e:elem_base) : GTot bool = let x = elem_v e in is_elem_int x
-let is_elem_i32 (e:I32.t) : GTot bool = let x = I32.v e in is_elem_int x
-let is_elem_i64 (e:I64.t) : GTot bool = let x = I64.v e in is_elem_int x
-
 type elem = elem_base
 let is_uelem e = let x = uelem_v e in let q = elem_v params_q in 0 <= x /\ x < q
 type uelem = uelem_base
@@ -44,10 +36,20 @@ let is_sparse_elem_sk (e:sparse_elem) = let s = pow2 (v params_s_bits-1) in -s <
 let is_y_sampler_output (e:elem) = let b = elem_v params_B in -b <= elem_v e /\ elem_v e <= b
 let is_pk (e:elem) = 0 <= elem_v e /\ elem_v e < elem_v params_q
 //let is_sk (e:elem) = -(pow2 (v params_s_bits)) <= elem_v e /\ elem_v e < pow2 (v params_s_bits)
-let is_pmq (e:elem) = let q = elem_v params_q in -q < elem_v e /\ elem_v e < q
+let is_pmq_int (e:int) = let q = elem_v params_q in -q < e /\ e < q
+let is_pmq (e:elem) = is_pmq_int (elem_v e)
 let is_z_accepted (e:elem) = let b = elem_v params_B in let s = elem_v params_U in -(b-s) <= elem_v e /\ elem_v e <= (b-s)
 let is_sparse_mul_output (e:elem) = (-65536) <= elem_v e /\ elem_v e <= 65536 // [-2^16, 2^16]; see sparse_mul for comments
 let is_sparse_mul32_output (e:elem) = let q = elem_v params_q in -q <= elem_v e /\ elem_v e < 2 * q
+let is_barr_reduce_input (e:elem) = let q = elem_v params_q in -4 * q <= elem_v e /\ elem_v e <= 4 * q
+
+let is_elem_int (e:int) : GTot (r:bool{is_pmq_int e <==> r}) =
+  let q = elem_v params_q in
+  -q < e && e < q
+
+let is_elem (e:elem_base) : GTot bool = let x = elem_v e in is_elem_int x
+let is_elem_i32 (e:I32.t) : GTot bool = let x = I32.v e in is_elem_int x
+let is_elem_i64 (e:I64.t) : GTot bool = let x = I64.v e in is_elem_int x
 
 let is_poly_montgomery_i (h:HS.mem) (p:poly) (j:nat{j <= v params_n}) = forall (i:nat{i < j}). {:pattern is_montgomery (bget h p i)} is_montgomery (bget h p i)
 let is_poly_corrected_i (h:HS.mem) (p:poly) (j:nat{j <= v params_n}) = forall (i:nat{i < j}). {:pattern is_corrected (bget h p i)}  is_corrected (bget h p i)
@@ -67,6 +69,7 @@ let is_poly_k_sampler_output_i (h:HS.mem) (p:poly_k) (j:nat{j <= v params_k * v 
 let is_poly_k_pk_i (h:HS.mem) (p:poly_k) (j:nat{j <= v params_k * v params_n}) = forall (i:nat{i < j}). {:pattern is_pk (bget h p i)} is_pk (bget h p i)
 //let is_poly_k_sk_i (h:HS.mem) (p:poly_k) (j:nat{j <= v params_k * v params_n}) = forall (i:nat{i < j}). {:pattern is_sk (bget h p i)} is_sk (bget h p i)
 unfold let is_poly_k_sk_i = is_poly_sampler_output_i
+let is_poly_k_pmq_i (h:HS.mem) (p:poly_k) (j:nat{j <= v params_n * v params_k}) = forall (i:nat{i < j}). {:pattern is_pmq (bget h p i)} is_pmq (bget h p i)
 
 let is_poly_montgomery (h:HS.mem) (p:poly) = is_poly_montgomery_i h p (v params_n)
 let is_poly_corrected (h:HS.mem) (p:poly) = is_poly_corrected_i h p (v params_n)
@@ -86,6 +89,7 @@ let is_poly_k_sampler_output (h:HS.mem) (p:poly_k) = is_poly_k_sampler_output_i 
 let is_poly_k_pk (h:HS.mem) (p:poly_k) = is_poly_k_pk_i h p (v params_k * v params_n)
 //let is_poly_k_sk (h:HS.mem) (p:poly_k) = is_poly_k_sk_i h p (v params_k * v params_n)
 unfold let is_poly_k_sk = is_poly_k_sampler_output
+let is_poly_k_pmq (h:HS.mem) (p:poly_k) = is_poly_k_pmq_i h p (v params_k * v params_n)
 
 let is_poly_equal (h0 h1:HS.mem) (p:poly) = 
     forall (i:nat{i < v params_n}) . {:pattern bget h1 p i} bget h0 p i == bget h1 p i
@@ -225,7 +229,7 @@ let reduce a =
     int64_to_elem result
 
 val barr_reduce:
-    a: elem_base
+    a: elem_base{is_barr_reduce_input a}
   -> Tot (r:elem{is_sparse_mul32_output r})
 
 // Output range of barr_reduce is [-q, 2q] per Patrick

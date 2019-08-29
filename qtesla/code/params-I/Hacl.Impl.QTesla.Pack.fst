@@ -137,6 +137,8 @@ let decode_sk_s j_in s sk =
     );
 
     let hReturn = ST.get () in
+    // ASSUMPTION per Patrick: The input secret key is assumed to be trustworthy. The reference code does not actually
+    // check that all coefficients are within the expected bounds, so we assume it here.
     assume(is_s_sk hReturn s);
     j_in +. (params_n /. size 4) *. size 5
 

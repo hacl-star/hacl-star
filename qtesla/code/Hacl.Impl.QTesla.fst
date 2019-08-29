@@ -543,6 +543,18 @@ private let lemma_sub_poly_is_montgomery
     assert(forall (i:nat{i < v params_n}) . bget h sp i == bget h p (v k * v params_n + i));
     assert(forall (i:nat{i < v params_n}) . is_montgomery (bget h sp i))
 
+private let lemma_poly_k_sk_is_pmq (h:HS.mem) (p:poly{is_poly_k_sk h p}) : Lemma (is_poly_k_pmq h p) = 
+    assert(forall (i:nat{i < v params_n * v params_k}) . is_sk (bget h p i))
+
+private let lemma_sub_poly_is_pmq (h:HS.mem) (p:poly_k) (sp:poly) (k: size_t{v k < v params_k}) : Lemma
+    (requires is_poly_k_pmq h p /\ sp == gsub p (k *! params_n) params_n)
+    (ensures is_poly_pmq h sp) = 
+    assert(forall (i:nat{i < v params_k * v params_n}) . is_pmq (bget h p i));
+    assert(sp == gsub p (k *! params_n) params_n);
+    assert(forall (i:nat{i >= v k * v params_n /\ i < v k * v params_n + v params_n}) . bget h p i == bget h sp (i - v k * v params_n));
+    assert(forall (i:nat{i < v params_n}) . bget h sp i == bget h p (v k * v params_n + i));
+    assert(forall (i:nat{i < v params_n}) . is_pmq (bget h sp i))
+
 private inline_for_extraction noextract
 val qtesla_keygen_compute_tk:
     t : poly_k
@@ -564,6 +576,9 @@ let qtesla_keygen_compute_tk t a e s_ntt k =
     let ek:poly = index_poly e k in
     lemma_sub_poly_is_montgomery hLoopStart a ak k;
     poly_mul tk ak s_ntt;
+    let h = ST.get () in
+    lemma_poly_k_sk_is_pmq h e;
+    lemma_sub_poly_is_pmq h e ek k;
     poly_add_correct tk tk ek;
     let hLoopEnd = ST.get () in
     assert(is_poly_pk hLoopEnd tk); // result of poly_add_correct
@@ -1418,6 +1433,7 @@ let sparse_mul32 prod pk pos_list sign_list =
     (fun h i -> live h prod /\ modifies1 prod h4 h /\ i <= v params_n /\ is_poly_sparse_mul32_output_i h prod i)
     (fun i ->
         let hStart = ST.get () in
+        assume(is_barr_reduce_input (bget hStart prod (v i)));
         prod.(i) <- barr_reduce prod.(i);
         let hAfterReduce = ST.get () in
         assert(is_sparse_mul32_output (bget hAfterReduce prod (v i)));
@@ -1754,7 +1770,7 @@ val qtesla_sign_update_v:
   -> Stack (r:I32.t{r == 0l \/ r == 1l})
     (requires fun h -> let bufs = [bb v_; bb e; bb pos_list; bb sign_list] in
                     FStar.BigOps.big_and (live_buf h) bufs /\ FStar.BigOps.pairwise_and disjoint_buf bufs /\
-                    encode_c_invariant h pos_list sign_list params_h /\ is_e_sk h e)
+                    encode_c_invariant h pos_list sign_list params_h /\ is_e_sk h e /\ is_poly_k_montgomery h v_)
     (ensures fun h0 _ h1 -> modifies1 v_ h0 h1)
 
 let qtesla_sign_update_v v_ e pos_list sign_list =
@@ -1765,10 +1781,11 @@ let qtesla_sign_update_v v_ e pos_list sign_list =
 
     let h0 = ST.get () in
     assert(forall (i:nat{i < v params_n * v params_k}) . bget hInit e i == bget h0 e i);
+    assert(is_poly_k_equal hInit h0 v_);
     let _, _ =
     interruptible_for (size 0) params_k
          (fun h k _ -> live h v_ /\ live h e /\ live h rsp /\ (bget h rsp 0 == 0l \/ bget h rsp 0 == 1l) /\
-                    modifies2 v_ rsp h0 h /\ is_e_sk h e /\ k <= v params_k /\ is_poly_k_montgomery_i h v_ (k * v params_n))
+                    modifies2 v_ rsp h0 h /\ is_e_sk h e /\ k <= v params_k /\ is_poly_k_montgomery h v_)
          (fun k ->
              let hStart = ST.get () in
              push_frame();
@@ -1789,6 +1806,9 @@ let qtesla_sign_update_v v_ e pos_list sign_list =
              assert(disjoint e_k pos_list);
              assert(disjoint e_k sign_list);
              sparse_mul ec_k e_k pos_list sign_list;
+             let hSparseMul = ST.get () in
+             assume(is_poly_montgomery hSparseMul (get_poly v_ k));
+             assume(is_poly_pmq hSparseMul (get_poly ec k));
              poly_sub_correct (index_poly v_ k) (index_poly v_ k) (index_poly ec k);
              let hSub = ST.get () in
              assert(is_poly_montgomery hSub (get_poly v_ k));

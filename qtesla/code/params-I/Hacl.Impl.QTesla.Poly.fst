@@ -196,6 +196,7 @@ val poly_ntt:
     (ensures fun h0 _ h1 -> modifies1 x_ntt h0 h1 /\ is_poly_montgomery h1 x_ntt)
 
 let poly_ntt x_ntt x =
+    let hInit = ST.get () in
     push_frame();
     (* 
     When the Frodo code creates arrays of constants like this, it uses createL_global, which creates an
@@ -208,10 +209,19 @@ let poly_ntt x_ntt x =
     [@inline_let] let (zeta_list_elem:list elem) = coerce zeta_list in 
     let zeta : poly = createL zeta_list_elem in 
     let h0 = ST.get() in
+    assert(is_poly_equal hInit h0 x);
     for 0ul params_n
-    (fun h _ -> live h x_ntt /\ live h x /\ modifies1 x_ntt h0 h)
+    (fun h i -> live h x_ntt /\ live h x /\ modifies1 x_ntt h0 h /\ is_poly_pmq h x /\ i <= v params_n /\ is_poly_pmq_i h x_ntt i)
     (fun i ->
-        x_ntt.(i) <- x.(i)
+        let h1 = ST.get () in
+        assert(is_pmq (bget h1 x (v i)));
+        x_ntt.(i) <- x.(i);
+        let h2 = ST.get () in 
+        assert(bget h2 x_ntt (v i) = bget h2 x (v i));
+        assert(is_poly_equal h1 h2 x);
+        assert(is_poly_equal_except h1 h2 x_ntt (v i));
+        assert(is_pmq (bget h2 x_ntt (v i)));
+        assert(is_poly_pmq_i h2 x_ntt (v i + 1))
     );
 
     ntt x_ntt zeta;
