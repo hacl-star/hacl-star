@@ -99,7 +99,7 @@ type h_result =
   h_result
 | H_Failure
 
-let header_len (h:header) (pn_len:nat2) (npn:lbytes (1 + pn_len)) : n:nat{2 <= n /\ n <= 54} =
+let header_len (h:header) (pn_len:nat2) : n:nat{2 <= n /\ n <= 54} =
   match h with
   | Short spin phase cid ->
     1 + S.length cid + 1 + pn_len
@@ -112,7 +112,7 @@ let cid_len : header -> nat4 = function
   | Long _ _ dcil _ _ _ _ -> dcil
 
 val format_header: h:header -> pn_len:nat2 -> npn: lbytes (1+pn_len) ->
-  lbytes (header_len h pn_len npn)
+  lbytes (header_len h pn_len)
 
 val parse_header: b:packet -> cid_len: nat4 -> h_result
 
@@ -201,7 +201,7 @@ val decrypt:
   k: lbytes (AEAD.key_length a) ->
   static_iv: lbytes 12 ->
   hpk: lbytes (ae_keysize a) ->
-  last: nat{last + 1 < pow2 62} ->
+  last: nat62 ->
   cid_len: nat4 ->
   packet: packet ->
   result
