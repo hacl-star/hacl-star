@@ -1,5 +1,8 @@
 module Vale.Stdcalls.X64.Fadd
 
+val z3rlimit_hack (x:nat) : squash (x < x + x + 1)
+#reset-options "--z3rlimit 50"
+
 open FStar.HyperStack.ST
 module B = LowStar.Buffer
 module HS = FStar.HyperStack
@@ -71,7 +74,7 @@ let add1_post : VSig.vale_post dom =
     (f:V.va_fuel) ->
       FU.va_ens_fast_add1_stdcall c va_s0 IA.win (as_vale_buffer out) (as_vale_buffer f1) (UInt64.v f2) va_s1 f
 
-#set-options "--z3rlimit 20"
+#reset-options "--z3rlimit 50"
 
 [@__reduce__] noextract
 let add1_lemma'
@@ -98,6 +101,7 @@ let add1_lemma'
    let va_s1, f = FU.va_lemma_fast_add1_stdcall code va_s0 IA.win (as_vale_buffer out) (as_vale_buffer f1) (UInt64.v f2) in
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 out;
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 f1;
+  assert (VSig.vale_calling_conventions_stdcall va_s0 va_s1);
    (va_s1, f)
 
 (* Prove that add1_lemma' has the required type *)
@@ -112,7 +116,6 @@ let code_add1 = FU.va_code_fast_add1_stdcall IA.win
 let lowstar_add1_t =
   assert_norm (List.length dom + List.length ([]<:list arg) <= 4);
   IX64.as_lowstar_sig_t_weak_stdcall
-    Vale.Interop.down_mem
     code_add1
     dom
     []
@@ -192,7 +195,6 @@ let code_fadd = FH.va_code_fadd_stdcall IA.win
 let lowstar_fadd_t =
   assert_norm (List.length fadd_dom + List.length ([]<:list arg) <= 4);
   IX64.as_lowstar_sig_t_weak_stdcall
-    Vale.Interop.down_mem
     code_fadd
     fadd_dom
     []

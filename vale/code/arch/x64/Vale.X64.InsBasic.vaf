@@ -30,7 +30,6 @@ open Vale.X64.Memory
 open Vale.X64.Stack_i
 module I = Vale.X64.Instructions_s
 module S = Vale.X64.Machine_Semantics_s
-friend Vale.X64.StateLemmas
 friend Vale.X64.Decls
 #endverbatim
 

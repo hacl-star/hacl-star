@@ -8,7 +8,11 @@ module VS = Vale.X64.State
 module T = FStar.Tactics
 module B = LowStar.Buffer
 module DV = LowStar.BufferView.Down
+open Vale.Arch.HeapImpl
+open Vale.Arch.Heap
 
+friend Vale.Arch.HeapImpl
+friend Vale.Arch.Heap
 friend Vale.X64.Memory
 friend Vale.X64.Stack_i
 
@@ -22,6 +26,10 @@ let as_vale_immbuffer #src #t i =
 
 let mem_eq = ()
 let stack_eq = ()
+
+let as_mem h = _ih h
+let as_vale_mem ih = heap_new ih (heap_down ih)
+
 let buffer_addr_is_nat64 (#t:_) (x:ME.buffer t) (s:VS.vale_state) = ()
 
 module V = Vale.X64.Decls

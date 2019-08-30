@@ -1,5 +1,8 @@
 module Vale.Stdcalls.X64.Fsub
 
+val z3rlimit_hack (x:nat) : squash (x < x + x + 1)
+#reset-options "--z3rlimit 50"
+
 open FStar.HyperStack.ST
 module HS = FStar.HyperStack
 module B = LowStar.Buffer
@@ -111,7 +114,6 @@ let code_fsub = FH.va_code_fsub_stdcall IA.win
 let lowstar_fsub_t =
   assert_norm (List.length dom + List.length ([]<:list arg) <= 4);
   IX64.as_lowstar_sig_t_weak_stdcall
-    Vale.Interop.down_mem
     code_fsub
     dom
     []

@@ -21,6 +21,7 @@ module SL = Vale.X64.StateLemmas
 module VL = Vale.X64.Lemmas
 module ST = FStar.HyperStack.ST
 module I = Vale.Interop
+open Vale.Arch.Heap
 open FStar.Mul
 
 val as_vale_buffer_len (#src #t:base_typ) (x:buf_t src t)
@@ -37,7 +38,7 @@ val state_eq_down_mem (va_s1:V.va_state) (s1:_)
         VL.state_eq_opt (Some (SL.state_to_S va_s1))
                         (Some s1))
       (ensures (
-         I.down_mem (as_mem va_s1.VS.vs_heap) == s1.BS.ms_heap))
+        heap_down (as_mem va_s1.VS.vs_heap) == heap_get s1.BS.ms_heap))
 
 val relate_modifies (args:list arg) (m0 m1 : ME.vale_heap)
   : Lemma
@@ -82,8 +83,11 @@ val get_heap_mk_mem_reveal
   (args:IX64.arg_list)
   (h0:HS.mem{mem_roots_p h0 args}) : Lemma (
    let mem = mk_mem args h0 in
-   MES.get_heap (as_vale_mem mem) == I.down_mem mem)
+   coerce (as_vale_mem mem) == heap_new mem (heap_down mem))
 
+val lemma_as_mem_as_vale_mem (h:interop_heap) : Lemma
+  (ensures as_mem (as_vale_mem h) == h)
+  [SMTPat (as_mem (as_vale_mem h))]
 
 val mk_stack_reveal (stack:BS.machine_stack) : Lemma
   (VSS.stack_to_s (as_vale_stack stack) == stack /\

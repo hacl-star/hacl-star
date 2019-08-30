@@ -5,8 +5,6 @@ open Vale.X64.StateLemmas
 module BS = Vale.X64.Machine_Semantics_s
 module ME = Vale.X64.Memory
 
-friend Vale.X64.StateLemmas
-
 #reset-options "--initial_fuel 2 --max_fuel 2 --z3rlimit 30"
 
 val eval_code_eq_all (c:code) (f:fuel) : Lemma

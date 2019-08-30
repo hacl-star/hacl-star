@@ -8,6 +8,10 @@ open Vale.Def.Words_s
 open Vale.Def.Words.Two
 open FStar.Calc
 
+let lemma_nat_to_two32 () =
+  assert_norm (forall (x:nat64).{:pattern (nat_to_two 32 x)}
+    nat_to_two 32 x == Mktwo (x % 0x100000000) (x / 0x100000000))
+
 let lemma_BitwiseXorCommutative x y =
   lemma_ixor_nth_all 32;
   lemma_equal_nth 32 (x *^ y) (y *^ x)

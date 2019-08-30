@@ -15,7 +15,7 @@ open Vale.Lib.Seqs_s
 friend Lib.IntTypes
 friend Vale.SHA.SHA_helpers
 
-#set-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 800 --max_fuel 0 --max_ifuel 0"
 
 let math_aux (n:nat) : Lemma ( ((64 * n) * 1) / 16 == 4 * n) = ()
 

@@ -1,7 +1,7 @@
 module Vale.X64.Stack_i
 
 module BS = Vale.X64.Machine_Semantics_s
-open Vale.X64.Bytes_Semantics
+open Vale.Arch.MachineHeap
 let vale_stack = BS.machine_stack
 
 let valid_src_stack64 i st = BS.valid_src_stack64 i st

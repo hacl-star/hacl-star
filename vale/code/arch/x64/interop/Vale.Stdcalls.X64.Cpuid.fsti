@@ -61,7 +61,6 @@ let code_aesni = VC.va_code_check_aesni_stdcall IA.win
 [@__reduce__] noextract
 let lowstar_aesni_t =
   IX64.as_lowstar_sig_t_weak_stdcall
-    Vale.Interop.down_mem
     code_aesni
     dom
     []
@@ -116,7 +115,6 @@ let code_sha = VC.va_code_check_sha_stdcall IA.win
 [@__reduce__] noextract
 let lowstar_sha_t =
   IX64.as_lowstar_sig_t_weak_stdcall
-    Vale.Interop.down_mem
     code_sha
     dom
     []
@@ -166,7 +164,6 @@ let code_adx = VC.va_code_check_adx_bmi2_stdcall IA.win
 [@__reduce__] noextract
 let lowstar_adx_t =
   IX64.as_lowstar_sig_t_weak_stdcall
-    Vale.Interop.down_mem
     code_adx
     dom
     []
@@ -215,7 +212,6 @@ let code_avx = VC.va_code_check_avx_stdcall IA.win
 [@__reduce__] noextract
 let lowstar_avx_t =
   IX64.as_lowstar_sig_t_weak_stdcall
-    Vale.Interop.down_mem
     code_avx
     dom
     []
@@ -264,7 +260,6 @@ let code_avx2 = VC.va_code_check_avx2_stdcall IA.win
 [@__reduce__] noextract
 let lowstar_avx2_t =
   IX64.as_lowstar_sig_t_weak_stdcall
-    Vale.Interop.down_mem
     code_avx2
     dom
     []

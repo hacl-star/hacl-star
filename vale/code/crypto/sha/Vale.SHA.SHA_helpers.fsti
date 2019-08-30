@@ -9,8 +9,7 @@ open Vale.Def.Words.Seq_s
 open FStar.Seq
 open Vale.Arch.Types
 
-unfold
-let (.[]) = FStar.Seq.index
+unfold let (.[]) = FStar.Seq.index
 
 #reset-options "--max_fuel 0 --max_ifuel 0"
 

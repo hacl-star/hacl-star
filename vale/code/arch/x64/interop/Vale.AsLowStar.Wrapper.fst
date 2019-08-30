@@ -287,22 +287,22 @@ let core_create_lemma_state
   : Lemma
       (ensures
         (let va_s = LSig.create_initial_vale_state #max_arity #arg_reg args h0 in
-         fst (IX64.create_initial_trusted_state max_arity arg_reg args I.down_mem h0) == SL.state_to_S va_s))
+         fst (IX64.create_initial_trusted_state max_arity arg_reg args h0) == SL.state_to_S va_s))
   = let va_s = LSig.create_initial_vale_state #max_arity #arg_reg args h0 in
-    let tr_s = fst (IX64.create_initial_trusted_state max_arity arg_reg args I.down_mem h0) in
+    let tr_s = fst (IX64.create_initial_trusted_state max_arity arg_reg args h0) in
     let sl_s = SL.state_to_S va_s in
     assert (tr_s.BS.ms_memTaint == va_s.VS.vs_memTaint);
     assert (tr_s.BS.ms_stackTaint == va_s.VS.vs_stackTaint);
-    SL.lemma_to_ok va_s;
+    //SL.lemma_to_ok va_s;
     let aux_flag (f:MS.flag) : Lemma (tr_s.BS.ms_flags f == sl_s.BS.ms_flags f)
-      = SL.lemma_to_flags va_s f
+      = ()//SL.lemma_to_flags va_s f
     in
     Classical.forall_intro aux_flag;
     assert (FunctionalExtensionality.feq tr_s.BS.ms_flags sl_s.BS.ms_flags);
-    SL.lemma_to_mem va_s;
-    SL.lemma_to_stack va_s;
+    //SL.lemma_to_mem va_s;
+    //SL.lemma_to_stack va_s;
     let aux_reg (r:MS.reg) : Lemma (tr_s.BS.ms_regs r == sl_s.BS.ms_regs r)
-      = SL.lemma_to_reg va_s r
+      = ()//SL.lemma_to_reg va_s r
     in
     Classical.forall_intro aux_reg;
     assert (FunctionalExtensionality.feq tr_s.BS.ms_regs sl_s.BS.ms_regs);
@@ -411,7 +411,7 @@ let rec stack_of_args_stack_args'
           let v = IX64.arg_as_nat64 hd in // We will store the arg hd
           let h_final = BS.update_heap64 ptr v accu' in
           stack_of_args_stack_args'_aux max_arity (n-1) (n-1) tl init_rsp accu' v;
-          Vale.X64.Bytes_Semantics.correct_update_get ptr v accu';
+          Vale.Arch.MachineHeap.correct_update_get ptr v accu';
           Vale.Def.Opaque_s.reveal_opaque BS.update_heap64_def
         )
 
@@ -475,7 +475,7 @@ let core_create_lemma
   : Lemma
       (ensures
         (let va_s = LSig.create_initial_vale_state #max_arity #arg_reg args h0 in
-         fst (IX64.create_initial_trusted_state max_arity arg_reg args I.down_mem h0) == SL.state_to_S va_s /\
+         fst (IX64.create_initial_trusted_state max_arity arg_reg args h0) == SL.state_to_S va_s /\
          LSig.mem_correspondence args h0 va_s /\
          VSig.disjoint_or_eq args /\
          VSig.readable args VS.(va_s.vs_heap) /\
@@ -483,7 +483,7 @@ let core_create_lemma
          ST.equal_domains h0 (hs_of_mem (as_mem va_s.VS.vs_heap))
   ))
   = let va_s = LSig.create_initial_vale_state #max_arity #arg_reg args h0 in
-    let t_state = fst (IX64.create_initial_trusted_state max_arity arg_reg args I.down_mem h0) in
+    let t_state = fst (IX64.create_initial_trusted_state max_arity arg_reg args h0) in
     let t_stack = t_state.BS.ms_stack in
     core_create_lemma_mem_correspondance #max_arity #arg_reg args h0;
     core_create_lemma_disjointness args;
@@ -526,34 +526,6 @@ let rec mem_correspondence_refl (args:list arg)
 
 ////////////////////////////////////////////////////////////////////////////////
 
-[@__reduce__]
-let prediction_pre_rel
-          (#max_arity:nat)
-          (#arg_reg:IX64.arg_reg_relation max_arity)
-          (pre:VSig.vale_pre_tl [])
-          (code:V.va_code)
-          (args:IX64.arg_list)
-   : IX64.prediction_pre_rel_t code args
-   = fun (h0:mem_roots args) ->
-      LSig.(to_low_pre #max_arity #arg_reg pre args h0)
-
-[@__reduce__]
-let prediction_post_rel
-          (#max_arity:nat)
-          (post:VSig.vale_post_tl [])
-          (code:V.va_code)
-          (args:IX64.arg_list)
-   : IX64.prediction_post_rel_t code args
-   = fun (h0:mem_roots args)
-       (_s0:BS.machine_state)
-       (rax_fuel_mem:(UInt64.t & nat & ME.vale_heap))
-       (s1:BS.machine_state) ->
-    let rax, fuel, mem = rax_fuel_mem in
-    exists h1.
-      h1 == hs_of_mem (as_mem mem) /\
-      mem_roots_p h1 args /\
-      LSig.(to_low_post post args h0 rax h1)
-
 let loc_includes_union (l1 l1' l:B.loc)
   : Lemma (requires B.(loc_includes l1 l1'))
           (ensures  B.(loc_includes (loc_union l1 l) (loc_union l1' l)))
@@ -563,27 +535,6 @@ let loc_includes_union (l1 l1' l:B.loc)
     loc_includes_union_r (loc_union l1 l) l1' l
 
 #set-options "--z3rlimit_factor 2"
-val vale_lemma_as_prediction
-          (#max_arity:nat)
-          (#arg_reg:IX64.arg_reg_relation max_arity)
-          (#regs_modified:MS.reg_64 -> bool)
-          (#xmms_modified:MS.reg_xmm -> bool)
-          (code:V.va_code)
-          (args:IX64.arg_list)
-          (pre:VSig.vale_pre_tl [])
-          (post:VSig.vale_post_tl [])
-          (v:VSig.vale_sig_tl regs_modified xmms_modified args (coerce code) pre post)
-   : IX64.prediction
-             max_arity
-             arg_reg
-             regs_modified
-             xmms_modified
-             I.down_mem
-             (coerce code)
-             args
-             (prediction_pre_rel #max_arity #arg_reg pre (coerce code) args)
-             (prediction_post_rel #max_arity post (coerce code) args)
-
 let vale_lemma_as_prediction
           (#max_arity:nat)
           (#arg_reg:IX64.arg_reg_relation max_arity)
@@ -620,7 +571,7 @@ let vale_lemma_as_prediction
        Vale.AsLowStar.MemoryHelpers.modifies_same_roots
          (VSig.mloc_modified_args args) va_s0.VS.vs_heap final_mem;
        Vale.AsLowStar.MemoryHelpers.state_eq_down_mem va_s1 s1;
-       assert (I.down_mem (as_mem final_mem) == s1.BS.ms_heap);
+       assert (heap_down (as_mem final_mem) == heap_get s1.BS.ms_heap);
        mem_correspondence_refl args va_s1;
        assert (VSig.readable args VS.(va_s1.vs_heap));
        assert (disjoint_or_eq args);
@@ -665,7 +616,6 @@ let rec lowstar_typ
         (elim_1 post x)
 
 #set-options "--initial_ifuel 1"
-private
 let rec __test__wrap
              (#max_arity:nat)
              (#arg_reg:IX64.arg_reg_relation max_arity)
@@ -693,7 +643,7 @@ let rec __test__wrap
            let h0 = ST.get () in
            let prediction =
              vale_lemma_as_prediction code args pre post v in
-           let rax, ret = IX64.wrap_variadic (coerce code) max_arity arg_reg regs_modified xmms_modified I.down_mem args prediction in
+           let rax, ret = IX64.wrap_variadic (coerce code) max_arity arg_reg regs_modified xmms_modified args prediction in
            rax
       in
       f <: lowstar_typ #max_arity #arg_reg #[] code args pre post
@@ -708,74 +658,3 @@ let rec __test__wrap
           (elim_1 post x)
           (VSig.elim_vale_sig_cons hd tl args pre post v x)
 
-// ////////////////////////////////////////////////////////////////////////////////
-// //Wrap abstract
-// ////////////////////////////////////////////////////////////////////////////////
-[@__reduce__]
-let rec pre_rel_generic
-      (#max_arity:nat)
-      (#arg_reg:IX64.arg_reg_relation max_arity)
-      (code:V.va_code)
-      (dom:list td)
-      (args:list arg{List.length dom + List.length args <= 20})
-      (pre:VSig.vale_pre_tl dom)
-   : IX64.rel_gen_t code dom args (IX64.prediction_pre_rel_t (coerce code))
-   = match dom with
-     | [] ->
-       prediction_pre_rel #max_arity #arg_reg pre (coerce code) args
-     | hd::tl ->
-       fun (x:td_as_type hd) ->
-       pre_rel_generic #max_arity #arg_reg code tl IX64.(x ++ args) (elim_1 pre x)
-
-[@__reduce__]
-let rec post_rel_generic
-      (#max_arity:nat)
-      (code:V.va_code)
-      (dom:list td)
-      (args:list arg{List.length dom + List.length args <= 20})
-      (post:VSig.vale_post_tl dom)
-   : IX64.rel_gen_t code dom args (IX64.prediction_post_rel_t (coerce code))
-   = match dom with
-     | [] ->
-       prediction_post_rel #max_arity post (coerce code) args
-     | hd::tl ->
-       fun (x:td_as_type hd) ->
-       post_rel_generic #max_arity code tl IX64.(x ++ args) (elim_1 post x)
-
-let rec mk_prediction
-       (#max_arity:nat)
-       (#arg_reg:IX64.arg_reg_relation max_arity)
-       (#regs_modified:MS.reg_64 -> bool)
-       (#xmms_modified:MS.reg_xmm -> bool)
-       (code:V.va_code)
-       (dom:list td)
-       (args:list arg{List.length dom + List.length args <= 20})
-       (#pre:VSig.vale_pre_tl dom)
-       (#post:VSig.vale_post_tl dom)
-       (v:VSig.vale_sig_tl regs_modified xmms_modified args (coerce code) pre post)
-   :  IX64.prediction_t
-          max_arity
-          arg_reg
-          regs_modified
-          xmms_modified
-          I.down_mem
-          (coerce code)
-          dom
-          args
-          (pre_rel_generic #max_arity #arg_reg code dom args pre)
-          (post_rel_generic #max_arity code dom args post)
-   = let open IX64 in
-     match dom with
-     | [] ->
-       vale_lemma_as_prediction #max_arity #arg_reg _ _ _ _ v
-     | hd::tl ->
-       fun (x:td_as_type hd) ->
-        mk_prediction
-          #max_arity
-          #arg_reg
-          code
-          tl
-          (x ++ args)
-          #(elim_1 pre x)
-          #(elim_1 post x)
-          (VSig.elim_vale_sig_cons hd tl args pre post v x)

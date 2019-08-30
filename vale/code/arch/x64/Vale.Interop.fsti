@@ -7,13 +7,13 @@ module M = LowStar.Modifies
 module DV = LowStar.BufferView.Down
 
 open Vale.Def.Opaque_s
-open Vale.Interop.Base
-open Vale.X64.Machine_s
-open Vale.X64.Machine_Semantics_s
-open Vale.X64.Bytes_Semantics
+open Vale.Interop.Types
+open Vale.Interop.Heap_s
+//open Vale.Interop.Base
+open Vale.Arch.MachineHeap_s
 
-let op_String_Access = Map.sel
-let op_String_Assignment = Map.upd
+unfold let (.[]) = Map.sel
+unfold let (.[]<-) = Map.upd
 
 let disjoint (ptr1 ptr2:b8) = MB.loc_disjoint (MB.loc_buffer ptr1.bsrc) (MB.loc_buffer ptr2.bsrc)
 
@@ -37,17 +37,17 @@ let addrs_set_mem (mem:interop_heap) (a:b8) (i:int)
 (* Takes a Low* Hyperstack and a list of buffers and create a vale memory + keep track of the vale addresses *)
 val down_mem: down_mem_t
 
-val same_unspecified_down:
-  (hs1: HS.mem) ->
-  (hs2: HS.mem) ->
-  (ptrs:list b8{list_disjoint_or_eq ptrs /\ list_live hs1 ptrs /\ list_live hs2 ptrs}) ->
-  Lemma (
+val same_unspecified_down
+    (hs1: HS.mem)
+    (hs2: HS.mem)
+    (ptrs:list b8{list_disjoint_or_eq ptrs /\ list_live hs1 ptrs /\ list_live hs2 ptrs})
+  : Lemma (
     let mem1 = mem_of_hs_roots ptrs hs1 in
     let mem2 = mem_of_hs_roots ptrs hs2 in
     let addrs = addrs_of_mem mem1 in
     let heap1 = down_mem mem1 in
     let heap2 = down_mem mem2 in
-    forall i. not (valid_addr mem1 i) ==>
+    forall i. not (valid_addr mem1 i) ==> // REVIEW: the 'forall' lacks a {:pattern ...}
          heap1.[i] == heap2.[i])
 
 let get_seq_heap (heap:machine_heap) (addrs:addr_map) (b:b8)
@@ -57,25 +57,30 @@ let get_seq_heap (heap:machine_heap) (addrs:addr_map) (b:b8)
     Seq.init length contents
 
 val up_mem (heap:machine_heap) (mem:interop_heap{Set.equal (addrs_set mem) (Map.domain heap)})
-  : GTot (new_mem:Vale.Interop.Base.interop_heap{ptrs_of_mem mem == ptrs_of_mem new_mem /\
+  : GTot (new_mem:interop_heap{ptrs_of_mem mem == ptrs_of_mem new_mem /\
                          correct_down new_mem heap})
 
 val down_up_identity (mem:interop_heap)
   : Lemma (mem == up_mem (down_mem mem) mem)
 
-val up_down_identity (mem:interop_heap)
-                     (heap:machine_heap{Set.equal (addrs_set mem) (Map.domain heap)})
+val up_down_identity
+    (mem:interop_heap)
+    (heap:machine_heap{Set.equal (addrs_set mem) (Map.domain heap)})
   : Lemma
-      (requires (forall x. not (Map.contains heap x) ==> Map.sel heap x == Map.sel (down_mem mem) x))
+      (requires
+        (forall x.{:pattern Map.sel heap x \/ Map.sel (down_mem mem) x}
+          not (Map.contains heap x) ==> Map.sel heap x == Map.sel (down_mem mem) x))
       (ensures (down_mem (up_mem heap mem) == heap))
 
 val update_buffer_up_mem
-      (mem:interop_heap)
-      (b:b8{List.memP b (ptrs_of_mem mem)})
-      (heap1:machine_heap{correct_down mem heap1})
-      (heap2:machine_heap{Set.equal (Map.domain heap1) (Map.domain heap2)})
+    (mem:interop_heap)
+    (b:b8{List.memP b (ptrs_of_mem mem)})
+    (heap1:machine_heap{correct_down mem heap1})
+    (heap2:machine_heap{Set.equal (Map.domain heap1) (Map.domain heap2)})
  : Lemma
-      (requires (forall x. x < addrs_of_mem mem b \/ x >= addrs_of_mem mem b + DV.length (get_downview b.bsrc)
-        ==> heap1.[x] == heap2.[x]))
+      (requires
+        (forall x.{:pattern heap1.[x] \/ heap2.[x]}
+          x < addrs_of_mem mem b \/ x >= addrs_of_mem mem b + DV.length (get_downview b.bsrc)
+            ==> heap1.[x] == heap2.[x]))
       (ensures hs_of_mem (up_mem heap2 mem) ==
                DV.upd_seq (hs_of_mem mem) (get_downview b.bsrc) (get_seq_heap heap2 (addrs_of_mem mem) b))

@@ -8,11 +8,8 @@ open FStar.Seq
 open Vale.AES.AES_s
 
 // syntax for seq accesses, s.[index] and s.[index] <- value
-unfold
-let op_String_Access (#a:Type) (s:seq a) (i:nat{ i < length s}) : Tot a = index s i
-
-unfold
-let op_String_Assignment = Seq.upd
+unfold let (.[]) (#a:Type) (s:seq a) (i:nat{ i < length s}) : Tot a = index s i
+unfold let (.[]<-) = Seq.upd
 
 unfold let ( *^ ) = nat32_xor
 unfold let ( *^^ ) = quad32_xor

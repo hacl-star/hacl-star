@@ -1,5 +1,8 @@
 module Vale.Stdcalls.X64.Poly
 
+val z3rlimit_hack (x:nat) : squash (x < x + x + 1)
+#reset-options "--z3rlimit 50"
+
 open FStar.HyperStack.ST
 module HS = FStar.HyperStack
 module B = LowStar.Buffer
@@ -110,7 +113,6 @@ let code_poly = PO.va_code_Poly1305 IA.win
 [@__reduce__] noextract
 let lowstar_poly_t =
   IX64.as_lowstar_sig_t_weak_stdcall
-    Vale.Interop.down_mem
     code_poly
     dom
     []

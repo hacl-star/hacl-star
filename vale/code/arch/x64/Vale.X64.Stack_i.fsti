@@ -88,14 +88,14 @@ val store_taint_stack64 (ptr:int) (t:taint) (stackTaint:memtaint) : GTot memtain
 
 val lemma_valid_taint_stack64 (ptr:int) (t:taint) (stackTaint:memtaint) : Lemma
   (requires valid_taint_stack64 ptr t stackTaint)
-  (ensures forall i. i >= ptr /\ i < ptr + 8 ==> Map.sel stackTaint i == t)
+  (ensures forall i.{:pattern Map.sel stackTaint i} i >= ptr /\ i < ptr + 8 ==> Map.sel stackTaint i == t)
 
 val lemma_valid_taint_stack128 (ptr:int) (t:taint) (stackTaint:memtaint) : Lemma
   (requires valid_taint_stack128 ptr t stackTaint)
-  (ensures forall i. i >= ptr /\ i < ptr + 16 ==> Map.sel stackTaint i == t)
+  (ensures forall i.{:pattern Map.sel stackTaint i} i >= ptr /\ i < ptr + 16 ==> Map.sel stackTaint i == t)
 
 val lemma_valid_taint_stack64_reveal (ptr:int) (t:taint) (stackTaint:memtaint) : Lemma
-  (requires forall i. i >= ptr /\ i < ptr + 8 ==> Map.sel stackTaint i == t)
+  (requires forall i.{:pattern Map.sel stackTaint i} i >= ptr /\ i < ptr + 8 ==> Map.sel stackTaint i == t)
   (ensures valid_taint_stack64 ptr t stackTaint)
 
 val lemma_correct_store_load_taint_stack64 (ptr:int) (t:taint) (stackTaint:memtaint) : Lemma

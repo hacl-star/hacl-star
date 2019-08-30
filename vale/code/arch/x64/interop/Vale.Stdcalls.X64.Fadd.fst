@@ -1,5 +1,8 @@
 module Vale.Stdcalls.X64.Fadd
 
+#reset-options "--z3rlimit 50"
+let z3rlimit_hack x = ()
+
 open FStar.HyperStack.ST
 module HS = FStar.HyperStack
 module B = LowStar.Buffer
@@ -27,7 +30,6 @@ module FW = Vale.Curve25519.X64.FastWide
 let lowstar_add1 : lowstar_add1_t  =
   assert_norm (List.length dom + List.length ([]<:list arg) <= 4);
   IX64.wrap_weak_stdcall
-    Vale.Interop.down_mem
     code_add1
     dom
     (W.mk_prediction code_add1 dom [] (add1_lemma code_add1 IA.win))
@@ -39,7 +41,6 @@ let add1 //: normal lowstar_add1_t
 let lowstar_fadd : lowstar_fadd_t  =
   assert_norm (List.length fadd_dom + List.length ([]<:list arg) <= 4);
   IX64.wrap_weak_stdcall
-    Vale.Interop.down_mem
     code_fadd
     fadd_dom
     (W.mk_prediction code_fadd fadd_dom [] (fadd_lemma code_fadd IA.win))

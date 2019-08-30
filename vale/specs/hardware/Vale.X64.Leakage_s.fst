@@ -1,5 +1,6 @@
 module Vale.X64.Leakage_s
 
+open Vale.Arch.Heap
 open Vale.X64.Machine_s
 open Vale.X64.Machine_Semantics_s
 module F = FStar.FunctionalExtensionality
@@ -32,8 +33,8 @@ let publicMemValueIsSame
      mem1.[x] == mem2.[x]
 
 let publicMemValuesAreSame (s1:machine_state) (s2:machine_state) =
-  forall x.{:pattern s1.ms_memTaint.[x] \/ s2.ms_memTaint.[x] \/ s1.ms_heap.[x] \/ s2.ms_heap.[x]}
-    publicMemValueIsSame s1.ms_heap s2.ms_heap s1.ms_memTaint s2.ms_memTaint x
+  forall x.{:pattern s1.ms_memTaint.[x] \/ s2.ms_memTaint.[x] \/ (heap_get s1.ms_heap).[x] \/ (heap_get s2.ms_heap).[x]}
+    publicMemValueIsSame (heap_get s1.ms_heap) (heap_get s2.ms_heap) s1.ms_memTaint s2.ms_memTaint x
 
 let publicStackValueIsSame
   (stack1 stack2:machine_heap)

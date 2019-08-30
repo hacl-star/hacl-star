@@ -1,9 +1,11 @@
 module Vale.Stdcalls.X64.Sha
 
+#reset-options "--z3rlimit 50"
+let z3rlimit_hack x = ()
+
 (* And here's the sha wrapper itself *)
 let lowstar_sha : lowstar_sha_t  =
   IX64.wrap_weak_stdcall
-    Vale.Interop.down_mem
     code_sha
     dom
     (W.mk_prediction code_sha dom [] (sha_lemma code_sha IA.win))

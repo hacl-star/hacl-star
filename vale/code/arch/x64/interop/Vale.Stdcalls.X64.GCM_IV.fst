@@ -132,7 +132,6 @@ let code_compute_iv = GC.va_code_compute_iv_stdcall IA.win
 let lowstar_compute_iv_t (iv:Ghost.erased supported_iv_LE) =
   assert_norm (List.length dom + List.length ([]<:list arg) <= 20);
   IX64.as_lowstar_sig_t_weak_stdcall
-    Vale.Interop.down_mem
     code_compute_iv
     dom
     []
@@ -145,7 +144,6 @@ noextract
 let lowstar_compute_iv (iv:Ghost.erased supported_iv_LE) : lowstar_compute_iv_t iv =
   assert_norm (List.length dom + List.length ([]<:list arg) <= 20);
   IX64.wrap_weak_stdcall
-    Vale.Interop.down_mem
     code_compute_iv
     dom
     (W.mk_prediction code_compute_iv dom [] ((compute_iv_lemma iv) code_compute_iv IA.win))

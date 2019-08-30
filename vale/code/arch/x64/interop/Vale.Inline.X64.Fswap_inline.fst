@@ -128,7 +128,6 @@ let lowstar_cswap_t =
     arg_reg
     cswap_regs_modified
     cswap_xmms_modified
-    Vale.Interop.down_mem
     code_cswap
     cswap_dom
     []
@@ -145,7 +144,6 @@ let lowstar_cswap : lowstar_cswap_t  =
     arg_reg
     cswap_regs_modified
     cswap_xmms_modified
-    Vale.Interop.down_mem
     code_cswap
     cswap_dom
     (W.mk_prediction code_cswap cswap_dom [] (cswap_lemma code_cswap IA.win))

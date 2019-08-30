@@ -1,4 +1,5 @@
 module Vale.AsLowStar.MemoryHelpers
+open Vale.Arch.HeapImpl
 open Vale.X64.MemoryAdapters
 open Vale.Interop.Base
 module B = LowStar.Buffer
@@ -41,6 +42,7 @@ let readable_live (#src #t:_) (x:buf_t src t) (s:ME.vale_heap) = ()
 let readable_imm_live (#src #t:_) (x:ibuf_t src t) (s:ME.vale_heap) = ()
 let buffer_readable_reveal #max_arity src bt x args h0 = ()
 let get_heap_mk_mem_reveal args h0 = ()
+let lemma_as_mem_as_vale_mem h = ()
 let mk_stack_reveal stack = ()
 let buffer_as_seq_reveal src t x args h0 = ()
 let immbuffer_as_seq_reveal src t x args h0 = ()
@@ -72,7 +74,7 @@ let core_create_lemma_taint_hyp
     let mem = va_s.VS.vs_heap in
 //    assert (mem == mk_mem args h0);
     let raw_taint = IX64.(mk_taint args IX64.init_taint) in
-    assert (taint_map == create_memtaint mem (args_b8 args) raw_taint);
+    assert (taint_map == create_memtaint (_ih mem) (args_b8 args) raw_taint);
     ME.valid_memtaint mem (args_b8 args) raw_taint;
 //    assert (forall x. List.memP x (args_b8 args) ==> ME.valid_taint_buf x mem taint_map (raw_taint x));
     assert (forall x. List.memP x (args_b8 args) ==> ME.valid_taint_buf x mem taint_map (raw_taint x));

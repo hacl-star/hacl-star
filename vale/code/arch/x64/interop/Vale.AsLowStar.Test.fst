@@ -38,11 +38,11 @@ assume val v: VSig.vale_sig_stdcall pre post
 assume val c: V.va_code
 
 [@__reduce__]
-let call_c_t = IX64.as_lowstar_sig_t_weak_stdcall Vale.Interop.down_mem c dom [] _ _ (W.mk_prediction c dom [] (v c IA.win))
+let call_c_t = IX64.as_lowstar_sig_t_weak_stdcall c dom [] _ _ (W.mk_prediction c dom [] (v c IA.win))
 
 
 let call_c : call_c_t = IX64.wrap_weak_stdcall
-  Vale.Interop.down_mem c  dom (W.mk_prediction c dom [] (v c IA.win))
+  c dom (W.mk_prediction c dom [] (v c IA.win))
 
 let call_c_normal_t : normal call_c_t = as_normal_t #call_c_t call_c
 //You can ask emacs to show you the type of call_c_normal_t ...
@@ -112,7 +112,6 @@ let code_memcpy = VM.va_code_memcpy IA.win
 [@__reduce__]
 let lowstar_memcpy_t =
   IX64.as_lowstar_sig_t_weak_stdcall
-    Vale.Interop.down_mem
     code_memcpy
     vm_dom
     []
@@ -123,7 +122,6 @@ let lowstar_memcpy_t =
 (* And here's the memcpy wrapper itself *)
 let lowstar_memcpy : lowstar_memcpy_t  =
   IX64.wrap_weak_stdcall
-    Vale.Interop.down_mem
     code_memcpy
     vm_dom
     (W.mk_prediction code_memcpy vm_dom [] (vm_lemma code_memcpy IA.win))
@@ -230,7 +228,6 @@ let code_aesni = VC.va_code_check_aesni_stdcall IA.win
 [@__reduce__]
 let lowstar_aesni_t =
   IX64.as_lowstar_sig_t_weak_stdcall
-    Vale.Interop.down_mem
     (coerce code_aesni)
     aesni_dom
     empty_list
@@ -241,7 +238,6 @@ let lowstar_aesni_t =
 (* And here's the check_aesni wrapper itself *)
 let lowstar_aesni : lowstar_aesni_t  =
   IX64.wrap_weak_stdcall
-    Vale.Interop.down_mem
     (coerce code_aesni)
     aesni_dom
     (W.mk_prediction code_aesni aesni_dom [] (aesni_lemma code_aesni IA.win))
@@ -373,7 +369,6 @@ let code_ta = TA.va_code_test IA.win
 [@__reduce__]
 let lowstar_ta_t =
   IX64.as_lowstar_sig_t_weak_stdcall
-    Vale.Interop.down_mem
     (coerce code_ta)
     ta_dom
     []
@@ -384,7 +379,6 @@ let lowstar_ta_t =
 (* And here's the check_aesni wrapper itself *)
 let lowstar_ta : lowstar_ta_t  =
   IX64.wrap_weak_stdcall
-    Vale.Interop.down_mem
     (coerce code_ta)
     ta_dom
     (W.mk_prediction code_ta ta_dom [] (ta_lemma code_ta IA.win))

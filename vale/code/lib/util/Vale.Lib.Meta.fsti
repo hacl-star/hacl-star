@@ -2,7 +2,7 @@ module Vale.Lib.Meta
 
 val generic_injective_proof
     (#a:eqtype) (#b:eqtype) (f:a -> b) (g:b -> a) (l:(x:a -> Lemma (g (f x) == x)))
-  : Lemma (forall (x x':a). f x == f x' ==> x == x')
+  : Lemma (forall (x x':a).{:pattern f x; f x'} f x == f x' ==> x == x')
 
 val exists_elim2
     (goal:Type) (#a:Type) (#b:(a -> Type)) (#p:(x:a -> b x -> Type))

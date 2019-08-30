@@ -1,5 +1,8 @@
 module Vale.Stdcalls.X64.Fmul
 
+val z3rlimit_hack (x:nat) : squash (x < x + x + 1)
+#reset-options "--z3rlimit 50"
+
 open FStar.HyperStack.ST
 module HS = FStar.HyperStack
 module B = LowStar.Buffer
@@ -118,7 +121,6 @@ let code_fmul = FW.va_code_fmul_stdcall IA.win
 let lowstar_fmul_t =
   assert_norm (List.length fmul_dom + List.length ([]<:list arg) <= 4);
   IX64.as_lowstar_sig_t_weak_stdcall
-    Vale.Interop.down_mem
     code_fmul
     fmul_dom
     []
@@ -198,7 +200,6 @@ let code_fmul2 = FW.va_code_fmul2_stdcall IA.win
 let lowstar_fmul2_t =
   assert_norm (List.length fmul_dom + List.length ([]<:list arg) <= 4);
   IX64.as_lowstar_sig_t_weak_stdcall
-    Vale.Interop.down_mem
     code_fmul2
     fmul_dom
     []
@@ -234,7 +235,7 @@ let fmul1_post : VSig.vale_post fmul1_dom =
     (f:V.va_fuel) ->
       FH.va_ens_fmul1_stdcall c va_s0 IA.win (as_vale_buffer out) (as_vale_buffer f1) (UInt64.v f2) va_s1 f
 
-#set-options "--z3rlimit 20"
+#set-options "--z3rlimit 50"
 
 [@__reduce__] noextract
 let fmul1_lemma'
@@ -261,6 +262,14 @@ let fmul1_lemma'
    let va_s1, f = FH.va_lemma_fmul1_stdcall code va_s0 IA.win (as_vale_buffer out) (as_vale_buffer f1) (UInt64.v f2) in
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 out;
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 f1;
+let s0 = va_s0 in
+let s1 = va_s1 in
+let regs_modified = IX64.regs_modified_stdcall in
+let xmms_modified = IX64.xmms_modified_stdcall in
+let open MS in
+let open Vale.AsLowStar.ValeSig in
+assert (forall (r:MS.reg_64).{:pattern vale_save_reg r s0 s1} not (regs_modified r) ==> vale_save_reg r s0 s1);
+assert (forall (x:MS.reg_xmm).{:pattern vale_save_xmm x s0 s1} not (xmms_modified x) ==> vale_save_xmm x s0 s1);
    (va_s1, f)
 
 (* Prove that fmul1_lemma' has the required type *)
@@ -274,7 +283,6 @@ let code_fmul1 = FH.va_code_fmul1_stdcall IA.win
 let lowstar_fmul1_t =
   assert_norm (List.length fmul1_dom + List.length ([]<:list arg) <= 4);
   IX64.as_lowstar_sig_t_weak_stdcall
-    Vale.Interop.down_mem
     code_fmul1
     fmul1_dom
     []

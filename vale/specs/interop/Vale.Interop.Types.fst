@@ -1,20 +1,12 @@
 module Vale.Interop.Types
+include Vale.Arch.HeapTypes_s
 module MB = LowStar.Monotonic.Buffer
 module DV = LowStar.BufferView.Down
 module W = Vale.Def.Words_s
 module L = FStar.List.Tot
 
-let __reduce__ = ()
-
-type base_typ:eqtype =
-  | TUInt8
-  | TUInt16
-  | TUInt32
-  | TUInt64
-  | TUInt128
-
 [@__reduce__]
-let base_typ_as_type (t:base_typ) : Tot eqtype =
+let base_typ_as_type (t:base_typ) : eqtype =
   let open W in
   let open Vale.Def.Types_s in
   match t with
@@ -25,7 +17,8 @@ let base_typ_as_type (t:base_typ) : Tot eqtype =
   | TUInt128 -> quad32
 
 [@__reduce__]
-let view_n = function
+let view_n (t:base_typ) : int =
+  match t with
   | TUInt8 -> 1
   | TUInt16 -> 2
   | TUInt32 -> 4

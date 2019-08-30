@@ -3367,6 +3367,7 @@ procedure AESNI_ctr32_6x_loop_recursive(
                              init0, init1, init2, init3, init4, init5);
 }
 
+#reset-options " --z3rlimit 100"
 procedure AESNI_ctr32_6x_round9(
         inline alg:algorithm,
         ghost count:nat,
@@ -4259,7 +4260,13 @@ procedure GCM_finalize(
 }
 */
 
-#reset-options " --z3rlimit 150"
+#verbatim
+#restart-solver
+#endverbatim
+#reset-options "--z3rlimit 800 --z3refresh"
+#verbatim
+#restart-solver
+#endverbatim
 procedure AES_GCM_encrypt_6mult(
         inline alg:algorithm,
         ghost h_LE:quad32,

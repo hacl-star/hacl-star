@@ -8,11 +8,8 @@ module M = LowStar.Modifies
 module DV = LowStar.BufferView.Down
 
 open Vale.Def.Opaque_s
-open Vale.Interop.Base
+//open Vale.Interop.Base
 open Vale.Lib.BufferViewHelpers
-// open Vale.X64.Machine_s
-// open Vale.X64.Machine_Semantics_s
-// open Vale.X64.Bytes_Semantics
 
 #reset-options "--max_fuel 2 --initial_fuel 2 --max_ifuel 1 --initial_ifuel 1"
 
