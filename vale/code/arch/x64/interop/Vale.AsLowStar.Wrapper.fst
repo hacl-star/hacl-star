@@ -571,7 +571,7 @@ let vale_lemma_as_prediction
        Vale.AsLowStar.MemoryHelpers.modifies_same_roots
          (VSig.mloc_modified_args args) va_s0.VS.vs_heap final_mem;
        Vale.AsLowStar.MemoryHelpers.state_eq_down_mem va_s1 s1;
-       assert (heap_down (as_mem final_mem) == heap_get s1.BS.ms_heap);
+       assert (heap_get (heap_of_interop (as_mem final_mem)) == heap_get s1.BS.ms_heap);
        mem_correspondence_refl args va_s1;
        assert (VSig.readable args VS.(va_s1.vs_heap));
        assert (disjoint_or_eq args);

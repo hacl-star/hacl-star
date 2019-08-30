@@ -232,7 +232,7 @@ let create_initial_trusted_state
       BS.ms_ok = true;
       BS.ms_regs = regs;
       BS.ms_flags = flags;
-      BS.ms_heap = heap_new mem (heap_down mem);
+      BS.ms_heap = heap_of_interop mem;
       BS.ms_memTaint = create_memtaint mem (args_b8 args) (mk_taint args init_taint);
       BS.ms_stack = BS.Machine_stack init_rsp stack;
       BS.ms_stackTaint = Map.const MS.Public;
@@ -287,7 +287,7 @@ let prediction_post
     FStar.HyperStack.ST.equal_domains h0 h1 /\
     B.modifies (loc_modified_args args) h0 h1 /\
     mem_roots_p h1 args /\
-    heap_down (mk_mem args h1) == heap_get s1.BS.ms_heap /\
+    heap_get (heap_of_interop (mk_mem args h1)) == heap_get s1.BS.ms_heap /\
     calling_conventions s0 s1 regs_modified xmms_modified /\
     rax == return_val s1 /\
     post_rel h0 s0 rax_fuel_mem s1

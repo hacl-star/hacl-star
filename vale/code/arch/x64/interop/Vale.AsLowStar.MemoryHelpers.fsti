@@ -38,7 +38,7 @@ val state_eq_down_mem (va_s1:V.va_state) (s1:_)
         VL.state_eq_opt (Some (SL.state_to_S va_s1))
                         (Some s1))
       (ensures (
-        heap_down (as_mem va_s1.VS.vs_heap) == heap_get s1.BS.ms_heap))
+        heap_get (heap_of_interop (as_mem va_s1.VS.vs_heap)) == heap_get s1.BS.ms_heap))
 
 val relate_modifies (args:list arg) (m0 m1 : ME.vale_heap)
   : Lemma
@@ -83,7 +83,7 @@ val get_heap_mk_mem_reveal
   (args:IX64.arg_list)
   (h0:HS.mem{mem_roots_p h0 args}) : Lemma (
    let mem = mk_mem args h0 in
-   coerce (as_vale_mem mem) == heap_new mem (heap_down mem))
+   as_vale_mem mem == coerce (heap_of_interop mem))
 
 val lemma_as_mem_as_vale_mem (h:interop_heap) : Lemma
   (ensures as_mem (as_vale_mem h) == h)

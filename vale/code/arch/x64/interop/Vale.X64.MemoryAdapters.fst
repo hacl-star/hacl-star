@@ -28,7 +28,7 @@ let mem_eq = ()
 let stack_eq = ()
 
 let as_mem h = _ih h
-let as_vale_mem ih = heap_new ih (heap_down ih)
+let as_vale_mem ih = heap_of_interop ih
 
 let buffer_addr_is_nat64 (#t:_) (x:ME.buffer t) (s:VS.vale_state) = ()
 
