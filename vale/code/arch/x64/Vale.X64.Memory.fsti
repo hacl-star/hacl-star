@@ -5,7 +5,14 @@ open Vale.X64.Machine_s
 
 val fstar_heap : Type u#1
 val vale_heap : Type u#1
-val vale_hpls : Type u#1
+
+type vale_hpls = Map.t nat vale_heap
+
+noeq type vale_memory = {
+  vm_heap : vale_heap;
+  vm_hpls : vale_hpls;
+  vm_hmap : Map.t int nat
+}
 
 unfold let nat8 = Vale.Def.Words_s.nat8
 unfold let nat16 = Vale.Def.Words_s.nat16

@@ -42,6 +42,8 @@ unfold let eval_reg_64 (r:reg_64) (s:vale_state) : nat64 = eval_reg (Reg 0 r) s
 [@va_qattr]
 unfold let eval_reg_xmm (r:reg_xmm) (s:vale_state) : quad32 = eval_reg (Reg 1 r) s
 
+let contains_heap (hp:nat) (s:vale_state) : GTot bool = Map.contains s.vs_memory.vm_hpls hp
+  
 [@va_qattr]
 let eval_maddr (m:maddr) (s:vale_state) : int =
   match m with
