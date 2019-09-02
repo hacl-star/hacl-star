@@ -349,6 +349,16 @@ let lemma_varint_safe (b1:bytes) (b2:bytes) : Lemma
     if vll1 = vlen l1 && vll2 = vlen l2 then
       lemma_varint_weak_safe b1 b2
 
+
+
+let lemma_varint_inv (b:bytes) (n:nat62) (suff:bytes) : Lemma
+  (requires S.length b > 0 /\ parse_varint b = Some (n,suff))
+  (ensures S.equal b S.(encode_varint n @| suff)) =
+  lemma_varint n suff;
+  lemma_varint_safe b S.(encode_varint n @| suff)
+
+
+
 (*
    +-+-+-+-+-+-+-+-+
    |1|1| T |R R|P P|
@@ -403,7 +413,9 @@ let rec lemma_bitfield_inv (l:list bool)
   =
   match l with
   | [] -> ()
-  | _ :: t -> lemma_bitfield_inv t
+  | _ :: t ->
+    assert (List.Tot.length t = List.Tot.length l - 1);
+    lemma_bitfield_inv t
 
 
 let rec lemma_bitfield_lower_bound (n:nat) (l:list bool) : Lemma
@@ -1234,8 +1246,7 @@ let header_encrypt a hpk h pn_len npn c =
 
 
 
-
-let header_decrypt a hpk cid_len packet =
+let header_decrypt_old a hpk cid_len (packet:packet) =
   let open FStar.Math.Lemmas in
   let f = S.index packet 0 in
   let is_short = U8.(f <^ 128uy) in
@@ -1272,6 +1283,47 @@ let header_decrypt a hpk cid_len packet =
     parse_header packet'' cid_len
 
 
+let header_decrypt a hpk cid_len packet =
+  let open FStar.Math.Lemmas in
+  let f = S.index packet 0 in
+  let is_short = U8.(f <^ 128uy) in
+  (* See https://tools.ietf.org/html/draft-ietf-quic-tls-19#section-5.4.2 *)
+  let sample_offset =
+    if is_short then
+      let offset = 5 + add3 cid_len in
+      if offset + 16 <= S.length packet then
+        Some (S.slice packet offset (offset+16), offset-4)
+      else None
+    else
+      let dcb = U8.v (S.index packet 5) in
+      let dcil, scil = dcb / 0x10, dcb % 0x10 in
+      let _ = modulo_range_lemma dcb 0x10 in
+      let l_offset = 6 + add3 dcil + add3 scil in
+      if l_offset >= S.length packet then None
+      else
+        let len_npn_c = S.slice packet l_offset (S.length packet) in
+        match parse_varint len_npn_c with
+      | None -> None
+      | Some (len, npn_c) ->
+        let pn_offset = l_offset + vlen len in
+        if pn_offset + 20 <= S.length packet then
+          Some (S.slice npn_c 4 20, pn_offset)
+        else None
+    in
+  match sample_offset with
+  | None -> H_Failure
+  | Some (sample,pn_offset) ->
+    //let sample = S.slice packet so (so + 16) in
+    let mask = C16.block (calg_of_ae a) hpk sample in
+    let sflags = if is_short then 0x1fuy else 0x0fuy in
+    let fmask = S.create 1 U8.(S.index mask 0 `logand` sflags) in
+    let packet' = xor_inplace packet fmask 0 in
+    let flags = U8.v (S.index packet' 0) in
+    let pn_len : nat2 = modulo_range_lemma flags 4; flags % 4 in
+    let pnmask = and_inplace (S.slice mask 1 5) (pn_sizemask pn_len) 0 in
+    //let pn_offset = so - 4 in
+    let packet'' = xor_inplace packet' pnmask pn_offset in
+    parse_header packet'' cid_len
 
 
 
@@ -1666,30 +1718,26 @@ let lemma_header_encryption_correct_short a k h pn_len npn c : Lemma
 
 
 
+let long_sample_offset (packet:packet) : option (n:nat{n + 16 <= S.length packet}) =
+   let dcb = U8.v (S.index packet 5) in
+   let dcil, scil = dcb / 0x10, dcb % 0x10 in
+   let l_offset = 6 + add3 dcil + add3 scil in
+   (if l_offset >= S.length packet then None else
+   match parse_varint (S.slice packet l_offset (S.length packet)) with
+   | None -> None
+   | Some (l, _) ->
+     let offset = l_offset + vlen l + 4 in
+     if offset + 16 <= S.length packet then Some offset else None)
 
 
 
 
-
-// almost duplicated from the two lemmas above
 let lemma_header_encryption_long_sample a k h pn_len npn c : Lemma
   (requires Long? h)
   (ensures (
     let sample = S.slice c (3-pn_len) (19-pn_len) in
     let packet = header_encrypt a k h pn_len npn c in
-    let sample_offset =
-      let dcb = U8.v (S.index packet 5) in
-      let dcil, scil = dcb / 0x10, dcb % 0x10 in
-      let _ = FStar.Math.Lemmas.modulo_range_lemma dcb 0x10 in
-      let l_offset = 6 + add3 dcil + add3 scil in
-      (if l_offset >= S.length packet then None else
-      match parse_varint (S.slice packet l_offset (S.length packet)) with
-      | None -> None
-      | Some (l, _) ->
-        let offset = l_offset + vlen l + 4 in
-        if offset + 16 <= S.length packet then Some offset else None)
-    in
-    match sample_offset with
+    match long_sample_offset packet with
     | None -> False
     | Some so -> S.equal sample (S.slice packet so (so+16)))) =
 
