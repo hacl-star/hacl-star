@@ -10,7 +10,7 @@ open Spec.GaloisField
 open Hacl.Spec.GF128.Lemmas
 
 module Loops = Lib.LoopCombinators
-module PLoops = Lib.Loops.Lemmas
+module PLoops = Lib.Sequence.Lemmas
 module S = Spec.GF128
 
 include Hacl.Spec.GF128.Vec
