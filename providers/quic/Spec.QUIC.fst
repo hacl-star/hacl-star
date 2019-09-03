@@ -741,7 +741,7 @@ let parse_long_header_clen_correct h npn c : Lemma
   (ensures (
     assert_norm (max_cipher_length < pow2 62);
     let clen = U8.(16uy *^ uint_to_t (Long?.dcil h) +^ uint_to_t (Long?.scil h)) in
-    let input =  S.(create 1 clen @| (Long?.dcid h) @| (Long?.scid h) @| encode_varint (Long?.len h) @| npn @| c) in
+    let input =  S.(create 1 clen @| Long?.dcid h @| Long?.scid h @| encode_varint (Long?.len h) @| npn @| c) in
     parse_long_header_clen input = Some (Long?.dcil h, Long?.scil h, S.(Long?.dcid h @| Long?.scid h @| encode_varint (Long?.len h) @| npn @| c)))) =
   assert_norm (max_cipher_length < pow2 62);
   let clen = U8.(16uy *^ uint_to_t (Long?.dcil h) +^ uint_to_t (Long?.scil h)) in
@@ -750,7 +750,34 @@ let parse_long_header_clen_correct h npn c : Lemma
   S.append_slices S.(create 1 clen) S.(Long?.dcid h @| Long?.scid h @| encode_varint (Long?.len h) @| npn @| c)
 
 
-/// parsing
+/// parsing connection ids
+
+let parse_long_header_id b len : option (bytes * bytes) =
+  if S.length b < add3 len then None
+  else Some (S.slice b 0 (add3 len), S.slice b (add3 len) (S.length b))
+
+let parse_long_header_dcid_scid b dcil scil : option (bytes * bytes * bytes) =
+  match parse_long_header_id b dcil with
+  | None -> None
+  | Some (dcid, scid_rest) ->
+    match parse_long_header_id scid_rest scil with
+    | None -> None
+    | Some (scid, rest) -> Some (dcid, scid, rest)
+
+let parse_long_header_dcid_scid_correct h npn c : Lemma
+  (requires Long? h)
+  (ensures (
+    assert_norm (max_cipher_length < pow2 62);
+    let input =  S.(Long?.dcid h @| Long?.scid h @| encode_varint (Long?.len h) @| npn @| c) in
+    parse_long_header_dcid_scid input (Long?.dcil h) (Long?.scil h) = Some (Long?.dcid h, Long?.scid h, S.(encode_varint (Long?.len h) @| npn @| c)))) =
+  assert_norm (max_cipher_length < pow2 62);
+  let input = S.(Long?.dcid h @| Long?.scid h @| encode_varint (Long?.len h) @| npn @| c) in
+  match parse_long_header_id input (Long?.dcil h) with
+  | Some (_, scid_rest) ->
+    match parse_long_header_id scid_rest (Long?.scil h) with
+    | Some _ ->
+      S.append_slices (Long?.dcid h) S.(Long?.scid h @| encode_varint (Long?.len h) @| npn @| c);
+      S.append_slices (Long?.scid h) S.(encode_varint (Long?.len h) @| npn @| c)
 
 
 
