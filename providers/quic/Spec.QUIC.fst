@@ -794,7 +794,7 @@ let lemma_parse_long_header_dcid_scid_correct h npn c : Lemma
   (requires Long? h)
   (ensures (
     assert_norm (max_cipher_length < pow2 62);
-    let input =  S.(Long?.dcid h @| Long?.scid h @| encode_varint (Long?.len h) @| npn @| c) in
+    let input = S.(Long?.dcid h @| Long?.scid h @| encode_varint (Long?.len h) @| npn @| c) in
     parse_long_header_dcid_scid input (Long?.dcil h) (Long?.scil h) = Some (Long?.dcid h, Long?.scid h, S.(encode_varint (Long?.len h) @| npn @| c)))) =
   assert_norm (max_cipher_length < pow2 62);
   let input = S.(Long?.dcid h @| Long?.scid h @| encode_varint (Long?.len h) @| npn @| c) in
@@ -806,11 +806,20 @@ let lemma_parse_long_header_dcid_scid_correct h npn c : Lemma
       S.append_slices (Long?.scid h) S.(encode_varint (Long?.len h) @| npn @| c)
 
 
-/// parsing of npn and the suffix
-/// NB: parsing of the plaintext length is already performable using
-/// encode_varint.
+/// parsing of the plaintext length (performed using parse_varint)
 
-let parse_long_header_npn (l:nat62) (pn_len:nat2) (b:bytes) : option (bytes * cbytes) =
+let lemma_parse_long_header_len_correct h npn c : Lemma
+  (requires Long? h)
+  (ensures (
+    assert_norm (max_cipher_length < pow2 62);
+    let input = S.(encode_varint (Long?.len h) @| npn @| c) in
+    parse_varint input = Some (Long?.len h, S.(npn @| c)))) =
+  assert_norm (max_cipher_length < pow2 62);
+  lemma_varint (Long?.len h) S.(npn @| c)
+
+/// parsing of npn and the suffix
+
+let parse_long_header_npn (l:nat62) (pn_len:nat2) (b:bytes) : option (bytes * (c:cbytes{S.length c = l})) =
   if 19 <= l && l < max_cipher_length && S.length b = pn_len+1+l then
      Some (S.slice b 0 (pn_len + 1), S.slice b (pn_len + 1) (S.length b))
   else None
@@ -819,7 +828,7 @@ let lemma_parse_long_header_npn_correct (h:header) (pn_len:nat2) (npn:lbytes (1+
   (requires Long? h)
   (ensures (
     assert_norm (max_cipher_length < pow2 62);
-   parse_long_header_npn (S.length c) pn_len S.(npn @| c) = Some (npn,c))) =
+    parse_long_header_npn (S.length c) pn_len S.(npn @| c) = Some (npn,c))) =
   assert_norm (max_cipher_length < pow2 62);
   let input = S.(npn @| c) in
   if 19 <= S.length c && S.length c < max_cipher_length && S.length input = pn_len+1+S.length c then begin
@@ -857,7 +866,7 @@ let parse_header b cid_len =
           match parse_varint rest4 with
           | None -> H_Failure
           | Some (l, rest5) ->
-            match parse_long_header_npn l pn_len b with
+            match parse_long_header_npn l pn_len rest5 with
             | None -> H_Failure
             | Some (npn,c) ->
               H_Success pn_len npn (Long typ version dcil scil dcid scid l) c
@@ -872,17 +881,14 @@ let lemma_header_parsing_correct h pn_len npn c =
     lemma_parse_short_header_flag_correct h pn_len npn c;
     lemma_parse_short_header_cid_correct h pn_len npn c;
     lemma_parse_short_header_npn_correct h pn_len npn c
-  | Some (LongFlag _) ->
+  | Some (LongFlag (pnl, typ, rest1)) ->
     assert (Long? h);
     lemma_parse_long_header_flag_correct h pn_len npn c;
     lemma_parse_long_header_version_correct h npn c;
     lemma_parse_long_header_clen_correct h npn c;
     lemma_parse_long_header_dcid_scid_correct h npn c;
-    assert_norm (max_cipher_length < pow2 62);
-    lemma_varint (Long?.len h) c;
-    lemma_parse_long_header_npn_correct h pn_len npn c;
-    admit() // all arguments are there
-
+    lemma_parse_long_header_len_correct h npn c;
+    lemma_parse_long_header_npn_correct h pn_len npn c
 
 
 
