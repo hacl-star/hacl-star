@@ -69,7 +69,7 @@ let vlen (n:nat62) : vlsize =
   else 8
 
 val encode_varint: n:nat62 -> lbytes (vlen n)
-val parse_varint: b:bytes{S.length b > 0} -> option (n:nat{n < pow2 62} * bytes)
+val parse_varint: b:bytes -> option (n:nat62 * bytes)
 
 val lemma_varint: (n:nat62) -> (suff:bytes) -> Lemma (parse_varint S.(encode_varint n @| suff) == Some (n,suff))
 

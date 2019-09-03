@@ -42,7 +42,7 @@ let encode_varint n =
 
 let suffix (b:bytes) (n:nat{n <= S.length b}) = S.slice b n (S.length b)
 
-let parse_varint_weak (b:bytes{S.length b > 0}) : option (n:nat{n < pow2 62} * vlsize * bytes) =
+let parse_varint_weak (b:bytes{S.length b > 0}) : option (nat62 * vlsize * bytes) =
   let open FStar.Endianness in
   assert_norm(pow2 0 == 1 /\ pow2 1 == 2 /\ pow2 2 == 4 /\ pow2 3 == 8 /\ pow2 8 == 256);
   assert_norm(pow2 8 / 0x40 == 4);
@@ -60,7 +60,8 @@ let parse_varint_weak (b:bytes{S.length b > 0}) : option (n:nat{n < pow2 62} * v
 
 
 let parse_varint b =
-  match parse_varint_weak b with
+  if S.length b = 0 then None
+  else match parse_varint_weak b with
   | None -> None
   | Some(l,vll,suff) ->
     if vlen l <> vll then None else Some(l,suff)
@@ -685,12 +686,14 @@ let lemma_parse_short_header_cid_safe (b1 b2:bytes) (cid_len:nat4) : Lemma
 
 /// parsing of the npn
 
-let parse_short_header_npn (b:bytes) (pn_len:nat2) : option (bytes * bytes) =
-  if S.length b < 1 + pn_len then None
-  else Some (S.slice b 0 (1+pn_len), S.slice b (1+pn_len) (S.length b))
+let parse_short_header_npn (b:bytes) (pn_len:nat2) : option (bytes * cbytes) =
+  let len = 1+pn_len in
+  if S.length b - len < max_cipher_length && S.length b - len >= 19 then
+    Some (S.slice b 0 len, S.slice b len (S.length b))
+  else None
 
 
-let lemma_parse_short_header_npn_correct h (pn_len:nat2) (npn:lbytes (1+pn_len)) c : Lemma
+let lemma_parse_short_header_npn_correct h (pn_len:nat2) (npn:lbytes (1+pn_len)) (c:cbytes) : Lemma
   (requires Short? h)
   (ensures parse_short_header_npn S.(npn @| c) pn_len = Some (npn,c)) =
   S.append_slices npn c
@@ -736,7 +739,7 @@ let parse_long_header_clen b : option (nat4 * nat4 * bytes) =
     Some (dcil, scil, S.slice b 1 (S.length b))
   end
 
-let parse_long_header_clen_correct h npn c : Lemma
+let lemma_parse_long_header_clen_correct h npn c : Lemma
   (requires Long? h)
   (ensures (
     assert_norm (max_cipher_length < pow2 62);
@@ -752,11 +755,11 @@ let parse_long_header_clen_correct h npn c : Lemma
 
 /// parsing connection ids
 
-let parse_long_header_id b len : option (bytes * bytes) =
+let parse_long_header_id b len : option (qbytes len * bytes) =
   if S.length b < add3 len then None
   else Some (S.slice b 0 (add3 len), S.slice b (add3 len) (S.length b))
 
-let parse_long_header_dcid_scid b dcil scil : option (bytes * bytes * bytes) =
+let parse_long_header_dcid_scid b dcil scil : option (qbytes dcil * qbytes scil * bytes) =
   match parse_long_header_id b dcil with
   | None -> None
   | Some (dcid, scid_rest) ->
@@ -764,7 +767,7 @@ let parse_long_header_dcid_scid b dcil scil : option (bytes * bytes * bytes) =
     | None -> None
     | Some (scid, rest) -> Some (dcid, scid, rest)
 
-let parse_long_header_dcid_scid_correct h npn c : Lemma
+let lemma_parse_long_header_dcid_scid_correct h npn c : Lemma
   (requires Long? h)
   (ensures (
     assert_norm (max_cipher_length < pow2 62);
@@ -780,6 +783,61 @@ let parse_long_header_dcid_scid_correct h npn c : Lemma
       S.append_slices (Long?.scid h) S.(encode_varint (Long?.len h) @| npn @| c)
 
 
+/// parsing of npn and the suffix
+/// NB: parsing of the plaintext length is already performable using
+/// encode_varint.
+
+let parse_long_header_npn (l:nat62) (pn_len:nat2) (b:bytes) : option (bytes * cbytes) =
+  if 19 <= l && l < max_cipher_length && S.length b = pn_len+1+l then
+     Some (S.slice b 0 (pn_len + 1), S.slice b (pn_len + 1) (S.length b))
+  else None
+
+let lemma_parse_long_header_npn_correct (h:header) (pn_len:nat2) (npn:lbytes (1+pn_len)) (c:cbytes) : Lemma
+  (requires Long? h)
+  (ensures (
+    assert_norm (max_cipher_length < pow2 62);
+   parse_long_header_npn (S.length c) pn_len S.(npn @| c) = Some (npn,c))) =
+  assert_norm (max_cipher_length < pow2 62);
+  let input = S.(npn @| c) in
+  if 19 <= S.length c && S.length c < max_cipher_length && S.length input = pn_len+1+S.length c then begin
+    S.append_slices npn c;
+    assert (S.length npn = pn_len+1);
+    assert (S.slice input 0 (pn_len+1) = npn);
+    assert (S.slice input (pn_len+1) (S.length input) = c);
+    assert (parse_long_header_npn (S.length c) pn_len S.(npn @| c) = Some (npn,c))
+  end
+
+
+/// compiling chunks
+
+let parse_header b cid_len =
+  match parse_header_flag b with
+  | None -> H_Failure
+  | Some (ShortFlag (pn_len, phase, spin, rest1)) ->
+    begin match parse_short_header_cid rest1 cid_len with
+    | None -> H_Failure
+    | Some (cid, rest2) ->
+      match parse_short_header_npn rest2 pn_len with
+      | None -> H_Failure
+      | Some (npn,c) -> H_Success pn_len npn (Short spin phase cid) c
+    end
+  | Some (LongFlag (pn_len, typ, rest1)) ->
+    match parse_long_header_version rest1 with
+    | None -> H_Failure
+    | Some (version, rest2) ->
+      match parse_long_header_clen rest2 with
+      | None -> H_Failure
+      | Some (dcil, scil, rest3) ->
+        match parse_long_header_dcid_scid rest3 dcil scil with
+        | None -> H_Failure
+        | Some (dcid, scid, rest4) ->
+          match parse_varint rest4 with
+          | None -> H_Failure
+          | Some (l, rest5) ->
+            match parse_long_header_npn l pn_len b with
+            | None -> H_Failure
+            | Some (npn,c) ->
+              H_Success pn_len npn (Long typ version dcil scil dcid scid l) c
 
 
 let parse_header b cid_len =
