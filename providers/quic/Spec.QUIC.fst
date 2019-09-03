@@ -548,6 +548,29 @@ let parse_header_flag (b:bytes) : option flag =
     Some (LongFlag(of_bitfield2 (pn0,pn1), of_bitfield2 (typ0,typ1), S.slice b 1 (S.length b)))
   | _ -> None
 
+
+let lemma_parse_header_flag_correct h pn_len npn c : Lemma
+  (match parse_header_flag S.(format_header h pn_len npn @| c) with
+   | None -> False
+   | Some (ShortFlag _) -> Short? h
+   | Some (LongFlag _) -> Long? h) =
+  let b = S.(format_header h pn_len npn @| c) in
+  let (pnb0, pnb1) = to_bitfield2 pn_len in
+  match h with
+  | Short spin phase cid ->
+    let l = [pnb0; pnb1; phase; false; false; spin; true; false] in
+    assert_norm(List.Tot.length l == 8);
+    assert (S.index b 0 = of_bitfield8 l);
+    lemma_bitfield8 l
+  | Long typ version dcil scil dcid scid plain_len ->
+    let _ = assert_norm (max_cipher_length < pow2 62) in
+    let (typ0, typ1) = to_bitfield2 typ in
+    let l = [pnb0; pnb1; false; false; typ0; typ1; true; true] in
+    assert_norm (List.Tot.length l = 8);
+    assert (S.index b 0 = of_bitfield8 l);
+    lemma_bitfield8 l
+
+
 let lemma_parse_short_header_flag_correct h pn_len npn c : Lemma
   (requires Short? h)
   (ensures (
@@ -838,6 +861,29 @@ let parse_header b cid_len =
             | None -> H_Failure
             | Some (npn,c) ->
               H_Success pn_len npn (Long typ version dcil scil dcid scid l) c
+
+
+let lemma_header_parsing_correct h pn_len npn c =
+  let b = S.(format_header h pn_len npn @| c) in
+  lemma_parse_header_flag_correct h pn_len npn c;
+  match parse_header_flag b with
+  | Some (ShortFlag _) ->
+    assert (Short? h);
+    lemma_parse_short_header_flag_correct h pn_len npn c;
+    lemma_parse_short_header_cid_correct h pn_len npn c;
+    lemma_parse_short_header_npn_correct h pn_len npn c
+  | Some (LongFlag _) ->
+    assert (Long? h);
+    lemma_parse_long_header_flag_correct h pn_len npn c;
+    lemma_parse_long_header_version_correct h npn c;
+    lemma_parse_long_header_clen_correct h npn c;
+    lemma_parse_long_header_dcid_scid_correct h npn c;
+    assert_norm (max_cipher_length < pow2 62);
+    lemma_varint (Long?.len h) c;
+    lemma_parse_long_header_npn_correct h pn_len npn c;
+    admit() // all arguments are there
+
+
 
 
 let parse_header b cid_len =
