@@ -126,11 +126,8 @@ val lemma_header_parsing_correct:
 
 // N.B. this is only true for a given DCID len
 val lemma_header_parsing_safe: b1:packet -> b2:packet -> cl:nat4 -> Lemma
-  (requires
-    H_Success? (parse_header b1 cl) /\
-    H_Success? (parse_header b2 cl) /\
-    parse_header b1 cl == parse_header b2 cl)
-  (ensures b1 == b2)
+  (requires parse_header b1 cl = parse_header b2 cl)
+  (ensures parse_header b1 cl = H_Failure \/ b1 = b2)
 
 // Header protection only
 val header_encrypt: a:ea ->

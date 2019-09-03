@@ -596,6 +596,11 @@ let lemma_recomp_assoc a b c d e f g h : Lemma
   (S.(equal ((a @| b @| c @| d @| e @| f @| g) @| h) (a @| b @| c @| d @| e @| f @| g @| h))) =
   ()
 
+let lemma_parse_flag_pnlen (l:bitfield8) : Lemma
+  (match l with
+  | a :: b :: _ -> of_bitfield l % 4 = of_bitfield2 (a,b)) =
+  ()
+
 #push-options "--z3rlimit 30"
 let lemma_parse_long_header_flag_correct h pn_len npn c : Lemma
   (requires Long? h)
@@ -751,16 +756,25 @@ let lemma_parse_long_header_version_correct h npn c : Lemma
   let clen = S.create 1 U8.(16uy *^ uint_to_t (Long?.dcil h) +^ uint_to_t (Long?.scil h)) in
   S.append_slices (FStar.Endianness.n_to_be 4 (Long?.version h)) S.(clen @| (Long?.dcid h) @| (Long?.scid h) @| encode_varint (Long?.len h) @| npn @| c)
 
+let lemma_parse_long_header_version_safe b1 b2 : Lemma
+  (requires parse_long_header_version b1 = parse_long_header_version b2)
+  (ensures parse_long_header_version b1 = None \/ b1 = b2) =
+  if S.length b1 >= 4 && S.length b2 >= 4 then begin
+    let open FStar.Endianness in
+    be_to_n_inj (S.slice b1 0 4) (S.slice b2 0 4);
+    S.lemma_split b1 4;
+    S.lemma_split b2 4
+  end
+
 
 /// parsing of the clen in the long header
 
 let parse_long_header_clen b : option (nat4 * nat4 * bytes) =
   if S.length b = 0 then None
-  else begin
+  else
     let clen = U8.v (S.index b 0) in
     let dcil, scil = clen / 0x10, clen % 0x10 in
     Some (dcil, scil, S.slice b 1 (S.length b))
-  end
 
 let lemma_parse_long_header_clen_correct h npn c : Lemma
   (requires Long? h)
@@ -775,12 +789,35 @@ let lemma_parse_long_header_clen_correct h npn c : Lemma
   lemma_create_slice input 0;
   S.append_slices S.(create 1 clen) S.(Long?.dcid h @| Long?.scid h @| encode_varint (Long?.len h) @| npn @| c)
 
+let lemma_parse_long_header_clen_safe b1 b2 : Lemma
+  (requires parse_long_header_clen b1 = parse_long_header_clen b2)
+  (ensures parse_long_header_clen b1 = None \/ b1 = b2) =
+  match parse_long_header_clen b1, parse_long_header_clen b2 with
+  | None, _
+  | _, None -> ()
+  | Some _, Some _ ->
+    S.lemma_split b1 1;
+    S.lemma_split b2 1;
+    lemma_create_slice b1 0;
+    lemma_create_slice b2 0
+
+
+
 
 /// parsing connection ids
 
 let parse_long_header_id b len : option (qbytes len * bytes) =
   if S.length b < add3 len then None
   else Some (S.slice b 0 (add3 len), S.slice b (add3 len) (S.length b))
+
+let parse_long_header_id_safe b1 b2 len : Lemma
+  (requires parse_long_header_id b1 len = parse_long_header_id b2 len)
+  (ensures parse_long_header_id b1 len = None \/ b1 = b2) =
+  if S.length b1 < add3 len || S.length b2 < add3 len then ()
+  else begin
+    S.lemma_split b1 (add3 len);
+    S.lemma_split b2 (add3 len)
+  end
 
 let parse_long_header_dcid_scid b dcil scil : option (qbytes dcil * qbytes scil * bytes) =
   match parse_long_header_id b dcil with
@@ -805,21 +842,26 @@ let lemma_parse_long_header_dcid_scid_correct h npn c : Lemma
       S.append_slices (Long?.dcid h) S.(Long?.scid h @| encode_varint (Long?.len h) @| npn @| c);
       S.append_slices (Long?.scid h) S.(encode_varint (Long?.len h) @| npn @| c)
 
+let lemma_parse_long_header_dcid_scid_safe b1 b2 dcil scil : Lemma
+  (requires parse_long_header_dcid_scid b1 dcil scil = parse_long_header_dcid_scid b2 dcil scil)
+  (ensures parse_long_header_dcid_scid b1 dcil scil = None \/ b1 = b2) =
+  match parse_long_header_id b1 dcil, parse_long_header_id b2 dcil with
+  | None, _
+  | _, None -> ()
+  | Some (_, scid_rest1), Some (_, scid_rest2) ->
+    match parse_long_header_id scid_rest1 scil, parse_long_header_id scid_rest2 scil with
+    | None, _
+    | _, None -> ()
+    | Some _, Some _ ->
+      parse_long_header_id_safe scid_rest1 scid_rest2 scil;
+      parse_long_header_id_safe b1 b2 dcil
 
-/// parsing of the plaintext length (performed using parse_varint)
 
-let lemma_parse_long_header_len_correct h npn c : Lemma
-  (requires Long? h)
-  (ensures (
-    assert_norm (max_cipher_length < pow2 62);
-    let input = S.(encode_varint (Long?.len h) @| npn @| c) in
-    parse_varint input = Some (Long?.len h, S.(npn @| c)))) =
-  assert_norm (max_cipher_length < pow2 62);
-  lemma_varint (Long?.len h) S.(npn @| c)
+
 
 /// parsing of npn and the suffix
 
-let parse_long_header_npn (l:nat62) (pn_len:nat2) (b:bytes) : option (bytes * (c:cbytes{S.length c = l})) =
+let parse_long_header_npn (l:nat62) (pn_len:nat2) (b:bytes) : option (bytes * cbytes) =
   if 19 <= l && l < max_cipher_length && S.length b = pn_len+1+l then
      Some (S.slice b 0 (pn_len + 1), S.slice b (pn_len + 1) (S.length b))
   else None
@@ -839,8 +881,19 @@ let lemma_parse_long_header_npn_correct (h:header) (pn_len:nat2) (npn:lbytes (1+
     assert (parse_long_header_npn (S.length c) pn_len S.(npn @| c) = Some (npn,c))
   end
 
+let lemma_parse_long_header_npn_safe (l:nat62) (pn_len:nat2) b1 b2 : Lemma
+  (requires parse_long_header_npn l pn_len b1 = parse_long_header_npn l pn_len b2)
+  (ensures parse_long_header_npn l pn_len b1 = None \/ b1 = b2) =
+  if 19 <= l && l < max_cipher_length && S.length b1 = pn_len+1+l && S.length b2 = pn_len+1+l then begin
+    S.lemma_split b1 (1+pn_len);
+    S.lemma_split b2 (1+pn_len)
+  end
 
-/// compiling chunks
+
+
+
+
+/// compiling all chunks
 
 let parse_header b cid_len =
   match parse_header_flag b with
@@ -872,23 +925,133 @@ let parse_header b cid_len =
               H_Success pn_len npn (Long typ version dcil scil dcid scid l) c
 
 
+
+/// proof of correctness
 let lemma_header_parsing_correct h pn_len npn c =
   let b = S.(format_header h pn_len npn @| c) in
   lemma_parse_header_flag_correct h pn_len npn c;
   match parse_header_flag b with
   | Some (ShortFlag _) ->
-    assert (Short? h);
     lemma_parse_short_header_flag_correct h pn_len npn c;
     lemma_parse_short_header_cid_correct h pn_len npn c;
     lemma_parse_short_header_npn_correct h pn_len npn c
-  | Some (LongFlag (pnl, typ, rest1)) ->
-    assert (Long? h);
+  | Some (LongFlag _) ->
     lemma_parse_long_header_flag_correct h pn_len npn c;
     lemma_parse_long_header_version_correct h npn c;
     lemma_parse_long_header_clen_correct h npn c;
     lemma_parse_long_header_dcid_scid_correct h npn c;
-    lemma_parse_long_header_len_correct h npn c;
+    assert_norm (max_cipher_length < pow2 62);
+    lemma_varint (Long?.len h) S.(npn @| c);
     lemma_parse_long_header_npn_correct h pn_len npn c
+
+
+
+
+/// proof of safety
+
+type parsed_short_flag b =
+  (let res = parse_header_flag b in
+  Some? res /\ ShortFlag? (Some?.v res))
+type parsed_long_flag b =
+  (let res = parse_header_flag b in
+  Some? res /\ LongFlag? (Some?.v res))
+let failure_parse b cid_len =
+  H_Failure? (parse_header b cid_len)
+
+// case 1: two short headers
+let lemma_header_parsing_safe_short_short b1 b2 cid_len : Lemma
+  (requires
+    parsed_short_flag b1 /\
+    parsed_short_flag b2 /\
+    parse_header b1 cid_len = parse_header b2 cid_len)
+  (ensures failure_parse b1 cid_len \/ b1 = b2) =
+  match parse_header_flag b1, parse_header_flag b2 with
+  | Some (ShortFlag (pn_len1, _, _, r1)),
+    Some (ShortFlag (pn_len2, _, _, s1)) ->
+    match parse_short_header_cid r1 cid_len,
+          parse_short_header_cid s1 cid_len with
+  | None, _
+  | _, None -> ()
+  | Some (_,r2), Some (_,s2) ->
+    match parse_short_header_npn r2 pn_len1,
+          parse_short_header_npn s2 pn_len2 with
+    | None, _
+    | _, None -> ()
+    | Some _, Some _ ->
+      lemma_parse_short_header_npn_safe r2 s2 pn_len1;
+      lemma_parse_short_header_cid_safe r1 s1 cid_len;
+      lemma_parse_header_flag_safe b1 b2
+
+// case 2: two long headers
+let lemma_header_parsing_safe_long_long b1 b2 cid_len : Lemma
+  (requires
+    parsed_long_flag b1 /\
+    parsed_long_flag b2 /\
+    parse_header b1 cid_len = parse_header b2 cid_len)
+  (ensures failure_parse b1 cid_len \/ b1 = b2) =
+  match parse_header_flag b1, parse_header_flag b2 with
+  | Some (LongFlag (pn_len1, typ1, r1)),
+    Some (LongFlag (pn_len2, typ2, s1)) ->
+    match parse_long_header_version r1, parse_long_header_version s1 with
+    | None, _ | _, None -> ()
+    | Some (version1, r2), Some (version2, s2) ->
+      match parse_long_header_clen r2,parse_long_header_clen s2 with
+      | None, _ | _, None -> ()
+      | Some (dcil1, scil1, r3), Some (dcil2, scil2, s3) ->
+        match parse_long_header_dcid_scid r3 dcil1 scil1, parse_long_header_dcid_scid s3 dcil2 scil2 with
+        | None, _ | _, None -> ()
+        | Some (dcid1, scid1, r4), Some (dcid2, scid2, s4) ->
+          match parse_varint r4, parse_varint s4 with
+          | None, _ | _, None  -> ()
+          | Some (l1, r5), Some (l2, s5) ->
+            match parse_long_header_npn l1 pn_len1 r5, parse_long_header_npn l2 pn_len2 s5 with
+            | None, _ | _, None -> ()
+            | Some _, Some _ ->
+              lemma_parse_long_header_npn_safe l1 pn_len1 r5 s5;
+              lemma_varint_safe r4 s4;
+              lemma_parse_long_header_dcid_scid_safe r3 s3 dcil1 scil1;
+              lemma_parse_long_header_clen_safe r2 s2;
+              lemma_parse_long_header_version_safe r1 s1;
+              lemma_parse_header_flag_safe b1 b2
+
+// case 3: incompatible-type headers
+let lemma_result_parse_short_header b cid_len : Lemma
+  (requires parsed_short_flag b)
+  (ensures
+    failure_parse b cid_len \/
+    Short? (H_Success?.h (parse_header b cid_len))) =
+  ()
+
+let lemma_result_parse_long_header b cid_len : Lemma
+  (requires parsed_long_flag b)
+  (ensures
+    failure_parse b cid_len \/
+    Long? (H_Success?.h (parse_header b cid_len))) =
+  ()
+
+let lemma_incompatibility_short_long b1 b2 cid_len : Lemma
+  (requires parsed_short_flag b1 /\ parsed_long_flag b2)
+  (ensures
+    failure_parse b1 cid_len \/
+    failure_parse b2 cid_len \/
+    parse_header b1 cid_len <> parse_header b2 cid_len) =
+  lemma_result_parse_short_header b1 cid_len;
+  lemma_result_parse_long_header b2 cid_len
+
+
+
+let lemma_header_parsing_safe b1 b2 cid_len =
+  match parse_header_flag b1, parse_header_flag b2 with
+  | None, _
+  | _, None -> ()
+  | Some (ShortFlag _), Some (ShortFlag _) ->
+    lemma_header_parsing_safe_short_short b1 b2 cid_len
+  | Some (LongFlag _), Some (LongFlag _) ->
+    lemma_header_parsing_safe_long_long b1 b2 cid_len
+  | Some (ShortFlag _), Some (LongFlag _) ->
+    lemma_incompatibility_short_long b1 b2 cid_len
+  | Some (LongFlag _), Some (ShortFlag _) ->
+    lemma_incompatibility_short_long b2 b1 cid_len
 
 
 
@@ -1040,12 +1203,6 @@ let lemma_long_header_parsing_correct_flag h pn_len npn : Lemma
     lemma_bitfield8 l
 
 #pop-options
-
-
-let lemma_parse_flag_pnlen (l:bitfield8) : Lemma
-  (match l with
-  | a :: b :: _ -> of_bitfield l % 4 = of_bitfield2 (a,b)) =
-  ()
 
 
 // an additional lemma in cases we want to extract only pn_len
