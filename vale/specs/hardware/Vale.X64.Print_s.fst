@@ -9,6 +9,7 @@ open Vale.X64.Machine_Semantics_s
 open FStar.IO
 
 noeq type printer = {
+  print_reg_name: reg_64 -> string;
   reg_prefix : unit -> string;
   mem_prefix : string -> string;
   maddr      : string -> option(string * string) -> string -> string;
@@ -43,7 +44,7 @@ let print_reg_name (r:reg_64) : string =
   | 15 -> "r15"
 
 let print_reg64 (r:reg_64) (p:printer) : string =
-  p.reg_prefix() ^ print_reg_name r
+  p.reg_prefix() ^ p.print_reg_name r
 
 let print_reg32 (r:reg_64) (p:printer) : string =
   p.reg_prefix() ^
@@ -308,6 +309,7 @@ let masm : printer =
   let proc_name (name:string) = "ALIGN 16\n" ^ name ^ " proc\n" in
   let ret (name:string) = "  ret\n" ^ name ^ " endp\n" in
   {
+  print_reg_name = print_reg_name;
   reg_prefix = reg_prefix;
   mem_prefix = mem_prefix;
   maddr      = maddr;
@@ -344,6 +346,7 @@ let gcc : printer =
   let proc_name (name:string) = ".global " ^ name ^ "\n" ^ name ^ ":\n" in
   let ret (name:string) = "  ret\n\n" in
   {
+  print_reg_name = print_reg_name;
   reg_prefix = reg_prefix;
   mem_prefix = mem_prefix;
   maddr      = maddr;
