@@ -503,6 +503,167 @@ let format_header p pn_len npn =
 
 
 
+// Splitting the lemma S.append_slices in several parts. This is
+// dirty, but otherwise the SMT solver is lost after ~4 applications
+// of the lemma (and here we need 7)
+let append_slices1 (s1:bytes) (s2:bytes) : Lemma
+  (S.equal s1 (S.slice (S.append s1 s2) 0 (S.length s1))) =
+  ()
+
+let append_slices2 (s1 s2:bytes) : Lemma
+  (Seq.equal s2 (Seq.slice (Seq.append s1 s2) (Seq.length s1) (Seq.length s1 + Seq.length s2))) =
+  ()
+
+let append_slices3 (s1:bytes) (s2:bytes) : Lemma
+  ( (forall (i:nat) (j:nat).
+                i <= j /\ j <= Seq.length s2 ==>
+                Seq.equal (Seq.slice s2 i j)
+                          (Seq.slice (Seq.append s1 s2) (Seq.length s1 + i) (Seq.length s1 + j)))) =
+  ()
+
+
+/// flag parsing
+
+// result of a flag parsing
+type flag =
+  | ShortFlag of (nat2 * bool * bool * bytes)
+  | LongFlag of (nat2 * nat2 * bytes)
+
+let parse_header_flag (b:bytes) : option flag =
+  if S.length b = 0 then None else
+  match to_bitfield8 (S.index b 0) with
+  | [pn0; pn1; phase; false; false; spin; true; false] ->
+    Some (ShortFlag (of_bitfield2 (pn0,pn1), phase, spin, S.slice b 1 (S.length b)))
+  | [pn0; pn1; false; false; typ0; typ1; true; true] ->
+    Some (LongFlag(of_bitfield2 (pn0,pn1), of_bitfield2 (typ0,typ1), S.slice b 1 (S.length b)))
+  | _ -> None
+
+let lemma_parse_short_header_flag_correct h pn_len npn c : Lemma
+  (requires Short? h)
+  (ensures (
+    match parse_header_flag S.(format_header h pn_len npn @| c) with
+    | Some (ShortFlag (pnl, phase, spin, rest)) ->
+      pnl = pn_len /\
+      phase = Short?.phase h /\
+      spin = Short?.spin h /\
+      rest = S.(Short?.cid h @| npn @| c)
+    | _ -> False)) =
+  match h with
+  | Short spin phase cid ->
+    let (pnb0, pnb1) = to_bitfield2 pn_len in
+    lemma_bitfield2 pn_len;
+    let l = [pnb0; pnb1; phase; false; false; spin; true; false] in
+    let flag = of_bitfield8 (assert_norm(List.Tot.length l == 8); l) in
+    let b = S.(format_header h pn_len npn @| c) in
+    assert (S.index b 0 = flag);
+    lemma_bitfield8 l;
+    assert (S.equal (S.slice b 1 (S.length b)) S.(cid @| npn @| c))
+
+
+#push-options "--z3rlimit 20" // TODO state correctness of the rest
+let lemma_parse_long_header_flag_correct h pn_len npn c : Lemma
+  (requires Long? h)
+  (ensures (
+    match parse_header_flag S.(format_header h pn_len npn @| c) with
+    | Some (LongFlag (pnl,typ,_)) ->
+      pnl = pn_len /\
+      typ = Long?.typ h
+    | _ -> False)) =
+  match h with
+  | Long typ version dcil scil dcid scid plain_len ->
+    let (pn0,pn1) = to_bitfield2 pn_len in
+    lemma_bitfield2 pn_len;
+    let (typ0,typ1) = to_bitfield2 typ in
+    lemma_bitfield2 typ;
+    let l = [pn0; pn1; false; false; typ0; typ1; true; true] in
+    let flag = of_bitfield8 (assert_norm(List.Tot.length l == 8); l) in
+    let b = S.(format_header h pn_len npn @| c) in
+    assert (S.index b 0 = flag);
+    lemma_bitfield8 l;
+    match to_bitfield8 flag with
+    | [_; _; false; false; _; _; true; true] -> ()
+#pop-options
+
+let lemma_parse_flag_invert (b:bytes) : Lemma
+  (requires S.length b > 0)
+  (ensures (
+    match parse_header_flag b with
+    | None -> True
+    | Some (ShortFlag (pnl, phase, spin, _)) ->
+      let (pn0,pn1) = to_bitfield2 pnl in
+      to_bitfield8 (S.index b 0) = [pn0; pn1; phase; false; false; spin; true; false]
+    | Some (LongFlag (pnl, typ, _)) ->
+      let (pn0,pn1) = to_bitfield2 pnl in
+      let (typ0,typ1) = to_bitfield2 typ in
+      to_bitfield8 (S.index b 0) = [pn0; pn1; false; false; typ0; typ1; true; true])) =
+  match parse_header_flag b with
+  | None -> ()
+  | Some (ShortFlag _) ->
+    begin match to_bitfield8 (S.index b 0) with
+    | _ :: _ :: _ :: _ :: _ :: _ :: _ :: _ :: [] -> ()
+    | _ -> () end
+  | Some (LongFlag _) ->
+    begin match to_bitfield8 (S.index b 0) with
+    | _ :: _ :: _ :: _ :: _ :: _ :: _ :: _ :: [] -> ()
+    | _ -> () end
+
+let lemma_parse_header_flag_safe (b1 b2:bytes) : Lemma
+  (requires parse_header_flag b1 = parse_header_flag b2)
+  (ensures
+    parse_header_flag b1 = None \/ (
+      S.index b1 0 = S.index b2 0 /\
+      S.slice b1 1 (S.length b1) = S.slice b2 1 (S.length b2))) =
+  match parse_header_flag b1, parse_header_flag b2 with
+  | None, _
+  | _, None -> ()
+  | Some _, Some _ ->
+    lemma_parse_flag_invert b1;
+    lemma_parse_flag_invert b2;
+    lemma_bitfield 8 (U8.v (S.index b1 0));
+    lemma_bitfield 8 (U8.v (S.index b2 0))
+
+
+
+/// parsing of the cid in short headers
+
+let parse_short_header_cid (b:bytes) (cid_len:nat4) : option (bytes * bytes) =
+  if S.length b < add3 cid_len then None
+  else Some (S.slice b 0 (add3 cid_len), S.slice b (add3 cid_len) (S.length b))
+
+let cid_len_real h : Lemma
+  (requires Short? h)
+  (ensures S.length (Short?.cid h) = add3 (cid_len h)) =
+  ()
+
+let lemma_parse_short_header_cid_correct h pn_len npn c : Lemma
+  (requires Short? h)
+  (ensures (
+    match parse_short_header_cid S.(Short?.cid h @| npn @| c) (cid_len h) with
+      | None -> False
+      | Some (cid,rest) ->
+        Short?.cid h = cid /\
+        rest = S.(npn @| c))) =
+  cid_len_real h;
+  S.append_slices (Short?.cid h) S.(npn @| c)
+
+let lemma_parse_short_header_cid_safe (b1 b2:bytes) (cid_len:nat4) : Lemma
+  (requires
+    parse_short_header_cid b1 cid_len = parse_short_header_cid b2 cid_len)
+  (ensures
+    parse_short_header_cid b1 cid_len = None \/ (
+      S.slice b1 0 (add3 cid_len) = S.slice b2 0 (add3 cid_len) /\
+      S.slice b1 (add3 cid_len) (S.length b1) = S.slice b2 (add3 cid_len) (S.length b2))) =
+  ()
+
+
+/// parsing of the npn
+
+let parse_short_header_npn (b:bytes) (pn_len:nat2) : option (bytes * bytes) =
+  if S.length b < 1 + pn_len then None
+  else Some (S.slice b 0 (1+pn_len), S.slice b (1+pn_len) (S.length b))
+
+
+
 
 let parse_header b cid_len =
   let open FStar.Endianness in
@@ -548,19 +709,7 @@ let parse_header b cid_len =
 
 
 
-// Splitting the lemma S.append_slices in several parts. This is
-// dirty, but otherwise the SMT solver is lost after ~4 applications
-// of the lemma (and here we need 7)
-let append_slices1 (s1:bytes) (s2:bytes) : Lemma
-  (S.equal s1 (S.slice (S.append s1 s2) 0 (S.length s1))) =
-  ()
 
-let append_slices3 (s1:bytes) (s2:bytes) : Lemma
-  ( (forall (i:nat) (j:nat).
-                i <= j /\ j <= Seq.length s2 ==>
-                Seq.equal (Seq.slice s2 i j)
-                          (Seq.slice (Seq.append s1 s2) (Seq.length s1 + i) (Seq.length s1 + j)))) =
-  ()
 
 let extract_dcil_scil (dcil:nat4) (scil:nat4) (cl:nat) : Lemma
   (requires (let open FStar.Mul in cl = 0x10 * dcil + scil))
@@ -1612,10 +1761,7 @@ let lemma_arithmetic3 (a b c:int) : Lemma
   ()
 
 
-let cid_len_real h : Lemma
-  (requires Short? h)
-  (ensures S.length (Short?.cid h) = add3 (cid_len h)) =
-  ()
+
 
 let lemma_header_encryption_short_sample a k h pn_len npn c : Lemma
   (requires Short? h)
