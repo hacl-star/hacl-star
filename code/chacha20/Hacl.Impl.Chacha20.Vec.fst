@@ -12,7 +12,6 @@ open Lib.IntVector
 
 open Hacl.Impl.Chacha20.Core32xN
 module Spec = Hacl.Spec.Chacha20.Vec
-module Lemmas =  Hacl.Spec.Chacha20.Vec.Lemmas
 module Chacha20Equiv = Hacl.Spec.Chacha20.Equiv
 module Loop = Lib.LoopCombinators
 
@@ -284,7 +283,7 @@ val chacha20_encrypt_vec_: #w:lanes -> chacha20_encrypt_st w
 let chacha20_encrypt_vec_ #w len out text key n ctr =
   let h0 = ST.get () in
   chacha20_encrypt_vec #w len out text key n ctr;
-  Chacha20Equiv.chacha20_encrypt_bytes_lemma_equiv #w (as_seq h0 key) (as_seq h0 n) (v ctr) (as_seq h0 text)
+  Chacha20Equiv.lemma_chacha20_vec_equiv #w (as_seq h0 key) (as_seq h0 n) (v ctr) (as_seq h0 text)
 
 [@CInline]
 let chacha20_encrypt_32 : chacha20_encrypt_st 1 = chacha20_encrypt_vec_ #1
@@ -342,7 +341,7 @@ val chacha20_decrypt_vec_: #w:lanes -> chacha20_decrypt_st w
 let chacha20_decrypt_vec_ #w len out cipher key n ctr =
   let h0 = ST.get () in
   chacha20_decrypt_vec #w len out cipher key n ctr;
-  Chacha20Equiv.chacha20_encrypt_bytes_lemma_equiv #w (as_seq h0 key) (as_seq h0 n) (v ctr) (as_seq h0 cipher)
+  Chacha20Equiv.lemma_chacha20_vec_equiv #w (as_seq h0 key) (as_seq h0 n) (v ctr) (as_seq h0 cipher)
 
 [@CInline]
 let chacha20_decrypt_32 : chacha20_decrypt_st 1 = chacha20_decrypt_vec_ #1
