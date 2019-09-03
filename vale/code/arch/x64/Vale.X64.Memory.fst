@@ -19,13 +19,6 @@ let b8 = IB.b8
 
 let fstar_heap = H.heap
 type vale_heap = IB.interop_heap
-type vale_hpls = Map.t nat IB.interop_heap
-
-noeq type vale_memory = {
-  vm_heap : vale_heap;
-  vm_hpls : vale_hpls;
-  vm_hmap : Map.t int nat;
-}
 
 let op_String_Access = Map.sel
 let op_String_Assignment = Map.upd
@@ -698,8 +691,9 @@ let memory_ok (m:vale_memory) =
      (forall (ptr:int{heap_contains_ptr (Map.sel m.vm_hpls hp) ptr}).
        Map.contains m.vm_hmap ptr /\
        Map.sel m.vm_hmap ptr == hp /\
-       (let t = get_base_typ ptr in
-       load_hmem (dfst t) ptr hp m.vm_hpls == load_mem (get_base_typ ptr) m.vm_heap)))
+       (let t = get_base_typ ptr (Map.sel m.vm_hpls hp) in
+       let t' = get_base_typ ptr m.vm_heap in
+       load_hmem (dfst t) ptr hp m.vm_hpls == load_mem (dfst t') ptr m.vm_heap)))
 
 #set-options "--z3rlimit 100"
 let memory_load64 (ptr:int) (hp:nat{hp < 16}) (m:vale_memory) : Ghost int
