@@ -17,10 +17,10 @@ module L = FStar.List.Tot
 open FStar.Mul
 
 [@__reduce__]
-let buf_t src t = b:B.buffer (base_typ_as_type src){(B.length b * view_n src) % view_n t = 0}
+let buf_t src t = b:B.buffer (base_typ_as_type src){(B.length b * view_n_unfold src) % view_n_unfold t = 0}
 
 [@__reduce__]
-let ibuf_t src t = b:IB.ibuffer (base_typ_as_type src){(B.length b * view_n src) % view_n t = 0}
+let ibuf_t src t = b:IB.ibuffer (base_typ_as_type src){(B.length b * view_n_unfold src) % view_n_unfold t = 0}
 
 let lemma_seq_neq_intro (#a:Type) (s1:Seq.seq a) (s2:Seq.seq a)
  : Lemma (requires (Seq.length s1 =!= Seq.length s2))

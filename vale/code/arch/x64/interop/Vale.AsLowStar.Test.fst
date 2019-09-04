@@ -136,8 +136,13 @@ open FStar.HyperStack.ST
 
 module M = Vale.X64.Memory
 
-let test (x:b64) = assert (V.buffer_length (as_vale_buffer x) == B.length x / 8)
-let itest (x:ib64) = assert (V.buffer_length (as_vale_immbuffer x) == B.length x / 8)
+open FStar.Mul
+let test (x:b64) =
+  assert (V.buffer_length (as_vale_buffer x) == (B.length x * view_n TUInt8) / view_n TUInt64);
+  assert (V.buffer_length (as_vale_buffer x) == B.length x / 8)
+let itest (x:ib64) =
+  assert (V.buffer_length (as_vale_immbuffer x) == (B.length x * view_n TUInt8) / view_n TUInt64);
+  assert (V.buffer_length (as_vale_immbuffer x) == B.length x / 8)
 
 module T = FStar.Tactics
 #reset-options "--using_facts_from '* -FStar.Tactics -FStar.Reflection'"

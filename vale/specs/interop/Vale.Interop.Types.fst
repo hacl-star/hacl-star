@@ -17,13 +17,16 @@ let base_typ_as_type (t:base_typ) : eqtype =
   | TUInt128 -> quad32
 
 [@__reduce__]
-let view_n (t:base_typ) : int =
+unfold // without the unfold, "% view_n t" leads to very slow Z3 performance
+let view_n_unfold (t:base_typ) : pos =
   match t with
   | TUInt8 -> 1
   | TUInt16 -> 2
   | TUInt32 -> 4
   | TUInt64 -> 8
   | TUInt128 -> 16
+
+let view_n (t:base_typ) : pos = view_n_unfold t
 
 [@__reduce__]
 let down_view (t:base_typ) : DV.view (base_typ_as_type t) UInt8.t = match t with
