@@ -380,7 +380,7 @@ let lemma_varint_inv (b:bytes) (n:nat62) (suff:bytes) : Lemma
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-    
+
    +-+-+-+-+-+-+-+-+
    |0|1|S|R|R|K|P P|
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -1426,7 +1426,7 @@ let lemma_header_type_128 p pn_len npn : Lemma
   (Short? p <==> U8.(S.index (format_header p pn_len npn) 0 <^ 128uy)) =
   let b = format_header p pn_len npn in
   if Short? p then begin
-    lemma_short_header_parsing_correct_flag p pn_len npn;
+    lemma_parse_short_header_flag_correct p pn_len npn S.empty;
     let l = to_bitfield8 (S.index b 0) in
     assert_norm (List.Tot.length l = 8);
     lemma_bitfield8_128 (S.index b 0);
@@ -1434,7 +1434,7 @@ let lemma_header_type_128 p pn_len npn : Lemma
     assert (List.Tot.index l 7 = false)
   end
   else begin
-    lemma_long_header_parsing_correct_flag p pn_len npn;
+    lemma_parse_long_header_flag_correct p pn_len npn S.empty;
     let l = to_bitfield8 (S.index b 0) in
     assert_norm (List.Tot.length l = 8);
     lemma_bitfield8_128 (S.index b 0);
