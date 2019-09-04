@@ -15,7 +15,7 @@ open Vale.Lib.Seqs_s
 friend Lib.IntTypes
 friend Vale.SHA.SHA_helpers
 
-#set-options "--z3rlimit 800 --max_fuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 
 let math_aux (n:nat) : Lemma ( ((64 * n) * 1) / 16 == 4 * n) = ()
 
@@ -177,10 +177,6 @@ let simplify_le_bytes_to_hash_uint32 b h =
         Seq.index (Seq.slice (B.as_seq h b) (i' * 4) (i'*4+4)) (i%4))
   in Classical.forall_intro aux;
   assert (Seq.equal sf s_init)
-
-friend Vale.Arch.BufferFriend
-
-#set-options "--z3rlimit 300"
 
 let sha256_update ctx_b in_b num_val k_b =
   let h0 = get() in

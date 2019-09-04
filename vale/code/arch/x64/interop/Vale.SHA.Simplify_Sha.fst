@@ -31,6 +31,7 @@ let lemma_seq_nat8_le_seq_quad32_to_bytes_uint32 b h =
   let s_init = B.as_seq h b in
   let db = get_downview b in
   DV.length_eq db;
+  assert (Seq.length s_init == B.length b);
   let ub = UV.mk_buffer db Vale.Interop.Views.up_view128 in
   let s = UV.as_seq h ub in
   let s' = le_seq_quad32_to_bytes s in
