@@ -261,7 +261,7 @@ val spec_blake2b_incremental_update_inner_longer:
 noextract
 let spec_blake2b_incremental_update_inner_longer ll input state rb ll0 =
   let open Spec.Blake2.Incremental in
-  let tlen = spec_compute_prev state.SpecI.n in
+  let tlen = v (spec_compute_prev state.SpecI.n) in
   let hash = Spec.blake2_update_block Spec.Blake2B tlen state.SpecI.block state.SpecI.hash in
   let state = {state with hash = hash; n = state.SpecI.n + 1; pl = 0;} in
   (* Handle all full blocks available *)
@@ -345,16 +345,14 @@ let blake2b_incremental_update_inner_longer state ll input rb ll0 =
 noextract
 val spec_blake2b_incremental_update_inner:
     state:(SpecI.state_r Spec.Blake2B)
-  -> ll:size_nat
-  -> input:LBS.lbytes ll
-  -> rb:size_nat{rb = (Spec.size_block Spec.Blake2B) - ll /\ rb <= Spec.size_block Spec.Blake2B}
-  -> ll0:size_nat{ll0 = (if ll < rb then ll else rb)} ->
+  -> ll:size_nat{state.SpecI.n + 1 + ll / v size_block <= max_size_t}
+  -> rb:size_nat{rb = (Spec.size_block Spec.Blake2B) - state.SpecI.pl /\ rb <= Spec.size_block Spec.Blake2B}
+  -> ll0:size_nat{ll0 = (if ll < rb then ll else rb) /\ state.SpecI.pl + ll0 <= v size_block}
+  -> input:LBS.lbytes ll ->
   Tot (SpecI.state_r Spec.Blake2B)
 
-let spec_blake2b_incremental_update_inner state ll input rb ll0 =
+let spec_blake2b_incremental_update_inner state ll rb ll0 input =
   let open Spec.Blake2.Incremental in
-  admit();
-  assert(state.SpecI.pl <= Spec.size_block Spec.Blake2B);
   if ll <= rb then ({state with pl = state.SpecI.pl + ll0})
   else spec_blake2b_incremental_update_inner_longer ll input state rb ll0
 
@@ -362,10 +360,10 @@ let spec_blake2b_incremental_update_inner state ll input rb ll0 =
 inline_for_extraction
 val blake2b_incremental_update_inner:
     state:state_r
-  -> ll:size_t
-  -> input:lbuffer uint8 ll
-  -> rb:size_t{v rb <= v size_block}
-  -> ll0:size_t{v ll0 = (if ll <. rb then v ll else v rb)} ->
+  -> ll:size_t{v state.n + 1 + v ll / v size_block <= max_size_t}
+  -> rb:size_t{v rb = v size_block - v state.pl /\ v rb <= v size_block}
+  -> ll0:size_t{v ll0 = (if ll <. rb then v ll else v rb) /\ v state.pl + v ll0 <= v size_block}
+  -> input:lbuffer uint8 ll ->
   Stack state_r
   (requires fun h ->
     state_inv h state /\ live h input /\
@@ -374,18 +372,37 @@ val blake2b_incremental_update_inner:
     v (state.n *. size_block) + v ll < pow2 128)
   (ensures  fun h0 rstate h1 ->
     modifies2 state.hash state.block h0 h1 /\
-    state_eq h1 rstate (spec_blake2b_incremental_update_inner (spec_of h0 state) (v ll) h0.[|input|] (v rb) (v ll0)))
+    state_eq h1 rstate (spec_blake2b_incremental_update_inner (spec_of h0 state) (v ll) (v rb) (v ll0) h0.[|input|]))
 
-let blake2b_incremental_update_inner state ll input rb ll0 =
+let blake2b_incremental_update_inner state ll rb ll0 input =
   if ll <=. rb then ({state with pl = state.pl +. ll0})
   else blake2b_incremental_update_inner_longer state ll input rb ll0
 
 
 
+noextract
+val spec_blake2b_incremental_update:
+    state:(SpecI.state_r Spec.Blake2B)
+  -> ll:size_nat{state.SpecI.n + 1 + ll / v size_block <= max_size_t}
+  -> input:LBS.lbytes ll ->
+  Tot (SpecI.state_r Spec.Blake2B)
+
+let spec_blake2b_incremental_update state ll input =
+  let open Spec.Blake2.Incremental in
+  let nll = ll / v size_block in
+  if ll = 0 || not (state.SpecI.n + nll + 2 <= 0xFFFFFFFF) then state else (
+  let rb = v size_block - state.SpecI.pl in
+  let ll0 = if ll < rb then ll else rb in
+  let partial = Lib.Sequence.sub input 0 ll0 in
+  let block = Lib.Sequence.update_sub state.SpecI.block state.SpecI.pl ll0 partial in
+  {state with block = block})
+  (* spec_blake2b_incremental_update_inner state ll rb ll0 input) *)
+
+
 inline_for_extraction
 val blake2b_incremental_update:
     state:state_r
-  -> ll:size_t
+  -> ll:size_t{v state.n + 1 + v ll / v size_block <= max_size_t}
   -> input:lbuffer uint8 ll ->
   Stack state_r
   (requires fun h ->
@@ -393,17 +410,39 @@ val blake2b_incremental_update:
     disjoint state.hash input /\ disjoint state.block input /\
     state_inv h state /\
     v (state.n *. size_block) + v ll < pow2 128)
-  (ensures  fun h0 _ h1 ->
-    modifies2 state.hash state.block h0 h1)
+  (ensures  fun h0 rstate h1 ->
+    modifies2 state.hash state.block h0 h1
+    /\ state_eq h1 rstate (spec_blake2b_incremental_update (spec_of h0 state) (v ll) h0.[|input|]))
 
 let blake2b_incremental_update state ll input =
+  let h00 = ST.get () in
+  assert(state_eq h00 state (spec_of h00 state));
   let nll = ll /. size_block in
   if ll =. 0ul || not (state.n +. nll +. 2ul <=. size 0xFFFFFFFF) then state else (
   let rb = size_block -. state.pl in
   let ll0 = if ll <. rb then ll else rb in
   let partial = sub input 0ul ll0 in
+  let h0 = ST.get() in
+  assert(state_eq h0 state (spec_of h00 state));
   update_sub #MUT #uint8 #size_block state.block state.pl ll0 partial;
-  blake2b_incremental_update_inner state ll input rb ll0)
+  let h1 = ST.get() in
+  (* let spec_state00 : (SpecI.state_r Spec.Blake2B) = (spec_of h00 state) in *)
+  (* let spec_state_h1 : (SpecI.state_r Spec.Blake2B) = *)
+  (*   {spec_state00 with block = Lib.Sequence.update_sub (as_seq h0 state.SpecI.block) (v state.SpecI.pl) (v ll0) (as_seq h0 partial)} *)
+  (* in *)
+  (* assert(state_eq h1 state spec_state_h1); *)
+  assert(as_seq h1 state.hash == as_seq h00 state.hash);
+  assert(as_seq h1 partial == Lib.Sequence.sub (as_seq h00 input) 0 (v ll0));
+  assert(v state.pl = (spec_of h00 state).SpecI.pl);
+  assert(v state.n = (spec_of h00 state).SpecI.n);
+  assert(as_seq h1 state.block == Lib.Sequence.update_sub (as_seq h00 state.block) (spec_of h00 state).SpecI.pl (v ll0) (as_seq h0 partial));
+  (* let spec_state_h1 = {} *)
+  (* assert(spec_of h1 state == spec_state_h1); *)
+  admit();
+  state)
+
+
+  (* blake2b_incremental_update_inner state ll rb ll0 input) *)
 
 
 
