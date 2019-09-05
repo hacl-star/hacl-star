@@ -509,7 +509,7 @@ let blake2b_incremental_update_inner state ll rb ll0 input =
     blake2b_incremental_update_inner_longer state ll input rb ll0
 
 
-
+noextract
 val spec_compute_branching_condition:
     state:(SpecI.state_r Spec.Blake2B)
   -> ll:size_nat{state.SpecI.n + 2 + ll / v size_block <= max_size_t} ->
@@ -527,8 +527,10 @@ val compute_branching_condition:
   Tot (b:bool{b == spec_compute_branching_condition (spec_of h state) (v ll) })
 
 let compute_branching_condition #h state ll =
+  [@inline_let]
+  let max = normalize_term (size max_size_t) in
   let nll = ll /. size_block in
-  ll =. 0ul || not (state.n +! nll +! 2ul <=. size max_size_t)
+  ll =. 0ul || not (state.n +! nll +! 2ul <=. max)
 
 
 noextract
