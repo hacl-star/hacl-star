@@ -5,6 +5,8 @@ open FStar.Mul
 open Lib.IntTypes
 open Lib.Sequence
 
+#set-options "--z3rlimit 30 --max_fuel 0 --max_ifuel 0"
+
 /// Definition of byte-based sequences
 
 unfold inline_for_extraction
@@ -101,6 +103,11 @@ val index_uints_to_bytes_le: #t:inttype{unsigned t} -> #l:secrecy_level -> #len:
 inline_for_extraction
 val uints_to_bytes_be: #t:inttype{unsigned t} -> #l:secrecy_level -> #len:size_nat{len * numbytes t < pow2 32}
   -> lseq (uint_t t l) len -> lbytes_l l (len * numbytes t)
+
+val index_uints_to_bytes_be: #t:inttype{unsigned t} -> #l:secrecy_level -> #len:size_nat{len * numbytes t < pow2 32}
+  -> ul:lseq (uint_t t l) len -> i:nat{i < len * numbytes t}
+  -> Lemma
+    (index (uints_to_bytes_be #t #l #len ul) i == (uint_to_bytes_be ul.[i / numbytes t]).[i % numbytes t])
 
 inline_for_extraction
 val uints_from_bytes_le: #t:inttype{unsigned t /\ ~(U1? t)} -> #l:secrecy_level -> #len:size_nat{len * numbytes t < pow2 32}

@@ -243,6 +243,9 @@ let uints_to_bytes_be #t #l #len ul =
     (uints_to_bytes_be_inner #t #l #len ul) () in
   o
 
+let index_uints_to_bytes_be #t #l #len ul i =
+  index_generate_blocks (numbytes t) len len (uints_to_bytes_be_inner #t #l #len ul) i
+
 let uints_from_bytes_le #t #l #len b =
   Lib.Sequence.createi #(int_t t l) len
     (fun i -> uint_from_bytes_le (sub b (i * numbytes t) (numbytes t)))
