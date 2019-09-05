@@ -280,14 +280,6 @@ let decode_pk_set_pk snapshot pk_in pk i j value =
     assert(forall (k:nat{k < 32}) (h:HS.mem) . {:pattern bget h pk (v i + k) \/ bget h (gsub pk i (size 32)) k} bget h pk (v i + k) == bget h (gsub pk i (size 32)) k);
     reveal_valid_decode_pk pk_in pk snapshot h1 i
 
-private let lemma_decode_pk_extend 
-    (pk : lbuffer I32.t (params_n *. params_k))
-    (i : size_t{v i + 31 < v params_n * v params_k})
-    (h : HS.mem) : Lemma
-    (requires is_poly_k_pk_i h pk (v i) /\
-              (forall (k:nat{k >= v i /\ k < v i + 32}) . is_pk (bget h pk k)))
-    (ensures is_poly_pk_i h pk (v i + 32)) = ()
-
 private inline_for_extraction noextract
 val decode_pk_loopBody:
     pk : lbuffer I32.t (params_n *. params_k)
@@ -296,14 +288,14 @@ val decode_pk_loopBody:
   -> i : size_t{v i + 31 < v params_n * v params_k}
   -> j : size_t{v j + 22 < v crypto_publickeybytes / 4}
   -> Stack unit
-    (requires fun h -> live h pk /\ live h pk_in /\ disjoint pk pk_in /\ is_poly_k_pk_i h pk (v i))
-    (ensures fun h0 _ h1 -> modifies1 pk h0 h1 /\ is_poly_k_pk_i h1 pk (v i + 32))
+    (requires fun h -> live h pk /\ live h pk_in /\ disjoint pk pk_in)
+    (ensures fun h0 _ h1 -> modifies1 (gsub pk i (size 32)) h0 h1)
 
-#push-options "--z3rlimit 1500"
+#push-options "--z3rlimit 800"
 let decode_pk_loopBody pk pk_in mask23 i j =
     let h0 = ST.get () in
     reveal_valid_decode_pk pk_in pk h0 h0 i;
-    //assert(modifies1 (gsub pk i (size 32)) h0 h0); 
+    assert(modifies1 (gsub pk i (size 32)) h0 h0); 
     assert(valid_decode_pk pk_in pk h0 h0 i);
 
     // In the reference code, "pt = (uint32_t*)pk_in" where pk_in is (unsigned char *). We can't recast buffers to have
@@ -358,19 +350,7 @@ let decode_pk_loopBody pk pk_in mask23 i j =
 
     let h1 = ST.get () in
     reveal_valid_decode_pk pk_in pk h0 h1 i;
-    assert(valid_decode_pk pk_in pk h0 h1 i); 
-    //assert(modifies1 (gsub pk i (size 32)) h0 h1);
-    assert(forall (k:nat{k < v i}) . bget h0 (gsub pk (size 0) i) k == bget h1 (gsub pk (size 0) i) k); 
-    // ASSUMPTION per Patrick: The above unpacking does not guarantee the values of the coefficients are less than q.
-    // The reference code specifically assumes input public keys are valid, and so we assume this here.
-    assume(forall (k:nat{k >= v i /\ k < v i + 32}) . is_pk (bget h1 pk k));
-    // index reassignment assertion
-    assert(forall (k:nat{k < v i}) (h:HS.mem) . {:pattern bget h pk k \/ bget h (gsub pk (size 0) i) k} bget h pk k == bget h (gsub pk (size 0) i) k); 
-    assert(is_poly_k_pk_i h1 pk (v i)); 
-    // TODO (kkane): This function checks in the interactive mode, but without this admit here, always fails due to being
-    // canceled when run from the command line. Leaving this here for now until we can look into this.
-    admit();
-    lemma_decode_pk_extend pk i h1
+    assert(valid_decode_pk pk_in pk h0 h1 i)
 #pop-options
 
 #push-options "--max_fuel 0"
@@ -389,8 +369,6 @@ val decode_pk:
     (ensures fun h0 _ h1 -> modifies2 pk seedA h0 h1 /\ is_poly_k_pk h1 pk)
 
 let decode_pk pk seedA pk_in =
-    //let iBuf = create (size 1) (size 0) in
-    //let jBuf = create (size 1) (size 0) in
     // In the reference implementation, pp is a uint32_t view into pk. We can't do that in F*, so we operate
     // directly on pk, doing a cast from int32 to uint32 in-line. pt is a uint32_t view into pk, and the
     // function pt above takes care of doing that conversion.
@@ -400,7 +378,7 @@ let decode_pk pk seedA pk_in =
 
     let h0 = ST.get () in
     for (size 0) (params_n /. size 32)
-    (fun h k -> live h pk /\ live h pk_in /\ modifies1 pk h0 h /\ k <= v params_n / 32 /\ is_poly_k_pk_i h pk (k * 32))
+    (fun h k -> live h pk /\ live h pk_in /\ modifies1 pk h0 h)
     (fun k ->
         let j = k *. size 23 in
         let i = k *. size 32 in
@@ -408,12 +386,15 @@ let decode_pk pk seedA pk_in =
         decode_pk_loopBody pk pk_in mask23 i j
     );
 
-    // Actually have to point this fact out to the prover to prove the post-condition.
-    let h1 = ST.get () in
-    assert(is_poly_k_pk_i h1 pk (v (params_n /. size 32) * 32));
-
     assert(v params_k = 1);
-    copy seedA (sub pk_in (params_n *. params_q_log /. size 8) crypto_seedbytes)
+    copy seedA (sub pk_in (params_n *. params_q_log /. size 8) crypto_seedbytes);
+
+    // ASSUMPTION per Patrick: The above unpacking does not guarantee the values of the coefficients are less than q.
+    // The reference code specifically assumes input public keys are valid, and so we assume this here. This isn't a
+    // security vulnerability because "malicious" public keys with coefficients >= q won't actually verify anything
+    // useful.
+    let h1 = ST.get () in
+    assume(is_poly_k_pk h1 pk)
 
 [@"opaque_to_smt"]
 private let valid_encode_sig (z: poly) (sm: lbuffer uint8 crypto_bytes) (h0 h1: HS.mem) =
