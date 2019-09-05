@@ -557,6 +557,22 @@ let slice_trans (#a:eqtype) (b:S.seq a) (i j k:nat) : Lemma
   (ensures S.slice b i k = S.(slice b i j @| slice b j k)) =
   S.lemma_split (S.slice b i k) (j-i)
 
+let extensionality_slice (#a:eqtype) (b1 b2:S.seq a) (i j:nat) : Lemma
+  (requires
+    S.length b1 = S.length b2 /\
+    i <= j /\ j <= S.length b1 /\
+    (forall (k:nat{i<=k /\ k<j}). S.index b1 k = S.index b2 k))
+  (ensures S.equal (S.slice b1 i j) (S.slice b2 i j)) =
+  let index_slice_aux (b:S.seq a) (i j k:nat) : Lemma
+    (requires i <= j /\ j <= S.length b /\ k < j - i)
+    (ensures S.index (S.slice b i j) k = S.index b (i+k)) =
+    () in
+  let index_slice (b:S.seq a{j <= S.length b}) (k:nat{k < j - i}) : Lemma
+    (S.index (S.slice b i j) k = S.index b (i+k)) =
+    index_slice_aux b i j k in
+
+  FStar.Classical.forall_intro (index_slice b1);
+  FStar.Classical.forall_intro (index_slice b2)
 
 
 /// flag parsing
@@ -1282,21 +1298,16 @@ let header_encrypt a hpk h pn_len npn c =
 
 
 
-
-#push-options "--z3rlimit 30"
 let long_sample (packet:packet) : option (lbytes 16 * (n:nat{n+20 <= S.length packet})) =
   let (dcil,scil,rest) = Some?.v (parse_long_header_clen (S.slice packet 5 (S.length packet))) in
-  match parse_long_header_dcid_scid rest dcil scil with
-  | None -> None
-  | Some (_,_,rest') ->
-    match parse_varint rest' with
+  if S.length rest < add3 dcil + add3 scil then None
+  else match parse_varint (S.slice rest (add3 dcil + add3 scil) (S.length rest)) with
     | None -> None
     | Some (len, npn_c) ->
       let pn_offset = 6 + add3 dcil + add3 scil + vlen len in
       if pn_offset + 20 <= S.length packet then
         Some (S.slice npn_c 4 20, pn_offset)
       else None
-#pop-options
 
 
 let header_decrypt a hpk cid_len packet =
@@ -1723,7 +1734,6 @@ let lemma_long_header_npn_offset h pn_len npn c : Lemma
   (requires Long? h)
   (ensures (
     let open S in
-    assert_norm (max_cipher_length < pow2 62);
     let b = format_header h pn_len npn @| c in
     let offset = long_header_npn_offset h in
     equal (npn @| c) (slice b offset (S.length b)))) =
@@ -1748,6 +1758,17 @@ let lemma_long_header_npn_offset h pn_len npn c : Lemma
   add_offset b 6 dcid (scid @| plain_len @| npn @| c);
   add_offset b (6 + add3 (Long?.dcil h)) scid (plain_len @| npn @| c);
   add_offset b (6 + add3 (Long?.dcil h) + add3 (Long?.scil h)) plain_len (npn @| c)
+
+
+let lemma_long_header_npn_offset_shift h pn_len npn (c:cbytes) : Lemma
+  (requires Long? h)
+  (ensures (
+    let open S in
+    let b = format_header h pn_len npn @| c in
+    let pn_offset = long_header_npn_offset h in
+    equal (slice c (3-pn_len) (19-pn_len)) (slice b (pn_offset+4) (pn_offset+20)))) =
+  lemma_long_header_npn_offset h pn_len npn c
+
 
 
 let lemma_long_header_clen_offset h pn_len npn c b : Lemma
@@ -1779,16 +1800,15 @@ let lemma_long_header_plen_offset (h:header) (pn_len:nat2) (npn:lbytes (1+pn_len
     Long? h /\ (
     assert_norm (max_cipher_length < pow2 62);
     let res = S.(format_header h pn_len npn @| c) in
-    let offset = 6 + add3 (Long?.dcil h) + add3 (Long?.scil h) in
-    let vl = vlen (Long?.len h) in
     S.length b = S.length res /\
-    S.equal (S.slice b offset (offset+vl)) (S.slice res offset (offset+vl))))
+    (forall (i:nat{6 <= i /\ i < long_header_npn_offset h}). S.index b i = S.index res i)))
   (ensures (
-    let offset = 6 + add3 (Long?.dcil h) + add3 (Long?.scil h) in
-    match parse_varint (S.slice b offset (S.length b)) with
+    let rest = S.slice b 6 (S.length b) in
+    let offset = add3 (Long?.dcil h) + add3 (Long?.scil h) in
+    match parse_varint (S.slice rest offset (S.length rest)) with
     | None -> False
-    | Some (_,rest) -> S.equal rest (S.slice b (long_header_npn_offset h) (S.length b)))) =
-  let open FStar.Endianness in
+    | Some (l,r) -> l = Long?.len h /\ S.equal r (S.slice b (long_header_npn_offset h) (S.length b)))) =
+    let open FStar.Endianness in
   let open S in
   let res = S.(format_header h pn_len npn @| c) in
   assert_norm (max_cipher_length < pow2 62);
@@ -1803,9 +1823,10 @@ let lemma_long_header_plen_offset (h:header) (pn_len:nat2) (npn:lbytes (1+pn_len
   add_offset res pre_offset (encode_varint (Long?.len h)) (npn @| c);
   append_slices1 (encode_varint (Long?.len h)) (npn @| c);
   assert (S.slice res pre_offset offset = encode_varint (Long?.len h));
-  assert (S.slice b pre_offset offset = encode_varint (Long?.len h));
+  assert (S.equal (S.slice b pre_offset offset) (encode_varint (Long?.len h)));
   lemma_varint (Long?.len h) (S.slice b offset (S.length b));
   slice_trans b pre_offset offset (S.length b)
+#pop-options
 
 
 
@@ -1819,11 +1840,11 @@ let lemma_header_encryption_long_sample a k h pn_len npn c : Lemma
     let packet = header_encrypt a k h pn_len npn c in
     match long_sample packet with
     | None -> False
-    | Some s -> S.equal sample s)) =
+    | Some (s,off) -> S.equal sample s /\ off = long_header_npn_offset h)) =
 
   // computation of the packet
   assert_norm(max_cipher_length < pow2 62);
-  let pn_offset = 6 + add3 (Long?.dcil h) + add3 (Long?.scil h) + vlen (Long?.len h) in
+  let pn_offset = long_header_npn_offset h in
   let sample = S.slice c (3-pn_len) (19-pn_len) in
   let mask = C16.block (calg_of_ae a) k sample in
   let pnmask = and_inplace (S.slice mask 1 5) (pn_sizemask pn_len) 0 in
@@ -1834,70 +1855,41 @@ let lemma_header_encryption_long_sample a k h pn_len npn c : Lemma
   let packet = xor_inplace r2 fmask 0 in
 
   // computation of the sample
-  pointwise_index3 U8.logxor r2 fmask 5 0;
-  pointwise_index1 U8.logxor r1 pnmask 5 pn_offset;
-  lemma_long_header_clen_offset h pn_len npn c packet;
-  let (dcil,scil,rest) = Some?.v (parse_long_header_clen (S.slice packet 5 (S.length packet))) in
-
-  let preserve_plen (i:nat{let offset = 6 + add3 (Long?.dcil h) + add3 (Long?.scil h) in let vl = vlen (Long?.len h) in offset <= i /\ i < offset+vl}) : Lemma
+  let preserved_indexes (i:nat{1 <= i /\ i < pn_offset}) : Lemma
     (S.index packet i = S.index r1 i) =
     pointwise_index3 U8.logxor r2 fmask i 0;
     pointwise_index1 U8.logxor r1 pnmask i pn_offset in
 
-  FStar.Classical.forall_intro preserve_plen;
-  match parse_varint rest with
-  | None -> lemma_long_header_plen_offset h pn_len npn c packet
-  | Some (_,_) -> admit()
+  FStar.Classical.forall_intro preserved_indexes;
+  lemma_long_header_clen_offset h pn_len npn c packet;
+  let (dcil,scil,rest) = Some?.v (parse_long_header_clen (S.slice packet 5 (S.length packet))) in
+  if S.length rest >= add3 dcil + add3 scil then begin
+    lemma_long_header_plen_offset h pn_len npn c packet;
+    match parse_varint (S.slice rest (add3 dcil + add3 scil) (S.length rest)) with
+    | Some (_,r) ->
+      if pn_offset + 20 <= S.length packet then begin
+        assert (r = S.slice packet pn_offset (S.length packet));
+        let res_sample = S.slice r 4 20 in
+        assert (S.equal res_sample S.(slice packet (pn_offset+4) (pn_offset+20)));
 
-#pop-options
+        let preserved_indexes_end (i:nat{i >= pn_offset+4 /\ i < pn_offset+20}) : Lemma
+      (S.index packet i = S.index r1 i) =
+               pointwise_index3 U8.logxor r2 fmask i 0;
+               pointwise_index3 U8.logxor r1 pnmask i pn_offset in
 
-let lemma_header_encryption_long_sample a k h pn_len npn c : Lemma
-  (requires Long? h)
-  (ensures (
-    let sample = S.slice c (3-pn_len) (19-pn_len) in
-    let packet = header_encrypt a k h pn_len npn c in
-    match long_sample_offset packet with
-    | None -> False
-    | Some so -> S.equal sample (S.slice packet so (so+16)))) =
-
-  // computation of the packet
-  assert_norm(max_cipher_length < pow2 62);
-  let pn_offset = 6 + add3 (Long?.dcil h) + add3 (Long?.scil h) + vlen (Long?.len h) in
-  let sample = S.slice c (3-pn_len) (19-pn_len) in
-  let mask = C16.block (calg_of_ae a) k sample in
-  let pnmask = and_inplace (S.slice mask 1 5) (pn_sizemask pn_len) 0 in
-  let sflags = 0x0fuy in
-  let fmask = S.create 1 U8.(S.index mask 0 `logand` sflags) in
-  let r1 = S.(format_header h pn_len npn @| c) in
-  let r2 = xor_inplace r1 pnmask pn_offset in
-  let r = xor_inplace r2 fmask 0 in
-
-  admit();
-  // comparison of the offsets
-  let so = 5 + S.length (Short?.cid h) in
-  cid_len_real h;
-
-  // extraction of the sample
-  let index_beyond_so (i:nat{i >= so /\ i < S.length r1}) : Lemma
-    (S.index r i = S.index r1 i) =
-    pointwise_index3 U8.logxor r1 pnmask i pn_offset;
-    pointwise_index3 U8.logxor r2 fmask i 0 in
-
-  FStar.Classical.forall_intro index_beyond_so;
-  assert (S.equal (S.slice r so (so+16)) (S.slice r1 so (so+16)));
-  assert_norm (pn_offset = 1 + S.length (Short?.cid h));
-  assert_norm (so = 5 + S.length (Short?.cid h));
-
-  assert (S.length (format_header h pn_len npn) = 1 + S.length (Short?.cid h) + 1 + pn_len);
-  lemma_arithmetic1 1 (S.length (Short?.cid h)) 1 pn_len 3;
-  assert (so = S.length (format_header h pn_len npn) + (3-pn_len));
-  lemma_arithmetic2 (S.length (format_header h pn_len npn)) 3 pn_len 16;
-  assert (so+16 = S.length (format_header h pn_len npn) + (19-pn_len));
-  append_slices3 (format_header h pn_len npn) c
+               FStar.Classical.forall_intro preserved_indexes_end;
+               extensionality_slice packet r1 (pn_offset+4) (pn_offset+20);
+               assert (S.equal res_sample S.(slice r1 (pn_offset+4) (pn_offset+20)));
+               lemma_long_header_npn_offset_shift h pn_len npn c;
+               assert (S.(slice r1 (pn_offset+4) (pn_offset+20)) = sample);
+               assert (long_sample packet = Some (res_sample,pn_offset))
+      end
+    end
 
 
 
-let lemma_header_encryption_correct_long a k h pn_len npn c : Lemma
+
+let lemma_header_encryption_correct_long a k (h:header) (pn_len:nat2) (npn:lbytes (1+pn_len)) (c:cbytes{Long? h ==> S.length c = Long?.len h}) : Lemma
   (requires Long? h)
   (ensures header_encryption_correct a k h pn_len npn c) =
 
@@ -1921,24 +1913,10 @@ let lemma_header_encryption_correct_long a k h pn_len npn c : Lemma
   assert (~is_short);
 
   // extraction of the sample
-  let sample_offset : option (n:nat{n+16 <= S.length packet}) =
-     let dcb = U8.v (S.index packet 5) in
-     let dcil, scil = dcb / 0x10, dcb % 0x10 in
-     let _ = FStar.Math.Lemmas.modulo_range_lemma dcb 0x10 in
-     let l_offset = 6 + add3 dcil + add3 scil in
-     (if l_offset >= S.length packet then None else
-     match parse_varint (S.slice packet l_offset (S.length packet)) with
-     | None -> None
-     | Some (l, _) ->
-       let offset = l_offset + vlen l + 4 in
-       if offset + 16 <= S.length packet then Some offset else None)
-    in
-
   lemma_header_encryption_long_sample a k h pn_len npn c;
-  match sample_offset with
-  | None -> ()
-  | Some so ->
-    assert (S.equal sample (S.slice packet so (so+16)));
+  match long_sample packet with
+  | Some (sample',pn_offset') ->
+    assert (sample = sample' /\ pn_offset = pn_offset');
 
     // removing the fmask
     let packet' = xor_inplace packet fmask 0 in
@@ -1949,20 +1927,13 @@ let lemma_header_encryption_correct_long a k h pn_len npn c : Lemma
     pointwise_index1 U8.logxor r1 pnmask 0 pn_offset;
     assert (flags = U8.v (S.index (format_header h pn_len npn) 0));
     lemma_parse_header_pnlen h pn_len npn;
-    assert (pn_len = flags % 4); admit();
-    // computing pn_offset
-    admit();
-    //lemma_arithmetic3 5 (S.length (Short?.cid h)) 4;
-    assert (pn_offset = so - 4);
+    assert (pn_len = flags % 4);
     // removing the pnmask
     let packet'' = xor_inplace packet' pnmask pn_offset in
     xor_inplace_involutive r1 pnmask pn_offset;
     assert (packet'' = r1);
     // parsing the header
     lemma_header_parsing_correct h pn_len npn c
-
-
-
 
 
 

@@ -154,7 +154,7 @@ val lemma_header_encryption_correct:
   h: header ->
   pn_len: nat2 ->
   npn: lbytes (1+pn_len) ->
-  c: cbytes ->
+  c: cbytes{Long? h ==> S.length c = Long?.len h} ->
   Lemma (header_decrypt a k (cid_len h)
     (header_encrypt a k h pn_len npn c)
     == H_Success pn_len npn h c)
