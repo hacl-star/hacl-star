@@ -8,7 +8,7 @@
       0,
       [ "@query" ],
       0,
-      "e3e29ff04770d9569698e04095e20a7e"
+      "7b86b0c93d493ed2223d13eaffd2a6b9"
     ],
     [
       "Vale.AES.X64.AESCTR.va_lemma_aes_ctr_encrypt",
@@ -33,7 +33,7 @@
         "typing_tok_Vale.AES.AES_s.AES_128@tok"
       ],
       0,
-      "c7ca07eed0007e2cdf647b1071590fe4"
+      "2e90ba468442c2c906f4628fa48a19c1"
     ],
     [
       "Vale.AES.X64.AESCTR.va_wp_aes_ctr_encrypt",
@@ -53,7 +53,7 @@
         "typing_tok_Vale.AES.AES_s.AES_128@tok"
       ],
       0,
-      "4430a21abdf2d54852fa2fea4ad1f94a"
+      "4fb700d85249c15de7eb5fb6a6cd704b"
     ],
     [
       "Vale.AES.X64.AESCTR.va_quick_aes_ctr_encrypt",
@@ -65,7 +65,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "28616d755b318d7723a4904ea22097bf"
+      "f6712475e2facab4335a131b14b4673c"
     ],
     [
       "Vale.AES.X64.AESCTR.va_lemma_aes_counter_loop",
@@ -74,23 +74,24 @@
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "constructor_distinct_Vale.Interop.Types.TUInt128",
-        "equality_tok_Vale.Interop.Types.TUInt128@tok",
+        "constructor_distinct_Vale.Arch.HeapTypes_s.TUInt128",
+        "equality_tok_Vale.Arch.HeapTypes_s.TUInt128@tok",
         "equality_tok_Vale.X64.Machine_s.Secret@tok",
+        "equation_Vale.Arch.HeapImpl.vale_heap_impl",
         "equation_Vale.X64.Decls.validDstAddrs128",
         "equation_Vale.X64.Memory.base_typ_as_vale_type",
         "equation_Vale.X64.Memory.buffer128",
+        "equation_Vale.X64.Memory.get_vale_heap",
         "lemma_Vale.X64.Memory.buffer_length_buffer_as_seq",
         "primitive_Prims.op_LessThanOrEqual",
-        "proj_equation_Vale.X64.State.Mkvale_state_vs_heap",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_f17a77a7ade93461619759cefc078479",
+        "refinement_interpretation_Tm_refine_64d91105b7405946e0e9a14132ee8e98",
         "typing_Vale.X64.State.__proj__Mkvale_state__item__vs_heap",
-        "typing_tok_Vale.Interop.Types.TUInt128@tok"
+        "typing_tok_Vale.Arch.HeapTypes_s.TUInt128@tok"
       ],
       0,
-      "3a0f811f65a1934c203e209ca48b413c"
+      "2bfce02d05ab8134a91acfc235d20299"
     ],
     [
       "Vale.AES.X64.AESCTR.va_wp_aes_counter_loop",
@@ -98,23 +99,26 @@
       1,
       0,
       [
-        "@query", "constructor_distinct_Vale.Interop.Types.TUInt128",
-        "equality_tok_Vale.Interop.Types.TUInt128@tok",
+        "@query", "constructor_distinct_Vale.Arch.HeapTypes_s.TUInt128",
+        "equality_tok_Vale.Arch.HeapTypes_s.TUInt128@tok",
         "equality_tok_Vale.X64.Machine_s.Secret@tok",
+        "equation_Vale.Arch.HeapImpl.vale_heap_impl",
         "equation_Vale.X64.Decls.va_upd_mem",
         "equation_Vale.X64.Decls.validSrcAddrs128",
         "equation_Vale.X64.Memory.base_typ_as_vale_type",
         "equation_Vale.X64.Memory.buffer128",
+        "equation_Vale.X64.Memory.get_vale_heap",
+        "equation_Vale.X64.Memory.set_vale_heap",
         "lemma_Vale.X64.Memory.buffer_length_buffer_as_seq",
         "primitive_Prims.op_LessThanOrEqual",
         "proj_equation_Vale.X64.State.Mkvale_state_vs_heap",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_Vale.X64.State.Mkvale_state_vs_heap",
-        "typing_tok_Vale.Interop.Types.TUInt128@tok"
+        "typing_tok_Vale.Arch.HeapTypes_s.TUInt128@tok"
       ],
       0,
-      "ec9a2ed808c93b5270cb8aa47fa3bf5e"
+      "608f70c359c024b254eb66472aeff006"
     ],
     [
       "Vale.AES.X64.AESCTR.va_quick_aes_counter_loop",
@@ -126,7 +130,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "81ad4840f7f250aafd53de22481d4c09"
+      "b8e9adf33c00c50fb5857666172f5ee4"
     ]
   ]
 ]
