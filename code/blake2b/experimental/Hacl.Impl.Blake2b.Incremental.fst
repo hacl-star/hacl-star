@@ -538,17 +538,18 @@ val spec_blake2b_incremental_update:
     state:(SpecI.state_r Spec.Blake2B)
   -> ll:size_nat{state.SpecI.n + 2 + ll / v size_block <= max_size_t} // Why N+2? (Might be too strong!)
   -> input:LBS.lbytes ll ->
-  Tot (SpecI.state_r Spec.Blake2B)
+  Tot (option (SpecI.state_r Spec.Blake2B))
 
 let spec_blake2b_incremental_update state ll input =
   let open Spec.Blake2.Incremental in
-  if spec_compute_branching_condition state ll then state else (
+  if spec_compute_branching_condition state ll then None else (
   let rb = v size_block - state.SpecI.pl in
   let ll0 = if ll < rb then ll else rb in
   let partial = Lib.Sequence.sub input 0 ll0 in
   let block = Lib.Sequence.update_sub state.SpecI.block state.SpecI.pl ll0 partial in
   let state = {state with block = block} in
-  spec_blake2b_incremental_update_inner state ll rb ll0 input)
+  let state = spec_blake2b_incremental_update_inner state ll rb ll0 input in
+  Some state)
 
 
 inline_for_extraction
@@ -556,23 +557,28 @@ val blake2b_incremental_update:
     state:state_r
   -> ll:size_t{v state.n + 2 + v ll / v size_block <= max_size_t}
   -> input:lbuffer uint8 ll ->
-  Stack state_r
+  Stack (option state_r)
   (requires fun h ->
     live h input /\ disjoint state.hash input /\ disjoint state.block input /\
     state_inv h state /\
     v (state.n *. size_block) + v ll < pow2 128)
-  (ensures  fun h0 rstate h1 ->
-    modifies2 state.hash state.block h0 h1
-    /\ state_eq h1 rstate (spec_blake2b_incremental_update (spec_of h0 state) (v ll) h0.[|input|]))
+  (ensures  fun h0 orstate h1 ->
+    modifies2 state.hash state.block h0 h1 /\ (
+    let osstate = (SpecI.blake2_incremental_update Spec.Blake2B h0.[|input|] (spec_of h0 state)) in
+    match orstate, osstate with | _,_ -> True | Some rstate, Some sstate ->
+      (* state_eq h1 rstate sstate *)
+      ((spec_of h1 rstate) == sstate)
+   ))
 
 let blake2b_incremental_update state ll input =
   let h0 = ST.get() in
-  if compute_branching_condition #h0 state ll then state else (
+  if compute_branching_condition #h0 state ll then None else (
   let rb = size_block -! state.pl in
   let ll0 = if ll <. rb then ll else rb in
   let partial = sub input 0ul ll0 in
   update_sub state.block state.pl ll0 partial;
-  blake2b_incremental_update_inner state ll rb ll0 input)
+  assert(false);
+  Some(blake2b_incremental_update_inner state ll rb ll0 input))
 
 
 val blake2b_incremental_finish:
