@@ -569,6 +569,8 @@ val valid_state_store_mem128_aux (i:int) (v:quad32) (h:vale_heap) : Lemma
     heap' == I.down_mem (_ih h')
   ))
 
+#push-options "--z3cliopt smt.arith.nl=true --smtencoding.nl_arith_repr boxwrap"
+#restart-solver
 let rec written_buffer_down128_aux1
   (b:buffer128{buffer_writeable b})
   (i:nat{i < buffer_length b})
@@ -593,7 +595,9 @@ let rec written_buffer_down128_aux1
       heap_shift mem1 mem2 ptr 16;
       written_buffer_down128_aux1 b i v h base (k+1) h1 mem1 mem2
     end
+#pop-options
 
+#push-options "--z3cliopt smt.arith.nl=true --smtencoding.l_arith_repr boxwrap"
 #restart-solver
 let rec written_buffer_down128_aux2
   (b:buffer128{buffer_writeable b})
@@ -620,6 +624,7 @@ let rec written_buffer_down128_aux2
       heap_shift mem1 mem2 ptr 16;
       written_buffer_down128_aux2 b i v h base n (k+1) h1 mem1 mem2
     end
+#pop-options
 
 let written_buffer_down128 (b:buffer128) (i:nat{i < buffer_length b}) (v:quad32) (h:vale_heap)
   : Lemma

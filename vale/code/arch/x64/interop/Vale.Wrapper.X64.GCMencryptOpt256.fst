@@ -197,6 +197,7 @@ val gcm256_encrypt_opt':
 
 
 #push-options "--smtencoding.nl_arith_repr boxwrap"
+#restart-solver
 inline_for_extraction
 let gcm256_encrypt_opt' key iv auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
   in128x6_b out128x6_b len128x6 in128_b out128_b len128_num inout_b plain_num scratch_b tag_b =
