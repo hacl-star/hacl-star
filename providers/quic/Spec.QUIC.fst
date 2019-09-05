@@ -1283,27 +1283,34 @@ let header_encrypt a hpk h pn_len npn c =
 
 
 
+#push-options "--z3rlimit 30"
+let long_sample (packet:packet) : option (lbytes 16 * (n:nat{n+20 <= S.length packet})) =
+  let (dcil,scil,rest) = Some?.v (parse_long_header_clen (S.slice packet 5 (S.length packet))) in
+  match parse_long_header_dcid_scid rest dcil scil with
+  | None -> None
+  | Some (_,_,rest') ->
+    match parse_varint rest' with
+    | None -> None
+    | Some (len, npn_c) ->
+      let pn_offset = 6 + add3 dcil + add3 scil + vlen len in
+      if pn_offset + 20 <= S.length packet then
+        Some (S.slice npn_c 4 20, pn_offset)
+      else None
+#pop-options
+
+
 let header_decrypt a hpk cid_len packet =
   let open FStar.Math.Lemmas in
   let f = S.index packet 0 in
   let is_short = U8.(f <^ 128uy) in
   (* See https://tools.ietf.org/html/draft-ietf-quic-tls-19#section-5.4.2 *)
-  let sample_offset =
+  let sample_offset : option (lbytes 16 * (n:nat{n+20 <= S.length packet}))=
     if is_short then
       let offset = 5 + add3 cid_len in
       if offset + 16 <= S.length packet then
         Some (S.slice packet offset (offset+16), offset-4)
       else None
-    else
-      let (dcil,scil,rest) = Some?.v (parse_long_header_clen (S.slice packet 5 (S.length packet))) in
-      let l_offset = 6 + add3 dcil + add3 scil in
-      match parse_varint rest with
-      | None -> None
-      | Some (len, npn_c) ->
-        let pn_offset = l_offset + vlen len in
-        if pn_offset + 20 <= S.length packet then
-           Some (S.slice npn_c 4 20, pn_offset)
-        else None in
+    else long_sample packet in
   match sample_offset with
   | None -> H_Failure
   | Some (sample,pn_offset) ->
@@ -1766,7 +1773,7 @@ let lemma_long_header_clen_offset h pn_len npn c b : Lemma
   lemma_parse_long_header_clen_correct_generic h (slice b 6 (length b))
 
 
-#push-options "--z3rlimit 30"
+#push-options "--z3rlimit 20"
 let lemma_long_header_plen_offset (h:header) (pn_len:nat2) (npn:lbytes (1+pn_len)) (c:cbytes) (b:bytes) : Lemma
   (requires
     Long? h /\ (
@@ -1800,17 +1807,9 @@ let lemma_long_header_plen_offset (h:header) (pn_len:nat2) (npn:lbytes (1+pn_len
   lemma_varint (Long?.len h) (S.slice b offset (S.length b));
   slice_trans b pre_offset offset (S.length b)
 
-#pop-options
 
-let long_sample (packet:packet) : option bytes =
-  let (dcil,scil,rest) = Some?.v (parse_long_header_clen (S.slice packet 5 (S.length packet))) in
-  match parse_varint rest with
-  | None -> None
-  | Some (len, npn_c) ->
-    let pn_offset = 6 + add3 dcil + add3 scil + vlen len in
-    if pn_offset + 20 <= S.length packet then
-       Some (S.slice npn_c 4 20)
-    else None
+
+
 
 
 let lemma_header_encryption_long_sample a k h pn_len npn c : Lemma
@@ -1835,10 +1834,10 @@ let lemma_header_encryption_long_sample a k h pn_len npn c : Lemma
   let packet = xor_inplace r2 fmask 0 in
 
   // computation of the sample
-  let (dcil,scil,rest) = Some?.v (parse_long_header_clen (S.slice packet 5 (S.length packet))) in
   pointwise_index3 U8.logxor r2 fmask 5 0;
   pointwise_index1 U8.logxor r1 pnmask 5 pn_offset;
   lemma_long_header_clen_offset h pn_len npn c packet;
+  let (dcil,scil,rest) = Some?.v (parse_long_header_clen (S.slice packet 5 (S.length packet))) in
 
   let preserve_plen (i:nat{let offset = 6 + add3 (Long?.dcil h) + add3 (Long?.scil h) in let vl = vlen (Long?.len h) in offset <= i /\ i < offset+vl}) : Lemma
     (S.index packet i = S.index r1 i) =
@@ -1846,10 +1845,11 @@ let lemma_header_encryption_long_sample a k h pn_len npn c : Lemma
     pointwise_index1 U8.logxor r1 pnmask i pn_offset in
 
   FStar.Classical.forall_intro preserve_plen;
-  lemma_long_header_plen_offset h pn_len npn c packet;
-  //match parse_varint rest with
- admit()
+  match parse_varint rest with
+  | None -> lemma_long_header_plen_offset h pn_len npn c packet
+  | Some (_,_) -> admit()
 
+#pop-options
 
 let lemma_header_encryption_long_sample a k h pn_len npn c : Lemma
   (requires Long? h)
