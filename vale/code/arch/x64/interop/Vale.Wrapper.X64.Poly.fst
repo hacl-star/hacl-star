@@ -9,6 +9,7 @@ open Vale.X64.MemoryAdapters
 module V = Vale.X64.Decls
 
 #set-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
+#set-options "--z3cliopt smt.arith.nl=true"
 
 let x64_poly1305 ctx_b inp_b len finish =
   let h0 = get () in

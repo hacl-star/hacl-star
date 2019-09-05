@@ -36,9 +36,11 @@ val heap_shift (m1 m2:S.machine_heap) (base:int) (n:nat) : Lemma
   (requires (forall i. 0 <= i /\ i < n ==> m1.[base + i] == m2.[base + i]))
   (ensures (forall i. {:pattern (m1.[i])} base <= i /\ i < base + n ==> m1.[i] == m2.[i]))
 
+#push-options "--smtencoding.l_arith_repr boxwrap"
 let heap_shift m1 m2 base n =
   assert (forall i. base <= i /\ i < base + n ==>
     m1.[base + (i - base)] == m2.[base + (i - base)])
+#pop-options
 
 open FStar.Mul
 
@@ -104,6 +106,7 @@ let same_mem_get_heap_val64 b j v k h1 h2 mem1 mem2 =
   Classical.forall_intro aux;
   assert (forall i. addr + (8 * k + i) == ptr + i)
 
+#push-options "--z3cliopt smt.arith.nl=true --smtencoding.l_arith_repr boxwrap"
 let rec written_buffer_down64_aux1
   (b:buffer64{buffer_writeable b})
   (i:nat{i < buffer_length b})
@@ -154,6 +157,7 @@ let rec written_buffer_down64_aux2
       heap_shift mem1 mem2 ptr 8;
       written_buffer_down64_aux2 b i v h base n (k+1) h1 mem1 mem2
     end
+#pop-options
 
 let written_buffer_down64 (b:buffer64{buffer_writeable b}) (i:nat{i < buffer_length b}) (v:nat64) (h:vale_heap)
   : Lemma
@@ -176,6 +180,7 @@ let written_buffer_down64 (b:buffer64{buffer_writeable b}) (i:nat{i < buffer_len
     written_buffer_down64_aux1 b i v h base 0 h1 mem1 mem2;
     written_buffer_down64_aux2 b i v h base n (i+1) h1 mem1 mem2
 
+#push-options "--z3cliopt smt.arith.nl=true"
 let unwritten_buffer_down (t:base_typ) (b:buffer t{buffer_writeable b})
                           (i:nat{i < buffer_length b})
                           (v:base_typ_as_vale_type t)
@@ -215,6 +220,7 @@ let unwritten_buffer_down (t:base_typ) (b:buffer t{buffer_writeable b})
           heap_shift mem1 mem2 base (DV.length db)
     in
     Classical.forall_intro aux
+#pop-options
 
 let store_buffer_down64_mem
   (b:buffer64{buffer_writeable b})
@@ -588,6 +594,7 @@ let rec written_buffer_down128_aux1
       written_buffer_down128_aux1 b i v h base (k+1) h1 mem1 mem2
     end
 
+#restart-solver
 let rec written_buffer_down128_aux2
   (b:buffer128{buffer_writeable b})
   (i:nat{i < buffer_length b})
@@ -743,12 +750,14 @@ let low_lemma_store_mem128 b i v h =
   in_bounds128 h b i;
   I.update_buffer_up_mem (_ih h) b heap heap'
 
+#push-options "--smtencoding.l_arith_repr boxwrap"
 let low_lemma_valid_mem128_64 b i h =
   FStar.Pervasives.reveal_opaque (`%S.valid_addr64) S.valid_addr64;
   FStar.Pervasives.reveal_opaque (`%S.valid_addr128) S.valid_addr128;
   low_lemma_valid_mem128 b i h;
   let ptr = buffer_addr b h + 16 `op_Multiply` i in
   assert (buffer_addr b h + 16 `op_Multiply` i + 8 = ptr + 8)
+#pop-options
 
 open Vale.Def.Words.Two_s
 open Vale.Def.Words.Four_s

@@ -9,6 +9,7 @@ open Vale.AES.Gcm_simplify
 open Vale.SHA.Simplify_Sha
 
 #set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+#set-options "--z3cliopt smt.arith.nl=true"
 
 let aes128_key_expansion_stdcall input_b output_b =
   let h0 = get() in

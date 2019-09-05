@@ -191,6 +191,7 @@ let aes_simplify_aux (s:seq16 nat8) : Lemma
   = Vale.Def.Opaque_s.reveal_opaque le_bytes_to_quad32_def;
     assert (Seq.equal (seq_nat8_to_seq_nat32_LE s) (quad32_to_seq (le_bytes_to_quad32 s)))
 
+#push-options "--z3cliopt smt.arith.nl=true"
 let aes_simplify1 b h =
   let view = Vale.Interop.Views.up_view128 in
   let s_init = B.as_seq h b in
@@ -211,8 +212,9 @@ let aes_simplify1 b h =
     four_to_seq_LE (Vale.Interop.Views.get128 (B.as_seq h b)));
   Vale.Def.Opaque_s.reveal_opaque Vale.Interop.Views.get128_def;
   aes_simplify_aux (seq_uint8_to_seq_nat8 s_init)
+#pop-options
 
-
+#push-options "--z3cliopt smt.arith.nl=true"
 let aes_simplify2 b h =
   FStar.Pervasives.reveal_opaque (`%seq_to_seq_four_LE) (seq_to_seq_four_LE #nat8);
   let view = Vale.Interop.Views.up_view128 in
@@ -240,6 +242,7 @@ let aes_simplify2 b h =
       (seq_nat8_to_seq_nat32_LE (seq_uint8_to_seq_nat8 (Seq.slice s_init 0 16)))
       (seq_nat8_to_seq_nat32_LE (seq_uint8_to_seq_nat8 (Seq.slice s_init 16 32)))
     ))
+#pop-options
 
 let aes_simplify3 b h s =
   let db = get_downview b in

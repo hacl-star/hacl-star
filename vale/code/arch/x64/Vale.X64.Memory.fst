@@ -633,6 +633,7 @@ let rec write_taint_lemma
        assert (forall j. 0 <= j /\ j < i + 1 ==> new_accu.[addr + i] == ts b);
        write_taint_lemma (i + 1) mem ts b new_accu
 
+#restart-solver
 let rec valid_memtaint (mem:vale_heap) (ps:list b8{IB.list_disjoint_or_eq ps}) (ts:b8 -> GTot taint)
   : Lemma (valid_taint_bufs mem (IB.create_memtaint (_ih mem) ps ts) ps ts)
   = match ps with

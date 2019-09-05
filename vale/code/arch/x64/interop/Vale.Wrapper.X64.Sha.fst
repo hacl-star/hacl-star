@@ -31,7 +31,7 @@ val lemma_k_reqs_equiv
     k_reqs (UV.as_seq h (UV.mk_buffer (get_downview k_b) Vale.Interop.Views.up_view128))))
 
 
-
+#push-options "--z3cliopt smt.arith.nl=true"
 let lemma_k_reqs_equiv k_b h =
   let db = get_downview k_b in
   DV.length_eq db;
@@ -96,7 +96,7 @@ let lemma_k_reqs_equiv k_b h =
     seq_to_four_to_seq_LE (nat_to_four 8 (UInt32.v (Seq.index s (4*i+3))))
 
   in Classical.forall_intro aux
-
+#pop-options
 
 
 val simplify_le_bytes_to_hash_uint32
@@ -110,6 +110,7 @@ val simplify_le_bytes_to_hash_uint32
     (le_bytes_to_hash (le_seq_quad32_to_bytes (UV.as_seq h (UV.mk_buffer (get_downview b) Vale.Interop.Views.up_view128))))
     (B.as_seq h b)))
 
+#push-options "--z3cliopt smt.arith.nl=true"
 let simplify_le_bytes_to_hash_uint32 b h =
   let db = get_downview b in
   let down_s = DV.as_seq h db in
@@ -177,6 +178,7 @@ let simplify_le_bytes_to_hash_uint32 b h =
         Seq.index (Seq.slice (B.as_seq h b) (i' * 4) (i'*4+4)) (i%4))
   in Classical.forall_intro aux;
   assert (Seq.equal sf s_init)
+#pop-options
 
 let sha256_update ctx_b in_b num_val k_b =
   let h0 = get() in
