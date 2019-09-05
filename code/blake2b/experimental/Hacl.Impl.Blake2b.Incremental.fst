@@ -549,7 +549,6 @@ let spec_blake2b_incremental_update state ll input =
   let block = Lib.Sequence.update_sub state.SpecI.block state.SpecI.pl ll0 partial in
   let state = {state with block = block} in
   spec_blake2b_incremental_update_inner state ll rb ll0 input)
-  (* state) *)
 
 
 inline_for_extraction
@@ -572,19 +571,8 @@ let blake2b_incremental_update state ll input =
   let rb = size_block -! state.pl in
   let ll0 = if ll <. rb then ll else rb in
   let partial = sub input 0ul ll0 in
-  let h1 = ST.get () in
   update_sub state.block state.pl ll0 partial;
-  let h2 = ST.get () in
-  let state = blake2b_incremental_update_inner state ll rb ll0 input in
-  let h3 = ST.get () in
-  (* assert(as_seq h3 state.block == Lib.Sequence.update_sub (as_seq h1 state.block) (v state.pl) (v ll0) (as_seq h0 partial)); *)
-  assert(as_seq h3 state.hash == (spec_blake2b_incremental_update (spec_of h0 state) (v ll) h0.[|input|]).SpecI.hash);
-  assert(as_seq h3 state.block == (spec_blake2b_incremental_update (spec_of h0 state) (v ll) h0.[|input|]).SpecI.block);
-  assert(v state.n == (spec_blake2b_incremental_update (spec_of h0 state) (v ll) h0.[|input|]).SpecI.n);
-  assert(v state.pl == (spec_blake2b_incremental_update (spec_of h0 state) (v ll) h0.[|input|]).SpecI.pl);
-  assert(state_eq h3 state (spec_blake2b_incremental_update (spec_of h0 state) (v ll) h0.[|input|]));
-  state
-  )
+  blake2b_incremental_update_inner state ll rb ll0 input)
 
 
 val blake2b_incremental_finish:
