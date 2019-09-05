@@ -577,7 +577,6 @@ let blake2b_incremental_update state ll input =
   let ll0 = if ll <. rb then ll else rb in
   let partial = sub input 0ul ll0 in
   update_sub state.block state.pl ll0 partial;
-  assert(false);
   Some(blake2b_incremental_update_inner state ll rb ll0 input))
 
 
