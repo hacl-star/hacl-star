@@ -1,5 +1,6 @@
 module Vale.AES.Gcm_simplify
 
+open FStar.Mul
 open Vale.SHA.Simplify_Sha
 
 let le_bytes_to_seq_quad32_uint8_to_nat8_length s =

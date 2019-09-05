@@ -1,5 +1,6 @@
 module Vale.X64.BufferViewStore
 
+open FStar.Mul
 open Vale.Interop.Views
 open Vale.Interop
 module MB = LowStar.Monotonic.Buffer

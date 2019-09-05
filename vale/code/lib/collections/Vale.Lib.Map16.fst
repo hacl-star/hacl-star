@@ -1,4 +1,5 @@
 module Vale.Lib.Map16
+open FStar.Mul
 
 let lemma_self16 (#a:Type0) (m:map16 a) (n:int) (v:a) = ()
 let lemma_other16 (#a:Type0) (m:map16 a) (n1 n2:int) (v:a) = ()

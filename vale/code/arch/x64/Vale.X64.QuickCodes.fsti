@@ -1,6 +1,6 @@
-// Optimized weakest precondition generation for 'quick' procedures
-
 module Vale.X64.QuickCodes
+// Optimized weakest precondition generation for 'quick' procedures
+open FStar.Mul
 open Vale.Def.Prop_s
 open Vale.X64.Machine_s
 open Vale.X64.Memory
@@ -320,7 +320,7 @@ let qAssertBy (#a:Type) (#cs:codes) (mods:mods_t) (r:range) (msg:string) (p:Type
 ///// Code
 
 val wp_sound_code (#a:Type0) (c:code) (qc:quickCode a c) (k:vale_state -> a -> Type0) (s0:vale_state) :
-  Ghost ((sN:vale_state) * (fN:fuel) * (g:a))
+  Ghost (vale_state & fuel & a)
   (requires QProc?.wp qc s0 k)
   (ensures fun (sN, fN, gN) -> eval_code c s0 fN sN /\ update_state_mods qc.mods sN s0 == sN /\ k sN gN)
 

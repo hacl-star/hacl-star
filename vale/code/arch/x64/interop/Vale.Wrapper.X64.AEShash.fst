@@ -1,5 +1,6 @@
 module Vale.Wrapper.X64.AEShash
 
+open FStar.Mul
 open Vale.Stdcalls.X64.AesHash
 open Vale.AsLowStar.MemoryHelpers
 open Vale.X64.MemoryAdapters

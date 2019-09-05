@@ -1,5 +1,6 @@
 module Vale.X64.Machine_Semantics_s
 
+open FStar.Mul
 open Vale.Def.Prop_s
 open Vale.Def.Opaque_s
 open Vale.X64.Machine_s
@@ -83,11 +84,10 @@ unfold let eval_stack128 (ptr:int) (s:machine_stack) : quad32 =
 
 [@va_qattr]
 let eval_maddr (m:maddr) (s:machine_state) : int =
-  let open FStar.Mul in
-    match m with
-    | MConst n -> n
-    | MReg r offset -> (eval_reg_int r s) + offset
-    | MIndex base scale index offset -> (eval_reg_int base s) + scale * (eval_reg_int index s) + offset
+  match m with
+  | MConst n -> n
+  | MReg r offset -> (eval_reg_int r s) + offset
+  | MIndex base scale index offset -> (eval_reg_int base s) + scale * (eval_reg_int index s) + offset
 
 let eval_operand (o:operand64) (s:machine_state) : nat64 =
   match o with

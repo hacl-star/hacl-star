@@ -1,5 +1,6 @@
 module Vale.Inline.X64.Fadd_inline
 
+open FStar.Mul
 open FStar.HyperStack.ST
 module HS = FStar.HyperStack
 module B = LowStar.Buffer

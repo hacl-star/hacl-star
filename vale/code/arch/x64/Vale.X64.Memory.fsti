@@ -1,5 +1,6 @@
 module Vale.X64.Memory
 include Vale.Arch.HeapTypes_s
+open FStar.Mul
 open Vale.Def.Prop_s
 open Vale.X64.Machine_s
 open Vale.Arch.HeapImpl
@@ -212,7 +213,7 @@ val lemma_valid_mem64 (b:buffer64) (i:nat) (h:vale_heap) : Lemma
     buffer_readable h b
   )
   (ensures
-    valid_mem64 (buffer_addr b h + 8 `op_Multiply` i) h
+    valid_mem64 (buffer_addr b h + 8 * i) h
   )
 
 val lemma_writeable_mem64 (b:buffer64) (i:nat) (h:vale_heap) : Lemma
@@ -222,7 +223,7 @@ val lemma_writeable_mem64 (b:buffer64) (i:nat) (h:vale_heap) : Lemma
     buffer_writeable b
   )
   (ensures
-    writeable_mem64 (buffer_addr b h + 8 `op_Multiply` i) h
+    writeable_mem64 (buffer_addr b h + 8 * i) h
   )
 
 val lemma_load_mem64 (b:buffer64) (i:nat) (h:vale_heap) : Lemma
@@ -231,7 +232,7 @@ val lemma_load_mem64 (b:buffer64) (i:nat) (h:vale_heap) : Lemma
     buffer_readable h b
   )
   (ensures
-    load_mem64 (buffer_addr b h + 8 `op_Multiply` i) h == buffer_read b i h
+    load_mem64 (buffer_addr b h + 8 * i) h == buffer_read b i h
   )
 
 val lemma_store_mem64 (b:buffer64) (i:nat) (v:nat64) (h:vale_heap) : Lemma
@@ -241,7 +242,7 @@ val lemma_store_mem64 (b:buffer64) (i:nat) (v:nat64) (h:vale_heap) : Lemma
     buffer_writeable b
   )
   (ensures
-    store_mem64 (buffer_addr b h + 8 `op_Multiply` i) v h == buffer_write b i v h
+    store_mem64 (buffer_addr b h + 8 * i) v h == buffer_write b i v h
   )
 
 val lemma_valid_mem128 (b:buffer128) (i:nat) (h:vale_heap) : Lemma
@@ -250,7 +251,7 @@ val lemma_valid_mem128 (b:buffer128) (i:nat) (h:vale_heap) : Lemma
     buffer_readable h b
   )
   (ensures
-    valid_mem128 (buffer_addr b h + 16 `op_Multiply` i) h
+    valid_mem128 (buffer_addr b h + 16 * i) h
   )
 
 val lemma_writeable_mem128 (b:buffer128) (i:nat) (h:vale_heap) : Lemma
@@ -260,7 +261,7 @@ val lemma_writeable_mem128 (b:buffer128) (i:nat) (h:vale_heap) : Lemma
     buffer_writeable b
   )
   (ensures
-    writeable_mem128 (buffer_addr b h + 16 `op_Multiply` i) h
+    writeable_mem128 (buffer_addr b h + 16 * i) h
   )
 
 val lemma_load_mem128 (b:buffer128) (i:nat) (h:vale_heap) : Lemma
@@ -269,7 +270,7 @@ val lemma_load_mem128 (b:buffer128) (i:nat) (h:vale_heap) : Lemma
     buffer_readable h b
   )
   (ensures
-    load_mem128 (buffer_addr b h + 16 `op_Multiply` i) h == buffer_read b i h
+    load_mem128 (buffer_addr b h + 16 * i) h == buffer_read b i h
   )
 
 val lemma_store_mem128 (b:buffer128) (i:nat) (v:quad32) (h:vale_heap) : Lemma
@@ -279,7 +280,7 @@ val lemma_store_mem128 (b:buffer128) (i:nat) (v:quad32) (h:vale_heap) : Lemma
     buffer_writeable b
   )
   (ensures
-    store_mem128 (buffer_addr b h + 16 `op_Multiply` i) v h == buffer_write b i v h
+    store_mem128 (buffer_addr b h + 16 * i) v h == buffer_write b i v h
   )
 
 //Memtaint related functions
@@ -298,7 +299,7 @@ val lemma_valid_taint64
   : Lemma
   (requires valid_taint_buf64 b vale_heap memTaint t /\ buffer_readable vale_heap b)
   (ensures (
-    let ptr = buffer_addr b vale_heap + 8 `op_Multiply` i in
+    let ptr = buffer_addr b vale_heap + 8 * i in
     forall i'.{:pattern Map.sel memTaint i'} i' >= ptr /\ i' < ptr + 8 ==> Map.sel memTaint i' == t))
 
 val lemma_valid_taint128
@@ -310,7 +311,7 @@ val lemma_valid_taint128
   : Lemma
   (requires valid_taint_buf128 b vale_heap memTaint t /\ buffer_readable vale_heap b)
   (ensures (
-    let ptr = buffer_addr b vale_heap + 16 `op_Multiply` i in
+    let ptr = buffer_addr b vale_heap + 16 * i in
     forall i'.{:pattern Map.sel memTaint i'} i' >= ptr /\ i' < ptr + 16 ==> Map.sel memTaint i' == t))
 
 val same_memTaint64

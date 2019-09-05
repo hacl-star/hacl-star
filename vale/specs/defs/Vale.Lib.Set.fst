@@ -1,4 +1,5 @@
 module Vale.Lib.Set
+open FStar.Mul
 
 friend FStar.Map
 

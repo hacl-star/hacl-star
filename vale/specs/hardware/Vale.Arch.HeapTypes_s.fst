@@ -1,4 +1,5 @@
 module Vale.Arch.HeapTypes_s
+open FStar.Mul
 
 let __reduce__ = ()
 

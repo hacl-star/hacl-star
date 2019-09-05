@@ -1,5 +1,6 @@
 module Vale.X64.Bytes_Semantics
 
+open FStar.Mul
 open Vale.Def.Words_s
 open Vale.Def.Types_s
 open Vale.Arch.MachineHeap_s

@@ -1,4 +1,5 @@
 module Vale.AsLowStar.MemoryHelpers
+open FStar.Mul
 open Vale.Arch.HeapImpl
 open Vale.X64.MemoryAdapters
 open Vale.Interop.Base

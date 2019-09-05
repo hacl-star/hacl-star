@@ -1,5 +1,6 @@
 module Vale.X64.Memory_Sems
 
+open FStar.Mul
 open Vale.Def.Prop_s
 open Vale.X64.Machine_s
 open Vale.X64.Memory
@@ -41,8 +42,6 @@ let heap_shift m1 m2 base n =
   assert (forall i. base <= i /\ i < base + n ==>
     m1.[base + (i - base)] == m2.[base + (i - base)])
 #pop-options
-
-open FStar.Mul
 
 val same_mem_eq_slices64 (b:buffer64{buffer_writeable b})
                        (i:nat{i < buffer_length b})
@@ -321,7 +320,7 @@ val same_mem_get_heap_val128 (b:buffer128)
                           (mem1:S.machine_heap{IB.correct_down_p (_ih h1) mem1 b})
                           (mem2:S.machine_heap{IB.correct_down_p (_ih h2) mem2 b}) : Lemma
   (requires (Seq.index (buffer_as_seq h1 b) k == Seq.index (buffer_as_seq h2 b) k))
-  (ensures (let ptr = buffer_addr b h1 + 16 `op_Multiply` k in
+  (ensures (let ptr = buffer_addr b h1 + 16 * k in
     forall i. {:pattern (mem1.[ptr+i])} i >= 0 /\ i < 16 ==> mem1.[ptr+i] == mem2.[ptr+i]))
 
 val same_mem_eq_slices128 (b:buffer128)
@@ -349,14 +348,14 @@ let same_mem_eq_slices128 b i v k h1 h2 mem1 mem2 =
     UV.length_eq ub
 
 let length_up128 (b:buffer128) (h:vale_heap) (k:nat{k < buffer_length b}) (i:nat{i < 16}) : Lemma
-  (16 `op_Multiply` k + i <= DV.length (get_downview b.bsrc)) =
+  (16 * k + i <= DV.length (get_downview b.bsrc)) =
   let vb = UV.mk_buffer (get_downview b.bsrc) uint128_view in
   UV.length_eq vb
 
 let same_mem_get_heap_val128 b j v k h1 h2 mem1 mem2 =
-  let ptr = buffer_addr b h1 + 16 `op_Multiply` k in
+  let ptr = buffer_addr b h1 + 16 * k in
   let addr = buffer_addr b h1 in
-  let aux (i:nat{i < 16}) : Lemma (mem1.[addr+(16 `op_Multiply` k + i)] == mem2.[addr+(16 `op_Multiply` k +i)]) =
+  let aux (i:nat{i < 16}) : Lemma (mem1.[addr+(16 * k + i)] == mem2.[addr+(16 * k +i)]) =
     let db = get_downview b.bsrc in
     let ub = UV.mk_buffer db uint128_view in
     UV.as_seq_sel (IB.hs_of_mem (_ih h1)) ub k;
@@ -372,11 +371,11 @@ let same_mem_get_heap_val128 b j v k h1 h2 mem1 mem2 =
     assert (mem2.[addr+(16 * k + i)] == UInt8.v (Seq.index (DV.as_seq (IB.hs_of_mem (_ih h2)) db) (k * 16 + i)))
   in
   Classical.forall_intro aux;
-  assert (forall i. addr + (16 `op_Multiply` k + i) == ptr + i)
+  assert (forall i. addr + (16 * k + i) == ptr + i)
 
 let in_bounds128 (h:vale_heap) (b:buffer128) (i:nat{i < buffer_length b}) : Lemma
-  (forall j. j >= (_ih h).IB.addrs b + 16 `op_Multiply` i /\
-          j < (_ih h).IB.addrs b + 16 `op_Multiply` i + 16 ==>
+  (forall j. j >= (_ih h).IB.addrs b + 16 * i /\
+          j < (_ih h).IB.addrs b + 16 * i + 16 ==>
           j < (_ih h).IB.addrs b + DV.length (get_downview b.bsrc)) =
   length_t_eq TUInt128 b
 
@@ -415,16 +414,16 @@ let equiv_load_mem64 ptr h =
 
 //let low_lemma_valid_mem64 b i h =
 //  lemma_valid_mem64 b i h;
-//  bytes_valid64 (buffer_addr b h + 8 `op_Multiply` i) h
+//  bytes_valid64 (buffer_addr b h + 8 * i) h
 
 //let low_lemma_load_mem64 b i h =
 //  lemma_valid_mem64 b i h;
 //  lemma_load_mem64 b i h;
-//  equiv_load_mem64 (buffer_addr b h + 8 `op_Multiply` i) h
+//  equiv_load_mem64 (buffer_addr b h + 8 * i) h
 
 //let same_domain_update64 b i v h =
 //  low_lemma_valid_mem64 b i h;
-//  Vale.Arch.MachineHeap.same_domain_update (buffer_addr b h + 8 `op_Multiply` i) v (get_heap h)
+//  Vale.Arch.MachineHeap.same_domain_update (buffer_addr b h + 8 * i) v (get_heap h)
 
 open Vale.X64.BufferViewStore
 
@@ -436,10 +435,10 @@ let low_lemma_store_mem64_aux
   (h:vale_heap{buffer_readable h b /\ buffer_writeable b})
   : Lemma
     (requires IB.correct_down_p (_ih h) heap b)
-    (ensures (let heap' = S.update_heap64 (buffer_addr b h + 8 `op_Multiply` i) v heap in
-     let h' = store_mem64 (buffer_addr b h + 8 `op_Multiply` i) v h in
+    (ensures (let heap' = S.update_heap64 (buffer_addr b h + 8 * i) v heap in
+     let h' = store_mem64 (buffer_addr b h + 8 * i) v h in
      (_ih h').IB.hs == DV.upd_seq (_ih h).IB.hs (get_downview b.bsrc) (I.get_seq_heap heap' (_ih h).IB.addrs b))) =
-   let ptr = buffer_addr b h + 8 `op_Multiply` i in
+   let ptr = buffer_addr b h + 8 * i in
    let heap' = S.update_heap64 ptr v heap in
    let h' = store_mem64 ptr v h in
    lemma_store_mem64 b i v h;
@@ -481,11 +480,11 @@ let valid_state_store_mem64_aux i v h =
 let low_lemma_store_mem64 b i v h =
   lemma_writeable_mem64 b i h;
   lemma_store_mem64 b i v h;
-  valid_state_store_mem64_aux (buffer_addr b h + 8 `op_Multiply` i) v h;
+  valid_state_store_mem64_aux (buffer_addr b h + 8 * i) v h;
   let heap = get_heap h in
-  let heap' = S.update_heap64 (buffer_addr b h + 8 `op_Multiply` i) v heap in
+  let heap' = S.update_heap64 (buffer_addr b h + 8 * i) v heap in
   low_lemma_store_mem64_aux b heap i v h;
-  Vale.Arch.MachineHeap.frame_update_heap (buffer_addr b h + 8 `op_Multiply` i) v heap;
+  Vale.Arch.MachineHeap.frame_update_heap (buffer_addr b h + 8 * i) v heap;
   in_bounds64 h b i;
   I.update_buffer_up_mem (_ih h) b heap heap'
 #pop-options
@@ -496,12 +495,12 @@ val low_lemma_valid_mem128 (b:buffer128) (i:nat) (h:vale_heap) : Lemma
     buffer_readable h b
   )
   (ensures
-    S.valid_addr128 (buffer_addr b h + 16 `op_Multiply` i) (get_heap h)
+    S.valid_addr128 (buffer_addr b h + 16 * i) (get_heap h)
   )
 
 let low_lemma_valid_mem128 b i h =
   lemma_valid_mem128 b i h;
-  bytes_valid128 (buffer_addr b h + 16 `op_Multiply` i) h
+  bytes_valid128 (buffer_addr b h + 16 * i) h
 
 val equiv_load_mem128_aux: (ptr:int) -> (h:vale_heap) -> Lemma
   (requires valid_mem128 ptr h)
@@ -527,17 +526,17 @@ val low_lemma_load_mem128 (b:buffer128) (i:nat) (h:vale_heap) : Lemma
     buffer_readable h b
   )
   (ensures
-    S.get_heap_val128 (buffer_addr b h + 16 `op_Multiply` i) (get_heap h) == buffer_read b i h
+    S.get_heap_val128 (buffer_addr b h + 16 * i) (get_heap h) == buffer_read b i h
   )
 
 let low_lemma_load_mem128 b i h =
   lemma_valid_mem128 b i h;
   lemma_load_mem128 b i h;
-  equiv_load_mem128_aux (buffer_addr b h + 16 `op_Multiply` i) h
+  equiv_load_mem128_aux (buffer_addr b h + 16 * i) h
 
 //let same_domain_update128 b i v h =
 //  low_lemma_valid_mem128 b i h;
-//  Vale.Arch.MachineHeap.same_domain_update128 (buffer_addr b h + 16 `op_Multiply` i) v (get_heap h)
+//  Vale.Arch.MachineHeap.same_domain_update128 (buffer_addr b h + 16 * i) v (get_heap h)
 
 let low_lemma_store_mem128_aux
   (b:buffer128)
@@ -547,10 +546,10 @@ let low_lemma_store_mem128_aux
   (h:vale_heap{buffer_readable h b /\ buffer_writeable b})
   : Lemma
     (requires IB.correct_down_p (_ih h) heap b)
-    (ensures (let heap' = S.update_heap128 (buffer_addr b h + 16 `op_Multiply` i) v heap in
-     let h' = store_mem128 (buffer_addr b h + 16 `op_Multiply` i) v h in
+    (ensures (let heap' = S.update_heap128 (buffer_addr b h + 16 * i) v heap in
+     let h' = store_mem128 (buffer_addr b h + 16 * i) v h in
      (_ih h').IB.hs == DV.upd_seq (_ih h).IB.hs (get_downview b.bsrc) (I.get_seq_heap heap' (_ih h).IB.addrs b))) =
-   let ptr = buffer_addr b h + 16 `op_Multiply` i in
+   let ptr = buffer_addr b h + 16 * i in
    let heap' = S.update_heap128 ptr v heap in
    let h' = store_mem128 ptr v h in
    lemma_store_mem128 b i v h;
@@ -746,12 +745,12 @@ let valid_state_store_mem128_aux i v h =
 let low_lemma_store_mem128 b i v h =
   lemma_valid_mem128 b i h;
   lemma_store_mem128 b i v h;
-  valid_state_store_mem128_aux (buffer_addr b h + 16 `op_Multiply` i) v h;
+  valid_state_store_mem128_aux (buffer_addr b h + 16 * i) v h;
   let heap = get_heap h in
-  let heap' = S.update_heap128 (buffer_addr b h + 16 `op_Multiply` i) v heap in
-  let h' = store_mem128 (buffer_addr b h + 16 `op_Multiply` i) v h in
+  let heap' = S.update_heap128 (buffer_addr b h + 16 * i) v heap in
+  let h' = store_mem128 (buffer_addr b h + 16 * i) v h in
   low_lemma_store_mem128_aux b heap i v h;
-  Vale.Arch.MachineHeap.frame_update_heap128 (buffer_addr b h + 16 `op_Multiply` i) v heap;
+  Vale.Arch.MachineHeap.frame_update_heap128 (buffer_addr b h + 16 * i) v heap;
   in_bounds128 h b i;
   I.update_buffer_up_mem (_ih h) b heap heap'
 
@@ -760,8 +759,8 @@ let low_lemma_valid_mem128_64 b i h =
   FStar.Pervasives.reveal_opaque (`%S.valid_addr64) S.valid_addr64;
   FStar.Pervasives.reveal_opaque (`%S.valid_addr128) S.valid_addr128;
   low_lemma_valid_mem128 b i h;
-  let ptr = buffer_addr b h + 16 `op_Multiply` i in
-  assert (buffer_addr b h + 16 `op_Multiply` i + 8 = ptr + 8)
+  let ptr = buffer_addr b h + 16 * i in
+  assert (buffer_addr b h + 16 * i + 8 = ptr + 8)
 #pop-options
 
 open Vale.Def.Words.Two_s
@@ -783,8 +782,8 @@ let low_lemma_load_mem128_hi64 b i h =
 
 //let same_domain_update128_64 b i v h =
 //  low_lemma_valid_mem128_64 b i (_ih h);
-//  Vale.Arch.MachineHeap.same_domain_update (buffer_addr b h + 16 `op_Multiply` i) v (get_heap h);
-//  Vale.Arch.MachineHeap.same_domain_update (buffer_addr b h + 16 `op_Multiply` i + 8) v (get_heap h)
+//  Vale.Arch.MachineHeap.same_domain_update (buffer_addr b h + 16 * i) v (get_heap h);
+//  Vale.Arch.MachineHeap.same_domain_update (buffer_addr b h + 16 * i + 8) v (get_heap h)
 
 open Vale.Def.Types_s
 
@@ -815,7 +814,7 @@ let update_heap128_lo (ptr:int) (v:quad32) (mem:S.machine_heap) : Lemma
   Vale.Arch.MachineHeap.update_heap32_get_heap32 (ptr+12) mem1
 
 let low_lemma_store_mem128_lo64 b i v h =
-  let ptr = buffer_addr b h + 16 `op_Multiply` i in
+  let ptr = buffer_addr b h + 16 * i in
   let v128 = buffer_read b i h in
   let v' = insert_nat64_opaque v128 v 0 in
   low_lemma_load_mem128 b i h;
@@ -828,7 +827,7 @@ let low_lemma_store_mem128_lo64 b i v h =
 
 let low_lemma_store_mem128_hi64 b i v h =
   FStar.Pervasives.reveal_opaque (`%S.valid_addr128) S.valid_addr128;
-  let ptr = buffer_addr b h + 16 `op_Multiply` i in
+  let ptr = buffer_addr b h + 16 * i in
   let v128 = buffer_read b i h in
   let v' = insert_nat64_opaque v128 v 1 in
   low_lemma_load_mem128 b i h;

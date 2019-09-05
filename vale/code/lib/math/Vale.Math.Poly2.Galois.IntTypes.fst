@@ -1,4 +1,5 @@
 module Vale.Math.Poly2.Galois.IntTypes
+open FStar.Mul
 friend Lib.IntTypes
 
 #reset-options "--z3rlimit 20"

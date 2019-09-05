@@ -1,5 +1,6 @@
 module Vale.SHA.SHA_helpers
 
+open FStar.Mul
 open Vale.Def.Prop_s
 open Vale.Def.Opaque_s
 open Spec.SHA2
@@ -150,7 +151,7 @@ let shuffle_core_properties (block:block_w) (hash:hash256) (t:counter{t < size_k
   elim_of_list l;
   ()
 
-let sha256_rnds2_spec_update_quad32 (abef cdgh:quad32) (wk:UInt32.t) : (quad32*quad32) =
+let sha256_rnds2_spec_update_quad32 (abef cdgh:quad32) (wk:UInt32.t) : (quad32 & quad32) =
   let hash0 = make_hash abef cdgh in
   let a', b', c', d', e', f', g', h' = sha256_rnds2_spec_update hash0.[0] hash0.[1] hash0.[2] hash0.[3] hash0.[4] hash0.[5] hash0.[6] hash0.[7] wk in
   let abef' = Mkfour (vv f') (vv e') (vv b') (vv a') in
@@ -300,7 +301,7 @@ let lemma_sha256_rnds2_spec_update_is_shuffle_core (hash:hash256) (wk:UInt32.t) 
   lemma_add_mod_a hash.[0] hash.[1] hash.[2] hash.[3] hash.[4] hash.[5] hash.[6] hash.[7] wk;
   lemma_add_mod_e hash.[0] hash.[1] hash.[2] hash.[3] hash.[4] hash.[5] hash.[6] hash.[7] wk
 
-let sha256_rnds2_spec_update_core_quad32 (abef cdgh:quad32) (wk:UInt32.t) (block:block_w) (t:counter{t < size_k_w_256}) : (quad32*quad32) =
+let sha256_rnds2_spec_update_core_quad32 (abef cdgh:quad32) (wk:UInt32.t) (block:block_w) (t:counter{t < size_k_w_256}) : (quad32 & quad32) =
   let hash0 = make_hash abef cdgh in
   let hash1 = shuffle_core_opaque block hash0 t in
   let abef' = Mkfour (vv hash1.[5]) (vv hash1.[4]) (vv hash1.[1]) (vv hash1.[0]) in
@@ -757,7 +758,6 @@ friend Lib.ByteSequence
 let lemma_be_to_n_4 (s:seq4 nat8) : Lemma
   (Lib.ByteSequence.nat_from_bytes_be #Lib.IntTypes.SEC (seq_nat8_to_seq_uint8 s) == be_bytes_to_nat32 s)
   =
-  let open FStar.Mul in
   let open Lib.IntTypes in
   let open Vale.Def.Words.Four_s in
   assert (pow2 8 = 0x100);
@@ -796,7 +796,6 @@ let lemma_endian_relation (quads qs:seq quad32) (input2:seq UInt8.t) : Lemma
   let fi (i:nat{i < length (quads_to_block qs)}) : Lemma
     ((quads_to_block qs).[i] == (words_of_bytes SHA2_256 #block_word_length input2).[i])
     =
-    let open FStar.Mul in
     let open Vale.Def.Words.Four_s in
     let open Vale.Lib.Seqs_s in
     let ni = (seq_four_to_seq_LE quads).[i] in
@@ -879,7 +878,6 @@ let rec lemma_update_multi_equiv_vale (hash hash':hash256) (quads:seq quad32) (r
            hash' == update_multi_opaque_vale hash blocks)
         (decreases (length quads))
   =
-  let open FStar.Mul in
   lemma_mod_transform quads;
   assert (length blocks % 64 == 0);
   reveal_opaque update_multi;

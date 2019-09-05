@@ -17,7 +17,7 @@ let quad32_shift_left_1 (q:quad32) : quad32 =
   let Mkfour r0 r1 r2 r3 = r in
   quad32_xor l (Mkfour 0 r0 r1 r2)
 
-let quad32_shift_2_left_1 (qa qb:quad32) : tuple2 quad32 quad32 =
+let quad32_shift_2_left_1 (qa qb:quad32) : quad32 & quad32 =
   let la = four_map (fun (i:nat32) -> ishl i 1) qa in
   let lb = four_map (fun (i:nat32) -> ishl i 1) qb in
   let ra = four_map (fun (i:nat32) -> ishr i 31) qa in

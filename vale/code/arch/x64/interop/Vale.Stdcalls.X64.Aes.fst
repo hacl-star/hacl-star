@@ -1,5 +1,6 @@
 module Vale.Stdcalls.X64.Aes
 
+open FStar.Mul
 open FStar.HyperStack.ST
 module HS = FStar.HyperStack
 module B = LowStar.Buffer

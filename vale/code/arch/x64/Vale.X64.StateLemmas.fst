@@ -1,4 +1,5 @@
 module Vale.X64.StateLemmas
+open FStar.Mul
 open Vale.X64.Machine_s
 open Vale.X64.State
 module BS = Vale.X64.Machine_Semantics_s

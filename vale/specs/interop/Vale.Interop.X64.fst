@@ -1,5 +1,6 @@
 module Vale.Interop.X64
 
+open FStar.Mul
 open Vale.Interop.Base
 module B = LowStar.Buffer
 module BS = Vale.X64.Machine_Semantics_s

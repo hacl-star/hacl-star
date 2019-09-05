@@ -1,4 +1,5 @@
 module Vale.X64.Decls
+open FStar.Mul
 open Vale.X64.Machine_s
 open Vale.X64
 open Vale.X64.State
@@ -8,10 +9,10 @@ module P = Vale.X64.Print_s
 module BC = Vale.X64.Bytes_Code_s
 module BS = Vale.X64.Machine_Semantics_s
 #reset-options "--max_fuel 0 --max_ifuel 0 --smtencoding.elim_box true --smtencoding.l_arith_repr boxwrap --smtencoding.nl_arith_repr boxwrap --z3cliopt smt.arith.nl=true --using_facts_from 'Prims FStar.UInt Vale.Def.Words_s FStar.UInt64'"
-let lemma_mul_in_bounds (x y:nat64) : Lemma (requires x `op_Multiply` y < pow2_64) (ensures FStar.UInt.mul_mod #64 x y == x `op_Multiply` y) = ()
+let lemma_mul_in_bounds (x y:nat64) : Lemma (requires x * y < pow2_64) (ensures FStar.UInt.mul_mod #64 x y == x * y) = ()
 
 #reset-options "--z3cliopt smt.arith.nl=true --using_facts_from Prims --using_facts_from FStar.Math"
-let lemma_mul_nat (x:nat) (y:nat) : Lemma (ensures 0 <= (x `op_Multiply` y)) = ()
+let lemma_mul_nat (x:nat) (y:nat) : Lemma (ensures 0 <= (x * y)) = ()
 #reset-options "--initial_fuel 2 --max_fuel 2"
 
 let cf flags = match Lemmas.cf flags with | Some v -> v | None -> false

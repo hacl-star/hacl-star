@@ -1,5 +1,6 @@
 module Vale.X64.Leakage_s
 
+open FStar.Mul
 open Vale.Arch.Heap
 open Vale.X64.Machine_s
 open Vale.X64.Machine_Semantics_s

@@ -1,4 +1,5 @@
 module Vale.Lib.Meta
+open FStar.Mul
 
 val generic_injective_proof
     (#a:eqtype) (#b:eqtype) (f:a -> b) (g:b -> a) (l:(x:a -> Lemma (g (f x) == x)))

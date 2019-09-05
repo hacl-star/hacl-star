@@ -1,4 +1,5 @@
 module Vale.X64.Decls
+open FStar.Mul
 module M = Vale.X64.Memory
 module S = Vale.X64.Stack_i
 
@@ -77,10 +78,10 @@ unfold let va_operand_xmm = reg_xmm
 unfold let va_operand128 = operand128
 unfold let va_operand_opr128 = va_operand128
 
-val mul_nat_helper (x y:nat) : Lemma (x `op_Multiply` y >= 0)
+val mul_nat_helper (x y:nat) : Lemma (x * y >= 0)
 [@va_qattr] unfold let va_mul_nat (x y:nat) : nat =
   mul_nat_helper x y;
-  x `op_Multiply` y
+  x * y
 
 [@va_qattr] unfold let va_expand_state (s:vale_state) : vale_state = state_eta s
 
@@ -111,12 +112,12 @@ unfold let loc_union = M.loc_union
 let valid_buf_maddr64 (addr:int) (s_mem:vale_heap) (s_memTaint:M.memtaint) (b:M.buffer64) (index:int) (t:taint) : prop0 =
   valid_src_addr s_mem b index /\
   M.valid_taint_buf64 b s_mem s_memTaint t /\
-  addr == M.buffer_addr b s_mem + 8 `op_Multiply` index
+  addr == M.buffer_addr b s_mem + 8 * index
 
 let valid_buf_maddr128 (addr:int) (s_mem:vale_heap) (s_memTaint:M.memtaint) (b:M.buffer128) (index:int) (t:taint) : prop0 =
   valid_src_addr s_mem b index /\
   M.valid_taint_buf128 b s_mem s_memTaint t /\
-  addr == M.buffer_addr b s_mem + 16 `op_Multiply` index
+  addr == M.buffer_addr b s_mem + 16 * index
 
 let valid_mem_operand64 (addr:int) (t:taint) (s_mem:vale_heap) (s_memTaint:M.memtaint) : prop0 =
   exists (b:M.buffer64) (index:int).{:pattern (valid_buf_maddr64 addr s_mem s_memTaint b index t)}
@@ -191,12 +192,12 @@ val va_opr_lemma_Mem (s:va_state) (base:va_operand) (offset:int) (b:M.buffer64) 
     OReg? base /\
     valid_src_addr h b index /\
     M.valid_taint_buf64 b h s.vs_memTaint t /\
-    eval_operand base s + offset == M.buffer_addr b h + 8 `op_Multiply` index
+    eval_operand base s + offset == M.buffer_addr b h + 8 * index
   ))
   (ensures (
     let h = M.get_vale_heap s.vs_heap in
     valid_operand (va_opr_code_Mem base offset t) s /\
-    M.load_mem64 (M.buffer_addr b h + 8 `op_Multiply` index) h == M.buffer_read b index h
+    M.load_mem64 (M.buffer_addr b h + 8 * index) h == M.buffer_read b index h
   ))
 
 [@va_qattr]
@@ -225,12 +226,12 @@ val va_opr_lemma_Mem128 (s:va_state) (base:va_operand) (offset:int) (t:taint) (b
     OReg? base /\
     valid_src_addr h b index /\
     M.valid_taint_buf128 b h s.vs_memTaint t /\
-    eval_operand base s + offset == M.buffer_addr b h + 16 `op_Multiply` index
+    eval_operand base s + offset == M.buffer_addr b h + 16 * index
   ))
   (ensures (
     let h = M.get_vale_heap s.vs_heap in
     valid_operand128 (va_opr_code_Mem128 base offset t) s /\
-    M.load_mem128 (M.buffer_addr b h + 16 `op_Multiply` index) h == M.buffer_read b index h
+    M.load_mem128 (M.buffer_addr b h + 16 * index) h == M.buffer_read b index h
   ))
 
 val taint_at (memTaint:M.memtaint) (addr:int) : taint
@@ -452,14 +453,14 @@ let validDstAddrs128 (m:vale_heap) (addr:int) (b:M.buffer128) (len:int) (memTain
 let validSrcAddrsOffset128 (m:vale_heap) (addr:int) (b:M.buffer128) (offset len:int) (memTaint:M.memtaint) (t:taint) =
     buffer_readable m b /\
     offset + len <= buffer_length b /\
-    M.buffer_addr b m + 16 `op_Multiply` offset == addr /\
+    M.buffer_addr b m + 16 * offset == addr /\
     M.valid_taint_buf128 b m memTaint t
 
 let validDstAddrsOffset128 (m:vale_heap) (addr:int) (b:M.buffer128) (offset len:int) (memTaint:M.memtaint) (t:taint) =
     buffer_readable m b /\
     buffer_writeable b /\
     offset + len <= buffer_length b /\
-    M.buffer_addr b m + 16 `op_Multiply` offset == addr /\
+    M.buffer_addr b m + 16 * offset == addr /\
     M.valid_taint_buf128 b m memTaint t
 
 let modifies_buffer_specific128 (b:M.buffer128) (h1 h2:vale_heap) (start last:nat) : GTot prop0 =
@@ -598,14 +599,14 @@ val va_lemma_merge_total (b0:va_codes) (s0:va_state) (f0:va_fuel) (sM:va_state) 
     eval_code (va_Block b0) s0 fN sN
   ))
 
-val va_lemma_empty_total (s0:va_state) (bN:va_codes) : Ghost ((sM:va_state) * (fM:va_fuel))
+val va_lemma_empty_total (s0:va_state) (bN:va_codes) : Ghost (va_state & va_fuel)
   (requires True)
   (ensures (fun (sM, fM) ->
     s0 == sM /\
     eval_code (va_Block []) s0 fM sM
   ))
 
-val va_lemma_ifElse_total (ifb:ocmp) (ct:va_code) (cf:va_code) (s0:va_state) : Ghost (bool * va_state * va_state * va_fuel)
+val va_lemma_ifElse_total (ifb:ocmp) (ct:va_code) (cf:va_code) (s0:va_state) : Ghost (bool & va_state & va_state & va_fuel)
   (requires True)
   (ensures  (fun (cond, sM, sN, f0) ->
     cond == eval_ocmp s0 ifb /\
@@ -635,18 +636,18 @@ val va_lemma_ifElseFalse_total (ifb:ocmp) (ct:va_code) (cf:va_code) (s0:va_state
 let va_whileInv_total (b:ocmp) (c:va_code) (s0:va_state) (sN:va_state) (f0:va_fuel) : prop0 =
   eval_while_inv (While b c) s0 f0 sN
 
-val va_lemma_while_total (b:ocmp) (c:va_code) (s0:va_state) : Ghost ((s1:va_state) * (f1:va_fuel))
+val va_lemma_while_total (b:ocmp) (c:va_code) (s0:va_state) : Ghost (va_state & va_fuel)
   (requires True)
   (ensures fun (s1, f1) ->
     s1 == s0 /\
     eval_while_inv (While b c) s1 f1 s1
   )
 
-val va_lemma_whileTrue_total (b:ocmp) (c:va_code) (s0:va_state) (sW:va_state) (fW:va_fuel) : Ghost ((s1:va_state) * (f1:va_fuel))
+val va_lemma_whileTrue_total (b:ocmp) (c:va_code) (s0:va_state) (sW:va_state) (fW:va_fuel) : Ghost (va_state & va_fuel)
   (requires eval_ocmp sW b /\ valid_ocmp b sW)
   (ensures fun (s1, f1) -> s1 == sW /\ f1 == fW)
 
-val va_lemma_whileFalse_total (b:ocmp) (c:va_code) (s0:va_state) (sW:va_state) (fW:va_fuel) : Ghost ((s1:va_state) * (f1:va_fuel))
+val va_lemma_whileFalse_total (b:ocmp) (c:va_code) (s0:va_state) (sW:va_state) (fW:va_fuel) : Ghost (va_state & va_fuel)
   (requires
     valid_ocmp b sW /\
     not (eval_ocmp sW b) /\

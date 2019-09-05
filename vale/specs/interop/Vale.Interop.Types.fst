@@ -1,4 +1,5 @@
 module Vale.Interop.Types
+open FStar.Mul
 include Vale.Arch.HeapTypes_s
 module MB = LowStar.Monotonic.Buffer
 module DV = LowStar.BufferView.Down

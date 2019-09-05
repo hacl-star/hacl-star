@@ -1,5 +1,6 @@
 module Vale.X64.Bytes_Code_s
 
+open FStar.Mul
 open Vale.X64.Machine_s
 open Vale.X64.Instruction_s
 

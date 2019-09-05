@@ -12,8 +12,6 @@ open Vale.Arch.TypesNative
 open FStar.Classical
 open Vale.Poly1305.Bitvectors
 
-// private unfold let op_Star = op_Multiply
-
 #reset-options "--smtencoding.elim_box true --z3cliopt smt.arith.nl=true --max_fuel 1 --max_ifuel 1 --smtencoding.nl_arith_repr native --z3rlimit 100 --using_facts_from Prims --using_facts_from FStar.Math.Lemmas"
 
 val lemma_mul_div_comm: a:nat -> b:pos -> c:nat ->

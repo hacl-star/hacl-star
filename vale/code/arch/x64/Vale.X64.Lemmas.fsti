@@ -1,4 +1,5 @@
 module Vale.X64.Lemmas
+open FStar.Mul
 open Vale.X64.Machine_s
 open Vale.X64.State
 open Vale.X64.StateLemmas
@@ -104,7 +105,7 @@ val lemma_merge_total (b0:codes) (s0:vale_state) (f0:fuel) (sM:vale_state) (fM:f
   )
   (ensures eval_code (Block b0) s0 (compute_merge_total f0 fM) sN)
 
-val lemma_empty_total (s0:vale_state) (bN:codes) : Ghost ((sM:vale_state) * (fM:fuel))
+val lemma_empty_total (s0:vale_state) (bN:codes) : Ghost (vale_state & fuel)
   (requires True)
   (ensures (fun (sM, fM) ->
     s0 == sM /\
@@ -140,18 +141,18 @@ val lemma_ifElseFalse_total (ifb:ocmp) (ct:code) (cf:code) (s0:vale_state) (f0:f
 
 val eval_while_inv (c:code) (s0:vale_state) (fW:fuel) (sW:vale_state) : Type0
 
-val lemma_while_total (b:ocmp) (c:code) (s0:vale_state) : Ghost ((s1:vale_state) * (f1:fuel))
+val lemma_while_total (b:ocmp) (c:code) (s0:vale_state) : Ghost (vale_state & fuel)
   (requires True)
   (ensures fun (s1, f1) ->
     s1 == s0 /\
     eval_while_inv (While b c) s1 f1 s1
   )
 
-val lemma_whileTrue_total (b:ocmp) (c:code) (s0:vale_state) (sW:vale_state) (fW:fuel) : Ghost ((s1:vale_state) * (f1:fuel))
+val lemma_whileTrue_total (b:ocmp) (c:code) (s0:vale_state) (sW:vale_state) (fW:fuel) : Ghost (vale_state & fuel)
   (requires eval_ocmp sW b)
   (ensures fun (s1, f1) -> s1 == sW /\ f1 == fW)
 
-val lemma_whileFalse_total (b:ocmp) (c:code) (s0:vale_state) (sW:vale_state) (fW:fuel) : Ghost ((s1:vale_state) * (f1:fuel))
+val lemma_whileFalse_total (b:ocmp) (c:code) (s0:vale_state) (sW:vale_state) (fW:fuel) : Ghost (vale_state & fuel)
   (requires
     valid_ocmp b sW /\
     not (eval_ocmp sW b) /\

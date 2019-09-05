@@ -1,5 +1,6 @@
 module Vale.X64.Stack_i
 
+open FStar.Mul
 open Vale.X64.Machine_s
 open Vale.X64.Memory
 open Vale.Def.Prop_s
@@ -25,7 +26,7 @@ let modifies_stack (lo_rsp hi_rsp:nat) (h h':vale_stack) : Vale.Def.Prop_s.prop0
 
 let valid_src_stack64s (base num_slots:nat) (h:vale_stack) : Vale.Def.Prop_s.prop0 =
   forall addr . {:pattern (valid_src_stack64 addr h)}
-    (base <= addr) && (addr < base + num_slots `op_Multiply` 8) && (addr - base) % 8 = 0 ==>
+    (base <= addr) && (addr < base + num_slots * 8) && (addr - base) % 8 = 0 ==>
       valid_src_stack64 addr h
 
 (* Validity preservation *)
@@ -114,7 +115,7 @@ let valid_stack_slot64 (ptr:int) (h:vale_stack) (t:taint) (stackTaint:memtaint) 
 let valid_stack_slot64s (base num_slots:nat) (h:vale_stack) (t:taint) (stackTaint:memtaint) : Vale.Def.Prop_s.prop0 =
   forall addr . {:pattern (valid_src_stack64 addr h) \/ (valid_taint_stack64 addr t stackTaint) \/
     (valid_stack_slot64 addr h t stackTaint)}
-    (base <= addr) && (addr < base + num_slots `op_Multiply` 8) && (addr - base) % 8 = 0 ==>
+    (base <= addr) && (addr < base + num_slots * 8) && (addr - base) % 8 = 0 ==>
       valid_src_stack64 addr h /\ valid_taint_stack64 addr t stackTaint
 
 let modifies_stacktaint (lo_rsp hi_rsp:nat) (h h':memtaint) : Vale.Def.Prop_s.prop0 =

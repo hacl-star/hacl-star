@@ -1,5 +1,6 @@
 module Vale.Arch.Types
 
+open FStar.Mul
 open Vale.Def.Types_s
 open Vale.Lib.Seqs_s
 open Vale.Lib.Seqs
@@ -235,8 +236,6 @@ let reverse_bytes_quad32_seq (s:seq quad32) : seq quad32 =
 val lemma_reverse_reverse_bytes_quad32_seq (s:seq quad32) :
   Lemma (reverse_bytes_quad32_seq (reverse_bytes_quad32_seq s) == s)
   [SMTPat (reverse_bytes_quad32_seq (reverse_bytes_quad32_seq s))]
-
-open FStar.Mul
 
 val lemma_le_seq_quad32_to_bytes_length (s:seq quad32) :
   Lemma(length (le_seq_quad32_to_bytes s) == (length s) * 16)

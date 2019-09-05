@@ -1,5 +1,6 @@
 module Vale.Wrapper.X64.GCMdecryptOpt256
 
+open FStar.Mul
 open Vale.Stdcalls.X64.GCMdecryptOpt
 open Vale.AsLowStar.MemoryHelpers
 open Vale.X64.MemoryAdapters

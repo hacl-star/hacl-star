@@ -1,4 +1,5 @@
 module Vale.Wrapper.X64.Sha
+open FStar.Mul
 
 module UV = LowStar.BufferView.Up
 module DV = LowStar.BufferView.Down
@@ -139,7 +140,7 @@ let simplify_le_bytes_to_hash_uint32 b h =
       Vale.Def.Opaque_s.reveal_opaque le_bytes_to_quad32_def;
       // Revealing these definitions gives us the following
       assert (Vale.Interop.Views.get128 (Seq.slice (DV.as_seq h db)
-             (i' `op_Multiply` 16) (i' `op_Multiply` 16 + 16))
+             (i' * 16) (i' * 16 + 16))
              == Mkfour
 (four_to_nat 8 (seq_to_four_LE (seq_uint8_to_seq_nat8
                                (Seq.slice down_s (i'*16) (i'*16+4)))))

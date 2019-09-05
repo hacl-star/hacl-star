@@ -2,6 +2,7 @@ module Vale.Interop.Views
 
 module DV = LowStar.BufferView.Down
 module BV = LowStar.BufferView.Up
+open FStar.Mul
 open Vale.Def.Words_s
 open Vale.Def.Types_s
 open Vale.Def.Opaque_s
@@ -27,7 +28,7 @@ let down_view8 = inverses8 (); DV.View 1 put8 get8
 
 let get16_def (s:Seq.lseq U8.t 2) = UInt16.uint_to_t (
   U8.v (Seq.index s 0) +
-  U8.v (Seq.index s 1) `op_Multiply` 0x100
+  U8.v (Seq.index s 1) * 0x100
   )
 let put16_def (x:UInt16.t) : GTot (Seq.lseq U8.t 2) =
   let s = Seq.create 2 (U8.uint_to_t 0) in
@@ -86,8 +87,6 @@ val inverses128 (u:unit) : Lemma (DV.inverses get128 put128)
 
 let up_view128 = inverses128 (); BV.View 16 get128 put128
 let down_view128 = inverses128 (); DV.View 16 put128 get128
-
-open FStar.Mul
 
 let nat32s_to_nat128 (v1 v2 v3 v4: nat32): nat128 =
   v1 + v2 * 0x100000000 + v3 * 0x1000000000000 + v4 * 0x1000000000000000000000000

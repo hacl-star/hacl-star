@@ -1,4 +1,5 @@
 module Vale.X64.Bytes_Semantics
+open FStar.Mul
 open Vale.Def.Opaque_s
 open Vale.Def.Words_s
 open Vale.Def.Words.Two_s

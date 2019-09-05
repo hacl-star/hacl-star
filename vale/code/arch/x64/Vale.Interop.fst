@@ -1,4 +1,5 @@
 module Vale.Interop
+open FStar.Mul
 
 module List = FStar.List.Tot.Base
 module HS = FStar.Monotonic.HyperStack

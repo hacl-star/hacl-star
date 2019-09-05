@@ -1,5 +1,6 @@
 module Vale.Arch.MachineHeap_s
 
+open FStar.Mul
 open Vale.Def.Prop_s
 open Vale.Def.Opaque_s
 open Vale.Def.Words_s

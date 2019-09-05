@@ -1,5 +1,6 @@
 module Vale.X64.InsLemmas
 
+open FStar.Mul
 open Vale.X64.StateLemmas
 open Vale.X64.Taint_Semantics
 open Vale.X64.Memory

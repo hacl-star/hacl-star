@@ -1,4 +1,5 @@
 module Vale.Stdcalls.X64.Cpuid
+open FStar.Mul
 
 (* And here's the check_aesni wrapper itself *)
 let lowstar_aesni : lowstar_aesni_t  =

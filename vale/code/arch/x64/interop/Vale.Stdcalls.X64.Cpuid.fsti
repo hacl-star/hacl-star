@@ -1,5 +1,6 @@
 module Vale.Stdcalls.X64.Cpuid
 
+open FStar.Mul
 open Vale.Interop.Base
 module IX64 = Vale.Interop.X64
 module VSig = Vale.AsLowStar.ValeSig

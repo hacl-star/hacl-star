@@ -1,4 +1,5 @@
 module Vale.Arch.Heap
+open FStar.Mul
 open Vale.Interop
 open Vale.Arch.HeapImpl
 friend Vale.Arch.HeapImpl

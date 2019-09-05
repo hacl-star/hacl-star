@@ -1,4 +1,5 @@
 module Vale.X64.QuickCodes
+open FStar.Mul
 
 #reset-options "--initial_ifuel 1 --z3rlimit 30"
 

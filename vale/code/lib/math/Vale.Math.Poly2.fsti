@@ -1,4 +1,5 @@
 module Vale.Math.Poly2
+open FStar.Mul
 open FStar.Seq
 open Vale.Math.Poly2_s
 

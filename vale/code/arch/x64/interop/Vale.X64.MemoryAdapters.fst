@@ -1,5 +1,6 @@
 module Vale.X64.MemoryAdapters
 
+open FStar.Mul
 open Vale.Interop.Base
 module HS = FStar.HyperStack
 module ME = Vale.X64.Memory

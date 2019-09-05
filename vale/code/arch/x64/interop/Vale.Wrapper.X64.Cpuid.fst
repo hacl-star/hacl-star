@@ -1,4 +1,5 @@
 module Vale.Wrapper.X64.Cpuid
+open FStar.Mul
 
 let check_aesni () =
   let x, _ = Vale.Stdcalls.X64.Cpuid.check_aesni () in //This is a call to the interop wrapper

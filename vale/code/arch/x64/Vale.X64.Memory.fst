@@ -477,7 +477,7 @@ let lemma_store_mem (t:base_typ) (b:buffer t) (i:nat) (v:base_typ_as_vale_type t
     buffer_writeable b
   )
   (ensures
-    store_mem t (buffer_addr b h + view_n t `op_Multiply` i) v h == buffer_write b i v h
+    store_mem t (buffer_addr b h + view_n t * i) v h == buffer_write b i v h
   )
   =
   let view = uint_view t in

@@ -1,4 +1,5 @@
 module Vale.Arch.HeapImpl
+open FStar.Mul
 
 (**
 Define abstract (or mostly abstract) types for use by Vale.X64.Decls.fsti.

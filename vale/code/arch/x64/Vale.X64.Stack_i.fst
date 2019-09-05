@@ -1,4 +1,5 @@
 module Vale.X64.Stack_i
+open FStar.Mul
 
 module BS = Vale.X64.Machine_Semantics_s
 open Vale.Arch.MachineHeap

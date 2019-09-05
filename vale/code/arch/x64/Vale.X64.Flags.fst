@@ -1,4 +1,5 @@
 module Vale.X64.Flags
+open FStar.Mul
 open Vale.X64.Machine_s
 
 type t = (m:Map.t flag flag_val_t{Set.equal (Map.domain m) (Set.complement Set.empty)})

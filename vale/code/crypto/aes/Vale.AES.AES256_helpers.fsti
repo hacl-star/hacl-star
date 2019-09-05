@@ -1,5 +1,6 @@
 module Vale.AES.AES256_helpers
 
+open FStar.Mul
 open Vale.Def.Opaque_s
 open Vale.Def.Words_s
 open Vale.Arch.Types
@@ -49,8 +50,6 @@ let rec expand_key_256_def (key:seq nat32) (round:nat) : Pure quad32
   else round_key_256 (expand_key_256_def key (round - 2)) (expand_key_256_def key (round - 1)) round
 
 let expand_key_256 = make_opaque expand_key_256_def
-
-open FStar.Mul
 
 // quad32 key expansion is equivalent to nat32 key expansion
 val lemma_expand_key_256 (key:seq nat32) (size:nat) : Lemma

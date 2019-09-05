@@ -1,4 +1,5 @@
 module Vale.X64.Leakage_Ins
+open FStar.Mul
 open Vale.Arch.MachineHeap_s
 open Vale.Arch.Heap
 open Vale.X64.Machine_s

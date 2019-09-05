@@ -1,5 +1,6 @@
 module Vale.Wrapper.X64.GCM_IV
 
+open FStar.Mul
 open Vale.Stdcalls.X64.GCM_IV
 open Vale.AsLowStar.MemoryHelpers
 open Vale.X64.MemoryAdapters

@@ -1,4 +1,5 @@
 module Vale.AsLowStar.Test
+open FStar.Mul
 open Vale.Interop.Base
 module ME = Vale.X64.Memory
 module IA = Vale.Interop.Assumptions
@@ -136,7 +137,6 @@ open FStar.HyperStack.ST
 
 module M = Vale.X64.Memory
 
-open FStar.Mul
 let test (x:b64) =
   assert (V.buffer_length (as_vale_buffer x) == (B.length x * view_n TUInt8) / view_n TUInt64);
   assert (V.buffer_length (as_vale_buffer x) == B.length x / 8)

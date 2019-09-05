@@ -1,4 +1,5 @@
 module Vale.Arch.HeapImpl
+open FStar.Mul
 open Vale.Interop
 open Vale.Def.Words_s
 open Vale.Arch.MachineHeap_s

@@ -1,4 +1,5 @@
 module Vale.Stdcalls.X64.Sha
+open FStar.Mul
 
 val z3rlimit_hack (x:nat) : squash (x < x + x + 1)
 #reset-options "--z3rlimit 50"

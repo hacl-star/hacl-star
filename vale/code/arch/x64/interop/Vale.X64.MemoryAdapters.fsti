@@ -1,5 +1,6 @@
 module Vale.X64.MemoryAdapters
 
+open FStar.Mul
 open Vale.Interop.Base
 module BS = Vale.X64.Machine_Semantics_s
 module BV = LowStar.BufferView

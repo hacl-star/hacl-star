@@ -1,4 +1,5 @@
 module Vale.X64.Leakage
+open FStar.Mul
 open Vale.X64.Machine_s
 module S = Vale.X64.Machine_Semantics_s
 open Vale.X64.Leakage_s
