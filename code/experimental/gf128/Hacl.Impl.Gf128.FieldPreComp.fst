@@ -164,6 +164,22 @@ let load_felem4 x y =
   load_felem x3 y3
 
 
+val uints64_to_bytes_be_lemma: lo:uint64 -> hi:uint64 -> Lemma
+  (LSeq.concat (BSeq.uint_to_bytes_be lo) (BSeq.uint_to_bytes_be hi) == BSeq.nat_to_bytes_be 16 (v lo * pow2 64 + v hi))
+let uints64_to_bytes_be_lemma lo hi =
+  let open Lib.ByteSequence in
+  let lp = nat_to_bytes_be #SEC 16 (v lo * pow2 64 + v hi) in
+  let rp = LSeq.concat (uint_to_bytes_be lo) (uint_to_bytes_be hi) in
+  assert (nat_from_bytes_be lp == v lo * pow2 64 + v hi);
+  Seq.append_slices (uint_to_bytes_be lo) (uint_to_bytes_be hi);
+  nat_from_intseq_be_slice_lemma #U8 #SEC #16 rp 8;
+  assert (nat_from_bytes_be rp == nat_from_bytes_be (LSeq.sub rp 8 8) + pow2 (8 * 8) * nat_from_bytes_be (LSeq.sub rp 0 8));
+  assert (nat_from_bytes_be rp == nat_from_bytes_be (uint_to_bytes_be hi) + pow2 64 * nat_from_bytes_be (uint_to_bytes_be lo));
+  lemma_uint_to_bytes_be_preserves_value lo;
+  lemma_uint_to_bytes_be_preserves_value hi;
+  nat_from_intseq_be_inj lp rp
+
+
 inline_for_extraction
 val store_felem:
     x:lbuffer uint8 16ul
@@ -174,9 +190,26 @@ val store_felem:
     as_seq h1 x == S.store_elem (feval h0 y))
 
 let store_felem x y =
-  uint_to_bytes_be #U64 (sub x (size 0) (size 8)) y.(size 1);
-  uint_to_bytes_be #U64 (sub x (size 8) (size 8)) y.(size 0);
-  admit()
+  let h0 = ST.get () in
+  assert (S.store_elem (feval h0 y) == BSeq.uint_to_bytes_be #U128 #SEC (feval h0 y));
+  let h0 = ST.get () in
+  let r0 = y.(1ul) in
+  let r1 = y.(0ul) in
+  update_sub_f h0 x 0ul 8ul
+    (fun h -> BSeq.uint_to_bytes_be #U64 r0)
+    (fun _ -> uint_to_bytes_be (sub x 0ul 8ul) r0);
+  let h1 = ST.get () in
+  update_sub_f h1 x 8ul 8ul
+    (fun h -> BSeq.uint_to_bytes_be #U64 r1)
+    (fun _ -> uint_to_bytes_be (sub x 8ul 8ul) r1);
+  let h2 = ST.get () in
+  LSeq.eq_intro (LSeq.sub (as_seq h2 x) 0 8) (BSeq.uint_to_bytes_be #U64 r0);
+  LSeq.lemma_concat2 8 (BSeq.uint_to_bytes_be #U64 r0) 8 (BSeq.uint_to_bytes_be #U64 r1) (as_seq h2 x);
+  uints64_to_bytes_be_lemma r0 r1;
+  assert (as_seq h2 x == BSeq.nat_to_bytes_be 16 (v (feval h0 y)));
+  BSeq.lemma_nat_to_from_bytes_be_preserves_value (as_seq h2 x) 16 (v (feval h0 y));
+  BSeq.lemma_uint_to_bytes_be_preserves_value (feval h0 y);
+  BSeq.nat_from_intseq_be_inj (as_seq h2 x) (BSeq.uint_to_bytes_be #U128 #SEC (feval h0 y))
 
 
 inline_for_extraction
