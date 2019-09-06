@@ -120,18 +120,82 @@ let lemma_mask_logor a b mask r =
       lemma_int32_logor_zero a
       end
 
-// TODO (kkane): Proofs of these two lemmas are in incoming work Santiago has, so for now we assume them.
-assume
+// Proofs for shift_right wholesale ripped off from HACL*'s Lib.IntTypes. I'm not sure why these
+// lemmas aren't in ulib, or why HACL*'s shift_right doesn't make some statement about its behavior conforming to
+// the ulib versions.
+private val shift_right_value_aux_1: #n:pos{1 < n} -> a:Int.int_t n -> s:nat{n <= s} ->
+  Lemma (Int.shift_arithmetic_right #n a s = a / pow2 s)
+let shift_right_value_aux_1 #n a s =
+  Math.Lemmas.pow2_le_compat s n;
+  if a >= 0 then Int.sign_bit_positive a else Int.sign_bit_negative a
+
+private val shift_right_value_aux_2: #n:pos{1 < n} -> a:Int.int_t n ->
+  Lemma (Int.shift_arithmetic_right #n a 1 = a / 2)
+let shift_right_value_aux_2 #n a =
+  if a >= 0 then
+    begin
+    Int.sign_bit_positive a;
+    UInt.shift_right_value_aux_3 #n a 1
+    end
+  else
+    begin
+    Int.sign_bit_negative a;
+    let a1 = Int.to_vec a in
+    let au = Int.to_uint a in
+    let sar = Int.shift_arithmetic_right #n a 1 in
+    let sar1 = Int.to_vec sar in
+    let sr = UInt.shift_right #n au 1 in
+    let sr1 = UInt.to_vec sr in
+    assert (Seq.equal (Seq.slice sar1 1 n) (Seq.slice sr1 1 n));
+    assert (Seq.equal sar1 (Seq.append (BitVector.ones_vec #1) (Seq.slice sr1 1 n)));
+    UInt.append_lemma #1 #(n-1) (BitVector.ones_vec #1) (Seq.slice sr1 1 n);
+    assert (Seq.equal (Seq.slice a1 0 (n-1)) (Seq.slice sar1 1 n));
+    UInt.slice_left_lemma a1 (n-1);
+    assert (sar + pow2 n = pow2 (n-1) + (au / 2));
+    Math.Lemmas.pow2_double_sum (n-1);
+    assert (sar + pow2 (n-1) = (a + pow2 n) / 2);
+    Math.Lemmas.pow2_double_mult (n-1);
+    Math.Lemmas.lemma_div_plus a (pow2 (n-1)) 2;
+    assert (sar = a / 2)
+  end
+
+private val shift_right_value_aux_3: #n:pos -> a:Int.int_t n -> s:pos{s < n} ->
+  Lemma (ensures Int.shift_arithmetic_right #n a s = a / pow2 s)
+        (decreases s)
+let rec shift_right_value_aux_3 #n a s =
+  if s = 1 then
+    shift_right_value_aux_2 #n a
+  else
+    begin
+    let a1 = Int.to_vec a in
+    assert (Seq.equal (BitVector.shift_arithmetic_right_vec #n a1 s)
+                      (BitVector.shift_arithmetic_right_vec #n
+                         (BitVector.shift_arithmetic_right_vec #n a1 (s-1)) 1));
+    assert (Int.shift_arithmetic_right #n a s =
+            Int.shift_arithmetic_right #n (Int.shift_arithmetic_right #n a (s-1)
+) 1);
+    shift_right_value_aux_3 #n a (s-1);
+    shift_right_value_aux_2 #n (Int.shift_arithmetic_right #n a (s-1));
+    assert (Int.shift_arithmetic_right #n a s = (a / pow2 (s-1)) / 2);
+    Math.Lemmas.pow2_double_mult (s-1);
+    Math.Lemmas.division_multiplication_lemma a (pow2 (s-1)) 2
+    end
+
 val shift_arithmetic_right_lemma_i32:
     a:I32.t
-  -> b:UI32.t{UI32.v b < I32.n}
+  -> b:UI32.t{UI32.v b > 0 /\ UI32.v b < I32.n}
   -> Lemma (I32.v (I32.shift_arithmetic_right a b) = I32.v a / pow2 (UI32.v b))
 
-assume
+let shift_arithmetic_right_lemma_i32 a b =
+    shift_right_value_aux_3 #I32.n (I32.v a) (UI32.v b)
+
 val shift_arithmetic_right_lemma_i64:
     a:I64.t
-  -> b:UI32.t{UI32.v b < I64.n}
+  -> b:UI32.t{UI32.v b > 0 /\ UI32.v b < I64.n}
   -> Lemma (I64.v (I64.shift_arithmetic_right a b) = I64.v a / pow2 (UI32.v b))
+
+let shift_arithmetic_right_lemma_i64 a b =
+   shift_right_value_aux_3 #I64.n (I64.v a) (UI32.v b)
 
 #push-options "--z3cliopt 'smt.arith.nl=false'"
 // Generously borrowed from Vale.
