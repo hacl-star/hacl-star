@@ -369,74 +369,89 @@ val poly_add_correct:
   -> x: poly
   -> y: poly
   -> Stack unit
-    (requires fun h -> live h result /\ live h x /\ live h y /\ is_poly_montgomery h x /\ is_poly_pmq h y)
+    (requires fun h -> live h result /\ live h x /\ live h y /\ is_poly_montgomery h x /\ is_poly_pmq h y /\ disjoint result y /\
+                    (disjoint result x \/ result == x))
     (ensures fun h0 _ h1 -> modifies1 result h0 h1 /\ is_poly_pk h1 result)
 
 let poly_add_correct result x y =
     let h0 = ST.get() in
     for 0ul params_n
-    (fun h _ -> live h result /\ live h x /\ live h y /\ modifies1 result h0 h)
+    (fun h i -> live h result /\ live h x /\ live h y /\ modifies1 result h0 h /\ is_poly_montgomery h x /\ is_poly_pmq h y /\
+             i <= v params_n /\ is_poly_pk_i h result i)
     (fun i ->
-        let h1 = ST.get () in 
-        assume(FStar.Int.fits ((elem_v (bget h1 x (v i))) + (elem_v (bget h1 y (v i)))) elem_n);
-        let temp:elem_base = x.(i) +^ y.(i) in
+        let h1 = ST.get () in
+        // If I don't reassert these facts, the size condition on the addition doesn't check. I don't currently have
+        // a framing lemma for is_pmq, and I'm guessing I may need an additional pattern for index/op_Array_Access.
+        assert(is_poly_montgomery h1 x);
+        assert(is_poly_pmq h1 y);
+        assert(is_montgomery (bget h1 x (v i)));
+        assert(is_pmq (bget h1 y (v i))); 
+        let temp:elem_base = x.(i) +^ y.(i) in 
         assert_norm(size elem_n -. size 1 <. size I32.n);
-        assume(elem_v temp >= 0);
-        [@inline_let] let shiftresult = temp >>^ (size elem_n -. size 1) in
-        //assert_norm(elem_v shiftresult == -1 \/ elem_v shiftresult == 0);
-        //assert(elem_v temp < 0 <==> elem_v shiftresult == -1);
-        //assert(elem_v temp >= 0 <==> elem_v shiftresult == 0);
+        [@inline_let] let shiftresult = temp >>>^ (size elem_n -. size 1) in
+        shift_arithmetic_right_lemma_i32 temp (size elem_n -. size 1);
+        assert_norm(elem_v shiftresult == -1 \/ elem_v shiftresult == 0);
+        assert(elem_v temp < 0 <==> elem_v shiftresult == -1);
+        assert(elem_v temp >= 0 <==> elem_v shiftresult == 0);
         [@inline_let] let andresult = shiftresult &^ params_q in
-        //assume(forall (x:elem) . (elem_v (to_elem (-1) &^ x)) == elem_v x);
-        //assert(elem_v temp < 0 ==> elem_v shiftresult == (-1));
-        //assert(elem_v temp < 0 ==> elem_v (shiftresult &^ params_q) == elem_v params_q);
-        //assert(elem_v temp < 0 ==> elem_v andresult == elem_v params_q);
-        //assert(elem_v andresult == elem_v params_q <==> elem_v temp < 0);
-        //assume((elem_v ((to_elem (-1)) &^ params_q)) == elem_v params_q); 
-        //assert(elem_v andresult == elem_v params_q \/ elem_v andresult == 0);
-        assume(FStar.Int.fits (elem_v temp + elem_v andresult) I32.n);
+        Int.logand_lemma_1 (elem_v params_q);
+        Int.logand_lemma_2 (elem_v params_q);
+        Int.logand_commutative (elem_v shiftresult) (elem_v params_q);
+        assert(elem_v temp < 0 ==> elem_v shiftresult == (-1));
+        assert(elem_v temp < 0 ==> elem_v (shiftresult &^ params_q) == elem_v params_q);
+        assert(elem_v temp < 0 ==> elem_v andresult == elem_v params_q);
+        assert(elem_v andresult == elem_v params_q <==> elem_v temp < 0);
 	let temp:elem_base = temp +^ andresult in
-        assume(FStar.Int.fits (elem_v temp - elem_v params_q) I32.n);
 	let temp:elem_base = temp -^ params_q in
-        assume(elem_v temp >= 0);
-        [@inline_let] let addend = ((temp >>^ (size elem_n -. size 1)) &^ params_q) in
-        assume(is_elem_int (elem_v temp + elem_v addend));
-	let temp:elem = temp +^ ((temp >>^ (size elem_n -. size 1)) &^ params_q) in
-        result.(i) <- temp
-    );
-    let hReturn = ST.get () in
-    assume(is_poly_pk hReturn result)
+        [@inline_let] let addend = ((temp >>>^ (size elem_n -. size 1)) &^ params_q) in
+        shift_arithmetic_right_lemma_i32 temp (size elem_n -. size 1);
+        Int.logand_commutative (elem_v (temp >>>^ (size elem_n -. size 1))) (elem_v params_q);
+	let temp:elem = temp +^ ((temp >>>^ (size elem_n -. size 1)) &^ params_q) in
+        result.(i) <- temp;
+        let h2 = ST.get () in
+        assert(is_poly_equal h1 h2 y);
+        assert(is_poly_equal_except h1 h2 result (v i));
+        assume(is_pk (bget h2 result (v i)))
+    )
 
 val poly_sub_correct:
     result: poly
   -> x: poly
   -> y: poly
   -> Stack unit
-    (requires fun h -> live h result /\ live h x /\ live h y /\ is_poly_montgomery h x /\ is_poly_pmq h y)
+    (requires fun h -> live h result /\ live h x /\ live h y /\ is_poly_montgomery h x /\ is_poly_pmq h y /\ disjoint result y /\
+                    (disjoint result x \/ x == result))
     (ensures fun h0 _ h1 -> modifies1 result h0 h1 /\ is_poly_montgomery h1 result)
 
 let poly_sub_correct result x y =
-    push_frame();
     let h0 = ST.get() in
     for 0ul params_n
-    (fun h _ -> live h result /\ live h x /\ live h y /\ modifies1 result h0 h)
+    (fun h i -> live h result /\ live h x /\ live h y /\ modifies1 result h0 h /\ is_poly_montgomery h x /\ is_poly_pmq h y /\
+             i <= v params_n /\ is_poly_montgomery_i h result i)
     (fun i ->
-        let h1 = ST.get () in 
-        assume(FStar.Int.fits ((elem_v (bget h1 x (v i))) - (elem_v (bget h1 y (v i)))) elem_n);    
+        let h1 = ST.get () in
+        // Again, I have to explicitly assert these facts to get them in the context.
+        assert(is_poly_montgomery h1 x);
+        assert(is_montgomery (bget h1 x (v i)));
+        assert(is_poly_pmq h1 y);
+        assert(is_pmq (bget h1 y (v i)));
         let temp:elem_base = x.(i) -^ y.(i) in
         assert_norm(size elem_n -. size 1 <. size I32.n);
-        assume(elem_v temp >= 0);
-        assume(FStar.Int.fits (elem_v temp + elem_v ((temp >>^ (size elem_n -. size 1)) &^ params_q)) elem_n);
-        let temp:elem_base = temp +^ ((temp >>^ (size elem_n -. size 1)) &^ params_q) in
-        assume(is_elem temp);
-        result.(i) <- temp
-    );
-    pop_frame();
-    let hReturn = ST.get () in
-    assume(is_poly_montgomery hReturn result)
+        shift_arithmetic_right_lemma_i32 temp (size elem_n -. size 1);
+        Int.logand_lemma_1 (elem_v params_q);
+        Int.logand_lemma_2 (elem_v params_q);
+        Int.logand_commutative (elem_v (temp >>>^ (size elem_n -. size 1))) (elem_v params_q);
+        let temp:elem_base = temp +^ ((temp >>>^ (size elem_n -. size 1)) &^ params_q) in
+        result.(i) <- temp;
+        let h2 = ST.get () in
+        assert(is_poly_equal h1 h2 y);
+        assert(is_poly_equal_except h1 h2 result (v i));
+        assume(is_montgomery (bget h2 result (v i)))
+    )
 
-// This function is sometimes used with result and x the same, so we can't assume they are disjoint.
-val poly_sub_reduce:
+// This function is sometimes used with result and x the same, so we can't assume they are disjoint. But either they're
+// disjoint or they're the same buffer, so we can conclude a change to one is at most a change to the other at the same index.
+ val poly_sub_reduce:
     result: poly
   -> x: poly
   -> y: poly
@@ -460,8 +475,6 @@ let poly_sub_reduce result x y =
         assert(is_sparse_mul32_output (bget hBegin y (v i)));
         let xi = x.(i) in
         let yi = y.(i) in
-        //assume(let q = elem_v params_q in let r = I64.v params_r in let result = r * (elem_v xi - elem_v yi) in
-        //       result >= 0 /\ result <= (q-1)*(q-1));
         assert(elem_v xi >= 0 /\ elem_v xi < 2 * elem_v params_q);
         assert(let q = elem_v params_q in elem_v yi >= -q /\ elem_v yi < 2*q);
         assert(elem_v xi - elem_v yi <= 3 * elem_v params_q);
@@ -470,16 +483,7 @@ let poly_sub_reduce result x y =
         assert(is_poly_equal_except hBegin hResult result (v i));
         assert(is_poly_montgomery_i hBegin result (v i));
         assert(is_montgomery (bget hResult result (v i)));
-        assert(is_poly_equal hBegin hResult y);
-        // TODO: This is tricky. Need to figure out how to prove:
-        // if disjoint x result
-        // 1. Trivial: x never changes, stays is_poly_montgomery the whole time
-        // else x == result
-        // 1. x started off is_poly_montgomery
-        // 2. result therefore is is_poly_montgomery
-        // 3. result.(i) we prove is_montgomery
-        // 4. result therefore is still is_poly_montgomery
-        assume(is_poly_montgomery hResult x)
+        assert(is_poly_equal hBegin hResult y)
     );
     let hFinal = ST.get () in
     pop_frame();

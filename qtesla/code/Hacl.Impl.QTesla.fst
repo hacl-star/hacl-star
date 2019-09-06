@@ -1427,6 +1427,9 @@ let sparse_mul32 prod pk pos_list sign_list =
         assert(is_poly_pk hOuterLoopEnd pk)
     );
 
+    // TODO (kkane): qTESLA-I doesn't call barr_reduce, but it does no harm to do so. It's just unnecessary work.
+    // Either split this out so qTESLA-I has its own version, or figure out the ifdef-like stuff that's been
+    // incorporated to exclude this section when building for qTESLA-I.
     let h4 = ST.get () in
     assert(is_poly_sparse_mul32_output_i h4 prod 0);
     for 0ul params_n
