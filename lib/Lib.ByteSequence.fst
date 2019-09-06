@@ -481,11 +481,21 @@ let rec nat_from_intseq_le_inj #t #l b1 b2 =
     Seq.lemma_split b2 1
   end
 
+let rec nat_from_intseq_be_inj #t #l b1 b2 =
+  if length b1 = 0 then ()
+  else begin
+    nat_from_intseq_be_inj (Seq.slice b1 0 (length b1 - 1)) (Seq.slice b2 0 (length b2 - 1));
+    Seq.lemma_split b1 (length b1 - 1);
+    Seq.lemma_split b2 (length b2 - 1)
+  end
+
 let lemma_nat_to_from_bytes_be_preserves_value #l b len x = ()
 
 let lemma_nat_to_from_bytes_le_preserves_value #l b len x = ()
 
 let lemma_uint_to_bytes_le_preserves_value #t #l x = ()
+
+let lemma_uint_to_bytes_be_preserves_value #t #l x = ()
 
 let lemma_nat_from_to_intseq_le_preserves_value #t #l len b =
   nat_from_intseq_le_inj (nat_to_intseq_le len (nat_from_intseq_le b)) b

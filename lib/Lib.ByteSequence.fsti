@@ -168,7 +168,14 @@ val nat_from_intseq_le_inj:
     (ensures Seq.equal b1 b2)
     (decreases (length b1))
 
-val lemma_nat_to_from_bytes_be_preserves_value: #l:secrecy_level -> b:bytes_l l -> len:size_nat{len == length b} -> x:size_nat{x < pow2 (8 * len)} ->
+val nat_from_intseq_be_inj:
+  #t:inttype{unsigned t} -> #l:secrecy_level -> b1:seq (uint_t t l) -> b2:seq (uint_t t l) ->
+  Lemma
+    (requires length b1 == length b2 /\ nat_from_intseq_be b1 == nat_from_intseq_be b2)
+    (ensures Seq.equal b1 b2)
+    (decreases (length b1))
+
+val lemma_nat_to_from_bytes_be_preserves_value: #l:secrecy_level -> b:bytes_l l -> len:size_nat{len == length b} -> x:nat{x < pow2 (8 * len)} ->
   Lemma (nat_from_bytes_be (nat_to_bytes_be #l len x) == x)
 
 val lemma_nat_to_from_bytes_le_preserves_value: #l:secrecy_level -> b:bytes_l l -> len:size_nat{len == length b} -> x:nat{x < pow2 (8 * len)} ->
@@ -176,6 +183,9 @@ val lemma_nat_to_from_bytes_le_preserves_value: #l:secrecy_level -> b:bytes_l l 
 
 val lemma_uint_to_bytes_le_preserves_value: #t:inttype{unsigned t} -> #l:secrecy_level -> x:uint_t t l ->
   Lemma (nat_from_bytes_le (uint_to_bytes_le #t #l x) == uint_v x)
+
+val lemma_uint_to_bytes_be_preserves_value: #t:inttype{unsigned t} -> #l:secrecy_level -> x:uint_t t l ->
+  Lemma (nat_from_bytes_be (uint_to_bytes_be #t #l x) == uint_v x)
 
 val lemma_nat_from_to_intseq_le_preserves_value: #t:inttype{unsigned t} -> #l:secrecy_level -> len:nat -> b:seq (uint_t t l){length b == len} ->
   Lemma (nat_to_intseq_le len (nat_from_intseq_le b) == b)
