@@ -120,14 +120,24 @@ val load_felem:
     x:felem
   -> y:block ->
   Stack unit
-  (requires fun h -> live h x /\ live h y)
+  (requires fun h -> live h x /\ live h y /\ disjoint x y)
   (ensures  fun h0 _ h1 -> modifies1 x h0 h1 /\
     feval h1 x == S.encode (as_seq h0 y))
 
 let load_felem x y =
+  let h0 = ST.get () in
+  assert (S.encode (as_seq h0 y) == BSeq.uint_from_bytes_be #U128 #SEC (as_seq h0 y));
   x.(size 1) <- uint_from_bytes_be #U64 (sub y (size 0) (size 8));
   x.(size 0) <- uint_from_bytes_be #U64 (sub y (size 8) (size 8));
-  admit()
+  let h1 = ST.get () in
+  assert (feval h1 x == uint #U128 #SEC (v (as_seq h1 x).[1] * pow2 64 + v (as_seq h1 x).[0]));
+  BSeq.lemma_reveal_uint_to_bytes_be #U64 (LSeq.sub (as_seq h0 y) 0 8);
+  BSeq.lemma_reveal_uint_to_bytes_be #U64 (LSeq.sub (as_seq h0 y) 8 8);
+  assert (v (feval h1 x) == BSeq.nat_from_bytes_be (LSeq.sub (as_seq h0 y) 8 8) + pow2 64 * BSeq.nat_from_bytes_be (LSeq.sub (as_seq h0 y) 0 8));
+  BSeq.nat_from_intseq_be_slice_lemma (as_seq h0 y) 8;
+  assert (v (feval h1 x) == BSeq.nat_from_bytes_be (as_seq h0 y));
+  BSeq.lemma_reveal_uint_to_bytes_be #U128 (as_seq h0 y);
+  assert (v (feval h1 x) == v (S.encode (as_seq h0 y)))
 
 
 inline_for_extraction

@@ -182,7 +182,7 @@ val load_felem:
   -> x:felem s
   -> y:block ->
   Stack unit
-  (requires fun h -> live h x /\ live h y)
+  (requires fun h -> live h x /\ live h y /\ disjoint x y)
   (ensures  fun h0 _ h1 -> modifies1 x h0 h1 /\
     feval h1 x == S.encode (as_seq h0 y))
 
