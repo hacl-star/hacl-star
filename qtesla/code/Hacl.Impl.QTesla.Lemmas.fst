@@ -46,30 +46,22 @@ let shift_right_value_lemma_int64 x s =
   FStar.UInt.shift_right_value_lemma #UI64.n (I64.v x) (UI32.v s)
 
 val elem_product_fits_int64: x:elem_base -> y:elem_base -> GTot bool
-let elem_product_fits_int64 x y = FStar.Int.fits (elem_v x * elem_v y) 64
+let elem_product_fits_int64 x y = FStar.Int.fits (elem_v x * elem_v y) I64.n
 
-// TODO (kkane): This lemma isn't actually true. We'll need to replace it where it is as we fix our proofs.
-val lemma_elem_product_fits_int64: x:elem_base -> y:elem_base -> Lemma
-  (ensures elem_product_fits_int64 x y /\ FStar.Int.fits (elem_v x * elem_v y * I64.v params_qinv) 64)
-
-let lemma_elem_product_fits_int64 x y = admit()
-
-//val lemma_int32_sar_n_minus_1: x:I32.t -> Lemma
-//  (ensures (x >=^ 0l) <==> I32.(x >>^ (UI32.uint_to_t (I32.n - 1)) == 0l) /\
-//           (x <^ 0l) <==> I32.(x >>^ (UI32.uint_to_t (I32.n - 1)) == (-1l)))
-//  (ensures ((I32.v x >= 0) <==> I32.v I32.(x >>>^ (UI32.uint_to_t (I32.n - 1))) == 0) /\
-//           ((I32.v x < 0) <==> I32.v I32.(x >>>^ (UI32.uint_to_t (I32.n - 1))) == (-1)))
-
-//let lemma_int32_sar_n_minus_1 x = admit()// shift_arithmetic_right_lemma_1 #I32.n (I32.v x) (I32.n - 1) (I32.n - 1)
-
-val lemma_int32_logxor_identities: x:I32.t -> Lemma
-  (ensures I32.v (I32.logxor x 0l) == I32.v x /\
-           I32.v (I32.logxor x (-1l)) == (-1) * (I32.v x) - 1)
+val lemma_int32_logxor_identities: x:I32.t{I32.v x > Int.min_int I32.n} -> Lemma
+  (ensures I32.v (I32.logxor x 0l) = I32.v x /\
+           I32.v (I32.logxor x (-1l)) = (-1) * (I32.v x) - 1)
 
 let lemma_int32_logxor_identities x = 
-    Int.nth_lemma (Int.logxor (I32.v x) (Int.zero I32.n)) (I32.v x);
-    assume(I32.v (I32.logxor x (-1l)) == (-1) * (I32.v x) - 1)
-
+    let x = I32.v x in
+    Int.nth_lemma (Int.logxor x (Int.zero I32.n)) x;
+    if (x < 0) then
+     begin
+      Int.lognot_negative #I32.n x;
+      UInt.lemma_lognot_value_mod #I32.n (x + pow2 I32.n)
+     end
+    else UInt.lemma_lognot_value_mod #I32.n x;
+    Int.nth_lemma (Int.logxor x (Int.ones I32.n)) ((-x) - 1)
     
 val lemma_int32_logor_zero: x:I32.t -> Lemma
   (ensures I32.logor x 0l == x /\ I32.logor 0l x == x)
@@ -96,21 +88,15 @@ let uint_pow2_minus_one m =
 val uint_logand_pow2_minus_one: a:uint32 -> m:pos{m <= bits U32} ->
   Lemma (0 <= v (Lib.IntTypes.logand a (uint_pow2_minus_one m)) /\
     v (Lib.IntTypes.logand a (uint_pow2_minus_one m)) <= v (uint_pow2_minus_one m))
-let uint_logand_pow2_minus_one a m = admit()
-  //UInt.logand_le #(numbytes U32) (v a) (v (uint_pow2_minus_one m))
+let uint_logand_pow2_minus_one a m = 
+  Lib.IntTypes.logand_le a (uint_pow2_minus_one m)
 
 val lemma_shift_left_one_eq_pow2: s:shiftval U32 -> Lemma
   (ensures v (Lib.IntTypes.shift_left (u32 1) s) == pow2 (v s))
 
-let lemma_shift_left_one_eq_pow2 s = admit()
-(*
-val lemma_logand_value_max: x:I64.t -> n:nat -> Lemma
-  (requires (n >= 2 /\ n <= 64 /\ FStar.Int.fits (pow2 n - 1) n))
-  (ensures (I64.v I64.(x &^ (I64.int_to_t (pow2 n))) <= pow2 n - 1))
-*)
-
-(*private let lemma_q_log_fact _ : Lemma (ensures pow2 (v params_q_log) < 2 * elem_v params_q) =
-    assert_norm(pow2 (v params_q_log) < 2 * elem_v params_q)*)
+let lemma_shift_left_one_eq_pow2 s = 
+  Lib.IntTypes.shift_left_lemma (u32 1) s;
+  Math.Lemmas.pow2_lt_compat 32 (v s)
 
 val lemma_mask_logor: a:I32.t -> b:I32.t -> mask:I32.t{I32.v mask == 0 \/ I32.v mask == (-1)} -> r:I32.t -> Lemma
     (requires r == I32.logor (I32.logand a mask) (I32.logand b (I32.lognot mask)))

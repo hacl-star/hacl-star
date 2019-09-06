@@ -324,8 +324,14 @@ let poly_uniform_valFromBuffer subbuff =
     // But good sanity check to make sure params_q and params_q_log are compatible for this function.
     //assert_norm(pow2 (v params_q_log) < 2 * elem_v params_q);
     let mask:uint32 = (u32 1 <<. params_q_log) -. u32 1 in
-    lemma_shift_left_one_eq_pow2 params_q_log;
-    assert(v (u32 1 <<. params_q_log) == pow2 (v params_q_log));
+    shift_left_lemma (u32 1) params_q_log;
+    //lemma_shift_left_one_eq_pow2 params_q_log;
+    assert(v (u32 1 <<. params_q_log) == (1 * pow2 (v params_q_log)) % pow2 32);
+    normalize_term_spec (pow2 (v params_q_log));
+    assert_norm(v params_q_log < 32);
+    Math.Lemmas.pow2_lt_compat 32 (v params_q_log);
+    assert(pow2 (v params_q_log) < pow2 32); 
+    assert(pow2 (v params_q_log) % pow2 32 == pow2 (v params_q_log));
     assert(v ((u32 1 <<. params_q_log) -. u32 1) == pow2 (v params_q_log) - 1);
     assert(v mask == v ((u32 1 <<. params_q_log) -. u32 1));
     assert(v mask == pow2 (v params_q_log) - 1);

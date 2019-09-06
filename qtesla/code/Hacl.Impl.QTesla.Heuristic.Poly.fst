@@ -58,7 +58,6 @@ let ntt_innerfor numoProblems jFirst a wj =
             let ajNumo:elem = a.(jNumo) in // a[j + NumoProblems]
             let h1 = ST.get() in
             assume(elem_product_fits_int64 wj (bget h1 a (v jNumo)));
-            //lemma_elem_product_fits_int64 wj (bget h1 a (v jNumo));
             let product = I64.((elem_to_int64 wj) *^ (elem_to_int64 ajNumo)) in
             assume(FStar.Int.fits (I64.v product * I64.v params_qinv) I64.n);
             assume(let q = elem_v params_q in I64.v product <= (q-1)*(q-1) /\ I64.v product >= 0);
@@ -200,7 +199,6 @@ let nttinv_innerfor numoProblems jFirst a wj =
            assume(FStar.Int.fits (elem_v temp - elem_v ajNumo) elem_n);
            [@inline_let] let difference = temp -^ ajNumo in
            assume(elem_product_fits_int64 wj difference);
-           //lemma_elem_product_fits_int64 wj difference;
            [@inline_let] let product = I64.((elem_to_int64 wj) *^ (elem_to_int64 difference)) in
            assume(FStar.Int.fits (I64.v product * I64.v params_qinv) I64.n);
            assume(let q = elem_v params_q in let p = I64.v product in p >= 0 /\ p <= (q-1)*(q-1));
