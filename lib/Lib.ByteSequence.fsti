@@ -97,8 +97,7 @@ val uints_to_bytes_le: #t:inttype{unsigned t} -> #l:secrecy_level -> #len:size_n
 
 val index_uints_to_bytes_le: #t:inttype{unsigned t} -> #l:secrecy_level -> #len:size_nat{len * numbytes t < pow2 32}
   -> ul:lseq (uint_t t l) len -> i:nat{i < len * numbytes t}
-  -> Lemma
-    (index (uints_to_bytes_le #t #l #len ul) i == (uint_to_bytes_le ul.[i / numbytes t]).[i % numbytes t])
+  -> Lemma (index (uints_to_bytes_le #t #l #len ul) i == (uint_to_bytes_le ul.[i / numbytes t]).[i % numbytes t])
 
 inline_for_extraction
 val uints_to_bytes_be: #t:inttype{unsigned t} -> #l:secrecy_level -> #len:size_nat{len * numbytes t < pow2 32}
@@ -106,8 +105,7 @@ val uints_to_bytes_be: #t:inttype{unsigned t} -> #l:secrecy_level -> #len:size_n
 
 val index_uints_to_bytes_be: #t:inttype{unsigned t} -> #l:secrecy_level -> #len:size_nat{len * numbytes t < pow2 32}
   -> ul:lseq (uint_t t l) len -> i:nat{i < len * numbytes t}
-  -> Lemma
-    (index (uints_to_bytes_be #t #l #len ul) i == (uint_to_bytes_be ul.[i / numbytes t]).[i % numbytes t])
+  -> Lemma (index (uints_to_bytes_be #t #l #len ul) i == (uint_to_bytes_be ul.[i / numbytes t]).[i % numbytes t])
 
 inline_for_extraction
 val uints_from_bytes_le: #t:inttype{unsigned t /\ ~(U1? t)} -> #l:secrecy_level -> #len:size_nat{len * numbytes t < pow2 32}
@@ -115,8 +113,7 @@ val uints_from_bytes_le: #t:inttype{unsigned t /\ ~(U1? t)} -> #l:secrecy_level 
 
 val index_uints_from_bytes_le: #t:inttype{unsigned t /\ ~(U1? t)} -> #l:secrecy_level -> #len:size_nat{len * numbytes t < pow2 32}
   -> b:lbytes_l l (len * numbytes t) -> i:size_nat{i < len}
-  -> Lemma
-    (index (uints_from_bytes_le #t #l #len b) i == uint_from_bytes_le (sub b (i * numbytes t) (numbytes t)))
+  -> Lemma (index (uints_from_bytes_le #t #l #len b) i == uint_from_bytes_le (sub b (i * numbytes t) (numbytes t)))
 
 inline_for_extraction
 val uints_from_bytes_be: #t:inttype{unsigned t /\ ~(U1? t)} -> #l:secrecy_level -> #len:size_nat{len * numbytes t < pow2 32}
@@ -124,8 +121,7 @@ val uints_from_bytes_be: #t:inttype{unsigned t /\ ~(U1? t)} -> #l:secrecy_level 
 
 val index_uints_from_bytes_be: #t:inttype{unsigned t /\ ~(t == U1)} -> #l:secrecy_level -> #len:size_nat{len * numbytes t < pow2 32}
   -> b:lbytes_l l (len * numbytes t) -> i:size_nat{i < len}
-  -> Lemma
-    (index (uints_from_bytes_be #t #l #len b) i == uint_from_bytes_be (sub b (i * numbytes t) (numbytes t)))
+  -> Lemma (index (uints_from_bytes_be #t #l #len b) i == uint_from_bytes_be (sub b (i * numbytes t) (numbytes t)))
 
 inline_for_extraction
 val uint_at_index_le: #t:inttype{unsigned t /\ ~(U1? t)} -> #l:secrecy_level -> #len:size_nat{len * numbytes t < pow2 32}
@@ -144,7 +140,18 @@ val nat_from_intseq_le_lemma0: #t:inttype{unsigned t} -> #l:secrecy_level -> b:l
 
 val nat_from_intseq_le_slice_lemma: #t:inttype{unsigned t} -> #l:secrecy_level -> #len:size_nat
   -> b:lseq (uint_t t l) len -> i:nat{i <= len} ->
-  Lemma (nat_from_intseq_le b == nat_from_intseq_le (Seq.slice b 0 i) + pow2 (i * bits t) * nat_from_intseq_le (Seq.slice b i len))
+  Lemma (nat_from_intseq_le b == nat_from_intseq_le (slice b 0 i) + pow2 (i * bits t) * nat_from_intseq_le (slice b i len))
+
+val nat_from_intseq_be_lemma0: #t:inttype{unsigned t} -> #l:secrecy_level -> b:lseq (uint_t t l) 1 ->
+  Lemma (nat_from_intseq_be b == uint_v b.[0])
+
+val nat_from_intseq_be_slice_lemma: #t:inttype{unsigned t} -> #l:secrecy_level -> #len:size_nat
+  -> b:lseq (uint_t t l) len -> i:nat{i <= len} ->
+  Lemma (nat_from_intseq_be b == nat_from_intseq_be (slice b i len) + pow2 ((len - i) * bits t) * nat_from_intseq_be (slice b 0 i))
+
+val uints_from_bytes_le_slice_lemma: #t:inttype{unsigned t /\ ~(U1? t)} -> #l:secrecy_level -> #len:size_pos{len * numbytes t < pow2 32}
+  -> b:lbytes_l l (len * numbytes t) -> i:nat -> j:nat{i <= j /\ j <= len} ->
+  Lemma (slice (uints_from_bytes_le #t #l #len b) i j == uints_from_bytes_le #t #l #(j-i) (slice b (i * numbytes t) (j * numbytes t)))
 
 val uints_from_bytes_le_nat_lemma: #t:inttype{unsigned t /\ ~(U1? t)} -> #l:secrecy_level -> #len:size_nat{len * numbytes t < pow2 32}
   -> b:lbytes_l l (len * numbytes t) ->
@@ -165,9 +172,7 @@ val lemma_nat_to_from_bytes_be_preserves_value: #l:secrecy_level -> b:bytes_l l 
   Lemma (nat_from_bytes_be (nat_to_bytes_be #l len x) == x)
 
 val lemma_nat_to_from_bytes_le_preserves_value: #l:secrecy_level -> b:bytes_l l -> len:size_nat{len == length b} -> x:nat{x < pow2 (8 * len)} ->
-  Lemma
-  (requires (True))
-  (ensures  (nat_from_bytes_le (nat_to_bytes_le #l len x) == x))
+  Lemma (nat_from_bytes_le (nat_to_bytes_le #l len x) == x)
 
 val lemma_uint_to_bytes_le_preserves_value: #t:inttype{unsigned t} -> #l:secrecy_level -> x:uint_t t l ->
   Lemma (nat_from_bytes_le (uint_to_bytes_le #t #l x) == uint_v x)
@@ -176,9 +181,10 @@ val lemma_nat_from_to_intseq_le_preserves_value: #t:inttype{unsigned t} -> #l:se
   Lemma (nat_to_intseq_le len (nat_from_intseq_le b) == b)
 
 val lemma_nat_from_to_bytes_le_preserves_value: #l:secrecy_level -> b:bytes_l l -> len:size_nat{len == Lib.Sequence.length b} ->
-  Lemma
-  (requires (True))
-  (ensures  (nat_to_bytes_le #l len (nat_from_bytes_le b)) == b)
+  Lemma (nat_to_bytes_le #l len (nat_from_bytes_le b) == b)
 
 val lemma_reveal_uint_to_bytes_le: #t:inttype{unsigned t /\ t <> U1} -> #l:secrecy_level -> b:bytes_l l{Lib.Sequence.length b == numbytes t} ->
   Lemma (nat_from_bytes_le b == uint_v (uint_from_bytes_le #t #l b))
+
+val lemma_reveal_uint_to_bytes_be: #t:inttype{unsigned t /\ t <> U1} -> #l:secrecy_level -> b:bytes_l l{Lib.Sequence.length b == numbytes t} ->
+  Lemma (nat_from_bytes_be b == uint_v (uint_from_bytes_be #t #l b))
