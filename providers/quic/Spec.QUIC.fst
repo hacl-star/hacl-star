@@ -1373,7 +1373,83 @@ let rec lemma_bitwise_op_index (f:bool->bool->bool) (l1 l2:list bool) (n:nat) : 
     else lemma_bitwise_op_index f t1 t2 (n-1)
 
 
+let rec bitfield_vs_bitvector_index (n:pos) (b:FStar.UInt.uint_t n) (i:nat{i<n}) : Lemma
+  (List.Tot.index (to_bitfield n b) i = S.index (FStar.UInt.to_vec #n b) (n-1-i)) =
+  let open FStar.UInt in
+  if n = 0 then ()
+  else if i = 0 then ()
+  else bitfield_vs_bitvector_index (n-1) (b/2) (i-1)
 
+let rec list_to_seq (#a:eqtype) (l:list a) : (s:(S.seq a){S.length s = List.Tot.length l /\ (forall i. S.index s i = List.Tot.index l i)}) =
+  match l with
+  | [] -> S.empty
+  | h :: t -> S.(create 1 h @| list_to_seq t)
+
+let rec rev_seq (#a:eqtype) (s:S.seq a) : Pure (S.seq a)
+  (requires True)
+  (ensures fun s' -> S.length s = S.length s')
+  (decreases (S.length s)) =
+  if s = S.empty then S.empty
+  else
+    let _ = S.lemma_empty s in
+    S.(rev_seq S.(slice s 1 (length s)) @| create 1 (index s 0))
+
+
+let rec lemma_rev_seq (#a:eqtype) (s:S.seq a) (i:nat) : Lemma
+  (requires i < S.length s)
+  (ensures
+    S.length (rev_seq s) = S.length s /\
+    S.index s i = S.index (rev_seq s) (S.length s-1-i))
+  (decreases (i))=
+  if s = S.empty then ()
+  else if i = 0 then ()
+  else lemma_rev_seq (S.slice s 1 (S.length s)) (i-1)
+
+let bitfield_vs_bitvector (n:pos) (b:FStar.UInt.uint_t n) : Lemma
+  (S.equal (FStar.UInt.to_vec #n b) (rev_seq (list_to_seq (to_bitfield n b)))) =
+  let s1 = FStar.UInt.to_vec #n b in
+  let s2 = rev_seq (list_to_seq (to_bitfield n b)) in
+  let proof_with_fixed_index (i:nat{i<n}) : Lemma
+    (S.index s1 i = S.index s2 i) =
+    bitfield_vs_bitvector_index n b (n-1-i);
+    lemma_rev_seq (list_to_seq (to_bitfield n b)) (n-1-i) in
+  FStar.Classical.forall_intro proof_with_fixed_index
+
+
+let lemma_charac_bitwise_aux (n:pos) (f:bool->bool->bool) (l1 l2:list bool) (i:nat) : Lemma
+  (requires List.Tot.length l1 = n /\ List.Tot.length l2 = n /\ i < n)
+  (ensures (
+    let b = of_bitfield (bitwise_op f l1 l2) in
+    let s = FStar.UInt.to_vec #n b in
+    S.index s i = f (List.Tot.index l1 (n-1-i)) (List.Tot.index l2 (n-1-i)))) =
+  let b = of_bitfield (bitwise_op f l1 l2) in
+  let s = FStar.UInt.to_vec #n b in
+  bitfield_vs_bitvector n b;
+  lemma_bitfield_inv (bitwise_op f l1 l2);
+  assert (s = rev_seq (list_to_seq (bitwise_op f l1 l2)));
+  lemma_bitwise_op_index f l1 l2 (n-1-i);
+  lemma_rev_seq (list_to_seq (bitwise_op f l1 l2)) (n-1-i)
+
+
+let lemma_charac_bitwise (n:pos) (f:bool->bool->bool) (b1 b2:UInt.uint_t n) (i:nat) : Lemma
+  (requires i < n)
+  (ensures (
+    let open FStar.UInt in
+    let l1 = to_bitfield n b1 in
+    let l2 = to_bitfield n b2 in
+    let vb1 = to_vec #n b1 in
+    let vb2 = to_vec #n b2 in
+    let s = to_vec #n (of_bitfield (bitwise_op f l1 l2)) in
+    S.index s i = f (S.index vb1 i) (S.index vb2 i))) =
+  let open FStar.UInt in
+  let l1 = to_bitfield n b1 in
+  let l2 = to_bitfield n b2 in
+  let vb1 = to_vec #n b1 in
+  let vb2 = to_vec #n b2 in
+  let s = to_vec #n (of_bitfield (bitwise_op f l1 l2)) in
+  lemma_charac_bitwise_aux n f l1 l2 i;
+  bitfield_vs_bitvector_index n b1 (n-1-i);
+  bitfield_vs_bitvector_index n b2 (n-1-i)
 
 // characterisation of logand in terms of bitfields
 let lemma_charac_logand (n:pos) (b1 b2:FStar.UInt.uint_t n) : Lemma
@@ -1395,11 +1471,14 @@ let lemma_charac_logand (n:pos) (b1 b2:FStar.UInt.uint_t n) : Lemma
   let vb2 = to_vec #n b2 in
   let right = to_vec #n (of_bitfield (bitwise_op (fun x y -> x && y) l1 l2)) in
 
-  let index_right i : Lemma
+  let rec index_right (i:nat{i<n}) : Lemma
     (S.index right i = (S.index vb1 i && S.index vb2 i)) =
-    admit() in
+    lemma_charac_bitwise n (fun x y -> x && y) b1 b2 i in
 
   FStar.Classical.forall_intro index_right
+
+
+
 
 
 let lemma_charac_logand_byte (b1 b2:byte) : Lemma
@@ -1441,7 +1520,7 @@ let lemma_charac_logxor (n:pos) (b1 b2:FStar.UInt.uint_t n) : Lemma
 
   let index_right i : Lemma
     (S.index right i = (S.index vb1 i <> S.index vb2 i)) =
-    admit() in
+    lemma_charac_bitwise n (fun x y -> x <> y) b1 b2 i in
 
   FStar.Classical.forall_intro index_right
 
