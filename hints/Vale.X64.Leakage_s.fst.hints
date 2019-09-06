@@ -1,5 +1,5 @@
 [
-  "©ñX\u001bU&K;U| â­ë\u0001",
+  "A¥¡\u0017\ttî‘\">2n\u000eð¶‘",
   [
     [
       "Vale.X64.Leakage_s.publicCfFlagValuesAreSame",
@@ -15,7 +15,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "0623d660c3eb617a0946ff63c35c8a49"
+      "39199f721ca9876aa050e72f40d32a3e"
     ],
     [
       "Vale.X64.Leakage_s.publicOfFlagValuesAreSame",
@@ -31,7 +31,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "833013f05758fffa46637a1ba41e335d"
+      "20d2e85009b9bd07c5f234d0158e92c0"
     ],
     [
       "Vale.X64.Leakage_s.publicRegisterValuesAreSame",
@@ -58,7 +58,7 @@
         "typing_Vale.X64.Machine_s.__proj__Reg__item__rf"
       ],
       0,
-      "5aa129d14cc47908c955a0f2ce30ce47"
+      "efdecd280f0de72b59eead759e8edfa7"
     ],
     [
       "Vale.X64.Leakage_s.constTimeInvariant",
@@ -74,7 +74,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "8cff4a5b67c61c4742da5b65cf130084"
+      "09e48b5cbcacd2c093c4a915ce4f381e"
     ],
     [
       "Vale.X64.Leakage_s.isConstantTimeGivenStates",
@@ -90,7 +90,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "4b07fb2734039b5ccae373afb2bf00f9"
+      "5c3e5abde096c644f8937b61d9037a39"
     ],
     [
       "Vale.X64.Leakage_s.is_explicit_leakage_free_lhs",
@@ -99,7 +99,7 @@
       0,
       [ "@query" ],
       0,
-      "76e42e763163ed30a2c12cc5450dc938"
+      "de1f146c5a9735a9b4e9eed269514272"
     ],
     [
       "Vale.X64.Leakage_s.is_explicit_leakage_free_rhs",
@@ -108,116 +108,7 @@
       0,
       [ "@query" ],
       0,
-      "30424f8f4fbbd038f197d1a2b85aefad"
-    ],
-    [
-      "Vale.X64.Leakage_s.publicCfFlagValuesAreSame",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "assumption_FStar.Pervasives.Native.option__uu___haseq",
-        "equation_Prims.eqtype",
-        "equation_Vale.X64.Machine_Semantics_s.flag_val_t",
-        "function_token_typing_Prims.bool",
-        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
-      ],
-      0,
-      "d5664c7b07b90aacc39f3f926e768ad8"
-    ],
-    [
-      "Vale.X64.Leakage_s.publicOfFlagValuesAreSame",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "assumption_FStar.Pervasives.Native.option__uu___haseq",
-        "equation_Prims.eqtype",
-        "equation_Vale.X64.Machine_Semantics_s.flag_val_t",
-        "function_token_typing_Prims.bool",
-        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
-      ],
-      0,
-      "9c9b27e9112a3191e3f641881e684d1b"
-    ],
-    [
-      "Vale.X64.Leakage_s.publicRegisterValuesAreSame",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
-        "equation_Prims.nat", "equation_Vale.Def.Types_s.quad32",
-        "equation_Vale.Def.Words_s.nat64", "equation_Vale.Def.Words_s.natN",
-        "equation_Vale.X64.Machine_s.n_reg_files",
-        "equation_Vale.X64.Machine_s.reg_file_id",
-        "equation_Vale.X64.Machine_s.t_reg",
-        "equation_Vale.X64.Machine_s.t_reg_file",
-        "function_token_typing_Prims.int",
-        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "haseqTm_refine_c1424615841f28cac7fc34e92b7ff33c", "int_inversion",
-        "proj_equation_Vale.X64.Machine_s.Reg_rf",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_d9979b96a3f2b18961b3dd63a2783b64",
-        "typing_Vale.Def.Types_s.quad32",
-        "typing_Vale.X64.Machine_s.__proj__Reg__item__rf"
-      ],
-      0,
-      "6cc76e35d550e3afeb6b9d2fcba4b02d"
-    ],
-    [
-      "Vale.X64.Leakage_s.constTimeInvariant",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "assumption_Prims.list__uu___haseq",
-        "assumption_Vale.X64.Machine_s.observation__uu___haseq",
-        "equation_Prims.eqtype",
-        "kinding_Vale.X64.Machine_s.observation@tok",
-        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
-      ],
-      0,
-      "3e1f2b231292b006fb14e23413c76752"
-    ],
-    [
-      "Vale.X64.Leakage_s.isConstantTimeGivenStates",
-      2,
-      1,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "assumption_Prims.list__uu___haseq",
-        "assumption_Vale.X64.Machine_s.observation__uu___haseq",
-        "equation_Prims.eqtype",
-        "kinding_Vale.X64.Machine_s.observation@tok",
-        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
-      ],
-      0,
-      "5e75f7361f723ac59c13d7be91622437"
-    ],
-    [
-      "Vale.X64.Leakage_s.is_explicit_leakage_free_lhs",
-      2,
-      1,
-      0,
-      [ "@query" ],
-      0,
-      "20532cf9e03a02df9524fa83036d6685"
-    ],
-    [
-      "Vale.X64.Leakage_s.is_explicit_leakage_free_rhs",
-      2,
-      1,
-      0,
-      [ "@query" ],
-      0,
-      "b11056380a4e956914446c5b67bb2594"
+      "3026061513e82d08390027d64544cbff"
     ]
   ]
 ]
