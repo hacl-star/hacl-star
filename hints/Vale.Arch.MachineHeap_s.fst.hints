@@ -53,6 +53,59 @@
       ],
       0,
       "eb31a3f90493f82983d28d0e95a4ee27"
+    ],
+    [
+      "Vale.Arch.MachineHeap_s.get_heap_val64_def",
+      2,
+      1,
+      0,
+      [ "@query" ],
+      0,
+      "5b0f6f9ce31f6ef05bf2af701e28ec01"
+    ],
+    [
+      "Vale.Arch.MachineHeap_s.get_heap_val32_def",
+      2,
+      1,
+      0,
+      [ "@query" ],
+      0,
+      "b821f82e330f284bbb3cbf13df2e6423"
+    ],
+    [
+      "Vale.Arch.MachineHeap_s.update_heap32_def",
+      2,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "equation_Vale.Def.Words_s.natN",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
+      ],
+      0,
+      "86a4de9db33758289b9c02cd8c31c7f1"
+    ],
+    [
+      "Vale.Arch.MachineHeap_s.update_heap64_def",
+      2,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "equation_Vale.Def.Words.Two_s.nat_to_two",
+        "equation_Vale.Def.Words_s.nat64", "equation_Vale.Def.Words_s.natN",
+        "int_inversion", "proj_equation_Vale.Def.Words_s.Mktwo_lo",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_Vale.Def.Words_s.Mktwo_lo",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
+      ],
+      0,
+      "efc5debc25398e6e7cc9eddf661ea340"
     ]
   ]
 ]
