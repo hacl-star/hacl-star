@@ -16,85 +16,146 @@ open Hacl.Impl.Addition
 open Hacl.Impl.Multiplication
 
 module ST = FStar.HyperStack.ST
+module S = Spec.RSAPSS
+module LSeq = Lib.Sequence
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
-inline_for_extraction
-let hLen = 32ul
-
 val xor_bytes:
-    len:size_t
+    len:size_t{v len > 0}
   -> b1:lbuffer uint8 len
-  -> b2:lbuffer uint8 len
-  -> Stack unit
-    (requires fun h -> live h b1 /\ live h b2 /\ disjoint b1 b2)
-    (ensures  fun h0 _ h1 -> modifies (loc b1) h0 h1)
+  -> b2:lbuffer uint8 len ->
+  Stack unit
+  (requires fun h -> live h b1 /\ live h b2 /\ disjoint b1 b2)
+  (ensures  fun h0 _ h1 -> modifies (loc b1) h0 h1 /\
+    as_seq h1 b1 == S.xor_bytes (as_seq h0 b1) (as_seq h0 b2))
+
 [@"c_inline"]
 let xor_bytes len b1 b2 =
-  let h0 = ST.get () in
-  let inv h1 i = modifies (loc b1) h0 h1 in
-  Lib.Loops.for 0ul len inv
-  (fun i -> b1.(i) <- b1.(i) ^. b2.(i))
+  map2T len b1 (fun x y -> x ^. y) b1 b2
 
-val pss_encode:
-    sLen:size_t{8 + v hLen + v sLen < max_size_t}
-  -> salt:lbuffer uint8 sLen
-  -> msgLen:size_t
-  -> msg:lbuffer uint8 msgLen
-  -> emBits:size_t{v emBits > 0 /\ v hLen + v sLen + 2 <= v (blocks emBits 8ul)}
-  -> em:lbuffer uint8 (blocks emBits 8ul)
-  -> Stack unit
-    (requires fun h ->
-      live h salt /\ live h msg /\ live h em /\
-      disjoint msg salt /\ disjoint em msg /\ disjoint em salt)
-    (ensures  fun h0 _ h1 -> modifies (loc em) h0 h1)
-[@"c_inline"]
-let pss_encode sLen salt msgLen msg emBits em = admit();
-  push_frame ();
-  let emLen = blocks emBits 8ul in
+
+inline_for_extraction noextract
+val db_zero:
+    len:size_t{v len > 0}
+  -> db:lbuffer uint8 len
+  -> emBits:size_t ->
+  Stack unit
+  (requires fun h -> live h db)
+  (ensures  fun h0 _ h1 -> modifies (loc db) h0 h1 /\
+    as_seq h1 db == S.db_zero #(v len) (as_seq h0 db) (v emBits))
+
+let db_zero len db emBits =
   let msBits = emBits %. 8ul in
+  if msBits >. 0ul then
+    db.(0ul) <- db.(0ul) &. (u8 0xff >>. (8ul -. msBits))
 
-  let m1Len = 8ul +. hLen +. sLen in
-  let dbLen = emLen -. hLen -. 1ul in
-  //st = [hash(msg); m1; hash(m1); db; dbMask]
-  assume (2 * v hLen + 4 + v (blocks dbLen hLen) * v hLen < pow2 32); //for mgf
-  assume (v hLen + v sLen + 6 + 2 * v emLen < max_size_t);
-  let stLen = hLen +. m1Len +. hLen +. dbLen +. dbLen in
-  let st = create stLen (u8 0) in
 
-  let mHash = sub st 0ul hLen in
-  let m1 = sub st hLen m1Len in
-  let m1Hash = sub st (hLen +. m1Len) hLen in
-  let db = sub st (hLen +. m1Len +. hLen) dbLen in
-  let dbMask = sub st (stLen -. dbLen) dbLen in
+inline_for_extraction noextract
+val get_m1Hash:
+    sLen:size_t{8 + v hLen + v sLen < max_size_t /\ 8 + v hLen + v sLen < S.max_input}
+  -> salt:lbuffer uint8 sLen
+  -> msgLen:size_t{v msgLen < S.max_input}
+  -> msg:lbuffer uint8 msgLen
+  -> m1Hash:lbuffer uint8 hLen ->
+  Stack unit
+  (requires fun h ->
+    live h salt /\ live h msg /\ live h m1Hash /\
+    disjoint msg salt /\ disjoint m1Hash msg /\ disjoint m1Hash salt)
+  (ensures  fun h0 _ h1 -> modifies (loc m1Hash) h0 h1 /\
+    (let mHash = S.sha2_256 (as_seq h0 msg) in
+    let m1Len = 8 + v hLen + v sLen in
+    let m1 = LSeq.create m1Len (u8 0) in
+    let m1 = LSeq.update_sub m1 8 (v hLen) mHash in
+    let m1 = LSeq.update_sub m1 (8 + v hLen) (v sLen) (as_seq h0 salt) in
+    as_seq h1 m1Hash == S.sha2_256 m1))
 
-  hash_sha256 mHash msgLen msg;
-  let m1_hash = sub m1 8ul hLen in
-  copy m1_hash mHash;
-  let m1_salt = sub m1 (8ul +. hLen) sLen in
-  copy m1_salt salt;
+let get_m1Hash sLen salt msgLen msg m1Hash =
+  push_frame ();
+  //m1 = [8 * 0x00; mHash; salt]
+  let m1Len = 8ul +! hLen +! sLen in
+  let m1 = create m1Len (u8 0) in
+  let h0 = ST.get () in
+  update_sub_f h0 m1 8ul hLen
+    (fun h -> S.sha2_256 (as_seq h0 msg))
+    (fun _ -> hash_sha256 (sub m1 8ul hLen) msgLen msg);
+  update_sub m1 (8ul +! hLen) sLen salt;
   hash_sha256 m1Hash m1Len m1;
+  pop_frame()
 
-  assert (0 <= v dbLen - v sLen - 1);
-  let last_before_salt = dbLen -. sLen -. 1ul in
+
+inline_for_extraction noextract
+val get_maskedDB:
+    sLen:size_t{8 + v hLen + v sLen < max_size_t /\ 8 + v hLen + v sLen < S.max_input}
+  -> salt:lbuffer uint8 sLen
+  -> m1Hash:lbuffer uint8 hLen
+  -> emBits:size_t{0 < v emBits /\ v hLen + v sLen + 2 <= v (blocks emBits 8ul)}
+  -> dbLen:size_t{v dbLen == v (blocks emBits 8ul -! hLen -! 1ul)}
+  -> db_mask:lbuffer uint8 dbLen ->
+  Stack unit
+  (requires fun h ->
+    live h salt /\ live h m1Hash /\ live h db_mask /\
+    disjoint m1Hash salt /\ disjoint m1Hash db_mask /\ disjoint db_mask salt /\
+    as_seq h db_mask == LSeq.create (v dbLen) (u8 0))
+  (ensures  fun h0 _ h1 -> modifies (loc db_mask) h0 h1 /\
+   (let emLen = S.blocks (v emBits) 8 in
+    let dbLen = emLen - v hLen - 1 in
+    let db = LSeq.create dbLen (u8 0) in
+    let last_before_salt = dbLen - v sLen - 1 in
+    let db = LSeq.upd db last_before_salt (u8 1) in
+    let db = LSeq.update_sub db (last_before_salt + 1) (v sLen) (as_seq h0 salt) in
+
+    let dbMask = S.mgf_sha256 (as_seq h0 m1Hash) dbLen in
+    let maskedDB = S.xor_bytes db dbMask in
+    let maskedDB = S.db_zero maskedDB (v emBits) in
+    as_seq h1 db_mask == maskedDB))
+
+let get_maskedDB sLen salt m1Hash emBits dbLen db =
+  push_frame ();
+  //db = [0x00;..; 0x00; 0x01; salt]
+  let last_before_salt = dbLen -! sLen -! 1ul in
   db.(last_before_salt) <- u8 1;
-  let db_salt = sub db (last_before_salt +. 1ul) sLen in
-  copy db_salt salt;
+  update_sub db (last_before_salt +! 1ul) sLen salt;
+
+  let dbMask = create dbLen (u8 0) in
+  assert_norm (v hLen + 4 <= max_size_t /\ v hLen + 4 < S.max_input);
   mgf_sha256 hLen m1Hash dbLen dbMask;
   xor_bytes dbLen db dbMask;
+  db_zero dbLen db emBits;
+  pop_frame()
 
-  (if msBits >. 0ul then begin
-    let shift_bits = 8ul -. msBits in
-    assert (0 < v shift_bits /\ v shift_bits < 8);
-    db.(0ul) <- db.(0ul) &. (u8 0xff >>. shift_bits)
-  end);
 
-  let em_db = sub em 0ul dbLen in
-  copy em_db db;
-  let em_hash = sub em dbLen hLen in
-  copy em_hash m1Hash;
-  em.(emLen -. 1ul) <- u8 0xbc;
-  pop_frame ()
+val pss_encode:
+    sLen:size_t{8 + v hLen + v sLen < max_size_t /\ 8 + v hLen + v sLen < S.max_input}
+  -> salt:lbuffer uint8 sLen
+  -> msgLen:size_t{v msgLen < S.max_input}
+  -> msg:lbuffer uint8 msgLen
+  -> emBits:size_t{0 < v emBits /\ v hLen + v sLen + 2 <= v (blocks emBits 8ul)}
+  -> em:lbuffer uint8 (blocks emBits 8ul) ->
+  Stack unit
+  (requires fun h ->
+    live h salt /\ live h msg /\ live h em /\
+    disjoint msg salt /\ disjoint em msg /\ disjoint em salt /\
+    as_seq h em == LSeq.create (S.blocks (v emBits) 8) (u8 0))
+  (ensures  fun h0 _ h1 -> modifies (loc em) h0 h1 /\
+    as_seq h1 em == S.pss_encode #(v sLen) #(v msgLen) (as_seq h0 salt) (as_seq h0 msg) (v emBits))
+
+[@"c_inline"]
+let pss_encode sLen salt msgLen msg emBits em =
+  push_frame ();
+  let m1Hash = create hLen (u8 0) in
+  get_m1Hash sLen salt msgLen msg m1Hash;
+
+  let emLen = blocks emBits 8ul in
+  let dbLen = emLen -! hLen -! 1ul in
+  let db = create dbLen (u8 0) in
+  get_maskedDB sLen salt m1Hash emBits dbLen db;
+
+  update_sub em 0ul dbLen db;
+  update_sub em dbLen hLen m1Hash;
+  em.(emLen -! 1ul) <- u8 0xbc;
+  pop_frame()
+
 
 val pss_verify:
     sLen:size_t{8 + v hLen + v sLen < max_size_t}
