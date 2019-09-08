@@ -150,7 +150,7 @@ val to_mont:
       disjoint aM st_kara /\ disjoint st_kara aM)
     (ensures  fun h0 _ h1 -> modifies (loc aM |+| loc st_kara) h0 h1)
 [@"c_inline"]
-let to_mont nLen rLen pow2_i n nInv_u64 r2 a st_kara aM =
+let to_mont nLen rLen pow2_i n nInv_u64 r2 a st_kara aM = admit();
   let cLen = nLen +. nLen in
   let stLen = cLen +. 4ul *. pow2_i in
   let c = sub st_kara 0ul cLen in

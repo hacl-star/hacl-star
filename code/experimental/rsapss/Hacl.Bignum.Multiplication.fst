@@ -7,6 +7,7 @@ open FStar.Mul
 open Lib.IntTypes
 open Lib.Buffer
 
+open Hacl.Bignum.Base
 open Hacl.Bignum.Lib
 open Hacl.Bignum.Comparison
 open Hacl.Bignum.Addition
@@ -23,11 +24,7 @@ val bn_mul_by_limb_addj_f:
   -> r_ij:uint64
   -> uint64 & uint64
 let bn_mul_by_limb_addj_f a_i l c r_ij =
-  assume (uint_v a_i * uint_v l + uint_v c + uint_v r_ij < pow2 128);
-  let res = mul64_wide a_i l +. to_u128 c +. to_u128 r_ij in
-  let r = to_u64 res in
-  let c' = to_u64 (res >>. 64ul) in
-  c', r
+  mul_carry_add_u64 a_i l c r_ij
 
 //res = res + limb * bn * beta_j
 inline_for_extraction noextract

@@ -7,6 +7,7 @@ open FStar.Mul
 open Lib.IntTypes
 open Lib.Buffer
 
+open Hacl.Bignum.Base
 open Hacl.Bignum.Lib
 
 val bn_is_less_:

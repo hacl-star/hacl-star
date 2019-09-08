@@ -6,7 +6,8 @@ open FStar.Mul
 
 open Lib.IntTypes
 open Lib.Buffer
-open Lib.RawIntTypes
+
+open Hacl.Bignum.Base
 
 module S = Spec.RSAPSS
 
@@ -23,21 +24,13 @@ val blocks:
 let blocks x m =
   (x -. 1ul) /. m +. 1ul
 
-inline_for_extraction noextract
-val eq_u64: a:uint64 -> b:uint64 -> Tot bool
-let eq_u64 a b = FStar.UInt64.(u64_to_UInt64 a =^ u64_to_UInt64 b)
 
 inline_for_extraction noextract
-val lt_u64: a:uint64 -> b:uint64 -> Tot bool
-let lt_u64 a b = FStar.UInt64.(u64_to_UInt64 a <^ u64_to_UInt64 b)
+val eq_u8: a:uint8 -> b:uint8 -> Tot bool
+let eq_u8 a b =
+  let open Lib.RawIntTypes in
+  FStar.UInt8.(u8_to_UInt8 a =^ u8_to_UInt8 b)
 
-inline_for_extraction noextract
-val le_u64: a:uint64 -> b:uint64 -> Tot bool
-let le_u64 a b = FStar.UInt64.(u64_to_UInt64 a <=^ u64_to_UInt64 b)
-
-inline_for_extraction noextract
-val eq_u8: a:uint8 -> b:uint8 -> Tot (r:bool{r == (uint_to_nat a = uint_to_nat b)})
-let eq_u8 a b = FStar.UInt8.(u8_to_UInt8 a =^ u8_to_UInt8 b)
 
 (* check if input[ind] is equal to 1 *)
 val bn_is_bit_set:
