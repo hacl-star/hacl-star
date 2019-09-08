@@ -89,7 +89,7 @@ let db_zero #len db emBits =
   else db
 
 val pss_encode:
-    #sLen: size_nat{sLen + hLen + 8 < max_size_t /\ sLen + hLen + 8 < max_input}
+    #sLen: size_nat{sLen + hLen + 8 <= max_size_t /\ sLen + hLen + 8 < max_input}
   -> #msgLen: size_nat{msgLen < max_input}
   -> salt: lbytes sLen
   -> msg: lbytes msgLen
@@ -125,6 +125,43 @@ let pss_encode #sLen #msgLen salt msg emBits =
   em.[emLen - 1] <- u8 0xbc
 
 
+val pss_verify_:
+    #msgLen: size_nat{msgLen < max_input}
+  -> sLen: size_nat{sLen + hLen + 8 <= max_size_t /\ sLen + hLen + 8 < max_input}
+  -> msg: lbytes msgLen
+  -> emBits: size_pos {blocks emBits 8 >= sLen + hLen + 2}
+  -> em: lbytes (blocks emBits 8) ->
+  Tot bool
+
+let pss_verify_ #msgLen sLen msg emBits em =
+  let emLen = blocks emBits 8 in
+  let dbLen = emLen - hLen - 1 in
+  let maskedDB = sub em 0 dbLen in
+  let m1Hash = sub em dbLen hLen in
+
+  let dbMask = mgf_sha256 m1Hash dbLen in
+  let db = xor_bytes dbMask maskedDB in
+  let db = db_zero db emBits in
+
+  let padLen = emLen - sLen - hLen - 1 in
+  let pad2 = create padLen (u8 0) in
+  let pad2 = pad2.[padLen - 1] <- u8 0x01 in
+
+  let pad  = sub db 0 padLen in
+  let salt = sub db padLen sLen in
+
+  if not (lbytes_eq pad pad2) then false
+  else begin
+    let mHash = sha2_256 msg in
+    let m1Len = 8 + hLen + sLen in
+    let m1 = create m1Len (u8 0) in
+    let m1 = update_sub m1 8 hLen mHash in
+    let m1 = update_sub m1 (8 + hLen) sLen salt in
+    let m1Hash0 = sha2_256 m1 in
+    lbytes_eq m1Hash0 m1Hash
+  end
+
+
 val pss_verify:
     #msgLen: size_nat{msgLen < max_input}
   -> sLen: size_nat{sLen + hLen + 8 <= max_size_t /\ sLen + hLen + 8 < max_input}
@@ -134,8 +171,6 @@ val pss_verify:
   Tot bool
 
 let pss_verify #msgLen sLen msg emBits em =
-  let mHash = sha2_256 msg in
-
   let emLen = blocks emBits 8 in
   let msBits = emBits % 8 in
 
@@ -145,33 +180,7 @@ let pss_verify #msgLen sLen msg emBits em =
   if (emLen < sLen + hLen + 2) then false
   else begin
     if (not (uint_to_nat #U8 em_last = 0xbc && uint_to_nat #U8 em_0 = 0)) then false
-    else begin
-      let dbLen = emLen - hLen - 1 in
-      let maskedDB = sub em 0 dbLen in
-      let m1Hash = sub em dbLen hLen in
-
-      let dbMask = mgf_sha256 m1Hash dbLen in
-      let db = xor_bytes maskedDB dbMask in
-      let db = db_zero db emBits in
-
-      let padLen = emLen - sLen - hLen - 1 in
-      let pad2 = create padLen (u8 0) in
-      let pad2 = pad2.[padLen - 1] <- u8 0x01 in
-
-      let pad  = sub db 0 padLen in
-      let salt = sub db padLen sLen in
-
-      if not (lbytes_eq pad pad2) then false
-      else begin
-        let m1Len = 8 + hLen + sLen in
-        let m1 = create m1Len (u8 0) in
-        let m1 = update_sub m1 8 hLen mHash in
-        let m1 = update_sub m1 (8 + hLen) sLen salt in
-        let m1Hash0 = sha2_256 m1 in
-        lbytes_eq m1Hash0 m1Hash
-      end
-    end
-  end
+    else pss_verify_ #msgLen sLen msg emBits em end
 
 
 val rsapss_sign:

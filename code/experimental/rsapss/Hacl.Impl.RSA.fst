@@ -53,7 +53,7 @@ let db_zero len db emBits =
 
 inline_for_extraction noextract
 val get_m1Hash:
-    sLen:size_t{8 + v hLen + v sLen < max_size_t /\ 8 + v hLen + v sLen < S.max_input}
+    sLen:size_t{8 + v hLen + v sLen <= max_size_t /\ 8 + v hLen + v sLen < S.max_input}
   -> salt:lbuffer uint8 sLen
   -> msgLen:size_t{v msgLen < S.max_input}
   -> msg:lbuffer uint8 msgLen
@@ -86,7 +86,7 @@ let get_m1Hash sLen salt msgLen msg m1Hash =
 
 inline_for_extraction noextract
 val get_maskedDB:
-    sLen:size_t{8 + v hLen + v sLen < max_size_t /\ 8 + v hLen + v sLen < S.max_input}
+    sLen:size_t{8 + v hLen + v sLen <= max_size_t /\ 8 + v hLen + v sLen < S.max_input}
   -> salt:lbuffer uint8 sLen
   -> m1Hash:lbuffer uint8 hLen
   -> emBits:size_t{0 < v emBits /\ v hLen + v sLen + 2 <= v (blocks emBits 8ul)}
@@ -126,7 +126,7 @@ let get_maskedDB sLen salt m1Hash emBits dbLen db =
 
 
 val pss_encode:
-    sLen:size_t{8 + v hLen + v sLen < max_size_t /\ 8 + v hLen + v sLen < S.max_input}
+    sLen:size_t{8 + v hLen + v sLen <= max_size_t /\ 8 + v hLen + v sLen < S.max_input}
   -> salt:lbuffer uint8 sLen
   -> msgLen:size_t{v msgLen < S.max_input}
   -> msg:lbuffer uint8 msgLen
@@ -157,67 +157,72 @@ let pss_encode sLen salt msgLen msg emBits em =
   pop_frame()
 
 
-val pss_verify:
-    sLen:size_t{8 + v hLen + v sLen < max_size_t}
-  -> msgLen:size_t
+inline_for_extraction noextract
+val pss_verify_:
+    sLen:size_t{8 + v hLen + v sLen <= max_size_t /\ 8 + v hLen + v sLen < S.max_input}
+  -> msgLen:size_t{v msgLen < S.max_input}
   -> msg:lbuffer uint8 msgLen
-  -> emBits:size_t{v emBits > 0 /\ v hLen + v sLen + 2 <= v (blocks emBits 8ul)}  // <- check the last condition before calling this function!
-  -> em:lbuffer uint8 (blocks emBits 8ul)
-  -> Stack bool
-    (requires fun h -> live h msg /\ live h em /\ disjoint em msg)
-    (ensures  fun h0 _ h1 -> modifies0 h0 h1)
-[@"c_inline"]
-let pss_verify sLen msgLen msg emBits em = admit();
+  -> emBits:size_t{0 < v emBits /\ v (blocks emBits 8ul) >= v sLen + v hLen + 2}
+  -> em:lbuffer uint8 (blocks emBits 8ul) ->
+  Stack bool
+  (requires fun h -> live h msg /\ live h em /\ disjoint em msg)
+  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
+    r == S.pss_verify_ #(v msgLen) (v sLen) (as_seq h0 msg) (v emBits) (as_seq h0 em))
+
+let pss_verify_ sLen msgLen msg emBits em =
   push_frame ();
+  let emLen = blocks emBits 8ul in
+
+  let dbLen = emLen -! hLen -! 1ul in
+  let maskedDB = sub em 0ul dbLen in
+  let m1Hash = sub em dbLen hLen in
+
+  let dbMask = create dbLen (u8 0) in
+  mgf_sha256 hLen m1Hash dbLen dbMask;
+  xor_bytes dbLen dbMask maskedDB;
+  db_zero dbLen dbMask emBits;
+
+  let padLen = emLen -! sLen -! hLen -! 1ul in
+  let pad2 = create padLen (u8 0) in
+  pad2.(padLen -! 1ul) <- u8 0x01;
+
+  let pad = sub dbMask 0ul padLen in
+  let salt = sub dbMask padLen sLen in
+
+  let res =
+    if not (Lib.ByteBuffer.lbytes_eq #padLen pad pad2) then false
+    else begin
+      let m1Hash0 = create hLen (u8 0) in
+      get_m1Hash sLen salt msgLen msg m1Hash0;
+      Lib.ByteBuffer.lbytes_eq #hLen m1Hash0 m1Hash end in
+  pop_frame ();
+  res
+
+
+val pss_verify:
+    sLen:size_t{8 + v hLen + v sLen <= max_size_t /\ 8 + v hLen + v sLen < S.max_input}
+  -> msgLen:size_t{v msgLen < S.max_input}
+  -> msg:lbuffer uint8 msgLen
+  -> emBits:size_t{0 < v emBits}
+  -> em:lbuffer uint8 (blocks emBits 8ul) ->
+  Stack bool
+  (requires fun h -> live h msg /\ live h em /\ disjoint em msg)
+  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
+    r == S.pss_verify #(v msgLen) (v sLen) (as_seq h0 msg) (v emBits) (as_seq h0 em))
+
+[@"c_inline"]
+let pss_verify sLen msgLen msg emBits em =
   let emLen = blocks emBits 8ul in
   let msBits = emBits %. 8ul in
 
   let em_0 = if msBits >. 0ul then em.(0ul) &. (u8 0xff <<. msBits) else u8 0 in
-  let em_last = em.(emLen -. 1ul) in
+  let em_last = em.(emLen -! 1ul) in
 
-  let padLen = emLen -. sLen -. hLen -. 1ul in
-  let dbLen = emLen -. hLen -. 1ul in
-  let m1Len = 8ul +. hLen +. sLen in
-  assume (4 + 2 * v hLen + v hLen * v (blocks dbLen hLen) < max_size_t);
-  //st = [hash(msg); pad; dbMask; m1; hash(m1)]
-  let stLen = hLen +. padLen +. dbLen +. m1Len +. hLen in
-  let st = create stLen (u8 0) in
-  let res =
-    if not ((eq_u8 em_0 (u8 0)) && (eq_u8 em_last (u8 0xbc))) then false
-    else begin
-      let mHash = sub st 0ul hLen in
-      let pad2 = sub st hLen padLen in
-      let dbMask = sub st (hLen +. padLen) dbLen in
-      let m1 = sub st (hLen +. padLen +. dbLen) m1Len in
-      let m1Hash' = sub st (stLen -. hLen) hLen in
+  if (emLen <. sLen +! hLen +! 2ul) then false
+  else begin
+    if not (eq_u8 em_last (u8 0xbc) && eq_u8 em_0 (u8 0)) then false
+    else pss_verify_ sLen msgLen msg emBits em end
 
-      let maskedDB = sub em 0ul dbLen in
-      let m1Hash = sub em dbLen hLen in
-
-      hash_sha256 mHash msgLen msg;
-
-      mgf_sha256 hLen m1Hash dbLen dbMask;
-      xor_bytes dbLen dbMask maskedDB;
-      (if msBits >. 0ul then begin
-        let shift_bits = 8ul -. msBits in
-        dbMask.(0ul) <- dbMask.(0ul) &. (u8 0xff >>. shift_bits)
-      end);
-
-      pad2.(padLen -. 1ul) <- u8 0x01;
-      let pad = sub dbMask 0ul padLen in
-      let salt = sub dbMask padLen sLen in
-
-      let m1_hash = sub m1 8ul hLen in
-      copy m1_hash mHash;
-      let m1_salt = sub m1 (8ul +. hLen) sLen in
-      copy m1_salt salt;
-      hash_sha256 m1Hash' m1Len m1;
-
-      if not (Lib.ByteBuffer.lbytes_eq #padLen pad pad2) then false
-      else Lib.ByteBuffer.lbytes_eq #hLen m1Hash m1Hash'
-    end in
-  pop_frame ();
-  res
 
 inline_for_extraction noextract
 val rsa_sign:
