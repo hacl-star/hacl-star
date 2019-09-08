@@ -4,8 +4,6 @@ open FStar.HyperStack
 open FStar.HyperStack.ST
 open FStar.Mul
 
-open LowStar.Buffer
-
 open Lib.IntTypes
 open Lib.Buffer
 
@@ -43,10 +41,10 @@ val bn_mult_by_limb_addj_add:
   -> carry:lbignum 1ul
   -> Stack uint64
     (requires fun h -> live h a /\ live h res /\ live h carry /\ disjoint res a)
-    (ensures  fun h0 _ h1 -> modifies (loc_union (loc_buffer carry) (loc_buffer res)) h0 h1)
+    (ensures  fun h0 _ h1 -> modifies (loc carry |+| loc res) h0 h1)
 let bn_mult_by_limb_addj_add aLen a l j resLen res carry =
   let h0 = ST.get () in
-  let inv h1 i = modifies (loc_union (loc_buffer carry) (loc_buffer res)) h0 h1 in
+  let inv h1 i = modifies (loc carry |+| loc res) h0 h1 in
   Lib.Loops.for 0ul aLen inv
   (fun i ->
     let ij = i +. j in
@@ -70,10 +68,10 @@ val bn_mult_by_limb_addj:
   -> carry:lbignum 1ul
   -> Stack unit
     (requires fun h -> live h a /\ live h res /\ live h carry /\ disjoint res a)
-    (ensures  fun h0 _ h1 -> modifies (loc_union (loc_buffer carry) (loc_buffer res)) h0 h1)
+    (ensures  fun h0 _ h1 -> modifies (loc carry |+| loc res) h0 h1)
 let bn_mult_by_limb_addj aLen a l j resLen res carry =
   let h0 = ST.get() in
-  let inv h1 i = modifies (loc_union (loc_buffer carry) (loc_buffer res)) h0 h1 in
+  let inv h1 i = modifies (loc carry |+| loc res) h0 h1 in
   Lib.Loops.for 0ul aLen inv
   (fun i ->
     let ij = i +. j in
@@ -97,10 +95,10 @@ val bn_mult_:
     (requires fun h ->
       live h a /\ live h b /\ live h res /\ live h carry /\
       disjoint res a /\ disjoint res b)
-    (ensures  fun h0 _ h1 -> modifies (loc_union (loc_buffer carry) (loc_buffer res)) h0 h1)
+    (ensures  fun h0 _ h1 -> modifies (loc carry |+| loc res) h0 h1)
 let bn_mult_ aLen a bLen b resLen res carry =
   let h0 = ST.get() in
-  let inv h1 j = modifies (loc_union (loc_buffer carry) (loc_buffer res)) h0 h1 in
+  let inv h1 j = modifies (loc carry |+| loc res) h0 h1 in
   Lib.Loops.for 0ul bLen inv
   (fun j ->
     carry.(0ul) <- u64 0;
@@ -117,7 +115,7 @@ val bn_mul:
   -> Stack unit
     (requires fun h ->
       live h a /\ live h b /\ live h res /\ disjoint res a /\ disjoint res b)
-    (ensures  fun h0 _ h1 -> modifies (loc_buffer res) h0 h1)
+    (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1)
 [@"c_inline"]
 let bn_mul aLen a bLen b res =
   push_frame ();
@@ -139,7 +137,7 @@ val abs:
   -> res:lbignum aLen
   -> Stack sign
     (requires fun h -> live h a /\ live h b /\ live h res)
-    (ensures  fun h0 _ h1 -> modifies (loc_buffer res) h0 h1)
+    (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1)
 let abs aLen a b res =
   if (bn_is_less aLen a aLen b) // a < b
   then begin
@@ -170,11 +168,11 @@ val add_sign:
       live h a0 /\ live h a1 /\ live h a2 /\
       live h b0 /\ live h b1 /\ live h b2 /\
       live h res)
-    (ensures  fun h0 _ h1 -> modifies (loc_buffer res) h0 h1)
+    (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1)
 [@"c_inline"]
 let add_sign a0Len c0 c1 c2 a0 a1 a2 b0 b1 b2 sa2 sb2 resLen res =
   let c0Len = a0Len +. a0Len in
-  let res1 = sub #_ #(v resLen) #(v c0Len) res 0ul c0Len in
+  let res1 = sub res 0ul c0Len in
   let c = bn_add c0Len c0 c0Len c1 res1 in
   res.(c0Len) <- c;
   if ((sa2 = Positive && sb2 = Positive) || (sa2 = Negative && sb2 = Negative))
@@ -192,7 +190,7 @@ val karatsuba_:
     (requires fun h ->
       live h a /\ live h b /\ live h tmp /\ live h res /\
       disjoint res a /\ disjoint res b /\ disjoint res tmp)
-    (ensures  fun h0 _ h1 -> modifies (loc_union (loc_buffer res) (loc_buffer tmp)) h0 h1)
+    (ensures  fun h0 _ h1 -> modifies (loc res |+| loc tmp) h0 h1)
 [@"c_inline"]
 let rec karatsuba_ pow2_i aLen a b tmp res = admit();
   let tmpLen = 4ul *. pow2_i in
@@ -245,7 +243,7 @@ val karatsuba:
     (requires fun h ->
       live h a /\ live h b /\ live h st_kara /\
       disjoint st_kara a /\ disjoint st_kara b)
-    (ensures  fun h0 _ h1 -> modifies (loc_buffer st_kara) h0 h1)
+    (ensures  fun h0 _ h1 -> modifies (loc st_kara) h0 h1)
 [@"c_inline"]
 let karatsuba pow2_i aLen a b st_kara =
   let stLen = aLen +. aLen +. 4ul *. pow2_i in

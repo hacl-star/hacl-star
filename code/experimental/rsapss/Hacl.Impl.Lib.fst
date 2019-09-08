@@ -4,17 +4,14 @@ open FStar.HyperStack
 open FStar.HyperStack.ST
 open FStar.Mul
 
-open LowStar.Buffer
-
 open Lib.IntTypes
 open Lib.Buffer
 open Lib.RawIntTypes
 
-inline_for_extraction noextract
-let lbytes len = lbuffer uint8 (v len)
+#set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
 inline_for_extraction noextract
-let lbignum len = lbuffer uint64 (v len)
+let lbignum len = lbuffer uint64 len
 
 inline_for_extraction noextract
 val blocks:
@@ -47,7 +44,7 @@ val bn_is_bit_set:
   -> ind:size_t{v ind / 64 < v len}
   -> Stack bool
     (requires fun h -> live h input)
-    (ensures  fun h0 r h1 -> modifies loc_none h0 h1 /\ h0 == h1)
+    (ensures  fun h0 r h1 -> h0 == h1)
 [@"c_inline"]
 let bn_is_bit_set len input ind =
   let i = ind /. 64ul in
@@ -62,7 +59,7 @@ val bn_set_bit:
   -> ind:size_t{v ind / 64 < v len}
   -> Stack unit
     (requires fun h -> live h input)
-    (ensures  fun h0 _ h1 -> modifies (loc_buffer input) h0 h1)
+    (ensures  fun h0 _ h1 -> modifies (loc input) h0 h1)
 [@"c_inline"]
 let bn_set_bit len input ind =
   let i = ind /. 64ul in
@@ -77,6 +74,6 @@ val bval:
   -> i:size_t
   -> Stack uint64
     (requires fun h -> live h b)
-    (ensures  fun h0 _ h1 -> modifies loc_none h0 h1 /\ h0 == h1)
+    (ensures  fun h0 _ h1 -> h0 == h1)
 let bval len b i =
   if i <. len then b.(i) else u64 0

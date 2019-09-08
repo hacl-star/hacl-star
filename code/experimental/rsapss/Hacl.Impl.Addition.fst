@@ -4,8 +4,6 @@ open FStar.HyperStack
 open FStar.HyperStack.ST
 open FStar.Mul
 
-open LowStar.Buffer
-
 open Lib.IntTypes
 open Lib.Buffer
 
@@ -44,19 +42,19 @@ let subborrow_u64 carry a b =
 inline_for_extraction noextract
 val bn_sub_:
     aLen:size_t
-  -> a:lbuffer uint64 (v aLen)
+  -> a:lbuffer uint64 aLen
   -> bLen:size_t
-  -> b:lbuffer uint64 (v bLen)
-  -> carry:lbuffer uint64 1
-  -> res:lbuffer uint64 (v aLen)
+  -> b:lbuffer uint64 bLen
+  -> carry:lbuffer uint64 1ul
+  -> res:lbuffer uint64 aLen
   -> Stack unit
     (requires fun h ->
       live h a /\ live h b /\ live h res /\ live h carry)
     (ensures  fun h0 _ h1 ->
-      modifies (loc_union (loc_buffer carry) (loc_buffer res)) h0 h1)
+      modifies (loc carry |+| loc res) h0 h1)
 let bn_sub_ aLen a bLen b carry res =
   let h0 = ST.get () in
-  let inv h1 i = modifies (loc_union (loc_buffer carry) (loc_buffer res)) h0 h1 in
+  let inv h1 i = modifies (loc carry |+| loc res) h0 h1 in
   Lib.Loops.for 0ul aLen inv
   (fun i ->
     let t1 = a.(i) in
@@ -68,13 +66,13 @@ let bn_sub_ aLen a bLen b carry res =
 
 val bn_sub:
     aLen:size_t
-  -> a:lbuffer uint64 (v aLen)
+  -> a:lbuffer uint64 aLen
   -> bLen:size_t{v bLen <= v aLen}
-  -> b:lbuffer uint64 (v bLen)
-  -> res:lbuffer uint64 (v aLen)
+  -> b:lbuffer uint64 bLen
+  -> res:lbuffer uint64 aLen
   -> Stack uint64
     (requires fun h -> live h a /\ live h b /\ live h res)
-    (ensures  fun h0 _ h1 -> modifies (loc_buffer res) h0 h1)
+    (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1)
 [@"c_inline"]
 let bn_sub aLen a bLen b res =
   push_frame ();
@@ -87,17 +85,17 @@ let bn_sub aLen a bLen b res =
 inline_for_extraction noextract
 val bn_add_:
     aLen:size_t
-  -> a:lbuffer uint64 (v aLen)
+  -> a:lbuffer uint64 aLen
   -> bLen:size_t
-  -> b:lbuffer uint64 (v bLen)
-  -> carry:lbuffer uint64 1
-  -> res:lbuffer uint64 (v aLen)
+  -> b:lbuffer uint64 bLen
+  -> carry:lbuffer uint64 1ul
+  -> res:lbuffer uint64 aLen
   -> Stack unit
     (requires fun h -> live h a /\ live h b /\ live h res /\ live h carry)
-    (ensures  fun h0 _ h1 -> modifies (loc_union (loc_buffer carry) (loc_buffer res)) h0 h1)
+    (ensures  fun h0 _ h1 -> modifies (loc carry |+| loc res) h0 h1)
 let bn_add_ aLen a bLen b carry res =
   let h0 = ST.get () in
-  let inv h1 i = modifies (loc_union (loc_buffer carry) (loc_buffer res)) h0 h1 in
+  let inv h1 i = modifies (loc carry |+| loc res) h0 h1 in
   Lib.Loops.for 0ul aLen inv
   (fun i ->
     let t1 = a.(i) in
@@ -109,13 +107,13 @@ let bn_add_ aLen a bLen b carry res =
 
 val bn_add:
     aLen:size_t
-  -> a:lbuffer uint64 (v aLen)
+  -> a:lbuffer uint64 aLen
   -> bLen:size_t{v bLen <= v aLen}
-  -> b:lbuffer uint64 (v bLen)
-  -> res:lbuffer uint64 (v aLen)
+  -> b:lbuffer uint64 bLen
+  -> res:lbuffer uint64 aLen
   -> Stack uint64
     (requires fun h -> live h a /\ live h b /\ live h res)
-    (ensures  fun h0 _ h1 -> modifies (loc_buffer res) h0 h1)
+    (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1)
 [@"c_inline"]
 let bn_add aLen a bLen b res =
   push_frame ();

@@ -17,6 +17,9 @@ module ST = FStar.HyperStack.ST
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
+inline_for_extraction noextract
+let lbytes len = ilbuffer uint8 len
+
 val ctest:
     pow2_i:size_t
   -> modBits:size_t{v modBits > 0}
@@ -43,7 +46,7 @@ val ctest:
       live h r2 /\ live h rBlind /\ live h msg /\ live h salt /\
       live h sgnt_expected)
     (ensures  fun h0 r h1 -> True)
-let ctest pow2_i modBits n pkeyBits e skeyBits d pTLen p qTLen q r2 rBlindTLen rBlind msgLen msg saltLen salt sgnt_expected =
+let ctest pow2_i modBits n pkeyBits e skeyBits d pTLen p qTLen q r2 rBlindTLen rBlind msgLen msg saltLen salt sgnt_expected = admit();
   push_frame ();
   //let pow2_i = size (pow2 (x0 - 6)) in
   let nLen = blocks modBits 64ul in
@@ -87,15 +90,14 @@ let ctest pow2_i modBits n pkeyBits e skeyBits d pTLen p qTLen q r2 rBlindTLen r
   pop_frame ();
   res
 
+inline_for_extraction noextract
 val u8: n:nat{n < 0x100} -> uint8
 let u8 n = u8 n
-
-let lbytes len = lbuffer uint8 len
 
 //
 // Test1
 //
-let test1_n: b:lbytes 128{ recallable b } =
+let test1_n: b:ilbuffer uint8 128ul{ recallable b } =
   let open Lib.RawIntTypes in
   [@ inline_let]
   let l:list uint8 =
@@ -112,7 +114,7 @@ let test1_n: b:lbytes 128{ recallable b } =
   assert_norm (List.Tot.length l == 128);
   createL_global l
 
-let test1_e: b:lbytes 3{ recallable b } =
+let test1_e: b:ilbuffer uint8 3ul{ recallable b } =
   let open Lib.RawIntTypes in
   [@ inline_let]
   let l:list uint8 =
@@ -120,7 +122,7 @@ let test1_e: b:lbytes 3{ recallable b } =
   assert_norm (List.Tot.length l == 3);
   createL_global l
 
-let test1_d: b:lbytes 128{ recallable b } =
+let test1_d: b:ilbuffer uint8 128ul{ recallable b } =
   let open Lib.RawIntTypes in
   [@ inline_let]
   let l:list uint8 =
@@ -137,7 +139,7 @@ let test1_d: b:lbytes 128{ recallable b } =
   assert_norm (List.Tot.length l == 128);
   createL_global l
 
-let test1_p: b:lbytes 64{ recallable b } =
+let test1_p: b:ilbuffer uint8 64ul{ recallable b } =
   let open Lib.RawIntTypes in
   [@ inline_let]
   let l:list uint8 =
@@ -150,7 +152,7 @@ let test1_p: b:lbytes 64{ recallable b } =
   assert_norm (List.Tot.length l == 64);
   createL_global l
 
-let test1_q: b:lbytes 64{ recallable b } =
+let test1_q: b:ilbuffer uint8 64ul{ recallable b } =
   let open Lib.RawIntTypes in
   [@ inline_let]
   let l:list uint8 =
@@ -163,7 +165,7 @@ let test1_q: b:lbytes 64{ recallable b } =
   assert_norm (List.Tot.length l == 64);
   createL_global l
 
-let test1_r2: b:lbytes 128{ recallable b } =
+let test1_r2: b:ilbuffer uint8 128ul{ recallable b } =
   let open Lib.RawIntTypes in
   [@ inline_let]
   let l:list uint8 =
@@ -180,7 +182,7 @@ let test1_r2: b:lbytes 128{ recallable b } =
   assert_norm (List.Tot.length l == 128);
   createL_global l
 
-let test1_rBlind: b:lbytes 8{ recallable b } =
+let test1_rBlind: b:ilbuffer uint8 8ul{ recallable b } =
   let open Lib.RawIntTypes in
   [@ inline_let]
   let l:list uint8 =
@@ -190,7 +192,7 @@ let test1_rBlind: b:lbytes 8{ recallable b } =
   assert_norm (List.Tot.length l == 8);
   createL_global l
 
-let test1_msg: b:lbytes 51{ recallable b } =
+let test1_msg: b:ilbuffer uint8 51ul{ recallable b } =
   let open Lib.RawIntTypes in
   [@ inline_let]
   let l:list uint8 =
@@ -203,7 +205,7 @@ let test1_msg: b:lbytes 51{ recallable b } =
   assert_norm (List.Tot.length l == 51);
   createL_global l
 
-let test1_salt: b:lbytes 20{ recallable b } =
+let test1_salt: b:ilbuffer uint8 20ul{ recallable b } =
   let open Lib.RawIntTypes in
   [@ inline_let]
   let l:list uint8 =
@@ -214,7 +216,7 @@ let test1_salt: b:lbytes 20{ recallable b } =
   assert_norm (List.Tot.length l == 20);
   createL_global l
 
-let test1_sgnt_expected: b:lbytes 128{ recallable b } =
+let test1_sgnt_expected: b:ilbuffer uint8 128ul{ recallable b } =
   let open Lib.RawIntTypes in
   [@ inline_let]
   let l:list uint8 =
@@ -235,7 +237,7 @@ let test1_sgnt_expected: b:lbytes 128{ recallable b } =
 //
 // Test2
 //
-let test2_n: b:lbytes 129{ recallable b } =
+let test2_n: b:ilbuffer uint8 129ul{ recallable b } =
   let open Lib.RawIntTypes in
   [@ inline_let]
   let l:list uint8 =
@@ -253,7 +255,7 @@ let test2_n: b:lbytes 129{ recallable b } =
   assert_norm (List.Tot.length l == 129);
   createL_global l
 
-let test2_e: b:lbytes 3{ recallable b } =
+let test2_e: b:ilbuffer uint8 3ul{ recallable b } =
   let open Lib.RawIntTypes in
   [@ inline_let]
   let l:list uint8 =
@@ -261,7 +263,7 @@ let test2_e: b:lbytes 3{ recallable b } =
   assert_norm (List.Tot.length l == 3);
   createL_global l
 
-let test2_d: b:lbytes 128{ recallable b } =
+let test2_d: b:ilbuffer uint8 128ul{ recallable b } =
   let open Lib.RawIntTypes in
   [@ inline_let]
   let l:list uint8 =
@@ -278,7 +280,7 @@ let test2_d: b:lbytes 128{ recallable b } =
   assert_norm (List.Tot.length l == 128);
   createL_global l
 
-let test2_p: b:lbytes 65{ recallable b } =
+let test2_p: b:ilbuffer uint8 65ul{ recallable b } =
   let open Lib.RawIntTypes in
   [@ inline_let]
   let l:list uint8 =
@@ -292,7 +294,7 @@ let test2_p: b:lbytes 65{ recallable b } =
   assert_norm (List.Tot.length l == 65);
   createL_global l
 
-let test2_q: b:lbytes 65{ recallable b } =
+let test2_q: b:ilbuffer uint8 65ul{ recallable b } =
   let open Lib.RawIntTypes in
   [@ inline_let]
   let l:list uint8 =
@@ -306,7 +308,7 @@ let test2_q: b:lbytes 65{ recallable b } =
   assert_norm (List.Tot.length l == 65);
   createL_global l
 
-let test2_r2: b:lbytes 129{ recallable b } =
+let test2_r2: b:ilbuffer uint8 129ul{ recallable b } =
   let open Lib.RawIntTypes in
   [@ inline_let]
   let l:list uint8 =
@@ -324,7 +326,7 @@ let test2_r2: b:lbytes 129{ recallable b } =
   assert_norm (List.Tot.length l == 129);
   createL_global l
 
-let test2_rBlind: b:lbytes 8{ recallable b } =
+let test2_rBlind: b:ilbuffer uint8 8ul{ recallable b } =
   let open Lib.RawIntTypes in
   [@ inline_let]
   let l:list uint8 =
@@ -334,7 +336,7 @@ let test2_rBlind: b:lbytes 8{ recallable b } =
   assert_norm (List.Tot.length l == 8);
   createL_global l
 
-let test2_msg: b:lbytes 234{ recallable b } =
+let test2_msg: b:ilbuffer uint8 234ul{ recallable b } =
   let open Lib.RawIntTypes in
   [@ inline_let]
   let l:list uint8 =
@@ -358,7 +360,7 @@ let test2_msg: b:lbytes 234{ recallable b } =
   assert_norm (List.Tot.length l == 234);
   createL_global l
 
-let test2_salt: b:lbytes 20{ recallable b } =
+let test2_salt: b:ilbuffer uint8 20ul{ recallable b } =
   let open Lib.RawIntTypes in
   [@ inline_let]
   let l:list uint8 =
@@ -369,7 +371,7 @@ let test2_salt: b:lbytes 20{ recallable b } =
   assert_norm (List.Tot.length l == 20);
   createL_global l
 
-let test2_sgnt_expected: b:lbytes 129{ recallable b } =
+let test2_sgnt_expected: b:ilbuffer uint8 129ul{ recallable b } =
   let open Lib.RawIntTypes in
   [@ inline_let]
   let l:list uint8 =
@@ -390,7 +392,7 @@ let test2_sgnt_expected: b:lbytes 129{ recallable b } =
 //
 // Test3
 //
-let test3_n: b:lbytes 192{ recallable b } =
+let test3_n: b:ilbuffer uint8 192ul{ recallable b } =
   let open Lib.RawIntTypes in
   [@ inline_let]
   let l:list uint8 =
@@ -411,7 +413,7 @@ let test3_n: b:lbytes 192{ recallable b } =
   assert_norm (List.Tot.length l == 192);
   createL_global l
 
-let test3_e: b:lbytes 3{ recallable b } =
+let test3_e: b:ilbuffer uint8 3ul{ recallable b } =
   let open Lib.RawIntTypes in
   [@ inline_let]
   let l:list uint8 =
@@ -419,7 +421,7 @@ let test3_e: b:lbytes 3{ recallable b } =
   assert_norm (List.Tot.length l == 3);
   createL_global l
 
-let test3_d: b:lbytes 192{ recallable b } =
+let test3_d: b:ilbuffer uint8 192ul{ recallable b } =
   let open Lib.RawIntTypes in
   [@ inline_let]
   let l:list uint8 =
@@ -440,7 +442,7 @@ let test3_d: b:lbytes 192{ recallable b } =
   assert_norm (List.Tot.length l == 192);
   createL_global l
 
-let test3_p: b:lbytes 96{ recallable b } =
+let test3_p: b:ilbuffer uint8 96ul{ recallable b } =
   let open Lib.RawIntTypes in
   [@ inline_let]
   let l:list uint8 =
@@ -455,7 +457,7 @@ let test3_p: b:lbytes 96{ recallable b } =
   assert_norm (List.Tot.length l == 96);
   createL_global l
 
-let test3_q: b:lbytes 96{ recallable b } =
+let test3_q: b:ilbuffer uint8 96ul{ recallable b } =
   let open Lib.RawIntTypes in
   [@ inline_let]
   let l:list uint8 =
@@ -470,7 +472,7 @@ let test3_q: b:lbytes 96{ recallable b } =
   assert_norm (List.Tot.length l == 96);
   createL_global l
 
-let test3_r2: b:lbytes 192{ recallable b } =
+let test3_r2: b:ilbuffer uint8 192ul{ recallable b } =
   let open Lib.RawIntTypes in
   [@ inline_let]
   let l:list uint8 =
@@ -491,7 +493,7 @@ let test3_r2: b:lbytes 192{ recallable b } =
   assert_norm (List.Tot.length l == 192);
   createL_global l
 
-let test3_rBlind: b:lbytes 8{ recallable b } =
+let test3_rBlind: b:ilbuffer uint8 8ul{ recallable b } =
   let open Lib.RawIntTypes in
   [@ inline_let]
   let l:list uint8 =
@@ -501,7 +503,7 @@ let test3_rBlind: b:lbytes 8{ recallable b } =
   assert_norm (List.Tot.length l == 8);
   createL_global l
 
-let test3_msg: b:lbytes 107{ recallable b } =
+let test3_msg: b:ilbuffer uint8 107ul{ recallable b } =
   let open Lib.RawIntTypes in
   [@ inline_let]
   let l:list uint8 =
@@ -517,7 +519,7 @@ let test3_msg: b:lbytes 107{ recallable b } =
   assert_norm (List.Tot.length l == 107);
   createL_global l
 
-let test3_salt: b:lbytes 20{ recallable b } =
+let test3_salt: b:ilbuffer uint8 20ul{ recallable b } =
   let open Lib.RawIntTypes in
   [@ inline_let]
   let l:list uint8 =
@@ -528,7 +530,7 @@ let test3_salt: b:lbytes 20{ recallable b } =
   assert_norm (List.Tot.length l == 20);
   createL_global l
 
-let test3_sgnt_expected: b:lbytes 129{ recallable b } =
+let test3_sgnt_expected: b:ilbuffer uint8 192ul{ recallable b } =
   let open Lib.RawIntTypes in
   [@ inline_let]
   let l:list uint8 =
@@ -546,14 +548,14 @@ let test3_sgnt_expected: b:lbytes 129{ recallable b } =
      0x89; 0x2a; 0x74; 0x0e; 0x1b; 0x8a; 0x88; 0x76; 0x6a; 0x30; 0xfc; 0xe9; 0xb6; 0x0e; 0x03; 0x32;
      0xd7; 0xa0; 0x1b; 0xa5; 0xfa; 0x13; 0x5f; 0xe7; 0xc4; 0x92; 0x72; 0xac; 0xbb; 0x1d; 0x30; 0xf1])
   in
-  assert_norm (List.Tot.length l == 129);
+  assert_norm (List.Tot.length l == 192);
   createL_global l
 
 
 //
 // Test4
 //
-let test4_n: b:lbytes 256{ recallable b } =
+let test4_n: b:ilbuffer uint8 256ul{ recallable b } =
   let open Lib.RawIntTypes in
   [@ inline_let]
   let l:list uint8 =
@@ -578,7 +580,7 @@ let test4_n: b:lbytes 256{ recallable b } =
   assert_norm (List.Tot.length l == 256);
   createL_global l
 
-let test4_e: b:lbytes 3{ recallable b } =
+let test4_e: b:ilbuffer uint8 3ul{ recallable b } =
   let open Lib.RawIntTypes in
   [@ inline_let]
   let l:list uint8 =
@@ -586,7 +588,7 @@ let test4_e: b:lbytes 3{ recallable b } =
   assert_norm (List.Tot.length l == 3);
   createL_global l
 
-let test4_d: b:lbytes 256{ recallable b } =
+let test4_d: b:ilbuffer uint8 256ul{ recallable b } =
   let open Lib.RawIntTypes in
   [@ inline_let]
   let l:list uint8 =
@@ -611,7 +613,7 @@ let test4_d: b:lbytes 256{ recallable b } =
   assert_norm (List.Tot.length l == 256);
   createL_global l
 
-let test4_p: b:lbytes 128{ recallable b } =
+let test4_p: b:ilbuffer uint8 128ul{ recallable b } =
   let open Lib.RawIntTypes in
   [@ inline_let]
   let l:list uint8 =
@@ -628,7 +630,7 @@ let test4_p: b:lbytes 128{ recallable b } =
   assert_norm (List.Tot.length l == 128);
   createL_global l
 
-let test4_q: b:lbytes 128{ recallable b } =
+let test4_q: b:ilbuffer uint8 128ul{ recallable b } =
   let open Lib.RawIntTypes in
   [@ inline_let]
   let l:list uint8 =
@@ -645,7 +647,7 @@ let test4_q: b:lbytes 128{ recallable b } =
   assert_norm (List.Tot.length l == 128);
   createL_global l
 
-let test4_r2: b:lbytes 256{ recallable b } =
+let test4_r2: b:ilbuffer uint8 256ul{ recallable b } =
   let open Lib.RawIntTypes in
   [@ inline_let]
   let l:list uint8 =
@@ -670,7 +672,7 @@ let test4_r2: b:lbytes 256{ recallable b } =
   assert_norm (List.Tot.length l == 256);
   createL_global l
 
-let test4_rBlind: b:lbytes 8{ recallable b } =
+let test4_rBlind: b:ilbuffer uint8 8ul{ recallable b } =
   let open Lib.RawIntTypes in
   [@ inline_let]
   let l:list uint8 =
@@ -680,7 +682,7 @@ let test4_rBlind: b:lbytes 8{ recallable b } =
   assert_norm (List.Tot.length l == 8);
   createL_global l
 
-let test4_msg: b:lbytes 128{ recallable b } =
+let test4_msg: b:ilbuffer uint8 128ul{ recallable b } =
   let open Lib.RawIntTypes in
   [@ inline_let]
   let l:list uint8 =
@@ -697,7 +699,7 @@ let test4_msg: b:lbytes 128{ recallable b } =
   assert_norm (List.Tot.length l == 128);
   createL_global l
 
-let test4_salt: b:lbytes 20{ recallable b } =
+let test4_salt: b:ilbuffer uint8 20ul{ recallable b } =
   let open Lib.RawIntTypes in
   [@ inline_let]
   let l:list uint8 =
@@ -708,7 +710,7 @@ let test4_salt: b:lbytes 20{ recallable b } =
   assert_norm (List.Tot.length l == 20);
   createL_global l
 
-let test4_sgnt_expected: b:lbytes 256{ recallable b } =
+let test4_sgnt_expected: b:ilbuffer uint8 256ul{ recallable b } =
   let open Lib.RawIntTypes in
   [@ inline_let]
   let l:list uint8 =
@@ -735,15 +737,55 @@ let test4_sgnt_expected: b:lbytes 256{ recallable b } =
 
 val main: unit -> St C.exit_code
 let main () =
+  recall test1_n;
+  recall test1_e;
+  recall test1_d;
+  recall test1_p;
+  recall test1_q;
+  recall test1_r2;
+  recall test1_rBlind;
+  recall test1_msg;
+  recall test1_salt;
+  recall test1_sgnt_expected;
   let test1 =
     ctest 16ul 1024ul test1_n 24ul test1_e 1024ul test1_d 64ul test1_p 64ul test1_q
     test1_r2 8ul test1_rBlind 51ul test1_msg 20ul test1_salt test1_sgnt_expected in
+  recall test2_n;
+  recall test2_e;
+  recall test2_d;
+  recall test2_p;
+  recall test2_q;
+  recall test2_r2;
+  recall test2_rBlind;
+  recall test2_msg;
+  recall test2_salt;
+  recall test2_sgnt_expected;
   let test2 =
     ctest 32ul 1025ul test2_n 24ul test2_e 1024ul test2_d 65ul test2_p 65ul test2_q
     test2_r2 8ul test2_rBlind 234ul test2_msg 20ul test2_salt test2_sgnt_expected in
+  recall test3_n;
+  recall test3_e;
+  recall test3_d;
+  recall test3_p;
+  recall test3_q;
+  recall test3_r2;
+  recall test3_rBlind;
+  recall test3_msg;
+  recall test3_salt;
+  recall test3_sgnt_expected;
   let test3 =
     ctest 32ul 1536ul test3_n 24ul test3_e 1536ul test3_d 96ul test3_p 96ul test3_q
     test3_r2 8ul test3_rBlind 107ul test3_msg 20ul test3_salt test3_sgnt_expected in
+  recall test4_n;
+  recall test4_e;
+  recall test4_d;
+  recall test4_p;
+  recall test4_q;
+  recall test4_r2;
+  recall test4_rBlind;
+  recall test4_msg;
+  recall test4_salt;
+  recall test4_sgnt_expected;
   let test4 =
     ctest 32ul 2048ul test4_n 24ul test4_e 2048ul test4_d 128ul test4_p 128ul test4_q
     test4_r2 8ul test4_rBlind 128ul test4_msg 20ul test4_salt test4_sgnt_expected in

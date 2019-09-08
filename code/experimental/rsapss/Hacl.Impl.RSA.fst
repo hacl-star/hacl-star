@@ -4,8 +4,6 @@ open FStar.HyperStack
 open FStar.HyperStack.ST
 open FStar.Mul
 
-open LowStar.Buffer
-
 open Lib.IntTypes
 open Lib.Buffer
 
@@ -26,30 +24,30 @@ let hLen = 32ul
 
 val xor_bytes:
     len:size_t
-  -> b1:lbytes len
-  -> b2:lbytes len
+  -> b1:lbuffer uint8 len
+  -> b2:lbuffer uint8 len
   -> Stack unit
     (requires fun h -> live h b1 /\ live h b2 /\ disjoint b1 b2)
-    (ensures  fun h0 _ h1 -> modifies (loc_buffer b1) h0 h1)
+    (ensures  fun h0 _ h1 -> modifies (loc b1) h0 h1)
 [@"c_inline"]
 let xor_bytes len b1 b2 =
   let h0 = ST.get () in
-  let inv h1 i = modifies (loc_buffer b1) h0 h1 in
+  let inv h1 i = modifies (loc b1) h0 h1 in
   Lib.Loops.for 0ul len inv
   (fun i -> b1.(i) <- b1.(i) ^. b2.(i))
 
 val pss_encode:
     sLen:size_t{8 + v hLen + v sLen < max_size_t}
-  -> salt:lbytes sLen
+  -> salt:lbuffer uint8 sLen
   -> msgLen:size_t
-  -> msg:lbytes msgLen
+  -> msg:lbuffer uint8 msgLen
   -> emBits:size_t{v emBits > 0 /\ v hLen + v sLen + 2 <= v (blocks emBits 8ul)}
-  -> em:lbytes (blocks emBits 8ul)
+  -> em:lbuffer uint8 (blocks emBits 8ul)
   -> Stack unit
     (requires fun h ->
       live h salt /\ live h msg /\ live h em /\
       disjoint msg salt /\ disjoint em msg /\ disjoint em salt)
-    (ensures  fun h0 _ h1 -> modifies (loc_buffer em) h0 h1)
+    (ensures  fun h0 _ h1 -> modifies (loc em) h0 h1)
 [@"c_inline"]
 let pss_encode sLen salt msgLen msg emBits em = admit();
   push_frame ();
@@ -68,20 +66,20 @@ let pss_encode sLen salt msgLen msg emBits em = admit();
   let m1 = sub st hLen m1Len in
   let m1Hash = sub st (hLen +. m1Len) hLen in
   let db = sub st (hLen +. m1Len +. hLen) dbLen in
-  let dbMask = sub #_ #(v stLen) st (stLen -. dbLen) dbLen in
+  let dbMask = sub st (stLen -. dbLen) dbLen in
 
   hash_sha256 mHash msgLen msg;
   let m1_hash = sub m1 8ul hLen in
-  copy m1_hash hLen mHash;
+  copy m1_hash mHash;
   let m1_salt = sub m1 (8ul +. hLen) sLen in
-  copy m1_salt sLen salt;
+  copy m1_salt salt;
   hash_sha256 m1Hash m1Len m1;
 
   assert (0 <= v dbLen - v sLen - 1);
   let last_before_salt = dbLen -. sLen -. 1ul in
   db.(last_before_salt) <- u8 1;
   let db_salt = sub db (last_before_salt +. 1ul) sLen in
-  copy db_salt sLen salt;
+  copy db_salt salt;
   mgf_sha256 hLen m1Hash dbLen dbMask;
   xor_bytes dbLen db dbMask;
 
@@ -92,21 +90,21 @@ let pss_encode sLen salt msgLen msg emBits em = admit();
   end);
 
   let em_db = sub em 0ul dbLen in
-  copy em_db dbLen db;
+  copy em_db db;
   let em_hash = sub em dbLen hLen in
-  copy em_hash hLen m1Hash;
+  copy em_hash m1Hash;
   em.(emLen -. 1ul) <- u8 0xbc;
   pop_frame ()
 
 val pss_verify:
     sLen:size_t{8 + v hLen + v sLen < max_size_t}
   -> msgLen:size_t
-  -> msg:lbytes msgLen
+  -> msg:lbuffer uint8 msgLen
   -> emBits:size_t{v emBits > 0 /\ v hLen + v sLen + 2 <= v (blocks emBits 8ul)}  // <- check the last condition before calling this function!
-  -> em:lbytes (blocks emBits 8ul)
+  -> em:lbuffer uint8 (blocks emBits 8ul)
   -> Stack bool
     (requires fun h -> live h msg /\ live h em /\ disjoint em msg)
-    (ensures  fun h0 _ h1 -> modifies loc_none h0 h1)
+    (ensures  fun h0 _ h1 -> modifies0 h0 h1)
 [@"c_inline"]
 let pss_verify sLen msgLen msg emBits em = admit();
   push_frame ();
@@ -130,7 +128,7 @@ let pss_verify sLen msgLen msg emBits em = admit();
       let pad2 = sub st hLen padLen in
       let dbMask = sub st (hLen +. padLen) dbLen in
       let m1 = sub st (hLen +. padLen +. dbLen) m1Len in
-      let m1Hash' = sub #_ #(v stLen) st (stLen -. hLen) hLen in
+      let m1Hash' = sub st (stLen -. hLen) hLen in
 
       let maskedDB = sub em 0ul dbLen in
       let m1Hash = sub em dbLen hLen in
@@ -149,9 +147,9 @@ let pss_verify sLen msgLen msg emBits em = admit();
       let salt = sub dbMask padLen sLen in
 
       let m1_hash = sub m1 8ul hLen in
-      copy m1_hash hLen mHash;
+      copy m1_hash mHash;
       let m1_salt = sub m1 (8ul +. hLen) sLen in
-      copy #_ #(v sLen) m1_salt sLen salt;
+      copy m1_salt salt;
       hash_sha256 m1Hash' m1Len m1;
 
       if not (Lib.ByteBuffer.lbytes_eq #padLen pad pad2) then false
@@ -171,15 +169,15 @@ val rsa_sign:
   -> skey:lbignum (blocks modBits 64ul +. blocks eBits 64ul +. blocks dBits 64ul +. pLen +. qLen)
   -> rBlind:uint64
   -> sLen:size_t{v sLen + v hLen + 8 < max_size_t /\ v (blocks modBits 8ul) - v sLen - v hLen - 2 >= 0}
-  -> salt:lbytes sLen
+  -> salt:lbuffer uint8 sLen
   -> msgLen:size_t
-  -> msg:lbytes msgLen
-  -> sgnt:lbytes (blocks modBits 8ul)
+  -> msg:lbuffer uint8 msgLen
+  -> sgnt:lbuffer uint8 (blocks modBits 8ul)
   -> Stack unit
     (requires fun h ->
       live h salt /\ live h msg /\ live h sgnt /\ live h skey /\
       disjoint msg salt /\ disjoint msg sgnt /\ disjoint sgnt salt)
-    (ensures  fun h0 _ h1 -> modifies (loc_buffer sgnt) h0 h1)
+    (ensures  fun h0 _ h1 -> modifies (loc sgnt) h0 h1)
 let rsa_sign pow2_i modBits eBits dBits pLen qLen skey rBlind sLen salt msgLen msg sgnt =
   admit();
   push_frame ();
@@ -190,7 +188,7 @@ let rsa_sign pow2_i modBits eBits dBits pLen qLen skey rBlind sLen salt msgLen m
   let skeyLen = pkeyLen +. dLen +. pLen +. qLen in
 
   let n = sub skey 0ul nLen in
-  let e = sub #_ #(v skeyLen) #(v eLen) skey nLen eLen in
+  let e = sub skey nLen eLen in
   let r2 = sub skey (nLen +. eLen) nLen in
   let d = sub skey pkeyLen dLen in
   let p = sub skey (pkeyLen +. dLen) pLen in
@@ -216,7 +214,7 @@ let rsa_sign pow2_i modBits eBits dBits pLen qLen skey rBlind sLen salt msgLen m
   let dLen' = pLen +. qLen +. 1ul in
   let d' = sub tmp (n2Len +. pqLen) dLen' in
   let bn1_start = n2Len +. pqLen +. pLen +. qLen +. 1ul in
-  let bn1 = sub #_ #(v stLen) tmp bn1_start 1ul in
+  let bn1 = sub tmp bn1_start 1ul in
 
   text_to_nat emLen em m;
   bn1.(0ul) <- u64 1;
@@ -239,12 +237,12 @@ val rsa_verify:
   -> eBits:size_t{0 < v eBits /\ v eBits <= v modBits /\ v (blocks modBits 64ul) + v (blocks eBits 64ul) < max_size_t}
   -> pkey:lbignum (blocks modBits 64ul +. blocks eBits 64ul)
   -> sLen:size_t{v sLen + v hLen + 8 < max_size_t /\ v (blocks modBits 8ul) - v sLen - v hLen - 2 >= 0}
-  -> sgnt:lbytes (blocks modBits 8ul)
+  -> sgnt:lbuffer uint8 (blocks modBits 8ul)
   -> msgLen:size_t
-  -> msg:lbytes msgLen
+  -> msg:lbuffer uint8 msgLen
   -> Stack bool
     (requires fun h -> live h msg /\ live h sgnt /\ live h pkey /\ disjoint msg sgnt)
-    (ensures  fun h0 _ h1 -> modifies loc_none h0 h1)
+    (ensures  fun h0 _ h1 -> modifies0 h0 h1)
 let rsa_verify pow2_i modBits eBits pkey sLen sgnt msgLen msg =
   admit();
   push_frame ();
@@ -265,7 +263,7 @@ let rsa_verify pow2_i modBits eBits pkey sLen sgnt msgLen msg =
   let em = create k (u8 0) in
 
   let m = sub tmp 0ul nLen in
-  let s = sub #_ #(v n2Len) tmp nLen nLen in
+  let s = sub tmp nLen nLen in
   text_to_nat k sgnt s;
 
   let res =

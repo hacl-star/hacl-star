@@ -4,8 +4,6 @@ open FStar.HyperStack
 open FStar.HyperStack.ST
 open FStar.Mul
 
-open LowStar.Buffer
-
 open Lib.IntTypes
 open Lib.Buffer
 
@@ -19,7 +17,7 @@ val bn_is_less_:
   -> i:size_t{v i <= v aLen}
   -> Stack bool
     (requires fun h -> live h a /\ live h b)
-    (ensures  fun h0 _ h1 -> modifies loc_none h0 h1 /\ h0 == h1)
+    (ensures  fun h0 _ h1 -> h0 == h1)
 let rec bn_is_less_ aLen a bLen b i =
   if i >. 0ul then
     let i = i -. size 1 in
@@ -37,6 +35,6 @@ val bn_is_less:
   -> b:lbignum bLen
   -> Stack bool
     (requires fun h -> live h a /\ live h b)
-    (ensures  fun h0 _ h1 -> modifies loc_none h0 h1 /\ h0 == h1)
+    (ensures  fun h0 _ h1 -> h0 == h1)
 [@"c_inline"]
 let bn_is_less aLen a bLen b = bn_is_less_ aLen a bLen b aLen
