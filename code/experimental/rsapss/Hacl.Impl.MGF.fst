@@ -10,6 +10,7 @@ open Lib.Buffer
 open Hacl.Impl.Lib
 
 module ST = FStar.HyperStack.ST
+module S = Spec.RSAPSS
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
@@ -19,13 +20,15 @@ let hLen = 32ul
 
 val hash_sha256:
     mHash:lbuffer uint8 hLen
-  -> len:size_t
-  -> m:lbuffer uint8 len
-  -> Stack unit
-    (requires fun h -> live h mHash /\ live h m /\ disjoint m mHash)
-    (ensures  fun h0 _ h1 -> modifies (loc mHash) h0 h1)
-let hash_sha256 mHash len m = Hacl.SHA256.hash mHash len m
-//SHA2_256.hash mHash m clen
+  -> msg_len:size_t{v msg_len < S.max_input}
+  -> msg:lbuffer uint8 msg_len ->
+  Stack unit
+  (requires fun h -> live h mHash /\ live h msg /\ disjoint msg mHash)
+  (ensures  fun h0 _ h1 -> modifies (loc mHash) h0 h1 /\
+    as_seq h1 mHash == S.sha2_256 (as_seq h0 msg))
+let hash_sha256 mHash msg_len msg =
+  Hacl.Hash.SHA2.hash_256 msg msg_len mHash
+
 
 (* Mask Generation Function *)
 inline_for_extraction noextract

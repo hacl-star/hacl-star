@@ -8,7 +8,7 @@ open Lib.IntTypes
 open Lib.Buffer
 
 open Hacl.Impl.Lib
-open Hacl.SHA256
+open Hacl.Impl.MGF
 
 module ST = FStar.HyperStack.ST
 

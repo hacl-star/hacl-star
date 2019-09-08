@@ -27,7 +27,8 @@ FSTAR_INCLUDE_DIRS = \
   $(KREMLIN_HOME)/kremlib \
   $(HACL_HOME)/specs \
   $(HACL_HOME)/lib \
-  $(HACL_HOME)/lib/c
+  $(HACL_HOME)/lib/c \
+  $(HACL_HOME)/code/hash
 
 FSTAR_FLAGS = $(OTHERFLAGS) --cmi \
   --cache_checked_modules --cache_dir $(CACHE_DIR) --odir $(OUTPUT_DIR) \
@@ -79,8 +80,9 @@ $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	-bundle 'Lib.*' \
 	-bundle 'Spec.*' \
 	-bundle 'C=C.Endianness' \
+	-bundle 'Hacl.Hash.SHA2=Hacl.Hash.*,Spec.Hash.*' \
 	-bundle 'Hacl.RSAPSS=Hacl.Impl.*,Hacl.RSAPSS' \
-	-library 'Hacl.SHA256,C,FStar' \
+	-library 'C,FStar' \
 	-drop 'LowStar,Spec,Prims,Lib,C.Loops.*' \
 	-add-include '"c/Lib_PrintBuffer.h"' \
 	-tmpdir $(GENERATED_DIR) \
@@ -106,14 +108,12 @@ include $(GENERATED_DIR)/Makefile.include
 # KreMLin sees the fsti's for the various Lib* and LowStar modules and creates .h/.c
 # files for them in $(GENERATED_DIR). However, we are only interested in the header,
 # and drop these (mostly empty) C files.
-ALL_OUR_FILES 	    = $(filter-out FStar_* Lib.c LowStar.c C.c Hacl_SHA256.c, $(ALL_C_FILES))
+ALL_OUR_FILES 	    = $(filter-out FStar_* Lib.c LowStar.c C.c, $(ALL_C_FILES))
 ALL_GENERATED_FILES = $(addprefix $(GENERATED_DIR)/,$(ALL_OUR_FILES))
 
 ALL_SOURCES = \
   $(ALL_GENERATED_FILES) \
-  $(HACL_HOME)/lib/c/Lib_PrintBuffer.c \
-  include/Hacl_SHA256.c \
-  $(HACL_HOME)/snapshots/hacl-c/Hacl_SHA2_256.c
+  $(HACL_HOME)/lib/c/Lib_PrintBuffer.c
 
 ALL_OBJS = $(patsubst %.c,%.o,$(ALL_SOURCES))
 
@@ -123,12 +123,12 @@ INCLUDE_DIRS = \
   $(KREMLIN_HOME)/kremlib/c \
   $(KREMLIN_HOME)/kremlib/dist/minimal \
   $(HACL_HOME)/lib \
-  $(HACL_HOME)/lib/c \
-  $(HACL_HOME)/snapshots/hacl-c
+  $(HACL_HOME)/lib/c
 
 CFLAGS += -O3 -march=native -mtune=native -funroll-loops
 CFLAGS += $(addprefix -I ,$(INCLUDE_DIRS)) -Wall -Wextra -Werror \
-  -Wno-parentheses -Wno-unused-parameter -Wno-unused-variable -Wno-infinite-recursion
+  -Wno-parentheses -Wno-unused-parameter -Wno-unused-variable -Wno-infinite-recursion \
+  -Wno-deprecated-declarations
 
 # GNU Make manual section 4.14
 %.d: %.c
