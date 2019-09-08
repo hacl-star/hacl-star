@@ -1,13 +1,13 @@
-module Hacl.Impl.Addition
+module Hacl.Bignum.Addition
 
 open FStar.HyperStack
 open FStar.HyperStack.ST
 open FStar.Mul
 
+open Hacl.Bignum.Lib
+
 open Lib.IntTypes
 open Lib.Buffer
-
-open Hacl.Impl.Lib
 
 module ST = FStar.HyperStack.ST
 

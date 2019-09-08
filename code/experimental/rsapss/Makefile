@@ -39,7 +39,7 @@ FSTAR = $(FSTAR_HOME)/bin/fstar.exe $(FSTAR_FLAGS)
 
 ENABLE_HINTS = --use_hints --use_hint_hashes --record_hints --query_stats
 
-ROOTS = Hacl.Test.RSA.fst
+ROOTS = Hacl.Test.RSAPSS.fst
 
 .PRECIOUS: %.krml
 
@@ -74,14 +74,14 @@ KREMLIN=$(KREMLIN_HOME)/krml
 # We use -drop (deprecated) only to avoid creating unnecessary .c,.h files
 $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	$(KREMLIN) $(KREMLIN_TESTLIB) -skip-compilation \
-	-no-prefix 'Hacl.Test.RSA' \
-	-no-prefix 'Hacl.Impl.RSA' \
+	-no-prefix 'Hacl.Test.RSAPSS' \
+	-no-prefix 'Hacl.Impl.RSAPSS' \
 	-no-prefix 'Hacl.RSAPSS' \
 	-bundle 'Lib.*' \
 	-bundle 'Spec.*' \
 	-bundle 'C=C.Endianness' \
 	-bundle 'Hacl.Hash.SHA2=Hacl.Hash.*,Spec.Hash.*' \
-	-bundle 'Hacl.RSAPSS=Hacl.Impl.*,Hacl.RSAPSS' \
+	-bundle 'Hacl.RSAPSS=Hacl.Bignum.*,Hacl.Impl.*,Hacl.RSAPSS' \
 	-library 'C,FStar' \
 	-drop 'LowStar,Spec,Prims,Lib,C.Loops.*' \
 	-add-include '"c/Lib_PrintBuffer.h"' \

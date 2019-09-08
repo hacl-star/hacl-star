@@ -1,4 +1,4 @@
-module Hacl.Impl.Lib
+module Hacl.Bignum.Lib
 
 open FStar.HyperStack
 open FStar.HyperStack.ST

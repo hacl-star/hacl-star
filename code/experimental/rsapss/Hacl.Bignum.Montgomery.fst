@@ -1,4 +1,4 @@
-module Hacl.Impl.Montgomery
+module Hacl.Bignum.Montgomery
 
 open FStar.HyperStack
 open FStar.HyperStack.ST
@@ -7,9 +7,9 @@ open FStar.Mul
 open Lib.IntTypes
 open Lib.Buffer
 
-open Hacl.Impl.Lib
-open Hacl.Impl.Addition
-open Hacl.Impl.Multiplication
+open Hacl.Bignum.Lib
+open Hacl.Bignum.Addition
+open Hacl.Bignum.Multiplication
 
 module ST = FStar.HyperStack.ST
 

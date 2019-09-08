@@ -1,4 +1,4 @@
-module Hacl.Impl.RSA
+module Hacl.Impl.RSAPSS
 
 open FStar.HyperStack
 open FStar.HyperStack.ST
@@ -7,13 +7,13 @@ open FStar.Mul
 open Lib.IntTypes
 open Lib.Buffer
 
-open Hacl.Impl.Lib
+open Hacl.Bignum.Lib
 open Hacl.Impl.MGF
-open Hacl.Impl.Comparison
-open Hacl.Impl.Convert
-open Hacl.Impl.Exponentiation
-open Hacl.Impl.Addition
-open Hacl.Impl.Multiplication
+open Hacl.Bignum.Comparison
+open Hacl.Bignum.Convert
+open Hacl.Bignum.Exponentiation
+open Hacl.Bignum.Addition
+open Hacl.Bignum.Multiplication
 
 module ST = FStar.HyperStack.ST
 module S = Spec.RSAPSS

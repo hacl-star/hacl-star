@@ -7,7 +7,7 @@ open FStar.Mul
 open Lib.IntTypes
 open Lib.Buffer
 
-open Hacl.Impl.Lib
+open Hacl.Bignum.Lib
 open Hacl.Impl.MGF
 
 module ST = FStar.HyperStack.ST
@@ -34,7 +34,7 @@ val rsa_pss_sign:
       disjoint msg salt /\ disjoint msg sgnt /\ disjoint sgnt salt)
     (ensures  fun h0 _ h1 -> modifies (loc sgnt) h0 h1)
 let rsa_pss_sign pow2_i modBits eBits dBits pLen qLen skey rBlind sLen salt msgLen msg sgnt =
-  Hacl.Impl.RSA.rsa_sign pow2_i modBits eBits dBits pLen qLen skey rBlind sLen salt msgLen msg sgnt
+  Hacl.Impl.RSAPSS.rsa_sign pow2_i modBits eBits dBits pLen qLen skey rBlind sLen salt msgLen msg sgnt
 
 val rsa_pss_verify:
     pow2_i:size_t
@@ -49,4 +49,4 @@ val rsa_pss_verify:
     (requires fun h -> live h msg /\ live h sgnt /\ live h pkey /\ disjoint msg sgnt)
     (ensures  fun h0 _ h1 -> modifies0 h0 h1)
 let rsa_pss_verify pow2_i modBits eBits pkey sLen sgnt msgLen msg =
-  Hacl.Impl.RSA.rsa_verify pow2_i modBits eBits pkey sLen sgnt msgLen msg
+  Hacl.Impl.RSAPSS.rsa_verify pow2_i modBits eBits pkey sLen sgnt msgLen msg
