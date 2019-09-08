@@ -28,6 +28,20 @@ let sha2_256 (msg:bytes{length msg < max_input}) : lbytes hLen = Spec.Hash.hash 
 
 
 (* Mask Generation Function *)
+val mgf_sha256_f:
+     len: size_nat{len + 4 <= max_size_t /\ len + 4 < max_input}
+  -> i:size_nat
+  -> mgfseed_counter: lbytes (len + 4) ->
+  lbytes (len + 4) & lbytes hLen
+
+let mgf_sha256_f len i mgfseed_counter =
+  let counter = nat_to_bytes_be 4 i in
+  let mgfseed_counter = update_sub mgfseed_counter len 4 counter in
+  let block = sha2_256 mgfseed_counter in
+  mgfseed_counter, block
+
+let mgf_sha256_a (len:size_nat{len + 4 <= max_size_t}) (n:pos) (i:nat{i <= n}) = lbytes (len + 4)
+
 val mgf_sha256:
     #len: size_nat{len + 4 <= max_size_t /\ len + 4 < max_input}
   -> mgfseed: lbytes len
@@ -38,13 +52,8 @@ let mgf_sha256 #len mgfseed maskLen =
   let mgfseed_counter = create (len + 4) (u8 0) in
   let mgfseed_counter = update_sub mgfseed_counter 0 len mgfseed in
 
-  let f (i:size_nat) : lbytes hLen =
-    let counter = nat_to_bytes_be 4 i in
-    let mgfseed_counter = update_sub mgfseed_counter len 4 counter in
-    sha2_256 mgfseed_counter in
-
   let n = blocks maskLen hLen in
-  let acc = generate_blocks_simple #uint8 hLen n n f in
+  let _, acc = generate_blocks #uint8 hLen n n (mgf_sha256_a len n) (mgf_sha256_f len) mgfseed_counter in
   sub #uint8 #(n * hLen) acc 0 maskLen
 
 
@@ -105,7 +114,7 @@ let pss_encode #sLen #msgLen salt msg emBits =
   let db = db.[last_before_salt] <- u8 1 in
   let db = update_sub db (last_before_salt + 1) sLen salt in
 
-  let dbMask = mgf_sha256 #hLen m1Hash dbLen in
+  let dbMask = mgf_sha256 m1Hash dbLen in
   let maskedDB = xor_bytes db dbMask in
   let maskedDB = db_zero maskedDB emBits in
 

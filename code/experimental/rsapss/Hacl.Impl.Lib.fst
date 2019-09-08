@@ -8,6 +8,8 @@ open Lib.IntTypes
 open Lib.Buffer
 open Lib.RawIntTypes
 
+module S = Spec.RSAPSS
+
 #set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
 inline_for_extraction noextract
@@ -17,7 +19,7 @@ inline_for_extraction noextract
 val blocks:
     x:size_t{v x > 0}
   -> m:size_t{v m > 0}
-  -> r:size_t{v r > 0 /\ v x <= v m * v r}
+  -> r:size_t{v r == S.blocks (v x) (v m)}
 let blocks x m =
   (x -. 1ul) /. m +. 1ul
 
