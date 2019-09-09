@@ -1390,26 +1390,28 @@ let sparse_mul32 prod pk pos_list sign_list =
         assert(is_poly_pk hOuterLoopEnd pk)
     );
 
-    // TODO (kkane): qTESLA-I doesn't call barr_reduce, but it does no harm to do so. It's just unnecessary work.
-    // Either split this out so qTESLA-I has its own version, or figure out the ifdef-like stuff that's been
-    // incorporated to exclude this section when building for qTESLA-I.
-    let h4 = ST.get () in
-    assert(is_poly_sparse_mul32_output_i h4 prod 0);
-    for 0ul params_n
-    (fun h i -> live h prod /\ modifies1 prod h4 h /\ i <= v params_n /\ is_poly_sparse_mul32_output_i h prod i)
-    (fun i ->
-        let hStart = ST.get () in
-        assume(is_barr_reduce_input (bget hStart prod (v i)));
-        prod.(i) <- barr_reduce prod.(i);
-        let hAfterReduce = ST.get () in
-        assert(is_sparse_mul32_output (bget hAfterReduce prod (v i)));
-        assert(is_poly_equal_except hStart hAfterReduce prod (v i))
-    );
+    (* TODO (kkane): not needed for qTESLA-I 
+    if Hacl.Impl.QTesla.TargetConfig.isProvable
+    then (
+      let h4 = ST.get () in
+      assert(is_poly_sparse_mul32_output_i h4 prod 0);
+      for 0ul params_n
+      (fun h i -> live h prod /\ modifies1 prod h4 h /\ i <= v params_n /\ is_poly_sparse_mul32_output_i h prod i)
+      (fun i ->
+          let hStart = ST.get () in
+          assume(is_barr_reduce_input (bget hStart prod (v i)));
+          prod.(i) <- barr_reduce prod.(i);
+          let hAfterReduce = ST.get () in
+          assert(is_sparse_mul32_output (bget hAfterReduce prod (v i)));
+          assert(is_poly_equal_except hStart hAfterReduce prod (v i))
+      )
+    ) else (let h5 = ST.get () in assume(is_poly_sparse_mul32_output h5 prod));*)
 
     let hFinal = ST.get () in
     pop_frame();
     let hReturn = ST.get () in
-    assert(is_poly_equal hFinal hReturn prod)
+    assert(is_poly_equal hFinal hReturn prod);
+    assume(is_poly_sparse_mul32_output hReturn prod)
 
 val test_rejection:
     z : poly
@@ -1727,11 +1729,6 @@ private let lemma_disjoint_2
     (requires disjoint buf other)
     (ensures disjoint subbuf other) = ()
 
-private let lemma_sparse_mul_output_is_pmq (h:HS.mem) (p:poly) : Lemma
-    (requires is_poly_sparse_mul_output h p)
-    (ensures is_poly_pmq h p) = 
-    assert(forall (i:nat{i < v params_n}) . is_sparse_mul_output (bget h p i))
-
 private inline_for_extraction noextract
 val qtesla_sign_update_v:
     v_: poly_k
@@ -1782,9 +1779,8 @@ let qtesla_sign_update_v v_ e pos_list sign_list =
              assert(is_poly_k_montgomery hSparseMul v_);
              lemma_sub_poly_is_montgomery hSparseMul v_ (get_poly v_ k) k;
              assert(is_poly_montgomery hSparseMul (get_poly v_ k));
-             assert(is_poly_sparse_mul_output hSparseMul ec_k); // (get_poly ec k));
-             lemma_sparse_mul_output_is_pmq hSparseMul ec_k;
-             poly_sub_correct (index_poly v_ k) (index_poly v_ k) (index_poly ec k);
+             assert(is_poly_sparse_mul_output hSparseMul ec_k);
+             poly_sub_correct (index_poly v_ k) (index_poly v_ k) ec_k;
              let hSub = ST.get () in
              assert(is_poly_montgomery hSub (get_poly v_ k));
              rsp.(size 0) <- test_correctness (index_poly v_ k);

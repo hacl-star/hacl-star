@@ -417,22 +417,22 @@ val poly_sub_correct:
   -> x: poly
   -> y: poly
   -> Stack unit
-    (requires fun h -> live h result /\ live h x /\ live h y /\ is_poly_montgomery h x /\ is_poly_pmq h y /\ disjoint result y /\
-                    (disjoint result x \/ x == result))
+    (requires fun h -> live h result /\ live h x /\ live h y /\ is_poly_montgomery h x /\ is_poly_sparse_mul_output h y /\
+                    disjoint result y /\ (disjoint result x \/ x == result))
     (ensures fun h0 _ h1 -> modifies1 result h0 h1 /\ is_poly_montgomery h1 result)
 
 let poly_sub_correct result x y =
     let h0 = ST.get() in
     for 0ul params_n
-    (fun h i -> live h result /\ live h x /\ live h y /\ modifies1 result h0 h /\ is_poly_montgomery h x /\ is_poly_pmq h y /\
-             i <= v params_n /\ is_poly_montgomery_i h result i)
+    (fun h i -> live h result /\ live h x /\ live h y /\ modifies1 result h0 h /\ is_poly_montgomery h x /\ 
+             is_poly_sparse_mul_output h y /\ i <= v params_n /\ is_poly_montgomery_i h result i)
     (fun i ->
         let h1 = ST.get () in
         // Again, I have to explicitly assert these facts to get them in the context.
         assert(is_poly_montgomery h1 x);
         assert(is_montgomery (bget h1 x (v i)));
-        assert(is_poly_pmq h1 y);
-        assert(is_pmq (bget h1 y (v i)));
+        assert(is_poly_sparse_mul_output h1 y);
+        assert(is_sparse_mul_output (bget h1 y (v i)));
         let temp:elem_base = x.(i) -^ y.(i) in
         assert_norm(size elem_n -. size 1 <. size I32.n);
         shift_arithmetic_right_lemma_i32 temp (size elem_n -. size 1);
