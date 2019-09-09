@@ -50,39 +50,6 @@ module R    = Hacl.QTesla.Random
 
 private let _RADIX32 = size params_radix32
 
-(*private let lemma_abs_by_mask (mask:I32.t{mask == 0l \/ mask == (-1l)}) (value:I32.t) : Lemma
-    (requires FStar.Int.fits (I32.v (I32.(mask ^^ value)) - I32.v mask) I32.n /\
-              ((mask == 0l) <==> (I32.v value >= 0)) /\
-              ((mask == (-1l)) <==> (I32.v value < 0)))
-    (ensures I32.v I32.((mask ^^ value) -^ mask) == FStar.Math.Lib.abs (I32.v value)) =
-    [@inline_let] let op_Plus_Hat = I32.op_Plus_Hat in
-    [@inline_let] let op_Subtraction_Hat = I32.op_Subtraction_Hat in
-    [@inline_let] let op_Greater_Greater_Hat = I32.op_Greater_Greater_Hat in
-    [@inline_let] let op_Amp_Hat = I32.op_Amp_Hat in
-    [@inline_let] let op_Bar_Hat = I32.op_Bar_Hat in
-    [@inline_let] let op_Star_Hat = I32.op_Star_Hat in
-    [@inline_let] let lognot = I32.lognot in
-    lemma_int32_logxor_identities value;
-    Int.logxor_commutative (I32.v mask) (I32.v value);
-    assert((mask == 0l) ==> ( (mask ^^ value) == value ));
-    assert((mask == 0l) ==> ( value -^ mask == value ));
-    assert((mask == (-1l)) ==> ( (mask ^^ value) == (-1l) *^ value -^ 1l ));
-    assert((mask == (-1l)) ==> ( ((-1l) *^ value -^ 1l) -^ mask == (-1l) *^ value ))*)
-
-    //assume(mask == 0l \/ mask == (-1l));
-    //assume(FStar.Int.fits (elem_v (mask ^^ value) - elem_v mask) I32.n);
-    // Proof sketch:
-    // If value >= 0: |value| == value
-    // 1. mask == 0
-    // 2. mask ^ value == value
-    // 3. (mask ^ value) - mask == value - mask == value - 0 == value
-    // 4. value == |value|
-    // If value < 0: |value| == -value
-    // 1. mask == -1
-    // 2. mask ^ value == |value| - 1 (definition of signed bitwise XOR)
-    // 3. (mask ^ value) - mask == |value| - 1 - mask == |value| - 1 - (-1) == |value|
-    // 4. |value|
-
 // Reference implementation returns the unsigned version of the element type. Not sure yet whether or not
 // it's important to do this. In one case the return value is compared against a quantity that isn't even close
 // to exceeding the maximum value of a signed int32, much less an int64, and in all other cases ends up getting
@@ -197,19 +164,9 @@ let check_ES_ordered_exchange_ct (list: lbuffer I32.t params_n) (i: size_t{v i +
     assert((mask == 0l) ==> ( ((bget h3 list (v i + 1)) &^ mask) == 0l));
     assert((mask == 0l) ==> ( ((bget h3 list (v i)) &^ (lognot mask)) == (bget h3 list (v i)) ));
     assert( (0l |^ (bget h3 list (v i))) == (bget h3 list (v i)) );
-    //assert((mask == 0l) ==> ( ( ((bget h3 list (v i + 1)) &^ mask)  |^
-    //                             ((bget h3 list (v i)) &^ (lognot mask))) == (bget h3 list (v i)) ));
     assert((mask == 0l) ==> ( (temp == (bget h3 list (v i))) /\
                               ((bget h3end list (v i + 1)) == (bget h3 list (v i + 1))) /\
                               ((bget h3end list (v i)) == (bget h3 list (v i))) ));
-    //assert((mask == 0l) ==> (bget h3end list (v i + 1)) == (bget h3 list (v i + 1)));
-    //assert(I32.v (bget h3 list (v i)) < I32.v (bget h3 list (v i + 1)) ==> (temp == (bget h3 list (v i))));
-           //(I32.v temp == I32.v (bget h3 list (v i))));// /\
-            //I32.v (bget h3end list (v i)) == I32.v (bget h3 list (v i)) /\
-            //I32.v (bget h3end list (v i + 1)) == I32.v (bget h3 list (v i + 1))));
-    //assert(I32.v (bget h3 list (v i)) >= I32.v (bget h3 list (v i + 1)) ==> I32.v temp == I32.v (bget h3end list (v i + 1)));
-    // Need to add in reasoning for all the bitwise operations. But either they end up exchanging
-    // list[i] and list[i+1] or leaving them as-is. Assume as much.
     assert((bget h3 list (v i) == bget h3end list (v i + 1) /\
            bget h3 list (v i + 1) == bget h3end list (v i)) \/
            (bget h3 list (v i) == bget h3end list (v i) /\
@@ -1770,6 +1727,11 @@ private let lemma_disjoint_2
     (requires disjoint buf other)
     (ensures disjoint subbuf other) = ()
 
+private let lemma_sparse_mul_output_is_pmq (h:HS.mem) (p:poly) : Lemma
+    (requires is_poly_sparse_mul_output h p)
+    (ensures is_poly_pmq h p) = 
+    assert(forall (i:nat{i < v params_n}) . is_sparse_mul_output (bget h p i))
+
 private inline_for_extraction noextract
 val qtesla_sign_update_v:
     v_: poly_k
@@ -1816,8 +1778,12 @@ let qtesla_sign_update_v v_ e pos_list sign_list =
              assert(disjoint e_k sign_list);
              sparse_mul ec_k e_k pos_list sign_list;
              let hSparseMul = ST.get () in
-             assume(is_poly_montgomery hSparseMul (get_poly v_ k));
-             assume(is_poly_pmq hSparseMul (get_poly ec k));
+             assert(is_poly_k_equal hStart hSparseMul v_);
+             assert(is_poly_k_montgomery hSparseMul v_);
+             lemma_sub_poly_is_montgomery hSparseMul v_ (get_poly v_ k) k;
+             assert(is_poly_montgomery hSparseMul (get_poly v_ k));
+             assert(is_poly_sparse_mul_output hSparseMul ec_k); // (get_poly ec k));
+             lemma_sparse_mul_output_is_pmq hSparseMul ec_k;
              poly_sub_correct (index_poly v_ k) (index_poly v_ k) (index_poly ec k);
              let hSub = ST.get () in
              assert(is_poly_montgomery hSub (get_poly v_ k));
