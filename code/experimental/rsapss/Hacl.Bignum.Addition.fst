@@ -4,27 +4,31 @@ open FStar.HyperStack
 open FStar.HyperStack.ST
 open FStar.Mul
 
+open Hacl.Bignum
 open Hacl.Bignum.Base
-open Hacl.Bignum.Lib
 
 open Lib.IntTypes
 open Lib.Buffer
 
 module ST = FStar.HyperStack.ST
 
+
+#set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+
 inline_for_extraction noextract
 val bn_sub_:
     aLen:size_t
-  -> a:lbuffer uint64 aLen
+  -> a:lbignum aLen
   -> bLen:size_t
-  -> b:lbuffer uint64 bLen
+  -> b:lbignum bLen
   -> carry:lbuffer uint64 1ul
-  -> res:lbuffer uint64 aLen
-  -> Stack unit
-    (requires fun h ->
-      live h a /\ live h b /\ live h res /\ live h carry)
-    (ensures  fun h0 _ h1 ->
-      modifies (loc carry |+| loc res) h0 h1)
+  -> res:lbignum aLen ->
+  Stack unit
+  (requires fun h ->
+    live h a /\ live h b /\ live h res /\ live h carry)
+  (ensures  fun h0 _ h1 ->
+    modifies (loc carry |+| loc res) h0 h1)
+
 let bn_sub_ aLen a bLen b carry res =
   let h0 = ST.get () in
   let inv h1 i = modifies (loc carry |+| loc res) h0 h1 in
@@ -37,35 +41,40 @@ let bn_sub_ aLen a bLen b carry res =
     res.(i) <- res_i
   )
 
+
 val bn_sub:
     aLen:size_t
-  -> a:lbuffer uint64 aLen
+  -> a:lbignum aLen
   -> bLen:size_t{v bLen <= v aLen}
-  -> b:lbuffer uint64 bLen
-  -> res:lbuffer uint64 aLen
-  -> Stack uint64
-    (requires fun h -> live h a /\ live h b /\ live h res)
-    (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1)
+  -> b:lbignum bLen
+  -> res:lbignum aLen ->
+  Stack uint64
+  (requires fun h -> live h a /\ live h b /\ live h res)
+  (ensures  fun h0 c h1 -> modifies (loc res) h0 h1 /\
+    bn_v h1 res - v c * pow2 (64 * v aLen) == bn_v h0 a - bn_v h0 b)
+
 [@"c_inline"]
 let bn_sub aLen a bLen b res =
   push_frame ();
   let carry = create 1ul (u64 0) in
   bn_sub_ aLen a bLen b carry res;
   let res = carry.(0ul) in
-  pop_frame ();
+  pop_frame (); admit();
   res
+
 
 inline_for_extraction noextract
 val bn_add_:
     aLen:size_t
-  -> a:lbuffer uint64 aLen
+  -> a:lbignum aLen
   -> bLen:size_t
-  -> b:lbuffer uint64 bLen
+  -> b:lbignum bLen
   -> carry:lbuffer uint64 1ul
-  -> res:lbuffer uint64 aLen
-  -> Stack unit
+  -> res:lbignum aLen ->
+  Stack unit
     (requires fun h -> live h a /\ live h b /\ live h res /\ live h carry)
     (ensures  fun h0 _ h1 -> modifies (loc carry |+| loc res) h0 h1)
+
 let bn_add_ aLen a bLen b carry res =
   let h0 = ST.get () in
   let inv h1 i = modifies (loc carry |+| loc res) h0 h1 in
@@ -79,20 +88,23 @@ let bn_add_ aLen a bLen b carry res =
     res.(i) <- res_i
   )
 
+
 val bn_add:
     aLen:size_t
-  -> a:lbuffer uint64 aLen
+  -> a:lbignum aLen
   -> bLen:size_t{v bLen <= v aLen}
-  -> b:lbuffer uint64 bLen
-  -> res:lbuffer uint64 aLen
-  -> Stack uint64
-    (requires fun h -> live h a /\ live h b /\ live h res)
-    (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1)
+  -> b:lbignum bLen
+  -> res:lbignum aLen ->
+  Stack uint64
+  (requires fun h -> live h a /\ live h b /\ live h res)
+  (ensures  fun h0 c h1 -> modifies (loc res) h0 h1 /\
+    bn_v h1 res + v c * pow2 (64 * v aLen) == bn_v h0 a + bn_v h0 b)
+
 [@"c_inline"]
 let bn_add aLen a bLen b res =
   push_frame ();
   let carry = create 1ul (u64 0) in
   bn_add_ aLen a bLen b carry res;
-  let res = carry.(0ul) in
+  let res = carry.(0ul) in admit();
   pop_frame ();
   res

@@ -83,7 +83,7 @@ $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	-bundle 'Hacl.Hash.SHA2=Hacl.Hash.*,Spec.Hash.*' \
 	-bundle 'Hacl.RSAPSS=Hacl.Bignum.*,Hacl.Impl.*,Hacl.RSAPSS' \
 	-library 'C,FStar' \
-	-drop 'LowStar,Spec,Prims,Lib,C.Loops.*' \
+	-drop 'LowStar,Spec,Prims,Lib,C.Loops.*,Hacl.Spec.*' \
 	-add-include '"c/Lib_PrintBuffer.h"' \
 	-tmpdir $(GENERATED_DIR) \
 	$^

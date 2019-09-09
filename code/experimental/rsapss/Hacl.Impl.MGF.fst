@@ -7,7 +7,7 @@ open FStar.Mul
 open Lib.IntTypes
 open Lib.Buffer
 
-open Hacl.Bignum.Lib
+open Hacl.Bignum
 
 module ST = FStar.HyperStack.ST
 module S = Spec.RSAPSS

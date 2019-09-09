@@ -8,9 +8,11 @@ open Lib.IntTypes
 open Lib.Buffer
 open Lib.ByteBuffer
 
-open Hacl.Bignum.Lib
+open Hacl.Bignum
 
 module ST = FStar.HyperStack.ST
+module S = Spec.RSAPSS
+
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
@@ -19,30 +21,34 @@ val text_to_nat_:
     len:size_t
   -> input:lbuffer uint8 len
   -> resLen:size_t{v len = 8 * v resLen}
-  -> res:lbignum resLen
-  -> Stack unit
-    (requires fun h -> live h input /\ live h res /\ disjoint res input)
-    (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1)
+  -> res:lbignum resLen ->
+  Stack unit
+  (requires fun h -> live h input /\ live h res /\ disjoint res input)
+  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1)
+
 let text_to_nat_ len input resLen res =
   let h0 = ST.get () in
   let inv h1 i = modifies (loc res) h0 h1 in
   Lib.Loops.for 0ul resLen inv
   (fun i ->
-    res.(resLen -. i -. 1ul) <- uint_from_bytes_be (sub input (8ul *. i) 8ul)
+    res.(resLen -! i -! 1ul) <- uint_from_bytes_be (sub input (8ul *! i) 8ul)
   )
+
 
 val text_to_nat:
     len:size_t{v len > 0}
   -> input:lbuffer uint8 len
-  -> res:lbignum (blocks len 8ul){8 * v (blocks len 8ul) < max_size_t}
-  -> Stack unit
-    (requires fun h -> live h input /\ live h res /\ disjoint res input)
-    (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1)
+  -> res:lbignum (blocks len 8ul){8 * v (blocks len 8ul) <= max_size_t} ->
+  Stack unit
+  (requires fun h -> live h input /\ live h res /\ disjoint res input)
+  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    bn_v h1 res == S.os2ip #(v len) (as_seq h0 input))
+
 [@"c_inline"]
-let text_to_nat len input res =
+let text_to_nat len input res = admit();
   push_frame ();
   let num_words = blocks len 8ul in
-  let tmpLen = 8ul *. num_words in
+  let tmpLen = 8ul *! num_words in
   let m = len %. 8ul in
   let ind = if m =. 0ul then 0ul else 8ul -. m in
 
@@ -53,15 +59,17 @@ let text_to_nat len input res =
   text_to_nat_ tmpLen tmp num_words res;
   pop_frame ()
 
+
 inline_for_extraction noextract
 val nat_to_text_:
     len:size_t
   -> input:lbignum len
   -> resLen:size_t{v resLen = 8 * v len}
-  -> res:lbuffer uint8 resLen
-  -> Stack unit
-    (requires fun h -> live h input /\ live h res /\ disjoint res input)
-    (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1)
+  -> res:lbuffer uint8 resLen ->
+  Stack unit
+  (requires fun h -> live h input /\ live h res /\ disjoint res input)
+  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1)
+
 let nat_to_text_ len input resLen res =
   let h0 = ST.get () in
   let inv h1 i = modifies (loc res) h0 h1 in
@@ -71,18 +79,23 @@ let nat_to_text_ len input resLen res =
     uint_to_bytes_be (sub res (8ul *. i) 8ul) tmp
   )
 
+
 val nat_to_text:
     len:size_t{v len > 0}
-  -> input:lbignum (blocks len 8ul){8 * v (blocks len 8ul) < max_size_t}
-  -> res:lbuffer uint8 len
-  -> Stack unit
-    (requires fun h -> live h input /\ live h res /\ disjoint res input)
-    (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1)
+  -> input:lbignum (blocks len 8ul){8 * v (blocks len 8ul) <= max_size_t}
+  -> res:lbuffer uint8 len ->
+  Stack unit
+  (requires fun h ->
+    live h input /\ live h res /\ disjoint res input /\
+    bn_v h input < pow2 (8 * v len))
+  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_seq h1 res == S.i2osp #(v len) (bn_v h0 input))
+
 [@"c_inline"]
-let nat_to_text len input res =
+let nat_to_text len input res = admit();
   push_frame ();
   let num_words = blocks len 8ul in
-  let tmpLen = 8ul *. num_words in
+  let tmpLen = 8ul *! num_words in
   let m = len %. 8ul in
   let ind = if m =. 0ul then 0ul else 8ul -. m in
 

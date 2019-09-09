@@ -9,7 +9,7 @@ open LowStar.Buffer
 open Lib.IntTypes
 open Lib.Buffer
 
-open Hacl.Bignum.Lib
+open Hacl.Bignum
 open Hacl.Bignum.Convert
 open Hacl.RSAPSS
 
@@ -21,34 +21,33 @@ inline_for_extraction noextract
 let lbytes len = ilbuffer uint8 len
 
 val ctest:
-    pow2_i:size_t
-  -> modBits:size_t{v modBits > 0}
+    modBits:size_t{v modBits > 1}
   -> n:lbytes (blocks modBits 8ul)
-  -> pkeyBits:size_t{v pkeyBits > 0}
-  -> e:lbytes (blocks pkeyBits 8ul)
-  -> skeyBits:size_t{v skeyBits > 0}
-  -> d:lbytes (blocks skeyBits 8ul)
-  -> pTLen:size_t
-  -> p:lbytes pTLen
-  -> qTLen:size_t
-  -> q:lbytes qTLen
+  -> eBits:size_t{v eBits > 0}
+  -> e:lbytes (blocks eBits 8ul)
+  -> dBits:size_t{v dBits > 0}
+  -> d:lbytes (blocks dBits 8ul)
+  -> pLen:size_t
+  -> p:lbytes pLen
+  -> qLen:size_t
+  -> q:lbytes qLen
   -> r2:lbytes (blocks modBits 8ul)
-  -> rBlindTLen:size_t
-  -> rBlind:lbytes rBlindTLen
+  -> rBlindLen:size_t
+  -> rBlind:lbytes rBlindLen
   -> msgLen:size_t
   -> msg:lbytes msgLen
   -> saltLen:size_t
   -> salt:lbytes saltLen
-  -> sgnt_expected:lbytes (blocks modBits 8ul)
-  -> Stack bool
-    (requires fun h ->
-      live h n /\ live h e /\ live h d /\ live h p /\ live h q /\
-      live h r2 /\ live h rBlind /\ live h msg /\ live h salt /\
-      live h sgnt_expected)
-    (ensures  fun h0 r h1 -> True)
-let ctest pow2_i modBits n pkeyBits e skeyBits d pTLen p qTLen q r2 rBlindTLen rBlind msgLen msg saltLen salt sgnt_expected = admit();
+  -> sgnt_expected:lbytes (blocks modBits 8ul) ->
+  Stack bool
+  (requires fun h ->
+    live h n /\ live h e /\ live h d /\ live h p /\ live h q /\
+    live h r2 /\ live h rBlind /\ live h msg /\ live h salt /\
+    live h sgnt_expected)
+  (ensures  fun h0 r h1 -> True)
+
+let ctest modBits n pkeyBits e skeyBits d pTLen p qTLen q r2 rBlindTLen rBlind msgLen msg saltLen salt sgnt_expected = admit();
   push_frame ();
-  //let pow2_i = size (pow2 (x0 - 6)) in
   let nLen = blocks modBits 64ul in
   let eLen = blocks pkeyBits 64ul in
   let dLen = blocks skeyBits 64ul in
@@ -56,25 +55,25 @@ let ctest pow2_i modBits n pkeyBits e skeyBits d pTLen p qTLen q r2 rBlindTLen r
   let qLen = blocks qTLen 8ul in
   let rBlindLen = blocks rBlindTLen 8ul in
 
-  let pkeyLen = nLen +. eLen +. nLen in
+  let pkeyLen = nLen +. eLen in
   let skeyLen = pkeyLen +. dLen +. pLen +. qLen in
   let skey = create skeyLen (u64 0) in
+  let pkey = sub skey 0ul pkeyLen in
 
   let nNat = sub skey 0ul nLen in
   let eNat = sub skey nLen eLen in
-  let r2Nat =sub skey (nLen +. eLen) nLen in
   let dNat = sub skey pkeyLen dLen in
   let pNat = sub skey (pkeyLen +. dLen) pLen in
   let qNat = sub skey (pkeyLen +. dLen +. pLen) qLen in
-
   text_to_nat (blocks modBits 8ul) n nNat;
   text_to_nat (blocks pkeyBits 8ul) e eNat;
-  text_to_nat (blocks modBits 8ul) r2 r2Nat;
   text_to_nat (blocks skeyBits 8ul) d dNat;
   text_to_nat pTLen p pNat;
   text_to_nat qTLen q qNat;
 
-  let pkey = sub skey 0ul pkeyLen in
+
+  let r2Nat = create nLen (u64 0) in
+  text_to_nat (blocks modBits 8ul) r2 r2Nat;
 
   let rBlindNat = create rBlindLen (u64 0) in
   text_to_nat rBlindTLen rBlind rBlindNat;
@@ -82,13 +81,14 @@ let ctest pow2_i modBits n pkeyBits e skeyBits d pTLen p qTLen q r2 rBlindTLen r
 
   let nTLen = blocks modBits 8ul in
   let sgnt = create nTLen (u8 0) in
-  rsa_pss_sign pow2_i modBits pkeyBits skeyBits pLen qLen skey rBlind0 saltLen salt msgLen msg sgnt;
+  rsapss_sign modBits pkeyBits skeyBits pLen qLen skey rBlind0 r2Nat saltLen salt msgLen msg sgnt;
   let check_sgnt = Lib.ByteBuffer.lbytes_eq #nTLen sgnt sgnt_expected in
-  let verify_sgnt = rsa_pss_verify pow2_i modBits pkeyBits pkey saltLen sgnt msgLen msg in
+  let verify_sgnt = rsapss_verify modBits pkeyBits pkey r2Nat saltLen sgnt_expected msgLen msg in
   Lib.PrintBuffer.print_compare_display nTLen sgnt sgnt_expected;
   let res = check_sgnt && verify_sgnt in
   pop_frame ();
   res
+
 
 inline_for_extraction noextract
 val u8: n:nat{n < 0x100} -> uint8
@@ -735,6 +735,7 @@ let test4_sgnt_expected: b:ilbuffer uint8 256ul{ recallable b } =
   assert_norm (List.Tot.length l == 256);
   createL_global l
 
+
 val main: unit -> St C.exit_code
 let main () =
   recall test1_n;
@@ -748,7 +749,7 @@ let main () =
   recall test1_salt;
   recall test1_sgnt_expected;
   let test1 =
-    ctest 16ul 1024ul test1_n 24ul test1_e 1024ul test1_d 64ul test1_p 64ul test1_q
+    ctest 1024ul test1_n 24ul test1_e 1024ul test1_d 64ul test1_p 64ul test1_q
     test1_r2 8ul test1_rBlind 51ul test1_msg 20ul test1_salt test1_sgnt_expected in
   recall test2_n;
   recall test2_e;
@@ -761,7 +762,7 @@ let main () =
   recall test2_salt;
   recall test2_sgnt_expected;
   let test2 =
-    ctest 32ul 1025ul test2_n 24ul test2_e 1024ul test2_d 65ul test2_p 65ul test2_q
+    ctest 1025ul test2_n 24ul test2_e 1024ul test2_d 65ul test2_p 65ul test2_q
     test2_r2 8ul test2_rBlind 234ul test2_msg 20ul test2_salt test2_sgnt_expected in
   recall test3_n;
   recall test3_e;
@@ -774,7 +775,7 @@ let main () =
   recall test3_salt;
   recall test3_sgnt_expected;
   let test3 =
-    ctest 32ul 1536ul test3_n 24ul test3_e 1536ul test3_d 96ul test3_p 96ul test3_q
+    ctest 1536ul test3_n 24ul test3_e 1536ul test3_d 96ul test3_p 96ul test3_q
     test3_r2 8ul test3_rBlind 107ul test3_msg 20ul test3_salt test3_sgnt_expected in
   recall test4_n;
   recall test4_e;
@@ -787,7 +788,7 @@ let main () =
   recall test4_salt;
   recall test4_sgnt_expected;
   let test4 =
-    ctest 32ul 2048ul test4_n 24ul test4_e 2048ul test4_d 128ul test4_p 128ul test4_q
+    ctest 2048ul test4_n 24ul test4_e 2048ul test4_d 128ul test4_p 128ul test4_q
     test4_r2 8ul test4_rBlind 128ul test4_msg 20ul test4_salt test4_sgnt_expected in
   let test = test1 && test2 && test3 && test4 in
   if test then C.String.print (C.String.of_literal "SUCCESS\n")

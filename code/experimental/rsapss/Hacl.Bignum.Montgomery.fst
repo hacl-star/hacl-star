@@ -7,11 +7,12 @@ open FStar.Mul
 open Lib.IntTypes
 open Lib.Buffer
 
-open Hacl.Bignum.Lib
+open Hacl.Bignum
 open Hacl.Bignum.Addition
 open Hacl.Bignum.Multiplication
 
 module ST = FStar.HyperStack.ST
+
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
@@ -19,10 +20,11 @@ inline_for_extraction noextract
 val mod_inv_u64_:
     alpha:uint64
   -> beta:uint64
-  -> uv:lbignum 2ul
-  -> Stack unit
-    (requires fun h -> live h uv)
-    (ensures  fun h0 _ h1 -> modifies (loc uv) h0 h1)
+  -> uv:lbignum 2ul ->
+  Stack unit
+  (requires fun h -> live h uv)
+  (ensures  fun h0 _ h1 -> modifies (loc uv) h0 h1)
+
 let mod_inv_u64_ alpha beta uv =
   let h0 = ST.get () in
   let inv h1 i = modifies (loc uv) h0 h1 in
@@ -38,11 +40,12 @@ let mod_inv_u64_ alpha beta uv =
     uv.(1ul) <- (vb >>. 1ul) +. alpha_if_u_is_odd
   )
 
-val mod_inv_u64:
-    n0:uint64
-  -> Stack uint64
-    (requires fun h -> True)
-    (ensures  fun h0 _ h1 -> modifies0 h0 h1)
+
+val mod_inv_u64: n0:uint64 ->
+  Stack uint64
+  (requires fun h -> True)
+  (ensures  fun h0 _ h1 -> modifies0 h0 h1)
+
 [@"c_inline"]
 let mod_inv_u64 n0 =
   push_frame ();
@@ -56,34 +59,38 @@ let mod_inv_u64 n0 =
   pop_frame ();
   res
 
+
 inline_for_extraction noextract
 val mont_reduction_f:
     nLen:size_t
-  -> rLen:size_t{v nLen < v rLen /\ v nLen + v rLen < max_size_t}
-  -> c:lbignum (nLen +. rLen)
+  -> rLen:size_t{v nLen < v rLen /\ v nLen + v rLen <= max_size_t}
+  -> c:lbignum (nLen +! rLen)
   -> n:lbignum nLen
   -> nInv_u64:uint64
   -> carry:lbignum 1ul
-  -> i:size_t{v i < v rLen}
-  -> Stack unit
-    (requires fun h -> live h c /\ live h n /\ live h carry /\ disjoint c n)
-    (ensures  fun h0 _ h1 -> modifies (loc carry |+| loc c) h0 h1)
+  -> i:size_t{v i < v rLen} ->
+  Stack unit
+  (requires fun h -> live h c /\ live h n /\ live h carry /\ disjoint c n)
+  (ensures  fun h0 _ h1 -> modifies (loc carry |+| loc c) h0 h1)
+
 let mont_reduction_f nLen rLen c n nInv_u64 carry i =
   let ci = c.(i) in
   let qi = nInv_u64 *. ci in
   let _ = bn_mult_by_limb_addj_add nLen n qi i (nLen +. rLen) c carry in ()
 
+
 inline_for_extraction noextract
 val mont_reduction_:
     nLen:size_t
-  -> rLen:size_t{v nLen < v rLen /\ v nLen + v rLen < max_size_t}
-  -> c:lbignum (nLen +. rLen)
+  -> rLen:size_t{v nLen < v rLen /\ v nLen + v rLen <= max_size_t}
+  -> c:lbignum (nLen +! rLen)
   -> n:lbignum nLen
   -> nInv_u64:uint64
-  -> carry:lbignum 1ul
-  -> Stack unit
-    (requires fun h -> live h c /\ live h n /\ live h carry /\ disjoint c n)
-    (ensures  fun h0 _ h1 -> modifies (loc carry |+| loc c) h0 h1)
+  -> carry:lbignum 1ul ->
+  Stack unit
+  (requires fun h -> live h c /\ live h n /\ live h carry /\ disjoint c n)
+  (ensures  fun h0 _ h1 -> modifies (loc carry |+| loc c) h0 h1)
+
 let mont_reduction_ nLen rLen c n nInv_u64 carry =
   let h0 = ST.get () in
   let inv h1 i = modifies (loc carry |+| loc c) h0 h1 in
@@ -93,15 +100,17 @@ let mont_reduction_ nLen rLen c n nInv_u64 carry =
     mont_reduction_f nLen rLen c n nInv_u64 carry i
   )
 
+
 val mont_reduction_a:
     nLen:size_t
-  -> rLen:size_t{v nLen < v rLen /\ v nLen + v rLen < max_size_t}
-  -> c:lbignum (nLen +. rLen)
+  -> rLen:size_t{v nLen < v rLen /\ v nLen + v rLen <= max_size_t}
+  -> c:lbignum (nLen +! rLen)
   -> n:lbignum nLen
-  -> nInv_u64:uint64
-  -> Stack unit
-    (requires fun h -> live h c /\ live h n /\  disjoint c n)
-    (ensures  fun h0 _ h1 -> modifies (loc c) h0 h1)
+  -> nInv_u64:uint64 ->
+  Stack unit
+  (requires fun h -> live h c /\ live h n /\  disjoint c n)
+  (ensures  fun h0 _ h1 -> modifies (loc c) h0 h1)
+
 [@"c_inline"]
 let mont_reduction_a nLen rLen c n nInv_u64 =
   push_frame ();
@@ -109,76 +118,86 @@ let mont_reduction_a nLen rLen c n nInv_u64 =
   mont_reduction_ nLen rLen c n nInv_u64 carry;
   pop_frame ()
 
+
 val mont_reduction:
     nLen:size_t
-  -> rLen:size_t{v nLen < v rLen /\ v nLen + v rLen < max_size_t}
+  -> rLen:size_t{v nLen < v rLen /\ v nLen + v rLen <= max_size_t}
   -> n:lbignum nLen
   -> nInv_u64:uint64
-  -> c:lbignum (nLen +. nLen)
-  -> tmp:lbignum (nLen +. rLen)
-  -> res:lbignum nLen
-  -> Stack unit
-    (requires fun h ->
-      live h n /\ live h c /\ live h tmp /\ live h res /\
-      disjoint tmp n /\ disjoint tmp c /\ disjoint res tmp)
-    (ensures  fun h0 _ h1 -> modifies (loc res |+| loc tmp) h0 h1)
+  -> c:lbignum (nLen +! nLen)
+  -> tmp:lbignum (nLen +! rLen)
+  -> res:lbignum nLen ->
+  Stack unit
+  (requires fun h ->
+    live h n /\ live h c /\ live h tmp /\ live h res /\
+    disjoint tmp n /\ disjoint tmp c /\ disjoint res tmp /\
+    0 < bn_v h n)
+  (ensures  fun h0 _ h1 -> modifies (loc res |+| loc tmp) h0 h1 /\
+    bn_v h1 res % bn_v h0 n == bn_v h0 c / pow2 (64 * v rLen) % bn_v h0 n)
+
 [@"c_inline"]
 let mont_reduction nLen rLen n nInv_u64 c tmp res =
-  let nLen2 = nLen +. nLen in
+  let nLen2 = nLen +! nLen in
   let tmp1 = sub tmp 0ul nLen2 in
   copy tmp1 c;
   tmp.(nLen2) <- u64 0;
   mont_reduction_a nLen rLen tmp n nInv_u64;
   //bn_rshift rLen2 tmp (mul #SIZE (size 64) rrLen) tmp; // tmp = tmp / r
   let tmp1 = sub tmp rLen nLen in
-  copy res tmp1
+  copy res tmp1;
+  admit()
+
 
 val to_mont:
-    nLen:size_t
-  -> rLen:size_t{v nLen < v rLen /\ v nLen + v rLen < max_size_t}
-  -> pow2_i:size_t{v nLen + v nLen + 4 * v pow2_i < max_size_t /\ v nLen <= v pow2_i /\ v rLen < 2 * v pow2_i}
+    nLen:size_t{v nLen > 0}
+  -> rLen:size_t{v nLen < v rLen /\ v nLen + v rLen <= max_size_t}
   -> n:lbignum nLen
   -> nInv_u64:uint64
   -> r2:lbignum nLen
   -> a:lbignum nLen
-  -> st_kara:lbignum (nLen +. nLen +. 4ul *. pow2_i)
-  -> aM:lbignum nLen
-  -> Stack unit
-    (requires fun h ->
-      live h n /\ live h r2 /\ live h a /\ live h aM /\ live h st_kara /\
-      disjoint st_kara a /\ disjoint st_kara r2 /\ disjoint st_kara n /\
-      disjoint aM st_kara /\ disjoint st_kara aM)
-    (ensures  fun h0 _ h1 -> modifies (loc aM |+| loc st_kara) h0 h1)
+  -> aM:lbignum nLen ->
+  Stack unit
+  (requires fun h ->
+    live h n /\ live h r2 /\ live h a /\ live h aM /\
+    0 < bn_v h n /\ bn_v h r2 == pow2 (2 * 64 * v rLen) % bn_v h n)
+  (ensures  fun h0 _ h1 -> modifies (loc aM) h0 h1 /\
+    bn_v h1 aM % bn_v h0 n == bn_v h0 a * pow2 (64 * v rLen) % bn_v h0 n)
+
 [@"c_inline"]
-let to_mont nLen rLen pow2_i n nInv_u64 r2 a st_kara aM = admit();
-  let cLen = nLen +. nLen in
-  let stLen = cLen +. 4ul *. pow2_i in
-  let c = sub st_kara 0ul cLen in
-  karatsuba pow2_i nLen a r2 st_kara; // c = a * r2
-  let tmp = sub st_kara cLen (nLen +. rLen) in
-  mont_reduction nLen rLen n nInv_u64 c tmp aM // aM = c % n
+let to_mont nLen rLen n nInv_u64 r2 a aM =
+  push_frame ();
+  let cLen = nLen +! nLen in
+  let tmpLen = nLen +! rLen in
+  let c = create cLen (u64 0) in
+  let tmp = create tmpLen (u64 0) in
+  bn_mul nLen a nLen r2 c; // c = a * r2
+  mont_reduction nLen rLen n nInv_u64 c tmp aM; // aM = c % n
+  admit();
+  pop_frame ()
+
 
 val from_mont:
-    nLen:size_t
-  -> rLen:size_t{v nLen < v rLen /\ v nLen + v rLen < max_size_t}
-  -> pow2_i:size_t{v nLen + v nLen + 4 * v pow2_i < max_size_t /\ v nLen <= v pow2_i /\ v rLen < 2 * v pow2_i}
+    nLen:size_t{v nLen > 0}
+  -> rLen:size_t{v nLen < v rLen /\ v nLen + v rLen <= max_size_t}
   -> n:lbignum nLen
   -> nInv_u64:uint64
   -> aM:lbignum nLen
-  -> tmp:lbignum (nLen +. rLen)
-  -> a:lbignum nLen
-  -> Stack unit
-    (requires fun h ->
-      live h n /\ live h a /\ live h aM /\ live h tmp /\
-      disjoint tmp n /\ disjoint aM tmp /\ disjoint a tmp)
-    (ensures  fun h0 _ h1 -> modifies (loc a |+| loc tmp) h0 h1)
+  -> a:lbignum nLen ->
+  Stack unit
+  (requires fun h ->
+    live h n /\ live h a /\ live h aM /\
+    0 < bn_v h n)
+  (ensures  fun h0 _ h1 -> modifies (loc a) h0 h1 /\
+    bn_v h1 a == bn_v h0 aM / pow2 (64 * v rLen) % bn_v h0 n)
+
 [@"c_inline"]
-let from_mont nLen rLen pow2_i n nInv_u64 aM tmp a =
-  let tmpLen = nLen +. rLen in
-  memset tmp (u64 0) tmpLen;
-  let tmp1 = sub tmp 0ul nLen in
-  copy tmp1 aM;
+let from_mont nLen rLen n nInv_u64 aM a =
+  push_frame ();
+  let tmpLen = nLen +! rLen in
+  let tmp = create tmpLen (u64 0) in
+  update_sub tmp 0ul nLen aM;
   mont_reduction_a nLen rLen tmp n nInv_u64;
   //bn_rshift rLen2 tmp (mul #SIZE (size 64) rrLen) tmp; // tmp = tmp / r
-  let tmp1 = sub tmp rLen nLen in
-  copy a tmp1
+  copy a (sub tmp rLen nLen);
+  admit();
+  pop_frame ()
