@@ -1,5 +1,5 @@
 [
-  "\u0003\u000fø)$ê†¶\"ÆslW#K\u0001",
+  "Ø\n#“\u0000M\u0001g¨ó@\u007fpwh8",
   [
     [
       "Hacl.Impl.QTesla.Globals.poly_k",
@@ -2145,51 +2145,71 @@
       1,
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_FStar.BitVector.logand_vec.fuel_instrumented",
+        "@fuel_correspondence_FStar.UInt.from_vec.fuel_instrumented",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented",
         "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
-        "b2t_def", "bool_inversion", "bool_typing",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "Prims_pretyping_f537159ed795b314b4e58c260361ae86", "b2t_def",
+        "bool_inversion", "bool_typing",
         "constructor_distinct_Lib.IntTypes.S16",
         "constructor_distinct_Lib.IntTypes.S8",
         "constructor_distinct_Lib.IntTypes.U32",
         "equality_tok_Lib.IntTypes.PUB@tok",
-        "equality_tok_Lib.IntTypes.U32@tok",
+        "equality_tok_Lib.IntTypes.U32@tok", "equation_FStar.BitVector.bv_t",
         "equation_FStar.Int.Cast.op_At_Percent", "equation_FStar.Int.fits",
         "equation_FStar.Int.int_t", "equation_FStar.Int.max_int",
         "equation_FStar.Int.min_int", "equation_FStar.Int.op_At_Percent",
-        "equation_FStar.Int.size", "equation_FStar.UInt.min_int",
+        "equation_FStar.Int.size", "equation_FStar.UInt.fits",
+        "equation_FStar.UInt.logand", "equation_FStar.UInt.max_int",
+        "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
+        "equation_FStar.UInt.uint_t",
         "equation_Hacl.Impl.QTesla.Params.params_q",
         "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.maxint",
         "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.range",
-        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
-        "equation_Prims.pos", "equation_QTesla.Params.params_k",
-        "equation_QTesla.Params.params_q",
-        "equation_with_fuel_Prims.pow2.fuel_instrumented", "int_inversion",
-        "int_typing", "lemma_FStar.Int32.vu_inv",
+        "equation_Lib.IntTypes.unsigned", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Prims.pos",
+        "equation_QTesla.Params.params_k", "equation_QTesla.Params.params_q",
+        "equation_with_fuel_FStar.UInt.from_vec.fuel_instrumented",
+        "equation_with_fuel_Prims.pow2.fuel_instrumented",
+        "function_token_typing_Prims.__cache_version_number__",
+        "function_token_typing_Prims.bool", "int_inversion", "int_typing",
+        "lemma_FStar.Int32.vu_inv", "lemma_FStar.Seq.Base.lemma_len_slice",
         "lemma_FStar.UInt.index_to_vec_ones", "lemma_FStar.UInt.pow2_values",
         "lemma_Lib.IntTypes.v_mk_int", "primitive_Prims.op_Addition",
-        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_LessThan",
-        "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Minus",
-        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
-        "primitive_Prims.op_Subtraction",
+        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_BarBar",
+        "primitive_Prims.op_Equality",
+        "primitive_Prims.op_GreaterThanOrEqual",
+        "primitive_Prims.op_LessThan", "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Minus", "primitive_Prims.op_Modulus",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
         "refinement_interpretation_Tm_refine_7e0b9b2dbca36eab00de093c1b701c6d",
+        "refinement_interpretation_Tm_refine_81407705a0828c2c1b1976675443f647",
         "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
         "refinement_interpretation_Tm_refine_8f613f6939fa4621ed692536fbe3f95d",
         "refinement_interpretation_Tm_refine_bbc68fe5de0a744264afed7bd2c5498b",
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
         "refinement_interpretation_Tm_refine_c156ecc6eab05d1687a383ef171435eb",
         "refinement_interpretation_Tm_refine_d247c40384a6493f72c4f648a277f2eb",
+        "refinement_interpretation_Tm_refine_e2d5d62a90ceed8a6faf9d20615f4e1e",
+        "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
+        "token_correspondence_FStar.UInt.from_vec.fuel_instrumented",
+        "typing_FStar.BitVector.logand_vec",
         "typing_FStar.Int.Cast.int32_to_int64", "typing_FStar.Int.fits",
         "typing_FStar.Int32.v", "typing_FStar.Int64.v",
-        "typing_Hacl.Impl.QTesla.Params.params_q",
+        "typing_FStar.Seq.Base.slice", "typing_FStar.UInt.fits",
+        "typing_FStar.UInt.to_vec", "typing_FStar.UInt64.v",
+        "typing_Hacl.Impl.QTesla.Params.params_q", "typing_Prims.pow2",
         "typing_QTesla.Params.params_k", "typing_QTesla.Params.params_q",
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "1dc5b52d542c2688856a88c1f4c5cf01"
+      "b3bad6be7a97ac896757913d83c7c290"
     ],
     [
       "Hacl.Impl.QTesla.Globals.barr_reduce",
@@ -2240,7 +2260,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "600d2a347b38d52b6b0d53d074a68c4e"
+      "d2824965f631fb447263c8ceec2e39be"
     ],
     [
       "Hacl.Impl.QTesla.Globals.unsafe_declassify",
@@ -2249,7 +2269,7 @@
       1,
       [ "@query" ],
       0,
-      "2d5795da1cdf0fc133c17ec1d84944db"
+      "eaab9c58d1a4047690673b850347c714"
     ],
     [
       "Hacl.Impl.QTesla.Globals.unsafe_declassify",
@@ -2311,7 +2331,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "1560f6ebd4d7442eec4454b67d32ea59"
+      "776357972c3ad3f7ea79cd972476a348"
     ],
     [
       "Hacl.Impl.QTesla.Globals.shift_arithmetic_left_value_check",
@@ -2332,7 +2352,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "4570fd5c11e63f6c42322ce7a66a6ba4"
+      "bb96e1bf9afecbc4bc0754095e5f7e86"
     ]
   ]
 ]

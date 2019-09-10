@@ -216,14 +216,11 @@ let reduce a =
     assert(I64.v u <= (pow2 32 - 1) * elem_v params_q);
     let a:I64.t = I64.(a +^ u) in
     assert(let q = elem_v params_q in I64.v a <= (2*q)*(2*q) + (pow2 32 - 1) * q);
-    //assume(I64.v I64.(a >>^ 32ul) == I64.v a / pow2 32); 
-    //assume(let result = I64.v I64.(a >>^ 32ul) in let q = elem_v params_q in -q < result /\ result < q);
-    //assume(let result = I64.(a >>^ 32ul) in is_montgomery (int64_to_elem result));
-    //assume(0 <= I64.v a);
     shift_arithmetic_right_lemma_i64 a 32ul;
     normalize_term_spec (pow2 32);
     let result:I64.t = I64.(a >>>^ 32ul) in
-    assume(I64.v (I64.shift_arithmetic_right a 32ul) = I64.v a / pow2 32);
+    assert(I64.v (I64.shift_arithmetic_right a 32ul) = I64.v a / pow2 32);
+    //assume(let q = elem_v params_q in ((2*q)*(2*q)) / (pow2 32) < q);
     assume(is_montgomery (int64_to_elem (I64.shift_arithmetic_right a 32ul)));
     //int64_to_elem I64.(a >>>^ 32ul)
     int64_to_elem result

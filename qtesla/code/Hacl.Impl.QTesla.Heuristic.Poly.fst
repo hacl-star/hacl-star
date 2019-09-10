@@ -367,24 +367,29 @@ val poly_add_correct:
   -> x: poly
   -> y: poly
   -> Stack unit
-    (requires fun h -> live h result /\ live h x /\ live h y /\ is_poly_montgomery h x /\ is_poly_pmq h y /\ disjoint result y /\
+    (requires fun h -> live h result /\ live h x /\ live h y /\ is_poly_montgomery h x /\ is_poly_sk h y /\ disjoint result y /\
                     (disjoint result x \/ result == x))
     (ensures fun h0 _ h1 -> modifies1 result h0 h1 /\ is_poly_pk h1 result)
 
 let poly_add_correct result x y =
     let h0 = ST.get() in
     for 0ul params_n
-    (fun h i -> live h result /\ live h x /\ live h y /\ modifies1 result h0 h /\ is_poly_montgomery h x /\ is_poly_pmq h y /\
+    (fun h i -> live h result /\ live h x /\ live h y /\ modifies1 result h0 h /\ is_poly_montgomery h x /\ is_poly_sk h y /\
              i <= v params_n /\ is_poly_pk_i h result i)
     (fun i ->
         let h1 = ST.get () in
         // If I don't reassert these facts, the size condition on the addition doesn't check. I don't currently have
         // a framing lemma for is_pmq, and I'm guessing I may need an additional pattern for index/op_Array_Access.
         assert(is_poly_montgomery h1 x);
-        assert(is_poly_pmq h1 y);
+        assert(is_poly_sk h1 y);
         assert(is_montgomery (bget h1 x (v i)));
-        assert(is_pmq (bget h1 y (v i))); 
+        assert(is_sk (bget h1 y (v i)));
+        normalize_term_spec (pow2 (v params_s_bits-1)); // needed for is_sk to have a meaningful bound
         let temp:elem_base = x.(i) +^ y.(i) in 
+        // TODO (kkane): Current known bounds on x are [0, 2q) but it's actually [0, q+\epsilon) for some small
+        // epsilon that, when added to y.(i) (also known to be small) won't exceed 2q. Assume this fact for now.
+        // x is actually t from crypto_sign_keypair, and t = a * s + e. 
+        assume(elem_v temp < 2 * elem_v params_q);
         assert_norm(size elem_n -. size 1 <. size I32.n);
         [@inline_let] let shiftresult = temp >>>^ (size elem_n -. size 1) in
         shift_arithmetic_right_lemma_i32 temp (size elem_n -. size 1);
@@ -408,8 +413,7 @@ let poly_add_correct result x y =
         result.(i) <- temp;
         let h2 = ST.get () in
         assert(is_poly_equal h1 h2 y);
-        assert(is_poly_equal_except h1 h2 result (v i));
-        assume(is_pk (bget h2 result (v i)))
+        assert(is_poly_equal_except h1 h2 result (v i))
     )
 
 val poly_sub_correct:
@@ -434,6 +438,14 @@ let poly_sub_correct result x y =
         assert(is_poly_sparse_mul_output h1 y);
         assert(is_sparse_mul_output (bget h1 y (v i)));
         let temp:elem_base = x.(i) -^ y.(i) in
+        // TODO (kkane): Our known bounds on x.(i) are [0, 2q), which doesn't let us prove the upper bound on the difference
+        // is 2q. Per Patrick it's actually bounded by [0, q+\epsilon) for some small \epsilon that actually does guarantees
+        // the difference doesn't exceed 2q, since y.(i) is at most 2^16.
+        //
+        // x is actually v from crypto_sign, and v = a * y where a is the output of poly_uniform (need to get bounds on a
+        // in non-NTT form) and y is from y_sampler (coefficients in [-B,B]). Need to reason all of v's coefficients are
+        // at most 2q-(2^16).
+        assume(elem_v temp < 2 * elem_v params_q);
         assert_norm(size elem_n -. size 1 <. size I32.n);
         shift_arithmetic_right_lemma_i32 temp (size elem_n -. size 1);
         Int.logand_lemma_1 (elem_v params_q);
@@ -443,8 +455,7 @@ let poly_sub_correct result x y =
         result.(i) <- temp;
         let h2 = ST.get () in
         assert(is_poly_equal h1 h2 y);
-        assert(is_poly_equal_except h1 h2 result (v i));
-        assume(is_montgomery (bget h2 result (v i)))
+        assert(is_poly_equal_except h1 h2 result (v i))
     )
 
 // This function is sometimes used with result and x the same, so we can't assume they are disjoint. But either they're

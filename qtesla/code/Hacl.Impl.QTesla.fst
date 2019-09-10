@@ -518,6 +518,15 @@ private let lemma_sub_poly_is_pmq (h:HS.mem) (p:poly_k) (sp:poly) (k: size_t{v k
     assert(forall (i:nat{i < v params_n}) . bget h sp i == bget h p (v k * v params_n + i));
     assert(forall (i:nat{i < v params_n}) . is_pmq (bget h sp i))
 
+private let lemma_sub_poly_is_sk (h:HS.mem) (p:poly_k) (sp:poly) (k: size_t{v k < v params_k}) : Lemma
+    (requires is_poly_k_sk h p /\ sp == gsub p (k *! params_n) params_n)
+    (ensures is_poly_sk h sp) = 
+    assert(forall (i:nat{i < v params_k * v params_n}) . is_sk (bget h p i));
+    assert(sp == gsub p (k *! params_n) params_n);
+    assert(forall (i:nat{i >= v k * v params_n /\ i < v k * v params_n + v params_n}) . bget h p i == bget h sp (i - v k * v params_n));
+    assert(forall (i:nat{i < v params_n}) . bget h sp i == bget h p (v k * v params_n + i));
+    assert(forall (i:nat{i < v params_n}) . is_sk (bget h sp i))
+
 private inline_for_extraction noextract
 val qtesla_keygen_compute_tk:
     t : poly_k
@@ -541,7 +550,7 @@ let qtesla_keygen_compute_tk t a e s_ntt k =
     poly_mul tk ak s_ntt;
     let h = ST.get () in
     lemma_poly_k_sk_is_pmq h e;
-    lemma_sub_poly_is_pmq h e ek k;
+    lemma_sub_poly_is_sk h e ek k;
     poly_add_correct tk tk ek;
     let hLoopEnd = ST.get () in
     assert(is_poly_pk hLoopEnd tk); // result of poly_add_correct
@@ -1697,7 +1706,7 @@ let qtesla_sign_compute_c_z v_ randomness_input s y c z pos_list sign_list =
     let hReturn = ST.get () in
     assert(is_poly_equal hFinal hReturn z)
 
-private let lemma_sub_poly_is_sk
+private let lemma_sub_sparse_poly_is_sk
     (h: HS.mem)
     (e: lbuffer sparse_elem (params_n *! params_k))
     (s: lbuffer sparse_elem params_n)
@@ -1765,7 +1774,7 @@ let qtesla_sign_update_v v_ e pos_list sign_list =
              let h = ST.get () in
              assert(forall (i:nat{i < v params_n * v params_k}) . bget hInit e i == bget h e i);
              assert(is_e_sk h e);
-             lemma_sub_poly_is_sk h e e_k k;
+             lemma_sub_sparse_poly_is_sk h e e_k k;
              assert(is_s_sk h e_k);
              lemma_disjoint ec e ec_k e_k k;
              assert(disjoint ec_k e_k);

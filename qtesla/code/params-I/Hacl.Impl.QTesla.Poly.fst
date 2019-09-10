@@ -119,8 +119,8 @@ val nttinv:
     a: poly
   -> w: poly
   -> Stack unit
-    (requires fun h -> live h a /\ live h w /\ disjoint a w)
-    (ensures fun h0 _ h1 -> modifies1 a h0 h1)
+    (requires fun h -> live h a /\ live h w /\ disjoint a w /\ is_poly_montgomery h a)
+    (ensures fun h0 _ h1 -> modifies1 a h0 h1 /\ is_poly_montgomery h1 a)
 
 let nttinv a w =
     push_frame();
@@ -159,7 +159,9 @@ let nttinv a w =
 	a.(i) <- reduce I64.(params_r *^ (elem_to_int64 ai))
     );
 
-    pop_frame()
+    pop_frame();
+    let hReturn = ST.get () in
+    assume(is_poly_montgomery hReturn a)
 
 private val move_refinement: #a:Type -> #p:(a -> Type)
   -> l:list a{forall z. FStar.List.Tot.Base.memP z l ==> p z} -> list (x:a{p x})
@@ -254,9 +256,10 @@ let poly_mul result x y =
     assert(is_poly_equal hInit hPointwise y);
     poly_pointwise result x y;
     nttinv result zetainv;
+    let hFinal = ST.get () in
     pop_frame();
-    let h1 = ST.get () in
-    assume(is_poly_montgomery h1 result)
+    let hReturn = ST.get () in
+    assert(is_poly_equal hFinal hReturn result)
 
 inline_for_extraction noextract
 let poly_add = Hacl.Impl.QTesla.Heuristic.Poly.poly_add
