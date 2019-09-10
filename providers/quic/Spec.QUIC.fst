@@ -9,6 +9,7 @@ module C16 = Spec.Cipher16
 module AEAD = Spec.AEAD
 module HKDF = Spec.HKDF
 
+
 let prefix: lbytes 11 =
   let l = [0x74uy; 0x6cuy; 0x73uy; 0x31uy; 0x33uy;
            0x20uy; 0x71uy; 0x75uy; 0x69uy; 0x63uy; 0x20uy] in
@@ -224,7 +225,7 @@ let lemma_varint_case3 (n:nat{n < pow2 62}) (suff:bytes)
   match b0 with
   | 3 -> assert(parse_varint_weak b == Some (n % 0x4000000000000000, 8, suff))
 
-#push-options "--z3rlimit 30"
+#push-options "--z3rlimit 60"
 let length_encode (n:nat62) : Lemma
   (let b = encode_varint n in
    let b0 = U8.v (S.index b 0) / 0x40 in
@@ -541,6 +542,11 @@ let lemma_append_assoc (#a:eqtype) (u v w:S.seq a) : Lemma
 let compose_split (#a:eqtype) (b:S.seq a) (i j:nat) : Lemma
   (requires i+j <= S.length b)
   (ensures snd (S.split (snd (S.split b i)) j) = snd (S.split b (i+j))) =
+  ()
+
+let lemma_compose_slice (#a:eqtype) (b:S.seq a) (i j k l:nat) : Lemma
+  (requires i <= j /\ j <= S.length b /\ k <= l /\ k <= j - i /\ l <= j - i)
+  (ensures S.slice (S.slice b i j) k l = S.slice b (i+k) (i+l)) =
   ()
 
 let add_offset (#a:eqtype) (b:S.seq a) (i:nat) (p1 p2:S.seq a) : Lemma
@@ -2025,7 +2031,13 @@ let lemma_header_encryption_correct a k h pn_len npn c : Lemma
 
 
 
+
+
 let lemma_header_encryption_malleable a k c spin phase cid x npn = admit()
+
+
+
+(* not useful anymore by using declassify below
 
 let coerce (#a:Type) (x:a) (b:Type) : Pure b
   (requires a == b) (ensures fun y -> y == x) = x
@@ -2039,23 +2051,53 @@ inline_for_extraction private
 let reveal (x:S.seq Lib.IntTypes.uint8) : Pure bytes
   (requires True) (ensures fun r -> S.length x == S.length r)
   = S.init (S.length x) (fun i -> U8.uint_to_t (Lib.IntTypes.uint_v (S.index x i)))
+*)
 
-#push-options "--z3rlimit 30"
-let encrypt a k siv hpk pn_len seqn h plain =
-  let open FStar.Endianness in
-  assert_norm(8 `op_Multiply` 12 == 96);
-  assert_norm(pow2 62 < pow2 96 /\ pow2 16 < pow2 62 /\ 54 < max_plain_length);
-  let pnb = n_to_be 12 seqn in
-  let npn : lbytes (1+pn_len) = S.slice pnb (11 - pn_len) 12 in
-  let header = format_header h pn_len npn in 
-  lemma_format_len a h pn_len npn;
-  let iv = xor_inplace pnb siv 0 in
-  let cipher = AEAD.encrypt #a (hide k) (hide iv) (hide header) (hide plain) in
-  header_encrypt a hpk h pn_len npn (reveal cipher)
-#pop-options
+// two lines to break the abstraction of UInt8 used for
+// side-channel protection (useless here). Copied from mitls-fstar
+// src/tls/declassify.fst (branch dev)
+friend Lib.IntTypes
+let declassify : squash (Lib.IntTypes.uint8 == UInt8.t)= ()
+
+
+/// encryption of a packet
 
 #push-options "--z3rlimit 20"
-let lemma_disjoint_sum (k:nat) (a:nat) (b:nat) (u:nat)
+let encrypt a k siv hpk pn_len seqn h plain =
+  let open FStar.Endianness in
+  assert_norm(pow2 62 < pow2 (8 `op_Multiply` 12));
+  let pnb = n_to_be 12 seqn in
+  let npn : lbytes (1+pn_len) = S.slice pnb (11 - pn_len) 12 in
+  let header = format_header h pn_len npn in
+  lemma_format_len a h pn_len npn;
+  let iv = xor_inplace pnb siv 0 in
+  let cipher = AEAD.encrypt #a k iv header plain in
+  header_encrypt a hpk h pn_len npn cipher
+#pop-options
+
+
+
+/// Decryption of packets: recovery of the packet number (if it is in
+/// the right window)
+
+let reduce_pn pn_len pn = pn % (bound_npn pn_len)
+
+
+
+// replaces a%b by new_mod
+let replace_modulo (a b new_mod:nat) : Pure nat
+  (requires b > 0 /\ new_mod < b)
+  (ensures fun res -> res % b = new_mod /\ res / b = a / b) =
+  let open FStar.Math.Lemmas in
+  let res = a - a%b + new_mod in
+  lemma_mod_plus new_mod (a/b) b;
+  small_mod new_mod b;
+  res
+
+
+
+#push-options "--z3rlimit 20"
+let lemma_replace_modulo_bound_aux (k:nat) (a:nat) (b:nat) (u:nat)
   : Lemma (requires a < pow2 k /\ a % pow2 u == 0 /\ b < pow2 u /\ u < k)
   (ensures a + b < pow2 k) =
   let open FStar.Math.Lemmas in
@@ -2068,50 +2110,152 @@ let lemma_disjoint_sum (k:nat) (a:nat) (b:nat) (u:nat)
   assert((a / pow2 u) < pow2 (k-u));
   assert(((a + b) / pow2 u) / pow2 (k-u) < 1);
   division_multiplication_lemma (a+b) (pow2 u) (pow2 (k-u));
-  pow2_plus u (k-u); ()
-#pop-options
+  pow2_plus u (k-u)
 
-(* From https://tools.ietf.org/html/draft-ietf-quic-transport-20#appendix-A *)
-#push-options "--z3rlimit 20"
-let expand_npn (last:nat{last + 1 < pow2 62}) (pn_len:nat2) (npn:nat{npn < pow2 (8 `op_Multiply` (pn_len + 1))}) : n:nat{n < pow2 62} =
+let lemma_replace_modulo_bound (a mod_pow new_mod up_pow:nat) : Lemma
+  (requires
+    mod_pow < up_pow /\
+    new_mod < pow2 mod_pow /\
+    a < pow2 up_pow)
+  (ensures replace_modulo a (pow2 mod_pow) new_mod < pow2 up_pow) =
   let open FStar.Math.Lemmas in
   let open FStar.Mul in
-  let bits = 8 * (pn_len + 1) in
-  assert(pn_len < 4 /\ bits < 33);
-  let wbits = bits - 1 in
-  let hlast = ((last + 1) / pow2 bits) in
-  lemma_div_lt (last+1) 62 bits;
-  assert(hlast < pow2 (62 - bits));
-  assert(pow2 bits * hlast < pow2 bits * pow2 (62 - bits));
-  pow2_plus bits (62-bits);
-  let high = pow2 bits * hlast in
-  assert(high < pow2 62);
-  lemma_mod_plus 0 hlast (pow2 bits);
-  assert(high % pow2 bits == 0);
-  let candidate = npn + high in
-  lemma_disjoint_sum 62 high npn bits;
-  assert(candidate < pow2 62);
-  if candidate + pow2 wbits <= last + 1  then
-    candidate + pow2 wbits
-  else if candidate - pow2 wbits > last + 1 && candidate > pow2 bits then
-    candidate - pow2 wbits
-  else candidate
+  let (pmod,umod) = (pow2 mod_pow, pow2 up_pow) in
+  lemma_div_mod a pmod;
+  multiple_modulo_lemma (a / pmod) pmod;
+  lemma_replace_modulo_bound_aux up_pow (a-a%pow2 mod_pow) new_mod mod_pow
 #pop-options
 
-#push-options "--z3rlimit 30 --admit_smt_queries true"
+
+
+(* From https://tools.ietf.org/html/draft-ietf-quic-transport-20#appendix-A *)
+let expand_npn (pn_len:nat2) (last:nat{last + 1 < pow2 62}) (npn:nat{npn < pow2 (8 `op_Multiply` (pn_len + 1))}) : nat62 =
+  let open FStar.Math.Lemmas in
+  let open FStar.Mul in
+  let expected = last + 1 in
+  let bound = bound_npn pn_len in
+  let candidate = replace_modulo expected bound npn in
+  lemma_replace_modulo_bound expected (8*(pn_len+1)) npn 62;
+  if candidate <= last + 1 - bound/2
+     && candidate < pow2 62 - bound then // the test for overflow (candidate < pow2 62) is not present in draft 22.
+    candidate + bound
+  else if candidate > last + 1 + bound/2
+          && candidate > bound then
+    candidate - bound
+  else candidate
+
+
+
+
+
+
+#push-options "--admit_smt_queries true"
 let decrypt a k siv hpk last cid_len packet =
   let open FStar.Math.Lemmas in
   let open FStar.Endianness in
-  match header_decrypt a hpk cid_len packet with 
+  match header_decrypt a hpk cid_len packet with
   | H_Failure -> Failure
   | H_Success pn_len npn h c ->
     let pn = expand_npn last pn_len (be_to_n npn) in
     let pnb = n_to_be 12 pn in
     let iv = xor_inplace pnb siv 0 in
     let aad = format_header h pn_len npn in
-    match AEAD.decrypt #a (hide k) (hide pnb) (hide aad) (hide c) with
+    match AEAD.decrypt #a k pnb aad c with
     | None -> Failure
-    | Some plain -> Success pn_len pn h (reveal plain)
+    | Some plain -> Success pn_len pn h plain
 #pop-options
+
+
+
+
+/// proving correctness of decryption
+
+let lemma_propagate_mul_mod (a b:nat) : Lemma
+  (requires b > 0)
+  (ensures (
+    let open FStar.Mul in
+    (2*a) % (2*b) = 2 * (a % b))) =
+  let open FStar.Math.Lemmas in
+  let open FStar.Mul in
+  lemma_div_mod a b;
+  lemma_div_mod (2*a) b;
+  let (p,r) = ((a/b)*(2*b), 2*(a%b)) in
+  assert (2*a = p + r);
+  modulo_distributivity p r (2*b);
+  multiple_modulo_lemma (a/b) (2*b);
+  modulo_range_lemma a b;
+  small_mod r (2*b)
+
+let recompose_pow2_assoc (n:pos) (a:nat) : Lemma
+  (let open FStar.Mul in 2 * (pow2 (n-1) * a) = pow2 n * a) =
+  ()
+
+#push-options "--z3rlimit 30" // strange that F* has so much trouble completing this induction
+let rec lemma_propagate_pow_mod (a b n:nat) : Lemma
+  (requires b > 0)
+  (ensures (
+    let open FStar.Mul in
+    (pow2 n * a) % (pow2 n * b) = pow2 n * (a % b))) =
+  let open FStar.Mul in
+  let open FStar.Math.Lemmas in
+  if n = 0 then ()
+  else begin
+    let res = (pow2 n * a) % (pow2 n * b) in
+    lemma_propagate_mul_mod (pow2 (n-1) * a) (pow2 (n-1) * b);
+    assert (res = 2 * ((pow2 (n-1) * a) % (pow2 (n-1) * b)));
+    lemma_propagate_pow_mod a b (n-1);
+    assert (res = 2 * (pow2 (n-1) * (a%b)));
+    recompose_pow2_assoc n (a%b)
+  end
+#pop-options
+
+let lemma_modulo_shift_byte (a:nat) (i:pos) : Lemma
+  (let open FStar.Mul in
+  (pow2 8 * a) % (pow2 (8*i)) = pow2 8 * (a % pow2 (8*(i-1)))) =
+  let sub = 8 `op_Multiply` (i-1) in
+  FStar.Math.Lemmas.pow2_plus 8 sub;
+  lemma_propagate_pow_mod a (pow2 sub) 8
+
+let rec reveal_be_to_n_slice (b:bytes) (i j:nat) : Lemma
+  (requires i < j /\ j <= S.length b)
+  (ensures (
+    let open FStar.Mul in
+    let open FStar.Endianness in
+    let h = U8.v (S.index b (j-1)) in
+    be_to_n (S.slice b i j) = h + pow2 8 * be_to_n (S.slice b i (j - 1)))) =
+  FStar.Endianness.reveal_be_to_n (S.slice b i j)
+
+let rec lemma_correctness_slice_be_to_n (b:bytes) (i:nat) : Lemma
+  (requires i <= S.length b)
+  (ensures (
+    let open FStar.Endianness in
+    let open FStar.Mul in
+    be_to_n b % pow2 (8 * i) =
+    be_to_n (S.slice b (S.length b - i) (S.length b))))
+  (decreases i) =
+  let open FStar.Endianness in
+  let open FStar.Math.Lemmas in
+  let open FStar.Mul in
+  if i = 0 then reveal_be_to_n S.empty
+  else begin
+    reveal_be_to_n b;
+    let h = U8.v (S.index b (S.length b - 1)) in
+    let l = S.slice b 0 (S.length b - 1) in
+    let pow = pow2 (8*i) in
+    //assert (be_to_n b = h + pow2 8 * be_to_n l);
+    modulo_distributivity h (pow2 8 * be_to_n l) pow;
+    pow2_le_compat (8*i) 8;
+    small_mod h pow;
+    //assert (be_to_n b % pow = (h + (pow2 8 * be_to_n l)%pow) % pow);
+    lemma_modulo_shift_byte (be_to_n l) i;
+    lemma_correctness_slice_be_to_n l (i-1);
+    //assert (be_to_n b % pow = (h + pow2 8 * be_to_n (S.slice b (S.length b - i) (S.length b - 1))) % pow);
+    reveal_be_to_n_slice b (S.length b - i) (S.length b);
+    //assert (be_to_n b % pow = be_to_n (S.slice b (S.length b - i) (S.length b)) % pow);
+    lemma_be_to_n_is_bounded (S.slice b (S.length b - i) (S.length b));
+    FStar.Math.Lemmas.small_mod (be_to_n (S.slice b (S.length b - i) (S.length b))) pow
+  end
+
+
 
 let lemma_encrypt_correct a k siv hpk pn_len pn h p = admit()

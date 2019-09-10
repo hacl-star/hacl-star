@@ -193,6 +193,35 @@ val encrypt:
   plain: pbytes{Long? h ==> Long?.len h == S.length plain + AEAD.tag_length a} ->
   packet
 
+
+
+/// compression of the packet number
+
+
+let bound_npn (pn_len:nat2) = pow2 (8 `op_Multiply` (pn_len+1))
+let in_window (pn_len:nat2) (last x:nat) =
+  let h = bound_npn pn_len in
+  last+1 - h/2 < x /\ x <= last+1 + h/2
+
+val reduce_pn :
+  pn_len:nat2 ->
+  pn:nat62 ->
+  npn:nat{npn < pow2 (8 `op_Multiply` (pn_len+1))}
+
+val expand_pn :
+  pn_len:nat2 ->
+  last:nat{last+1 < pow2 62} ->
+  npn:nat{npn < pow2 (8 `op_Multiply` (pn_len+1))} ->
+  nat62
+
+val lemma_parse_npn_correct : pn_len:nat2 -> last:nat{last+1 < pow2 62} -> pn:nat62 -> Lemma
+  (requires in_window pn_len last pn)
+  (ensures expand_pn pn_len last (reduce_pn pn_len pn) = pn)
+
+
+
+/// decryption and correctness
+
 val decrypt:
   a: ea ->
   k: lbytes (AEAD.key_length a) ->
