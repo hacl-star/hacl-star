@@ -1,41 +1,73 @@
 module Hacl.Spec.GF128.Lemmas
 
 open FStar.Mul
+open Lib.IntTypes
 open Spec.GaloisField
 
-module S = Spec.GF128
+open FStar.Tactics
+open FStar.Algebra.CommMonoid
+open FStar.Tactics.CanonCommSemiring
+
+friend Lib.IntTypes
+
+let add_identity a =
+  FStar.UInt.logxor_commutative #128 (v a) (v #U128 #SEC (zero #S.gf128));
+  FStar.UInt.logxor_lemma_1 #128 (v a);
+  v_extensionality (zero ^. a) a
+
+let mul_identity a = admit()
+
+let add_associativity a b c =
+  FStar.UInt.logxor_associative #128 (v a) (v b) (v c);
+  v_extensionality ((a ^. b) ^. c) (a ^. (b ^. c))
+
+let add_commutativity a b =
+  FStar.UInt.logxor_commutative #128 (v a) (v b);
+  v_extensionality (a ^. b) (b ^. a)
+
+let mul_associativity a b c = admit()
+
+let mul_commutativity a b = admit()
 
 
-#set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+[@canon_attr]
+let elem_add_cm : cm elem =
+  CM zero ( +% ) add_identity add_associativity add_commutativity
 
-let elem = S.elem
+[@canon_attr]
+let elem_mul_cm : cm elem =
+  CM one ( *% ) mul_identity mul_associativity mul_commutativity
 
-let ( +% ) (a b:elem) : elem = fadd #S.gf128 a b
-let ( *% ) (a b:elem) : elem = fmul_be #S.gf128 a b
+val mul_add_distr: distribute_left_lemma elem elem_add_cm elem_mul_cm
+let mul_add_distr a b c = admit()
 
-val add_identity: a:elem -> Lemma (zero +% a == a)
-let add_identity a = admit()
+val mul_zero_l: mult_zero_l_lemma elem elem_add_cm elem_mul_cm
+let mul_zero_l a = admit()
 
-val add_commutativity: a:elem -> b:elem -> Lemma (a +% b == b +% a)
-let add_commutativity a b = admit()
+[@canon_attr]
+let elem_cr : cr elem = CR elem_add_cm elem_mul_cm mul_add_distr mul_zero_l
 
-
-val gf128_update_multi_mul_add_lemma_load_acc_aux:
-    a0:elem -> b0:elem -> b1:elem -> b2:elem -> b3:elem
-  -> r:elem -> r2:elem{r2 == r *% r} -> r3:elem{r3 == r *% r2} -> r4:elem{r4 == r *% r3} ->
-  Lemma
-  ((a0 +% b0) *% r4 +% (zero +% b1) *% r3 +% (zero +% b2)*% r2 +% (zero +% b3) *% r ==
-  ((((a0 +% b0) *% r +% b1) *% r +% b2) *% r +% b3) *% r)
-
-let gf128_update_multi_mul_add_lemma_load_acc_aux a0 b0 b1 b2 b3 r r2 r3 r4 = admit()
+let gf128_semiring () : Tac unit = canon_semiring elem_cr
 
 
-val gf128_update_multi_mul_add_lemma_loop_aux:
-    a0:elem -> a1:elem -> a2:elem -> a3:elem
-  -> b0:elem -> b1:elem -> b2:elem -> b3:elem
-  -> r:elem -> r2:elem{r2 == r *% r} -> r3:elem{r3 == r *% r2} -> r4:elem{r4 == r *% r3} ->
-  Lemma
-  ((a0 *% r4 +% b0) *% r4 +% (a1 *% r4 +% b1) *% r3 +% (a2 *% r4 +% b2) *% r2 +% (a3 *% r4 +% b3) *% r ==
-  ((((a0 *% r4 +% a1 *% r3 +% a2 *% r2 +% a3 *% r +% b0) *% r +% b1) *% r +% b2) *% r +% b3) *% r)
+let gf128_update_multi_mul_add_lemma_load_acc_aux a0 b0 b1 b2 b3 r =
+  add_identity b1;
+  add_identity b2;
+  add_identity b3;
+  assert (
+    (a0 +% b0) *% (r *% (r *% (r *% r))) +% b1 *% (r *% (r *% r)) +% b2 *% (r *% r) +% b3 *% r ==
+    ((((a0 +% b0) *% r +% b1) *% r +% b2) *% r +% b3) *% r)
+  by (gf128_semiring ())
 
-let gf128_update_multi_mul_add_lemma_loop_aux a0 a1 a2 a3 b0 b1 b2 b3 r r2 r3 r4 = admit()
+
+let gf128_update_multi_mul_add_lemma_loop_aux a0 a1 a2 a3 b0 b1 b2 b3 r =
+  assert (
+    (a0 *% (r *% (r *% (r *% r))) +% b0) *% (r *% (r *% (r *% r))) +%
+    (a1 *% (r *% (r *% (r *% r))) +% b1) *% (r *% (r *% r)) +%
+    (a2 *% (r *% (r *% (r *% r))) +% b2) *% (r *% r) +%
+    (a3 *% (r *% (r *% (r *% r))) +% b3) *% r ==
+    ((((a0 *% (r *% (r *% (r *% r))) +%
+        a1 *% (r *% (r *% r)) +%
+	a2 *% (r *% r) +%
+	a3 *% r +% b0) *% r +% b1) *% r +% b2) *% r +% b3) *% r)
+  by (gf128_semiring ())
