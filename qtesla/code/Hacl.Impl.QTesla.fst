@@ -1347,7 +1347,7 @@ let sparse_mul32 prod pk pos_list sign_list =
 
     for 0ul params_h
     (fun h i -> live h prod /\ live h pk /\ live h pos_list /\ live h sign_list /\ modifies1 prod h1 h /\
-             encode_c_invariant h pos_list sign_list params_h /\ is_poly_pk h pk /\
+             encode_c_invariant h pos_list sign_list params_h /\ is_poly_pk h pk /\ 
              i <= v params_h /\ sparse_mul32_invariant h i prod)
     (fun i ->
         let hPos = ST.get () in
@@ -1357,7 +1357,7 @@ let sparse_mul32 prod pk pos_list sign_list =
         let sign_list_i = sign_list.(i) in
         let h2 = ST.get () in
         for 0ul pos
-        (fun h j -> live h prod /\ live h pk /\ modifies1 prod h2 h /\ is_poly_pk h pk /\
+        (fun h j -> live h prod /\ live h pk /\ modifies1 prod h2 h /\ is_poly_pk h pk /\ 
                  v i <= v params_h /\ j <= v params_n /\ sparse_mul32_invariant_i h (v i) prod j)
         (fun j ->
             let h = ST.get () in
@@ -1378,7 +1378,7 @@ let sparse_mul32 prod pk pos_list sign_list =
         );
         let h3 = ST.get () in
         for pos params_n
-        (fun h j -> live h prod /\ live h pk /\ modifies1 prod h3 h /\ is_poly_pk h pk /\
+        (fun h j -> live h prod /\ live h pk /\ modifies1 prod h3 h /\ is_poly_pk h pk /\ 
                  v i <= v params_h /\ j <= v params_n /\ sparse_mul32_invariant_i h (v i) prod j)
         (fun j ->
             let h = ST.get () in
@@ -1420,7 +1420,7 @@ let sparse_mul32 prod pk pos_list sign_list =
     pop_frame();
     let hReturn = ST.get () in
     assert(is_poly_equal hFinal hReturn prod);
-    assume(is_poly_sparse_mul32_output hReturn prod)
+    assert(is_poly_sparse_mul32_output hReturn prod)
 
 val test_rejection:
     z : poly

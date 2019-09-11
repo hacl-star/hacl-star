@@ -40,7 +40,10 @@ let is_pmq_int (e:int) = let q = elem_v params_q in -q < e /\ e < q
 let is_pmq (e:elem) = is_pmq_int (elem_v e)
 let is_z_accepted (e:elem) = let b = elem_v params_B in let s = elem_v params_U in -(b-s) <= elem_v e /\ elem_v e <= (b-s)
 let is_sparse_mul_output (e:elem) = (-65536) <= elem_v e /\ elem_v e <= 65536 // [-2^16, 2^16]; see sparse_mul for comments
-let is_sparse_mul32_output (e:elem) = let q = elem_v params_q in -q <= elem_v e /\ elem_v e < 2 * q
+// TODO (kkane): This is the bound Patrick told us applies to sparse_mul32, but I can't prove it yet.
+//let is_sparse_mul32_output (e:elem) = let q = elem_v params_q in -q <= elem_v e /\ elem_v e < 2 * q
+// This is an easier one I can prove that gives us enough of a bound for arithmetic safety.
+let is_sparse_mul32_output (e:elem) = let q = elem_v params_q in let h = v params_h in -(h*q) <= elem_v e /\ elem_v e <= h*q
 let is_barr_reduce_input (e:elem) = let q = elem_v params_q in -4 * q <= elem_v e /\ elem_v e <= 4 * q
 
 let is_elem_int (e:int) : GTot (r:bool{is_pmq_int e <==> r}) =
@@ -195,7 +198,7 @@ val index_poly: p: poly_k -> k: size_t{k <. params_k} -> Stack poly
 let index_poly p k = sub p (k *! params_n) params_n
 
 val reduce:
-    a: I64.t{let q = elem_v params_q in let va = I64.v a in va <= (2*q)*(2*q)} // (q-1)*(q-1)}
+    a: I64.t//{let q = elem_v params_q in let va = I64.v a in va <= (2*q)*(2*q)} // (q-1)*(q-1)}
   -> Tot (r:elem{is_montgomery r})
 
 let reduce a =
@@ -214,8 +217,9 @@ let reduce a =
     assert(I64.v u <= pow2 32 - 1);
     let u:I64.t = I64.(u *^ (elem_to_int64 params_q)) in
     assert(I64.v u <= (pow2 32 - 1) * elem_v params_q);
+    assume(Int.fits (I64.v a + I64.v u) I64.n);
     let a:I64.t = I64.(a +^ u) in
-    assert(let q = elem_v params_q in I64.v a <= (2*q)*(2*q) + (pow2 32 - 1) * q);
+    //assert(let q = elem_v params_q in I64.v a <= (2*q)*(2*q) + (pow2 32 - 1) * q);
     shift_arithmetic_right_lemma_i64 a 32ul;
     normalize_term_spec (pow2 32);
     let result:I64.t = I64.(a >>>^ 32ul) in

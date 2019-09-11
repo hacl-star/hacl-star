@@ -460,7 +460,7 @@ let poly_sub_correct result x y =
 
 // This function is sometimes used with result and x the same, so we can't assume they are disjoint. But either they're
 // disjoint or they're the same buffer, so we can conclude a change to one is at most a change to the other at the same index.
- val poly_sub_reduce:
+val poly_sub_reduce:
     result: poly
   -> x: poly
   -> y: poly
@@ -484,9 +484,8 @@ let poly_sub_reduce result x y =
         assert(is_sparse_mul32_output (bget hBegin y (v i)));
         let xi = x.(i) in
         let yi = y.(i) in
-        assert(elem_v xi >= 0 /\ elem_v xi < 2 * elem_v params_q);
-        assert(let q = elem_v params_q in elem_v yi >= -q /\ elem_v yi < 2*q);
-        assert(elem_v xi - elem_v yi <= 3 * elem_v params_q);
+        assert(is_montgomery xi);
+        assert(is_sparse_mul32_output yi);
         result.(i) <- reduce I64.(params_r *^ ((elem_to_int64 xi) -^ (elem_to_int64 yi)));
         let hResult = ST.get () in
         assert(is_poly_equal_except hBegin hResult result (v i));
