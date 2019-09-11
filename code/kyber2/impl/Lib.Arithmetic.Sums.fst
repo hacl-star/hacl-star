@@ -79,11 +79,11 @@ let rec br_lemma_rec_p i p x =
     pow2_double_mult (p-1)
     end
 
-let rec br_lemma_zero i : Lemma (ensures br i 0 = 0) (decreases i) =
+let rec br_lemma_zero i =
   if i = 0 then ()
   else (br_lemma_zero (i-1); br_lemma_rec (i-1) 0)
 
-let rec br_lemma_one (i:size_nat{i>0}) : Lemma (ensures br i 1 = pow2 (i-1)) (decreases i) =
+let rec br_lemma_one i =
   if (i = 1) then
     let v = UInt.to_vec #1 1 in
     let vbr = Seq.createi 1 (fun p -> (Seq.index #_ #1 v (1-1-p))) in

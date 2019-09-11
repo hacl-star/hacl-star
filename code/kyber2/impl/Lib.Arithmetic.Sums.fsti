@@ -24,6 +24,9 @@ val br_lemma_rec: i:size_nat{i < max_size_t} -> x:nat{x<pow2 i} ->
 val br_lemma_rec_p: i:size_nat -> p:nat{i+p <= max_size_t} -> x:nat{x<pow2 i} ->
   Lemma (ensures x < pow2 (i+p) /\ br (i+p) x = (pow2 p) * br i x) (decreases p)
 
+val br_lemma_zero: i:size_nat -> Lemma (ensures br i 0 = 0) (decreases i)
+
+val br_lemma_one: (i:size_nat{i>0}) -> Lemma (ensures br i 1 = pow2 (i-1)) (decreases i)
 
 val br_lemma_n2_1: i:size_nat{i < max_size_t} -> x:nat{x<pow2 i} ->
   Lemma (br (i+1) (x+pow2 i) == (br (i+1) x) + 1)

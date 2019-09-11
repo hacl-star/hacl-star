@@ -448,3 +448,4 @@ let gen_matrix m spec_f impl_f =
   let h_end = ST.get () in
   to_spec_matrix_lemma h1 h_end m m;
   b
+

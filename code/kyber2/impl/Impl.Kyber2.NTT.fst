@@ -342,6 +342,8 @@ val cooley_tukey_for_3_inner:
     (requires fun h -> cooley_tukey_for_3_inv h0 p k powbuf lenbuf startbuf zeta t (v i) (v a) h1 h2 h (v j))
     (ensures fun _ _ h -> cooley_tukey_for_3_inv h0 p k powbuf lenbuf startbuf zeta t (v i) (v a) h1 h2 h (v j + 1))
 
+#reset-options "--z3rlimit 4000 --max_fuel 0 --max_ifuel 0"
+
 let cooley_tukey_for_3_inner h0 p k powbuf lenbuf startbuf zeta t i a h1 h2 j =
   assert_norm(params_n = pow2 8);
   assert(v j / pow2 (7 - v i) = 2 * (v a));
@@ -418,10 +420,22 @@ let cooley_tukey_for_3_inner h0 p k powbuf lenbuf startbuf zeta t i a h1 h2 j =
   assert(p_1.[v j] == (ntt1_reorg_rec (6 - v i) (p0'.[br (7 - v i) (v j % pow2 (7 - v i))])).[2*(v a)]);
   assert(p_1.[indice] == (ntt1_reorg_rec (6 - v i) (p0'.[br (7 - v i) (v j % pow2 (7 - v i))])).[2*(v a)+1]);
   lemma_for_3_location1 p i a h_1 j;
-  lemma_for_3_location2 p i a h_1 j;
-  assert(p'.[br (7-i) (v j - 2*(v a)*pow2(7 - v i))].[2*a] == (ntt1_reorg_rec (6-i) p0'.[br (7-i) (v j - 2*(v a)*pow2(7 - v i))]).[2*a] /\ p'.[br (7-i) (v j - 2*(v a)*pow2(7 - v i))].[2*a+1] == (ntt1_reorg_rec (6-i) p0'.[br (7-i) (v j - 2*(v a)*pow2(7 - v i))]).[2*a+1]); admit();
-  assert(modifies2 p t h2 h_1 /\ live_and_disjoint7 h_1 p k powbuf lenbuf startbuf zeta t); admit();
+  lemma_for_3_location2 p i a h_1 j; admit();
+  assert(p'.[br (7-v i) (v j - 2*(v a)*pow2(7 - v i))].[2*(v a)] == (ntt1_reorg_rec (6 - v i) p0'.[br (7 - v i) (v j - 2*(v a)*pow2(7 - v i))]).[2*(v a)] /\ p'.[br (7 - v i) (v j - 2*(v a)*pow2(7 - v i))].[2*(v a)+1] == (ntt1_reorg_rec (6 - v i) p0'.[br (7 - v i) (v j - 2*(v a)*pow2(7 - v i))]).[2*(v a)+1]); admit();
+  assert(modifies2 p t h2 h_1 /\ live_and_disjoint7 h_1 p k powbuf lenbuf startbuf zeta t);
   assert(MGroup.to_t (h_1.[|zeta|].[0]) == exp_t (Spec.Kyber2.Group.mk_t params_zeta) (br 7 (v a + pow2 (v i))));
-  assert(v h_1.[|powbuf|].[0] = pow2 (v i) /\ v h_1.[|lenbuf|].[0] = pow2 (7 - v i) /\ v h_1.[|k|].[0] = pow2 (v i) + v a);
-  assert(let start = h_1.[|startbuf|].[0] in let len = h_1.[|lenbuf|].[0] in start = 2*(v a)*len /\ (forall (m:size_nat{m<(j%pow2 (7-i))}). p'.[br (7-i) m].[2*a] == (ntt1_reorg_rec (6-i) p0'.[br (7-i) m]).[2*a] /\ p'.[br (7-i) m].[2*a+1] == (ntt1_reorg_rec (6-i) p0'.[br (7-i) m]).[2*a+1]) /\ cooley_tukey_for_2_inv h0 p k powbuf lenbuf startbuf zeta t i h1 h2 a /\ (forall (b:size_nat{b < params_n /\ (b < start \/ (b >= j /\ b <start+len) \/ b >= len+j)}). h_1.[|p|].[b] == h2.[|p|].[b]) /\ (forall (x:size_nat{x < params_n /\ ((x >= start /\ x < j) \/ (x>= start+len /\ x < j + len))}). v h_1.[|p|].[x] <= (i+2) * params_q /\ v h_1.[|p|].[x] >= - (i + 2) * params_q)));
+  assert(v h_1.[|powbuf|].[0] = pow2 (v i) /\ v h_1.[|lenbuf|].[0] = pow2 (7 - v i) /\ v h_1.[|k|].[0] = pow2 (v i) + v a))
+
+#reset-options "--z3rlimit 100 --max_fuel 1 --max_ifuel 0"
+
+//will not extract, but used to continue the implementation structure
+assume val ntt_unsafe: (p:poly) -> Stack unit (requires fun h -> forall (k:size_nat{k< params_n}). v h.[|p|].[k] <= params_q /\ v h.[|p|].[k] >= - params_q) (ensures fun h0 _ h1 -> Seq.map MGroup.int16_to_t h1.[|p|] == Spec.Kyber2.NTT.ntt (Seq.map MGroup.int16_to_t h0.[|p|]))
+
+assume val nttinv_unsafe: (p:poly) -> Stack unit (requires fun h -> forall (k:size_nat{k< params_n}). v h.[|p|].[k] <= params_q /\ v h.[|p|].[k] >= - params_q) (ensures fun h0 _ h1 -> Seq.map (MGroup.int16_to_t) h1.[|p|] == Spec.Kyber2.NTT.ntt (Seq.map MGroup.int16_to_t h0.[|p|]) /\ (forall (k:size_nat{k< params_n}). v h1.[|p|].[k] <= params_q /\ v h1.[|p|].[k] >= - params_q))
+
+
+  (*
+  assert(let start = v h_1.[|startbuf|].[0] in let len = v h_1.[|lenbuf|].[0] in start = 2*(v a)*len /\ (forall (m:size_nat{m<((v j + 1) - 2*(v a)*pow2 (7-v i))}). p'.[br (7-v i) m].[2*(v a)] == (ntt1_reorg_rec (6-v i) p0'.[br (7-v i) m]).[2*(v a)+1] /\ p'.[br (7-v i) m].[2*(v a)+1] == (ntt1_reorg_rec (6-v i) p0'.[br (7-v i) m]).[2*(v a)+1])); admit();
+  assert(cooley_tukey_for_2_inv h0 p k powbuf lenbuf startbuf zeta t (v i) h1 h2 (v a));
+  assert(let start = 2*(v a)*pow2(7 - v i) in let len = pow2 (7 - v i) in (forall (b:size_nat{b < params_n /\ (b < start \/ (b >= v j + 1 /\ b <start+len) \/ b >= len+v j + 1)}). h_1.[|p|].[b] == h2.[|p|].[b]) /\ (forall (x:size_nat{x < params_n /\ ((x >= start /\ x < v j + 1) \/ (x>= start+len /\ x < v j + 1 + len))}). v h_1.[|p|].[x] <= (i+2) * params_q /\ v h_1.[|p|].[x] >= - (i + 2) * params_q)));
   admit()
