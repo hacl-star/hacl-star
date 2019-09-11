@@ -1357,7 +1357,7 @@ let lemma_bitfield8_128 (b:byte) : Lemma
   lemma_bitfield 8 (U8.v b)
 
 
-let max (a b:nat) : Tot (n:nat{n >= a /\ n >= b}) =
+let max (a b:int) : Tot (n:int{n >= a /\ n >= b}) =
   if a > b then a else b // this must exist somewhere...
 
 
@@ -2080,9 +2080,6 @@ let encrypt a k siv hpk pn_len seqn h plain =
 /// Decryption of packets: recovery of the packet number (if it is in
 /// the right window)
 
-let reduce_pn pn_len pn = pn % (bound_npn pn_len)
-
-
 
 // replaces a%b by new_mod
 let replace_modulo (a b new_mod:nat) : Pure nat
@@ -2128,47 +2125,99 @@ let lemma_replace_modulo_bound (a mod_pow new_mod up_pow:nat) : Lemma
 
 
 
-(* From https://tools.ietf.org/html/draft-ietf-quic-transport-20#appendix-A *)
-let expand_npn (pn_len:nat2) (last:nat{last + 1 < pow2 62}) (npn:nat{npn < pow2 (8 `op_Multiply` (pn_len + 1))}) : nat62 =
-  let open FStar.Math.Lemmas in
+(* From https://tools.ietf.org/html/draft-ietf-quic-transport-22#appendix-A *)
+let reduce_pn pn_len pn = pn % (bound_npn pn_len)
+
+let expand_pn pn_len last npn =
   let open FStar.Mul in
+  let open FStar.Math.Lemmas in
   let expected = last + 1 in
   let bound = bound_npn pn_len in
   let candidate = replace_modulo expected bound npn in
   lemma_replace_modulo_bound expected (8*(pn_len+1)) npn 62;
   if candidate <= last + 1 - bound/2
-     && candidate < pow2 62 - bound then // the test for overflow (candidate < pow2 62) is not present in draft 22.
+     && candidate < pow2 62 - bound then // the test for overflow (candidate < pow2 62 - bound) is not present in draft 22.
+    let _ = lemma_mod_plus candidate 1 bound in
     candidate + bound
   else if candidate > last + 1 + bound/2
-          && candidate > bound then
+          && candidate >= bound then // in draft 22 the test for underflow (candidate >= bound) uses a strict inequality
+    let _ = lemma_mod_plus candidate (-1) bound in
     candidate - bound
   else candidate
 
 
+let lemma_uniqueness_in_interval_modulo (p:pos) (low high a b:nat) : Lemma
+  (requires
+    low <= high /\
+    high - low < p /\
+    low <= a /\ low <= b /\
+    a <= high /\ b <= high /\
+    a%p = b%p)
+  (ensures a = b) =
+  FStar.Math.Lemmas.lemma_mod_plus_injective p low (a-low) (b-low)
 
 
 
 
-#push-options "--admit_smt_queries true"
+let lemma_uniqueness_in_window (pn_len:nat2) (last x y:nat62) : Lemma
+  (requires (
+    let h = bound_npn pn_len in
+    in_window pn_len last x /\
+    in_window pn_len last y /\
+    x%h = y%h))
+  (ensures x = y) =
+  let h : nat62 = FStar.Math.Lemmas.pow2_lt_compat 62 (8 `op_Multiply` (pn_len+1)); bound_npn pn_len in
+  let cond1 a = last+1 < h/2 && a < h in
+  let cond2 a = last+1 >= pow2 62 - h/2 && a >= pow2 62 - h in
+  let cond3 a = last+1 - h/2 < a && a <= last+1 + h/2 in
+  if cond1 x && cond1 y then
+    lemma_uniqueness_in_interval_modulo h 0 (h-1) x y
+  else if cond1 x && cond2 y then ()
+  else if cond1 x && cond3 y then
+    lemma_uniqueness_in_interval_modulo h 0 (h-1) x y
+  else if cond2 x && cond1 y then ()
+  else if cond2 x && cond2 y then
+    lemma_uniqueness_in_interval_modulo h (pow2 62-h) (pow2 62-1) x y
+  else if cond2 x && cond3 y then
+    lemma_uniqueness_in_interval_modulo h (pow2 62-h) (pow2 62-1) x y
+  else if cond3 x && cond1 y then
+    lemma_uniqueness_in_interval_modulo h 0 (h-1) x y
+  else if cond3 x && cond2 y then
+    lemma_uniqueness_in_interval_modulo h (pow2 62-h) (pow2 62-1) x y
+  else if cond3 x && cond3 y then
+    lemma_uniqueness_in_interval_modulo h (max (last+1-h/2+1) 0) (last+1+h/2) x y
+
+
+
+let lemma_parse_pn_correct pn_len last pn =
+  lemma_uniqueness_in_window pn_len last pn (expand_pn pn_len last (reduce_pn pn_len pn))
+
+
+
+
 let decrypt a k siv hpk last cid_len packet =
   let open FStar.Math.Lemmas in
   let open FStar.Endianness in
   match header_decrypt a hpk cid_len packet with
   | H_Failure -> Failure
   | H_Success pn_len npn h c ->
-    let pn = expand_npn last pn_len (be_to_n npn) in
-    let pnb = n_to_be 12 pn in
+    let pn =
+      lemma_be_to_n_is_bounded npn;
+      expand_pn pn_len last (be_to_n npn) in
+    let pnb =
+      pow2_lt_compat (8 `op_Multiply` 12) 62;
+      n_to_be 12 pn in
     let iv = xor_inplace pnb siv 0 in
     let aad = format_header h pn_len npn in
-    match AEAD.decrypt #a k pnb aad c with
+    match AEAD.decrypt #a k iv aad c with
     | None -> Failure
     | Some plain -> Success pn_len pn h plain
-#pop-options
 
 
 
 
-/// proving correctness of decryption
+/// proving correctness of decryption (link between modulo, and be_to_n
+/// + slice last bytes
 
 let lemma_propagate_mul_mod (a b:nat) : Lemma
   (requires b > 0)
@@ -2257,5 +2306,31 @@ let rec lemma_correctness_slice_be_to_n (b:bytes) (i:nat) : Lemma
   end
 
 
+/// gathering all ingredients into a complete proof
 
-let lemma_encrypt_correct a k siv hpk pn_len pn h p = admit()
+let lemma_encrypt_correct a k siv hpk pn_len pn last h p =
+
+  // computation of encryption
+  assert_norm (pow2 62 < pow2 (8 `op_Multiply` 12));
+  let open FStar.Endianness in
+  let pnb = n_to_be 12 pn in
+  let npn : lbytes (1+pn_len) = S.slice pnb (11 - pn_len) 12 in
+  let header = format_header h pn_len npn in
+  lemma_format_len a h pn_len npn;
+  let iv = xor_inplace pnb siv 0 in
+  let c = AEAD.encrypt #a k iv header p in
+  let packet = header_encrypt a hpk h pn_len npn c in
+  assert (encrypt a k siv hpk pn_len pn h p = packet);
+
+  // computation of decryption
+  lemma_header_encryption_correct a hpk h pn_len npn c;
+  match header_decrypt a hpk (cid_len h) packet with
+  | H_Success _ _ _ _ ->
+    lemma_be_to_n_is_bounded npn;
+    lemma_correctness_slice_be_to_n pnb (1+pn_len);
+    //assert (be_to_n npn = reduce_pn pn_len (be_to_n pnb));
+    lemma_parse_pn_correct pn_len last pn;
+    //assert (expand_pn pn_len last (be_to_n npn) = pn);
+    AEAD.correctness #a k iv header p;
+    match AEAD.decrypt #a k iv header c with
+    | Some _ -> ()

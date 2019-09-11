@@ -199,22 +199,24 @@ val encrypt:
 
 
 let bound_npn (pn_len:nat2) = pow2 (8 `op_Multiply` (pn_len+1))
-let in_window (pn_len:nat2) (last x:nat) =
+let in_window (pn_len:nat2) (last pn:nat) =
   let h = bound_npn pn_len in
-  last+1 - h/2 < x /\ x <= last+1 + h/2
+  (last+1 < h/2 /\ pn < h) \/
+  (last+1 >= pow2 62 - h/2 /\ pn >= pow2 62 - h) \/
+  (last+1 - h/2 < pn /\ pn <= last+1 + h/2)
 
 val reduce_pn :
   pn_len:nat2 ->
   pn:nat62 ->
-  npn:nat{npn < pow2 (8 `op_Multiply` (pn_len+1))}
+  npn:nat{npn < bound_npn pn_len}
 
 val expand_pn :
   pn_len:nat2 ->
   last:nat{last+1 < pow2 62} ->
-  npn:nat{npn < pow2 (8 `op_Multiply` (pn_len+1))} ->
-  nat62
+  npn:nat{npn < bound_npn pn_len} ->
+  pn:nat62{in_window pn_len last pn /\ pn % bound_npn pn_len = npn}
 
-val lemma_parse_npn_correct : pn_len:nat2 -> last:nat{last+1 < pow2 62} -> pn:nat62 -> Lemma
+val lemma_parse_pn_correct : pn_len:nat2 -> last:nat{last+1 < pow2 62} -> pn:nat62 -> Lemma
   (requires in_window pn_len last pn)
   (ensures expand_pn pn_len last (reduce_pn pn_len pn) = pn)
 
@@ -227,7 +229,7 @@ val decrypt:
   k: lbytes (AEAD.key_length a) ->
   static_iv: lbytes 12 ->
   hpk: lbytes (ae_keysize a) ->
-  last: nat62 ->
+  last: nat{last+1 < pow2 62} ->
   cid_len: nat4 ->
   packet: packet ->
   result
@@ -239,8 +241,10 @@ val lemma_encrypt_correct:
   hpk: lbytes (ae_keysize a) ->
   pn_len: nat2 ->
   pn: nat62 ->
+  last: nat{last+1 < pow2 62} ->
   h: header ->
-  p: pbytes{Long? h ==> Long?.len h == S.length p + AEAD.tag_length a} ->
-  Lemma (decrypt a k siv hpk (if pn=0 then 0 else pn-1) (cid_len h)
-    (encrypt a k siv hpk pn_len pn h p)
+  p: pbytes{Long? h ==> Long?.len h == S.length p + AEAD.tag_length a} -> Lemma
+  (requires in_window pn_len last pn)
+  (ensures
+    decrypt a k siv hpk last (cid_len h) (encrypt a k siv hpk pn_len pn h p)
     == Success pn_len pn h p)
