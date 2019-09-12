@@ -560,7 +560,6 @@ val poly1305_update_vec:
 
 let poly1305_update_vec #s len text pre acc =
   let sz_block = blocklen s in
-  FStar.Math.Lemmas.multiply_fractions (v len) (v sz_block);
   let len0 = (len /. sz_block) *! sz_block in
   let t0 = sub text 0ul len0 in
   FStar.Math.Lemmas.multiple_modulo_lemma (v (len /. sz_block)) (v (blocklen s));
