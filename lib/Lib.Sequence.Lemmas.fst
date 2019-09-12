@@ -253,6 +253,8 @@ let repeat_blocks_split12 #a #b blocksize len0 inp f acc0 =
     }
 
 
+#reset-options "--z3rlimit 200 --max_fuel 1 --max_ifuel 1"
+
 val lemma_aux4: blocksize:pos -> len:nat -> len0:nat ->
   Lemma
   (requires len0 <= len /\ len0 % blocksize == 0)

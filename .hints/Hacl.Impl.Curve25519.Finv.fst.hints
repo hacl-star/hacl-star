@@ -28,7 +28,7 @@
         "typing_FStar.Monotonic.HyperStack.get_tip"
       ],
       0,
-      "ad79170a06a0a64ca026a375a6af32b4"
+      "f7c1aafc757083fbf6b5be34cae22e07"
     ],
     [
       "Hacl.Impl.Curve25519.Finv.fsqr_s",
@@ -37,7 +37,7 @@
       1,
       [ "@query" ],
       0,
-      "752d62c116412bb920b3ac5d1a2c9374"
+      "13bb13f444ae6a8549b0188687038259"
     ],
     [
       "Hacl.Impl.Curve25519.Finv.fsqr_s",
@@ -126,7 +126,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "5e88973441425bac60b1079181b9ec8e"
+      "48135bab9b01dc26f33447a5a43f7dd0"
     ],
     [
       "Hacl.Impl.Curve25519.Finv.fmuls_pre",
@@ -155,7 +155,7 @@
         "typing_FStar.Monotonic.HyperStack.get_tip"
       ],
       0,
-      "c5cd5f8888c2eda5382c44b73e0cfd6c"
+      "ecd2557cdc559d1957d8213df52d47d3"
     ],
     [
       "Hacl.Impl.Curve25519.Finv.fmul_s",
@@ -168,7 +168,7 @@
         "equation_Lib.IntTypes.unsigned", "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "cddb5cf42e4e8c6bf569119c5eb78c65"
+      "edf1be2c64c73fbf0446a83a93a28750"
     ],
     [
       "Hacl.Impl.Curve25519.Finv.fmul_s",
@@ -278,7 +278,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "89172688634987fd840c5272dae04868"
+      "ca8f8d612b599dc551b8966e465e1f04"
     ],
     [
       "Hacl.Impl.Curve25519.Finv.fsquare_times_",
@@ -290,7 +290,7 @@
         "refinement_interpretation_Tm_refine_cfc41488cee641ca406ae764563b3947"
       ],
       0,
-      "a8d950b8f8465c44be11303b282b99af"
+      "4227d9a1c079e6606576722c82c61aef"
     ],
     [
       "Hacl.Impl.Curve25519.Finv.fsquare_times_",
@@ -383,7 +383,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "1e77167efa376ac0e7a30824f6c14ae5"
+      "dec853f1bad1b3e414b904e1f57cb29a"
     ],
     [
       "Hacl.Impl.Curve25519.Finv.fsquare_times",
@@ -395,7 +395,7 @@
         "refinement_interpretation_Tm_refine_cfc41488cee641ca406ae764563b3947"
       ],
       0,
-      "df2ec8f67cf59009a63c3ca5a92e7a25"
+      "30149768bc96d1829cd76b5532ce5137"
     ],
     [
       "Hacl.Impl.Curve25519.Finv.fsquare_times",
@@ -440,7 +440,7 @@
         "typing_Lib.Buffer.op_Bar_Plus_Bar", "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "d0e23772962be288de7e4bf78449044b"
+      "9796df5cb0539c7473dd865c66af1a2c"
     ],
     [
       "Hacl.Impl.Curve25519.Finv.finv0",
@@ -505,7 +505,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "e3428ae4f24eb3a06259707f4c5667f5"
+      "5baf48b29ceaef1654460e4503cd27b3"
     ],
     [
       "Hacl.Impl.Curve25519.Finv.finv0",
@@ -539,7 +539,7 @@
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec"
       ],
       0,
-      "ae9728245d65f37f8ec40b5e1e4dbfa3"
+      "01cca0aa09314c6bbf7c9378041582d5"
     ],
     [
       "Hacl.Impl.Curve25519.Finv.finv0",
@@ -580,6 +580,7 @@
         "equation_Hacl.Impl.Curve25519.Finv.fmuls_pre",
         "equation_Hacl.Impl.Curve25519.Finv.fsquare_times_inv",
         "equation_Hacl.Spec.Curve25519.Finv.finv0",
+        "equation_Hacl.Spec.Curve25519.Finv.fsquare_times",
         "equation_Lib.Buffer.as_seq", "equation_Lib.Buffer.buffer_t",
         "equation_Lib.Buffer.disjoint", "equation_Lib.Buffer.gsub",
         "equation_Lib.Buffer.lbuffer_t", "equation_Lib.Buffer.length",
@@ -596,7 +597,6 @@
         "equation_LowStar.Buffer.trivial_preorder",
         "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.nat",
         "equation_Spec.Curve25519.elem", "equation_Spec.Curve25519.fmul",
-        "equation_Spec.Curve25519.prime",
         "fuel_guarded_inversion_Hacl.Impl.Curve25519.Fields.field_spec",
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Lib.IntTypes.uint128",
@@ -630,7 +630,6 @@
         "lemma_LowStar.Monotonic.Buffer.modifies_liveness_insensitive_buffer_weak",
         "lemma_LowStar.Monotonic.Buffer.modifies_loc_includes",
         "lemma_LowStar.Monotonic.Buffer.modifies_trans_linear",
-        "lemma_Spec.Curve25519.Lemmas.lemma_prime_value",
         "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Modulus",
         "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
@@ -639,8 +638,10 @@
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
         "projection_inverse_FStar.Pervasives.Native.Mktuple5__2",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple5__5",
         "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
         "refinement_interpretation_Tm_refine_387e6d282145573240ab7b8a4b94cce5",
+        "refinement_interpretation_Tm_refine_3f874e5fb2589b3d98f212a0379ef620",
         "refinement_interpretation_Tm_refine_47aaa67459497b5e666a7a7277396a51",
         "refinement_interpretation_Tm_refine_4fa8e2dd96f8bb1e23e6574326e9e019",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
@@ -650,15 +651,12 @@
         "refinement_interpretation_Tm_refine_7410d318ca82b18ad7a1945995e498a2",
         "refinement_interpretation_Tm_refine_7d1a5d4128c7a7042e0ae64f6cfd5d79",
         "refinement_interpretation_Tm_refine_884b2a422b11dd9bedcd21df7fa99a4a",
-        "refinement_interpretation_Tm_refine_9d3fd79fd314167f1a9c213a188da3ec",
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
         "refinement_interpretation_Tm_refine_9ff150f589411d5a40376aa0c5e1ca86",
         "refinement_interpretation_Tm_refine_b550ca9347e0645a53715102a08d8fa1",
         "refinement_interpretation_Tm_refine_b983b1df8fb12dfc3453908633adf76f",
         "refinement_interpretation_Tm_refine_bb5654593991b163239609f05109e5b7",
         "refinement_interpretation_Tm_refine_c6c18a7ceb46d419c35ff8551117551e",
-        "refinement_interpretation_Tm_refine_c9f318957334bae90e9d8f370d26a655",
-        "refinement_interpretation_Tm_refine_e9c32a5fb00a4e8c339597118c871180",
         "refinement_interpretation_Tm_refine_f0ba29b24d06869974c132bf19996819",
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
         "true_interp", "typing_FStar.Map.contains",
@@ -670,9 +668,7 @@
         "typing_Hacl.Spec.Curve25519.Finv.fsquare_times",
         "typing_Lib.Buffer.length", "typing_Lib.Buffer.loc",
         "typing_Lib.Buffer.op_Bar_Plus_Bar", "typing_Lib.IntTypes.add_mod",
-        "typing_Lib.IntTypes.mk_int", "typing_Lib.IntTypes.mul",
-        "typing_Lib.IntTypes.pub_int_v",
-        "typing_LowStar.Buffer.trivial_preorder",
+        "typing_Lib.IntTypes.mul", "typing_LowStar.Buffer.trivial_preorder",
         "typing_LowStar.Monotonic.Buffer.address_liveness_insensitive_locs",
         "typing_LowStar.Monotonic.Buffer.len",
         "typing_LowStar.Monotonic.Buffer.loc_buffer",
@@ -681,7 +677,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "9ef53a3f0485a2bddf98ca315729dd8f"
+      "6fe107c26328477383e9d853840accbc"
     ],
     [
       "Hacl.Impl.Curve25519.Finv.finv_",
@@ -708,7 +704,9 @@
         "lemma_LowStar.Monotonic.Buffer.length_null_1",
         "lemma_LowStar.Monotonic.Buffer.length_null_2",
         "lemma_Spec.Curve25519.Lemmas.lemma_prime_value",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
         "typing_Lib.IntTypes.unsigned",
@@ -911,7 +909,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "fbafd23b6a6e5631e18ac59ddcd884d9"
+      "93983e403bf2534fefc8568e32d57386"
     ],
     [
       "Hacl.Impl.Curve25519.Finv.finv",
@@ -938,7 +936,9 @@
         "lemma_LowStar.Monotonic.Buffer.length_null_1",
         "lemma_LowStar.Monotonic.Buffer.length_null_2",
         "lemma_Spec.Curve25519.Lemmas.lemma_prime_value",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
         "typing_Lib.IntTypes.unsigned",
@@ -992,7 +992,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "9965e87ff7b9ab8de5f9fcd14a63d17f"
+      "1e0e6c7bf5e3eea596ddabd279bc090b"
     ]
   ]
 ]
