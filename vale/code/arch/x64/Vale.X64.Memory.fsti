@@ -11,7 +11,7 @@ type vale_hpls = Map.t nat vale_heap
 noeq type vale_memory = {
   vm_heap : vale_heap;
   vm_hpls : vale_hpls;
-  vm_hmap : Map.t int nat
+  vm_hmap : Map.t nat nat
 }
 
 unfold let nat8 = Vale.Def.Words_s.nat8

@@ -676,61 +676,69 @@ let rec valid_memtaint (mem:vale_heap) (ps:list b8{IB.list_disjoint_or_eq ps}) (
       assert (forall p. List.memP p q ==> IB.disjoint_or_eq_b8 p b)
 
 // get all ptrs in a vale_heap h
-let get_heap_ptrs (h:vale_heap) : GTot (Set.set int) = admit()
+let get_heap_ptrs (h:vale_heap) : GTot (Set.set nat) = admit()
 
 // true if ptr is in h
 let heap_contains_ptr (h:vale_heap) (ptr:int) : GTot bool = admit()
 
-// true if 64, false if 128
 let get_base_typ (ptr:int) (h:vale_heap) : GTot (t:base_typ & buffer t) = admit()
 
 let memory_ok (m:vale_memory) = 
    Map.domain m.vm_hmap == get_heap_ptrs m.vm_heap /\
-   (forall (hp:nat{hp < 16}).
+   (forall (hp:nat).
      Map.contains m.vm_hpls hp /\
-     (forall (ptr:int{heap_contains_ptr (Map.sel m.vm_hpls hp) ptr}).
+     (forall (ptr:nat{heap_contains_ptr (Map.sel m.vm_hpls hp) ptr}).
        Map.contains m.vm_hmap ptr /\
        Map.sel m.vm_hmap ptr == hp /\
        (let t = get_base_typ ptr (Map.sel m.vm_hpls hp) in
        let t' = get_base_typ ptr m.vm_heap in
        load_hmem (dfst t) ptr hp m.vm_hpls == load_mem (dfst t') ptr m.vm_heap)))
 
-#set-options "--z3rlimit 100"
-let memory_load64 (ptr:int) (hp:nat{hp < 16}) (m:vale_memory) : Ghost int
+#set-options "--z3rlimit 800"
+let memory_load64 (ptr:int) (hp:nat) (m:vale_memory) : Ghost nat
   (requires (
     valid_mem64 ptr m.vm_heap /\
     valid_hmem64 ptr hp m.vm_hpls /\
     Map.sel m.vm_hmap ptr == hp /\
     memory_ok m))
   (ensures
-    fun v -> //let (hp:nat) = Map.sel s.ts_hmap ptr in
+    fun v ->
     v == load_hmem64 ptr hp m.vm_hpls
   )
   =
+    // debug
+    assert(Map.domain m.vm_hmap == get_heap_ptrs m.vm_heap);
+    assert(forall (hp:nat).
+    (forall (ptr:nat{heap_contains_ptr (Map.sel m.vm_hpls hp) ptr}).
+      (let t = get_base_typ ptr (Map.sel m.vm_hpls hp) in
+       let t' = get_base_typ ptr m.vm_heap in
+       load_hmem (dfst t) ptr hp m.vm_hpls == load_mem (dfst t') ptr m.vm_heap)));
+    
+    assume false;
     load_mem64 ptr m.vm_heap
 
-// let memory_store64 (ptr:int) (v:tv) (hp:nat{hp < 16}) (s:toy_state) : Ghost toy_state
-//   (requires
-//     Map.sel s.ts_hmap ptr == hp /\
-//     mem_ok s)
-//   (ensures
-//   fun s' ->
-//     valid_mem ptr s'.ts_heap /\
-//     valid_hmem ptr hp s'.ts_hpls /\
-//     Map.sel s'.ts_hmap ptr == hp /\
-//     mem_ok s'
-//   )
-//   =  
-//   let hmap': Map.t (key:ta) (value:nat) = Map.upd s.ts_hmap ptr hp in 
-//   let hmem' : toy_hpls = store_hmem ptr v hp s.ts_hpls in
-//   let mem' : toy_heap = store_mem ptr v s.ts_heap in
-//   {
-//   m with
-//       vm_heap = mem';
-//       vm_hpls = hmem';
-//       vm_hmap = hmap';
-//    }
-// 
+ let memory_store64 (ptr:int) (v:int) (hp:nat) (m:vale_memory) : Ghost vale_memory
+   (requires
+     Map.sel m.vm_hmap ptr == hp /\
+     memory_ok m)
+   (ensures
+   fun s' ->
+     valid_mem ptr s'.ts_heap /\
+     valid_hmem ptr hp s'.ts_hpls /\
+     Map.sel s'.ts_hmap ptr == hp /\
+     mem_ok s'
+   )
+   =  
+   let hmap': Map.t (key:ta) (value:nat) = Map.upd s.ts_hmap ptr hp in 
+   let hmem' : toy_hpls = store_hmem ptr v hp s.ts_hpls in
+   let mem' : toy_heap = store_mem ptr v s.ts_heap in
+   {
+   m with
+       vm_heap = mem';
+       vm_hpls = hmem';
+       vm_hmap = hmap';
+    }
+ 
 // #set-options "--z3rlimit 100"
 // let switch_hp (ptr:ta) (ohp:nat{ohp<16}) (nhp:nat{nhp<16}) (s:toy_state) : Ghost toy_state
 //   (requires
