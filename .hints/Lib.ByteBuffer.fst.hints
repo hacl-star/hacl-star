@@ -1068,6 +1068,7 @@
       1,
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_FStar.Kremlin.Endianness.be_to_n.fuel_instrumented",
         "@fuel_correspondence_Lib.ByteSequence.nat_from_intseq_be_.fuel_instrumented",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented",
         "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
@@ -1123,6 +1124,7 @@
         "equation_LowStar.Buffer.trivial_preorder",
         "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.nat",
         "equation_Prims.pos",
+        "equation_with_fuel_FStar.Kremlin.Endianness.be_to_n.fuel_instrumented",
         "equation_with_fuel_Lib.ByteSequence.nat_from_intseq_be_.fuel_instrumented",
         "equation_with_fuel_Prims.pow2.fuel_instrumented",
         "fuel_guarded_inversion_Lib.IntTypes.inttype",
