@@ -1,8 +1,8 @@
+set(CMAKE_LEGACY_CYGWIN_WIN32 0)
 project(benchmark LANGUAGES C CXX ASM)
 cmake_minimum_required(VERSION 3.5)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(CMAKE_LEGACY_CYGWIN_WIN32 0) # Remove when CMake >= 3.8.4 is required
 
 option(USE_HACL "Use HaCl." ON)
 option(USE_VALE "Use Vale." ON)
@@ -20,6 +20,8 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   add_compile_options(-flto -ffat-lto-objects)
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   add_compile_options(-fbracket-depth=512)
+  # message("Disabling libjc")
+  set(USE_LIBJC OFF)
 endif()
 
 add_subdirectory(libevercrypt)
@@ -36,12 +38,16 @@ add_executable(runbenchmark
   bench_curve25519.cpp
   bench_ed25519.cpp
   bench_merkle.cpp
-#  bench_cipher.cpp
-#  bench_mac.cpp
+  bench_cipher.cpp
+  bench_mac.cpp
 )
 target_include_directories(runbenchmark PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(runbenchmark PRIVATE benchmark evercrypt)
 target_compile_options(runbenchmark PRIVATE -march=native -mtune=native -std=c++11)
+
+if ("${CMAKE_SYSTEM_NAME}" STREQUAL "CYGWIN")
+  target_compile_definitions(benchmark PUBLIC WIN32)
+endif()
 
 if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
   target_compile_definitions(benchmark PRIVATE _DEBUG)
@@ -70,8 +76,9 @@ endif(USE_BCRYPT)
 
 if(USE_OPENSSL)
   SET(CMAKE_FIND_LIBRARY_SUFFIXES "")
-  find_library(OPENSSL_LIB libcrypto.a PATHS $ENV{MLCRYPTO_HOME}/openssl NO_DEFAULT_PATH)
-  find_library(OPENSSL_LIB libcrypto.a) # search default paths
+  SET(OPENSSL_LIB_NAME libcrypto.a)
+  find_library(OPENSSL_LIB ${OPENSSL_LIB_NAME} PATHS $ENV{MLCRYPTO_HOME}/openssl NO_DEFAULT_PATH)
+  find_library(OPENSSL_LIB ${OPENSSL_LIB_NAME}) # search default paths
   find_path(OPENSSL_INC openssl/crypto.h PATHS $ENV{MLCRYPTO_HOME}/openssl/include NO_DEFAULT_PATH)
   find_path(OPENSSL_INC openssl/crypto.h) # search default paths
   get_filename_component(OPENSSL_LIB ${OPENSSL_LIB} REALPATH)

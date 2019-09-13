@@ -4,9 +4,6 @@ open FStar.Mul
 module Ints = Lib.IntTypes
 open Lib.IntVector.Intrinsics
 
-// WARNING: this file is experimental and the vectorized implementations are
-// currently not enabled on EverCrypt release builds.
-
 #set-options "--admit_smt_queries true"
 
 inline_for_extraction
@@ -28,7 +25,7 @@ let vec_v #t #w x = admit()
 let vec_zero (t:v_inttype) (w:width) =
   match t,w with
   | U128,1 -> vec128_zero
-  | _,1 -> nat_to_uint #t #SEC 0
+  | _,1 -> mk_int #t #SEC 0
   | U8, 16
   | U32,4
   | U64,2 -> vec128_zero
@@ -40,7 +37,7 @@ let vec_zero (t:v_inttype) (w:width) =
 let vec_counter (t:v_inttype) (w:width) =
   match t,w with
   | U128,1 -> vec128_zero
-  | _,1 -> nat_to_uint #t #SEC 0
+  | _,1 -> mk_int #t #SEC 0
   | U32,4 -> vec128_load32s (u32 3) (u32 2) (u32 1) (u32 0)
   | U64,2 -> vec128_load64s (u64 1) (u64 0)
   | U32,8 -> vec256_load32s (u32 7) (u32 6) (u32 5) (u32 4) (u32 3) (u32 2) (u32 1) (u32 0)
@@ -261,6 +258,8 @@ let vec_lte_mask (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) =
 let vec_gte_mask (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) =
   vec_not (vec_lt_mask #t #w x y)
 
+let cast #t #w t' w' v = v
+
 let vec_interleave_low (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) =
   match t,w with
   | _,1 -> x
@@ -270,9 +269,27 @@ let vec_interleave_low (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) =
   | U64,4 -> vec256_interleave_low64 x y
   | U128,2 -> vec256_interleave_low128 x y
 
-let vec_interleave_low_lemma2 #vt v1 v2 = admit()
+let vec_interleave_low_n (#t:v_inttype) (#w:width) (n:width) (x:vec_t t w) (y:vec_t t w) =
+  match t,w,n with
+  | _,1,_ -> x
+  | U32,4,2 -> vec128_interleave_low64 x y
+  //cast U32 4 (vec_interleave_low (cast U64 2 x) (cast U64 2 y))
+  | U32,8,4 -> vec256_interleave_low64 x y
+  //cast U32 8 (vec_interleave_low (cast U64 4 x) (cast U64 4 y))
+  | U32,8,2 -> vec256_interleave_low128 x y
+  //cast U32 8 (vec_interleave_low (cast U128 2 x) (cast U128 2 y))
+  | U64,4,2 -> vec256_interleave_low128 x y
+  //cast U64 4 (vec_interleave_low (cast U128 2 x) (cast U128 2 y))
+  | _ -> admit()
 
+let vec_interleave_low_lemma2 #t v1 v2 = admit()
+let vec_interleave_low_lemma_uint32_4 v1 v2 = admit()
+let vec_interleave_low_lemma_uint32_8 v1 v2 = admit()
 let vec_interleave_low_lemma_uint64_4 v1 v2 = admit()
+let vec_interleave_low_n_lemma_uint32_4_2 v1 v2 = admit()
+let vec_interleave_low_n_lemma_uint32_8_2 v1 v2 = admit()
+let vec_interleave_low_n_lemma_uint32_8_4 v1 v2 = admit()
+let vec_interleave_low_n_lemma_uint64_4_2 v1 v2 = admit()
 
 let vec_interleave_high (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) =
   match t,w with
@@ -283,9 +300,27 @@ let vec_interleave_high (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) =
   | U64,4 -> vec256_interleave_high64 x y
   | U128,2 -> vec256_interleave_high128 x y
 
-let vec_interleave_high_lemma2 #vt v1 v2 = admit()
+let vec_interleave_high_n (#t:v_inttype) (#w:width) (n:width) (x:vec_t t w) (y:vec_t t w) =
+  match t,w,n with
+  | _,1,_ -> x
+  | U32,4,2 -> vec128_interleave_high64 x y
+  //cast U32 4 (vec_interleave_high (cast U64 2 x) (cast U64 2 y))
+  | U32,8,4 -> vec256_interleave_high64 x y
+  //cast U32 8 (vec_interleave_high (cast U64 4 x) (cast U64 4 y))
+  | U32,8,2 -> vec256_interleave_high128 x y
+  //cast U32 8 (vec_interleave_high (cast U128 2 x) (cast U128 2 y))
+  | U64,4,2 -> vec256_interleave_high128 x y
+  //cast U64 4 (vec_interleave_high (cast U128 2 x) (cast U128 2 y))
+  | _ -> admit()
 
+let vec_interleave_high_lemma2 #t v1 v2 = admit()
+let vec_interleave_high_lemma_uint32_4 v1 v2 = admit()
+let vec_interleave_high_lemma_uint32_8 v1 v2 = admit()
 let vec_interleave_high_lemma_uint64_4 v1 v2 = admit()
+let vec_interleave_high_n_lemma_uint32_4_2 v1 v2 = admit()
+let vec_interleave_high_n_lemma_uint32_8_2 v1 v2 = admit()
+let vec_interleave_high_n_lemma_uint32_8_4 v1 v2 = admit()
+let vec_interleave_high_n_lemma_uint64_4_2 v1 v2 = admit()
 
 let vec_permute2 #t v i1 i2 =
   match t with
@@ -300,11 +335,6 @@ let vec_permute4 #t v i1 i2 i3 i4 =
 let vec_permute8 #t v i1 i2 i3 i4 i5 i6 i7 i8 = admit()
 let vec_permute16 #t = admit()
 let vec_permute32 #t = admit()
-
-let cast #t #w t' w' v = v
-
-let cast_vec_u128_to_u64_lemma #w b = admit()
-let cast_vec_u64_to_u128_lemma #w b = admit()
 
 let vec_aes_enc key state =
   ni_aes_enc key state

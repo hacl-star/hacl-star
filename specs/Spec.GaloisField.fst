@@ -7,12 +7,12 @@ open Lib.ByteSequence
 (* Consequently this module is specialized for GF(8/16/32/64/128) but can be generalized to other sizes if needed *)
 
 noeq type field = 
-  | GF: t:inttype{t <> U1} -> irred: uint_t t SEC -> field
+  | GF: t:inttype{unsigned t /\ t <> U1} -> irred: uint_t t SEC -> field
 
-let gf t irred = GF t irred 
+let gf t irred = GF t irred
 type felem (f:field) = uint_t f.t SEC
-let to_felem (#f:field) (n:nat{n <= maxint f.t}) : felem f = uint #f.t #SEC n 
-let from_felem (#f:field) (e:felem f) : n:nat{n <= maxint f.t} = uint_v #f.t #SEC e 
+let to_felem (#f:field) (n:nat{n <= maxint f.t}) : felem f = uint #f.t #SEC n
+let from_felem (#f:field) (e:felem f) : n:nat{n <= maxint f.t} = uint_v #f.t #SEC e
 
 let zero (#f:field) : felem f = to_felem 0
 let one (#f:field) : felem f = to_felem 1
@@ -20,7 +20,7 @@ let one (#f:field) : felem f = to_felem 1
 let load_felem_be (#f:field) (b:lbytes (numbytes f.t)) : felem f = uint_from_bytes_be #f.t #SEC b
 let store_felem_be (#f:field) (e:felem f): lbytes (numbytes f.t) = uint_to_bytes_be #f.t #SEC e
 
-let reverse (#t:inttype) (a:uint_t t SEC) : uint_t t SEC = 
+let reverse (#t:inttype{unsigned t}) (a:uint_t t SEC) : uint_t t SEC = 
   repeati (bits t) (fun i u ->
     u |. (((a >>. size i) &. uint #t #SEC 1) <<. (size (bits t - 1 - i)))) (uint #t #SEC 0)
 
@@ -57,5 +57,5 @@ let rec fexp #f a x =
   else fmul #f a r'
 let op_Star_Star_At #f e1 e2 = fexp #f e1 e2
 
-let finv (#f:field) (a:felem f) : felem f = 
+let finv (#f:field) (a:felem f) : felem f =
   fexp #f a (maxint f.t - 1)

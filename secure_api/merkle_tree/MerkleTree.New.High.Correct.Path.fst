@@ -7,7 +7,7 @@ open MerkleTree.Spec
 open MerkleTree.New.High
 open MerkleTree.New.High.Correct.Base
 // Need to use some facts of `mt_get_root`
-open MerkleTree.New.High.Correct.Rhs 
+open MerkleTree.New.High.Correct.Rhs
 
 open FStar.Classical
 open FStar.Ghost
@@ -38,7 +38,7 @@ val path_spec:
 let rec path_spec k j actd p =
   if j = 0 then S.empty
   else (if k % 2 = 0
-       then (if j = k || (j = k + 1 && not actd) 
+       then (if j = k || (j = k + 1 && not actd)
             then S.cons HPad (path_spec (k / 2) (j / 2) (actd || (j % 2 = 1)) p)
             else S.cons (HRaw (S.head p))
                    (path_spec (k / 2) (j / 2) (actd || (j % 2 = 1)) (S.tail p)))
@@ -70,17 +70,17 @@ val mt_get_path_acc:
        (decreases j)
 let rec mt_get_path_acc j fhs rhs k actd =
   if j = 0 then S.empty
-  else 
+  else
     (let sp = mt_get_path_step_acc j (S.head fhs) (S.head rhs) k actd in
     let rp = mt_get_path_acc (j / 2) (S.tail fhs) (S.tail rhs) (k / 2)
                              (actd || j % 2 = 1) in
-    if Some? sp 
+    if Some? sp
     then (S.cons (Some?.v sp) rp)
     else rp)
 
 val mt_get_path_step_acc_consistent:
   lv:nat{lv <= 32} ->
-  i:nat -> 
+  i:nat ->
   j:nat{i <= j /\ j < pow2 (32 - lv)} ->
   olds:hash_ss{S.length olds = 32 /\ mt_olds_inv lv i olds} ->
   hs:hash_ss{S.length hs = 32 /\ hs_wf_elts lv hs i j} ->
@@ -95,11 +95,11 @@ val mt_get_path_step_acc_consistent:
           (match mt_get_path_step_acc j
                    (S.index (merge_hs olds hs) lv) (S.index rhs lv)
                    k actd with
-          | Some v -> 
-            S.equal (mt_get_path_step lv hs rhs i j k S.empty actd) 
+          | Some v ->
+            S.equal (mt_get_path_step lv hs rhs i j k S.empty actd)
                     (S.cons v S.empty)
-          | None -> 
-            S.equal (mt_get_path_step lv hs rhs i j k S.empty actd) 
+          | None ->
+            S.equal (mt_get_path_step lv hs rhs i j k S.empty actd)
                     S.empty)))
 let mt_get_path_step_acc_consistent lv i j olds hs rhs k actd = ()
 
@@ -111,7 +111,7 @@ private let seq_cons_append #a hd tl = ()
 
 val mt_get_path_acc_consistent:
   lv:nat{lv <= 32} ->
-  i:nat -> 
+  i:nat ->
   j:nat{i <= j /\ j < pow2 (32 - lv)} ->
   olds:hash_ss{S.length olds = 32 /\ mt_olds_inv lv i olds} ->
   hs:hash_ss{S.length hs = 32 /\ hs_wf_elts lv hs i j} ->
@@ -123,12 +123,13 @@ val mt_get_path_acc_consistent:
           (log2c_bound j (32 - lv);
           mt_olds_hs_lth_inv_ok lv i j olds hs;
           mt_hashes_lth_inv_log_converted_ lv j (merge_hs olds hs);
-          S.equal (mt_get_path_acc j 
+          S.equal (mt_get_path_acc j
                     (S.slice (merge_hs olds hs) lv (lv + log2c j))
                     (S.slice rhs lv (lv + log2c j)) k actd)
                   (mt_get_path_ lv hs rhs i j k S.empty actd)))
         (decreases j)
-#reset-options "--z3rlimit 200 --max_fuel 1 --max_ifuel 0"
+
+#reset-options "--z3rlimit 800 --max_fuel 1 --max_ifuel 0"
 let rec mt_get_path_acc_consistent lv i j olds hs rhs k actd =
   log2c_bound j (32 - lv);
   mt_olds_hs_lth_inv_ok lv i j olds hs;
@@ -140,7 +141,7 @@ let rec mt_get_path_acc_consistent lv i j olds hs rhs k actd =
     let nactd_ = actd || j % 2 = 1 in
     assert (nactd == nactd_);
 
-    let pa = mt_get_path_acc j 
+    let pa = mt_get_path_acc j
                (S.slice (merge_hs olds hs) lv (lv + log2c j))
                (S.slice rhs lv (lv + log2c j)) k actd in
     let p = mt_get_path_ lv hs rhs i j k S.empty actd in
@@ -234,7 +235,7 @@ let rec mt_get_path_acc_inv_ok j fhs rhs k acc actd =
 #reset-options "--max_fuel 1 --initial_fuel 1 --max_ifuel 0 --z3rlimit 60"
 val mt_get_path_inv_ok_:
   lv:nat{lv < 32} ->
-  i:nat -> 
+  i:nat ->
   j:nat{j > 0 /\ i <= j /\ j < pow2 (32 - lv)} ->
   olds:hash_ss{S.length olds = 32 /\ mt_olds_inv lv i olds} ->
   hs:hash_ss{S.length hs = 32 /\ hs_wf_elts lv hs i j} ->
@@ -248,7 +249,7 @@ val mt_get_path_inv_ok_:
 		  (let t1 = hash_seq_spec_full (S.index (merge_hs olds hs) lv) acc actd in
 		   let t2 = S.slice rhs lv (lv + log2c j) in
                    mt_rhs_inv j t1 t2 actd))))
-        (ensures (S.equal (path_spec k j actd 
+        (ensures (S.equal (path_spec k j actd
                             (S.slice (mt_get_path_ lv hs rhs i j k p actd)
                               (S.length p) (S.length p + mt_path_length k j actd)))
                           (MTS.mt_get_path #(log2c j)
@@ -263,7 +264,7 @@ let mt_get_path_inv_ok_ lv i j olds hs rhs k p acc actd =
 
   mt_get_path_acc_consistent lv i j olds hs rhs k actd;
   mt_get_path_slice lv hs rhs i j k p actd;
-  mt_get_path_acc_inv_ok j 
+  mt_get_path_acc_inv_ok j
     (S.slice (merge_hs olds hs) lv (lv + log2c j))
     (S.slice rhs lv (lv + log2c j))
     k acc actd
@@ -292,7 +293,7 @@ let mt_get_path_inv_ok mt olds idx drt =
   let ofs = offset_of (MT?.i mt) in
   let umt, _ = mt_get_root mt drt in
   let ip = path_insert S.empty (S.index (mt_base mt olds) idx) in
-  mt_get_path_unchanged 0 (MT?.hs umt) (MT?.rhs umt) 
+  mt_get_path_unchanged 0 (MT?.hs umt) (MT?.rhs umt)
     (MT?.i umt) (MT?.j umt) idx ip false;
   assert (S.head ip == S.head (S.slice p 0 (S.length ip)));
   assert (S.head ip == S.head p);
@@ -331,12 +332,12 @@ let rec mt_verify_ok_ k j p ppos acc actd =
 
     if k % 2 = 0
     then begin
-      if j = k || (j = k + 1 && not actd) 
+      if j = k || (j = k + 1 && not actd)
       then begin
         assert (vi == mt_verify_ (k / 2) (j / 2) p ppos acc nactd);
         assert (plen == nplen);
         assert (S.equal (path_spec k j actd (S.slice p ppos (ppos + plen)))
-                        (S.cons HPad 
+                        (S.cons HPad
                           (path_spec (k / 2) (j / 2) nactd
                             (S.slice p ppos (ppos + plen)))));
         assert (vs ==
@@ -388,9 +389,8 @@ val mt_verify_ok:
   j:nat{k < j} ->
   p:path{S.length p = 1 + mt_path_length k j false} ->
   rt:hash ->
-  Lemma (mt_verify k j p rt ==
-        MTS.mt_verify #(log2c j) 
+  Lemma (mt_verify k j p rt <==>
+        MTS.mt_verify #(log2c j)
           (path_spec k j false (S.tail p)) k (HRaw (S.head p)) (HRaw rt))
 let mt_verify_ok k j p rt =
   mt_verify_ok_ k j p 1 (S.head p) false
-

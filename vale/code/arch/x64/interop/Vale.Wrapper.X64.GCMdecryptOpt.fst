@@ -1,5 +1,6 @@
 module Vale.Wrapper.X64.GCMdecryptOpt
 
+open FStar.Mul
 open Vale.Stdcalls.X64.GCMdecryptOpt
 open Vale.AsLowStar.MemoryHelpers
 open Vale.X64.MemoryAdapters
@@ -120,7 +121,7 @@ val gcm128_decrypt_opt':
       UInt64.v auth_bytes < pow2_32 /\
 
       UInt64.v len128x6 % 6 == 0 /\
-      (UInt64.v len128x6 > 0 ==> UInt64.v len128x6 >= 18) /\
+      (UInt64.v len128x6 > 0 ==> UInt64.v len128x6 >= 6) /\
       12 + UInt64.v len128x6 + 6 < pow2_32 /\
 
       UInt64.v len128x6 * (128/8) + UInt64.v len128_num * (128/8) <= UInt64.v cipher_num /\
@@ -140,10 +141,10 @@ val gcm128_decrypt_opt':
        let ub = UV.mk_buffer db Vale.Interop.Views.up_view128 in
        hkeys_reqs_pub (UV.as_seq h0 ub) (reverse_bytes_quad32 (aes_encrypt_LE AES_128 (Ghost.reveal key) (Mkfour 0 0 0 0)))) /\
       (length_div iv_b;
-       (reverse_bytes_quad32 (low_buffer_read TUInt8 TUInt128 h0 iv_b 0) ==
+       (low_buffer_read TUInt8 TUInt128 h0 iv_b 0 ==
          compute_iv_BE (aes_encrypt_LE AES_128 (Ghost.reveal key) (Mkfour 0 0 0 0)) (Ghost.reveal iv))
       )
-    
+
     )
     (ensures fun h0 c h1 ->
       B.modifies  (B.loc_union (B.loc_buffer iv_b)
@@ -196,6 +197,8 @@ val gcm128_decrypt_opt':
     )
 
 
+#push-options "--z3cliopt smt.arith.nl=true --smtencoding.nl_arith_repr boxwrap"
+#restart-solver
 inline_for_extraction
 let gcm128_decrypt_opt' key iv auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
   in128x6_b out128x6_b len128x6 in128_b out128_b len128_num inout_b cipher_num scratch_b tag_b =
@@ -211,7 +214,7 @@ let gcm128_decrypt_opt' key iv auth_b auth_bytes auth_num keys_b iv_b hkeys_b ab
   B.disjoint_neq iv_b out128_b;
   B.disjoint_neq iv_b inout_b;
   B.disjoint_neq iv_b scratch_b;
-  B.disjoint_neq iv_b tag_b; 
+  B.disjoint_neq iv_b tag_b;
 
 
   DV.length_eq (get_downview auth_b);
@@ -281,6 +284,7 @@ let gcm128_decrypt_opt' key iv auth_b auth_bytes auth_num keys_b iv_b hkeys_b ab
 
   let h1 = get() in
   x
+#pop-options
 
 inline_for_extraction
 val gcm128_decrypt_opt_alloca:
@@ -366,9 +370,9 @@ val gcm128_decrypt_opt_alloca:
         (reverse_bytes_quad32 (aes_encrypt_LE AES_128 (Ghost.reveal key) (Mkfour 0 0 0 0))) /\
 
       (length_div iv_b;
-       (be_bytes_to_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h0 iv_b))) ==
+       (le_bytes_to_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h0 iv_b))) ==
          compute_iv_BE (aes_encrypt_LE AES_128 (Ghost.reveal key) (Mkfour 0 0 0 0)) (Ghost.reveal iv)
-      )      
+      )
     )
     (ensures fun h0 c h1 ->
       B.modifies  (B.loc_union (B.loc_buffer iv_b)
@@ -563,7 +567,16 @@ let gcm128_decrypt_opt_alloca key iv cipher_b cipher_len auth_b auth_bytes iv_b
   // Simplify the expression for the iv
   DV.length_eq (get_downview iv_b);
   length_aux4 iv_b;
-  gcm_simplify3 iv_b h0;
+  calc (==) {
+    compute_iv_BE (aes_encrypt_LE AES_128 (Ghost.reveal key) (Mkfour 0 0 0 0))
+                  (Ghost.reveal iv);
+    (==) { }
+    le_bytes_to_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h0 iv_b));
+    (==) { gcm_simplify2 iv_b h0 }
+    le_bytes_to_quad32 (le_quad32_to_bytes (low_buffer_read TUInt8 TUInt128 h0 iv_b 0));
+    (==) { le_bytes_to_quad32_to_bytes (low_buffer_read TUInt8 TUInt128 h0 iv_b 0) }
+    low_buffer_read TUInt8 TUInt128 h0 iv_b 0;
+  };
 
   // Simplify post condition for tag
   gcm_simplify2 tag_b h0;
@@ -571,7 +584,7 @@ let gcm128_decrypt_opt_alloca key iv cipher_b cipher_len auth_b auth_bytes iv_b
 
   // Compute length of biggest blocks of 6 * 128-bit blocks
   let len128x6 = UInt64.mul (cipher_len / 96uL) 96uL in
-  if len128x6 / 16uL >= 18uL then (
+  if len128x6 / 16uL >= 6uL then (
     let len128_num = ((cipher_len / 16uL) * 16uL) - len128x6 in
     // Casting to uint32 is here the equality
     math_cast_aux len128x6;
@@ -749,6 +762,7 @@ let lemma_identical_uv (b:uint8_p) (h0 h1:HS.mem) : Lemma
 let length_aux6 (b:uint8_p) : Lemma (B.length b = DV.length (get_downview b))
   = DV.length_eq (get_downview b)
 
+#push-options "--z3cliopt smt.arith.nl=true"
 let lemma_slice_uv_extra (b:uint8_p) (b_start:uint8_p) (b_extra:uint8_p) (h:HS.mem) : Lemma
   (requires
     B.length b_start = B.length b / 16 * 16 /\
@@ -828,6 +842,7 @@ let lemma_slice_uv_extra (b:uint8_p) (b_start:uint8_p) (b_extra:uint8_p) (h:HS.m
  //     b_f;
  //   }
  // )
+#pop-options
 
 let lemma_slice_sub (b:uint8_p) (b_sub:uint8_p) (b_extra:uint8_p) (h:HS.mem) : Lemma
   (requires B.length b_extra = 16 /\ B.length b_sub = B.length b / 16 * 16 /\

@@ -1,4 +1,5 @@
 module Vale.X64.QuickCode
+open FStar.Mul
 open Vale.Def.Prop_s
 open Vale.X64.Machine_s
 open Vale.X64.State

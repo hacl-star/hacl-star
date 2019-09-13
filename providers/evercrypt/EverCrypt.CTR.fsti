@@ -112,7 +112,7 @@ let create_in_st (a:alg) =
           freeable h1 s /\
 
           // Useful stuff
-          kv (B.deref h1 s) == B.as_seq h0 (k <: B.buffer uint8) /\
+          kv (B.deref h1 s) == B.as_seq h0 k /\
           iv (B.deref h1 s) == B.as_seq h0 nonce /\
           ctr h1 s = UInt32.v c
       | _ -> False)

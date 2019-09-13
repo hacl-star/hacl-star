@@ -1,4 +1,5 @@
 module Vale.AES.GHash
+open FStar.Mul
 open Vale.Math.Poly2.Lemmas
 open Vale.Math.Poly2.Words
 
@@ -211,7 +212,6 @@ let lemma_reverse_bytes_quad32_xor (a b:quad32) : Lemma
   (reverse_bytes_quad32 (quad32_xor a b) == quad32_xor (reverse_bytes_quad32 a) (reverse_bytes_quad32 b))
   =
   let open Vale.Def.Words.Four_s in
-  let open FStar.Mul in
   let open FStar.UInt in
   let open FStar.BV in
   let open Vale.Math.Bits in
@@ -509,7 +509,6 @@ let ghash_incremental_bytes_pure_no_extra (old_io io h:quad32) (in_quads:seq qua
 
 
 #reset-options "--z3rlimit 30"
-open FStar.Mul
 let lemma_ghash_incremental_bytes_extra_helper (h y_init y_mid y_final:quad32) (input:seq quad32) (final final_padded:quad32) (num_bytes:nat)  // Precondition definitions
   =
   let num_blocks = num_bytes / 16 in

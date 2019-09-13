@@ -1,4 +1,5 @@
 module Vale.X64.Flags
+open FStar.Mul
 // This interface should not refer to Semantics_s
 
 open Vale.Def.Prop_s

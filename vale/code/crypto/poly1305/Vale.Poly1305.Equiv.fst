@@ -1,4 +1,5 @@
 module Vale.Poly1305.Equiv
+open FStar.Mul
 
 module BSeq = Lib.ByteSequence
 
@@ -27,10 +28,12 @@ unfold let to_felem = S.to_felem
 unfold let modp = V.modp
 unfold let mod2_128 = V.mod2_128
 
+#set-options "--z3rlimit 150 --max_fuel 1 --max_ifuel 1"
+
 let rec lemma_poly1305_equiv_rec (text:bytes) (acc0:felem) (r:felem) (k:nat) : Lemma
   (requires k <= length text / size_block)
   (ensures (
-    let f = S.update1 r size_block in
+    let f = S.poly1305_update1 r size_block in
     let repeat_f = repeat_blocks_f size_block text f (length text / size_block) in
     let pad = pow2 (8 * size_block) in
     V.poly1305_hash_blocks acc0 pad r (block_fun text) k == repeati k repeat_f acc0
@@ -38,7 +41,7 @@ let rec lemma_poly1305_equiv_rec (text:bytes) (acc0:felem) (r:felem) (k:nat) : L
   (decreases k)
   =
   let inp = block_fun text in
-  let f = S.update1 r size_block in
+  let f = S.poly1305_update1 r size_block in
   let len = length text in
   let nb = len / size_block in
   let repeat_f = repeat_blocks_f size_block text f nb in
@@ -64,11 +67,13 @@ let rec lemma_poly1305_equiv_rec (text:bytes) (acc0:felem) (r:felem) (k:nat) : L
       ((pad + inp kk + r0) % prime) * r % prime;
       == {assert_norm (fmul (fadd (pad + inp kk) r0) r == ((pad + inp kk + r0) % prime) * r % prime)}
       fmul (fadd (pad + inp kk) r0) r;
+      == { FStar.Math.Lemmas.lemma_mod_plus_distr_l (pad + inp kk) r0 prime }
+      fmul (fadd (fadd pad (inp kk)) r0) r;
       == {}
-      S.update1 r size_block block (repeati kk repeat_f acc0);
+      S.poly1305_update1 r size_block block (repeati kk repeat_f acc0);
     };
     calc (==) {
-      S.update1 r size_block block (repeati kk repeat_f acc0);
+      S.poly1305_update1 r size_block block (repeati kk repeat_f acc0);
       == {}
       f block (repeati kk repeat_f acc0);
       == {}
@@ -86,7 +91,7 @@ let lemma_poly1305_equiv_last (text:bytes) (r:felem) (hBlocks:felem) : Lemma
     let last = Seq.slice text (nb * size_block) len in
     let nExtra = len % size_block in
     let padLast = pow2 (nExtra * 8) in
-    modp ((hBlocks + padLast + inp nb % padLast) * r) == S.update1 r nExtra last hBlocks
+    modp ((hBlocks + padLast + inp nb % padLast) * r) == S.poly1305_update1 r nExtra last hBlocks
   ))
   =
   let inp = block_fun text in
@@ -109,15 +114,17 @@ let lemma_poly1305_equiv_last (text:bytes) (r:felem) (hBlocks:felem) : Lemma
     ((x + padLast + hBlocks) % prime) * r % prime;
     == {assert_norm (((x + padLast + hBlocks) % prime) * r % prime == fmul (fadd (x + padLast) hBlocks) r)}
     fmul (fadd (x + padLast) hBlocks) r;
+    == { FStar.Math.Lemmas.lemma_mod_plus_distr_l (x + padLast) hBlocks prime }
+    fmul (fadd (fadd x padLast) hBlocks) r;
     == {}
-    S.update1 r nExtra last hBlocks;
+    S.poly1305_update1 r nExtra last hBlocks;
   }
 
 let lemma_poly1305_equiv_r (k:key) : Lemma
   (ensures (
     let key_bytes = slice k 0 16 in
     let key_r:nat128 = nat_from_bytes_le key_bytes in
-    iand key_r 0x0ffffffc0ffffffc0ffffffc0fffffff == S.encode_r key_bytes
+    iand key_r 0x0ffffffc0ffffffc0ffffffc0fffffff == S.poly1305_encode_r key_bytes
   ))
   =
   let key_bytes:S.block = slice k 0 16 in
@@ -133,7 +140,7 @@ let lemma_poly1305_equiv_r (k:key) : Lemma
   let mhi = logand hi mask1 in
   assert_norm (pow2 128 < prime);
   let rs:felem = to_felem (uint_v mhi * pow2 64 + uint_v mlo) in
-  assert_norm (rs == S.encode_r key_bytes);
+  assert_norm (rs == S.poly1305_encode_r key_bytes);
 
   let v_mask0:nat64 = 0x0ffffffc0fffffff in
   let v_mask1:nat64 = 0x0ffffffc0ffffffc in
@@ -170,19 +177,19 @@ let lemma_poly1305_equiv text k =
   let key_bytes = slice k 0 16 in
   let key_r:nat128 = nat_from_bytes_le key_bytes in
   let key_s:nat128 = nat_from_bytes_le (slice k 16 32) in
-  let r = S.encode_r key_bytes in
+  let r = S.poly1305_encode_r key_bytes in
   lemma_poly1305_equiv_r k;
   let acc0 = 0 in
   let inp = block_fun text in
   let pad = pow2 (8 * size_block) in
   assert_norm (pad == pow2_128);
-  let f = S.update1 r size_block in
+  let f = S.poly1305_update1 r size_block in
   let len = length text in
   let nb = len / size_block in
   let acc1 = repeati nb (repeat_blocks_f size_block text f nb) acc0 in
   let last = Seq.slice text (nb * size_block) len in
   let nExtra = len % size_block in
-  let l = S.poly_update1_rem r in
+  let l = S.poly1305_update_last r in
   let repeat_f = repeat_blocks_f size_block text f nb in
   let hBlocks = V.poly1305_hash_blocks acc0 pad r inp nb in
   if nExtra = 0 then
@@ -208,14 +215,14 @@ let lemma_poly1305_equiv text k =
       == {Lib.Sequence.lemma_repeat_blocks size_block text f l acc0}
       repeat_blocks #uint8 #felem size_block text f l acc0;
       == {}
-      S.poly text acc0 r;
+      S.poly1305_update text acc0 r;
     };
     calc (==) {
       nat_to_bytes_le 16 (V.poly1305_hash key_r key_s inp len);
       == {}
-      nat_to_bytes_le 16 ((S.poly text acc0 r + key_s) % pow2 128);
+      nat_to_bytes_le 16 ((S.poly1305_update text acc0 r + key_s) % pow2 128);
       == {}
-      S.poly1305 text k;
+      S.poly1305_mac text k;
     };
     ()
   )
@@ -238,21 +245,21 @@ let lemma_poly1305_equiv text k =
       repeati nb repeat_f acc0 <: felem;
     };
     calc (==) {
-      S.update1 r nExtra last (repeati nb repeat_f acc0);
+      S.poly1305_update1 r nExtra last (repeati nb repeat_f acc0);
       == {}
       l nExtra last acc1;
       == {Lib.Sequence.lemma_repeat_blocks size_block text f l acc0}
       repeat_blocks #uint8 #felem size_block text f l acc0;
       == {}
-      S.poly text acc0 r;
+      S.poly1305_update text acc0 r;
     };
     lemma_poly1305_equiv_last text r hBlocks;
     calc (==) {
       nat_to_bytes_le 16 (V.poly1305_hash key_r key_s inp len);
       == {}
-      nat_to_bytes_le 16 ((S.poly text acc0 r + key_s) % pow2 128);
+      nat_to_bytes_le 16 ((S.poly1305_update text acc0 r + key_s) % pow2 128);
       == {}
-      S.poly1305 text k;
+      S.poly1305_mac text k;
     };
     ()
   )

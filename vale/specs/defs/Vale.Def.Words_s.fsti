@@ -1,4 +1,5 @@
 module Vale.Def.Words_s
+open FStar.Mul
 
 (*
 Various representations of words with 2^n bits.

@@ -1,6 +1,7 @@
 module Vale.Interop.X64
 open FStar.Mul
 open Vale.Interop.Base
+open Vale.Arch.Heap
 module B = LowStar.Buffer
 module BS = Vale.X64.Machine_Semantics_s
 module UV = LowStar.BufferView.Up
@@ -39,7 +40,7 @@ let arg_list = l:list arg{List.Tot.length l <= 20}
 let arg_list_sb = l:list arg{List.Tot.length l <= 21}
 
 unfold
-let injective f = forall x y. f x == f y ==> x == y
+let injective f = forall x y.{:pattern f x; f y} f x == f y ==> x == y
 
 noeq
 type arg_reg_relation' (n:nat) =
@@ -48,16 +49,16 @@ type arg_reg_relation' (n:nat) =
            // This function should be injective
            injective of_arg /\
            // rRsp is not a valid register to store paramters
-           (forall (i:reg_nat n). of_arg i <> MS.rRsp) /\
+           (forall (i:reg_nat n).{:pattern of_arg i} of_arg i <> MS.rRsp) /\
            // of_reg should always return Some when the register corresponds to an of_arg
-           (forall (i:reg_nat n).
+           (forall (i:reg_nat n).{:pattern of_arg i}
               Some? (of_reg (of_arg i)) /\ Some?.v (of_reg (of_arg i)) = i)} ->
          arg_reg_relation' n
 
 unfold
 let arg_reg_relation (n:nat) = (v:arg_reg_relation' n{
   // of_reg is a partial inverse of of_arg
-  forall (r:MS.reg_64). Some? (v.of_reg r) ==> v.of_arg (Some?.v (v.of_reg r)) = r})
+  forall (r:MS.reg_64).{:pattern v.of_reg r} Some? (v.of_reg r) ==> v.of_arg (Some?.v (v.of_reg r)) = r})
 
 let registers = MS.reg_64 -> MS.nat64
 
@@ -210,7 +211,6 @@ let create_initial_trusted_state
       (max_arity:nat)
       (arg_reg:arg_reg_relation max_arity)
       (args:arg_list)
-      (down_mem: down_mem_t)
   : state_builder_t max_arity args (BS.machine_state & interop_heap) =
   fun h0 ->
     let open MS in
@@ -232,7 +232,7 @@ let create_initial_trusted_state
       BS.ms_ok = true;
       BS.ms_regs = regs;
       BS.ms_flags = flags;
-      BS.ms_heap = down_mem mem;
+      BS.ms_heap = heap_of_interop mem;
       BS.ms_memTaint = create_memtaint mem (args_b8 args) (mk_taint args init_taint);
       BS.ms_stack = BS.Machine_stack init_rsp stack;
       BS.ms_stackTaint = Map.const MS.Public;
@@ -260,7 +260,6 @@ let prediction_post_rel_t (c:BS.code) (args:arg_list) =
 let prediction_pre
     (n:nat)
     (arg_reg:arg_reg_relation n)
-    (down_mem:down_mem_t)
     (c:BS.code)
     (args:arg_list)
     (pre_rel: prediction_pre_rel_t c args)
@@ -268,14 +267,13 @@ let prediction_pre
     (s0:BS.machine_state)
     =
   pre_rel h0 /\
-  s0 == fst (create_initial_trusted_state n arg_reg args down_mem h0)
+  s0 == fst (create_initial_trusted_state n arg_reg args h0)
 
 [@__reduce__]
 let prediction_post
     (n:nat)
     (regs_modified:MS.reg_64 -> bool)
     (xmms_modified:MS.reg_xmm -> bool)
-    (down_mem:down_mem_t)
     (c:BS.code)
     (args:arg_list)
     (post_rel: prediction_post_rel_t c args)
@@ -289,7 +287,7 @@ let prediction_post
     FStar.HyperStack.ST.equal_domains h0 h1 /\
     B.modifies (loc_modified_args args) h0 h1 /\
     mem_roots_p h1 args /\
-    down_mem (mk_mem args h1) == s1.BS.ms_heap /\
+    heap_get (heap_of_interop (mk_mem args h1)) == heap_get s1.BS.ms_heap /\
     calling_conventions s0 s1 regs_modified xmms_modified /\
     rax == return_val s1 /\
     post_rel h0 s0 rax_fuel_mem s1
@@ -300,7 +298,6 @@ let prediction
     (arg_reg:arg_reg_relation n)
     (regs_modified:MS.reg_64 -> bool)
     (xmms_modified:MS.reg_xmm -> bool)
-    (down_mem:down_mem_t)
     (c:BS.code)
     (args:arg_list)
     (pre_rel:prediction_pre_rel_t c args)
@@ -308,8 +305,8 @@ let prediction
   h0:mem_roots args{pre_rel h0} ->
   s0:BS.machine_state ->
   Ghost (UInt64.t & nat & interop_heap)
-    (requires prediction_pre n arg_reg down_mem c args pre_rel h0 s0)
-    (ensures prediction_post n regs_modified xmms_modified down_mem c args post_rel h0 s0)
+    (requires prediction_pre n arg_reg c args pre_rel h0 s0)
+    (ensures prediction_post n regs_modified xmms_modified c args post_rel h0 s0)
 
 noeq
 type as_lowstar_sig_ret =
@@ -328,13 +325,12 @@ let as_lowstar_sig_post
     (arg_reg:arg_reg_relation n)
     (regs_modified:MS.reg_64 -> bool)
     (xmms_modified:MS.reg_xmm -> bool)
-    (down_mem:down_mem_t)
     (c:BS.code)
     (args:arg_list)
     (h0:mem_roots args)
     (#pre_rel:_)
     (#post_rel: _)
-    (predict:prediction n arg_reg regs_modified xmms_modified down_mem c args pre_rel post_rel)
+    (predict:prediction n arg_reg regs_modified xmms_modified c args pre_rel post_rel)
     (ret:als_ret)
     (h1:HS.mem) =
   (* write it this way to be reduction friendly *)
@@ -344,11 +340,11 @@ let as_lowstar_sig_post
   n == As_lowstar_sig_ret?.n ret /\
  (let fuel = As_lowstar_sig_ret?.fuel ret in
   let final_mem = As_lowstar_sig_ret?.final_mem ret in
-  let s0 = fst (create_initial_trusted_state n arg_reg args down_mem h0) in
+  let s0 = fst (create_initial_trusted_state n arg_reg args h0) in
   h1 == hs_of_mem final_mem /\
-  prediction_pre n arg_reg down_mem c args pre_rel h0 s0 /\
+  prediction_pre n arg_reg c args pre_rel h0 s0 /\
   (rax, fuel, final_mem) == predict h0 s0 /\
-  prediction_post n regs_modified xmms_modified down_mem c args post_rel h0 s0 (rax, fuel, final_mem) /\
+  prediction_post n regs_modified xmms_modified c args post_rel h0 s0 (rax, fuel, final_mem) /\
   FStar.HyperStack.ST.equal_domains h0 h1)
 
 [@__reduce__]
@@ -357,13 +353,12 @@ let as_lowstar_sig_post_weak
     (arg_reg:arg_reg_relation n)
     (regs_modified:MS.reg_64 -> bool)
     (xmms_modified:MS.reg_xmm -> bool)
-    (down_mem:down_mem_t)
     (c:BS.code)
     (args:arg_list)
     (h0:mem_roots args)
     (#pre_rel:_)
     (#post_rel: _)
-    (predict:prediction n arg_reg regs_modified xmms_modified down_mem c args pre_rel post_rel)
+    (predict:prediction n arg_reg regs_modified xmms_modified c args pre_rel post_rel)
     (ret:als_ret)
     (h1:HS.mem) =
   (* write it this way to be reduction friendly *)
@@ -373,7 +368,7 @@ let as_lowstar_sig_post_weak
   n == As_lowstar_sig_ret?.n ret /\
  (let fuel = As_lowstar_sig_ret?.fuel ret in
   let final_mem = As_lowstar_sig_ret?.final_mem ret in
-  let s0 = fst (create_initial_trusted_state n arg_reg args down_mem h0) in
+  let s0 = fst (create_initial_trusted_state n arg_reg args h0) in
   (exists fuel
      final_mem
      s1.
@@ -387,14 +382,13 @@ let as_lowstar_sig (c:BS.code) =
     arg_reg:arg_reg_relation n ->
     regs_modified:(MS.reg_64 -> bool) ->
     xmms_modified:(MS.reg_xmm -> bool) ->
-    down_mem:down_mem_t ->
     args:arg_list ->
     #pre_rel:_ ->
     #post_rel:_ ->
-    predict:prediction n arg_reg regs_modified xmms_modified down_mem c args pre_rel post_rel ->
+    predict:prediction n arg_reg regs_modified xmms_modified c args pre_rel post_rel ->
     FStar.HyperStack.ST.Stack als_ret
         (requires (fun h0 -> mem_roots_p h0 args /\ pre_rel h0))
-        (ensures fun h0 ret h1 -> as_lowstar_sig_post n arg_reg regs_modified xmms_modified down_mem c args h0 predict ret h1)
+        (ensures fun h0 ret h1 -> as_lowstar_sig_post n arg_reg regs_modified xmms_modified c args h0 predict ret h1)
 
 val wrap_variadic (c:BS.code) : as_lowstar_sig c
 
@@ -429,7 +423,6 @@ let rec prediction_t
       (arg_reg:arg_reg_relation n)
       (regs_modified:MS.reg_64 -> bool)
       (xmms_modified:MS.reg_xmm -> bool)
-      (down_mem:down_mem_t)
       (c:BS.code)
       (dom:list td)
       (args:arg_list{List.length dom + List.length args <= 20})
@@ -438,7 +431,7 @@ let rec prediction_t
     =
     match dom with
       | [] ->
-        prediction n arg_reg regs_modified xmms_modified down_mem c args pre_rel post_rel
+        prediction n arg_reg regs_modified xmms_modified c args pre_rel post_rel
 
       | hd::tl ->
         x:td_as_type hd ->
@@ -447,7 +440,6 @@ let rec prediction_t
           arg_reg
           regs_modified
           xmms_modified
-          down_mem
           c
           tl
           (x ++ args)
@@ -460,13 +452,12 @@ let elim_predict_t_nil
       (#arg_reg:arg_reg_relation n)
       (#regs_modified:MS.reg_64 -> bool)
       (#xmms_modified:MS.reg_xmm -> bool)
-      (#down_mem:down_mem_t)
       (#c:BS.code)
       (#args:arg_list)
       (#pre_rel:_)
       (#post_rel:_)
-      (p:prediction_t n arg_reg regs_modified xmms_modified down_mem c [] args pre_rel post_rel)
-   : prediction n arg_reg regs_modified xmms_modified down_mem c args pre_rel post_rel
+      (p:prediction_t n arg_reg regs_modified xmms_modified c [] args pre_rel post_rel)
+   : prediction n arg_reg regs_modified xmms_modified c args pre_rel post_rel
    = p
 
 [@__reduce__]
@@ -475,16 +466,15 @@ let elim_predict_t_cons
       (#arg_reg:arg_reg_relation n)
       (#regs_modified:MS.reg_64 -> bool)
       (#xmms_modified:MS.reg_xmm -> bool)
-      (#down_mem:down_mem_t)
       (#c:BS.code)
       (hd:td)
       (tl:list td)
       (#args:arg_list{List.length args + List.length tl <= 19})
       (#pre_rel:_)
       (#post_rel:_)
-      (p:prediction_t n arg_reg regs_modified xmms_modified down_mem c (hd::tl) args pre_rel post_rel)
+      (p:prediction_t n arg_reg regs_modified xmms_modified c (hd::tl) args pre_rel post_rel)
    : x:td_as_type hd ->
-     prediction_t n arg_reg regs_modified xmms_modified down_mem c tl (x ++ args)
+     prediction_t n arg_reg regs_modified xmms_modified c tl (x ++ args)
        (elim_rel_gen_t_cons hd tl pre_rel x)
        (elim_rel_gen_t_cons hd tl post_rel x)
    = p
@@ -495,13 +485,12 @@ let rec as_lowstar_sig_t
       (arg_reg:arg_reg_relation n)
       (regs_modified:MS.reg_64 -> bool)
       (xmms_modified:MS.reg_xmm -> bool)
-      (down_mem:down_mem_t)
       (c:BS.code)
       (dom:list td)
       (args:arg_list{List.length args + List.length dom <= 20})
       (pre_rel:rel_gen_t c dom args (prediction_pre_rel_t c))
       (post_rel:rel_gen_t c dom args (prediction_post_rel_t c))
-      (predict:prediction_t n arg_reg regs_modified xmms_modified down_mem c dom args pre_rel post_rel) =
+      (predict:prediction_t n arg_reg regs_modified xmms_modified c dom args pre_rel post_rel) =
       match dom with
       | [] ->
         (unit ->
@@ -510,7 +499,7 @@ let rec as_lowstar_sig_t
               mem_roots_p h0 args /\
               elim_rel_gen_t_nil pre_rel h0))
            (ensures fun h0 ret h1 ->
-              as_lowstar_sig_post n arg_reg regs_modified xmms_modified down_mem c args h0
+              as_lowstar_sig_post n arg_reg regs_modified xmms_modified c args h0
                 #pre_rel #post_rel (elim_predict_t_nil predict) ret h1))
       | hd::tl ->
         x:td_as_type hd ->
@@ -519,7 +508,6 @@ let rec as_lowstar_sig_t
           arg_reg
           regs_modified
           xmms_modified
-          down_mem
           c
           tl
           (x ++ args)
@@ -533,13 +521,12 @@ val wrap'
     (arg_reg:arg_reg_relation n)
     (regs_modified:MS.reg_64 -> bool)
     (xmms_modified:MS.reg_xmm -> bool)
-    (down_mem:down_mem_t)
     (c:BS.code)
     (dom:list td{List.length dom <= 20})
     (#pre_rel:rel_gen_t c dom [] (prediction_pre_rel_t c))
     (#post_rel:rel_gen_t c dom [] (prediction_post_rel_t c))
-    (predict:prediction_t n arg_reg regs_modified xmms_modified down_mem c dom [] pre_rel post_rel)
-  : as_lowstar_sig_t n arg_reg regs_modified xmms_modified down_mem c dom [] pre_rel post_rel predict
+    (predict:prediction_t n arg_reg regs_modified xmms_modified c dom [] pre_rel post_rel)
+  : as_lowstar_sig_t n arg_reg regs_modified xmms_modified c dom [] pre_rel post_rel predict
 
 [@__reduce__]
 private
@@ -548,13 +535,12 @@ let rec as_lowstar_sig_t_weak'
       (arg_reg:arg_reg_relation n)
       (regs_modified:MS.reg_64 -> bool)
       (xmms_modified:MS.reg_xmm -> bool)
-      (down_mem:down_mem_t)
       (c:BS.code)
       (dom:list td)
       (args:list arg{List.length args + List.length dom <= 20})
       (pre_rel:rel_gen_t c dom args (prediction_pre_rel_t c))
       (post_rel:rel_gen_t c dom args (prediction_post_rel_t c))
-      (predict:prediction_t n arg_reg regs_modified xmms_modified down_mem c dom args pre_rel post_rel) =
+      (predict:prediction_t n arg_reg regs_modified xmms_modified c dom args pre_rel post_rel) =
       match dom with
       | [] ->
         (unit ->
@@ -563,7 +549,7 @@ let rec as_lowstar_sig_t_weak'
               mem_roots_p h0 args /\
               elim_rel_gen_t_nil pre_rel h0))
            (ensures fun h0 ret h1 ->
-              as_lowstar_sig_post_weak n arg_reg regs_modified xmms_modified down_mem c args h0
+              as_lowstar_sig_post_weak n arg_reg regs_modified xmms_modified c args h0
                 #pre_rel #post_rel (elim_predict_t_nil predict) ret h1))
       | hd::tl ->
         x:td_as_type hd ->
@@ -572,7 +558,6 @@ let rec as_lowstar_sig_t_weak'
           arg_reg
           regs_modified
           xmms_modified
-          down_mem
           c
           tl
           (x ++ args)
@@ -586,13 +571,12 @@ val wrap_weak'
     (arg_reg:arg_reg_relation n)
     (regs_modified:MS.reg_64 -> bool)
     (xmms_modified:MS.reg_xmm -> bool)
-    (down_mem:down_mem_t)
     (c:BS.code)
     (dom:list td{List.length dom <= 20})
     (#pre_rel:rel_gen_t c dom [] (prediction_pre_rel_t c))
     (#post_rel:rel_gen_t c dom [] (prediction_post_rel_t c))
-    (predict:prediction_t n arg_reg regs_modified xmms_modified down_mem c dom [] pre_rel post_rel)
-  : as_lowstar_sig_t_weak' n arg_reg regs_modified xmms_modified down_mem c dom [] pre_rel post_rel predict
+    (predict:prediction_t n arg_reg regs_modified xmms_modified c dom [] pre_rel post_rel)
+  : as_lowstar_sig_t_weak' n arg_reg regs_modified xmms_modified c dom [] pre_rel post_rel predict
 
 (* These two functions are the ones that are available from outside the module. The arity_ok restriction ensures that all arguments are passed in registers for inline assembly *)
 [@__reduce__]
@@ -601,27 +585,25 @@ let as_lowstar_sig_t_weak
       (arg_reg:arg_reg_relation n)
       (regs_modified:MS.reg_64 -> bool)
       (xmms_modified:MS.reg_xmm -> bool)
-      (down_mem:down_mem_t)
       (c:BS.code)
       (dom:list td)
       (args:list arg{List.length args + List.length dom <= n})
       (pre_rel:rel_gen_t c dom args (prediction_pre_rel_t c))
       (post_rel:rel_gen_t c dom args (prediction_post_rel_t c))
-      (predict:prediction_t n arg_reg regs_modified xmms_modified down_mem c dom args pre_rel post_rel) =
-      as_lowstar_sig_t_weak' n arg_reg regs_modified xmms_modified down_mem c dom args pre_rel post_rel predict
+      (predict:prediction_t n arg_reg regs_modified xmms_modified c dom args pre_rel post_rel) =
+      as_lowstar_sig_t_weak' n arg_reg regs_modified xmms_modified c dom args pre_rel post_rel predict
 
 val wrap_weak
     (n:nat{n <= 20})
     (arg_reg:arg_reg_relation n)
     (regs_modified:MS.reg_64 -> bool)
     (xmms_modified:MS.reg_xmm -> bool)
-    (down_mem:down_mem_t)
     (c:BS.code)
     (dom:arity_ok n td)
     (#pre_rel:rel_gen_t c dom [] (prediction_pre_rel_t c))
     (#post_rel:rel_gen_t c dom [] (prediction_post_rel_t c))
-    (predict:prediction_t n arg_reg regs_modified xmms_modified down_mem c dom [] pre_rel post_rel)
-  : as_lowstar_sig_t_weak n arg_reg regs_modified xmms_modified down_mem c dom [] pre_rel post_rel predict
+    (predict:prediction_t n arg_reg regs_modified xmms_modified c dom [] pre_rel post_rel)
+  : as_lowstar_sig_t_weak n arg_reg regs_modified xmms_modified c dom [] pre_rel post_rel predict
 
 let register_of_arg_i (i:reg_nat (if IA.win then 4 else 6)) : MS.reg_64 =
   let open MS in

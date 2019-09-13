@@ -29,7 +29,7 @@ let math_aux (b:uint8_p) (n:nat) : Lemma
   (ensures DV.length (get_downview b) % 8 = 0) =
   DV.length_eq (get_downview b)
 
-
+#set-options "--smtencoding.nl_arith_repr boxwrap"
 inline_for_extraction
 val x64_poly1305
   (ctx_b:uint8_p)

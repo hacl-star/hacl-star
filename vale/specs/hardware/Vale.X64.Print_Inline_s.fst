@@ -1,5 +1,6 @@
 module Vale.X64.Print_Inline_s
 
+open FStar.Mul
 open Vale.X64.Machine_s
 open Vale.X64.Bytes_Code_s
 open Vale.X64.Machine_Semantics_s
@@ -125,14 +126,14 @@ let print_cmp (c:ocmp) (counter:int) (p:P.printer) : string =
   | OGt o1 o2 -> "    \"" ^ print_ops o1 o2 ^ "  ja " ^ "L" ^ string_of_int counter ^ ";\"\n"
 
 
-let rec print_block (b:codes) (n:int) (p:P.printer) : string * int =
+let rec print_block (b:codes) (n:int) (p:P.printer) : string & int =
   match b with
   | Nil -> "", n
   | head :: tail ->
     let head_str, n' = print_code head n p in
     let rest, n'' = print_block tail n' p in
     head_str ^ rest, n''
-and print_code (c:code) (n:int) (p:P.printer) : string * int =
+and print_code (c:code) (n:int) (p:P.printer) : string & int =
   match c with
   | Ins ins -> ("    \"" ^ P.print_ins ins p ^ ";\"\n", n)
   | Block b -> print_block b n p

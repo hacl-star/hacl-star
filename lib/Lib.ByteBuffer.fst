@@ -127,9 +127,7 @@ let uint_from_bytes_le #t #l i =
   | U64 -> let u = C.load64_le i in cast #t #l U64 l u
   | U128 ->
     let u = C.load128_le i in
-    let o = cast #t #l U128 l u in
-    uintv_extensionality o (BS.uint_from_bytes_le (as_seq h0 i));
-    o
+    cast #t #l U128 l u
 
 let uint_from_bytes_be #t #l i =
   let h0 = ST.get () in
@@ -141,9 +139,7 @@ let uint_from_bytes_be #t #l i =
   | U64 -> let u = C.load64_be i in cast #t #l U64 l u
   | U128 ->
     let u = C.load128_be i in
-    let o = cast #t #l U128 l u in
-    uintv_extensionality o (BS.uint_from_bytes_be (as_seq h0 i));
-    o
+    cast #t #l U128 l u
 
 val nat_to_bytes_n_to_le: len:size_nat -> l:secrecy_level -> n:nat{n < pow2 (8 * len)} ->
   Lemma (ensures (Seq.equal (Kremlin.Endianness.n_to_le (size len) n)
@@ -231,7 +227,6 @@ let uints_from_bytes_le #t #l #len o i =
     let bj = sub i (j *! (size (numbytes t))) (size (numbytes t)) in
     let r = uint_from_bytes_le bj in
     as_seq_gsub h i (j *! size (numbytes t)) (size (numbytes t));
-    uintv_extensionality r (spec h0 (v j));
     r);
   let h1 = ST.get() in
   assert (Seq.equal (as_seq h1 o) (BS.uints_from_bytes_le (as_seq h0 i)))
@@ -248,7 +243,6 @@ let uints_from_bytes_be #t #l #len o i =
     let bj = sub i (j *! (size (numbytes t))) (size (numbytes t)) in
     let r = uint_from_bytes_be bj in
     as_seq_gsub h i (j *! size (numbytes t)) (size (numbytes t));
-    uintv_extensionality r (spec h0 (v j));
     r);
   let h1 = ST.get() in
   assert (Seq.equal (as_seq h1 o) (BS.uints_from_bytes_be (as_seq h0 i)))
@@ -276,3 +270,11 @@ let uints_to_bytes_be #t #l len o i =
     (fun j -> uint_to_bytes_be (sub o (mul_mod j (size (numbytes t))) (size (numbytes t))) i.(j));
   assert_norm (BS.uints_to_bytes_be (as_seq h0 i) ==
                norm [delta] BS.uints_to_bytes_be (as_seq h0 i))
+
+let uint_at_index_le #t #l #len i idx =
+  let b = sub i (idx *! (size (numbytes t))) (size (numbytes t)) in
+  uint_from_bytes_le b
+
+let uint_at_index_be #t #l #len i idx =
+  let b = sub i (idx *! (size (numbytes t))) (size (numbytes t)) in
+  uint_from_bytes_be b

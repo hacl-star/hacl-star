@@ -24,7 +24,7 @@ endif
 # TODO: no more separate variable definitions?
 LIB_DIR		= $(HACL_HOME)/lib
 SPECS_DIR 	= $(HACL_HOME)/specs $(HACL_HOME)/specs/derived $(HACL_HOME)/specs/tests
-CODE_DIRS	= $(addprefix $(HACL_HOME)/code/,hash hmac sha3 poly1305 chacha20 chacha20poly1305 curve25519 tests experimental/ed25519)
+CODE_DIRS	= $(addprefix $(HACL_HOME)/code/,hash hmac sha3 poly1305 chacha20 chacha20poly1305 curve25519 tests ed25519 salsa20 nacl-box)
 EVERCRYPT_DIRS  = $(addprefix $(HACL_HOME)/providers/,evercrypt evercrypt/fst test test/vectors evercrypt/config/$(EVERCRYPT_CONFIG))
 MERKLE_DIRS	= $(HACL_HOME)/secure_api/merkle_tree
 # Vale dirs also include directories that only contain .vaf files
@@ -35,6 +35,7 @@ VALE_DIRS	= \
   $(HACL_HOME)/vale/code/arch/x64/interop \
   $(HACL_HOME)/vale/code/crypto/aes \
   $(HACL_HOME)/vale/code/crypto/aes/x64 \
+  $(HACL_HOME)/vale/code/crypto/bignum \
   $(HACL_HOME)/vale/code/crypto/ecc/curve25519 \
   $(HACL_HOME)/vale/code/crypto/poly1305 \
   $(HACL_HOME)/vale/code/crypto/poly1305/x64 \
@@ -50,6 +51,7 @@ VALE_DIRS	= \
   $(HACL_HOME)/vale/code/thirdPartyPorts/OpenSSL/poly1305/x64 \
   $(HACL_HOME)/vale/code/thirdPartyPorts/OpenSSL/sha \
   $(HACL_HOME)/vale/code/thirdPartyPorts/rfc7748/curve25519/x64 \
+  $(HACL_HOME)/vale/code/thirdPartyPorts/SymCrypt/bignum \
   $(HACL_HOME)/vale/specs/crypto \
   $(HACL_HOME)/vale/specs/defs \
   $(HACL_HOME)/vale/specs/hardware \

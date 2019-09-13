@@ -32,7 +32,6 @@ module S = Vale.X64.Machine_Semantics_s
 module P = Vale.X64.Print_s
 open Vale.X64.Taint_Semantics
 
-friend Vale.X64.StateLemmas
 friend Vale.X64.Decls
 #endverbatim
 
@@ -86,12 +85,7 @@ procedure Load64_buffer(
         src + offset == buffer_addr(b, mem) + 8 * index;
     ensures
         dst == buffer64_read(b, index, mem);
-        //dst == mem[b](index);
-        valid_taint_buf64(b, mem, memTaint, t);
 {
-    low_lemma_valid_mem64(b, #nat(index), mem);
-    low_lemma_load_mem64(b, #nat(index), mem);
-    lemma_valid_taint64(b, #memTaint_t(memTaint), mem, #nat(index), t);
 }
     
 procedure Store64_buffer(
@@ -112,7 +106,6 @@ procedure Store64_buffer(
         mem == old(buffer64_write(b, index, src, mem));
         valid_taint_buf64(b, mem, memTaint, t);
 {
-    low_lemma_valid_mem64(b, #nat(index), old(mem));
     low_lemma_store_mem64(b, #nat(index), old(src), old(mem));
     lemma_valid_taint64(b, old(#memTaint_t(memTaint)), old(mem), #nat(index), t);
     same_memTaint64(b, old(mem), mem, old(#memTaint_t(memTaint)), #memTaint_t(memTaint));
@@ -132,12 +125,7 @@ procedure LoadBe64_buffer(
         src + offset == buffer_addr(b, mem) + 8 * index;
     ensures
         dst == reverse_bytes_nat64(buffer64_read(b, index, mem));
-        //dst == mem[b](index);
-        valid_taint_buf64(b, mem, memTaint, t);
 {
-    low_lemma_valid_mem64(b, #nat(index), mem);
-    low_lemma_load_mem64(b, #nat(index), mem);
-    lemma_valid_taint64(b, #memTaint_t(memTaint), mem, #nat(index), t);
 }
 
 procedure StoreBe64_buffer(
@@ -158,9 +146,7 @@ procedure StoreBe64_buffer(
         mem == old(buffer64_write(b, index, reverse_bytes_nat64(src), mem));
         valid_taint_buf64(b, mem, memTaint, t);
 {
-    low_lemma_valid_mem64(b, #nat(index), old(mem));
     low_lemma_store_mem64(b, #nat(index), old(reverse_bytes_nat64(src)), old(mem));
     lemma_valid_taint64(b, old(#memTaint_t(memTaint)), old(mem), #nat(index), t);
     same_memTaint64(b, old(mem), mem, old(#memTaint_t(memTaint)), #memTaint_t(memTaint));
 }
-

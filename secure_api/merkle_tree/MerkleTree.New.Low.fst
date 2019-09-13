@@ -1,12 +1,12 @@
 module MerkleTree.New.Low
 
-open EverCrypt
 open EverCrypt.Helpers
 
 open FStar.All
 open FStar.Integers
 open FStar.Mul
-open LowStar.Modifies
+
+open LowStar.Buffer
 open LowStar.BufferOps
 open LowStar.Vector
 open LowStar.Regional
@@ -27,23 +27,23 @@ module RVI = LowStar.Regional.Instances
 
 module S = FStar.Seq
 
-module U16 = FStar.UInt16
 module U32 = FStar.UInt32
 module U64 = FStar.UInt64
-module U8 = FStar.UInt8
 
 module EHS = EverCrypt.Hash
 
-module High = MerkleTree.New.High
+#set-options "--z3rlimit 10 --max_fuel 0 --max_ifuel 0"
 
 unfold
 noextract
 let hash_alg = MerkleTree.Spec.hash_alg
 
 val hash_size: uint32_t
-let hash_size = UInt32.uint_to_t (MerkleTree.Spec.hash_size)
+let hash_size = normalize_term (UInt32.uint_to_t (MerkleTree.Spec.hash_size))
 
-type hash = uint8_p
+open Lib.IntTypes
+
+type hash = buffer uint8
 
 // We cannot use `Low.RVector.Instances`, where we have some general
 // typeclass instances of `regional`, e.g., if `rg:regional a` then
@@ -55,17 +55,13 @@ type hash = uint8_p
 /// Some instantiations of `regional` used in Merkle tree
 /// 1. `hash` is regional
 
-val hash_region_of:
-  v:hash -> GTot HH.rid
+val hash_region_of: v:hash -> GTot HH.rid
 let hash_region_of v =
   B.frameOf v
 
-noextract
-inline_for_extraction
-private val hash_dummy: hash
-noextract
-inline_for_extraction
-private let hash_dummy = B.null
+noextract inline_for_extraction private
+val hash_dummy: hash
+let hash_dummy = B.null
 
 val hash_r_inv: h:HS.mem -> v:hash -> GTot Type0
 let hash_r_inv h v =
@@ -74,39 +70,42 @@ let hash_r_inv h v =
 
 val hash_r_inv_reg:
   h:HS.mem -> v:hash ->
-  Lemma (requires (hash_r_inv h v))
-  (ensures (MHS.live_region h (hash_region_of v)))
+  Lemma (requires hash_r_inv h v)
+        (ensures MHS.live_region h (hash_region_of v))
 let hash_r_inv_reg h v = ()
 
-private val hash_repr: Type0
-private let hash_repr = High.hash
+private
+val hash_repr: Type0
+let hash_repr = High.hash
 
-val hash_r_repr:
-  h:HS.mem -> v:hash{hash_r_inv h v} -> GTot hash_repr
+val hash_r_repr: h:HS.mem -> v:hash{hash_r_inv h v} -> GTot hash_repr
 let hash_r_repr h v = B.as_seq h v
 
 val hash_r_sep:
   v:hash -> p:loc -> h0:HS.mem -> h1:HS.mem ->
-  Lemma (requires (hash_r_inv h0 v /\
+  Lemma (requires
+      hash_r_inv h0 v /\
       loc_disjoint
         (loc_all_regions_from false
           (hash_region_of v)) p /\
-      modifies p h0 h1))
-  (ensures (hash_r_inv h1 v /\
-     hash_r_repr h0 v == hash_r_repr h1 v))
+      modifies p h0 h1)
+  (ensures
+     hash_r_inv h1 v /\
+     hash_r_repr h0 v == hash_r_repr h1 v)
 let hash_r_sep v p h0 h1 =
   assert (loc_includes (loc_all_regions_from false (hash_region_of v))
-           (loc_buffer v));
+                       (loc_buffer v));
   B.modifies_buffer_elim v p h0 h1
 
 val hash_irepr: Ghost.erased hash_repr
 let hash_irepr =
-  Ghost.hide (S.create (U32.v hash_size) 0uy)
+  Ghost.hide (S.create (U32.v hash_size) (u8 0))
 
 val hash_r_alloc_p: v:hash -> GTot Type0
 let hash_r_alloc_p v = True
 
-private val hash_r_alloc:
+private
+val hash_r_alloc:
   r:HST.erid ->
   HST.ST hash
     (requires (fun h0 -> true))
@@ -119,33 +118,32 @@ private val hash_r_alloc:
       hash_region_of v = r /\
       hash_r_repr h1 v == Ghost.reveal hash_irepr /\
       B.fresh_loc (B.loc_buffer v) h0 h1))
-private let hash_r_alloc r =
-  B.malloc r 0uy hash_size
+let hash_r_alloc r =
+  B.malloc r (u8 0) hash_size
 
 val hash_r_free:
   v:hash ->
   HST.ST unit
-    (requires (fun h0 -> hash_r_inv h0 v))
-    (ensures (fun h0 _ h1 ->
-      modifies (loc_all_regions_from false (hash_region_of v)) h0 h1))
+    (requires fun h0 -> hash_r_inv h0 v)
+    (ensures  fun h0 _ h1 ->
+      modifies (loc_all_regions_from false (hash_region_of v)) h0 h1)
 let hash_r_free v =
   B.free v
 
 val hash_copy:
   src:hash -> dst:hash ->
   HST.ST unit
-    (requires (fun h0 ->
+    (requires fun h0 ->
       hash_r_inv h0 src /\ hash_r_inv h0 dst /\
-      HH.disjoint (hash_region_of src) (hash_region_of dst)))
-    (ensures (fun h0 _ h1 ->
+      HH.disjoint (hash_region_of src) (hash_region_of dst))
+    (ensures fun h0 _ h1 ->
       modifies (loc_all_regions_from false (hash_region_of dst)) h0 h1 /\
       hash_r_inv h1 dst /\
-      hash_r_repr h1 dst == hash_r_repr h0 src))
+      hash_r_repr h1 dst == hash_r_repr h0 src)
 let hash_copy src dst =
   B.blit src 0ul dst 0ul hash_size
 
-noextract
-inline_for_extraction
+noextract inline_for_extraction
 val hreg: regional hash
 let hreg =
   Rgl hash_region_of
@@ -161,8 +159,9 @@ let hreg =
       hash_r_alloc
       hash_r_free
 
-private val hcpy: copyable hash hreg
-private let hcpy = Cpy hash_copy
+private
+val hcpy: copyable hash hreg
+let hcpy = Cpy hash_copy
 
 type hash_vec = RV.rvector hreg
 
@@ -172,8 +171,9 @@ val hash_vec_region_of:
   v:hash_vec -> GTot HH.rid
 let hash_vec_region_of v = V.frameOf v
 
-private val hash_vec_dummy: hash_vec
-private let hash_vec_dummy = V.alloc_empty hash
+private
+val hash_vec_dummy: hash_vec
+let hash_vec_dummy = V.alloc_empty hash
 
 val hash_vec_r_inv:
   h:HS.mem -> v:hash_vec -> GTot Type0
@@ -185,8 +185,9 @@ val hash_vec_r_inv_reg:
   (ensures (MHS.live_region h (hash_vec_region_of v)))
 let hash_vec_r_inv_reg h v = ()
 
-private val hash_vec_repr: Type0
-private let hash_vec_repr = High.hash_seq
+private
+val hash_vec_repr: Type0
+let hash_vec_repr = High.hash_seq
 
 val hash_vec_r_repr:
   h:HS.mem -> v:hash_vec{hash_vec_r_inv h v} -> GTot hash_vec_repr
@@ -214,7 +215,10 @@ val hash_vec_r_alloc_p: v:hash_vec -> GTot Type0
 let hash_vec_r_alloc_p v =
   V.size_of v = 0ul
 
-private val hash_vec_r_alloc:
+#push-options "--max_fuel 1"
+
+private
+val hash_vec_r_alloc:
   r:HST.erid ->
   HST.ST (v:hash_vec)
     (requires (fun h0 -> true))
@@ -227,10 +231,12 @@ private val hash_vec_r_alloc:
       hash_vec_region_of v = r /\
       hash_vec_r_repr h1 v == Ghost.reveal hash_vec_irepr /\
       B.fresh_loc (V.loc_vector v) h0 h1))
-private let hash_vec_r_alloc r =
+let hash_vec_r_alloc r =
   let nrid = HST.new_region r in
   let ia = Rgl?.dummy hreg in
   V.alloc_reserve 1ul ia r
+
+#pop-options
 
 val hash_vec_r_free:
   v:hash_vec ->
@@ -241,8 +247,7 @@ val hash_vec_r_free:
 let hash_vec_r_free v =
   RV.free v
 
-noextract
-inline_for_extraction
+noextract inline_for_extraction
 val hvreg: regional hash_vec
 let hvreg =
   Rgl hash_vec_region_of
@@ -260,27 +265,30 @@ let hvreg =
 
 type hash_vv = RV.rvector hvreg
 
-noextract val hvvreg: regional hash_vv
-noextract let hvvreg =
-  RVI.vector_regional hvreg
+noextract
+val hvvreg: regional hash_vv
+let hvvreg = RVI.vector_regional hvreg
 
-private val hash_vec_rv_inv_r_inv:
+private
+val hash_vec_rv_inv_r_inv:
   h:HS.mem -> hv:hash_vec -> i:uint32_t{i < V.size_of hv} ->
-  Lemma (requires (RV.rv_inv h hv))
-        (ensures (Rgl?.r_inv hreg h (V.get h hv i)))
-private let hash_vec_rv_inv_r_inv h hv i = ()
+  Lemma (requires RV.rv_inv h hv)
+        (ensures  Rgl?.r_inv hreg h (V.get h hv i))
+let hash_vec_rv_inv_r_inv h hv i = ()
 
-private val hash_vv_rv_inv_r_inv:
+private
+val hash_vv_rv_inv_r_inv:
   h:HS.mem -> hvv:hash_vv ->
   i:uint32_t -> j:uint32_t ->
-  Lemma (requires (RV.rv_inv h hvv /\
+  Lemma (requires RV.rv_inv h hvv /\
                   i < V.size_of hvv /\
-                  j < V.size_of (V.get h hvv i)))
-        (ensures (Rgl?.r_inv hvreg h (V.get h hvv i) /\
-                 Rgl?.r_inv hreg h (V.get h (V.get h hvv i) j)))
-private let hash_vv_rv_inv_r_inv h hvv i j = ()
+                  j < V.size_of (V.get h hvv i))
+        (ensures Rgl?.r_inv hvreg h (V.get h hvv i) /\
+                 Rgl?.r_inv hreg h (V.get h (V.get h hvv i) j))
+let hash_vv_rv_inv_r_inv h hvv i j = ()
 
-private val hash_vv_rv_inv_disjoint:
+private
+val hash_vv_rv_inv_disjoint:
   h:HS.mem -> hvv:hash_vv ->
   i:uint32_t -> j:uint32_t -> drid:HH.rid ->
   Lemma (requires (RV.rv_inv h hvv /\
@@ -288,12 +296,13 @@ private val hash_vv_rv_inv_disjoint:
                   j < V.size_of (V.get h hvv i) /\
                   HH.disjoint (Rgl?.region_of hvvreg hvv) drid))
         (ensures (HH.disjoint (Rgl?.region_of hreg (V.get h (V.get h hvv i) j)) drid))
-private let hash_vv_rv_inv_disjoint h hvv i j drid =
+let hash_vv_rv_inv_disjoint h hvv i j drid =
   assert (HH.disjoint (Rgl?.region_of hvreg (V.get h hvv i)) drid);
   assert (RV.rv_inv h (V.get h hvv i));
   assert (HH.disjoint (Rgl?.region_of hreg (V.get h (V.get h hvv i) j)) drid)
 
-private val hash_vv_rv_inv_includes:
+private
+val hash_vv_rv_inv_includes:
   h:HS.mem -> hvv:hash_vv ->
   i:uint32_t -> j:uint32_t ->
   Lemma (requires (RV.rv_inv h hvv /\
@@ -302,9 +311,10 @@ private val hash_vv_rv_inv_includes:
         (ensures (HH.includes
                    (Rgl?.region_of hvvreg hvv)
                    (Rgl?.region_of hreg (V.get h (V.get h hvv i) j))))
-private let hash_vv_rv_inv_includes h hvv i j = ()
+let hash_vv_rv_inv_includes h hvv i j = ()
 
-private val hash_vv_as_seq_get_index:
+private
+val hash_vv_as_seq_get_index:
   h:HS.mem -> hvv:hash_vv -> i:uint32_t -> j:uint32_t ->
   Lemma (requires (RV.rv_inv h hvv /\
                   i < V.size_of hvv /\
@@ -313,7 +323,7 @@ private val hash_vv_as_seq_get_index:
                  S.index (S.index (RV.as_seq h hvv) (U32.v i)) (U32.v j)))
 
 #reset-options "--z3rlimit 20"
-private let hash_vv_as_seq_get_index h hvv i j = ()
+let hash_vv_as_seq_get_index h hvv i j = ()
 
 /// The Merkle tree implementation begins here.
 
@@ -344,7 +354,7 @@ let hash_2 src1 src2 dst =
   let hh0 = HST.get () in
   HST.push_frame ();
   // KreMLin can't extract `EHS.blockLen EHS.SHA256` (= 64ul)
-  let cb = B.alloca 0uy 64ul in
+  let cb = B.alloca (u8 0) 64ul in
   B.blit src1 0ul cb 0ul hash_size;
   B.blit src2 0ul cb 32ul hash_size;
 
@@ -399,28 +409,24 @@ type offset_t = uint64_t
 inline_for_extraction noextract unfold let u32_64 = Int.Cast.uint32_to_uint64
 inline_for_extraction noextract unfold let u64_32 = Int.Cast.uint64_to_uint32
 
-private
-inline_for_extraction
+private inline_for_extraction
 let offsets_connect (x:offset_t) (y:offset_t): Tot bool = y >= x && (y - x) <= offset_range_limit
 
-private
-inline_for_extraction
+private inline_for_extraction
 let split_offset (tree:offset_t) (index:offset_t{offsets_connect tree index}): Tot index_t =
   let diff = U64.sub_mod index tree in
   assert (diff <= offset_range_limit);
   Int.Cast.uint64_to_uint32 diff
 
-private
-inline_for_extraction
+private inline_for_extraction
 let add64_fits (x:offset_t) (i:index_t): Tot bool = uint64_max - x >= (u32_64 i)
 
-private
-inline_for_extraction
+private inline_for_extraction
 let join_offset (tree:offset_t) (i:index_t{add64_fits tree i}): Tot (r:offset_t{offsets_connect tree r}) =
   U64.add tree (u32_64 i)
 
 inline_for_extraction val merkle_tree_size_lg: uint32_t
-inline_for_extraction let merkle_tree_size_lg = 32ul
+let merkle_tree_size_lg = 32ul
 
 // A Merkle tree `MT i j hs rhs_ok rhs` stores all necessary hashes to generate
 // a Merkle path for each element from the index `i` to `j-1`.
@@ -453,8 +459,7 @@ let merkle_tree_conditions (offset:uint64_t) (i j:uint32_t) (hs:hash_vv) (rhs_ok
 // The maximum number of currenty held elements in the tree is (2^32 - 1).
 // cwinter: even when using 64-bit indices, we fail if the underlying 32-bit
 // vector is full; this can be fixed if necessary.
-private
-inline_for_extraction
+private inline_for_extraction
 val mt_not_full_nst: mtv:merkle_tree -> Tot bool
 let mt_not_full_nst mtv =
   MT?.j mtv < uint32_32_max
@@ -655,7 +660,8 @@ let mt_preserved mt p h0 h1 =
 
 // Note that the public function for creation is `mt_create` defined below,
 // which builds a tree with an initial hash.
-private val create_empty_mt: r:HST.erid ->
+private
+val create_empty_mt: r:HST.erid ->
   HST.ST mt_p
    (requires (fun _ -> true))
    (ensures (fun h0 mt h1 ->
@@ -668,7 +674,7 @@ private val create_empty_mt: r:HST.erid ->
      mt_lift h1 mt == High.create_empty_mt () /\
      (MT?.offset (B.get h1 mt 0) = 0UL)))
 #reset-options "--z3rlimit 100"
-private let create_empty_mt r =
+let create_empty_mt r =
   let hs_region = HST.new_region r in
   let hs = RV.alloc_rid hvreg merkle_tree_size_lg hs_region in
   let h0 = HST.get () in
@@ -713,7 +719,8 @@ let mt_free mt =
 
 /// Insertion
 
-private val as_seq_sub_upd:
+private
+val as_seq_sub_upd:
   #a:Type0 -> #rg:regional a ->
   h:HS.mem -> rv:rvector rg ->
   i:uint32_t{i < V.size_of rv} -> v:Rgl?.repr rg ->
@@ -723,7 +730,7 @@ private val as_seq_sub_upd:
                             (RV.as_seq_sub h rv 0ul i)
                             (S.cons v (RV.as_seq_sub h rv (i + 1ul) (V.size_of rv))))))
 #reset-options "--z3rlimit 20"
-private let as_seq_sub_upd #a #rg h rv i v =
+let as_seq_sub_upd #a #rg h rv i v =
   Seq.Properties.slice_upd (RV.as_seq h rv) 0 (U32.v i) (U32.v i) v;
   Seq.Properties.slice_upd (RV.as_seq h rv) (U32.v i + 1) (U32.v (V.size_of rv)) (U32.v i) v;
   RV.as_seq_seq_slice rg h (V.as_seq h rv)
@@ -740,7 +747,8 @@ private let as_seq_sub_upd #a #rg h rv i v =
 // and pushing its content to `hs[lv]`. For detailed insertion procedure, see
 // `insert_` and `mt_insert`.
 #reset-options "--z3rlimit 40"
-inline_for_extraction private val hash_vv_insert_copy:
+inline_for_extraction private
+val hash_vv_insert_copy:
   lv:uint32_t{lv < merkle_tree_size_lg} ->
   i:Ghost.erased index_t ->
   j:index_t{
@@ -778,7 +786,7 @@ inline_for_extraction private val hash_vv_insert_copy:
       (S.snoc (S.index (RV.as_seq h0 hs) (U32.v lv))
       (Rgl?.r_repr hreg h0 v))))
 #reset-options "--z3rlimit 100"
-inline_for_extraction private let hash_vv_insert_copy lv i j hs v =
+let hash_vv_insert_copy lv i j hs v =
   let hh0 = HST.get () in
   mt_safe_elts_rec hh0 lv hs (Ghost.reveal i) j;
 
@@ -877,14 +885,16 @@ inline_for_extraction private let hash_vv_insert_copy lv i j hs v =
                             (RV.as_seq_sub hh0 hs (lv + 1ul) merkle_tree_size_lg))));
   as_seq_sub_upd hh0 hs lv (RV.as_seq hh1 ihv)
 
-private val insert_index_helper_even:
+private
+val insert_index_helper_even:
   lv:uint32_t{lv < merkle_tree_size_lg} ->
   j:index_t{U32.v j < pow2 (32 - U32.v lv) - 1} ->
   Lemma (requires (j % 2ul <> 1ul))
         (ensures (U32.v j % 2 <> 1 /\ j / 2ul == (j + 1ul) / 2ul))
-private let insert_index_helper_even lv j = ()
+let insert_index_helper_even lv j = ()
 
-private val insert_index_helper_odd:
+private
+val insert_index_helper_odd:
   lv:uint32_t{lv < merkle_tree_size_lg} ->
   i:index_t ->
   j:index_t{i <= j && U32.v j < pow2 (32 - U32.v lv) - 1} ->
@@ -894,19 +904,21 @@ private val insert_index_helper_odd:
                  U32.v (j / 2ul) < pow2 (32 - U32.v (lv + 1ul)) - 1 /\
                  (j + 1ul) / 2ul == j / 2ul + 1ul /\
                  j - offset_of i > 0ul))
-private let insert_index_helper_odd lv i j = ()
+let insert_index_helper_odd lv i j = ()
 
-private val loc_union_assoc_4:
+private
+val loc_union_assoc_4:
   a:loc -> b:loc -> c:loc -> d:loc ->
   Lemma (loc_union (loc_union a b) (loc_union c d) ==
         loc_union (loc_union a c) (loc_union b d))
-private let loc_union_assoc_4 a b c d =
+let loc_union_assoc_4 a b c d =
   loc_union_assoc (loc_union a b) c d;
   loc_union_assoc a b c;
   loc_union_assoc a c b;
   loc_union_assoc (loc_union a c) b d
 
-private val insert_modifies_rec_helper:
+private
+val insert_modifies_rec_helper:
   lv:uint32_t{lv < merkle_tree_size_lg} ->
   hs:hash_vv{V.size_of hs = merkle_tree_size_lg} ->
   aloc:loc ->
@@ -927,7 +939,7 @@ private val insert_modifies_rec_helper:
               (RV.rv_loc_elems h hs lv (V.size_of hs))
               (V.loc_vector_within hs lv (V.size_of hs)))
             aloc)
-private let insert_modifies_rec_helper lv hs aloc h =
+let insert_modifies_rec_helper lv hs aloc h =
   assert (V.loc_vector_within hs lv (V.size_of hs) ==
          loc_union (V.loc_vector_within hs lv (lv + 1ul))
                    (V.loc_vector_within hs (lv + 1ul) (V.size_of hs)));
@@ -964,26 +976,29 @@ private let insert_modifies_rec_helper lv hs aloc h =
     (RV.rv_loc_elems h hs (lv + 1ul) (V.size_of hs))
     (V.loc_vector_within hs (lv + 1ul) (V.size_of hs))
 
-private val insert_modifies_union_loc_weakening:
+private
+val insert_modifies_union_loc_weakening:
   l1:loc -> l2:loc -> l3:loc -> h0:HS.mem -> h1:HS.mem ->
   Lemma (requires (modifies l1 h0 h1))
         (ensures (modifies (loc_union (loc_union l1 l2) l3) h0 h1))
-private let insert_modifies_union_loc_weakening l1 l2 l3 h0 h1 =
+let insert_modifies_union_loc_weakening l1 l2 l3 h0 h1 =
   B.loc_includes_union_l l1 l2 l1;
   B.loc_includes_union_l (loc_union l1 l2) l3 (loc_union l1 l2)
 
-private val insert_snoc_last_helper:
+private
+val insert_snoc_last_helper:
   #a:Type -> s:S.seq a{S.length s > 0} -> v:a ->
   Lemma (S.index (S.snoc s v) (S.length s - 1) == S.last s)
-private let insert_snoc_last_helper #a s v = ()
+let insert_snoc_last_helper #a s v = ()
 
-private val rv_inv_rv_elems_reg:
+private
+val rv_inv_rv_elems_reg:
   #a:Type0 -> #rg:regional a ->
   h:HS.mem -> rv:rvector rg ->
   i:uint32_t -> j:uint32_t{i <= j && j <= V.size_of rv} ->
   Lemma (requires (RV.rv_inv h rv))
         (ensures (RV.rv_elems_reg h rv i j))
-private let rv_inv_rv_elems_reg #a #rg h rv i j = ()
+let rv_inv_rv_elems_reg #a #rg h rv i j = ()
 
 // `insert_` recursively inserts proper hashes to each level `lv` by
 // accumulating a compressed hash. For example, if there are three leaf elements
@@ -996,7 +1011,8 @@ private let rv_inv_rv_elems_reg #a #rg h rv i j = ()
 // 1   h01                     h01 h23
 // 2                           h03
 //
-private val insert_:
+private
+val insert_:
   lv:uint32_t{lv < merkle_tree_size_lg} ->
   i:Ghost.erased index_t ->
   j:index_t{
@@ -1029,7 +1045,7 @@ private val insert_:
                      (RV.as_seq h0 hs) (Rgl?.r_repr hreg h0 acc)))))
          (decreases (U32.v j))
 #reset-options "--z3rlimit 800 --max_fuel 1"
-private let rec insert_ lv i j hs acc =
+let rec insert_ lv i j hs acc =
   let hh0 = HST.get () in
   hash_vv_insert_copy lv i j hs acc;
   let hh1 = HST.get () in
@@ -1220,8 +1236,7 @@ private let rec insert_ lv i j hs acc =
                     (RV.as_seq hh0 hs) (Rgl?.r_repr hreg hh0 acc))) // QED
 #reset-options
 
-private
-inline_for_extraction
+private inline_for_extraction
 val mt_insert_pre_nst: mtv:merkle_tree -> v:hash -> Tot bool
 let mt_insert_pre_nst mtv v = mt_not_full_nst mtv && add64_fits (MT?.offset mtv) ((MT?.j mtv) + 1ul)
 
@@ -1427,7 +1442,8 @@ let lift_path_eq h hs1 hs2 i j =
   assert (forall (k:nat{i <= k && k < j}).
            S.index (S.slice hs1 i j) (k - i) == S.index (S.slice hs2 i j) (k - i))
 
-private val path_safe_preserved_:
+private
+val path_safe_preserved_:
   mtr:HH.rid -> hs:S.seq hash ->
   i:nat -> j:nat{i <= j && j <= S.length hs} ->
   dl:loc -> h0:HS.mem -> h1:HS.mem ->
@@ -1443,7 +1459,7 @@ private val path_safe_preserved_:
                  Rgl?.r_inv hreg h1 hp /\
                  HH.includes mtr (Rgl?.region_of hreg hp))))
     (decreases j)
-private let rec path_safe_preserved_ mtr hs i j dl h0 h1 =
+let rec path_safe_preserved_ mtr hs i j dl h0 h1 =
   if i = j then ()
   else (assert (loc_includes
                  (B.loc_all_regions_from false mtr)
@@ -1564,7 +1580,8 @@ let free_path p =
 // Construct "rightmost hashes" for a given (incomplete) Merkle tree.
 // This function calculates the Merkle root as well, which is the final
 // accumulator value.
-private val construct_rhs:
+private
+val construct_rhs:
   lv:uint32_t{lv <= merkle_tree_size_lg} ->
   hs:hash_vv{V.size_of hs = merkle_tree_size_lg} ->
   rhs:hash_vec{V.size_of rhs = merkle_tree_size_lg} ->
@@ -1599,7 +1616,7 @@ private val construct_rhs:
      (Rgl?.r_repr hvreg h1 rhs, Rgl?.r_repr hreg h1 acc))))
    (decreases (U32.v j))
 #reset-options "--z3rlimit 400 --max_fuel 1"
-private let rec construct_rhs lv hs rhs i j acc actd =
+let rec construct_rhs lv hs rhs i j acc actd =
   let hh0 = HST.get () in
   let ofs = offset_of i in
   let copy = Cpy?.copy hcpy in
@@ -1742,8 +1759,7 @@ private let rec construct_rhs lv hs rhs i j acc actd =
     end)
 #reset-options
 
-private
-inline_for_extraction
+private inline_for_extraction
 val mt_get_root_pre_nst: mtv:merkle_tree -> rt:hash -> Tot bool
 let mt_get_root_pre_nst mtv rt = true
 
@@ -1910,7 +1926,7 @@ inline_for_extraction val path_insert:
       V.size_of (B.get h1 p 0) = V.size_of (B.get h0 p 0) + 1ul /\
       S.equal (lift_path h1 mtr p)
               (High.path_insert (lift_path h0 mtr p) (Rgl?.r_repr hreg h0 hp))))
-inline_for_extraction let path_insert mtr p hp =
+let path_insert mtr p hp =
   let pv = B.index p 0ul in
   let hh0 = HST.get () in
   let ipv = V.insert pv hp in
@@ -1945,18 +1961,20 @@ inline_for_extraction let path_insert mtr p hp =
 //
 // `mt_path_length` is a postcondition of `mt_get_path`, and a precondition
 // of `mt_verify`. For detailed description, see `mt_get_path` and `mt_verify`.
-private val mt_path_length_step:
+private
+val mt_path_length_step:
   k:index_t ->
   j:index_t{k <= j} ->
   actd:bool ->
   Tot (sl:uint32_t{U32.v sl = High.mt_path_length_step (U32.v k) (U32.v j) actd})
-private let mt_path_length_step k j actd =
+let mt_path_length_step k j actd =
   if j = 0ul then 0ul
   else (if k % 2ul = 0ul
        then (if j = k || (j = k + 1ul && not actd) then 0ul else 1ul)
        else 1ul)
 
-private val mt_path_length:
+private
+val mt_path_length:
   lv:uint32_t{lv <= merkle_tree_size_lg} ->
   k:index_t ->
   j:index_t{k <= j && U32.v j < pow2 (32 - U32.v lv)} ->
@@ -1965,13 +1983,14 @@ private val mt_path_length:
         U32.v l = High.mt_path_length (U32.v k) (U32.v j) actd &&
         l <= 32ul - lv})
       (decreases (U32.v j))
-private let rec mt_path_length lv k j actd =
+let rec mt_path_length lv k j actd =
   if j = 0ul then 0ul
   else (let nactd = actd || (j % 2ul = 1ul) in
        mt_path_length_step k j actd +
        mt_path_length (lv + 1ul) (k / 2ul) (j / 2ul) nactd)
 
-inline_for_extraction private val mt_get_path_step:
+inline_for_extraction private
+val mt_get_path_step:
   lv:uint32_t{lv <= merkle_tree_size_lg} ->
   mtr:HH.rid ->
   hs:hash_vv{V.size_of hs = merkle_tree_size_lg} ->
@@ -2001,7 +2020,7 @@ inline_for_extraction private val mt_get_path_step:
              (High.mt_get_path_step
                (U32.v lv) (RV.as_seq h0 hs) (RV.as_seq h0 rhs)
                (U32.v i) (U32.v j) (U32.v k) (lift_path h0 mtr p) actd))))
-inline_for_extraction private let mt_get_path_step lv mtr hs rhs i j k p actd =
+let mt_get_path_step lv mtr hs rhs i j k p actd =
   let hh0 = HST.get () in
   let ofs = offset_of i in
   if k % 2ul = 1ul
@@ -2023,7 +2042,8 @@ inline_for_extraction private let mt_get_path_step lv mtr hs rhs i j k p actd =
          path_insert mtr p (V.index (V.index hs lv) (k + 1ul - ofs)))
   end
 
-private val mt_get_path_:
+private
+val mt_get_path_:
   lv:uint32_t{lv <= merkle_tree_size_lg} ->
   mtr:HH.rid ->
   hs:hash_vv{V.size_of hs = merkle_tree_size_lg} ->
@@ -2053,7 +2073,7 @@ private val mt_get_path_:
                (U32.v i) (U32.v j) (U32.v k) (lift_path h0 mtr p) actd))))
    (decreases (32 - U32.v lv))
 #reset-options "--z3rlimit 300 --max_fuel 1 --initial_fuel 1 --max_ifuel 2 --initial_ifuel 2"
-private let rec mt_get_path_ lv mtr hs rhs i j k p actd =
+let rec mt_get_path_ lv mtr hs rhs i j k p actd =
   let hh0 = HST.get () in
   mt_safe_elts_spec hh0 lv hs i j;
 
@@ -2097,8 +2117,7 @@ private let rec mt_get_path_ lv mtr hs rhs i j k p actd =
                       (lift_path hh0 mtr p) actd)))
 #reset-options
 
-private
-inline_for_extraction
+private inline_for_extraction
 val mt_get_path_pre_nst: mtv:merkle_tree -> idx:offset_t -> p:(vector hash) -> root:hash-> Tot bool
 let mt_get_path_pre_nst mtv idx p root =
   offsets_connect (MT?.offset mtv) idx &&
@@ -2250,7 +2269,8 @@ let mt_get_path mt idx p root =
 
 /// Flushing
 
-private val mt_flush_to_modifies_rec_helper:
+private val
+mt_flush_to_modifies_rec_helper:
   lv:uint32_t{lv < merkle_tree_size_lg} ->
   hs:hash_vv{V.size_of hs = merkle_tree_size_lg} ->
   h:HS.mem ->
@@ -2264,7 +2284,7 @@ private val mt_flush_to_modifies_rec_helper:
         loc_union
           (RV.rv_loc_elems h hs lv (V.size_of hs))
           (V.loc_vector_within hs lv (V.size_of hs)))
-private let mt_flush_to_modifies_rec_helper lv hs h =
+let mt_flush_to_modifies_rec_helper lv hs h =
   assert (V.loc_vector_within hs lv (V.size_of hs) ==
          loc_union (V.loc_vector_within hs lv (lv + 1ul))
                    (V.loc_vector_within hs (lv + 1ul) (V.size_of hs)));
@@ -2278,7 +2298,8 @@ private let mt_flush_to_modifies_rec_helper lv hs h =
     (RV.rv_loc_elems h hs (lv + 1ul) (V.size_of hs))
     (V.loc_vector_within hs (lv + 1ul) (V.size_of hs))
 
-private val mt_flush_to_:
+private
+val mt_flush_to_:
   lv:uint32_t{lv < merkle_tree_size_lg} ->
   hs:hash_vv{V.size_of hs = merkle_tree_size_lg} ->
   pi:index_t ->
@@ -2305,8 +2326,8 @@ private val mt_flush_to_:
                (U32.v lv) (RV.as_seq h0 hs) (U32.v pi)
                (U32.v i) (U32.v (Ghost.reveal j))))))
    (decreases (U32.v i))
-#reset-options "--z3rlimit 800 --max_fuel 1" 
-private let rec mt_flush_to_ lv hs pi i j =
+#reset-options "--z3rlimit 800 --max_fuel 1"
+let rec mt_flush_to_ lv hs pi i j =
   let hh0 = HST.get () in
 
   // Base conditions
@@ -2494,8 +2515,7 @@ private let rec mt_flush_to_ lv hs pi i j =
 // precondition `MT?.i <= idx < MT?.j` we still have `idx`-th element after
 // flushing.
 
-private
-inline_for_extraction
+private inline_for_extraction
 val mt_flush_to_pre_nst: mtv:merkle_tree -> idx:offset_t -> Tot bool
 let mt_flush_to_pre_nst mtv idx =
   offsets_connect (MT?.offset mtv) idx &&
@@ -2565,8 +2585,7 @@ let rec mt_flush_to mt idx =
   Rgl?.r_sep hreg (MT?.mroot mtv) (B.loc_buffer mt) hh1 hh2;
   mt_safe_elts_preserved 0ul hs idx (MT?.j mtv) (B.loc_buffer mt) hh1 hh2
 
-private
-inline_for_extraction
+private inline_for_extraction
 val mt_flush_pre_nst: mt:merkle_tree -> Tot bool
 let mt_flush_pre_nst mt = MT?.j mt > MT?.i mt
 
@@ -2600,13 +2619,14 @@ let mt_flush mt =
 /// Retraction
 
 #reset-options "--z3rlimit 50 --initial_fuel 1 --max_fuel 1 --initial_ifuel 0 --max_ifuel 0"
-private val mt_retract_to_:
+private
+val mt_retract_to_:
   hs:hash_vv{V.size_of hs = merkle_tree_size_lg} ->
   lv:uint32_t{lv < V.size_of hs} ->
   i:index_t ->
   s:index_t ->
-  j:index_t{i <= s && s <= j && U32.v j < pow2 (U32.v (V.size_of hs) - U32.v lv)}
--> HST.ST unit
+  j:index_t{i <= s && s <= j && v j < pow2 (U32.v (V.size_of hs) - v lv)}
+  -> HST.ST unit
    (requires (fun h0 ->
      RV.rv_inv h0 hs /\
      mt_safe_elts h0 lv hs i j))
@@ -2627,7 +2647,8 @@ private val mt_retract_to_:
      ))
    (decreases (U32.v merkle_tree_size_lg - U32.v lv))
 #reset-options "--z3rlimit 250  --initial_fuel 1 --max_fuel 1 --initial_ifuel 1 --max_ifuel 1"
-private let rec mt_retract_to_ hs lv i s j =
+private
+let rec mt_retract_to_ hs lv i s j =
   let hh0 = HST.get () in
 
   // Base conditions
@@ -2811,8 +2832,7 @@ private let rec mt_retract_to_ hs lv i s j =
   end
 #reset-options
 
-private
-inline_for_extraction
+private inline_for_extraction
 val mt_retract_to_pre_nst: mtv:merkle_tree -> r:offset_t -> Tot bool
 let mt_retract_to_pre_nst mtv r =
   offsets_connect (MT?.offset mtv) r &&
@@ -2883,7 +2903,8 @@ let rec mt_retract_to mt r =
 /// Client-side verification
 
 #reset-options "--z3rlimit 50 --initial_fuel 1 --max_fuel 1 --initial_ifuel 0 --max_ifuel 0"
-private val mt_verify_:
+private
+val mt_verify_:
   k:index_t ->
   j:index_t{k <= j} ->
   mtr:HH.rid -> p:path ->
@@ -2908,7 +2929,8 @@ private val mt_verify_:
      High.mt_verify_ (U32.v k) (U32.v j) (lift_path h0 mtr p)
        (U32.v ppos) (Rgl?.r_repr hreg h0 acc) actd))
 #reset-options "--z3rlimit 200 --max_fuel 1"
-private let rec mt_verify_ k j mtr p ppos acc actd =
+private
+let rec mt_verify_ k j mtr p ppos acc actd =
   let hh0 = HST.get () in
   if j = 0ul then ()
   else (let nactd = actd || (j % 2ul = 1ul) in
@@ -2941,28 +2963,7 @@ private let rec mt_verify_ k j mtr p ppos acc actd =
          mt_verify_ (k / 2ul) (j / 2ul) mtr p (ppos + 1ul) acc nactd
        end)
 
-private val buf_eq:
-  #a:eqtype -> b1:B.buffer a -> b2:B.buffer a ->
-  len:uint32_t ->
-  HST.ST bool
-   (requires (fun h0 ->
-     B.live h0 b1 /\ B.live h0 b2 /\
-     len <= B.len b1 /\ len <= B.len b2))
-   (ensures (fun h0 b h1 ->
-     // memory safety
-     h0 == h1 /\
-     // correctness
-     (b <==> (forall (i:nat{i < U32.v len}).
-               S.index (B.as_seq h0 b1) i = S.index (B.as_seq h0 b2) i))))
-private let rec buf_eq #a b1 b2 len =
-  if len = 0ul then true
-  else (let a1 = B.index b1 (len - 1ul) in
-       let a2 = B.index b2 (len - 1ul) in
-       let teq = buf_eq b1 b2 (len - 1ul) in
-       a1 = a2 && teq)
-
-private
-inline_for_extraction
+private inline_for_extraction
 val mt_verify_pre_nst: mt:merkle_tree -> k:offset_t -> j:offset_t -> p:V.vector hash -> rt:hash -> Tot bool
 let mt_verify_pre_nst mt k j p rt =
   k < j &&
@@ -3025,7 +3026,7 @@ val mt_verify:
      (let mtv = B.get h0 mt 0 in
       let k = split_offset (MT?.offset mtv) k in
       let j = split_offset (MT?.offset mtv) j in
-      b == High.mt_verify (U32.v k) (U32.v j)
+      b <==> High.mt_verify (U32.v k) (U32.v j)
              (lift_path h0 mtr p) (Rgl?.r_repr hreg h0 rt))))
 #reset-options "--z3rlimit 200 --initial_fuel 1 --max_fuel 1 --initial_ifuel 0 --max_ifuel 0"
 let mt_verify mt k j mtr p rt =
@@ -3049,9 +3050,7 @@ let mt_verify mt k j mtr p rt =
   assert (Rgl?.r_repr hreg hh2 ih ==
          High.mt_verify_ (U32.v k) (U32.v j) (lift_path hh1 mtr p)
            1 (Rgl?.r_repr hreg hh1 ih) false);
-  let r = buf_eq ih rt hash_size in
-  assert (if r
-         then S.equal (Rgl?.r_repr hreg hh2 ih) (Rgl?.r_repr hreg hh2 rt)
-         else True);
+  let r = Lib.ByteBuffer.lbytes_eq #hash_size ih rt in
+  //let r = Lib.RawBuffer.lbytes_eq #hash_size ih rt in
   Rgl?.r_free hreg ih;
   r

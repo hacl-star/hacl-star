@@ -4,6 +4,7 @@ include "../../../../arch/x64/Vale.X64.InsMem.vaf"
 include "../../../../arch/x64/Vale.X64.InsStack.vaf"
 include "../../../../test/Vale.Test.X64.Memcpy.vaf"
 include "../../../../test/Vale.Test.X64.Vale_memcpy.vaf"
+include "../../../../crypto/bignum/Vale.Bignum.X64.vaf"
 include{:fstar}{:open} "Vale.Curve25519.Fast_defs"
 include{:fstar}{:open} "Vale.Curve25519.Fast_lemmas_external"
 include{:fstar}{:open} "Vale.Curve25519.FastSqr_helpers"
@@ -32,6 +33,7 @@ open Vale.Test.X64.Vale_memcpy
 #endverbatim
 
 #verbatim{:implementation}
+open Vale.Def.Words_s
 open Vale.Def.Types_s
 open Vale.Arch.Types
 open Vale.X64.Machine_s
@@ -49,6 +51,8 @@ open Vale.Curve25519.Fast_lemmas_external
 open Vale.Curve25519.FastSqr_helpers
 open Vale.X64.CPU_Features_s
 open Vale.Test.X64.Vale_memcpy
+open Vale.Bignum.Defs
+open Vale.Bignum.X64
 #endverbatim
 
 const int_canon:tactic extern;
@@ -125,11 +129,14 @@ procedure fast_sqr_part1(inline offset:nat, ghost inA_b:buffer64)
 
 }
 
-#reset-options "--z3rlimit 2000000"
+#reset-options "--z3rlimit 500 --max_fuel 0 --max_ifuel 0"
 procedure fast_sqr_part2()
     {:quick}
+    reads
+        rax; rcx;
+
     modifies
-        rax; rcx; rdx; r8; r9; r10; r11; r12; r13; r14; r15;
+        r8; r9; r10; r11; r12; r13; r14; r15;
         efl;
 
     requires
@@ -143,15 +150,17 @@ procedure fast_sqr_part2()
         r14 <= 2;
 {
     xor_lemmas();
+    lemma_add_hi_lo64(0);
 
     Xor64(r15, r15);
-    Adox64Wrap(r10, rax);     Adcx64Wrap(r8, r8);
-    Adox64Wrap(r11, rcx);     Adcx64Wrap(r9, r9);
-    Adox64Wrap(r12, r15);     Adcx64Wrap(r10, r10);
-    Adox64Wrap(r13, r15);     Adcx64Wrap(r11, r11);
-    Adox64Wrap(r14, r15);     Adcx64Wrap(r12, r12);
-                              Adcx64Wrap(r13, r13);
-                              Adcx64Wrap(r14, r14);
+    reveal_flags(efl);
+    Adox_64(r10, rax);     Adcx_64(r8, r8);
+    Adox_64(r11, rcx);     Adcx_64(r9, r9);
+    Adox_64(r12, r15);     Adcx_64(r10, r10);
+    Adox_64(r13, r15);     Adcx_64(r11, r11);
+    Adox_64(r14, r15);     Adcx_64(r12, r12);
+                           Adcx_64(r13, r13);
+                           Adcx_64(r14, r14);
 }
 
 #reset-options "--z3rlimit 400"

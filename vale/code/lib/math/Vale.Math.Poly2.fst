@@ -1,4 +1,5 @@
 module Vale.Math.Poly2
+open FStar.Mul
 module D = Vale.Math.Poly2.Defs_s
 module I = Vale.Math.Poly2.Defs
 open FStar.Seq

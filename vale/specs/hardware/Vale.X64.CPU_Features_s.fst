@@ -1,5 +1,6 @@
 module Vale.X64.CPU_Features_s
 
+open FStar.Mul
 open Vale.X64.Machine_s
 open Vale.Def.Words_s
 

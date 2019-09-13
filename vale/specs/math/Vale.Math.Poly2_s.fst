@@ -1,4 +1,5 @@
 module Vale.Math.Poly2_s
+open FStar.Mul
 open FStar.Seq
 
 let poly = D.poly

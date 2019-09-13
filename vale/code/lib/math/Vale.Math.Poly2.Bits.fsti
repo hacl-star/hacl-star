@@ -1,4 +1,5 @@
 module Vale.Math.Poly2.Bits
+open FStar.Mul
 open Vale.Def.Words_s
 open Vale.Def.Types_s
 open FStar.UInt

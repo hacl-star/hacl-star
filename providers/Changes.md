@@ -1,5 +1,27 @@
 ## EverCrypt v0.1 alpha 2
 
+### August 9th, 2019
+
+- Addition of the box API under `Hacl_Nacl.h`. There is no multiplexing between
+  implementations and as such, there will be no `EverCrypt.Nacl`.
+- Addition of Salsa20 under `Hacl_Salsa20.h`. Salsa20 *may* be added to
+  `EverCrypt.CTR` if there is demand for it (please speak up).
+
+### August 5th, 2019
+
+- OCaml bindings for EverCrypt (alpha, work in progress).
+
+### July 13th, 2019
+
+- Fully-verified implementation of Ed25519. Not currently multiplexing, but
+  eventually will be. `EverCrypt_Ed25519.h` will perform multiplexing once
+  multiple implementations of Ed25519 are available.
+
+### July 9th, 2019
+
+- `EverCrypt_CTR.h`, an agile, multiplexing API that exposes one block of the
+  counter-mode construction (will eventually support complete encryption).
+
 ### June 27th, 2019
 
 - (possibly) **Breaking change**: KreMLin now compiles deprecation warnings in

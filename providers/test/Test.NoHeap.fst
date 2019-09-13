@@ -240,7 +240,7 @@ let test_one_curve25519 (v: Test.Vectors.Curve25519.vector): Stack unit (fun _ -
   B.recall public;
   B.recall private_;
   if public_len = 32ul && private__len = 32ul then
-    EverCrypt.Curve25519.ecdh dst private_ public;
+    EverCrypt.Curve25519.scalarmult dst private_ public;
   B.recall result;
   if result_len = 32ul && valid then
     TestLib.compare_and_print !$"Curve25519" result dst 32ul;

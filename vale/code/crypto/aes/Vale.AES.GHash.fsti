@@ -167,7 +167,6 @@ val ghash_incremental_bytes_pure_no_extra (old_io io h:quad32) (in_quads:seq qua
                               io == ghash_incremental h old_io input_quads))
 
 #reset-options "--z3rlimit 30"
-open FStar.Mul
 val lemma_ghash_incremental_bytes_extra_helper (h y_init y_mid y_final:quad32) (input:seq quad32) (final final_padded:quad32) (num_bytes:nat) : Lemma
   (requires (1 <= num_bytes /\
              num_bytes < 16 * length input /\

@@ -1,5 +1,6 @@
 module Vale.X64.Taint_Semantics
 
+open FStar.Mul
 open Vale.X64.Decls
 open Vale.X64.Machine_s
 open Vale.X64.Instruction_s

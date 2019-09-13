@@ -3,6 +3,7 @@ open FStar.Mul
 // This interface should not refer to Machine_Semantics_s
 
 open Vale.Def.Prop_s
+open Vale.Arch.HeapImpl
 open Vale.X64.Machine_s
 open Vale.X64.Memory
 open Vale.X64.Stack_i
@@ -14,7 +15,7 @@ noeq type vale_state = {
   vs_ok: bool;
   vs_regs: Regs.t;
   vs_flags: Flags.t;
-  vs_heap: vale_heap;
+  vs_heap: vale_heap_impl;
   vs_memory: vale_memory;
   vs_stack: vale_stack;
   vs_memTaint: memtaint;
@@ -28,9 +29,9 @@ unfold let eval_reg_int (r:reg) (s:vale_state) : int = t_reg_to_int r.rf (eval_r
 [@va_qattr]
 unfold let eval_flag (f:flag) (s:vale_state) : Flags.flag_val_t = Flags.sel f s.vs_flags
 [@va_qattr]
-unfold let eval_mem (ptr:int) (s:vale_state) : GTot nat64 = load_mem64 ptr s.vs_heap
+unfold let eval_mem (ptr:int) (s:vale_state) : GTot nat64 = load_mem64 ptr (get_vale_heap s.vs_heap)
 [@va_qattr]
-unfold let eval_mem128 (ptr:int) (s:vale_state) : GTot Vale.Def.Types_s.quad32 = load_mem128 ptr s.vs_heap
+unfold let eval_mem128 (ptr:int) (s:vale_state) : GTot Vale.Def.Types_s.quad32 = load_mem128 ptr (get_vale_heap s.vs_heap)
 [@va_qattr]
 unfold let eval_heap (hp:nat) (s:vale_state) : vale_heap = Map.sel s.vs_memory.vm_hpls hp
 [@va_qattr]
@@ -84,15 +85,16 @@ let update_reg_xmm (r:reg_xmm) (v:quad32) (s:vale_state) : vale_state =
   update_reg (Reg 1 r) v s
 
 [@va_qattr]
-let update_mem (ptr:int) (v:nat64) (s:vale_state) : GTot vale_state = {s with vs_heap = store_mem64 ptr v s.vs_heap}
+let update_mem (ptr:int) (v:nat64) (s:vale_state) : GTot vale_state =
+  {s with vs_heap = set_vale_heap s.vs_heap (store_mem64 ptr v (get_vale_heap s.vs_heap))}
 
 [@va_qattr]
 let update_heap (hp:nat) (h:vale_heap) (s:vale_state) : vale_state = 
   let memory' = {s.vs_memory with vm_hpls = Map.upd s.vs_memory.vm_hpls hp h} in
   {s with vs_memory = memory'}
 
-[@va_qattr]
-let update_stack64 (ptr:int) (v:nat64) (s:vale_state) : GTot vale_state = {s with vs_stack = store_stack64 ptr v s.vs_stack}
+let update_stack64 (ptr:int) (v:nat64) (s:vale_state) : GTot vale_state =
+  {s with vs_stack = store_stack64 ptr v s.vs_stack}
 
 [@va_qattr]
 let update_operand64 (o:operand64) (v:nat64) (sM:vale_state) : GTot vale_state =
@@ -103,17 +105,19 @@ let update_operand64 (o:operand64) (v:nat64) (sM:vale_state) : GTot vale_state =
   | OStack (m, _) -> update_stack64 (eval_maddr m sM) v sM
 
 [@va_qattr]
-let valid_maddr (m:maddr) (s:vale_state) : prop0 = valid_mem64 (eval_maddr m s) s.vs_heap
+let valid_maddr (m:maddr) (s:vale_state) : prop0 =
+  valid_mem64 (eval_maddr m s) (get_vale_heap s.vs_heap)
 
 [@va_qattr]
-let valid_maddr128 (m:maddr) (s:vale_state) : prop0 = valid_mem128 (eval_maddr m s) s.vs_heap
-  
+let valid_maddr128 (m:maddr) (s:vale_state) : prop0 =
+  valid_mem128 (eval_maddr m s) (get_vale_heap s.vs_heap)
+
 [@va_qattr]
 let valid_src_operand (o:operand64) (s:vale_state) : prop0 =
   match o with
   | OConst c -> True
   | OReg r -> True
-  | OMem (m, _) -> valid_mem64 (eval_maddr m s) s.vs_heap
+  | OMem (m, _) -> valid_maddr m s
   | OStack (m, _) -> valid_src_stack64 (eval_maddr m s) s.vs_stack
 
 [@va_qattr]
@@ -138,9 +142,8 @@ let state_eq (s0:vale_state) (s1:vale_state) : prop0 =
   s0.vs_ok == s1.vs_ok /\
   Regs.equal s0.vs_regs s1.vs_regs /\
   Flags.equal s0.vs_flags s1.vs_flags /\
-  s0.vs_heap == s1.vs_heap /\
+  vale_heap_impl_equal s0.vs_heap s1.vs_heap /\
   memory_eq s0.vs_memory s1.vs_memory /\
   s0.vs_stack == s1.vs_stack /\
   s0.vs_memTaint == s1.vs_memTaint /\
   s0.vs_stackTaint == s1.vs_stackTaint
-  

@@ -34,5 +34,5 @@ val lemma_poly1305_equiv (text:bytes) (k:key) : Lemma
     let key_s:nat128 = nat_from_bytes_le (slice k 16 32) in
     let v = V.poly1305_hash key_r key_s inp len in
     0 <= v /\ v < pow2 128 /\
-    nat_to_bytes_le 16 v == S.poly1305 text k
+    nat_to_bytes_le 16 v == S.poly1305_mac text k
   ))

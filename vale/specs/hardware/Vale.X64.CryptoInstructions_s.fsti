@@ -1,5 +1,6 @@
 module Vale.X64.CryptoInstructions_s
 
+open FStar.Mul
 open Vale.Def.Types_s
 open Vale.Def.Words_s
 open Vale.Def.Words.Four_s

@@ -1,4 +1,5 @@
 module Vale.Math.Poly2.Bits_s
+open FStar.Mul
 
 let to_double32 a = to_double32_def a
 let of_double32 d = of_double32_def d

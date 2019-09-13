@@ -1,4 +1,5 @@
 module Vale.Math.Poly2.Words
+open FStar.Mul
 
 let lemma_quad32_zero () =
   lemma_bitwise_all ();

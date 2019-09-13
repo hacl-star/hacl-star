@@ -1,4 +1,5 @@
 module Vale.Def.Words.Seq_s
+open FStar.Mul
 
 #reset-options "--max_fuel 3 --initial_fuel 3"
 let two_to_seq_LE #a x =

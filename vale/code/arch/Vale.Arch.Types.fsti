@@ -1,5 +1,6 @@
 module Vale.Arch.Types
 
+open FStar.Mul
 open Vale.Def.Types_s
 open Vale.Lib.Seqs_s
 open Vale.Lib.Seqs
@@ -41,6 +42,10 @@ unfold let ishr128 (a:nat128) (s:int) : nat128 = ishr a s
 
 unfold let two_to_nat32 (x:two nat32) : nat64 = two_to_nat 32 x
 
+val lemma_nat_to_two32 (_:unit) : Lemma
+  (forall (x:nat64).{:pattern (nat_to_two 32 x)}
+    nat_to_two 32 x == Mktwo (x % 0x100000000) (x / 0x100000000))
+
 let quad32_shl32 (q:quad32) : quad32 =
   let Mkfour v0 v1 v2 v3 = q in
   Mkfour 0 v0 v1 v2
@@ -80,6 +85,10 @@ val lemma_reverse_bytes_quad32 (q:quad32) :
   Lemma (reverse_bytes_quad32 (reverse_bytes_quad32 q) == q)
   [SMTPat (reverse_bytes_quad32 (reverse_bytes_quad32 q))]
 
+val lemma_reverse_bytes_quad32_zero (_:unit) : Lemma
+  (let z = Mkfour 0 0 0 0 in
+   reverse_bytes_quad32 z == z)
+
 val lemma_reverse_reverse_bytes_nat32_seq (s:seq nat32) :
   Lemma (reverse_bytes_nat32_seq (reverse_bytes_nat32_seq s) == s)
   [SMTPat (reverse_bytes_nat32_seq (reverse_bytes_nat32_seq s))]
@@ -109,11 +118,13 @@ let hi64_def (q:quad32) : nat64 = two_to_nat 32 (two_select (four_to_two_two q) 
 let lo64 = Vale.Def.Opaque_s.make_opaque lo64_def
 let hi64 = Vale.Def.Opaque_s.make_opaque hi64_def
 
-val lemma_lo64_properties (_:unit) :
-  Lemma (forall (q0 q1:quad32) . (q0.lo0 == q1.lo0 /\ q0.lo1 == q1.lo1) <==> (lo64 q0 == lo64 q1))
+val lemma_lo64_properties (_:unit) : Lemma
+  (forall (q0 q1:quad32).{:pattern lo64 q0; lo64 q1}
+    (q0.lo0 == q1.lo0 /\ q0.lo1 == q1.lo1) <==> (lo64 q0 == lo64 q1))
 
-val lemma_hi64_properties (_:unit) :
-  Lemma (forall (q0 q1:quad32) . (q0.hi2 == q1.hi2 /\ q0.hi3 == q1.hi3) <==> (hi64 q0 == hi64 q1))
+val lemma_hi64_properties (_:unit) : Lemma
+  (forall (q0 q1:quad32).{:pattern hi64 q0; hi64 q1}
+    (q0.hi2 == q1.hi2 /\ q0.hi3 == q1.hi3) <==> (hi64 q0 == hi64 q1))
 
 val lemma_reverse_bytes_quad32_64 (src orig final:quad32) : Lemma
   (requires final == insert_nat64_opaque (insert_nat64_opaque orig (reverse_bytes_nat64 (hi64 src)) 0) (reverse_bytes_nat64 (lo64 src)) 1)
@@ -225,8 +236,6 @@ let reverse_bytes_quad32_seq (s:seq quad32) : seq quad32 =
 val lemma_reverse_reverse_bytes_quad32_seq (s:seq quad32) :
   Lemma (reverse_bytes_quad32_seq (reverse_bytes_quad32_seq s) == s)
   [SMTPat (reverse_bytes_quad32_seq (reverse_bytes_quad32_seq s))]
-
-open FStar.Mul
 
 val lemma_le_seq_quad32_to_bytes_length (s:seq quad32) :
   Lemma(length (le_seq_quad32_to_bytes s) == (length s) * 16)

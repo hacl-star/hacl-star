@@ -1,4 +1,5 @@
 module Vale.Poly1305.CallingFromLowStar
+open FStar.Mul
 
 module BS = Lib.ByteSequence
 module LI = Lib.IntTypes
@@ -7,6 +8,8 @@ module PU = Vale.Poly1305.Util
 module PM = Vale.Poly1305.Math
 module IT = Vale.Interop.Types
 module PS = Vale.Wrapper.X64.Poly
+
+#reset-options "--z3rlimit 100"
 
 let lemma_hash_init h0 h1 ctx_b is_zero =
   let open IT in
@@ -140,7 +143,6 @@ let lemma_hash_init h0 h1 ctx_b is_zero =
       0;
     }
 
-#reset-options "--z3rlimit 100"
 let lemma_block (h1:HS.mem) (inp_b:B.buffer UInt8.t) (len:nat) (i:nat) : Lemma
   (requires B.length inp_b = 8 * PU.readable_words len /\ i < B.length inp_b / 16)
   (ensures (
@@ -195,7 +197,7 @@ let lemma_block (h1:HS.mem) (inp_b:B.buffer UInt8.t) (len:nat) (i:nat) : Lemma
     nat_from_bytes_le (slice text j1 (j1 + 8)) + pow2 64 * nat_from_bytes_le (slice text (j1 + 8) (j1 + 16));
     == {}
     nat_from_bytes_le (slice (slice text j1 j2) 0 8) + pow2 64 * nat_from_bytes_le (slice (slice text j1 j2) 8 16);
-    == {BS.nat_from_bytes_le_slice_lemma #LI.SEC #16 (slice text j1 j2) 8}
+    == {BS.nat_from_intseq_le_slice_lemma #LI.U8 #LI.SEC #16 (slice text j1 j2) 8}
     nat_from_bytes_le (slice text j1 j2);
     == {}
     block_fun text i;
@@ -235,7 +237,7 @@ let lemma_block_extra (h1:HS.mem) (inp_b:B.buffer UInt8.t) (len:nat) : Lemma
     block_fun text i % padLast;
     == {}
     nat_from_bytes_le block % padLast;
-    == {BS.nat_from_bytes_le_slice_lemma #LI.SEC #16 block nExtra}
+    == {BS.nat_from_intseq_le_slice_lemma #LI.U8 #LI.SEC #16 block nExtra}
     (nLo + padLast * nHi) % padLast;
     == {FStar.Math.Lemmas.swap_mul nHi padLast}
     (nLo + nHi * padLast) % padLast;
@@ -387,7 +389,7 @@ let lemma_call_poly1305 h0 h1 ctx_b inp_b src key =
     lowerUpper128_opaque key_r0 key_r1;
     == {Vale.Def.Opaque_s.reveal_opaque lowerUpper128}
     nat_from_bytes_le (slice (slice key 0 16) 0 8) + pow2 64 * nat_from_bytes_le (slice (slice key 0 16) 8 16);
-    == {BS.nat_from_bytes_le_slice_lemma #LI.SEC #16 (slice key 0 16) 8}
+    == {BS.nat_from_intseq_le_slice_lemma #LI.U8 #LI.SEC #16 (slice key 0 16) 8}
     nat_from_bytes_le (slice key 0 16);
     == {}
     key_r_spec;
@@ -421,7 +423,7 @@ let lemma_call_poly1305 h0 h1 ctx_b inp_b src key =
     lowerUpper128_opaque key_s0 key_s1;
     == {Vale.Def.Opaque_s.reveal_opaque lowerUpper128}
     nat_from_bytes_le (slice (slice key 16 32) 0 8) + pow2 64 * nat_from_bytes_le (slice (slice key 16 32) 8 16);
-    == {BS.nat_from_bytes_le_slice_lemma #LI.SEC #16 (slice key 16 32) 8}
+    == {BS.nat_from_intseq_le_slice_lemma #LI.U8 #LI.SEC #16 (slice key 16 32) 8}
     nat_from_bytes_le (slice key 16 32);
     == {}
     key_s_spec;
@@ -462,7 +464,7 @@ let lemma_call_poly1305 h0 h1 ctx_b inp_b src key =
     lowerUpper128_opaque h0_out h1_out;
     == {Vale.Def.Opaque_s.reveal_opaque lowerUpper128}
     nat_from_bytes_le (slice tag 0 8) + pow2 64 * nat_from_bytes_le (slice tag 8 16);
-    == {BS.nat_from_bytes_le_slice_lemma #LI.SEC #16 tag 8}
+    == {BS.nat_from_intseq_le_slice_lemma #LI.U8 #LI.SEC #16 tag 8}
     nat_from_bytes_le tag;
   };
 

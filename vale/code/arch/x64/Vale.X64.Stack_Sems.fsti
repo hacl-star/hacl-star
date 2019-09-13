@@ -1,5 +1,6 @@
 module Vale.X64.Stack_Sems
 
+open FStar.Mul
 open Vale.X64.Machine_s
 open Vale.X64.Stack_i
 module S = Vale.X64.Machine_Semantics_s

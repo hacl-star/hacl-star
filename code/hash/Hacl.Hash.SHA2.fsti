@@ -21,11 +21,12 @@ val hash_384: hash_st SHA2_384
 val hash_512: hash_st SHA2_512
 
 // Interface that exposes a sha2-512 signature suitable for calling from HACL-lib code.
-module BF = Vale.Arch.BufferFriend
 
 open Lib.IntTypes
 open Lib.Sequence
 open Lib.Buffer
+
+#set-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 2"
 
 noextract inline_for_extraction
 val hash_512_lib:
@@ -41,4 +42,4 @@ val hash_512_lib:
     (ensures (fun h0 _ h1 ->
       modifies1 dst h0 h1 /\
       as_seq h1 dst `equal`
-        BF.to_bytes (Spec.Hash.hash SHA2_512 (BF.of_bytes (as_seq h0 input)))))
+        Spec.Hash.hash SHA2_512 (as_seq h0 input)))
