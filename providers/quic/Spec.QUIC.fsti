@@ -199,6 +199,7 @@ val encrypt:
 
 
 let bound_npn (pn_len:nat2) = pow2 (8 `op_Multiply` (pn_len+1))
+
 let in_window (pn_len:nat2) (last pn:nat) =
   let h = bound_npn pn_len in
   (last+1 < h/2 /\ pn < h) \/
@@ -246,5 +247,6 @@ val lemma_encrypt_correct:
   p: pbytes{Long? h ==> Long?.len h == S.length p + AEAD.tag_length a} -> Lemma
   (requires in_window pn_len last pn)
   (ensures
-    decrypt a k siv hpk last (cid_len h) (encrypt a k siv hpk pn_len pn h p)
+    decrypt a k siv hpk last (cid_len h)
+      (encrypt a k siv hpk pn_len pn h p)
     == Success pn_len pn h p)

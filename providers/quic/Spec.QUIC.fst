@@ -2140,23 +2140,10 @@ let expand_pn pn_len last npn =
     let _ = lemma_mod_plus candidate 1 bound in
     candidate + bound
   else if candidate > last + 1 + bound/2
-          && candidate >= bound then // in draft 22 the test for underflow (candidate >= bound) uses a strict inequality
+          && candidate >= bound then // in draft 22 the test for underflow (candidate >= bound) uses a strict inequality, which makes it impossible to expand npn to 0
     let _ = lemma_mod_plus candidate (-1) bound in
     candidate - bound
   else candidate
-
-
-let lemma_uniqueness_in_interval_modulo (p:pos) (low high a b:nat) : Lemma
-  (requires
-    low <= high /\
-    high - low < p /\
-    low <= a /\ low <= b /\
-    a <= high /\ b <= high /\
-    a%p = b%p)
-  (ensures a = b) =
-  FStar.Math.Lemmas.lemma_mod_plus_injective p low (a-low) (b-low)
-
-
 
 
 let lemma_uniqueness_in_window (pn_len:nat2) (last x y:nat62) : Lemma
@@ -2166,26 +2153,17 @@ let lemma_uniqueness_in_window (pn_len:nat2) (last x y:nat62) : Lemma
     in_window pn_len last y /\
     x%h = y%h))
   (ensures x = y) =
-  let h : nat62 = FStar.Math.Lemmas.pow2_lt_compat 62 (8 `op_Multiply` (pn_len+1)); bound_npn pn_len in
-  let cond1 a = last+1 < h/2 && a < h in
-  let cond2 a = last+1 >= pow2 62 - h/2 && a >= pow2 62 - h in
-  let cond3 a = last+1 - h/2 < a && a <= last+1 + h/2 in
-  if cond1 x && cond1 y then
-    lemma_uniqueness_in_interval_modulo h 0 (h-1) x y
-  else if cond1 x && cond2 y then ()
-  else if cond1 x && cond3 y then
-    lemma_uniqueness_in_interval_modulo h 0 (h-1) x y
-  else if cond2 x && cond1 y then ()
-  else if cond2 x && cond2 y then
-    lemma_uniqueness_in_interval_modulo h (pow2 62-h) (pow2 62-1) x y
-  else if cond2 x && cond3 y then
-    lemma_uniqueness_in_interval_modulo h (pow2 62-h) (pow2 62-1) x y
-  else if cond3 x && cond1 y then
-    lemma_uniqueness_in_interval_modulo h 0 (h-1) x y
-  else if cond3 x && cond2 y then
-    lemma_uniqueness_in_interval_modulo h (pow2 62-h) (pow2 62-1) x y
-  else if cond3 x && cond3 y then
-    lemma_uniqueness_in_interval_modulo h (max (last+1-h/2+1) 0) (last+1+h/2) x y
+  let open FStar.Math.Lemmas in
+  pow2_lt_compat 62 (8 `op_Multiply` (pn_len+1));
+  let h : nat62 = bound_npn pn_len in
+  if last+1 < h/2 && x < h then
+    lemma_mod_plus_injective h 0 x y
+  else if last+1 >= pow2 62 - h/2 && x >= pow2 62 - h then
+    let low = pow2 62 - h in
+    lemma_mod_plus_injective h low (x-low) (y-low)
+  else
+    let low = max (last+2-h/2) 0 in
+    lemma_mod_plus_injective h low (x-low) (y-low)
 
 
 
@@ -2238,6 +2216,7 @@ let lemma_propagate_mul_mod (a b:nat) : Lemma
 let recompose_pow2_assoc (n:pos) (a:nat) : Lemma
   (let open FStar.Mul in 2 * (pow2 (n-1) * a) = pow2 n * a) =
   ()
+
 
 #push-options "--z3rlimit 30" // strange that F* has so much trouble completing this induction
 let rec lemma_propagate_pow_mod (a b n:nat) : Lemma
