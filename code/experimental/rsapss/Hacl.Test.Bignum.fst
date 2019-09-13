@@ -723,7 +723,6 @@ let test_exp_gen n a exp =
   nat_bytes_num_fit (fexp #n a exp) n;
   let bn_expected:lbignum nLen = nat_to_bignum (normalize_term (fexp #n a exp)) in
 
-  let h = FStar.HyperStack.ST.get () in
   nat_bytes_num_range n;
   bn_modular_exp bn_n bn_a bn_exp bn_res;
   let res = bn_is_equal bn_expected bn_res in
@@ -782,6 +781,101 @@ let test_exp _ =
   pop_frame ()
 
 
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+
+inline_for_extraction noextract
+val test_div_gen:
+     a:snat
+  -> b:snat{ b <= a /\ b > 0 }
+  -> Stack unit (requires fun _ -> true) (ensures fun _ _ _ -> true)
+let test_div_gen a b =
+  push_frame();
+
+  nat_bytes_num_range a;
+  let aLen:bn_len_strict = normalize_term (nat_bytes_num a) in
+
+  nat_bytes_num_fit b a;
+
+  let bn_a:lbignum aLen = nat_to_bignum a in
+  let bn_b:lbignum aLen = nat_to_bignum b in
+  let bn_quo:lbignum aLen = create aLen (uint 0) in
+  let bn_rem:lbignum aLen = create aLen (uint 0) in
+
+
+  assert (a % b <= a);
+  assume ((a / b) <= a); // ?
+  snat_order (a / b) a;
+  snat_order (a % b) a;
+  nat_bytes_num_fit (a / b) a;
+  nat_bytes_num_fit (a % b) a;
+  let bn_exp_quo:lbignum aLen = nat_to_bignum (normalize_term (a / b)) in
+  let bn_exp_rem:lbignum aLen = nat_to_bignum (normalize_term (a % b)) in
+
+
+  bn_divide bn_a bn_b bn_quo bn_rem;
+  let res1 = bn_is_equal bn_quo bn_exp_quo in
+  print_verdict bn_quo bn_exp_quo res1;
+
+  let res2 = bn_is_equal bn_rem bn_exp_rem in
+  print_verdict bn_rem bn_exp_rem res2;
+
+  pop_frame()
+
+
+#reset-options "--z3rlimit 100 --max_fuel 2 --max_ifuel 0"
+
+val test_div: unit -> St unit
+let test_div _ =
+  C.String.print (C.String.of_literal "Testing div reduction\n");
+  push_frame();
+
+  test_div_gen 3 1;
+  test_div_gen 3 2;
+  test_div_gen 3 3;
+
+  test_div_gen 20 5;
+  test_div_gen 20 6;
+  test_div_gen 20 7;
+
+  test_div_gen 2048 100;
+  test_div_gen 2048 1024;
+  test_div_gen 2048 511;
+  test_div_gen 2048 512;
+  test_div_gen 2048 513;
+  test_div_gen 2048 2048;
+
+  test_div_gen 1000000 256;
+  test_div_gen 1000000 511;
+  test_div_gen 1000000 512;
+  test_div_gen 1000000 513;
+  test_div_gen 1000000 1024;
+  test_div_gen 1000000 1000000;
+
+  test_div_gen 100000000001 100000000001;
+
+  test_div_gen 1000000000000000000000000 1;
+  test_div_gen 1000000000000000000000000 2;
+  test_div_gen 1000000000000000000000000 256;
+  test_div_gen 1000000000000000000000000 1000000000000000000000000;
+  test_div_gen 10000001234912034981720349871029834701928374019823401 1000000000000000000000000;
+
+  // divulo 2^64-1
+  test_div_gen 18446744073709551615 18446744073709551613;
+  test_div_gen 18446744073709551615 18446744073709551614;
+  test_div_gen 18446744073709551615 18446744073709551615;
+
+  // divulo 2^64
+  test_div_gen 18446744073709551616 18446744073709551614;
+  test_div_gen 18446744073709551616 18446744073709551615;
+  test_div_gen 18446744073709551616 18446744073709551616;
+
+  // divulo 2^64+1
+  test_div_gen 18446744073709551617 18446744073709551615;
+  test_div_gen 18446744073709551617 18446744073709551616;
+  test_div_gen 18446744073709551617 18446744073709551617;
+
+  pop_frame ()
+
 
 val testBignum: unit -> St unit
 let testBignum _ =
@@ -796,4 +890,5 @@ let testBignum _ =
   test_mod ();
   test_mod_ops ();
   test_exp ();
+  test_div ();
   C.String.print (C.String.of_literal "Bignum tests are done \n\n")
