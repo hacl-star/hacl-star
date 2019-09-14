@@ -53,3 +53,28 @@ val gf128_update_multi_mul_add_lemma_loop_aux:
         a1 *% (r *% (r *% r)) +%
 	a2 *% (r *% r) +%
 	a3 *% r +% b0) *% r +% b1) *% r +% b2) *% r +% b3) *% r)
+
+
+open Lib.Sequence
+open Lib.IntTypes
+
+let elem_s = lseq uint64 2
+
+let to_elem (x:elem_s) : elem =
+  mk_int #U128 (v x.[0] + v x.[1] * pow2 64)
+
+let logxor_s (x:elem_s) (y:elem_s) : elem_s =
+  let r0 = x.[0] ^. y.[0] in
+  let r1 = x.[1] ^. y.[1] in
+  Lib.IntVector.create2 r0 r1
+
+val logxor_s_lemma: x:elem_s -> y:elem_s -> Lemma
+  (to_elem (logxor_s x y) == to_elem x ^. to_elem y)
+
+let logand_s (x:elem_s) (y:elem_s) : elem_s =
+  let r0 = x.[0] &. y.[0] in
+  let r1 = x.[1] &. y.[1] in
+  Lib.IntVector.create2 r0 r1
+
+val logand_s_lemma: x:elem_s -> y:elem_s -> Lemma
+  (to_elem (logand_s x y) == (to_elem x &. to_elem y))

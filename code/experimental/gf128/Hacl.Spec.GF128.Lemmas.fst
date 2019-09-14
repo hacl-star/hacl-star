@@ -71,3 +71,52 @@ let gf128_update_multi_mul_add_lemma_loop_aux a0 a1 a2 a3 b0 b1 b2 b3 r =
 	a2 *% (r *% r) +%
 	a3 *% r +% b0) *% r +% b1) *% r +% b2) *% r +% b3) *% r)
   by (gf128_semiring ())
+
+
+module BV = FStar.BitVector
+
+let to_vec128 (x:uint128) : BV.bv_t 128 = UInt.to_vec #128 (v x)
+let to_vec64 (x:uint64) : BV.bv_t 64 = UInt.to_vec #64 (v x)
+
+val to_vec128_lemma : x:elem_s -> Lemma
+  (to_vec128 (to_elem x) == Seq.append (to_vec64 x.[1]) (to_vec64 x.[0]))
+let to_vec128_lemma x =
+  UInt.append_lemma (to_vec64 x.[1]) (to_vec64 x.[0])
+
+val logxor_vec_lemma: x:elem_s -> y:elem_s -> Lemma
+  (BV.logxor_vec (to_vec128 (to_elem x)) (to_vec128 (to_elem y)) ==
+   Seq.append (BV.logxor_vec (to_vec64 x.[1]) (to_vec64 y.[1])) (BV.logxor_vec (to_vec64 x.[0]) (to_vec64 y.[0])))
+let logxor_vec_lemma x y =
+  to_vec128_lemma x;
+  to_vec128_lemma y;
+  Seq.lemma_eq_intro
+    (BV.logxor_vec (to_vec128 (to_elem x)) (to_vec128 (to_elem y)))
+    (Seq.append (BV.logxor_vec (to_vec64 x.[1]) (to_vec64 y.[1])) (BV.logxor_vec (to_vec64 x.[0]) (to_vec64 y.[0])))
+
+let logxor_s_lemma x y =
+  assert (to_vec128 (to_elem x ^. to_elem y) == BV.logxor_vec (to_vec128 (to_elem x)) (to_vec128 (to_elem y)));
+  logxor_vec_lemma x y;
+  assert (to_vec128 (to_elem x ^. to_elem y) == Seq.append (BV.logxor_vec (to_vec64 x.[1]) (to_vec64 y.[1])) (BV.logxor_vec (to_vec64 x.[0]) (to_vec64 y.[0])));
+  let lp = logxor_s x y in
+  assert (to_vec64 lp.[0] == BV.logxor_vec (to_vec64 x.[0]) (to_vec64 y.[0]));
+  assert (to_vec64 lp.[1] == BV.logxor_vec (to_vec64 x.[1]) (to_vec64 y.[1]));
+  to_vec128_lemma lp
+
+val logand_vec_lemma: x:elem_s -> y:elem_s -> Lemma
+  (BV.logand_vec (to_vec128 (to_elem x)) (to_vec128 (to_elem y)) ==
+   Seq.append (BV.logand_vec (to_vec64 x.[1]) (to_vec64 y.[1])) (BV.logand_vec (to_vec64 x.[0]) (to_vec64 y.[0])))
+let logand_vec_lemma x y =
+  to_vec128_lemma x;
+  to_vec128_lemma y;
+  Seq.lemma_eq_intro
+    (BV.logand_vec (to_vec128 (to_elem x)) (to_vec128 (to_elem y)))
+    (Seq.append (BV.logand_vec (to_vec64 x.[1]) (to_vec64 y.[1])) (BV.logand_vec (to_vec64 x.[0]) (to_vec64 y.[0])))
+
+let logand_s_lemma x y =
+  assert (to_vec128 (to_elem x &. to_elem y) == BV.logand_vec (to_vec128 (to_elem x)) (to_vec128 (to_elem y)));
+  logand_vec_lemma x y;
+  assert (to_vec128 (to_elem x &. to_elem y) == Seq.append (BV.logand_vec (to_vec64 x.[1]) (to_vec64 y.[1])) (BV.logand_vec (to_vec64 x.[0]) (to_vec64 y.[0])));
+  let lp = logand_s x y in
+  assert (to_vec64 lp.[0] == BV.logand_vec (to_vec64 x.[0]) (to_vec64 y.[0]));
+  assert (to_vec64 lp.[1] == BV.logand_vec (to_vec64 x.[1]) (to_vec64 y.[1]));
+  to_vec128_lemma lp

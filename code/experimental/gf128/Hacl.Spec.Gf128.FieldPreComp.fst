@@ -9,7 +9,7 @@ open Hacl.Spec.GF128.Vec
 
 module GF = Spec.GaloisField
 module Loops = Lib.LoopCombinators
-
+module Lemmas = Hacl.Spec.GF128.Lemmas
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
@@ -30,7 +30,7 @@ let fadd_s (x:elem_s) (y:elem_s) : elem_s =
 
 val fadd_lemma: x:elem_s -> y:elem_s -> Lemma
   (to_elem (fadd_s x y) == GF.fadd (to_elem x) (to_elem y))
-let fadd_lemma x y = admit()
+let fadd_lemma x y = Lemmas.logxor_s_lemma x y
 
 
 let logand_s (x:elem_s) (y:elem_s) : elem_s =
@@ -38,9 +38,9 @@ let logand_s (x:elem_s) (y:elem_s) : elem_s =
   let r1 = x.[1] &. y.[1] in
   create2 r0 r1
 
-val logand_lemma: x:elem_s -> y:elem_s -> Lemma
+val logand_s_lemma: x:elem_s -> y:elem_s -> Lemma
   (to_elem (logand_s x y) == (to_elem x &. to_elem y))
-let logand_lemma x y = admit()
+let logand_s_lemma x y = Lemmas.logand_s_lemma x y
 
 ///
 ///  `fmul_be_one_loop` is used to prove functional correctness of `fmul_be_s`
@@ -164,7 +164,7 @@ val mask_logand_lemma: x:elem_s -> y:elem_s -> i:nat{i < 128} -> Lemma
 let mask_logand_lemma x y i =
   let m = eq_mask_get_ith_bit x i in
   eq_mask_get_ith_bit_lemma x i;
-  logand_lemma y (create2 m m)
+  logand_s_lemma y (create2 m m)
 
 val mask_add_lemma: x:elem_s -> y:elem_s -> res:elem_s -> i:nat{i < 128} ->
   Lemma (to_elem (mask_add x y res i) == GF.mask_add (to_elem x) (to_elem y) (to_elem res) i)
