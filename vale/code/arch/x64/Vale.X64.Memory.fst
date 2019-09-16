@@ -681,6 +681,8 @@ let rec valid_memtaint (mem:vale_heap) (ps:list b8{IB.list_disjoint_or_eq ps}) (
 
 // get all ptrs in a vale_heap h
 let get_heap_ptrs (h:vale_heap) : GTot (Set.set nat) = admit()
+// set all ptrs in a vale_heap h
+let set_heap_ptrs (ptrs: Set.set nat) (h:vale_heap) : GTot (vale_heap) = admit()
 
 // true if ptr is in h
 let heap_contains_ptr (h:vale_heap) (ptr:int) : GTot bool = admit()
@@ -689,7 +691,7 @@ let get_base_typ (ptr:int) (h:vale_heap) : GTot (t:base_typ & buffer t) = admit(
 
 let memory_ok (m:vale_memory) = 
    Map.domain m.vm_hmap == get_heap_ptrs m.vm_heap /\
-   (forall (hp:nat).
+   (forall (hp:nat{hp<16}).
      Map.contains m.vm_hpls hp /\
      (forall (ptr:nat{heap_contains_ptr (Map.sel m.vm_hpls hp) ptr}).
        Map.contains m.vm_hmap ptr /\
@@ -699,7 +701,7 @@ let memory_ok (m:vale_memory) =
        load_hmem (dfst t) ptr hp m.vm_hpls == load_mem (dfst t') ptr m.vm_heap)))
 
 #set-options "--z3rlimit 800"
-let memory_load64 (ptr:int) (hp:nat) (m:vale_memory) : Ghost nat
+let memory_load64 (ptr:int) (hp:nat{hp<16}) (m:vale_memory) : Ghost nat
   (requires (
     valid_mem64 ptr m.vm_heap /\
     valid_hmem64 ptr hp m.vm_hpls /\
@@ -712,86 +714,89 @@ let memory_load64 (ptr:int) (hp:nat) (m:vale_memory) : Ghost nat
   =
     // debug
     assert(Map.domain m.vm_hmap == get_heap_ptrs m.vm_heap);
-    assert(forall (hp:nat).
+    assert(forall (hp:nat{hp<16}).
     (forall (ptr:nat{heap_contains_ptr (Map.sel m.vm_hpls hp) ptr}).
       (let t = get_base_typ ptr (Map.sel m.vm_hpls hp) in
        let t' = get_base_typ ptr m.vm_heap in
        load_hmem (dfst t) ptr hp m.vm_hpls == load_mem (dfst t') ptr m.vm_heap)));
     
     assume false;
+    // end debug
+    
     load_mem64 ptr m.vm_heap
 
-// let memory_store64 (ptr:int) (v:int) (hp:nat) (m:vale_memory) : Ghost vale_memory
-//   (requires
-//     Map.sel m.vm_hmap ptr == hp /\
-//     memory_ok m)
-//   (ensures
-//   fun s' ->
-//     valid_mem ptr s'.ts_heap /\
-//     valid_hmem ptr hp s'.ts_hpls /\
-//     Map.sel s'.ts_hmap ptr == hp /\
-//     mem_ok s'
-//   )
-//   =  
-//   let hmap': Map.t (key:ta) (value:nat) = Map.upd s.ts_hmap ptr hp in 
-//   let hmem' : toy_hpls = store_hmem ptr v hp s.ts_hpls in
-//   let mem' : toy_heap = store_mem ptr v s.ts_heap in
-//   {
-//   m with
-//       vm_heap = mem';
-//       vm_hpls = hmem';
-//       vm_hmap = hmap';
-//    }
+let memory_store64 (ptr:nat) (v:nat64) (hp:nat{hp<16}) (m:vale_memory) : Ghost vale_memory
+  (requires
+    valid_mem64 ptr m.vm_heap /\
+    valid_hmem64 ptr hp m.vm_hpls /\
+    Map.sel m.vm_hmap ptr == hp /\
+    memory_ok m)
+  (ensures
+  fun m' ->
+    valid_mem64 ptr m'.vm_heap /\
+    valid_hmem64 ptr hp m'.vm_hpls /\
+    Map.sel m'.vm_hmap ptr == hp /\
+    memory_ok m'
+  )
+  =  
+  let hmap': Map.t (key:nat) (value:nat) = Map.upd m.vm_hmap ptr hp in 
+  let hmem' : vale_hpls = store_hmem64 ptr v hp m.vm_hpls in
+  let mem' : vale_heap = store_mem64 ptr v m.vm_heap in
+  assume false;
+  {
+  m with
+      vm_heap = mem';
+      vm_hpls = hmem';
+      vm_hmap = hmap';
+   }
  
-// #set-options "--z3rlimit 100"
-// let switch_hp (ptr:ta) (ohp:nat{ohp<16}) (nhp:nat{nhp<16}) (s:toy_state) : Ghost toy_state
-//   (requires
-//     //ohp <> nhp /\
-//     Map.sel s.ts_hmap ptr == ohp /\
-//     //valid_mem ptr s.ts_heap /\
-//     valid_hmem ptr ohp s.ts_hpls /\
-//     mem_ok s
-//   )
-//   (ensures
-//     fun s' ->
-//     Map.sel s'.ts_hmap ptr == nhp /\
-//     valid_hmem ptr nhp s'.ts_hpls /\
-//     mem_ok s' /\
-//     (Map.sel (Map.sel s.ts_hpls ohp)) ptr == (Map.sel (Map.sel s'.ts_hpls nhp) ptr) /\
-//     Map.sel s'.ts_heap ptr == (Map.sel (Map.sel s'.ts_hpls nhp) ptr)
-//   ) =
-// 
-//   // s' is:
-//   // s with ts_hmap = hmap'                         <-- updated hmap
-//   //   with ts_hpls with (ohp, oh') and (nhp, nh')  <-- updated heaplets
-//   //   where
-//   //       nh' contains (ptr, v)
-//   //       oh' does not contain ptr
-//   //  and ts_heap is unchanged
-// 
-//   // updated hmap
-//   let hmap' = Map.upd s.ts_hmap ptr nhp in //update expectd heaplet
-//   assert(Set.equal (Map.domain s.ts_heap) (Map.domain hmap'));
-// 
-//   // get value to move from oh to nh
-//   let v = load_mem ptr s.ts_heap in
-// 
-//   // remote ptr from heaplet ohp
-//   let oh = Map.sel s.ts_hpls ohp in //old heaplet
-//   let no_ptr = Set.complement(Set.singleton ptr) in
-//   let ohd' = Set.intersect (Map.domain oh) no_ptr in //new domain
-//   let oh' = Map.restrict ohd' oh in //oh without ptr
-// 
-//   // add ptr and value to new heaplet
-//   let nh = Map.sel s.ts_hpls nhp in
-//   let nh' = Map.upd nh ptr v in
-// 
-//   // update heaplets map
-//   let ts_hpls' = Map.upd s.ts_hpls ohp oh' in
-//   let ts_hpls' = Map.upd ts_hpls' nhp nh' in
-// 
-//   {
-//   s with
-//       ts_hpls = ts_hpls';
-//       ts_hmap = hmap';
-//    }
+let switch_hp (ptr:nat) (ohp:nat{ohp<16}) (nhp:nat{nhp<16}) (m:vale_memory) : Ghost vale_memory
+  (requires
+    Map.sel m.vm_hmap ptr == ohp /\
+    valid_hmem64 ptr ohp m.vm_hpls /\
+    memory_ok m
+  )
+  (ensures
+    fun m' ->
+    Map.sel m'.vm_hmap ptr == nhp /\
+    valid_hmem64 ptr nhp m'.vm_hpls /\
+  // old heaplet memory matches new heaplet memory
+    load_hmem64 ptr ohp m'.vm_hpls == load_hmem64 ptr nhp m'.vm_hpls /\
+  // memory invariant maintained
+    memory_ok m'
+  ) =
+
+  // m' is:
+  // m with vm_hmap = hmap'                         <-- updated hmap
+  //   with vm_hpls with (ohp, oh') and (nhp, nh')  <-- updated heaplets
+  //   where
+  //       nh' contains (ptr, v)
+  //       oh' does not contain ptr
+  //  and vm_heap is unchanged
+
+  // updated hmap
+  let hmap' = Map.upd m.vm_hmap ptr nhp in //update expectd heaplet
+  //assert(Set.equal (get_heap_ptrs m.vm_heap) (Map.domain hmap')); //TODO: fix
+
+  // get value to move from oh to nh
+  let v = load_mem64 ptr m.vm_heap in
+
+  // remote ptr from heaplet ohp
+  let oh = Map.sel m.vm_hpls ohp in //old heaplet : vale_heap_impl
+  let no_ptr = Set.complement(Set.singleton ptr) in
+  let ohd' = Set.intersect (get_heap_ptrs oh) no_ptr in //new domain
+  let oh' = set_heap_ptrs ohd' oh in //oh without ptr
+
+  // add ptr and value to new heaplet
+  let nh = Map.sel m.vm_hpls nhp in
+  let nh' = store_mem64 ptr v nh in
+
+  // update heaplets map
+  let vm_hpls' = Map.upd m.vm_hpls ohp oh' in
+  let vm_hpls' = Map.upd vm_hpls' nhp nh' in
+
+  {
+  m with
+      vm_hpls = vm_hpls';
+      vm_hmap = hmap';
+   }
