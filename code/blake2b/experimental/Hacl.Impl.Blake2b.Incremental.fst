@@ -612,6 +612,11 @@ let spec_blake2b_incremental_update state ll input =
   Some state)
 
 
+///
+/// BB. TODO: Show 'spec_blake2b_incremental_update state ll input
+///                 == SpecI.blake2_incremental_update Spec.Blake2B h0.[|input|] (spec_of h0 state)'
+///
+
 inline_for_extraction
 val blake2b_incremental_update:
     state:state_r
@@ -628,12 +633,12 @@ val blake2b_incremental_update:
   (ensures  fun h0 b h1 ->
     state_inv h1 state /\
     modifies4 state.hash state.block state.n state.pl h0 h1 /\
-    (let osstate = (SpecI.blake2_incremental_update Spec.Blake2B h0.[|input|] (spec_of h0 state)) in
-    match osstate with | None -> b == false | Some sstate -> b == true))// /\ (spec_of h1 state) == sstate))
+    (let osstate = spec_blake2b_incremental_update (spec_of h0 state) (v ll) h0.[|input|] in
+    match osstate with | None -> b == false | Some sstate -> b == true /\ (spec_of h1 state) == sstate))
 
 let blake2b_incremental_update state ll input =
   let h0 = ST.get() in
-  if compute_branching_condition #h0 state ll then false
+  if compute_branching_condition #h0 state ll then false // BB. I am surprised that this works regarding 'modifies'
   else (
     let pl = state_get_pl state in
     let rb = size_block -! pl in
