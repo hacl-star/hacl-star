@@ -463,6 +463,10 @@ let lemma_bitfield8 (l:bitfield8) : Lemma
   (ensures to_bitfield8 (of_bitfield8 l) == l) =
   lemma_bitfield_inv l
 
+let lemma_bitfield8_inv (b:byte) : Lemma
+  (of_bitfield8 (to_bitfield8 b) = b) =
+  lemma_bitfield 8 (U8.v b)
+
 let lemma_to_bitfield8_inj (b1 b2:byte) : Lemma
   (requires to_bitfield8 b1 = to_bitfield8 b2)
   (ensures b1 = b2) =
@@ -486,8 +490,9 @@ let lemma_of_bitfield2_inj (b0 b1 b2 b3:bool) : Lemma
   lemma_bitfield_inv [b2;b3]
 
 
-let format_header p pn_len npn =
+let format_header p npn =
   let open FStar.Endianness in
+  let pn_len = S.length npn - 1 in
   let (pnb0, pnb1) = to_bitfield2 pn_len in
   match p with
   | Short spin phase cid ->
@@ -506,8 +511,8 @@ let format_header p pn_len npn =
 
 // lemma justifying that headers have the same size as their
 // encryption (type packet)
-let format_header_size h pn_len npn (c:cbytes) : Lemma
-  (let l = S.length S.(format_header h pn_len npn @| c) in
+let format_header_size h npn (c:cbytes) : Lemma
+  (let l = S.length S.(format_header h npn @| c) in
   l >= 21 /\ l < pow2 32) =
   ()
 
@@ -598,12 +603,13 @@ let parse_header_flag (b:bytes) : option flag =
   | _ -> None
 
 
-let lemma_parse_header_flag_correct h pn_len npn c : Lemma
-  (match parse_header_flag S.(format_header h pn_len npn @| c) with
+let lemma_parse_header_flag_correct h npn c : Lemma
+  (match parse_header_flag S.(format_header h npn @| c) with
    | None -> False
    | Some (ShortFlag _) -> Short? h
    | Some (LongFlag _) -> Long? h) =
-  let b = S.(format_header h pn_len npn @| c) in
+  let b = S.(format_header h npn @| c) in
+  let pn_len = S.length npn - 1 in
   let (pnb0, pnb1) = to_bitfield2 pn_len in
   match h with
   | Short spin phase cid ->
@@ -620,23 +626,24 @@ let lemma_parse_header_flag_correct h pn_len npn c : Lemma
     lemma_bitfield8 l
 
 
-let lemma_parse_short_header_flag_correct h pn_len npn c : Lemma
+let lemma_parse_short_header_flag_correct h npn c : Lemma
   (requires Short? h)
   (ensures (
-    match parse_header_flag S.(format_header h pn_len npn @| c) with
+    match parse_header_flag S.(format_header h npn @| c) with
     | Some (ShortFlag (pnl, phase, spin, rest)) ->
-      pnl = pn_len /\
+      pnl = S.length npn - 1 /\
       phase = Short?.phase h /\
       spin = Short?.spin h /\
       rest = S.(Short?.cid h @| npn @| c)
     | _ -> False)) =
   match h with
   | Short spin phase cid ->
+    let pn_len = S.length npn - 1 in
     let (pnb0, pnb1) = to_bitfield2 pn_len in
     lemma_bitfield2 pn_len;
     let l = [pnb0; pnb1; phase; false; false; spin; true; false] in
     let flag = of_bitfield8 (assert_norm(List.Tot.length l == 8); l) in
-    let b = S.(format_header h pn_len npn @| c) in
+    let b = S.(format_header h npn @| c) in
     assert (S.index b 0 = flag);
     lemma_bitfield8 l;
     assert (S.equal (S.slice b 1 (S.length b)) S.(cid @| npn @| c))
@@ -648,18 +655,19 @@ let lemma_recomp_assoc a b c d e f g h : Lemma
 
 
 #push-options "--z3rlimit 30"
-let lemma_parse_long_header_flag_correct h pn_len npn c : Lemma
+let lemma_parse_long_header_flag_correct h npn c : Lemma
   (requires Long? h)
   (ensures (
-    match parse_header_flag S.(format_header h pn_len npn @| c) with
+    match parse_header_flag S.(format_header h npn @| c) with
     | Some (LongFlag (pnl,typ,rest)) ->
       assert_norm (max_cipher_length < pow2 62);
       let clen = S.create 1 U8.(16uy *^ uint_to_t (Long?.dcil h) +^ uint_to_t (Long?.scil h)) in
-      pnl = pn_len /\
+      pnl = S.length npn - 1 /\
       typ = Long?.typ h /\
       rest = S.(FStar.Endianness.n_to_be 4 (Long?.version h) @| clen @| (Long?.dcid h) @| (Long?.scid h) @| encode_varint (Long?.len h) @| npn @| c)
     | _ -> False)) =
   let open FStar.Endianness in
+  let pn_len = S.length npn - 1 in
   match h with
   | Long typ version dcil scil dcid scid plain_len ->
     let (pn0,pn1) = to_bitfield2 pn_len in
@@ -668,7 +676,7 @@ let lemma_parse_long_header_flag_correct h pn_len npn c : Lemma
     lemma_bitfield2 typ;
     let l = [pn0; pn1; false; false; typ0; typ1; true; true] in
     let flag = of_bitfield8 (assert_norm(List.Tot.length l == 8); l) in
-    let b = S.(format_header h pn_len npn @| c) in
+    let b = S.(format_header h npn @| c) in
     assert (S.index b 0 = flag);
     lemma_bitfield8 l;
     match to_bitfield8 flag with
@@ -736,16 +744,18 @@ let lemma_parse_flag_pnlen (l:bitfield8) : Lemma
   ()
 
 // an additional lemma in cases we want to extract only pn_len
-let lemma_parse_header_pnlen h pn_len npn : Lemma
-  (U8.v (S.index (format_header h pn_len npn) 0) % 4 = pn_len) =
+let lemma_parse_header_pnlen h npn : Lemma
+  (let res = format_header h npn in
+  U8.v (S.index res 0) % 4 = S.length npn - 1) =
   let open FStar.Mul in
-  let res = format_header h pn_len npn in
+  let res = format_header h npn in
+  let pn_len = S.length npn - 1 in
   let (pnb0, pnb1) = to_bitfield2 pn_len in
   match h with
   | Short spin phase cid ->
     let l = [pnb0; pnb1; phase; false; false; spin; true; false] in
     assert_norm (List.Tot.length l = 8);
-    lemma_parse_short_header_flag_correct h pn_len npn S.empty;
+    lemma_parse_short_header_flag_correct h npn S.empty;
     lemma_bitfield 8 (U8.v (S.index res 0));
     lemma_parse_flag_pnlen l;
     lemma_bitfield2 pn_len
@@ -754,7 +764,7 @@ let lemma_parse_header_pnlen h pn_len npn : Lemma
     let (typ0, typ1) = to_bitfield2 typ in
     let l = [pnb0; pnb1; false; false; typ0; typ1; true; true] in
     assert_norm (List.Tot.length l = 8);
-    lemma_parse_long_header_flag_correct h pn_len npn S.empty;
+    lemma_parse_long_header_flag_correct h npn S.empty;
     lemma_bitfield 8 (U8.v (S.index res 0));
     lemma_parse_flag_pnlen l;
     lemma_bitfield2 pn_len
@@ -771,7 +781,7 @@ let cid_len_real h : Lemma
   (ensures S.length (Short?.cid h) = add3 (cid_len h)) =
   ()
 
-let lemma_parse_short_header_cid_correct h pn_len npn c : Lemma
+let lemma_parse_short_header_cid_correct h npn c : Lemma
   (requires Short? h)
   (ensures (
     parse_short_header_cid S.(Short?.cid h @| npn @| c) (cid_len h) = Some (Short?.cid h, S.(npn @| c)))) =
@@ -798,9 +808,11 @@ let parse_short_header_npn (b:bytes) (pn_len:nat2) : option (bytes * cbytes) =
   else None
 
 
-let lemma_parse_short_header_npn_correct h (pn_len:nat2) (npn:lbytes (1+pn_len)) (c:cbytes) : Lemma
+let lemma_parse_short_header_npn_correct h (npn:npn) (c:cbytes) : Lemma
   (requires Short? h)
-  (ensures parse_short_header_npn S.(npn @| c) pn_len = Some (npn,c)) =
+  (ensures (
+    let pn_len = S.length npn - 1 in
+    parse_short_header_npn S.(npn @| c) pn_len = Some (npn,c))) =
   S.append_slices npn c
 
 let lemma_parse_short_header_npn_safe (b1 b2:bytes) (pn_len:nat2) : Lemma
@@ -965,13 +977,15 @@ let parse_long_header_npn (l:nat62) (pn_len:nat2) (b:bytes) : option (bytes * cb
      Some (S.slice b 0 (pn_len + 1), S.slice b (pn_len + 1) (S.length b))
   else None
 
-let lemma_parse_long_header_npn_correct (h:header) (pn_len:nat2) (npn:lbytes (1+pn_len)) (c:cbytes) : Lemma
+let lemma_parse_long_header_npn_correct (h:header) (npn:npn) (c:cbytes) : Lemma
   (requires Long? h)
   (ensures (
     assert_norm (max_cipher_length < pow2 62);
+    let pn_len = S.length npn - 1 in
     parse_long_header_npn (S.length c) pn_len S.(npn @| c) = Some (npn,c))) =
   assert_norm (max_cipher_length < pow2 62);
   let input = S.(npn @| c) in
+  let pn_len = S.length npn - 1 in
   if 19 <= S.length c && S.length c < max_cipher_length && S.length input = pn_len+1+S.length c then begin
     S.append_slices npn c;
     assert (S.length npn = pn_len+1);
@@ -1003,7 +1017,7 @@ let parse_header b cid_len =
     | Some (cid, rest2) ->
       match parse_short_header_npn rest2 pn_len with
       | None -> H_Failure
-      | Some (npn,c) -> H_Success pn_len npn (Short spin phase cid) c
+      | Some (npn,c) -> H_Success npn (Short spin phase cid) c
     end
   | Some (LongFlag (pn_len, typ, rest1)) ->
     match parse_long_header_version rest1 with
@@ -1021,27 +1035,27 @@ let parse_header b cid_len =
             match parse_long_header_npn l pn_len rest5 with
             | None -> H_Failure
             | Some (npn,c) ->
-              H_Success pn_len npn (Long typ version dcil scil dcid scid l) c
+              H_Success npn (Long typ version dcil scil dcid scid l) c
 
 
 
 /// proof of correctness
-let lemma_header_parsing_correct h pn_len npn c =
-  let b = S.(format_header h pn_len npn @| c) in
-  lemma_parse_header_flag_correct h pn_len npn c;
+let lemma_header_parsing_correct h npn c =
+  let b = S.(format_header h npn @| c) in
+  lemma_parse_header_flag_correct h npn c;
   match parse_header_flag b with
   | Some (ShortFlag _) ->
-    lemma_parse_short_header_flag_correct h pn_len npn c;
-    lemma_parse_short_header_cid_correct h pn_len npn c;
-    lemma_parse_short_header_npn_correct h pn_len npn c
+    lemma_parse_short_header_flag_correct h npn c;
+    lemma_parse_short_header_cid_correct h npn c;
+    lemma_parse_short_header_npn_correct h npn c
   | Some (LongFlag _) ->
-    lemma_parse_long_header_flag_correct h pn_len npn c;
+    lemma_parse_long_header_flag_correct h npn c;
     lemma_parse_long_header_version_correct h npn c;
     lemma_parse_long_header_clen_correct h npn c;
     lemma_parse_long_header_dcid_scid_correct h npn c;
     assert_norm (max_cipher_length < pow2 62);
     lemma_varint (Long?.len h) S.(npn @| c);
-    lemma_parse_long_header_npn_correct h pn_len npn c
+    lemma_parse_long_header_npn_correct h npn c
 
 
 
@@ -1056,7 +1070,9 @@ type parsed_long_flag b =
 let failure_parse b cid_len =
   H_Failure? (parse_header b cid_len)
 
+
 // case 1: two short headers
+#push-options "--z3rlimit 30"
 let lemma_header_parsing_safe_short_short b1 b2 cid_len : Lemma
   (requires
     parsed_short_flag b1 /\
@@ -1079,6 +1095,7 @@ let lemma_header_parsing_safe_short_short b1 b2 cid_len : Lemma
       lemma_parse_short_header_npn_safe r2 s2 pn_len1;
       lemma_parse_short_header_cid_safe r1 s1 cid_len;
       lemma_parse_header_flag_safe b1 b2
+#pop-options
 
 // case 2: two long headers
 let lemma_header_parsing_safe_long_long b1 b2 cid_len : Lemma
@@ -1254,6 +1271,65 @@ let rec xor_inplace_involutive (b1 b2:bytes) (pos:nat) : Lemma
   FStar.Classical.forall_intro step
 
 
+let rec xor_inplace_commutative (b b1 b2:bytes) (pos1 pos2:nat) : Lemma
+  (requires
+    S.length b1 + pos1 <= S.length b /\
+    S.length b2 + pos2 <= S.length b)
+  (ensures S.equal
+    (xor_inplace (xor_inplace b b1 pos1) b2 pos2)
+    (xor_inplace (xor_inplace b b2 pos2) b1 pos1)) =
+  let xor1 = xor_inplace (xor_inplace b b1 pos1) b2 pos2 in
+  let xor2 = xor_inplace (xor_inplace b b2 pos2) b1 pos1 in
+  let step (i:nat{i < S.length b}) : Lemma (S.index xor1 i = S.index xor2 i) =
+    if i < pos1 then begin
+      pointwise_index1 U8.logxor b b1 i pos1;
+      pointwise_index1 U8.logxor (xor_inplace b b2 pos2) b1 i pos1;
+      if i < pos2 then begin
+        pointwise_index1 U8.logxor b b2 i pos2;
+        pointwise_index1 U8.logxor (xor_inplace b b1 pos1) b2 i pos2
+      end else if i >= pos2 + S.length b2 then begin
+        pointwise_index3 U8.logxor b b2 i pos2;
+        pointwise_index3 U8.logxor (xor_inplace b b1 pos1) b2 i pos2
+      end else begin
+        pointwise_index2 U8.logxor b b2 i pos2;
+        pointwise_index2 U8.logxor (xor_inplace b b1 pos1) b2 i pos2
+      end
+    end else if i >= pos1 + S.length b1 then begin
+      pointwise_index3 U8.logxor b b1 i pos1;
+      pointwise_index3 U8.logxor (xor_inplace b b2 pos2) b1 i pos1;
+      if i < pos2 then begin
+        pointwise_index1 U8.logxor b b2 i pos2;
+        pointwise_index1 U8.logxor (xor_inplace b b1 pos1) b2 i pos2
+      end else if i >= pos2 + S.length b2 then begin
+        pointwise_index3 U8.logxor b b2 i pos2;
+        pointwise_index3 U8.logxor (xor_inplace b b1 pos1) b2 i pos2
+      end else begin
+        pointwise_index2 U8.logxor b b2 i pos2;
+        pointwise_index2 U8.logxor (xor_inplace b b1 pos1) b2 i pos2
+      end
+    end else begin
+      pointwise_index2 U8.logxor b b1 i pos1;
+      pointwise_index2 U8.logxor (xor_inplace b b2 pos2) b1 i pos1;
+      if i < pos2 then begin
+        pointwise_index1 U8.logxor b b2 i pos2;
+        pointwise_index1 U8.logxor (xor_inplace b b1 pos1) b2 i pos2
+      end else if i >= pos2 + S.length b2 then begin
+        pointwise_index3 U8.logxor b b2 i pos2;
+        pointwise_index3 U8.logxor (xor_inplace b b1 pos1) b2 i pos2
+      end else begin
+        let ind = U8.v (S.index b i) in
+        let ind1 = U8.v (S.index b1 (i-pos1)) in
+        let ind2 = U8.v (S.index b2 (i-pos2)) in
+        FStar.UInt.logxor_associative #8 ind ind1 ind2;
+        FStar.UInt.logxor_associative #8 ind ind2 ind1;
+        FStar.UInt.logxor_commutative #8 ind1 ind2;
+        pointwise_index2 U8.logxor b b2 i pos2;
+        pointwise_index2 U8.logxor (xor_inplace b b1 pos1) b2 i pos2
+      end
+    end in
+
+  FStar.Classical.forall_intro step
+
 
 let rec and_inplace (b1 b2:bytes) (pos:nat)
   : Pure bytes
@@ -1269,8 +1345,8 @@ let calg_of_ae (a:ea) = match a with
 | AEAD.AES256_GCM -> C16.AES256
 | AEAD.CHACHA20_POLY1305 -> C16.CHACHA20
 
-let lemma_format_len (a:ea) (h:header) (pn_len:nat2) (npn:lbytes (1+pn_len))
-  : Lemma (S.length (format_header h pn_len npn) <= AEAD.max_length a)
+let lemma_format_len (a:ea) (h:header) (npn:npn)
+  : Lemma (S.length (format_header h npn) <= AEAD.max_length a)
   = assert_norm(54 < pow2 32 - 70)
 
 (*
@@ -1287,17 +1363,18 @@ let pn_sizemask (pn_len:nat2) : lbytes 4 =
   let open FStar.Endianness in
   n_to_be 4 (pow2 32 - pow2 (24 - (8 `op_Multiply` pn_len)))
 
-let header_encrypt a hpk h pn_len npn c =
+let header_encrypt a hpk h npn c =
   assert_norm(max_cipher_length < pow2 62);
   let pn_offset = match h with
     | Short _ _ cid -> 1 + S.length cid
     | Long _ _ dcil scil _ _ pl -> 6 + add3 dcil + add3 scil + vlen pl in
+  let pn_len = S.length npn - 1 in
   let sample = S.slice c (3-pn_len) (19-pn_len) in
   let mask = C16.block (calg_of_ae a) hpk sample in
   let pnmask = and_inplace (S.slice mask 1 5) (pn_sizemask pn_len) 0 in
   let sflags = if Short? h then 0x1fuy else 0x0fuy in
   let fmask = S.create 1 U8.(S.index mask 0 `logand` sflags) in
-  let r = S.(format_header h pn_len npn @| c) in
+  let r = S.(format_header h npn @| c) in
   let r = xor_inplace r pnmask pn_offset in
   let r = xor_inplace r fmask 0 in
   r
@@ -1560,10 +1637,10 @@ let lemma_index_list_7 (l:bitfield8) : Lemma
 
 
 let lemma_header_type_128 p pn_len npn : Lemma
-  (Short? p <==> U8.(S.index (format_header p pn_len npn) 0 <^ 128uy)) =
-  let b = format_header p pn_len npn in
+  (Short? p <==> U8.(S.index (format_header p npn) 0 <^ 128uy)) =
+  let b = format_header p npn in
   if Short? p then begin
-    lemma_parse_short_header_flag_correct p pn_len npn S.empty;
+    lemma_parse_short_header_flag_correct p npn S.empty;
     let l = to_bitfield8 (S.index b 0) in
     assert_norm (List.Tot.length l = 8);
     lemma_bitfield8_128 (S.index b 0);
@@ -1571,7 +1648,7 @@ let lemma_header_type_128 p pn_len npn : Lemma
     assert (List.Tot.index l 7 = false)
   end
   else begin
-    lemma_parse_long_header_flag_correct p pn_len npn S.empty;
+    lemma_parse_long_header_flag_correct p npn S.empty;
     let l = to_bitfield8 (S.index b 0) in
     assert_norm (List.Tot.length l = 8);
     lemma_bitfield8_128 (S.index b 0);
@@ -1583,9 +1660,9 @@ let lemma_header_type_128 p pn_len npn : Lemma
 
 
 // correctness of the condition to check whether a header is short
-let lemma_header_encrypt_type_short a hpk h pn_len npn c : Lemma
+let lemma_header_encrypt_type_short a hpk h npn c : Lemma
   (requires (
-    let packet = header_encrypt a hpk h pn_len npn c in
+    let packet = header_encrypt a hpk h npn c in
     U8.(S.index packet 0 <^ 128uy)))
   (ensures Short? h) =
   if Short? h then ()
@@ -1593,6 +1670,7 @@ let lemma_header_encrypt_type_short a hpk h pn_len npn c : Lemma
 
     // notations
     assert_norm(max_cipher_length < pow2 62);
+    let pn_len = S.length npn - 1 in
     let pn_offset =
       match h with
       | Long _ _ dcil scil _ _ pl -> 6 + add3 dcil + add3 scil + vlen pl in
@@ -1601,7 +1679,7 @@ let lemma_header_encrypt_type_short a hpk h pn_len npn c : Lemma
     let pnmask = and_inplace (S.slice mask 1 5) (pn_sizemask pn_len) 0 in
     let sflags = 0x0fuy in
     let fmask = S.create 1 U8.(S.index mask 0 `logand` sflags) in
-    let r1 = S.(format_header h pn_len npn @| c) in
+    let r1 = S.(format_header h npn @| c) in
     let r2 = xor_inplace r1 pnmask pn_offset in
     let packet = xor_inplace r2 fmask 0 in
 
@@ -1616,12 +1694,12 @@ let lemma_header_encrypt_type_short a hpk h pn_len npn c : Lemma
     pointwise_index1 U8.logxor r1 pnmask 0 pn_offset;
     pointwise_index2 U8.logxor r2 fmask 0 0;
     lemma_charac_logxor_byte (S.index r1 0) (S.index fmask 0);
-    let r1_bitfield = to_bitfield8 (S.index (format_header h pn_len npn) 0) in
+    let r1_bitfield = to_bitfield8 (S.index (format_header h npn) 0) in
 
     // extracting the last bit
     lemma_bitwise_op_index (fun x y -> x <> y) r1_bitfield fmask_bitfield 7;
     lemma_bitfield8_128 (S.index packet 0);
-    lemma_bitfield8_128 (S.index (format_header h pn_len npn) 0);
+    lemma_bitfield8_128 (S.index (format_header h npn) 0);
     lemma_header_type_128 h pn_len npn
   end
 
@@ -1629,11 +1707,12 @@ let lemma_header_encrypt_type_short a hpk h pn_len npn c : Lemma
 
 // same, for the long header. Proof is duplicated, except for the
 // definition of pn_offset and sflags
-let lemma_header_encrypt_type_long a hpk h pn_len npn c : Lemma
+let lemma_header_encrypt_type_long a hpk h npn c : Lemma
   (requires (
-    let packet = header_encrypt a hpk h pn_len npn c in
+    let packet = header_encrypt a hpk h npn c in
     U8.(S.index packet 0 >=^ 128uy)))
   (ensures (Long? h)) =
+  let pn_len = S.length npn - 1 in
   if Long? h then ()
   else begin
 
@@ -1647,7 +1726,7 @@ let lemma_header_encrypt_type_long a hpk h pn_len npn c : Lemma
     let pnmask = and_inplace (S.slice mask 1 5) (pn_sizemask pn_len) 0 in
     let sflags = 0x1fuy in
     let fmask = S.create 1 U8.(S.index mask 0 `logand` sflags) in
-    let r1 = S.(format_header h pn_len npn @| c) in
+    let r1 = S.(format_header h npn @| c) in
     let r2 = xor_inplace r1  pnmask pn_offset in
     let packet = xor_inplace r2 fmask 0 in
 
@@ -1662,37 +1741,36 @@ let lemma_header_encrypt_type_long a hpk h pn_len npn c : Lemma
     pointwise_index1 U8.logxor r1 pnmask 0 pn_offset;
     pointwise_index2 U8.logxor r2 fmask 0 0;
     lemma_charac_logxor_byte (S.index r1 0) (S.index fmask 0);
-    let r1_bitfield = to_bitfield8 (S.index (format_header h pn_len npn) 0) in
+    let r1_bitfield = to_bitfield8 (S.index (format_header h npn) 0) in
 
     // extracting the last bit
     lemma_bitwise_op_index (fun x y -> x <> y) r1_bitfield fmask_bitfield 7;
     lemma_bitfield8_128 (S.index packet 0);
-    lemma_bitfield8_128 (S.index (format_header h pn_len npn) 0);
+    lemma_bitfield8_128 (S.index (format_header h npn) 0);
     lemma_header_type_128 h pn_len npn
   end
 
 
 
-let lemma_header_encrypt_type a hpk h pn_len npn c : Lemma
-  (let packet = header_encrypt a hpk h pn_len npn c in
+let lemma_header_encrypt_type a hpk h npn c : Lemma
+  (let packet = header_encrypt a hpk h npn c in
   U8.(S.index packet 0 <^ 128uy) <==> Short? h) =
-  let packet = header_encrypt a hpk h pn_len npn c in
+  let packet = header_encrypt a hpk h npn c in
   if U8.(S.index packet 0 <^ 128uy) then
-    lemma_header_encrypt_type_short a hpk h pn_len npn c
-  else lemma_header_encrypt_type_long a hpk h pn_len npn c
+    lemma_header_encrypt_type_short a hpk h npn c
+  else lemma_header_encrypt_type_long a hpk h npn c
 
 
 
 type header_encryption_correct
-  (a:ea)
-  (k:lbytes (ae_keysize a))
+  (a: ea)
+  (k: lbytes (ae_keysize a))
   (h: header)
-  (pn_len: nat2)
-  (npn: lbytes (1+pn_len))
+  (npn: npn)
   (c: cbytes)
   = (header_decrypt a k (cid_len h)
-    (header_encrypt a k h pn_len npn c)
-    == H_Success pn_len npn h c)
+    (header_encrypt a k h npn c)
+    == H_Success npn h c)
 
 
 
@@ -1711,22 +1789,24 @@ let lemma_arithmetic3 (a b c:int) : Lemma
 
 
 
-let lemma_header_encryption_short_sample a k h pn_len npn c : Lemma
+let lemma_header_encryption_short_sample a k h npn c : Lemma
   (requires Short? h)
   (ensures (
+    let pn_len = S.length npn - 1 in
     let sample = S.slice c (3-pn_len) (19-pn_len) in
-    let packet = header_encrypt a k h pn_len npn c in
+    let packet = header_encrypt a k h npn c in
     let so = 5 + add3 (cid_len h) in
     sample = S.slice packet so (so+16))) =
 
   // computation of the packet
+  let pn_len = S.length npn - 1 in
   let pn_offset = 1 + S.length (Short?.cid h) in
   let sample = S.slice c (3-pn_len) (19-pn_len) in
   let mask = C16.block (calg_of_ae a) k sample in
   let pnmask = and_inplace (S.slice mask 1 5) (pn_sizemask pn_len) 0 in
   let sflags = 0x1fuy in
   let fmask = S.create 1 U8.(S.index mask 0 `logand` sflags) in
-  let r1 = S.(format_header h pn_len npn @| c) in
+  let r1 = S.(format_header h npn @| c) in
   let r2 = xor_inplace r1 pnmask pn_offset in
   let r = xor_inplace r2 fmask 0 in
 
@@ -1745,36 +1825,39 @@ let lemma_header_encryption_short_sample a k h pn_len npn c : Lemma
   assert_norm (pn_offset = 1 + S.length (Short?.cid h));
   assert_norm (so = 5 + S.length (Short?.cid h));
 
-  assert (S.length (format_header h pn_len npn) = 1 + S.length (Short?.cid h) + 1 + pn_len);
+  assert (S.length (format_header h npn) = 1 + S.length (Short?.cid h) + 1 + pn_len);
   lemma_arithmetic1 1 (S.length (Short?.cid h)) 1 pn_len 3;
-  assert (so = S.length (format_header h pn_len npn) + (3-pn_len));
-  lemma_arithmetic2 (S.length (format_header h pn_len npn)) 3 pn_len 16;
-  assert (so+16 = S.length (format_header h pn_len npn) + (19-pn_len));
-  append_slices3 (format_header h pn_len npn) c
+  assert (so = S.length (format_header h npn) + (3-pn_len));
+  lemma_arithmetic2 (S.length (format_header h npn)) 3 pn_len 16;
+  assert (so+16 = S.length (format_header h npn) + (19-pn_len));
+  append_slices3 (format_header h npn) c
 
 
 
 
 
-let lemma_header_encryption_correct_short a k h pn_len npn c : Lemma
+let lemma_header_encryption_correct_short a k h (npn:npn) c : Lemma
   (requires Short? h)
-  (ensures header_encryption_correct a k h pn_len npn c) =
+  (ensures (
+    let pn_len = S.length npn - 1 in
+    header_encryption_correct a k h npn c)) =
 
   // computing the result of header_encrypt
+  let pn_len = S.length npn - 1 in
   let pn_offset = 1 + S.length (Short?.cid h) in
   let sample = S.slice c (3-pn_len) (19-pn_len) in
   let mask = C16.block (calg_of_ae a) k sample in
   let pnmask = and_inplace (S.slice mask 1 5) (pn_sizemask pn_len) 0 in
   let sflags = 0x1fuy in
   let fmask = S.create 1 U8.(S.index mask 0 `logand` sflags) in
-  let r1 = S.(format_header h pn_len npn @| c) in
+  let r1 = S.(format_header h npn @| c) in
   let r2 = xor_inplace r1 pnmask pn_offset in
   let packet = xor_inplace r2 fmask 0 in
-  assert (packet = header_encrypt a k h pn_len npn c);
+  assert (packet = header_encrypt a k h npn c);
 
   // proving that the decryption extracts correctly the header type
   let f = S.index packet 0 in
-  lemma_header_encrypt_type a k h pn_len npn c;
+  lemma_header_encrypt_type a k h npn c;
   let is_short = U8.(f <^ 128uy) in
   assert (is_short);
 
@@ -1787,7 +1870,7 @@ let lemma_header_encryption_correct_short a k h pn_len npn c : Lemma
   | None -> ()
   | Some so ->
     cid_len_real h;
-    lemma_header_encryption_short_sample a k h pn_len npn c;
+    lemma_header_encryption_short_sample a k h npn c;
 
     // removing the fmask
     let packet' = xor_inplace packet fmask 0 in
@@ -1795,14 +1878,14 @@ let lemma_header_encryption_correct_short a k h pn_len npn c : Lemma
     // computing pn_len
     let flags = U8.v (S.index packet' 0) in
     pointwise_index1 U8.logxor r1 pnmask 0 pn_offset;
-    lemma_parse_header_pnlen h pn_len npn;
+    lemma_parse_header_pnlen h npn;
     // computing pn_offset
     lemma_arithmetic3 5 (S.length (Short?.cid h)) 4;
     // removing the pnmask
     let packet'' = xor_inplace packet' pnmask pn_offset in
     xor_inplace_involutive r1 pnmask pn_offset;
     // parsing the header
-    lemma_header_parsing_correct h pn_len npn c
+    lemma_header_parsing_correct h npn c
 
 
 
@@ -1815,15 +1898,16 @@ let long_header_npn_offset (h:header) : Pure nat
   assert_norm (max_cipher_length < pow2 62);
   6 + add3 (Long?.dcil h) + add3 (Long?.scil h) + vlen (Long?.len h)
 
-let lemma_long_header_npn_offset h pn_len npn c : Lemma
+let lemma_long_header_npn_offset h npn c : Lemma
   (requires Long? h)
   (ensures (
     let open S in
-    let b = format_header h pn_len npn @| c in
+    let b = format_header h npn @| c in
     let offset = long_header_npn_offset h in
     equal (npn @| c) (slice b offset (S.length b)))) =
   let open S in
-  let b = format_header h pn_len npn @| c in
+  let pn_len = S.length npn - 1 in
+  let b = format_header h npn @| c in
   let (pnb0, pnb1) = to_bitfield2 pn_len in
   let (typ0, typ1) = to_bitfield2 (Long?.typ h) in
   let l = [pnb0; pnb1; false; false; typ0; typ1; true; true] in
@@ -1845,20 +1929,23 @@ let lemma_long_header_npn_offset h pn_len npn c : Lemma
   add_offset b (6 + add3 (Long?.dcil h) + add3 (Long?.scil h)) plain_len (npn @| c)
 
 
-let lemma_long_header_npn_offset_shift h pn_len npn (c:cbytes) : Lemma
+#push-options "--z3rlimit 20"
+let lemma_long_header_npn_offset_shift h (npn:npn) (c:cbytes) : Lemma
   (requires Long? h)
   (ensures (
     let open S in
-    let b = format_header h pn_len npn @| c in
+    let pn_len = S.length npn - 1 in
+    let b = format_header h npn @| c in
     let pn_offset = long_header_npn_offset h in
     equal (slice c (3-pn_len) (19-pn_len)) (slice b (pn_offset+4) (pn_offset+20)))) =
-  lemma_long_header_npn_offset h pn_len npn c
+  lemma_long_header_npn_offset h npn c
+#pop-options
 
 
-
-let lemma_long_header_clen_offset h pn_len npn c b : Lemma
+let lemma_long_header_clen_offset h (npn:npn) c b : Lemma
   (requires (
-    let res = S.(format_header h pn_len npn @| c) in
+    let pn_len = S.length npn - 1 in
+    let res = S.(format_header h npn @| c) in
     Long? h /\
     S.length b = S.length res /\
     S.index b 5 = S.index res 5))
@@ -1868,10 +1955,11 @@ let lemma_long_header_clen_offset h pn_len npn c b : Lemma
     parse_long_header_clen input = Some (Long?.dcil h, Long?.scil h,next))) =
   let open FStar.Endianness in
   let open S in
-  let res = S.(format_header h pn_len npn @| c) in
+  let pn_len = S.length npn - 1 in
+  let res = S.(format_header h npn @| c) in
   assert_norm (max_cipher_length < pow2 62);
   let clen = U8.(16uy *^ uint_to_t (Long?.dcil h) +^ uint_to_t (Long?.scil h)) in
-  lemma_parse_long_header_flag_correct h pn_len npn c;
+  lemma_parse_long_header_flag_correct h npn c;
   add_offset res 1 (n_to_be 4 (Long?.version h)) (create 1 clen @| Long?.dcid h @| Long?.scid h @| encode_varint (Long?.len h) @| npn @| c);
   assert (index res 5 = index (slice res 5 (length res)) 0);
   slice_trans b 5 6 (length b);
@@ -1880,11 +1968,11 @@ let lemma_long_header_clen_offset h pn_len npn c b : Lemma
 
 
 #push-options "--z3rlimit 20"
-let lemma_long_header_plen_offset (h:header) (pn_len:nat2) (npn:lbytes (1+pn_len)) (c:cbytes) (b:bytes) : Lemma
+let lemma_long_header_plen_offset (h:header) (npn:npn) (c:cbytes) (b:bytes) : Lemma
   (requires
     Long? h /\ (
     assert_norm (max_cipher_length < pow2 62);
-    let res = S.(format_header h pn_len npn @| c) in
+    let res = S.(format_header h npn @| c) in
     S.length b = S.length res /\
     (forall (i:nat{6 <= i /\ i < long_header_npn_offset h}). S.index b i = S.index res i)))
   (ensures (
@@ -1893,12 +1981,13 @@ let lemma_long_header_plen_offset (h:header) (pn_len:nat2) (npn:lbytes (1+pn_len
     match parse_varint (S.slice rest offset (S.length rest)) with
     | None -> False
     | Some (l,r) -> l = Long?.len h /\ S.equal r (S.slice b (long_header_npn_offset h) (S.length b)))) =
-    let open FStar.Endianness in
+  let open FStar.Endianness in
   let open S in
-  let res = S.(format_header h pn_len npn @| c) in
+  let pn_len = S.length npn - 1 in
+  let res = S.(format_header h npn @| c) in
   assert_norm (max_cipher_length < pow2 62);
   let clen = U8.(16uy *^ uint_to_t (Long?.dcil h) +^ uint_to_t (Long?.scil h)) in
-  lemma_parse_long_header_flag_correct h pn_len npn c;
+  lemma_parse_long_header_flag_correct h npn c;
   add_offset res 1 (n_to_be 4 (Long?.version h)) (create 1 clen @| Long?.dcid h @| Long?.scid h @| encode_varint (Long?.len h) @| npn @| c);
   add_offset res 5 (create 1 clen) (Long?.dcid h @| Long?.scid h @| encode_varint (Long?.len h) @| npn @| c);
   add_offset res 6 (Long?.dcid h) (Long?.scid h @| encode_varint (Long?.len h) @| npn @| c);
@@ -1918,24 +2007,26 @@ let lemma_long_header_plen_offset (h:header) (pn_len:nat2) (npn:lbytes (1+pn_len
 
 
 
-let lemma_header_encryption_long_sample a k h pn_len npn c : Lemma
+let lemma_header_encryption_long_sample a k h (npn:npn) c : Lemma
   (requires Long? h)
   (ensures (
+    let pn_len = S.length npn - 1 in
     let sample = S.slice c (3-pn_len) (19-pn_len) in
-    let packet = header_encrypt a k h pn_len npn c in
+    let packet = header_encrypt a k h npn c in
     match long_sample packet with
     | None -> False
     | Some (s,off) -> S.equal sample s /\ off = long_header_npn_offset h)) =
 
   // computation of the packet
   assert_norm(max_cipher_length < pow2 62);
+  let pn_len = S.length npn - 1 in
   let pn_offset = long_header_npn_offset h in
   let sample = S.slice c (3-pn_len) (19-pn_len) in
   let mask = C16.block (calg_of_ae a) k sample in
   let pnmask = and_inplace (S.slice mask 1 5) (pn_sizemask pn_len) 0 in
   let sflags = 0x0fuy in
   let fmask = S.create 1 U8.(S.index mask 0 `logand` sflags) in
-  let r1 = S.(format_header h pn_len npn @| c) in
+  let r1 = S.(format_header h npn @| c) in
   let r2 = xor_inplace r1 pnmask pn_offset in
   let packet = xor_inplace r2 fmask 0 in
 
@@ -1946,10 +2037,10 @@ let lemma_header_encryption_long_sample a k h pn_len npn c : Lemma
     pointwise_index1 U8.logxor r1 pnmask i pn_offset in
 
   FStar.Classical.forall_intro preserved_indexes;
-  lemma_long_header_clen_offset h pn_len npn c packet;
+  lemma_long_header_clen_offset h npn c packet;
   let (dcil,scil,rest) = Some?.v (parse_long_header_clen (S.slice packet 5 (S.length packet))) in
   if S.length rest >= add3 dcil + add3 scil then begin
-    lemma_long_header_plen_offset h pn_len npn c packet;
+    lemma_long_header_plen_offset h npn c packet;
     match parse_varint (S.slice rest (add3 dcil + add3 scil) (S.length rest)) with
     | Some (_,r) ->
       if pn_offset + 20 <= S.length packet then begin
@@ -1965,7 +2056,7 @@ let lemma_header_encryption_long_sample a k h pn_len npn c : Lemma
                FStar.Classical.forall_intro preserved_indexes_end;
                extensionality_slice packet r1 (pn_offset+4) (pn_offset+20);
                assert (S.equal res_sample S.(slice r1 (pn_offset+4) (pn_offset+20)));
-               lemma_long_header_npn_offset_shift h pn_len npn c;
+               lemma_long_header_npn_offset_shift h npn c;
                assert (S.(slice r1 (pn_offset+4) (pn_offset+20)) = sample);
                assert (long_sample packet = Some (res_sample,pn_offset))
       end
@@ -1974,31 +2065,32 @@ let lemma_header_encryption_long_sample a k h pn_len npn c : Lemma
 
 
 
-let lemma_header_encryption_correct_long a k (h:header) (pn_len:nat2) (npn:lbytes (1+pn_len)) (c:cbytes{Long? h ==> S.length c = Long?.len h}) : Lemma
+let lemma_header_encryption_correct_long a k (h:header) (npn:npn) (c:cbytes{Long? h ==> S.length c = Long?.len h}) : Lemma
   (requires Long? h)
-  (ensures header_encryption_correct a k h pn_len npn c) =
+  (ensures header_encryption_correct a k h npn c) =
 
   // computing the result of header_encrypt
   assert_norm(max_cipher_length < pow2 62);
+  let pn_len = S.length npn - 1 in
   let pn_offset = 6 + add3 (Long?.dcil h) + add3 (Long?.scil h) + vlen (Long?.len h) in
   let sample = S.slice c (3-pn_len) (19-pn_len) in
   let mask = C16.block (calg_of_ae a) k sample in
   let pnmask = and_inplace (S.slice mask 1 5) (pn_sizemask pn_len) 0 in
   let sflags = 0x0fuy in
   let fmask = S.create 1 U8.(S.index mask 0 `logand` sflags) in
-  let r1 = S.(format_header h pn_len npn @| c) in
+  let r1 = S.(format_header h npn @| c) in
   let r2 = xor_inplace r1 pnmask pn_offset in
   let packet = xor_inplace r2 fmask 0 in
-  assert (packet = header_encrypt a k h pn_len npn c);
+  assert (packet = header_encrypt a k h npn c);
 
   // proving that the decryption extracts correctly the header type
   let f = S.index packet 0 in
-  lemma_header_encrypt_type a k h pn_len npn c;
+  lemma_header_encrypt_type a k h npn c;
   let is_short = U8.(f <^ 128uy) in
   assert (~is_short);
 
   // extraction of the sample
-  lemma_header_encryption_long_sample a k h pn_len npn c;
+  lemma_header_encryption_long_sample a k h npn c;
   match long_sample packet with
   | Some (sample',pn_offset') ->
     assert (sample = sample' /\ pn_offset = pn_offset');
@@ -2010,31 +2102,178 @@ let lemma_header_encryption_correct_long a k (h:header) (pn_len:nat2) (npn:lbyte
     // computing pn_len
     let flags = U8.v (S.index packet' 0) in
     pointwise_index1 U8.logxor r1 pnmask 0 pn_offset;
-    assert (flags = U8.v (S.index (format_header h pn_len npn) 0));
-    lemma_parse_header_pnlen h pn_len npn;
+    assert (flags = U8.v (S.index (format_header h npn) 0));
+    lemma_parse_header_pnlen h npn;
     assert (pn_len = flags % 4);
     // removing the pnmask
     let packet'' = xor_inplace packet' pnmask pn_offset in
     xor_inplace_involutive r1 pnmask pn_offset;
     assert (packet'' = r1);
     // parsing the header
-    lemma_header_parsing_correct h pn_len npn c
+    lemma_header_parsing_correct h npn c
 
 
 
 
-let lemma_header_encryption_correct a k h pn_len npn c : Lemma
-  (header_encryption_correct a k h pn_len npn c) =
+let lemma_header_encryption_correct a k h npn c : Lemma
+  (header_encryption_correct a k h npn c) =
   if Short? h then
-    lemma_header_encryption_correct_short a k h pn_len npn c
-  else lemma_header_encryption_correct_long a k h pn_len npn c
+    lemma_header_encryption_correct_short a k h npn c
+  else lemma_header_encryption_correct_long a k h npn c
+
+
+
+#push-options "--z3rlimit 20"
+let lemma_bitfield28 (b:byte) : Lemma
+  (requires U8.v b < 4)
+  (ensures (
+    let (x0,x1) = to_bitfield2 (U8.v b) in
+    to_bitfield8 b = [x0;x1;false;false;false;false;false;false])) =
+  ()
+
+
+
+let lemma_cancel_xor6 (l:list bool{List.Tot.length l = 6}) : Lemma
+  (let lf = [false;false;false;false;false;false] in
+  bitwise_op (fun x y -> x <> y) l lf = l) =
+  match l with
+  | [_;_;_;_;_;_] -> ()
+#pop-options
+
+
+let lemma_cancel_xor2 (b:byte) : Lemma
+  (match to_bitfield8 b with
+  | x :: y :: l ->
+    let l' = [x;y;false;false;false;false;false;false] in
+    assert_norm (List.Tot.length l' = 8);
+    bitwise_op (fun x y -> x <> y) (to_bitfield8 b) l' =
+    false :: false :: l) =
+  match to_bitfield8 b with
+  | x :: y :: l ->
+    let l' = [x;y;false;false;false;false;false;false] in
+    assert_norm (List.Tot.length l' = 8);
+    let res = bitwise_op (fun x y -> x <> y) (to_bitfield8 b) l' in
+    assert (res = false :: false :: bitwise_op (fun x y -> x <> y) l [false; false; false; false; false; false]);
+    lemma_cancel_xor6 l
 
 
 
 
 
-let lemma_header_encryption_malleable a k c spin phase cid x npn = admit()
+let lemma_format_header_malleable_aux (h1 h2:(h:header{Short? h})) (npn1 npn2:npn) : Lemma
+  (requires
+    S.(equal (Short?.cid h1 @| npn1) (Short?.cid h2 @| npn2)) /\
+    Short?.spin h1 = Short?.spin h2 /\
+    Short?.phase h1 = Short?.phase h2)
+  (ensures (
+    let hb1 = format_header h1 npn1 in
+    let hb2 = format_header h2 npn2 in
+    let pn_len1 = U8.uint_to_t (S.length npn1 - 1) in
+    let pn_len2 = U8.uint_to_t (S.length npn2 - 1) in
+    let hb = S.upd hb2 0 U8.((S.index hb2 0 `logxor` pn_len2) `logxor` pn_len1) in
+    S.equal hb1 hb)) =
+  //let len1 : nat2 = S.length npn1 - 1 in
+  //let len2 : nat2 = S.length npn2 - 1 in
+  let pn_len1 = U8.uint_to_t (S.length npn1 - 1) in
+  let pn_len2 = U8.uint_to_t (S.length npn2 - 1) in
+  let (pnb10,pnb11) = to_bitfield2 (U8.v pn_len1) in
+  let (pnb20,pnb21) = to_bitfield2 (U8.v pn_len2) in
+  match h1,h2 with
+  | Short spin phase cid1, Short _ _ cid2 ->
+    let l = [phase; false; false; spin; true; false] in
+    let l1 = pnb10 :: pnb11 :: l in
+    let l2 = pnb20 :: pnb21 :: l in
+    assert_norm(List.Tot.length l1 = 8 /\ List.Tot.length l2 = 8);
+    let flag1 = of_bitfield8 l1 in
+    let flag2 = of_bitfield8 l2 in
+    lemma_bitfield8 l1;
+    lemma_bitfield8 l2;
+    let hb1 = format_header h1 npn1 in
+    let hb2 = format_header h2 npn2 in
+    let hb = S.upd hb2 0 U8.((S.index hb2 0 `logxor` pn_len2) `logxor` pn_len1) in
+    //assert (hb1 = S.(create 1 flag1 @| cid1 @| npn1));
+    //assert (hb2 = S.(create 1 flag2 @| cid2 @| npn2));
+    let flag = U8.((flag2 `logxor` pn_len2) `logxor` pn_len1) in
+    assert (S.equal hb S.(create 1 flag @| cid1 @| npn1));
+    lemma_bitfield28 pn_len2;
+    lemma_bitfield28 pn_len1;
+    let bitfield_pn_len1 = to_bitfield8 pn_len1 in
+    let bitfield_pn_len2 = to_bitfield8 pn_len2 in
+    //assert (bitfield_pn_len1 = [pnb10;pnb11;false;false;false;false;false;false]);
+    //assert (bitfield_pn_len2 = [pnb20;pnb21;false;false;false;false;false;false]);
+    lemma_charac_logxor_byte flag2 pn_len2;
+    lemma_charac_logxor_byte (flag2 `U8.logxor` pn_len2) pn_len1;
+    lemma_cancel_xor2 flag2;
+    let xor1 = bitwise_op (fun x y -> x <> y) l2 bitfield_pn_len2 in
+    assert (xor1 = false :: false :: l);
+    let xor2 = bitwise_op (fun x y -> x <> y) xor1 bitfield_pn_len1 in
+    assert (xor2 = l1);
+    assert (to_bitfield8 flag = l1);
+    lemma_bitfield8_inv flag;
+    assert (flag = flag1)
 
+
+let lemma_upd0_xor_inplace (b:bytes) (x:byte) : Lemma
+  (requires S.length b > 0)
+  (ensures S.upd b 0 (S.index b 0 `U8.logxor` x) = xor_inplace b (S.create 1 x) 0) =
+  ()
+
+let lemma_format_header_malleable (h1 h2:(h:header{Short? h})) (npn1 npn2:npn) (c:cbytes) : Lemma
+  (requires
+    S.(equal (Short?.cid h1 @| npn1) (Short?.cid h2 @| npn2)) /\
+    Short?.spin h1 = Short?.spin h2 /\
+    Short?.phase h1 = Short?.phase h2)
+  (ensures (
+    let hb1 = S.(format_header h1 npn1 @| c) in
+    let hb2 = S.(format_header h2 npn2 @| c) in
+    let pn_len1 = U8.uint_to_t (S.length npn1 - 1) in
+    let pn_len2 = U8.uint_to_t (S.length npn2 - 1) in
+    let hb = xor_inplace hb2 (S.create 1 (pn_len1 `U8.logxor` pn_len2)) 0 in
+    S.equal hb1 hb)) =
+  let hb1 = S.(format_header h1 npn1 @| c) in
+  let hb2 = S.(format_header h2 npn2 @| c) in
+  let pn_len1 = S.length npn1 - 1 in
+  let pn_len2 = S.length npn2 - 1 in
+  FStar.UInt.logxor_associative #8 (U8.v (S.index hb2 0)) pn_len2 pn_len1;
+  FStar.UInt.logxor_commutative #8 pn_len1 pn_len2;
+  lemma_upd0_xor_inplace hb2 (U8.uint_to_t pn_len2 `U8.logxor` U8.uint_to_t pn_len1);
+  lemma_format_header_malleable_aux h1 h2 npn1 npn2
+
+
+let lemma_header_encryption_malleable a k c spin phase cid x npn =
+  let h1 = Short spin phase cid in
+  let h2 = Short spin phase S.(cid @| x) in
+  let npn1 = S.(x @| npn) in
+  let npn2 = npn in
+  let pn_offset1 = 1 + S.length cid in
+  let pn_offset2 = 2 + S.length cid in
+
+  // computation of the cipher
+  let sample = S.slice c 2 18 in
+  let mask = C16.block (calg_of_ae a) k sample in
+  let pnmask = and_inplace (S.slice mask 1 5) (pn_sizemask 1) 0 in
+  let sflags = 0x1fuy in
+  let fmask = S.create 1 U8.(S.index mask 0 `logand` sflags) in
+  let r1 = S.(format_header h1 npn1 @| c) in
+  let r2 = xor_inplace r1 pnmask pn_offset1 in
+  let p = xor_inplace r2 fmask 0 in
+  assert (p = header_encrypt a k h1 npn1 c);
+
+  // xoring it to change the pn_len
+  let p' = S.upd p 0 (S.index p 0 `U8.logxor` 1z) in
+  lemma_upd0_xor_inplace p 1z;
+  assert (S.equal p' (xor_inplace p (S.create 1 1z) 0));
+
+  // showing that it is successfully decrypted to an other plaintext
+  xor_inplace_commutative r2 fmask (S.create 1 1z) 0 0;
+  xor_inplace_commutative r1 pnmask (S.create 1 1z) pn_offset1 0;
+  S.append_assoc cid x npn;
+  lemma_format_header_malleable h1 h2 npn1 npn2 c;
+  let pn_len1 = U8.uint_to_t 1 in
+  let pn_len2 = U8.uint_to_t 0 in
+  assert (pn_len1 `U8.logxor` pn_len2 = 1z);
+  assert (p' = header_encrypt a k h2 npn2 c);
+  admit()
 
 
 (* not useful anymore by using declassify below

@@ -61,6 +61,7 @@ let add3 (n:nat4) : n:nat{n=0 \/ (n >= 4 /\ n <= 18)} = if n = 0 then 0 else 3+n
 let sub3 (n:nat{n = 0 \/ (n >= 4 /\ n <= 18)}) : nat4 = if n = 0 then 0 else n-3
 type qbytes (n:nat4) = lbytes (add3 n)
 type vlsize = n:nat{n == 1 \/ n == 2 \/ n == 4 \/ n == 8}
+type npn = b:bytes{1 <= S.length b /\ S.length b <= 4}
 
 let vlen (n:nat62) : vlsize =
   if n < pow2 6 then 1
@@ -92,8 +93,7 @@ type header =
 
 type h_result =
 | H_Success:
-  pn_len: nat2 ->
-  npn: lbytes (1 + pn_len) ->
+  npn: npn ->
   h: header ->
   c: cbytes ->
   h_result
@@ -111,18 +111,18 @@ let cid_len : header -> nat4 = function
   | Short _ _ cid -> sub3 (S.length cid)
   | Long _ _ dcil _ _ _ _ -> dcil
 
-val format_header: h:header -> pn_len:nat2 -> npn: lbytes (1+pn_len) ->
-  lbytes (header_len h pn_len)
+val format_header: h:header -> npn:npn ->
+  lbytes (header_len h (S.length npn-1))
 
 val parse_header: b:packet -> cid_len: nat4 -> h_result
 
 val lemma_header_parsing_correct:
   h: header ->
-  pn_len: nat2 ->
-  npn: lbytes (1+pn_len) ->
+  npn: npn ->
   c: cbytes{Long? h ==> S.length c = Long?.len h} ->
-  Lemma (parse_header S.(format_header h pn_len npn @| c) (cid_len h)
-    == H_Success pn_len npn h c)
+  Lemma (
+    parse_header S.(format_header h npn @| c) (cid_len h)
+    == H_Success npn h c)
 
 // N.B. this is only true for a given DCID len
 val lemma_header_parsing_safe: b1:packet -> b2:packet -> cl:nat4 -> Lemma
@@ -133,8 +133,7 @@ val lemma_header_parsing_safe: b1:packet -> b2:packet -> cl:nat4 -> Lemma
 val header_encrypt: a:ea ->
   hpk: lbytes (ae_keysize a) ->
   h: header ->
-  pn_len: nat2 ->
-  npn: lbytes (1+pn_len) ->
+  npn: npn ->
   c: cbytes ->
   packet
 
@@ -151,28 +150,32 @@ val header_decrypt: a:ea ->
 val lemma_header_encryption_correct:
   a:ea ->
   k:lbytes (ae_keysize a) ->
-  h: header ->
-  pn_len: nat2 ->
-  npn: lbytes (1+pn_len) ->
+  h:header ->
+  npn:npn ->
   c: cbytes{Long? h ==> S.length c = Long?.len h} ->
-  Lemma (header_decrypt a k (cid_len h)
-    (header_encrypt a k h pn_len npn c)
-    == H_Success pn_len npn h c)
+  Lemma (
+    header_decrypt a k (cid_len h) (header_encrypt a k h npn c)
+    == H_Success npn h c)
 
 // Even though parse_header is a secure parser, decryption is malleable:
-// it is possible to successfully decrypt with a different npn
+// it is possible to successfully decrypt while parsing part of the
+// npn into the cid
 val lemma_header_encryption_malleable:
   a:ea ->
   k:lbytes (ae_keysize a) ->
   c:cbytes ->
   spin:bool -> phase:bool ->
   cid:bytes{let l = S.length cid in 4 <= l /\ l <= 17} ->
-  x: lbytes 1 -> // Arbitrary byte
+  x: lbytes 1 -> // Arbitrary part of the npn, transferred to the cid
   npn:lbytes 1 ->
-  Lemma (exists (npn':lbytes 2).
-    header_decrypt a k (S.length cid - 3) (header_encrypt a k
-      (Short spin phase S.(cid @| x)) 0 npn c)
-    == H_Success 1 npn' (Short spin phase cid) c)
+  Lemma (
+    let p = header_encrypt a k (Short spin phase cid) S.(x @| npn) c in
+    let p' = S.upd p 0 (S.index p 0 `FStar.UInt8.logxor` 1z) in // applying xor to change the value of npn in the flag
+    header_decrypt a k (S.length cid-2) p'
+    = H_Success npn (Short spin phase S.(cid @| x)) c)
+
+
+
 
 type result =
 | Success: pn_len:nat2 ->
