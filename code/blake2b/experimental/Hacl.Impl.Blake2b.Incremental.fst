@@ -218,8 +218,7 @@ let blake2b_incremental_update_loop_step state ni i blocks =
   let n64 = to_u64 (state_get_n state) in
   let i64 = to_u64 i in
   let size_block64 = to_u64 size_block in
-  let prev = to_u128 ((n64 +! i64 +! (u64 1)) *! size_block64) in
-  assume(v prev == ((v (gstate_get_n h0 state) * Spec.size_block Spec.Blake2B) + (v i * Spec.size_block Spec.Blake2B)));
+  let prev = to_u128 ((n64 *! size_block64) +! (i64 *! size_block64)) in
   blake2b_update_block state.hash prev block
 
 
@@ -236,22 +235,6 @@ let spec_blake2_incremental_update_loop init blocks hash =
   repeati n (fun i hash ->
     spec_incremental_update_loop_step init n (n * Spec.size_block Spec.Blake2B) blocks i hash
   ) hash
-
-
-(* noextract *)
-(* val spec_blake2_incremental_update_loop: *)
-(*   init:size_nat *)
-(*   -> blocks:LBS.bytes{Seq.length blocks <= max_size_t /\ (init + (Seq.length blocks / (Spec.size_block Spec.Blake2B))) * (Spec.size_block Spec.Blake2B) <= pow2 128 - 1} *)
-(*   -> hash:Spec.hash_ws Spec.Blake2B -> *)
-(*   Tot (Spec.hash_ws Spec.Blake2B) *)
-
-(* noextract *)
-(* let spec_blake2_incremental_update_loop init blocks hash = *)
-(*   let n = Seq.length blocks / Spec.size_block Spec.Blake2B in *)
-(*   repeati n (fun i hash -> *)
-(*     let block = Seq.sub #uint8 #(Seq.length blocks) blocks (i * Spec.size_block Spec.Blake2B) (Spec.size_block Spec.Blake2B) in *)
-(*       Spec.blake2_update_block Spec.Blake2B ((init + i + 1) * Spec.size_block Spec.Blake2B) block hash *)
-(*     ) hash *)
 
 
 inline_for_extraction noextract
