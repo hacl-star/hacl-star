@@ -35,19 +35,19 @@ let print_register_ret = function
   | None -> ""
   | Some name -> "  uint64_t " ^ name ^ ";\n"
 
-// Prints `"=r" (name)` if an output is specified
+// Prints `"=&r" (name)` if an output is specified
 let print_output_ret ret_val (reg_names:reg_64 -> string) (counter:nat) : list string * (reg_64 -> string) * nat
   = match ret_val with
   | None -> [], reg_names, counter
-  | Some name -> (["\"=r\" (" ^ name ^ ")"],
+  | Some name -> (["\"=&r\" (" ^ name ^ ")"],
       // If r = rax then address it as current arg number
       (fun r -> if r = 0 then string_of_int counter else reg_names r),
       counter + 1)
 
-// If the register in which a is passed is modified, we should specify `"+r" (name)`
+// If the register in which a is passed is modified, we should specify `"+&r" (name)`
 let print_modified_input (n:nat) (a:td) (i:nat{i < n}) (of_arg:reg_nat n -> reg_64) (regs_mod:reg_64 -> bool) (reg_names:reg_64 -> string) (counter:nat) : list string * (reg_64 -> string) * nat =
    if regs_mod (of_arg i) then
-    (["\"+r\" (arg" ^ string_of_int i ^ ")"],
+    (["\"+&r\" (arg" ^ string_of_int i ^ ")"],
      (fun r -> if r = of_arg i then string_of_int counter else reg_names r),
      counter + 1) else ([], reg_names, counter)
 

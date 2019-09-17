@@ -69,7 +69,7 @@ let fsqr_post : VSig.vale_post fsqr_dom =
 
 let fsqr_regs_modified: MS.reg_64 -> bool = fun (r:MS.reg_64) ->
   let open MS in
-  if r = rRax || r = rRbx || r = rRcx || r = rRdx || r = rRdi || r = rRsi || r = rR8 || r = rR9 || r = rR10 || r = rR11 || r = rR12 || r = rR13 || r = rR14 || r = rR15 then true
+  if r = rRax || r = rRcx || r = rRdx || r = rRdi || r = rRsi || r = rR8 || r = rR9 || r = rR10 || r = rR11 || r = rR12 || r = rR13 || r = rR14 || r = rR15 then true
   else false
 
 let fsqr_xmms_modified = fun _ -> false
