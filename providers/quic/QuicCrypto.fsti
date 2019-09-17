@@ -353,7 +353,7 @@ val decrypt:
       let pn = U64.v o.pn in
       let last = pnT s Reader h0 in
       inv s h1 /\ pn >= initial_pn s h0 /\
-      pnT s Reader h1 == U64.v o.pn /\
+      pnT s Reader h1 == max (pnT s Reader h0) (U64.v o.pn) /\
       B.length o.plain == U32.v o.plain_len /\
       (safe i ==>
        begin (* Ideal case *)
