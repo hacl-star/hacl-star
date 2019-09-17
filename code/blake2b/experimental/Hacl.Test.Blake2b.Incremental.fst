@@ -34,8 +34,8 @@ let test_blake2b ll d kk k nn expected =
   let output = create nn (u8 0) in
   let state = {
     hash = create (size 8) (u64 0);
-    n = 0ul;
-    pl = 0ul;
+    n = create (size 1) (size 0);
+    pl = create (size 1) (size 0);
     block = create Hacl.Impl.Blake2b.size_block (u8 0);
   } in
   blake2b_incremental_init state kk k nn;
