@@ -25,10 +25,10 @@ AESGCM_NI_FILES= $(HACL_HOME)/lib/Lib.IntTypes.fst \
 	$(HACL_HOME)/lib/Lib.Loops.fst \
 	$(HACL_HOME)/lib/Lib.IntVector.fst \
 	$(HACL_HOME)/lib/Lib.IntVector.Intrinsics.fsti \
+	$(HACL_HOME)/lib/Lib.Sequence.Lemmas.fst \
+	$(HACL_HOME)/lib/Lib.Sequence.Lemmas.fsti \
 	../gf128/Hacl.Impl.Gf128.FieldNI.fst \
 	../gf128/Hacl.Impl.Gf128.Fields.fst \
-	$(HACL_HOME)/code/poly1305/Lib.Loops.Lemmas.fsti \
-	$(HACL_HOME)/code/poly1305/Lib.Loops.Lemmas.fst \
 	../gf128/Hacl.Spec.GF128.Equiv.fst \
 	../gf128/Hacl.Impl.Gf128.Generic.fst \
 	../gf128/Hacl.Gf128.NI.fst \
@@ -45,10 +45,10 @@ AESGCM_AES256_NI_FILES= $(HACL_HOME)/lib/Lib.IntTypes.fst \
 	$(HACL_HOME)/lib/Lib.Loops.fst \
 	$(HACL_HOME)/lib/Lib.IntVector.fst \
 	$(HACL_HOME)/lib/Lib.IntVector.Intrinsics.fsti \
+	$(HACL_HOME)/lib/Lib.Sequence.Lemmas.fst \
+	$(HACL_HOME)/lib/Lib.Sequence.Lemmas.fsti \
 	../gf128/Hacl.Impl.Gf128.FieldNI.fst \
 	../gf128/Hacl.Impl.Gf128.Fields.fst \
-	$(HACL_HOME)/code/poly1305/Lib.Loops.Lemmas.fsti \
-	$(HACL_HOME)/code/poly1305/Lib.Loops.Lemmas.fst \
 	../gf128/Hacl.Spec.GF128.Equiv.fst \
 	../gf128/Hacl.Impl.Gf128.Generic.fst \
 	../gf128/Hacl.Gf128.NI.fst \
@@ -63,10 +63,10 @@ AESGCM_M32_FILES= $(HACL_HOME)/lib/Lib.IntTypes.fst \
 	$(HACL_HOME)/lib/Lib.Buffer.fst \
 	$(HACL_HOME)/lib/Lib.ByteBuffer.fst \
 	$(HACL_HOME)/lib/Lib.Loops.fst \
+	$(HACL_HOME)/lib/Lib.Sequence.Lemmas.fst \
+	$(HACL_HOME)/lib/Lib.Sequence.Lemmas.fsti \
 	../gf128/Hacl.Impl.Gf128.FieldPreComp.fst \
 	../gf128/Hacl.Impl.Gf128.Fields.fst \
-	$(HACL_HOME)/code/poly1305/Lib.Loops.Lemmas.fsti \
-	$(HACL_HOME)/code/poly1305/Lib.Loops.Lemmas.fst \
 	../gf128/Hacl.Spec.GF128.Equiv.fst \
 	../gf128/Hacl.Impl.Gf128.Generic.fst \
 	../gf128/Hacl.Gf128.PreComp.fst \
@@ -81,10 +81,10 @@ AESGCM_AES256_M32_FILES= $(HACL_HOME)/lib/Lib.IntTypes.fst \
 	$(HACL_HOME)/lib/Lib.Buffer.fst \
 	$(HACL_HOME)/lib/Lib.ByteBuffer.fst \
 	$(HACL_HOME)/lib/Lib.Loops.fst \
+	$(HACL_HOME)/lib/Lib.Sequence.Lemmas.fst \
+	$(HACL_HOME)/lib/Lib.Sequence.Lemmas.fsti \
 	../gf128/Hacl.Impl.Gf128.FieldPreComp.fst \
 	../gf128/Hacl.Impl.Gf128.Fields.fst \
-	$(HACL_HOME)/code/poly1305/Lib.Loops.Lemmas.fsti \
-	$(HACL_HOME)/code/poly1305/Lib.Loops.Lemmas.fst \
 	../gf128/Hacl.Spec.GF128.Equiv.fst \
 	../gf128/Hacl.Impl.Gf128.Generic.fst \
 	../gf128/Hacl.Gf128.PreComp.fst \

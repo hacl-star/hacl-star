@@ -502,7 +502,7 @@ let poly1305_update_multi_loop #s bs len text pre acc =
 #pop-options
 
 
-#push-options "--z3rlimit 150"
+#push-options "--z3rlimit 400"
 inline_for_extraction noextract
 val poly1305_update_multi:
     #s:field_spec
@@ -525,7 +525,7 @@ val poly1305_update_multi:
 
 let poly1305_update_multi #s len text pre acc =
   let h0 = ST.get () in
-  assert (feval h0 (gsub pre 10ul 5ul) == Vec.compute_rw ((feval h0 (gsub pre 0ul 5ul)).[0]));
+  assert (feval h0 (gsub pre 10ul 5ul) == Vec.compute_rw #(width s) ((feval h0 (gsub pre 0ul 5ul)).[0]));
 
   let bs = blocklen s in
   //assert (v bs == width s * S.size_block);
@@ -560,7 +560,6 @@ val poly1305_update_vec:
 
 let poly1305_update_vec #s len text pre acc =
   let sz_block = blocklen s in
-  FStar.Math.Lemmas.multiply_fractions (v len) (v sz_block);
   let len0 = (len /. sz_block) *! sz_block in
   let t0 = sub text 0ul len0 in
   FStar.Math.Lemmas.multiple_modulo_lemma (v (len /. sz_block)) (v (blocklen s));

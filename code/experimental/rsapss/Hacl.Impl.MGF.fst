@@ -4,14 +4,15 @@ open FStar.HyperStack
 open FStar.HyperStack.ST
 open FStar.Mul
 
-open LowStar.Buffer
-
 open Lib.IntTypes
 open Lib.Buffer
 
-open Hacl.Impl.Lib
+open Hacl.Bignum
 
 module ST = FStar.HyperStack.ST
+module S = Spec.RSAPSS
+module BSeq = Lib.ByteSequence
+module LSeq = Lib.Sequence
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
@@ -20,69 +21,81 @@ inline_for_extraction
 let hLen = 32ul
 
 val hash_sha256:
-    mHash:lbytes hLen
-  -> len:size_t
-  -> m:lbytes len
-  -> Stack unit
-    (requires fun h -> live h mHash /\ live h m /\ disjoint m mHash)
-    (ensures  fun h0 _ h1 -> modifies (loc_buffer mHash) h0 h1)
-let hash_sha256 mHash len m = Hacl.SHA256.hash mHash len m
-//SHA2_256.hash mHash m clen
+    mHash:lbuffer uint8 hLen
+  -> msgLen:size_t{v msgLen < S.max_input}
+  -> msg:lbuffer uint8 msgLen ->
+  Stack unit
+  (requires fun h -> live h mHash /\ live h msg /\ disjoint msg mHash)
+  (ensures  fun h0 _ h1 -> modifies (loc mHash) h0 h1 /\
+    as_seq h1 mHash == S.sha2_256 (as_seq h0 msg))
+let hash_sha256 mHash msgLen msg =
+  Hacl.Hash.SHA2.hash_256 msg msgLen mHash
+
 
 (* Mask Generation Function *)
 inline_for_extraction noextract
-val mgf_sha256_:
-    mgfseedLen:size_t
-  -> accLen:size_t
-  -> stLen:size_t{v stLen = v mgfseedLen + 4 + v hLen + v accLen}
-  -> st:lbytes stLen
-  -> count_max:size_t{v accLen = v count_max * v hLen}
-  -> Stack unit
-    (requires fun h -> live h st)
-    (ensures  fun h0 _ h1 -> modifies (loc_buffer st) h0 h1)
-let mgf_sha256_ mgfseedLen accLen stLen st count_max =
+val counter_to_bytes:
+    i:size_t
+  -> counter:lbuffer uint8 4ul ->
+  Stack unit
+  (requires fun h -> live h counter)
+  (ensures  fun h0 _ h1 -> modifies (loc counter) h0 h1 /\
+    as_seq h1 counter == BSeq.nat_to_bytes_be 4 (v i))
+let counter_to_bytes i c =
   let h0 = ST.get () in
-  let inv h1 i = modifies (loc_buffer st) h0 h1 in
-  Lib.Loops.for 0ul count_max inv
-  (fun counter ->
-    let mgfseed_counterLen = mgfseedLen +. 4ul in
-    let mgfseed_counter = sub st 0ul mgfseed_counterLen in
-    let mHash = sub st mgfseed_counterLen hLen in
-    let acc = sub st (mgfseed_counterLen +. hLen) accLen in
-    let c = sub #_ #(v mgfseed_counterLen) #4 mgfseed_counter mgfseedLen 4ul in
+  c.(0ul) <- to_u8 (i >>. 24ul);
+  c.(1ul) <- to_u8 (i >>. 16ul);
+  c.(2ul) <- to_u8 (i >>. 8ul);
+  c.(3ul) <- to_u8 i;
+  let h1 = ST.get () in
+  assume (as_seq h1 c == BSeq.nat_to_bytes_be 4 (v i))
 
-    c.(0ul) <- to_u8 (counter >>. 24ul);
-    c.(1ul) <- to_u8 (counter >>. 16ul);
-    c.(2ul) <- to_u8 (counter >>. 8ul);
-    c.(3ul) <- to_u8 counter;
 
-    hash_sha256 mHash mgfseed_counterLen mgfseed_counter;
-    let acc' = sub #_ #(v accLen) acc (hLen *. counter) hLen in
-    copy acc' hLen mHash
-  )
+inline_for_extraction noextract
+val mgf_sha256_f:
+    len:size_t{v len + 4 <= max_size_t /\ v len + 4 < S.max_input}
+  -> i:size_t
+  -> mgfseed_counter:lbuffer uint8 (len +! 4ul)
+  -> block:lbuffer uint8 hLen ->
+  Stack unit
+  (requires fun h -> live h mgfseed_counter /\ live h block /\ disjoint mgfseed_counter block)
+  (ensures  fun h0 _ h1 -> modifies (loc mgfseed_counter |+| loc block) h0 h1 /\
+    (as_seq h1 mgfseed_counter, as_seq h1 block) == S.mgf_sha256_f (v len) (v i) (as_seq h0 mgfseed_counter))
+
+let mgf_sha256_f len i mgfseed_counter block =
+  let h0 = ST.get () in
+  update_sub_f h0 mgfseed_counter len 4ul
+    (fun h -> BSeq.nat_to_bytes_be 4 (v i))
+    (fun _ -> counter_to_bytes i (sub mgfseed_counter len 4ul));
+  hash_sha256 block (len +! 4ul) mgfseed_counter
+
 
 val mgf_sha256:
-    mgfseedLen:size_t{v mgfseedLen + 4 < max_size_t}
-  -> mgfseed:lbytes mgfseedLen
-  -> maskLen:size_t{0 < v maskLen /\ v mgfseedLen + 4 + v hLen + v (blocks maskLen hLen) * v hLen < pow2 32}
-  -> res:lbytes maskLen
-  -> Stack unit
-    (requires fun h -> live h mgfseed /\ live h res /\ disjoint res mgfseed)
-    (ensures  fun h0 _ h1 -> modifies (loc_buffer res) h0 h1)
+    len:size_t{v len + 4 <= max_size_t /\ v len + 4 < S.max_input}
+  -> mgfseed:lbuffer uint8 len
+  -> maskLen:size_t{0 < v maskLen /\ v (blocks maskLen hLen) * v hLen < pow2 32}
+  -> res:lbuffer uint8 maskLen ->
+  Stack unit
+  (requires fun h -> live h mgfseed /\ live h res /\ disjoint res mgfseed)
+  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_seq h1 res == S.mgf_sha256 #(v len) (as_seq h0 mgfseed) (v maskLen))
+
 [@"c_inline"]
-let mgf_sha256 mgfseedLen mgfseed maskLen res =
+let mgf_sha256 len mgfseed maskLen res =
   push_frame ();
-  let count_max = blocks maskLen hLen in
-  let accLen = count_max *. hLen in
-  let mgfseed_counterLen = mgfseedLen +. 4ul in
-  //st = [mgfseed_counter; hash(mgfseed_counter); acc]
-  let stLen = mgfseed_counterLen +. hLen +. accLen in
-  let st = create stLen (u8 0) in
-  let mgfseed_counter = sub st 0ul mgfseed_counterLen in
-  let mgfseed_st = sub #_ #(v mgfseed_counterLen) mgfseed_counter 0ul mgfseedLen in
-  copy mgfseed_st mgfseedLen mgfseed;
-  mgf_sha256_ mgfseedLen accLen stLen st count_max;
-  let acc = sub st (mgfseed_counterLen +. hLen) accLen in
-  let acc1 = sub #_ #(v accLen) acc 0ul maskLen in
-  copy res maskLen acc1;
+  let mgfseed_counter = create (len +! 4ul) (u8 0) in
+  update_sub mgfseed_counter 0ul len mgfseed;
+
+  let n = blocks maskLen hLen in
+  let accLen = n *! hLen in
+  let acc = create accLen (u8 0) in
+  [@ inline_let]
+  let a_spec = S.mgf_sha256_a (v len) (v n) in
+  let h0 = ST.get () in
+  fill_blocks h0 hLen n acc a_spec
+    (fun h i -> as_seq h mgfseed_counter)
+    (fun _ -> loc mgfseed_counter)
+    (fun h0 -> S.mgf_sha256_f (v len))
+    (fun i -> mgf_sha256_f len i mgfseed_counter (sub acc (i *! hLen) hLen));
+  copy res (sub acc 0ul maskLen);
   pop_frame ()

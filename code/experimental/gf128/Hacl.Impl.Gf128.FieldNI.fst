@@ -151,12 +151,9 @@ val store_felem:
 let store_felem x y =
   let h0 = ST.get () in
   vec_store_be x y.(size 0);
-  let h1 = ST.get () in
-  assert (as_seq h1 x == BSeq.uints_to_bytes_be (vec_v (as_seq h0 y).[0]));
-  //BSeq.index_uints_to_bytes_be #U128 #SEC #1 (vec_v (as_seq h0 y).[0]) 0;
-  //assert (LSeq.index (BSeq.uints_to_bytes_be (vec_v (as_seq h0 y).[0])) 0 == BSeq.uint_to_bytes_be (vec_v (as_seq h0 y).[0]).[0]);
-  //assert (BSeq.uints_to_bytes_be (vec_v (as_seq h0 y).[0]) == BSeq.uint_to_bytes_be (vec_v (as_seq h0 y).[0]).[0]);
-  admit()
+  let ul = vec_v (as_seq h0 y).[0] in
+  FStar.Classical.forall_intro (BSeq.index_uints_to_bytes_be #U128 #SEC #1 ul);
+  LSeq.eq_intro (BSeq.uints_to_bytes_be #U128 #SEC #1 ul) (BSeq.uint_to_bytes_be ul.[0])
 
 
 val fadd:
