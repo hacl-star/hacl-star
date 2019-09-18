@@ -68,14 +68,16 @@ let mask_shift_right_mod #f y =
   logxor_lemma (y >>. 1ul) zero;
   (y >>. 1ul) `fadd` (f.irred &. eq_mask #f.t (get_ith_bit y (bits f.t - 1)) one)
 
+
+val fmul_be_f: #f:field -> x:felem f -> i:nat{i < bits f.t} -> res_y:tuple2 (felem f) (felem f) -> felem f & felem f
+let fmul_be_f #f x i (res, y) =
+  let res = mask_add x y res i in
+  let y = mask_shift_right_mod y in
+  (res, y)
+
+
 let fmul_be (#f:field) (x:felem f) (y:felem f) : felem f =
-  let (res, y) =
-    repeati (bits f.t)
-    (fun i (res, y) ->
-      let res = mask_add x y res i in
-      let y = mask_shift_right_mod y in
-      (res, y))
-    (zero, y) in
+  let (res, y) = repeati (bits f.t) (fmul_be_f x) (zero, y) in
   res
 
 val fexp: #f:field -> a:felem f -> n:nat{n >= 1} -> Tot (felem f) (decreases n)

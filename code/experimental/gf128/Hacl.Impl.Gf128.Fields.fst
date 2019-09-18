@@ -111,9 +111,7 @@ noextract
 val precomp_inv_t: #s:field_spec -> h:mem -> pre:precomp s -> Type0
 let precomp_inv_t #s h pre =
   match s with
-  | PreComp ->
-    get_r4321 h pre == load_precompute_r (get_r1 h pre) /\
-    as_seq h (gsub pre 8ul 256ul) == Hacl.Spec.Gf128.FieldPreComp.precomp_s (as_seq h (gsub pre 0ul 2ul))
+  | PreComp -> Hacl.Impl.Gf128.FieldPreComp.load_precomp_r_inv h pre
   | NI -> get_r4321 h pre == load_precompute_r (get_r1 h pre)
 
 

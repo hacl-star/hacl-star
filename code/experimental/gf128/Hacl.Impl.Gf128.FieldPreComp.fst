@@ -18,6 +18,7 @@ module Vec = Hacl.Spec.GF128.Vec
 module SPreComp = Hacl.Spec.Gf128.FieldPreComp
 module Lemmas = Hacl.Spec.GF128.Lemmas
 
+
 #set-options "--z3rlimit 25 --max_fuel 1 --max_ifuel 1"
 
 noextract
@@ -28,8 +29,7 @@ let bit_mask64 (u:uint64) = u64 0 -. (u &. u64 1)
 
 type felem = lbuffer uint64 2ul
 type felem4 = lbuffer uint64 8ul
-type table = lbuffer uint64 256ul // r4(8) + table(256)
-type table1 = lbuffer uint64 128ul
+type table = lbuffer uint64 256ul
 type precomp = lbuffer uint64 264ul // r4(8) + table(256)
 
 type block = lbuffer uint8 16ul
@@ -59,7 +59,9 @@ let feval4 (h:mem) (f:felem4) : GTot Vec.elem4 =
 noextract
 let load_precomp_r_inv (h:mem) (pre:precomp) : Type0 =
   feval4 h (gsub pre 0ul 8ul) == Vec.load_precompute_r (feval h (gsub pre 6ul 2ul)) /\
-  as_seq h (gsub pre 8ul 256ul) == SPreComp.precomp_s (as_seq h (gsub pre 0ul 2ul))
+  (let (y1, tab1) = SPreComp.precomp_s0 (as_seq h (gsub pre 0ul 2ul)) in
+   let (y2, tab2) = SPreComp.precomp_s0 y1 in
+   as_seq h (gsub pre 8ul 128ul) == tab1 /\ as_seq h (gsub pre 136ul 128ul) == tab2)
 
 
 inline_for_extraction
@@ -256,26 +258,57 @@ let fadd4 x y =
   LSeq.eq_intro (feval4 h1 x) (Vec.fadd4 (feval4 h0 x) (feval4 h0 y))
 
 
-inline_for_extraction
-val fmul_f:
+inline_for_extraction noextract
+val mask_add0:
+    x:uint64
+  -> y:felem
+  -> res:felem
+  -> i:size_t{v i < 64} ->
+  Stack unit
+  (requires fun h -> live h y /\ live h res /\ disjoint y res)
+  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_seq h1 res == SPreComp.mask_add0 x (as_seq h0 y) (as_seq h0 res) (v i))
+
+let mask_add0 x y res i =
+  let h0 = ST.get () in
+  let m = bit_mask64 (x >>. (63ul -. i)) in
+  res.(0ul) <- res.(0ul) ^. (y.(0ul) &. m);
+  res.(1ul) <- res.(1ul) ^. (y.(1ul) &. m);
+  let h1 = ST.get () in
+  LSeq.eq_intro (as_seq h1 res) (SPreComp.mask_add0 x (as_seq h0 y) (as_seq h0 res) (v i))
+
+
+inline_for_extraction noextract
+val mask_shift_right_mod: y:felem ->
+  Stack unit
+  (requires fun h -> live h y)
+  (ensures  fun h0 _ h1 -> modifies (loc y) h0 h1 /\
+    as_seq h1 y == SPreComp.mask_shift_right_mod (as_seq h0 y))
+
+let mask_shift_right_mod y =
+  let h0 = ST.get () in
+  let m = bit_mask64 y.(0ul) in
+  y.(0ul) <- (y.(0ul) >>. 1ul) |. (y.(1ul) <<. 63ul);
+  y.(1ul) <- (y.(1ul) >>. 1ul) ^. (u64 0xE100000000000000 &. m);
+  let h1 = ST.get () in
+  LSeq.eq_intro (as_seq h1 y) (SPreComp.mask_shift_right_mod_optimized (as_seq h0 y));
+  SPreComp.mask_shift_right_mod_optimized_lemma (as_seq h0 y)
+
+
+inline_for_extraction noextract
+val fmul_f0:
     x:uint64
   -> i:size_t{v i < 64}
-  -> tmp:felem
-  -> sh:felem ->
+  -> res:felem
+  -> y:felem ->
   Stack unit
-  (requires fun h -> live h tmp /\ live h sh /\ disjoint tmp sh)
-  (ensures  fun h0 _ h1 -> modifies2 tmp sh h0 h1 /\
-    (as_seq h1 tmp, as_seq h1 sh) == SPreComp.fmul_be_s_f x (v i) (as_seq h0 tmp, as_seq h0 sh))
+  (requires fun h -> live h res /\ live h y /\ disjoint y res)
+  (ensures  fun h0 _ h1 -> modifies2 res y h0 h1 /\
+    (as_seq h1 res, as_seq h1 y) == SPreComp.fmul_be_s_f0 x (v i) (as_seq h0 res, as_seq h0 y))
 
-let fmul_f x i tmp sh =
-  let s0 = sh.(0ul) in
-  let s1 = sh.(1ul) in
-  let m = bit_mask64 (x >>. (63ul -. i)) in
-  tmp.(0ul) <- tmp.(0ul) ^. (m &. s0);
-  tmp.(1ul) <- tmp.(1ul) ^. (m &. s1);
-  let s = bit_mask64 s0 in
-  sh.(0ul) <- (s0 >>. 1ul) |. (s1 <<. size 63);
-  sh.(1ul) <- (s1 >>. 1ul) ^. (s &. u64 0xE100000000000000)
+let fmul_f0 x i res y =
+  mask_add0 x y res i;
+  mask_shift_right_mod y
 
 
 val fmul:
@@ -289,60 +322,61 @@ val fmul:
 [@CInline]
 let fmul x y =
   push_frame();
-  let tmp = create 2ul (u64 0) in
-  let sh = create 2ul (u64 0) in
-  copy_felem sh y;
+  let res = create 2ul (u64 0) in
+  let y_ = create 2ul (u64 0) in
+  copy_felem y_ y;
 
-  let h0 = ST.get() in
+  let h0 = ST.get () in
   [@inline_let]
-  let spec1 h = SPreComp.fmul_be_s_f (LSeq.index (as_seq h x) 1) in
-  loop2 h0 64ul tmp sh spec1
+  let spec1 h = SPreComp.fmul_be_s_f0 (LSeq.index (as_seq h x) 1) in
+  loop2 h0 64ul res y_ spec1
   (fun i ->
-    Lib.LoopCombinators.unfold_repeati 64 (spec1 h0) (as_seq h0 tmp, as_seq h0 sh) (v i);
-    fmul_f x.(1ul) i tmp sh);
+    Lib.LoopCombinators.unfold_repeati 64 (spec1 h0) (as_seq h0 res, as_seq h0 y_) (v i);
+    fmul_f0 x.(1ul) i res y_);
 
-  let h1 = ST.get() in
+  let h1 = ST.get () in
   [@inline_let]
-  let spec0 h = SPreComp.fmul_be_s_f (LSeq.index (as_seq h x) 0) in
-  loop2 h1 64ul tmp sh spec0
+  let spec0 h = SPreComp.fmul_be_s_f0 (LSeq.index (as_seq h x) 0) in
+  loop2 h1 64ul res y_ spec0
   (fun i ->
-    Lib.LoopCombinators.unfold_repeati 64 (spec0 h0) (as_seq h1 tmp, as_seq h1 sh) (v i);
-    fmul_f x.(0ul) i tmp sh);
+    Lib.LoopCombinators.unfold_repeati 64 (spec0 h0) (as_seq h1 res, as_seq h1 y_) (v i);
+    fmul_f0 x.(0ul) i res y_);
   let h2 = ST.get () in
-  assert (as_seq h2 tmp == SPreComp.fmul_be_s (as_seq h0 x) (as_seq h0 y));
+  assert (as_seq h2 res == SPreComp.fmul_be_s (as_seq h0 x) (as_seq h0 y));
+  copy_felem x res;
   SPreComp.fmul_be_lemma (as_seq h0 x) (as_seq h0 y);
-  copy_felem x tmp;
+  SPreComp.fmul_be_one_loop_lemma (as_seq h0 x) (as_seq h0 y);
   pop_frame()
 
 
+inline_for_extraction noextract
+let table1 = lbuffer uint64 128ul
+
 inline_for_extraction
 val precomp_f:
-    i:size_t{v i < 128}
-  -> pre:table
-  -> sh:felem ->
+    i:size_t{v i < 64}
+  -> sh:felem
+  -> pre:table1 ->
   Stack unit
   (requires fun h -> live h pre /\ live h sh /\ disjoint pre sh)
   (ensures  fun h0 _ h1 -> modifies2 pre sh h0 h1 /\
-    (as_seq h1 pre, as_seq h1 sh) == SPreComp.precomp_s_f (v i) (as_seq h0 pre, as_seq h0 sh))
+    (as_seq h1 sh, as_seq h1 pre) == SPreComp.precomp_s_f0 (v i) (as_seq h0 sh, as_seq h0 pre))
 
-let precomp_f i pre sh =
-  let s0 = sh.(0ul) in
-  let s1 = sh.(1ul) in
-  pre.(i *! 2ul) <- s0;
-  pre.(i *! 2ul +! 1ul) <- s1;
-  let s = bit_mask64 s0 in
-  sh.(0ul) <- (s0 >>. 1ul) |. (s1 <<. size 63);
-  sh.(1ul) <- (s1 >>. 1ul) ^. (s &. u64 0xE100000000000000)
+let precomp_f i sh pre =
+  update_sub pre (2ul *! i) 2ul sh;
+  mask_shift_right_mod sh
 
 
 val prepare:
     pre:table
   -> r:felem ->
   Stack unit
-  (requires fun h ->
-    live h pre /\ live h r /\ disjoint pre r)
+  (requires fun h -> live h pre /\ live h r /\ disjoint pre r)
   (ensures  fun h0 _ h1 -> modifies1 pre h0 h1 /\
-    as_seq h1 pre == SPreComp.precomp_s (as_seq h0 r))
+    (let (y1, tab1) = SPreComp.precomp_s0 (as_seq h0 r) in
+     let (y2, tab2) = SPreComp.precomp_s0 y1 in
+     as_seq h1 (gsub pre 0ul 128ul) == tab1 /\
+     as_seq h1 (gsub pre 128ul 128ul) == tab2))
 
 [@CInline]
 let prepare pre r =
@@ -351,13 +385,29 @@ let prepare pre r =
   let sh = create 2ul (u64 0) in
   copy_felem sh r;
 
+  let pre1 = sub pre 0ul 128ul in
+  let pre2 = sub pre 128ul 128ul in
+
   let h0 = ST.get() in
+  LSeq.eq_intro (as_seq h0 pre1) (LSeq.create 128 (u64 0));
+  LSeq.eq_intro (as_seq h0 pre2) (LSeq.create 128 (u64 0));
+
   [@inline_let]
-  let spec h = SPreComp.precomp_s_f in
-  loop2 h0 128ul pre sh spec
+  let spec h = SPreComp.precomp_s_f0 in
+  loop2 h0 64ul sh pre1 spec
   (fun i ->
-    Lib.LoopCombinators.unfold_repeati 128 (spec h0) (as_seq h0 pre, as_seq h0 sh) (v i);
-    precomp_f i pre sh);
+    Lib.LoopCombinators.unfold_repeati 64 (spec h0) (as_seq h0 sh, as_seq h0 pre1) (v i);
+    precomp_f i sh pre1);
+
+  let h1 = ST.get() in
+  Seq.lemma_split (as_seq h1 pre) 128;
+
+  loop2 h1 64ul sh pre2 spec
+  (fun i ->
+    Lib.LoopCombinators.unfold_repeati 64 (spec h1) (as_seq h1 sh, as_seq h1 pre2) (v i);
+    precomp_f i sh pre2);
+  let h2 = ST.get () in
+  Seq.lemma_split (as_seq h2 pre) 128;
   pop_frame()
 
 
@@ -399,12 +449,10 @@ val fmul_pre_f:
   Stack unit
   (requires fun h -> live h tmp /\ live h tab /\ disjoint tmp tab)
   (ensures  fun h0 _ h1 -> modifies1 tmp h0 h1 /\
-    as_seq h1 tmp == SPreComp.fmul_pre_s_f x (as_seq h0 tab) (v i) (as_seq h0 tmp))
+    as_seq h1 tmp == SPreComp.fmul_pre_s_f0 x (as_seq h0 tab) (v i) (as_seq h0 tmp))
 
 let fmul_pre_f x tab i tmp =
-  let m = bit_mask64 (x >>. (63ul -. i)) in
-  tmp.(0ul) <- tmp.(0ul) ^. (m &. tab.(i *! 2ul));
-  tmp.(1ul) <- tmp.(1ul) ^. (m &. tab.(i *! 2ul +! 1ul))
+  mask_add0 x (sub tab (2ul *! i) 2ul) tmp i
 
 
 val fmul_pre:
@@ -425,24 +473,22 @@ let fmul_pre x pre =
 
   let h0 = ST.get() in
   [@inline_let]
-  let spec1 h = SPreComp.fmul_pre_s_f (LSeq.index (as_seq h x) 1) (LSeq.sub (as_seq h0 tab) 0 128) in
-  let tab1 = sub tab 0ul 128ul in
+  let spec1 h = SPreComp.fmul_pre_s_f0 (LSeq.index (as_seq h x) 1) (LSeq.sub (as_seq h tab) 0 128) in
   loop1 h0 64ul tmp spec1
   (fun i ->
     Lib.LoopCombinators.unfold_repeati 64 (spec1 h0) (as_seq h0 tmp) (v i);
-    fmul_pre_f x.(1ul) tab1 i tmp);
+    fmul_pre_f x.(1ul) (sub tab 0ul 128ul) i tmp);
 
-  let h1 = ST.get() in
+  let h1 = ST.get () in
   [@inline_let]
-  let spec0 h = SPreComp.fmul_pre_s_f (LSeq.index (as_seq h x) 0) (LSeq.sub (as_seq h0 tab) 128 128) in
-  let tab1 = sub tab 128ul 128ul in
+  let spec0 h = SPreComp.fmul_pre_s_f0 (LSeq.index (as_seq h x) 0) (LSeq.sub (as_seq h tab) 128 128) in
   loop1 h1 64ul tmp spec0
   (fun i ->
-    Lib.LoopCombinators.unfold_repeati 64 (spec0 h0) (as_seq h1 tmp) (v i);
-    fmul_pre_f x.(0ul) tab1 i tmp);
+    Lib.LoopCombinators.unfold_repeati 64 (spec0 h1) (as_seq h1 tmp) (v i);
+    fmul_pre_f x.(0ul) (sub tab 128ul 128ul) i tmp);
   copy_felem x tmp;
-  let h2 = ST.get () in
   SPreComp.fmul_pre_lemma (as_seq h0 x) (as_seq h0 (gsub pre 0ul 2ul));
+  SPreComp.fmul_be_one_loop_lemma (as_seq h0 x) (as_seq h0 (gsub pre 0ul 2ul));
   pop_frame()
 
 
