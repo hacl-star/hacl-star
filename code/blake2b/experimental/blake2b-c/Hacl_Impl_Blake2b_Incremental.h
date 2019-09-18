@@ -15,11 +15,7 @@
 
 typedef uint32_t Hacl_Impl_Blake2b_Incremental_n_t;
 
-typedef uint32_t *Hacl_Impl_Blake2b_Incremental_n_tp;
-
 typedef uint32_t Hacl_Impl_Blake2b_Incremental_pl_t;
-
-typedef uint32_t *Hacl_Impl_Blake2b_Incremental_pl_tp;
 
 typedef struct Hacl_Impl_Blake2b_Incremental_state_r_s
 {
