@@ -1,11 +1,12 @@
-FSTAR_HOME   ?= ../../../../FStar
-KREMLIN_HOME ?= ../../../kremlin
-HACL_HOME    ?= ../../..
+FSTAR_HOME   ?= ../../../FStar
+KREMLIN_HOME ?= ../../kremlin
+HACL_HOME    ?= ../..
 
-OUTPUT_DIR    = .output
-HINT_DIR      = .hints
-GENERATED_DIR = ed25519-c
-OUT_DIR	      = ed25519-c
+CACHE_DIR     ?= $(HACL_HOME)/.cache
+HINT_DIR      ?= $(HACL_HOME)/.hints
+OUTPUT_DIR    ?= .output
+GENERATED_DIR ?= ed25519-c
+OUT_DIR	      ?= ed25519-c
 
 .PHONY: all test stage1 stage2 clean clean-c distclean
 

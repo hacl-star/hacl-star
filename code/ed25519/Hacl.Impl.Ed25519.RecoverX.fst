@@ -75,8 +75,6 @@ let is_0 x =
    u64_to_UInt64 x3 =^ 0uL &&
    u64_to_UInt64 x4 =^ 0uL)
 
-#push-options "--z3rlimit 100"
-
 val mul_modp_sqrt_m1:
   x:elemB ->
   Stack unit
@@ -94,8 +92,6 @@ let mul_modp_sqrt_m1 x =
   assert_norm (S51.as_nat5 (u64 0x00061b274a0ea0b0, u64 0x0000d5a5fc8f189d, u64 0x0007ef5e9cbd0c60, u64 0x00078595a6804c9e, u64 0x0002b8324804fc1d) == SE.modp_sqrt_m1);
   fmul x x sqrt_m1;
   pop_frame()
-
-#pop-options
 
 inline_for_extraction noextract
 val gte_q:
