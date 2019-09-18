@@ -1,0 +1,69 @@
+[
+  "¯I-\u0017!\t9g,¿X·£Áú^",
+  [
+    [
+      "Hacl.Curve25519.Finv.Field51.fsquare_times_51",
+      1,
+      0,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_cfc41488cee641ca406ae764563b3947"
+      ],
+      0,
+      "533826f1dfa0eac640f421d3f5524c86"
+    ],
+    [
+      "Hacl.Curve25519.Finv.Field51.fsquare_times_51",
+      2,
+      0,
+      1,
+      [ "@query" ],
+      0,
+      "e1cf9bd0c4f8fc98d7922c11d9cfc05f"
+    ],
+    [
+      "Hacl.Curve25519.Finv.Field51.finv_51",
+      1,
+      0,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "equation_Spec.Curve25519.prime", "int_typing",
+        "lemma_Spec.Curve25519.Lemmas.lemma_prime_value",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "5e1c1f5aa6a1a1d24f74e105b00ac89d"
+    ],
+    [
+      "Hacl.Curve25519.Finv.Field51.finv_51",
+      2,
+      0,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "constructor_distinct_Hacl.Impl.Curve25519.Fields.M51",
+        "equality_tok_Hacl.Impl.Curve25519.Fields.M51@tok",
+        "equality_tok_Lib.Buffer.MUT@tok",
+        "equality_tok_Lib.IntTypes.PUB@tok",
+        "equality_tok_Lib.IntTypes.U32@tok",
+        "equation_Hacl.Impl.Curve25519.Fields.felem",
+        "equation_Hacl.Impl.Curve25519.Fields.felem_wide2",
+        "equation_Lib.Buffer.disjoint", "equation_Lib.Buffer.lbuffer_t",
+        "equation_Lib.IntTypes.uint128", "equation_Lib.IntTypes.uint64",
+        "function_token_typing_Lib.IntTypes.uint128",
+        "function_token_typing_Lib.IntTypes.uint64",
+        "lemma_LowStar.Monotonic.Buffer.loc_disjoint_sym_",
+        "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
+        "refinement_interpretation_Tm_refine_cffe23865fc9ed31024dd97f26f44e17",
+        "refinement_interpretation_Tm_refine_e6e1c078674886479eb7ce9e7e64b0b9",
+        "typing_Lib.Buffer.loc", "typing_tok_Lib.Buffer.MUT@tok"
+      ],
+      0,
+      "223f72b5dba847de47ed86868d71209d"
+    ]
+  ]
+]
