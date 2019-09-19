@@ -1113,7 +1113,6 @@ val map_blocks_multi:
     (ensures  fun _ _ h1 -> modifies1 output h0 h1 /\
 	as_seq h1 output == Seq.map_blocks_multi (v blocksize) (v nb) (v nb) (as_seq h0 inp) (spec_f h0))
 
-#set-options "--z3rlimit 50"
 inline_for_extraction noextract
 val map_blocks:
     #t:buftype

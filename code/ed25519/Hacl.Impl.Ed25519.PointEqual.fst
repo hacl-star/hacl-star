@@ -69,7 +69,7 @@ val lemma_equality1:
 
 open FStar.Calc
 
-#push-options "--z3rlimit 50"
+#push-options "--z3rlimit 100"
 
 let lemma_equality1 a b c d e a' b' c' d' e' =
   assert_norm(pow2 51 = 0x8000000000000);
