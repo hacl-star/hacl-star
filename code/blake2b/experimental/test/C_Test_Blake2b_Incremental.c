@@ -43,21 +43,16 @@ test_hacl_blake2b(uint32_t ll, uint8_t *d, uint32_t kk, uint8_t *k, uint32_t nn,
 }
 
 
-bool Lib_PrintBuffer_compare(uint32_t len, uint8_t* buffer1, uint8_t* buffer2) {
+uint8_t Lib_PrintBuffer_compare_fast(uint32_t len, uint8_t* buffer1, uint8_t* buffer2) {
   uint8_t res = 0;
   uint32_t i;
   for (i = 0; i < len; i++) {
     res |= buffer1[i] ^ buffer2[i];
   }
-  if (res == 0) {
-    printf("Success !\n");
-  } else {
-    printf("Failure !\n");
-  }
   return res;
 }
 
-uint8_t Lib_PrintBuffer_result_compare(uint32_t len, uint8_t* buffer1, uint8_t* buffer2) {
+uint8_t Lib_PrintBuffer_compare(uint32_t len, uint8_t* buffer1, uint8_t* buffer2) {
   uint8_t res = 0;
   uint32_t i;
   for (i = 0; i < len; i++) {
@@ -71,7 +66,7 @@ uint8_t Lib_PrintBuffer_result_compare(uint32_t len, uint8_t* buffer1, uint8_t* 
   return res;
 }
 
-uint8_t Lib_PrintBuffer_result_compare_display2(uint32_t len, uint8_t* buffer1, uint8_t* buffer2) {
+uint8_t Lib_PrintBuffer_compare_display(uint32_t len, uint8_t* buffer1, uint8_t* buffer2) {
   uint8_t res = 0;
   uint32_t i;
   Lib_PrintBuffer_print_compare(len, buffer1, buffer2);
@@ -144,10 +139,11 @@ exit_code main()
     Hacl_Blake2b_blake2b(outlen, outh, len, input, keylen, key);
 
     /* Display output */
-    C_String_print("Test ...\n");
+    /* C_String_print("Test ...\n"); */
     /* Lib_PrintBuffer_print_bytes(outlen, outr); */
     /* Lib_PrintBuffer_print_bytes(outlen, outh); */
-    result |= Lib_PrintBuffer_result_compare_display2(outlen, outh, outr);
+    result |= Lib_PrintBuffer_compare_fast(outlen, outh, outr);
+    /* result |= Lib_PrintBuffer_result_compare_display2(outlen, outh, outr); */
   }
 
   /* Test for failure */
