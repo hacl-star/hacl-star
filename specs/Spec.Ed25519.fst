@@ -47,7 +47,7 @@ let modp_inv (x:elem) : Tot elem =
   x **% (prime - 2)
 
 let sha512_modq (len:size_nat) (s:lbytes len) : n:nat{n < pow2 256} =
-  nat_from_bytes_le (Spec.Hash.hash Spec.Hash.Definitions.SHA2_512 s) % q
+  nat_from_bytes_le (Spec.Agile.Hash.hash Spec.Hash.Definitions.SHA2_512 s) % q
 
 let point_add (p:ext_point) (q:ext_point) : Tot ext_point =
   let x1, y1, z1, t1 = p in
@@ -134,7 +134,7 @@ let point_decompress (s:lbytes 32) : Tot (option ext_point) =
   | _ -> None
 
 let secret_expand (secret:lbytes 32) : (lbytes 32 & lbytes 32) =
-  let h = Spec.Hash.hash Spec.Hash.Definitions.SHA2_512 secret in
+  let h = Spec.Agile.Hash.hash Spec.Hash.Definitions.SHA2_512 secret in
   let h_low : lbytes 32 = slice #uint8 #64 h 0 32 in
   let h_high : lbytes 32 = slice #uint8 #64 h 32 64 in
   let h_low0 : uint8  = index #uint8 #32 h_low 0 in

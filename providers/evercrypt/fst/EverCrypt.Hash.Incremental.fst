@@ -73,7 +73,7 @@ let invariant_s #a h s =
   S.length blocks + S.length rest = U64.v total_len /\
   S.length seen = U64.v total_len /\
   U64.v total_len < pow2 61 /\
-  S.equal (Hash.repr hash_state h) (Spec.Hash.update_multi a (Spec.Hash.init a) blocks) /\
+  S.equal (Hash.repr hash_state h) (Spec.Agile.Hash.update_multi a (Spec.Agile.Hash.init a) blocks) /\
   S.equal (S.slice (B.as_seq h buf_) 0 (U64.v total_len % block_length a)) rest
 
 #push-options "--max_ifuel 1"
@@ -338,7 +338,7 @@ let update_small a p data len =
     S.length blocks + S.length rest = U64.v total_len /\
     S.length b = U64.v total_len /\
     U64.v total_len < pow2 61 /\
-    S.equal (Hash.repr hash_state h2) (Spec.Hash.update_multi a (Spec.Hash.init a) blocks) /\
+    S.equal (Hash.repr hash_state h2) (Spec.Agile.Hash.update_multi a (Spec.Agile.Hash.init a) blocks) /\
     S.equal (S.slice (B.as_seq h2 buf) 0 (U64.v total_len % block_length a)) rest
     );
   assert (hashed #a h2 p `S.equal` (S.append (G.reveal seen) (B.as_seq h0 data)));
@@ -544,7 +544,7 @@ let update_round a p data len =
   let h2 = ST.get () in
   // JP: no clue why I had to go through all these manual steps.
   (
-    let open Spec.Hash in
+    let open Spec.Agile.Hash in
     let blocks, rest = split_at_last a (G.reveal seen) in
     assert (S.equal (Hash.repr hash_state h2)
       (update_multi a (Hash.repr hash_state h1) (B.as_seq h1 buf0)));
@@ -553,21 +553,21 @@ let update_round a p data len =
     assert (S.equal (B.as_seq h0 data) (B.as_seq h1 data));
     assert (S.equal (B.as_seq h1 buf0) (S.append (B.as_seq h1 buf1) (B.as_seq h1 data)));
     assert (S.equal (Hash.repr hash_state h2)
-      (update_multi a (Spec.Hash.init a)
+      (update_multi a (Spec.Agile.Hash.init a)
         (S.append blocks (B.as_seq h1 buf0))));
     assert (S.equal (Hash.repr hash_state h2)
-      (update_multi a (Spec.Hash.init a)
+      (update_multi a (Spec.Agile.Hash.init a)
         (S.append blocks (S.append (B.as_seq h1 buf1) (B.as_seq h1 data)))));
     S.append_assoc blocks (B.as_seq h1 buf1) (B.as_seq h1 data);
     assert (S.equal (Hash.repr hash_state h2)
-      (update_multi a (Spec.Hash.init a)
+      (update_multi a (Spec.Agile.Hash.init a)
         (S.append (S.append blocks (B.as_seq h1 buf1)) (B.as_seq h1 data))));
     assert (S.equal (S.append blocks rest) (G.reveal seen));
     assert (S.equal (Hash.repr hash_state h2)
-      (update_multi a (Spec.Hash.init a)
+      (update_multi a (Spec.Agile.Hash.init a)
         (S.append (G.reveal seen) (B.as_seq h1 data))));
     assert (S.equal (Hash.repr hash_state h2)
-      (update_multi a (Spec.Hash.init a)
+      (update_multi a (Spec.Agile.Hash.init a)
         (S.append (G.reveal seen) (B.as_seq h0 data))));
     split_at_last_block a (G.reveal seen) (B.as_seq h0 data);
     let blocks', rest' = split_at_last a (S.append (G.reveal seen) (B.as_seq h0 data)) in
@@ -682,7 +682,7 @@ let mk_finish a p dst =
   let h5 = ST.get () in
   begin
     let open Spec.Hash.PadFinish in
-    let open Spec.Hash in
+    let open Spec.Agile.Hash in
     let seen = G.reveal seen in
     let n = S.length seen / block_length a in
     let blocks, rest_ = S.split seen (n * block_length a) in
@@ -710,7 +710,7 @@ let mk_finish a p dst =
         update_multi a (init a)
           (S.append (S.append blocks rest_) (pad a (UInt64.v total_len))));
     (S.equal) { Spec.Hash.Lemmas.hash_is_hash_incremental a seen }
-      Spec.Hash.hash a seen;
+      Spec.Agile.Hash.hash a seen;
     }
   end;
 

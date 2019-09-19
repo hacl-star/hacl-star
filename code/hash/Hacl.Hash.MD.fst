@@ -92,7 +92,7 @@ let mk_update_multi a update s blocks n_blocks =
     B.live h s /\ B.live h blocks /\
     B.(modifies (loc_buffer s) h0 h) /\
     S.equal (B.as_seq h s)
-      (Spec.Hash.update_multi a (B.as_seq h0 s) (S.slice (B.as_seq h0 blocks) 0 i_block))
+      (Spec.Agile.Hash.update_multi a (B.as_seq h0 s) (S.slice (B.as_seq h0 blocks) 0 i_block))
   in
   let f (i:U32.t { U32.(0 <= v i /\ v i < v n_blocks)}): ST.Stack unit
     (requires (fun h -> inv h (U32.v i)))
@@ -116,7 +116,7 @@ let mk_update_multi a update s blocks n_blocks =
       block_length a * (i + 1) <= S.length blocks /\
       (block_length a * (i + 1) - block_length a * i) % block_length a = 0 /\
       S.equal block (S.slice blocks (block_length a * i) (block_length a * (i + 1))) /\
-      S.equal s2 (Spec.Hash.update_multi a s1 block))
+      S.equal s2 (Spec.Agile.Hash.update_multi a s1 block))
   in
   assert (B.length blocks = U32.v n_blocks * block_length a);
   C.Loops.for 0ul n_blocks inv f
@@ -144,7 +144,7 @@ let mk_update_last a update_multi pad s prev_len input input_len =
 
   let h1 = ST.get () in
   assert (S.equal (B.as_seq h0 input) (S.append (B.as_seq h1 blocks) (B.as_seq h1 rest)));
-  assert (S.equal (B.as_seq h1 s) (Spec.Hash.update_multi a (B.as_seq h0 s) (B.as_seq h0 blocks)));
+  assert (S.equal (B.as_seq h1 s) (Spec.Agile.Hash.update_multi a (B.as_seq h0 s) (B.as_seq h0 blocks)));
 
   (* Compute the total number of bytes fed. *)
   let total_input_len: len_t a = len_add32 a prev_len input_len in
@@ -179,7 +179,7 @@ let mk_update_last a update_multi pad s prev_len input input_len =
 
   let h3 = ST.get () in
   assert (S.equal (B.as_seq h3 s)
-    (Spec.Hash.update_multi a (Spec.Hash.update_multi a (B.as_seq h0 s) (B.as_seq h1 blocks))
+    (Spec.Agile.Hash.update_multi a (Spec.Agile.Hash.update_multi a (B.as_seq h0 s) (B.as_seq h1 blocks))
       (S.append (B.as_seq h1 rest) (Spec.Hash.PadFinish.pad a (len_v a total_input_len)))));
   assert (
     let s1 = B.as_seq h1 blocks in

@@ -1,4 +1,4 @@
-module Spec.HMAC
+module Spec.Agile.HMAC
 
 open Spec.Hash.Definitions
 open Lib.IntTypes

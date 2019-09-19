@@ -1,4 +1,4 @@
-module Spec.HKDF
+module Spec.Agile.HKDF
 
 open FStar.Mul
 
@@ -6,7 +6,7 @@ open Spec.Hash.Definitions
 
 val extract:
   a: hash_alg ->
-  key: bytes{ Spec.HMAC.keysized a (Seq.length key) } ->
+  key: bytes{ Spec.Agile.HMAC.keysized a (Seq.length key) } ->
   data: bytes{ Seq.length data + block_length a <= max_input_length a } ->
   Tot (Lib.ByteSequence.lbytes (hash_length a))
 

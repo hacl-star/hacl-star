@@ -4,7 +4,7 @@ module S = FStar.Seq
 
 include Spec.Hash.Lemmas0
 
-open Spec.Hash
+open Spec.Agile.Hash
 open Spec.Hash.Definitions
 open Spec.Hash.Incremental
 open Spec.Hash.PadFinish
@@ -99,7 +99,7 @@ let update_multi_associative' (a: hash_alg)
 
 #set-options "--max_fuel 0 --max_ifuel 0"
 
-let hash = Spec.Hash.hash
+let hash = Spec.Agile.Hash.hash
 
 let hash_is_hash_incremental (a: hash_alg) (input: bytes { S.length input <= max_input_length a }):
   Lemma (ensures (S.equal (hash a input) (hash_incremental a input)))

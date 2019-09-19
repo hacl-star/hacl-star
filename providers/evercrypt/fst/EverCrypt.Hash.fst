@@ -198,8 +198,8 @@ let update_last_224 s prev_len input input_len =
   [@inline_let]
   let l x y:
     Lemma
-      (ensures (Spec.Hash.update_multi SHA2_224 x y == Spec.Hash.update_multi SHA2_256 x y))
-    [ SMTPat (Spec.Hash.update_multi SHA2_224 x y); SMTPat (Spec.Hash.update_multi SHA2_256 x y) ]
+      (ensures (Spec.Agile.Hash.update_multi SHA2_224 x y == Spec.Agile.Hash.update_multi SHA2_256 x y))
+    [ SMTPat (Spec.Agile.Hash.update_multi SHA2_224 x y); SMTPat (Spec.Agile.Hash.update_multi SHA2_256 x y) ]
   =
     Spec.SHA2.Lemmas.update_multi_224_256 x y
   in
@@ -225,7 +225,7 @@ let update_last_st (#a:e_alg) =
     B.(modifies (loc_buffer p) h0 h1) /\
     (B.length last + Seq.length (Spec.Hash.PadFinish.pad a (v total_len))) % block_length a = 0 /\
     B.as_seq h1 p ==
-      Spec.Hash.update_multi a (B.as_seq h0 p)
+      Spec.Agile.Hash.update_multi a (B.as_seq h0 p)
         (Seq.append (B.as_seq h0 last) (Spec.Hash.PadFinish.pad a (v total_len))))
 
 inline_for_extraction

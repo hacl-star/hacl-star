@@ -10,7 +10,7 @@ module Hacl.HMAC
 module B = LowStar.Buffer
 module D = Hacl.Hash.Definitions
 
-open Spec.HMAC
+open Spec.Agile.HMAC
 open Spec.Hash.Definitions
 open FStar.HyperStack.ST
 open Lib.IntTypes

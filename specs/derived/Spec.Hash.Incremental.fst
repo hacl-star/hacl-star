@@ -2,7 +2,7 @@ module Spec.Hash.Incremental
 
 module S = FStar.Seq
 
-open Spec.Hash
+open Spec.Agile.Hash
 open Spec.Hash.Definitions
 open Spec.Hash.PadFinish
 

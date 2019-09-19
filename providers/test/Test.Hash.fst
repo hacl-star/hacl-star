@@ -66,7 +66,7 @@ let test_incremental_api (): St unit =
 
   let h4 = ST.get () in
   assert (Seq.equal (B.as_seq h4 dst)
-    (Spec.Hash.hash SHA2_256 (Seq.append (B.as_seq h0 b1) (B.as_seq h0 b2))));
+    (Spec.Agile.Hash.hash SHA2_256 (Seq.append (B.as_seq h0 b1) (B.as_seq h0 b2))));
 
   HI.free (G.hide SHA2_256) st;
   pop_frame ()

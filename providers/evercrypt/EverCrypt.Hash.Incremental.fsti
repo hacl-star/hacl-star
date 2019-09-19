@@ -307,7 +307,7 @@ let finish_st (a: Hash.alg) =
       hashed h0 s == hashed h1 s /\
       footprint h0 s == footprint h1 s /\
       B.(modifies (loc_union (loc_buffer dst) (footprint h0 s)) h0 h1) /\
-      S.equal (B.as_seq h1 dst) (Spec.Hash.hash a (hashed h0 s)))
+      S.equal (B.as_seq h1 dst) (Spec.Agile.Hash.hash a (hashed h0 s)))
 
 (** @type: true
 *)

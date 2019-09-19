@@ -1,4 +1,4 @@
-module Spec.Hash
+module Spec.Agile.Hash
 
 module S = FStar.Seq
 

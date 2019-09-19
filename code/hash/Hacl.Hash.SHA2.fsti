@@ -42,4 +42,4 @@ val hash_512_lib:
     (ensures (fun h0 _ h1 ->
       modifies1 dst h0 h1 /\
       as_seq h1 dst `equal`
-        Spec.Hash.hash SHA2_512 (as_seq h0 input)))
+        Spec.Agile.Hash.hash SHA2_512 (as_seq h0 input)))
