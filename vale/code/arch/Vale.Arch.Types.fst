@@ -1,5 +1,6 @@
 module Vale.Arch.Types
 
+open FStar.Mul
 open Vale.Def.Opaque_s
 open Vale.Def.Types_s
 open Vale.Arch.TypesNative
@@ -7,6 +8,10 @@ open Vale.Lib.Seqs
 open Vale.Def.Words_s
 open Vale.Def.Words.Two
 open FStar.Calc
+
+let lemma_nat_to_two32 () =
+  assert_norm (forall (x:nat64).{:pattern (nat_to_two 32 x)}
+    nat_to_two 32 x == Mktwo (x % 0x100000000) (x / 0x100000000))
 
 let lemma_BitwiseXorCommutative x y =
   lemma_ixor_nth_all 32;
@@ -111,7 +116,6 @@ let lemma_equality_check_helper_two_to_nat_32 (n:two nat32) :
           ( ~(n.lo == 0) \/ (~(n.hi == 0))) ==> ~(two_to_nat 32 n == 0) /\
           ((n.lo == 0xFFFFFFFF /\ n.hi == 0xFFFFFFFF) <==> two_to_nat 32 n == 0xFFFFFFFFFFFFFFFF))
   =
-  let open FStar.Mul in
   if n.lo == 0 /\ n.hi == 0 then (
     assert (int_to_natN pow2_64 (n.lo + pow2_32 * n.hi) == 0);
     ()
@@ -497,8 +501,6 @@ let lemma_reverse_reverse_bytes_quad32_seq (s:seq quad32) :
   [SMTPat (reverse_bytes_quad32_seq (reverse_bytes_quad32_seq s))]
   =
   seq_map_inverses reverse_bytes_quad32 reverse_bytes_quad32 s
-
-open FStar.Mul
 
 let lemma_le_seq_quad32_to_bytes_length (s:seq quad32) :
   Lemma(length (le_seq_quad32_to_bytes s) == (length s) * 16)

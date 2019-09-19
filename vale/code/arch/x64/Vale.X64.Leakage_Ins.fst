@@ -1,14 +1,16 @@
 module Vale.X64.Leakage_Ins
+open FStar.Mul
+open Vale.Arch.MachineHeap_s
+open Vale.Arch.Heap
 open Vale.X64.Machine_s
 open Vale.X64.Instruction_s
 module BC = Vale.X64.Bytes_Code_s
 module S = Vale.X64.Machine_Semantics_s
 open Vale.X64.Leakage_s
 open Vale.X64.Leakage_Helpers
-open Vale.X64.Bytes_Semantics
 
-unfold let op_String_Access = Map.sel
-unfold let op_String_Assignment = Map.upd
+unfold let (.[]) = Map.sel
+unfold let (.[]<-) = Map.upd
 
 unfold let obs_args = S.obs_args
 unfold let obs_inouts = S.obs_inouts
@@ -365,6 +367,20 @@ let lemma_preserve_valid128 (m m':S.machine_heap) : Lemma
   =
   FStar.Pervasives.reveal_opaque (`%S.valid_addr128) S.valid_addr128
 
+let lemma_is_machine_heap_update64 (ptr:int) (v:nat64) (mh:machine_heap) : Lemma
+  (requires S.valid_addr64 ptr mh)
+  (ensures is_machine_heap_update mh (S.update_heap64 ptr v mh))
+  [SMTPat (S.update_heap64 ptr v mh)]
+  =
+  FStar.Pervasives.reveal_opaque (`%valid_addr64) valid_addr64
+
+let lemma_is_machine_heap_update128 (ptr:int) (v:quad32) (mh:machine_heap) : Lemma
+  (requires S.valid_addr128 ptr mh)
+  (ensures is_machine_heap_update mh (S.update_heap128 ptr v mh))
+  [SMTPat (S.update_heap128 ptr v mh)]
+  =
+  FStar.Pervasives.reveal_opaque (`%S.valid_addr128) S.valid_addr128
+
 let lemma_instr_set_taints_explicit
     (i:instr_operand_explicit) (v1 v2:instr_val_t (IOpEx i)) (o:instr_operand_t i)
     (ts_orig ts:analysis_taints) (t_out:taint)
@@ -375,8 +391,8 @@ let lemma_instr_set_taints_explicit
       let s2' = S.instr_write_output_explicit i v2 o s2_orig s2 in
       s1'.S.ms_ok /\ s2'.S.ms_ok /\
       (t_out == Public ==> v1 == v2) /\
-      Set.equal (Map.domain s1_orig.S.ms_heap) (Map.domain s1.S.ms_heap) /\
-      Set.equal (Map.domain s2_orig.S.ms_heap) (Map.domain s2.S.ms_heap) /\
+      Set.equal (Map.domain (heap_get s1_orig.S.ms_heap)) (Map.domain (heap_get s1.S.ms_heap)) /\
+      Set.equal (Map.domain (heap_get s2_orig.S.ms_heap)) (Map.domain (heap_get s2.S.ms_heap)) /\
       check_if_consumes_fixed_time_outs_explicit i o ts_orig t_out /\
       publicValuesAreSame ts_orig.lts s1_orig s2_orig /\
       publicValuesAreSame ts.lts s1 s2
@@ -385,17 +401,17 @@ let lemma_instr_set_taints_explicit
       let s1' = S.instr_write_output_explicit i v1 o s1_orig s1 in
       let s2' = S.instr_write_output_explicit i v2 o s2_orig s2 in
       let ts' = instr_set_taint_explicit i o ts t_out in
-      Set.equal (Map.domain s1_orig.S.ms_heap) (Map.domain s1'.S.ms_heap) /\
-      Set.equal (Map.domain s2_orig.S.ms_heap) (Map.domain s2'.S.ms_heap) /\
+      Set.equal (Map.domain (heap_get s1_orig.S.ms_heap)) (Map.domain (heap_get s1'.S.ms_heap)) /\
+      Set.equal (Map.domain (heap_get s2_orig.S.ms_heap)) (Map.domain (heap_get s2'.S.ms_heap)) /\
       publicValuesAreSame ts'.lts s1' s2'
     ))
   =
   allow_inversion maddr;
   allow_inversion tmaddr;
-  lemma_preserve_valid64 s1_orig.S.ms_heap s1.S.ms_heap;
-  lemma_preserve_valid64 s2_orig.S.ms_heap s2.S.ms_heap;
-  lemma_preserve_valid128 s1_orig.S.ms_heap s1.S.ms_heap;
-  lemma_preserve_valid128 s2_orig.S.ms_heap s2.S.ms_heap;
+  lemma_preserve_valid64 (heap_get s1_orig.S.ms_heap) (heap_get s1.S.ms_heap);
+  lemma_preserve_valid64 (heap_get s2_orig.S.ms_heap) (heap_get s2.S.ms_heap);
+  lemma_preserve_valid128 (heap_get s1_orig.S.ms_heap) (heap_get s1.S.ms_heap);
+  lemma_preserve_valid128 (heap_get s2_orig.S.ms_heap) (heap_get s2.S.ms_heap);
   FStar.Pervasives.reveal_opaque (`%S.valid_addr128) S.valid_addr128;
   ()
 
@@ -409,8 +425,8 @@ let lemma_instr_set_taints_implicit
       let s2' = S.instr_write_output_implicit i v2 s2_orig s2 in
       s1'.S.ms_ok /\ s2'.S.ms_ok /\
       (t_out == Public ==> v1 == v2) /\
-      Set.equal (Map.domain s1_orig.S.ms_heap) (Map.domain s1.S.ms_heap) /\
-      Set.equal (Map.domain s2_orig.S.ms_heap) (Map.domain s2.S.ms_heap) /\
+      Set.equal (Map.domain (heap_get s1_orig.S.ms_heap)) (Map.domain (heap_get s1.S.ms_heap)) /\
+      Set.equal (Map.domain (heap_get s2_orig.S.ms_heap)) (Map.domain (heap_get s2.S.ms_heap)) /\
       check_if_consumes_fixed_time_outs_implicit i ts_orig t_out /\
       publicValuesAreSame ts_orig.lts s1_orig s2_orig /\
       publicValuesAreSame ts.lts s1 s2
@@ -419,8 +435,8 @@ let lemma_instr_set_taints_implicit
       let s1' = S.instr_write_output_implicit i v1 s1_orig s1 in
       let s2' = S.instr_write_output_implicit i v2 s2_orig s2 in
       let ts' = instr_set_taint_implicit i ts t_out in
-      Set.equal (Map.domain s1_orig.S.ms_heap) (Map.domain s1'.S.ms_heap) /\
-      Set.equal (Map.domain s2_orig.S.ms_heap) (Map.domain s2'.S.ms_heap) /\
+      Set.equal (Map.domain (heap_get s1_orig.S.ms_heap)) (Map.domain (heap_get s1'.S.ms_heap)) /\
+      Set.equal (Map.domain (heap_get s2_orig.S.ms_heap)) (Map.domain (heap_get s2'.S.ms_heap)) /\
       publicValuesAreSame ts'.lts s1' s2'
     ))
   =
@@ -428,10 +444,10 @@ let lemma_instr_set_taints_implicit
   allow_inversion tmaddr;
   allow_inversion operand64;
   allow_inversion operand128;
-  lemma_preserve_valid64 s1_orig.S.ms_heap s1.S.ms_heap;
-  lemma_preserve_valid64 s2_orig.S.ms_heap s2.S.ms_heap;
-  lemma_preserve_valid128 s1_orig.S.ms_heap s1.S.ms_heap;
-  lemma_preserve_valid128 s2_orig.S.ms_heap s2.S.ms_heap;
+  lemma_preserve_valid64 (heap_get s1_orig.S.ms_heap) (heap_get s1.S.ms_heap);
+  lemma_preserve_valid64 (heap_get s2_orig.S.ms_heap) (heap_get s2.S.ms_heap);
+  lemma_preserve_valid128 (heap_get s1_orig.S.ms_heap) (heap_get s1.S.ms_heap);
+  lemma_preserve_valid128 (heap_get s2_orig.S.ms_heap) (heap_get s2.S.ms_heap);
   FStar.Pervasives.reveal_opaque (`%S.valid_addr128) S.valid_addr128;
   ()
 
@@ -447,8 +463,8 @@ let rec lemma_instr_set_taints
       let s2_state' = S.instr_write_outputs outs args vs2 oprs s2_orig s2 in
       s1_state'.S.ms_ok /\ s2_state'.S.ms_ok /\
       (t_out == Public ==> vs1 == vs2) /\
-      Set.equal (Map.domain s1_orig.S.ms_heap) (Map.domain s1.S.ms_heap) /\
-      Set.equal (Map.domain s2_orig.S.ms_heap) (Map.domain s2.S.ms_heap) /\
+      Set.equal (Map.domain (heap_get s1_orig.S.ms_heap)) (Map.domain (heap_get s1.S.ms_heap)) /\
+      Set.equal (Map.domain (heap_get s2_orig.S.ms_heap)) (Map.domain (heap_get s2.S.ms_heap)) /\
       check_if_consumes_fixed_time_outs outs args oprs ts_orig t_out /\
       publicValuesAreSame ts_orig.lts s1_orig s2_orig /\
       publicValuesAreSame ts.lts s1 s2

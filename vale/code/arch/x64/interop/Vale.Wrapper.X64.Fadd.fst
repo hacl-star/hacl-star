@@ -1,5 +1,6 @@
 module Vale.Wrapper.X64.Fadd
 
+open FStar.Mul
 open Vale.Interop.Base
 module DV = LowStar.BufferView.Down
 

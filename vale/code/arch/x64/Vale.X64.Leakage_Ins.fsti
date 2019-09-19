@@ -1,5 +1,6 @@
 module Vale.X64.Leakage_Ins
 
+open FStar.Mul
 open Vale.X64.Machine_s
 open Vale.X64.Leakage_s
 open Vale.X64.Leakage_Helpers

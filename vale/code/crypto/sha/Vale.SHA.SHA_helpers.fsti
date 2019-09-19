@@ -1,5 +1,6 @@
 module Vale.SHA.SHA_helpers
 
+open FStar.Mul
 open Vale.Def.Prop_s
 open Vale.Def.Opaque_s
 open Vale.X64.CryptoInstructions_s
@@ -9,8 +10,7 @@ open Vale.Def.Words.Seq_s
 open FStar.Seq
 open Vale.Arch.Types
 
-unfold
-let (.[]) = FStar.Seq.index
+unfold let (.[]) = FStar.Seq.index
 
 #reset-options "--max_fuel 0 --max_ifuel 0"
 
@@ -21,7 +21,6 @@ val word:Type0
 let size_block_w_256 = 16
 (* Define the size block in bytes *)
 let block_length =
-  let open FStar.Mul in
   4 (*word_length a*) * size_block_w_256
 let block_w  = m:seq word {length m = size_block_w_256}
 let counter = nat
@@ -136,10 +135,10 @@ val lemma_sha256_msg2 (src1 src2:quad32) (t:counter) (block:block_w) : Lemma
 let k_reqs (k_seq:seq quad32) : prop0 =
   length k_seq == size_k_w_256 / 4 /\
   (forall i . {:pattern (index k_seq i)} 0 <= i /\ i < (size_k_w_256/4) ==>
-    (k_seq.[i]).lo0 == word_to_nat32 (k.[4 `op_Multiply` i]) /\
-    (k_seq.[i]).lo1 == word_to_nat32 (k.[4 `op_Multiply` i + 1]) /\
-    (k_seq.[i]).hi2 == word_to_nat32 (k.[4 `op_Multiply` i + 2]) /\
-    (k_seq.[i]).hi3 == word_to_nat32 (k.[4 `op_Multiply` i + 3]))
+    (k_seq.[i]).lo0 == word_to_nat32 (k.[4 * i]) /\
+    (k_seq.[i]).lo1 == word_to_nat32 (k.[4 * i + 1]) /\
+    (k_seq.[i]).hi2 == word_to_nat32 (k.[4 * i + 2]) /\
+    (k_seq.[i]).hi3 == word_to_nat32 (k.[4 * i + 3]))
 
 let quads_to_block (qs:seq quad32) : block_w
   =
@@ -152,22 +151,22 @@ val lemma_quads_to_block (qs:seq quad32) : Lemma
   (ensures
   (let block = quads_to_block qs in
             forall i . {:pattern (index qs i)} 0 <= i /\ i < 4 ==>
-              (qs.[i]).lo0 == ws_opaque block (4 `op_Multiply` i + 0) /\
-              (qs.[i]).lo1 == ws_opaque block (4 `op_Multiply` i + 1) /\
-              (qs.[i]).hi2 == ws_opaque block (4 `op_Multiply` i + 2) /\
-              (qs.[i]).hi3 == ws_opaque block (4 `op_Multiply` i + 3) /\
-              qs.[i] == ws_quad32 (4 `op_Multiply` i) block))
+              (qs.[i]).lo0 == ws_opaque block (4 * i + 0) /\
+              (qs.[i]).lo1 == ws_opaque block (4 * i + 1) /\
+              (qs.[i]).hi2 == ws_opaque block (4 * i + 2) /\
+              (qs.[i]).hi3 == ws_opaque block (4 * i + 3) /\
+              qs.[i] == ws_quad32 (4 * i) block))
 (*
 #push-options "--z3rlimit 20 --max_fuel 1"
 let lemma_quads_to_block (qs:seq quad32) : Lemma
   (requires length qs == 4)
   (ensures (let block = quads_to_block qs in
             forall i . {:pattern (index qs i)} 0 <= i /\ i < 4 ==>
-              (qs.[i]).lo0 == ws_opaque block (4 `op_Multiply` i + 0) /\
-              (qs.[i]).lo1 == ws_opaque block (4 `op_Multiply` i + 1) /\
-              (qs.[i]).hi2 == ws_opaque block (4 `op_Multiply` i + 2) /\
-              (qs.[i]).hi3 == ws_opaque block (4 `op_Multiply` i + 3) /\
-              qs.[i] == ws_quad32 (4 `op_Multiply` i) block))
+              (qs.[i]).lo0 == ws_opaque block (4 * i + 0) /\
+              (qs.[i]).lo1 == ws_opaque block (4 * i + 1) /\
+              (qs.[i]).hi2 == ws_opaque block (4 * i + 2) /\
+              (qs.[i]).hi3 == ws_opaque block (4 * i + 3) /\
+              qs.[i] == ws_quad32 (4 * i) block))
   =
   //reveal_opaque ws;
   ()

@@ -1,4 +1,5 @@
 module Vale.Lib.BufferViewHelpers
+open FStar.Mul
 
 module MB = LowStar.Monotonic.Buffer
 module BV = LowStar.BufferView

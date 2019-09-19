@@ -1,4 +1,5 @@
 module Vale.Lib.Set
+open FStar.Mul
 
 module S = FStar.Set
 module M = FStar.Map

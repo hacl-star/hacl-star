@@ -1,4 +1,5 @@
 module Vale.Poly1305.Equiv
+open FStar.Mul
 
 module BSeq = Lib.ByteSequence
 

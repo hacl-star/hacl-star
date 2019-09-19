@@ -1,4 +1,5 @@
 module Vale.Lib.MapTree
+open FStar.Mul
 
 (** Balanced binary search tree *)
 

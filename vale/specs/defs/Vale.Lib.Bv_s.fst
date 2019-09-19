@@ -1,4 +1,5 @@
 module Vale.Lib.Bv_s
+open FStar.Mul
 open FStar.UInt
 open FStar.BV
 

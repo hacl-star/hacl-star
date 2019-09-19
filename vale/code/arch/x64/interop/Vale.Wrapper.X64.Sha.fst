@@ -1,4 +1,5 @@
 module Vale.Wrapper.X64.Sha
+open FStar.Mul
 
 module UV = LowStar.BufferView.Up
 module DV = LowStar.BufferView.Down
@@ -15,7 +16,7 @@ open Vale.Lib.Seqs_s
 friend Lib.IntTypes
 friend Vale.SHA.SHA_helpers
 
-#set-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 
 let math_aux (n:nat) : Lemma ( ((64 * n) * 1) / 16 == 4 * n) = ()
 
@@ -31,7 +32,7 @@ val lemma_k_reqs_equiv
     k_reqs (UV.as_seq h (UV.mk_buffer (get_downview k_b) Vale.Interop.Views.up_view128))))
 
 
-
+#push-options "--z3cliopt smt.arith.nl=true"
 let lemma_k_reqs_equiv k_b h =
   let db = get_downview k_b in
   DV.length_eq db;
@@ -96,7 +97,7 @@ let lemma_k_reqs_equiv k_b h =
     seq_to_four_to_seq_LE (nat_to_four 8 (UInt32.v (Seq.index s (4*i+3))))
 
   in Classical.forall_intro aux
-
+#pop-options
 
 
 val simplify_le_bytes_to_hash_uint32
@@ -110,6 +111,7 @@ val simplify_le_bytes_to_hash_uint32
     (le_bytes_to_hash (le_seq_quad32_to_bytes (UV.as_seq h (UV.mk_buffer (get_downview b) Vale.Interop.Views.up_view128))))
     (B.as_seq h b)))
 
+#push-options "--z3cliopt smt.arith.nl=true"
 let simplify_le_bytes_to_hash_uint32 b h =
   let db = get_downview b in
   let down_s = DV.as_seq h db in
@@ -138,7 +140,7 @@ let simplify_le_bytes_to_hash_uint32 b h =
       Vale.Def.Opaque_s.reveal_opaque le_bytes_to_quad32_def;
       // Revealing these definitions gives us the following
       assert (Vale.Interop.Views.get128 (Seq.slice (DV.as_seq h db)
-             (i' `op_Multiply` 16) (i' `op_Multiply` 16 + 16))
+             (i' * 16) (i' * 16 + 16))
              == Mkfour
 (four_to_nat 8 (seq_to_four_LE (seq_uint8_to_seq_nat8
                                (Seq.slice down_s (i'*16) (i'*16+4)))))
@@ -177,10 +179,7 @@ let simplify_le_bytes_to_hash_uint32 b h =
         Seq.index (Seq.slice (B.as_seq h b) (i' * 4) (i'*4+4)) (i%4))
   in Classical.forall_intro aux;
   assert (Seq.equal sf s_init)
-
-friend Vale.Arch.BufferFriend
-
-#set-options "--z3rlimit 300"
+#pop-options
 
 let sha256_update ctx_b in_b num_val k_b =
   let h0 = get() in

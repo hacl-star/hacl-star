@@ -26,6 +26,7 @@ include{:fstar}{:open} "Vale.X64.CPU_Features_s"
 module Vale.AES.X64.AESopt
 
 #verbatim{:interface}{:implementation}
+open FStar.Mul
 open Vale.Def.Prop_s
 open Vale.Def.Opaque_s
 open Vale.Def.Words_s
@@ -69,7 +70,7 @@ let aes_reqs
   // with the spec below that says the entire keys_b is exactly round_keys
   buffer_readable mem keys_b /\
   (nr alg + 1) <= buffer_length keys_b /\
-  buffer_addr keys_b mem + 16 `op_Multiply` 8 == key_ptr /\
+  buffer_addr keys_b mem + 16 * 8 == key_ptr /\
   valid_taint_buf128 keys_b mem memTaint Secret /\
 
   buffer128_as_seq mem keys_b == round_keys

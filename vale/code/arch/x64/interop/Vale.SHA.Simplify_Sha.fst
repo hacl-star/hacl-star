@@ -1,4 +1,5 @@
 module Vale.SHA.Simplify_Sha
+open FStar.Mul
 
 friend Vale.SHA.SHA_helpers
 
@@ -31,6 +32,7 @@ let lemma_seq_nat8_le_seq_quad32_to_bytes_uint32 b h =
   let s_init = B.as_seq h b in
   let db = get_downview b in
   DV.length_eq db;
+  assert (Seq.length s_init == B.length b);
   let ub = UV.mk_buffer db Vale.Interop.Views.up_view128 in
   let s = UV.as_seq h ub in
   let s' = le_seq_quad32_to_bytes s in
@@ -47,9 +49,9 @@ let lemma_seq_nat8_le_seq_quad32_to_bytes_uint32 b h =
     UV.as_seq_sel h ub i';
     UV.get_sel h ub i';
     same_seq_downview8 b h;
-    assert (Seq.index s i' == Vale.Interop.Views.get128 (Seq.slice s_init (i' `op_Multiply` 16) (i' `op_Multiply` 16 + 16)));
+    assert (Seq.index s i' == Vale.Interop.Views.get128 (Seq.slice s_init (i' * 16) (i' * 16 + 16)));
     Vale.Def.Opaque_s.reveal_opaque Vale.Interop.Views.get128_def;
-    let s_slice = seq_uint8_to_seq_nat8 (Seq.slice s_init (i' `op_Multiply` 16) (i' `op_Multiply` 16 +16)) in
+    let s_slice = seq_uint8_to_seq_nat8 (Seq.slice s_init (i' * 16) (i' * 16 +16)) in
     Vale.Def.Opaque_s.reveal_opaque le_bytes_to_quad32_def;
     assert (seq_to_four_LE (seq_map (four_to_nat 8) (seq_to_seq_four_LE s_slice)) ==
             Seq.index s i')

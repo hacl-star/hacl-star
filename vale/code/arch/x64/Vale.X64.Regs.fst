@@ -1,4 +1,5 @@
 module Vale.X64.Regs
+open FStar.Mul
 open Vale.X64.Machine_s
 
 let of_fun m =

@@ -1,4 +1,5 @@
 module Vale.X64.Instruction_s
+open FStar.Mul
 open Vale.Def.Words_s
 open Vale.Def.Types_s
 open Vale.X64.Machine_s

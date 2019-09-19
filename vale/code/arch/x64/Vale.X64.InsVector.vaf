@@ -44,7 +44,6 @@ open Vale.X64.Memory
 open Vale.X64.Stack_i
 module I = Vale.X64.Instructions_s
 module S = Vale.X64.Machine_Semantics_s
-friend Vale.X64.StateLemmas // TODO: this shouldn't be here
 friend Vale.X64.Decls
 #endverbatim
 
@@ -474,11 +473,8 @@ procedure Load128_buffer(
         src + offset == buffer_addr(b, mem) + 16 * index;
     ensures
         dst == buffer128_read(b, index, mem);
-        valid_taint_buf128(b, mem, memTaint, t);  // REVIEW: Why is this needed?
+//        valid_taint_buf128(b, mem, memTaint, t);  // REVIEW: Why is this needed?
 {
-    low_lemma_valid_mem128(b, #nat(index), mem);
-    low_lemma_load_mem128(b, #nat(index), mem);
-    lemma_valid_taint128(b, #memTaint_t(memTaint), mem, #nat(index), t);
 }
 
 procedure LoadBe64_buffer128(
@@ -495,7 +491,7 @@ procedure LoadBe64_buffer128(
         src + offset == buffer_addr(b, mem) + 16 * index + (if upper then 8 else 0);
     ensures
         dst == reverse_bytes_nat64(if upper then hi64(buffer128_read(b, index, mem)) else lo64(buffer128_read(b, index, mem)));
-        valid_taint_buf128(b, mem, memTaint, t);
+//        valid_taint_buf128(b, mem, memTaint, t);
 {
     low_lemma_valid_mem128_64(b, #nat(index), mem);
     low_lemma_load_mem128_lo64(b, #nat(index), mem);
@@ -521,7 +517,6 @@ procedure Store128_buffer(
         valid_taint_buf128(b, mem, memTaint, t);
         mem == old(buffer128_write(b, index, src, mem));
 {
-    low_lemma_valid_mem128(b, #nat(index), old(mem));
     low_lemma_store_mem128(b, #nat(index), old(src), old(mem));
     lemma_valid_taint128(b, old(#memTaint_t(memTaint)), old(mem), #nat(index), t);
     same_memTaint128(b, old(mem), mem, old(#memTaint_t(memTaint)), #memTaint_t(memTaint));
@@ -571,8 +566,7 @@ procedure InitPshufbMask(inout dst:xmm, out tmp:reg_opr64)
     ensures
         dst == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
 {
-    assert two_to_nat32(Mktwo(0x0C0D0E0F, 0x08090A0B)) == 0x08090A0B0C0D0E0F; // OBSERVE
-    assert two_to_nat32(Mktwo(0x04050607, 0x00010203)) == 0x0001020304050607; // OBSERVE
+    lemma_nat_to_two32();
     PinsrqImm(dst, 0x08090A0B0C0D0E0F, 0, tmp);
     PinsrqImm(dst, 0x0001020304050607, 1, tmp);
     Vale.Def.Opaque_s.reveal_opaque(insert_nat64);
@@ -585,8 +579,7 @@ procedure InitPshufbStableMask(inout dst:xmm, out tmp:reg_opr64)
     ensures
         dst == Mkfour(0x00010203, 0x04050607, 0x08090A0B, 0x0C0D0E0F);
 {
-    assert two_to_nat32(Mktwo(0x08090A0B, 0x0C0D0E0F)) == 0x0C0D0E0F08090A0B; // OBSERVE
-    assert two_to_nat32(Mktwo(0x00010203, 0x04050607)) == 0x0405060700010203; // OBSERVE
+    lemma_nat_to_two32();
     PinsrqImm(dst, 0x0405060700010203, 0, tmp);
     PinsrqImm(dst, 0x0C0D0E0F08090A0B, 1, tmp);
     Vale.Def.Opaque_s.reveal_opaque(insert_nat64);
@@ -599,7 +592,7 @@ procedure InitPshufbDupMask(inout dst:xmm, out tmp:reg_opr64)
     ensures
         dst == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x0C0D0E0F, 0x08090A0B);
 {
-    assert two_to_nat32(Mktwo(0x0C0D0E0F, 0x08090A0B)) == 0x08090A0B0C0D0E0F; // OBSERVE
+    lemma_nat_to_two32();
     PinsrqImm(dst, 0x08090A0B0C0D0E0F, 0, tmp);
     PinsrqImm(dst, 0x08090A0B0C0D0E0F, 1, tmp);
     Vale.Def.Opaque_s.reveal_opaque(insert_nat64);
@@ -612,8 +605,7 @@ procedure InitPshufb64Mask(inout dst:xmm, out tmp:reg_opr64)
     ensures
         dst == Mkfour(0x04050607, 0x00010203, 0x0C0D0E0F, 0x08090A0B);
 {
-    assert two_to_nat32(Mktwo(0x0C0D0E0F, 0x08090A0B)) == 0x08090A0B0C0D0E0F; // OBSERVE
-    assert two_to_nat32(Mktwo(0x04050607, 0x00010203)) == 0x0001020304050607; // OBSERVE
+    lemma_nat_to_two32();
     PinsrqImm(dst, 0x0001020304050607, 0, tmp);
     PinsrqImm(dst, 0x08090A0B0C0D0E0F, 1, tmp);
     Vale.Def.Opaque_s.reveal_opaque(insert_nat64);

@@ -1,4 +1,5 @@
 module Vale.Lib.Tactics
+open FStar.Mul
 open FStar.Tactics
 open FStar.Tactics.Derived
 open FStar.Reflection.Formula

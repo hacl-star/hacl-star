@@ -1,5 +1,6 @@
 module Vale.X64.CryptoInstructions_s
 
+open FStar.Mul
 open Vale.Def.Opaque_s
 open Vale.Def.Types_s
 open Vale.Def.Words_s

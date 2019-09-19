@@ -1,91 +1,109 @@
 module Vale.X64.StateLemmas
 open Vale.X64.Machine_s
+open Vale.Arch.Heap
 open Vale.X64.State
 open FStar.FunctionalExtensionality
-module BS = Vale.X64.Machine_Semantics_s
-module ME = Vale.X64.Memory
-module MS = Vale.X64.Memory_Sems
+module Ms = Vale.X64.Machine_Semantics_s
+//open Vale.X64.Machine_Semantics_s
+//module ME = Vale.X64.Memory
+open Vale.X64.Memory
+open Vale.Arch.MachineHeap_s
+//module MS = Vale.X64.Memory_Sems
 module VSS = Vale.X64.Stack_Sems
+module F = FStar.FunctionalExtensionality
 open Vale.Def.Prop_s
+open FStar.Mul
 
-unfold let ok' s = s.BS.ms_ok
-unfold let regs' s = s.BS.ms_regs
-unfold let flags' s = s.BS.ms_flags
-unfold let mem' s = s.BS.ms_heap
-unfold let memTaint' s = s.BS.ms_memTaint
-unfold let stack' s = s.BS.ms_stack
-unfold let stackTaint' s = s.BS.ms_stackTaint
-unfold let trace' s = s.BS.ms_trace
+unfold let machine_state = Ms.machine_state
+unfold let code = Ms.code
+unfold let machine_eval_code = Ms.machine_eval_code
+val same_heap_types : squash (vale_heap_impl == heap_impl)
+unfold let coerce (#b #a:Type) (x:a{a == b}) : b = x
 
-val same_domain (sv:vale_state) (s:BS.machine_state) : prop0
+let state_to_S (s:vale_state) : GTot machine_state =
+  let open Ms in
+  {
+    ms_ok = s.vs_ok;
+    ms_regs = F.on_dom reg (fun r -> Regs.sel r s.vs_regs);
+    ms_flags = F.on_dom flag (fun f -> Flags.sel f s.vs_flags);
+    ms_heap = coerce s.vs_heap;
+    ms_memTaint = s.vs_memTaint;
+    ms_stack = VSS.stack_to_s s.vs_stack;
+    ms_stackTaint = s.vs_stackTaint;
+    ms_trace = [];
+  }
 
-val same_domain_eval_ins (c:BS.code{Ins? c}) (f:nat) (s0:BS.machine_state) (sv:vale_state) : Lemma
-  (requires same_domain sv s0)
-  (ensures (let s1 = BS.machine_eval_code c f s0 in
-     same_domain sv (Some?.v s1))
-  )
+let state_of_S (s:machine_state) : GTot vale_state =
+  let open Ms in
+  {
+    vs_ok = s.ms_ok;
+    vs_regs = Regs.of_fun s.ms_regs;
+    vs_flags = Flags.of_fun s.ms_flags;
+    vs_heap = coerce s.ms_heap;
+    vs_memTaint = s.ms_memTaint;
+    vs_stack = VSS.stack_from_s s.ms_stack;
+    vs_stackTaint = s.ms_stackTaint;
+  }
 
-val state_to_S (s:vale_state) : GTot (s':BS.machine_state{same_domain s s'})
-val state_of_S (sv:vale_state) (s:BS.machine_state{same_domain sv s}) : GTot vale_state
+val lemma_valid_mem_addr64 (h:vale_heap_impl) (ptr:int) : Lemma
+  (requires valid_mem64 ptr (get_vale_heap h))
+  (ensures valid_addr64 ptr (heap_get (coerce h)))
+  [SMTPat (valid_mem64 ptr (get_vale_heap h))]
 
-val lemma_to_ok (s:vale_state) : Lemma
-  (ensures s.vs_ok == ok' (state_to_S s))
-  [SMTPat s.vs_ok]
+val lemma_valid_mem_addr128 (h:vale_heap_impl) (ptr:int) : Lemma
+  (requires valid_mem128 ptr (get_vale_heap h))
+  (ensures valid_addr128 ptr (heap_get (coerce h)))
+  [SMTPat (valid_mem128 ptr (get_vale_heap h))]
 
-val lemma_to_flags (s:vale_state) (f:flag) : Lemma
-  (ensures Flags.sel f s.vs_flags == flags' (state_to_S s) f)
-  [SMTPat (Flags.sel f s.vs_flags)]
+val lemma_load_mem_get64 (h:vale_heap_impl) (ptr:int) : Lemma
+  (requires valid_mem64 ptr (get_vale_heap h))
+  (ensures load_mem64 ptr (get_vale_heap h) == get_heap_val64 ptr (heap_get (coerce h)))
+  [SMTPat (load_mem64 ptr (get_vale_heap h))]
 
-val lemma_to_reg (s:vale_state) (r:reg) : Lemma
-  (ensures Regs.sel r s.vs_regs == regs' (state_to_S s) r)
-  [SMTPat (Regs.sel r s.vs_regs)]
+val lemma_load_mem_get128 (h:vale_heap_impl) (ptr:int) : Lemma
+  (requires valid_mem128 ptr (get_vale_heap h))
+  (ensures load_mem128 ptr (get_vale_heap h) == get_heap_val128 ptr (heap_get (coerce h)))
+  [SMTPat (load_mem128 ptr (get_vale_heap h))]
 
-val lemma_to_mem (s:vale_state) : Lemma
-  (ensures MS.get_heap s.vs_heap == mem' (state_to_S s))
+val lemma_valid_buffer_read64 (h:vale_heap) (b:buffer64) (i:int) : Lemma
+  (requires valid_buffer_read h b i)
+  (ensures valid_mem64 (buffer_addr b h + 8 * i) h)
+  [SMTPat (valid_buffer_read h b i)]
 
-val lemma_to_stack (s:vale_state) : Lemma
-  (ensures VSS.stack_to_s s.vs_stack == stack' (state_to_S s))
+val lemma_valid_buffer_read128 (h:vale_heap) (b:buffer128) (i:int) : Lemma
+  (requires valid_buffer_read h b i)
+  (ensures valid_mem128 (buffer_addr b h + 16 * i) h)
+  [SMTPat (valid_buffer_read h b i)]
 
-val lemma_to_trace (s:vale_state) : Lemma
-  (ensures [] == trace' (state_to_S s))
-  [SMTPat (state_to_S s)]
+val lemma_load_buffer_read64 (h:vale_heap) (b:buffer64) (i:int) : Lemma
+  (requires valid_buffer_read h b i)
+  (ensures buffer_read b i h == load_mem64 (buffer_addr b h + 8 * i) h)
+  [SMTPat (buffer_read b i h)]
 
-val lemma_to_memTaint (s:vale_state) : Lemma
-  (ensures s.vs_memTaint === memTaint' (state_to_S s))
-  [SMTPat s.vs_memTaint]
+val lemma_load_buffer_read128 (h:vale_heap) (b:buffer128) (i:int) : Lemma
+  (requires valid_buffer_read h b i)
+  (ensures buffer_read b i h == load_mem128 (buffer_addr b h + 16 * i) h)
+  [SMTPat (buffer_read b i h)]
 
-val lemma_to_stackTaint (s:vale_state) : Lemma
-  (ensures s.vs_stackTaint === stackTaint' (state_to_S s))
-  [SMTPat s.vs_stackTaint]
-
+// REVIEW: should this lemma be needed, since it is provable from the lemmas above?
 val lemma_to_eval_operand (s:vale_state) (o:operand64) : Lemma
   (requires valid_src_operand o s)
-  (ensures eval_operand o s == BS.eval_operand o (state_to_S s))
+  (ensures eval_operand o s == Ms.eval_operand o (state_to_S s))
   [SMTPat (eval_operand o s)]
 
-val lemma_to_eval_xmm (s:vale_state) (x:reg_xmm) : Lemma
-  (ensures eval_reg_xmm x s == BS.eval_reg_xmm x (state_to_S s))
-  [SMTPat (eval_reg_xmm x s)]
+//val lemma_to_eval_xmm (s:vale_state) (x:reg_xmm) : Lemma
+//  (ensures eval_reg_xmm x s == Ms.eval_reg_xmm x (state_to_S s))
+//  [SMTPat (eval_reg_xmm x s)]
+//
+//val lemma_to_eval_operand128 (s:vale_state) (o:operand128) : Lemma
+//  (requires valid_src_operand128 o s)
+//  (ensures eval_operand128 o s == Ms.eval_mov128_op o (state_to_S s))
+//  [SMTPat (eval_operand128 o s)]
+//
+//val lemma_to_valid_operand (s:vale_state) (o:operand64) : Lemma
+//  (ensures valid_src_operand o s ==> Ms.valid_src_operand o (state_to_S s))
+//  [SMTPat (valid_src_operand o s)]
 
-val lemma_to_eval_operand128 (s:vale_state) (o:operand128) : Lemma
-  (requires valid_src_operand128 o s)
-  (ensures eval_operand128 o s == BS.eval_mov128_op o (state_to_S s))
-  [SMTPat (eval_operand128 o s)]
+val lemma_to_of (s:machine_state) : Lemma
+  (ensures state_to_S (state_of_S s) == {s with Ms.ms_trace = []})
 
-val lemma_to_valid_operand (s:vale_state) (o:operand64) : Lemma
-  (ensures valid_src_operand o s ==> BS.valid_src_operand o (state_to_S s))
-  [SMTPat (valid_src_operand o s)]
-
-val lemma_of_to (s:vale_state) : Lemma
-  (ensures s == state_of_S s (state_to_S s))
-  [SMTPat (state_of_S s (state_to_S s))]
-
-val lemma_to_of_eval_ins (c:BS.code) (s0:vale_state) : Lemma
-  (requires Ins? c)
-  (ensures (
-    let Some sM = BS.machine_eval_code c 0 (state_to_S s0) in
-    same_domain_eval_ins c 0 (state_to_S s0) s0;
-    (state_to_S (state_of_S s0 sM) == {sM with BS.ms_trace = []})
-  ))
-
-unfold let op_String_Access (#a:eqtype) (#b:Type) (x:Map.t a b) (y:a) : Tot b = Map.sel x y

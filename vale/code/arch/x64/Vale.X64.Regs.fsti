@@ -1,4 +1,5 @@
 module Vale.X64.Regs
+open FStar.Mul
 // This interface should not refer to Machine_Semantics_s
 
 open Vale.Def.Prop_s
