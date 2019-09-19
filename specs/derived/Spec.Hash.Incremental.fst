@@ -14,14 +14,14 @@ open Spec.Hash.PadFinish
 let update_last (a:hash_alg)
   (hash:words_state a)
   (prevlen:nat{prevlen % block_length a = 0})
-  (input:bytes{S.length input + prevlen < max_input_length a}):
+  (input:bytes{S.length input + prevlen <= max_input_length a}):
   Tot (words_state a)
 =
   let total_len = prevlen + S.length input in
   let padding = pad a total_len in
   update_multi a hash S.(input @| padding)
 
-let hash_incremental (a:hash_alg) (input:bytes{S.length input < (max_input_length a)}):
+let hash_incremental (a:hash_alg) (input:bytes{S.length input <= (max_input_length a)}):
   Tot (hash:bytes{S.length hash = (hash_length a)})
 =
   let open FStar.Mul in

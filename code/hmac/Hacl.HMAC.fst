@@ -40,7 +40,7 @@ let xor_bytes_inplace a b len =
 inline_for_extraction noextract
 let wrap_key_st (a: hash_alg) =
   output: B.buffer uint8 { B.length output == block_length a } ->
-  key: B.buffer uint8 {B.length key < max_input_length a /\ B.disjoint output key} ->
+  key: B.buffer uint8 {B.length key <= max_input_length a /\ B.disjoint output key} ->
   len: UInt32.t {v len = B.length key} ->
   Stack unit
     (requires fun h0 ->
@@ -52,7 +52,7 @@ let wrap_key_st (a: hash_alg) =
 
 /// This one is only to avoid a warning about a pattern that is not encoding properly.
 inline_for_extraction
-let helper_smtpat (a: hash_alg) (len: uint32_t{ v len < max_input_length a }):
+let helper_smtpat (a: hash_alg) (len: uint32_t{ v len <= max_input_length a }):
   x:uint32_t { x <= D.block_len a } =
   if len <= D.block_len a then len else D.hash_len a
 

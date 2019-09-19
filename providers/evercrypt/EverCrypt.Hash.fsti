@@ -36,7 +36,7 @@ type alg13 = a:alg { a=SHA2_256 \/ a=SHA2_384 \/ a=SHA2_512 }
 /// No pattern (would fire too often)!
 let uint32_fits_maxLength (a: alg) (x: UInt32.t): Lemma
   (requires True)
-  (ensures UInt32.v x < max_input_length a)
+  (ensures UInt32.v x <= max_input_length a)
 =
   assert_norm (pow2 32 < pow2 61);
   assert_norm (pow2 61 < pow2 125)
@@ -291,7 +291,7 @@ val update_last:
   s:state a ->
   last:B.buffer Lib.IntTypes.uint8 { B.length last < block_length a } ->
   total_len:uint64_t {
-    v total_len < max_input_length a /\
+    v total_len <= max_input_length a /\
     (v total_len - B.length last) % block_length a = 0 } ->
   Stack unit
   (requires fun h0 ->
@@ -367,7 +367,7 @@ val hash:
   a:alg ->
   dst:B.buffer Lib.IntTypes.uint8 {B.length dst = hash_length a} ->
   input:B.buffer Lib.IntTypes.uint8 ->
-  len:uint32_t {B.length input = v len /\ v len < max_input_length a} ->
+  len:uint32_t {B.length input = v len /\ v len <= max_input_length a} ->
   Stack unit
   (requires fun h0 ->
     B.live h0 dst /\

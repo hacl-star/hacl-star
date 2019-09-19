@@ -644,7 +644,7 @@ let mk_finish a p dst =
   assert (Hash.invariant hash_state h1);
 
   assert_norm (pow2 61 < pow2 125);
-  assert (U64.v total_len < max_input_length a);
+  assert (U64.v total_len <= max_input_length a);
   let buf_ = B.sub buf_ 0ul (rest a total_len) in
   assert (
     let r = rest a total_len in

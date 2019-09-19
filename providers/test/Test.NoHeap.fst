@@ -58,7 +58,7 @@ let test_one_hash vec =
       C.String.memcpy (B.sub total_input (input_len * i) input_len) input input_len
     );
     EverCrypt.Hash.uint32_fits_maxLength a total_input_len;
-    assert (v total_input_len <= Spec.Hash.Definitions.max_input_length a);
+    assert (v total_input_len <= Spec.Hash.Definitions.max_input_length a + 1);
 
     EverCrypt.Hash.hash a computed total_input total_input_len;
 
@@ -81,7 +81,7 @@ let supported_hmac_algorithm a =
 
 let keysized (a:H.alg) (l: UInt32.t): Tot (b:bool{b ==> Spec.HMAC.keysized a (UInt32.v l) }) =
   EverCrypt.Hash.uint32_fits_maxLength a l;
-  assert (v l < Spec.Hash.Definitions.max_input_length a);
+  assert (v l <= Spec.Hash.Definitions.max_input_length a);
   assert_norm (v 0xfffffffful = pow2 32 - 1);
   l <= 0xfffffffful - Hacl.Hash.Definitions.block_len a
 

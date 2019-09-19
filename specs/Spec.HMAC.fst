@@ -6,7 +6,7 @@ open Spec.Hash.Definitions
 open FStar.Integers
 open Lib.IntTypes
 
-let wrap (a:hash_alg) (key: bytes{Seq.length key < max_input_length a}): Tot (lbytes (block_length a))
+let wrap (a:hash_alg) (key: bytes{Seq.length key <= max_input_length a}): Tot (lbytes (block_length a))
 =
   let key0 = if Seq.length key <= block_length a then key else Spec.Hash.hash a key in
   let paddingLength = block_length a - Seq.length key0 in

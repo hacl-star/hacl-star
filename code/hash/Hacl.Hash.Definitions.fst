@@ -93,7 +93,7 @@ inline_for_extraction
 let pad_st (a: hash_alg) = len:len_t a -> dst:B.buffer uint8 ->
   ST.Stack unit
     (requires (fun h ->
-      len_v a len < max_input_length a /\
+      len_v a len <= max_input_length a /\
       B.live h dst /\
       B.length dst = pad_length a (len_v a len)))
     (ensures (fun h0 _ h1 ->
@@ -119,7 +119,7 @@ inline_for_extraction
 let update_last_st (a: hash_alg) =
   s:state a ->
   prev_len:len_t a { len_v a prev_len % block_length a = 0 } ->
-  input:B.buffer uint8 { B.length input + len_v a prev_len < max_input_length a } ->
+  input:B.buffer uint8 { B.length input + len_v a prev_len <= max_input_length a } ->
   input_len:size_t { B.length input = v input_len } ->
   ST.Stack unit
     (requires (fun h ->
@@ -149,7 +149,7 @@ let hash_st (a: hash_alg) =
       B.live h input /\
       B.live h dst /\
       B.disjoint input dst /\
-      B.length input < max_input_length a))
+      B.length input <= max_input_length a))
     (ensures (fun h0 _ h1 ->
       B.(modifies (loc_buffer dst) h0 h1) /\
       Seq.equal (B.as_seq h1 dst) (Spec.Hash.hash a (B.as_seq h0 input))))

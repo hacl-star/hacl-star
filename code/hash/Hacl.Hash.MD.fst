@@ -68,7 +68,7 @@ let pad_length_bound (a: hash_alg) (len: len_t a): Lemma
 noextract inline_for_extraction
 let len_add32 (a: hash_alg)
   (prev_len: len_t a)
-  (input_len: U32.t { U32.v input_len + len_v a prev_len < max_input_length a }):
+  (input_len: U32.t { U32.v input_len + len_v a prev_len <= max_input_length a }):
   x:len_t a { len_v a x = len_v a prev_len + U32.v input_len }
 =
   let open FStar.Int.Cast.Full in

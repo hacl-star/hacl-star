@@ -167,7 +167,7 @@ val hash_fits: #a:Hash.alg -> h:HS.mem -> s:state a -> Lemma
   (requires (
     invariant h s))
   (ensures (
-    S.length (hashed h s) < Spec.Hash.Definitions.max_input_length a))
+    S.length (hashed h s) <= Spec.Hash.Definitions.max_input_length a))
   [ SMTPat (hashed h s) ]
 
 val alg_of_state: a:e_alg -> (

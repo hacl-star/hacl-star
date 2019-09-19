@@ -214,7 +214,7 @@ let update_last_st (#a:e_alg) =
   p:Hacl.Hash.Definitions.state a ->
   last:uint8_p { B.length last < block_length a } ->
   total_len:uint64_t {
-    v total_len < max_input_length a /\
+    v total_len <= max_input_length a /\
     (v total_len - B.length last) % block_length a = 0 } ->
   Stack unit
   (requires fun h0 ->

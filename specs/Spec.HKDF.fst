@@ -30,7 +30,7 @@ let rec expand0 :
     let chainLength = if count = 0 then 0 else hash_length a in
     HMAC.keysized a (Seq.length prk) /\
     Seq.length last = chainLength /\
-    hash_length a + length info + 1 + block_length a < max_input_length a /\
+    hash_length a + length info + 1 + block_length a <= max_input_length a /\
     count < 255 /\
     required <= (255 - count) * hash_length a } ->
   Tot (Lib.ByteSequence.lbytes required)

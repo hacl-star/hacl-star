@@ -14,7 +14,7 @@ open Spec.Hash.Definitions
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 10"
 
 let pad (a:hash_alg)
-  (total_len:nat{total_len < max_input_length a}):
+  (total_len:nat{total_len <= max_input_length a}):
   Tot (b:bytes{(S.length b + total_len) % block_length a = 0})
 =
   let open FStar.Mul in

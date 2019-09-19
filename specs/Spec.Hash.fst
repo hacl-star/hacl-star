@@ -54,7 +54,7 @@ let rec update_multi
     update_multi a hash rem
 
 (* As defined in the NIST standard; pad, then update, then finish. *)
-let hash (a:hash_alg) (input:bytes{S.length input < max_input_length a}):
+let hash (a:hash_alg) (input:bytes{S.length input <= max_input_length a}):
   Tot (hash:Lib.ByteSequence.lbytes (hash_length a))
 =
   let padding = pad a (S.length input) in

@@ -101,7 +101,7 @@ let update_multi_associative' (a: hash_alg)
 
 let hash = Spec.Hash.hash
 
-let hash_is_hash_incremental (a: hash_alg) (input: bytes { S.length input < max_input_length a }):
+let hash_is_hash_incremental (a: hash_alg) (input: bytes { S.length input <= max_input_length a }):
   Lemma (ensures (S.equal (hash a input) (hash_incremental a input)))
 =
   let open FStar.Mul in
