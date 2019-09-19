@@ -7,7 +7,7 @@ open FStar.Mul
 open Lib.IntTypes
 open Lib.Buffer
 
-module S = Spec.RSAPSS
+module S = Hacl.Spec.Bignum
 
 
 #set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
@@ -30,6 +30,7 @@ inline_for_extraction noextract
 val bval: len:size_t -> b:lbignum len -> i:size_t ->
   Stack uint64
   (requires fun h -> live h b)
-  (ensures  fun h0 _ h1 -> h0 == h1)
+  (ensures  fun h0 r h1 -> h0 == h1 /\
+    r == S.bval #(v len) (as_seq h0 b) (v i))
 let bval len b i =
   if i <. len then b.(i) else u64 0

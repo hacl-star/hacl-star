@@ -33,7 +33,9 @@ val bn_mult_by_limb_addj_add:
   -> res:lbignum resLen
   -> carry:lbignum 1ul ->
   Stack uint64
-  (requires fun h -> live h a /\ live h res /\ live h carry /\ disjoint res a)
+  (requires fun h ->
+    live h a /\ live h res /\ live h carry /\
+    disjoint res a /\ disjoint res carry)
   (ensures  fun h0 _ h1 -> modifies (loc carry |+| loc res) h0 h1)
 
 let bn_mult_by_limb_addj_add aLen a l j resLen res carry =

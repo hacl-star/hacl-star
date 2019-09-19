@@ -70,7 +70,9 @@ val mont_reduction_f:
   -> carry:lbignum 1ul
   -> i:size_t{v i < v rLen} ->
   Stack unit
-  (requires fun h -> live h c /\ live h n /\ live h carry /\ disjoint c n)
+  (requires fun h ->
+    live h c /\ live h n /\ live h carry /\
+    disjoint c n /\ disjoint c carry)
   (ensures  fun h0 _ h1 -> modifies (loc carry |+| loc c) h0 h1)
 
 let mont_reduction_f nLen rLen c n nInv_u64 carry i =
@@ -88,7 +90,9 @@ val mont_reduction_:
   -> nInv_u64:uint64
   -> carry:lbignum 1ul ->
   Stack unit
-  (requires fun h -> live h c /\ live h n /\ live h carry /\ disjoint c n)
+  (requires fun h ->
+    live h c /\ live h n /\ live h carry /\
+    disjoint c n /\ disjoint c carry)
   (ensures  fun h0 _ h1 -> modifies (loc carry |+| loc c) h0 h1)
 
 let mont_reduction_ nLen rLen c n nInv_u64 carry =
