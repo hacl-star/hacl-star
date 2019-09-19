@@ -57,6 +57,35 @@ bool Lib_PrintBuffer_compare(uint32_t len, uint8_t* buffer1, uint8_t* buffer2) {
   return res;
 }
 
+uint8_t Lib_PrintBuffer_result_compare(uint32_t len, uint8_t* buffer1, uint8_t* buffer2) {
+  uint8_t res = 0;
+  uint32_t i;
+  for (i = 0; i < len; i++) {
+    res |= buffer1[i] ^ buffer2[i];
+  }
+  if (res == 0) {
+    printf("Success !\n\n");
+  } else {
+    printf("Failure !\n\n");
+  }
+  return res;
+}
+
+uint8_t Lib_PrintBuffer_result_compare_display2(uint32_t len, uint8_t* buffer1, uint8_t* buffer2) {
+  uint8_t res = 0;
+  uint32_t i;
+  Lib_PrintBuffer_print_compare(len, buffer1, buffer2);
+  for (i = 0; i < len; i++) {
+    res |= buffer1[i] ^ buffer2[i];
+  }
+  if (res == 0) {
+    printf("Success !\n\n");
+  } else {
+    printf("Failure !\n\n");
+  }
+  return res;
+}
+
 
 exit_code main()
 {
@@ -97,21 +126,32 @@ exit_code main()
   C_String_print("Control (Failure)... ");
   bool cres1 = Lib_PrintBuffer_compare(len, input, zeros);
 
-  /* Testing the computation of Blake2b */
-  int ref0 = ref_blake2b(outr, outlen, input, len, key, keylen);
-  Hacl_Blake2b_blake2b(outlen, outh, len, input, keylen, key);
+  /* Perform multiple tests */
+  uint8_t result = 0;
+  uint32_t i;
+  for (i = 0; i < 100; i++) {
+    /* memset(input, 0, len); */
+    /* memset(key, 0, keylen); */
+    /* memset(outr, 0, outlen); */
+    /* memset(outh, 0, outlen); */
 
-  /* Display output */
-  C_String_print("Test ... \n");
-  /* Lib_PrintBuffer_print_bytes(outlen, outr); */
-  /* Lib_PrintBuffer_print_bytes(outlen, outh); */
-  bool r0 = Lib_PrintBuffer_result_compare_display(outlen, outh, outr);
+    /* Setting the input and key to a random values */
+    bool ires0 = randombytes(input, len);
+    bool ires1 = randombytes(key, keylen);
 
-  /* Compose results of all tests */
-  bool result = !cres0 && cres1 && r0;
+    /* Testing the computation of Blake2b */
+    int ignored = ref_blake2b(outr, outlen, input, len, key, keylen);
+    Hacl_Blake2b_blake2b(outlen, outh, len, input, keylen, key);
+
+    /* Display output */
+    C_String_print("Test ...\n");
+    /* Lib_PrintBuffer_print_bytes(outlen, outr); */
+    /* Lib_PrintBuffer_print_bytes(outlen, outh); */
+    result |= Lib_PrintBuffer_result_compare_display2(outlen, outh, outr);
+  }
 
   /* Test for failure */
-  if (result) {
+  if (result == 0) {
     C_String_print("\nComposite Success !!\n");
   } else {
     C_String_print("\nComposite Failure !!\n");
