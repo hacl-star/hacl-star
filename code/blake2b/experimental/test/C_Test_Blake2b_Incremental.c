@@ -88,8 +88,8 @@ exit_code main()
   C_String_print("\n");
 
   /* Length of the input */
-  size_t len = 123456;
-  size_t keylen = 27;
+  size_t len = 2999;
+  size_t keylen = 2999;
   size_t outlen = 64;
 
   /* Allocating space for random input */
@@ -123,27 +123,34 @@ exit_code main()
 
   /* Perform multiple tests */
   uint8_t result = 0;
-  uint32_t i;
-  for (i = 0; i < 100; i++) {
-    /* memset(input, 0, len); */
-    /* memset(key, 0, keylen); */
-    /* memset(outr, 0, outlen); */
-    /* memset(outh, 0, outlen); */
+  uint32_t i,ll,kl,nn;
+  for (i = 0; i < 1; i++) {
+    for (ll = 1; ll < 2999; ll++) { // This fail abnormally for all values where ll % 128 = 0.
+      for (kl = 0; kl < 64; kl++) { // This seems to fail ?abnormally? for 65 < kl
+        for (nn = 1; nn < 64; nn++) { // This seems to normally fail for 64 <= nn.
+          /* memset(input, 0, len); */
+          /* memset(key, 0, keylen); */
+          /* memset(outr, 0, outlen); */
+          /* memset(outh, 0, outlen); */
 
-    /* Setting the input and key to a random values */
-    bool ires0 = randombytes(input, len);
-    bool ires1 = randombytes(key, keylen);
+          /* Setting the input and key to a random values */
+          bool ires0 = randombytes(input, ll);
+          bool ires1 = randombytes(key, kl);
 
-    /* Testing the computation of Blake2b */
-    int ignored = ref_blake2b(outr, outlen, input, len, key, keylen);
-    Hacl_Blake2b_blake2b(outlen, outh, len, input, keylen, key);
+          /* Testing the computation of Blake2b */
+          int ignored = ref_blake2b(outr, nn, input, ll, key, kl);
+          Hacl_Blake2b_blake2b(nn, outh, ll, input, kl, key);
 
-    /* Display output */
-    /* C_String_print("Test ...\n"); */
-    /* Lib_PrintBuffer_print_bytes(outlen, outr); */
-    /* Lib_PrintBuffer_print_bytes(outlen, outh); */
-    result |= Lib_PrintBuffer_compare_fast(outlen, outh, outr);
-    /* result |= Lib_PrintBuffer_result_compare_display2(outlen, outh, outr); */
+          /* Display output */
+          C_String_print("Test ... ");
+          printf("ll=%d; kl=%d; nn=%d\n", ll, kl, nn);
+          /* Lib_PrintBuffer_print_bytes(outlen, outr); */
+          /* Lib_PrintBuffer_print_bytes(outlen, outh); */
+          /* result |= Lib_PrintBuffer_compare_fast(outlen, outh, outr); */
+          result |= Lib_PrintBuffer_compare_display(nn, outh, outr);
+        }
+      }
+    }
   }
 
   /* Test for failure */
