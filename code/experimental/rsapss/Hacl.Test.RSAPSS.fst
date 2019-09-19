@@ -65,18 +65,18 @@ let ctest modBits n pkeyBits e skeyBits d pTLen p qTLen q r2 rBlindTLen rBlind m
   let dNat = sub skey pkeyLen dLen in
   let pNat = sub skey (pkeyLen +. dLen) pLen in
   let qNat = sub skey (pkeyLen +. dLen +. pLen) qLen in
-  text_to_nat (blocks modBits 8ul) n nNat;
-  text_to_nat (blocks pkeyBits 8ul) e eNat;
-  text_to_nat (blocks skeyBits 8ul) d dNat;
-  text_to_nat pTLen p pNat;
-  text_to_nat qTLen q qNat;
+  bignum_from_bytes (blocks modBits 8ul) n nNat;
+  bignum_from_bytes (blocks pkeyBits 8ul) e eNat;
+  bignum_from_bytes (blocks skeyBits 8ul) d dNat;
+  bignum_from_bytes pTLen p pNat;
+  bignum_from_bytes qTLen q qNat;
 
 
   let r2Nat = create nLen (u64 0) in
-  text_to_nat (blocks modBits 8ul) r2 r2Nat;
+  bignum_from_bytes (blocks modBits 8ul) r2 r2Nat;
 
   let rBlindNat = create rBlindLen (u64 0) in
-  text_to_nat rBlindTLen rBlind rBlindNat;
+  bignum_from_bytes rBlindTLen rBlind rBlindNat;
   let rBlind0 = rBlindNat.(0ul) in
 
   let nTLen = blocks modBits 8ul in
