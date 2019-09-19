@@ -2,9 +2,9 @@ FSTAR_HOME   ?= ../../../../FStar
 KREMLIN_HOME ?= ../../../../kremlin
 HACL_HOME    ?= ../../..
 
-CACHE_DIR     = .cache
+CACHE_DIR     = $(HACL_HOME)/.cache
 OUTPUT_DIR    = .output
-HINT_DIR      = .hints
+HINT_DIR      = $(HACL_HOME)/.hints
 GENERATED_DIR = rsapss-c
 OUT_DIR	      = rsapss-c
 

@@ -276,14 +276,14 @@ let rsapss_sign modBits eBits dBits pLen qLen skey rBlind r2 sLen salt msgLen ms
   pss_encode sLen salt msgLen msg emBits em;
   assume (8 * v (blocks emLen 8ul) <= max_size_t);
   assume (v (blocks emLen 8ul) == v nLen);
-  text_to_nat emLen em m;
+  bignum_from_bytes emLen em m;
   let h = ST.get () in
   mod_exp modBits nLen n r2 m dBits d s;
   assume (8 * v (blocks k 8ul) <= max_size_t);
   assume (v (blocks k 8ul) == v nLen);
   let h1 = ST.get () in
   assume (bn_v h1 s < pow2 (8 * v k));
-  nat_to_text k s sgnt;
+  bignum_to_bytes k s sgnt;
   pop_frame ()
 
 
@@ -325,7 +325,7 @@ let rsapss_verify modBits eBits pkey r2 sLen sgnt msgLen msg =
   let s = create nLen (u64 0) in
   assume (v (blocks k 8ul) == v nLen);
   assume (8 * v (blocks k 8ul) <= max_size_t);
-  text_to_nat k sgnt s;
+  bignum_from_bytes k sgnt s;
 
   let res =
     if (bn_is_less nLen s nLen n) then begin
@@ -334,7 +334,7 @@ let rsapss_verify modBits eBits pkey r2 sLen sgnt msgLen msg =
       assume (v (blocks emLen 8ul) == v nLen);
       let h1 = ST.get () in
       assume (bn_v h1 m < pow2 (8 * v emLen));
-      nat_to_text emLen m em;
+      bignum_to_bytes emLen m em;
       pss_verify sLen msgLen msg emBits em end
     else false in
   pop_frame ();

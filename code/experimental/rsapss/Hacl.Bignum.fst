@@ -23,7 +23,7 @@ let lbignum len = lbuffer uint64 len
 
 val bn_v: #len:size_t -> h:mem  -> b:lbignum len -> GTot nat
 let bn_v #len h b =
-  Hacl.Spec.Bignum.bn_v (v len) (as_seq h b)
+  Hacl.Spec.Bignum.bn_v #(v len) (as_seq h b)
 
 
 inline_for_extraction noextract
