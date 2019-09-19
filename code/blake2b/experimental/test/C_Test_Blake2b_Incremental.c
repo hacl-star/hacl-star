@@ -72,8 +72,8 @@ exit_code main()
   uint8_t *zeros = malloc(len * sizeof(uint8_t));
   uint8_t *input = malloc(len * sizeof(uint8_t));
   uint8_t *key = malloc(keylen * sizeof(uint8_t));
-  uint8_t *outr = malloc(keylen * sizeof(uint8_t));
-  uint8_t *outh = malloc(keylen * sizeof(uint8_t));
+  uint8_t *outr = malloc(outlen * sizeof(uint8_t));
+  uint8_t *outh = malloc(outlen * sizeof(uint8_t));
 
   /* Setting zeros */
   memset(zeros, 0, len);
@@ -97,22 +97,21 @@ exit_code main()
   C_String_print("Control (Failure)... ");
   bool cres1 = Lib_PrintBuffer_compare(len, input, zeros);
 
-
   /* Testing the computation of Blake2b */
-  int R0 = blake2b(outr, outlen, input, len, key, keylen);
+  int ref0 = ref_blake2b(outr, outlen, input, len, key, keylen);
   Hacl_Blake2b_blake2b(outlen, outh, len, input, keylen, key);
 
-  /* Compose results of all tests */
-  bool result = ires0 && ires1 && cres0 && !cres1;
-
   /* Display output */
-  C_String_print("Test ... ");
+  C_String_print("Test ... \n");
   /* Lib_PrintBuffer_print_bytes(outlen, outr); */
   /* Lib_PrintBuffer_print_bytes(outlen, outh); */
-  Lib_PrintBuffer_result_compare_display(outlen, outh, outr);
+  bool r0 = Lib_PrintBuffer_result_compare_display(outlen, outh, outr);
+
+  /* Compose results of all tests */
+  bool result = !cres0 && cres1 && r0;
 
   /* Test for failure */
-  if (!result) {
+  if (result) {
     C_String_print("\nComposite Success !!\n");
   } else {
     C_String_print("\nComposite Failure !!\n");
