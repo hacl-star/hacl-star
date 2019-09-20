@@ -227,11 +227,8 @@ inline_for_extraction noextract
 val rsapss_sign:
      modBits:size_t{1 < v modBits /\ 128 * (v (blocks modBits 64ul) + 1) <= max_size_t}
   -> eBits:size_t{0 < v eBits /\ v eBits <= v modBits}
-  -> dBits:size_t{0 < v dBits /\ v dBits <= v modBits}
-  -> pLen:size_t
-  -> qLen:size_t{v (blocks modBits 64ul) + v (blocks eBits 64ul) + v (blocks dBits 64ul) + v pLen + v qLen <= max_size_t}
-  -> skey:lbignum (blocks modBits 64ul +! blocks eBits 64ul +! blocks dBits 64ul +! pLen +! qLen)
-  -> rBlind:uint64
+  -> dBits:size_t{0 < v dBits /\ v dBits <= v modBits /\ v (blocks modBits 64ul) + v (blocks eBits 64ul) + v (blocks dBits 64ul) <= max_size_t}
+  -> skey:lbignum (blocks modBits 64ul +! blocks eBits 64ul +! blocks dBits 64ul)
   -> r2:lbignum (blocks modBits 64ul)
   -> sLen:size_t{v sLen + v hLen + 8 <= max_size_t /\ v sLen + v hLen + 8 < S.max_input /\ v sLen + v hLen + 2 <= v (blocks (modBits -! 1ul) 8ul)}
   -> salt:lbuffer uint8 sLen
@@ -249,19 +246,15 @@ val rsapss_sign:
   (ensures  fun h0 _ h1 -> modifies (loc sgnt) h0 h1)
     //as_seq h1 sgnt == S.rsapss_sign #(v sLen) #(v msgLen) (v modBits) skey_s (as_seq h0 salt) (as_seq h0 msg))
 
-let rsapss_sign modBits eBits dBits pLen qLen skey rBlind r2 sLen salt msgLen msg sgnt =
+let rsapss_sign modBits eBits dBits skey r2 sLen salt msgLen msg sgnt =
   push_frame ();
   let nLen = blocks modBits 64ul in
   let eLen = blocks eBits 64ul in
   let dLen = blocks dBits 64ul in
-  let pkeyLen = nLen +! eLen in
-  let skeyLen = pkeyLen +! dLen +! pLen +! qLen in
 
   let n = sub skey 0ul nLen in
   let e = sub skey nLen eLen in
-  let d = sub skey pkeyLen dLen in
-  let p = sub skey (pkeyLen +! dLen) pLen in
-  let q = sub skey (pkeyLen +! dLen +! pLen) qLen in
+  let d = sub skey (nLen +! eLen) dLen in
 
   let k = blocks modBits 8ul in
   let emBits = modBits -! 1ul in
