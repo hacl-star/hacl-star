@@ -28,7 +28,7 @@ val mul_mod_mont:
   Stack unit
   (requires fun h ->
     live h aM /\ live h bM /\ live h resM /\ live h n /\
-    0 < bn_v h n)
+    eq_or_disjoint aM bM /\ 0 < bn_v h n)
   (ensures  fun h0 _ h1 -> modifies (loc resM) h0 h1 /\
     bn_v h1 resM % bn_v h0 n == bn_v h0 aM * bn_v h0 bM / pow2 (64 * v rLen) % bn_v h0 n)
 
@@ -39,9 +39,6 @@ let mul_mod_mont nLen rLen n nInv_u64 aM bM resM =
   let c = create cLen (u64 0) in
   let tmpLen = nLen +! rLen in
   let tmp = create tmpLen (u64 0) in
-  //let c = sub st_kara 0ul cLen in
-  //let tmp = sub st_kara cLen (nLen +. rLen) in
-  //karatsuba pow2_i nLen aM bM st_kara;
   bn_mul nLen aM nLen bM c; // c = aM * bM
   mont_reduction nLen rLen n nInv_u64 c tmp resM; // resM = c % n
   admit();
@@ -91,6 +88,7 @@ val mod_exp:
   (requires fun h ->
     live h n /\ live h a /\ live h b /\ live h res /\ live h r2 /\
     disjoint res a /\ disjoint res b /\ disjoint res n /\ disjoint res r2 /\
+    disjoint a r2 /\
     0 < bn_v h n /\ bn_v h r2 == pow2 (2 * 64 * (v nLen + 1)) % bn_v h n)
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1)
 // bn_v h1 res == fexp (bn_v h0 a) (bn_v h0 b) (bn_v h0 n)

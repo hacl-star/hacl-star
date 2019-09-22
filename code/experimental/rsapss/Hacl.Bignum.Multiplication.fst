@@ -9,103 +9,81 @@ open Lib.Buffer
 
 open Hacl.Bignum
 open Hacl.Bignum.Base
-open Hacl.Bignum.Comparison
 open Hacl.Bignum.Addition
 
 module ST = FStar.HyperStack.ST
+module LSeq = Lib.Sequence
+module B = LowStar.Buffer
+module S = Hacl.Spec.Bignum.Multiplication
+module Loops = Lib.LoopCombinators
 
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
 inline_for_extraction noextract
-val bn_mul_by_limb_addj_f: a_i:uint64 -> l:uint64 -> c:uint64 -> r_ij:uint64 -> uint64 & uint64
-let bn_mul_by_limb_addj_f a_i l c r_ij =
-  mul_carry_add_u64 a_i l c r_ij
-
-//res = res + limb * bn * beta_j
-inline_for_extraction noextract
-val bn_mult_by_limb_addj_add:
+val bn_mul_by_limb_addj:
     aLen:size_t
   -> a:lbignum aLen
   -> l:uint64
-  -> j:size_t
-  -> resLen:size_t{v aLen + v j < v resLen}
-  -> res:lbignum resLen
-  -> carry:lbignum 1ul ->
+  -> res:lbignum aLen ->
   Stack uint64
   (requires fun h ->
-    live h a /\ live h res /\ live h carry /\
-    disjoint res a /\ disjoint res carry)
-  (ensures  fun h0 _ h1 -> modifies (loc carry |+| loc res) h0 h1)
+    live h a /\ live h res /\ disjoint res a)
+  (ensures  fun h0 c_out h1 -> modifies (loc res) h0 h1 /\
+    (c_out, as_seq h1 res) == S.bn_mul_by_limb_addj #(v aLen) (as_seq h0 a) l (as_seq h0 res))
 
-let bn_mult_by_limb_addj_add aLen a l j resLen res carry =
+let bn_mul_by_limb_addj aLen a l res =
+  push_frame ();
+  let c = create 1ul (u64 0) in
+
+  [@inline_let]
+  let refl h i = LSeq.index (as_seq h c) 0 in
+  [@inline_let]
+  let footprint (i:size_nat{i <= v aLen}) : GTot (l:B.loc{B.loc_disjoint l (loc res) /\
+    B.address_liveness_insensitive_locs `B.loc_includes` l}) = loc c in
+  [@inline_let]
+  let spec h = S.bn_mul_by_limb_addj_f #(v aLen) (as_seq h a) l (as_seq h res) in
+
   let h0 = ST.get () in
-  let inv h1 i = modifies (loc carry |+| loc res) h0 h1 in
-  Lib.Loops.for 0ul aLen inv
+  fill_elems h0 aLen res refl footprint spec
   (fun i ->
-    let ij = i +. j in
-    let res_ij = res.(ij) in
-    let c, res_ij = bn_mul_by_limb_addj_f a.(i) l carry.(0ul) res_ij in
-    carry.(0ul) <- c;
-    res.(ij) <- res_ij
+    c.(0ul) <- mul_carry_add_u64_st c.(0ul) a.(i) l (sub res i 1ul)
   );
-  let res1Len = resLen -. (aLen +. j) in
-  let res1 = sub res (aLen +. j) res1Len in
-  bn_add res1Len res1 1ul carry res1
+  let c = c.(0ul) in
+  pop_frame ();
+  c
 
 
 inline_for_extraction noextract
-val bn_mult_by_limb_addj:
+val bn_mul_:
     aLen:size_t
   -> a:lbignum aLen
-  -> l:uint64
-  -> j:size_t
-  -> resLen:size_t{v aLen + v j < v resLen}
-  -> res:lbignum resLen
-  -> carry:lbignum 1ul ->
-  Stack unit
-  (requires fun h -> live h a /\ live h res /\ live h carry /\ disjoint res a)
-  (ensures  fun h0 _ h1 -> modifies (loc carry |+| loc res) h0 h1)
-
-let bn_mult_by_limb_addj aLen a l j resLen res carry =
-  let h0 = ST.get() in
-  let inv h1 i = modifies (loc carry |+| loc res) h0 h1 in
-  Lib.Loops.for 0ul aLen inv
-  (fun i ->
-    let ij = i +. j in
-    let res_ij = res.(ij) in
-    let c, res_ij = bn_mul_by_limb_addj_f a.(i) l carry.(0ul) res_ij in
-    carry.(0ul) <- c;
-    res.(ij) <- res_ij
-  );
-  res.(aLen +. j) <- carry.(0ul)
-
-
-inline_for_extraction noextract
-val bn_mult_:
-    aLen:size_t
-  -> a:lbignum aLen
-  -> bLen:size_t
+  -> bLen:size_t{v aLen + v bLen <= max_size_t}
   -> b:lbignum bLen
-  -> resLen:size_t{v resLen = v aLen + v bLen}
-  -> res:lbignum resLen
-  -> carry:lbignum 1ul ->
+  -> j:size_t{v j < v bLen}
+  -> res:lbignum (aLen +! bLen) ->
   Stack unit
   (requires fun h ->
-    live h a /\ live h b /\ live h res /\ live h carry /\
-    disjoint res a /\ disjoint res b)
-  (ensures  fun h0 _ h1 -> modifies (loc carry |+| loc res) h0 h1)
+    live h a /\ live h b /\ live h res /\
+    disjoint res a /\ disjoint res b /\ eq_or_disjoint a b)
+  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_seq h1 res == S.bn_mul_ #(v aLen) #(v bLen) (as_seq h0 a) (as_seq h0 b) (v j) (as_seq h0 res))
 
-let bn_mult_ aLen a bLen b resLen res carry =
-  let h0 = ST.get() in
-  let inv h1 j = modifies (loc carry |+| loc res) h0 h1 in
-  Lib.Loops.for 0ul bLen inv
-  (fun j ->
-    carry.(0ul) <- u64 0;
-    bn_mult_by_limb_addj aLen a b.(j) j resLen res carry
-  )
+let bn_mul_ aLen a bLen b j res =
+  let res' = sub res j aLen in
+  let l = b.(j) in
+  let h0 = ST.get () in
+  let c = bn_mul_by_limb_addj aLen a l res' in
+  let h1 = ST.get () in
+  B.modifies_buffer_elim (B.gsub #uint64 res 0ul j) (loc res') h0 h1;
+  assert (v (aLen +! bLen -! (j +! aLen)) == v aLen + v bLen - v j - v aLen);
+  B.modifies_buffer_elim (B.gsub #uint64 res (j +! aLen) (aLen +! bLen -! (j +! aLen))) (loc res') h0 h1;
+  LSeq.lemma_update_sub (as_seq h0 res) (v j) (v aLen) 
+    (snd (S.bn_mul_by_limb_addj #(v aLen) (as_seq h0 a) l (as_seq h0 res'))) (as_seq h1 res);
+  res.(aLen +! j) <- c
 
 
+// bn_v h1 res == bn_v h0 a * bn_v h0 b
 val bn_mul:
     aLen:size_t
   -> a:lbignum aLen
@@ -115,16 +93,22 @@ val bn_mul:
   Stack unit
   (requires fun h ->
     live h a /\ live h b /\ live h res /\
-    disjoint res a /\ disjoint res b)
+    disjoint res a /\ disjoint res b /\ eq_or_disjoint a b)
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    bn_v h1 res == bn_v h0 a * bn_v h0 b)
+    as_seq h1 res == S.bn_mul #(v aLen) #(v bLen) (as_seq h0 a) (as_seq h0 b))
 
-[@"c_inline"]
+[@CInline]
 let bn_mul aLen a bLen b res =
-  push_frame ();
   let resLen = aLen +! bLen in
   memset res (u64 0) resLen;
-  let carry = create 1ul (u64 0) in
-  bn_mult_ aLen a bLen b resLen res carry;
-  admit();
-  pop_frame ()
+  let h0 = ST.get () in
+  LSeq.eq_intro (LSeq.sub (as_seq h0 res) 0 (v resLen)) (as_seq h0 res);
+
+  [@ inline_let]
+  let spec h = S.bn_mul_ (as_seq h a) (as_seq h b) in
+
+  loop1 h0 bLen res spec
+  (fun j ->
+    Loops.unfold_repeati (v bLen) (spec h0) (as_seq h0 res) (v j);
+    bn_mul_ aLen a bLen b j res
+  )

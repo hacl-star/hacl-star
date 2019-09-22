@@ -8,6 +8,7 @@ open Lib.IntTypes
 open Lib.Buffer
 
 open Hacl.Bignum
+open Hacl.Bignum.Base
 open Hacl.Bignum.Addition
 open Hacl.Bignum.Multiplication
 
@@ -58,6 +59,38 @@ let mod_inv_u64 n0 =
   let res = uv.(1ul) in
   pop_frame ();
   res
+
+
+//res = res + limb * bn * beta_j
+inline_for_extraction noextract
+val bn_mult_by_limb_addj_add:
+    aLen:size_t
+  -> a:lbignum aLen
+  -> l:uint64
+  -> j:size_t
+  -> resLen:size_t{v aLen + v j < v resLen}
+  -> res:lbignum resLen
+  -> carry:lbignum 1ul ->
+  Stack uint64
+  (requires fun h ->
+    live h a /\ live h res /\ live h carry /\
+    disjoint res a /\ disjoint res carry)
+  (ensures  fun h0 _ h1 -> modifies (loc carry |+| loc res) h0 h1)
+
+let bn_mult_by_limb_addj_add aLen a l j resLen res carry =
+  let h0 = ST.get () in
+  let inv h1 i = modifies (loc carry |+| loc res) h0 h1 in
+  Lib.Loops.for 0ul aLen inv
+  (fun i ->
+    let ij = i +. j in
+    let res_ij = res.(ij) in
+    let c, res_ij = mul_carry_add_u64 a.(i) l carry.(0ul) res_ij in
+    carry.(0ul) <- c;
+    res.(ij) <- res_ij
+  );
+  let res1Len = resLen -. (aLen +. j) in
+  let res1 = sub res (aLen +. j) res1Len in
+  bn_add res1Len res1 1ul carry res1
 
 
 inline_for_extraction noextract
@@ -163,6 +196,7 @@ val to_mont:
   Stack unit
   (requires fun h ->
     live h n /\ live h r2 /\ live h a /\ live h aM /\
+    disjoint a r2 /\
     0 < bn_v h n /\ bn_v h r2 == pow2 (2 * 64 * v rLen) % bn_v h n)
   (ensures  fun h0 _ h1 -> modifies (loc aM) h0 h1 /\
     bn_v h1 aM % bn_v h0 n == bn_v h0 a * pow2 (64 * v rLen) % bn_v h0 n)
