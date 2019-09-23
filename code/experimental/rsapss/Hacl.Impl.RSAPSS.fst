@@ -239,7 +239,7 @@ val rsapss_sign:
   (requires fun h ->
     live h salt /\ live h msg /\ live h sgnt /\ live h skey /\ live h r2 /\
     disjoint msg salt /\ disjoint msg sgnt /\ disjoint sgnt salt /\
-    disjoint sgnt skey /\ disjoint sgnt r2 /\
+    disjoint sgnt skey /\ disjoint sgnt r2 /\ disjoint skey r2 /\
    (let nLen = blocks modBits 64ul in
     let n = gsub skey 0ul nLen in
     bn_v h n > 0 /\ bn_v h r2 == pow2 (2 * 64 * (v nLen + 1)) % bn_v h n))
@@ -291,7 +291,7 @@ val rsapss_verify:
   Stack bool
   (requires fun h ->
     live h msg /\ live h sgnt /\ live h pkey /\ live h r2 /\
-    disjoint msg sgnt /\
+    disjoint msg sgnt /\ disjoint pkey r2 /\
    (let nLen = blocks modBits 64ul in
     let n = gsub pkey 0ul nLen in
     bn_v h n > 0 /\ bn_v h r2 == pow2 (2 * 64 * (v nLen + 1)) % bn_v h n))

@@ -17,44 +17,42 @@ module ST = FStar.HyperStack.ST
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
+//bn_v h1 resM % bn_v h0 n == bn_v h0 aM * bn_v h0 bM / pow2 (64 * v rLen) % bn_v h0 n
 val mul_mod_mont:
-    nLen:size_t{v nLen > 0}
-  -> rLen:size_t{v nLen < v rLen /\ v nLen + v rLen <= max_size_t}
+    nLen:size_t
+  -> rLen:size_t{v rLen = v nLen + 1 /\ v rLen + v rLen <= max_size_t}
   -> n:lbignum nLen
   -> nInv_u64:uint64
-  -> aM:lbignum nLen
-  -> bM:lbignum nLen
-  -> resM:lbignum nLen ->
+  -> aM:lbignum rLen
+  -> bM:lbignum rLen
+  -> resM:lbignum rLen ->
   Stack unit
   (requires fun h ->
     live h aM /\ live h bM /\ live h resM /\ live h n /\
-    eq_or_disjoint aM bM /\ 0 < bn_v h n)
-  (ensures  fun h0 _ h1 -> modifies (loc resM) h0 h1 /\
-    bn_v h1 resM % bn_v h0 n == bn_v h0 aM * bn_v h0 bM / pow2 (64 * v rLen) % bn_v h0 n)
+    disjoint resM n /\ eq_or_disjoint aM bM /\
+    eq_or_disjoint aM resM /\ eq_or_disjoint bM resM /\
+    0 < bn_v h n)
+  (ensures  fun h0 _ h1 -> modifies (loc resM) h0 h1)
 
-[@"c_inline"]
+[@CInline]
 let mul_mod_mont nLen rLen n nInv_u64 aM bM resM =
   push_frame ();
-  let cLen = nLen +! nLen in
-  let c = create cLen (u64 0) in
-  let tmpLen = nLen +! rLen in
-  let tmp = create tmpLen (u64 0) in
-  bn_mul nLen aM nLen bM c; // c = aM * bM
-  mont_reduction nLen rLen n nInv_u64 c tmp resM; // resM = c % n
-  admit();
+  let c = create (rLen +! rLen) (u64 0) in
+  bn_mul rLen aM rLen bM c; // c = aM * bM
+  mont_reduction nLen rLen n nInv_u64 c resM; // resM = c % n
   pop_frame ()
 
 
 val mod_exp_:
-    nLen:size_t{v nLen > 0}
-  -> rLen:size_t{v nLen < v rLen /\ v nLen + v rLen <= max_size_t}
+    nLen:size_t
+  -> rLen:size_t{v rLen = v nLen + 1 /\ v rLen + v rLen <= max_size_t}
   -> n:lbignum nLen
   -> nInv_u64:uint64
   -> bBits:size_t{v bBits > 0}
   -> bLen:size_t{v bLen = v (blocks bBits 64ul) /\ (v bBits - 1) / 64 < v bLen}
   -> b:lbignum bLen
-  -> aM:lbignum nLen
-  -> accM:lbignum nLen ->
+  -> aM:lbignum rLen
+  -> accM:lbignum rLen ->
   Stack unit
   (requires fun h ->
     live h n /\ live h b /\ live h aM /\ live h accM /\
@@ -63,7 +61,7 @@ val mod_exp_:
     0 < bn_v h n)
   (ensures  fun h0 _ h1 -> modifies (loc aM |+| loc accM) h0 h1)
 
-[@"c_inline"]
+[@CInline]
 let mod_exp_ nLen rLen n nInv_u64 bBits bLen b aM accM =
   let h0 = ST.get () in
   let inv h1 i = modifies (loc aM |+| loc accM) h0 h1 in
@@ -88,7 +86,7 @@ val mod_exp:
   (requires fun h ->
     live h n /\ live h a /\ live h b /\ live h res /\ live h r2 /\
     disjoint res a /\ disjoint res b /\ disjoint res n /\ disjoint res r2 /\
-    disjoint a r2 /\
+    disjoint a r2 /\ disjoint a n /\ disjoint n r2 /\
     0 < bn_v h n /\ bn_v h r2 == pow2 (2 * 64 * (v nLen + 1)) % bn_v h n)
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1)
 // bn_v h1 res == fexp (bn_v h0 a) (bn_v h0 b) (bn_v h0 n)
@@ -100,8 +98,8 @@ let mod_exp modBits nLen n r2 a bBits b res =
   let bLen = blocks bBits 64ul in
 
   let acc  = create nLen (u64 0) in
-  let aM   = create nLen (u64 0) in
-  let accM = create nLen (u64 0) in
+  let aM   = create rLen (u64 0) in
+  let accM = create rLen (u64 0) in
 
   acc.(0ul) <- u64 1;
   let n0 = n.(0ul) in
