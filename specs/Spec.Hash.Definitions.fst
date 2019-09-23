@@ -48,8 +48,8 @@ let sha2_alg = a:hash_alg { is_sha2 a }
 inline_for_extraction noextract
 let max_input_length: hash_alg -> Tot nat = function
   | MD5 | SHA1
-  | SHA2_224 | SHA2_256 -> pow2 61
-  | SHA2_384 | SHA2_512 -> pow2 125
+  | SHA2_224 | SHA2_256 -> pow2 61 - 1 
+  | SHA2_384 | SHA2_512 -> pow2 125 - 1
 
 inline_for_extraction
 let len_int_type: hash_alg -> inttype = function
@@ -196,7 +196,7 @@ let update_t (a: hash_alg) =
   h':words_state a
 
 let pad_t (a: hash_alg) =
-  l:nat { l < max_input_length a } ->
+  l:nat { l <= max_input_length a } ->
   b:bytes { (Seq.length b + l) % block_length a = 0 }
 
 let finish_t (a: hash_alg) =

@@ -23,8 +23,8 @@ let hash_raw = Spec.Hash.Definitions.bytes_hash hash_alg
 // Thus we can hash two tags together with a single call to the compression function.
 val hash2_raw: hash_raw -> hash_raw -> GTot hash_raw
 let hash2_raw src1 src2 =
-  let acc = Spec.Hash.init hash_alg in
-  let acc = Spec.Hash.update hash_alg acc (S.append src1 src2) in
+  let acc = Spec.Agile.Hash.init hash_alg in
+  let acc = Spec.Agile.Hash.update hash_alg acc (S.append src1 src2) in
   Spec.Hash.PadFinish.finish hash_alg acc
 
 /// For simplicity, we will specify the root for a sequence of [i]
