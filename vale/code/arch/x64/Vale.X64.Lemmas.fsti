@@ -1,4 +1,5 @@
 module Vale.X64.Lemmas
+open FStar.Mul
 open Vale.X64.Machine_s
 open Vale.X64.State
 open Vale.X64.StateLemmas
@@ -14,7 +15,10 @@ let overflow (flags:Flags.t) : Flags.flag_val_t = Flags.sel fOverflow flags
 let update_cf (flags:Flags.t) (new_cf:bool) = Flags.upd fCarry (Some new_cf) flags
 let update_of (flags:Flags.t) (new_of:bool) = Flags.upd fOverflow (Some new_of) flags
 
-let state_eq_S (s1 s2:BS.machine_state) =
+unfold let machine_state = BS.machine_state
+unfold let machine_eval_code = BS.machine_eval_code
+
+let state_eq_S (s1 s2:machine_state) =
   s1 == {s2 with BS.ms_trace = s1.BS.ms_trace}
 
 let state_eq_opt (s1 s2:option BS.machine_state) =
@@ -23,18 +27,16 @@ let state_eq_opt (s1 s2:option BS.machine_state) =
   | _ -> s1 == s2
 
 let eval_code (c:code) (s0:vale_state) (f0:fuel) (s1:vale_state) : Type0 =
-  state_eq_opt (BS.machine_eval_code c f0 (state_to_S s0)) (Some (state_to_S s1))
+  state_eq_opt (machine_eval_code c f0 (state_to_S s0)) (Some (state_to_S s1))
 
-let eval_ins (c:code) (s0:vale_state) : Ghost ((sM:vale_state) * (f0:fuel))
+let eval_ins (c:code) (s0:vale_state) : Ghost (vale_state & fuel)
   (requires Ins? c)
-  (ensures fun (sM, f0) ->
-    eval_code c s0 f0 sM
-  ) =
+  (ensures fun (sM, f0) -> eval_code c s0 f0 sM)
+  =
   let f0 = 0 in
-  let (Some sM) = BS.machine_eval_code c f0 (state_to_S s0) in
-  same_domain_eval_ins c f0 (state_to_S s0) s0;
-  lemma_to_of_eval_ins c s0;
-  (state_of_S s0 sM, f0)
+  let (Some sM) = machine_eval_code c f0 (state_to_S s0) in
+  lemma_to_of sM;
+  (state_of_S sM, f0)
 
 let eval_ocmp (s:vale_state) (c:ocmp) : GTot bool = snd (BS.machine_eval_ocmp (state_to_S s) c)
 
@@ -42,8 +44,8 @@ let valid_ocmp (c:ocmp) (s:vale_state) : GTot bool =
   BS.valid_ocmp c (state_to_S s)
 
 let ensure_valid_ocmp (c:ocmp) (s:vale_state) : GTot vale_state =
-  let ts:BS.machine_state = fst (BS.machine_eval_ocmp (state_to_S s) c) in
-  state_of_S s ts
+  let ts:machine_state = fst (BS.machine_eval_ocmp (state_to_S s) c) in
+  state_of_S ts
 
 val lemma_cmp_eq (s:vale_state) (o1:operand64{not (OMem? o1 || OStack? o1)}) (o2:operand64{not (OMem? o2 || OStack? o2)}) : Lemma
   (ensures eval_ocmp s (BC.OEq o1 o2) <==> eval_operand o1 s == eval_operand o2 s)
@@ -103,7 +105,7 @@ val lemma_merge_total (b0:codes) (s0:vale_state) (f0:fuel) (sM:vale_state) (fM:f
   )
   (ensures eval_code (Block b0) s0 (compute_merge_total f0 fM) sN)
 
-val lemma_empty_total (s0:vale_state) (bN:codes) : Ghost ((sM:vale_state) * (fM:fuel))
+val lemma_empty_total (s0:vale_state) (bN:codes) : Ghost (vale_state & fuel)
   (requires True)
   (ensures (fun (sM, fM) ->
     s0 == sM /\
@@ -139,18 +141,18 @@ val lemma_ifElseFalse_total (ifb:ocmp) (ct:code) (cf:code) (s0:vale_state) (f0:f
 
 val eval_while_inv (c:code) (s0:vale_state) (fW:fuel) (sW:vale_state) : Type0
 
-val lemma_while_total (b:ocmp) (c:code) (s0:vale_state) : Ghost ((s1:vale_state) * (f1:fuel))
+val lemma_while_total (b:ocmp) (c:code) (s0:vale_state) : Ghost (vale_state & fuel)
   (requires True)
   (ensures fun (s1, f1) ->
     s1 == s0 /\
     eval_while_inv (While b c) s1 f1 s1
   )
 
-val lemma_whileTrue_total (b:ocmp) (c:code) (s0:vale_state) (sW:vale_state) (fW:fuel) : Ghost ((s1:vale_state) * (f1:fuel))
+val lemma_whileTrue_total (b:ocmp) (c:code) (s0:vale_state) (sW:vale_state) (fW:fuel) : Ghost (vale_state & fuel)
   (requires eval_ocmp sW b)
   (ensures fun (s1, f1) -> s1 == sW /\ f1 == fW)
 
-val lemma_whileFalse_total (b:ocmp) (c:code) (s0:vale_state) (sW:vale_state) (fW:fuel) : Ghost ((s1:vale_state) * (f1:fuel))
+val lemma_whileFalse_total (b:ocmp) (c:code) (s0:vale_state) (sW:vale_state) (fW:fuel) : Ghost (vale_state & fuel)
   (requires
     valid_ocmp b sW /\
     not (eval_ocmp sW b) /\

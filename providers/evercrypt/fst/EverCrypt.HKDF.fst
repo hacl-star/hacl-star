@@ -17,8 +17,10 @@ open FStar.Integers
 open EverCrypt.Hash
 
 open Spec.Hash.Definitions
-open Spec.HKDF
-friend Spec.HKDF
+open Spec.Agile.HKDF
+friend Spec.Agile.HKDF
+
+friend Lib.IntTypes
 
 // [hashed] holds the HMAC text,
 // of the form | Spec.Hash.Definitions.hash_len a | infolen | 1 |;
@@ -26,19 +28,19 @@ friend Spec.HKDF
 
 val hkdf_expand_loop:
   a       : EverCrypt.HMAC.supported_alg -> (
-  okm     : uint8_p ->
-  prk     : uint8_p ->
-  prklen  : uint8_l prk ->
+  okm     : B.buffer Lib.IntTypes.uint8 ->
+  prk     : B.buffer Lib.IntTypes.uint8 ->
+  prklen  : UInt32.t { UInt32.v prklen == B.length prk } ->
   infolen : UInt32.t ->
-  len     : uint8_l okm  ->
-  hashed  : uint8_pl (Spec.Hash.Definitions.hash_length a + v infolen + 1) ->
+  len     : UInt32.t { UInt32.v len == B.length okm } ->
+  hashed  : B.buffer Lib.IntTypes.uint8 { B.length hashed == Spec.Hash.Definitions.hash_length a + v infolen + 1} ->
   i       : UInt8.t {
-    Spec.HMAC.keysized a (length prk) /\
+    Spec.Agile.HMAC.keysized a (length prk) /\
     disjoint okm prk /\
     disjoint hashed okm /\
     disjoint hashed prk /\
     Spec.Hash.Definitions.hash_length a + v infolen + 1 + Spec.Hash.Definitions.block_length a < pow2 32 /\ (* specific to this implementation *)
-    Spec.Hash.Definitions.hash_length a + pow2 32 + Spec.Hash.Definitions.block_length a <= Spec.Hash.Definitions.max_input_length a /\
+    Spec.Hash.Definitions.hash_length a + pow2 32 + Spec.Hash.Definitions.block_length a <= Spec.Hash.Definitions.max_input_length a + 1 /\
     v i < 255 /\
     v len <= (255 - v i) * Spec.Hash.Definitions.hash_length a } ->
   Stack unit
@@ -84,7 +86,7 @@ let rec hkdf_expand_loop a okm prk prklen infolen len hashed i =
       // Seq.lemma_eq_intro (as_seq h1 counter) ctr1;
       // assert(tag2 == HMAC.hmac a v_prk (as_seq h1 hashed1));
       Seq.lemma_eq_intro (as_seq h1 info_counter) text;
-      assert(tag2 == Spec.HMAC.hmac a prk text)  ))
+      assert(tag2 == Spec.Agile.HMAC.hmac a prk text)  ))
   else (
     HMAC.compute a tag prk prklen hashed (tlen + infolen + 1ul);
     ( let h2 = ST.get() in
@@ -96,7 +98,7 @@ let rec hkdf_expand_loop a okm prk prklen infolen len hashed i =
       let text = tag1 @| info @| ctr1 in
       // assert(tag2 == HMAC.hmac (Ghost.hide a) prk (as_seq h1 hashed));
       Seq.lemma_eq_intro (as_seq h1 hashed) text ;
-      assert(tag2 == Spec.HMAC.hmac a prk text )));
+      assert(tag2 == Spec.Agile.HMAC.hmac a prk text )));
 
   // copy it to the result; iterate if required
   let h2 = ST.get() in
@@ -149,6 +151,6 @@ let hkdf_expand a okm prk prklen info infolen len =
   assert_norm (64 + pow2 32 + 128 < pow2 61);
   assert_norm (pow2 61 < pow2 125);
   assert(
-    Spec.Hash.Definitions.hash_length a + pow2 32 + Spec.Hash.Definitions.block_length a < Spec.Hash.Definitions.max_input_length a);
+    Spec.Hash.Definitions.hash_length a + pow2 32 + Spec.Hash.Definitions.block_length a <= Spec.Hash.Definitions.max_input_length a);
   hkdf_expand_loop a okm prk prklen infolen len text 0uy;
   pop_frame()

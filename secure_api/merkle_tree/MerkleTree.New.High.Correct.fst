@@ -1,8 +1,5 @@
 module MerkleTree.New.High.Correct
 
-open EverCrypt
-open EverCrypt.Helpers
-
 open FStar.Seq
 
 open MerkleTree.Spec
@@ -15,13 +12,14 @@ open MerkleTree.New.High.Correct.Path
 
 module S = FStar.Seq
 
-module Base = MerkleTree.New.High.Correct.Base
 module Insertion = MerkleTree.New.High.Correct.Insertion
 module Rhs = MerkleTree.New.High.Correct.Rhs
 module Flushing = MerkleTree.New.High.Correct.Flushing
 module Path = MerkleTree.New.High.Correct.Path
 
 module Spec = MerkleTree.Spec
+
+#set-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0"
 
 /// Correctness of the high-level Merkle tree design
 
@@ -36,8 +34,8 @@ type old_hashes (mt: merkle_tree) =
   olds:hash_ss{S.length olds = 32 /\ mt_olds_inv 0 (MT?.i mt) olds}
 
 noeq type mt_olds =
-| MTO: mt:merkle_tree{mt_wf_elts mt} -> 
-       olds: old_hashes mt -> 
+| MTO: mt:merkle_tree{mt_wf_elts mt} ->
+       olds: old_hashes mt ->
        mt_olds
 
 val mto_inv: mt_olds -> GTot Type0
@@ -48,9 +46,9 @@ val mto_base: mto:mt_olds -> GTot (hs:hash_seq{S.length hs = MT?.j (MTO?.mt mto)
 let mto_base mto =
   mt_base (MTO?.mt mto) (MTO?.olds mto)
 
-val mto_spec: 
+val mto_spec:
   mto:mt_olds{MT?.j (MTO?.mt mto) > 0} ->
-  GTot (smt:Spec.merkle_tree (log2c (MT?.j (MTO?.mt mto))))
+  GTot (Spec.merkle_tree (log2c (MT?.j (MTO?.mt mto))))
 let mto_spec mto =
   mt_spec (MTO?.mt mto) (MTO?.olds mto)
 
@@ -59,7 +57,7 @@ let mto_spec mto =
 val create_mt_ok:
   init:hash ->
   Lemma (empty_olds_inv 0;
-        mto_inv (MTO (create_mt init) (empty_hashes 32)))
+         mto_inv (MTO (create_mt init) (empty_hashes 32)))
 let create_mt_ok init =
   Insertion.create_mt_inv_ok init
 
@@ -67,8 +65,8 @@ let create_mt_ok init =
 
 val mt_insert_ok:
   mto:mt_olds -> v:hash ->
-  Lemma (requires (mto_inv mto /\ mt_not_full (MTO?.mt mto)))
-        (ensures (mto_inv (MTO (mt_insert (MTO?.mt mto) v) (MTO?.olds mto))))
+  Lemma (requires mto_inv mto /\ mt_not_full (MTO?.mt mto))
+        (ensures  mto_inv (MTO (mt_insert (MTO?.mt mto) v) (MTO?.olds mto)))
 let mt_insert_ok mto v =
   Insertion.mt_insert_inv_preserved (MTO?.mt mto) v (MTO?.olds mto)
 
@@ -77,20 +75,20 @@ let mt_insert_ok mto v =
 val mt_flush_to_ok:
   mto:mt_olds ->
   idx:nat{idx >= MT?.i (MTO?.mt mto) /\ idx < MT?.j (MTO?.mt mto)} ->
-  Lemma (requires (mto_inv mto))
-        (ensures (mto_inv (MTO (mt_flush_to (MTO?.mt mto) idx)
+  Lemma (requires mto_inv mto)
+        (ensures  mto_inv (MTO (mt_flush_to (MTO?.mt mto) idx)
                                (mt_flush_to_olds 0 (MT?.i (MTO?.mt mto)) idx (MT?.j (MTO?.mt mto))
-                                 (MTO?.olds mto) (MT?.hs (MTO?.mt mto))))))
+                                 (MTO?.olds mto) (MT?.hs (MTO?.mt mto)))))
 let mt_flush_to_ok mto idx =
   Flushing.mt_flush_to_inv_preserved (MTO?.mt mto) (MTO?.olds mto) idx
-  
+
 val mt_flush_ok:
   mto:mt_olds ->
-  Lemma (requires (mto_inv mto /\ MT?.j (MTO?.mt mto) > MT?.i (MTO?.mt mto)))
-        (ensures (mto_inv (MTO (mt_flush_to (MTO?.mt mto) (MT?.j (MTO?.mt mto) - 1))
-                               (mt_flush_to_olds 0 (MT?.i (MTO?.mt mto)) 
+  Lemma (requires mto_inv mto /\ MT?.j (MTO?.mt mto) > MT?.i (MTO?.mt mto))
+        (ensures  mto_inv (MTO (mt_flush_to (MTO?.mt mto) (MT?.j (MTO?.mt mto) - 1))
+                               (mt_flush_to_olds 0 (MT?.i (MTO?.mt mto))
                                  (MT?.j (MTO?.mt mto) - 1) (MT?.j (MTO?.mt mto))
-                                 (MTO?.olds mto) (MT?.hs (MTO?.mt mto))))))
+                                 (MTO?.olds mto) (MT?.hs (MTO?.mt mto)))))
 let mt_flush_ok mto =
   Flushing.mt_flush_inv_preserved (MTO?.mt mto) (MTO?.olds mto)
 
@@ -98,7 +96,7 @@ let mt_flush_ok mto =
 
 val mt_get_root_ok:
   mto:mt_olds -> drt:hash ->
-  Lemma (requires (mto_inv mto))
+  Lemma (requires mto_inv mto)
         (ensures (let nmt, rt = mt_get_root (MTO?.mt mto) drt in
                  // Only `MT?.rhs` and `MT?.mroot` are changed.
                  MT?.i (MTO?.mt mto) == MT?.i nmt /\
@@ -113,12 +111,11 @@ let mt_get_root_ok mto drt =
 
 // `mt_get_path` is correct.
 
-#set-options "--z3rlimit 20"
 val mt_get_path_ok:
-  mto:mt_olds -> 
+  mto:mt_olds ->
   idx:nat{MT?.i (MTO?.mt mto) <= idx && idx < MT?.j (MTO?.mt mto)} ->
   drt:hash ->
-  Lemma (requires (mto_inv mto /\ MT?.j (MTO?.mt mto) > 0))
+  Lemma (requires mto_inv mto /\ MT?.j (MTO?.mt mto) > 0)
         (ensures (let j, p, rt = mt_get_path (MTO?.mt mto) idx drt in
                  j == MT?.j (MTO?.mt mto) /\
                  mt_root_inv (mto_base mto) hash_init false rt /\
@@ -136,9 +133,8 @@ val mt_verify_ok:
   j:nat{k < j} ->
   p:path{S.length p = 1 + mt_path_length k j false} ->
   rt:hash ->
-  Lemma (mt_verify k j p rt ==
-        Spec.mt_verify #(log2c j) 
-          (path_spec k j false (S.tail p)) k (HRaw (S.head p)) (HRaw rt))
+  Lemma (mt_verify k j p rt <==>
+         Spec.mt_verify #(log2c j)
+           (path_spec k j false (S.tail p)) k (HRaw (S.head p)) (HRaw rt))
 let mt_verify_ok k j p rt =
   Path.mt_verify_ok k j p rt
-

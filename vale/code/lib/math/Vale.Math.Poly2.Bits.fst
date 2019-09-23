@@ -1,4 +1,5 @@
 module Vale.Math.Poly2.Bits
+open FStar.Mul
 open Vale.Arch.TypesNative
 
 let lemma_to_of_uint n u =

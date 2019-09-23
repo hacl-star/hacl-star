@@ -29,7 +29,6 @@ val reveal_poly1305_heap_blocks (h:int) (pad:int) (r:int) (s:Seq.seq nat64) (k:i
 type t_seqTo128 = int -> nat128
 let seqTo128 (s:Seq.seq nat64) : t_seqTo128 =
   let f (i:int) : nat128 =
-    let open FStar.Mul in
     if 0 <= i && i < Seq.length s / 2 then
       (Seq.index s (2 * i)) + 0x10000000000000000 * (Seq.index s (2 * i + 1))
     else
@@ -67,7 +66,7 @@ unfold let buffers_disjoint (b1 b2:buffer64) =
   locs_disjoint [loc_buffer b1; loc_buffer b2]
 
 let readable_words (len:nat) =
-  ((len + 15) / 16) `op_Multiply` 2 // 2 == 16 for rounding /8 for 8-byte words
+  ((len + 15) / 16) * 2 // 2 == 16 for rounding /8 for 8-byte words
 
 val lemma_equal_blocks (h pad r:int) (inp1 inp2:int -> nat128) (k:nat) : Lemma
   (requires

@@ -1,4 +1,5 @@
 module Vale.Math.Poly2.Galois
+open FStar.Mul
 
 module U = FStar.UInt
 module PL = Vale.Math.Poly2.Lemmas

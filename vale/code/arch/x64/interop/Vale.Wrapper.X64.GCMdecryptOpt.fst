@@ -1,5 +1,6 @@
 module Vale.Wrapper.X64.GCMdecryptOpt
 
+open FStar.Mul
 open Vale.Stdcalls.X64.GCMdecryptOpt
 open Vale.AsLowStar.MemoryHelpers
 open Vale.X64.MemoryAdapters
@@ -196,6 +197,8 @@ val gcm128_decrypt_opt':
     )
 
 
+#push-options "--z3cliopt smt.arith.nl=true --smtencoding.nl_arith_repr boxwrap"
+#restart-solver
 inline_for_extraction
 let gcm128_decrypt_opt' key iv auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
   in128x6_b out128x6_b len128x6 in128_b out128_b len128_num inout_b cipher_num scratch_b tag_b =
@@ -281,6 +284,7 @@ let gcm128_decrypt_opt' key iv auth_b auth_bytes auth_num keys_b iv_b hkeys_b ab
 
   let h1 = get() in
   x
+#pop-options
 
 inline_for_extraction
 val gcm128_decrypt_opt_alloca:
@@ -758,6 +762,7 @@ let lemma_identical_uv (b:uint8_p) (h0 h1:HS.mem) : Lemma
 let length_aux6 (b:uint8_p) : Lemma (B.length b = DV.length (get_downview b))
   = DV.length_eq (get_downview b)
 
+#push-options "--z3cliopt smt.arith.nl=true"
 let lemma_slice_uv_extra (b:uint8_p) (b_start:uint8_p) (b_extra:uint8_p) (h:HS.mem) : Lemma
   (requires
     B.length b_start = B.length b / 16 * 16 /\
@@ -837,6 +842,7 @@ let lemma_slice_uv_extra (b:uint8_p) (b_start:uint8_p) (b_extra:uint8_p) (h:HS.m
  //     b_f;
  //   }
  // )
+#pop-options
 
 let lemma_slice_sub (b:uint8_p) (b_sub:uint8_p) (b_extra:uint8_p) (h:HS.mem) : Lemma
   (requires B.length b_extra = 16 /\ B.length b_sub = B.length b / 16 * 16 /\

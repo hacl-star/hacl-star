@@ -1,5 +1,6 @@
 module Vale.AES.OptPublic
 
+open FStar.Mul
 open FStar.Seq
 open Vale.Def.Types_s
 open Vale.Math.Poly2_s

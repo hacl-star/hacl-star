@@ -1,5 +1,6 @@
 module Vale.X64.BufferViewStore
 
+open FStar.Mul
 open Vale.Interop.Views
 open Vale.Interop
 module MB = LowStar.Monotonic.Buffer
@@ -101,7 +102,7 @@ let bv_upd_update_heap64 b heap i v mem =
         Seq.index s_init j;
         ( == ) { assert (Seq.index s_init j == UInt8.uint_to_t (heap.[addrs b + j])) }
         UInt8.uint_to_t (heap.[addrs b + j]); // True by correct_down_p
-        ( == ) { Vale.X64.Bytes_Semantics.frame_update_heap ptr v heap } // True by frame_update
+        ( == ) { Vale.Arch.MachineHeap.frame_update_heap ptr v heap } // True by frame_update
         UInt8.uint_to_t (heap'.[addrs b + j]);
         ( == ) { } // True by definition of get_seq_heap
         Seq.index s_f j;
@@ -111,7 +112,7 @@ let bv_upd_update_heap64 b heap i v mem =
       // assert (UV.sel h' uv i == UInt64.uint_to_t v);
       UV.get_sel h' uv i;
       // assert (Vale.Interop.Views.get64 (Seq.slice s_down (i*8) (i*8+8)) = UInt64.uint_to_t v);
-      Vale.X64.Bytes_Semantics.correct_update_get ptr v heap;
+      Vale.Arch.MachineHeap.correct_update_get ptr v heap;
       // assert (get_heap_val64 ptr heap' = v);
       let k = j - i * 8 in
       get64_aux ptr heap' v k;
@@ -147,7 +148,7 @@ let bv_upd_update_heap64 b heap i v mem =
         Seq.index s_init j;
         ( == ) { assert (Seq.index s_init j == UInt8.uint_to_t (heap.[addrs b + j])) }
         UInt8.uint_to_t (heap.[addrs b + j]); // True by correct_down_p
-        ( == ) { Vale.X64.Bytes_Semantics.frame_update_heap ptr v heap } // True by frame_update
+        ( == ) { Vale.Arch.MachineHeap.frame_update_heap ptr v heap } // True by frame_update
         UInt8.uint_to_t (heap'.[addrs b + j]);
         ( == ) { } // True by definition of get_seq_heap
         Seq.index s_f j;
@@ -205,7 +206,7 @@ let bv_upd_update_heap128 b heap i v mem =
         Seq.index s_init j;
         ( == ) { assert (Seq.index s_init j == UInt8.uint_to_t (heap.[addrs b + j])) }
         UInt8.uint_to_t (heap.[addrs b + j]); // True by correct_down_p
-        ( == ) { Vale.X64.Bytes_Semantics.frame_update_heap128 ptr v heap } // True by frame_update
+        ( == ) { Vale.Arch.MachineHeap.frame_update_heap128 ptr v heap } // True by frame_update
         UInt8.uint_to_t (heap'.[addrs b + j]);
         ( == ) { } // True by definition of get_seq_heap
         Seq.index s_f j;
@@ -215,7 +216,7 @@ let bv_upd_update_heap128 b heap i v mem =
       // assert (UV.sel h' uv i == v);
       UV.get_sel h' uv i;
       // assert (Vale.Interop.Views.get128 (Seq.slice s_down (i*16) (i*16+16)) = v);
-      Vale.X64.Bytes_Semantics.correct_update_get128 ptr v heap;
+      Vale.Arch.MachineHeap.correct_update_get128 ptr v heap;
       // assert (get_heap_val128 ptr heap' = v);
       let k = j - i * 16 in
       get128_aux ptr heap' v k;
@@ -251,7 +252,7 @@ let bv_upd_update_heap128 b heap i v mem =
         Seq.index s_init j;
         ( == ) { assert (Seq.index s_init j == UInt8.uint_to_t (heap.[addrs b + j])) }
         UInt8.uint_to_t (heap.[addrs b + j]); // True by correct_down_p
-        ( == ) { Vale.X64.Bytes_Semantics.frame_update_heap128 ptr v heap } // True by frame_update
+        ( == ) { Vale.Arch.MachineHeap.frame_update_heap128 ptr v heap } // True by frame_update
         UInt8.uint_to_t (heap'.[addrs b + j]);
         ( == ) { } // True by definition of get_seq_heap
         Seq.index s_f j;

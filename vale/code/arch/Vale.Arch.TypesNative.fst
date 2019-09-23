@@ -1,4 +1,5 @@
 module Vale.Arch.TypesNative
+open FStar.Mul
 
 let lemma_equal_nth n x y =
   UInt.to_vec_lemma_2 #n x y

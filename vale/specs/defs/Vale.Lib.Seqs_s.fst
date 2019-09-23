@@ -1,4 +1,5 @@
 module Vale.Lib.Seqs_s
+open FStar.Mul
 open FStar.Seq
 
 let compose (f:'b -> 'c) (g:'a -> 'b) : 'a -> 'c = fun x -> f (g x)

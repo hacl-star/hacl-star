@@ -9,8 +9,6 @@ open Vale.X64.State   // needed for mem
 open Vale.Poly1305.Bitvectors
 open Vale.X64.Memory
 
-// private unfold let op_Star = op_Multiply
-
 //#reset-options "--z3cliopt smt.QI.EAGER_THRESHOLD=100 --z3cliopt smt.CASE_SPLIT=3 --z3cliopt smt.arith.nl=false --max_fuel 0 --max_ifuel 0 --smtencoding.elim_box true --eager_inference --smtencoding.nl_arith_repr wrapped --smtencoding.l_arith_repr native"
 
 (* Getting a weird error otherwise, will file an issue

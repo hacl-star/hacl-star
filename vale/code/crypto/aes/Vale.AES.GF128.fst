@@ -1,4 +1,5 @@
 module Vale.AES.GF128
+open FStar.Mul
 open Vale.Arch.TypesNative
 open Vale.Math.Poly2.Bits
 

@@ -1,4 +1,5 @@
 module Vale.Interop.Assumptions
+open FStar.Mul
 open Vale.Interop.Base
 module ST = FStar.HyperStack.ST
 module HS = FStar.HyperStack

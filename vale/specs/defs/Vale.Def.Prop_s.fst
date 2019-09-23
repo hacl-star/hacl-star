@@ -1,4 +1,5 @@
 module Vale.Def.Prop_s
+open FStar.Mul
 
 // Prims.logical (which is private to Prims) and prop0 are synonyms for Type0 in F*,
 // but are not synonyms in Vale's type system:

@@ -1,4 +1,5 @@
 module Vale.AES.GF128_s
+open FStar.Mul
 open Vale.Math.Poly2_s
 open Vale.Math.Poly2.Bits_s
 open FStar.Seq

@@ -1,4 +1,5 @@
 module Vale.X64.Decls
+open FStar.Mul
 module M = Vale.X64.Memory
 module S = Vale.X64.Stack_i
 
@@ -14,6 +15,7 @@ open Vale.X64.State
 open Vale.Def.Types_s
 
 unfold let vale_heap = M.vale_heap
+unfold let vale_heap_impl = M.vale_heap_impl
 unfold let quad32 = quad32
 
 val cf (flags:Flags.t) : bool
@@ -76,14 +78,13 @@ unfold let va_operand_xmm = reg_xmm
 unfold let va_operand128 = operand128
 unfold let va_operand_opr128 = va_operand128
 
-val mul_nat_helper (x y:nat) : Lemma (x `op_Multiply` y >= 0)
+val mul_nat_helper (x y:nat) : Lemma (x * y >= 0)
 [@va_qattr] unfold let va_mul_nat (x y:nat) : nat =
   mul_nat_helper x y;
-  x `op_Multiply` y
+  x * y
 
 [@va_qattr] unfold let va_expand_state (s:vale_state) : vale_state = state_eta s
 
-(* Abbreviations *)
 unfold let get_reg (o:va_reg_operand) : reg = Reg 0 (OReg?.r o)
 unfold let buffer_readable (#t:M.base_typ) (h:vale_heap) (b:M.buffer t) : GTot prop0 = M.buffer_readable #t h b
 unfold let buffer_writeable (#t:M.base_typ) (b:M.buffer t) : GTot prop0 = M.buffer_writeable #t b
@@ -93,16 +94,14 @@ unfold let buffer64_as_seq (m:vale_heap) (b:M.buffer64) : GTot (Seq.seq nat64) =
 unfold let s64 (m:vale_heap) (b:M.buffer64) : GTot (Seq.seq nat64) = buffer64_as_seq m b
 unfold let buffer128_as_seq (m:vale_heap) (b:M.buffer128) : GTot (Seq.seq quad32) = M.buffer_as_seq m b
 unfold let s128 (m:vale_heap) (b:M.buffer128) : GTot (Seq.seq quad32) = buffer128_as_seq m b
-unfold let valid_src_addr (#t:M.base_typ) (m:vale_heap) (b:M.buffer t) (i:int) : prop0 =
-  0 <= i /\ i < buffer_length b /\ buffer_readable m b
-unfold let valid_dst_addr (#t:M.base_typ) (m:vale_heap) (b:M.buffer t) (i:int) : prop0 =
-  0 <= i /\ i < buffer_length b /\ buffer_readable m b /\ buffer_writeable b
+unfold let valid_src_addr (#t:M.base_typ) (m:vale_heap) (b:M.buffer t) (i:int) : prop0 = M.valid_buffer_read m b i
+unfold let valid_dst_addr (#t:M.base_typ) (m:vale_heap) (b:M.buffer t) (i:int) : prop0 = M.valid_buffer_write m b i
 unfold let buffer64_read (b:M.buffer64) (i:int) (m:vale_heap) : GTot nat64 = M.buffer_read b i m
-unfold let buffer64_write (b:M.buffer64) (i:int) (v:nat64) (m:vale_heap) : GTot vale_heap =
+let buffer64_write (b:M.buffer64) (i:int) (v:nat64) (m:vale_heap) : GTot vale_heap =
   if FStar.StrongExcludedMiddle.strong_excluded_middle (buffer_readable m b /\ buffer_writeable b) then
     M.buffer_write b i v m else m
 unfold let buffer128_read (b:M.buffer128) (i:int) (m:vale_heap) : GTot quad32 = M.buffer_read b i m
-unfold let buffer128_write (b:M.buffer128) (i:int) (v:quad32) (m:vale_heap) : GTot vale_heap =
+let buffer128_write (b:M.buffer128) (i:int) (v:quad32) (m:vale_heap) : GTot vale_heap =
   if FStar.StrongExcludedMiddle.strong_excluded_middle (buffer_readable m b /\ buffer_writeable b) then
     M.buffer_write b i v m else m
 unfold let modifies_mem (s:M.loc) (h1 h2:vale_heap) : GTot prop0 = M.modifies s h1 h2
@@ -110,29 +109,29 @@ unfold let loc_buffer(#t:M.base_typ) (b:M.buffer t) = M.loc_buffer #t b
 unfold let locs_disjoint = M.locs_disjoint
 unfold let loc_union = M.loc_union
 
-let valid_maddr (addr:int) (s_mem:vale_heap) (s_memTaint:M.memtaint) (b:M.buffer64) (index:int) (t:taint) : prop0 =
+let valid_buf_maddr64 (addr:int) (s_mem:vale_heap) (s_memTaint:M.memtaint) (b:M.buffer64) (index:int) (t:taint) : prop0 =
   valid_src_addr s_mem b index /\
   M.valid_taint_buf64 b s_mem s_memTaint t /\
-  addr == M.buffer_addr b s_mem + 8 `op_Multiply` index
+  addr == M.buffer_addr b s_mem + 8 * index
 
-let valid_maddr128 (addr:int) (s_mem:vale_heap) (s_memTaint:M.memtaint) (b:M.buffer128) (index:int) (t:taint) : prop0 =
+let valid_buf_maddr128 (addr:int) (s_mem:vale_heap) (s_memTaint:M.memtaint) (b:M.buffer128) (index:int) (t:taint) : prop0 =
   valid_src_addr s_mem b index /\
   M.valid_taint_buf128 b s_mem s_memTaint t /\
-  addr == M.buffer_addr b s_mem + 16 `op_Multiply` index
+  addr == M.buffer_addr b s_mem + 16 * index
 
-let valid_mem_operand (addr:int) (t:taint) (s_mem:vale_heap) (s_memTaint:M.memtaint) : prop0 =
-  exists (b:M.buffer64) (index:int).{:pattern (valid_maddr addr s_mem s_memTaint b index t)}
-    valid_maddr addr s_mem s_memTaint b index t
+let valid_mem_operand64 (addr:int) (t:taint) (s_mem:vale_heap) (s_memTaint:M.memtaint) : prop0 =
+  exists (b:M.buffer64) (index:int).{:pattern (valid_buf_maddr64 addr s_mem s_memTaint b index t)}
+    valid_buf_maddr64 addr s_mem s_memTaint b index t
 
 let valid_mem_operand128 (addr:int) (t:taint) (s_mem:vale_heap) (s_memTaint:M.memtaint) : prop0 =
-  exists (b:M.buffer128) (index:int).{:pattern (valid_maddr128 addr s_mem s_memTaint b index t)}
-    valid_maddr128 addr s_mem s_memTaint b index t
+  exists (b:M.buffer128) (index:int).{:pattern (valid_buf_maddr128 addr s_mem s_memTaint b index t)}
+    valid_buf_maddr128 addr s_mem s_memTaint b index t
 
 [@va_qattr]
 let valid_operand (o:operand64) (s:vale_state) : prop0 =
   Vale.X64.State.valid_src_operand o s /\
   ( match o with
-    | OMem (m, t) -> valid_mem_operand (eval_maddr m s) t s.vs_heap s.vs_memTaint
+    | OMem (m, t) -> valid_mem_operand64 (eval_maddr m s) t (M.get_vale_heap s.vs_heap) s.vs_memTaint
     | OStack (m, t) -> S.valid_taint_stack64 (eval_maddr m s) t s.vs_stackTaint
     | _ -> True
   )
@@ -141,7 +140,7 @@ let valid_operand (o:operand64) (s:vale_state) : prop0 =
 let valid_operand128 (o:operand128) (s:vale_state) : prop0 =
   Vale.X64.State.valid_src_operand128 o s /\
   ( match o with
-    | OMem (m, t) -> valid_mem_operand128 (eval_maddr m s) t s.vs_heap s.vs_memTaint
+    | OMem (m, t) -> valid_mem_operand128 (eval_maddr m s) t (M.get_vale_heap s.vs_heap) s.vs_memTaint
     | OStack (m, t) -> S.valid_taint_stack128 (eval_maddr m s) t s.vs_stackTaint
     | _ -> True
   )
@@ -188,16 +187,18 @@ unfold let va_opr_code_Mem (o:va_operand) (offset:int) (t:taint) : va_operand =
   | _ -> OMem (MConst 42, t)
 
 val va_opr_lemma_Mem (s:va_state) (base:va_operand) (offset:int) (b:M.buffer64) (index:int) (t:taint) : Lemma
-  (requires
+  (requires (
+    let h = M.get_vale_heap s.vs_heap in
     OReg? base /\
-    valid_src_addr s.vs_heap b index /\
-    M.valid_taint_buf64 b s.vs_heap s.vs_memTaint t /\
-    eval_operand base s + offset == M.buffer_addr b s.vs_heap + 8 `op_Multiply` index
-  )
-  (ensures
+    valid_src_addr h b index /\
+    M.valid_taint_buf64 b h s.vs_memTaint t /\
+    eval_operand base s + offset == M.buffer_addr b h + 8 * index
+  ))
+  (ensures (
+    let h = M.get_vale_heap s.vs_heap in
     valid_operand (va_opr_code_Mem base offset t) s /\
-    M.load_mem64 (M.buffer_addr b s.vs_heap + 8 `op_Multiply` index) s.vs_heap == M.buffer_read b index s.vs_heap
-  )
+    M.load_mem64 (M.buffer_addr b h + 8 * index) h == M.buffer_read b index h
+  ))
 
 [@va_qattr]
 unfold let va_opr_code_Stack (o:va_operand) (offset:int) (t:taint) : va_operand =
@@ -220,16 +221,18 @@ unfold let va_opr_code_Mem128 (o:va_operand) (offset:int) (t:taint) : va_operand
   | _ -> OMem (MConst 42, t)
 
 val va_opr_lemma_Mem128 (s:va_state) (base:va_operand) (offset:int) (t:taint) (b:M.buffer128) (index:int) : Lemma
-  (requires
+  (requires (
+    let h = M.get_vale_heap s.vs_heap in
     OReg? base /\
-    valid_src_addr s.vs_heap b index /\
-    M.valid_taint_buf128 b s.vs_heap s.vs_memTaint t /\
-    eval_operand base s + offset == M.buffer_addr b s.vs_heap + 16 `op_Multiply` index
-  )
-  (ensures
+    valid_src_addr h b index /\
+    M.valid_taint_buf128 b h s.vs_memTaint t /\
+    eval_operand base s + offset == M.buffer_addr b h + 16 * index
+  ))
+  (ensures (
+    let h = M.get_vale_heap s.vs_heap in
     valid_operand128 (va_opr_code_Mem128 base offset t) s /\
-    M.load_mem128 (M.buffer_addr b s.vs_heap + 16 `op_Multiply` index) s.vs_heap == M.buffer_read b index s.vs_heap
-  )
+    M.load_mem128 (M.buffer_addr b h + 16 * index) h == M.buffer_read b index h
+  ))
 
 val taint_at (memTaint:M.memtaint) (addr:int) : taint
 
@@ -262,7 +265,7 @@ val taint_at (memTaint:M.memtaint) (addr:int) : taint
 [@va_qattr] unfold let va_get_flags (s:va_state) : Flags.t = s.vs_flags
 [@va_qattr] unfold let va_get_reg64 (r:reg_64) (s:va_state) : nat64 = eval_reg_64 r s
 [@va_qattr] unfold let va_get_xmm (x:reg_xmm) (s:va_state) : quad32 = eval_reg_xmm x s
-[@va_qattr] unfold let va_get_mem (s:va_state) : vale_heap = s.vs_heap
+[@va_qattr] unfold let va_get_mem (s:va_state) : vale_heap = M.get_vale_heap s.vs_heap
 [@va_qattr] unfold let va_get_stack (s:va_state) : S.vale_stack = s.vs_stack
 [@va_qattr] unfold let va_get_memTaint (s:va_state) : M.memtaint = s.vs_memTaint
 [@va_qattr] unfold let va_get_stackTaint (s:va_state) : M.memtaint = s.vs_stackTaint
@@ -272,7 +275,7 @@ val taint_at (memTaint:M.memtaint) (addr:int) : taint
 [@va_qattr] let va_upd_reg (r:reg) (v:t_reg r) (s:vale_state) : vale_state = update_reg r v s
 [@va_qattr] let va_upd_reg64 (r:reg_64) (v:nat64) (s:vale_state) : vale_state = update_reg_64 r v s
 [@va_qattr] let va_upd_xmm (x:reg_xmm) (v:quad32) (s:vale_state) : vale_state = update_reg_xmm x v s
-[@va_qattr] let va_upd_mem (mem:vale_heap) (s:vale_state) : vale_state = { s with vs_heap = mem }
+[@va_qattr] let va_upd_mem (mem:vale_heap) (s:vale_state) : vale_state = { s with vs_heap = M.set_vale_heap s.vs_heap mem }
 [@va_qattr] let va_upd_stack (stack:S.vale_stack) (s:vale_state) : vale_state = { s with vs_stack = stack }
 [@va_qattr] let va_upd_memTaint (memTaint:M.memtaint) (s:vale_state) : vale_state = { s with vs_memTaint = memTaint }
 [@va_qattr] let va_upd_stackTaint (stackTaint:M.memtaint) (s:vale_state) : vale_state = { s with vs_stackTaint = stackTaint }
@@ -287,7 +290,7 @@ val taint_at (memTaint:M.memtaint) (addr:int) : taint
   va_upd_reg64 r (eval_reg_64 r sM) sK
 [@va_qattr] unfold let va_update_xmm (x:reg_xmm) (sM:va_state) (sK:va_state) : va_state =
   va_upd_xmm x (eval_reg_xmm x sM) sK
-[@va_qattr] unfold let va_update_mem (sM:va_state) (sK:va_state) : va_state = va_upd_mem sM.vs_heap sK
+[@va_qattr] unfold let va_update_mem (sM:va_state) (sK:va_state) : va_state = va_upd_mem (M.get_vale_heap sM.vs_heap) sK
 [@va_qattr] unfold let va_update_stack (sM:va_state) (sK:va_state) : va_state = va_upd_stack sM.vs_stack sK
 [@va_qattr] unfold let va_update_memTaint (sM:va_state) (sK:va_state) : va_state = va_upd_memTaint sM.vs_memTaint sK
 [@va_qattr] unfold let va_update_stackTaint (sM:va_state) (sK:va_state) : va_state = va_upd_stackTaint sM.vs_stackTaint sK
@@ -382,13 +385,13 @@ unfold let va_get_whileBody (c:va_code{While? c}) : va_code = While?.whileBody c
 
 (** Map syntax **)
 
-//unfold let op_String_Access (m:vale_heap) (b:M.buffer64) = fun index -> buffer64_read b index m
+//unfold let (.[]) (m:vale_heap) (b:M.buffer64) = fun index -> buffer64_read b index m
 
 // syntax for map accesses, m.[key] and m.[key] <- value
 (*
 type map (key:eqtype) (value:Type) = Map.t key value
-let op_String_Access     = Map.sel
-let op_String_Assignment = Map.upd
+unfold let (.[]) = Map.sel
+unfold let (.[]<-) = Map.upd
 *)
 (** Memory framing **)
 
@@ -450,14 +453,14 @@ let validDstAddrs128 (m:vale_heap) (addr:int) (b:M.buffer128) (len:int) (memTain
 let validSrcAddrsOffset128 (m:vale_heap) (addr:int) (b:M.buffer128) (offset len:int) (memTaint:M.memtaint) (t:taint) =
     buffer_readable m b /\
     offset + len <= buffer_length b /\
-    M.buffer_addr b m + 16 `op_Multiply` offset == addr /\
+    M.buffer_addr b m + 16 * offset == addr /\
     M.valid_taint_buf128 b m memTaint t
 
 let validDstAddrsOffset128 (m:vale_heap) (addr:int) (b:M.buffer128) (offset len:int) (memTaint:M.memtaint) (t:taint) =
     buffer_readable m b /\
     buffer_writeable b /\
     offset + len <= buffer_length b /\
-    M.buffer_addr b m + 16 `op_Multiply` offset == addr /\
+    M.buffer_addr b m + 16 * offset == addr /\
     M.valid_taint_buf128 b m memTaint t
 
 let modifies_buffer_specific128 (b:M.buffer128) (h1 h2:vale_heap) (start last:nat) : GTot prop0 =
@@ -596,14 +599,14 @@ val va_lemma_merge_total (b0:va_codes) (s0:va_state) (f0:va_fuel) (sM:va_state) 
     eval_code (va_Block b0) s0 fN sN
   ))
 
-val va_lemma_empty_total (s0:va_state) (bN:va_codes) : Ghost ((sM:va_state) * (fM:va_fuel))
+val va_lemma_empty_total (s0:va_state) (bN:va_codes) : Ghost (va_state & va_fuel)
   (requires True)
   (ensures (fun (sM, fM) ->
     s0 == sM /\
     eval_code (va_Block []) s0 fM sM
   ))
 
-val va_lemma_ifElse_total (ifb:ocmp) (ct:va_code) (cf:va_code) (s0:va_state) : Ghost (bool * va_state * va_state * va_fuel)
+val va_lemma_ifElse_total (ifb:ocmp) (ct:va_code) (cf:va_code) (s0:va_state) : Ghost (bool & va_state & va_state & va_fuel)
   (requires True)
   (ensures  (fun (cond, sM, sN, f0) ->
     cond == eval_ocmp s0 ifb /\
@@ -633,18 +636,18 @@ val va_lemma_ifElseFalse_total (ifb:ocmp) (ct:va_code) (cf:va_code) (s0:va_state
 let va_whileInv_total (b:ocmp) (c:va_code) (s0:va_state) (sN:va_state) (f0:va_fuel) : prop0 =
   eval_while_inv (While b c) s0 f0 sN
 
-val va_lemma_while_total (b:ocmp) (c:va_code) (s0:va_state) : Ghost ((s1:va_state) * (f1:va_fuel))
+val va_lemma_while_total (b:ocmp) (c:va_code) (s0:va_state) : Ghost (va_state & va_fuel)
   (requires True)
   (ensures fun (s1, f1) ->
     s1 == s0 /\
     eval_while_inv (While b c) s1 f1 s1
   )
 
-val va_lemma_whileTrue_total (b:ocmp) (c:va_code) (s0:va_state) (sW:va_state) (fW:va_fuel) : Ghost ((s1:va_state) * (f1:va_fuel))
+val va_lemma_whileTrue_total (b:ocmp) (c:va_code) (s0:va_state) (sW:va_state) (fW:va_fuel) : Ghost (va_state & va_fuel)
   (requires eval_ocmp sW b /\ valid_ocmp b sW)
   (ensures fun (s1, f1) -> s1 == sW /\ f1 == fW)
 
-val va_lemma_whileFalse_total (b:ocmp) (c:va_code) (s0:va_state) (sW:va_state) (fW:va_fuel) : Ghost ((s1:va_state) * (f1:va_fuel))
+val va_lemma_whileFalse_total (b:ocmp) (c:va_code) (s0:va_state) (sW:va_state) (fW:va_fuel) : Ghost (va_state & va_fuel)
   (requires
     valid_ocmp b sW /\
     not (eval_ocmp sW b) /\

@@ -1,4 +1,4 @@
-module Spec.HKDF
+module Spec.Agile.HKDF
 
 open FStar.Integers
 open Spec.Hash.Definitions
@@ -12,7 +12,9 @@ open Spec.Hash.Definitions
 
 open FStar.Seq
 
-let extract = Spec.HMAC.hmac 
+let extract = Spec.Agile.HMAC.hmac
+
+#push-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
 
 // [a, prk, info] are fixed.
 // [required] is the number of bytes to be extracted
@@ -28,19 +30,18 @@ let rec expand0 :
     let chainLength = if count = 0 then 0 else hash_length a in
     HMAC.keysized a (Seq.length prk) /\
     Seq.length last = chainLength /\
-    hash_length a + length info + 1 + block_length a < max_input_length a /\
+    hash_length a + length info + 1 + block_length a <= max_input_length a /\
     count < 255 /\
     required <= (255 - count) * hash_length a } ->
-  Tot (lbytes required)
+  Tot (Lib.ByteSequence.lbytes required)
 =
   fun a prk info required count last ->
   let count = count + 1 in
-  let text = last @| info @| Seq.create 1 (UInt8.uint_to_t count) in
-  let tag = Spec.HMAC.hmac a prk text in
+  let text = last @| info @| Seq.create 1 (Lib.IntTypes.u8 count) in
+  let tag = Spec.Agile.HMAC.hmac a prk text in
   if required <= hash_length a
   then fst (split tag required)
   else tag @| expand0 a prk info (required - hash_length a) count tag
 
 let expand a prk info required =
   expand0 a prk info required 0 Seq.empty
-

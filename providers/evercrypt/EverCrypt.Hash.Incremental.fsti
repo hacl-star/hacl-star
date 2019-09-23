@@ -158,7 +158,7 @@ val invariant_loc_in_footprint
 ///                                            JP (20190607)
 
 noextract
-let bytes = S.seq UInt8.t
+let bytes = S.seq Lib.IntTypes.uint8
 
 val hashed: #a:Hash.alg -> h:HS.mem -> s:state a -> GTot bytes
 
@@ -167,7 +167,7 @@ val hash_fits: #a:Hash.alg -> h:HS.mem -> s:state a -> Lemma
   (requires (
     invariant h s))
   (ensures (
-    S.length (hashed h s) < Spec.Hash.Definitions.max_input_length a))
+    S.length (hashed h s) <= Spec.Hash.Definitions.max_input_length a))
   [ SMTPat (hashed h s) ]
 
 val alg_of_state: a:e_alg -> (
@@ -251,7 +251,7 @@ unfold
 let update_pre
   (a: Hash.alg)
   (s: state a)
-  (data: B.buffer UInt8.t)
+  (data: B.buffer Lib.IntTypes.uint8)
   (len: UInt32.t)
   (h0: HS.mem)
 =
@@ -265,7 +265,7 @@ unfold
 let update_post
   (a: Hash.alg)
   (s: state a)
-  (data: B.buffer UInt8.t)
+  (data: B.buffer Lib.IntTypes.uint8)
   (len: UInt32.t)
   (h0 h1: HS.mem)
 =
@@ -281,11 +281,14 @@ val update:
   a:e_alg -> (
   let a = G.reveal a in
   s:state a ->
-  data: B.buffer UInt8.t ->
+  data: B.buffer Lib.IntTypes.uint8 ->
   len: UInt32.t ->
   Stack unit
     (requires fun h0 -> update_pre a s data len h0)
     (ensures fun h0 s' h1 -> update_post a s data len h0 h1))
+
+#set-options "--z3rlimit 20"
+open Lib.IntTypes
 
 /// Note: the state is left to be reused by the caller to feed more data into
 /// the hash.
@@ -304,7 +307,7 @@ let finish_st (a: Hash.alg) =
       hashed h0 s == hashed h1 s /\
       footprint h0 s == footprint h1 s /\
       B.(modifies (loc_union (loc_buffer dst) (footprint h0 s)) h0 h1) /\
-      S.equal (B.as_seq h1 dst) (Spec.Hash.hash a (hashed h0 s)))
+      S.equal (B.as_seq h1 dst) (Spec.Agile.Hash.hash a (hashed h0 s)))
 
 (** @type: true
 *)

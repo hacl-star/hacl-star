@@ -1,4 +1,5 @@
 module Vale.Math.Poly2.Lemmas
+open FStar.Mul
 open Vale.Math.Poly2_s
 open Vale.Math.Poly2
 open FStar.Seq

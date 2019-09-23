@@ -54,7 +54,7 @@ val lemma_bv128_64_64_and: x:bv_t 128 -> x0:bv_t 64 -> x1:bv_t 64 ->
         (ensures (z == bvand #128 x y))
 
 let lowerUpper128u (l:uint_t 64) (u:uint_t 64) : uint_t 128 =
-    0x10000000000000000 `op_Multiply` u + l
+    0x10000000000000000 * u + l
 
 val lemma_lowerUpper128_andu : x:uint_t 128 -> x0:uint_t 64 -> x1:uint_t 64 -> y:uint_t 128 ->
                             y0:uint_t 64 -> y1:uint_t 64 -> z:uint_t 128 -> z0:uint_t 64 ->

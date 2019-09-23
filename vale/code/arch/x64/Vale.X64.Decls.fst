@@ -1,4 +1,5 @@
 module Vale.X64.Decls
+open FStar.Mul
 open Vale.X64.Machine_s
 open Vale.X64
 open Vale.X64.State
@@ -8,10 +9,10 @@ module P = Vale.X64.Print_s
 module BC = Vale.X64.Bytes_Code_s
 module BS = Vale.X64.Machine_Semantics_s
 #reset-options "--max_fuel 0 --max_ifuel 0 --smtencoding.elim_box true --smtencoding.l_arith_repr boxwrap --smtencoding.nl_arith_repr boxwrap --z3cliopt smt.arith.nl=true --using_facts_from 'Prims FStar.UInt Vale.Def.Words_s FStar.UInt64'"
-let lemma_mul_in_bounds (x y:nat64) : Lemma (requires x `op_Multiply` y < pow2_64) (ensures FStar.UInt.mul_mod #64 x y == x `op_Multiply` y) = ()
+let lemma_mul_in_bounds (x y:nat64) : Lemma (requires x * y < pow2_64) (ensures FStar.UInt.mul_mod #64 x y == x * y) = ()
 
 #reset-options "--z3cliopt smt.arith.nl=true --using_facts_from Prims --using_facts_from FStar.Math"
-let lemma_mul_nat (x:nat) (y:nat) : Lemma (ensures 0 <= (x `op_Multiply` y)) = ()
+let lemma_mul_nat (x:nat) (y:nat) : Lemma (ensures 0 <= (x * y)) = ()
 #reset-options "--initial_fuel 2 --max_fuel 2"
 
 let cf flags = match Lemmas.cf flags with | Some v -> v | None -> false
@@ -32,20 +33,22 @@ let mul_nat_helper x y =
 let va_fuel_default () = 0
 
 let va_opr_lemma_Mem s base offset b index t =
+  let h = M.get_vale_heap s.vs_heap in
   let t = va_opr_code_Mem base offset t in
-  M.lemma_valid_mem64 b index s.vs_heap;
+  M.lemma_valid_mem64 b index h;
   let OMem (m, t) = t in
-  assert (valid_maddr (eval_maddr m s) s.vs_heap s.vs_memTaint b index t);
-  M.lemma_load_mem64 b index s.vs_heap
+  assert (valid_buf_maddr64 (eval_maddr m s) h s.vs_memTaint b index t);
+  M.lemma_load_mem64 b index h
 
 let va_opr_lemma_Stack s base offset t = ()
 
 let va_opr_lemma_Mem128 s base offset t b index =
+  let h = M.get_vale_heap s.vs_heap in
   let t = va_opr_code_Mem128 base offset t in
-  M.lemma_valid_mem128 b index s.vs_heap;
+  M.lemma_valid_mem128 b index h;
   let OMem (m, t) = t in
-  assert (valid_maddr128 (eval_maddr m s) s.vs_heap s.vs_memTaint b index t);
-  M.lemma_load_mem128 b index s.vs_heap
+  assert (valid_buf_maddr128 (eval_maddr m s) h s.vs_memTaint b index t);
+  M.lemma_load_mem128 b index h
 
 let taint_at memTaint addr = Map.sel memTaint addr
 

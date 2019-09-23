@@ -1,4 +1,5 @@
 module Vale.Math.Poly2.Galois
+open FStar.Mul
 module I = Lib.IntTypes
 module G = Spec.GaloisField
 module P = Vale.Math.Poly2_s

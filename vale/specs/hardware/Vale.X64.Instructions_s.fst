@@ -1,4 +1,5 @@
 module Vale.X64.Instructions_s
+open FStar.Mul
 friend Vale.X64.Instruction_s // We're part of the trusted specification, so we can friend Instruction_s
 
 let ins_Mov64 = make_ins (fun dst src -> print_s "mov" [P64 dst; P64 src])

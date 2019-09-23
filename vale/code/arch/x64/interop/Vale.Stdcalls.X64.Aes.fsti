@@ -100,7 +100,6 @@ let code_key128 = AE.va_code_KeyExpansionStdcall IA.win AES_128
 let lowstar_key128_t =
   assert_norm (List.length dom + List.length ([]<:list arg) <= 4);
   IX64.as_lowstar_sig_t_weak_stdcall
-    Vale.Interop.down_mem
     code_key128
     dom
     []
@@ -164,7 +163,6 @@ let code_key256 = AE.va_code_KeyExpansionStdcall IA.win AES_256
 let lowstar_key256_t =
   assert_norm (List.length dom + List.length ([]<:list arg) <= 4);
   IX64.as_lowstar_sig_t_weak_stdcall
-    Vale.Interop.down_mem
     code_key256
     dom
     []
