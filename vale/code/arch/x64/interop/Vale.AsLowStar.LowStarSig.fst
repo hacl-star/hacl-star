@@ -258,7 +258,7 @@ let create_initial_vale_state
        (args:IX64.arg_list)
   : IX64.state_builder_t max_arity args V.va_state =
   fun h0 ->
-    let t_state, mem = IX64.create_initial_trusted_state max_arity arg_reg args Vale.Interop.down_mem h0 in
+    let t_state, mem = IX64.create_initial_trusted_state max_arity arg_reg args h0 in
     let open VS in
     { vs_ok = true;
       vs_regs = Vale.X64.Regs.of_fun t_state.BS.ms_regs;

@@ -18,7 +18,7 @@ let update_224_256 hash block =
     assert_norm (size_k_w SHA2_256 == size_k_w SHA2_224);
     assert_norm (_sigma1 SHA2_256 == _sigma1 SHA2_224);
     assert_norm (_sigma0 SHA2_256 == _sigma0 SHA2_224);
-    assert_norm (word_add_mod SHA2_256 == word_add_mod SHA2_224);
+    // assert_norm (word_add_mod SHA2_256 == word_add_mod SHA2_224);
     if t < block_word_length then
       ()
     else begin
@@ -68,9 +68,11 @@ let update_224_256 hash block =
     else
       seq_map2_f f g (S.tail s) (S.tail s')
   in
-  assert_norm (word_add_mod SHA2_256 == word_add_mod SHA2_224);
-  assert_norm (words_of_bytes SHA2_256 == words_of_bytes SHA2_224);
+  assert_norm (words_of_bytes SHA2_256 #block_word_length == words_of_bytes SHA2_224 #block_word_length);
+  reveal_opaque (`%shuffle) shuffle;
   reveal_opaque (`%update) update
+
+
 #pop-options
 
 let rec update_multi_224_256 hash blocks =

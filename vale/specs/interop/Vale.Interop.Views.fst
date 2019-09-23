@@ -1,4 +1,5 @@
 module Vale.Interop.Views
+open FStar.Mul
 
 let inverses8 (u:unit) =
   reveal_opaque get8_def;

@@ -104,7 +104,6 @@ let code_key128 = GF.va_code_Keyhash_init IA.win AES_128
 let lowstar_key128_t (s:Ghost.erased (Seq.seq nat32)) =
   assert_norm (List.length dom + List.length ([]<:list arg) <= 4);
   IX64.as_lowstar_sig_t_weak_stdcall
-    Vale.Interop.down_mem
     code_key128
     dom
     []
@@ -117,7 +116,6 @@ noextract
 let lowstar_key128 (s:Ghost.erased (Seq.seq nat32)) : lowstar_key128_t s =
   assert_norm (List.length dom + List.length ([]<:list arg) <= 4);
   IX64.wrap_weak_stdcall
-    Vale.Interop.down_mem
     code_key128
     dom
     (W.mk_prediction code_key128 dom [] ((key128_lemma s) code_key128 IA.win))
@@ -182,7 +180,6 @@ let code_key256 = GF.va_code_Keyhash_init IA.win AES_256
 let lowstar_key256_t (s:Ghost.erased (Seq.seq nat32)) =
   assert_norm (List.length dom + List.length ([]<:list arg) <= 4);
   IX64.as_lowstar_sig_t_weak_stdcall
-    Vale.Interop.down_mem
     code_key256
     dom
     []
@@ -195,7 +192,6 @@ noextract
 let lowstar_key256 (s:Ghost.erased (Seq.seq nat32)) : lowstar_key256_t s =
   assert_norm (List.length dom + List.length ([]<:list arg) <= 4);
   IX64.wrap_weak_stdcall
-    Vale.Interop.down_mem
     code_key256
     dom
     (W.mk_prediction code_key256 dom [] ((key256_lemma s) code_key256 IA.win))

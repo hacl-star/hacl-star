@@ -1,5 +1,6 @@
 module Vale.Inline.X64.Fmul_inline
 
+open FStar.Mul
 open FStar.HyperStack.ST
 module HS = FStar.HyperStack
 module B = LowStar.Buffer
@@ -141,7 +142,6 @@ let lowstar_fmul_t =
     fmul_arg_reg
     fmul_regs_modified
     fmul_xmms_modified
-    Vale.Interop.down_mem
     code_fmul
     fmul_dom
     []
@@ -157,7 +157,6 @@ let lowstar_fmul : lowstar_fmul_t  =
     fmul_arg_reg
     fmul_regs_modified
     fmul_xmms_modified
-    Vale.Interop.down_mem
     code_fmul
     fmul_dom
     (W.mk_prediction code_fmul fmul_dom [] (fmul_lemma code_fmul IA.win))
@@ -262,7 +261,6 @@ let lowstar_fmul2_t =
     fmul_arg_reg
     fmul_regs_modified
     fmul_xmms_modified
-    Vale.Interop.down_mem
     code_fmul2
     fmul_dom
     []
@@ -278,7 +276,6 @@ let lowstar_fmul2 : lowstar_fmul2_t  =
     fmul_arg_reg
     fmul_regs_modified
     fmul_xmms_modified
-    Vale.Interop.down_mem
     code_fmul2
     fmul_dom
     (W.mk_prediction code_fmul2 fmul_dom [] (fmul2_lemma code_fmul2 IA.win))
@@ -392,7 +389,6 @@ let lowstar_fmul1_t =
     arg_reg
     fmul1_regs_modified
     fmul1_xmms_modified
-    Vale.Interop.down_mem
     code_fmul1
     fmul1_dom
     []
@@ -409,7 +405,6 @@ let lowstar_fmul1 : lowstar_fmul1_t  =
     arg_reg
     fmul1_regs_modified
     fmul1_xmms_modified
-    Vale.Interop.down_mem
     code_fmul1
     fmul1_dom
     (W.mk_prediction code_fmul1 fmul1_dom [] (fmul1_lemma code_fmul1 IA.win))

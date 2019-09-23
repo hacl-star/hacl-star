@@ -1,5 +1,6 @@
 module Vale.Wrapper.X64.GCM_IV
 
+open FStar.Mul
 open Vale.Stdcalls.X64.GCM_IV
 open Vale.AsLowStar.MemoryHelpers
 open Vale.X64.MemoryAdapters
@@ -31,6 +32,7 @@ let length_aux5 (b:uint8_p) : Lemma
     DV.length_eq db
 
 
+#push-options "--z3cliopt smt.arith.nl=true"
 inline_for_extraction
 val compute_iv_stdcall':
   iv:Ghost.erased supported_iv_LE ->
@@ -85,7 +87,9 @@ val compute_iv_stdcall':
     let h_LE = reverse_bytes_quad32 (low_buffer_read TUInt8 TUInt128 h0 hkeys_b 2) in
     low_buffer_read TUInt8 TUInt128 h1 j0_b 0 == compute_iv_BE h_LE (Ghost.reveal iv))
    )
+#pop-options
 
+#push-options "--z3cliopt smt.arith.nl=true"
 inline_for_extraction
 let compute_iv_stdcall' iv iv_b num_bytes len j0_b iv_extra_b hkeys_b =
   let h0 = get() in
@@ -106,7 +110,9 @@ let compute_iv_stdcall' iv iv_b num_bytes len j0_b iv_extra_b hkeys_b =
   let x, _ = compute_iv_stdcall iv iv_b num_bytes len j0_b iv_extra_b hkeys_b () in
 
   ()
+#pop-options
 
+#push-options "--z3cliopt smt.arith.nl=true"
 let lemma_slice_uv_extra (b:uint8_p) (b_start:uint8_p) (b_extra:uint8_p) (h:HS.mem) : Lemma
   (requires
     B.length b_start = B.length b / 16 * 16 /\
@@ -174,6 +180,7 @@ let lemma_slice_uv_extra (b:uint8_p) (b_start:uint8_p) (b_extra:uint8_p) (h:HS.m
      }
      b_f;
    }
+#pop-options
 
 let lemma_slice_sub (b:uint8_p) (b_sub:uint8_p) (b_extra:uint8_p) (h:HS.mem) : Lemma
   (requires B.length b_extra = 16 /\ B.length b_sub = B.length b / 16 * 16 /\
@@ -212,6 +219,7 @@ let lemma_slice_sub (b:uint8_p) (b_sub:uint8_p) (b_extra:uint8_p) (h:HS.mem) : L
 open Vale.Lib.BufferViewHelpers
 
 
+#push-options "--smtencoding.nl_arith_repr boxwrap"
 let lemma_same_seq_same_buffer_read (h0 h1:HS.mem) (b:uint8_p) : Lemma
     (requires
       B.live h0 b /\ B.live h1 b /\
@@ -229,6 +237,7 @@ let lemma_same_seq_same_buffer_read (h0 h1:HS.mem) (b:uint8_p) : Lemma
    UV.length_eq b_u;
    UV.as_seq_sel h0 b_u 2;
    UV.as_seq_sel h1 b_u 2
+#pop-options
 
 inline_for_extraction
 let compute_iv a key full_iv_b num_bytes j0_b extra_b hkeys_b =

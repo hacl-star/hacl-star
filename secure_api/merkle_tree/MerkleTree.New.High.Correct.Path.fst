@@ -389,7 +389,7 @@ val mt_verify_ok:
   j:nat{k < j} ->
   p:path{S.length p = 1 + mt_path_length k j false} ->
   rt:hash ->
-  Lemma (mt_verify k j p rt ==
+  Lemma (mt_verify k j p rt <==>
         MTS.mt_verify #(log2c j)
           (path_spec k j false (S.tail p)) k (HRaw (S.head p)) (HRaw rt))
 let mt_verify_ok k j p rt =

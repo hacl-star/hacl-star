@@ -12,7 +12,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "77b3834c1b9168c6f18f7896aa76a195"
+      "1da4b9bdf394652d93c0a90b6798e6d8"
     ],
     [
       "Vale.FDefMulx.X64.va_lemma_MulAdd18",
@@ -25,7 +25,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "8ac9edbbec39315170226147014e563b"
+      "bd2f77e2a1fc758537e83c2aea9bc7f1"
     ],
     [
       "Vale.FDefMulx.X64.va_lemma_MulAdd18",
@@ -46,7 +46,7 @@
         "Vale.Bignum.Lemmas_interpretation_Tm_arrow_de97be8ee64f7ac0b0672846efe27600",
         "Vale.FDefMulx.X64_interpretation_Tm_arrow_e133ace719991fa80b046e7e6249f187",
         "bool_inversion", "constructor_distinct_Prims.Cons",
-        "constructor_distinct_Vale.Interop.Types.TUInt64",
+        "constructor_distinct_Vale.Arch.HeapTypes_s.TUInt64",
         "constructor_distinct_Vale.X64.Machine_s.Block",
         "constructor_distinct_Vale.X64.Machine_s.MReg",
         "constructor_distinct_Vale.X64.Machine_s.OConst",
@@ -57,10 +57,11 @@
         "data_typing_intro_Vale.X64.Machine_s.Reg@tok",
         "disc_equation_Prims.Cons", "disc_equation_Vale.X64.Machine_s.Block",
         "disc_equation_Vale.X64.Machine_s.OReg", "eq2-interp",
-        "equality_tok_Vale.Interop.Types.TUInt64@tok",
+        "equality_tok_Vale.Arch.HeapTypes_s.TUInt64@tok",
         "equality_tok_Vale.X64.Machine_s.Public@tok",
         "equation_FStar.Pervasives.Native.fst", "equation_Prims.eqtype",
         "equation_Prims.logical", "equation_Prims.nat",
+        "equation_Vale.Arch.HeapImpl.vale_heap_impl",
         "equation_Vale.Bignum.Defs.add_hi_def",
         "equation_Vale.Bignum.Defs.add_lo_def",
         "equation_Vale.Bignum.Lemmas.init_ys",
@@ -78,6 +79,7 @@
         "equation_Vale.Def.Words_s.nat64", "equation_Vale.Def.Words_s.natN",
         "equation_Vale.FDefMulx.X64.make_seq9",
         "equation_Vale.FDefMulx.X64.operand_reg8",
+        "equation_Vale.X64.Decls.buffer64_write",
         "equation_Vale.X64.Decls.va_ensure_total",
         "equation_Vale.X64.Decls.va_is_dst_opr64",
         "equation_Vale.X64.Decls.va_operand_reg_opr64",
@@ -103,6 +105,11 @@
         "equation_Vale.X64.Machine_s.t_reg_to_int",
         "equation_Vale.X64.Memory.base_typ_as_vale_type",
         "equation_Vale.X64.Memory.buffer64",
+        "equation_Vale.X64.Memory.get_vale_heap",
+        "equation_Vale.X64.Memory.set_vale_heap",
+        "equation_Vale.X64.Memory.vale_heap_impl_equal",
+        "equation_Vale.X64.Memory.valid_buffer_read",
+        "equation_Vale.X64.Memory.valid_buffer_write",
         "equation_Vale.X64.State.eval_maddr",
         "equation_Vale.X64.State.eval_operand",
         "equation_Vale.X64.State.state_eq",
@@ -182,10 +189,10 @@
         "projection_inverse_Vale.X64.State.Mkvale_state_vs_stackTaint",
         "refinement_interpretation_Tm_refine_0559236e7a05befcc7b6302f3642ad81",
         "refinement_interpretation_Tm_refine_0b0dad9ad71dcf1bcf2cedd32323b972",
-        "refinement_interpretation_Tm_refine_2bfdecd003b0c831c7a73eb407a7e139",
         "refinement_interpretation_Tm_refine_2c7ecebd8a41d0890aab4251b61d6458",
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Tm_refine_49e103a2c0501eb5080f2f3b099f36fc",
+        "refinement_interpretation_Tm_refine_4b8cb9d02d0425880fe398ab5d3efb72",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_8289bd22e6642db482a4f05e06dff82d",
         "refinement_interpretation_Tm_refine_8545a50511781623fc41e3fb8428bce0",
@@ -228,17 +235,18 @@
         "typing_Vale.X64.Memory.buffer_readable",
         "typing_Vale.X64.Memory.buffer_write",
         "typing_Vale.X64.Memory.buffer_writeable",
-        "typing_Vale.X64.Regs.sel", "typing_Vale.X64.Regs.upd",
+        "typing_Vale.X64.Memory.get_vale_heap", "typing_Vale.X64.Regs.sel",
+        "typing_Vale.X64.Regs.upd",
         "typing_Vale.X64.State.__proj__Mkvale_state__item__vs_flags",
         "typing_Vale.X64.State.__proj__Mkvale_state__item__vs_heap",
         "typing_Vale.X64.State.__proj__Mkvale_state__item__vs_ok",
         "typing_Vale.X64.State.__proj__Mkvale_state__item__vs_regs",
         "typing_Vale.X64.State.eval_maddr",
         "typing_Vale.X64.State.eval_operand",
-        "typing_tok_Vale.Interop.Types.TUInt64@tok"
+        "typing_tok_Vale.Arch.HeapTypes_s.TUInt64@tok"
       ],
       0,
-      "e46bc36e2042a871c8f2b379b9a4d653"
+      "73854f6b6e7e7373b84970a80c779b6e"
     ]
   ]
 ]

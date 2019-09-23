@@ -1,5 +1,6 @@
 module Vale.Wrapper.X64.Cpuid
 
+open FStar.Mul
 open Vale.X64.CPU_Features_s
 open FStar.HyperStack.ST
 module B = LowStar.Buffer

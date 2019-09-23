@@ -1,5 +1,6 @@
 module Vale.Math.Poly2_s
 module D = Vale.Math.Poly2.Defs_s
+open FStar.Mul
 open FStar.Seq
 
 // Polynomials cn * x^n + ... + c0 * x^0

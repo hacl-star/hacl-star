@@ -1,4 +1,5 @@
 module Vale.Lib.Map16
+open FStar.Mul
 open Vale.X64.Machine_s
 
 type map2 (a:Type0) = a & a

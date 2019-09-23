@@ -1,4 +1,5 @@
 module Vale.Def.Words.Two
+open FStar.Mul
 open Vale.Lib.Meta
 
 let lemma_fundamental_div_mod (x:nat64) :

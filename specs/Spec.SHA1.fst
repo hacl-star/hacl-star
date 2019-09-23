@@ -1,41 +1,35 @@
 module Spec.SHA1
 
+open Lib.IntTypes
 module H = Spec.Hash.Definitions
-module U32 = FStar.UInt32
 module Seq = FStar.Seq
-module E = FStar.Kremlin.Endianness
 
+open Spec.Hash.Definitions
 (* Source: https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf *)
 
 (* Section 5.3.1 *)
 
 inline_for_extraction
-let init_as_list = [
-  0x67452301ul;
-  0xefcdab89ul;
-  0x98badcfeul;
-  0x10325476ul;
-  0xc3d2e1f0ul;
+let init_as_list : list uint32 = [
+  u32 0x67452301;
+  u32 0xefcdab89;
+  u32 0x98badcfe;
+  u32 0x10325476;
+  u32 0xc3d2e1f0;
 ]
 
 let h0 : words_state SHA1 = Seq.seq_of_list init_as_list
 
 let init = h0
 
-(* Section 2.2.2: rotate left *)
-
-inline_for_extraction
-let rotl (n_:U32.t{0 < U32.v n_ /\ U32.v n_ < 32}) (x:U32.t): Tot U32.t =
-  U32.((x <<^ n_) |^ (x >>^ (32ul -^ n_)))
-
 (* Section 6.1.2 Step 1: message schedule *)
 
 let rec w' (mi: Seq.lseq (word SHA1) block_word_length) (t: nat {t <= 79}) : GTot (word SHA1) (decreases (t)) =
   if t < 16
   then Seq.index mi (t)
-  else rotl 1ul (w' mi (t - 3) `U32.logxor` w' mi (t - 8) `U32.logxor` w' mi (t - 14) `U32.logxor` w' mi (t - 16))
+  else (w' mi (t - 3) ^. w' mi (t - 8) ^. w' mi (t - 14) ^. w' mi (t - 16)) <<<. 1ul
 
-let w (mi: Seq.lseq (word SHA1) block_word_length) (t: U32.t {U32.v t <= 79}) : GTot (word SHA1) = w' mi (U32.v t)
+let w (mi: Seq.lseq (word SHA1) block_word_length) (t: size_t {v t <= 79}) : GTot (word SHA1) = w' mi (v t)
 
 let compute_w_post
   (mi: Seq.lseq (word SHA1) block_word_length)
@@ -68,7 +62,7 @@ let compute_w_n'
 = let r =
       if n < 16
       then Seq.index mi n
-      else rotl 1ul (w (n - 3) `U32.logxor` w (n - 8) `U32.logxor` w (n - 14) `U32.logxor` w (n - 16))
+      else (w (n - 3) ^. w (n - 8) ^. w (n - 14) ^. w (n - 16)) <<<. 1ul
   in
   r
 
@@ -125,27 +119,27 @@ let rec compute_w
 (* Section 4.1.1: logical functions *)
 
 inline_for_extraction
-let f (t: U32.t {U32.v t <= 79}) (x y z: word SHA1) : Tot (word SHA1) =
-  if U32.lt t 20ul
+let f (t: size_t {v t <= 79}) (x y z: word SHA1) : Tot (word SHA1) =
+  if t <. 20ul
   then
-    (x `U32.logand` y) `U32.logxor` (U32.lognot x `U32.logand` z)
-  else if U32.lt 39ul t && U32.lt t 60ul
+    (x &. y) ^. (~. x &. z)
+  else if 39ul <. t && t <. 60ul
   then
-    (x `U32.logand` y) `U32.logxor` (x `U32.logand` z) `U32.logxor` (y `U32.logand` z)
+    (x &. y) ^. (x &. z) ^. (y &. z)
   else
-    x `U32.logxor` y `U32.logxor` z
+    x ^. y ^. z
 
 (* Section 4.2.1 *)
 
 inline_for_extraction
-let k (t: U32.t { U32.v t <= 79 } ) : Tot (word SHA1) =
-  if U32.lt t 20ul
-  then 0x5a827999ul
-  else if U32.lt t 40ul
-  then 0x6ed9eba1ul
-  else if U32.lt t  60ul
-  then 0x8f1bbcdcul
-  else 0xca62c1d6ul
+let k (t: size_t { v t <= 79 } ) : Tot (word SHA1) =
+  if t <. 20ul
+  then u32 0x5a827999
+  else if t <. 40ul
+  then u32 0x6ed9eba1
+  else if t <. 60ul
+  then u32 0x8f1bbcdc
+  else u32 0xca62c1d6
 
 (* Section 6.1.2 Step 3 *)
 
@@ -154,7 +148,7 @@ let word_block = Seq.lseq (word SHA1) block_word_length
 let step3_body'_aux
   (mi: word_block)
   (st: words_state SHA1)
-  (t: U32.t {U32.v t < 80})
+  (t: size_t {v t < 80})
   (wt: word SHA1 { wt == w mi t } )
 : Tot (words_state SHA1)
 = let sta = Seq.index st 0 in
@@ -162,23 +156,26 @@ let step3_body'_aux
   let stc = Seq.index st 2 in
   let std = Seq.index st 3 in
   let ste = Seq.index st 4 in
-  let _T = rotl 5ul sta `U32.add_mod` f t stb stc std `U32.add_mod` ste `U32.add_mod` k t `U32.add_mod` wt in
+  let _T = (sta <<<. 5ul) +. f t stb stc std +. ste +. k t +. wt in
   let e = std in
   let d = stc in
-  let c = rotl 30ul stb in
+  let c = stb <<<. 30ul in
   let b = sta in
   let a = _T in
-  Seq.seq_of_list [
+  let l : list uint32 = [
     a;
     b;
     c;
     d;
     e;
-  ]
-
+  ] in
+  assert_norm (List.Tot.length l = 5);
+  Seq.seq_of_list l
+  
 [@"opaque_to_smt"]
 let step3_body' = step3_body'_aux
 
+#reset-options "--z3rlimit 50"
 [@unifier_hint_injective]
 inline_for_extraction
 let step3_body_w_t
@@ -192,7 +189,7 @@ let step3_body
   (st: words_state SHA1)
   (t: nat {t < 80})
 : Tot (words_state SHA1)
-= step3_body' mi st (U32.uint_to_t t) (w t)
+= step3_body' mi st (size t) (w t)
 
 inline_for_extraction
 let index_compute_w
@@ -224,11 +221,11 @@ let step4_aux
   let std = Seq.index st 3 in
   let ste = Seq.index st 4 in
   Seq.seq_of_list [
-    sta `U32.add_mod` Seq.index h 0;
-    stb `U32.add_mod` Seq.index h 1;
-    stc `U32.add_mod` Seq.index h 2;
-    std `U32.add_mod` Seq.index h 3;
-    ste `U32.add_mod` Seq.index h 4;
+    sta +. Seq.index h 0;
+    stb +. Seq.index h 1;
+    stc +. Seq.index h 2;
+    std +. Seq.index h 3;
+    ste +. Seq.index h 4;
   ]
 
 [@"opaque_to_smt"]
@@ -239,7 +236,7 @@ let step4 = step4_aux
 let words_of_bytes_block
   (l: bytes { Seq.length l == block_length SHA1 } )
 : Tot word_block
-= E.seq_uint32_of_be block_word_length l
+= words_of_bytes SHA1 #(block_word_length) l
 
 (* Section 6.1.2: outer loop body *)
 
@@ -255,4 +252,4 @@ let pad = Spec.Hash.PadFinish.pad SHA1
 
 (* Section 6.1.2: no truncation needed *)
 
-let finish = Spec.Hash.PadFinish.finish _
+let finish = Spec.Hash.PadFinish.finish SHA1

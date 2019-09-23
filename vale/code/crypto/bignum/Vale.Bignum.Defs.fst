@@ -1,4 +1,5 @@
 module Vale.Bignum.Defs
+open FStar.Mul
 
 let lemma_mul_nat_bound a a' b b' =
   let open FStar.Math.Lemmas in

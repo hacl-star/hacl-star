@@ -1,4 +1,5 @@
 module Vale.Math.Poly2.Defs_s
+open FStar.Mul
 open FStar.Seq
 unfold let max = FStar.Math.Lib.max
 
@@ -118,7 +119,7 @@ let mul (a b:poly) : Pure poly
   let len = length a + length b in
   of_fun len (fun (i:nat) -> mul_element a b i)
 
-let rec divmod (a:poly) (b:poly{length b > 0}) : Tot (poly * poly) (decreases (length a)) =
+let rec divmod (a:poly) (b:poly{length b > 0}) : Tot (poly & poly) (decreases (length a)) =
   if length a < length b then
     (zero, a)
   else

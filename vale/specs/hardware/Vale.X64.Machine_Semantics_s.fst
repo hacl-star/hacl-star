@@ -1,5 +1,6 @@
 module Vale.X64.Machine_Semantics_s
 
+open FStar.Mul
 open Vale.Def.Prop_s
 open Vale.Def.Opaque_s
 open Vale.X64.Machine_s
@@ -8,16 +9,17 @@ open Vale.Def.Words_s
 open Vale.Def.Words.Two_s
 open Vale.Def.Words.Four_s
 open Vale.Def.Types_s
+include Vale.Arch.MachineHeap_s
+open Vale.Arch.Heap
 open Vale.X64.Instruction_s
 open Vale.X64.Instructions_s
 open FStar.Seq.Base
 module BC = Vale.X64.Bytes_Code_s
 
-type uint64:eqtype = UInt64.t
+//type uint64:eqtype = UInt64.t
 
-type machine_heap = Map.t int nat8
-let op_String_Access = Map.sel
-let op_String_Assignment = Map.upd
+unfold let (.[]) = Map.sel
+unfold let (.[]<-) = Map.upd
 
 //TODO: [@"opaque_to_smt"]
 let equals_instr (x1 x2:instr_t_record) : Type0 =
@@ -51,7 +53,7 @@ type machine_state = {
   ms_ok: bool;
   ms_regs: regs_t;
   ms_flags: flags_t;
-  ms_heap: machine_heap;
+  ms_heap: heap_impl;
   ms_memTaint: memTaint_t;
   ms_stack: machine_stack;
   ms_stackTaint: memTaint_t;
@@ -70,33 +72,8 @@ unfold let eval_reg_xmm (r:reg_xmm) (s:machine_state) : quad32 = eval_reg (Reg 1
 
 unfold let eval_reg_int (r:reg) (s:machine_state) : int = t_reg_to_int r.rf (eval_reg r s)
 
-let get_heap_val64_def (ptr:int) (mem:machine_heap) : nat64 =
-  two_to_nat 32
-  (Mktwo
-    (four_to_nat 8 (Mkfour mem.[ptr] mem.[ptr + 1] mem.[ptr + 2] mem.[ptr + 3]))
-    (four_to_nat 8 (Mkfour mem.[ptr + 4] mem.[ptr + 5] mem.[ptr + 6] mem.[ptr + 7]))
-  )
-let get_heap_val64 = make_opaque get_heap_val64_def
-
-let get_heap_val32_def (ptr:int) (mem:machine_heap) : nat32 =
-  four_to_nat 8
-  (Mkfour
-    mem.[ptr]
-    mem.[ptr + 1]
-    mem.[ptr + 2]
-    mem.[ptr + 3])
-
-let get_heap_val32 = make_opaque get_heap_val32_def
-
-let get_heap_val128_def (ptr:int) (mem:machine_heap) : quad32 = Mkfour
-  (get_heap_val32 ptr mem)
-  (get_heap_val32 (ptr + 4) mem)
-  (get_heap_val32 (ptr + 8) mem)
-  (get_heap_val32 (ptr + 12) mem)
-let get_heap_val128 = make_opaque get_heap_val128_def
-
-unfold let eval_mem (ptr:int) (s:machine_state) : nat64 = get_heap_val64 ptr s.ms_heap
-unfold let eval_mem128 (ptr:int) (s:machine_state) : quad32 = get_heap_val128 ptr s.ms_heap
+unfold let eval_mem (ptr:int) (s:machine_state) : nat64 = get_heap_val64 ptr (heap_get s.ms_heap)
+unfold let eval_mem128 (ptr:int) (s:machine_state) : quad32 = get_heap_val128 ptr (heap_get s.ms_heap)
 
 unfold let eval_stack (ptr:int) (s:machine_stack) : nat64 =
   let Machine_stack _ mem = s in
@@ -107,11 +84,10 @@ unfold let eval_stack128 (ptr:int) (s:machine_stack) : quad32 =
 
 [@va_qattr]
 let eval_maddr (m:maddr) (s:machine_state) : int =
-  let open FStar.Mul in
-    match m with
-    | MConst n -> n
-    | MReg r offset -> (eval_reg_int r s) + offset
-    | MIndex base scale index offset -> (eval_reg_int base s) + scale * (eval_reg_int index s) + offset
+  match m with
+  | MConst n -> n
+  | MReg r offset -> (eval_reg_int r s) + offset
+  | MIndex base scale index offset -> (eval_reg_int base s) + scale * (eval_reg_int index s) + offset
 
 let eval_operand (o:operand64) (s:machine_state) : nat64 =
   match o with
@@ -145,73 +121,8 @@ let update_reg_64' (r:reg_64) (v:nat64) (s:machine_state) : machine_state =
 let update_reg_xmm' (r:reg_xmm) (v:quad32) (s:machine_state) : machine_state =
   update_reg' (Reg 1 r) v s
 
-val mod_8: (n:nat{n < pow2_64}) -> nat8
-let mod_8 n = n % 0x100
-
-let update_heap32_def (ptr:int) (v:nat32) (mem:machine_heap) : machine_heap =
-  let v = nat_to_four 8 v in
-  let mem = mem.[ptr] <- v.lo0 in
-  let mem = mem.[ptr + 1] <- v.lo1 in
-  let mem = mem.[ptr + 2] <- v.hi2 in
-  let mem = mem.[ptr + 3] <- v.hi3 in
-  mem
-let update_heap32 = make_opaque update_heap32_def
-
-let update_heap64_def (ptr:int) (v:nat64) (mem:machine_heap) : machine_heap =
-  let v = nat_to_two 32 v in
-  let lo = nat_to_four 8 v.lo in
-  let hi = nat_to_four 8 v.hi in
-  let mem = mem.[ptr] <- lo.lo0 in
-  let mem = mem.[ptr + 1] <- lo.lo1 in
-  let mem = mem.[ptr + 2] <- lo.hi2 in
-  let mem = mem.[ptr + 3] <- lo.hi3 in
-  let mem = mem.[ptr + 4] <- hi.lo0 in
-  let mem = mem.[ptr + 5] <- hi.lo1 in
-  let mem = mem.[ptr + 6] <- hi.hi2 in
-  let mem = mem.[ptr + 7] <- hi.hi3 in
-  mem
-let update_heap64 = make_opaque update_heap64_def
-
-let update_heap128_def (ptr:int) (v:quad32) (mem:machine_heap) =
-  let mem = update_heap32 ptr v.lo0 mem in
-  let mem = update_heap32 (ptr + 4) v.lo1 mem in
-  let mem = update_heap32 (ptr + 8) v.hi2 mem in
-  let mem = update_heap32 (ptr + 12) v.hi3 mem in
-  mem
-let update_heap128 = make_opaque update_heap128_def
-
-let valid_addr (ptr:int) (mem:machine_heap) : bool =
-  Map.contains mem ptr
-
-[@"opaque_to_smt"]
-let valid_addr64 (ptr:int) (mem:machine_heap) =
-  valid_addr ptr mem &&
-  valid_addr (ptr + 1) mem &&
-  valid_addr (ptr + 2) mem &&
-  valid_addr (ptr + 3) mem &&
-  valid_addr (ptr + 4) mem &&
-  valid_addr (ptr + 5) mem &&
-  valid_addr (ptr + 6) mem &&
-  valid_addr (ptr + 7) mem
-
-[@"opaque_to_smt"]
-let valid_addr128 (ptr:int) (mem:machine_heap) =
-  valid_addr ptr mem &&
-  valid_addr (ptr + 1) mem &&
-  valid_addr (ptr + 2) mem &&
-  valid_addr (ptr + 3) mem &&
-  valid_addr (ptr + 4) mem &&
-  valid_addr (ptr + 5) mem &&
-  valid_addr (ptr + 6) mem &&
-  valid_addr (ptr + 7) mem &&
-  valid_addr (ptr + 8) mem &&
-  valid_addr (ptr + 9) mem &&
-  valid_addr (ptr + 10) mem &&
-  valid_addr (ptr + 11) mem &&
-  valid_addr (ptr + 12) mem &&
-  valid_addr (ptr + 13) mem &&
-  valid_addr (ptr + 14) mem &&
-  valid_addr (ptr + 15) mem
+//val mod_8: (n:nat{n < pow2_64}) -> nat8
+//let mod_8 n = n % 0x100
 
 (*
 Check if the taint annotation of a memory operand matches the taint in the memory map.
@@ -243,17 +154,22 @@ let rec update_n (addr:int) (n:nat) (memTaint:memTaint_t) (t:taint)
   else update_n (addr + 1) (n - 1) (memTaint.[addr] <- t) t
 
 let update_mem_and_taint (ptr:int) (v:nat64) (s:machine_state) (t:taint) : machine_state =
-  if valid_addr64 ptr s.ms_heap then
+  FStar.Pervasives.reveal_opaque (`%valid_addr64) valid_addr64;
+  Vale.Def.Opaque_s.reveal_opaque update_heap64_def;
+  if valid_addr64 ptr (heap_get s.ms_heap) then
     { s with
-      ms_heap = update_heap64 ptr v s.ms_heap;
+      ms_heap = heap_upd s.ms_heap (update_heap64 ptr v (heap_get s.ms_heap));
       ms_memTaint = update_n ptr 8 s.ms_memTaint t;
     }
   else s
 
 let update_mem128_and_taint (ptr:int) (v:quad32) (s:machine_state) (t:taint) : machine_state =
-  if valid_addr128 ptr s.ms_heap then
+  FStar.Pervasives.reveal_opaque (`%valid_addr128) valid_addr128;
+  Vale.Def.Opaque_s.reveal_opaque update_heap32_def;
+  Vale.Def.Opaque_s.reveal_opaque update_heap128_def;
+  if valid_addr128 ptr (heap_get s.ms_heap) then
     { s with
-      ms_heap = update_heap128 ptr v s.ms_heap;
+      ms_heap = heap_upd s.ms_heap (update_heap128 ptr v (heap_get s.ms_heap));
       ms_memTaint = update_n ptr 16 s.ms_memTaint t
     }
   else s
@@ -298,7 +214,7 @@ let valid_src_operand (o:operand64) (s:machine_state) : bool =
   match o with
   | OConst n -> true
   | OReg r -> true
-  | OMem (m, t) -> valid_addr64 (eval_maddr m s) s.ms_heap
+  | OMem (m, t) -> valid_addr64 (eval_maddr m s) (heap_get s.ms_heap)
   | OStack (m, t) -> valid_src_stack64 (eval_maddr m s) s.ms_stack
 
 let valid_src_operand64_and_taint (o:operand64) (s:machine_state) : bool =
@@ -307,7 +223,7 @@ let valid_src_operand64_and_taint (o:operand64) (s:machine_state) : bool =
   | OReg r -> true
   | OMem (m, t) ->
     let ptr = eval_maddr m s in
-    valid_addr64 ptr s.ms_heap && match_n ptr 8 s.ms_memTaint t
+    valid_addr64 ptr (heap_get s.ms_heap) && match_n ptr 8 s.ms_memTaint t
   | OStack (m, t) ->
     let ptr = eval_maddr m s in
     valid_src_stack64 ptr s.ms_stack && match_n ptr 8 s.ms_stackTaint t
@@ -318,7 +234,7 @@ let valid_src_operand128_and_taint (o:operand128) (s:machine_state) : bool =
   | OReg i -> true // We leave it to the printer/assembler to object to invalid XMM indices
   | OMem (m, t) ->
     let ptr = eval_maddr m s in
-    valid_addr128 ptr s.ms_heap && match_n ptr 16 s.ms_memTaint t
+    valid_addr128 ptr (heap_get s.ms_heap) && match_n ptr 16 s.ms_memTaint t
   | OStack (m, t) ->
     let ptr = eval_maddr m s in
     valid_src_stack128 ptr s.ms_stack && match_n ptr 16 s.ms_stackTaint t
@@ -348,21 +264,21 @@ let valid_dst_operand64 (o:operand64) (s:machine_state) : bool =
   match o with
   | OConst n -> false
   | OReg r -> not (rRsp = r)
-  | OMem (m, _) -> valid_addr64 (eval_maddr m s) s.ms_heap
+  | OMem (m, _) -> valid_addr64 (eval_maddr m s) (heap_get s.ms_heap)
   | OStack (m, _) -> valid_dst_stack64 (eval_reg_64 rRsp s) (eval_maddr m s) s.ms_stack
 
 let valid_dst_operand128 (o:operand128) (s:machine_state) : bool =
   match o with
   | OConst _ -> false
   | OReg i -> true // We leave it to the printer/assembler to object to invalid XMM indices
-  | OMem (m, _) -> valid_addr128 (eval_maddr m s) s.ms_heap
+  | OMem (m, _) -> valid_addr128 (eval_maddr m s) (heap_get s.ms_heap)
   | OStack (m, _) -> valid_dst_stack128 (eval_reg_64 rRsp s) (eval_maddr m s) s.ms_stack
 
 let update_operand64_preserve_flags'' (o:operand64) (v:nat64) (s_orig s:machine_state) : machine_state =
   match o with
   | OConst _ -> {s with ms_ok = false}
   | OReg r -> update_reg_64' r v s
-  | OMem (m, t) -> update_mem_and_taint (eval_maddr m s_orig) v s t // see valid_maddr for how eval_maddr connects to b and i
+  | OMem (m, t) -> update_mem_and_taint (eval_maddr m s_orig) v s t // see valid_buf_maddr64 for how eval_maddr connects to b and i
   | OStack (m, t) -> update_stack_and_taint (eval_maddr m s_orig) v s t
 
 let update_operand64_preserve_flags' (o:operand64) (v:nat64) (s:machine_state) : machine_state =
@@ -657,7 +573,7 @@ let state_or_fail (s:machine_state) (b:bool) (s':machine_state) : machine_state 
   if b then s' else {s with ms_ok = false}
 
 [@instr_attr]
-let rec instr_write_output_explicit
+let instr_write_output_explicit
     (i:instr_operand_explicit) (v:instr_val_t (IOpEx i)) (o:instr_operand_t i) (s_orig s:machine_state)
   : machine_state =
   match i with
@@ -667,7 +583,7 @@ let rec instr_write_output_explicit
     state_or_fail s (valid_dst_operand128 o s_orig) (update_operand128_preserve_flags'' o v s_orig s)
 
 [@instr_attr]
-let rec instr_write_output_implicit
+let instr_write_output_implicit
     (i:instr_operand_implicit) (v:instr_val_t (IOpIm i)) (s_orig s:machine_state)
   : machine_state =
   match i with

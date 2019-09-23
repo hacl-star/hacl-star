@@ -1,4 +1,5 @@
 module Vale.Lib.Meta
+open FStar.Mul
 
 let generic_injective_proof #a #b f g l =
   let helper (x x':a) : Lemma (f x == f x' ==> x == x') =

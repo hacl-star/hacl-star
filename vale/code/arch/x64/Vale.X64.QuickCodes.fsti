@@ -1,6 +1,6 @@
-// Optimized weakest precondition generation for 'quick' procedures
-
 module Vale.X64.QuickCodes
+// Optimized weakest precondition generation for 'quick' procedures
+open FStar.Mul
 open Vale.Def.Prop_s
 open Vale.X64.Machine_s
 open Vale.X64.Memory
@@ -320,7 +320,7 @@ let qAssertBy (#a:Type) (#cs:codes) (mods:mods_t) (r:range) (msg:string) (p:Type
 ///// Code
 
 val wp_sound_code (#a:Type0) (c:code) (qc:quickCode a c) (k:vale_state -> a -> Type0) (s0:vale_state) :
-  Ghost ((sN:vale_state) * (fN:fuel) * (g:a))
+  Ghost (vale_state & fuel & a)
   (requires QProc?.wp qc s0 k)
   (ensures fun (sN, fN, gN) -> eval_code c s0 fN sN /\ update_state_mods qc.mods sN s0 == sN /\ k sN gN)
 
@@ -364,7 +364,7 @@ let va_state_match (s0:vale_state) (s1:vale_state) : Pure Type0
 
 [@va_qattr]
 unfold let wp_sound_code_pre (#a:Type0) (#c:code) (qc:quickCode a c) (s0:vale_state) (k:(s0':vale_state{s0 == s0'}) -> vale_state -> a -> Type0) : Type0 =
-  forall (ok:bool) (regs:Regs.t) (flags:Flags.t) (mem:vale_heap) (stack:vale_stack) (memTaint:memtaint) (stackTaint:memtaint).
+  forall (ok:bool) (regs:Regs.t) (flags:Flags.t) (mem:vale_heap_impl) (stack:vale_stack) (memTaint:memtaint) (stackTaint:memtaint).
     let s0' = {vs_ok = ok; vs_regs = regs; vs_flags = flags; vs_heap = mem; vs_stack = stack; vs_memTaint = memTaint; vs_stackTaint = stackTaint} in
     s0 == s0' ==> QProc?.wp qc (state_eta s0') (k (state_eta s0'))
 

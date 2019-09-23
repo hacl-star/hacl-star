@@ -1,4 +1,5 @@
 module Vale.Bignum.Lemmas
+open FStar.Mul
 
 let rec lemma_sum_seq_left_right_rec (s:seq int) (i j k:nat) : Lemma
   (requires i <= j /\ j <= k /\ k <= length s)

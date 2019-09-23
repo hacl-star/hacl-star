@@ -134,7 +134,6 @@ let code_gctr128 = GC.va_code_gctr_bytes_stdcall IA.win AES_128
 let lowstar_gctr128_t (s:Ghost.erased (Seq.seq nat32)) =
   assert_norm (List.length dom + List.length ([]<:list arg) <= 20);
   IX64.as_lowstar_sig_t_weak_stdcall
-    Vale.Interop.down_mem
     code_gctr128
     dom
     []
@@ -147,7 +146,6 @@ noextract
 let lowstar_gctr128 (s:Ghost.erased (Seq.seq nat32)) : lowstar_gctr128_t s =
   assert_norm (List.length dom + List.length ([]<:list arg) <= 20);
   IX64.wrap_weak_stdcall
-    Vale.Interop.down_mem
     code_gctr128
     dom
     (W.mk_prediction code_gctr128 dom [] ((gctr128_lemma s) code_gctr128 IA.win))
@@ -239,7 +237,6 @@ let code_gctr256 = GC.va_code_gctr_bytes_stdcall IA.win AES_256
 let lowstar_gctr256_t (s:Ghost.erased (Seq.seq nat32)) =
   assert_norm (List.length dom + List.length ([]<:list arg) <= 20);
   IX64.as_lowstar_sig_t_weak_stdcall
-    Vale.Interop.down_mem
     code_gctr256
     dom
     []
@@ -252,7 +249,6 @@ noextract
 let lowstar_gctr256 (s:Ghost.erased (Seq.seq nat32)) : lowstar_gctr256_t s =
   assert_norm (List.length dom + List.length ([]<:list arg) <= 20);
   IX64.wrap_weak_stdcall
-    Vale.Interop.down_mem
     code_gctr256
     dom
     (W.mk_prediction code_gctr256 dom [] ((gctr256_lemma s) code_gctr256 IA.win))

@@ -50,7 +50,6 @@ module S = Vale.X64.Machine_Semantics_s
 module P = Vale.X64.Print_s
 open Vale.X64.Taint_Semantics
 
-friend Vale.X64.StateLemmas
 friend Vale.X64.Decls
 friend Vale.X64.Stack_i
 #endverbatim

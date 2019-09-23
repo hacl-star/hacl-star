@@ -1,4 +1,5 @@
 module Vale.Poly1305.CallingFromLowStar
+open FStar.Mul
 
 module BS = Lib.ByteSequence
 module LI = Lib.IntTypes

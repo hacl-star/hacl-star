@@ -1,5 +1,6 @@
 module Vale.Math.Poly2.Galois.IntTypes
 module U = FStar.UInt
+open FStar.Mul
 open Lib.IntTypes
 
 val define_logand (t:inttype{unsigned t}) (a b:uint_t t SEC) : Lemma

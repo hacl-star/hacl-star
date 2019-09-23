@@ -42,7 +42,6 @@ module I = Vale.X64.Instructions_s
 module S = Vale.X64.Machine_Semantics_s
 module P = Vale.X64.Print_s
 
-friend Vale.X64.StateLemmas
 friend Vale.X64.Decls
 #reset-options "--initial_fuel 4 --max_fuel 4 --z3rlimit 20"
 #endverbatim

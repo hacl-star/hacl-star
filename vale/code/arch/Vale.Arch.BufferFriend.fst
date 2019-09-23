@@ -1,4 +1,5 @@
 module Vale.Arch.BufferFriend
+open FStar.Mul
 friend Lib.IntTypes
 friend Lib.RawIntTypes
 friend Lib.ByteSequence

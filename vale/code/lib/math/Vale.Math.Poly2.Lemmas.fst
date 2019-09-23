@@ -1,4 +1,5 @@
 module Vale.Math.Poly2.Lemmas
+open FStar.Mul
 
 let lemma_pointwise_equal a b pf =
   FStar.Classical.forall_intro pf;

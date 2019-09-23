@@ -37,6 +37,7 @@ include "Vale.AES.X64.AESopt2.vaf"
 module Vale.AES.X64.AESGCM
 
 #verbatim{:interface}{:implementation}
+open FStar.Mul
 open Vale.Def.Prop_s
 open Vale.Def.Opaque_s
 open Vale.Def.Words_s
@@ -89,7 +90,7 @@ let aes_reqs_offset
   // with the spec below that says the entire keys_b is exactly round_keys
   buffer_readable mem keys_b /\
   (nr alg + 1) <= buffer_length keys_b /\
-  buffer_addr keys_b mem + 16 `op_Multiply` 8 == key_ptr /\
+  buffer_addr keys_b mem + 16 * 8 == key_ptr /\
   valid_taint_buf128 keys_b mem memTaint Secret /\
 
   s128 mem keys_b == round_keys
@@ -101,7 +102,6 @@ unfold let lo(x:poly):poly = mask x 64
 unfold let hi(x:poly):poly = shift x (-64)
 
 let scratch_reqs (scratch_b:buffer128) (count:nat) (mem:vale_heap) (s:seq quad32) (z3:quad32) : prop0 =
-  let open FStar.Mul in
   count * 6 + 6 <= length s /\
   (let data = slice s (count * 6) (count * 6 + 6) in
    z3 == reverse_bytes_quad32 (index data 5) /\
@@ -3367,6 +3367,7 @@ procedure AESNI_ctr32_6x_loop_recursive(
                              init0, init1, init2, init3, init4, init5);
 }
 
+#reset-options " --z3rlimit 100"
 procedure AESNI_ctr32_6x_round9(
         inline alg:algorithm,
         ghost count:nat,
@@ -4259,7 +4260,13 @@ procedure GCM_finalize(
 }
 */
 
-#reset-options " --z3rlimit 150"
+#verbatim
+#restart-solver
+#endverbatim
+#reset-options "--z3rlimit 800 --z3refresh"
+#verbatim
+#restart-solver
+#endverbatim
 procedure AES_GCM_encrypt_6mult(
         inline alg:algorithm,
         ghost h_LE:quad32,

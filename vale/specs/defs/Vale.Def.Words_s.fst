@@ -1,4 +1,5 @@
 module Vale.Def.Words_s
+open FStar.Mul
 
 // Sanity check our constants
 let _ = assert_norm (pow2 8 = pow2_8)

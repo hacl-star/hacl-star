@@ -1,5 +1,6 @@
 module Vale.Inline.X64.Fadd_inline
 
+open FStar.Mul
 open FStar.HyperStack.ST
 module HS = FStar.HyperStack
 module B = LowStar.Buffer
@@ -129,7 +130,6 @@ let lowstar_add1_t =
     arg_reg
     add1_regs_modified
     add1_xmms_modified
-    Vale.Interop.down_mem
     code_add1
     dom
     []
@@ -146,7 +146,6 @@ let lowstar_add1 : lowstar_add1_t  =
     arg_reg
     add1_regs_modified
     add1_xmms_modified
-    Vale.Interop.down_mem
     code_add1
     dom
     (W.mk_prediction code_add1 dom [] (add1_lemma code_add1 IA.win))
@@ -247,7 +246,6 @@ let lowstar_fadd_t =
     arg_reg
     fadd_regs_modified
     fadd_xmms_modified
-    Vale.Interop.down_mem
     code_fadd
     fadd_dom
     []
@@ -264,7 +262,6 @@ let lowstar_fadd : lowstar_fadd_t  =
     arg_reg
     fadd_regs_modified
     fadd_xmms_modified
-    Vale.Interop.down_mem
     code_fadd
     fadd_dom
     (W.mk_prediction code_fadd fadd_dom [] (fadd_lemma code_fadd IA.win))
@@ -363,7 +360,6 @@ let lowstar_fsub_t =
     arg_reg
     fsub_regs_modified
     fsub_xmms_modified
-    Vale.Interop.down_mem
     code_fsub
     fsub_dom
     []
@@ -380,7 +376,6 @@ let lowstar_fsub : lowstar_fsub_t  =
     arg_reg
     fsub_regs_modified
     fsub_xmms_modified
-    Vale.Interop.down_mem
     code_fsub
     fsub_dom
     (W.mk_prediction code_fsub fsub_dom [] (fsub_lemma code_fsub IA.win))

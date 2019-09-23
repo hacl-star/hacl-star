@@ -1,4 +1,5 @@
 module Vale.Math.Bits
+open FStar.Mul
 
 let lemma_pow2_le m n = FStar.Math.Lemmas.pow2_le_compat n m
 
