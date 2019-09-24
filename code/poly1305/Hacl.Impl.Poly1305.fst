@@ -235,13 +235,14 @@ val poly1305_update_last:
     (feval h1 acc).[0] == S.poly1305_update1
       (feval h0 (gsub p 0ul 5ul)).[0] (v len) (as_seq h0 b) (feval h0 acc).[0])
 
+#push-options "--z3rlimit 200"
 let poly1305_update_last #s pre len b acc =
   push_frame ();
   let e = create (nlimb s) (limb_zero s) in
   poly1305_encode_last e len b;
   fadd_mul_r acc e pre;
   pop_frame ()
-
+#pop-options
 
 inline_for_extraction noextract
 val poly1305_update_nblocks:
@@ -532,6 +533,7 @@ let poly1305_update #s =
   | M32 -> poly1305_update32
   | _ -> poly1305_update_128_256 #s
 
+#set-options "--z3rlimit 150"
 
 let poly1305_finish #s tag key ctx =
   let acc = get_acc ctx in
@@ -550,8 +552,6 @@ let poly1305_finish #s tag key ctx =
     ((fas_nat h1 acc).[0] % pow2 128 + BSeq.nat_from_bytes_le (as_seq h0 ks)) % pow2 128);
   FStar.Math.Lemmas.lemma_mod_plus_distr_l (fas_nat h1 acc).[0] (BSeq.nat_from_bytes_le (as_seq h0 ks)) (pow2 128);
   uints64_to_bytes_le tag f30 f31
-
-#set-options "--z3rlimit 150"
 
 let mk_poly1305_mac #s poly1305_init poly1305_update poly1305_finish tag len text key =
   push_frame ();
