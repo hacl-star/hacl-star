@@ -97,6 +97,7 @@ let aux_repeat_bf_s0 #a #b blocksize len0 inp f i acc =
   assert (repeat_bf_t i acc == f block acc)
 
 
+#restart-solver
 val lemma_aux: blocksize:pos -> len:nat -> len0:nat ->
   Lemma
   (requires len0 <= len /\ len0 % blocksize == 0)
@@ -308,7 +309,7 @@ let repeat_blocks_multi_split #a #b blocksize len0 inp f acc0 =
 
 
 #set-options "--z3rlimit 150 --initial_ifuel 1 --max_ifuel 1"
-
+#restart-solver
 let repeat_blocks_split #a #b blocksize len0 inp f l acc0 =
   let len = length inp in
   let len1 = len - len0 in
@@ -443,6 +444,7 @@ let lemma_aux1 w blocksize len =
   assert (len1 / blocksize == w * (len1 / sb))
 
 
+#set-options "--z3rlimit 200 --z3seed 1"
 let lemma_repeat_blocks_multi_vec #a #b #b_vec w blocksize inp f f_vec normalize_n load_acc acc0 =
   let len = length inp in
   let len0 = w * blocksize in
