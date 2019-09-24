@@ -3,7 +3,7 @@ module EverCrypt.HMAC
 
 module B = LowStar.Buffer
 
-open Spec.HMAC
+open Spec.Agile.HMAC
 open Spec.Hash.Definitions
 
 open FStar.HyperStack.ST

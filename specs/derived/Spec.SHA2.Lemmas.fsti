@@ -9,6 +9,6 @@ val update_224_256: hash:words_state SHA2_256 ->
 
 val update_multi_224_256: hash:words_state SHA2_256 -> blocks:bytes_blocks SHA2_256 ->
   Lemma
-    (ensures (Spec.Hash.update_multi SHA2_256 hash blocks ==
-      Spec.Hash.update_multi SHA2_224 hash blocks))
+    (ensures (Spec.Agile.Hash.update_multi SHA2_256 hash blocks ==
+      Spec.Agile.Hash.update_multi SHA2_224 hash blocks))
     (decreases (Seq.length blocks))

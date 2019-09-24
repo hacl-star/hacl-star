@@ -38,8 +38,8 @@ val hash_512_lib:
       live h input /\
       live h dst /\
       disjoint input dst /\
-      length input < max_input_length SHA2_512))
+      length input <= max_input_length SHA2_512))
     (ensures (fun h0 _ h1 ->
       modifies1 dst h0 h1 /\
       as_seq h1 dst `equal`
-        Spec.Hash.hash SHA2_512 (as_seq h0 input)))
+        Spec.Agile.Hash.hash SHA2_512 (as_seq h0 input)))
