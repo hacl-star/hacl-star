@@ -70,6 +70,12 @@ let allocate_bv_for (st: state) (allocated: list (name & bv)) (n: name) =
   | _ ->
       fail "allocate_bv_for: unknown_failure"
 
+let rec zip #a #b (xs: list a) (ys: list b): Tac (list (a & b)) =
+  match xs, ys with
+  | x :: xs, y :: ys -> (x, y) :: zip xs ys
+  | [], [] -> []
+  | _ -> fail "invalid argument: zip"
+
 let rec visit_function (st: state) (f_name: name): Tac (state & list sigelt) =
   if (List.Tot.existsb (fun (name, _) -> name = f_name) st.seen) then
     let _ = print (st.indent ^ "Already visited " ^ string_of_name f_name) in
@@ -131,6 +137,16 @@ let rec visit_function (st: state) (f_name: name): Tac (state & list sigelt) =
           else
             st, []
 
+and visit_many (st: state) (bvs: list (name & bv)) (es: list term):
+  Tac (state & list term & list (name & bv) & list sigelt)
+=
+  let st, es, bvs, ses = fold_left (fun (st, es, bvs, ses) e ->
+    let st, e, bvs, ses' = visit_body st bvs e in
+    st, e :: es, bvs, ses @ ses'
+  ) (st, [], bvs, []) es in
+  let es = List.Tot.rev es in
+  st, es, bvs, ses
+
 and visit_body (st: state) (bvs: list (name & bv)) (e: term):
   Tac (state & term & list (name & bv) & list sigelt)
 =
@@ -143,11 +159,9 @@ and visit_body (st: state) (bvs: list (name & bv)) (e: term):
       let e, es = collect_app e in
 
       // Recursively visit arguments
-      let st, es, bvs, ses = fold_left (fun (st, es, bvs, ses) (e, q) ->
-        let st, e, bvs, ses' = visit_body st bvs e in
-        st, (e, q) :: es, bvs, ses @ ses'
-      ) (st, [], bvs, []) es in
-      let es = List.Tot.rev es in
+      let es, qs = List.Pure.split es in
+      let st, es, bvs, ses = visit_many st bvs es in
+      let es = zip es qs in
 
       // If this is an application ...
       begin match inspect e with
@@ -221,6 +235,13 @@ and visit_body (st: state) (bvs: list (name & bv)) (e: term):
       let st, e, bvs, ses = visit_body st bvs e in
       let e = pack (Tv_Abs b e) in
       st, e, bvs, ses
+
+  | Tv_Match scrut branches ->
+      let st, scrut, bvs, ses = visit_body st bvs scrut in
+      let pats, es = List.Tot.split branches in
+      let st, es, bvs, ses' = visit_many st bvs es in
+      let branches = zip pats es in
+      st, pack_ln (Tv_Match scrut branches), bvs, ses @ ses'
 
   | _ ->
       fail ("todo: recursively visit term structurally: " ^ term_to_string e)

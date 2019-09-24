@@ -2,10 +2,14 @@ module Interface
 
 /// This is an fsti without an fst, i.e. an interface that we will write our client against.
 
-let add_st = int -> int -> int
-[@ MetaAttribute.specialize ]
-val add: add_st
+type w = | W32 | W64
 
-let mul_st = int -> int -> int
+let word = function W32 -> UInt32.t | W64 -> UInt64.t
+
+let add_st w = word w -> word w -> word w
 [@ MetaAttribute.specialize ]
-val mul: mul_st
+val add: #w:w -> add_st w
+
+let mul_st w = word w -> word w -> word w
+[@ MetaAttribute.specialize ]
+val mul: #w:w -> mul_st w
