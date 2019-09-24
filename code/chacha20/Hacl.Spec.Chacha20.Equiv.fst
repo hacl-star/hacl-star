@@ -504,12 +504,13 @@ let get_last_s
   b
 
 
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
-
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 val lemma_i_div_bs: w:pos -> bs:pos -> bs_v:pos{bs_v == w * bs} -> i:nat ->
   Lemma (w * (i / bs_v) + i % bs_v / bs == i / bs)
 let lemma_i_div_bs w bs bs_v i =
   calc (==) {
+    w * (i / bs_v) + i % bs_v / bs;
+  (==) { (* hyp *) }
     w * (i / bs_v) + i % (w * bs) / bs;
   (==) { FStar.Math.Lemmas.swap_mul w bs }
     w * (i / bs_v) + i % (bs * w) / bs;
@@ -884,7 +885,7 @@ let chacha20_encrypt_last_equiv_lemma_index1 #w k n ctr0 len rem b_v bs_v i =
   FStar.Math.Lemmas.modulo_modulo_lemma i size_block w
 
 
-#set-options "--z3refresh"
+#set-options "--z3refresh --z3rlimit 250 --z3seed 1"
 
 val chacha20_encrypt_last_equiv_lemma_index2:
     #w:lanes
