@@ -225,14 +225,14 @@ val coerce:
       match e with
       | Success ->
         let s = B.deref h1 dst in
-	SQ.supported_hash a.ha /\
+        SQ.supported_hash a.ha /\
         not (B.g_is_null s) /\
-	inv s h1 /\
+        inv s h1 /\
         M.modifies (M.loc_buffer dst) h0 h1 /\
         M.fresh_loc (footprint s h1) h0 h1 /\
         M.loc_region_only true a.region `M.loc_includes` footprint s h1 /\
-	pnT s Reader h1 == U64.v initial_pn /\
-	pnT s Writer h1 == U64.v initial_pn /\
+        pnT s Reader h1 == U64.v initial_pn /\
+        pnT s Writer h1 == U64.v initial_pn /\
         freeable h1 s
       | _ -> M.modifies M.loc_none h0 h1)
 
@@ -250,15 +250,15 @@ val create:
       match e with
       | Success ->
         let s = B.deref h1 dst in
-	SQ.supported_hash a.ha /\
+        SQ.supported_hash a.ha /\
         not (B.g_is_null s) /\
-	inv s h1 /\
+        inv s h1 /\
         M.modifies (M.loc_buffer dst) h0 h1 /\
         M.fresh_loc (footprint s h1) h0 h1 /\
         M.loc_region_only true a.region `M.loc_includes` footprint s h1 /\
-	pnT s Reader h1 == U64.v initial_pn /\
-	pnT s Writer h1 == U64.v initial_pn /\
-	itable i h1 == S.empty /\
+        pnT s Reader h1 == U64.v initial_pn /\
+        pnT s Writer h1 == U64.v initial_pn /\
+        itable i h1 == S.empty /\
         freeable h1 s
       | _ -> M.modifies M.loc_none h0 h1)
 
@@ -306,10 +306,10 @@ val encrypt:
       (safe i ==>
        begin (* Ideal case *)
         let log0 = itable i h0 in
-	let log1 = itable i h1 in
-	log1 == S.append log0
-	  (S.create 1 (Packet (U8.v pn_len) (spec_header h h0)
-	    (B.as_seq h0 plain) (B.as_seq h1 out)))
+        let log1 = itable i h1 in
+        log1 == S.append log0
+          (S.create 1 (Packet (U8.v pn_len) (spec_header h h0)
+            (B.as_seq h0 plain) (B.as_seq h1 out)))
        end) /\
       ~(safe i) ==>
        begin (* Concrete case *)
@@ -318,10 +318,10 @@ val encrypt:
         let k = SQ.derive_secret a.ha s0 label_key (SAEAD.key_length a.ea) in
         let iv = SQ.derive_secret a.ha s0 label_iv 12 in
         let pne = SQ.derive_secret a.ha s0 label_hp (SQ.ae_keysize a.ea) in
-	let plain : SQ.pbytes = B.as_seq h0 plain in
-	let packet : SQ.packet = B.as_seq h1 out in
-	let ctr = pnT s Writer h0 in
-	packet == SQ.encrypt a.ea k iv pne (U8.v pn_len) ctr (spec_header h h0) plain
+        let plain : SQ.pbytes = B.as_seq h0 plain in
+        let packet : SQ.packet = B.as_seq h1 out in
+        let ctr = pnT s Writer h0 in
+        packet == SQ.encrypt a.ea k iv pne (U8.v pn_len) ctr (spec_header h h0) plain
        end
     | _ -> True))
 
@@ -331,6 +331,8 @@ noeq type result = {
   plain_len: n:U32.t{let l = U32.v n in 3 <= l /\ l < SQ.max_plain_length};
   plain: B.buffer U8.t;
 }
+
+let max (x y: nat) = if x >= y then x else y
 
 val decrypt:
   #i:id -> // Erased
@@ -358,12 +360,12 @@ val decrypt:
       (safe i ==>
        begin (* Ideal case *)
         let log0 = itable i h0 in
-	let log1 = itable i h1 in
-	log0 == log1 /\
-	pn - initial_pn s h0 < S.length log0 /\
-	S.index log0 (pn - initial_pn s h0) ==
-	  (Packet (U8.v o.pn_len) (spec_header h h1)
-	    (B.as_seq h0 o.plain) (B.as_seq h0 packet))
+        let log1 = itable i h1 in
+        log0 == log1 /\
+        pn - initial_pn s h0 < S.length log0 /\
+        S.index log0 (pn - initial_pn s h0) ==
+          (Packet (U8.v o.pn_len) (spec_header h h1)
+            (B.as_seq h0 o.plain) (B.as_seq h0 packet))
        end) /\
       ~(safe i) ==>
        begin (* Concrete case *)
@@ -373,11 +375,11 @@ val decrypt:
         let k = SQ.derive_secret a.ha s0 label_key (SAEAD.key_length a.ea) in
         let iv = SQ.derive_secret a.ha s0 label_iv 12 in
         let pne = SQ.derive_secret a.ha s0 label_hp (SQ.ae_keysize a.ea) in
-	let plain : SQ.pbytes = B.as_seq h0 o.plain in
-	let packet : SQ.packet = B.as_seq h0 packet in
-	let last = pnT s Reader h0 in
-	SQ.decrypt a.ea k iv pne last (U8.v cid_len) packet
-	  == SQ.Success (U8.v o.pn_len) (U64.v o.pn) (spec_header h h1) plain
+        let plain : SQ.pbytes = B.as_seq h0 o.plain in
+        let packet : SQ.packet = B.as_seq h0 packet in
+        let last = pnT s Reader h0 in
+        SQ.decrypt a.ea k iv pne last (U8.v cid_len) packet
+          == SQ.Success (U8.v o.pn_len) (U64.v o.pn) (spec_header h h1) plain
        end
     | _ -> True))
 
