@@ -113,6 +113,7 @@ let rec visit_function (st: state) (f_name: name): Tac (state & list sigelt) =
           // BUG: without the eta-expansion around mk_binder, "tactic got stuck".
           let new_typ = mk_tot_arr (List.Tot.map (fun x -> mk_binder x) new_bvs) f_typ in
           let se = pack_sigelt (Sg_Let false (pack_fv new_name) [] new_typ new_body) in
+          let se = set_sigelt_quals [ NoExtract; Inline_for_extraction ] se in
           let _ = print (st.indent ^ "New body for " ^ string_of_name new_name ^ ":\n" ^
             st.indent ^ term_to_string new_body) in
           let _ = print (st.indent ^ "New type for " ^ string_of_name new_name ^ ":\n" ^
