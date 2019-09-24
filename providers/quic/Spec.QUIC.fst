@@ -9,6 +9,7 @@ module C16 = Spec.Cipher16
 module AEAD = Spec.AEAD
 module HKDF = Spec.HKDF
 
+#set-options "--max_fuel 0 --max_ifuel 0"
 
 let prefix: lbytes 11 =
   let l = [0x74uy; 0x6cuy; 0x73uy; 0x31uy; 0x33uy;
@@ -16,7 +17,7 @@ let prefix: lbytes 11 =
   let _ = assert_norm (List.Tot.length l == 11) in
   S.seq_of_list l
 
-#push-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 10"
+#push-options "--z3rlimit 10"
 let lemma_hash_lengths (a:ha)
   : Lemma (HD.hash_length a <= 64 /\ HD.word_length a <= 8 /\
     HD.block_length a <= 128 /\ HD.max_input_length a >= pow2 61)
@@ -34,12 +35,22 @@ let derive_secret a prk label len =
   assert_norm(452 < pow2 61);
   HKDF.expand a prk info len
 
+#push-options "--initial_ifuel 2 --max_ifuel 2"
 let encode_varint n =
   let open FStar.Endianness in
-  if n < pow2 6 then n_to_be 1 n
-  else if n < pow2 14 then n_to_be 2 (pow2 14 + n)
-  else if n < pow2 30 then n_to_be 4 (pow2 31 + n)
-  else n_to_be 8 (pow2 63 + pow2 62 + n)
+  if n < pow2 6 then (
+    assert_norm (pow2 6 < pow2 8);
+    n_to_be 1 n
+  ) else if n < pow2 14 then (
+    assert_norm (pow2 14 + pow2 14 < pow2 16);
+    n_to_be 2 (pow2 14 + n)
+  ) else if n < pow2 30 then (
+    assert_norm (pow2 31 + pow2 30 < pow2 32);
+    n_to_be 4 (pow2 31 + n)
+  ) else (
+    assert_norm (pow2 63 + pow2 62 + pow2 62 - 1 < pow2 64);
+    n_to_be 8 (pow2 63 + pow2 62 + n)
+  )
 
 let suffix (b:bytes) (n:nat{n <= S.length b}) = S.slice b n (S.length b)
 
@@ -165,6 +176,7 @@ private let mod_case1 (n:nat) : n:nat{n < pow2 62} =
   assert_norm(0x4000 < pow2 62);
   modulo_range_lemma n 0x4000; n % 0x4000
 
+#push-options "--max_fuel 2"
 private let lemma_varint_case1 (n:nat{n < pow2 14}) (suff:bytes)
   : Lemma (parse_varint_weak S.(FStar.Endianness.n_to_be 2 (pow2 14 + n) @| suff) ==
     Some (mod_case1 n, 2, suff))
@@ -180,12 +192,14 @@ private let lemma_varint_case1 (n:nat{n < pow2 14}) (suff:bytes)
   S.append_slices (n_to_be 2 (pow2 14 + n)) suff;
   match b0 with
   | 1 -> assert(parse_varint_weak b == Some (mod_case1 n, 2, suff))
+#pop-options
 
 private let mod_case2 (n:nat) : n:nat{n < pow2 62} =
   let open FStar.Math.Lemmas in
   assert_norm(0x40000000 < pow2 62);
   modulo_range_lemma n 0x40000000; n % 0x40000000
 
+#push-options "--initial_fuel 6 --max_fuel 6 --initial_ifuel 2 --max_ifuel 2"
 private let lemma_varint_case2 (n:nat{n < pow2 30}) (suff:bytes)
   : Lemma (parse_varint_weak S.(FStar.Endianness.n_to_be 4 (pow2 31 + n) @| suff) ==
     Some (mod_case2 n, 4, suff)) =
@@ -198,10 +212,13 @@ private let lemma_varint_case2 (n:nat{n < pow2 30}) (suff:bytes)
   lemma_be_index 4 (pow2 31 + n);
   division_multiplication_lemma (pow2 31 + n) 0x1000000 0x40;
   lemma_divrem2 30 31 n;
-  assert(S.length b == 4 + S.length suff /\ b0 == 2 /\ n % 0x40000000 == n);
+  assert (S.length b == 4 + S.length suff);
+  assert (b0 == 2); // <-- this is the difficult proof that requires fuel 6
+  assert (n % 0x40000000 == n);
   S.append_slices (n_to_be 4 (pow2 31 + n)) suff;
   match b0 with
   | 2 -> assert(parse_varint_weak b == Some (n % 0x40000000, 4, suff))
+#pop-options
 
 private let mod_case3 (n:nat) : n:nat{n < pow2 62} =
   let open FStar.Math.Lemmas in
@@ -209,11 +226,14 @@ private let mod_case3 (n:nat) : n:nat{n < pow2 62} =
   modulo_range_lemma n 0x4000000000000000; n % 0x4000000000000000
 
 let lemma_varint_case3 (n:nat{n < pow2 62}) (suff:bytes)
-  : Lemma (parse_varint_weak S.(FStar.Endianness.n_to_be 8 (pow2 63 + pow2 62 + n) @| suff) ==
+  : Lemma (
+    assert_norm (pow2 63 + pow2 62 + pow2 62 - 1 < pow2 64);
+    parse_varint_weak S.(FStar.Endianness.n_to_be 8 (pow2 63 + pow2 62 + n) @| suff) ==
     Some (mod_case3 n, 8, suff)) =
   let open FStar.Endianness in
   let open FStar.Math.Lemmas in
   let open FStar.Mul in
+  assert_norm (pow2 63 + pow2 62 + pow2 62 - 1 < pow2 64);
   assert_norm(pow2 0 == 1 /\ pow2 1 == 2 /\ pow2 2 == 4 /\ pow2 3 == 8 /\ pow2 8 == 256);
   assert_norm(pow2 (8 * 0) == 1 /\ pow2 (8 * 1) == 0x100 /\ pow2 (8 * 3) == 0x1000000 /\ pow2 (8 * 7) == 0x100000000000000);
   let b = S.(n_to_be 8 (pow2 63 + pow2 62 + n) @| suff) in
@@ -224,6 +244,9 @@ let lemma_varint_case3 (n:nat{n < pow2 62}) (suff:bytes)
   S.append_slices (n_to_be 8 (pow2 63 + pow2 62 + n)) suff;
   match b0 with
   | 3 -> assert(parse_varint_weak b == Some (n % 0x4000000000000000, 8, suff))
+
+// JP: tightened proofs up to here. Resetting options as before for the rest.
+#reset-options
 
 #push-options "--z3rlimit 60"
 let length_encode (n:nat62) : Lemma

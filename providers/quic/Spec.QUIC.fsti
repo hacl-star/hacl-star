@@ -57,7 +57,7 @@ val derive_secret:
   prk: bytes ->
   label: bytes ->
   len: nat ->
-  Ghost (lbytes len)
+  Pure (lbytes len)
   (requires len <= 255 /\
     S.length label <= 244 /\
     keysized a (S.length prk))
@@ -83,7 +83,8 @@ let vlen (n:nat62) : vlsize =
 val encode_varint: n:nat62 -> lbytes (vlen n)
 val parse_varint: b:bytes -> option (n:nat62 * bytes)
 
-val lemma_varint: (n:nat62) -> (suff:bytes) -> Lemma (parse_varint S.(encode_varint n @| suff) == Some (n,suff))
+val lemma_varint: (n:nat62) -> (suff:bytes) ->
+  Lemma (parse_varint S.(encode_varint n @| suff) == Some (n,suff))
 
 
 type header =
@@ -187,9 +188,6 @@ val lemma_header_encryption_malleable:
     let p' = S.upd p 0 (S.index p 0 `FStar.UInt8.logxor` 1z) in // applying xor to change the value of npn in the flag
     header_decrypt a k (S.length cid-2) p'
     = H_Success npn (Short spin phase S.(cid @| x)) c)
-
-
-
 
 type result =
 | Success: pn_len:nat2 ->
