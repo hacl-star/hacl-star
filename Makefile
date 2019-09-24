@@ -137,6 +137,7 @@ ci:
 	NOSHORTLOG=1 $(MAKE) wasm
 	$(MAKE) -C providers/quic_provider # needs a checkout of miTLS, only valid on CI
 	./tools/sloccount.sh
+	$(MAKE) -C qtesla/code
 
 wasm:
 	tools/blast-staticconfig.sh wasm
