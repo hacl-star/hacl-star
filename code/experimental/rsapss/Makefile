@@ -146,6 +146,10 @@ $(OUT_DIR)/test.exe: $(ALL_OBJS) | $(OUT_DIR)
 	$(info ALL_SOURCES is $(ALL_SOURCES))
 	$(CC) $(CFLAGS) -o $@ $^ -L $(KREMLIN_HOME)/kremlib/dist/generic -lkremlib
 
+test-rsapss.exe:
+	$(CC) $(CFLAGS) -I $(GENERATED_DIR)/ -I $(GENERATED_DIR)/tests -I . $(GENERATED_DIR)/Hacl_Hash_SHA2.c $(GENERATED_DIR)/Hacl_RSAPSS.c ./tests/rsa_pss_2048_sha256_mgf1_0_test.c ./tests/rsa_pss_2048_sha256_mgf1_32_test.c ./tests/rsa_pss_3072_sha256_mgf1_32_test.c ./tests/rsa_pss_4096_sha256_mgf1_32_test.c ./tests/test-rsapss.c -L $(KREMLIN_HOME)/kremlib/dist/generic -lkremlib -o test-rsapss.exe
+
+
 .PRECIOUS: %.o
 
 endif # STAGE=2
