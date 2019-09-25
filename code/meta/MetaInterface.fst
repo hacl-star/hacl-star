@@ -162,10 +162,10 @@ let rec visit_function (st: state) (f_name: name): Tac (state & list sigelt) =
           let m = if has_attr f (`MetaAttribute.specialize) then Specialize else Inline new_name in
 
           // The type of ``f`` when it appears as a ``gi`` parameter, i.e. its ``gi_t``.
-          let f_typ_as_arg = lambda_over_index st f_name f_typ in
+          let f_typ = lambda_over_index st f_name f_typ in
           print (st.indent ^ "  Registering " ^ string_of_name f_name ^ " with type " ^
-            term_to_string f_typ_as_arg);
-          let st = { st with seen = (f_name, (f_typ_as_arg, m, new_args)) :: st.seen } in
+            term_to_string f_typ);
+          let st = { st with seen = (f_name, (f_typ, m, new_args)) :: st.seen } in
 
           // Declaration for the new resulting function. We need to construct
           // the actual type of ``f``.
