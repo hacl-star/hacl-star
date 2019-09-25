@@ -885,7 +885,7 @@ let chacha20_encrypt_last_equiv_lemma_index1 #w k n ctr0 len rem b_v bs_v i =
   FStar.Math.Lemmas.modulo_modulo_lemma i size_block w
 
 
-#push-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+#push-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 
 val chacha20_encrypt_last_equiv_lemma_index2:
     #w:lanes
@@ -900,23 +900,23 @@ val chacha20_encrypt_last_equiv_lemma_index2:
   Lemma
   (let st_v0 = chacha20_init #w k n ctr0 in
    let st0 = Scalar.chacha20_init k n ctr0 in
-   let j = i % bs_v in
+   let (j:nat{j < rem}) = i % bs_v in
    let b_j: lseq uint8 (rem % size_block) = get_last_s #uint8 #rem size_block b_v in
    FStar.Math.Lemmas.modulo_modulo_lemma i size_block w;
-   chacha20_encrypt_last st_v0 (len / bs_v) rem b_v ==
-   Scalar.chacha20_encrypt_last st0 (len / size_block) (rem % size_block) b_j)
+   (chacha20_encrypt_last st_v0 (len / bs_v) rem b_v).[j] ==
+   (Scalar.chacha20_encrypt_last st0 (len / size_block) (rem % size_block) b_j).[i % size_block])
 #pop-options
 
-#set-options "--z3refresh --z3rlimit 300"
+#push-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 0"
 let chacha20_encrypt_last_equiv_lemma_index2 #w k n ctr0 len rem b_v bs_v i =
   let st_v0 = chacha20_init #w k n ctr0 in
   let st0 = Scalar.chacha20_init k n ctr0 in
   let j = i % bs_v in
   chacha20_encrypt_last_equiv_lemma_index #w k n ctr0 (len / bs_v) rem b_v j;
   lemma_i_div_bs2 w size_block bs_v len i;
-  FStar.Math.Lemmas.modulo_modulo_lemma i size_block w;
-  admit ()
+  FStar.Math.Lemmas.modulo_modulo_lemma i size_block w
 
+#pop-options
 
 val lemma_slice_slice_f_vec_f:
     #a:Type
@@ -1076,7 +1076,6 @@ val lemma_chacha20_vec_equiv_pre_g_vec_g:
   Lemma (chacha20_vec_equiv_pre #w k n c msg i)
 
 let lemma_chacha20_vec_equiv_pre_g_vec_g #w key nonce ctr0 msg i =
-  admit ();
   let len = length msg in
   let bs = size_block in
   let bs_v = w * bs in
