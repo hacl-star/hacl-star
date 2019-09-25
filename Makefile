@@ -399,7 +399,7 @@ hints:
 %.checked: FSTAR_FLAGS=
 %.checked: | hints
 	$(call run-with-log,\
-	  $(FSTAR) $(notdir $*) $(FSTAR_FLAGS) \
+	  $(FSTAR) $< $(FSTAR_FLAGS) \
 	    --hint_file hints/$(notdir $*).hints \
 	    && \
 	    touch -c $@ \
