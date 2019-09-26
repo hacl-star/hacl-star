@@ -345,3 +345,18 @@ let specialize (names: list term): Tac _ =
     st, ses @ ses'
   ) (st, []) names in
   exact (quote ses)
+
+// TODO:
+// - do not re-check leaves of the call-graph (just return the Tm_FVar for the body)
+// - quote and splice the internal state of the tactic as `tactic_state`; this way:
+//   - a new tactic instantiate can re-load the state, then
+//   - instantiate each one of the specialize node, and
+//   - mark as private those that were not arguments to the tactic initially
+// - figure out the bug in Example (might pop up later, 0b1611a5f03d9f91359eae54403da42957cfeb67)
+// - figure out the issue with type annotations sending F* off the rails
+//   (88c8ec01e066ab0adc550c2bdba4212ff5e7c5c9)
+// - is there any way to not do as much work and skip re-checking some things?
+// - we're going to hit a breaking point when declarations that are recursively
+//   found need to be checked with different options... we can always break
+//   things down, but at what cost? could F* annotate a "snapshot" of the
+//   options for each declaration?
