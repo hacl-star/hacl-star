@@ -35,8 +35,8 @@ type branch4 = (branch & branch & branch & branch)
 type branch6 = (branch & branch & branch & branch & branch & branch)
 type branch8 = (branch & branch & branch & branch & branch & branch & branch & branch)
 
-val arx: c:uint32 -> branch -> Tot branch
-let arx c b =
+inline_for_extraction val arx: c:uint32 -> branch -> Tot branch
+inline_for_extraction let arx c b =
   let x, y = b in
 
   let x = x +. (y >>>. 31ul) in
