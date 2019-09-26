@@ -317,6 +317,12 @@ and visit_body (index_bv: term) (st: state) (bvs: list (name & bv)) (e: term):
       let branches = zip pats es in
       st, pack (Tv_Match scrut branches), bvs, ses @ ses'
 
+  | Tv_Let r bv e1 e2 ->
+      let st, e1, bvs, ses = visit_body index_bv st bvs e1 in
+      let st, e2, bvs, ses = visit_body index_bv st bvs e2 in
+      let e = pack (Tv_Let r bv e1 e2) in
+      st, e, bvs, ses
+
   | _ ->
       fail ("todo: recursively visit term structurally: " ^ term_to_string e)
 
