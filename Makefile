@@ -624,6 +624,7 @@ REQUIRED_FLAGS	=\
   -bundle Hacl.Impl.Poly1305.Fields \
   -bundle LowStar.* \
   -bundle Prims,C.Failure,C,C.String,C.Loops,Spec.Loops,C.Endianness,FStar.*[rename=Hacl_Kremlib] \
+  -bundle 'Meta.*' \
   -bundle 'EverCrypt.Spec.*' \
   -library EverCrypt.AutoConfig,EverCrypt.OpenSSL,EverCrypt.BCrypt \
   -minimal \
