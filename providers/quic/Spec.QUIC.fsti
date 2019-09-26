@@ -1,12 +1,14 @@
 module Spec.QUIC
 
-
 module S = FStar.Seq
 module H = Spec.Hash
 module HD = Spec.Hash.Definitions
 module AEAD = Spec.AEAD
 
 type byte = FStar.UInt8.t
+
+// JP: should we allow inversion on either hash algorithm or AEAD algorithm?
+#set-options "--max_fuel 0 --max_ifuel 0"
 
 let supported_hash = function
   | HD.SHA1 | HD.SHA2_256 | HD.SHA2_384 | HD.SHA2_512 -> true
@@ -29,8 +31,17 @@ let hashable (a:ha) (l:nat) = l < HD.max_input_length a
 
 // AEAD plain and ciphertext. We want to guarantee that regardless
 // of the header size (max is 54), the neader + ciphertext + tag fits in a buffer
-let max_plain_length : n:nat{forall a. n <= AEAD.max_length a} = pow2 32 - 70
-let max_cipher_length : n:nat{forall a. n <= AEAD.max_length a + AEAD.tag_length a} = pow2 32 - 54
+// JP: perhaps cleaner with a separate lemma; any reason for putting this in a refinement?
+let max_plain_length: n:nat {
+  forall a. {:pattern AEAD.max_length a} n <= AEAD.max_length a
+} =
+  pow2 32 - 70
+
+let max_cipher_length : n:nat {
+  forall a. {:pattern AEAD.max_length a \/ AEAD.tag_length a }
+    n <= AEAD.max_length a + AEAD.tag_length a
+} =
+  pow2 32 - 54
 
 type pbytes = b:bytes{let l = S.length b in 3 <= l /\ l < max_plain_length}
 type cbytes = b:bytes{let l = S.length b in 19 <= l /\ l < max_cipher_length}
@@ -46,7 +57,7 @@ val derive_secret:
   prk: bytes ->
   label: bytes ->
   len: nat ->
-  Ghost (lbytes len)
+  Pure (lbytes len)
   (requires len <= 255 /\
     S.length label <= 244 /\
     keysized a (S.length prk))
@@ -72,7 +83,8 @@ let vlen (n:nat62) : vlsize =
 val encode_varint: n:nat62 -> lbytes (vlen n)
 val parse_varint: b:bytes -> option (n:nat62 * bytes)
 
-val lemma_varint: (n:nat62) -> (suff:bytes) -> Lemma (parse_varint S.(encode_varint n @| suff) == Some (n,suff))
+val lemma_varint: (n:nat62) -> (suff:bytes) ->
+  Lemma (parse_varint S.(encode_varint n @| suff) == Some (n,suff))
 
 
 type header =
@@ -98,6 +110,9 @@ type h_result =
   c: cbytes ->
   h_result
 | H_Failure
+
+// JP: seems appropriate for this module...?
+let _: squash (inversion header) = allow_inversion header
 
 let header_len (h:header) (pn_len:nat2) : n:nat{2 <= n /\ n <= 54} =
   match h with
@@ -173,9 +188,6 @@ val lemma_header_encryption_malleable:
     let p' = S.upd p 0 (S.index p 0 `FStar.UInt8.logxor` 1z) in // applying xor to change the value of npn in the flag
     header_decrypt a k (S.length cid-2) p'
     = H_Success npn (Short spin phase S.(cid @| x)) c)
-
-
-
 
 type result =
 | Success: pn_len:nat2 ->
