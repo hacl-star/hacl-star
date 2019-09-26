@@ -1235,6 +1235,88 @@ let rec pointwise_index3 (#a:eqtype) (f:a->a->a) (b1 b2:S.seq a) (i pos:nat) : L
 
 
 
+let pointwise_op_suff (#a:eqtype) (f:a->a->a) (a1 a2 b:S.seq a) (pos:nat) : Lemma
+  (requires pos >= S.length a1 /\ S.length b + pos <= S.length a1 + S.length a2)
+  (ensures
+    S.equal
+      (pointwise_op f S.(a1 @| a2) b pos)
+      S.(a1 @| pointwise_op f a2 b (pos - S.length a1))) =
+  let b1 = pointwise_op f S.(a1 @| a2) b pos in
+  let b2 = S.(a1 @| pointwise_op f a2 b (pos - S.length a1)) in
+  let step i : Lemma (S.index b1 i = S.index b2 i) =
+    if i < S.length a1 then pointwise_index1 f S.(a1 @| a2) b i pos
+    else begin
+      if i < pos then begin
+        pointwise_index1 f S.(a1 @| a2) b i pos;
+        pointwise_index1 f a2 b (i-S.length a1) (pos-S.length a1)
+      end else if i < S.length b + pos then begin
+        pointwise_index2 f S.(a1 @| a2) b i pos;
+        pointwise_index2 f a2 b (i-S.length a1) (pos-S.length a1)
+      end else begin
+        pointwise_index3 f S.(a1 @| a2) b i pos;
+        pointwise_index3 f a2 b (i-S.length a1) (pos-S.length a1)
+      end
+    end in
+
+  FStar.Classical.forall_intro step
+
+
+let pointwise_op_pref (#a:eqtype) (f:a->a->a) (a1 a2 b:S.seq a) (pos:nat) : Lemma
+  (requires S.length b + pos <= S.length a1)
+  (ensures
+    S.equal
+      (pointwise_op f S.(a1 @| a2) b pos)
+      S.(pointwise_op f a1 b pos @| a2)) =
+  let b1 = pointwise_op f S.(a1 @| a2) b pos in
+  let b2 = S.(pointwise_op f a1 b pos @| a2) in
+  let step i : Lemma (S.index b1 i = S.index b2 i) =
+    if i < pos then begin
+      pointwise_index1 f S.(a1 @| a2) b i pos;
+      pointwise_index1 f a1 b i pos
+    end else if i < S.length b + pos then begin
+      pointwise_index2 f S.(a1 @| a2) b i pos;
+      pointwise_index2 f a1 b i pos
+    end else begin
+      pointwise_index3 f S.(a1 @| a2) b i pos;
+      if i < S.length a1 then pointwise_index3 f a1 b i pos
+      else ()
+    end in
+
+  FStar.Classical.forall_intro step
+
+
+let pointwise_op_dec (#a:eqtype) (f:a->a->a) (a1 a2 b:S.seq a) (pos:nat) : Lemma
+  (requires
+    pos < S.length a1 /\
+    S.length a1 <= S.length b + pos /\
+    S.length b + pos <= S.length a1 + S.length a2)
+  (ensures (
+    let open S in
+    let (b1,b2) = S.split b (length a1 - pos) in
+    equal
+      (pointwise_op f (a1 @| a2) b pos)
+      (pointwise_op f a1 b1 pos @| pointwise_op f a2 b2 0))) =
+  let open S in
+  let (b1,b2) = S.split b (length a1 - pos) in
+  let p = pointwise_op f (a1 @| a2) b pos in
+  let q = pointwise_op f a1 b1 pos @| pointwise_op f a2 b2 0 in
+  let step i : Lemma (S.index p i = S.index q i) =
+    if i < pos then begin
+      pointwise_index1 f (a1 @| a2) b i pos;
+      pointwise_index1 f a1 b1 i pos
+    end else if i < length a1 then begin
+      pointwise_index2 f (a1 @| a2) b i pos;
+      pointwise_index2 f a1 b1 i pos
+    end else if i < length b + pos then begin
+      pointwise_index2 f (a1 @| a2) b i pos;
+      pointwise_index2 f a2 b2 (i-length a1) 0
+    end else begin
+      pointwise_index3 f (a1 @| a2) b i pos;
+      pointwise_index3 f a2 b2 (i-length a1) 0
+    end in
+
+  FStar.Classical.forall_intro step
+
 
 
 // application: byte-wise xor
@@ -2294,14 +2376,42 @@ let lemma_insert_encrypt (flags cid npn c x:bytes) : Lemma
 
 
 
-/// HHEEERRREEE
 
-let lemma_header_encrypt_insert_malleable a k h (npn:lbytes 1) (x y:byte) (c:cbytes) : Lemma
-  (requires
-    Short? h /\
-    S.length (Short?.cid h) <= 17)
+
+
+
+
+let lemma_decomp_mask_encrypt (flag x:byte) (fmask:lbytes 1) (cid npn c pnmask:bytes) : Lemma
+  (requires S.length pnmask <= 1 + S.length npn + S.length c)
   (ensures (
     let open S in
+    let p = create 1 flag @| cid @| create 1 x @| npn @| c in
+    let pnpn = xor_inplace p pnmask (S.length cid + 1) in
+    let pflag = xor_inplace pnpn fmask 0 in
+    equal pflag (xor_inplace (create 1 flag) fmask 0 @| cid @| xor_inplace (create 1 x @| npn @| c) pnmask 0))) =
+  let open S in
+  let p = create 1 flag @| cid @| create 1 x @| npn @| c in
+  let pnpn = xor_inplace p pnmask (length cid + 1) in
+  let pflag = xor_inplace pnpn fmask 0 in
+  pointwise_op_suff U8.logxor (create 1 flag) (cid @| create 1 x @| npn @| c) pnmask (length cid+1);
+  pointwise_op_suff U8.logxor cid (create 1 x @| npn @| c) pnmask (length cid);
+  let suff = cid @| xor_inplace (create 1 x @| npn @| c) pnmask 0 in
+  assert (equal pnpn (create 1 flag @| suff));
+  pointwise_op_pref U8.logxor (create 1 flag) suff fmask 0
+
+
+
+
+/// HHEEERRREEE
+
+let lemma_header_encrypt_insert_malleable a k (spin phase:bool) (cid:lbytes 4) (npn:lbytes 1) (x y:byte) (c:cbytes) : Lemma
+  (requires (
+    let h = Short spin phase cid in
+    Short? h /\
+    S.length (Short?.cid h) <= 17))
+  (ensures (
+    let open S in
+    let h = Short spin phase cid in
     let p = header_encrypt a k h (create 1 x @| npn) c in
     //let pn_len = S.length npn - 1 in
     //let sample = S.slice c (3-pn_len) (19-pn_len) in
@@ -2312,7 +2422,38 @@ let lemma_header_encrypt_insert_malleable a k h (npn:lbytes 1) (x y:byte) (c:cby
     //let npn' = create 1 (index npn 0 `U8.logxor` index pnmask 1) @| create 1 y in
     exists h' npn'.
     let p' = header_encrypt a k h' npn' c in
-    equal (insert (create 1 y) p (S.length (Short?.cid h))) p')) =
+    equal (insert (create 1 y) p 7) p')) =
+  let open S in
+
+  // computing format_header
+  let h = Short spin phase cid in
+  let xnpn = create 1 x @| npn in
+  let pn_len = S.length xnpn - 1 in
+  assert (pn_len = S.length npn);
+  let (pnb0, pnb1) = to_bitfield2 pn_len in
+  let l = [pnb0; pnb1; phase; false; false; spin; true; false] in
+  assert_norm(List.Tot.length l = 8);
+  let flag = of_bitfield8 l in
+  let fh = create 1 flag @| cid @| create 1 x @| npn @| c in
+  assert (equal fh (format_header h xnpn @| c));
+
+  // compting header_encrypt
+  let pn_offset = 5 in
+  let sample = S.slice c (3-pn_len) (19-pn_len) in
+  let mask = C16.block (calg_of_ae a) k sample in
+  let pnmask = and_inplace (S.slice mask 1 5) (pn_sizemask pn_len) 0 in
+  let sflags = 0x1fuy in
+  let fmask = S.create 1 U8.(S.index mask 0 `logand` sflags) in
+  let r = xor_inplace fh pnmask pn_offset in
+  let packet = xor_inplace r fmask 0 in
+  assert (packet = header_encrypt a k h xnpn c);
+
+  let flag' = xor_inplace (create 1 flag) fmask 0 in
+  lemma_decomp_mask_encrypt flag x fmask cid npn c pnmask;
+  assert (equal packet (flag' @| cid @| xor_inplace (create 1 x @| npn @| c) pnmask 0));
+  let x' = x `U8.logxor` index pnmask 0 in
+  let npn' = create 1 (index npn 0 `U8.logxor` index pnmask 1) @| create 1 y in
+  assert (equal packet (flag' @| cid @| create 1 x' @| npn' @| xor_inplace c (slice pnmask 2 (length pnmask)) 0));
   admit()
 
 
