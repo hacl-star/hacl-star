@@ -256,7 +256,6 @@ val double_round:
     (requires (fun h -> live h st))
     (ensures (fun h0 _ h1 -> modifies (loc st) h0 h1 /\
       as_seq h1 st == Spec.double_round (as_seq h0 st)))
-[@ MetaAttribute.specialize ]
 let double_round #w st =
   quarter_round st (size 0) (size 4) (size 8) (size 12);
   quarter_round st (size 1) (size 5) (size 9) (size 13);
