@@ -1,15 +1,13 @@
 module Hacl.Chacha20.Vec128
 
-open FStar.HyperStack
-open FStar.HyperStack.All
+open Hacl.Meta.Chacha20.Vec
 
-open Lib.IntTypes
-open Lib.Buffer
+private
+let double_round_128 = double_round_inline #4
+private
+let chacha20_core_128 = chacha20_core_inline #4 double_round_128
+private
+let chacha20_init_128 = chacha20_init_inline #4
 
-open Hacl.Impl.Chacha20.Vec
-
-let chacha20_encrypt : chacha20_encrypt_st 4 =
-  chacha20_encrypt
-
-let chacha20_decrypt : chacha20_decrypt_st 4 =
-  chacha20_decrypt
+let chacha20_encrypt_128 = chacha20_encrypt_inline #4 chacha20_init_128 chacha20_core_128
+let chacha20_decrypt_128 = chacha20_decrypt_inline #4 chacha20_init_128 chacha20_core_128

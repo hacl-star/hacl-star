@@ -27,7 +27,7 @@ val rounds:
     (requires (fun h -> live h st))
     (ensures (fun h0 _ h1 -> modifies (loc st) h0 h1 /\
       as_seq h1 st == Spec.rounds (as_seq h0 st)))
-[@ MetaAttribute.inline_ ]
+[@ Meta.Attribute.inline_ ]
 let rounds #w st =
   double_round st;
   double_round st;
@@ -50,7 +50,7 @@ val chacha20_core:
     (requires (fun h -> live h ctx0 /\ live h k /\ disjoint ctx0 k))
     (ensures (fun h0 _ h1 -> modifies (loc k) h0 h1 /\
       as_seq h1 k == Spec.chacha20_core (v ctr) (as_seq h0 ctx0)))
-[@ MetaAttribute.specialize ]
+[@ Meta.Attribute.specialize ]
 let chacha20_core #w k ctx ctr =
   copy_state k ctx;
   let ctr_u32 = u32 w *! size_to_uint32 ctr in
@@ -83,7 +83,6 @@ val setup1:
       as_seq h ctx == Lib.Sequence.create 16 (u32 0)))
     (ensures (fun h0 _ h1 -> modifies (loc ctx) h0 h1 /\
       as_seq h1 ctx == Spec.setup1 (as_seq h0 k) (as_seq h0 n) (v ctr0)))
-[@ MetaAttribute.inline_ ]
 let setup1 ctx k n ctr =
   let h0 = ST.get() in
   recall_contents chacha20_constants Spec.chacha20_constants;
@@ -116,7 +115,7 @@ val chacha20_init:
       as_seq h ctx == Lib.Sequence.create 16 (vec_zero U32 w)))
     (ensures (fun h0 _ h1 -> modifies (loc ctx) h0 h1 /\
       as_seq h1 ctx == Spec.chacha20_init (as_seq h0 k) (as_seq h0 n) (v ctr0)))
-[@ MetaAttribute.specialize ]
+[@ Meta.Attribute.specialize ]
 let chacha20_init #w ctx k n ctr =
   push_frame();
   let ctx1 = create 16ul (u32 0) in
@@ -140,7 +139,7 @@ val chacha20_encrypt_block:
       disjoint out ctx /\ disjoint text ctx))
     (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1 /\
       as_seq h1 out == Spec.chacha20_encrypt_block (as_seq h0 ctx) (v incr) (as_seq h0 text)))
-[@ MetaAttribute.inline_ ]
+[@ Meta.Attribute.inline_ ]
 let chacha20_encrypt_block #w ctx out incr text =
   push_frame();
   let k = create 16ul (vec_zero U32 w) in
@@ -161,7 +160,7 @@ val chacha20_encrypt_last:
       disjoint out ctx /\ disjoint text ctx))
     (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1 /\
       as_seq h1 out == Spec.chacha20_encrypt_last (as_seq h0 ctx) (v incr) (v len) (as_seq h0 text)))
-[@ MetaAttribute.inline_ ]
+[@ Meta.Attribute.inline_ ]
 let chacha20_encrypt_last #w ctx len out incr text =
   push_frame();
   let plain = create (size w *! size 64) (u8 0) in
@@ -183,7 +182,7 @@ val chacha20_update:
       eq_or_disjoint text out /\ disjoint text ctx /\ disjoint out ctx))
     (ensures (fun h0 _ h1 -> modifies (loc ctx |+| loc out) h0 h1 /\
       as_seq h1 out == Spec.chacha20_update (as_seq h0 ctx) (as_seq h0 text)))
-[@ MetaAttribute.inline_ ]
+[@ Meta.Attribute.inline_ ]
 let chacha20_update #w ctx len out text =
   push_frame();
   let k = create_state w in
@@ -212,7 +211,7 @@ val chacha20_encrypt_vec:
       live h key /\ live h n /\ live h text /\ live h out /\ eq_or_disjoint text out))
     (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1 /\
       as_seq h1 out == Spec.chacha20_encrypt_bytes #w (as_seq h0 key) (as_seq h0 n) (v ctr) (as_seq h0 text)))
-[@ MetaAttribute.inline_ ]
+[@ Meta.Attribute.inline_ ]
 let chacha20_encrypt_vec #w len out text key n ctr =
   push_frame();
   let ctx = create_state w in
@@ -237,7 +236,7 @@ let chacha20_encrypt_st (w:lanes) =
 
 inline_for_extraction noextract
 val chacha20_encrypt: #w:lanes -> chacha20_encrypt_st w
-[@ MetaAttribute.specialize ]
+[@ Meta.Attribute.specialize ]
 let chacha20_encrypt #w len out text key n ctr =
   let h0 = ST.get () in
   chacha20_encrypt_vec #w len out text key n ctr;
@@ -257,7 +256,7 @@ val chacha20_decrypt_vec:
       live h key /\ live h n /\ live h cipher /\ live h out /\ eq_or_disjoint cipher out))
     (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1 /\
       as_seq h1 out == Spec.chacha20_decrypt_bytes #w (as_seq h0 key) (as_seq h0 n) (v ctr) (as_seq h0 cipher)))
-[@ MetaAttribute.inline_ ]
+[@ Meta.Attribute.inline_ ]
 let chacha20_decrypt_vec #w len out cipher key n ctr =
   push_frame();
   let ctx = create_state w in
@@ -282,7 +281,7 @@ let chacha20_decrypt_st (w:lanes) =
 
 inline_for_extraction noextract
 val chacha20_decrypt: #w:lanes -> chacha20_decrypt_st w
-[@ MetaAttribute.specialize ]
+[@ Meta.Attribute.specialize ]
 let chacha20_decrypt #w len out cipher key n ctr =
   let h0 = ST.get () in
   chacha20_decrypt_vec #w len out cipher key n ctr;

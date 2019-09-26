@@ -1,4 +1,4 @@
-module MetaInterface
+module Meta.Interface
 
 open FStar.Reflection
 open FStar.Tactics
@@ -113,7 +113,7 @@ let rec visit_function (st: state) (f_name: name): Tac (state & list sigelt) =
     // Environment lookup.
     let f = lookup_typ (cur_env ()) f_name in
     let f = match f with Some f -> f | None -> fail "unexpected: name not in the environment" in
-    if not (has_attr f (`MetaAttribute.specialize) || has_attr f (`MetaAttribute.inline_)) then
+    if not (has_attr f (`Meta.Attribute.specialize) || has_attr f (`Meta.Attribute.inline_)) then
       let _ = print (st.indent ^ "Not visiting " ^ string_of_name f_name) in
       // We want to user to specify which nodes should be traversed, otherwise,
       // we'd end up visiting the entire F* standard library.
@@ -159,7 +159,7 @@ let rec visit_function (st: state) (f_name: name): Tac (state & list sigelt) =
           // Update the state with a mapping and which extra arguments are
           // needed. Each function that has been transformed has a type that's a
           // function of the index.
-          let m = if has_attr f (`MetaAttribute.specialize) then Specialize else Inline new_name in
+          let m = if has_attr f (`Meta.Attribute.specialize) then Specialize else Inline new_name in
 
           // The type of ``f`` when it appears as a ``gi`` parameter, i.e. its ``gi_t``.
           let f_typ = lambda_over_index st f_name f_typ in
@@ -169,6 +169,7 @@ let rec visit_function (st: state) (f_name: name): Tac (state & list sigelt) =
             term_to_string f_typ_typ ^ " = " ^
             term_to_string f_typ);
           let se_t = pack_sigelt (Sg_Let false (pack_fv f_typ_name) [] f_typ_typ f_typ) in
+          let se_t = set_sigelt_quals [ NoExtract; Inline_for_extraction ] se_t in
           let f_typ = pack (Tv_FVar (pack_fv f_typ_name)) in
           let st = { st with seen = (f_name, (f_typ, m, new_args)) :: st.seen } in
 
@@ -190,7 +191,7 @@ let rec visit_function (st: state) (f_name: name): Tac (state & list sigelt) =
           st, new_sigelts @ [ se_t; se ]
 
       | _ ->
-          if has_attr f (`MetaAttribute.specialize) then
+          if has_attr f (`Meta.Attribute.specialize) then
             // Assuming that this is a val, but we can't inspect it. Let's work around this.
             let t = pack (Tv_FVar (pack_fv f_name)) in
             let f_typ = tc t in
@@ -324,9 +325,9 @@ and visit_body (index_bv: term) (st: state) (bvs: list (name & bv)) (e: term):
 
   | Tv_Let r bv e1 e2 ->
       let st, e1, bvs, ses = visit_body index_bv st bvs e1 in
-      let st, e2, bvs, ses = visit_body index_bv st bvs e2 in
+      let st, e2, bvs, ses' = visit_body index_bv st bvs e2 in
       let e = pack (Tv_Let r bv e1 e2) in
-      st, e, bvs, ses
+      st, e, bvs, ses @ ses'
 
   | _ ->
       fail ("todo: recursively visit term structurally: " ^ term_to_string e)
@@ -335,11 +336,12 @@ let specialize (names: list term): Tac _ =
   let names = map (fun name ->
     match inspect name with
     | Tv_FVar fv -> inspect_fv fv
-    | _ -> fail "error: arguemnt to specialize is not a top-level name"
+    | _ -> fail "error: argument to specialize is not a top-level name"
   ) names in
   let st = { seen = []; indent = "" } in
   let _, ses = fold_left (fun (st, ses) name ->
     let st, ses' = visit_function st name in
+    print (string_of_int (List.length ses') ^ " declarations generated");
     st, ses @ ses'
   ) (st, []) names in
   exact (quote ses)
