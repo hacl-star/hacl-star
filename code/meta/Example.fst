@@ -96,12 +96,14 @@ fun
 
 *)
 
+let _: squash (inversion I.w) = allow_inversion I.w
+
+#set-options "--max_fuel 0 --max_ifuel 0"
+
 // BUG: this is what the tactic generates (see debug output)
 
-let four_inline_t: #w1639: Interface.w -> Prims.Tot Type0 = fun (#w1640: Interface.w) -> Interface.word w1640
-let four_inline:
-#w1700: Interface.w -> Prims.Tot (four_inline_t #w1700)
-=
+let four_inline_t': #w1639: Interface.w -> Prims.Tot Type0 = fun (#w1640: Interface.w) -> Interface.word w1640
+let four_inline': #w1700: Interface.w -> Prims.Tot (four_inline_t' #w1700) =
 fun (#w1701: Interface.w) ->
   if Prims.op_Equality #Interface.w w1701 (Interface.W32)
   then 4ul
@@ -117,7 +119,6 @@ let u1 = ()
 //
 // Note that the problem is somewhere in the definition of four_inline since
 // commenting out line 172 of the tactic fixes the problem.
-
 %splice[
   //times_four_inline;
   //times_sixteen_inline;
