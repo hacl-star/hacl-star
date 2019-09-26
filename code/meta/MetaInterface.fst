@@ -163,8 +163,13 @@ let rec visit_function (st: state) (f_name: name): Tac (state & list sigelt) =
 
           // The type of ``f`` when it appears as a ``gi`` parameter, i.e. its ``gi_t``.
           let f_typ = lambda_over_index st f_name f_typ in
-          print (st.indent ^ "  Registering " ^ string_of_name f_name ^ " with type " ^
+          let f_typ_name = suffix_name new_name "_t" in
+          let f_typ_typ = mk_tot_arr [ pack_binder index_bv Q_Implicit ] (`Type0) in
+          print (st.indent ^ "  let " ^ string_of_name f_typ_name ^ ": " ^
+            term_to_string f_typ_typ ^ " = " ^
             term_to_string f_typ);
+          let se_t = pack_sigelt (Sg_Let false (pack_fv f_typ_name) [] f_typ_typ f_typ) in
+          let f_typ = pack (Tv_FVar (pack_fv f_typ_name)) in
           let st = { st with seen = (f_name, (f_typ, m, new_args)) :: st.seen } in
 
           // Declaration for the new resulting function. We need to construct
@@ -177,12 +182,12 @@ let rec visit_function (st: state) (f_name: name): Tac (state & list sigelt) =
           in
           let se = pack_sigelt (Sg_Let false (pack_fv new_name) [] new_typ new_body) in
           let se = set_sigelt_quals [ NoExtract; Inline_for_extraction ] se in
-          let _ = print (st.indent ^ "New body for " ^ string_of_name new_name ^ ":\n" ^
-            st.indent ^ term_to_string new_body) in
-          let _ = print (st.indent ^ "New type for " ^ string_of_name new_name ^ ":\n" ^
-            st.indent ^ term_to_string new_typ) in
+          print (st.indent ^ "  let " ^ string_of_name new_name ^ ":\n" ^
+            st.indent ^ term_to_string new_typ ^ "\n" ^
+            st.indent ^ "=\n" ^
+            st.indent ^ term_to_string new_body);
 
-          st, new_sigelts @ [ se ]
+          st, new_sigelts @ [ se_t; se ]
 
       | _ ->
           if has_attr f (`MetaAttribute.specialize) then
