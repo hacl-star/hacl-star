@@ -766,7 +766,7 @@
         "fuel_guarded_inversion_Lib.IntTypes.secrecy_level"
       ],
       0,
-      "caa4391eccd981923e7fba1d5101ca81"
+      "50d3fef33c5c7a11c3245f2f1aa28355"
     ],
     [
       "Lib.ByteBuffer.nat_from_bytes_le_to_n",
@@ -823,7 +823,7 @@
         "typing_tok_Lib.IntTypes.U8@tok", "well-founded-ordering-on-nat"
       ],
       0,
-      "ec83ba0d40d64487cff32ee5937732d4"
+      "8d2b0ad6b37565493181c0c69544f086"
     ],
     [
       "Lib.ByteBuffer.nat_from_bytes_be_to_n",
@@ -853,7 +853,7 @@
         "fuel_guarded_inversion_Lib.IntTypes.secrecy_level"
       ],
       0,
-      "20a939baa4c744402320eb3f644188f0"
+      "13475e430ec5062f3848c12080cff231"
     ],
     [
       "Lib.ByteBuffer.nat_from_bytes_be_to_n",
@@ -910,7 +910,7 @@
         "typing_tok_Lib.IntTypes.U8@tok", "well-founded-ordering-on-nat"
       ],
       0,
-      "cff9f6eccb0b61eab2ac2aeae4a8cedc"
+      "a2286e1ebf7cee6d9524e654310693ca"
     ],
     [
       "Lib.ByteBuffer.uint_from_bytes_le",
@@ -1110,7 +1110,7 @@
         "typing_tok_Lib.IntTypes.U64@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "dc36c4fda7579abe3036a93937921a78"
+      "44e79af38a30dfce572045103421779d"
     ],
     [
       "Lib.ByteBuffer.uint_from_bytes_be",
@@ -1188,6 +1188,7 @@
       1,
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_FStar.Kremlin.Endianness.be_to_n.fuel_instrumented",
         "@fuel_correspondence_Lib.ByteSequence.nat_from_intseq_be_.fuel_instrumented",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented",
         "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
@@ -1243,6 +1244,7 @@
         "equation_LowStar.Buffer.trivial_preorder",
         "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.nat",
         "equation_Prims.pos",
+        "equation_with_fuel_FStar.Kremlin.Endianness.be_to_n.fuel_instrumented",
         "equation_with_fuel_Lib.ByteSequence.nat_from_intseq_be_.fuel_instrumented",
         "equation_with_fuel_Prims.pow2.fuel_instrumented",
         "fuel_guarded_inversion_Lib.IntTypes.inttype",
@@ -1373,7 +1375,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "d075a059021581dd80db1371c0030870"
+      "547e8606a6bad1363d4e7af99cbf7bfa"
     ],
     [
       "Lib.ByteBuffer.nat_to_bytes_n_to_le",
@@ -1466,7 +1468,7 @@
         "typing_tok_Lib.IntTypes.U8@tok", "well-founded-ordering-on-nat"
       ],
       0,
-      "a6fe7320938d282c072377bffa1dab31"
+      "38715835c9f7b8ea2d0f7a75b3c89e05"
     ],
     [
       "Lib.ByteBuffer.nat_to_bytes_n_to_be",
@@ -1528,7 +1530,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "8385759ee4b891f5c18d2e06f42801c2"
+      "2dfd17269af194bf3b46e2c81db3d522"
     ],
     [
       "Lib.ByteBuffer.nat_to_bytes_n_to_be",
@@ -1623,7 +1625,7 @@
         "typing_tok_Lib.IntTypes.U8@tok", "well-founded-ordering-on-nat"
       ],
       0,
-      "eb005494df9e0ed8f92a46cd70f49163"
+      "d4bd77611321aa697d1d3828b6cd8701"
     ],
     [
       "Lib.ByteBuffer.uint_to_bytes_le",
