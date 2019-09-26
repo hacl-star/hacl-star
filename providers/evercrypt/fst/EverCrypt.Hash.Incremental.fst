@@ -118,7 +118,8 @@ let split_at_last_empty (a: Hash.alg): Lemma
 =
   ()
 
-#push-options "--z3rlimit 20"
+#restart-solver
+#push-options "--z3rlimit 40"
 let create_in a r =
   (**) let h0 = ST.get () in
 
@@ -148,10 +149,19 @@ let create_in a r =
   (**) split_at_last_empty a;
   (**) B.modifies_only_not_unused_in B.loc_none h0 h4;
 
+  (**) let h5 = ST.get () in
+  (**) assert (invariant h5 p /\
+  (**)   hashed h5 p == S.empty /\
+  (**)   B.(modifies loc_none h0 h5) /\
+  (**)   B.fresh_loc (footprint h5 p) h0 h5 /\
+  (**)   B.(loc_includes (loc_region_only true r) (footprint h5 p)) /\
+  (**)   freeable h5 p);
+
   p
 #pop-options
 
 #push-options "--z3refresh"
+#restart-solver
 let init a s =
   let open LowStar.BufferOps in
   let h1 = ST.get () in

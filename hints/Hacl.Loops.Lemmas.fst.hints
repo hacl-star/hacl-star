@@ -1,5 +1,5 @@
 [
-  "^\\%/6\u007f¬«Ý×y˜R»£Ú",
+  "l\t°GúYê­—Ü?E\"÷°)",
   [
     [
       "Hacl.Loops.Lemmas.repeati_extensionality",
@@ -1036,6 +1036,15 @@
       "7d728ecfe6bfb11eec3b83f3b4b27b96"
     ],
     [
+      "Hacl.Loops.Lemmas.swap_mul",
+      1,
+      0,
+      0,
+      [ "@query" ],
+      0,
+      "d42f33c1b82ab37c6ca8eae3fd752715"
+    ],
+    [
       "Hacl.Loops.Lemmas.lemma_aux1",
       1,
       0,
@@ -1056,7 +1065,23 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "6b23ad8c6f166fb8fe632b5dcd6c04d7"
+      "b096eaa9f43fb6c6a03db115cf83e3b8"
+    ],
+    [
+      "Hacl.Loops.Lemmas.lemma_aux1",
+      2,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "int_inversion", "int_typing", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Division", "primitive_Prims.op_Modulus",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
+      0,
+      "d1a00b70831cf057fadea1449371ab6b"
     ],
     [
       "Hacl.Loops.Lemmas.lemma_repeat_blocks_multi_vec",
@@ -1104,7 +1129,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "02b343b8cb5ecf124d9e1764a1ae1925"
+      "6a4e810cb1e5c726c3004ca5b0ef3592"
     ],
     [
       "Hacl.Loops.Lemmas.lemma_repeat_blocks_multi_vec",
@@ -1130,7 +1155,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "dd0500537b5bf2afdc77a45263ce4960"
+      "321a96694fc0b2c46716ee8bfc51b4d4"
     ],
     [
       "Hacl.Loops.Lemmas.lemma_repeat_blocks_multi_vec",
@@ -1174,7 +1199,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "b41e7aa515a6db815f70a7a7d9c8614a"
+      "2f25bc4dd3d5f221dab995844457824e"
     ]
   ]
 ]

@@ -350,7 +350,7 @@ let specialize (names: list term): Tac _ =
 // - do not re-check leaves of the call-graph (just return the Tm_FVar for the body)
 // - quote and splice the internal state of the tactic as `tactic_state`; this way:
 //   - a new tactic instantiate can re-load the state, then
-//   - instantiate each one of the specialize node, and
+//   - instantiate each one of the specialize nodes, and
 //   - mark as private those that were not arguments to the tactic initially
 // - figure out the bug in Example (might pop up later, 0b1611a5f03d9f91359eae54403da42957cfeb67)
 // - figure out the issue with type annotations sending F* off the rails

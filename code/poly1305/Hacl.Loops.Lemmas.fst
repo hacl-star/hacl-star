@@ -382,10 +382,17 @@ let lemma_repeat_blocks_multi_load_acc #a #b #b_vec w size_block inp f normalize
   assert (normalize_n acc1 == repeat_blocks_multi #a #b size_block t0 f acc0)
 
 
-#reset-options "--z3refresh --z3rlimit 100 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3refresh --z3rlimit 100 --max_fuel 0 --max_ifuel 0 --z3seed 1 \
+  --using_facts_from '+FStar.Math.Lemmas +Prims' --smtencoding.elim_box true \
+  --smtencoding.nl_arith_repr wrapped --smtencoding.l_arith_repr native"
 
+let swap_mul a b c: Lemma (a / b * c == c * (a / b)) =
+  FStar.Math.Lemmas.swap_mul (a / b) c
+
+#restart-solver
 let lemma_aux1 w size_block len =
   let sb = w * size_block in
+  assert (sb > 0);
   let len1 = len - w * size_block in
   FStar.Math.Lemmas.modulo_addition_lemma len sb (- 1);
   assert (len % sb == len1 % sb);
@@ -398,12 +405,12 @@ let lemma_aux1 w size_block len =
     ((len1 / sb * w) * size_block) / size_block;
     (==) { FStar.Math.Lemmas.multiple_division_lemma (len1 / sb * w) size_block }
     len1 / sb * w;
-    (==) { FStar.Math.Lemmas.swap_mul (len1 / sb) w}
+    (==) { swap_mul len1 sb w }
     w * (len1 / sb);
   };
   assert (len1 / size_block == w * (len1 / sb))
 
-#set-options "--z3rlimit 300"
+#reset-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 0"
 
 let lemma_repeat_blocks_multi_vec #a #b #b_vec w size_block inp f f_vec normalize_n load_acc acc0 =
   let len = length inp in
