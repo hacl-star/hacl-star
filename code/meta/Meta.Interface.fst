@@ -128,7 +128,7 @@ let rec visit_function (st: state) (f_name: name): Tac (state & list sigelt) =
           // Build a new function with proper parameters
           let old_indent = st.indent in
           let st = { st with indent = st.indent ^ "  " } in
-          let new_name = suffix_name f_name "_inline" in
+          let new_name = suffix_name f_name "_higher" in
 
           // The function must be of the form fun (x: index) -> ...
           // We recognize and distinguish this index.
@@ -150,9 +150,15 @@ let rec visit_function (st: state) (f_name: name): Tac (state & list sigelt) =
           let st = { st with indent = old_indent } in
           // new_body is: fun (g1: g1_t i) ... (gn: gn_t i) x -> (e: f_t i)
           // i is free
-          let new_body = fold_right (fun (_, bv) acc ->
-              pack (Tv_Abs (mk_binder bv) acc)
-            ) new_args new_body
+          let new_body =
+            if List.length new_args = 0 then
+              // Small optimization: if this is a leaf of the call-graph, just
+              // call the original function.
+              pack (Tv_App (pack (Tv_FVar (pack_fv f_name))) (pack (Tv_Var index_bv), Q_Implicit))
+            else
+              fold_right (fun (_, bv) acc ->
+                pack (Tv_Abs (mk_binder bv) acc)
+              ) new_args new_body
           in
           let new_args, new_bvs = List.Tot.split new_args in
 
@@ -347,7 +353,6 @@ let specialize (names: list term): Tac _ =
   exact (quote ses)
 
 // TODO:
-// - do not re-check leaves of the call-graph (just return the Tm_FVar for the body)
 // - quote and splice the internal state of the tactic as `tactic_state`; this way:
 //   - a new tactic instantiate can re-load the state, then
 //   - instantiate each one of the specialize nodes, and

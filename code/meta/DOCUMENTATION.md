@@ -193,7 +193,7 @@ let double_round32 = double_round #1
 
 However, attempting to specialize `core` will result in the following:
 
-```
+```fstar
 // Chacha20.fst
 let core32 = core #1
 
