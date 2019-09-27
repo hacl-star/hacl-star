@@ -554,6 +554,10 @@ void showbuf(const uint8_t *buf, size_t len)
 #undef HAVE_JC
 #endif
 
+static uint32_t
+Hacl_Impl_Chacha20_chacha20_constants[4U] =
+  { (uint32_t)0x61707865U, (uint32_t)0x3320646eU, (uint32_t)0x79622d32U, (uint32_t)0x6b206574U };
+
 #ifdef HAVE_JC
 template<size_t key_size_bits, size_t tag_len>
 class JCChacha20Poly1305EncryptBM : public AEADBenchmark
