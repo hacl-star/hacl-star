@@ -1,4 +1,4 @@
-module Hacl.Blake2b
+module Hacl.Blake2
 
 open FStar.Mul
 open FStar.HyperStack
@@ -8,7 +8,7 @@ open Lib.IntTypes
 open Lib.Buffer
 
 module Spec = Spec.Blake2
-module Impl = Hacl.Impl.Blake2b
+module Impl = Hacl.Impl.Blake2
 
 
 let hash_wp = lbuffer uint64 (size 8)
@@ -27,21 +27,22 @@ val blake2b_init:
     (ensures  (fun h0 _ h1 -> modifies1 hash h0 h1
                          /\ h1.[|hash|] == Spec.Blake2.blake2_init Spec.Blake2B (v kk) h0.[|k|] (v nn)))
 
-let blake2b_init hash kk k nn = Impl.blake2b_init hash kk k nn
+let blake2b_init hash kk k nn = Impl.blake2_init Spec.Blake2B hash kk k nn
 
 
 val blake2b_update_block:
     hash:hash_wp
-  -> prev:uint128{uint_v prev <= Spec.max_limb Spec.Blake2B}
+  -> flag:bool
+  -> totlen:uint128{uint_v totlen <= Spec.max_limb Spec.Blake2B}
   -> d:block_p ->
   Stack unit
     (requires (fun h -> live h hash
                    /\ live h d
                    /\ disjoint hash d))
     (ensures  (fun h0 _ h1 -> modifies1 hash h0 h1
-                         /\ h1.[|hash|] == Spec.blake2_update_block Spec.Blake2B (uint_v prev) h0.[|d|] h0.[|hash|]))
+                         /\ h1.[|hash|] == Spec.blake2_update_block Spec.Blake2B flag (v totlen) h0.[|d|] h0.[|hash|]))
 
-let blake2b_update_block hash prev d = Impl.blake2b_update_block hash prev d
+let blake2b_update_block hash flag totlen d = Impl.blake2_update_block Spec.Blake2B hash flag totlen d
 
 
 val blake2b_update_last:
@@ -56,7 +57,7 @@ val blake2b_update_last:
     (ensures  (fun h0 _ h1 -> modifies1 hash h0 h1
                          /\ h1.[|hash|] == Spec.Blake2.blake2_update_last Spec.Blake2B (uint_v prev) (v len) h0.[|last|] h0.[|hash|]))
 
-let blake2b_update_last hash prev len last = Impl.blake2b_update_last hash prev len last
+let blake2b_update_last hash prev len last = Impl.blake2_update_last Spec.Blake2B hash prev len last
 
 
 val blake2b_finish:
@@ -71,7 +72,7 @@ val blake2b_finish:
     (ensures  (fun h0 _ h1 -> modifies1 output h0 h1
                          /\ h1.[|output|] == Spec.Blake2.blake2_finish Spec.Blake2B h0.[|hash|] (v nn)))
 
-let blake2b_finish output hash nn = Impl.blake2b_finish output hash nn
+let blake2b_finish output hash nn = Impl.blake2_finish Spec.Blake2B output hash nn
 
 
 val blake2b:
@@ -90,4 +91,4 @@ val blake2b:
     (ensures  (fun h0 _ h1 -> modifies (loc output) h0 h1
                          /\ h1.[|output|] == Spec.Blake2.blake2b h0.[|d|] (v kk) h0.[|k|] (v nn)))
 
-let blake2b nn output ll d kk k = Impl.blake2b nn output ll d kk k
+let blake2b nn output ll d kk k = Impl.blake2 Spec.Blake2B nn output ll d kk k
