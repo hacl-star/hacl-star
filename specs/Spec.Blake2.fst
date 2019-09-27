@@ -33,6 +33,7 @@ inline_for_extraction let size_word (a:alg) : size_nat = numbytes (wt a)
 inline_for_extraction let size_block (a:alg) : size_nat = size_block_w * (size_word a)
 inline_for_extraction let size_const_iv : size_nat = 8
 inline_for_extraction let size_const_sigma : size_nat = 160
+
 inline_for_extraction let max_key (a:alg) =
   match a with
   | Blake2S -> 32
@@ -177,12 +178,14 @@ type block_s (a:alg) = lseq uint8 (size_block a)
 type hash_ws (a:alg) = lseq (word_t a) size_hash_w
 type idx_t = n:size_nat{n < 16}
 
+
 (* Functions *)
 let g1 (a:alg) (wv:vector_ws a) (i:idx_t) (j:idx_t) (r:rotval (wt a)) : Tot (vector_ws a) =
   wv.[i] <- (wv.[i] ^. wv.[j]) >>>. r
 
 let g2 (a:alg) (wv:vector_ws a) (i:idx_t) (j:idx_t) (x:word_t a) : Tot (vector_ws a) =
   wv.[i] <- (wv.[i] +. wv.[j] +. x)
+
 
 val blake2_mixing:
     a:alg
@@ -207,6 +210,7 @@ let blake2_mixing al wv a b c d x y =
   let wv = g1 al wv b c rt.[3] in
   wv
 
+
 val blake2_round1:
     a:alg
   -> wv:vector_ws a
@@ -229,6 +233,7 @@ let blake2_round1 a wv m i =
   let wv = blake2_mixing a wv 2 6 10 14 (m.[s4]) (m.[s5]) in
   let wv = blake2_mixing a wv 3 7 11 15 (m.[s6]) (m.[s7]) in
   wv
+
 
 val blake2_round2:
     a:alg
@@ -341,15 +346,31 @@ let blake2_compress a s m offset flag =
 
 val blake2_update_block:
     a:alg
-  -> prev:nat{prev <= max_limb a}
+  -> flag:bool
+  -> totlen:nat{totlen <= max_limb a}
   -> d:block_s a
   -> s:hash_ws a ->
   Tot (hash_ws a)
 
-let blake2_update_block a prev d s =
+let blake2_update_block a flag totlen d s =
   let to_compress : lseq (word_t a) 16 = uints_from_bytes_le #(wt a) #SEC d in
-  let offset = nat_to_limb a prev in
-  blake2_compress a s to_compress offset false
+  let offset = nat_to_limb a totlen in
+  blake2_compress a s to_compress offset flag
+
+
+val blake2_update_block_multi:
+    a:alg
+  -> prev:nat
+  -> n:nat
+  -> blocks:bytes{n * size_block a == length blocks /\ prev + n * size_block a <= max_limb a /\ length blocks <= max_size_t}
+  -> s:hash_ws a ->
+  Tot (hash_ws a)
+
+let blake2_update_block_multi a prev n blocks s =
+  repeati n (fun i si ->
+    let block = sub #uint8 #(length blocks) blocks (i * size_block a) (size_block a) in
+    blake2_update_block a false (prev + (i + 1) * size_block a) block si
+  ) s
 
 
 val blake2_init_hash:
@@ -364,6 +385,7 @@ let blake2_init_hash a kk nn =
   let s0' = s0 ^. (nat_to_word a 0x01010000) ^. ((nat_to_word a kk) <<. (size 8)) ^. (nat_to_word a nn) in
   s.[0] <- s0'
 
+
 val blake2_init:
     a:alg
   -> kk:size_nat{kk <= max_key a}
@@ -377,13 +399,13 @@ let blake2_init a kk k nn =
   if kk = 0 then s
   else begin
     let key_block = update_sub key_block 0 kk k in
-    blake2_update_block a (size_block a) key_block s end
+    blake2_update_block a false (size_block a) key_block s end
 
 
 val blake2_update_last:
     a:alg
-  -> prev:nat{prev <= max_limb a}
-  -> len:size_nat{len <= size_block a}
+  -> prev:nat
+  -> len:size_nat{len <= size_block a /\ prev + len <= max_limb a}
   -> last:lbytes len
   -> s:hash_ws a ->
   Tot (hash_ws a)
@@ -391,38 +413,8 @@ val blake2_update_last:
 let blake2_update_last a prev len last s =
   let last_block = create (size_block a) (u8 0) in
   let last_block = update_sub last_block 0 len last in
-  let last_uints = uints_from_bytes_le last_block in
-  blake2_compress a s last_uints (nat_to_limb a prev) true
+  blake2_update_block a true (prev + len) last_block s
 
-
-val blake2_update:
-    a:alg
-  -> s:hash_ws a
-  -> d:bytes
-  -> kk:size_nat{kk <= max_key a /\ (if kk = 0 then length d <= max_limb a else length d + (size_block a) <= max_limb a)} ->
-  Tot (hash_ws a)
-
-let spec_update_block
-    (a:alg)
-    (init:nat)
-    (i:nat{init + (i * size_block a) <= max_limb a}) =
-    blake2_update_block a (init + (i * size_block a))
-
-let spec_update_last
-    (a:alg)
-    (len:nat{len <= max_limb a})
-    (i:nat) =
-    blake2_update_last a len
-
-
-// BB. This naming is just bad. Change it !
-let blake2_update a s d kk =
-  let ll = length d in
-  let klen = if kk = 0 then 0 else 1 in
-  repeati_blocks (size_block a) d
-    (spec_update_block a ((klen + 1) * size_block a))
-    (spec_update_last a (klen * (size_block a) + ll))
-    s
 
 val blake2_finish:
     a:alg
@@ -437,20 +429,29 @@ let blake2_finish a s nn =
 
 val blake2:
     a:alg
-  -> d:bytes
+  -> d:bytes{length d + size_block a <= max_size_t}
   -> kk:size_nat{kk <= max_key a /\ (if kk = 0 then length d <= max_limb a else length d + (size_block a) <= max_limb a)}
   -> k:lbytes kk
   -> nn:size_nat{1 <= nn /\ nn <= max_output a} ->
   Tot (lbytes nn)
 
 let blake2 a d kk k nn =
-  let s = blake2_init a kk k nn in
-  let s = blake2_update a s d kk in
+  let ll = length d in
+  let n = ll / size_block a in
+  let rem = ll % size_block a in
+  let n,rem = if n <> 0 && rem = 0 then n - 1, size_block a else n, rem in
+  let flag = if rem = 0 then true else false in
+  let blocks = sub #uint8 #(length d) d 0 (n * size_block a) in
+  let last = sub #uint8 #(length d) d (n * size_block a) rem in
+  let kn = if kk = 0 then 0 else 1 in
+  let s: hash_ws a = blake2_init a kk k nn in
+  let s: hash_ws a = blake2_update_block_multi a (kn * size_block a) n blocks s in
+  let s: hash_ws a = blake2_update_last a ((kn + n) * size_block a) rem last s in
   blake2_finish a s nn
 
 
 val blake2s:
-    d:bytes
+    d:bytes{length d + size_block Blake2S <= max_size_t}
   -> kk:size_nat{kk <= 32 /\ (if kk = 0 then length d < pow2 64 else length d + 64 < pow2 64)}
   -> k:lbytes kk
   -> nn:size_nat{1 <= nn /\ nn <= 32} ->
@@ -460,10 +461,41 @@ let blake2s d kk k n = blake2 Blake2S d kk k n
 
 
 val blake2b:
-    d:bytes
+    d:bytes{length d + size_block Blake2B <= max_size_t}
   -> kk:size_nat{kk <= 64 /\ (if kk = 0 then length d < pow2 128 else length d + 128  < pow2 128)}
   -> k:lbytes kk
   -> nn:size_nat{1 <= nn /\ nn <= 64} ->
   Tot (lbytes nn)
 
 let blake2b d kk k n = blake2 Blake2B d kk k n
+
+
+(* let spec_update_block *)
+(*     (a:alg) *)
+(*     (flag:bool) *)
+(*     (init:nat) *)
+(*     (i:nat{init + (i * size_block a) <= max_limb a}) = *)
+(*     blake2_update_block a flag (init + (i * size_block a)) *)
+
+(* let spec_update_last *)
+(*     (a:alg) *)
+(*     (len:nat{len <= max_limb a}) *)
+(*     (i:nat) = *)
+(*     blake2_update_last a len *)
+
+(* val blake2_update: *)
+(*     a:alg *)
+(*   -> s:hash_ws a *)
+(*   -> d:bytes *)
+(*   -> kk:size_nat{kk <= max_key a /\ (if kk = 0 then length d <= max_limb a else length d + (size_block a) <= max_limb a)} -> *)
+(*   Tot (hash_ws a) *)
+
+(* // BB. This naming is just bad. Change it ! *)
+(* let blake2_update a s d kk = *)
+(*   let ll = length d in *)
+(*   let klen = if kk = 0 then 0 else 1 in *)
+(*   let flag = length d % size_block a = 0 in *)
+(*   repeati_blocks (size_block a) d *)
+(*     (spec_update_block a flag ((klen + 1) * size_block a)) *)
+(*     (spec_update_last a (klen * (size_block a) + ll)) *)
+(*     s *)
