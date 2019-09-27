@@ -14,7 +14,7 @@ type alg =
   | Blake2B
 
 inline_for_extraction
-unfold let wt (a:alg) =
+let wt (a:alg) : t:inttype{unsigned t} =
   match a with
   | Blake2S -> U32
   | Blake2B -> U64
@@ -31,8 +31,8 @@ inline_for_extraction let size_hash_w : size_nat = 8
 inline_for_extraction let size_block_w : size_nat = 16
 inline_for_extraction let size_word (a:alg) : size_nat = numbytes (wt a)
 inline_for_extraction let size_block (a:alg) : size_nat = size_block_w * (size_word a)
-inline_for_extraction let size_const_iv : size_nat = 8
-inline_for_extraction let size_const_sigma : size_nat = 160
+inline_for_extraction let size_ivTable : size_nat = 8
+inline_for_extraction let size_sigmaTable : size_nat = 160
 
 inline_for_extraction let max_key (a:alg) =
   match a with
@@ -106,7 +106,7 @@ let rTable (a:alg) : rtable_t a =
 
 [@"opaque_to_smt"]
 inline_for_extraction
-let list_iv_S: l:List.Tot.llist size_t 8 =
+let list_iv_S: l:List.Tot.llist (uint_t U32 PUB) 8 =
   [@inline_let]
   let l = [
     0x6A09E667ul; 0xBB67AE85ul; 0x3C6EF372ul; 0xA54FF53Aul;
@@ -125,6 +125,13 @@ let list_iv_B: List.Tot.llist (uint_t U64 PUB) 8 =
     0x1F83D9ABFB41BD6BuL; 0x5BE0CD19137E2179uL] in
   assert_norm(List.Tot.length l == 8);
   l
+
+[@"opaque_to_smt"]
+inline_for_extraction
+let list_iv (a:alg): List.Tot.llist (pub_word_t a) 8 =
+  match a with
+  | Blake2S -> list_iv_S
+  | Blake2B -> list_iv_B
 
 inline_for_extraction
 let ivTable (a:alg) : lseq (pub_word_t a) 8 =
@@ -166,8 +173,8 @@ let list_sigma: list_sigma_t =
   l
 
 inline_for_extraction
-let const_sigma:lseq sigma_elt_t size_const_sigma =
-  assert_norm (List.Tot.length list_sigma == size_const_sigma);
+let sigmaTable:lseq sigma_elt_t size_sigmaTable =
+  assert_norm (List.Tot.length list_sigma == size_sigmaTable);
   of_list list_sigma
 
 
@@ -220,14 +227,14 @@ val blake2_round1:
 
 let blake2_round1 a wv m i =
   let start = ((i % 10) * 16) in
-  let s0 = size_v const_sigma.[start + 0] in
-  let s1 = size_v const_sigma.[start + 1] in
-  let s2 = size_v const_sigma.[start + 2] in
-  let s3 = size_v const_sigma.[start + 3] in
-  let s4 = size_v const_sigma.[start + 4] in
-  let s5 = size_v const_sigma.[start + 5] in
-  let s6 = size_v const_sigma.[start + 6] in
-  let s7 = size_v const_sigma.[start + 7] in
+  let s0 = size_v sigmaTable.[start + 0] in
+  let s1 = size_v sigmaTable.[start + 1] in
+  let s2 = size_v sigmaTable.[start + 2] in
+  let s3 = size_v sigmaTable.[start + 3] in
+  let s4 = size_v sigmaTable.[start + 4] in
+  let s5 = size_v sigmaTable.[start + 5] in
+  let s6 = size_v sigmaTable.[start + 6] in
+  let s7 = size_v sigmaTable.[start + 7] in
   let wv = blake2_mixing a wv 0 4  8 12 (m.[s0]) (m.[s1]) in
   let wv = blake2_mixing a wv 1 5  9 13 (m.[s2]) (m.[s3]) in
   let wv = blake2_mixing a wv 2 6 10 14 (m.[s4]) (m.[s5]) in
@@ -244,14 +251,14 @@ val blake2_round2:
 
 let blake2_round2 a wv m i =
   let start = ((i % 10) * 16) in
-  let s8 = size_v const_sigma.[start + 8] in
-  let s9 = size_v const_sigma.[start + 9] in
-  let s10 = size_v const_sigma.[start + 10] in
-  let s11 = size_v const_sigma.[start + 11] in
-  let s12 = size_v const_sigma.[start + 12] in
-  let s13 = size_v const_sigma.[start + 13] in
-  let s14 = size_v const_sigma.[start + 14] in
-  let s15 = size_v const_sigma.[start + 15] in
+  let s8 = size_v sigmaTable.[start + 8] in
+  let s9 = size_v sigmaTable.[start + 9] in
+  let s10 = size_v sigmaTable.[start + 10] in
+  let s11 = size_v sigmaTable.[start + 11] in
+  let s12 = size_v sigmaTable.[start + 12] in
+  let s13 = size_v sigmaTable.[start + 13] in
+  let s14 = size_v sigmaTable.[start + 14] in
+  let s15 = size_v sigmaTable.[start + 15] in
   let wv = blake2_mixing a wv 0 5 10 15 (m.[s8]) (m.[s9]) in
   let wv = blake2_mixing a wv 1 6 11 12 (m.[s10]) (m.[s11]) in
   let wv = blake2_mixing a wv 2 7  8 13 (m.[s12]) (m.[s13]) in
@@ -362,13 +369,13 @@ val blake2_update_block_multi:
     a:alg
   -> prev:nat
   -> n:nat
-  -> blocks:bytes{n * size_block a == length blocks /\ prev + n * size_block a <= max_limb a /\ length blocks <= max_size_t}
+  -> blocks:bytes{n * size_block a == length blocks /\ prev + n * size_block a <= max_limb a}
   -> s:hash_ws a ->
   Tot (hash_ws a)
 
 let blake2_update_block_multi a prev n blocks s =
   repeati n (fun i si ->
-    let block = sub #uint8 #(length blocks) blocks (i * size_block a) (size_block a) in
+    let block = Seq.slice blocks (i * size_block a) ((i + 1) * (size_block a)) in
     blake2_update_block a false (prev + (i + 1) * size_block a) block si
   ) s
 
@@ -429,20 +436,20 @@ let blake2_finish a s nn =
 
 val blake2:
     a:alg
-  -> d:bytes{length d + size_block a <= max_size_t}
+  -> d:bytes
   -> kk:size_nat{kk <= max_key a /\ (if kk = 0 then length d <= max_limb a else length d + (size_block a) <= max_limb a)}
   -> k:lbytes kk
   -> nn:size_nat{1 <= nn /\ nn <= max_output a} ->
   Tot (lbytes nn)
 
 let blake2 a d kk k nn =
-  let ll = length d in
+  let ll = Seq.length d in
   let n = ll / size_block a in
   let rem = ll % size_block a in
   let n,rem = if n <> 0 && rem = 0 then n - 1, size_block a else n, rem in
   let flag = if rem = 0 then true else false in
-  let blocks = sub #uint8 #(length d) d 0 (n * size_block a) in
-  let last = sub #uint8 #(length d) d (n * size_block a) rem in
+  let blocks = Seq.slice #uint8 d 0 (n * size_block a) in
+  let last = Seq.slice #uint8 d (n * size_block a) ll in
   let kn = if kk = 0 then 0 else 1 in
   let s: hash_ws a = blake2_init a kk k nn in
   let s: hash_ws a = blake2_update_block_multi a (kn * size_block a) n blocks s in
@@ -451,7 +458,7 @@ let blake2 a d kk k nn =
 
 
 val blake2s:
-    d:bytes{length d + size_block Blake2S <= max_size_t}
+    d:bytes
   -> kk:size_nat{kk <= 32 /\ (if kk = 0 then length d < pow2 64 else length d + 64 < pow2 64)}
   -> k:lbytes kk
   -> nn:size_nat{1 <= nn /\ nn <= 32} ->
@@ -461,7 +468,7 @@ let blake2s d kk k n = blake2 Blake2S d kk k n
 
 
 val blake2b:
-    d:bytes{length d + size_block Blake2B <= max_size_t}
+    d:bytes
   -> kk:size_nat{kk <= 64 /\ (if kk = 0 then length d < pow2 128 else length d + 128  < pow2 128)}
   -> k:lbytes kk
   -> nn:size_nat{1 <= nn /\ nn <= 64} ->
