@@ -2428,6 +2428,11 @@ let lemma_decomp_mask_encrypt (flag x:byte) (fmask:lbytes 1) (cid npn c pnmask:b
 /// HHEEERRREEE
 
 
+let lemma_xor_inplace_byte (a b:byte) : Lemma
+  (S.equal (xor_inplace (S.create 1 a) (S.create 1 b) 0) (S.create 1 (a `U8.logxor` b))) =
+  ()
+
+
 let lemma_header_encrypt_dec a k h (npn:lbytes 2) (c:cbytes) : Lemma
   (requires Short? h /\ S.length (Short?.cid h) = 4)
   (ensures (
@@ -2438,11 +2443,37 @@ let lemma_header_encrypt_dec a k h (npn:lbytes 2) (c:cbytes) : Lemma
     let sample = slice c 2 18 in
     let mask = C16.block (calg_of_ae a) k sample in
     let pnmask = and_inplace (slice mask 1 5) (pn_sizemask 1) 0 in
-    let flag' = create 1 U8.(flag `logxor` (index pnmask 0 `logand` 0x1fuy)) in
+    let flag' = create 1 U8.(flag `logxor` (index mask 0 `logand` 0x1fuy)) in
     let npn' = xor_inplace npn (slice pnmask 0 2) 0 in
     let c' = xor_inplace c (slice pnmask 2 (length pnmask)) 0 in
     equal (header_encrypt a k h npn c) (flag' @| Short?.cid h @| npn' @| c'))) =
-  admit()
+  let open S in
+
+  // computing format_header
+  let l = [true; false; Short?.phase h; false; false; Short?.spin h; true; false] in
+  assert_norm(List.Tot.length l = 8);
+  let flag = of_bitfield8 l in
+  let fh = create 1 flag @| Short?.cid h @| npn @| c in
+  assert (equal fh (format_header h npn @| c));
+
+  // computing packet
+  let sample = S.slice c 2 18 in
+  let mask = C16.block (calg_of_ae a) k sample in
+  let pnmask = and_inplace (S.slice mask 1 5) (pn_sizemask 1) 0 in
+  let fmask = U8.(S.index mask 0 `logand` 0x1fuy) in
+  let r = xor_inplace fh pnmask 5 in
+  let packet = xor_inplace r (create 1 fmask) 0 in
+  assert (packet = header_encrypt a k h npn c);
+
+  // decomposing packet
+  pointwise_op_suff U8.logxor (create 1 flag) (Short?.cid h @| npn @| c) pnmask 5;
+  pointwise_op_suff U8.logxor (Short?.cid h) (npn @| c) pnmask 4;
+  pointwise_op_dec U8.logxor npn c pnmask 0;
+  let npn' = xor_inplace npn (slice pnmask 0 2) 0 in
+  let c' = xor_inplace c (slice pnmask 2 (length pnmask)) 0 in
+  pointwise_op_pref U8.logxor (create 1 flag) (Short?.cid h @| npn' @| c') (create 1 fmask) 0;
+  lemma_xor_inplace_byte flag fmask
+
 
 
 let lemma_header_encrypt_insert_malleable a k (spin phase:bool) (cid:lbytes 4) (npn:lbytes 1) (x y:byte) (c:cbytes) : Lemma
