@@ -1,6 +1,6 @@
 module Hacl.Meta.Chacha20.Vec
 
-#set-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 250 --max_fuel 0 --max_ifuel 0"
 
 // Somehow miraculously, this works.
 %splice[
