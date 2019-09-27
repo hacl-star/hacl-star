@@ -789,4 +789,5 @@ let free a s =
   let open LowStar.BufferOps in
   let State hash_state buf _ _ = !*s in
   Hash.free #a hash_state;
-  B.free buf
+  B.free buf;
+  B.free s
