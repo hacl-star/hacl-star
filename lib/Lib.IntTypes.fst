@@ -2,7 +2,7 @@ module Lib.IntTypes
 
 open FStar.Math.Lemmas
 
-#push-options "--max_fuel 0 --max_ifuel 1 --z3rlimit 50"
+#push-options "--max_fuel 0 --max_ifuel 1 --z3rlimit 100"
 
 let pow2_2 _   = assert_norm (pow2 2 = 4)
 let pow2_3 _   = assert_norm (pow2 3 = 8)
