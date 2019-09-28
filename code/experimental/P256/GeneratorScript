@@ -1,0 +1,158 @@
+prime = 2 ** 256 - 2 ** 224 + 2 ** 192 + 2 ** 96 - 1
+
+def to_felem(a0, a1, a2, a3):
+    a = a0 + a1 * (2 ** 64) + a2 * (2 ** 128) + a3 * (2 ** 192)
+    return a
+
+def from_felem(coordinate):
+    l = []
+    for i in range(4):
+        v = (coordinate >> (i * 64)) % (2 ** 64)
+        l.append(v)
+    return l
+
+def from_felemL(a, b, c):
+    from_felem(a)
+    from_felem(b)
+    from_felem(c)
+
+def generateK(k, counter):
+    keyInt = int(k)
+    import math
+    bytes = int(math.log2(keyInt)//8) + 1
+    stringToPrint = " uint8_t * scalar" + str(counter) + " = (uint8_t *) malloc (sizeof (uint8_t) * " + str(bytes) + "); \n";
+    stringResult = stringToPrint
+    for i in range(bytes):
+        keyPart = (keyInt >> (i * 8)) % 256
+        string1ToPrint = "  scalar" + str(counter)  + "[" + str(i)+ "] = " + str(keyPart) +  "; \n"
+        stringResult = stringResult + string1ToPrint
+    return stringResult + "\n\n", bytes
+
+def generateX(k, counter):
+    stringToPrint0 = "  uint64_t * expectedPoint" +\
+                     " = (uint64_t *) malloc (sizeof (uint64_t) * 12); \n"
+    stringResult = stringToPrint0
+    value = int(k, base=16)
+    r = from_felem(value)
+    for i in range(len(r)):
+        stringToPrint = "  expectedPoint" \
+                        "[" + str(i) + "] = " +  str(r[i]) + "uL; \n"
+        stringResult = stringResult + stringToPrint
+    return stringResult
+
+def generateY(k, counter):
+    stringResult = ""
+    value = int(k, base=16)
+    r = from_felem(value)
+    for i in range(len(r)):
+        stringToPrint = "  expectedPoint"  \
+                        "[" + str(i + 4) + "] = " +  str(r[i]) + "uL; \n"
+        stringResult = stringResult + stringToPrint
+
+    stringToPrintLast =  "  expectedPoint"  + \
+        "[8] = 1;\n"
+    stringResult = stringResult + stringToPrintLast
+
+    for i in range(3):
+        stringToPrint = "  expectedPoint" + \
+        "[" + str(i + 9) + "] = 0; \n"
+        stringResult = stringResult + stringToPrint
+
+    return stringResult + "\n\n"
+
+
+def generateStartOfFunction(counter):
+    stringToPrint = "void Test" + str(counter) + "() \n { \n "
+    stringToPrint1 = " uint64_t* tempBuffer = (uint64_t *) malloc (sizeof (uint64_t) * 100);\n"
+    stringToPrint2 = "  uint64_t* basePoint = (uint64_t *) malloc (sizeof (uint64_t) * 12);\n"
+    stringToPrint2_5 = "  uint64_t* resultPoint = (uint64_t *) malloc (sizeof (uint64_t) * 12);\n"
+    stringToPrint3 = "  basePoint[0] = 17627433388654248598uL;  \n" \
+                     "  basePoint[1] = 8575836109218198432uL; \n" \
+                     "  basePoint[2] = 17923454489921339634uL;  \n" \
+                     "  basePoint[3] = 7716867327612699207uL; \n \n" \
+                     "  basePoint[4] = 14678990851816772085uL; \n" \
+                     "  basePoint[5] = 3156516839386865358uL; \n" \
+                     "  basePoint[6] = 10297457778147434006uL;  \n" \
+                     "  basePoint[7] = 5756518291402817435uL; \n \n" \
+                     "  basePoint[8] = 1uL; \n" \
+                     "  basePoint[9] = 0uL; \n" \
+                     "  basePoint[10] = 0uL; \n" \
+                     "  basePoint[11] = 0uL; \n \n \n "
+
+    return(stringToPrint + stringToPrint1 + stringToPrint2_5  + stringToPrint2 + stringToPrint3)
+
+def generateEndOfFunction(counter, l):
+    stringToPrint0 = "  scalarMultiplication(basePoint, resultPoint, " + str(l) + ", scalar" + str(counter) + ", tempBuffer); \n"
+    stringToPrint = "  bool flag = true; \n"
+    stringToPrint1 = "  for (int i = 0; i< 8; i++) \n  { " \
+                     "\n bool f1 = (expectedPoint[i] == resultPoint[i]); \n flag = flag && f1; \n  } \n \n"
+    p0 = "\\"
+    p1 = "n"
+    stringToPrint2 = "  if (flag) \n    printf(\"%s" + p0 + p1 +  " \", \"The test " + str(counter) + " is correct\");  \n  else \n  { \n   printf(\"%s"  + p0 + p1 +  " \", \"The test " + str(counter) +  \
+    "has not passed\"); \n   printf(\"%s"+ p0 + p1 +  " \", \"The expectedPoint:\"); \n   print_uu_l(expectedPoint, 12, false); \n   printf(\"%s"+ p0 + p1 +  " \", \"The computed result\"); \n   print_uu_l(resultPoint, 12, false); \n  }\n }"
+
+    stringResult = stringToPrint0 +  stringToPrint + stringToPrint1 + stringToPrint2 + "\n\n"
+
+    return stringResult
+
+def searchForY(f):
+    line = f.readline()
+    keySymbol = "y = "
+    start = line.find(keySymbol)
+    if start == -1:
+        return searchForY(f)
+    value = line[start + len(keySymbol)::]
+    return value
+
+def searchForX(f):
+    line = f.readline()
+    keySymbol = "x = "
+    start = line.find(keySymbol)
+    if start == -1:
+        return searchForX(f)
+    value = line[start + len(keySymbol)::]
+    return value
+
+def testVectorCallGen(n):
+    r = ""
+    for i in range(n + 1):
+        r = r + ("Test" + str(i) + "();\n")
+    return r
+
+
+def searchForKey(f, counter):
+    line = f.readline()
+    keySymbol = 'k = '
+    startOfkey = line.find(keySymbol)
+    if startOfkey == -1:
+        return searchForKey(f, counter)
+    key = line[startOfkey + len(keySymbol)::]
+    x = searchForX(f)
+    y = searchForY(f)
+    str0 = generateStartOfFunction(counter)
+    str1, l = generateK(key, counter)
+    str2 = generateX(x, counter)
+    str3 = generateY(y, counter)
+    str4 = generateEndOfFunction(counter, l)
+    return str0 + str1 + str2 + str3 + str4
+
+
+fileTestVector = "..."
+toWrite = "..."
+def main():
+    f = open (fileTestVector, 'r')
+    f1 = open(toWrite, 'w+')
+    counter = 0
+    print(testVectorCallGen(51))
+
+    while (True):
+        try:
+            r = searchForKey(f, counter)
+            counter = counter + 1
+            f1.write(r)
+        except:
+            f1.close()
+            f.close()
+            break
+
+main()
