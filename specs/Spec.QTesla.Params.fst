@@ -1,4 +1,4 @@
-module QTesla.Params
+module Spec.QTesla.Params
 
 open Lib.IntTypes
 

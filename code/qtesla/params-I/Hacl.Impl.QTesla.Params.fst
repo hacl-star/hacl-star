@@ -6,7 +6,7 @@ open Lib.Buffer
 open FStar.Int.Cast
 open Hacl.Impl.QTesla.Constants
 
-module S = QTesla.Params
+module S = Spec.QTesla.Params
 module SHA3 = Hacl.SHA3
 module I16 = FStar.Int16
 module I32 = FStar.Int32

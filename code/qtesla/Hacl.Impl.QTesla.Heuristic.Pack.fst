@@ -30,7 +30,7 @@ module LL = Lib.Loops
 open Hacl.Impl.QTesla.Params
 open Hacl.Impl.QTesla.Constants
 open Hacl.Impl.QTesla.Globals
-module SP = QTesla.Params
+module SP = Spec.QTesla.Params
 
 #reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 

@@ -29,7 +29,7 @@ module LL = Lib.Loops
 open Hacl.Impl.QTesla.Params
 open Hacl.Impl.QTesla.Globals
 open Hacl.Impl.QTesla.ShiftArithmeticLeft
-module SP = QTesla.Params
+module SP = Spec.QTesla.Params
 
 #reset-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 0"
 

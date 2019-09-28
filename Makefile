@@ -668,6 +668,7 @@ MERKLE_BUNDLE=-bundle 'MerkleTree.New.Low+MerkleTree.New.Low.Serialization=[rena
 CTR_BUNDLE=-bundle EverCrypt.CTR=EverCrypt.CTR.*
 # Disabled by default, overridden for wasm
 WASMSUPPORT_BUNDLE = -bundle WasmSupport
+QTESLA_BUNDLE=-bundle 'Hacl.Impl.QTesla=QTesla.Params,Hacl.Impl.QTesla.*'
 
 BUNDLE_FLAGS	=\
   $(HASH_BUNDLE) \
@@ -682,7 +683,8 @@ BUNDLE_FLAGS	=\
   $(NACLBOX_BUNDLE) \
   $(MERKLE_BUNDLE) \
   $(WASMSUPPORT_BUNDLE) \
-  $(CTR_BUNDLE)
+  $(CTR_BUNDLE) \
+  $(QTESLA_BUNDLE)
 
 DEFAULT_FLAGS = \
   $(HAND_WRITTEN_LIB_FLAGS) \
