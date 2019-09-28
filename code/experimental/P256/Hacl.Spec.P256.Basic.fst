@@ -9,6 +9,7 @@ open Hacl.Spec.P256.Definitions
 open Hacl.Spec.Curve25519.Field64.Lemmas
 
 (*This code was written by Polubelova M *)
+#reset-options "--z3refresh --z3rlimit 200"
 
 inline_for_extraction noextract
 val lt_u64:a:uint64 -> b:uint64 -> Tot bool
@@ -37,7 +38,7 @@ val addcarry:
     (ensures fun (r, c) -> v c <= 2 /\
       v r + v c * pow2 64 == v x + v y + v cin)
 [@CInline]
-let addcarry x y cin =
+let addcarry x y cin =  
   let res1 = x +. cin in
   let c = if lt_u64 res1 cin then u64 1 else u64 0 in
   let res = res1 +. y in

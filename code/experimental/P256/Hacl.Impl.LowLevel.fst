@@ -241,13 +241,7 @@ val lemma_reduction1: a: nat {a < pow2 256} -> r: nat{if a >= prime256 then r = 
   Lemma (r = a % prime256)
 
 let lemma_reduction1 a r = 
-  assert_norm (pow2 256 - prime256 < prime256);
-  assert(if a >= prime256 then a - prime256 < prime256 else True);
-  assert(if a >= prime256 then r < prime256 else True);
-  assert(if a >= prime256 then r = a % prime256 else True);
-  assert(if a < prime256 then r < prime256 else True);
-  assert(if a < prime256 then r = a % prime256 else True);
-  assert(r = a % prime256)
+  assert_norm (pow2 256 - prime256 < prime256)
 
 
 

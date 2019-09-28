@@ -10,7 +10,7 @@ open Lib.Sequence
 
 open Hacl.Spec.P256.Core
 
-#reset-options "--z3refresh --z3rlimit 200"
+#reset-options "--z3refresh --z3rlimit 300"
 
 let prime = prime256
 

@@ -721,7 +721,7 @@ inline_for_extraction noextract
 val normalisation_update: z2x: felem -> z3y: felem ->p: point ->  resultPoint: point -> Stack unit 
   (requires fun h -> live h z2x /\ live h z3y /\ live h resultPoint /\ live h p /\ 
     as_nat h z2x < prime256 /\ as_nat h z3y < prime /\
-
+    as_nat h (gsub p (size 8) (size 4)) < prime /\ 
     disjoint z2x z3y /\ disjoint z2x resultPoint /\ disjoint z3y resultPoint)
   (ensures fun h0 _ h1 -> modifies (loc resultPoint) h0 h1 /\
     (
@@ -739,7 +739,7 @@ val normalisation_update: z2x: felem -> z3y: felem ->p: point ->  resultPoint: p
       ))
   )
 
-#reset-options "--z3rlimit 400"
+#reset-options "--z3rlimit 500"
 
 let normalisation_update z2x z3y p resultPoint = 
   push_frame(); 

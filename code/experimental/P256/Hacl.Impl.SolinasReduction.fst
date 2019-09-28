@@ -46,7 +46,7 @@ let store_high_low_u high low =
   logxor as_uint64_low as_uint64_high
 
 
-#reset-options "--z3refresh --z3rlimit 200"
+#set-options "--z3rlimit 500"
 
 inline_for_extraction noextract
 val load_buffer: a0: uint64 -> a1: uint64 -> a2: uint64 -> a3: uint64 -> o: lbuffer uint64 (size 4) -> 
@@ -85,16 +85,8 @@ let upl_zer_buffer c0 c1 c2 c3 c4 c5 c6 c7 temp o =
       assert_norm (pow2 (3 * 32) * pow2 (2 * 32) = pow2 (5 * 32));
       assert_norm (pow2 (4 * 32) * pow2 (2 * 32) = pow2 (6 * 32));
       assert_norm (pow2 (5 * 32) * pow2 (2 * 32) = pow2 (7 * 32));
-   
-    assert(uint_v b0 = uint_v c1 * pow2 32 + uint_v c0);
-    assert(uint_v b1 = uint_v c3 * pow2 32 + uint_v c2);
-    assert(uint_v b2 = uint_v c5 * pow2 32 + uint_v c4);
-    assert(uint_v b3 = uint_v c7 * pow2 32 + uint_v c6);
-    
     load_buffer b0 b1 b2 b3 temp;
-    reduction_prime_2prime_impl temp o;
-      let h2 = ST.get() in 
-    assert(as_nat h2 o = (uint_v c1 * pow2 32 + uint_v c0 + uint_v c3 * pow2 (3 * 32) + uint_v c2 * pow2 (2 * 32) + uint_v c5 * pow2 (32 * 5) + uint_v c4 * pow2 (32 * 4) + uint_v c7 * pow2 (32 * 7) + uint_v c6 * pow2 (32 * 6)) % prime256)
+    reduction_prime_2prime_impl temp o
 
 
 val upl_fir_buffer: c11: uint32 -> c12: uint32 -> c13: uint32 -> c14: uint32 -> c15: uint32
@@ -459,8 +451,6 @@ val lemma_opened: i: Lib.Sequence.lseq uint64 8 -> Lemma
     uint_v c13 * pow2 (13 * 32) + uint_v c14 * pow2 (14 * 32) + uint_v c15 * pow2 (15 * 32)
     )
 
-
-#reset-options " --z3rlimit 300 --z3refresh"
 
 let lemma_opened i = 
      let open Lib.Sequence in 
