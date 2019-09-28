@@ -27,9 +27,6 @@ The things left to be done (or assumed):
 		Didnot work because of the wrong approach for scalar presentation as nat?
 
 
-* bunch of staff in Lemmas. I will try to solve by myself, small annoying pieces of code.
-
-
 NB: Point add in the Impl assumes that points are IN DOMAIN. And doesnot take them away after. Need to work together with (toDomain) + point add + (from Domain). I will changes asa I have time.
 
 NB: the file test P256 is a set of tests. Some tests are commented because the previous version was taking an ARBITRARY key size, whereas the current one is waiting for 32 byte scalar. Other than that, the function to do scalar multiplication (together with toDomain, fromDomain) is     
