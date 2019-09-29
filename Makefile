@@ -106,6 +106,8 @@ ci:
 	$(MAKE) -C code/experimental/aes-gcm || [[ "$(shell uname)" == "CYGWIN_NT"* ]]
 	$(MAKE) -C code/frodo/spec
 	$(MAKE) -C code/frodo/code TARGET=
+	$(MAKE) -C code/ed25519
+#	$(MAKE) -C code/experimental/P256
 
 #
 # Clean

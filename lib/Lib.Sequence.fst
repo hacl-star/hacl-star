@@ -220,6 +220,7 @@ let generate_blocks_simple #a bs max nb f =
  repeat_gen nb (map_blocks_a a bs max)
    (generate_blocks_simple_f #a bs max f) Seq.empty
 
+#restart-solver
 let div_interval b n i =
   Math.Lemmas.lemma_div_le (n * b) i b;
   Math.Lemmas.cancel_mul_div n b

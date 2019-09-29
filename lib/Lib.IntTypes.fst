@@ -2,7 +2,7 @@ module Lib.IntTypes
 
 open FStar.Math.Lemmas
 
-#push-options "--max_fuel 0 --max_ifuel 1 --z3rlimit 50"
+#push-options "--max_fuel 0 --max_ifuel 1 --z3rlimit 100"
 
 let pow2_2 _   = assert_norm (pow2 2 = 4)
 let pow2_3 _   = assert_norm (pow2 3 = 8)
@@ -593,6 +593,39 @@ let logor_disjoint #t #l a b m =
 
 #pop-options
 
+let logor_zeros #t #l a = 
+  match t with 
+  |U1 -> assert_norm(u1 0 `logor` zeros U1 l == u1 0 /\ u1 1 `logor` zeros U1 l == u1 1)
+  | U8 | U16 | U32 | U64 | U128 -> UInt.logor_lemma_1 #(bits t) (v a)
+  | S8 | S16 | S32 | S64 | S128 -> Int.nth_lemma #(bits t) (Int.logor #(bits t) (v a) (Int.zero (bits t))) (v a)
+
+
+let logor_ones #t #l a = 
+  match t with 
+  |U1 -> assert_norm(u1 0 `logor` ones U1 l == u1 1 /\ u1 1 `logor` ones U1 l == u1 1)
+  | U8 | U16 | U32 | U64 | U128 -> UInt.logor_lemma_2 #(bits t) (v a)
+  | S8 | S16 | S32 | S64 | S128 -> Int.nth_lemma (Int.logor #(bits t) (v a) (Int.ones (bits t))) (Int.ones (bits t))
+
+let logor_lemma #t #l a b = 
+  logor_zeros #t #l b;
+  logor_ones #t #l b;
+  match t with 
+  | U1 -> 
+    assert_norm(u1 0 `logor` ones U1 l == u1 1 /\ u1 1 `logor` ones U1 l == u1 1);
+    assert_norm(u1 0 `logor` zeros U1 l == u1 0 /\ u1 1 `logor` zeros U1 l == u1 1)
+  | U8 | U16 | U32 | U64 | U128 -> UInt.logor_commutative #(bits t) (v a) (v b)
+  | S8 | S16 | S32 | S64 | S128 -> Int.nth_lemma #(bits t) (Int.logor #(bits t) (v a) (v b)) (Int.logor #(bits t) (v b) (v a))
+
+let logor_spec #t #l a b =
+  match t with
+  | U1 ->
+    assert_norm(u1 0 `logor` ones U1 l == u1 1 /\ u1 1 `logor` ones U1 l == u1 1);
+    assert_norm(u1 0 `logor` zeros U1 l == u1 0 /\ u1 1 `logor` zeros U1 l == u1 1);
+    assert_norm (0 `logor_v #U1` 0 == 0 /\ 0 `logor_v #U1` 1 == 1);
+    assert_norm (1 `logor_v #U1` 0 == 1 /\ 1 `logor_v #U1` 1 == 1)
+  | _ -> ()
+  
+
 [@(strict_on_arguments [0])]
 let lognot #t #l a =
   match t with
@@ -607,6 +640,17 @@ let lognot #t #l a =
   | S32  -> Int32.lognot a
   | S64  -> Int64.lognot a
   | S128 -> Int128.lognot a
+
+let lognot_lemma #t #l a = 
+  match t with 
+  |U1 -> assert_norm(lognot (u1 0) == u1 1 /\ lognot (u1 1)  == u1 0)
+  | U8 | U16 | U32 | U64 | U128 -> 
+    FStar.UInt.lognot_lemma_1 #(bits t); 
+    UInt.nth_lemma (FStar.UInt.lognot #(bits t) (UInt.ones (bits t))) (UInt.zero (bits t))
+  | S8 | S16 | S32 | S64 | S128 -> 
+    Int.nth_lemma (FStar.Int.lognot #(bits t) (Int.zero (bits t))) (Int.ones (bits t));
+    Int.nth_lemma (FStar.Int.lognot #(bits t) (Int.ones (bits t))) (Int.zero (bits t))
+
 
 [@(strict_on_arguments [0])]
 let shift_right #t #l a b =
@@ -628,6 +672,8 @@ val shift_right_value_aux_1: #n:pos{1 < n} -> a:Int.int_t n -> s:nat{n <= s} ->
 let shift_right_value_aux_1 #n a s =
   pow2_le_compat s n;
   if a >= 0 then Int.sign_bit_positive a else Int.sign_bit_negative a
+
+#push-options "--z3rlimit 200"
 
 val shift_right_value_aux_2: #n:pos{1 < n} -> a:Int.int_t n ->
   Lemma (Int.shift_arithmetic_right #n a 1 = a / 2)

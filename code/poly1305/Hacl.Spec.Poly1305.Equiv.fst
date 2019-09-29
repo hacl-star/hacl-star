@@ -7,7 +7,7 @@ open Lib.ByteSequence
 open Lib.IntVector
 
 module Loops = Lib.LoopCombinators
-module PLoops = Lib.Loops.Lemmas
+module PLoops = Lib.Sequence.Lemmas
 module Lemmas = Hacl.Spec.Poly1305.Lemmas
 module S = Spec.Poly1305
 

@@ -10,7 +10,7 @@ open Spec.GaloisField
 open Hacl.Spec.GF128.Lemmas
 
 module Loops = Lib.LoopCombinators
-module PLoops = Lib.Loops.Lemmas
+module PLoops = Lib.Sequence.Lemmas
 module S = Spec.GF128
 
 include Hacl.Spec.GF128.Vec
@@ -55,7 +55,7 @@ let gf128_update_multi_add_mul_lemma_loop r text acc0 i acc =
 
   let acc2 = PLoops.repeat_w 4 (len / 64) repeat_bf_sc i acc in
   assert (acc2 == ((((acc +% b0) *% r +% b1) *% r +% b2) *% r +% b3) *% r);
-  gf128_update_multi_mul_add_lemma_load_acc_aux acc b0 b1 b2 b3 pre.[3] pre.[2] pre.[1] pre.[0];
+  gf128_update_multi_mul_add_lemma_load_acc_aux acc b0 b1 b2 b3 pre.[3];
   assert (acc2 == acc1)
 
 
@@ -112,7 +112,7 @@ let gf128_update_multi_mul_add_lemma_load_acc r text acc0 =
   assert (acc1 == (acc0 +% b0) *% pre.[0] +% (zero +% b1) *% pre.[1] +% (zero +% b2)*% pre.[2] +% (zero +% b3) *% pre.[3]);
   let acc2 = PLoops.repeat_w #elem 4 1 repeat_bf_t0 0 acc0 in
   assert (acc2 == ((((acc0 +% b0) *% r +% b1) *% r +% b2) *% r +% b3) *% r);
-  gf128_update_multi_mul_add_lemma_load_acc_aux acc0 b0 b1 b2 b3 pre.[3] pre.[2] pre.[1] pre.[0];
+  gf128_update_multi_mul_add_lemma_load_acc_aux acc0 b0 b1 b2 b3 pre.[3];
   assert (acc2 == acc1)
 
 
@@ -171,7 +171,7 @@ let gf128_update_multi_mul_add_lemma_loop r text i acc_vec =
   let acc3 = normalize4 pre acc_vec in
   assert (acc3 == acc_vec.[0] *% pre.[0] +% acc_vec.[1] *% pre.[1] +% acc_vec.[2] *% pre.[2] +% acc_vec.[3] *% pre.[3]);
   assert (acc2 == ((((acc3 +% b0) *% r +% b1) *% r +% b2) *% r +% b3) *% r);
-  gf128_update_multi_mul_add_lemma_loop_aux acc_vec.[0] acc_vec.[1] acc_vec.[2] acc_vec.[3] b0 b1 b2 b3 pre.[3] pre.[2] pre.[1] pre.[0];
+  gf128_update_multi_mul_add_lemma_loop_aux acc_vec.[0] acc_vec.[1] acc_vec.[2] acc_vec.[3] b0 b1 b2 b3 pre.[3];
   assert (acc1 == acc2)
 
 

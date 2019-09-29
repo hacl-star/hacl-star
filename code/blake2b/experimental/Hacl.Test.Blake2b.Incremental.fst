@@ -20,7 +20,7 @@ val test_blake2b:
   -> key:ilbuffer uint8 key_len
   -> expected_len:size_t{1 <= v expected_len /\ v expected_len <= 32}
   -> expected:ilbuffer uint8 expected_len
-  -> Stack unit
+  -> Stack bool
     (requires fun h ->
       live h msg /\ live h expected /\ live h key)
     (ensures  fun h0 r h1 -> True)
@@ -34,15 +34,16 @@ let test_blake2b ll d kk k nn expected =
   let output = create nn (u8 0) in
   let state = {
     hash = create (size 8) (u64 0);
-    n = 0ul;
-    pl = 0ul;
+    n = create (size 1) (size 0);
+    pl = create (size 1) (size 0);
     block = create Hacl.Impl.Blake2b.size_block (u8 0);
   } in
-  let state = blake2b_incremental_init state kk k nn in
-  let state = blake2b_incremental_update state ll d in
+  blake2b_incremental_init state kk k nn;
+  let res = blake2b_incremental_update state ll d in
   blake2b_incremental_finish nn output state;
   print_compare_display nn output expected;
-  pop_frame()
+  pop_frame();
+  res
 
 
 ///
@@ -111,6 +112,6 @@ let main () =
   recall test1_plaintext;
   recall test1_key;
   recall test1_expected;
-  test_blake2b test1_size_plaintext test1_plaintext test1_size_key test1_key test1_size_expected test1_expected;
-
+  let res = test_blake2b test1_size_plaintext test1_plaintext test1_size_key test1_key test1_size_expected test1_expected in
+  if res then () else (C.String.print (C.String.of_literal "\nFAILED in blake2b_incremental_update !!!\n"));
   C.EXIT_SUCCESS
