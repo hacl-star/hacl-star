@@ -2435,8 +2435,9 @@ let lemma_xor_inplace_byte (a b:byte) : Lemma
   ()
 
 
+// todo: remove hypothesis on cid length
 let lemma_header_encrypt_dec a k h (npn:lbytes 2) (c:cbytes) : Lemma
-  (requires Short? h /\ S.length (Short?.cid h) = 4)
+  (requires Short? h /\ S.length (Short?.cid h) <> 0)
   (ensures (
     let open S in
     let l = [true; false; Short?.phase h; false; false; Short?.spin h; true; false] in
@@ -2448,7 +2449,9 @@ let lemma_header_encrypt_dec a k h (npn:lbytes 2) (c:cbytes) : Lemma
     let flag' = create 1 U8.(flag `logxor` (index mask 0 `logand` 0x1fuy)) in
     let npn' = xor_inplace npn (slice pnmask 0 2) 0 in
     let c' = xor_inplace c (slice pnmask 2 (length pnmask)) 0 in
-    equal (header_encrypt a k h npn c) (flag' @| Short?.cid h @| npn' @| c'))) =
+    equal
+      (header_encrypt a k h npn c)
+      (flag' @| Short?.cid h @| npn' @| c'))) =
   let open S in
 
   // computing format_header
@@ -2459,17 +2462,18 @@ let lemma_header_encrypt_dec a k h (npn:lbytes 2) (c:cbytes) : Lemma
   assert (equal fh (format_header h npn @| c));
 
   // computing packet
+  let pn_offset = 1 + length (Short?.cid h) in
   let sample = S.slice c 2 18 in
   let mask = C16.block (calg_of_ae a) k sample in
   let pnmask = and_inplace (S.slice mask 1 5) (pn_sizemask 1) 0 in
   let fmask = U8.(S.index mask 0 `logand` 0x1fuy) in
-  let r = xor_inplace fh pnmask 5 in
+  let r = xor_inplace fh pnmask pn_offset in
   let packet = xor_inplace r (create 1 fmask) 0 in
   assert (packet = header_encrypt a k h npn c);
 
   // decomposing packet
-  pointwise_op_suff U8.logxor (create 1 flag) (Short?.cid h @| npn @| c) pnmask 5;
-  pointwise_op_suff U8.logxor (Short?.cid h) (npn @| c) pnmask 4;
+  pointwise_op_suff U8.logxor (create 1 flag) (Short?.cid h @| npn @| c) pnmask pn_offset;
+  pointwise_op_suff U8.logxor (Short?.cid h) (npn @| c) pnmask (length (Short?.cid h));
   pointwise_op_dec U8.logxor npn c pnmask 0;
   let npn' = xor_inplace npn (slice pnmask 0 2) 0 in
   let c' = xor_inplace c (slice pnmask 2 (length pnmask)) 0 in
@@ -2532,7 +2536,7 @@ let lemma_header_encrypt_dec_cid_assoc a b c d e f : Lemma
 
 
 let lemma_header_encrypt_dec_cid a k h (x' y npn:byte) (c:cbytes) : Lemma
-  (requires Short? h /\ S.length (Short?.cid h) = 3)
+  (requires Short? h /\ S.length (Short?.cid h) = 4)
   (ensures (
     let open S in
     let l = [true; false; Short?.phase h; false; false; Short?.spin h; true; false] in
@@ -2565,8 +2569,8 @@ let lemma_header_encrypt_dec_cid a k h (x' y npn:byte) (c:cbytes) : Lemma
   lemma_header_encrypt_dec a k h' (create 1 npn @| create 1 y') c;
   lemma_xor_inplace_byte2 npn y' pnmask;
   assert (equal packet (flag' @| (Short?.cid h @| create 1 x') @| (create 1 npn' @| create 1 (y' `U8.logxor` index pnmask 1)) @| c'));
-  xor_involutive y' (index pnmask 1);
-  lemma_header_encrypt_dec_cid_assoc flag' (Short?.cid h) (create 1 x') (create 1 npn') (create 1 y') c'
+  xor_involutive y (index pnmask 1);
+  lemma_header_encrypt_dec_cid_assoc flag' (Short?.cid h) (create 1 x') (create 1 npn') (create 1 y) c'
 
 
 
@@ -2574,23 +2578,72 @@ let lemma_header_encrypt_dec_cid a k h (x' y npn:byte) (c:cbytes) : Lemma
 
 
 
-let lemma_header_encrypt_insert_malleable a k (spin phase:bool) (cid:lbytes 4) (npn:lbytes 1) (x y:byte) (c:cbytes) : Lemma
-  (requires (
+let lemma_header_encrypt_insert_malleable a k (spin phase:bool) (cid:lbytes 4) (x y npn:byte) (c:cbytes) : Lemma
+  (let open S in
     let h = Short spin phase cid in
-    Short? h /\
-    S.length (Short?.cid h) <= 17))
-  (ensures (
-    let open S in
-    let h = Short spin phase cid in
-    let p = header_encrypt a k h (create 1 x @| npn) c in
+    let p = header_encrypt a k h (create 1 x @| create 1 npn) c in
     exists h' npn'.
-    let p' = header_encrypt a k h' npn' c in
-    equal (insert (create 1 y) p 7) p')) =
+      length (Short?.cid h') = length (Short?.cid h) + 1 /\
+      insert (create 1 y) p 7 = header_encrypt a k h' npn' c) =
   let open S in
-  // use : lemma_header_encrypt_dec_npn + lemma_header_encrypt_dec_cid + lemma_insert_encrypt
-  admit()
+  let l = [true; false; phase; false; false; spin; true; false] in
+  assert_norm (List.Tot.length l = 8);
+  let flag = of_bitfield8 l in
+  let sample = slice c 2 18 in
+  let mask = C16.block (calg_of_ae a) k sample in
+  let pnmask = and_inplace (slice mask 1 5) (pn_sizemask 1) 0 in
+
+  let h = Short spin phase cid in
+  let p = header_encrypt a k h (create 1 x @| create 1 npn) c in
+  let x' = x `U8.logxor` index pnmask 0 in
+  let h' = Short (Short?.spin h) (Short?.phase h) (Short?.cid h @| create 1 x') in
+  let npn0 = npn `U8.logxor` index pnmask 1 in
+  let y' = y `U8.logxor` index pnmask 1 in
+  let flag' = create 1 U8.(flag `logxor` (index mask 0 `logand` 0x1fuy)) in
+  let c' = xor_inplace c (slice pnmask 2 (length pnmask)) 0 in
+
+  // decomposition of the header encryption
+  lemma_header_encrypt_dec_npn a k h x npn c;
+  assert (
+    p = flag' @| Short?.cid h @| create 1 x' @| create 1 npn0 @| c'
+  );
+
+  // insertion of an adversarial byte
+  lemma_insert_encrypt flag' (Short?.cid h) (create 1 x') (create 1 npn0) (create 1 y) c';
+  assert (
+    insert (create 1 y) p 7 =
+    flag' @| Short?.cid h @| create 1 x' @| create 1 npn0 @| create 1 y @| c'
+  );
+
+  // proof that it leads to a valid header encryption
+  let npn' = npn0 `U8.logxor` index pnmask 0 in
+  xor_involutive npn0 (index pnmask 0);
+  lemma_header_encrypt_dec_cid a k h x' y npn' c;
+  assert (
+    insert (create 1 y) p 7 =
+    header_encrypt a k h' (create 1 npn' @| create 1 y') c
+  )
 
 
+
+/// compile last chunks here
+
+let test a k (c:cbytes) spin phase (cid:lbytes 4) (x y npn:lbytes 1) : Lemma
+  (let p = header_encrypt a k (Short spin phase cid) S.(x @| npn) c in
+  let p' = insert y p 7 in
+  exists h' npn'.
+    header_decrypt a k (S.length cid-2) p' =
+    H_Success npn' h' c) =
+  let open S in
+  let h = Short spin phase cid in
+  let p = header_encrypt a k (Short spin phase cid) S.(x @| npn) c in
+  let p' = insert y p 7 in
+  lemma_header_encrypt_insert_malleable a k spin phase cid (S.index x 0) (S.index y 0) (S.index npn 0) c;
+  let h' =
+    FStar.Classical.exists_elim (exists h'. exists npn'.
+      length (Short?.cid h') = length (Short?.cid h) + 1 /\
+      insert y p 7 = header_encrypt a k h' npn' c) in
+  admit()//lemma_header_encryption_correct a k h' npn' c
 
 
 let lemma_recomp_assoc_adv (a b c d:bytes) : Lemma
