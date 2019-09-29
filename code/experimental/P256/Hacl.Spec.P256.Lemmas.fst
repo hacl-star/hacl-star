@@ -267,44 +267,6 @@ let lemma_add_mod5 a b c d e f k =
 
 #reset-options " --z3rlimit 300" 
 
-val lemma_reduce_mod_by_sub2: t: nat -> 
-  Lemma ((prime256 * (t % pow2 64)) % pow2 64 == (-t)  % pow2 64)
-
-let lemma_reduce_mod_by_sub2 t = 
-  let t_ = t % pow2 64 in   
-  let f = (pow2 256 - pow2 224 + pow2 192 + pow2 96 -1) * (t % pow2 64) in 
-  assert_norm (pow2 256 - pow2 224 + pow2 192 + pow2 94 - 1 > 0);
-  assert(f == pow2 256 * t_ - pow2 224 * t_ + pow2 192 * t_ + pow2 96 * t_ - t_);
-  lemma_add_mod5 (pow2 256 * t_) (pow2 224 * t_) (pow2 192 * t_) (pow2 96 * t_) t_ f (pow2 64);
-  assert(f % (pow2 64) ==  ((pow2 256 * t_) % pow2 64 -  (pow2 224 * t_) % pow2 64 +  (pow2 192 * t_) % pow2 64 +  (pow2 96 * t_) % pow2 64 -  t_) % pow2 64);
-
-    pow2_plus 192 64;
-    lemma_multiplication_same_number2 (pow2 192) (pow2 64) (pow2 256) t_;
-    multiple_modulo_lemma (pow2 192 * t_) (pow2 64);
-    assert((pow2 256 * t_) % pow2 64 == 0);
-
-    pow2_plus 160 64;
-    lemma_multiplication_same_number2 (pow2 160) (pow2 64) (pow2 224) t_;
-    multiple_modulo_lemma (pow2 160 * t_) (pow2 64);
-    assert((pow2 224 * t_) % pow2 64 == 0);
-
-    pow2_plus 128 64;
-    lemma_multiplication_same_number2 (pow2 128) (pow2 64) (pow2 192) t_;
-    multiple_modulo_lemma (pow2 128 * t_) (pow2 64);
-    assert((pow2 192 * t_) % pow2 64 == 0);
-
-    pow2_plus 32 64; 
-    assert(pow2 32 * pow2 64 = pow2 96);
-
-    lemma_multiplication_same_number2 (pow2 32) (pow2 64) (pow2 96) t_; 
-    multiple_modulo_lemma (pow2 32 * t_) (pow2 64);
-    assert((pow2 96 * t_) % pow2 64 == 0);
-
-  assert(f % pow2 64 == (- (t % pow2 64)) % pow2 64);
-  lemma_mod_sub_distr 0 t (pow2 64);
-  assert(f % pow2 64 == (- t) % pow2 64)
-
-
 val lemma_reduce_mod_by_sub3 : t: nat -> Lemma ((t + (t % pow2 64) * prime256) % pow2 64 == 0)
 
 let lemma_reduce_mod_by_sub3 t = 
