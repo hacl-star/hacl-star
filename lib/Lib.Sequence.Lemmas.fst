@@ -5,7 +5,7 @@ open Lib.IntTypes
 open Lib.Sequence
 
 // This is unnecessary because the same pragma is interleaved from the interface
-#set-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0 \
+#set-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 \
               --using_facts_from '-* +Prims +Lib.Sequence.Lemmas +Lib.Sequence +FStar.Seq'"
 
 val lemma_map_blocks_vec_i:
@@ -383,7 +383,7 @@ let rec lemma_repeati_vec #a #a_vec w n normalize_n f f_vec acc0_vec =
   end
 
 
-#reset-options "--z3refresh --z3rlimit 100 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3refresh --z3rlimit 300 --max_fuel 0 --max_ifuel 0"
 
 val lemma_repeat_blocks_multi_load_acc:
     #a:Type0
@@ -444,15 +444,15 @@ let lemma_aux1 w blocksize len =
   assert (len1 / blocksize == w * (len1 / sb))
 
 
-#set-options "--z3rlimit 200 --z3seed 1"
+#set-options "--z3rlimit 300 --z3seed 1"
 let lemma_repeat_blocks_multi_vec #a #b #b_vec w blocksize inp f f_vec normalize_n load_acc acc0 =
   let len = length inp in
   let len0 = w * blocksize in
   let len1 = len - len0 in
   FStar.Math.Lemmas.modulo_addition_lemma len len0 (- 1);
   assert (len % len0 == len1 % len0);
-  //FStar.Math.Lemmas.modulo_addition_lemma len blocksize (- w);
-  //assert (len % blocksize == len1 % blocksize);
+  FStar.Math.Lemmas.modulo_addition_lemma len blocksize (- w);
+  assert (len % blocksize == len1 % blocksize);
 
   let t0 = Seq.slice inp 0 len0 in
   let t1 = Seq.slice inp len0 len in
