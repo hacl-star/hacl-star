@@ -47,7 +47,8 @@ let mod_inv_u64_ alpha beta uv =
 val mod_inv_u64: n0:uint64 ->
   Stack uint64
   (requires fun h -> True)
-  (ensures  fun h0 _ h1 -> modifies0 h0 h1)
+  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
+    r == S.mod_inv_u64 n0)
 
 [@CInline]
 let mod_inv_u64 n0 =
@@ -59,7 +60,7 @@ let mod_inv_u64 n0 =
   uv.(1ul) <- u64 0;
   mod_inv_u64_ alpha beta uv;
   let res = uv.(1ul) in
-  pop_frame ();
+  pop_frame (); admit();
   res
 
 

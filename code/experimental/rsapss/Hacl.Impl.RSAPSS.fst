@@ -8,7 +8,6 @@ open Lib.IntTypes
 open Lib.Buffer
 
 open Hacl.Bignum
-open Hacl.Bignum.Lib
 open Hacl.Impl.MGF
 open Hacl.Bignum.Comparison
 open Hacl.Bignum.Convert
@@ -196,6 +195,13 @@ let pss_verify_ sLen msgLen msg emBits em =
       Lib.ByteBuffer.lbytes_eq #hLen m1Hash0 m1Hash end in
   pop_frame ();
   res
+
+
+inline_for_extraction noextract
+val eq_u8: a:uint8 -> b:uint8 -> Tot bool
+let eq_u8 a b =
+  let open Lib.RawIntTypes in
+  FStar.UInt8.(u8_to_UInt8 a =^ u8_to_UInt8 b)
 
 
 val pss_verify:
