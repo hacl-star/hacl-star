@@ -28,7 +28,7 @@ val xor_bytes:
   (ensures  fun h0 _ h1 -> modifies (loc b1) h0 h1 /\
     as_seq h1 b1 == S.xor_bytes (as_seq h0 b1) (as_seq h0 b2))
 
-[@"c_inline"]
+[@CInline]
 let xor_bytes len b1 b2 =
   map2T len b1 (fun x y -> x ^. y) b1 b2
 
@@ -138,7 +138,7 @@ val pss_encode:
   (ensures  fun h0 _ h1 -> modifies (loc em) h0 h1 /\
     as_seq h1 em == S.pss_encode #(v sLen) #(v msgLen) (as_seq h0 salt) (as_seq h0 msg) (v emBits))
 
-[@"c_inline"]
+[@CInline]
 let pss_encode sLen salt msgLen msg emBits em =
   push_frame ();
   let m1Hash = create hLen (u8 0) in
@@ -197,13 +197,6 @@ let pss_verify_ sLen msgLen msg emBits em =
   res
 
 
-inline_for_extraction noextract
-val eq_u8: a:uint8 -> b:uint8 -> Tot bool
-let eq_u8 a b =
-  let open Lib.RawIntTypes in
-  FStar.UInt8.(u8_to_UInt8 a =^ u8_to_UInt8 b)
-
-
 val pss_verify:
     sLen:size_t{8 + v hLen + v sLen <= max_size_t /\ 8 + v hLen + v sLen < S.max_input}
   -> msgLen:size_t{v msgLen < S.max_input}
@@ -215,8 +208,9 @@ val pss_verify:
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
     r == S.pss_verify #(v msgLen) (v sLen) (as_seq h0 msg) (v emBits) (as_seq h0 em))
 
-[@"c_inline"]
+[@CInline]
 let pss_verify sLen msgLen msg emBits em =
+  let open Lib.RawIntTypes in
   let emLen = blocks emBits 8ul in
   let msBits = emBits %. 8ul in
 
@@ -225,7 +219,7 @@ let pss_verify sLen msgLen msg emBits em =
 
   if (emLen <. sLen +! hLen +! 2ul) then false
   else begin
-    if not (eq_u8 em_last (u8 0xbc) && eq_u8 em_0 (u8 0)) then false
+    if not (FStar.UInt8.(u8_to_UInt8 em_last =^ 0xbcuy) && FStar.UInt8.(u8_to_UInt8 em_0 =^ 0uy)) then false
     else pss_verify_ sLen msgLen msg emBits em end
 
 
