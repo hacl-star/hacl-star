@@ -172,22 +172,37 @@ val lemma_header_encryption_correct:
     header_decrypt a k (cid_len h) (header_encrypt a k h npn c)
     == H_Success npn h c)
 
+
+// insert bytes x in b at position i
+val insert : x:bytes -> b:bytes -> i:nat -> Pure bytes
+  (requires i < S.length b)
+  (ensures fun res ->
+    S.length res = S.length b + S.length x /\ (
+    forall j.
+      (j < i ==> S.index res j = S.index b j) /\
+      ((i <= j /\ j < i + S.length x) ==> S.index res j = S.index x (j-i)) /\
+      (i + S.length x <= j ==> S.index res j = S.index b (j-S.length x))))
+
+
 // Even though parse_header is a secure parser, decryption is malleable:
 // it is possible to successfully decrypt while parsing part of the
-// npn into the cid
+// encrypted npn into the cid
 val lemma_header_encryption_malleable:
   a:ea ->
   k:lbytes (ae_keysize a) ->
   c:cbytes ->
   spin:bool -> phase:bool ->
-  cid:bytes{let l = S.length cid in 4 <= l /\ l <= 17} ->
-  x: lbytes 1 -> // Arbitrary part of the npn, transferred to the cid
-  npn:lbytes 1 ->
+  cid:lbytes 4 -> // Arbitrary cid (minimal size to simplify the proof)
+  x: byte -> // Arbitrary part of the npn, transferred to the cid (after xor)
+  npn:byte -> // Rest of the npn
+  y: byte -> // Arbitrary byte, inserted by the adversay in the encrypted header
   Lemma (
-    let p = header_encrypt a k (Short spin phase cid) S.(x @| npn) c in
-    let p' = S.upd p 0 (S.index p 0 `FStar.UInt8.logxor` 1z) in // applying xor to change the value of npn in the flag
-    header_decrypt a k (S.length cid-2) p'
-    = H_Success npn (Short spin phase S.(cid @| x)) c)
+    let p = header_encrypt a k (Short spin phase cid) S.(create 1 x @| create 1 npn) c in
+    let p' = insert (S.create 1 y) p 7 in
+    S.length p' < pow2 32 /\
+    (exists h' npn'. header_decrypt a k 2 p' = H_Success npn' h' c))
+
+
 
 type result =
 | Success: pn_len:nat2 ->
