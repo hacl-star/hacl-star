@@ -49,15 +49,16 @@ let size_to_limb al s = match al with
   | Spec.Blake2S -> size_to_uint64 s
   | Spec.Blake2B -> to_u128 (size_to_uint64 s)
 
+
 /// Constants
 
 let sigmaTable : x:ilbuffer Spec.Blake2.sigma_elt_t 160ul{witnessed x Spec.Blake2.sigmaTable /\ recallable x} =
   createL_global Spec.Blake2.list_sigma
 
-let ivTable_S (x:ilbuffer (Spec.pub_word_t Spec.Blake2S) 8ul{witnessed x (Spec.Blake2.ivTable Spec.Blake2S) /\ recallable x}) =
+let ivTable_S: (x:ilbuffer (Spec.pub_word_t Spec.Blake2S) 8ul{witnessed x (Spec.Blake2.ivTable Spec.Blake2S) /\ recallable x}) =
   createL_global Spec.Blake2.list_iv_S
 
-let ivTable_B (x:ilbuffer (Spec.pub_word_t Spec.Blake2B) 8ul{witnessed x (Spec.Blake2.ivTable Spec.Blake2B) /\ recallable x}) =
+let ivTable_B: (x:ilbuffer (Spec.pub_word_t Spec.Blake2B) 8ul{witnessed x (Spec.Blake2.ivTable Spec.Blake2B) /\ recallable x}) =
   createL_global Spec.Blake2.list_iv_B
 
 let rTable_S : x:ilbuffer (rotval U32) 4ul{witnessed x (Spec.Blake2.rTable Spec.Blake2S) /\ recallable x} =
@@ -79,10 +80,9 @@ val get_iv:
 
 [@ Substitute ]
 let get_iv a s =
-  admit();
-  recall_contents #_ #8ul ivTable_S (Spec.ivTable Spec.Blake2S);
-  recall_contents #_ #8ul ivTable_B (Spec.ivTable Spec.Blake2B);
-  let ivTable: (x:ilbuffer (Spec.pub_word_t Spec.Blake2S) 8ul{witnessed x (Spec.Blake2.ivTable Spec.Blake2S) /\ recallable x}) =
+  recall_contents #(Spec.pub_word_t Spec.Blake2S) #8ul ivTable_S (Spec.ivTable Spec.Blake2S);
+  recall_contents #(Spec.pub_word_t Spec.Blake2B) #8ul ivTable_B (Spec.ivTable Spec.Blake2B);
+  let ivTable: (x:ilbuffer (Spec.pub_word_t a) 8ul{witnessed x (Spec.Blake2.ivTable a) /\ recallable x}) =
     match a with
     | Spec.Blake2S -> ivTable_S
     | Spec.Blake2B -> ivTable_B
@@ -96,15 +96,14 @@ val set_iv:
   -> hash: hash_wp a ->
   Stack unit
     (requires (fun h -> live h hash))
-    (ensures  (fun h0 _ h1 -> modifies1 hash h0 h1))
-//                         /\ h1.[|hash|]  == Seq.map #(int_t (Spec.wt a) PUB) #(int_t (Spec.wt a) SEC) #8 secret (Spec.ivTable a)))
+    (ensures  (fun h0 _ h1 -> modifies1 hash h0 h1
+                        /\ h1.[|hash|]  == Seq.map #(int_t (Spec.wt a) PUB) #(int_t (Spec.wt a) SEC) #8 secret (Spec.ivTable a)))
 [@ Substitute ]
 let set_iv a hash =
-  admit();
-  recall_contents #_ #8ul ivTable_S (Spec.ivTable Spec.Blake2S);
-  recall_contents #_ #8ul ivTable_B (Spec.ivTable Spec.Blake2B);
+  recall_contents #(Spec.pub_word_t Spec.Blake2S) #8ul ivTable_S (Spec.ivTable Spec.Blake2S);
+  recall_contents #(Spec.pub_word_t Spec.Blake2B) #8ul ivTable_B (Spec.ivTable Spec.Blake2B);
   let h0 = ST.get() in
-  let ivTable: (x:ilbuffer (Spec.pub_word_t Spec.Blake2S) 8ul{witnessed x (Spec.Blake2.ivTable Spec.Blake2S) /\ recallable x}) =
+  let ivTable: (x:ilbuffer (Spec.pub_word_t a) 8ul{witnessed x (Spec.Blake2.ivTable a) /\ recallable x}) =
     match a with
     | Spec.Blake2S -> ivTable_S
     | Spec.Blake2B -> ivTable_B
@@ -131,7 +130,6 @@ let set_iv_sub a b =
   set_iv a half1;
   let h2 = ST.get () in
   Seq.eq_intro h2.[|b|] (Seq.concat h2.[|half0|] h2.[|half1|]);
-  (* admit(); *)
   Seq.eq_intro h2.[|b|] (Seq.update_sub h0.[|b|] 8 8 (Seq.map secret (Spec.ivTable a)))
 
 
@@ -167,11 +165,10 @@ val get_r:
 
 [@ Substitute ]
 let get_r a s =
-  admit();
-  recall_contents #_ #8ul ivTable_S (Spec.ivTable Spec.Blake2S);
-  recall_contents #_ #8ul ivTable_B (Spec.ivTable Spec.Blake2B);
+  recall_contents #(rotval (Spec.wt Spec.Blake2S)) #4ul rTable_S (Spec.rTable Spec.Blake2S);
+  recall_contents #(rotval (Spec.wt Spec.Blake2B)) #4ul rTable_B (Spec.rTable Spec.Blake2B);
   let h0 = ST.get() in
-  let rTable: (x:ilbuffer (rotval (Spec.wt a)) 8ul{witnessed x (Spec.Blake2.rTable a) /\ recallable x}) =
+  let rTable: (x:ilbuffer (rotval (Spec.wt a)) 4ul{witnessed x (Spec.Blake2.rTable a) /\ recallable x}) =
     match a with
     | Spec.Blake2S -> rTable_S
     | Spec.Blake2B -> rTable_B
@@ -441,8 +438,7 @@ let blake2_init_hash al hash kk nn =
   let s0 = hash.(size 0) in
   let kk_shift_8 = shift_left (size_to_word al kk) (size 8) in
   let s0' = s0 ^. (Spec.nat_to_word al 0x01010000) ^. kk_shift_8 ^. (size_to_word al nn) in
-  hash.(size 0) <- s0';
-  admit()
+  hash.(size 0) <- s0'
 
 
 val blake2_init_branching:
@@ -530,10 +526,9 @@ val blake2_finish:
 
 let blake2_finish al nn output hash =
   let h0 = ST.get () in
-  salloc1 h0 (size_block al) (u8 0) (Ghost.hide (loc output))
+  salloc1 h0 (size (Spec.max_output al)) (u8 0) (Ghost.hide (loc output))
   (fun _ h1 -> live h1 output /\ h1.[|output|] == Spec.Blake2.blake2_finish al h0.[|hash|] (v nn))
   (fun full ->
-    admit();
     uints_to_bytes_le (size 8) full hash;
     let final = sub full (size 0) nn in
     copy output final)
@@ -544,14 +539,15 @@ val blake2_update_block_multi:
   -> hash: hash_wp al
   -> flag: bool
   -> prev: Spec.limb_t al
-  -> n: size_t{v prev + v n * v (size_block al) <= Spec.max_limb al}
-  -> blocks: block_p al{v n * v (size_block al) = length blocks} ->
+  -> n: size_t{v prev + v n * v (size_block al) <= Spec.max_limb al /\ v n * v (size_block al) <= max_size_t}
+  -> blocks: lbuffer uint8 (n *! (size_block al)){v n * v (size_block al) = length blocks} ->
   Stack unit
     (requires (fun h -> live h hash /\ live h blocks /\ disjoint hash blocks))
     (ensures  (fun h0 _ h1 -> modifies1 hash h0 h1
                          /\ h1.[|hash|] == Spec.blake2_update_block_multi al (v prev) (v n) h0.[|blocks|] h0.[|hash|]))
 
 let blake2_update_block_multi al hash flag prev n blocks =
+  admit();
   let h0 = ST.get () in
 //  [@inline_let]
 //  let spec h = Spec.blake2_update_block al flag (v prev) h.[|blocks|] in
@@ -559,6 +555,62 @@ let blake2_update_block_multi al hash flag prev n blocks =
   (fun i ->
     let totlen:Spec.limb_t al = prev +! (i +! 1ul) * size_block al in
     blake2_update_block al hash false totlen blocks)
+
+
+(* val spec_blake2: *)
+(*     a:Spec.alg *)
+(*   -> d:Lib.ByteSequence.bytes{Seq.length d <= max_size_t} *)
+(*   -> kk:size_nat{kk <= Spec.max_key a /\ (if kk = 0 then Seq.length d <= Spec.max_limb a else Seq.length d + (Spec.size_block a) <= Spec.max_limb a)} *)
+(*   -> k:Lib.ByteSequence.lbytes kk *)
+(*   -> nn:size_nat{1 <= nn /\ nn <= Spec.max_output a} -> *)
+(*   Tot (Lib.ByteSequence.lbytes nn) *)
+
+(* let spec_blake2 a d kk k nn = *)
+(*   let ll = Seq.length d in *)
+(*   let n = ll / Spec.size_block a in *)
+(*   let rem = ll % Spec.size_block a in *)
+(*   let n,rem = if n <> 0 && rem = 0 then n - 1, Spec.size_block a else n, rem in *)
+(*   let flag = if rem = 0 then true else false in *)
+(*   let blocks = Seq.slice #uint8 #ll d 0 (n * (Spec.size_block a)) in *)
+(*   let last = Seq.slice #uint8 #ll d (n * Spec.size_block a) ll in *)
+(*   let kn = if kk = 0 then 0 else 1 in *)
+(*   let prev_multi = kn * Spec.size_block a in *)
+(*   let prev_last = (kn + n) * Spec.size_block a in *)
+(*   let s: Spec.hash_ws a = Spec.blake2_init a kk k nn in *)
+(*   let s: Spec.hash_ws a = Spec.blake2_update_block_multi a prev_multi n blocks s in *)
+(*   let s: Spec.hash_ws a = Spec.blake2_update_last a prev_multi rem last s in *)
+(*   Spec.blake2_finish a s nn *)
+
+
+(* val compute_values: *)
+(*     al:Spec.alg *)
+(*   -> d:Lib.ByteSequence.bytes{Seq.length d <= max_size_t} *)
+(*   -> kk:size_nat{kk <= Spec.max_key al /\ (if kk = 0 then Seq.length d <= Spec.max_limb al else Seq.length d + (Spec.size_block al) <= Spec.max_limb al)} *)
+(*   -> k:Lib.ByteSequence.lbytes kk *)
+(*   -> nn:size_nat{1 <= nn /\ nn <= Spec.max_output al} -> *)
+(*   (\* Tot (size_nat & size_nat & bool & size_nat & size_nat & size_nat) *\) *)
+(*   Pure (size_nat & size_nat & bool & size_nat & size_nat & size_nat) *)
+(*   (requires ) *)
+(*   (ensures  ) *)
+
+(* let compute_values al d kk k nn = *)
+(*   let ll = Seq.length d in *)
+(*   let n = ll / Spec.size_block al in *)
+(*   assert(n * Spec.size_block al <= max_size_t); *)
+(*   assert((n + 1) * Spec.size_block al <= max_size_t); *)
+(*   let rem = ll % Spec.size_block al in *)
+(*   let n,rem = if n <> 0 && rem = 0 then n - 1, Spec.size_block al else n, rem in *)
+(*   let flag = if rem = 0 then true else false in *)
+(*   let kn = if kk = 0 then 0 else 1 in *)
+(*   let prev_multi = kn * Spec.size_block al in *)
+(*   let prev_last = (kn + n) * Spec.size_block al in *)
+(*   assert(0 <= prev_last); *)
+(*   assert(rem <= Spec.size_block al /\ prev_last + rem <= Spec.Blake2.max_limb al); *)
+(*   assert((n + 1) * Spec.size_block al <= max_size_t); *)
+(*   assert(prev_last <= max_size_t); *)
+(*   n,rem,flag,kn,prev_multi,prev_last *)
+
+
 
 
 val blake2:
@@ -583,11 +635,14 @@ let blake2 al nn output ll d kk k =
   let blocks = sub d 0ul (n *! (size_block al)) in
   let last = sub d (n *! (size_block al)) rem in
   let kn = if kk =. 0ul then 0ul else 1ul in
+  let prev_multi: Spec.limb_t al = size_to_limb al (kn *! size_block al) in
+  admit();
+  let prev_last:Spec.limb_t al = size_to_limb al ((kn +! n) *! (size_block al)) in
   let h0 = ST.get () in
   salloc1 h0 (size 8) (Spec.nat_to_word al 0) (Ghost.hide (loc output))
   (fun _ h1 -> live h1 output /\ h1.[|output|] == Spec.Blake2.blake2b h0.[|d|] (v kk) h0.[|k|] (v nn))
   (fun hash ->
     blake2_init al hash kk k nn;
-    blake2_update_block_multi al hash flag (kn *! size_block al) n blocks;
-    blake2_update_last al hash ((kn +! n) *! size_block al) rem last;
+    blake2_update_block_multi al hash flag prev_multi n blocks;
+    blake2_update_last al hash prev_last rem last;
     blake2_finish al nn output hash)
