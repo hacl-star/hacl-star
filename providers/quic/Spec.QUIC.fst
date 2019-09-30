@@ -2775,7 +2775,7 @@ let lemma_encrypt_correct a k siv hpk pn_len pn last h p =
   let iv = xor_inplace pnb siv 0 in
   let c = AEAD.encrypt #a k iv header p in
   let packet = header_encrypt a hpk h npn c in
-  assert (encrypt a k siv hpk pn_len pn h p = packet);
+  //assert (encrypt a k siv hpk pn_len pn h p = packet);
 
   // computation of decryption
   lemma_header_encryption_correct a hpk h npn c;
@@ -2784,7 +2784,7 @@ let lemma_encrypt_correct a k siv hpk pn_len pn last h p =
   | H_Failure -> ()
   | H_Success _ _ _ ->
     lemma_be_to_n_is_bounded npn;
-    assert (S.length pnb - (1+pn_len) = 11 - pn_len);
+    //assert (S.length pnb - (1+pn_len) = 11 - pn_len);
     lemma_correctness_slice_be_to_n pnb (1+pn_len);
     FStar.Math.Lemmas.small_mod (reduce_pn pn_len (be_to_n pnb)) (bound_npn pn_len);
     //assert (be_to_n npn = reduce_pn pn_len (be_to_n pnb));
