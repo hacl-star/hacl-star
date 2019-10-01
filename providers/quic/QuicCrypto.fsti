@@ -11,7 +11,6 @@ open FStar.HyperStack.ST
 open EverCrypt.Helpers
 open EverCrypt.Error
 
-module M = LowStar.Modifies
 module H = EverCrypt.Hash
 module HKDF = EverCrypt.HKDF
 module AEAD = EverCrypt.AEAD
@@ -60,7 +59,7 @@ val is_fresh: i:id -> ST bool
   (ensures fun h0 b h1 -> if b then defined i else fresh i h1)
 
 // Location for the shared, global ideal state
-val global_loc: M.loc
+val global_loc: B.loc
 
 // State of the packet encryption stream functionality
 [@CAbstractStruct]
@@ -86,7 +85,7 @@ let inv (#i:id) (s:state i) (m:HS.mem) =
 
 val inv_loc_in_footprint (#i:id) (s:state i) (m:HS.mem)
   : Lemma (requires (inv s m))
-  (ensures ((footprint s m) `M.loc_in` m))
+  (ensures ((footprint s m) `B.loc_in` m))
   [SMTPat (inv s m)]
 
 val frame_inv: #i:id -> s:state i -> m0:HS.mem -> l:B.loc -> m1:HS.mem ->
@@ -197,8 +196,8 @@ val lemma_itable_length:
   (requires inv s h)
   (ensures S.length (itable i h) == pnT s Writer h - initial_pn s h)
 
-val lemma_itable_frame: i:id -> h0:mem -> l:M.loc -> h1:mem ->
-  Lemma (requires M.modifies l h0 h1 /\ M.loc_disjoint l global_loc)
+val lemma_itable_frame: i:id -> h0:mem -> l:B.loc -> h1:mem ->
+  Lemma (requires B.modifies l h0 h1 /\ B.loc_disjoint l global_loc)
   (ensures itable i h0 == itable i h1)
 let modifies_itable (i:id) (h0:mem) (h1:mem) =
   (forall (j:id{i <> j}). itable j h0 == itable j h1)
@@ -228,13 +227,13 @@ val coerce:
         SQ.supported_hash a.ha /\
         not (B.g_is_null s) /\
         inv s h1 /\
-        M.modifies (M.loc_buffer dst) h0 h1 /\
-        M.fresh_loc (footprint s h1) h0 h1 /\
-        M.loc_region_only true a.region `M.loc_includes` footprint s h1 /\
+        B.modifies (B.loc_buffer dst) h0 h1 /\
+        B.fresh_loc (footprint s h1) h0 h1 /\
+        B.loc_region_only true a.region `B.loc_includes` footprint s h1 /\
         pnT s Reader h1 == U64.v initial_pn /\
         pnT s Writer h1 == U64.v initial_pn /\
         freeable h1 s
-      | _ -> M.modifies M.loc_none h0 h1)
+      | _ -> B.modifies B.loc_none h0 h1)
 
 val create:
   i: id -> // Erased
@@ -253,14 +252,14 @@ val create:
         SQ.supported_hash a.ha /\
         not (B.g_is_null s) /\
         inv s h1 /\
-        M.modifies (M.loc_buffer dst) h0 h1 /\
-        M.fresh_loc (footprint s h1) h0 h1 /\
-        M.loc_region_only true a.region `M.loc_includes` footprint s h1 /\
+        B.modifies (B.loc_buffer dst) h0 h1 /\
+        B.fresh_loc (footprint s h1) h0 h1 /\
+        B.loc_region_only true a.region `B.loc_includes` footprint s h1 /\
         pnT s Reader h1 == U64.v initial_pn /\
         pnT s Writer h1 == U64.v initial_pn /\
         itable i h1 == S.empty /\
         freeable h1 s
-      | _ -> M.modifies M.loc_none h0 h1)
+      | _ -> B.modifies B.loc_none h0 h1)
 
 val infoT: #i:id -> s:state i -> h:mem -> GTot (info0 i)
 val get_info: #i:id -> s:state i -> ST (info0 i)
@@ -295,9 +294,9 @@ val encrypt:
     (Long? h ==> U32.v (Long?.plain_len h) = clen) /\
     B.length out == len))
   (ensures fun h0 r h1 ->
-    let fp = M.loc_union (M.loc_buffer out)
-      (M.loc_union global_loc (footprint s h0)) in
-    M.modifies fp h0 h1 /\
+    let fp = B.loc_union (B.loc_buffer out)
+      (B.loc_union global_loc (footprint s h0)) in
+    B.modifies fp h0 h1 /\
     modifies_itable i h0 h1 /\
     (match r with
     | Success ->
@@ -346,8 +345,8 @@ val decrypt:
   (requires fun h0 -> B.live h0 packet /\ B.live h0 header /\ B.live h0 out /\
     inv s h0 /\ (Long? (B.deref h0 header) ==> cid_len = 0z))
   (ensures fun h0 r h1 ->
-    M.modifies (M.loc_union (footprint s h0)
-      (M.loc_buffer header `M.loc_union` M.loc_buffer out)) h0 h1 /\
+    B.modifies (B.loc_union (footprint s h0)
+      (B.loc_buffer header `B.loc_union` B.loc_buffer out)) h0 h1 /\
     (match r with
     | Success ->
       let o = B.deref h1 out in
