@@ -631,6 +631,7 @@ REQUIRED_FLAGS	=\
   -add-include '"kremlin/internal/types.h"' \
   -add-include '"kremlin/internal/target.h"' \
   -add-include '"kremlin/lowstar_endianness.h"' \
+  -add-include '"kremlin/fstar_int.h"' \
   -add-include '<string.h>'
 
 # Disabled for distributions that don't include vectorized implementations.
