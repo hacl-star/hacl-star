@@ -11,8 +11,8 @@ open FStar.Integers
 open LowStar.BufferOps
 
 open Spec.Hash.Definitions
-open Spec.HMAC
-friend Spec.HMAC
+open Spec.Agile.HMAC
+friend Spec.Agile.HMAC
 
 let _: squash (inversion hash_alg) = allow_inversion hash_alg
 
@@ -40,7 +40,7 @@ let xor_bytes_inplace a b len =
 inline_for_extraction noextract
 let wrap_key_st (a: hash_alg) =
   output: B.buffer uint8 { B.length output == block_length a } ->
-  key: B.buffer uint8 {B.length key < max_input_length a /\ B.disjoint output key} ->
+  key: B.buffer uint8 {B.length key <= max_input_length a /\ B.disjoint output key} ->
   len: UInt32.t {v len = B.length key} ->
   Stack unit
     (requires fun h0 ->
@@ -52,7 +52,7 @@ let wrap_key_st (a: hash_alg) =
 
 /// This one is only to avoid a warning about a pattern that is not encoding properly.
 inline_for_extraction
-let helper_smtpat (a: hash_alg) (len: uint32_t{ v len < max_input_length a }):
+let helper_smtpat (a: hash_alg) (len: uint32_t{ v len <= max_input_length a }):
   x:uint32_t { x <= D.block_len a } =
   if len <= D.block_len a then len else D.hash_len a
 
@@ -80,7 +80,7 @@ fun output key len ->
     hash key len nkey;
     let h1 = ST.get () in
     assert (Seq.equal (B.as_seq h1 zeroes) (B.as_seq h0 zeroes));
-    assert (Seq.equal (B.as_seq h1 nkey) (Spec.Hash.hash a (B.as_seq h0 key)));
+    assert (Seq.equal (B.as_seq h1 nkey) (Spec.Agile.Hash.hash a (B.as_seq h0 key)));
     assert (Seq.equal (B.as_seq h1 output) (S.append (B.as_seq h1 nkey) (B.as_seq h1 zeroes)));
     Seq.lemma_eq_elim (B.as_seq h1 output) (S.append (B.as_seq h1 nkey) (B.as_seq h1 zeroes));
     assert (B.as_seq h1 output == wrap a (B.as_seq h0 key))
@@ -110,7 +110,7 @@ val part1:
       key_and_data_fits a;
       B.(modifies (loc_union (loc_buffer s) (loc_buffer key)) h0 h1) /\
       S.slice (B.as_seq h1 key) 0 (hash_length a) `Seq.equal`
-        Spec.Hash.hash a (S.append (B.as_seq h0 key) (B.as_seq h0 data)))
+        Spec.Agile.Hash.hash a (S.append (B.as_seq h0 key) (B.as_seq h0 data)))
 
 inline_for_extraction noextract
 let block_len_as_len (a: hash_alg):
@@ -128,22 +128,22 @@ let part1 a init update_multi update_last finish s key data len =
   (**) let h0 = ST.get () in
   init s;
   (**) let h1 = ST.get () in
-  (**) assert (B.as_seq h1 s `Seq.equal` Spec.Hash.init a);
+  (**) assert (B.as_seq h1 s `Seq.equal` Spec.Agile.Hash.init a);
   update_multi s key 1ul;
   (**) let h2 = ST.get () in
-  (**) assert (B.as_seq h2 s `Seq.equal` Spec.Hash.(update_multi a (init a) (B.as_seq h0 key)));
+  (**) assert (B.as_seq h2 s `Seq.equal` Spec.Agile.Hash.(update_multi a (init a) (B.as_seq h0 key)));
   update_last s (block_len_as_len a) data len;
   (**) let h3 = ST.get () in
   (**) assert (B.as_seq h3 s `Seq.equal`
     Spec.Hash.Incremental.update_last a
-      (Spec.Hash.(update_multi a (init a) (B.as_seq h0 key))) (block_length a) (B.as_seq h0 data));
+      (Spec.Agile.Hash.(update_multi a (init a) (B.as_seq h0 key))) (block_length a) (B.as_seq h0 data));
   let dst = B.sub key 0ul (D.hash_len a) in
   finish s dst;
   (**) let h4 = ST.get () in
   begin
     let open Spec.Hash.PadFinish in
     let open Spec.Hash.Incremental in
-    let open Spec.Hash in
+    let open Spec.Agile.Hash in
     let open Spec.Hash.Lemmas in
     calc (S.equal) {
       B.as_seq h4 dst;
@@ -194,7 +194,7 @@ val part2:
       key_and_data_fits a;
       B.(modifies (loc_union (loc_buffer s) (loc_buffer dst)) h0 h1) /\
       B.as_seq h1 dst `Seq.equal`
-        Spec.Hash.hash a (S.append (B.as_seq h0 key) (B.as_seq h0 data)))
+        Spec.Agile.Hash.hash a (S.append (B.as_seq h0 key) (B.as_seq h0 data)))
 
 #set-options "--z3rlimit 80"
 inline_for_extraction noextract
@@ -203,21 +203,21 @@ let part2 a init update_multi update_last finish s dst key data len =
   (**) let h0 = ST.get () in
   init s;
   (**) let h1 = ST.get () in
-  (**) assert (B.as_seq h1 s `Seq.equal` Spec.Hash.init a);
+  (**) assert (B.as_seq h1 s `Seq.equal` Spec.Agile.Hash.init a);
   update_multi s key 1ul;
   (**) let h2 = ST.get () in
-  (**) assert (B.as_seq h2 s `Seq.equal` Spec.Hash.(update_multi a (init a) (B.as_seq h0 key)));
+  (**) assert (B.as_seq h2 s `Seq.equal` Spec.Agile.Hash.(update_multi a (init a) (B.as_seq h0 key)));
   update_last s (block_len_as_len a) data len;
   (**) let h3 = ST.get () in
   (**) assert (B.as_seq h3 s `Seq.equal`
     Spec.Hash.Incremental.update_last a
-      (Spec.Hash.(update_multi a (init a) (B.as_seq h0 key))) (block_length a) (B.as_seq h0 data));
+      (Spec.Agile.Hash.(update_multi a (init a) (B.as_seq h0 key))) (block_length a) (B.as_seq h0 data));
   finish s dst;
   (**) let h4 = ST.get () in
   begin
     let open Spec.Hash.PadFinish in
     let open Spec.Hash.Incremental in
-    let open Spec.Hash in
+    let open Spec.Agile.Hash in
     let open Spec.Hash.Lemmas in
     calc (S.equal) {
       B.as_seq h4 dst;
@@ -280,7 +280,7 @@ let mk_compute a hash alloca init update_multi update_last finish dst key key_le
   (**) key_and_data_fits a;
   (**) let h5 = ST.get () in
   (**) S.lemma_eq_intro (S.slice (B.as_seq h5 ipad) 0 (hash_length a))
-      (Spec.Hash.hash a S.(append (xor (u8 0x36) (wrap a (B.as_seq h0 key))) (B.as_seq h0 data)));
+      (Spec.Agile.Hash.hash a S.(append (xor (u8 0x36) (wrap a (B.as_seq h0 key))) (B.as_seq h0 data)));
   let hash1 = B.sub ipad 0ul (D.hash_len a) in
   part2 a init update_multi update_last finish s dst opad hash1 (D.hash_len a);
   (**) let h6 = ST.get () in

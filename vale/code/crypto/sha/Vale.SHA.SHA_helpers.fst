@@ -4,7 +4,7 @@ open FStar.Mul
 open Vale.Def.Prop_s
 open Vale.Def.Opaque_s
 open Spec.SHA2
-open Spec.Hash
+open Spec.Agile.Hash
 open Spec.Hash.Definitions
 open Spec.Hash.Lemmas
 open Vale.X64.CryptoInstructions_s

@@ -49,17 +49,16 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "1eca84c8f62dbef3729baeff735680ae"
+      "f5ef0a742943f2217688f3dd43f0050f"
     ],
     [
       "Hacl.Impl.HSalsa20.hsalsa20_init",
       2,
-      2,
+      1,
       1,
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
-        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
-        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "assumption_FStar.Monotonic.HyperHeap.Mod_set_def", "b2t_def",
         "bool_inversion", "bool_typing",
         "constructor_distinct_Lib.Buffer.MUT",
@@ -73,6 +72,7 @@
         "disc_equation_Lib.IntTypes.S128", "disc_equation_Lib.IntTypes.U1",
         "disc_equation_Lib.IntTypes.U128", "equality_tok_Lib.Buffer.MUT@tok",
         "equality_tok_Lib.IntTypes.PUB@tok",
+        "equality_tok_Lib.IntTypes.SEC@tok",
         "equality_tok_Lib.IntTypes.U32@tok",
         "equation_FStar.HyperStack.ST.equal_domains",
         "equation_FStar.HyperStack.ST.inline_stack_inv",
@@ -110,6 +110,7 @@
         "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.eqtype",
         "equation_Prims.nat", "equation_Spec.Salsa20.hsalsa20_init",
         "equation_Spec.Salsa20.size_nonce", "equation_Spec.Salsa20.xsetup",
+        "equation_with_fuel_Prims.pow2.fuel_instrumented",
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Lib.IntTypes.uint32",
         "function_token_typing_Lib.IntTypes.uint8",
@@ -176,7 +177,9 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_72530680bea79807d75cb9d6e7632258",
+        "refinement_interpretation_Tm_refine_782420a2054fd965084564ef5ff53609",
         "refinement_interpretation_Tm_refine_81407705a0828c2c1b1976675443f647",
+        "refinement_interpretation_Tm_refine_9d3fd79fd314167f1a9c213a188da3ec",
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
         "refinement_interpretation_Tm_refine_9ff150f589411d5a40376aa0c5e1ca86",
         "refinement_interpretation_Tm_refine_b550ca9347e0645a53715102a08d8fa1",
@@ -185,7 +188,6 @@
         "refinement_interpretation_Tm_refine_c301805fd1fb5ac894318ca91ebfbca9",
         "refinement_interpretation_Tm_refine_c6c18a7ceb46d419c35ff8551117551e",
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
-        "refinement_interpretation_Tm_refine_edccc421660c61e3591d98071500d795",
         "refinement_interpretation_Tm_refine_ee4e3ad73f846037e8152c74ec9316ba",
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
         "refinement_interpretation_Tm_refine_faa870010f904c859d417ddc1e6c9f31",
@@ -206,7 +208,8 @@
         "typing_FStar.UInt32.v", "typing_Lib.Buffer.as_seq",
         "typing_Lib.Buffer.length", "typing_Lib.Buffer.loc",
         "typing_Lib.IntTypes.bits", "typing_Lib.IntTypes.minint",
-        "typing_Lib.IntTypes.mul", "typing_Lib.Sequence.slice",
+        "typing_Lib.IntTypes.mk_int", "typing_Lib.IntTypes.mul",
+        "typing_Lib.IntTypes.v", "typing_Lib.Sequence.slice",
         "typing_LowStar.Buffer.trivial_preorder",
         "typing_LowStar.Monotonic.Buffer.address_liveness_insensitive_locs",
         "typing_LowStar.Monotonic.Buffer.as_addr",
@@ -223,7 +226,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "ce863699e82f6e47562cafb0bf2ed4d1"
+      "2079d175cfbb316f7ed8c2463d940b1e"
     ],
     [
       "Hacl.Impl.HSalsa20.hsalsa20",
@@ -283,7 +286,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "69219bbbcc4f207dcee3ea0021d23e67"
+      "d1ac1771a2fce620bd8418a6ba340b86"
     ],
     [
       "Hacl.Impl.HSalsa20.hsalsa20",
@@ -444,7 +447,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "412f76ae7cf200c1955cd4e2e44e4f7f"
+      "393ed219cca18ec19590f1f381d52e6e"
     ]
   ]
 ]

@@ -1,5 +1,5 @@
 [
-  "_∞=§¶¥\u0003içSñ‰È#\u0019í",
+  "©uÃTı‡iPËnüu≤\u0004\u0007Ñ",
   [
     [
       "Spec.SHA2.Lemmas.update_224_256",
@@ -28,7 +28,7 @@
         "refinement_interpretation_Tm_refine_ee7f9ad7b411394a04a1e8bcaa63b394"
       ],
       0,
-      "bfc7552f8f06240aafc72c9e68c91df2"
+      "03bd98aeb822dbac8298979bde100f95"
     ],
     [
       "Spec.SHA2.Lemmas.update_224_256",
@@ -147,7 +147,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "c211ffe63764c02e1c8c1771b1dacf85"
+      "81e383f2e6fffd1d901d682b9e78d68c"
     ],
     [
       "Spec.SHA2.Lemmas.update_224_256",
@@ -161,7 +161,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "27d782c4ca13d7385b68435f9920d182"
+      "ca4c1fd5209c371f6028bc9c74404eb4"
     ],
     [
       "Spec.SHA2.Lemmas.update_224_256",
@@ -175,7 +175,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "4a243f0359d66dc99e63cd221366571c"
+      "fa3e21c5bee857437bbd526f19f45c48"
     ],
     [
       "Spec.SHA2.Lemmas.update_224_256",
@@ -189,7 +189,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "d826116c9368d432d5c413568d8abeaf"
+      "8febd7526d7c18499bca4d843ff3b3f8"
     ],
     [
       "Spec.SHA2.Lemmas.update_224_256",
@@ -203,7 +203,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "26897e7212a9879c32a120badd83f33d"
+      "9adfbcd5b64b9bcafd9ee6f20f91f04b"
     ],
     [
       "Spec.SHA2.Lemmas.update_multi_224_256",
@@ -231,7 +231,7 @@
         "refinement_interpretation_Tm_refine_f7a8f8340b3c54b659acfc982cbf3004"
       ],
       0,
-      "0a3b403802d9850e214db09965dbced9"
+      "37da37a388f3d85e93e498d5f815ba57"
     ],
     [
       "Spec.SHA2.Lemmas.update_multi_224_256",
@@ -260,7 +260,7 @@
         "refinement_interpretation_Tm_refine_f7a8f8340b3c54b659acfc982cbf3004"
       ],
       0,
-      "745b6952437fc139e59303aaa048773a"
+      "96f2ced4e1ca3fdbfe99e93be59ab028"
     ],
     [
       "Spec.SHA2.Lemmas.update_multi_224_256",
@@ -269,8 +269,8 @@
       1,
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
-        "@fuel_correspondence_Spec.Hash.update_multi.fuel_instrumented",
-        "@fuel_irrelevance_Spec.Hash.update_multi.fuel_instrumented",
+        "@fuel_correspondence_Spec.Agile.Hash.update_multi.fuel_instrumented",
+        "@fuel_irrelevance_Spec.Agile.Hash.update_multi.fuel_instrumented",
         "@query", "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "binder_x_2cc995fa6234a28d6d1adc50b356b677_0",
         "binder_x_b55238243ce2634bf4086edce83980ca_1",
@@ -284,7 +284,9 @@
         "equality_tok_Spec.Hash.Definitions.SHA2_224@tok",
         "equality_tok_Spec.Hash.Definitions.SHA2_256@tok",
         "equation_FStar.Seq.Properties.split", "equation_Lib.IntTypes.uint8",
-        "equation_Prims.nat", "equation_Spec.Hash.Definitions.block_length",
+        "equation_Prims.nat", "equation_Spec.Agile.Hash.split_block",
+        "equation_Spec.Agile.Hash.update",
+        "equation_Spec.Hash.Definitions.block_length",
         "equation_Spec.Hash.Definitions.block_word_length",
         "equation_Spec.Hash.Definitions.bytes",
         "equation_Spec.Hash.Definitions.bytes_blocks",
@@ -294,8 +296,7 @@
         "equation_Spec.Hash.Definitions.word_length",
         "equation_Spec.Hash.Definitions.word_t",
         "equation_Spec.Hash.Definitions.words_state",
-        "equation_Spec.Hash.split_block", "equation_Spec.Hash.update",
-        "equation_with_fuel_Spec.Hash.update_multi.fuel_instrumented",
+        "equation_with_fuel_Spec.Agile.Hash.update_multi.fuel_instrumented",
         "function_token_typing_Lib.IntTypes.uint8",
         "function_token_typing_Prims.__cache_version_number__",
         "int_inversion", "int_typing",
@@ -311,7 +312,7 @@
         "refinement_interpretation_Tm_refine_778cda52ca3898c9d0220c148d4775e7",
         "refinement_interpretation_Tm_refine_81407705a0828c2c1b1976675443f647",
         "refinement_interpretation_Tm_refine_f7a8f8340b3c54b659acfc982cbf3004",
-        "token_correspondence_Spec.Hash.update",
+        "token_correspondence_Spec.Agile.Hash.update",
         "token_correspondence_Spec.SHA2.update",
         "typing_FStar.Seq.Base.length",
         "typing_Spec.Hash.Definitions.block_length",
@@ -320,7 +321,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "0725c96b2840f9820777051fb9def135"
+      "2e6dac67ef601a6b6777ded11da54542"
     ]
   ]
 ]

@@ -12,6 +12,8 @@ open Lib.ByteSequence
 /// block. We leave details of key expansion to the ``.fst``, or possibly even
 /// to the low-level implementation.
 
+val force_flush_interleaving: unit
+
 /// Definitions
 /// -----------
 
