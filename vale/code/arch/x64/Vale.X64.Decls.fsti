@@ -79,10 +79,10 @@ unfold let va_operand128 = operand128
 unfold let va_operand_opr128 = va_operand128
 
 val va_pbool : Type0
-val va_ttrue : unit -> va_pbool
-val va_ffalse : string -> va_pbool
-val va_pbool_and : va_pbool -> va_pbool -> va_pbool
-val get_reason : va_pbool -> option string
+val va_ttrue (_:unit) : va_pbool
+val va_ffalse (reason:string) : va_pbool
+val va_pbool_and (x y:va_pbool) : va_pbool
+val get_reason (p:va_pbool) : option string
 
 noeq
 type va_transformation_result = {

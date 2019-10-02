@@ -301,7 +301,7 @@ procedure Xor64(inout dst:dst_opr64, in src:opr64)
     modifies
         efl;
     ensures
-        dst == old(ixor64(dst,src));
+        dst == old(ixor64(dst, src));
         !overflow(efl);
         !cf(efl);
         valid_cf(efl);
@@ -316,7 +316,7 @@ procedure And64(inout dst:dst_opr64, in src:opr64)
     modifies
         efl;
     ensures
-        dst == old(iand64(dst,src));
+        dst == old(iand64(dst, src));
 {
 }
 
