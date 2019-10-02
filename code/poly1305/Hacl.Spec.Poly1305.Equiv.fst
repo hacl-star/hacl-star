@@ -198,6 +198,8 @@ let poly_update_multi_lemma_loop2 r text i acc_vec0 =
   assert (normalize_2 r acc_vec1 == PLoops.repeat_w #pfelem 2 nb_vec repeat_bf_t1 i (normalize_n r acc_vec0))
 
 
+#set-options "--z3rlimit 150"
+
 val poly_update_multi_lemma_loop4:
     r:pfelem
   -> text:bytes{4 * size_block <= length text /\ length text % (4 * size_block) = 0 /\ length text % size_block = 0}
