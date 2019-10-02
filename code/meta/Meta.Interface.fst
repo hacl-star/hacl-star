@@ -64,6 +64,9 @@ let assoc (#a: eqtype) #b (x: a) (l: list (a & b)): Tac b =
 let has_attr (s: sigelt) (x: term) =
   List.Tot.existsb (fun t -> term_eq t x) (sigelt_attrs s)
 
+let has_inline_for_extraction (s: sigelt) =
+  List.Tot.existsb (function Inline_for_extraction -> true | _ -> false) (sigelt_quals s)
+
 // A demo on how to allocate a fresh variable and pack it as a binder.
 let _: int -> int = _ by (
   let bv: bv = pack_bv ({ bv_ppname = "x"; bv_index = 42; bv_sort = `int }) in
@@ -152,9 +155,12 @@ let rec visit_function (st: state) (f_name: name): Tac (state & list sigelt) =
           // i is free
           let new_body =
             if List.length new_args = 0 then
-              // Small optimization: if this is a leaf of the call-graph, just
-              // call the original function.
-              pack (Tv_App (pack (Tv_FVar (pack_fv f_name))) (pack (Tv_Var index_bv), Q_Implicit))
+              if not (has_inline_for_extraction f) then
+                fail (string_of_name f_name ^ " should be inline_for_extraction")
+              else
+                // Small optimization: if this is a leaf of the call-graph, just
+                // call the original function.
+                pack (Tv_App (pack (Tv_FVar (pack_fv f_name))) (pack (Tv_Var index_bv), Q_Implicit))
             else
               fold_right (fun (_, bv) acc ->
                 pack (Tv_Abs (mk_binder bv) acc)

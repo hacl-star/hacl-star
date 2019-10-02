@@ -611,8 +611,6 @@ let update a p data len =
   let s = !*p in
   let State hash_state buf_ total_len seen = s in
   let a = Hash.alg_of_state a hash_state in
-  [@inline_let]
-  let hash_state: Hash.state a = hash_state in
   let sz = rest a total_len in
   if len `U32.lt` (Hacl.Hash.Definitions.block_len a `U32.sub` sz) then
     update_small (G.hide a) p data len
@@ -651,11 +649,7 @@ inline_for_extraction noextract
 let mk_finish a p dst =
   let open LowStar.BufferOps in
   let h0 = ST.get () in
-  let s = !*p in
-  let State hash_state buf_ total_len seen = s in
-  let a = Hash.alg_of_state (G.hide a) hash_state in
-  [@inline_let]
-  let hash_state: Hash.state a = hash_state in
+  let State hash_state buf_ total_len seen = !*p in
 
   push_frame ();
   let h1 = ST.get () in
