@@ -127,7 +127,7 @@ val derive_key_poly1305_do:
   (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
     (let key:LSeq.lseq uint8 64 = Spec.Chacha20.chacha20_encrypt_bytes (as_seq h0 k) (as_seq h0 n) 0 (LSeq.create 64 (u8 0)) in
     as_seq h1 out == Spec.poly1305_do (LSeq.sub key 0 32) (as_seq h0 m) (as_seq h0 aad)))
-[@Meta.Attribute.inline_]
+[@ Meta.Attribute.inline_ ]
 let derive_key_poly1305_do #w k n aadlen aad mlen m out =
   push_frame ();
   // Create a new buffer to derive the key
