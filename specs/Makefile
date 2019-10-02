@@ -36,7 +36,8 @@ FIXME = \
 	Spec.Hash_Generic.fst \
 	Spec.Hash_Generic.fsti \
 	Spec.HMAC_Generic.fst \
-	Spec.HMAC_Generic.fsti
+	Spec.HMAC_Generic.fsti \
+	Spec.Blake2.Incremental.fst
 
 ROOTS = $(filter-out $(FIXME),$(ALL_SOURCES))
 
