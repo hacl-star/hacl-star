@@ -11,8 +11,7 @@ FSTAR_INCLUDE_DIRS = \
   $(HACL_HOME)/specs \
   $(HACL_HOME)/specs/lemmas \
   $(HACL_HOME)/lib \
-  $(HACL_HOME)/code/curve25519 \
-  $(HACL_HOME)/code/curve25519/lemmas \
+  $(HACL_HOME)/code/curve25519
 
 FSTAR_FLAGS = --cmi \
   --cache_checked_modules --odir $(OUTPUT_DIR) \

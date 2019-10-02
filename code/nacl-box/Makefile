@@ -29,7 +29,6 @@ FSTAR_INCLUDE_DIRS = \
   $(HACL_HOME)/specs/lemmas \
   $(HACL_HOME)/lib \
   $(HACL_HOME)/code/curve25519 \
-  $(HACL_HOME)/code/curve25519/lemmas \
   $(HACL_HOME)/code/poly1305 \
   $(HACL_HOME)/code/chacha20
 
