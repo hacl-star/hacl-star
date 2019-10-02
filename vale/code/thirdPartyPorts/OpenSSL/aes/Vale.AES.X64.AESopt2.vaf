@@ -170,7 +170,7 @@ procedure MulAdd_step(
         buffers_disjoint128(hkeys_b, scratch_b);
         validSrcAddrs128(mem, Xip - 0x20, hkeys_b, 8, memTaint, Secret);
         validSrcAddrs128(mem, rbp, scratch_b, 8, memTaint, Secret);
-        rbp + 0x10 * 8 <= pow2_64;
+//        rbp + 0x10 * 8 <= pow2_64;
         0 <= power_index < 8;
         let z0 := if m = 1 then a1 else Z0;
         m > 0 ==> of_quad32(z0) +. shift(of_quad32(Z2), 64) +. shift(of_quad32(Z3), 128) ==
@@ -776,7 +776,7 @@ procedure Ghash_register(
     PinsrdImm(Hkey, 0xc2000000, 3, scratch_ptr);
     lemma_gf128_low_shift();
     lemma_gf128_degree();
-    Reduce(false, gf128_modulus_low_terms); // REVIEW[jb]: I added the [false] here. Is this correct?
+    Reduce(true, gf128_modulus_low_terms);
     assert of_quad32(Xi) == mod_rev(128, ghash_unroll_back(h, prev, pdata, 0, 1, 0), gf128_modulus);
     lemma_ghash_unroll_back_forward(h, prev, pdata, 0, 0);
     assert of_quad32(Xi) == mod_rev(128, ghash_unroll(h, prev, pdata, 0, 0, 0), gf128_modulus);

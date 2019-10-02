@@ -76,42 +76,19 @@ open Vale.AES.X64.AESopt
 open Vale.AES.X64.AESopt2
 #endverbatim
 
-#verbatim{:interface}
-let aes_reqs_offset
-  (alg:algorithm) (key:seq nat32) (round_keys:seq quad32) (keys_b:buffer128)
-  (key_ptr:int) (mem:vale_heap) (memTaint:memtaint) : prop0
-  =
-  aesni_enabled /\ avx_enabled /\
-  (alg = AES_128 || alg = AES_256) /\
-  is_aes_key_LE alg key /\
-  length(round_keys) == nr(alg) + 1 /\
-  round_keys == key_to_round_keys_LE alg key /\
-
-  //validSrcAddrsOffset128 mem key_ptr keys_b 8 (nr alg + 1) memTaint Secret /\
-  // Can't use the standard Offset, since that makes the size too large and conflicts
-  // with the spec below that says the entire keys_b is exactly round_keys
-  buffer_readable mem keys_b /\
-  (nr alg + 1) <= buffer_length keys_b /\
-  buffer_addr keys_b mem + 16 * 8 == key_ptr /\
-  valid_taint_buf128 keys_b mem memTaint Secret /\
-
-  s128 mem keys_b == round_keys
-
-#endverbatim
-
 #verbatim{:implementation}
 unfold let lo(x:poly):poly = mask x 64
 unfold let hi(x:poly):poly = shift x (-64)
 
-let scratch_reqs (scratch_b:buffer128) (count:nat) (mem:vale_heap) (s:seq quad32) (z3:quad32) : prop0 =
-  count * 6 + 6 <= length s /\
-  (let data = slice s (count * 6) (count * 6 + 6) in
-   z3 == reverse_bytes_quad32 (index data 5) /\
-   buffer128_read scratch_b 3 mem == reverse_bytes_quad32 (index data 4) /\
-   buffer128_read scratch_b 4 mem == reverse_bytes_quad32 (index data 3) /\
-   buffer128_read scratch_b 5 mem == reverse_bytes_quad32 (index data 2) /\
-   buffer128_read scratch_b 6 mem == reverse_bytes_quad32 (index data 1) /\
-   buffer128_read scratch_b 7 mem == reverse_bytes_quad32 (index data 0))
+//let scratch_reqs (scratch_b:buffer128) (count:nat) (mem:vale_heap) (s:seq quad32) (z3:quad32) : prop0 =
+//  count * 6 + 6 <= length s /\
+//  (let data = slice s (count * 6) (count * 6 + 6) in
+//   z3 == reverse_bytes_quad32 (index data 5) /\
+//   buffer128_read scratch_b 3 mem == reverse_bytes_quad32 (index data 4) /\
+//   buffer128_read scratch_b 4 mem == reverse_bytes_quad32 (index data 3) /\
+//   buffer128_read scratch_b 5 mem == reverse_bytes_quad32 (index data 2) /\
+//   buffer128_read scratch_b 6 mem == reverse_bytes_quad32 (index data 1) /\
+//   buffer128_read scratch_b 7 mem == reverse_bytes_quad32 (index data 0))
 
 
 let scratch_reqs_simple (scratch_b:buffer128) (mem:vale_heap) (data:seq quad32) (z3:quad32) : prop0 =
@@ -123,9 +100,6 @@ let scratch_reqs_simple (scratch_b:buffer128) (mem:vale_heap) (data:seq quad32) 
    buffer128_read scratch_b 6 mem == reverse_bytes_quad32 (index data 1) /\
    buffer128_read scratch_b 7 mem == reverse_bytes_quad32 (index data 0)
 #endverbatim
-
-function aes_reqs_offset(alg:algorithm, key:seq(nat32), round_keys:seq(quad32), keys_b:buffer128,
-    key_ptr:int, mem:vale_heap, memTaint:memtaint) : prop extern;
 
 function lo(x:poly) : poly extern;
 function hi(x:poly) : poly extern;
@@ -170,18 +144,6 @@ procedure Load_one_msb()
     assert two_to_nat32(Mktwo(0, 0x1000000)) == 0x100000000000000; // OBSERVE
     PinsrqImm(T2, 0x100000000000000, 1, constp);
     Vale.Def.Opaque_s.reveal_opaque(insert_nat64);
-}
-
-procedure Load_0xc2_msb(out dst:xmm)
-    {:quick exportOnly}
-    lets constp @= r11;
-    modifies constp; efl;
-    ensures  dst == Mkfour(0, 0, 0, 0xc2000000);
-{
-    ZeroXmm(dst);
-    assert two_to_nat32(Mktwo(0, 0xc2000000)) == 0xc200000000000000; // OBSERVE
-    lemma_insert_nat64_nat32s(dst, 0, 0xc2000000);
-    PinsrqImm(dst, 0xc200000000000000, 1, constp);
 }
 
 #reset-options " --z3rlimit 20"
@@ -496,22 +458,20 @@ procedure Loop6x_decrypt(
     lemma_of_to_quad32(prev);
 
     let init :=
-        Loop6x_partial(alg, h_LE, y_prev, data, count, iv_b, in0_b, in_b, scratch_b, key_words, round_keys, keys_b, hkeys_b, ctr_BE);
+        Loop6x_partial(alg, h_LE, y_prev, data, count, (if len > 6 then count + 1 else count),
+            iv_b, in0_b, in_b, scratch_b, key_words, round_keys, keys_b, hkeys_b, ctr_BE);
     let eventual_Xi := of_quad32(Xi) +. of_quad32(buffer128_read(scratch_b, 1, mem)) +. of_quad32(Z0);
     assert eventual_Xi == of_quad32(reverse_bytes_quad32(ghash_incremental(h_LE, y_prev, data)));
 
     let ctrs := make_six_of(fun(i:int_range(0, 5)) reverse_bytes_quad32(inc32lite(ctr_BE, i)));
     let plains := make_six_of(fun(i:int_range(0, 5)) buffer128_read(in_b, count*6 + i, mem));
 
-    Loop6x_final(alg, iv_b, scratch_b, key_words, round_keys, keys_b,
-                 inc32lite(ctr_BE, 6), 
-                 init,
-                 ctrs,
-                 plains,
-                 buffer128_read(in0_b, (if len > 6 then count+1 else count)*6 + 0, mem));
+    Loop6x_final(alg, iv_b, scratch_b, key_words, round_keys, keys_b, inc32lite(ctr_BE, 6), init,
+        ctrs, plains, buffer128_read(in0_b, (if len > 6 then count + 1 else count) * 6 + 0, mem));
 
     Sub64(len, 6);
-    if (len > 6) {
+    if (len > 6)
+    {
         Add64(in0, 0x60);
     }
 
@@ -524,7 +484,8 @@ procedure Loop6x_decrypt(
     assert y_new == ghash_incremental0(h_LE, y_orig, slice(plain_quads, 0, (count + 1) * 6));
 
 
-    if (len > 0) {
+    if (len > 0)
+    {
         Loop6x_save_output(count, out_b);
 //        assert equal(slice(s128(mem,      out_b), 0, (count - 1) * 6),
 //                     slice(s128(mem_snap, out_b), 0, (count - 1) * 6));    // OBSERVE
@@ -545,7 +506,9 @@ procedure Loop6x_decrypt(
         //    of_quad32(Xi) +. of_quad32(Z0) +. of_quad32(buffer128_read(scratch_b, 1, mem));
 
         assert y_new == reverse_bytes_quad32(to_quad32(of_quad32(reverse_bytes_quad32(ghash_incremental(h_LE, y_prev, data)))));
-    } else {
+    }
+    else
+    {
         assert eventual_Xi == of_quad32(reverse_bytes_quad32(ghash_incremental(h_LE, y_prev, data)));
         VPolyAdd(Xi, Xi, Mem128(rbp, 0x10, Secret, scratch_b, 1));  // # modulo-scheduled
         VPolyAdd(Xi, Xi, Z0);                                    // # modulo-scheduled
@@ -2167,7 +2130,7 @@ procedure GCM_finalize(
 #verbatim
 #restart-solver
 #endverbatim
-#reset-options "--z3rlimit 800 --z3refresh"
+#reset-options "--z3rlimit 1600 --z3refresh --max_ifuel 0"
 #verbatim
 #restart-solver
 #endverbatim
