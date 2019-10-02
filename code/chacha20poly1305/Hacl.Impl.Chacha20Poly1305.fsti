@@ -1,56 +1,70 @@
 module Hacl.Impl.Chacha20Poly1305
 
-module ST = FStar.HyperStack.ST
+open FStar.Mul
 open FStar.HyperStack
 open FStar.HyperStack.All
+
 open Lib.IntTypes
 open Lib.Buffer
-open Lib.ByteBuffer
-module Seq = Lib.Sequence
-open FStar.Mul
 
+module ST = FStar.HyperStack.ST
 module Spec = Spec.Chacha20Poly1305
 
-val aead_encrypt_chacha_poly:
-  k:lbuffer uint8 32ul -> // key
-  n:lbuffer uint8 12ul -> // nonce
-  aadlen:size_t ->
-  aad:lbuffer uint8 aadlen ->
-  (mlen:size_t{v mlen + 16 <= max_size_t /\ v aadlen + v mlen / 64 <= max_size_t}) ->
-  m:lbuffer uint8 mlen -> // input: plaintext
-  cipher:lbuffer uint8 mlen -> // output: buffer for cipher + mac
-  tag:lbuffer uint8 16ul -> // output: buffer for cipher + mac
-  Stack unit
-    (requires (fun h ->
-      disjoint k cipher /\ disjoint n cipher /\
-      disjoint k tag /\ disjoint n tag /\
-      disjoint cipher tag /\
-      eq_or_disjoint m cipher /\
-      disjoint aad cipher /\
-      live h k /\ live h n /\ live h aad /\ live h m /\ live h cipher /\ live h tag))
-    (ensures  (fun h0 _ h1 -> modifies (loc cipher |+| loc tag) h0 h1 /\
-      Seq.equal
-        (Seq.concat (as_seq h1 cipher) (as_seq h1 tag))
-        (Spec.aead_encrypt (as_seq h0 k) (as_seq h0 n) (as_seq h0 m) (as_seq h0 aad))))
+open Hacl.Impl.Poly1305.Fields
 
-val aead_decrypt_chacha_poly:
-  k:lbuffer uint8 32ul -> // key
-  n:lbuffer uint8 12ul -> // nonce
-  aadlen:size_t -> 
-  aad:lbuffer uint8 aadlen ->
-  (mlen:size_t{v mlen + 16 <= max_size_t /\ v aadlen + v mlen / 64 <= max_size_t}) ->
-  m:lbuffer uint8 mlen -> // output: buffer for decrypted plaintext
-  c:lbuffer uint8 mlen -> // input: cipher
-  mac:lbuffer uint8 16ul -> // input: mac
+
+#set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 1"
+
+inline_for_extraction noextract
+let aead_encrypt_st (w:field_spec) =
+    key:lbuffer uint8 32ul
+  -> nonce:lbuffer uint8 12ul
+  -> alen:size_t
+  -> aad:lbuffer uint8 alen
+  -> len:size_t
+  -> input:lbuffer uint8 len
+  -> output:lbuffer uint8 len
+  -> tag:lbuffer uint8 16ul ->
+  Stack unit
+  (requires fun h ->
+    live h key /\ live h nonce /\ live h aad /\
+    live h input /\ live h output /\ live h tag /\
+    disjoint key output /\ disjoint nonce output /\
+    disjoint key tag /\ disjoint nonce tag /\
+    disjoint output tag /\ eq_or_disjoint input output /\
+    disjoint aad output)
+  (ensures  fun h0 _ h1 -> modifies2 output tag h0 h1 /\
+    Seq.append (as_seq h1 output) (as_seq h1 tag) ==
+    Spec.aead_encrypt (as_seq h0 key) (as_seq h0 nonce) (as_seq h0 input) (as_seq h0 aad))
+
+
+inline_for_extraction noextract
+val aead_encrypt: #w:field_spec -> aead_encrypt_st w
+
+
+inline_for_extraction noextract
+let aead_decrypt_st (w:field_spec) =
+    key:lbuffer uint8 32ul
+  -> nonce:lbuffer uint8 12ul
+  -> alen:size_t
+  -> aad:lbuffer uint8 alen
+  -> len:size_t
+  -> input:lbuffer uint8 len
+  -> output:lbuffer uint8 len
+  -> mac:lbuffer uint8 16ul ->
   Stack UInt32.t
-    (requires (fun h ->
-      eq_or_disjoint m c /\
-      live h k /\ live h n /\ live h aad /\ live h m /\ live h c /\ live h mac))
-    (ensures  (fun h0 z h1 -> modifies (loc m) h0 h1 /\
-      (let plain = Spec.aead_decrypt (as_seq h0 k) (as_seq h0 n) (as_seq h0 c) (as_seq h0 mac) (as_seq h0 aad) in
-      match z with
-      | 0ul -> Some? plain /\ as_seq h1 m == Some?.v plain // decryption succeeded
-      | 1ul -> None? plain
-      | _ -> false)  // decryption failed
-      )
-    )
+  (requires fun h ->
+    live h key /\ live h nonce /\ live h aad /\
+    live h input /\ live h output /\ live h mac /\
+    eq_or_disjoint input output)
+  (ensures  fun h0 z h1 -> modifies1 input h0 h1 /\
+   (let plain = Spec.aead_decrypt (as_seq h0 key) (as_seq h0 nonce) (as_seq h0 output) (as_seq h0 mac) (as_seq h0 aad) in
+    match z with
+    | 0ul -> Some? plain /\ as_seq h1 input == Some?.v plain // decryption succeeded
+    | 1ul -> None? plain
+    | _ -> false)  // decryption failed
+  )
+
+
+inline_for_extraction noextract
+val aead_decrypt: #w:field_spec -> aead_decrypt_st w
