@@ -1,7 +1,6 @@
 module Spec.QUIC
 
 module S = FStar.Seq
-module H = Spec.Hash
 module HD = Spec.Hash.Definitions
 module AEAD = Spec.AEAD
 
@@ -51,6 +50,15 @@ let ae_keysize (a:ea) =
   match a with
   | AEAD.AES128_GCM -> 16
   | _ -> 32
+
+// Static byte sequences to be fed into secret derivation. Marked as inline, so
+// that they can be used as arguments to gcmalloc_of_list for top-level arrays.
+inline_for_extraction
+val label_key: lbytes 3
+inline_for_extraction
+val label_iv: lbytes 2
+inline_for_extraction
+val label_hp: lbytes 2
 
 val derive_secret:
   a: ha ->
