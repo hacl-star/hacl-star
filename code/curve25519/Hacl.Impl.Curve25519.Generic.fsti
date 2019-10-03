@@ -10,9 +10,8 @@ open Hacl.Impl.Curve25519.Fields
 module S = Spec.Curve25519
 
 inline_for_extraction noextract
-val scalarmult:
-    #s:field_spec
-  -> o:lbuffer uint8 32ul
+let scalarmult_st (s:field_spec) =
+    o:lbuffer uint8 32ul
   -> k:lbuffer uint8 32ul
   -> i:lbuffer uint8 32ul
   -> Stack unit
@@ -23,10 +22,11 @@ val scalarmult:
     (ensures  fun h0 _ h1 -> modifies (loc o) h0 h1 /\
       as_seq h1 o == S.scalarmult (as_seq h0 k) (as_seq h0 i))
 
+val scalarmult: (#s: field_spec) -> scalarmult_st s
+
 inline_for_extraction noextract
-val secret_to_public:
-    #s:field_spec
-  -> o:lbuffer uint8 32ul
+let secret_to_public_st (s: field_spec) =
+    o:lbuffer uint8 32ul
   -> i:lbuffer uint8 32ul
   -> Stack unit
     (requires fun h0 ->
@@ -35,10 +35,11 @@ val secret_to_public:
     (ensures  fun h0 _ h1 -> modifies (loc o) h0 h1 /\
       as_seq h1 o == S.secret_to_public (as_seq h0 i))
 
+val secret_to_public (#s:field_spec): secret_to_public_st s
+
 inline_for_extraction noextract
-val ecdh:
-    #s:field_spec
-  -> o:lbuffer uint8 32ul
+let ecdh_st (s:field_spec) =
+    o:lbuffer uint8 32ul
   -> k:lbuffer uint8 32ul
   -> i:lbuffer uint8 32ul
   -> Stack bool
@@ -49,3 +50,5 @@ val ecdh:
     (ensures  fun h0 r h1 -> modifies (loc o) h0 h1 /\
       as_seq h1 o == S.scalarmult (as_seq h0 k) (as_seq h0 i)
       /\ (not r == Lib.ByteSequence.lbytes_eq #32 (as_seq h1 o) (Lib.Sequence.create 32 (u8 0))))
+
+val ecdh: (#s:field_spec) -> ecdh_st s

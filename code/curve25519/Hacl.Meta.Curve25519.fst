@@ -2,6 +2,8 @@ module Hacl.Meta.Curve25519
 
 #set-options "--z3rlimit 250 --max_fuel 0 --max_ifuel 1"
 
+friend Hacl.Impl.Curve25519.Generic
+
 %splice[
   // From Finv.
   fsqr_s_higher;

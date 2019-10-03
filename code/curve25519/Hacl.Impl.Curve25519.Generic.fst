@@ -481,6 +481,7 @@ let g25519 : x:ilbuffer byte_t 32ul{witnessed x (Lib.Sequence.of_list S.basepoin
 /// Public API
 /// ==========
 
+[@ Meta.Attribute.specialize ]
 let scalarmult #s out priv pub =
   push_frame ();
   let init = create (2ul *. nlimb s) (limb_zero s) in
@@ -489,6 +490,7 @@ let scalarmult #s out priv pub =
   encode_point #s out init;
   pop_frame()
 
+[@ Meta.Attribute.specialize ]
 let secret_to_public #s pub priv =
   push_frame ();
   recall_contents g25519 S.basepoint_lseq;
@@ -497,6 +499,7 @@ let secret_to_public #s pub priv =
   scalarmult #s pub priv basepoint;
   pop_frame()
 
+[@ Meta.Attribute.specialize ]
 let ecdh #s out priv pub =
   push_frame ();
   let zeros = create 32ul (u8 0) in
