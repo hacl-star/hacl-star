@@ -19,7 +19,7 @@ module Loop = Lib.LoopCombinators
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 200"
 //#set-options "--debug Hacl.Impl.Chacha20.Vec --debug_level ExtractNorm"
 
-inline_for_extraction
+noextract
 val rounds:
     #w:lanes
   -> st:state w ->
@@ -40,7 +40,7 @@ let rounds #w st =
   double_round st;
   double_round st
 
-inline_for_extraction noextract
+noextract
 val chacha20_core:
     #w:lanes
   -> k:state w
@@ -127,7 +127,7 @@ let chacha20_init #w ctx k n ctr =
   ctx.(12ul) <- c12 +| ctr;
   pop_frame()
 
-inline_for_extraction noextract
+noextract
 val chacha20_encrypt_block:
     #w:lanes
   -> ctx:state w
@@ -147,7 +147,7 @@ let chacha20_encrypt_block #w ctx out incr text =
   xor_block out k text;
   pop_frame()
 
-inline_for_extraction noextract
+noextract
 val chacha20_encrypt_last:
     #w:lanes
   -> ctx:state w
@@ -170,7 +170,7 @@ let chacha20_encrypt_last #w ctx len out incr text =
   pop_frame()
 
 
-inline_for_extraction noextract
+noextract
 val chacha20_update:
     #w:lanes
   -> ctx:state w
@@ -197,7 +197,7 @@ let chacha20_update #w ctx len out text =
     (fun i -> chacha20_encrypt_last ctx rem (sub out (i *! (size w *. 64ul)) rem) i (sub text (i *! (size w *. 64ul)) rem));
   pop_frame()
 
-inline_for_extraction noextract
+noextract
 val chacha20_encrypt_vec:
     #w:lanes
   -> len:size_t
@@ -234,7 +234,7 @@ let chacha20_encrypt_st (w:lanes) =
       modifies (loc out) h0 h1 /\
       as_seq h1 out == Spec.Chacha20.chacha20_encrypt_bytes (as_seq h0 key) (as_seq h0 n) (v ctr) (as_seq h0 text))
 
-inline_for_extraction noextract
+noextract
 val chacha20_encrypt: #w:lanes -> chacha20_encrypt_st w
 [@ Meta.Attribute.specialize ]
 let chacha20_encrypt #w len out text key n ctr =
@@ -242,7 +242,7 @@ let chacha20_encrypt #w len out text key n ctr =
   chacha20_encrypt_vec #w len out text key n ctr;
   Chacha20Equiv.lemma_chacha20_vec_equiv #w (as_seq h0 key) (as_seq h0 n) (v ctr) (as_seq h0 text)
 
-inline_for_extraction noextract
+noextract
 val chacha20_decrypt_vec:
     #w:lanes
   -> len:size_t
@@ -279,7 +279,7 @@ let chacha20_decrypt_st (w:lanes) =
       modifies (loc out) h0 h1 /\
       as_seq h1 out == Spec.Chacha20.chacha20_decrypt_bytes (as_seq h0 key) (as_seq h0 n) (v ctr) (as_seq h0 cipher))
 
-inline_for_extraction noextract
+noextract
 val chacha20_decrypt: #w:lanes -> chacha20_decrypt_st w
 [@ Meta.Attribute.specialize ]
 let chacha20_decrypt #w len out cipher key n ctr =

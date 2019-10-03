@@ -755,6 +755,7 @@
         "@MaxIFuel_assumption", "@query",
         "FStar.Seq.Base_interpretation_Tm_arrow_44bb45ed5c2534b346e0f58ea5033251",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "Prims_pretyping_e4836109f73687024ac3edd113084865",
         "Vale.X64.Memory_interpretation_Tm_arrow_81aac8ba692481017bca6e707e93646b",
         "bool_inversion", "equality_tok_Prims.LexTop@tok",
         "equation_FStar.Monotonic.HyperHeap.hmap",
@@ -796,7 +797,6 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_64c7cdf80f5eb0b5f10cf9506fa04793",
-        "refinement_interpretation_Tm_refine_67e0164a942554353955142625c3d913",
         "refinement_interpretation_Tm_refine_703c6f879c5b001c36b204e25e1b2371",
         "refinement_interpretation_Tm_refine_8ae5e7ec51c01b06a6c5c069c9bd60bc",
         "refinement_interpretation_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e",
@@ -805,6 +805,7 @@
         "refinement_interpretation_Tm_refine_d2179e9e4c59ec138821d558895d918b",
         "refinement_interpretation_Tm_refine_d2bc69a528535ed6093b3e6a59ecec1b",
         "refinement_interpretation_Tm_refine_d83f8da8ef6c1cb9f71d1465c1bb1c55",
+        "refinement_interpretation_Tm_refine_dcbfc73242b72914ef6a7370bbd5f53b",
         "refinement_interpretation_Tm_refine_ff9c29737b4a7ad4656cd79051ec80a3",
         "typing_FStar.Map.contains", "typing_FStar.Monotonic.HyperHeap.rid",
         "typing_FStar.Monotonic.HyperStack.get_hmap",
@@ -825,10 +826,11 @@
         "typing_Vale.X64.Memory.base_typ_as_vale_type",
         "typing_Vale.X64.Memory.buffer_as_seq",
         "typing_Vale.X64.Memory.buffer_length",
-        "typing_Vale.X64.Memory.uint_view", "well-founded-ordering-on-nat"
+        "typing_Vale.X64.Memory.uint_view", "typing_tok_Prims.LexTop@tok",
+        "well-founded-ordering-on-nat"
       ],
       0,
-      "9bd66245fefd38ea5927ff7b8c289fa3"
+      "32019e7713de7143850b3eab35405250"
     ],
     [
       "Vale.X64.Memory.modifies_buffer_elim",
@@ -1207,7 +1209,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "353e3ad07eb82a876cfde677d7b2ad33"
+      "e42dcd859ff0bee769e352d3ea31e1d7"
     ],
     [
       "Vale.X64.Memory.buffer_write",
@@ -1334,7 +1336,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "ffede20b1c8d18e3e428e4a8b393ba10"
+      "625fd9b43b7bab5447652695f74eab67"
     ],
     [
       "Vale.X64.Memory.get_addr_in_ptr",
@@ -1360,7 +1362,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "7d5a4cf25873a0845edb9f9492bd0385"
+      "5dbaa763686a277b91f1508d7c2a5046"
     ],
     [
       "Vale.X64.Memory.valid_buffer",
@@ -1420,7 +1422,7 @@
         "typing_Vale.X64.Memory.valid_mem_aux"
       ],
       0,
-      "5f2a26d55253920585ddf14e4e732613"
+      "f596e629dc8b59cb207b8c965f56f7e4"
     ],
     [
       "Vale.X64.Memory.valid_mem",
@@ -1547,7 +1549,7 @@
         "typing_Vale.X64.Memory.buffer"
       ],
       0,
-      "f8d2a9d8307c11b45b643259601dc0c7"
+      "55d49e6bfaab92ade0f5df557adc2f8d"
     ],
     [
       "Vale.X64.Memory.find_valid_buffer_aux_ps",
@@ -1628,7 +1630,7 @@
         "typing_Vale.X64.Memory.find_valid_buffer_aux"
       ],
       0,
-      "a6978949f4f57bb1dee525c7814be231"
+      "08a4023843f4e20c500ef0bed471c8d6"
     ],
     [
       "Vale.X64.Memory.find_valid_buffer_aux_ps",
@@ -1823,7 +1825,7 @@
         "typing_Vale.X64.Memory.writeable_mem_aux"
       ],
       0,
-      "2ac3be683c4fba724dfec3b4ce2b32d9"
+      "ca06d564e41447ff36a84efb728af3f4"
     ],
     [
       "Vale.X64.Memory.writeable_mem",
@@ -1975,7 +1977,7 @@
         "typing_Vale.X64.Memory.addr_in_ptr", "typing_Vale.X64.Memory.buffer"
       ],
       0,
-      "f4b0dc262553a21ab01170d4a08f2412"
+      "d8fab9da866777a6979327f97ca3eb7a"
     ],
     [
       "Vale.X64.Memory.load_mem64",
@@ -3290,7 +3292,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "194dc1be35e9c1bbe9e89aab06c660a5"
+      "82e2b5aadf703e21673761046234d9a9"
     ],
     [
       "Vale.X64.Memory.valid_memtaint",

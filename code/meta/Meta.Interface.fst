@@ -64,6 +64,9 @@ let assoc (#a: eqtype) #b (x: a) (l: list (a & b)): Tac b =
 let has_attr (s: sigelt) (x: term) =
   List.Tot.existsb (fun t -> term_eq t x) (sigelt_attrs s)
 
+let has_inline_for_extraction (s: sigelt) =
+  List.Tot.existsb (function Inline_for_extraction -> true | _ -> false) (sigelt_quals s)
+
 // A demo on how to allocate a fresh variable and pack it as a binder.
 let _: int -> int = _ by (
   let bv: bv = pack_bv ({ bv_ppname = "x"; bv_index = 42; bv_sort = `int }) in
@@ -152,9 +155,12 @@ let rec visit_function (st: state) (f_name: name): Tac (state & list sigelt) =
           // i is free
           let new_body =
             if List.length new_args = 0 then
-              // Small optimization: if this is a leaf of the call-graph, just
-              // call the original function.
-              pack (Tv_App (pack (Tv_FVar (pack_fv f_name))) (pack (Tv_Var index_bv), Q_Implicit))
+              if not (has_inline_for_extraction f) then
+                fail (string_of_name f_name ^ " should be inline_for_extraction")
+              else
+                // Small optimization: if this is a leaf of the call-graph, just
+                // call the original function.
+                pack (Tv_App (pack (Tv_FVar (pack_fv f_name))) (pack (Tv_Var index_bv), Q_Implicit))
             else
               fold_right (fun (_, bv) acc ->
                 pack (Tv_Abs (mk_binder bv) acc)
@@ -242,69 +248,72 @@ and visit_body (index_bv: term) (st: state) (bvs: list (name & bv)) (e: term):
           let fv = inspect_fv fv in
           let st, ses' = visit_function st fv in
           let ses = ses @ ses' in
-          begin try
-            // ... that is one of the names of our call-graph
-            let _, map, fns = assoc fv st.seen in
-            let _ = print (st.indent ^ "Rewriting application of " ^ string_of_name fv) in
+          begin match List.Tot.assoc fv st.seen with
+          | Some (_, map, fns) ->
+              // ... that is one of the names of our call-graph
+              let _, map, fns = assoc fv st.seen in
+              print (st.indent ^ "Rewriting application of " ^ string_of_name fv);
 
-            // A helper that says: I will need a specialized instance of `name`,
-            // so allocate an extra parameter for this current function if
-            // needed.
-            let allocate_bv_for name bvs: Tac _ =
-              match List.Tot.assoc name bvs with
-              | Some bv ->
-                  // fv needs to receive a specialized instance of name;
-                  // it's already found in this function's own bvs
-                  (pack (Tv_Var bv), Q_Explicit), bvs
-              | None ->
-                  // this is the first time the current function needs to
-                  // receive a specialized instance of name; add it to this
-                  // function's own bvs
-                  let typ, _, _ = assoc name st.seen in
-                  print (st.indent ^ "Allocating bv for " ^ string_of_name name ^ " at type " ^
-                    "app <" ^ term_to_string typ ^ "> <" ^ term_to_string index_bv ^ ">");
-                  let typ = pack (Tv_App typ (index_bv, Q_Implicit)) in
-                  let bv: bv = pack_bv ({
-                    bv_ppname = "arg_" ^ string_of_name name;
-                    bv_index = 42;
-                    bv_sort = typ
-                  }) in
-                  (pack (Tv_Var bv), Q_Explicit), (name, bv) :: bvs
-            in
+              // A helper that says: I will need a specialized instance of `name`,
+              // so allocate an extra parameter for this current function if
+              // needed.
+              let allocate_bv_for name bvs: Tac _ =
+                match List.Tot.assoc name bvs with
+                | Some bv ->
+                    print (st.indent ^ string_of_name name ^ " already has a bv");
+                    // fv needs to receive a specialized instance of name;
+                    // it's already found in this function's own bvs
+                    (pack (Tv_Var bv), Q_Explicit), bvs
+                | None ->
+                    // this is the first time the current function needs to
+                    // receive a specialized instance of name; add it to this
+                    // function's own bvs
+                    let typ, _, _ = assoc name st.seen in
+                    print (st.indent ^ "Allocating bv for " ^ string_of_name name ^ " at type " ^
+                      "app <" ^ term_to_string typ ^ "> <" ^ term_to_string index_bv ^ ">");
+                    let typ = pack (Tv_App typ (index_bv, Q_Implicit)) in
+                    let bv: bv = pack_bv ({
+                      bv_ppname = "arg_" ^ string_of_name name;
+                      bv_index = 42;
+                      bv_sort = typ
+                    }) in
+                    (pack (Tv_Var bv), Q_Explicit), (name, bv) :: bvs
+              in
 
-            let es = match es with
-              | (e, Q_Implicit) :: es ->
-                  begin match inspect e with
-                  | Tv_Var _ -> es
-                  | _ -> fail "this application does not seem to start with the index"
-                  end
-              | _ -> fail "this application does not seem to start with the index"
-            in
+              let es = match es with
+                | (e, Q_Implicit) :: es ->
+                    begin match inspect e with
+                    | Tv_Var _ -> es
+                    | _ -> fail "this application does not seem to start with the index"
+                    end
+                | _ -> fail "this application does not seem to start with the index"
+              in
 
-            match map with
-            | Inline fv ->
-                // fv has been rewritten to take fns as extra arguments for the
-                //   specialize nodes reachable through the body of fv; we need
-                //   ourselves to take a dependency on those nodes
-                let extra_args, bvs = fold_left (fun (extra_args, bvs) name ->
-                  let term, bvs = allocate_bv_for name bvs in
-                  term :: extra_args, bvs
-                ) ([], bvs) fns in
-                let extra_args = List.rev extra_args in
+              begin match map with
+              | Inline fv ->
+                  // fv has been rewritten to take fns as extra arguments for the
+                  //   specialize nodes reachable through the body of fv; we need
+                  //   ourselves to take a dependency on those nodes
+                  let extra_args, bvs = fold_left (fun (extra_args, bvs) name ->
+                    let term, bvs = allocate_bv_for name bvs in
+                    term :: extra_args, bvs
+                  ) ([], bvs) fns in
+                  let extra_args = List.rev extra_args in
 
-                // Inline nodes retain their index.
-                let e = mk_app (pack (Tv_FVar (pack_fv fv)))
-                  ((index_bv, Q_Implicit) :: extra_args @ es)
-                in
-                st, e, bvs, ses
+                  // Inline nodes retain their index.
+                  let e = mk_app (pack (Tv_FVar (pack_fv fv)))
+                    ((index_bv, Q_Implicit) :: extra_args @ es)
+                  in
+                  st, e, bvs, ses
 
-            | Specialize ->
-                // Specialized nodes are received as parameters and no longer have the index.
-                let e, bvs = allocate_bv_for fv bvs in
-                let e = mk_app (fst e) es in
-                st, e, bvs, ses
-          with
-          | _ ->
+              | Specialize ->
+                  // Specialized nodes are received as parameters and no longer have the index.
+                  let e, bvs = allocate_bv_for fv bvs in
+                  let e = mk_app (fst e) es in
+                  st, e, bvs, ses
+              end
+
+          | None ->
               let e = mk_app e es in
               st, e, bvs, ses
           end
@@ -365,3 +374,5 @@ let specialize (names: list term): Tac _ =
 //   found need to be checked with different options... we can always break
 //   things down, but at what cost? could F* annotate a "snapshot" of the
 //   options for each declaration?
+// - the order of arguments is unspecified and gives surprising results; any way
+//   we can make it more stable?
