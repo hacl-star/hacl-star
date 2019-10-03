@@ -23,7 +23,6 @@ module Poly = Hacl.Impl.Poly1305
 
 #reset-options "--z3rlimit 150 --max_fuel 0 --max_ifuel 1"
 
-inline_for_extraction noextract
 val poly1305_do_:
     #w:field_spec
   -> k:lbuffer uint8 32ul // key
@@ -111,7 +110,6 @@ let width_chacha20 (s:field_spec) : Hacl.Spec.Chacha20.Vec.lanes =
 
 
 // Derives the key, and then perform poly1305
-inline_for_extraction noextract
 val derive_key_poly1305_do:
     #w:field_spec
   -> k:lbuffer uint8 32ul
