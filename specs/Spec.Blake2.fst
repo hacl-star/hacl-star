@@ -447,7 +447,6 @@ let blake2 a d kk k nn =
   let n = ll / size_block a in
   let rem = ll % size_block a in
   let n,rem = if n <> 0 && rem = 0 then n - 1, size_block a else n, rem in
-  let flag = if rem = 0 then true else false in
   let blocks = Seq.slice #uint8 d 0 (n * size_block a) in
   let last = Seq.slice #uint8 d (n * size_block a) ll in
   let kn = if kk = 0 then 0 else 1 in
