@@ -12,7 +12,7 @@ private
 let poly1305_do_256 = poly1305_do_higher #M256 poly1305_padded_256
 
 let aead_encrypt : aead_encrypt_st M256 =
-  aead_encrypt_higher #M256 poly1305_do_256
+  aead_encrypt_higher #M256 poly1305_do_256 Hacl.Chacha20.Vec256.chacha20_encrypt_256
 
 let aead_decrypt : aead_decrypt_st M256 =
-  aead_decrypt_higher #M256 poly1305_do_256
+  aead_decrypt_higher #M256 Hacl.Chacha20.Vec256.chacha20_encrypt_256 poly1305_do_256

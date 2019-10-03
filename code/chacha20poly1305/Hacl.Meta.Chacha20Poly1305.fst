@@ -5,7 +5,6 @@ module Hacl.Meta.Chacha20Poly1305
 %splice[
   poly1305_padded_higher;
   poly1305_do_higher;
-  chacha20_encrypt_higher;
   aead_encrypt_higher;
   aead_decrypt_higher
 ] (Meta.Interface.specialize [

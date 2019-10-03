@@ -17,9 +17,7 @@ module BSeq = Lib.ByteSequence
 
 module Spec = Spec.Chacha20Poly1305
 module SpecPoly = Spec.Poly1305
-module ChachaVec = Hacl.Impl.Chacha20.Vec
 module Poly = Hacl.Impl.Poly1305
-
 
 #reset-options "--z3rlimit 150 --max_fuel 0 --max_ifuel 1"
 
@@ -108,6 +106,9 @@ let width_chacha20 (s:field_spec) : Hacl.Spec.Chacha20.Vec.lanes =
   | M128 -> 4
   | M256 -> 8
 
+[@ Meta.Attribute.specialize ]
+assume val chacha20_encrypt: #w:field_spec ->
+  Hacl.Impl.Chacha20.Vec.chacha20_encrypt_st (width_chacha20 w)
 
 // Derives the key, and then perform poly1305
 val derive_key_poly1305_do:
@@ -130,7 +131,7 @@ let derive_key_poly1305_do #w k n aadlen aad mlen m out =
   push_frame ();
   // Create a new buffer to derive the key
   let tmp = create 64ul (u8 0) in
-  ChachaVec.chacha20_encrypt #(width_chacha20 w) 64ul tmp tmp k n 0ul;
+  chacha20_encrypt #w 64ul tmp tmp k n 0ul;
   // The derived key should only be the first 32 bytes
   let key = sub tmp 0ul 32ul in
   poly1305_do #w key aadlen aad mlen m out;
@@ -163,7 +164,7 @@ val aead_encrypt: #w:field_spec -> aead_encrypt_st w
 
 [@ Meta.Attribute.specialize ]
 let aead_encrypt #w k n aadlen aad mlen m cipher mac =
-  ChachaVec.chacha20_encrypt #(width_chacha20 w) mlen cipher m k n 1ul;
+  chacha20_encrypt #w mlen cipher m k n 1ul;
   derive_key_poly1305_do #w k n aadlen aad mlen cipher mac
 
 
@@ -208,7 +209,7 @@ let aead_decrypt #w k n aadlen aad mlen m cipher mac =
     if lbytes_eq computed_mac mac then (
       assert (BSeq.lbytes_eq (as_seq h1 computed_mac) (as_seq h1 mac));
       // If the computed mac matches the mac given, decrypt the ciphertext and return 0
-      ChachaVec.chacha20_encrypt #(width_chacha20 w) mlen m cipher k n 1ul;
+      chacha20_encrypt #w mlen m cipher k n 1ul;
       0ul
     ) else 1ul // Macs do not agree, do not decrypt
   in

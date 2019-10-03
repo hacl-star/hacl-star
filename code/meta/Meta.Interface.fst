@@ -374,3 +374,5 @@ let specialize (names: list term): Tac _ =
 //   found need to be checked with different options... we can always break
 //   things down, but at what cost? could F* annotate a "snapshot" of the
 //   options for each declaration?
+// - the order of arguments is unspecified and gives surprising results; any way
+//   we can make it more stable?
