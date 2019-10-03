@@ -27,7 +27,6 @@ let fsquare_times_inv #s h f =
   | M51 -> F51.felem_fits h f (1, 2, 1, 1, 1)
   | M64 -> Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)
 
-inline_for_extraction noextract
 val fsqr_s:
     #s:field_spec
   -> out:felem s
@@ -44,6 +43,7 @@ val fsqr_s:
       modifies (loc out |+| loc tmp) h0 h1 /\
       fsquare_times_inv h1 out /\
       feval h1 out == P.fmul (feval h0 f1) (feval h0 f1))
+[@ Meta.Attribute.specialize ]
 let fsqr_s #s out f1 tmp =
   match s with
   | M51 -> F51.fsqr out f1
@@ -56,7 +56,6 @@ let fmuls_pre #s h f1 f2 =
   | M51 -> F51.felem_fits h f1 (1, 2, 1, 1, 1) /\ F51.felem_fits h f2 (1, 2, 1, 1, 1)
   | M64 -> Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)
 
-inline_for_extraction noextract
 val fmul_s:
     #s:field_spec
   -> out:felem s
@@ -76,13 +75,13 @@ val fmul_s:
     (ensures  fun h0 _ h1 ->
       modifies (loc out |+| loc tmp) h0 h1 /\ fsquare_times_inv h1 out /\
       feval h1 out == P.fmul (feval h0 f1) (feval h0 f2))
+[@ Meta.Attribute.specialize ]
 let fmul_s #s out f1 f2 tmp =
   match s with
   | M51 -> F51.fmul out f1 f2
   | M64 -> F64.fmul out f1 f2 tmp
 
-inline_for_extraction noextract
-val fsquare_times_:
+val fsquare_times:
     #s:field_spec
   -> o:felem s
   -> i:felem s
@@ -99,7 +98,8 @@ val fsquare_times_:
       modifies (loc o |+| loc tmp) h0 h1 /\
       fsquare_times_inv h1 o /\
       feval h1 o == S.pow (feval #s h0 i) (pow2 (v n)))
-let fsquare_times_ #s o inp tmp n =
+[@ Meta.Attribute.specialize ]
+let fsquare_times #s o inp tmp n =
   let h0 = ST.get() in
   fsqr_s #s o inp tmp;
   let h1 = ST.get() in
@@ -119,39 +119,8 @@ let fsquare_times_ #s o inp tmp n =
     S.lemma_pow_mul (feval #s h0 inp) (pow2 (v i + 1)) (pow2 1);
     assert_norm (pow2 (v i + 1) * pow2 1 = pow2 (v i + 2)))
 
-(* WRAPPER to Prevent Inlining *)
-[@CInline]
-let fsquare_times_51 (o:F51.felem) (i:F51.felem) = fsquare_times_ #M51 o i
-[@CInline]
-let fsquare_times_64 (o:F64.felem) (i:F64.felem) = fsquare_times_ #M64 o i
-
-inline_for_extraction noextract
-val fsquare_times:
-    #s:field_spec
-  -> o:felem s
-  -> i:felem s
-  -> tmp:felem_wide s
-  -> n:size_t{v n > 0}
-  -> Stack unit
-    (requires fun h0 ->
-      live h0 o /\ live h0 i /\ live h0 tmp /\
-      (disjoint o i \/ o == i) /\
-      disjoint o tmp /\
-      disjoint tmp i /\
-      fsquare_times_inv h0 i)
-    (ensures  fun h0 _ h1 ->
-      modifies (loc o |+| loc tmp) h0 h1 /\ live h1 o /\ live h1 i /\
-      fsquare_times_inv h1 o /\
-      feval h1 o == S.pow (feval #s h0 i) (pow2 (v n)))
-let fsquare_times #s o i tmp n =
-  match s with
-  | M51 -> fsquare_times_51 o i tmp n
-  | M64 -> fsquare_times_64 o i tmp n
-(* WRAPPER to Prevent Inlining *)
-
 #set-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 3"
 
-inline_for_extraction noextract
 val finv0:
     #s:field_spec
   -> i:felem s
@@ -170,6 +139,7 @@ val finv0:
       fsquare_times_inv h1 a /\
       fsquare_times_inv h1 t0 /\
       (feval h1 a, feval h1 t0) == (a_s, t0_s)))
+[@ Meta.Attribute.inline_ ]
 let finv0 #s i t1 tmp =
   let h0 = ST.get () in
   let a : felem s = sub t1 0ul (nlimb s) in
@@ -209,7 +179,7 @@ let finv0 #s i t1 tmp =
   assert ( (feval h1 a, feval h1 t0) == S.finv0 (feval h0 i))
 
 inline_for_extraction noextract
-val finv_:
+val finv:
     #s:field_spec
   -> o:felem s
   -> i:felem s
@@ -224,7 +194,8 @@ val finv_:
       modifies (loc o |+| loc tmp) h0 h1 /\
       fsquare_times_inv h1 o /\
       feval h1 o == P.fpow (feval #s h0 i) (pow2 255 - 21))
-let finv_ #s o i tmp =
+[@ Meta.Attribute.specialize ]
+let finv #s o i tmp =
   push_frame();
   let t1 = create (4ul *! nlimb s) (limb_zero s) in
   let h0 = ST.get () in
@@ -235,31 +206,3 @@ let finv_ #s o i tmp =
   let h1 = ST.get () in
   assert (feval h1 o == S.finv (feval h0 i));
   pop_frame()
-
-(* WRAPPER to Prevent Inlining *)
-[@CInline]
-let finv_51 (o:F51.felem) (i:F51.felem) = finv_ #M51 o i
-[@CInline]
-let finv_64 (o:F64.felem) (i:F64.felem) = finv_ #M64 o i
-
-inline_for_extraction noextract
-val finv:
-    #s:field_spec
-  -> o:felem s
-  -> i:felem s
-  -> tmp:felem_wide2 s
-  -> Stack unit
-    (requires fun h0 ->
-      live h0 o /\ live h0 i /\ live h0 tmp /\
-      disjoint i tmp /\ disjoint i o /\
-      (disjoint o tmp \/ o == tmp) /\
-      fsquare_times_inv h0 i)
-    (ensures  fun h0 _ h1 ->
-      modifies (loc o |+| loc tmp) h0 h1 /\
-      fsquare_times_inv h1 o /\
-      feval h1 o == P.fpow (feval #s h0 i) (pow2 255 - 21))
-let finv #s o i tmp =
-  match s with
-  | M51 -> finv_51 o i tmp
-  | M64 -> finv_64 o i tmp
- (* WRAPPER to Prevent Inlining *)
