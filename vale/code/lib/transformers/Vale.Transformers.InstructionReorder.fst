@@ -1966,7 +1966,8 @@ and lemma_is_empty_codes (cs:codes) (fuel:nat) (s:machine_state) :
     lemma_is_empty_codes xs fuel s
 #pop-options
 
-#push-options "--z3rlimit 50 --initial_fuel 3 --max_fuel 3 --initial_ifuel 1 --max_ifuel 1"
+#restart-solver
+#push-options "--z3rlimit 100 --initial_fuel 3 --max_fuel 3 --initial_ifuel 1 --max_ifuel 1"
 let rec lemma_perform_reordering_with_hint (t:transformation_hint) (cs:codes) (fuel:nat) (s:machine_state) :
   Lemma
     (requires (
@@ -2115,7 +2116,8 @@ and lemma_perform_reordering_with_hints (ts:transformation_hints) (cs:codes) (fu
         let Ok cs' = perform_reordering_with_hints ts cs in
         equiv_ostates
           (machine_eval_codes cs fuel s)
-          (machine_eval_codes cs' fuel s))) =
+          (machine_eval_codes cs' fuel s)))
+    (decreases %[ts; fuel; cs]) =
   let c = cs in
   let Ok cs' = perform_reordering_with_hints ts cs in
   let Some s' = machine_eval_codes cs fuel s in
