@@ -56,8 +56,26 @@ let rec lemma_disjoint_locations_symmetric l1 l2 :
     lemma_disjoint_locations_symmetric xs l2;
     lemma_disjoint_locations_symmetric xs ys
 
+(** Inversion lemma based on FStar.Universe.downgrade_val_raise_val, with more liberal SMTPat *)
+val downgrade_val_raise_val_u0_u1 :
+  #a:Type0 ->
+  x:a ->
+  Lemma
+    (ensures FStar.Universe.downgrade_val u#0 u#1 (FStar.Universe.raise_val x) == x)
+    [SMTPat (FStar.Universe.raise_val x)]
+
 (** [location_val_t a] is the type of the value represented by the location [a]. *)
-val location_val_t : location -> Type0
+val location_val_t : location -> Type u#1
+
+(** Same as location_val_t in cases where location_val_t is an eqtype, otherwise arbitrary *)
+val location_val_eqt : location -> eqtype
+
+(** Locations where location_val_t is an eqtype *)
+let location_eq = l:location{location_val_t l == FStar.Universe.raise_t (location_val_eqt l)}
+
+(** Coerce location_val_eqt to location_val_t *)
+let raise_location_val_eqt (#l:location_eq) (v:location_val_eqt l) : location_val_t l =
+  coerce (FStar.Universe.raise_val v)
 
 (** [eval_location a s] gives the value at location [a] in state [s]. *)
 val eval_location :

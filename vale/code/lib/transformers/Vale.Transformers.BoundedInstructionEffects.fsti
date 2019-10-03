@@ -9,8 +9,11 @@ open Vale.Transformers.Locations
 
 module L = FStar.List.Tot
 
+(** A [location_with_value] contains a location and the value it must hold *)
+type location_with_value = l:location_eq & location_val_eqt l
+
 (** A [locations_with_values] contains locations and values they must hold *)
-type locations_with_values = list ((l:location{hasEq (location_val_t l)}) & location_val_t l)
+type locations_with_values = list location_with_value
 
 (** An [rw_set] contains information about what locations are read and
      written by a stateful operation. *)
@@ -61,7 +64,7 @@ let rec constant_on_execution (locv:locations_with_values) (f:st unit) (s:machin
     match locv with
     | [] -> True
     | (|l, v|) :: xs -> (
-        (eval_location l (run f s) = v) /\
+        (eval_location l (run f s) == raise_location_val_eqt v) /\
         (constant_on_execution xs f s)
       )
   )

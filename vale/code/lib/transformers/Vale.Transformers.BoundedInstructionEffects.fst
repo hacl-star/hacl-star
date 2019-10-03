@@ -363,7 +363,7 @@ let unchanged_at' (l:locations) (s1 s2:machine_state) =
   (s1.ms_ok /\ s2.ms_ok ==>
    unchanged_at l s1 s2)
 
-#push-options "--z3rlimit 20 --initial_fuel 4 --max_fuel 4 --initial_ifuel 2 --max_ifuel 2"
+#push-options "--z3rlimit 20 --initial_fuel 4 --max_fuel 4 --initial_ifuel 3 --max_ifuel 3"
 let lemma_instr_write_output_explicit_only_writes
     (i:instr_operand_explicit) (v:instr_val_t (IOpEx i)) (o:instr_operand_t i)
     (s_orig1 s1 s_orig2 s2:machine_state) :
@@ -381,7 +381,7 @@ let lemma_instr_write_output_explicit_only_writes
          unchanged_except locs s2 s2'))) = ()
 #pop-options
 
-#push-options "--z3rlimit 20 --initial_fuel 4 --max_fuel 4 --initial_ifuel 2 --max_ifuel 2"
+#push-options "--z3rlimit 20 --initial_fuel 4 --max_fuel 4 --initial_ifuel 4 --max_ifuel 4"
 let lemma_instr_write_output_implicit_only_writes
     (i:instr_operand_implicit) (v:instr_val_t (IOpIm i))
     (s_orig1 s1 s_orig2 s2:machine_state) :
@@ -870,13 +870,13 @@ let rw_set_in_series rw1 rw2 =
   }
 
 let rec lemma_constant_on_execution_mem (locv:locations_with_values) (f:st unit) (s:machine_state)
-    (l:location{hasEq (location_val_t l)}) (v:location_val_t l) :
+    (l:location_eq) (v:location_val_eqt l) :
   Lemma
     (requires (
         (run f s).ms_ok /\
         (constant_on_execution locv f s) /\
         (L.mem (|l,v|) locv)))
-    (ensures (eval_location l (run f s) = v)) =
+    (ensures (eval_location l (run f s) == raise_location_val_eqt v)) =
   let (|l1,v1|) :: xs = locv in
   if l = l1 && v = v1 then () else (
     lemma_constant_on_execution_mem xs f s l v
@@ -900,10 +900,10 @@ let lemma_add_r_to_rw_set r rw_old f =
   FStar.Classical.forall_intro_2 aux
 
 let rec lemma_constant_intersect_belongs_to_writes_union
-    (c1 c2:locations_with_values) (w1 w2:locations) (l:location{hasEq (location_val_t l)}) (v:location_val_t l) :
+    (c1 c2:locations_with_values) (w1 w2:locations) (l:location_eq) (v:location_val_eqt l) :
   Lemma
     (requires (
-        (let x : (l:location{hasEq (location_val_t l)} & v:location_val_t l) = (|l,v|) in
+        (let x : location_with_value = (|l,v|) in
          L.mem x (c1 `intersect` c2) /\
          (forall l v. {:pattern (L.mem (|l,v|) c1); (L.mem l w1)}
             L.mem (|l,v|) c1 ==> L.mem l w1) /\
