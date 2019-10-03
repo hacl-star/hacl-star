@@ -1,12 +1,12 @@
-FSTAR_HOME   ?= ../../../FStar
-KREMLIN_HOME ?= ../../kremlin
-HACL_HOME    ?= ../..
+FSTAR_HOME   ?= ../../../../FStar
+KREMLIN_HOME ?= ../../../../kremlin
+HACL_HOME    ?= ../../..
 
 CACHE_DIR     ?= $(HACL_HOME)/.cache
 HINT_DIR      ?= $(HACL_HOME)/.hints
 OUTPUT_DIR    ?= .output
-GENERATED_DIR ?= ed25519-c
-OUT_DIR	      ?= ed25519-c
+GENERATED_DIR ?= salsa20-c
+OUT_DIR	     ?= salsa20-c
 
 .PHONY: all test stage1 stage2 clean clean-c distclean
 
@@ -17,37 +17,35 @@ test:
 	$(MAKE) stage1
 	STAGE=2 $(MAKE) stage2
 
-stage1: $(GENERATED_DIR)/Makefile.include
+stage1: $(GENERATED_DIR)/Hacl_Salsa20.c
 
-stage2: $(OUT_DIR)/test.exe
-	$(OUT_DIR)/test.exe
+stage2: salsa20.exe
+	./salsa20.exe
 
 FSTAR_INCLUDE_DIRS = \
   $(HACL_KREMLIN) \
   $(KREMLIN_HOME)/kremlib \
   $(HACL_HOME)/specs \
-  $(HACL_HOME)/lib \
   $(HACL_HOME)/lib/c \
-  $(HACL_HOME)/code/curve25519 \
-  $(HACL_HOME)/specs/lemmas \
-  $(HACL_HOME)/code/hash
+  $(HACL_HOME)/lib
 
 FSTAR_FLAGS = $(OTHERFLAGS) --cmi \
-  --cache_checked_modules --odir $(OUTPUT_DIR) \
-  --already_cached "'Prims+FStar+LowStar+C+TestLib+Lib'" \
+  --cache_checked_modules --cache_dir $(CACHE_DIR) --odir $(OUTPUT_DIR) \
+  --already_cached "'Prims+FStar+LowStar+C+Spec.Loops+TestLib+Lib'" \
   $(addprefix --include ,$(FSTAR_INCLUDE_DIRS))
 
 FSTAR = $(FSTAR_HOME)/bin/fstar.exe $(FSTAR_FLAGS)
 
 ENABLE_HINTS = --use_hints --use_hint_hashes --record_hints --query_stats
 
-ROOTS = Hacl.Test.Ed25519.fst
-#Hacl.Ed25519.fst
-#Hacl.Test.Ed25519.fst
+ROOTS = Hacl.Salsa20.fst
 
 .PRECIOUS: %.krml
 
 $(HINT_DIR):
+	mkdir -p $@
+
+$(CACHE_DIR):
 	mkdir -p $@
 
 .depend:
@@ -55,7 +53,7 @@ $(HINT_DIR):
 
 include .depend
 
-%.checked: | .depend $(HINT_DIR)
+%.checked: | .depend $(HINT_DIR) $(CACHE_DIR)
 	$(FSTAR) $< $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $*).hints && \
 	touch -c $@
 
@@ -67,25 +65,18 @@ $(OUTPUT_DIR)/%.krml: | .depend
 
 # 2. Generation of .c files
 
-KREMLIN_TESTLIB=-fbuiltin-uint128 -fnocompound-literals -fc89-scope -fparentheses -fcurly-braces \
-	-funroll-loops 8 -warn-error +9 -add-include '"kremlib.h"' -add-include '"FStar_UInt_8_16_32_64.h"' $(KREMLIB)/dist/minimal/testlib.c
+KREMLIN_TESTLIB=-funroll-loops 8 -warn-error +9 -add-include '"TestLib.h"' $(KREMLIB)/dist/generic/testlib.c
 
 KREMLIN=$(KREMLIN_HOME)/krml
 
-# 2. Generation of .c files
-
 # We use -drop (deprecated) only to avoid creating unnecessary .c,.h files
-$(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
+$(GENERATED_DIR)/Hacl_Salsa20.c: $(ALL_KRML_FILES) | .depend
 	$(KREMLIN) $(KREMLIN_TESTLIB) -skip-compilation \
-	-no-prefix 'Hacl.Test.Ed25519' \
 	-bundle 'Lib.*' \
-	-bundle 'Spec.*' \
-	-bundle 'C=C.Endianness' \
-	-bundle 'Hacl.Hash.SHA2=Hacl.Hash.*,Spec.Hash.*' \
-	-bundle 'Hacl.Ed25519=Hacl.Impl.*,Hacl.Bignum25519,Hacl.Ed25519' \
-	-library 'C,FStar' \
-	-drop 'LowStar,Spec,Prims,Lib,C.Loops.*,Hacl.Spec.*,Hacl.Impl.Curve25519.Fields,Hacl.Impl.Curve25519.Field64,Hacl.Impl.Curve25519.Field64.*' \
-	-add-include '"c/Lib_PrintBuffer.h"' \
+	-bundle 'Spec.\*' \
+	-bundle 'Hacl_Salsa20=*' \
+	-bundle 'FStar.*' \
+	-drop 'LowStar,Spec,Prims,Lib,C.Loops.*,Hacl.Spec.*' \
 	-tmpdir $(GENERATED_DIR) \
 	$^
 
@@ -97,7 +88,7 @@ ifeq ($(STAGE),2)
 
 # The top-level invocation guarantees that stage1 has been run and this file is
 # there.
-include $(GENERATED_DIR)/Makefile.include
+#include $(GENERATED_DIR)/Makefile.include
 
 # 3. Collecting all of our source files, and generating corresponding object
 # files.
@@ -109,29 +100,20 @@ include $(GENERATED_DIR)/Makefile.include
 # KreMLin sees the fsti's for the various Lib* and LowStar modules and creates .h/.c
 # files for them in $(GENERATED_DIR). However, we are only interested in the header,
 # and drop these (mostly empty) C files.
-ALL_OUR_FILES 	    = $(filter-out FStar_* Lib.c LowStar.c C.c, $(ALL_C_FILES))
-ALL_GENERATED_FILES = $(addprefix $(GENERATED_DIR)/,$(ALL_OUR_FILES))
-
-ALL_SOURCES = \
-  $(ALL_GENERATED_FILES) \
-  $(HACL_HOME)/lib/c/Lib_PrintBuffer.c \
-#Hacl.Benchmark.Ed25519.c
-
-ALL_OBJS = $(patsubst %.c,%.o,$(ALL_SOURCES))
+#ALL_OUR_FILES 	    = $(filter-out FStar_* Lib.c LowStar.c C.c, $(ALL_C_FILES))
+#ALL_GENERATED_FILES = $(addprefix $(GENERATED_DIR)/,$(ALL_OUR_FILES))
 
 INCLUDE_DIRS = \
   $(KREMLIN_HOME)/include \
   $(KREMLIN_HOME)/kremlib \
   $(KREMLIN_HOME)/kremlib/dist/generic \
   $(HACL_HOME)/lib \
-  $(HACL_HOME)/snapshots/hacl-c
+  $(HACL_HOME)/lib/c
 
-# TODO: remove -Wno-incompatible-pointer-types when issue with --cmi is fixed
-CFLAGS += -O3 -march=native -mtune=native -funroll-loops
-CFLAGS += $(addprefix -I ,$(INCLUDE_DIRS)) -Wall -Wextra -Werror \
-  -Wno-parentheses -Wno-unused-parameter -Wno-unused-variable \
-  -Wno-incompatible-pointer-types -Wno-unused-function \
-  -Wno-deprecated-declarations -Wno-unused-but-set-variable
+CFLAGS += -O3 -march=native -mtune=native
+CFLAGS += $(addprefix -I ,$(INCLUDE_DIRS))
+#-Wall -Wextra -Werror \
+  -Wno-parentheses -Wno-unused-parameter -Wno-unused-variable
 
 # GNU Make manual section 4.14
 %.d: %.c
@@ -142,21 +124,9 @@ CFLAGS += $(addprefix -I ,$(INCLUDE_DIRS)) -Wall -Wextra -Werror \
 
 -include $(patsubst %.c,%.d,$(ALL_SOURCES))
 
-$(OUT_DIR):
-	mkdir -p $@
-
-$(OUT_DIR)/test.exe: $(ALL_OBJS) | $(OUT_DIR)
-	$(info ALL_SOURCES is $(ALL_SOURCES))
-	$(CC) $(CFLAGS) -o $@ $^ -L $(KREMLIN_HOME)/kremlib/dist/generic -lkremlib
-
-ALL_SOURCES_HACL = \
-  ed25519-hacl/Hacl_Ed25519.c \
-  Hacl.Benchmark.Ed25519.c
-
-ALL_OBJS_HACL = $(patsubst %.c,%.o,$(ALL_SOURCES_HACL))
-
-test-hacl.exe: $(ALL_OBJS_HACL) | ed25519-hacl
-	$(CC) $(CFLAGS) -o $@ $^ -L $(KREMLIN_HOME)/kremlib/dist/generic -lkremlib
+salsa20.exe:
+	$(CC) $(CFLAGS) $(GENERATED_DIR)/Hacl_Salsa20.c salsa20-test.c -L $(KREMLIN_HOME)/kremlib/dist/generic -lkremlib -o salsa20.exe
+	./salsa20.exe
 
 .PRECIOUS: %.o
 
@@ -178,6 +148,7 @@ SHELL=/bin/bash
 
 clean:
 	rm -rf $(GENERATED_DIR) $(OUT_DIR)/*.exe $(OUT_DIR)/*.a
+	rm -rf include/*.o include/*.d
 
 clean-c:
 	rm -rf $(GENERATED_DIR)/{*.{c,h},Makefile.include}

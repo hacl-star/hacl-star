@@ -2,12 +2,10 @@ module Spec.RSAPSS
 
 open FStar.Mul
 open Lib.IntTypes
-open Lib.RawIntTypes
 
 open Lib.Sequence
 open Lib.ByteSequence
 open Lib.LoopCombinators
-open Lib.NatMod
 
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
@@ -64,22 +62,30 @@ let os2ip #len b = nat_from_bytes_be b
 val i2osp: #len: size_nat -> n: nat{n < pow2 (8 * len)} -> Tot (lbytes len)
 let i2osp #len n = nat_to_bytes_be len n
 
+(* Modular arithmetic *)
+type elem (n:pos) = x:nat{x < n}
+
+let fmul (#n:pos) (x:elem n) (y:elem n) : elem n = (x * y) % n
+
+val fpow: #n:pos -> a:elem n -> b:pos -> Tot (res:elem n) (decreases b)
+let rec fpow #n a b =
+  if b = 1 then a
+  else
+    if b % 2 = 0 then fpow (fmul a a) (b / 2)
+    else fmul a (fpow (fmul a a) (b / 2))
+
 
 ///
 /// RSA
 ///
 
-type modBits = modBits: size_nat{1 < modBits}
+type modBits_t = modBits: size_nat{1 < modBits}
 
-noeq type rsa_pubkey (modBits:modBits) =
-  | Mk_rsa_pubkey: n: nat{pow2 (modBits - 1) <= n /\ n < pow2 modBits}
-                 -> e: nat_mod n{1 < nat_mod_v e}
-                 -> rsa_pubkey modBits
+noeq type rsa_pubkey (modBits:modBits_t) =
+  | Mk_rsa_pubkey: n:pos{pow2 (modBits - 1) <= n /\ n < pow2 modBits} -> e:pos -> rsa_pubkey modBits
 
-noeq type rsa_privkey (modBits:modBits) =
-  | Mk_rsa_privkey: pkey: rsa_pubkey modBits
-                  -> d: nat_mod (Mk_rsa_pubkey?.n pkey){1 < nat_mod_v d}
-                  -> rsa_privkey modBits
+noeq type rsa_privkey (modBits:modBits_t) =
+  | Mk_rsa_privkey: pkey:rsa_pubkey modBits -> d:pos -> rsa_privkey modBits
 
 val db_zero: #len: size_pos -> db: lbytes len -> emBits: size_nat -> Tot (lbytes len)
 let db_zero #len db emBits =
@@ -171,6 +177,7 @@ val pss_verify:
   Tot bool
 
 let pss_verify #msgLen sLen msg emBits em =
+  let open Lib.RawIntTypes in
   let emLen = blocks emBits 8 in
   let msBits = emBits % 8 in
 
@@ -186,7 +193,7 @@ let pss_verify #msgLen sLen msg emBits em =
 val rsapss_sign:
     #sLen: size_nat{sLen + hLen + 8 <= max_size_t /\ sLen + hLen + 8 < max_input}
   -> #msgLen: size_nat{msgLen < max_input}
-  -> modBits: modBits{sLen + hLen + 2 <= blocks (modBits - 1) 8}
+  -> modBits: modBits_t{sLen + hLen + 2 <= blocks (modBits - 1) 8}
   -> skey: rsa_privkey modBits
   -> salt: lbytes sLen
   -> msg: lbytes msgLen ->
@@ -207,14 +214,13 @@ let rsapss_sign #sLen #msgLen modBits skey salt msg =
   let em = pss_encode salt msg emBits in
   let m = os2ip #emLen em in
   assume (m < n);
-  let m = modulo m n in
-  let s = m **% d in
+  let s = fpow #n m d in
   i2osp #nLen s
 
 
 val rsapss_verify:
     #msgLen: size_nat{msgLen < max_input}
-  -> modBits: modBits
+  -> modBits: modBits_t
   -> pkey: rsa_pubkey modBits
   -> sLen: size_nat{sLen + hLen + 8 <= max_size_t /\ sLen + hLen + 8 < max_input}
   -> msg: lbytes msgLen
@@ -232,8 +238,7 @@ let rsapss_verify #msgLen modBits pkey sLen msg sgnt =
 
   let s = os2ip #nLen sgnt in
   if s < n then begin
-    let s = modulo s n in
-    let m = s **% e in
+    let m = fpow #n s e in
     if m < pow2 (emLen * 8) then
       let em = i2osp #emLen m in
       pss_verify #msgLen sLen msg emBits em
