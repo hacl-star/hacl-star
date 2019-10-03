@@ -11,9 +11,6 @@ extern "C" {
 #ifdef HAVE_VALE
 #include <EverCrypt_Vale.h>
 #endif
-#include <Hacl_Chacha20.h>
-#include <Hacl_Chacha20Poly1305.h>
-#include <Hacl_Poly1305_128.h>
 #include <EverCrypt_Chacha20Poly1305.h>
 }
 

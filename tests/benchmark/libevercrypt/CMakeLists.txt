@@ -25,7 +25,12 @@ add_library(evercrypt STATIC
   ${EVERCRYPT_SRC_DIR}/evercrypt_vale_stubs.c
   ${EVERCRYPT_SRC_DIR}/Hacl_AES.c
   ${EVERCRYPT_SRC_DIR}/Hacl_Chacha20.c
-  ${EVERCRYPT_SRC_DIR}/Hacl_Chacha20Poly1305.c
+  ${EVERCRYPT_SRC_DIR}/Hacl_Chacha20_Vec32.c
+  ${EVERCRYPT_SRC_DIR}/Hacl_Chacha20_Vec128.c
+  ${EVERCRYPT_SRC_DIR}/Hacl_Chacha20_Vec256.c
+  ${EVERCRYPT_SRC_DIR}/Hacl_Chacha20Poly1305_32.c
+  ${EVERCRYPT_SRC_DIR}/Hacl_Chacha20Poly1305_128.c
+  ${EVERCRYPT_SRC_DIR}/Hacl_Chacha20Poly1305_256.c
   ${EVERCRYPT_SRC_DIR}/Hacl_Curve25519.c
   ${EVERCRYPT_SRC_DIR}/Hacl_Ed25519.c
   ${EVERCRYPT_SRC_DIR}/Hacl_Hash.c

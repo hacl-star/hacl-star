@@ -288,7 +288,7 @@ let encrypt #a s iv iv_len ad ad_len plain plain_len cipher tag =
         else begin
           // Length restrictions
           assert_norm (pow2 31 + pow2 32 / 64 <= pow2 32 - 1);
-          Hacl.Impl.Chacha20Poly1305.aead_encrypt_chacha_poly
+          EverCrypt.Chacha20Poly1305.aead_encrypt
             ek iv ad_len ad plain_len plain cipher tag;
           Success
         end
@@ -440,7 +440,7 @@ let decrypt #a s iv iv_len ad ad_len cipher cipher_len tag dst =
           assert_norm (pow2 31 + bound / 64 <= pow2 32 - 1);
 
           let h0 = ST.get () in
-          let r = Hacl.Impl.Chacha20Poly1305.aead_decrypt_chacha_poly
+          let r = EverCrypt.Chacha20Poly1305.aead_decrypt
             ek iv ad_len ad cipher_len dst cipher tag
           in
           assert (

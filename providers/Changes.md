@@ -1,5 +1,8 @@
 ## EverCrypt v0.1 alpha 2
 
+### October 2, 2019
+- Vectorized implementations of Chacha20Poly1305
+
 ### August 9th, 2019
 
 - Addition of the box API under `Hacl_Nacl.h`. There is no multiplexing between
