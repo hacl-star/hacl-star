@@ -47,6 +47,7 @@ let scalar_bit s n =
   assert (v (mod_mask #U8 #SEC 1ul) == v (u8 1));
   to_u64 ((s.(n /. 8ul) >>. (n %. 8ul)) &. u8 1)
 
+inline_for_extraction noextract
 val decode_point:
     #s:field_spec
   -> o:point s
@@ -116,7 +117,8 @@ let encode_point #s o i =
   assert (as_seq h3 o == BSeq.nat_to_bytes_le 32 (feval h1 tmp));
   pop_frame()
 
-val cswap2:
+[@ Meta.Attribute.specialize ]
+assume val cswap2:
     #s:field_spec
   -> bit:uint64{v bit <= 1}
   -> p1:felem2 s
@@ -130,11 +132,10 @@ val cswap2:
       (v bit == 1 ==> as_seq h1 p1 == as_seq h0 p2 /\ as_seq h1 p2 == as_seq h0 p1) /\
       (v bit == 0 ==> as_seq h1 p1 == as_seq h0 p1 /\ as_seq h1 p2 == as_seq h0 p2) /\
       (fget_xz h1 p1, fget_xz h1 p2) == S.cswap2 bit (fget_xz h0 p1) (fget_xz h0 p2))
-[@ Meta.Attribute.specialize ]
-let cswap2 #s bit p0 p1 =
+(* let cswap2 #s bit p0 p1 =
   match s with
   | M51 -> F51.cswap2 bit p0 p1
-  | M64 -> F64.cswap2 bit p0 p1
+  | M64 -> F64.cswap2 bit p0 p1 *)
 
 #set-options "--z3rlimit 150 --max_fuel 0 --max_ifuel 3"
 
@@ -371,6 +372,7 @@ let ladder2_ #s k q p01_tmp1_swap tmp2 =
   ladder0_ #s k q p01_tmp1_swap tmp2;
   ladder1_ #s p01_tmp1 tmp2
 
+inline_for_extraction noextract
 val ladder3_:
     #s:field_spec
   -> q:point s

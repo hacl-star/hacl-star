@@ -344,8 +344,24 @@ and visit_body (index_bv: term) (st: state) (bvs: list (name & bv)) (e: term):
       let e = pack (Tv_Let r bv e1 e2) in
       st, e, bvs, ses @ ses'
 
-  | _ ->
-      fail ("todo: recursively visit term structurally: " ^ term_to_string e)
+  | Tv_AscribedT e t tac ->
+      let st, e, bvs, ses = visit_body index_bv st bvs e in
+      let e = pack (Tv_AscribedT e t tac) in
+      st, e, bvs, ses
+
+  | Tv_AscribedC e c tac ->
+      let st, e, bvs, ses = visit_body index_bv st bvs e in
+      let e = pack (Tv_AscribedC e c tac) in
+      st, e, bvs, ses
+
+  | Tv_Arrow _ _
+  | Tv_Type _
+  | Tv_Uvar _ _
+  | Tv_Refine _ _
+  | Tv_Unknown ->
+      // Looks like we ended up visiting a type argument of an application.
+      st, e, bvs, []
+
 
 let specialize (names: list term): Tac _ =
   let names = map (fun name ->
