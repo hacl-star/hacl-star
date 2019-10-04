@@ -189,6 +189,9 @@ let rec visit_function (st: state) (f_name: name): Tac (state & list sigelt) =
         if List.length new_args = 0 then begin
           if not (has_inline_for_extraction f) then
             fail (string_of_name f_name ^ " should be inline_for_extraction");
+          if not (Specialize? m) then
+            fail (string_of_name f_name ^ " is marked as [@ inline_ ] but does not reach \
+              any specializations");
 
           st, new_sigelts @ [ se_t ]
         end
