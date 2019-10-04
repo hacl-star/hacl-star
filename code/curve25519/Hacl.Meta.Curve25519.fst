@@ -5,7 +5,7 @@ module Hacl.Meta.Curve25519
 friend Hacl.Impl.Curve25519.Generic
 
 %splice[
-  // From Finv.
+(*  // From Finv.
   fsqr_s_higher;
   fmul_s_higher;
   fsquare_times_higher;
@@ -20,7 +20,7 @@ friend Hacl.Impl.Curve25519.Generic
   decode_point_higher;
   scalarmult_higher;
   secret_to_public_higher;
-  ecdh_higher
+  ecdh_higher *)
 ]
 (Meta.Interface.specialize (`Hacl.Impl.Curve25519.Fields.field_spec) [
   `Hacl.Impl.Curve25519.Generic.ecdh;
