@@ -1,5 +1,5 @@
 [
-  "‡\u001eðáv\u001f\u0002wßÐ§ãèËr\u000f",
+  "¸\u001d.U³µuÆsJÂÓ8®Ç…",
   [
     [
       "Meta.Interface.assoc",
@@ -46,7 +46,7 @@
         "fuel_guarded_inversion_Prims.list"
       ],
       0,
-      "0994cbe127869d5cd585d8c7c41cbd01"
+      "b1d1559b31fea7d7d6b948f5d08feeae"
     ],
     [
       "Meta.Interface.suffix_name",
@@ -59,7 +59,7 @@
         "fuel_guarded_inversion_Prims.list"
       ],
       0,
-      "1890da92f1375623f5c47e48810e9503"
+      "95389fd637e05aedb0c5aa8a701e6407"
     ],
     [
       "Meta.Interface.in_namespace",
@@ -80,7 +80,23 @@
         "subterm_ordering_Prims.Cons"
       ],
       0,
-      "e723cf1ece8cc43c98eb7a827343b97d"
+      "715e2262b3aef54c81fd4e7fd877e454"
+    ],
+    [
+      "Meta.Interface.must",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "bool_inversion",
+        "disc_equation_FStar.Pervasives.Native.None",
+        "disc_equation_FStar.Pervasives.Native.Some",
+        "lemma_FStar.Pervasives.invertOption",
+        "projection_inverse_BoxBool_proj_0",
+        "typing_FStar.Pervasives.Native.uu___is_Some"
+      ],
+      0,
+      "24be0ff7f2a31b02002b833c3f27a36a"
     ],
     [
       "Meta.Interface.visit_function",
@@ -105,7 +121,7 @@
         "typing_FStar.Pervasives.Native.uu___is_Some"
       ],
       0,
-      "5051e2aa400e26e28613958f76a2a858"
+      "82031cae09634ed2184cb57dd6692da1"
     ],
     [
       "Meta.Interface.visit_function",
@@ -152,12 +168,14 @@
         "fuel_guarded_inversion_FStar.Tactics.Result.__result",
         "fuel_guarded_inversion_Meta.Interface.mapping",
         "fuel_guarded_inversion_Meta.Interface.state",
+        "fuel_guarded_inversion_Prims.list",
         "function_token_typing_FStar.Reflection.Types.bv",
         "function_token_typing_FStar.Reflection.Types.term",
+        "function_token_typing_Prims.bool",
         "function_token_typing_Prims.string",
-        "kinding_FStar.Pervasives.Native.tuple3@tok",
+        "kinding_FStar.Pervasives.Native.tuple4@tok",
         "kinding_Meta.Interface.mapping@tok", "kinding_Prims.list@tok",
-        "lemma_FStar.Pervasives.invertOption",
+        "lemma_FStar.Pervasives.invertOption", "primitive_Prims.op_Negation",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_FStar.Tactics.Result.Failed_a",
         "projection_inverse_FStar.Tactics.Result.Failed_exn",
@@ -173,7 +191,7 @@
         "typing_Meta.Interface.__proj__Mkstate__item__seen", "unit_typing"
       ],
       0,
-      "8d1ac1376b8e77ae2812407f2aeed942"
+      "d8f579503b015d97d8884c0c71170918"
     ]
   ]
 ]

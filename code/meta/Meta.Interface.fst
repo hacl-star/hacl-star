@@ -135,7 +135,7 @@ let binder_is_legit f_name t_i binder: Tac bool =
   if right_type && not implicit then
     fail ("the first parameter of " ^ string_of_name f_name ^ " is \
       not implicit but has the index type");
-  not right_type || not implicit
+  right_type && implicit
 
 
 let rec visit_function (t_i: term) (st: state) (f_name: name): Tac (state & list sigelt) =
@@ -173,12 +173,11 @@ let rec visit_function (t_i: term) (st: state) (f_name: name): Tac (state & list
           | Tv_Abs binder f_body ->
               let bv, qual = inspect_binder binder in
               let { bv_sort = t; bv_ppname = name } = inspect_bv bv in
-              if binder_is_legit f_name t_i binder then
-                None, "", f_body
-              else begin
+              if binder_is_legit f_name t_i binder then begin
                 print (st.indent ^ "Found " ^ name ^ ", index of type " ^ term_to_string t);
                 Some bv, name, f_body
-              end
+              end else
+                None, "", f_body
           | _ ->
               fail (string_of_name f_name ^ "is expected to be a function!")
         in
@@ -186,7 +185,7 @@ let rec visit_function (t_i: term) (st: state) (f_name: name): Tac (state & list
         let st, new_body, new_args, new_sigelts =
           match index_bv with
           | Some index_bv -> visit_body t_i (Some (pack (Tv_Var index_bv))) st [] f_body
-          | None -> visit_body t_i None st [] f_body
+          | _ -> visit_body t_i None st [] f_body
         in
         let st = { st with indent = old_indent } in
 
@@ -205,7 +204,7 @@ let rec visit_function (t_i: term) (st: state) (f_name: name): Tac (state & list
               lambda_over_index st f_name f_typ,
               mk_tot_arr [ pack_binder index_bv Q_Implicit ] (`Type0),
               true
-          | None ->
+          | _ ->
               f_typ,
               (`Type0),
               false
@@ -246,7 +245,7 @@ let rec visit_function (t_i: term) (st: state) (f_name: name): Tac (state & list
           let new_body =
             match index_bv with
             | Some index_bv -> pack (Tv_Abs (pack_binder index_bv Q_Implicit) new_body)
-            | None -> new_body
+            | _ -> new_body
           in
           let new_typ =
             match index_bv with
@@ -254,7 +253,7 @@ let rec visit_function (t_i: term) (st: state) (f_name: name): Tac (state & list
                 mk_tot_arr
                   (pack_binder index_bv Q_Implicit :: List.Tot.map (fun x -> mk_binder x) new_bvs)
                   (pack (Tv_App f_typ (pack (Tv_Var index_bv), Q_Implicit)))
-            | None ->
+            | _ ->
                 mk_tot_arr
                   (List.Tot.map (fun x -> mk_binder x) new_bvs)
                   f_typ
