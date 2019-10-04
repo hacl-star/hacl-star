@@ -657,7 +657,7 @@
         "fuel_guarded_inversion_Prims.list", "subterm_ordering_Prims.Cons"
       ],
       0,
-      "4e7297ae52e0da6e260037e4c3bb8f32"
+      "e88457a4061209d95a49b19d568ea141"
     ],
     [
       "Vale.X64.Leakage.check_if_block_consumes_fixed_time",
@@ -694,7 +694,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "63e5e4daf75ddc1da6a380fd8f538a4c"
+      "55ee9d78ff4369ee2408a24dd4cc971a"
     ],
     [
       "Vale.X64.Leakage.check_if_block_consumes_fixed_time",
@@ -753,7 +753,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "c8453e1705cb14ad05658411268b6439"
+      "45431b9833675ab3e2fc2de5a86415db"
     ],
     [
       "Vale.X64.Leakage.monotone_ok_eval",
@@ -855,7 +855,7 @@
         "unit_inversion", "unit_typing"
       ],
       0,
-      "1c6352c418e5ce1325c6415c10fda04a"
+      "e81d1f51e3d0879a5ea80730cf51c97c"
     ],
     [
       "Vale.X64.Leakage.monotone_ok_eval",
@@ -898,7 +898,7 @@
         "typing_Vale.X64.Machine_Semantics_s.machine_eval_code"
       ],
       0,
-      "169956a88889f074ce6de0279b34713c"
+      "24ac90d3f4709c87b70124d491a18f60"
     ],
     [
       "Vale.X64.Leakage.monotone_ok_eval_while",
@@ -982,7 +982,7 @@
       1,
       [ "@query" ],
       0,
-      "2a895f758605927bb4bf2a6ec8b37b8e"
+      "daa39d6dfbc92def05cf023ec4d87646"
     ],
     [
       "Vale.X64.Leakage.lemma_loop_taintstate_monotone",
@@ -1124,7 +1124,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "05add5eef0ab703cc54f0c8ec4e8c72e"
+      "30fddf1f4696f3f4e8c9ea7553326c69"
     ],
     [
       "Vale.X64.Leakage.lemma_code_explicit_leakage_free",
@@ -1145,6 +1145,7 @@
         "FStar.FunctionalExtensionality_interpretation_Tm_arrow_a7d5cc170be69663c495e8582d2bc62a",
         "Prims_interpretation_Tm_arrow_2eaa01e78f73e9bab5d0955fc1a662da",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "Prims_pretyping_e4836109f73687024ac3edd113084865",
         "Prims_pretyping_f537159ed795b314b4e58c260361ae86",
         "Prims_pretyping_f8666440faa91836cc5a13998af863fc",
         "Vale.Lib.MapTree_interpretation_Tm_arrow_6c9cf9481699be8541b47b0f2a7e6435",
@@ -1345,11 +1346,12 @@
         "typing_Vale.X64.Machine_Semantics_s.get_snd_ocmp",
         "typing_Vale.X64.Machine_Semantics_s.machine_eval_code",
         "typing_Vale.X64.Machine_Semantics_s.valid_src_operand64_and_taint",
+        "typing_tok_Prims.LexTop@tok",
         "typing_tok_Vale.X64.Machine_s.Public@tok", "unit_typing",
         "well-founded-ordering-on-nat"
       ],
       0,
-      "ede165b641e0abeae784270d7df393cc"
+      "b17e0ab0405cd8812ed45b75c73f4486"
     ],
     [
       "Vale.X64.Leakage.lemma_code_explicit_leakage_free",
@@ -1433,7 +1435,7 @@
         "unit_inversion", "unit_typing"
       ],
       0,
-      "a5c72c632ad2e18fd5ff22c9b773166d"
+      "0f284a135c06abd040d14ab5dfed8e1b"
     ],
     [
       "Vale.X64.Leakage.lemma_code_explicit_leakage_free",
@@ -1453,6 +1455,7 @@
         "FStar.FunctionalExtensionality_interpretation_Tm_arrow_a7d5cc170be69663c495e8582d2bc62a",
         "Prims_interpretation_Tm_arrow_2eaa01e78f73e9bab5d0955fc1a662da",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "Prims_pretyping_e4836109f73687024ac3edd113084865",
         "Prims_pretyping_f537159ed795b314b4e58c260361ae86",
         "Prims_pretyping_f8666440faa91836cc5a13998af863fc",
         "Vale.Lib.MapTree_interpretation_Tm_arrow_6c9cf9481699be8541b47b0f2a7e6435",
@@ -1495,6 +1498,7 @@
         "disc_equation_Vale.X64.Machine_s.Public",
         "disc_equation_Vale.X64.Machine_s.Secret",
         "disc_equation_Vale.X64.Machine_s.While",
+        "equality_tok_Prims.LexTop@tok",
         "equality_tok_Vale.X64.Machine_s.Public@tok",
         "equality_tok_Vale.X64.Machine_s.Secret@tok",
         "equation_FStar.FunctionalExtensionality.feq",
@@ -1645,11 +1649,12 @@
         "typing_Vale.X64.Machine_Semantics_s.get_snd_ocmp",
         "typing_Vale.X64.Machine_Semantics_s.machine_eval_code",
         "typing_Vale.X64.Machine_Semantics_s.valid_src_operand64_and_taint",
+        "typing_tok_Prims.LexTop@tok",
         "typing_tok_Vale.X64.Machine_s.Public@tok", "unit_inversion",
         "unit_typing", "well-founded-ordering-on-nat"
       ],
       0,
-      "8a8a3400931801a8cbc983c32d597880"
+      "a09c68366a8e871032b37be7eb1a31b6"
     ],
     [
       "Vale.X64.Leakage.lemma_code_leakage_free",

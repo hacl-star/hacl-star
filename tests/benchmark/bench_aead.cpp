@@ -11,9 +11,6 @@ extern "C" {
 #ifdef HAVE_VALE
 #include <EverCrypt_Vale.h>
 #endif
-#include <Hacl_Chacha20.h>
-#include <Hacl_Chacha20Poly1305.h>
-#include <Hacl_Poly1305_128.h>
 #include <EverCrypt_Chacha20Poly1305.h>
 }
 
@@ -553,6 +550,10 @@ void showbuf(const uint8_t *buf, size_t len)
 #ifdef WIN32
 #undef HAVE_JC
 #endif
+
+static uint32_t
+Hacl_Impl_Chacha20_chacha20_constants[4U] =
+  { (uint32_t)0x61707865U, (uint32_t)0x3320646eU, (uint32_t)0x79622d32U, (uint32_t)0x6b206574U };
 
 #ifdef HAVE_JC
 template<size_t key_size_bits, size_t tag_len>

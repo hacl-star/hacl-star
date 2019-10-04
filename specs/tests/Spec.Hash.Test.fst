@@ -208,7 +208,7 @@ let test5_expected224 = []
 //   0x4euy; 0xaduy; 0xb2uy; 0x17uy; 0xaduy; 0x8cuy; 0xc0uy; 0x9buy
 // ]
 
-open Spec.Hash
+open Spec.Agile.Hash
 open Spec.Hash.Definitions
 
 //
@@ -219,7 +219,7 @@ type vec =
   | Vec :
     a: hash_alg ->
     plain:
-    list UInt8.t {norm [delta; iota; zeta; primops] (List.Tot.length plain < max_input_length a) == true} ->
+    list UInt8.t {norm [delta; iota; zeta; primops] (List.Tot.length plain <= max_input_length a) == true} ->
     hash:
     list UInt8.t {norm [delta; iota; zeta; primops] (List.Tot.length hash = hash_length a) == true} ->
     vec

@@ -181,7 +181,7 @@ procedure MulAdd_step(
         buffers_disjoint128(hkeys_b, scratch_b);
         validSrcAddrs128(mem, Xip - 0x20, hkeys_b, 8, memTaint, Secret);
         validSrcAddrs128(mem, rbp, scratch_b, 8, memTaint, Secret);
-        rbp + 0x10 * 8 <= pow2_64;
+//        rbp + 0x10 * 8 <= pow2_64;
         0 <= power_index < 8;
         let z0 := if m = 1 then a1 else Z0;
         m > 0 ==> of_quad32(z0) +. shift(of_quad32(Z2), 64) +. shift(of_quad32(Z3), 128) ==
@@ -634,7 +634,8 @@ procedure Reduce(inline last_adds:bool, ghost f:poly)
     VPolyMul(Z0, Z0, Hkey, false, true);
     VHigh64ToLow(Z2, Z2);
     VPolyAdd(Z3, Z3, Z2);
-    VPolyAdd(Z0, Ii, Z0);
+    lemma_add_commute(of_quad32(Z0), of_quad32(Ii));
+    VPolyAdd(Z0, Z0, Ii);
     // TODO: save Z3 in memory
     VSwap(Xi, Z0);
     VPolyMul(Z0, Z0, Hkey, false, true);
@@ -734,17 +735,7 @@ procedure GhashUnroll_n(
     MulAdd_unroll_n(rev_bytes, rev_blocks, exactly6, scratch_len, hkeys_b, scratch_b, h, prev, data);
     ZeroXmm(Hkey);
     PinsrdImm(Hkey, 0xc2000000, 3, scratch_reg);
-    lemma_gf128_low_shift();
-    lemma_gf128_degree();
-    Reduce(gf128_modulus_low_terms);
-    // assert of_quad32(Xi) == mod_rev(128, ghash_unroll_back(h, prev, pdata, 0, n, #nat(n - 1)), gf128_modulus);
-    lemma_ghash_unroll_back_forward(h, prev, pdata, 0, #nat(n - 1));
-    // assert of_quad32(Xi) == mod_rev(128, ghash_unroll(h, prev, pdata, 0, #nat(n - 1), 0), gf128_modulus);
-    lemma_ghash_poly_of_unroll(h, prev, pdata, 0, #nat(n - 1));
-    // assert of_quad32(Xi) == ghash_poly(h, prev, pdata, 0, n);
-    lemma_ghash_incremental_poly(h_LE, y_prev, data);
-    // assert of_quad32(Xi) == of_quad32(reverse_bytes_quad32(ghash_incremental(h_LE, y_prev, data)));
-    lemma_to_of_quad32(reverse_bytes_quad32(ghash_incremental(h_LE, y_prev, data)));
+    ReduceLast(true, hkeys_b, scratch_b, h_LE, y_prev, data);
 }
 
 // TODO: Pair this up with a version of gcm_make_length_quad that doesn't reverse it's output,
@@ -796,7 +787,7 @@ procedure Ghash_register(
     PinsrdImm(Hkey, 0xc2000000, 3, scratch_ptr);
     lemma_gf128_low_shift();
     lemma_gf128_degree();
-    Reduce(gf128_modulus_low_terms);
+    Reduce(true, gf128_modulus_low_terms);
     assert of_quad32(Xi) == mod_rev(128, ghash_unroll_back(h, prev, pdata, 0, 1, 0), gf128_modulus);
     lemma_ghash_unroll_back_forward(h, prev, pdata, 0, 0);
     assert of_quad32(Xi) == mod_rev(128, ghash_unroll(h, prev, pdata, 0, 0, 0), gf128_modulus);

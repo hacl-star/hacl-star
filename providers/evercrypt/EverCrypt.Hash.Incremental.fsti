@@ -167,7 +167,7 @@ val hash_fits: #a:Hash.alg -> h:HS.mem -> s:state a -> Lemma
   (requires (
     invariant h s))
   (ensures (
-    S.length (hashed h s) < Spec.Hash.Definitions.max_input_length a))
+    S.length (hashed h s) <= Spec.Hash.Definitions.max_input_length a))
   [ SMTPat (hashed h s) ]
 
 val alg_of_state: a:e_alg -> (
@@ -307,7 +307,7 @@ let finish_st (a: Hash.alg) =
       hashed h0 s == hashed h1 s /\
       footprint h0 s == footprint h1 s /\
       B.(modifies (loc_union (loc_buffer dst) (footprint h0 s)) h0 h1) /\
-      S.equal (B.as_seq h1 dst) (Spec.Hash.hash a (hashed h0 s)))
+      S.equal (B.as_seq h1 dst) (Spec.Agile.Hash.hash a (hashed h0 s)))
 
 (** @type: true
 *)

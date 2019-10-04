@@ -36,7 +36,7 @@ type alg13 = a:alg { a=SHA2_256 \/ a=SHA2_384 \/ a=SHA2_512 }
 /// No pattern (would fire too often)!
 let uint32_fits_maxLength (a: alg) (x: UInt32.t): Lemma
   (requires True)
-  (ensures UInt32.v x < max_input_length a)
+  (ensures UInt32.v x <= max_input_length a)
 =
   assert_norm (pow2 32 < pow2 61);
   assert_norm (pow2 61 < pow2 125)
@@ -216,7 +216,7 @@ val init: #a:e_alg -> (
   (requires invariant s)
   (ensures fun h0 _ h1 ->
     invariant s h1 /\
-    repr s h1 == Spec.Hash.init a /\
+    repr s h1 == Spec.Agile.Hash.init a /\
     M.(modifies (footprint s h0) h0 h1) /\
     footprint s h0 == footprint s h1 /\
     preserves_freeable s h0 h1))
@@ -246,7 +246,7 @@ val update:
     M.(modifies (footprint s h0) h0 h1) /\
     footprint s h0 == footprint s h1 /\
     invariant s h1 /\
-    repr s h1 == Spec.Hash.update a (repr s h0) (B.as_seq h0 block) /\
+    repr s h1 == Spec.Agile.Hash.update a (repr s h0) (B.as_seq h0 block) /\
     preserves_freeable s h0 h1))
 
 // Note that we pass the data length in bytes (rather than blocks).
@@ -267,7 +267,7 @@ val update_multi:
     M.(modifies (footprint s h0) h0 h1) /\
     footprint s h0 == footprint s h1 /\
     invariant s h1 /\
-    repr s h1 == Spec.Hash.update_multi a (repr s h0) (B.as_seq h0 blocks) /\
+    repr s h1 == Spec.Agile.Hash.update_multi a (repr s h0) (B.as_seq h0 blocks) /\
     preserves_freeable s h0 h1))
 
 val update_last_256: Hacl.Hash.Definitions.update_last_st SHA2_256
@@ -291,7 +291,7 @@ val update_last:
   s:state a ->
   last:B.buffer Lib.IntTypes.uint8 { B.length last < block_length a } ->
   total_len:uint64_t {
-    v total_len < max_input_length a /\
+    v total_len <= max_input_length a /\
     (v total_len - B.length last) % block_length a = 0 } ->
   Stack unit
   (requires fun h0 ->
@@ -302,7 +302,7 @@ val update_last:
     invariant s h1 /\
     (B.length last + Seq.length (Spec.Hash.PadFinish.pad a (v total_len))) % block_length a = 0 /\
     repr s h1 ==
-      Spec.Hash.update_multi a (repr s h0)
+      Spec.Agile.Hash.update_multi a (repr s h0)
         (Seq.append (B.as_seq h0 last) (Spec.Hash.PadFinish.pad a (v total_len))) /\
     M.(modifies (footprint s h0) h0 h1) /\
     footprint s h0 == footprint s h1 /\
@@ -367,7 +367,7 @@ val hash:
   a:alg ->
   dst:B.buffer Lib.IntTypes.uint8 {B.length dst = hash_length a} ->
   input:B.buffer Lib.IntTypes.uint8 ->
-  len:uint32_t {B.length input = v len /\ v len < max_input_length a} ->
+  len:uint32_t {B.length input = v len /\ v len <= max_input_length a} ->
   Stack unit
   (requires fun h0 ->
     B.live h0 dst /\
@@ -375,4 +375,4 @@ val hash:
     M.(loc_disjoint (loc_buffer input) (loc_buffer dst)))
   (ensures fun h0 _ h1 ->
     M.(modifies (loc_buffer dst) h0 h1) /\
-    B.as_seq h1 dst == Spec.Hash.hash a (B.as_seq h0 input))
+    B.as_seq h1 dst == Spec.Agile.Hash.hash a (B.as_seq h0 input))

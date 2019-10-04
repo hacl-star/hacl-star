@@ -11,7 +11,7 @@ open Lib.Buffer
 module F56 = Hacl.Impl.Ed25519.Field56
 module BF = Vale.Arch.BufferFriend
 
-#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
 
 //FIX
 val sha512_pre_msg:
@@ -24,7 +24,7 @@ val sha512_pre_msg:
       live h hash /\ live h prefix /\ live h input /\
       disjoint input hash /\ disjoint prefix hash)
     (ensures fun h0 _ h1 -> modifies (loc hash) h0 h1 /\
-      as_seq h1 hash == Spec.Hash.hash Spec.Hash.Definitions.SHA2_512
+      as_seq h1 hash == Spec.Agile.Hash.hash Spec.Hash.Definitions.SHA2_512
            (concat #uint8 #32 #(v len) (as_seq h0 prefix) (as_seq h0 input))
     )
 let sha512_pre_msg h prefix len input =
@@ -48,7 +48,7 @@ val sha512_pre_pre2_msg:
       disjoint prefix hash /\ disjoint prefix2 hash /\ disjoint input hash
     )
     (ensures fun h0 _ h1 -> modifies (loc hash) h0 h1 /\
-      as_seq h1 hash == Spec.Hash.hash Spec.Hash.Definitions.SHA2_512
+      as_seq h1 hash == Spec.Agile.Hash.hash Spec.Hash.Definitions.SHA2_512
         (concat #uint8 #64 #(v len)
           (concat #uint8 #32 #32 (as_seq h0 prefix) (as_seq h0 prefix2))
           (as_seq h0 input)

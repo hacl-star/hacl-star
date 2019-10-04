@@ -4,6 +4,7 @@ include "../../../arch/x64/Vale.X64.InsVector.vaf"
 include "../../../arch/x64/Vale.X64.InsStack.vaf"
 include "../../../lib/util/Vale.Lib.Basic.vaf"
 include "../../../lib/util/x64/Vale.X64.Stack.vaf"
+include "../../../thirdPartyPorts/OpenSSL/aes/Vale.AES.X64.AESopt.vaf"
 include "../../../thirdPartyPorts/OpenSSL/aes/Vale.AES.X64.AESGCM.vaf"
 include "../../../thirdPartyPorts/OpenSSL/aes/Vale.AES.X64.AESopt2.vaf"
 include "Vale.AES.X64.GCMencryptOpt.vaf"
@@ -81,6 +82,7 @@ open Vale.AES.X64.GF128_Mul
 open Vale.X64.Stack
 open Vale.X64.CPU_Features_s
 open Vale.Math.Poly2.Bits_s
+open Vale.AES.X64.AESopt
 open Vale.AES.X64.AESGCM
 open Vale.AES.X64.AESopt2
 open Vale.Lib.Meta
@@ -114,7 +116,7 @@ function aes_reqs(alg:algorithm, key:seq(nat32), round_keys:seq(quad32), keys_b:
 // GCM
 ///////////////////////////
 
-#reset-options "--z3rlimit 10"
+#reset-options "--z3rlimit 10 --max_ifuel 0"
 procedure Gcm_extra_bytes(
         inline alg:algorithm,
         ghost inout_b:buffer128,
@@ -274,7 +276,7 @@ procedure Gcm_blocks128(
     Gctr_blocks128(alg, in_b, out_b, key, round_keys, keys_b);
 }
 
-#reset-options "--z3rlimit 400"
+#reset-options "--z3rlimit 1000 --max_ifuel 0"
 procedure Gcm_blocks(
         inline alg:algorithm,
         inline offset:int,
@@ -582,7 +584,7 @@ procedure Gcm_blocks(
     ghash_incremental_to_ghash(h_LE, auth_in);
 }
 
-#reset-options "--z3rlimit 60"
+#reset-options "--z3rlimit 60 --max_ifuel 0"
 procedure Gcm_blocks_wrapped(
         inline alg:algorithm,
         inline offset:int,
@@ -755,9 +757,9 @@ procedure Gcm_blocks_wrapped(
 }
 
 #verbatim{:interface}
-#reset-options "--z3rlimit 100"
+#reset-options "--z3rlimit 100 --max_ifuel 0"
 #endverbatim
-#reset-options "--z3rlimit 1600"
+#reset-options "--z3rlimit 1600 --max_ifuel 0"
 // Using exportOnly, since verification with quick mode fails with:
 // (Error 196) Implicit argument: Expected a total term; got a ghost term
 procedure gcm_blocks_decrypt_stdcall(

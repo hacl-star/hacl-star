@@ -7,7 +7,7 @@ open Lib.ByteSequence
 open Lib.IntVector
 
 module Loops = Lib.LoopCombinators
-module PLoops = Hacl.Loops.Lemmas
+module PLoops = Lib.Sequence.Lemmas
 module Lemmas = Hacl.Spec.Poly1305.Lemmas
 module S = Spec.Poly1305
 
@@ -197,6 +197,8 @@ let poly_update_multi_lemma_loop2 r text i acc_vec0 =
   Lemmas.poly_update_repeat_blocks_multi_lemma2_simplify acc_vec0.[0] acc_vec0.[1] c0 c1 r;
   assert (normalize_2 r acc_vec1 == PLoops.repeat_w #pfelem 2 nb_vec repeat_bf_t1 i (normalize_n r acc_vec0))
 
+
+#set-options "--z3rlimit 150"
 
 val poly_update_multi_lemma_loop4:
     r:pfelem

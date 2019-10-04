@@ -5,7 +5,7 @@ module B = LowStar.Buffer
 open FStar.Integers
 open EverCrypt.Helpers
 
-open Spec.HKDF
+open Spec.Agile.HKDF
 open Spec.Hash.Definitions
 
 /// IMPLEMENTATION
@@ -19,7 +19,7 @@ open FStar.HyperStack.ST
 val hkdf_extract :
   a       : EverCrypt.HMAC.supported_alg ->
   prk     : B.buffer Lib.IntTypes.uint8{B.length prk == hash_length a} ->
-  salt    : B.buffer Lib.IntTypes.uint8 { B.disjoint salt prk /\ Spec.HMAC.keysized a (B.length salt)} ->
+  salt    : B.buffer Lib.IntTypes.uint8 { B.disjoint salt prk /\ Spec.Agile.HMAC.keysized a (B.length salt)} ->
   saltlen : UInt32.t { UInt32.v saltlen == B.length salt } ->
   ikm     : B.buffer Lib.IntTypes.uint8 { B.length ikm + block_length a < pow2 32 /\ B.disjoint ikm prk } ->
   ikmlen  : UInt32.t { UInt32.v ikmlen == B.length ikm } -> Stack unit
@@ -28,7 +28,7 @@ val hkdf_extract :
   (ensures  (fun h0 r h1 ->
     Hacl.HMAC.key_and_data_fits a;
     LowStar.Modifies.(modifies (loc_buffer prk) h0 h1) /\
-    B.as_seq h1 prk == Spec.HMAC.hmac a (B.as_seq h0 salt) (B.as_seq h0 ikm)))
+    B.as_seq h1 prk == Spec.Agile.HMAC.hmac a (B.as_seq h0 salt) (B.as_seq h0 ikm)))
 
 let hash_block_length_fits (a: hash_alg): Lemma
   (ensures (hash_length a + pow2 32 + block_length a < max_input_length a))
@@ -48,7 +48,7 @@ val hkdf_expand :
   len     : UInt32.t {
     UInt32.v len == B.length okm /\
     B.disjoint okm prk /\
-    Spec.HMAC.keysized a (v prklen) /\
+    Spec.Agile.HMAC.keysized a (v prklen) /\
     hash_length a + v infolen + 1 + block_length a < pow2 32 /\
     v len <= 255 * hash_length a } ->
   Stack unit

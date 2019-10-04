@@ -81,11 +81,17 @@ def find_fsti(module):
             return norm(os.path.join(d, module + '.fst'))
     raise Exception('Could not find fst/fsti for dependency ' + module)
 
+def find_checked_file(fst_file):
+    fst_file = norm(fst_file)
+    checked_file = os.path.basename(fst_file) + '.checked'
+    for d in inc_dirs:
+        if os.path.isfile(os.path.join(d, checked_file)):
+            return norm(os.path.join(d, checked_file))
+    return to_obj_dir(fst_file + '.checked')
+
 def make_dump(fst_file):
     dump = to_obj_dir(fst_file + '.dump')
-    checked = fst_file + '.checked'
-    if not os.path.exists(checked):
-        checked = to_obj_dir(checked)
+    checked = find_checked_file(fst_file)
     depends(dump, checked)
     return dump
 
