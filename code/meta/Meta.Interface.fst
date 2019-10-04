@@ -218,7 +218,20 @@ let rec visit_function (st: state) (f_name: name): Tac (state & list sigelt) =
             st.indent ^ "=\n" ^
             st.indent ^ term_to_string new_body);
 
-          st, new_sigelts @ [ se_t; se ]
+          // For debugging. This is very meta.
+          let se_debug = pack_sigelt (Sg_Let
+            false
+            (pack_fv (suffix_name new_name "debug"))
+            []
+            (`unit)
+            (`(let x: unit =
+              _ by (
+                print ("About to check " ^ (`#(string_of_name f_name)));
+                exact (`(()))) in
+              x)))
+          in
+
+          st, new_sigelts @ [ se_debug; se_t; se ]
 
       | _ ->
           if has_attr f (`Meta.Attribute.specialize) then
