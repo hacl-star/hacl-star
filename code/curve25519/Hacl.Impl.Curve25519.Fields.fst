@@ -114,7 +114,6 @@ let load_felem #s f b =
   | M51 -> F51.load_felem f b
   | M64 -> F64.load_felem f b
 
-inline_for_extraction noextract
 val store_felem:
     #s:field_spec
   -> b:lbuffer uint64 4ul
@@ -126,6 +125,7 @@ val store_felem:
     (ensures  fun h0 _ h1 ->
       modifies (loc b |+| loc f) h0 h1 /\
       as_seq h1 b == BSeq.nat_to_intseq_le 4 (feval h0 f))
+[@ Meta.Attribute.inline_ ]
 let store_felem #s b f =
   match s with
   | M51 -> F51.store_felem b f
@@ -189,7 +189,6 @@ let fadd_post #s h out =
   | M51 -> F51.felem_fits h out (2, 4, 2, 2, 2)
   | M64 -> True
 
-inline_for_extraction noextract
 val fadd:
     #s:field_spec
   -> out:felem s
@@ -205,6 +204,7 @@ val fadd:
     (ensures  fun h0 _ h1 ->
       modifies (loc out) h0 h1 /\ fadd_post h1 out /\
       feval h1 out == P.fadd (feval h0 f1) (feval h0 f2))
+[@ Meta.Attribute.inline_ ]
 let fadd #s out f1 f2=
   match s with
   | M51 -> F51.fadd out f1 f2
@@ -216,7 +216,6 @@ let fsub_post #s h out =
   | M51 -> F51.felem_fits h out (9, 10, 9, 9, 9)
   | M64 -> True
 
-inline_for_extraction noextract
 val fsub:
     #s:field_spec
   -> out:felem s
@@ -233,6 +232,7 @@ val fsub:
     (ensures fun h0 _ h1 ->
       modifies (loc out) h0 h1 /\ fsub_post h1 out /\
       feval h1 out == P.fsub (feval h0 f1) (feval h0 f2))
+[@ Meta.Attribute.inline_ ]
 let fsub #s out f1 f2=
   match s with
   | M51 -> F51.fsub out f1 f2
@@ -246,7 +246,6 @@ let fmul_pre #s h f1 f2 =
       F51.felem_fits h f2 (9, 10, 9, 9, 9)
   | M64 -> Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)
 
-inline_for_extraction noextract
 val fmul:
     #s:field_spec
   -> out:felem s
@@ -266,6 +265,7 @@ val fmul:
     (ensures fun h0 _ h1 ->
       modifies (loc out |+| loc tmp) h0 h1 /\ state_inv_t h1 out /\
       feval h1 out == P.fmul (feval h0 f1) (feval h0 f2))
+[@ Meta.Attribute.inline_ ]
 let fmul #s out f1 f2 tmp =
   match s with
   | M51 -> F51.fmul out f1 f2
@@ -296,7 +296,6 @@ let fmul2_fsqr2_post #s h out =
   | M64 -> True
 
 
-inline_for_extraction noextract
 val fmul2:
     #s:field_spec
   -> out:felem2 s
@@ -323,6 +322,7 @@ val fmul2:
       let f21 = gsub f2 (nlimb s) (nlimb s) in
       feval h1 out0 == P.fmul (feval h0 f10) (feval h0 f20) /\
       feval h1 out1 == P.fmul (feval h0 f11) (feval h0 f21)))
+[@ Meta.Attribute.inline_ ]
 let fmul2 #s out f1 f2 tmp =
   match s with
   | M51 -> F51.fmul2 out f1 f2
@@ -334,7 +334,6 @@ let fmul1_pre #s h f1 f2 =
   | M51 -> F51.felem_fits h f1 (9, 10, 9, 9, 9) /\ F51.felem_fits1 f2 1
   | M64 -> v f2 < pow2 17 /\ Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)
 
-inline_for_extraction noextract
 val fmul1:
     #s:field_spec
   -> out:felem s
@@ -349,6 +348,7 @@ val fmul1:
       modifies (loc out) h0 h1 /\ state_inv_t h1 out /\
       feval h1 out == P.fmul (feval h0 f1) (v f2))
 //     feval h1 out == (feval h0 f1 * v f2) % P.prime)
+[@ Meta.Attribute.inline_ ]
 let fmul1 #s out f1 f2 =
   match s with
   | M51 -> F51.fmul1 out f1 f2
@@ -360,7 +360,6 @@ let fsqr_pre #s h f =
   | M51 -> F51.felem_fits h f (9, 10, 9, 9, 9)
   | M64 -> Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)
 
-inline_for_extraction noextract
 val fsqr:
     #s:field_spec
   -> out:felem s
@@ -376,6 +375,7 @@ val fsqr:
     (ensures  fun h0 _ h1 ->
       modifies (loc out |+| loc tmp) h0 h1 /\ state_inv_t h1 out /\
       feval h1 out == P.fmul (feval h0 f1) (feval h0 f1))
+[@ Meta.Attribute.inline_ ]
 let fsqr #s out f1 tmp =
   match s with
   | M51 -> F51.fsqr out f1
@@ -391,7 +391,6 @@ let fsqr2_pre #s h f =
       F51.felem_fits h f2 (9, 10, 9, 9, 9)
   | M64 -> Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)
 
-inline_for_extraction noextract
 val fsqr2:
     #s:field_spec
   -> out:felem2 s
@@ -412,12 +411,12 @@ val fsqr2:
       let f2 = gsub f (nlimb s) (nlimb s) in
       feval h1 out1 == P.fmul (feval h0 f1) (feval h0 f1) /\
       feval h1 out2 == P.fmul (feval h0 f2) (feval h0 f2)))
+[@ Meta.Attribute.inline_ ]
 let fsqr2 #s out f tmp =
   match s with
   | M51 -> F51.fsqr2 out f
   | M64 -> F64.fsqr2 out f tmp
 
-inline_for_extraction noextract
 val cswap2:
     #s:field_spec
   -> bit:uint64{v bit <= 1}
@@ -432,6 +431,7 @@ val cswap2:
       modifies (loc p1 |+| loc p2) h0 h1 /\
       (v bit == 1 ==> as_seq h1 p1 == as_seq h0 p2 /\ as_seq h1 p2 == as_seq h0 p1) /\
       (v bit == 0 ==> as_seq h1 p1 == as_seq h0 p1 /\ as_seq h1 p2 == as_seq h0 p2))
+[@ Meta.Attribute.inline_ ]
 let cswap2 #s bit p0 p1 =
   match s with
   | M51 -> F51.cswap2 bit p0 p1

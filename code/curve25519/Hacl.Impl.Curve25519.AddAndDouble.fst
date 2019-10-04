@@ -68,6 +68,7 @@ val point_add_and_double0:
       modifies (loc nq_p1 |+| loc dc |+| loc tmp2) h0 h1 /\
       point_post_add_t h1 (get_x nq_p1) /\ point_post_sub_t h1 (get_z nq_p1) /\
       fget_xz h1 nq_p1 == S.add_and_double1_0 (fget_x h0 ab) (fget_z h0 ab) (fget_xz h0 nq_p1))
+[@ Meta.Attribute.inline_ ]
 let point_add_and_double0 #s nq_p1 ab dc tmp2 =
   let x3 = sub nq_p1 0ul (nlimb s) in
   let z3 = sub nq_p1 (nlimb s) (nlimb s) in
@@ -109,6 +110,7 @@ val point_add_and_double1:
       (fget_xz h1 nq, fget_xz h1 nq_p1) ==
 	S.add_and_double1_1 (feval h0 (gsub tmp1 0ul (nlimb s)))
 	  (feval h0 (gsub tmp1 (nlimb s) (nlimb s))) (fget_xz h0 nq_p1))
+[@ Meta.Attribute.inline_ ]
 let point_add_and_double1 #s nq nq_p1 tmp1 tmp2 =
   let x2 = sub nq 0ul (nlimb s) in
   let z2 = sub nq (nlimb s) (nlimb s) in

@@ -43,6 +43,7 @@ val fsqr_s:
       modifies (loc out |+| loc tmp) h0 h1 /\
       fsquare_times_inv h1 out /\
       feval h1 out == P.fmul (feval h0 f1) (feval h0 f1))
+[@ Meta.Attribute.inline_ ]
 let fsqr_s #s out f1 tmp =
   match s with
   | M51 -> F51.fsqr out f1
@@ -74,6 +75,7 @@ val fmul_s:
     (ensures  fun h0 _ h1 ->
       modifies (loc out |+| loc tmp) h0 h1 /\ fsquare_times_inv h1 out /\
       feval h1 out == P.fmul (feval h0 f1) (feval h0 f2))
+[@ Meta.Attribute.inline_ ]
 let fmul_s #s out f1 f2 tmp =
   match s with
   | M51 -> F51.fmul out f1 f2
@@ -137,6 +139,7 @@ val finv0:
       fsquare_times_inv h1 a /\
       fsquare_times_inv h1 t0 /\
       (feval h1 a, feval h1 t0) == (a_s, t0_s)))
+[@ Meta.Attribute.inline_ ]
 let finv0 #s i t1 tmp =
   let h0 = ST.get () in
   let a : felem s = sub t1 0ul (nlimb s) in

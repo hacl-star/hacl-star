@@ -60,7 +60,6 @@ let load_felem f u64s =
   f.(2ul) <- u64s.(2ul);
   f.(3ul) <- u64s.(3ul)
 
-inline_for_extraction noextract
 val carry_pass_store:
     f:felem
  -> Stack unit
@@ -69,13 +68,13 @@ val carry_pass_store:
    (ensures fun h0 _ h1 ->
      modifies (loc f) h0 h1 /\
      as_nat h1 f == S.as_nat4 (SC.carry_pass_store (as_tup4 h0 f)))
+[@ Meta.Attribute.inline_ ]
 let carry_pass_store f =
   let f3 = f.(3ul) in
   let top_bit = f3 >>. 63ul in
   f.(3ul) <- f3 &. u64 0x7fffffffffffffff;
   let carry = add1 f f (u64 19 *! top_bit) in ()
 
-inline_for_extraction noextract
 val store_felem:
     u64s:lbuffer uint64 4ul
   -> f:felem
@@ -86,6 +85,7 @@ val store_felem:
     (ensures  fun h0 _ h1 ->
       modifies (loc u64s |+| loc f) h0 h1 /\
       as_seq h1 u64s == BSeq.nat_to_intseq_le 4 (fevalh h0 f))
+[@ Meta.Attribute.inline_ ]
 let store_felem u64s f =
   let h0 = ST.get () in
   carry_pass_store f;

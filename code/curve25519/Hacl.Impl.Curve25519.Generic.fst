@@ -131,6 +131,7 @@ val cswap2:
       (v bit == 1 ==> as_seq h1 p1 == as_seq h0 p2 /\ as_seq h1 p2 == as_seq h0 p1) /\
       (v bit == 0 ==> as_seq h1 p1 == as_seq h0 p1 /\ as_seq h1 p2 == as_seq h0 p2) /\
       (fget_xz h1 p1, fget_xz h1 p2) == S.cswap2 bit (fget_xz h0 p1) (fget_xz h0 p2))
+[@ Meta.Attribute.inline_ ]
 let cswap2 #s bit p0 p1 =
   match s with
   | M51 -> F51.cswap2 bit p0 p1
@@ -170,6 +171,7 @@ val ladder_step:
       state_inv_t h1 (get_x q) /\ state_inv_t h1 (get_z q) /\
       state_inv_t h1 (get_x nq) /\ state_inv_t h1 (get_z nq) /\
       state_inv_t h1 (get_x nq_p1) /\ state_inv_t h1 (get_z nq_p1)))
+[@ Meta.Attribute.inline_ ]
 let ladder_step #s k q i p01_tmp1_swap tmp2 =
   let p01_tmp1 = sub p01_tmp1_swap 0ul (8ul *! nlimb s) in
   let swap : lbuffer uint64 1ul = sub p01_tmp1_swap (8ul *! nlimb s) 1ul in
@@ -225,6 +227,7 @@ val ladder_step_loop:
       v (LSeq.index (as_seq h1 bit) 0) <= 1 /\
       state_inv_t h1 (get_x nq) /\ state_inv_t h1 (get_z nq) /\
       state_inv_t h1 (get_x nq_p1) /\ state_inv_t h1 (get_z nq_p1)))
+[@ Meta.Attribute.inline_ ]
 let ladder_step_loop #s k q p01_tmp1_swap tmp2 =
   let h0 = ST.get () in
 
@@ -281,6 +284,7 @@ val ladder0_:
       state_inv_t h1 (get_x nq) /\ state_inv_t h1 (get_z nq) /\
       fget_xz h1 nq ==
       M.montgomery_ladder1_0 (as_seq h0 k) (fget_xz h0 q) (fget_xz h0 nq) (fget_xz h0 nq_p1)))
+[@ Meta.Attribute.inline_ ]
 let ladder0_ #s k q p01_tmp1_swap tmp2 =
   let p01_tmp1 = sub p01_tmp1_swap 0ul (8ul *! nlimb s) in
   let nq : point s = sub p01_tmp1_swap 0ul (2ul *! nlimb s) in
@@ -320,6 +324,7 @@ val ladder1_:
      (let nq = gsub p01_tmp1 0ul (2ul *! nlimb s) in
       state_inv_t h1 (get_x nq) /\ state_inv_t h1 (get_z nq) /\
       fget_xz h1 nq == M.montgomery_ladder1_1 (fget_xz h0 nq)))
+[@ Meta.Attribute.inline_ ]
 let ladder1_ #s p01_tmp1 tmp2 =
   let nq : point s = sub p01_tmp1 0ul (2ul *! nlimb s) in
   let tmp1 = sub p01_tmp1 (4ul *! nlimb s) (4ul *! nlimb s) in
@@ -354,6 +359,7 @@ val ladder2_:
       state_inv_t h1 (get_x nq) /\ state_inv_t h1 (get_z nq) /\
      (let nq' = M.montgomery_ladder1_0 (as_seq h0 k) (fget_xz h0 q) (fget_xz h0 nq) (fget_xz h0 nq_p1) in
       fget_xz h1 nq == M.montgomery_ladder1_1 nq')))
+[@ Meta.Attribute.inline_ ]
 let ladder2_ #s k q p01_tmp1_swap tmp2 =
   let p01_tmp1 = sub p01_tmp1_swap 0ul (8ul *! nlimb s) in
   let nq : point s = sub p01_tmp1_swap 0ul (2ul *! nlimb s) in
@@ -425,6 +431,7 @@ val ladder4_:
      (let nq = gsub p01_tmp1_swap 0ul (2ul *! nlimb s) in
       state_inv_t h1 (get_x nq) /\ state_inv_t h1 (get_z nq) /\
       fget_xz h1 nq == S.montgomery_ladder (fget_x h0 q) (as_seq h0 k)))
+[@ Meta.Attribute.inline_ ]
 let ladder4_ #s k q p01_tmp1_swap tmp2 =
   let h0 = ST.get () in
   let p01 = sub p01_tmp1_swap 0ul (4ul *! nlimb s) in
