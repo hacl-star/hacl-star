@@ -45,7 +45,7 @@ noextract
 let feval_wideh (h:mem) (f:u512) : GTot P.elem = (wide_as_nat h f) % P.prime
 
 
-[@ CInline]
+[@ CInline Meta.Attribute.specialize ]
 val add1: out:u256 -> f1:u256  -> f2:uint64
   -> Stack uint64
     (requires fun h ->
@@ -56,7 +56,7 @@ val add1: out:u256 -> f1:u256  -> f2:uint64
       modifies (loc out) h0 h1 /\
       as_nat h1 out + v c * pow2 256 == as_nat h0 f1 + v f2)
 
-[@ CInline]
+[@ CInline Meta.Attribute.specialize ]
 val fadd: out:u256 -> f1:u256  -> f2:u256
   -> Stack unit
     (requires fun h ->
@@ -69,7 +69,7 @@ val fadd: out:u256 -> f1:u256  -> f2:u256
       modifies (loc out) h0 h1 /\
       fevalh h1 out == P.fadd (fevalh h0 f1) (fevalh h0 f2))
 
-[@ CInline]
+[@ CInline Meta.Attribute.specialize ]
 val fsub: out:u256 -> f1:u256 -> f2:u256
   -> Stack unit
     (requires fun h ->
@@ -82,7 +82,7 @@ val fsub: out:u256 -> f1:u256 -> f2:u256
       modifies (loc out) h0 h1 /\
       fevalh h1 out == P.fsub (fevalh h0 f1) (fevalh h0 f2))
 
-[@ CInline]
+[@ CInline Meta.Attribute.specialize ]
 val fmul: out:u256 -> f1:u256 -> f2:u256 -> tmp:u1024
   -> Stack unit
     (requires fun h ->
@@ -98,7 +98,7 @@ val fmul: out:u256 -> f1:u256 -> f2:u256 -> tmp:u1024
       modifies (loc out |+| loc tmp) h0 h1 /\
       fevalh h1 out == P.fmul (fevalh h0 f1) (fevalh h0 f2))
 
-[@ CInline]
+[@ CInline Meta.Attribute.specialize ]
 val fmul2: out:u512 -> f1:u512 -> f2:u512 -> tmp:u1024
   -> Stack unit
     (requires fun h ->
@@ -121,7 +121,7 @@ val fmul2: out:u512 -> f1:u512 -> f2:u512 -> tmp:u1024
       fevalh h1 out0 == P.fmul (fevalh h0 f10) (fevalh h0 f20) /\
       fevalh h1 out1 == P.fmul (fevalh h0 f11) (fevalh h0 f21)))
 
-[@ CInline]
+[@ CInline Meta.Attribute.specialize ]
 val fmul1: out:u256 -> f1:u256 -> f2:uint64{v f2 < pow2 17}
   -> Stack unit
     (requires fun h ->
@@ -132,7 +132,7 @@ val fmul1: out:u256 -> f1:u256 -> f2:uint64{v f2 < pow2 17}
       modifies (loc out) h0 h1 /\
       fevalh h1 out == (fevalh h0 f1 * v f2) % P.prime)
 
-[@ CInline]
+[@ CInline Meta.Attribute.specialize ]
 val fsqr: out:u256 -> f1:u256 -> tmp:u512
   -> Stack unit
     (requires fun h ->
@@ -145,7 +145,7 @@ val fsqr: out:u256 -> f1:u256 -> tmp:u512
       modifies (loc out |+| loc tmp) h0 h1 /\
       fevalh h1 out == P.fmul (fevalh h0 f1) (fevalh h0 f1))
 
-[@ CInline]
+[@ CInline Meta.Attribute.specialize ]
 val fsqr2: out:u512 -> f:u512 -> tmp:u1024
   -> Stack unit
     (requires fun h ->
@@ -163,7 +163,7 @@ val fsqr2: out:u512 -> f:u512 -> tmp:u1024
       fevalh h1 out1 == P.fmul (fevalh h0 f1) (fevalh h0 f1) /\
       fevalh h1 out2 == P.fmul (fevalh h0 f2) (fevalh h0 f2)))
 
-[@ CInline]
+[@ CInline Meta.Attribute.specialize ]
 val cswap2: bit:uint64{v bit <= 1} -> p1:u512 -> p2:u512
   -> Stack unit
     (requires fun h ->

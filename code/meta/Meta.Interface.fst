@@ -3,6 +3,23 @@ module Meta.Interface
 open FStar.Reflection
 open FStar.Tactics
 
+/// Local library
+/// -------------
+
+let assoc (#a: eqtype) #b (x: a) (l: list (a & b)): Tac b =
+  match List.Tot.assoc x l with
+  | Some x -> x
+  | None -> fail "failure: assoc"
+
+let rec zip #a #b (xs: list a) (ys: list b): Tac (list (a & b)) =
+  match xs, ys with
+  | x :: xs, y :: ys -> (x, y) :: zip xs ys
+  | [], [] -> []
+  | _ -> fail "invalid argument: zip"
+
+/// Actual tactic
+/// -------------
+///
 /// All function nodes in the call-graph are parameterized over an implicit
 /// argument ``#i:t_i`` (coming first) that represents the specialization index.
 ///
@@ -26,7 +43,7 @@ open FStar.Tactics
 /// - For each specialize node ``f``, clients instantiate as follows:
 ///  ``let f_specialized = mk_f I1 g1_specialized ... gn_specialized``
 ///  where the gn_specialized have been recursively generated the same way.
-
+///
 /// The new (rewritten) name of inline nodes is part of the global tactic state,
 /// which we thread through as ``state`` below.
 noeq
@@ -36,13 +53,17 @@ type mapping =
 
 noeq
 type state = {
-  // A mapping from a top-level function f to its type f_t (of type index ->
-  // Type); its inlining status; and the extra parameters it transitively needs
-  // (its g_i).
+  // A mapping from a top-level function f to:
+  // - its type f_t (of type index -> Type OR Type if the function doesn't take the index);
+  // - its inlining status; and
+  // - the extra parameters it transitively needs (its g_i).
   seen: list (name & (term & mapping & list name));
   // For debugging purposes only.
   indent: string;
 }
+
+/// Helpers
+/// -------
 
 let rec string_of_name (n: name): Tac string =
   match n with
@@ -56,28 +77,11 @@ let rec suffix_name (n: name) (s: string): Tac name =
   | n :: ns -> suffix_name ns s
   | [] -> fail "impossible: empty name"
 
-let assoc (#a: eqtype) #b (x: a) (l: list (a & b)): Tac b =
-  match List.Tot.assoc x l with
-  | Some x -> x
-  | None -> fail "failure: assoc"
-
 let has_attr (s: sigelt) (x: term) =
   List.Tot.existsb (fun t -> term_eq t x) (sigelt_attrs s)
 
 let has_inline_for_extraction (s: sigelt) =
   List.Tot.existsb (function Inline_for_extraction -> true | _ -> false) (sigelt_quals s)
-
-// A demo on how to allocate a fresh variable and pack it as a binder.
-let _: int -> int = _ by (
-  let bv: bv = pack_bv ({ bv_ppname = "x"; bv_index = 42; bv_sort = `int }) in
-  exact (pack (Tv_Abs (mk_binder bv) (pack (Tv_Var bv))))
-)
-
-let rec zip #a #b (xs: list a) (ys: list b): Tac (list (a & b)) =
-  match xs, ys with
-  | x :: xs, y :: ys -> (x, y) :: zip xs ys
-  | [], [] -> []
-  | _ -> fail "invalid argument: zip"
 
 let is_implicit = function
   | Q_Implicit -> true
@@ -104,6 +108,15 @@ let lambda_over_index (st: state) (f_name: name) (f_typ: term): Tac term =
       fail (string_of_name f_name ^ "is expected to have \
         an arrow type with the index as a first argument")
 
+let rec in_namespace (n: name) (ns: list string): Tot bool =
+  match n, ns with
+  | _ :: _, [] -> true
+  | [], _ :: _ -> false
+  | [], [] -> false
+  | n :: ns, n' :: ns' -> n = n' && in_namespace ns ns'
+
+/// Tactic core
+/// -----------
 
 let rec visit_function (st: state) (f_name: name): Tac (state & list sigelt) =
   if (List.Tot.existsb (fun (name, _) -> name = f_name) st.seen) then
@@ -126,64 +139,69 @@ let rec visit_function (st: state) (f_name: name): Tac (state & list sigelt) =
       match inspect_sigelt f with
       | Sg_Let r _ _ f_typ f_body ->
         if r then
-          fail ("user error: " ^  string_of_name f_name ^ " is recursive")
+          fail ("user error: " ^  string_of_name f_name ^ " is recursive");
+
+        // Build a new function with proper parameters
+        let old_indent = st.indent in
+        let st = { st with indent = st.indent ^ "  " } in
+        let new_name = suffix_name f_name "_higher" in
+
+        // The function must be of the form fun (x: index) -> ...
+        // We recognize and distinguish this index.
+        let index_bv, index_name, f_body = match inspect f_body with
+          | Tv_Abs binder f_body ->
+              let bv, qual = inspect_binder binder in
+              if not (is_implicit qual) then
+                fail ("The first parameter of " ^ string_of_name f_name ^ " is not implicit");
+              let { bv_sort = t; bv_ppname = name } = inspect_bv bv in
+              print (st.indent ^ "Found " ^ name ^ ", index of type " ^ term_to_string t);
+              bv, name, f_body
+          | _ ->
+              fail (string_of_name f_name ^ "is expected to be a function of the index")
+        in
+
+        let st, new_body, new_args, new_sigelts =
+          visit_body (pack (Tv_Var index_bv)) st [] f_body
+        in
+        let st = { st with indent = old_indent } in
+
+        // Update the state with a mapping and which extra arguments are
+        // needed. Each function that has been transformed has a type that's a
+        // function of the index.
+
+        let m = if has_attr f (`Meta.Attribute.specialize) then Specialize else Inline new_name in
+        let new_args, new_bvs = List.Tot.split new_args in
+
+        // The type of ``f`` when it appears as a ``gi`` parameter, i.e. its ``gi_t``.
+        let f_typ = lambda_over_index st f_name f_typ in
+        let f_typ_name = suffix_name new_name "_t" in
+        let f_typ_typ = mk_tot_arr [ pack_binder index_bv Q_Implicit ] (`Type0) in
+        print (st.indent ^ "  let " ^ string_of_name f_typ_name ^ ": " ^
+          term_to_string f_typ_typ ^ " = " ^
+          term_to_string f_typ);
+        let se_t = pack_sigelt (Sg_Let false (pack_fv f_typ_name) [] f_typ_typ f_typ) in
+        let se_t = set_sigelt_quals [ NoExtract; Inline_for_extraction ] se_t in
+        let f_typ = pack (Tv_FVar (pack_fv f_typ_name)) in
+        let st = { st with seen = (f_name, (f_typ, m, new_args)) :: st.seen } in
+
+        // Fast-path; just register the function as being a specialize node
+        // but don't rewrite it or splice a new declaration.
+        if List.length new_args = 0 then begin
+          if not (has_inline_for_extraction f) then
+            fail (string_of_name f_name ^ " should be inline_for_extraction");
+
+          st, new_sigelts @ [ se_t ]
+        end
+
         else
-          // Build a new function with proper parameters
-          let old_indent = st.indent in
-          let st = { st with indent = st.indent ^ "  " } in
-          let new_name = suffix_name f_name "_higher" in
 
-          // The function must be of the form fun (x: index) -> ...
-          // We recognize and distinguish this index.
-          let index_bv, index_name, f_body = match inspect f_body with
-            | Tv_Abs binder f_body ->
-                let bv, qual = inspect_binder binder in
-                if not (is_implicit qual) then
-                  fail ("The first parameter of " ^ string_of_name f_name ^ " is not implicit");
-                let { bv_sort = t; bv_ppname = name } = inspect_bv bv in
-                print (st.indent ^ "Found " ^ name ^ ", index of type " ^ term_to_string t);
-                bv, name, f_body
-            | _ ->
-                fail (string_of_name f_name ^ "is expected to be a function of the index")
-          in
-
-          let st, new_body, new_args, new_sigelts =
-            visit_body (pack (Tv_Var index_bv)) st [] f_body
-          in
-          let st = { st with indent = old_indent } in
           // new_body is: fun (g1: g1_t i) ... (gn: gn_t i) x -> (e: f_t i)
           // i is free
           let new_body =
-            if List.length new_args = 0 then
-              if not (has_inline_for_extraction f) then
-                fail (string_of_name f_name ^ " should be inline_for_extraction")
-              else
-                // Small optimization: if this is a leaf of the call-graph, just
-                // call the original function.
-                pack (Tv_App (pack (Tv_FVar (pack_fv f_name))) (pack (Tv_Var index_bv), Q_Implicit))
-            else
               fold_right (fun (_, bv) acc ->
                 pack (Tv_Abs (mk_binder bv) acc)
-              ) new_args new_body
+              ) (zip new_args new_bvs) new_body
           in
-          let new_args, new_bvs = List.Tot.split new_args in
-
-          // Update the state with a mapping and which extra arguments are
-          // needed. Each function that has been transformed has a type that's a
-          // function of the index.
-          let m = if has_attr f (`Meta.Attribute.specialize) then Specialize else Inline new_name in
-
-          // The type of ``f`` when it appears as a ``gi`` parameter, i.e. its ``gi_t``.
-          let f_typ = lambda_over_index st f_name f_typ in
-          let f_typ_name = suffix_name new_name "_t" in
-          let f_typ_typ = mk_tot_arr [ pack_binder index_bv Q_Implicit ] (`Type0) in
-          print (st.indent ^ "  let " ^ string_of_name f_typ_name ^ ": " ^
-            term_to_string f_typ_typ ^ " = " ^
-            term_to_string f_typ);
-          let se_t = pack_sigelt (Sg_Let false (pack_fv f_typ_name) [] f_typ_typ f_typ) in
-          let se_t = set_sigelt_quals [ NoExtract; Inline_for_extraction ] se_t in
-          let f_typ = pack (Tv_FVar (pack_fv f_typ_name)) in
-          let st = { st with seen = (f_name, (f_typ, m, new_args)) :: st.seen } in
 
           // Declaration for the new resulting function. We need to construct
           // the actual type of ``f``.

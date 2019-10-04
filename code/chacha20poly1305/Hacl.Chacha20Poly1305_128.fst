@@ -8,7 +8,7 @@ open Hacl.Impl.Poly1305.Fields
 #set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
 private
-let poly1305_padded_128 = poly1305_padded_higher #M128
+let poly1305_padded_128 = Hacl.Impl.Chacha20Poly1305.PolyCore.poly1305_padded #M128
 private
 let poly1305_do_128 = poly1305_do_higher #M128 poly1305_padded_128
 

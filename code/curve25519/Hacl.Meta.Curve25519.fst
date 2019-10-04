@@ -21,8 +21,9 @@ friend Hacl.Impl.Curve25519.Generic
   scalarmult_higher;
   secret_to_public_higher;
   ecdh_higher
-] (Meta.Interface.specialize [
-    `Hacl.Impl.Curve25519.Generic.ecdh;
-    `Hacl.Impl.Curve25519.Generic.secret_to_public;
-    `Hacl.Impl.Curve25519.Generic.scalarmult
+]
+(Meta.Interface.specialize [ "Hacl"; "Impl"; "Curve25519" ] [
+  `Hacl.Impl.Curve25519.Generic.ecdh;
+  `Hacl.Impl.Curve25519.Generic.secret_to_public;
+  `Hacl.Impl.Curve25519.Generic.scalarmult
 ])
