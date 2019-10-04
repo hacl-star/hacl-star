@@ -54,6 +54,7 @@ type mapping =
 noeq
 type state = {
   // A mapping from a top-level function f to:
+  // - a boolean to indicate whether this function is parameterized over the index
   // - its type f_t (of type index -> Type OR Type if the function doesn't take the index);
   // - its inlining status; and
   // - the extra parameters it transitively needs (its g_i).
@@ -118,7 +119,7 @@ let rec in_namespace (n: name) (ns: list string): Tot bool =
 /// Tactic core
 /// -----------
 
-let rec visit_function (st: state) (f_name: name): Tac (state & list sigelt) =
+let rec visit_function (t_i: term) (st: state) (f_name: name): Tac (state & list sigelt) =
   if (List.Tot.existsb (fun (name, _) -> name = f_name) st.seen) then
     let _ = print (st.indent ^ "Already visited " ^ string_of_name f_name) in
     // We don't need a three-state graph traversal since we automatically refuse
@@ -154,6 +155,9 @@ let rec visit_function (st: state) (f_name: name): Tac (state & list sigelt) =
               if not (is_implicit qual) then
                 fail ("The first parameter of " ^ string_of_name f_name ^ " is not implicit");
               let { bv_sort = t; bv_ppname = name } = inspect_bv bv in
+              if not (term_eq t_i t) then
+                fail ("The first parameter of " ^ string_of_name f_name ^ " has type " ^
+                  term_to_string t_i ^ " when the index type is " ^ term_to_string t);
               print (st.indent ^ "Found " ^ name ^ ", index of type " ^ term_to_string t);
               bv, name, f_body
           | _ ->
@@ -161,7 +165,7 @@ let rec visit_function (st: state) (f_name: name): Tac (state & list sigelt) =
         in
 
         let st, new_body, new_args, new_sigelts =
-          visit_body (pack (Tv_Var index_bv)) st [] f_body
+          visit_body t_i (pack (Tv_Var index_bv)) st [] f_body
         in
         let st = { st with indent = old_indent } in
 
@@ -249,17 +253,17 @@ let rec visit_function (st: state) (f_name: name): Tac (state & list sigelt) =
           else
             st, []
 
-and visit_many (index_bv: term) (st: state) (bvs: list (name & bv)) (es: list term):
+and visit_many (t_i: term) (index_bv: term) (st: state) (bvs: list (name & bv)) (es: list term):
   Tac (state & list term & list (name & bv) & list sigelt)
 =
   let st, es, bvs, ses = fold_left (fun (st, es, bvs, ses) e ->
-    let st, e, bvs, ses' = visit_body index_bv st bvs e in
+    let st, e, bvs, ses' = visit_body t_i index_bv st bvs e in
     st, e :: es, bvs, ses @ ses'
   ) (st, [], bvs, []) es in
   let es = List.Tot.rev es in
   st, es, bvs, ses
 
-and visit_body (index_bv: term) (st: state) (bvs: list (name & bv)) (e: term):
+and visit_body (t_i: term) (index_bv: term) (st: state) (bvs: list (name & bv)) (e: term):
   Tac (state & term & list (name & bv) & list sigelt)
 =
   // st is state that is threaded through
@@ -272,7 +276,7 @@ and visit_body (index_bv: term) (st: state) (bvs: list (name & bv)) (e: term):
 
       // Recursively visit arguments
       let es, qs = List.Pure.split es in
-      let st, es, bvs, ses = visit_many index_bv st bvs es in
+      let st, es, bvs, ses = visit_many t_i index_bv st bvs es in
       let es = zip es qs in
 
       // If this is an application ...
@@ -280,7 +284,7 @@ and visit_body (index_bv: term) (st: state) (bvs: list (name & bv)) (e: term):
       | Tv_FVar fv ->
           // ... of a top-level name ...
           let fv = inspect_fv fv in
-          let st, ses' = visit_function st fv in
+          let st, ses' = visit_function t_i st fv in
           let ses = ses @ ses' in
           begin match List.Tot.assoc fv st.seen with
           | Some (_, map, fns) ->
@@ -361,30 +365,30 @@ and visit_body (index_bv: term) (st: state) (bvs: list (name & bv)) (e: term):
       st, e, bvs, []
 
   | Tv_Abs b e ->
-      let st, e, bvs, ses = visit_body index_bv st bvs e in
+      let st, e, bvs, ses = visit_body t_i index_bv st bvs e in
       let e = pack (Tv_Abs b e) in
       st, e, bvs, ses
 
   | Tv_Match scrut branches ->
-      let st, scrut, bvs, ses = visit_body index_bv st bvs scrut in
+      let st, scrut, bvs, ses = visit_body t_i index_bv st bvs scrut in
       let pats, es = List.Tot.split branches in
-      let st, es, bvs, ses' = visit_many index_bv st bvs es in
+      let st, es, bvs, ses' = visit_many t_i index_bv st bvs es in
       let branches = zip pats es in
       st, pack (Tv_Match scrut branches), bvs, ses @ ses'
 
   | Tv_Let r bv e1 e2 ->
-      let st, e1, bvs, ses = visit_body index_bv st bvs e1 in
-      let st, e2, bvs, ses' = visit_body index_bv st bvs e2 in
+      let st, e1, bvs, ses = visit_body t_i index_bv st bvs e1 in
+      let st, e2, bvs, ses' = visit_body t_i index_bv st bvs e2 in
       let e = pack (Tv_Let r bv e1 e2) in
       st, e, bvs, ses @ ses'
 
   | Tv_AscribedT e t tac ->
-      let st, e, bvs, ses = visit_body index_bv st bvs e in
+      let st, e, bvs, ses = visit_body t_i index_bv st bvs e in
       let e = pack (Tv_AscribedT e t tac) in
       st, e, bvs, ses
 
   | Tv_AscribedC e c tac ->
-      let st, e, bvs, ses = visit_body index_bv st bvs e in
+      let st, e, bvs, ses = visit_body t_i index_bv st bvs e in
       let e = pack (Tv_AscribedC e c tac) in
       st, e, bvs, ses
 
@@ -397,7 +401,7 @@ and visit_body (index_bv: term) (st: state) (bvs: list (name & bv)) (e: term):
       st, e, bvs, []
 
 
-let specialize (names: list term): Tac _ =
+let specialize (t_i: term) (names: list term): Tac _ =
   let names = map (fun name ->
     match inspect name with
     | Tv_FVar fv -> inspect_fv fv
@@ -405,7 +409,7 @@ let specialize (names: list term): Tac _ =
   ) names in
   let st = { seen = []; indent = "" } in
   let _, ses = fold_left (fun (st, ses) name ->
-    let st, ses' = visit_function st name in
+    let st, ses' = visit_function t_i st name in
     print (string_of_int (List.length ses') ^ " declarations generated");
     st, ses @ ses'
   ) (st, []) names in

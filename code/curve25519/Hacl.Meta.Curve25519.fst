@@ -22,7 +22,7 @@ friend Hacl.Impl.Curve25519.Generic
   secret_to_public_higher;
   ecdh_higher
 ]
-(Meta.Interface.specialize [
+(Meta.Interface.specialize (`Hacl.Impl.Curve25519.Fields.field_spec) [
   `Hacl.Impl.Curve25519.Generic.ecdh;
   `Hacl.Impl.Curve25519.Generic.secret_to_public;
   `Hacl.Impl.Curve25519.Generic.scalarmult

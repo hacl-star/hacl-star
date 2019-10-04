@@ -7,7 +7,7 @@ module Hacl.Meta.Chacha20.Vec
   chacha20_core_higher;
   chacha20_encrypt_higher;
   chacha20_decrypt_higher
-] (Meta.Interface.specialize [
+] (Meta.Interface.specialize (`Hacl.Impl.Chacha20.Core32xN.lanes) [
   `Hacl.Impl.Chacha20.Vec.chacha20_encrypt;
   `Hacl.Impl.Chacha20.Vec.chacha20_decrypt
 ])
