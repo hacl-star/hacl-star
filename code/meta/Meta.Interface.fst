@@ -27,6 +27,7 @@ let rec zip #a #b (xs: list a) (ys: list b): Tac (list (a & b)) =
 ///
 /// At definition-site, every function ``f #i x`` is replaced by a function
 ///  ``mk_f #i (g1: g1_t i) ... (gn: gn_t i) x`` where:
+/// 
 /// - the gi are the ``specialize`` nodes reachable via a (possibly-empty) path
 ///   of ``inline`` nodes through the body of ``f``
 /// - the gi_t are the types of the original gi, minus that index i, which has
@@ -34,15 +35,17 @@ let rec zip #a #b (xs: list a) (ys: list b): Tac (list (a & b)) =
 ///   ``fun #i:t_i -> t``
 ///
 /// At call-site, when encountering ``f #i e``, we distinguish between two cases.
+/// 
 /// - If ``f`` is a specialize node: this becomes ``gi e`` and references the
 ///   bound variable instead of the global name
 /// - If ``f`` is an inline node: this becomes ``mk_f #i gf1 ... gfn e`` where
 ///   ``gfi`` is the i-th function needed by f, i.e. one of our gk.
 ///
 /// The intended usage is as follows.
+/// 
 /// - For each specialize node ``f``, clients instantiate as follows:
-///  ``let f_specialized = mk_f I1 g1_specialized ... gn_specialized``
-///  where the gn_specialized have been recursively generated the same way.
+///   ``let f_specialized = mk_f I1 g1_specialized ... gn_specialized``
+///   where the gn_specialized have been recursively generated the same way.
 ///
 /// The new (rewritten) name of inline nodes is part of the global tactic state,
 /// which we thread through as ``state`` below.
@@ -170,12 +173,12 @@ let rec visit_function (t_i: term) (st: state) (f_name: name): Tac (state & list
         // We recognize and distinguish this index.
         let index_bv, index_name, f_body =
           match inspect f_body with
-          | Tv_Abs binder f_body ->
+          | Tv_Abs binder f_body' ->
               let bv, qual = inspect_binder binder in
               let { bv_sort = t; bv_ppname = name } = inspect_bv bv in
               if binder_is_legit f_name t_i binder then begin
                 print (st.indent ^ "Found " ^ name ^ ", index of type " ^ term_to_string t);
-                Some bv, name, f_body
+                Some bv, name, f_body'
               end else
                 None, "", f_body
           | _ ->

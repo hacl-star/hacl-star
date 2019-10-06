@@ -1,6 +1,9 @@
 module Hacl.Meta.Curve25519
 
-#set-options "--z3rlimit 250 --max_fuel 0 --max_ifuel 1"
+#set-options "--max_fuel 2 --max_ifuel 1 --z3rlimit 300 --print_implicits --print_full_names"
+
+// For debugging
+#set-options "--admit_smt_queries true"
 
 friend Hacl.Impl.Curve25519.Generic
 
@@ -23,7 +26,8 @@ friend Hacl.Impl.Curve25519.Generic
   ecdh_higher *)
 ]
 (Meta.Interface.specialize (`Hacl.Impl.Curve25519.Fields.field_spec) [
-  `Hacl.Impl.Curve25519.Generic.ecdh;
+  `Hacl.Impl.Curve25519.Field64.store_felem
+  (*`Hacl.Impl.Curve25519.Generic.scalarmult;
   `Hacl.Impl.Curve25519.Generic.secret_to_public;
-  `Hacl.Impl.Curve25519.Generic.scalarmult
+  `Hacl.Impl.Curve25519.Generic.ecdh*)
 ])
