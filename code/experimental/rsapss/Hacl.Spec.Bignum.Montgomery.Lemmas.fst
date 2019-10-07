@@ -237,3 +237,56 @@ val from_mont_lemma: rLen:size_nat -> n:pos -> d:nat -> mu:nat -> aM:nat -> Lemm
 
 let from_mont_lemma rLen n d mu aM =
   mont_reduction_lemma rLen n d mu aM
+
+
+(* To avoid the conditional subtraction, we need to select R s.t. 4 * N < R *)
+(* It means that the montgomery multiplication will take 0 <= A, B < 2 * N and
+   return C % N = A * B * R % N /\ C < 2 * N *)
+
+val lemma_mult_lt_right: a:pos -> b:pos -> c:pos -> Lemma
+  (requires b < c)
+  (ensures  b * a < c * a)
+let lemma_mult_lt_right a b c = ()
+
+
+val div_mul_lt: b:pos -> a:int -> n:int -> Lemma
+  (requires a < n * b)
+  (ensures  a / b < n)
+let div_mul_lt b a n = ()
+
+
+val lemma_fits_aux: c:nat -> r:pos -> n:pos -> Lemma
+  (requires c < 4 * n * n /\ 4 * n < r)
+  (ensures (c - n) / r < n)
+
+let lemma_fits_aux c r n =
+  lemma_mult_lt_right n (4 * n) r;
+  assert (c < r * n);
+  div_mul_lt r c n;
+  assert (c / r < n);
+  Math.Lemmas.lemma_div_le (c - n) c r
+
+
+val mont_mult_lemma_fits: rLen:size_nat -> n:pos -> d:nat-> mu:nat -> c:nat -> Lemma
+  (requires
+    (1 + n * mu) % pow2 64 == 0 /\ pow2 (64 * rLen) * d % n == 1 /\
+    4 * n < pow2 (64 * rLen) /\ c < 4 * n * n)
+  (ensures (let res = mont_reduction rLen n mu c in res < 2 * n))
+
+let mont_mult_lemma_fits rLen n d mu c =
+  let r = pow2 (64 * rLen) in
+  let res : nat = repeati rLen (smont_reduction_f rLen n mu) c in
+  mont_reduction_loop_lemma rLen n mu rLen c;
+  assert (res <= c + (r - 1) * n /\ res % r == 0);
+  Math.Lemmas.lemma_div_le res (c + (r - 1) * n) r;
+  assert (res / r <= (c + (r - 1) * n) / r);
+  calc (<) {
+    (c + (r - 1) * n) / r;
+    (==) { Math.Lemmas.distributivity_sub_left r 1 n }
+    (c - n + r * n) / r;
+    (==) { Math.Lemmas.lemma_div_plus (c - n) n r }
+    (c - n) / r + n;
+    (<) { lemma_fits_aux c r n }
+    n + n;
+  };
+  assert (res / r < 2 * n)
