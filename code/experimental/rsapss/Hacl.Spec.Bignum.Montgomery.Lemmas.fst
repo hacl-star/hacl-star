@@ -290,3 +290,53 @@ let mont_mult_lemma_fits rLen n d mu c =
     n + n;
   };
   assert (res / r < 2 * n)
+
+
+val to_mont_lemma_fits: rLen:size_nat -> n:pos -> d:nat-> mu:nat -> a:nat -> Lemma
+  (requires
+    (1 + n * mu) % pow2 64 == 0 /\ pow2 (64 * rLen) * d % n == 1 /\
+    4 * n < pow2 (64 * rLen) /\ a < n)
+  (ensures (let aM = to_mont rLen n mu a in aM < 2 * n))
+
+let to_mont_lemma_fits rLen n d mu a =
+  let r2 = pow2 (128 * rLen) % n in
+  let c = a * r2 in
+  assert (a * r2 <= n * n);
+  let aM = mont_reduction rLen n mu c in
+  assert (a * r2 < 4 * n * n);
+  mont_mult_lemma_fits rLen n d mu c
+
+
+val lemma_fits_aux1: aM:nat -> r:pos -> n:pos -> Lemma
+  (requires aM < 2 * n /\ 4 * n < r)
+  (ensures (aM - n) / r <= 0)
+
+let lemma_fits_aux1 aM r n =
+  assert (aM - n < n);
+  Math.Lemmas.lemma_div_le (aM - n) n r;
+  Math.Lemmas.small_division_lemma_1 n r
+
+
+val from_mont_lemma_fits: rLen:size_nat -> n:pos -> d:nat-> mu:nat -> aM:nat -> Lemma
+  (requires
+    (1 + n * mu) % pow2 64 == 0 /\ pow2 (64 * rLen) * d % n == 1 /\
+    4 * n < pow2 (64 * rLen) /\ aM < 2 * n)
+  (ensures (let a = from_mont rLen n mu aM in a <= n))
+
+let from_mont_lemma_fits rLen n d mu aM =
+  let r = pow2 (64 * rLen) in
+  let res : nat = repeati rLen (smont_reduction_f rLen n mu) aM in
+  mont_reduction_loop_lemma rLen n mu rLen aM;
+  assert (res <= aM + (r - 1) * n /\ res % r == 0);
+  Math.Lemmas.lemma_div_le res (aM + (r - 1) * n) r;
+  assert (res / r <= (aM + (r - 1) * n) / r);
+  calc (<=) {
+    (aM + (r - 1) * n) / r;
+    (==) { Math.Lemmas.distributivity_sub_left r 1 n }
+    (aM - n + r * n) / r;
+    (==) { Math.Lemmas.lemma_div_plus (aM - n) n r }
+    (aM - n) / r + n;
+    (<=) { lemma_fits_aux1 aM r n }
+    n;
+  };
+  assert (res / r <= n)
