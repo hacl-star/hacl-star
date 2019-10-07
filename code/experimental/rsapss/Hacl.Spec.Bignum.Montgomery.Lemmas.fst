@@ -134,3 +134,38 @@ let rec mont_reduction_loop_lemma rLen n mu i c =
     mont_reduction_loop_lemma rLen n mu (i - 1) c;
     mont_reduction_lemma_step rLen n mu i c res0;
     () end
+
+
+val mont_reduction: rLen:size_nat -> n:pos -> mu:nat -> c:nat -> res:nat
+let mont_reduction rLen n mu c =
+  let res = repeati rLen (smont_reduction_f rLen n mu) c in
+  res / pow2 (64 * rLen)
+
+
+val mont_reduction_lemma: rLen:size_nat -> n:pos -> d:nat-> mu:nat -> c:nat -> Lemma
+  (requires (1 + n * mu) % pow2 64 == 0 /\ pow2 (64 * rLen) * d % n == 1)
+  (ensures  (let res = mont_reduction rLen n mu c in res % n == c * d % n))
+
+let mont_reduction_lemma rLen n d mu c =
+  let r = pow2 (64 * rLen) in
+  let res : nat = repeati rLen (smont_reduction_f rLen n mu) c in
+  mont_reduction_loop_lemma rLen n mu rLen c;
+  assert (res % n == c % n /\ res % r == 0 /\ res <= c + (r - 1) * n);
+  calc (==) {
+    res / r % n;
+    (==) { assert (r * d % n == 1) }
+    res / r * (r * d % n) % n;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_r (res / r) (r * d) n }
+    res / r * (r * d) % n;
+    (==) { Math.Lemmas.paren_mul_right (res / r) r d }
+    res / r * r * d % n;
+    (==) { Math.Lemmas.div_exact_r res r }
+    res * d % n;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_l res d n }
+    res % n * d % n;
+    (==) { assert (res % n == c % n) }
+    c % n * d % n;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_l c d n }
+    c * d % n;
+  };
+  assert (res / r % n == c * d % n)
