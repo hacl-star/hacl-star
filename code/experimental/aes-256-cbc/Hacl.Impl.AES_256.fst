@@ -190,12 +190,6 @@ let sbox : (b:ilbuffer uint8 (size 256){
   createL_global sbox_list
 
 
-// ENCRYPTION
-inline_for_extraction noextract
-let op_Array_Access #t #u #v a b = index #t #u #v a b
-inline_for_extraction noextract
-let op_Array_Assignment #t #u a b c = upd #t #u a b c
-
 // Our implementation is not constant time...
 let access_sbox (i: uint8) : Stack uint8 (requires (fun _ -> True)) (ensures (fun h0 _ h1 -> modifies0 h0 h1)) =
   let idx = Lib.RawIntTypes.size_from_UInt32
