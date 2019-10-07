@@ -1,14 +1,88 @@
 [
-  ";5Ö*mo®\u000eªnË•Exc´",
+  "\u001a\u000b>Á\"˙\u0005\\\b\rHÍóêÃ\f",
   [
     [
-      "Vale.AES.X64.AESopt2.scratch_b_data",
+      "Vale.AES.X64.AESopt2.scratch_b_blocks",
       1,
       1,
       0,
       [ "@query" ],
       0,
-      "b0db283b3916d4282681d7f69c54a01d"
+      "c99767f0814fa0bbafeac153b817ae81"
+    ],
+    [
+      "Vale.AES.X64.AESopt2.va_lemma_MulAdd_step",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565", "bool_inversion",
+        "equation_Prims.nat",
+        "function_token_typing_Prims.__cache_version_number__",
+        "int_inversion", "primitive_Prims.op_Equality",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "typing_Vale.X64.CPU_Features_s.avx_enabled"
+      ],
+      0,
+      "d96ee045409b2dab49015559e3a62d74"
+    ],
+    [
+      "Vale.AES.X64.AESopt2.va_wp_MulAdd_step",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "d1e65bec51f3f14a6886127b9fc68b85"
+    ],
+    [
+      "Vale.AES.X64.AESopt2.va_quick_MulAdd_step",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
+      ],
+      0,
+      "cb76526ad951aee397516f9d78c3ca31"
+    ],
+    [
+      "Vale.AES.X64.AESopt2.va_lemma_ReduceLast",
+      1,
+      1,
+      0,
+      [ "@query" ],
+      0,
+      "3aa2860a50390fe12ebc2b2d28a759f0"
+    ],
+    [
+      "Vale.AES.X64.AESopt2.va_wp_ReduceLast",
+      1,
+      1,
+      0,
+      [ "@query" ],
+      0,
+      "67d6b88520e9c78ac7cca0daf9dbb181"
+    ],
+    [
+      "Vale.AES.X64.AESopt2.va_quick_ReduceLast",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
+      ],
+      0,
+      "baf2850f2e8602433f0fa4d51369e228"
     ],
     [
       "Vale.AES.X64.AESopt2.va_quick_GhashUnroll_n",
@@ -20,7 +94,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "306a906867e8eac0ea51fb0b1f4338be"
+      "c671b017a5f9c30cd5479fcc24b7d640"
     ],
     [
       "Vale.AES.X64.AESopt2.va_quick_Ghash_register",
@@ -32,7 +106,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "38a934279f7b5e9eec82631527dda90b"
+      "a802ad9b91dea2d2ebe9a067bfd14c99"
     ],
     [
       "Vale.AES.X64.AESopt2.va_quick_Ghash_buffer",
@@ -44,7 +118,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "b58f8a659875375e27717c660452fbb9"
+      "9cbac551a5455e9c58211fb03f42a7a2"
     ],
     [
       "Vale.AES.X64.AESopt2.va_lemma_GhashUnroll6x",
@@ -53,7 +127,7 @@
       0,
       [ "@query", "projection_inverse_BoxInt_proj_0" ],
       0,
-      "630d0189db70d176163f201588897d09"
+      "fa2bf09da00c6231f01d704eb6b8ce4b"
     ],
     [
       "Vale.AES.X64.AESopt2.va_wp_GhashUnroll6x",
@@ -62,7 +136,7 @@
       0,
       [ "@query", "projection_inverse_BoxInt_proj_0" ],
       0,
-      "abefbdf43521770ac8f17a2914624869"
+      "a535d86bb1b81f7d46a0b1ddd9e9b50e"
     ],
     [
       "Vale.AES.X64.AESopt2.va_quick_GhashUnroll6x",
@@ -74,7 +148,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "c16b0cc85b9734e26ab17ec67c13ef4d"
+      "bd3557543cd26925b75e449321d76a85"
     ]
   ]
 ]
