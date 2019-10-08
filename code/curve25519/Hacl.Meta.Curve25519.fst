@@ -1,29 +1,40 @@
 module Hacl.Meta.Curve25519
 
-#set-options "--max_fuel 2 --max_ifuel 1 --z3rlimit 300 --print_implicits --print_full_names"
-
-// For debugging
-#set-options "--admit_smt_queries true --print_effect_args"
+#set-options "--print_implicits --print_full_names"
 
 friend Hacl.Impl.Curve25519.Generic
 
 %splice[
-(*  // From Finv.
-  fsqr_s_higher;
-  fmul_s_higher;
-  fsquare_times_higher;
-  finv_higher;
-  // From AddAnddouble
-  point_add_and_double_higher;
-  point_double_higher;
-  // From Generic
-  encode_higher;
-  cswap2_higher;
-  montgomery_ladder_higher;
-  decode_point_higher;
-  scalarmult_higher;
-  secret_to_public_higher;
-  ecdh_higher *)
+  generic_cswap2_higher;
+  fields_fadd_higher;
+  fields_fsub_higher;
+  fields_fmul2_higher;
+  addanddouble_point_add_and_double0_higher;
+  fields_fsqr2_higher;
+  fields_fmul1_higher;
+  addanddouble_point_add_and_double1_higher;
+  fields_fmul_higher;
+  addanddouble_point_add_and_double_higher;
+  generic_ladder_step_higher;
+  generic_ladder_step_loop_higher;
+  generic_ladder0__higher;
+  addanddouble_point_double_higher;
+  generic_ladder1__higher;
+  generic_ladder2__higher;
+  generic_ladder4__higher;
+  generic_montgomery_ladder_higher;
+  finv_fsqr_s_higher;
+  finv_fsquare_times_higher;
+  finv_fmul_s_higher;
+  finv_finv0_higher;
+  finv_finv_higher;
+  field64_carry_pass_store_higher;
+  field64_store_felem_higher;
+  fields_store_felem_higher;
+  generic_encode_point_higher;
+  generic_scalarmult_higher;
+  generic_secret_to_public_higher;
+  generic_ecdh_higher
 ]
 (Meta.Interface.specialize (`Hacl.Impl.Curve25519.Fields.field_spec) [
   `Hacl.Impl.Curve25519.Generic.scalarmult;

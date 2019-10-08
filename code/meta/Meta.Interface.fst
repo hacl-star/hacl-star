@@ -125,6 +125,12 @@ let must: _ -> Tac _ = function
 
 let tm_unit = `((()))
 
+val add_check_with : optionstate -> sigelt -> Tac sigelt
+let add_check_with opts se =
+  let attrs = sigelt_attrs se in
+  let t = quote (check_with opts) in
+  set_sigelt_attrs (t :: attrs) se
+
 /// Tactic core
 /// -----------
 
@@ -165,6 +171,8 @@ let rec visit_function (t_i: term) (st: state) (f_name: name): Tac (state & list
       | Sg_Let r _ _ f_typ f_body ->
         if r then
           fail ("user error: " ^  string_of_name f_name ^ " is recursive");
+
+        let original_opts = sigelt_opts f in
 
         // Build a new function with proper parameters
         let old_indent = st.indent in
@@ -265,6 +273,10 @@ let rec visit_function (t_i: term) (st: state) (f_name: name): Tac (state & list
           in
           let se = pack_sigelt (Sg_Let false (pack_fv new_name) [] new_typ new_body) in
           let se = set_sigelt_quals [ NoExtract; Inline_for_extraction ] se in
+          let se = match original_opts with
+            | Some original_opts -> add_check_with original_opts se
+            | _ -> se
+          in
           print (st.indent ^ "  let " ^ string_of_name new_name ^ ":\n" ^
             st.indent ^ term_to_string new_typ ^ "\n" ^
             st.indent ^ "=\n" ^
