@@ -249,7 +249,7 @@ val encrypt: #i:G.erased index -> (
       // Memory & preservation
       B.modifies (footprint h0 s) h0 h1 /\
       invariant h1 s /\
-      footprint h1 s == footprint h0 s /\ ( // JP: probably footprint_s here? for precision?
+      footprint_s (B.deref h1 s) == footprint_s (B.deref h0 s) /\ (
 
       // Functional correctness
       let s0 = g_hash (B.deref h0 s) h0 in
