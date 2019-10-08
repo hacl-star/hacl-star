@@ -227,8 +227,25 @@ let rec visit_function (t_i: term) (st: state) (f_name: name): Tac (state & list
           term_to_string f_typ);
         let se_t = pack_sigelt (Sg_Let false (pack_fv f_typ_name) [] f_typ_typ f_typ) in
         let se_t = set_sigelt_quals [ NoExtract; Inline_for_extraction ] se_t in
+        let se_t = match original_opts with
+          | Some original_opts -> add_check_with original_opts se_t
+          | _ -> se_t
+        in
         let f_typ = pack (Tv_FVar (pack_fv f_typ_name)) in
         let st = { st with seen = (f_name, (has_index, f_typ, m, new_args)) :: st.seen } in
+
+        // For debugging. This is very meta.
+        let se_debug = pack_sigelt (Sg_Let
+          false
+          (pack_fv (suffix_name f_name "_higher_debug_print"))
+          []
+          (`unit)
+          (`(let x: unit =
+            _ by (
+              print ("About to check " ^ (`@(string_of_name new_name)));
+              exact tm_unit) in
+            x)))
+        in
 
         // Fast-path; just register the function as being a specialize node
         // but don't rewrite it or splice a new declaration.
@@ -239,7 +256,7 @@ let rec visit_function (t_i: term) (st: state) (f_name: name): Tac (state & list
             fail (string_of_name f_name ^ " is marked as [@ inline_ ] but does not reach \
               any specializations");
 
-          st, new_sigelts @ [ se_t ]
+          st, new_sigelts @ [ se_debug; se_t ]
         end
 
         else
@@ -281,19 +298,6 @@ let rec visit_function (t_i: term) (st: state) (f_name: name): Tac (state & list
             st.indent ^ term_to_string new_typ ^ "\n" ^
             st.indent ^ "=\n" ^
             st.indent ^ term_to_string new_body);
-
-          // For debugging. This is very meta.
-          let se_debug = pack_sigelt (Sg_Let
-            false
-            (pack_fv (suffix_name f_name "_higher_debug_print"))
-            []
-            (`unit)
-            (`(let x: unit =
-              _ by (
-                print ("About to check " ^ (`@(string_of_name new_name)));
-                exact tm_unit) in
-              x)))
-          in
 
           st, new_sigelts @ [ se_debug;  se_t; se ]
 
