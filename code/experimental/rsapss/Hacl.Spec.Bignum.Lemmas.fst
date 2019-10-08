@@ -788,12 +788,12 @@ val eea_pow2_odd: a:nat -> n:pos ->
 let eea_pow2_odd a n = admit()
 
 
-val mod_exp_mont_ll_lemma_eq_simplify:
-  rLen:nat -> n:pos{n > 1} -> mu:nat -> a:nat -> bBits:nat -> b:pos{b < pow2 bBits} -> Lemma
-  (requires (1 + (n % pow2 64) * mu) % pow2 64 == 0 /\ 4 * n < pow2 (64 * rLen) /\ a < n /\ n % 2 = 1)
-  (ensures  mod_exp_mont_ll_final_sub rLen n mu a bBits b == S.fpow #n a b)
+val mod_exp_mont_preconditions:
+  rLen:nat -> n:pos{n > 1} -> mu:nat -> Lemma
+  (requires (1 + (n % pow2 64) * mu) % pow2 64 == 0 /\ n % 2 = 1)
+  (ensures  (let d, k = eea_pow2_odd (64 * rLen) n in (1 + n * mu) % pow2 64 == 0 /\ pow2 (64 * rLen) * d % n == 1))
 
-let mod_exp_mont_ll_lemma_eq_simplify rLen n mu a bBits b =
+let mod_exp_mont_preconditions rLen n mu =
   calc (==) {
     (1 + n * mu) % pow2 64;
     (==) { Math.Lemmas.lemma_mod_plus_distr_r 1 (n * mu) (pow2 64) }
@@ -817,5 +817,33 @@ let mod_exp_mont_ll_lemma_eq_simplify rLen n mu a bBits b =
     (==) { Math.Lemmas.small_mod 1 n }
     1;
   };
-  assert (pow2 (64 * rLen) * d % n == 1);
+  assert (pow2 (64 * rLen) * d % n == 1)
+
+
+val mod_exp_mont_ll_lemma_eq_simplify:
+  rLen:nat -> n:pos{n > 1} -> mu:nat -> a:nat -> bBits:nat -> b:pos{b < pow2 bBits} -> Lemma
+  (requires (1 + (n % pow2 64) * mu) % pow2 64 == 0 /\ 4 * n < pow2 (64 * rLen) /\ a < n /\ n % 2 = 1)
+  (ensures  mod_exp_mont_ll_final_sub rLen n mu a bBits b == S.fpow #n a b)
+
+let mod_exp_mont_ll_lemma_eq_simplify rLen n mu a bBits b =
+  let d, k = eea_pow2_odd (64 * rLen) n in
+  mod_exp_mont_preconditions rLen n mu;
   mod_exp_mont_ll_lemma_eq rLen n d mu a bBits b
+
+
+val mod_exp_mont_preconditions_rLen: nLen:nat -> n:pos{n < pow2 (64 * nLen)} -> Lemma (4 * n < pow2 (64 * (nLen + 1)))
+let mod_exp_mont_preconditions_rLen nLen n =
+  calc (<) {
+    4 * n;
+    (<) { Math.Lemmas.lemma_mult_lt_left 4 n (pow2 (64 * nLen)) }
+    4 * pow2 (64 * nLen);
+    (==) { assert_norm (pow2 2 = 4) }
+    pow2 2 * pow2 (64 * nLen);
+    (==) { Math.Lemmas.pow2_plus 2 (64 * nLen) }
+    pow2 (2 + 64 * nLen);
+    (<) { Math.Lemmas.pow2_lt_compat (64 + 64 * nLen) (2 + 64 * nLen) }
+    pow2 (64 + 64 * nLen);
+    (==) { Math.Lemmas.distributivity_add_right 64 1 nLen }
+    pow2 (64 * (nLen + 1));
+  };
+  assert (4 * n < pow2 (64 * (nLen + 1)))
