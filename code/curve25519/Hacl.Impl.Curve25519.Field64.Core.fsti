@@ -45,8 +45,8 @@ noextract
 let feval_wideh (h:mem) (f:u512) : GTot P.elem = (wide_as_nat h f) % P.prime
 
 
-[@ CInline Meta.Attribute.specialize ]
-val add1: out:u256 -> f1:u256  -> f2:uint64
+inline_for_extraction
+let add1_t =  out:u256 -> f1:u256  -> f2:uint64
   -> Stack uint64
     (requires fun h ->
       Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled) /\
@@ -55,9 +55,11 @@ val add1: out:u256 -> f1:u256  -> f2:uint64
     (ensures  fun h0 c h1 ->
       modifies (loc out) h0 h1 /\
       as_nat h1 out + v c * pow2 256 == as_nat h0 f1 + v f2)
-
 [@ CInline Meta.Attribute.specialize ]
-val fadd: out:u256 -> f1:u256  -> f2:u256
+val add1: add1_t
+
+inline_for_extraction
+let fadd_t = out:u256 -> f1:u256  -> f2:u256
   -> Stack unit
     (requires fun h ->
       Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled) /\    
@@ -68,9 +70,11 @@ val fadd: out:u256 -> f1:u256  -> f2:u256
     (ensures  fun h0 _ h1 ->
       modifies (loc out) h0 h1 /\
       fevalh h1 out == P.fadd (fevalh h0 f1) (fevalh h0 f2))
-
 [@ CInline Meta.Attribute.specialize ]
-val fsub: out:u256 -> f1:u256 -> f2:u256
+val fadd: fadd_t
+
+inline_for_extraction
+let fsub_t = out:u256 -> f1:u256 -> f2:u256
   -> Stack unit
     (requires fun h ->
       Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled) /\    
@@ -81,9 +85,11 @@ val fsub: out:u256 -> f1:u256 -> f2:u256
     (ensures  fun h0 _ h1 ->
       modifies (loc out) h0 h1 /\
       fevalh h1 out == P.fsub (fevalh h0 f1) (fevalh h0 f2))
-
 [@ CInline Meta.Attribute.specialize ]
-val fmul: out:u256 -> f1:u256 -> f2:u256 -> tmp:u1024
+val fsub: fsub_t
+
+inline_for_extraction
+let fmul_t = out:u256 -> f1:u256 -> f2:u256 -> tmp:u1024
   -> Stack unit
     (requires fun h ->
       Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled) /\    
@@ -97,9 +103,11 @@ val fmul: out:u256 -> f1:u256 -> f2:u256 -> tmp:u1024
     (ensures  fun h0 _ h1 ->
       modifies (loc out |+| loc tmp) h0 h1 /\
       fevalh h1 out == P.fmul (fevalh h0 f1) (fevalh h0 f2))
-
 [@ CInline Meta.Attribute.specialize ]
-val fmul2: out:u512 -> f1:u512 -> f2:u512 -> tmp:u1024
+val fmul: fmul_t
+
+inline_for_extraction
+let fmul2_t = out:u512 -> f1:u512 -> f2:u512 -> tmp:u1024
   -> Stack unit
     (requires fun h ->
       Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled) /\    
@@ -120,9 +128,11 @@ val fmul2: out:u512 -> f1:u512 -> f2:u512 -> tmp:u1024
       let f21 = gsub f2 4ul 4ul in
       fevalh h1 out0 == P.fmul (fevalh h0 f10) (fevalh h0 f20) /\
       fevalh h1 out1 == P.fmul (fevalh h0 f11) (fevalh h0 f21)))
-
 [@ CInline Meta.Attribute.specialize ]
-val fmul1: out:u256 -> f1:u256 -> f2:uint64{v f2 < pow2 17}
+val fmul2: fmul2_t
+
+inline_for_extraction
+let fmul1_t = out:u256 -> f1:u256 -> f2:uint64{v f2 < pow2 17}
   -> Stack unit
     (requires fun h ->
       Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled) /\    
@@ -131,9 +141,11 @@ val fmul1: out:u256 -> f1:u256 -> f2:uint64{v f2 < pow2 17}
     (ensures  fun h0 _ h1 ->
       modifies (loc out) h0 h1 /\
       fevalh h1 out == (fevalh h0 f1 * v f2) % P.prime)
-
 [@ CInline Meta.Attribute.specialize ]
-val fsqr: out:u256 -> f1:u256 -> tmp:u512
+val fmul1: fmul1_t
+
+inline_for_extraction
+let fsqr_t = out:u256 -> f1:u256 -> tmp:u512
   -> Stack unit
     (requires fun h ->
       Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled) /\    
@@ -144,9 +156,11 @@ val fsqr: out:u256 -> f1:u256 -> tmp:u512
     (ensures  fun h0 _ h1 ->
       modifies (loc out |+| loc tmp) h0 h1 /\
       fevalh h1 out == P.fmul (fevalh h0 f1) (fevalh h0 f1))
-
 [@ CInline Meta.Attribute.specialize ]
-val fsqr2: out:u512 -> f:u512 -> tmp:u1024
+val fsqr: fsqr_t
+
+inline_for_extraction
+let fsqr2_t = out:u512 -> f:u512 -> tmp:u1024
   -> Stack unit
     (requires fun h ->
       Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled) /\    
@@ -162,9 +176,11 @@ val fsqr2: out:u512 -> f:u512 -> tmp:u1024
       let f2 = gsub f 4ul 4ul in
       fevalh h1 out1 == P.fmul (fevalh h0 f1) (fevalh h0 f1) /\
       fevalh h1 out2 == P.fmul (fevalh h0 f2) (fevalh h0 f2)))
-
 [@ CInline Meta.Attribute.specialize ]
-val cswap2: bit:uint64{v bit <= 1} -> p1:u512 -> p2:u512
+val fsqr2: fsqr2_t
+
+inline_for_extraction
+let cswap2_t = bit:uint64{v bit <= 1} -> p1:u512 -> p2:u512
   -> Stack unit
     (requires fun h ->
       Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled) /\    
@@ -174,3 +190,5 @@ val cswap2: bit:uint64{v bit <= 1} -> p1:u512 -> p2:u512
       modifies (loc p1 |+| loc p2) h0 h1 /\
       (v bit == 1 ==> as_seq h1 p1 == as_seq h0 p2 /\ as_seq h1 p2 == as_seq h0 p1) /\
       (v bit == 0 ==> as_seq h1 p1 == as_seq h0 p1 /\ as_seq h1 p2 == as_seq h0 p2))
+[@ CInline Meta.Attribute.specialize ]
+val cswap2: cswap2_t

@@ -321,7 +321,7 @@ let rec visit_function (t_i: term) (st: state) (f_name: name): Tac (state & list
                   else
                     f_typ, false
               | _ ->
-                  fail (string_of_name f_name ^ " does not have an arrow type")
+                  f_typ, false // fail (string_of_name f_name ^ " does not have an arrow type")
             in
             print (st.indent ^ "  Registering " ^ string_of_name f_name ^ " with type " ^
               term_to_string f_typ);

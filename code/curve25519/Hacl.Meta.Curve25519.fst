@@ -1,6 +1,6 @@
 module Hacl.Meta.Curve25519
 
-#set-options "--print_implicits --print_full_names"
+#set-options "--print_implicits --print_full_names --print_effect_args"
 
 friend Hacl.Impl.Curve25519.Generic
 
