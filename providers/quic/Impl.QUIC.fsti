@@ -19,8 +19,6 @@ open EverCrypt.Error
 
 #set-options "--max_fuel 0 --max_ifuel 0"
 
-type role = | Reader | Writer
-
 unfold noextract
 let hash_alg = Spec.Hash.Definitions.hash_alg
 
@@ -32,12 +30,11 @@ let lbytes = Spec.QUIC.lbytes
 
 /// This is not a cryptographic index; rather, this is just a regular type
 /// index, where instead of indexing on a single algorithm (like, say, AEAD), we
-/// index on three values.
+/// index on two values.
 ///
 /// The record is here to limit the profileration of hide/reveal in the stateful
 /// functions, and to give easier projectors (ADL, JP).
 type index = {
-  role: role;
   hash_alg: Spec.QUIC.ha;
   aead_alg: Spec.QUIC.ea
 }
@@ -103,13 +100,22 @@ let hash_is_keysized #i (s: state_s i) (h: HS.mem): Lemma
 /// Note that this one does *NOT* take the memory as an argument. (This is
 /// because the initial packet number is erased in the concrete state.) Callers
 /// should be able to derive, from this, that the initial packet number remains
-/// the same.
+/// the same, thanks to the precise use of footprint_s in encrypt/decrypt.
 val g_initial_packet_number: #i:index -> (s: state_s i) -> GTot Spec.QUIC.nat62
 
 val g_packet_number: #i:index -> (s: state_s i) -> (h: HS.mem) ->
   GTot (pn:Spec.QUIC.nat62{
     pn >= g_initial_packet_number s
   })
+
+let incrementable (#i: index) (s: state i) (h: HS.mem) =
+  g_packet_number (B.deref h s) h + 1 < pow2 62
+
+/// This will be maintained internally but can be used by clients. This was
+/// previously revealed in the post-condition of decrypt.
+val invariant_packet_number (#i: index) (s: state i) (h: HS.mem): Lemma
+  (requires (invariant h s))
+  (ensures (g_packet_number (B.deref h s) h >= g_initial_packet_number (B.deref h s)))
 
 /// Preserving all the ghost accessors via a single framing lemma only works
 /// because we don't do stack allocation. See comments in
@@ -146,7 +152,7 @@ type u62 = n:UInt64.t{UInt64.v n < pow2 62}
 let add3 (k:u4) : n:U8.t{U8.v n <= 18} = if k = 0uy then 0uy else U8.(k +^ 3uy)
 
 /// Information stored in a QUIC header. This is a Low* type passed by value --
-/// it's a little expensive. Consider passing it by reference?
+/// it's a little expensive. Consider passing it by reference in ``encrypt``?
 ///
 /// Note that we try to follow the convention of buffer arguments followed by
 /// their lengths.
@@ -190,10 +196,6 @@ let g_header (h: header) (m: HS.mem): GTot Spec.QUIC.header =
 
 /// Actual stateful API
 /// -------------------
-///
-/// Note that we do not store the role at run-time, since the representation is
-/// the same regardless of the role. It's just the *interpretation* of the
-/// packet number that varies according to the role.
 
 val aead_alg_of_state (i: G.erased index) (s: state (G.reveal i)): Stack aead_alg
   (requires (fun h0 -> invariant #(G.reveal i) h0 s))
@@ -212,9 +214,6 @@ val packet_number_of_state (i: G.erased index) (s: state (G.reveal i)): Stack U6
   (ensures fun h0 ctr h1 ->
     U64.v ctr == g_packet_number (B.deref h0 s) h0 /\
     h0 == h1)
-
-let incrementable (#i: index) (s: state i) (h: HS.mem) =
-  g_packet_number (B.deref h s) h + 1 < pow2 62
 
 val encrypt: #i:G.erased index -> (
   let i = G.reveal i in
@@ -237,27 +236,94 @@ val encrypt: #i:G.erased index -> (
 
       invariant h0 s /\
 
-      i.role = Writer /\ // JP: why does the role matter at all here?
       incrementable s h0 /\ (
-
       let clen = U32.v plain_len + Spec.AEAD.tag_length i.aead_alg in
       let len = clen + Spec.QUIC.header_len (g_header h h0) (U8.v pn_len) in
       (Long? h ==> U32.v (Long?.plain_len h) = clen) /\
       B.length dst == len
     ))
     (ensures fun h0 r h1 ->
-      // Memory & preservation
-      B.modifies (footprint h0 s) h0 h1 /\
-      invariant h1 s /\
-      footprint_s (B.deref h1 s) == footprint_s (B.deref h0 s) /\ (
+      match r with
+      | Success ->
+          // Memory & preservation
+          B.modifies (footprint_s (B.deref h0 s)) h0 h1 /\
+          invariant h1 s /\
+          footprint h1 s == footprint h0 s /\ (
 
-      // Functional correctness
-      let s0 = g_hash (B.deref h0 s) h0 in
-      let open Spec.QUIC in
-      let k = derive_secret i.hash_alg s0 label_key (Spec.AEAD.key_length i.aead_alg) in
-      let iv = derive_secret i.hash_alg s0 label_iv 12 in
-      let pne = derive_secret i.hash_alg s0 label_hp (ae_keysize i.aead_alg) in
-      let plain: pbytes = B.as_seq h0 plain in
-      let packet: packet = B.as_seq h1 dst in
-      let ctr = g_packet_number (B.deref h0 s) h0 in
-      packet == Spec.QUIC.encrypt i.aead_alg k iv pne (U8.v pn_len) ctr (g_header h h0) plain)))
+          // Functional correctness
+          let s0 = g_hash (B.deref h0 s) h0 in
+          let open Spec.QUIC in
+          let k = derive_secret i.hash_alg s0 label_key (Spec.AEAD.key_length i.aead_alg) in
+          let iv = derive_secret i.hash_alg s0 label_iv 12 in
+          let pne = derive_secret i.hash_alg s0 label_hp (ae_keysize i.aead_alg) in
+          let plain: pbytes = B.as_seq h0 plain in
+          let packet: packet = B.as_seq h1 dst in
+          let ctr = g_packet_number (B.deref h0 s) h0 in
+          packet ==
+            Spec.QUIC.encrypt i.aead_alg k iv pne (U8.v pn_len) ctr (g_header h h0) plain)
+      | _ ->
+          False)) // JP: this will be refined as we go to figure out the error conditions
+
+// Callers allocate this type prior to calling decrypt. The contents are only
+// meaningful, and plain is only non-null, if the decryption was a success.
+noeq
+type result = {
+  pn_len: u2;
+  pn: u62;
+  plain_len: n:U32.t{let l = U32.v n in 3 <= l /\ l < Spec.QUIC.max_plain_length};
+  plain: B.buffer U8.t; // NULL is a valid buffer.
+}
+
+let max (x y: nat) = if x >= y then x else y
+
+val decrypt: #i:G.erased index -> (
+  let i = G.reveal i in
+  s:state i ->
+  dst: B.pointer result ->
+  packet: B.buffer U8.t ->
+  len: U32.t{
+    21 <= U32.v len /\ U32.v len < pow2 32 /\
+    B.length packet == U32.v len
+  } ->
+  cid_len: u4 ->
+  h: header ->
+  Stack error_code
+    (requires fun h0 ->
+      // There are various design choices here. We could, for instance, make dst
+      // a pointer_or_null (pointer result), which would allow to use NULL as a
+      // sentinel value. However, this complicates memory reasoning from the
+      // caller's perspective and we already have the error code to indicate
+      // failure. So, we take the easiest thing and require that the caller
+      // always allocate a result, and pass us its address. There just won't be
+      // anything meaningful in there in case of failure.
+      B.live h0 packet /\ B.live h0 dst /\
+      header_live h h0 /\
+      B.disjoint dst packet /\ // JP: todo, more stuff coming up here
+
+      invariant h0 s /\
+      incrementable s h0 /\
+      (Long? h ==> cid_len = 0uy))
+    (ensures fun h0 r h1 ->
+      match r with
+      | Success ->
+          B.modifies (footprint_s (B.deref h0 s)) h0 h1 /\
+          invariant h1 s /\
+          footprint h1 s == footprint h0 s /\ (
+
+          let r = B.deref h1 dst in
+          // prev is known to be >= g_initial_packet_number (see lemma invariant_packet_number)
+          let prev = g_packet_number (B.deref h0 s) h0 in
+          let curr = g_packet_number (B.deref h1 s) h1 in
+          curr == max prev (U64.v r.pn) /\
+          B.length r.plain == U32.v r.plain_len /\ (
+
+          let s0 = g_hash (B.deref h0 s) h0 in
+          let k = Spec.QUIC.(derive_secret i.hash_alg s0 label_key (Spec.AEAD.key_length i.aead_alg)) in
+          let iv = Spec.QUIC.(derive_secret i.hash_alg s0 label_iv 12) in
+          let pne = Spec.QUIC.(derive_secret i.hash_alg s0 label_hp (ae_keysize i.aead_alg)) in
+          let plain: Spec.QUIC.pbytes = B.as_seq h0 r.plain in
+          let packet: Spec.QUIC.packet = B.as_seq h0 packet in
+          Spec.QUIC.decrypt i.aead_alg k iv pne prev (U8.v cid_len) packet
+            == Spec.QUIC.Success (U8.v r.pn_len) (U64.v r.pn) (g_header h h1) plain))
+      | _ ->
+          False))
