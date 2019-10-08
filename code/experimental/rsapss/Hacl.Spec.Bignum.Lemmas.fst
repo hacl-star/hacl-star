@@ -741,3 +741,41 @@ let mod_exp_mont_ll_lemma_fits rLen n d mu a bBits b =
   let res = M.from_mont rLen n mu accM1 in
   M.from_mont_lemma_fits rLen n d mu accM1;
   assert (res <= n)
+
+///
+///  Lemma (mod_exp_mont_ll_final_sub rLen n mu a bBits b == S.fpow #n a b)
+///
+
+val mod_exp_mont_ll_final_sub: rLen:nat -> n:pos -> mu:nat -> a:nat -> bBits:nat -> b:pos{b < pow2 bBits} -> res:nat
+let mod_exp_mont_ll_final_sub rLen n mu a bBits b =
+  let res = mod_exp_mont_ll rLen n mu a bBits b in
+  if res = n then 0 else res
+
+
+val mod_exp_mont_ll_lemma_eq:
+  rLen:nat -> n:pos -> d:nat -> mu:nat -> a:nat -> bBits:nat -> b:pos{b < pow2 bBits} -> Lemma
+  (requires
+    (1 + n * mu) % pow2 64 == 0 /\ pow2 (64 * rLen) * d % n == 1 /\
+    4 * n < pow2 (64 * rLen) /\ a < n)
+  (ensures  mod_exp_mont_ll_final_sub rLen n mu a bBits b == S.fpow #n a b)
+
+let mod_exp_mont_ll_lemma_eq rLen n d mu a bBits b =
+  let res1 = mod_exp_mont_ll_final_sub rLen n mu a bBits b in
+  let res = mod_exp_mont_ll rLen n mu a bBits b in
+  calc (==) {
+    res % n;
+    (==) { mod_exp_mont_ll_lemma rLen n d mu a bBits b }
+    pow a b % n;
+    (==) { lemma_pow_mod_n_is_fpow n a b }
+    S.fpow #n a b;
+  };
+  assert (res % n == S.fpow #n a b);
+  if res = n then begin
+    assert (res1 = 0);
+    Math.Lemmas.cancel_mul_mod 1 n end
+  else begin
+    assert (res1 == res);
+    mod_exp_mont_ll_lemma_fits rLen n d mu a bBits b;
+    assert (res < n);
+    Math.Lemmas.small_mod res n;
+    () end
