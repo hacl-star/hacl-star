@@ -246,7 +246,7 @@ val encrypt: #i:G.erased index -> (
       match r with
       | Success ->
           // Memory & preservation
-          B.modifies (footprint_s (B.deref h0 s)) h0 h1 /\
+          B.(modifies (footprint_s (deref h0 s) `loc_union` loc_buffer dst)) h0 h1 /\
           invariant h1 s /\
           footprint h1 s == footprint h0 s /\ (
 
@@ -270,8 +270,9 @@ noeq
 type result = {
   pn_len: u2;
   pn: u62;
+  header: header;
+  header_len: U32.t;
   plain_len: n:U32.t{let l = U32.v n in 3 <= l /\ l < Spec.QUIC.max_plain_length};
-  plain: B.buffer U8.t; // NULL is a valid buffer.
 }
 
 let max (x y: nat) = if x >= y then x else y
@@ -286,27 +287,26 @@ val decrypt: #i:G.erased index -> (
     B.length packet == U32.v len
   } ->
   cid_len: u4 ->
-  h: header ->
   Stack error_code
     (requires fun h0 ->
-      // There are various design choices here. We could, for instance, make dst
-      // a pointer_or_null (pointer result), which would allow to use NULL as a
-      // sentinel value. However, this complicates memory reasoning from the
-      // caller's perspective and we already have the error code to indicate
-      // failure. So, we take the easiest thing and require that the caller
-      // always allocate a result, and pass us its address. There just won't be
-      // anything meaningful in there in case of failure.
+      // We require clients to allocate space for a result, e.g.
+      //   result r = { 0 };
+      //   decrypt(s, &r, ...);
+      // This means that we don't require that the pointers inside ``r`` be live
+      // (i.e. NO ``header_live header`` precondition).
+      // After a successful call to decrypt, ``packet`` contains the decrypted
+      // data; ``header`` is modified to point within the header area of
+      // ``packet``; and the plaintext is within ``packet`` in range
+      // ``[header_len, header_len + plain_len)``.
       B.live h0 packet /\ B.live h0 dst /\
-      header_live h h0 /\
       B.disjoint dst packet /\ // JP: todo, more stuff coming up here
 
       invariant h0 s /\
-      incrementable s h0 /\
-      (Long? h ==> cid_len = 0uy))
+      incrementable s h0)
     (ensures fun h0 r h1 ->
       match r with
       | Success ->
-          B.modifies (footprint_s (B.deref h0 s)) h0 h1 /\
+          B.(modifies (footprint_s (deref h0 s) `loc_union` loc_buffer packet) h0 h1) /\
           invariant h1 s /\
           footprint h1 s == footprint h0 s /\ (
 
@@ -314,16 +314,20 @@ val decrypt: #i:G.erased index -> (
           // prev is known to be >= g_initial_packet_number (see lemma invariant_packet_number)
           let prev = g_packet_number (B.deref h0 s) h0 in
           let curr = g_packet_number (B.deref h1 s) h1 in
-          curr == max prev (U64.v r.pn) /\
-          B.length r.plain == U32.v r.plain_len /\ (
+          curr == max prev (U64.v r.pn) /\ (
 
           let s0 = g_hash (B.deref h0 s) h0 in
           let k = Spec.QUIC.(derive_secret i.hash_alg s0 label_key (Spec.AEAD.key_length i.aead_alg)) in
           let iv = Spec.QUIC.(derive_secret i.hash_alg s0 label_iv 12) in
           let pne = Spec.QUIC.(derive_secret i.hash_alg s0 label_hp (ae_keysize i.aead_alg)) in
-          let plain: Spec.QUIC.pbytes = B.as_seq h0 r.plain in
+          let r = B.deref h1 dst in
+          U32.v r.header_len + U32.v r.plain_len <= B.length packet /\ (
+          let plain: Spec.QUIC.pbytes =
+            S.slice (B.as_seq h1 packet) (U32.v r.header_len)
+              (U32.v r.header_len + U32.v r.plain_len) in
           let packet: Spec.QUIC.packet = B.as_seq h0 packet in
+          (Long? r.header ==> cid_len = 0uy) /\
           Spec.QUIC.decrypt i.aead_alg k iv pne prev (U8.v cid_len) packet
-            == Spec.QUIC.Success (U8.v r.pn_len) (U64.v r.pn) (g_header h h1) plain))
+            == Spec.QUIC.Success (U8.v r.pn_len) (U64.v r.pn) (g_header r.header h1) plain)))
       | _ ->
           False))
