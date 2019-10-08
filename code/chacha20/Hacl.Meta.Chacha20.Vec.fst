@@ -4,9 +4,9 @@ module Hacl.Meta.Chacha20.Vec
 
 // Somehow miraculously, this works.
 %splice[
-  chacha20_core_higher;
-  chacha20_encrypt_higher;
-  chacha20_decrypt_higher
+  vec_chacha20_core_higher;
+  vec_chacha20_encrypt_higher;
+  vec_chacha20_decrypt_higher
 ] (Meta.Interface.specialize (`Hacl.Impl.Chacha20.Core32xN.lanes) [
   `Hacl.Impl.Chacha20.Vec.chacha20_encrypt;
   `Hacl.Impl.Chacha20.Vec.chacha20_decrypt

@@ -27,7 +27,7 @@ let rec zip #a #b (xs: list a) (ys: list b): Tac (list (a & b)) =
 ///
 /// At definition-site, every function ``f #i x`` is replaced by a function
 ///  ``mk_f #i (g1: g1_t i) ... (gn: gn_t i) x`` where:
-/// 
+///
 /// - the gi are the ``specialize`` nodes reachable via a (possibly-empty) path
 ///   of ``inline`` nodes through the body of ``f``
 /// - the gi_t are the types of the original gi, minus that index i, which has
@@ -35,14 +35,14 @@ let rec zip #a #b (xs: list a) (ys: list b): Tac (list (a & b)) =
 ///   ``fun #i:t_i -> t``
 ///
 /// At call-site, when encountering ``f #i e``, we distinguish between two cases.
-/// 
+///
 /// - If ``f`` is a specialize node: this becomes ``gi e`` and references the
 ///   bound variable instead of the global name
 /// - If ``f`` is an inline node: this becomes ``mk_f #i gf1 ... gfn e`` where
 ///   ``gfi`` is the i-th function needed by f, i.e. one of our gk.
 ///
 /// The intended usage is as follows.
-/// 
+///
 /// - For each specialize node ``f``, clients instantiate as follows:
 ///   ``let f_specialized = mk_f I1 g1_specialized ... gn_specialized``
 ///   where the gn_specialized have been recursively generated the same way.
@@ -77,9 +77,9 @@ let rec string_of_name (n: name): Tac string =
 
 let rec suffix_name (n: name) (s: string): Tac name =
   match n with
-  | [ n ] -> cur_module () @ [ n ^ s ]
+  | [ m; n ] -> cur_module () @ [ String.lowercase m ^ "_" ^ n ^ s ]
   | n :: ns -> suffix_name ns s
-  | [] -> fail "impossible: empty name"
+  | [ _ ] | [] -> fail "impossible: empty name"
 
 let has_attr (s: sigelt) (x: term) =
   List.Tot.existsb (fun t -> term_eq t x) (sigelt_attrs s)
@@ -122,6 +122,8 @@ let rec in_namespace (n: name) (ns: list string): Tot bool =
 let must: _ -> Tac _ = function
   | Some x -> x
   | None -> fail "Invalid argument: must"
+
+let tm_unit = `((()))
 
 /// Tactic core
 /// -----------
@@ -200,7 +202,7 @@ let rec visit_function (t_i: term) (st: state) (f_name: name): Tac (state & list
         let new_args, new_bvs = List.Tot.split new_args in
 
         // The type of ``f`` when it appears as a ``gi`` parameter, i.e. its ``gi_t``.
-        let f_typ_name = suffix_name new_name "_t" in
+        let f_typ_name = suffix_name f_name "_higher_t" in
         let f_typ, f_typ_typ, has_index =
           match index_bv with
           | Some index_bv ->
@@ -271,13 +273,13 @@ let rec visit_function (t_i: term) (st: state) (f_name: name): Tac (state & list
           // For debugging. This is very meta.
           let se_debug = pack_sigelt (Sg_Let
             false
-            (pack_fv (suffix_name new_name "debug"))
+            (pack_fv (suffix_name f_name "_higher_debug_print"))
             []
             (`unit)
             (`(let x: unit =
               _ by (
-                print ("About to check " ^ (`@(string_of_name f_name)));
-                exact (`(()))) in
+                print ("About to check " ^ (`@(string_of_name new_name)));
+                exact tm_unit) in
               x)))
           in
 

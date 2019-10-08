@@ -9,10 +9,10 @@ open Hacl.Impl.Poly1305.Fields
 private
 let poly1305_padded_256 = Hacl.Impl.Chacha20Poly1305.PolyCore.poly1305_padded #M256
 private
-let poly1305_do_256 = poly1305_do_higher #M256 poly1305_padded_256
+let poly1305_do_256 = chacha20poly1305_poly1305_do_higher #M256 poly1305_padded_256
 
 let aead_encrypt : aead_encrypt_st M256 =
-  aead_encrypt_higher #M256 poly1305_do_256 Hacl.Chacha20.Vec256.chacha20_encrypt_256
+  chacha20poly1305_aead_encrypt_higher #M256 poly1305_do_256 Hacl.Chacha20.Vec256.chacha20_encrypt_256
 
 let aead_decrypt : aead_decrypt_st M256 =
-  aead_decrypt_higher #M256 Hacl.Chacha20.Vec256.chacha20_encrypt_256 poly1305_do_256
+  chacha20poly1305_aead_decrypt_higher #M256 Hacl.Chacha20.Vec256.chacha20_encrypt_256 poly1305_do_256
