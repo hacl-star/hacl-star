@@ -69,6 +69,10 @@ type state = {
 /// Helpers
 /// -------
 
+let string_of_mapping = function
+  | Inline _ -> "inline"
+  | Specialize -> "specialize"
+
 let rec string_of_name (n: name): Tac string =
   match n with
   | [ n ] -> n
@@ -306,7 +310,9 @@ let rec visit_function (t_i: term) (st: state) (f_name: name): Tac (state & list
             st.indent ^ "=\n" ^
             st.indent ^ term_to_string new_body);
 
-          st, new_sigelts @ [ se_debug "Checking type and definition: "; se_t; se ]
+          st, new_sigelts @ [
+            se_debug ("Checking type and definition [" ^ string_of_mapping m ^ "]:"); se_t; se
+          ]
 
       | _ ->
           if has_attr f (`Meta.Attribute.specialize) then
