@@ -346,3 +346,14 @@ val mont_mul: rLen:nat -> n:pos -> mu:nat -> a:nat -> b:nat -> res:nat
 let mont_mul rLen n mu a b =
   let c = a * b in
   mont_reduction rLen n mu c
+
+
+val mont_mul_lemma_fits: rLen:nat -> n:pos -> d:nat-> mu:nat -> a:nat -> b:nat -> Lemma
+  (requires
+    (1 + n * mu) % pow2 64 == 0 /\ pow2 (64 * rLen) * d % n == 1 /\
+    4 * n < pow2 (64 * rLen) /\ a < 2 * n /\ b < 2 * n)
+  (ensures (let res = mont_mul rLen n mu a b in res < 2 * n))
+
+let mont_mul_lemma_fits rLen n d mu a b =
+  let c = a * b in
+  mont_mult_lemma_fits rLen n d mu c

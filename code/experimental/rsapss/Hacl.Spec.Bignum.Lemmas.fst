@@ -687,3 +687,57 @@ let mod_exp_mont_ll_lemma rLen n d mu a bBits b =
     pow a b % n;
   };
   assert (accM1 * d % n == pow a b % n)
+
+
+val mod_exp_mont_ll_lemma_fits_loop:
+  rLen:nat -> n:pos -> d:nat -> mu:nat -> bBits:nat -> b:pos{b < pow2 bBits} -> i:nat{i <= bBits} -> aM0:nat -> accM0:nat -> Lemma
+  (requires
+    (1 + n * mu) % pow2 64 == 0 /\ pow2 (64 * rLen) * d % n == 1 /\
+    4 * n < pow2 (64 * rLen) /\ aM0 < 2 * n /\ accM0 < 2 * n)
+  (ensures
+    (let (aM1, accM1) = Loops.repeati i (mod_exp_f_ll rLen n mu bBits b) (aM0, accM0) in
+    aM1 < 2 * n /\ accM1 < 2 * n))
+
+let rec mod_exp_mont_ll_lemma_fits_loop rLen n d mu bBits b i aM0 accM0 =
+  let (aM1, accM1) = Loops.repeati i (mod_exp_f_ll rLen n mu bBits b) (aM0, accM0) in
+  if i = 0 then begin
+    Loops.eq_repeati0 i (mod_exp_f_ll rLen n mu bBits b) (aM0, accM0);
+    () end
+  else begin
+    Loops.unfold_repeati i (mod_exp_f_ll rLen n mu bBits b) (aM0, accM0) (i - 1);
+    let (aM2, accM2) = Loops.repeati (i - 1) (mod_exp_f_ll rLen n mu bBits b) (aM0, accM0) in
+    //assert ((aM1, accM1) == mod_exp_f_ll rLen n mu bBits b (i - 1) (aM2, accM2));
+    mod_exp_mont_ll_lemma_fits_loop rLen n d mu bBits b (i - 1) aM0 accM0;
+    //assert (aM2 < 2 * n /\ accM2 < 2 * n);
+    //assert (aM1 == M.mont_mul rLen n mu aM2 aM2);
+    M.mont_mul_lemma_fits rLen n d mu aM2 aM2;
+    assert (aM1 < 2 * n);
+
+    if (b / pow2 (i - 1) % 2 = 1) then begin
+      M.mont_mul_lemma_fits rLen n d mu accM2 aM2;
+      assert (accM1 < 2 * n) end
+    else assert (accM1 < 2 * n);
+    () end
+
+
+val mod_exp_mont_ll_lemma_fits:
+  rLen:nat -> n:pos -> d:nat -> mu:nat -> a:nat -> bBits:nat -> b:pos{b < pow2 bBits} -> Lemma
+  (requires
+    (1 + n * mu) % pow2 64 == 0 /\ pow2 (64 * rLen) * d % n == 1 /\
+    4 * n < pow2 (64 * rLen) /\ a < n)
+  (ensures  mod_exp_mont_ll rLen n mu a bBits b <= n)
+
+let mod_exp_mont_ll_lemma_fits rLen n d mu a bBits b =
+  let r = pow2 (64 * rLen) in
+  let aM0 = M.to_mont rLen n mu a in
+  let accM0 = M.to_mont rLen n mu 1 in
+  M.to_mont_lemma_fits rLen n d mu a;
+  M.to_mont_lemma_fits rLen n d mu 1;
+  assert (aM0 < 2 * n);
+  assert (accM0 < 2 * n);
+  let (aM1, accM1) : tuple2 nat nat = Loops.repeati bBits (mod_exp_f_ll rLen n mu bBits b) (aM0, accM0) in
+  mod_exp_mont_ll_lemma_fits_loop rLen n d mu bBits b bBits aM0 accM0;
+  assert (aM1 < 2 * n /\ accM1 < 2 * n);
+  let res = M.from_mont rLen n mu accM1 in
+  M.from_mont_lemma_fits rLen n d mu accM1;
+  assert (res <= n)
