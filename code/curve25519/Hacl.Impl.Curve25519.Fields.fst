@@ -189,8 +189,7 @@ let fadd_post #s h out =
   | M51 -> F51.felem_fits h out (2, 4, 2, 2, 2)
   | M64 -> True
 
-val fadd:
-    #s:field_spec
+let fadd_t (#s:field_spec) =
   -> out:felem s
   -> f1:felem s
   -> f2:felem s
@@ -204,11 +203,8 @@ val fadd:
     (ensures  fun h0 _ h1 ->
       modifies (loc out) h0 h1 /\ fadd_post h1 out /\
       feval h1 out == P.fadd (feval h0 f1) (feval h0 f2))
-[@ Meta.Attribute.inline_ ]
-let fadd #s out f1 f2=
-  match s with
-  | M51 -> F51.fadd out f1 f2
-  | M64 -> F64.fadd out f1 f2
+[@ Meta.Attribute.specialize]
+assume val fadd: #s:field_spec -> fadd_t s
 
 val fsub_post:#s:field_spec -> h:mem -> out:felem s -> Type0
 let fsub_post #s h out =
