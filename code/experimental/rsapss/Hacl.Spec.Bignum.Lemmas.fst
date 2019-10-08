@@ -779,3 +779,43 @@ let mod_exp_mont_ll_lemma_eq rLen n d mu a bBits b =
     assert (res < n);
     Math.Lemmas.small_mod res n;
     () end
+
+
+val eea_pow2_odd: a:nat -> n:pos ->
+  Pure (tuple2 nat nat)
+  (requires n % 2 = 1)
+  (ensures  fun (d, k) -> pow2 a * d == 1 + k * n)
+let eea_pow2_odd a n = admit()
+
+
+val mod_exp_mont_ll_lemma_eq_simplify:
+  rLen:nat -> n:pos{n > 1} -> mu:nat -> a:nat -> bBits:nat -> b:pos{b < pow2 bBits} -> Lemma
+  (requires (1 + (n % pow2 64) * mu) % pow2 64 == 0 /\ 4 * n < pow2 (64 * rLen) /\ a < n /\ n % 2 = 1)
+  (ensures  mod_exp_mont_ll_final_sub rLen n mu a bBits b == S.fpow #n a b)
+
+let mod_exp_mont_ll_lemma_eq_simplify rLen n mu a bBits b =
+  calc (==) {
+    (1 + n * mu) % pow2 64;
+    (==) { Math.Lemmas.lemma_mod_plus_distr_r 1 (n * mu) (pow2 64) }
+    (1 + n * mu % pow2 64) % pow2 64;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_l n mu (pow2 64) }
+    (1 + n % pow2 64 * mu % pow2 64) % pow2 64;
+    (==) { Math.Lemmas.lemma_mod_plus_distr_r 1 (n % pow2 64 * mu) (pow2 64) }
+    (1 + n % pow2 64 * mu) % pow2 64;
+    (==) { assert ((1 + (n % pow2 64) * mu) % pow2 64 == 0) }
+    0;
+  };
+  assert ((1 + n * mu) % pow2 64 == 0);
+
+  let d, k = eea_pow2_odd (64 * rLen) n in
+  calc (==) {
+    pow2 (64 * rLen) * d % n;
+    (==) { }
+    (1 + k * n) % n;
+    (==) { Math.Lemmas.modulo_addition_lemma 1 n k }
+    1 % n;
+    (==) { Math.Lemmas.small_mod 1 n }
+    1;
+  };
+  assert (pow2 (64 * rLen) * d % n == 1);
+  mod_exp_mont_ll_lemma_eq rLen n d mu a bBits b
