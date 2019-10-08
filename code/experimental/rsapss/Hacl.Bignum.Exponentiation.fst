@@ -10,40 +10,13 @@ open Lib.Buffer
 open Hacl.Bignum
 open Hacl.Bignum.Base
 open Hacl.Bignum.Montgomery
-open Hacl.Bignum.Multiplication
+open Hacl.Bignum.Montgomery.PreCompConstants
 
 module ST = FStar.HyperStack.ST
 module S = Hacl.Spec.Bignum.Exponentiation
 
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
-
-
-val mul_mod_mont:
-    nLen:size_t
-  -> rLen:size_t{v rLen = v nLen + 1 /\ v rLen + v rLen <= max_size_t}
-  -> n:lbignum nLen
-  -> nInv_u64:uint64
-  -> aM:lbignum rLen
-  -> bM:lbignum rLen
-  -> resM:lbignum rLen ->
-  Stack unit
-  (requires fun h ->
-    live h aM /\ live h bM /\ live h resM /\ live h n /\
-    disjoint resM n /\ eq_or_disjoint aM bM /\
-    eq_or_disjoint aM resM /\ eq_or_disjoint bM resM /\
-    0 < bn_v h n)
-  (ensures  fun h0 _ h1 -> modifies (loc resM) h0 h1 /\
-    as_seq h1 resM == S.mul_mod_mont (as_seq h0 n) nInv_u64 (as_seq h0 aM) (as_seq h0 bM))
-
-[@CInline]
-let mul_mod_mont nLen rLen n nInv_u64 aM bM resM =
-  push_frame ();
-  let c = create (rLen +! rLen) (u64 0) in
-  bn_mul rLen aM rLen bM c; // c = aM * bM
-  mont_reduction nLen rLen n nInv_u64 c resM; // resM = c % n
-  pop_frame ()
-
 
 val bn_is_bit_set:
     len:size_t

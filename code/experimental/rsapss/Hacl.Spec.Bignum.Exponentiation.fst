@@ -8,27 +8,11 @@ open Lib.LoopCombinators
 
 open Hacl.Spec.Bignum
 open Hacl.Spec.Bignum.Base
-open Hacl.Spec.Bignum.Addition
-open Hacl.Spec.Bignum.Multiplication
 open Hacl.Spec.Bignum.Montgomery
+open Hacl.Spec.Bignum.Montgomery.PreCompConstants
 
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
-
-//bn_v h1 resM % bn_v h0 n == bn_v h0 aM * bn_v h0 bM / pow2 (64 * v rLen) % bn_v h0 n
-val mul_mod_mont:
-    #nLen:size_nat
-  -> #rLen:size_nat{rLen = nLen + 1 /\ rLen + rLen <= max_size_t}
-  -> n:lbignum nLen
-  -> nInv_u64:uint64
-  -> aM:lbignum rLen
-  -> bM:lbignum rLen ->
-  resM:lbignum rLen
-
-let mul_mod_mont #nLen #rLen n nInv_u64 aM bM =
-  let c = bn_mul aM bM in // c = aM * bM
-  mont_reduction n nInv_u64 c // resM = c % n
-
 
 val bn_is_bit_set: #len:size_nat -> input:lbignum len -> ind:size_nat{ind / 64 < len} -> bool
 let bn_is_bit_set #len input ind =
@@ -67,7 +51,6 @@ val mod_exp:
   -> bBits:size_pos
   -> b:lbignum (blocks bBits 64) ->
   res:lbignum nLen
-// bn_v h1 res == fexp (bn_v h0 a) (bn_v h0 b) (bn_v h0 n)
 
 let mod_exp modBits nLen n r2 a bBits b =
   let rLen = nLen + 1 in
@@ -75,7 +58,7 @@ let mod_exp modBits nLen n r2 a bBits b =
 
   let acc  = create nLen (u64 0) in
   let acc = acc.[0] <- u64 1 in
-  let nInv_u64 = mod_inv_u64 n.[0] in // n * nInv = 1 (mod (pow2 64))
+  let nInv_u64 = mod_inv_u64 n.[0] in
 
   let aM = to_mont n nInv_u64 r2 a in
   let accM = to_mont n nInv_u64 r2 acc in
