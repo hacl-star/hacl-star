@@ -148,7 +148,7 @@ let binder_is_legit f_name t_i binder: Tac bool =
       not implicit but has the index type");
   right_type && implicit
 
-
+#push-options "--z3rlimit 100"
 let rec visit_function (t_i: term) (st: state) (f_name: name): Tac (state & list sigelt) =
   if (List.Tot.existsb (fun (name, _) -> name = f_name) st.seen) then
     let _ = print (st.indent ^ "Already visited " ^ string_of_name f_name) in
@@ -235,16 +235,23 @@ let rec visit_function (t_i: term) (st: state) (f_name: name): Tac (state & list
         let st = { st with seen = (f_name, (has_index, f_typ, m, new_args)) :: st.seen } in
 
         // For debugging. This is very meta.
-        let se_debug = pack_sigelt (Sg_Let
-          false
-          (pack_fv (suffix_name f_name "_higher_debug_print"))
-          []
-          (`unit)
-          (`(let x: unit =
-            _ by (
-              print ("About to check " ^ (`@(string_of_name new_name)));
-              exact tm_unit) in
-            x)))
+        let se_debug msg: Tac sigelt =
+          let deps = map string_of_name new_args in
+          let deps =
+            match deps with
+            | _ :: _ -> " (needs: " ^ String.concat ", " deps ^ ")"
+            | _ -> ""
+          in
+          pack_sigelt (Sg_Let
+            false
+            (pack_fv (suffix_name f_name "_higher_debug_print"))
+            []
+            (`unit)
+            (`(let x: unit =
+              _ by (
+                print (`@(msg) ^ " " ^ (`@(string_of_name new_name)) ^ `@(deps));
+                exact tm_unit) in
+              x)))
         in
 
         // Fast-path; just register the function as being a specialize node
@@ -256,7 +263,7 @@ let rec visit_function (t_i: term) (st: state) (f_name: name): Tac (state & list
             fail (string_of_name f_name ^ " is marked as [@ inline_ ] but does not reach \
               any specializations");
 
-          st, new_sigelts @ [ se_debug; se_t ]
+          st, new_sigelts @ [ se_debug "Checking only a type:"; se_t ]
         end
 
         else
@@ -299,7 +306,7 @@ let rec visit_function (t_i: term) (st: state) (f_name: name): Tac (state & list
             st.indent ^ "=\n" ^
             st.indent ^ term_to_string new_body);
 
-          st, new_sigelts @ [ se_debug;  se_t; se ]
+          st, new_sigelts @ [ se_debug "Checking type and definition: "; se_t; se ]
 
       | _ ->
           if has_attr f (`Meta.Attribute.specialize) then
