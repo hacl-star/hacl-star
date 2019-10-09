@@ -1,4 +1,4 @@
-module Hacl.Impl.Curve25519.Field64.Core
+module Hacl.Impl.Curve25519.Field64.Vale
 
 module HS = FStar.HyperStack
 module ST = FStar.HyperStack.ST
@@ -7,14 +7,28 @@ open FStar.Calc
 friend Lib.Buffer
 friend Lib.IntTypes
 
+open FStar.HyperStack
+open FStar.HyperStack.All
+open FStar.Mul
+
+open Lib.Sequence
+open Lib.IntTypes
+open Lib.Buffer
+
+module B = Lib.Buffer
+module S = Hacl.Spec.Curve25519.Field64.Definition
+module P = Spec.Curve25519
+
 module FA = Vale.Wrapper.X64.Fadd
+
+open Hacl.Impl.Curve25519.Field64
 
 /// We are trying to connect HACL* abstractions with regular F* libraries, so in
 /// addition to ``friend``'ing ``Lib.*``, we also write a couple lemmas that we
 /// prove via normalization to facilitate the job of proving that calling the
 /// Vale interop signatures faithfully implements the required HACL* signature.
 
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
+#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100 --z3refresh"
 
 let buffer_is_buffer a len: Lemma
   (ensures (lbuffer a len == b:B.buffer a{B.length b == UInt32.v len}))
@@ -41,6 +55,7 @@ let add1 out f1 f2 =
     Vale.Wrapper.X64.Fadd.add1 out f1 f2
 
 // Spec discrepancy. Need to call the right lemma from FStar.Math.Lemmas.
+#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 300"
 [@ CInline]
 let fadd out f1 f2 =
   let h0 = ST.get () in

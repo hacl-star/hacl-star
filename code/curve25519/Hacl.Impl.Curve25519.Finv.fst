@@ -12,8 +12,7 @@ open Hacl.Impl.Curve25519.Fields
 
 module ST = FStar.HyperStack.ST
 
-module F51 = Hacl.Impl.Curve25519.Field51
-module F64 = Hacl.Impl.Curve25519.Field64
+module C = Hacl.Impl.Curve25519.Fields.Core
 
 module S = Hacl.Spec.Curve25519.Finv
 module P = Spec.Curve25519
@@ -24,7 +23,7 @@ noextract
 val fsquare_times_inv: #s:field_spec -> h:mem -> f:felem s -> Type0
 let fsquare_times_inv #s h f =
   match s with
-  | M51 -> F51.felem_fits h f (1, 2, 1, 1, 1)
+  | M51 -> C.f51_felem_fits h f (1, 2, 1, 1, 1)
   | M64 -> Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)
 
 val fsqr_s:
@@ -45,15 +44,13 @@ val fsqr_s:
       feval h1 out == P.fmul (feval h0 f1) (feval h0 f1))
 [@ Meta.Attribute.inline_ ]
 let fsqr_s #s out f1 tmp =
-  match s with
-  | M51 -> F51.fsqr out f1
-  | M64 -> F64.fsqr out f1 tmp
+  C.fsqr #s out f1 tmp
 
 noextract
 val fmuls_pre: #s:field_spec -> h:mem -> f1:felem s -> f2:felem s -> Type0
 let fmuls_pre #s h f1 f2 =
   match s with
-  | M51 -> F51.felem_fits h f1 (1, 2, 1, 1, 1) /\ F51.felem_fits h f2 (1, 2, 1, 1, 1)
+  | M51 -> f51_felem_fits h f1 (1, 2, 1, 1, 1) /\ f51_felem_fits h f2 (1, 2, 1, 1, 1)
   | M64 -> Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)
 
 val fmul_s:
@@ -77,9 +74,7 @@ val fmul_s:
       feval h1 out == P.fmul (feval h0 f1) (feval h0 f2))
 [@ Meta.Attribute.inline_ ]
 let fmul_s #s out f1 f2 tmp =
-  match s with
-  | M51 -> F51.fmul out f1 f2
-  | M64 -> F64.fmul out f1 f2 tmp
+  C.fmul #s out f1 f2 tmp
 
 val fsquare_times:
     #s:field_spec

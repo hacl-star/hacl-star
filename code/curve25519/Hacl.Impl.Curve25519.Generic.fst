@@ -17,8 +17,7 @@ module ST = FStar.HyperStack.ST
 module BSeq = Lib.ByteSequence
 module LSeq = Lib.Sequence
 
-module F51 = Hacl.Impl.Curve25519.Field51
-module F64 = Hacl.Impl.Curve25519.Field64
+module C = Hacl.Impl.Curve25519.Fields.Core
 
 module S = Spec.Curve25519
 module M = Hacl.Spec.Curve25519.AddAndDouble
@@ -117,6 +116,7 @@ let encode_point #s o i =
   assert (as_seq h3 o == BSeq.nat_to_bytes_le 32 (feval h1 tmp));
   pop_frame()
 
+// TODO: why re-define the signature here?
 val cswap2:
     #s:field_spec
   -> bit:uint64{v bit <= 1}
@@ -133,9 +133,7 @@ val cswap2:
       (fget_xz h1 p1, fget_xz h1 p2) == S.cswap2 bit (fget_xz h0 p1) (fget_xz h0 p2))
 [@ Meta.Attribute.inline_ ]
 let cswap2 #s bit p0 p1 =
-  match s with
-  | M51 -> F51.cswap2 bit p0 p1
-  | M64 -> F64.cswap2 bit p0 p1
+  C.cswap2 #s bit p0 p1
 
 #set-options "--z3rlimit 150 --max_fuel 0 --max_ifuel 3"
 

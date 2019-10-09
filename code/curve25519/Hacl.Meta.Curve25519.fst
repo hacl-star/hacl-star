@@ -4,64 +4,30 @@ module Hacl.Meta.Curve25519
 
 friend Hacl.Impl.Curve25519.Generic
 
-// Hacl_Meta_Curve25519_generic_decode_point_higher
-// Hacl_Meta_Curve25519_generic_cswap2_higher (needs: Hacl_Impl_Curve25519_Field64_Core_cswap2)
-// Hacl_Meta_Curve25519_fields_fadd_higher (needs: Hacl_Impl_Curve25519_Field64_Core_fadd)
-// Hacl_Meta_Curve25519_fields_fsub_higher (needs: Hacl_Impl_Curve25519_Field64_Core_fsub)
-// Hacl_Meta_Curve25519_fields_fmul2_higher (needs: Hacl_Impl_Curve25519_Field64_Core_fmul2)
-// Hacl_Meta_Curve25519_addanddouble_point_add_and_double0_higher (needs: Hacl_Impl_Curve25519_Field64_Core_fmul2, Hacl_Impl_Curve25519_Field64_Core_fsub, Hacl_Impl_Curve25519_Field64_Core_fadd)
-// Hacl_Meta_Curve25519_fields_fsqr2_higher (needs: Hacl_Impl_Curve25519_Field64_Core_fsqr2)
-// Hacl_Meta_Curve25519_fields_fmul1_higher (needs: Hacl_Impl_Curve25519_Field64_Core_fmul1)
-// Hacl_Meta_Curve25519_addanddouble_point_add_and_double1_higher (needs: Hacl_Impl_Curve25519_Field64_Core_fmul2, Hacl_Impl_Curve25519_Field64_Core_fadd, Hacl_Impl_Curve25519_Field64_Core_fmul1, Hacl_Impl_Curve25519_Field64_Core_fsub, Hacl_Impl_Curve25519_Field64_Core_fsqr2)
-// Hacl_Meta_Curve25519_fields_fmul_higher (needs: Hacl_Impl_Curve25519_Field64_Core_fmul)
-// Hacl_Meta_Curve25519_addanddouble_point_add_and_double_higher (needs: Hacl_Impl_Curve25519_Field64_Core_fmul, Hacl_Impl_Curve25519_Field64_Core_fsqr2, Hacl_Impl_Curve25519_Field64_Core_fmul1, Hacl_Impl_Curve25519_Field64_Core_fmul2, Hacl_Impl_Curve25519_Field64_Core_fsub, Hacl_Impl_Curve25519_Field64_Core_fadd)
-// Hacl_Meta_Curve25519_generic_ladder_step_higher (needs: Hacl_Impl_Curve25519_AddAndDouble_point_add_and_double, Hacl_Impl_Curve25519_Field64_Core_cswap2)
-// Hacl_Meta_Curve25519_generic_ladder_step_loop_higher (needs: Hacl_Impl_Curve25519_Field64_Core_cswap2, Hacl_Impl_Curve25519_AddAndDouble_point_add_and_double)
-// Hacl_Meta_Curve25519_generic_ladder0__higher (needs: Hacl_Impl_Curve25519_AddAndDouble_point_add_and_double, Hacl_Impl_Curve25519_Field64_Core_cswap2)
-// Hacl_Meta_Curve25519_addanddouble_point_double_higher (needs: Hacl_Impl_Curve25519_Field64_Core_fmul2, Hacl_Impl_Curve25519_Field64_Core_fmul1, Hacl_Impl_Curve25519_Field64_Core_fsqr2, Hacl_Impl_Curve25519_Field64_Core_fsub, Hacl_Impl_Curve25519_Field64_Core_fadd)
-// Hacl_Meta_Curve25519_generic_ladder1__higher (needs: Hacl_Impl_Curve25519_AddAndDouble_point_double)
-// Hacl_Meta_Curve25519_generic_ladder2__higher (needs: Hacl_Impl_Curve25519_AddAndDouble_point_double, Hacl_Impl_Curve25519_Field64_Core_cswap2, Hacl_Impl_Curve25519_AddAndDouble_point_add_and_double)
-// Hacl_Meta_Curve25519_generic_ladder4__higher (needs: Hacl_Impl_Curve25519_AddAndDouble_point_add_and_double, Hacl_Impl_Curve25519_Field64_Core_cswap2, Hacl_Impl_Curve25519_AddAndDouble_point_double)
-// Hacl_Meta_Curve25519_generic_montgomery_ladder_higher (needs: Hacl_Impl_Curve25519_AddAndDouble_point_double, Hacl_Impl_Curve25519_Field64_Core_cswap2, Hacl_Impl_Curve25519_AddAndDouble_point_add_and_double)
-// Hacl_Meta_Curve25519_finv_fsqr_s_higher (needs: Hacl_Impl_Curve25519_Field64_Core_fsqr)
-// Hacl_Meta_Curve25519_finv_fsquare_times_higher (needs: Hacl_Impl_Curve25519_Field64_Core_fsqr)
-// Hacl_Meta_Curve25519_finv_fmul_s_higher (needs: Hacl_Impl_Curve25519_Field64_Core_fmul)
-// Hacl_Meta_Curve25519_finv_finv0_higher (needs: Hacl_Impl_Curve25519_Field64_Core_fmul, Hacl_Impl_Curve25519_Finv_fsquare_times)
-// Hacl_Meta_Curve25519_finv_finv_higher (needs: Hacl_Impl_Curve25519_Finv_fsquare_times, Hacl_Impl_Curve25519_Field64_Core_fmul)
-// Hacl_Meta_Curve25519_field64_carry_pass_store_higher (needs: Hacl_Impl_Curve25519_Field64_Core_add1)
-// Hacl_Meta_Curve25519_field64_store_felem_higher (needs: Hacl_Impl_Curve25519_Field64_Core_add1)
-// Hacl_Meta_Curve25519_fields_store_felem_higher (needs: Hacl_Impl_Curve25519_Field64_Core_add1)
-// Hacl_Meta_Curve25519_generic_encode_point_higher (needs: Hacl_Impl_Curve25519_Field64_Core_add1, Hacl_Impl_Curve25519_Field64_Core_fmul, Hacl_Impl_Curve25519_Finv_finv)
-// Hacl_Meta_Curve25519_generic_scalarmult_higher (needs: Hacl_Impl_Curve25519_Generic_encode_point, Hacl_Impl_Curve25519_Generic_montgomery_ladder, Hacl_Impl_Curve25519_Generic_decode_point)
-// Hacl_Meta_Curve25519_generic_secret_to_public_higher (needs: Hacl_Impl_Curve25519_Generic_scalarmult)
-// Hacl_Meta_Curve25519_generic_ecdh_higher (needs: Hacl_Impl_Curve25519_Generic_scalarmult)
+// Hacl_Meta_Curve25519_addanddouble_point_add_and_double_higher
+//   (needs: Hacl_Impl_Curve25519_Fields_Core_fmul, Hacl_Impl_Curve25519_Fields_Core_fsqr2, Hacl_Impl_Curve25519_Fields_Core_fmul1, Hacl_Impl_Curve25519_Fields_Core_fmul2, Hacl_Impl_Curve25519_Fields_Core_fsub, Hacl_Impl_Curve25519_Fields_Core_fadd)
+// Hacl_Meta_Curve25519_addanddouble_point_double_higher
+//   (needs: Hacl_Impl_Curve25519_Fields_Core_fmul2, Hacl_Impl_Curve25519_Fields_Core_fmul1, Hacl_Impl_Curve25519_Fields_Core_fsqr2, Hacl_Impl_Curve25519_Fields_Core_fsub, Hacl_Impl_Curve25519_Fields_Core_fadd)
+// Hacl_Meta_Curve25519_generic_montgomery_ladder_higher
+//   (needs: Hacl_Impl_Curve25519_AddAndDouble_point_double, Hacl_Impl_Curve25519_Fields_Core_cswap2, Hacl_Impl_Curve25519_AddAndDouble_point_add_and_double)
+// Hacl_Meta_Curve25519_finv_fsquare_times_higher
+//   (needs: Hacl_Impl_Curve25519_Fields_Core_fsqr)
+// Hacl_Meta_Curve25519_finv_finv_higher
+//   (needs: Hacl_Impl_Curve25519_Finv_fsquare_times, Hacl_Impl_Curve25519_Fields_Core_fmul)
+// Hacl_Meta_Curve25519_generic_encode_point_higher
+//   (needs: Hacl_Impl_Curve25519_Fields_Core_add1, Hacl_Impl_Curve25519_Fields_Core_fmul, Hacl_Impl_Curve25519_Finv_finv)
+// Hacl_Meta_Curve25519_generic_scalarmult_higher
+//   (needs: Hacl_Impl_Curve25519_Generic_encode_point, Hacl_Impl_Curve25519_Generic_montgomery_ladder, Hacl_Impl_Curve25519_Generic_decode_point)
+// Hacl_Meta_Curve25519_generic_secret_to_public_higher
+//   (needs: Hacl_Impl_Curve25519_Generic_scalarmult)
+// Hacl_Meta_Curve25519_generic_ecdh_higher
+//   (needs: Hacl_Impl_Curve25519_Generic_scalarmult)
 %splice[
-  generic_cswap2_higher;
-  fields_fadd_higher;
-  fields_fsub_higher;
-  fields_fmul2_higher;
-  addanddouble_point_add_and_double0_higher;
-  fields_fsqr2_higher;
-  fields_fmul1_higher;
-  addanddouble_point_add_and_double1_higher;
-  fields_fmul_higher;
   addanddouble_point_add_and_double_higher;
-  generic_ladder_step_higher;
-  generic_ladder_step_loop_higher;
-  generic_ladder0__higher;
   addanddouble_point_double_higher;
-  generic_ladder1__higher;
-  generic_ladder2__higher;
-  generic_ladder4__higher;
   generic_montgomery_ladder_higher;
-  finv_fsqr_s_higher;
   finv_fsquare_times_higher;
-  finv_fmul_s_higher;
-  finv_finv0_higher;
   finv_finv_higher;
-  field64_carry_pass_store_higher;
-  field64_store_felem_higher;
-  fields_store_felem_higher;
   generic_encode_point_higher;
   generic_scalarmult_higher;
   generic_secret_to_public_higher;

@@ -8,7 +8,7 @@ open Lib.Sequence
 open Lib.IntTypes
 open Lib.Buffer
 
-include Hacl.Impl.Curve25519.Field64.Core
+open Hacl.Impl.Curve25519.Fields.Core
 
 module ST = FStar.HyperStack.ST
 module LSeq = Lib.Sequence
@@ -17,6 +17,38 @@ module BSeq = Lib.ByteSequence
 module P = Spec.Curve25519
 module S = Hacl.Spec.Curve25519.Field64.Definition
 module SC = Hacl.Spec.Curve25519.Field64
+
+let u256 = lbuffer uint64 4ul
+let u512 = lbuffer uint64 8ul
+let u1024 = lbuffer uint64 16ul
+
+noextract
+let as_nat (h:mem) (e:u256) : GTot nat =
+  let s = as_seq h e in
+  let s0 = s.[0] in
+  let s1 = s.[1] in
+  let s2 = s.[2] in
+  let s3 = s.[3] in
+  S.as_nat4 (s0, s1, s2, s3)
+
+noextract
+let wide_as_nat (h:mem) (e:u512) : GTot nat =
+  let s = as_seq h e in
+  let s0 = s.[0] in
+  let s1 = s.[1] in
+  let s2 = s.[2] in
+  let s3 = s.[3] in
+  let s4 = s.[4] in
+  let s5 = s.[5] in
+  let s6 = s.[6] in
+  let s7 = s.[7] in
+  S.wide_as_nat4 (s0, s1, s2, s3, s4, s5, s6, s7)
+
+noextract
+let fevalh (h:mem) (f:u256) : GTot P.elem = (as_nat h f) % P.prime
+
+noextract
+let feval_wideh (h:mem) (f:u512) : GTot P.elem = (wide_as_nat h f) % P.prime
 
 #reset-options "--z3rlimit 50"
 
