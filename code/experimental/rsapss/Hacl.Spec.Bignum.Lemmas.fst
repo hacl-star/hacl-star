@@ -689,6 +689,27 @@ let mod_exp_mont_ll_lemma rLen n d mu a bBits b =
   assert (accM1 * d % n == pow a b % n)
 
 
+val mod_exp_mont_ll_lemma_fits_loop_step:
+  rLen:nat -> n:pos -> d:nat -> mu:nat -> bBits:nat -> b:pos{b < pow2 bBits} -> i:nat{i < bBits} -> aM2:nat -> accM2:nat -> Lemma
+  (requires
+    (1 + n * mu) % pow2 64 == 0 /\ pow2 (64 * rLen) * d % n == 1 /\
+    4 * n < pow2 (64 * rLen) /\ aM2 < 2 * n /\ accM2 < 2 * n)
+  (ensures
+    (let (aM1, accM1) = mod_exp_f_ll rLen n mu bBits b i (aM2, accM2) in
+    aM1 < 2 * n /\ accM1 < 2 * n))
+
+let mod_exp_mont_ll_lemma_fits_loop_step rLen n d mu bBits b i aM2 accM2 =
+  let (aM1, accM1) = mod_exp_f_ll rLen n mu bBits b i (aM2, accM2) in
+  //assert (aM1 == M.mont_mul rLen n mu aM2 aM2);
+  M.mont_mul_lemma_fits rLen n d mu aM2 aM2;
+  assert (aM1 < 2 * n);
+
+  if (b / pow2 i % 2 = 1) then begin
+    M.mont_mul_lemma_fits rLen n d mu accM2 aM2;
+    assert (accM1 < 2 * n) end
+  else assert (accM1 < 2 * n)
+
+
 val mod_exp_mont_ll_lemma_fits_loop:
   rLen:nat -> n:pos -> d:nat -> mu:nat -> bBits:nat -> b:pos{b < pow2 bBits} -> i:nat{i <= bBits} -> aM0:nat -> accM0:nat -> Lemma
   (requires
@@ -710,13 +731,7 @@ let rec mod_exp_mont_ll_lemma_fits_loop rLen n d mu bBits b i aM0 accM0 =
     mod_exp_mont_ll_lemma_fits_loop rLen n d mu bBits b (i - 1) aM0 accM0;
     //assert (aM2 < 2 * n /\ accM2 < 2 * n);
     //assert (aM1 == M.mont_mul rLen n mu aM2 aM2);
-    M.mont_mul_lemma_fits rLen n d mu aM2 aM2;
-    assert (aM1 < 2 * n);
-
-    if (b / pow2 (i - 1) % 2 = 1) then begin
-      M.mont_mul_lemma_fits rLen n d mu accM2 aM2;
-      assert (accM1 < 2 * n) end
-    else assert (accM1 < 2 * n);
+    mod_exp_mont_ll_lemma_fits_loop_step rLen n d mu bBits b (i - 1) aM2 accM2;
     () end
 
 
