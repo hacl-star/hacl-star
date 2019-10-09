@@ -39,8 +39,9 @@
         "equation_FStar.UInt.fits", "equation_FStar.UInt.max_int",
         "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
         "equation_FStar.UInt.uint_t",
-        "equation_Hacl.Impl.Curve25519.Field51.as_felem",
         "equation_Hacl.Impl.Curve25519.Field51.mul_inv_t",
+        "equation_Hacl.Impl.Curve25519.Fields.Core.f51_as_felem",
+        "equation_Hacl.Impl.Curve25519.Fields.Core.f51_mul_inv_t",
         "equation_Hacl.Impl.Ed25519.Field51.mul_inv_t",
         "equation_Hacl.Impl.Ed25519.Field51.point_inv_t",
         "equation_Hacl.Impl.Ed25519.Sign.Steps.point",
@@ -60,9 +61,7 @@
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Lib.IntTypes.uint64",
         "function_token_typing_Lib.IntTypes.uint8", "int_inversion",
-        "int_typing",
-        "interpretation_Tm_abs_612136ee4143d24977831c80e4f470a1",
-        "lemma_FStar.HyperStack.ST.lemma_equal_domains_trans",
+        "int_typing", "lemma_FStar.HyperStack.ST.lemma_equal_domains_trans",
         "lemma_FStar.HyperStack.ST.lemma_same_refs_in_all_regions_elim",
         "lemma_FStar.HyperStack.ST.lemma_same_refs_in_all_regions_intro",
         "lemma_FStar.HyperStack.ST.lemma_same_refs_in_non_tip_regions_elim",
@@ -85,7 +84,6 @@
         "lemma_LowStar.Monotonic.Buffer.lemma_live_equal_mem_domains",
         "lemma_LowStar.Monotonic.Buffer.length_null_1",
         "lemma_LowStar.Monotonic.Buffer.length_null_2",
-        "lemma_LowStar.Monotonic.Buffer.live_gsub",
         "lemma_LowStar.Monotonic.Buffer.loc_disjoint_none_r",
         "lemma_LowStar.Monotonic.Buffer.loc_includes_none",
         "lemma_LowStar.Monotonic.Buffer.loc_includes_refl",
@@ -111,16 +109,14 @@
         "refinement_interpretation_Tm_refine_156c49afb7e1e070fbb2e47dc0e3d4b2",
         "refinement_interpretation_Tm_refine_23cdaa8a9dbfaad907e4bf1cdd4c1ee7",
         "refinement_interpretation_Tm_refine_248f1ace7fa6c8fb9f8e39fcdd5fffbd",
-        "refinement_interpretation_Tm_refine_4fa8e2dd96f8bb1e23e6574326e9e019",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_725342882e3aa1e6724efd69e1dddc3d",
         "refinement_interpretation_Tm_refine_95270f80e5dfe2570eab0e994994d3f6",
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
         "refinement_interpretation_Tm_refine_c6c18a7ceb46d419c35ff8551117551e",
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
-        "true_interp", "typing_FStar.Map.contains",
-        "typing_FStar.Map.domain", "typing_FStar.Map.restrict",
-        "typing_FStar.Monotonic.Heap.emp",
+        "typing_FStar.Map.contains", "typing_FStar.Map.domain",
+        "typing_FStar.Map.restrict", "typing_FStar.Monotonic.Heap.emp",
         "typing_FStar.Monotonic.HyperHeap.mod_set",
         "typing_FStar.Monotonic.HyperHeap.rid",
         "typing_FStar.Monotonic.HyperHeap.root",
@@ -135,15 +131,13 @@
         "typing_LowStar.Buffer.trivial_preorder",
         "typing_LowStar.Monotonic.Buffer.address_liveness_insensitive_locs",
         "typing_LowStar.Monotonic.Buffer.len",
-        "typing_LowStar.Monotonic.Buffer.loc_buffer",
         "typing_LowStar.Monotonic.Buffer.loc_none",
         "typing_LowStar.Monotonic.Buffer.loc_regions",
         "typing_LowStar.Monotonic.Buffer.loc_union",
-        "typing_LowStar.Monotonic.Buffer.mgsub",
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "b42d81f1b42390ddcaf6182c438f46ad"
+      "ffa606084bb8970795abf97806a243e3"
     ],
     [
       "Hacl.Impl.Ed25519.Sign.Steps.point_mul_g_compress",
@@ -194,7 +188,7 @@
         "typing_Lib.Buffer.length", "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "f46c5a7a9d56080077178221d7779549"
+      "e1f9998587fcc97c1180fb31c10d3f32"
     ],
     [
       "Hacl.Impl.Ed25519.Sign.Steps.point_mul_g_compress",
@@ -342,7 +336,7 @@
         "typing_Spec.Ed25519.point_compress", "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "ddd6813f5987cd055da159854917c238"
+      "fe607ed966525c8e4d51a7baebcebd67"
     ],
     [
       "Hacl.Impl.Ed25519.Sign.Steps.sign_step_1",
@@ -409,7 +403,7 @@
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "5c03b0bf22b0665208f10dde42084cd0"
+      "92dc6be4ddafd5c0cbda82496e66f39c"
     ],
     [
       "Hacl.Impl.Ed25519.Sign.Steps.sign_step_1",
@@ -495,7 +489,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "8f209651a9860f436d62a545db43a0ff"
+      "9a301e21545467443d9268515f4adad8"
     ],
     [
       "Hacl.Impl.Ed25519.Sign.Steps.sign_step_2",
@@ -555,7 +549,7 @@
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "c4a242788106ff7f57825a8e86f1ef54"
+      "2b2514d97890c057f8a2fadf763c4017"
     ],
     [
       "Hacl.Impl.Ed25519.Sign.Steps.sign_step_2",
@@ -632,7 +626,7 @@
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "b2b634d7404072490e20e5574f2dade0"
+      "7185fe9ea2e01afc604b6c5aa3c58d8c"
     ],
     [
       "Hacl.Impl.Ed25519.Sign.Steps.sign_step_3",
@@ -726,7 +720,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "e9e4609eafa22171d5b46ede1621381b"
+      "9c4592c8e1e627dba05d1d6b4b024973"
     ],
     [
       "Hacl.Impl.Ed25519.Sign.Steps.sign_step_3",
@@ -892,7 +886,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "dc3dd135dfe27be5fe8d5445cb527f4b"
+      "b5066bf5dd783d4ae5374bddf41b4112"
     ],
     [
       "Hacl.Impl.Ed25519.Sign.Steps.sign_step_4",
@@ -957,7 +951,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "a71e091a187f1819dfad546537f7a636"
+      "125dbb7eb683e3563d1e99ffde0c2438"
     ],
     [
       "Hacl.Impl.Ed25519.Sign.Steps.sign_step_4",
@@ -1030,7 +1024,7 @@
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "49e15e5fd6f98952b8c1658a80402d39"
+      "a35f8af098975591b5b66152c80ea215"
     ],
     [
       "Hacl.Impl.Ed25519.Sign.Steps.sign_step_5",
@@ -1083,7 +1077,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "8fe4ea06f3e5d5ddbccc9bb17460a006"
+      "c0f9d72b9fde23b8b67c210d2e94640d"
     ],
     [
       "Hacl.Impl.Ed25519.Sign.Steps.sign_step_5",
@@ -1223,7 +1217,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "c06d8427bbff5ac2231fb9f7a819edca"
+      "dbad8bdaadeaaa54a7d7688b5fdd9f5b"
     ]
   ]
 ]
