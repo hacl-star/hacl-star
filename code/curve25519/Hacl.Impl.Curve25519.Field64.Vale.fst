@@ -21,7 +21,7 @@ module P = Spec.Curve25519
 
 module FA = Vale.Wrapper.X64.Fadd
 
-open Hacl.Impl.Curve25519.Field64
+module F64 = Hacl.Impl.Curve25519.Field64
 
 /// We are trying to connect HACL* abstractions with regular F* libraries, so in
 /// addition to ``friend``'ing ``Lib.*``, we also write a couple lemmas that we
@@ -37,7 +37,7 @@ let buffer_is_buffer a len: Lemma
   assert_norm (lbuffer a len == b:B.buffer a{B.length b == UInt32.v len})
 
 let as_nat_is_as_nat (b:lbuffer uint64 4ul) (h:HS.mem): Lemma
-  (ensures (FA.as_nat b h == as_nat h b))
+  (ensures (FA.as_nat b h == F64.as_nat h b))
   [ SMTPat (as_nat h b) ]
 =
   ()
@@ -70,8 +70,8 @@ let fadd out f1 f2 =
 [@ CInline]
 let fsub out f1 f2 =
   let h0 = ST.get() in
-  let aux () : Lemma (P.fsub (fevalh h0 f1) (fevalh h0 f2) == (FA.as_nat f1 h0 - FA.as_nat f2 h0) % Vale.Curve25519.Fast_defs.prime) =
-    let a = P.fsub (fevalh h0 f1) (fevalh h0 f2) in
+  let aux () : Lemma (P.fsub (F64.fevalh h0 f1) (F64.fevalh h0 f2) == (FA.as_nat f1 h0 - FA.as_nat f2 h0) % Vale.Curve25519.Fast_defs.prime) =
+    let a = P.fsub (F64.fevalh h0 f1) (F64.fevalh h0 f2) in
     let a1 = (as_nat h0 f1 % Vale.Curve25519.Fast_defs.prime - as_nat h0 f2 % Vale.Curve25519.Fast_defs.prime) % Vale.Curve25519.Fast_defs.prime in
     let a2 = (as_nat h0 f1 % Vale.Curve25519.Fast_defs.prime - as_nat h0 f2) % Vale.Curve25519.Fast_defs.prime in
     let a3 = (as_nat h0 f1 - as_nat h0 f2) % Vale.Curve25519.Fast_defs.prime in
@@ -94,9 +94,9 @@ let fsub out f1 f2 =
   else
     Vale.Wrapper.X64.Fsub.fsub out f1 f2
 
-let lemma_fmul_equiv (h0:HS.mem) (f1 f2:u256) : Lemma 
-  (P.fmul (fevalh h0 f1) (fevalh h0 f2) == (FA.as_nat f1 h0 * FA.as_nat f2 h0) % Vale.Curve25519.Fast_defs.prime)
-  = let a = P.fmul (fevalh h0 f1) (fevalh h0 f2) in
+let lemma_fmul_equiv (h0:HS.mem) (f1 f2:F64.u256) : Lemma 
+  (P.fmul (F64.fevalh h0 f1) (F64.fevalh h0 f2) == (FA.as_nat f1 h0 * FA.as_nat f2 h0) % Vale.Curve25519.Fast_defs.prime)
+  = let a = P.fmul (F64.fevalh h0 f1) (F64.fevalh h0 f2) in
     let a1 = ((as_nat h0 f1 % Vale.Curve25519.Fast_defs.prime) * (as_nat h0 f2 % Vale.Curve25519.Fast_defs.prime)) % Vale.Curve25519.Fast_defs.prime in
     let a2 = ((as_nat h0 f1 % Vale.Curve25519.Fast_defs.prime) * as_nat h0 f2) % Vale.Curve25519.Fast_defs.prime in
     let a3 = (as_nat h0 f1 * as_nat h0 f2) % Vale.Curve25519.Fast_defs.prime in
@@ -135,8 +135,8 @@ let fmul2 out f1 f2 tmp =
 [@ CInline]
 let fmul1 out f1 f2 =
   let h0 = ST.get() in
-  let aux () : Lemma (P.fmul (fevalh h0 f1) (v f2) == (FA.as_nat f1 h0 * v f2) % Vale.Curve25519.Fast_defs.prime) =
-    let a = P.fmul (fevalh h0 f1) (v f2) in
+  let aux () : Lemma (P.fmul (F64.fevalh h0 f1) (v f2) == (FA.as_nat f1 h0 * v f2) % Vale.Curve25519.Fast_defs.prime) =
+    let a = P.fmul (F64.fevalh h0 f1) (v f2) in
     let a1 =  ((as_nat h0 f1 % Vale.Curve25519.Fast_defs.prime) * v f2) % Vale.Curve25519.Fast_defs.prime in
     let a2 = (as_nat h0 f1 * v f2) % Vale.Curve25519.Fast_defs.prime in
     let b = (FA.as_nat f1 h0 * v f2) % Vale.Curve25519.Fast_defs.prime in
