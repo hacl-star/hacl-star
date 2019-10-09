@@ -162,8 +162,9 @@ let create_in a r =
   p
 #pop-options
 
-#push-options "--z3refresh"
+#push-options "--z3rlimit 40"
 #restart-solver
+
 let init a s =
   let open LowStar.BufferOps in
   let h1 = ST.get () in
