@@ -50,7 +50,7 @@ let poly1305_init_st (s:field_spec) =
     state_inv_t #s h1 ctx /\
     (as_get_acc h1 ctx, as_get_r h1 ctx) == S.poly1305_init (as_seq h0 key))
 
-
+[@ Meta.Attribute.specialize ]
 inline_for_extraction noextract
 val poly1305_init: #s:field_spec -> poly1305_init_st s
 
@@ -91,6 +91,7 @@ let poly1305_update_st (s:field_spec) =
 
 
 inline_for_extraction noextract
+[@ Meta.Attribute.specialize ]
 val poly1305_update: #s:field_spec -> poly1305_update_st s
 
 
@@ -108,8 +109,8 @@ let poly1305_finish_st (s:field_spec) =
     modifies (loc tag |+| loc ctx) h0 h1 /\
     as_seq h1 tag == S.poly1305_finish (as_seq h0 key) (as_get_acc h0 ctx))
 
-
-inline_for_extraction noextract
+[@ Meta.Attribute.specialize ]
+noextract inline_for_extraction
 val poly1305_finish: #s:field_spec -> poly1305_finish_st s
 
 
@@ -127,10 +128,7 @@ let poly1305_mac_st (s:field_spec) =
     modifies (loc tag) h0 h1 /\
     as_seq h1 tag == S.poly1305_mac (as_seq h0 text) (as_seq h0 key))
 
-
-inline_for_extraction noextract
-val mk_poly1305_mac: #s:field_spec
-  -> init:poly1305_init_st s
-  -> update:poly1305_update_st s
-  -> finish:poly1305_finish_st s ->
+noextract
+[@ Meta.Attribute.specialize ]
+val poly1305_mac: #s:field_spec ->
   poly1305_mac_st s
