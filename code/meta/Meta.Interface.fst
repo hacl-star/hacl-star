@@ -373,6 +373,17 @@ and visit_body (t_i: term) (index_bv: option term) (st: state) (bvs: list (name 
           | Some (has_index, _, map, fns) ->
               print (st.indent ^ "Rewriting application of " ^ string_of_name fv);
 
+              let index_arg, es =
+                if has_index then
+                  match es with
+                  | (e, Q_Implicit) :: es ->
+                      Some e, es
+                  | _ ->
+                      fail "this application does not seem to start with an index"
+                else
+                  None, es
+              in
+
               // A helper that says: I will need a specialized instance of `name`,
               // so allocate an extra parameter for this current function if
               // needed.
@@ -388,15 +399,15 @@ and visit_body (t_i: term) (index_bv: option term) (st: state) (bvs: list (name 
                     // receive a specialized instance of name; add it to this
                     // function's own bvs
                     let needs_index, typ, _, _ = assoc name st.seen in
-                    if needs_index && not (Some? index_bv) then
+                    if needs_index && not (Some? index_arg) then
                       fail ("Index inconsistency in bv for " ^ string_of_name name);
 
                     print (st.indent ^ "Allocating bv for " ^ string_of_name name ^ " at type " ^
                       "app <" ^ term_to_string typ ^ "> <" ^
-                      (if needs_index then term_to_string (must index_bv) else "no-index") ^ ">");
+                      (if needs_index then term_to_string (must index_arg) else "no-index") ^ ">");
 
                     let typ =
-                      if needs_index then pack (Tv_App typ (must index_bv, Q_Implicit)) else typ
+                      if needs_index then pack (Tv_App typ (must index_arg, Q_Implicit)) else typ
                     in
                     let bv: bv = pack_bv ({
                       bv_ppname = "arg_" ^ string_of_name name;
@@ -404,22 +415,6 @@ and visit_body (t_i: term) (index_bv: option term) (st: state) (bvs: list (name 
                       bv_sort = typ
                     }) in
                     (pack (Tv_Var bv), Q_Explicit), (name, bv) :: bvs
-              in
-
-              let es = match es with
-                | (e, Q_Implicit) :: es ->
-                    begin match inspect e with
-                    | Tv_Var _ ->
-                        if not has_index then
-                          fail (string_of_name fv ^ " wasn't supposed to have an index");
-                        es
-                    | _ ->
-                        fail "this application does not seem to start with the index"
-                    end
-                | _ ->
-                    if has_index then
-                      fail ("failed to find the index for " ^ string_of_name fv);
-                    es
               in
 
               begin match map with
@@ -520,9 +515,5 @@ let specialize (t_i: term) (names: list term): Tac _ =
 // - figure out the issue with type annotations sending F* off the rails
 //   (88c8ec01e066ab0adc550c2bdba4212ff5e7c5c9)
 // - is there any way to not do as much work and skip re-checking some things?
-// - we're going to hit a breaking point when declarations that are recursively
-//   found need to be checked with different options... we can always break
-//   things down, but at what cost? could F* annotate a "snapshot" of the
-//   options for each declaration?
 // - the order of arguments is unspecified and gives surprising results; any way
 //   we can make it more stable?
