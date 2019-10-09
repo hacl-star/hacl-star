@@ -26,6 +26,11 @@ let bn_is_bit_set #len input ind =
   eq_u64 tmp (u64 1)
 
 
+val bn_is_bit_set_lemma: #len:size_nat -> b:lbignum len -> i:size_nat{i / 64 < len} -> Lemma
+  ((bn_v b / pow2 i % 2 = 1) == bn_is_bit_set #len b i)
+let bn_is_bit_set_lemma #len b i = admit()
+
+
 val mod_exp_f:
     #nLen:size_nat
   -> #rLen:size_nat{rLen = nLen + 1 /\ rLen + rLen <= max_size_t}
@@ -95,7 +100,11 @@ val mod_exp_f_lemma:
 let mod_exp_f_lemma #nLen #rLen n mu bBits bLen b i (aM0, accM0) =
   let (aM1, accM1) = mod_exp_f #nLen #rLen n mu bBits bLen b i (aM0, accM0) in
   let (aM2, accM2) = BL.mod_exp_f_ll rLen (bn_v n) (v mu) bBits (bn_v b) i (bn_v aM0, bn_v accM0) in
-  assume (bn_v aM1 == aM2 /\ bn_v accM1 == accM2);
+  mul_mod_mont_lemma #nLen #rLen n mu aM0 aM0;
+  assert (bn_v aM1 == aM2);
+  bn_is_bit_set_lemma #bLen b i;
+  if (bn_v b / pow2 i % 2 = 1) then mul_mod_mont_lemma #nLen #rLen n mu aM0 accM0;
+  assert (bn_v accM1 == accM2);
   let d, k = BL.eea_pow2_odd (64 * rLen) (bn_v n) in
   BL.mod_exp_mont_preconditions rLen (bn_v n) (v mu);
   BL.mod_exp_mont_preconditions_rLen nLen (bn_v n);
@@ -110,6 +119,7 @@ val mod_exp_mont_loop_lemma:
   -> bBits:size_pos
   -> bLen:size_nat{bLen == blocks bBits 64}
   -> b:lbignum bLen
+  -> i:size_nat{i <= bBits}
   -> aM_accM0: tuple2 (lbignum rLen) (lbignum rLen) -> Lemma
   (requires
    (let (aM0, accM0) = aM_accM0 in
@@ -119,19 +129,30 @@ val mod_exp_mont_loop_lemma:
     bn_v aM0 < 2 * bn_v n /\ bn_v accM0 < 2 * bn_v n))
   (ensures
    (let (aM0, accM0) = aM_accM0 in
-    let (aM1, accM1) = repeati bBits (mod_exp_f #nLen #rLen n mu bBits bLen b) (aM0, accM0) in
-    let (aM2, accM2) = repeati bBits (BL.mod_exp_f_ll rLen (bn_v n) (v mu) bBits (bn_v b)) (bn_v aM0, bn_v accM0) in
+    let (aM1, accM1) = repeati i (mod_exp_f #nLen #rLen n mu bBits bLen b) (aM0, accM0) in
+    let (aM2, accM2) = repeati i (BL.mod_exp_f_ll rLen (bn_v n) (v mu) bBits (bn_v b)) (bn_v aM0, bn_v accM0) in
     bn_v aM1 == aM2 /\ bn_v accM1 == accM2 /\
     bn_v aM1 < 2 * bn_v n /\ bn_v accM1 < 2 * bn_v n))
 
-let mod_exp_mont_loop_lemma #nLen #rLen n mu bBits bLen b (aM0, accM0) =
-  let (aM1, accM1) = repeati bBits (mod_exp_f #nLen #rLen n mu bBits bLen b) (aM0, accM0) in
-  let (aM2, accM2) = repeati bBits (BL.mod_exp_f_ll rLen (bn_v n) (v mu) bBits (bn_v b)) (bn_v aM0, bn_v accM0) in
-  assume (bn_v aM1 == aM2 /\ bn_v accM1 == accM2);
-  let d, k = BL.eea_pow2_odd (64 * rLen) (bn_v n) in
-  BL.mod_exp_mont_preconditions rLen (bn_v n) (v mu);
-  BL.mod_exp_mont_preconditions_rLen nLen (bn_v n);
-  BL.mod_exp_mont_ll_lemma_fits_loop rLen (bn_v n) d (v mu) bBits (bn_v b) bBits (bn_v aM0) (bn_v accM0)
+let rec mod_exp_mont_loop_lemma #nLen #rLen n mu bBits bLen b i (aM0, accM0) =
+  let (aM1, accM1) = repeati i (mod_exp_f #nLen #rLen n mu bBits bLen b) (aM0, accM0) in
+  let (aM2, accM2) = repeati i (BL.mod_exp_f_ll rLen (bn_v n) (v mu) bBits (bn_v b)) (bn_v aM0, bn_v accM0) in
+
+  if i = 0 then begin
+    eq_repeati0 i (mod_exp_f #nLen #rLen n mu bBits bLen b) (aM0, accM0);
+    eq_repeati0 i (BL.mod_exp_f_ll rLen (bn_v n) (v mu) bBits (bn_v b)) (bn_v aM0, bn_v accM0);
+    () end
+  else begin
+    unfold_repeati i (mod_exp_f #nLen #rLen n mu bBits bLen b) (aM0, accM0) (i - 1);
+    unfold_repeati i (BL.mod_exp_f_ll rLen (bn_v n) (v mu) bBits (bn_v b)) (bn_v aM0, bn_v accM0) (i - 1);
+    let (aM3, accM3) = repeati (i - 1) (mod_exp_f #nLen #rLen n mu bBits bLen b) (aM0, accM0) in
+    let (aM4, accM4) = repeati (i - 1) (BL.mod_exp_f_ll rLen (bn_v n) (v mu) bBits (bn_v b)) (bn_v aM0, bn_v accM0) in
+    assert ((aM1, accM1) == mod_exp_f #nLen #rLen n mu bBits bLen b (i - 1) (aM3, accM3));
+    assert ((aM2, accM2) == BL.mod_exp_f_ll rLen (bn_v n) (v mu) bBits (bn_v b) (i - 1) (aM4, accM4));
+    mod_exp_mont_loop_lemma #nLen #rLen n mu bBits bLen b (i - 1) (aM0, accM0);
+    assert (bn_v aM3 == aM4 /\ bn_v accM3 == accM4);
+    mod_exp_f_lemma #nLen #rLen n mu bBits bLen b (i - 1) (aM3, accM3);
+    () end
 
 
 val mod_exp_mont_lemma:
@@ -172,7 +193,7 @@ let mod_exp_mont_lemma modBits nLen n r2 a bBits b =
   to_mont_lemma #nLen #rLen n mu r2 acc;
 
   let (aM1, accM1) = repeati bBits (mod_exp_f #nLen #rLen n mu bBits bLen b) (aM0, accM0) in
-  mod_exp_mont_loop_lemma #nLen #rLen n mu bBits bLen b (aM0, accM0);
+  mod_exp_mont_loop_lemma #nLen #rLen n mu bBits bLen b bBits (aM0, accM0);
 
   let res = from_mont n mu accM1 in
   from_mont_lemma #nLen #rLen n mu accM1;
