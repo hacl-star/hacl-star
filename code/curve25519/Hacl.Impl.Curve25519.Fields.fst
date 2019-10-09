@@ -61,7 +61,7 @@ val store_felem:
     (ensures  fun h0 _ h1 ->
       modifies (loc b |+| loc f) h0 h1 /\
       as_seq h1 b == BSeq.nat_to_intseq_le 4 (feval h0 f))
-[@ Meta.Attribute.inline_ ]
+[@ Meta.Attribute.specialize ]
 let store_felem #s b f =
   match s with
   | M51 -> F51.store_felem b f

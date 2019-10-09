@@ -14,8 +14,10 @@ friend Hacl.Impl.Curve25519.Generic
 //   (needs: Hacl_Impl_Curve25519_Fields_Core_fsqr)
 // Hacl_Meta_Curve25519_finv_finv_higher
 //   (needs: Hacl_Impl_Curve25519_Finv_fsquare_times, Hacl_Impl_Curve25519_Fields_Core_fmul)
+// Hacl_Meta_Curve25519_fields_store_felem_higher
+//   (needs: Hacl_Impl_Curve25519_Fields_Core_add1)
 // Hacl_Meta_Curve25519_generic_encode_point_higher
-//   (needs: Hacl_Impl_Curve25519_Fields_Core_add1, Hacl_Impl_Curve25519_Fields_Core_fmul, Hacl_Impl_Curve25519_Finv_finv)
+//   (needs: Hacl_Impl_Curve25519_Fields_store_felem, Hacl_Impl_Curve25519_Fields_Core_fmul, Hacl_Impl_Curve25519_Finv_finv)
 // Hacl_Meta_Curve25519_generic_scalarmult_higher
 //   (needs: Hacl_Impl_Curve25519_Generic_encode_point, Hacl_Impl_Curve25519_Generic_montgomery_ladder, Hacl_Impl_Curve25519_Generic_decode_point)
 // Hacl_Meta_Curve25519_generic_secret_to_public_higher
@@ -28,6 +30,7 @@ friend Hacl.Impl.Curve25519.Generic
   generic_montgomery_ladder_higher;
   finv_fsquare_times_higher;
   finv_finv_higher;
+  fields_store_felem_higher;
   generic_encode_point_higher;
   generic_scalarmult_higher;
   generic_secret_to_public_higher;
