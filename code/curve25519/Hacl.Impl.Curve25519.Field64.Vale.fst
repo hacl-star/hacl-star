@@ -28,7 +28,7 @@ open Hacl.Impl.Curve25519.Field64
 /// prove via normalization to facilitate the job of proving that calling the
 /// Vale interop signatures faithfully implements the required HACL* signature.
 
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100 --z3refresh"
+#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 300 --z3refresh"
 
 let buffer_is_buffer a len: Lemma
   (ensures (lbuffer a len == b:B.buffer a{B.length b == UInt32.v len}))
@@ -55,7 +55,7 @@ let add1 out f1 f2 =
     Vale.Wrapper.X64.Fadd.add1 out f1 f2
 
 // Spec discrepancy. Need to call the right lemma from FStar.Math.Lemmas.
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 300"
+#push-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 400 --z3seed 1"
 [@ CInline]
 let fadd out f1 f2 =
   let h0 = ST.get () in
@@ -65,6 +65,7 @@ let fadd out f1 f2 =
     Vale.Inline.X64.Fadd_inline.fadd_inline out f1 f2
   else
     Vale.Wrapper.X64.Fadd.fadd out f1 f2
+#pop-options
 
 [@ CInline]
 let fsub out f1 f2 =
