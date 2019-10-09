@@ -13,7 +13,7 @@ module F51 = Hacl.Impl.Ed25519.Field51
 module F56 = Hacl.Impl.Ed25519.Field56
 module S56 = Hacl.Spec.Ed25519.Field56.Definition
 
-#set-options "--z3rlimit 10 --max_fuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 30 --max_fuel 0 --max_ifuel 0"
 
 inline_for_extraction noextract
 let point = lbuffer uint64 20ul

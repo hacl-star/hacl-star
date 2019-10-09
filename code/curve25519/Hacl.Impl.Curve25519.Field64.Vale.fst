@@ -49,18 +49,36 @@ let _: squash (Vale.Curve25519.Fast_defs.prime = Spec.Curve25519.prime) =
 // ``as_nat_is_as_nat`` and ``buffer_is_buffer`` above.
 [@ CInline]
 let add1 out f1 f2 =
-  if EverCrypt.TargetConfig.gcc then
+  if EverCrypt.TargetConfig.gcc then//
     Vale.Inline.X64.Fadd_inline.add1_inline out f1 f2
   else
     Vale.Wrapper.X64.Fadd.add1 out f1 f2
 
 // Spec discrepancy. Need to call the right lemma from FStar.Math.Lemmas.
-#push-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 400 --z3seed 1"
+#push-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 400"
 [@ CInline]
 let fadd out f1 f2 =
   let h0 = ST.get () in
-  FStar.Math.Lemmas.modulo_distributivity
-    (FA.as_nat f1 h0) (FA.as_nat f2 h0) Vale.Curve25519.Fast_defs.prime;
+  let aux () : Lemma (P.fadd (F64.fevalh h0 f1) (F64.fevalh h0 f2) == (FA.as_nat f1 h0 + FA.as_nat f2 h0) % Vale.Curve25519.Fast_defs.prime) =
+    let a = P.fadd (F64.fevalh h0 f1) (F64.fevalh h0 f2) in
+    let a1 = (as_nat h0 f1 % Vale.Curve25519.Fast_defs.prime + as_nat h0 f2 % Vale.Curve25519.Fast_defs.prime) % Vale.Curve25519.Fast_defs.prime in
+    let a2 = (as_nat h0 f1 % Vale.Curve25519.Fast_defs.prime + as_nat h0 f2) % Vale.Curve25519.Fast_defs.prime in
+    let a3 = (as_nat h0 f1 + as_nat h0 f2) % Vale.Curve25519.Fast_defs.prime in
+    let b = (FA.as_nat f1 h0 + FA.as_nat f2 h0) % Vale.Curve25519.Fast_defs.prime in
+    calc (==) {
+      a;
+      == {  FStar.Math.Lemmas.modulo_distributivity
+    (as_nat h0 f1) (as_nat h0 f2) Vale.Curve25519.Fast_defs.prime }
+      a1;
+      == {  FStar.Math.Lemmas.lemma_mod_add_distr (as_nat h0 f1 % Vale.Curve25519.Fast_defs.prime)
+      (as_nat h0 f2) Vale.Curve25519.Fast_defs.prime }
+      a2;
+      == { FStar.Math.Lemmas.lemma_mod_add_distr (as_nat h0 f2) (as_nat h0 f1) Vale.Curve25519.Fast_defs.prime }
+      a3;
+      == { }
+      b;
+    }
+  in aux();
   if EverCrypt.TargetConfig.gcc then
     Vale.Inline.X64.Fadd_inline.fadd_inline out f1 f2
   else
@@ -94,24 +112,26 @@ let fsub out f1 f2 =
   else
     Vale.Wrapper.X64.Fsub.fsub out f1 f2
 
-let lemma_fmul_equiv (h0:HS.mem) (f1 f2:F64.u256) : Lemma 
+#push-options "--z3rlimit 200"
+let lemma_fmul_equiv (h0:HS.mem) (f1 f2:F64.u256) : Lemma
   (P.fmul (F64.fevalh h0 f1) (F64.fevalh h0 f2) == (FA.as_nat f1 h0 * FA.as_nat f2 h0) % Vale.Curve25519.Fast_defs.prime)
   = let a = P.fmul (F64.fevalh h0 f1) (F64.fevalh h0 f2) in
-    let a1 = ((as_nat h0 f1 % Vale.Curve25519.Fast_defs.prime) * (as_nat h0 f2 % Vale.Curve25519.Fast_defs.prime)) % Vale.Curve25519.Fast_defs.prime in
-    let a2 = ((as_nat h0 f1 % Vale.Curve25519.Fast_defs.prime) * as_nat h0 f2) % Vale.Curve25519.Fast_defs.prime in
-    let a3 = (as_nat h0 f1 * as_nat h0 f2) % Vale.Curve25519.Fast_defs.prime in
+    let a1 = ((F64.as_nat h0 f1 % Vale.Curve25519.Fast_defs.prime) * (F64.as_nat h0 f2 % Vale.Curve25519.Fast_defs.prime)) % Vale.Curve25519.Fast_defs.prime in
+    let a2 = ((F64.as_nat h0 f1 % Vale.Curve25519.Fast_defs.prime) * F64.as_nat h0 f2) % Vale.Curve25519.Fast_defs.prime in
+    let a3 = (F64.as_nat h0 f1 * F64.as_nat h0 f2) % Vale.Curve25519.Fast_defs.prime in
     let b = (FA.as_nat f1 h0 * FA.as_nat f2 h0) % Vale.Curve25519.Fast_defs.prime in
     calc (==) {
       a;
       == { }
       a1;
-      == { FStar.Math.Lemmas.lemma_mod_mul_distr_r (as_nat h0 f1 % Vale.Curve25519.Fast_defs.prime) (as_nat h0 f2) Vale.Curve25519.Fast_defs.prime }
+      == { FStar.Math.Lemmas.lemma_mod_mul_distr_r (F64.as_nat h0 f1 % Vale.Curve25519.Fast_defs.prime) (F64.as_nat h0 f2) Vale.Curve25519.Fast_defs.prime }
       a2;
-      == { FStar.Math.Lemmas.lemma_mod_mul_distr_l (as_nat h0 f1) (as_nat h0 f2) Vale.Curve25519.Fast_defs.prime }
+      == { FStar.Math.Lemmas.lemma_mod_mul_distr_l (F64.as_nat h0 f1) (F64.as_nat h0 f2) Vale.Curve25519.Fast_defs.prime }
       a3;
       == { }
       b;
     }
+#pop-options
 
 [@ CInline]
 let fmul out f1 f2 tmp =
@@ -137,14 +157,14 @@ let fmul1 out f1 f2 =
   let h0 = ST.get() in
   let aux () : Lemma (P.fmul (F64.fevalh h0 f1) (v f2) == (FA.as_nat f1 h0 * v f2) % Vale.Curve25519.Fast_defs.prime) =
     let a = P.fmul (F64.fevalh h0 f1) (v f2) in
-    let a1 =  ((as_nat h0 f1 % Vale.Curve25519.Fast_defs.prime) * v f2) % Vale.Curve25519.Fast_defs.prime in
-    let a2 = (as_nat h0 f1 * v f2) % Vale.Curve25519.Fast_defs.prime in
+    let a1 =  ((F64.as_nat h0 f1 % Vale.Curve25519.Fast_defs.prime) * v f2) % Vale.Curve25519.Fast_defs.prime in
+    let a2 = (F64.as_nat h0 f1 * v f2) % Vale.Curve25519.Fast_defs.prime in
     let b = (FA.as_nat f1 h0 * v f2) % Vale.Curve25519.Fast_defs.prime in
     calc (==) {
       a;
       == { }
       a1;
-      == { FStar.Math.Lemmas.lemma_mod_mul_distr_l (as_nat h0 f1) (v f2) Vale.Curve25519.Fast_defs.prime }
+      == { FStar.Math.Lemmas.lemma_mod_mul_distr_l (F64.as_nat h0 f1) (v f2) Vale.Curve25519.Fast_defs.prime }
       a2;
       == { }
       b;
