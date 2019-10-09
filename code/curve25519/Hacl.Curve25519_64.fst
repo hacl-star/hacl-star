@@ -16,7 +16,6 @@ let montgomery_ladder =
 let fsquare_times = finv_fsquare_times_higher #M64 C.fsqr
 let finv = finv_finv_higher #M64 fsquare_times C.fmul
 let encode_point = generic_encode_point_higher #M64 C.add1 C.fmul finv
-
 let scalarmult = generic_scalarmult_higher #M64 encode_point montgomery_ladder decode_point
 let secret_to_public = generic_secret_to_public_higher #M64 scalarmult
 let ecdh = generic_ecdh_higher #M64 scalarmult

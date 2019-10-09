@@ -11,16 +11,6 @@ open Hacl.Impl.Curve25519.Generic
 
 module S = Spec.Curve25519
 
-val secret_to_public:
-    pub:lbuffer uint8 32ul
-  -> priv:lbuffer uint8 32ul
-  -> Stack unit
-    (requires fun h0 ->
-      live h0 pub /\ live h0 priv /\ disjoint pub priv)
-    (ensures  fun h0 _ h1 -> modifies (loc pub) h0 h1 /\
-      as_seq h1 pub == S.secret_to_public (as_seq h0 priv))
-
-
 val scalarmult:
     shared:lbuffer uint8 32ul
   -> my_priv:lbuffer uint8 32ul
@@ -32,6 +22,14 @@ val scalarmult:
     (ensures  fun h0 _ h1 -> modifies (loc shared) h0 h1 /\
       as_seq h1 shared == S.scalarmult (as_seq h0 my_priv) (as_seq h0 their_pub))
 
+val secret_to_public:
+    pub:lbuffer uint8 32ul
+  -> priv:lbuffer uint8 32ul
+  -> Stack unit
+    (requires fun h0 ->
+      live h0 pub /\ live h0 priv /\ disjoint pub priv)
+    (ensures  fun h0 _ h1 -> modifies (loc pub) h0 h1 /\
+      as_seq h1 pub == S.secret_to_public (as_seq h0 priv))
 
 val ecdh:
     shared:lbuffer uint8 32ul
