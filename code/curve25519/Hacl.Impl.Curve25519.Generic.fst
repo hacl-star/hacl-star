@@ -474,12 +474,12 @@ let montgomery_ladder #s out key init =
   copy out p0;
   pop_frame ()
 
-let g25519 : x:ilbuffer byte_t 32ul{witnessed x (Lib.Sequence.of_list S.basepoint_list) /\ recallable x} =
-  createL_global S.basepoint_list
+let g25519_t = x:ilbuffer byte_t 32ul{witnessed x (Lib.Sequence.of_list S.basepoint_list) /\ recallable x}
 
 /// Public API
 /// ==========
 
+val scalarmult: (#s: field_spec) -> scalarmult_st s
 [@ Meta.Attribute.specialize ]
 let scalarmult #s out priv pub =
   push_frame ();
@@ -489,8 +489,9 @@ let scalarmult #s out priv pub =
   encode_point #s out init;
   pop_frame()
 
+val secret_to_public (#s:field_spec) (g25519: g25519_t): secret_to_public_st s
 [@ Meta.Attribute.specialize ]
-let secret_to_public #s pub priv =
+let secret_to_public #s g25519 pub priv =
   push_frame ();
   recall_contents g25519 S.basepoint_lseq;
   let basepoint = create 32ul (u8 0) in
@@ -498,6 +499,7 @@ let secret_to_public #s pub priv =
   scalarmult #s pub priv basepoint;
   pop_frame()
 
+val ecdh: (#s:field_spec) -> ecdh_st s
 [@ Meta.Attribute.specialize ]
 let ecdh #s out priv pub =
   push_frame ();

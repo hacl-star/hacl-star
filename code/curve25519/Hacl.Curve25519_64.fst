@@ -6,6 +6,9 @@ open Hacl.Meta.Curve25519
 // The Vale core.
 module C = Hacl.Impl.Curve25519.Field64.Vale
 
+let g25519: g25519_t =
+  Lib.Buffer.createL_global Spec.Curve25519.basepoint_list
+
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 let point_add_and_double =
   addanddouble_point_add_and_double_higher #M64 C.fmul C.fsqr2 C.fmul1 C.fmul2 C.fsub C.fadd
@@ -21,6 +24,6 @@ let finv = finv_finv_higher #M64 fsquare_times C.fmul
 let store_felem = fields_store_felem_higher #M64 C.add1
 let encode_point = generic_encode_point_higher #M64 store_felem C.fmul finv
 let scalarmult = generic_scalarmult_higher #M64 encode_point montgomery_ladder decode_point
-let secret_to_public = generic_secret_to_public_higher #M64 scalarmult
+let secret_to_public = generic_secret_to_public_higher #M64 scalarmult g25519
 let ecdh = generic_ecdh_higher #M64 scalarmult
 

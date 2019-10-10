@@ -22,8 +22,6 @@ let scalarmult_st (s:field_spec) =
     (ensures  fun h0 _ h1 -> modifies (loc o) h0 h1 /\
       as_seq h1 o == S.scalarmult (as_seq h0 k) (as_seq h0 i))
 
-val scalarmult: (#s: field_spec) -> scalarmult_st s
-
 inline_for_extraction noextract
 let secret_to_public_st (s: field_spec) =
     o:lbuffer uint8 32ul
@@ -34,8 +32,6 @@ let secret_to_public_st (s: field_spec) =
       live h0 o /\ live h0 i /\ disjoint o i)
     (ensures  fun h0 _ h1 -> modifies (loc o) h0 h1 /\
       as_seq h1 o == S.secret_to_public (as_seq h0 i))
-
-val secret_to_public (#s:field_spec): secret_to_public_st s
 
 inline_for_extraction noextract
 let ecdh_st (s:field_spec) =
@@ -50,5 +46,3 @@ let ecdh_st (s:field_spec) =
     (ensures  fun h0 r h1 -> modifies (loc o) h0 h1 /\
       as_seq h1 o == S.scalarmult (as_seq h0 k) (as_seq h0 i)
       /\ (not r == Lib.ByteSequence.lbytes_eq #32 (as_seq h1 o) (Lib.Sequence.create 32 (u8 0))))
-
-val ecdh: (#s:field_spec) -> ecdh_st s
