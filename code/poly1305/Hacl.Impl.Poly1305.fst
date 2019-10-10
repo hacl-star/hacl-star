@@ -25,7 +25,7 @@ friend Lib.LoopCombinators
 let _: squash (inversion field_spec) = allow_inversion field_spec
 
 
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq' --record_options"
 
 inline_for_extraction noextract
 let get_acc #s (ctx:poly1305_ctx s) : Stack (felem s)
@@ -53,8 +53,7 @@ let state_inv_t #s h ctx =
   F32xN.load_precompute_r_post #(width s) h (gsub ctx (nlimb s) (precomplen s))
 
 
-#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
-
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --record_options"
 let reveal_ctx_inv #s ctx h0 h1 =
   let acc_b = gsub ctx 0ul (nlimb s) in
   let r_b = gsub ctx (nlimb s) (nlimb s) in
@@ -70,7 +69,7 @@ let reveal_ctx_inv #s ctx h0 h1 =
   assert (as_seq h0 precom_b == as_seq h1 precom_b)
 
 
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq' --record_options"
 
 val lemma_felem_fits_init_post:
     #s:field_spec

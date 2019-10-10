@@ -20,7 +20,7 @@ module SC = Hacl.Spec.Curve25519.Field64
 /// implementations. They are marked as assume val's since we strictly have more
 /// than one implementation per index value.
 
-#set-options "--z3rlimit 50 --max_fuel 0 --initial_ifuel 1 --max_ifuel 1"
+#set-options "--z3rlimit 50 --max_fuel 0 --initial_ifuel 1 --max_ifuel 1 --record_options"
 
 /// Shared definitions for agility of the field type
 /// ------------------------------------------------

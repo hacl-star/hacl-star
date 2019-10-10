@@ -17,7 +17,7 @@ module C = Hacl.Impl.Curve25519.Fields.Core
 module S = Hacl.Spec.Curve25519.Finv
 module P = Spec.Curve25519
 
-#reset-options "--z3rlimit 50 --using_facts_from '* -FStar.Seq'"
+#reset-options "--z3rlimit 50 --using_facts_from '* -FStar.Seq' --record_options"
 
 noextract
 val fsquare_times_inv: #s:field_spec -> h:mem -> f:felem s -> Type0

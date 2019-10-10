@@ -18,7 +18,7 @@ module F51 = Hacl.Impl.Curve25519.Field51
 module F64 = Hacl.Impl.Curve25519.Field64
 
 
-#set-options "--z3rlimit 50 --max_fuel 0 --initial_ifuel 1 --max_ifuel 1"
+#set-options "--z3rlimit 50 --max_fuel 0 --initial_ifuel 1 --max_ifuel 1 --record_options"
 
 inline_for_extraction noextract
 val create_felem:

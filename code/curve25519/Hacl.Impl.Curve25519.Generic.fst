@@ -25,7 +25,7 @@ module Lemmas = Hacl.Spec.Curve25519.Field64.Lemmas
 
 friend Lib.LoopCombinators
 
-#reset-options "--z3rlimit 200 --max_fuel 2 --using_facts_from '* -FStar.Seq -Hacl.Spec.*'"
+#reset-options "--z3rlimit 200 --max_fuel 2 --using_facts_from '* -FStar.Seq -Hacl.Spec.*' --record_options"
 //#set-options "--debug Hacl.Impl.Curve25519.Generic --debug_level ExtractNorm"
 
 inline_for_extraction noextract

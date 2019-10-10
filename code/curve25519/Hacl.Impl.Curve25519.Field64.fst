@@ -50,7 +50,7 @@ let fevalh (h:mem) (f:u256) : GTot P.elem = (as_nat h f) % P.prime
 noextract
 let feval_wideh (h:mem) (f:u512) : GTot P.elem = (wide_as_nat h f) % P.prime
 
-#reset-options "--z3rlimit 50"
+#reset-options "--z3rlimit 50 --record_options"
 
 let felem = lbuffer uint64 4ul
 let felem2 = lbuffer uint64 8ul

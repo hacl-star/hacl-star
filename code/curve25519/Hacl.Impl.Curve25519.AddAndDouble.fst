@@ -18,7 +18,7 @@ module F64 = Hacl.Impl.Curve25519.Field64
 module P = Spec.Curve25519
 module S = Hacl.Spec.Curve25519.AddAndDouble
 
-#reset-options "--z3rlimit 150 --max_fuel 1 --using_facts_from '* -FStar.Seq'"
+#reset-options "--z3rlimit 150 --max_fuel 1 --using_facts_from '* -FStar.Seq' --record_options"
 
 inline_for_extraction noextract
 let point (s:field_spec) = lbuffer (limb s) (nlimb s +! nlimb s)
