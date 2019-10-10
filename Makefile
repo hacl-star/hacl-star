@@ -104,6 +104,7 @@ ci:
 	$(MAKE) -C code/chacha20poly1305
 	$(MAKE) -C code/curve25519
 	$(MAKE) -C code/nacl-box
+	$(MAKE) -C code/experimental/gf128
 	$(MAKE) -C code/experimental/aes-gcm || [[ "$(shell uname)" == "CYGWIN_NT"* ]]
 	$(MAKE) -C code/frodo/spec
 	$(MAKE) -C code/frodo/code TARGET=
