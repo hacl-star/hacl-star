@@ -51,7 +51,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "08635e4d233de31f91c573042a3fcc45"
+      "db63a006029546a003ebad0980513c45"
     ],
     [
       "Hacl.Impl.Salsa20.rounds",
@@ -105,7 +105,7 @@
         "typing_Spec.Salsa20.size_key", "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "441adf5286813a1b83a553e78cd08de7"
+      "ded5a271468ce06d576ff8a877e8965a"
     ],
     [
       "Hacl.Impl.Salsa20.salsa20_core",
@@ -158,7 +158,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "aa5fb31b40e427abef90b6254abfc40b"
+      "59413edbfaa2b2c5707143ee96c14b8b"
     ],
     [
       "Hacl.Impl.Salsa20.salsa20_core",
@@ -237,7 +237,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "978f790ec2e037dbf1aa93c6df0e67c8"
+      "d4540baef6d49a03146c719ffb02f1b4"
     ],
     [
       "Hacl.Impl.Salsa20.salsa20_init",
@@ -290,7 +290,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "a4e81c5bf53da870d7634737a3ab227a"
+      "02445df2da661d48ca3add3cb64ec819"
     ],
     [
       "Hacl.Impl.Salsa20.salsa20_init",
@@ -429,6 +429,7 @@
         "refinement_interpretation_Tm_refine_7cad7b50578858995777cc74921e2dce",
         "refinement_interpretation_Tm_refine_81407705a0828c2c1b1976675443f647",
         "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
+        "refinement_interpretation_Tm_refine_90d4317accc78f4148152d8e7c820c05",
         "refinement_interpretation_Tm_refine_9d3fd79fd314167f1a9c213a188da3ec",
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
         "refinement_interpretation_Tm_refine_9ff150f589411d5a40376aa0c5e1ca86",
@@ -440,7 +441,6 @@
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
         "refinement_interpretation_Tm_refine_ee4e3ad73f846037e8152c74ec9316ba",
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
-        "refinement_interpretation_Tm_refine_faa870010f904c859d417ddc1e6c9f31",
         "refinement_kinding_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "typing_FStar.Map.contains", "typing_FStar.Map.domain",
         "typing_FStar.Map.restrict", "typing_FStar.Monotonic.Heap.emp",
@@ -478,7 +478,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "f8620c7e94674993ae2383a893a38b59"
+      "3ac1f6facaf229ba23f68152c675248a"
     ],
     [
       "Hacl.Impl.Salsa20.salsa20_encrypt_block",
@@ -535,7 +535,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "a7fce335f0663abae42fd0a68f82ae4a"
+      "481027efbc0f21b5f10702a5ce9b2534"
     ],
     [
       "Hacl.Impl.Salsa20.salsa20_encrypt_block",
@@ -615,8 +615,6 @@
         "lemma_LowStar.Monotonic.Buffer.fresh_frame_loc_not_unused_in_disjoint",
         "lemma_LowStar.Monotonic.Buffer.fresh_frame_modifies",
         "lemma_LowStar.Monotonic.Buffer.lemma_live_equal_mem_domains",
-        "lemma_LowStar.Monotonic.Buffer.length_null_1",
-        "lemma_LowStar.Monotonic.Buffer.length_null_2",
         "lemma_LowStar.Monotonic.Buffer.live_loc_not_unused_in",
         "lemma_LowStar.Monotonic.Buffer.loc_disjoint_includes_r",
         "lemma_LowStar.Monotonic.Buffer.loc_disjoint_none_r",
@@ -647,8 +645,8 @@
         "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
         "refinement_interpretation_Tm_refine_156c49afb7e1e070fbb2e47dc0e3d4b2",
         "refinement_interpretation_Tm_refine_34df948cfd5b7bc5cfe8f656e4ee9729",
+        "refinement_interpretation_Tm_refine_4010703c6199e10f619875c697ea767e",
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
-        "refinement_interpretation_Tm_refine_4d2c4a914c556bfb9e52e90ac25a24d0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
         "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
@@ -684,7 +682,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "d1da2be09bb9b056a48b1369a0aff92d"
+      "0642434c0c996e0b19c091556fcff9c8"
     ],
     [
       "Hacl.Impl.Salsa20.salsa20_encrypt_last",
@@ -740,7 +738,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "1f6c305b98a60a840ed9d1591428c0a8"
+      "fbc58fadc2c27729b63f1ee1b7018eb3"
     ],
     [
       "Hacl.Impl.Salsa20.salsa20_encrypt_last",
@@ -870,7 +868,7 @@
         "refinement_interpretation_Tm_refine_c6c18a7ceb46d419c35ff8551117551e",
         "refinement_interpretation_Tm_refine_d02d973dc3adf4174ff2dfa91b49155b",
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
-        "refinement_interpretation_Tm_refine_e79251297f30bd4dd49852ad7029e7fc",
+        "refinement_interpretation_Tm_refine_e4f2775750cec783bc27da289036c79e",
         "refinement_interpretation_Tm_refine_e9c32a5fb00a4e8c339597118c871180",
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
         "refinement_interpretation_Tm_refine_f5560f0b74a68fe1e66fb0f9c692d437",
@@ -906,7 +904,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "e97c242472a6617994209e71c26d5e35"
+      "69020263f2bc129d7b33b72955cc17bc"
     ],
     [
       "Hacl.Impl.Salsa20.salsa20_update",
@@ -963,7 +961,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "bf34759c678f2ebcc62e98bce8173d8e"
+      "e5ea29bd9a87fa6b18628041056269ae"
     ],
     [
       "Hacl.Impl.Salsa20.salsa20_update",
@@ -1096,6 +1094,7 @@
         "refinement_interpretation_Tm_refine_e450d0eda8ec6ce5c9eff42d01f0e81a",
         "refinement_interpretation_Tm_refine_e9c32a5fb00a4e8c339597118c871180",
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
+        "refinement_interpretation_Tm_refine_f63e058f9631c11993f3ef0430296051",
         "refinement_kinding_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "typing_FStar.Map.contains", "typing_FStar.Map.domain",
         "typing_FStar.Map.restrict", "typing_FStar.Monotonic.Heap.emp",
@@ -1127,7 +1126,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "d35b51515eac51cbb6607097917e295d"
+      "8107b085f1da8e395fa81586d539473c"
     ],
     [
       "Hacl.Impl.Salsa20.salsa20_key_block0",
@@ -1185,7 +1184,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "bf17de9e3aa4ed1509a8bb5063d0de9c"
+      "346eba94c45b03a756fdadb98dc39aef"
     ],
     [
       "Hacl.Impl.Salsa20.salsa20_key_block0",
@@ -1309,6 +1308,7 @@
         "refinement_interpretation_Tm_refine_e54f147411758d9b5bd9b030c74e081c",
         "refinement_interpretation_Tm_refine_ee4e3ad73f846037e8152c74ec9316ba",
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
+        "refinement_interpretation_Tm_refine_f63e058f9631c11993f3ef0430296051",
         "refinement_interpretation_Tm_refine_fc1f69e4229a94f85b0de30f1747a8d3",
         "refinement_kinding_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "typing_FStar.Map.contains", "typing_FStar.Map.domain",
@@ -1339,7 +1339,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "1194bc0e306af8bf2a9229f83b149e6f"
+      "1a30d06e9c81929746a9a019ad896a77"
     ],
     [
       "Hacl.Impl.Salsa20.salsa20_encrypt",
@@ -1406,7 +1406,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "b8959c0a75cabbdbc60adba05625d6ac"
+      "5b9623d322ed6177305a71cceea9170b"
     ],
     [
       "Hacl.Impl.Salsa20.salsa20_encrypt",
@@ -1485,8 +1485,6 @@
         "lemma_LowStar.Monotonic.Buffer.fresh_frame_loc_not_unused_in_disjoint",
         "lemma_LowStar.Monotonic.Buffer.fresh_frame_modifies",
         "lemma_LowStar.Monotonic.Buffer.lemma_live_equal_mem_domains",
-        "lemma_LowStar.Monotonic.Buffer.length_null_1",
-        "lemma_LowStar.Monotonic.Buffer.length_null_2",
         "lemma_LowStar.Monotonic.Buffer.live_loc_not_unused_in",
         "lemma_LowStar.Monotonic.Buffer.loc_disjoint_includes_r",
         "lemma_LowStar.Monotonic.Buffer.loc_disjoint_none_r",
@@ -1527,6 +1525,7 @@
         "refinement_interpretation_Tm_refine_bc761841f54eddf278259ea4158a0001",
         "refinement_interpretation_Tm_refine_d52c7ccbf9c6ef3b37f9419066e494f4",
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
+        "refinement_interpretation_Tm_refine_f63e058f9631c11993f3ef0430296051",
         "refinement_interpretation_Tm_refine_fc1f69e4229a94f85b0de30f1747a8d3",
         "refinement_kinding_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "typing_FStar.Map.contains", "typing_FStar.Map.domain",
@@ -1558,7 +1557,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "53b0ab09c0421fc650e706a76c18c1b1"
+      "d0ffa985c1bc68e27a3bb66eafaa28ed"
     ],
     [
       "Hacl.Impl.Salsa20.salsa20_decrypt",
@@ -1625,7 +1624,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "65625475d950908ce7dd81bd50a74f9b"
+      "8486b9baf6f1a320a320c2e2b867676f"
     ],
     [
       "Hacl.Impl.Salsa20.salsa20_decrypt",
@@ -1704,8 +1703,6 @@
         "lemma_LowStar.Monotonic.Buffer.fresh_frame_loc_not_unused_in_disjoint",
         "lemma_LowStar.Monotonic.Buffer.fresh_frame_modifies",
         "lemma_LowStar.Monotonic.Buffer.lemma_live_equal_mem_domains",
-        "lemma_LowStar.Monotonic.Buffer.length_null_1",
-        "lemma_LowStar.Monotonic.Buffer.length_null_2",
         "lemma_LowStar.Monotonic.Buffer.live_loc_not_unused_in",
         "lemma_LowStar.Monotonic.Buffer.loc_disjoint_includes_r",
         "lemma_LowStar.Monotonic.Buffer.loc_disjoint_none_r",
@@ -1746,6 +1743,7 @@
         "refinement_interpretation_Tm_refine_bc761841f54eddf278259ea4158a0001",
         "refinement_interpretation_Tm_refine_d52c7ccbf9c6ef3b37f9419066e494f4",
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
+        "refinement_interpretation_Tm_refine_f63e058f9631c11993f3ef0430296051",
         "refinement_interpretation_Tm_refine_fc1f69e4229a94f85b0de30f1747a8d3",
         "refinement_kinding_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "typing_FStar.Map.contains", "typing_FStar.Map.domain",
@@ -1777,7 +1775,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "c892111012cd82737e97a90fbb2e37c0"
+      "89245d8af5b1a0e4f5ad23cc3cebbf5b"
     ]
   ]
 ]
