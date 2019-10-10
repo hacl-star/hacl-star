@@ -467,10 +467,10 @@ and visit_body (t_i: term) (index_bv: option term) (st: state) (bvs: list (name 
       let branches = zip pats es in
       st, pack (Tv_Match scrut branches), bvs, ses @ ses'
 
-  | Tv_Let r bv e1 e2 ->
+  | Tv_Let r attrs bv e1 e2 ->
       let st, e1, bvs, ses = visit_body t_i index_bv st bvs e1 in
       let st, e2, bvs, ses' = visit_body t_i index_bv st bvs e2 in
-      let e = pack (Tv_Let r bv e1 e2) in
+      let e = pack (Tv_Let r attrs bv e1 e2) in
       st, e, bvs, ses @ ses'
 
   | Tv_AscribedT e t tac ->
