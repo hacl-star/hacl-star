@@ -19,7 +19,7 @@ module Spec = Spec.Chacha20Poly1305
 module SpecPoly = Spec.Poly1305
 module Poly = Hacl.Impl.Poly1305
 
-#reset-options "--z3rlimit 150 --max_fuel 0 --max_ifuel 1"
+#reset-options "--z3rlimit 150 --max_fuel 0 --max_ifuel 1 --record_options"
 
 val poly1305_do_:
     #w:field_spec

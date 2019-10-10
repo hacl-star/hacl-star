@@ -14,7 +14,7 @@ module Spec = Spec.Chacha20Poly1305
 module Poly = Hacl.Impl.Poly1305
 
 
-#set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 1"
+#set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 1 --record_options"
 
 inline_for_extraction noextract
 let poly1305_padded_st (w:field_spec) =
