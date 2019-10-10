@@ -7,7 +7,7 @@ open Lib.Sequence
 open Lib.ByteSequence
 open Lib.LoopCombinators
 
-#set-options "--z3rlimit 25"
+#set-options "--z3rlimit 50"
 
 type alg =
   | Blake2S
