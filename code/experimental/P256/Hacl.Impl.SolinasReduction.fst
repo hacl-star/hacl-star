@@ -451,6 +451,7 @@ val lemma_opened: i: Lib.Sequence.lseq uint64 8 -> Lemma
     uint_v c13 * pow2 (13 * 32) + uint_v c14 * pow2 (14 * 32) + uint_v c15 * pow2 (15 * 32)
     )
 
+#set-options "--z3rlimit 1000"
 
 let lemma_opened i = 
      let open Lib.Sequence in 

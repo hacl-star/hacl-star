@@ -21,7 +21,7 @@ module Loops = Lib.LoopCombinators
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
 inline_for_extraction noextract
-val bn_mul_by_limb_addj:
+val bn_mul_by_limb_add:
     aLen:size_t
   -> a:lbignum aLen
   -> l:uint64
@@ -30,9 +30,9 @@ val bn_mul_by_limb_addj:
   (requires fun h ->
     live h a /\ live h res /\ disjoint res a)
   (ensures  fun h0 c_out h1 -> modifies (loc res) h0 h1 /\
-    (c_out, as_seq h1 res) == S.bn_mul_by_limb_addj #(v aLen) (as_seq h0 a) l (as_seq h0 res))
+    (c_out, as_seq h1 res) == S.bn_mul_by_limb_add #(v aLen) (as_seq h0 a) l (as_seq h0 res))
 
-let bn_mul_by_limb_addj aLen a l res =
+let bn_mul_by_limb_add aLen a l res =
   push_frame ();
   let c = create 1ul (u64 0) in
 
@@ -42,7 +42,7 @@ let bn_mul_by_limb_addj aLen a l res =
   let footprint (i:size_nat{i <= v aLen}) : GTot (l:B.loc{B.loc_disjoint l (loc res) /\
     B.address_liveness_insensitive_locs `B.loc_includes` l}) = loc c in
   [@inline_let]
-  let spec h = S.bn_mul_by_limb_addj_f #(v aLen) (as_seq h a) l (as_seq h res) in
+  let spec h = S.bn_mul_by_limb_add_f #(v aLen) (as_seq h a) l (as_seq h res) in
 
   let h0 = ST.get () in
   fill_elems h0 aLen res refl footprint spec
@@ -73,13 +73,13 @@ let bn_mul_ aLen a bLen b j res =
   let res' = sub res j aLen in
   let l = b.(j) in
   let h0 = ST.get () in
-  let c = bn_mul_by_limb_addj aLen a l res' in
+  let c = bn_mul_by_limb_add aLen a l res' in
   let h1 = ST.get () in
   B.modifies_buffer_elim (B.gsub #uint64 res 0ul j) (loc res') h0 h1;
   assert (v (aLen +! bLen -! (j +! aLen)) == v aLen + v bLen - v j - v aLen);
   B.modifies_buffer_elim (B.gsub #uint64 res (j +! aLen) (aLen +! bLen -! (j +! aLen))) (loc res') h0 h1;
-  LSeq.lemma_update_sub (as_seq h0 res) (v j) (v aLen) 
-    (snd (S.bn_mul_by_limb_addj #(v aLen) (as_seq h0 a) l (as_seq h0 res'))) (as_seq h1 res);
+  LSeq.lemma_update_sub (as_seq h0 res) (v j) (v aLen)
+    (snd (S.bn_mul_by_limb_add #(v aLen) (as_seq h0 a) l (as_seq h0 res'))) (as_seq h1 res);
   res.(aLen +! j) <- c
 
 

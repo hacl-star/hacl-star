@@ -119,7 +119,7 @@ let mk_update_multi a update s blocks n_blocks =
   assert (B.length blocks = U32.v n_blocks * block_length a);
   C.Loops.for 0ul n_blocks inv f
 
-#set-options "--z3rlimit 400"
+#set-options "--z3rlimit 600"
 
 (** An arbitrary number of bytes, then padding. *)
 noextract inline_for_extraction

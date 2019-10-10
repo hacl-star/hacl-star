@@ -97,17 +97,19 @@ ci:
 # Temporary setting until code-verify, code-extract and code-test exist
 	$(MAKE) -C code/hash
 	$(MAKE) -C code/sha3
-	$(MAKE) -C code/blake2s
+	#$(MAKE) -C code/blake2s
 	$(MAKE) -C code/chacha20
+	$(MAKE) -C code/salsa20
 	$(MAKE) -C code/poly1305
 	$(MAKE) -C code/chacha20poly1305
 	$(MAKE) -C code/curve25519
 	$(MAKE) -C code/nacl-box
+	$(MAKE) -C code/experimental/gf128
 	$(MAKE) -C code/experimental/aes-gcm || [[ "$(shell uname)" == "CYGWIN_NT"* ]]
 	$(MAKE) -C code/frodo/spec
 	$(MAKE) -C code/frodo/code TARGET=
 	$(MAKE) -C code/ed25519
-#	$(MAKE) -C code/experimental/P256
+	$(MAKE) -C code/experimental/P256
 
 #
 # Clean

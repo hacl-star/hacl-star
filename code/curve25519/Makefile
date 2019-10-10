@@ -34,8 +34,7 @@ FSTAR_INCLUDE_DIRS = \
   $(KREMLIN_HOME)/kremlib \
   $(HACL_HOME)/specs \
   $(HACL_HOME)/specs/lemmas \
-  $(HACL_HOME)/lib \
-  ./lemmas
+  $(HACL_HOME)/lib
 
 FSTAR_INCLUDE = $(addprefix --include ,$(FSTAR_INCLUDE_DIRS))
 
@@ -155,7 +154,7 @@ boringssl_x25519.exe: boringssl-test.c
 	$(CC) -march=native -mtune=native -flto -O3 -I $(HACL_HOME)/../boringssl/include boringssl-test.c -o boringssl_x25519.exe $(HACL_HOME)/other_providers/openssl/libcrypto.a
 	./boringssl_x25519.exe
 
-curve25519_64.exe: 
+curve25519_64.exe:
 	$(MAKE) curve25519_64_slow.exe
 	$(MAKE) curve25519_64_vale.exe
 	$(MAKE) curve25519_64_v_inline.exe
