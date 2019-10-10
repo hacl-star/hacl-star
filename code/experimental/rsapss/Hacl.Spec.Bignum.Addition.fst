@@ -122,6 +122,10 @@ let bn_add #aLen #bLen a b =
   generate_elems #uint64 #carry aLen aLen (bn_add_f a b) (u64 0)
 
 
+///
+///  Lemma (let (c, res) = bn_add #aLen #bLen a b in v c * pow2 (64 * aLen) + bn_v res == bn_v a + bn_v b)
+///
+
 val bn_add_lemma_loop_step:
     #aLen:size_nat
   -> #bLen:size_nat{bLen <= aLen}
@@ -209,3 +213,97 @@ val bn_add_lemma:
 let bn_add_lemma #aLen #bLen a b =
   let (c, res) = bn_add #aLen #bLen a b in
   bn_add_lemma_loop #aLen #bLen a b aLen
+
+
+///
+///  Lemma (let (c, res) = bn_sub #aLen #bLen a b in bn_v res - v c * pow2 (64 * aLen) == bn_v a - bn_v b)
+///
+
+
+val bn_sub_lemma_loop_step:
+    #aLen:size_nat
+  -> #bLen:size_nat{bLen <= aLen}
+  -> a:lbignum aLen
+  -> b:lbignum bLen
+  -> i:pos{i <= aLen}
+  -> c1_res1:generate_elem_a uint64 carry aLen (i - 1)
+  -> Lemma
+  (requires
+   (let (c1, res1) = c1_res1 in
+    bn_v #(i - 1) res1 - v c1 * pow2 (64 * (i - 1)) == eval_ aLen a (i - 1) - eval_bval bLen b (i - 1)))
+  (ensures
+   (let (c1, res1) = c1_res1 in
+    let (c, res) = generate_elem_f #uint64 #carry aLen (bn_sub_f a b) (i - 1) (c1, res1) in
+    bn_v #i res - v c * pow2 (64 * i) == eval_ aLen a i - eval_bval bLen b i))
+
+let bn_sub_lemma_loop_step #aLen #bLen a b i (c1, res1) =
+  let (c, res) = generate_elem_f #uint64 #carry aLen (bn_sub_f a b) (i - 1) (c1, res1) in
+  let c, e = bn_sub_f a b (i - 1) c1 in
+  let bi1 = if i - 1 < bLen then b.[i - 1] else u64 0 in
+  assert (v e - v c * pow2 64 == v a.[i - 1] - v bi1 - v c1);
+
+  calc (==) {
+    bn_v #i res - v c * pow2 (64 * i);
+    (==) { bn_eval_snoc #(i - 1) res1 e }
+    bn_v #(i - 1) res1 + v e * pow2 (64 * (i - 1)) - v c * pow2 (64 * i);
+    (==) { }
+    eval_ aLen a (i - 1) - eval_bval bLen b (i - 1) + (v a.[i - 1] - v bi1 + v c * pow2 64 - v e) * pow2 (64 * (i - 1)) + v e * pow2 (64 * (i - 1)) - v c * pow2 (64 * i);
+    (==) { Math.Lemmas.distributivity_sub_left (v a.[i - 1] - v bi1 + v c * pow2 64) (v e) (pow2 (64 * (i - 1))) }
+    eval_ aLen a (i - 1) - eval_bval bLen b (i - 1) + (v a.[i - 1] - v bi1 + v c * pow2 64) * pow2 (64 * (i - 1)) - v c * pow2 (64 * i);
+    (==) { Math.Lemmas.distributivity_add_left (v a.[i - 1] - v bi1) (v c * pow2 64) (pow2 (64 * (i - 1))) }
+    eval_ aLen a (i - 1) - eval_bval bLen b (i - 1) + (v a.[i - 1] - v bi1) * pow2 (64 * (i - 1)) + v c * pow2 64 * pow2 (64 * (i - 1)) - v c * pow2 (64 * i);
+    (==) { Math.Lemmas.paren_mul_right (v c) (pow2 64) (pow2 (64 * (i - 1))); Math.Lemmas.pow2_plus 64 (64 * (i - 1)) }
+    eval_ aLen a (i - 1) - eval_bval bLen b (i - 1) + (v a.[i - 1] - v bi1) * pow2 (64 * (i - 1));
+    (==) { Math.Lemmas.distributivity_sub_left (v a.[i - 1]) (v bi1) (pow2 (64 * (i - 1))) }
+    eval_ aLen a (i - 1) - eval_bval bLen b (i - 1) + v a.[i - 1] * pow2 (64 * (i - 1)) - v bi1 * pow2 (64 * (i - 1));
+    (==) { bn_eval_unfold_i #aLen a i }
+    eval_ aLen a i - eval_bval bLen b (i - 1) - v bi1 * pow2 (64 * (i - 1));
+    (==) { bn_eval_bval_unfold_i #bLen b i }
+    eval_ aLen a i - eval_bval bLen b i;
+  };
+  assert (bn_v #i res - v c * pow2 (64 * i) == eval_ aLen a i - eval_bval bLen b i)
+
+
+val bn_sub_lemma_loop:
+    #aLen:size_nat
+  -> #bLen:size_nat{bLen <= aLen}
+  -> a:lbignum aLen
+  -> b:lbignum bLen
+  -> i:nat{i <= aLen} -> Lemma
+  (let (c, res) : generate_elem_a uint64 carry aLen i = generate_elems #uint64 #carry aLen i (bn_sub_f a b) (u64 0) in
+   bn_v #i res - v c * pow2 (64 * i) == eval_ aLen a i - eval_bval bLen b i)
+
+let rec bn_sub_lemma_loop #aLen #bLen a b i =
+  let (c, res) : generate_elem_a uint64 carry aLen i = generate_elems #uint64 #carry aLen i (bn_sub_f a b) (u64 0) in
+  if i = 0 then begin
+    eq_generate_elems0 #uint64 #carry aLen i (bn_sub_f a b) (u64 0);
+    assert (c == u64 0 /\ res == Seq.empty);
+    bn_eval0 #0 res;
+    assert_norm (pow2 0 = 1);
+    bn_eval0 a;
+    bn_eval0 b;
+    () end
+  else begin
+    let (c1, res1) : generate_elem_a uint64 carry aLen (i - 1) = generate_elems #uint64 #carry aLen (i - 1) (bn_sub_f a b) (u64 0) in
+    generate_elems_unfold #uint64 #carry aLen i (bn_sub_f a b) (u64 0) (i - 1);
+    assert (generate_elems #uint64 #carry aLen i (bn_sub_f a b) (u64 0) ==
+      generate_elem_f aLen (bn_sub_f a b) (i - 1) (generate_elems #uint64 #carry aLen (i - 1) (bn_sub_f a b) (u64 0)));
+    assert ((c, res) == generate_elem_f #uint64 #carry aLen (bn_sub_f a b) (i - 1) (c1, res1));
+    bn_sub_lemma_loop #aLen #bLen a b (i - 1);
+    assert (bn_v #(i - 1) res1 - v c1 * pow2 (64 * (i - 1)) == eval_ aLen a (i - 1) - eval_bval bLen b (i - 1));
+    bn_sub_lemma_loop_step #aLen #bLen a b i (c1, res1);
+    assert (bn_v #i res - v c * pow2 (64 * i) == eval_ aLen a i - eval_bval bLen b i);
+    () end
+
+
+val bn_sub_lemma:
+    #aLen:size_nat
+  -> #bLen:size_nat{bLen <= aLen}
+  -> a:lbignum aLen
+  -> b:lbignum bLen -> Lemma
+  (let (c, res) = bn_sub #aLen #bLen a b in
+   bn_v res - v c * pow2 (64 * aLen) == bn_v a - bn_v b)
+
+let bn_sub_lemma #aLen #bLen a b =
+  let (c, res) = bn_sub #aLen #bLen a b in
+  bn_sub_lemma_loop #aLen #bLen a b aLen
