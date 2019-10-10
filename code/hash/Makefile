@@ -27,6 +27,7 @@ FSTAR_INCLUDE_DIRS = \
   $(KREMLIN_HOME)/include/kremlin \
   $(KREMLIN_HOME)/kremlib \
   $(HACL_HOME)/specs \
+  $(HACL_HOME)/specs/lemmas \
   $(HACL_HOME)/lib \
   $(HACL_HOME)/lib/c
 
