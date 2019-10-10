@@ -137,9 +137,11 @@ let lemma_fmul_equiv (h0:HS.mem) (f1 f2:F64.u256) : Lemma
 let fmul out f1 f2 tmp =
   let h0 = ST.get() in
   lemma_fmul_equiv h0 f1 f2;
-  if EverCrypt.TargetConfig.gcc then
+  if EverCrypt.TargetConfig.gcc then (
+    assert (disjoint f1 (gsub tmp 0ul 8ul));
+    assert (disjoint f2 (gsub tmp 0ul 8ul));
     Vale.Inline.X64.Fmul_inline.fmul_inline (sub tmp 0ul 8ul) f1 out f2
-  else
+  ) else
     Vale.Wrapper.X64.Fmul.fmul (sub tmp 0ul 8ul) f1 out f2
 
 [@ CInline]

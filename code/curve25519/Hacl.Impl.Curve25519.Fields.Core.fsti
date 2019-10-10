@@ -186,6 +186,18 @@ let fmul_pre (#s:field_spec) (h:mem) (f1:felem s) (f2:felem s): Type0 =
       f51_felem_fits h f2 (9, 10, 9, 9, 9)
   | M64 -> Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)
 
+let fmul_disjoint (#s:field_spec) (out f1 f2:felem s) (tmp:felem_wide2 s): Type0 =
+  match s with
+  | M51 -> True
+  | M64 ->
+      (disjoint out f1 \/ out == f1) /\
+      (disjoint out f2 \/ out == f2) /\
+      (disjoint out tmp \/ out == tmp) /\
+      (disjoint f1 f2 \/ f1 == f2) /\
+      disjoint f1 tmp /\
+      disjoint f2 tmp
+
+
 let state_inv_t (#s:field_spec) (h:mem) (f:felem s): Type0 =
   match s with
   | M51 -> f51_mul_inv_t h f
@@ -200,12 +212,7 @@ let fmul_t (s:field_spec) =
   -> Stack unit
     (requires fun h ->
       live h out /\ live h f1 /\ live h f2 /\ live h tmp /\
-      (disjoint out f1 \/ out == f1) /\
-      (disjoint out f2 \/ out == f2) /\
-      (disjoint out tmp \/ out == tmp) /\
-      (disjoint f1 f2 \/ f1 == f2) /\
-      disjoint f1 tmp /\
-      disjoint f2 tmp /\
+      fmul_disjoint out f1 f2 tmp /\
       fmul_pre h f1 f2)
     (ensures fun h0 _ h1 ->
       modifies (loc out |+| loc tmp) h0 h1 /\ state_inv_t h1 out /\
@@ -293,6 +300,14 @@ let fsqr_pre (#s:field_spec) (h:mem) (f:felem s): Type0 =
   | M51 -> f51_felem_fits h f (9, 10, 9, 9, 9)
   | M64 -> Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)
 
+let fsqr_disjoint (#s:field_spec) (out f1:felem s) (tmp:felem_wide s): Type0 =
+  match s with
+  | M51 -> True
+  | M64 ->
+      (disjoint out f1 \/ out == f1) /\
+      (disjoint out tmp \/ out == tmp) /\
+      disjoint tmp f1
+
 inline_for_extraction
 let fsqr_t (s:field_spec) =
     out:felem s
@@ -301,9 +316,7 @@ let fsqr_t (s:field_spec) =
   -> Stack unit
     (requires fun h ->
       live h out /\ live h f1 /\ live h tmp /\
-      (disjoint out f1 \/ out == f1) /\
-      (disjoint out tmp \/ out == tmp) /\
-      disjoint tmp f1 /\
+      fsqr_disjoint out f1 tmp /\
       fsqr_pre h f1)
     (ensures  fun h0 _ h1 ->
       modifies (loc out |+| loc tmp) h0 h1 /\

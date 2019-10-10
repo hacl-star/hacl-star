@@ -1,5 +1,5 @@
 [
-  "­\u001c0µVYxj…5ê€¸ƒŠÀ",
+  "¬`ô†S\u0016\u000fµ¦÷–bÎf\u001a\u0000",
   [
     [
       "Hacl.Impl.Curve25519.Fields.Core.limb",
@@ -442,6 +442,25 @@
       "8fef66861b8020d2dcec9f2640ad40ca"
     ],
     [
+      "Hacl.Impl.Curve25519.Fields.Core.fmul_disjoint",
+      1,
+      0,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "bool_inversion",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "disc_equation_Hacl.Impl.Curve25519.Fields.Core.M51",
+        "disc_equation_Hacl.Impl.Curve25519.Fields.Core.M64",
+        "equality_tok_Lib.IntTypes.U32@tok",
+        "equation_Lib.IntTypes.unsigned",
+        "fuel_guarded_inversion_Hacl.Impl.Curve25519.Fields.Core.field_spec",
+        "projection_inverse_BoxBool_proj_0", "typing_Lib.IntTypes.unsigned",
+        "typing_tok_Lib.IntTypes.U32@tok"
+      ],
+      0,
+      "5c9a12e2a5322800e3cd68de9aeac08f"
+    ],
+    [
       "Hacl.Impl.Curve25519.Fields.Core.state_inv_t",
       1,
       0,
@@ -468,20 +487,7 @@
         "typing_FStar.Monotonic.HyperStack.get_tip"
       ],
       0,
-      "aa8ad676ddfbff6edf003bbb9c44d821"
-    ],
-    [
-      "Hacl.Impl.Curve25519.Fields.Core.fmul_t",
-      1,
-      0,
-      1,
-      [
-        "@query", "constructor_distinct_Lib.IntTypes.U32",
-        "equality_tok_Lib.IntTypes.U32@tok",
-        "equation_Lib.IntTypes.unsigned", "projection_inverse_BoxBool_proj_0"
-      ],
-      0,
-      "48c23978b7eedea7f77c02ef540a6a8b"
+      "127ba13b236af9d5ca84914606814676"
     ],
     [
       "Hacl.Impl.Curve25519.Fields.Core.fmul2_pre",
@@ -554,7 +560,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "def77b2b187f7539c0d6591ea55ff407"
+      "5796dd1e8c370a1190dd242364c8b274"
     ],
     [
       "Hacl.Impl.Curve25519.Fields.Core.fmul2_fsqr2_post",
@@ -624,7 +630,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "f25a04027e59c1df5acb537a42934cb3"
+      "081717f69213d1068686f6b07b9c6276"
     ],
     [
       "Hacl.Impl.Curve25519.Fields.Core.fmul2_t",
@@ -707,7 +713,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "208de0fdc39bc03691f5f77ad1b381d7"
+      "5e8e714b82a718a9cc62759395c20c4e"
     ],
     [
       "Hacl.Impl.Curve25519.Fields.Core.fmul1_pre",
@@ -736,7 +742,7 @@
         "typing_FStar.Monotonic.HyperStack.get_tip"
       ],
       0,
-      "b7f512d9fea13d300dfc1a1a1926ab2d"
+      "72ebb03dad0035bf8f916eff9649cb7d"
     ],
     [
       "Hacl.Impl.Curve25519.Fields.Core.fmul1_t",
@@ -759,7 +765,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "9f951c3143c66d567bf2cc03027c40c0"
+      "a0442cbd1193172a45e91f161df89fd0"
     ],
     [
       "Hacl.Impl.Curve25519.Fields.Core.fsqr_pre",
@@ -788,16 +794,21 @@
         "typing_FStar.Monotonic.HyperStack.get_tip"
       ],
       0,
-      "a576be7df6c76a3bae9229b7be29cdee"
+      "fa022f5514b216dcfb69575bcbbdfda9"
     ],
     [
-      "Hacl.Impl.Curve25519.Fields.Core.fsqr_t",
+      "Hacl.Impl.Curve25519.Fields.Core.fsqr_disjoint",
       1,
       0,
       1,
-      [ "@query" ],
+      [
+        "@MaxIFuel_assumption", "@query",
+        "disc_equation_Hacl.Impl.Curve25519.Fields.Core.M51",
+        "disc_equation_Hacl.Impl.Curve25519.Fields.Core.M64",
+        "fuel_guarded_inversion_Hacl.Impl.Curve25519.Fields.Core.field_spec"
+      ],
       0,
-      "c9e15ebcf9a95bdbcee0a2d999d2afcc"
+      "2885f78f79e4de067c1141f99cb97945"
     ],
     [
       "Hacl.Impl.Curve25519.Fields.Core.fsqr2_pre",
@@ -870,7 +881,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "cdd8c8bce63fe7a39434304d4bcd2b9b"
+      "a93960469c58e804b36ea49eb102b650"
     ],
     [
       "Hacl.Impl.Curve25519.Fields.Core.fsqr2_t",
@@ -950,7 +961,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "d9c2566f3f3923576eea495ce50e40f7"
+      "d542d653b557cbaca830d784ca4c8aea"
     ],
     [
       "Hacl.Impl.Curve25519.Fields.Core.cswap2_t",
@@ -985,7 +996,7 @@
         "typing_Lib.Buffer.length", "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "bf3ccdd0713b8ffda585bcc97e6869c2"
+      "9ef99535922200859ec21a4b872a2e6b"
     ]
   ]
 ]
