@@ -474,34 +474,3 @@ val blake2b:
   Tot (lbytes nn)
 
 let blake2b d kk k n = blake2 Blake2B d kk k n
-
-
-(* let spec_update_block *)
-(*     (a:alg) *)
-(*     (flag:bool) *)
-(*     (init:nat) *)
-(*     (i:nat{init + (i * size_block a) <= max_limb a}) = *)
-(*     blake2_update_block a flag (init + (i * size_block a)) *)
-
-(* let spec_update_last *)
-(*     (a:alg) *)
-(*     (len:nat{len <= max_limb a}) *)
-(*     (i:nat) = *)
-(*     blake2_update_last a len *)
-
-(* val blake2_update: *)
-(*     a:alg *)
-(*   -> s:hash_ws a *)
-(*   -> d:bytes *)
-(*   -> kk:size_nat{kk <= max_key a /\ (if kk = 0 then length d <= max_limb a else length d + (size_block a) <= max_limb a)} -> *)
-(*   Tot (hash_ws a) *)
-
-(* // BB. This naming is just bad. Change it ! *)
-(* let blake2_update a s d kk = *)
-(*   let ll = length d in *)
-(*   let klen = if kk = 0 then 0 else 1 in *)
-(*   let flag = length d % size_block a = 0 in *)
-(*   repeati_blocks (size_block a) d *)
-(*     (spec_update_block a flag ((klen + 1) * size_block a)) *)
-(*     (spec_update_last a (klen * (size_block a) + ll)) *)
-(*     s *)
