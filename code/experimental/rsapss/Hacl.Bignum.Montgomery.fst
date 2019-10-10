@@ -37,7 +37,7 @@ let mont_reduction_ nLen rLen n nInv_u64 j res =
   push_frame ();
   let qj = nInv_u64 *. res.(j) in
   let res' = sub res j nLen in
-  let c = bn_mul_by_limb_addj nLen n qj res' in
+  let c = bn_mul_by_limb_add nLen n qj res' in
 
   let res' = sub res (j +! nLen) (rLen +! rLen -! j -! nLen) in
   let c = create 1ul c in

@@ -29,7 +29,7 @@ val mont_reduction_:
 let mont_reduction_ #nLen #rLen n nInv_u64 j res =
   let qj = nInv_u64 *. res.[j] in
   let res' = sub res j nLen in
-  let c, res' = bn_mul_by_limb_addj #nLen n qj res' in
+  let c, res' = bn_mul_by_limb_add #nLen n qj res' in
   let res = update_sub res j nLen res' in
 
   let res' = sub res (j + nLen) (rLen + rLen - j - nLen) in
