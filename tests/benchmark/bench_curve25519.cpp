@@ -64,7 +64,8 @@ class RFC7748: public Curve25519Benchmark
 #endif
 
 #ifdef HAVE_HACL
-#include <Hacl_Curve25519.h>
+#include <Hacl_Curve25519_51.h>
+#include <Hacl_Curve25519_64.h>
 
 class Hacl51: public Curve25519Benchmark
 {
@@ -88,6 +89,7 @@ class Hacl64: public Curve25519Benchmark
       // { curve25519_evercrypt64(shared_secret, our_secret, their_public); }
     virtual ~Hacl64() {}
 };
+
 #endif
 
 #ifdef HAVE_OPENSSL

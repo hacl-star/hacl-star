@@ -660,7 +660,7 @@ SALSA20_BUNDLE=-bundle Hacl.Impl.Salsa20+Hacl.Impl.HSalsa20=Hacl.Impl.Salsa20.*[
 CURVE_BUNDLE=-bundle Hacl.Curve25519_64=Hacl.Impl.Curve25519.Field64.Vale \
   -bundle Hacl.Curve25519_64_Slow=Hacl.Impl.Curve25519.Field64.Hacl \
   -bundle Hacl.Curve25519_51=Hacl.Impl.Curve25519.Field51 \
-  -bundle Hacl.Impl.Curve25519[rename=Hacl_Curve_Leftovers]
+  -bundle Hacl.Impl.Curve25519.*[rename=Hacl_Curve_Leftovers]
 CHACHAPOLY_BUNDLE=-bundle Hacl.Impl.Chacha20Poly1305
 ED_BUNDLE=-bundle 'Hacl.Ed25519=Hacl.Impl.Ed25519.*,Hacl.Impl.BignumQ.Mul,Hacl.Impl.Load56,Hacl.Impl.SHA512.ModQ,Hacl.Impl.Store56,Hacl.Bignum25519'
 POLY_BUNDLE=-bundle 'Hacl.Poly1305_32=Hacl.Impl.Poly1305.Field32xN_32' \

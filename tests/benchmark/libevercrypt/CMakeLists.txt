@@ -31,7 +31,9 @@ add_library(evercrypt STATIC
   ${EVERCRYPT_SRC_DIR}/Hacl_Chacha20Poly1305_32.c
   ${EVERCRYPT_SRC_DIR}/Hacl_Chacha20Poly1305_128.c
   ${EVERCRYPT_SRC_DIR}/Hacl_Chacha20Poly1305_256.c
-  ${EVERCRYPT_SRC_DIR}/Hacl_Curve25519.c
+  ${EVERCRYPT_SRC_DIR}/Hacl_Curve25519_51.c
+  ${EVERCRYPT_SRC_DIR}/Hacl_Curve25519_64.c
+  ${EVERCRYPT_SRC_DIR}/Hacl_Curve25519_64_Slow.c
   ${EVERCRYPT_SRC_DIR}/Hacl_Ed25519.c
   ${EVERCRYPT_SRC_DIR}/Hacl_Hash.c
   ${EVERCRYPT_SRC_DIR}/Hacl_Kremlib.c
