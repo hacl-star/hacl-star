@@ -1,4 +1,4 @@
-module Spec.AEAD
+module Spec.Agile.AEAD
 
 open FStar.Integers
 
@@ -112,7 +112,7 @@ let decrypted #a (c: cipher a) = p:plain a { S.length c = cipher_length p }
 //
 // The implementation will friend this module, and expose expand as a stateful
 // function, then will expose a function that does the <rest-of-encrypt> but
-// still expresses its post-condition using Spec.AEAD.encrypt. So, encrypt takes
+// still expresses its post-condition using Spec.Agile.AEAD.encrypt. So, encrypt takes
 // a kv, not an ekv.
 
 // Note: adopting the argument order of EverCrypt... which doesn't match other

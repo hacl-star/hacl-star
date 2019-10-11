@@ -77,8 +77,8 @@ let test_one_aes_ecb block0 v =
 let test_aes_ecb (block0: block_cipher) : Stack unit (fun _ -> True) (fun _ _ _ -> True) =
   Test.NoHeap.test_many !$"cipher" (test_one_aes_ecb block0) block_cipher_vectors_low
 
-let aead_key_length32 (al: Spec.AEAD.alg) : Tot (x: U32.t { U32.v x == Spec.AEAD.key_length al } ) =
-  let open Spec.AEAD in
+let aead_key_length32 (al: Spec.Agile.AEAD.alg) : Tot (x: U32.t { U32.v x == Spec.Agile.AEAD.key_length al } ) =
+  let open Spec.Agile.AEAD in
   match al with
   | AES128_GCM        -> 16ul
   | AES256_GCM        -> 32ul
@@ -88,15 +88,15 @@ let aead_key_length32 (al: Spec.AEAD.alg) : Tot (x: U32.t { U32.v x == Spec.AEAD
   | AES256_CCM        -> 32ul
   | AES256_CCM8       -> 32ul
 
-let aead_max_length32 (al: Spec.AEAD.alg) : Tot (x: U32.t { Spec.AEAD.is_supported_alg al ==> U32.v x == Spec.AEAD.max_length al }) =
-  let open Spec.AEAD in
+let aead_max_length32 (al: Spec.Agile.AEAD.alg) : Tot (x: U32.t { Spec.Agile.AEAD.is_supported_alg al ==> U32.v x == Spec.Agile.AEAD.max_length al }) =
+  let open Spec.Agile.AEAD in
   match al with
   | CHACHA20_POLY1305 -> 4294967295ul `U32.sub` 16ul
   | AES128_GCM | AES256_GCM -> 4294967295ul
   | _ -> 0ul // dummy
 
-let aead_tag_length32 (al: Spec.AEAD.alg) : Tot (x: U32.t { U32.v x == Spec.AEAD.tag_length al /\ (Spec.AEAD.is_supported_alg al ==> U32.v x <= Spec.AEAD.max_length al) } ) =
-  let open Spec.AEAD in
+let aead_tag_length32 (al: Spec.Agile.AEAD.alg) : Tot (x: U32.t { U32.v x == Spec.Agile.AEAD.tag_length al /\ (Spec.Agile.AEAD.is_supported_alg al ==> U32.v x <= Spec.Agile.AEAD.max_length al) } ) =
+  let open Spec.Agile.AEAD in
   match al with
   | AES128_CCM8       ->  8ul
   | AES256_CCM8       ->  8ul
@@ -106,9 +106,9 @@ let aead_tag_length32 (al: Spec.AEAD.alg) : Tot (x: U32.t { U32.v x == Spec.AEAD
   | AES128_CCM        -> 16ul
   | AES256_CCM        -> 16ul
 
-let aead_iv_length32 (al: Spec.AEAD.supported_alg) (x:U32.t) : Tot
-  (res:bool{res <==> Spec.AEAD.iv_length al (U32.v x)}) =
-  let open Spec.AEAD in
+let aead_iv_length32 (al: Spec.Agile.AEAD.supported_alg) (x:U32.t) : Tot
+  (res:bool{res <==> Spec.Agile.AEAD.iv_length al (U32.v x)}) =
+  let open Spec.Agile.AEAD in
   match al with
   | AES128_GCM -> 0ul `U32.lt` x
   | AES256_GCM -> 0ul `U32.lt` x
@@ -141,7 +141,7 @@ let test_aead_st alg key key_len iv iv_len aad aad_len tag tag_len plaintext pla
   let max_len = aead_max_length32 alg in
   let _ = assert_norm (pow2 31 == 2147483648) in
   if not (
-    Spec.AEAD.is_supported_alg alg
+    Spec.Agile.AEAD.is_supported_alg alg
   )
   then
     C.Failure.failwith !$"Error: skipping a test_aead_st instance because algo unsupported etc.\n"
@@ -211,9 +211,9 @@ let test_aead_st alg key key_len iv iv_len aad aad_len tag tag_len plaintext pla
 #reset-options
 
 let alg_of_alg = function
-| CHACHA20_POLY1305 -> Spec.AEAD.CHACHA20_POLY1305
-| AES_128_GCM -> Spec.AEAD.AES128_GCM
-| AES_256_GCM -> Spec.AEAD.AES256_GCM
+| CHACHA20_POLY1305 -> Spec.Agile.AEAD.CHACHA20_POLY1305
+| AES_128_GCM -> Spec.Agile.AEAD.AES128_GCM
+| AES_256_GCM -> Spec.Agile.AEAD.AES256_GCM
 
 val test_aead_loop: Test.Vectors.cipher -> lbuffer aead_vector -> St unit
 let rec test_aead_loop alg0 (LB len vs) =
@@ -248,7 +248,7 @@ let rec test_aes128_gcm_loop (i: U32.t): St unit =
     let Vector output output_len tag tag_len input input_len aad aad_len nonce nonce_len key key_len =
       vectors.(i)
     in
-    test_aead_st Spec.AEAD.AES128_GCM key key_len nonce nonce_len aad aad_len tag tag_len
+    test_aead_st Spec.Agile.AEAD.AES128_GCM key key_len nonce nonce_len aad aad_len tag tag_len
       input input_len output output_len;
     test_aes128_gcm_loop (i `U32.add_mod` 1ul)
   end

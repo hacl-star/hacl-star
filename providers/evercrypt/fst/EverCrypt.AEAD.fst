@@ -12,11 +12,11 @@ open FStar.HyperStack.ST
 open FStar.Integers
 open FStar.Int.Cast
 
-open Spec.AEAD
+open Spec.Agile.AEAD
 open Spec.Cipher.Expansion
 open EverCrypt.CTR.Keys
 
-friend Spec.AEAD
+friend Spec.Agile.AEAD
 friend Spec.Cipher.Expansion
 friend EverCrypt.CTR.Keys
 

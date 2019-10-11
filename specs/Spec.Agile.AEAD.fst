@@ -1,4 +1,4 @@
-module Spec.AEAD
+module Spec.Agile.AEAD
 
 open FStar.Integers
 
