@@ -4,6 +4,7 @@ open FStar.Mul
 open Vale.Def.Prop_s
 open Vale.Def.Opaque_s
 open Spec.SHA2
+open Spec.SHA2.Lemmas
 open Spec.Agile.Hash
 open Spec.Hash.Definitions
 open Spec.Hash.Lemmas
@@ -15,6 +16,7 @@ open FStar.UInt32  // Interop with UInt-based SHA spec
 open Vale.Arch.Types
 
 friend Spec.SHA2
+friend Spec.SHA2.Lemmas
 friend Vale.X64.CryptoInstructions_s
 
 #reset-options "--max_fuel 0 --max_ifuel 0"
@@ -692,6 +694,7 @@ let update_lemma (src1 src2 src1' src2' h0 h1:quad32) (block:block_w) : Lemma
   assert (make_hash src1 src2 == shuffle_opaque SHA2_256 hash_orig block);
 *)
   translate_hash_update src1 src2 src1' src2' h0 h1;
+  shuffle_is_shuffle_pre SHA2_256 hash_orig block;
   assert (equal (make_hash src1' src2') (update_block hash_orig block));
   ()
 
