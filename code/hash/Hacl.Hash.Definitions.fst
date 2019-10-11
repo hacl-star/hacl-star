@@ -1,6 +1,5 @@
 module Hacl.Hash.Definitions
 
-open Lib.IntTypes
 module HS = FStar.HyperStack
 module ST = FStar.HyperStack.ST
 
@@ -8,6 +7,7 @@ module M = LowStar.Modifies
 module B = LowStar.Buffer
 module Spec = Spec.Hash.PadFinish
 
+open Lib.IntTypes
 open Spec.Hash.Definitions
 open FStar.Mul
 

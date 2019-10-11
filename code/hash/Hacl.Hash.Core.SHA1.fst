@@ -7,8 +7,6 @@ module HS = FStar.HyperStack
 module HST = FStar.HyperStack.ST
 module Spec = Spec.SHA1
 module U32 = FStar.UInt32
-module E = FStar.Kremlin.Endianness
-module CE = C.Endianness
 
 open Hacl.Hash.Definitions
 open Spec.Hash.Definitions
