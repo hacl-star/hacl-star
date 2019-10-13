@@ -61,3 +61,89 @@ let bn_eval_snoc #len b e =
   bn_eval_unfold_i #(len + 1) b1 (len + 1);
   bn_eval_sub1 #(len + 1) b1 len;
   eq_intro (sub #uint64 #(len + 1) b1 0 len) b
+
+
+val bn_eval_zeroes: #len:size_nat -> b:lbignum len -> i:nat{i <= len} -> Lemma
+  (requires b == create len (u64 0))
+  (ensures eval_ len b i == 0)
+
+let rec bn_eval_zeroes #len b i =
+  if i = 0 then ()
+  else bn_eval_zeroes #len b (i - 1)
+
+
+val bn_eval_extensionality_j:
+    #len1:size_nat
+  -> #len2:size_nat
+  -> b1:lbignum len1
+  -> b2:lbignum len2
+  -> j:nat{j <= len1 /\ j <= len2} ->
+  Lemma
+    (requires sub b1 0 j == sub b2 0 j)
+    (ensures  eval_ len1 b1 j == eval_ len2 b2 j)
+    (decreases j)
+
+let rec bn_eval_extensionality_j #len1 #len2 b1 b2 j =
+  if j = 0 then ()
+  else begin
+    let b1j = slice b1 0 j in
+    let b2j = slice b2 0 j in
+    let c1 = slice b1j 0 (j - 1) in
+    let c2 = slice b2j 0 (j - 1) in
+    eq_intro c1 c2;
+    bn_eval_extensionality_j #len1 #len2 b1 b2 (j - 1);
+    Seq.lemma_index_slice b1 0 j (j - 1);
+    Seq.lemma_index_slice b2 0 j (j - 1);
+    assert (v b1.[j - 1] == v b2.[j - 1]);
+    () end
+
+
+// val bn_eval_sub: #len:size_nat -> b:lbignum len -> j:nat{j <= len} -> Lemma
+//   (eval_ len b j == eval_ j (sub b 0 j) j)
+// let bn_eval_sub #len b j =
+//   bn_eval_extensionality_j #len #j b (sub b 0 j) j
+
+
+val bn_eval_split_i_lemma_aux: a:nat -> b:nat -> c:nat -> i:nat -> Lemma
+  (requires pow2 64 * c == a - b)
+  (ensures pow2 (64 * (i + 1)) * c == pow2 (64 * i) * a - pow2 (64 * i) * b)
+
+let bn_eval_split_i_lemma_aux a b c i =
+  calc (==) {
+    pow2 (64 * (i + 1)) * c;
+    (==) { Math.Lemmas.pow2_plus (64 * i) 64 }
+    pow2 (64 * i) * pow2 64 * c;
+    (==) { Math.Lemmas.paren_mul_right (pow2 (64 * i)) (pow2 64) c }
+    pow2 (64 * i) * (pow2 64 * c);
+    (==) { }
+    pow2 (64 * i) * (a - b);
+    (==) { Math.Lemmas.distributivity_sub_right (pow2 (64 * i)) a b }
+    pow2 (64 * i) * a - pow2 (64 * i) * b;
+  }
+
+
+val bn_eval_split_i: #len:size_nat -> b:lbignum len -> i:nat{i <= len} -> Lemma
+  (ensures bn_v b == bn_v (slice b 0 i) + pow2 (64 * i) * bn_v (slice b i len))
+  (decreases (len - i))
+
+let rec bn_eval_split_i #len b i =
+  if i = 0 then ()
+  else begin
+    if len = i then ()
+    else begin
+      let b1 = slice b i len in
+      bn_eval_split_i b1 1;
+      assert (bn_v b1 == v b1.[0] + pow2 64 * bn_v (slice b1 1 (len - i)));
+      Seq.lemma_index_slice b i len 0;
+      assert (bn_v b1 == v b.[i] + pow2 64 * bn_v (slice b (i + 1) len));
+      calc (==) {
+        bn_v b;
+        (==) { bn_eval_split_i b (i + 1) }
+        bn_v (slice b 0 (i + 1)) + pow2 (64 * (i + 1)) * bn_v (slice b (i + 1) len);
+        (==) { bn_eval_split_i_lemma_aux (bn_v b1) (v b.[i]) (bn_v (slice b (i + 1) len)) i }
+        bn_v (slice b 0 (i + 1)) + pow2 (64 * i) * bn_v b1 - pow2 (64 * i) * v b.[i];
+        (==) { bn_eval_unfold_i b (i + 1) }
+        eval_ (i + 1) (slice b 0 (i + 1)) i + pow2 (64 * i) * bn_v b1;
+        (==) { bn_eval_extensionality_j (slice b 0 (i + 1)) (slice b 0 i) i }
+        eval_ i (slice b 0 i) i + pow2 (64 * i) * bn_v b1;
+      }; () end end
