@@ -72,6 +72,12 @@ let rec bn_eval_zeroes #len b i =
   else bn_eval_zeroes #len b (i - 1)
 
 
+val bn_eval_create1: c:uint64 -> Lemma (bn_v (create 1 c) == v c)
+let bn_eval_create1 c =
+  bn_eval_unfold_i (create 1 c) 1;
+  bn_eval0 (create 1 c)
+
+
 val bn_eval_extensionality_j:
     #len1:size_nat
   -> #len2:size_nat
@@ -147,3 +153,48 @@ let rec bn_eval_split_i #len b i =
         (==) { bn_eval_extensionality_j (slice b 0 (i + 1)) (slice b 0 i) i }
         eval_ i (slice b 0 i) i + pow2 (64 * i) * bn_v b1;
       }; () end end
+
+
+val bn_eval_bound: #len:size_nat -> b:lbignum len -> i:nat{i <= len} -> Lemma
+  (eval_ len b i < pow2 (64 * i))
+let rec bn_eval_bound #len b i =
+  if i = 0 then ()
+  else begin
+    bn_eval_unfold_i b i;
+    assert (eval_ len b i == eval_ len b (i - 1) + pow2 (64 * (i - 1)) * v b.[i - 1]);
+    calc (<) {
+      eval_ len b (i - 1) + pow2 (64 * (i - 1)) * v b.[i - 1];
+      (<) { bn_eval_bound #len b (i - 1) }
+      pow2 (64 * (i - 1)) + pow2 (64 * (i - 1)) * v b.[i - 1];
+      (==) { Math.Lemmas.distributivity_add_right (pow2 (64 * (i - 1))) 1 (v b.[i - 1]) }
+      pow2 (64 * (i - 1)) * (1 + v b.[i - 1]);
+      (<=) { Math.Lemmas.lemma_mult_le_left (pow2 (64 * (i - 1))) (1 + v b.[i - 1]) (pow2 64) }
+      pow2 (64 * (i - 1)) * pow2 64;
+      (==) { Math.Lemmas.pow2_plus (64 * (i - 1)) 64 }
+      pow2 (64 * i);
+    };
+    assert (eval_ len b i < pow2 (64 * i))
+    end
+
+
+val bn_eval_index: #len:size_nat -> b:lbignum len -> i:nat{i < len} -> Lemma
+  (v b.[i] == bn_v b / pow2 (64 * i) % pow2 64)
+let bn_eval_index #len b i =
+  calc (==) {
+    bn_v b / pow2 (64 * i) % pow2 64;
+    (==) { bn_eval_split_i #len b i }
+    (bn_v (slice b 0 i) + pow2 (64 * i) * bn_v (slice b i len)) / pow2 (64 * i) % pow2 64;
+    (==) { Math.Lemmas.division_addition_lemma (bn_v (slice b 0 i)) (pow2 (64 * i)) (bn_v (slice b i len)) }
+    (bn_v (slice b 0 i) / pow2 (64 * i) + bn_v (slice b i len)) % pow2 64;
+    (==) { bn_eval_bound (slice b 0 i) i; Math.Lemmas.small_division_lemma_1 (bn_v (slice b 0 i)) (pow2 (64 * i)) }
+    bn_v (slice b i len) % pow2 64;
+    (==) { bn_eval_split_i (slice b i len) 1 }
+    (bn_v (slice b i (i + 1)) + pow2 64 * bn_v (slice b (i + 1) len)) % pow2 64;
+    (==) { Math.Lemmas.modulo_addition_lemma (bn_v (slice b i (i + 1))) (pow2 64) (bn_v (slice b (i + 1) len)) }
+    bn_v (slice b i (i + 1)) % pow2 64;
+    (==) { Seq.lemma_index_slice b i (i + 1) 0 }
+    v b.[i] % pow2 64;
+    (==) { Math.Lemmas.modulo_lemma (v b.[i]) (pow2 64) }
+    v b.[i];
+  };
+  assert (bn_v b / pow2 (64 * i) % pow2 64 == v b.[i])

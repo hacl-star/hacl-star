@@ -20,15 +20,11 @@ let smont_reduction_f rLen n mu i c =
   res
 
 
-val mont_reduction_lemma_step_bound: rLen:nat -> n:pos -> mu:nat -> i:pos{i <= rLen} -> c:nat -> res0:nat -> Lemma
+val mont_reduction_lemma_step_bound_aux: rLen:nat -> n:pos -> q_i:nat{q_i < pow2 64} -> i:pos{i <= rLen} -> c:nat -> res0:nat -> Lemma
    (requires res0 <= c + (pow2 (64 * (i - 1)) - 1) * n)
-   (ensures (let res = smont_reduction_f rLen n mu (i - 1) res0 in res <= c + (pow2 (64 * i) - 1) * n))
+   (ensures (res0 + n * q_i * pow2 (64 * (i - 1)) <= c + (pow2 (64 * i) - 1) * n))
 
-let mont_reduction_lemma_step_bound rLen n mu i c res0 =
-  let res = smont_reduction_f rLen n mu (i - 1) res0 in
-  let c_i = res0 / pow2 (64 * (i - 1)) % pow2 64 in
-  let q_i = mu * c_i % pow2 64 in
-  assert (res == res0 + n * q_i * pow2 (64 * (i - 1)));
+let mont_reduction_lemma_step_bound_aux rLen n q_i i c res0 =
   calc (<=) {
     res0 + n * q_i * pow2 (64 * (i - 1));
     (<=) { Math.Lemmas.lemma_mult_le_right (pow2 (64 * (i - 1))) q_i (pow2 64 - 1) }
@@ -49,7 +45,19 @@ let mont_reduction_lemma_step_bound rLen n mu i c res0 =
     c - n + pow2 (64 * i) * n;
     (==) { Math.Lemmas.distributivity_sub_left (pow2 (64 * i)) 1 n }
     c + (pow2 (64 * i) - 1) * n;
-  };
+  }
+
+
+val mont_reduction_lemma_step_bound: rLen:nat -> n:pos -> mu:nat -> i:pos{i <= rLen} -> c:nat -> res0:nat -> Lemma
+   (requires res0 <= c + (pow2 (64 * (i - 1)) - 1) * n)
+   (ensures (let res = smont_reduction_f rLen n mu (i - 1) res0 in res <= c + (pow2 (64 * i) - 1) * n))
+
+let mont_reduction_lemma_step_bound rLen n mu i c res0 =
+  let res = smont_reduction_f rLen n mu (i - 1) res0 in
+  let c_i = res0 / pow2 (64 * (i - 1)) % pow2 64 in
+  let q_i = mu * c_i % pow2 64 in
+  assert (res == res0 + n * q_i * pow2 (64 * (i - 1)));
+  mont_reduction_lemma_step_bound_aux rLen n q_i i c res0;
   assert (res <= c + (pow2 (64 * i) - 1) * n)
 
 
