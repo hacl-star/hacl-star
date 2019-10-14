@@ -317,7 +317,7 @@ val ecdsa_verification_step23: mLen: size_t -> m: lbuffer uint8 mLen{uint_v mLen
   (requires fun h -> live h m /\ live h hashAsFelem)
   (ensures fun h0 _ h1 -> modifies (loc hashAsFelem) h0 h1 /\ as_nat h1 hashAsFelem < prime_p256_order /\
     (
-      as_nat h1 hashAsFelem = (felem_seq_as_nat (Hacl.Spec.ECDSA.changeEndian(Lib.ByteSequence.uints_from_bytes_be (Spec.Hash.hash Spec.Hash.Definitions.SHA2_256 (as_seq h0 m))))) % prime_p256_order
+      as_nat h1 hashAsFelem = (felem_seq_as_nat (Hacl.Spec.ECDSA.changeEndian(Lib.ByteSequence.uints_from_bytes_be (Spec.Agile.Hash.hash Spec.Hash.Definitions.SHA2_256 (as_seq h0 m))))) % prime_p256_order
  ) 
 )
 
@@ -327,7 +327,7 @@ let ecdsa_verification_step23 mLen m hashAsFelem =
       let h0 = ST.get() in 
     hash_256 m mLen mHash;
       let h1 = ST.get() in 
-      assert(Seq.equal (as_seq h1 mHash) (Spec.Hash.hash Spec.Hash.Definitions.SHA2_256 (as_seq h0 m)));
+      assert(Seq.equal (as_seq h1 mHash) (Spec.Agile.Hash.hash Spec.Hash.Definitions.SHA2_256 (as_seq h0 m)));
     toUint64 mHash hashAsFelem;
     reduction_prime_2prime_order hashAsFelem hashAsFelem;
   pop_frame()
@@ -585,7 +585,7 @@ val ecdsa_verification_core: publicKeyBuffer: point ->
       LowStar.Monotonic.Buffer.all_disjoint [loc publicKeyBuffer; loc r; loc s; loc m; loc hashAsFelem;  loc xBuffer; loc tempBuffer] )
     (ensures fun h0 state h1 -> modifies (loc hashAsFelem |+| loc publicKeyBuffer |+| loc tempBuffer |+| loc xBuffer) h0 h1 /\
        (
-	 let hash = Spec.Hash.hash Spec.Hash.Definitions.SHA2_256 (as_seq h0 m) in 
+	 let hash = Spec.Agile.Hash.hash Spec.Hash.Definitions.SHA2_256 (as_seq h0 m) in 
 	 let hashNat = felem_seq_as_nat (Hacl.Spec.ECDSA.changeEndian(Lib.ByteSequence.uints_from_bytes_be hash)) % prime_p256_order in 
 	   let u1 = (Hacl.Spec.P256.Definitions.pow (as_nat h0 s) (prime_p256_order - 2)  * hashNat) % prime_p256_order in 
 	   let u2 = (Hacl.Spec.P256.Definitions.pow (as_nat h0 s) (prime_p256_order - 2)  * (as_nat h0 r)) % prime_p256_order in 
@@ -643,7 +643,7 @@ let ecdsa_verification pubKey r s mLen m =
 	  let pubKeyX = as_nat h0 (gsub pubKey (size 0) (size 4)) in 
 	  let pubKeyY = as_nat h0 (gsub pubKey (size 4) (size 4)) in 
 	  let pointJac = toJacobianCoordinates (pubKeyX, pubKeyY) in 
-	 let hash = Spec.Hash.hash Spec.Hash.Definitions.SHA2_256 (as_seq h0 m) in 
+	 let hash = Spec.Agile.Hash.hash Spec.Hash.Definitions.SHA2_256 (as_seq h0 m) in 
 	 let hashNat = felem_seq_as_nat (Hacl.Spec.ECDSA.changeEndian(Lib.ByteSequence.uints_from_bytes_be hash)) % prime_p256_order in 
 	   let u1 = (Hacl.Spec.P256.Definitions.pow (as_nat h0 s) (prime_p256_order - 2)  * hashNat) % prime_p256_order in 
 	   let u2 = (Hacl.Spec.P256.Definitions.pow (as_nat h0 s) (prime_p256_order - 2)  * (as_nat h0 r)) % prime_p256_order in 
