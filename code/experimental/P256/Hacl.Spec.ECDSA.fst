@@ -8,7 +8,7 @@ open Lib.ByteSequence
 open Lib.IntTypes
 open Lib.Sequence
 
-open Spec.Hash
+open Spec.Agile.Hash
 open Hacl.Spec.P256 
 
 (*
@@ -206,7 +206,7 @@ let ecdsa_verification publicKey r s mLen input =
     if qValid = false then false else begin
   let step1 = checkCoordinates r s in if step1 = false then false else begin
 
-  let hashResult = Spec.Hash.hash Spec.Hash.Definitions.SHA2_256 input in 
+  let hashResult = Spec.Agile.Hash.hash Spec.Hash.Definitions.SHA2_256 input in 
   let hashNat = felem_seq_as_nat (changeEndian(Lib.ByteSequence.uints_from_bytes_be hashResult)) % prime_p256_order in 
 
   let u1 = (Hacl.Spec.P256.Definitions.pow s (prime_p256_order - 2) * hashNat) % prime_p256_order in 
