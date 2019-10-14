@@ -57,14 +57,14 @@ let blake2_incremental_update a input state =
   if ll < rb then (
     Some ({state with pl = state.pl + ll; block = block}))
   else (
-    let hash = blake2_update_block a ((state.n + 1) * size_block a) block state.hash in
+    let hash = blake2_update_block a false ((state.n + 1) * size_block a) block state.hash in
     let state = {state with hash = hash; n = state.n + 1; pl = 0;} in
     (* Handle all full blocks available *)
     let n1 = (ll - ll0) / size_block a in
     let input1 = sub #uint8 #ll input ll0 (ll - ll0) in
     let hash = repeati n1 (fun i ->
         let block = sub #uint8 #(length input1) input1 (i * size_block a) (size_block a) in
-        blake2_update_block a ((state.n + i + 1) * size_block a) block
+        blake2_update_block a false ((state.n + i + 1) * size_block a) block
       ) state.hash
     in
     let state = {state with hash = hash; n = state.n + n1;} in
