@@ -51,8 +51,13 @@ unfold let limb_inttype (a:alg) =
   | U32 -> U64
   | U64 -> U128
 
+inline_for_extraction
 unfold type word_t (a:alg) = uint_t (wt a) SEC
+
+inline_for_extraction
 type pub_word_t (a:alg) = uint_t (wt a) PUB
+
+inline_for_extraction
 type limb_t (a:alg) : Type0 = uint_t (limb_inttype a) SEC
 
 inline_for_extraction
