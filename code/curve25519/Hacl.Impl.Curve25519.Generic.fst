@@ -100,7 +100,7 @@ let encode_point #s o i =
   let z : felem s = sub i (nlimb s) (nlimb s) in
   let tmp = create_felem s in
   let u64s = create 4ul (u64 0) in
-  let tmp_w = create (2ul *. nwide s) (wide_zero s) in
+  let tmp_w = create (2ul `FStar.UInt32.mul` ((nwide s) <: FStar.UInt32.t)) (wide_zero s) in
   let h0 = ST.get () in
   finv tmp z tmp_w;
   fmul tmp tmp x tmp_w;
@@ -465,7 +465,7 @@ val montgomery_ladder:
 let montgomery_ladder #s out key init =
   push_frame();
   let h0 = ST.get () in
-  let tmp2 = create (2ul *! nwide s) (wide_zero s) in
+  let tmp2 = create (2ul `FStar.UInt32.mul` ((nwide s) <: FStar.UInt32.t)) (wide_zero s) in
   let p01_tmp1_swap = create (8ul *! nlimb s +! 1ul) (limb_zero s) in
 
   let p0 : point s = sub p01_tmp1_swap 0ul (2ul *! nlimb s) in
@@ -483,7 +483,7 @@ val scalarmult: (#s: field_spec) -> scalarmult_st s
 [@ Meta.Attribute.specialize ]
 let scalarmult #s out priv pub =
   push_frame ();
-  let init = create (2ul *. nlimb s) (limb_zero s) in
+  let init = create (2ul `FStar.UInt32.mul` ((nlimb s) <: FStar.UInt32.t)) (limb_zero s) in
   decode_point #s init pub;
   montgomery_ladder #s init priv init;
   encode_point #s out init;

@@ -629,9 +629,11 @@ REQUIRED_FLAGS	=\
   -library EverCrypt.AutoConfig,EverCrypt.OpenSSL,EverCrypt.BCrypt \
   -minimal \
   -add-include '"kremlin/internal/types.h"' \
-  -add-include '"kremlin/internal/target.h"' \
   -add-include '"kremlin/lowstar_endianness.h"' \
   -add-include '<string.h>'
+
+# Disabled for Mozilla (carefully avoiding any KRML_CHECK_SIZE)
+TARGET_H_INCLUDE = -add-include '"kremlin/internal/target.h"'
 
 # Disabled for distributions that don't include vectorized implementations.
 INTRINSIC_FLAGS = -add-include '"libintvector.h"'
@@ -694,7 +696,8 @@ DEFAULT_FLAGS = \
   $(OPT_FLAGS) \
   $(INTRINSIC_FLAGS) \
   $(BUNDLE_FLAGS) \
-  $(REQUIRED_FLAGS)
+  $(REQUIRED_FLAGS) \
+  $(TARGET_H_INCLUDE)
 
 
 # WASM distribution
@@ -803,6 +806,7 @@ dist/mozilla/Makefile.basic: HACL_OLD_FILES =
 dist/mozilla/Makefile.basic: HAND_WRITTEN_FILES =
 dist/mozilla/Makefile.basic: TARGETCONFIG_FLAGS =
 dist/mozilla/Makefile.basic: HAND_WRITTEN_LIB_FLAGS =
+dist/mozilla/Makefile.basic: TARGET_H_INCLUDE = -add-include '<stdbool.h>'
 
 # Portable distribution
 # ---------------------
