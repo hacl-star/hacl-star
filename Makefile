@@ -658,7 +658,7 @@ SHA3_BUNDLE=-bundle Hacl.Impl.SHA3+Hacl.SHA3=[rename=Hacl_SHA3]
 CHACHA20_BUNDLE=-bundle Hacl.Chacha20=Hacl.Impl.Chacha20,Hacl.Impl.Chacha20.*
 SALSA20_BUNDLE=-bundle Hacl.Impl.Salsa20+Hacl.Impl.HSalsa20=Hacl.Impl.Salsa20.*[rename=Hacl_Salsa20]
 CURVE_BUNDLE=-bundle Hacl.Curve25519_64=Hacl.Impl.Curve25519.Field64.Vale \
-  -bundle Hacl.Curve25519_64_Slow=Hacl.Impl.Curve25519.Field64.Hacl \
+  -bundle Hacl.Curve25519_64_Slow=Hacl.Impl.Curve25519.Field64.Hacl,Hacl.Spec.Curve25519,Hacl.Spec.Curve25519.* \
   -bundle Hacl.Curve25519_51=Hacl.Impl.Curve25519.Field51 \
   -bundle Hacl.Impl.Curve25519.*[rename=Hacl_Curve_Leftovers]
 CHACHAPOLY_BUNDLE=-bundle Hacl.Impl.Chacha20Poly1305
@@ -689,12 +689,12 @@ BUNDLE_FLAGS	=\
 
 DEFAULT_FLAGS = \
   $(HAND_WRITTEN_LIB_FLAGS) \
-  $(REQUIRED_FLAGS) \
   $(TARGETCONFIG_FLAGS) \
   $(TEST_FLAGS) \
   $(OPT_FLAGS) \
   $(INTRINSIC_FLAGS) \
-  $(BUNDLE_FLAGS)
+  $(BUNDLE_FLAGS) \
+  $(REQUIRED_FLAGS)
 
 
 # WASM distribution
