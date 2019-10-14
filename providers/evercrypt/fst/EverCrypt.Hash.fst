@@ -127,8 +127,8 @@ let create a =
 
 let init #a s =
   match !*s with
-  | MD5_s p -> Hacl.Hash.MD5.init p
-  | SHA1_s p -> Hacl.Hash.SHA1.init p
+  | MD5_s p -> Hacl.Hash.MD5.legacy_init p
+  | SHA1_s p -> Hacl.Hash.SHA1.legacy_init p
   | SHA2_224_s p -> Hacl.Hash.SHA2.init_224 p
   | SHA2_256_s p -> Hacl.Hash.SHA2.init_256 p
   | SHA2_384_s p -> Hacl.Hash.SHA2.init_384 p
@@ -160,8 +160,8 @@ let update_multi_224 s blocks n =
 #push-options "--max_fuel 1"
 let update #a s block =
   match !*s with
-  | MD5_s p -> Hacl.Hash.MD5.update p block
-  | SHA1_s p -> Hacl.Hash.SHA1.update p block
+  | MD5_s p -> Hacl.Hash.MD5.legacy_update p block
+  | SHA1_s p -> Hacl.Hash.SHA1.legacy_update p block
   | SHA2_224_s p -> update_multi_224 p block 1ul
   | SHA2_256_s p -> update_multi_256 p block 1ul
   | SHA2_384_s p -> Hacl.Hash.SHA2.update_384 p block
@@ -172,10 +172,10 @@ let update_multi #a s blocks len =
   match !*s with
   | MD5_s p ->
       let n = len / block_len MD5 in
-      Hacl.Hash.MD5.update_multi p blocks n
+      Hacl.Hash.MD5.legacy_update_multi p blocks n
   | SHA1_s p ->
       let n = len / block_len SHA1 in
-      Hacl.Hash.SHA1.update_multi p blocks n
+      Hacl.Hash.SHA1.legacy_update_multi p blocks n
   | SHA2_224_s p ->
       let n = len / block_len SHA2_224 in
       update_multi_224 p blocks n
@@ -254,9 +254,9 @@ let update_last_128 a update_last p last total_len =
 let update_last #a s last total_len =
   match !*s with
   | MD5_s p ->
-      update_last_64 a Hacl.Hash.MD5.update_last p last total_len
+      update_last_64 a Hacl.Hash.MD5.legacy_update_last p last total_len
   | SHA1_s p ->
-      update_last_64 a Hacl.Hash.SHA1.update_last p last total_len
+      update_last_64 a Hacl.Hash.SHA1.legacy_update_last p last total_len
   | SHA2_224_s p ->
       update_last_64 a update_last_224 p last total_len
   | SHA2_256_s p ->
@@ -269,8 +269,8 @@ let update_last #a s last total_len =
 
 let finish #a s dst =
   match !*s with
-  | MD5_s p -> Hacl.Hash.MD5.finish p dst
-  | SHA1_s p -> Hacl.Hash.SHA1.finish p dst
+  | MD5_s p -> Hacl.Hash.MD5.legacy_finish p dst
+  | SHA1_s p -> Hacl.Hash.SHA1.legacy_finish p dst
   | SHA2_224_s p -> Hacl.Hash.SHA2.finish_224 p dst
   | SHA2_256_s p -> Hacl.Hash.SHA2.finish_256 p dst
   | SHA2_384_s p -> Hacl.Hash.SHA2.finish_384 p dst
@@ -331,8 +331,8 @@ let hash_224 input input_len dst =
 
 let hash a dst input len =
   match a with
-  | MD5 -> Hacl.Hash.MD5.hash input len dst
-  | SHA1 -> Hacl.Hash.SHA1.hash input len dst
+  | MD5 -> Hacl.Hash.MD5.legacy_hash input len dst
+  | SHA1 -> Hacl.Hash.SHA1.legacy_hash input len dst
   | SHA2_224 -> hash_224 input len dst
   | SHA2_256 -> hash_256 input len dst
   | SHA2_384 -> Hacl.Hash.SHA2.hash_384 input len dst

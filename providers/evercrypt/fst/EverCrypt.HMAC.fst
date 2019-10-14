@@ -5,7 +5,7 @@ open Hacl.HMAC
 
 let compute_sha1: compute_st SHA1 =
   let open Hacl.Hash.SHA1 in
-  mk_compute SHA1 hash alloca init update_multi update_last finish
+  mk_compute SHA1 legacy_hash legacy_alloca legacy_init legacy_update_multi legacy_update_last legacy_finish
 
 let compute_sha2_256: compute_st SHA2_256 =
   let open Hacl.Hash.SHA2 in
