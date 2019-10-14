@@ -8,7 +8,7 @@ open LowStar.Buffer
 open Lib.IntTypes
 open Lib.Buffer
 open Lib.PrintBuffer
-open Hacl.Blake2
+open Hacl.Blake2b
 
 #reset-options "--admit_smt_queries true"
 

@@ -38,7 +38,7 @@ FSTAR = $(FSTAR_HOME)/bin/fstar.exe $(FSTAR_FLAGS)
 
 ENABLE_HINTS = --use_hints --use_hint_hashes --record_hints --query_stats
 
-ROOTS = Hacl.Test.Blake2b.fst
+ROOTS = Hacl.Test.Blake2b.fst # Hacl.Blake2b.fst Hacl.Blake2s.fst
 
 .PRECIOUS: %.krml
 
@@ -75,11 +75,11 @@ KREMLIN=$(KREMLIN_HOME)/krml
 $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	$(KREMLIN) -skip-compilation \
 	-no-prefix 'Hacl.Test.Blake2b' \
-	-no-prefix 'Hacl.Blake2' \
+	-no-prefix 'Hacl.Blake2b' \
 	-bundle 'Lib.*' \
 	-bundle 'Spec.*' \
 	-bundle 'C=C.Endianness' \
-	-bundle 'Hacl.Blake2=Hacl.Impl.*,Hacl.Blake2' \
+	-bundle 'Hacl.Impl.*[rename=Hacl_Blake_Tables]' \
 	-library 'C,FStar' \
 	-drop 'LowStar,Spec,Prims,Lib,C.Loops.*' \
 	-add-include '"c/Lib_PrintBuffer.h"' \
