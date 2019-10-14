@@ -157,7 +157,7 @@ inline_for_extraction
 let pad_3 (a: hash_alg) (len: len_t a) (dst: B.buffer uint8):
   ST.Stack unit
     (requires (fun h ->
-      len_v a len < max_input_length a /\
+      len_v a len <= max_input_length a /\
       B.live h dst /\ B.length dst = len_length a))
     (ensures (fun h0 _ h1 ->
       max_input_size_len a;
