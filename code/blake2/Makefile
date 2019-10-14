@@ -75,11 +75,13 @@ KREMLIN=$(KREMLIN_HOME)/krml
 $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	$(KREMLIN) -skip-compilation \
 	-no-prefix 'Hacl.Test.Blake2b' \
+	-no-prefix 'Hacl.Test.Blake2s' \
 	-no-prefix 'Hacl.Blake2b' \
+	-no-prefix 'Hacl.Blake2s' \
 	-bundle 'Lib.*' \
 	-bundle 'Spec.*' \
 	-bundle 'C=C.*,C.Endianness' \
-	-bundle 'Hacl.Impl.*[rename=Hacl_Blake_Tables]' \
+	-bundle 'Hacl.Impl.*[rename=Hacl_Blake2_Constants]' \
 	-library 'C,FStar' \
 	-drop 'LowStar,Spec,Prims,Lib,C.Loops.*' \
 	-add-include '"c/Lib_PrintBuffer.h"' \
