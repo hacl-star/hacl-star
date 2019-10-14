@@ -5,8 +5,8 @@ HACL_HOME    ?= ../..
 CACHE_DIR     ?= $(HACL_HOME)/.cache
 HINT_DIR      ?= $(HACL_HOME)/.hints
 OUTPUT_DIR    ?= .output
-GENERATED_DIR ?= blake2b-c
-OUT_DIR	     ?= blake2b-c
+GENERATED_DIR ?= blake2-c
+OUT_DIR	     ?= blake2-c
 
 .PHONY: all test stage1 stage2 clean clean-c distclean
 
@@ -38,7 +38,7 @@ FSTAR = $(FSTAR_HOME)/bin/fstar.exe $(FSTAR_FLAGS)
 
 ENABLE_HINTS = --use_hints --use_hint_hashes --record_hints --query_stats
 
-ROOTS = Hacl.Test.Blake2b.fst # Hacl.Blake2b.fst Hacl.Blake2s.fst
+ROOTS = Hacl.Test.Blake2b.fst Hacl.Test.Blake2s.fst
 
 .PRECIOUS: %.krml
 
@@ -78,7 +78,7 @@ $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	-no-prefix 'Hacl.Blake2b' \
 	-bundle 'Lib.*' \
 	-bundle 'Spec.*' \
-	-bundle 'C=C.Endianness' \
+	-bundle 'C=C.*,C.Endianness' \
 	-bundle 'Hacl.Impl.*[rename=Hacl_Blake_Tables]' \
 	-library 'C,FStar' \
 	-drop 'LowStar,Spec,Prims,Lib,C.Loops.*' \
