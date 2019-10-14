@@ -22,7 +22,7 @@ let xor_bytes #len b1 b2 = map2 (fun x y -> x ^. y) b1 b2
 
 let hLen = 32
 let max_input = Spec.Hash.Definitions.max_input_length Spec.Hash.Definitions.SHA2_256
-let sha2_256 (msg:bytes{length msg < max_input}) : lbytes hLen = Spec.Hash.hash Spec.Hash.Definitions.SHA2_256 msg
+let sha2_256 (msg:bytes{length msg < max_input}) : lbytes hLen = Spec.Agile.Hash.hash Spec.Hash.Definitions.SHA2_256 msg
 
 
 (* Mask Generation Function *)

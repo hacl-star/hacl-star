@@ -8,9 +8,8 @@ open Lib.RawIntTypes
 open Lib.Sequence
 open Lib.ByteSequence
 
-module Hash = Spec.Hash
-module HMAC = Spec.HMAC
-module HKDF = Spec.HKDF
+module HMAC = Spec.Agile.HMAC
+module HKDF = Spec.Agile.HKDF
 
 
 //

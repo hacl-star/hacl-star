@@ -7,6 +7,7 @@ open Lib.Sequence
 open Lib.ByteSequence
 open Lib.RandomSequence
 
+module Def = Spec.Hash.Definitions
 module DH = Spec.Agile.DH
 module AEAD = Spec.Agile.AEAD
 module Hash = Spec.Agile.Hash
@@ -21,19 +22,19 @@ let pow2_35_less_than_pow2_125 : _:unit{pow2 32 * pow2 3 <= pow2 125 - 1} = asse
 
 /// Types
 
-type ciphersuite = DH.algorithm & AEAD.algorithm & a:Hash.algorithm{a == Hash.HASH_SHA2_256 \/ a == Hash.HASH_SHA2_512}
+type ciphersuite = DH.algorithm & AEAD.algorithm & a:Def.hash_alg{a == Def.SHA2_256 \/ a == Def.SHA2_512}
 
 val id_of_cs: cs:ciphersuite -> Tot (lbytes 1)
 let id_of_cs cs =
   match cs with
-  | DH.DH_Curve25519, AEAD.AEAD_AES128_GCM,        Hash.HASH_SHA2_256 -> create 1 (u8 0)
-  | DH.DH_Curve25519, AEAD.AEAD_AES128_GCM,        Hash.HASH_SHA2_512 -> create 1 (u8 1)
-  | DH.DH_Curve25519, AEAD.AEAD_Chacha20_Poly1305, Hash.HASH_SHA2_256 -> create 1 (u8 2)
-  | DH.DH_Curve25519, AEAD.AEAD_Chacha20_Poly1305, Hash.HASH_SHA2_512 -> create 1 (u8 3)
-  | DH.DH_Curve448,   AEAD.AEAD_AES128_GCM,        Hash.HASH_SHA2_256 -> create 1 (u8 4)
-  | DH.DH_Curve448,   AEAD.AEAD_AES128_GCM,        Hash.HASH_SHA2_512 -> create 1 (u8 5)
-  | DH.DH_Curve448,   AEAD.AEAD_Chacha20_Poly1305, Hash.HASH_SHA2_256 -> create 1 (u8 6)
-  | DH.DH_Curve448,   AEAD.AEAD_Chacha20_Poly1305, Hash.HASH_SHA2_512 -> create 1 (u8 7)
+  | DH.DH_Curve25519, AEAD.AEAD_AES128_GCM,        Def.SHA2_256 -> create 1 (u8 0)
+  | DH.DH_Curve25519, AEAD.AEAD_AES128_GCM,        Def.SHA2_512 -> create 1 (u8 1)
+  | DH.DH_Curve25519, AEAD.AEAD_Chacha20_Poly1305, Def.SHA2_256 -> create 1 (u8 2)
+  | DH.DH_Curve25519, AEAD.AEAD_Chacha20_Poly1305, Def.SHA2_512 -> create 1 (u8 3)
+  | DH.DH_Curve448,   AEAD.AEAD_AES128_GCM,        Def.SHA2_256 -> create 1 (u8 4)
+  | DH.DH_Curve448,   AEAD.AEAD_AES128_GCM,        Def.SHA2_512 -> create 1 (u8 5)
+  | DH.DH_Curve448,   AEAD.AEAD_Chacha20_Poly1305, Def.SHA2_256 -> create 1 (u8 6)
+  | DH.DH_Curve448,   AEAD.AEAD_Chacha20_Poly1305, Def.SHA2_512 -> create 1 (u8 7)
 
 let curve_of_cs (cs:ciphersuite) : DH.algorithm =
   let (c,a,h) = cs in c
@@ -41,7 +42,7 @@ let curve_of_cs (cs:ciphersuite) : DH.algorithm =
 let aead_of_cs (cs:ciphersuite) : AEAD.algorithm =
   let (c,a,h) = cs in a
 
-let hash_of_cs (cs:ciphersuite) : Hash.algorithm =
+let hash_of_cs (cs:ciphersuite) : Def.hash_alg =
   let (c,a,h) = cs in h
 
 
