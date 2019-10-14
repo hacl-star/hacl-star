@@ -36,7 +36,7 @@ let hkdf_round0 a prk info =
   let input = input.[ilen] <- u8 1 in
   HMAC.hmac a prk input
 
-#reset-options "--z3rlimit 100"
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 val hkdf_round:
     a: hash_alg
   -> prk: bytes{HMAC.keysized a (Seq.length prk)}
@@ -92,5 +92,7 @@ let hkdf_expand_label a secret label context len =
 
 
 let hkdf_expand_derive_secret a secret label context =
+  assert_norm (maxint U8 <= pow2 61 - 1);
+  assert_norm (maxint U8 <= pow2 125 - 1);
   let loghash = Hash.hash a context in
   hkdf_expand_label a secret label loghash (hash_length a)

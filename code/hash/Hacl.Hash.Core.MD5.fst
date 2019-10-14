@@ -20,7 +20,7 @@ let _h0 = IB.igcmalloc_of_list HS.root Spec.init_as_list
 let _t = IB.igcmalloc_of_list HS.root Spec.t_as_list
 
 noextract inline_for_extraction
-let alloca () =
+let legacy_alloca () =
   B.alloca_of_list Spec.init_as_list
 
 (* We read values from constant buffers through accessors to isolate
@@ -54,7 +54,7 @@ let seq_index_upd (#t: Type) (s: Seq.seq t) (i: nat) (v: t) (j: nat) : Lemma
   [SMTPat (Seq.index (Seq.upd s i v) j)]
 = ()
 
-let init s =
+let legacy_init s =
   let h = HST.get () in
   let inv (h' : HS.mem) (i: nat) : GTot Type0 =
     B.live h' s /\ B.modifies (B.loc_buffer s) h h' /\ i <= 4 /\ Seq.slice (B.as_seq h' s) 0 i == Seq.slice Spec.init 0 i
@@ -399,8 +399,8 @@ let update'
   reveal_opaque (`%Spec.update) Spec.update;
   assert (Seq.equal (B.as_seq h1 abcd) (Spec.update (B.as_seq h0 abcd) (B.as_seq h0 x)))
 
-let update abcd x = update' abcd x
+let legacy_update abcd x = update' abcd x
 
-let pad: pad_st MD5 = Hacl.Hash.PadFinish.pad MD5
+let legacy_pad: pad_st MD5 = Hacl.Hash.PadFinish.pad MD5
 
-let finish: finish_st MD5 = Hacl.Hash.PadFinish.finish MD5
+let legacy_finish: finish_st MD5 = Hacl.Hash.PadFinish.finish MD5
