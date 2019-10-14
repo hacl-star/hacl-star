@@ -461,6 +461,7 @@ val poly1305_update_multi:
 
 let poly1305_update_multi #s len text pre acc =
   let h0 = ST.get () in
+  assert_norm (v 10ul + v 5ul <= v 20ul);
   assert (feval h0 (gsub pre 10ul 5ul) == Vec.compute_rw #(width s) ((feval h0 (gsub pre 0ul 5ul)).[0]));
 
   let bs = blocklen s in
