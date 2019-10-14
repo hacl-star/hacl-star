@@ -819,7 +819,6 @@ let lemma_optimized_barrett_reduce2 a =
   assert_norm (S.q == 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed);
   assert_norm (0x100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000 == pow2 512)
 
-#pop-options
 
 private
 let lemma_0 (x:nat) (y:nat) (c:pos) : Lemma
@@ -828,7 +827,14 @@ let lemma_0 (x:nat) (y:nat) (c:pos) : Lemma
   = if x / c - y / c > 1 then (
       Math.Lemmas.lemma_div_mod x c;
       Math.Lemmas.lemma_div_mod y c;
-      Math.Lemmas.distributivity_sub_right c (x / c) (y / c))
+      Math.Lemmas.distributivity_sub_right c (x / c) (y / c);
+      Math.Lemmas.lemma_div_mod (x-y) c;
+      Math.Lemmas.small_div (x-y) c;
+      Math.Lemmas.swap_mul c (x/c - y/c);
+      Math.Lemmas.cancel_mul_div (x/c - y/c) c
+      )
+
+#pop-options
 
 #set-options "--z3rlimit 700"
 

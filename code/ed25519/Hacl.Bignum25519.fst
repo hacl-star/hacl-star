@@ -74,13 +74,26 @@ let fsum a b =
 let fdifference a b =
   BN.fsub a b a
 
+#push-options "--z3cliopt smt.arith.nl=false"
+
 private val lemma_carry_local: x:int -> y:int -> n:nat -> Lemma
   (pow2 n * x + pow2 (n+51) * y = pow2 n * (x % (pow2 51)) + pow2 (n+51) * ((x / pow2 51) + y))
 private let lemma_carry_local x y n =
-  Math.Lemmas.lemma_div_mod x (pow2 51);
-  Math.Lemmas.pow2_plus n 51;
-  Math.Lemmas.distributivity_add_right (pow2 n) (pow2 51 * (x / pow2 51)) (x % pow2 51);
-  Math.Lemmas.distributivity_add_right (pow2 (n + 51)) (x / pow2 51) y
+  calc (==) {
+    pow2 n * x + pow2 (n + 51) * y;
+    (==) {  Math.Lemmas.lemma_div_mod x (pow2 51) }
+    pow2 n * (pow2 51 * (x / pow2 51) + x % pow2 51) + pow2 (n + 51) * y;
+    (==) { Math.Lemmas.distributivity_add_right (pow2 n) (pow2 51 * (x / pow2 51)) (x % pow2 51) }
+    pow2 n * (pow2 51 * (x / pow2 51)) + pow2 n * (x % pow2 51) + pow2 (n + 51) * y;
+    (==) { Math.Lemmas.paren_mul_right (pow2 n) (pow2 51) (x / pow2 51);
+           Math.Lemmas.paren_mul_left (pow2 n) (pow2 51) (x / pow2 51);
+           Math.Lemmas.pow2_plus n 51 }
+    pow2 (n + 51) * (x / pow2 51) + pow2 n * (x % pow2 51) + pow2 (n + 51) * y;
+    (==) { Math.Lemmas.distributivity_add_right (pow2 (n + 51)) (x / pow2 51) y }
+    pow2 (n + 51) * (x / pow2 51 + y) + pow2 n * (x % pow2 51);
+  }
+
+#pop-options
 
 let lemma_change_as_nat_repr (v0 v1 v2 v3 v4:nat) : Lemma
   (v0 + pow2 51 * v1 + pow2 102 * v2 + pow2 153 * v3 + pow2 204 * v4 ==
