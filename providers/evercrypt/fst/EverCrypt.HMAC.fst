@@ -5,7 +5,7 @@ open Hacl.HMAC
 
 let compute_sha1 =
   let open Hacl.Hash.SHA1 in
-  mk_compute SHA1 hash alloca init update_multi update_last finish
+  mk_compute SHA1 legacy_hash legacy_alloca legacy_init legacy_update_multi legacy_update_last legacy_finish
 
 (* This implementation calls into EverCrypt.Hash, which multiplexes
    between Hacl and Vale implementations of SHA2_256 functions depending on
