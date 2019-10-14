@@ -51,6 +51,7 @@ let max_input_length: hash_alg -> Tot nat = function
   | SHA2_224 | SHA2_256 -> pow2 61 - 1 
   | SHA2_384 | SHA2_512 -> pow2 125 - 1
 
+(* A type that can hold a maximum length, in bits. *)
 inline_for_extraction
 let len_int_type: hash_alg -> inttype = function
   | MD5 | SHA1
