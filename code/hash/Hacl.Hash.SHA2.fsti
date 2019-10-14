@@ -26,8 +26,6 @@ open Lib.IntTypes
 open Lib.Sequence
 open Lib.Buffer
 
-#set-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 2"
-
 noextract inline_for_extraction
 val hash_512_lib:
   input_len:size_t ->
@@ -41,5 +39,5 @@ val hash_512_lib:
       length input <= max_input_length SHA2_512))
     (ensures (fun h0 _ h1 ->
       modifies1 dst h0 h1 /\
-      as_seq h1 dst `equal`
+      as_seq h1 dst ==
         Spec.Agile.Hash.hash SHA2_512 (as_seq h0 input)))
