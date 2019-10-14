@@ -12,9 +12,9 @@ open Spec.Hash.Definitions
 
 open FStar.Seq
 
-let extract = Spec.Agile.HMAC.hmac
+#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
 
-#push-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
+let extract = Spec.Agile.HMAC.hmac
 
 // [a, prk, info] are fixed.
 // [required] is the number of bytes to be extracted
@@ -26,14 +26,16 @@ let rec expand0 :
   info: bytes ->
   required: nat ->
   count: nat ->
-  last: bytes {
-    let chainLength = if count = 0 then 0 else hash_length a in
-    HMAC.keysized a (Seq.length prk) /\
-    Seq.length last = chainLength /\
-    hash_length a + length info + 1 + block_length a <= max_input_length a /\
-    count < 255 /\
-    required <= (255 - count) * hash_length a } ->
-  Tot (Lib.ByteSequence.lbytes required)
+  last: bytes ->
+  Pure (lbytes required)
+    (requires
+     (let chainLength = if count = 0 then 0 else hash_length a in
+      HMAC.keysized a (Seq.length prk) /\
+      Seq.length last = chainLength /\
+      hash_length a + length info + 1 + block_length a <= max_input_length a /\
+      count < 255 /\
+      required <= (255 - count) * hash_length a))
+    (ensures fun _ -> True)
 =
   fun a prk info required count last ->
   let count = count + 1 in
