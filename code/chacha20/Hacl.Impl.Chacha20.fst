@@ -174,7 +174,6 @@ val chacha20_update:
 [@ CInline ]
 let chacha20_update ctx len out text =
   push_frame();
-  let k = create_state () in
   let blocks = len /. size 64 in
   let rem = len %. size 64 in
   let h0 = ST.get() in
