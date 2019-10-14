@@ -10,7 +10,7 @@ open Lib.Buffer
 
 module F56 = Hacl.Impl.Ed25519.Field56
 
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
 
 //FIX
 val sha512_pre_msg:
@@ -23,18 +23,15 @@ val sha512_pre_msg:
       live h hash /\ live h prefix /\ live h input /\
       disjoint input hash /\ disjoint prefix hash)
     (ensures fun h0 _ h1 -> modifies (loc hash) h0 h1 /\
-      as_seq h1 hash == Spec.Agile.Hash.hash Spec.Agile.Hash.HASH_SHA2_512
-          (concat #uint8 #32 #(v len) (as_seq h0 prefix) (as_seq h0 input))
+      as_seq h1 hash == Spec.Agile.Hash.hash Spec.Hash.Definitions.SHA2_512
+           (concat #uint8 #32 #(v len) (as_seq h0 prefix) (as_seq h0 input))
     )
 let sha512_pre_msg h prefix len input =
   push_frame ();
   assert_norm(pow2 32 <= pow2 125 - 1);
   let pre_msg = create (len +. 32ul) (u8 0) in
   concat2 32ul prefix len input pre_msg;
-  (**) let h0 = get() in
-  // TODO: Replace that with agile call
-  Hacl.Hash.SHA2.hash_512 pre_msg (len +. 32ul) h;
-  (**) Hacl.Impl.Hash.Reveal.reveal_agile_sha512 (as_seq h0 pre_msg);
+  Hacl.Hash.SHA2.hash_512_lib (len +. 32ul) pre_msg h;
   pop_frame ()
 
 //FIX
@@ -50,7 +47,7 @@ val sha512_pre_pre2_msg:
       disjoint prefix hash /\ disjoint prefix2 hash /\ disjoint input hash
     )
     (ensures fun h0 _ h1 -> modifies (loc hash) h0 h1 /\
-      as_seq h1 hash == Spec.Agile.Hash.hash Spec.Agile.Hash.HASH_SHA2_512
+      as_seq h1 hash == Spec.Agile.Hash.hash Spec.Hash.Definitions.SHA2_512
         (concat #uint8 #64 #(v len)
           (concat #uint8 #32 #32 (as_seq h0 prefix) (as_seq h0 prefix2))
           (as_seq h0 input)
@@ -63,9 +60,7 @@ let sha512_pre_pre2_msg h prefix prefix2 len input =
   let pre_msg = create (len +. 64ul) (u8 0) in
   assert_norm(pow2 32 <= pow2 125 - 1);
   concat3 32ul prefix 32ul prefix2 len input pre_msg;
-  let h0 = get() in
-  Hacl.Hash.SHA2.hash_512 pre_msg (len +. 64ul) h;
-  (**) Hacl.Impl.Hash.Reveal.reveal_agile_sha512 (as_seq h0 pre_msg);
+  Hacl.Hash.SHA2.hash_512_lib (len +. 64ul) pre_msg h;
   pop_frame ()
 
 val sha512_modq_pre:
