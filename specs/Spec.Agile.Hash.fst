@@ -5,7 +5,7 @@ module S = FStar.Seq
 open Spec.Hash.Definitions
 open Spec.Hash.PadFinish
 
-let init a: init_t a =
+let init a =
   match a with
   | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 ->
       Spec.SHA2.init a
@@ -14,7 +14,7 @@ let init a: init_t a =
   | SHA1 ->
       Spec.SHA1.init
 
-let update a: update_t a =
+let update a =
   match a with
   | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 ->
       Spec.SHA2.update a
@@ -43,9 +43,8 @@ let split_block (a: hash_alg)
 let rec update_multi
   (a:hash_alg)
   (hash:words_state a)
-  (blocks:bytes_blocks a):
-  Tot (words_state a) (decreases (S.length blocks))
-=
+  (blocks:bytes_blocks a)
+  =
   if S.length blocks = 0 then
     hash
   else
@@ -54,8 +53,7 @@ let rec update_multi
     update_multi a hash rem
 
 (* As defined in the NIST standard; pad, then update, then finish. *)
-let hash (a:hash_alg) (input:bytes{S.length input <= max_input_length a}):
-  Tot (hash:Lib.ByteSequence.lbytes (hash_length a))
-=
+let hash (a:hash_alg) (input:bytes{S.length input <= max_input_length a})
+  =
   let padding = pad a (S.length input) in
   finish a (update_multi a (init a) S.(input @| padding))
