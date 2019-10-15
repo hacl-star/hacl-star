@@ -595,11 +595,7 @@ HAND_WRITTEN_OPTIONAL_FILES = \
 #
 # See Makefile.include for the definition of VALE_BUNDLES
 REQUIRED_FLAGS	=\
-  $(addprefix -library ,$(HACL_HAND_WRITTEN_C)) \
-  -bundle Hacl.Spec.*,Spec.*[rename=Hacl_Spec] \
   -bundle Hacl.Poly1305.Field32xN.Lemmas[rename=Hacl_Lemmas] \
-  -bundle Lib.*[rename=Hacl_Lib] \
-  -drop Lib.IntVector.Intrinsics \
   -drop EverCrypt.TargetConfig \
   -bundle EverCrypt.BCrypt \
   -bundle EverCrypt.OpenSSL \
@@ -620,18 +616,13 @@ REQUIRED_FLAGS	=\
   -add-include '"curve25519-inline.h"' \
   -no-prefix 'MerkleTree.New.Low' \
   -no-prefix 'MerkleTree.New.Low.Serialization' \
-  -fparentheses -fno-shadow -fcurly-braces \
   -bundle Hacl.Impl.Poly1305.Fields \
-  -bundle LowStar.* \
-  -bundle Prims,C.Failure,C,C.String,C.Loops,Spec.Loops,C.Endianness,FStar.*[rename=Hacl_Kremlib] \
-  -bundle 'Meta.*' \
   -bundle 'EverCrypt.Spec.*' \
   -library EverCrypt.AutoConfig,EverCrypt.OpenSSL,EverCrypt.BCrypt \
-  -minimal \
-  -add-include '"kremlin/internal/types.h"' \
-  -add-include '"kremlin/internal/target.h"' \
-  -add-include '"kremlin/lowstar_endianness.h"' \
-  -add-include '<string.h>'
+  $(BASE_FLAGS)
+
+# Disabled for Mozilla (carefully avoiding any KRML_CHECK_SIZE)
+TARGET_H_INCLUDE = -add-include '"kremlin/internal/target.h"'
 
 # Disabled for distributions that don't include vectorized implementations.
 INTRINSIC_FLAGS = -add-include '"libintvector.h"'
@@ -652,21 +643,7 @@ TARGETCONFIG_FLAGS = -add-include '"evercrypt_targetconfig.h"'
 # All of these bundles that have something on the left-hand side. They demand
 # that a particular feature be enabled. For a distribution to disable the
 # corresponding feature, one of these variables needs to be overridden.
-HASH_BUNDLE=-bundle Hacl.Hash.MD5+Hacl.Hash.Core.MD5+Hacl.Hash.SHA1+Hacl.Hash.Core.SHA1+Hacl.Hash.SHA2+Hacl.Hash.Core.SHA2+Hacl.Hash.Core.SHA2.Constants=Hacl.Hash.*[rename=Hacl_Hash]
 E_HASH_BUNDLE=-bundle EverCrypt.Hash+EverCrypt.Hash.Incremental=[rename=EverCrypt_Hash]
-SHA3_BUNDLE=-bundle Hacl.Impl.SHA3+Hacl.SHA3=[rename=Hacl_SHA3]
-CHACHA20_BUNDLE=-bundle Hacl.Chacha20=Hacl.Impl.Chacha20,Hacl.Impl.Chacha20.*
-SALSA20_BUNDLE=-bundle Hacl.Impl.Salsa20+Hacl.Impl.HSalsa20=Hacl.Impl.Salsa20.*[rename=Hacl_Salsa20]
-CURVE_BUNDLE=-bundle Hacl.Curve25519_64=Hacl.Impl.Curve25519.Field64.Vale \
-  -bundle Hacl.Curve25519_64_Slow=Hacl.Impl.Curve25519.Field64.Hacl,Hacl.Spec.Curve25519,Hacl.Spec.Curve25519.* \
-  -bundle Hacl.Curve25519_51=Hacl.Impl.Curve25519.Field51 \
-  -bundle Hacl.Impl.Curve25519.*[rename=Hacl_Curve_Leftovers]
-CHACHAPOLY_BUNDLE=-bundle Hacl.Impl.Chacha20Poly1305
-ED_BUNDLE=-bundle 'Hacl.Ed25519=Hacl.Impl.Ed25519.*,Hacl.Impl.BignumQ.Mul,Hacl.Impl.Load56,Hacl.Impl.SHA512.ModQ,Hacl.Impl.Store56,Hacl.Bignum25519'
-POLY_BUNDLE=-bundle 'Hacl.Poly1305_32=Hacl.Impl.Poly1305.Field32xN_32' \
-  -bundle 'Hacl.Poly1305_128=Hacl.Impl.Poly1305.Field32xN_128' \
-  -bundle 'Hacl.Poly1305_256=Hacl.Impl.Poly1305.Field32xN_256'
-NACLBOX_BUNDLE=-bundle Hacl.NaCl=Hacl.Impl.SecretBox,Hacl.Impl.Box
 MERKLE_BUNDLE=-bundle 'MerkleTree.New.Low+MerkleTree.New.Low.Serialization=[rename=MerkleTree]'
 CTR_BUNDLE=-bundle EverCrypt.CTR=EverCrypt.CTR.*
 # Disabled by default, overridden for wasm
@@ -694,7 +671,8 @@ DEFAULT_FLAGS = \
   $(OPT_FLAGS) \
   $(INTRINSIC_FLAGS) \
   $(BUNDLE_FLAGS) \
-  $(REQUIRED_FLAGS)
+  $(REQUIRED_FLAGS) \
+  $(TARGET_H_INCLUDE)
 
 
 # WASM distribution
@@ -803,6 +781,7 @@ dist/mozilla/Makefile.basic: HACL_OLD_FILES =
 dist/mozilla/Makefile.basic: HAND_WRITTEN_FILES =
 dist/mozilla/Makefile.basic: TARGETCONFIG_FLAGS =
 dist/mozilla/Makefile.basic: HAND_WRITTEN_LIB_FLAGS =
+dist/mozilla/Makefile.basic: TARGET_H_INCLUDE = -add-include '<stdbool.h>'
 
 # Portable distribution
 # ---------------------
