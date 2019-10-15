@@ -798,8 +798,8 @@ procedure fast_sub_stdcall(
 procedure cswap_single(inline offset:nat, ghost p0_b:buffer64, ghost p1_b:buffer64)
     {:quick}
     lets
-        p0_ptr @= rdi;
-        p1_ptr @= rsi;
+        p0_ptr @= rsi;
+        p1_ptr @= rdx;
 
         tmp0 @= r8;
         tmp1 @= r9;
@@ -851,14 +851,14 @@ procedure cswap_single(inline offset:nat, ghost p0_b:buffer64, ghost p1_b:buffer
     Store64_buffer(p1_ptr, tmp1,  0 + offset * 8, Secret, p1_b, 0 + offset);
 }
 
-procedure cswap2(ghost p0_b:buffer64, ghost p1_b:buffer64, ghost bit_in:nat64)
+procedure cswap2(ghost bit_in:nat64, ghost p0_b:buffer64, ghost p1_b:buffer64)
     {:public}
     {:quick}
     {:exportSpecs}
     lets
-        p0_ptr @= rdi;
-        p1_ptr @= rsi;
-        bit @= rdx;
+        bit @= rdi;
+        p0_ptr @= rsi;
+        p1_ptr @= rdx;
 
         tmp0 @= r8;
         tmp1 @= r9;
@@ -951,16 +951,16 @@ procedure cswap2(ghost p0_b:buffer64, ghost p1_b:buffer64, ghost bit_in:nat64)
 
 procedure cswap2_stdcall(
         inline win:bool,
+        ghost bit_in:nat64,
         ghost p0_b:buffer64,
-        ghost p1_b:buffer64,
-        ghost bit_in:nat64)
+        ghost p1_b:buffer64)
     {:public}
     {:quick}
     {:exportSpecs}
     lets
-        p0_ptr @= rdi; p1_ptr @= rsi; bit @= rdx;
-        p0_in := (if win then rcx else rdi);
-        p1_in := (if win then rdx else rsi);
+        bit @= rdi; p0_ptr @= rsi; p1_ptr @= rdx; 
+        p0_in := (if win then rdx else rsi);
+        p1_in := (if win then r8 else rdx);
 
         old_p0_0 := buffer64_read(p0_b, 0, mem);
         old_p0_1 := buffer64_read(p0_b, 1, mem);
@@ -987,7 +987,7 @@ procedure cswap2_stdcall(
     requires
         rsp == init_rsp(stack);
         bit_in <= 1;
-        bit_in = (if win then r8  else rdx);
+        bit_in = (if win then rcx  else rdi);
         //adx_enabled && bmi2_enabled;
         buffers_disjoint(p0_b, p1_b) || p1_b == p0_b;
 
@@ -1061,12 +1061,12 @@ procedure cswap2_stdcall(
         // Store callee-save registers
         Push_Secret(rdi);
         Push_Secret(rsi);
-        Mov64(p0_ptr, rcx);
-        Mov64(p1_ptr, rdx);
-        Mov64(bit, r8);
+        Mov64(bit, rcx);
+        Mov64(p0_ptr, rdx);
+        Mov64(p1_ptr, r8);
     }
 
-    cswap2(p0_b, p1_b, bit_in);
+    cswap2(bit_in, p0_b, p1_b);
 
     inline if (win)
     {
