@@ -1,6 +1,6 @@
 # CUSTOMIZE HERE: determine what is the main target of this Makefile, e.g. a C
 # test, a Low* test, or just a binary archive (like libcurve.a).
-all: compile
+all: dist/chacha20-test.exe
 
 test: all
 	dist/chacha20-test.exe
@@ -13,8 +13,8 @@ export CFLAGS
 
 # CUSTOMIZE HERE: how to produce binary objects
 # An archive with all the compiled code in this directory.
-compile: dist/Makefile.basic
-	$(MAKE) -C dist
+dist/libchacha.a: dist/Makefile.basic
+	$(MAKE) -C dist -f Makefile.basic
 
 dist/Makefile.basic: $(filter-out obj/prims.krml,$(ALL_KRML_FILES))
 	$(KRML) $^ -o libchacha.a $(BASE_FLAGS) $(CHACHA20_BUNDLE) \
@@ -22,3 +22,8 @@ dist/Makefile.basic: $(filter-out obj/prims.krml,$(ALL_KRML_FILES))
 	  -ccopts -std=gnu11,-g,-O3 \
 	  -add-include '"libintvector.h"' \
 	  -skip-compilation
+
+dist/chacha20-test.exe: $(HACL_HOME)/tests/chacha20-test.o dist/libchacha.a
+
+%.exe:
+	$(CC) $^ $(KREMLIB_A) -o $@

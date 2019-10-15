@@ -37,3 +37,8 @@ include .depend
 	    --extract_module $(basename $(notdir $(subst .checked,,$<))) \
 	    $(notdir $(subst .checked,,$<))
 
+# Useful definitions for C compilation
+
+CFLAGS += -Idist -I$(KREMLIN_HOME)/include
+
+KREMLIB_A=$(KREMLIN_HOME)/kremlib/dist/minimal/libkremlib.a

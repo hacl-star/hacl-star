@@ -37,10 +37,6 @@ dist/Makefile.basic: $(filter-out obj/prims.krml,$(ALL_KRML_FILES)) | dist
 	  -ccopts -std=gnu11,-g,-O3 \
 	  -skip-compilation
 
-CFLAGS += -Idist -I$(KREMLIN_HOME)/include
-
-KREMLIB_A=$(KREMLIN_HOME)/kremlib/dist/minimal/libkremlib.a
-
 # CUSTOMIZE HERE: list the dependencies for each test (there may be multiple)
 dist/curve64-ours.exe: $(HACL_HOME)/tests/curve64-ours.o dist/libcurve.a
 
