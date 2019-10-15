@@ -1,5 +1,7 @@
 # A shared set of local definitions for local Makefiles. See curve25519/Makefile
-# for comments. Expects HACL_HOME.
+# for comments.
+
+HACL_HOME?=../..
 
 ALL_HACL_DIRS=$(addprefix $(HACL_HOME)/,lib specs specs/lemmas code/meta) \
   $(addprefix $(HACL_HOME)/vale/specs/,defs hardware)
@@ -10,7 +12,7 @@ OUTPUT_DIR=$(HACL_HOME)/obj
 include $(HACL_HOME)/Makefile.common
 
 # All the files in the current directory ought to be verified.
-FSTAR_ROOTS=$(wildcard *.fst *.fsti)
+FSTAR_ROOTS?=$(wildcard *.fst *.fsti)
 
 # This is the right way to ensure the .depend file always gets re-built.
 ifndef NODEPEND
