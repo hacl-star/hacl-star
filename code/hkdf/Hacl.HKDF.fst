@@ -2,7 +2,7 @@ module Hacl.HKDF
 
 open FStar.Seq
 
-module B = LowStar.Buffer
+module B = Lib.Buffer
 
 open Spec.Hash.Definitions
 open Spec.Agile.HKDF
@@ -10,14 +10,12 @@ open Spec.Agile.HKDF
 open FStar.HyperStack.ST
 
 open FStar.Mul
-open FStar.Integers
+//open FStar.Integers
 open FStar.HyperStack
-open Lib.IntTypes
-open LowStar.Buffer
-open LowStar.BufferOps
 
 friend Spec.Agile.HKDF
 friend Lib.IntTypes
+open Lib.Buffer
 
 // TODO: proofs break mysteriously when not befriending Lib.IntTypes and
 // declassifying uint8; investigate
@@ -25,10 +23,82 @@ friend Lib.IntTypes
 
 module ST = FStar.HyperStack.ST
 
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 20"
+#set-options "--max_fuel 1 --max_ifuel 0 --z3rlimit 100"
 
 let mk_extract a hmac prk salt saltlen ikm ikmlen =
   hmac prk salt saltlen ikm ikmlen
+
+module Seq = Lib.Sequence
+
+let mk_expand a hmac okm prk prklen info infolen len =
+  let okm: B.lbuffer uint8 len = okm in
+  let prk: B.lbuffer uint8 prklen = prk in
+  let info:B.lbuffer uint8 infolen = info in
+  
+  let tlen = Hacl.Hash.Definitions.hash_len a in
+  let n = len /. tlen in
+  let output = B.sub okm 0ul (n *! tlen) in
+  FStar.Math.Lemmas.lemma_div_mod (v len) (v tlen);
+  assert (v len - (v len / v tlen) * v tlen == v len % v tlen);
+
+  push_frame();
+  let text = B.create (tlen +! infolen +! 1ul) (u8 0) in
+  let tag = B.sub text 0ul tlen in
+  B.copy (B.sub text tlen infolen) info;
+  [@inline_let]
+  let a_spec (i:size_nat{i <= v n}) = Seq.lseq uint8 (v tlen) in
+  [@inline_let]
+  let refl h (i:size_nat{i <= v n}) : GTot (a_spec i) =
+    B.as_seq h (B.gsub text 0ul tlen)
+  in
+  [@inline_let]
+  let footprint (i:size_nat{i <= v n}) :
+    GTot LowStar.Buffer.(l:loc{
+        loc_disjoint l (B.loc output) /\
+        address_liveness_insensitive_locs `loc_includes` l})
+    = B.loc text in
+  [@inline_let]
+  let spec h : GTot (i:size_nat{i < v n} -> a_spec i -> a_spec (i + 1) & Seq.lseq uint8 (v tlen)) =
+    let prk = B.as_seq h prk in
+    let info = B.as_seq h info in
+    fun i last ->
+      assume (pow2 32 + block_length a <= max_input_length a);
+      let t = Spec.Agile.HMAC.hmac a prk (last @| info @| Seq.create 1 (u8 i)) in
+      t, t
+  in
+  let h0 = ST.get () in    
+  B.fill_blocks h0 tlen n output
+    a_spec
+    refl
+    footprint
+    spec
+    (fun i ->
+      text.(tlen +! infolen) <- Lib.IntTypes.cast U8 PUB i;
+      hmac tag prk prklen text (tlen +! infolen +! 1ul);
+      B.copy (B.sub okm (i *! tlen) tlen) tag;
+      admit()
+    );
+  text.(tlen +! infolen) <- Lib.IntTypes.cast U8 PUB n;
+  hmac tag prk prklen text (tlen +! infolen +! 1ul);
+  B.copy (B.sub okm (n *! tlen) (len -! (n *! tlen))) 
+         (B.sub tag 0ul (len -! (n *! tlen)));
+  admit()
+
+(*
+let expand a prk info len =
+  let open Spec.Agile.HMAC in
+  // n = ceil(len / hash_length a)
+  let n = 1 + (len - 1) / hash_length a in
+  let last, okm = 
+    Seq.generate_blocks (hash_length a) n n 
+      (fun i -> Seq.lseq uint8 (if i = 0 then 0 else hash_length a))
+      (fun i last ->
+        let t = hmac a prk (last @| info @| Seq.create 1 (u8 i)) in
+        t, t)
+      FStar.Seq.empty
+  in
+  Seq.sub #uint8 #(n * hash_length a) okm 0 len
+
 
 // [hashed] holds the HMAC text, of the form | hash_len a | infolen | 1 |
 // Its prefix is overwritten by HMAC at each iteration.
@@ -165,7 +235,7 @@ let mk_expand a hmac okm prk prklen info infolen len =
   assert (hash_length a + pow2 32 + block_length a <= max_input_length a);
   hkdf_expand_loop a hmac okm prk prklen infolen len text (u8 0);
   pop_frame()
-
+*)
 
 let expand_sha2_256: expand_st SHA2_256 =
   mk_expand SHA2_256 Hacl.HMAC.compute_sha2_256

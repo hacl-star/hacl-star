@@ -3,6 +3,8 @@ module Spec.Agile.HMAC
 open Spec.Hash.Definitions
 open Lib.IntTypes
 
+#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
+
 let is_supported_alg = function
   | SHA1 | SHA2_256 | SHA2_384 | SHA2_512 -> true
   | _ -> false

@@ -66,6 +66,7 @@ let expand_st (a:hash_alg) =
     v prklen == B.length prk /\
     v infolen == B.length info /\
     v len == B.length okm /\
+    hash_length a <= v prklen /\
     Spec.Agile.HMAC.keysized a (v prklen) /\
     hash_length a + v infolen + 1 + block_length a < pow2 32 /\
     v len <= FStar.Mul.(255 * hash_length a))
