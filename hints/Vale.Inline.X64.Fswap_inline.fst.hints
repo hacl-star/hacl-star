@@ -1,5 +1,5 @@
 [
-  "≤_`\u007f◊Å√Œ„œY¿∏3ò",
+  "«« ëy{¡pÂò«÷Ô¸ë›",
   [
     [
       "Vale.Inline.X64.Fswap_inline.as_nat",
@@ -22,7 +22,7 @@
         "typing_LowStar.Buffer.trivial_preorder"
       ],
       0,
-      "fcf131bc5db823317f1e41b7fbe2cf35"
+      "8d97054370d5510db0f2604a51eb065b"
     ],
     [
       "Vale.Inline.X64.Fswap_inline.as_t",
@@ -31,7 +31,7 @@
       0,
       [ "@query" ],
       0,
-      "c7531f1214482dce2e625b7e4c85d6e8"
+      "8ac626e6c770cee6c0cc93b53799ac62"
     ],
     [
       "Vale.Inline.X64.Fswap_inline.as_normal_t",
@@ -40,7 +40,7 @@
       0,
       [ "@query" ],
       0,
-      "e882294401e0c1b47808a8a485a51fe0"
+      "21778b546a7e3df06e9941a9885e6c0f"
     ],
     [
       "Vale.Inline.X64.Fswap_inline.cswap_dom",
@@ -49,7 +49,7 @@
       0,
       [ "@query" ],
       0,
-      "97ea105e3adf34e753baf512134badb0"
+      "d38ba60537c41e740ed86a04be8b9f54"
     ],
     [
       "Vale.Inline.X64.Fswap_inline.cswap_pre",
@@ -75,7 +75,7 @@
         "token_correspondence_Prims.pow2.fuel_instrumented"
       ],
       0,
-      "d4320c49df55f88fe7b1e37f629390cc"
+      "30cb6148908dbc38873a9ad36cc7b465"
     ],
     [
       "Vale.Inline.X64.Fswap_inline.cswap_post",
@@ -101,7 +101,7 @@
         "token_correspondence_Prims.pow2.fuel_instrumented"
       ],
       0,
-      "e7cf0d5fe61d1bdb3c26062f9ceff3c4"
+      "bec61d50336c282ce13630aaa70434bb"
     ],
     [
       "Vale.Inline.X64.Fswap_inline.cswap_regs_modified",
@@ -117,7 +117,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "54846d66a98abc7fa0b104f39b6be699"
+      "b9c69323c3b0f90065e854f52741f4c8"
     ],
     [
       "Vale.Inline.X64.Fswap_inline.cswap_lemma'",
@@ -141,6 +141,7 @@
         "equation_Vale.AsLowStar.ValeSig.vale_save_xmm",
         "equation_Vale.Curve25519.X64.FastUtil.va_ens_cswap2",
         "equation_Vale.Curve25519.X64.FastUtil.va_req_cswap2",
+        "equation_Vale.Inline.X64.Fswap_inline.b64",
         "equation_Vale.Inline.X64.Fswap_inline.cswap_post",
         "equation_Vale.Inline.X64.Fswap_inline.cswap_pre",
         "equation_Vale.Inline.X64.Fswap_inline.cswap_regs_modified",
@@ -170,8 +171,8 @@
         "function_token_typing_Vale.Inline.X64.Fswap_inline.cswap_regs_modified",
         "function_token_typing_Vale.X64.MemoryAdapters.code_equiv",
         "int_typing",
-        "interpretation_Tm_abs_45f494d2c238827cb45c49006bdea59c",
-        "interpretation_Tm_abs_bffd08bd8bdc0d953a5855ec47718137",
+        "interpretation_Tm_abs_20564608393354367d575bdc75170505",
+        "interpretation_Tm_abs_b8d0ebc06e0bdb5bf9160750c38fb704",
         "lemma_Vale.X64.Memory.loc_includes_refl",
         "lemma_Vale.X64.Memory.loc_includes_union_l_buffer",
         "lemma_Vale.X64.Memory.loc_includes_union_r",
@@ -207,15 +208,16 @@
         "typing_FStar.UInt64.v", "typing_Vale.X64.Decls.va_upd_ok",
         "typing_Vale.X64.Memory.loc_buffer",
         "typing_Vale.X64.Memory.loc_none",
-        "typing_Vale.X64.Memory.loc_union", "typing_Vale.X64.Regs.sel",
-        "typing_Vale.X64.Regs.upd",
+        "typing_Vale.X64.Memory.loc_union",
+        "typing_Vale.X64.MemoryAdapters.as_vale_buffer",
+        "typing_Vale.X64.Regs.sel", "typing_Vale.X64.Regs.upd",
         "typing_Vale.X64.State.__proj__Mkvale_state__item__vs_heap",
         "typing_Vale.X64.State.__proj__Mkvale_state__item__vs_ok",
         "typing_Vale.X64.State.__proj__Mkvale_state__item__vs_regs",
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt64@tok"
       ],
       0,
-      "7c79caee7675fb0129e5bbec18872898"
+      "1ff0c882b5b2728f9da427b638d00399"
     ],
     [
       "Vale.Inline.X64.Fswap_inline.cswap_lemma",
@@ -252,8 +254,8 @@
         "fuel_guarded_inversion_Vale.X64.State.vale_state",
         "function_token_typing_Vale.AsLowStar.MemoryHelpers.fuel_eq",
         "function_token_typing_Vale.X64.MemoryAdapters.code_equiv",
-        "interpretation_Tm_abs_45f494d2c238827cb45c49006bdea59c",
-        "interpretation_Tm_abs_bffd08bd8bdc0d953a5855ec47718137",
+        "interpretation_Tm_abs_20564608393354367d575bdc75170505",
+        "interpretation_Tm_abs_b8d0ebc06e0bdb5bf9160750c38fb704",
         "lemma_Vale.X64.Memory.loc_includes_refl",
         "lemma_Vale.X64.Memory.loc_includes_union_l_buffer",
         "lemma_Vale.X64.Memory.loc_includes_union_r",
@@ -276,7 +278,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt64@tok"
       ],
       0,
-      "dc3b752a459eee06bdbee2d38f3f2b99"
+      "75e7e1052271ddc1f84907709bb52ac6"
     ],
     [
       "Vale.Inline.X64.Fswap_inline.of_arg",
@@ -291,7 +293,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "d7499765f7f51ce31250b6308d9de22e"
+      "2e1263b44a0ab1331034899aad372061"
     ],
     [
       "Vale.Inline.X64.Fswap_inline.arg_reg",
@@ -341,7 +343,7 @@
         "typing_Vale.Interop.X64.reg_nat"
       ],
       0,
-      "01fa328b29b1f5b8fec0ff0b6bce14f3"
+      "a508e72b316beae65a2a20c90a418341"
     ],
     [
       "Vale.Inline.X64.Fswap_inline.lowstar_cswap_t",
@@ -362,7 +364,7 @@
         "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c"
       ],
       0,
-      "091865da044d01e0bf0618cf799331b5"
+      "373029ef5984f8d5505d358e3de079a4"
     ],
     [
       "Vale.Inline.X64.Fswap_inline.lowstar_cswap",
@@ -380,7 +382,7 @@
         "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c"
       ],
       0,
-      "9d5cc8a51f961dfed90c2f0368ac5194"
+      "9c3e0c76188bec56ad3ab59df9e6f8ec"
     ],
     [
       "Vale.Inline.X64.Fswap_inline.cswap2_inline",
@@ -532,7 +534,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt64@tok"
       ],
       0,
-      "6d648ce3d43a01d26d5de61611bc3dd0"
+      "672c9bc0b4045bda3c0ec070a8790a71"
     ],
     [
       "Vale.Inline.X64.Fswap_inline.cswap2_code_inline",
@@ -549,7 +551,7 @@
         "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c"
       ],
       0,
-      "0287fd1bf82142ab45bb8cfc925c74ac"
+      "12881904b5324e35e46f3f4704c86ac9"
     ]
   ]
 ]

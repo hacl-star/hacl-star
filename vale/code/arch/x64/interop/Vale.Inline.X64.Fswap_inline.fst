@@ -39,7 +39,7 @@ let tuint64 = TD_Base TUInt64
 
 [@__reduce__]
 let cswap_dom: IX64.arity_ok 3 td =
-  let y = [t64_mod; t64_mod; tuint64] in
+  let y = [tuint64; t64_mod; t64_mod] in
   assert_norm (List.length y = 3);
   y
 
@@ -47,29 +47,29 @@ let cswap_dom: IX64.arity_ok 3 td =
 [@__reduce__]
 let cswap_pre : VSig.vale_pre cswap_dom =
   fun (c:V.va_code)
+    (bit:uint64)
     (p0:b64)
     (p1:b64)
-    (bit:uint64)
     (va_s0:V.va_state) ->
       FU.va_req_cswap2 c va_s0
-        (as_vale_buffer p0) (as_vale_buffer p1) (UInt64.v bit)
+        (UInt64.v bit) (as_vale_buffer p0) (as_vale_buffer p1)
 
 [@__reduce__]
 let cswap_post : VSig.vale_post cswap_dom =
   fun (c:V.va_code)
+    (bit:uint64)
     (p0:b64)
     (p1:b64)
-    (bit:uint64)
     (va_s0:V.va_state)
     (va_s1:V.va_state)
     (f:V.va_fuel) ->
-      FU.va_ens_cswap2 c va_s0 (as_vale_buffer p0) (as_vale_buffer p1) (UInt64.v bit) va_s1 f
+      FU.va_ens_cswap2 c va_s0 (UInt64.v bit) (as_vale_buffer p0) (as_vale_buffer p1) va_s1 f
 
 #set-options "--z3rlimit 50"
 
 let cswap_regs_modified: MS.reg_64 -> bool = fun (r:MS.reg_64) ->
   let open MS in
-  if r = rRdx || r = rR8 || r = rR9 || r = rR10 then true
+  if r = rRdi || r = rR8 || r = rR9 || r = rR10 then true
   else false
 
 let cswap_xmms_modified = fun _ -> false
@@ -78,17 +78,17 @@ let cswap_xmms_modified = fun _ -> false
 let cswap_lemma'
     (code:V.va_code)
     (_win:bool)
+    (bit:uint64)
     (p0:b64)
     (p1:b64)
-    (bit:uint64)
     (va_s0:V.va_state)
  : Ghost (V.va_state & V.va_fuel)
      (requires
-       cswap_pre code p0 p1 bit va_s0)
+       cswap_pre code bit p0 p1 va_s0)
      (ensures (fun (va_s1, f) ->
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions va_s0 va_s1 cswap_regs_modified cswap_xmms_modified /\
-       cswap_post code p0 p1 bit va_s0 va_s1 f /\
+       cswap_post code bit p0 p1 va_s0 va_s1 f /\
        ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer p0) /\
        ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer p1) /\
        ME.buffer_writeable (as_vale_buffer p0) /\
@@ -97,7 +97,7 @@ let cswap_lemma'
                    (ME.loc_union (ME.loc_buffer (as_vale_buffer p1))
                                  ME.loc_none)) va_s0.VS.vs_heap va_s1.VS.vs_heap
  )) =
-   let va_s1, f = FU.va_lemma_cswap2 code va_s0 (as_vale_buffer p0) (as_vale_buffer p1) (UInt64.v bit) in
+   let va_s1, f = FU.va_lemma_cswap2 code va_s0 (UInt64.v bit) (as_vale_buffer p0) (as_vale_buffer p1) in
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 p0;
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 p1;
    (va_s1, f)
@@ -154,10 +154,10 @@ let lowstar_cswap_normal_t : normal lowstar_cswap_t
 
 open Vale.AsLowStar.MemoryHelpers
 
-let cswap2_inline p0 p1 bit
+let cswap2_inline bit p0 p1
   = DV.length_eq (get_downview p0);
     DV.length_eq (get_downview p1);
-    let x, _ = lowstar_cswap_normal_t p0 p1 bit () in
+    let x, _ = lowstar_cswap_normal_t bit p0 p1 () in
     ()
 
 let cswap2_code_inline () : FStar.All.ML int =
