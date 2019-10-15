@@ -14,6 +14,11 @@ all: dist/curve64-ours.exe
 
 HACL_HOME=../..
 
+.depend: HACK
+.PHONY: HACK
+HACK:
+	rm -rf $(HACL_HOME)/obj/Hacl_Impl_Curve25519_Field64_Vale.krml
+
 # Defines rules for producing .checked, .krml, .depend, etc.
 include ../Makefile.local
 
