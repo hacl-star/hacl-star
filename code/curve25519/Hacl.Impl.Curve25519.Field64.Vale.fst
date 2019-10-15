@@ -201,9 +201,9 @@ let fsqr2 out f tmp =
 let cswap2 bit p1 p2 =
   let h0 = ST.get() in
   if EverCrypt.TargetConfig.gcc then
-    Vale.Inline.X64.Fswap_inline.cswap2_inline p1 p2 bit
+    Vale.Inline.X64.Fswap_inline.cswap2_inline bit p1 p2
   else
-    Vale.Wrapper.X64.Fswap.cswap2 p1 p2 bit;
+    Vale.Wrapper.X64.Fswap.cswap2 bit p1 p2;
   let h1 = ST.get() in
   // Seq.equal is swapped in the interop wrappers, so the SMTPat is not matching:
   // We have Seq.equal s1 s2 but are trying to prove s2 == s1

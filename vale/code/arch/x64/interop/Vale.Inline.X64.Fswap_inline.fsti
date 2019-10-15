@@ -23,9 +23,9 @@ let as_nat (b:B.buffer UInt64.t{B.length b == 4}) (h:HS.mem) : GTot nat =
   pow2_four s0 s1 s2 s3
 
 val cswap2_inline
+  (bit:UInt64.t{UInt64.v bit <= 1})
   (p0:u512)
   (p1:u512)
-  (bit:UInt64.t{UInt64.v bit <= 1})
   : Stack unit
     (requires fun h ->
       B.live h p0 /\ B.live h p1 /\
