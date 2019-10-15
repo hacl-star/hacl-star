@@ -12,6 +12,8 @@
 # test, a Low* test, or just a binary archive (like libcurve.a).
 all: dist/curve64-ours.exe
 
+HACL_HOME=../..
+
 # Defines rules for producing .checked, .krml, .depend, etc.
 include ../Makefile.local
 

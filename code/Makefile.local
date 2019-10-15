@@ -1,7 +1,5 @@
 # A shared set of local definitions for local Makefiles. See curve25519/Makefile
-# for comments.
-
-HACL_HOME=../..
+# for comments. Expects HACL_HOME.
 
 ALL_HACL_DIRS=$(addprefix $(HACL_HOME)/,lib specs specs/lemmas code/meta) \
   $(addprefix $(HACL_HOME)/vale/specs/,defs hardware)
