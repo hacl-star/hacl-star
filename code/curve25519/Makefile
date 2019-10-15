@@ -1,16 +1,9 @@
-# An examplary local Makefile
-# ---------------------------
-#
-# This demonstrates how to author a local Makefile that will allow for quick
-# edit-compile-test cycles when working on a specific algorithm.
-# - This is not under CI, so this Makefile may be broken.
-# - This Makefile can *NOT* be run in parallel with another local Makefile.
-# - In the case of Curve, this Makefile relies on an unverified connection with
-#   Vale.
-
 # CUSTOMIZE HERE: determine what is the main target of this Makefile, e.g. a C
 # test, a Low* test, or just a binary archive (like libcurve.a).
 all: dist/curve64-ours.exe
+
+test: all
+	dist/curve64-ours.exe
 
 FSTAR_ROOTS = Hacl.Curve25519_64_Local.fst Hacl.Curve25519_64_Slow.fst Hacl.Curve25519_51.fst
 
