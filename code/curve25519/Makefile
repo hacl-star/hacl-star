@@ -1,45 +1,25 @@
-# We reuse some definitions for F*, etc. but override the list of local
-# directories we wish to have in scope to speed things up.
-HACL_HOME=../..
+# An examplary local Makefile
+# ---------------------------
+#
+# This demonstrates how to author a local Makefile that will allow for quick
+# edit-compile-test cycles when working on a specific algorithm.
+# - This is not under CI, so this Makefile may be broken.
+# - This Makefile can *NOT* be run in parallel with another local Makefile.
+# - In the case of Curve, this Makefile relies on an unverified connection with
+#   Vale.
 
-ALL_HACL_DIRS=$(addprefix $(HACL_HOME)/,lib specs specs/lemmas code/meta) \
-  $(addprefix $(HACL_HOME)/vale/specs/,defs hardware)
-
-# This uses the definition of ALL_HACL_DIRS
-include $(HACL_HOME)/Makefile.common
-
-# All the files in the current directory ought to be verified.
-FSTAR_ROOTS=$(wildcard *.fst *.fsti)
-
+# CUSTOMIZE HERE: determine what is the main target of this Makefile, e.g. a C
+# test, a Low* test, or just a binary archive (like libcurve.a).
 all: dist/curve64-ours.exe
 
-# This is the right way to ensure the .depend file always gets re-built.
-ifndef NODEPEND
-ifndef MAKE_RESTARTS
-.depend: .FORCE
-	$(FSTAR_NO_FLAGS) --dep full $(notdir $(FSTAR_ROOTS)) > $@
+# Defines rules for producing .checked, .krml, .depend, etc.
+include ../Makefile.local
 
-.PHONY: .FORCE
-.FORCE:
-endif
-endif
-
-include .depend
-
-# Producing .checked and .krml.
-%.checked:
-	$(FSTAR) $< --hint_file $(HACL_HOME)/hints/$(notdir $*).hints && \
-	  touch -c $@
-
-%.krml:
-	$(FSTAR) --codegen Kremlin \
-	    --extract_module $(basename $(notdir $(subst .checked,,$<))) \
-	    $(notdir $(subst .checked,,$<))
-
-# Obtaining binary objects
+# CUSTOMIZE HERE: how to produce binary objects
 dist:
 	mkdir -p $@
 
+# An archive with all the compiled code in this directory.
 dist/libcurve.a: dist/curve25519-inline-tweaked.h dist/Makefile.basic | dist
 	$(MAKE) -C dist -f Makefile.basic
 
@@ -49,6 +29,8 @@ dist/curve25519-inline-tweaked.h: $(HACL_HOME)/dist/vale/curve25519-inline.h | d
 $(HACL_HOME)/dist/vale/curve25519-inline.h:
 	$(error Please run a full build first in $(HACL_HOME) so as to obtain $@)
 
+# CUSTOMIZE HERE: if necessary, move the bundle from $(HACL_HOME)/Makefile to
+# $(HACL_HOME)/Makefile.common; then, provide suitable compile flags.
 dist/Makefile.basic: $(filter-out obj/prims.krml,$(ALL_KRML_FILES)) | dist
 	$(KRML) $^ -o libcurve.a $(BASE_FLAGS) $(VALE_BUNDLES) $(CURVE_BUNDLE) \
 	  -no-prefix 'Hacl.Impl.Curve25519.Field64.Vale' \
@@ -58,11 +40,11 @@ dist/Makefile.basic: $(filter-out obj/prims.krml,$(ALL_KRML_FILES)) | dist
 	  -ccopts -std=gnu11,-g,-O3 \
 	  -skip-compilation
 
-# C tests
 CFLAGS += -Idist -I$(KREMLIN_HOME)/include
 
 KREMLIB_A=$(KREMLIN_HOME)/kremlib/dist/minimal/libkremlib.a
 
+# CUSTOMIZE HERE: list the dependencies for each test (there may be multiple)
 dist/curve64-ours.exe: $(HACL_HOME)/tests/curve64-ours.o dist/libcurve.a
 
 %.exe:
