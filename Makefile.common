@@ -48,3 +48,21 @@ FSTAR = $(FSTAR_NO_FLAGS) $(OTHERFLAGS)
 # 2. Kremlin
 
 KRML = $(KREMLIN_HOME)/krml
+
+BASE_FLAGS = \
+  -bundle Hacl.Spec.*,Spec.*[rename=Hacl_Spec] \
+  -bundle Lib.*[rename=Hacl_Lib] \
+  -drop Lib.IntVector.Intrinsics \
+  -fparentheses -fno-shadow -fcurly-braces \
+  -bundle LowStar.* \
+  -bundle Prims,C.Failure,C,C.String,C.Loops,Spec.Loops,C.Endianness,FStar.*[rename=Hacl_Kremlib] \
+  -bundle 'Meta.*' \
+  -minimal \
+  -add-include '"kremlin/internal/types.h"' \
+  -add-include '"kremlin/lowstar_endianness.h"' \
+  -add-include '<string.h>'
+
+CURVE_BUNDLE=-bundle Hacl.Curve25519_64=Hacl.Impl.Curve25519.Field64.Vale \
+  -bundle 'Hacl.Curve25519_64_Slow=Hacl.Impl.Curve25519.Field64.Hacl,Hacl.Spec.Curve25519,Hacl.Spec.Curve25519.\*' \
+  -bundle Hacl.Curve25519_51=Hacl.Impl.Curve25519.Field51 \
+  -bundle 'Hacl.Impl.Curve25519.\*[rename=Hacl_Curve_Leftovers]'
