@@ -11,7 +11,7 @@ include $(HACL_HOME)/Makefile.common
 # All the files in the current directory ought to be verified.
 FSTAR_ROOTS=$(wildcard *.fst *.fsti)
 
-all: dist/libcurve.a
+all: dist/curve64-ours.exe
 
 # This is the right way to ensure the .depend file always gets re-built.
 ifndef NODEPEND
@@ -51,8 +51,19 @@ $(HACL_HOME)/dist/vale/curve25519-inline.h:
 
 dist/Makefile.basic: $(filter-out obj/prims.krml,$(ALL_KRML_FILES)) | dist
 	$(KRML) $^ -o libcurve.a $(BASE_FLAGS) $(VALE_BUNDLES) $(CURVE_BUNDLE) \
+	  -no-prefix 'Hacl.Impl.Curve25519.Field64.Vale' \
 	  -add-include '"curve25519-inline-tweaked.h"' \
 	  -add-include '<stdbool.h>' \
 	  -tmpdir dist \
 	  -ccopts -std=gnu11,-g,-O3 \
 	  -skip-compilation
+
+# C tests
+CFLAGS += -Idist -I$(KREMLIN_HOME)/include
+
+KREMLIB_A=$(KREMLIN_HOME)/kremlib/dist/minimal/libkremlib.a
+
+dist/curve64-ours.exe: $(HACL_HOME)/tests/curve64-ours.o dist/libcurve.a
+
+%.exe:
+	$(CC) $^ $(KREMLIB_A) -o $@
