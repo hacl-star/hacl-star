@@ -1,176 +1,68 @@
-UNAME := $(shell uname)
-.DEFAULT_GOAL=all
+# This Makefile can be included by client projects; it exports the set of
+# include directories relative to HACL_HOME and exports the set of needed
+# kremlin flags to successfully extract Vale. This Makefile honors
+# EVERCRYPT_CONFIG.
 
-ifndef HACL_HOME
-  HACL_HOME:=$(abspath $(dir $(lastword $(MAKEFILE_LIST))))
-  HACL_HOME:=$(HACL_HOME:/=)
-endif
+VALE_BUNDLES=\
+  -bundle 'Vale.Stdcalls.*,Vale.Interop,Vale.Interop.*,Vale.Wrapper.X64.*[rename=Vale]' \
+  -bundle 'Vale.Inline.X64.*[rename=Vale_Inline]' \
+  -bundle Vale.*[rename=Unused2]
 
-ifndef FSTAR_HOME
-  FSTAR_HOME:=$(HACL_HOME)/../FStar
-endif
-
-ifndef KREMLIN_HOME
-  KREMLIN_HOME:=$(HACL_HOME)/../kremlin
-endif
-
-export HACL_HOME
-export FSTAR_HOME
-export KREMLIN_HOME
-
-# $(info $(HACL_HOME))
-# $(info $(FSTAR_HOME))
-# $(info $(KREMLIN_HOME))
-
-ifeq ($(CI),true)
-VERBOSE=
-else
-VERBOSE=-verbose
-endif
-
-#
-# Kremlin
-#
-
-KREMLIB=$(KREMLIN_HOME)/kremlib/compat
-KREMLIN=$(KREMLIN_HOME)/krml
-KREMTEST=$(KREMLIN_HOME)/test
-
-
-# Default Kremlin arguments
-KREMLIN_ARGS?=
-KREMLIN_ARGS+=$(KOPTS)
-KREMLIN_ARGS+=-I $(KREMLIN_HOME)/kremlib/compat -I $(HACL_KREMLIN) -I $(KREMLIB) -I $(HACL_HOME)/specs -I .
-
+# Other configs are possible, e.g. everest or hacl-vale, by exporting
+# EVERCRYPT_CONFIG manually.
 ifneq (,$(EVEREST_WINDOWS))
-KREMLIN_ARGS+=-falloca -ftail-calls
-endif
-
-# Compiler options
-ifdef USE_CCOMP
-  KREMLIN_ARGS+=-cc compcert $(VERBOSE)
-else ifdef USE_CL
-  KREMLIN_ARGS+=-cc msvc $(VERBOSE)
+  # hacl, vale, bcrypt
+  EVERCRYPT_CONFIG = noopenssl
+else ifneq (,$(KAIZALA))
+  # hacl, openssl
+  EVERCRYPT_CONFIG = kaizala
 else
-  KREMLIN_ARGS+=-ccopt -march=native $(VERBOSE) -ldopt -flto
+  # everything
+  EVERCRYPT_CONFIG ?= default
 endif
 
-# BB. Check if this is necessary
-# Release mode (includes testlib if not release)
-ifdef HACL_RELEASE
-  KREMLIN_TESTLIB=
-else
-  KREMLIN_TESTLIB=-add-include '"extracted/TestLib.h"' $(KREMLIB)/c/testlib.c
-endif
+# TODO: no more separate variable definitions?
+LIB_DIR		= $(HACL_HOME)/lib
+SPECS_DIR 	= $(HACL_HOME)/specs $(HACL_HOME)/specs/lemmas $(HACL_HOME)/specs/tests
+CODE_DIRS	= $(addprefix $(HACL_HOME)/code/,hash hmac sha3 poly1305 \
+  chacha20 chacha20poly1305 curve25519 tests ed25519 salsa20 nacl-box meta)
+EVERCRYPT_DIRS  = $(addprefix $(HACL_HOME)/providers/,evercrypt evercrypt/fst test test/vectors evercrypt/config/$(EVERCRYPT_CONFIG))
+MERKLE_DIRS	= $(HACL_HOME)/secure_api/merkle_tree
+# Vale dirs also include directories that only contain .vaf files
+# (for a in $(find vale -iname '*.fst' -or -iname '*.fsti' -or -iname '*.vaf'); do dirname $a; done) | sort | uniq
+VALE_DIRS	= \
+  $(HACL_HOME)/vale/code/arch \
+  $(HACL_HOME)/vale/code/arch/x64 \
+  $(HACL_HOME)/vale/code/arch/x64/interop \
+  $(HACL_HOME)/vale/code/crypto/aes \
+  $(HACL_HOME)/vale/code/crypto/aes/x64 \
+  $(HACL_HOME)/vale/code/crypto/bignum \
+  $(HACL_HOME)/vale/code/crypto/ecc/curve25519 \
+  $(HACL_HOME)/vale/code/crypto/poly1305 \
+  $(HACL_HOME)/vale/code/crypto/poly1305/x64 \
+  $(HACL_HOME)/vale/code/crypto/sha \
+  $(HACL_HOME)/vale/code/lib/collections \
+  $(HACL_HOME)/vale/code/lib/math \
+  $(HACL_HOME)/vale/code/lib/util \
+  $(HACL_HOME)/vale/code/lib/util/x64 \
+  $(HACL_HOME)/vale/code/lib/util/x64/stdcalls \
+  $(HACL_HOME)/vale/code/lib/transformers \
+  $(HACL_HOME)/vale/code/test \
+  $(HACL_HOME)/vale/code/thirdPartyPorts/Intel/aes/x64 \
+  $(HACL_HOME)/vale/code/thirdPartyPorts/OpenSSL/aes \
+  $(HACL_HOME)/vale/code/thirdPartyPorts/OpenSSL/poly1305/x64 \
+  $(HACL_HOME)/vale/code/thirdPartyPorts/OpenSSL/sha \
+  $(HACL_HOME)/vale/code/thirdPartyPorts/rfc7748/curve25519/x64 \
+  $(HACL_HOME)/vale/code/thirdPartyPorts/SymCrypt/bignum \
+  $(HACL_HOME)/vale/specs/crypto \
+  $(HACL_HOME)/vale/specs/defs \
+  $(HACL_HOME)/vale/specs/hardware \
+  $(HACL_HOME)/vale/specs/interop \
+  $(HACL_HOME)/vale/specs/math
 
-# License header
-ifdef HACL_LICENSE
-  KREMLIN_ARGS+=-header $(HACL_LICENSE)
-endif
+ALL_HACL_SOURCE_DIRS = \
+  $(LIB_DIR) $(SPECS_DIR) $(CODE_DIRS) $(VALE_DIRS) \
+  $(EVERCRYPT_DIRS) $(MERKLE_DIRS) \
+  $(KREMLIN_HOME)/runtime
 
-#
-# FStar
-#
-
-FSTAR_LIB=$(FSTAR_HOME)/ulib
-
-HINTS_ENABLED?=--use_hints
-FSTAR_INCLUDES+= \
-	--include $(HACL_HOME)/lib \
-	--include $(HACL_HOME)/specs \
-	--query_stats
-
-FSTAR=$(FSTAR_HOME)/bin/fstar.exe $(HINTS_ENABLED) $(OTHERFLAGS) $(FSTAR_INCLUDES)
-
-include $(FSTAR_HOME)/ulib/ml/Makefile.include
-
-#
-# OCaml
-#
-
-OCAMLOPT:=$(OCAMLOPT) -thread -package batteries,zarith,stdint -w -20-26-3-8-58
-
-#
-# Compilers and tools
-#
-
-HAS_CL=$(shell which cl.exe >/dev/null 2>&1 && echo true || echo false)
-HAS_CCOMP=$(shell which ccomp >/dev/null 2>&1 && echo true || echo false)
-GFIND=$(shell which gfind >/dev/null 2>&1 && echo gfind || echo find)
-
-ifeq ($(OS),Windows_NT)
-  GCC=x86_64-w64-mingw32-gcc.exe
-  MSVC=cl.exe
-else
-  GCC=$(shell which gcc-8 >/dev/null 2>&1 && echo gcc-8 || (which gcc-7 >/dev/null 2>&1 && echo gcc-7 || echo gcc))
-  CMAKE_COMPILER_OPTION := -DCMAKE_C_COMPILER=$(GCC)
-  ENABLE_LTO=-flto
-endif
-GCC_OPTS=$(ENABLE_LTO) -std=c11 -D_GNU_SOURCE
-
-#
-# HACL* generalized targets
-#
-
-# ml-lib:
-# 	$(MAKE) -C $(ULIB_ML)
-
-# import-lib:
-# 	@cp $(HACL_LIB_FILES) .
-
-# import-kremlin:
-# 	@cp $(HACL_KREMLIN_FILES)) .
-
-%.fst-lax: %.fst
-	$(FSTAR) --lax $^
-
-%.fsti-lax: %.fsti
-	$(FSTAR) --lax $^
-
-%.fst-verify: %.fst
-	$(FSTAR) $<
-
-%.fsti-verify: %.fsti
-	$(FSTAR) $<
-
-%.fst-in:
-	@echo --hint_info \
-	$(HINTS_ENABLED) \
-	$(OTHERFLAGS) \
-	$(FSTAR_INCLUDES)
-
-%.fsti-in:
-	@echo --hint_info \
-	$(HINTS_ENABLED) \
-	$(OTHERFLAGS) \
-	$(FSTAR_INCLUDES)
-
-%.fst.hints: %.fst
-	$(FSTAR) --record_hints --z3rlimit_factor 5 $<
-
-%.fsti.hints: %.fsti
-	$(FSTAR) --record_hints --z3rlimit_factor 5 $<
-
-# Custom verification targets for re-located hint files
-%.fst-reloc-verify: %.fst
-	$(FSTAR) --hint_file $(subst -reloc-verify,,$(@F)).hints $<
-%.fsti-reloc-verify: %.fsti
-	$(FSTAR) --hint_file $(subst -reloc-verify,,$(@F)).hints $<
-%.fst.reloc.hints: %.fst
-	$(FSTAR) --hint_file $(subst .reloc,,$(@F)) --record_hints $<
-%.fsti.reloc.hints: %.fsti
-	$(FSTAR) --hint_file $(subst .reloc,,$(@F)) --record_hints $<
-
-# Directories
-%.dir-verify: %
-	$(MAKE) -C $^ verify
-
-%.dir-extract-c: %
-	$(MAKE) -C $^ extract-c
-
-%.dir-hints: %
-	$(MAKE) -C $^ hints
-
-# Colors
-NORMAL="\\033[0;39m"
-CYAN="\\033[1;36m"
+ALL_HACL_DIRS	?= $(ALL_HACL_SOURCE_DIRS) $(HACL_HOME)/obj

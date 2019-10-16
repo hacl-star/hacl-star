@@ -1,0 +1,85 @@
+# This Makefile can be safely included from sub-directories for the purposes of
+# defining the .fst-in targets, as long as the sub-directory defines HACL_HOME.
+
+HACL_HOME 	?= .
+
+# Put your local configuration (e.g. HACL_HOME, KREMLIN_HOME, etc.) in
+# Makefile.config
+-include $(HACL_HOME)/Makefile.config
+
+KREMLIN_HOME 	?= $(HACL_HOME)/../kremlin
+FSTAR_HOME	?= $(HACL_HOME)/../FStar
+VALE_HOME	?= $(HACL_HOME)/../vale
+
+include $(HACL_HOME)/Makefile.include
+
+INCLUDES = \
+  $(ALL_HACL_DIRS) \
+  $(FSTAR_HOME)/ulib/.cache \
+  $(KREMLIN_HOME)/kremlib
+
+# 1. FStar
+
+OUTPUT_DIR ?= obj
+
+FSTAR_INCLUDES = $(addprefix --include ,$(INCLUDES))
+
+FSTAR_HINTS ?= --use_hints --use_hint_hashes --record_hints
+
+# --trivial_pre_for_unannotated_effectful_fns false
+#   to not enforce trivial preconditions
+#   for top-level unannotated effectful functions
+
+# 272: top-level bindings must be total
+# 247: checked file not written because some of its dependencies...
+# 241: corrupt cache file AND stale cache file (argh!) we wish to make the
+#      former fatal, and the latter non-fatal if it's the file we're about to
+#      verify... see https://github.com/FStarLang/FStar/issues/1652
+FSTAR_NO_FLAGS = $(FSTAR_HOME)/bin/fstar.exe $(FSTAR_HINTS) \
+  --odir $(OUTPUT_DIR) --cache_checked_modules $(FSTAR_INCLUDES) --cmi \
+  --already_cached 'Prims FStar LowStar C Spec.Loops TestLib WasmSupport' --warn_error '+241@247-272' \
+  --cache_dir $(OUTPUT_DIR) --trivial_pre_for_unannotated_effectful_fns false
+
+FSTAR = $(FSTAR_NO_FLAGS) $(OTHERFLAGS)
+
+%.fst-in %.fsti-in:
+	@echo $(FSTAR_INCLUDES)
+
+# 2. Kremlin
+
+KRML = $(KREMLIN_HOME)/krml
+
+BASE_FLAGS = \
+  -bundle Hacl.Spec.*,Spec.*[rename=Hacl_Spec] \
+  -bundle Lib.*[rename=Hacl_Lib] \
+  -drop Lib.IntVector.Intrinsics \
+  -fparentheses -fno-shadow -fcurly-braces \
+  -bundle LowStar.* \
+  -bundle Prims,C.Failure,C,C.String,C.Loops,Spec.Loops,C.Endianness,FStar.*[rename=Hacl_Kremlib] \
+  -bundle 'Meta.*' \
+  -minimal \
+  -add-include '"kremlin/internal/types.h"' \
+  -add-include '"kremlin/lowstar_endianness.h"' \
+  -add-include '<string.h>'
+
+CURVE_BUNDLE_BASE= \
+  -bundle 'Hacl.Curve25519_64_Slow=Hacl.Impl.Curve25519.Field64.Hacl,Hacl.Spec.Curve25519,Hacl.Spec.Curve25519.\*' \
+  -bundle Hacl.Curve25519_51=Hacl.Impl.Curve25519.Field51 \
+  -bundle 'Hacl.Impl.Curve25519.\*[rename=Hacl_Curve_Leftovers]'
+
+CURVE_BUNDLE_LOCAL=-bundle Hacl.Curve25519_64_Local=Hacl.Impl.Curve25519.Field64.Local[rename=Hacl_Curve25519_64] \
+  $(CURVE_BUNDLE_BASE)
+
+CURVE_BUNDLE=-bundle Hacl.Curve25519_64=Hacl.Impl.Curve25519.Field64.Vale \
+  $(CURVE_BUNDLE_BASE) -bundle Hacl.Curve25519_64_Local
+HASH_BUNDLE=-bundle Hacl.Hash.MD5+Hacl.Hash.Core.MD5+Hacl.Hash.SHA1+Hacl.Hash.Core.SHA1+Hacl.Hash.SHA2+Hacl.Hash.Core.SHA2+Hacl.Hash.Core.SHA2.Constants=Hacl.Hash.*[rename=Hacl_Hash]
+SHA3_BUNDLE=-bundle Hacl.Impl.SHA3+Hacl.SHA3=[rename=Hacl_SHA3]
+CHACHA20_BUNDLE=-bundle Hacl.Chacha20=Hacl.Impl.Chacha20,Hacl.Impl.Chacha20.*
+SALSA20_BUNDLE=-bundle Hacl.Impl.Salsa20+Hacl.Impl.HSalsa20=Hacl.Impl.Salsa20.*[rename=Hacl_Salsa20]
+CHACHAPOLY_BUNDLE=-bundle Hacl.Impl.Chacha20Poly1305
+ED_BUNDLE=-bundle 'Hacl.Ed25519=Hacl.Impl.Ed25519.*,Hacl.Impl.BignumQ.Mul,Hacl.Impl.Load56,Hacl.Impl.SHA512.ModQ,Hacl.Impl.Store56,Hacl.Bignum25519'
+POLY_BUNDLE=-bundle 'Hacl.Poly1305_32=Hacl.Impl.Poly1305.Field32xN_32' \
+  -bundle 'Hacl.Poly1305_128=Hacl.Impl.Poly1305.Field32xN_128' \
+  -bundle 'Hacl.Poly1305_256=Hacl.Impl.Poly1305.Field32xN_256'
+NACLBOX_BUNDLE=-bundle Hacl.NaCl=Hacl.Impl.SecretBox,Hacl.Impl.Box
+
