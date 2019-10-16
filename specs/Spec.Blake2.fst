@@ -370,6 +370,20 @@ let blake2_update_block a flag totlen d s =
   blake2_compress a s to_compress offset flag
 
 
+val blake2_update_block_multi_step:
+    a:alg
+  -> prev:nat
+  -> n:nat
+  -> blocks:bytes{n * size_block a == length blocks /\ prev + n * size_block a <= max_limb a}
+  -> i:nat{i < n}
+  -> si:hash_ws a ->
+  Tot (hash_ws a)
+
+let blake2_update_block_multi_step a prev n blocks i si =
+  let block = Seq.slice blocks (i * size_block a) ((i + 1) * (size_block a)) in
+  blake2_update_block a false (prev + (i + 1) * size_block a) block si
+
+
 val blake2_update_block_multi:
     a:alg
   -> prev:nat
@@ -379,10 +393,7 @@ val blake2_update_block_multi:
   Tot (hash_ws a)
 
 let blake2_update_block_multi a prev n blocks s =
-  repeati n (fun i si ->
-    let block = Seq.slice blocks (i * size_block a) ((i + 1) * (size_block a)) in
-    blake2_update_block a false (prev + (i + 1) * size_block a) block si
-  ) s
+  repeati n (blake2_update_block_multi_step a prev n blocks) s
 
 
 val blake2_init_hash:
