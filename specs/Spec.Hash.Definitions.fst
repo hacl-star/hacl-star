@@ -26,7 +26,7 @@ open Lib.ByteSequence
  *)
 
 (** Supported hash algorithms. *)
-
+// BB. This needs to be renamed...
 type hash_alg =
   | SHA2_224
   | SHA2_256
@@ -34,6 +34,9 @@ type hash_alg =
   | SHA2_512
   | SHA1
   | MD5
+
+// BB. Remove when renamed.
+let algorithm = hash_alg
 
 let is_sha2 = function
   | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 -> true

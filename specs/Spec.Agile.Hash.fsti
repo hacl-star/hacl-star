@@ -18,5 +18,6 @@ val split_block (a: hash_alg)
 
 val update_multi (a:hash_alg) (hash:words_state a) (blocks:bytes_blocks a):
   Tot (words_state a) (decreases (S.length blocks))
+
 val hash (a:hash_alg) (input:bytes{S.length input <= max_input_length a}):
   Tot (hash:Lib.ByteSequence.lbytes (hash_length a))
