@@ -45,11 +45,16 @@ let sha2_alg = a:hash_alg { is_sha2 a }
 (** Maximum input data length. *)
 
 (* In bytes. *)
+
+// BB. Needs to be renamed...
 inline_for_extraction noextract
 let max_input_length: hash_alg -> Tot nat = function
   | MD5 | SHA1
-  | SHA2_224 | SHA2_256 -> pow2 61 - 1 
+  | SHA2_224 | SHA2_256 -> pow2 61 - 1
   | SHA2_384 | SHA2_512 -> pow2 125 - 1
+
+// BB. Removed once renamed...
+let max_input = max_input_length
 
 (* A type that can hold a maximum length, in bits. *)
 inline_for_extraction
@@ -112,10 +117,14 @@ noextract
 let block_word_length = 16
 
 (* Define the size block in bytes *)
+// BB. Needs to be renamed
 noextract
 let block_length a =
   let open FStar.Mul in
   word_length a * block_word_length
+
+// BB. Removed once renamed
+let size_block = block_length
 
 (* Number of words for intermediate hash, i.e. the working state. *)
 inline_for_extraction noextract
@@ -139,10 +148,14 @@ let hash_word_length: hash_alg -> Tot nat = function
   | SHA2_512 -> 8
 
 (* Define the final hash length in bytes *)
+// BB. Needs to be renamed
 noextract
 let hash_length a =
   let open FStar.Mul in
   word_length a * hash_word_length a
+
+// BB. Removed once renamed
+let size_hash = hash_length
 
 
 (** Padding *)
