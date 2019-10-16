@@ -22,14 +22,18 @@ open Lib.IntTypes
 (** See https://tools.ietf.org/html/rfc5869#section-2.3 *)
 let expand a prk info len =
   let open Spec.Agile.HMAC in
-  // n = ceil(len / hash_length a)
-  let n = 1 + (len - 1) / hash_length a in
-  let last, okm = 
-    Seq.generate_blocks (hash_length a) n n 
-      (fun i -> Seq.lseq uint8 (if i = 0 then 0 else hash_length a))
-      (fun i last ->
-        let t = hmac a prk (last @| info @| Seq.create 1 (u8 i)) in
+  let tlen = hash_length a in
+  let n = len / tlen in
+  let tag, output = 
+    Seq.generate_blocks tlen n n 
+      (fun i -> Seq.lseq uint8 (if i = 0 then 0 else tlen))
+      (fun i tag ->
+        let t = hmac a prk (tag @| info @| Seq.create 1 (u8 (i + 1))) in
         t, t)
       FStar.Seq.empty
   in
-  Seq.sub #uint8 #(n * hash_length a) okm 0 len
+  if n * tlen < len then
+    let t = hmac a prk (tag @| info @| Seq.create 1 (u8 (n + 1))) in
+    output @| Seq.sub #_ #tlen t 0 (len - (n * tlen))
+  else
+    output
