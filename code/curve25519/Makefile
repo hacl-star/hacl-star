@@ -1,228 +1,44 @@
-FSTAR_HOME   ?= ../../../../FStar
-KREMLIN_HOME ?= ../../../../kremlin
-HACL_HOME    ?= ../../..
+# CUSTOMIZE HERE: determine what is the main target of this Makefile, e.g. a C
+# test, a Low* test, or just a binary archive (like libcurve.a).
+all: dist/curve64-ours.exe
 
-CACHE_DIR     ?= $(HACL_HOME)/.cache
-HINT_DIR      ?= $(HACL_HOME)/.hints
-OUTPUT_DIR    ?= .output
-GENERATED_DIR ?= curve25519-c
-OUT_DIR	     ?= curve25519-c
+test: all
+	dist/curve64-ours.exe
 
-.PHONY: all test stage1 stage2 clean clean-c distclean
+FSTAR_ROOTS = Hacl.Curve25519_64_Local.fst Hacl.Curve25519_64_Slow.fst Hacl.Curve25519_51.fst
 
-all: test
+# Defines rules for producing .checked, .krml, .depend, etc.
+include ../Makefile.local
 
-test:
-	rm -f .depend && $(MAKE) .depend
-	$(MAKE) stage1
-	STAGE=2 $(MAKE) stage2
-
-stage1: $(GENERATED_DIR)/Hacl_Curve25519_51.c \
-	$(GENERATED_DIR)/Hacl_Curve25519_64.c \
-	$(GENERATED_DIR)/Hacl_Curve25519_64_slow.c
-
-stage2: curve25519_51.exe curve25519_64.exe
-	./curve25519_51.exe
-	./curve25519_64_slow.exe
-	./curve25519_64_vale.exe
-	./curve25519_64_v_inline.exe
-	./curve25519_64_rfc.exe
-	./curve25519_64_mixed.exe
-
-FSTAR_INCLUDE_DIRS = \
-  $(HACL_KREMLIN) \
-  $(KREMLIN_HOME)/kremlib \
-  $(HACL_HOME)/specs \
-  $(HACL_HOME)/specs/lemmas \
-  $(HACL_HOME)/lib
-
-FSTAR_INCLUDE = $(addprefix --include ,$(FSTAR_INCLUDE_DIRS))
-
-FSTAR_FLAGS = $(OTHERFLAGS) --cmi \
-  --cache_checked_modules --cache_dir $(CACHE_DIR) --odir $(OUTPUT_DIR) \
-  --already_cached "'Prims FStar LowStar C Spec.Loops TestLib Lib'" \
-  $(FSTAR_INCLUDE)
-
-FSTAR = $(FSTAR_HOME)/bin/fstar.exe $(FSTAR_FLAGS)
-
-ENABLE_HINTS = --use_hints --use_hint_hashes --record_hints --query_stats
-
-ROOTS = Hacl.Curve25519_51.fst Hacl.Curve25519_64.fst
-
-.PRECIOUS: %.krml
-
-.depend:
-	$(FSTAR) --dep full $(ROOTS) --extract '* -Prims -FStar -LowStar -Spec' > $@
-
-include .depend
-
-
-$(HINT_DIR):
+# CUSTOMIZE HERE: how to produce binary objects
+dist:
 	mkdir -p $@
 
-$(CACHE_DIR):
-	mkdir -p $@
+# An archive with all the compiled code in this directory.
+dist/libcurve.a: dist/curve25519-inline-tweaked.h dist/Makefile.basic | dist
+	$(MAKE) -C dist -f Makefile.basic
 
-%.checked: | .depend $(HINT_DIR) $(CACHE_DIR)
-	$(FSTAR) $< $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $*).hints && \
-	touch -c $@
+dist/curve25519-inline-tweaked.h: $(HACL_HOME)/dist/vale/curve25519-inline.h | dist
+	sed 's/_inline//g' $< > $@
 
-$(OUTPUT_DIR)/%.krml: | .depend
-	$(FSTAR) --codegen Kremlin \
-	  --extract_module $(basename $(notdir $(subst .checked,,$<))) \
-	  $(notdir $(subst .checked,,$<)) && \
-	touch $@
+$(HACL_HOME)/dist/vale/curve25519-inline.h:
+	$(error Please run a full build first in $(HACL_HOME) so as to obtain $@)
 
-# 2. Generation of .c files
+# CUSTOMIZE HERE: if necessary, move the bundle from $(HACL_HOME)/Makefile to
+# $(HACL_HOME)/Makefile.common; then, provide suitable compile flags.
+dist/Makefile.basic: $(filter-out obj/prims.krml,$(ALL_KRML_FILES)) | dist
+	$(KRML) $^ -o libcurve.a $(BASE_FLAGS) $(VALE_BUNDLES) $(CURVE_BUNDLE_LOCAL) \
+	  -no-prefix 'Hacl.Impl.Curve25519.Field64.Local' \
+	  -drop 'Hacl.Impl.Curve25519.Field64.Local' \
+	  -add-include '"curve25519-inline-tweaked.h"' \
+	  -add-include '<stdbool.h>' \
+	  -add-include '"local.h"' \
+	  -tmpdir dist \
+	  -ccopts -std=gnu11,-g,-O3 \
+	  -skip-compilation
 
-KREMLIN_TESTLIB=-fbuiltin-uint128 -fnocompound-literals -fc89-scope -fparentheses -fcurly-braces \
-	-funroll-loops 8 -warn-error +9 -add-include '"kremlib.h"' -add-include '"FStar_UInt_8_16_32_64.h"' $(KREMLIB)/dist/minimal/testlib.c
+# CUSTOMIZE HERE: list the dependencies for each test (there may be multiple)
+dist/curve64-ours.exe: $(HACL_HOME)/tests/curve64-ours.o dist/libcurve.a
 
-KREMLIN=$(KREMLIN_HOME)/krml
-
-# 2. Generation of .c files
-
-# We use -drop (deprecated) only to avoid creating unnecessary .c,.h files
-$(GENERATED_DIR)/Hacl_Curve25519_51.c: $(ALL_KRML_FILES) | .depend
-	$(KREMLIN) $(KREMLIN_TESTLIB) -skip-compilation  \
-	-bundle 'Lib.*' \
-	-bundle 'Spec.*' \
-	-bundle 'Hacl.Curve25519_51=Hacl.Impl.*' \
-	-drop 'FStar.UInt128,LowStar,Spec,Prims,Lib,C.Loops.*,C.*,C,FStar.*,Hacl.Spec.*,Hacl.Curve25519_64' \
-	-tmpdir $(GENERATED_DIR) \
-	$^
-
-$(GENERATED_DIR)/Hacl_Curve25519_64.c: $(ALL_KRML_FILES) | .depend
-	$(KREMLIN) $(KREMLIN_TESTLIB) -skip-compilation \
-	-add-include '"vale_25519.h"' \
-	-library 'C,FStar' \
-	-bundle 'Lib.*' \
-	-bundle 'Spec.*' \
-	-bundle 'C=C.Endianness' \
-	-bundle 'Hacl.Curve25519_64=Hacl.Impl.*' \
-	-drop 'FStar.UInt128,Hacl.Impl.Curve25519.Field64.Core,LowStar,Spec,Prims,Lib,C.Loops.*,C.*,C,FStar.*,Hacl.Spec.*,Hacl.Curve25519_51' \
-	-no-prefix  Hacl.Impl.Curve25519.Field64.Core \
-	-tmpdir $(GENERATED_DIR) \
-	$^
-
-$(GENERATED_DIR)/Hacl_Curve25519_64_slow.c: $(ALL_KRML_FILES) | .depend
-	$(KREMLIN) $(KREMLIN_TESTLIB) -skip-compilation \
-	-library 'C,FStar' \
-	-bundle 'Lib.*' \
-	-bundle 'Spec.*' \
-	-bundle 'C=C.Endianness' \
-	-bundle 'Hacl.Curve25519_64=Hacl.Spec.*,Hacl.Impl.*[rename=Hacl_Curve25519_64_slow]' \
-	-drop 'FStar.UInt128,LowStar,Spec,Prims,Lib,C.Loops.*,C.*,C,FStar.*,Hacl.Curve25519_51' \
-	-tmpdir $(GENERATED_DIR) \
-	$^
-
-# The Makefile is manually staged because GNU Make does not understand
-# dependencies between the Makefiles we include, i.e. it won't first generate
-# the .depend, parse it, then generate Makefile.include, parse it, then
-# generate dependencies among the C files
-ifeq ($(STAGE),2)
-
-# 3. Collecting all of our source files, and generating corresponding object
-# files.
-
-INCLUDE_DIRS = \
-  $(KREMLIN_HOME)/include \
-  $(KREMLIN_HOME)/kremlib \
-  $(KREMLIN_HOME)/kremlib/c \
-  $(KREMLIN_HOME)/kremlib/dist/minimal \
-  $(HACL_HOME)/lib \
-  $(HACL_HOME)/lib/c
-
-CFLAGS += -O3 -march=native -mtune=native -funroll-loops
-CFLAGS += $(addprefix -I ,$(INCLUDE_DIRS)) -Wall -Wextra -Werror \
-  -Wno-parentheses -Wno-unused-parameter -Wno-unused-variable
-
-UNAME = $(shell uname)
-ifeq ($(UNAME),Darwin)
-    VALE_SRC = curve25519-x86_64-darwin.S
-else ifeq ($(UNAME),Linux)
-    VALE_SRC = curve25519-x86_64-linux.S
-else ifeq ($(OS),Windows_NT)
-    VALE_SRC = curve25519-x86_64-mingw.S
-endif
-
-curve25519_51.exe: $(GENERATED_DIR)/Hacl_Curve25519_51.c
-	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/dist/minimal -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . $(GENERATED_DIR)/Hacl_Curve25519_51.c $(KREMLIN_HOME)/kremlib/dist/generic/testlib.o $(KREMLIN_HOME)/kremlib/dist/minimal/FStar_UInt_8_16_32_64.o curve51-test.c -o curve25519_51.exe
-
-boringssl_x25519.exe: boringssl-test.c
-#	$(CC) -march=native -mtune=native -flto -O3 -I $(HACL_HOME)/../boringssl/include boringssl-test.c -o boringssl_x25519.exe $(HACL_HOME)/../boringssl/build/crypto/libcrypto.a -lpthread
-	$(CC) -march=native -mtune=native -flto -O3 -I $(HACL_HOME)/../boringssl/include boringssl-test.c -o boringssl_x25519.exe $(HACL_HOME)/other_providers/openssl/libcrypto.a
-	./boringssl_x25519.exe
-
-curve25519_64.exe:
-	$(MAKE) curve25519_64_slow.exe
-	$(MAKE) curve25519_64_vale.exe
-	$(MAKE) curve25519_64_v_inline.exe
-	$(MAKE) curve25519_64_mixed.exe
-	$(MAKE)	curve25519_64_rfc.exe
-
-curve25519_64_slow.exe: $(GENERATED_DIR)/Hacl_Curve25519_64_slow.c
-	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/dist/generic -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . $(GENERATED_DIR)/Hacl_Curve25519_64_slow.c $(KREMLIN_HOME)/kremlib/dist/generic/testlib.o $(KREMLIN_HOME)/kremlib/dist/minimal/FStar_UInt_8_16_32_64.o curve64-test.c -o curve25519_64_slow.exe
-
-curve25519_64_vale.exe: $(GENERATED_DIR)/Hacl_Curve25519_64.c rfc7748_25519.h vale/obj/$(VALE_SRC)
-	cp -f vale_25519.h tmp_25519.h
-	cp -f rfc7748_25519.h vale_25519.h
-	$(CC) -march=native -mtune=native -flto -O3 vale/obj/$(VALE_SRC) -c -o vale25519.o
-	$(CC) -march=native -mtune=native -flto -O3 -I $(KREMLIN_HOME)/kremlib/dist/minimal -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . $(GENERATED_DIR)/Hacl_Curve25519_64.c $(KREMLIN_HOME)/kremlib/dist/generic/testlib.o $(KREMLIN_HOME)/kremlib/dist/minimal/FStar_UInt_8_16_32_64.o curve64-test.c -o curve25519_64_vale.exe vale25519.o
-	cp -f tmp_25519.h vale_25519.h
-
-curve25519_64_v_inline.exe: $(GENERATED_DIR)/Hacl_Curve25519_64.c vale-inline.h
-	cp -f vale_25519.h tmp_25519.h
-	cp -f vale-inline.h vale_25519.h
-	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/dist/minimal -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . $(GENERATED_DIR)/Hacl_Curve25519_64.c $(KREMLIN_HOME)/kremlib/dist/generic/testlib.o $(KREMLIN_HOME)/kremlib/dist/minimal/FStar_UInt_8_16_32_64.o curve64-test.c -o curve25519_64_v_inline.exe
-	cp -f tmp_25519.h vale_25519.h
-
-curve25519_64_mixed.exe: $(GENERATED_DIR)/Hacl_Curve25519_64.c rfc7748_25519.h
-	cp -f vale_25519.h tmp_25519.h
-	cp -f rfc7748_25519.h vale_25519.h
-	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/dist/minimal -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . $(GENERATED_DIR)/Hacl_Curve25519_64.c $(KREMLIN_HOME)/kremlib/dist/generic/testlib.o $(KREMLIN_HOME)/kremlib/dist/minimal/FStar_UInt_8_16_32_64.o curve64-test.c -o curve25519_64_mixed.exe
-	cp -f tmp_25519.h vale_25519.h
-
-curve25519_64_rfc.exe: rfc7748_src/fp25519_x64.c rfc7748_src/x25519_x64.c
-	$(CC) -march=native -mtune=native -O3 -I rfc7748_src/ rfc7748_src/fp25519_x64.c -c -o fp25519.o
-	$(CC) -march=native -mtune=native -O3 -I rfc7748_src/ rfc7748_src/x25519_x64.c -c -o x25519.o
-	$(CC) -march=native -mtune=native -O3 -I $(KREMLIN_HOME)/kremlib/dist/minimal -I $(KREMLIN_HOME)/kremlib/c -I $(KREMLIN_HOME)/include -I . $(KREMLIN_HOME)/kremlib/dist/generic/testlib.o $(KREMLIN_HOME)/kremlib/dist/minimal/FStar_UInt_8_16_32_64.o curve64-rfc-test.c -o curve25519_64_rfc.exe fp25519.o x25519.o
-
-# GNU Make manual section 4.14
-
-%.d: %.c
-	@set -e; rm -f $@; \
-	  $(CC) -MM $(CFLAGS) $< > $@.$$$$; \
-	  sed 's,\($(notdir $*)\)\.o[ :]*,$(dir $@)\1.o $@ : ,g' < $@.$$$$ > $@; \
-	  rm -f $@.$$$$
-
--include $(patsubst %.c,%.d,$(ALL_SOURCES))
-
-
-.PRECIOUS: %.o
-
-endif # STAGE=2
-
-# 5. Targets for interactive mode
-
-%.fst-in:
-	@echo $(FSTAR_INCLUDE) \
-	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(basename $@).fst.hints
-
-%.fsti-in:
-	@echo $(FSTAR_INCLUDE) \
-	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(basename $@).fsti.hints
-
-# 6. Clean targets
-
-SHELL=/bin/bash
-
-clean:
-	rm -rf $(GENERATED_DIR) $(OUT_DIR)/*.exe $(OUT_DIR)/*.a
-	rm -rf include/*.o include/*.d
-
-clean-c:
-	rm -rf $(GENERATED_DIR)/{*.{c,h},Makefile.include}
-
-distclean: clean
-	rm -rf $(OUT_DIR) $(OUTPUT_DIR) *.checked
+%.exe:
+	$(CC) $^ $(KREMLIB_A) -o $@

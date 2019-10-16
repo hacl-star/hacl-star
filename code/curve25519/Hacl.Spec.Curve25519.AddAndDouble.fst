@@ -44,6 +44,7 @@ val lemma_add_and_double: q:proj_point -> nq:proj_point -> nqp1:proj_point ->
   Lemma (add_and_double1 q nq nqp1 == add_and_double q nq nqp1)
 let lemma_add_and_double q nq nqp1 = ()
 
+
 let montgomery_ladder1_0 (k:scalar) (q:proj_point) (nq:proj_point) (nqp1:proj_point) =
   // bit 255 is 0 and bit 254 is 1
   let nq,nqp1 = cswap2 (u64 1) nq nqp1 in

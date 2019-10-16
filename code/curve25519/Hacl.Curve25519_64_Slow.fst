@@ -1,10 +1,10 @@
-module Hacl.Curve25519_64
+module Hacl.Curve25519_64_Slow
 
 friend Hacl.Meta.Curve25519
 open Hacl.Meta.Curve25519
 
 // The Vale core.
-module C = Hacl.Impl.Curve25519.Field64.Vale
+module C = Hacl.Impl.Curve25519.Field64.Hacl
 
 let g25519: g25519_t =
   Lib.Buffer.createL_global Spec.Curve25519.basepoint_list
