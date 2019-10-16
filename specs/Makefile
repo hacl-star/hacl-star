@@ -37,7 +37,9 @@ FIXME = \
 	Spec.Hash.KeyedHash.fsti \
 	Spec.HMAC.KeyedHash.fst \
 	Spec.HMAC.KeyedHash.fsti \
-	Spec.Blake2.Incremental.fst
+	Spec.Blake2.Incremental.fst \
+  Spec.Cipher.Expansion.fsti \
+  Spec.Cipher.Expansion.fst
 
 ROOTS = $(filter-out $(FIXME),$(ALL_SOURCES))
 
