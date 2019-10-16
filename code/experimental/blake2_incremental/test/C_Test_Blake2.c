@@ -5,7 +5,7 @@
 #include "C_Test_Blake2.h"
 #include "c/Lib_RandomBuffer_System.h"
 
-#define MAX 10
+#define MAX 10000
 
 uint8_t Lib_PrintBuffer_compare_fast(uint32_t len, uint8_t* buffer1, uint8_t* buffer2) {
   uint8_t res = 0;
@@ -95,12 +95,12 @@ exit_code main()
   uint32_t i,ll,kl,nn;
   for (i = 0; i < 1; i++) {
     for (ll = 1; ll < MAX; ll++) {
-      for (kl = 0; kl < 2; kl++) {
-        for (nn = 1; nn < 2; nn++) {
+      for (kl = 0; kl < 32; kl++) {
+        for (nn = 1; nn < 32; nn++) {
           /* memset(input, 0, len); */
           /* memset(key, 0, keylen); */
-          memset(outrs, 0, outlens);
-          memset(ouths, 0, outlens);
+          /* memset(outrs, 0, outlens); */
+          /* memset(ouths, 0, outlens); */
 
           /* Setting the input and key to a random values */
           bool ires0 = randombytes(input, ll);
@@ -125,8 +125,8 @@ exit_code main()
   /* Perform multiple tests */
   for (i = 0; i < 1; i++) {
     for (ll = 1; ll < MAX; ll++) {
-      for (kl = 0; kl < 2; kl++) {
-        for (nn = 1; nn < 2; nn++) {
+      for (kl = 0; kl < 64; kl++) {
+        for (nn = 1; nn < 64; nn++) {
           /* memset(input, 0, len); */
           /* memset(key, 0, keylen); */
           /* memset(outr, 0, outlen); */

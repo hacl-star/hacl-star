@@ -293,7 +293,7 @@ int blake2s( void *out, size_t outlen, const void *in, size_t inlen, const void 
 
 int ref_blake2s( void *out, size_t outlen, const void *in, size_t inlen, const void *key, size_t keylen )
 {
-  return blake2s( out, BLAKE2S_OUTBYTES, in, inlen, NULL, 0 );
+  return blake2s( out, outlen, in, inlen, key, keylen );
 }
 
 #if defined(SUPERCOP)
