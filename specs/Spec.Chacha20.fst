@@ -152,7 +152,7 @@ let chacha20_encrypt_last
   let plain = create size_block (u8 0) in
   let plain = update_sub plain 0 len b in
   let cipher = chacha20_encrypt_block st0 incr plain in
-  sub cipher 0 len
+  sub cipher 0 (length b)
 
 
 val chacha20_update:
