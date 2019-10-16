@@ -1,17 +1,21 @@
-(** Agile HKDF *)
-module EverCrypt.HKDF
+module Hacl.HKDF
+
+/// A generic, meta-programmed HKDF module. It provides one concrete
+/// instantiation, namely HKDF-SHA2-256 instantiated with the HACL*
+/// implementation. In the future, this module may provide more implementations
+/// using optimized HACL versions of SHA2-256. For more algorithms, and
+/// for an assembly-optimized HKDF version that may call into Vale, see
+/// EverCrypt.HKDF.
 
 module B = LowStar.Buffer
 
-open Spec.Agile.HKDF
 open Spec.Hash.Definitions
+open Spec.Agile.HKDF
 
 open FStar.HyperStack.ST
 open Lib.IntTypes
 
-#set-options "--max_ifuel 0 --max_fuel 0 --z3rlimit 20"
-
-/// Auxiliary lemmas
+#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 20"
 
 let key_and_data_fits (a:hash_alg) : 
   Lemma (block_length a + pow2 32 <= max_input_length a)
@@ -26,9 +30,6 @@ let hash_block_length_fits (a:hash_alg) :
   let open FStar.Mul in
   assert_norm (8 * 16 + 8 * 8 + pow2 32 < pow2 61);
   assert_norm (pow2 61 < pow2 125)
-
-/// Types for expand and extract
-/// Duplicated from Hacl.HKDF because we don't want clients to depend on Hacl.HKDF
 
 inline_for_extraction
 let extract_st (a:hash_alg) = 
@@ -75,48 +76,18 @@ let expand_st (a:hash_alg) =
     B.modifies (B.loc_buffer okm) h0 h1 /\
     B.as_seq h1 okm == expand a (B.as_seq h0 prk) (B.as_seq h0 info) (v len))
 
+inline_for_extraction noextract
+val mk_extract:
+  a: hash_alg ->
+  hmac: Hacl.HMAC.compute_st a ->
+  extract_st a
 
-/// Four monomorphized variants, for callers who already know which algorithm they want
+inline_for_extraction noextract
+val mk_expand:
+  a: hash_alg ->
+  hmac: Hacl.HMAC.compute_st a ->
+  expand_st a
 
-(** @type: true
-*)
-val expand_sha1: expand_st SHA1
-
-(** @type: true
-*)
-val extract_sha1: extract_st SHA1
-
-(** @type: true
-*)
 val expand_sha2_256: expand_st SHA2_256
 
-(** @type: true
-*)
 val extract_sha2_256: extract_st SHA2_256
-
-(** @type: true
-*)
-val expand_sha2_384: expand_st SHA2_384
-
-(** @type: true
-*)
-val extract_sha2_384: extract_st SHA2_384
-
-(** @type: true
-*)
-val expand_sha2_512: expand_st SHA2_512
-
-(** @type: true
-*)
-val extract_sha2_512: extract_st SHA2_512
-
-
-/// Agile versions that dynamically dispatches between the above four
-
-(** @type: true
-*)
-val expand: a:EverCrypt.HMAC.supported_alg -> expand_st a
-
-(** @type: true
-*)
-val extract: a:EverCrypt.HMAC.supported_alg -> extract_st a
