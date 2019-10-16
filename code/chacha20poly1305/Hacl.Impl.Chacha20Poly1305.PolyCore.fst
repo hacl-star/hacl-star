@@ -14,7 +14,7 @@ module Spec = Spec.Chacha20Poly1305
 module Poly = Hacl.Impl.Poly1305
 
 
-#set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 1"
+#set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 1 --record_options"
 
 inline_for_extraction noextract
 let poly1305_padded_st (w:field_spec) =
@@ -34,8 +34,9 @@ let poly1305_padded_st (w:field_spec) =
 
 
 inline_for_extraction noextract
-val poly1305_padded_: #w:field_spec -> poly1305_padded_st w
-let poly1305_padded_ #w ctx len text =
+val poly1305_padded: #w:field_spec -> poly1305_padded_st w
+[@Meta.Attribute.specialize]
+let poly1305_padded #w ctx len text =
   let h0 = ST.get () in
   push_frame ();
   let h1 = ST.get () in
@@ -56,20 +57,3 @@ let poly1305_padded_ #w ctx len text =
   pop_frame();
   let h5 = ST.get () in
   Poly.reveal_ctx_inv ctx h4 h5
-
-
-[@CInline]
-let poly1305_padded_32 : poly1305_padded_st M32 = poly1305_padded_
-[@CInline]
-let poly1305_padded_128 : poly1305_padded_st M128 = poly1305_padded_
-[@CInline]
-let poly1305_padded_256 : poly1305_padded_st M256 = poly1305_padded_
-
-
-inline_for_extraction noextract
-val poly1305_padded: #w:field_spec -> poly1305_padded_st w
-let poly1305_padded #w =
-  match w with
-  | M32 -> poly1305_padded_32
-  | M128 -> poly1305_padded_128
-  | M256 -> poly1305_padded_256

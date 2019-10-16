@@ -7,6 +7,11 @@ open FStar.Mul
 open Lib.IntTypes
 open Lib.Buffer
 
+open Hacl.Impl.Poly1305.Field32xN_32
+open Hacl.Impl.Poly1305.Field32xN_128
+open Hacl.Impl.Poly1305.Field32xN_256
+open Hacl.Impl.Poly1305.Field32xN
+
 module ST = FStar.HyperStack.ST
 module LSeq = Lib.Sequence
 module BSeq = Lib.ByteSequence
@@ -191,9 +196,9 @@ val load_acc:
 
 let load_acc #s acc b =
   match s with
-  | M32 -> F32xN.load_acc1 acc b
-  | M128 -> F32xN.load_acc2 acc b
-  | M256 -> F32xN.load_acc4 acc b
+  | M32 -> Field32xN_32.load_acc1 acc b
+  | M128 -> Field32xN_128.load_acc2 acc b
+  | M256 -> Field32xN_256.load_acc4 acc b
 
 
 inline_for_extraction noextract
@@ -369,10 +374,9 @@ val fmul_rn_normalize:
 
 let fmul_rn_normalize #s out precomp =
   match s with
-  | M32  -> F32xN.fmul_rn_normalize #1 out precomp
-  | M128 -> F32xN.fmul_rn_normalize #2 out precomp
-  | M256 -> F32xN.fmul_rn_normalize #4 out precomp
-
+  | M32  -> Field32xN_32.fmul_r1_normalize out precomp
+  | M128 -> Field32xN_128.fmul_r2_normalize out precomp
+  | M256 -> Field32xN_256.fmul_r4_normalize out precomp
 
 inline_for_extraction noextract
 val fadd:

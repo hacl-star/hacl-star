@@ -327,12 +327,18 @@ let fmul_r2_normalize51 a fa1 =
   FStar.Math.Lemmas.modulo_lemma (v a4 + v a14) (pow2 64);
   assert (felem_fits5 out (2, 4, 2, 2, 2));
 
-  assert (as_nat5 (o0, o1, o2, o3, o4) ==
-    as_nat5 (a0, a1, a2, a3, a4) + as_nat5 (a10, a11, a12, a13, a14));
-  FStar.Math.Lemmas.lemma_mod_plus_distr_l
+  calc (==) {
+    ((feval5 a).[0] + (feval5 a).[1]) % Vec.prime;
+    (==) { }
+    (as_nat5 (a0, a1, a2, a3, a4) % Vec.prime + as_nat5 (a10, a11, a12, a13, a14) % Vec.prime) % Vec.prime;
+    (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_l
     (as_nat5 (a0, a1, a2, a3, a4)) (as_nat5 (a10, a11, a12, a13, a14)) Vec.prime;
   FStar.Math.Lemmas.lemma_mod_plus_distr_r
-    (as_nat5 (a0, a1, a2, a3, a4) % Vec.prime) (as_nat5 (a10, a11, a12, a13, a14)) Vec.prime;
+    (as_nat5 (a0, a1, a2, a3, a4) % Vec.prime) (as_nat5 (a10, a11, a12, a13, a14)) Vec.prime }
+    (as_nat5 (a0, a1, a2, a3, a4) + as_nat5 (a10, a11, a12, a13, a14)) % Vec.prime;
+    (==) { }
+    (feval5 out).[0];
+  };
   out
 #pop-options
 
@@ -635,7 +641,7 @@ let load_acc5_2_lemma f e =
   let r3 = vec_set f3 1ul (u64 0) in
   let r4 = vec_set f4 1ul (u64 0) in
   let r = (r0, r1, r2, r3, r4) in
-  assert ((feval5 r).[0] == (feval5 f).[0]);
+  //assert ((feval5 r).[0] == (feval5 f).[0]);
   assert ((feval5 r).[1] == 0);
   eq_intro (feval5 r) (create2 (feval5 f).[0] 0)
 
@@ -725,6 +731,20 @@ let mod_add128_lemma a b =
   let r0 = a0 +. b0 in
   let r1 = a1 +. b1 in
   let c = r0 ^. ((r0 ^. b0) |. ((r0 -. b0) ^. b0)) >>. 63ul in
+  // This is a well-documented assume that is also present in FStar's own
+  // FStar.UInt128.fst. The lemma can be proven for 8-bit integers via Z3's
+  // bitvector theory, as follows:
+  //
+  // open FStar.BV
+  // let test (a b:bv_t 8) =
+  // let ( ^ ) = bvxor in
+  // let ( ||| ) = bvor in
+  // let ( --- ) = bvsub in
+  // let ( >> ) = bvshr in
+  // assume (bvult a b);
+  // assert (((a ^ ((a ^ b) ||| ((a --- b) ^ b))) >> 7) == (int2bv 1))
+  //
+  // Unfortunately, z3 times out for larger bit widths.
   assume (v c == (if v r0 < v b0 then 1 else 0));
   assert (v c == (v a0 + v b0) / pow2 64);
   let r2 = r1 +. c in
