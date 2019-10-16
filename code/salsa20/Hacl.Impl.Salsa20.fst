@@ -69,7 +69,7 @@ let salsa20_core k ctx ctr =
 
 #set-options "--z3rlimit 100 --max_fuel 2"
 
-inline_for_extraction noextract
+inline_for_extraction
 val salsa20_init:
     ctx:state
   -> k:lbuffer uint8 32ul
@@ -109,7 +109,7 @@ let salsa20_init ctx k n ctr =
   assert (modifies (loc ctx) h0 h1)
 
 
-inline_for_extraction noextract
+inline_for_extraction
 val salsa20_encrypt_block:
     ctx:state
   -> out:lbuffer uint8 64ul
@@ -130,7 +130,7 @@ let salsa20_encrypt_block ctx out incr text =
   pop_frame()
 
 
-inline_for_extraction noextract
+inline_for_extraction
 val salsa20_encrypt_last:
     ctx:state
   -> len:size_t{v len < 64}
@@ -153,7 +153,7 @@ let salsa20_encrypt_last ctx len out incr text =
   pop_frame()
 
 
-inline_for_extraction noextract
+inline_for_extraction
 val salsa20_update:
     ctx:state
   -> len:size_t

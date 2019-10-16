@@ -18,7 +18,7 @@ module Salsa20 = Hacl.Impl.Salsa20
 
 #set-options "--z3rlimit 100 --max_fuel 1 --max_ifuel 1"
 
-inline_for_extraction noextract
+inline_for_extraction
 val hsalsa20_init:
     ctx:state
   -> k:lbuffer uint8 32ul
