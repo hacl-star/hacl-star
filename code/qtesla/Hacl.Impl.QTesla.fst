@@ -44,7 +44,7 @@ module SHA3 = Hacl.SHA3
 //module S    = Spec.QTesla
 module SP = Spec.QTesla.Params
 
-module R    = Hacl.QTesla.Random
+module R    = Lib.RandomBuffer
 
 #reset-options "--z3rlimit 100 --max_fuel 1 --max_ifuel 1 --query_stats"
 
@@ -703,15 +703,13 @@ val qtesla_keygen:
     pk: lbuffer uint8 crypto_publickeybytes
   -> sk: lbuffer uint8 crypto_secretkeybytes
   -> Stack (r:I32.t{r == 0l})
-    (requires fun h -> live h pk /\ live h sk /\
-                    disjoint R.state pk /\ disjoint R.state sk /\ disjoint pk sk)
-    (ensures fun h0 _ h1 -> modifies3 R.state pk sk h0 h1)
+    (requires fun h -> live h pk /\ live h sk /\ disjoint pk sk)
+    (ensures fun h0 _ h1 -> modifies2 pk sk h0 h1)
 
 let qtesla_keygen pk sk =
-    recall R.state;
     push_frame();
     let randomness = create crypto_randombytes (u8 0) in
-    R.randombytes_ crypto_randombytes randomness;
+    let _ = R.randombytes randomness crypto_randombytes in
     let r = qtesla_keygen_ randomness pk sk in
     pop_frame();
     r
@@ -1951,15 +1949,13 @@ val qtesla_sign:
   -> Stack unit
     (requires fun h -> let bufs = [bb smlen; bb m; bb sm; bb sk] in
                     BigOps.big_and (live_buf h) bufs /\
-                    BigOps.pairwise_and disjoint_buf bufs /\
-                    disjoint R.state smlen /\ disjoint R.state m /\ disjoint R.state sm /\ disjoint R.state sk)
-    (ensures fun h0 _ h1 -> modifies3 R.state sm smlen h0 h1)
+                    BigOps.pairwise_and disjoint_buf bufs)
+    (ensures fun h0 _ h1 -> modifies2 sm smlen h0 h1)
 
 #reset-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 0 --query_stats \
                 --using_facts_from '* -LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2'"
 
 let qtesla_sign smlen mlen m sm sk =
-    recall R.state;
     push_frame();
 
     let randomness = create crypto_seedbytes (u8 0) in
@@ -1993,18 +1989,21 @@ let qtesla_sign smlen mlen m sm sk =
     let h1 = ST.get () in
     assert(modifies3 seeds s e h0 h1);
 
-    R.randombytes_ crypto_randombytes (sub randomness_input crypto_randombytes crypto_randombytes);
+    // For whatever reason, having the call to sub inline in the call to R.randombytes causes a typechecking error.
+    // let _ = R.randombytes (sub randomness_input crypto_randombytes crypto_randombytes) crypto_randombytes in
+    let subbuff = sub randomness_input crypto_randombytes crypto_randombytes in
+    let _ = R.randombytes subbuff crypto_randombytes in 
     update_sub randomness_input (size 0) crypto_seedbytes (sub seeds crypto_seedbytes crypto_seedbytes);
     params_SHAKE mlen m crypto_hmbytes (sub randomness_input (crypto_randombytes +. crypto_seedbytes) crypto_hmbytes);
     params_SHAKE (crypto_randombytes +. crypto_seedbytes +. crypto_hmbytes) randomness_input crypto_seedbytes randomness;
 
     let h2 = ST.get () in
-    assert(modifies (loc seeds |+| loc s |+| loc e |+| loc randomness |+| loc randomness_input |+| loc R.state) h0 h2);
+    assert(modifies (loc seeds |+| loc s |+| loc e |+| loc randomness |+| loc randomness_input) h0 h2);
 
     poly_uniform a (sub seeds (size 0) crypto_randombytes);
 
     let h3 = ST.get () in
-    assert(modifies (loc seeds |+| loc s |+| loc e |+| loc randomness |+| loc randomness_input |+| loc R.state |+| loc a) h0 h3);
+    assert(modifies (loc seeds |+| loc s |+| loc e |+| loc randomness |+| loc randomness_input |+| loc a) h0 h3);
     assert(forall (i:nat{i < v params_n}) . {:pattern bget h3 s i} bget h1 s i == bget h3 s i);
     assert(forall (i:nat{i < v params_n * v params_k}) . {:pattern bget h3 e i} bget h1 e i == bget h3 e i);
 
@@ -2023,7 +2022,7 @@ let qtesla_sign smlen mlen m sm sk =
         );
 
     let h5 = ST.get () in
-    assert(modifies (loc seeds |+| loc s |+| loc e |+| loc randomness |+| loc randomness_input |+| loc R.state |+| loc a |+|
+    assert(modifies (loc seeds |+| loc s |+| loc e |+| loc randomness |+| loc randomness_input |+| loc a |+|
                      loc nonce |+| loc smlen |+| loc sm) h0 h5);
 
     pop_frame()
@@ -2301,9 +2300,8 @@ val crypto_sign_keypair:
     pk: lbuffer uint8 crypto_publickeybytes
   -> sk: lbuffer uint8 crypto_secretkeybytes
   -> Stack (r:I32.t{r == 0l})
-    (requires fun h -> live h pk /\ live h sk /\
-                    disjoint R.state pk /\ disjoint R.state sk /\ disjoint pk sk)
-    (ensures fun h0 _ h1 -> modifies3 R.state pk sk h0 h1)
+    (requires fun h -> live h pk /\ live h sk /\ disjoint pk sk)
+    (ensures fun h0 _ h1 -> modifies2 pk sk h0 h1)
 
 let crypto_sign_keypair pk sk = qtesla_keygen pk sk
 
@@ -2315,17 +2313,14 @@ val crypto_sign:
   -> sk : lbuffer uint8 crypto_secretkeybytes
   -> Stack (r:I32.t{r == 0l})
     (requires fun h -> live h sm /\ live h smlen /\ live h m /\ live h sk /\
-                    disjoint R.state sm /\ disjoint R.state smlen /\ disjoint R.state m /\ disjoint R.state sk /\
                     disjoint sm smlen /\ disjoint sm m /\ disjoint sm sk /\
                     disjoint smlen m /\ disjoint smlen sk /\
                     disjoint m sk)
-    (ensures fun h0 _ h1 -> modifies3 R.state sm smlen h0 h1)
+    (ensures fun h0 _ h1 -> modifies2 sm smlen h0 h1)
 
 let crypto_sign sm smlen m mlen sk =
-    recall R.state;
     push_frame();
     let smlen_sizet = create (size 1) (size 0) in
-    assert(disjoint R.state smlen_sizet);
     qtesla_sign smlen_sizet (uint64_to_uint32 mlen) m sm sk;
     let smlen_sizet = smlen_sizet.(size 0) in
     smlen.(size 0) <- uint32_to_uint64 smlen_sizet;

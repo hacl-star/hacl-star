@@ -621,6 +621,7 @@ REQUIRED_FLAGS	=\
   -add-include '"curve25519-inline.h"' \
   -no-prefix 'MerkleTree.New.Low' \
   -no-prefix 'MerkleTree.New.Low.Serialization' \
+  -no-prefix 'Lib.RandomBuffer' \
   -fparentheses -fno-shadow -fcurly-braces \
   -bundle Hacl.Impl.Poly1305.Fields \
   -bundle LowStar.* \
