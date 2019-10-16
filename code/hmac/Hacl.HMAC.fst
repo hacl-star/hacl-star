@@ -12,8 +12,9 @@ open LowStar.BufferOps
 open Lib.IntTypes
 
 open Spec.Hash.Definitions
-open Spec.HMAC
-friend Spec.HMAC
+open Spec.Agile.HMAC
+friend Spec.Agile.HMAC
+friend Spec.Agile.Hash
 
 let _: squash (inversion hash_alg) = allow_inversion hash_alg
 

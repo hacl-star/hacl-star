@@ -1,4 +1,4 @@
-module Spec.Hash_Generic
+module Spec.Hash.KeyedHash
 
 open FStar.Mul
 open Lib.IntTypes

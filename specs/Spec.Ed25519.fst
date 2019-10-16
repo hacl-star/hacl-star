@@ -6,9 +6,7 @@ open Lib.Sequence
 open Lib.ByteSequence
 open Lib.RawIntTypes
 
-open Spec.Agile.Hash
 open Spec.Curve25519
-
 
 #reset-options "--max_fuel 0 --z3rlimit 100"
 
@@ -34,7 +32,7 @@ let q: n:nat{n < pow2 256} =
   assert_norm(pow2 252 + 27742317777372353535851937790883648493 < pow2 255 - 19);
   (pow2 252 + 27742317777372353535851937790883648493) // Group order
 
-let _:_:unit{max_input HASH_SHA2_512 > pow2 32} = assert_norm (max_input HASH_SHA2_512 > pow2 32)
+let _:_:unit{Spec.Hash.Definitions.max_input_length Spec.Hash.Definitions.SHA2_512 > pow2 32} = assert_norm (Spec.Hash.Definitions.max_input_length Spec.Hash.Definitions.SHA2_512 > pow2 32)
 
 let g_x : elem = 15112221349535400772501151409588531511454012693041857206046113283949847762202
 let g_y : elem = 46316835694926478169428394003475163141307993866256225615783033603165251855960
@@ -49,8 +47,7 @@ let modp_inv (x:elem) : Tot elem =
   x **% (prime - 2)
 
 let sha512_modq (len:size_nat) (s:lbytes len) : n:nat{n < pow2 256} =
-  nat_from_bytes_le (Spec.Agile.Hash.hash HASH_SHA2_512 s) % q
-
+  nat_from_bytes_le (Spec.Agile.Hash.hash Spec.Hash.Definitions.SHA2_512 s) % q
 
 let point_add (p:ext_point) (q:ext_point) : Tot ext_point =
   let x1, y1, z1, t1 = p in
@@ -137,7 +134,7 @@ let point_decompress (s:lbytes 32) : Tot (option ext_point) =
   | _ -> None
 
 let secret_expand (secret:lbytes 32) : (lbytes 32 & lbytes 32) =
-  let h = Spec.Agile.Hash.hash HASH_SHA2_512 secret in
+  let h = Spec.Agile.Hash.hash Spec.Hash.Definitions.SHA2_512 secret in
   let h_low : lbytes 32 = slice #uint8 #64 h 0 32 in
   let h_high : lbytes 32 = slice #uint8 #64 h 32 64 in
   let h_low0 : uint8  = index #uint8 #32 h_low 0 in

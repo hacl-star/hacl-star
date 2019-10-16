@@ -8,7 +8,7 @@ open Lib.RawIntTypes
 open Lib.Sequence
 open Lib.ByteSequence
 
-module H = Spec.Hash
+module H = Spec.Agile.Hash
 module Def = Spec.Hash.Definitions
 
 //

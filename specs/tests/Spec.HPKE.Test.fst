@@ -37,7 +37,7 @@ let test1_context = List.Tot.map u8_from_UInt8 [
 
 assume val e: Lib.RandomSequence.entropy
 
-let cs: Spec.ciphersuite = Spec.Agile.DH.DH_Curve25519, Spec.Agile.AEAD.AEAD_AES128_GCM, Spec.Agile.Hash.HASH_SHA2_256
+let cs: Spec.ciphersuite = Spec.Agile.DH.DH_Curve25519, Spec.Agile.AEAD.AEAD_AES128_GCM, Spec.Hash.Definitions.SHA2_256
 
 
 

@@ -92,11 +92,11 @@ Box.exe: $(LIBS_FILES) Spec.Salsa20.fst Spec.Poly1305.fst Spec.SecretBox.fst Spe
 	$(OCAMLOPT) -I Box-ml $(addprefix Box-ml/, $(LIBS_ML)) Box-ml/Spec_Salsa20.ml Box-ml/Spec_Poly1305.ml Box-ml/Spec_SecretBox.ml Box-ml/Spec_Curve25519.ml Box-ml/Spec_Box.ml Box-ml/Spec_Box_Test.ml -o Box.exe
 	./Box.exe
 
-Ed25519.exe: $(LIBS_FILES) Spec.SHA2.Constants.fst Spec.Hash.Definitions.fst Spec.Hash.PadFinish.fst Spec.MD5.fst Spec.SHA1.fst Spec.SHA2.fst Spec.Hash.fst Spec.Hash.Incremental.fst Spec.Agile.Hash.fst Spec.Curve25519.fst Spec.Ed25519.fst tests/Spec.Ed25519.Test.fst
+Ed25519.exe: $(LIBS_FILES) Spec.SHA2.Constants.fst Spec.Hash.Definitions.fst Spec.Hash.PadFinish.fst Spec.MD5.fst Spec.SHA1.fst Spec.SHA2.fst lemmas/Spec.Hash.Incremental.fst Spec.Agile.Hash.fst Spec.Curve25519.fst Spec.Ed25519.fst tests/Spec.Ed25519.Test.fst
 	mkdir -p Ed25519-ml
-	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.SHA2.Constants --extract_module Spec.Hash.Definitions --extract_module Spec.Hash.PadFinish --extract_module Spec.MD5 --extract_module Spec.SHA1 --extract_module Spec.SHA2 --extract_module Spec.Hash --extract_module Spec.Hash.Incremental --extract_module Spec.Agile.Hash --extract_module Spec.Curve25519 --extract_module Spec.Ed25519 --extract_module Spec.Ed25519.Test --odir Ed25519-ml $^
+	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.SHA2.Constants --extract_module Spec.Hash.Definitions --extract_module Spec.Hash.PadFinish --extract_module Spec.MD5 --extract_module Spec.SHA1 --extract_module Spec.SHA2 --extract_module Spec.Hash.Incremental --extract_module Spec.Agile.Hash --extract_module Spec.Curve25519 --extract_module Spec.Ed25519 --extract_module Spec.Ed25519.Test --odir Ed25519-ml $^
 	@echo 'let _ = test()' >> Ed25519-ml/Spec_Ed25519_Test.ml
-	$(OCAMLOPT) -I Ed25519-ml $(addprefix Ed25519-ml/, $(LIBS_ML)) Ed25519-ml/Spec_SHA2_Constants.ml Ed25519-ml/Spec_Hash_Definitions.ml Ed25519-ml/Spec_Hash_PadFinish.ml Ed25519-ml/Spec_MD5.ml Ed25519-ml/Spec_SHA1.ml Ed25519-ml/Spec_SHA2.ml Ed25519-ml/Spec_Hash.ml Ed25519-ml/Spec_Hash_Incremental.ml Ed25519-ml/Spec_Agile_Hash.ml Ed25519-ml/Spec_Curve25519.ml Ed25519-ml/Spec_Ed25519.ml Ed25519-ml/Spec_Ed25519_Test.ml -o Ed25519.exe
+	$(OCAMLOPT) -I Ed25519-ml $(addprefix Ed25519-ml/, $(LIBS_ML)) Ed25519-ml/Spec_SHA2_Constants.ml Ed25519-ml/Spec_Hash_Definitions.ml Ed25519-ml/Spec_Hash_PadFinish.ml Ed25519-ml/Spec_MD5.ml Ed25519-ml/Spec_SHA1.ml Ed25519-ml/Spec_SHA2.ml Ed25519-ml/Spec_Agile_Hash.ml Ed25519-ml/Spec_Curve25519.ml Ed25519-ml/Spec_Ed25519.ml Ed25519-ml/Spec_Ed25519_Test.ml -o Ed25519.exe
 	./Ed25519.exe
 
 gf128.exe: $(LIBS_FILES) Spec.GaloisField.fst Spec.GF128.fst tests/Spec.GF128.Test.fst
@@ -159,11 +159,11 @@ kyber.exe: $(LIBS_FILES) Spec.Kyber.fst
 	$(OCAMLOPT) -I kyber-ml $(OCAML_INCLUDES) $(addprefix kyber-ml/, $(LIBS_ML)) kyber-ml/Spec_Kyber.ml -o kyber.exe
 	./kyber.exe
 
-sha2.exe: $(LIBS_FILES) Spec.SHA2.Constants.fst Spec.Hash.Definitions.fst Spec.Hash.PadFinish.fst Spec.MD5.fst Spec.SHA1.fst Spec.SHA2.fst Spec.Hash.fst tests/Spec.SHA2.Test.fst
+sha2.exe: $(LIBS_FILES) Spec.SHA2.Constants.fst Spec.Hash.Definitions.fst Spec.Hash.PadFinish.fst Spec.MD5.fst Spec.SHA1.fst Spec.SHA2.fst Spec.Agile.Hash.fst tests/Spec.SHA2.Test.fst
 	mkdir -p sha2-ml
-	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.SHA2.Constants --extract_module Spec.Hash.Definitions --extract_module Spec.Hash.PadFinish --extract_module Spec.MD5 --extract_module Spec.SHA1 --extract_module Spec.SHA2 --extract_module Spec.Hash --extract_module Spec.SHA2.Test --odir sha2-ml $^
+	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.SHA2.Constants --extract_module Spec.Hash.Definitions --extract_module Spec.Hash.PadFinish --extract_module Spec.Agile.Hash --extract_module Spec.MD5 --extract_module Spec.SHA1 --extract_module Spec.SHA2 --extract_module Spec.SHA2.Test --odir sha2-ml $^
 	@echo 'let _ = test()' >> sha2-ml/Spec_SHA2_Test.ml
-	$(OCAMLOPT) -I sha2-ml $(addprefix sha2-ml/, $(LIBS_ML)) sha2-ml/Spec_SHA2_Constants.ml sha2-ml/Spec_Hash_Definitions.ml sha2-ml/Spec_Hash_PadFinish.ml sha2-ml/Spec_MD5.ml sha2-ml/Spec_SHA1.ml sha2-ml/Spec_SHA2.ml sha2-ml/Spec_Hash.ml sha2-ml/Spec_SHA2_Test.ml -o sha2.exe
+	$(OCAMLOPT) -I sha2-ml $(addprefix sha2-ml/, $(LIBS_ML)) sha2-ml/Spec_SHA2_Constants.ml sha2-ml/Spec_Hash_Definitions.ml sha2-ml/Spec_Hash_PadFinish.ml sha2-ml/Spec_MD5.ml sha2-ml/Spec_SHA1.ml sha2-ml/Spec_SHA2.ml sha2-ml/Spec_Agile_Hash.ml sha2-ml/Spec_SHA2_Test.ml -o sha2.exe
 	./sha2.exe
 
 sha2-fixed.exe: $(LIBS_FILES) Spec.SHA2.Constants.fst Spec.Hash.Definitions.fst Spec.SHA2.Fixed.fst tests/Spec.SHA2.Fixed.Test.fst
@@ -173,26 +173,26 @@ sha2-fixed.exe: $(LIBS_FILES) Spec.SHA2.Constants.fst Spec.Hash.Definitions.fst 
 	$(OCAMLOPT) -I sha2-fixed-ml $(OCAML_INCLUDES) $(addprefix sha2-fixed-ml/, $(LIBS_ML)) sha2-fixed-ml/Spec_SHA2_Constants.ml sha2-fixed-ml/Spec_Hash_Definitions.ml sha2-fixed-ml/Spec_SHA2_Fixed.ml sha2-fixed-ml/Spec_SHA2_Fixed_Test.ml -o sha2-fixed.exe
 	./sha2-fixed.exe
 
-hmac.exe: $(LIBS_FILES) Spec.SHA2.Constants.fst Spec.Hash.Definitions.fst Spec.Hash.PadFinish.fst Spec.MD5.fst Spec.SHA1.fst Spec.SHA2.fst Spec.Hash.fst Spec.HMAC.fst tests/Spec.HMAC.Test.fst
+hmac.exe: $(LIBS_FILES) Spec.SHA2.Constants.fst Spec.Hash.Definitions.fst Spec.Hash.PadFinish.fst Spec.MD5.fst Spec.SHA1.fst Spec.SHA2.fst Spec.Agile.Hash.fst Spec.Agile.HMAC.fst tests/Spec.HMAC.Test.fst
 	mkdir -p hmac-ml
-	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.SHA2.Constants --extract_module Spec.Hash.Definitions --extract_module Spec.Hash.PadFinish --extract_module Spec.MD5 --extract_module Spec.SHA1 --extract_module Spec.SHA2 --extract_module Spec.Hash --extract_module Spec.HMAC --extract_module Spec.HMAC.Test --odir hmac-ml $^
+	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.SHA2.Constants --extract_module Spec.Hash.Definitions --extract_module Spec.Hash.PadFinish --extract_module Spec.MD5 --extract_module Spec.SHA1 --extract_module Spec.SHA2 --extract_module Spec.Agile.Hash --extract_module Spec.Agile.HMAC --extract_module Spec.HMAC.Test --odir hmac-ml $^
 	@echo 'let _ = test()' >> hmac-ml/Spec_HMAC_Test.ml
-	$(OCAMLOPT) -I hmac-ml $(OCAML_INCLUDES) $(addprefix hmac-ml/, $(LIBS_ML)) hmac-ml/Spec_SHA2_Constants.ml hmac-ml/Spec_Hash_Definitions.ml hmac-ml/Spec_Hash_PadFinish.ml hmac-ml/Spec_MD5.ml hmac-ml/Spec_SHA1.ml hmac-ml/Spec_SHA2.ml hmac-ml/Spec_Hash.ml hmac-ml/Spec_HMAC.ml hmac-ml/Spec_HMAC_Test.ml -o hmac.exe
+	$(OCAMLOPT) -I hmac-ml $(OCAML_INCLUDES) $(addprefix hmac-ml/, $(LIBS_ML)) hmac-ml/Spec_SHA2_Constants.ml hmac-ml/Spec_Hash_Definitions.ml hmac-ml/Spec_Hash_PadFinish.ml hmac-ml/Spec_MD5.ml hmac-ml/Spec_SHA1.ml hmac-ml/Spec_SHA2.ml hmac-ml/Spec_Agile_Hash.ml hmac-ml/Spec_Agile_HMAC.ml hmac-ml/Spec_HMAC_Test.ml -o hmac.exe
 	./hmac.exe
 
-hkdf.exe: $(LIBS_FILES) Spec.SHA2.Constants.fst Spec.Hash.Definitions.fst Spec.Hash.PadFinish.fst Spec.MD5.fst Spec.SHA1.fst Spec.SHA2.fst Spec.Hash.fst Spec.HMAC.fst Spec.HKDF.fst tests/Spec.HKDF.Test.fst
+hkdf.exe: $(LIBS_FILES) Spec.SHA2.Constants.fst Spec.Hash.Definitions.fst Spec.Hash.PadFinish.fst Spec.MD5.fst Spec.SHA1.fst Spec.SHA2.fst Spec.Agile.Hash.fst Spec.Agile.HMAC.fst Spec.Agile.HKDF.fst tests/Spec.HKDF.Test.fst
 	mkdir -p hkdf-ml
-	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.SHA2.Constants --extract_module Spec.Hash.Definitions --extract_module Spec.Hash.PadFinish --extract_module Spec.MD5 --extract_module Spec.SHA1 --extract_module Spec.SHA2 --extract_module Spec.Hash --extract_module Spec.HMAC --extract_module Spec.HKDF --extract_module Spec.HKDF.Test --odir hkdf-ml $^
+	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.SHA2.Constants --extract_module Spec.Hash.Definitions --extract_module Spec.Hash.PadFinish --extract_module Spec.MD5 --extract_module Spec.SHA1 --extract_module Spec.SHA2 --extract_module Spec.Agile.Hash --extract_module Spec.Agile.HMAC --extract_module Spec.Agile.HKDF --extract_module Spec.HKDF.Test --odir hkdf-ml $^
 	@echo 'let _ = test()' >> hkdf-ml/Spec_HKDF_Test.ml
-	$(OCAMLOPT) -I hkdf-ml $(OCAML_INCLUDES) $(addprefix hkdf-ml/, $(LIBS_ML)) hkdf-ml/Spec_SHA2_Constants.ml hkdf-ml/Spec_Hash_Definitions.ml hkdf-ml/Spec_Hash_PadFinish.ml hkdf-ml/Spec_MD5.ml hkdf-ml/Spec_SHA1.ml hkdf-ml/Spec_SHA2.ml hkdf-ml/Spec_Hash.ml hkdf-ml/Spec_HMAC.ml hkdf-ml/Spec_HKDF.ml hkdf-ml/Spec_HKDF_Test.ml -o hkdf.exe
+	$(OCAMLOPT) -I hkdf-ml $(OCAML_INCLUDES) $(addprefix hkdf-ml/, $(LIBS_ML)) hkdf-ml/Spec_SHA2_Constants.ml hkdf-ml/Spec_Hash_Definitions.ml hkdf-ml/Spec_Hash_PadFinish.ml hkdf-ml/Spec_MD5.ml hkdf-ml/Spec_SHA1.ml hkdf-ml/Spec_SHA2.ml hkdf-ml/Spec_Agile_Hash.ml hkdf-ml/Spec_Agile_HMAC.ml hkdf-ml/Spec_Agile_HKDF.ml hkdf-ml/Spec_HKDF_Test.ml -o hkdf.exe
 	./hkdf.exe
 
-hpke.exe: $(LIBS_FILES) Spec.SHA2.Constants.fst Spec.Hash.Definitions.fst Spec.Hash.PadFinish.fst Spec.MD5.fst Spec.SHA1.fst Spec.SHA2.fst Spec.Hash.fst Spec.Hash.Incremental.fst Spec.Agile.Hash.fst Spec.Agile.HMAC.fst Spec.Agile.HKDF.fst Spec.Curve25519.fst Spec.Curve448.fst Spec.Agile.DH.fst Spec.GaloisField.fst Spec.AES.fst Spec.GF128.fst Spec.AES_GCM.fst Spec.Chacha20.fst Spec.Poly1305.fst Spec.Chacha20Poly1305.fst Spec.Agile.AEAD.fst Spec.HPKE.fst tests/Spec.HPKE.Test.fst
+hpke.exe: $(LIBS_FILES) Spec.SHA2.Constants.fst Spec.Hash.Definitions.fst Spec.Hash.PadFinish.fst Spec.MD5.fst Spec.SHA1.fst Spec.SHA2.fst lemmas/Spec.Hash.Incremental.fst Spec.Agile.Hash.fst Spec.Agile.HMAC.fst Spec.Agile.HKDF.fst Spec.Curve25519.fst Spec.Curve448.fst Spec.Agile.DH.fst Spec.GaloisField.fst Spec.AES.fst Spec.GF128.fst Spec.AES_GCM.fst Spec.Chacha20.fst Spec.Poly1305.fst Spec.Chacha20Poly1305.fst Spec.Agile.AEAD.fst Spec.HPKE.fst tests/Spec.HPKE.Test.fst
 	mkdir -p hpke-ml
 	cp $(HACL_HOME)/lib/ml/Lib_RandomSequence.ml hpke-ml
-	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.SHA2.Constants --extract_module Spec.Hash.Definitions --extract_module Spec.Hash.PadFinish --extract_module Spec.MD5 --extract_module Spec.SHA1 --extract_module Spec.SHA2 --extract_module Spec.Hash --extract_module Spec.Hash.Incremental --extract_module Spec.Agile.Hash --extract_module Spec.Agile.HMAC --extract_module Spec.Agile.HKDF --extract_module Spec.Curve25519 --extract_module Spec.Curve448 --extract_module Spec.Agile.DH --extract_module Spec.GaloisField --extract_module Spec.AES --extract_module Spec.GF128 --extract_module Spec.AES_GCM --extract_module Spec.Chacha20 --extract_module Spec.Poly1305 --extract_module Spec.Chacha20Poly1305 --extract_module Spec.Agile.AEAD --extract_module Spec.HPKE --extract_module Spec.HPKE.Test --odir hpke-ml $^
+	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.SHA2.Constants --extract_module Spec.Hash.Definitions --extract_module Spec.Hash.PadFinish --extract_module Spec.MD5 --extract_module Spec.SHA1 --extract_module Spec.SHA2 --extract_module Spec.Hash.Incremental --extract_module Spec.Agile.Hash --extract_module Spec.Agile.HMAC --extract_module Spec.Agile.HKDF --extract_module Spec.Curve25519 --extract_module Spec.Curve448 --extract_module Spec.Agile.DH --extract_module Spec.GaloisField --extract_module Spec.AES --extract_module Spec.GF128 --extract_module Spec.AES_GCM --extract_module Spec.Chacha20 --extract_module Spec.Poly1305 --extract_module Spec.Chacha20Poly1305 --extract_module Spec.Agile.AEAD --extract_module Spec.HPKE --extract_module Spec.HPKE.Test --odir hpke-ml $^
 	@echo 'let _ = test()' >> hpke-ml/Spec_HPKE_Test.ml
-	$(OCAMLOPT) -package cryptokit -I hpke-ml $(OCAML_INCLUDES) $(addprefix hpke-ml/, $(LIBS_ML)) hpke-ml/Lib_RandomSequence.ml hpke-ml/Spec_SHA2_Constants.ml hpke-ml/Spec_Hash_Definitions.ml hpke-ml/Spec_Hash_PadFinish.ml hpke-ml/Spec_MD5.ml hpke-ml/Spec_SHA1.ml hpke-ml/Spec_SHA2.ml hpke-ml/Spec_Hash.ml hpke-ml/Spec_Hash_Incremental.ml hpke-ml/Spec_Agile_Hash.ml hpke-ml/Spec_Agile_HMAC.ml hpke-ml/Spec_Agile_HKDF.ml hpke-ml/Spec_Curve25519.ml hpke-ml/Spec_Curve448.ml hpke-ml/Spec_Agile_DH.ml hpke-ml/Spec_GaloisField.ml hpke-ml/Spec_AES.ml hpke-ml/Spec_GF128.ml hpke-ml/Spec_AES_GCM.ml hpke-ml/Spec_Chacha20.ml hpke-ml/Spec_Poly1305.ml hpke-ml/Spec_Chacha20Poly1305.ml hpke-ml/Spec_Agile_AEAD.ml hpke-ml/Spec_HPKE.ml hpke-ml/Spec_HPKE_Test.ml -o hpke.exe
+	$(OCAMLOPT) -package cryptokit -I hpke-ml $(OCAML_INCLUDES) $(addprefix hpke-ml/, $(LIBS_ML)) hpke-ml/Lib_RandomSequence.ml hpke-ml/Spec_SHA2_Constants.ml hpke-ml/Spec_Hash_Definitions.ml hpke-ml/Spec_Hash_PadFinish.ml hpke-ml/Spec_MD5.ml hpke-ml/Spec_SHA1.ml hpke-ml/Spec_SHA2.ml hpke-ml/Spec_Agile_Hash.ml hpke-ml/Spec_Hash_Incremental.ml hpke-ml/Spec_Agile_HMAC.ml hpke-ml/Spec_Agile_HKDF.ml hpke-ml/Spec_Curve25519.ml hpke-ml/Spec_Curve448.ml hpke-ml/Spec_Agile_DH.ml hpke-ml/Spec_GaloisField.ml hpke-ml/Spec_AES.ml hpke-ml/Spec_GF128.ml hpke-ml/Spec_AES_GCM.ml hpke-ml/Spec_Chacha20.ml hpke-ml/Spec_Poly1305.ml hpke-ml/Spec_Chacha20Poly1305.ml hpke-ml/Spec_Agile_AEAD.ml hpke-ml/Spec_HPKE.ml hpke-ml/Spec_HPKE_Test.ml -o hpke.exe
 	./hpke.exe
 
 blake2inc.exe: $(LIBS_FILES) Spec.Blake2.fst Spec.Blake2.Incremental.fst tests/Spec.Blake2.Incremental.Test.fst tests/Spec.Blake2.Incremental.Test.fst
@@ -216,11 +216,11 @@ argon2i.exe: $(LIBS_FILES) Spec.Argon2i.fst tests/Spec.Argon2i.Test.fst
 	$(OCAMLOPT) -I argon2i-ml $(OCAML_INCLUDES) $(addprefix argon2i-ml/, $(LIBS_ML)) argon2i-ml/Spec_Blake2.ml argon2i-ml/Spec_Argon2i.ml argon2i-ml/Spec_Argon2i_Test.ml -o argon2i.exe
 	./argon2i.exe
 
-rsapss.exe: $(LIBS_FILES) Spec.SHA2.Constants.fst Spec.Hash.Definitions.fst Spec.Hash.PadFinish.fst Spec.MD5.fst Spec.SHA1.fst Spec.SHA2.fst Spec.Hash.fst Spec.Hash.Incremental.fst Spec.Agile.Hash.fst Spec.RSAPSS.fst tests/Spec.RSAPSS.Test.fst
+rsapss.exe: $(LIBS_FILES) Spec.SHA2.Constants.fst Spec.Hash.Definitions.fst Spec.Hash.PadFinish.fst Spec.MD5.fst Spec.SHA1.fst Spec.SHA2.fst lemmas/Spec.Hash.Incremental.fst Spec.Agile.Hash.fst Spec.RSAPSS.fst tests/Spec.RSAPSS.Test.fst
 	mkdir -p rsapss-ml
-	$(FSTAR)  --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.SHA2.Constants --extract_module Spec.Hash.Definitions --extract_module Spec.Hash.PadFinish --extract_module Spec.MD5 --extract_module Spec.SHA1 --extract_module Spec.SHA2 --extract_module Spec.Hash --extract_module Spec.Hash.Incremental --extract_module Spec.Agile.Hash --extract_module Spec.RSAPSS --extract_module Spec.RSAPSS.Test --odir rsapss-ml $^
+	$(FSTAR)  --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.SHA2.Constants --extract_module Spec.Hash.Definitions --extract_module Spec.Hash.PadFinish --extract_module Spec.MD5 --extract_module Spec.SHA1 --extract_module Spec.SHA2 --extract_module Spec.Hash.Incremental --extract_module Spec.Agile.Hash --extract_module Spec.RSAPSS --extract_module Spec.RSAPSS.Test --odir rsapss-ml $^
 	@echo 'let _ = test()' >> rsapss-ml/Spec_RSAPSS_Test.ml
-	$(OCAMLOPT) -I rsapss-ml $(OCAML_INCLUDES) $(addprefix rsapss-ml/, $(LIBS_ML)) rsapss-ml/Spec_SHA2_Constants.ml rsapss-ml/Spec_Hash_Definitions.ml rsapss-ml/Spec_Hash_PadFinish.ml rsapss-ml/Spec_MD5.ml rsapss-ml/Spec_SHA1.ml rsapss-ml/Spec_SHA2.ml rsapss-ml/Spec_Hash.ml rsapss-ml/Spec_Hash_Incremental.ml rsapss-ml/Spec_Agile_Hash.ml rsapss-ml/Spec_RSAPSS.ml rsapss-ml/Spec_RSAPSS_Test.ml -o rsapss.exe
+	$(OCAMLOPT) -I rsapss-ml $(OCAML_INCLUDES) $(addprefix rsapss-ml/, $(LIBS_ML)) rsapss-ml/Spec_SHA2_Constants.ml rsapss-ml/Spec_Hash_Definitions.ml rsapss-ml/Spec_Hash_PadFinish.ml rsapss-ml/Spec_MD5.ml rsapss-ml/Spec_SHA1.ml rsapss-ml/Spec_SHA2.ml rsapss-ml/Spec_Agile_Hash.ml rsapss-ml/Spec_Hash_Incremental.ml rsapss-ml/Spec_RSAPSS.ml rsapss-ml/Spec_RSAPSS_Test.ml -o rsapss.exe
 	./rsapss.exe
 
 random.exe: $(LIBS_FILES) tests/Spec.Random.Test.fst
