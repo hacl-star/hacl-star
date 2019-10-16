@@ -158,6 +158,7 @@ val double_round:
   (ensures  fun h0 _ h1 -> modifies (loc st) h0 h1 /\
     as_seq h1 st == Spec.double_round (as_seq h0 st))
 
+[@ CInline ]
 let double_round st =
   quarter_round st (size 0) (size 4) (size 8) (size 12);
   quarter_round st (size 5) (size 9) (size 13) (size 1);
