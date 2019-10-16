@@ -2,7 +2,7 @@ module Spec.Agile.Hash
 
 module S = FStar.Seq
 
-open Spec.Hash.Definitions
+include Spec.Hash.Definitions
 open Spec.Hash.PadFinish
 
 val init (a:hash_alg): init_t a
