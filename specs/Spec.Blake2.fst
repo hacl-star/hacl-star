@@ -460,15 +460,18 @@ val blake2:
 
 let blake2 a d kk k nn =
   let ll = Seq.length d in
-  let n = ll / size_block a in
-  let rem = ll % size_block a in
-  let n,rem = if n <> 0 && rem = 0 then n - 1, size_block a else n, rem in
+  let n0 = ll / size_block a in
+  let rem0 = ll % size_block a in
+  let kn = if kk = 0 then 0 else 1 in
+  let n = if n0 <> 0 && rem0 = 0 then n0 - 1 else n0 in
+  let rem = if n0 <> 0 && rem0 = 0 then size_block a else rem0 in
   let blocks = Seq.slice #uint8 d 0 (n * size_block a) in
   let last = Seq.slice #uint8 d (n * size_block a) ll in
-  let kn = if kk = 0 then 0 else 1 in
+  let prev_multi = kn * (size_block a) in
+  let prev_last = prev_multi + n * size_block a in
   let s: hash_ws a = blake2_init a kk k nn in
-  let s: hash_ws a = blake2_update_block_multi a (kn * size_block a) n blocks s in
-  let s: hash_ws a = blake2_update_last a ((kn + n) * size_block a) rem last s in
+  let s: hash_ws a = blake2_update_block_multi a prev_multi n blocks s in
+  let s: hash_ws a = blake2_update_last a prev_last rem last s in
   blake2_finish a s nn
 
 
@@ -484,7 +487,7 @@ let blake2s d kk k n = blake2 Blake2S d kk k n
 
 val blake2b:
     d:bytes
-  -> kk:size_nat{kk <= 64 /\ (if kk = 0 then length d < pow2 128 else length d + 128  < pow2 128)}
+  -> kk:size_nat{kk <= 64 /\ (if kk = 0 then length d < pow2 128 else length d + 128 < pow2 128)}
   -> k:lbytes kk
   -> nn:size_nat{1 <= nn /\ nn <= 64} ->
   Tot (lbytes nn)
