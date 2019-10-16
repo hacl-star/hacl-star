@@ -76,8 +76,6 @@ $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	$(KREMLIN) -skip-compilation \
 	-no-prefix 'Hacl.Test.Blake2b' \
 	-no-prefix 'Hacl.Test.Blake2s' \
-	-no-prefix 'Hacl.Blake2b' \
-	-no-prefix 'Hacl.Blake2s' \
 	-bundle 'Lib.*' \
 	-bundle 'Spec.*' \
 	-bundle 'C=C.*,C.Endianness' \

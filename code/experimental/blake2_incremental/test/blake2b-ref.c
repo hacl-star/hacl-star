@@ -87,7 +87,7 @@ int blake2b_init_param( blake2b_state *S, const blake2b_param *P )
 
   /* IV XOR ParamBlock */
   for( i = 0; i < 8; ++i )
-    S->h[i] ^= load64( p + sizeof( S->h[i] ) * i );
+    S->h[i] ^= ref_load64( p + sizeof( S->h[i] ) * i );
 
   S->outlen = P->digest_length;
   return 0;
@@ -105,9 +105,9 @@ int blake2b_init( blake2b_state *S, size_t outlen )
   P->key_length    = 0;
   P->fanout        = 1;
   P->depth         = 1;
-  store32( &P->leaf_length, 0 );
-  store32( &P->node_offset, 0 );
-  store32( &P->xof_length, 0 );
+  ref_store32( &P->leaf_length, 0 );
+  ref_store32( &P->node_offset, 0 );
+  ref_store32( &P->xof_length, 0 );
   P->node_depth    = 0;
   P->inner_length  = 0;
   memset( P->reserved, 0, sizeof( P->reserved ) );
@@ -129,9 +129,9 @@ int blake2b_init_key( blake2b_state *S, size_t outlen, const void *key, size_t k
   P->key_length    = (uint8_t)keylen;
   P->fanout        = 1;
   P->depth         = 1;
-  store32( &P->leaf_length, 0 );
-  store32( &P->node_offset, 0 );
-  store32( &P->xof_length, 0 );
+  ref_store32( &P->leaf_length, 0 );
+  ref_store32( &P->node_offset, 0 );
+  ref_store32( &P->xof_length, 0 );
   P->node_depth    = 0;
   P->inner_length  = 0;
   memset( P->reserved, 0, sizeof( P->reserved ) );
@@ -181,7 +181,7 @@ static void blake2b_compress( blake2b_state *S, const uint8_t block[BLAKE2B_BLOC
   size_t i;
 
   for( i = 0; i < 16; ++i ) {
-    m[i] = load64( block + i * sizeof( m[i] ) );
+    m[i] = ref_load64( block + i * sizeof( m[i] ) );
   }
 
   for( i = 0; i < 8; ++i ) {
@@ -262,7 +262,7 @@ int blake2b_final( blake2b_state *S, void *out, size_t outlen )
   blake2b_compress( S, S->buf );
 
   for( i = 0; i < 8; ++i ) /* Output full hash to temp buffer */
-    store64( buffer + sizeof( S->h[i] ) * i, S->h[i] );
+    ref_store64( buffer + sizeof( S->h[i] ) * i, S->h[i] );
 
   memcpy( out, buffer, S->outlen );
   secure_zero_memory(buffer, sizeof(buffer));
