@@ -1,19 +1,21 @@
 module Spec.Hash.PadFinish
-open Lib.IntTypes
+
 module S = FStar.Seq
+open Lib.IntTypes
+open Lib.ByteSequence
 
 open Spec.Hash.Lemmas0
 open Spec.Hash.Definitions
-
-#set-options "--z3rlimit 100"
 
 (** This module contains specifications shared across all the Merkle-Damgård
     constructions. *)
 
 (** Padding *)
 
+#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 10"
+
 let pad (a:hash_alg)
-  (total_len:nat{total_len < max_input_length a}):
+  (total_len:nat{total_len <= max_input_length a}):
   Tot (b:bytes{(S.length b + total_len) % block_length a = 0})
 =
   let open FStar.Mul in

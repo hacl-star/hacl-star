@@ -16,7 +16,7 @@ module HS = FStar.HyperStack
 module Seq = Lib.Sequence
 module ByteSeq = Lib.ByteSequence
 
-#reset-options "--z3rlimit 150 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 350 --max_fuel 0 --max_ifuel 0"
 
 let modifies_preserves_live #t #a b l h0 h1 = ()
 let modifies_includes l1 l2 h0 h1 = ()
@@ -63,10 +63,10 @@ let recall #t #a #len b =
 let create #a clen init =
   B.alloca init (normalize_term clen)
 
-#set-options "--max_fuel 1"
-
 let createL #a init =
   B.alloca_of_list init
+
+#set-options "--max_fuel 1"
 
 let createL_global #a init =
   IB.igcmalloc_of_list #a root init
@@ -529,6 +529,7 @@ let mapi #a #b h0 clen out spec_f f inp =
       lemma_eq_disjoint clen clen out inp i h0 h1;
       let xi = inp.(i) in f i xi)
 
+#reset-options "--z3rlimit 500 --max_fuel 2"
 let map_blocks_multi #t #a h0 bs nb inp output spec_f impl_f =
   Math.Lemmas.multiple_division_lemma (v nb) (v bs);
   [@inline_let]

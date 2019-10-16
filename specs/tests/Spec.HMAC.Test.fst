@@ -7,8 +7,7 @@ open Lib.RawIntTypes
 open Lib.Sequence
 open Lib.ByteSequence
 
-module Hash = Spec.Hash
-module HMAC = Spec.HMAC
+module HMAC = Spec.Agile.HMAC
 
 
 //

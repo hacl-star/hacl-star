@@ -4,14 +4,14 @@ open Spec.Hash.Definitions
 
 (* A useful lemma for all the operations that involve going from bytes to bits. *)
 let max_input_size_len (a: hash_alg): Lemma
-  (ensures FStar.Mul.(max_input_length a * 8 = pow2 (len_length a * 8)))
+  (ensures FStar.Mul.((max_input_length a) * 8 + 8 = pow2 (len_length a * 8)))
 =
   let open FStar.Mul in
   match a with
   | MD5 | SHA1 | SHA2_224 | SHA2_256 ->
-      assert_norm (max_input_length a * 8 = pow2 (len_length a * 8))
+      assert_norm (max_input_length a * 8 + 8 = pow2 (len_length a * 8))
   | SHA2_384 | SHA2_512 ->
-      assert_norm (max_input_length a * 8 = pow2 (len_length a * 8))
+      assert_norm (max_input_length a * 8 + 8 = pow2 (len_length a * 8))
 
 #reset-options "--using_facts_from 'Prims Spec.Hash.Definitions'"
 let pad_invariant_block (a: hash_alg) (blocks: nat) (rest: nat): Lemma

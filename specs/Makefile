@@ -33,10 +33,10 @@ FIXME = \
 	Spec.HPKE.fst \
 	Spec.HPKE.CFRG.fst \
 	Spec.Poly1305.Generic.fst \
-	Spec.Hash_Generic.fst \
-	Spec.Hash_Generic.fsti \
-	Spec.HMAC_Generic.fst \
-	Spec.HMAC_Generic.fsti \
+	Spec.Hash.KeyedHash.fst \
+	Spec.Hash.KeyedHash.fsti \
+	Spec.HMAC.KeyedHash.fst \
+	Spec.HMAC.KeyedHash.fsti \
 	Spec.Blake2.Incremental.fst
 
 ROOTS = $(filter-out $(FIXME),$(ALL_SOURCES))

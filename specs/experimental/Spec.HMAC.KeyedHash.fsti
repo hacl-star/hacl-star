@@ -1,11 +1,11 @@
-module Spec.HMAC_Generic
+module Spec.HMAC.KeyedHash
 
 open FStar.Mul
 open Lib.IntTypes
 open Lib.Sequence
 open Lib.ByteSequence
 
-module H = Spec.Hash_Generic
+module H = Spec.Hash.KeyedHash
 
 val wrap_key:
     a: H.algorithm
