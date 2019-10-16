@@ -298,4 +298,5 @@ let pad = Spec.Hash.PadFinish.pad MD5
 
 (* Section 3.5 *)
 
-let finish = Spec.Hash.PadFinish.finish _
+let finish = Spec.Hash.PadFinish.finish MD5
+
