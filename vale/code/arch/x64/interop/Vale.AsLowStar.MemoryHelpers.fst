@@ -1,19 +1,22 @@
 module Vale.AsLowStar.MemoryHelpers
-open X64.MemoryAdapters
-open Interop.Base
+open FStar.Mul
+open Vale.Arch.HeapImpl
+open Vale.X64.MemoryAdapters
+open Vale.Interop.Base
 module B = LowStar.Buffer
 module UV = LowStar.BufferView.Up
 module DV = LowStar.BufferView.Down
-module ME = X64.Memory
+module ME = Vale.X64.Memory
 module VSig = Vale.AsLowStar.ValeSig
+module IX64 = Vale.Interop.X64
 
-friend X64.Memory
-friend X64.Memory_Sems
-friend X64.Stack_i
-friend X64.Stack_Sems
-friend X64.Vale.Decls
-friend X64.Vale.StateLemmas
-friend X64.MemoryAdapters
+friend Vale.X64.Memory
+friend Vale.X64.Memory_Sems
+friend Vale.X64.Stack_i
+friend Vale.X64.Stack_Sems
+friend Vale.X64.Decls
+friend Vale.X64.StateLemmas
+friend Vale.X64.MemoryAdapters
 
 let as_vale_buffer_len (#src #t:base_typ) (x:buf_t src t)
    = let db = get_downview x in
@@ -24,7 +27,7 @@ let as_vale_immbuffer_len (#src #t:base_typ) (x:ibuf_t src t)
    = let db = get_downview x in
    DV.length_eq db;
    UV.length_eq (UV.mk_buffer db (ME.uint_view t))
-   
+
 let state_eq_down_mem (va_s1:V.va_state) (s1:_) = ()
 
 let rec loc_eq (args:list arg)
@@ -33,13 +36,14 @@ let rec loc_eq (args:list arg)
     | [] -> ()
     | hd :: tl -> loc_eq tl
 
-let relate_modifies (args:list arg) (m0 m1 : ME.mem) = loc_eq args
-let reveal_readable (#src #t:_) (x:buf_t src t) (s:ME.mem) = ()
-let reveal_imm_readable (#src #t:_) (x:ibuf_t src t) (s:ME.mem) = ()
-let readable_live (#src #t:_) (x:buf_t src t) (s:ME.mem) = ()
-let readable_imm_live (#src #t:_) (x:ibuf_t src t) (s:ME.mem) = ()
+let relate_modifies (args:list arg) (m0 m1 : ME.vale_heap) = loc_eq args
+let reveal_readable (#src #t:_) (x:buf_t src t) (s:ME.vale_heap) = ()
+let reveal_imm_readable (#src #t:_) (x:ibuf_t src t) (s:ME.vale_heap) = ()
+let readable_live (#src #t:_) (x:buf_t src t) (s:ME.vale_heap) = ()
+let readable_imm_live (#src #t:_) (x:ibuf_t src t) (s:ME.vale_heap) = ()
 let buffer_readable_reveal #max_arity src bt x args h0 = ()
 let get_heap_mk_mem_reveal args h0 = ()
+let lemma_as_mem_as_vale_mem h = ()
 let mk_stack_reveal stack = ()
 let buffer_as_seq_reveal src t x args h0 = ()
 let immbuffer_as_seq_reveal src t x args h0 = ()
@@ -67,11 +71,11 @@ let core_create_lemma_taint_hyp
       (ensures (let va_s = LSig.create_initial_vale_state #max_arity #arg_reg args h0 in
                 LSig.taint_hyp args va_s))
   = let va_s = LSig.create_initial_vale_state #max_arity #arg_reg args h0 in
-    let taint_map = va_s.VS.memTaint in
-    let mem = va_s.VS.mem in
+    let taint_map = va_s.VS.vs_memTaint in
+    let mem = va_s.VS.vs_heap in
 //    assert (mem == mk_mem args h0);
     let raw_taint = IX64.(mk_taint args IX64.init_taint) in
-    assert (taint_map == create_memtaint mem (args_b8 args) raw_taint);
+    assert (taint_map == create_memtaint (_ih mem) (args_b8 args) raw_taint);
     ME.valid_memtaint mem (args_b8 args) raw_taint;
 //    assert (forall x. List.memP x (args_b8 args) ==> ME.valid_taint_buf x mem taint_map (raw_taint x));
     assert (forall x. List.memP x (args_b8 args) ==> ME.valid_taint_buf x mem taint_map (raw_taint x));
@@ -100,10 +104,10 @@ let imm_buffer_read_reveal src t h s b i =
 let buffer_as_seq_invert src t h s b =
   let db = get_downview b in
   DV.length_eq db;
-  assert (Seq.equal 
+  assert (Seq.equal
     (ME.buffer_as_seq s (as_vale_buffer b))
     (LSig.uint_to_nat_seq_t t (UV.as_seq h (UV.mk_buffer db (LSig.view_of_base_typ t)))))
-    
+
 let buffer_as_seq_reveal_tuint128 src x va_s = ()
 
 let immbuffer_as_seq_reveal_tuint128 src x va_s = ()
@@ -118,7 +122,7 @@ let same_down_up_buffer_length src b =
 val lemma_mult_lt_right: a:pos -> b:nat -> c:nat -> Lemma
   (requires (b < c))
   (ensures  (b * a < c * a))
-let lemma_mult_lt_right a b c = 
+let lemma_mult_lt_right a b c =
   assert (c <> 0);
   if b = 0 then (
     assert (0 * a == 0);
@@ -138,7 +142,7 @@ let down_up_buffer_read_reveal src h s b i =
   lemma_mult_lt_right n i (DV.length db / n);
   FStar.Math.Lemmas.multiply_fractions (DV.length db) n;
   FStar.Math.Lemmas.nat_times_nat_is_nat i n;
-  assert (low_buffer_read src src h b i == 
+  assert (low_buffer_read src src h b i ==
     UV.View?.get up_view (Seq.slice (DV.as_seq h db) (i*n) (i*n + n)));
   DV.put_sel h db (i*n);
   let aux () : Lemma (n * ((i*n)/n) == i*n) =
@@ -146,7 +150,7 @@ let down_up_buffer_read_reveal src h s b i =
   in aux()
 
 let same_buffer_same_upviews #src #bt b h0 h1 =
-    let dv = get_downview b in 
+    let dv = get_downview b in
     let s0 = DV.as_seq h0 dv in
     let s1 = DV.as_seq h1 dv in
     let aux (i:nat{i < DV.length dv}) : Lemma (Seq.index s0 i == Seq.index s1 i) =
@@ -157,10 +161,10 @@ let same_buffer_same_upviews #src #bt b h0 h1 =
     in Classical.forall_intro aux;
     Seq.lemma_eq_intro s0 s1;
     DV.length_eq dv;
-    BufferViewHelpers.lemma_uv_equal (LSig.view_of_base_typ bt) dv h0 h1
+    Vale.Lib.BufferViewHelpers.lemma_uv_equal (LSig.view_of_base_typ bt) dv h0 h1
 
 let same_immbuffer_same_upviews #src #bt b h0 h1 =
-    let dv = get_downview b in 
+    let dv = get_downview b in
     let s0 = DV.as_seq h0 dv in
     let s1 = DV.as_seq h1 dv in
     let aux (i:nat{i < DV.length dv}) : Lemma (Seq.index s0 i == Seq.index s1 i) =
@@ -171,4 +175,4 @@ let same_immbuffer_same_upviews #src #bt b h0 h1 =
     in Classical.forall_intro aux;
     Seq.lemma_eq_intro s0 s1;
     DV.length_eq dv;
-    BufferViewHelpers.lemma_uv_equal (LSig.view_of_base_typ bt) dv h0 h1
+    Vale.Lib.BufferViewHelpers.lemma_uv_equal (LSig.view_of_base_typ bt) dv h0 h1
