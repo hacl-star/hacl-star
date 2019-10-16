@@ -1,4 +1,4 @@
-module Spec.HMAC_Generic.Test
+module Spec.HMAC.KeyedHash.Test
 
 
 open FStar.Mul
@@ -7,8 +7,8 @@ open Lib.RawIntTypes
 open Lib.Sequence
 open Lib.ByteSequence
 
-module Hash = Spec.Hash_Generic
-module HMAC = Spec.HMAC_Generic
+module Hash = Spec.Hash.KeyedHash
+module HMAC = Spec.HMAC.KeyedHash
 
 
 //

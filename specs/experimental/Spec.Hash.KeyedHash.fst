@@ -1,4 +1,4 @@
-module Spec.Hash_Generic
+module Spec.Hash.KeyedHash
 
 #set-options "--z3rlimit 25"
 
