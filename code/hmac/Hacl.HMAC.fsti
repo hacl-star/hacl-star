@@ -36,11 +36,9 @@ let compute_st (a: hash_alg) =
   Stack unit
   (requires fun h0 -> B.live h0 tag /\ B.live h0 key /\ B.live h0 data)
   (ensures fun h0 _ h1 ->
-    LowStar.Modifies.(modifies (loc_buffer tag) h0 h1) /\ (
-    assert_norm (pow2 32 < pow2 61 - 1);
-    assert_norm (pow2 32 < pow2 125 - 1);
-    assert_norm (pow2 32 - 1 == max_size_t);
-    B.as_seq h1 tag == hmac a (B.as_seq h0 key) (B.as_seq h0 data)))
+    key_and_data_fits a;
+    LowStar.Modifies.(modifies (loc_buffer tag) h0 h1) /\
+    B.as_seq h1 tag == hmac a (B.as_seq h0 key) (B.as_seq h0 data))
 
 inline_for_extraction noextract
 val mk_compute:
