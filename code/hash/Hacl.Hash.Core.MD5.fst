@@ -14,6 +14,7 @@ open Spec.Hash.Definitions
 
 friend Spec.MD5
 friend Hacl.Hash.PadFinish
+friend Spec.Agile.Hash
 
 (** Top-level constant arrays for the MD5 algorithm. *)
 let _h0 = IB.igcmalloc_of_list HS.root Spec.init_as_list

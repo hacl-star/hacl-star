@@ -13,6 +13,7 @@ open Spec.Hash.Definitions
 
 friend Spec.SHA1
 friend Hacl.Hash.PadFinish
+friend Spec.Agile.Hash
 
 #reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 

@@ -16,6 +16,7 @@ module Hash = EverCrypt.Hash
 
 open FStar.HyperStack.ST
 open Spec.Hash.Definitions
+friend Spec.Agile.Hash
 
 #set-options "--max_fuel 0 --max_ifuel 0"
 

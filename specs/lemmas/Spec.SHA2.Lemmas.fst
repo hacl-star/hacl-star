@@ -8,6 +8,7 @@ open Spec.Hash.Definitions
 open Spec.SHA2
 
 friend Spec.SHA2
+friend Spec.Agile.Hash
 
 (* Scheduling function *)
 
