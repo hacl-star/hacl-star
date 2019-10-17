@@ -1,5 +1,5 @@
 [
-  "²„Õ6á…Ä¾YG®(ƒÆ\u0018Ð",
+  "R¾‹Iuw\u0016\u001cÃÄdÍ\u0017C\u0017 ",
   [
     [
       "Spec.Agile.HMAC.lbytes",
@@ -13,7 +13,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "510af15cac3edcf3109f762f46fb5307"
+      "3dd7df3644dcb758de222828a1523037"
     ],
     [
       "Spec.Agile.HMAC.wrap",
@@ -131,7 +131,7 @@
         "typing_tok_Spec.Hash.Definitions.SHA2_224@tok"
       ],
       0,
-      "c747a3ea253b877778bf870e812e2f33"
+      "b143e1281cf3bb96d266e493bf228ed9"
     ],
     [
       "Spec.Agile.HMAC.xor",
@@ -140,13 +140,13 @@
       1,
       [ "@query", "equation_Lib.Sequence.length" ],
       0,
-      "e158931882a5cc8ac785d940ad1b01d0"
+      "caf49f16117482a9d87c7a29ff8623e2"
     ],
     [
       "Spec.Agile.HMAC.xor_lemma",
       1,
-      2,
       1,
+      0,
       [
         "@MaxIFuel_assumption", "@query", "equation_Lib.IntTypes.uint8",
         "equation_Prims.eqtype", "equation_Prims.nat",
@@ -155,18 +155,18 @@
         "function_token_typing_Prims.int",
         "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "lemma_FStar.Seq.Base.lemma_create_len",
-        "refinement_interpretation_Tm_refine_231a0046b1aee74e5b08c47bc6749b6b",
+        "refinement_interpretation_Tm_refine_21746de6cfbcd1fe03ad4a9e10c508ba",
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "16a33e2f07b59163b5a79f88b402aa73"
+      "65123de818a8e5ca61265e99a6d3c6ec"
     ],
     [
       "Spec.Agile.HMAC.xor_lemma",
       2,
-      2,
       1,
+      0,
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Spec.Loops.seq_map.fuel_instrumented",
@@ -186,8 +186,8 @@
         "equation_FStar.Integers.int_t",
         "equation_FStar.Seq.Properties.head",
         "equation_FStar.Seq.Properties.tail", "equation_Lib.IntTypes.uint8",
-        "equation_Lib.Sequence.length", "equation_Prims.eqtype",
-        "equation_Prims.nat", "equation_Spec.Agile.HMAC.xor",
+        "equation_Prims.eqtype", "equation_Prims.nat",
+        "equation_Spec.Agile.HMAC.xor",
         "equation_Spec.Hash.Definitions.bytes",
         "equation_with_fuel_Spec.Loops.seq_map.fuel_instrumented",
         "equation_with_fuel_Spec.Loops.seq_map2.fuel_instrumented",
@@ -201,6 +201,7 @@
         "lemma_FStar.Seq.Base.lemma_index_slice",
         "lemma_FStar.Seq.Base.lemma_len_slice",
         "primitive_Prims.op_Addition", "primitive_Prims.op_Equality",
+        "primitive_Prims.op_GreaterThan",
         "primitive_Prims.op_LessThanOrEqual",
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
@@ -221,7 +222,7 @@
         "typing_tok_Lib.IntTypes.U8@tok", "well-founded-ordering-on-nat"
       ],
       0,
-      "120822851d46b32265942653c80a9ee0"
+      "0d379d119902a334646fe3662580d29b"
     ],
     [
       "Spec.Agile.HMAC.hmac",
@@ -240,7 +241,7 @@
         "typing_Spec.Hash.Definitions.word_length"
       ],
       0,
-      "371e2a9e800302d62c2cff42dd58438e"
+      "373a9e04ce93a3ca73aa0f42f3626a08"
     ],
     [
       "Spec.Agile.HMAC.hmac",
@@ -335,7 +336,7 @@
         "typing_tok_Spec.Hash.Definitions.MD5@tok"
       ],
       0,
-      "96a302991ab28334c00a08419f8cf8b6"
+      "87d7433262f0874aa89a9b5e08b07496"
     ]
   ]
 ]

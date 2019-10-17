@@ -1,5 +1,5 @@
 [
-  "´\u0010GÙ'ÀGžj\u0004oFVu\rG",
+  "ÀÅ×€)÷Ê—á¹\u0000(]â‘Ÿ",
   [
     [
       "Hacl.HMAC.key_and_data_fits",
@@ -27,7 +27,7 @@
         "typing_Spec.Hash.Definitions.word_length"
       ],
       0,
-      "f02c207c5128af8f10b25b82edf79d0a"
+      "1ddbe51c6f0b4789bbd7c3782edcdf91"
     ],
     [
       "Hacl.HMAC.compute_st",
@@ -35,20 +35,24 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "constructor_distinct_Tm_unit",
-        "equation_Lib.IntTypes.uint8", "equation_LowStar.Buffer.buffer",
+        "@MaxIFuel_assumption", "@query", "equation_Lib.IntTypes.uint8",
+        "equation_LowStar.Buffer.buffer",
         "equation_LowStar.Buffer.trivial_preorder", "equation_Prims.nat",
-        "equation_Spec.Hash.Definitions.max_input_length",
-        "function_token_typing_Lib.IntTypes.uint8", "int_inversion",
+        "equation_Spec.Hash.Definitions.block_length",
+        "equation_Spec.Hash.Definitions.block_word_length",
+        "equation_Spec.Hash.Definitions.word_length",
+        "function_token_typing_Lib.IntTypes.uint8",
         "lemma_LowStar.Monotonic.Buffer.length_as_seq",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Multiply",
+        "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_dd0acc6b0a6d213c976d90b31ff4bbf0",
         "refinement_interpretation_Tm_refine_e887a8e6ee6a76633ceebf23311c2363",
         "typing_LowStar.Buffer.trivial_preorder",
-        "typing_Spec.Hash.Definitions.max_input_length"
+        "typing_Spec.Hash.Definitions.word_length"
       ],
       0,
-      "7a5261f93e1e8012408d66e22dd7acd8"
+      "c54074228d8cd719a02c2534429e478f"
     ]
   ]
 ]
