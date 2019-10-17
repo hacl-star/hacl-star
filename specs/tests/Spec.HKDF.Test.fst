@@ -256,5 +256,5 @@ let test () =
   else IO.print_string "HKDF Expand: Failure :(\n";
 
   // Composite result
-  if r1_a && r1_b && r2_a && r2_b && r3_a && r3_b then IO.print_string "\nComposite result: Success!\n"
-  else IO.print_string "\nComposite result: Failure :(\n"
+  if r1_a && r1_b && r2_a && r2_b && r3_a && r3_b then begin IO.print_string "\nComposite result: Success!\n"; true end
+  else begin IO.print_string "\nComposite result: Failure :(\n"; false end

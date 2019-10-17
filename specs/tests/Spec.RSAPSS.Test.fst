@@ -285,5 +285,5 @@ let test4() =
 
 let test() =
   let res = test1() && test2() && test3() && test4() in
-  if res then IO.print_string "\nSuccess!\n"
-  else IO.print_string "\nFailure"
+  if res then begin IO.print_string "\nSuccess!\n"; true end
+  else begin IO.print_string "\nFailure"; false end

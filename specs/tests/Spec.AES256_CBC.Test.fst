@@ -144,32 +144,33 @@ let test_compare_buffers (msg:string) (expected:seq uint8) (computed:seq uint8) 
     for_all2 #uint8 #uint8 #(length computed) (fun x y -> uint_to_nat #U8 x = uint_to_nat #U8 y)
       computed expected
   in
-  if result then IO.print_string "\nSuccess !\n"
-  else IO.print_string "\nFailed !\n"
+  if result then begin IO.print_string "\nSuccess !\n"; true end
+  else begin IO.print_string "\nFailed !\n"; false end
 
-let test() : FStar.All.ML unit =
+let test() : FStar.All.ML bool =
   let computed1 = aes256_cbc_encrypt test1_input_key test1_input_iv test1_input_plaintext (length test1_input_plaintext) in
-  test_compare_buffers "TEST1: encryption of one block" test1_output_ciphertext computed1;
+  let result1 = test_compare_buffers "TEST1: encryption of one block" test1_output_ciphertext computed1 in
   let computed2 = aes256_cbc_decrypt test1_input_key test1_input_iv computed1 (length computed1) in
-  begin match computed2 with
+  let result2 = begin match computed2 with
   | Some computed2 ->
     test_compare_buffers "TEST2: decryption of the previous block" test1_input_plaintext computed2
-  | None -> IO.print_string "TEST2: decryption of the previous block : Failure\n"
-  end;
+  | None -> IO.print_string "TEST2: decryption of the previous block : Failure\n"; false
+  end in
 
   let computed3 = aes256_cbc_encrypt test2_input_key test2_input_iv test2_input_plaintext (length test2_input_plaintext) in
-  test_compare_buffers "TEST3: encryption of message" test2_output_ciphertext computed3;
+  let result3 = test_compare_buffers "TEST3: encryption of message" test2_output_ciphertext computed3 in
   let computed4 = aes256_cbc_decrypt test2_input_key test2_input_iv computed3 (length computed3) in
-  begin match computed4 with
+  let result4 = begin match computed4 with
   | Some computed4 ->
     test_compare_buffers "TEST4: decryption of the previous message" test2_input_plaintext computed4
-  | None -> IO.print_string "TEST4: decryption of the previous message : Failure\n"
-  end;
+  | None -> IO.print_string "TEST4: decryption of the previous message : Failure\n"; false
+  end in
   let computed4 = aes256_cbc_encrypt test3_input_key test3_input_iv test3_input_plaintext (length test3_input_plaintext) in
-  test_compare_buffers "TEST4: encryption of Signal message" test3_output_ciphertext computed4;
+  let result5 = test_compare_buffers "TEST4: encryption of Signal message" test3_output_ciphertext computed4 in
   let computed5 = aes256_cbc_decrypt test3_input_key test3_input_iv computed4 (length computed4) in
-  begin match computed5 with
+  let result6 = begin match computed5 with
   | Some computed5 ->
     test_compare_buffers "TEST5: decryption of the previous Signal message" test3_input_plaintext computed5
-  | None -> IO.print_string "TEST5: decryption of the previous Signal message : Failure\n"
-  end
+  | None -> IO.print_string "TEST5: decryption of the previous Signal message : Failure\n"; false
+  end in
+  result1 && result2 && result3 && result4 && result5 && result6

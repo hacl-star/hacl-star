@@ -34,5 +34,5 @@ let test () =
   let flag1 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) expected1 computed1 in
   Lib.PrintSequence.print_label_lbytes dflag "1. Result" (length computed1) computed1;
   Lib.PrintSequence.print_label_lbytes dflag "1. Expected" (length expected1) expected1;
-  if flag1 then IO.print_string "\nSuccess !\n"
-  else IO.print_string "\nFailure !\n"
+  if flag1 then begin IO.print_string "\nSuccess !\n"; true end
+  else begin IO.print_string "\nFailure !\n"; false end

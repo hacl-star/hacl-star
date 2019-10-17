@@ -306,7 +306,7 @@ val test_aesgcm:
   k:lbytes (AEAD.size_key v) ->
   expected:lbytes (16 + text_len) ->
   i:size_nat ->
-  FStar.All.ML unit
+  FStar.All.ML bool 
 
 let test_aesgcm v text_len text aad_len aad n_len n k expected i =
   IO.print_string " ================================ CIPHER ";
@@ -322,8 +322,8 @@ let test_aesgcm v text_len text aad_len aad n_len n k expected i =
     | Some dec ->
 	   for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) dec text
     | None -> false in
-  if result0 && result1 then IO.print_string "Success!\n"
-  else (IO.print_string "Failure!\n";
+  if result0 && result1 then begin IO.print_string "Success!\n"; true end
+  else begin (IO.print_string "Failure!\n";
     IO.print_string  "\nExpected ciphertext: ";
     List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a);  IO.print_string ":") (to_list expected);
     IO.print_string "\nComputed ciphertext: ";
@@ -335,7 +335,7 @@ let test_aesgcm v text_len text aad_len aad n_len n k expected i =
 		    List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a);
 		    IO.print_string ":") (to_list dec);
 		    IO.print_string "\n"
-      | None -> IO.print_string "\n AEAD decryption failed!\n"))
+      | None -> IO.print_string "\n AEAD decryption failed!\n")); false end
 
 
 val test_ghash:
@@ -347,7 +347,7 @@ val test_ghash:
   aad:lbytes aad_len ->
   k:lbytes (AEAD.size_key v) ->
   i:size_nat ->
-  FStar.All.ML unit
+  FStar.All.ML bool 
 
 let test_ghash v expected text_len text aad_len aad k i =
   IO.print_string " ================================ GHASH ";
@@ -356,14 +356,15 @@ let test_ghash v expected text_len text aad_len aad k i =
   let k = Spec.AES.aes_ctr_key_block0 v k 12 (create 12 (u8 0)) in
   let output = AEAD.ghash text aad k (create 16 (u8 0)) in
   let result = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) output expected in
-  if result then IO.print_string "Success!\n"
+  if result then begin IO.print_string "Success!\n"; true end
   else (
     IO.print_string "Failure :(\n";
     IO.print_string   "Expected tag: ";
     List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a);  IO.print_string ":") (to_list expected);
     IO.print_string "\nComputed tag: ";
     List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a);  IO.print_string ":") (to_list output);
-    IO.print_string "\n"
+    IO.print_string "\n";
+    false
   )
 
 let test () =
@@ -374,18 +375,18 @@ let test () =
     List.iter (fun a -> IO.print_uint8 (u8_to_UInt8 a);  IO.print_string ":") (test2_hash_key);
     IO.print_string "\n";
 
-  test_ghash Spec.AES.AES128 (of_list test1_ghash) test1_c_length (of_list test1_ciphertext) test1_aad_length (of_list test1_aad) (of_list test1_key) 1;
-  test_aesgcm Spec.AES.AES128 test1_msg_length (of_list test1_msg) test1_aad_length (of_list test1_aad) test1_nonce_length (of_list test1_nonce) (of_list test1_key) (of_list test1_expected) 1;
-  test_ghash Spec.AES.AES128 (of_list test2_ghash) test2_c_length (of_list test2_ciphertext) test2_aad_length (of_list test2_aad) (of_list test2_key) 2;
-  test_aesgcm Spec.AES.AES128 test2_msg_length (of_list test2_msg) test2_aad_length (of_list test2_aad) test2_nonce_length (of_list test2_nonce) (of_list test2_key) (of_list test2_expected) 2;
-  test_ghash Spec.AES.AES128 (of_list test3_ghash) test3_c_length (of_list test3_ciphertext) test3_aad_length (of_list test3_aad) (of_list test3_key) 3;
-  test_aesgcm Spec.AES.AES128 test3_msg_length (of_list test3_msg) test3_aad_length (of_list test3_aad) test3_nonce_length (of_list test3_nonce) (of_list test3_key) (of_list test3_expected) 3;
-  test_ghash Spec.AES.AES128 (of_list test4_ghash) test4_c_length (of_list test4_ciphertext) test4_aad_length (of_list test4_aad) (of_list test4_key) 4;
-  test_aesgcm Spec.AES.AES128 test4_msg_length (of_list test4_msg) test4_aad_length (of_list test4_aad) test4_nonce_length (of_list test4_nonce) (of_list test4_key) (of_list test4_expected) 4;
-  test_ghash Spec.AES.AES128 (of_list test5_ghash) test5_c_length (of_list test5_ciphertext) test5_aad_length (of_list test5_aad) (of_list test5_key) 5;
+  let g1 = test_ghash Spec.AES.AES128 (of_list test1_ghash) test1_c_length (of_list test1_ciphertext) test1_aad_length (of_list test1_aad) (of_list test1_key) 1 in
+  let a1 = test_aesgcm Spec.AES.AES128 test1_msg_length (of_list test1_msg) test1_aad_length (of_list test1_aad) test1_nonce_length (of_list test1_nonce) (of_list test1_key) (of_list test1_expected) 1 in
+  let g2 = test_ghash Spec.AES.AES128 (of_list test2_ghash) test2_c_length (of_list test2_ciphertext) test2_aad_length (of_list test2_aad) (of_list test2_key) 2 in
+  let a2 = test_aesgcm Spec.AES.AES128 test2_msg_length (of_list test2_msg) test2_aad_length (of_list test2_aad) test2_nonce_length (of_list test2_nonce) (of_list test2_key) (of_list test2_expected) 2 in
+  let g3 = test_ghash Spec.AES.AES128 (of_list test3_ghash) test3_c_length (of_list test3_ciphertext) test3_aad_length (of_list test3_aad) (of_list test3_key) 3 in
+  let a3 = test_aesgcm Spec.AES.AES128 test3_msg_length (of_list test3_msg) test3_aad_length (of_list test3_aad) test3_nonce_length (of_list test3_nonce) (of_list test3_key) (of_list test3_expected) 3 in
+  let g4 = test_ghash Spec.AES.AES128 (of_list test4_ghash) test4_c_length (of_list test4_ciphertext) test4_aad_length (of_list test4_aad) (of_list test4_key) 4 in
+  let a4 = test_aesgcm Spec.AES.AES128 test4_msg_length (of_list test4_msg) test4_aad_length (of_list test4_aad) test4_nonce_length (of_list test4_nonce) (of_list test4_key) (of_list test4_expected) 4 in
+  let g5 = test_ghash Spec.AES.AES128 (of_list test5_ghash) test5_c_length (of_list test5_ciphertext) test5_aad_length (of_list test5_aad) (of_list test5_key) 5 in
 //  test_aesgcm Spec.AES.AES128 test5_msg_length (of_list test5_msg) test5_aad_length (of_list test5_aad) test5_nonce_length (of_list test5_nonce) (of_list test5_key) (of_list test5_expected) 5;
-  test_ghash Spec.AES.AES128 (of_list test6_ghash) test6_c_length (of_list test6_ciphertext) test6_aad_length (of_list test6_aad) (of_list test6_key) 6;
+  let g6 = test_ghash Spec.AES.AES128 (of_list test6_ghash) test6_c_length (of_list test6_ciphertext) test6_aad_length (of_list test6_aad) (of_list test6_key) 6 in
 //  test_aesgcm Spec.AES.AES128 test6_msg_length (of_list test6_msg) test6_aad_length (of_list test6_aad) test6_nonce_length (of_list test6_nonce) (of_list test6_key) (of_list test6_expected) 6;
-  test_aesgcm Spec.AES.AES256 (List.Tot.length test7_msg) (of_list test7_msg) (List.Tot.length test7_aad) (of_list test7_aad) (List.Tot.length test7_nonce) (of_list test7_nonce) (of_list test7_key) (of_list test7_expected) 7;
-  test_aesgcm Spec.AES.AES256 (List.Tot.length test8_msg) (of_list test8_msg) (List.Tot.length test8_aad) (of_list test8_aad) (List.Tot.length test8_nonce) (of_list test8_nonce) (of_list test8_key) (of_list test8_expected) 8;
-  ()
+  let a7 = test_aesgcm Spec.AES.AES256 (List.Tot.length test7_msg) (of_list test7_msg) (List.Tot.length test7_aad) (of_list test7_aad) (List.Tot.length test7_nonce) (of_list test7_nonce) (of_list test7_key) (of_list test7_expected) 7 in
+  let a8 = test_aesgcm Spec.AES.AES256 (List.Tot.length test8_msg) (of_list test8_msg) (List.Tot.length test8_aad) (of_list test8_aad) (List.Tot.length test8_nonce) (of_list test8_nonce) (of_list test8_key) (of_list test8_expected) 8 in
+  g1 && a1 && g2 && a2 && g3 && a3 && g4 && a4 && g5 && g6 && a7 && a8
