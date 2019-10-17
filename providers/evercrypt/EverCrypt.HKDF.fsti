@@ -122,7 +122,9 @@ val expand: a:EverCrypt.HMAC.supported_alg -> expand_st a
 val extract: a:EverCrypt.HMAC.supported_alg -> extract_st a
 
 [@(deprecated "expand")]
-let hkdf_expand = expand
+let hkdf_expand a okm prk prklen info infolen len = 
+  expand a okm prk prklen info infolen len
 
 [@(deprecated "extract")]
-let hkdf_extract = extract
+let hkdf_extract a prk salt saltlen ikm ikmlen =
+  extract a prk salt saltlen ikm ikmlen
