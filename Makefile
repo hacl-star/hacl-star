@@ -613,7 +613,7 @@ REQUIRED_FLAGS	=\
   -no-prefix 'Vale.Inline.X64.Fswap_inline' \
   -no-prefix 'Vale.Inline.X64.Fsqr_inline' \
   -no-prefix 'EverCrypt.Vale' \
-  -add-include '"curve25519-inline.h"' \
+  -add-include 'Hacl_Curve25519_64:"curve25519-inline.h"' \
   -no-prefix 'MerkleTree.New.Low' \
   -no-prefix 'MerkleTree.New.Low.Serialization' \
   -bundle Hacl.Impl.Poly1305.Fields \
