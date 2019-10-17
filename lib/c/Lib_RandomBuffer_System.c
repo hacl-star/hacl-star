@@ -1,4 +1,4 @@
-#include "Lib_RandomBuffer.h"
+#include "Lib_RandomBuffer_System.h"
 #include <stdio.h>
 
 #if (defined(_WIN32) || defined(_WIN64))
