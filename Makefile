@@ -766,14 +766,20 @@ dist/ccf/Makefile.basic: POLY_BUNDLE =
 #
 # Disable the EverCrypt and MerkleTree layers. Only keep Chacha20, Poly1305,
 # Curve25519 for now. Everything else in Hacl is disabled.
-dist/mozilla/Makefile.basic: BUNDLE_FLAGS = \
-  $(CHACHA20_BUNDLE) $(POLY_BUNDLE) $(CURVE_BUNDLE)
+dist/mozilla/Makefile.basic: CURVE_BUNDLE_SLOW = -bundle Hacl.Curve25519_64_Slow
+dist/mozilla/Makefile.basic: SALSA20_BUNDLE =
+dist/mozilla/Makefile.basic: ED_BUNDLE = -bundle Hacl.Ed25519
+dist/mozilla/Makefile.basic: NACLBOX_BUNDLE = -bundle Hacl.NaCl
+dist/mozilla/Makefile.basic: E_HASH_BUNDLE =
+dist/mozilla/Makefile.basic: MERKLE_BUNDLE =
+dist/mozilla/Makefile.basic: CTR_BUNDLE =
+dist/mozilla/Makefile.basic: SHA3_BUNDLE = -bundle Hacl.SHA3
+dist/mozilla/Makefile.basic: HASH_BUNDLE = -bundle Hacl.Hash.*,Hacl.HKDF,Hacl.HMAC
 dist/mozilla/Makefile.basic: \
-  DEFAULT_FLAGS += \
-    -bundle EverCrypt.* \
+  BUNDLE_FLAGS += \
+    -bundle EverCrypt,EverCrypt.* \
     -bundle MerkleTree.* \
-    -bundle Hacl.* \
-    -bundle WasmSupport
+    -bundle Hacl.Impl.*,Hacl.Bignum25519.*,Hacl.Bignum25519
 dist/mozilla/Makefile.basic: VALE_ASMS := $(filter dist/vale/curve25519-%,$(VALE_ASMS))
 dist/mozilla/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES =
 dist/mozilla/Makefile.basic: HAND_WRITTEN_H_FILES := $(filter %/libintvector.h,$(HAND_WRITTEN_H_FILES))
