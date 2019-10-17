@@ -14,7 +14,7 @@ extract: extract-poly1305 extract-chacha20 extract-curve25519 extract-blake2s ex
 
 snapshot: extract-poly1305 extract-chacha20 extract-curve25519 extract-blake2s extract-sha3
 	$(MAKE) extract-chacha20poly1305
-	cp $(HACL_HOME)/lib/c/vec-intrin.h $(BUILD_DIR)
+	cp $(HACL_HOME)/lib/c/libintvector.h $(BUILD_DIR)
 	cp $(KREMLIN_HOME)/kremlib/dist/generic/libkremlib.a $(BUILD_DIR)
 	cp $(KREMLIN_HOME)/kremlib/dist/generic/TestLib.h $(BUILD_DIR)
 	cp $(KREMLIN_HOME)/kremlib/dist/generic/FStar_UInt_8_16_32_64.h $(BUILD_DIR)
