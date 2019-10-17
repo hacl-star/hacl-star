@@ -77,7 +77,6 @@ void hacl_aligned_free(void *ptr) { free(ptr); }
 
 #endif
 
-void randombytes(uint8_t *x, uint32_t len) {
-  if (!(read_random_bytes(len, x)))
-    exit(1);
+bool Lib_RandomBuffer_System_randombytes(uint8_t *x, uint32_t len) {
+  return read_random_bytes(len, x);
 }
