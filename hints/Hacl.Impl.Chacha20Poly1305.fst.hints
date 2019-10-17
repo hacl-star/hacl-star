@@ -62,7 +62,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "fc32b7066f347ab82155e28032170bb6"
+      "4ae5d020692562847ffbd60a837bd1c8"
     ],
     [
       "Hacl.Impl.Chacha20Poly1305.poly1305_do_",
@@ -208,7 +208,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "62bb5ea5d0872038307357ffbe6eaa94"
+      "4bc8eed8cebb05b031ed71d22dc01b67"
     ],
     [
       "Hacl.Impl.Chacha20Poly1305.poly1305_do_core_st",
@@ -267,7 +267,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "754a6e94c18ee70764c62c482a3edd22"
+      "67f49acd29af2f46bf420868c68162b1"
     ],
     [
       "Hacl.Impl.Chacha20Poly1305.poly1305_do",
@@ -450,7 +450,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "520fd35d15d125abcfe4509958319cf6"
+      "17d6146e77f53200956b361222834e0a"
     ],
     [
       "Hacl.Impl.Chacha20Poly1305.width_chacha20",
@@ -502,13 +502,15 @@
         "equation_Lib.Sequence.lseq", "equation_Lib.Sequence.seq",
         "equation_Lib.Sequence.to_seq", "equation_Spec.AES.elem",
         "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
+        "equation_Spec.Chacha20.size_block",
         "equation_Spec.Chacha20.size_key",
         "equation_Spec.Chacha20.size_nonce",
         "equation_Spec.GaloisField.felem", "equation_Spec.GaloisField.gf",
         "equation_Spec.Poly1305.size_key",
         "function_token_typing_Spec.AES.elem", "int_typing",
         "lemma_FStar.UInt.pow2_values", "lemma_FStar.UInt32.vu_inv",
-        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_Division",
+        "primitive_Prims.op_LessThanOrEqual",
         "primitive_Prims.op_Subtraction",
         "proj_equation_Spec.GaloisField.GF_t",
         "projection_inverse_BoxBool_proj_0",
@@ -531,7 +533,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "7f9185d286379cf36037cfb167d0ae75"
+      "b6238b9b3d3f11f69311add0b29ef664"
     ],
     [
       "Hacl.Impl.Chacha20Poly1305.derive_key_poly1305_do",
@@ -762,7 +764,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "c81e294bed74f5b0426d9b55dc4823a2"
+      "8df94e145ce414706e7762a70e7e3c32"
     ],
     [
       "Hacl.Impl.Chacha20Poly1305.aead_encrypt",
@@ -905,7 +907,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "417e527d01bc56f91088f2378f45a60e"
+      "88b1f58d807e636e136b560eed2d4044"
     ],
     [
       "Hacl.Impl.Chacha20Poly1305.aead_decrypt",

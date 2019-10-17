@@ -17,7 +17,7 @@
         "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "fc07497fb5e0fcda0b8528ca70efd4ec"
+      "59f1e04c82041db0bdf1f185df44b4da"
     ],
     [
       "Spec.Chacha20Poly1305.size_nonce",
@@ -48,7 +48,7 @@
         "equation_Lib.IntTypes.unsigned", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "7c74c14f3f6a1312a336b2df310b2ee6"
+      "a4562f291b32b0918b5c7630c28082a8"
     ],
     [
       "Spec.Chacha20Poly1305.size_tag",
@@ -62,7 +62,7 @@
         "equation_Lib.IntTypes.unsigned", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "c9f4441fdc6b9a59709380bc8ec3dc23"
+      "4275edf2dca60cd31399fdf040006e86"
     ],
     [
       "Spec.Chacha20Poly1305.poly1305_padded",
@@ -101,7 +101,7 @@
         "typing_Spec.Poly1305.size_key", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "2fc4423d27b4f18772865a98c600b2e9"
+      "f3a6bb93082b265522bab263a1914752"
     ],
     [
       "Spec.Chacha20Poly1305.poly1305_do",
@@ -114,7 +114,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "606b173b1b876c7be76c7b339a7800ce"
+      "0c1445ac7e38c6f5d36607e5f5054987"
     ],
     [
       "Spec.Chacha20Poly1305.poly1305_do",
@@ -162,7 +162,7 @@
         "typing_Spec.Poly1305.size_block", "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "ca674c5853a19267165f8541e4809992"
+      "284d1043cf81ddab70bf0582985ece9b"
     ],
     [
       "Spec.Chacha20Poly1305.poly1305_do",
@@ -196,7 +196,7 @@
         "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "99da776d23da187eb81112b478506cf0"
+      "1233d54aec685f6a81147d6b9df5005d"
     ],
     [
       "Spec.Chacha20Poly1305.aead_encrypt",
@@ -217,7 +217,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "4d5aa7e44718184129a98d3a09b3a490"
+      "a425b9e41dfc6a0ee7350e956f588f95"
     ],
     [
       "Spec.Chacha20Poly1305.aead_encrypt",
@@ -233,7 +233,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "76be464b01d57c19538f4ea8721f220c"
+      "0fd423b43e246962599167d7d8331ac9"
     ],
     [
       "Spec.Chacha20Poly1305.aead_encrypt",
@@ -255,13 +255,14 @@
         "equation_Lib.IntTypes.unsigned", "equation_Lib.Sequence.length",
         "equation_Lib.Sequence.lseq", "equation_Lib.Sequence.seq",
         "equation_Lib.Sequence.to_seq", "equation_Prims.nat",
-        "equation_Prims.pos", "equation_Spec.Chacha20.size_key",
+        "equation_Prims.pos", "equation_Spec.Chacha20.size_block",
+        "equation_Spec.Chacha20.size_key",
         "equation_Spec.Poly1305.size_block",
         "equation_Spec.Poly1305.size_key", "equation_Spec.Poly1305.tag",
         "function_token_typing_Lib.IntTypes.uint8", "int_inversion",
         "int_typing", "lemma_FStar.Seq.Base.lemma_len_append",
         "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Addition",
-        "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Division", "primitive_Prims.op_LessThanOrEqual",
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
@@ -278,7 +279,7 @@
         "typing_Spec.Poly1305.size_key", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "a047eb88369e16e9bfd1faf9d4fed460"
+      "6d16912b4d38c2fa073fbd1ba378310b"
     ],
     [
       "Spec.Chacha20Poly1305.aead_decrypt",
@@ -294,7 +295,7 @@
         "refinement_interpretation_Tm_refine_c5579466c1fcb6457bba4b009a86e2ac"
       ],
       0,
-      "d51c6ccd48c5c12362bda4cb683ae146"
+      "6872180a8f509d6d9965176e27996d4d"
     ],
     [
       "Spec.Chacha20Poly1305.aead_decrypt",
@@ -308,7 +309,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "44b8d49cb7e632d273972ede70f3523a"
+      "150af910a5a704563e55c6f00b5aca47"
     ],
     [
       "Spec.Chacha20Poly1305.aead_decrypt",
@@ -329,9 +330,10 @@
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
         "equation_Lib.Sequence.length", "equation_Lib.Sequence.lseq",
         "equation_Lib.Sequence.to_seq", "equation_Prims.nat",
-        "equation_Prims.pos", "equation_Spec.Chacha20.size_key",
-        "equation_Spec.Poly1305.size_key", "int_inversion",
-        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Addition",
+        "equation_Prims.pos", "equation_Spec.Chacha20.size_block",
+        "equation_Spec.Chacha20.size_key", "equation_Spec.Poly1305.size_key",
+        "int_inversion", "lemma_FStar.UInt.pow2_values",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Division",
         "primitive_Prims.op_LessThanOrEqual",
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
@@ -349,7 +351,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "5b86c3b3e9eef79c5b30150ea58b3abd"
+      "8c9ef4031d8a66a22a48cbc0e95afd39"
     ]
   ]
 ]
