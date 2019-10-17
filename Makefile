@@ -630,7 +630,7 @@ INTRINSIC_FLAGS = -add-include '"libintvector.h"'
 OPT_FLAGS = -ccopts -march=native,-mtune=native
 # Disables tests; overriden in Wasm where tests indicate what can be compiled.
 TEST_FLAGS = -bundle Test,Test.*,Hacl.Test.*
-# Ensures that Lib_RandomBuffer.h and Lib_PrintBuffer.h have a constant name
+# Ensures that Lib_RandomBuffer_System.h and Lib_PrintBuffer.h have a constant name
 # (and are not subject to bundling). Erased by distributions that don't need
 # those files.
 HAND_WRITTEN_LIB_FLAGS = -bundle Lib.RandomBuffer.System= -bundle Lib.PrintBuffer=
