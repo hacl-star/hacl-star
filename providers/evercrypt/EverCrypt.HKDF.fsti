@@ -120,3 +120,9 @@ val expand: a:EverCrypt.HMAC.supported_alg -> expand_st a
 (** @type: true
 *)
 val extract: a:EverCrypt.HMAC.supported_alg -> extract_st a
+
+[@(deprecated "expand")]
+let hkdf_expand = expand
+
+[@(deprecated "extract")]
+let hkdf_extract = extract
