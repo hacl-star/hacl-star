@@ -1,0 +1,77 @@
+[
+  "\b6\u0017β\u0006ό2l\u0015\u001aL\n\u001dγά",
+  [
+    [
+      "Vale.Math.Poly2.Bits.lemma_to_of_uint",
+      1,
+      1,
+      0,
+      [ "@query" ],
+      0,
+      "92b8a041163c07a543f664aad92564aa"
+    ],
+    [
+      "Vale.Math.Poly2.Bits.of_uint_",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "int_inversion", "primitive_Prims.op_Equality",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "68b4d39a5d742ccf1a6c47bad9ed165b"
+    ],
+    [
+      "Vale.Math.Poly2.Bits.lemma_of_nat_of_uint",
+      1,
+      1,
+      0,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "b2t_def", "equation_FStar.UInt.fits", "equation_FStar.UInt.max_int",
+        "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
+        "equation_Prims.squash",
+        "equation_with_fuel_Prims.pow2.fuel_instrumented",
+        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_LessThan",
+        "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c"
+      ],
+      0,
+      "6fc98ddff44c7f54210748a89a863dfd"
+    ],
+    [
+      "Vale.Math.Poly2.Bits.poly_nat_eq_rec",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "binder_x_bb4e1c9af0265270f8e7a5f250f730e2_0",
+        "binder_x_bb4e1c9af0265270f8e7a5f250f730e2_2",
+        "binder_x_bb4e1c9af0265270f8e7a5f250f730e2_3",
+        "equality_tok_Prims.LexTop@tok", "equation_Prims.nat",
+        "int_inversion", "int_typing", "primitive_Prims.op_Equality",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "well-founded-ordering-on-nat"
+      ],
+      0,
+      "ce3ce0ea00b4b7626762d68aa6e42b45"
+    ],
+    [
+      "Vale.Math.Poly2.Bits.of_nat32_eq",
+      1,
+      1,
+      0,
+      [ "@query" ],
+      0,
+      "40e5c4e4d66d3880b8311755e126acd2"
+    ]
+  ]
+]

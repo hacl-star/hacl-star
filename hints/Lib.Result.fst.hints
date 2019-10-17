@@ -1,0 +1,53 @@
+[
+  "\tgxà×ëë8.ðPXt\u0015“ð",
+  [
+    [
+      "Lib.Result.result",
+      1,
+      2,
+      1,
+      [ "@query" ],
+      0,
+      "b866096ddaa8069bbc307e78698d4a81"
+    ],
+    [
+      "Lib.Result.__proj__Success__item__v",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "disc_equation_Lib.Result.Success",
+        "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_Tm_refine_77dc3eaa40f7188f40fad220486366b0"
+      ],
+      0,
+      "e4b8a0e4ffa33d5828a3281663d6f651"
+    ],
+    [
+      "Lib.Result.__proj__Error__item___0",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "disc_equation_Lib.Result.Error",
+        "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_Tm_refine_e3a136c6ab7eb78bcbc35bc8bb202807"
+      ],
+      0,
+      "f2916f0a7d279fd9b92cd6380254a8df"
+    ],
+    [
+      "Lib.Result.bind",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "disc_equation_Lib.Result.Error",
+        "disc_equation_Lib.Result.Success",
+        "fuel_guarded_inversion_Lib.Result.result"
+      ],
+      0,
+      "59a2097ece86412a7255b122ac7d51da"
+    ]
+  ]
+]
