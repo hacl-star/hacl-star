@@ -1,4 +1,4 @@
-module Lib.RandomBuffer
+module Lib.RandomBuffer.System
 
 open Lib.IntTypes
 open Lib.Buffer

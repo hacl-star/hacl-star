@@ -561,7 +561,7 @@ HACL_OLD_FILES=\
 # variables (except for REQUIRED_FLAGS) are intended to be overridden with
 # target-specific values (see GNU Make Manual 6.11 "Target-specific Variable Values").
 
-HAND_WRITTEN_C		= Lib.PrintBuffer Lib.RandomBuffer
+HAND_WRITTEN_C		= Lib.PrintBuffer Lib.RandomBuffer.System
 
 # Always copied into the destination directory, always passed to kremlin.
 HAND_WRITTEN_FILES 	= $(wildcard $(LIB_DIR)/c/*.c) \
@@ -630,10 +630,10 @@ INTRINSIC_FLAGS = -add-include '"libintvector.h"'
 OPT_FLAGS = -ccopts -march=native,-mtune=native
 # Disables tests; overriden in Wasm where tests indicate what can be compiled.
 TEST_FLAGS = -bundle Test,Test.*,Hacl.Test.*
-# Ensures that Lib_RandomBuffer.h and Lib_PrintBuffer.h have a constant name
+# Ensures that Lib_RandomBuffer_System.h and Lib_PrintBuffer.h have a constant name
 # (and are not subject to bundling). Erased by distributions that don't need
 # those files.
-HAND_WRITTEN_LIB_FLAGS = -bundle Lib.RandomBuffer= -bundle Lib.PrintBuffer=
+HAND_WRITTEN_LIB_FLAGS = -bundle Lib.RandomBuffer.System= -bundle Lib.PrintBuffer=
 # Disabling by pure-HACL distributions
 TARGETCONFIG_FLAGS = -add-include '"evercrypt_targetconfig.h"'
 
