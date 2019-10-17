@@ -1,6 +1,6 @@
 module Spec.AES_GCM.Test
 
-#reset-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0"
+#reset-options "--lax"
 
 open FStar.Mul
 open Lib.IntTypes

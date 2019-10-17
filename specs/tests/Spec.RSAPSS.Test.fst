@@ -9,7 +9,7 @@ open FStar.All
 
 open Spec.RSAPSS
 
-#reset-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0"
+#reset-options "--lax"
 
 (* RSASSA-PSS vector tests *)
 (* https://github.com/pyca/cryptography/blob/master/vectors/cryptography_vectors/asymmetric/RSA/pkcs-1v2-1d2-vec/pss-vect.txt *)
