@@ -1,0 +1,832 @@
+u64 __38 = 38;
+
+param int rem_p = 38; /* 2^(4*64) mod p */
+
+// ** addition
+// ************************************************************************
+
+fn add(reg u64[4] x, stack u64[4] ya) -> reg u64[4] {
+
+  reg u64    add0;
+  reg u64    add1;
+  reg bool   cf;
+  inline int i;
+
+  for i = 0 to 4 {
+    if   (i == 0) { cf, x[0] += ya[0]; }
+    else          { cf, x[i] += ya[i] + cf; }
+  }
+
+  add0 = #x86_MOV(0);
+  add1 = rem_p;
+  add1 = add0 if !cf;
+
+  for i = 0 to 4 {
+    if (i == 0) {
+      cf, x[0] += add1;
+    } else {
+      cf, x[i] += add0 + cf;
+    }
+  }
+
+  add0 = add1 if cf;
+  x[0] += add0;
+
+  return x;
+}
+
+
+// ** subtraction
+// ************************************************************************
+
+fn sub(reg u64[4] x, stack u64[4] ya) -> reg u64[4] {
+
+  reg u64 sub0;
+  reg u64 sub1;
+  reg bool cf;
+  inline int i;
+
+  for i = 0 to 4 {
+    if (i == 0) {
+      cf, x[0] -= ya[0];
+    } else {
+      cf, x[i] -= ya[i] - cf;
+    }
+  }
+
+  sub0  = #x86_MOV(0);
+  sub1 = rem_p;
+  sub1 = sub0 if !cf;
+
+  for i = 0 to 4 {
+    if (i == 0) {
+      cf, x[0] -= sub1;
+    } else {
+      cf, x[i] -= sub0 - cf;
+    }
+  }
+
+  sub0 = sub1 if cf;
+  x[0] -= sub0;
+
+  return x;
+}
+
+// ** reduction from 8 limbs to 4 limbs
+// ************************************************************************
+
+fn reduce(reg u64[8] z) -> reg u64[4] {
+
+  reg u64 z8;
+  reg u64 r0;
+  reg u64 r38;
+  reg u64[4] r;
+  reg u64 rax;
+  reg u64 h;
+  reg u64 l;
+  reg bool cf;
+  inline int i;
+
+  r38 = 38;
+
+	rax = z[4];
+	h, l = rax * __38;
+	r[0] = l;
+	r[1] = h;
+
+	rax = z[5];
+	h, l = rax * __38;
+	cf, r[1] += l;
+
+  r[2] = #x86_MOV(0);
+	rax = z[6];
+	_, r[2] += h + cf;
+	h, l = rax * r38;
+	cf, r[2] += l;
+
+	r[3] = #x86_MOV(0);
+	rax = z[7];
+	_, r[3] += h + cf;
+	h, l = rax * r38;
+	cf, r[3] += l;
+
+	z8 = #x86_MOV(0);
+	_, z8  += h + cf;
+
+	cf, r[0] += z[0];
+
+  for i = 1 to 4 {
+  	cf, r[i] += z[i] + cf;
+	}
+
+	_, z8 += 0 + cf;
+	z8 *= 38;
+
+  r0 = #x86_MOV(0);
+
+  cf, r[0] += z8;
+  for i = 1 to 4 {
+	    cf, r[i] += r0 + cf;
+  }
+
+	_, r0 += r0 + cf;
+
+	r0 *= 38;
+	r[0] += r0;
+
+  return r;
+}
+
+
+// ** multiplication
+// ************************************************************************
+
+fn mul(stack u64[4] xa, stack u64[4] ya) -> reg u64[4] {
+
+  reg u64[8] z;
+  reg u64[4] r;
+  reg u64[4] x;
+  reg u64[4] y;
+  reg u64 h;
+  reg u64 l;
+  reg u64 hprev;
+  reg bool cf;
+  inline int i;
+  inline int j;
+
+  for i = 2 to 8 { z[i] = #x86_MOV(0); }
+
+  x[0] = xa[0];
+  for j = 0 to 4 {
+    y[j] = ya[j];
+    h, l = y[j] * x[0];
+
+    if (j == 0) {
+      z[0] = l;
+      z[1] = h;
+    } else {
+      cf, z[j] += l;
+      _, z[j + 1] += h + cf;
+    }
+  }
+
+  
+  for i = 1 to 4 {
+    x[i] = xa[i];
+    for j = 0 to 4 {
+      y[j] = ya[j];
+      h, l = y[j] * x[i];
+      cf, z[i+j] += l;
+      if (j == 0) {
+        hprev = #x86_MOV(0);
+        _, hprev += h + cf;
+      } else {
+        _, h += 0 + cf;
+        cf, z[i+j] += hprev;
+        if (1 <= j && j < 4 - 1) {
+          hprev = #x86_MOV(0);
+          _, hprev += h + cf;
+        } else { /* j = 4 */
+          cf, z[i + j + 1] += h + cf;
+        }
+      }
+    }
+  }
+
+  r = reduce(z);
+
+  return r;
+}
+
+// ** multiplication by small constant 121666
+// ************************************************************************
+
+fn mul121666(stack u64[4] xa) -> reg u64[4] {
+ 
+  reg u64 rax;
+  reg u64 rdx;
+  reg u64 holdc;
+  reg u64[4] z;
+  reg u64 t1;
+  reg u64 t2;
+  reg u64 t3;
+  reg u64 t4;
+  reg bool cf;
+
+  holdc = 121666;
+
+  rax = xa[0];
+  rdx, rax = rax * holdc;
+  z[0] = rax;
+  z[1] = rdx;
+
+  rax = xa[2];
+  rdx, rax = rax * holdc;
+  z[2] = rax;
+  z[3] = rdx;
+
+  rax = xa[1];
+  rdx, rax = rax * holdc;
+  t1 = rax;
+  t2 = rdx;
+
+  rax = xa[3];
+  rdx, rax = rax * holdc;
+  t3 = rax;
+  t4 = rdx;
+
+  cf, z[1] += t1;
+  cf, z[2] += t2 + cf;
+  cf, z[3] += t3 + cf;
+  _, t4 += 0 + cf;
+  _, t4 *= 38;
+
+  cf, z[0] += t4;
+  cf, z[1] += 0 + cf;
+  cf, z[2] += 0 + cf;
+  cf, z[3] += 0 + cf;
+
+  t1 = 38;
+  t2 = #x86_MOV(0);
+  t1 = t2 if !cf;
+  z[0] += t1;
+
+  return z;
+}
+
+// ** squaring
+// ************************************************************************
+
+fn square(stack u64[4] xa) -> reg u64[4] {
+
+  reg u64 zero;
+  reg u64[8] z;
+  reg u64[4] r;
+  reg u64[5] t;
+  reg u64 rax;
+  reg u64 rdx;
+  reg bool cf;
+
+  z[7] = #x86_MOV(0);
+  zero = #x86_MOV(0);
+
+  /*   2*x01 + 2*x02 + 2*x03 + 2*x12 + 2*x13 + 2*x23
+     + x00 + x11 + x22 + x33 */
+
+  rax = xa[1];
+  rdx, rax = rax * xa[0];
+  z[1] = rax;
+  z[2] = rdx;
+
+  rax = xa[2];
+  rdx, rax = rax * xa[1];
+  z[3] = rax;
+  z[4] = rdx;
+
+  rax = xa[3];
+  rdx, rax = rax * xa[2];
+  z[5] = rax;
+  z[6] = rdx;
+
+  /*   [2*]x01 + 2*x02 + 2*x03 + [2*]x12 + 2*x13 + [2*]x23
+     + x00 + x11 + x22 + x33 */
+
+  rax = xa[2];
+  rdx, rax = rax * xa[0];
+  cf, z[2] += rax;
+  cf, z[3] += rdx + cf;
+   _, z[4] += zero   + cf;
+
+  rax = xa[3];
+  rdx, rax = rax * xa[1];
+  cf, z[4] += rax;
+  cf, z[5] += rdx + cf;
+   _, z[6] += zero   + cf;
+
+  /*   [2*]x01 + [2*]x02 + 2*x03 + [2*]x12 + [2*]x13 + [2*]x23
+     + x00 + x11 + x22 + x33 */
+
+  rax = xa[3];
+  rdx, rax = rax * xa[0];
+  cf, z[3] += rax;
+  cf, z[4] += rdx + cf;
+  cf, z[5] += zero   + cf;
+  cf, z[6] += zero   + cf;
+  _,  z[7] += zero   + cf;
+
+  /*   x01 + x02 + x03 + x12 + x13 + x23
+     + x00 + x11 + x22 + x33 */
+
+  /* set z<1..2n+1> = 2*z<1..2n+1> since
+     we have summed all x_i*x_j with i<>j
+     so far and these occur twice */
+  cf, z[1] += z[1];
+  cf, z[2] += z[2] + cf;
+  cf, z[3] += z[3] + cf;
+  cf, z[4] += z[4] + cf;
+  cf, z[5] += z[5] + cf;
+  cf, z[6] += z[6] + cf;
+  cf, z[7] += z[7] + cf;
+
+  /* x00 + x11 + x22 + x33 */
+
+  rax = xa[0];
+  rdx, rax = rax * xa[0];
+  z[0] = rax;
+  t[0] = rdx;
+
+  rax = xa[1];
+  rdx, rax = rax * xa[1];
+  t[1] = rax;
+  t[2] = rdx;
+
+  rax = xa[2];
+  rdx, rax = rax * xa[2];
+  t[3] = rax;
+  t[4] = rdx;
+
+  cf, z[1] += t[0];
+  cf, z[2] += t[1] + cf;
+  cf, z[3] += t[2] + cf;
+  cf, z[4] += t[3] + cf;
+  cf, z[5] += t[4] + cf;
+  cf, z[6] += 0 + cf;
+   _, z[7] += 0 + cf;
+
+  rax = xa[3];
+  rdx, rax = rax * xa[3];
+  cf, z[6] += rax;
+   _, z[7] += rdx + cf;
+
+  r = reduce(z);
+
+  return r;
+}
+
+
+fn iterated_square(stack u64[4] xa, stack u64 n) -> stack u64[4] {
+
+  reg u64[8] z;
+  reg u64[4] r;
+  reg u64[5] t;
+  reg u64 xa0;
+  reg u64 xa1;
+  reg u64 xa2;
+
+  reg u64 rax;
+  reg u64 rdx;
+  reg bool cf;
+
+  reg u64 n_r;
+
+  while {
+  xa0 = xa[0];
+  xa1 = xa[1];
+  xa2 = xa[2];
+
+    rax = xa1;
+    rdx, rax = rax * xa0;
+    z[1] = rax;
+    z[2] = rdx;
+
+    rax = xa2;
+    rdx, rax = rax * xa1;
+    z[3] = rax;
+    z[4] = rdx;
+
+    rax = xa[3];
+    rdx, rax = rax * xa2;
+    z[5] = rax;
+    z[6] = rdx;
+    z[7] = #x86_MOV(0);
+
+    rax = xa[2];
+    rdx, rax = rax * xa0;
+    cf, z[2] += rax;
+    cf, z[3] += rdx + cf;
+     _, z[4] += 0   + cf;
+
+    rax = xa[3];
+    rdx, rax = rax * xa1;
+    cf, z[4] += rax;
+    cf, z[5] += rdx + cf;
+     _, z[6] += 0   + cf;
+
+    rax = xa[3];
+    rdx, rax = rax * xa0;
+    cf, z[3] += rax;
+    cf, z[4] += rdx + cf;
+    cf, z[5] += 0   + cf;
+    cf, z[6] += 0   + cf;
+    _,  z[7] += 0   + cf;
+
+    cf, z[1] += z[1];
+    cf, z[2] += z[2] + cf;
+    cf, z[3] += z[3] + cf;
+    cf, z[4] += z[4] + cf;
+    cf, z[5] += z[5] + cf;
+    cf, z[6] += z[6] + cf;
+    cf, z[7] += z[7] + cf;
+
+    rax = xa0;
+    rdx, rax = rax * xa0;
+    z[0] = rax;
+    t[0] = rdx;
+
+    rax = xa1;
+    rdx, rax = rax * xa1;
+    t[1] = rax;
+    t[2] = rdx;
+
+    rax = xa[2];
+    rdx, rax = rax * xa[2];
+    t[3] = rax;
+    t[4] = rdx;
+
+    cf, z[1] += t[0];
+    cf, z[2] += t[1] + cf;
+    cf, z[3] += t[2] + cf;
+    cf, z[4] += t[3] + cf;
+    cf, z[5] += t[4] + cf;
+    cf, z[6] += 0 + cf;
+     _, z[7] += 0 + cf;
+
+    rax = xa[3];
+    rdx, rax = rax * xa[3];
+    cf, z[6] += rax;
+     _, z[7] += rdx + cf;
+
+    r = reduce(z);
+    xa = r;
+
+  n_r = n;
+  cf, n_r -= 1;
+  n = n_r;
+  }(!cf)
+
+  return xa;
+}
+
+// ** ladderstep
+// ************************************************************************
+
+fn ladderstep(stack u64[4] x1p, reg u64[4] x2, stack u64[4] z2p, stack u64[4] x3p, stack u64[4] z3p)
+    -> (reg u64[4] , stack u64[4] , stack u64[4] , stack u64[4]) {
+
+
+  reg u64[4] t1;
+  reg u64[4] t2;
+  reg u64[4] t7;
+  reg u64[4] t6;
+  reg u64[4] t5;
+  reg u64[4] t3;
+  reg u64[4] t4;
+  reg u64[4] t9;
+  reg u64[4] t8;
+  stack u64[4] t1p;
+  stack u64[4] t2p;
+  stack u64[4] t7p;
+  stack u64[4] t6p;
+  stack u64[4] t5p;
+  stack u64[4] t3p;
+  stack u64[4] t4p;
+  stack u64[4] t9p;
+  reg u64[4] w1;
+  reg u64[4] w2;
+  reg u64[4] w3;
+  reg u64[4] w4;
+  reg u64[4] w5;
+  reg u64[4] w6;
+  reg u64[4] w7;
+
+  //t1      = x2p;
+  t2      = x2;
+  x2      = add(x2,z2p);
+  t2      = sub(t2,z2p);
+  t1p     = x2;
+  t2p     = t2;
+  t7      = square(t2p);
+  t7p     = t7;
+  t6      = square(t1p);
+  t6p     = t6;
+  t5      = t6;
+  t5      = sub(t5,t7p);
+  t5p     = t5;
+  t3      = x3p;
+  t4      = t3;
+  t3      = add(t3,z3p);
+  t4      = sub(t4,z3p);
+  t3p     = t3;
+  t4p     = t4;
+  t9      = mul(t3p,t2p);
+  t9p     = t9;
+  t8      = mul(t4p,t1p);
+  w1      = t8;
+  w1      = add(w1,t9p);
+
+  t8      = sub(t8,t9p);
+  x3p     = w1;
+  z3p     = t8;
+  w2      = square(x3p);
+  x3p     = w2;
+  w3      = square(z3p);
+  z3p     = w3;
+  w4      = mul(z3p,x1p);
+  z3p     = w4;
+
+  w6      = mul121666(t5p);
+  w6      = add(w6,t7p);
+  z2p     = w6;
+  w7      = mul(z2p,t5p);
+  z2p     = w7;
+
+  x2      = mul(t6p,t7p);
+ 
+  return x2, z2p, x3p, z3p;
+}
+
+// ** cswap
+// ************************************************************************
+
+fn cswap(stack u64[4] x2p, stack u64[4] z2p, stack u64[4] x3p, stack u64[4] z3p, reg u64 swap)
+    -> (reg u64[4] , stack u64[4] , stack u64[4] , stack u64[4]) {
+
+  reg u64 tmp1;
+  reg u64 tmp2;
+  reg u64 tmp3;
+  reg u64[4] x2;
+  reg bool cf;
+  inline int i;
+
+  cf, swap -= 1;
+
+  for i = 0 to 4 {
+    tmp1   = z2p[i];
+    tmp2   = z3p[i];
+    tmp3   = tmp1;
+    tmp1   = tmp2 if !cf;
+    tmp2   = tmp3 if !cf;
+    z2p[i] = tmp1;
+    z3p[i] = tmp2;
+  }
+
+  for i = 0 to 4 {
+    x2[i]  = x2p[i];
+    tmp2   = x3p[i];
+    tmp3   = x2[i];
+    x2[i]  = tmp2 if !cf;
+    tmp2   = tmp3 if !cf;
+    x3p[i] = tmp2;
+  }
+
+  return x2, z2p, x3p, z3p;
+}
+
+// ** montgomery ladder
+// ************************************************************************
+
+fn mladder(stack u64[4] x2, stack u64[4] z2, stack u64[4] xr, reg u64 sp) -> (stack u64[4], stack u64[4]) {
+
+  stack u64    s;
+  reg u64      tmp1;
+  reg u64      tmp2;
+  reg u64      bit;
+  reg u64      swap;
+  stack u64    prevbit;
+  stack u64[4] x1;
+  reg u64[4] x2r;
+  stack u64[4] x3;
+  stack u64[4] z3;
+  reg u64      i;
+  reg u64      j;
+  stack u64    is;
+  stack u64    js;
+  reg bool     cf;
+  reg u64[4]   buf;
+
+  buf = xr; x1 = buf; x3 = buf;
+  x2[0] = 1;           x2[1] = #x86_MOV(0); x2[2] = #x86_MOV(0); x2[3] = #x86_MOV(0);
+  z2[0] = #x86_MOV(0); z2[1] = #x86_MOV(0); z2[2] = #x86_MOV(0); z2[3] = #x86_MOV(0);
+  z3[0] = 1;           z3[1] = #x86_MOV(0); z3[2] = #x86_MOV(0); z3[3] = #x86_MOV(0);
+
+
+  j = 62; i = 3; prevbit = #x86_MOV(0);
+  while {
+    tmp1 = [sp + 8*i];
+    is = i;
+    s = tmp1;
+    while {
+      tmp2 = s;
+      bit = tmp2 >> j;
+      js = j;
+      bit = bit & 1;
+      swap = prevbit;
+      swap ^= bit;
+      prevbit = bit;
+      x2r,z2,x3,z3 = cswap(x2,z2,x3,z3,swap);
+      x2r,z2,x3,z3 = ladderstep(x1,x2r,z2,x3,z3);
+      x2 = x2r;
+      j = js;
+      j -= 1;
+    } (j >=s 0)
+    j = 63;
+    i = is;
+    i -= 1;
+  } (i >=s 0)
+  return x2, z2;
+}
+
+// ** inversion
+// ************************************************************************
+
+fn invert(stack u64[4] xa) -> stack u64[4] {
+  stack u64[4] z2;
+  stack u64[4] t;
+
+  reg u64[4] buf;
+  reg u64[4] buf1;
+
+  stack u64[4] z9;
+  stack u64[4] z11;
+  stack u64[4] z2_5_0;
+  stack u64[4] z2_10_0;
+  stack u64[4] z2_20_0;
+  stack u64[4] z2_50_0;
+  stack u64[4] z2_100_0;
+  inline int i;
+  stack u64 ks;
+
+  buf = square(xa);   z2 = buf;
+  buf = square(z2);   t = buf;
+  buf = square(t);    t = buf;
+  buf = mul(t,xa);    z9 = buf;
+  buf = mul(z9,z2);   z11 = buf;
+  buf = square(z11); t =  buf;
+  buf = mul(t,z9); z2_5_0 = buf;
+
+  buf = square(z2_5_0); t = buf;
+  /* 4 times */ ks = 3; t = iterated_square(t, ks);
+  buf = mul(t, z2_5_0); z2_10_0 = buf;
+
+  buf = square(z2_10_0); t = buf;
+  /* 9 times */ ks = 8; t = iterated_square(t, ks);
+  buf = mul(t,z2_10_0); z2_20_0 = buf;
+
+  buf = square(z2_20_0); t = buf;
+  /* 19 times */ ks = 18; t = iterated_square(t, ks);
+  buf = mul(t,z2_20_0); t = buf;
+
+  buf = square(t); t = buf;
+  /* 9 times */ ks = 8; t = iterated_square(t, ks);
+  buf = mul(t,z2_10_0); z2_50_0 = buf;
+
+  buf = square(z2_50_0); t = buf;
+  /* 49 times */ ks = 48; t = iterated_square(t, ks);
+  buf = mul(t,z2_50_0); z2_100_0 = buf;
+
+  buf = square(z2_100_0); t = buf;
+  /* 99 times */ ks = 98; t = iterated_square(t, ks);
+  buf = mul(t,z2_100_0); t = buf;
+
+  buf = square(t); t = buf;
+  /* 49 times */ ks = 48; t = iterated_square(t, ks);
+  buf = mul(t,z2_50_0); t = buf;
+
+  buf = square(t); t = buf;
+  buf = square(t); t = buf;
+  buf = square(t); t = buf;
+  buf = square(t); t = buf;
+
+  buf = square(t); t = buf;
+  buf = mul(t,z11); xa = buf;
+
+  return xa;
+}
+
+// ** unpack_point
+// ************************************************************************
+
+fn unpack_point(stack u64[4] xa, reg u64 xp) -> stack u64[4] {
+  reg u64 x3;
+  reg u64 buf;
+
+  buf = [xp + 0*8]; xa[0] = buf;
+  buf = [xp + 1*8]; xa[1] = buf;
+  buf = [xp + 2*8]; xa[2] = buf;
+  x3    = [xp + 3*8];
+  buf = 0x7fffffffffffffff;
+  x3    = x3 & buf;
+  xa[3] = x3;
+
+  return xa;
+}
+
+// ** unpack_secret
+// ************************************************************************
+
+fn unpack_secret(reg u64 sp) {
+  reg u64[4] sa;
+  reg u64 si;
+  reg u64 buf;
+  inline int i;
+
+  si    = [sp + 0*8];
+  si    = si & 0xfffffffffffffff8;
+  sa[0] = si;
+  sa[1] = [sp + 1*8];
+  sa[2] = [sp + 2*8];
+  si    = [sp + 3*8];
+  buf = 0x7fffffffffffffff;
+  si    = si & buf;
+  buf = 0x4000000000000000;
+  si    = si | buf;
+  sa[3] = si;
+  for i = 0 to 4 { [sp + 8*i] = sa[i]; }
+}
+
+// ** freeze
+// ************************************************************************
+
+fn freeze(reg u64[4] xa) -> reg u64[4] {
+  reg u64[4] r;
+  reg u64[4] t;
+  reg u64 two63;
+  reg bool cf;
+
+  r = xa;
+  t = r;
+  two63 = 1;
+  two63 <<= 63;
+  cf, t[0] += 19;
+  cf, t[1] += 0     + cf;
+  cf, t[2] += 0     + cf;
+  cf, t[3] += two63 + cf;
+  r[0] = t[0] if cf;
+  r[1] = t[1] if cf;
+  r[2] = t[2] if cf;
+  r[3] = t[3] if cf;
+  t[0] = r[0];
+  t[1] = r[1];
+  t[2] = r[2];
+  t[3] = r[3];
+  cf, t[0] += 19;
+  cf, t[1] += 0     + cf;
+  cf, t[2] += 0     + cf;
+  cf, t[3] += two63 + cf;
+  r[0] = t[0] if cf;
+  r[1] = t[1] if cf;
+  r[2] = t[2] if cf;
+  r[3] = t[3] if cf;
+  xa[0] = r[0];
+  xa[1] = r[1];
+  xa[2] = r[2];
+  xa[3] = r[3];
+  return xa;
+}
+
+// ** pack
+// ************************************************************************
+
+// assumes input x reduced below 2^255 */
+fn pack(reg u64 rp, reg u64[4] xa) {
+  inline int i;
+
+  xa = freeze(xa);
+  for i = 0 to 4 {
+    [rp + (i*8)] = xa[i];
+  }
+}
+
+// ** scalar multiplication
+// ************************************************************************
+
+export fn curve25519_ref4(
+  reg u64 rp, /* address to store result  */
+  reg u64 sp, /* address of secret scalar */
+  reg u64 pp  /* address of point         */
+)
+{
+  stack u64[4] save;
+  stack u64[4] xr;
+  stack u64[4] xa;
+  stack u64[4] za;
+  reg u64[4] r;
+  reg u64 buf;
+  inline int i;
+
+  stack u64 sp_s;
+  sp_s = sp;
+  for i = 0 to 4 { buf = [sp + 8*i]; save[i] = buf; }
+
+  unpack_secret(sp);
+  xr = unpack_point(xr,pp);
+  xa, za = mladder(xa,za,xr,sp);
+  za = invert(za);
+  r = mul(xa,za);
+  pack(rp,r);
+
+  sp = sp_s;
+  for i = 0 to 4 { buf = save[i]; [sp + 8*i] = buf; }
+ 
+}
+

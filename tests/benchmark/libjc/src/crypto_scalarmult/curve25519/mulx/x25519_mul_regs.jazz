@@ -1,0 +1,225 @@
+
+
+
+/*
+
+  abbrevs: (.) <- multiplication low-part
+           (x) <- multiplication hi-part
+
+
+2^64
+0:     0.0
+1:     0x0 0.1 1.0
+2:     0.2 0x1 1x0    1.1 2.0
+3:     0x2 0.3 1.2    1x1 2x0 2.1 3.0
+4:     1.3 0x3 1x2    2.2 3.1 2x1 3x0
+5:     1x3 2.3 3.2    2x2 3x1
+6:     3.3 2x3 3x2
+7:     3x3
+
+2^64
+0:     0.0
+1:     0x0 0.1 1.0
+2:     0.2 0x1 1x0   1.1 2.0
+3:     0x2 0.3 1.2   1x1 2x0   2.1 3.0
+4:         0x3 1x2   1.3 2.2   2x1 3x0   3.1
+5:     (uses:5-1+2)  1x3 2x2   2.3 3.2   3x1
+6:                   (u:6-1+2) 2x3 3x2   3.3
+7:                             (u:7-1+2) 3x3
+                                         (u:8-1+1)
+
+2^64 ---- 2 (4*38)
+0:     4L  7H
+1:     5L  4H
+2:     6L  5H
+3:     7L  6H
+
+2^64 ---- 4 (1*19)
+1:     4L
+2:     0
+3:     0
+4:     0
+
+*/
+
+fn mul25519(stack u64[4] xs, reg u64[4] y) -> reg u64[4] {
+ reg u64[4] r h;
+ reg u64 tA tB tC; //temps
+ reg bool cf of;
+ //# clear flags
+ of, cf, _, _, _, tA = #x86_XOR(tA, tA);  
+ /*
+    # 2^64
+    # 0:     0.0
+    # 1:     0x0 0.1 1.0
+    # 2:     0.2 0x1 1x0   1.1 2.0
+    # 3:     0x2 0.3 1.2   1x1 2x0   2.1 3.0
+    # 0:         0x3 1x2   1.3 2.2   2x1 3x0   3.1
+    # 1:             of    1x3 2x2   2.3 3.2   3x1
+    # 2:                   cf  of    2x3 3x2   3.3
+    # 3:                             cf  of    3x3
+    #                                          cf  
+ spass1 = [m00l,
+	   m00h + m01l + m10l,
+	   m02l + m01h + m10h,
+	   m02h + m03l + m12l,
+	   m03h + m12h];
+ spass2 = addrep(spass1,
+		 [0, 0,
+		  m11l + m20l,
+		  m11h + m20h,
+		  m13l + m22l,
+		  m13h + m22h]);
+ spass3 = addrep(spass2,
+		 [0, 0, 0,
+		  m21l + m30l,
+		  m21h + m30h,
+		  m23l + m32l,
+		  m23h + m32h]);
+ spass4 = addrep(spass3,
+		 [0, 0, 0, 0,
+		  m31l, m31h, m33l, m33h]);
+ */
+ //check("spec", spass4, [valrep(xold)*valrep(yold)])
+ tC       = xs[0];
+ r[1],r[0]= #x86_MULX(tC, y[0]);
+ r[2], tA = #x86_MULX(tC, y[1]);
+ cf, r[1] = #x86_ADCX(r[1], tA, cf);
+ r[3], tA = #x86_MULX(tC, y[2]);
+ cf, r[2] = #x86_ADCX(r[2], tA, cf);
+ h[0], tA = #x86_MULX(tC, y[3]);
+ cf, r[3] = #x86_ADCX(r[3], tA, cf);
+ tC       = 0;
+ cf, h[0] = #x86_ADCX(h[0], tC, cf);
+ //assert cf==0
+ tC       = xs[1];
+ tB, tA   = #x86_MULX(tC, y[0]);
+ of, r[1] = #x86_ADOX(r[1], tA, of);
+ of, r[2] = #x86_ADOX(r[2], tB, of);
+ tB, tA   = #x86_MULX(tC, y[2]);
+ of, r[3] = #x86_ADOX(r[3], tA, of);
+ of, h[0] = #x86_ADOX(h[0], tB, of);
+ h[1]     = 0;
+ of, h[1] = #x86_ADOX(h[1], h[1], of);
+ //check("spass1", r + h, spass1)
+ tB, tA   = #x86_MULX(tC, y[1]);
+ cf, r[2] = #x86_ADCX(r[2], tA, cf);
+ cf, r[3] = #x86_ADCX(r[3], tB, cf);
+ tB, tA   = #x86_MULX(tC, y[3]);
+ cf, h[0] = #x86_ADCX(h[0], tA, cf);
+ cf, h[1] = #x86_ADCX(h[1], tB, cf);
+ //assert cf==0 #REALLY???
+ tC       = xs[2];
+ tB, tA   = #x86_MULX(tC, y[0]);
+ of, r[2] = #x86_ADOX(r[2], tA, of);
+ of, r[3] = #x86_ADOX(r[3], tB, of);
+ tB, tA   = #x86_MULX(tC, y[2]);
+ of, h[0] = #x86_ADOX(h[0], tA, of);
+ of, h[1] = #x86_ADOX(h[1], tB, of);
+ h[2]     = 0;
+ of, h[2] = #x86_ADOX(h[2], h[2], of);
+ //check("spass2", r + h, spass2)
+ tB, tA   = #x86_MULX(tC, y[1]);
+ cf, r[3] = #x86_ADCX(r[3], tA, cf);
+ cf, h[0] = #x86_ADCX(h[0], tB, cf);
+ tB, tA   = #x86_MULX(tC, y[3]);
+ cf, h[1] = #x86_ADCX(h[1], tA, cf);
+ cf, h[2] = #x86_ADCX(h[2], tB, cf);
+ //assert cf==0 # REALLY???
+ tC       = xs[3];
+ tB, tA   = #x86_MULX(tC, y[0]);
+ of, r[3] = #x86_ADOX(r[3], tA, of);
+ of, h[0] = #x86_ADOX(h[0], tB, of);
+ tB, tA   = #x86_MULX(tC, y[2]);
+ of, h[1] = #x86_ADOX(h[1], tA, of);
+ of, h[2] = #x86_ADOX(h[2], tB, of);
+ h[3]     = 0;
+ of, h[3] = #x86_ADOX(h[3], h[3], of);
+ //check("spass3", r + h, spass3)
+ tB, tA   = #x86_MULX(tC, y[1]);
+ cf, h[0] = #x86_ADCX(h[0], tA, cf);
+ cf, h[1] = #x86_ADCX(h[1], tB, cf);
+ tB, tA   = #x86_MULX(tC, y[3]);
+ cf, h[2] = #x86_ADCX(h[2], tA, cf);
+ cf, h[3] = #x86_ADCX(h[3], tB, cf);
+ //check("spass4", r + h + [of], spass4)
+ /*
+    # 2^64 ---- 2 (4*38)
+    # 0:     4L  7H
+    # 1:     5L  4H
+    # 2:     6L  5H
+    # 3:     7L  6H
+    #        cf  of          */
+ tB       = 0;
+ tC       = 38;
+ tA, h[3] = #x86_MULX(tC, h[3]);
+ cf, tA = #x86_ADCX(tA, tB, cf);
+ //assert cf==0
+ of, cf, _, _, _, tA = #x86_IMULtimm(tA,38);
+ //assert cf==0 and of==0
+ cf, r[0] = #x86_ADCX(r[0], tA, cf);
+ tA, h[0] = #x86_MULX(tC, h[0]);
+ of, r[0] = #x86_ADOX(r[0], h[0], of);
+ cf, r[1] = #x86_ADCX(r[1], tA, cf);
+ tA, h[1] = #x86_MULX(tC, h[1]);
+ of, r[1] = #x86_ADOX(r[1], h[1], of);
+ of, r[2] = #x86_ADOX(r[2], tA, of);
+ tA, h[2] = #x86_MULX(tC, h[2]);
+ cf, r[2] = #x86_ADCX(r[2], h[2], cf);
+ cf, r[3] = #x86_ADCX(r[3], tA, cf);
+ of, r[3] = #x86_ADOX(r[3], h[3], of);
+ of, tB   = #x86_ADOX(tB, tB, of);
+ //assert of==0
+ //assert tB==0 or tB==1
+ //check("spass5", r + [cf + tB], spass4)
+ //# final reduction
+ _,_,_,_,_,tA = #x86_SBB(tA, tA, cf);
+ //assert tA == (u64max if cf==1 else 0)
+ _,_,_,_,_,tA = #x86_AND(tA, 38);
+ tB = -tB;
+ _,_,_,_,_,tB = #x86_AND(tB, 38);
+ tA += tB;
+ of,cf,_,_,_,r[3] = #x86_SHL(r[3], 1);
+ //assert cf==0 or cf==1
+ _,_,_,_,_,tB = #x86_SBB(tB, tB, cf);
+ //assert tB == (u64max if cf==1 else 0)
+ of,cf,_,_,_,tB = #x86_AND(tB, 19);
+ tA += tB;
+ of, cf, _, _, _, r[3] = #x86_SHR(r[3], 1);
+ //assert cf==0
+ tC       = 0;
+ of,cf,_,_,_,r[0] = #x86_ADD(r[0], tA);
+ cf, r[1] = #x86_ADCX(r[1], tC, cf);
+ cf, r[2] = #x86_ADCX(r[2], tC, cf);
+ cf, r[3] = #x86_ADCX(r[3], tC, cf);
+ //assert cf==0
+ //check("mul", r, [valrep(xold)*valrep(yold)])
+ return r;
+}
+
+
+
+export fn x25519_fe64_mul(reg u64 f g) {
+ stack u64[4] bs;
+ reg u64[4] __R12 c;
+ reg u64 t;
+ stack u64 fs gs;
+ inline int i;
+ for i = 0 to 4 {
+  t = [f + 8*i];
+  bs[i] = t; 
+  t = [g + 8*i];
+  c[i] = t; 
+ }
+ fs = f;
+ gs = g;
+ __R12 = mul25519(bs,c);
+ f = fs;
+ g = gs;
+ for i = 0 to 4 {
+  t = __R12[i];
+  [f + 8*i] = t;
+  t = c[i];
+  [g + 8*i] = t;
+ } 
+}
