@@ -27,23 +27,16 @@ inline_for_extraction
 type block_wp (a:Spec.alg) = lbuffer (word_t a) (size Spec.size_block_w)
 
 inline_for_extraction
-type block_p (a:Spec.alg) = lbuffer uint8 (size (Spec.size_block a))
-
-inline_for_extraction
 type hash_wp (a:Spec.alg) = lbuffer (word_t a) (size Spec.size_hash_w)
 
 inline_for_extraction
+let size_block (a:Spec.alg): x:size_t = size (Spec.size_block a)
+
+inline_for_extraction
+type block_p (a:Spec.alg) = lbuffer uint8 (size_block a)
+
+inline_for_extraction
 type index_t = n:size_t{size_v n < 16}
-
-
-inline_for_extraction
-let size_word (a:Spec.alg): size_t = size (Spec.size_word a)
-
-inline_for_extraction
-let size_block (a:Spec.alg): x:size_t = (size Spec.size_block_w) *! (size_word a)
-
-inline_for_extraction noextract
-let rounds_nat (a:Spec.alg): size_nat = Spec.rounds a
 
 inline_for_extraction noextract
 let rounds_t (a:Spec.alg): size_t = size (Spec.rounds a)
@@ -289,6 +282,7 @@ let blake2_round2 al wv m i =
   blake2_mixing al wv (size 2) (size 7) (size  8) (size 13) m.(s4) m.(s5);
   blake2_mixing al wv (size 3) (size 4) (size  9) (size 14) m.(s6) m.(s7)
 
+
 inline_for_extraction noextract
 val blake2_round: al:Spec.alg -> wv:vector_wp al -> m:block_wp al -> i:size_t{v i <= Spec.rounds al - 1} ->
   Stack unit
@@ -330,8 +324,6 @@ let blake2_compress1 al wv s m offset flag =
   wv.(size 13) <- wv_13;
  (if flag then wv.(size 14) <- wv_14)
 
-
-#reset-options "--z3rlimit 100 --max_ifuel 1 --max_fuel 1"
 
 inline_for_extraction noextract
 val blake2_compress2 :
@@ -417,7 +409,7 @@ let blake2_compress al s m offset flag =
   let spec _ h1 = live h1 s /\ h1.[|s|] == Spec.blake2_compress al h0.[|s|] h0.[|m|] offset flag in
   salloc1 h0 (size 16) (Spec.nat_to_word al 0) (Ghost.hide (loc s)) spec
   (fun wv ->
-     blake2_compress1 al wv s m offset flag;
+    blake2_compress1 al wv s m offset flag;
     blake2_compress2 al wv m;
     blake2_compress3 al wv s)
 
@@ -427,7 +419,7 @@ let blake2_update_block_t
     (al:Spec.alg) =
     hash: hash_wp al
   -> flag: bool
-  -> totlen: Spec.limb_t al{uint_v totlen <= Spec.Blake2.max_limb al}
+  -> totlen: Spec.limb_t al{v totlen <= Spec.Blake2.max_limb al}
   -> d: block_p al ->
   Stack unit
     (requires (fun h -> live h hash /\ live h d /\ disjoint hash d))
@@ -435,15 +427,13 @@ let blake2_update_block_t
                          /\ h1.[|hash|] == Spec.blake2_update_block al flag (v totlen) h0.[|d|] h0.[|hash|]))
 
 
-
 inline_for_extraction noextract
 val blake2_update_block: (al:Spec.alg) -> blake2_compress: compress_t al -> blake2_update_block_t al
-
 
 let blake2_update_block al blake2_compress hash flag totlen d =
   let h0 = ST.get () in
   [@inline_let]
-  let spec _ h1 = live h1 hash /\ h1.[|hash|] == Spec.blake2_update_block al flag (uint_v totlen) h0.[|d|] h0.[|hash|] in
+  let spec _ h1 = live h1 hash /\ h1.[|hash|] == Spec.blake2_update_block al flag (v totlen) h0.[|d|] h0.[|hash|] in
   salloc1 h0 (size 16) (Spec.nat_to_word al 0) (Ghost.hide (loc hash)) spec
   (fun block_w ->
      uints_from_bytes_le block_w d;
@@ -496,7 +486,7 @@ let blake2_init_branching al blake2_update_block hash key_block kk k nn =
   if kk <>. (size 0) then
   begin
     update_sub key_block (size 0) kk k;
-    assert(uint_v (secret (size_block al)) <= Spec.max_limb al);
+    assert(v (secret (size_block al)) <= Spec.max_limb al);
     let totlenw = size_to_word al (size_block al) in
     [@inline_let]
     let totlen = Spec.word_to_limb al totlenw in
@@ -529,18 +519,72 @@ let blake2_init al blake2_update_block hash kk k nn =
     blake2_init_hash al hash kk nn;
     blake2_init_branching al blake2_update_block hash key_block kk k nn)
 
+
+#push-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
+let _ : squash (inversion Spec.alg) = allow_inversion Spec.alg
+
+
+inline_for_extraction noextract
+val blake2_update_block_multi_step:
+    al:Spec.alg
+  -> blake2_update_block:blake2_update_block_t al
+  -> hash: hash_wp al
+  -> prev: Spec.limb_t al
+  -> n: size_t{v prev + v n * (Spec.size_block al) <= Spec.max_limb al /\ v n * (Spec.size_block al) <= max_size_t}
+  -> i: size_t{v i < v n}
+  -> blocks: lbuffer uint8 (n *! size_block al){v n * (Spec.size_block al) = length blocks} ->
+  Stack unit
+    (requires (fun h -> live h hash /\ live h blocks /\ disjoint hash blocks))
+    (ensures  (fun h0 _ h1 -> modifies1 hash h0 h1 /\
+                           max_size_t <= Spec.max_limb al /\
+                           h1.[|hash|] == Spec.blake2_update_block_multi_step al (v prev) (v n) h0.[|blocks|] (v i) h0.[|hash|]))
+
+let blake2_update_block_multi_step al blake2_update_block hash prev n i blocks =
+  let curlen:size_t = (i +! 1ul) *! (size_block al) in
+  let curlen:Spec.limb_t al = size_to_limb al curlen in
+  let totlen:Spec.limb_t al = prev +! curlen in
+  let block:block_p al = sub blocks (i *! (size_block al)) (size_block al) in
+  blake2_update_block hash false totlen block
+
+#pop-options
+
+
+inline_for_extraction noextract
+let blake2_update_block_multi_t
+    (al:Spec.alg) =
+    hash: hash_wp al
+  -> prev: Spec.limb_t al
+  -> n: size_t{v prev + v n * (Spec.size_block al) <= Spec.max_limb al /\ v n * (Spec.size_block al) <= max_size_t}
+  -> blocks: lbuffer uint8 (n *! (size_block al)) ->
+  Stack unit
+    (requires (fun h -> live h hash /\ live h blocks /\ disjoint hash blocks))
+    (ensures  (fun h0 _ h1 -> modifies1 hash h0 h1
+                        /\ h1.[|hash|] == Spec.blake2_update_block_multi al (v prev) (v n) h0.[|blocks|] h0.[|hash|]))
+
+inline_for_extraction noextract
+val blake2_update_block_multi: al:Spec.alg -> blake2_update_block_t al -> blake2_update_block_multi_t al
+
+let blake2_update_block_multi al blake2_update_block hash prev n blocks =
+  let h0 = ST.get () in
+  [@inline_let]
+  let spec h = Spec.blake2_update_block_multi_step al (v prev) (v n) h0.[|blocks|] in
+  loop1 h0 n hash spec
+  (fun i ->
+    Loops.unfold_repeati (v n) (spec h0) h0.[|hash|] (v i);
+    blake2_update_block_multi_step al blake2_update_block hash prev n i blocks)
+
+
 inline_for_extraction noextract
 let blake2_update_last_t
     (al:Spec.alg) =
     hash: hash_wp al
   -> prev: Spec.limb_t al
-  -> len: size_t{v len <= Spec.size_block al /\ v prev + v len <= Spec.Blake2.max_limb al}
-  -> last: lbuffer uint8 len ->
+  -> rem: size_t{v rem <= Spec.size_block al /\ v prev + v rem <= Spec.Blake2.max_limb al}
+  -> last: lbuffer uint8 rem ->
   Stack unit
     (requires (fun h -> live h hash /\ live h last /\ disjoint hash last))
     (ensures  (fun h0 _ h1 -> modifies1 hash h0 h1
-                         /\ h1.[|hash|] == Spec.Blake2.blake2_update_last al (uint_v prev) (v len) h0.[|last|] h0.[|hash|]))
-
+                         /\ h1.[|hash|] == Spec.Blake2.blake2_update_last al (v prev) (v rem) h0.[|last|] h0.[|hash|]))
 
 inline_for_extraction noextract
 val blake2_update_last: al:Spec.alg -> blake2_update_block_t al -> blake2_update_last_t al
@@ -554,6 +598,7 @@ let blake2_update_last al blake2_update_block hash prev rem last =
     let totlen: Spec.limb_t al = prev +! (size_to_limb al rem) in
     blake2_update_block hash true totlen last_block)
 
+
 inline_for_extraction noextract
 let blake2_finish_t
     (al:Spec.alg) =
@@ -561,8 +606,7 @@ let blake2_finish_t
   -> output: lbuffer uint8 nn
   -> hash: hash_wp al ->
   Stack unit
-    (requires (fun h -> live h hash
-                   /\ live h output /\ disjoint output hash /\ disjoint hash output))
+    (requires (fun h -> live h hash /\ live h output /\ disjoint output hash))
     (ensures  (fun h0 _ h1 -> modifies1 output h0 h1
                          /\ h1.[|output|] == Spec.Blake2.blake2_finish al h0.[|hash|] (v nn)))
 
@@ -579,180 +623,45 @@ let blake2_finish al nn output hash =
     copy output final)
 
 
-noextract
-let spec_update_block
-    (al:Spec.alg)
-    (init:nat)
-    (d:Lib.ByteSequence.bytes{Seq.length d <= max_size_t
-                             /\ init + Seq.length d <= max_size_t})
-    (i:nat{init + Seq.length d <= Spec.max_limb al /\ i < Seq.length d / v (size_block al)})
-    (hash:Spec.Blake2.hash_ws al)
-    =
-    let block = Seq.slice #uint8 #(Seq.length d) d (i * Spec.size_block al) ((i + 1) * (Spec.size_block al)) in
-    Spec.blake2_update_block al false (init + ((i + 1) * (Spec.size_block al))) block hash
 
+inline_for_extraction noextract
+val compute_prev_multi:
+    al:Spec.alg
+  -> kn:size_t{v kn == 0 \/ v kn == 1} ->
+  Tot (r:Spec.limb_t al{v r = (v kn) * Spec.size_block al})
 
-noextract
-val lemma_spec_eq_update_block:
-    (al:Spec.alg)
-    -> (init:nat)
-    -> (d:Lib.ByteSequence.bytes{Seq.length d <= max_size_t
-                             /\ init + Seq.length d <= max_size_t})
-    -> (i:nat{init + Seq.length d <= Spec.max_limb al /\ i < Seq.length d / v (size_block al)})
-    -> (hash:Spec.hash_ws al) ->
-    Lemma (
-      let f1 = spec_update_block al init d i hash in
-      let block = Seq.sub #uint8 #(Seq.length d) d (i * Spec.size_block al) (Spec.size_block al) in
-      let f2 = Spec.blake2_update_block al false (init + ((i + 1) * v (size_block al))) block hash in
-      f1 == f2)
-
-let lemma_spec_eq_update_block al init d i hash =
-  let block1 = Seq.slice #uint8 #(Seq.length d) d (i * Spec.size_block al) ((i + 1) * (Spec.size_block al)) in
-  let block2 = Seq.sub #uint8 #(Seq.length d) d (i * Spec.size_block al) (Spec.size_block al) in
-  Seq.eq_intro block1 block2
+let compute_prev_multi al kn =
+  size_to_limb al (kn *! (size_block al))
 
 
 inline_for_extraction noextract
-val blake2_update_block_multi_single:
+val compute_prev_last:
     al:Spec.alg
-  -> blake2_update_block:blake2_update_block_t al
-  -> hash: hash_wp al
-  -> prev: Spec.limb_t al
-  -> n: size_t{v prev + v n * v (size_block al) <= Spec.max_limb al /\ v prev + v n * v (size_block al) <= max_size_t}
-  -> i: size_t{v i < v n}
-  -> blocks: lbuffer uint8 (n *! size_block al){v n * v (size_block al) = length blocks} ->
-  Stack unit
-    (requires (fun h -> live h hash /\ live h blocks /\ disjoint hash blocks))
-    (ensures  (fun h0 _ h1 -> modifies1 hash h0 h1
-                           /\ h1.[|hash|] == spec_update_block al (v prev) h0.[|blocks|] (v i) h0.[|hash|]
-                           /\ (
-                           let block = Seq.sub h0.[|blocks|] (v i * Spec.size_block al) (Spec.size_block al) in
-                           h1.[|hash|] == Spec.blake2_update_block al false (v prev + ((v i + 1) * Spec.size_block al)) block h0.[|hash|])))
+  -> prev_multi:Spec.limb_t al{v prev_multi == 0 \/ v prev_multi == Spec.size_block al}
+  -> n: size_t{v prev_multi + (v n) * (Spec.size_block al) <= max_size_t}
+  -> rem: size_t ->
+  Tot (r:Spec.limb_t al)
 
-let blake2_update_block_multi_single al blake2_update_block hash prev n i blocks =
-  let curlen:size_t = (i +! 1ul) *! (size_block al) in
-  let curlen:Spec.limb_t al = size_to_limb al curlen in
-  let totlen:Spec.limb_t al = prev +! curlen in
-  let block:block_p al = sub blocks (i *! (size_block al)) (size_block al) in
-  blake2_update_block hash false totlen block
+let compute_prev_last al prev_multi n rem =
+  prev_multi +! (size_to_limb al (n *! (size_block al)))
 
 
-noextract
-val spec_blake2_update_block_multi:
+val lemma_prev_last:
     al:Spec.alg
-  -> prev:nat
-  -> n:nat
-  -> blocks:Lib.ByteSequence.bytes{n * v (size_block al) == Seq.length blocks /\ prev + n * (Spec.size_block al) <= Spec.max_limb al /\ prev + Seq.length blocks <= max_size_t}
-  -> s:Spec.hash_ws al ->
-  Tot (Spec.hash_ws al)
+  -> prev_multi:Spec.limb_t al{v prev_multi == 0 \/ v prev_multi == Spec.size_block al}
+  -> n: size_t{v prev_multi + (v n) * (Spec.size_block al) <= max_size_t}
+  -> rem: size_t ->
+  Lemma (ensures(
+    let r = compute_prev_last al prev_multi n rem in
+    v r = v prev_multi + (v n) * Spec.size_block al /\ v r + v rem <= Spec.max_limb al))
+  [SMTPat (compute_prev_last al prev_multi n rem)]
 
-let spec_blake2_update_block_multi al prev n blocks s =
-  repeati n (spec_update_block al prev blocks) s
-
-
-noextract
-val lemma_spec_eq_block_multi:
-    al:Spec.alg
-  -> prev:nat
-  -> n:nat
-  -> blocks:Lib.ByteSequence.bytes{n * Spec.size_block al == Seq.length blocks
-                                 /\ prev + n * (Spec.size_block al) <= Spec.max_limb al
-                                 /\ prev + Seq.length blocks <= max_size_t}
-  -> hash:Spec.hash_ws al ->
-  Lemma (Spec.blake2_update_block_multi al prev n blocks hash
-        == spec_blake2_update_block_multi al prev n blocks hash)
-
-let lemma_spec_eq_block_multi al prev n blocks hash =
-  let a = spec_blake2_update_block_multi al prev n blocks hash in
-  let b = Spec.blake2_update_block_multi al prev n blocks hash in
-  admit();
-  Seq.eq_intro a b
-
-inline_for_extraction noextract
-let blake2_update_block_multi_t
-    (al:Spec.alg) =
-  hash: hash_wp al
-  -> prev: Spec.limb_t al
-  -> n: size_t{v prev + v n * v (size_block al) <= Spec.max_limb al /\ v prev + v n * v (size_block al) <= max_size_t}
-  -> blocks: lbuffer uint8 (n *! (size_block al)){v n * v (size_block al) = length blocks} ->
-  Stack unit
-    (requires (fun h -> live h hash /\ live h blocks /\ disjoint hash blocks))
-    (ensures  (fun h0 _ h1 -> modifies1 hash h0 h1
-                        /\ h1.[|hash|] == Spec.blake2_update_block_multi al (v prev) (v n) h0.[|blocks|] h0.[|hash|]))
-
-inline_for_extraction noextract
-val blake2_update_block_multi: al:Spec.alg -> blake2_update_block_t al -> blake2_update_block_multi_t al
-
-let blake2_update_block_multi al blake2_update_block hash prev n blocks =
-  let h0 = ST.get () in
-  [@inline_let]
-  let spec h = spec_update_block al (v prev) h.[|blocks|] in
-  loop1 h0 n hash spec
-  (fun i ->
-    Loops.unfold_repeati (v n) (spec h0) h0.[|hash|] (v i);
-    blake2_update_block_multi_single al blake2_update_block hash prev n i blocks);
-  let h1 = ST.get() in
-  lemma_spec_eq_block_multi al (v prev) (v n) h0.[|blocks|] h0.[|hash|]
+let lemma_prev_last al prev_multi n rem = ()
 
 
-#reset-options "--z3rlimit 300 --max_fuel 3 --max_ifuel 3"
+#reset-options "--z3rlimit 500 --max_fuel 0 --max_ifuel 0"
+let _ : squash (inversion Spec.alg) = allow_inversion Spec.alg
 
-noextract
-val lemma_spec_blake2_params:
-    h0:mem
-  -> al:Spec.alg
-  -> nn:size_t{1 <= v nn /\ v nn <= Spec.max_output al}
-  -> output: lbuffer uint8 nn
-  -> ll: size_t
-  -> d: lbuffer uint8 ll
-  -> kk: size_t{v kk <= Spec.max_key al /\ (if v kk = 0 then v ll <= max_size_t else v ll + Spec.size_block al <= max_size_t)}
-  -> k: lbuffer uint8 kk ->
-  Lemma (
-      let spec_d = h0.[|d|] in
-      let spec_k = h0.[|k|] in
-      let spec_kk = Seq.length #uint8 spec_k in
-      let spec_ll = Seq.length #uint8 spec_d in
-      let spec_n = (spec_ll) / Spec.size_block al in
-      let spec_rem = (spec_ll) % Spec.size_block al in
-      let spec_n,spec_rem = if spec_n <> 0 && spec_rem = 0 then spec_n - 1, Spec.size_block al else spec_n, spec_rem in
-      let spec_kn = if spec_kk = 0 then 0 else 1 in
-      let n = ll /. (size_block al) in
-      let rem = ll %. (size_block al) in
-      let n,rem = if n <>. 0ul && rem =. 0ul then n -! 1ul, size_block al else n, rem in
-      let kn = if kk =. 0ul then 0ul else 1ul in
-      let prev_multi: Spec.limb_t al = size_to_limb al (kn *! size_block al) in
-      let prev_last:Spec.limb_t al = size_to_limb al ((kn +! n) *! (size_block al)) in
-
-      spec_kk = v kk /\ spec_ll = v ll /\ spec_n = v n /\ spec_rem = v rem /\ spec_kn = v kn
-      /\ (spec_kn * Spec.size_block al) = v prev_multi
-      /\ ((spec_kn + spec_n) * Spec.size_block al) = v prev_last
-  )
-
-let lemma_spec_blake2_params h0 al nn output ll d kk k = ()
-
-noextract
-val lemma_spec_blake2_buffers:
-    h0:mem
-  -> al:Spec.alg
-  -> nn:size_t{1 <= v nn /\ v nn <= Spec.max_output al}
-  -> output: lbuffer uint8 nn
-  -> ll: size_t
-  -> d: lbuffer uint8 ll
-  -> kk: size_t{v kk <= Spec.max_key al /\ (if v kk = 0 then v ll <= max_size_t else v ll + Spec.size_block al <= max_size_t)}
-  -> k: lbuffer uint8 kk ->
-  Lemma (
-    let n = ll /. (size_block al) in
-    let rem = ll %. (size_block al) in
-    let n,rem = if n <>. 0ul && rem =. 0ul then n -! 1ul, size_block al else n, rem in
-    lemma_spec_blake2_params h0 al nn output ll d kk k;
-    let blocks = gsub d 0ul (n *! (size_block al)) in
-    let last = gsub d (n *! (size_block al)) rem in
-    let spec_blocks = Seq.slice #uint8 #(v ll) h0.[|d|] 0 (v n * Spec.size_block al) in
-    let spec_last = Seq.slice #uint8 #(v ll) h0.[|d|] (v n * Spec.size_block al) (v ll) in
-    h0.[|blocks|] == spec_blocks /\ h0.[|last|] == spec_last
-  )
-
-let lemma_spec_blake2_buffers h0 al nn output ll d kk k = ()
 
 noextract
 val lemma_spec_blake2:
@@ -765,14 +674,13 @@ val lemma_spec_blake2:
   -> kk: size_t{v kk <= Spec.max_key al /\ (if v kk = 0 then v ll <= max_size_t else v ll + Spec.size_block al <= max_size_t)}
   -> k: lbuffer uint8 kk ->
   Lemma (
-    lemma_spec_blake2_params h0 al nn output ll d kk k;
-    lemma_spec_blake2_buffers h0 al nn output ll d kk k;
-    let n = ll /. (size_block al) in
-    let rem = ll %. (size_block al) in
-    let n,rem = if n <>. 0ul && rem =. 0ul then n -! 1ul, size_block al else n, rem in
+    let n0 = ll /. (size_block al) in
+    let rem0 = ll %. (size_block al) in
     let kn = if kk =. 0ul then 0ul else 1ul in
-    let prev_multi: Spec.limb_t al = size_to_limb al (kn *! size_block al) in
-    let prev_last:Spec.limb_t al = size_to_limb al ((kn +! n) *! (size_block al)) in
+    let n = if n0 <>. 0ul && rem0 =. 0ul then n0 -! 1ul else n0 in
+    let rem = if n0 <>. 0ul && rem0 =. 0ul then size_block al else rem0 in
+    let prev_multi: Spec.limb_t al = compute_prev_multi al kn in
+    let prev_last: Spec.limb_t al = compute_prev_last al prev_multi n rem in
     let blocks = gsub d 0ul (n *! (size_block al)) in
     let last = gsub d (n *! (size_block al)) rem in
     let spec_blocks = Seq.slice #uint8 #(v ll) h0.[|d|] 0 (v n * Spec.size_block al) in
@@ -806,114 +714,24 @@ val blake2: al:Spec.alg ->
   blake2_init_t al -> blake2_update_block_multi_t al -> blake2_update_last_t al -> blake2_finish_t al -> blake2_t al
 
 let blake2 al blake2_init blake2_update_block_multi blake2_update_last blake2_finish nn output ll d kk k =
-  let h0 = ST.get () in
-  let n = ll /. (size_block al) in
-  let rem = ll %. (size_block al) in
-  let n,rem = if n <>. 0ul && rem =. 0ul then n -! 1ul, size_block al else n, rem in
+  let h00 = ST.get () in
+  let n0 = ll /. (size_block al) in
+  let rem0 = ll %. (size_block al) in
+  let kn = if kk =. 0ul then 0ul else 1ul in
+  let n = if n0 <>. 0ul && rem0 =. 0ul then n0 -! 1ul else n0 in
+  let rem = if n0 <>. 0ul && rem0 =. 0ul then size_block al else rem0 in
+  let h01 = ST.get () in
   let blocks = sub d 0ul (n *! (size_block al)) in
   let last = sub d (n *! (size_block al)) rem in
-  let kn = if kk =. 0ul then 0ul else 1ul in
-  let prev_multi: Spec.limb_t al = size_to_limb al (kn *! size_block al) in
-  let prev_last:Spec.limb_t al = size_to_limb al ((kn +! n) *! (size_block al)) in
-  salloc1 h0 (size 8) (Spec.nat_to_word al 0) (Ghost.hide (loc output))
-  (fun _ h1 -> live h1 output /\ h1.[|output|] == Spec.Blake2.blake2 al h0.[|d|] (v kk) h0.[|k|] (v nn))
+  let prev_multi: Spec.limb_t al = compute_prev_multi al kn in
+  let prev_last: Spec.limb_t al = compute_prev_last al prev_multi n rem in
+  let h01 = ST.get () in
+  salloc1 h01 (size 8) (Spec.nat_to_word al 0) (Ghost.hide (loc output))
+  (fun _ h1 -> live h1 output /\ h1.[|output|] == Spec.Blake2.blake2 al h01.[|d|] (v kk) h01.[|k|] (v nn))
   (fun hash ->
     blake2_init hash kk k nn;
     blake2_update_block_multi hash prev_multi n blocks;
     blake2_update_last hash prev_last rem last;
     blake2_finish nn output hash;
-    lemma_spec_blake2 h0 al nn output ll d kk k
+    lemma_spec_blake2 h01 al nn output ll d kk k
   )
-
-
-(* val spec_blake2_core: *)
-(*     a:Spec.alg *)
-(*   -> d:Lib.ByteSequence.bytes{Seq.length d <= max_size_t} *)
-(*   -> kk:size_nat{kk <= Spec.max_key a /\ (if kk = 0 then Seq.length d <= Spec.max_limb a else Seq.length d + (Spec.size_block a) <= Spec.max_limb a)} *)
-(*   -> k:Lib.ByteSequence.lbytes kk *)
-(*   -> nn:size_nat{1 <= nn /\ nn <= Spec.max_output a} *)
-(*   -> kn:nat{if kk = 0 then kn = 0 else kn = 1} *)
-(*   -> prev_multi:nat{prev_multi = kn * Spec.size_block a} *)
-(*   -> n:nat{prev_multi + n * Spec.size_block a <= Spec.max_limb a /\ prev_multi + n * Spec.size_block a <= max_size_t /\ n * Spec.size_block a <= Seq.length d} *)
-(*   -> prev_last:nat{(prev_last = (kn + n) * Spec.size_block a)} *)
-(*   -> rem:size_nat{rem <= Spec.size_block a /\ prev_last + rem <= Spec.max_limb a /\ rem + n * Spec.size_block a <= Seq.length d} *)
-(*   -> hash:Spec.hash_ws a -> *)
-(*   Tot (Lib.ByteSequence.lbytes nn) *)
-
-(* let spec_blake2_core a d kk k nn kn prev_multi n prev_last rem hash = *)
-(*   let ll = Seq.length d in *)
-(*   let blocks = Seq.slice #uint8 #(Seq.length d) d 0 (n * Spec.size_block a) in *)
-(*   let last = Seq.slice #uint8 #(Seq.length d) d (n * Spec.size_block a) (rem + n * Spec.size_block a) in *)
-(*   let kn = if kk = 0 then 0 else 1 in *)
-(*   let s: Spec.hash_ws a = Spec.blake2_init a kk k nn in *)
-(*   let s: Spec.hash_ws a = Spec.blake2_update_block_multi a prev_multi n blocks s in *)
-(*   let s: Spec.hash_ws a = Spec.blake2_update_last a prev_last rem last s in *)
-(*   Spec.blake2_finish a s nn *)
-
-
-(* val blake2_core: *)
-(*     al:Spec.alg *)
-(*   -> nn:size_t{1 <= v nn /\ v nn <= Spec.max_output al} *)
-(*   -> output: lbuffer uint8 nn *)
-(*   -> ll: size_t *)
-(*   -> d: lbuffer uint8 ll *)
-(*   -> kk: size_t{v kk <= Spec.max_key al /\ (if v kk = 0 then v ll <= max_size_t else v ll + Spec.size_block al <= max_size_t)} *)
-(*   -> k: lbuffer uint8 kk *)
-(*   -> kn: size_t{if v kk = 0 then v kn = 0 else v kn = 1} *)
-(*   -> prev_multi: Spec.limb_t al{v prev_multi = v kn * Spec.size_block al} *)
-(*   -> n: size_t{v prev_multi + v n * Spec.size_block al <= Spec.max_limb al /\ v prev_multi + v n * Spec.size_block al <= max_size_t /\ v n * Spec.size_block al <= v ll} *)
-(*   -> prev_last: Spec.limb_t al{(v prev_last = (v kn + v n) * Spec.size_block al)} *)
-(*   -> rem:size_t{v rem <= Spec.size_block al /\ v prev_last + v rem <= Spec.max_limb al /\ v rem + v n * Spec.size_block al <= v ll} *)
-(*   -> hash:hash_wp al -> *)
-(*   Stack unit *)
-(*     (requires (fun h -> live h output /\ live h d /\ live h k *)
-(*                    /\ disjoint output d /\ disjoint output k /\ disjoint d k)) *)
-(*     (ensures  (fun h0 _ h1 -> modifies1 output h0 h1 *)
-(*                          /\ h1.[|output|] == spec_blake2_core al h0.[|d|] (v kk) h0.[|k|] (v nn) (v kn) (v prev_multi) (v n) (v prev_last) (v rem) h0.[|hash|])) *)
-
-(* let blake2_core al nn output ll d kk k kn prev_multi n prev_last rem hash = *)
-(*   let h0 = ST.get () in *)
-(*   let blocks = sub d 0ul (n *! (size_block al)) in *)
-(*   let last = sub d (n *! (size_block al)) rem in *)
-(*   lemma_spec_blake2_params h0 al nn output ll d kk k; *)
-(*   lemma_spec_blake2_buffers h0 al nn output ll d kk k; *)
-(*   blake2_init al hash kk k nn; *)
-(*   blake2_update_block_multi al hash prev_multi n blocks; *)
-(*   blake2_update_last al hash prev_last rem last; *)
-(*   blake2_finish al nn output hash *)
-
-
-(* val lemma_spec_blake2': *)
-(*     h0:mem *)
-(*   -> al:Spec.alg *)
-(*   -> nn:size_t{1 <= v nn /\ v nn <= Spec.max_output al} *)
-(*   -> output: lbuffer uint8 nn *)
-(*   -> ll: size_t *)
-(*   -> d: lbuffer uint8 ll *)
-(*   -> kk: size_t{v kk <= Spec.max_key al /\ (if v kk = 0 then v ll <= max_size_t else v ll + Spec.size_block al <= max_size_t)} *)
-(*   -> k: lbuffer uint8 kk *)
-(*   -> prev_multi: Spec.limb_t al *)
-(*   -> n: size_t{v prev_multi + v n * v (size_block al) <= Spec.max_limb al /\ v prev_multi + v n * v (size_block al) <= max_size_t} *)
-(*   -> kn: size_t{if v kk = 0 then v kn = 0 else v kn = 1} *)
-(*   -> blocks: lbuffer uint8 (n *! (size_block al)){v n * v (size_block al) = length blocks /\ gsub d 0ul (n *! (size_block al)) == as_seq h0 blocks} *)
-(*   -> prev_last: Spec.limb_t al *)
-(*   -> rem: size_t{v rem <= Spec.size_block al /\ v prev_last + v rem <= Spec.Blake2.max_limb al} *)
-(*   -> last: lbuffer uint8 rem{gsub d (n *! (size_block al)) rem == as_seq h0 last} -> *)
-(*   Lemma ( *)
-(*     lemma_spec_blake2_params h0 al nn output ll d kk k; *)
-(*     lemma_spec_blake2_buffers h0 al nn output ll d kk k; *)
-(*     (\* let blocks = gsub d 0ul (n *! (size_block al)) in *\) *)
-(*     (\* let last = gsub d (n *! (size_block al)) rem in *\) *)
-(*     (\* lemma_spec_blake2_params h0 al nn output ll d kk k; *\) *)
-(*     (\* let spec_blocks = Seq.slice #uint8 #(v ll) h0.[|d|] 0 (v n * Spec.size_block al) in *\) *)
-(*     (\* let spec_last = Seq.slice #uint8 #(v ll) h0.[|d|] (v n * Spec.size_block al) (v ll) in *\) *)
-(*     (\* lemma_spec_blake2_buffers h0 al nn output ll d kk k; *\) *)
-(*     let hash1 = Spec.Blake2.blake2_init al (v kk) h0.[|k|] (v nn) in *)
-(*     let hash2 = Spec.Blake2.blake2_update_block_multi al (v prev_multi) (v n) h0.[|blocks|] hash1 in *)
-(*     let hash3 = Spec.Blake2.blake2_update_last al (v prev_last) (v rem) h0.[|last|] hash2 in *)
-(*     let spec_output = Spec.Blake2.blake2_finish al hash3 (v nn) in *)
-(*     spec_output == Spec.Blake2.blake2 al h0.[|d|] (v kk) h0.[|k|] (v nn) *)
-(*   ) *)
-
-(* let lemma_spec_blake2' h0 al nn output ll d kk k prev_multi n kn blocks prev_last rem last = () *)
-

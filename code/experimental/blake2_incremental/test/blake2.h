@@ -179,6 +179,9 @@ extern "C" {
   int blake2s( void *out, size_t outlen, const void *in, size_t inlen, const void *key, size_t keylen );
   int blake2b( void *out, size_t outlen, const void *in, size_t inlen, const void *key, size_t keylen );
 
+  int ref_blake2s( void *out, size_t outlen, const void *in, size_t inlen, const void *key, size_t keylen );
+  int ref_blake2b( void *out, size_t outlen, const void *in, size_t inlen, const void *key, size_t keylen );
+
   int blake2sp( void *out, size_t outlen, const void *in, size_t inlen, const void *key, size_t keylen );
   int blake2bp( void *out, size_t outlen, const void *in, size_t inlen, const void *key, size_t keylen );
 
