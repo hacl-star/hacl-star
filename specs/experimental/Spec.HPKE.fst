@@ -11,7 +11,8 @@ module Def = Spec.Hash.Definitions
 module DH = Spec.Agile.DH
 module AEAD = Spec.Agile.AEAD
 module Hash = Spec.Agile.Hash
-module HKDF = Spec.Agile.KDF
+module HKDF = Spec.Agile.HKDF
+module KDF = Spec.Agile.KDF
 
 
 let pow2_61 : _:unit{pow2 61 == 2305843009213693952} = assert_norm(pow2 61 == 2305843009213693952)
