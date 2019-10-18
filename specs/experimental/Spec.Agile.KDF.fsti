@@ -20,7 +20,7 @@ val build_label:
 
 val expand_label:
     a: Hash.algorithm
-  -> secret: bytes{length secret <= Hash.max_input a}
+  -> secret: bytes{length secret <= Hash.max_input a /\ Hash.size_hash a <= Seq.length secret}
   -> label: bytes{length label <= maxint U8}
   -> context: bytes{
     let size_hkdf_label = numbytes U16 + numbytes U8 + length label + numbytes U8 + length context in
