@@ -117,7 +117,11 @@ all-unstaged: compile-compact compile-compact-msvc compile-compact-gcc \
 	cp $< $@
 
 test: test-staged
-test-unstaged: test-handwritten test-c test-ml test-benchmark
+test-unstaged: test-handwritten test-c test-ml
+
+ifneq ($(OS),Windows_NT)
+test-unstaged: test-benchmark
+endif
 
 # Any file in code/tests is taken to contain an `int main()` function.
 # Test should be renamed into Test.EverCrypt
