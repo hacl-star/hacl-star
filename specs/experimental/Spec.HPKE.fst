@@ -9,7 +9,7 @@ open Lib.RandomSequence
 
 module Def = Spec.Hash.Definitions
 module DH = Spec.Agile.DH
-module AEAD = Spec.Agile.AEAD
+module AEAD = Spec.Agile.AEAD.Hacl
 module Hash = Spec.Agile.Hash
 module HKDF = Spec.Agile.HKDF
 module KDF = Spec.Agile.KDF
@@ -28,14 +28,14 @@ type ciphersuite = DH.algorithm & AEAD.algorithm & a:Hash.algorithm{a == Def.SHA
 val id_of_cs: cs:ciphersuite -> Tot (lbytes 1)
 let id_of_cs cs =
   match cs with
-  | DH.DH_Curve25519, AEAD.AES128_GCM,        Hash.SHA2_256 -> create 1 (u8 0)
-  | DH.DH_Curve25519, AEAD.AES128_GCM,        Hash.SHA2_512 -> create 1 (u8 1)
-  | DH.DH_Curve25519, AEAD.CHACHA20_POLY1305, Hash.SHA2_256 -> create 1 (u8 2)
-  | DH.DH_Curve25519, AEAD.CHACHA20_POLY1305, Hash.SHA2_512 -> create 1 (u8 3)
-  | DH.DH_Curve448,   AEAD.AES128_GCM,        Hash.SHA2_256 -> create 1 (u8 4)
-  | DH.DH_Curve448,   AEAD.AES128_GCM,        Hash.SHA2_512 -> create 1 (u8 5)
-  | DH.DH_Curve448,   AEAD.CHACHA20_POLY1305, Hash.SHA2_256 -> create 1 (u8 6)
-  | DH.DH_Curve448,   AEAD.CHACHA20_POLY1305, Hash.SHA2_512 -> create 1 (u8 7)
+  | DH.DH_Curve25519, AEAD.AEAD_AES128_GCM,        Hash.SHA2_256 -> create 1 (u8 0)
+  | DH.DH_Curve25519, AEAD.AEAD_AES128_GCM,        Hash.SHA2_512 -> create 1 (u8 1)
+  | DH.DH_Curve25519, AEAD.AEAD_Chacha20_Poly1305, Hash.SHA2_256 -> create 1 (u8 2)
+  | DH.DH_Curve25519, AEAD.AEAD_Chacha20_Poly1305, Hash.SHA2_512 -> create 1 (u8 3)
+  | DH.DH_Curve448,   AEAD.AEAD_AES128_GCM,        Hash.SHA2_256 -> create 1 (u8 4)
+  | DH.DH_Curve448,   AEAD.AEAD_AES128_GCM,        Hash.SHA2_512 -> create 1 (u8 5)
+  | DH.DH_Curve448,   AEAD.AEAD_Chacha20_Poly1305, Hash.SHA2_256 -> create 1 (u8 6)
+  | DH.DH_Curve448,   AEAD.AEAD_Chacha20_Poly1305, Hash.SHA2_512 -> create 1 (u8 7)
 
 let curve_of_cs (cs:ciphersuite) : DH.algorithm =
   let (c,a,h) = cs in c
@@ -152,7 +152,7 @@ let encrypt cs sk input aad counter =
   let key = sub sk 0 klen in
   let nonce = sub sk klen (size_nonce cs - numbytes U32) in
   let ctr = uint_to_bytes_le counter in
-  AEAD.encrypt #(aead_of_cs cs) key (nonce @| ctr) input aad
+  AEAD.aead_encrypt (aead_of_cs cs) key (nonce @| ctr) input aad
 
 
 val decrypt:
@@ -171,7 +171,7 @@ let decrypt cs sk input tag aad counter =
   let key = sub sk 0 klen in
   let nonce = sub sk klen (size_nonce cs - numbytes U32) in
   let ctr = uint_to_bytes_le counter in
-  AEAD.decrypt_split #(aead_of_cs cs) key (nonce @| ctr) aad input tag
+  AEAD.aead_decrypt (aead_of_cs cs) key (nonce @| ctr) aad input tag
 
 ///
 /// One time KEM API
