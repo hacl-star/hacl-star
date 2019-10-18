@@ -1,0 +1,21 @@
+#include "crypto_core/keccakf160064bits/ref/keccak_f1600.jazz"
+
+//
+// TODO : rewrite to match crypto_core
+//
+export fn keccak_f1600(
+  reg u64 in
+)
+{
+  inline int i;
+  stack u64[25] state;
+  reg u64 t;
+
+  for i=0 to 25
+  { t = [in + 8*i]; state[i] = t; }
+
+  state = __keccak_f1600_ref(state);
+
+  for i=0 to 25
+  { t = state[i]; t = [in + 8*i]; }
+}

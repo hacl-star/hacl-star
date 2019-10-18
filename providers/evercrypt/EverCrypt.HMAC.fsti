@@ -1,56 +1,76 @@
-(* Agile HMAC *)
+(** Agile HMAC *)
 module EverCrypt.HMAC
-/// 18-03-03 Do we get specialized extraction of HMAC?
 
-// for simplicity, we currently require that the key be block-sized;
-// the standardized algorithm is more general.
+module B = LowStar.Buffer
 
-open EverCrypt.Hash
-
-let ha = a: alg {a = SHA256 \/ a = SHA384 \/ a = SHA512}
-let e_ha = Ghost.erased ha
-
-//18-07-09 rename to Hash's bytes and lbytes?
-noextract
-type bseq = Seq.seq UInt8.t
-noextract
-let lbseq (l:nat) = b:bseq {Seq.length b = l}
-
-let keysized (a:e_alg) (l:nat) =
-  l <= maxLength a /\
-  l + blockLength a < pow2 32
-
-(* ghost specification; its algorithmic definition is given in the .fst *)
-noextract val hmac:
-  a: e_alg -> //18-07-09 can't mix refinements and erasure??
-  key: bseq{ keysized a (Seq.length key) } ->
-  data: bseq{ Seq.length data + blockLength a <= maxLength a } ->
-  GTot (lbseq (tagLength a))
+open Spec.Agile.HMAC
+open Spec.Hash.Definitions
 
 open FStar.HyperStack.ST
-open LowStar.Buffer
-open EverCrypt.Helpers
+open Lib.IntTypes
 
-#reset-options "--max_fuel 0  --z3rlimit 20"
-(* implementation, relying on 3 variants of SHA2 supported by HACL*;
-   we tolerate overlaps between tag and data.
-   (we used to require [disjoint data tag])
-*)
-val compute:
-  a: ha ->
-  tag: uint8_pl (tagLength (Ghost.hide a)) ->
-  key: uint8_p{ keysized (Ghost.hide a) (length key) /\ disjoint key tag } ->
-  keylen: UInt32.t{ UInt32.v keylen = length key } ->
-  data: uint8_p{ length data + blockLength (Ghost.hide a) < pow2 32 } ->
-  datalen: UInt32.t{ UInt32.v datalen = length data } ->
-  ST unit
-  (requires fun h0 -> live h0 tag /\ live h0 key /\ live h0 data)
-  (ensures fun h0 _ h1 ->
-    live h1 tag /\
-    live h1 key /\
-    live h1 data /\
+#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 20"
+
+/// Auxiliary lemma
+
+let key_and_data_fits (a: hash_alg): Lemma
+  (ensures (block_length a + pow2 32 <= max_input_length a))
+=
+  let open FStar.Mul in
+  assert_norm (8 * 16 + pow2 32 < pow2 61);
+  assert_norm (pow2 61 < pow2 125)
+
+/// Type for compute
+/// Duplicated from Hacl.HMAC because we don't want clients to depend on Hacl.HMAC
+
+inline_for_extraction
+let compute_st (a: hash_alg) =
+  tag: B.buffer uint8 {B.length tag == hash_length a} ->
+  key: B.buffer uint8{ keysized a (B.length key) /\ B.disjoint key tag } ->
+  keylen: UInt32.t{ UInt32.v keylen = B.length key } ->
+  // Can we have max_input_length a instead of pow2 32?
+  data: B.buffer uint8{ B.length data + block_length a < pow2 32 } ->
+  datalen: UInt32.t{ UInt32.v datalen = B.length data } ->
+  Stack unit
+  (requires fun h0 -> B.live h0 tag /\ B.live h0 key /\ B.live h0 data)
+  (ensures  fun h0 _ h1 ->
+    key_and_data_fits a;
     LowStar.Modifies.(modifies (loc_buffer tag) h0 h1) /\
-    length data + blockLength (Ghost.hide a) <= maxLength (Ghost.hide a) /\ (* required for subtyping the RHS below *)
-      as_seq h1 tag == hmac (Ghost.hide a) (as_seq h0 key) (as_seq h0 data))
+    B.as_seq h1 tag == hmac a (B.as_seq h0 key) (B.as_seq h0 data))
+
+/// Four monomorphized variants, for callers who already know which algorithm they want
+
+(** @type: true
+*)
+val compute_sha1: compute_st SHA1
+
+(** @type: true
+*)
+val compute_sha2_256: compute_st SHA2_256
+
+(** @type: true
+*)
+val compute_sha2_384: compute_st SHA2_384
+
+(** @type: true
+*)
+val compute_sha2_512: compute_st SHA2_512
+
+
+let is_supported_alg = function
+| SHA1 | SHA2_256 | SHA2_384 | SHA2_512 -> true
+| _ -> false
+
+let supported_alg = a:hash_alg{ is_supported_alg a }
+
+/// The agile version that dynamically dispatches between the above four
 
 //18-07-13 pick uniform names? hash{spec} vs compute{hmac}
+
+(* The implementation of compute relies on 3 the variants of SHA2 supported by HACL*;
+   Tolerates overlaps between tag and data (we used to require [disjoint data tag])
+*)
+
+(** @type: true
+*)
+val compute: a: supported_alg -> compute_st a

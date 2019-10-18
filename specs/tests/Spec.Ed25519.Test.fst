@@ -307,5 +307,5 @@ let test () =
   let res4 = test_ed25519 test4_sk test4_pk test4_msg test4_expected_sig in
 
   if res1 && res2 && res3 && res4
-  then IO.print_string "\n\n Ed25519: Success!\n"
-  else IO.print_string "\n\n Ed25519: Failure :(\n"
+  then begin IO.print_string "\n\n Ed25519: Success!\n"; true end
+  else begin IO.print_string "\n\n Ed25519: Failure :(\n"; false end

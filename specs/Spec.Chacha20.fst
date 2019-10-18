@@ -71,6 +71,26 @@ let sum_state (s0:state) (s1:state) : Tot state =
 let chacha20_add_counter (s0:state) (ctr:counter) : Tot state =
   s0.[12] <- s0.[12] +. u32 ctr
 
+// protz 10:37 AM
+//   question about chacha20 spec: why the double counter increment in chacha20_core?
+//   https://github.com/project-everest/hacl-star/blob/_dev/specs/Spec.Chacha20.fst#L75
+//   is this in the spec?
+// karthik 11:28 AM
+//   This is doing the same as:
+//
+//   let chacha20_core (ctr:counter) (s0:state)  : Tot state =
+//     let s0 = chacha20_add_counter s0 ctr in
+//     let k = rounds s0 in
+//     sum_state k s0
+//
+//   but we rewrite in this way so that s0 remains constant
+//   (in the code)
+// protz 11:32 AM
+//   do sum_state and add_counter commute?
+//   I feel like I'm missing some equational property of these sub-combinators
+//   to understand why this is true
+// karthik 11:33 AM
+//   yes, they do.
 let chacha20_core (ctr:counter) (s0:state)  : Tot state =
   let k = chacha20_add_counter s0 ctr in
   let k = rounds k in
@@ -132,7 +152,7 @@ let chacha20_encrypt_last
   let plain = create size_block (u8 0) in
   let plain = update_sub plain 0 len b in
   let cipher = chacha20_encrypt_block st0 incr plain in
-  sub cipher 0 len
+  sub cipher 0 (length b)
 
 
 val chacha20_update:

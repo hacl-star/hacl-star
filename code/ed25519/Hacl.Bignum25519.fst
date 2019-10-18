@@ -597,7 +597,11 @@ let reduce_ out =
   let h1 = get() in
   Math.Lemmas.small_mod (F51.as_nat h1 out) SC.prime
 
-let fmul output input input2 = BN.fmul output input input2
+let fmul output input input2 =
+  push_frame();
+  let tmp = create 10ul (u128 0) in
+  BN.fmul output input input2 tmp;
+  pop_frame()
 
 let times_2 out a =
   (**) let h0 = get() in
@@ -679,7 +683,11 @@ let times_2d out a =
       Spec.Curve25519.prime == 2 `SC.fmul` Spec.Ed25519.d);
   pop_frame()
 
-let fsquare out a = BN.fsqr out a
+let fsquare out a =
+  push_frame();
+  let tmp = create 5ul (u128 0) in
+  BN.fsqr out a tmp;
+  pop_frame()
 
 inline_for_extraction noextract
 val fsquare_times_:

@@ -126,5 +126,5 @@ let test () =
 
   // Composite result
   if r1 && r2 && r3 && r4
-  then IO.print_string "\nComposite result: Success! \o/ \n"
-  else IO.print_string "\nComposite result: Failure :(\n"
+  then begin IO.print_string "\nComposite result: Success! \o/ \n"; true end
+  else begin IO.print_string "\nComposite result: Failure :(\n"; false end

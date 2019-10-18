@@ -1,0 +1,203 @@
+///////////////////////////////////////////////////////////////////////////////
+//
+// Based on fdef_mulx.asm from SymCrypt
+// See https://github.com/microsoft/SymCrypt/blob/master/lib/amd64/fdef_mulx.asm
+// The original file contains the following notices:
+//
+// ;  fdef_asm.asm   Assembler code for large integer arithmetic in the default data format
+// ;
+// ; Copyright (c) Microsoft Corporation. Licensed under the MIT license.
+//
+///////////////////////////////////////////////////////////////////////////////
+
+include "../../../arch/x64/Vale.X64.InsBasic.vaf"
+include "../../../arch/x64/Vale.X64.InsMem.vaf"
+include "../../../arch/x64/Vale.X64.InsStack.vaf"
+include "../../../crypto/bignum/Vale.Bignum.X64.vaf"
+include{:/*TODO*/fstar}{:open} "FStar.Seq.Base"
+include{:fstar}{:open} "Vale.Def.Words_s"
+include{:fstar}{:open} "Vale.Def.Types_s"
+include{:fstar}{:open} "Vale.Arch.Types"
+include{:fstar}{:open} "Vale.X64.Machine_s"
+include{:fstar}{:open} "Vale.X64.Memory"
+include{:fstar}{:open} "Vale.X64.Stack_i"
+include{:fstar}{:open} "Vale.X64.State"
+include{:fstar}{:open} "Vale.X64.Decls"
+include{:fstar}{:open} "Vale.X64.QuickCode"
+include{:fstar}{:open} "Vale.Bignum.Defs"
+include{:fstar}{:open} "Vale.Bignum.Lemmas"
+
+module Vale.FDefMulx.X64
+
+#verbatim{:interface}{:implementation}
+open Vale.Def.Types_s
+open Vale.Arch.Types
+open Vale.X64.Machine_s
+open Vale.X64.Memory
+open Vale.X64.Stack_i
+open Vale.X64.State
+open Vale.X64.Decls
+open Vale.X64.InsBasic
+open Vale.X64.InsMem
+open Vale.X64.InsStack
+open Vale.X64.QuickCode
+open Vale.X64.QuickCodes
+open Vale.X64.CPU_Features_s
+open Vale.Bignum.Defs
+open Vale.Bignum.Lemmas
+open Vale.Bignum.X64
+#endverbatim
+
+#verbatim
+open FStar.Mul
+open FStar.Seq
+open Vale.Def.Words_s
+unfold let (.[]) = index
+
+//[@"opaque_to_smt"]
+let make_seq9 (#a:Type0) (v0 v1 v2 v3 v4 v5 v6 v7 v8:a) : seq a =
+  init 9 (fun i ->
+    if i = 0 then v0 else
+    if i = 1 then v1 else
+    if i = 2 then v2 else
+    if i = 3 then v3 else
+    if i = 4 then v4 else
+    if i = 5 then v5 else
+    if i = 6 then v6 else
+    if i = 7 then v7 else
+    v8)
+
+let operand_reg8 (n:nat) : va_operand = oreg (Reg 0 (8 + n % 8))
+#endverbatim
+
+function init_ys(a:nat64, bs:seq(nat64)):seq(nat64) extern;
+function init_zs(a:nat64, bs:seq(nat64), d:nat64):seq (nat64) extern;
+function make_seq9#[a:Type(0)](v0:a, v1:a, v2:a, v3:a, v4:a, v5:a, v6:a, v7:a, v8:a):seq(a) extern;
+function sum_pow_seq(s:seq(nat64)):int extern;
+
+function seq_add(as:seq(nat64), bs:seq(nat64), c0:nat1):tuple(seq(nat64), nat1)
+    requires
+        length(as) == length(bs);
+    extern;
+
+ghost procedure lemma_seq_add_is_norm(
+        ghost as:seq(nat64),
+        ghost bs:seq(nat64),
+        ghost c0:nat1,
+        ghost i:nat)
+    {:infer_spec}
+    extern;
+
+ghost procedure lemma_scale_add(
+        ghost l:nat,
+        ghost a:nat64,
+        ghost d:nat64,
+        ghost bs:seq(nat64),
+        ghost rs:seq(nat64),
+        ghost ys:seq(nat64),
+        ghost zs:seq(nat64),
+        ghost qs:seq(nat64),
+        ghost xs:seq(nat64))
+    {:infer_spec}
+    extern;
+
+function operand_reg8(n:nat):va_operand extern;
+
+#reset-options "--z3rlimit 80 --max_fuel 1 --max_ifuel 0"
+
+// Multiply 1-word value "b" by 8-word value "a"
+procedure MulAdd18(
+    inout r0:reg_opr64,
+    inout r1:reg_opr64,
+    inout r2:reg_opr64,
+    inout r3:reg_opr64,
+    inout r4:reg_opr64,
+    inout r5:reg_opr64,
+    inout r6:reg_opr64,
+    inout r7:reg_opr64,
+    ghost regRotate:nat,
+    ghost bA:buffer64,
+    ghost bB:buffer64,
+    ghost bD:buffer64)
+    lets
+        pD @= rdi; pA @= rcx; pB @= rsi; T0 @= rax; T1 @= rbx;
+        as := s64(mem, bA);
+        rs:seq(nat64) := make_seq9(r0, r1, r2, r3, r4, r5, r6, r7, 0);
+    reads pD; pA; pB;
+    modifies T0; T1; rdx; efl; mem; memTaint;
+    requires/ensures
+        valid_cf(efl) && flag_cf(efl) == 0;
+        valid_of(efl) && flag_of(efl) == 0;
+    requires
+        adx_enabled && bmi2_enabled;
+        validDstAddrs64(mem, pA, bA, 8, memTaint, Public);
+        validSrcAddrs64(mem, pB, bB, 1, memTaint, Public);
+        validDstAddrs64(mem, pD, bD, 1, memTaint, Public);
+        length(as) == 8;
+        @r0 == operand_reg8(regRotate + 0);
+        @r1 == operand_reg8(regRotate + 1);
+        @r2 == operand_reg8(regRotate + 2);
+        @r3 == operand_reg8(regRotate + 3);
+        @r4 == operand_reg8(regRotate + 4);
+        @r5 == operand_reg8(regRotate + 5);
+        @r6 == operand_reg8(regRotate + 6);
+        @r7 == operand_reg8(regRotate + 7);
+    lets
+        b := buffer64_read(bB, 0, mem);
+        d := buffer64_read(bD, 0, mem);
+    ensures
+        let xs:seq(nat64) := make_seq9(buffer64_read(bD, 0, mem), r1, r2, r3, r4, r5, r6, r7, r0);
+        sum_pow_seq(xs) == sum_pow_seq(rs) + b * sum_pow_seq(as) + d;
+{
+    reveal_add_lo_all();
+    Mov64(rdx, Mem(pB, 0, bB, 0, Public));
+    Adox_64(r0, Mem(pD, 0, bD, 0, Public));
+
+    Mulx_64(T1, T0, Mem(pA, 0 * 8, bA, 0, Public));
+    Adcx_64(r0, T0);
+    Adox_64(r1, T1);
+
+    Mulx_64(T1, T0, Mem(pA, 1 * 8, bA, 1, Public));
+    Adcx_64(r1, T0);
+    Adox_64(r2, T1);
+
+    Mulx_64(T1, T0, Mem(pA, 2 * 8, bA, 2, Public));
+    Adcx_64(r2, T0);
+    Adox_64(r3, T1);
+
+    Mulx_64(T1, T0, Mem(pA, 3 * 8, bA, 3, Public));
+    Adcx_64(r3, T0);
+    Adox_64(r4, T1);
+
+    Mulx_64(T1, T0, Mem(pA, 4 * 8, bA, 4, Public));
+    Adcx_64(r4, T0);
+    Adox_64(r5, T1);
+
+    Mulx_64(T1, T0, Mem(pA, 5 * 8, bA, 5, Public));
+    Adcx_64(r5, T0);
+    Adox_64(r6, T1);
+
+    Mulx_64(T1, T0, Mem(pA, 6 * 8, bA, 6, Public));
+    Adcx_64(r6, T0);
+    Adox_64(r7, T1);
+
+    Mulx_64(T1, T0, Mem(pA, 7 * 8, bA, 7, Public));
+    Adcx_64(r7, T0);
+    Store64_buffer(pD, r0, 0, Public, bD, 0);
+
+    Mov64(r0, 0);
+    Adcx_64(r0, r0);
+    Adox_64(r0, T1);
+
+    let l := 8;
+    let ys := init_ys(b, as);
+    let zs := init_zs(b, as, d);
+    let qs := seq_add(rs, zs, 0)._1;
+    let xs:seq(nat64) := make_seq9(buffer64_read(bD, 0, mem), r1, r2, r3, r4, r5, r6, r7, r0);
+    lemma_seq_add_is_norm(rs, zs, 0, l + 1);
+    lemma_seq_add_is_norm(qs, ys, 0, l + 1);
+    lemma_scale_add(l, b, d, as, rs, ys, zs, qs, xs);
+    assert equal(xs, seq_add(qs, ys, 0)._1);
+    assert flag_cf(efl) == 0 && flag_of(efl) == 0 by {reveal_add_hi_all();}
+}
+

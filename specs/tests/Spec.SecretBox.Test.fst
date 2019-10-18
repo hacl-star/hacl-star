@@ -8,7 +8,7 @@ open Lib.ByteSequence
 open Spec.SecretBox
 
 
-#set-options "--lax"
+#set-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 
 
 let key = List.Tot.map u8_from_UInt8 [
@@ -65,7 +65,6 @@ let mac =  List.Tot.map u8_from_UInt8 [
 	0xf3uy;0xffuy;0xc7uy;0x70uy;0x3fuy;0x94uy;0x00uy;0xe5uy;
         0x2auy;0x7duy;0xfbuy;0x4buy;0x3duy;0x33uy;0x05uy;0xd9uy]
 
-#set-options "--max_fuel 0 --z3rlimit 25"
 
 let test () =
   assert_norm(List.Tot.length key = 32);
@@ -88,5 +87,6 @@ let test () =
   let dec_p = match dec with | Some p -> p | None -> create 131 (u8 0) in
   let result_decryption = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) dec_p plaintext in
 
-  if result_encryption && result_mac_compare && result_decryption then IO.print_string "\nSuccess!\n"
-  else IO.print_string "\nFailure :("
+  if result_encryption && result_mac_compare && result_decryption
+  then begin IO.print_string "\nSuccess!\n"; true end
+  else begin IO.print_string "\nFailure :("; false end

@@ -1,7 +1,8 @@
--include Makefile.include 
+KREMLIN_HOME ?= ../../../../kremlin
 
-KREMLIN_HOME?=../../../../kremlin
-EVERCRYPT_HOME=../../out
+-include Makefile.include
+
+EVERCRYPT_HOME=../../dist/compact
 MLCRYPTO_HOME?=../../../../MLCrypto
 OPENSSL_HOME=$(MLCRYPTO_HOME)/openssl
 
@@ -18,13 +19,16 @@ ifeq ($(UNAME),Linux)
   LDFLAGS += -Wl,-z,defs,-z,noexecstack,--unresolved-symbols=report-all
 endif
 
-LDFLAGS += $(KREMLIN_HOME)/kremlib/out/libkremlib.a
-
 all: test
 
-ALL_SOURCES = Test.c TestLib.c
+ALL_SOURCES = Test.c
 
 $(info All sources are $(ALL_SOURCES))
+
+LDFLAGS += $(KREMLIN_HOME)/kremlib/dist/generic/libkremlib.a
+ifeq ($(OS),Windows_NT)
+LDFLAGS += $(EVERCRYPT_HOME)/libevercrypt.dll -lbcrypt
+endif
 
 # See https://www.gnu.org/software/make/manual/html_node/Automatic-Prerequisites.html
 %.d: %.c

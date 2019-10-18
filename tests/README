@@ -1,0 +1,16 @@
+Performance tests for HACL*, written in C
+-----------------------------------------
+
+These tests are compiled by the local Makefile. They're executed when the user
+runs `make test`.
+
+Note: LTO is disabled since it causes a bunch of issues (not all systems have it
+properly enabled; issues with MinGW in the past...). Also, I haven't noticed a
+measurable performance improvement. If you wish to recompile the tests with LTO
+enabled:
+
+```
+$ export AR=gcc-ar # if $CC is gcc
+$ cd kremlin/kremlib && git clean -fdx dist && CFLAGS=-flto make -j
+$ cd hacl-star && git clean -fdx dist && CFLAGS=-flto make -j test
+```

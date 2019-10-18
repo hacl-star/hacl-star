@@ -16,7 +16,7 @@ module Loop = Lib.LoopCombinators
 module Salsa20 = Hacl.Impl.Salsa20
 
 
-#set-options "--z3rlimit 100 --max_fuel 2"
+#set-options "--z3rlimit 100 --max_fuel 1 --max_ifuel 1"
 
 inline_for_extraction
 val hsalsa20_init:

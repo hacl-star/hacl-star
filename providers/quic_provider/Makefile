@@ -26,7 +26,7 @@ ifeq ($(OS),Windows_NT)
     # altered to include by default the mingw64 native DLLs. We also need to
     # find dllcorecrypto.dll; it is in the current directory, which Windows
     # always uses to search for DLLs.
-    EXTRA_PATH = PATH="$(shell cygpath -u $(OPENSSL_HOME)):../out:$(PATH)"
+    EXTRA_PATH = PATH="$(shell cygpath -u $(OPENSSL_HOME)):../../dist/compact:$(PATH)"
     EXTRA_OPTS =
     AR = $(MARCH)-w64-mingw32-ar
     CC = $(MARCH)-w64-mingw32-gcc
@@ -35,11 +35,11 @@ else
     UNAME_S := $(shell uname -s)
     AR = ar
     ifeq ($(UNAME_S),Darwin)
-	EXTRA_PATH = DYLD_LIBRARY_PATH=$(OPENSSL_HOME):../out:.:$(DYLD_LIBRARY_PATH)
+	EXTRA_PATH = DYLD_LIBRARY_PATH=$(OPENSSL_HOME):../../dist/compact:.:$(DYLD_LIBRARY_PATH)
         EXTRA_OPTS =
         ARCH = osx
     else
-	EXTRA_PATH = LD_LIBRARY_PATH=$(OPENSSL_HOME):../out:.:$(LD_LIBRARY_PATH)
+	EXTRA_PATH = LD_LIBRARY_PATH=$(OPENSSL_HOME):../../dist/compact:.:$(LD_LIBRARY_PATH)
         EXTRA_OPTS = -thread -ccopt -fPIC
         ARCH = x86_64
     endif
@@ -57,8 +57,8 @@ else
 LIB_MACHINE=x86
 endif
 
-CFLAGS += -I $(KREMLIN_HOME)/include -I ../include
-LDFLAGS += -L ../out -levercrypt
+CFLAGS += -I $(KREMLIN_HOME)/include -I ../../dist/evercrypt-external-headers
+LDFLAGS += -L ../../dist/compact -levercrypt
 
 ifeq (,$(EVEREST_WINDOWS))
 LDFLAGS += -L$(OPENSSL_HOME) -lcrypto
@@ -66,7 +66,7 @@ else
 LDFLAGS += -lbcrypt
 endif
 
-LDFLAGS += $(KREMLIN_HOME)/kremlib/out/libkremlib.a
+LDFLAGS += $(KREMLIN_HOME)/kremlib/dist/generic/libkremlib.a
 
 .PHONY: all test
 
@@ -81,7 +81,7 @@ $(LIBFILE): $(LIBQUICCRYPTO)
 	"$(VS_BIN)/lib.exe" /nologo /def:libquiccrypto.def /out:$(LIBFILE) /machine:$(LIB_MACHINE)
 endif
 
-$(LIBQUICCRYPTO): Crypto_HKDF_Crypto_HMAC.o quic_provider.o
+$(LIBQUICCRYPTO): quic_provider.o
 	$(CC) $(CFLAGS) -shared $^ -o $@ $(LDFLAGS)
 
 test.exe: $(LIBQUICCRYPTO) test.o

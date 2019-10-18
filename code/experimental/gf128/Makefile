@@ -76,7 +76,7 @@ KREMLIN=$(KREMLIN_HOME)/krml
 
 # We use -drop (deprecated) only to avoid creating unnecessary .c,.h files
 $(GENERATED_DIR)/Hacl_Gf128_NI.c: $(ALL_KRML_FILES) | .depend
-	$(KREMLIN) $(KREMLIN_TESTLIB) -add-include '"vec-intrin.h"' -skip-compilation \
+	$(KREMLIN) $(KREMLIN_TESTLIB) -add-include '"libintvector.h"' -skip-compilation \
 	-bundle 'Lib.*' \
 	-bundle 'Spec.*' \
 	-bundle 'Hacl.Gf128.NI=Hacl.Impl.*,Hacl.Gf128.NI' \

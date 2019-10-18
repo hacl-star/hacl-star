@@ -1,0 +1,97 @@
+[
+  "}ÍÕ¥\u0003>Hˆsf¬)§A€¤",
+  [
+    [
+      "Vale.SHA.X64.va_req_sha_update_bytes_stdcall",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_f8666440faa91836cc5a13998af863fc",
+        "equation_Prims.l_and", "equation_Prims.squash",
+        "equation_Prims.subtype_of",
+        "l_quant_interp_5b2993f9f2c0eba3627049a3b4167c7a",
+        "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c",
+        "unit_typing"
+      ],
+      0,
+      "8fc853449fdd4f32f4d7aec28695a142"
+    ],
+    [
+      "Vale.SHA.X64.va_ens_sha_update_bytes_stdcall",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_f8666440faa91836cc5a13998af863fc", "bool_inversion",
+        "equation_Prims.l_and", "equation_Prims.nat",
+        "equation_Prims.squash", "equation_Prims.subtype_of",
+        "equation_Vale.Def.Words_s.nat64", "equation_Vale.Def.Words_s.natN",
+        "equation_Vale.SHA.SHA_helpers.block_length",
+        "equation_Vale.SHA.SHA_helpers.byte",
+        "equation_Vale.SHA.SHA_helpers.size_block_w_256",
+        "equation_Vale.SHA.X64.va_req_sha_update_bytes_stdcall",
+        "equation_Vale.X64.Decls.va_state_eq",
+        "fuel_guarded_inversion_Vale.X64.State.vale_state", "int_inversion",
+        "l_quant_interp_5b2993f9f2c0eba3627049a3b4167c7a",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
+        "unit_typing"
+      ],
+      0,
+      "81f727e4f5dc9e7b2b0ea83316ca8226"
+    ],
+    [
+      "Vale.SHA.X64.va_lemma_sha_update_bytes_stdcall",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "bool_inversion", "eq2-interp",
+        "equation_Prims.nat", "equation_Vale.Def.Words_s.nat64",
+        "equation_Vale.Def.Words_s.natN",
+        "equation_Vale.SHA.SHA_helpers.block_length",
+        "equation_Vale.SHA.SHA_helpers.byte",
+        "equation_Vale.SHA.SHA_helpers.size_block_w_256",
+        "equation_Vale.X64.Decls.va_require_total",
+        "fuel_guarded_inversion_Vale.X64.State.vale_state", "int_inversion",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_9b1a35c3836fc7b3680ce290558ed5a1",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
+      ],
+      0,
+      "0a44ede7ff6f26114b9c4ec3675014d4"
+    ],
+    [
+      "Vale.SHA.X64.va_wp_sha_update_bytes_stdcall",
+      1,
+      1,
+      0,
+      [
+        "@query", "equation_Vale.SHA.SHA_helpers.block_length",
+        "equation_Vale.SHA.SHA_helpers.byte",
+        "equation_Vale.SHA.SHA_helpers.size_block_w_256",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "eed5e210d43e57827709b4a38c6ced1c"
+    ],
+    [
+      "Vale.SHA.X64.va_quick_sha_update_bytes_stdcall",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
+      ],
+      0,
+      "d0f932985175f18fea36a359f1ef1e1c"
+    ]
+  ]
+]

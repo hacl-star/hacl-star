@@ -18,8 +18,8 @@ val carry_pass_store:
 let carry_pass_store (f0, f1, f2, f3) =
   let top_bit = f3 >>. 63ul in
   let f3' = f3 &. u64 0x7fffffffffffffff in
-  let (c, r0, r1, r2, r3) = SC.add1 (f0, f1, f2, f3') (u64 19 *! top_bit) in
-  (r0, r1, r2, r3)
+  let (c, r) = SC.add1 (f0, f1, f2, f3') (u64 19 *! top_bit) in
+  r
 
 val lemma_carry_pass_store0: f:felem4 ->
   Lemma
@@ -49,8 +49,7 @@ let lemma_carry_pass_store0 f =
   lemma_prime19 ();
   FStar.Math.Lemmas.lemma_mod_plus_distr_r (as_nat4 f') (v top_bit * 19) prime;
   assert (feval f == (as_nat4 f' + v top_bit * 19) % prime);
-  let c, r0, r1, r2, r3 = SC.add1 f' (u64 19 *! top_bit) in
-  let r = (r0, r1, r2, r3) in
+  let c, r = SC.add1 f' (u64 19 *! top_bit) in
   assert (as_nat4 r + v c * pow2 256 == as_nat4 f' + 19 * v top_bit);
   assert (as_nat4 f' <= (pow2 64 - 1) + (pow2 64 - 1) * pow2 64 +
     (pow2 64 - 1) * pow2 64 * pow2 64 + (pow2 63 - 1) * pow2 64 * pow2 64 * pow2 64);
@@ -81,8 +80,7 @@ let lemma_carry_pass_store1_0 f =
   assert (v top_bit = 0);
   assert (v f3 == v f3');
   let f' = (f0, f1, f2, f3') in
-  let c, r0, r1, r2, r3 = SC.add1 f' (u64 19 *! top_bit) in
-  let r = (r0, r1, r2, r3) in
+  let c, r = SC.add1 f' (u64 19 *! top_bit) in
   assert (as_nat4 r == as_nat4 f');
   assert (as_nat4 f' <= (pow2 64 - 1) + (pow2 64 - 1) * pow2 64 +
     (pow2 64 - 1) * pow2 64 * pow2 64 + (pow2 63 - 1) * pow2 64 * pow2 64 * pow2 64);
@@ -128,8 +126,7 @@ let lemma_carry_pass_store1_1 f =
   lemma_prime19 ();
   FStar.Math.Lemmas.lemma_mod_plus_distr_r (as_nat4 f') (v top_bit * 19) prime;
   assert (feval f == (as_nat4 f' + 19) % prime);
-  let c, r0, r1, r2, r3 = SC.add1 f' (u64 19) in
-  let r = (r0, r1, r2, r3) in
+  let c, r = SC.add1 f' (u64 19) in
   assert (as_nat4 r + v c * pow2 256 == as_nat4 f' + 19);
   assert (as_nat4 f' == v f0 + v f3' * pow2 64 * pow2 64 * pow2 64);
   assert (v f3' <= 1);
