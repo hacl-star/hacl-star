@@ -11,7 +11,7 @@ module Def = Spec.Hash.Definitions
 module DH = Spec.Agile.DH
 module AEAD = Spec.Agile.AEAD
 module Hash = Spec.Agile.Hash
-module HKDF = Spec.Agile.HKDF
+module HKDF = Spec.Agile.KDF
 
 
 let pow2_61 : _:unit{pow2 61 == 2305843009213693952} = assert_norm(pow2 61 == 2305843009213693952)
@@ -22,19 +22,19 @@ let pow2_35_less_than_pow2_125 : _:unit{pow2 32 * pow2 3 <= pow2 125 - 1} = asse
 
 /// Types
 
-type ciphersuite = DH.algorithm & AEAD.algorithm & a:Def.hash_alg{a == Def.SHA2_256 \/ a == Def.SHA2_512}
+type ciphersuite = DH.algorithm & AEAD.algorithm & a:Hash.algorithm{a == Def.SHA2_256 \/ a == Def.SHA2_512}
 
 val id_of_cs: cs:ciphersuite -> Tot (lbytes 1)
 let id_of_cs cs =
   match cs with
-  | DH.DH_Curve25519, AEAD.AEAD_AES128_GCM,        Def.SHA2_256 -> create 1 (u8 0)
-  | DH.DH_Curve25519, AEAD.AEAD_AES128_GCM,        Def.SHA2_512 -> create 1 (u8 1)
-  | DH.DH_Curve25519, AEAD.AEAD_Chacha20_Poly1305, Def.SHA2_256 -> create 1 (u8 2)
-  | DH.DH_Curve25519, AEAD.AEAD_Chacha20_Poly1305, Def.SHA2_512 -> create 1 (u8 3)
-  | DH.DH_Curve448,   AEAD.AEAD_AES128_GCM,        Def.SHA2_256 -> create 1 (u8 4)
-  | DH.DH_Curve448,   AEAD.AEAD_AES128_GCM,        Def.SHA2_512 -> create 1 (u8 5)
-  | DH.DH_Curve448,   AEAD.AEAD_Chacha20_Poly1305, Def.SHA2_256 -> create 1 (u8 6)
-  | DH.DH_Curve448,   AEAD.AEAD_Chacha20_Poly1305, Def.SHA2_512 -> create 1 (u8 7)
+  | DH.DH_Curve25519, AEAD.AES128_GCM,        Hash.SHA2_256 -> create 1 (u8 0)
+  | DH.DH_Curve25519, AEAD.AES128_GCM,        Hash.SHA2_512 -> create 1 (u8 1)
+  | DH.DH_Curve25519, AEAD.CHACHA20_POLY1305, Hash.SHA2_256 -> create 1 (u8 2)
+  | DH.DH_Curve25519, AEAD.CHACHA20_POLY1305, Hash.SHA2_512 -> create 1 (u8 3)
+  | DH.DH_Curve448,   AEAD.AES128_GCM,        Hash.SHA2_256 -> create 1 (u8 4)
+  | DH.DH_Curve448,   AEAD.AES128_GCM,        Hash.SHA2_512 -> create 1 (u8 5)
+  | DH.DH_Curve448,   AEAD.CHACHA20_POLY1305, Hash.SHA2_256 -> create 1 (u8 6)
+  | DH.DH_Curve448,   AEAD.CHACHA20_POLY1305, Hash.SHA2_512 -> create 1 (u8 7)
 
 let curve_of_cs (cs:ciphersuite) : DH.algorithm =
   let (c,a,h) = cs in c
@@ -42,7 +42,7 @@ let curve_of_cs (cs:ciphersuite) : DH.algorithm =
 let aead_of_cs (cs:ciphersuite) : AEAD.algorithm =
   let (c,a,h) = cs in a
 
-let hash_of_cs (cs:ciphersuite) : Def.hash_alg =
+let hash_of_cs (cs:ciphersuite) : Hash.hash_alg =
   let (c,a,h) = cs in h
 
 
@@ -111,9 +111,9 @@ let encap cs e pk context =
   | None -> e', None
   | Some secret ->
     let salt = epk @| pk in
-    let extracted = HKDF.hkdf_extract (hash_of_cs cs) salt secret in
+    let extracted = HKDF.extract (hash_of_cs cs) salt secret in
     let info = (id_of_cs cs) @| label_key @| context in
-    let key = HKDF.hkdf_expand (hash_of_cs cs) extracted info (size_key cs) in
+    let key = HKDF.expand (hash_of_cs cs) extracted info (size_key cs) in
     e', Some (key, epk)
 
 
@@ -130,9 +130,9 @@ let decap cs sk epk context =
   | None -> None
   | Some secret ->
     let salt = epk @| pk in
-    let extracted = HKDF.hkdf_extract (hash_of_cs cs) salt secret in
+    let extracted = HKDF.extract (hash_of_cs cs) salt secret in
     let info = (id_of_cs cs) @| label_key @| context in
-    let key = HKDF.hkdf_expand (hash_of_cs cs) extracted info (size_key cs) in
+    let key = HKDF.expand (hash_of_cs cs) extracted info (size_key cs) in
     Some key
 
 
@@ -151,7 +151,7 @@ let encrypt cs sk input aad counter =
   let key = sub sk 0 klen in
   let nonce = sub sk klen (size_nonce cs - numbytes U32) in
   let ctr = uint_to_bytes_le counter in
-  AEAD.aead_encrypt (aead_of_cs cs) key (nonce @| ctr) input aad
+  AEAD.encrypt #(aead_of_cs cs) key (nonce @| ctr) input aad
 
 
 val decrypt:
@@ -170,7 +170,7 @@ let decrypt cs sk input tag aad counter =
   let key = sub sk 0 klen in
   let nonce = sub sk klen (size_nonce cs - numbytes U32) in
   let ctr = uint_to_bytes_le counter in
-  AEAD.aead_decrypt (aead_of_cs cs) key (nonce @| ctr) input tag aad
+  AEAD.decrypt_split #(aead_of_cs cs) key (nonce @| ctr) aad input tag
 
 ///
 /// One time KEM API
