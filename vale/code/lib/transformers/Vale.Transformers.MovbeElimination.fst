@@ -70,6 +70,7 @@ let lemma_replace_movbe_specifically (i:ins{Instr? i}) (fuel:nat) (s:machine_sta
   assert_norm (Some? s2_opt); (* OBSERVE *)
   let Some s2 = s2_opt in
   admit () (* TODO:FIXME *)
+#pop-options
 
 #push-options "--initial_fuel 2 --max_fuel 2 --initial_ifuel 1 --max_ifuel 1"
 let rec lemma_replace_movbe_in_code (c:code) (fuel:nat) (s:machine_state) :
