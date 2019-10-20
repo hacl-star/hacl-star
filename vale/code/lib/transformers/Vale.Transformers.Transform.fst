@@ -18,6 +18,7 @@ friend Vale.X64.Decls
 friend Vale.X64.StateLemmas
 
 module IR = Vale.Transformers.InstructionReorder
+module ME = Vale.Transformers.MovbeElimination
 
 unfold
 let transformation_result_of_possibly_codes (c:possibly codes) (if_fail:code) =
@@ -109,3 +110,19 @@ let check_if_same_printed_code orig hint =
 (* See fsti *)
 let lemma_check_if_same_printed_code orig hint transformed va_s0 va_sM va_fM =
   va_sM, va_fM
+
+/// Transformation to replace movbes -> mov + bswap.
+
+let eliminate_movbe orig =
+  {
+    success = ttrue;
+    result = ME.replace_movbe_in_code orig;
+  }
+
+let lemma_eliminate_movbe orig transformed va_s0 va_sM va_fM =
+  ME.lemma_replace_movbe_in_code orig va_fM (state_to_S va_s0);
+  let Some s = machine_eval_code orig va_fM (state_to_S va_s0) in
+  let Some s' = machine_eval_code transformed va_fM (state_to_S va_s0) in
+  let va_sM' = state_of_S s' in
+  lemma_to_of s';
+  va_sM', va_fM

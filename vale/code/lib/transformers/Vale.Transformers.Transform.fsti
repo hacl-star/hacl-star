@@ -99,3 +99,29 @@ val lemma_check_if_same_printed_code :
          (equiv_states va_sM va_sM') /\
          (va_ensure_total transformed va_s0 va_sM' va_fM') /\
          (va_get_ok va_sM')))
+
+/// Transformation to replace movbes -> mov + bswap.
+///
+/// The movbe instruction does not exist on some older generations of
+/// the processor. This transform replaces movbe with the semantically
+/// equivalent mov + bswap.
+
+val eliminate_movbe :
+  orig:va_code ->
+  va_transformation_result
+
+val lemma_eliminate_movbe :
+  orig:va_code ->
+  transformed:va_code ->
+  va_s0:va_state -> va_sM:va_state -> va_fM:va_fuel ->
+  Ghost (va_state & va_fuel)
+    (requires (
+        (va_require_total transformed (eliminate_movbe orig).result va_s0) /\
+        (va_get_ok va_s0) /\
+        (va_ensure_total orig va_s0 va_sM va_fM) /\
+        (va_get_ok va_sM)))
+    (ensures (fun (va_sM', va_fM') ->
+         (va_fM' == va_fM) /\
+         (equiv_states va_sM va_sM') /\
+         (va_ensure_total transformed va_s0 va_sM' va_fM') /\
+         (va_get_ok va_sM')))
