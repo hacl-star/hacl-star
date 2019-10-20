@@ -6,6 +6,8 @@ let ins_Mov64 = make_ins (fun dst src -> print_s "mov" [P64 dst; P64 src])
 
 let ins_MovBe64 = make_ins (fun dst src -> print_s "movbe" [P64 dst; P64 src])
 
+let ins_Bswap64 = make_ins (fun dst -> print_s "bswap" [P64 dst])
+
 let ins_Cmovc64 = make_ins (fun dst src -> print_s "cmovc" [P64 dst; P64 src])
 
 let ins_Add64 = make_ins (fun dst src -> print_s "add" [P64 dst; P64 src])

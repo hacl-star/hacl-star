@@ -16,6 +16,9 @@ val ins_Mov64 : instr_dep [out op64] [op64] PreserveFlags eval_Mov64
 let eval_MovBe64 (src:nat64) : option nat64 = Some (reverse_bytes_nat64 src)
 val ins_MovBe64 : instr_dep [out op64] [op64] PreserveFlags eval_MovBe64
 
+let eval_Bswap64 (dst:nat64) : option nat64 = Some (reverse_bytes_nat64 dst)
+val ins_Bswap64 : instr_dep [inOut op64] [] PreserveFlags eval_Bswap64
+
 let eval_Cmovc64 (dst src:nat64) (carry:bool) : option nat64 = Some (if carry then src else dst)
 val ins_Cmovc64 : instr_dep [inOut op64] [op64; opFlagsCf] PreserveFlags eval_Cmovc64
 
