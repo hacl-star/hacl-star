@@ -482,7 +482,7 @@ procedure LoadBe64_buffer128(
         ghost b:buffer128, ghost index:int)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_ins(make_instr(I.ins_MovBe64, dst, OMem(tuple(MReg(get_reg(src), offset), t))))}
+    {:instruction mk_ins(make_instr_annotate(I.ins_MovBe64, S.AnnotateMovbe64(), dst, OMem(tuple(MReg(get_reg(src), offset), t))))}
     reads
         mem; memTaint;
     requires

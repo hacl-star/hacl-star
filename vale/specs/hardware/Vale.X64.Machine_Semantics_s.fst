@@ -30,6 +30,7 @@ noeq type instr_annotation (it:instr_t_record) =
   | AnnotateXor64 : equals_instr it (InstrTypeRecord ins_Xor64) -> instr_annotation it
   | AnnotatePxor : equals_instr it (InstrTypeRecord ins_Pxor) -> instr_annotation it
   | AnnotateVPxor : equals_instr it (InstrTypeRecord ins_VPxor) -> instr_annotation it
+  | AnnotateMovbe64 : equals_instr it (InstrTypeRecord ins_MovBe64) -> instr_annotation it
 
 let ins = BC.instruction_t instr_annotation
 let ocmp = BC.ocmp
