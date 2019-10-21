@@ -41,7 +41,7 @@ let size_nonce (a:algorithm) : Tot size_nat =
   | AEAD_Chacha20_Poly1305 -> Spec.Chacha20Poly1305.size_nonce
 
 inline_for_extraction
-let padlen (a:algorithm) (x:size_nat) : size_nat =
+let padlen (a:algorithm) (x:nat) : nat =
   (size_block a - x % (size_block a)) % size_block a
 
 
