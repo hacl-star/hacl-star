@@ -760,7 +760,7 @@ procedure Loop6x_save_output(ghost count:nat, ghost out_b:buffer128)
 }
 
 #reset-options "--z3rlimit 50 --max_ifuel 0"
-procedure Loop6x_partial(
+procedure Loop6x_partial_nomovbe(
         inline alg:algorithm,
         ghost h_LE:quad32,
         ghost y_prev:quad32,
@@ -781,7 +781,7 @@ procedure Loop6x_partial(
         ghost ctr_BE:quad32)
     returns(ghost init:quad32_6)
     {:quick}
-    {:transform reorder, Loop6x_partial_expected_code}
+    {:transform eliminate_movbe}
     {:public}
     lets
 //      inp @= rdi; outp @= rsi; len @= rdx; key @= rcx; ivp @= r8; Xip @= r9;
@@ -957,6 +957,130 @@ procedure Loop6x_partial(
     }
 
     Loop6x_round9(alg, count, in_b, stack_b, key_words, round_keys, keys_b);
+}
+
+procedure Loop6x_partial(
+        inline alg:algorithm,
+        ghost h_LE:quad32,
+        ghost y_prev:quad32,
+        ghost data:seq(quad32),
+        ghost count:nat,        // Number of 6x128-bit blocks processed so far
+        ghost in0_count:nat,
+        ghost iv_b:buffer128,
+        ghost in0_b:buffer128,
+        ghost in_b:buffer128,
+        ghost stack_b:buffer128,
+
+        ghost key_words:seq(nat32),
+        ghost round_keys:seq(quad32),
+        ghost keys_b:buffer128,
+        ghost hkeys_b:buffer128,
+
+        //ghost ctr_BE_orig:quad32,
+        ghost ctr_BE:quad32)
+    returns(ghost init:quad32_6)
+    {:quick}
+    {:transform reorder, Loop6x_partial_expected_code}
+    {:public}
+    lets
+//      inp @= rdi; outp @= rsi; len @= rdx; key @= rcx; ivp @= r8; Xip @= r9;
+        inp @= rdi; key @= rcx; ivp @= r8; Xip @= r9;
+        Ii @= xmm0; T1 @= xmm1; T2 @= xmm2; Hkey @= xmm3;
+        Z0 @= xmm4; Z1 @= xmm5; Z2 @= xmm6; Z3 @= xmm7; Xi @= xmm8;
+        inout0 @= xmm9; inout1 @= xmm10; inout2 @= xmm11; inout3 @= xmm12;
+        inout4 @= xmm13; inout5 @= xmm14; rndkey @= xmm15;
+//      counter @= rbx; rounds @= rbp; ret @= r10; constp @= r11; in0 @= r14; end0 @= r15;
+        counter @= rbx; constp @= r11; in0 @= r14;
+        h := of_quad32(reverse_bytes_quad32(h_LE));
+        prev := of_quad32(reverse_bytes_quad32(y_prev));
+
+    reads
+        inp; key; ivp; Xip; rbp; in0;
+        memTaint;
+
+    modifies
+        counter; constp; r12; r13;
+        Ii; T1; T2; Hkey; Z0; Z1; Z2; Z3; Xi; inout0; inout1; inout2; inout3; inout4; inout5; rndkey;
+        mem; efl;
+
+    requires
+        T2 == Mkfour(0, 0, 0, 0x1000000);
+
+        // Valid ptrs and buffers
+        validDstAddrs128(mem, ivp, iv_b, 1, memTaint, Public);
+        validSrcAddrsOffset128(mem, in0, in0_b, in0_count * 6, 6, memTaint, Secret);
+        validSrcAddrsOffset128(mem, inp, in_b, count * 6, 6, memTaint, Secret);
+        validDstAddrs128(mem, rbp, stack_b, 9, memTaint, Secret);
+        buffers_disjoint128(iv_b, keys_b);
+        buffers_disjoint128(iv_b, stack_b);
+        buffers_disjoint128(iv_b, in0_b);
+        buffers_disjoint128(iv_b, in_b);
+        buffers_disjoint128(iv_b, hkeys_b);
+        buffers_disjoint128(iv_b, hkeys_b);
+        buffers_disjoint128(stack_b, keys_b);
+        buffers_disjoint128(stack_b, in0_b);
+        buffers_disjoint128(stack_b, in_b);
+        buffers_disjoint128(stack_b, hkeys_b);
+        inp + 0x60 < pow2_64;
+
+        // AES reqs
+        aes_reqs_offset(alg, key_words, round_keys, keys_b, key, mem, memTaint);
+//        aes_reqs0(alg, key_words, round_keys, keys_b, key, mem, memTaint);
+        rndkey == index(round_keys, 0);
+
+        // Counter requirements
+        T2 == Mkfour(0, 0, 0, 0x1000000);
+        T1 == reverse_bytes_quad32(inc32lite(ctr_BE, 0));
+        counter == ctr_BE.lo0 % 256;
+
+        inout0 == quad32_xor(reverse_bytes_quad32(inc32lite(ctr_BE, 0)), rndkey);
+        counter + 6 < 256 ==> tuple(inout0, inout1, inout2, inout3, inout4, inout5) ==
+            xor_reverse_inc32lite_6(1, 0, ctr_BE, rndkey);
+
+        length(data) == 6;
+        hkeys_b_powers(hkeys_b, mem, memTaint, Xip - 0x20, h);
+        scratch_b_data(true, true, stack_b, 8, 5, mem, memTaint, rbp, data);
+        Z3 == reverse_bytes_quad32(data[5]);
+        of_quad32(Xi) +. of_quad32(Z0) +. of_quad32(buffer128_read(stack_b, 1, mem)) == prev;
+//        rbp + 0x10 * 8 <= pow2_64;
+    ensures
+        // Framing
+        modifies_buffer128_2(stack_b, iv_b, old(mem), mem);
+        buffer_modifies_specific128(stack_b, old(mem), mem, 1, 8);
+        buffer_modifies_specific128(iv_b,    old(mem), mem, 0, 0);
+
+        // Semantics
+
+        // Counters
+        0 <= counter < 256;
+        counter == inc32lite(ctr_BE, 6).lo0 % 256;
+
+        // Encryption results
+        tuple(inout0, inout1, inout2, inout3, inout4, inout5) == rounds_opaque_6(init, round_keys, #nat(nr(alg) - 1));
+        r13 == reverse_bytes_nat64(hi64(buffer128_read(in0_b, in0_count * 6 + 0, mem)));
+        r12 == reverse_bytes_nat64(lo64(buffer128_read(in0_b, in0_count * 6 + 0, mem)));
+        let rk := index(round_keys, #nat(nr(alg)));
+        tuple(T2, Ii, Z1, Z2, Z3, Hkey) ==
+            make_six_of(fun(i:int_range(0, 5)) quad32_xor(rk, buffer128_read(in_b, count * 6 + i, mem)));
+        buffer128_read(stack_b, 8, mem) == reverse_bytes_quad32(inc32lite(ctr_BE, 6));
+        //buffer128_read(iv_b, 0, mem) == reverse_bytes_quad32(inc32lite(ctr_BE, 6));
+
+        // Byte reversals for use by GCM
+        buffer128_read(stack_b, 2, mem) == old(reverse_bytes_quad32(buffer128_read(in0_b, in0_count * 6 + 5, mem)));
+        buffer128_read(stack_b, 3, mem) == old(reverse_bytes_quad32(buffer128_read(in0_b, in0_count * 6 + 4, mem)));
+        buffer128_read(stack_b, 4, mem) == old(reverse_bytes_quad32(buffer128_read(in0_b, in0_count * 6 + 3, mem)));
+        buffer128_read(stack_b, 5, mem) == old(reverse_bytes_quad32(buffer128_read(in0_b, in0_count * 6 + 2, mem)));
+        buffer128_read(stack_b, 6, mem) == old(reverse_bytes_quad32(buffer128_read(in0_b, in0_count * 6 + 1, mem)));
+        init == make_six_of(fun (n:int_range(0, 5))
+            quad32_xor(reverse_bytes_quad32(inc32lite(ctr_BE, n)), index(round_keys, 0)));
+        let eventual_Xi := of_quad32(Xi) +. of_quad32(buffer128_read(stack_b, 1, mem)) +. of_quad32(Z0);
+        eventual_Xi == of_quad32(reverse_bytes_quad32(ghash_incremental(h_LE, y_prev, data)));
+{
+
+    init := Loop6x_partial_nomovbe(alg, h_LE, y_prev, data, count,
+        in0_count, iv_b, in0_b, in_b, stack_b, key_words,
+        round_keys, keys_b, hkeys_b, ctr_BE);
+
 }
 
 #verbatim{:interface}
