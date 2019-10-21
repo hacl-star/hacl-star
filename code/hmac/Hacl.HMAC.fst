@@ -13,10 +13,11 @@ open LowStar.BufferOps
 open Spec.Hash.Definitions
 open Spec.Agile.HMAC
 friend Spec.Agile.HMAC
+friend Spec.Agile.Hash
 
 let _: squash (inversion hash_alg) = allow_inversion hash_alg
 
-#set-options "--max_fuel 0 --max_ifuel 0"
+#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
 
 /// Helpers
 
@@ -250,7 +251,6 @@ let block_len_positive (a: hash_alg): Lemma (D.block_len a > 0ul) = ()
 let hash_lt_block (a: hash_alg): Lemma (hash_length a < block_length a) = ()
 
 #set-options "--z3rlimit 100"
-inline_for_extraction noextract
 let mk_compute a hash alloca init update_multi update_last finish dst key key_len data data_len =
   block_len_positive a;
   hash_lt_block a;

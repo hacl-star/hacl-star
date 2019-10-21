@@ -13,6 +13,7 @@ open Spec.Hash.Definitions
 
 friend Spec.SHA1
 friend Hacl.Hash.PadFinish
+friend Spec.Agile.Hash
 
 #reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 
@@ -20,7 +21,7 @@ friend Hacl.Hash.PadFinish
 let _h0 = IB.igcmalloc_of_list HS.root Spec.init_as_list
 
 noextract inline_for_extraction
-let alloca () =
+let legacy_alloca () =
   B.alloca_of_list Spec.init_as_list
 
 (* We read values from constant buffers through accessors to isolate
@@ -38,7 +39,7 @@ let h0 (i: U32.t { U32.v i < 5 } ) : HST.Stack uint32
 = IB.recall_contents _h0 Spec.init;
   B.index _h0 i
 
-let init s =
+let legacy_init s =
   let h = HST.get () in
   let inv (h' : HS.mem) (i: nat) : GTot Type0 =
     B.live h' s /\ B.modifies (B.loc_buffer s) h h' /\ i <= 5 /\ Seq.slice (B.as_seq h' s) 0 i == Seq.slice Spec.init 0 i
@@ -303,9 +304,9 @@ let step4
     (ste +. he);
   reveal_opaque (`%Spec.step4) Spec.step4
 
-let update h l =
+let legacy_update h l =
   step4 l h
 
-let pad: pad_st SHA1 = Hacl.Hash.PadFinish.pad SHA1
+let legacy_pad: pad_st SHA1 = Hacl.Hash.PadFinish.pad SHA1
 
-let finish: finish_st SHA1 = Hacl.Hash.PadFinish.finish SHA1
+let legacy_finish: finish_st SHA1 = Hacl.Hash.PadFinish.finish SHA1

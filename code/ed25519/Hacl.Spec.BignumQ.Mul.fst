@@ -347,7 +347,11 @@ val mul_5:
 
 let lemma_mult_distr_3 (a b c:nat) (n:nat) : Lemma
   ((a + b - c * pow2 56) * pow2 n == a * pow2 n + b * pow2 n - c * pow2 (n + 56))
-  = Math.Lemmas.pow2_plus 56 n
+  =
+    Math.Lemmas.distributivity_sub_left (a + b) (c * pow2 56) (pow2 n);
+    Math.Lemmas.distributivity_add_left a b (pow2 n);
+    Math.Lemmas.pow2_plus 56 n
+
 
 #set-options "--z3rlimit 200"
 

@@ -75,14 +75,14 @@ int MITLS_CALLCONV quic_crypto_hkdf_extract(quic_hash a, unsigned char *prk,
                              const unsigned char *ikm, uint32_t ikm_len)
 {
   if(a < TLS_hash_SHA256) return 0;
-  EverCrypt_HKDF_hkdf_extract(CONVERT_ALG(a), (uint8_t*) prk, (uint8_t*)salt, salt_len, (uint8_t*)ikm, ikm_len);
+  EverCrypt_HKDF_extract(CONVERT_ALG(a), (uint8_t*) prk, (uint8_t*)salt, salt_len, (uint8_t*)ikm, ikm_len);
   return 1;
 }
 
 int MITLS_CALLCONV quic_crypto_hkdf_expand(quic_hash a, unsigned char *okm, uint32_t olen, const unsigned char *prk, uint32_t prk_len, const unsigned char *info, uint32_t info_len)
 {
   if(a < TLS_hash_SHA256) return 0;
-  EverCrypt_HKDF_hkdf_expand(CONVERT_ALG(a), (uint8_t*) okm, (uint8_t*)prk, prk_len, (uint8_t*)info, info_len, olen);
+  EverCrypt_HKDF_expand(CONVERT_ALG(a), (uint8_t*) okm, (uint8_t*)prk, prk_len, (uint8_t*)info, info_len, olen);
   return 1;
 }
 

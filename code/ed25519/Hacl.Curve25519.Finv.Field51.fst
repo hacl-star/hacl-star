@@ -9,7 +9,9 @@ open Lib.Buffer
 open Lib.ByteBuffer
 
 open Hacl.Impl.Curve25519.Fields
-open Hacl.Impl.Curve25519.Finv
+open Hacl.Curve25519_51
+
+friend Hacl.Curve25519_51
 
 module ST = FStar.HyperStack.ST
 
@@ -18,42 +20,8 @@ module P = Spec.Curve25519
 
 #reset-options "--max_fuel 0 --using_facts_from '* -FStar.Seq'"
 
-inline_for_extraction noextract
-val fsquare_times_51:
-  o:felem M51
-  -> i:felem M51
-  -> tmp:felem_wide M51
-  -> n:size_t{v n > 0}
-  -> Stack unit
-    (requires fun h0 ->
-      live h0 o /\ live h0 i /\ live h0 tmp /\
-      (disjoint o i \/ o == i) /\
-      disjoint o tmp /\
-      disjoint tmp i /\
-      fsquare_times_inv h0 i)
-    (ensures  fun h0 _ h1 ->
-      modifies (loc o |+| loc tmp) h0 h1 /\
-      fsquare_times_inv h1 o /\
-      feval h1 o == S.pow (feval #M51 h0 i) (pow2 (v n)))
 let fsquare_times_51 o inp tmp n =
-  fsquare_times #M51 o inp tmp n
+  fsquare_times o inp tmp n
 
-
-inline_for_extraction noextract
-val finv_51:
-  o:felem M51
-  -> i:felem M51
-  -> tmp:felem_wide2 M51
-  -> Stack unit
-    (requires fun h0 ->
-      live h0 o /\ live h0 i /\ live h0 tmp /\
-      disjoint o i /\
-      disjoint o tmp /\
-      disjoint tmp i /\
-      fsquare_times_inv h0 i)
-    (ensures  fun h0 _ h1 ->
-      modifies (loc o |+| loc tmp) h0 h1 /\
-      fsquare_times_inv h1 o /\
-      feval h1 o == P.fpow (feval #M51 h0 i) (pow2 255 - 21))
 let finv_51 o i tmp =
-  finv #M51 o i tmp
+  finv o i tmp

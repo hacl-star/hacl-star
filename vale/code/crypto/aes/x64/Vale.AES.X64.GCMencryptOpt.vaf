@@ -4,6 +4,7 @@ include "../../../arch/x64/Vale.X64.InsVector.vaf"
 include "../../../arch/x64/Vale.X64.InsStack.vaf"
 include "../../../lib/util/Vale.Lib.Basic.vaf"
 include "../../../lib/util/x64/Vale.X64.Stack.vaf"
+include "../../../thirdPartyPorts/OpenSSL/aes/Vale.AES.X64.AESopt.vaf"
 include "../../../thirdPartyPorts/OpenSSL/aes/Vale.AES.X64.AESGCM.vaf"
 include "../../../thirdPartyPorts/OpenSSL/aes/Vale.AES.X64.AESopt2.vaf"
 include "Vale.AES.X64.AES.vaf"
@@ -79,6 +80,7 @@ open Vale.AES.X64.GF128_Mul
 open Vale.X64.Stack
 open Vale.X64.CPU_Features_s
 open Vale.Math.Poly2.Bits_s
+open Vale.AES.X64.AESopt
 open Vale.AES.X64.AESGCM
 open Vale.AES.X64.AESopt2
 open Vale.Lib.Meta

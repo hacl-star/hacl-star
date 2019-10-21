@@ -41,7 +41,7 @@ let pad_invariant_block (a: hash_alg) (blocks: nat) (rest: nat): Lemma
 
   FStar.Math.Lemmas.lemma_mod_sub_distr x (blocks + y) x;
   //gives us: (x - (blocks + y)) % x == (x - (blocks + y)%x) % x -- 2
-  
+
   FStar.Math.Lemmas.lemma_mod_add_distr y blocks x;
   //gives us: (y + blocks) % x == (y + blocks%x) % x
   //and since blocks%x == 0,

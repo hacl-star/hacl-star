@@ -25,7 +25,7 @@ friend Lib.LoopCombinators
 let _: squash (inversion field_spec) = allow_inversion field_spec
 
 
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq' --record_options"
 
 inline_for_extraction noextract
 let get_acc #s (ctx:poly1305_ctx s) : Stack (felem s)
@@ -53,8 +53,7 @@ let state_inv_t #s h ctx =
   F32xN.load_precompute_r_post #(width s) h (gsub ctx (nlimb s) (precomplen s))
 
 
-#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
-
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --record_options"
 let reveal_ctx_inv #s ctx h0 h1 =
   let acc_b = gsub ctx 0ul (nlimb s) in
   let r_b = gsub ctx (nlimb s) (nlimb s) in
@@ -70,7 +69,7 @@ let reveal_ctx_inv #s ctx h0 h1 =
   assert (as_seq h0 precom_b == as_seq h1 precom_b)
 
 
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq' --record_options"
 
 val lemma_felem_fits_init_post:
     #s:field_spec
@@ -171,7 +170,7 @@ let poly1305_encode_r #s p b =
   let hi = hi &. mask1 in
   load_precompute_r p lo hi
 
-
+[@ Meta.Attribute.specialize ]
 let poly1305_init #s ctx key =
   let acc = get_acc ctx in
   let pre = get_precomp_r ctx in
@@ -462,6 +461,7 @@ val poly1305_update_multi:
 
 let poly1305_update_multi #s len text pre acc =
   let h0 = ST.get () in
+  assert_norm (v 10ul + v 5ul <= v 20ul);
   assert (feval h0 (gsub pre 10ul 5ul) == Vec.compute_rw #(width s) ((feval h0 (gsub pre 0ul 5ul)).[0]));
 
   let bs = blocklen s in
@@ -528,6 +528,7 @@ let poly1305_update_128_256 #s ctx len text =
 
 
 inline_for_extraction noextract
+[@ Meta.Attribute.specialize ]
 let poly1305_update #s =
   match s with
   | M32 -> poly1305_update32
@@ -535,6 +536,7 @@ let poly1305_update #s =
 
 #set-options "--z3rlimit 150"
 
+[@ Meta.Attribute.specialize ]
 let poly1305_finish #s tag key ctx =
   let acc = get_acc ctx in
   let ks = sub key 16ul 16ul in
@@ -553,10 +555,12 @@ let poly1305_finish #s tag key ctx =
   FStar.Math.Lemmas.lemma_mod_plus_distr_l (fas_nat h1 acc).[0] (BSeq.nat_from_bytes_le (as_seq h0 ks)) (pow2 128);
   uints64_to_bytes_le tag f30 f31
 
-let mk_poly1305_mac #s poly1305_init poly1305_update poly1305_finish tag len text key =
+noextract
+[@ Meta.Attribute.specialize ]
+let poly1305_mac #s tag len text key =
   push_frame ();
   let ctx = create (nlimb s +! precomplen s) (limb_zero s) in
-  poly1305_init ctx key;
-  poly1305_update ctx len text;
-  poly1305_finish tag key ctx;
+  poly1305_init #s ctx key;
+  poly1305_update #s ctx len text;
+  poly1305_finish #s tag key ctx;
   pop_frame ()

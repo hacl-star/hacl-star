@@ -16,6 +16,7 @@ module Hash = EverCrypt.Hash
 
 open FStar.HyperStack.ST
 open Spec.Hash.Definitions
+friend Spec.Agile.Hash
 
 #set-options "--max_fuel 0 --max_ifuel 0"
 
@@ -118,7 +119,8 @@ let split_at_last_empty (a: Hash.alg): Lemma
 =
   ()
 
-#push-options "--z3rlimit 20"
+#restart-solver
+#push-options "--z3rlimit 40"
 let create_in a r =
   (**) let h0 = ST.get () in
 
@@ -148,10 +150,22 @@ let create_in a r =
   (**) split_at_last_empty a;
   (**) B.modifies_only_not_unused_in B.loc_none h0 h4;
 
+  (**) let h5 = ST.get () in
+  (**) assert (invariant h5 p /\
+  (**)   hashed h5 p == S.empty /\
+  (**)   B.(modifies loc_none h0 h5) /\
+  (**)   B.fresh_loc (footprint h5 p) h0 h5 /\
+  (**)   B.(loc_includes (loc_region_only true r) (footprint h5 p)) /\
+  (**)   freeable h5 p);
+
+  (**) assert (ST.equal_stack_domains h1 h5);
+
   p
 #pop-options
 
-#push-options "--z3refresh"
+#push-options "--z3rlimit 40"
+#restart-solver
+
 let init a s =
   let open LowStar.BufferOps in
   let h1 = ST.get () in
@@ -177,8 +191,16 @@ let init a s =
   assert B.(modifies (footprint #a h1 s) h1 h3);
   // This seems to cause insurmountable difficulties. Puzzled.
   ST.lemma_equal_domains_trans h1 h2 h3;
+
   // AR: 07/22: same old `Seq.equal` and `==` story
-  assert (Seq.equal (hashed #a h3 s) Seq.empty)
+  assert (Seq.equal (hashed #a h3 s) Seq.empty);
+
+  assert (ST.equal_domains h1 h3);
+  assert (preserves_freeable #a s h1 h3 /\
+    invariant #a h3 s /\
+    hashed h3 s == S.empty /\
+    footprint h1 s == footprint #a h3 s /\
+    B.(modifies (footprint #a h1 s) h1 h3))
 #pop-options
 
 /// We keep the total length at run-time, on 64 bits, but require that it abides
@@ -591,8 +613,6 @@ let update a p data len =
   let s = !*p in
   let State hash_state buf_ total_len seen = s in
   let a = Hash.alg_of_state a hash_state in
-  [@inline_let]
-  let hash_state: Hash.state a = hash_state in
   let sz = rest a total_len in
   if len `U32.lt` (Hacl.Hash.Definitions.block_len a `U32.sub` sz) then
     update_small (G.hide a) p data len
@@ -631,11 +651,7 @@ inline_for_extraction noextract
 let mk_finish a p dst =
   let open LowStar.BufferOps in
   let h0 = ST.get () in
-  let s = !*p in
-  let State hash_state buf_ total_len seen = s in
-  let a = Hash.alg_of_state (G.hide a) hash_state in
-  [@inline_let]
-  let hash_state: Hash.state a = hash_state in
+  let State hash_state buf_ total_len seen = !*p in
 
   push_frame ();
   let h1 = ST.get () in
@@ -769,4 +785,5 @@ let free a s =
   let open LowStar.BufferOps in
   let State hash_state buf _ _ = !*s in
   Hash.free #a hash_state;
-  B.free buf
+  B.free buf;
+  B.free s

@@ -11,9 +11,6 @@ extern "C" {
 #ifdef HAVE_VALE
 #include <EverCrypt_Vale.h>
 #endif
-#include <Hacl_Chacha20.h>
-#include <Hacl_Chacha20Poly1305.h>
-#include <Hacl_Poly1305_128.h>
 #include <EverCrypt_Chacha20Poly1305.h>
 }
 
@@ -132,13 +129,13 @@ public:
 void type2name_evercrypt(AEADBenchmark & b, int type)
 {
   switch (type) {
-      case Spec_AEAD_AES128_GCM: b.set_name("EverCrypt", "AES128\\nGCM"); break;
-      case Spec_AEAD_AES256_GCM: b.set_name("EverCrypt", "AES256\\nGCM"); break;
-      case Spec_AEAD_CHACHA20_POLY1305: b.set_name("EverCrypt", "Chacha20\\nPoly1305"); break;
-      case Spec_AEAD_AES128_CCM: b.set_name("EverCrypt", "AES128\\nCCM"); break;
-      case Spec_AEAD_AES256_CCM: b.set_name("EverCrypt", "AES256\\nCCM"); break;
-      case Spec_AEAD_AES128_CCM8: b.set_name("EverCrypt", "AES128\\nCCM8"); break;
-      case Spec_AEAD_AES256_CCM8: b.set_name("EverCrypt", "AES256\\nCCM8"); break;
+      case Spec_Agile_AEAD_AES128_GCM: b.set_name("EverCrypt", "AES128\\nGCM"); break;
+      case Spec_Agile_AEAD_AES256_GCM: b.set_name("EverCrypt", "AES256\\nGCM"); break;
+      case Spec_Agile_AEAD_CHACHA20_POLY1305: b.set_name("EverCrypt", "Chacha20\\nPoly1305"); break;
+      case Spec_Agile_AEAD_AES128_CCM: b.set_name("EverCrypt", "AES128\\nCCM"); break;
+      case Spec_Agile_AEAD_AES256_CCM: b.set_name("EverCrypt", "AES256\\nCCM"); break;
+      case Spec_Agile_AEAD_AES128_CCM8: b.set_name("EverCrypt", "AES128\\nCCM8"); break;
+      case Spec_Agile_AEAD_AES256_CCM8: b.set_name("EverCrypt", "AES256\\nCCM8"); break;
       default: throw std::logic_error("Unknown AEAD algorithm");
     }
 }
@@ -554,6 +551,10 @@ void showbuf(const uint8_t *buf, size_t len)
 #undef HAVE_JC
 #endif
 
+static uint32_t
+Hacl_Impl_Chacha20_chacha20_constants[4U] =
+  { (uint32_t)0x61707865U, (uint32_t)0x3320646eU, (uint32_t)0x79622d32U, (uint32_t)0x6b206574U };
+
 #ifdef HAVE_JC
 template<size_t key_size_bits, size_t tag_len>
 class JCChacha20Poly1305EncryptBM : public AEADBenchmark
@@ -661,7 +662,7 @@ class JCChacha20Poly1305EncryptBM : public AEADBenchmark
       #if 0 // def _DEBUG
       EverCrypt_AEAD_state_s *state;
       EverCrypt_Error_error_code ec;
-      ec = EverCrypt_AEAD_create_in(Spec_AEAD_CHACHA20_POLY1305, &state, (uint8_t*)key);
+      ec = EverCrypt_AEAD_create_in(Spec_Agile_AEAD_CHACHA20_POLY1305, &state, (uint8_t*)key);
       if (ec != EverCrypt_Error_Success)
         throw std::logic_error("AEAD context creation failed");
       ec = EverCrypt_AEAD_encrypt(state,
@@ -718,13 +719,13 @@ void bench_aead_encrypt(const BenchmarkSettings & s)
     }
 
     std::list<Benchmark*> todo = {
-      new EverCryptAEADEncrypt<Spec_AEAD_AES128_GCM, 128, 16>(ds),
-      new EverCryptAEADEncrypt<Spec_AEAD_AES256_GCM, 256, 16>(ds),
-      new EverCryptAEADEncrypt<Spec_AEAD_CHACHA20_POLY1305, 256, 16>(ds),
-      // new EverCryptAEADEncrypt<Spec_AEAD_AES128_CCM, 128, 16>(ds), // unsupported?
-      // new EverCryptAEADEncrypt<Spec_AEAD_AES256_CCM, 256, 16>(ds), // unsupported?
-      // new EverCryptAEADEncrypt<Spec_AEAD_AES128_CCM8, 128, 8>(ds), // unsupported?
-      // new EverCryptAEADEncrypt<Spec_AEAD_AES256_CCM8, 256, 8>(ds), // unsupported?
+      new EverCryptAEADEncrypt<Spec_Agile_AEAD_AES128_GCM, 128, 16>(ds),
+      new EverCryptAEADEncrypt<Spec_Agile_AEAD_AES256_GCM, 256, 16>(ds),
+      new EverCryptAEADEncrypt<Spec_Agile_AEAD_CHACHA20_POLY1305, 256, 16>(ds),
+      // new EverCryptAEADEncrypt<Spec_Agile_AEAD_AES128_CCM, 128, 16>(ds), // unsupported?
+      // new EverCryptAEADEncrypt<Spec_Agile_AEAD_AES256_CCM, 256, 16>(ds), // unsupported?
+      // new EverCryptAEADEncrypt<Spec_Agile_AEAD_AES128_CCM8, 128, 8>(ds), // unsupported?
+      // new EverCryptAEADEncrypt<Spec_Agile_AEAD_AES256_CCM8, 256, 8>(ds), // unsupported?
 
       // #ifdef HAVE_VALE
       // new OldValeEncrypt<128, 16>(ds),
@@ -880,13 +881,13 @@ void bench_aead_decrypt(const BenchmarkSettings & s)
     }
 
     std::list<Benchmark*> todo = {
-      new EverCryptAEADDecrypt<Spec_AEAD_AES128_GCM, 128, 16>(ds),
-      new EverCryptAEADDecrypt<Spec_AEAD_AES256_GCM, 256, 16>(ds),
-      new EverCryptAEADDecrypt<Spec_AEAD_CHACHA20_POLY1305, 256, 16>(ds),
-      // new EverCryptAEADDecrypt<Spec_AEAD_AES128_CCM, 128, 16>(ds), // unsupported?
-      // new EverCryptAEADDecrypt<Spec_AEAD_AES256_CCM, 256, 16>(ds), // unsupported?
-      // new EverCryptAEADDecrypt<Spec_AEAD_AES128_CCM8, 128, 8>(ds), // unsupported?
-      // new EverCryptAEADDecrypt<Spec_AEAD_AES256_CCM8, 256, 8>(ds), // unsupported?
+      new EverCryptAEADDecrypt<Spec_Agile_AEAD_AES128_GCM, 128, 16>(ds),
+      new EverCryptAEADDecrypt<Spec_Agile_AEAD_AES256_GCM, 256, 16>(ds),
+      new EverCryptAEADDecrypt<Spec_Agile_AEAD_CHACHA20_POLY1305, 256, 16>(ds),
+      // new EverCryptAEADDecrypt<Spec_Agile_AEAD_AES128_CCM, 128, 16>(ds), // unsupported?
+      // new EverCryptAEADDecrypt<Spec_Agile_AEAD_AES256_CCM, 256, 16>(ds), // unsupported?
+      // new EverCryptAEADDecrypt<Spec_Agile_AEAD_AES128_CCM8, 128, 8>(ds), // unsupported?
+      // new EverCryptAEADDecrypt<Spec_Agile_AEAD_AES256_CCM8, 256, 8>(ds), // unsupported?
 
       // #ifdef HAVE_VALE
       // new OldValeDecrypt<128, 16>(ds),

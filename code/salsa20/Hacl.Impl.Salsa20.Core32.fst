@@ -16,7 +16,7 @@ let state = lbuffer uint32 16ul
 let index = i:size_t{size_v i < 16}
 
 
-inline_for_extraction noextract
+inline_for_extraction
 val create_state: unit ->
   StackInline state
   (requires fun h -> True)
@@ -27,7 +27,7 @@ val create_state: unit ->
 let create_state () = create (size 16) (u32 0)
 
 
-inline_for_extraction noextract
+inline_for_extraction
 val load_state:
     st:state
   -> b:lbuffer uint8 64ul ->
@@ -40,7 +40,7 @@ let load_state st b =
   uints_from_bytes_le st b
 
 
-inline_for_extraction noextract
+inline_for_extraction
 val store_state:
     b:lbuffer uint8 64ul
   -> st:state ->
@@ -53,7 +53,7 @@ let store_state st b =
   uints_to_bytes_le 16ul st b
 
 
-inline_for_extraction noextract
+inline_for_extraction
 val set_counter:
     st:state
   -> c:size_t ->
@@ -66,7 +66,7 @@ let set_counter st c =
   st.(size 8) <- size_to_uint32 c
 
 
-inline_for_extraction noextract
+inline_for_extraction
 val copy_state:
     st:state
   -> ost:state ->
@@ -78,7 +78,7 @@ val copy_state:
 let copy_state st ost = copy #MUT #uint32 #(size 16) st ost
 
 
-inline_for_extraction noextract
+inline_for_extraction
 val sum_state:
     st:state
   -> ost:state ->
@@ -90,7 +90,7 @@ val sum_state:
 let sum_state st ost = map2T #MUT #uint32 #uint32 #uint32 (size 16) st ( +. ) st ost
 
 
-inline_for_extraction noextract
+inline_for_extraction
 val xor_block:
     o:lbuffer uint8 64ul
   -> st:state
@@ -110,7 +110,7 @@ let xor_block o st b =
   pop_frame()
 
 
-inline_for_extraction noextract
+inline_for_extraction
 val line:
     st:state
   -> a:index

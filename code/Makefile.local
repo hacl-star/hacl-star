@@ -1,0 +1,44 @@
+# A shared set of local definitions for local Makefiles. See curve25519/Makefile
+# for comments.
+
+HACL_HOME?=../..
+
+ALL_HACL_DIRS=$(addprefix $(HACL_HOME)/,lib specs specs/lemmas code/meta) \
+  $(addprefix $(HACL_HOME)/vale/specs/,defs hardware)
+
+OUTPUT_DIR=$(HACL_HOME)/obj
+
+# This uses the definition of ALL_HACL_DIRS
+include $(HACL_HOME)/Makefile.common
+
+# All the files in the current directory ought to be verified.
+FSTAR_ROOTS?=$(wildcard *.fst *.fsti)
+
+# This is the right way to ensure the .depend file always gets re-built.
+ifndef NODEPEND
+ifndef MAKE_RESTARTS
+.depend: .FORCE
+	$(FSTAR_NO_FLAGS) --dep full $(notdir $(FSTAR_ROOTS)) > $@
+
+.PHONY: .FORCE
+.FORCE:
+endif
+endif
+
+include .depend
+
+# Producing .checked and .krml.
+%.checked:
+	$(FSTAR) $< --hint_file $(HACL_HOME)/hints/$(notdir $*).hints && \
+	  touch -c $@
+
+%.krml:
+	$(FSTAR) --codegen Kremlin \
+	    --extract_module $(basename $(notdir $(subst .checked,,$<))) \
+	    $(notdir $(subst .checked,,$<))
+
+# Useful definitions for C compilation
+
+CFLAGS += -Idist -I$(KREMLIN_HOME)/include
+
+KREMLIB_A=$(KREMLIN_HOME)/kremlib/dist/minimal/libkremlib.a

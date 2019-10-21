@@ -143,13 +143,13 @@ let test_one_hkdf vec =
     B.recall info;
     let str = EverCrypt.Hash.string_of_alg ha in
     let computed_prk = B.alloca 0uy (Hacl.Hash.Definitions.hash_len ha) in
-    EverCrypt.HKDF.hkdf_extract ha computed_prk salt saltlen ikm ikmlen;
+    EverCrypt.HKDF.extract ha computed_prk salt saltlen ikm ikmlen;
     B.recall expected_prk;
     TestLib.compare_and_print str expected_prk computed_prk (Hacl.Hash.Definitions.hash_len ha);
 
     let computed_okm = B.alloca 0uy (okmlen + 1ul) in
     let computed_okm = B.sub computed_okm 0ul okmlen in
-    EverCrypt.HKDF.hkdf_expand ha computed_okm computed_prk prklen info infolen okmlen;
+    EverCrypt.HKDF.expand ha computed_okm computed_prk prklen info infolen okmlen;
     B.recall expected_okm;
     TestLib.compare_and_print str expected_okm computed_okm okmlen;
     pop_frame()

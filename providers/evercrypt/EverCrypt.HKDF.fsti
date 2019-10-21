@@ -1,59 +1,130 @@
+(** Agile HKDF *)
 module EverCrypt.HKDF
 
 module B = LowStar.Buffer
 
-open FStar.Integers
-open EverCrypt.Helpers
-
 open Spec.Agile.HKDF
 open Spec.Hash.Definitions
 
-/// IMPLEMENTATION
-
 open FStar.HyperStack.ST
+open Lib.IntTypes
 
-//18-03-05 TODO drop hkdf_ prefix? conflicts with spec name
+#set-options "--max_ifuel 0 --max_fuel 0 --z3rlimit 20"
 
-(** @type: true
-*)
-val hkdf_extract :
-  a       : EverCrypt.HMAC.supported_alg ->
-  prk     : B.buffer Lib.IntTypes.uint8{B.length prk == hash_length a} ->
-  salt    : B.buffer Lib.IntTypes.uint8 { B.disjoint salt prk /\ Spec.Agile.HMAC.keysized a (B.length salt)} ->
-  saltlen : UInt32.t { UInt32.v saltlen == B.length salt } ->
-  ikm     : B.buffer Lib.IntTypes.uint8 { B.length ikm + block_length a < pow2 32 /\ B.disjoint ikm prk } ->
-  ikmlen  : UInt32.t { UInt32.v ikmlen == B.length ikm } -> Stack unit
-  (requires (fun h0 ->
-    B.live h0 prk /\ B.live h0 salt /\ B.live h0 ikm ))
-  (ensures  (fun h0 r h1 ->
-    Hacl.HMAC.key_and_data_fits a;
-    LowStar.Modifies.(modifies (loc_buffer prk) h0 h1) /\
-    B.as_seq h1 prk == Spec.Agile.HMAC.hmac a (B.as_seq h0 salt) (B.as_seq h0 ikm)))
+/// Auxiliary lemmas
 
-let hash_block_length_fits (a: hash_alg): Lemma
-  (ensures (hash_length a + pow2 32 + block_length a < max_input_length a))
+let key_and_data_fits (a:hash_alg) : 
+  Lemma (block_length a + pow2 32 <= max_input_length a)
 =
+  let open FStar.Mul in
+  assert_norm (8 * 16 + pow2 32 < pow2 61);
+  assert_norm (pow2 61 < pow2 125)
+
+let hash_block_length_fits (a:hash_alg) : 
+  Lemma (hash_length a + pow2 32 + block_length a < max_input_length a)
+=
+  let open FStar.Mul in
   assert_norm (8 * 16 + 8 * 8 + pow2 32 < pow2 61);
   assert_norm (pow2 61 < pow2 125)
 
-(** @type: true
-*)
-val hkdf_expand :
-  a       : EverCrypt.HMAC.supported_alg ->
-  okm     : B.buffer Lib.IntTypes.uint8 ->
-  prk     : B.buffer Lib.IntTypes.uint8 ->
-  prklen  : UInt32.t { UInt32.v prklen == B.length prk } ->
-  info    : B.buffer Lib.IntTypes.uint8 ->
-  infolen : UInt32.t { UInt32.v infolen == B.length info } ->
-  len     : UInt32.t {
-    UInt32.v len == B.length okm /\
+/// Types for expand and extract
+/// Duplicated from Hacl.HKDF because we don't want clients to depend on Hacl.HKDF
+
+inline_for_extraction
+let extract_st (a:hash_alg) = 
+  prk     : B.buffer uint8 ->
+  salt    : B.buffer uint8 ->
+  saltlen : pub_uint32 ->
+  ikm     : B.buffer uint8 ->
+  ikmlen  : pub_uint32 -> 
+  Stack unit
+  (requires fun h0 -> 
+    B.live h0 prk /\ B.live h0 salt /\ B.live h0 ikm /\
+    B.disjoint salt prk /\ B.disjoint ikm prk /\
+    B.length prk == hash_length a /\
+    v saltlen == B.length salt /\
+    v ikmlen == B.length ikm /\
+    Spec.Agile.HMAC.keysized a (v saltlen) /\
+    B.length ikm + block_length a < pow2 32)
+  (ensures fun h0 _ h1 ->
+    key_and_data_fits a;
+    B.modifies (B.loc_buffer prk) h0 h1 /\
+    B.as_seq h1 prk == extract a (B.as_seq h0 salt) (B.as_seq h0 ikm))
+
+inline_for_extraction
+let expand_st (a:hash_alg) =
+  okm     : B.buffer uint8 ->
+  prk     : B.buffer uint8 ->
+  prklen  : pub_uint32 ->
+  info    : B.buffer uint8 ->
+  infolen : pub_uint32 ->
+  len     : pub_uint32 ->
+  Stack unit
+  (requires fun h0 -> 
+    B.live h0 okm /\ B.live h0 prk /\ B.live h0 info /\
     B.disjoint okm prk /\
+    v prklen == B.length prk /\
+    v infolen == B.length info /\
+    v len == B.length okm /\
+    hash_length a <= v prklen /\
     Spec.Agile.HMAC.keysized a (v prklen) /\
     hash_length a + v infolen + 1 + block_length a < pow2 32 /\
-    v len <= 255 * hash_length a } ->
-  Stack unit
-  (requires (fun h0 -> B.live h0 okm /\ B.live h0 prk /\ B.live h0 info))
-  (ensures  (fun h0 r h1 ->
+    v len <= FStar.Mul.(255 * hash_length a))
+  (ensures fun h0 _ h1 ->
     hash_block_length_fits a;
-    LowStar.Modifies.(modifies (loc_buffer okm) h0 h1) /\
-    B.as_seq h1 okm == expand a (B.as_seq h0 prk) (B.as_seq h0 info) (v len) ))
+    B.modifies (B.loc_buffer okm) h0 h1 /\
+    B.as_seq h1 okm == expand a (B.as_seq h0 prk) (B.as_seq h0 info) (v len))
+
+
+/// Four monomorphized variants, for callers who already know which algorithm they want
+
+(** @type: true
+*)
+val expand_sha1: expand_st SHA1
+
+(** @type: true
+*)
+val extract_sha1: extract_st SHA1
+
+(** @type: true
+*)
+val expand_sha2_256: expand_st SHA2_256
+
+(** @type: true
+*)
+val extract_sha2_256: extract_st SHA2_256
+
+(** @type: true
+*)
+val expand_sha2_384: expand_st SHA2_384
+
+(** @type: true
+*)
+val extract_sha2_384: extract_st SHA2_384
+
+(** @type: true
+*)
+val expand_sha2_512: expand_st SHA2_512
+
+(** @type: true
+*)
+val extract_sha2_512: extract_st SHA2_512
+
+
+/// Agile versions that dynamically dispatches between the above four
+
+(** @type: true
+*)
+val expand: a:EverCrypt.HMAC.supported_alg -> expand_st a
+
+(** @type: true
+*)
+val extract: a:EverCrypt.HMAC.supported_alg -> extract_st a
+
+[@(deprecated "expand")]
+let hkdf_expand a okm prk prklen info infolen len = 
+  expand a okm prk prklen info infolen len
+
+[@(deprecated "extract")]
+let hkdf_extract a prk salt saltlen ikm ikmlen =
+  extract a prk salt saltlen ikm ikmlen

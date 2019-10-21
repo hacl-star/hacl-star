@@ -242,6 +242,7 @@ procedure fast_multiply_a1b(
     Store64_buffer(dst_ptr, r8,  8 + offset*16, Secret, dst_b, 1 + offset*2);  // REVIEW: Why not combine the Adcx with the Store?
 
     Mulx64(r11, r10, Mem(inB_ptr,  8 + offset*8, inB_b, 1 + offset, Secret));  /* A[1]*B[1] */ lemma_prod_bounds(r11, r10, a1, b1);  lemma_overflow(r11, r10, r9, bool_bit(overflow(efl)));
+    assert valid_of(efl); // OBSERVE
     Adox64Wrap(r10,  r9);  let a1b_1 := r10;      // At this point, overflow = 0, r9 < 2^64 - 1, and (r10 is <= 1 (so no new overflow), or r11 < 2^64-2)
     Adcx64Wrap(r10, r12);
     Store64_buffer(dst_ptr, r10, 16 + offset*16, Secret, dst_b, 2 + offset*2);

@@ -78,6 +78,20 @@ unfold let va_operand_xmm = reg_xmm
 unfold let va_operand128 = operand128
 unfold let va_operand_opr128 = va_operand128
 
+val va_pbool : Type0
+val va_ttrue (_:unit) : va_pbool
+val va_ffalse (reason:string) : va_pbool
+val va_pbool_and (x y:va_pbool) : va_pbool
+val get_reason (p:va_pbool) : option string
+
+noeq
+type va_transformation_result = {
+  success : va_pbool;
+  result : va_code;
+}
+unfold let va_get_success (r:va_transformation_result) : va_pbool = r.success
+unfold let va_get_result (r:va_transformation_result) : va_code = r.result
+
 val mul_nat_helper (x y:nat) : Lemma (x * y >= 0)
 [@va_qattr] unfold let va_mul_nat (x y:nat) : nat =
   mul_nat_helper x y;

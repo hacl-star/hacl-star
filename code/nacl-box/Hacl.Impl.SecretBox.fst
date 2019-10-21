@@ -8,6 +8,7 @@ open Lib.IntTypes
 open Lib.Buffer
 open Lib.ByteBuffer
 
+open Hacl.Salsa20
 open Hacl.Poly1305_32
 
 module ST = FStar.HyperStack.ST
@@ -38,8 +39,8 @@ let secretbox_init xkeys k n =
   let aekey = sub xkeys 32ul 64ul in
   let n0 = sub n 0ul 16ul in
   let n1 = sub n 16ul 8ul in
-  Hacl.Impl.HSalsa20.hsalsa20 subkey k n0;
-  Hacl.Impl.Salsa20.salsa20_key_block0 aekey subkey n1
+  hsalsa20 subkey k n0;
+  salsa20_key_block0 aekey subkey n1
 
 
 inline_for_extraction noextract
@@ -92,7 +93,7 @@ let secretbox_detached_cipher mlen c k xkeys n m =
   copy c0 (sub block0 0ul mlen0);
   let h2 = ST.get () in
   //assert (as_seq h2 c0 == LSeq.sub (as_seq h1 block0) 0 (v mlen0));
-  Hacl.Impl.Salsa20.salsa20_encrypt mlen1 c1 m1 subkey n1 1ul;
+  salsa20_encrypt mlen1 c1 m1 subkey n1 1ul;
   let h3 = ST.get () in
   //assert (as_seq h3 c1 == Spec.Salsa20.salsa20_encrypt_bytes (as_seq h2 subkey) (as_seq h2 n1) 1 (as_seq h2 m1));
   FStar.Seq.Properties.lemma_split (as_seq h3 c) (v mlen0);
@@ -182,7 +183,7 @@ let secretbox_open_detached_plain mlen m xkeys n c =
   let m0 = sub m 0ul mlen0 in
   let m1 = sub m mlen0 mlen1 in
   copy m0 (sub block0 0ul mlen0);
-  Hacl.Impl.Salsa20.salsa20_decrypt mlen1 m1 c1 subkey n1 1ul;
+  salsa20_decrypt mlen1 m1 c1 subkey n1 1ul;
   let h1 = ST.get () in
   FStar.Seq.Properties.lemma_split (as_seq h1 m) (v mlen0);
   pop_frame ()

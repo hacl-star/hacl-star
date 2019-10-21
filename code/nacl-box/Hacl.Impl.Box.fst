@@ -38,7 +38,7 @@ let box_beforenm k pk sk =
   let r = Hacl.Curve25519_51.ecdh k sk pk in
   let res =
     if r then (
-      Hacl.Impl.HSalsa20.hsalsa20 k k n0;
+      Hacl.Salsa20.hsalsa20 k k n0;
       0ul)
     else
       0xfffffffful in

@@ -9,7 +9,6 @@ open Lib.Sequence
 open Lib.Buffer
 
 module F56 = Hacl.Impl.Ed25519.Field56
-module BF = Vale.Arch.BufferFriend
 
 #reset-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
 

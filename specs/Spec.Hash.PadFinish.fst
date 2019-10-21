@@ -2,11 +2,12 @@ module Spec.Hash.PadFinish
 
 module S = FStar.Seq
 open Lib.IntTypes
+open Lib.ByteSequence
 
 open Spec.Hash.Lemmas0
 open Spec.Hash.Definitions
 
-(** This module contains specifications shared across all the Merkle-Damg??rd
+(** This module contains specifications shared across all the Merkle-Damgård
     constructions. *)
 
 (** Padding *)
@@ -23,7 +24,7 @@ let pad (a:hash_alg)
   let total_len_bits = total_len * 8 in
   // Saves the need for high fuel + makes hint replayable.
   max_input_size_len a;
-  let encodedlen : Lib.ByteSequence.lbytes (len_length a) =
+  let encodedlen : lbytes (len_length a) =
     match a with
     | MD5 -> Lib.ByteSequence.uint_to_bytes_le (secret (nat_to_len a (total_len * 8)))
     | _ -> Lib.ByteSequence.uint_to_bytes_be (secret (nat_to_len a (total_len * 8)))
@@ -34,6 +35,6 @@ let pad (a:hash_alg)
 (** Extracting the hash, which we call "finish" *)
 
 (* Unflatten the hash from the sequence of words to bytes up to the correct size *)
-let finish (a:hash_alg) (hashw:words_state a): Tot (hash:bytes{S.length hash = (hash_length a)}) =
+let finish (a:hash_alg) (hashw:words_state a): Tot (hash:lbytes (hash_length a)) =
   let hash_final_w = S.slice hashw 0 (hash_word_length a) in
   bytes_of_words a #(hash_word_length a) hash_final_w

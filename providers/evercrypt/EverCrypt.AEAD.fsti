@@ -21,7 +21,7 @@ module B = LowStar.Buffer
 open FStar.HyperStack.ST
 open FStar.Integers
 
-open Spec.AEAD
+open Spec.Agile.AEAD
 open EverCrypt.Error
 
 /// Note: if the fst and the fsti are running on different fuel settings,
