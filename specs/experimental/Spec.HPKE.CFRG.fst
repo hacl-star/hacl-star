@@ -8,9 +8,10 @@ open Lib.ByteSequence
 open Lib.RandomSequence
 
 module DH = Spec.Agile.DH
-module AEAD = Spec.Agile.AEAD
-module Hash = Spec.Hash.Definitions
-module HKDF = Spec.HKDF
+module AEAD = Spec.Agile.AEAD.Hacl
+module Hash = Spec.Agile.Hash
+module HKDF = Spec.Agile.HKDF
+module KDF = Spec.Agile.KDF
 
 
 let pow2_61 : _:unit{pow2 61 == 2305843009213693952} = assert_norm(pow2 61 == 2305843009213693952)
@@ -119,13 +120,13 @@ let encap cs e pkR einfo =
   let e', skE = crypto_random e (size_key_dh cs) in
   let pkE = DH.secret_to_public (curve_of_cs cs) skE in
   let zz = DH.scalarmult (curve_of_cs cs) skE pkR in
-  let nh0 = create (Hash.hash_length (hash_of_cs cs)) (u8 0) in
-  let secret = HKDF.hkdf_extract (hash_of_cs cs) nh0 zz in
+  let nh0 = create (size_key_dh cs) (u8 0) in
+  let secret = HKDF.extract (hash_of_cs cs) nh0 zz in
   let context: lbytes (size_context cs) = (id_of_cs cs) @| pkE @| pkR @| einfo in
   let info_key: lbytes (size_context cs + size_label_key) = label_key @| context in
   let info_nonce: lbytes (size_context cs + size_label_nonce) = label_nonce @| context in
-  let keyIR = HKDF.hkdf_expand (hash_of_cs cs) secret info_key (size_key cs) in
-  let nonceIR = HKDF.hkdf_expand (hash_of_cs cs) secret info_nonce (size_nonce cs) in
+  let keyIR = HKDF.expand (hash_of_cs cs) secret info_key (size_key cs) in
+  let nonceIR = HKDF.expand (hash_of_cs cs) secret info_nonce (size_nonce cs) in
   e', pkE, keyIR, nonceIR
 
 
@@ -147,15 +148,15 @@ val decap:
   Tot (key_s cs & nonce_s cs)
 
 let decap cs pkE skR einfo =
-  let nh0 = create (Hash.size_hash (hash_of_cs cs)) (u8 0) in
-  let zz = DH.scalarmult (curve_of_cs cs) skR pkE in
   let pkR = DH.secret_to_public (curve_of_cs cs) skR in
-  let secret = HKDF.hkdf_extract (hash_of_cs cs) nh0 zz in
+  let nh0 = create (size_key_dh cs) (u8 0) in
+  let zz = DH.scalarmult (curve_of_cs cs) skR pkE in
+  let secret = HKDF.extract (hash_of_cs cs) nh0 zz in
   let context: lbytes (size_context cs) = (id_of_cs cs) @| pkE @| pkR @| einfo in
   let info_key: lbytes (size_context cs + size_label_key) = label_key @| context in
   let info_nonce: lbytes (size_context cs + size_label_nonce) = label_nonce @| context in
-  let keyIR = HKDF.hkdf_expand (hash_of_cs cs) secret info_key (size_key cs) in
-  let nonceIR = HKDF.hkdf_expand (hash_of_cs cs) secret info_nonce (size_nonce cs) in
+  let keyIR = HKDF.expand (hash_of_cs cs) secret info_key (size_key cs) in
+  let nonceIR = HKDF.expand (hash_of_cs cs) secret info_nonce (size_nonce cs) in
   keyIR, nonceIR
 
 
@@ -171,8 +172,8 @@ val encrypt:
   -> e: entropy
   -> pkR: key_public_s cs
   -> info: lbytes size_einfo
-  -> aad: bytes {length aad <= max_size_t /\ length aad + AEAD.padlen (aead_of_cs cs) (length aad) <= max_size_t}
-  -> pt: bytes{length pt <= max_size_t
+  -> aad: bytes {length aad + AEAD.padlen (aead_of_cs cs) (length aad) <= max_size_t}
+  -> pt: bytes {length pt <= max_size_t
            /\ length pt + AEAD.size_block (aead_of_cs cs) <= max_size_t
            /\ length pt + AEAD.padlen (aead_of_cs cs) (length pt) <= max_size_t} ->
   Tot (bytes & key_public_s cs)
@@ -195,7 +196,7 @@ val decrypt:
   -> skR: key_secret_s cs
   -> pkE: key_public_s cs
   -> info: lbytes size_einfo
-  -> aad: bytes{length aad <= max_size_t /\ length aad + AEAD.padlen (aead_of_cs cs) (length aad) <= max_size_t}
+  -> aad: bytes{length aad + AEAD.padlen (aead_of_cs cs) (length aad) <= max_size_t}
   -> ct: bytes{AEAD.size_tag (aead_of_cs cs) <= length ct
              /\ (length ct + length aad) / 64 <= max_size_t
              /\ length ct + AEAD.size_block (aead_of_cs cs) <= max_size_t}
