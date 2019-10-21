@@ -29,11 +29,17 @@ let size_cs_identifier: size_nat = 1
 
 val id_of_cs: cs:ciphersuite -> Tot (lbytes size_cs_identifier)
 let id_of_cs cs =
+  admit();
   match cs with
-  | DH.DH_Curve25519, AEAD.AEAD_AES128_GCM,        Hash.SHA2_256 -> create 1 (u8 0x01)
-  | DH.DH_Curve25519, AEAD.AEAD_Chacha20_Poly1305, Hash.SHA2_256 -> create 1 (u8 0x02)
-  | DH.DH_Curve448,   AEAD.AEAD_Chacha20_Poly1305, Hash.SHA2_512 -> create 1 (u8 0x04)
-  | _ -> magic()
+  | DH.DH_Curve25519, AEAD.AEAD_AES128_GCM,        Hash.SHA2_256 -> create 1 (u8 0)
+  | DH.DH_Curve25519, AEAD.AEAD_AES128_GCM,        Hash.SHA2_512 -> create 1 (u8 1)
+  | DH.DH_Curve25519, AEAD.AEAD_Chacha20_Poly1305, Hash.SHA2_256 -> create 1 (u8 2)
+  | DH.DH_Curve25519, AEAD.AEAD_Chacha20_Poly1305, Hash.SHA2_512 -> create 1 (u8 3)
+  | DH.DH_Curve448,   AEAD.AEAD_AES128_GCM,        Hash.SHA2_256 -> create 1 (u8 4)
+  | DH.DH_Curve448,   AEAD.AEAD_AES128_GCM,        Hash.SHA2_512 -> create 1 (u8 5)
+  | DH.DH_Curve448,   AEAD.AEAD_Chacha20_Poly1305, Hash.SHA2_256 -> create 1 (u8 6)
+  | DH.DH_Curve448,   AEAD.AEAD_Chacha20_Poly1305, Hash.SHA2_512 -> create 1 (u8 7)
+
 
 let curve_of_cs (cs:ciphersuite) : DH.algorithm =
   let (c,a,h) = cs in c
@@ -111,13 +117,12 @@ type nonce_s (cs:ciphersuite) = lbytes (size_nonce cs)
 
 val encap:
     cs: ciphersuite
-  -> e: entropy
+  -> skE: key_secret_s cs
   -> pkR: key_public_s cs
   -> einfo: lbytes size_einfo ->
-  Tot (entropy & key_public_s cs & key_s cs & nonce_s cs)
+  Tot (key_public_s cs & key_s cs & nonce_s cs)
 
-let encap cs e pkR einfo =
-  let e', skE = crypto_random e (size_key_dh cs) in
+let encap cs skE pkR einfo =
   let pkE = DH.secret_to_public (curve_of_cs cs) skE in
   let zz = DH.scalarmult (curve_of_cs cs) skE pkR in
   let nh0 = create (size_key_dh cs) (u8 0) in
@@ -127,7 +132,7 @@ let encap cs e pkR einfo =
   let info_nonce: lbytes (size_context cs + size_label_nonce) = label_nonce @| context in
   let keyIR = HKDF.expand (hash_of_cs cs) secret info_key (size_key cs) in
   let nonceIR = HKDF.expand (hash_of_cs cs) secret info_nonce (size_nonce cs) in
-  e', pkE, keyIR, nonceIR
+  pkE, keyIR, nonceIR
 
 
 /// Input: ciphersuite, pkE, skR, info
@@ -169,7 +174,7 @@ let decap cs pkE skR einfo =
 
 val encrypt:
     cs: ciphersuite
-  -> e: entropy
+  -> skE: key_secret_s cs
   -> pkR: key_public_s cs
   -> info: lbytes size_einfo
   -> aad: bytes {length aad + AEAD.padlen (aead_of_cs cs) (length aad) <= max_size_t}
@@ -178,8 +183,8 @@ val encrypt:
            /\ length pt + AEAD.padlen (aead_of_cs cs) (length pt) <= max_size_t} ->
   Tot (bytes & key_public_s cs)
 
-let encrypt cs e pkR info aad pt =
-  let e, pkE, keyIR, nonceIR = encap cs e pkR info in
+let encrypt cs skE pkR info aad pt =
+  let pkE, keyIR, nonceIR = encap cs skE pkR info in
   let ct = AEAD.aead_encrypt (aead_of_cs cs) keyIR nonceIR pt aad in
   ct, pkE
 
