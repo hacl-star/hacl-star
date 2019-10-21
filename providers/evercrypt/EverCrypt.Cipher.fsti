@@ -7,7 +7,6 @@ open Lib.Buffer
 
 module Spec = Spec.Chacha20
 
-inline_for_extraction
 val chacha20:
     len:size_t
   -> out:lbuffer uint8 len
