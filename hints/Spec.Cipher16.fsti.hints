@@ -1,0 +1,80 @@
+[
+  "”ê°AÌâí©{ØhNÿà3z",
+  [
+    [
+      "Spec.Cipher16.keylen",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "disc_equation_Spec.Cipher16.AES128",
+        "disc_equation_Spec.Cipher16.AES256",
+        "disc_equation_Spec.Cipher16.CHACHA20",
+        "fuel_guarded_inversion_Spec.Cipher16.alg"
+      ],
+      0,
+      "4ffdccbf99ab9859146dcfbe27c1f1bc"
+    ],
+    [
+      "Spec.Cipher16.slen",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "disc_equation_Spec.Cipher16.AES128",
+        "disc_equation_Spec.Cipher16.AES256",
+        "disc_equation_Spec.Cipher16.CHACHA20",
+        "fuel_guarded_inversion_Spec.Cipher16.alg"
+      ],
+      0,
+      "459cab937ffcd5fc3fbcb378c03ec76a"
+    ],
+    [
+      "Spec.Cipher16.lbytes",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
+        "equation_Prims.nat", "function_token_typing_Prims.int",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+      ],
+      0,
+      "1b6e48dd406fa641fea81d2d49edd775"
+    ],
+    [
+      "Spec.Cipher16.key",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Spec.Cipher16.keylen",
+        "fuel_guarded_inversion_Spec.Cipher16.alg",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "3f4ae9a70bfcd855d6b73a4e2cb6a4dc"
+    ],
+    [
+      "Spec.Cipher16.expand",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Spec.Cipher16.bytes", "equation_Spec.Cipher16.key",
+        "equation_Spec.Cipher16.keylen", "equation_Spec.Cipher16.lbytes",
+        "equation_Spec.Cipher16.slen", "function_token_typing_FStar.UInt8.t",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_fa9367774f23a225015924c83bbe1f7c",
+        "typing_FStar.Seq.Base.length"
+      ],
+      0,
+      "5253b7d44b4b11cbf5afb0c375eb7798"
+    ]
+  ]
+]
