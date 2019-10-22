@@ -499,7 +499,17 @@ procedure LoadBe64_buffer128(
     lemma_valid_taint128(b, #memTaint_t(memTaint), mem, #nat(index), t);
 }
 
+procedure codeonly_Load64_buffer128(
+        out dst:reg_opr64, in src:reg_opr64, inline offset:int, inline t:taint, inline upper:bool,
+        ghost b:buffer128, ghost index:int)
+    {:public}
+    {:codeOnly}
+    {:instruction mk_ins(make_instr(I.ins_Mov64, dst, OMem(tuple(MReg(get_reg(src), offset), t))))}
+{
+}
+
 procedure codeonly_Bswap(inout dst:dst_opr64)
+    {:public}
     {:codeOnly}
     {:instruction mk_ins(make_instr(I.ins_Bswap64, dst))}
 {
