@@ -6,17 +6,19 @@ module B = LowStar.Buffer
 module IB = LowStar.ImmutableBuffer
 module BV = LowStar.BufferView
 module HS = FStar.HyperStack
+module BF = Vale.Arch.BufferFriend
 open FStar.Mul
 open Vale.SHA.SHA_helpers
+open Lib.IntTypes
 
 unfold
-let uint32_p = B.buffer UInt32.t
+let uint32_p = B.buffer uint32
 unfold
-let uint32_i = IB.ibuffer UInt32.t
+let uint32_i = IB.ibuffer uint32
 unfold
-let uint8_p = B.buffer UInt8.t
+let uint8_p = B.buffer uint8
 unfold
-let uint64 = UInt64.t
+let uint64 = uint_t U64 PUB
 
 inline_for_extraction
 val sha256_update
@@ -41,5 +43,5 @@ val sha256_update
    (reveal_word();
     Seq.equal
       (B.as_seq h1 ctx_b)
-      (update_multi_transparent (B.as_seq h0 ctx_b) (B.as_seq h0 in_b)))
+      (update_multi_transparent (B.as_seq h0 ctx_b) (BF.of_bytes (B.as_seq h0 in_b))))
   )

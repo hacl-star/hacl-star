@@ -4,7 +4,6 @@ open FStar.Mul
 open Lib.IntTypes
 open Lib.Sequence
 open Lib.ByteSequence
-open Lib.RawIntTypes
 
 module Poly = Spec.Poly1305
 
@@ -26,75 +25,64 @@ type tag = lbytes size_tag
 
 /// Specification
 
-let poly1305_padded
-  (r_elem:Poly.felem)
-  (len:size_nat) 
-  (text:lbytes len) 
-  (tmp:lbytes Poly.size_block) 
-  (acc:Poly.felem) 
-  : Tot (Poly.felem)
-  = let n = len / Poly.size_block in
-    let r = len % Poly.size_block in
-    let blocks = sub text 0 (n * Poly.size_block) in
-    let rem = sub text (n * Poly.size_block) r in
-    let acc = Poly.poly blocks acc r_elem in
-    let tmp = update_sub tmp 0 r rem in
-    // Only run the padded block if the initial text needed padding
-    let acc = if r > 0 then Poly.update1 r_elem Poly.size_block tmp acc else acc in
-    acc
+val poly1305_padded:
+    r_elem:Poly.felem
+  -> text:bytes
+  -> acc:Poly.felem ->
+  Tot Poly.felem
+let poly1305_padded r_elem text acc =
+  let len = length text in
+  let n = len / Poly.size_block in
+  let r = len % Poly.size_block in
+  let blocks = Seq.slice text 0 (n * Poly.size_block) in
+  let rem = Seq.slice text (n * Poly.size_block) len in
+  let acc = Poly.poly1305_update blocks acc r_elem in
 
-let poly1305_do
-  (k:Poly.key)
-  (len:size_nat{len <= max_size_t})
-  (m:lbytes len)
-  (aad_len:size_nat{(len + aad_len) / Spec.Chacha20.blocklen <= max_size_t})
-  (aad:lbytes aad_len):
-  Tot Poly.tag =
+  let tmp = create Poly.size_block (u8 0) in
+  let tmp = update_sub tmp 0 r rem in
+  // Only run the padded block if the initial text needed padding
+  let acc = if r > 0 then Poly.poly1305_update1 r_elem Poly.size_block tmp acc else acc in
+  acc
+
+val poly1305_do:
+    k:Poly.key
+  -> m:bytes{length m <= maxint U64}
+  -> aad:bytes{length aad <= maxint U64} ->
+  Tot Poly.tag
+let poly1305_do k m aad =
   let acc, r = Poly.poly1305_init k in
-  let block = create Poly.size_block (u8 0) in
-  let acc = poly1305_padded r aad_len aad block acc in
-  let acc = poly1305_padded r len m block acc in
-  let aad_len8 = uint_to_bytes_le #U64 (u64 aad_len) in
-  let ciphertext_len8 = uint_to_bytes_le #U64 (u64 len) in
-  let block = update_sub block 0 8 aad_len8 in
-  let block = update_sub block 8 8 ciphertext_len8 in
-  let acc = Poly.update1 r 16 block acc in
-  Poly.finish k acc
+  let acc = poly1305_padded r aad acc in
+  let acc = poly1305_padded r m acc in
+  let aad_len8 = uint_to_bytes_le #U64 (u64 (length aad)) in
+  let ciphertext_len8 = uint_to_bytes_le #U64 (u64 (length m)) in
+  let block = aad_len8 @| ciphertext_len8 in
+  let acc = Poly.poly1305_update1 r 16 block acc in
+  Poly.poly1305_finish k acc
 
 val aead_encrypt:
     k:key
   -> n:nonce
-  -> m: bytes{length m + size_block <= max_size_t}
-  -> aad: bytes{length aad <= max_size_t /\ (length m + length aad) / Spec.Chacha20.blocklen <= max_size_t} ->
-  Tot (lbytes (length m + Poly.size_block))
-
+  -> m:bytes{length m <= max_size_t}
+  -> aad:bytes{length aad <= maxint U64} ->
+  Tot (res:bytes{length res == length m + Poly.size_block})
 let aead_encrypt k n m aad =
-  let len = length m in
-  let len_aad : size_nat = length aad in
-  let key0 = Spec.Chacha20.chacha20_key_block0 k n in
-  let poly_k = sub key0 0 32 in
-  let res = create (len + Poly.size_block) (u8 0) in
   let cipher = Spec.Chacha20.chacha20_encrypt_bytes k n 1 m in
-  let mac = poly1305_do poly_k len cipher len_aad aad in
-  let res = update_sub res 0 len cipher in
-  let res = update_sub res len Poly.size_block mac in
-  res
-
+  let key0:lbytes 64 = Spec.Chacha20.chacha20_encrypt_bytes k n 0 (create 64 (u8 0)) in
+  let poly_k = sub key0 0 32 in
+  let mac = poly1305_do poly_k cipher aad in
+  Seq.append cipher mac
 
 val aead_decrypt:
-    k: key
-  -> n: nonce
-  -> c: bytes{length c + size_block <= max_size_t}
-  -> mac: tag
-  -> aad: bytes{length aad <= max_size_t /\ (length c + length aad) / 64 <= max_size_t} ->
+    k:key
+  -> n:nonce
+  -> c:bytes{length c <= max_size_t}
+  -> mac:tag
+  -> aad:bytes{length aad <= maxint U64} ->
   Tot (option (lbytes (length c)))
-
 let aead_decrypt k n cipher mac aad =
-  let len_aad = length aad in
-  let clen = length cipher in
-  let key0 = Spec.Chacha20.chacha20_key_block0 k n in
+  let key0:lbytes 64 = Spec.Chacha20.chacha20_encrypt_bytes k n 0 (create 64 (u8 0)) in
   let poly_k = sub key0 0 32 in
-  let computed_mac = poly1305_do poly_k clen cipher len_aad aad in
+  let computed_mac = poly1305_do poly_k cipher aad in
   if lbytes_eq computed_mac mac then
     let plain = Spec.Chacha20.chacha20_encrypt_bytes k n 1 cipher in
     Some plain

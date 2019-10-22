@@ -1,9 +1,11 @@
 module Vale.Interop.Base
 include Vale.Interop.Types
+include Vale.Interop.Heap_s
 module MB = LowStar.Monotonic.Buffer
 module DV = LowStar.BufferView.Down
 module B = LowStar.Buffer
 module IB = LowStar.ImmutableBuffer
+include Vale.Arch.Heap
 module BS = Vale.X64.Machine_Semantics_s
 module BV = LowStar.BufferView
 module HS = FStar.HyperStack
@@ -15,10 +17,10 @@ module L = FStar.List.Tot
 open FStar.Mul
 
 [@__reduce__]
-let buf_t src t = b:B.buffer (base_typ_as_type src){(B.length b * view_n src) % view_n t = 0}
+let buf_t src t = b:B.buffer (base_typ_as_type src){(B.length b * view_n_unfold src) % view_n_unfold t = 0}
 
 [@__reduce__]
-let ibuf_t src t = b:IB.ibuffer (base_typ_as_type src){(B.length b * view_n src) % view_n t = 0}
+let ibuf_t src t = b:IB.ibuffer (base_typ_as_type src){(B.length b * view_n_unfold src) % view_n_unfold t = 0}
 
 let lemma_seq_neq_intro (#a:Type) (s1:Seq.seq a) (s2:Seq.seq a)
  : Lemma (requires (Seq.length s1 =!= Seq.length s2))
@@ -42,32 +44,6 @@ let imm_to_b8 (src:base_typ) (b:IB.ibuffer (base_typ_as_type src)) : GTot b8 =
 
 let mut_to_b8 (src:base_typ) (b:B.buffer (base_typ_as_type src)) : GTot b8 =
   Buffer b true
-
-[@__reduce__]
-let disjoint_or_eq_b8 (ptr1 ptr2:b8) =
-  B.loc_disjoint (B.loc_buffer ptr1.bsrc) (B.loc_buffer ptr2.bsrc) \/
-  ptr1 == ptr2
-
-let list_disjoint_or_eq (ptrs:list b8) =
-  forall (p1 p2:b8). {:pattern (L.memP p1 ptrs); (L.memP p2 ptrs)}
-    L.memP p1 ptrs /\
-    L.memP p2 ptrs ==> disjoint_or_eq_b8 p1 p2
-
-unfold
-let list_live mem (ptrs:list b8) =
-  forall p . {:pattern (L.memP p ptrs)} L.memP p ptrs ==> B.live mem p.bsrc
-
-assume val global_addrs_map : addr_map
-
-let mk_addr_map (ptrs : list b8 { list_disjoint_or_eq ptrs }) : GTot addr_map =
-  global_addrs_map
-
-noeq
-type interop_heap =
-  | InteropHeap : ptrs : list b8 { list_disjoint_or_eq ptrs } ->
-          addrs : addr_map { addrs  == mk_addr_map ptrs } ->
-          hs : HS.mem{ list_live hs ptrs } ->
-          interop_heap
 
 [@__reduce__]
 let coerce (x:'a{'a == 'b}) : 'b = x
@@ -421,21 +397,9 @@ let liveness_disjointness (args:list arg) (h:mem_roots args)
   = args_b8_disjoint_or_eq args;
     args_b8_live h args
 
-let mem_of_hs_roots (ptrs:list b8{list_disjoint_or_eq ptrs})
-                    (h:HS.mem{list_live h ptrs})
-  : GTot interop_heap
-  = InteropHeap ptrs (mk_addr_map ptrs) h
-
 let mk_mem (args:list arg) (h:mem_roots args) : GTot interop_heap =
   liveness_disjointness args h;
   mem_of_hs_roots (args_b8 args) h
-
-unfold
-let hs_of_mem (m:interop_heap) : HS.mem = InteropHeap?.hs m
-unfold
-let ptrs_of_mem (m:interop_heap) : l:list b8{list_disjoint_or_eq l} = InteropHeap?.ptrs m
-unfold
-let addrs_of_mem (m:interop_heap) : addr_map = InteropHeap?.addrs m
 
 let mk_mem_injective (args:list arg) (h:mem_roots args)
   : Lemma (hs_of_mem (mk_mem args h) == h /\
@@ -505,26 +469,3 @@ let create_memtaint
   : GTot MS.memTaint_t
   = List.Tot.fold_right_gtot ps (write_taint 0 mem ts) (FStar.Map.const MS.Public)
 
-let correct_down_p (mem:interop_heap) (h:BS.machine_heap) (p:b8) =
-  let b = get_downview p.bsrc in
-  let length = DV.length b in
-  let contents = DV.as_seq (hs_of_mem mem) b in
-  let addr = addrs_of_mem mem p in
-  let open BS in
-  (forall i.{:pattern (Seq.index contents i)}  0 <= i /\ i < length ==> h.[addr + i] == UInt8.v (FStar.Seq.index contents i))
-
-let rec addrs_ptr (i:nat) (addrs:addr_map) (ptr:b8{i <= DV.length (get_downview ptr.bsrc)}) (acc:Set.set int)
-  : GTot (Set.set int)
-         (decreases (DV.length (get_downview ptr.bsrc) - i))
-  = if i = DV.length (get_downview ptr.bsrc) then acc
-    else addrs_ptr (i + 1) addrs ptr (Set.union (Set.singleton (addrs ptr + i)) acc)
-
-let addrs_set (mem:interop_heap) : GTot (Set.set int) =
-  L.fold_right_gtot (ptrs_of_mem mem) (addrs_ptr 0 (addrs_of_mem mem)) Set.empty
-
-let correct_down (mem:interop_heap) (h:BS.machine_heap) =
-  Set.equal (addrs_set mem) (Map.domain h) /\
-  (forall p.{:pattern (L.memP p (ptrs_of_mem mem))}
-    L.memP p (ptrs_of_mem mem) ==> correct_down_p mem h p)
-
-let down_mem_t = m:interop_heap -> GTot (h:BS.machine_heap {correct_down m h})

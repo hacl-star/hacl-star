@@ -1,4 +1,5 @@
 module Vale.X64.Stack_Sems
+open FStar.Mul
 
 friend Vale.X64.Stack_i
 

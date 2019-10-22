@@ -1,6 +1,6 @@
 module Hacl.Hash.Core.SHA2
 
-module U8 = FStar.UInt8
+open Lib.IntTypes
 module U32 = FStar.UInt32
 module U64 = FStar.UInt64
 module U128 = FStar.UInt128
@@ -11,6 +11,7 @@ module Helpers = Spec.Hash.Definitions
 module Endianness = FStar.Kremlin.Endianness
 module Math = FStar.Math.Lemmas
 module Spec = Spec.SHA2
+module SpecLemmas = Spec.SHA2.Lemmas
 
 module M = LowStar.Modifies
 module S = FStar.Seq
@@ -26,6 +27,7 @@ open Hacl.Hash.Lemmas
 open Hacl.Hash.Definitions
 
 friend Spec.SHA2
+friend Spec.SHA2.Lemmas
 friend Hacl.Hash.PadFinish
 
 #reset-options "--max_fuel 0 --max_ifuel 0"
@@ -50,7 +52,7 @@ let index_h (a: sha2_alg) (i: U32.t): ST.Stack (word a)
   (requires (fun _ -> U32.v i < 8))
   (ensures (fun h0 r h1 ->
     B.(modifies loc_none h0 h1) /\
-    r = S.index (h a) (U32.v i)))
+    r == S.index (h a) (U32.v i)))
 =
     match a with
     | SHA2_224 -> B.recall h224; IB.recall_contents h224 Constants.h224; h224.(i)
@@ -126,13 +128,13 @@ let block_w (a: sha2_alg) =
   b:B.buffer (word a) { B.length b = Helpers.block_word_length }
 
 let block_b (a: sha2_alg) =
-  b:B.buffer U8.t { FStar.Mul.(B.length b = block_word_length * word_length a) }
+  b:B.buffer uint8 { FStar.Mul.(B.length b = block_word_length * word_length a) }
 
 inline_for_extraction
 let ws_w (a: sha2_alg) = b:B.buffer (word a) { B.length b = Spec.size_k_w a }
 
 let block_words_be (a: sha2_alg) (h: HS.mem) (b: block_b a) =
-  words_of_bytes a block_word_length (B.as_seq h b)
+  words_of_bytes a #block_word_length (B.as_seq h b)
 
 inline_for_extraction
 val ws (a: sha2_alg) (b: block_b a) (ws: ws_w a):
@@ -142,22 +144,21 @@ val ws (a: sha2_alg) (b: block_b a) (ws: ws_w a):
     (ensures (fun h0 _ h1 ->
       let b = block_words_be a h0 b in
       M.(modifies (loc_buffer ws) h0 h1) /\
-      B.as_seq h1 ws == S.init (Spec.size_k_w a) (Spec.ws a b)))
+      B.as_seq h1 ws == S.init (Spec.size_k_w a) (SpecLemmas.ws a b)))
 
 inline_for_extraction
-let index_be (a: sha2_alg) (b: B.buffer U8.t) (i: U32.t):
+let index_be (a: sha2_alg) (b: block_b a) (i: U32.t):
   ST.Stack (word a)
     (requires (fun h ->
-      B.length b % word_length a = 0 /\
       B.live h b /\
-      U32.v i < B.length b / word_length a))
+      U32.v i < block_word_length))
     (ensures (fun h0 r h1 ->
        M.(modifies loc_none h0 h1) /\
-       r = S.index (words_of_bytes a (B.length b / word_length a) (B.as_seq h0 b)) (U32.v i)))
+       r == S.index (words_of_bytes a #(B.length b / word_length a) (B.as_seq h0 b)) (U32.v i)))
 =
   match a with
-  | SHA2_224 | SHA2_256 -> C.Endianness.index_32_be b i
-  | SHA2_384 | SHA2_512 -> C.Endianness.index_64_be b i
+  | SHA2_224 | SHA2_256 -> Lib.ByteBuffer.uint_at_index_be #U32 #SEC #(size block_word_length) b i
+  | SHA2_384 | SHA2_512 -> Lib.ByteBuffer.uint_at_index_be #U64 #SEC #(size block_word_length) b i
 
 #set-options "--max_fuel 1 --z3rlimit 20"
 
@@ -168,9 +169,9 @@ let ws a b ws =
     let b = block_words_be a h0 b in
     i <= Spec.size_k_w a /\
     M.(modifies (loc_buffer ws) h0 h1) /\
-    S.equal (S.slice (B.as_seq h1 ws) 0 i) (S.init i (Spec.ws a b))
+    S.equal (S.slice (B.as_seq h1 ws) 0 i) (S.init i (SpecLemmas.ws a b))
   in
-  reveal_opaque (`%Spec.ws) Spec.ws;
+  reveal_opaque (`%SpecLemmas.ws) SpecLemmas.ws;
   let f (i: U32.t { U32.(0 <= v i /\ v i < Spec.size_k_w a) }):
     ST.Stack unit
       (requires (fun h -> inv h (U32.v i)))
@@ -180,7 +181,7 @@ let ws a b ws =
       (**) let h1 = ST.get () in
       ws.(i) <- index_be a b i;
       (**) let h2 = ST.get () in
-      (**) init_next (B.as_seq h2 ws) (Spec.ws a (block_words_be a h0 b)) (U32.v i)
+      (**) init_next (B.as_seq h2 ws) (SpecLemmas.ws a (block_words_be a h0 b)) (U32.v i)
     end else
       let h1 = ST.get () in
       let t16 = ws.(U32.sub i 16ul) in
@@ -190,24 +191,24 @@ let ws a b ws =
 
       // JP: TODO, understand why this is not going through.
       (**) assert (S.index (B.as_seq h1 ws) (U32.v i - 16) ==
-      (**)   S.index (S.init (U32.v i) (Spec.ws a (block_words_be a h0 b))) (U32.v i - 16));
-      (**) assert (t16 == Spec.ws a (block_words_be a h0 b) (U32.v i - 16));
+      (**)   S.index (S.init (U32.v i) (SpecLemmas.ws a (block_words_be a h0 b))) (U32.v i - 16));
+      (**) assert (t16 == SpecLemmas.ws a (block_words_be a h0 b) (U32.v i - 16));
       (**) assert (S.index (B.as_seq h1 ws) (U32.v i - 15) ==
-      (**)   S.index (S.init (U32.v i) (Spec.ws a (block_words_be a h0 b))) (U32.v i - 15));
-      (**) assert (t15 == Spec.ws a (block_words_be a h0 b) (U32.v i - 15));
+      (**)   S.index (S.init (U32.v i) (SpecLemmas.ws a (block_words_be a h0 b))) (U32.v i - 15));
+      (**) assert (t15 == SpecLemmas.ws a (block_words_be a h0 b) (U32.v i - 15));
       (**) assert (S.index (B.as_seq h1 ws) (U32.v i - 7) ==
-      (**)   S.index (S.init (U32.v i) (Spec.ws a (block_words_be a h0 b))) (U32.v i - 7));
-      (**) assert (t7 == Spec.ws a (block_words_be a h0 b) (U32.v i - 7));
+      (**)   S.index (S.init (U32.v i) (SpecLemmas.ws a (block_words_be a h0 b))) (U32.v i - 7));
+      (**) assert (t7 == SpecLemmas.ws a (block_words_be a h0 b) (U32.v i - 7));
       (**) assert (S.index (B.as_seq h1 ws) (U32.v i - 2) ==
-      (**)   S.index (S.init (U32.v i) (Spec.ws a (block_words_be a h0 b))) (U32.v i - 2));
-      (**) assert (t2 == Spec.ws a (block_words_be a h0 b) (U32.v i - 2));
+      (**)   S.index (S.init (U32.v i) (SpecLemmas.ws a (block_words_be a h0 b))) (U32.v i - 2));
+      (**) assert (t2 == SpecLemmas.ws a (block_words_be a h0 b) (U32.v i - 2));
 
       let s1 = Spec._sigma1 a t2 in
       let s0 = Spec._sigma0 a t15 in
-      let w = Spec.word_add_mod a s1 (Spec.word_add_mod a t7 (Spec.word_add_mod a s0 t16)) in
+      let w = s1 +. t7 +. s0 +. t16 in
       ws.(i) <- w;
       (**) let h2 = ST.get () in
-      (**) init_next (B.as_seq h2 ws) (Spec.ws a (block_words_be a h0 b)) (U32.v i)
+      (**) init_next (B.as_seq h2 ws) (SpecLemmas.ws a (block_words_be a h0 b)) (U32.v i)
   in
   C.Loops.for 0ul (U32.uint_to_t (Spec.size_k_w a)) inv f
 
@@ -235,8 +236,6 @@ let k0 a =
       IB.recall_contents k384_512 (S.seq_of_list Constants.k384_512_l);
       k384_512
 
-inline_for_extraction unfold
-let add = Spec.word_add_mod
 
 inline_for_extraction
 val shuffle_core (a: sha2_alg)
@@ -250,14 +249,14 @@ val shuffle_core (a: sha2_alg)
       let b = block_words_be a h block in
       B.live h block /\ B.live h hash /\ B.live h ws /\
       B.disjoint block hash /\ B.disjoint block ws /\ B.disjoint hash ws /\
-      B.as_seq h ws == S.init (Spec.size_k_w a) (Spec.ws a b)))
+      B.as_seq h ws == S.init (Spec.size_k_w a) (SpecLemmas.ws a b)))
     (ensures (fun h0 _ h1 ->
       let block = G.reveal block in
       let b = block_words_be a h0 block in
       M.(modifies (loc_buffer hash) h0 h1) /\
-      B.as_seq h1 hash == Spec.shuffle_core a b (B.as_seq h0 hash) (U32.v t)))
+      B.as_seq h1 hash == SpecLemmas.shuffle_core a b (B.as_seq h0 hash) (U32.v t)))
 
-#set-options "--z3rlimit 50"
+#set-options "--max_fuel 1 --z3rlimit 100"
 inline_for_extraction
 let shuffle_core a block hash ws t =
   let a0 = hash.(0ul) in
@@ -271,25 +270,26 @@ let shuffle_core a block hash ws t =
 
   let w = ws.(t) in
 
-  let t1 = add a h0 (add a (Spec._Sigma1 a e0) (add a (Spec._Ch a e0 f0 g0) (add a (k0 a).(t) w))) in
-  let t2 = add a (Spec._Sigma0 a a0) (Spec._Maj a a0 b0 c0) in
+  let t1 = h0 +. (Spec._Sigma1 a e0) +. (Spec._Ch a e0 f0 g0) +. (k0 a).(t) +. w in
+  let t2 = (Spec._Sigma0 a a0) +. (Spec._Maj a a0 b0 c0) in
 
-  hash.(0ul) <- add a t1 t2;
+  hash.(0ul) <- t1 +. t2;
   hash.(1ul) <- a0;
   hash.(2ul) <- b0;
   hash.(3ul) <- c0;
-  hash.(4ul) <- add a d0 t1;
+  hash.(4ul) <- d0 +. t1;
   hash.(5ul) <- e0;
   hash.(6ul) <- f0;
   hash.(7ul) <- g0;
 
-  (**) reveal_opaque (`%Spec.shuffle_core) Spec.shuffle_core;
+  (**) reveal_opaque (`%SpecLemmas.shuffle_core) SpecLemmas.shuffle_core;
   (**) let h = ST.get () in
   (**) [@inline_let]
-  (**) let l = [ add a t1 t2; a0; b0; c0; add a d0 t1; e0; f0; g0 ] in
+  (**) let l = [ t1 +. t2; a0; b0; c0; d0 +. t1; e0; f0; g0 ] in
   (**) assert_norm (List.Tot.length l = 8);
   (**) S.intro_of_list #(word a) (B.as_seq h hash) l
 
+#reset-options "--max_fuel 2 --z3rlimit 500"
 inline_for_extraction
 val shuffle: a:sha2_alg -> block:G.erased (block_b a) -> hash:words_state a -> ws:ws_w a ->
   ST.Stack unit
@@ -298,7 +298,7 @@ val shuffle: a:sha2_alg -> block:G.erased (block_b a) -> hash:words_state a -> w
       let b = block_words_be a h block in
       B.live h block /\ B.live h hash /\ B.live h ws /\
       B.disjoint block hash /\ B.disjoint block ws /\ B.disjoint hash ws /\
-      B.as_seq h ws == S.init (Spec.size_k_w a) (Spec.ws a b)))
+      B.as_seq h ws == S.init (Spec.size_k_w a) (SpecLemmas.ws a b)))
     (ensures (fun h0 _ h1 ->
       let block = G.reveal block in
       let b = block_words_be a h0 block in
@@ -317,7 +317,7 @@ let shuffle a block hash ws =
     M.(modifies (loc_buffer hash) h0 h1) /\
     i <= Spec.size_k_w a /\
     B.as_seq h1 hash ==
-      Spec.Loops.repeat_range 0 i (Spec.shuffle_core a block) (B.as_seq h0 hash)
+      Spec.Loops.repeat_range 0 i (SpecLemmas.shuffle_core a block) (B.as_seq h0 hash)
   in
   let f (i: U32.t { U32.(0 <= v i /\ v i < Spec.size_k_w a)}):
     ST.Stack unit
@@ -331,19 +331,23 @@ let shuffle a block hash ws =
     (**) let block = G.reveal block in
     (**) let block = block_words_be a h0 block in
     (**) let hash = B.as_seq h0 hash in
-    (**) Spec.Loops.repeat_range_induction 0 (U32.v i + 1) (Spec.shuffle_core a block) hash
+    (**) Spec.Loops.repeat_range_induction 0 (U32.v i + 1) (SpecLemmas.shuffle_core a block) hash
   in
-  (**) Spec.Loops.repeat_range_base 0 (Spec.shuffle_core a (block_words_be a h0 (G.reveal block))) (B.as_seq h0 hash);
+  (**) Spec.Loops.repeat_range_base 0 (SpecLemmas.shuffle_core a (block_words_be a h0 (G.reveal block))) (B.as_seq h0 hash);
   C.Loops.for 0ul (size_k_w a) inv f;
-  reveal_opaque (`%Spec.shuffle) Spec.shuffle
+  reveal_opaque (`%Spec.shuffle) Spec.shuffle;
+  (**) let hash = B.as_seq h0 hash in
+  (**) let block = G.reveal block in
+  (**) let block = block_words_be a h0 block in
+  SpecLemmas.shuffle_is_shuffle_pre a hash block
 
 inline_for_extraction
 let zero (a: sha2_alg): word a =
   match a with
-  | SHA2_224 | SHA2_256 -> 0ul
-  | SHA2_384 | SHA2_512 -> 0UL
+  | SHA2_224 | SHA2_256 -> u32 0
+  | SHA2_384 | SHA2_512 -> u64 0
 
-#set-options "--max_fuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
 
 noextract inline_for_extraction
 val update: a:sha2_alg -> update_st a
@@ -359,9 +363,15 @@ let update a hash block =
   (**) assert (S.equal (B.as_seq h1 hash1) (B.as_seq h0 hash));
   (**) assert (S.equal (B.as_seq h1 hash) (B.as_seq h0 hash));
   shuffle a (G.hide block) hash1 computed_ws;
-  C.Loops.in_place_map2 hash hash1 8ul (add a);
-  (**) ST.pop_frame ();
+  (**) let h2 = ST.get () in
+  (**) assert (let block_w = words_of_bytes a #block_word_length (B.as_seq h1 block) in
+	       S.equal (B.as_seq h2 hash1) (Spec.shuffle a (B.as_seq h1 hash1) block_w));
+  C.Loops.in_place_map2 hash hash1 8ul ( +. );
+  (**) let h3 = ST.get () in
+  (**) assert (S.equal (B.as_seq h3 hash) (Spec.update_pre a (B.as_seq h1 hash1) (B.as_seq h1 block)));
+  ST.pop_frame();
   (**) reveal_opaque (`%Spec.update) Spec.update
+
 
 let update_224: update_st SHA2_224 = update SHA2_224
 let update_256: update_st SHA2_256 = update SHA2_256

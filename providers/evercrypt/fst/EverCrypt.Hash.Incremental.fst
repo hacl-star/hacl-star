@@ -16,6 +16,7 @@ module Hash = EverCrypt.Hash
 
 open FStar.HyperStack.ST
 open Spec.Hash.Definitions
+friend Spec.Agile.Hash
 
 #set-options "--max_fuel 0 --max_ifuel 0"
 
@@ -27,7 +28,7 @@ noeq
 type state_s a =
 | State:
     hash_state: Hash.state a ->
-    buf: B.buffer UInt8.t { B.length buf = block_length a } ->
+    buf: B.buffer Lib.IntTypes.uint8 { B.length buf = block_length a } ->
     total_len: UInt64.t ->
     seen: G.erased bytes ->
     state_s a
@@ -73,7 +74,7 @@ let invariant_s #a h s =
   S.length blocks + S.length rest = U64.v total_len /\
   S.length seen = U64.v total_len /\
   U64.v total_len < pow2 61 /\
-  S.equal (Hash.repr hash_state h) (Spec.Hash.update_multi a (Spec.Hash.init a) blocks) /\
+  S.equal (Hash.repr hash_state h) (Spec.Agile.Hash.update_multi a (Spec.Agile.Hash.init a) blocks) /\
   S.equal (S.slice (B.as_seq h buf_) 0 (U64.v total_len % block_length a)) rest
 
 #push-options "--max_ifuel 1"
@@ -118,11 +119,12 @@ let split_at_last_empty (a: Hash.alg): Lemma
 =
   ()
 
-#push-options "--z3rlimit 20"
+#restart-solver
+#push-options "--z3rlimit 40"
 let create_in a r =
   (**) let h0 = ST.get () in
 
-  let buf = B.malloc r 0uy (Hacl.Hash.Definitions.block_len a) in
+  let buf = B.malloc r (Lib.IntTypes.u8 0) (Hacl.Hash.Definitions.block_len a) in
   (**) let h1 = ST.get () in
   (**) assert (B.fresh_loc (B.loc_buffer buf) h0 h1);
 
@@ -148,10 +150,22 @@ let create_in a r =
   (**) split_at_last_empty a;
   (**) B.modifies_only_not_unused_in B.loc_none h0 h4;
 
+  (**) let h5 = ST.get () in
+  (**) assert (invariant h5 p /\
+  (**)   hashed h5 p == S.empty /\
+  (**)   B.(modifies loc_none h0 h5) /\
+  (**)   B.fresh_loc (footprint h5 p) h0 h5 /\
+  (**)   B.(loc_includes (loc_region_only true r) (footprint h5 p)) /\
+  (**)   freeable h5 p);
+
+  (**) assert (ST.equal_stack_domains h1 h5);
+
   p
 #pop-options
 
-#push-options "--z3refresh"
+#push-options "--z3rlimit 40"
+#restart-solver
+
 let init a s =
   let open LowStar.BufferOps in
   let h1 = ST.get () in
@@ -177,8 +191,16 @@ let init a s =
   assert B.(modifies (footprint #a h1 s) h1 h3);
   // This seems to cause insurmountable difficulties. Puzzled.
   ST.lemma_equal_domains_trans h1 h2 h3;
+
   // AR: 07/22: same old `Seq.equal` and `==` story
-  assert (Seq.equal (hashed #a h3 s) Seq.empty)
+  assert (Seq.equal (hashed #a h3 s) Seq.empty);
+
+  assert (ST.equal_domains h1 h3);
+  assert (preserves_freeable #a s h1 h3 /\
+    invariant #a h3 s /\
+    hashed h3 s == S.empty /\
+    footprint h1 s == footprint #a h3 s /\
+    B.(modifies (footprint #a h1 s) h1 h3))
 #pop-options
 
 /// We keep the total length at run-time, on 64 bits, but require that it abides
@@ -293,7 +315,7 @@ val update_small:
   a:e_alg -> (
   let a = G.reveal a in
   s:state a ->
-  data: B.buffer UInt8.t ->
+  data: B.buffer Lib.IntTypes.uint8 ->
   len: UInt32.t ->
   Stack unit
     (requires fun h0 ->
@@ -338,7 +360,7 @@ let update_small a p data len =
     S.length blocks + S.length rest = U64.v total_len /\
     S.length b = U64.v total_len /\
     U64.v total_len < pow2 61 /\
-    S.equal (Hash.repr hash_state h2) (Spec.Hash.update_multi a (Spec.Hash.init a) blocks) /\
+    S.equal (Hash.repr hash_state h2) (Spec.Agile.Hash.update_multi a (Spec.Agile.Hash.init a) blocks) /\
     S.equal (S.slice (B.as_seq h2 buf) 0 (U64.v total_len % block_length a)) rest
     );
   assert (hashed #a h2 p `S.equal` (S.append (G.reveal seen) (B.as_seq h0 data)));
@@ -424,7 +446,7 @@ val update_empty_buf:
   a:e_alg -> (
   let a = G.reveal a in
   s:state a ->
-  data: B.buffer UInt8.t ->
+  data: B.buffer Lib.IntTypes.uint8 ->
   len: UInt32.t ->
   Stack unit
     (requires fun h0 ->
@@ -497,7 +519,7 @@ val update_round:
   a:e_alg -> (
   let a = G.reveal a in
   s:state a ->
-  data: B.buffer UInt8.t ->
+  data: B.buffer Lib.IntTypes.uint8 ->
   len: UInt32.t ->
   Stack unit
     (requires fun h0 ->
@@ -544,7 +566,7 @@ let update_round a p data len =
   let h2 = ST.get () in
   // JP: no clue why I had to go through all these manual steps.
   (
-    let open Spec.Hash in
+    let open Spec.Agile.Hash in
     let blocks, rest = split_at_last a (G.reveal seen) in
     assert (S.equal (Hash.repr hash_state h2)
       (update_multi a (Hash.repr hash_state h1) (B.as_seq h1 buf0)));
@@ -553,21 +575,21 @@ let update_round a p data len =
     assert (S.equal (B.as_seq h0 data) (B.as_seq h1 data));
     assert (S.equal (B.as_seq h1 buf0) (S.append (B.as_seq h1 buf1) (B.as_seq h1 data)));
     assert (S.equal (Hash.repr hash_state h2)
-      (update_multi a (Spec.Hash.init a)
+      (update_multi a (Spec.Agile.Hash.init a)
         (S.append blocks (B.as_seq h1 buf0))));
     assert (S.equal (Hash.repr hash_state h2)
-      (update_multi a (Spec.Hash.init a)
+      (update_multi a (Spec.Agile.Hash.init a)
         (S.append blocks (S.append (B.as_seq h1 buf1) (B.as_seq h1 data)))));
     S.append_assoc blocks (B.as_seq h1 buf1) (B.as_seq h1 data);
     assert (S.equal (Hash.repr hash_state h2)
-      (update_multi a (Spec.Hash.init a)
+      (update_multi a (Spec.Agile.Hash.init a)
         (S.append (S.append blocks (B.as_seq h1 buf1)) (B.as_seq h1 data))));
     assert (S.equal (S.append blocks rest) (G.reveal seen));
     assert (S.equal (Hash.repr hash_state h2)
-      (update_multi a (Spec.Hash.init a)
+      (update_multi a (Spec.Agile.Hash.init a)
         (S.append (G.reveal seen) (B.as_seq h1 data))));
     assert (S.equal (Hash.repr hash_state h2)
-      (update_multi a (Spec.Hash.init a)
+      (update_multi a (Spec.Agile.Hash.init a)
         (S.append (G.reveal seen) (B.as_seq h0 data))));
     split_at_last_block a (G.reveal seen) (B.as_seq h0 data);
     let blocks', rest' = split_at_last a (S.append (G.reveal seen) (B.as_seq h0 data)) in
@@ -591,8 +613,6 @@ let update a p data len =
   let s = !*p in
   let State hash_state buf_ total_len seen = s in
   let a = Hash.alg_of_state a hash_state in
-  [@inline_let]
-  let hash_state: Hash.state a = hash_state in
   let sz = rest a total_len in
   if len `U32.lt` (Hacl.Hash.Definitions.block_len a `U32.sub` sz) then
     update_small (G.hide a) p data len
@@ -631,11 +651,7 @@ inline_for_extraction noextract
 let mk_finish a p dst =
   let open LowStar.BufferOps in
   let h0 = ST.get () in
-  let s = !*p in
-  let State hash_state buf_ total_len seen = s in
-  let a = Hash.alg_of_state (G.hide a) hash_state in
-  [@inline_let]
-  let hash_state: Hash.state a = hash_state in
+  let State hash_state buf_ total_len seen = !*p in
 
   push_frame ();
   let h1 = ST.get () in
@@ -644,7 +660,7 @@ let mk_finish a p dst =
   assert (Hash.invariant hash_state h1);
 
   assert_norm (pow2 61 < pow2 125);
-  assert (U64.v total_len < max_input_length a);
+  assert (U64.v total_len <= max_input_length a);
   let buf_ = B.sub buf_ 0ul (rest a total_len) in
   assert (
     let r = rest a total_len in
@@ -682,7 +698,7 @@ let mk_finish a p dst =
   let h5 = ST.get () in
   begin
     let open Spec.Hash.PadFinish in
-    let open Spec.Hash in
+    let open Spec.Agile.Hash in
     let seen = G.reveal seen in
     let n = S.length seen / block_length a in
     let blocks, rest_ = S.split seen (n * block_length a) in
@@ -710,7 +726,7 @@ let mk_finish a p dst =
         update_multi a (init a)
           (S.append (S.append blocks rest_) (pad a (UInt64.v total_len))));
     (S.equal) { Spec.Hash.Lemmas.hash_is_hash_incremental a seen }
-      Spec.Hash.hash a seen;
+      Spec.Agile.Hash.hash a seen;
     }
   end;
 
@@ -769,4 +785,5 @@ let free a s =
   let open LowStar.BufferOps in
   let State hash_state buf _ _ = !*s in
   Hash.free #a hash_state;
-  B.free buf
+  B.free buf;
+  B.free s

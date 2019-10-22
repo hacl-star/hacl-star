@@ -1,4 +1,8 @@
 module Vale.Stdcalls.X64.Fswap
+open FStar.Mul
+
+val z3rlimit_hack (x:nat) : squash (x < x + x + 1)
+#reset-options "--z3rlimit 50"
 
 open FStar.HyperStack.ST
 module HS = FStar.HyperStack
@@ -42,7 +46,7 @@ let tuint64 = TD_Base TUInt64
 
 [@__reduce__] noextract
 let cswap_dom: IX64.arity_ok_stdcall td =
-  let y = [t64_mod; t64_mod; tuint64] in
+  let y = [tuint64; t64_mod; t64_mod] in
   assert_norm (List.length y = 3);
   y
 
@@ -50,23 +54,23 @@ let cswap_dom: IX64.arity_ok_stdcall td =
 [@__reduce__] noextract
 let cswap_pre : VSig.vale_pre cswap_dom =
   fun (c:V.va_code)
+    (bit:uint64)
     (p0:b64)
     (p1:b64)
-    (bit:uint64)
     (va_s0:V.va_state) ->
       FU.va_req_cswap2_stdcall c va_s0 IA.win
-        (as_vale_buffer p0) (as_vale_buffer p1) (UInt64.v bit)
+        (UInt64.v bit) (as_vale_buffer p0) (as_vale_buffer p1)
 
 [@__reduce__] noextract
 let cswap_post : VSig.vale_post cswap_dom =
   fun (c:V.va_code)
+    (bit:uint64)
     (p0:b64)
     (p1:b64)
-    (bit:uint64)
     (va_s0:V.va_state)
     (va_s1:V.va_state)
     (f:V.va_fuel) ->
-      FU.va_ens_cswap2_stdcall c va_s0 IA.win (as_vale_buffer p0) (as_vale_buffer p1) (UInt64.v bit) va_s1 f
+      FU.va_ens_cswap2_stdcall c va_s0 IA.win (UInt64.v bit) (as_vale_buffer p0) (as_vale_buffer p1) va_s1 f
 
 #set-options "--z3rlimit 20"
 
@@ -74,17 +78,17 @@ let cswap_post : VSig.vale_post cswap_dom =
 let cswap_lemma'
     (code:V.va_code)
     (_win:bool)
+    (bit:uint64)
     (p0:b64)
     (p1:b64)
-    (bit:uint64)
     (va_s0:V.va_state)
  : Ghost (V.va_state & V.va_fuel)
      (requires
-       cswap_pre code p0 p1 bit va_s0)
+       cswap_pre code bit p0 p1 va_s0)
      (ensures (fun (va_s1, f) ->
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
-       cswap_post code p0 p1 bit va_s0 va_s1 f /\
+       cswap_post code bit p0 p1 va_s0 va_s1 f /\
        ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer p1) /\
        ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer p0) /\
        ME.buffer_writeable (as_vale_buffer p0) /\
@@ -93,7 +97,7 @@ let cswap_lemma'
                    (ME.loc_union (ME.loc_buffer (as_vale_buffer p1))
                                  ME.loc_none)) va_s0.VS.vs_heap va_s1.VS.vs_heap
  )) =
-   let va_s1, f = FU.va_lemma_cswap2_stdcall code va_s0 IA.win (as_vale_buffer p0) (as_vale_buffer p1) (UInt64.v bit) in
+   let va_s1, f = FU.va_lemma_cswap2_stdcall code va_s0 IA.win (UInt64.v bit) (as_vale_buffer p0) (as_vale_buffer p1) in
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 p0;
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 p1;
    (va_s1, f)
@@ -109,7 +113,6 @@ let code_cswap = FU.va_code_cswap2_stdcall IA.win
 let lowstar_cswap_t =
   assert_norm (List.length cswap_dom + List.length ([]<:list arg) <= 4);
   IX64.as_lowstar_sig_t_weak_stdcall
-    Vale.Interop.down_mem
     code_cswap
     cswap_dom
     []

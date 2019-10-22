@@ -1,37 +1,24 @@
 module Hacl.Curve25519_51
 
-open FStar.HyperStack
-open FStar.HyperStack.All
+friend Hacl.Meta.Curve25519
+open Hacl.Meta.Curve25519
 
-open Lib.IntTypes
-open Lib.Buffer
+// The Hacl core.
+module C = Hacl.Impl.Curve25519.Field51
 
-open Hacl.Impl.Curve25519.Fields
-open Hacl.Impl.Curve25519.Generic
+let g25519: g25519_t =
+  Lib.Buffer.createL_global Spec.Curve25519.basepoint_list
 
-module S = Spec.Curve25519
-
-val secret_to_public:
-    pub:lbuffer uint8 32ul
-  -> priv:lbuffer uint8 32ul
-  -> Stack unit
-    (requires fun h0 ->
-      live h0 pub /\ live h0 priv /\ disjoint pub priv)
-    (ensures  fun h0 _ h1 -> modifies (loc pub) h0 h1 /\
-      as_seq h1 pub == S.secret_to_public (as_seq h0 priv))
-let secret_to_public pub priv =
-  secret_to_public #M51 pub priv
-
-
-val ecdh:
-    shared:lbuffer uint8 32ul
-  -> my_priv:lbuffer uint8 32ul
-  -> their_pub:lbuffer uint8 32ul
-  -> Stack unit
-    (requires fun h0 ->
-      live h0 shared /\ live h0 my_priv /\ live h0 their_pub /\
-      disjoint shared my_priv /\ disjoint shared their_pub)
-    (ensures  fun h0 _ h1 -> modifies (loc shared) h0 h1 /\
-      as_seq h1 shared == S.scalarmult (as_seq h0 my_priv) (as_seq h0 their_pub))
-let ecdh shared my_priv their_pub =
-  scalarmult #M51 shared my_priv their_pub
+#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+let point_add_and_double =
+  addanddouble_point_add_and_double_higher #M51 C.fmul C.fsqr2 C.fmul1 C.fmul2 C.fsub C.fadd
+let point_double =
+  addanddouble_point_double_higher #M51 C.fmul2 C.fmul1 C.fsqr2 C.fsub C.fadd
+let montgomery_ladder =
+  generic_montgomery_ladder_higher #M51 point_double C.cswap2 point_add_and_double
+let fsquare_times = finv_fsquare_times_higher #M51 C.fsqr
+let finv = finv_finv_higher #M51 fsquare_times C.fmul
+let encode_point = generic_encode_point_higher #M51 C.store_felem C.fmul finv
+let scalarmult = generic_scalarmult_higher #M51 encode_point montgomery_ladder decode_point
+let secret_to_public = generic_secret_to_public_higher #M51 scalarmult g25519
+let ecdh = generic_ecdh_higher #M51 scalarmult

@@ -11,8 +11,8 @@
 #include "bench_curve25519.h"
 #include "bench_ed25519.h"
 #include "bench_merkle.h"
-// #include "bench_cipher.h"
-// #include "bench_mac.h"
+#include "bench_cipher.h"
+#include "bench_mac.h"
 
 BenchmarkSettings & parse_args(int argc, char const ** argv)
 {
@@ -55,8 +55,8 @@ BenchmarkSettings & parse_args(int argc, char const ** argv)
     r.families_to_run.push_back("curve25519");
     r.families_to_run.push_back("ed25519");
     r.families_to_run.push_back("merkle");
-//    r.families_to_run.push_back("cipher");
-//    r.families_to_run.push_back("mac");
+    r.families_to_run.push_back("cipher");
+    r.families_to_run.push_back("mac");
   }
   else
   {
@@ -108,13 +108,11 @@ int main(int argc, char const **argv)
 
       ADD_BENCH(merkle);
 
-//      ADD_BENCH(cipher);
-//      ADD_BENCH(mac);
+      ADD_BENCH(cipher);
+      ADD_BENCH(mac);
 
       std::cout << "Unsupported benchmark '" << b << "'.\n";
     }
-
-    // CRYPTO_cleanup_all_ex_data();
 
     return 0;
   }

@@ -18,7 +18,7 @@ module Seq = Lib.Sequence
 module ByteSeq = Lib.ByteSequence
 module Loop = Lib.LoopCombinators
 
-#set-options "--z3rlimit 15"
+#set-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 1"
 
 type buftype =
   | MUT
@@ -41,14 +41,6 @@ let length (#t:buftype) (#a:Type0) (b:buffer_t t a) =
   | MUT -> B.length (b <: buffer a)
   | IMMUT -> IB.length (b <: ibuffer a)
 
-let mut_immut_disjoint #t #t' (b: buffer_t MUT t) (ib: buffer_t IMMUT t') (h: HS.mem):
-  Lemma
-    (requires (B.live h b /\ B.live h ib))
-    (ensures (B.disjoint b ib))
-//  [ SMTPat [ B.disjoint b ib; B.live h b ] ]
-=
-  IB.buffer_immutable_buffer_disjoint b ib h
-
 inline_for_extraction
 let lbuffer_t (ty:buftype) (a:Type0) (len:size_t) =
   b:buffer_t ty a{length #ty #a b == v len}
@@ -66,6 +58,8 @@ let loc (#t:buftype) (#a:Type0) (b:buffer_t t a) : GTot B.loc =
   match t with
   | MUT -> B.loc_buffer (b <: buffer a)
   | IMMUT -> B.loc_buffer (b <: ibuffer a)
+
+#set-options "--max_ifuel 0"
 
 let union (l1:B.loc) (l2:B.loc) : GTot B.loc = B.loc_union l1 l2
 let ( |+| ) (l1:B.loc) (l2:B.loc) : GTot B.loc = union l1 l2
@@ -98,6 +92,15 @@ val modifies_trans: l1:B.loc ->  l2:B.loc -> h0:mem -> h1:mem -> h2:mem
 let disjoint (#t1 #t2:buftype) (#a1 #a2:Type0) (b1:buffer_t t1 a1) (b2:buffer_t t2 a2) =
   B.loc_disjoint (loc b1) (loc b2)
 
+let mut_immut_disjoint #t #t' (b: buffer_t MUT t) (ib: buffer_t IMMUT t') (h: HS.mem):
+  Lemma
+    (requires (B.live h b /\ B.live h ib))
+    (ensures (disjoint b ib))
+    [SMTPat (B.loc_disjoint (loc b) (loc ib)); SMTPat (B.live h b); SMTPat (B.live h ib)]
+=
+  IB.buffer_immutable_buffer_disjoint b ib h
+
+
 (** Modifies nothing *)
 let modifies0 (h1 h2:HS.mem) =
   modifies (B.loc_none) h1 h2
@@ -116,14 +119,17 @@ let modifies3 (#a0:Type0) (#a1:Type0) (#a2:Type0)
   (b0:buffer_t MUT a0) (b1:buffer_t MUT a1) (b2:buffer_t MUT a2) (h1 h2: HS.mem) =
   modifies (loc b0 |+| loc b1 |+| loc b2) h1 h2
 
+(** Modification four buffers *)
+let modifies4 (#a0:Type0) (#a1:Type0) (#a2:Type0) (#a3:Type0)
+  (b0:buffer_t MUT a0) (b1:buffer_t MUT a1) (b2:buffer_t MUT a2) (b3:buffer_t MUT a3) (h1 h2: HS.mem) =
+  modifies (loc b0 |+| loc b1 |+| loc b2 |+| loc b3) h1 h2
+
 (** Ghost reveal a buffer as a sequence *)
 let as_seq (#t:buftype) (#a:Type0) (#len:size_t) (h:HS.mem) (b:lbuffer_t t a len) :
   GTot (Seq.lseq a (v len)) =
   match t with
   | MUT -> B.as_seq h (b <: buffer a)
   | IMMUT -> IB.as_seq h (b <: ibuffer a)
-
-#reset-options "--z3rlimit 100"
 
 (** Ghostly get a sub-buffer of a buffer *)
 let gsub (#t:buftype) (#a:Type0) (#len:size_t) (b:lbuffer_t t a len)
@@ -151,6 +157,65 @@ val modifies_sub: #t:buftype -> #a:Type0 -> #len:size_t -> b:lbuffer_t t a len
     (requires modifies (loc (gsub b start n)) h0 h1)
     (ensures  modifies (loc b) h0 h1)
     [SMTPat (modifies (loc (gsub b start n)) h0 h1)]
+
+val modifies0_is_modifies1: #a0:Type0 -> b0:buffer_t MUT a0 -> h0: HS.mem -> h1: HS.mem ->
+  Lemma
+  (requires (live h0 b0))
+  (ensures  (modifies0 h0 h1 ==> modifies1 b0 h0 h1))
+
+val modifies0_is_modifies2: #a0:Type0 -> #a1:Type0 ->
+  b0:buffer_t MUT a0 -> b1:buffer_t MUT a1 -> h0: HS.mem -> h1: HS.mem ->
+  Lemma
+  (requires (live h0 b0 /\ live h0 b1))
+  (ensures  (modifies0 h0 h1 ==> modifies2 b0 b1 h0 h1))
+
+val modifies0_is_modifies3: #a0:Type0 -> #a1:Type0 -> #a2:Type0 ->
+  b0:buffer_t MUT a0 -> b1:buffer_t MUT a1 -> b2:buffer_t MUT a2 -> h0: HS.mem -> h1: HS.mem ->
+  Lemma
+  (requires (live h0 b0 /\ live h0 b1 /\ live h0 b2))
+  (ensures  (modifies0 h0 h1 ==> modifies3 b0 b1 b2 h0 h1))
+
+val modifies0_is_modifies4: #a0:Type0 -> #a1:Type0 -> #a2:Type0 -> #a3:Type0 ->
+  b0:buffer_t MUT a0 -> b1:buffer_t MUT a1 -> b2:buffer_t MUT a2 -> b3:buffer_t MUT a3 -> h0: HS.mem -> h1: HS.mem ->
+  Lemma
+  (requires (live h0 b0 /\ live h0 b1 /\ live h0 b2 /\ live h0 b3))
+  (ensures  (modifies0 h0 h1 ==> modifies4 b0 b1 b2 b3 h0 h1))
+
+val modifies1_is_modifies2: #a0:Type0 -> #a1:Type0 ->
+  b0:buffer_t MUT a0 -> b1:buffer_t MUT a1 -> h0: HS.mem -> h1: HS.mem ->
+  Lemma
+  (requires (live h0 b0 /\ live h0 b1))
+  (ensures  (modifies1 b0 h0 h1 ==> modifies2 b0 b1 h0 h1))
+
+val modifies1_is_modifies3: #a0:Type0 -> #a1:Type0 -> #a2:Type0 ->
+  b0:buffer_t MUT a0 -> b1:buffer_t MUT a1 -> b2:buffer_t MUT a2 -> h0: HS.mem -> h1: HS.mem ->
+  Lemma
+  (requires (live h0 b0 /\ live h0 b1 /\ live h0 b2))
+  (ensures  (modifies1 b0 h0 h1 ==> modifies3 b0 b1 b2 h0 h1))
+
+val modifies1_is_modifies4: #a0:Type0 -> #a1:Type0 -> #a2:Type0 -> #a3:Type0 ->
+  b0:buffer_t MUT a0 -> b1:buffer_t MUT a1 -> b2:buffer_t MUT a2 -> b3:buffer_t MUT a3 -> h0: HS.mem -> h1: HS.mem ->
+  Lemma
+  (requires (live h0 b0 /\ live h0 b1 /\ live h0 b2 /\ live h0 b3))
+  (ensures  (modifies1 b0 h0 h1 ==> modifies4 b0 b1 b2 b3 h0 h1))
+
+val modifies2_is_modifies3: #a0:Type0 -> #a1:Type0 -> #a2:Type0 ->
+  b0:buffer_t MUT a0 -> b1:buffer_t MUT a1 -> b2:buffer_t MUT a2 -> h0: HS.mem -> h1: HS.mem ->
+  Lemma
+  (requires (live h0 b0 /\ live h0 b1 /\ live h0 b2))
+  (ensures  (modifies2 b0 b1 h0 h1 ==> modifies3 b0 b1 b2 h0 h1))
+
+val modifies2_is_modifies4: #a0:Type0 -> #a1:Type0 -> #a2:Type0 -> #a3:Type0 ->
+  b0:buffer_t MUT a0 -> b1:buffer_t MUT a1 -> b2:buffer_t MUT a2 -> b3:buffer_t MUT a3 -> h0: HS.mem -> h1: HS.mem ->
+  Lemma
+  (requires (live h0 b0 /\ live h0 b1 /\ live h0 b2 /\ live h0 b3))
+  (ensures  (modifies2 b0 b1 h0 h1 ==> modifies4 b0 b1 b2 b3 h0 h1))
+
+val modifies3_is_modifies4: #a0:Type0 -> #a1:Type0 -> #a2:Type0 -> #a3:Type0 ->
+  b0:buffer_t MUT a0 -> b1:buffer_t MUT a1 -> b2:buffer_t MUT a2 -> b3:buffer_t MUT a3 -> h0: HS.mem -> h1: HS.mem ->
+  Lemma
+  (requires (live h0 b0 /\ live h0 b1 /\ live h0 b2 /\ live h0 b3))
+  (ensures  (modifies3 b0 b1 b2 h0 h1 ==> modifies4 b0 b1 b2 b3 h0 h1))
 
 inline_for_extraction
 val as_seq_gsub:
@@ -209,16 +274,16 @@ val upd:
 
 (** Operator for updating a mutable buffer: b.(i) <- x *)
 inline_for_extraction
-let op_Array_Assignment #a #len b i x = upd #a #len b i x
+let op_Array_Assignment #a #len = upd #a #len
 
 (** Operator for accessing a buffer: b.(i) *)
 inline_for_extraction
-let op_Array_Access #t #a #len b i = index #t #a #len b i
+let op_Array_Access #t #a #len = index #t #a #len
 
 (* 2018.16.11 SZ: this doesn't parse: let f a len (b:lbuffer a len) h = h.[| b |] *)
 (** Operator for getting a ghost view of a buffer as a sequence: h.[(b)] *)
 inline_for_extraction
-let op_Brack_Lens_Access #t #a #len h b = as_seq #t #a #len h b
+let op_Brack_Lens_Access #t #a #len = as_seq #t #a #len
 
 (** Ghostly read an element in a buffer *)
 let bget (#t:buftype) (#a:Type0) (#len:size_t) (h:mem) (b:lbuffer_t t a len)
@@ -260,14 +325,14 @@ let recallable (#t:buftype) (#a:Type0) (#len:size_t) (b:lbuffer_t t a len) =
   | MUT -> B.recallable (b <: buffer a)
 
 inline_for_extraction noextract
-let recall (#t:buftype) (#a:Type0) (#len:size_t) (b:lbuffer_t t a len)
-  : Stack unit
+val recall:
+    #t:buftype 
+  -> #a:Type0
+  -> #len:size_t
+  -> b:lbuffer_t t a len -> 
+  Stack unit
     (requires fun _ -> recallable b)
-    (ensures  fun h0 _ h1 ->
-      live h0 b /\ h1 == h0)
-  = match t with
-    | IMMUT -> B.recall (b <: ibuffer a)
-    | MUT -> B.recall (b <: buffer a)
+    (ensures  fun h0 _ h1 -> h0 == h1 /\ live h0 b)
 
 unfold private
 let cpred (#a:Type0) (s:Seq.seq a) : B.spred a = fun s1 -> FStar.Seq.equal s s1
@@ -284,6 +349,8 @@ val create:
   StackInline (lbuffer a len)
     (requires fun h0 -> v len > 0)
     (ensures  fun h0 b h1 -> live h1 b /\ stack_allocated b h0 h1 (Seq.create (v len) init))
+
+#set-options "--max_fuel 1"
 
 (** Allocate a stack fixed-length mutable buffer initialized to a list *)
 inline_for_extraction noextract
@@ -304,6 +371,8 @@ val createL_global:
     (ensures  fun h0 b h1 -> global_allocated b h0 h1 (Seq.of_list init) /\
                           recallable b /\
                           witnessed b (Seq.of_list init))
+
+#set-options "--max_fuel 0"
 
 (** Recall the liveness and contents of a global immutable buffer *)
 inline_for_extraction noextract
@@ -447,6 +516,45 @@ val loop_nospec:
 
 (** Loop combinator with just memory safety specification *)
 inline_for_extraction noextract
+val loop_nospec2:
+    #h0:mem
+  -> #a1:Type0
+  -> #a2:Type0
+  -> #len1:size_t
+  -> #len2:size_t
+  -> n:size_t
+  -> buf1:lbuffer a1 len1
+  -> buf2:lbuffer a2 len2
+  -> impl: (i:size_t{v i < v n} -> Stack unit
+      (requires fun h -> modifies2 buf1 buf2 h0 h)
+      (ensures  fun _ _ h1 -> modifies2 buf1 buf2 h0 h1)) ->
+  Stack unit
+    (requires fun h -> h0 == h /\ live h0 buf1 /\ live h0 buf2)
+    (ensures  fun _ _ h1 -> modifies2 buf1 buf2 h0 h1)
+
+(** Loop combinator with just memory safety specification *)
+inline_for_extraction noextract
+val loop_nospec3:
+    #h0:mem
+  -> #a1:Type0
+  -> #a2:Type0
+  -> #a3:Type0
+  -> #len1:size_t
+  -> #len2:size_t
+  -> #len3:size_t
+  -> n:size_t
+  -> buf1:lbuffer a1 len1
+  -> buf2:lbuffer a2 len2
+  -> buf3:lbuffer a3 len3
+  -> impl: (i:size_t{v i < v n} -> Stack unit
+      (requires fun h -> modifies3 buf1 buf2 buf3 h0 h)
+      (ensures  fun _ _ h1 -> modifies3 buf1 buf2 buf3 h0 h1)) ->
+  Stack unit
+    (requires fun h -> h0 == h /\ live h0 buf1 /\ live h0 buf2 /\ live h0 buf3)
+    (ensures  fun _ _ h1 -> modifies3 buf1 buf2 buf3 h0 h1)
+
+(** Loop combinator with just memory safety specification *)
+inline_for_extraction noextract
 val loop_range_nospec:
     #h0:mem
   -> #a:Type0
@@ -584,7 +692,7 @@ val loop2:
 * after popping the stack frame
 *)
 inline_for_extraction noextract
-val salloc1:
+val salloc1_with_inv:
     #a:Type
   -> #res:Type
   -> h:mem
@@ -615,7 +723,7 @@ val salloc1:
     (ensures  fun h0 r h1 -> modifies (Ghost.reveal footprint) h0 h1 /\ spec r h1)
 
 inline_for_extraction noextract
-val salloc1_trivial:
+val salloc1:
     #a:Type
   -> #res:Type
   -> h:mem
@@ -772,6 +880,41 @@ val loop_blocks:
       Seq.repeat_blocks #a #(Seq.lseq b (v blen)) (v blocksize) (as_seq h0 inp) spec_f spec_l (as_seq h0 write))
 
 open FStar.Mul
+(*
+(** Fills a buffer block by block using a function with an accumulator *)
+inline_for_extraction noextract
+val fill_blocks_:
+    #t:Type0
+  -> h0:mem
+  -> len:size_t
+  -> n:size_t{v n * v len <= max_size_t}
+  -> output:lbuffer t (n *! len)
+  -> a_spec:(i:size_nat{i <= v n} -> Type)
+  -> refl:(mem -> i:size_nat{i <= v n} -> GTot (a_spec i))
+  -> footprint:(i:size_nat{i <= v n} -> GTot
+      (l:B.loc{B.loc_disjoint l (loc output) /\
+               B.address_liveness_insensitive_locs `B.loc_includes` l}))
+  -> spec:(mem -> GTot (i:size_nat{i < v n} -> a_spec i -> a_spec (i + 1) & Seq.lseq t (v len)))
+  -> impl:(i:size_t{v i < v n} -> block:lbuffer t len -> Stack unit
+      (requires fun h1 ->
+        live h1 block /\
+        loc output `B.loc_includes` loc block /\
+        modifies (B.loc_union (footprint (v i)) (loc output)) h0 h1)
+      (ensures  fun h1 _ h2 ->
+        let s, b = spec h0 (v i) (refl h1 (v i)) in
+        footprint (v i + 1) `B.loc_includes` footprint (v i) /\
+        B.modifies (B.loc_union (footprint (v i + 1)) (loc block)) h1 h2 /\
+        refl h2 (v i + 1) == s /\ as_seq h2 block == b)) ->
+  Stack unit
+    (requires fun h -> h0 == h /\ live h output)
+    (ensures  fun _ _ h1 ->
+      let s, o = Seq.generate_blocks (v len) (v n) a_spec (spec h0) (refl h0 0) in
+      B.modifies (B.loc_union (footprint (v n)) (loc output)) h0 h1 /\
+      refl h1 (v n) == s /\
+      as_seq #_ #t h1 (gsub output (size 0) (n *! len)) == o)
+*)
+
+#set-options "--z3rlimit 150"
 
 (** Fills a buffer block by block using a function with an accumulator *)
 inline_for_extraction noextract
@@ -789,7 +932,7 @@ val fill_blocks:
   -> spec:(mem -> GTot (i:size_nat{i < v n} -> a_spec i -> a_spec (i + 1) & Seq.lseq t (v len)))
   -> impl:(i:size_t{v i < v n} -> Stack unit
       (requires fun h1 ->
-        (v i + 1) * v len <= max_size_t /\
+      	(v i + 1) * v len <= max_size_t /\
         modifies (footprint (v i) |+| loc (gsub output 0ul (i *! len))) h0 h1)
       (ensures  fun h1 _ h2 ->
         (let block = gsub output (i *! len) len in
@@ -804,6 +947,30 @@ val fill_blocks:
      (let s, o = Seq.generate_blocks (v len) (v n) (v n) a_spec (spec h0) (refl h0 0) in
       refl h1 (v n) == s /\
       as_seq #_ #t h1 output == o))
+
+(** Fills a buffer block by block using a function without an accumulator *)
+inline_for_extraction noextract
+val fill_blocks_simple:
+    #t:Type0
+  -> h0:mem
+  -> bs:size_t{v bs > 0}
+  -> n:size_t{v bs * v n <= max_size_t}
+  -> output:lbuffer t (bs *! n)
+  -> spec:(mem -> GTot (i:size_nat{i < v n} -> Seq.lseq t (v bs)))
+  -> impl:(i:size_t{v i < v n} -> Stack unit
+      (requires fun h1 ->
+        FStar.Math.Lemmas.lemma_mult_lt_right (v bs) (v i) (v n);
+      	(v i + 1) * v bs <= max_size_t /\
+        modifies (loc (gsub output 0ul (i *! bs))) h0 h1)
+      (ensures  fun h1 _ h2 ->
+        (let block = gsub output (i *! bs) bs in
+        let ob = spec h0 (v i) in
+        B.modifies (loc block) h1 h2 /\
+	as_seq h2 block == ob))) ->
+  Stack unit
+    (requires fun h -> h0 == h /\ live h output)
+    (ensures  fun _ _ h1 -> modifies1 output h0 h1 /\
+      as_seq #_ #t h1 output == Sequence.generate_blocks_simple (v bs) (v n) (v n) (spec h0))
 
 (** Fill a buffer with a total function *)
 inline_for_extraction
@@ -830,7 +997,7 @@ val fill:
   -> impl:(i:size_t{v i < v clen} -> Stack a
           (requires fun h -> modifies1 (gsub o 0ul i) h0 h)
           (ensures  fun h r h' -> h == h' /\
-            r == spec h0 (v i)))
+			       r == spec h0 (v i)))
   -> Stack unit
     (requires fun h -> h == h0 /\ live h0 o)
     (ensures  fun h _ h' ->
@@ -880,7 +1047,7 @@ val map2T:
   -> i2:lbuffer_t t a2 clen ->
   Stack unit
     (requires fun h0 -> live h0 o /\ live h0 i1 /\ live h0 i2 /\
-      eq_or_disjoint o i1 /\ eq_or_disjoint o i2)
+		     eq_or_disjoint o i1 /\ eq_or_disjoint o i2)
     (ensures  fun h0 _ h1 ->
       modifies1 o h0 h1 /\
       as_seq h1 o == Seq.map2 f (as_seq h0 i1) (as_seq h0 i2))
@@ -920,7 +1087,6 @@ val mapi:
       modifies1 o h h1 /\
       as_seq h1 o == Seq.mapi (spec_f h0) (as_seq h i))
 
-#set-options "--z3rlimit 200"
 inline_for_extraction noextract
 val map_blocks_multi:
     #t:buftype
@@ -933,7 +1099,8 @@ val map_blocks_multi:
   -> spec_f:(mem -> GTot (i:nat{i < v nb} -> Seq.lseq a (v blocksize) -> Seq.lseq a (v blocksize)))
   -> impl_f:(i:size_t{v i < v nb} -> Stack unit
       (requires fun h1 ->
-	(v i + 1) * v blocksize <= max_size_t /\
+        FStar.Math.Lemmas.lemma_mult_lt_right (v blocksize) (v i) (v nb);
+        (v i + 1) * v blocksize <= max_size_t /\
         modifies (loc (gsub output 0ul (i *! blocksize))) h0 h1)
       (ensures  fun h1 _ h2 ->
 	let iblock = gsub inp (i *! blocksize) blocksize in
@@ -944,14 +1111,13 @@ val map_blocks_multi:
   -> Stack unit
     (requires fun h -> h0 == h /\ live h output /\ live h inp /\ eq_or_disjoint inp output)
     (ensures  fun _ _ h1 -> modifies1 output h0 h1 /\
-	as_seq h1 output == Seq.map_blocks_multi (v blocksize) (v nb)
-(as_seq h0 inp) (spec_f h0))
+	as_seq h1 output == Seq.map_blocks_multi (v blocksize) (v nb) (v nb) (as_seq h0 inp) (spec_f h0))
 
 inline_for_extraction noextract
 val map_blocks:
     #t:buftype
   -> #a:Type0
-  -> h0:mem
+  -> h0: mem
   -> len:size_t
   -> blocksize:size_t{v blocksize > 0}
   -> inp:lbuffer_t t a len
@@ -960,11 +1126,12 @@ val map_blocks:
   -> spec_l:(mem -> GTot (i:nat{i == v len / v blocksize} -> llen:size_nat{llen < v blocksize} -> Seq.lseq a llen -> Seq.lseq a llen))
   -> impl_f:(i:size_t{v i < v len / v blocksize} -> Stack unit
       (requires fun h1 ->
+        FStar.Math.Lemmas.lemma_mult_lt_right (v blocksize) (v i) (v len / v blocksize);
         (v i + 1) * v blocksize <= max_size_t /\
         modifies (loc (gsub output 0ul (i *! blocksize))) h0 h1)
       (ensures  fun h1 _ h2 ->
-        let iblock = gsub inp (i *! blocksize) blocksize in
-        let oblock = gsub output (i *! blocksize) blocksize in
+	let iblock = gsub inp (i *! blocksize) blocksize in
+	let oblock = gsub output (i *! blocksize) blocksize in
         let ob = spec_f h0 (v i) (as_seq h1 iblock) in
         B.modifies (loc oblock) h1 h2 /\
         as_seq h2 oblock == ob))
@@ -972,12 +1139,12 @@ val map_blocks:
       (requires fun h1 ->
         modifies (loc (gsub output 0ul (i *! blocksize))) h0 h1)
       (ensures  fun h1 _ h2 ->
-        let iblock = gsub inp (i *! blocksize) (len %. blocksize)  in
-        let oblock = gsub output (i *! blocksize) (len %. blocksize) in
+	let iblock = gsub inp (i *! blocksize) (len %. blocksize)  in
+	let oblock = gsub output (i *! blocksize) (len %. blocksize) in
         let ob = spec_l h0 (v i) (v len % v blocksize) (as_seq h1 iblock) in
         B.modifies (loc oblock) h1 h2 /\
         as_seq h2 oblock == ob))
   -> Stack unit
     (requires fun h -> h0 == h /\ live h output /\ live h inp /\ eq_or_disjoint inp output)
     (ensures  fun _ _ h1 -> modifies1 output h0 h1 /\
-      as_seq h1 output == Seq.map_blocks (v blocksize) (as_seq h0 inp) (spec_f h0) (spec_l h0))
+	as_seq h1 output == Seq.map_blocks (v blocksize) (as_seq h0 inp) (spec_f h0) (spec_l h0))

@@ -6,9 +6,13 @@
       1,
       2,
       1,
-      [ "@query" ],
+      [
+        "@query", "constructor_distinct_Lib.IntTypes.U8",
+        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.unsigned",
+        "projection_inverse_BoxBool_proj_0"
+      ],
       0,
-      "786a5ba1ef51c47e626379da8a4a8960"
+      "b48a0662b4ad768979ebbbddce3bcc6d"
     ],
     [
       "Lib.RawIntTypes.u8_from_UInt8",
@@ -21,19 +25,23 @@
         "equality_tok_Lib.IntTypes.SEC@tok",
         "equality_tok_Lib.IntTypes.U8@tok",
         "equation_Lib.IntTypes.pub_int_v", "equation_Lib.IntTypes.sec_int_v",
-        "equation_Lib.IntTypes.uint_v"
+        "equation_Lib.IntTypes.v"
       ],
       0,
-      "b6ebf0b26efa0a5725ec8727748c3378"
+      "d41ad4fdf2a11803f8d59245e77efb4c"
     ],
     [
       "Lib.RawIntTypes.u16_from_UInt16",
       1,
       2,
       1,
-      [ "@query" ],
+      [
+        "@query", "constructor_distinct_Lib.IntTypes.U16",
+        "equality_tok_Lib.IntTypes.U16@tok",
+        "equation_Lib.IntTypes.unsigned", "projection_inverse_BoxBool_proj_0"
+      ],
       0,
-      "cf7b614bcf71b246e3ed2962cef414fb"
+      "b780e1b476751fa864c09ff7188b021d"
     ],
     [
       "Lib.RawIntTypes.u16_from_UInt16",
@@ -46,19 +54,23 @@
         "equality_tok_Lib.IntTypes.SEC@tok",
         "equality_tok_Lib.IntTypes.U16@tok",
         "equation_Lib.IntTypes.pub_int_v", "equation_Lib.IntTypes.sec_int_v",
-        "equation_Lib.IntTypes.uint_v"
+        "equation_Lib.IntTypes.v"
       ],
       0,
-      "ed44a625b81348e8081b06a6719b9e1c"
+      "b8e211076f7b8d1db19720bf1dc14d97"
     ],
     [
       "Lib.RawIntTypes.u32_from_UInt32",
       1,
       2,
       1,
-      [ "@query" ],
+      [
+        "@query", "constructor_distinct_Lib.IntTypes.U32",
+        "equality_tok_Lib.IntTypes.U32@tok",
+        "equation_Lib.IntTypes.unsigned", "projection_inverse_BoxBool_proj_0"
+      ],
       0,
-      "e2f51aab8d8f97a56ef9c08710619c83"
+      "efababc82b467a8d85d133a98ebb1045"
     ],
     [
       "Lib.RawIntTypes.u32_from_UInt32",
@@ -71,19 +83,23 @@
         "equality_tok_Lib.IntTypes.SEC@tok",
         "equality_tok_Lib.IntTypes.U32@tok",
         "equation_Lib.IntTypes.pub_int_v", "equation_Lib.IntTypes.sec_int_v",
-        "equation_Lib.IntTypes.uint_v"
+        "equation_Lib.IntTypes.v"
       ],
       0,
-      "8d1bf5a323e977b3c2e8912af9f2dbd5"
+      "4685eeae8c1cdf8f67637634d47e13da"
     ],
     [
       "Lib.RawIntTypes.u64_from_UInt64",
       1,
       2,
       1,
-      [ "@query" ],
+      [
+        "@query", "constructor_distinct_Lib.IntTypes.U64",
+        "equality_tok_Lib.IntTypes.U64@tok",
+        "equation_Lib.IntTypes.unsigned", "projection_inverse_BoxBool_proj_0"
+      ],
       0,
-      "8e4e1e36f2c254f2b19489541f81490b"
+      "10b07ec8ddf908fde1da82b3101fb6c1"
     ],
     [
       "Lib.RawIntTypes.u64_from_UInt64",
@@ -96,10 +112,10 @@
         "equality_tok_Lib.IntTypes.SEC@tok",
         "equality_tok_Lib.IntTypes.U64@tok",
         "equation_Lib.IntTypes.pub_int_v", "equation_Lib.IntTypes.sec_int_v",
-        "equation_Lib.IntTypes.uint_v"
+        "equation_Lib.IntTypes.v"
       ],
       0,
-      "5b25126de0c523ce645101cbbfe6ff71"
+      "a2d570bf79873f9825331d4efe250142"
     ],
     [
       "Lib.RawIntTypes.u128_from_UInt128",
@@ -107,11 +123,14 @@
       2,
       1,
       [
-        "@query", "equation_FStar.UInt128.n",
+        "@query", "constructor_distinct_Lib.IntTypes.U128",
+        "equality_tok_Lib.IntTypes.U128@tok", "equation_FStar.UInt128.n",
+        "equation_Lib.IntTypes.unsigned",
+        "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "8edda5429557be928d68a882d3fa02d8"
+      "b40dad3c48e8f6405c71a4c5edae79f1"
     ],
     [
       "Lib.RawIntTypes.u128_from_UInt128",
@@ -124,19 +143,23 @@
         "equality_tok_Lib.IntTypes.SEC@tok",
         "equality_tok_Lib.IntTypes.U128@tok",
         "equation_Lib.IntTypes.pub_int_v", "equation_Lib.IntTypes.sec_int_v",
-        "equation_Lib.IntTypes.uint_v"
+        "equation_Lib.IntTypes.v"
       ],
       0,
-      "ee42970afb9625098c3118d25772cda5"
+      "8800162600d3d9ab96f8b63c20c1a18b"
     ],
     [
       "Lib.RawIntTypes.size_from_UInt32",
       1,
       2,
       1,
-      [ "@query" ],
+      [
+        "@query", "constructor_distinct_Lib.IntTypes.U32",
+        "equality_tok_Lib.IntTypes.U32@tok",
+        "equation_Lib.IntTypes.unsigned", "projection_inverse_BoxBool_proj_0"
+      ],
       0,
-      "96c35bc5edbc01592bd7f2f2cf17ff61"
+      "8fabd716a7b4a9bbd061c9b2f82dc54b"
     ],
     [
       "Lib.RawIntTypes.size_from_UInt32",
@@ -148,19 +171,23 @@
         "constructor_distinct_Lib.IntTypes.U32",
         "equality_tok_Lib.IntTypes.PUB@tok",
         "equality_tok_Lib.IntTypes.U32@tok",
-        "equation_Lib.IntTypes.pub_int_v", "equation_Lib.IntTypes.uint_v"
+        "equation_Lib.IntTypes.pub_int_v", "equation_Lib.IntTypes.v"
       ],
       0,
-      "dff549bf0c17c838a50fce57cadebe26"
+      "1fc41b01f889e15f72f916749b84fd1f"
     ],
     [
       "Lib.RawIntTypes.u8_to_UInt8",
       1,
       2,
       1,
-      [ "@query" ],
+      [
+        "@query", "constructor_distinct_Lib.IntTypes.U8",
+        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.unsigned",
+        "projection_inverse_BoxBool_proj_0"
+      ],
       0,
-      "e790ef4b70d91c43b96f7c73c0d85779"
+      "ed9d799436832404227858776fea96da"
     ],
     [
       "Lib.RawIntTypes.u8_to_UInt8",
@@ -173,19 +200,23 @@
         "equality_tok_Lib.IntTypes.SEC@tok",
         "equality_tok_Lib.IntTypes.U8@tok",
         "equation_Lib.IntTypes.pub_int_v", "equation_Lib.IntTypes.sec_int_v",
-        "equation_Lib.IntTypes.uint_v"
+        "equation_Lib.IntTypes.v"
       ],
       0,
-      "b3f5711fedee5901fef61f6cf7e09b2c"
+      "76fb3271719aa5656b7735be83337517"
     ],
     [
       "Lib.RawIntTypes.u16_to_UInt16",
       1,
       2,
       1,
-      [ "@query" ],
+      [
+        "@query", "constructor_distinct_Lib.IntTypes.U16",
+        "equality_tok_Lib.IntTypes.U16@tok",
+        "equation_Lib.IntTypes.unsigned", "projection_inverse_BoxBool_proj_0"
+      ],
       0,
-      "24ff33cbf2175876fa3625d3be3a48c4"
+      "1430bd6fcdc72fc3f17fa6ab7c2ffe76"
     ],
     [
       "Lib.RawIntTypes.u16_to_UInt16",
@@ -198,19 +229,23 @@
         "equality_tok_Lib.IntTypes.SEC@tok",
         "equality_tok_Lib.IntTypes.U16@tok",
         "equation_Lib.IntTypes.pub_int_v", "equation_Lib.IntTypes.sec_int_v",
-        "equation_Lib.IntTypes.uint_v"
+        "equation_Lib.IntTypes.v"
       ],
       0,
-      "a2fc5b7bfafae01e3c7f0578a413ebc9"
+      "a1c917290adf5bc0802851031bbc9b96"
     ],
     [
       "Lib.RawIntTypes.u32_to_UInt32",
       1,
       2,
       1,
-      [ "@query" ],
+      [
+        "@query", "constructor_distinct_Lib.IntTypes.U32",
+        "equality_tok_Lib.IntTypes.U32@tok",
+        "equation_Lib.IntTypes.unsigned", "projection_inverse_BoxBool_proj_0"
+      ],
       0,
-      "ad0fd0e5a55dd6a15facc61fdbeca950"
+      "8ed6f4c88babc79025767c4fc120d916"
     ],
     [
       "Lib.RawIntTypes.u32_to_UInt32",
@@ -223,19 +258,23 @@
         "equality_tok_Lib.IntTypes.SEC@tok",
         "equality_tok_Lib.IntTypes.U32@tok",
         "equation_Lib.IntTypes.pub_int_v", "equation_Lib.IntTypes.sec_int_v",
-        "equation_Lib.IntTypes.uint_v"
+        "equation_Lib.IntTypes.v"
       ],
       0,
-      "ebca631dd83c4c0d93dcb7beb8c35d1d"
+      "8e63b3164e4033be5cb048e51cac87bd"
     ],
     [
       "Lib.RawIntTypes.u64_to_UInt64",
       1,
       2,
       1,
-      [ "@query" ],
+      [
+        "@query", "constructor_distinct_Lib.IntTypes.U64",
+        "equality_tok_Lib.IntTypes.U64@tok",
+        "equation_Lib.IntTypes.unsigned", "projection_inverse_BoxBool_proj_0"
+      ],
       0,
-      "46aff2a659d5f9e6e2a52abbc9f5a95f"
+      "702b3752e02542ef6bf7b5d5fdb81ebb"
     ],
     [
       "Lib.RawIntTypes.u64_to_UInt64",
@@ -248,10 +287,10 @@
         "equality_tok_Lib.IntTypes.SEC@tok",
         "equality_tok_Lib.IntTypes.U64@tok",
         "equation_Lib.IntTypes.pub_int_v", "equation_Lib.IntTypes.sec_int_v",
-        "equation_Lib.IntTypes.uint_v"
+        "equation_Lib.IntTypes.v"
       ],
       0,
-      "e05b27f5fc3dc79a34c60b63ecbe326b"
+      "c1265c6071d49666c837f01e27853b5d"
     ],
     [
       "Lib.RawIntTypes.u128_to_UInt128",
@@ -259,11 +298,14 @@
       2,
       1,
       [
-        "@query", "equation_FStar.UInt128.n",
+        "@query", "constructor_distinct_Lib.IntTypes.U128",
+        "equality_tok_Lib.IntTypes.U128@tok", "equation_FStar.UInt128.n",
+        "equation_Lib.IntTypes.unsigned",
+        "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "8c4d3d6a29c5157839d567b8ddd8fc52"
+      "ce794b2b71be35ea67c71061e319e5c5"
     ],
     [
       "Lib.RawIntTypes.u128_to_UInt128",
@@ -276,19 +318,23 @@
         "equality_tok_Lib.IntTypes.SEC@tok",
         "equality_tok_Lib.IntTypes.U128@tok",
         "equation_Lib.IntTypes.pub_int_v", "equation_Lib.IntTypes.sec_int_v",
-        "equation_Lib.IntTypes.uint_v"
+        "equation_Lib.IntTypes.v"
       ],
       0,
-      "ba5e6f7021d4a556827e766416c6e6b7"
+      "dc3d326e9cb1e4baeda6f9480bda0a3f"
     ],
     [
       "Lib.RawIntTypes.size_to_UInt32",
       1,
       2,
       1,
-      [ "@query" ],
+      [
+        "@query", "constructor_distinct_Lib.IntTypes.U32",
+        "equality_tok_Lib.IntTypes.U32@tok",
+        "equation_Lib.IntTypes.unsigned", "projection_inverse_BoxBool_proj_0"
+      ],
       0,
-      "2225584ed4e97ad5351c45f43e235074"
+      "ab6ef22a1c0b49083c73d42ede7300d1"
     ],
     [
       "Lib.RawIntTypes.size_to_UInt32",
@@ -300,10 +346,10 @@
         "constructor_distinct_Lib.IntTypes.U32",
         "equality_tok_Lib.IntTypes.PUB@tok",
         "equality_tok_Lib.IntTypes.U32@tok",
-        "equation_Lib.IntTypes.pub_int_v", "equation_Lib.IntTypes.uint_v"
+        "equation_Lib.IntTypes.pub_int_v", "equation_Lib.IntTypes.v"
       ],
       0,
-      "ea342c0ec4b2949b2c0fc01c41a0d3de"
+      "dcfd015808adb86082cf387b3d70cd67"
     ],
     [
       "Lib.RawIntTypes.uint_to_nat",
@@ -317,7 +363,22 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "de76b2c8ed878c4ed0f55eadcdd7f065"
+      "a5d785c2a1edaa5b2ba9e05d1a93df7d"
+    ],
+    [
+      "Lib.RawIntTypes.uint_to_nat",
+      2,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "bool_inversion",
+        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.range",
+        "equation_Lib.IntTypes.unsigned",
+        "refinement_interpretation_Tm_refine_387e6d282145573240ab7b8a4b94cce5",
+        "typing_Lib.IntTypes.unsigned"
+      ],
+      0,
+      "ce770e8c906d052e14f8277e927e172c"
     ]
   ]
 ]

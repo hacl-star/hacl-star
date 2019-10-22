@@ -91,7 +91,7 @@ let uint_ext (#n : nat) (#m : nat{n <= m}) (x : uint_t n) : r:(uint_t m){uint_to
 #reset-options "--smtencoding.elim_box true --smtencoding.l_arith_repr boxwrap --smtencoding.nl_arith_repr boxwrap"
 let mul_bvshl (u:uint_t 64) :
   Lemma (0x10000000000000000 * u < pow2 128 /\
-         (int2bv #128 (0x10000000000000000 `op_Multiply` u) ==
+         (int2bv #128 (0x10000000000000000 * u) ==
           bvshl (bv_uext #64 #64 (int2bv u)) 64)) =
   assert_norm ( 0x10000000000000000 * pow2 63 < pow2 128);
   modulo_lemma (0x10000000000000000 * u) (pow2 128);

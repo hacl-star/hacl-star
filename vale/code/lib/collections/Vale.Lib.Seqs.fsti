@@ -1,5 +1,6 @@
 module Vale.Lib.Seqs
 
+open FStar.Mul
 open Vale.Lib.Seqs_s
 open FStar.Seq
 

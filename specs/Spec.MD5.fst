@@ -2,17 +2,17 @@ module Spec.MD5
 
 (* Source: https://tools.ietf.org/html/rfc1321 *)
 
-module U32 = FStar.UInt32
+open Lib.IntTypes
 open Spec.Hash.Definitions
 
 (* Section 3.3 *)
 
 inline_for_extraction
-let init_as_list : list U32.t = [
-  0x67452301ul;
-  0xefcdab89ul;
-  0x98badcfeul;
-  0x10325476ul;
+let init_as_list : list uint32 = [
+  u32 0x67452301;
+  u32 0xefcdab89;
+  u32 0x98badcfe;
+  u32 0x10325476;
 ]
 
 let init = Seq.seq_of_list init_as_list
@@ -20,124 +20,118 @@ let init = Seq.seq_of_list init_as_list
 (* Section 3.4 *)
 
 inline_for_extraction
-let f (x y z: U32.t) : Tot U32.t =
-  (x `U32.logand` y) `U32.logor` (U32.lognot x `U32.logand` z)
+let f (x y z: uint32) : Tot uint32 =
+  (x &. y) |. ((~. x) &. z)
 
 inline_for_extraction
-let g (x y z: U32.t) : Tot U32.t =
-  (x `U32.logand` z) `U32.logor` (y `U32.logand` U32.lognot z)
+let g (x y z: uint32) : Tot uint32 =
+  (x &. z) |. (y &. (~. z))
 
 inline_for_extraction
-let h (x y z: U32.t) : Tot U32.t =
-  x `U32.logxor` y `U32.logxor` z
+let h (x y z: uint32) : Tot uint32 =
+  x ^. y ^. z
 
 inline_for_extraction
-let i (x y z: U32.t) : Tot U32.t =
-  y `U32.logxor` (x `U32.logor` U32.lognot z)
+let i (x y z: uint32) : Tot uint32 =
+  y ^. (x |. ~. z)
 
 (* Table T: specified in 3.4, defined in Appendix A.3, function MD5Transform *)
 
 inline_for_extraction
-let t_as_list : list U32.t = [
-  0xd76aa478ul;
-  0xe8c7b756ul;
-  0x242070dbul;
-  0xc1bdceeeul;
-  0xf57c0faful;
-  0x4787c62aul;
-  0xa8304613ul;
-  0xfd469501ul;
-  0x698098d8ul;
-  0x8b44f7aful;
-  0xffff5bb1ul;
-  0x895cd7beul;
-  0x6b901122ul;
-  0xfd987193ul;
-  0xa679438eul;
-  0x49b40821ul;
+let t_as_list : list uint32 = [
+  u32 0xd76aa478;
+  u32 0xe8c7b756;
+  u32 0x242070db;
+  u32 0xc1bdceee;
+  u32 0xf57c0faf;
+  u32 0x4787c62a;
+  u32 0xa8304613;
+  u32 0xfd469501;
+  u32 0x698098d8;
+  u32 0x8b44f7af;
+  u32 0xffff5bb1;
+  u32 0x895cd7be;
+  u32 0x6b901122;
+  u32 0xfd987193;
+  u32 0xa679438e;
+  u32 0x49b40821;
 
-  0xf61e2562ul;
-  0xc040b340ul;
-  0x265e5a51ul;
-  0xe9b6c7aaul;
-  0xd62f105dul;
-  0x02441453ul;
-  0xd8a1e681ul;
-  0xe7d3fbc8ul;
-  0x21e1cde6ul;
-  0xc33707d6ul;
-  0xf4d50d87ul;
-  0x455a14edul;
-  0xa9e3e905ul;
-  0xfcefa3f8ul;
-  0x676f02d9ul;
-  0x8d2a4c8aul;
+  u32 0xf61e2562;
+  u32 0xc040b340;
+  u32 0x265e5a51;
+  u32 0xe9b6c7aa;
+  u32 0xd62f105d;
+  u32 0x02441453;
+  u32 0xd8a1e681;
+  u32 0xe7d3fbc8;
+  u32 0x21e1cde6;
+  u32 0xc33707d6;
+  u32 0xf4d50d87;
+  u32 0x455a14ed;
+  u32 0xa9e3e905;
+  u32 0xfcefa3f8;
+  u32 0x676f02d9;
+  u32 0x8d2a4c8a;
 
-  0xfffa3942ul;
-  0x8771f681ul;
-  0x6d9d6122ul;
-  0xfde5380cul;
-  0xa4beea44ul;
-  0x4bdecfa9ul;
-  0xf6bb4b60ul;
-  0xbebfbc70ul;
-  0x289b7ec6ul;
-  0xeaa127faul;
-  0xd4ef3085ul;
-  0x4881d05ul;
-  0xd9d4d039ul;
-  0xe6db99e5ul;
-  0x1fa27cf8ul;
-  0xc4ac5665ul;
+  u32 0xfffa3942;
+  u32 0x8771f681;
+  u32 0x6d9d6122;
+  u32 0xfde5380c;
+  u32 0xa4beea44;
+  u32 0x4bdecfa9;
+  u32 0xf6bb4b60;
+  u32 0xbebfbc70;
+  u32 0x289b7ec6;
+  u32 0xeaa127fa;
+  u32 0xd4ef3085;
+  u32 0x4881d05;
+  u32 0xd9d4d039;
+  u32 0xe6db99e5;
+  u32 0x1fa27cf8;
+  u32 0xc4ac5665;
 
-  0xf4292244ul;
-  0x432aff97ul;
-  0xab9423a7ul;
-  0xfc93a039ul;
-  0x655b59c3ul;
-  0x8f0ccc92ul;
-  0xffeff47dul;
-  0x85845dd1ul;
-  0x6fa87e4ful;
-  0xfe2ce6e0ul;
-  0xa3014314ul;
-  0x4e0811a1ul;
-  0xf7537e82ul;
-  0xbd3af235ul;
-  0x2ad7d2bbul;
-  0xeb86d391ul;
+  u32 0xf4292244;
+  u32 0x432aff97;
+  u32 0xab9423a7;
+  u32 0xfc93a039;
+  u32 0x655b59c3;
+  u32 0x8f0ccc92;
+  u32 0xffeff47d;
+  u32 0x85845dd1;
+  u32 0x6fa87e4f;
+  u32 0xfe2ce6e0;
+  u32 0xa3014314;
+  u32 0x4e0811a1;
+  u32 0xf7537e82;
+  u32 0xbd3af235;
+  u32 0x2ad7d2bb;
+  u32 0xeb86d391;
 ]
 
 module L = FStar.List.Tot
 
-let t : Seq.lseq U32.t 64 =
+let t : Seq.lseq uint32 64 =
   assert_norm (L.length t_as_list == 64);
   Seq.seq_of_list t_as_list
 
 let abcd_idx = (n: nat { n < 4 } )
 
-let abcd_t = Seq.lseq U32.t 4
+let abcd_t = Seq.lseq uint32 4
 
 let x_idx = (n: nat { n < 16 } )
-let x_t = Seq.lseq U32.t 16
+let x_t = Seq.lseq uint32 16
 
 let t_idx = (n: nat { 1 <= n /\ n <= 64 } )
 
 inline_for_extraction
-let rotate_idx = (n_:U32.t{0 < U32.v n_ /\ U32.v n_ < 32})
+let rotate_idx = rotval U32
 
-inline_for_extraction
-let rotl (x:U32.t) (n_ : rotate_idx): Tot U32.t =
-  U32.((x <<^ n_) |^ (x >>^ (32ul -^ n_)))
-
-let (<<<) = rotl
-
-let round_op_gen_aux (f: (U32.t -> U32.t -> U32.t -> Tot U32.t)) (abcd: abcd_t) (x: x_t) (a b c d: abcd_idx) (k: x_idx) (s: rotate_idx) (i: t_idx) : Tot abcd_t =
+let round_op_gen_aux (f: (uint32 -> uint32 -> uint32 -> Tot uint32)) (abcd: abcd_t) (x: x_t) (a b c d: abcd_idx) (k: x_idx) (s: rotate_idx) (i: t_idx) : Tot abcd_t =
   let va = Seq.index abcd a in
   let vb = Seq.index abcd b in
   let vc = Seq.index abcd c in
   let vd = Seq.index abcd d in
-  Seq.upd abcd a (vb `U32.add_mod` ((va `U32.add_mod` f vb vc vd `U32.add_mod` Seq.index x k `U32.add_mod` Seq.index t (i - 1)) <<< s))
+  Seq.upd abcd a (vb +. ((va +. f vb vc vd +. Seq.index x k +. Seq.index t (i - 1)) <<<. s))
 
 [@"opaque_to_smt"]
 let round_op_gen = round_op_gen_aux
@@ -171,7 +165,7 @@ let round1_aux (abcd: abcd_t) (x: x_t) : Tot abcd_t =
   let abcd = round1_op abcd x id ia ib ic 13 12ul 14 in
   let abcd = round1_op abcd x ic id ia ib 14 17ul 15 in
   let abcd = round1_op abcd x ib ic id ia 15 22ul 16 in
-     
+
   abcd
 
 [@"opaque_to_smt"]
@@ -261,8 +255,6 @@ let round4_aux (abcd: abcd_t) (x: x_t) : Tot abcd_t =
 [@"opaque_to_smt"]
 let round4 = round4_aux
 
-module E = FStar.Kremlin.Endianness
-
 let rounds_aux (abcd: abcd_t) (x: x_t) : Tot abcd_t =
   let abcd = round1 abcd x in
   let abcd = round2 abcd x in
@@ -273,7 +265,7 @@ let rounds_aux (abcd: abcd_t) (x: x_t) : Tot abcd_t =
 [@"opaque_to_smt"]
 let rounds = rounds_aux
 
-let overwrite_aux (abcd: abcd_t) (a' b' c' d' : U32.t) : Tot abcd_t =
+let overwrite_aux (abcd: abcd_t) (a' b' c' d' : uint32) : Tot abcd_t =
   let abcd : abcd_t = Seq.upd abcd ia a' in
   let abcd : abcd_t = Seq.upd abcd ib b' in
   let abcd : abcd_t = Seq.upd abcd ic c' in
@@ -284,7 +276,7 @@ let overwrite_aux (abcd: abcd_t) (a' b' c' d' : U32.t) : Tot abcd_t =
 let overwrite = overwrite_aux
 
 let update_aux abcd x =
-  let x = words_of_bytes MD5 16 x in
+  let x = words_of_bytes MD5 #16 x in
   let aa = Seq.index abcd ia in
   let bb = Seq.index abcd ib in
   let cc = Seq.index abcd ic in
@@ -292,10 +284,10 @@ let update_aux abcd x =
 //  let aabbccdd = abcd in
   let abcd = rounds abcd x in
   overwrite abcd
-    (Seq.index abcd ia `U32.add_mod` aa)
-    (Seq.index abcd ib `U32.add_mod` bb)
-    (Seq.index abcd ic `U32.add_mod` cc)
-    (Seq.index abcd id `U32.add_mod` dd)
+    (Seq.index abcd ia +. aa)
+    (Seq.index abcd ib +. bb)
+    (Seq.index abcd ic +. cc)
+    (Seq.index abcd id +. dd)
 
 [@"opaque_to_smt"]
 let update = update_aux
@@ -306,4 +298,5 @@ let pad = Spec.Hash.PadFinish.pad MD5
 
 (* Section 3.5 *)
 
-let finish = Spec.Hash.PadFinish.finish _
+let finish = Spec.Hash.PadFinish.finish MD5
+

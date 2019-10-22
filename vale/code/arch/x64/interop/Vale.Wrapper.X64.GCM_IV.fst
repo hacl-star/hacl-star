@@ -1,5 +1,6 @@
 module Vale.Wrapper.X64.GCM_IV
 
+open FStar.Mul
 open Vale.Stdcalls.X64.GCM_IV
 open Vale.AsLowStar.MemoryHelpers
 open Vale.X64.MemoryAdapters
@@ -24,6 +25,14 @@ let length_aux (b:uint8_p) (n:nat) : Lemma
 
 #set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
+let length_aux5 (b:uint8_p) : Lemma
+  (requires B.length b = 128)
+  (ensures DV.length (get_downview b) % 16 = 0) =
+    let db = get_downview b in
+    DV.length_eq db
+
+
+#push-options "--z3cliopt smt.arith.nl=true"
 inline_for_extraction
 val compute_iv_stdcall':
   iv:Ghost.erased supported_iv_LE ->
@@ -34,7 +43,7 @@ val compute_iv_stdcall':
   iv_extra_b:uint8_p ->
   hkeys_b:uint8_p ->
   Stack unit
-  (requires fun h0 -> 
+  (requires fun h0 ->
     B.disjoint iv_b j0_b /\ B.disjoint iv_b iv_extra_b /\ B.disjoint iv_b hkeys_b /\
     (B.disjoint j0_b iv_extra_b \/ j0_b == iv_extra_b) /\
     B.disjoint j0_b hkeys_b /\ B.disjoint iv_extra_b hkeys_b /\
@@ -54,6 +63,13 @@ val compute_iv_stdcall':
 
     pclmulqdq_enabled /\ avx_enabled /\
 
+    (  let db = get_downview hkeys_b in
+       length_aux5 hkeys_b; DV.length_eq (get_downview hkeys_b);
+       let ub = UV.mk_buffer db Vale.Interop.Views.up_view128 in
+       hkeys_reqs_pub (UV.as_seq h0 ub) (reverse_bytes_quad32
+         (reverse_bytes_quad32 (low_buffer_read TUInt8 TUInt128 h0 hkeys_b 2)))) /\
+
+
     (  let in_d = get_downview iv_b in
        length_aux iv_b (UInt64.v len);
        let in_u = UV.mk_buffer in_d Vale.Interop.Views.up_view128 in
@@ -65,13 +81,15 @@ val compute_iv_stdcall':
        Seq.equal iv_bytes_LE (Ghost.reveal iv)
     )
     )
-  (ensures fun h0 _ h1 -> 
+  (ensures fun h0 _ h1 ->
     B.modifies (B.loc_buffer j0_b) h0 h1 /\
     (DV.length_eq (get_downview hkeys_b); DV.length_eq (get_downview j0_b);
     let h_LE = reverse_bytes_quad32 (low_buffer_read TUInt8 TUInt128 h0 hkeys_b 2) in
-    low_buffer_read TUInt8 TUInt128 h1 j0_b 0 == reverse_bytes_quad32 (compute_iv_BE h_LE (Ghost.reveal iv)))
+    low_buffer_read TUInt8 TUInt128 h1 j0_b 0 == compute_iv_BE h_LE (Ghost.reveal iv))
    )
+#pop-options
 
+#push-options "--z3cliopt smt.arith.nl=true"
 inline_for_extraction
 let compute_iv_stdcall' iv iv_b num_bytes len j0_b iv_extra_b hkeys_b =
   let h0 = get() in
@@ -84,13 +102,17 @@ let compute_iv_stdcall' iv iv_b num_bytes len j0_b iv_extra_b hkeys_b =
   as_vale_buffer_len #TUInt8 #TUInt128 iv_b;
   as_vale_buffer_len #TUInt8 #TUInt128 iv_extra_b;
   as_vale_buffer_len #TUInt8 #TUInt128 j0_b;
-  as_vale_buffer_len #TUInt8 #TUInt128 hkeys_b; 
+  as_vale_buffer_len #TUInt8 #TUInt128 hkeys_b;
 
   Classical.forall_intro (bounded_buffer_addrs TUInt8 TUInt128 h0 iv_b);
+  Classical.forall_intro (bounded_buffer_addrs TUInt8 TUInt128 h0 hkeys_b);
 
   let x, _ = compute_iv_stdcall iv iv_b num_bytes len j0_b iv_extra_b hkeys_b () in
-  ()
 
+  ()
+#pop-options
+
+#push-options "--z3cliopt smt.arith.nl=true"
 let lemma_slice_uv_extra (b:uint8_p) (b_start:uint8_p) (b_extra:uint8_p) (h:HS.mem) : Lemma
   (requires
     B.length b_start = B.length b / 16 * 16 /\
@@ -113,7 +135,7 @@ let lemma_slice_uv_extra (b:uint8_p) (b_start:uint8_p) (b_extra:uint8_p) (h:HS.m
  ))
  =
  let b_start_d = get_downview b_start in
- DV.length_eq (get_downview b_start); 
+ DV.length_eq (get_downview b_start);
  let b_start_u = UV.mk_buffer b_start_d Vale.Interop.Views.up_view128 in
  let b_extra_d = get_downview b_extra in
  DV.length_eq (get_downview b_extra);
@@ -158,6 +180,7 @@ let lemma_slice_uv_extra (b:uint8_p) (b_start:uint8_p) (b_extra:uint8_p) (h:HS.m
      }
      b_f;
    }
+#pop-options
 
 let lemma_slice_sub (b:uint8_p) (b_sub:uint8_p) (b_extra:uint8_p) (h:HS.mem) : Lemma
   (requires B.length b_extra = 16 /\ B.length b_sub = B.length b / 16 * 16 /\
@@ -196,6 +219,7 @@ let lemma_slice_sub (b:uint8_p) (b_sub:uint8_p) (b_extra:uint8_p) (h:HS.mem) : L
 open Vale.Lib.BufferViewHelpers
 
 
+#push-options "--smtencoding.nl_arith_repr boxwrap"
 let lemma_same_seq_same_buffer_read (h0 h1:HS.mem) (b:uint8_p) : Lemma
     (requires
       B.live h0 b /\ B.live h1 b /\
@@ -212,7 +236,8 @@ let lemma_same_seq_same_buffer_read (h0 h1:HS.mem) (b:uint8_p) : Lemma
    lemma_uv_equal Vale.Interop.Views.up_view128 (get_downview b) h0 h1;
    UV.length_eq b_u;
    UV.as_seq_sel h0 b_u 2;
-   UV.as_seq_sel h1 b_u 2   
+   UV.as_seq_sel h1 b_u 2
+#pop-options
 
 inline_for_extraction
 let compute_iv a key full_iv_b num_bytes j0_b extra_b hkeys_b =
@@ -227,15 +252,13 @@ let compute_iv a key full_iv_b num_bytes j0_b extra_b hkeys_b =
   lemma_slice_sub full_iv_b iv_b extra_b h1;
   lemma_slice_uv_extra full_iv_b iv_b extra_b h1;
 
-  compute_iv_stdcall' (Ghost.hide (seq_uint8_to_seq_nat8 (B.as_seq h0 full_iv_b)))
-    iv_b (uint32_to_uint64 num_bytes) (uint32_to_uint64 len)
-     j0_b  extra_b hkeys_b;
-  let h2 = get() in
 
   DV.length_eq (get_downview hkeys_b); DV.length_eq (get_downview j0_b);
 
+  lemma_same_seq_same_buffer_read h0 h1 hkeys_b;
+
   let aux () : Lemma
-    (aes_encrypt_LE a (Ghost.reveal key) (Mkfour 0 0 0 0) == 
+    (aes_encrypt_LE a (Ghost.reveal key) (Mkfour 0 0 0 0) ==
       reverse_bytes_quad32 (low_buffer_read TUInt8 TUInt128 h0 hkeys_b 2))
   = let keys_quad = le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h0 hkeys_b)) in
     let h_BE = low_buffer_read TUInt8 TUInt128 h0 hkeys_b 2 in
@@ -260,6 +283,35 @@ let compute_iv a key full_iv_b num_bytes j0_b extra_b hkeys_b =
 
   in aux();
 
-  lemma_same_seq_same_buffer_read h0 h1 hkeys_b;
 
-  gcm_simplify3 j0_b h2
+  let lemma_uv_key () : Lemma
+    (let db = get_downview hkeys_b in
+      length_aux5 hkeys_b;
+      let ub = UV.mk_buffer db Vale.Interop.Views.up_view128 in
+      Seq.length (le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h1 hkeys_b))) == 8 /\
+      Seq.equal (UV.as_seq h1 ub) (le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h1 hkeys_b))))
+    = length_aux5 hkeys_b;
+      let db = get_downview hkeys_b in
+      let ub = UV.mk_buffer db Vale.Interop.Views.up_view128 in
+      DV.length_eq db;
+      UV.length_eq ub;
+      calc (==) {
+        le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h1 hkeys_b));
+        (==) { lemma_seq_nat8_le_seq_quad32_to_bytes_uint32 hkeys_b h1 }
+        le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (seq_nat8_to_seq_uint8 (le_seq_quad32_to_bytes (UV.as_seq h1 ub))));
+        (==) { le_bytes_to_seq_quad32_to_bytes (UV.as_seq h1 ub) }
+        UV.as_seq h1 ub;
+      }
+
+  in lemma_uv_key ();
+
+  compute_iv_stdcall' (Ghost.hide (seq_uint8_to_seq_nat8 (B.as_seq h0 full_iv_b)))
+    iv_b (uint32_to_uint64 num_bytes) (uint32_to_uint64 len)
+     j0_b  extra_b hkeys_b;
+  let h2 = get() in
+
+
+  gcm_simplify2 j0_b h2;
+
+  le_bytes_to_quad32_to_bytes (compute_iv_BE (aes_encrypt_LE a (Ghost.reveal key) (Mkfour 0 0 0 0))
+    (seq_uint8_to_seq_nat8 (B.as_seq h0 full_iv_b)))

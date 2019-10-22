@@ -13,7 +13,7 @@ include{:fstar}{:open} "Vale.Def.Words.Seq_s"
 include{:fstar}{:open} "Vale.Arch.Types"
 include{:fstar}{:open} "Spec.SHA2"
 include{:fstar}{:open} "Vale.SHA.SHA_helpers"
-include{:fstar}{:open} "Spec.Hash"
+include{:fstar}{:open} "Spec.Agile.Hash"
 include{:fstar}{:open} "Spec.Hash.PadFinish"
 include{:fstar}{:open} "Spec.Hash.Definitions"
 include{:fstar}{:open} "Vale.X64.Machine_s"
@@ -46,7 +46,7 @@ open Vale.X64.QuickCodes
 open Vale.Arch.Types
 open Vale.SHA.SHA_helpers
 open Spec.SHA2
-open Spec.Hash
+open Spec.Agile.Hash
 open Spec.Hash.PadFinish
 open Spec.Hash.Definitions
 open Spec.Loops

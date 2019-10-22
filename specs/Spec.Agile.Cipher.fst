@@ -7,6 +7,8 @@ open Lib.ByteSequence
 
 #reset-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 1"
 
+let force_flush_interleaving = ()
+
 let aes_ctr_block_add_counter (block: lbytes 16) (incr:size_nat): Tot (lbytes 16) =
   let n = nat_from_bytes_be block in
   let n' = (n + incr) % pow2 128 in

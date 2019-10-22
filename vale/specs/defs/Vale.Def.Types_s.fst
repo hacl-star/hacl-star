@@ -1,5 +1,6 @@
 module Vale.Def.Types_s
 
+open FStar.Mul
 open Vale.Def.Opaque_s
 open Vale.Def.Words_s
 open Vale.Def.Words.Two_s
@@ -90,7 +91,7 @@ let le_seq_quad32_to_bytes_def (b:seq quad32) : seq nat8 =
 let le_seq_quad32_to_bytes = make_opaque le_seq_quad32_to_bytes_def
 
 let le_seq_quad32_to_bytes_length (s:seq quad32) : Lemma
-  (ensures length (le_seq_quad32_to_bytes s) == 16 `op_Multiply` (length s))
+  (ensures length (le_seq_quad32_to_bytes s) == 16 * (length s))
   [SMTPat (length (le_seq_quad32_to_bytes s))]
   =
   reveal_opaque le_seq_quad32_to_bytes_def

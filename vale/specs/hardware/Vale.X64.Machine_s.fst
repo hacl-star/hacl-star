@@ -1,4 +1,5 @@
 module Vale.X64.Machine_s
+open FStar.Mul
 
 irreducible let va_qattr = ()
 unfold let pow2_32 = Vale.Def.Words_s.pow2_32

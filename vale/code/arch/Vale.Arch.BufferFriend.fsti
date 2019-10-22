@@ -13,8 +13,8 @@ open Vale.Def.Types_s
 open FStar.Mul
 open FStar.Seq.Base
 
-val to_bytes (s:seq UInt8.t) : GTot (b:BS.bytes{b === s /\ length b == length s})
-val of_bytes (b:BS.bytes) : GTot (s:seq UInt8.t{b === s /\ length b == length s})
+val to_bytes (s:seq UInt8.t) : Tot (b:BS.bytes{b === s /\ length b == length s})
+val of_bytes (b:BS.bytes) : Tot (s:seq UInt8.t{b === s /\ length b == length s})
 
 val lemma_to_bytes_slice (s:seq UInt8.t) (i j:nat) : Lemma
   (requires i <= j /\ j <= length s)
@@ -93,4 +93,3 @@ val lemma_le_to_n_indexed_rec (b:FE.bytes) (i:nat{i <= length b}) : Lemma
 
 val lemma_le_to_n_indexed (b:FE.bytes) : Lemma
   (ensures le_to_n_indexed b == FE.le_to_n b)
-

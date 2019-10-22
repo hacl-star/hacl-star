@@ -4,10 +4,12 @@ module S = FStar.Seq
 
 include Spec.Hash.Lemmas0
 
-open Spec.Hash
+open Spec.Agile.Hash
 open Spec.Hash.Definitions
 open Spec.Hash.Incremental
 open Spec.Hash.PadFinish
+
+friend Spec.Agile.Hash
 
 (* Lemmas such as: relationship between maximum lengths, incremental API vs.
  * NIST reference, etc. *)
@@ -45,23 +47,6 @@ let update_multi_block (a: hash_alg) (h: words_state a) (input: bytes):
 
 #set-options "--max_fuel 0 --max_ifuel 0"
 
-val update_multi_associative:
-  a: hash_alg ->
-  h: words_state a ->
-  input: bytes ->
-  len: nat ->
-  Lemma
-    (requires (
-      len % block_length a = 0 /\
-      S.length input % block_length a = 0 /\
-      len <= S.length input
-    ))
-    (ensures (
-      let input1, input2 = split_block a input (len / block_length a) in
-      S.equal (update_multi a (update_multi a h input1) input2)
-        (update_multi a h input)))
-    (decreases (
-      %[ S.length input; len ]))
 
 let rec update_multi_associative a h input len =
   let i_l, i_r = S.split input len in
@@ -99,9 +84,7 @@ let update_multi_associative' (a: hash_alg)
 
 #set-options "--max_fuel 0 --max_ifuel 0"
 
-let hash = Spec.Hash.hash
-
-let hash_is_hash_incremental (a: hash_alg) (input: bytes { S.length input < max_input_length a }):
+let hash_is_hash_incremental (a: hash_alg) (input: bytes { S.length input <= max_input_length a }):
   Lemma (ensures (S.equal (hash a input) (hash_incremental a input)))
 =
   let open FStar.Mul in

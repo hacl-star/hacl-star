@@ -1,4 +1,5 @@
 module Vale.Arch.TypesNative
+open FStar.Mul
 open Vale.Def.Words_s
 open Vale.Def.Types_s
 open Vale.Def.TypesNative_s

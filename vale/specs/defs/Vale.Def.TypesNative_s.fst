@@ -1,4 +1,5 @@
 module Vale.Def.TypesNative_s
+open FStar.Mul
 
 unfold let natN = Vale.Def.Words_s.natN
 unfold let pow2_norm = Vale.Def.Words_s.pow2_norm

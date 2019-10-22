@@ -22,39 +22,53 @@ open FStar.Mul
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 
 let padding_round (a: hash_alg) (len: len_t a): Lemma
-  (ensures (
-    (len_v a len + pad_length a (len_v a len)) % block_length a = 0))
+  ((len_v a len + pad_length a (len_v a len)) % block_length a = 0)
 =
   ()
+
+private
+val mod_sub_add: a:int -> b:int -> c:int -> d:int -> p:pos -> Lemma
+  (requires b % p = 0)
+  (ensures  (a - ((b + c) + d)) % p == (a - (c + d)) % p)
+let mod_sub_add a b c d p =
+  calc (==) {
+    (a - ((b + c) + d)) % p;
+    == { Math.Lemmas.lemma_mod_sub_distr a ((b + c) + d) p }
+    (a - ((b + c) + d) % p) % p;
+    == { Math.Lemmas.lemma_mod_plus_distr_l (b + c) d p }
+    (a - ((b + c) % p + d) % p) % p;
+    == { Math.Lemmas.lemma_mod_plus_distr_l b c p }
+    (a - ((b % p + c) % p + d) % p) % p;
+    == { }
+    (a - (c % p + d) % p) % p;
+    == { Math.Lemmas.lemma_mod_plus_distr_l c d p }
+    (a - (c + d) % p) % p;
+    == { Math.Lemmas.lemma_mod_sub_distr a (c + d) p }
+    (a - (c + d)) % p;
+  }
 
 let pad0_length_mod (a: hash_alg) (base_len: nat) (len: nat): Lemma
-  (requires (
-    base_len % block_length a = 0))
-  (ensures (
-    pad0_length a (base_len + len) = pad0_length a len))
+  (requires base_len % block_length a = 0)
+  (ensures  pad0_length a (base_len + len) = pad0_length a len)
 =
-  ()
+  mod_sub_add (block_length a) base_len len (len_length a + 1) (block_length a)
 
 let pad_length_mod (a: hash_alg) (base_len len: nat): Lemma
-  (requires (
-    base_len % block_length a = 0))
-  (ensures (
-    pad_length a (base_len + len) = pad_length a len))
+  (requires base_len % block_length a = 0)
+  (ensures  pad_length a (base_len + len) = pad_length a len)
 =
   pad0_length_mod a base_len len
 
 let pad_length_bound (a: hash_alg) (len: len_t a): Lemma
-  (ensures (pad_length a (len_v a len) <= 2 * block_length a))
+  (pad_length a (len_v a len) <= 2 * block_length a)
 =
   ()
-
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 200"
 
 (* Avoiding an ill-formed pattern error... *)
 noextract inline_for_extraction
 let len_add32 (a: hash_alg)
   (prev_len: len_t a)
-  (input_len: U32.t { U32.v input_len + len_v a prev_len < max_input_length a }):
+  (input_len: U32.t { U32.v input_len + len_v a prev_len <= max_input_length a }):
   x:len_t a { len_v a x = len_v a prev_len + U32.v input_len }
 =
   let open FStar.Int.Cast.Full in
@@ -66,7 +80,7 @@ let len_add32 (a: hash_alg)
       assert_norm (pow2 125 < pow2 128);
       U128.(prev_len +^ uint64_to_uint128 (uint32_to_uint64 input_len))
 
-#push-options "--max_fuel 1 --z3rlimit 128 --using_facts_from '* -FStar.UInt8 -FStar.UInt16 -FStar.UInt32 -FStar.UInt64 -FStar.UInt128'"
+#push-options "--max_fuel 1 --z3rlimit 128"
 
 (** Iterated compression function. *)
 noextract inline_for_extraction
@@ -78,7 +92,7 @@ let mk_update_multi a update s blocks n_blocks =
     B.live h s /\ B.live h blocks /\
     B.(modifies (loc_buffer s) h0 h) /\
     S.equal (B.as_seq h s)
-      (Spec.Hash.update_multi a (B.as_seq h0 s) (S.slice (B.as_seq h0 blocks) 0 i_block))
+      (Spec.Agile.Hash.update_multi a (B.as_seq h0 s) (S.slice (B.as_seq h0 blocks) 0 i_block))
   in
   let f (i:U32.t { U32.(0 <= v i /\ v i < v n_blocks)}): ST.Stack unit
     (requires (fun h -> inv h (U32.v i)))
@@ -102,12 +116,12 @@ let mk_update_multi a update s blocks n_blocks =
       block_length a * (i + 1) <= S.length blocks /\
       (block_length a * (i + 1) - block_length a * i) % block_length a = 0 /\
       S.equal block (S.slice blocks (block_length a * i) (block_length a * (i + 1))) /\
-      S.equal s2 (Spec.Hash.update_multi a s1 block))
+      S.equal s2 (Spec.Agile.Hash.update_multi a s1 block))
   in
   assert (B.length blocks = U32.v n_blocks * block_length a);
   C.Loops.for 0ul n_blocks inv f
 
-#push-options "--max_fuel 0 --z3rlimit 400"
+#push-options "--max_fuel 0 --z3rlimit 800"
 
 (** An arbitrary number of bytes, then padding. *)
 noextract inline_for_extraction
@@ -130,7 +144,7 @@ let mk_update_last a update_multi pad s prev_len input input_len =
 
   let h1 = ST.get () in
   assert (S.equal (B.as_seq h0 input) (S.append (B.as_seq h1 blocks) (B.as_seq h1 rest)));
-  assert (S.equal (B.as_seq h1 s) (Spec.Hash.update_multi a (B.as_seq h0 s) (B.as_seq h0 blocks)));
+  assert (S.equal (B.as_seq h1 s) (Spec.Agile.Hash.update_multi a (B.as_seq h0 s) (B.as_seq h0 blocks)));
 
   (* Compute the total number of bytes fed. *)
   let total_input_len: len_t a = len_add32 a prev_len input_len in
@@ -148,7 +162,7 @@ let mk_update_last a update_multi pad s prev_len input input_len =
   pad_length_bound a total_input_len;
   assert (U32.v tmp_len <= 2 * block_length a);
 
-  let tmp_twoblocks = B.alloca 0uy U32.(2ul *^ block_len a) in
+  let tmp_twoblocks = B.alloca (Lib.IntTypes.u8 0) U32.(2ul *^ block_len a) in
   let tmp = B.sub tmp_twoblocks 0ul tmp_len in
   let tmp_rest = B.sub tmp 0ul rest_len in
   let tmp_pad = B.sub tmp rest_len pad_len in
@@ -165,7 +179,7 @@ let mk_update_last a update_multi pad s prev_len input input_len =
 
   let h3 = ST.get () in
   assert (S.equal (B.as_seq h3 s)
-    (Spec.Hash.update_multi a (Spec.Hash.update_multi a (B.as_seq h0 s) (B.as_seq h1 blocks))
+    (Spec.Agile.Hash.update_multi a (Spec.Agile.Hash.update_multi a (B.as_seq h0 s) (B.as_seq h1 blocks))
       (S.append (B.as_seq h1 rest) (Spec.Hash.PadFinish.pad a (len_v a total_input_len)))));
   assert (
     let s1 = B.as_seq h1 blocks in
@@ -182,12 +196,10 @@ noextract inline_for_extraction
 let u32_to_len (a: hash_alg) (l: U32.t): l':len_t a { len_v a l' = U32.v l } =
   match a with
   | SHA2_384 | SHA2_512 ->
-      FStar.Int.Cast.Full.(uint64_to_uint128 (uint32_to_uint64 l))
-  | _ ->
-      FStar.Int.Cast.Full.(uint32_to_uint64 l)
+    FStar.Int.Cast.Full.(uint64_to_uint128 (uint32_to_uint64 l))
+  | _ -> FStar.Int.Cast.Full.uint32_to_uint64 l
 
 #pop-options
-
 
 (** Complete hash. *)
 noextract inline_for_extraction

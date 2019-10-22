@@ -16,6 +16,16 @@ open Vale.Lib.Seqs
 
 #set-options "--z3rlimit 20 --max_fuel 1 --max_ifuel 0"
 
+let lemma_counter_init x low64 low8 =
+  Vale.Poly1305.Bitvectors.lemma_bytes_and_mod1 low64;
+  Vale.Def.TypesNative_s.reveal_iand 64 low64 0xff;
+  assert (low8 == low64 % 256);
+  Vale.Def.Opaque_s.reveal_opaque lo64_def;
+  assert_norm (pow2_norm 32 == pow2_32);      // OBSERVE
+  assert (low64 == x.lo0 + x.lo1 * pow2_32);  // OBSERVE
+  assert (low64 % 256 == x.lo0 % 256);
+  ()
+
 let gctr_encrypt_block_offset (icb_BE:quad32) (plain_LE:quad32) (alg:algorithm) (key:seq nat32) (i:int) =
   ()
 
@@ -36,6 +46,23 @@ let gctr_encrypt_empty (icb_BE:quad32) (plain_LE cipher_LE:seq quad32) (alg:algo
   assert (plain_quads_LE == empty);
   assert (cipher_quads_LE == empty);
   assert (equal (le_seq_quad32_to_bytes cipher_quads_LE) empty);  // OBSERVEs
+  ()
+
+let gctr_partial_opaque_init alg plain cipher key icb =
+  reveal_opaque gctr_partial;
+  ()
+
+let lemma_gctr_partial_append alg b1 b2 p1 c1 p2 c2 key icb1 icb2 =
+  reveal_opaque gctr_partial;
+  ()
+
+let gctr_partial_opaque_ignores_postfix alg bound plain plain' cipher cipher' key icb =
+  reveal_opaque gctr_partial;
+  // OBSERVE:
+  assert (forall i . 0 <= i /\ i < bound ==> index plain i == index (slice plain 0 bound) i);
+  assert (forall i . 0 <= i /\ i < bound ==> index plain' i == index (slice plain' 0 bound) i);
+  assert (forall i . 0 <= i /\ i < bound ==> index cipher i == index (slice cipher 0 bound) i);
+  assert (forall i . 0 <= i /\ i < bound ==> index cipher' i == index (slice cipher' 0 bound) i);
   ()
 
 let gctr_partial_extend6 (alg:algorithm) (bound:nat) (plain cipher:seq quad32) (key:seq nat32) (icb:quad32)

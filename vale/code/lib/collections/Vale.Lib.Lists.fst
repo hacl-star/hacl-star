@@ -1,4 +1,5 @@
 module Vale.Lib.Lists
+open FStar.Mul
 
 #reset-options "--initial_fuel 2 --max_fuel 2"
 let singleton_list_rev #a x = ()

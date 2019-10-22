@@ -9,6 +9,7 @@ include{:fstar}{:open} "Vale.X64.CPU_Features_s"
 module Vale.X64.InsBasic
 
 #verbatim{:interface}
+open FStar.Mul
 open Vale.Def.Types_s
 open Vale.Arch.Types
 open Vale.X64.Machine_s
@@ -30,7 +31,6 @@ open Vale.X64.Memory
 open Vale.X64.Stack_i
 module I = Vale.X64.Instructions_s
 module S = Vale.X64.Machine_Semantics_s
-friend Vale.X64.StateLemmas
 friend Vale.X64.Decls
 #endverbatim
 
@@ -69,7 +69,7 @@ operand_type reg64:nat64 :=
 | inout r12 | inout r13 | inout r14 | inout r15
 ;
 operand_type shift_amt64:nat64 := in rcx | const;
-operand_type reg_opr64:nat64 := reg64;
+operand_type reg_opr64:nat64 @ va_operand := reg64;
 operand_type Mem(in base:reg64, inline offset:int, ghost b:buffer64, ghost index:int, inline t:taint):int;
 operand_type Stack(in base:reg64, inline offset:int, inline t:taint):int;
 operand_type dst_opr64:nat64 @ va_operand := reg_opr64 | Mem | Stack;
@@ -240,9 +240,9 @@ procedure Sbb64(inout dst:dst_opr64, in src:opr64)
 
 #verbatim
 let lemma_fundamental_div_mod (a b:nat64) :
-  Lemma (pow2_64 `op_Multiply` (FStar.UInt.mul_div #64 a b) + (FStar.UInt.mul_mod #64 a b) == a `op_Multiply` b)
+  Lemma (pow2_64 * (FStar.UInt.mul_div #64 a b) + (FStar.UInt.mul_mod #64 a b) == a * b)
   =
-  FStar.Math.Lemmas.lemma_div_mod (a `op_Multiply` b) pow2_64
+  FStar.Math.Lemmas.lemma_div_mod (a * b) pow2_64
 #endverbatim
 
 #reset-options "--initial_fuel 5 --max_fuel 5 --max_ifuel 2 --z3rlimit 50"
@@ -301,7 +301,7 @@ procedure Xor64(inout dst:dst_opr64, in src:opr64)
     modifies
         efl;
     ensures
-        dst == old(ixor64(dst,src));
+        dst == old(ixor64(dst, src));
         !overflow(efl);
         !cf(efl);
         valid_cf(efl);
@@ -316,7 +316,7 @@ procedure And64(inout dst:dst_opr64, in src:opr64)
     modifies
         efl;
     ensures
-        dst == old(iand64(dst,src));
+        dst == old(iand64(dst, src));
 {
 }
 
@@ -418,4 +418,12 @@ procedure Nat64Equal(out dst:reg_opr64, inout src:reg_opr64)
     Sub64Wrap(src, 0xFFFFFFFFFFFFFFFF);
     Mov64(dst, 0);
     Adc64(dst, 0);
+}
+
+procedure Comment(inline c:string)
+    {:public}
+    {:quick exportOnly}
+    {:instruction mk_ins(make_instr(I.ins_Comment(c)))}
+{
+    // Do nothing. This is a no-op.
 }

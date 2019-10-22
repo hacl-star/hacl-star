@@ -208,7 +208,7 @@ let test5_expected224 = []
 //   0x4euy; 0xaduy; 0xb2uy; 0x17uy; 0xaduy; 0x8cuy; 0xc0uy; 0x9buy
 // ]
 
-open Spec.Hash
+open Spec.Agile.Hash
 open Spec.Hash.Definitions
 
 //
@@ -216,10 +216,10 @@ open Spec.Hash.Definitions
 //
 
 type vec =
-  | Vec : 
+  | Vec :
     a: hash_alg ->
     plain:
-    list UInt8.t {norm [delta; iota; zeta; primops] (List.Tot.length plain < max_input_length a) == true} ->
+    list UInt8.t {norm [delta; iota; zeta; primops] (List.Tot.length plain <= max_input_length a) == true} ->
     hash:
     list UInt8.t {norm [delta; iota; zeta; primops] (List.Tot.length hash = hash_length a) == true} ->
     vec
@@ -1378,9 +1378,17 @@ let test_vectors: list vec =
       Vec SHA1 plain cipher)
   ]
 
+let print_and_compare (str1:string) (str2:string) (len:Lib.IntTypes.size_nat) (test_expected:Lib.ByteSequence.lbytes len) (test_result:Lib.ByteSequence.lbytes len) =
+  IO.print_string str1;
+  List.iter (fun a -> IO.print_string (UInt8.to_string (Lib.RawIntTypes.u8_to_UInt8 a))) (Lib.Sequence.to_list test_expected);
+  IO.print_string str2;
+  List.iter (fun a -> IO.print_string (UInt8.to_string (Lib.RawIntTypes.u8_to_UInt8 a))) (Lib.Sequence.to_list test_result);
+  Lib.ByteSequence.lbytes_eq test_expected test_result
+
 let test_one (v: vec) =
   let Vec a plain tag = v in
-  hash a (Seq.seq_of_list plain) = Seq.seq_of_list tag
+  let expected = Seq.seq_of_list (List.Tot.map Lib.RawIntTypes.u8_from_UInt8 tag) in
+  let computed = hash a (Seq.seq_of_list (List.Tot.map Lib.RawIntTypes.u8_from_UInt8 plain)) in
+  print_and_compare "\nExpected: " "\nComputed: "(hash_length a) expected computed
 
-let test () = List.Tot.for_all test_one test_vectors
-
+let test () = List.for_all test_one test_vectors

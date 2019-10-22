@@ -3,13 +3,16 @@ module Hacl.Spec.Poly1305.Field32xN
 open Lib.IntTypes
 open Lib.IntVector
 open Lib.Sequence
+open FStar.Mul
 
 open Hacl.Spec.Poly1305.Vec
 
-(* low-level spec *)
+#reset-options "--z3rlimit 100 --using_facts_from '* -FStar.Seq'"
+
+
 let scale32 = s:nat{s <= 64}
 let scale64 = s:nat{s <= 4096}
-let nat5 = (nat * nat * nat * nat * nat)
+let nat5 = (nat & nat & nat & nat & nat)
 
 let scale32_5 = x:nat5{let (x1,x2,x3,x4,x5) = x in
 		       x1 <= 64 /\ x2 <= 64 /\ x3 <= 64 /\ x4 <= 64 /\ x5 <= 64}
@@ -17,10 +20,6 @@ let scale64_5 = x:nat5{let (x1,x2,x3,x4,x5) = x in
 		       x1 <= 4096 /\ x2 <= 4096 /\ x3 <= 4096 /\ x4 <= 4096 /\ x5 <= 4096}
 
 let s64x5 (x:scale64) : scale64_5 = (x,x,x,x,x)
-
-open FStar.Mul
-
-#reset-options "--z3rlimit 100 --using_facts_from '* -FStar.Seq'"
 
 noextract
 let ( *^ ) (x:scale32) (y:scale32_5) : scale64_5 =
@@ -52,12 +51,16 @@ let ( <=* ) (x:nat5) (y:nat5) : Type =
   (x4 <= y4) /\
   (x5 <= y5)
 
-abstract
+//abstract
 let pow26: (pow26: pos { pow2 32 == 64 * pow26 /\ pow2 64 == 4096 * pow26 * pow26 /\ pow26 == pow2 26 }) =
   let pow26: pos = pow2 26 in
   assert_norm (pow2 32 == 64 * pow26);
   assert_norm (pow2 64 == 4096 * pow26 * pow26);
   pow26
+
+let pow52: (pow52:pos {pow52 == pow2 52}) = normalize_term (pow2 52)
+let pow78: (pow78:pos {pow78 == pow2 78}) = normalize_term (pow2 78)
+let pow104: (pow104:pos {pow104 == pow2 104}) = normalize_term (pow2 104)
 
 inline_for_extraction
 let max26 = pow26 - 1
@@ -68,6 +71,9 @@ let tup64_5 = (uint64 & uint64 & uint64 & uint64 & uint64)
 let tup64_fits1 (f:uint64) (m:scale32) =
   uint_v f <= m * max26
 
+let tup64_wide_fits1 (f:uint64) (m:scale64) =
+  uint_v f <= m * max26 * max26
+
 let tup64_fits5 (f:tup64_5) (m:scale32_5) =
   let (x0, x1, x2, x3, x4) = f in
   let (m0, m1, m2, m3, m4) = m in
@@ -77,12 +83,20 @@ let tup64_fits5 (f:tup64_5) (m:scale32_5) =
   tup64_fits1 x3 m3 /\
   tup64_fits1 x4 m4
 
+let tup64_wide_fits5 (f:tup64_5) (m:scale64_5) =
+  let (x0, x1, x2, x3, x4) = f in
+  let (m0, m1, m2, m3, m4) = m in
+  tup64_wide_fits1 x0 m0 /\
+  tup64_wide_fits1 x1 m1 /\
+  tup64_wide_fits1 x2 m2 /\
+  tup64_wide_fits1 x3 m3 /\
+  tup64_wide_fits1 x4 m4
+
 noextract
 val as_nat5: f:tup64_5 -> nat
 let as_nat5  f =
-  let (s0,s1,s2,s3,s4) = f in
-  uint_v s0 + (uint_v s1 * pow26) + (uint_v s2 * pow26 * pow26) +
-    (uint_v s3 * pow26 * pow26 * pow26) + (uint_v s4 * pow26 * pow26 * pow26 * pow26)
+  let (s0, s1, s2, s3, s4) = f in
+  v s0 + v s1 * pow26 + v s2 * pow52 + v s3 * pow78 + v s4 * pow104
 
 noextract
 let as_pfelem5 (f:tup64_5) : pfelem =
@@ -406,10 +420,11 @@ inline_for_extraction noextract
 val store_felem5:
     #w:lanes
   -> f:felem5 w
-  -> uint64xN w & uint64xN w
+  -> uint64 & uint64
 let store_felem5 #w (f0, f1, f2, f3, f4) =
-  let lo = vec_or (vec_or f0 (vec_shift_left f1 26ul)) (vec_shift_left f2 52ul) in
-  let hi = vec_or (vec_or (vec_shift_right f2 12ul) (vec_shift_left f3 14ul)) (vec_shift_left f4 40ul) in
+  let (f0, f1, f2, f3, f4) = (vec_get f0 0ul, vec_get f1 0ul, vec_get f2 0ul, vec_get f3 0ul, vec_get f4 0ul) in
+  let lo = (f0 |. (f1 <<. 26ul)) |. (f2 <<. 52ul) in
+  let hi = ((f2 >>. 12ul) |. (f3 <<. 14ul)) |. (f4 <<. 40ul) in
   lo, hi
 
 inline_for_extraction noextract
@@ -510,46 +525,46 @@ let fmul_r4_normalize5 (a0, a1, a2, a3, a4) (r10, r11, r12, r13, r14) (r150, r15
 
   let v12120 = vec_interleave_low r20 r10 in
   let v34340 = vec_interleave_low r40 r30 in
-  let r12340 = cast U64 4 (vec_interleave_low (cast U128 2 v34340) (cast U128 2 v12120)) in
+  let r12340 = vec_interleave_low_n 2 v34340 v12120 in
 
   let v12121 = vec_interleave_low r21 r11 in
   let v34341 = vec_interleave_low r41 r31 in
-  let r12341 = cast U64 4 (vec_interleave_low (cast U128 2 v34341) (cast U128 2 v12121)) in
+  let r12341 = vec_interleave_low_n 2 v34341 v12121 in
 
   let v12122 = vec_interleave_low r22 r12 in
   let v34342 = vec_interleave_low r42 r32 in
-  let r12342 = cast U64 4 (vec_interleave_low (cast U128 2 v34342) (cast U128 2 v12122)) in
+  let r12342 = vec_interleave_low_n 2 v34342 v12122 in
 
   let v12123 = vec_interleave_low r23 r13 in
   let v34343 = vec_interleave_low r43 r33 in
-  let r12343 = cast U64 4 (vec_interleave_low (cast U128 2 v34343) (cast U128 2 v12123)) in
+  let r12343 = vec_interleave_low_n 2 v34343 v12123 in
 
   let v12124 = vec_interleave_low r24 r14 in
   let v34344 = vec_interleave_low r44 r34 in
-  let r12344 = cast U64 4 (vec_interleave_low (cast U128 2 v34344) (cast U128 2 v12124)) in
+  let r12344 = vec_interleave_low_n 2 v34344 v12124 in
 
   let (r123450, r123451, r123452, r123453, r123454) = precomp_r5 #4 (r12340, r12341, r12342, r12343, r12344) in
   let (o0, o1, o2, o3, o4) =
     fmul_r5 #4 (a0, a1, a2, a3, a4) (r12340, r12341, r12342, r12343, r12344)
       (r123450, r123451, r123452, r123453, r123454) in
 
-  let v00 = cast U64 4 (vec_interleave_high (cast U128 2 o0) (cast U128 2 o0)) in
+  let v00 = vec_interleave_high_n 2 o0 o0 in
   let v10 = vec_add_mod o0 v00 in
   let v20 = vec_add_mod v10 (vec_permute4 v10 1ul 1ul 1ul 1ul) in
 
-  let v01 = cast U64 4 (vec_interleave_high (cast U128 2 o1) (cast U128 2 o1)) in
+  let v01 = vec_interleave_high_n 2 o1 o1 in
   let v11 = vec_add_mod o1 v01 in
   let v21 = vec_add_mod v11 (vec_permute4 v11 1ul 1ul 1ul 1ul) in
 
-  let v02 = cast U64 4 (vec_interleave_high (cast U128 2 o2) (cast U128 2 o2)) in
+  let v02 = vec_interleave_high_n 2 o2 o2 in
   let v12 = vec_add_mod o2 v02 in
   let v22 = vec_add_mod v12 (vec_permute4 v12 1ul 1ul 1ul 1ul) in
 
-  let v03 = cast U64 4 (vec_interleave_high (cast U128 2 o3) (cast U128 2 o3)) in
+  let v03 = vec_interleave_high_n 2 o3 o3 in
   let v13 = vec_add_mod o3 v03 in
   let v23 = vec_add_mod v13 (vec_permute4 v13 1ul 1ul 1ul 1ul) in
 
-  let v04 = cast U64 4 (vec_interleave_high (cast U128 2 o4) (cast U128 2 o4)) in
+  let v04 = vec_interleave_high_n 2 o4 o4 in
   let v14 = vec_add_mod o4 v04 in
   let v24 = vec_add_mod v14 (vec_permute4 v14 1ul 1ul 1ul 1ul) in
   carry_full_felem5 (v20, v21, v22, v23, v24)
@@ -568,14 +583,13 @@ let set_bit5 #w f i =
   res
 
 inline_for_extraction noextract
-val mod_add128_ws:
-    #w:lanes
-  -> a:(uint64xN w & uint64xN w)
-  -> b:(uint64xN w & uint64xN w)
-  -> uint64xN w & uint64xN w
-let mod_add128_ws #w (a0, a1) (b0, b1) =
-  let r0 = vec_add_mod a0 b0 in
-  let r1 = vec_add_mod a1 b1 in
-  let c = r0 ^| ((r0 ^| b0) `vec_or` ((r0 -| b0) ^| b0)) >>| 63ul in
-  let r1 = vec_add_mod r1 c in
+val mod_add128:
+    a:(uint64 & uint64)
+  -> b:(uint64 & uint64)
+  -> uint64 & uint64
+let mod_add128 (a0, a1) (b0, b1) =
+  let r0 = a0 +. b0 in
+  let r1 = a1 +. b1 in
+  let c = r0 ^. ((r0 ^. b0) |. ((r0 -. b0) ^. b0)) >>. 63ul in
+  let r1 = r1 +. c in
   (r0, r1)

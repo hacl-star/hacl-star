@@ -29,7 +29,7 @@ let poly1305_vale
     (ensures fun h0 _ h1 ->
       B.(modifies (loc_buffer dst) h0 h1 /\ (
       B.as_seq h1 dst ==
-        BF.of_bytes (Spec.Poly1305.poly1305
+        BF.of_bytes (Spec.Poly1305.poly1305_mac
           (BF.to_bytes (B.as_seq h0 src))
           (BF.to_bytes (B.as_seq h0 key))))))
   =
@@ -60,7 +60,7 @@ let poly1305_vale
     Vale.Arch.BufferFriend.lemma_n_to_le_is_nat_to_bytes 16 (FStar.Endianness.le_to_n (S.slice (B.as_seq h2 ctx) 0 16));
     FStar.Endianness.n_to_le_le_to_n 16 (S.slice (B.as_seq h2 ctx) 0 16);
     assert (S.slice (B.as_seq h2 ctx) 0 16 `S.equal`
-      Spec.Poly1305.poly1305 (B.as_seq h1 src) (B.as_seq h1 key));
+      Spec.Poly1305.poly1305_mac (B.as_seq h1 src) (B.as_seq h1 key));
     ()
   end else begin
     let tmp = B.alloca 0uy 16ul in // space for last 0..15 bytes
@@ -87,7 +87,7 @@ let poly1305_vale
     Vale.Poly1305.CallingFromLowStar.lemma_hash_init h1' h1'' ctx false;
     Vale.Wrapper.X64.Poly.x64_poly1305 ctx tmp (FStar.Int.Cast.Full.uint32_to_uint64 n_extra) 1UL;
     let h2 = ST.get () in
-    let proof : squash (S.slice (B.as_seq h2 ctx) 0 16 `S.equal` Spec.Poly1305.poly1305 (B.as_seq h1 src) (B.as_seq h1 key)) =
+    let proof : squash (S.slice (B.as_seq h2 ctx) 0 16 `S.equal` Spec.Poly1305.poly1305_mac (B.as_seq h1 src) (B.as_seq h1 key)) =
       let open FStar.Seq.Base in
       let open Vale.Poly1305.Spec_s in
       let open Vale.Def.Words_s in
@@ -120,7 +120,7 @@ let poly1305_vale
   pop_frame ();
 
   let h3 = ST.get () in
-  assert (B.as_seq h3 dst `S.equal` Spec.Poly1305.poly1305 (B.as_seq h0 src) (B.as_seq h0 key))
+  assert (B.as_seq h3 dst `S.equal` Spec.Poly1305.poly1305_mac (B.as_seq h0 src) (B.as_seq h0 key))
 
 let poly1305 dst src len key =
   let h0 = ST.get () in
@@ -129,17 +129,14 @@ let poly1305 dst src len key =
   let vale = EverCrypt.AutoConfig2.wants_vale () in
 
   if EverCrypt.TargetConfig.x64 && avx2 then begin
-    Hacl.Poly1305_256.poly1305_mac dst len src key;
-    Hacl.Spec.Poly1305.Equiv.poly1305_vec_is_poly1305 #4 (B.as_seq h0 src) (B.as_seq h0 key)
+    Hacl.Poly1305_256.poly1305_mac dst len src key
 
   end else if EverCrypt.TargetConfig.x64 && avx then begin
-    Hacl.Poly1305_128.poly1305_mac dst len src key;
-    Hacl.Spec.Poly1305.Equiv.poly1305_vec_is_poly1305 #2 (B.as_seq h0 src) (B.as_seq h0 key)
+    Hacl.Poly1305_128.poly1305_mac dst len src key
 
   end else if EverCrypt.TargetConfig.x64 && vale then begin
     poly1305_vale dst src len key
 
   end else begin
-    Hacl.Poly1305_32.poly1305_mac dst len src key;
-    Hacl.Spec.Poly1305.Equiv.poly1305_vec_is_poly1305 #1 (B.as_seq h0 src) (B.as_seq h0 key)
+    Hacl.Poly1305_32.poly1305_mac dst len src key
   end

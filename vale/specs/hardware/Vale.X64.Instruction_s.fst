@@ -1,4 +1,5 @@
 module Vale.X64.Instruction_s
+open FStar.Mul
 // only trusted specification files should friend this module
 
 [@instr_attr]

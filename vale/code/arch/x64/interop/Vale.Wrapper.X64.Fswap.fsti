@@ -10,9 +10,9 @@ open Vale.Wrapper.X64.Fadd
 
 inline_for_extraction
 val cswap2
+  (bit:UInt64.t{UInt64.v bit <= 1})
   (p0:u512)
   (p1:u512)
-  (bit:UInt64.t{UInt64.v bit <= 1})
   : Stack unit
     (requires fun h ->
       B.live h p0 /\ B.live h p1 /\

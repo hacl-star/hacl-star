@@ -58,7 +58,7 @@ let test_one_hash vec =
       C.String.memcpy (B.sub total_input (input_len * i) input_len) input input_len
     );
     EverCrypt.Hash.uint32_fits_maxLength a total_input_len;
-    assert (v total_input_len <= Spec.Hash.Definitions.max_input_length a);
+    assert (v total_input_len <= Spec.Hash.Definitions.max_input_length a + 1);
 
     EverCrypt.Hash.hash a computed total_input total_input_len;
 
@@ -79,9 +79,9 @@ let supported_hmac_algorithm a =
   | MD5 | SHA2_224 -> false
   | _ -> true
 
-let keysized (a:H.alg) (l: UInt32.t): Tot (b:bool{b ==> Spec.HMAC.keysized a (UInt32.v l) }) =
+let keysized (a:H.alg) (l: UInt32.t): Tot (b:bool{b ==> Spec.Agile.HMAC.keysized a (UInt32.v l) }) =
   EverCrypt.Hash.uint32_fits_maxLength a l;
-  assert (v l < Spec.Hash.Definitions.max_input_length a);
+  assert (v l <= Spec.Hash.Definitions.max_input_length a);
   assert_norm (v 0xfffffffful = pow2 32 - 1);
   l <= 0xfffffffful - Hacl.Hash.Definitions.block_len a
 
@@ -97,7 +97,7 @@ let test_one_hmac vec =
   else if supported_hmac_algorithm ha then
     begin
     push_frame();
-    assert (Spec.HMAC.keysized ha (v keylen));
+    assert (Spec.Agile.HMAC.keysized ha (v keylen));
     assert (v datalen + Spec.Hash.Definitions.block_length ha < pow2 32);
     B.recall key;
     B.recall data;
@@ -134,7 +134,7 @@ let test_one_hkdf vec =
     failwith !$"infolen is too large\n"
   else if supported_hmac_algorithm ha then begin
     push_frame();
-    assert (Spec.HMAC.keysized ha (v saltlen));
+    assert (Spec.Agile.HMAC.keysized ha (v saltlen));
     assert (v ikmlen + Spec.Hash.Definitions.block_length ha < pow2 32);
     assert Spec.Hash.Definitions.(hash_length ha
       + v infolen + 1 + block_length ha < pow2 32);
@@ -143,13 +143,13 @@ let test_one_hkdf vec =
     B.recall info;
     let str = EverCrypt.Hash.string_of_alg ha in
     let computed_prk = B.alloca 0uy (Hacl.Hash.Definitions.hash_len ha) in
-    EverCrypt.HKDF.hkdf_extract ha computed_prk salt saltlen ikm ikmlen;
+    EverCrypt.HKDF.extract ha computed_prk salt saltlen ikm ikmlen;
     B.recall expected_prk;
     TestLib.compare_and_print str expected_prk computed_prk (Hacl.Hash.Definitions.hash_len ha);
 
     let computed_okm = B.alloca 0uy (okmlen + 1ul) in
     let computed_okm = B.sub computed_okm 0ul okmlen in
-    EverCrypt.HKDF.hkdf_expand ha computed_okm computed_prk prklen info infolen okmlen;
+    EverCrypt.HKDF.expand ha computed_okm computed_prk prklen info infolen okmlen;
     B.recall expected_okm;
     TestLib.compare_and_print str expected_okm computed_okm okmlen;
     pop_frame()
@@ -240,7 +240,7 @@ let test_one_curve25519 (v: Test.Vectors.Curve25519.vector): Stack unit (fun _ -
   B.recall public;
   B.recall private_;
   if public_len = 32ul && private__len = 32ul then
-    EverCrypt.Curve25519.ecdh dst private_ public;
+    EverCrypt.Curve25519.scalarmult dst private_ public;
   B.recall result;
   if result_len = 32ul && valid then
     TestLib.compare_and_print !$"Curve25519" result dst 32ul;

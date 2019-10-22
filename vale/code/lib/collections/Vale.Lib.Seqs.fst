@@ -1,4 +1,5 @@
 module Vale.Lib.Seqs
+open FStar.Mul
 
 let lemma_slice_first_exactly_in_append (#a:Type) (x y:seq a) :
   Lemma (slice (append x y) 0 (length x) == x) =

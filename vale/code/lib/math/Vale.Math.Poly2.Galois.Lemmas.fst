@@ -1,4 +1,5 @@
 module Vale.Math.Poly2.Galois.Lemmas
+open FStar.Mul
 module PL = Vale.Math.Poly2.Lemmas
 
 let lemma_eq_to_poly #f a b =

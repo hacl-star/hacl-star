@@ -1,5 +1,42 @@
 ## EverCrypt v0.1 alpha 2
 
+### October 17, 2019
+
+- Addition of HKDF-Extract and HKDF-Expand in `Hacl_HKDF.{h,c}`.
+These replace the previous implementations in `EverCrypt_HKDF.c`.
+In particular, the implementation of `EverCrypt_HKDF_hkdf_expand` is no
+longer recursive but calls into the iterative `Hacl_HKDF_expand`.
+
+- **Breaking change** The `EverCrypt_HKDF_hkdf_expand` and
+`EverCrypt_HKDF_hkdf_extract` functions are marked as deprecated.
+Use `EverCrypt_HKDF_expand` and `EverCrypt_HKDF_extract` instead.
+This may break clients that compile with -Werror.
+
+### October 2, 2019
+- Vectorized implementations of Chacha20Poly1305
+
+### August 9th, 2019
+
+- Addition of the box API under `Hacl_Nacl.h`. There is no multiplexing between
+  implementations and as such, there will be no `EverCrypt.Nacl`.
+- Addition of Salsa20 under `Hacl_Salsa20.h`. Salsa20 *may* be added to
+  `EverCrypt.CTR` if there is demand for it (please speak up).
+
+### August 5th, 2019
+
+- OCaml bindings for EverCrypt (alpha, work in progress).
+
+### July 13th, 2019
+
+- Fully-verified implementation of Ed25519. Not currently multiplexing, but
+  eventually will be. `EverCrypt_Ed25519.h` will perform multiplexing once
+  multiple implementations of Ed25519 are available.
+
+### July 9th, 2019
+
+- `EverCrypt_CTR.h`, an agile, multiplexing API that exposes one block of the
+  counter-mode construction (will eventually support complete encryption).
+
 ### June 27th, 2019
 
 - (possibly) **Breaking change**: KreMLin now compiles deprecation warnings in

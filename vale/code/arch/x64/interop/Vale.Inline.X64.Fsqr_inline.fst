@@ -1,5 +1,6 @@
 module Vale.Inline.X64.Fsqr_inline
 
+open FStar.Mul
 open FStar.HyperStack.ST
 module HS = FStar.HyperStack
 module B = LowStar.Buffer
@@ -133,7 +134,6 @@ let lowstar_fsqr_t =
     arg_reg
     fsqr_regs_modified
     fsqr_xmms_modified
-    Vale.Interop.down_mem
     code_fsqr
     fsqr_dom
     []
@@ -150,7 +150,6 @@ let lowstar_fsqr : lowstar_fsqr_t  =
     arg_reg
     fsqr_regs_modified
     fsqr_xmms_modified
-    Vale.Interop.down_mem
     code_fsqr
     fsqr_dom
     (W.mk_prediction code_fsqr fsqr_dom [] (fsqr_lemma code_fsqr IA.win))
@@ -241,7 +240,6 @@ let lowstar_fsqr2_t =
     arg_reg
     fsqr_regs_modified
     fsqr_xmms_modified
-    Vale.Interop.down_mem
     code_fsqr2
     fsqr_dom
     []
@@ -257,7 +255,6 @@ let lowstar_fsqr2 : lowstar_fsqr2_t  =
     arg_reg
     fsqr_regs_modified
     fsqr_xmms_modified
-    Vale.Interop.down_mem
     code_fsqr2
     fsqr_dom
     (W.mk_prediction code_fsqr2 fsqr_dom [] (fsqr2_lemma code_fsqr2 IA.win))

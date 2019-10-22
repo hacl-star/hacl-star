@@ -49,6 +49,7 @@ val gcm_simplify3 (b:buf_t TUInt8 TUInt128) (h:HS.mem) : Lemma
       (be_quad32_to_bytes (reverse_bytes_quad32 (low_buffer_read TUInt8 TUInt128 h b 0)))
   ))
 
+#push-options "--z3cliopt smt.arith.nl=true"
 val aes_simplify1 (b:buf_t TUInt8 TUInt128) (h:HS.mem) : Lemma
   (requires B.live h b /\ B.length b = 16)
   (ensures (
@@ -57,6 +58,7 @@ val aes_simplify1 (b:buf_t TUInt8 TUInt128) (h:HS.mem) : Lemma
     (seq_nat8_to_seq_nat32_LE (seq_uint8_to_seq_nat8 (B.as_seq h b)))
     (quad32_to_seq (low_buffer_read TUInt8 TUInt128 h b 0))
   ))
+#pop-options
 
 val aes_simplify2 (b:buf_t TUInt8 TUInt128) (h:HS.mem) : Lemma
   (requires B.live h b /\ B.length b = 32)

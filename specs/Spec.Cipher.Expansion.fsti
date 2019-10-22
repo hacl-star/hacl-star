@@ -5,7 +5,7 @@ open Spec.Agile.Cipher
 /// This module gathers key expansion details shared between the CTR and AEAD
 /// constructions.
 ///
-/// From the perspective of Spec.Agile.CTR (and EverCrypt.CTR) and Spec.AEAD
+/// From the perspective of Spec.Agile.CTR (and EverCrypt.CTR) and Spec.Agile.AEAD
 /// (and EverCrypt.AEAD), none of the following appear in the interface:
 ///
 /// - expanded keys, considered to be an implementation detail

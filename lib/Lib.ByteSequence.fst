@@ -28,32 +28,31 @@ let lemma_not_equal_last #a b1 b2 i j =
   Seq.lemma_index_slice b1 i j (j - i - 1);
   Seq.lemma_index_slice b2 i j (j - i - 1)
 
-val seq_eq_mask_inner: #t:inttype{~(U1? t)} -> #len1:size_nat -> #len2:size_nat
-  -> b1:lseq (uint_t t SEC) len1
-  -> b2:lseq (uint_t t SEC) len2
+val seq_eq_mask_inner: #t:inttype{~(S128? t)} -> #len1:size_nat -> #len2:size_nat
+  -> b1:lseq (int_t t SEC) len1
+  -> b2:lseq (int_t t SEC) len2
   -> len:size_nat{len <= len1 /\ len <= len2}
   -> i:size_nat{i < len}
-  -> res:uint_t t SEC{
+  -> res:int_t t SEC{
       (sub b1 0 i == sub b2 0 i  ==> v res == v (ones t SEC)) /\
-      (sub b1 0 i =!= sub b2 0 i ==> v res == v (zeroes t SEC))}
-  -> res':uint_t t SEC{
+      (sub b1 0 i =!= sub b2 0 i ==> v res == v (zeros t SEC))}
+  -> res':int_t t SEC{
       (sub b1 0 (i + 1) == sub b2 0 (i + 1)  ==> v res' == v (ones t SEC)) /\
-      (sub b1 0 (i + 1) =!= sub b2 0 (i + 1) ==> v res' == v (zeroes t SEC))}
+      (sub b1 0 (i + 1) =!= sub b2 0 (i + 1) ==> v res' == v (zeros t SEC))}
 let seq_eq_mask_inner #t #len1 #len2 b1 b2 len i res =
-  UInt.logand_lemma_1 #(8 * numbytes t) (maxint t);
-  UInt.logand_lemma_2 #(8 * numbytes t) (maxint t);
-  UInt.logand_lemma_1 #(8 * numbytes t) 0;
-  UInt.logand_lemma_2 #(8 * numbytes t) 0;
+  logand_zeros (ones t SEC);
+  logand_ones  (ones t SEC);
+  logand_zeros (zeros t SEC);
+  logand_ones  (zeros t SEC);
   let z0 = res in
   let res = eq_mask b1.[i] b2.[i] &. z0 in
   logand_spec (eq_mask b1.[i] b2.[i]) z0;
-  if v res = maxint t then
+  if v res = ones_v t then
     begin
     let s1 = sub b1 0 (i + 1) in
     let s2 = sub b2 0 (i + 1) in
     Seq.lemma_split s1 i;
     Seq.lemma_split s2 i;
-    uintv_extensionality b1.[i] b2.[i];
     assert (equal s1 s2)
     end
   else if v z0 = 0 then
@@ -66,7 +65,7 @@ let seq_eq_mask #t #len1 #len2 b1 b2 len =
   repeati_inductive len
     (fun (i:nat{i <= len}) res ->
       (sub b1 0 i == sub b2 0 i  ==> v res == v (ones t SEC)) /\
-      (sub b1 0 i =!= sub b2 0 i ==> v res == v (zeroes t SEC)))
+      (sub b1 0 i =!= sub b2 0 i ==> v res == v (zeros t SEC)))
     (seq_eq_mask_inner b1 b2 len)
     (ones t SEC)
 
@@ -77,7 +76,7 @@ let lbytes_eq #len b1 b2 =
 /// END constant-time sequence equality
 
 val nat_from_intseq_be_:
-    #t:inttype -> #l:secrecy_level
+    #t:inttype{unsigned t} -> #l:secrecy_level
   -> b:seq (uint_t t l)
   -> Tot (n:nat{n < pow2 (length b * bits t)}) (decreases (length b))
 let rec nat_from_intseq_be_ #t #l b =
@@ -94,7 +93,7 @@ let rec nat_from_intseq_be_ #t #l b =
 let nat_from_intseq_be = nat_from_intseq_be_
 
 val nat_from_intseq_le_:
-    #t:inttype -> #l:secrecy_level
+    #t:inttype{unsigned t} -> #l:secrecy_level
   -> b:seq (uint_t t l)
   -> Tot (n:nat{n < pow2 (length b * bits t)}) (decreases (length b))
 
@@ -111,16 +110,14 @@ let rec nat_from_intseq_le_ #t #l b =
     n
 
 let nat_from_intseq_le = nat_from_intseq_le_
-let nat_from_bytes_be = nat_from_intseq_be #U8
-let nat_from_bytes_le = nat_from_intseq_le #U8
 
-#push-options "--max_fuel 1"
+#set-options "--max_fuel 1"
 
 val nat_to_intseq_be_:
-    #t:inttype -> #l:secrecy_level
+    #t:inttype{unsigned t} -> #l:secrecy_level
   -> len:nat
   -> n:nat{n < pow2 (bits t * len)}
-  -> Tot (b:seq (uint_t t l){length b == len /\ n == nat_from_intseq_be b}) (decreases len)
+  -> Tot (b:seq (int_t t l){length b == len /\ n == nat_from_intseq_be b}) (decreases len)
 let rec nat_to_intseq_be_ #t #l len n =
   if len = 0 then create len (uint #t #l 0)
   else
@@ -137,7 +134,7 @@ let rec nat_to_intseq_be_ #t #l len n =
 let nat_to_intseq_be = nat_to_intseq_be_
 
 val nat_to_intseq_le_:
-    #t:inttype -> #l:secrecy_level
+    #t:inttype{unsigned t} -> #l:secrecy_level
   -> len:nat
   -> n:nat{n < pow2 (bits t * len)}
   -> Tot (b:seq (uint_t t l){length b == len /\ n == nat_from_intseq_le b}) (decreases len)
@@ -158,22 +155,10 @@ let nat_to_intseq_le = nat_to_intseq_le_
 let nat_to_bytes_be = nat_to_intseq_be_ #U8
 let nat_to_bytes_le = nat_to_intseq_le_ #U8
 
-private
-val unfold_nat_to_intseq_le:
-    #t:inttype
-  -> #l:secrecy_level
-  -> len:size_nat{0 < len}
-  -> n:nat{n < pow2 (bits t * len)}
-  -> Lemma (Math.Lemmas.lemma_div_lt_nat n (bits t * len) (bits t);
-           nat_to_intseq_le #t #l len n ==
-           Seq.append (create 1 (uint #t #l (n % modulus t))) 
-                     (nat_to_intseq_le_ #t #l (len - 1) (n / modulus t)))
-let unfold_nat_to_intseq_le #t #l len n = ()
-
-#pop-options
+#reset-options "--z3rlimit 1000 --max_fuel 1 --max_ifuel 0"
 
 val index_nat_to_intseq_le:
-    #t:inttype
+    #t:inttype{unsigned t}
   -> #l:secrecy_level
   -> len:size_nat
   -> n:nat{n < pow2 (bits t * len)}
@@ -181,29 +166,27 @@ val index_nat_to_intseq_le:
   -> Lemma (Seq.index (nat_to_intseq_le #t #l len n) i ==
            uint #t #l (n / pow2 (bits t * i) % pow2 (bits t)))
 let rec index_nat_to_intseq_le #t #l len n i =
-  Math.Lemmas.lemma_div_lt_nat n (bits t * len) (bits t);
-  unfold_nat_to_intseq_le #t #l len n;
   if i = 0 then ()
   else
     begin
     calc (==) {
-      Seq.index (nat_to_intseq_le #t #l len n) i;
-      == { Seq.lemma_index_app2 
-             (create 1 (uint #t #l (n % modulus t))) 
-             (nat_to_intseq_le (len - 1) (n / modulus t)) i }
-      Seq.index (nat_to_intseq_le (len - 1) (n / modulus t)) (i - 1);
+      Seq.index (nat_to_intseq_le #t #l (len - 1) (n / modulus t)) (i - 1);
       == { index_nat_to_intseq_le #t #l (len - 1) (n / modulus t) (i - 1) }
       uint ((n / modulus t) / pow2 (bits t * (i - 1)) % modulus t);
       == { Math.Lemmas.division_multiplication_lemma n (modulus t) (pow2 (bits t * (i - 1))) }
       uint ((n / (pow2 (bits t) * pow2 (bits t * (i - 1)))) % modulus t);
       == { Math.Lemmas.pow2_plus (bits t) (bits t * (i - 1)) }
       uint ((n / pow2 (bits t + bits t * (i - 1))) % modulus t);
-      == { Math.Lemmas.distributivity_sub_right (bits t) i 1 }
-      uint (n / pow2 (bits t + (bits t * i - bits t * 1)) % modulus t);
-      == { assert (bits t + (bits t * i - bits t * 1) == bits t * i) }
+      == { Math.Lemmas.distributivity_add_right (bits t) i (-1) }
+      uint (n / pow2 (bits t + (bits t * i - bits t)) % modulus t);
+      == { }
       uint (n / pow2 (bits t * i) % modulus t);
+      == { }
+      uint (n / pow2 (bits t * i) % (pow2 (bits t)));
     }
     end
+
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 
 let uint_to_bytes_le #t #l n =
   nat_to_bytes_le (numbytes t) (uint_to_nat n)
@@ -216,15 +199,15 @@ let uint_to_bytes_be #t #l n =
 
 let uint_from_bytes_le #t #l b =
   let n = nat_from_intseq_le #U8 b in
-  nat_to_uint #t #l n
+  uint #t #l n
 
 let uint_from_bytes_be #t #l b =
   let n = nat_from_intseq_be #U8 b in
-  nat_to_uint #t #l n
+  uint #t #l n
 
-val uints_to_bytes_le_inner: #t:inttype -> #l:secrecy_level
+val uints_to_bytes_le_inner: #t:inttype{unsigned t} -> #l:secrecy_level
   -> #len:size_nat{len * numbytes t < pow2 32}
-  -> lseq (uint_t t l) len
+  -> lseq (int_t t l) len
   -> i:nat{i < len} -> unit -> unit & (lseq (uint_t U8 l) (numbytes t))
 let uints_to_bytes_le_inner #t #l #len b i () =
   let open Lib.Sequence in
@@ -236,9 +219,19 @@ let uints_to_bytes_le #t #l #len ul =
     (uints_to_bytes_le_inner #t #l #len ul) () in
   o
 
-val uints_to_bytes_be_inner: #t:inttype -> #l:secrecy_level
+(* Could also be written more simply as:
+let uints_to_bytes_le #t #l #len ul =
+  createi (len * numbytes t)
+    (fun i -> let s = uint_to_bytes_le ul.[i / numbytes t] in
+           s.[i % numbytes t])
+*)
+
+let index_uints_to_bytes_le #t #l #len ul i =
+  index_generate_blocks (numbytes t) len len (uints_to_bytes_le_inner #t #l #len ul) i
+
+val uints_to_bytes_be_inner: #t:inttype{unsigned t} -> #l:secrecy_level
   -> #len:size_nat{len * numbytes t < pow2 32}
-  -> lseq (uint_t t l) len
+  -> lseq (int_t t l) len
   -> i:nat{i < len} -> unit -> unit & (lseq (uint_t U8 l) (numbytes t))
 let uints_to_bytes_be_inner #t #l #len b i () =
   let open Lib.Sequence in
@@ -250,118 +243,131 @@ let uints_to_bytes_be #t #l #len ul =
     (uints_to_bytes_be_inner #t #l #len ul) () in
   o
 
+let index_uints_to_bytes_be #t #l #len ul i =
+  index_generate_blocks (numbytes t) len len (uints_to_bytes_be_inner #t #l #len ul) i
+
 let uints_from_bytes_le #t #l #len b =
-  Lib.Sequence.createi #(uint_t t l) len
+  Lib.Sequence.createi #(int_t t l) len
     (fun i -> uint_from_bytes_le (sub b (i * numbytes t) (numbytes t)))
 
+let index_uints_from_bytes_le #t #l #len b i = ()
+
 let uints_from_bytes_be #t #l #len b =
-  Lib.Sequence.createi #(uint_t t l) len
+  Lib.Sequence.createi #(int_t t l) len
     (fun i -> uint_from_bytes_be (sub b (i * numbytes t) (numbytes t)))
+
+let index_uints_from_bytes_be #t #l #len b i = ()
+
+let uint_at_index_le #t #l #len b i =
+  uint_from_bytes_le (sub b (i * numbytes t) (numbytes t))
+
+let uint_at_index_be #t #l #len b i =
+  uint_from_bytes_be (sub b (i * numbytes t) (numbytes t))
 
 #push-options "--max_fuel 1"
 
-val nat_from_intseq_le_slice_lemma0:
-  #t:inttype -> #l:secrecy_level -> #len:size_nat{len > 0} -> b:lseq (uint_t t l) len -> i:size_nat{0 < i /\ i <= len} ->
-  Lemma
-    (pow2 ((i - 1) * bits t) * nat_from_intseq_le_ (Seq.slice b (i - 1) len) ==
-     pow2 ((i - 1) * bits t) * v b.[i - 1] + pow2 (i * bits t) * nat_from_intseq_le_ (Seq.slice b i len))
-let nat_from_intseq_le_slice_lemma0 #t #l #len b i =
-  FStar.Math.Lemmas.distributivity_add_right (pow2 ((i - 1) * bits t)) (v b.[i - 1]) (pow2 (bits t) * nat_from_intseq_le_ (Seq.slice b i len));
-  FStar.Math.Lemmas.paren_mul_right (pow2 ((i - 1) * bits t)) (pow2 (bits t)) (nat_from_intseq_le_ (Seq.slice b i len));
-  FStar.Math.Lemmas.pow2_plus ((i - 1) * bits t) (bits t)
-
-val nat_from_intseq_le_slice_lemma1:
-  #t:inttype -> #l:secrecy_level -> #len:size_nat -> b:lseq (uint_t t l) len -> i:size_nat{0 < i /\ i <= len} ->
-  Lemma
-    (requires (let b1 = Seq.slice b 0 i in
-      nat_from_intseq_le_ b1 == nat_from_intseq_le_ (Seq.slice b1 0 (i - 1)) + pow2 ((i - 1) * bits t) * nat_from_intseq_le_ (Seq.slice b1 (i - 1) i)))
-    (ensures
-      nat_from_intseq_le_ (Seq.slice b 0 i) == nat_from_intseq_le_ (Seq.slice b 0 (i - 1)) + pow2 ((i - 1) * bits t) * v b.[i - 1])
-let nat_from_intseq_le_slice_lemma1 #t #l #len b i = ()
-
-#pop-options
+val nat_from_intseq_slice_lemma_aux: len:pos -> a:nat -> b:nat -> c:nat -> i:pos{i <= len} ->
+  Lemma (pow2 ((i - 1) * c) * (a + pow2 c * b) == pow2 ((i - 1) * c) * a + pow2 (i * c) * b)
+let nat_from_intseq_slice_lemma_aux len a b c i =
+  FStar.Math.Lemmas.distributivity_add_right (pow2 ((i - 1) * c)) a (pow2 c * b);
+  FStar.Math.Lemmas.paren_mul_right (pow2 ((i - 1) * c)) (pow2 c) b;
+  FStar.Math.Lemmas.pow2_plus ((i - 1) * c) c
 
 val nat_from_intseq_le_slice_lemma_:
-  #t:inttype -> #l:secrecy_level -> #len:size_nat -> b:lseq (uint_t t l) len -> i:nat{i <= len} ->
-  Lemma
-    (nat_from_intseq_le_ b == nat_from_intseq_le_ (Seq.slice b 0 i) + pow2 (i * bits t) * nat_from_intseq_le_ (Seq.slice b i len))
+    #t:inttype{unsigned t} -> #l:secrecy_level -> #len:size_nat
+  -> b:lseq (int_t t l) len
+  -> i:nat{i <= len} ->
+  Lemma (nat_from_intseq_le_ b == nat_from_intseq_le_ (slice b 0 i) + pow2 (i * bits t) * nat_from_intseq_le_ (slice b i len))
 let rec nat_from_intseq_le_slice_lemma_ #t #l #len b i =
   if len = 0 then ()
   else begin
     if i = 0 then ()
     else begin
-      nat_from_intseq_le_slice_lemma_ b (i - 1);
-      nat_from_intseq_le_slice_lemma0 b i;
-      nat_from_intseq_le_slice_lemma_ #t #l #i (Seq.slice b 0 i) (i - 1);
-      nat_from_intseq_le_slice_lemma1 b i
+      let b1 = slice b 0 i in
+      nat_from_intseq_le_slice_lemma_ #t #l #i b1 (i - 1);
+      assert (nat_from_intseq_le_ b1 == nat_from_intseq_le_ (slice b 0 (i - 1)) + pow2 ((i - 1) * bits t) * v b.[i - 1]);
+      nat_from_intseq_le_slice_lemma_ #t #l #len b (i - 1);
+      assert (nat_from_intseq_le_ b == nat_from_intseq_le_ (slice b 0 (i - 1)) + pow2 ((i - 1) * bits t) * nat_from_intseq_le_ (slice b (i - 1) len));
+      nat_from_intseq_slice_lemma_aux len (v b.[i - 1]) (nat_from_intseq_le_ (slice b i len)) (bits t) i
     end
   end
+
+let nat_from_intseq_le_lemma0 #t #l b = ()
 
 let nat_from_intseq_le_slice_lemma #t #l #len b i =
   nat_from_intseq_le_slice_lemma_ b i
 
-let nat_from_bytes_le_slice_lemma #l #len b i =
-  nat_from_intseq_le_slice_lemma_ b i
+val nat_from_intseq_be_slice_lemma_:
+    #t:inttype{unsigned t} -> #l:secrecy_level -> #len:size_nat
+  -> b:lseq (int_t t l) len
+  -> i:nat{i <= len} ->
+  Lemma (ensures (nat_from_intseq_be_ b == nat_from_intseq_be_ (slice b i len) + pow2 ((len - i) * bits t) * nat_from_intseq_be_ (slice b 0 i)))
+  (decreases (len - i))
+let rec nat_from_intseq_be_slice_lemma_ #t #l #len b i =
+  if len = 0 then ()
+  else begin
+    if i = len then ()
+    else begin
+      let b1 = slice b i len in
+      nat_from_intseq_be_slice_lemma_ #t #l #(len - i) b1 1;
+      assert (nat_from_intseq_be_ b1 == nat_from_intseq_be_ (slice b (i + 1) len) + pow2 ((len - i - 1) * bits t) * v b.[i]);
+      nat_from_intseq_be_slice_lemma_ #t #l #len b (i + 1);
+      assert (nat_from_intseq_be_ b == nat_from_intseq_be_ (slice b (i + 1) len) + pow2 ((len - i - 1) * bits t) * nat_from_intseq_be_ (slice b 0 (i + 1)));
+      nat_from_intseq_slice_lemma_aux len (v b.[i]) (nat_from_intseq_be_ (slice b 0 i)) (bits t) (len - i)
+    end
+  end
 
-val uints_from_bytes_le_lemma0:
-    #t:inttype{~(t == U1)}
-  -> #l:secrecy_level
-  -> #len:size_nat{len * numbytes t < pow2 32}
-  -> b:lbytes_l l (len * numbytes t) ->
-  Lemma (forall (i:nat). i < len - 1 ==>
-    (uints_from_bytes_le #t #l #len b).[i + 1] == uint_from_bytes_le (sub b ((i + 1) * numbytes t) (numbytes t)))
-let uints_from_bytes_le_lemma0 #t #l #len b = ()
-
-val uints_from_bytes_le_lemma1:
-    #t:inttype{~(t == U1)}
-  -> #l:secrecy_level
-  -> #len:size_nat{0 < len /\ len * numbytes t < pow2 32}
-  -> b:lbytes_l l (len * numbytes t) ->
-  Lemma (forall (i:nat). i < len - 1 ==>
-    Seq.index (Seq.slice (uints_from_bytes_le #t #l #len b) 1 len) i ==
-    uint_from_bytes_le (sub b ((i + 1) * numbytes t) (numbytes t)))
-let uints_from_bytes_le_lemma1 #t #l #len b =
-  uints_from_bytes_le_lemma0 b
-
-val uints_from_bytes_le_slice_lemma:
-    #t:inttype{~(t == U1)}
-  -> #l:secrecy_level
-  -> #len:size_nat{0 < len /\ len * numbytes t < pow2 32}
-  -> b:lbytes_l l (len * numbytes t) ->
-  Lemma (
-    Seq.slice (uints_from_bytes_le #t #_ #len b) 1 len ==
-    uints_from_bytes_le #t #_ #(len-1) (Seq.slice b (numbytes t) (len * numbytes t)))
-let uints_from_bytes_le_slice_lemma #t #l #len b =
-  let r = uints_from_bytes_le #t #_ #len b in
-  let r1 = uints_from_bytes_le #t #_ #(len-1) (Seq.slice b (numbytes t) (len * numbytes t)) in
-  assert (forall (i:nat). i < len - 1 ==> r1.[i] == uint_from_bytes_le (sub b ((i + 1) * numbytes t) (numbytes t)));
-  uints_from_bytes_le_lemma1 b;
-  eq_intro (Seq.slice r 1 len) r1
-
-#push-options "--max_fuel 1"
-
-val uints_from_bytes_le_nat_lemma0:
-    #t:inttype{~(t == U1)}
-  -> #l:secrecy_level
-  -> #len:size_nat{0 < len /\ len * numbytes t < pow2 32}
-  -> b:lbytes_l l (len * numbytes t) ->
-  Lemma (
-    nat_from_intseq_le_ (uints_from_bytes_le #t #_ #len b) ==
-    nat_from_intseq_le_ (Seq.slice b 0 (numbytes t)) +
-    pow2 (bits t) * nat_from_intseq_le_ (uints_from_bytes_le #t #_ #(len-1) (Seq.slice b (numbytes t) (numbytes t * len))))
-let uints_from_bytes_le_nat_lemma0 #t #l #len b =
-  let r = uints_from_bytes_le #t #_ #len b in
-  let r2 = Seq.slice r 1 len in
-  let b1 = Seq.slice b (numbytes t) (numbytes t * len) in
-  let r1 = uints_from_bytes_le #t #_ #(len-1) b1 in
-  uints_from_bytes_le_slice_lemma b;
-  assert (nat_from_intseq_le_ r == v r.[0] + pow2 (bits t) * nat_from_intseq_le_ r2);
-  assert (nat_from_intseq_le_ (Seq.slice b 0 (numbytes t)) == v r.[0])
-
+let nat_from_intseq_be_lemma0 #t #l b = ()
 #pop-options
 
+let nat_from_intseq_be_slice_lemma #t #l #len b i =
+  nat_from_intseq_be_slice_lemma_ #t #l #len b i
+
+val uints_from_bytes_le_slice_lemma_lp:
+    #t:inttype{unsigned t /\ ~(U1? t)} -> #l:secrecy_level -> #len:size_pos{len * numbytes t < pow2 32}
+  -> b:lbytes_l l (len * numbytes t) -> i:nat -> j:nat{i <= j /\ j <= len} -> k:nat{k < j - i} ->
+  Lemma (index (slice (uints_from_bytes_le #t #l #len b) i j) k ==
+         uint_from_bytes_le (sub b ((i + k) * numbytes t) (numbytes t)))
+let uints_from_bytes_le_slice_lemma_lp #t #l #len b i j k =
+  let r = slice (uints_from_bytes_le #t #l #len b) i j in
+  index_uints_from_bytes_le #t #l #len b (i + k);
+  assert (r.[k] == uint_from_bytes_le (sub b ((i + k) * numbytes t) (numbytes t)))
+
+val uints_from_bytes_le_slice_lemma_rp:
+    #t:inttype{unsigned t /\ ~(U1? t)} -> #l:secrecy_level -> #len:size_pos{len * numbytes t < pow2 32}
+  -> b:lbytes_l l (len * numbytes t) -> i:nat -> j:nat{i <= j /\ j <= len} -> k:nat{k < j - i} ->
+  Lemma (index (uints_from_bytes_le #t #l #(j-i) (slice b (i * numbytes t) (j * numbytes t))) k ==
+         uint_from_bytes_le (sub b ((i + k) * numbytes t) (numbytes t)))
+let uints_from_bytes_le_slice_lemma_rp #t #l #len b i j k =
+  let b1 = slice b (i * numbytes t) (j * numbytes t) in
+  let r = uints_from_bytes_le #t #l #(j-i) b1 in
+  index_uints_from_bytes_le #t #l #(j-i) b1 k;
+  assert (r.[k] == uint_from_bytes_le (sub b1 (k * numbytes t) (numbytes t)));
+  assert (r.[k] == uint_from_bytes_le (sub b ((i + k) * numbytes t) (numbytes t)))
+
+let uints_from_bytes_le_slice_lemma #t #l #len b i j =
+  FStar.Classical.forall_intro (uints_from_bytes_le_slice_lemma_lp #t #l #len b i j);
+  FStar.Classical.forall_intro (uints_from_bytes_le_slice_lemma_rp #t #l #len b i j);
+  eq_intro (slice (uints_from_bytes_le #t #l #len b) i j) (uints_from_bytes_le #t #l #(j-i) (slice b (i * numbytes t) (j * numbytes t)))
+
+#push-options "--max_fuel 1"
+val uints_from_bytes_le_nat_lemma_aux:
+    #t:inttype{unsigned t /\ ~(U1? t)}
+  -> #l:secrecy_level
+  -> #len:size_pos{len * numbytes t < pow2 32}
+  -> b:lbytes_l l (len * numbytes t) ->
+  Lemma (nat_from_intseq_le_ (uints_from_bytes_le #t #l #len b) ==
+         nat_from_intseq_le_ (slice b 0 (numbytes t)) + pow2 (bits t) *
+         nat_from_intseq_le_ (uints_from_bytes_le #t #l #(len-1) (slice b (numbytes t) (len * numbytes t))))
+let uints_from_bytes_le_nat_lemma_aux #t #l #len b =
+  let r = uints_from_bytes_le #t #l #len b in
+  assert (nat_from_intseq_le_ r == v r.[0] + pow2 (bits t) * nat_from_intseq_le_ (slice r 1 len));
+  assert (nat_from_intseq_le_ (slice b 0 (numbytes t)) == v r.[0]);
+  uints_from_bytes_le_slice_lemma #t #l #len b 1 len;
+  assert (slice r 1 len == uints_from_bytes_le #t #l #(len-1) (slice b (numbytes t) (len * numbytes t)))
+
 val uints_from_bytes_le_nat_lemma_:
-    #t:inttype{~(t == U1)}
+    #t:inttype{unsigned t /\ ~(U1? t)}
   -> #l:secrecy_level
   -> #len:size_nat{len * numbytes t < pow2 32}
   -> b:lbytes_l l (len * numbytes t) ->
@@ -369,27 +375,30 @@ val uints_from_bytes_le_nat_lemma_:
 let rec uints_from_bytes_le_nat_lemma_ #t #l #len b =
   if len = 0 then ()
   else begin
-    let b1 = Seq.slice b (numbytes t) (len * numbytes t) in
+    let b1 = slice b (numbytes t) (len * numbytes t) in
+    nat_from_intseq_le_slice_lemma_ #U8 #l #(len * numbytes t) b (numbytes t);
+    assert (nat_from_intseq_le_ b == nat_from_intseq_le_ (slice b 0 (numbytes t)) + pow2 (bits t) * nat_from_intseq_le_ b1);
     uints_from_bytes_le_nat_lemma_ #t #l #(len - 1) b1;
-    nat_from_bytes_le_slice_lemma #l #(len * numbytes t) b (numbytes t);
-    uints_from_bytes_le_nat_lemma0 b
+    assert (nat_from_intseq_le_ (uints_from_bytes_le #t #l #(len - 1) b1) == nat_from_intseq_le_ b1);
+    uints_from_bytes_le_nat_lemma_aux #t #l #len b
   end
+#pop-options
 
 let uints_from_bytes_le_nat_lemma #t #l #len b =
   uints_from_bytes_le_nat_lemma_ #t #l #len b
 
-val index_uints_to_bytes_le:
-    #t:inttype{~(t == U1)}
+val index_uints_to_bytes_le_aux:
+    #t:inttype{unsigned t /\ ~(U1? t)}
   -> #l:secrecy_level
   -> len:nat{len * numbytes t < pow2 32}
   -> n:nat{n < pow2 (bits t * len)}
   -> i:nat{i < len * numbytes t}
-  -> Lemma (let s:lseq (uint_t t l) len = nat_to_intseq_le #t #l len n in
+  -> Lemma (let s:lseq (int_t t l) len = nat_to_intseq_le #t #l len n in
            Seq.index (uints_to_bytes_le #t #l #len s) i ==
            Seq.index (nat_to_bytes_le #l (numbytes t) (uint_to_nat s.[i / numbytes t])) (i % numbytes t))
-let index_uints_to_bytes_le #t #l len n i =
+let index_uints_to_bytes_le_aux #t #l len n i =
   let open Lib.Sequence in
-  let s: lseq (uint_t t l) len = nat_to_intseq_le #t #l len n in
+  let s: lseq (int_t t l) len = nat_to_intseq_le #t #l len n in
   index_generate_blocks (numbytes t) len len
     (uints_to_bytes_le_inner #t #l #len s) i
 
@@ -409,17 +418,23 @@ let modulo_pow2_prop r a b c =
     (a / pow2 (r * c)) % pow2 r;
   }
 
+val index_nat_to_intseq_to_bytes_le_aux: m:pos -> i:nat ->
+  Lemma ((8 * m) * (i / m) == 8 * (i - i % m))
+let index_nat_to_intseq_to_bytes_le_aux m i =
+  FStar.Math.Lemmas.paren_mul_right 8 m (i / m);
+  FStar.Math.Lemmas.euclidean_division_definition i m
+
 val index_nat_to_intseq_to_bytes_le:
-    #t:inttype{~(t == U1)}
+    #t:inttype{unsigned t /\ ~(U1? t)}
   -> #l:secrecy_level
   -> len:nat{len * numbytes t < pow2 32}
   -> n:nat{n < pow2 (bits t * len)}
   -> i:nat{i < len * numbytes t}
-  -> Lemma (let s:lseq (uint_t t l) len = nat_to_intseq_le #t #l len n in
+  -> Lemma (let s:lseq (int_t t l) len = nat_to_intseq_le #t #l len n in
            Seq.index (nat_to_bytes_le #l (numbytes t) (uint_to_nat s.[i / numbytes t])) (i % numbytes t) ==
            Seq.index (nat_to_bytes_le #l (len * numbytes t) n) i)
 let index_nat_to_intseq_to_bytes_le #t #l len n i =
-  let s:lseq (uint_t t l) len = nat_to_intseq_le #t #l len n in
+  let s:lseq (int_t t l) len = nat_to_intseq_le #t #l len n in
   let m = numbytes t in
   index_nat_to_intseq_le #U8 #l (len * m) n i;
   assert (Seq.index (nat_to_bytes_le #l (len * m) n) i ==
@@ -434,9 +449,9 @@ let index_nat_to_intseq_to_bytes_le #t #l len n i =
   modulo_pow2_prop 8 (n / pow2 (8 * i - 8 * (i % m))) m (i % m);
   calc (==) {
     n / pow2 (bits t * (i / m)) % pow2 (bits t) / pow2 (8 * (i % m)) % pow2 8;
-    == { }
+    == { assert (bits t == 8 * m) }
     n / pow2 ((8 * m) * (i / m)) % pow2 (8 * m) / pow2 (8 * (i % m)) % pow2 8;
-    == { assert ((8 * m) * (i / m) == 8 * (i - i % m)) }
+    == { index_nat_to_intseq_to_bytes_le_aux m i }
     n / pow2 (8 * (i - i % m)) % pow2 (8 * m) / pow2 (8 * (i % m)) % pow2 8;
     == { Math.Lemmas.distributivity_sub_right 8 i (i % m) }
     n / pow2 (8 * i - 8 * (i % m)) % pow2 (8 * m) / pow2 (8 * (i % m)) % pow2 8;
@@ -450,7 +465,7 @@ let index_nat_to_intseq_to_bytes_le #t #l len n i =
   }
 
 let uints_to_bytes_le_nat_lemma #t #l len n =
-  Classical.forall_intro (index_uints_to_bytes_le #t #l len n);
+  Classical.forall_intro (index_uints_to_bytes_le_aux #t #l len n);
   Classical.forall_intro (index_nat_to_intseq_to_bytes_le #t #l len n);
   Seq.lemma_eq_intro
     (uints_to_bytes_le #t #l #len (nat_to_intseq_le #t #l len n))
@@ -463,6 +478,31 @@ let rec nat_from_intseq_le_inj #t #l b1 b2 =
   else begin
     nat_from_intseq_le_inj (Seq.slice b1 1 (length b1)) (Seq.slice b2 1 (length b2));
     Seq.lemma_split b1 1;
-    Seq.lemma_split b2 1;
-    uintv_extensionality (Seq.index b1 0) (Seq.index b2 0)
+    Seq.lemma_split b2 1
   end
+
+let rec nat_from_intseq_be_inj #t #l b1 b2 =
+  if length b1 = 0 then ()
+  else begin
+    nat_from_intseq_be_inj (Seq.slice b1 0 (length b1 - 1)) (Seq.slice b2 0 (length b2 - 1));
+    Seq.lemma_split b1 (length b1 - 1);
+    Seq.lemma_split b2 (length b2 - 1)
+  end
+
+let lemma_nat_to_from_bytes_be_preserves_value #l b len x = ()
+
+let lemma_nat_to_from_bytes_le_preserves_value #l b len x = ()
+
+let lemma_uint_to_bytes_le_preserves_value #t #l x = ()
+
+let lemma_uint_to_bytes_be_preserves_value #t #l x = ()
+
+let lemma_nat_from_to_intseq_le_preserves_value #t #l len b =
+  nat_from_intseq_le_inj (nat_to_intseq_le len (nat_from_intseq_le b)) b
+
+let lemma_nat_from_to_bytes_le_preserves_value #l b len =
+  lemma_nat_from_to_intseq_le_preserves_value len b
+
+let lemma_reveal_uint_to_bytes_le #t #l b = ()
+
+let lemma_reveal_uint_to_bytes_be #t #l b = ()

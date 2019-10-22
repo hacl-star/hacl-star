@@ -21,7 +21,7 @@ module B = LowStar.Buffer
 open FStar.HyperStack.ST
 open FStar.Integers
 
-open Spec.AEAD
+open Spec.Agile.AEAD
 open EverCrypt.Error
 
 /// Note: if the fst and the fsti are running on different fuel settings,
@@ -196,9 +196,12 @@ let encrypt_st (a: supported_alg) =
         B.(modifies (loc_union (footprint h1 s) (loc_union (loc_buffer cipher) (loc_buffer tag))) h0 h1) /\
         invariant h1 s /\
         footprint h0 s == footprint h1 s /\
+        preserves_freeable s h0 h1 /\
+        as_kv (B.deref h1 s) == as_kv (B.deref h0 s) /\
           S.equal (S.append (B.as_seq h1 cipher) (B.as_seq h1 tag))
             (encrypt #a (as_kv (B.deref h0 s)) (B.as_seq h0 iv) (B.as_seq h0 ad) (B.as_seq h0 plain))
       | InvalidKey ->
+          B.g_is_null s /\
           B.(modifies loc_none h0 h1)
       | _ -> False)
 
@@ -240,6 +243,7 @@ let decrypt_st (a: supported_alg) =
       let cipher_tag = B.as_seq h0 cipher `S.append` B.as_seq h0 tag in
       match err with
       | InvalidKey ->
+          B.g_is_null s /\
           B.(modifies loc_none h0 h1)
       | Success ->
           not (B.g_is_null s) /\ (
@@ -247,6 +251,8 @@ let decrypt_st (a: supported_alg) =
           B.(modifies (loc_union (footprint h1 s) (loc_buffer dst)) h0 h1) /\
           invariant h1 s /\
           footprint h0 s == footprint h1 s /\
+          preserves_freeable s h0 h1 /\
+          as_kv (B.deref h1 s) == as_kv (B.deref h0 s) /\
           Some? plain /\ S.equal (Some?.v plain) (B.as_seq h1 dst))
       | AuthenticationFailure ->
           not (B.g_is_null s) /\ (
@@ -254,6 +260,8 @@ let decrypt_st (a: supported_alg) =
           B.(modifies (loc_union (footprint h1 s) (loc_buffer dst)) h0 h1) /\
           invariant h1 s /\
           footprint h0 s == footprint h1 s /\
+          preserves_freeable s h0 h1 /\
+          as_kv (B.deref h1 s) == as_kv (B.deref h0 s) /\
           None? plain)
       | _ ->
           False)

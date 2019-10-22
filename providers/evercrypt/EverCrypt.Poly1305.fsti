@@ -23,6 +23,6 @@ val poly1305: dst:B.buffer UInt8.t { B.length dst = 16 } ->
     (ensures fun h0 _ h1 ->
       B.(modifies (loc_buffer dst) h0 h1 /\ (
       B.as_seq h1 dst ==
-        BF.of_bytes (Spec.Poly1305.poly1305
+        BF.of_bytes (Spec.Poly1305.poly1305_mac
           (BF.to_bytes (B.as_seq h0 src))
           (BF.to_bytes (B.as_seq h0 key))))))

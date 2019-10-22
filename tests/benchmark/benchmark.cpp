@@ -229,7 +229,9 @@ void Benchmark::report(std::ostream & rs, const BenchmarkSettings & s) const
     << "," << median
     << "," << q75
     << "," << cmax
-    << "," << stddev;
+    << "," << stddev
+    << "," << n
+    << "," << (n/(std::chrono::duration_cast<std::chrono::nanoseconds>(texcl).count() / 1000000000.0));
 }
 
 static const char time_fmt[] = "%b %d %Y %H:%M:%S";

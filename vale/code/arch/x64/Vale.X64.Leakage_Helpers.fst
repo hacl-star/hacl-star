@@ -1,8 +1,43 @@
 module Vale.X64.Leakage_Helpers
+open FStar.Mul
 open Vale.X64.Machine_Semantics_s
 open Vale.X64.Machine_s
 open Vale.X64.Leakage_s
 open Vale.X64.Instruction_s
+open Vale.Lib.MapTree
+
+let regmap = map reg taint
+
+let reg_le (r1 r2:reg) : bool =
+  let Reg f1 n1 = r1 in
+  let Reg f2 n2 = r2 in
+  f1 < f2 || (f1 = f2 && n1 <= n2)
+
+let map_to_regs (m:regmap) : reg_taint =
+  FunctionalExtensionality.on reg (sel m)
+
+let is_map_of (m:regmap) (rs:reg_taint) =
+  FStar.FunctionalExtensionality.feq (map_to_regs m) rs
+
+let rec regs_to_map_rec (rs:reg_taint) (f n:nat) : Pure regmap
+  (requires (f == n_reg_files /\ n == 0) \/ (f < n_reg_files /\ n <= n_regs f))
+  (ensures (fun m -> forall (r:reg).{:pattern sel m r}
+    r.rf < f \/ (r.rf == f /\ r.r < n) ==> sel m r == rs r))
+  (decreases %[f; n])
+  =
+  if n = 0 then
+    if f = 0 then const reg taint reg_le Secret
+    else regs_to_map_rec rs (f - 1) (n_regs (f - 1))
+  else
+    let m = regs_to_map_rec rs f (n - 1) in
+    let r = Reg f (n - 1) in
+    upd m r (rs r)
+
+let regs_to_map (rs:reg_taint) : (m:regmap{is_map_of m rs}) =
+  regs_to_map_rec rs n_reg_files 0
+
+noeq type analysis_taints =
+  | AnalysisTaints: lts:leakage_taints -> rts:regmap{is_map_of rts lts.regTaint} -> analysis_taints
 
 let merge_taint (t1:taint) (t2:taint) :taint =
   if Secret? t1 || Secret? t2 then Secret
@@ -12,7 +47,7 @@ let merge_taint (t1:taint) (t2:taint) :taint =
 let operand_taint (rf:reg_file_id) (o:operand_rf rf) (ts:analysis_taints) : taint =
   match o with
   | OConst _ -> Public
-  | OReg r -> ts.regTaint (Reg rf r)
+  | OReg r -> sel ts.rts (Reg rf r)
   | OMem (_, t) | OStack (_, t) -> t
 
 [@instr_attr]
@@ -33,8 +68,8 @@ let operand_taint_implicit
   match i with
   | IOp64One o -> operand_taint 0 o ts
   | IOpXmmOne o -> operand_taint 1 o ts
-  | IOpFlagsCf -> ts.cfFlagsTaint
-  | IOpFlagsOf -> ts.ofFlagsTaint
+  | IOpFlagsCf -> ts.lts.cfFlagsTaint
+  | IOpFlagsOf -> ts.lts.ofFlagsTaint
 
 [@instr_attr]
 let rec args_taint
@@ -82,10 +117,10 @@ let rec inouts_taint
 let maddr_does_not_use_secrets (addr:maddr) (ts:analysis_taints) : bool =
   match addr with
   | MConst _ -> true
-  | MReg r _ -> Public? (ts.regTaint r)
+  | MReg r _ -> Public? (sel ts.rts r)
   | MIndex base _ index _ ->
-      let baseTaint = ts.regTaint base in
-      let indexTaint = ts.regTaint index in
+      let baseTaint = sel ts.rts base in
+      let indexTaint = sel ts.rts index in
       (Public? baseTaint) && (Public? indexTaint)
 
 let operand_does_not_use_secrets (#tc #tr:eqtype) (o:operand tc tr) (ts:analysis_taints) : bool =
@@ -101,36 +136,37 @@ let operand_taint_allowed (#tc #tr:eqtype) (o:operand tc tr) (t_data:taint) : bo
 let set_taint (rf:reg_file_id) (dst:operand_rf rf) (ts:analysis_taints) (t:taint) : analysis_taints =
   match dst with
   | OConst _ -> ts  // Shouldn't actually happen
-  | OReg r -> AnalysisTaints
-      (FunctionalExtensionality.on reg (fun x -> if x = Reg rf r then t else ts.regTaint x))
-      ts.flagsTaint ts.cfFlagsTaint ts.ofFlagsTaint
+  | OReg r ->
+      let AnalysisTaints (LeakageTaints rs f c o) rts = ts in
+      let rts = upd rts (Reg rf r) t in
+      AnalysisTaints (LeakageTaints (map_to_regs rts) f c o) rts
   | OMem _ | OStack _ -> ts // Ensured by taint semantics
 
 let set_taint_cf_and_flags (ts:analysis_taints) (t:taint) : analysis_taints =
-  let AnalysisTaints rs flags cf ovf = ts in
-  AnalysisTaints rs (merge_taint t flags) t ovf
+  let AnalysisTaints (LeakageTaints rs flags cf ovf) rts = ts in
+  AnalysisTaints (LeakageTaints rs (merge_taint t flags) t ovf) rts
 
 let set_taint_of_and_flags (ts:analysis_taints) (t:taint) : analysis_taints =
-  let AnalysisTaints rs flags cf ovf = ts in
-  AnalysisTaints rs (merge_taint t flags) cf t
+  let AnalysisTaints (LeakageTaints rs flags cf ovf) rts = ts in
+  AnalysisTaints (LeakageTaints rs (merge_taint t flags) cf t) rts
 
 let ins_consumes_fixed_time (ins:ins) (ts:analysis_taints) (res:bool & analysis_taints) =
   let (b, ts') = res in
-  (b2t b ==> isConstantTime (Ins ins) ts)
+  (b2t b ==> isConstantTime (Ins ins) ts.lts)
 
 #set-options "--z3rlimit 20"
 
 let publicFlagValuesAreAsExpected (tsAnalysis:analysis_taints) (tsExpected:analysis_taints) : bool =
-  (tsExpected.flagsTaint = Public && tsAnalysis.flagsTaint = Public) || (tsExpected.flagsTaint = Secret)
+  (tsExpected.lts.flagsTaint = Public && tsAnalysis.lts.flagsTaint = Public) || (tsExpected.lts.flagsTaint = Secret)
 
 let publicCfFlagValuesAreAsExpected (tsAnalysis:analysis_taints) (tsExpected:analysis_taints) : bool =
-  (tsExpected.cfFlagsTaint = Public && tsAnalysis.cfFlagsTaint = Public) || (tsExpected.cfFlagsTaint = Secret)
+  (tsExpected.lts.cfFlagsTaint = Public && tsAnalysis.lts.cfFlagsTaint = Public) || (tsExpected.lts.cfFlagsTaint = Secret)
 
 let publicOfFlagValuesAreAsExpected (tsAnalysis:analysis_taints) (tsExpected:analysis_taints) : bool =
-  (tsExpected.ofFlagsTaint = Public && tsAnalysis.ofFlagsTaint = Public) || (tsExpected.ofFlagsTaint = Secret)
+  (tsExpected.lts.ofFlagsTaint = Public && tsAnalysis.lts.ofFlagsTaint = Public) || (tsExpected.lts.ofFlagsTaint = Secret)
 
 let registerAsExpected (r:reg) (tsAnalysis:analysis_taints) (tsExpected:analysis_taints) : bool =
-  (tsExpected.regTaint r = Public && tsAnalysis.regTaint r = Public) || (tsExpected.regTaint r = Secret)
+  (sel tsExpected.rts r = Public && sel tsAnalysis.rts r = Public) || (sel tsExpected.rts r = Secret)
 
 let rec publicRegisterValuesAreAsExpected_reg_file
     (tsAnalysis:analysis_taints) (tsExpected:analysis_taints) (rf:reg_file_id) (k:nat{k <= n_regs rf})

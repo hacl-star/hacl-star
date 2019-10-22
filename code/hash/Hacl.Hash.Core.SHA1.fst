@@ -1,20 +1,19 @@
 module Hacl.Hash.Core.SHA1
 
+open Lib.IntTypes
 module B = LowStar.Buffer
 module IB = LowStar.ImmutableBuffer
 module HS = FStar.HyperStack
 module HST = FStar.HyperStack.ST
 module Spec = Spec.SHA1
-module U8 = FStar.UInt8
 module U32 = FStar.UInt32
-module E = FStar.Kremlin.Endianness
-module CE = C.Endianness
 
 open Hacl.Hash.Definitions
 open Spec.Hash.Definitions
 
 friend Spec.SHA1
 friend Hacl.Hash.PadFinish
+friend Spec.Agile.Hash
 
 #reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 
@@ -22,7 +21,7 @@ friend Hacl.Hash.PadFinish
 let _h0 = IB.igcmalloc_of_list HS.root Spec.init_as_list
 
 noextract inline_for_extraction
-let alloca () =
+let legacy_alloca () =
   B.alloca_of_list Spec.init_as_list
 
 (* We read values from constant buffers through accessors to isolate
@@ -31,7 +30,7 @@ let alloca () =
    immutable buffers. *)
 
 inline_for_extraction
-let h0 (i: U32.t { U32.v i < 5 } ) : HST.Stack U32.t
+let h0 (i: U32.t { U32.v i < 5 } ) : HST.Stack uint32
   (requires (fun _ -> True))
   (ensures (fun h res h' ->
     B.modifies B.loc_none h h' /\
@@ -40,7 +39,7 @@ let h0 (i: U32.t { U32.v i < 5 } ) : HST.Stack U32.t
 = IB.recall_contents _h0 Spec.init;
   B.index _h0 i
 
-let init s =
+let legacy_init s =
   let h = HST.get () in
   let inv (h' : HS.mem) (i: nat) : GTot Type0 =
     B.live h' s /\ B.modifies (B.loc_buffer s) h h' /\ i <= 5 /\ Seq.slice (B.as_seq h' s) 0 i == Seq.slice Spec.init 0 i
@@ -56,7 +55,7 @@ inline_for_extraction
 let w_t = (b: B.lbuffer (word SHA1) 80)
 
 inline_for_extraction
-let block_t = (block: B.buffer U8.t { B.length block == block_length SHA1 } )
+let block_t = (block: B.buffer uint8 { B.length block == block_length SHA1 } )
 
 let w_inv' (i: nat) (mi: Spec.word_block) (b: w_t) (h: HS.mem) : GTot Type0 =
   i <= 80 /\
@@ -75,7 +74,7 @@ let w_loop_inv (h0: Ghost.erased HS.mem) (m: block_t) (b: w_t) (h: HS.mem) (i: n
   B.live h m /\
   B.live h b /\
   B.modifies (B.loc_buffer b) h0 h /\ (
-    let mi = E.seq_uint32_of_be block_word_length (B.as_seq h m) in
+    let mi = Lib.ByteSequence.uints_from_bytes_be #U32 #SEC #block_word_length (B.as_seq h m) in
     w_inv' i mi b h
   )
 
@@ -86,34 +85,35 @@ let w_inv_elim (h: HS.mem) (m: Spec.word_block) (b: w_t) (i: nat) (j: nat) : Lem
 
 let w_loop_inv_elim (h0: Ghost.erased HS.mem) (h: HS.mem) (m: block_t) (b: w_t) (i: nat) (j: nat) : Lemma
   (requires (w_loop_inv h0 m b h i /\ j < i))
-  (ensures (Seq.index (B.as_seq h b) j == Spec.w (E.seq_uint32_of_be block_word_length (B.as_seq h m)) (U32.uint_to_t j)))
+  (ensures (Seq.index (B.as_seq h b) j == Spec.w (Lib.ByteSequence.uints_from_bytes_be #U32 #SEC #block_word_length (B.as_seq h m)) (U32.uint_to_t j)))
 = ()
 
 inline_for_extraction
-let index_32_be' (n: Ghost.erased nat) (b: B.buffer UInt8.t) (i: UInt32.t):
-  HST.Stack UInt32.t
+let index_32_be' (n: UInt32.t) (b: B.buffer uint8) (i: UInt32.t):
+  HST.Stack uint32
     (requires (fun h ->
-      B.live h b /\ B.length b == 4 `Prims.op_Multiply` Ghost.reveal n /\
-      UInt32.v i < Ghost.reveal n))
+      B.live h b /\ B.length b == 4 `Prims.op_Multiply` UInt32.v n /\
+      UInt32.v i < UInt32.v n))
     (ensures (fun h0 r h1 ->
       B.(modifies loc_none h0 h1) /\
-      r = Seq.index (E.seq_uint32_of_be (Ghost.reveal n) (B.as_seq h0 b)) (UInt32.v i)))
-= CE.index_32_be b i
+      r == Seq.index (Lib.ByteSequence.uints_from_bytes_be #U32 #SEC #(v n) (B.as_seq h0 b)) (UInt32.v i)))
+= Lib.ByteBuffer.uint_at_index_be #U32 #SEC #n b i
 
 #push-options "--max_fuel 1"
 inline_for_extraction
-let w_body_value (h0: Ghost.erased HS.mem) (m: block_t) (b: w_t) (i: U32.t) : HST.Stack U32.t
+let w_body_value (h0: Ghost.erased HS.mem) (m: block_t) (b: w_t) (i: U32.t) : HST.Stack uint32
   (requires (fun h -> w_loop_inv h0 m b h (U32.v i) /\ U32.v i < 80))
-  (ensures (fun h v h' -> B.modifies B.loc_none h h' /\ v == Spec.w (E.seq_uint32_of_be block_word_length (B.as_seq (Ghost.reveal h0) m)) i))
+  (ensures (fun h v h' -> B.modifies B.loc_none h h' /\ v == 
+		       Spec.w (Lib.ByteSequence.uints_from_bytes_be #U32 #SEC #block_word_length (B.as_seq (Ghost.reveal h0) m)) i))
 =
   if U32.lt i 16ul then
-    index_32_be' (Ghost.hide block_word_length) m i
+    index_32_be' (size block_word_length) m i
   else
     let wmit3 = B.index b (i `U32.sub` 3ul) in
     let wmit8 = B.index b (i `U32.sub` 8ul) in
     let wmit14 = B.index b (i `U32.sub` 14ul) in
     let wmit16 = B.index b (i `U32.sub` 16ul) in
-    Spec.rotl 1ul (wmit3 `U32.logxor` wmit8 `U32.logxor` wmit14 `U32.logxor` wmit16)
+    (wmit3 ^. wmit8 ^. wmit14 ^. wmit16) <<<. 1ul 
 #pop-options
 
 let lt_S_r (j i: nat) : Lemma
@@ -131,7 +131,9 @@ let w_body (h0: Ghost.erased HS.mem) (m: block_t) (b: w_t) (i: U32.t { U32.v i <
   let h' = HST.get () in
   let f (j: nat) : Lemma
     (requires (j < U32.v i + 1))
-    (ensures (j < U32.v i + 1 /\ Seq.index (B.as_seq h' b) j == Spec.w (E.seq_uint32_of_be block_word_length (B.as_seq (Ghost.reveal h0) m)) (U32.uint_to_t j)))
+    (ensures (j < U32.v i + 1 /\ 
+	      Seq.index (B.as_seq h' b) j == 
+	      Spec.w (Lib.ByteSequence.uints_from_bytes_be #U32 #SEC #block_word_length (B.as_seq (Ghost.reveal h0) m)) (U32.uint_to_t j)))
   = lt_S_r j (U32.v i);
     if j = U32.v i
     then ()
@@ -142,7 +144,8 @@ let w_body (h0: Ghost.erased HS.mem) (m: block_t) (b: w_t) (i: U32.t { U32.v i <
 inline_for_extraction
 let w (m: block_t) (b: w_t) : HST.Stack unit
   (requires (fun h -> B.live h m /\ B.live h b /\ B.disjoint m b))
-  (ensures (fun h _ h' -> B.modifies (B.loc_buffer b) h h' /\ w_inv (E.seq_uint32_of_be block_word_length (B.as_seq h m)) b h'))
+  (ensures (fun h _ h' -> B.modifies (B.loc_buffer b) h h' /\ w_inv 
+		       (Lib.ByteSequence.uints_from_bytes_be #U32 #SEC #block_word_length (B.as_seq h m)) b h'))
 = let h = Ghost.hide (HST.get ()) in
   C.Loops.for 0ul 80ul (w_loop_inv h m b) (fun i -> w_body h m b i)
 
@@ -193,19 +196,19 @@ let step3_body
   let _d = B.index b 3ul in
   let _e = B.index b 4ul in
   let wmit = B.index w t in
-  let _T = Spec.rotl 5ul _a `U32.add_mod` Spec.f t _b _c _d `U32.add_mod` _e `U32.add_mod` Spec.k t `U32.add_mod` wmit in
-  upd5 b _T _a (Spec.rotl 30ul _b) _c _d;
+  let _T = (_a <<<. 5ul) +. Spec.f t _b _c _d +. _e  +. Spec.k t +. wmit in
+  upd5 b _T _a (_b <<<. 30ul) _c _d;
   reveal_opaque (`%Spec.step3_body') Spec.step3_body'
 
 inline_for_extraction
 let zero_out
-  (b: B.buffer U32.t)
+  (b: B.buffer uint32)
   (len: U32.t { U32.v len == B.length b })
 : HST.Stack unit
   (requires (fun h -> B.live h b))
   (ensures (fun h _ h' -> B.modifies (B.loc_buffer b) h h' /\ B.live h' b))
 = let h0 = HST.get () in
-  C.Loops.for 0ul len (fun h _ -> B.live h b /\ B.modifies (B.loc_buffer b) h0 h) (fun i -> B.upd b i 0ul)
+  C.Loops.for 0ul len (fun h _ -> B.live h b /\ B.modifies (B.loc_buffer b) h0 h) (fun i -> B.upd b i (u32 0))
 
 let spec_step3_body
   (mi: Spec.word_block)
@@ -237,13 +240,15 @@ let step3
   (ensures (fun h0 _ h1 ->
     B.modifies (B.loc_buffer h) h0 h1 /\
     B.live h1 h /\
-    B.as_seq h1 h == Spec.step3 (E.seq_uint32_of_be block_word_length (B.as_seq h0 m)) (B.as_seq h0 h)
+    B.as_seq h1 h == Spec.step3 
+	     (Lib.ByteSequence.uints_from_bytes_be #U32 #SEC #block_word_length (B.as_seq h0 m)) (B.as_seq h0 h)
   ))
 = let h0 = HST.get () in
   HST.push_frame ();
-  let _w = B.alloca 0ul 80ul in
+  let _w = B.alloca (u32 0) 80ul in
   w m _w;
-  let mi = Ghost.hide (E.seq_uint32_of_be block_word_length (B.as_seq h0 m)) in
+  let mi = Ghost.hide (
+      Lib.ByteSequence.uints_from_bytes_be #U32 #SEC #block_word_length (B.as_seq h0 m)) in
   let h1 = HST.get () in
   let cwt = Ghost.hide (Spec.compute_w (Ghost.reveal mi) 0 Seq.empty) in
   let gw: Ghost.erased (Spec.step3_body_w_t (Ghost.reveal mi)) =
@@ -275,7 +280,9 @@ let step4
   (ensures (fun h0 _ h1 ->
     B.modifies (B.loc_buffer h) h0 h1 /\
     B.live h1 h /\
-    B.as_seq h1 h == Spec.step4 (E.seq_uint32_of_be block_word_length (B.as_seq h0 m)) (B.as_seq h0 h)
+      B.as_seq h1 h == Spec.step4 
+	       (Lib.ByteSequence.uints_from_bytes_be #U32 #SEC #block_word_length (B.as_seq h0 m)) 
+	       (B.as_seq h0 h)
   ))
 = let ha = B.index h 0ul in
   let hb = B.index h 1ul in
@@ -290,16 +297,16 @@ let step4
   let ste = B.index h 4ul in
   upd5
     h
-    (sta `U32.add_mod` ha)
-    (stb `U32.add_mod` hb)
-    (stc `U32.add_mod` hc)
-    (std `U32.add_mod` hd)
-    (ste `U32.add_mod` he);
+    (sta +. ha)
+    (stb +. hb)
+    (stc +. hc)
+    (std +. hd)
+    (ste +. he);
   reveal_opaque (`%Spec.step4) Spec.step4
 
-let update h l =
+let legacy_update h l =
   step4 l h
 
-let pad: pad_st SHA1 = Hacl.Hash.PadFinish.pad SHA1
+let legacy_pad: pad_st SHA1 = Hacl.Hash.PadFinish.pad SHA1
 
-let finish: finish_st SHA1 = Hacl.Hash.PadFinish.finish SHA1
+let legacy_finish: finish_st SHA1 = Hacl.Hash.PadFinish.finish SHA1
