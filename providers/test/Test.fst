@@ -190,7 +190,6 @@ let test_aead_st alg key key_len iv iv_len aad aad_len tag tag_len plaintext pla
       if EverCrypt.AEAD.(encrypt #(G.hide alg) st iv iv_len aad aad_len plaintext plaintext_len ciphertext' tag' <> Success) then
         C.Failure.failwith !$"Failure AEAD encrypt\n";
       let h3 = HST.get () in
-      Classical.move_requires (EverCrypt.AEAD.frame_invariant (B.loc_buffer ciphertext' `B.loc_union` B.loc_buffer tag') st h2) h3;
       (match EverCrypt.AEAD.decrypt #(G.hide alg) st iv iv_len aad aad_len ciphertext' ciphertext_len tag' plaintext' with
       | Success ->
         B.recall ciphertext;
