@@ -81,6 +81,8 @@ let lemma_merge_mov_bswap dst src fuel (s:machine_state) :
   assert ({s12 with ms_trace = []} == machine_eval_ins i2 (machine_eval_ins i1 s0))
 #pop-options
 
+module T = Vale.Def.Types_s
+
 #push-options "--initial_fuel 0 --max_fuel 8 --initial_ifuel 0 --max_ifuel 2"
 let lemma_movbe_is_mov_bswap (dst src:operand64) (s:machine_state) :
   Lemma
@@ -98,17 +100,10 @@ let lemma_movbe_is_mov_bswap (dst src:operand64) (s:machine_state) :
   let s_movbe = machine_eval_ins movbe s in
   let s_mov = machine_eval_ins mov s in
   let s_bswap = machine_eval_ins bswap s_mov in
-  if valid_src_operand64_and_taint src s then (
-    assert (
-      s_movbe == (
-        instr_write_output_explicit
-          IOp64
-          (Some?.v (eval_MovBe64 (eval_operand src s)))
-          dst
-          s
-          s
-      )
-    );
+  if valid_src_operand64_and_taint src s && valid_dst_operand64 dst s then (
+    let src_v = eval_operand src s in
+    assert (s_movbe == update_operand64_preserve_flags'' dst (T.reverse_bytes_nat64 src_v) s s);
+    assert (s_mov == update_operand64_preserve_flags'' dst src_v s s);
     admit ()
   ) else (
     assert (s_movbe == {s with ms_ok = false});
