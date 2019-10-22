@@ -81,6 +81,7 @@ let lemma_merge_mov_bswap dst src fuel (s:machine_state) :
   assert ({s12 with ms_trace = []} == machine_eval_ins i2 (machine_eval_ins i1 s0))
 #pop-options
 
+#push-options "--initial_fuel 0 --max_fuel 8 --initial_ifuel 0 --max_ifuel 2"
 let lemma_movbe_is_mov_bswap (dst src:operand64) (s:machine_state) :
   Lemma
     (requires (s.ms_trace = []))
@@ -88,13 +89,36 @@ let lemma_movbe_is_mov_bswap (dst src:operand64) (s:machine_state) :
         let movbe = make_instr_annotate ins_MovBe64 (AnnotateMovbe64 ()) dst src in
         let mov = make_instr ins_Mov64 dst src in
         let bswap = make_instr ins_Bswap64 dst in
-        equiv_states
+        equiv_states_or_both_not_ok
           (machine_eval_ins movbe s)
           (machine_eval_ins bswap (machine_eval_ins mov s)))) =
-  admit ()
+  let movbe = make_instr_annotate ins_MovBe64 (AnnotateMovbe64 ()) dst src in
+  let mov = make_instr ins_Mov64 dst src in
+  let bswap = make_instr ins_Bswap64 dst in
+  let s_movbe = machine_eval_ins movbe s in
+  let s_mov = machine_eval_ins mov s in
+  let s_bswap = machine_eval_ins bswap s_mov in
+  if valid_src_operand64_and_taint src s then (
+    assert (
+      s_movbe == (
+        instr_write_output_explicit
+          IOp64
+          (Some?.v (eval_MovBe64 (eval_operand src s)))
+          dst
+          s
+          s
+      )
+    );
+    admit ()
+  ) else (
+    assert (s_movbe == {s with ms_ok = false});
+    assert (s_mov == {s with ms_ok = false});
+    assert (s_bswap.ms_ok == false)
+  )
+#pop-options
 
 #restart-solver
-#push-options "--initial_fuel 3 --max_fuel 3 --initial_ifuel 0 --max_ifuel 0"
+#push-options "--z3rlimit 10 --initial_fuel 3 --max_fuel 3 --initial_ifuel 0 --max_ifuel 0"
 let lemma_replace_movbe_specifically (i:ins{Instr? i}) (fuel:nat) (s:machine_state) :
   Lemma
     (requires (
@@ -103,9 +127,12 @@ let lemma_replace_movbe_specifically (i:ins{Instr? i}) (fuel:nat) (s:machine_sta
     (ensures (
         let c = Ins i in
         let c' = replace_movbe_in_code c in
-        equiv_ostates
-          (machine_eval_code c fuel s)
-          (machine_eval_code c' fuel s))) =
+        let os = machine_eval_code c fuel s in
+        let os' = machine_eval_code c' fuel s in
+        Some? os /\ Some? os' /\
+        equiv_states_or_both_not_ok
+          (Some?.v os)
+          (Some?.v os'))) =
   let ins = i in
   let c = Ins i in
   let c' = replace_movbe_in_code c in
@@ -128,15 +155,18 @@ let lemma_replace_movbe_specifically (i:ins{Instr? i}) (fuel:nat) (s:machine_sta
   assert (machine_eval_ins ins s_a == s1_a);
   assert (machine_eval_ins (make_instr_annotate ins_MovBe64 (AnnotateMovbe64 ()) dst src) s_a == s1_a);
   lemma_movbe_is_mov_bswap dst src s_a;
-  assert (equiv_states s1_a s2_a)
+  assert (equiv_states_or_both_not_ok s1_a s2_a)
 #pop-options
 
 #push-options "--initial_fuel 2 --max_fuel 2 --initial_ifuel 1 --max_ifuel 1"
 let rec lemma_replace_movbe_in_code (c:code) (fuel:nat) (s:machine_state) :
   Lemma
+    (requires (
+        (Some? (machine_eval_code c fuel s)) /\
+        (Some?.v (machine_eval_code c fuel s)).ms_ok))
     (ensures (
         let c' = replace_movbe_in_code c in
-        equiv_ostates
+        equiv_option_states
           (machine_eval_code c fuel s)
           (machine_eval_code c' fuel s)))
     (decreases %[fuel; c; 1]) =
@@ -154,28 +184,35 @@ let rec lemma_replace_movbe_in_code (c:code) (fuel:nat) (s:machine_state) :
 
 and lemma_replace_movbe_in_codes (cs:codes) (fuel:nat) (s:machine_state) :
   Lemma
+    (requires (
+        (Some? (machine_eval_codes cs fuel s)) /\
+        (Some?.v (machine_eval_codes cs fuel s)).ms_ok))
     (ensures (
         let cs' = replace_movbe_in_codes cs in
-        equiv_ostates
+        equiv_option_states
           (machine_eval_codes cs fuel s)
           (machine_eval_codes cs' fuel s)))
     (decreases %[fuel; cs]) =
   match cs with
   | [] -> ()
   | x :: xs ->
+    if not ((Some?.v (machine_eval_code x fuel s)).ms_ok) then (
+      lemma_not_ok_propagate_codes xs fuel (Some?.v (machine_eval_code x fuel s))
+    ) else ();
     lemma_replace_movbe_in_code x fuel s;
-    match machine_eval_code x fuel s with
-    | None -> ()
-    | Some s' ->
-      let Some s'' = machine_eval_code (replace_movbe_in_code x) fuel s in
-      lemma_eval_codes_equiv_states (replace_movbe_in_codes xs) fuel s' s'';
-      lemma_replace_movbe_in_codes xs fuel s'
+    let Some s' =  machine_eval_code x fuel s in
+    let Some s'' = machine_eval_code (replace_movbe_in_code x) fuel s in
+    lemma_eval_codes_equiv_states (replace_movbe_in_codes xs) fuel s' s'';
+    lemma_replace_movbe_in_codes xs fuel s'
 
 and lemma_replace_movbe_in_while (c:code{While? c}) (fuel:nat) (s:machine_state) :
   Lemma
+    (requires (
+        (Some? (machine_eval_code c fuel s)) /\
+        (Some?.v (machine_eval_code c fuel s)).ms_ok))
     (ensures (
         let c' = replace_movbe_in_code c in
-        equiv_ostates
+        equiv_option_states
           (machine_eval_code c fuel s)
           (machine_eval_code c' fuel s)))
     (decreases %[fuel; c; 0]) =
@@ -185,18 +222,18 @@ and lemma_replace_movbe_in_while (c:code{While? c}) (fuel:nat) (s:machine_state)
     if not b then () else (
       let s = { s with ms_trace = (BranchPredicate true) :: s.ms_trace } in
       lemma_replace_movbe_in_code body (fuel - 1) s;
-      let s_opt1 = machine_eval_code body (fuel - 1) s in
-      let s_opt2 = machine_eval_code (replace_movbe_in_code body) (fuel - 1) s in
-      assert (equiv_ostates s_opt1 s_opt2);
-      match s_opt1 with
-      | None -> ()
-      | Some _ ->
-        let Some s1, Some s2 = s_opt1, s_opt2 in
-        if s1.ms_ok then (
-          lemma_replace_movbe_in_while c (fuel - 1) s1;
-          lemma_replace_movbe_in_while (replace_movbe_in_code c) (fuel - 1) s2;
-          lemma_eval_code_equiv_states (replace_movbe_in_code c) (fuel - 1) s1 s2
-        ) else ()
+      let Some s1 = machine_eval_code body (fuel - 1) s in
+      let Some s2 = machine_eval_code (replace_movbe_in_code body) (fuel - 1) s in
+      assert (equiv_states_or_both_not_ok s1 s2);
+      if s1.ms_ok then (
+        lemma_replace_movbe_in_while c (fuel - 1) s1;
+        lemma_eval_while_equiv_states (replace_movbe_in_code c) (fuel - 1) s1 s2;
+        assert (Some? (machine_eval_code (replace_movbe_in_code c) (fuel - 1) s1));
+        assert (Some? (machine_eval_code (replace_movbe_in_code c) (fuel - 1) s2));
+        assert (Some?.v (machine_eval_code (replace_movbe_in_code c) (fuel - 1) s2)).ms_ok;
+        lemma_replace_movbe_in_while (replace_movbe_in_code c) (fuel - 1) s2;
+        lemma_eval_code_equiv_states (replace_movbe_in_code c) (fuel - 1) s1 s2
+      ) else ()
     )
   )
 #pop-options
