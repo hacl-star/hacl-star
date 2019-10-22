@@ -44,7 +44,7 @@ module SHA3 = Hacl.SHA3
 //module S    = Spec.QTesla
 module SP = Spec.QTesla.Params
 
-module R    = Lib.RandomBuffer
+module R    = Lib.RandomBuffer.System
 
 #reset-options "--z3rlimit 100 --max_fuel 1 --max_ifuel 1 --query_stats"
 

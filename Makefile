@@ -141,7 +141,6 @@ ci:
 	NOSHORTLOG=1 $(MAKE) wasm
 	$(MAKE) -C providers/quic_provider # needs a checkout of miTLS, only valid on CI
 	./tools/sloccount.sh
-	$(MAKE) -C qtesla/code
 
 wasm:
 	tools/blast-staticconfig.sh wasm
@@ -782,6 +781,7 @@ dist/mozilla/Makefile.basic: MERKLE_BUNDLE = -bundle MerkleTree.*
 dist/mozilla/Makefile.basic: CTR_BUNDLE =
 dist/mozilla/Makefile.basic: SHA3_BUNDLE = -bundle Hacl.SHA3
 dist/mozilla/Makefile.basic: HASH_BUNDLE = -bundle Hacl.Hash.*,Hacl.HKDF,Hacl.HMAC
+dist/mozilla/Makefile.basic: QTESLA_BUNDLE = -bundle QTesla.*,Hacl.Impl.QTesla,Hacl.Impl.QTesla.*
 dist/mozilla/Makefile.basic: \
   BUNDLE_FLAGS += \
     -bundle EverCrypt,EverCrypt.* \
