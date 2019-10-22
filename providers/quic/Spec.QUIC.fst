@@ -3,11 +3,11 @@ module Spec.QUIC
 module S = FStar.Seq
 module U32 = FStar.UInt32
 module U8 = FStar.UInt8
-module H = Spec.Hash
+module H = Spec.Agile.Hash
 module HD = Spec.Hash.Definitions
 module C16 = Spec.Cipher16
-module AEAD = Spec.AEAD
-module HKDF = Spec.HKDF
+module AEAD = Spec.Agile.AEAD
+module HKDF = Spec.Agile.HKDF
 
 #set-options "--max_fuel 0 --max_ifuel 0"
 

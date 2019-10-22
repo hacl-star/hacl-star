@@ -2,7 +2,7 @@ module Spec.QUIC
 
 module S = FStar.Seq
 module HD = Spec.Hash.Definitions
-module AEAD = Spec.AEAD
+module AEAD = Spec.Agile.AEAD
 
 type byte = FStar.UInt8.t
 
