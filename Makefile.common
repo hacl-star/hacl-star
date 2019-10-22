@@ -84,4 +84,4 @@ POLY_BUNDLE=-bundle 'Hacl.Poly1305_32=Hacl.Impl.Poly1305.Field32xN_32' \
   -bundle 'Hacl.Poly1305_128=Hacl.Impl.Poly1305.Field32xN_128' \
   -bundle 'Hacl.Poly1305_256=Hacl.Impl.Poly1305.Field32xN_256'
 NACLBOX_BUNDLE=-bundle Hacl.NaCl=Hacl.Impl.SecretBox,Hacl.Impl.Box
-
+QUIC_BUNDLE=-bundle Impl.QUIC=Cipher16,Spec.Cipher16,Spec.QUIC
