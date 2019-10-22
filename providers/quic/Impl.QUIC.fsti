@@ -6,6 +6,8 @@ module G = FStar.Ghost
 module B = LowStar.Buffer
 module S = FStar.Seq
 module HS = FStar.HyperStack
+module ST = FStar.HyperStack.ST
+
 
 module U64 = FStar.UInt64
 module U32 = FStar.UInt32
@@ -215,6 +217,46 @@ val packet_number_of_state (i: G.erased index) (s: state (G.reveal i)): Stack U6
     U64.v ctr == g_packet_number (B.deref h0 s) h0 /\
     h0 == h1)
 
+// JP: we could be defensive and allow callers to pass potentially unsupported
+// algorithms; however, this would require a lot more machinery as we would not
+// even be able to state the index type, since index currently has a refinement
+// that the two algorithms are supported. We would have to separate index into
+// index0 and a well-formedness refinement. Not sure it's worth it. We can
+// always perform redundant tests inside the definition of create to be fully
+// defensive.
+inline_for_extraction noextract
+let create_in_st (i:index) =
+  r:HS.rid ->
+  initial_pn:u62 ->
+  dst: B.pointer (B.pointer_or_null (state_s i)) ->
+  ST error_code
+    (requires fun h0 ->
+      // JP: we could require that ``dst`` point to NULL prior to calling
+      // ``create`` (otherwise, it's a memory leak). Other modules don't enforce
+      // this (see AEAD) so for now, let's make the caller's life easier and not
+      // demand anything.
+      ST.is_eternal_region r /\
+      B.live h0 dst)
+    (ensures (fun h0 e h1 ->
+      match e with
+      | UnsupportedAlgorithm ->
+          B.(modifies loc_none h0 h1)
+      | Success ->
+          let s = B.deref h1 dst in
+          not (B.g_is_null s) /\
+          invariant h1 s /\
+
+          B.(modifies (loc_buffer dst) h0 h1) /\
+          B.fresh_loc (footprint h1 s) h0 h1 /\
+          B.(loc_includes (loc_region_only true r) (footprint h1 s)) /\
+
+          g_initial_packet_number (B.deref h1 s) == U64.v initial_pn
+      | _ ->
+          False))
+
+// The index is passed at run-time.
+val create_in: i:index -> create_in_st i
+
 val encrypt: #i:G.erased index -> (
   let i = G.reveal i in
   s: state i ->
@@ -275,6 +317,7 @@ type result = {
   plain_len: n:U32.t{let l = U32.v n in 3 <= l /\ l < Spec.QUIC.max_plain_length};
 }
 
+noextract
 let max (x y: nat) = if x >= y then x else y
 
 val decrypt: #i:G.erased index -> (
