@@ -181,6 +181,21 @@ let encrypt_last_lemma_index1_slice #w len b_v j =
   let b = Lemmas.get_block_s #uint8 #len blocksize b_v j in
   eq_intro b b_p
 
+val encrypt_last_equiv_lemma_index1_aux: w:pos -> bs:pos -> len:nat -> i:nat -> Lemma
+  (requires
+    len / (w * bs) * (w * bs) <= i /\ i < len /\
+    i % (w * bs) < (len % (w * bs) / bs) * bs /\
+    w * bs <= max_size_t /\ len / bs <= max_size_t /\
+    w * (len / (w * bs) + 1) <= max_size_t)
+  (ensures
+    i % (w * bs) < len % (w * bs) /\
+    i / bs <= max_size_t /\
+    len / (w * bs) <= max_size_t)
+
+let encrypt_last_equiv_lemma_index1_aux w bs len i =
+  Lemmas.lemma_i_div_bs_lt w bs len i;
+  assert (i / bs < len / bs)
+
 
 val encrypt_last_equiv_lemma_index1:
     #w:width_t
@@ -198,7 +213,7 @@ val encrypt_last_equiv_lemma_index1:
    let j = i % blocksize_v in
    let rem = len % blocksize_v in
    let b = Lemmas.get_block_s #uint8 #rem blocksize b_v j in
-   assume (i % blocksize_v < len % blocksize_v /\ i / blocksize <= max_size_t /\ len / blocksize_v <= max_size_t);
+   encrypt_last_equiv_lemma_index1_aux w blocksize len i;
    (encrypt_last_v st_v0 (len / blocksize_v) rem b_v).[j] ==
    (encrypt_block st0 (i / blocksize) b).[i % blocksize])
 
@@ -211,15 +226,31 @@ let encrypt_last_equiv_lemma_index1 #w blocksize_v k n ctr0 len b_v i =
   let plain = create blocksize_v (u8 0) in
   let plain = update_sub plain 0 rem b_v in
   let ctr = i / blocksize_v in
-  assume (i / blocksize_v == len / blocksize_v);
+  Lemmas.lemma_len_div_bs_v w blocksize len i;
+  assert (i / blocksize_v == len / blocksize_v);
   let res = encrypt_last_v st_v0 ctr rem b_v in
   assert (res == sub (encrypt_block_v st_v0 ctr plain) 0 rem);
-  assume (i % blocksize_v < len % blocksize_v /\ i / blocksize <= max_size_t /\ len / blocksize_v <= max_size_t);
+  encrypt_last_equiv_lemma_index1_aux w blocksize len i;
   lemma_encrypt_block_vec_equiv #w k n ctr0 i plain;
   Math.Lemmas.multiple_division_lemma w blocksize;
   let b = Lemmas.get_block_s #uint8 #blocksize_v blocksize plain j in
   //assert ((encrypt_block_v st_v0 ctr plain).[j] == (encrypt_block st0 (i / blocksize) b).[i % blocksize]);
   encrypt_last_lemma_index1_slice #w rem b_v j
+
+
+val encrypt_last_equiv_lemma_index2_aux: w:pos -> bs:pos -> len:nat -> i:nat -> Lemma
+  (requires
+    len / (w * bs) * (w * bs) <= i /\ i < len /\
+    (len % (w * bs) / bs) * bs <= i % (w * bs) /\ i % (w * bs) < len % (w * bs) /\
+    w * bs <= max_size_t /\ len / bs <= max_size_t /\
+    w * (len / (w * bs) + 1) <= max_size_t)
+  (ensures
+    i % bs < (len % (w * bs)) % bs /\
+    len / (w * bs) <= max_size_t)
+
+let encrypt_last_equiv_lemma_index2_aux w bs len i =
+  Lemmas.lemma_i_mod_bs_lt w bs len i;
+  Lemmas.lemma_mod_bs_v_bs len w bs
 
 
 val encrypt_last_equiv_lemma_index2:
@@ -239,7 +270,7 @@ val encrypt_last_equiv_lemma_index2:
    let rem = len % blocksize_v in
    let b : lseq uint8 (rem % blocksize) = Lemmas.get_last_s #uint8 #rem blocksize b_v in
    let rp : lseq uint8 (rem % blocksize) = encrypt_last st0 (len / blocksize) (rem % blocksize) b in
-   assume (len / blocksize_v <= max_size_t /\ i % blocksize < rem % blocksize);
+   encrypt_last_equiv_lemma_index2_aux w blocksize len i;
    (encrypt_last_v st_v0 (len / blocksize_v) rem b_v).[j] == rp.[i % blocksize])
 
 let encrypt_last_equiv_lemma_index2 #w blocksize_v k n ctr0 len b_v i =
@@ -251,15 +282,18 @@ let encrypt_last_equiv_lemma_index2 #w blocksize_v k n ctr0 len b_v i =
   let plain = create blocksize_v (u8 0) in
   let plain = update_sub plain 0 rem b_v in
   let ctr = i / blocksize_v in
-  assume (len / blocksize_v <= max_size_t);
-  assume (i / blocksize_v == len / blocksize_v);
+  encrypt_last_equiv_lemma_index2_aux w blocksize len i;
+  Lemmas.lemma_len_div_bs_v w blocksize len i;
+  assert (i / blocksize_v == len / blocksize_v);
   let res = encrypt_last_v st_v0 ctr rem b_v in
   assert (res == sub (encrypt_block_v st_v0 ctr plain) 0 rem);
-  assume (i / blocksize == len / blocksize);
+  Lemmas.lemma_i_le_len_div_bs_mul_bs w blocksize len i;
+  Lemmas.lemma_len_div_bs w blocksize len i;
+  assert (i / blocksize == len / blocksize);
   lemma_encrypt_block_vec_equiv #w k n ctr0 i plain;
   Math.Lemmas.multiple_division_lemma w blocksize;
   let b = Lemmas.get_block_s #_ #blocksize_v blocksize plain j in
-  assert ((encrypt_block_v st_v0 ctr plain).[j] == (encrypt_block st0 (i / blocksize) b).[i % blocksize]);
+  //assert ((encrypt_block_v st_v0 ctr plain).[j] == (encrypt_block st0 (i / blocksize) b).[i % blocksize]);
   admit()
 
 
@@ -285,16 +319,17 @@ let lemma_map_blocks_vec_equiv_pre_g_v #w k n ctr0 msg i b_v =
   let blocksize_v = w * blocksize in
   let rem_v = len % blocksize_v in
   let rem = len % blocksize in
-  assume (rem_v % blocksize = rem);
+  Lemmas.lemma_mod_bs_v_bs len w blocksize;
+  assert (rem_v % blocksize = rem);
 
   let j = i % blocksize_v in
   if j < (rem_v / blocksize) * blocksize then
     encrypt_last_equiv_lemma_index1 #w blocksize_v k n ctr0 len b_v i
   else begin
-    assume (len / blocksize_v * blocksize_v <= i /\ i < len);
     mod_div_lt blocksize_v i len;
     assert (i % blocksize_v < len % blocksize_v);
-    assume (i % blocksize < rem);
+    Lemmas.lemma_i_mod_bs_lt w blocksize len i;
+    assert (i % blocksize < rem);
     encrypt_last_equiv_lemma_index2 #w blocksize_v k n ctr0 len b_v i end
 
 

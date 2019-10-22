@@ -55,6 +55,12 @@ val lemma_i_div_bs_lt: w:pos -> bs:pos -> len:nat -> i:nat -> Lemma
     i % (w * bs) < (len % (w * bs) / bs) * bs)
   (ensures  i / bs < len / bs)
 
+val lemma_i_le_len_div_bs_mul_bs: w:pos -> bs:pos -> len:nat -> i:nat -> Lemma
+  (requires
+    len / (w * bs) * (w * bs) <= i /\ i < len /\
+    (len % (w * bs) / bs) * bs <= i % (w * bs) /\ i % (w * bs) < len % (w * bs))
+  (ensures  len / bs * bs <= i /\ i < len)
+
 val lemma_i_mod_bs_lt: w:pos -> bs:pos -> len:nat -> i:nat -> Lemma
   (requires
     len / (w * bs) * (w * bs) <= i /\ i < len /\
