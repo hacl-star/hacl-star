@@ -185,7 +185,6 @@ val chacha20_update:
 [@ Meta.Attribute.inline_ ]
 let chacha20_update #w ctx len out text =
   push_frame();
-  let k = create_state w in
   assert_norm (range (v len / v (size w *. size 64)) U32);
   let blocks = len /. (size w *. size 64) in
   let rem = len %. (size w *. size 64) in
