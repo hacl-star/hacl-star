@@ -97,7 +97,29 @@ let lemma_update_to_valid_destination_keeps_it_as_valid_src (o:operand64) (s:mac
   Vale.Def.Opaque_s.reveal_opaque get_heap_val64_def
 #pop-options
 
-#push-options "--initial_fuel 2 --max_fuel 8 --initial_ifuel 0 --max_ifuel 2"
+#push-options "--z3rlimit 10 --initial_fuel 0 --max_fuel 8 --initial_ifuel 0 --max_ifuel 2"
+let lemma_double_update (dst:operand64) (s0 s1 s2 s3:machine_state) (v v_fin:nat64) :
+  Lemma
+    (requires (
+        (valid_dst_operand64 dst s0) /\
+        (s1 == update_operand64_preserve_flags'' dst v s0 s0) /\
+        (s2 == update_operand64_preserve_flags'' dst v_fin s1 s1) /\
+        (s3 == update_operand64_preserve_flags'' dst v_fin s0 s0)))
+    (ensures (
+        equiv_states s2 s3)) =
+  match dst with
+  | OConst _ -> ()
+  | OReg r -> assert (equiv_states_ext s2 s3) (* OBSERVE *)
+  | OMem (m, t) ->
+    FStar.Pervasives.reveal_opaque (`%valid_addr64) valid_addr64;
+    Vale.Def.Opaque_s.reveal_opaque update_heap64_def;
+    let ptr = eval_maddr m s0 in
+    admit ()
+  | _ ->
+    admit ()
+#pop-options
+
+#push-options "--initial_fuel 2 --max_fuel 2 --initial_ifuel 0 --max_ifuel 0"
 let lemma_movbe_is_mov_bswap (dst src:operand64) (s:machine_state) :
   Lemma
     (requires (s.ms_trace = []))
@@ -127,8 +149,7 @@ let lemma_movbe_is_mov_bswap (dst src:operand64) (s:machine_state) :
     assert (s_bswap == update_operand64_preserve_flags'' dst dst_bswap_v s_mov s_mov);
     assert (src_v == dst_mov_v);
     assert (dst_movbe_v == dst_bswap_v);
-    //
-    admit ()
+    lemma_double_update dst s s_mov s_bswap s_movbe src_v dst_bswap_v
   ) else (
     assert (s_movbe == {s with ms_ok = false});
     assert (s_mov == {s with ms_ok = false});
