@@ -233,7 +233,7 @@ let label_key = LowStar.ImmutableBuffer.igcmalloc_of_list HS.root Spec.QUIC.labe
 let label_iv = LowStar.ImmutableBuffer.igcmalloc_of_list HS.root Spec.QUIC.label_iv_l
 let label_hp = LowStar.ImmutableBuffer.igcmalloc_of_list HS.root Spec.QUIC.label_hp_l
 
-#set-options "--z3rlimit 200"
+#set-options "--z3rlimit 300"
 let create_in i r dst initial_pn traffic_secret =
   LowStar.ImmutableBuffer.recall label_key;
   LowStar.ImmutableBuffer.recall_contents label_key Spec.QUIC.label_key;
@@ -325,10 +325,10 @@ let create_in i r dst initial_pn traffic_secret =
       // NOTE: how to conclude efficiently the same thing with h11?
       pop_frame ();
       (**) let h11 = ST.get () in
+      (**) assert (AEAD.invariant #aead_alg h11 aead_state);
       (**) B.popped_modifies h10 h11;
       (**) assert B.(modifies (loc_buffer dst) h0 h11);
       (**) assert (ST.equal_stack_domains h0 h11);
-      (**) AEAD.frame_invariant #aead_alg (B.loc_buffer dst) aead_state h3 h11;
 
       Success
 
