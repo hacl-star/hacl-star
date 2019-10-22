@@ -81,7 +81,20 @@ let lemma_merge_mov_bswap dst src fuel (s:machine_state) :
   assert ({s12 with ms_trace = []} == machine_eval_ins i2 (machine_eval_ins i1 s0))
 #pop-options
 
-#push-options "--initial_fuel 3 --max_fuel 8 --initial_ifuel 0 --max_ifuel 2"
+let lemma_movbe_is_mov_bswap (dst src:operand64) (s:machine_state) :
+  Lemma
+    (requires (s.ms_trace = []))
+    (ensures (
+        let movbe = make_instr_annotate ins_MovBe64 (AnnotateMovbe64 ()) dst src in
+        let mov = make_instr ins_Mov64 dst src in
+        let bswap = make_instr ins_Bswap64 dst in
+        equiv_states
+          (machine_eval_ins movbe s)
+          (machine_eval_ins bswap (machine_eval_ins mov s)))) =
+  admit ()
+
+#restart-solver
+#push-options "--initial_fuel 3 --max_fuel 3 --initial_ifuel 0 --max_ifuel 0"
 let lemma_replace_movbe_specifically (i:ins{Instr? i}) (fuel:nat) (s:machine_state) :
   Lemma
     (requires (
@@ -113,8 +126,9 @@ let lemma_replace_movbe_specifically (i:ins{Instr? i}) (fuel:nat) (s:machine_sta
   let s2_a = {s2 with ms_trace = []} in
   assert (machine_eval_ins ins_bswap (machine_eval_ins ins_mov s_a) == s2_a);
   assert (machine_eval_ins ins s_a == s1_a);
-  assume (equiv_states s1_a s2_a);
-  ()
+  assert (machine_eval_ins (make_instr_annotate ins_MovBe64 (AnnotateMovbe64 ()) dst src) s_a == s1_a);
+  lemma_movbe_is_mov_bswap dst src s_a;
+  assert (equiv_states s1_a s2_a)
 #pop-options
 
 #push-options "--initial_fuel 2 --max_fuel 2 --initial_ifuel 1 --max_ifuel 1"
