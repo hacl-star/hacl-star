@@ -1,4 +1,4 @@
-module Spec.HPKE.CFRG
+module Spec.HPKE
 
 open FStar.Mul
 open Lib.IntTypes
@@ -11,7 +11,6 @@ module DH = Spec.Agile.DH
 module AEAD = Spec.Agile.AEAD.Hacl
 module Hash = Spec.Agile.Hash
 module HKDF = Spec.Agile.HKDF
-module KDF = Spec.Agile.KDF
 
 
 let pow2_61 : _:unit{pow2 61 == 2305843009213693952} = assert_norm(pow2 61 == 2305843009213693952)
