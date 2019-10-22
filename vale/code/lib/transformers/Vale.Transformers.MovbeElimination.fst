@@ -32,10 +32,12 @@ let rec replace_movbe_in_code (c:code) : code =
     let oprs:normal (instr_operands_t [out op64] [op64]) =
       coerce_to_normal #(instr_operands_t [out op64] [op64]) oprs in
     let (dst, (src, ())) = oprs in
-    Block [
-      Ins (make_instr ins_Mov64 dst src);
-      Ins (make_instr ins_Bswap64 dst);
-    ]
+    if OReg? dst then (
+      Block [
+        Ins (make_instr ins_Mov64 dst src);
+        Ins (make_instr ins_Bswap64 dst);
+      ]
+    ) else c
   | Ins i -> Ins i
   | Block l -> Block (replace_movbe_in_codes l)
   | IfElse c t f -> IfElse c (replace_movbe_in_code t) (replace_movbe_in_code f)
@@ -101,6 +103,7 @@ let lemma_update_to_valid_destination_keeps_it_as_valid_src (o:operand64) (s:mac
 let lemma_double_update (dst:operand64) (s0 s1 s2 s3:machine_state) (v v_fin:nat64) :
   Lemma
     (requires (
+        (OReg? dst) /\
         (valid_dst_operand64 dst s0) /\
         (s1 == update_operand64_preserve_flags'' dst v s0 s0) /\
         (s2 == update_operand64_preserve_flags'' dst v_fin s1 s1) /\
@@ -108,28 +111,13 @@ let lemma_double_update (dst:operand64) (s0 s1 s2 s3:machine_state) (v v_fin:nat
     (ensures (
         equiv_states s2 s3)) =
   match dst with
-  | OConst _ -> ()
   | OReg r -> assert (equiv_states_ext s2 s3) (* OBSERVE *)
-  | OMem (m, t) ->
-    FStar.Pervasives.reveal_opaque (`%valid_addr64) valid_addr64;
-    Vale.Def.Opaque_s.reveal_opaque update_heap64_def;
-    let ptr = eval_maddr m s0 in
-    if valid_addr64 ptr (H.heap_get s0.ms_heap) then (
-      assert (Map.equal s2.ms_memTaint s3.ms_memTaint);
-      assert (Map.equal (H.heap_get s2.ms_heap) (H.heap_get s3.ms_heap));
-      assume (s2.ms_heap == s3.ms_heap) // TODO: HOW?!
-    ) else ()
-  | OStack (m, t) ->
-    FStar.Pervasives.reveal_opaque (`%valid_addr64) valid_addr64;
-    Vale.Def.Opaque_s.reveal_opaque update_heap64_def;
-    let ptr = eval_maddr m s0 in
-    assert (equiv_states_ext s2 s3) (* OBSERVE *)
 #pop-options
 
 #push-options "--initial_fuel 2 --max_fuel 2 --initial_ifuel 0 --max_ifuel 0"
 let lemma_movbe_is_mov_bswap (dst src:operand64) (s:machine_state) :
   Lemma
-    (requires (s.ms_trace = []))
+    (requires ((OReg? dst) /\ (s.ms_trace = [])))
     (ensures (
         let movbe = make_instr_annotate ins_MovBe64 (AnnotateMovbe64 ()) dst src in
         let mov = make_instr ins_Mov64 dst src in
@@ -164,13 +152,24 @@ let lemma_movbe_is_mov_bswap (dst src:operand64) (s:machine_state) :
   )
 #pop-options
 
+let is_replaceable_movbe (i:ins) : bool =
+  match i with
+  | Instr _ oprs ann -> (
+      match ann with
+      | AnnotateMovbe64 _ ->
+        let oprs:normal (instr_operands_t [out op64] [op64]) =
+          coerce_to_normal #(instr_operands_t [out op64] [op64]) oprs in
+        let (dst, (src, ())) = oprs in
+        OReg? dst
+      | _ -> false
+    )
+  | _ -> false
+
 #restart-solver
 #push-options "--z3rlimit 10 --initial_fuel 3 --max_fuel 3 --initial_ifuel 0 --max_ifuel 0"
-let lemma_replace_movbe_specifically (i:ins{Instr? i}) (fuel:nat) (s:machine_state) :
+let lemma_replace_movbe_specifically (i:ins) (fuel:nat) (s:machine_state) :
   Lemma
-    (requires (
-        let Instr _ _ ann = i in
-        AnnotateMovbe64? ann))
+    (requires (is_replaceable_movbe i))
     (ensures (
         let c = Ins i in
         let c' = replace_movbe_in_code c in
@@ -218,9 +217,10 @@ let rec lemma_replace_movbe_in_code (c:code) (fuel:nat) (s:machine_state) :
           (machine_eval_code c' fuel s)))
     (decreases %[fuel; c; 1]) =
   match c with
-  | Ins (Instr i oprs (AnnotateMovbe64 proof_of_movbe)) ->
-    lemma_replace_movbe_specifically (Instr i oprs (AnnotateMovbe64 proof_of_movbe)) fuel s
-  | Ins i -> ()
+  | Ins i ->
+    if is_replaceable_movbe i then (
+      lemma_replace_movbe_specifically i fuel s
+    ) else ()
   | Block l -> lemma_replace_movbe_in_codes l fuel s
   | IfElse c t f ->
     let (st, b) = machine_eval_ocmp s c in
