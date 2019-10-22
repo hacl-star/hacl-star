@@ -81,21 +81,12 @@ let ctr_v (#w:width_t) (k:key) (n:nonce) (c0:counter) (msg:bytes{length msg / (w
 
 val transpose_state_i: #w:width_t -> st_v:state_v w -> i:nat{i < w} -> state
 
-val init_v_i: #w:width_t -> k:key -> n:nonce -> ctr0:counter{ctr0 + w <= max_size_t} -> i:nat{i < w} ->
-  Lemma (transpose_state_i (init_v #w k n ctr0) i == init k n (ctr0 + i))
+// val init_v_i: #w:width_t -> k:key -> n:nonce -> ctr0:counter{ctr0 + w <= max_size_t} -> i:nat{i < w} ->
+//   Lemma (transpose_state_i (init_v #w k n ctr0) i == init k n (ctr0 + i))
 
-val kb_v_i: #w:width_t -> ctr:counter{w * ctr <= max_size_t} -> st_v0:state_v w -> i:nat{i < w} -> Lemma
-  (assert ((i + 1) * blocksize <= w * blocksize);
-   sub (kb_v st_v0 ctr) (i * blocksize) blocksize == kb (transpose_state_i st_v0 i) (w * ctr))
+// val kb_v_i: #w:width_t -> ctr:counter{w * ctr <= max_size_t} -> st_v0:state_v w -> i:nat{i < w} -> Lemma
+//   (assert ((i + 1) * blocksize <= w * blocksize);
+//    sub (kb_v st_v0 ctr) (i * blocksize) blocksize == kb (transpose_state_i st_v0 i) (w * ctr))
 
-val kb_equiv_lemma: #w:width_t -> k:key -> n:nonce -> ctr0:counter -> ctr:counter{w * (ctr + 1) <= max_size_t /\ ctr0 + w <= max_size_t} -> i:nat{i < w} ->
-  Lemma (kb (init k n ctr0) (w * ctr + i) == kb (init k n (ctr0 + i)) (w * ctr))
-
-
-///
-///  Specification equivalence lemma
-///
-
-val ctr_equivalence: w:width_t -> k:key -> n:nonce -> c0:counter{c0 + w <= max_size_t} -> msg:bytes -> Lemma
-  (requires w * (length msg / (w * blocksize) + 1) <= max_size_t /\ length msg / blocksize <= max_size_t)
-  (ensures  ctr_v #w k n c0 msg == ctr k n c0 msg)
+// val kb_equiv_lemma: #w:width_t -> k:key -> n:nonce -> ctr0:counter -> ctr:counter{w * (ctr + 1) <= max_size_t /\ ctr0 + w <= max_size_t} -> i:nat{i < w} ->
+//   Lemma (kb (init k n ctr0) (w * ctr + i) == kb (init k n (ctr0 + i)) (w * ctr))
