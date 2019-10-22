@@ -98,6 +98,7 @@ val frame_invariant: #a:alg -> l:B.loc -> s:state a -> h0:HS.mem -> h1:HS.mem ->
   (ensures (
     invariant h1 s /\
     footprint h0 s == footprint h1 s))
+  [ SMTPat (invariant h1 s); SMTPat (B.modifies l h0 h1) ]
 
 
 /// Actual stateful API

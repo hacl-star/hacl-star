@@ -46,6 +46,7 @@ type pbytes = b:bytes{let l = S.length b in 3 <= l /\ l < max_plain_length}
 type cbytes = b:bytes{let l = S.length b in 19 <= l /\ l < max_cipher_length}
 type packet = b:bytes{let l = S.length b in 21 <= l /\ l < pow2 32}
 
+// JP: this is Spec.Agile.Cipher.key_length
 let ae_keysize (a:ea) =
   match a with
   | AEAD.AES128_GCM -> 16

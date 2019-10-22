@@ -2,6 +2,7 @@
 /// correctness (no notion of model for now).
 module Impl.QUIC
 
+// This MUST be kept in sync with Impl.QUIC.fst...
 module G = FStar.Ghost
 module B = LowStar.Buffer
 module S = FStar.Seq
@@ -20,6 +21,7 @@ open EverCrypt.Helpers
 open EverCrypt.Error
 
 #set-options "--max_fuel 0 --max_ifuel 0"
+// ... up to here!
 
 unfold noextract
 let hash_alg = Spec.Hash.Definitions.hash_alg
@@ -41,6 +43,13 @@ type index = {
   aead_alg: Spec.QUIC.ea
 }
 
+/// Low-level types used in this API
+/// --------------------------------
+
+type u2 = n:U8.t{U8.v n < 4}
+type u4 = n:U8.t{U8.v n < 16}
+type u62 = n:UInt64.t{UInt64.v n < pow2 62}
+
 /// Boilerplate
 /// -----------
 
@@ -49,51 +58,36 @@ val state_s: index -> Type0
 
 let state i = B.pointer (state_s i)
 
-val footprint_s: #i:index -> state_s i -> GTot B.loc
+val footprint_s: #i:index -> HS.mem -> state_s i -> GTot B.loc
 let footprint (#i:index) (m: HS.mem) (s: state i) =
-  B.(loc_union (loc_addr_of_buffer s) (footprint_s (B.deref m s)))
+  B.(loc_union (loc_addr_of_buffer s) (footprint_s m (B.deref m s)))
 
 let loc_includes_union_l_footprint_s
-  (l1 l2: B.loc) (#i: index) (s: state_s i)
+  (m: HS.mem)
+  (l1 l2: B.loc) (#a: index) (s: state_s a)
 : Lemma
   (requires (
-    B.loc_includes l1 (footprint_s s) \/ B.loc_includes l2 (footprint_s s)
+    B.loc_includes l1 (footprint_s m s) \/ B.loc_includes l2 (footprint_s m s)
   ))
-  (ensures (B.loc_includes (B.loc_union l1 l2) (footprint_s s)))
-  [SMTPat (B.loc_includes (B.loc_union l1 l2) (footprint_s s))]
-= B.loc_includes_union_l l1 l2 (footprint_s s)
+  (ensures (B.loc_includes (B.loc_union l1 l2) (footprint_s m s)))
+  [SMTPat (B.loc_includes (B.loc_union l1 l2) (footprint_s m s))]
+= B.loc_includes_union_l l1 l2 (footprint_s m s)
 
-val invariant_s: (#i:index) -> HS.mem -> state_s i -> Type0
-let invariant (#i:index) (m: HS.mem) (s: state i) =
-  B.live m s /\
-  B.(loc_disjoint (loc_addr_of_buffer s) (footprint_s (B.deref m s))) /\
-  invariant_s m (B.get m s 0)
-
-val invariant_loc_in_footprint
-  (#i: index)
-  (s: state i)
-  (m: HS.mem)
-: Lemma
-  (requires (invariant m s))
-  (ensures (B.loc_in (footprint m s) m))
-  [SMTPat (invariant m s)]
-
-/// Ghost accessors
-/// ---------------
+/// Ghost accessors (not needing the invariant)
+/// -------------------------------------------
 ///
 /// We need to define those, so that we can state a framing lemma for them.
 /// Attempting a new convention to distinguish ghost accessors from stateful
 /// functions: a ``g_`` prefix.
 
-val g_aead_key: #i:index -> (s: state_s i) -> (h: HS.mem) -> GTot (Spec.AEAD.kv i.aead_alg)
-val g_static_iv: #i:index -> (s: state_s i) -> (h: HS.mem) -> GTot (lbytes 12)
-val g_hash: #i:index -> (s: state_s i) -> (h: HS.mem) ->
+/// See remark for ``g_initial_packet_number`` below.
+val g_traffic_secret: #i:index -> (s: state_s i) ->
   GTot (Spec.Hash.Definitions.bytes_hash i.hash_alg)
 
 #push-options "--max_ifuel 1" // inversion on hash_alg
-let hash_is_keysized #i (s: state_s i) (h: HS.mem): Lemma
-  (ensures (Spec.QUIC.keysized i.hash_alg (S.length (g_hash s h))))
-  [ SMTPat (g_hash s h) ]
+let hash_is_keysized #i (s: state_s i): Lemma
+  (ensures (Spec.QUIC.keysized i.hash_alg (S.length (g_traffic_secret s))))
+  [ SMTPat (g_traffic_secret s) ]
 =
   assert_norm (512 < pow2 61);
   assert_norm (512 < pow2 125)
@@ -105,19 +99,35 @@ let hash_is_keysized #i (s: state_s i) (h: HS.mem): Lemma
 /// the same, thanks to the precise use of footprint_s in encrypt/decrypt.
 val g_initial_packet_number: #i:index -> (s: state_s i) -> GTot Spec.QUIC.nat62
 
-val g_packet_number: #i:index -> (s: state_s i) -> (h: HS.mem) ->
+/// Invariant
+/// ---------
+
+val invariant_s: (#i:index) -> HS.mem -> state_s i -> Type0
+let invariant (#i:index) (m: HS.mem) (s: state i) =
+  B.live m s /\
+  B.(loc_disjoint (loc_addr_of_buffer s) (footprint_s m (B.deref m s))) /\
+  invariant_s m (B.get m s 0)
+
+val invariant_loc_in_footprint
+  (#i: index)
+  (s: state i)
+  (m: HS.mem)
+: Lemma
+  (requires (invariant m s))
+  (ensures (B.loc_in (footprint m s) m))
+  [SMTPat (invariant m s)]
+
+
+/// Ghost accessors needing the invariant
+/// -------------------------------------
+
+val g_packet_number: #i:index -> (s: state_s i) -> (h: HS.mem { invariant_s h s }) ->
   GTot (pn:Spec.QUIC.nat62{
     pn >= g_initial_packet_number s
   })
 
-let incrementable (#i: index) (s: state i) (h: HS.mem) =
+let incrementable (#i: index) (s: state i) (h: HS.mem { invariant h s }) =
   g_packet_number (B.deref h s) h + 1 < pow2 62
-
-/// This will be maintained internally but can be used by clients. This was
-/// previously revealed in the post-condition of decrypt.
-val invariant_packet_number (#i: index) (s: state i) (h: HS.mem): Lemma
-  (requires (invariant h s))
-  (ensures (g_packet_number (B.deref h s) h >= g_initial_packet_number (B.deref h s)))
 
 /// Preserving all the ghost accessors via a single framing lemma only works
 /// because we don't do stack allocation. See comments in
@@ -130,26 +140,17 @@ val frame_invariant: #i:index -> l:B.loc -> s:state i -> h0:HS.mem -> h1:HS.mem 
   (ensures (
     invariant h1 s /\
     footprint h0 s == footprint h1 s /\
-    g_aead_key (B.deref h0 s) == g_aead_key (B.deref h1 s) /\
-    g_static_iv (B.deref h0 s) == g_static_iv (B.deref h1 s) /\
-    g_packet_number (B.deref h0 s) == g_packet_number (B.deref h1 s) /\
-    g_hash (B.deref h0 s) == g_hash (B.deref h1 s)
+    g_packet_number (B.deref h0 s) h0 == g_packet_number (B.deref h1 s) h0 /\
+    g_traffic_secret (B.deref h0 s) == g_traffic_secret (B.deref h1 s)
     ))
   // Assertion failure: unexpected pattern term
   (*[ SMTPat (B.modifies l h0 h1); SMTPatOr [
     [ SMTPat (invariant h1 s) ];
     [ SMTPat (footprint h1 s) ];
     [ SMTPat (g_aead_key (B.deref h1 s)) ];
-    [ SMTPat (g_static_iv (B.deref h1 s)) ];
     [ SMTPat (g_counter (B.deref h1 s)) ]
   ]]*)
 
-/// Low-level types used in this API
-/// --------------------------------
-
-type u2 = n:U8.t{U8.v n < 4}
-type u4 = n:U8.t{U8.v n < 16}
-type u62 = n:UInt64.t{UInt64.v n < pow2 62}
 
 let add3 (k:u4) : n:U8.t{U8.v n <= 18} = if k = 0uy then 0uy else U8.(k +^ 3uy)
 
@@ -199,19 +200,19 @@ let g_header (h: header) (m: HS.mem): GTot Spec.QUIC.header =
 /// Actual stateful API
 /// -------------------
 
-val aead_alg_of_state (i: G.erased index) (s: state (G.reveal i)): Stack aead_alg
+val aead_alg_of_state (#i: G.erased index) (s: state (G.reveal i)): Stack aead_alg
   (requires (fun h0 -> invariant #(G.reveal i) h0 s))
   (ensures (fun h0 a h1 ->
     a == (G.reveal i).aead_alg /\
     h0 == h1))
 
-val hash_alg_of_state (i: G.erased index) (s: state (G.reveal i)): Stack hash_alg
+val hash_alg_of_state (#i: G.erased index) (s: state (G.reveal i)): Stack hash_alg
   (requires (fun h0 -> invariant #(G.reveal i) h0 s))
   (ensures (fun h0 a h1 ->
     a == (G.reveal i).hash_alg /\
     h0 == h1))
 
-val packet_number_of_state (i: G.erased index) (s: state (G.reveal i)): Stack U64.t
+val packet_number_of_state (#i: G.erased index) (s: state (G.reveal i)): Stack U64.t
   (requires fun h0 -> invariant h0 s)
   (ensures fun h0 ctr h1 ->
     U64.v ctr == g_packet_number (B.deref h0 s) h0 /\
@@ -227,8 +228,11 @@ val packet_number_of_state (i: G.erased index) (s: state (G.reveal i)): Stack U6
 inline_for_extraction noextract
 let create_in_st (i:index) =
   r:HS.rid ->
-  initial_pn:u62 ->
   dst: B.pointer (B.pointer_or_null (state_s i)) ->
+  initial_pn:u62 ->
+  traffic_secret:B.buffer U8.t {
+    B.length traffic_secret = Spec.Hash.Definitions.hash_length i.hash_alg
+  } ->
   ST error_code
     (requires fun h0 ->
       // JP: we could require that ``dst`` point to NULL prior to calling
@@ -236,7 +240,7 @@ let create_in_st (i:index) =
       // this (see AEAD) so for now, let's make the caller's life easier and not
       // demand anything.
       ST.is_eternal_region r /\
-      B.live h0 dst)
+      B.live h0 dst /\ B.live h0 traffic_secret)
     (ensures (fun h0 e h1 ->
       match e with
       | UnsupportedAlgorithm ->
@@ -288,12 +292,12 @@ val encrypt: #i:G.erased index -> (
       match r with
       | Success ->
           // Memory & preservation
-          B.(modifies (footprint_s (deref h0 s) `loc_union` loc_buffer dst)) h0 h1 /\
+          B.(modifies (footprint_s h0 (deref h0 s) `loc_union` loc_buffer dst)) h0 h1 /\
           invariant h1 s /\
           footprint h1 s == footprint h0 s /\ (
 
           // Functional correctness
-          let s0 = g_hash (B.deref h0 s) h0 in
+          let s0 = g_traffic_secret (B.deref h0 s) in
           let open Spec.QUIC in
           let k = derive_secret i.hash_alg s0 label_key (Spec.AEAD.key_length i.aead_alg) in
           let iv = derive_secret i.hash_alg s0 label_iv 12 in
@@ -349,7 +353,7 @@ val decrypt: #i:G.erased index -> (
     (ensures fun h0 r h1 ->
       match r with
       | Success ->
-          B.(modifies (footprint_s (deref h0 s) `loc_union` loc_buffer packet) h0 h1) /\
+          B.(modifies (footprint_s h0 (deref h0 s) `loc_union` loc_buffer packet) h0 h1) /\
           invariant h1 s /\
           footprint h1 s == footprint h0 s /\ (
 
@@ -359,7 +363,7 @@ val decrypt: #i:G.erased index -> (
           let curr = g_packet_number (B.deref h1 s) h1 in
           curr == max prev (U64.v r.pn) /\ (
 
-          let s0 = g_hash (B.deref h0 s) h0 in
+          let s0 = g_traffic_secret (B.deref h0 s) in
           let k = Spec.QUIC.(derive_secret i.hash_alg s0 label_key (Spec.AEAD.key_length i.aead_alg)) in
           let iv = Spec.QUIC.(derive_secret i.hash_alg s0 label_iv 12) in
           let pne = Spec.QUIC.(derive_secret i.hash_alg s0 label_hp (ae_keysize i.aead_alg)) in
