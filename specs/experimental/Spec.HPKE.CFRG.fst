@@ -22,23 +22,31 @@ let pow2_35_less_than_pow2_125 : _:unit{pow2 32 * pow2 3 <= pow2 125 - 1} = asse
 
 /// Types
 
-type ciphersuite = DH.algorithm & AEAD.algorithm & a:Hash.algorithm{a == Hash.SHA2_256 \/ a == Hash.SHA2_512}
+let is_ciphersuite = function
+  | DH.DH_Curve25519, AEAD.AEAD_AES128_GCM,        Hash.SHA2_256
+  | DH.DH_Curve25519, AEAD.AEAD_Chacha20_Poly1305, Hash.SHA2_256
+  | DH.DH_Curve448,   AEAD.AEAD_AES256_GCM,        Hash.SHA2_512
+  | DH.DH_Curve448,   AEAD.AEAD_Chacha20_Poly1305, Hash.SHA2_512
+  | DH.DH_P256,       AEAD.AEAD_AES128_GCM,        Hash.SHA2_256
+  | DH.DH_P256,       AEAD.AEAD_Chacha20_Poly1305, Hash.SHA2_256 -> true
+  | _,_,_ -> false
+
+type ciphersuite = cs:(DH.algorithm & AEAD.algorithm & Hash.algorithm){is_ciphersuite cs}
+
 
 inline_for_extraction
 let size_cs_identifier: size_nat = 1
 
+
 val id_of_cs: cs:ciphersuite -> Tot (lbytes size_cs_identifier)
 let id_of_cs cs =
-  admit();
   match cs with
-  | DH.DH_Curve25519, AEAD.AEAD_AES128_GCM,        Hash.SHA2_256 -> create 1 (u8 0)
-  | DH.DH_Curve25519, AEAD.AEAD_AES128_GCM,        Hash.SHA2_512 -> create 1 (u8 1)
+  | DH.DH_Curve25519, AEAD.AEAD_AES128_GCM,        Hash.SHA2_256 -> create 1 (u8 1)
   | DH.DH_Curve25519, AEAD.AEAD_Chacha20_Poly1305, Hash.SHA2_256 -> create 1 (u8 2)
-  | DH.DH_Curve25519, AEAD.AEAD_Chacha20_Poly1305, Hash.SHA2_512 -> create 1 (u8 3)
-  | DH.DH_Curve448,   AEAD.AEAD_AES128_GCM,        Hash.SHA2_256 -> create 1 (u8 4)
-  | DH.DH_Curve448,   AEAD.AEAD_AES128_GCM,        Hash.SHA2_512 -> create 1 (u8 5)
-  | DH.DH_Curve448,   AEAD.AEAD_Chacha20_Poly1305, Hash.SHA2_256 -> create 1 (u8 6)
-  | DH.DH_Curve448,   AEAD.AEAD_Chacha20_Poly1305, Hash.SHA2_512 -> create 1 (u8 7)
+  | DH.DH_Curve448,   AEAD.AEAD_AES256_GCM,        Hash.SHA2_512 -> create 1 (u8 3)
+  | DH.DH_Curve448,   AEAD.AEAD_Chacha20_Poly1305, Hash.SHA2_512 -> create 1 (u8 4)
+  | DH.DH_P256,       AEAD.AEAD_AES128_GCM,        Hash.SHA2_256 -> create 1 (u8 5)
+  | DH.DH_P256,       AEAD.AEAD_Chacha20_Poly1305, Hash.SHA2_256 -> create 1 (u8 6)
 
 
 let curve_of_cs (cs:ciphersuite) : DH.algorithm =
@@ -81,29 +89,47 @@ let label_key : lbytes size_label_key = createL label_key_list
 /// Constants sizes
 
 inline_for_extraction
-let size_nonce (cs:ciphersuite): size_nat = AEAD.size_nonce (aead_of_cs cs)
+let size_aead_nonce (cs:ciphersuite): size_nat = AEAD.size_nonce (aead_of_cs cs)
 
 inline_for_extraction
-let size_key (cs:ciphersuite): size_nat = AEAD.size_key (aead_of_cs cs)
+let size_aead_key (cs:ciphersuite): size_nat = AEAD.size_key (aead_of_cs cs)
 
 inline_for_extraction
-let size_key_dh (cs:ciphersuite): size_nat = DH.size_key (curve_of_cs cs)
+let size_dh_key (cs:ciphersuite): size_nat = DH.size_key (curve_of_cs cs)
+
+inline_for_extraction
+let size_dh_public (cs:ciphersuite): size_nat = DH.size_public (curve_of_cs cs)
 
 inline_for_extraction
 let size_einfo: size_nat = 32
 
 inline_for_extraction
 let size_context (cs:ciphersuite): size_nat =
-  size_cs_identifier + 2 * size_key_dh cs + size_einfo
+  size_cs_identifier + 2 * size_dh_public cs + size_einfo
 
 /// Types
 
-type key_public_s (cs:ciphersuite) = lbytes (size_key_dh cs)
-type key_secret_s (cs:ciphersuite) = lbytes (size_key_dh cs)
-type key_s (cs:ciphersuite) = lbytes (size_key cs)
-type nonce_s (cs:ciphersuite) = lbytes (size_nonce cs)
+type key_dh_public_s (cs:ciphersuite) = lbytes (size_dh_public cs)
+type key_dh_secret_s (cs:ciphersuite) = lbytes (size_dh_key cs)
+type key_aead_s (cs:ciphersuite) = lbytes (size_aead_key cs)
+type nonce_aead_s (cs:ciphersuite) = lbytes (size_aead_nonce cs)
 
 
+
+val build_context:
+    cs:ciphersuite
+  -> key_dh_public_s cs
+  -> key_dh_public_s cs
+  -> lbytes (size_einfo) ->
+  Tot (lbytes (size_context cs))
+
+let build_context cs pkE pkR einfo =
+  let idcs: lbytes 1 = id_of_cs cs in
+  idcs @| pkE @| pkR @| einfo
+
+
+/// SetupI()
+///
 /// Input: ciphersuite, pkR, info
 ///
 ///    1. (skE, pkE) = GenerateKeyPair()
@@ -117,24 +143,26 @@ type nonce_s (cs:ciphersuite) = lbytes (size_nonce cs)
 
 val encap:
     cs: ciphersuite
-  -> skE: key_secret_s cs
-  -> pkR: key_public_s cs
+  -> skE: key_dh_secret_s cs
+  -> pkR: key_dh_public_s cs
   -> einfo: lbytes size_einfo ->
-  Tot (key_public_s cs & key_s cs & nonce_s cs)
+  Tot (key_dh_public_s cs & key_aead_s cs & nonce_aead_s cs)
 
 let encap cs skE pkR einfo =
   let pkE = DH.secret_to_public (curve_of_cs cs) skE in
   let zz = DH.scalarmult (curve_of_cs cs) skE pkR in
-  let nh0 = create (size_key_dh cs) (u8 0) in
+  let nh0 = create (size_dh_key cs) (u8 0) in
   let secret = HKDF.extract (hash_of_cs cs) nh0 zz in
-  let context: lbytes (size_context cs) = (id_of_cs cs) @| pkE @| pkR @| einfo in
+  let context: lbytes (size_context cs) = build_context cs pkE pkR einfo in
   let info_key: lbytes (size_context cs + size_label_key) = label_key @| context in
   let info_nonce: lbytes (size_context cs + size_label_nonce) = label_nonce @| context in
-  let keyIR = HKDF.expand (hash_of_cs cs) secret info_key (size_key cs) in
-  let nonceIR = HKDF.expand (hash_of_cs cs) secret info_nonce (size_nonce cs) in
+  let keyIR = HKDF.expand (hash_of_cs cs) secret info_key (size_aead_key cs) in
+  let nonceIR = HKDF.expand (hash_of_cs cs) secret info_nonce (size_aead_nonce cs) in
   pkE, keyIR, nonceIR
 
 
+/// SetupR()
+///
 /// Input: ciphersuite, pkE, skR, info
 ///
 ///    1. zz = DH(skR, pkE)
@@ -147,24 +175,26 @@ let encap cs skE pkR einfo =
 
 val decap:
     cs: ciphersuite
-  -> pkE: key_public_s cs
-  -> skR: key_secret_s cs
+  -> pkE: key_dh_public_s cs
+  -> skR: key_dh_secret_s cs
   -> einfo: lbytes size_einfo ->
-  Tot (key_s cs & nonce_s cs)
+  Tot (key_aead_s cs & nonce_aead_s cs)
 
 let decap cs pkE skR einfo =
   let pkR = DH.secret_to_public (curve_of_cs cs) skR in
-  let nh0 = create (size_key_dh cs) (u8 0) in
   let zz = DH.scalarmult (curve_of_cs cs) skR pkE in
+  let nh0 = create (size_dh_key cs) (u8 0) in
   let secret = HKDF.extract (hash_of_cs cs) nh0 zz in
-  let context: lbytes (size_context cs) = (id_of_cs cs) @| pkE @| pkR @| einfo in
+  let context: lbytes (size_context cs) = build_context cs pkE pkR einfo in
   let info_key: lbytes (size_context cs + size_label_key) = label_key @| context in
   let info_nonce: lbytes (size_context cs + size_label_nonce) = label_nonce @| context in
-  let keyIR = HKDF.expand (hash_of_cs cs) secret info_key (size_key cs) in
-  let nonceIR = HKDF.expand (hash_of_cs cs) secret info_nonce (size_nonce cs) in
+  let keyIR = HKDF.expand (hash_of_cs cs) secret info_key (size_aead_key cs) in
+  let nonceIR = HKDF.expand (hash_of_cs cs) secret info_nonce (size_aead_nonce cs) in
   keyIR, nonceIR
 
 
+/// Encrypt()
+///
 /// Input: ciphersuite, pkR, info, ad, pt
 ///
 ///    1. pkE, keyIR, nonceIR = SetupI(ciphersuite, pkR, info)
@@ -174,14 +204,14 @@ let decap cs pkE skR einfo =
 
 val encrypt:
     cs: ciphersuite
-  -> skE: key_secret_s cs
-  -> pkR: key_public_s cs
+  -> skE: key_dh_secret_s cs
+  -> pkR: key_dh_public_s cs
   -> info: lbytes size_einfo
   -> aad: bytes {length aad + AEAD.padlen (aead_of_cs cs) (length aad) <= max_size_t}
   -> pt: bytes {length pt <= max_size_t
            /\ length pt + AEAD.size_block (aead_of_cs cs) <= max_size_t
            /\ length pt + AEAD.padlen (aead_of_cs cs) (length pt) <= max_size_t} ->
-  Tot (bytes & key_public_s cs)
+  Tot (bytes & key_dh_public_s cs)
 
 let encrypt cs skE pkR info aad pt =
   let pkE, keyIR, nonceIR = encap cs skE pkR info in
@@ -189,6 +219,8 @@ let encrypt cs skE pkR info aad pt =
   ct, pkE
 
 
+/// Decrypt()
+///
 /// Input: ciphersuite, skR, pkE, info, ad, ct
 ///
 ///    1. keyIR, nonceIR = Decap(ciphersuite, pkE, pkR, info)
@@ -198,8 +230,8 @@ let encrypt cs skE pkR info aad pt =
 
 val decrypt:
     cs: ciphersuite
-  -> skR: key_secret_s cs
-  -> pkE: key_public_s cs
+  -> skR: key_dh_secret_s cs
+  -> pkE: key_dh_public_s cs
   -> info: lbytes size_einfo
   -> aad: bytes{length aad + AEAD.padlen (aead_of_cs cs) (length aad) <= max_size_t}
   -> ct: bytes{AEAD.size_tag (aead_of_cs cs) <= length ct
