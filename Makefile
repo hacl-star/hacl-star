@@ -666,7 +666,8 @@ BUNDLE_FLAGS	=\
   $(NACLBOX_BUNDLE) \
   $(MERKLE_BUNDLE) \
   $(WASMSUPPORT_BUNDLE) \
-  $(CTR_BUNDLE)
+  $(CTR_BUNDLE) \
+  $(QUIC_BUNDLE)
 
 DEFAULT_FLAGS = \
   $(HAND_WRITTEN_LIB_FLAGS) \
@@ -779,6 +780,7 @@ dist/mozilla/Makefile.basic: MERKLE_BUNDLE = -bundle MerkleTree.*
 dist/mozilla/Makefile.basic: CTR_BUNDLE =
 dist/mozilla/Makefile.basic: SHA3_BUNDLE = -bundle Hacl.SHA3
 dist/mozilla/Makefile.basic: HASH_BUNDLE = -bundle Hacl.Hash.*,Hacl.HKDF,Hacl.HMAC
+dist/mozilla/Makefile.basic: QUIC_BUNDLE = -bundle Impl.QUIC,Spec.QUIC,Cipher16,Spec.Cipher16
 dist/mozilla/Makefile.basic: \
   BUNDLE_FLAGS += \
     -bundle EverCrypt,EverCrypt.* \

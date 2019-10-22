@@ -2724,7 +2724,7 @@ let recompose_pow2_assoc (n:pos) (a:nat) : Lemma
   ()
 
 
-#push-options "--z3rlimit 30" // strange that F* has so much trouble completing this induction
+#push-options "--max_fuel 2 --initial_fuel 2 --max_ifuel 1 --initial_ifuel 1 --z3rlimit 60" // strange that F* has so much trouble completing this induction
 let rec lemma_propagate_pow_mod (a b n:nat) : Lemma
   (requires b > 0)
   (ensures (
