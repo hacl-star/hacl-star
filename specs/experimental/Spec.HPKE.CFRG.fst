@@ -124,14 +124,6 @@ inline_for_extraction
 let size_psk (cs:ciphersuite): size_nat = size_kdf cs
 
 
-
-(* inline_for_extraction *)
-(* let size_einfo: size_nat = 32 *)
-
-(* inline_for_extraction *)
-(* let size_context (cs:ciphersuite): size_nat = *)
-(*   size_cs_identifier + 2 * size_dh_public cs + size_einfo *)
-
 inline_for_extraction
 let max_pskID: size_nat = pow2 16 - 1
 
