@@ -117,28 +117,16 @@ let lemma_movbe_is_mov_bswap (dst src:operand64) (s:machine_state) :
   if valid_src_operand64_and_taint src s && valid_dst_operand64 dst s then (
     let src_v = eval_operand src s in
     let dst_movbe_v = T.reverse_bytes_nat64 src_v in
+    let dst_mov_v = eval_operand dst s_mov in
+    let dst_bswap_v = T.reverse_bytes_nat64 dst_mov_v in
     assert (s_movbe == update_operand64_preserve_flags'' dst dst_movbe_v s s);
     assert (s_mov == update_operand64_preserve_flags'' dst src_v s s);
     lemma_update_to_valid_destination_keeps_it_as_valid_src dst s src_v;
     assert (eval_operand dst s_mov == src_v);
     assert (valid_src_operand64_and_taint dst s_mov);
-    //
-    let Instr it oprs ann = bswap in
-    let InstrTypeRecord #outs #args #havoc_flags' i = it in
-    assert (havoc_flags' == PreserveFlags);
-    assert (i == ins_Bswap64);
-    let vs = instr_apply_eval_inouts outs outs args (instr_eval i) oprs s_mov in
-    let os = FStar.Option.mapTot (fun vs -> instr_write_outputs outs args vs oprs s_mov s_mov) vs in
-    assert (Some? vs);
-    assert (Some s_bswap == os);
-    if valid_dst_operand64 dst s_mov then (
-      let dst_mov_v = eval_operand dst s_mov in
-      let dst_bswap_v = T.reverse_bytes_nat64 dst_mov_v in
-      assert (s_bswap == update_operand64_preserve_flags'' dst dst_bswap_v s_mov s_mov);
-      admit ()
-    ) else (
-      admit ()
-    );
+    assert (s_bswap == update_operand64_preserve_flags'' dst dst_bswap_v s_mov s_mov);
+    assert (src_v == dst_mov_v);
+    assert (dst_movbe_v == dst_bswap_v);
     //
     admit ()
   ) else (
