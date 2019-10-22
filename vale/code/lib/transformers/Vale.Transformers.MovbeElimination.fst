@@ -47,21 +47,6 @@ and replace_movbe_in_codes (c:codes) : codes =
   | x :: xs ->
     replace_movbe_in_code x :: replace_movbe_in_codes xs
 
-let lemma_movbe_is_mov_bswap_ins (i:ins{Instr? i}) (s:machine_state) :
-  Lemma
-    (requires (
-        let Instr _ _ ann = i in
-        AnnotateMovbe64? ann))
-    (ensures (
-        let Instr _ oprs (AnnotateMovbe64 proof_of_movbe) = i in
-        let oprs:normal (instr_operands_t [out op64] [op64]) =
-          coerce_to_normal #(instr_operands_t [out op64] [op64]) oprs in
-        let (dst, (src, ())) = oprs in
-        machine_eval_ins (make_instr ins_Bswap64 dst) (
-          machine_eval_ins (make_instr ins_Mov64 dst src) s) ==
-        machine_eval_ins i s)) =
-  admit ()
-
 #push-options "--initial_fuel 3 --max_fuel 3 --initial_ifuel 0 --max_ifuel 0"
 let lemma_merge_mov_bswap dst src fuel (s:machine_state) :
   Lemma
@@ -123,22 +108,12 @@ let lemma_replace_movbe_specifically (i:ins{Instr? i}) (fuel:nat) (s:machine_sta
   assert_norm (Some? s2_opt); (* OBSERVE *)
   let Some s2 = s2_opt in
   let s_a = {s with ms_trace = []} in
-  lemma_movbe_is_mov_bswap_ins ins s;
   lemma_merge_mov_bswap dst src fuel s;
-  admit ();
-  // let ob1 = ins_obs ins s in
-  // assert (s1 == {machine_eval_ins ins s_a with ms_trace = ob1 @ s.ms_trace});
-  // assert (s1 == {machine_eval_ins (make_instr ins_Bswap64 dst) (
-  //     machine_eval_ins (make_instr ins_Mov64 dst src) s_a) with ms_trace = ob1 @ s.ms_trace});
-  // let ob21 = ins_obs ins_mov s in
-  // let s_b = {machine_eval_ins ins_mov s_a with ms_trace = ob21 @ s.ms_trace} in
-  // let ob22 = ins_obs ins_bswap s_b in
-  // let s_c = {s_b with ms_trace = []} in
-  // assert (s_c == machine_eval_ins ins_mov s_a);
-  // let s_d = {machine_eval_ins ins_bswap s_c with ms_trace = ob22 @ s_b.ms_trace} in
-  // admit ();
-  // // assert_norm (s_d == s2);
-  // admit () (* TODO:FIXME *)
+  let s1_a = {s1 with ms_trace = []} in
+  let s2_a = {s2 with ms_trace = []} in
+  assert (machine_eval_ins ins_bswap (machine_eval_ins ins_mov s_a) == s2_a);
+  assert (machine_eval_ins ins s_a == s1_a);
+  assume (equiv_states s1_a s2_a);
   ()
 #pop-options
 
