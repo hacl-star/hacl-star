@@ -31,6 +31,7 @@ let lemma_hash_lengths (a:ha)
   assert_norm(pow2 61 < pow2 125)
 #pop-options
 
+inline_for_extraction
 let label_key_l: List.Tot.llist U8.t 3 =
   [@inline_let]
   let l = [ 0x6buy; 0x65uy; 0x79uy ] in
@@ -40,6 +41,7 @@ let label_key_l: List.Tot.llist U8.t 3 =
 let label_key =
   Seq.seq_of_list label_key_l
 
+inline_for_extraction
 let label_iv_l: List.Tot.llist U8.t 2 =
   [@inline_let]
   let l = [ 0x69uy; 0x76uy ] in
@@ -49,6 +51,7 @@ let label_iv_l: List.Tot.llist U8.t 2 =
 let label_iv =
   Seq.seq_of_list label_iv_l
 
+inline_for_extraction
 let label_hp_l: List.Tot.llist U8.t 2 =
   [@inline_let]
   let l = [ 0x68uy; 0x70uy ] in
