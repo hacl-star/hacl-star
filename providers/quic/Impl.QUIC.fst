@@ -233,6 +233,7 @@ let label_key = LowStar.ImmutableBuffer.igcmalloc_of_list HS.root Spec.QUIC.labe
 let label_iv = LowStar.ImmutableBuffer.igcmalloc_of_list HS.root Spec.QUIC.label_iv_l
 let label_hp = LowStar.ImmutableBuffer.igcmalloc_of_list HS.root Spec.QUIC.label_hp_l
 
+#set-options "--z3rlimit 200"
 let create_in i r dst initial_pn traffic_secret =
   LowStar.ImmutableBuffer.recall label_key;
   LowStar.ImmutableBuffer.recall_contents label_key Spec.QUIC.label_key;
@@ -241,85 +242,98 @@ let create_in i r dst initial_pn traffic_secret =
   LowStar.ImmutableBuffer.recall label_hp;
   LowStar.ImmutableBuffer.recall_contents label_hp Spec.QUIC.label_hp;
   (**) let h0 = ST.get () in
+  [@inline_let]
+  let e_traffic_secret: G.erased (Spec.Hash.Definitions.bytes_hash i.hash_alg) =
+    G.hide (B.as_seq h0 traffic_secret)
+  in
+  [@inline_let]
+  let e_initial_pn: G.erased Spec.QUIC.nat62 = G.hide (U64.v initial_pn) in
+  [@inline_let]
+  let hash_alg = i.hash_alg in
+  [@inline_let]
+  let aead_alg = i.aead_alg in
+
   push_frame ();
   (**) let h1 = ST.get () in
 
-  let aead_key = B.alloca 0uy (key_len32 i.aead_alg) in
-  derive_secret i.hash_alg aead_key (key_len i.aead_alg) traffic_secret label_key 3uy;
+  let aead_key = B.alloca 0uy (key_len32 aead_alg) in
+  derive_secret hash_alg aead_key (key_len aead_alg) traffic_secret label_key 3uy;
 
   (**) let h2 = ST.get () in
-  (**) assert B.(modifies (loc_union (loc_all_regions_from false (HS.get_tip h1))
-    (B.loc_buffer dst)) h1 h2);
+  (**) B.(modifies_loc_includes (loc_unused_in h1) h1 h2 (loc_buffer aead_key));
 
-  let aead_state: B.pointer (B.pointer_or_null (AEAD.state_s i.aead_alg)) = B.alloca B.null 1ul in
-  let ret = AEAD.create_in #i.aead_alg r aead_state aead_key in
+  let aead_state: B.pointer (B.pointer_or_null (AEAD.state_s aead_alg)) = B.alloca B.null 1ul in
+  let ret = AEAD.create_in #aead_alg r aead_state aead_key in
+
+  (**) let h3 = ST.get () in
+  (**) B.(modifies_loc_includes (loc_unused_in h1) h2 h3 (loc_buffer aead_state));
+  (**) B.(modifies_trans (loc_unused_in h1) h1 h2 (loc_unused_in h1) h3);
   match ret with
   | UnsupportedAlgorithm ->
       pop_frame ();
       UnsupportedAlgorithm
 
   | Success ->
+      // JP: there is something difficult to prove here... confused.
+      let aead_state: AEAD.state aead_alg = !*aead_state in
+      (**) assert (AEAD.invariant h3 aead_state);
+
       let iv = B.malloc r 0uy 12ul in
-      derive_secret i.hash_alg iv 12uy traffic_secret label_iv 2uy;
-
-      (**) let h3 = ST.get () in
-      (**) B.modifies_only_not_unused_in B.loc_none h1 h3;
-      (**) assert B.(modifies (loc_union (loc_all_regions_from false (HS.get_tip h1))
-        (B.loc_buffer dst)) h1 h3);
-
-      let hp_key = B.malloc r 0uy (key_len32 i.aead_alg) in
-      derive_secret i.hash_alg hp_key (key_len i.aead_alg) traffic_secret label_hp 2uy;
-
       (**) let h4 = ST.get () in
-      (**) B.modifies_only_not_unused_in B.loc_none h1 h4;
-      (**) assert B.(modifies (loc_union (loc_all_regions_from false (HS.get_tip h1))
-        (B.loc_buffer dst)) h1 h4);
+      (**) B.(modifies_loc_includes (loc_buffer dst) h3 h4 loc_none);
+
+      let hp_key = B.malloc r 0uy (key_len32 aead_alg) in
+      (**) let h5 = ST.get () in
+      (**) B.(modifies_loc_includes (loc_buffer dst) h4 h5 loc_none);
 
       let pn = B.malloc r initial_pn 1ul in
+      (**) let h6 = ST.get () in
+      (**) B.(modifies_loc_includes (loc_buffer dst) h5 h6 loc_none);
 
-      (**) let h5 = ST.get () in
-      (**) B.modifies_only_not_unused_in B.loc_none h1 h5;
-      (**) assert B.(modifies (loc_union (loc_all_regions_from false (HS.get_tip h1))
-        (B.loc_buffer dst)) h1 h5);
+      (**) assert (B.length hp_key = Spec.QUIC.ae_keysize aead_alg);
+      let s: state_s i = State #i
+        hash_alg aead_alg e_traffic_secret
+        e_initial_pn aead_state iv hp_key pn
+      in
+      let s:B.pointer_or_null (state_s i) = B.malloc r s 1ul in
+      (**) let h7 = ST.get () in
+      (**) B.(modifies_loc_includes (loc_buffer dst) h6 h7 loc_none);
 
-      let s:B.pointer_or_null (state_s i) = B.malloc r (State #i
-        i.hash_alg i.aead_alg (G.hide (B.as_seq h0 traffic_secret))
-        (G.hide (U64.v initial_pn)) !*aead_state iv hp_key pn
-      ) 1ul in
+      derive_secret hash_alg iv 12uy traffic_secret label_iv 2uy;
+      (**) let h8 = ST.get () in
+      (**) B.(modifies_loc_includes (loc_unused_in h1) h7 h8 (loc_buffer iv));
+
+      derive_secret hash_alg hp_key (key_len aead_alg) traffic_secret label_hp 2uy;
+      (**) let h9 = ST.get () in
+      (**) B.(modifies_loc_includes (loc_unused_in h1) h8 h9 (loc_buffer hp_key));
+      (**) B.(modifies_trans (loc_unused_in h1) h7 h8 (loc_unused_in h1) h9);
+
       dst *= s;
 
-      (**) let h6 = ST.get () in
-      (**) assert B.(modifies (loc_buffer dst) h5 h6);
-      (**) B.(modifies_only_not_unused_in (loc_buffer dst) h1 h6);
-      (**) assert B.(modifies (loc_union (loc_all_regions_from false (HS.get_tip h1))
-        (B.loc_buffer dst)) h1 h6);
+      (**) let h10 = ST.get () in
+      (**) B.(modifies_trans (loc_unused_in h1) h7 h9 (loc_buffer dst) h10);
+      (**) B.(modifies_trans (loc_unused_in h1) h1 h3 (loc_buffer dst) h7);
+      (**) B.(modifies_trans (loc_buffer dst) h3 h7
+      (**)   (loc_unused_in h1 `loc_union` loc_buffer dst) h10);
+      (**) B.(modifies_only_not_unused_in (loc_buffer dst) h1 h10);
+      (**) B.(modifies_only_not_unused_in (loc_buffer dst) h3 h10);
+      (**) B.fresh_frame_modifies h0 h1;
+      (**) B.(modifies_trans loc_none h0 h1 (loc_buffer dst) h10);
 
+      // TODO: everything goes through well up to here; and we know:
+      //   B.modifies (loc_buffer dst) h0 h10
+      // NOTE: how to conclude efficiently the same thing with h11?
       pop_frame ();
-      (**) let h7 = ST.get () in
-      (**) B.modifies_fresh_frame_popped h0 h1 (B.loc_buffer dst) h6 h7;
-      (**) assert (ST.equal_stack_domains h0 h7);
-      admit ()
-
-      (
-      let open Spec.QUIC in
-      let h = h7 in
-      let State hash_alg aead_alg traffic_secret initial_pn aead_state iv hp_key pn = B.deref h s in
-      assert (
-        AEAD.invariant h aead_state /\
-        B.(all_live h [ buf iv; buf hp_key; buf pn ])  /\
-        B.(all_disjoint [
-          AEAD.footprint h aead_state; loc_buffer iv; loc_buffer hp_key; loc_buffer pn ]) /\
-        // JP: automatic insertion of reveal does not work here
-        G.reveal initial_pn <= U64.v (B.deref h pn))); admit ()
-        AEAD.as_kv (B.deref h aead_state) ==
-          derive_secret i.hash_alg (G.reveal traffic_secret) label_key (Spec.AEAD.key_length aead_alg) /\
-        B.as_seq h iv ==
-          derive_secret i.hash_alg (G.reveal traffic_secret) label_iv 12 /\
-        B.as_seq h hp_key ==
-          derive_secret i.hash_alg (G.reveal traffic_secret) label_hp (Spec.QUIC.ae_keysize aead_alg)
-        )
-      );
-
-      admit ()
+      (**) let h11 = ST.get () in
+      (**) B.popped_modifies h10 h11;
+      (**) assert B.(modifies (loc_buffer dst) h0 h11);
+      (**) assert (ST.equal_stack_domains h0 h11);
+      (**) AEAD.frame_invariant #aead_alg (B.loc_buffer dst) aead_state h3 h11;
 
       Success
+
+let encrypt #i s dst h plain plain_len pn_len =
+  admit ()
+
+let decrypt #i s dst packet len cid_len =
+  admit ()
