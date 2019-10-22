@@ -68,7 +68,7 @@ let derive_secret a prk label len =
   assert_norm(452 < pow2 61);
   HKDF.expand a prk info len
 
-#push-options "--initial_ifuel 2 --max_ifuel 2"
+#push-options "--initial_ifuel 2 --max_ifuel 2 --z3rlimit 50"
 let encode_varint n =
   let open FStar.Endianness in
   if n < pow2 6 then (
@@ -148,6 +148,7 @@ private let lemma_pow2_div (a:nat) (b:nat) (k:nat)
   pow2_minus b k;
   pow2_minus a k
 
+#restart-solver
 #push-options "--z3rlimit 60"
 private let lemma_divrem3 (k:nat) (a:nat) (b:nat) (n:nat)
   : Lemma (requires a >= k /\ b >= k /\ n < pow2 k)
@@ -546,6 +547,7 @@ let lemma_of_bitfield2_inj (b0 b1 b2 b3:bool) : Lemma
   lemma_bitfield_inv [b2;b3]
 
 
+#push-options "--z3rlimit 200"
 let format_header p npn =
   let open FStar.Endianness in
   let pn_len = S.length npn - 1 in
@@ -563,6 +565,7 @@ let format_header p npn =
     let clen = S.create 1 U8.(16uy *^ uint_to_t dcil +^ uint_to_t scil) in
     S.((S.create 1 flag) @| (n_to_be 4 version) @| clen
       @| dcid @| scid @| (encode_varint plain_len) @| npn)
+#pop-options
 
 
 // lemma justifying that headers have the same size as their
@@ -659,6 +662,7 @@ let parse_header_flag (b:bytes) : option flag =
   | _ -> None
 
 
+#push-options "--z3rlimit 200"
 let lemma_parse_header_flag_correct h npn c : Lemma
   (match parse_header_flag S.(format_header h npn @| c) with
    | None -> False
@@ -680,6 +684,7 @@ let lemma_parse_header_flag_correct h npn c : Lemma
     assert_norm (List.Tot.length l = 8);
     assert (S.index b 0 = of_bitfield8 l);
     lemma_bitfield8 l
+#pop-options
 
 
 let lemma_parse_short_header_flag_correct h npn c : Lemma
@@ -804,6 +809,7 @@ let lemma_parse_flag_pnlen (l:bitfield8) : Lemma
   ()
 
 // an additional lemma in cases we want to extract only pn_len
+#push-options "--z3rlimit 200"
 let lemma_parse_header_pnlen h npn : Lemma
   (let res = format_header h npn in
   U8.v (S.index res 0) % 4 = S.length npn - 1) =
@@ -828,6 +834,7 @@ let lemma_parse_header_pnlen h npn : Lemma
     lemma_bitfield 8 (U8.v (S.index res 0));
     lemma_parse_flag_pnlen l;
     lemma_bitfield2 pn_len
+#pop-options
 
 
 /// parsing of the cid in short headers
@@ -1805,6 +1812,8 @@ let lemma_header_type_128 p pn_len npn : Lemma
 
 
 // correctness of the condition to check whether a header is short
+#restart-solver
+#set-options "--z3rlimit 200"
 let lemma_header_encrypt_type_short a hpk h npn c : Lemma
   (requires (
     let packet = header_encrypt a hpk h npn c in
@@ -1894,6 +1903,7 @@ let lemma_header_encrypt_type_long a hpk h npn c : Lemma
     lemma_bitfield8_128 (S.index (format_header h npn) 0);
     lemma_header_type_128 h pn_len npn
   end
+#pop-options
 
 
 
@@ -1934,6 +1944,8 @@ let lemma_arithmetic3 (a b c:int) : Lemma
 
 
 
+#restart-solver
+#push-options "--z3rlimit 100 --max_fuel 2 --initial_fuel 2 --max_ifuel 1 --initial_ifuel 1"
 let lemma_header_encryption_short_sample a k h npn c : Lemma
   (requires Short? h)
   (ensures (
@@ -1976,10 +1988,6 @@ let lemma_header_encryption_short_sample a k h npn c : Lemma
   lemma_arithmetic2 (S.length (format_header h npn)) 3 pn_len 16;
   assert (so+16 = S.length (format_header h npn) + (19-pn_len));
   append_slices3 (format_header h npn) c
-
-
-
-
 
 let lemma_header_encryption_correct_short a k h (npn:npn) c : Lemma
   (requires Short? h)
@@ -2032,7 +2040,7 @@ let lemma_header_encryption_correct_short a k h (npn:npn) c : Lemma
     // parsing the header
     lemma_header_parsing_correct h npn c
 
-
+#pop-options
 
 
 /// correctness of decryption for long headers
@@ -2145,12 +2153,6 @@ let lemma_long_header_plen_offset (h:header) (npn:npn) (c:cbytes) (b:bytes) : Le
   assert (S.equal (S.slice b pre_offset offset) (encode_varint (Long?.len h)));
   lemma_varint (Long?.len h) (S.slice b offset (S.length b));
   slice_trans b pre_offset offset (S.length b)
-#pop-options
-
-
-
-
-
 
 let lemma_header_encryption_long_sample a k h (npn:npn) c : Lemma
   (requires Long? h)
@@ -2207,9 +2209,6 @@ let lemma_header_encryption_long_sample a k h (npn:npn) c : Lemma
       end
     end
 
-
-
-
 let lemma_header_encryption_correct_long a k (h:header) (npn:npn) (c:cbytes{Long? h ==> S.length c = Long?.len h}) : Lemma
   (requires Long? h)
   (ensures header_encryption_correct a k h npn c) =
@@ -2257,7 +2256,7 @@ let lemma_header_encryption_correct_long a k (h:header) (npn:npn) (c:cbytes{Long
     // parsing the header
     lemma_header_parsing_correct h npn c
 
-
+#pop-options
 
 
 let lemma_header_encryption_correct a k h npn c : Lemma
@@ -2745,6 +2744,7 @@ let rec lemma_propagate_pow_mod (a b n:nat) : Lemma
 #pop-options
 
 
+#restart-solver
 let lemma_modulo_shift_byte (a:nat) (i:pos) : Lemma
   (let open FStar.Mul in
   (pow2 8 * a) % (pow2 (8*i)) = pow2 8 * (a % pow2 (8*(i-1)))) =
@@ -2795,6 +2795,7 @@ let rec lemma_correctness_slice_be_to_n (b:bytes) (i:nat) : Lemma
 
 /// gathering all ingredients into a complete proof
 
+#set-options "--z3rlimit 100"
 let lemma_encrypt_correct a k siv hpk pn_len pn last h p =
 
   // computation of encryption
