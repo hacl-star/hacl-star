@@ -97,7 +97,7 @@ let lemma_update_to_valid_destination_keeps_it_as_valid_src (o:operand64) (s:mac
   Vale.Def.Opaque_s.reveal_opaque get_heap_val64_def
 #pop-options
 
-#push-options "--z3rlimit 10 --initial_fuel 0 --max_fuel 8 --initial_ifuel 0 --max_ifuel 2"
+#push-options "--z3rlimit 10 --initial_fuel 0 --max_fuel 0 --initial_ifuel 1 --max_ifuel 1"
 let lemma_double_update (dst:operand64) (s0 s1 s2 s3:machine_state) (v v_fin:nat64) :
   Lemma
     (requires (
@@ -114,9 +114,16 @@ let lemma_double_update (dst:operand64) (s0 s1 s2 s3:machine_state) (v v_fin:nat
     FStar.Pervasives.reveal_opaque (`%valid_addr64) valid_addr64;
     Vale.Def.Opaque_s.reveal_opaque update_heap64_def;
     let ptr = eval_maddr m s0 in
-    admit ()
-  | _ ->
-    admit ()
+    if valid_addr64 ptr (H.heap_get s0.ms_heap) then (
+      assert (Map.equal s2.ms_memTaint s3.ms_memTaint);
+      assert (Map.equal (H.heap_get s2.ms_heap) (H.heap_get s3.ms_heap));
+      assume (s2.ms_heap == s3.ms_heap) // TODO: HOW?!
+    ) else ()
+  | OStack (m, t) ->
+    FStar.Pervasives.reveal_opaque (`%valid_addr64) valid_addr64;
+    Vale.Def.Opaque_s.reveal_opaque update_heap64_def;
+    let ptr = eval_maddr m s0 in
+    assert (equiv_states_ext s2 s3) (* OBSERVE *)
 #pop-options
 
 #push-options "--initial_fuel 2 --max_fuel 2 --initial_ifuel 0 --max_ifuel 0"
