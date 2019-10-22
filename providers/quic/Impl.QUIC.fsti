@@ -27,7 +27,7 @@ unfold noextract
 let hash_alg = Spec.Hash.Definitions.hash_alg
 
 unfold noextract
-let aead_alg = Spec.AEAD.alg
+let aead_alg = Spec.Agile.AEAD.alg
 
 unfold noextract
 let lbytes = Spec.QUIC.lbytes
@@ -283,7 +283,7 @@ val encrypt: #i:G.erased index -> (
       invariant h0 s /\
 
       incrementable s h0 /\ (
-      let clen = U32.v plain_len + Spec.AEAD.tag_length i.aead_alg in
+      let clen = U32.v plain_len + Spec.Agile.AEAD.tag_length i.aead_alg in
       let len = clen + Spec.QUIC.header_len (g_header h h0) (U8.v pn_len) in
       (Long? h ==> U32.v (Long?.plain_len h) = clen) /\
       B.length dst == len
@@ -299,7 +299,7 @@ val encrypt: #i:G.erased index -> (
           // Functional correctness
           let s0 = g_traffic_secret (B.deref h0 s) in
           let open Spec.QUIC in
-          let k = derive_secret i.hash_alg s0 label_key (Spec.AEAD.key_length i.aead_alg) in
+          let k = derive_secret i.hash_alg s0 label_key (Spec.Agile.AEAD.key_length i.aead_alg) in
           let iv = derive_secret i.hash_alg s0 label_iv 12 in
           let pne = derive_secret i.hash_alg s0 label_hp (ae_keysize i.aead_alg) in
           let plain: pbytes = B.as_seq h0 plain in
@@ -364,7 +364,7 @@ val decrypt: #i:G.erased index -> (
           curr == max prev (U64.v r.pn) /\ (
 
           let s0 = g_traffic_secret (B.deref h0 s) in
-          let k = Spec.QUIC.(derive_secret i.hash_alg s0 label_key (Spec.AEAD.key_length i.aead_alg)) in
+          let k = Spec.QUIC.(derive_secret i.hash_alg s0 label_key (Spec.Agile.AEAD.key_length i.aead_alg)) in
           let iv = Spec.QUIC.(derive_secret i.hash_alg s0 label_iv 12) in
           let pne = Spec.QUIC.(derive_secret i.hash_alg s0 label_hp (ae_keysize i.aead_alg)) in
           let r = B.deref h1 dst in

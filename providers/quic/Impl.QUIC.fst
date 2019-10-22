@@ -78,7 +78,7 @@ let invariant_s #i h s =
   // JP: automatic insertion of reveal does not work here
   G.reveal initial_pn <= U64.v (B.deref h pn) /\
   AEAD.as_kv (B.deref h aead_state) ==
-    derive_secret i.hash_alg (G.reveal traffic_secret) label_key (Spec.AEAD.key_length aead_alg) /\
+    derive_secret i.hash_alg (G.reveal traffic_secret) label_key (Spec.Agile.AEAD.key_length aead_alg) /\
   B.as_seq h iv ==
     derive_secret i.hash_alg (G.reveal traffic_secret) label_iv 12 /\
   B.as_seq h hp_key ==
@@ -213,15 +213,15 @@ let derive_secret a dst dst_len secret label label_len =
   (**)     z lb llen Spec.QUIC.prefix (B.as_seq h0 label) z
   (**) );
   (**) hash_is_keysized_ a;
-  HKDF.hkdf_expand a dst secret (Hacl.Hash.Definitions.hash_len a) info info_len dst_len32;
+  HKDF.expand a dst secret (Hacl.Hash.Definitions.hash_len a) info info_len dst_len32;
   (**) let h3 = ST.get () in
   pop_frame ();
   (**) let h4 = ST.get () in
   (**) B.modifies_fresh_frame_popped h0 h1 (B.loc_buffer dst) h3 h4;
   (**) assert (ST.equal_domains h0 h4)
 
-let key_len (a: Spec.QUIC.ea): x:U8.t { U8.v x = Spec.AEAD.key_length a } =
-  let open Spec.AEAD in
+let key_len (a: Spec.QUIC.ea): x:U8.t { U8.v x = Spec.Agile.AEAD.key_length a } =
+  let open Spec.Agile.AEAD in
   match a with
   | AES128_GCM -> 16uy
   | AES256_GCM -> 32uy

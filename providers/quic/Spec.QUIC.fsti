@@ -25,8 +25,8 @@ type lbytes (n:nat) = b:bytes{S.length b = n}
 
 // Move from Hashing.Spec to Spec.Hash?
 let keysized (a:ha) (l:nat) =
-  l < HD.max_input_length a /\ l + HD.block_length a < pow2 32
-let hashable (a:ha) (l:nat) = l < HD.max_input_length a
+  l <= HD.max_input_length a /\ l + HD.block_length a < pow2 32
+let hashable (a:ha) (l:nat) = l <= HD.max_input_length a
 
 // AEAD plain and ciphertext. We want to guarantee that regardless
 // of the header size (max is 54), the neader + ciphertext + tag fits in a buffer
@@ -63,13 +63,14 @@ val label_hp: lbytes 2
 
 val derive_secret:
   a: ha ->
-  prk: bytes ->
+  prk:Spec.Hash.Definitions.bytes_hash a ->
   label: bytes ->
   len: nat ->
   Pure (lbytes len)
   (requires len <= 255 /\
     S.length label <= 244 /\
-    keysized a (S.length prk))
+    keysized a (S.length prk)
+    )
   (ensures fun out -> True)
 
 type nat2 = n:nat{n < 4}
