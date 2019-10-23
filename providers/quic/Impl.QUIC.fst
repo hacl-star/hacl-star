@@ -333,7 +333,166 @@ let create_in i r dst initial_pn traffic_secret =
 
       Success
 
+val xor_inplace (dst src: B.buffer U8.t) (len: U32.t { B.length dst = U32.v len }):
+  Stack unit
+    (requires fun h0 ->
+      B.(all_live h0 [ buf dst; buf src ]) /\
+      B.disjoint dst src /\
+      B.length dst = B.length src)
+    (ensures fun h0 _ h1 ->
+      B.(modifies (loc_buffer dst) h0 h1) /\
+      B.as_seq h1 dst `S.equal` Spec.QUIC.xor_inplace (B.as_seq h0 dst) (B.as_seq h0 src) 0)
+
+let lemma_slice s (i: nat { i <= S.length s }): Lemma
+  (ensures (s `S.equal` S.append (S.slice s 0 i) (S.slice s i (S.length s))))
+=
+  ()
+
+#set-options "--max_fuel 1 --z3rlimit 100"
+let rec pointwise_upd (#a: eqtype) f b1 b2 i pos (x: a): Lemma
+  (requires (S.length b2 + pos <= S.length b1 /\ i < pos))
+  (ensures (S.upd (Spec.QUIC.pointwise_op f b1 b2 pos) i x `S.equal`
+    Spec.QUIC.pointwise_op f (S.upd b1 i x) b2 pos))
+  (decreases (S.length b2))
+=
+  calc (S.equal) {
+    Spec.QUIC.pointwise_op f (S.upd b1 i x) b2 pos;
+  (S.equal) { lemma_slice (S.upd b1 i x) (i + 1) }
+    Spec.QUIC.pointwise_op f
+      S.(slice (S.upd b1 i x) 0 (i + 1) @| S.slice (S.upd b1 i x) (i + 1) (S.length b1))
+      b2 pos;
+  (S.equal) { }
+    Spec.QUIC.pointwise_op f
+      S.(slice (S.upd b1 i x) 0 (i + 1) @| S.slice b1 (i + 1) (S.length b1))
+      b2 pos;
+  (S.equal) {
+    Spec.QUIC.pointwise_op_suff f
+      (S.slice (S.upd b1 i x) 0 (i + 1))
+      (S.slice b1 (i + 1) (S.length b1)) b2 pos
+  }
+    S.slice (S.upd b1 i x) 0 (i + 1) `S.append`
+    Spec.QUIC.pointwise_op f
+      (S.slice b1 (i + 1) (S.length b1))
+      b2 (pos - (i + 1));
+  (S.equal) { }
+    S.upd (S.slice b1 0 (i + 1)) i x `S.append`
+    Spec.QUIC.pointwise_op f
+      (S.slice b1 (i + 1) (S.length b1))
+      b2 (pos - (i + 1));
+  (S.equal) { }
+    S.upd (S.slice b1 0 (i + 1) `S.append`
+    Spec.QUIC.pointwise_op f
+      (S.slice b1 (i + 1) (S.length b1))
+      b2 (pos - (i + 1))
+    ) i x;
+  (S.equal) {
+    Spec.QUIC.pointwise_op_suff f
+      (S.slice b1 0 (i + 1))
+      (S.slice b1 (i + 1) (S.length b1)) b2 pos
+  }
+    S.upd (
+      Spec.QUIC.pointwise_op f
+      (S.slice b1 0 (i + 1) `S.append` S.slice b1 (i + 1) (S.length b1))
+      b2 pos
+    ) i x;
+  (S.equal) { lemma_slice b1 (i + 1) }
+    S.upd (Spec.QUIC.pointwise_op f b1 b2 pos) i x;
+  };
+  ()
+
+#push-options "--z3rlimit 50"
+let rec lemma_xor_inplace0 (s1 s2: S.seq U8.t) (i: nat): Lemma
+  (requires (
+    let l = S.length s1 in
+    S.length s2 = l - i /\ i <= S.length s1))
+  (ensures (
+    let l = S.length s1 in
+    Spec.Loops.seq_map2 U8.logxor (S.slice s1 i l) s2 `S.equal`
+    S.slice (Spec.QUIC.xor_inplace s1 s2 i) i l))
+  (decreases (S.length s2))
+=
+  if S.length s2 = 0 then
+    ()
+  else
+    let l = S.length s1 in
+    let s2l = S.slice s2 0 1 in
+    let s2r = S.slice s2 1 (S.length s2) in
+    let s1p = S.slice s1 0 i in
+    let s1l = S.slice s1 i (i + 1) in
+    let s1r = S.slice s1 (i + 1) l in
+    assert S.(s2 `equal` (s2l @| s2r));
+    assert S.(s1 `equal` (s1p @| s1l @| s1r));
+    assert (i < S.length s1);
+    assert (i < S.length (Spec.QUIC.xor_inplace s1 s2 i));
+    calc (S.equal) {
+      Spec.Loops.seq_map2 U8.logxor (S.slice s1 i l) s2;
+    (S.equal) {}
+      S.cons (U8.logxor (S.head (S.slice s1 i l)) (S.head s2))
+        (Spec.Loops.seq_map2 U8.logxor (S.tail (S.slice s1 i l)) (S.tail s2));
+    (S.equal) {}
+      S.cons (U8.logxor (S.head (S.slice s1 i l)) (S.head s2))
+        (Spec.Loops.seq_map2 U8.logxor (S.slice s1 (i + 1) l) (S.tail s2));
+    (S.equal) { lemma_xor_inplace0 s1 (S.slice s2 1 (S.length s2)) (i + 1) }
+      S.cons (U8.logxor (S.head (S.slice s1 i l)) (S.head s2))
+        (S.slice (Spec.QUIC.xor_inplace s1 (S.tail s2) (i + 1)) (i + 1) l);
+    (S.equal) { }
+      S.cons (U8.logxor (S.head (S.slice s1 i l)) (S.head s2))
+        (S.slice (Spec.QUIC.pointwise_op U8.logxor s1 (S.tail s2) (i + 1)) (i + 1) l);
+    (S.equal) { }
+      S.slice (
+        S.upd (Spec.QUIC.pointwise_op U8.logxor s1 (S.tail s2) (i + 1))
+          i
+          (U8.logxor (S.head (S.slice s1 i l)) (S.head s2)))
+        i
+        l;
+    (S.equal) { }
+      S.slice (
+        S.upd (Spec.QUIC.pointwise_op U8.logxor s1 (S.slice s2 1 (S.length s2)) (i + 1))
+          i
+          (U8.logxor (S.head (S.slice s1 i l)) (S.head s2)))
+        i
+        l;
+    (S.equal) {
+      pointwise_upd U8.logxor s1 (S.slice s2 1 (S.length s2)) i (i + 1)
+        (U8.logxor (S.head (S.slice s1 i l)) (S.head s2))
+    }
+      S.slice
+        (Spec.QUIC.pointwise_op U8.logxor
+          (S.upd s1 i (U8.logxor (S.head (S.slice s1 i l)) (S.head s2)))
+          (S.slice s2 1 (S.length s2))
+          (i + 1))
+        i l;
+
+    };
+    ()
+#pop-options
+
+let lemma_xor_inplace (s1 s2: S.seq U8.t): Lemma
+  (requires (S.length s1 = S.length s2))
+  (ensures (
+    let l = S.length s1 in
+    Spec.Loops.seq_map2 U8.logxor s1 s2 `S.equal`
+    Spec.QUIC.xor_inplace s1 s2 0))
+=
+  lemma_xor_inplace0 s1 s2 0
+
+let xor_inplace dst src len =
+  let h0 = ST.get () in
+  C.Loops.in_place_map2 dst src len U8.logxor;
+  lemma_xor_inplace (B.as_seq h0 dst) (B.as_seq h0 src)
+
 let encrypt #i s dst h plain plain_len pn_len =
+  let State hash_alg aead_alg e_traffic_secret e_initial_pn aead_state iv hp_key pn = !*s in
+  (**) let h0 = ST.get () in
+  assert (
+    let s0 = g_traffic_secret (B.deref h0 s) in
+    let open Spec.QUIC in
+    let k = derive_secret i.hash_alg s0 label_key (Spec.Agile.AEAD.key_length i.aead_alg) in
+    let iv_seq = derive_secret i.hash_alg s0 label_iv 12 in
+    let hp_key_seq = derive_secret i.hash_alg s0 label_hp (ae_keysize i.aead_alg) in
+    AEAD.as_kv (B.deref h0 aead_state) `S.equal` k /\
+    B.as_seq h0 iv `S.equal` iv_seq /\
+    B.as_seq h0 hp_key `S.equal` hp_key_seq);
   admit ()
 
 let decrypt #i s dst packet len cid_len =
