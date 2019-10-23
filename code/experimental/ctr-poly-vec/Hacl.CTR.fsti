@@ -90,12 +90,3 @@ val kb_v_i: #w:width_t -> ctr:counter{w * ctr <= max_size_t} -> st_v0:state_v w 
 
 val kb_equiv_lemma: #w:width_t -> k:key -> n:nonce -> ctr0:counter -> ctr:counter{w * (ctr + 1) <= max_size_t /\ ctr0 + w <= max_size_t} -> i:nat{i < w} ->
   Lemma (kb (init k n ctr0) (w * ctr + i) == kb (init k n (ctr0 + i)) (w * ctr))
-
-
-///
-///  Specification equivalence lemma
-///
-
-val ctr_equivalence: w:width_t -> k:key -> n:nonce -> c0:counter{c0 + w <= max_size_t} -> msg:bytes -> Lemma
-  (requires w * (length msg / (w * blocksize) + 1) <= max_size_t /\ length msg / blocksize <= max_size_t)
-  (ensures  ctr_v #w k n c0 msg == ctr k n c0 msg)
