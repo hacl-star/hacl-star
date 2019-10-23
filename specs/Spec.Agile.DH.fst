@@ -34,6 +34,15 @@ let prime (a:algorithm) =
   | DH_Curve448 -> Spec.Curve448.prime
   | DH_P256 -> Spec.P256.prime
 
+// BB. 2019/10/23: This needs confirmation !
+inline_for_extraction
+let order (a:algorithm) =
+  match a with
+  | DH_Curve25519 -> pow2 252 + 0x14def9dea2f79cd65812631a5cf5d3ed
+  | DH_Curve448 -> pow2 446 - 0x8335dc163bb124b65129c96fde933d8d723a70aadc873d6d54a7bb0d
+  | DH_P256 -> pow2 256 - 432420386565659656852420866394968145599
+
+
 /// Types
 
 type scalar (a:algorithm) = lbytes (size_key a)
@@ -41,6 +50,12 @@ type serialized_point (a:algorithm) = lbytes (size_public a)
 
 
 /// Functions
+
+val clamp: alg:algorithm{alg = DH_Curve25519 \/ alg = DH_Curve448} -> scalar alg -> Tot (scalar alg)
+let clamp a k =
+  match a with
+  | DH.DH_Curve25519 -> Spec.Curve25519.decodeScalar k
+  | DH.DH_Curve448 -> Spec.Curve448.decodeScalar k
 
 val scalarmult:
     a:algorithm
