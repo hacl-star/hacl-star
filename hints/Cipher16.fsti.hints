@@ -1,0 +1,53 @@
+[
+  "éê¿ÿwªAr’\u0000×‘i'c£",
+  [
+    [
+      "Cipher16.state",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Cipher16.alg",
+        "equation_Spec.Cipher16.slen",
+        "fuel_guarded_inversion_Spec.Cipher16.alg",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "ef138d5b1ddec232aa561e7deae95be2"
+    ],
+    [
+      "Cipher16.create",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Cipher16.alg",
+        "equation_LowStar.Buffer.trivial_preorder",
+        "equation_Spec.Cipher16.keylen",
+        "fuel_guarded_inversion_Spec.Cipher16.alg",
+        "function_token_typing_FStar.UInt8.t",
+        "lemma_LowStar.Monotonic.Buffer.length_as_seq",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_243a7d40b15057dd63f99047fa727153",
+        "typing_LowStar.Buffer.trivial_preorder"
+      ],
+      0,
+      "572531ace39df158a7d52dfc321eef2d"
+    ],
+    [
+      "Cipher16.compute",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "function_token_typing_FStar.UInt8.t",
+        "lemma_LowStar.Monotonic.Buffer.length_as_seq",
+        "refinement_interpretation_Tm_refine_352f29f5b291d9b891739cdac915fa8c",
+        "typing_LowStar.Buffer.trivial_preorder"
+      ],
+      0,
+      "8deb791c9299b8720ddce92240c5d613"
+    ]
+  ]
+]
