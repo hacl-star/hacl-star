@@ -27,6 +27,13 @@ let size_public (a:algorithm) : Tot size_nat =
   | DH_Curve448 -> 56
   | DH_P256 -> 64
 
+inline_for_extraction
+let prime (a:algorithm) =
+  match a with
+  | DH_Curve25519 -> Spec.Curve25519.prime
+  | DH_Curve448 -> Spec.Curve448.prime
+  | DH_P256 -> Spec.P256.prime
+
 /// Types
 
 type scalar (a:algorithm) = lbytes (size_key a)
