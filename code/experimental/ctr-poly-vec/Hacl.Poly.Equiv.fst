@@ -48,6 +48,42 @@ let rec lemma_repeat_right_vec #a #a_vec w n normalize_n f f_vec acc_v0 =
     end
 
 
+val repeat_right_step:
+    #a:Type0
+  -> #b:Type0
+  -> bs:size_pos
+  -> start:nat
+  -> n:nat
+  -> f1:(i:nat{i < n} -> b -> b)
+  -> f2:(i:nat{i < start + n} -> b -> b)
+  -> init:b
+  -> i:nat{i <= n} ->
+  Lemma
+  (requires
+    (forall (i:nat{i < n}) (acc:b). f1 i acc == f2 (start + i) acc))
+  (ensures
+    Loops.repeat_right 0 i (Loops.fixed_a b) f1 init ==
+    Loops.repeat_right start (start + i) (Loops.fixed_a b) f2 init)
+
+let rec repeat_right_step #a #b bs start n f1 f2 init i =
+  if i = 0 then begin
+    Loops.eq_repeat_right 0 i (Loops.fixed_a b) f1 init;
+    Loops.eq_repeat_right start (start + i) (Loops.fixed_a b) f2 init;
+    () end
+  else begin
+    repeat_right_step #a #b bs start n f1 f2 init (i - 1);
+    let next_p = Loops.repeat_right 0 (i - 1) (Loops.fixed_a b) f1 init in
+    let next_v = Loops.repeat_right start (start + i - 1) (Loops.fixed_a b) f2 init in
+    assert (next_p == next_v);
+    let res1 = Loops.repeat_right 0 i (Loops.fixed_a b) f1 init in
+    let res2 = Loops.repeat_right start (start + i) (Loops.fixed_a b) f2 init in
+    Loops.unfold_repeat_right 0 i (Loops.fixed_a b) f1 init (i - 1);
+    Loops.unfold_repeat_right start (start + i) (Loops.fixed_a b) f2 init (start + i - 1);
+    assert (res1 == f1 (i - 1) next_p);
+    assert (res2 == f2 (start + i - 1) next_p);
+    () end
+
+
 //TODO: change the definition of the repeat_blocks function in Lib.Sequence
 val repeat_blocks_split:
      #a:Type0
@@ -70,9 +106,8 @@ val repeat_blocks_split:
 let repeat_blocks_split #a #b #c blocksize len0 inp f l acc0 = admit()
 
 
-
 #set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 \
-              --using_facts_from '-* +Prims +Hacl.Poly.Equiv +Lib.Sequence +FStar.Seq +Math.Lemmas +Lib.Inttypes +Hacl.Poly'"
+             --using_facts_from '-* +Prims +Hacl.Poly.Equiv +Lib.Sequence +FStar.Seq +Math.Lemmas +Lib.Inttypes +Hacl.Poly'"
 
 
 val repeat_blocks_last:
@@ -98,6 +133,95 @@ let repeat_blocks_last #w text acc_v r =
   let last = Seq.slice text (nb * blocksize_v) len in
   Seq.Properties.slice_length text
 
+//(forall (i:nat{i < n}) (acc:b). f1 i acc == f2 (start + i) acc))
+
+val repeat_blocks_multi_v_equiv_step:
+    #w:lanes
+  -> text:bytes{length text % (w * blocksize) = 0}
+  -> r:felem
+  -> i:nat{i < length text / (w * blocksize)}
+  -> j:nat{j < w}
+  -> acc:felem ->
+  Lemma
+  (let len = length text in
+   let blocksize_v = w * blocksize in
+   let nb_vec = len / blocksize_v in
+   let nb = len / blocksize in
+   assume (nb == w * nb_vec);
+
+   assert ((i + 1) * blocksize_v <= nb_vec * blocksize_v);
+   let block = Seq.slice text (i * blocksize_v) (i * blocksize_v + blocksize_v) in
+   FStar.Math.Lemmas.cancel_mul_div w blocksize;
+   let repeat_bf_s1 = repeat_blocks_f blocksize block (poly_update1 r) w in
+   let repeat_bf_s = repeat_blocks_f blocksize text (poly_update1 r) nb in
+   assume (w * i + j < w * nb_vec);
+   repeat_bf_s1 j acc == repeat_bf_s (w * i + j) acc)
+
+let repeat_blocks_multi_v_equiv_step #w text r i j acc =
+  // let len = length text in
+  // let blocksize_v = w * blocksize in
+  // let nb_vec = len / blocksize_v in
+  // let nb = len / blocksize in
+  // assume (nb == w * nb_vec);
+
+  // assert ((i + 1) * blocksize_v <= nb_vec * blocksize_v);
+  // let block = Seq.slice text (i * blocksize_v) (i * blocksize_v + blocksize_v) in
+  // FStar.Math.Lemmas.cancel_mul_div w blocksize;
+  // let repeat_bf_s1 = repeat_blocks_f blocksize block (poly_update1 r) w in
+  // let repeat_bf_s = repeat_blocks_f blocksize text (poly_update1 r) nb in
+
+  // let b1 = Seq.slice block (j * blocksize) (j * blocksize + blocksize) in
+  // assert (repeat_bf_s1 j acc == poly_update1 r b1 acc);
+  // let b2 = Seq.slice text ((w * i + j) * blocksize) ((w * i + j) * blocksize + blocksize) in
+  // assert (repeat_bf_s (w * i + j) acc == poly_update1 r b2 acc);
+  // //b1 == b2
+  admit()
+
+
+
+val poly_update_nblocks_lemma_lp:
+    #w:lanes
+  -> text:bytes{length text % (w * blocksize) = 0}
+  -> r:felem
+  -> i:nat{i < length text / (w * blocksize)}
+  -> acc:felem -> Lemma
+  (let len = length text in
+   let blocksize_v = w * blocksize in
+   let nb_vec = len / (w * blocksize) in
+   let nb = len / blocksize in
+   assume (nb == w * nb_vec);
+
+   assert ((i + 1) * blocksize_v <= nb_vec * blocksize_v);
+   let block = Seq.slice text (i * blocksize_v) (i * blocksize_v + blocksize_v) in
+   FStar.Math.Lemmas.cancel_mul_mod w blocksize;
+   let repeat_bf_s1 = repeat_blocks_f blocksize block (poly_update1 r) w in
+   let repeat_bf_s = repeat_blocks_f blocksize text (poly_update1 r) nb in
+   assume (w * i + w <= w * nb_vec);
+   Loops.repeat_right 0 w (Loops.fixed_a felem) repeat_bf_s1 acc ==
+   Loops.repeat_right (w * i) (w * i + w) (Loops.fixed_a felem) repeat_bf_s acc)
+
+let poly_update_nblocks_lemma_lp #w text r i acc =
+  let len = length text in
+  let blocksize_v = w * blocksize in
+  let nb_vec = len / (w * blocksize) in
+  let nb = len / blocksize in
+  assume (nb == w * nb_vec);
+
+  let repeat_bf_s = repeat_blocks_f blocksize text (poly_update1 r) nb in
+
+  assert ((i + 1) * blocksize_v <= nb_vec * blocksize_v);
+  let block = Seq.slice text (i * blocksize_v) (i * blocksize_v + blocksize_v) in
+  FStar.Math.Lemmas.cancel_mul_mod w blocksize;
+  let repeat_bf_s1 = repeat_blocks_f blocksize block (poly_update1 r) w in
+
+  assume (w * i + w <= w * nb_vec);
+  Classical.forall_intro_2
+    //#(j:nat{j < w})
+    //#(fun _ -> felem)
+    //#(fun j acc -> repeat_bf_s1 j acc == repeat_bf_s (w * i + j) acc)
+    (repeat_blocks_multi_v_equiv_step #w text r i);
+  repeat_right_step #uint8 #felem blocksize (w * i) w repeat_bf_s1 repeat_bf_s acc w
+
 
 val repeat_blocks_multi_v_equiv_aux:
     #w:lanes
@@ -118,29 +242,30 @@ val repeat_blocks_multi_v_equiv_aux:
    normalize_v r (repeat_bf_vec i acc_v) ==
    Loops.repeat_right (w * i) (w * (i + 1)) (Loops.fixed_a felem) repeat_bf_s (normalize_v r acc_v))
 
-let repeat_blocks_multi_v_equiv_aux #w text r i acc_v = admit()
-  // let len = length text in
-  // let blocksize_v = w * blocksize in
-  // let nb_vec = len / blocksize_v in
-  // let nb = len / blocksize in
-  // assume (nb == w * nb_vec);
+let repeat_blocks_multi_v_equiv_aux #w text r i acc_v =
+  let len = length text in
+  let blocksize_v = w * blocksize in
+  let nb_vec = len / blocksize_v in
+  let nb = len / blocksize in
+  assume (nb == w * nb_vec);
 
-  // let pre = create w (pow_w w r) in
-  // let f_vec = poly_update_nblocks #w pre in
-  // let f = poly_update1 r in
+  let pre = create w (pow_w w r) in
+  let repeat_bf_vec = repeat_blocks_f blocksize_v text (poly_update_nblocks #w pre) nb_vec in
+  let repeat_bf_s = repeat_blocks_f blocksize text (poly_update1 r) nb in
+  assert ((i + 1) * blocksize_v <= nb_vec * blocksize_v);
+  let block = Seq.slice text (i * blocksize_v) (i * blocksize_v + blocksize_v) in
+  assert (repeat_bf_vec i acc_v == poly_update_nblocks #w pre block acc_v);
 
-  // let repeat_bf_vec = repeat_blocks_f blocksize_v text f_vec nb_vec in
-  // let repeat_bf_s = repeat_blocks_s #w text r i in
+  let acc : felem = normalize_v r acc_v in
+  FStar.Math.Lemmas.cancel_mul_mod w blocksize;
+  poly_update_nblocks_lemma #w r block acc_v;
+  assert (normalize_v r (poly_update_nblocks #w pre block acc_v) == repeat_blocks_multi blocksize block (poly_update1 r) acc);
 
-  // assert ((i + 1) * blocksize_v <= nb_vec * blocksize_v);
-  // let block = Seq.slice text (i * blocksize_v) (i * blocksize_v + blocksize_v) in
-  // assert (repeat_bf_vec i acc_v == f_vec block acc_v);
-
-  // FStar.Math.Lemmas.cancel_mul_mod w blocksize;
-  // lemma_repeat_blocks_multi blocksize block f (normalize_v r acc_v);
-
-  // let acc0 = normalize_v r acc_v in
-  // poly_update_nblocks_lemma #w r block acc_v;
+  lemma_repeat_blocks_multi blocksize block (poly_update1 r) acc;
+  let repeat_bf_s1 = repeat_blocks_f blocksize block (poly_update1 r) w in
+  assert (normalize_v r (poly_update_nblocks #w pre block acc_v) == Loops.repeati w repeat_bf_s1 acc);
+  Loops.repeati_def w repeat_bf_s1 acc;
+  poly_update_nblocks_lemma_lp #w text r i acc
 
 
 val repeat_blocks_multi_v_equiv:
