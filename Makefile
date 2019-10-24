@@ -55,6 +55,8 @@ endif
 
 # Better error early.
 ifeq (,$(NOVALE))
+ifneq (hacl-verify,$(MAKECMDGOALS))
+
 ifeq (,$(VALE_HOME))
   $(error Please define VALE_HOME, possibly using cygpath -m on Windows)
 endif
@@ -66,6 +68,8 @@ endif
 ifneq ($(shell cat $(VALE_HOME)/bin/.vale_version | tr -d '\r'),$(shell cat vale/.vale_version | tr -d '\r'))
   $(error this repository wants Vale $(shell cat vale/.vale_version) but in \
     $$VALE_HOME I found $(shell cat $(VALE_HOME)/bin/.vale_version). Hint: ./tools/get_vale.sh)
+endif
+
 endif
 endif
 
@@ -416,13 +420,16 @@ vale-verify-unstaged: \
   $(addsuffix .checked,$(VALE_FSTS)) \
   $(call only-for,$(HACL_HOME)/vale/%.checked) \
 
-hacl-verify-unstaged: code-verify-unstaged spec-verify-unstaged
+# Overriding the pattern rule and making this one unstaged.
 code-verify-unstaged: $(call only-for,$(HACL_HOME)/code/%)
 spec-verify-unstaged: $(call only-for,$(HACL_HOME)/specs/%)
+lib-verify-unstaged: $(call only-for,$(HACL_HOME)/lib/%)
 curve25519-verify-unstaged: $(call only-for,$(HACL_HOME)/code/curve25519/%)
 poly1305-verify-unstaged: $(call only-for,$(HACL_HOME)/code/poly1305/%)
 chacha20-verify-unstaged: $(call only-for,$(HACL_HOME)/code/chacha20/%)
 salsa20-verify-unstaged: $(call only-for,$(HACL_HOME)/code/salsa20/%)
+
+verify-hacl: code-verify-unstaged spec-verify-unstaged lib-verify-unstaged
 
 ############
 # min-test #
