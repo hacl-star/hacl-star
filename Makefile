@@ -65,7 +65,7 @@ endif
 
 ifneq ($(shell cat $(VALE_HOME)/bin/.vale_version | tr -d '\r'),$(shell cat vale/.vale_version | tr -d '\r'))
   $(error this repository wants Vale $(shell cat vale/.vale_version) but in \
-    $$VALE_HOME I found $(shell cat $(VALE_HOME)/bin/.vale_version). Hint: ./everest get_vale.)
+    $$VALE_HOME I found $(shell cat $(VALE_HOME)/bin/.vale_version). Hint: ./tools/get_vale.sh)
 endif
 endif
 
