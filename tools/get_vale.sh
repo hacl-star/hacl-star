@@ -43,6 +43,9 @@ if [ $vale_version != $old_vale_version ]; then
   rm -rf "vale/bin"
   mv "vale/vale-release-${vale_version}/bin" vale/
   chmod +x vale/bin/*.exe
+  echo
+  echo -e "\033[0;31mRemember to do:\033[0;0m"
+  echo "export VALE_HOME=$(realpath $HACL_HOME/..)/vale"
 else
   echo "Vale is up-to-date"
 fi
