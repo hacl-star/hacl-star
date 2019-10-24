@@ -25,10 +25,15 @@ open EverCrypt.Error
 module Cipher = EverCrypt.Cipher
 module AEAD = EverCrypt.AEAD
 module HKDF = EverCrypt.HKDF
+module CTR = EverCrypt.CTR
 
 friend Spec.QUIC
 
 open LowStar.BufferOps
+
+inline_for_extraction noextract
+let as_cipher_alg (a: Spec.QUIC.ea) =
+  Spec.Agile.AEAD.cipher_alg_of_supported_alg a
 
 /// https://tools.ietf.org/html/draft-ietf-quic-tls-23#section-5
 ///
@@ -50,11 +55,13 @@ type state_s (i: index) =
       iv:EverCrypt.AEAD.iv_p the_aead_alg ->
       hp_key:B.buffer U8.t { B.length hp_key = Spec.QUIC.ae_keysize the_aead_alg } ->
       pn:B.pointer u62 ->
+      ctr_state:CTR.state (as_cipher_alg the_aead_alg) ->
       state_s i
 
 let footprint_s #i h s =
   let open LowStar.Buffer in
   AEAD.footprint h (State?.aead_state s) `loc_union`
+  CTR.footprint h (State?.ctr_state s) `loc_union`
   loc_buffer (State?.iv s) `loc_union`
   loc_buffer (State?.hp_key s) `loc_union`
   loc_buffer (State?.pn s)
@@ -69,9 +76,12 @@ let g_initial_packet_number #i s =
 
 let invariant_s #i h s =
   let open Spec.QUIC in
-  let State hash_alg aead_alg traffic_secret initial_pn aead_state iv hp_key pn = s in
+  let State hash_alg aead_alg traffic_secret initial_pn aead_state iv hp_key pn ctr_state =
+    s
+  in
   hash_is_keysized s; (
   AEAD.invariant h aead_state /\
+  CTR.invariant h ctr_state /\
   B.(all_live h [ buf iv; buf hp_key; buf pn ])  /\
   B.(all_disjoint [
     AEAD.footprint h aead_state; loc_buffer iv; loc_buffer hp_key; loc_buffer pn ]) /\
@@ -91,18 +101,19 @@ let g_packet_number #i s h =
   U64.v (B.deref h (State?.pn s))
 
 let frame_invariant #i l s h0 h1 =
-  AEAD.frame_invariant l (State?.aead_state (B.deref h0 s)) h0 h1
+  AEAD.frame_invariant l (State?.aead_state (B.deref h0 s)) h0 h1;
+  CTR.frame_invariant l (State?.ctr_state (B.deref h0 s)) h0 h1
 
 let aead_alg_of_state #i s =
-  let State _ the_aead_alg _ _ _ _ _ _ = !*s in
+  let State _ the_aead_alg _ _ _ _ _ _ _ = !*s in
   the_aead_alg
 
 let hash_alg_of_state #i s =
-  let State the_hash_alg _ _ _ _ _ _ _ = !*s in
+  let State the_hash_alg _ _ _ _ _ _ _ _ = !*s in
   the_hash_alg
 
 let packet_number_of_state #i s =
-  let State _ _ _ _ _ _ _ pn = !*s in
+  let State _ _ _ _ _ _ _ pn _ = !*s in
   !*pn
 
 #push-options "--max_ifuel 1 --initial_ifuel 1"
@@ -233,7 +244,7 @@ let label_key = LowStar.ImmutableBuffer.igcmalloc_of_list HS.root Spec.QUIC.labe
 let label_iv = LowStar.ImmutableBuffer.igcmalloc_of_list HS.root Spec.QUIC.label_iv_l
 let label_hp = LowStar.ImmutableBuffer.igcmalloc_of_list HS.root Spec.QUIC.label_hp_l
 
-#set-options "--z3rlimit 350"
+#push-options "--z3rlimit 400 --query_stats"
 let create_in i r dst initial_pn traffic_secret =
   LowStar.ImmutableBuffer.recall label_key;
   LowStar.ImmutableBuffer.recall_contents label_key Spec.QUIC.label_key;
@@ -262,11 +273,20 @@ let create_in i r dst initial_pn traffic_secret =
   (**) let h2 = ST.get () in
   (**) B.(modifies_loc_includes (loc_unused_in h1) h1 h2 (loc_buffer aead_key));
 
-  let aead_state: B.pointer (B.pointer_or_null (AEAD.state_s aead_alg)) = B.alloca B.null 1ul in
+  let aead_state: B.pointer (B.pointer_or_null (AEAD.state_s aead_alg)) =
+    B.alloca B.null 1ul
+  in
   let ret = AEAD.create_in #aead_alg r aead_state aead_key in
 
+  let ctr_state: B.pointer (B.pointer_or_null (CTR.state_s (as_cipher_alg aead_alg))) =
+    B.alloca B.null 1ul
+  in
+  let dummy_iv = B.alloca 0uy 12ul in
+  let ret' = CTR.create_in (as_cipher_alg aead_alg) r ctr_state aead_key dummy_iv 12ul 0ul in
+
   (**) let h3 = ST.get () in
-  (**) B.(modifies_loc_includes (loc_unused_in h1) h2 h3 (loc_buffer aead_state));
+  (**) B.(modifies_loc_includes (loc_unused_in h1) h2 h3
+    (loc_buffer ctr_state `loc_union` loc_buffer aead_state));
   (**) B.(modifies_trans (loc_unused_in h1) h1 h2 (loc_unused_in h1) h3);
   match ret with
   | UnsupportedAlgorithm ->
@@ -274,9 +294,21 @@ let create_in i r dst initial_pn traffic_secret =
       UnsupportedAlgorithm
 
   | Success ->
+
+      match ret' with
+      | UnsupportedAlgorithm ->
+          pop_frame ();
+          UnsupportedAlgorithm
+
+      // InvalidIVLength ruled out statically
+
+      | Success ->
       // JP: there is something difficult to prove here... confused.
       let aead_state: AEAD.state aead_alg = !*aead_state in
       (**) assert (AEAD.invariant h3 aead_state);
+
+      let ctr_state: CTR.state (as_cipher_alg aead_alg) = !*ctr_state in
+      (**) assert (CTR.invariant h3 ctr_state);
 
       let iv = B.malloc r 0uy 12ul in
       (**) assert_norm FStar.Mul.(8 * 12 <= pow2 64 - 1);
@@ -293,8 +325,8 @@ let create_in i r dst initial_pn traffic_secret =
 
       (**) assert (B.length hp_key = Spec.QUIC.ae_keysize aead_alg);
       let s: state_s i = State #i
-        hash_alg aead_alg e_traffic_secret
-        e_initial_pn aead_state iv hp_key pn
+        hash_alg aead_alg e_traffic_secret e_initial_pn
+        aead_state iv hp_key pn ctr_state
       in
       let s:B.pointer_or_null (state_s i) = B.malloc r s 1ul in
       (**) let h7 = ST.get () in
@@ -327,11 +359,13 @@ let create_in i r dst initial_pn traffic_secret =
       pop_frame ();
       (**) let h11 = ST.get () in
       (**) assert (AEAD.invariant #aead_alg h11 aead_state);
+      (**) assert (CTR.invariant #(as_cipher_alg aead_alg) h11 ctr_state);
       (**) B.popped_modifies h10 h11;
       (**) assert B.(modifies (loc_buffer dst) h0 h11);
       (**) assert (ST.equal_stack_domains h0 h11);
 
       Success
+#pop-options
 
 let lemma_slice s (i: nat { i <= S.length s }): Lemma
   (ensures (s `S.equal` S.append (S.slice s 0 i) (S.slice s i (S.length s))))
@@ -512,8 +546,7 @@ let header_disjoint (h: header) =
   | Short _ _ cid _ -> True
   | Long _ _ dcid _ scid _ _ -> B.disjoint dcid scid
 
-assume
-val format_header (dst: B.buffer U8.t) (h: header) (npn: B.buffer U8.t) (pn_len: u2):
+let format_header (dst: B.buffer U8.t) (h: header) (npn: B.buffer U8.t) (pn_len: u2):
   Stack unit
     (requires (fun h0 ->
       B.length dst = Spec.QUIC.header_len (g_header h h0) (U8.v pn_len) /\
@@ -525,6 +558,9 @@ val format_header (dst: B.buffer U8.t) (h: header) (npn: B.buffer U8.t) (pn_len:
       B.(modifies (loc_buffer dst) h0 h1) /\ (
       let fh = Spec.QUIC.format_header (g_header h h0) (B.as_seq h0 npn) in
       S.slice (B.as_seq h1 dst) 0 (S.length fh) `S.equal` fh)))
+=
+  admit ();
+  C.Failure.failwith C.String.(!$"TODO")
 
 let vlen (n:u62) : x:U8.t { U8.v x = Spec.QUIC.vlen (U64.v n) } =
   assert_norm (pow2 6 = 64);
@@ -553,8 +589,40 @@ let header_len (h: header) (pn_len: u2): Stack U32.t
       U32.(6ul +^ u32_of_u8 (add3 dcil) +^ u32_of_u8 (add3 scil) +^
         u32_of_u8 (vlen (u64_of_u32 plain_len)) +^ 1ul +^ u32_of_u8 pn_len)
 
+inline_for_extraction
+let block_of_sample (a: Spec.Agile.Cipher.cipher_alg)
+  (dst: B.buffer U8.t)
+  (s: CTR.state a)
+  (k: B.buffer U8.t)
+  (sample: B.buffer U8.t):
+  Stack unit
+    (requires fun h0 ->
+      B.(all_live h0 [ buf dst; buf k; buf sample ]) /\
+      CTR.invariant h0 s /\
+      B.(all_disjoint
+        [ CTR.footprint h0 s; loc_buffer dst; loc_buffer k; loc_buffer sample ]) /\
+      Spec.Agile.Cipher.(a == AES128 \/ a == AES256 \/ a == CHACHA20) /\
+      B.length k = Spec.Agile.Cipher.key_length a /\
+      B.length dst = 16 /\
+      B.length sample = 16)
+    (ensures fun h0 _ h1 ->
+      B.(modifies (loc_buffer dst) h0 h1) /\
+      B.as_seq h1 dst `S.equal`
+        Spec.QUIC.block_of_sample a (B.as_seq h0 k) (B.as_seq h0 sample))
+=
+  match a with
+  | Spec.Agile.Cipher.CHACHA20 ->
+      let ctr = LowStar.Endianness.load32_le (B.sub sample 0ul 4ul) in
+      let iv = B.sub sample 4ul 12ul in
+      CTR.init (G.hide a) s k iv 12ul ctr;
+      admit ()
+  | _ ->
+      admit ()
+
 let encrypt #i s dst h plain plain_len pn_len =
-  let State hash_alg aead_alg e_traffic_secret e_initial_pn aead_state iv hp_key pn = !*s in
+  let State hash_alg aead_alg e_traffic_secret e_initial_pn
+    aead_state iv hp_key pn ctr_state = !*s
+  in
   (**) let h0 = ST.get () in
   assert (
     let s0 = g_traffic_secret (B.deref h0 s) in

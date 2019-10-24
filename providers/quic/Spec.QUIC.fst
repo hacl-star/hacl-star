@@ -1511,7 +1511,7 @@ let pn_sizemask (pn_len:nat2) : lbytes 4 =
   let open FStar.Endianness in
   n_to_be 4 (pow2 32 - pow2 (24 - (8 `op_Multiply` pn_len)))
 
-let block_of_sample a (k: Cipher.key a) (sample: lbytes 16) =
+let block_of_sample a (k: Cipher.key a) (sample: lbytes 16): lbytes 16 =
   let open FStar.Mul in
   let ctr, iv = match a with
     | Cipher.CHACHA20 ->
@@ -1525,7 +1525,7 @@ let block_of_sample a (k: Cipher.key a) (sample: lbytes 16) =
         assert_norm (pow2 (8 * 4) = pow2 32);
         FStar.Endianness.be_to_n ctr_bytes, iv
   in
-  Cipher.ctr_block a k iv ctr
+  S.slice (Cipher.ctr_block a k iv ctr) 0 16
 
 let header_encrypt a hpk h npn c =
   assert_norm(max_cipher_length < pow2 62);
@@ -2493,7 +2493,7 @@ let lemma_header_encrypt_dec_cid a k h (x' y npn:byte) (c:cbytes) : Lemma
 
 
 
-
+#push-options "--z3rlimit 100"
 let compute_new_header_after_insertion (a:ea) (k:lbytes (ae_keysize a)) (spin phase:bool) (cid:lbytes 4) (x y pn:byte) (c:cbytes) : Pure (header * npn)
   (requires True)
   (ensures fun (h',npn') -> (
@@ -2544,7 +2544,7 @@ let compute_new_header_after_insertion (a:ea) (k:lbytes (ae_keysize a)) (spin ph
 
   // result
   (h',npn')
-
+#pop-options
 
 
 
@@ -2589,7 +2589,7 @@ let encrypt a k siv hpk pn_len seqn h plain =
   let open FStar.Endianness in
   assert_norm(pow2 62 < pow2 (8 `op_Multiply` 12));
   // packet number bytes
-  let pnb = n_to_be 12 seqn in
+  let pnb = FStar.Endianness.n_to_be 12 seqn in
   let npn : lbytes (1+pn_len) = S.slice pnb (11 - pn_len) 12 in
   let header = format_header h npn in
   lemma_format_len a h npn;
