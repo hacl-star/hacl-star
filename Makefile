@@ -453,21 +453,6 @@ min-test-unstaged: $(filter-out \
 # print ASM files                                                             #
 ###############################################################################
 
-TAC = $(shell which tac >/dev/null 2>&1 && echo "tac" || echo "tail -r")
-
-ALL_CMX_FILES = $(patsubst %.ml,%.cmx,$(shell echo $(ALL_ML_FILES) | $(TAC)))
-
-ifeq ($(OS),Windows_NT)
-  export OCAMLPATH := $(FSTAR_HOME)/bin;$(OCAMLPATH)
-else
-  export OCAMLPATH := $(FSTAR_HOME)/bin:$(OCAMLPATH)
-endif
-
-# Warning 8: this pattern-matching is not exhaustive.
-# Warning 20: this argument will not be used by the function.
-# Warning 26: unused variable
-OCAMLOPT = ocamlfind opt -package fstarlib -linkpkg -g -I obj -w -8-20-26
-
 .PRECIOUS: obj/%.cmx
 obj/%.cmx: obj/%.ml
 	$(call run-with-log,\
