@@ -8,8 +8,13 @@ if [[ $HACL_HOME == "" ]]; then
   exit 1
 fi
 
-echo "Will install vale into $(realpath $HACL_HOME/..)/vale, hit Ctrl-C to abort..."
-read || true
+echo -n "Will install vale into $(realpath $HACL_HOME/..)/vale, hit Ctrl-C to abort"
+sleep 1
+echo -n .
+sleep 1
+echo -n .
+sleep 1
+echo .
 
 cd $HACL_HOME/..
 
