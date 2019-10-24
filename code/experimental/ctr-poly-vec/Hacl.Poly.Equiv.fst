@@ -9,8 +9,43 @@ open Hacl.Poly
 
 module Loops = Lib.LoopCombinators
 
-#set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 \
-              --using_facts_from '-* +Prims +Hacl.Poly.Equiv +Lib.Sequence +FStar.Seq +Math.Lemmas +Lib.Inttypes +Hacl.Poly'"
+#reset-options "--z3rlimit 50 --max_ifuel 0 --max_fuel 2"
+
+val lemma_repeat_right_vec:
+    #a:Type0
+  -> #a_vec:Type0
+  -> w:lanes
+  -> n:nat
+  -> normalize_n:(a_vec -> a)
+  -> f:(i:nat{i < n * w} -> a -> a)
+  -> f_vec:(i:nat{i < n} -> a_vec -> a_vec)
+  -> acc_v0:a_vec ->
+  Lemma
+  (requires (forall (i:nat{i < n}) (acc_v:a_vec).
+   (assert (w * (i + 1) <= w * n);
+    normalize_n (f_vec i acc_v) == Loops.repeat_right (w * i) (w * (i + 1)) (Loops.fixed_a a) f (normalize_n acc_v))))
+  (ensures
+    normalize_n (Loops.repeat_right 0 n (Loops.fixed_a a_vec) f_vec acc_v0) ==
+    Loops.repeat_right 0 (w * n) (Loops.fixed_a a) f (normalize_n acc_v0))
+
+let rec lemma_repeat_right_vec #a #a_vec w n normalize_n f f_vec acc_v0 =
+  if n = 0 then begin
+    Loops.eq_repeat_right 0 n (Loops.fixed_a a_vec) f_vec acc_v0;
+    Loops.eq_repeat_right 0 (w * n) (Loops.fixed_a a) f (normalize_n acc_v0);
+    () end
+  else begin
+    lemma_repeat_right_vec #a #a_vec w (n - 1) normalize_n f f_vec acc_v0;
+    let next_p : a_vec = Loops.repeat_right 0 (n - 1) (Loops.fixed_a a_vec) f_vec acc_v0 in
+    let next_v = Loops.repeat_right 0 (w * (n - 1)) (Loops.fixed_a a) f (normalize_n acc_v0) in
+    assert (normalize_n next_p == next_v);
+    let res1 = Loops.repeat_right 0 n (Loops.fixed_a a_vec) f_vec acc_v0 in
+    let res2 = Loops.repeat_right 0 (w * n) (Loops.fixed_a a) f (normalize_n acc_v0) in
+    Loops.unfold_repeat_right 0 n (Loops.fixed_a a_vec) f_vec acc_v0 (n - 1);
+    assert (res1 == f_vec (n - 1) next_p);
+    Loops.repeat_right_plus 0 (w * (n - 1)) (w * n) (Loops.fixed_a a) f (normalize_n acc_v0);
+    assert (res2 == Loops.repeat_right (w * (n - 1)) (w * n) (Loops.fixed_a a) f next_v);
+    assert (normalize_n res1 == Loops.repeat_right (w * (n - 1)) (w * n) (Loops.fixed_a a) f next_v)
+    end
 
 
 //TODO: change the definition of the repeat_blocks function in Lib.Sequence
@@ -33,6 +68,11 @@ val repeat_blocks_split:
       (repeat_blocks_multi blocksize (Seq.slice inp 0 len0) f acc0))
 
 let repeat_blocks_split #a #b #c blocksize len0 inp f l acc0 = admit()
+
+
+
+#set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 \
+              --using_facts_from '-* +Prims +Hacl.Poly.Equiv +Lib.Sequence +FStar.Seq +Math.Lemmas +Lib.Inttypes +Hacl.Poly'"
 
 
 val repeat_blocks_last:
@@ -59,40 +99,6 @@ let repeat_blocks_last #w text acc_v r =
   Seq.Properties.slice_length text
 
 
-val lemma_repeati_vec:
-    #a:Type0
-  -> #a_vec:Type0
-  -> w:lanes
-  -> n:nat
-  -> normalize_n:(a_vec -> a)
-  -> f:(i:nat{i < n * w} -> a -> a)
-  -> f_vec:(i:nat{i < n} -> a_vec -> a_vec)
-  -> acc_v0:a_vec ->
-  Lemma
-  (requires (forall (i:nat{i < n}) (acc_v:a_vec). normalize_n (f_vec i acc_v) == Loops.repeati w f (normalize_n acc_v)))
-  (ensures  (normalize_n (Loops.repeati n f_vec acc_v0) == Loops.repeati (w * n) f (normalize_n acc_v0)))
-
-let rec lemma_repeati_vec #a #a_vec w n normalize_n f f_vec acc_v0 =
-  if n = 0 then begin
-    Loops.eq_repeati0 n f_vec acc_v0;
-    Loops.eq_repeati0 (w * n) f (normalize_n acc_v0);
-    () end
-  else begin
-    lemma_repeati_vec #a #a_vec w (n - 1) normalize_n f f_vec acc_v0;
-    let next_p = Loops.repeati (n - 1) f_vec acc_v0 in
-    let next_v = Loops.repeati (w * (n - 1)) f (normalize_n acc_v0) in
-    assert (normalize_n next_p == next_v);
-
-    let res1 = Loops.repeati n f_vec acc_v0 in
-    let res2 = Loops.repeati (w * n) f (normalize_n acc_v0) in
-    Loops.unfold_repeati n f_vec acc_v0 (n-1);
-    assert (res1 == f_vec (n - 1) next_p);
-    assume (res2 == Loops.repeati w f next_v);
-    assert (normalize_n res1 == Loops.repeati w f next_v);
-    assert (normalize_n (f_vec (n - 1) next_p) == Loops.repeati w f (normalize_n next_p));
-    () end
-
-
 val repeat_blocks_multi_v_equiv_aux:
     #w:lanes
   -> text:bytes{length text % (w * blocksize) = 0}
@@ -100,20 +106,41 @@ val repeat_blocks_multi_v_equiv_aux:
   -> i:nat{i < length text / (w * blocksize)}
   -> acc_v:felem_v w -> Lemma
   (let len = length text in
+   let blocksize_v = w * blocksize in
    let nb_vec = len / (w * blocksize) in
    let nb = len / blocksize in
    assume (nb == w * nb_vec);
 
    let pre = create w (pow_w w r) in
-   let f_vec = poly_update_nblocks #w pre in
-   let f = poly_update1 r in
-
-   let repeat_bf_vec = repeat_blocks_f (w * blocksize) text f_vec nb_vec in
-   let repeat_bf_s = repeat_blocks_f blocksize text f nb in
-   normalize_v r (repeat_bf_vec i acc_v) == Loops.repeati w repeat_bf_s (normalize_v r acc_v))
+   let repeat_bf_vec = repeat_blocks_f (w * blocksize) text (poly_update_nblocks #w pre) nb_vec in
+   let repeat_bf_s = repeat_blocks_f blocksize text (poly_update1 r) nb in
+   assert (w * (i + 1) <= w * nb_vec);
+   normalize_v r (repeat_bf_vec i acc_v) ==
+   Loops.repeat_right (w * i) (w * (i + 1)) (Loops.fixed_a felem) repeat_bf_s (normalize_v r acc_v))
 
 let repeat_blocks_multi_v_equiv_aux #w text r i acc_v = admit()
-//define the poly_update_nblocks_lemma lemma in term of the `repeati` function
+  // let len = length text in
+  // let blocksize_v = w * blocksize in
+  // let nb_vec = len / blocksize_v in
+  // let nb = len / blocksize in
+  // assume (nb == w * nb_vec);
+
+  // let pre = create w (pow_w w r) in
+  // let f_vec = poly_update_nblocks #w pre in
+  // let f = poly_update1 r in
+
+  // let repeat_bf_vec = repeat_blocks_f blocksize_v text f_vec nb_vec in
+  // let repeat_bf_s = repeat_blocks_s #w text r i in
+
+  // assert ((i + 1) * blocksize_v <= nb_vec * blocksize_v);
+  // let block = Seq.slice text (i * blocksize_v) (i * blocksize_v + blocksize_v) in
+  // assert (repeat_bf_vec i acc_v == f_vec block acc_v);
+
+  // FStar.Math.Lemmas.cancel_mul_mod w blocksize;
+  // lemma_repeat_blocks_multi blocksize block f (normalize_v r acc_v);
+
+  // let acc0 = normalize_v r acc_v in
+  // poly_update_nblocks_lemma #w r block acc_v;
 
 
 val repeat_blocks_multi_v_equiv:
@@ -143,9 +170,13 @@ let repeat_blocks_multi_v_equiv #w text acc_v0 r =
     normalize_v r (repeat_blocks_multi (w * blocksize) text f_vec acc_v0);
     (==) { lemma_repeat_blocks_multi (w * blocksize) text f_vec acc_v0 }
     normalize_v r (Loops.repeati nb_vec repeat_bf_vec acc_v0);
+    (==) { Loops.repeati_def nb_vec repeat_bf_vec acc_v0 }
+    normalize_v #w r (Loops.repeat_right 0 nb_vec (Loops.fixed_a (felem_v w)) repeat_bf_vec acc_v0);
     (==) { Classical.forall_intro_2 (repeat_blocks_multi_v_equiv_aux #w text r);
-      lemma_repeati_vec w nb_vec (normalize_v r) repeat_bf_s repeat_bf_vec acc_v0 }
-    Loops.repeati nb repeat_bf_s (normalize_v r acc_v0);
+      lemma_repeat_right_vec w nb_vec (normalize_v r) repeat_bf_s repeat_bf_vec acc_v0 }
+    Loops.repeat_right 0 (w * nb_vec) (Loops.fixed_a felem) repeat_bf_s (normalize_v r acc_v0);
+    (==) { Loops.repeati_def (w * nb_vec) repeat_bf_s (normalize_v r acc_v0) }
+    Loops.repeati (w * nb_vec) repeat_bf_s (normalize_v r acc_v0);
     (==) { lemma_repeat_blocks_multi blocksize text f (normalize_v r acc_v0) }
     repeat_blocks_multi blocksize text f (normalize_v r acc_v0);
   }
