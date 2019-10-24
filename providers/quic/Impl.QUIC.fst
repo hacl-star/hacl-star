@@ -444,35 +444,114 @@ let rec pointwise_seq_map2 (#a: eqtype) (f: a -> a -> a) (s1 s2: S.seq a) (i: na
     ()
 #pop-options
 
-val xor_inplace (dst src: B.buffer U8.t) (len: U32.t { B.length dst = U32.v len }):
+inline_for_extraction noextract
+let op_inplace (dst src: B.buffer U8.t)
+  (src_len: U32.t)
+  (ofs: U32.t)
+  (op: U8.t -> U8.t -> U8.t)
+:
   Stack unit
     (requires fun h0 ->
       B.(all_live h0 [ buf dst; buf src ]) /\
       B.disjoint dst src /\
-      B.length dst = B.length src)
+      B.length src = U32.v src_len /\
+      B.length dst = U32.v ofs + B.length src)
     (ensures fun h0 _ h1 ->
       B.(modifies (loc_buffer dst) h0 h1) /\
-      B.as_seq h1 dst `S.equal` Spec.QUIC.xor_inplace (B.as_seq h0 dst) (B.as_seq h0 src) 0)
-
-let xor_inplace dst src len =
+      B.as_seq h1 dst `S.equal`
+        Spec.QUIC.pointwise_op op (B.as_seq h0 dst) (B.as_seq h0 src) (U32.v ofs))
+=
   let h0 = ST.get () in
-  C.Loops.in_place_map2 dst src len U8.logxor;
-  pointwise_seq_map2 U8.logxor (B.as_seq h0 dst) (B.as_seq h0 src) 0
+  let dst0 = B.sub dst 0ul ofs in
+  let dst' = B.sub dst ofs src_len in
+  C.Loops.in_place_map2 dst' src src_len op;
+  let h1 = ST.get () in
+  calc (S.equal) {
+    B.as_seq h1 dst;
+  (S.equal) { lemma_slice (B.as_seq h1 dst) (U32.v ofs) }
+    S.append (S.slice (B.as_seq h1 dst) 0 (U32.v ofs))
+      (S.slice (B.as_seq h1 dst) (U32.v ofs) (B.length dst));
+  (S.equal) { (* needs dst0 in scope for this step to go through *) }
+    S.append (S.slice (B.as_seq h0 dst) 0 (U32.v ofs))
+      (S.slice (B.as_seq h1 dst) (U32.v ofs) (B.length dst));
+  (S.equal) { }
+    S.append (S.slice (B.as_seq h0 dst) 0 (U32.v ofs))
+      (S.slice (B.as_seq h1 dst) (U32.v ofs) (B.length dst));
+  (S.equal) { pointwise_seq_map2 op (B.as_seq h0 dst') (B.as_seq h0 src) 0 }
+    S.append (S.slice (B.as_seq h0 dst) 0 (U32.v ofs))
+      (Spec.QUIC.pointwise_op op
+        (S.slice (B.as_seq h0 dst) (U32.v ofs) (B.length dst))
+        (B.as_seq h0 src)
+        0);
+  (S.equal) { Spec.QUIC.pointwise_op_suff op (S.slice (B.as_seq h0 dst) 0 (U32.v ofs))
+    (S.slice (B.as_seq h0 dst) (U32.v ofs) (B.length dst))
+    (B.as_seq h0 src)
+    (U32.v ofs)
+  }
+    Spec.QUIC.pointwise_op op
+      (S.append (S.slice (B.as_seq h0 dst) 0 (U32.v ofs))
+        (S.slice (B.as_seq h0 dst) (U32.v ofs) (B.length dst)))
+      (B.as_seq h0 src)
+      (U32.v ofs);
+  (S.equal) { lemma_slice (B.as_seq h0 dst) (U32.v ofs) }
+    Spec.QUIC.pointwise_op op
+      (B.as_seq h0 dst)
+      (B.as_seq h0 src)
+      (U32.v ofs);
+  }
 
-val and_inplace (dst src: B.buffer U8.t) (len: U32.t { B.length dst = U32.v len }):
+let header_footprint (h: header) =
+  let open B in
+  match h with
+  | Short _ _ cid _ -> loc_buffer cid
+  | Long _ _ dcid _ scid _ _ -> loc_buffer dcid `loc_union` loc_buffer scid
+
+let header_disjoint (h: header) =
+  let open B in
+  match h with
+  | Short _ _ cid _ -> True
+  | Long _ _ dcid _ scid _ _ -> B.disjoint dcid scid
+
+assume
+val format_header (dst: B.buffer U8.t) (h: header) (npn: B.buffer U8.t) (pn_len: u2):
   Stack unit
-    (requires fun h0 ->
-      B.(all_live h0 [ buf dst; buf src ]) /\
-      B.disjoint dst src /\
-      B.length dst = B.length src)
-    (ensures fun h0 _ h1 ->
-      B.(modifies (loc_buffer dst) h0 h1) /\
-      B.as_seq h1 dst `S.equal` Spec.QUIC.and_inplace (B.as_seq h0 dst) (B.as_seq h0 src) 0)
+    (requires (fun h0 ->
+      B.length dst = Spec.QUIC.header_len (g_header h h0) (U8.v pn_len) /\
+      B.length npn = 1 + U8.v pn_len /\
+      header_live h h0 /\
+      header_disjoint h /\
+      B.(all_disjoint [ loc_buffer dst; header_footprint h; loc_buffer npn ])))
+    (ensures (fun h0 _ h1 ->
+      B.(modifies (loc_buffer dst) h0 h1) /\ (
+      let fh = Spec.QUIC.format_header (g_header h h0) (B.as_seq h0 npn) in
+      S.slice (B.as_seq h1 dst) 0 (S.length fh) `S.equal` fh)))
 
-let and_inplace dst src len =
-  let h0 = ST.get () in
-  C.Loops.in_place_map2 dst src len U8.logand;
-  pointwise_seq_map2 U8.logand (B.as_seq h0 dst) (B.as_seq h0 src) 0
+let vlen (n:u62) : x:U8.t { U8.v x = Spec.QUIC.vlen (U64.v n) } =
+  assert_norm (pow2 6 = 64);
+  assert_norm (pow2 14 = 16384);
+  assert_norm (pow2 30 = 1073741824);
+  if n `U64.lt` 64UL then 1uy
+  else if n `U64.lt` 16384UL then 2uy
+  else if n `U64.lt` 1073741824UL then 4uy
+  else 8uy
+
+let header_len (h: header) (pn_len: u2): Stack U32.t
+  (requires fun h0 -> True)
+  (ensures fun h0 x h1 ->
+    U32.v x = Spec.QUIC.header_len (g_header h h0) (U8.v pn_len) /\
+    h0 == h1)
+=
+  [@inline_let]
+  let u32_of_u8 = FStar.Int.Cast.uint8_to_uint32 in
+  [@inline_let]
+  let u64_of_u32 = FStar.Int.Cast.uint32_to_uint64 in
+  match h with
+  | Short _ _ _ cid_len ->
+      U32.(1ul +^ u32_of_u8 cid_len +^ 1ul +^ u32_of_u8 pn_len)
+  | Long _ _ _ dcil _ scil plain_len ->
+      assert_norm (pow2 32 < pow2 62);
+      U32.(6ul +^ u32_of_u8 (add3 dcil) +^ u32_of_u8 (add3 scil) +^
+        u32_of_u8 (vlen (u64_of_u32 plain_len)) +^ 1ul +^ u32_of_u8 pn_len)
 
 let encrypt #i s dst h plain plain_len pn_len =
   let State hash_alg aead_alg e_traffic_secret e_initial_pn aead_state iv hp_key pn = !*s in

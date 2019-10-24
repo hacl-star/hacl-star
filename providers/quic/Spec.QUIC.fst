@@ -2588,6 +2588,7 @@ let declassify : squash (Lib.IntTypes.uint8 == UInt8.t)= ()
 let encrypt a k siv hpk pn_len seqn h plain =
   let open FStar.Endianness in
   assert_norm(pow2 62 < pow2 (8 `op_Multiply` 12));
+  // packet number bytes
   let pnb = n_to_be 12 seqn in
   let npn : lbytes (1+pn_len) = S.slice pnb (11 - pn_len) 12 in
   let header = format_header h npn in
