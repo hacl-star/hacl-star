@@ -5,7 +5,7 @@ module U32 = FStar.UInt32
 module U8 = FStar.UInt8
 module H = Spec.Agile.Hash
 module HD = Spec.Hash.Definitions
-module C16 = Spec.Cipher16
+module Cipher = Spec.Agile.Cipher
 module AEAD = Spec.Agile.AEAD
 module HKDF = Spec.Agile.HKDF
 
@@ -1386,7 +1386,7 @@ let pointwise_op_dec (#a:eqtype) (f:a->a->a) (a1 a2 b:S.seq a) (pos:nat) : Lemma
 
 
 // application: byte-wise xor
-let rec xor_inplace (b1 b2:bytes) (pos:nat)
+let xor_inplace (b1 b2:bytes) (pos:nat)
   : Pure bytes
   (requires S.length b2 + pos <= S.length b1)
   (ensures fun b -> S.length b == S.length b1)
@@ -1493,13 +1493,6 @@ let rec and_inplace (b1 b2:bytes) (pos:nat)
   (decreases (S.length b2)) =
   pointwise_op U8.logand b1 b2 pos
 
-
-
-let calg_of_ae (a:ea) = match a with
-| AEAD.AES128_GCM -> C16.AES128
-| AEAD.AES256_GCM -> C16.AES256
-| AEAD.CHACHA20_POLY1305 -> C16.CHACHA20
-
 let lemma_format_len (a:ea) (h:header) (npn:npn)
   : Lemma (S.length (format_header h npn) <= AEAD.max_length a)
   = assert_norm(54 < pow2 32 - 70)
@@ -1518,6 +1511,22 @@ let pn_sizemask (pn_len:nat2) : lbytes 4 =
   let open FStar.Endianness in
   n_to_be 4 (pow2 32 - pow2 (24 - (8 `op_Multiply` pn_len)))
 
+let block_of_sample a (k: Cipher.key a) (sample: lbytes 16) =
+  let open FStar.Mul in
+  let ctr, iv = match a with
+    | Cipher.CHACHA20 ->
+        let ctr_bytes, iv = S.split sample 4 in
+        FStar.Endianness.lemma_le_to_n_is_bounded ctr_bytes;
+        assert_norm (pow2 (8 * 4) = pow2 32);
+        FStar.Endianness.le_to_n ctr_bytes, iv
+    | _ ->
+        let iv, ctr_bytes = S.split sample 12 in
+        FStar.Endianness.lemma_be_to_n_is_bounded ctr_bytes;
+        assert_norm (pow2 (8 * 4) = pow2 32);
+        FStar.Endianness.be_to_n ctr_bytes, iv
+  in
+  Cipher.ctr_block a k iv ctr
+
 let header_encrypt a hpk h npn c =
   assert_norm(max_cipher_length < pow2 62);
   let pn_offset = match h with
@@ -1525,7 +1534,7 @@ let header_encrypt a hpk h npn c =
     | Long _ _ dcil scil _ _ pl -> 6 + add3 dcil + add3 scil + vlen pl in
   let pn_len = S.length npn - 1 in
   let sample = S.slice c (3-pn_len) (19-pn_len) in
-  let mask = C16.block (calg_of_ae a) hpk sample in
+  let mask = block_of_sample (AEAD.cipher_alg_of_supported_alg a) hpk sample in
   let pnmask = and_inplace (S.slice mask 1 5) (pn_sizemask pn_len) 0 in
   let sflags = if Short? h then 0x1fuy else 0x0fuy in
   let fmask = S.create 1 U8.(S.index mask 0 `logand` sflags) in
@@ -1564,7 +1573,7 @@ let header_decrypt a hpk cid_len packet =
   | None -> H_Failure
   | Some (sample,pn_offset) ->
     //let sample = S.slice packet so (so + 16) in
-    let mask = C16.block (calg_of_ae a) hpk sample in
+    let mask = block_of_sample (AEAD.cipher_alg_of_supported_alg a) hpk sample in
     let sflags = if is_short then 0x1fuy else 0x0fuy in
     let fmask = S.create 1 U8.(S.index mask 0 `logand` sflags) in
     let packet' = xor_inplace packet fmask 0 in
@@ -1654,6 +1663,7 @@ let bitfield_vs_bitvector (n:pos) (b:FStar.UInt.uint_t n) : Lemma
   FStar.Classical.forall_intro proof_with_fixed_index
 
 
+#restart-solver
 let lemma_charac_bitwise_aux (n:pos) (f:bool->bool->bool) (l1 l2:list bool) (i:nat) : Lemma
   (requires List.Tot.length l1 = n /\ List.Tot.length l2 = n /\ i < n)
   (ensures (
@@ -1832,7 +1842,7 @@ let lemma_header_encrypt_type_short a hpk h npn c : Lemma
       match h with
       | Long _ _ dcil scil _ _ pl -> 6 + add3 dcil + add3 scil + vlen pl in
     let sample = S.slice c (3-pn_len) (19-pn_len) in
-    let mask = C16.block (calg_of_ae a) hpk sample in
+    let mask = block_of_sample (AEAD.cipher_alg_of_supported_alg a) hpk sample in
     let pnmask = and_inplace (S.slice mask 1 5) (pn_sizemask pn_len) 0 in
     let sflags = 0x0fuy in
     let fmask = S.create 1 U8.(S.index mask 0 `logand` sflags) in
@@ -1879,7 +1889,7 @@ let lemma_header_encrypt_type_long a hpk h npn c : Lemma
       match h with
       | Short _ _ cid -> 1 + S.length cid in
     let sample = S.slice c (3-pn_len) (19-pn_len) in
-    let mask = C16.block (calg_of_ae a) hpk sample in
+    let mask = block_of_sample (AEAD.cipher_alg_of_supported_alg a) hpk sample in
     let pnmask = and_inplace (S.slice mask 1 5) (pn_sizemask pn_len) 0 in
     let sflags = 0x1fuy in
     let fmask = S.create 1 U8.(S.index mask 0 `logand` sflags) in
@@ -1962,7 +1972,7 @@ let lemma_header_encryption_short_sample a k h npn c : Lemma
   let pn_len = S.length npn - 1 in
   let pn_offset = 1 + S.length (Short?.cid h) in
   let sample = S.slice c (3-pn_len) (19-pn_len) in
-  let mask = C16.block (calg_of_ae a) k sample in
+  let mask = block_of_sample (AEAD.cipher_alg_of_supported_alg a) k sample in
   let pnmask = and_inplace (S.slice mask 1 5) (pn_sizemask pn_len) 0 in
   let sflags = 0x1fuy in
   let fmask = S.create 1 U8.(S.index mask 0 `logand` sflags) in
@@ -2002,7 +2012,7 @@ let lemma_header_encryption_correct_short a k h (npn:npn) c : Lemma
   let pn_len = S.length npn - 1 in
   let pn_offset = 1 + S.length (Short?.cid h) in
   let sample = S.slice c (3-pn_len) (19-pn_len) in
-  let mask = C16.block (calg_of_ae a) k sample in
+  let mask = block_of_sample (AEAD.cipher_alg_of_supported_alg a) k sample in
   let pnmask = and_inplace (S.slice mask 1 5) (pn_sizemask pn_len) 0 in
   let sflags = 0x1fuy in
   let fmask = S.create 1 U8.(S.index mask 0 `logand` sflags) in
@@ -2157,6 +2167,7 @@ let lemma_long_header_plen_offset (h:header) (npn:npn) (c:cbytes) (b:bytes) : Le
   lemma_varint (Long?.len h) (S.slice b offset (S.length b));
   slice_trans b pre_offset offset (S.length b)
 
+#push-options "--z3rlimit 40 --max_fuel 2 --initial_fuel 2 --max_ifuel 1 --initial_ifuel 1"
 let lemma_header_encryption_long_sample a k h (npn:npn) c : Lemma
   (requires Long? h)
   (ensures (
@@ -2172,7 +2183,7 @@ let lemma_header_encryption_long_sample a k h (npn:npn) c : Lemma
   let pn_len = S.length npn - 1 in
   let pn_offset = long_header_npn_offset h in
   let sample = S.slice c (3-pn_len) (19-pn_len) in
-  let mask = C16.block (calg_of_ae a) k sample in
+  let mask = block_of_sample (AEAD.cipher_alg_of_supported_alg a) k sample in
   let pnmask = and_inplace (S.slice mask 1 5) (pn_sizemask pn_len) 0 in
   let sflags = 0x0fuy in
   let fmask = S.create 1 U8.(S.index mask 0 `logand` sflags) in
@@ -2183,7 +2194,10 @@ let lemma_header_encryption_long_sample a k h (npn:npn) c : Lemma
   // computation of the sample
   let preserved_indexes (i:nat{1 <= i /\ i < pn_offset}) : Lemma
     (S.index packet i = S.index r1 i) =
+    assert (S.length fmask = 1);
+    assert (S.equal packet (pointwise_op U8.logxor r2 fmask 0));
     pointwise_index3 U8.logxor r2 fmask i 0;
+    assert (S.index packet i = S.index r2 i);
     pointwise_index1 U8.logxor r1 pnmask i pn_offset in
 
   FStar.Classical.forall_intro preserved_indexes;
@@ -2199,16 +2213,17 @@ let lemma_header_encryption_long_sample a k h (npn:npn) c : Lemma
         assert (S.equal res_sample S.(slice packet (pn_offset+4) (pn_offset+20)));
 
         let preserved_indexes_end (i:nat{i >= pn_offset+4 /\ i < pn_offset+20}) : Lemma
-      (S.index packet i = S.index r1 i) =
-               pointwise_index3 U8.logxor r2 fmask i 0;
-               pointwise_index3 U8.logxor r1 pnmask i pn_offset in
+          (S.index packet i = S.index r1 i) =
+          pointwise_index3 U8.logxor r2 fmask i 0;
+          pointwise_index3 U8.logxor r1 pnmask i pn_offset
+        in
 
-               FStar.Classical.forall_intro preserved_indexes_end;
-               extensionality_slice packet r1 (pn_offset+4) (pn_offset+20);
-               assert (S.equal res_sample S.(slice r1 (pn_offset+4) (pn_offset+20)));
-               lemma_long_header_npn_offset_shift h npn c;
-               assert (S.(slice r1 (pn_offset+4) (pn_offset+20)) = sample);
-               assert (long_sample packet = Some (res_sample,pn_offset))
+        FStar.Classical.forall_intro preserved_indexes_end;
+        extensionality_slice packet r1 (pn_offset+4) (pn_offset+20);
+        assert (S.equal res_sample S.(slice r1 (pn_offset+4) (pn_offset+20)));
+        lemma_long_header_npn_offset_shift h npn c;
+        assert (S.(slice r1 (pn_offset+4) (pn_offset+20)) = sample);
+        assert (long_sample packet == Some (res_sample,pn_offset))
       end
     end
 
@@ -2221,7 +2236,7 @@ let lemma_header_encryption_correct_long a k (h:header) (npn:npn) (c:cbytes{Long
   let pn_len = S.length npn - 1 in
   let pn_offset = 6 + add3 (Long?.dcil h) + add3 (Long?.scil h) + vlen (Long?.len h) in
   let sample = S.slice c (3-pn_len) (19-pn_len) in
-  let mask = C16.block (calg_of_ae a) k sample in
+  let mask = block_of_sample (AEAD.cipher_alg_of_supported_alg a) k sample in
   let pnmask = and_inplace (S.slice mask 1 5) (pn_sizemask pn_len) 0 in
   let sflags = 0x0fuy in
   let fmask = S.create 1 U8.(S.index mask 0 `logand` sflags) in
@@ -2335,12 +2350,11 @@ let lemma_decomp_mask_encrypt (flag x:byte) (fmask:lbytes 1) (cid npn c pnmask:b
 
 
 
+#push-options "--max_fuel 2 --initial_fuel 2 --max_ifuel 1 --initial_ifuel 1"
 let lemma_xor_inplace_byte (a b:byte) : Lemma
   (S.equal (xor_inplace (S.create 1 a) (S.create 1 b) 0) (S.create 1 (a `U8.logxor` b))) =
   ()
 
-
-#push-options "--z3rlimit 30"
 let lemma_header_encrypt_dec a k h (npn:lbytes 2) (c:cbytes) : Lemma
   (requires Short? h /\ S.length (Short?.cid h) <> 0)
   (ensures (
@@ -2349,7 +2363,7 @@ let lemma_header_encrypt_dec a k h (npn:lbytes 2) (c:cbytes) : Lemma
     assert_norm (List.Tot.length l = 8);
     let flag = of_bitfield8 l in
     let sample = slice c 2 18 in
-    let mask = C16.block (calg_of_ae a) k sample in
+    let mask = block_of_sample (AEAD.cipher_alg_of_supported_alg a) k sample in
     let pnmask = and_inplace (slice mask 1 5) (pn_sizemask 1) 0 in
     let flag' = create 1 U8.(flag `logxor` (index mask 0 `logand` 0x1fuy)) in
     let npn' = xor_inplace npn (slice pnmask 0 2) 0 in
@@ -2369,7 +2383,7 @@ let lemma_header_encrypt_dec a k h (npn:lbytes 2) (c:cbytes) : Lemma
   // computing packet
   let pn_offset = 1 + length (Short?.cid h) in
   let sample = S.slice c 2 18 in
-  let mask = C16.block (calg_of_ae a) k sample in
+  let mask = block_of_sample (AEAD.cipher_alg_of_supported_alg a) k sample in
   let pnmask = and_inplace (S.slice mask 1 5) (pn_sizemask 1) 0 in
   let fmask = U8.(S.index mask 0 `logand` 0x1fuy) in
   let r = xor_inplace fh pnmask pn_offset in
@@ -2384,7 +2398,6 @@ let lemma_header_encrypt_dec a k h (npn:lbytes 2) (c:cbytes) : Lemma
   let c' = xor_inplace c (slice pnmask 2 (length pnmask)) 0 in
   pointwise_op_pref U8.logxor (create 1 flag) (Short?.cid h @| npn' @| c') (create 1 fmask) 0;
   lemma_xor_inplace_byte flag fmask
-#pop-options
 
 
 let lemma_xor_inplace_byte2 (a b:byte) (c:lbytes 4) : Lemma
@@ -2393,6 +2406,7 @@ let lemma_xor_inplace_byte2 (a b:byte) (c:lbytes 4) : Lemma
     (let open U8 in let open S in
     create 1 (a `logxor` index c 0) @| create 1 (b `logxor` index c 1))) =
   pointwise_op_dec U8.logxor (S.create 1 a) (S.create 1 b) (S.slice c 0 2) 0
+#pop-options
 
 let lemma_header_encrypt_dec_npn_assoc a b c d e : Lemma
   (let open S in equal
@@ -2408,7 +2422,7 @@ let lemma_header_encrypt_dec_npn a k h (x npn:byte) (c:cbytes) : Lemma
     assert_norm (List.Tot.length l = 8);
     let flag = of_bitfield8 l in
     let sample = slice c 2 18 in
-    let mask = C16.block (calg_of_ae a) k sample in
+    let mask = block_of_sample (AEAD.cipher_alg_of_supported_alg a) k sample in
     let pnmask = and_inplace (slice mask 1 5) (pn_sizemask 1) 0 in
     let flag' = create 1 U8.(flag `logxor` (index mask 0 `logand` 0x1fuy)) in
     let x' = x `U8.logxor` index pnmask 0 in
@@ -2422,7 +2436,7 @@ let lemma_header_encrypt_dec_npn a k h (x npn:byte) (c:cbytes) : Lemma
   assert_norm (List.Tot.length l = 8);
   let flag = of_bitfield8 l in
   let sample = slice c 2 18 in
-  let mask = C16.block (calg_of_ae a) k sample in
+  let mask = block_of_sample (AEAD.cipher_alg_of_supported_alg a) k sample in
   let pnmask = and_inplace (slice mask 1 5) (pn_sizemask 1) 0 in
   let flag' = create 1 U8.(flag `logxor` (index mask 0 `logand` 0x1fuy)) in
   let x' = x `U8.logxor` index pnmask 0 in
@@ -2448,7 +2462,7 @@ let lemma_header_encrypt_dec_cid a k h (x' y npn:byte) (c:cbytes) : Lemma
     assert_norm (List.Tot.length l = 8);
     let flag = of_bitfield8 l in
     let sample = slice c 2 18 in
-    let mask = C16.block (calg_of_ae a) k sample in
+    let mask = block_of_sample (AEAD.cipher_alg_of_supported_alg a) k sample in
     let pnmask = and_inplace (slice mask 1 5) (pn_sizemask 1) 0 in
     let flag' = create 1 U8.(flag `logxor` (index mask 0 `logand` 0x1fuy)) in
     let y' = y `U8.logxor` index pnmask 1 in
@@ -2463,7 +2477,7 @@ let lemma_header_encrypt_dec_cid a k h (x' y npn:byte) (c:cbytes) : Lemma
   assert_norm (List.Tot.length l = 8);
   let flag = of_bitfield8 l in
   let sample = slice c 2 18 in
-  let mask = C16.block (calg_of_ae a) k sample in
+  let mask = block_of_sample (AEAD.cipher_alg_of_supported_alg a) k sample in
   let pnmask = and_inplace (slice mask 1 5) (pn_sizemask 1) 0 in
   let flag' = create 1 U8.(flag `logxor` (index mask 0 `logand` 0x1fuy)) in
   let y' = y `U8.logxor` index pnmask 1 in
@@ -2493,7 +2507,7 @@ let compute_new_header_after_insertion (a:ea) (k:lbytes (ae_keysize a)) (spin ph
   assert_norm (List.Tot.length l = 8);
   let flag = of_bitfield8 l in
   let sample = slice c 2 18 in
-  let mask = C16.block (calg_of_ae a) k sample in
+  let mask = block_of_sample (AEAD.cipher_alg_of_supported_alg a) k sample in
   let pnmask = and_inplace (slice mask 1 5) (pn_sizemask 1) 0 in
 
   let h = Short spin phase cid in
@@ -2590,6 +2604,7 @@ let encrypt a k siv hpk pn_len seqn h plain =
 
 
 // replaces a%b by new_mod
+#restart-solver
 let replace_modulo (a b new_mod:nat) : Pure nat
   (requires b > 0 /\ new_mod < b)
   (ensures fun res -> res % b = new_mod /\ res / b = a / b) =
@@ -2636,6 +2651,7 @@ let lemma_replace_modulo_bound (a mod_pow new_mod up_pow:nat) : Lemma
 (* From https://tools.ietf.org/html/draft-ietf-quic-transport-22#appendix-A *)
 let reduce_pn pn_len pn = pn % (bound_npn pn_len)
 
+#push-options "--max_fuel 2 --initial_fuel 2 --max_ifuel 1 --initial_ifuel 1"
 let expand_pn pn_len last npn =
   let open FStar.Mul in
   let open FStar.Math.Lemmas in
@@ -2652,6 +2668,7 @@ let expand_pn pn_len last npn =
     let _ = lemma_mod_plus candidate (-1) bound in
     candidate - bound
   else candidate
+#pop-options
 
 
 let lemma_uniqueness_in_window (pn_len:nat2) (last x y:nat62) : Lemma
@@ -2722,12 +2739,12 @@ let lemma_propagate_mul_mod (a b:nat) : Lemma
   modulo_range_lemma a b;
   small_mod r (2*b)
 
+#push-options "--max_fuel 2 --initial_fuel 2 --max_ifuel 1 --initial_ifuel 1 --z3rlimit 60" // strange that F* has so much trouble completing this induction
 let recompose_pow2_assoc (n:pos) (a:nat) : Lemma
   (let open FStar.Mul in 2 * (pow2 (n-1) * a) = pow2 n * a) =
   ()
 
 
-#push-options "--max_fuel 2 --initial_fuel 2 --max_ifuel 1 --initial_ifuel 1 --z3rlimit 60" // strange that F* has so much trouble completing this induction
 let rec lemma_propagate_pow_mod (a b n:nat) : Lemma
   (requires b > 0)
   (ensures (
