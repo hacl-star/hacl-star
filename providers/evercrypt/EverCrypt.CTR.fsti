@@ -164,14 +164,13 @@ let update_block_st (a: alg) =
       B.(loc_disjoint (loc_buffer src) (footprint h0 s)) /\
       B.(loc_disjoint (loc_buffer dst) (footprint h0 s)) /\
       B.disjoint src dst /\
-      invariant h0 s /\
-      ctr h0 s < pow2 32 - 1))
+      invariant h0 s))
     (ensures (fun h0 _ h1 ->
       preserves_freeable s h0 h1 /\
       invariant h1 s /\
       B.(modifies (footprint_s (B.deref h0 s) `loc_union` loc_buffer dst) h0 h1) /\
       footprint h0 s == footprint h1 s /\
-      ctr h1 s == ctr h0 s + 1 /\
+      (ctr h0 s < pow2 32 - 1 ==> ctr h1 s == ctr h0 s + 1) /\
       B.as_seq h1 dst == Spec.Loops.seq_map2 xor8 (B.as_seq h0 src)
         (Spec.ctr_block a (kv (B.deref h0 s)) (iv (B.deref h0 s)) (ctr h0 s))))
 

@@ -244,7 +244,8 @@ let label_key = LowStar.ImmutableBuffer.igcmalloc_of_list HS.root Spec.QUIC.labe
 let label_iv = LowStar.ImmutableBuffer.igcmalloc_of_list HS.root Spec.QUIC.label_iv_l
 let label_hp = LowStar.ImmutableBuffer.igcmalloc_of_list HS.root Spec.QUIC.label_hp_l
 
-#push-options "--z3rlimit 400 --query_stats"
+// JP: this proof currently takes 12 minutes. It could conceivably be improved.
+#push-options "--z3rlimit 1000 --query_stats"
 let create_in i r dst initial_pn traffic_secret =
   LowStar.ImmutableBuffer.recall label_key;
   LowStar.ImmutableBuffer.recall_contents label_key Spec.QUIC.label_key;
@@ -288,6 +289,7 @@ let create_in i r dst initial_pn traffic_secret =
   (**) B.(modifies_loc_includes (loc_unused_in h1) h2 h3
     (loc_buffer ctr_state `loc_union` loc_buffer aead_state));
   (**) B.(modifies_trans (loc_unused_in h1) h1 h2 (loc_unused_in h1) h3);
+
   match ret with
   | UnsupportedAlgorithm ->
       pop_frame ();
@@ -299,8 +301,6 @@ let create_in i r dst initial_pn traffic_secret =
       | UnsupportedAlgorithm ->
           pop_frame ();
           UnsupportedAlgorithm
-
-      // InvalidIVLength ruled out statically
 
       | Success ->
       // JP: there is something difficult to prove here... confused.
@@ -589,6 +589,32 @@ let header_len (h: header) (pn_len: u2): Stack U32.t
       U32.(6ul +^ u32_of_u8 (add3 dcil) +^ u32_of_u8 (add3 scil) +^
         u32_of_u8 (vlen (u64_of_u32 plain_len)) +^ 1ul +^ u32_of_u8 pn_len)
 
+let block_len (a: Spec.Agile.Cipher.cipher_alg):
+  x:U32.t { U32.v x = Spec.Agile.Cipher.block_length a }
+=
+  let open Spec.Agile.Cipher in
+  match a with | CHACHA20 -> 64ul | _ -> 16ul
+
+#push-options "--max_fuel 1"
+let rec seq_map2_xor0 (s1 s2: S.seq U8.t): Lemma
+  (requires
+    S.length s1 = S.length s2 /\
+    s1 `S.equal` S.create (S.length s2) 0uy)
+  (ensures
+    Spec.Loops.seq_map2 CTR.xor8 s1 s2 `S.equal` s2)
+  (decreases (S.length s1))
+=
+  if S.length s1 = 0 then
+    ()
+  else
+    let open FStar.UInt in
+    logxor_lemma_1 #8 (U8.v (S.head s2));
+    logxor_lemma_1 #8 (U8.v (S.head s1));
+    logxor_commutative (U8.v (S.head s1)) (U8.v (S.head s2));
+    seq_map2_xor0 (S.tail s1) (S.tail s2)
+#pop-options
+
+#push-options "--z3rlimit 100"
 inline_for_extraction
 let block_of_sample (a: Spec.Agile.Cipher.cipher_alg)
   (dst: B.buffer U8.t)
@@ -606,18 +632,51 @@ let block_of_sample (a: Spec.Agile.Cipher.cipher_alg)
       B.length dst = 16 /\
       B.length sample = 16)
     (ensures fun h0 _ h1 ->
-      B.(modifies (loc_buffer dst) h0 h1) /\
+      B.(modifies (loc_buffer dst `loc_union` CTR.footprint h0 s) h0 h1) /\
       B.as_seq h1 dst `S.equal`
         Spec.QUIC.block_of_sample a (B.as_seq h0 k) (B.as_seq h0 sample))
 =
-  match a with
+  push_frame ();
+  (**) let h0 = ST.get () in
+  let zeroes = B.alloca 0uy (block_len a) in
+  let dst_block = B.alloca 0uy (block_len a) in
+  begin match a with
   | Spec.Agile.Cipher.CHACHA20 ->
       let ctr = LowStar.Endianness.load32_le (B.sub sample 0ul 4ul) in
       let iv = B.sub sample 4ul 12ul in
+      (**) let h1 = ST.get () in
       CTR.init (G.hide a) s k iv 12ul ctr;
-      admit ()
+      CTR.update_block (G.hide a) s dst_block zeroes;
+      (**) let h2 = ST.get () in
+      (**) seq_map2_xor0 (B.as_seq h1 dst_block)
+      (**)   (Spec.Agile.Cipher.ctr_block a (B.as_seq h0 k) (B.as_seq h1 iv) (U32.v ctr));
+      (**) assert (B.as_seq h2 dst_block `S.equal`
+      (**)   Spec.Agile.Cipher.ctr_block a (B.as_seq h0 k) (B.as_seq h1 iv) (U32.v ctr));
+      let dst_slice = B.sub dst_block 0ul 16ul in
+      (**) assert (B.as_seq h2 dst_slice `S.equal` S.slice (
+      (**)   Spec.Agile.Cipher.ctr_block a (B.as_seq h0 k) (B.as_seq h1 iv) (U32.v ctr)
+      (**) ) 0 16);
+      B.blit dst_slice 0ul dst 0ul 16ul
   | _ ->
-      admit ()
+      let ctr = LowStar.Endianness.load32_be (B.sub sample 12ul 4ul) in
+      let iv = B.sub sample 0ul 12ul in
+      (**) let h1 = ST.get () in
+      CTR.init (G.hide a) s k iv 12ul ctr;
+      CTR.update_block (G.hide a) s dst_block zeroes;
+      (**) let h2 = ST.get () in
+      (**) seq_map2_xor0 (B.as_seq h1 dst_block)
+      (**)   (Spec.Agile.Cipher.ctr_block a (B.as_seq h0 k) (B.as_seq h1 iv) (U32.v ctr));
+      (**) assert (B.as_seq h2 dst_block `S.equal`
+      (**)   Spec.Agile.Cipher.ctr_block a (B.as_seq h0 k) (B.as_seq h1 iv) (U32.v ctr));
+      let dst_slice = B.sub dst_block 0ul 16ul in
+      (**) assert (B.as_seq h2 dst_slice `S.equal` S.slice (
+      (**)   Spec.Agile.Cipher.ctr_block a (B.as_seq h0 k) (B.as_seq h1 iv) (U32.v ctr)
+      (**) ) 0 16);
+      B.blit dst_slice 0ul dst 0ul 16ul
+
+  end;
+  pop_frame ()
+#pop-options
 
 let encrypt #i s dst h plain plain_len pn_len =
   let State hash_alg aead_alg e_traffic_secret e_initial_pn

@@ -317,7 +317,7 @@ fun p dst src ->
   (**) vale_encrypt_is_hacl_encrypt i (G.reveal g_key) (B.as_seq h2 ctr_block)
     (B.as_seq h2 src);
 
-  let c = c0 `UInt32.add` 1ul in
+  let c = c0 `UInt32.add_mod` 1ul in
   p *= (State #(cipher_alg_of_impl i) i g_iv iv iv_len g_key ek c);
 
   pop_frame ();
