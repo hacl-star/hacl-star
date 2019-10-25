@@ -152,7 +152,10 @@ val frame_invariant: #i:index -> l:B.loc -> s:state i -> h0:HS.mem -> h1:HS.mem 
   ]]*)
 
 
-let add3 (k:u4) : n:U8.t{U8.v n <= 18} = if k = 0uy then 0uy else U8.(k +^ 3uy)
+let add3 (k:u4):
+  n:U8.t { U8.v n <= 18 /\ U8.v n = Spec.QUIC.add3 (U8.v k) }
+=
+  if k = 0uy then 0uy else U8.(k +^ 3uy)
 
 /// Information stored in a QUIC header. This is a Low* type passed by value --
 /// it's a little expensive. Consider passing it by reference in ``encrypt``?
