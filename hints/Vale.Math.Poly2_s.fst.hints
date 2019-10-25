@@ -1,1 +1,229 @@
-[ "ÿó[√Ÿ‹•®\nÍ[4ñO¢ê", [] ]
+[
+  "ÿó[√Ÿ‹•®\nÍ[4ñO¢ê",
+  [
+    [
+      "Vale.Math.Poly2_s.poly",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "assumption_FStar.Seq.Base.seq__uu___haseq", "equation_Prims.eqtype",
+        "equation_Vale.Math.Poly2.Defs_s.poly",
+        "function_token_typing_Prims.bool",
+        "haseqTm_refine_f57a9e437e59d89f626741292bcb316f",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+      ],
+      0,
+      "a11bc163f4097611fe940b316584e299"
+    ],
+    [
+      "Vale.Math.Poly2_s.zero",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "bool_typing",
+        "equation_Prims.eqtype", "equation_Prims.nat",
+        "equation_Vale.Math.Poly2.Defs_s.valid",
+        "equation_Vale.Math.Poly2.Defs_s.zero",
+        "function_token_typing_Prims.bool", "int_typing",
+        "lemma_FStar.Seq.Base.lemma_create_len", "primitive_Prims.op_BarBar",
+        "primitive_Prims.op_Equality", "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "7b3d8078c4b4688f1fbbdf5d46313187"
+    ],
+    [
+      "Vale.Math.Poly2_s.one",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_f537159ed795b314b4e58c260361ae86", "bool_inversion",
+        "bool_typing", "equation_Prims.eqtype", "equation_Prims.nat",
+        "equation_Vale.Math.Poly2.Defs_s.one",
+        "equation_Vale.Math.Poly2.Defs_s.valid",
+        "function_token_typing_Prims.bool", "int_typing",
+        "lemma_FStar.Seq.Base.lemma_create_len",
+        "lemma_FStar.Seq.Base.lemma_index_create",
+        "primitive_Prims.op_BarBar", "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
+        "refinement_interpretation_Tm_refine_d83f8da8ef6c1cb9f71d1465c1bb1c55",
+        "typing_FStar.Seq.Base.index", "typing_Vale.Math.Poly2.Defs_s.one",
+        "typing_Vale.Math.Poly2.Defs_s.valid"
+      ],
+      0,
+      "105d4584f4c693258cf3bd7c65605eea"
+    ],
+    [
+      "Vale.Math.Poly2_s.to_seq",
+      1,
+      1,
+      0,
+      [ "@query", "equation_Vale.Math.Poly2_s.poly_index" ],
+      0,
+      "06790d1b40e71f64164f033fac3e866b"
+    ],
+    [
+      "Vale.Math.Poly2_s.of_seq",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_Vale.Math.Poly2.Defs_s.degree",
+        "equation_Vale.Math.Poly2_s.degree",
+        "equation_Vale.Math.Poly2_s.poly_index",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_1df65257096079d187d68ee028bb4224",
+        "typing_Vale.Math.Poly2.Defs_s.of_seq"
+      ],
+      0,
+      "f5ea76be817778435ebafd973b340160"
+    ],
+    [
+      "Vale.Math.Poly2_s.of_fun",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_Vale.Math.Poly2.Defs_s.degree",
+        "equation_Vale.Math.Poly2_s.degree",
+        "equation_Vale.Math.Poly2_s.poly_index",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_b7f59fbe639567c5ab8ed10579365264",
+        "typing_Vale.Math.Poly2.Defs_s.of_fun"
+      ],
+      0,
+      "c0c0f24b41d12c191b93ffcb64463c43"
+    ],
+    [
+      "Vale.Math.Poly2_s.div",
+      1,
+      1,
+      0,
+      [
+        "@query", "equation_Vale.Math.Poly2.Defs_s.degree",
+        "equation_Vale.Math.Poly2_s.degree",
+        "primitive_Prims.op_GreaterThanOrEqual",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "fc9bdf39230314d03927313c0fcb1bc7"
+    ],
+    [
+      "Vale.Math.Poly2_s.mod",
+      1,
+      1,
+      0,
+      [
+        "@query", "equation_Vale.Math.Poly2.Defs_s.degree",
+        "equation_Vale.Math.Poly2_s.degree",
+        "primitive_Prims.op_GreaterThanOrEqual",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "4203bea66c50c7103e845beed012ca0f"
+    ],
+    [
+      "Vale.Math.Poly2_s.coerce",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_754b00004f4a881ff74d076ab276dfe1"
+      ],
+      0,
+      "8da02ccca8767ce073d022a8f5345f36"
+    ],
+    [
+      "Vale.Math.Poly2_s.of_poly",
+      1,
+      1,
+      0,
+      [ "@query" ],
+      0,
+      "7d95e238f6746fe09d8b025a70773691"
+    ],
+    [
+      "Vale.Math.Poly2_s.reveal_defs",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "Prims_pretyping_f537159ed795b314b4e58c260361ae86", "bool_inversion",
+        "bool_typing", "equation_Prims.eqtype", "equation_Prims.nat",
+        "equation_Vale.Math.Poly2.Defs_s.degree",
+        "equation_Vale.Math.Poly2.Defs_s.one",
+        "equation_Vale.Math.Poly2.Defs_s.valid",
+        "equation_Vale.Math.Poly2.Defs_s.zero",
+        "equation_Vale.Math.Poly2_s.degree",
+        "equation_Vale.Math.Poly2_s.poly",
+        "function_token_typing_Prims.__cache_version_number__",
+        "function_token_typing_Prims.bool", "int_typing",
+        "lemma_FStar.Seq.Base.lemma_create_len",
+        "lemma_FStar.Seq.Base.lemma_index_create",
+        "primitive_Prims.op_BarBar", "primitive_Prims.op_Equality",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
+        "refinement_interpretation_Tm_refine_d83f8da8ef6c1cb9f71d1465c1bb1c55",
+        "typing_FStar.Seq.Base.index", "typing_Vale.Math.Poly2.Defs_s.one",
+        "typing_Vale.Math.Poly2.Defs_s.valid",
+        "typing_Vale.Math.Poly2.Defs_s.zero"
+      ],
+      0,
+      "6cc2e447d70ac4f00e9406544d11c029"
+    ],
+    [
+      "Vale.Math.Poly2_s.reveal_defs",
+      2,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_f537159ed795b314b4e58c260361ae86", "bool_inversion",
+        "bool_typing", "equation_Prims.eqtype", "equation_Prims.nat",
+        "equation_Vale.Math.Poly2.Defs_s.one",
+        "equation_Vale.Math.Poly2.Defs_s.poly",
+        "equation_Vale.Math.Poly2.Defs_s.valid",
+        "equation_Vale.Math.Poly2_s.add",
+        "equation_Vale.Math.Poly2_s.degree",
+        "equation_Vale.Math.Poly2_s.div", "equation_Vale.Math.Poly2_s.mod",
+        "equation_Vale.Math.Poly2_s.monomial",
+        "equation_Vale.Math.Poly2_s.mul", "equation_Vale.Math.Poly2_s.one",
+        "equation_Vale.Math.Poly2_s.poly",
+        "equation_Vale.Math.Poly2_s.poly_index",
+        "equation_Vale.Math.Poly2_s.reverse",
+        "equation_Vale.Math.Poly2_s.shift",
+        "equation_Vale.Math.Poly2_s.zero",
+        "function_token_typing_Prims.bool", "int_typing",
+        "lemma_FStar.Seq.Base.lemma_create_len",
+        "primitive_Prims.op_GreaterThanOrEqual",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_f57a9e437e59d89f626741292bcb316f",
+        "typing_Vale.Math.Poly2.Defs_s.valid",
+        "typing_Vale.Math.Poly2.Defs_s.zero", "typing_Vale.Math.Poly2_s.zero"
+      ],
+      0,
+      "e94d7a90a3281603889e5fac2633b624"
+    ]
+  ]
+]

@@ -1,1 +1,84 @@
-[ "´À6IÅAa®∫·ûÚ…?–º", [] ]
+[
+  "´À6IÅAa®∫·ûÚ…?–º",
+  [
+    [
+      "Vale.Curve25519.FastHybrid_helpers.uu___2",
+      1,
+      1,
+      0,
+      [ "@query" ],
+      0,
+      "6fafcef4d35491805fbedddcedd9e421"
+    ],
+    [
+      "Vale.Curve25519.FastHybrid_helpers.lemma_mul_pow256_add",
+      1,
+      1,
+      0,
+      [ "@query" ],
+      0,
+      "35316446e6607770aa8de4284f733bd9"
+    ],
+    [
+      "Vale.Curve25519.FastHybrid_helpers.lemma_carry_prime",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Vale.Curve25519.Fast_defs.bit",
+        "equation_Vale.Def.Words_s.nat64", "equation_Vale.Def.Words_s.natN",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_b51b45ce195a33a465eab411d92fdae9",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
+      ],
+      0,
+      "fd650c9cb1385b589d36f6d695a46971"
+    ],
+    [
+      "Vale.Curve25519.FastHybrid_helpers.lemma_fast_mul1",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Vale.Curve25519.Fast_defs.add_carry",
+        "equation_Vale.Curve25519.Fast_defs.bit",
+        "equation_Vale.Def.Words_s.nat64", "equation_Vale.Def.Words_s.natN",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2", "int_inversion",
+        "int_typing", "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_b51b45ce195a33a465eab411d92fdae9",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
+      ],
+      0,
+      "945e2dbd42feedb6511859c9590ecad2"
+    ],
+    [
+      "Vale.Curve25519.FastHybrid_helpers.lemma_addition",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Vale.Curve25519.Fast_defs.add_carry",
+        "equation_Vale.Curve25519.Fast_defs.bit",
+        "equation_Vale.Def.Words_s.nat64", "equation_Vale.Def.Words_s.natN",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2", "int_inversion",
+        "int_typing", "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_b51b45ce195a33a465eab411d92fdae9",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
+      ],
+      0,
+      "94cb773a3f5e1748d99e014b81153904"
+    ]
+  ]
+]

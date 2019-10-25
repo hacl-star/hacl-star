@@ -1,1 +1,154 @@
-[ "dû∑ﬂ›µÁ\u0003OÖ\u001bﬁz  \u000f", [] ]
+[
+  "dû∑ﬂ›µÁ\u0003OÖ\u001bﬁz  \u000f",
+  [
+    [
+      "Vale.Interop.addrs_set_mem",
+      1,
+      1,
+      0,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_FStar.List.Tot.Base.memP.fuel_instrumented",
+        "@fuel_irrelevance_FStar.List.Tot.Base.memP.fuel_instrumented",
+        "@query", "equation_Vale.Interop.Types.b8",
+        "fuel_guarded_inversion_Vale.Interop.Heap_s.interop_heap",
+        "fuel_guarded_inversion_Vale.Interop.Types.b8_", "int_inversion",
+        "lemma_Vale.Interop.addrs_set_lemma",
+        "proj_equation_Vale.Interop.Heap_s.InteropHeap_ptrs",
+        "refinement_interpretation_Tm_refine_25f03280eee84f53f1b2ad3f058d1b9b",
+        "refinement_interpretation_Tm_refine_703c6f879c5b001c36b204e25e1b2371"
+      ],
+      0,
+      "3005a8d89d8ec080325ce8f69e921c3f"
+    ],
+    [
+      "Vale.Interop.same_unspecified_down",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_68aa0df7915bf348bcb6532fe1aaf275"
+      ],
+      0,
+      "4d35c9ec76e85e86e58efb1878ec41fe"
+    ],
+    [
+      "Vale.Interop.get_seq_heap",
+      1,
+      1,
+      0,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "FStar.Seq.Base_interpretation_Tm_arrow_44bb45ed5c2534b346e0f58ea5033251",
+        "Vale.Interop_interpretation_Tm_arrow_992025dc489e7315d2abb53d1ad49c82",
+        "b2t_def", "equation_FStar.UInt.fits", "equation_FStar.UInt.max_int",
+        "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
+        "equation_Prims.nat", "equation_Vale.Interop.Types.b8",
+        "fuel_guarded_inversion_Vale.Interop.Types.b8_",
+        "function_token_typing_FStar.UInt8.t", "int_typing",
+        "lemma_FStar.Seq.Base.lemma_init_len",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_AmpAmp",
+        "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_703c6f879c5b001c36b204e25e1b2371",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
+        "refinement_interpretation_Tm_refine_ff9cf9634d9ad82e44410ccec01e1955"
+      ],
+      0,
+      "6d34e9120ebb3c47eff81c912e94a34b"
+    ],
+    [
+      "Vale.Interop.up_mem",
+      1,
+      1,
+      0,
+      [ "@query" ],
+      0,
+      "ddbf62635015c70698133c56ff2f4d05"
+    ],
+    [
+      "Vale.Interop.down_up_identity",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Vale.Interop.Heap_s_interpretation_Tm_ghost_arrow_918a6217dad728349cf023555f8761c0",
+        "equation_Vale.Interop.Heap_s.correct_down",
+        "equation_Vale.Interop.Heap_s.down_mem_t",
+        "fuel_guarded_inversion_Vale.Interop.Heap_s.interop_heap",
+        "refinement_interpretation_Tm_refine_b50f45fba9bc6f60eec05ca9dc1f94ef",
+        "typing_Vale.Interop.down_mem"
+      ],
+      0,
+      "a16f3f23d6ecb5541c48fec5da7658ce"
+    ],
+    [
+      "Vale.Interop.up_down_identity",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_3a2dd58f50cd5923bb942c80f67255f6"
+      ],
+      0,
+      "3c00650cb6bfe62d3dd30ac36947fe80"
+    ],
+    [
+      "Vale.Interop.update_buffer_up_mem",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "equation_FStar.Seq.Properties.lseq",
+        "equation_LowStar.BufferView.Down.buffer", "equation_Prims.eqtype",
+        "equation_Vale.Arch.MachineHeap_s.machine_heap",
+        "equation_Vale.Def.Words_s.nat8",
+        "equation_Vale.Interop.Heap_s.correct_down",
+        "equation_Vale.Interop.Types.b8",
+        "equation_Vale.Interop.Types.down_view",
+        "equation_Vale.Interop.Types.get_downview",
+        "fuel_guarded_inversion_FStar.Pervasives.dtuple4",
+        "fuel_guarded_inversion_Vale.Interop.Heap_s.interop_heap",
+        "fuel_guarded_inversion_Vale.Interop.Types.b8_",
+        "function_token_typing_FStar.UInt8.t",
+        "function_token_typing_Prims.__cache_version_number__",
+        "function_token_typing_Prims.int",
+        "function_token_typing_Vale.Def.Words_s.nat8",
+        "lemma_FStar.Set.lemma_equal_elim",
+        "lemma_LowStar.BufferView.Down.as_buffer_mk_buffer_view",
+        "proj_equation_FStar.Pervasives.Mkdtuple4__1",
+        "proj_equation_FStar.Pervasives.Mkdtuple4__2",
+        "proj_equation_FStar.Pervasives.Mkdtuple4__3",
+        "proj_equation_Vale.Interop.Types.Buffer_bsrc",
+        "proj_equation_Vale.Interop.Types.Buffer_src",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_50d3b3dd51fb0799a5eeaaea500ed7b0",
+        "refinement_interpretation_Tm_refine_703c6f879c5b001c36b204e25e1b2371",
+        "refinement_interpretation_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e",
+        "refinement_interpretation_Tm_refine_b50f45fba9bc6f60eec05ca9dc1f94ef",
+        "refinement_interpretation_Tm_refine_f053bb82fde0bb5e3b79f846e507678a",
+        "refinement_interpretation_Tm_refine_ff9c29737b4a7ad4656cd79051ec80a3",
+        "typing_FStar.Map.domain",
+        "typing_Vale.Interop.Heap_s.__proj__InteropHeap__item__hs",
+        "typing_Vale.Interop.Types.__proj__Buffer__item__bsrc",
+        "typing_Vale.Interop.Types.__proj__Buffer__item__rel",
+        "typing_Vale.Interop.Types.__proj__Buffer__item__rrel",
+        "typing_Vale.Interop.Types.__proj__Buffer__item__src",
+        "typing_Vale.Interop.Types.base_typ_as_type",
+        "typing_Vale.Interop.Types.down_view"
+      ],
+      0,
+      "b3b782ed55c8a8a2913618240bae4480"
+    ]
+  ]
+]

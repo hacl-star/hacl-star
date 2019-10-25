@@ -1,1 +1,146 @@
-[ "rƒ\r\u0015cŒyç|y´ýŠ%Þ”", [] ]
+[
+  "rƒ\r\u0015cŒyç|y´ýŠ%Þ”",
+  [
+    [
+      "Vale.X64.InsSha.va_lemma_SHA256_rnds2",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "eq2-interp", "equation_Prims.nat",
+        "equation_Vale.SHA.SHA_helpers.counter",
+        "equation_Vale.X64.Decls.va_require_total",
+        "equation_Vale.X64.Machine_s.reg_xmm",
+        "fuel_guarded_inversion_Vale.X64.State.vale_state", "int_inversion",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_1ac5541806f355944a04e7bdf6a74b55",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_b023f92fdc85789979f7b1f8b2bc8a31",
+        "refinement_interpretation_Tm_refine_c365eb902b454950de62fba701d9049d",
+        "typing_Vale.SHA.SHA_helpers.k"
+      ],
+      0,
+      "8570bd67760d98a1bd797b98ac9afef5"
+    ],
+    [
+      "Vale.X64.InsSha.va_wp_SHA256_rnds2",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Vale.SHA.SHA_helpers.counter",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_b023f92fdc85789979f7b1f8b2bc8a31",
+        "typing_Vale.SHA.SHA_helpers.k"
+      ],
+      0,
+      "5c2a3188ea943623f7d692bfd39dc269"
+    ],
+    [
+      "Vale.X64.InsSha.va_quick_SHA256_rnds2",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
+      ],
+      0,
+      "156ec84b260a1cf7b5173d11d8c99b1e"
+    ],
+    [
+      "Vale.X64.InsSha.va_lemma_SHA256_msg1",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Vale.SHA.SHA_helpers.counter",
+        "equation_Vale.SHA.SHA_helpers.size_block_w_256", "int_inversion",
+        "primitive_Prims.op_LessThan", "primitive_Prims.op_LessThanOrEqual",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "ba3b4248395a47beff767472b97fa900"
+    ],
+    [
+      "Vale.X64.InsSha.va_wp_SHA256_msg1",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Vale.SHA.SHA_helpers.counter",
+        "equation_Vale.SHA.SHA_helpers.size_block_w_256", "int_inversion",
+        "primitive_Prims.op_LessThan", "primitive_Prims.op_LessThanOrEqual",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "943f290c0bdf15c31e86ffe9cb473a41"
+    ],
+    [
+      "Vale.X64.InsSha.va_quick_SHA256_msg1",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
+      ],
+      0,
+      "69c66f28df8663b72769d65b3c221ac5"
+    ],
+    [
+      "Vale.X64.InsSha.va_lemma_SHA256_msg2",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Vale.SHA.SHA_helpers.counter",
+        "equation_Vale.SHA.SHA_helpers.size_block_w_256", "int_inversion",
+        "primitive_Prims.op_LessThan", "primitive_Prims.op_LessThanOrEqual",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "4c69d503622466267ab3df7370cd0563"
+    ],
+    [
+      "Vale.X64.InsSha.va_wp_SHA256_msg2",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Vale.SHA.SHA_helpers.counter",
+        "equation_Vale.SHA.SHA_helpers.size_block_w_256", "int_inversion",
+        "primitive_Prims.op_LessThan", "primitive_Prims.op_LessThanOrEqual",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "927eddee351c3f098b47e13569ad24b3"
+    ],
+    [
+      "Vale.X64.InsSha.va_quick_SHA256_msg2",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
+      ],
+      0,
+      "a0f3f8b285fd9c125f24bdc2be5f8157"
+    ]
+  ]
+]
