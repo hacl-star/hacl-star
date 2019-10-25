@@ -26,7 +26,7 @@ $(HACL_HOME)/dist/vale/curve25519-inline.h:
 
 # CUSTOMIZE HERE: if necessary, move the bundle from $(HACL_HOME)/Makefile to
 # $(HACL_HOME)/Makefile.common; then, provide suitable compile flags.
-dist/Makefile.basic: $(filter-out obj/prims.krml,$(ALL_KRML_FILES)) | dist
+dist/Makefile.basic: $(filter-out %/prims.krml,$(ALL_KRML_FILES)) | dist
 	$(KRML) $^ -o libcurve.a $(BASE_FLAGS) $(VALE_BUNDLES) $(CURVE_BUNDLE_LOCAL) \
 	  -no-prefix 'Hacl.Impl.Curve25519.Field64.Local' \
 	  -drop 'Hacl.Impl.Curve25519.Field64.Local' \
@@ -42,3 +42,6 @@ dist/curve64-ours.exe: $(HACL_HOME)/tests/curve64-ours.o dist/libcurve.a
 
 %.exe:
 	$(CC) $^ $(KREMLIB_A) -o $@
+
+clean-c:
+	$(MAKE) -C dist/ -f Makefile.basic clean

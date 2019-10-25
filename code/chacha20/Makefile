@@ -2,10 +2,11 @@ HACL_HOME=../..
 
 # CUSTOMIZE HERE: determine what is the main target of this Makefile, e.g. a C
 # test, a Low* test, or just a binary archive (like libcurve.a).
-all: dist/chacha20-test.exe
+all: dist/chacha20-test.exe dist/chacha20-vec-test.exe
 
 test: all
 	dist/chacha20-test.exe
+	dist/chacha20-vec-test.exe
 
 # Defines rules for producing .checked, .krml, .depend, etc.
 include ../Makefile.local
@@ -26,6 +27,8 @@ dist/Makefile.basic: $(filter-out %/prims.krml,$(ALL_KRML_FILES))
 	  -skip-compilation
 
 dist/chacha20-test.exe: $(HACL_HOME)/tests/chacha20-test.o dist/libchacha.a
+
+dist/chacha20-vec-test.exe: $(HACL_HOME)/tests/chacha20-vec-test.o dist/libchacha.a
 
 %.exe:
 	$(CC) $^ $(KREMLIB_A) -o $@
