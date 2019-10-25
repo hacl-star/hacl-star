@@ -5,7 +5,8 @@ HACL_HOME?=../..
 
 OUTPUT_DIR=$(HACL_HOME)/obj
 
-# This uses the definition of ALL_HACL_DIRS
+# This uses the definition of ALL_HACL_DIRS, and transitively includes
+# Makefile.include
 include $(HACL_HOME)/Makefile.common
 
 # All the files in the current directory ought to be verified.
