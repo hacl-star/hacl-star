@@ -22,6 +22,8 @@ test: $(patsubst %.exe,%.test,$(TARGETS))
 # Side-effect: running with -B ensures *ALL* files get recompiled with optimized
 # flags.
 
+curve64-rfc.exe: $(patsubst %.c,%.o,$(wildcard rfc7748_src/*.c))
+
 %.exe: %.o
 	$(CC) $(CFLAGS) $(LDFLAGS) $^ ../dist/compact-gcc/libevercrypt.a $(KREMLIN_HOME)/kremlib/dist/minimal/libkremlib.a -o $@
 
