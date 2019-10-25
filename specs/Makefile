@@ -1,2 +1,20 @@
-HACL_HOME=..
-include $(HACL_HOME)/Makefile.common
+HACL_HOME = ..
+
+all: all-tests
+
+include ../code/Makefile.local
+
+# By default, we process all the files in the current directory. Here, we
+# *extend* the set of relevant files with the tests.
+FSTAR_ROOTS += $(wildcard tests/*.fst)
+
+# tests/Test.SHA3.fst --> tests/Test.SHA3.test
+all-tests: $(patsubst %.fst,%.test,$(wildcard tests/*.fst))
+
+%.test: %.exe
+	$<
+
+%.exe: $(ALL_CMX_FILES)
+	echo "let _ = if not ($(subst .,_,$(notdir $*)).test ()) then failwith \"$* failed\";;" > \
+	  $(HACL_HOME)/obj/$(notdir $*)_main.ml
+	$(OCAMLOPT) $^ $(HACL_HOME)/obj/$(notdir $*)_main.ml -o $@

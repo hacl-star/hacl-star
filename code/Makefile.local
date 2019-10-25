@@ -3,9 +3,6 @@
 
 HACL_HOME?=../..
 
-ALL_HACL_DIRS=$(addprefix $(HACL_HOME)/,lib specs specs/tests specs/lemmas code/meta) \
-  $(addprefix $(HACL_HOME)/vale/specs/,defs hardware crypto math) $(HACL_HOME)/vale/code/lib/math
-
 OUTPUT_DIR=$(HACL_HOME)/obj
 
 # This uses the definition of ALL_HACL_DIRS
