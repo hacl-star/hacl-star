@@ -67,7 +67,7 @@ val encrypt:
   -> k: key a
   -> n: nonce a
   -> m: bytes{length m <= max_size_t
-           /\ length m + size_block a <= max_size_t
+           /\ length m + size_tag a <= max_size_t
            /\ length m + padlen a (length m) <= max_size_t}
   -> aad: bytes {length aad <= max_size_t /\ length aad + padlen a (length aad) <= max_size_t} ->
   Tot (lbytes (length m + size_tag a))
@@ -78,13 +78,13 @@ let encrypt a k n m aad =
   | AEAD_AES256_GCM -> Spec.AES_GCM.aes256gcm_encrypt k n m aad
   | AEAD_Chacha20_Poly1305 -> Spec.Chacha20Poly1305.aead_encrypt k n m aad
 
+
 val decrypt:
     a: algorithm
   -> k: key a
   -> n: nonce a
-  -> ct: bytes{size_tag a <= length ct /\ length ct + size_block a <= max_size_t}
+  -> ct: bytes{size_tag a <= length ct /\ length ct <= max_size_t}
   -> aad: bytes{length aad <= max_size_t
-             /\ (length ct + length aad) / 64 <= max_size_t
              /\ length aad + padlen a (length aad) <= max_size_t} ->
   Tot (option (lbytes (length ct - size_tag a)))
 
@@ -102,7 +102,7 @@ val encrypt_detached:
   -> k: key a
   -> n: nonce a
   -> m: bytes{length m <= max_size_t
-           /\ length m + size_block a <= max_size_t
+           /\ length m + size_tag a <= max_size_t
            /\ length m + padlen a (length m) <= max_size_t}
   -> aad: bytes {length aad <= max_size_t /\ length aad + padlen a (length aad) <= max_size_t} ->
   Tot (lbytes (length m) & lbytes (size_tag a))
@@ -116,14 +116,14 @@ let encrypt_detached a k n m aad =
   let t = sub #uint8 #(Seq.length o) o (length m) (size_tag a) in
   c,t
 
+
 val decrypt_detached:
     a: algorithm
   -> k: key a
   -> n: nonce a
-  -> c: bytes{length c + size_block a <= max_size_t}
+  -> c: bytes{length c <= max_size_t}
   -> mac: tag a
   -> aad: bytes{length aad <= max_size_t
-             /\ (length c + length aad) / 64 <= max_size_t
              /\ length aad + padlen a (length aad) <= max_size_t} ->
   Tot (option (lbytes (length c)))
 
