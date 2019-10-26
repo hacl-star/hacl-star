@@ -282,7 +282,7 @@ let create_in i r dst initial_pn traffic_secret =
   let ret = AEAD.create_in #aead_alg r aead_state aead_key in
 
   let ctr_state: B.pointer (B.pointer_or_null (CTR.state_s (as_cipher_alg aead_alg))) =
-    B.alloca B.null 1ul
+    B.alloca (B.null #(CTR.state_s (as_cipher_alg aead_alg))) 1ul
   in
   let dummy_iv = B.alloca 0uy 12ul in
   let ret' = CTR.create_in (as_cipher_alg aead_alg) r ctr_state aead_key dummy_iv 12ul 0ul in
