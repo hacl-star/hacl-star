@@ -6,7 +6,7 @@ include ../code/Makefile.local
 
 # By default, we process all the files in the current directory. Here, we
 # *extend* the set of relevant files with the tests.
-FSTAR_ROOTS += $(wildcard tests/*.fst)
+FSTAR_ROOTS += $(wildcard tests/*.fst) $(wildcard alternative/*.fst) $(wildcard experimental/*.fst)
 
 # tests/Test.SHA3.fst --> tests/Test.SHA3.test
 all-tests: $(patsubst %.fst,%.test,$(wildcard tests/*.fst))
