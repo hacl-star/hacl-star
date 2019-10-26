@@ -471,7 +471,8 @@ let lemma_mul_nat5 a b c d e = ()
 
 val modulo_distributivity_mult2: a: int -> b: int -> c: int -> d: pos -> Lemma (((a % d) * (b % d) * c) % d = (a * b * c)% d)
 
-let modulo_distributivity_mult2 a b c d = 
+let modulo_distributivity_mult2 a b c d =
+  admit();
   lemma_mod_mul_distr_l a ((b % d) * c) d;
     assert((a % d * ((b % d) * c)) % d == (a * ((b % d) * c)) % d);
   let open FStar.Tactics in 
