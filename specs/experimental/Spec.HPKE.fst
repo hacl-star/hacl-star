@@ -5,7 +5,6 @@ open Lib.IntTypes
 open Lib.RawIntTypes
 open Lib.Sequence
 open Lib.ByteSequence
-open Lib.RandomSequence
 
 module DH = Spec.Agile.DH
 module AEAD = Spec.Agile.AEAD.Hacl
