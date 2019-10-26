@@ -55,7 +55,14 @@ type tag (a:algorithm) = lbytes (size_tag a)
 
 /// API
 
-val aead_encrypt:
+private
+let convert (#n:size_nat) : option (b:bytes{length b = n}) -> option (lbytes n) =
+  function
+  | None   -> None
+  | Some v -> Some v
+
+
+val encrypt:
     a: algorithm
   -> k: key a
   -> n: nonce a
@@ -65,13 +72,51 @@ val aead_encrypt:
   -> aad: bytes {length aad <= max_size_t /\ length aad + padlen a (length aad) <= max_size_t} ->
   Tot (lbytes (length m + size_tag a))
 
-let aead_encrypt a k n m aad =
+let encrypt a k n m aad =
   match a with
   | AEAD_AES128_GCM -> Spec.AES_GCM.aes128gcm_encrypt k n m aad
   | AEAD_AES256_GCM -> Spec.AES_GCM.aes256gcm_encrypt k n m aad
   | AEAD_Chacha20_Poly1305 -> Spec.Chacha20Poly1305.aead_encrypt k n m aad
 
-val aead_decrypt:
+val decrypt:
+    a: algorithm
+  -> k: key a
+  -> n: nonce a
+  -> ct: bytes{size_tag a <= length ct /\ length ct + size_block a <= max_size_t}
+  -> aad: bytes{length aad <= max_size_t
+             /\ (length ct + length aad) / 64 <= max_size_t
+             /\ length aad + padlen a (length aad) <= max_size_t} ->
+  Tot (option (lbytes (length ct - size_tag a)))
+
+let decrypt a k n ct aad =
+  let c = sub #uint8 #(Seq.length ct) ct 0 (length ct - size_tag a) in
+  let t = sub #uint8 #(Seq.length ct) ct (length ct - size_tag a) (size_tag a) in
+  match a with
+  | AEAD_AES128_GCM -> convert (Spec.AES_GCM.aead_decrypt Spec.AES.AES128 k n aad c t)
+  | AEAD_AES256_GCM -> convert (Spec.AES_GCM.aead_decrypt Spec.AES.AES256 k n aad c t)
+  | AEAD_Chacha20_Poly1305 -> Spec.Chacha20Poly1305.aead_decrypt k n c t aad
+
+
+val encrypt_detached:
+    a: algorithm
+  -> k: key a
+  -> n: nonce a
+  -> m: bytes{length m <= max_size_t
+           /\ length m + size_block a <= max_size_t
+           /\ length m + padlen a (length m) <= max_size_t}
+  -> aad: bytes {length aad <= max_size_t /\ length aad + padlen a (length aad) <= max_size_t} ->
+  Tot (lbytes (length m) & lbytes (size_tag a))
+
+let encrypt_detached a k n m aad =
+  let o = match a with
+          | AEAD_AES128_GCM -> Spec.AES_GCM.aes128gcm_encrypt k n m aad
+          | AEAD_AES256_GCM -> Spec.AES_GCM.aes256gcm_encrypt k n m aad
+          | AEAD_Chacha20_Poly1305 -> Spec.Chacha20Poly1305.aead_encrypt k n m aad in
+  let c = sub #uint8 #(Seq.length o) o 0 (length m) in
+  let t = sub #uint8 #(Seq.length o) o (length m) (size_tag a) in
+  c,t
+
+val decrypt_detached:
     a: algorithm
   -> k: key a
   -> n: nonce a
@@ -82,13 +127,7 @@ val aead_decrypt:
              /\ length aad + padlen a (length aad) <= max_size_t} ->
   Tot (option (lbytes (length c)))
 
-private
-let convert (#n:size_nat) : option (b:bytes{length b = n}) -> option (lbytes n) =
-  function
-  | None   -> None
-  | Some v -> Some v
-
-let aead_decrypt a k n c mac aad =
+let decrypt_detached a k n c mac aad =
   match a with
   | AEAD_AES128_GCM -> convert (Spec.AES_GCM.aead_decrypt Spec.AES.AES128 k n aad c mac)
   | AEAD_AES256_GCM -> convert (Spec.AES_GCM.aead_decrypt Spec.AES.AES256 k n aad c mac)
