@@ -140,6 +140,7 @@ test-benchmark: all-unstaged
 
 # Not reusing the -staged automatic target so as to export NOSHORTLOG
 ci:
+	tools/blast-staticconfig.sh wasm
 	EVERCRYPT_CONFIG=wasm $(MAKE) wasm-staged
 	tools/blast-staticconfig.sh
 	NOSHORTLOG=1 $(MAKE) vale-fst
