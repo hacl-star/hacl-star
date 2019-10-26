@@ -366,13 +366,6 @@ vale-fst: $(VALE_FSTS)
 # Verifying F* files to produce .checked files #
 ################################################
 
-VALE_FSTAR_FLAGS=--z3cliopt smt.arith.nl=false \
-  --z3cliopt smt.QI.EAGER_THRESHOLD=100 --z3cliopt smt.CASE_SPLIT=3 \
-  --use_extracted_interfaces true \
-  --max_fuel 1 --max_ifuel 1 --initial_ifuel 0 \
-  --smtencoding.elim_box true --smtencoding.l_arith_repr native \
-  --smtencoding.nl_arith_repr wrapped
-
 # $(call only-for,<filter>) retains all the checked files that match <filter>,
 # taken from the source directories, then returns the corresponding set of
 # targets in obj/. For instance, $(call only-for,$(HACL_HOME)/code/%.checked)
