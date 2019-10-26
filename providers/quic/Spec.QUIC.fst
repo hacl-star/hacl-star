@@ -470,6 +470,7 @@ let rec lemma_bitfield (k:nat) (n:nat{n < pow2 k})
   if k = 0 then ()
   else lemma_bitfield (k-1) (n/2)
 
+#push-options "--max_fuel 2 --initial_fuel 2 --max_ifuel 1 --initial_ifuel 1"
 let rec lemma_bitfield_inv (l:list bool)
   : Lemma (to_bitfield (List.Tot.length l) (of_bitfield l) == l)
   =
@@ -511,6 +512,7 @@ let rec lemma_bitfield_upper_bound (n:nat) (l:list bool) : Lemma
   | h :: t ->
     assert (forall i. List.Tot.index t i = List.Tot.index l (i+1));
     lemma_bitfield_upper_bound (n-1) t
+#pop-options
 
 
 type bitfield8 = l:list bool{List.Tot.length l = 8}
@@ -1539,7 +1541,7 @@ let header_encrypt a hpk h npn c =
   let pn_len = S.length npn - 1 in
   let sample = S.slice c (3-pn_len) (19-pn_len) in
   let mask = block_of_sample (AEAD.cipher_alg_of_supported_alg a) hpk sample in
-  let pnmask = and_inplace (pn_sizemask pn_len) (S.slice mask 1 5) 0 in
+  let pnmask = and_inplace (S.slice mask 1 5) (pn_sizemask pn_len) 0 in
   let sflags = if Short? h then 0x1fuy else 0x0fuy in
   let fmask = S.create 1 U8.(S.index mask 0 `logand` sflags) in
   let r = S.(format_header h npn @| c) in

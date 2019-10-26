@@ -479,6 +479,24 @@ let rec pointwise_seq_map2 (#a: eqtype) (f: a -> a -> a) (s1 s2: S.seq a) (i: na
     ()
 #pop-options
 
+#push-options "--max_fuel 2 --initial_fuel 2 --max_ifuel 1 --initial_ifuel 1"
+let rec and_inplace_commutative (s1 s2: S.seq U8.t): Lemma
+  (requires S.length s1 = S.length s2)
+  (ensures Spec.Loops.seq_map2 U8.logand s1 s2 `S.equal`
+    Spec.Loops.seq_map2 U8.logand s2 s1)
+  (decreases (S.length s1))
+=
+  if S.length s1 = 0 then
+    ()
+  else (
+    FStar.UInt.logand_commutative #8 (U8.v (S.head s1)) (U8.v (S.head s2));
+    assert (U8.logand (S.head s1) (S.head s2) = U8.logand (S.head s2) (S.head s1));
+    and_inplace_commutative (S.tail s1) (S.tail s2);
+    assert (Spec.Loops.seq_map2 U8.logand (S.tail s1) (S.tail s2) `S.equal`
+      Spec.Loops.seq_map2 U8.logand (S.tail s2) (S.tail s1))
+  )
+#pop-options
+
 let lemma_slice3 #a (s: S.seq a) (i j: nat): Lemma
   (requires (i <= j /\ j <= S.length s))
   (ensures (s `S.equal`
@@ -856,6 +874,9 @@ let header_encrypt i dst dst_len s h cipher k iv npn pn_len =
   let sub_mask = B.sub mask 1ul 4ul in
   (**) assert (B.as_seq h3 sub_mask `S.equal` S.slice (B.as_seq h3 mask) 1 5);
   op_inplace pn_mask 4ul sub_mask 4ul 0ul U8.logand;
+  (**) pointwise_seq_map2 U8.logand (B.as_seq h3 pn_mask) (B.as_seq h3 sub_mask) 0;
+  (**) and_inplace_commutative (B.as_seq h3 pn_mask) (B.as_seq h3 sub_mask);
+  (**) pointwise_seq_map2 U8.logand (B.as_seq h3 sub_mask) (B.as_seq h3 pn_mask) 0;
   (**) let h4 = ST.get () in
   (**) frame_invariant B.(loc_buffer pn_mask) s h3 h4;
   (**) assert (invariant h4 s);
