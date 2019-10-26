@@ -85,13 +85,6 @@ let iv_length (a: supported_alg) (len: nat) =
   | AES256_GCM -> len > 0 /\ 8 * len <= pow2 64 - 1
   | CHACHA20_POLY1305 -> len == 12
 
-// BB. This needs to be checked
-let size_nonce (a: supported_alg) =
-  match a with
-  | AES128_GCM -> 12
-  | AES256_GCM -> 12
-  | CHACHA20_POLY1305 -> 12
-
 inline_for_extraction
 let padlen (a:algorithm) (x:nat) : nat =
   (size_block a - x % (size_block a)) % size_block a
@@ -164,9 +157,3 @@ val decrypt: #(a: supported_alg) -> kv a -> iv a -> ad a ->
 
 val correctness: #a:supported_alg -> k:kv a -> n:iv a -> aad:ad a -> p:plain a ->
   Lemma (decrypt k n aad (encrypt k n aad p) == Some p)
-
-
-val encrypt_split: #(a: supported_alg) -> kv a -> iv a -> ad a -> p:plain a -> (cipher a & tag a)
-val decrypt_split: #(a: supported_alg) -> kv a -> iv a -> ad a ->
-  c:cipher a { S.length c <= max_length a} -> tag a ->
-  option (plain a)
