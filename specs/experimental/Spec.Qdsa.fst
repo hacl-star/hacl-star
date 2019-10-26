@@ -7,20 +7,24 @@ open Lib.ByteSequence
 open Spec.SHA2
 open Spec.Curve25519
 
-module Hash = Spec.SHA2
+module Hash = Spec.SHA2.Normal
+
+
+let nine : elem = 9
 
 let n: elem =
   assert_norm(pow2 252 + 27742317777372353535851937790883648493 < pow2 255 - 19);
   pow2 252 + 27742317777372353535851937790883648493 // Group order
 
-let sha512_modn (len:size_t) (s:lbytes len) : Tot elem =
-  (nat_from_bytes_le (Hash.hash512 len s)) % n
+let sha512_modn (len:size_nat) (s:lbytes len) : Tot elem =
+  assert_norm (Seq.length s <= Hash.max_input512);
+  (nat_from_bytes_le (Hash.hash512 s)) % n
 
-let sha512_modn_bar (len:size_t) (s:lbytes len) : Tot elem =
+let sha512_modn_bar (len:size_nat) (s:lbytes len) : Tot elem =
   let h = sha512_modn len s in
   if h % 2 = 0 then h else n - h
 
-let _P = encodePoint (Proj 9 1)
+let _P = encodePoint (nine, one)
 let _A = 486662
 
 let fsub x y =
@@ -40,7 +44,7 @@ let sign (public:lbytes 32) (secret:lbytes 64) (len:size_t{len < pow2 32 - 64}) 
   let msg' = update_slice msg' 32 (32+len) msg in
   let r = sha512_modn (len + 32) msg' in
   let rs = nat_to_bytes_le 32 r in
-  let _R =  scalarmult' rs _P in
+  let _R =  scalarmult rs _P in
   let msg' = create (len + 64) (u8 0) in
   let msg' = update_slice msg' 0 32 _R in
   let msg' = update_slice msg' 32 64 _Q in
