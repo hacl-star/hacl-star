@@ -85,7 +85,7 @@ let invariant_s #i h s =
   AEAD.invariant h aead_state /\
   CTR.invariant h ctr_state /\
   B.(all_live h [ buf iv; buf hp_key; buf pn ])  /\
-  B.(all_disjoint [
+  B.(all_disjoint [ CTR.footprint h ctr_state;
     AEAD.footprint h aead_state; loc_buffer iv; loc_buffer hp_key; loc_buffer pn ]) /\
   // JP: automatic insertion of reveal does not work here
   G.reveal initial_pn <= U64.v (B.deref h pn) /\
@@ -696,6 +696,7 @@ let block_of_sample (a: Spec.Agile.Cipher.cipher_alg)
       B.(modifies (loc_buffer dst `loc_union` CTR.footprint h0 s) h0 h1) /\
       B.as_seq h1 dst `S.equal`
         Spec.QUIC.block_of_sample a (B.as_seq h0 k) (B.as_seq h0 sample) /\
+      CTR.footprint h0 s == CTR.footprint h1 s /\
       CTR.invariant h1 s)
 =
   push_frame ();
@@ -832,6 +833,13 @@ let pn_offset (h: header): Stack U32.t
       6ul `U32.add` u32_of_u8 (add3 dcil) `U32.add` u32_of_u8 (add3 scil)
         `U32.add` u32_of_u8 (vlen (u64_of_u32 pl))
 
+let proj_aead_state #i (s: state i): Stack (AEAD.state i.aead_alg)
+  (requires (fun h0 -> invariant h0 s))
+  (ensures (fun h0 x h1 -> h0 == h1 /\ x == (B.deref h0 s).aead_state))
+=
+  let State _ _ _ _ s _ _ _ _ = !*s in
+  s
+
 #push-options "--z3rlimit 1000 --query_stats"
 let header_encrypt i dst dst_len s h cipher k iv npn pn_len =
   // [@inline_let]
@@ -864,8 +872,9 @@ let header_encrypt i dst dst_len s h cipher k iv npn pn_len =
 
   block_of_sample (as_cipher_alg i.aead_alg) mask ctr_state k sample;
   (**) let h2 = ST.get () in
-  (**) assume (invariant h2 s);
-  (**) assume (footprint h1 s == footprint h2 s);
+  (**) assert (CTR.footprint h1 ctr_state == CTR.footprint h2 ctr_state);
+  (**) let aead_state = proj_aead_state s in
+  (**) assert (AEAD.footprint h1 aead_state == AEAD.footprint h2 aead_state);
 
   pn_sizemask pn_mask pn_len;
   (**) let h3 = ST.get () in
