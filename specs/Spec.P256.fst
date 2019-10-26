@@ -1,12 +1,42 @@
 module Spec.P256
 
 open FStar.Mul
+open FStar.Math.Lib
 open Spec.P256.Definitions
 open Spec.P256.Lemmas
 
 open Lib.ByteSequence
 open Lib.IntTypes
 open Lib.Sequence
+
+
+
+noextract
+let felem_seq = lseq uint64 4
+
+noextract
+let felem_seq_as_nat (a: felem_seq) : Tot (n: nat {n < pow2 256})  =
+  let open FStar.Mul in
+  let a0 = Lib.Sequence.index a 0 in
+  let a1 =  Lib.Sequence.index a 1 in
+  let a2 =  Lib.Sequence.index  a 2 in
+  let a3 =  Lib.Sequence.index a 3 in
+  assert_norm( uint_v a0 + uint_v a1 * pow2 64 + uint_v a2 * pow2 64 * pow2 64 + uint_v a3 * pow2 64 * pow2 64 * pow2 64 < pow2 256);
+  uint_v a0 + uint_v a1 * pow2 64 + uint_v a2 * pow2 64 * pow2 64 + uint_v a3 * pow2 64 * pow2 64 * pow2 64
+
+
+private noextract
+let nat_as_seq (a: nat { a < pow2 256}) : lseq uint64 4 =
+  let a0 = a % pow2 64 in
+  let a1 = (arithmetic_shift_right a 64) % pow2 64 in
+  let a2 = (arithmetic_shift_right a 128) % pow2 64 in
+  let a3 = (arithmetic_shift_right a 192) % pow2 64 in
+  let s = Lib.Sequence.create 4 (u64 0) in
+  let s = Lib.Sequence.upd s 0 (u64 a0) in
+  let s = Lib.Sequence.upd s 1 (u64 a1) in
+  let s = Lib.Sequence.upd s 2 (u64 a2) in
+  Lib.Sequence.upd s 3 (u64 a3)
+
 
 
 let prime = prime256
@@ -167,8 +197,8 @@ let point_to_serialized p =
   let py = py0 % prime256 in
   assert_norm(px < pow2 256);
   assert_norm(py < pow2 256);
-  let px8: lbytes 32 = Lib.ByteSequence.uints_to_bytes_le (Hacl.Spec.ECDSAP256.Definition.nat_as_seq px) in
-  let py8: lbytes 32 = Lib.ByteSequence.uints_to_bytes_le (Hacl.Spec.ECDSAP256.Definition.nat_as_seq py) in
+  let px8: lbytes 32 = Lib.ByteSequence.uints_to_bytes_le (nat_as_seq px) in
+  let py8: lbytes 32 = Lib.ByteSequence.uints_to_bytes_le (nat_as_seq py) in
   (concat px8 py8)
 
 val serialized_to_point: serialized_point -> Tot point_nat
@@ -177,8 +207,8 @@ let serialized_to_point p =
   let py8 = sub p 32 32 in
   let px64 = Lib.ByteSequence.uints_from_bytes_le px8 in
   let py64 = Lib.ByteSequence.uints_from_bytes_le py8 in
-  let px = Hacl.Spec.ECDSAP256.Definition.felem_seq_as_nat px64 in
-  let py = Hacl.Spec.ECDSAP256.Definition.felem_seq_as_nat py64 in
+  let px = felem_seq_as_nat px64 in
+  let py = felem_seq_as_nat py64 in
   (px, py, 1)
 
 
