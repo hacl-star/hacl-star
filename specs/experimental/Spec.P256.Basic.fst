@@ -232,7 +232,7 @@ let mul4 (f0, f1, f2, f3) (r0, r1, r2, r3) =
   let c0, (o00, o01, o02, o03) = mul1 (r0, r1, r2, r3) f0 in
   let c1, (o11, o12, o13, o14) = mul1_add (r0, r1, r2, r3) f1 (o01, o02, o03, c0) in
   let c2, (o22, o23, o24, o25) = mul1_add (r0, r1, r2, r3) f2 (o12, o13, o14, c1) in
-  let c3, (o33, o34, o35, o36)  = mul1_add (r0, r1, r2, r3) f3 (o23, o24, o25, c2) in
+  let c3, (o33, o34, o35, o36)  = mul1_add (r0, r1, r2, r3) f3 (o23, o24, o25, c2) in admit();
   (*let out = (o00, o11, o22, o33, o34, o35, o36, o37) in *)
   //lemma_mul4 (as_nat4 (r0, r1, r2, r3)) (v f0) (v f1) (v f2) (v f3) (v c0) (v c1) (v c2) (v c3)
   //(v o01) (v o02) (v o03) (v o12) (v o13) (v o14) (v o23) (v o24) (v o25) (v o34) (v o35) (v o36);

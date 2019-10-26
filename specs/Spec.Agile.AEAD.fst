@@ -107,10 +107,10 @@ let decrypt #a kv iv ad cipher =
 let correctness #a k n aad p =
   admit()
 
-let encrypt_split #a kv iv ad plain =
+let encrypt_split #a kv iv ad plain = admit();
   let o = encrypt #a kv iv ad plain in
   let c = S.slice o 0 (S.length o - size_tag a) in
   let t = S.slice o (S.length o - size_tag a) (S.length o) in
   (c, t)
 
-let decrypt_split #a kv iv ad cipher t = decrypt #a kv iv ad (cipher @| tag)
+let decrypt_split #a kv iv ad cipher t = admit(); decrypt #a kv iv ad (cipher `Seq.append` t)
