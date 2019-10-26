@@ -55,6 +55,8 @@ endif
 
 # Better error early.
 ifeq (,$(NOVALE))
+ifneq (hacl-verify,$(MAKECMDGOALS))
+
 ifeq (,$(VALE_HOME))
   $(error Please define VALE_HOME, possibly using cygpath -m on Windows)
 endif
@@ -65,7 +67,9 @@ endif
 
 ifneq ($(shell cat $(VALE_HOME)/bin/.vale_version | tr -d '\r'),$(shell cat vale/.vale_version | tr -d '\r'))
   $(error this repository wants Vale $(shell cat vale/.vale_version) but in \
-    $$VALE_HOME I found $(shell cat $(VALE_HOME)/bin/.vale_version). Hint: ./everest get_vale.)
+    $$VALE_HOME I found $(shell cat $(VALE_HOME)/bin/.vale_version). Hint: ./tools/get_vale.sh)
+endif
+
 endif
 endif
 
@@ -117,7 +121,11 @@ all-unstaged: compile-compact compile-compact-msvc compile-compact-gcc \
 	cp $< $@
 
 test: test-staged
-test-unstaged: test-handwritten test-c test-ml test-benchmark
+test-unstaged: test-handwritten test-c test-ml
+
+ifneq ($(OS),Windows_NT)
+test-unstaged: test-benchmark
+endif
 
 # Any file in code/tests is taken to contain an `int main()` function.
 # Test should be renamed into Test.EverCrypt
@@ -132,15 +140,15 @@ test-benchmark: all-unstaged
 
 # Not reusing the -staged automatic target so as to export NOSHORTLOG
 ci:
+	tools/blast-staticconfig.sh wasm
+	EVERCRYPT_CONFIG=wasm $(MAKE) wasm-staged
+	tools/blast-staticconfig.sh
 	NOSHORTLOG=1 $(MAKE) vale-fst
 	FSTAR_DEPEND_FLAGS="--warn_error +285" NOSHORTLOG=1 $(MAKE) all-unstaged test-unstaged
-	NOSHORTLOG=1 $(MAKE) wasm
 	$(MAKE) -C providers/quic_provider # needs a checkout of miTLS, only valid on CI
 	./tools/sloccount.sh
 
-wasm:
-	tools/blast-staticconfig.sh wasm
-	EVERCRYPT_CONFIG=wasm $(MAKE) wasm-staged
+wasm: wasm-staged
 
 wasm-unstaged: dist/wasm/Makefile.basic
 	cd $(dir $<) && node main.js
@@ -266,7 +274,7 @@ ifndef MAKE_RESTARTS
 	@if ! [ -f .didhelp ]; then echo "💡 Did you know? If your dependency graph didn't change (e.g. no files added or removed, no reference to a new module in your code), run NODEPEND=1 make <your-target> to skip dependency graph regeneration!"; touch .didhelp; fi
 	$(call run-with-log,\
 	  $(FSTAR_NO_FLAGS) --dep $* $(notdir $(FSTAR_ROOTS)) --warn_error '-285' $(FSTAR_DEPEND_FLAGS) \
-	    --extract '-* +FStar.Kremlin.Endianness +Vale.Arch +Vale.X64 -Vale.X64.MemoryAdapters +Vale.Def +Vale.Lib +Vale.Bignum.X64 -Vale.Lib.Tactics +Vale.Math +Vale.Transformers +Vale.AES +Vale.Interop +Vale.Arch.Types +Vale.Arch.BufferFriend +Vale.Lib.X64 +Vale.SHA.X64 +Vale.SHA.SHA_helpers +Vale.Curve25519.X64 +Vale.Poly1305.X64 +Vale.Inline +Vale.AsLowStar +Vale.Test +Spec +Lib -Lib.IntVector -Lib.RandomBuffer +C' > $@ && \
+	    --extract '-* +FStar.Kremlin.Endianness +Vale.Arch +Vale.X64 -Vale.X64.MemoryAdapters +Vale.Def +Vale.Lib +Vale.Bignum.X64 -Vale.Lib.Tactics +Vale.Math +Vale.Transformers +Vale.AES +Vale.Interop +Vale.Arch.Types +Vale.Arch.BufferFriend +Vale.Lib.X64 +Vale.SHA.X64 +Vale.SHA.SHA_helpers +Vale.Curve25519.X64 +Vale.Poly1305.X64 +Vale.Inline +Vale.AsLowStar +Vale.Test +Spec +Lib -Lib.IntVector +C -Impl.QUIC -Spec.QUIC' > $@ && \
 	  $(SED) -i 's!$(HACL_HOME)/obj/\(.*.checked\)!obj/\1!;s!/bin/../ulib/!/ulib/!g' $@ \
 	  ,[FSTAR-DEPEND ($*)],$(call to-obj-dir,$@))
 
@@ -358,13 +366,6 @@ vale-fst: $(VALE_FSTS)
 # Verifying F* files to produce .checked files #
 ################################################
 
-VALE_FSTAR_FLAGS=--z3cliopt smt.arith.nl=false \
-  --z3cliopt smt.QI.EAGER_THRESHOLD=100 --z3cliopt smt.CASE_SPLIT=3 \
-  --use_extracted_interfaces true \
-  --max_fuel 1 --max_ifuel 1 --initial_ifuel 0 \
-  --smtencoding.elim_box true --smtencoding.l_arith_repr native \
-  --smtencoding.nl_arith_repr wrapped
-
 # $(call only-for,<filter>) retains all the checked files that match <filter>,
 # taken from the source directories, then returns the corresponding set of
 # targets in obj/. For instance, $(call only-for,$(HACL_HOME)/code/%.checked)
@@ -412,13 +413,16 @@ vale-verify-unstaged: \
   $(addsuffix .checked,$(VALE_FSTS)) \
   $(call only-for,$(HACL_HOME)/vale/%.checked) \
 
-hacl-verify-unstaged: code-verify-unstaged spec-verify-unstaged
+# Overriding the pattern rule and making this one unstaged.
 code-verify-unstaged: $(call only-for,$(HACL_HOME)/code/%)
 spec-verify-unstaged: $(call only-for,$(HACL_HOME)/specs/%)
+lib-verify-unstaged: $(call only-for,$(HACL_HOME)/lib/%)
 curve25519-verify-unstaged: $(call only-for,$(HACL_HOME)/code/curve25519/%)
 poly1305-verify-unstaged: $(call only-for,$(HACL_HOME)/code/poly1305/%)
 chacha20-verify-unstaged: $(call only-for,$(HACL_HOME)/code/chacha20/%)
 salsa20-verify-unstaged: $(call only-for,$(HACL_HOME)/code/salsa20/%)
+
+verify-hacl: code-verify-unstaged spec-verify-unstaged lib-verify-unstaged
 
 ############
 # min-test #
@@ -441,21 +445,6 @@ min-test-unstaged: $(filter-out \
 # Extracting (checked files) to OCaml, producing executables, running them to #
 # print ASM files                                                             #
 ###############################################################################
-
-TAC = $(shell which tac >/dev/null 2>&1 && echo "tac" || echo "tail -r")
-
-ALL_CMX_FILES = $(patsubst %.ml,%.cmx,$(shell echo $(ALL_ML_FILES) | $(TAC)))
-
-ifeq ($(OS),Windows_NT)
-  export OCAMLPATH := $(FSTAR_HOME)/bin;$(OCAMLPATH)
-else
-  export OCAMLPATH := $(FSTAR_HOME)/bin:$(OCAMLPATH)
-endif
-
-# Warning 8: this pattern-matching is not exhaustive.
-# Warning 20: this argument will not be used by the function.
-# Warning 26: unused variable
-OCAMLOPT = ocamlfind opt -package fstarlib -linkpkg -g -I obj -w -8-20-26
 
 .PRECIOUS: obj/%.cmx
 obj/%.cmx: obj/%.ml
@@ -613,7 +602,7 @@ REQUIRED_FLAGS	=\
   -no-prefix 'Vale.Inline.X64.Fswap_inline' \
   -no-prefix 'Vale.Inline.X64.Fsqr_inline' \
   -no-prefix 'EverCrypt.Vale' \
-  -add-include '"curve25519-inline.h"' \
+  -add-include 'Hacl_Curve25519_64:"curve25519-inline.h"' \
   -no-prefix 'MerkleTree.New.Low' \
   -no-prefix 'MerkleTree.New.Low.Serialization' \
   -bundle Hacl.Impl.Poly1305.Fields \
@@ -662,7 +651,8 @@ BUNDLE_FLAGS	=\
   $(NACLBOX_BUNDLE) \
   $(MERKLE_BUNDLE) \
   $(WASMSUPPORT_BUNDLE) \
-  $(CTR_BUNDLE)
+  $(CTR_BUNDLE) \
+  $(QUIC_BUNDLE)
 
 DEFAULT_FLAGS = \
   $(HAND_WRITTEN_LIB_FLAGS) \
@@ -766,14 +756,21 @@ dist/ccf/Makefile.basic: POLY_BUNDLE =
 #
 # Disable the EverCrypt and MerkleTree layers. Only keep Chacha20, Poly1305,
 # Curve25519 for now. Everything else in Hacl is disabled.
-dist/mozilla/Makefile.basic: BUNDLE_FLAGS = \
-  $(CHACHA20_BUNDLE) $(POLY_BUNDLE) $(CURVE_BUNDLE)
+dist/mozilla/Makefile.basic: CURVE_BUNDLE_SLOW = -bundle Hacl.Curve25519_64_Slow
+dist/mozilla/Makefile.basic: SALSA20_BUNDLE = -bundle Hacl.Salsa20
+dist/mozilla/Makefile.basic: ED_BUNDLE = -bundle Hacl.Ed25519
+dist/mozilla/Makefile.basic: NACLBOX_BUNDLE = -bundle Hacl.NaCl
+dist/mozilla/Makefile.basic: E_HASH_BUNDLE =
+dist/mozilla/Makefile.basic: MERKLE_BUNDLE = -bundle MerkleTree.*
+dist/mozilla/Makefile.basic: CTR_BUNDLE =
+dist/mozilla/Makefile.basic: SHA3_BUNDLE = -bundle Hacl.SHA3
+dist/mozilla/Makefile.basic: HASH_BUNDLE = -bundle Hacl.Hash.*,Hacl.HKDF,Hacl.HMAC
+dist/mozilla/Makefile.basic: QUIC_BUNDLE = -bundle Impl.QUIC,Spec.QUIC,Cipher16,Spec.Cipher16
 dist/mozilla/Makefile.basic: \
-  DEFAULT_FLAGS += \
-    -bundle EverCrypt.* \
-    -bundle MerkleTree.* \
-    -bundle Hacl.* \
-    -bundle WasmSupport
+  BUNDLE_FLAGS += \
+    -bundle EverCrypt,EverCrypt.* \
+    -bundle Hacl.Impl.*,Hacl.Bignum25519.*,Hacl.Bignum25519 \
+    -bundle Hacl.Chacha20.Vec32
 dist/mozilla/Makefile.basic: VALE_ASMS := $(filter dist/vale/curve25519-%,$(VALE_ASMS))
 dist/mozilla/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES =
 dist/mozilla/Makefile.basic: HAND_WRITTEN_H_FILES := $(filter %/libintvector.h,$(HAND_WRITTEN_H_FILES))
@@ -838,7 +835,7 @@ dist/%/Makefile.basic: $(ALL_KRML_FILES) \
 dist/evercrypt-external-headers/Makefile.basic: $(ALL_KRML_FILES)
 	$(KRML) -silent \
 	  -minimal \
-	  -bundle EverCrypt+EverCrypt.AutoConfig2+EverCrypt.HKDF+EverCrypt.HMAC+EverCrypt.Hash+EverCrypt.Hash.Incremental+EverCrypt.Cipher+EverCrypt.Poly1305+EverCrypt.Chacha20Poly1305+EverCrypt.Curve25519=*[rename=EverCrypt] \
+	  -bundle EverCrypt+EverCrypt.AEAD+EverCrypt.AutoConfig2+EverCrypt.HKDF+EverCrypt.HMAC+EverCrypt.Hash+EverCrypt.Hash.Incremental+EverCrypt.Cipher+EverCrypt.Poly1305+EverCrypt.Chacha20Poly1305+EverCrypt.Curve25519=*[rename=EverCrypt] \
 	  -library EverCrypt,EverCrypt.* \
 	  -add-include '<inttypes.h>' \
 	  -add-include '<stdbool.h>' \

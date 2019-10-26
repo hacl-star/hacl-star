@@ -22,17 +22,10 @@ test: $(patsubst %.exe,%.test,$(TARGETS))
 # Side-effect: running with -B ensures *ALL* files get recompiled with optimized
 # flags.
 
-%.exe: %.o
-	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@
-
-curve51-ours.exe curve64-ours.exe: ../dist/compact-gcc/Hacl_Curve25519_51.o ../dist/compact-gcc/Hacl_Curve25519_64.o \
-  $(KREMLIN_HOME)/kremlib/dist/minimal/FStar_UInt_8_16_32_64.o
-
-chacha20-test.exe: ../dist/compact-gcc/Hacl_Chacha20.o $(KREMLIN_HOME)/kremlib/dist/minimal/FStar_UInt_8_16_32_64.o
-
 curve64-rfc.exe: $(patsubst %.c,%.o,$(wildcard rfc7748_src/*.c))
 
-merkle_tree_test.exe: ../dist/compact-gcc/libevercrypt.a $(KREMLIN_HOME)/kremlib/dist/minimal/libkremlib.a
+%.exe: %.o
+	$(CC) $(CFLAGS) $(LDFLAGS) $^ ../dist/compact-gcc/libevercrypt.a $(KREMLIN_HOME)/kremlib/dist/minimal/libkremlib.a -o $@
 
 # Running tests
 

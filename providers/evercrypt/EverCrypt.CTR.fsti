@@ -56,6 +56,7 @@ val frame_invariant: #a:alg -> l:B.loc -> s:state a -> h0:HS.mem -> h1:HS.mem ->
   (ensures (
     invariant h1 s /\
     footprint h0 s == footprint h1 s))
+  [ SMTPat (invariant h1 s); SMTPat (B.modifies l h0 h1) ]
 
 /// Ghost accessors
 /// ---------------
@@ -97,8 +98,10 @@ let create_in_st (a:alg) =
       B.live h0 dst /\ B.live h0 k /\ B.live h0 nonce)
     (ensures fun h0 e h1 ->
       match e with
-      | UnsupportedAlgorithm | InvalidIVLength ->
+      | UnsupportedAlgorithm ->
           B.(modifies loc_none h0 h1)
+      | InvalidIVLength ->
+          B.(modifies loc_none h0 h1) /\ UInt32.v nonce_len < 12
       | Success ->
           let s = B.deref h1 dst in
           // Sanity
@@ -161,14 +164,13 @@ let update_block_st (a: alg) =
       B.(loc_disjoint (loc_buffer src) (footprint h0 s)) /\
       B.(loc_disjoint (loc_buffer dst) (footprint h0 s)) /\
       B.disjoint src dst /\
-      invariant h0 s /\
-      ctr h0 s < pow2 32 - 1))
+      invariant h0 s))
     (ensures (fun h0 _ h1 ->
       preserves_freeable s h0 h1 /\
       invariant h1 s /\
       B.(modifies (footprint_s (B.deref h0 s) `loc_union` loc_buffer dst) h0 h1) /\
       footprint h0 s == footprint h1 s /\
-      ctr h1 s == ctr h0 s + 1 /\
+      (ctr h0 s < pow2 32 - 1 ==> ctr h1 s == ctr h0 s + 1) /\
       B.as_seq h1 dst == Spec.Loops.seq_map2 xor8 (B.as_seq h0 src)
         (Spec.ctr_block a (kv (B.deref h0 s)) (iv (B.deref h0 s)) (ctr h0 s))))
 

@@ -18,6 +18,15 @@ INCLUDES = \
   $(FSTAR_HOME)/ulib/.cache \
   $(KREMLIN_HOME)/kremlib
 
+# 0. Vale
+
+VALE_FSTAR_FLAGS=--z3cliopt smt.arith.nl=false \
+  --z3cliopt smt.QI.EAGER_THRESHOLD=100 --z3cliopt smt.CASE_SPLIT=3 \
+  --use_extracted_interfaces true \
+  --max_fuel 1 --max_ifuel 1 --initial_ifuel 0 \
+  --smtencoding.elim_box true --smtencoding.l_arith_repr native \
+  --smtencoding.nl_arith_repr wrapped
+
 # 1. FStar
 
 OUTPUT_DIR ?= obj
@@ -62,16 +71,17 @@ BASE_FLAGS = \
   -add-include '"kremlin/lowstar_endianness.h"' \
   -add-include '<string.h>'
 
+CURVE_BUNDLE_SLOW= \
+  -bundle 'Hacl.Curve25519_64_Slow=Hacl.Impl.Curve25519.Field64.Hacl,Hacl.Spec.Curve25519,Hacl.Spec.Curve25519.\*'
 CURVE_BUNDLE_BASE= \
-  -bundle 'Hacl.Curve25519_64_Slow=Hacl.Impl.Curve25519.Field64.Hacl,Hacl.Spec.Curve25519,Hacl.Spec.Curve25519.\*' \
+  $(CURVE_BUNDLE_SLOW) \
   -bundle Hacl.Curve25519_51=Hacl.Impl.Curve25519.Field51 \
   -bundle 'Hacl.Impl.Curve25519.\*[rename=Hacl_Curve_Leftovers]'
-
 CURVE_BUNDLE_LOCAL=-bundle Hacl.Curve25519_64_Local=Hacl.Impl.Curve25519.Field64.Local[rename=Hacl_Curve25519_64] \
   $(CURVE_BUNDLE_BASE)
-
 CURVE_BUNDLE=-bundle Hacl.Curve25519_64=Hacl.Impl.Curve25519.Field64.Vale \
   $(CURVE_BUNDLE_BASE) -bundle Hacl.Curve25519_64_Local
+
 HASH_BUNDLE=-bundle Hacl.Hash.MD5+Hacl.Hash.Core.MD5+Hacl.Hash.SHA1+Hacl.Hash.Core.SHA1+Hacl.Hash.SHA2+Hacl.Hash.Core.SHA2+Hacl.Hash.Core.SHA2.Constants=Hacl.Hash.*[rename=Hacl_Hash]
 SHA3_BUNDLE=-bundle Hacl.Impl.SHA3+Hacl.SHA3=[rename=Hacl_SHA3]
 CHACHA20_BUNDLE=-bundle Hacl.Chacha20=Hacl.Impl.Chacha20,Hacl.Impl.Chacha20.*
@@ -82,4 +92,21 @@ POLY_BUNDLE=-bundle 'Hacl.Poly1305_32=Hacl.Impl.Poly1305.Field32xN_32' \
   -bundle 'Hacl.Poly1305_128=Hacl.Impl.Poly1305.Field32xN_128' \
   -bundle 'Hacl.Poly1305_256=Hacl.Impl.Poly1305.Field32xN_256'
 NACLBOX_BUNDLE=-bundle Hacl.NaCl=Hacl.Impl.SecretBox,Hacl.Impl.Box
+QUIC_BUNDLE=-bundle Impl.QUIC=Cipher16,Spec.Cipher16,Spec.QUIC
 
+# 3. OCaml
+
+TAC = $(shell which tac >/dev/null 2>&1 && echo "tac" || echo "tail -r")
+
+ALL_CMX_FILES = $(patsubst %.ml,%.cmx,$(shell echo $(ALL_ML_FILES) | $(TAC)))
+
+ifeq ($(OS),Windows_NT)
+  export OCAMLPATH := $(FSTAR_HOME)/bin;$(OCAMLPATH)
+else
+  export OCAMLPATH := $(FSTAR_HOME)/bin:$(OCAMLPATH)
+endif
+
+# Warning 8: this pattern-matching is not exhaustive.
+# Warning 20: this argument will not be used by the function.
+# Warning 26: unused variable
+OCAMLOPT = ocamlfind opt -package fstarlib -linkpkg -g -I $(HACL_HOME)/obj -w -8-20-26

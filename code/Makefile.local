@@ -3,12 +3,10 @@
 
 HACL_HOME?=../..
 
-ALL_HACL_DIRS=$(addprefix $(HACL_HOME)/,lib specs specs/lemmas code/meta) \
-  $(addprefix $(HACL_HOME)/vale/specs/,defs hardware)
-
 OUTPUT_DIR=$(HACL_HOME)/obj
 
-# This uses the definition of ALL_HACL_DIRS
+# This uses the definition of ALL_HACL_DIRS, and transitively includes
+# Makefile.include
 include $(HACL_HOME)/Makefile.common
 
 # All the files in the current directory ought to be verified.
@@ -18,7 +16,9 @@ FSTAR_ROOTS?=$(wildcard *.fst *.fsti)
 ifndef NODEPEND
 ifndef MAKE_RESTARTS
 .depend: .FORCE
-	$(FSTAR_NO_FLAGS) --dep full $(notdir $(FSTAR_ROOTS)) > $@
+	$(FSTAR_NO_FLAGS) --dep full $(notdir $(FSTAR_ROOTS)) \
+	    --extract '-* +FStar.Kremlin.Endianness +Vale.Arch +Vale.X64 -Vale.X64.MemoryAdapters +Vale.Def +Vale.Lib +Vale.Bignum.X64 -Vale.Lib.Tactics +Vale.Math +Vale.Transformers +Vale.AES +Vale.Interop +Vale.Arch.Types +Vale.Arch.BufferFriend +Vale.Lib.X64 +Vale.SHA.X64 +Vale.SHA.SHA_helpers +Vale.Curve25519.X64 +Vale.Poly1305.X64 +Vale.Inline +Vale.AsLowStar +Vale.Test +Spec +Lib -Lib.IntVector +C -Impl.QUIC -Spec.QUIC' \
+	    > $@
 
 .PHONY: .FORCE
 .FORCE:
@@ -27,15 +27,26 @@ endif
 
 include .depend
 
+%.checked: FSTAR_FLAGS=
+$(OUTPUT_DIR)/Vale.%.checked: FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
+
 # Producing .checked and .krml.
 %.checked:
-	$(FSTAR) $< --hint_file $(HACL_HOME)/hints/$(notdir $*).hints && \
+	$(FSTAR) $(FSTAR_FLAGS) $< --hint_file $(HACL_HOME)/hints/$(notdir $*).hints && \
 	  touch -c $@
 
 %.krml:
 	$(FSTAR) --codegen Kremlin \
 	    --extract_module $(basename $(notdir $(subst .checked,,$<))) \
 	    $(notdir $(subst .checked,,$<))
+
+%.ml:
+	$(FSTAR) --codegen OCaml \
+	    --extract_module $(basename $(notdir $(subst .checked,,$<))) \
+	    $(notdir $(subst .checked,,$<))
+
+%.cmx: %.ml
+	$(OCAMLOPT) -c $< -o $@
 
 # Useful definitions for C compilation
 

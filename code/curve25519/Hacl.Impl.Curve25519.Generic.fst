@@ -474,6 +474,7 @@ let montgomery_ladder #s out key init =
   copy out p0;
   pop_frame ()
 
+inline_for_extraction noextract
 let g25519_t = x:ilbuffer byte_t 32ul{witnessed x (Lib.Sequence.of_list S.basepoint_list) /\ recallable x}
 
 /// Public API

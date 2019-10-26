@@ -20,7 +20,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "08a26b47ee41a67c909d6b1ffb298d15"
+      "6506a5a85aaee20a72fe5ecfb7a8a33b"
     ],
     [
       "Test.NoHeap.test_one_hash",
@@ -199,7 +199,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "unit_inversion", "unit_typing"
       ],
       0,
-      "da5c88b0eadad363fbda3d88d2c3d5d6"
+      "2c1a922376bb8bc19a6a22198dbd5dac"
     ],
     [
       "Test.NoHeap.keysized",
@@ -263,7 +263,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "092026ecefd81ad9c3ece09fe4e56e15"
+      "8f780adf0c22d10a455b20d51964861f"
     ],
     [
       "Test.NoHeap.test_one_hmac",
@@ -336,7 +336,7 @@
         "lemma_FStar.HyperStack.ST.lemma_same_refs_in_non_tip_regions_elim",
         "lemma_FStar.Map.lemma_ContainsDom",
         "lemma_FStar.Map.lemma_InDomRestrict",
-        "lemma_FStar.Map.lemma_InDomUpd2",
+        "lemma_FStar.Map.lemma_InDomUpd1", "lemma_FStar.Map.lemma_InDomUpd2",
         "lemma_FStar.Map.lemma_SelRestrict", "lemma_FStar.Map.lemma_SelUpd1",
         "lemma_FStar.Map.lemma_SelUpd2",
         "lemma_FStar.Monotonic.HyperStack.lemma_mk_mem__projectors",
@@ -356,7 +356,7 @@
         "lemma_LowStar.Monotonic.Buffer.unused_in_loc_unused_in",
         "lemma_LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2",
         "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
-        "primitive_Prims.op_Equality",
+        "primitive_Prims.op_BarBar", "primitive_Prims.op_Equality",
         "primitive_Prims.op_GreaterThanOrEqual",
         "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Multiply",
         "primitive_Prims.op_Negation", "primitive_Prims.op_Subtraction",
@@ -413,7 +413,7 @@
         "unit_inversion", "unit_typing"
       ],
       0,
-      "95ad20dd8a696b09711c65afb80e4da1"
+      "06e252f83d90715a31e186656a17fcf1"
     ],
     [
       "Test.NoHeap.test_one_hkdf",
@@ -593,7 +593,7 @@
         "unit_inversion", "unit_typing"
       ],
       0,
-      "77a4b4fd5fb42373921d842ba13d462f"
+      "5ac16bb6c0a851db90b88bbcdb8fe9d6"
     ],
     [
       "Test.NoHeap.test_one_chacha20",
@@ -742,7 +742,7 @@
         "unit_inversion", "unit_typing"
       ],
       0,
-      "75d361b8147a9d5a45f5a5d5afff9af4"
+      "8be952c72f965efac796793b6d35a253"
     ],
     [
       "Test.NoHeap.test_one_poly1305",
@@ -868,7 +868,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "unit_inversion"
       ],
       0,
-      "f1f5892bb6912d37d5ece21b468c5610"
+      "b06186e845d5f0366ceeafb2776ca142"
     ],
     [
       "Test.NoHeap.test_poly1305",
@@ -888,7 +888,7 @@
         "typing_Test.Vectors.Poly1305.vectors"
       ],
       0,
-      "f7b9737c191939f6e891b2a1c4fa9325"
+      "e601bee4345ebb12a0be78129b0af40c"
     ],
     [
       "Test.NoHeap.test_one_curve25519",
@@ -1016,7 +1016,7 @@
         "typing_Spec.Poly1305.size_key", "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "18f39328b8755d397a989e66bee970df"
+      "e0e4f79cb5be04daeae55eb8980a5241"
     ],
     [
       "Test.NoHeap.test_curve25519",
@@ -1036,7 +1036,7 @@
         "typing_Test.Vectors.Curve25519.vectors"
       ],
       0,
-      "f85fa434423994b94dea41dbf4cef32c"
+      "ba603f55a0f3ac5b993d33ee8aa322f3"
     ],
     [
       "Test.NoHeap.test_one_chacha20poly1305",
@@ -1192,7 +1192,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "unit_inversion", "unit_typing"
       ],
       0,
-      "091bedb2795f1fa582ef029d942df0a3"
+      "e6c4bf9a060ef204c1a86053bb73549f"
     ],
     [
       "Test.NoHeap.test_chacha20poly1305",
@@ -1212,7 +1212,7 @@
         "typing_Test.Vectors.Chacha20Poly1305.vectors"
       ],
       0,
-      "be1cc27dbb521e6f15933e2979127022"
+      "b2071d30e19390e4cb97d9c47903a763"
     ],
     [
       "Test.NoHeap.main",
@@ -1221,7 +1221,7 @@
       0,
       [ "@query", "lemma_FStar.HyperStack.ST.lemma_equal_domains_trans" ],
       0,
-      "40ff2a6040dfb48565f668a493053eb9"
+      "fd884b4e30822084eaf627e9cd00f269"
     ]
   ]
 ]

@@ -125,20 +125,8 @@ function fetch_mitls() {
 }
 
 function fetch_vale() {
-    # NOTE: the name of the directory where Vale is downloaded MUST NOT be vale, because the latter already exists
-    # so let's call it valebin
-    if [ ! -d valebin ]; then
-        mkdir valebin
-    fi
-    vale_version=$(<vale/.vale_version)
-    vale_version=${vale_version%$'\r'}  # remove Windows carriage return, if it exists
-    wget "https://github.com/project-everest/vale/releases/download/v${vale_version}/vale-release-${vale_version}.zip" -O valebin/vale-release.zip
-    rm -rf "valebin/vale-release-${vale_version}"
-    unzip -o valebin/vale-release.zip -d valebin
-    rm -rf "valebin/bin"
-    mv "valebin/vale-release-${vale_version}/bin" valebin/
-    chmod +x valebin/bin/*.exe
-    export_home VALE "$(pwd)/valebin"
+    HACL_HOME=$(pwd) tools/get_vale.sh
+    export_home VALE "$(pwd)/../vale"
 }
 
 function refresh_hacl_hints() {

@@ -204,7 +204,12 @@ let init a p k iv iv_len c =
   (**) let g_key: G.erased (key (cipher_alg_of_impl i)) = G.hide (B.as_seq h0 k) in
 
   B.blit iv 0ul iv' 0ul iv_len;
+  (**) let h1 = ST.get () in
+  (**) assert B.(modifies (footprint_s (B.deref h0 p)) h0 h1);
+
   copy_or_expand i k ek;
+  (**) let h2 = ST.get () in
+  (**) assert B.(modifies (footprint_s (B.deref h0 p)) h1 h2);
 
   // TODO: two in-place updates
   p *= (State i g_iv iv' iv_len g_key ek c)
@@ -317,7 +322,7 @@ fun p dst src ->
   (**) vale_encrypt_is_hacl_encrypt i (G.reveal g_key) (B.as_seq h2 ctr_block)
     (B.as_seq h2 src);
 
-  let c = c0 `UInt32.add` 1ul in
+  let c = c0 `UInt32.add_mod` 1ul in
   p *= (State #(cipher_alg_of_impl i) i g_iv iv iv_len g_key ek c);
 
   pop_frame ();
