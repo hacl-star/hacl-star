@@ -1,5 +1,5 @@
 [
-  "Ô“F”u•C∆ √.«vH\u001eM",
+  "À-(≤<°∑€sh ‘1¢Q3",
   [
     [
       "Spec.HPKE.pow2_61",
@@ -8,7 +8,7 @@
       1,
       [ "@query" ],
       0,
-      "c5c833f73a43b4479a700c2621f36f96"
+      "430a0fcc7c4d7f24bc93ebd153a4c77d"
     ],
     [
       "Spec.HPKE.pow2_35_less_than_pow2_61",
@@ -17,7 +17,7 @@
       1,
       [ "@query" ],
       0,
-      "4a80222edccfa40784b6406bd1a90012"
+      "156eb39402446d7a25d00a7c048d7264"
     ],
     [
       "Spec.HPKE.pow2_35_less_than_pow2_125",
@@ -26,7 +26,7 @@
       1,
       [ "@query" ],
       0,
-      "b0a8e2e98d857438647781eb1cddc28c"
+      "22f1b61d6f4b54f1475d5a0a545de361"
     ],
     [
       "Spec.HPKE.size_label_nonce",
@@ -43,7 +43,7 @@
         "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "6e90c3216a87804ea1010f9402b64ce3"
+      "3339aad8c21ffbf71ca0b5f1505d2b29"
     ],
     [
       "Spec.HPKE.size_label_key",
@@ -99,7 +99,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "b075bf5478bc85d38813dd76035bc374"
+      "82a7afd7b79386abb0b665ed87299d62"
     ],
     [
       "Spec.HPKE.label_key_list",
@@ -138,7 +138,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "6b8411d4a5992c287c63868d418695a1"
+      "bf1df55b5cbc77740b11d3a372b55487"
     ],
     [
       "Spec.HPKE.label_nonce",
@@ -154,7 +154,7 @@
         "typing_Spec.Poly1305.size_block"
       ],
       0,
-      "2b8cd1036b1127f65b7c6ed14c663d13"
+      "72f09d47752c330c875fe3a2402f9d00"
     ],
     [
       "Spec.HPKE.label_key",
@@ -230,10 +230,12 @@
         "disc_equation_Spec.Hash.Definitions.SHA2_256",
         "disc_equation_Spec.Hash.Definitions.SHA2_512",
         "equality_tok_Lib.IntTypes.SEC@tok",
+        "equality_tok_Lib.IntTypes.U128@tok",
         "equality_tok_Lib.IntTypes.U1@tok",
         "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
         "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
+        "equation_Spec.GF128.gf128", "equation_Spec.GF128.irred",
         "equation_Spec.GaloisField.gf", "equation_Spec.HPKE.ciphersuite",
         "equation_Spec.HPKE.is_ciphersuite",
         "equation_Spec.Hash.Definitions.algorithm",
@@ -256,11 +258,13 @@
         "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
         "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
         "typing_FStar.Pervasives.Native.__proj__Mktuple3__item___2",
-        "typing_Lib.IntTypes.v", "typing_Spec.AES.gf8",
-        "typing_Spec.AES.irred",
+        "typing_Lib.IntTypes.unsigned", "typing_Lib.IntTypes.v",
+        "typing_Spec.AES.gf8", "typing_Spec.AES.irred",
+        "typing_Spec.GF128.gf128",
         "typing_Spec.GaloisField.__proj__GF__item__t",
         "typing_Spec.HPKE.is_ciphersuite", "typing_Spec.Poly1305.size_key",
-        "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
+        "typing_tok_Lib.IntTypes.SEC@tok",
+        "typing_tok_Lib.IntTypes.U128@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
       "adf8c3a7fb67e7e31f1c88cf23d762e3"
@@ -271,17 +275,15 @@
       2,
       1,
       [
-        "@MaxIFuel_assumption", "@query", "bool_inversion",
+        "@MaxIFuel_assumption", "@query",
         "constructor_distinct_Lib.IntTypes.U8",
         "disc_equation_Spec.HPKE.Auth", "disc_equation_Spec.HPKE.Base",
         "disc_equation_Spec.HPKE.PSK", "disc_equation_Spec.HPKE.PSKAuth",
         "equality_tok_Lib.IntTypes.SEC@tok",
-        "equality_tok_Lib.IntTypes.U128@tok",
         "equality_tok_Lib.IntTypes.U1@tok",
         "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
         "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
-        "equation_Spec.GF128.gf128", "equation_Spec.GF128.irred",
         "equation_Spec.GaloisField.gf", "equation_Spec.Poly1305.size_key",
         "fuel_guarded_inversion_Spec.HPKE.mode",
         "proj_equation_Spec.GaloisField.GF_t",
@@ -291,12 +293,11 @@
         "refinement_interpretation_Tm_refine_48486e77aa5457d9a27027fef170c244",
         "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
         "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
-        "typing_Lib.IntTypes.unsigned", "typing_Lib.IntTypes.v",
-        "typing_Spec.AES.gf8", "typing_Spec.AES.irred",
-        "typing_Spec.GF128.gf128",
+        "typing_Lib.IntTypes.v", "typing_Spec.AES.gf8",
+        "typing_Spec.AES.irred",
         "typing_Spec.GaloisField.__proj__GF__item__t",
         "typing_Spec.Poly1305.size_key", "typing_tok_Lib.IntTypes.SEC@tok",
-        "typing_tok_Lib.IntTypes.U128@tok", "typing_tok_Lib.IntTypes.U8@tok"
+        "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
       "9f8db42a18ea18a77ff2c9051599c52d"
@@ -353,7 +354,7 @@
         "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "85d8a6e0e46f1829d658c9f51fac84f8"
+      "a83c595b6f3fc71c3a327ba580bbae32"
     ],
     [
       "Spec.HPKE.max_pskID",
@@ -388,7 +389,7 @@
         "typing_tok_Lib.IntTypes.U128@tok"
       ],
       0,
-      "ed30a3280d04f8520d0c339bae9b8faa"
+      "8213d0aa4092bf794f9ba2db3a4279df"
     ],
     [
       "Spec.HPKE.max_info",
@@ -461,7 +462,7 @@
         "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "00981cd20fccb91ec250d366c2dcf0fe"
+      "70f42e5cdbacdf6d6244f1eb1f3a5677"
     ],
     [
       "Spec.HPKE.auth_encap",
@@ -549,13 +550,13 @@
         "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "3a2329c9eca92c77863fb0a5480a77f4"
+      "0ee6f9af96e13d53f89fcd7771c6d7b3"
     ],
     [
       "Spec.HPKE.auth_decap",
       2,
       2,
-      2,
+      1,
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented",
@@ -586,7 +587,7 @@
         "typing_Spec.HPKE.size_dh_key", "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "da5ad6e048e7493b86394b3fdb6e73a3"
+      "a0a55193cb0009560263dcc94d1f8da7"
     ],
     [
       "Spec.HPKE.default_pkI",
@@ -651,7 +652,7 @@
       1,
       [ "@query" ],
       0,
-      "a59b3ae0199be358a3358ff56d5901da"
+      "22d03b7db598d02539c16e699508077b"
     ],
     [
       "Spec.HPKE.build_context",
@@ -668,7 +669,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "11189b04844489b47a38cb9c6b169dc7"
+      "b3ab283aeb0d1ee010a544c94d8bad19"
     ],
     [
       "Spec.HPKE.build_context",
@@ -937,7 +938,7 @@
         "unit_typing"
       ],
       0,
-      "2aba77056f36fc1111d673548028e48d"
+      "d8091e959c7fbd642d64206b10162b64"
     ],
     [
       "Spec.HPKE.setupBaseI",
@@ -954,7 +955,7 @@
         "typing_Spec.AES.gf8"
       ],
       0,
-      "d000548d99061177ccdce0db17919340"
+      "9782f8615dc08b2709f6e79deebe2430"
     ],
     [
       "Spec.HPKE.setupBaseI",
@@ -1157,14 +1158,14 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented",
         "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
-        "bool_inversion", "constructor_distinct_Lib.IntTypes.U32",
-        "constructor_distinct_Tm_unit", "equality_tok_Lib.IntTypes.U128@tok",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "constructor_distinct_Tm_unit", "equality_tok_Lib.IntTypes.U1@tok",
         "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
         "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
         "equation_Spec.Agile.DH.size_key",
-        "equation_Spec.Agile.DH.size_public", "equation_Spec.GF128.gf128",
-        "equation_Spec.GF128.irred", "equation_Spec.GaloisField.gf",
+        "equation_Spec.Agile.DH.size_public", "equation_Spec.GaloisField.gf",
         "equation_Spec.HPKE.max_info", "equation_Spec.HPKE.size_dh_key",
         "equation_Spec.HPKE.size_dh_public",
         "equation_Spec.Poly1305.size_block",
@@ -1177,12 +1178,10 @@
         "refinement_interpretation_Tm_refine_0ec011aea9f93256a3547ad9f0c667f1",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
-        "typing_Lib.IntTypes.unsigned", "typing_Spec.AES.gf8",
-        "typing_Spec.GF128.gf128",
-        "typing_Spec.GaloisField.__proj__GF__item__t",
+        "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t",
         "typing_Spec.HPKE.max_info", "typing_Spec.HPKE.size_dh_key",
         "typing_Spec.HPKE.size_dh_public", "typing_Spec.Poly1305.size_block",
-        "typing_Spec.Poly1305.size_key", "typing_tok_Lib.IntTypes.U128@tok"
+        "typing_Spec.Poly1305.size_key"
       ],
       0,
       "fdf7aa4ab117c34fd545060c36c6e563"
@@ -1311,7 +1310,7 @@
         "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
         "equation_Spec.Agile.DH.size_key",
         "equation_Spec.Agile.DH.size_public", "equation_Spec.GaloisField.gf",
-        "equation_Spec.HPKE.max_pskID", "equation_Spec.HPKE.size_dh_key",
+        "equation_Spec.HPKE.max_info", "equation_Spec.HPKE.size_dh_key",
         "equation_Spec.HPKE.size_dh_public",
         "equation_Spec.Poly1305.size_block",
         "equation_Spec.Poly1305.size_key", "int_inversion",
@@ -1324,7 +1323,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t",
-        "typing_Spec.HPKE.max_pskID", "typing_Spec.HPKE.size_dh_key",
+        "typing_Spec.HPKE.max_info", "typing_Spec.HPKE.size_dh_key",
         "typing_Spec.HPKE.size_dh_public", "typing_Spec.Poly1305.size_block",
         "typing_Spec.Poly1305.size_key"
       ],
