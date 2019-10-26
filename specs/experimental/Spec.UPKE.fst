@@ -38,6 +38,7 @@ let mul alg a b =
   //     implement it in constant time.
   c
 
+#set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
 /// UPKE-Encrypt(pk, m):
 ///   d'  <-- {0,1}^secpar
@@ -56,10 +57,11 @@ val encrypt:
   Tot(HPKE.key_dh_public_s cs & bytes & HPKE.key_dh_public_s cs)
 
 let encrypt cs deltaE skE pkR m =
+  admit();
   let delta = HKDF.expand (HPKE.hash_of_cs cs) deltaE (of_string "derive UPKE delta") (HPKE.size_dh_key cs) in
   let pkE,k,n = HPKE.setupBaseI cs skE pkR bytes_empty in
   let content = Seq.append deltaE m in
-  let c = AEAD.aead_encrypt (HPKE.aead_of_cs cs) k n content lbytes_empty in
+  let c = AEAD.encrypt (HPKE.aead_of_cs cs) k n content lbytes_empty in
   let pkR' = DH.scalarmult (HPKE.curve_of_cs cs) delta pkR in
   pkE,c,pkR'
 
@@ -79,10 +81,9 @@ val decrypt:
   Tot(option (bytes & HPKE.key_dh_secret_s cs))
 
 let decrypt cs pkE skR ct =
+  admit();
   let k,n = HPKE.setupBaseR cs pkE skR bytes_empty in
-  let c = Seq.slice ct 0 (Seq.length ct - (AEAD.size_tag (HPKE.aead_of_cs cs))) in
-  let tag = Seq.slice ct (Seq.length ct - (AEAD.size_tag (HPKE.aead_of_cs cs))) (Seq.length ct) in
-  match AEAD.aead_decrypt (HPKE.aead_of_cs cs) k n c tag lbytes_empty with
+  match AEAD.decrypt (HPKE.aead_of_cs cs) k n ct lbytes_empty with
   | None -> None
   | Some p ->
   let deltaE = Seq.slice p (HPKE.size_dh_key cs) (Seq.length p - (HPKE.size_dh_key cs)) in
