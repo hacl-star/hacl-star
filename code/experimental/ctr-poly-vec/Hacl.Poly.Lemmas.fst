@@ -57,35 +57,6 @@ let load_acc_v_i #w b acc0 i =
   assert ((load_acc_v b acc0).[i] == fadd zero (encode b2));
   fadd_identity (encode b2)
 
-
-// val load_acc_v_last: #w:lanes{w > 1} -> b:block_v w -> acc0:felem -> r:felem -> Lemma
-//   ((load_acc_v b acc0).[w - 1] == encode (sub b ((w - 1) * blocksize) blocksize))
-
-// let load_acc_v_last #w b acc0 r =
-//   let b2 = sub b ((w - 1) * blocksize) blocksize in
-//   assert ((load_acc_v b acc0).[w - 1] == fadd zero (encode b2));
-//   fadd_identity (encode b2)
-
-
-val rw_eq: #w:lanes{w > 1} -> r:felem -> i:pos{i < w} -> Lemma
-  (let rw = createi w (rw_f #w r) in
-   let rw1: lseq felem (w - 1) = createi (w - 1) (rw_f #(w-1) r) in
-   rw.[i - 1] == fmul rw1.[i - 1] r)
-
-let rw_eq #w r i =
-  //let rw = createi w (rw_f #w r) in
-  //let rw1: lseq felem (w - 1) = createi (w - 1) (rw_f #(w-1) r) in
-  //assert (rw.[i - 1] == pow_w (w - i + 1) r);
-  //assert (rw1.[i - 1] == pow_w (w - i) r);
-  calc (==) {
-    pow_w (w - i + 1) r;
-    (==) { pow_w_unfold (w - i + 1) r }
-    r *% pow_w (w - i) r;
-    (==) { fmul_commutativity r (pow_w (w - i) r) }
-    pow_w (w - i) r *% r;
-  }
-
-
 val load_acc_v_eq:
     #w:lanes{w > 1}
   -> b:block_v w
@@ -104,6 +75,21 @@ let load_acc_v_eq #w b acc0 i =
   else begin
     load_acc_v_i b acc0 (i - 1);
     load_acc_v_i b1 acc0 (i - 1) end
+
+
+val rw_eq: #w:lanes{w > 1} -> r:felem -> i:pos{i < w} -> Lemma
+  (let rw = createi w (rw_f #w r) in
+   let rw1: lseq felem (w - 1) = createi (w - 1) (rw_f #(w-1) r) in
+   rw.[i - 1] == fmul rw1.[i - 1] r)
+
+let rw_eq #w r i =
+  calc (==) {
+    pow_w (w - i + 1) r;
+    (==) { pow_w_unfold (w - i + 1) r }
+    r *% pow_w (w - i) r;
+    (==) { fmul_commutativity r (pow_w (w - i) r) }
+    pow_w (w - i) r *% r;
+  }
 
 
 val fsum_eq_step:
@@ -206,6 +192,37 @@ let normalize_unfold #w b acc0 r =
   }
 
 
+val repeat_blocks_multi_unfold_eq: #w:lanes{w > 1} -> b:block_v w -> acc0:felem -> r:felem -> Lemma
+  (let b1 = sub b 0 ((w - 1) * blocksize) in
+   let b2 = sub b ((w - 1) * blocksize) blocksize in
+   FStar.Math.Lemmas.cancel_mul_mod w blocksize;
+   FStar.Math.Lemmas.cancel_mul_mod (w - 1) blocksize;
+
+   let repeat_bf_b = repeat_blocks_f blocksize b (poly_update1 r) w in
+   let repeat_bf_b1 = repeat_blocks_f blocksize b1 (poly_update1 r) (w - 1) in
+   Loops.repeati (w - 1) repeat_bf_b acc0 == Loops.repeati (w - 1) repeat_bf_b1 acc0)
+
+let repeat_blocks_multi_unfold_eq #w b acc0 r =
+  let b1 = sub b 0 ((w - 1) * blocksize) in
+  let b2 = sub b ((w - 1) * blocksize) blocksize in
+  FStar.Math.Lemmas.cancel_mul_mod w blocksize;
+  FStar.Math.Lemmas.cancel_mul_mod (w - 1) blocksize;
+
+  let repeat_bf_b = repeat_blocks_f blocksize b (poly_update1 r) w in
+  let repeat_bf_b1 = repeat_blocks_f blocksize b1 (poly_update1 r) (w - 1) in
+
+  let lemma_aux (i:nat{i < w - 1}) (acc:felem) : Lemma (repeat_bf_b1 i acc == repeat_bf_b i acc) =
+    Math.Lemmas.lemma_mult_le_right blocksize (i + 1) (w - 1);
+    let b3 = sub b1 (i * blocksize) blocksize in
+    FStar.Seq.slice_slice b 0 ((w - 1) * blocksize) (i * blocksize) ((i + 1) * blocksize);
+    let b4 = sub b (i * blocksize) blocksize in
+    assert (repeat_bf_b1 i acc == poly_update1 r b3 acc);
+    assert (repeat_bf_b i acc == poly_update1 r b4 acc);
+    () in
+  Classical.forall_intro_2 lemma_aux;
+  Lib.Sequence.Lemmas.repeati_extensionality (w - 1) repeat_bf_b repeat_bf_b1 acc0
+
+
 val repeat_blocks_multi_unfold: #w:lanes{w > 1} -> b:block_v w -> acc0:felem -> r:felem -> Lemma
   (let b1 = sub b 0 ((w - 1) * blocksize) in
    let b2 = sub b ((w - 1) * blocksize) blocksize in
@@ -215,24 +232,26 @@ val repeat_blocks_multi_unfold: #w:lanes{w > 1} -> b:block_v w -> acc0:felem -> 
    poly_update1 r b2 (repeat_blocks_multi blocksize b1 (poly_update1 r) acc0))
 
 let repeat_blocks_multi_unfold #w b acc0 r =
-  FStar.Math.Lemmas.cancel_mul_mod w blocksize;
-  let lp = repeat_blocks_multi blocksize b (poly_update1 r) acc0 in
-  lemma_repeat_blocks_multi blocksize b (poly_update1 r) acc0;
-  let repeat_bf_b = repeat_blocks_f blocksize b (poly_update1 r) w in
-  assert (lp == Loops.repeati w repeat_bf_b acc0);
-
   let b1 = sub b 0 ((w - 1) * blocksize) in
+  let b2 = sub b ((w - 1) * blocksize) blocksize in
+  FStar.Math.Lemmas.cancel_mul_mod w blocksize;
   FStar.Math.Lemmas.cancel_mul_mod (w - 1) blocksize;
-  let lp1 = repeat_blocks_multi blocksize b1 (poly_update1 r) acc0 in
-  lemma_repeat_blocks_multi blocksize b1 (poly_update1 r) acc0;
-  let repeat_bf_b1 = repeat_blocks_f blocksize b1 (poly_update1 r) (w - 1) in
-  assert (lp1 == Loops.repeati (w - 1) repeat_bf_b1 acc0);
-  Loops.unfold_repeati w repeat_bf_b acc0 (w - 1);
-  assert (lp == repeat_bf_b (w - 1) (Loops.repeati (w - 1) repeat_bf_b acc0));
-  assume (Loops.repeati (w - 1) repeat_bf_b1 acc0 == Loops.repeati (w - 1) repeat_bf_b acc0)
-  //let b2 = sub b ((w - 1) * blocksize) blocksize in
-  //assert (lp == poly_update1 r b2 lp1)
 
+  let repeat_bf_b = repeat_blocks_f blocksize b (poly_update1 r) w in
+  let repeat_bf_b1 = repeat_blocks_f blocksize b1 (poly_update1 r) (w - 1) in
+  calc (==) {
+    repeat_blocks_multi blocksize b (poly_update1 r) acc0;
+    (==) { lemma_repeat_blocks_multi blocksize b (poly_update1 r) acc0 }
+    Loops.repeati w repeat_bf_b acc0;
+    (==) { Loops.unfold_repeati w repeat_bf_b acc0 (w - 1) }
+    repeat_bf_b (w - 1) (Loops.repeati (w - 1) repeat_bf_b acc0);
+    (==) { }
+    poly_update1 r b2 (Loops.repeati (w - 1) repeat_bf_b acc0);
+    (==) { repeat_blocks_multi_unfold_eq #w b acc0 r }
+    poly_update1 r b2 (Loops.repeati (w - 1) repeat_bf_b1 acc0);
+    (==) { lemma_repeat_blocks_multi blocksize b1 (poly_update1 r) acc0 }
+    poly_update1 r b2 (repeat_blocks_multi blocksize b1 (poly_update1 r) acc0);
+  }
 
 
 // val load_acc_v_lemma: #w:lanes -> b:block_v w -> acc0:felem -> r:felem -> Lemma
