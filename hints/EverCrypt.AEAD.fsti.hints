@@ -1,5 +1,5 @@
 [
-  "qS\u0011ıØ˝ò\u0004F\u0013¡nÅ⁄ò~",
+  "Úo\u001c˜£`A©g≈ı”ºÒ\u0016ﬂ",
   [
     [
       "EverCrypt.AEAD.loc_includes_union_l_footprint_s",
@@ -32,6 +32,26 @@
       [ "@query", "projection_inverse_BoxBool_proj_0" ],
       0,
       "140bc9acfd17035e9cf1344ccbb0800a"
+    ],
+    [
+      "EverCrypt.AEAD.encrypt_pre",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "bool_inversion",
+        "equation_LowStar.Buffer.pointer_or_null", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Spec.Agile.AEAD.is_supported_alg",
+        "equation_Spec.Agile.AEAD.supported_alg",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_cd18e9962a0d204005dcfcda04529ffc",
+        "refinement_interpretation_Tm_refine_ce5a1bd8437baa640019cd70bf466fc0",
+        "typing_Spec.Agile.AEAD.is_supported_alg"
+      ],
+      0,
+      "a940bd99f4699e140aeb899dc9e9b9fc"
     ],
     [
       "EverCrypt.AEAD.encrypt_st",
@@ -69,7 +89,7 @@
         "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "f2ef76c6e9fa33deadaa0ca71e3023fa"
+      "763999362cefdaa558113cc8f112cc41"
     ],
     [
       "EverCrypt.AEAD.decrypt_st",
@@ -117,7 +137,7 @@
         "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "aef1ae5ee459e52821d699e981eb81aa"
+      "ac357faff23ffb4c0cc6c4077390209a"
     ]
   ]
 ]
