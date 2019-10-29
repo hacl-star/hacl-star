@@ -9,7 +9,6 @@ open FStar.Mul
 open Spec.Matrix
 open Spec.Frodo.Lemmas
 open Spec.Frodo.Params
-open Spec.Frodo.KEM
 open Spec.Frodo.Encode
 open Spec.Frodo.Pack
 open Spec.Frodo.Sample

@@ -161,11 +161,11 @@ val crypto_kem_enc_ct0:
     (ensures fun h0 _ h1 -> modifies1 ct h0 h1 /\
      (let c1 = S.crypto_kem_enc_ct_pack_c1 (as_seq h0 seed_a) (as_seq h0 seed_e) (as_seq h0 sp_matrix) in
       let c2 = S.crypto_kem_enc_ct_pack_c2 (as_seq h0 seed_e) (as_seq h0 coins) (as_seq h0 b) (as_seq h0 sp_matrix) in
-      Spec.Frodo.KEM.expand_crypto_ciphertextbytes ();
+      Spec.Frodo.Params.expand_crypto_ciphertextbytes ();
       as_seq h1 ct == LSeq.concat (LSeq.concat c1 c2) (as_seq h0 d)))
 let crypto_kem_enc_ct0 seed_a seed_e b coins sp_matrix d ct =
   let h0 = ST.get () in
-  Spec.Frodo.KEM.expand_crypto_ciphertextbytes ();
+  Spec.Frodo.Params.expand_crypto_ciphertextbytes ();
   let c1Len = params_logq *! params_nbar *! params_n /. size 8 in
   let c2Len = params_logq *! params_nbar *! params_nbar /. size 8 in
   let c12Len = c1Len +! c2Len in

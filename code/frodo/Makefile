@@ -62,7 +62,7 @@ ROOTS = Hacl.Frodo.KEM.fst
 .PRECIOUS: %.krml
 
 .depend:
-	$(FSTAR) --dep full $(ROOTS) --extract '* -Prims -FStar +FStar.UInt128 -LowStar -Spec -Frodo.KEM' > $@
+	$(FSTAR) --dep full $(ROOTS) --extract '* -Prims -FStar +FStar.UInt128 -LowStar -Spec' > $@
 
 include .depend
 
@@ -107,8 +107,8 @@ $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	-bundle 'Lib.*' \
 	-bundle 'Spec.*' \
 	-bundle 'Hacl.SHA3=Hacl.Impl.SHA3,Hacl.SHA3' \
-	-library 'Hacl.AES128,C,FStar' \
-	-drop 'LowStar,Spec,Prims,Lib,C.Loops.*,Frodo.KEM' \
+	-library 'Hacl.AES128,C,FStar,Spec' \
+	-drop 'LowStar,Spec,Prims,Lib,C.Loops.*' \
 	-tmpdir $(GENERATED_DIR) \
 	$^
 
@@ -130,14 +130,13 @@ include $(GENERATED_DIR)/Makefile.include
 # KreMLin sees the fsti's for various modules and creates .h/.c files for them in
 # $(GENERATED_DIR). However, we are only interested in the headers, and drop these
 # (mostly empty) C files.
-ALL_OUR_FILES = $(filter-out C.c FStar.c Hacl_AES128.c, $(ALL_C_FILES))
+ALL_OUR_FILES = $(ALL_C_FILES)
 ALL_GENERATED_FILES = $(addprefix $(GENERATED_DIR)/,$(ALL_OUR_FILES))
 
 ALL_SOURCES = \
   $(ALL_GENERATED_FILES) \
   $(HACL_HOME)/lib/c/Lib_RandomBuffer_System.c \
-  $(HACL_HOME)/lib/c/Lib_Memzero.c \
-  include/random.c
+  $(HACL_HOME)/lib/c/Lib_Memzero.c
 
 ALL_OBJS = $(patsubst %.c,%.o,$(ALL_SOURCES))
 

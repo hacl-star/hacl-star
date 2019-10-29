@@ -8,7 +8,6 @@ open FStar.Mul
 
 open Spec.Matrix
 open Spec.Frodo.Params
-open Spec.Frodo.KEM
 open Spec.Frodo.Pack
 open Spec.Frodo.Sample
 

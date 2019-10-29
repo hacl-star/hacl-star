@@ -39,7 +39,7 @@ val get_bp_c_matrices:
       modifies2 bp_matrix c_matrix h0 h1 /\
       (as_matrix h1 bp_matrix, as_matrix h1 c_matrix) == S.get_bp_c_matrices (as_seq h0 ct))
 let get_bp_c_matrices ct bp_matrix c_matrix =
-  Spec.Frodo.KEM.expand_crypto_ciphertextbytes ();
+  Spec.Frodo.Params.expand_crypto_ciphertextbytes ();
   let c1Len = params_logq *! params_nbar *! params_n /. size 8 in
   let c2Len = params_logq *! params_nbar *! params_nbar /. size 8 in
   let c1 = sub ct (size 0) c1Len in
@@ -68,8 +68,8 @@ val get_bpp_cp_matrices:
 let get_bpp_cp_matrices g mu_decode sk bpp_matrix cp_matrix =
   assert (v params_nbar * v params_n % 2 = 0);
   push_frame();
-  Spec.Frodo.KEM.expand_crypto_publickeybytes ();
-  Spec.Frodo.KEM.expand_crypto_secretkeybytes ();
+  Spec.Frodo.Params.expand_crypto_publickeybytes ();
+  Spec.Frodo.Params.expand_crypto_secretkeybytes ();
   let pk: lbytes crypto_publickeybytes = sub sk crypto_bytes crypto_publickeybytes in
   let seed_a = sub pk (size 0) bytes_seed_a in
   let b = sub pk bytes_seed_a (crypto_publickeybytes -! bytes_seed_a) in
@@ -149,7 +149,7 @@ val crypto_kem_dec_kp_s:
 	(as_matrix h0 bp_matrix) (as_matrix h0 c_matrix) (as_seq h0 sk) (as_seq h0 ct))
 let crypto_kem_dec_kp_s mu_decode g bp_matrix c_matrix sk ct =
   push_frame ();
-  Spec.Frodo.KEM.expand_crypto_ciphertextbytes ();
+  Spec.Frodo.Params.expand_crypto_ciphertextbytes ();
   let dp = sub g (crypto_bytes +! crypto_bytes) crypto_bytes in
   let d = sub ct (crypto_ciphertextbytes -! crypto_bytes) crypto_bytes in
   let bpp_matrix = matrix_create params_nbar params_n in
@@ -276,7 +276,7 @@ val crypto_kem_dec:
       modifies1 ss h0 h1 /\
       as_seq h1 ss == S.crypto_kem_dec (as_seq h0 ct) (as_seq h0 sk))
 let crypto_kem_dec ss ct sk =
-  Spec.Frodo.KEM.expand_crypto_secretkeybytes ();
+  Spec.Frodo.Params.expand_crypto_secretkeybytes ();
   let h0 = ST.get() in
   push_frame();
   let bp_matrix = matrix_create params_nbar params_n in

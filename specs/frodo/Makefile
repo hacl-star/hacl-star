@@ -31,7 +31,7 @@ all:
 	rm -f .depend && $(MAKE) .depend
 	$(MAKE) $(TARGET)
 
-verify: $(addprefix $(CACHE_DIR)/,Spec.Frodo.KEM.KeyGen.fst.checked Spec.Frodo.KEM.Encaps.fst.checked Spec.Frodo.KEM.Decaps.fst.checked)
+verify: $(addprefix $(CACHE_DIR)/,Spec.Frodo.KEM.checked)
 	@echo SUCCESS!
 
 # 1. Generation of .ml files
@@ -60,17 +60,14 @@ ifeq ($(VARIANT),64-cSHAKE)
 else ifeq ($(VARIANT),64-AES)
   ROOTS = test-$(VARIANT)/Spec.Frodo.Test.fst
   FSTAR += --include test-$(VARIANT)
-else
-  ROOTS = Frodo.KEM.fst
 endif
+
+ROOTS += Spec.Frodo.KEM.fst
 
 .depend:
 	$(FSTAR) --dep full $(ROOTS) --extract '* -Prims -FStar' > $@
 
 include .depend
-
-$(CACHE_DIR):
-	mkdir -p $@
 
 $(CACHE_DIR)/%.checked: | .depend $(CACHE_DIR)
 	$(FSTAR) $< $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $<).hints && \
@@ -92,14 +89,11 @@ endif
 
 OCAMLOPT = ocamlfind opt -package fstarlib -linkpkg -g -w -8-20-26
 
-$(OUT_DIR):
-	mkdir -p $@
-
 %.cmx:
 	$(OCAMLOPT) -I $(OUT_DIR) -c $< -o $@
 
 $(OUT_DIR)/Spec_Frodo_Test.cmx:
-	@echo 'let _ = test()' >> $(OUT_DIR)/Spec_Frodo_Test.ml
+	@echo -e '\nlet _ = test()' >> $(OUT_DIR)/Spec_Frodo_Test.ml
 	$(OCAMLOPT) -I $(OUT_DIR) -c $< -o $@
 
 $(OUT_DIR)/test.exe: $(subst .ml,.cmx,$(ALL_ML_FILES)) | $(OUT_DIR)

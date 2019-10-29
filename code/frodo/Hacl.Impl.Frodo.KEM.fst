@@ -13,7 +13,7 @@ open Lib.Memzero
 open Hacl.Impl.Matrix
 open Hacl.Impl.Frodo.Params
 
-module S = Spec.Frodo.KEM
+module S = Spec.Frodo.Params
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 

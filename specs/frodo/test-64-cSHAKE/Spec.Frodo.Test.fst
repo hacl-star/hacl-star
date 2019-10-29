@@ -6,7 +6,6 @@ open Lib.RawIntTypes
 open Lib.Sequence
 open Lib.ByteSequence
 
-open Spec.Frodo.KEM
 open Spec.Frodo.KEM.KeyGen
 open Spec.Frodo.KEM.Encaps
 open Spec.Frodo.KEM.Decaps

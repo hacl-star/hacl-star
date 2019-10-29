@@ -13,7 +13,7 @@ open Hacl.Impl.Frodo.Params
 open Hacl.Impl.Frodo.KEM
 open Hacl.Frodo.Random
 
-module S = Frodo.KEM
+module S = Spec.Frodo.KEM
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
