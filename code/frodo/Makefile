@@ -128,7 +128,10 @@ ROOTS = Hacl.Test.Frodo.fst
 
 include .depend
 
-$(CACHE_DIR)/%.checked: | .depend
+$(CACHE_DIR):
+	mkdir -p $@
+
+$(CACHE_DIR)/%.checked: | .depend $(CACHE_DIR)
 	$(FSTAR) $< $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $<).hints && \
 	touch $@
 
