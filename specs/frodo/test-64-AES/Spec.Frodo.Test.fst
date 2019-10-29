@@ -457,4 +457,5 @@ let test () : ML unit =
   in
   if result
   then IO.print_string "\n\nFrodoKEM : Success!\n"
-  else IO.print_string "\n\nFrodoKEM: Failure :(\n"
+  else IO.print_string "\n\nFrodoKEM: Failure :(\n";
+  result

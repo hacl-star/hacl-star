@@ -20,9 +20,8 @@ else
 endif
 
 CACHE_DIR = $(HACL_HOME)/obj
-#HINT_DIR  = .hints.$(VARIANT)
 HINT_DIR  = $(HACL_HOME)/hints
-OUT_DIR   = frodo-ml.$(VARIANT)
+OUT_DIR   = $(HACL_HOME)/obj
 
 include $(HACL_HOME)/Makefile.include
 
@@ -118,13 +117,3 @@ test: $(OUT_DIR)/test.exe
 %.fsti-in:
 	@echo $(addprefix --include ,$(FSTAR_INCLUDE_DIRS)) \
 	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(basename $@).fsti.hints
-
-# 4. Clean targets
-
-SHELL=/bin/bash
-
-clean:
-	rm -rf $(OUT_DIR)
-
-distclean: clean
-	rm -rf $(CACHE_DIR)

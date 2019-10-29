@@ -439,7 +439,7 @@ let test1_sk_expected =
       0x02uy; 0x00uy; 0xfbuy; 0xffuy; 0xfduy; 0xffuy; 0xfduy; 0xffuy; 0xffuy; 0xffuy; 0x01uy; 0x00uy
     ]
 
-let test () : ML unit =
+let test () : ML bool =
   assert_norm (List.Tot.length test1_enccoins == 16);
   assert_norm (List.Tot.length test1_keypaircoins == 2 * crypto_bytes + bytes_seed_a);
   assert_norm (List.Tot.length test1_enccoins == bytes_mu);
@@ -457,4 +457,5 @@ let test () : ML unit =
   in
   if result
   then IO.print_string "\n\nFrodoKEM : Success!\n"
-  else IO.print_string "\n\nFrodoKEM: Failure :(\n"
+  else IO.print_string "\n\nFrodoKEM: Failure :(\n";
+  result

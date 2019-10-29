@@ -12,10 +12,9 @@ module S = Spec.Frodo.Random
 (* Stub stateless implementation on top of Lib.RandomBuffer.System.
    Intended to be replaced for KATs with include/rng.c *)
 
-let state =
-  let b: b:buffer uint8{length #MUT b == 48 /\ recallable #MUT #uint8 #48ul b} =    
-    gcmalloc HyperStack.root (u8 0) 48ul in
-  b
+friend Lib.IntTypes
+
+let state = gcmalloc HyperStack.root 0uy 48ul
 
 let randombytes_init_ entropy_input =
   let h0 = HyperStack.ST.get () in
