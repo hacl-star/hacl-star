@@ -10,14 +10,12 @@ void clear_words(void* mem, unsigned int nwords)
     }
 }
 
-void clear_words_u16(unsigned int nwords, uint16_t *mem)
+void Lib_Memzero_clear_words_u16(unsigned int nwords, uint16_t *mem)
 {
   clear_words((void*)mem, nwords/2);
 }
 
-void clear_words_u8(unsigned int nwords, uint8_t *mem)
+void Lib_Memzero_clear_words_u8(unsigned int nwords, uint8_t *mem)
 {
   clear_words((void*)mem, nwords/4);
 }
-
-

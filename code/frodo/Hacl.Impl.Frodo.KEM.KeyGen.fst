@@ -15,7 +15,6 @@ open Hacl.Impl.Frodo.KEM
 open Hacl.Impl.Frodo.Pack
 open Hacl.Impl.Frodo.Sample
 open Hacl.Frodo.Random
-open Hacl.Frodo.Clear
 
 module ST = FStar.HyperStack.ST
 module S = Spec.Frodo.KEM.KeyGen

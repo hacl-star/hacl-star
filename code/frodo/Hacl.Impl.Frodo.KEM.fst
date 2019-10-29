@@ -8,10 +8,10 @@ open LowStar.Buffer
 
 open Lib.IntTypes
 open Lib.Buffer
+open Lib.Memzero
 
 open Hacl.Impl.Matrix
 open Hacl.Impl.Frodo.Params
-open Hacl.Frodo.Clear
 
 module S = Spec.Frodo.KEM
 

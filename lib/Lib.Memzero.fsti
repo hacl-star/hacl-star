@@ -1,4 +1,4 @@
-module Hacl.Frodo.Clear
+module Lib.Memzero
 
 open FStar.HyperStack.All
 open FStar.Mul
@@ -9,7 +9,7 @@ open Lib.Buffer
 // REMARK:
 // The C implementation clears one 32-bit word at a time, so we need [len]
 // to be such that we clear an exact multiple of 32-bit words.
-// This condition can be relaxed, but it's enough for our use in Frodo.
+// This condition can be relaxed, but it's enough for our use in e.g. Frodo.
 
 val clear_words_u16:
     nwords:size_t{v nwords % 2 == 0}

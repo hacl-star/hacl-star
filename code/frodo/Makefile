@@ -22,6 +22,7 @@ lib:
 	STAGE=2 $(MAKE) stage2
 
 test: all
+	dist/Hacl_
 
 stage2: $(OUT_DIR)/libfrodo.a
 
@@ -84,7 +85,7 @@ KREMLIN = $(KREMLIN_HOME)/krml
 
 # We use -drop (deprecated) only to avoid creating unnecessary .c,.h files
 $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
-	$(KREMLIN) $(KREMLIB)/c/testlib.c -skip-compilation \
+	$(KREMLIN) $(KREMLIB)/c/testlib.c $(KREMLIB)/c/fstar_uint128.c -skip-compilation \
 	-no-prefix 'Hacl.Impl.Matrix' \
 	-no-prefix 'Hacl.Impl.Frodo.Params' \
 	-no-prefix 'Hacl.Impl.Frodo.Pack' \
@@ -97,14 +98,14 @@ $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	-no-prefix 'Hacl.Impl.Frodo.KEM.Decaps' \
 	-no-prefix 'Hacl.Frodo.KEM' \
 	-no-prefix 'Hacl.Frodo.Random' \
-	-no-prefix 'Hacl.Frodo.Clear' \
 	-no-prefix 'Hacl.SHA3' \
 	-no-prefix 'Hacl.Impl.SHA3' \
+	-bundle 'LowStar.Endianness' \
 	-bundle 'Hacl.Frodo.KEM=Frodo.Params,Hacl.Impl.Frodo.*,Hacl.Impl.Matrix,Hacl.Frodo.*' \
 	-bundle 'Lib.RandomBuffer.System' \
+	-bundle 'Lib.Memzero' \
 	-bundle 'Lib.*' \
 	-bundle 'Spec.*' \
-	-bundle 'C=C.Endianness' \
 	-bundle 'Hacl.SHA3=Hacl.Impl.SHA3,Hacl.SHA3' \
 	-library 'Hacl.AES128,C,FStar' \
 	-drop 'LowStar,Spec,Prims,Lib,C.Loops.*,Frodo.KEM' \
@@ -135,8 +136,8 @@ ALL_GENERATED_FILES = $(addprefix $(GENERATED_DIR)/,$(ALL_OUR_FILES))
 ALL_SOURCES = \
   $(ALL_GENERATED_FILES) \
   $(HACL_HOME)/lib/c/Lib_RandomBuffer_System.c \
-  include/random.c \
-  include/clearwords.c
+  $(HACL_HOME)/lib/c/Lib_Memzero.c \
+  include/random.c
 
 ALL_OBJS = $(patsubst %.c,%.o,$(ALL_SOURCES))
 
@@ -187,17 +188,3 @@ endif # STAGE=2
 %.fsti-in:
 	@echo $(addprefix --include ,$(FSTAR_INCLUDE_DIRS)) \
 	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(basename $@).fsti.hints
-
-# 6. Clean targets
-
-SHELL=/bin/bash
-
-clean:
-	rm -rf $(GENERATED_DIR) $(OUT_DIR)/*.exe $(OUT_DIR)/*.a
-	rm -rf include/*.o include/*.d
-
-clean-c:
-	rm -rf $(GENERATED_DIR)/{*.{c,h},Makefile.include}
-
-distclean: clean
-	rm -rf $(OUT_DIR) $(CACHE_DIR) $(OUTPUT_DIR)

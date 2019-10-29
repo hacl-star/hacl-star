@@ -8,6 +8,7 @@ open LowStar.Buffer
 
 open Lib.IntTypes
 open Lib.Buffer
+open Lib.Memzero
 
 open Hacl.Impl.Matrix
 open Hacl.Impl.Frodo.Params
@@ -17,7 +18,6 @@ open Hacl.Impl.Frodo.Encode
 open Hacl.Impl.Frodo.Pack
 open Hacl.Impl.Frodo.Sample
 open Hacl.Frodo.Random
-open Hacl.Frodo.Clear
 
 module ST = FStar.HyperStack.ST
 module S = Spec.Frodo.KEM.Decaps
