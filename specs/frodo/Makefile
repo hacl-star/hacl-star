@@ -19,7 +19,7 @@ else
   $(error ERROR: VARIANT must be one of 64-cSHAKE, 640-cSHAKE, 976-cSHAKE, 64-AES, 640-AES, 976-AES)
 endif
 
-CACHE_DIR = .cache.$(VARIANT)
+CACHE_DIR = $(HACL_HOME)/obj
 #HINT_DIR  = .hints.$(VARIANT)
 HINT_DIR  = $(HACL_HOME)/hints
 OUT_DIR   = frodo-ml.$(VARIANT)
