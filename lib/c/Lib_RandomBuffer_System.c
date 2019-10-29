@@ -25,17 +25,6 @@ bool read_random_bytes(uint32_t len, uint8_t *buf) {
   return pass;
 }
 
-void *hacl_aligned_malloc(size_t alignment, size_t size) {
-  void *res = _aligned_malloc(size, alignment);
-  if (res == NULL) {
-    printf("Cannot allocate %" PRIu64 " bytes aligned to %" PRIu64 "\n",
-           (uint64_t)size, (uint64_t)alignment);
-  }
-  return res;
-}
-
-void hacl_aligned_free(void *ptr) { _aligned_free(ptr); }
-
 #else
 
 /* assume POSIX here */
@@ -62,18 +51,6 @@ bool read_random_bytes(uint32_t len, uint8_t *buf) {
   close(fd);
   return pass;
 }
-
-void *hacl_aligned_malloc(size_t alignment, size_t size) {
-  void *res = NULL;
-  if (posix_memalign(&res, alignment, size)) {
-    printf("Cannot allocate %" PRIu64 " bytes aligned to %" PRIu64 "\n",
-           (uint64_t)size, (uint64_t)alignment);
-    return NULL;
-  }
-  return res;
-}
-
-void hacl_aligned_free(void *ptr) { free(ptr); }
 
 #endif
 
