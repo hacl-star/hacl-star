@@ -53,3 +53,6 @@ $(OUTPUT_DIR)/Vale.%.checked: FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 CFLAGS += -Idist -I$(KREMLIN_HOME)/include
 
 KREMLIB_A=$(KREMLIN_HOME)/kremlib/dist/minimal/libkremlib.a
+
+%.exe:
+	$(CC) $^ $(KREMLIB_A) -o $@
