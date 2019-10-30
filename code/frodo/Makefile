@@ -1,8 +1,8 @@
-all: dist/FrodoKEM-64-cSHAKE-test.exe
+all: dist/FrodoKEM-64-test.exe
 
 .PHONY: test
 test: all
-	dist/FrodoKEM-64-cSHAKE-test.exe
+	dist/FrodoKEM-64-test.exe
 
 include ../Makefile.local
 
@@ -35,9 +35,9 @@ dist/libfrodo.a: dist/Makefile.basic
 	$(MAKE) -C dist -f Makefile.basic
 	ranlib $@
 
-$(HACL_HOME)/tests/FrodoKEM-64-cSHAKE-test.o: dist/Makefile.basic
+$(HACL_HOME)/tests/FrodoKEM-64-test.o: dist/Makefile.basic
 
-dist/FrodoKEM-64-cSHAKE-test.exe: $(HACL_HOME)/tests/FrodoKEM-64-cSHAKE-test.o dist/libfrodo.a
+dist/FrodoKEM-64-test.exe: $(HACL_HOME)/tests/FrodoKEM-64-test.o dist/libfrodo.a
 
 .PHONY: clean-c
 clean-c:
