@@ -124,6 +124,8 @@ let size_kdf (cs:ciphersuite): size_nat = Hash.size_hash (hash_of_cs cs)
 inline_for_extraction
 let size_psk (cs:ciphersuite): size_nat = size_kdf cs
 
+inline_for_extraction
+let max_length (cs:ciphersuite) : size_nat = AEAD.max_length (aead_of_cs cs)
 
 inline_for_extraction
 let max_pskID: size_nat = pow2 16 - 1
@@ -414,7 +416,7 @@ val encryptBase:
     cs:ciphersuite
   -> skE:key_dh_secret_s cs
   -> pkR:key_dh_public_s cs
-  -> m:bytes{Seq.length m <= AEAD.max_length (aead_of_cs cs)}
+  -> m:bytes{Seq.length m <= max_length cs}
   -> info:bytes{Seq.length info <= max_info} ->
   Tot bytes
 
