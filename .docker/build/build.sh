@@ -125,20 +125,8 @@ function fetch_mitls() {
 }
 
 function fetch_vale() {
-    # NOTE: the name of the directory where Vale is downloaded MUST NOT be vale, because the latter already exists
-    # so let's call it valebin
-    if [ ! -d valebin ]; then
-        mkdir valebin
-    fi
-    vale_version=$(<vale/.vale_version)
-    vale_version=${vale_version%$'\r'}  # remove Windows carriage return, if it exists
-    wget "https://github.com/project-everest/vale/releases/download/v${vale_version}/vale-release-${vale_version}.zip" -O valebin/vale-release.zip
-    rm -rf "valebin/vale-release-${vale_version}"
-    unzip -o valebin/vale-release.zip -d valebin
-    rm -rf "valebin/bin"
-    mv "valebin/vale-release-${vale_version}/bin" valebin/
-    chmod +x valebin/bin/*.exe
-    export_home VALE "$(pwd)/valebin"
+    HACL_HOME=$(pwd) tools/get_vale.sh
+    export_home VALE "$(pwd)/../vale"
 }
 
 function refresh_hacl_hints() {
@@ -160,7 +148,7 @@ function refresh_hints() {
     local hints_dir="$4"
 
     # Figure out the branch
-    CI_BRANCH=$branchname
+    CI_BRANCH=${branchname##refs/heads/}
     echo "Current branch_name=$CI_BRANCH"
 
     # Add all the hints, even those not under version control
@@ -185,8 +173,16 @@ function refresh_hints() {
     # Silent, always-successful merge
     export GIT_MERGE_AUTOEDIT=no
     git merge $commit -Xtheirs
+
+    # If build hints branch exists on remote, remove it
+    exists=$(git branch -r -l "origin/BuildHints-$CI_BRANCH")
+    if [ ! -z $exists ]; then
+        git push $remote :BuildHints-$CI_BRANCH
+    fi
+
     # Push.
-    git push $remote $CI_BRANCH
+    git checkout -b BuildHints-$CI_BRANCH
+    git push $remote BuildHints-$CI_BRANCH
 }
 
 function exec_build() {
@@ -195,7 +191,7 @@ function exec_build() {
     local status_file="../status.txt"
     echo -n false >$status_file
 
-    if [ ! -d "providers" ]; then
+    if [ ! -d "secure_api" ]; then
         echo "I don't seem to be in the right directory, bailing"
         echo Failure >$result_file
         return

@@ -51,8 +51,13 @@ unfold let limb_inttype (a:alg) =
   | U32 -> U64
   | U64 -> U128
 
+inline_for_extraction
 unfold type word_t (a:alg) = uint_t (wt a) SEC
+
+inline_for_extraction
 type pub_word_t (a:alg) = uint_t (wt a) PUB
+
+inline_for_extraction
 type limb_t (a:alg) : Type0 = uint_t (limb_inttype a) SEC
 
 inline_for_extraction
@@ -365,6 +370,20 @@ let blake2_update_block a flag totlen d s =
   blake2_compress a s to_compress offset flag
 
 
+val blake2_update_block_multi_step:
+    a:alg
+  -> prev:nat
+  -> n:nat
+  -> blocks:bytes{n * size_block a == length blocks /\ prev + n * size_block a <= max_limb a}
+  -> i:nat{i < n}
+  -> si:hash_ws a ->
+  Tot (hash_ws a)
+
+let blake2_update_block_multi_step a prev n blocks i si =
+  let block = Seq.slice blocks (i * size_block a) ((i + 1) * (size_block a)) in
+  blake2_update_block a false (prev + (i + 1) * size_block a) block si
+
+
 val blake2_update_block_multi:
     a:alg
   -> prev:nat
@@ -374,10 +393,7 @@ val blake2_update_block_multi:
   Tot (hash_ws a)
 
 let blake2_update_block_multi a prev n blocks s =
-  repeati n (fun i si ->
-    let block = Seq.slice blocks (i * size_block a) ((i + 1) * (size_block a)) in
-    blake2_update_block a false (prev + (i + 1) * size_block a) block si
-  ) s
+  repeati n (blake2_update_block_multi_step a prev n blocks) s
 
 
 val blake2_init_hash:
@@ -444,15 +460,18 @@ val blake2:
 
 let blake2 a d kk k nn =
   let ll = Seq.length d in
-  let n = ll / size_block a in
-  let rem = ll % size_block a in
-  let n,rem = if n <> 0 && rem = 0 then n - 1, size_block a else n, rem in
+  let n0 = ll / size_block a in
+  let rem0 = ll % size_block a in
+  let kn = if kk = 0 then 0 else 1 in
+  let n = if n0 <> 0 && rem0 = 0 then n0 - 1 else n0 in
+  let rem = if n0 <> 0 && rem0 = 0 then size_block a else rem0 in
   let blocks = Seq.slice #uint8 d 0 (n * size_block a) in
   let last = Seq.slice #uint8 d (n * size_block a) ll in
-  let kn = if kk = 0 then 0 else 1 in
+  let prev_multi = kn * (size_block a) in
+  let prev_last = prev_multi + n * size_block a in
   let s: hash_ws a = blake2_init a kk k nn in
-  let s: hash_ws a = blake2_update_block_multi a (kn * size_block a) n blocks s in
-  let s: hash_ws a = blake2_update_last a ((kn + n) * size_block a) rem last s in
+  let s: hash_ws a = blake2_update_block_multi a prev_multi n blocks s in
+  let s: hash_ws a = blake2_update_last a prev_last rem last s in
   blake2_finish a s nn
 
 
@@ -468,7 +487,7 @@ let blake2s d kk k n = blake2 Blake2S d kk k n
 
 val blake2b:
     d:bytes
-  -> kk:size_nat{kk <= 64 /\ (if kk = 0 then length d < pow2 128 else length d + 128  < pow2 128)}
+  -> kk:size_nat{kk <= 64 /\ (if kk = 0 then length d < pow2 128 else length d + 128 < pow2 128)}
   -> k:lbytes kk
   -> nn:size_nat{1 <= nn /\ nn <= 64} ->
   Tot (lbytes nn)

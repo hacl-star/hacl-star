@@ -20,6 +20,8 @@ val hash_256: hash_st SHA2_256
 val hash_384: hash_st SHA2_384
 val hash_512: hash_st SHA2_512
 
+// Interface that exposes a sha2-512 signature suitable for calling from HACL-lib code.
+
 open Lib.IntTypes
 open Lib.Sequence
 open Lib.Buffer
@@ -34,14 +36,8 @@ val hash_512_lib:
       live h input /\
       live h dst /\
       disjoint input dst /\
-      length input < max_input_length SHA2_512))
+      length input <= max_input_length SHA2_512))
     (ensures (fun h0 _ h1 ->
       modifies1 dst h0 h1 /\
       as_seq h1 dst ==
-      Spec.Hash.hash SHA2_512 (as_seq h0 input)))
-
-
-
-
-
-
+        Spec.Agile.Hash.hash SHA2_512 (as_seq h0 input)))

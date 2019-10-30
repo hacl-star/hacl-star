@@ -249,14 +249,15 @@ let quarter_round #w st a b c d =
 
 //#set-options "--z3rlimit  200"
 inline_for_extraction noextract
-val double_round_:
+val double_round:
     #w:lanes
   -> st:state w ->
   Stack unit
     (requires (fun h -> live h st))
     (ensures (fun h0 _ h1 -> modifies (loc st) h0 h1 /\
       as_seq h1 st == Spec.double_round (as_seq h0 st)))
-let double_round_ #w st =
+[@ Meta.Attribute.specialize ]
+let double_round #w st =
   quarter_round st (size 0) (size 4) (size 8) (size 12);
   quarter_round st (size 1) (size 5) (size 9) (size 13);
   quarter_round st (size 2) (size 6) (size 10) (size 14);
@@ -266,24 +267,3 @@ let double_round_ #w st =
   quarter_round st (size 1) (size 6) (size 11) (size 12);
   quarter_round st (size 2) (size 7) (size 8) (size 13);
   quarter_round st (size 3) (size 4) (size 9) (size 14)
-
-[@CInline]
-let double_round1 = double_round_ #1
-[@CInline]
-let double_round4 = double_round_ #4
-[@CInline]
-let double_round8 = double_round_ #8
-
-inline_for_extraction noextract
-val double_round:
-    #w:lanes
-  -> st:state w ->
-  Stack unit
-    (requires (fun h -> live h st))
-    (ensures (fun h0 _ h1 -> modifies (loc st) h0 h1 /\
-      as_seq h1 st == Spec.double_round (as_seq h0 st)))
-let double_round #w st =
-  match w with
-  | 1 -> double_round1 st
-  | 4 -> double_round4 st
-  | 8 -> double_round8 st

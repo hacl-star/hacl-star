@@ -1,0 +1,133 @@
+[
+  "Ø\u0013\u000fª\u001eØ˜ø$kø}Ï\".u",
+  [
+    [
+      "Vale.Curve25519.X64.FastMul.va_lemma_fast_multiply",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "6b8fdcd6e83a2db377a8e0e2a1b86465"
+    ],
+    [
+      "Vale.Curve25519.X64.FastMul.va_wp_fast_multiply",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "b0187c6af60ee24815ebad31336fc195"
+    ],
+    [
+      "Vale.Curve25519.X64.FastMul.va_quick_fast_multiply",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
+      ],
+      0,
+      "aac697af5afb1d505bfb493cfdec8e89"
+    ],
+    [
+      "Vale.Curve25519.X64.FastMul.va_lemma_fast_mul_stdcall",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "bool_inversion", "eq2-interp",
+        "equality_tok_Vale.X64.Machine_s.Secret@tok", "equation_Prims.nat",
+        "equation_Vale.Def.Words_s.nat64", "equation_Vale.Def.Words_s.natN",
+        "equation_Vale.X64.Decls.va_require_total",
+        "equation_Vale.X64.Decls.validDstAddrs64",
+        "equation_Vale.X64.Decls.validSrcAddrs64",
+        "fuel_guarded_inversion_Vale.X64.State.vale_state",
+        "proj_equation_Vale.X64.State.Mkvale_state_vs_heap",
+        "proj_equation_Vale.X64.State.Mkvale_state_vs_memTaint",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_a57c89fee7a4b02e5611d55e98be1bd9",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
+      ],
+      0,
+      "31c35ad64d96f41381c45ca22adc2966"
+    ],
+    [
+      "Vale.Curve25519.X64.FastMul.va_wp_fast_mul_stdcall",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Vale.Def.Words_s.nat64", "equation_Vale.Def.Words_s.natN",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
+      ],
+      0,
+      "758644614ed8a5855add78068a57f47f"
+    ],
+    [
+      "Vale.Curve25519.X64.FastMul.va_quick_fast_mul_stdcall",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
+      ],
+      0,
+      "7dc1fc5016916c1d4c00a274dd74f191"
+    ],
+    [
+      "Vale.Curve25519.X64.FastMul.va_lemma_fast_mul2_stdcall",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "bool_inversion", "eq2-interp",
+        "equality_tok_Vale.X64.Machine_s.Secret@tok",
+        "equation_Vale.X64.Decls.va_require_total",
+        "equation_Vale.X64.Decls.validDstAddrs64",
+        "equation_Vale.X64.Decls.validSrcAddrs64",
+        "fuel_guarded_inversion_Vale.X64.State.vale_state",
+        "proj_equation_Vale.X64.State.Mkvale_state_vs_heap",
+        "proj_equation_Vale.X64.State.Mkvale_state_vs_memTaint",
+        "refinement_interpretation_Tm_refine_93b98a7ab276f8ccdf89a0a68078bbc7"
+      ],
+      0,
+      "d13bca92ff599e7a913f8bc6672d756c"
+    ],
+    [
+      "Vale.Curve25519.X64.FastMul.va_wp_fast_mul2_stdcall",
+      1,
+      1,
+      0,
+      [ "@query" ],
+      0,
+      "837140e71296efa00494d1a69c5365c7"
+    ],
+    [
+      "Vale.Curve25519.X64.FastMul.va_quick_fast_mul2_stdcall",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
+      ],
+      0,
+      "0e258d59196964ecc257180a28205ab4"
+    ]
+  ]
+]

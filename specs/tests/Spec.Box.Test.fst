@@ -8,7 +8,7 @@ open Lib.ByteSequence
 open Spec.Box
 
 
-#set-options "--lax"
+#set-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 
 
 let plain = List.Tot.map u8_from_UInt8 [
@@ -65,8 +65,6 @@ let sk2 = List.Tot.map u8_from_UInt8 [
   0x41uy; 0x49uy; 0xf5uy; 0x1cuy]
 
 
-#set-options "--max_fuel 0 --z3rlimit 25"
-
 let test () =
   assert_norm(List.Tot.length sk1 = 32);
   assert_norm(List.Tot.length sk2 = 32);
@@ -88,5 +86,6 @@ let test () =
   let dec_p = match dec with | Some p -> p | None -> create 72 (u8 0) in
   let result_decryption = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) dec_p plaintext in
 
-  if result_decryption then IO.print_string "\nSuccess!\n"
-  else IO.print_string "\nFailure :("
+  if result_decryption
+  then begin IO.print_string "\nSuccess!\n"; true end
+  else begin IO.print_string "\nFailure :("; false end

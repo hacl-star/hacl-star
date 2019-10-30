@@ -9,12 +9,12 @@ open FStar.Mul
 let updaten (acc_t:Type0) (data_t:Type0) (blocksize:size_pos)
 	    (text:seq data_t{length text % blocksize = 0})
 	    (update1: (i:nat -> lseq data_t blocksize -> acc_t -> acc_t))
-	    (st:acc_t & nat) : acc_t & nat =
-    let (acc,start) = st in
-    let update1' (i:nat) = update1 (i + start) in
-    let acc = repeati_blocks_multi blocksize text update1' acc in
-    let stop = start + (length text / blocksize) in
-    (acc,stop)
+	    (st:acc_t & nat) : acc_t & nat = magic()
+    (* let (acc,start) = st in *)
+    (* let update1' (i:nat) = update1 (i + start) in *)
+    (* let acc = repeati_blocks_multi blocksize text update1' acc in *)
+    (* let stop = start + (length text / blocksize) in *)
+    (* (acc,stop) *)
 
 let sub_block (data_t:Type0) (blocksize:size_pos) = b:seq data_t{length b < blocksize}
 

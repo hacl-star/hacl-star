@@ -1,0 +1,532 @@
+
+  // 0 uses external memory for the stack space
+  // 1 uses stack u64[] array
+  
+
+                  
+
+
+// reversed iotas with the first position at zero
+u64[25] iotas =
+{   0x0000000000000000
+  , 0x8000000080008008
+  , 0x0000000080000001
+  , 0x8000000000008080
+  , 0x8000000080008081
+  , 0x800000008000000a
+  , 0x000000000000800a
+  , 0x8000000000000080
+  , 0x8000000000008002
+  , 0x8000000000008003
+  , 0x8000000000008089
+  , 0x800000000000008b
+  , 0x000000008000808b
+  , 0x000000008000000a
+  , 0x0000000080008009
+  , 0x0000000000000088
+  , 0x000000000000008a
+  , 0x8000000000008009
+  , 0x8000000080008081
+  , 0x0000000080000001
+  , 0x000000000000808b
+  , 0x8000000080008000
+  , 0x800000000000808a
+  , 0x0000000000008082
+  , 0x0000000000000001
+};
+
+
+fn index(inline int x, inline int y) -> inline int {
+  inline int r;
+  r = 5*(x % 5) + (y % 5);
+  return r;
+}
+
+
+fn keccak_rho_offsets(inline int i) -> inline int
+{
+  inline int r, x, y, z, t;
+  r = 0;
+  x = 1;
+  y = 0;
+  for t = 0 to 24
+  { if ( i == x + 5 * y )
+    { r = ((t + 1) * (t + 2) / 2) % 64;
+    }
+    z = (2 * x + 3 * y) % 5;
+    x = y;
+    y = z;
+  }
+
+  return r;
+}
+
+
+fn rhotates(inline int x y) -> inline int
+{
+  inline int i r;
+  i = index(x, y);
+  r = keccak_rho_offsets(i);
+  return r;
+}
+
+
+fn ROL64(reg u64 x, inline int c) -> reg u64
+{
+  reg u64 y;
+  if (c == 0)
+  { y = x; }
+  else
+  { _, _, y = #x86_ROL_64(x, c); }
+  return y;
+}
+
+
+fn theta_sum(stack u64[25] A) -> reg u64[5]
+{
+  inline int i j;
+  reg u64[5] C;
+
+  for i=0 to 5
+  { C[i] = A[(5*(( 0) % 5) + (( i) % 5))]; }
+
+  for j=1 to 5
+  { for i=0 to 5
+    { C[i] ^= A[(5*(( j) % 5) + (( i) % 5))]; }
+  }
+
+  return C;
+}
+
+
+fn theta_rol(reg u64[5] C) -> reg u64[5]
+{
+  inline int i;
+  reg u64[5] D;
+  reg u64 t r;
+
+  for i = 0 to 5
+  { D[i] = ROL64(C[(i+1)%5], 1);
+    D[i] ^= C[(i+4)%5];
+  }
+
+  return D;
+}
+
+
+fn rol_sum(
+  reg u64[5] D,
+  stack u64[25] A,
+  inline int offset
+) -> reg u64[5]
+{
+  inline int j j1 k;
+  reg u64[5] C;
+  reg u64 t;
+
+  for j = 0 to 5
+  {
+    j1 = (j+offset) % 5;
+    k = rhotates(j, j1);
+    t = A[(5*((j) % 5) + ((j1) % 5))];
+    t ^= D[j1];
+    t = ROL64(t, k);
+    C[j] = t;
+  }
+
+  return C;
+}
+
+
+fn set_row(
+  stack u64[25] R,
+  inline int row,
+  reg u64[5] C,
+  stack u64[25] s_iotas,
+  reg u64 r
+) -> stack u64[25]
+{
+  inline int j j1 j2;
+  reg u64 t;
+
+  for j= 0 to 5
+  {
+    j1 = (j+1) % 5;
+    j2 = (j+2) % 5;
+    t = !C[j1] & C[j2];
+    if row==0 && j==0 { t ^= s_iotas[(int) r]; }
+    t ^= C[j];
+    R[(5*(( row) % 5) + (( j) % 5))] = t;
+  }
+
+  return R;
+}
+
+
+fn round2x(
+  stack u64[25] A,
+  stack u64[25] R,
+  stack u64[25] s_iotas,
+  reg u64 r
+) -> stack u64[25], stack u64[25]
+{
+  reg u64[5] C D;
+
+  C = theta_sum(A);
+  D = theta_rol(C);
+  C = rol_sum(D, A, 0);
+  R = set_row(R, 0, C, s_iotas, r);
+  C = rol_sum(D, A, 3);
+  R = set_row(R, 1, C, s_iotas, r);
+  C = rol_sum(D, A, 1);
+  R = set_row(R, 2, C, s_iotas, r);
+  C = rol_sum(D, A, 4);
+  R = set_row(R, 3, C, s_iotas, r);
+  C = rol_sum(D, A, 2);
+  R = set_row(R, 4, C, s_iotas, r);
+
+  return A, R;
+}
+
+
+fn __keccak_f1600_scalar_g(
+  stack u64[25] A
+) -> stack u64[25]
+{
+  reg bool zf;
+  stack u64[25] R;
+  stack u64[25] s_iotas;
+  reg u64 r;
+
+  
+
+  r = 24;
+  s_iotas = iotas;
+
+  align while
+  {
+    A, R = round2x(A, R, s_iotas, r);
+    r = #x86_DEC(r);
+    R, A = round2x(R, A, s_iotas, r);
+    (_, _, _, zf, r) = #x86_DEC(r);
+  } (!zf)
+
+  
+
+  return A;
+}
+
+
+fn spill_2(reg u64 a b) -> stack u64, stack u64
+{
+  stack u64 sa sb;
+  sa = a;
+  sb = b;
+  return sa, sb;
+}
+
+
+fn spill_3(reg u64 a b c) -> stack u64, stack u64, stack u64
+{
+  stack u64 sa sb sc;
+  sa = a;
+  sb = b;
+  sc = c;
+  return sa, sb, sc;
+}
+
+
+fn load_2(stack u64 sa sb) -> reg u64, reg u64
+{
+  reg u64 a b;
+  a = sa;
+  b = sb;
+  return a, b;
+}
+
+
+fn load_3(stack u64 sa sb sc) -> reg u64, reg u64, reg u64
+{
+  reg u64 a b c;
+  a = sa;
+  b = sb;
+  c = sc;
+  return a, b, c;
+}
+
+
+fn keccak_init(
+  ) -> stack u64[25]
+{
+  stack u64[25] state;
+  reg u64 i t;
+
+  _, _, _, _, _, t = #set0();
+
+  
+  i = 0;
+  while (i < 25)
+  { state[(int)i] = t;
+    i += 1;
+  }
+
+  return state;
+}
+
+
+fn add_full_block(
+  stack u64[25] state,
+  reg u64 in,
+  reg u64 inlen,
+  reg u64 rate
+) -> stack u64[25], reg u64, reg u64
+{
+  reg u64 i t rate8;
+
+  i = 0;
+  rate8 = rate;
+  rate8 >>= 3;
+  while( i < rate8)
+  {
+    t = [in + 8*i];
+    state[(int)i] ^= t;
+    i+=1;
+  }
+
+  in += rate;
+  inlen -= rate;
+
+  return state, in, inlen;
+}
+
+
+// obs: @pre: inlen < 8
+fn lastu64(
+  reg u64 in inlen suffix
+) -> reg u64
+{
+  reg bool zf;
+  reg u64 res delta t;
+
+  res = 0;
+  delta = 0;
+  zf = #x86_TEST_8(inlen,4);
+  if (!zf) {
+    res = (64u)(u32)[in + 0];
+    in += 4;
+    delta = 32;
+  }
+  zf = #x86_TEST_8(inlen,2);
+  if (!zf) {
+    t = (64u)(u16)[in + 0];
+    in += 2;
+    t <<= delta;
+    delta += 16;
+    res += t;
+  }
+  zf = #x86_TEST_8(inlen,1);
+  if (!zf) {
+    t = (64u)(u8)[in + 0];
+    t <<= delta;
+    delta += 8;
+    res += t;
+  }
+  suffix = suffix;
+  suffix <<= delta;
+  res += suffix;
+
+  return res;
+}
+
+
+// obs: @pre: inlen < rate_in_bytes
+fn add_final_block(
+  stack u64[25] state,
+  reg   u64 in,
+  reg   u64 inlen,
+  stack u8  suffix,
+  reg   u64 rate
+) -> stack u64[25]
+{
+  reg u64 i t inlen8 r_suffix;
+  reg u8 c;
+
+  inlen8 = inlen;
+  inlen8 >>= 3;
+  i = 0;
+  while ( i < inlen8 )
+  {
+    t = [in + 8*i];
+    state[(int)i] ^= t;
+    i += 1;
+  }
+  in += 8*i;
+  inlen &= 7; // inlen = inlen % 8
+  r_suffix = (64u) suffix;
+  t = lastu64(in, inlen, r_suffix);
+  state[(int)i] ^= t;
+
+  rate -= 1;
+  state[u8 (int)(rate)] ^= 0x80;
+
+  return state;
+}
+
+
+fn absorb(
+  stack u64[25] state,
+  reg   u64 in inlen,
+  stack u8  suffix,
+  reg   u64 rate // rate already in bytes
+) -> stack u64[25]
+{
+  stack u64 s_in s_inlen s_rate;
+
+  // intermediate blocks
+  while ( inlen >= rate )
+  {
+    state, in, inlen = add_full_block(state, in, inlen, rate);
+    s_in, s_inlen, s_rate = spill_3(in, inlen, rate);
+
+    state = __keccak_f1600_scalar_g(state);
+    in, inlen, rate = load_3(s_in, s_inlen, s_rate);
+  }
+
+  // final block
+  state = add_final_block(state, in, inlen, suffix, rate);
+
+  return state;
+}
+
+
+fn xtr_full_block(
+  stack u64[25] state,
+  reg u64 out,
+  reg u64 len
+) -> reg u64
+{
+  reg u64 i t len8;
+  reg u8 c;
+
+  len8 = len;
+  len8 >>= 3;
+  i = 0;
+  while ( i < len8 )
+  {
+    t = state[(int)i];
+    [out + 8*i] = t;
+    i += 1;
+  }
+  out += len;
+  return out;
+}
+
+
+fn xtr_bytes(
+  stack u64[25] state,
+  reg u64 out,
+  reg u64 len
+) -> reg u64
+{
+  reg u64 i t len8;
+  reg u8 c;
+
+  len8 = len;
+  len8 >>= 3;
+  i = 0;
+  while ( i < len8 )
+  {
+    t = state[(int)i];
+    [out + 8*i] = t;
+    i += 1;
+  }
+  i <<= 3;
+
+  while ( i < len )
+  {
+    c = state[u8 (int)(i)];
+    (u8)[out + i] = c;
+    i += 1;
+  }
+
+  out += len;
+  return out;
+}
+
+
+fn squeeze(
+  stack u64[25] state,
+  stack u64 s_out,
+  stack u64 s_outlen,
+  reg   u64 rate
+)
+{
+  reg u64 out outlen;
+  stack u64 s_rate;
+
+  outlen = s_outlen;
+
+  // intermediate blocks
+  while ( outlen > rate )
+  {
+    s_outlen, s_rate = spill_2(outlen, rate);
+    state = __keccak_f1600_scalar_g(state);
+    out, rate = load_2(s_out, s_rate);
+
+    out = xtr_full_block(state, out, rate);
+    s_out = out;
+
+    outlen = s_outlen;
+    outlen -= rate;
+  }
+
+  s_outlen = outlen;
+  state = __keccak_f1600_scalar_g(state);
+  out, outlen = load_2(s_out, s_outlen);
+
+  out = xtr_bytes(state, out, outlen);
+}
+
+
+fn __keccak_1600(
+  stack u64 s_out s_outlen,
+  reg   u64 in inlen ,
+  stack u8  suffix,
+  reg   u64 rate
+)
+{
+  stack u64[25] state;
+  stack u64 s_rate;
+
+  state = keccak_init();
+  s_rate = rate;
+
+  // absorb
+  state = absorb(state, in, inlen, suffix, rate);
+
+  // squeeze
+  rate = s_rate;
+  squeeze(state, s_out, s_outlen, rate);
+}
+
+
+export fn keccak_1600(reg u64 out outlen in inlen_ config )
+{
+  stack u8  s_suffix;
+  stack u64 s_out s_outlen;
+  reg   u8    suffix;
+  reg   u64   rate inlen;
+
+  s_out = out;
+  s_outlen = outlen;
+
+  inlen = inlen_; // swap register, rcx is needed
+
+  suffix = (u8)[config + 8*0];
+
+  s_suffix = suffix;
+  rate = [config + 8*1]; // rate in bytes
+
+  __keccak_1600(s_out, s_outlen, in, inlen, s_suffix, rate);
+}
+

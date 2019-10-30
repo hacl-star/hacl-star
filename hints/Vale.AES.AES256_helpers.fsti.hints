@@ -1,0 +1,76 @@
+[
+  "21æ4\\]y\u001dj³+rˆPog",
+  [
+    [
+      "Vale.AES.AES256_helpers.make_AES256_key",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "constructor_distinct_Vale.AES.AES_s.AES_256", "eq2-interp",
+        "equality_tok_Vale.AES.AES_s.AES_256@tok", "equation_Prims.nat",
+        "equation_Vale.AES.AES_s.is_aes_key_LE",
+        "equation_Vale.Def.Types_s.quad32",
+        "equation_Vale.Def.Words.Seq_s.seq4",
+        "equation_Vale.Def.Words.Seq_s.seqn",
+        "equation_Vale.Def.Words_s.nat32",
+        "function_token_typing_Prims.__cache_version_number__",
+        "function_token_typing_Vale.Def.Words_s.nat32", "int_inversion",
+        "lemma_FStar.Seq.Base.lemma_len_append",
+        "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_4543f1a564a33b21cd018d4b2bc02996",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e",
+        "typing_FStar.Seq.Base.length",
+        "typing_Vale.Def.Words.Seq_s.four_to_seq_LE"
+      ],
+      0,
+      "1495b4bd697949efec237644be554a71"
+    ],
+    [
+      "Vale.AES.AES256_helpers.expand_key_256_def",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "binder_x_bb4e1c9af0265270f8e7a5f250f730e2_1",
+        "constructor_distinct_Vale.AES.AES_s.AES_256", "eq2-interp",
+        "equality_tok_Prims.LexTop@tok",
+        "equality_tok_Vale.AES.AES_s.AES_256@tok", "equation_Prims.nat",
+        "equation_Vale.AES.AES_s.is_aes_key_LE",
+        "equation_Vale.Def.Types_s.quad32",
+        "function_token_typing_Prims.__cache_version_number__",
+        "int_inversion", "int_typing", "primitive_Prims.op_Equality",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "well-founded-ordering-on-nat"
+      ],
+      0,
+      "95d5aac94245d0dd9defe6d36a3655d2"
+    ],
+    [
+      "Vale.AES.AES256_helpers.lemma_expand_key_256",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "b2t_def", "equation_Prims.l_and",
+        "equation_Prims.nat", "equation_Prims.squash",
+        "equation_Vale.AES.AES_s.nb", "int_inversion", "l_and-interp",
+        "primitive_Prims.op_LessThanOrEqual",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c",
+        "refinement_interpretation_Tm_refine_501d12a9a3db14d8c73522605e3edbff",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_9c2d74ae21ebe21dc37eb1ac96ddb62a"
+      ],
+      0,
+      "02ec0c59945ffb15624cd07fa4ed36f4"
+    ]
+  ]
+]

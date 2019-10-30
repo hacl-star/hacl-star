@@ -1,0 +1,21 @@
+#include "x25519_mul.japp"
+
+export fn fe64_mul(reg u64 _h _f _g)
+{
+  inline int i;
+  stack u64[4] f;
+  stack u64 _hs;
+  reg u64[8] h;
+  reg u64[4] g;
+  reg u64 t;
+
+  _hs = _h;
+  for i=0 to 4
+  { g[i] = [_g + 8*i]; }
+
+  h = _fe64_mul(_f, g);
+
+  _h = _hs;
+  for i=0 to 4
+  { [_h + 8*i] = h[i]; }
+}

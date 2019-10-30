@@ -1,7 +1,9 @@
 module Spec.Hash.Definitions
-open Lib.IntTypes
 
-#set-options "--z3rlimit 50"
+open Lib.IntTypes
+open Lib.Sequence
+open Lib.ByteSequence
+
 (* This module contains shared definitions across all hash algorithms. It
  * defines a common, shared `hash_alg` type, along with word sizes, type of the
  * working state, and other helpers. It also defines the type of the core functions
@@ -24,7 +26,7 @@ open Lib.IntTypes
  *)
 
 (** Supported hash algorithms. *)
-
+// BB. This needs to be renamed...
 type hash_alg =
   | SHA2_224
   | SHA2_256
@@ -33,7 +35,8 @@ type hash_alg =
   | SHA1
   | MD5
 
-type algorithm = hash_alg
+// BB. Remove when renamed.
+let algorithm = hash_alg
 
 let is_sha2 = function
   | SHA2_224 | SHA2_256 | SHA2_384 | SHA2_512 -> true
@@ -45,14 +48,16 @@ let sha2_alg = a:hash_alg { is_sha2 a }
 (** Maximum input data length. *)
 
 (* In bytes. *)
+
+// BB. Needs to be renamed...
 inline_for_extraction noextract
 let max_input_length: hash_alg -> Tot nat = function
   | MD5 | SHA1
-  | SHA2_224 | SHA2_256 -> pow2 61
-  | SHA2_384 | SHA2_512 -> pow2 125
+  | SHA2_224 | SHA2_256 -> pow2 61 - 1
+  | SHA2_384 | SHA2_512 -> pow2 125 - 1
 
-inline_for_extraction
-let max_input a = max_input_length a
+// BB. Removed once renamed...
+let max_input = max_input_length
 
 (* A type that can hold a maximum length, in bits. *)
 inline_for_extraction
@@ -62,14 +67,21 @@ let len_int_type: hash_alg -> inttype = function
   | SHA2_384 | SHA2_512 -> U128
 
 inline_for_extraction
-let len_t (a:hash_alg) = uint_t (len_int_type a ) PUB
-
-inline_for_extraction
 let nat_to_len (a:hash_alg) (n:nat{n <= maxint (len_int_type a)}) =
   mk_int #(len_int_type a ) #PUB n
 
+(* A type that can hold a maximum length, in bits. *)
+inline_for_extraction
+let len_t: hash_alg -> Type = function
+  | MD5 | SHA1
+  | SHA2_224 | SHA2_256 -> pub_uint64
+  | SHA2_384 | SHA2_512 -> pub_uint128
+
 val len_v: a:hash_alg -> len_t a -> nat
-let len_v a l = uint_v l
+let len_v = function
+  | MD5 | SHA1
+  | SHA2_224 | SHA2_256 -> uint_v #U64 #PUB
+  | SHA2_384 | SHA2_512 -> uint_v #U128 #PUB
 
 (* Number of bytes occupied by a len_t, i.e. the size of the encoded length in
    the padding. *)
@@ -108,10 +120,14 @@ noextract
 let block_word_length = 16
 
 (* Define the size block in bytes *)
+// BB. Needs to be renamed
 noextract
 let block_length a =
   let open FStar.Mul in
   word_length a * block_word_length
+
+// BB. Removed once renamed
+let size_block = block_length
 
 (* Number of words for intermediate hash, i.e. the working state. *)
 inline_for_extraction noextract
@@ -135,12 +151,15 @@ let hash_word_length: hash_alg -> Tot nat = function
   | SHA2_512 -> 8
 
 (* Define the final hash length in bytes *)
+// BB. Needs to be renamed
 noextract
 let hash_length a =
   let open FStar.Mul in
   word_length a * hash_word_length a
 
-let size_hash a = hash_length a
+// BB. Removed once renamed
+let size_hash = hash_length
+
 
 (** Padding *)
 
@@ -153,9 +172,6 @@ let pad_length (a: hash_alg) (len: nat): Tot (n:nat { (len + n) % block_length a
   pad0_length a len + 1 + len_length a
 
 (** Endian-ness *)
-
-unfold let lseq (a:Type) (l:nat) = b:Seq.seq a{Seq.length b = l}
-unfold let lbytes (l:nat) = lseq uint8 l
 
 (* Define word based operators *)
 let bytes_of_words: a:hash_alg -> Tot (#len:size_nat{FStar.Mul.(len * word_length a) <= max_size_t} -> s:lseq (word a) len -> Tot (lbytes FStar.Mul.(word_length a * len))) = function
@@ -197,7 +213,7 @@ let update_t (a: hash_alg) =
   h':words_state a
 
 let pad_t (a: hash_alg) =
-  l:nat { l < max_input_length a } ->
+  l:nat { l <= max_input_length a } ->
   b:bytes { (Seq.length b + l) % block_length a = 0 }
 
 let finish_t (a: hash_alg) =

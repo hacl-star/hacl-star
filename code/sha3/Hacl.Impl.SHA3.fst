@@ -158,7 +158,7 @@ let rec index_map #a #b f l i =
     | [] -> ()
     | _ :: l' -> index_map f l' (i - 1)
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 
 inline_for_extraction noextract
 val state_pi_rho_inner:

@@ -8,7 +8,7 @@ open Lib.Sequence
 open Lib.IntTypes
 open Lib.Buffer
 
-include Hacl.Impl.Curve25519.Field64.Core
+open Hacl.Impl.Curve25519.Fields.Core
 
 module ST = FStar.HyperStack.ST
 module LSeq = Lib.Sequence
@@ -18,7 +18,39 @@ module P = Spec.Curve25519
 module S = Hacl.Spec.Curve25519.Field64.Definition
 module SC = Hacl.Spec.Curve25519.Field64
 
-#reset-options "--z3rlimit 50"
+let u256 = lbuffer uint64 4ul
+let u512 = lbuffer uint64 8ul
+let u1024 = lbuffer uint64 16ul
+
+noextract
+let as_nat (h:mem) (e:u256) : GTot nat =
+  let s = as_seq h e in
+  let s0 = s.[0] in
+  let s1 = s.[1] in
+  let s2 = s.[2] in
+  let s3 = s.[3] in
+  S.as_nat4 (s0, s1, s2, s3)
+
+noextract
+let wide_as_nat (h:mem) (e:u512) : GTot nat =
+  let s = as_seq h e in
+  let s0 = s.[0] in
+  let s1 = s.[1] in
+  let s2 = s.[2] in
+  let s3 = s.[3] in
+  let s4 = s.[4] in
+  let s5 = s.[5] in
+  let s6 = s.[6] in
+  let s7 = s.[7] in
+  S.wide_as_nat4 (s0, s1, s2, s3, s4, s5, s6, s7)
+
+noextract
+let fevalh (h:mem) (f:u256) : GTot P.elem = (as_nat h f) % P.prime
+
+noextract
+let feval_wideh (h:mem) (f:u512) : GTot P.elem = (wide_as_nat h f) % P.prime
+
+#reset-options "--z3rlimit 50 --record_options"
 
 let felem = lbuffer uint64 4ul
 let felem2 = lbuffer uint64 8ul
@@ -60,30 +92,32 @@ let load_felem f u64s =
   f.(2ul) <- u64s.(2ul);
   f.(3ul) <- u64s.(3ul)
 
-inline_for_extraction noextract
 val carry_pass_store:
     f:felem
  -> Stack unit
-   (requires fun h -> live h f)
+   (requires fun h ->
+      Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled) /\ live h f)
    (ensures fun h0 _ h1 ->
      modifies (loc f) h0 h1 /\
      as_nat h1 f == S.as_nat4 (SC.carry_pass_store (as_tup4 h0 f)))
+[@ Meta.Attribute.inline_ ]
 let carry_pass_store f =
   let f3 = f.(3ul) in
   let top_bit = f3 >>. 63ul in
   f.(3ul) <- f3 &. u64 0x7fffffffffffffff;
   let carry = add1 f f (u64 19 *! top_bit) in ()
 
-inline_for_extraction noextract
 val store_felem:
     u64s:lbuffer uint64 4ul
   -> f:felem
   -> Stack unit
     (requires fun h ->
+      Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled) /\
       live h f /\ live h u64s /\ disjoint u64s f)
     (ensures  fun h0 _ h1 ->
       modifies (loc u64s |+| loc f) h0 h1 /\
       as_seq h1 u64s == BSeq.nat_to_intseq_le 4 (fevalh h0 f))
+[@ Meta.Attribute.inline_ ]
 let store_felem u64s f =
   let h0 = ST.get () in
   carry_pass_store f;

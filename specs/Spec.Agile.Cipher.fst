@@ -7,48 +7,39 @@ open Lib.ByteSequence
 
 #reset-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 1"
 
-type cipher_alg = 
-  | AES128
-  | CHACHA20
+let force_flush_interleaving = ()
 
+let aes_ctr_block_add_counter (block: lbytes 16) (incr:size_nat): Tot (lbytes 16) =
+  let n = nat_from_bytes_be block in
+  let n' = (n + incr) % pow2 128 in
+  nat_to_bytes_be 16 n'
 
-let state (a:cipher_alg) = 
+let xkey (a: cipher_alg) =
   match a with
-  | AES128 -> Spec.AES.aes_ctr_state Spec.AES.AES128
-  | CHACHA20 -> Spec.Chacha20.state
+  | AES128 | AES256 -> Spec.AES.aes_xkey (aes_alg_of_alg a)
+  | CHACHA20 -> Spec.Chacha20.key
 
-let key_len (a:cipher_alg) =
+/// As specified by the NIST. Other implementations (e.g. Vale) may perform
+/// other steps beyond key expansion but this is an implementation detail.
+let expand (a: cipher_alg) (k: key a): xkey a =
   match a with
-  | AES128 -> 16
-  | CHACHA20 -> 32
+  | AES128 | AES256 -> Spec.AES.aes_key_expansion (aes_alg_of_alg a) k
+  | CHACHA20 -> k
 
-let counter_max (a:cipher_alg) =
+/// A block is a function of key, iv, counter.
+let ctr_block (a: cipher_alg) (k: key a) (iv: nonce a) (c: ctr): block a =
+  let k = expand a k in
   match a with
-  | AES128 -> max_size_t
-  | CHACHA20 -> max_size_t
+  | AES128 | AES256 ->
+      let open Spec.AES in
+      let open Lib.LoopCombinators in
+      let block = create 16 (u8 0) in
+      let block = repeati #(lbytes 16) (length iv) (fun i b -> b.[i] <- Seq.index iv i) block in
+      let block = aes_ctr_block_add_counter block c in
+      aes_encrypt_block (aes_alg_of_alg a) k block
 
-let block_len (a:cipher_alg) =
-  match a with
-  | AES128 -> 16
-  | CHACHA20 -> 64
-
-let nonce_len (a:cipher_alg) = 
-  match a with
-  | AES128 -> n_len:size_nat{n_len <= block_len a}
-  | CHACHA20 -> n_len:size_nat{n_len == 12}
-
-let init (a:cipher_alg) (k:lbytes (key_len a)) (n_len:nonce_len a) (n:lbytes n_len) (c:size_nat) : state a =
-  match a with
-  | AES128 -> Spec.AES.aes_ctr_init Spec.AES.AES128 k n_len n c
-  | CHACHA20 -> Spec.Chacha20.chacha20_init k n c
-
-let add_counter (a:cipher_alg) (s:state a) (n:size_nat) : state a =
-  match a with
-  | AES128 -> Spec.AES.aes_ctr_add_counter Spec.AES.AES128 s n
-  | CHACHA20 -> Spec.Chacha20.chacha20_add_counter s n
-
-let key_block (a:cipher_alg) (s:state a) : lbytes (block_len a) = 
-  match a with
-  | AES128 -> Spec.AES.aes_ctr_current_key_block Spec.AES.AES128 s
-  | CHACHA20 -> Spec.Chacha20.chacha20_key_block s
-
+  | CHACHA20 ->
+      let open Spec.Chacha20 in
+      let block = chacha20_init k iv c in
+      let block' = rounds block in
+      uints_to_bytes_le (sum_state block block')

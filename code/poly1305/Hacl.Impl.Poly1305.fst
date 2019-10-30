@@ -25,7 +25,7 @@ friend Lib.LoopCombinators
 let _: squash (inversion field_spec) = allow_inversion field_spec
 
 
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq' --record_options"
 
 inline_for_extraction noextract
 let get_acc #s (ctx:poly1305_ctx s) : Stack (felem s)
@@ -53,6 +53,7 @@ let state_inv_t #s h ctx =
   F32xN.load_precompute_r_post #(width s) h (gsub ctx (nlimb s) (precomplen s))
 
 
+#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --record_options"
 let reveal_ctx_inv #s ctx h0 h1 =
   let acc_b = gsub ctx 0ul (nlimb s) in
   let r_b = gsub ctx (nlimb s) (nlimb s) in
@@ -67,6 +68,8 @@ let reveal_ctx_inv #s ctx h0 h1 =
   assert (as_seq h0 r_b == as_seq h1 r_b);
   assert (as_seq h0 precom_b == as_seq h1 precom_b)
 
+
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq' --record_options"
 
 val lemma_felem_fits_init_post:
     #s:field_spec
@@ -167,10 +170,8 @@ let poly1305_encode_r #s p b =
   let hi = hi &. mask1 in
   load_precompute_r p lo hi
 
-
-inline_for_extraction noextract
-val poly1305_init_: #s:field_spec -> poly1305_init_st s
-let poly1305_init_ #s ctx key =
+[@ Meta.Attribute.specialize ]
+let poly1305_init #s ctx key =
   let acc = get_acc ctx in
   let pre = get_precomp_r ctx in
 
@@ -182,23 +183,10 @@ let poly1305_init_ #s ctx key =
   poly1305_encode_r #s pre kr
 
 
-[@CInline]
-let poly1305_init_32 : poly1305_init_st M32 = poly1305_init_ #M32
-[@CInline]
-let poly1305_init_128 : poly1305_init_st M128 = poly1305_init_ #M128
-[@CInline]
-let poly1305_init_256 : poly1305_init_st M256 = poly1305_init_ #M256
-
-let poly1305_init #s ctx key =
-  match s with
-  | M32 -> poly1305_init_32 ctx key
-  | M128 -> poly1305_init_128 ctx key
-  | M256 -> poly1305_init_256 ctx key
-
-
 inline_for_extraction noextract
-let update1_st (s:field_spec) =
-    p:precomp_r s
+val update1:
+    #s:field_spec
+  -> p:precomp_r s
   -> b:lbuffer uint8 16ul
   -> acc:felem s ->
   Stack unit
@@ -213,30 +201,12 @@ let update1_st (s:field_spec) =
     (feval h1 acc).[0] == S.poly1305_update1
       (feval h0 (gsub p 0ul 5ul)).[0] 16 (as_seq h0 b) (feval h0 acc).[0])
 
-inline_for_extraction noextract
-val update1_: #s:field_spec -> update1_st s
-let update1_ #s pre b acc =
+let update1 #s pre b acc =
   push_frame ();
   let e = create (nlimb s) (limb_zero s) in
   poly1305_encode_block e b;
   fadd_mul_r acc e pre;
   pop_frame ()
-
-
-[@CInline]
-let poly1305_update1_32 : update1_st M32 = update1_
-[@CInline]
-let poly1305_update1_128 : update1_st M128 = update1_
-[@CInline]
-let poly1305_update1_256 : update1_st M256 = update1_
-
-inline_for_extraction noextract
-val update1: (#s:field_spec) -> update1_st s
-let update1 #s =
-  match s with
-  | M32 -> poly1305_update1_32
-  | M128 -> poly1305_update1_128
-  | M256 -> poly1305_update1_256
 
 
 let poly1305_update1 #s ctx text =
@@ -246,8 +216,9 @@ let poly1305_update1 #s ctx text =
 
 
 inline_for_extraction noextract
-let update_last_st (s:field_spec) =
-    p:precomp_r s
+val poly1305_update_last:
+    #s:field_spec
+  -> p:precomp_r s
   -> len:size_t{v len < 16}
   -> b:lbuffer uint8 len
   -> acc:felem s ->
@@ -263,36 +234,19 @@ let update_last_st (s:field_spec) =
     (feval h1 acc).[0] == S.poly1305_update1
       (feval h0 (gsub p 0ul 5ul)).[0] (v len) (as_seq h0 b) (feval h0 acc).[0])
 
-
-inline_for_extraction noextract
-val update_last_: #s:field_spec -> update_last_st s
-let update_last_ #s pre len b acc =
+#push-options "--z3rlimit 200"
+let poly1305_update_last #s pre len b acc =
   push_frame ();
   let e = create (nlimb s) (limb_zero s) in
   poly1305_encode_last e len b;
   fadd_mul_r acc e pre;
   pop_frame ()
-
-
-[@CInline]
-let poly1305_update_last_32 : update_last_st M32 = update_last_
-[@CInline]
-let poly1305_update_last_128 : update_last_st M128 = update_last_
-[@CInline]
-let poly1305_update_last_256 : update_last_st M256 = update_last_
+#pop-options
 
 inline_for_extraction noextract
-val poly1305_update_last: #s:field_spec -> update_last_st s
-let poly1305_update_last #s =
-  match s with
-  | M32 -> poly1305_update_last_32
-  | M128 -> poly1305_update_last_128
-  | M256 -> poly1305_update_last_256
-
-
-inline_for_extraction noextract
-let update_nblocks_st (s:field_spec) =
-    p:precomp_r s
+val poly1305_update_nblocks:
+    #s:field_spec
+  -> p:precomp_r s
   -> b:lbuffer uint8 (blocklen s)
   -> acc:felem s ->
   Stack unit
@@ -307,31 +261,13 @@ let update_nblocks_st (s:field_spec) =
     feval h1 acc ==
       Vec.poly1305_update_nblocks #(width s) (feval h0 (gsub p 10ul 5ul)) (as_seq h0 b) (feval h0 acc))
 
-inline_for_extraction noextract
-val update_nblocks_: #s:field_spec -> update_nblocks_st s
-let update_nblocks_ #s pre b acc =
+let poly1305_update_nblocks #s pre b acc =
   push_frame ();
   let e = create (nlimb s) (limb_zero s) in
   poly1305_encode_blocks e b;
   fmul_rn acc acc pre;
   fadd acc acc e;
   pop_frame ()
-
-
-[@CInline]
-let poly1305_update_nblocks_32 : update_nblocks_st M32 = update_nblocks_ #M32
-[@CInline]
-let poly1305_update_nblocks_128 : update_nblocks_st M128 = update_nblocks_ #M128
-[@CInline]
-let poly1305_update_nblocks_256 : update_nblocks_st M256 = update_nblocks_ #M256
-
-inline_for_extraction noextract
-val poly1305_update_nblocks: #s:field_spec -> update_nblocks_st s
-let poly1305_update_nblocks #s pre b acc =
-  match s with
-  | M32 -> poly1305_update_nblocks_32 pre b acc
-  | M128 -> poly1305_update_nblocks_128 pre b acc
-  | M256 -> poly1305_update_nblocks_256 pre b acc
 
 
 inline_for_extraction noextract
@@ -502,7 +438,7 @@ let poly1305_update_multi_loop #s bs len text pre acc =
 #pop-options
 
 
-#push-options "--z3rlimit 400"
+#push-options "--z3rlimit 350"
 inline_for_extraction noextract
 val poly1305_update_multi:
     #s:field_spec
@@ -525,6 +461,7 @@ val poly1305_update_multi:
 
 let poly1305_update_multi #s len text pre acc =
   let h0 = ST.get () in
+  assert_norm (v 10ul + v 5ul <= v 20ul);
   assert (feval h0 (gsub pre 10ul 5ul) == Vec.compute_rw #(width s) ((feval h0 (gsub pre 0ul 5ul)).[0]));
 
   let bs = blocklen s in
@@ -560,6 +497,7 @@ val poly1305_update_vec:
 
 let poly1305_update_vec #s len text pre acc =
   let sz_block = blocklen s in
+  FStar.Math.Lemmas.multiply_fractions (v len) (v sz_block);
   let len0 = (len /. sz_block) *! sz_block in
   let t0 = sub text 0ul len0 in
   FStar.Math.Lemmas.multiple_modulo_lemma (v (len /. sz_block)) (v (blocklen s));
@@ -590,15 +528,16 @@ let poly1305_update_128_256 #s ctx len text =
 
 
 inline_for_extraction noextract
+[@ Meta.Attribute.specialize ]
 let poly1305_update #s =
   match s with
   | M32 -> poly1305_update32
   | _ -> poly1305_update_128_256 #s
 
+#set-options "--z3rlimit 150"
 
-inline_for_extraction noextract
-val poly1305_finish_: #s:field_spec -> poly1305_finish_st s
-let poly1305_finish_ #s tag key ctx =
+[@ Meta.Attribute.specialize ]
+let poly1305_finish #s tag key ctx =
   let acc = get_acc ctx in
   let ks = sub key 16ul 16ul in
 
@@ -616,27 +555,12 @@ let poly1305_finish_ #s tag key ctx =
   FStar.Math.Lemmas.lemma_mod_plus_distr_l (fas_nat h1 acc).[0] (BSeq.nat_from_bytes_le (as_seq h0 ks)) (pow2 128);
   uints64_to_bytes_le tag f30 f31
 
-
-[@CInline]
-let poly1305_finish_32 : poly1305_finish_st M32 = poly1305_finish_ #M32
-[@CInline]
-let poly1305_finish_128 : poly1305_finish_st M128 = poly1305_finish_ #M128
-[@CInline]
-let poly1305_finish_256 : poly1305_finish_st M256 = poly1305_finish_ #M256
-
-let poly1305_finish #s tag key ctx =
-  match s with
-  | M32 -> poly1305_finish_32 tag key ctx
-  | M128 -> poly1305_finish_128 tag key ctx
-  | M256 -> poly1305_finish_256 tag key ctx
-
-
-#set-options "--z3rlimit 150"
-
-let mk_poly1305_mac #s poly1305_init poly1305_update poly1305_finish tag len text key =
+noextract
+[@ Meta.Attribute.specialize ]
+let poly1305_mac #s tag len text key =
   push_frame ();
   let ctx = create (nlimb s +! precomplen s) (limb_zero s) in
-  poly1305_init ctx key;
-  poly1305_update ctx len text;
-  poly1305_finish tag key ctx;
+  poly1305_init #s ctx key;
+  poly1305_update #s ctx len text;
+  poly1305_finish #s tag key ctx;
   pop_frame ()

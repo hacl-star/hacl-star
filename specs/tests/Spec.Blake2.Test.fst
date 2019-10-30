@@ -93,7 +93,7 @@ let test3_plaintext_list = List.Tot.map u8_from_UInt8 [
   0xf8uy; 0xf9uy; 0xfauy; 0xfbuy; 0xfcuy; 0xfduy; 0xfeuy
 ]
 
-let test3_plaintext : lbytes (List.Tot.length test3_plaintext_list) =
+let test3_plaintext : lbytes 255 =
   assert_norm (List.Tot.length test3_plaintext_list = 255);
   of_list test3_plaintext_list
 
@@ -154,7 +154,7 @@ let test4_plaintext_list = List.Tot.map u8_from_UInt8 [
   0xf8uy; 0xf9uy; 0xfauy
 ]
 
-let test4_plaintext : lbytes (List.Tot.length test4_plaintext_list) =
+let test4_plaintext : lbytes 251 =
   assert_norm (List.Tot.length test4_plaintext_list = 251);
   of_list test4_plaintext_list
 
@@ -270,6 +270,7 @@ let test6_expected : lbytes 64 =
 //
 
 
+#set-options "--z3rlimit 400"
 
 //
 // Main
@@ -279,8 +280,10 @@ let test () =
 
   IO.print_string "\n\nTEST 1";
   let test1_plaintext_len : size_nat = 32 in
+  assert_norm (List.Tot.length [] == 0);
+  assert_norm (List.Tot.length [] <= max_size_t);
   let test1_result : lbytes 32 =
-    Spec.Blake2.blake2s test1_plaintext 0 (of_list []) 32
+    Spec.Blake2.blake2s test1_plaintext 0 (assert_norm (List.Tot.length ([] <: list uint8) <= max_size_t); of_list []) 32
   in
   let result1 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test1_expected test1_result in
 
@@ -375,8 +378,6 @@ let test () =
   //
   // RESULT
   //
-  if result1 && result2 && result3 && result4 && result5 && result6 then IO.print_string "\n\nSuccess !\n"
-  else IO.print_string "\n\nFailed !\n";
-
-  ()
-
+  if result1 && result2 && result3 && result4 && result5 && result6 then
+  begin IO.print_string "\n\nSuccess !\n"; true end
+  else begin IO.print_string "\n\nFailed !\n"; false end

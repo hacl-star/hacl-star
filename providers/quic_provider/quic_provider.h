@@ -70,8 +70,8 @@ int MITLS_CALLCONV quic_crypto_decrypt(quic_key *key, /*out*/ unsigned char *pla
 
 // Compute a one time pad to obfuscate the packet number from the encrypted packet contents
 // *sample must point to the start of the encrypted packet payload
-// 4 bytes will be written to *mask, to be XORed with the packet number (after encoding)
-int MITLS_CALLCONV quic_crypto_packet_number_otp(quic_key *key, const unsigned char *sample, unsigned char *mask);
+// 5 bytes will be written to *mask
+int MITLS_CALLCONV quic_crypto_hp_mask(quic_key *key, const unsigned char *sample, unsigned char *mask);
 
 // Keys allocated by quic_crypto_derive_key and quic_crypto_create must be freed
 int MITLS_CALLCONV quic_crypto_free_key(quic_key *key);

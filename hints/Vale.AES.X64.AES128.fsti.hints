@@ -1,0 +1,176 @@
+[
+  "”:1Wd\u001dª|\u001a0©›Zy\u007f2",
+  [
+    [
+      "Vale.AES.X64.AES128.va_lemma_KeyExpansion128Stdcall",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565", "bool_inversion",
+        "constructor_distinct_Vale.AES.AES_s.AES_128",
+        "constructor_distinct_Vale.Arch.HeapTypes_s.TUInt128", "eq2-interp",
+        "equality_tok_Vale.AES.AES_s.AES_128@tok",
+        "equality_tok_Vale.Arch.HeapTypes_s.TUInt128@tok",
+        "equality_tok_Vale.X64.Machine_s.Secret@tok",
+        "equation_Vale.AES.AES_s.is_aes_key_LE",
+        "equation_Vale.Arch.HeapImpl.vale_heap_impl",
+        "equation_Vale.Def.Types_s.quad32",
+        "equation_Vale.Def.Words.Seq_s.seq4",
+        "equation_Vale.Def.Words.Seq_s.seqn",
+        "equation_Vale.Def.Words_s.nat32",
+        "equation_Vale.X64.Decls.va_require_total",
+        "equation_Vale.X64.Decls.validDstAddrs128",
+        "equation_Vale.X64.Decls.validSrcAddrs128",
+        "equation_Vale.X64.Memory.base_typ_as_vale_type",
+        "equation_Vale.X64.Memory.buffer128",
+        "equation_Vale.X64.Memory.get_vale_heap",
+        "fuel_guarded_inversion_Vale.X64.State.vale_state",
+        "function_token_typing_Prims.__cache_version_number__",
+        "function_token_typing_Vale.Def.Words_s.nat32", "int_typing",
+        "proj_equation_Vale.X64.State.Mkvale_state_vs_memTaint",
+        "refinement_interpretation_Tm_refine_1786c28ad96fef48f93b504abba67154",
+        "refinement_interpretation_Tm_refine_4543f1a564a33b21cd018d4b2bc02996",
+        "refinement_interpretation_Tm_refine_8545a50511781623fc41e3fb8428bce0",
+        "refinement_interpretation_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e",
+        "typing_Vale.Def.Words.Seq_s.four_to_seq_LE",
+        "typing_Vale.X64.Memory.buffer_read",
+        "typing_Vale.X64.State.__proj__Mkvale_state__item__vs_heap",
+        "typing_tok_Vale.Arch.HeapTypes_s.TUInt128@tok"
+      ],
+      0,
+      "042dbf0d208dbd3184fafd6027e5c84d"
+    ],
+    [
+      "Vale.AES.X64.AES128.va_wp_KeyExpansion128Stdcall",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "constructor_distinct_Vale.AES.AES_s.AES_128",
+        "constructor_distinct_Vale.Arch.HeapTypes_s.TUInt128", "eq2-interp",
+        "equality_tok_Vale.AES.AES_s.AES_128@tok",
+        "equality_tok_Vale.Arch.HeapTypes_s.TUInt128@tok",
+        "equation_Vale.AES.AES_s.is_aes_key_LE",
+        "equation_Vale.Arch.HeapImpl.vale_heap_impl",
+        "equation_Vale.Def.Types_s.quad32",
+        "equation_Vale.Def.Words.Seq_s.seq4",
+        "equation_Vale.Def.Words.Seq_s.seqn",
+        "equation_Vale.Def.Words_s.nat32",
+        "equation_Vale.X64.Memory.base_typ_as_vale_type",
+        "equation_Vale.X64.Memory.buffer128",
+        "equation_Vale.X64.Memory.get_vale_heap",
+        "fuel_guarded_inversion_Vale.X64.State.vale_state",
+        "function_token_typing_Prims.__cache_version_number__",
+        "function_token_typing_Vale.Def.Words_s.nat32", "int_typing",
+        "refinement_interpretation_Tm_refine_4543f1a564a33b21cd018d4b2bc02996",
+        "refinement_interpretation_Tm_refine_8545a50511781623fc41e3fb8428bce0",
+        "refinement_interpretation_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e",
+        "typing_Vale.Def.Words.Seq_s.four_to_seq_LE",
+        "typing_Vale.X64.Memory.buffer_read",
+        "typing_Vale.X64.State.__proj__Mkvale_state__item__vs_heap",
+        "typing_tok_Vale.Arch.HeapTypes_s.TUInt128@tok"
+      ],
+      0,
+      "1a9640b49b8eb337b7718dfc57440798"
+    ],
+    [
+      "Vale.AES.X64.AES128.va_quick_KeyExpansion128Stdcall",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
+      ],
+      0,
+      "cd34870fc6958cc1eee43ba9a9057b76"
+    ],
+    [
+      "Vale.AES.X64.AES128.va_lemma_AES128EncryptBlock",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Vale.Def.Types_s.quad32",
+        "equation_Vale.Def.Words_s.nat32",
+        "fuel_guarded_inversion_Vale.Def.Words_s.four",
+        "fuel_guarded_inversion_Vale.X64.State.vale_state",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_7631127a0802f81e420686907d906279"
+      ],
+      0,
+      "7857dcbfd7e3e0595ebe00468ae80f91"
+    ],
+    [
+      "Vale.AES.X64.AES128.va_wp_AES128EncryptBlock",
+      1,
+      1,
+      0,
+      [ "@query", "projection_inverse_BoxInt_proj_0" ],
+      0,
+      "38101e2a7cc3853beaa7c719870eb5b3"
+    ],
+    [
+      "Vale.AES.X64.AES128.va_quick_AES128EncryptBlock",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
+      ],
+      0,
+      "53d43137ae53d2ef0bb3baa69c3a823c"
+    ],
+    [
+      "Vale.AES.X64.AES128.va_lemma_AES128EncryptBlockStdcall",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "bool_inversion", "eq2-interp",
+        "equality_tok_Vale.X64.Machine_s.Secret@tok",
+        "equation_Vale.Def.Types_s.quad32",
+        "equation_Vale.Def.Words_s.nat32",
+        "equation_Vale.X64.Decls.va_int_range",
+        "equation_Vale.X64.Decls.va_require_total",
+        "equation_Vale.X64.Decls.validDstAddrs128",
+        "equation_Vale.X64.Decls.validSrcAddrs128",
+        "equation_Vale.X64.Memory.get_vale_heap",
+        "fuel_guarded_inversion_Vale.Def.Words_s.four",
+        "fuel_guarded_inversion_Vale.X64.State.vale_state",
+        "proj_equation_Vale.X64.State.Mkvale_state_vs_memTaint",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_4d38686bf695f79f110ce5aef057279f",
+        "refinement_interpretation_Tm_refine_e46933fe2bb09d30c168e80a49b6196f"
+      ],
+      0,
+      "f07115c3f2e7aa64c7845a47cd73dcd7"
+    ],
+    [
+      "Vale.AES.X64.AES128.va_wp_AES128EncryptBlockStdcall",
+      1,
+      1,
+      0,
+      [ "@query", "projection_inverse_BoxInt_proj_0" ],
+      0,
+      "ef2eae25e11c5a0b8d18cb4ccfb0e8c5"
+    ],
+    [
+      "Vale.AES.X64.AES128.va_quick_AES128EncryptBlockStdcall",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
+      ],
+      0,
+      "7cb28e19f5965773309820d02379ac24"
+    ]
+  ]
+]

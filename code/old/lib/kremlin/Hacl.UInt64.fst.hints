@@ -1,0 +1,44 @@
+[
+  "Ãb4k‚Pµ—›+Fž„¼\u0004{",
+  [
+    [
+      "Hacl.UInt64.gt_mask",
+      1,
+      2,
+      1,
+      [
+        "@query", "equation_FStar.UInt.max_int", "equation_FStar.UInt.ones",
+        "equation_FStar.UInt.zero"
+      ],
+      0,
+      "4e0622520a66d17b34692b12eccd37e1"
+    ],
+    [
+      "Hacl.UInt64.lt_mask",
+      1,
+      2,
+      1,
+      [
+        "@query", "equation_FStar.UInt.max_int", "equation_FStar.UInt.ones",
+        "equation_FStar.UInt.zero"
+      ],
+      0,
+      "d2cb685669518c72ef123cef38b05761"
+    ],
+    [
+      "Hacl.UInt64.lte_mask",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_FStar.UInt.max_int",
+        "equation_FStar.UInt.ones", "equation_FStar.UInt.zero",
+        "equation_Hacl.UInt64.gt_mask",
+        "refinement_interpretation_Tm_refine_b065aafc5b2779a68c07af24bfd039c6",
+        "typing_Hacl.UInt64.gt_mask"
+      ],
+      0,
+      "d6f62672fb863245ad96b45845e2af90"
+    ]
+  ]
+]

@@ -1,0 +1,163 @@
+include "Vale.X64.InsBasic.vaf"
+include "Vale.X64.InsVector.vaf"
+include{:fstar}{:open} "Vale.Def.Words_s"
+include{:fstar}{:open} "Vale.Def.Types_s"
+include{:fstar}{:open} "Vale.Arch.Types"
+include{:fstar}{:open} "Vale.AES.AES_s"
+include{:fstar}{:open} "Vale.Math.Poly2_s"
+include{:fstar}{:open} "Vale.Math.Poly2.Bits_s"
+include{:fstar}{:open} "Vale.X64.Machine_s"
+include{:fstar}{:open} "Vale.X64.State"
+include{:fstar}{:open} "Vale.X64.Decls"
+include{:fstar}{:open} "Vale.X64.QuickCode"
+include{:fstar}{:open} "Vale.X64.CPU_Features_s"
+
+module Vale.X64.InsAes
+
+#verbatim{:interface}
+open Vale.Def.Words_s
+open Vale.Def.Types_s
+open Vale.Arch.Types
+open Vale.AES.AES_s
+open Vale.Math.Poly2_s
+open Vale.Math.Poly2.Bits_s
+open Vale.X64.Machine_s
+open Vale.X64.State
+open Vale.X64.Decls
+open Vale.X64.QuickCode
+open Vale.X64.CPU_Features_s
+#endverbatim
+
+#verbatim
+open Vale.Def.Types_s
+open Vale.X64.Machine_s
+open Vale.X64
+open Vale.X64.State
+open Vale.X64.StateLemmas
+open Vale.X64.InsLemmas
+open Vale.X64.Taint_Semantics
+open Vale.X64.Decls
+open Vale.X64.CPU_Features_s
+module I = Vale.X64.Instructions_s
+module S = Vale.X64.Machine_Semantics_s
+module P = Vale.X64.Print_s
+
+friend Vale.X64.Decls
+#reset-options "--initial_fuel 4 --max_fuel 4 --z3rlimit 20"
+#endverbatim
+
+procedure Pclmulqdq(inout dst:xmm, in src:xmm, inline dstHi:bool, inline srcHi:bool)
+    {:public}
+    {:quick exportOnly}
+    {:instruction mk_ins(make_instr(I.ins_Pclmulqdq((if dstHi then 1 else 0) + (if srcHi then 16 else 0)), OReg(dst), OReg(src)))}
+    requires pclmulqdq_enabled;
+    modifies efl;
+    ensures
+        dst == old(to_quad32(mul(
+            of_double32(if dstHi then quad32_double_hi(dst) else quad32_double_lo(dst)),
+            of_double32(if srcHi then quad32_double_hi(src) else quad32_double_lo(src)))));
+{
+}
+
+procedure VPclmulqdq(out dst:xmm, in src1:xmm, in src2:xmm, inline src1Hi:bool, inline src2Hi:bool)
+    {:public}
+    {:quick exportOnly}
+    {:instruction mk_ins(make_instr(I.ins_VPclmulqdq((if src1Hi then 1 else 0) + (if src2Hi then 16 else 0)), OReg(dst), OReg(src1), OReg(src2)))}
+    requires pclmulqdq_enabled && avx_enabled;
+    modifies efl;
+    ensures
+        dst == old(to_quad32(mul(
+            of_double32(if src1Hi then quad32_double_hi(src1) else quad32_double_lo(src1)),
+            of_double32(if src2Hi then quad32_double_hi(src2) else quad32_double_lo(src2)))));
+{
+}
+
+procedure AESNI_enc(inout dst:xmm, in src:xmm)
+    {:public}
+    {:quick exportOnly}
+    {:instruction mk_ins(make_instr(I.ins_AESNI_enc, OReg(dst), OReg(src)))}
+    requires aesni_enabled;
+    modifies efl;
+    ensures
+        dst == old(quad32_xor(mix_columns_LE(sub_bytes(shift_rows_LE(dst))), src));
+{
+}
+
+procedure VAESNI_enc(inout dst:xmm, in src1:xmm, in src2:xmm)
+    {:public}
+    {:quick exportOnly}
+    {:instruction mk_ins(make_instr(I.ins_VAESNI_enc, OReg(dst), OReg(src1), OReg(src2)))}
+    requires aesni_enabled && avx_enabled;
+    modifies efl;
+    ensures
+        dst == old(quad32_xor(mix_columns_LE(sub_bytes(shift_rows_LE(src1))), src2));
+{
+}
+
+procedure AESNI_enc_last(inout dst:xmm, in src:xmm)
+    {:public}
+    {:quick exportOnly}
+    {:instruction mk_ins(make_instr(I.ins_AESNI_enc_last, OReg(dst), OReg(src)))}
+    requires aesni_enabled;
+    modifies efl;
+    ensures
+        dst == old(quad32_xor(sub_bytes(shift_rows_LE(dst)), src));
+{
+}
+
+procedure VAESNI_enc_last(inout dst:xmm, in src1:xmm, in src2:xmm)
+    {:public}
+    {:quick exportOnly}
+    {:instruction mk_ins(make_instr(I.ins_VAESNI_enc_last, OReg(dst), OReg(src1), OReg(src2)))}
+    requires aesni_enabled && avx_enabled;
+    modifies efl;
+    ensures
+        dst == old(quad32_xor(sub_bytes(shift_rows_LE(src1)), src2));
+{
+}
+
+procedure AESNI_dec(inout dst:xmm, in src:xmm)
+    {:quick exportOnly}
+    {:instruction mk_ins(make_instr(I.ins_AESNI_dec, OReg(dst), OReg(src)))}
+    requires aesni_enabled;
+    modifies efl;
+    ensures
+        dst == old(quad32_xor(inv_mix_columns_LE(inv_sub_bytes(inv_shift_rows_LE(dst))), src));
+{
+}
+
+procedure AESNI_dec_last(inout dst:xmm, in src:xmm)
+    {:quick exportOnly}
+    {:instruction mk_ins(make_instr(I.ins_AESNI_dec_last, OReg(dst), OReg(src)))}
+    requires aesni_enabled;
+    modifies efl;
+    ensures
+        dst == old(quad32_xor(inv_sub_bytes(inv_shift_rows_LE(dst)), src));
+{
+}
+
+procedure AESNI_imc(inout dst:xmm, in src:xmm)
+    {:quick exportOnly}
+    {:instruction mk_ins(make_instr(I.ins_AESNI_imc, OReg(dst), OReg(src)))}
+    requires aesni_enabled;
+    modifies efl;
+    ensures
+        dst == old(inv_mix_columns_LE(src));
+{
+}
+
+procedure AESNI_keygen_assist(inout dst:xmm, in src:xmm, inline imm:nat8)
+    {:public}
+    {:quick exportOnly}
+    {:instruction mk_ins(make_instr(I.ins_AESNI_keygen_assist(imm), OReg(dst), OReg(src)))}
+    requires aesni_enabled;
+    modifies efl;
+    ensures
+        dst == old(Mkfour(
+            sub_word(src.lo1),
+            ixor32(rot_word_LE(sub_word(src.lo1)), imm),
+            sub_word(src.hi3),
+            ixor32(rot_word_LE(sub_word(src.hi3)), imm)));
+{
+}
+

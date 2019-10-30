@@ -5,8 +5,8 @@ HACL_HOME    ?= ../..
 CACHE_DIR     ?= $(HACL_HOME)/.cache
 HINT_DIR      ?= $(HACL_HOME)/.hints
 OUTPUT_DIR    ?= .output
-GENERATED_DIR ?= blake2b-c
-OUT_DIR	     ?= blake2b-c
+GENERATED_DIR ?= blake2-c
+OUT_DIR	     ?= blake2-c
 
 .PHONY: all test stage1 stage2 clean clean-c distclean
 
@@ -38,7 +38,7 @@ FSTAR = $(FSTAR_HOME)/bin/fstar.exe $(FSTAR_FLAGS)
 
 ENABLE_HINTS = --use_hints --use_hint_hashes --record_hints --query_stats
 
-ROOTS = Hacl.Test.Blake2b.fst
+ROOTS = Hacl.Test.Blake2b.fst Hacl.Test.Blake2s.fst
 
 .PRECIOUS: %.krml
 
@@ -75,11 +75,11 @@ KREMLIN=$(KREMLIN_HOME)/krml
 $(GENERATED_DIR)/Makefile.include: $(ALL_KRML_FILES) | .depend
 	$(KREMLIN) -skip-compilation \
 	-no-prefix 'Hacl.Test.Blake2b' \
-	-no-prefix 'Hacl.Blake2' \
+	-no-prefix 'Hacl.Test.Blake2s' \
 	-bundle 'Lib.*' \
 	-bundle 'Spec.*' \
-	-bundle 'C=C.Endianness' \
-	-bundle 'Hacl.Blake2=Hacl.Impl.*,Hacl.Blake2' \
+	-bundle 'C=C.*,C.Endianness' \
+	-bundle 'Hacl.Impl.*[rename=Hacl_Blake2_Constants]' \
 	-library 'C,FStar' \
 	-drop 'LowStar,Spec,Prims,Lib,C.Loops.*' \
 	-add-include '"c/Lib_PrintBuffer.h"' \

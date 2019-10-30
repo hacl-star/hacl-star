@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
-
 #if (defined(_WIN32) || defined(_WIN64))
 #  include <malloc.h>
 #else
@@ -11,11 +10,8 @@
 #endif
 
 #include "kremlib.h"
-#include "Crypto_HKDF_Crypto_HMAC.h"
 #include "EverCrypt.h"
 #include "quic_provider.h"
-
-#define DEBUG 0
 
 typedef struct quic_key {
   mitls_aead alg;
@@ -56,12 +52,13 @@ static void dump_secret(const quic_secret *s)
 #endif
 
 #define CONVERT_ALG(a) \
-  (a == TLS_hash_SHA256 ? Crypto_HMAC_SHA256 : \
-    (a == TLS_hash_SHA384 ? Crypto_HMAC_SHA384 : Crypto_HMAC_SHA512))
+  (a == TLS_hash_SHA256 ? Spec_Hash_Definitions_SHA2_256 : \
+     (a == TLS_hash_SHA384 ? Spec_Hash_Definitions_SHA2_384 : Spec_Hash_Definitions_SHA2_512))
 
-int MITLS_CALLCONV quic_crypto_hash(quic_hash a, /*out*/ unsigned char *hash, const unsigned char *data, size_t len){
+int MITLS_CALLCONV quic_crypto_hash(quic_hash a, /*out*/ unsigned char *hash, const unsigned char *data, size_t len)
+{
   if(a < TLS_hash_SHA256) return 0;
-  Crypto_HMAC_agile_hash(CONVERT_ALG(a), (uint8_t*) hash, (uint8_t*)data, len);
+  EverCrypt_Hash_hash(CONVERT_ALG(a), (uint8_t*)hash, (uint8_t*)data, len);
   return 1;
 }
 
@@ -69,7 +66,7 @@ int MITLS_CALLCONV quic_crypto_hmac(quic_hash a, unsigned char *mac,
                      const unsigned char *key, uint32_t key_len,
                      const unsigned char *data, uint32_t data_len) {
   if(a < TLS_hash_SHA256) return 0;
-  Crypto_HMAC_hmac(CONVERT_ALG(a), (uint8_t*) mac, (uint8_t*)key, key_len, (uint8_t*)data, data_len);
+  EverCrypt_HMAC_compute(CONVERT_ALG(a), (uint8_t*)mac, (uint8_t*)key, key_len, (uint8_t*)data, data_len);
   return 1;
 }
 
@@ -78,14 +75,14 @@ int MITLS_CALLCONV quic_crypto_hkdf_extract(quic_hash a, unsigned char *prk,
                              const unsigned char *ikm, uint32_t ikm_len)
 {
   if(a < TLS_hash_SHA256) return 0;
-  Crypto_HKDF_hkdf_extract(CONVERT_ALG(a), (uint8_t*) prk, (uint8_t*)salt, salt_len, (uint8_t*)ikm, ikm_len);
+  EverCrypt_HKDF_extract(CONVERT_ALG(a), (uint8_t*) prk, (uint8_t*)salt, salt_len, (uint8_t*)ikm, ikm_len);
   return 1;
 }
 
 int MITLS_CALLCONV quic_crypto_hkdf_expand(quic_hash a, unsigned char *okm, uint32_t olen, const unsigned char *prk, uint32_t prk_len, const unsigned char *info, uint32_t info_len)
 {
   if(a < TLS_hash_SHA256) return 0;
-  Crypto_HKDF_hkdf_expand(CONVERT_ALG(a), (uint8_t*) okm, (uint8_t*)prk, prk_len, (uint8_t*)info, info_len, olen);
+  EverCrypt_HKDF_expand(CONVERT_ALG(a), (uint8_t*) okm, (uint8_t*)prk, prk_len, (uint8_t*)info, info_len, olen);
   return 1;
 }
 
@@ -100,15 +97,11 @@ int MITLS_CALLCONV quic_crypto_hkdf_label(quic_hash a, unsigned char *info, size
 
   info[0] = out_len >> 8;
   info[1] = out_len & 255;
-  info[2] = label_len + 5;
-  memcpy(info+3, "quic ", 5);
-  memcpy(info+8, label, label_len);
-  info[8+label_len] = 0; // hlen;
-
-//  if(!quic_crypto_hash(a, info + label_len + 9, (const unsigned char*)label, 0))
-//    return 0;
-
-  *info_len = 9 + label_len; // + hlen;
+  info[2] = label_len + 11;
+  memcpy(info+3, "tls13 quic ", 11);
+  memcpy(info+14, label, label_len);
+  info[14+label_len] = 0;
+  *info_len = 15 + label_len;
   return 1;
 }
 
@@ -241,7 +234,7 @@ int MITLS_CALLCONV quic_crypto_derive_key(quic_key **k, const quic_secret *secre
     return 0;
 
 #if DEBUG
-   printf("KEY: "); dump(dkey, klen);
+   printf("KEY: "); dump(key->key, klen);
    printf("IV: "); dump(key->static_iv, 12);
    printf("PNE: "); dump(pnkey, klen);
 #endif
@@ -307,11 +300,14 @@ int MITLS_CALLCONV quic_crypto_encrypt(quic_key *key, unsigned char *cipher, uin
   }
   else if(key->alg == TLS_aead_CHACHA20_POLY1305)
   {
-    EverCrypt_chacha20_poly1305_encrypt(key->key, iv, (uint8_t*)ad, ad_len, (uint8_t*)plain, plain_len, cipher, (cipher+plain_len));
+    EverCrypt_Chacha20Poly1305_aead_encrypt(key->key, iv, ad_len, (uint8_t*)ad,
+        plain_len, (uint8_t*)plain, cipher, cipher + plain_len);
   }
 
 #if DEBUG
-  printf("ENCRYPT\nIV="); dump(iv, 12);
+  printf("ENCRYPT %s\n", key->alg == TLS_aead_AES_128_GCM ? "AES128-GCM" : (key->alg == TLS_aead_AES_256_GCM ? "AES256-GCM" : "CHACHA20-POLY1305"));
+  printf("KEY="); dump(key->key, key->alg == TLS_aead_AES_128_GCM ? 16 : 32);
+  printf("NONCE="); dump(iv, 12);
   printf("STATIC="); dump(key->static_iv, 12);
   printf("AD="); dump(ad, ad_len);
   printf("PLAIN="); dump(plain, plain_len);
@@ -343,11 +339,14 @@ int MITLS_CALLCONV quic_crypto_decrypt(quic_key *key, unsigned char *plain, uint
   }
   else if(key->alg == TLS_aead_CHACHA20_POLY1305)
   {
-    r = EverCrypt_chacha20_poly1305_decrypt(key->key, iv, (uint8_t*)ad, ad_len, plain, plain_len, (uint8_t*)cipher, (uint8_t*)(cipher+plain_len));
+    r = 1 - EverCrypt_Chacha20Poly1305_aead_decrypt(key->key, iv, ad_len, (uint8_t*)ad,
+        plain_len, (uint8_t*)plain, cipher, (uint8_t*)(cipher+plain_len));
   }
 
 #if DEBUG
-  printf("DECRYPT %s\nIV=", r?"OK":"BAD"); dump(iv, 12);
+  printf("DECRYPT %X->%X %s\n", cipher, plain, r?"OK":"BAD");
+  printf("KEY="); dump(key->key, key->alg == TLS_aead_AES_128_GCM ? 16 : 32);
+  printf("NONCE="); dump(iv, 12);
   printf("STATIC="); dump(key->static_iv, 12);
   printf("AD="); dump(ad, ad_len);
   printf("CIPHER="); dump(cipher, cipher_len);
@@ -357,29 +356,30 @@ int MITLS_CALLCONV quic_crypto_decrypt(quic_key *key, unsigned char *plain, uint
   return r;
 }
 
-int MITLS_CALLCONV quic_crypto_packet_number_otp(quic_key *key, const unsigned char *sample, unsigned char *mask)
+int MITLS_CALLCONV quic_crypto_hp_mask(quic_key *key, const unsigned char *sample, unsigned char *mask)
 {
   unsigned char block[16];
   if(key->alg == TLS_aead_AES_128_GCM)
   {
     EverCrypt_aes128_compute(key->pne.case_aes128, (uint8_t*)sample, block);
-    memcpy(mask, block, 4);
+    memcpy(mask, block, 5);
     return 1;
   }
 
   if(key->alg == TLS_aead_AES_256_GCM)
   {
     EverCrypt_aes256_compute(key->pne.case_aes256, (uint8_t*)sample, block);
-    memcpy(mask, block, 4);
+    memcpy(mask, block, 5);
     return 1;
   }
 
   if(key->alg == TLS_aead_CHACHA20_POLY1305)
   {
-    uint8_t zero[4] = {0};
+    uint8_t zero[5] = {0};
     uint32_t ctr = sample[0] + (sample[1] << 8) + (sample[2] << 16) + (sample[3] << 24);
 
-    EverCrypt_chacha20((uint8_t*)key->pne.case_chacha20, (uint8_t*)sample+4, ctr, zero, 4, mask);
+    EverCrypt_Cipher_chacha20(5, mask, zero, (uint8_t*)key->pne.case_chacha20,
+        (uint8_t*)sample+4, ctr);
     return 1;
   }
 

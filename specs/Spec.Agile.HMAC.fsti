@@ -1,44 +1,25 @@
 module Spec.Agile.HMAC
 
-open FStar.Mul
+open Spec.Hash.Definitions
 open Lib.IntTypes
-open Lib.Sequence
-open Lib.ByteSequence
 
-module H = Spec.Agile.Hash
+#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
 
-val wrap_key:
-    a: H.algorithm
-  -> key:bytes{length key <= H.max_input a} ->
-  Tot (lbytes (H.size_block a))
+let is_supported_alg = function
+  | SHA1 | SHA2_256 | SHA2_384 | SHA2_512 -> true
+  | _ -> false
 
-val init:
-    a: H.algorithm
-  -> key: lbytes (H.size_block a) ->
-  Tot (H.state a)
+let lbytes (l:nat) = b:bytes {Seq.length b = l}
 
-val update_block:
-    a: H.algorithm
-  -> data: lbytes (H.size_block a)
-  -> H.state a ->
-  Tot (H.state a)
-
-val update_last:
-    a: H.algorithm
-  -> prev: nat
-  -> len: nat{len <= H.size_block a /\ prev % H.size_block a = 0 /\ len + prev <= H.max_input a}
-  -> last: lbytes len
-  -> H.state a ->
-  Tot (H.state a)
-
-val finish:
-    a: H.algorithm
-  -> key: lbytes (H.size_block a)
-  -> H.state a ->
-  Tot (lbytes (H.size_hash a))
+let keysized (a:hash_alg) (l:nat) =
+  l <= max_input_length a /\
+  l + block_length a < pow2 32
 
 val hmac:
-    a: H.algorithm
-  -> key:bytes{length key <= H.max_input a}
-  -> input:bytes{length input + H.size_block a <= H.max_input a} ->
-  Tot (lbytes (H.size_hash a))
+  a: hash_alg ->
+  key: bytes ->
+  data: bytes ->
+  Pure (lbytes (hash_length a))
+    (requires keysized a (Seq.length key) /\
+      Seq.length data + block_length a <= max_input_length a)
+    (ensures fun _ -> True)

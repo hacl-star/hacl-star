@@ -1273,6 +1273,7 @@ let carry_reduce_felem5_fits_lemma_i #w f i =
   FStar.Math.Lemmas.modulo_lemma ((uint64xN_v c4).[i] * 5) (pow2 64);
   assert ((uint64xN_v (vec_smul_mod c4 (u64 5))).[i] == (uint64xN_v c4).[i] * 5);
   let tmp0', c5 = carry26 tmp0 (vec_smul_mod c4 (u64 5)) in
+  assert_norm (63 * 5 < 62 * max26);
   carry_reduce_lemma_i tmp0 (vec_smul_mod c4 (u64 5)) i;
   assert (if (uint64xN_v f1).[i] < pow2 26 then (uint64xN_v c5).[i] = 0 else (uint64xN_v c5).[i] <= 63);
   let tmp1' = vec_add_mod tmp1 c5 in

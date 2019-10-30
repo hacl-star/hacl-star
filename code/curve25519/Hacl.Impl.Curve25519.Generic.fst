@@ -17,8 +17,7 @@ module ST = FStar.HyperStack.ST
 module BSeq = Lib.ByteSequence
 module LSeq = Lib.Sequence
 
-module F51 = Hacl.Impl.Curve25519.Field51
-module F64 = Hacl.Impl.Curve25519.Field64
+module C = Hacl.Impl.Curve25519.Fields.Core
 
 module S = Spec.Curve25519
 module M = Hacl.Spec.Curve25519.AddAndDouble
@@ -26,7 +25,7 @@ module Lemmas = Hacl.Spec.Curve25519.Field64.Lemmas
 
 friend Lib.LoopCombinators
 
-#reset-options "--z3rlimit 50 --max_fuel 2 --using_facts_from '* -FStar.Seq -Hacl.Spec.*'"
+#reset-options "--z3rlimit 200 --max_fuel 2 --using_facts_from '* -FStar.Seq -Hacl.Spec.*' --record_options"
 //#set-options "--debug Hacl.Impl.Curve25519.Generic --debug_level ExtractNorm"
 
 inline_for_extraction noextract
@@ -48,7 +47,7 @@ let scalar_bit s n =
   to_u64 ((s.(n /. 8ul) >>. (n %. 8ul)) &. u8 1)
 
 inline_for_extraction noextract
-val decode_point_:
+val decode_point:
     #s:field_spec
   -> o:point s
   -> i:lbuffer uint8 32ul
@@ -57,7 +56,8 @@ val decode_point_:
     (ensures fun h0 _ h1 -> modifies (loc o) h0 h1 /\
       state_inv_t h1 (get_x o) /\ state_inv_t h1 (get_z o) /\
       fget_x h1 o == S.decodePoint (as_seq h0 i) /\ fget_z h1 o == 1)
-let decode_point_ #s o i =
+[@ Meta.Attribute.specialize ]
+let decode_point #s o i =
   push_frame();
   let tmp = create 4ul (u64 0) in
   let h0 = ST.get () in
@@ -80,47 +80,27 @@ let decode_point_ #s o i =
   load_felem x tmp;
   pop_frame()
 
-(* WRAPPER to Prevent Inlining *)
-inline_for_extraction noextract
-let decode_point_51 (o:point51) = decode_point_ #M51 o
-inline_for_extraction noextract
-let decode_point_64 (o:point64) = decode_point_ #M64 o
-
-inline_for_extraction noextract
-val decode_point:
-    #s:field_spec
-  -> o:point s
-  -> i:lbuffer uint8 32ul
-  -> Stack unit
-    (requires fun h0 -> live h0 o /\ live h0 i /\ disjoint o i)
-    (ensures  fun h0 _ h1 -> modifies (loc o) h0 h1 /\
-      state_inv_t h1 (get_x o) /\ state_inv_t h1 (get_z o) /\
-      fget_x h1 o == S.decodePoint (as_seq h0 i) /\ fget_z h1 o == 1)
-let decode_point #s o i =
-  match s with
-  | M51 -> decode_point_51 o i
-  | M64 -> decode_point_64 o i
-(* WRAPPER to Prevent Inlining *)
 
 
-inline_for_extraction noextract
-val encode_point_:
+val encode_point:
     #s:field_spec
   -> o:lbuffer uint8 32ul
   -> i:point s
   -> Stack unit
     (requires fun h0 ->
+      (s = M64 ==> Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
       live h0 o /\ live h0 i /\ disjoint o i /\
       state_inv_t h0 (get_x i) /\ state_inv_t h0 (get_z i))
     (ensures  fun h0 _ h1 -> modifies (loc o) h0 h1 /\
       as_seq h1 o == S.encodePoint (fget_x h0 i, fget_z h0 i))
-let encode_point_ #s o i =
+[@ Meta.Attribute.specialize ]
+let encode_point #s o i =
   push_frame();
   let x : felem s = sub i 0ul (nlimb s) in
   let z : felem s = sub i (nlimb s) (nlimb s) in
   let tmp = create_felem s in
   let u64s = create 4ul (u64 0) in
-  let tmp_w = create (2ul *. nwide s) (wide_zero s) in
+  let tmp_w = create (2ul `FStar.UInt32.mul` ((nwide s) <: FStar.UInt32.t)) (wide_zero s) in
   let h0 = ST.get () in
   finv tmp z tmp_w;
   fmul tmp tmp x tmp_w;
@@ -136,50 +116,27 @@ let encode_point_ #s o i =
   assert (as_seq h3 o == BSeq.nat_to_bytes_le 32 (feval h1 tmp));
   pop_frame()
 
-(* WRAPPER to Prevent Inlining *)
-inline_for_extraction noextract
-let encode_point_51 = encode_point_ #M51
-inline_for_extraction noextract
-let encode_point_64 = encode_point_ #M64
-
-inline_for_extraction noextract
-val encode_point:
-    #s:field_spec
-  -> o:lbuffer uint8 32ul
-  -> i:point s
-  -> Stack unit
-    (requires fun h0 ->
-      live h0 o /\ live h0 i /\ disjoint o i /\
-      state_inv_t h0 (get_x i) /\ state_inv_t h0 (get_z i))
-    (ensures  fun h0 _ h1 -> modifies (loc o) h0 h1 /\
-      as_seq h1 o == S.encodePoint (fget_x h0 i, fget_z h0 i))
-let encode_point #s o i =
-  match s with
-  | M51 -> encode_point_51 o i
-  | M64 -> encode_point_64 o i
-(* WRAPPER to Prevent Inlining *)
-
-inline_for_extraction noextract
+// TODO: why re-define the signature here?
 val cswap2:
     #s:field_spec
   -> bit:uint64{v bit <= 1}
   -> p1:felem2 s
   -> p2:felem2 s
   -> Stack unit
-    (requires fun h0 -> live h0 p1 /\ live h0 p2 /\ disjoint p1 p2)
+    (requires fun h0 ->
+      (s = M64 ==> Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
+      live h0 p1 /\ live h0 p2 /\ disjoint p1 p2)
     (ensures  fun h0 _ h1 ->
       modifies (loc p1 |+| loc p2) h0 h1 /\
       (v bit == 1 ==> as_seq h1 p1 == as_seq h0 p2 /\ as_seq h1 p2 == as_seq h0 p1) /\
       (v bit == 0 ==> as_seq h1 p1 == as_seq h0 p1 /\ as_seq h1 p2 == as_seq h0 p2) /\
       (fget_xz h1 p1, fget_xz h1 p2) == S.cswap2 bit (fget_xz h0 p1) (fget_xz h0 p2))
+[@ Meta.Attribute.inline_ ]
 let cswap2 #s bit p0 p1 =
-  match s with
-  | M51 -> F51.cswap2 bit p0 p1
-  | M64 -> F64.cswap2 bit p0 p1
+  C.cswap2 #s bit p0 p1
 
 #set-options "--z3rlimit 150 --max_fuel 0 --max_ifuel 3"
 
-inline_for_extraction noextract
 val ladder_step:
     #s:field_spec
   -> k:scalar
@@ -189,6 +146,7 @@ val ladder_step:
   -> tmp2:felem_wide2 s
   -> Stack unit
     (requires fun h0 ->
+      (s = M64 ==> Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
       live h0 k /\ live h0 q /\ live h0 p01_tmp1_swap /\ live h0 tmp2 /\
       LowStar.Monotonic.Buffer.all_disjoint [loc k; loc q; loc p01_tmp1_swap; loc tmp2] /\
      (let nq = gsub p01_tmp1_swap 0ul (2ul *! nlimb s) in
@@ -211,6 +169,7 @@ val ladder_step:
       state_inv_t h1 (get_x q) /\ state_inv_t h1 (get_z q) /\
       state_inv_t h1 (get_x nq) /\ state_inv_t h1 (get_z nq) /\
       state_inv_t h1 (get_x nq_p1) /\ state_inv_t h1 (get_z nq_p1)))
+[@ Meta.Attribute.inline_ ]
 let ladder_step #s k q i p01_tmp1_swap tmp2 =
   let p01_tmp1 = sub p01_tmp1_swap 0ul (8ul *! nlimb s) in
   let swap : lbuffer uint64 1ul = sub p01_tmp1_swap (8ul *! nlimb s) 1ul in
@@ -235,7 +194,6 @@ let ladder_step #s k q i p01_tmp1_swap tmp2 =
 
 #set-options "--max_fuel 2"
 
-inline_for_extraction noextract
 val ladder_step_loop:
     #s:field_spec
   -> k:scalar
@@ -244,6 +202,7 @@ val ladder_step_loop:
   -> tmp2:felem_wide2 s
   -> Stack unit
     (requires fun h0 ->
+      (s = M64 ==> Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
       live h0 k /\ live h0 q /\ live h0 p01_tmp1_swap /\ live h0 tmp2 /\
       LowStar.Monotonic.Buffer.all_disjoint [loc k; loc q; loc p01_tmp1_swap; loc tmp2] /\
      (let nq = gsub p01_tmp1_swap 0ul (2ul *! nlimb s) in
@@ -266,6 +225,7 @@ val ladder_step_loop:
       v (LSeq.index (as_seq h1 bit) 0) <= 1 /\
       state_inv_t h1 (get_x nq) /\ state_inv_t h1 (get_z nq) /\
       state_inv_t h1 (get_x nq_p1) /\ state_inv_t h1 (get_z nq_p1)))
+[@ Meta.Attribute.inline_ ]
 let ladder_step_loop #s k q p01_tmp1_swap tmp2 =
   let h0 = ST.get () in
 
@@ -299,7 +259,6 @@ let ladder_step_loop #s k q p01_tmp1_swap tmp2 =
 
 #set-options "--max_fuel 0 --z3rlimit 150"
 
-inline_for_extraction noextract
 val ladder0_:
     #s:field_spec
   -> k:scalar
@@ -308,6 +267,7 @@ val ladder0_:
   -> tmp2:felem_wide2 s
   -> Stack unit
     (requires fun h0 ->
+      (s = M64 ==> Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
       live h0 k /\ live h0 q /\ live h0 p01_tmp1_swap /\ live h0 tmp2 /\
       LowStar.Monotonic.Buffer.all_disjoint [loc k; loc q; loc p01_tmp1_swap; loc tmp2] /\
      (let nq = gsub p01_tmp1_swap 0ul (2ul *! nlimb s) in
@@ -322,6 +282,7 @@ val ladder0_:
       state_inv_t h1 (get_x nq) /\ state_inv_t h1 (get_z nq) /\
       fget_xz h1 nq ==
       M.montgomery_ladder1_0 (as_seq h0 k) (fget_xz h0 q) (fget_xz h0 nq) (fget_xz h0 nq_p1)))
+[@ Meta.Attribute.inline_ ]
 let ladder0_ #s k q p01_tmp1_swap tmp2 =
   let p01_tmp1 = sub p01_tmp1_swap 0ul (8ul *! nlimb s) in
   let nq : point s = sub p01_tmp1_swap 0ul (2ul *! nlimb s) in
@@ -346,13 +307,13 @@ let ladder0_ #s k q p01_tmp1_swap tmp2 =
   let sw = swap.(0ul) in
   cswap2 #s sw nq nq_p1
 
-inline_for_extraction noextract
 val ladder1_:
     #s:field_spec
   -> p01_tmp1:lbuffer (limb s) (8ul *! nlimb s)
   -> tmp2:felem_wide2 s
   -> Stack unit
     (requires fun h0 ->
+      (s = M64 ==> Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
       live h0 p01_tmp1 /\ live h0 tmp2 /\ disjoint p01_tmp1 tmp2 /\
      (let nq = gsub p01_tmp1 0ul (2ul *! nlimb s) in
       state_inv_t h0 (get_x nq) /\ state_inv_t h0 (get_z nq)))
@@ -361,6 +322,7 @@ val ladder1_:
      (let nq = gsub p01_tmp1 0ul (2ul *! nlimb s) in
       state_inv_t h1 (get_x nq) /\ state_inv_t h1 (get_z nq) /\
       fget_xz h1 nq == M.montgomery_ladder1_1 (fget_xz h0 nq)))
+[@ Meta.Attribute.inline_ ]
 let ladder1_ #s p01_tmp1 tmp2 =
   let nq : point s = sub p01_tmp1 0ul (2ul *! nlimb s) in
   let tmp1 = sub p01_tmp1 (4ul *! nlimb s) (4ul *! nlimb s) in
@@ -372,7 +334,6 @@ let ladder1_ #s p01_tmp1 tmp2 =
   point_double nq tmp1 tmp2;
   point_double nq tmp1 tmp2
 
-inline_for_extraction noextract
 val ladder2_:
     #s:field_spec
   -> k:scalar
@@ -381,6 +342,7 @@ val ladder2_:
   -> tmp2:felem_wide2 s
   -> Stack unit
     (requires fun h0 ->
+      (s = M64 ==> Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
       live h0 k /\ live h0 q /\ live h0 p01_tmp1_swap /\ live h0 tmp2 /\
       LowStar.Monotonic.Buffer.all_disjoint [loc k; loc q; loc p01_tmp1_swap; loc tmp2] /\
      (let nq = gsub p01_tmp1_swap 0ul (2ul *! nlimb s) in
@@ -395,6 +357,7 @@ val ladder2_:
       state_inv_t h1 (get_x nq) /\ state_inv_t h1 (get_z nq) /\
      (let nq' = M.montgomery_ladder1_0 (as_seq h0 k) (fget_xz h0 q) (fget_xz h0 nq) (fget_xz h0 nq_p1) in
       fget_xz h1 nq == M.montgomery_ladder1_1 nq')))
+[@ Meta.Attribute.inline_ ]
 let ladder2_ #s k q p01_tmp1_swap tmp2 =
   let p01_tmp1 = sub p01_tmp1_swap 0ul (8ul *! nlimb s) in
   let nq : point s = sub p01_tmp1_swap 0ul (2ul *! nlimb s) in
@@ -414,6 +377,7 @@ val ladder3_:
   -> p01:lbuffer (limb s) (4ul *! nlimb s)
   -> Stack unit
     (requires fun h0 ->
+      (s = M64 ==> Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
       live h0 q /\ live h0 p01 /\ disjoint q p01 /\
       fget_z h0 q == 1 /\ state_inv_t h0 (get_x q) /\ state_inv_t h0 (get_z q))
     (ensures  fun h0 _ h1 ->
@@ -448,7 +412,6 @@ let ladder3_ #s q p01 =
     state_inv_t h0 (get_x p0) /\ state_inv_t h0 (get_z p0) /\
     state_inv_t h0 (get_x p1) /\ state_inv_t h0 (get_z p1))
 
-inline_for_extraction noextract
 val ladder4_:
     #s:field_spec
   -> k:scalar
@@ -457,6 +420,7 @@ val ladder4_:
   -> tmp2:felem_wide2 s
   -> Stack unit
     (requires fun h0 ->
+      (s = M64 ==> Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
       live h0 k /\ live h0 q /\ live h0 p01_tmp1_swap /\ live h0 tmp2 /\
       LowStar.Monotonic.Buffer.all_disjoint [loc k; loc q; loc p01_tmp1_swap; loc tmp2] /\
       fget_z h0 q == 1 /\ state_inv_t h0 (get_x q) /\ state_inv_t h0 (get_z q))
@@ -465,6 +429,7 @@ val ladder4_:
      (let nq = gsub p01_tmp1_swap 0ul (2ul *! nlimb s) in
       state_inv_t h1 (get_x nq) /\ state_inv_t h1 (get_z nq) /\
       fget_xz h1 nq == S.montgomery_ladder (fget_x h0 q) (as_seq h0 k)))
+[@ Meta.Attribute.inline_ ]
 let ladder4_ #s k q p01_tmp1_swap tmp2 =
   let h0 = ST.get () in
   let p01 = sub p01_tmp1_swap 0ul (4ul *! nlimb s) in
@@ -481,14 +446,14 @@ let ladder4_ #s k q p01_tmp1_swap tmp2 =
   assert (fget_xz h1 p0 == M.montgomery_ladder1 (fget_x h0 q) (as_seq h0 k));
   M.lemma_montgomery_ladder (fget_x h0 q) (as_seq h0 k)
 
-inline_for_extraction noextract
-val montgomery_ladder_:
+val montgomery_ladder:
     #s:field_spec
   -> o:point s
   -> k:scalar
   -> i:point s
   -> Stack unit
     (requires fun h0 ->
+      (s = M64 ==> Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
       live h0 o /\ live h0 k /\ live h0 i /\
       (disjoint o i \/ o == i) /\ disjoint o k /\ disjoint k i /\
       fget_z h0 i == 1 /\ state_inv_t h0 (get_x i) /\ state_inv_t h0 (get_z i))
@@ -496,10 +461,11 @@ val montgomery_ladder_:
       modifies (loc o) h0 h1 /\
       state_inv_t h1 (get_x o) /\ state_inv_t h1 (get_z o) /\
       fget_xz h1 o == S.montgomery_ladder (fget_x h0 i) (as_seq h0 k))
-let montgomery_ladder_ #s out key init =
+[@ Meta.Attribute.specialize ]
+let montgomery_ladder #s out key init =
   push_frame();
   let h0 = ST.get () in
-  let tmp2 = create (2ul *! nwide s) (wide_zero s) in
+  let tmp2 = create (2ul `FStar.UInt32.mul` ((nwide s) <: FStar.UInt32.t)) (wide_zero s) in
   let p01_tmp1_swap = create (8ul *! nlimb s +! 1ul) (limb_zero s) in
 
   let p0 : point s = sub p01_tmp1_swap 0ul (2ul *! nlimb s) in
@@ -508,45 +474,25 @@ let montgomery_ladder_ #s out key init =
   copy out p0;
   pop_frame ()
 
-(* WRAPPER to Prevent Inlining *)
-[@CInline]
-let montgomery_ladder_51 = montgomery_ladder_ #M51
-[@CInline]
-let montgomery_ladder_64 = montgomery_ladder_ #M64
-
 inline_for_extraction noextract
-val montgomery_ladder:
-  #s:field_spec
-  -> o:point s
-  -> k:scalar
-  -> i:point s
-  -> Stack unit
-    (requires fun h0 ->
-      live h0 o /\ live h0 k /\ live h0 i /\
-      (disjoint o i \/ o == i) /\ disjoint o k /\ disjoint k i /\
-      fget_z h0 i == 1 /\ state_inv_t h0 (get_x i) /\ state_inv_t h0 (get_z i))
-    (ensures  fun h0 _ h1 ->
-      modifies (loc o) h0 h1 /\
-      state_inv_t h1 (get_x o) /\ state_inv_t h1 (get_z o) /\
-      fget_xz h1 o == S.montgomery_ladder (fget_x h0 i) (as_seq h0 k))
-let montgomery_ladder #s out key init =
-  match s with
-  | M51 -> montgomery_ladder_51 out key init
-  | M64 -> montgomery_ladder_64 out key init
-(* WRAPPER to Prevent Inlining *)
+let g25519_t = x:ilbuffer byte_t 32ul{witnessed x (Lib.Sequence.of_list S.basepoint_list) /\ recallable x}
 
+/// Public API
+/// ==========
+
+val scalarmult: (#s: field_spec) -> scalarmult_st s
+[@ Meta.Attribute.specialize ]
 let scalarmult #s out priv pub =
   push_frame ();
-  let init = create (2ul *. nlimb s) (limb_zero s) in
+  let init = create (2ul `FStar.UInt32.mul` ((nlimb s) <: FStar.UInt32.t)) (limb_zero s) in
   decode_point #s init pub;
   montgomery_ladder #s init priv init;
   encode_point #s out init;
   pop_frame()
 
-let g25519 : x:ilbuffer byte_t 32ul{witnessed x (Lib.Sequence.of_list S.basepoint_list) /\ recallable x} =
-  createL_global S.basepoint_list
-
-let secret_to_public #s pub priv =
+val secret_to_public (#s:field_spec) (g25519: g25519_t): secret_to_public_st s
+[@ Meta.Attribute.specialize ]
+let secret_to_public #s g25519 pub priv =
   push_frame ();
   recall_contents g25519 S.basepoint_lseq;
   let basepoint = create 32ul (u8 0) in
@@ -554,6 +500,8 @@ let secret_to_public #s pub priv =
   scalarmult #s pub priv basepoint;
   pop_frame()
 
+val ecdh: (#s:field_spec) -> ecdh_st s
+[@ Meta.Attribute.specialize ]
 let ecdh #s out priv pub =
   push_frame ();
   let zeros = create 32ul (u8 0) in

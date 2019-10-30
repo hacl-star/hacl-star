@@ -1,0 +1,6 @@
+#include "poly1305.jazz"
+
+export fn poly1305_ref3(reg u64 out, reg u64 in, reg u64 inlen, reg u64 k)
+{
+  poly1305_ref3_local(out, in, inlen, k);
+}
