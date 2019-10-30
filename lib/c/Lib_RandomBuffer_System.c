@@ -1,5 +1,4 @@
 #include <Lib_RandomBuffer_System.h>
-#include <stdio.h>
 
 #if (defined(_WIN32) || defined(_WIN64))
 
@@ -13,12 +12,12 @@ bool read_random_bytes(uint32_t len, uint8_t *buf) {
   if (!(CryptAcquireContext(&ctxt, NULL, NULL, PROV_RSA_FULL,
                             CRYPT_VERIFYCONTEXT))) {
     DWORD error = GetLastError();
-    printf("Cannot acquire crypto context: 0x%lx\n", error);
+    /* printf("Cannot acquire crypto context: 0x%lx\n", error); */
     return false;
   }
   bool pass = true;
   if (!(CryptGenRandom(ctxt, (uint64_t)len, buf))) {
-    printf("Cannot read random bytes\n");
+    /* printf("Cannot read random bytes\n"); */
     pass = false;
   }
   CryptReleaseContext(ctxt, 0);
@@ -37,15 +36,15 @@ bool read_random_bytes(uint32_t len, uint8_t *buf) {
 bool read_random_bytes(uint32_t len, uint8_t *buf) {
   int fd = open("/dev/urandom", O_RDONLY);
   if (fd == -1) {
-    printf("Cannot open /dev/urandom\n");
+    /* printf("Cannot open /dev/urandom\n"); */
     return false;
   }
   bool pass = true;
   uint64_t res = read(fd, buf, (uint64_t)len);
   if (res != (uint64_t)len) {
-    printf("Error on reading, expected %" PRIu32 " bytes, got %" PRIu64
-           " bytes\n",
-           len, res);
+    /* printf("Error on reading, expected %" PRIu32 " bytes, got %" PRIu64 */
+    /*        " bytes\n", */
+    /*        len, res); */
     pass = false;
   }
   close(fd);
