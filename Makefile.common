@@ -94,6 +94,8 @@ POLY_BUNDLE=-bundle 'Hacl.Poly1305_32=Hacl.Impl.Poly1305.Field32xN_32' \
 NACLBOX_BUNDLE=-bundle Hacl.NaCl=Hacl.Impl.SecretBox,Hacl.Impl.Box
 QUIC_BUNDLE=-bundle Impl.QUIC=Cipher16,Spec.Cipher16,Spec.QUIC
 
+TUTORIAL_BUNDLE=-bundle Tutorial
+
 # 3. OCaml
 
 TAC = $(shell which tac >/dev/null 2>&1 && echo "tac" || echo "tail -r")
