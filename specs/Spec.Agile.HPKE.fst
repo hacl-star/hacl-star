@@ -1,4 +1,4 @@
-module Spec.HPKE
+module Spec.Agile.HPKE
 
 open FStar.Mul
 open Lib.IntTypes
@@ -7,7 +7,7 @@ open Lib.Sequence
 open Lib.ByteSequence
 
 module DH = Spec.Agile.DH
-module AEAD = Spec.Agile.AEAD.Hacl
+module AEAD = Spec.Agile.AEAD
 module Hash = Spec.Agile.Hash
 module HKDF = Spec.Agile.HKDF
 
@@ -16,7 +16,7 @@ let pow2_61 : _:unit{pow2 61 == 2305843009213693952} = assert_norm(pow2 61 == 23
 let pow2_35_less_than_pow2_61 : _:unit{pow2 32 * pow2 3 <= pow2 61 - 1} = assert_norm(pow2 32 * pow2 3 <= pow2 61 - 1)
 let pow2_35_less_than_pow2_125 : _:unit{pow2 32 * pow2 3 <= pow2 125 - 1} = assert_norm(pow2 32 * pow2 3 <= pow2 125 - 1)
 
-#set-options "--z3rlimit 200"
+#set-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 1 --initial_ifuel 1"
 
 
 /// Constants
@@ -55,12 +55,12 @@ let size_mode_identifier: size_nat = 1
 
 
 let is_ciphersuite = function
-  | DH.DH_Curve25519, AEAD.AEAD_AES128_GCM,        Hash.SHA2_256
-  | DH.DH_Curve25519, AEAD.AEAD_Chacha20_Poly1305, Hash.SHA2_256
-  | DH.DH_Curve448,   AEAD.AEAD_AES256_GCM,        Hash.SHA2_512
-  | DH.DH_Curve448,   AEAD.AEAD_Chacha20_Poly1305, Hash.SHA2_512
-  | DH.DH_P256,       AEAD.AEAD_AES128_GCM,        Hash.SHA2_256
-  | DH.DH_P256,       AEAD.AEAD_Chacha20_Poly1305, Hash.SHA2_256 -> true
+  | DH.DH_Curve25519, AEAD.AES128_GCM,        Hash.SHA2_256
+  | DH.DH_Curve25519, AEAD.CHACHA20_POLY1305, Hash.SHA2_256
+  | DH.DH_Curve448,   AEAD.AES256_GCM,        Hash.SHA2_512
+  | DH.DH_Curve448,   AEAD.CHACHA20_POLY1305, Hash.SHA2_512
+  | DH.DH_P256,       AEAD.AES128_GCM,        Hash.SHA2_256
+  | DH.DH_P256,       AEAD.CHACHA20_POLY1305, Hash.SHA2_256 -> true
   | _,_,_ -> false
 
 type ciphersuite = cs:(DH.algorithm & AEAD.algorithm & Hash.algorithm){is_ciphersuite cs}
@@ -69,12 +69,12 @@ type ciphersuite = cs:(DH.algorithm & AEAD.algorithm & Hash.algorithm){is_cipher
 val id_of_cs: cs:ciphersuite -> Tot (lbytes size_cs_identifier)
 let id_of_cs cs =
   match cs with
-  | DH.DH_Curve25519, AEAD.AEAD_AES128_GCM,        Hash.SHA2_256 -> create 2 (u8 1)
-  | DH.DH_Curve25519, AEAD.AEAD_Chacha20_Poly1305, Hash.SHA2_256 -> create 2 (u8 2)
-  | DH.DH_Curve448,   AEAD.AEAD_AES256_GCM,        Hash.SHA2_512 -> create 2 (u8 3)
-  | DH.DH_Curve448,   AEAD.AEAD_Chacha20_Poly1305, Hash.SHA2_512 -> create 2 (u8 4)
-  | DH.DH_P256,       AEAD.AEAD_AES128_GCM,        Hash.SHA2_256 -> create 2 (u8 5)
-  | DH.DH_P256,       AEAD.AEAD_Chacha20_Poly1305, Hash.SHA2_256 -> create 2 (u8 6)
+  | DH.DH_Curve25519, AEAD.AES128_GCM,        Hash.SHA2_256 -> create 2 (u8 1)
+  | DH.DH_Curve25519, AEAD.CHACHA20_POLY1305, Hash.SHA2_256 -> create 2 (u8 2)
+  | DH.DH_Curve448,   AEAD.AES256_GCM,        Hash.SHA2_512 -> create 2 (u8 3)
+  | DH.DH_Curve448,   AEAD.CHACHA20_POLY1305, Hash.SHA2_512 -> create 2 (u8 4)
+  | DH.DH_P256,       AEAD.AES128_GCM,        Hash.SHA2_256 -> create 2 (u8 5)
+  | DH.DH_P256,       AEAD.CHACHA20_POLY1305, Hash.SHA2_256 -> create 2 (u8 6)
 
 
 let curve_of_cs (cs:ciphersuite) : DH.algorithm =
@@ -104,10 +104,13 @@ let id_of_mode m =
 /// Constants sizes
 
 inline_for_extraction
-let size_aead_nonce (cs:ciphersuite): size_nat = AEAD.size_nonce (aead_of_cs cs)
+let size_aead_nonce (cs:ciphersuite): size_nat = 12
 
 inline_for_extraction
 let size_aead_key (cs:ciphersuite): size_nat = AEAD.size_key (aead_of_cs cs)
+
+inline_for_extraction
+let size_aead_tag (cs:ciphersuite): size_nat = AEAD.size_tag (aead_of_cs cs)
 
 inline_for_extraction
 let size_dh_key (cs:ciphersuite): size_nat = DH.size_key (curve_of_cs cs)
@@ -411,23 +414,21 @@ val encryptBase:
     cs:ciphersuite
   -> skE:key_dh_secret_s cs
   -> pkR:key_dh_public_s cs
-  -> m:bytes
+  -> m:bytes{Seq.length m <= AEAD.max_length (aead_of_cs cs)}
   -> info:bytes{Seq.length info <= max_info} ->
-  Tot (option bytes)
+  Tot bytes
 
 let encryptBase cs skE pkR m info =
   let zz, pkR = encap cs skE pkR in
   let pkE,k,n = setupBaseI cs skE pkR info in
-  match Spec.Defensive.AEAD.encrypt (aead_of_cs cs) k n m info with
-  | None -> None
-  | Some c -> Some (Seq.append pkE c)
-
+  assert_norm (8 * 12 <= pow2 64 - 1);
+  Seq.append pkE (AEAD.encrypt #(aead_of_cs cs) k n info m)
 
 val decryptBase:
     cs:ciphersuite
   -> pkE:key_dh_public_s cs
   -> skR:key_dh_secret_s cs
-  -> input:bytes{size_dh_public cs <= Seq.length input /\ Seq.length input <= max_size_t}
+  -> input:bytes{size_dh_public cs + size_aead_tag cs <= Seq.length input /\ Seq.length input <= max_size_t}
   -> info:bytes{Seq.length info <= max_info} ->
   Tot (option bytes)
 
@@ -436,4 +437,7 @@ let decryptBase cs pkE skR input info =
   let c = sub #uint8 #(Seq.length input) input (size_dh_public cs) (length input - (size_dh_public cs)) in
   let zz = decap cs pkE skR in
   let k,n = setupBaseR cs pkE skR info in
-  Spec.Defensive.AEAD.decrypt (aead_of_cs cs) k n c info
+  assert_norm (8 * 12 <= pow2 64 - 1);
+  match AEAD.decrypt #(aead_of_cs cs) k n info c with
+  | None -> None
+  | Some v -> Some v

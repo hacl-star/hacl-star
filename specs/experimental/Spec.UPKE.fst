@@ -10,7 +10,7 @@ module DH = Spec.Agile.DH
 module AEAD = Spec.Agile.AEAD.Hacl
 module Hash = Spec.Agile.Hash
 module HKDF = Spec.Agile.HKDF
-module HPKE = Spec.HPKE
+module HPKE = Spec.Agile.HPKE
 
 
 /// Clamp(a)
