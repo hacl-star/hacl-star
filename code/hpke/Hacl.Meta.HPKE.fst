@@ -7,9 +7,11 @@ friend Hacl.Impl.HPKE
 %splice[
   hpke_setupBaseI_higher;
   hpke_setupBaseR_higher;
-  hpke_encryptBase_higher
+  hpke_encryptBase_higher;
+  hpke_decryptBase_higher
 ] (Meta.Interface.specialize (`Spec.Agile.HPKE.ciphersuite) [
     `Hacl.Impl.HPKE.setupBaseI;
     `Hacl.Impl.HPKE.setupBaseR;
-    `Hacl.Impl.HPKE.encryptBase
+    `Hacl.Impl.HPKE.encryptBase;
+    `Hacl.Impl.HPKE.decryptBase
 ])

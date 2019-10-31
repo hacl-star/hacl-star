@@ -410,6 +410,7 @@ val decryptBase_aux
          | _ -> False))
 
 noextract inline_for_extraction
+[@ Meta.Attribute.inline_]
 let decryptBase_aux #cs pkE skR inputlen input infolen info output zz k n =
   let pkE = sub input 0ul (nsize_dh_public cs) in
   let clen = inputlen -. nsize_dh_public cs in
