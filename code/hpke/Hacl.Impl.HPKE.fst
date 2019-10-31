@@ -11,6 +11,7 @@ module S = Spec.Agile.HPKE
 module SDH = Spec.Agile.DH
 module DH = Hacl.Impl.Generic.DH
 module HKDF = Hacl.Impl.Generic.HKDF
+module AEAD = Hacl.Impl.Generic.AEAD
 
 #set-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0"
 
@@ -98,6 +99,7 @@ val build_context_default:
 
 let build_context_default #cs pkE pkR pkI infolen info output = admit()
 
+noextract inline_for_extraction
 val ks_derive_default_aux:
      #cs:S.ciphersuite
   -> pkR:key_dh_public cs
@@ -139,6 +141,8 @@ val ks_derive_default_aux:
 
 #set-options "--z3rlimit 100"
 
+noextract inline_for_extraction
+[@ Meta.Attribute.inline_]
 let ks_derive_default_aux #cs pkR zz pkE infolen info o_key o_nonce context_len context secret pkI psk label_key label_nonce tmp =
   build_context_default pkE pkR pkI infolen info context;
   let h0 = get() in
@@ -191,7 +195,7 @@ let ks_derive_default #cs pkR zz pkE infolen info o_key o_nonce =
   (**) let h1 = get() in
   pop_frame();
   (**) let hf = get() in
-  LowStar.Monotonic.Buffer.modifies_fresh_frame_popped hinit h0 (loc o_key |+| loc o_nonce) h1 hf
+  (**) LowStar.Monotonic.Buffer.modifies_fresh_frame_popped hinit h0 (loc o_key |+| loc o_nonce) h1 hf
 
 #pop-options
 
@@ -215,8 +219,65 @@ let setupBaseR #cs o_key_aead o_nonce_aead pkE skR infolen info =
   ks_derive_default pkR zz pkE infolen info o_key_aead o_nonce_aead;
   pop_frame()
 
+noextract inline_for_extraction
+val encryptBase_aux
+     (#cs:S.ciphersuite)
+     (skE: key_dh_secret cs)
+     (pkR: key_dh_public cs)
+     (mlen: size_t{v mlen <= S.max_length cs})
+     (m:lbuffer uint8 mlen)
+     (infolen: size_t {v infolen <= S.max_info /\ v infolen + S.size_dh_public cs + 16 <= max_size_t})
+     (info: lbuffer uint8 infolen)
+     (output: lbuffer uint8 (size (v infolen + S.size_dh_public cs + 16)))
+     (zz:key_dh_public cs)
+     (pkR': key_dh_public cs)
+     (k:key_aead cs)
+     (n:nonce_aead cs) :
+     ST unit
+       (requires fun h0 ->
+         live h0 output /\ live h0 skE /\ live h0 pkR /\
+         live h0 m /\ live h0 info /\
+         live h0 zz /\ live h0 pkR' /\ live h0 k /\ live h0 n /\
+         disjoint output info /\ disjoint output m /\ disjoint output skE /\
+         disjoint zz skE /\ disjoint zz pkR /\ disjoint pkR' skE /\ disjoint pkR' pkR /\ disjoint zz pkR' /\
+         disjoint info zz /\ disjoint info pkR' /\ disjoint m zz /\ disjoint m pkR' /\
+         disjoint info k /\ disjoint info n /\ disjoint m n /\ disjoint k m /\
+         disjoint output pkR' /\ disjoint output k /\ disjoint output n /\ disjoint k n)
+       (ensures fun h0 _ h1 ->
+         modifies (loc zz |+| loc pkR' |+| loc k |+| loc n |+| loc output) h0 h1 /\
+         as_seq h1 output `Seq.equal` S.encryptBase cs (as_seq h0 skE) (as_seq h0 pkR) (as_seq h0 m) (as_seq h0 info))
+
+noextract inline_for_extraction
+[@ Meta.Attribute.inline_]
+let encryptBase_aux #cs skE pkR mlen m infolen info output zz pkR' k n =
+  assert (v (infolen +. 16ul) == v infolen + 16);
+  assert (S.size_dh_public cs + v (infolen +. 16ul) == length output);
+  encap zz pkR' skE pkR;
+  let pkE:key_dh_public cs = sub output 0ul (nsize_dh_public cs) in
+  setupBaseI pkE k n skE pkR' infolen info;
+  let dec = sub output (nsize_dh_public cs) (infolen +. 16ul) in
+  AEAD.aead_encrypt #cs k n mlen m infolen info dec;
+  let h2 = get() in
+  assert (as_seq h2 output `Seq.equal` (as_seq h2 pkE `Seq.append` as_seq h2 dec))
+
+#push-options "--z3rlimit 400"
+
 [@ Meta.Attribute.specialize]
-let encryptBase #cs skE pkR mlen m infolen info output = admit()
+let encryptBase #cs skE pkR mlen m infolen info output =
+  (**) let hinit = get() in
+  push_frame();
+  (**) let h0 = get() in
+  let zz = create (nsize_dh_public cs) (u8 0) in
+  let pkR' = create (nsize_dh_public cs) (u8 0) in
+  let k = create (nsize_aead_key cs) (u8 0) in
+  let n = create (nsize_aead_nonce cs) (u8 0) in
+  encryptBase_aux #cs skE pkR mlen m infolen info output zz pkR' k n;
+  (**) let h1 = get() in
+  pop_frame();
+  (**) let hf = get() in
+  (**) LowStar.Monotonic.Buffer.modifies_fresh_frame_popped hinit h0 (loc output) h1 hf
+
+#pop-options
 
 [@ Meta.Attribute.specialize]
 let decryptBase #cs pkE skR mlen m infolen info output = admit()

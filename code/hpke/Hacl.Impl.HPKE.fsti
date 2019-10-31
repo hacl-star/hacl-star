@@ -67,15 +67,16 @@ let encryptBase_st (cs:S.ciphersuite) =
   -> pkR: key_dh_public cs
   -> mlen: size_t{v mlen <= S.max_length cs}
   -> m:lbuffer uint8 mlen
-  -> infolen: size_t {v infolen <= S.max_info}
+  -> infolen: size_t {v infolen <= S.max_info /\ v infolen + S.size_dh_public cs + 16 <= max_size_t}
   -> info: lbuffer uint8 infolen
-  -> output: lbuffer uint8 (mlen +. size (S.size_dh_public cs))
+  -> output: lbuffer uint8 (size (v infolen + S.size_dh_public cs + 16))
   -> ST unit
        (requires fun h0 ->
          live h0 output /\ live h0 skE /\ live h0 pkR /\
-         live h0 m /\ live h0 info)
+         live h0 m /\ live h0 info /\
+         disjoint output info /\ disjoint output m /\ disjoint output skE)
        (ensures fun h0 _ h1 -> modifies (loc output) h0 h1 /\
-         as_seq h1 output == S.encryptBase cs (as_seq h0 skE) (as_seq h0 pkR) (as_seq h0 m) (as_seq h0 info))
+         as_seq h1 output `Seq.equal` S.encryptBase cs (as_seq h0 skE) (as_seq h0 pkR) (as_seq h0 m) (as_seq h0 info))
 
 inline_for_extraction noextract
 let decryptBase_st (cs:S.ciphersuite) =
