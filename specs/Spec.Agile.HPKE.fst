@@ -247,7 +247,7 @@ val build_context:
   -> pkI:key_dh_public_s cs
   -> pskID:bytes{Seq.length pskID <= max_pskID}
   -> info:bytes{Seq.length info <= max_pskID} ->
-  Tot bytes
+  Tot (b:bytes{Seq.length b == 7 + 3 * size_dh_public cs + length pskID + length info})
 
 let build_context cs m pkE pkR pkI pskID info =
   let pskID_len: lbytes 2 = nat_to_bytes_be 2 (Seq.length pskID) in
