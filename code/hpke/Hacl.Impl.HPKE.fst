@@ -100,11 +100,103 @@ val build_context_default:
   -> ST unit
     (requires fun h0 ->
       live h0 pkE /\ live h0 pkR /\
-      live h0 pkI /\ live h0 info)
+      live h0 pkI /\ live h0 info /\ live h0 output /\
+      disjoint output pkE /\ disjoint output pkR /\ disjoint output pkI /\ disjoint output info)
     (ensures fun h0 _ h1 -> modifies (loc output) h0 h1 /\
-      as_seq h1 output == S.build_context cs S.Base (as_seq h0 pkE) (as_seq h0 pkR) (as_seq h0 pkI) S.default_pskId (as_seq h0 info))
+      as_seq h1 output `Seq.equal` S.build_context cs S.Base (as_seq h0 pkE) (as_seq h0 pkR) (as_seq h0 pkI) S.default_pskId (as_seq h0 info))
 
-let build_context_default #cs pkE pkR pkI infolen info output = admit()
+noextract inline_for_extraction
+val id_of_cs (cs:S.ciphersuite) (output:lbuffer uint8 2ul):
+  ST unit
+  (requires fun h -> live h output)
+  (ensures fun h0 _ h1 -> modifies (loc output) h0 h1 /\ as_seq h1 output `Seq.equal` S.id_of_cs cs)
+
+let id_of_cs cs output =
+  let open Spec.Agile.DH in
+  let open Spec.Agile.AEAD in
+  let open Spec.Agile.Hash in
+  match cs with
+  | DH_Curve25519, AES128_GCM,        SHA2_256 ->
+      upd output 0ul (u8 1); upd output 1ul (u8 1)
+  | DH_Curve25519, CHACHA20_POLY1305, SHA2_256 ->
+      upd output 0ul (u8 2); upd output 1ul (u8 2)
+  | DH_Curve448,   AES256_GCM,        SHA2_512 ->
+      upd output 0ul (u8 3); upd output 1ul (u8 3)
+  | DH_Curve448,   CHACHA20_POLY1305, SHA2_512 ->
+      upd output 0ul (u8 4); upd output 1ul (u8 4)
+  | DH_P256,       AES128_GCM,        SHA2_256 ->
+      upd output 0ul (u8 5); upd output 1ul (u8 5)
+  | DH_P256,       CHACHA20_POLY1305, SHA2_256 ->
+      upd output 0ul (u8 6); upd output 1ul (u8 6)
+
+#set-options "--z3rlimit 300"
+
+let build_context_default #cs pkE pkR pkI infolen info output =
+  (**) let h0 = get() in
+  upd output 0ul (u8 0);
+  id_of_cs cs (sub output 1ul 2ul);
+  (**) let h1 = get() in
+  (**) assert (as_seq h1 (gsub output 1ul 2ul) == S.id_of_cs cs);
+  (**) assert (as_seq h1 (gsub output 0ul 1ul) `Seq.equal` S.id_of_mode S.Base);
+  (**) assert (as_seq h1 (gsub output 0ul 3ul) `Seq.equal` (S.id_of_mode S.Base `Seq.append` S.id_of_cs cs));
+  copy (sub output 3ul (nsize_dh_public cs)) pkE;
+  (**) let h2 = get() in
+  copy (sub output (3ul +. nsize_dh_public cs) (nsize_dh_public cs)) pkR;
+  (**) let h3 = get() in
+  copy (sub output (3ul +. nsize_dh_public cs +. nsize_dh_public cs) (nsize_dh_public cs)) pkI;
+  (**) let h4 = get() in
+  (**) assert (as_seq h4 (gsub output 0ul (3ul +. nsize_dh_public cs +. nsize_dh_public cs +. nsize_dh_public cs)) `Seq.equal`
+    (S.id_of_mode S.Base `Seq.append`
+    S.id_of_cs cs `Seq.append`
+    as_seq h0 pkE `Seq.append`
+    as_seq h0 pkR `Seq.append`
+    as_seq h0 pkI));
+  let psklen_b = sub output (3ul +. nsize_dh_public cs +. nsize_dh_public cs +. nsize_dh_public cs) 2ul in
+  Lib.ByteBuffer.uint_to_bytes_be (psklen_b) (u16 0);
+  (**) let h5 = get() in
+  (**) Lib.ByteSequence.lemma_uint_to_bytes_be_preserves_value (u16 0);
+  (**) Lib.ByteSequence.nat_from_intseq_be_inj (as_seq h5 psklen_b) (Lib.ByteSequence.nat_to_bytes_be #SEC 2 0);
+  (**) assert (as_seq h5 psklen_b `Seq.equal` Lib.ByteSequence.nat_to_bytes_be #SEC 2 0);
+  (**) assert (as_seq h5 (gsub output 0ul (3ul +. nsize_dh_public cs +. nsize_dh_public cs +. nsize_dh_public cs +. 2ul)) `Seq.equal`
+    (S.id_of_mode S.Base `Seq.append`
+     S.id_of_cs cs `Seq.append`
+     as_seq h0 pkE `Seq.append`
+     as_seq h0 pkR `Seq.append`
+     as_seq h0 pkI `Seq.append`
+     Lib.ByteSequence.nat_to_bytes_be 2 (Seq.length S.default_pskId) `Seq.append`
+     S.default_pskId));
+  let infolen_b = sub output (3ul +. nsize_dh_public cs +. nsize_dh_public cs +. nsize_dh_public cs +. 2ul) 2ul in
+  [@inline_let]
+  let infolen_u16 = to_u16 infolen in
+  (**) assert (v infolen_u16 == v infolen);
+  Lib.ByteBuffer.uint_to_bytes_be (infolen_b) infolen_u16;
+  (**) let h6 = get() in
+  (**) Lib.ByteSequence.lemma_uint_to_bytes_be_preserves_value infolen_u16;
+  (**) Lib.ByteSequence.nat_from_intseq_be_inj (as_seq h6 infolen_b) (Lib.ByteSequence.nat_to_bytes_be #SEC 2 (v infolen));
+  (**) assert (as_seq h6 infolen_b `Seq.equal` Lib.ByteSequence.nat_to_bytes_be #SEC 2 (v infolen));
+  (**) assert (as_seq h6 (gsub output 0ul (3ul +. nsize_dh_public cs +. nsize_dh_public cs +. nsize_dh_public cs +. 4ul)) `Seq.equal`
+    (S.id_of_mode S.Base `Seq.append`
+    S.id_of_cs cs `Seq.append`
+    as_seq h0 pkE `Seq.append`
+    as_seq h0 pkR `Seq.append`
+    as_seq h0 pkI `Seq.append`
+    Lib.ByteSequence.nat_to_bytes_be 2 (Seq.length S.default_pskId) `Seq.append`
+    S.default_pskId `Seq.append`
+    Lib.ByteSequence.nat_to_bytes_be 2 (length info)));
+  let output_info = sub output (3ul +. nsize_dh_public cs +. nsize_dh_public cs +. nsize_dh_public cs +. 4ul) infolen in
+  (**) assert(disjoint output_info info);
+  copy output_info info;
+  (**) let h7 = get() in
+  (**) assert (as_seq h7 (gsub output 0ul (3ul +. nsize_dh_public cs +. nsize_dh_public cs +. nsize_dh_public cs +. 4ul +. infolen)) `Seq.equal`
+    (S.id_of_mode S.Base `Seq.append`
+    S.id_of_cs cs `Seq.append`
+    as_seq h0 pkE `Seq.append`
+    as_seq h0 pkR `Seq.append`
+    as_seq h0 pkI `Seq.append`
+    Lib.ByteSequence.nat_to_bytes_be 2 (Seq.length S.default_pskId) `Seq.append`
+    S.default_pskId `Seq.append`
+    Lib.ByteSequence.nat_to_bytes_be 2 (length info) `Seq.append`
+    (as_seq h0 info)))
 
 noextract inline_for_extraction
 val ks_derive_default_aux:
