@@ -652,7 +652,7 @@ BUNDLE_FLAGS	=\
   $(MERKLE_BUNDLE) \
   $(WASMSUPPORT_BUNDLE) \
   $(CTR_BUNDLE) \
-
+  $(FRODO_BUNDLE)
 
 DEFAULT_FLAGS = \
   $(HAND_WRITTEN_LIB_FLAGS) \
@@ -765,6 +765,7 @@ dist/mozilla/Makefile.basic: MERKLE_BUNDLE = -bundle MerkleTree.*
 dist/mozilla/Makefile.basic: CTR_BUNDLE =
 dist/mozilla/Makefile.basic: SHA3_BUNDLE = -bundle Hacl.SHA3
 dist/mozilla/Makefile.basic: HASH_BUNDLE = -bundle Hacl.Hash.*,Hacl.HKDF,Hacl.HMAC
+dist/mozilla/Makefile.basic: FRODO_BUNDLE = -bundle Hacl.Frodo.*,Hacl.SHA3,Hacl.Keccak,Frodo.Params
 dist/mozilla/Makefile.basic: \
   BUNDLE_FLAGS += \
     -bundle EverCrypt,EverCrypt.* \
