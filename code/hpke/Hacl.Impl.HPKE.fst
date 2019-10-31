@@ -72,7 +72,7 @@ val encap:
 [@ Meta.Attribute.inline_]
 let encap #cs o_zz o_pkE skE pkR =
   DH.secret_to_public #cs o_pkE skE;
-  DH.scalarmult #cs skE pkR o_zz
+  DH.scalarmult #cs o_zz skE pkR
 
 val decap:
      #cs:S.ciphersuite
@@ -87,7 +87,7 @@ val decap:
       as_seq h1 o_pkR == S.decap cs (as_seq h0 pkE) (as_seq h0 skR))
 
 [@ Meta.Attribute.inline_ ]
-let decap #cs o_pkR pkE skR = DH.scalarmult #cs skR pkE o_pkR
+let decap #cs o_pkR pkE skR = DH.scalarmult #cs o_pkR skR pkE
 
 val build_context_default:
      #cs:S.ciphersuite

@@ -27,9 +27,9 @@ let nsize_public (a:DH.algorithm) =
 
 inline_for_extraction noextract
 let scalarmult_st (a:DH.algorithm) =
-     k:lbuffer uint8 (nsize_key a)
+     o:lbuffer uint8 (nsize_public a)
+  -> k:lbuffer uint8 (nsize_key a)
   -> i:lbuffer uint8 (nsize_public a)
-  -> o:lbuffer uint8 (nsize_public a)
   -> ST unit
      (requires fun h0 ->
        live h0 o /\ live h0 k /\ live h0 i /\
@@ -52,3 +52,12 @@ let secret_to_public_st (a: DH.algorithm) =
 
 [@ Meta.Attribute.specialize]
 assume val secret_to_public: #a:S.ciphersuite -> secret_to_public_st (S.curve_of_cs a)
+
+(** Instantiations for Curve25519 **)
+
+inline_for_extraction noextract
+let secret_to_public_c51 : secret_to_public_st (DH.DH_Curve25519) =
+  Hacl.Curve25519_51.secret_to_public
+inline_for_extraction noextract
+let scalarmult_c51 : scalarmult_st (DH.DH_Curve25519) =
+  Hacl.Curve25519_51.scalarmult
