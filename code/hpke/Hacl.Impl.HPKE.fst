@@ -227,6 +227,7 @@ val ks_derive_default_aux:
          disjoint tmp label_key /\ disjoint tmp label_nonce /\ disjoint tmp context /\
          disjoint label_key context /\ disjoint label_key secret /\
          disjoint label_nonce o_key /\ disjoint label_nonce context /\
+         disjoint context pkE /\ disjoint context pkR /\ disjoint context pkI /\ disjoint context info /\
          disjoint label_nonce secret /\
          disjoint secret tmp /\ disjoint o_key tmp /\
          disjoint o_key secret /\ disjoint o_nonce secret /\
