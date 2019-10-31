@@ -86,11 +86,12 @@ let decryptBase_st (cs:S.ciphersuite) =
   -> m:lbuffer uint8 mlen
   -> infolen: size_t {v infolen <= S.max_info}
   -> info: lbuffer uint8 infolen
-  -> output: lbuffer uint8 mlen
+  -> output: lbuffer uint8 (size (v mlen - S.size_dh_public cs - S.size_aead_tag cs))
   -> ST UInt32.t
        (requires fun h0 ->
          live h0 output /\ live h0 pkE /\ live h0 skR /\
-         live h0 m /\ live h0 info)
+         live h0 m /\ live h0 info /\
+         disjoint output info /\ disjoint output m)
        (ensures fun h0 z h1 -> modifies (loc output) h0 h1 /\
          (let plain = S.decryptBase cs (as_seq h0 pkE) (as_seq h0 skR) (as_seq h0 m) (as_seq h0 info) in
          match z with

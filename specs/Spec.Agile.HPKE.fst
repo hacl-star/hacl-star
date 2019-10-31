@@ -435,7 +435,7 @@ val decryptBase:
   Tot (option bytes)
 
 let decryptBase cs pkE skR input info =
-  let pkE = sub #uint8 #(Seq.length input) input 0 (size_dh_key cs) in
+  let pkE = sub #uint8 #(Seq.length input) input 0 (size_dh_public cs) in
   let c = sub #uint8 #(Seq.length input) input (size_dh_public cs) (length input - (size_dh_public cs)) in
   let zz = decap cs pkE skR in
   let k,n = setupBaseR cs pkE skR info in

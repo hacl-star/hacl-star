@@ -32,6 +32,13 @@ let nsize_dh_public (cs:S.ciphersuite) : (s:size_t{v s == S.size_dh_public cs}) 
   | SDH.DH_P256 -> 64ul
 
 inline_for_extraction noextract
+let nsize_dh_key (cs:S.ciphersuite) : (s:size_t{v s == S.size_dh_key cs}) =
+  match S.curve_of_cs cs with
+  | SDH.DH_Curve25519 -> 32ul
+  | SDH.DH_Curve448 -> 56ul
+  | SDH.DH_P256 -> 32ul
+
+inline_for_extraction noextract
 let nsize_aead_key (cs:S.ciphersuite) : (s:size_t{v s == S.size_aead_key cs}) =
   match S.aead_of_cs cs with
   | Spec.Agile.AEAD.AES128_GCM -> 16ul
@@ -279,5 +286,55 @@ let encryptBase #cs skE pkR mlen m infolen info output =
 
 #pop-options
 
+noextract inline_for_extraction
+val decryptBase_aux
+     (#cs:S.ciphersuite)
+     (pkE: key_dh_public cs)
+     (skR: key_dh_secret cs)
+     (inputlen: size_t{S.size_dh_public cs + S.size_aead_tag cs <= v inputlen /\ v inputlen <= max_size_t})
+     (input:lbuffer uint8 inputlen)
+     (infolen: size_t {v infolen <= S.max_info})
+     (info: lbuffer uint8 infolen)
+     (output: lbuffer uint8 (size (v inputlen - S.size_dh_public cs - S.size_aead_tag cs)))
+     (zz:key_dh_public cs)
+     (k:key_aead cs)
+     (n:nonce_aead cs) :
+     ST UInt32.t
+       (requires fun h0 ->
+         live h0 output /\ live h0 pkE /\ live h0 skR /\
+         live h0 input /\ live h0 info /\
+         live h0 zz /\ live h0 k /\ live h0 n /\
+         disjoint output info /\ disjoint output input /\
+         disjoint zz pkE /\ disjoint zz skR /\
+         disjoint info zz /\ disjoint input zz /\
+         disjoint info k /\ disjoint info n /\ disjoint input n /\ disjoint k input /\
+         disjoint output k /\ disjoint output n /\ disjoint k n)
+       (ensures fun h0 z h1 ->
+         modifies (loc zz |+| loc k |+| loc n |+| loc output) h0 h1 /\
+         (let plain = S.decryptBase cs (as_seq h0 pkE) (as_seq h0 skR) (as_seq h0 input) (as_seq h0 info) in
+         match z with
+         | 0ul -> Some? plain /\ as_seq h1 output `Seq.equal` Some?.v plain
+         | 1ul -> None? plain
+         | _ -> False))
+
+noextract inline_for_extraction
+let decryptBase_aux #cs pkE skR inputlen input infolen info output zz k n =
+  let pkE = sub input 0ul (nsize_dh_public cs) in
+  let clen = inputlen -. nsize_dh_public cs in
+  assert (v (clen -. 16ul) <= S.max_length cs);
+  assert (v (clen -. 16ul) + 16 <= max_size_t);
+  assert (length output == v (clen -. 16ul));
+  let c = sub input (nsize_dh_public cs) clen in
+  decap zz pkE skR;
+  setupBaseR k n pkE skR infolen info;
+  AEAD.aead_decrypt #cs k n infolen info (clen -. 16ul) output c
+
 [@ Meta.Attribute.specialize]
-let decryptBase #cs pkE skR mlen m infolen info output = admit()
+let decryptBase #cs pkE skR mlen m infolen info output =
+  push_frame();
+  let zz = create (nsize_dh_public cs) (u8 0) in
+  let k = create (nsize_aead_key cs) (u8 0) in
+  let n = create (nsize_aead_nonce cs) (u8 0) in
+  let z = decryptBase_aux #cs pkE skR mlen m infolen info output zz k n in
+  pop_frame();
+  z
