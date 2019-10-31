@@ -66,6 +66,21 @@ let encap #cs o_zz o_pkE skE pkR =
   DH.secret_to_public #cs o_pkE skE;
   DH.scalarmult #cs skE pkR o_zz
 
+val decap:
+     #cs:S.ciphersuite
+  -> o_pkR: key_dh_public cs
+  -> pkE: key_dh_public cs
+  -> skR: key_dh_secret cs
+  -> ST unit
+    (requires fun h0 ->
+      live h0 o_pkR /\ live h0 pkE /\ live h0 skR /\
+      disjoint o_pkR pkE /\ disjoint o_pkR skR)
+    (ensures fun h0 _ h1 -> modifies (loc o_pkR) h0 h1 /\
+      as_seq h1 o_pkR == S.decap cs (as_seq h0 pkE) (as_seq h0 skR))
+
+[@ Meta.Attribute.inline_ ]
+let decap #cs o_pkR pkE skR = DH.scalarmult #cs skR pkE o_pkR
+
 val build_context_default:
      #cs:S.ciphersuite
   -> pkE: key_dh_public cs
@@ -191,7 +206,14 @@ let setupBaseI #cs o_pkE o_k o_n skE pkR infolen info =
   pop_frame()
 
 [@ Meta.Attribute.specialize]
-let setupBaseR #cs o_key_aead o_nonce_aead pkE skR infolen info = admit()
+let setupBaseR #cs o_key_aead o_nonce_aead pkE skR infolen info =
+  push_frame();
+  let pkR = create (nsize_dh_public cs) (u8 0) in
+  let zz = create (nsize_dh_public cs) (u8 0) in
+  DH.secret_to_public pkR skR;
+  decap zz pkE skR;
+  ks_derive_default pkR zz pkE infolen info o_key_aead o_nonce_aead;
+  pop_frame()
 
 [@ Meta.Attribute.specialize]
 let encryptBase #cs skE pkR mlen m infolen info output = admit()
