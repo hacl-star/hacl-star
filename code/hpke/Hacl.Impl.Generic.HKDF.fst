@@ -17,3 +17,8 @@ inline_for_extraction noextract
 let hkdf_extract256 : HK.extract_st Hash.SHA2_256 = Hacl.HKDF.extract_sha2_256
 inline_for_extraction noextract
 let hkdf_expand256 : HK.expand_st Hash.SHA2_256 = Hacl.HKDF.expand_sha2_256
+
+inline_for_extraction noextract
+let hkdf_extract512 : HK.extract_st Hash.SHA2_512 = Hacl.HKDF.extract_sha2_512
+inline_for_extraction noextract
+let hkdf_expand512 : HK.expand_st Hash.SHA2_512 = Hacl.HKDF.expand_sha2_512

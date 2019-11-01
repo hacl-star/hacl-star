@@ -61,6 +61,8 @@ let is_ciphersuite = function
   | DH.DH_Curve448,   AEAD.CHACHA20_POLY1305, Hash.SHA2_512
   | DH.DH_P256,       AEAD.AES128_GCM,        Hash.SHA2_256
   | DH.DH_P256,       AEAD.CHACHA20_POLY1305, Hash.SHA2_256 -> true
+  // AF: To review
+  | DH.DH_Curve25519, AEAD.CHACHA20_POLY1305, Hash.SHA2_512 -> true
   | _,_,_ -> false
 
 type ciphersuite = cs:(DH.algorithm & AEAD.algorithm & Hash.algorithm){is_ciphersuite cs}
