@@ -295,3 +295,7 @@ let mk_compute a hash alloca init update_multi update_last finish dst key key_le
 let compute_sha2_256: compute_st SHA2_256 =
   let open Hacl.Hash.SHA2 in
   mk_compute SHA2_256 hash_256 alloca_256 init_256 update_multi_256 update_last_256 finish_256
+
+let compute_sha2_512: compute_st SHA2_512 =
+  let open Hacl.Hash.SHA2 in
+  mk_compute SHA2_512 hash_512 alloca_512 init_512 update_multi_512 update_last_512 finish_512

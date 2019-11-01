@@ -52,3 +52,5 @@ val mk_compute:
   compute_st a
 
 val compute_sha2_256: compute_st SHA2_256
+
+val compute_sha2_512: compute_st SHA2_512
