@@ -20,39 +20,39 @@ let psk (cs:S.ciphersuite) = lbuffer uint8 (size (S.size_psk cs))
 
 inline_for_extraction noextract
 let nhash_length (cs:S.ciphersuite) : (s:size_t{v s == S.size_psk cs}) =
-  match S.hash_of_cs cs with
-  | Spec.Agile.Hash.SHA2_256 -> 32ul
-  | Spec.Agile.Hash.SHA2_512 -> 64ul
+  match cs with
+  | _, _, Spec.Agile.Hash.SHA2_256 -> 32ul
+  | _, _, Spec.Agile.Hash.SHA2_512 -> 64ul
 
 inline_for_extraction noextract
 let nsize_dh_public (cs:S.ciphersuite) : (s:size_t{v s == S.size_dh_public cs}) =
-  match S.curve_of_cs cs with
-  | SDH.DH_Curve25519 -> 32ul
-  | SDH.DH_Curve448 -> 56ul
-  | SDH.DH_P256 -> 64ul
+  match cs with
+  | SDH.DH_Curve25519, _, _ -> 32ul
+  | SDH.DH_Curve448, _, _ -> 56ul
+  | SDH.DH_P256, _, _ -> 64ul
 
 inline_for_extraction noextract
 let nsize_dh_key (cs:S.ciphersuite) : (s:size_t{v s == S.size_dh_key cs}) =
-  match S.curve_of_cs cs with
-  | SDH.DH_Curve25519 -> 32ul
-  | SDH.DH_Curve448 -> 56ul
-  | SDH.DH_P256 -> 32ul
+  match cs with
+  | SDH.DH_Curve25519, _, _ -> 32ul
+  | SDH.DH_Curve448, _, _ -> 56ul
+  | SDH.DH_P256, _, _ -> 32ul
 
 inline_for_extraction noextract
 let nsize_aead_key (cs:S.ciphersuite) : (s:size_t{v s == S.size_aead_key cs}) =
-  match S.aead_of_cs cs with
-  | Spec.Agile.AEAD.AES128_GCM -> 16ul
-  | Spec.Agile.AEAD.AES256_GCM -> 32ul
-  | Spec.Agile.AEAD.CHACHA20_POLY1305 -> 32ul
+  match cs with
+  | _, Spec.Agile.AEAD.AES128_GCM, _ -> 16ul
+  | _, Spec.Agile.AEAD.AES256_GCM, _ -> 32ul
+  | _, Spec.Agile.AEAD.CHACHA20_POLY1305, _ -> 32ul
 
 inline_for_extraction noextract
 let nsize_aead_nonce (cs:S.ciphersuite) : (s:size_t{v s == S.size_aead_nonce cs}) =
-  match S.aead_of_cs cs with
-  | Spec.Agile.AEAD.AES128_GCM -> 12ul
-  | Spec.Agile.AEAD.AES256_GCM -> 12ul
-  | Spec.Agile.AEAD.CHACHA20_POLY1305 -> 12ul
+  match cs with
+  | _, Spec.Agile.AEAD.AES128_GCM, _ -> 12ul
+  | _, Spec.Agile.AEAD.AES256_GCM, _ -> 12ul
+  | _, Spec.Agile.AEAD.CHACHA20_POLY1305, _ -> 12ul
 
-
+inline_for_extraction noextract
 val encap:
      #cs:S.ciphersuite
   -> o_zz: key_dh_public cs
@@ -74,6 +74,7 @@ let encap #cs o_zz o_pkE skE pkR =
   DH.secret_to_public #cs o_pkE skE;
   DH.scalarmult #cs o_zz skE pkR
 
+inline_for_extraction noextract
 val decap:
      #cs:S.ciphersuite
   -> o_pkR: key_dh_public cs
@@ -89,6 +90,7 @@ val decap:
 [@ Meta.Attribute.inline_ ]
 let decap #cs o_pkR pkE skR = DH.scalarmult #cs o_pkR skR pkE
 
+inline_for_extraction noextract
 val build_context_default:
      #cs:S.ciphersuite
   -> pkE: key_dh_public cs
@@ -282,6 +284,12 @@ val ks_derive_default:
 noextract inline_for_extraction
 [@ Meta.Attribute.inline_]
 let ks_derive_default #cs pkR zz pkE infolen info o_key o_nonce =
+  [@inline_let]
+  let label_nonce_list:list uint8 = [u8 0x68; u8 0x70; u8 0x6b; u8 0x65; u8 0x20; u8 0x6e; u8 0x6f; u8 0x6e; u8 0x63; u8 0x65] in
+  assert_norm(label_nonce_list == S.label_nonce_list);
+  [@inline_let]
+  let label_key_list:list uint8 = [u8 0x68; u8 0x70; u8 0x6b; u8 0x65; u8 0x20; u8 0x6b; u8 0x65; u8 0x79] in
+  assert_norm(label_key_list == S.label_key_list);
   (**) let hinit = get() in
   push_frame();
   (**) let h0 = get() in
@@ -289,8 +297,8 @@ let ks_derive_default #cs pkR zz pkE infolen info o_key o_nonce =
   let default_pkI = create (nsize_dh_public cs) (u8 0) in
   let context_len = 7ul +. (3ul *. nsize_dh_public cs) +. infolen in
   let context = create context_len (u8 0) in
-  let label_key:lbuffer uint8 8ul = createL S.label_key_list in
-  let label_nonce = createL S.label_nonce_list in
+  let label_key:lbuffer uint8 8ul = createL label_key_list in
+  let label_nonce = createL label_nonce_list in
   let tmp = create (10ul +. context_len) (u8 0) in
   let secret:buffer uint8 = create (nhash_length cs) (u8 0) in
   ks_derive_default_aux #cs pkR zz pkE infolen info o_key o_nonce
@@ -317,7 +325,7 @@ let setupBaseR #cs o_key_aead o_nonce_aead pkE skR infolen info =
   push_frame();
   let pkR = create (nsize_dh_public cs) (u8 0) in
   let zz = create (nsize_dh_public cs) (u8 0) in
-  DH.secret_to_public pkR skR;
+  DH.secret_to_public #cs pkR skR;
   decap zz pkE skR;
   ks_derive_default pkR zz pkE infolen info o_key_aead o_nonce_aead;
   pop_frame()

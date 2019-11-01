@@ -9,7 +9,7 @@ module SAE = Spec.Agile.AEAD
 
 friend Spec.Agile.AEAD
 
-#set-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 40 --max_fuel 0 --max_ifuel 0"
 
 inline_for_extraction noextract
 let aead_encrypt_cp32 =

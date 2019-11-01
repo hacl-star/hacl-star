@@ -765,6 +765,7 @@ dist/mozilla/Makefile.basic: MERKLE_BUNDLE = -bundle MerkleTree.*
 dist/mozilla/Makefile.basic: CTR_BUNDLE =
 dist/mozilla/Makefile.basic: SHA3_BUNDLE = -bundle Hacl.SHA3
 dist/mozilla/Makefile.basic: HASH_BUNDLE = -bundle Hacl.Hash.*,Hacl.HKDF,Hacl.HMAC
+dist/mozilla/Makefile.basic: HPKE_BUNDLE = -bundle Hacl.HPKE.*
 dist/mozilla/Makefile.basic: TUTORIAL_BUNDLE = -bundle Tutorial,TestLib,Hacl_Lib,Hacl_Kremlib
 dist/mozilla/Makefile.basic: \
   BUNDLE_FLAGS += \
