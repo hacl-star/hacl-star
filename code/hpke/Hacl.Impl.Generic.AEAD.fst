@@ -32,8 +32,8 @@ let aead_encrypt_st (a:AEAD.supported_alg) =
     disjoint key output /\ disjoint nonce output /\
     eq_or_disjoint input output /\ disjoint aad output)
   (ensures  fun h0 _ h1 -> modifies (loc output) h0 h1 /\
-    (as_seq h1 output) ==
-    AEAD.encrypt #a (as_seq h0 key) (as_seq h0 nonce) (as_seq h0 input) (as_seq h0 aad))
+    (as_seq h1 output) `Seq.equal`
+    AEAD.encrypt #a (as_seq h0 key) (as_seq h0 nonce) (as_seq h0 aad) (as_seq h0 input))
 
 inline_for_extraction noextract
 let aead_decrypt_st (a:AEAD.supported_alg) =
@@ -52,10 +52,13 @@ let aead_decrypt_st (a:AEAD.supported_alg) =
   (ensures  fun h0 z h1 -> modifies1 input h0 h1 /\
    (let plain = AEAD.decrypt #a (as_seq h0 key) (as_seq h0 nonce) (as_seq h0 aad) (as_seq h0 output) in
     match z with
-    | 0ul -> Some? plain /\ as_seq h1 input == Some?.v plain // decryption succeeded
+    | 0ul -> Some? plain /\ as_seq h1 input `Seq.equal` Some?.v plain // decryption succeeded
     | 1ul -> None? plain
     | _ -> false)  // decryption failed
   )
 
+[@ Meta.Attribute.specialize]
 assume val aead_encrypt: #cs:S.ciphersuite -> aead_encrypt_st (S.aead_of_cs cs)
+
+[@ Meta.Attribute.specialize]
 assume val aead_decrypt: #cs:S.ciphersuite -> aead_decrypt_st (S.aead_of_cs cs)

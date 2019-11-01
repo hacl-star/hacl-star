@@ -258,6 +258,7 @@ let ks_derive_default_aux #cs pkR zz pkE infolen info o_key o_nonce context_len 
   (**) assert (as_seq h2 tmp `Seq.equal` (S.label_nonce `Seq.append` as_seq h0 context));
   HKDF.hkdf_expand #cs o_nonce secret (nhash_length cs) tmp (10ul +. context_len) (nsize_aead_nonce cs)
 
+noextract inline_for_extraction
 val ks_derive_default:
      #cs:S.ciphersuite
   -> pkR:key_dh_public cs
@@ -278,6 +279,8 @@ val ks_derive_default:
 
 #push-options "--z3rlimit 400"
 
+noextract inline_for_extraction
+[@ Meta.Attribute.inline_]
 let ks_derive_default #cs pkR zz pkE infolen info o_key o_nonce =
   (**) let hinit = get() in
   push_frame();
@@ -324,11 +327,11 @@ val encryptBase_aux
      (#cs:S.ciphersuite)
      (skE: key_dh_secret cs)
      (pkR: key_dh_public cs)
-     (mlen: size_t{v mlen <= S.max_length cs})
+     (mlen: size_t{v mlen <= S.max_length cs /\  v mlen + S.size_dh_public cs + 16 <= max_size_t})
      (m:lbuffer uint8 mlen)
-     (infolen: size_t {v infolen <= S.max_info /\ v infolen + S.size_dh_public cs + 16 <= max_size_t})
+     (infolen: size_t {v infolen <= S.max_info})
      (info: lbuffer uint8 infolen)
-     (output: lbuffer uint8 (size (v infolen + S.size_dh_public cs + 16)))
+     (output: lbuffer uint8 (size (v mlen + S.size_dh_public cs + 16)))
      (zz:key_dh_public cs)
      (pkR': key_dh_public cs)
      (k:key_aead cs)
@@ -350,13 +353,13 @@ val encryptBase_aux
 noextract inline_for_extraction
 [@ Meta.Attribute.inline_]
 let encryptBase_aux #cs skE pkR mlen m infolen info output zz pkR' k n =
-  assert (v (infolen +. 16ul) == v infolen + 16);
-  assert (S.size_dh_public cs + v (infolen +. 16ul) == length output);
+  assert (v (mlen +. 16ul) == v mlen + 16);
+  assert (S.size_dh_public cs + v (mlen +. 16ul) == length output);
   encap zz pkR' skE pkR;
   let pkE:key_dh_public cs = sub output 0ul (nsize_dh_public cs) in
   setupBaseI pkE k n skE pkR' infolen info;
-  let dec = sub output (nsize_dh_public cs) (infolen +. 16ul) in
-  AEAD.aead_encrypt #cs k n mlen m infolen info dec;
+  let dec = sub output (nsize_dh_public cs) (mlen +. 16ul) in
+  AEAD.aead_encrypt #cs k n infolen info mlen m dec;
   let h2 = get() in
   assert (as_seq h2 output `Seq.equal` (as_seq h2 pkE `Seq.append` as_seq h2 dec))
 

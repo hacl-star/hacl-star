@@ -65,11 +65,11 @@ inline_for_extraction noextract
 let encryptBase_st (cs:S.ciphersuite) =
      skE: key_dh_secret cs
   -> pkR: key_dh_public cs
-  -> mlen: size_t{v mlen <= S.max_length cs}
+  -> mlen: size_t{v mlen <= S.max_length cs /\ v mlen + S.size_dh_public cs + 16 <= max_size_t}
   -> m:lbuffer uint8 mlen
-  -> infolen: size_t {v infolen <= S.max_info /\ v infolen + S.size_dh_public cs + 16 <= max_size_t}
+  -> infolen: size_t {v infolen <= S.max_info}
   -> info: lbuffer uint8 infolen
-  -> output: lbuffer uint8 (size (v infolen + S.size_dh_public cs + 16))
+  -> output: lbuffer uint8 (size (v mlen + S.size_dh_public cs + 16))
   -> ST unit
        (requires fun h0 ->
          live h0 output /\ live h0 skE /\ live h0 pkR /\

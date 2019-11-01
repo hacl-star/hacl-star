@@ -9,3 +9,9 @@ noextract unfold
 let cs = (DH.DH_Curve25519, AEAD.CHACHA20_POLY1305, Hash.SHA2_256)
 
 val setupBaseI: setupBaseI_st cs
+
+val setupBaseR: setupBaseR_st cs
+
+val encryptBase: encryptBase_st cs
+
+val decryptBase: decryptBase_st cs
