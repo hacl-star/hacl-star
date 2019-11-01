@@ -30,6 +30,8 @@ let setupBaseI_st (cs:S.ciphersuite) =
   -> info: lbuffer uint8 infolen
   -> ST unit
      (requires fun h0 ->
+        (S.curve_of_cs cs = Spec.Agile.DH.DH_Curve25519 ==>
+          Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
         live h0 o_pkE /\ live h0 o_k /\ live h0 o_n /\
         live h0 skE /\ live h0 pkR /\ live h0 info /\
         disjoint o_pkE skE /\ disjoint o_pkE pkR /\ disjoint o_pkE info /\
@@ -52,6 +54,8 @@ let setupBaseR_st (cs:S.ciphersuite) =
   -> info: lbuffer uint8 infolen
   -> ST unit
      (requires fun h0 ->
+        (S.curve_of_cs cs = Spec.Agile.DH.DH_Curve25519 ==>
+          Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
         live h0 o_key_aead /\ live h0 o_nonce_aead /\
         live h0 pkE /\ live h0 skR /\ live h0 info /\
         disjoint o_key_aead o_nonce_aead)
@@ -72,6 +76,8 @@ let encryptBase_st (cs:S.ciphersuite) =
   -> output: lbuffer uint8 (size (v mlen + S.size_dh_public cs + 16))
   -> ST unit
        (requires fun h0 ->
+        (S.curve_of_cs cs = Spec.Agile.DH.DH_Curve25519 ==>
+          Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
          live h0 output /\ live h0 skE /\ live h0 pkR /\
          live h0 m /\ live h0 info /\
          disjoint output info /\ disjoint output m /\ disjoint output skE)
@@ -89,6 +95,8 @@ let decryptBase_st (cs:S.ciphersuite) =
   -> output: lbuffer uint8 (size (v mlen - S.size_dh_public cs - S.size_aead_tag cs))
   -> ST UInt32.t
        (requires fun h0 ->
+        (S.curve_of_cs cs = Spec.Agile.DH.DH_Curve25519 ==>
+          Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
          live h0 output /\ live h0 pkE /\ live h0 skR /\
          live h0 m /\ live h0 info /\
          disjoint output info /\ disjoint output m)

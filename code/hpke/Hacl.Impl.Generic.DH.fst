@@ -32,13 +32,11 @@ let scalarmult_st (a:DH.algorithm) =
   -> i:lbuffer uint8 (nsize_public a)
   -> ST unit
      (requires fun h0 ->
+       (a = DH.DH_Curve25519 ==> Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
        live h0 o /\ live h0 k /\ live h0 i /\
        disjoint o i /\ disjoint o k)
      (ensures fun h0 _ h1 -> modifies (loc o) h0 h1 /\
        as_seq h1 o == DH.scalarmult a (as_seq h0 k) (as_seq h0 i))
-
-[@ Meta.Attribute.specialize]
-assume val scalarmult: #a:S.ciphersuite -> scalarmult_st (S.curve_of_cs a)
 
 inline_for_extraction noextract
 let secret_to_public_st (a: DH.algorithm) =
@@ -46,9 +44,13 @@ let secret_to_public_st (a: DH.algorithm) =
   -> i:lbuffer uint8 (nsize_key a)
   -> Stack unit
     (requires fun h0 ->
+      (a = DH.DH_Curve25519 ==> Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
       live h0 o /\ live h0 i /\ disjoint o i)
     (ensures  fun h0 _ h1 -> modifies (loc o) h0 h1 /\
       as_seq h1 o == DH.secret_to_public a (as_seq h0 i))
+
+[@ Meta.Attribute.specialize]
+assume val scalarmult: #a:S.ciphersuite -> scalarmult_st (S.curve_of_cs a)
 
 [@ Meta.Attribute.specialize]
 assume val secret_to_public: #a:S.ciphersuite -> secret_to_public_st (S.curve_of_cs a)
@@ -61,3 +63,10 @@ let secret_to_public_c51 : secret_to_public_st (DH.DH_Curve25519) =
 inline_for_extraction noextract
 let scalarmult_c51 : scalarmult_st (DH.DH_Curve25519) =
   Hacl.Curve25519_51.scalarmult
+
+inline_for_extraction noextract
+let secret_to_public_c64 : secret_to_public_st (DH.DH_Curve25519) =
+  Hacl.Curve25519_64.secret_to_public
+inline_for_extraction noextract
+let scalarmult_c64 : scalarmult_st (DH.DH_Curve25519) =
+  Hacl.Curve25519_64.scalarmult

@@ -61,6 +61,8 @@ val encap:
   -> pkR: key_dh_public cs
   -> ST unit
     (requires fun h0 ->
+      (S.curve_of_cs cs = Spec.Agile.DH.DH_Curve25519 ==>
+        Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
       live h0 o_zz /\ live h0 o_pkE /\
       live h0 skE /\ live h0 pkR /\
       disjoint o_zz skE /\ disjoint o_zz pkR /\
@@ -82,6 +84,8 @@ val decap:
   -> skR: key_dh_secret cs
   -> ST unit
     (requires fun h0 ->
+      (S.curve_of_cs cs = Spec.Agile.DH.DH_Curve25519 ==>
+        Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
       live h0 o_pkR /\ live h0 pkE /\ live h0 skR /\
       disjoint o_pkR pkE /\ disjoint o_pkR skR)
     (ensures fun h0 _ h1 -> modifies (loc o_pkR) h0 h1 /\
@@ -346,6 +350,8 @@ val encryptBase_aux
      (n:nonce_aead cs) :
      ST unit
        (requires fun h0 ->
+        (S.curve_of_cs cs = Spec.Agile.DH.DH_Curve25519 ==>
+          Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
          live h0 output /\ live h0 skE /\ live h0 pkR /\
          live h0 m /\ live h0 info /\
          live h0 zz /\ live h0 pkR' /\ live h0 k /\ live h0 n /\
@@ -405,6 +411,8 @@ val decryptBase_aux
      (n:nonce_aead cs) :
      ST UInt32.t
        (requires fun h0 ->
+        (S.curve_of_cs cs = Spec.Agile.DH.DH_Curve25519 ==>
+          Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
          live h0 output /\ live h0 pkE /\ live h0 skR /\
          live h0 input /\ live h0 info /\
          live h0 zz /\ live h0 k /\ live h0 n /\
