@@ -134,6 +134,8 @@ let id_of_cs cs output =
       upd output 0ul (u8 5); upd output 1ul (u8 5)
   | DH_P256,       CHACHA20_POLY1305, SHA2_256 ->
       upd output 0ul (u8 6); upd output 1ul (u8 6)
+  | DH_Curve25519, CHACHA20_POLY1305, SHA2_512 ->
+      upd output 0ul (u8 7); upd output 1ul (u8 7)
 
 #set-options "--z3rlimit 300"
 

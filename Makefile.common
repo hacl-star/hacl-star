@@ -92,7 +92,12 @@ POLY_BUNDLE=-bundle 'Hacl.Poly1305_32=Hacl.Impl.Poly1305.Field32xN_32' \
   -bundle 'Hacl.Poly1305_128=Hacl.Impl.Poly1305.Field32xN_128' \
   -bundle 'Hacl.Poly1305_256=Hacl.Impl.Poly1305.Field32xN_256'
 NACLBOX_BUNDLE=-bundle Hacl.NaCl=Hacl.Impl.SecretBox,Hacl.Impl.Box
-HPKE_BUNDLE=-bundle Hacl.HPKE.*=Hacl.Impl.*,Hacl.Meta.HPKE
+HPKE_BUNDLE=-bundle Hacl.HPKE.Curve51_CP32_SHA256=Hacl.Impl.*,Hacl.Meta.HPKE \
+  -bundle Hacl.HPKE.Curve51_CP128_SHA256= \
+  -bundle Hacl.HPKE.Curve51_CP256_SHA256= \
+  -bundle Hacl.HPKE.Curve51_CP32_SHA512= \
+  -bundle Hacl.HPKE.Curve51_CP128_SHA512= \
+  -bundle Hacl.HPKE.Curve51_CP256_SHA512= \
 
 TUTORIAL_BUNDLE=-bundle Tutorial
 

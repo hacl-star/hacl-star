@@ -1,5 +1,5 @@
 [
-  "£NZGo”\u0018„ÎaÿôÈ‘è‚",
+  "[¶·\u000f\u000bÜ˛1òﬁÑGS≠^È",
   [
     [
       "Hacl.Impl.Generic.DH.nsize_key",
@@ -14,7 +14,7 @@
         "fuel_guarded_inversion_Spec.Agile.DH.algorithm"
       ],
       0,
-      "fd3fff7843bc4583facc402e937e6c98"
+      "e50ab820f1efa977fe3fe776175464af"
     ],
     [
       "Hacl.Impl.Generic.DH.nsize_public",
@@ -29,7 +29,7 @@
         "fuel_guarded_inversion_Spec.Agile.DH.algorithm"
       ],
       0,
-      "237894be20aa03133444b248085e000d"
+      "2a854d2bfcedcc86e77463ed72e15364"
     ],
     [
       "Hacl.Impl.Generic.DH.scalarmult_st",
@@ -37,12 +37,12 @@
       0,
       1,
       [
-        "@MaxIFuel_assumption", "@query", "b2t_def", "bool_inversion",
+        "@MaxIFuel_assumption", "@query",
+        "assumption_Spec.Agile.DH.algorithm__uu___haseq", "b2t_def",
         "constructor_distinct_FStar.Integers.W16",
         "constructor_distinct_FStar.Integers.W31",
         "constructor_distinct_FStar.Integers.W64",
         "constructor_distinct_FStar.Integers.W8",
-        "constructor_distinct_Lib.Buffer.MUT",
         "constructor_distinct_Lib.IntTypes.PUB",
         "constructor_distinct_Lib.IntTypes.S16",
         "constructor_distinct_Lib.IntTypes.U32",
@@ -61,17 +61,13 @@
         "equality_tok_Spec.Agile.DH.DH_Curve25519@tok",
         "equation_FStar.UInt.fits", "equation_FStar.UInt.max_int",
         "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
-        "equation_FStar.UInt.uint_t", "equation_Lib.Buffer.buffer_t",
-        "equation_Lib.Buffer.lbuffer_t", "equation_Lib.Buffer.length",
+        "equation_FStar.UInt.uint_t", "equation_Lib.Buffer.lbuffer_t",
         "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.pub_int_v", "equation_Lib.IntTypes.range",
         "equation_Lib.IntTypes.uint8", "equation_Lib.IntTypes.unsigned",
         "equation_Lib.IntTypes.v", "equation_Lib.Sequence.lseq",
-        "equation_LowStar.Buffer.buffer",
-        "equation_LowStar.Buffer.trivial_preorder",
-        "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.nat",
-        "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
-        "equation_Spec.Agile.DH.size_key",
+        "equation_Prims.nat", "equation_Spec.AES.gf8",
+        "equation_Spec.AES.irred", "equation_Spec.Agile.DH.size_key",
         "equation_Spec.Agile.DH.size_public", "equation_Spec.GaloisField.gf",
         "fuel_guarded_inversion_Spec.Agile.DH.algorithm",
         "function_token_typing_Lib.IntTypes.uint8", "int_typing",
@@ -91,10 +87,8 @@
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
         "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
-        "typing_FStar.UInt.fits", "typing_FStar.UInt32.v",
         "typing_Lib.Buffer.length", "typing_Lib.IntTypes.bits",
-        "typing_Lib.IntTypes.v", "typing_LowStar.Buffer.trivial_preorder",
-        "typing_LowStar.Monotonic.Buffer.len", "typing_Spec.AES.gf8",
+        "typing_Lib.IntTypes.v", "typing_Spec.AES.gf8",
         "typing_Spec.AES.irred", "typing_Spec.Agile.DH.size_key",
         "typing_Spec.Agile.DH.size_public",
         "typing_Spec.GaloisField.__proj__GF__item__t",
@@ -103,7 +97,7 @@
         "typing_tok_Spec.Agile.DH.DH_Curve25519@tok"
       ],
       0,
-      "b8a8d35a259b8b69b3240400157e48d9"
+      "4bc53424fb755a460b9f127befd2b590"
     ],
     [
       "Hacl.Impl.Generic.DH.secret_to_public_st",
@@ -111,11 +105,11 @@
       0,
       1,
       [
-        "@MaxIFuel_assumption", "@query", "b2t_def", "bool_inversion",
+        "@MaxIFuel_assumption", "@query",
+        "assumption_Spec.Agile.DH.algorithm__uu___haseq", "b2t_def",
         "constructor_distinct_FStar.Integers.W16",
         "constructor_distinct_FStar.Integers.W31",
         "constructor_distinct_FStar.Integers.W8",
-        "constructor_distinct_Lib.Buffer.MUT",
         "constructor_distinct_Lib.IntTypes.PUB",
         "constructor_distinct_Lib.IntTypes.U32",
         "constructor_distinct_Lib.IntTypes.U8",
@@ -130,21 +124,19 @@
         "equality_tok_Lib.IntTypes.U8@tok", "equation_FStar.UInt.fits",
         "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
         "equation_FStar.UInt.size", "equation_FStar.UInt.uint_t",
-        "equation_Lib.Buffer.buffer_t", "equation_Lib.Buffer.lbuffer_t",
-        "equation_Lib.Buffer.length", "equation_Lib.IntTypes.bits",
+        "equation_Lib.Buffer.lbuffer_t", "equation_Lib.IntTypes.bits",
         "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.pub_int_v",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.uint8",
         "equation_Lib.IntTypes.unsigned", "equation_Lib.IntTypes.v",
-        "equation_LowStar.Buffer.buffer",
-        "equation_LowStar.Buffer.trivial_preorder",
-        "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.nat",
-        "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
-        "equation_Spec.Agile.DH.size_key", "equation_Spec.GaloisField.gf",
+        "equation_Prims.nat", "equation_Spec.AES.gf8",
+        "equation_Spec.AES.irred", "equation_Spec.Agile.DH.size_key",
+        "equation_Spec.GaloisField.gf",
         "fuel_guarded_inversion_Spec.Agile.DH.algorithm",
         "function_token_typing_Lib.IntTypes.uint8",
         "lemma_FStar.UInt32.vu_inv", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_LessThanOrEqual",
         "proj_equation_Spec.GaloisField.GF_t",
+        "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_FStar.Integers.Signed__0",
         "projection_inverse_FStar.Integers.Unsigned__0",
@@ -156,17 +148,89 @@
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
         "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
-        "typing_FStar.UInt.fits", "typing_FStar.UInt32.v",
         "typing_Lib.Buffer.length", "typing_Lib.IntTypes.bits",
-        "typing_Lib.IntTypes.v", "typing_LowStar.Buffer.trivial_preorder",
-        "typing_LowStar.Monotonic.Buffer.len", "typing_Spec.AES.gf8",
+        "typing_Lib.IntTypes.v", "typing_Spec.AES.gf8",
         "typing_Spec.AES.irred", "typing_Spec.Agile.DH.size_key",
         "typing_Spec.GaloisField.__proj__GF__item__t",
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.SEC@tok",
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "95629b4d48326ea200109d34bd9cf71c"
+      "48ccdf65e4535118a38f655690c8df8c"
+    ],
+    [
+      "Hacl.Impl.Generic.DH.secret_to_public_c51",
+      1,
+      0,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "constructor_distinct_Spec.Agile.DH.DH_Curve25519",
+        "equality_tok_Lib.Buffer.MUT@tok",
+        "equality_tok_Spec.Agile.DH.DH_Curve25519@tok",
+        "equation_Lib.Buffer.as_seq",
+        "equation_Spec.Agile.DH.secret_to_public",
+        "refinement_interpretation_Tm_refine_1c2fd883c8ef4d206352bb810a4a03e9",
+        "refinement_interpretation_Tm_refine_2fa5537f636f3c1341e54801e3385c12"
+      ],
+      0,
+      "4966265718664ee578f86d983acddb68"
+    ],
+    [
+      "Hacl.Impl.Generic.DH.scalarmult_c51",
+      1,
+      0,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "constructor_distinct_Spec.Agile.DH.DH_Curve25519",
+        "equality_tok_Lib.Buffer.MUT@tok",
+        "equality_tok_Spec.Agile.DH.DH_Curve25519@tok",
+        "equation_FStar.HyperStack.ST.equal_domains",
+        "equation_FStar.HyperStack.ST.equal_stack_domains",
+        "equation_Lib.Buffer.as_seq", "equation_Spec.Agile.DH.scalarmult",
+        "lemma_FStar.HyperStack.ST.lemma_same_refs_in_all_regions_elim",
+        "lemma_FStar.HyperStack.ST.lemma_same_refs_in_stack_regions_intro",
+        "refinement_interpretation_Tm_refine_539cc3111cf6040e1fa17f013759f25b",
+        "refinement_interpretation_Tm_refine_ff7eb09d10768dda16bfea307598d7f7"
+      ],
+      0,
+      "1a35897aa9b84328b4ddaaec69f0d2c8"
+    ],
+    [
+      "Hacl.Impl.Generic.DH.secret_to_public_c64",
+      1,
+      0,
+      1,
+      [
+        "@query", "constructor_distinct_Spec.Agile.DH.DH_Curve25519",
+        "equality_tok_Lib.Buffer.MUT@tok",
+        "equality_tok_Spec.Agile.DH.DH_Curve25519@tok",
+        "equation_Lib.Buffer.as_seq",
+        "equation_Spec.Agile.DH.secret_to_public"
+      ],
+      0,
+      "05fd771ab5b1b97171901c967e1810f7"
+    ],
+    [
+      "Hacl.Impl.Generic.DH.scalarmult_c64",
+      1,
+      0,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "constructor_distinct_Spec.Agile.DH.DH_Curve25519",
+        "equality_tok_Lib.Buffer.MUT@tok",
+        "equality_tok_Spec.Agile.DH.DH_Curve25519@tok",
+        "equation_FStar.HyperStack.ST.equal_domains",
+        "equation_FStar.HyperStack.ST.equal_stack_domains",
+        "equation_Lib.Buffer.as_seq", "equation_Spec.Agile.DH.scalarmult",
+        "lemma_FStar.HyperStack.ST.lemma_same_refs_in_all_regions_elim",
+        "lemma_FStar.HyperStack.ST.lemma_same_refs_in_stack_regions_intro",
+        "refinement_interpretation_Tm_refine_539cc3111cf6040e1fa17f013759f25b"
+      ],
+      0,
+      "8c21fed8574df7f695c61f1910c51d9d"
     ]
   ]
 ]

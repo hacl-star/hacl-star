@@ -61,7 +61,6 @@ let is_ciphersuite = function
   | DH.DH_Curve448,   AEAD.CHACHA20_POLY1305, Hash.SHA2_512
   | DH.DH_P256,       AEAD.AES128_GCM,        Hash.SHA2_256
   | DH.DH_P256,       AEAD.CHACHA20_POLY1305, Hash.SHA2_256 -> true
-  // AF: To review
   | DH.DH_Curve25519, AEAD.CHACHA20_POLY1305, Hash.SHA2_512 -> true
   | _,_,_ -> false
 
@@ -77,6 +76,7 @@ let id_of_cs cs =
   | DH.DH_Curve448,   AEAD.CHACHA20_POLY1305, Hash.SHA2_512 -> create 2 (u8 4)
   | DH.DH_P256,       AEAD.AES128_GCM,        Hash.SHA2_256 -> create 2 (u8 5)
   | DH.DH_P256,       AEAD.CHACHA20_POLY1305, Hash.SHA2_256 -> create 2 (u8 6)
+  | DH.DH_Curve25519, AEAD.CHACHA20_POLY1305, Hash.SHA2_512 -> create 2 (u8 7)
 
 
 let curve_of_cs (cs:ciphersuite) : DH.algorithm =

@@ -652,7 +652,8 @@ BUNDLE_FLAGS	=\
   $(MERKLE_BUNDLE) \
   $(WASMSUPPORT_BUNDLE) \
   $(CTR_BUNDLE) \
-  $(TUTORIAL_BUNDLE)
+  $(TUTORIAL_BUNDLE) \
+  $(HPKE_BUNDLE)
 
 DEFAULT_FLAGS = \
   $(HAND_WRITTEN_LIB_FLAGS) \
@@ -750,6 +751,7 @@ dist/ccf/Makefile.basic: HAND_WRITTEN_FILES := $(filter-out %/Lib_PrintBuffer.c 
 dist/ccf/Makefile.basic: HAND_WRITTEN_H_FILES := $(filter-out %/libintvector.h,$(HAND_WRITTEN_H_FILES))
 dist/ccf/Makefile.basic: HACL_OLD_FILES =
 dist/ccf/Makefile.basic: POLY_BUNDLE =
+dist/ccf/Makefile.basic: HPKE_BUNDLE = -bundle Hacl.HPKE.*
 
 # Mozilla distribution
 # --------------------
