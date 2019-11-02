@@ -15,6 +15,44 @@ module S = Spec.HMAC_DRBG
 module D = Hacl.Hash.Definitions
 module LSeq = Lib.Sequence
 
+/// HMAC-DRBG
+///
+/// See 10.1.2 and B.2 of
+/// https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-90Ar1.pdf
+///
+/// This module implements the hash-algorithm-agile algorithms
+/// - HMAC_DRBG_Update
+/// - HMAC_DRBG_Instantiate_algorithm
+/// - HMAC_DRBG_Reseed_algorithm
+/// - HMAC_DRBG_Generate_algorithm
+///
+/// This is not linked to an appropriate Get_entropy_input function,
+/// so these algorithms should be combined to get entropy from Get_entropy_input
+/// for instantiation, reseeding, and optionally prediction resistance.
+/// 
+/// - Supports SHA-1, SHA2-256, SHA2-384 and SHA2-512 hash algorithms
+///
+/// - Supports reseeding
+///
+/// - The internal state is (Key,V,reseed_counter)
+///
+/// - The security_strength is fixed to the HMAC-strength of the hash algorithm
+///   as per p.54 of
+///   https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-57pt1r4.pdf
+///
+/// - The minimum entropy for instantiation is 3/2 * security_strength.
+///    - entropy_input must have at least security_strength bits.
+///    - nonce must have at least 1/2 security_strength bits.
+///    - entropy_input and nonce can have at most max_length = 2^16 bits.
+///
+/// - At most max_number_of_bits_per_request = 2^16 bits can be generated per request.
+///
+/// - The reseed_interval is 2^48
+///
+/// - Does not support optional additional_input for reseeding or generation
+///
+/// - Does not support the optional personalization_string for instantiation
+
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
 
 unfold
