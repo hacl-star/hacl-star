@@ -1,12 +1,12 @@
-HACL_HOME = ..
+#HACL_HOME = ..
 
 all: $(HACL_HOME)/obj/libhacl.cmxa
 
-include ../code/Makefile.local
+include $(HACL_HOME)/code/Makefile.local
 
 # By default, we process all the files in the current directory. Here, we
 # *extend* the set of relevant files with the alternative and experimental folders.
-FSTAR_ROOTS += $(wildcard alternative/*.fst) $(wildcard experimental/*.fst)
+FSTAR_ROOTS += $(wildcard $(HACL_HOME)/lib/*.fst) $(wildcard alternative/*.fst) $(wildcard experimental/*.fst)
 
 OCAMLMKLIB = ocamlfind mklib -package fstarlib
 
