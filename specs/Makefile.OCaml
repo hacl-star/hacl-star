@@ -11,4 +11,4 @@ FSTAR_ROOTS += $(wildcard alternative/*.fst) $(wildcard experimental/*.fst)
 OCAMLMKLIB = ocamlfind mklib -package fstarlib
 
 $(HACL_HOME)/obj/libhacl.cmxa: $(ALL_CMX_FILES)
-	$(OCAMLMKLIB) $^ -o $(HACL_HOME)/obj/libhacl
+	ocamlmklib $^ -o $(HACL_HOME)/obj/libhacl
