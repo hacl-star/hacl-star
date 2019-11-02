@@ -20,6 +20,7 @@ let supported_alg = a:hash_alg{ is_supported_alg a }
 let reseed_interval   = pow2 48
 let max_output_length = pow2 16
 let max_length        = pow2 16
+let max_personalization_string_length = pow2 16
 
 /// See p.54
 /// https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-57pt1r4.pdf
@@ -74,13 +75,17 @@ let update #a data (State k v ctr) =
 val instantiate: #a:supported_alg
   -> entropy_input:bytes
   -> nonce:bytes
+  -> personalization_string:bytes
   -> Pure (state a)
   (requires
-    hash_length a + Seq.length entropy_input 
-    + Seq.length nonce + 1 + block_length a <= max_input_length a)
+    hash_length a
+    + Seq.length entropy_input 
+    + Seq.length nonce 
+    + Seq.length personalization_string 
+    + 1 + block_length a <= max_input_length a)
   (ensures fun _ -> True)
-let instantiate #a entropy_input nonce =
-  let seed_material = entropy_input @| nonce in
+let instantiate #a entropy_input nonce personalization_string =
+  let seed_material = entropy_input @| nonce @| personalization_string in
   let k = Seq.create (hash_length a) (u8 0) in
   let v = Seq.create (hash_length a) (u8 1) in  
   update #a seed_material (State k v 1)

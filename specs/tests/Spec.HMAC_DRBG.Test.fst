@@ -34,24 +34,30 @@ let print_and_compare (len:size_nat) (test_expected test_result:lbytes len) : Al
   List.iter (fun a -> IO.print_uint8_hex_pad a) (seq_to_list test_expected);
   Lib.ByteSequence.lbytes_eq #len test_expected test_result
 
-let test_vec {a; entropy_input; entropy_input_reseed; nonce; returned_bits} =
+let test_vec 
+  {a; entropy_input; entropy_input_reseed; nonce; personalization_string; returned_bits} 
+=
   let returned_bytes_len       = String.strlen returned_bits / 2 in
   let entropy_input_len        = String.strlen entropy_input / 2 in
   let entropy_input_reseed_len = String.strlen entropy_input_reseed / 2 in
   let nonce_len                = String.strlen nonce / 2 in
+  let personalization_string_len = String.strlen personalization_string / 2 in
   let returned_bits_len        = String.strlen returned_bits / 2 in
   if not (is_supported_alg a &&
           min_length a <= entropy_input_len && 
           entropy_input_len <= max_length &&
           min_length a / 2 <= nonce_len && 
           nonce_len <= max_length &&
+          personalization_string_len <= max_personalization_string_length &&
           entropy_input_reseed_len <= max_length &&
           0 < returned_bits_len && 
           returned_bits_len <= max_output_length)
   then false
   else
     let _ = hmac_input_bound a in
-    let st = instantiate (from_hex entropy_input) (from_hex nonce) in
+    let st = instantiate 
+      (from_hex entropy_input) (from_hex nonce) (from_hex personalization_string)
+    in
     let st = reseed st (from_hex entropy_input_reseed) in
     match generate st returned_bytes_len with
     | None -> false

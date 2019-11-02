@@ -20,7 +20,8 @@ module B = LowStar.Buffer
 
 noextract
 let vectors_tmp = List.Tot.map 
-  (fun x -> x.a, h x.entropy_input, h x.nonce, h x.entropy_input_reseed, h x.returned_bits)
+  (fun x -> x.a, h x.entropy_input, h x.nonce, h x.personalization_string, 
+              h x.entropy_input_reseed, h x.returned_bits)
   test_vectors
 
 %splice[vectors_low] (lowstarize_toplevel "vectors_tmp" "vectors_low")
@@ -30,7 +31,7 @@ assume val declassify_uint8: squash (uint8 == UInt8.t)
 
 let vec8 = L.lbuffer UInt8.t
 
-let vector = hash_alg & vec8 & vec8 & vec8 & vec8
+let vector = hash_alg & vec8 & vec8 & vec8 & vec8 & vec8
 
 // This could replace TestLib.compare_and_print
 val compare_and_print: b1:B.buffer UInt8.t -> b2:B.buffer UInt8.t -> len:UInt32.t 
@@ -53,11 +54,13 @@ let test_one (vec:vector) : Stack unit (requires fun _ -> True) (ensures fun _ _
   let a, 
       LB entropy_input_len entropy_input, 
       LB nonce_len nonce,
+      LB personalization_string_len personalization_string,
       LB entropy_input_reseed_len entropy_input_reseed,
       LB returned_bits_len returned_bits = vec 
   in
   B.recall entropy_input;
   B.recall nonce;
+  B.recall personalization_string;
   B.recall entropy_input_reseed;
   B.recall returned_bits;
   // We need to check this at runtime because Low*-ized vectors don't carry any refinements
@@ -66,6 +69,7 @@ let test_one (vec:vector) : Stack unit (requires fun _ -> True) (ensures fun _ _
           entropy_input_len <=. max_length &&
           min_length a /. 2ul <=. nonce_len && 
           nonce_len <=. max_length &&
+          personalization_string_len <=. max_personalization_string_length &&
           min_length a <=. entropy_input_reseed_len && 
           entropy_input_reseed_len <=. max_length &&
           0ul <. returned_bits_len && 
@@ -75,7 +79,10 @@ let test_one (vec:vector) : Stack unit (requires fun _ -> True) (ensures fun _ _
     begin
     push_frame();
     let st = alloca_state a in
-    instantiate a st entropy_input_len entropy_input nonce_len nonce;
+    instantiate a st 
+      entropy_input_len entropy_input 
+      nonce_len nonce 
+      personalization_string_len personalization_string;
     reseed a st entropy_input_reseed_len entropy_input_reseed;
     let output = B.alloca (u8 0) returned_bits_len in
     let ok = generate a output st returned_bits_len in

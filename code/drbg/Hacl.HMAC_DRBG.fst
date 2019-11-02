@@ -33,6 +33,10 @@ module LSeq = Lib.Sequence
 /// - Supports SHA-1, SHA2-256, SHA2-384 and SHA2-512 hash algorithms
 ///
 /// - Supports reseeding
+/// 
+/// - Supports optional personalization_string for instantiation
+/// 
+/// - Does not support optional additional_input for reseeding or generation
 ///
 /// - The internal state is (Key,V,reseed_counter)
 ///
@@ -49,10 +53,6 @@ module LSeq = Lib.Sequence
 ///
 /// - The reseed_interval is 2^48
 ///
-/// - Does not support optional additional_input for reseeding or generation
-///
-/// - Does not support the optional personalization_string for instantiation
-
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
 
 unfold
@@ -75,6 +75,10 @@ let min_length (a:supported_alg) : n:size_t{v n == S.min_length a} =
   match a with
   | SHA1 -> normalize_term (mk_int (S.min_length SHA1))
   | SHA2_256 | SHA2_384 | SHA2_512 -> normalize_term (mk_int (S.min_length SHA2_256))
+
+let max_personalization_string_length: n:size_t{v n == S.max_personalization_string_length} = 
+  assert_norm (S.max_personalization_string_length < pow2 32);
+  normalize_term (mk_int S.max_personalization_string_length)
 
 noeq
 type state (a:hash_alg) =
@@ -164,56 +168,85 @@ let instantiate_st (a:supported_alg) =
   -> entropy_input:lbuffer uint8 entropy_input_len
   -> nonce_len:size_t
   -> nonce:lbuffer uint8 nonce_len
+  -> personalization_string_len:size_t
+  -> personalization_string:lbuffer uint8 personalization_string_len
   -> ST unit
   (requires fun h0 -> 
-    live h0 entropy_input /\ live h0 nonce /\ 
+    live h0 entropy_input /\ live h0 nonce /\ live h0 personalization_string /\
     live_st h0 st /\
     S.min_length a <= v entropy_input_len /\ v entropy_input_len <= v max_length /\
-    S.min_length a / 2 <= v nonce_len /\ v nonce_len <= v max_length)
+    S.min_length a / 2 <= v nonce_len /\ v nonce_len <= v max_length /\
+    v personalization_string_len <= S.max_personalization_string_length)
   (ensures  fun h0 _ h1 ->
     S.hmac_input_bound a;
     let S.State k v ctr =
-      S.instantiate #a (as_seq h0 entropy_input) (as_seq h0 nonce)
+      S.instantiate #a (as_seq h0 entropy_input) (as_seq h0 nonce) 
+        (as_seq h0 personalization_string)
     in    
     modifies3 st.k st.v st.reseed_counter h0 h1 /\
     as_seq h1 st.k == k /\
     as_seq h1 st.v == v /\
     uint_v (bget h1 st.reseed_counter 0) == ctr)
 
+#push-options "--z3rlimit 200"
+
 inline_for_extraction noextract
 val mk_instantiate: #a:supported_alg -> hmac:HMAC.compute_st a -> instantiate_st a
-let mk_instantiate #a hmac st entropy_input_len entropy_input nonce_len nonce =
+let mk_instantiate #a hmac st 
+  entropy_input_len entropy_input 
+  nonce_len nonce 
+  personalization_string_len personalization_string 
+=
   let h0 = get () in
   push_frame();
-  let seed_material = create (entropy_input_len +! nonce_len) (u8 0) in
+  let seed_material = create (entropy_input_len +! nonce_len +! personalization_string_len) (u8 0) in  
   copy (sub seed_material 0ul entropy_input_len) entropy_input;
   copy (sub seed_material entropy_input_len nonce_len) nonce;
+  copy (sub seed_material (entropy_input_len +! nonce_len) personalization_string_len) personalization_string;
   let State k v ctr = st in
   fillT (D.hash_len a) k (fun _ -> u8 0) (fun _ -> u8 0);
   fillT (D.hash_len a) v (fun _ -> u8 1) (fun _ -> u8 1);
   let h1 = get () in
-  assert (Seq.equal (as_seq h1 seed_material) (Seq.append (as_seq h0 entropy_input) (as_seq h0 nonce)));
+  assert (Seq.equal (as_seq h1 seed_material) 
+    (Seq.append (as_seq h0 entropy_input) (Seq.append (as_seq h0 nonce)
+      (as_seq h0 personalization_string))));
   assert (LSeq.equal (as_seq h1 k) (LSeq.create (hash_length a) (u8 0)));
   assert (LSeq.equal (as_seq h1 v) (LSeq.create (hash_length a) (u8 1)));
   ctr.(0ul) <- 1uL;
-  update hmac (entropy_input_len +! nonce_len) seed_material st;
+  update hmac (entropy_input_len +! nonce_len +! personalization_string_len) 
+    seed_material st;
   pop_frame()
 
+#pop-options
+
 val instantiate (a:supported_alg) : instantiate_st a
-let instantiate a st entropy_input_len entropy_input nonce_len nonce =
+let instantiate a st 
+  entropy_input_len entropy_input 
+  nonce_len nonce
+  personalization_string_len personalization_string
+=
   match a with
   | SHA1     -> 
-    mk_instantiate Hacl.HMAC.legacy_compute_sha1 
-                   st entropy_input_len entropy_input nonce_len nonce
+    mk_instantiate Hacl.HMAC.legacy_compute_sha1 st 
+      entropy_input_len entropy_input 
+      nonce_len nonce
+      personalization_string_len personalization_string
   | SHA2_256 -> 
-    mk_instantiate Hacl.HMAC.compute_sha2_256 
-                   st entropy_input_len entropy_input nonce_len nonce
+    mk_instantiate Hacl.HMAC.compute_sha2_256 st
+      entropy_input_len entropy_input 
+      nonce_len nonce
+      personalization_string_len personalization_string
   | SHA2_384 -> 
-    mk_instantiate Hacl.HMAC.compute_sha2_384
-                   st entropy_input_len entropy_input nonce_len nonce
+    mk_instantiate Hacl.HMAC.compute_sha2_384 st
+      entropy_input_len entropy_input 
+      nonce_len nonce
+      personalization_string_len personalization_string
   | SHA2_512 -> 
-    mk_instantiate Hacl.HMAC.compute_sha2_512
-                   st entropy_input_len entropy_input nonce_len nonce
+    mk_instantiate Hacl.HMAC.compute_sha2_512 st
+      entropy_input_len entropy_input 
+      nonce_len nonce
+      personalization_string_len personalization_string
+
 
 inline_for_extraction
 let reseed_st (a:supported_alg) =
