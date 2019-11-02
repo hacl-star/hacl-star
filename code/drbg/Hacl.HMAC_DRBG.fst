@@ -13,6 +13,7 @@ module B = LowStar.Buffer
 module HMAC = Hacl.HMAC
 module S = Spec.HMAC_DRBG
 module D = Hacl.Hash.Definitions
+module LSeq = Lib.Sequence
 
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
 
@@ -111,13 +112,12 @@ val update: #a:supported_alg
     modifies3 st.k st.v st.reseed_counter h0 h1 /\
     as_seq h1 st.k == k /\
     as_seq h1 st.v == v /\
-    bget h1 st.reseed_counter 0 == 1uL)
+    uint_v (bget h1 st.reseed_counter 0) == ctr)
 
 let update #a hmac len data st =
   update_round hmac len data (u8 0) st.k st.v;
   if len <> 0ul then 
-    update_round hmac len data (u8 1) st.k st.v;
-  st.reseed_counter.(0ul) <- 1uL
+    update_round hmac len data (u8 1) st.k st.v
 
 inline_for_extraction
 let instantiate_st (a:supported_alg) =
@@ -155,8 +155,8 @@ let mk_instantiate #a hmac st entropy_input_len entropy_input nonce_len nonce =
   fillT (D.hash_len a) v (fun _ -> u8 1) (fun _ -> u8 1);
   let h1 = get () in
   assert (Seq.equal (as_seq h1 seed_material) (Seq.append (as_seq h0 entropy_input) (as_seq h0 nonce)));
-  assert (Lib.Sequence.equal (as_seq h1 k) (Lib.Sequence.create (hash_length a) (u8 0)));
-  assert (Lib.Sequence.equal (as_seq h1 v) (Lib.Sequence.create (hash_length a) (u8 1)));
+  assert (LSeq.equal (as_seq h1 k) (LSeq.create (hash_length a) (u8 0)));
+  assert (LSeq.equal (as_seq h1 v) (LSeq.create (hash_length a) (u8 1)));
   ctr.(0ul) <- 1uL;
   update hmac (entropy_input_len +! nonce_len) seed_material st;
   pop_frame()
@@ -197,28 +197,25 @@ let reseed_st (a:supported_alg) =
     modifies3 st.k st.v st.reseed_counter h0 h1 /\
     as_seq h1 st.k == k /\
     as_seq h1 st.v == v /\
-    uint_v (bget h1 st.reseed_counter 0) == ctr)
+    bget h1 st.reseed_counter 0 == 1uL)
 
 inline_for_extraction noextract
 val mk_reseed: #a:supported_alg -> hmac:HMAC.compute_st a -> reseed_st a
 let mk_reseed #a hmac st entropy_input_len entropy_input =
-  update hmac entropy_input_len entropy_input st
+  update hmac entropy_input_len entropy_input st;
+  st.reseed_counter.(0ul) <- 1uL
 
 val reseed (a:supported_alg) : reseed_st a
 let reseed a st entropy_input_len entropy_input =
   match a with
-  | SHA1     -> 
-    mk_reseed Hacl.HMAC.legacy_compute_sha1 
-              st entropy_input_len entropy_input
+  | SHA1 -> 
+    mk_reseed Hacl.HMAC.legacy_compute_sha1 st entropy_input_len entropy_input
   | SHA2_256 -> 
-    mk_reseed Hacl.HMAC.compute_sha2_256 
-              st entropy_input_len entropy_input
+    mk_reseed Hacl.HMAC.compute_sha2_256 st entropy_input_len entropy_input
   | SHA2_384 -> 
-    mk_reseed Hacl.HMAC.compute_sha2_384
-              st entropy_input_len entropy_input
+    mk_reseed Hacl.HMAC.compute_sha2_384 st entropy_input_len entropy_input
   | SHA2_512 -> 
-    mk_reseed Hacl.HMAC.compute_sha2_512
-              st entropy_input_len entropy_input
+    mk_reseed Hacl.HMAC.compute_sha2_512 st entropy_input_len entropy_input
 
 inline_for_extraction
 let generate_st (a:supported_alg) =
@@ -239,53 +236,54 @@ let generate_st (a:supported_alg) =
     | None -> b = false /\ modifies0 h0 h1
     | Some (out, S.State k v ctr) ->
       b = true /\
-      modifies3 output st.k st.v h0 h1 /\
+      modifies4 output st.k st.v st.reseed_counter h0 h1 /\
       as_seq #MUT #_ #n h1 output == out /\
       as_seq h1 st.k == k /\
       as_seq h1 st.v == v /\
       uint_v (bget h1 st.reseed_counter 0) == ctr)
 
-
 inline_for_extraction noextract
 val mk_generate: #a:supported_alg -> hmac:HMAC.compute_st a -> generate_st a
 let mk_generate #a hmac output st n =
-  S.hmac_input_bound a;
-  let h0 = get () in
   if st.reseed_counter.(0ul) >. reseed_interval then
     false
   else
+    begin
+    S.hmac_input_bound a;
+    Math.Lemmas.lemma_div_mod (v n) (hash_length a);
+    let output:lbuffer uint8 n = output in
     let max = n /. D.hash_len a in
+    let out = sub output 0ul (max *! D.hash_len a) in
     [@inline_let]
-    let a_spec (i:nat{i <= v max}) = Spec.Agile.HMAC.lbytes (hash_length a) in
+    let a_spec = S.a_spec a in
     [@inline_let]
-    let refl (h:HS.mem) (i:size_nat{i <= v max}) : GTot (a_spec i) = as_seq h st.v in
-    let out = sub #_ #_ #n output 0ul (max *! D.hash_len a) in
+    let refl h i = as_seq h st.v in
     [@inline_let]
-    let footprint (i:size_nat{i <= v max}) : GTot
-      (l:B.loc{B.loc_disjoint l (loc out) /\
-               B.address_liveness_insensitive_locs `B.loc_includes` l}) =
-      loc st.v 
-    in  
-    [@inline_let]
-    let spec (h:HS.mem) : GTot (i:size_nat{i < v max} -> a_spec i -> a_spec (i + 1) & Lib.Sequence.lseq uint8 (hash_length a)) =
-      let k = as_seq h0 st.k in
-      fun i vi -> let v = Spec.Agile.HMAC.hmac a k vi in v, v
-    in
-    fill_blocks h0 (D.hash_len a) max
-      out
-      a_spec
-      refl 
-      footprint
-      spec
+    let spec h0 = S.generate_loop a (as_seq h0 st.k) (v max) in
+    let h0 = get () in
+    fill_blocks h0 (D.hash_len a) max out a_spec refl (fun i -> loc st.v) spec 
       (fun i ->
+        LSeq.unfold_generate_blocks 
+          (hash_length a) (v max) a_spec (spec h0) (as_seq h0 st.v) (v i);
         hmac st.v st.k (D.hash_len a) st.v (D.hash_len a); 
-        Lib.Sequence.unfold_generate_blocks (hash_length a) (v max)
-          a_spec (spec h0) (as_seq h0 st.v) (v i);
         copy (sub out (i *! D.hash_len a) (D.hash_len a)) st.v
       );
+    if max *! D.hash_len a <. n then
+      begin
+      let h1 = get () in
+      let block = sub output (max *! D.hash_len a) (n -! (max *! D.hash_len a)) in
+      hmac st.v st.k (D.hash_len a) st.v (D.hash_len a);      
+      copy block (sub st.v 0ul (n -! (max *! D.hash_len a)));
+      let h2 = get () in
+      LSeq.eq_intro (as_seq h2 output) 
+                    (as_seq h1 out `LSeq.op_At_Bar` as_seq h2 block)
+      end;
     update hmac 0ul (B.null #uint8) st;
-    admit();
+    LSeq.eq_intro (as_seq #MUT #_ #0ul h0 (B.null #uint8)) (Seq.empty #uint8);
+    let ctr = st.reseed_counter.(0ul) in
+    st.reseed_counter.(0ul) <- ctr +! 1uL;      
     true
+    end
 
 val generate (a:supported_alg) : generate_st a
 let generate a output st n =
@@ -294,6 +292,7 @@ let generate a output st n =
   | SHA2_256 -> mk_generate Hacl.HMAC.compute_sha2_256 output st n
   | SHA2_384 -> mk_generate Hacl.HMAC.compute_sha2_384 output st n
   | SHA2_512 -> mk_generate Hacl.HMAC.compute_sha2_512 output st n
+
 
 inline_for_extraction noextract
 val alloca_state: a:supported_alg -> StackInline (state a) 

@@ -96,7 +96,20 @@ let reseed #a st entropy_input =
   let State k v _ = update #a entropy_input st in
   State k v 1
 
-#push-options "--max_fuel 1"
+let a_spec (a:hash_alg) (i:nat) = Lib.Sequence.lseq uint8 (hash_length a)
+
+val generate_loop:
+    a:supported_alg
+  -> k:lbytes (hash_length a)
+  -> max:nat
+  -> i:nat{i < max}
+  -> a_spec a i
+  -> Pure (a_spec a (i + 1) & Lib.Sequence.lseq uint8 (hash_length a))
+    (requires True)
+    (ensures fun _ -> True)
+let generate_loop a k max i vi =
+  hmac_input_bound a;
+  let v = hmac a k vi in v, v
 
 (* We omit additional_input; n is the number of **bytes** requested *)
 val generate: #a:supported_alg
@@ -108,11 +121,37 @@ let generate #a (State k v ctr) n =
   if ctr > reseed_interval then 
     None
   else    
-    let max = (n + hash_length a - 1) / hash_length a in // ceil(n / hash_length a)
-    let acc (i:nat{i <= max}) = lbytes (hash_length a) in
+    let max = n / hash_length a in
     let v, output =
-      Lib.Sequence.generate_blocks (hash_length a) max max acc
-        (fun i vi -> let v = hmac a k vi in v, v)
+      Lib.Sequence.generate_blocks (hash_length a) max max (a_spec a)
+        (generate_loop a k max)
+        v
+    in
+    let v, output =
+      if max * hash_length a < n then
+        let v = hmac a k v in
+        v, output @| Lib.Sequence.sub #_ #(hash_length a) v 0 (n - max * hash_length a)
+      else
+        v, output
+    in
+    let State k v _ = update Seq.empty (State k v ctr) in
+    Some (output, State k v (ctr + 1))
+
+(** Equivalently, but proving it requires proving extensionality of generate_blocks *)
+val generate': #a:supported_alg
+  -> state a
+  -> n:pos{n <= max_output_length}
+  -> option (lbytes n & state a)
+let generate' #a (State k v ctr) n =
+  hmac_input_bound a;
+  if ctr > reseed_interval then 
+    None
+  else    
+    // let max = ceil (n / hash_length a) in
+    let max = (n + hash_length a - 1) / hash_length a in
+    let v, output =
+      Lib.Sequence.generate_blocks (hash_length a) max max (a_spec a)
+        (generate_loop a k max)
         v
     in
     let State k v _ = update Seq.empty (State k v ctr) in
