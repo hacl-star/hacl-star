@@ -1,5 +1,5 @@
 [
-  "qS\u0011ıØ˝ò\u0004F\u0013¡nÅ⁄ò~",
+  "Úo\u001c˜£`A©g≈ı”ºÒ\u0016ﬂ",
   [
     [
       "EverCrypt.AEAD.loc_includes_union_l_footprint_s",
@@ -8,7 +8,7 @@
       0,
       [ "@query" ],
       0,
-      "0b8d022e9c710a63acc17755fdcd937d"
+      "d81779041354d7c37f1498f957d0f9a4"
     ],
     [
       "EverCrypt.AEAD.invariant",
@@ -22,7 +22,7 @@
         "refinement_interpretation_Tm_refine_573cfed777dae20cc82e8fef9622857e"
       ],
       0,
-      "f55d7ac9b74079e741b36bab5c3f088f"
+      "5452ba65ed7d77d908dcdbe9c7c294f2"
     ],
     [
       "EverCrypt.AEAD.create_in_st",
@@ -31,7 +31,27 @@
       0,
       [ "@query", "projection_inverse_BoxBool_proj_0" ],
       0,
-      "3ee91f438b7f027b6472fd8e64cec94f"
+      "6df6625ceaffe0a81279ad0994048545"
+    ],
+    [
+      "EverCrypt.AEAD.encrypt_pre",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "bool_inversion",
+        "equation_LowStar.Buffer.pointer_or_null", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Spec.Agile.AEAD.is_supported_alg",
+        "equation_Spec.Agile.AEAD.supported_alg",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_cd18e9962a0d204005dcfcda04529ffc",
+        "refinement_interpretation_Tm_refine_ce5a1bd8437baa640019cd70bf466fc0",
+        "typing_Spec.Agile.AEAD.is_supported_alg"
+      ],
+      0,
+      "465d96ded3f1adae36841a3a6b743e32"
     ],
     [
       "EverCrypt.AEAD.encrypt_st",
@@ -69,7 +89,7 @@
         "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "225ae131cf1ed1fcbb2bc704f6b8b5c6"
+      "fd064870987e85b41b7ca9b6689cf0d3"
     ],
     [
       "EverCrypt.AEAD.decrypt_st",
@@ -117,7 +137,7 @@
         "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "86ffcf80ed439e1fe22597679d3e11ee"
+      "2f14679f925c761bb5c066ce05ea8d21"
     ]
   ]
 ]

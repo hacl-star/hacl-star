@@ -655,7 +655,8 @@ BUNDLE_FLAGS	=\
   $(WASMSUPPORT_BUNDLE) \
   $(CTR_BUNDLE) \
   $(TUTORIAL_BUNDLE) \
-  $(QTESLA_BUNDLE)
+  $(QTESLA_BUNDLE) \
+  $(FRODO_BUNDLE)
 
 DEFAULT_FLAGS = \
   $(HAND_WRITTEN_LIB_FLAGS) \
@@ -770,6 +771,7 @@ dist/mozilla/Makefile.basic: SHA3_BUNDLE = -bundle Hacl.SHA3
 dist/mozilla/Makefile.basic: HASH_BUNDLE = -bundle Hacl.Hash.*,Hacl.HKDF,Hacl.HMAC
 dist/mozilla/Makefile.basic: QTESLA_BUNDLE = -bundle QTesla.*,Hacl.Impl.QTesla,Hacl.Impl.QTesla.*
 dist/mozilla/Makefile.basic: TUTORIAL_BUNDLE = -bundle Tutorial,TestLib,Hacl_Lib,Hacl_Kremlib
+dist/mozilla/Makefile.basic: FRODO_BUNDLE = -bundle Hacl.Frodo.*,Hacl.SHA3,Hacl.Keccak,Frodo.Params
 dist/mozilla/Makefile.basic: \
   BUNDLE_FLAGS += \
     -bundle EverCrypt,EverCrypt.* \

@@ -1,7 +1,7 @@
 # A shared set of local definitions for local Makefiles. See curve25519/Makefile
 # for comments.
 
-HACL_HOME?=../..
+HACL_HOME ?= .
 
 OUTPUT_DIR=$(HACL_HOME)/obj
 
@@ -53,3 +53,6 @@ $(OUTPUT_DIR)/Vale.%.checked: FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 CFLAGS += -Idist -I$(KREMLIN_HOME)/include
 
 KREMLIB_A=$(KREMLIN_HOME)/kremlib/dist/minimal/libkremlib.a
+
+%.exe:
+	$(CC) $^ $(KREMLIB_A) -o $@

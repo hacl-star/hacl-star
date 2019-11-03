@@ -162,6 +162,39 @@ let ad_p a = ad:B.buffer uint8 { B.length ad <= max_length a }
 let plain_p a = p:B.buffer uint8 { B.length p <= max_length a }
 let cipher_p a = p:B.buffer uint8 { B.length p + tag_length a <= max_length a }
 
+let encrypt_pre (a: supported_alg)
+  (s:B.pointer_or_null (state_s a))
+  (iv:iv_p a)
+  (iv_len: UInt32.t)
+  (ad:ad_p a)
+  (ad_len: UInt32.t)
+  (plain: plain_p a)
+  (plain_len: UInt32.t)
+  (cipher: B.buffer uint8)
+  (tag: B.buffer uint8)
+  (h0: HS.mem)
+=
+  v iv_len = B.length iv /\ v iv_len > 0 /\
+  v ad_len = B.length ad /\ v ad_len <= pow2 31 /\
+  v plain_len = B.length plain /\ v plain_len <= max_length a /\
+  B.length cipher = B.length plain /\
+  B.length tag = tag_length a /\ (
+  not (B.g_is_null s) ==>
+    invariant h0 s /\
+    B.(loc_disjoint (footprint h0 s) (loc_buffer iv)) /\
+    B.(loc_disjoint (footprint h0 s) (loc_buffer ad)) /\
+    B.(loc_disjoint (footprint h0 s) (loc_buffer tag)) /\
+    B.(loc_disjoint (footprint h0 s) (loc_buffer plain)) /\
+    B.(loc_disjoint (footprint h0 s) (loc_buffer cipher)) /\
+    MB.(all_live h0 [ buf iv; buf ad; buf plain; buf cipher; buf tag ]) /\
+    (B.disjoint plain cipher \/ plain == cipher) /\
+    B.disjoint cipher tag /\
+    B.disjoint iv cipher /\ B.disjoint iv tag /\
+    B.disjoint plain tag /\
+    B.disjoint plain ad /\
+    B.disjoint ad cipher /\ B.disjoint ad tag)
+
+
 inline_for_extraction noextract
 let encrypt_st (a: supported_alg) =
   s:B.pointer_or_null (state_s a) ->
@@ -174,21 +207,7 @@ let encrypt_st (a: supported_alg) =
   cipher: B.buffer uint8 { B.length cipher = B.length plain } ->
   tag: B.buffer uint8 { B.length tag = tag_length a } ->
   Stack error_code
-    (requires fun h0 ->
-      not (B.g_is_null s) ==>
-        invariant h0 s /\
-        B.(loc_disjoint (footprint h0 s) (loc_buffer iv)) /\
-        B.(loc_disjoint (footprint h0 s) (loc_buffer ad)) /\
-        B.(loc_disjoint (footprint h0 s) (loc_buffer tag)) /\
-        B.(loc_disjoint (footprint h0 s) (loc_buffer plain)) /\
-        B.(loc_disjoint (footprint h0 s) (loc_buffer cipher)) /\
-        MB.(all_live h0 [ buf iv; buf ad; buf plain; buf cipher; buf tag ]) /\
-        (B.disjoint plain cipher \/ plain == cipher) /\
-        B.disjoint cipher tag /\
-        B.disjoint iv cipher /\ B.disjoint iv tag /\
-        B.disjoint plain tag /\
-        B.disjoint plain ad /\
-        B.disjoint ad cipher /\ B.disjoint ad tag)
+    (requires encrypt_pre a s iv iv_len ad ad_len plain plain_len cipher tag)
     (ensures fun h0 r h1 ->
       match r with
       | Success ->
