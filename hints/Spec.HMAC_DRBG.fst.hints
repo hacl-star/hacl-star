@@ -1,5 +1,5 @@
 [
-  "–Ï™¾à>Ê€Þ$O1Ñy",
+  "óOÅy× H»J\tf(C\u0016ÏÏ",
   [
     [
       "Spec.HMAC_DRBG.min_length",
@@ -18,7 +18,7 @@
         "typing_Spec.Agile.HMAC.is_supported_alg"
       ],
       0,
-      "ba415cf43579d22dd8b8a0b2dad2f8a6"
+      "a15535e8b8eae03961c34090e2ce0679"
     ],
     [
       "Spec.HMAC_DRBG.state",
@@ -36,7 +36,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "0f882c9e390d3b11a0405cd96e6480f4"
+      "c55c75425ac75790ee227510242acae8"
     ],
     [
       "Spec.HMAC_DRBG.__proj__State__item__k",
@@ -63,7 +63,7 @@
         "typing_Spec.Hash.Definitions.word_length"
       ],
       0,
-      "14c2842c808f253f48398f05b48237a5"
+      "8f1e53b86f8893486358557a54405517"
     ],
     [
       "Spec.HMAC_DRBG.__proj__State__item__k",
@@ -90,7 +90,7 @@
         "typing_Spec.Hash.Definitions.word_length"
       ],
       0,
-      "4c04c5ece05daba6926fdfcf541ace5e"
+      "556f62f4b14e367af88d49acfabfe25f"
     ],
     [
       "Spec.HMAC_DRBG.__proj__State__item__v",
@@ -117,7 +117,7 @@
         "typing_Spec.Hash.Definitions.word_length"
       ],
       0,
-      "de379d62c71f9ea8ed81578d340524b5"
+      "e2c3247aeb5564cc50945a3a4abd71ef"
     ],
     [
       "Spec.HMAC_DRBG.__proj__State__item__v",
@@ -144,7 +144,7 @@
         "typing_Spec.Hash.Definitions.word_length"
       ],
       0,
-      "f345f9f5a5cc8ebc5a7b6a7404b8809c"
+      "a6d6ac4f7fd4eb586004242466cf0b17"
     ],
     [
       "Spec.HMAC_DRBG.hmac_input_bound",
@@ -168,7 +168,7 @@
         "typing_Spec.Agile.HMAC.is_supported_alg"
       ],
       0,
-      "2bba82f10c1aeccd49e9a9d4cda3b55f"
+      "48585c7d78c9a3dd4d9ee5d886acffd2"
     ],
     [
       "Spec.HMAC_DRBG.update",
@@ -219,7 +219,85 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "64f2ef1344e655e6f1aade26d39dee63"
+      "cfc465f7c9198a9679349fa8c7fdaf6d"
+    ],
+    [
+      "Spec.HMAC_DRBG.update",
+      2,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "constructor_distinct_Lib.IntTypes.U1",
+        "constructor_distinct_Lib.IntTypes.U128",
+        "constructor_distinct_Lib.IntTypes.U16",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "constructor_distinct_Tm_unit", "equation_Prims.nat",
+        "equation_Spec.Agile.HMAC.is_supported_alg",
+        "equation_Spec.HMAC_DRBG.supported_alg",
+        "equation_Spec.Hash.Definitions.hash_length",
+        "equation_Spec.Hash.Definitions.hash_word_length",
+        "equation_Spec.Hash.Definitions.word_length", "int_inversion",
+        "primitive_Prims.op_Multiply", "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_00b7086f5544e6080b4b49859916f574",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "typing_Spec.Hash.Definitions.word_length"
+      ],
+      0,
+      "e0b4fb94672d35b8a3ddee12d9eb53a6"
+    ],
+    [
+      "Spec.HMAC_DRBG.update",
+      3,
+      0,
+      0,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "constructor_distinct_Lib.IntTypes.U1",
+        "constructor_distinct_Lib.IntTypes.U128",
+        "constructor_distinct_Lib.IntTypes.U16",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "constructor_distinct_Tm_unit", "equality_tok_Lib.IntTypes.U8@tok",
+        "equation_FStar.Seq.Base.op_At_Bar",
+        "equation_FStar.Seq.Properties.cons", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
+        "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.uint8",
+        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
+        "equation_Prims.pos", "equation_Spec.Agile.HMAC.is_supported_alg",
+        "equation_Spec.Agile.HMAC.keysized",
+        "equation_Spec.Agile.HMAC.lbytes",
+        "equation_Spec.HMAC_DRBG.supported_alg",
+        "equation_Spec.Hash.Definitions.block_length",
+        "equation_Spec.Hash.Definitions.block_word_length",
+        "equation_Spec.Hash.Definitions.bytes",
+        "equation_Spec.Hash.Definitions.hash_length",
+        "equation_Spec.Hash.Definitions.hash_word_length",
+        "equation_Spec.Hash.Definitions.word_length",
+        "function_token_typing_Lib.IntTypes.uint8", "int_inversion",
+        "int_typing", "lemma_FStar.Seq.Base.lemma_create_len",
+        "lemma_FStar.Seq.Base.lemma_len_append",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_00b7086f5544e6080b4b49859916f574",
+        "refinement_interpretation_Tm_refine_27dc038cce58e6a175dcb6195f80808a",
+        "refinement_interpretation_Tm_refine_29c27ac7c716b2238749315b70c9eca3",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_64007e4a8c187c3787ce4f8705e9db35",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "typing_FStar.Seq.Base.create", "typing_FStar.Seq.Base.length",
+        "typing_Lib.IntTypes.bits", "typing_Prims.pow2",
+        "typing_Spec.Hash.Definitions.hash_word_length",
+        "typing_Spec.Hash.Definitions.word_length",
+        "typing_tok_Lib.IntTypes.U8@tok"
+      ],
+      0,
+      "236f4993895f63428e30c8081e396eca"
     ],
     [
       "Spec.HMAC_DRBG.instantiate",
@@ -265,7 +343,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "7092319efe101654b700b475cf58a54a"
+      "ab9175e0371e1c8bea60393e89753079"
     ],
     [
       "Spec.HMAC_DRBG.reseed",
@@ -273,13 +351,33 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
-        "equation_Prims.nat", "function_token_typing_Prims.int",
-        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+        "@MaxIFuel_assumption", "@query",
+        "constructor_distinct_Lib.IntTypes.U1",
+        "constructor_distinct_Lib.IntTypes.U16",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "constructor_distinct_Tm_unit", "equation_FStar.Seq.Base.op_At_Bar",
+        "equation_Lib.IntTypes.uint8", "equation_Prims.nat",
+        "equation_Spec.Agile.HMAC.is_supported_alg",
+        "equation_Spec.HMAC_DRBG.supported_alg",
+        "equation_Spec.Hash.Definitions.block_length",
+        "equation_Spec.Hash.Definitions.bytes",
+        "equation_Spec.Hash.Definitions.hash_length",
+        "equation_Spec.Hash.Definitions.hash_word_length",
+        "equation_Spec.Hash.Definitions.word_length",
+        "fuel_guarded_inversion_Spec.HMAC_DRBG.state",
+        "function_token_typing_Lib.IntTypes.uint8", "int_inversion",
+        "lemma_FStar.Seq.Base.lemma_len_append",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Multiply",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_00b7086f5544e6080b4b49859916f574",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "typing_FStar.Seq.Base.length",
+        "typing_Spec.Hash.Definitions.hash_word_length"
       ],
       0,
-      "6d456e288cfe480f7f60b854f7dd47b3"
+      "668fe5a075699ab4abdfc8b6dc3b5691"
     ],
     [
       "Spec.HMAC_DRBG.a_spec",
@@ -306,7 +404,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "0830701095b46c9b43583d64e7dba1d3"
+      "2a18ab14bf4f718f25dfb5940be8c9d3"
     ],
     [
       "Spec.HMAC_DRBG.generate_loop",
@@ -347,7 +445,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "23e79a2331f9f4d86f401ac77a4efbea"
+      "ab20225e652794b4f9345c28e986fd7b"
     ],
     [
       "Spec.HMAC_DRBG.generate_loop",
@@ -373,7 +471,7 @@
         "typing_Spec.Hash.Definitions.word_length"
       ],
       0,
-      "12cd4aefc2fe743ebec02f9e7792ffad"
+      "b38e1778951e3410303eeaee0045a5f9"
     ],
     [
       "Spec.HMAC_DRBG.generate_loop",
@@ -421,7 +519,7 @@
         "typing_Spec.Hash.Definitions.word_length"
       ],
       0,
-      "11b2ebf659b0820917d430ca55dda293"
+      "41f7724e28176a79451fd22822bbf257"
     ],
     [
       "Spec.HMAC_DRBG.generate",
@@ -490,7 +588,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "59d18728d7228a964a321ec9819131a9"
+      "b405f25caf4d343ba79843ae516ede48"
     ],
     [
       "Spec.HMAC_DRBG.generate",
@@ -507,13 +605,17 @@
         "constructor_distinct_Lib.IntTypes.U16",
         "constructor_distinct_Lib.IntTypes.U32",
         "constructor_distinct_Lib.IntTypes.U8",
+        "equality_tok_Lib.IntTypes.SEC@tok",
         "equality_tok_Lib.IntTypes.U32@tok",
-        "equation_FStar.Seq.Base.op_At_Bar", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.uint8", "equation_Lib.IntTypes.unsigned",
-        "equation_Lib.Sequence.length", "equation_Lib.Sequence.lseq",
-        "equation_Lib.Sequence.seq", "equation_Lib.Sequence.to_seq",
-        "equation_Prims.nat", "equation_Prims.pos",
-        "equation_Spec.Agile.HMAC.is_supported_alg",
+        "equality_tok_Lib.IntTypes.U8@tok",
+        "equation_FStar.Seq.Base.op_At_Bar",
+        "equation_FStar.Seq.Properties.cons", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
+        "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.uint8",
+        "equation_Lib.IntTypes.unsigned", "equation_Lib.Sequence.length",
+        "equation_Lib.Sequence.lseq", "equation_Lib.Sequence.seq",
+        "equation_Lib.Sequence.to_seq", "equation_Prims.nat",
+        "equation_Prims.pos", "equation_Spec.Agile.HMAC.is_supported_alg",
         "equation_Spec.Agile.HMAC.keysized",
         "equation_Spec.Agile.HMAC.lbytes", "equation_Spec.HMAC_DRBG.a_spec",
         "equation_Spec.HMAC_DRBG.max_output_length",
@@ -523,34 +625,50 @@
         "equation_Spec.Hash.Definitions.bytes",
         "equation_Spec.Hash.Definitions.hash_length",
         "equation_Spec.Hash.Definitions.hash_word_length",
-        "equation_Spec.Hash.Definitions.max_input_length",
         "equation_Spec.Hash.Definitions.word_length",
         "fuel_guarded_inversion_Spec.HMAC_DRBG.state",
         "function_token_typing_Lib.IntTypes.uint8", "int_inversion",
-        "int_typing", "lemma_FStar.Seq.Base.lemma_len_append",
+        "int_typing", "lemma_FStar.Seq.Base.lemma_create_len",
+        "lemma_FStar.Seq.Base.lemma_len_append",
         "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Addition",
         "primitive_Prims.op_Division", "primitive_Prims.op_GreaterThan",
         "primitive_Prims.op_LessThan", "primitive_Prims.op_Multiply",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "primitive_Prims.op_Subtraction",
+        "proj_equation_Spec.HMAC_DRBG.State_k",
+        "proj_equation_Spec.HMAC_DRBG.State_reseed_counter",
+        "proj_equation_Spec.HMAC_DRBG.State_v",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
         "refinement_interpretation_Tm_refine_00b7086f5544e6080b4b49859916f574",
         "refinement_interpretation_Tm_refine_0ec011aea9f93256a3547ad9f0c667f1",
         "refinement_interpretation_Tm_refine_29c27ac7c716b2238749315b70c9eca3",
+        "refinement_interpretation_Tm_refine_3455145d0ac2b7d72faf37736faf8b8c",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_56c56f560459dc6c90e1044e54e31f27",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
         "refinement_interpretation_Tm_refine_8839f8ed7b036627b162519c87dcea66",
+        "refinement_interpretation_Tm_refine_9d3fd79fd314167f1a9c213a188da3ec",
         "refinement_interpretation_Tm_refine_a5edcaf039301f71c2b6335a09b424cd",
         "refinement_interpretation_Tm_refine_a8645f2c9391f0b1eef5cf29231f10dd",
-        "refinement_interpretation_Tm_refine_b913a3f691ca99086652e0a655e72f17",
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
-        "typing_FStar.Seq.Base.empty", "typing_FStar.Seq.Base.length",
+        "typing_FStar.Seq.Base.append", "typing_FStar.Seq.Base.create",
+        "typing_FStar.Seq.Base.length", "typing_FStar.Seq.Base.op_At_Bar",
+        "typing_FStar.Seq.Properties.cons", "typing_Lib.IntTypes.bits",
+        "typing_Lib.IntTypes.minint", "typing_Lib.IntTypes.mk_int",
         "typing_Lib.Sequence.length", "typing_Lib.Sequence.to_seq",
+        "typing_Prims.pow2", "typing_Spec.Agile.HMAC.hmac",
         "typing_Spec.Agile.HMAC.is_supported_alg",
-        "typing_Spec.Hash.Definitions.max_input_length",
-        "typing_Spec.Hash.Definitions.word_length"
+        "typing_Spec.HMAC_DRBG.__proj__State__item__k",
+        "typing_Spec.HMAC_DRBG.__proj__State__item__reseed_counter",
+        "typing_Spec.HMAC_DRBG.__proj__State__item__v",
+        "typing_Spec.Hash.Definitions.block_word_length",
+        "typing_Spec.Hash.Definitions.word_length",
+        "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "72d40fee99588d9327442daa85d8f562"
+      "ac2f0079c24f30718df846a02b0d3617"
     ],
     [
       "Spec.HMAC_DRBG.generate'",
@@ -559,7 +677,7 @@
       0,
       [ "@query" ],
       0,
-      "24b3191fe467ca564f3525cfbbcf71fd"
+      "6c8be6c5ee9119fc267ceccdc8c497c3"
     ],
     [
       "Spec.HMAC_DRBG.generate'",
@@ -576,52 +694,44 @@
         "constructor_distinct_Lib.IntTypes.U16",
         "constructor_distinct_Lib.IntTypes.U32",
         "constructor_distinct_Lib.IntTypes.U8",
-        "equality_tok_Lib.IntTypes.SEC@tok",
         "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
-        "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.uint8",
+        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.uint8",
         "equation_Lib.IntTypes.unsigned", "equation_Lib.Sequence.length",
         "equation_Lib.Sequence.seq", "equation_Prims.nat",
         "equation_Prims.pos", "equation_Spec.Agile.HMAC.is_supported_alg",
-        "equation_Spec.Agile.HMAC.lbytes",
+        "equation_Spec.HMAC_DRBG.max_output_length",
         "equation_Spec.HMAC_DRBG.supported_alg",
-        "equation_Spec.Hash.Definitions.block_length",
-        "equation_Spec.Hash.Definitions.bytes",
+        "equation_Spec.Hash.Definitions.block_word_length",
         "equation_Spec.Hash.Definitions.hash_length",
         "equation_Spec.Hash.Definitions.hash_word_length",
-        "equation_Spec.Hash.Definitions.max_input_length",
         "equation_Spec.Hash.Definitions.word_length",
         "fuel_guarded_inversion_Spec.HMAC_DRBG.state",
         "function_token_typing_Lib.IntTypes.uint8", "int_inversion",
-        "int_typing", "lemma_FStar.Seq.Base.lemma_create_len",
-        "lemma_FStar.Seq.Base.lemma_len_append",
-        "lemma_FStar.Seq.Base.lemma_len_slice",
-        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Addition",
-        "primitive_Prims.op_Division", "primitive_Prims.op_GreaterThan",
+        "int_typing", "lemma_FStar.Seq.Base.lemma_len_slice",
+        "lemma_FStar.UInt.pow2_values", "lemma_Lib.IntTypes.pow2_4",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Division",
+        "primitive_Prims.op_GreaterThan",
         "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Multiply",
         "primitive_Prims.op_Subtraction",
+        "proj_equation_Spec.HMAC_DRBG.State_reseed_counter",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_00b7086f5544e6080b4b49859916f574",
-        "refinement_interpretation_Tm_refine_29c27ac7c716b2238749315b70c9eca3",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_5ecded4928a77b5c9da75dea0bcdc683",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
         "refinement_interpretation_Tm_refine_81407705a0828c2c1b1976675443f647",
-        "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
-        "refinement_interpretation_Tm_refine_9d3fd79fd314167f1a9c213a188da3ec",
         "refinement_interpretation_Tm_refine_a5edcaf039301f71c2b6335a09b424cd",
-        "refinement_interpretation_Tm_refine_b913a3f691ca99086652e0a655e72f17",
-        "typing_FStar.Seq.Base.create", "typing_FStar.Seq.Base.empty",
-        "typing_FStar.Seq.Base.length", "typing_Lib.IntTypes.bits",
-        "typing_Lib.IntTypes.minint", "typing_Lib.IntTypes.mk_int",
-        "typing_Prims.pow2", "typing_Spec.Agile.HMAC.is_supported_alg",
-        "typing_Spec.Hash.Definitions.max_input_length",
-        "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
+        "typing_FStar.Seq.Base.length", "typing_Lib.IntTypes.minint",
+        "typing_Spec.Agile.HMAC.is_supported_alg",
+        "typing_Spec.HMAC_DRBG.__proj__State__item__reseed_counter",
+        "typing_Spec.Hash.Definitions.block_word_length",
+        "typing_Spec.Hash.Definitions.word_length",
+        "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "9b6fdb8309c2f2c51c23802064a9c764"
+      "c8cc525b1d6e01e2bcc55c5295771bc9"
     ]
   ]
 ]
