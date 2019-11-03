@@ -59,6 +59,7 @@ FSTAR = $(FSTAR_NO_FLAGS) $(OTHERFLAGS)
 KRML = $(KREMLIN_HOME)/krml
 
 BASE_FLAGS = \
+  -no-prefix 'Hacl.Frodo.Random' \
   -bundle Hacl.Spec.*,Spec.*[rename=Hacl_Spec] \
   -bundle Lib.*[rename=Hacl_Lib] \
   -drop Lib.IntVector.Intrinsics \
@@ -94,6 +95,7 @@ POLY_BUNDLE=-bundle 'Hacl.Poly1305_32=Hacl.Impl.Poly1305.Field32xN_32' \
 NACLBOX_BUNDLE=-bundle Hacl.NaCl=Hacl.Impl.SecretBox,Hacl.Impl.Box
 
 TUTORIAL_BUNDLE=-bundle Tutorial
+FRODO_BUNDLE=-bundle 'Hacl.Frodo.KEM=Frodo.Params,Hacl.Impl.Frodo.*,Hacl.Impl.Matrix,Hacl.Frodo.*,Hacl.Keccak'
 
 # 3. OCaml
 

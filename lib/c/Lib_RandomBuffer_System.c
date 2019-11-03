@@ -1,5 +1,4 @@
-#include "Lib_RandomBuffer_System.h"
-#include <stdio.h>
+#include <Lib_RandomBuffer_System.h>
 
 #if (defined(_WIN32) || defined(_WIN64))
 
@@ -13,28 +12,17 @@ bool read_random_bytes(uint32_t len, uint8_t *buf) {
   if (!(CryptAcquireContext(&ctxt, NULL, NULL, PROV_RSA_FULL,
                             CRYPT_VERIFYCONTEXT))) {
     DWORD error = GetLastError();
-    printf("Cannot acquire crypto context: 0x%lx\n", error);
+    /* printf("Cannot acquire crypto context: 0x%lx\n", error); */
     return false;
   }
   bool pass = true;
   if (!(CryptGenRandom(ctxt, (uint64_t)len, buf))) {
-    printf("Cannot read random bytes\n");
+    /* printf("Cannot read random bytes\n"); */
     pass = false;
   }
   CryptReleaseContext(ctxt, 0);
   return pass;
 }
-
-void *hacl_aligned_malloc(size_t alignment, size_t size) {
-  void *res = _aligned_malloc(size, alignment);
-  if (res == NULL) {
-    printf("Cannot allocate %" PRIu64 " bytes aligned to %" PRIu64 "\n",
-           (uint64_t)size, (uint64_t)alignment);
-  }
-  return res;
-}
-
-void hacl_aligned_free(void *ptr) { _aligned_free(ptr); }
 
 #else
 
@@ -48,32 +36,20 @@ void hacl_aligned_free(void *ptr) { _aligned_free(ptr); }
 bool read_random_bytes(uint32_t len, uint8_t *buf) {
   int fd = open("/dev/urandom", O_RDONLY);
   if (fd == -1) {
-    printf("Cannot open /dev/urandom\n");
+    /* printf("Cannot open /dev/urandom\n"); */
     return false;
   }
   bool pass = true;
   uint64_t res = read(fd, buf, (uint64_t)len);
   if (res != (uint64_t)len) {
-    printf("Error on reading, expected %" PRIu32 " bytes, got %" PRIu64
-           " bytes\n",
-           len, res);
+    /* printf("Error on reading, expected %" PRIu32 " bytes, got %" PRIu64 */
+    /*        " bytes\n", */
+    /*        len, res); */
     pass = false;
   }
   close(fd);
   return pass;
 }
-
-void *hacl_aligned_malloc(size_t alignment, size_t size) {
-  void *res = NULL;
-  if (posix_memalign(&res, alignment, size)) {
-    printf("Cannot allocate %" PRIu64 " bytes aligned to %" PRIu64 "\n",
-           (uint64_t)size, (uint64_t)alignment);
-    return NULL;
-  }
-  return res;
-}
-
-void hacl_aligned_free(void *ptr) { free(ptr); }
 
 #endif
 

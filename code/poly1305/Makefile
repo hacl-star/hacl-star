@@ -8,7 +8,7 @@ test: all
 	dist/poly1305-test.exe
 
 # Defines rules for producing .checked, .krml, .depend, etc.
-include ../Makefile.local
+include ../../Makefile.local
 
 CFLAGS += -I../../../lib/c -mavx -mavx2
 export CFLAGS

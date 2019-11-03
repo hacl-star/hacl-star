@@ -2,6 +2,6 @@ HACL_HOME = ..
 
 all: all-checked
 
-include ../code/Makefile.local
+include ../Makefile.local
 
 all-checked: $(ALL_CHECKED_FILES)
