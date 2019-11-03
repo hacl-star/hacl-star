@@ -4,7 +4,7 @@ all: dist/FrodoKEM-64-test.exe
 test: all
 	dist/FrodoKEM-64-test.exe
 
-include ../Makefile.local
+include ../../Makefile.local
 
 CFLAGS += -O3 -march=native -mtune=native -funroll-loops
 CFLAGS += -fno-asynchronous-unwind-tables

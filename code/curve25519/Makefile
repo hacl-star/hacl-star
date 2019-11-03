@@ -8,7 +8,7 @@ test: all
 FSTAR_ROOTS = Hacl.Curve25519_64_Local.fst Hacl.Curve25519_64_Slow.fst Hacl.Curve25519_51.fst
 
 # Defines rules for producing .checked, .krml, .depend, etc.
-include ../Makefile.local
+include ../../Makefile.local
 
 # CUSTOMIZE HERE: how to produce binary objects
 dist:
