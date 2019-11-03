@@ -18,10 +18,13 @@ module B = LowStar.Buffer
 
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 
+(* FStar.Reflection only supports up to 8-tuples *)
 noextract
 let vectors_tmp = List.Tot.map 
   (fun x -> x.a, h x.entropy_input, h x.nonce, h x.personalization_string, 
-              h x.entropy_input_reseed, h x.returned_bits)
+         h x.entropy_input_reseed, h x.additional_input_reseed,
+         (h x.additional_input_1, h x.additional_input_2),
+         h x.returned_bits)
   test_vectors
 
 %splice[vectors_low] (lowstarize_toplevel "vectors_tmp" "vectors_low")
@@ -31,7 +34,7 @@ assume val declassify_uint8: squash (uint8 == UInt8.t)
 
 let vec8 = L.lbuffer UInt8.t
 
-let vector = hash_alg & vec8 & vec8 & vec8 & vec8 & vec8
+let vector = hash_alg & vec8 & vec8 & vec8 & vec8 & vec8 & (vec8 & vec8) & vec8
 
 // This could replace TestLib.compare_and_print
 val compare_and_print: b1:B.buffer UInt8.t -> b2:B.buffer UInt8.t -> len:UInt32.t 
@@ -56,12 +59,18 @@ let test_one (vec:vector) : Stack unit (requires fun _ -> True) (ensures fun _ _
       LB nonce_len nonce,
       LB personalization_string_len personalization_string,
       LB entropy_input_reseed_len entropy_input_reseed,
+      LB additional_input_reseed_len additional_input_reseed,
+      (LB additional_input_1_len additional_input_1,
+       LB additional_input_2_len additional_input_2),
       LB returned_bits_len returned_bits = vec 
   in
   B.recall entropy_input;
   B.recall nonce;
   B.recall personalization_string;
   B.recall entropy_input_reseed;
+  B.recall additional_input_reseed;
+  B.recall additional_input_1;
+  B.recall additional_input_2;  
   B.recall returned_bits;
   // We need to check this at runtime because Low*-ized vectors don't carry any refinements
   if not (Spec.Agile.HMAC.is_supported_alg a &&
@@ -72,6 +81,9 @@ let test_one (vec:vector) : Stack unit (requires fun _ -> True) (ensures fun _ _
           personalization_string_len <=. max_personalization_string_length &&
           min_length a <=. entropy_input_reseed_len && 
           entropy_input_reseed_len <=. max_length &&
+          additional_input_reseed_len <=. max_additional_input_length &&
+          additional_input_1_len <=. max_additional_input_length &&
+          additional_input_2_len <=. max_additional_input_length &&
           0ul <. returned_bits_len && 
           returned_bits_len <=. max_output_length)
   then C.exit (-1l)
@@ -81,15 +93,20 @@ let test_one (vec:vector) : Stack unit (requires fun _ -> True) (ensures fun _ _
     let st = alloca_state a in
     instantiate a st 
       entropy_input_len entropy_input 
-      nonce_len nonce 
+      nonce_len nonce
       personalization_string_len personalization_string;
-    reseed a st entropy_input_reseed_len entropy_input_reseed;
+    reseed a st 
+      entropy_input_reseed_len entropy_input_reseed
+      additional_input_reseed_len additional_input_reseed;
     let output = B.alloca (u8 0) returned_bits_len in
-    let ok = generate a output st returned_bits_len in
+    let ok = generate a output st returned_bits_len 
+      additional_input_1_len additional_input_1
+    in
     if ok then
-      let ok = generate a output st returned_bits_len in
+      let ok = generate a output st returned_bits_len 
+        additional_input_2_len additional_input_2 
+      in
       if ok then
-        //TestLib.compare_and_print C.String.(!$"HMAC-DRBG") returned_bits output returned_bits_len
         let ok = compare_and_print returned_bits output returned_bits_len in
         if ok then ()
         else C.exit 1l

@@ -35,13 +35,18 @@ let print_and_compare (len:size_nat) (test_expected test_result:lbytes len) : Al
   Lib.ByteSequence.lbytes_eq #len test_expected test_result
 
 let test_vec 
-  {a; entropy_input; entropy_input_reseed; nonce; personalization_string; returned_bits} 
+  {a; entropy_input; entropy_input_reseed; nonce; personalization_string;   
+   additional_input_reseed; additional_input_1; additional_input_2;
+   returned_bits} 
 =
   let returned_bytes_len       = String.strlen returned_bits / 2 in
   let entropy_input_len        = String.strlen entropy_input / 2 in
   let entropy_input_reseed_len = String.strlen entropy_input_reseed / 2 in
   let nonce_len                = String.strlen nonce / 2 in
   let personalization_string_len = String.strlen personalization_string / 2 in
+  let additional_input_reseed_len = String.strlen additional_input_reseed / 2 in
+  let additional_input_1_len   = String.strlen additional_input_1 / 2 in
+  let additional_input_2_len   = String.strlen additional_input_2 / 2 in  
   let returned_bits_len        = String.strlen returned_bits / 2 in
   if not (is_supported_alg a &&
           min_length a <= entropy_input_len && 
@@ -50,19 +55,24 @@ let test_vec
           nonce_len <= max_length &&
           personalization_string_len <= max_personalization_string_length &&
           entropy_input_reseed_len <= max_length &&
+          additional_input_reseed_len <= max_additional_input_length &&
+          additional_input_1_len <= max_additional_input_length &&
+          additional_input_2_len <= max_additional_input_length &&
           0 < returned_bits_len && 
           returned_bits_len <= max_output_length)
   then false
   else
     let _ = hmac_input_bound a in
-    let st = instantiate 
+    let st = instantiate #a
       (from_hex entropy_input) (from_hex nonce) (from_hex personalization_string)
     in
-    let st = reseed st (from_hex entropy_input_reseed) in
-    match generate st returned_bytes_len with
+    let st = reseed st 
+      (from_hex entropy_input_reseed) (from_hex additional_input_reseed) 
+    in
+    match generate st returned_bytes_len (from_hex additional_input_1) with
     | None -> false
     | Some (_, st) -> 
-      match generate #a st returned_bytes_len with
+      match generate st returned_bytes_len (from_hex additional_input_2) with
       | None -> false
       | Some (out, st) -> print_and_compare returned_bytes_len (from_hex returned_bits) out
 

@@ -70,15 +70,19 @@ let max_length: n:size_t{v n == S.max_length} =
   assert_norm (S.max_length < pow2 32);
   normalize_term (mk_int S.max_length)
 
+let max_personalization_string_length: n:size_t{v n == S.max_personalization_string_length} = 
+  assert_norm (S.max_personalization_string_length < pow2 32);
+  normalize_term (mk_int S.max_personalization_string_length)
+
+let max_additional_input_length: n:size_t{v n == S.max_additional_input_length} = 
+  assert_norm (S.max_additional_input_length < pow2 32);
+  normalize_term (mk_int S.max_additional_input_length)
+
 let min_length (a:supported_alg) : n:size_t{v n == S.min_length a} =
   assert_norm (S.min_length a < pow2 32);
   match a with
   | SHA1 -> normalize_term (mk_int (S.min_length SHA1))
   | SHA2_256 | SHA2_384 | SHA2_512 -> normalize_term (mk_int (S.min_length SHA2_256))
-
-let max_personalization_string_length: n:size_t{v n == S.max_personalization_string_length} = 
-  assert_norm (S.max_personalization_string_length < pow2 32);
-  normalize_term (mk_int S.max_personalization_string_length)
 
 noeq
 type state (a:hash_alg) =
@@ -136,30 +140,25 @@ inline_for_extraction noextract
 val update: #a:supported_alg 
   -> hmac:HMAC.compute_st a
   -> len:size_t 
-  -> data:lbuffer uint8 len 
-  -> st:state a 
+  -> data:lbuffer uint8 len
+  -> k:lbuffer uint8 (D.hash_len a)
+  -> v:lbuffer uint8 (D.hash_len a)
   -> ST unit
   (requires fun h0 -> 
-    live h0 data /\
-    live_st h0 st /\
-    disjoint st.k data /\ disjoint st.v data /\ disjoint st.reseed_counter data /\
+    live h0 data /\ live h0 k /\ live h0 v /\
+    disjoint k v /\ disjoint k data /\ disjoint v data /\
     hash_length a + 1 + uint_v len + block_length a < pow2 32)
   (ensures  fun h0 _ h1 ->
     S.hmac_input_bound a;
-    let S.State k v ctr = 
-      S.update #a (as_seq h0 data) 
-        (S.State (as_seq h0 st.k) (as_seq h0 st.v) 
-        (v (bget h0 st.reseed_counter 0)))
-    in    
-    modifies3 st.k st.v st.reseed_counter h0 h1 /\
-    as_seq h1 st.k == k /\
-    as_seq h1 st.v == v /\
-    uint_v (bget h1 st.reseed_counter 0) == ctr)
+    let k', v' = S.update #a (as_seq h0 data) (as_seq h0 k) (as_seq h0 v) in    
+    modifies2 k v h0 h1 /\
+    as_seq h1 k == k' /\
+    as_seq h1 v == v')
 
-let update #a hmac len data st =
-  update_round hmac len data (u8 0) st.k st.v;
+let update #a hmac len data k v  =
+  update_round hmac len data (u8 0) k v;
   if len <> 0ul then 
-    update_round hmac len data (u8 1) st.k st.v
+    update_round hmac len data (u8 1) k v
 
 inline_for_extraction
 let instantiate_st (a:supported_alg) =
@@ -214,7 +213,7 @@ let mk_instantiate #a hmac st
   assert (LSeq.equal (as_seq h1 v) (LSeq.create (hash_length a) (u8 1)));
   ctr.(0ul) <- 1uL;
   update hmac (entropy_input_len +! nonce_len +! personalization_string_len) 
-    seed_material st;
+    seed_material st.k st.v;
   pop_frame()
 
 #pop-options
@@ -253,17 +252,24 @@ let reseed_st (a:supported_alg) =
     st:state a 
   -> entropy_input_len:size_t
   -> entropy_input:lbuffer uint8 entropy_input_len
+  -> additional_input_len:size_t
+  -> additional_input:lbuffer uint8 additional_input_len
   -> ST unit
-  (requires fun h0 -> 
-    live h0 entropy_input /\ live_st h0 st /\
-    disjoint st.k entropy_input /\ disjoint st.v entropy_input /\ disjoint st.reseed_counter entropy_input /\
-    S.min_length a <= v entropy_input_len /\ v entropy_input_len <= v max_length)
+  (requires fun h0 ->
+    live_st h0 st /\ live h0 entropy_input /\ live h0 additional_input /\
+    disjoint st.k entropy_input /\ disjoint st.v entropy_input /\ 
+    disjoint st.reseed_counter entropy_input /\
+    disjoint st.k additional_input /\ disjoint st.v additional_input /\ 
+    disjoint st.reseed_counter additional_input /\
+    S.min_length a <= v entropy_input_len /\ v entropy_input_len <= v max_length /\
+    v additional_input_len <= S.max_additional_input_length)
   (ensures  fun h0 _ h1 ->
     S.hmac_input_bound a;
     let S.State k v ctr = 
       S.reseed #a 
         (S.State (as_seq h0 st.k) (as_seq h0 st.v) (v (bget h0 st.reseed_counter 0)))
         (as_seq h0 entropy_input)
+        (as_seq h0 additional_input)
     in
     modifies3 st.k st.v st.reseed_counter h0 h1 /\
     as_seq h1 st.k == k /\
@@ -272,38 +278,66 @@ let reseed_st (a:supported_alg) =
 
 inline_for_extraction noextract
 val mk_reseed: #a:supported_alg -> hmac:HMAC.compute_st a -> reseed_st a
-let mk_reseed #a hmac st entropy_input_len entropy_input =
-  update hmac entropy_input_len entropy_input st;
-  st.reseed_counter.(0ul) <- 1uL
+let mk_reseed #a hmac st 
+  entropy_input_len entropy_input 
+  additional_input_len additional_input 
+=
+  let h0 = get () in
+  push_frame();
+  let seed_material = create (entropy_input_len +! additional_input_len) (u8 0) in
+  copy (sub seed_material 0ul entropy_input_len) entropy_input;
+  copy (sub seed_material entropy_input_len additional_input_len) additional_input;
+  let h1 = get () in
+  LSeq.eq_intro (as_seq h1 seed_material)
+                LSeq.(as_seq h0 entropy_input @| as_seq h0 additional_input);
+  update hmac (entropy_input_len +! additional_input_len) seed_material st.k st.v;
+  st.reseed_counter.(0ul) <- 1uL;
+  pop_frame()
 
 val reseed (a:supported_alg) : reseed_st a
-let reseed a st entropy_input_len entropy_input =
+let reseed a st 
+  entropy_input_len entropy_input
+  additional_input_input_len additional_input_input =
   match a with
   | SHA1 -> 
-    mk_reseed Hacl.HMAC.legacy_compute_sha1 st entropy_input_len entropy_input
+    mk_reseed Hacl.HMAC.legacy_compute_sha1 st 
+      entropy_input_len entropy_input
+      additional_input_input_len additional_input_input
   | SHA2_256 -> 
-    mk_reseed Hacl.HMAC.compute_sha2_256 st entropy_input_len entropy_input
+    mk_reseed Hacl.HMAC.compute_sha2_256 st 
+      entropy_input_len entropy_input
+      additional_input_input_len additional_input_input
   | SHA2_384 -> 
-    mk_reseed Hacl.HMAC.compute_sha2_384 st entropy_input_len entropy_input
+    mk_reseed Hacl.HMAC.compute_sha2_384 st 
+      entropy_input_len entropy_input
+      additional_input_input_len additional_input_input
   | SHA2_512 -> 
-    mk_reseed Hacl.HMAC.compute_sha2_512 st entropy_input_len entropy_input
+    mk_reseed Hacl.HMAC.compute_sha2_512 st
+      entropy_input_len entropy_input
+      additional_input_input_len additional_input_input
+
 
 inline_for_extraction
 let generate_st (a:supported_alg) =
     output:buffer uint8
   -> st:state a 
   -> n:size_t
+  -> additional_input_len:size_t
+  -> additional_input:lbuffer uint8 additional_input_len
   -> ST bool
   (requires fun h0 ->
-    live h0 output /\ live_st h0 st /\
-    disjoint st.v output /\ disjoint st.k output /\ disjoint st.reseed_counter output /\
+    live h0 output /\ live_st h0 st /\ live h0 additional_input /\
+    disjoint st.v output /\ disjoint st.k output /\ disjoint st.reseed_counter output /\ disjoint additional_input output /\
+    disjoint st.v additional_input /\ disjoint st.k additional_input /\ disjoint st.reseed_counter additional_input /\
     v n = length output /\ 
-    0 < v n /\ v n <= S.max_output_length)
+    0 < v n /\ v n <= S.max_output_length /\
+    v additional_input_len <= S.max_additional_input_length)
   (ensures  fun h0 b h1 ->
+    S.hmac_input_bound a;
     let st_ = 
       S.State (as_seq h0 st.k) (as_seq h0 st.v) (uint_v (bget h0 st.reseed_counter 0)) 
     in
-    match S.generate #a st_ (v n) with
+    match S.generate #a st_ (v n) (as_seq h0 additional_input) with
     | None -> b = false /\ modifies0 h0 h1
     | Some (out, S.State k v ctr) ->
       b = true /\
@@ -313,15 +347,19 @@ let generate_st (a:supported_alg) =
       as_seq h1 st.v == v /\
       uint_v (bget h1 st.reseed_counter 0) == ctr)
 
+#push-options "--z3rlimit 200"
+
 inline_for_extraction noextract
 val mk_generate: #a:supported_alg -> hmac:HMAC.compute_st a -> generate_st a
-let mk_generate #a hmac output st n =
+let mk_generate #a hmac output st n additional_input_len additional_input =
   if st.reseed_counter.(0ul) >. reseed_interval then
     false
   else
     begin
     S.hmac_input_bound a;
     Math.Lemmas.lemma_div_mod (v n) (hash_length a);
+    if additional_input_len >. 0ul then
+      update hmac additional_input_len additional_input st.k st.v;
     let output:lbuffer uint8 n = output in
     let max = n /. D.hash_len a in
     let out = sub output 0ul (max *! D.hash_len a) in
@@ -349,20 +387,29 @@ let mk_generate #a hmac output st n =
       LSeq.eq_intro (as_seq h2 output) 
                     (as_seq h1 out `LSeq.op_At_Bar` as_seq h2 block)
       end;
-    update hmac 0ul (B.null #uint8) st;
-    LSeq.eq_intro (as_seq #MUT #_ #0ul h0 (B.null #uint8)) (Seq.empty #uint8);
+    update hmac additional_input_len additional_input st.k st.v;
     let ctr = st.reseed_counter.(0ul) in
-    st.reseed_counter.(0ul) <- ctr +! 1uL;      
+    st.reseed_counter.(0ul) <- ctr +! 1uL;
     true
     end
 
+#pop-options
+
 val generate (a:supported_alg) : generate_st a
-let generate a output st n =
+let generate a output st n additional_input_len additional_input =
   match a with
-  | SHA1     -> mk_generate Hacl.HMAC.legacy_compute_sha1 output st n
-  | SHA2_256 -> mk_generate Hacl.HMAC.compute_sha2_256 output st n
-  | SHA2_384 -> mk_generate Hacl.HMAC.compute_sha2_384 output st n
-  | SHA2_512 -> mk_generate Hacl.HMAC.compute_sha2_512 output st n
+  | SHA1     -> 
+    mk_generate Hacl.HMAC.legacy_compute_sha1 output st n
+      additional_input_len additional_input
+  | SHA2_256 -> 
+    mk_generate Hacl.HMAC.compute_sha2_256 output st n
+      additional_input_len additional_input
+  | SHA2_384 -> 
+    mk_generate Hacl.HMAC.compute_sha2_384 output st n
+      additional_input_len additional_input
+  | SHA2_512 -> 
+    mk_generate Hacl.HMAC.compute_sha2_512 output st n
+      additional_input_len additional_input
 
 
 inline_for_extraction noextract
