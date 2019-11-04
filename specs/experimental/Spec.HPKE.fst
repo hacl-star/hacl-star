@@ -48,7 +48,7 @@ let label_key : lbytes size_label_key = createL label_key_list
 /// Types
 
 inline_for_extraction
-let size_cs_identifier: size_nat = 2
+let size_cs_identifier: size_nat = 6
 
 inline_for_extraction
 let size_mode_identifier: size_nat = 1
@@ -69,12 +69,12 @@ type ciphersuite = cs:(DH.algorithm & AEAD.algorithm & Hash.algorithm){is_cipher
 val id_of_cs: cs:ciphersuite -> Tot (lbytes size_cs_identifier)
 let id_of_cs cs =
   match cs with
-  | DH.DH_Curve25519, AEAD.AEAD_AES128_GCM,        Hash.SHA2_256 -> create 2 (u8 1)
-  | DH.DH_Curve25519, AEAD.AEAD_Chacha20_Poly1305, Hash.SHA2_256 -> create 2 (u8 2)
-  | DH.DH_Curve448,   AEAD.AEAD_AES256_GCM,        Hash.SHA2_512 -> create 2 (u8 3)
-  | DH.DH_Curve448,   AEAD.AEAD_Chacha20_Poly1305, Hash.SHA2_512 -> create 2 (u8 4)
-  | DH.DH_P256,       AEAD.AEAD_AES128_GCM,        Hash.SHA2_256 -> create 2 (u8 5)
-  | DH.DH_P256,       AEAD.AEAD_Chacha20_Poly1305, Hash.SHA2_256 -> create 2 (u8 6)
+  | DH.DH_Curve25519, AEAD.AEAD_AES128_GCM,        Hash.SHA2_256 -> create size_cs_identifier (u8 1)
+  | DH.DH_Curve25519, AEAD.AEAD_Chacha20_Poly1305, Hash.SHA2_256 -> create size_cs_identifier (u8 2)
+  | DH.DH_Curve448,   AEAD.AEAD_AES256_GCM,        Hash.SHA2_512 -> create size_cs_identifier (u8 3)
+  | DH.DH_Curve448,   AEAD.AEAD_Chacha20_Poly1305, Hash.SHA2_512 -> create size_cs_identifier (u8 4)
+  | DH.DH_P256,       AEAD.AEAD_AES128_GCM,        Hash.SHA2_256 -> create size_cs_identifier (u8 5)
+  | DH.DH_P256,       AEAD.AEAD_Chacha20_Poly1305, Hash.SHA2_256 -> create size_cs_identifier (u8 6)
 
 
 let curve_of_cs (cs:ciphersuite) : DH.algorithm =
@@ -206,6 +206,7 @@ let auth_decap cs pkE pkI skR =
   let ri = DH.scalarmult (curve_of_cs cs) skR pkI in
   concat re ri
 
+
 /// default_pkIm = zero(Npk)
 /// default_psk = zero(Nh)
 /// default_pskId = zero(0)
@@ -235,23 +236,23 @@ let default_pskId: b:bytes{Seq.length b = 0} = lbytes_empty
 ///     We are filtering those using our option type in `ks_derive`.
 
 val build_context:
-    cs:ciphersuite
-  -> m:mode
+    m:mode
+  -> cs:ciphersuite
   -> pkE:key_dh_public_s cs
   -> pkR:key_dh_public_s cs
   -> pkI:key_dh_public_s cs
-  -> pskID:bytes{Seq.length pskID <= max_pskID}
-  -> info:bytes{Seq.length info <= max_pskID} ->
+  -> pskID_hash:bytes{Seq.length pskID_hash = Hash.size_hash (hash_of_cs cs)}
+  -> info_hash:bytes{Seq.length info_hash = Hash.size_hash (hash_of_cs cs)} ->
   Tot bytes
 
-let build_context cs m pkE pkR pkI pskID info =
-  let pskID_len: lbytes 2 = nat_to_bytes_be 2 (Seq.length pskID) in
-  let info_len: lbytes 2 = nat_to_bytes_be 2 (Seq.length info) in
+let build_context m cs pkE pkR pkI pskID_hash info_hash =
+  let pskID_len: lbytes 1 = nat_to_bytes_be 1 (Hash.size_hash (hash_of_cs cs)) in
+  let info_len: lbytes 1 = nat_to_bytes_be 1 (Hash.size_hash (hash_of_cs cs)) in
   let context = (id_of_mode m) @| (id_of_cs cs) @| pkE @| pkR @| pkI in
   let context = Seq.append context pskID_len in
-  let context = Seq.append context pskID in
+  let context = Seq.append context pskID_hash in
   let context = Seq.append context info_len in
-  let context = Seq.append context info in
+  let context = Seq.append context info_hash in
   context
 
 
@@ -275,7 +276,9 @@ let ks_derive cs m pkR zz pkE info opsk opkI =
     match opkI with
     | None -> default_pkI cs
     | Some pki -> pki in
-  let context = build_context cs m pkE pkR pkI pskID info in
+  let pskID_hash = Hash.hash (hash_of_cs cs) pskID in
+  let info_hash = Hash.hash (hash_of_cs cs) info in
+  let context = build_context m cs pkE pkR pkI pskID_hash info_hash in
   let secret = HKDF.extract (hash_of_cs cs) psk zz in
   let info_key = Seq.append label_key context in
   let info_nonce = Seq.append label_nonce context in
@@ -361,12 +364,12 @@ let setupAuthR cs pkE pkI skR info =
   ks_derive cs Auth pkR zz pkE info None (Some pkI)
 
 
-/// def SetupAuthI(pkR, psk, pskID, skI, info):
+/// def SetupAuthPSKI(pkR, info, psk, pskID, skI):
 ///     zz, enc = AuthEncap(pkR, skI)
 ///     pkIm = Marshal(pk(skI))
-///     return enc, KeySchedule(pkR, zz, enc, info, psk, pskID, pkIm)
+///     return enc, KeySchedule(mode_psk_auth, pkR, zz, enc, info, psk, pskID, pkIm)
 
-val setupPSKAuthI:
+val setupAuthPSKI:
     cs:ciphersuite
   -> skE: key_dh_secret_s cs
   -> skI: key_dh_secret_s cs
@@ -376,17 +379,17 @@ val setupPSKAuthI:
   -> info:bytes{Seq.length info <= max_info} ->
   Tot (key_dh_public_s cs & key_aead_s cs & nonce_aead_s cs)
 
-let setupPSKAuthI cs skE skI pkR psk pskID info =
+let setupAuthPSKI cs skE skI pkR psk pskID info =
   let pkI = DH.secret_to_public (curve_of_cs cs) skI in
   let zz, pkE = auth_encap cs skE skI pkR in
   let k, n = ks_derive cs PSKAuth pkR zz pkE info (Some (psk, pskID)) (Some pkI) in
   pkE, k, n
 
 
-/// def SetupAuthR(enc, skR, psk, pskID, pkI, info):
+/// def SetupAuthPSKR(enc, skR, info, psk, pskID, pkI):
 ///     zz = AuthDecap(enc, skR, pkI)
 ///     pkIm = Marshal(pkI)
-///     return KeySchedule(pk(skR), zz, enc, info, psk, pskID, pkIm)
+///     return KeySchedule(mode_psk_auth, pk(skR), zz, enc, info, psk, pskID, pkIm)
 
 val setupPSKAuthR:
     cs:ciphersuite
@@ -407,7 +410,7 @@ let setupPSKAuthR cs pkE pkI skR psk pskID info =
 /// Encrypt() and Decrypt using the derived AEAD key and nonce
 /// are implemented by calling AEAD.encrypt and AEAD.Decrypt
 
-val encryptBase:
+val sealBase:
     cs:ciphersuite
   -> skE:key_dh_secret_s cs
   -> pkR:key_dh_public_s cs
@@ -415,7 +418,7 @@ val encryptBase:
   -> info:bytes{Seq.length info <= max_info} ->
   Tot (option bytes)
 
-let encryptBase cs skE pkR m info =
+let sealBase cs skE pkR m info =
   let zz, pkR = encap cs skE pkR in
   let pkE,k,n = setupBaseI cs skE pkR info in
   match Spec.Defensive.AEAD.encrypt (aead_of_cs cs) k n m info with
@@ -423,7 +426,7 @@ let encryptBase cs skE pkR m info =
   | Some c -> Some (Seq.append pkE c)
 
 
-val decryptBase:
+val openBase:
     cs:ciphersuite
   -> pkE:key_dh_public_s cs
   -> skR:key_dh_secret_s cs
@@ -431,7 +434,7 @@ val decryptBase:
   -> info:bytes{Seq.length info <= max_info} ->
   Tot (option bytes)
 
-let decryptBase cs pkE skR input info =
+let openBase cs pkE skR input info =
   let pkE = sub #uint8 #(Seq.length input) input 0 (size_dh_key cs) in
   let c = sub #uint8 #(Seq.length input) input (size_dh_public cs) (length input - (size_dh_public cs)) in
   let zz = decap cs pkE skR in
