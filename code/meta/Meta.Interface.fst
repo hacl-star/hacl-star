@@ -129,10 +129,10 @@ let must: _ -> Tac _ = function
 
 let tm_unit = `((()))
 
-val add_check_with : optionstate -> sigelt -> Tac sigelt
+val add_check_with : term -> sigelt -> Tac sigelt
 let add_check_with opts se =
   let attrs = sigelt_attrs se in
-  let t = quote (check_with opts) in
+  let t = `(check_with (`#opts)) in
   set_sigelt_attrs (t :: attrs) se
 
 /// Tactic core
@@ -162,7 +162,7 @@ let rec visit_function (t_i: term) (st: state) (f_name: name): Tac (state & list
 
   else
     // Environment lookup.
-    let f = lookup_typ (cur_env ()) f_name in
+    let f = lookup_typ (top_env ()) f_name in
     let f = match f with Some f -> f | None -> fail "unexpected: name not in the environment" in
     if not (has_attr f (`Meta.Attribute.specialize) || has_attr f (`Meta.Attribute.inline_)) then
       let _ = print (st.indent ^ "Not visiting " ^ string_of_name f_name) in
@@ -246,6 +246,7 @@ let rec visit_function (t_i: term) (st: state) (f_name: name): Tac (state & list
             | _ :: _ -> " (needs: " ^ String.concat ", " deps ^ ")"
             | _ -> ""
           in
+          let quote_string s : Tac term = pack (Tv_Const (C_String s)) in
           pack_sigelt (Sg_Let
             false
             (pack_fv (suffix_name f_name "_higher_debug_print"))
@@ -253,7 +254,9 @@ let rec visit_function (t_i: term) (st: state) (f_name: name): Tac (state & list
             (`unit)
             (`(let x: unit =
               _ by (
-                print (`@(msg) ^ " " ^ (`@(string_of_name new_name)) ^ `@(deps));
+                print (`#(quote_string msg) ^ " " ^
+                       (`#(quote_string (string_of_name new_name))) ^
+                       `#(quote_string deps));
                 exact tm_unit) in
               x)))
         in
@@ -318,7 +321,7 @@ let rec visit_function (t_i: term) (st: state) (f_name: name): Tac (state & list
           if has_attr f (`Meta.Attribute.specialize) then
             // Assuming that this is a val, but we can't inspect it. Let's work around this.
             let t = pack (Tv_FVar (pack_fv f_name)) in
-            let f_typ = tc t in
+            let f_typ = tc (top_env ()) t in
             let f_typ, has_index =
               match inspect f_typ with
               | Tv_Arrow bv _ ->
@@ -491,8 +494,8 @@ and visit_body (t_i: term) (index_bv: option term) (st: state) (bvs: list (name 
       // Looks like we ended up visiting a type argument of an application.
       st, e, bvs, []
 
-
-let specialize (t_i: term) (names: list term): Tac _ =
+[@plugin]
+let specialize (t_i: term) (names: list term): Tac decls =
   let names = map (fun name ->
     match inspect name with
     | Tv_FVar fv -> inspect_fv fv
@@ -504,7 +507,7 @@ let specialize (t_i: term) (names: list term): Tac _ =
     print (string_of_int (List.length ses') ^ " declarations generated");
     st, ses @ ses'
   ) (st, []) names in
-  exact (quote ses)
+  ses
 
 // TODO:
 // - quote and splice the internal state of the tactic as `tactic_state`; this way:
