@@ -2,17 +2,13 @@ module Hacl.Test.HMAC_DRBG
 
 open FStar.HyperStack.ST
 open Test.Lowstarize
-open LowStar.Buffer
 
 open Lib.IntTypes
 
-module S = Spec.HMAC_DRBG
-module D = Hacl.Hash.Definitions
-
 open Hacl.HMAC_DRBG
-open Spec.Hash.Definitions
-open Spec.HMAC_DRBG.Vectors
+open Spec.HMAC_DRBG.Test.Vectors
 
+module D = Spec.Hash.Definitions
 module L = Test.Lowstarize
 module B = LowStar.Buffer
 
@@ -34,7 +30,7 @@ assume val declassify_uint8: squash (uint8 == UInt8.t)
 
 let vec8 = L.lbuffer UInt8.t
 
-let vector = hash_alg & vec8 & vec8 & vec8 & vec8 & vec8 & (vec8 & vec8) & vec8
+let vector = D.hash_alg & vec8 & vec8 & vec8 & vec8 & vec8 & (vec8 & vec8) & vec8
 
 // This could replace TestLib.compare_and_print
 val compare_and_print: b1:B.buffer UInt8.t -> b2:B.buffer UInt8.t -> len:UInt32.t 
@@ -95,6 +91,7 @@ let test_one (vec:vector) : Stack unit (requires fun _ -> True) (ensures fun _ _
       entropy_input_len entropy_input 
       nonce_len nonce
       personalization_string_len personalization_string;
+    admit();      
     reseed a st 
       entropy_input_reseed_len entropy_input_reseed
       additional_input_reseed_len additional_input_reseed;
