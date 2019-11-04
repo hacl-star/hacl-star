@@ -97,7 +97,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "666fdabf338153b0daf85ddebee545e6"
+      "8dd7ab32452e822722bd694246f1f99a"
     ],
     [
       "Hacl.Impl.QTesla.Pack.lemma_sk_when_k_one",
@@ -156,7 +156,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "c125dee64b5ed2b76a1d703ad738b802"
+      "4658459b0116640b8fa2a36b4e9c8cb6"
     ],
     [
       "Hacl.Impl.QTesla.Pack.encode_sk",
@@ -177,7 +177,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "99217433c0070a77ba59a55bc537dc9d"
+      "ec6fe5e5bdfbadff0005915b5c5f3e29"
     ],
     [
       "Hacl.Impl.QTesla.Pack.encode_sk",
@@ -198,7 +198,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "478481428a75bbd50a9f0546931f98e7"
+      "0f6faf0c16b5e8e651f2f9802d47ba63"
     ],
     [
       "Hacl.Impl.QTesla.Pack.encode_sk",
@@ -230,7 +230,6 @@
         "equation_Hacl.Impl.QTesla.Globals.elem",
         "equation_Hacl.Impl.QTesla.Globals.is_poly_k_equal",
         "equation_Hacl.Impl.QTesla.Globals.is_poly_k_sampler_output",
-        "equation_Hacl.Impl.QTesla.Globals.is_poly_k_sampler_output_i",
         "equation_Hacl.Impl.QTesla.Globals.poly",
         "equation_Hacl.Impl.QTesla.Globals.poly_k",
         "equation_Hacl.Impl.QTesla.Heuristic.Parameters.elem_base",
@@ -241,12 +240,12 @@
         "equation_Hacl.Impl.QTesla.Params.params_s_bits",
         "equation_Hacl.Impl.QTesla.Params.params_s_bits_int",
         "equation_Lib.Buffer.bget", "equation_Lib.Buffer.buffer_t",
-        "equation_Lib.Buffer.disjoint", "equation_Lib.Buffer.lbuffer_t",
-        "equation_Lib.Buffer.length", "equation_Lib.Buffer.live",
-        "equation_Lib.Buffer.loc", "equation_Lib.Buffer.modifies",
-        "equation_Lib.Buffer.modifies1", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.int_t", "equation_Lib.IntTypes.maxint",
-        "equation_Lib.IntTypes.minint",
+        "equation_Lib.Buffer.disjoint", "equation_Lib.Buffer.gsub",
+        "equation_Lib.Buffer.lbuffer_t", "equation_Lib.Buffer.length",
+        "equation_Lib.Buffer.live", "equation_Lib.Buffer.loc",
+        "equation_Lib.Buffer.modifies", "equation_Lib.Buffer.modifies1",
+        "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.int_t",
+        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.op_At_Percent_Dot",
         "equation_Lib.IntTypes.pub_int32", "equation_Lib.IntTypes.pub_int_t",
         "equation_Lib.IntTypes.pub_int_v", "equation_Lib.IntTypes.range",
@@ -264,13 +263,16 @@
         "function_token_typing_Lib.IntTypes.uint8", "int_inversion",
         "int_typing", "lemma_FStar.HyperStack.ST.lemma_equal_domains_trans",
         "lemma_FStar.Map.lemma_ContainsDom", "lemma_FStar.UInt.pow2_values",
+        "lemma_Hacl.Impl.QTesla.Globals.frame_is_poly_k_sampler_output_i",
         "lemma_Lib.Buffer.modifies_preserves_live",
         "lemma_Lib.IntTypes.add_mod_lemma", "lemma_Lib.IntTypes.div_lemma",
         "lemma_Lib.IntTypes.mul_lemma", "lemma_Lib.IntTypes.mul_mod_lemma",
-        "lemma_Lib.IntTypes.v_mk_int",
+        "lemma_Lib.IntTypes.v_injective", "lemma_Lib.IntTypes.v_mk_int",
         "lemma_LowStar.Monotonic.Buffer.length_null_1",
         "lemma_LowStar.Monotonic.Buffer.length_null_2",
+        "lemma_LowStar.Monotonic.Buffer.loc_disjoint_includes_r",
         "lemma_LowStar.Monotonic.Buffer.loc_disjoint_sym_",
+        "lemma_LowStar.Monotonic.Buffer.loc_includes_gsub_buffer_r_",
         "lemma_LowStar.Monotonic.Buffer.loc_includes_refl",
         "lemma_LowStar.Monotonic.Buffer.modifies_buffer_elim",
         "lemma_LowStar.Monotonic.Buffer.modifies_trans_linear",
@@ -293,23 +295,23 @@
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
         "refinement_interpretation_Tm_refine_9ff150f589411d5a40376aa0c5e1ca86",
         "refinement_interpretation_Tm_refine_b550ca9347e0645a53715102a08d8fa1",
+        "refinement_interpretation_Tm_refine_b5cda3d21bf41e132c12b087ed24fed8",
         "refinement_interpretation_Tm_refine_b672d274f8002272417cc17ee4f8443a",
-        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
         "refinement_interpretation_Tm_refine_e450d0eda8ec6ce5c9eff42d01f0e81a",
+        "refinement_interpretation_Tm_refine_e9c32a5fb00a4e8c339597118c871180",
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
         "typing_FStar.Map.contains", "typing_FStar.Monotonic.HyperHeap.rid",
         "typing_FStar.Monotonic.HyperStack.get_hmap",
-        "typing_FStar.Monotonic.HyperStack.get_tip",
-        "typing_FStar.UInt.fits", "typing_FStar.UInt32.v",
+        "typing_FStar.Monotonic.HyperStack.get_tip", "typing_FStar.UInt32.v",
         "typing_Hacl.Impl.QTesla.Params.crypto_secretkeybytes",
         "typing_Hacl.Impl.QTesla.Params.crypto_seedbytes",
         "typing_Hacl.Impl.QTesla.Params.params_k",
-        "typing_Hacl.Impl.QTesla.Params.params_n",
+        "typing_Hacl.Impl.QTesla.Params.params_n", "typing_Lib.Buffer.gsub",
         "typing_Lib.Buffer.length", "typing_Lib.Buffer.loc",
         "typing_Lib.IntTypes.bits", "typing_Lib.IntTypes.div",
         "typing_Lib.IntTypes.minint", "typing_Lib.IntTypes.mk_int",
-        "typing_Lib.IntTypes.mul_mod",
-        "typing_Lib.IntTypes.op_At_Percent_Dot", "typing_Lib.IntTypes.v",
+        "typing_Lib.IntTypes.mul", "typing_Lib.IntTypes.mul_mod",
+        "typing_Lib.IntTypes.pub_int_v", "typing_Lib.IntTypes.v",
         "typing_LowStar.Buffer.trivial_preorder",
         "typing_LowStar.Monotonic.Buffer.len",
         "typing_Spec.QTesla.Params.params_k",
@@ -317,7 +319,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "c4f7e7bed80f0f551bcdf7f1e16aaa2f"
+      "72ca1325c64637f23c7706edb67580cc"
     ],
     [
       "Hacl.Impl.QTesla.Pack.decode_sk_s",
@@ -410,7 +412,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "98064b18b3ed522844c8d27d46b44dd6"
+      "a9dd0cb8b17346053fc1858f766bd576"
     ],
     [
       "Hacl.Impl.QTesla.Pack.decode_sk",
@@ -448,7 +450,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "db27a0e12f0bd981c24f3fa9e5e9fa05"
+      "591a67201dc2e70e16ffccd9aa5986e4"
     ],
     [
       "Hacl.Impl.QTesla.Pack.decode_sk",
@@ -470,7 +472,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "699e4d049fe742fb11a53865df63778f"
+      "ac8bd51217ee9d86d0df74294d8cef49"
     ],
     [
       "Hacl.Impl.QTesla.Pack.decode_sk",
@@ -574,8 +576,8 @@
         "refinement_interpretation_Tm_refine_f901da914893523ef9cfc4177fde792c",
         "typing_FStar.Map.contains", "typing_FStar.Monotonic.HyperHeap.rid",
         "typing_FStar.Monotonic.HyperStack.get_hmap",
-        "typing_FStar.Monotonic.HyperStack.get_tip",
-        "typing_FStar.UInt.fits", "typing_FStar.UInt32.v",
+        "typing_FStar.Monotonic.HyperStack.get_tip", "typing_FStar.UInt32.v",
+        "typing_Hacl.Impl.QTesla.Params.crypto_secretkeybytes",
         "typing_Hacl.Impl.QTesla.Params.crypto_seedbytes",
         "typing_Hacl.Impl.QTesla.Params.params_k",
         "typing_Hacl.Impl.QTesla.Params.params_n",
@@ -583,9 +585,7 @@
         "typing_Lib.Buffer.op_Bar_Plus_Bar", "typing_Lib.IntTypes.bits",
         "typing_Lib.IntTypes.div", "typing_Lib.IntTypes.minint",
         "typing_Lib.IntTypes.mk_int", "typing_Lib.IntTypes.mul",
-        "typing_Lib.IntTypes.mul_mod",
-        "typing_Lib.IntTypes.op_At_Percent_Dot",
-        "typing_Lib.IntTypes.pub_int_v", "typing_Lib.IntTypes.v",
+        "typing_Lib.IntTypes.mul_mod", "typing_Lib.IntTypes.v",
         "typing_LowStar.Buffer.trivial_preorder",
         "typing_LowStar.Monotonic.Buffer.len",
         "typing_Spec.QTesla.Params.params_k",
@@ -593,7 +593,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "9ba9b9b8ca16e765bf3206d4a2040cc5"
+      "61a3d211fe34029414bb68885465324c"
     ]
   ]
 ]
