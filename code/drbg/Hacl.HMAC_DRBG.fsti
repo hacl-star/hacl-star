@@ -101,7 +101,7 @@ let instantiate_st (a:supported_alg) =
   -> nonce:lbuffer uint8 nonce_len
   -> personalization_string_len:size_t
   -> personalization_string:lbuffer uint8 personalization_string_len
-  -> ST unit
+  -> Stack unit
   (requires fun h0 ->
     live h0 entropy_input /\ live h0 nonce /\ live h0 personalization_string /\
     live_st h0 st /\
@@ -129,10 +129,10 @@ let reseed_st (a:supported_alg) =
   -> entropy_input:lbuffer uint8 entropy_input_len
   -> additional_input_len:size_t
   -> additional_input:lbuffer uint8 additional_input_len
-  -> ST unit
+  -> Stack unit
   (requires fun h0 ->
     live_st h0 st /\ live h0 entropy_input /\ live h0 additional_input /\
-    disjoint_st st entropy_input /\  disjoint_st st additional_input /\
+    disjoint_st st entropy_input /\ disjoint_st st additional_input /\
     S.min_length a <= v entropy_input_len /\ v entropy_input_len <= v max_length /\
     v additional_input_len <= S.max_additional_input_length)
   (ensures  fun h0 _ h1 ->
@@ -156,7 +156,7 @@ let generate_st (a:supported_alg) =
   -> n:size_t
   -> additional_input_len:size_t
   -> additional_input:lbuffer uint8 additional_input_len
-  -> ST bool
+  -> Stack bool
   (requires fun h0 ->
     live h0 output /\ live_st h0 st /\ live h0 additional_input /\
     disjoint_st st output /\ disjoint_st st additional_input /\
@@ -185,4 +185,5 @@ val alloca_state: a:supported_alg -> StackInline (state a)
   (ensures  fun h0 st h1 ->
     B.modifies B.loc_none h0 h1 /\
     B.fresh_loc (footprint st) h0 h1 /\
+    B.(loc_includes (loc_region_only true (HS.get_tip h1)) (footprint st)) /\
     live_st h1 st)

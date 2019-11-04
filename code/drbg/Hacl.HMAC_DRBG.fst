@@ -29,7 +29,7 @@ val update_round: #a:supported_alg
   -> n:uint8
   -> k:lbuffer uint8 (hash_len a)
   -> v:lbuffer uint8 (hash_len a)
-  -> ST unit
+  -> Stack unit
   (requires fun h0 ->
     live h0 k /\ live h0 v /\ live h0 data /\
     disjoint k v /\
@@ -69,7 +69,7 @@ val update: #a:supported_alg
   -> data:lbuffer uint8 len
   -> k:lbuffer uint8 (hash_len a)
   -> v:lbuffer uint8 (hash_len a)
-  -> ST unit
+  -> Stack unit
   (requires fun h0 ->
     live h0 data /\ live h0 k /\ live h0 v /\
     disjoint k v /\ disjoint k data /\ disjoint v data /\
@@ -97,7 +97,12 @@ type state (a:supported_alg) =
   -> state a
 
 let footprint #a st =
-  loc st.k |+| loc st.v |+| loc st.reseed_counter
+  let k:B.buffer uint8 = st.k in
+  let v:B.buffer uint8 = st.v in
+  let ctr:B.buffer size_t = st.reseed_counter in
+  B.loc_addr_of_buffer k |+| 
+  B.loc_addr_of_buffer v |+|
+  B.loc_addr_of_buffer ctr
 
 let live_st #a h st =
   live h st.k /\ live h st.v /\ live h st.reseed_counter
