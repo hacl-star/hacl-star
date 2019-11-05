@@ -8,13 +8,17 @@ include ../Makefile.local
 # *extend* the set of relevant files with the tests.
 FSTAR_ROOTS += $(wildcard tests/*.fst) $(wildcard alternative/*.fst) $(wildcard experimental/*.fst)
 
-# tests/Test.SHA3.fst --> tests/Test.SHA3.test
-all-tests: $(patsubst %.fst,%.test,$(wildcard tests/*.fst))
+.PHONY: all-tests
+all-tests: $(subst .,_,$(patsubst %.fst,test-ml-%,$(notdir $(wildcard tests/*.fst))))
 
-%.test: %.exe
+.PRECIOUS: specs/tests/%_AutoTest.ml
+specs/tests/%_AutoTest.ml:
+	echo "if not ($*.test ()) then (print_endline \"$* failed\"; exit 1)" > $@
+
+.PRECIOUS: specs/tests/%.exe
+specs/tests/%.exe: $(ALL_CMX_FILES) specs/tests/%_AutoTest.ml
+	$(OCAMLOPT) $^ -o $@
+
+.PHONY: test-ml-%
+test-ml-%: specs/tests/%.exe
 	$<
-
-%.exe: $(ALL_CMX_FILES)
-	echo "let _ = if not ($(subst .,_,$(notdir $*)).test ()) then failwith \"$* failed\";;" > \
-	  $(HACL_HOME)/obj/$(notdir $*)_main.ml
-	$(OCAMLOPT) $^ $(HACL_HOME)/obj/$(notdir $*)_main.ml -o $@
