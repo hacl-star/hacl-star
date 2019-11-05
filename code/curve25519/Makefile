@@ -37,6 +37,8 @@ dist/Makefile.basic: $(filter-out %/prims.krml,$(ALL_KRML_FILES)) | dist
 	  -ccopts -std=gnu11,-g,-O3 \
 	  -skip-compilation
 
+$(HACL_HOME)/tests/curve64-ours.o : dist/Makefile.basic
+
 # CUSTOMIZE HERE: list the dependencies for each test (there may be multiple)
 dist/curve64-ours.exe: $(HACL_HOME)/tests/curve64-ours.o dist/libcurve.a
 

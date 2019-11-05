@@ -113,3 +113,4 @@ endif
 # Warning 20: this argument will not be used by the function.
 # Warning 26: unused variable
 OCAMLOPT = ocamlfind opt -package fstarlib -linkpkg -g -I $(HACL_HOME)/obj -w -8-20-26
+OCAMLSHARED = ocamlfind opt -shared -package fstar-tactics-lib -g -I $(HACL_HOME)/obj -w -8-20-26
