@@ -100,15 +100,12 @@ let footprint #a st =
   let k:B.buffer uint8 = st.k in
   let v:B.buffer uint8 = st.v in
   let ctr:B.buffer size_t = st.reseed_counter in
-  B.loc_addr_of_buffer k |+| 
+  B.loc_addr_of_buffer k |+|
   B.loc_addr_of_buffer v |+|
   B.loc_addr_of_buffer ctr
 
 let live_st #a h st =
   live h st.k /\ live h st.v /\ live h st.reseed_counter
-
-let disjoint_st #a st b =
-  disjoint st.k b /\ disjoint st.v b /\ disjoint st.reseed_counter b
 
 let refl_st #a h st =
   S.State (as_seq h st.k) (as_seq h st.v) (v (bget h st.reseed_counter 0))

@@ -86,16 +86,15 @@ let test_one (vec:vector) : Stack unit (requires fun _ -> True) (ensures fun _ _
   else
     begin
     push_frame();
+    let output = B.alloca (u8 0) returned_bits_len in
     let st = alloca_state a in
     instantiate a st 
       entropy_input_len entropy_input 
       nonce_len nonce
       personalization_string_len personalization_string;
-    admit();      
     reseed a st 
       entropy_input_reseed_len entropy_input_reseed
       additional_input_reseed_len additional_input_reseed;
-    let output = B.alloca (u8 0) returned_bits_len in
     let ok = generate a output st returned_bits_len 
       additional_input_1_len additional_input_1
     in

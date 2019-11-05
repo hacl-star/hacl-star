@@ -88,7 +88,8 @@ val footprint: #a:supported_alg -> st:state a -> GTot B.loc
 
 val live_st: #a:supported_alg -> h:HS.mem -> st:state a -> Type0
 
-val disjoint_st: #a:supported_alg -> st:state a -> b:buffer uint8 -> Type0
+let disjoint_st (#a:supported_alg) (st:state a) (b:buffer uint8) =
+  B.loc_disjoint (footprint st) (B.loc_buffer b)
 
 val refl_st: #a:supported_alg -> h:HS.mem -> st:state a -> GTot (S.state a)
 
@@ -110,6 +111,7 @@ let instantiate_st (a:supported_alg) =
     v personalization_string_len <= S.max_personalization_string_length)
   (ensures  fun h0 _ h1 ->
     S.hmac_input_bound a;
+    live_st h1 st /\
     B.modifies (footprint st) h0 h1 /\
     refl_st h1 st ==
     S.instantiate
@@ -137,6 +139,7 @@ let reseed_st (a:supported_alg) =
     v additional_input_len <= S.max_additional_input_length)
   (ensures  fun h0 _ h1 ->
     S.hmac_input_bound a;
+    live_st h1 st /\
     B.modifies (footprint st) h0 h1 /\
     refl_st h1 st ==
     S.reseed
@@ -167,9 +170,10 @@ let generate_st (a:supported_alg) =
   (ensures  fun h0 b h1 ->
     S.hmac_input_bound a;
     match S.generate (refl_st h0 st) (v n) (as_seq h0 additional_input) with
-    | None -> b = false /\ modifies0 h0 h1
+    | None -> b = false /\ live_st h1 st /\ modifies0 h0 h1
     | Some (out, st_) ->
       b = true /\
+      live_st h1 st /\
       B.modifies (loc output |+| footprint st) h0 h1 /\
       refl_st h1 st == st_ /\
       as_seq #MUT #_ #n h1 output == out)
