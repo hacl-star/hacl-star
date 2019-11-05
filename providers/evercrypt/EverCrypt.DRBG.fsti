@@ -16,16 +16,16 @@ module S = Spec.HMAC_DRBG
 /// See 10.1.2 and B.2 of
 /// https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-90Ar1.pdf
 ///
-/// This module implements the functions
+/// This module implements
 /// - HMAC_DRBG_Instantiate_function
 /// - HMAC_DRBG_Reseed_function
 /// - HMAC_DRBG_Generate_function
 /// - HMAC_DRBG_Uninstantiate_function
 ///
-/// This uses Lib.RandomBuffer.System as the Get_entropy_input function,
+/// Internally, it uses Lib.RandomBuffer.System as the Get_entropy_input function,
 /// for instantiation, reseeding, and prediction resistance.
 ///
-/// - Supports SHA-1, SHA2-256, SHA2-384 and SHA2-512 hash algorithms
+/// - Supports SHA-1, SHA2-256, SHA2-384 and SHA2-512
 ///
 /// - Supports reseeding
 ///

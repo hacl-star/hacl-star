@@ -5,7 +5,7 @@ open Spec.Hash.Definitions
 #set-options "--max_fuel 0 --max_ifuel 0"
 
 ///
-/// HMAC-DRBG test vectors from HIST CAVP
+/// HMAC-DRBG test vectors from NIST CAVP
 /// https://csrc.nist.gov/projects/cryptographic-algorithm-validation-program/random-number-generators#DRBG
 ///
 
