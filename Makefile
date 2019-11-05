@@ -451,6 +451,12 @@ obj/Meta_Interface.ml: obj/Meta.Interface.fst.checked
 obj/Meta_Interface.cmxs: obj/Meta_Interface.ml
 	$(OCAMLSHARED) $< -o $@
 
+# IMPORTANT NOTE: we cannot let F* compile the cmxs for several reasons.
+# First, it won't detect out-of-date .ml files and won't recompile the cmxs.
+# Second, it will race because several Hacl.Meta.%.checked targets might be
+# scheduled in parallel.
+# So, we don't trust F* to compile the tactic and add it as a step of the
+# dependency graph. Note that local Makefiles don't bother.
 obj/Hacl.Meta.%.checked: FSTAR_FLAGS += --load Meta.Interface
 $(filter obj/Hacl.Meta.%.checked,$(call to-obj-dir,$(ALL_CHECKED_FILES))): obj/Meta_Interface.cmxs
 
