@@ -274,16 +274,16 @@ and lowstarize_tuple (uniq: gensym) (es: list term): Tac (gensym * list sigelt *
   uniq, List.rev ses, mktuple_n es
 
 noextract
-let lowstarize_toplevel src dst: Tac unit =
+let lowstarize_toplevel src dst: Tac decls =
   // lookup_typ does not lookup a type but any arbitrary term, hence the name
-  let str = lookup_typ (cur_env ()) (cur_module () @ [ src ]) in
+  let str = lookup_typ (top_env ()) (cur_module () @ [ src ]) in
   let str = must str in
   let def = match inspect_sigelt str with Sg_Let _ _ _ _ def -> def | _ -> fail "must" in
   let _, ses, def = lowstarize_expr (dst, 0) def in
   let fv: fv = pack_fv (cur_module () @ [ dst ]) in
   let t: term = pack Tv_Unknown in
   let se: sigelt = pack_sigelt (Sg_Let false fv [] t def) in
-  exact (quote (normalize_term (ses @ [ se ])))
+  normalize_term (ses @ [ se ])
 
 
 /// Tests
