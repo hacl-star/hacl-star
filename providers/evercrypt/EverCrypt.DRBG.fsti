@@ -53,27 +53,27 @@ module S = Spec.HMAC_DRBG
 unfold
 let supported_alg = S.supported_alg
 
-[@ CMacro ]
+//[@ CMacro ]
 let reseed_interval: n:size_t{v n == S.reseed_interval} =
   assert_norm (S.reseed_interval < pow2 32);
   normalize_term (mk_int S.reseed_interval)
 
-[@ CMacro ]
+//[@ CMacro ]
 let max_output_length: n:size_t{v n == S.max_output_length} =
   assert_norm (S.max_output_length < pow2 32);
   normalize_term (mk_int S.max_output_length)
 
-[@ CMacro ]
+//[@ CMacro ]
 let max_length: n:size_t{v n == S.max_length} =
   assert_norm (S.max_length < pow2 32);
   normalize_term (mk_int S.max_length)
 
-[@ CMacro ]
+//[@ CMacro ]
 let max_personalization_string_length: n:size_t{v n == S.max_personalization_string_length} =
   assert_norm (S.max_personalization_string_length < pow2 32);
   normalize_term (mk_int S.max_personalization_string_length)
 
-[@ CMacro ]
+//[@ CMacro ]
 let max_additional_input_length: n:size_t{v n == S.max_additional_input_length} =
   assert_norm (S.max_additional_input_length < pow2 32);
   normalize_term (mk_int S.max_additional_input_length)
