@@ -171,7 +171,7 @@ let test_one_hmac_drbg vec =
                      additional_input_2 additional_input_2_len
           in
           if ok then
-            TestLib.compare_and_print !$"HMAC-DRBG" returned_bits returned_bits returned_bits_len
+            TestLib.compare_and_print !$"HMAC-DRBG" output output returned_bits_len
           else C.exit 1l
         else C.exit 1l
       else C.exit 1l
