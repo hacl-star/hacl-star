@@ -56,3 +56,11 @@ KREMLIB_A=$(KREMLIN_HOME)/kremlib/dist/minimal/libkremlib.a
 
 %.exe:
 	$(CC) $^ $(KREMLIB_A) -o $@
+
+# Tactic; sadly not shareable because obj vs. $(HACL_HOME)/obj
+
+$(HACL_HOME)/obj/Meta_Interface.ml: CODEGEN = Plugin
+$(HACL_HOME)/obj/Meta_Interface.ml: $(HACL_HOME)/obj/Meta.Interface.fst.checked
+
+$(HACL_HOME)/obj/Hacl.Meta.%.checked: FSTAR_FLAGS += --load Meta.Interface
+$(HACL_HOME)/obj/Hacl.Meta.%.checked: $(HACL_HOME)/obj/Meta_Interface.ml

@@ -441,6 +441,19 @@ min-test-unstaged: $(filter-out \
 	@echo $^
 	@echo "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>"
 
+####################################################
+# Tactic (not covered by --extract, intentionally) #
+####################################################
+
+obj/Meta_Interface.ml: CODEGEN = Plugin
+obj/Meta_Interface.ml: obj/Meta.Interface.fst.checked
+
+obj/Meta_Interface.cmxs: obj/Meta_Interface.ml
+	$(OCAMLSHARED) $< -o $@
+
+obj/Hacl.Meta.%.checked: FSTAR_FLAGS += --load Meta.Interface
+$(filter obj/Hacl.Meta.%.checked,$(call to-obj-dir,$(ALL_CHECKED_FILES))): obj/Meta_Interface.cmxs
+
 ###############################################################################
 # Extracting (checked files) to OCaml, producing executables, running them to #
 # print ASM files                                                             #
@@ -452,9 +465,11 @@ obj/%.cmx: obj/%.ml
 	  $(OCAMLOPT) -c $< -o $@ \
 	  ,[OCAMLOPT-CMX] $(notdir $*),$(call to-obj-dir,$@))
 
+obj/%.ml: CODEGEN=OCaml
+
 obj/%.ml:
 	$(call run-with-log,\
-	  $(FSTAR) $(notdir $(subst .checked,,$<)) --codegen OCaml \
+	  $(FSTAR) $(notdir $(subst .checked,,$<)) --codegen $(CODEGEN) \
 	    --extract_module $(subst .fst.checked,,$(notdir $<)) \
 	  ,[EXTRACT-ML] $(notdir $*),$(call to-obj-dir,$@))
 
