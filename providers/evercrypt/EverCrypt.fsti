@@ -14,6 +14,7 @@ module B = LowStar.Buffer
 include EverCrypt.Hash
 include EverCrypt.HMAC
 include EverCrypt.HKDF
+include EverCrypt.DRBG
 include EverCrypt.Poly1305
 include EverCrypt.Curve25519
 include EverCrypt.Cipher

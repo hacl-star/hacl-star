@@ -1,0 +1,23 @@
+module Spec.HMAC_DRBG.Test.Vectors
+
+open Lib.Meta
+open Spec.Hash.Definitions
+
+#set-options "--fuel 0 --ifuel 0"
+
+///
+/// HMAC-DRBG test vectors from HIST CAVP
+/// https://csrc.nist.gov/projects/cryptographic-algorithm-validation-program/random-number-generators#DRBG
+///
+
+type vec = {
+  a: hash_alg;
+  entropy_input: hex_string;
+  nonce: hex_string;
+  personalization_string: hex_string;
+  entropy_input_reseed: hex_string;
+  additional_input_reseed: hex_string;
+  additional_input_1: hex_string;
+  additional_input_2: hex_string;
+  returned_bits: hex_string;
+}
