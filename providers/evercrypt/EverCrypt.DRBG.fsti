@@ -291,7 +291,7 @@ let generate_st (a:supported_alg) =
     B.disjoint output additional_input /\
     B.length additional_input = v additional_input_len /\
     v n = B.length output /\
-    0 < v n /\ v n <= S.max_output_length /\
+    v n <= S.max_output_length /\
     v additional_input_len <= S.max_additional_input_length)
   (ensures  fun h0 b h1 ->
     S.hmac_input_bound a;

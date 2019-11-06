@@ -68,7 +68,7 @@ val generate: #a:supported_alg
   -> additional_input:bytes
   -> Pure (option (lbytes n & state a))
   (requires
-    0 < n /\ n <= max_output_length /\
+    n <= max_output_length /\
     hash_length a + Seq.length additional_input
       + 1 + block_length a <= max_input_length a)
   (ensures fun _ -> True)
