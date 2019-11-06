@@ -12,7 +12,7 @@ module D = Spec.Hash.Definitions
 module L = Test.Lowstarize
 module B = LowStar.Buffer
 
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 
 (* FStar.Reflection only supports up to 8-tuples *)
 noextract
@@ -87,7 +87,7 @@ let test_one (vec:vector) : Stack unit (requires fun _ -> True) (ensures fun _ _
     begin
     push_frame();
     let output = B.alloca (u8 0) returned_bits_len in
-    let st = alloca_state a in
+    let st = alloca a in
     instantiate a st 
       entropy_input_len entropy_input 
       nonce_len nonce

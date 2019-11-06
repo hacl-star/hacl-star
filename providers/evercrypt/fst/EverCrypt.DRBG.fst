@@ -24,7 +24,7 @@ friend Hacl.HMAC_DRBG
 [@CAbstractStruct]
 noeq
 type state_s: supported_alg -> Type0 =
-| SHA1_s: state SHA1 -> state_s SHA1
+| SHA1_s    : state SHA1     -> state_s SHA1
 | SHA2_256_s: state SHA2_256 -> state_s SHA2_256
 | SHA2_384_s: state SHA2_384 -> state_s SHA2_384
 | SHA2_512_s: state SHA2_512 -> state_s SHA2_512
@@ -36,30 +36,25 @@ let invert_state_s (a:supported_alg): Lemma
 =
   allow_inversion (state_s a)
 
-inline_for_extraction noextract
+/// Only call this function in extracted code with a known `a`
 let p #a (s:state_s a) : Hacl.HMAC_DRBG.state a =
-  match s with
-  | SHA1_s p -> p
-  | SHA2_256_s p -> p
-  | SHA2_384_s p -> p
-  | SHA2_512_s p -> p
+  match a with
+  | SHA1 -> let SHA1_s p = s in p
+  | SHA2_256 -> let SHA2_256_s p = s in p
+  | SHA2_384 -> let SHA2_384_s p = s in p
+  | SHA2_512 -> let SHA2_512_s p = s in p
 
-let freeable_s #a st =
-  let st = p st in
-  B.freeable (st.k<:B.buffer uint8) /\ 
-  B.freeable (st.v<:B.buffer uint8) /\ 
-  B.freeable (st.reseed_counter<:B.buffer size_t)
+let freeable_s #a st = freeable (p st)
 
-let footprint_s #a st = 
-  footprint (p st)
+let footprint_s #a st = footprint (p st)
 
-let invariant_s #a st h = live_st h (p st)
+let invariant_s #a st h = invariant (p st) h
 
-let repr #a st h = 
+let repr #a st h =
   let st = B.get h st 0 in
-  refl_st h (p st)
+  repr (p st) h
 
-let loc_includes_union_l_footprint_s #a l1 l2 st = 
+let loc_includes_union_l_footprint_s #a l1 l2 st =
   B.loc_includes_union_l l1 l2 (footprint_s st)
 
 let invariant_loc_in_footprint #a st m = ()
@@ -68,39 +63,25 @@ let frame_invariant #a l st h0 h1 = ()
 
 /// State allocation
 
+// Would like to specialize alloca in each branch, but two calls to StackInline
+// functions in the same block lead to variable redefinitions at extraction.
 let alloca a =
-  let st:state_s a =
+  let st =
     match a with
-    | SHA1 -> SHA1_s (alloca_state a)
-    | SHA2_256 -> SHA2_256_s (alloca_state a)
-    | SHA2_384 -> SHA2_384_s (alloca_state a)
-    | SHA2_512 -> SHA2_512_s (alloca_state a)
+    | SHA1     -> SHA1_s (alloca a)
+    | SHA2_256 -> SHA2_256_s (alloca a)
+    | SHA2_384 -> SHA2_384_s (alloca a)
+    | SHA2_512 -> SHA2_512_s (alloca a)
   in
   B.alloca st 1ul
 
 let create_in a r =
-  let st:state_s a =
+  let st =
     match a with
-    | SHA1 -> 
-      let k:B.buffer uint8 = B.malloc r (u8 0) (hash_len SHA1) in
-      let v:B.buffer uint8 = B.malloc r (u8 0) (hash_len SHA1) in
-      let ctr:B.buffer size_t = B.malloc r 0ul 1ul in 
-      SHA1_s (State k v ctr)
-    | SHA2_256 -> 
-      let k:B.buffer uint8 = B.malloc r (u8 0) (hash_len SHA2_256) in
-      let v:B.buffer uint8 = B.malloc r (u8 0) (hash_len SHA2_256) in
-      let ctr:B.buffer size_t = B.malloc r 0ul 1ul in 
-      SHA2_256_s (State k v ctr)
-    | SHA2_384 -> 
-      let k:B.buffer uint8 = B.malloc r (u8 0) (hash_len SHA2_384) in
-      let v:B.buffer uint8 = B.malloc r (u8 0) (hash_len SHA2_384) in
-      let ctr:B.buffer size_t = B.malloc r 0ul 1ul in 
-      SHA2_384_s (State k v ctr)
-    | SHA2_512 -> 
-      let k:B.buffer uint8 = B.malloc r (u8 0) (hash_len SHA2_512) in
-      let v:B.buffer uint8 = B.malloc r (u8 0) (hash_len SHA2_512) in
-      let ctr:B.buffer size_t = B.malloc r 0ul 1ul in 
-      SHA2_512_s (State k v ctr)  
+    | SHA1     -> SHA1_s     (create_in SHA1 r)
+    | SHA2_256 -> SHA2_256_s (create_in SHA2_256 r)
+    | SHA2_384 -> SHA2_384_s (create_in SHA2_384 r)
+    | SHA2_512 -> SHA2_512_s (create_in SHA2_512 r)
   in
   B.malloc r st 1ul
 
@@ -111,31 +92,34 @@ let create a = create_in a HS.root
 inline_for_extraction noextract
 val mk_instantiate: #a:supported_alg -> EverCrypt.HMAC.compute_st a -> instantiate_st a
 let mk_instantiate #a hmac st personalization_string personalization_string_len =
-  let entropy_input_len = min_length a in
-  let nonce_len = min_length a /. 2ul in
-  let min_entropy = entropy_input_len +! nonce_len in
-  push_frame();
-  assert_norm (range (v min_entropy) U32);
-  let entropy = B.alloca (u8 0) min_entropy in
-  let ok = randombytes entropy min_entropy in
-  let result =
-    if not ok then
-      false
-    else
-      begin
-      let entropy_input = B.sub entropy 0ul entropy_input_len in
-      let nonce = B.sub entropy entropy_input_len nonce_len in
-      S.hmac_input_bound a;
-      let st:state_s a = !*st in
-      mk_instantiate #a hmac (p st)
-        entropy_input_len entropy_input
-        nonce_len nonce
-        personalization_string_len personalization_string;
-      true
-      end
-  in
-  pop_frame();
-  result
+  if personalization_string_len >. max_personalization_string_length then
+    false
+  else
+    let entropy_input_len = min_length a in
+    let nonce_len = min_length a /. 2ul in
+    let min_entropy = entropy_input_len +! nonce_len in
+    push_frame();
+    assert_norm (range (v min_entropy) U32);
+    let entropy = B.alloca (u8 0) min_entropy in
+    let ok = randombytes entropy min_entropy in
+    let result =
+      if not ok then
+        false
+      else
+        begin
+        let entropy_input = B.sub entropy 0ul entropy_input_len in
+        let nonce = B.sub entropy entropy_input_len nonce_len in
+        S.hmac_input_bound a;
+        let st_s = !*st in
+        mk_instantiate hmac (p st_s)
+          entropy_input_len entropy_input
+          nonce_len nonce
+          personalization_string_len personalization_string;
+        true
+        end
+    in
+    pop_frame();
+    result
 
 let instantiate_sha1     = mk_instantiate EverCrypt.HMAC.compute_sha1
 let instantiate_sha2_256 = mk_instantiate EverCrypt.HMAC.compute_sha2_256
@@ -148,25 +132,28 @@ let instantiate_sha2_512 = mk_instantiate EverCrypt.HMAC.compute_sha2_512
 inline_for_extraction noextract
 val mk_reseed: #a:supported_alg -> EverCrypt.HMAC.compute_st a -> reseed_st a
 let mk_reseed #a hmac st additional_input additional_input_len =
-  let entropy_input_len = min_length a in
-  push_frame();
-  let entropy_input = B.alloca (u8 0) entropy_input_len in
-  let ok = randombytes entropy_input entropy_input_len in
-  let result =
-    if not ok then
-      false
-    else
-      begin
-      S.hmac_input_bound a;
-      let st:state_s a = !*st in
-      mk_reseed hmac (p st)
-        entropy_input_len entropy_input
-        additional_input_len additional_input;
-      true
-      end
-  in
-  pop_frame();
-  result
+  if additional_input_len >. max_additional_input_length then
+    false
+  else
+    let entropy_input_len = min_length a in
+    push_frame();
+    let entropy_input = B.alloca (u8 0) entropy_input_len in
+    let ok = randombytes entropy_input entropy_input_len in
+    let result =
+      if not ok then
+        false
+      else
+        begin
+        S.hmac_input_bound a;
+        let st_s = !*st in
+        mk_reseed hmac (p st_s)
+          entropy_input_len entropy_input
+          additional_input_len additional_input;
+        true
+        end
+    in
+    pop_frame();
+    result
 
 let reseed_sha1     = mk_reseed EverCrypt.HMAC.compute_sha1
 let reseed_sha2_256 = mk_reseed EverCrypt.HMAC.compute_sha2_256
@@ -178,6 +165,9 @@ let reseed_sha2_512 = mk_reseed EverCrypt.HMAC.compute_sha2_512
 inline_for_extraction noextract
 val mk_generate: #a:supported_alg -> EverCrypt.HMAC.compute_st a -> generate_st a
 let mk_generate #a hmac output st n additional_input additional_input_len =
+  if additional_input_len >. max_additional_input_length || n >. max_output_length then
+    false
+  else
   let entropy_input_len = min_length a in
   push_frame();
   let ok = mk_reseed hmac st additional_input additional_input_len in
@@ -186,9 +176,9 @@ let mk_generate #a hmac output st n additional_input additional_input_len =
       false
     else
       begin
-      let st = !*st in
-      let b = mk_generate hmac 
-        output (p st) n additional_input_len additional_input in
+      let st_s = !*st in
+      let b = mk_generate hmac
+        output (p st_s) n additional_input_len additional_input in
       true
       end
   in
@@ -217,10 +207,9 @@ let mk_uninstantiate a st =
   assert (B.loc_disjoint (B.loc_addr_of_buffer st) (footprint_s st_s));
   Lib.Memzero.clear_words_u8 (hash_len a) k;
   Lib.Memzero.clear_words_u8 (hash_len a) v;
-  // Can't erase ctr, but there is no need yet because we force 
-  // prediction resistance and that means that it ever holds 1ul
+  ctr.(0ul) <- 0ul;
   B.free k;
-  B.free v;  
+  B.free v;
   B.free ctr;
   B.free st
 

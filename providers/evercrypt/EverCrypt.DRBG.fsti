@@ -195,13 +195,13 @@ let instantiate_st (a:supported_alg) =
     invariant st h0 /\
     B.live h0 personalization_string /\ 
     disjoint_st st personalization_string h0 /\
-    B.length personalization_string = v personalization_string_len /\
-    v personalization_string_len <= S.max_personalization_string_length)
+    B.length personalization_string = v personalization_string_len)
   (ensures  fun h0 b h1 ->
     S.hmac_input_bound a;
     if not b then
       B.modifies B.loc_none h0 h1
     else
+      v personalization_string_len <= S.max_personalization_string_length /\
       invariant st h1 /\
       preserves_freeable st h0 h1 /\
       footprint st h0 == footprint st h1 /\
@@ -212,8 +212,7 @@ let instantiate_st (a:supported_alg) =
         S.min_length a / 2 <= Seq.length nonce /\
         Seq.length nonce <= S.max_length /\
         repr st h1 ==
-        S.instantiate entropy_input nonce 
-          (B.as_seq h0 personalization_string)))
+        S.instantiate entropy_input nonce (B.as_seq h0 personalization_string)))
 
 (** @type: true 
 *)
@@ -242,13 +241,13 @@ let reseed_st (a:supported_alg) =
     invariant st h0 /\
     B.live h0 additional_input /\
     disjoint_st st additional_input h0 /\
-    B.length additional_input = v additional_input_len /\
-    v additional_input_len <= S.max_additional_input_length)
+    B.length additional_input = v additional_input_len)
   (ensures  fun h0 b h1 ->
     S.hmac_input_bound a;
     if not b then
       B.modifies B.loc_none h0 h1
     else
+      v additional_input_len <= S.max_additional_input_length /\
       footprint st h0 == footprint st h1 /\
       invariant st h1 /\
       preserves_freeable st h0 h1 /\
@@ -290,14 +289,14 @@ let generate_st (a:supported_alg) =
     disjoint_st st output h0 /\ disjoint_st st additional_input h0 /\
     B.disjoint output additional_input /\
     B.length additional_input = v additional_input_len /\
-    v n = B.length output /\
-    v n <= S.max_output_length /\
-    v additional_input_len <= S.max_additional_input_length)
+    v n = B.length output)
   (ensures  fun h0 b h1 ->
     S.hmac_input_bound a;
     if not b then
       B.modifies B.loc_none h0 h1
     else
+      v n <= S.max_output_length /\
+      v additional_input_len <= S.max_additional_input_length /\
       invariant st h1 /\
       preserves_freeable st h0 h1 /\
       footprint st h0 == footprint st h1 /\

@@ -96,19 +96,59 @@ type state (a:supported_alg) =
     {disjoint k v /\ disjoint k reseed_counter /\ disjoint v reseed_counter}
   -> state a
 
+let freeable #a st =
+  let k:B.buffer uint8 = st.k in
+  let v:B.buffer uint8 = st.v in
+  let ctr:B.buffer size_t = st.reseed_counter in
+  B.freeable k /\ B.freeable v /\ B.freeable ctr
+
 let footprint #a st =
   let k:B.buffer uint8 = st.k in
   let v:B.buffer uint8 = st.v in
   let ctr:B.buffer size_t = st.reseed_counter in
-  B.loc_addr_of_buffer k |+|
-  B.loc_addr_of_buffer v |+|
-  B.loc_addr_of_buffer ctr
+  B.loc_addr_of_buffer k |+| B.loc_addr_of_buffer v |+| B.loc_addr_of_buffer ctr
 
-let live_st #a h st =
+let invariant #a st h =
   live h st.k /\ live h st.v /\ live h st.reseed_counter
 
-let refl_st #a h st =
+let repr #a st h =
   S.State (as_seq h st.k) (as_seq h st.v) (v (bget h st.reseed_counter 0))
+
+let alloca a =
+  let k =
+    match a with
+    | SHA1     -> create (hash_len SHA1)     (u8 0)
+    | SHA2_256 -> create (hash_len SHA2_256) (u8 0)
+    | SHA2_384 -> create (hash_len SHA2_384) (u8 0)
+    | SHA2_512 -> create (hash_len SHA2_512) (u8 0)
+  in
+  let v =
+    match a with
+    | SHA1     -> create (hash_len SHA1)     (u8 0)
+    | SHA2_256 -> create (hash_len SHA2_256) (u8 0)
+    | SHA2_384 -> create (hash_len SHA2_384) (u8 0)
+    | SHA2_512 -> create (hash_len SHA2_512) (u8 0)
+  in
+  let ctr = create 1ul 1ul in
+  State k v ctr
+
+let create_in a r =
+  let k:B.buffer uint8 =
+    match a with
+    | SHA1     -> B.malloc r (u8 0) (hash_len SHA1)
+    | SHA2_256 -> B.malloc r (u8 0) (hash_len SHA2_256)
+    | SHA2_384 -> B.malloc r (u8 0) (hash_len SHA2_384)
+    | SHA2_512 -> B.malloc r (u8 0) (hash_len SHA2_512)
+  in
+  let v:B.buffer uint8 =
+    match a with
+    | SHA1     -> B.malloc r (u8 0) (hash_len SHA1)
+    | SHA2_256 -> B.malloc r (u8 0) (hash_len SHA2_256)
+    | SHA2_384 -> B.malloc r (u8 0) (hash_len SHA2_384)
+    | SHA2_512 -> B.malloc r (u8 0) (hash_len SHA2_512)
+  in
+  let ctr:B.buffer size_t = B.malloc r 1ul 1ul in
+  State k v ctr
 
 #push-options "--z3rlimit 200"
 
@@ -134,7 +174,7 @@ let mk_instantiate #a hmac st
   assert (LSeq.equal (as_seq h1 v) (LSeq.create (hash_length a) (u8 1)));
   ctr.(0ul) <- 1ul;
   update hmac (entropy_input_len +! nonce_len +! personalization_string_len)
-    seed_material st.k st.v;
+    seed_material k v;
   pop_frame()
 
 #pop-options
@@ -179,8 +219,9 @@ let mk_reseed #a hmac st
   let h1 = get () in
   LSeq.eq_intro (as_seq h1 seed_material)
                 LSeq.(as_seq h0 entropy_input @| as_seq h0 additional_input);
-  update hmac (entropy_input_len +! additional_input_len) seed_material st.k st.v;
-  st.reseed_counter.(0ul) <- 1ul;
+  let State k v ctr: state a = st in
+  update hmac (entropy_input_len +! additional_input_len) seed_material k v;
+  ctr.(0ul) <- 1ul;
   pop_frame()
 
 
@@ -214,38 +255,39 @@ let mk_generate #a hmac output st n additional_input_len additional_input =
     begin
     S.hmac_input_bound a;
     Math.Lemmas.lemma_div_mod (v n) (hash_length a);
+    let State k v ctr = st in
     if additional_input_len >. 0ul then
-      update hmac additional_input_len additional_input st.k st.v;
+      update hmac additional_input_len additional_input k v;
     let output:lbuffer uint8 n = output in
     let max = n /. hash_len a in
     let out = sub output 0ul (max *! hash_len a) in
     [@inline_let]
     let a_spec = S.a_spec a in
     [@inline_let]
-    let refl h i = as_seq h st.v in
+    let refl h i = as_seq h v in
     [@inline_let]
-    let spec h0 = S.generate_loop a (as_seq h0 st.k) (v max) in
+    let spec h0 = S.generate_loop a (as_seq h0 k) (uint_v max) in
     let h0 = get () in
-    fill_blocks h0 (hash_len a) max out a_spec refl (fun i -> loc st.v) spec
+    fill_blocks h0 (hash_len a) max out a_spec refl (fun i -> loc v) spec
       (fun i ->
         LSeq.unfold_generate_blocks
-          (hash_length a) (v max) a_spec (spec h0) (as_seq h0 st.v) (v i);
-        hmac st.v st.k (hash_len a) st.v (hash_len a);
-        copy (sub out (i *! hash_len a) (hash_len a)) st.v
+          (hash_length a) (uint_v max) a_spec (spec h0) (as_seq h0 v) (uint_v i);
+        hmac v k (hash_len a) v (hash_len a);
+        copy (sub out (i *! hash_len a) (hash_len a)) v
       );
     if max *! hash_len a <. n then
       begin
       let h1 = get () in
       let block = sub output (max *! hash_len a) (n -! (max *! hash_len a)) in
-      hmac st.v st.k (hash_len a) st.v (hash_len a);
-      copy block (sub st.v 0ul (n -! (max *! hash_len a)));
+      hmac v k (hash_len a) v (hash_len a);
+      copy block (sub v 0ul (n -! (max *! hash_len a)));
       let h2 = get () in
       LSeq.eq_intro (as_seq h2 output)
                     (as_seq h1 out `LSeq.op_At_Bar` as_seq h2 block)
       end;
-    update hmac additional_input_len additional_input st.k st.v;
-    let ctr = st.reseed_counter.(0ul) in
-    st.reseed_counter.(0ul) <- ctr +! 1ul;
+    update hmac additional_input_len additional_input k v;
+    let old_ctr = ctr.(0ul) in
+    ctr.(0ul) <- old_ctr +! 1ul;
     true
     end
 
@@ -265,22 +307,3 @@ let generate a output st n additional_input_len additional_input =
   | SHA2_512 ->
     mk_generate Hacl.HMAC.compute_sha2_512 output st n
       additional_input_len additional_input
-
-
-let alloca_state a =
-  let k =
-    match a with
-    | SHA1     -> create (hash_len SHA1)     (u8 0)
-    | SHA2_256 -> create (hash_len SHA2_256) (u8 0)
-    | SHA2_384 -> create (hash_len SHA2_384) (u8 0)
-    | SHA2_512 -> create (hash_len SHA2_512) (u8 0)
-  in
-  let v =
-    match a with
-    | SHA1     -> create (hash_len SHA1)     (u8 0)
-    | SHA2_256 -> create (hash_len SHA2_256) (u8 0)
-    | SHA2_384 -> create (hash_len SHA2_384) (u8 0)
-    | SHA2_512 -> create (hash_len SHA2_512) (u8 0)
-  in
-  let ctr = create 1ul 1ul in
-  State k v ctr

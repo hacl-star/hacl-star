@@ -84,14 +84,35 @@ let min_length (a:supported_alg) : n:size_t{v n == S.min_length a} =
 
 val state: supported_alg -> Type0
 
+val freeable: #a:supported_alg -> st:state a -> Type0
+
 val footprint: #a:supported_alg -> st:state a -> GTot B.loc
 
-val live_st: #a:supported_alg -> h:HS.mem -> st:state a -> Type0
+val invariant: #a:supported_alg -> st:state a -> h:HS.mem -> Type0
 
 let disjoint_st (#a:supported_alg) (st:state a) (b:buffer uint8) =
   B.loc_disjoint (footprint st) (B.loc_buffer b)
 
-val refl_st: #a:supported_alg -> h:HS.mem -> st:state a -> GTot (S.state a)
+val repr: #a:supported_alg -> st:state a -> h:HS.mem -> GTot (S.state a)
+
+inline_for_extraction
+val alloca: a:supported_alg -> StackInline (state a)
+  (requires fun _ -> True)
+  (ensures  fun h0 st h1 ->
+    B.modifies B.loc_none h0 h1 /\
+    B.fresh_loc (footprint st) h0 h1 /\
+    B.(loc_includes (loc_region_only true (HS.get_tip h1)) (footprint st)) /\
+    invariant st h1)
+
+inline_for_extraction
+val create_in: a:supported_alg -> r:HS.rid -> ST (state a)
+  (requires fun _ -> is_eternal_region r)
+  (ensures  fun h0 st h1 ->
+    B.modifies B.loc_none h0 h1 /\
+    B.fresh_loc (footprint st) h0 h1 /\
+    B.(loc_includes (loc_region_only true r)) (footprint st) /\
+    invariant st h1 /\
+    freeable st)
 
 inline_for_extraction
 let instantiate_st (a:supported_alg) =
@@ -105,15 +126,15 @@ let instantiate_st (a:supported_alg) =
   -> Stack unit
   (requires fun h0 ->
     live h0 entropy_input /\ live h0 nonce /\ live h0 personalization_string /\
-    live_st h0 st /\
+    invariant st h0 /\
     S.min_length a <= v entropy_input_len /\ v entropy_input_len <= v max_length /\
     S.min_length a / 2 <= v nonce_len /\ v nonce_len <= v max_length /\
     v personalization_string_len <= S.max_personalization_string_length)
   (ensures  fun h0 _ h1 ->
     S.hmac_input_bound a;
-    live_st h1 st /\
+    invariant st h1 /\
     B.modifies (footprint st) h0 h1 /\
-    refl_st h1 st ==
+    repr st h1 ==
     S.instantiate
       (as_seq h0 entropy_input)
       (as_seq h0 nonce)
@@ -133,17 +154,17 @@ let reseed_st (a:supported_alg) =
   -> additional_input:lbuffer uint8 additional_input_len
   -> Stack unit
   (requires fun h0 ->
-    live_st h0 st /\ live h0 entropy_input /\ live h0 additional_input /\
+    invariant st h0 /\ live h0 entropy_input /\ live h0 additional_input /\
     disjoint_st st entropy_input /\ disjoint_st st additional_input /\
     S.min_length a <= v entropy_input_len /\ v entropy_input_len <= v max_length /\
     v additional_input_len <= S.max_additional_input_length)
   (ensures  fun h0 _ h1 ->
     S.hmac_input_bound a;
-    live_st h1 st /\
+    invariant st h1 /\
     B.modifies (footprint st) h0 h1 /\
-    refl_st h1 st ==
+    repr st h1 ==
     S.reseed
-      (refl_st h0 st)
+      (repr st h0)
       (as_seq h0 entropy_input)
       (as_seq h0 additional_input))
 
@@ -161,7 +182,7 @@ let generate_st (a:supported_alg) =
   -> additional_input:lbuffer uint8 additional_input_len
   -> Stack bool
   (requires fun h0 ->
-    live h0 output /\ live_st h0 st /\ live h0 additional_input /\
+    live h0 output /\ invariant st h0 /\ live h0 additional_input /\
     disjoint_st st output /\ disjoint_st st additional_input /\
     disjoint output additional_input /\
     v n = length output /\
@@ -169,25 +190,16 @@ let generate_st (a:supported_alg) =
     v additional_input_len <= S.max_additional_input_length)
   (ensures  fun h0 b h1 ->
     S.hmac_input_bound a;
-    match S.generate (refl_st h0 st) (v n) (as_seq h0 additional_input) with
-    | None -> b = false /\ live_st h1 st /\ modifies0 h0 h1
+    match S.generate (repr st h0) (v n) (as_seq h0 additional_input) with
+    | None -> b = false /\ invariant st h1 /\ modifies0 h0 h1
     | Some (out, st_) ->
       b = true /\
-      live_st h1 st /\
+      invariant st h1 /\
       B.modifies (loc output |+| footprint st) h0 h1 /\
-      refl_st h1 st == st_ /\
+      repr st h1 == st_ /\
       as_seq #MUT #_ #n h1 output == out)
 
 inline_for_extraction noextract
-val mk_generate: #a:supported_alg -> hmac:HMAC.compute_st a -> generate_st a
+val mk_generate: #a:supported_alg -> HMAC.compute_st a -> generate_st a
 
-val generate (a:supported_alg) : generate_st a
-
-inline_for_extraction noextract
-val alloca_state: a:supported_alg -> StackInline (state a)
-  (requires fun _ -> True)
-  (ensures  fun h0 st h1 ->
-    B.modifies B.loc_none h0 h1 /\
-    B.fresh_loc (footprint st) h0 h1 /\
-    B.(loc_includes (loc_region_only true (HS.get_tip h1)) (footprint st)) /\
-    live_st h1 st)
+val generate: a:supported_alg -> generate_st a
