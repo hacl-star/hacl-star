@@ -703,6 +703,7 @@ WASM_FLAGS	=\
   -bundle FStar.* \
   -bundle EverCrypt.*,Hacl.*,MerkleTree.*[rename=EverCrypt] \
   -bundle LowStar.* \
+  -bundle Lib.RandomBuffer.System \
   -bundle '\*[rename=Misc]' \
   -minimal -wasm
 
