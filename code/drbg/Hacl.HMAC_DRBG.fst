@@ -19,7 +19,7 @@ friend Spec.HMAC_DRBG
 unfold
 let hash_len (a:supported_alg) = Hacl.Hash.Definitions.hash_len a
 
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 50"
 
 inline_for_extraction noextract
 val update_round: #a:supported_alg
@@ -205,7 +205,7 @@ let reseed a st
       entropy_input_len entropy_input
       additional_input_input_len additional_input_input
 
-#push-options "--z3rlimit 200"
+#push-options "--z3rlimit 300"
 
 let mk_generate #a hmac output st n additional_input_len additional_input =
   if st.reseed_counter.(0ul) >. reseed_interval then

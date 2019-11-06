@@ -1,72 +1,14 @@
 module Spec.HMAC_DRBG.Test.Vectors
 
+open Lib.Meta
 open Spec.Hash.Definitions
 
-#set-options "--max_fuel 0 --max_ifuel 0"
+#set-options "--fuel 0 --ifuel 0"
 
 ///
 /// HMAC-DRBG test vectors from HIST CAVP
 /// https://csrc.nist.gov/projects/cryptographic-algorithm-validation-program/random-number-generators#DRBG
 ///
-
-/// BEGIN: excerpt of Test.Lowstarize
-/// Avoids having it as a dependency, but would be better to move this to /lib
-
-noextract
-val is_hex_digit: Char.char -> bool
-let is_hex_digit = function
-  | '0'
-  | '1'
-  | '2'
-  | '3'
-  | '4'
-  | '5'
-  | '6'
-  | '7'
-  | '8'
-  | '9'
-  | 'a' | 'A'
-  | 'b' | 'B'
-  | 'c' | 'C'
-  | 'd' | 'D'
-  | 'e' | 'E'
-  | 'f' | 'F' -> true
-  | _ -> false
-
-noextract
-type hex_digit = c:Char.char{is_hex_digit c}
-
-noextract
-val int_of_hex: c:hex_digit -> int
-let int_of_hex = function
-  | '0' -> 0
-  | '1' -> 1
-  | '2' -> 2
-  | '3' -> 3
-  | '4' -> 4
-  | '5' -> 5
-  | '6' -> 6
-  | '7' -> 7
-  | '8' -> 8
-  | '9' -> 9
-  | 'a' | 'A' -> 10
-  | 'b' | 'B' -> 11
-  | 'c' | 'C' -> 12
-  | 'd' | 'D' -> 13
-  | 'e' | 'E' -> 14
-  | 'f' | 'F' -> 15
-
-noextract
-val byte_of_hex: a:hex_digit -> b:hex_digit -> int
-let byte_of_hex a b =
-  FStar.Mul.(int_of_hex a * 16 + int_of_hex b)
-
-noextract unfold
-type hex_string =
-  s:string{normalize (String.strlen s % 2 = 0) /\
-           normalize (List.Tot.for_all is_hex_digit (String.list_of_string s))}
-
-/// END: Excerpt of Test.Lowstarize
 
 type vec = {
   a: hash_alg;

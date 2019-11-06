@@ -2,28 +2,13 @@ module Spec.HMAC_DRBG.Test
 
 open FStar.Seq
 open Lib.IntTypes
+open Lib.Meta
 
 open Spec.Agile.HMAC
 open Spec.HMAC_DRBG
 open Spec.HMAC_DRBG.Test.Vectors
 
 #set-options "--max_fuel 1 --max_ifuel 1 --z3rlimit 50"
-
-#push-options "--max_fuel 2"
-
-let rec as_uint8s acc
-  (cs:list Char.char{normalize (List.length cs % 2 = 0) /\
-                     normalize (List.Tot.for_all is_hex_digit cs)}):
-  Tot (l:list uint8{List.length l = List.length acc + List.length cs / 2}) (decreases cs)
-=
-  match cs with
-  | c1 :: c2 :: cs' -> as_uint8s (u8 (byte_of_hex c1 c2) :: acc) cs'
-  | [] -> List.rev_length acc; List.rev acc
-
-#pop-options
-
-let from_hex (s:hex_string) : lseq uint8 (String.strlen s / 2) =
-  seq_of_list (as_uint8s [] (String.list_of_string s))
 
 let print_and_compare (len:size_nat) (test_expected test_result:lbytes len) : All.ML bool =
   // Cheap alternative to friend Lib.IntTypes / Lib.RawIntTypes
