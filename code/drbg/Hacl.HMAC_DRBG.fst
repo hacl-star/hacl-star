@@ -124,8 +124,8 @@ let mk_instantiate #a hmac st
   copy (sub seed_material entropy_input_len nonce_len) nonce;
   copy (sub seed_material (entropy_input_len +! nonce_len) personalization_string_len) personalization_string;
   let State k v ctr = st in
-  fillT (hash_len a) k (fun _ -> u8 0) (fun _ -> u8 0);
-  fillT (hash_len a) v (fun _ -> u8 1) (fun _ -> u8 1);
+  memset k (u8 0) (hash_len a);
+  memset v (u8 1) (hash_len a);
   let h1 = get () in
   assert (Seq.equal (as_seq h1 seed_material)
     (Seq.append (as_seq h0 entropy_input) (Seq.append (as_seq h0 nonce)
