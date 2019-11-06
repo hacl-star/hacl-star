@@ -138,6 +138,9 @@ test-ml: $(subst .,_,$(patsubst %.fst,test-ml-%,$(notdir $(wildcard specs/tests/
 test-benchmark: all-unstaged
 	$(MAKE) -C tests/benchmark all
 
+mozilla-ci: mozilla-ci-staged
+mozilla-ci-unstaged: compile-mozilla test-c
+
 # Not reusing the -staged automatic target so as to export NOSHORTLOG
 ci:
 	tools/blast-staticconfig.sh wasm
