@@ -37,6 +37,7 @@ let invert_state_s (a:supported_alg): Lemma
   allow_inversion (state_s a)
 
 /// Only call this function in extracted code with a known `a`
+inline_for_extraction noextract
 let p #a (s:state_s a) : Hacl.HMAC_DRBG.state a =
   match a with
   | SHA1 -> let SHA1_s p = s in p
