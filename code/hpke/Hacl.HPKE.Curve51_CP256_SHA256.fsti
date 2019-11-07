@@ -12,6 +12,6 @@ val setupBaseI: setupBaseI_st cs
 
 val setupBaseR: setupBaseR_st cs
 
-val encryptBase: encryptBase_st cs
+val sealBase: sealBase_st cs
 
-val decryptBase: decryptBase_st cs
+val openBase: openBase_st cs

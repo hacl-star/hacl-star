@@ -66,7 +66,7 @@ let setupBaseR_st (cs:S.ciphersuite) =
      )
 
 inline_for_extraction noextract
-let encryptBase_st (cs:S.ciphersuite) =
+let sealBase_st (cs:S.ciphersuite) =
      skE: key_dh_secret cs
   -> pkR: key_dh_public cs
   -> mlen: size_t{v mlen <= S.max_length cs /\ v mlen + S.size_dh_public cs + 16 <= max_size_t}
@@ -82,10 +82,10 @@ let encryptBase_st (cs:S.ciphersuite) =
          live h0 m /\ live h0 info /\
          disjoint output info /\ disjoint output m /\ disjoint output skE)
        (ensures fun h0 _ h1 -> modifies (loc output) h0 h1 /\
-         as_seq h1 output `Seq.equal` S.encryptBase cs (as_seq h0 skE) (as_seq h0 pkR) (as_seq h0 m) (as_seq h0 info))
+         as_seq h1 output `Seq.equal` S.sealBase cs (as_seq h0 skE) (as_seq h0 pkR) (as_seq h0 m) (as_seq h0 info))
 
 inline_for_extraction noextract
-let decryptBase_st (cs:S.ciphersuite) =
+let openBase_st (cs:S.ciphersuite) =
      pkE: key_dh_public cs
   -> skR: key_dh_secret cs
   -> mlen: size_t{S.size_dh_public cs + S.size_aead_tag cs <= v mlen /\ v mlen <= S.max_length cs}
@@ -101,7 +101,7 @@ let decryptBase_st (cs:S.ciphersuite) =
          live h0 m /\ live h0 info /\
          disjoint output info /\ disjoint output m)
        (ensures fun h0 z h1 -> modifies (loc output) h0 h1 /\
-         (let plain = S.decryptBase cs (as_seq h0 pkE) (as_seq h0 skR) (as_seq h0 m) (as_seq h0 info) in
+         (let plain = S.openBase cs (as_seq h0 pkE) (as_seq h0 skR) (as_seq h0 m) (as_seq h0 info) in
          match z with
          | 0ul -> Some? plain /\ as_seq h1 output == Some?.v plain
          | 1ul -> None? plain
@@ -114,7 +114,7 @@ noextract inline_for_extraction
 val setupBaseR: #cs:S.ciphersuite -> setupBaseR_st cs
 
 noextract inline_for_extraction
-val encryptBase: #cs:S.ciphersuite -> encryptBase_st cs
+val sealBase: #cs:S.ciphersuite -> sealBase_st cs
 
 noextract inline_for_extraction
-val decryptBase: #cs:S.ciphersuite -> decryptBase_st cs
+val openBase: #cs:S.ciphersuite -> openBase_st cs

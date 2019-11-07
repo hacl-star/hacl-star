@@ -5,7 +5,7 @@ HACL_HOME=../..
 all: dist/libhpke.a
 
 # Defines rules for producing .checked, .krml, .depend, etc.
-include ../Makefile.local
+include ../../Makefile.local
 
 CFLAGS += -I../../../lib/c -I../../lib/c -march=native -mtune=native
 export CFLAGS
