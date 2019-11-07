@@ -129,28 +129,16 @@ let test_one_hmac_drbg vec =
        LB additional_input_2_len additional_input_2),
       LB returned_bits_len returned_bits = vec
   in
-  B.recall entropy_input;
-  B.recall nonce;
+  // EverCrypt.DRBG sources entropy internally.
+  // We don't use entropy_input, entropy_input_reseed, nonce, and returned_bits
+  // from the test vector, but we test safety of the API.
   B.recall personalization_string;
-  B.recall entropy_input_reseed;
   B.recall additional_input_reseed;
   B.recall additional_input_1;
   B.recall additional_input_2;
-  B.recall returned_bits;
-  // We need to check this at runtime because Low*-ized vectors don't carry any refinements
   if not (Spec.Agile.HMAC.is_supported_alg a &&
-          min_length a <=. entropy_input_len &&
-          entropy_input_len <=. max_length &&
-          min_length a /. 2ul <=. nonce_len &&
-          nonce_len <=. max_length &&
-          personalization_string_len <=. max_personalization_string_length &&
-          min_length a <=. entropy_input_reseed_len &&
-          entropy_input_reseed_len <=. max_length &&
-          additional_input_reseed_len <=. max_additional_input_length &&
-          additional_input_1_len <=. max_additional_input_length &&
-          additional_input_2_len <=. max_additional_input_length &&
           0ul <. returned_bits_len &&
-          returned_bits_len <=. max_output_length)
+          returned_bits_len <. 0xFFFFFFFFul)
   then C.exit (-1l)
   else
     begin
@@ -161,6 +149,7 @@ let test_one_hmac_drbg vec =
     let a = Ghost.hide a in
     let ok = instantiate a st personalization_string personalization_string_len in
     if ok then
+      // We always provide prediction_resistance, so technically we don't need to reseed
       let ok = reseed a st additional_input_reseed additional_input_reseed_len in
       if ok then
         let ok = generate a output st returned_bits_len
