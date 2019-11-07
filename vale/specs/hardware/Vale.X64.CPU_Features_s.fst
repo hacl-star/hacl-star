@@ -29,10 +29,6 @@ assume val cpuid_features (u:unit) :
          (forall rcx . {:pattern (cpuid rRcx 1 rcx)} (Vale.Def.Types_s.iand (cpuid rRcx 1 rcx) (pow2_norm 19)  > 0) = sse4_1_enabled) /\
          (forall rcx . {:pattern (cpuid rRcx 1 rcx)} (Vale.Def.Types_s.iand (cpuid rRcx 1 rcx) (pow2_norm 22)  > 0) = movbe_enabled) /\
          (Vale.Def.Types_s.iand (cpuid rRbx 7 0) (pow2_norm  5) > 0) = avx2_enabled /\
-         (Vale.Def.Types_s.iand (cpuid rRbx 7 0) (pow2_norm  5) > 0) = avx2_enabled /\
-         (Vale.Def.Types_s.iand (cpuid rRbx 7 0) (pow2_norm  5) > 0) = avx2_enabled /\
-         (Vale.Def.Types_s.iand (cpuid rRbx 7 0) (pow2_norm  5) > 0) = avx2_enabled /\
-         (Vale.Def.Types_s.iand (cpuid rRbx 7 0) (pow2_norm  5) > 0) = avx2_enabled /\
          (Vale.Def.Types_s.iand (cpuid rRbx 7 0) (pow2_norm  8) > 0) = bmi2_enabled /\
          (Vale.Def.Types_s.iand (cpuid rRbx 7 0) (pow2_norm 19) > 0) = adx_enabled /\
          (Vale.Def.Types_s.iand (cpuid rRbx 7 0) (pow2_norm 29) > 0) = sha_enabled

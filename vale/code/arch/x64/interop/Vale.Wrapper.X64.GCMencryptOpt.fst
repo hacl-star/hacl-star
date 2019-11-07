@@ -17,7 +17,7 @@ open Vale.Lib.BufferViewHelpers
 let wrap_slice (#a:Type0) (s:Seq.seq a) (i:int) : Seq.seq a =
   Seq.slice s 0 (if 0 <= i && i <= Seq.length s then i else 0)
 
-#set-options "--z3rlimit 400 --max_fuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 500 --max_fuel 0 --max_ifuel 0"
 
 let math_aux (n:nat) : Lemma (n * 1 == n) = ()
 
@@ -131,7 +131,7 @@ val gcm128_encrypt_opt':
       UInt64.v auth_num * (128/8) <= UInt64.v auth_bytes /\
       UInt64.v auth_bytes < UInt64.v auth_num * (128/8) + 128/8 /\
 
-      aesni_enabled /\ pclmulqdq_enabled /\ avx_enabled /\
+      aesni_enabled /\ pclmulqdq_enabled /\ avx_enabled /\ sse_enabled /\ movbe_enabled /\
       is_aes_key_LE AES_128 (Ghost.reveal key) /\
       (let db = get_downview keys_b in
       length_aux keys_b;
@@ -362,7 +362,7 @@ val gcm128_encrypt_opt_alloca:
       UInt64.v plain_len < pow2_32 /\
       UInt64.v auth_len < pow2_32 /\
 
-      aesni_enabled /\ pclmulqdq_enabled /\ avx_enabled /\
+      aesni_enabled /\ pclmulqdq_enabled /\ avx_enabled /\ sse_enabled /\ movbe_enabled /\
       is_aes_key_LE AES_128 (Ghost.reveal key) /\
       (Seq.equal (B.as_seq h0 keys_b)
          (seq_nat8_to_seq_uint8 (le_seq_quad32_to_bytes (key_to_round_keys_LE AES_128 (Ghost.reveal key))))) /\
