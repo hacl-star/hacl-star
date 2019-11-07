@@ -8,7 +8,7 @@ test: all
 FSTAR_ROOTS = Hacl.Curve25519_64_Local.fst Hacl.Curve25519_64_Slow.fst Hacl.Curve25519_51.fst
 
 # Defines rules for producing .checked, .krml, .depend, etc.
-include ../Makefile.local
+include ../../Makefile.local
 
 # CUSTOMIZE HERE: how to produce binary objects
 dist:
@@ -36,6 +36,8 @@ dist/Makefile.basic: $(filter-out %/prims.krml,$(ALL_KRML_FILES)) | dist
 	  -tmpdir dist \
 	  -ccopts -std=gnu11,-g,-O3 \
 	  -skip-compilation
+
+$(HACL_HOME)/tests/curve64-ours.o : dist/Makefile.basic
 
 # CUSTOMIZE HERE: list the dependencies for each test (there may be multiple)
 dist/curve64-ours.exe: $(HACL_HOME)/tests/curve64-ours.o dist/libcurve.a

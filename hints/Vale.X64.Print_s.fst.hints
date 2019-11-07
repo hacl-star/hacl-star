@@ -215,7 +215,7 @@
         "subterm_ordering_Prims.Cons"
       ],
       0,
-      "166f51d16d94223f765e2c29abab9cc6"
+      "28954849775cc75f4a0a01dc5e08bd7d"
     ],
     [
       "Vale.X64.Print_s.print_ins",
@@ -284,7 +284,7 @@
         "fuel_guarded_inversion_Prims.list", "subterm_ordering_Prims.Cons"
       ],
       0,
-      "2448380b79b6133a19b121f5db9b12c7"
+      "cf4cf643ffdffa8d37329ec3e25bddd5"
     ],
     [
       "Vale.X64.Print_s.print_block",
@@ -307,7 +307,7 @@
         "subterm_ordering_Vale.X64.Machine_s.While"
       ],
       0,
-      "81eec92ad378221f420b93fd466c8a89"
+      "7619feb18faaaa26586cf9e6b13f820d"
     ],
     [
       "Vale.X64.Print_s.masm",
@@ -565,7 +565,7 @@
         "subterm_ordering_Prims.Cons"
       ],
       0,
-      "b571851e96877bb629a742c51607262b"
+      "4115d6b4e491d554a18dba30b57f66e9"
     ],
     [
       "Vale.X64.Print_s.print_ins",
@@ -634,7 +634,7 @@
         "fuel_guarded_inversion_Prims.list", "subterm_ordering_Prims.Cons"
       ],
       0,
-      "05d3017d78c8e5f87478ec9e4acbe692"
+      "60fa6ac216c66634a49c6d88252ee8eb"
     ],
     [
       "Vale.X64.Print_s.print_block",
@@ -657,7 +657,7 @@
         "subterm_ordering_Vale.X64.Machine_s.While"
       ],
       0,
-      "987d9feb24061e2e78deb58e6e9b14d0"
+      "bf9f4ac5d1d5bb6c4d5594de5e57981d"
     ],
     [
       "Vale.X64.Print_s.masm",
@@ -680,18 +680,26 @@
       "Vale.X64.Print_s.gcc",
       2,
       1,
-      0,
+      1,
       [
-        "@MaxIFuel_assumption", "@query", "bool_inversion", "bool_typing",
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ce036b6b736ef4e0bc3a9ff132a12aed", "bool_inversion",
         "disc_equation_FStar.Pervasives.Native.None",
         "disc_equation_FStar.Pervasives.Native.Some",
-        "equation_Prims.eqtype", "function_token_typing_Prims.string",
+        "disc_equation_Prims.Cons", "disc_equation_Prims.Nil",
+        "equality_tok_Prims.LexTop@tok", "equation_Prims.eqtype",
+        "equation_Vale.X64.Machine_s.operand64",
+        "fuel_guarded_inversion_Prims.list",
+        "function_token_typing_Prims.string",
         "kinding_FStar.Pervasives.Native.tuple2@tok",
         "lemma_FStar.Pervasives.invertOption",
-        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "string_inversion", "subterm_ordering_Prims.Cons",
+        "typing_FStar.Pervasives.Native.uu___is_None",
+        "typing_FStar.Pervasives.Native.uu___is_Some"
       ],
       0,
-      "0a013fe1836b7bf0eb7530fe351a9e85"
+      "53f79d205609b65cb7c804371debd8ed"
     ]
   ]
 ]

@@ -441,6 +441,25 @@ min-test-unstaged: $(filter-out \
 	@echo $^
 	@echo "<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>"
 
+####################################################
+# Tactic (not covered by --extract, intentionally) #
+####################################################
+
+obj/Meta_Interface.ml: CODEGEN = Plugin
+obj/Meta_Interface.ml: obj/Meta.Interface.fst.checked
+
+obj/Meta_Interface.cmxs: obj/Meta_Interface.ml
+	$(OCAMLSHARED) $< -o $@
+
+# IMPORTANT NOTE: we cannot let F* compile the cmxs for several reasons.
+# First, it won't detect out-of-date .ml files and won't recompile the cmxs.
+# Second, it will race because several Hacl.Meta.%.checked targets might be
+# scheduled in parallel.
+# So, we don't trust F* to compile the tactic and add it as a step of the
+# dependency graph. Note that local Makefiles don't bother.
+obj/Hacl.Meta.%.checked: FSTAR_FLAGS += --load Meta.Interface
+$(filter obj/Hacl.Meta.%.checked,$(call to-obj-dir,$(ALL_CHECKED_FILES))): obj/Meta_Interface.cmxs
+
 ###############################################################################
 # Extracting (checked files) to OCaml, producing executables, running them to #
 # print ASM files                                                             #
@@ -452,9 +471,11 @@ obj/%.cmx: obj/%.ml
 	  $(OCAMLOPT) -c $< -o $@ \
 	  ,[OCAMLOPT-CMX] $(notdir $*),$(call to-obj-dir,$@))
 
+obj/%.ml: CODEGEN=OCaml
+
 obj/%.ml:
 	$(call run-with-log,\
-	  $(FSTAR) $(notdir $(subst .checked,,$<)) --codegen OCaml \
+	  $(FSTAR) $(notdir $(subst .checked,,$<)) --codegen $(CODEGEN) \
 	    --extract_module $(subst .fst.checked,,$(notdir $<)) \
 	  ,[EXTRACT-ML] $(notdir $*),$(call to-obj-dir,$@))
 
@@ -603,6 +624,7 @@ REQUIRED_FLAGS	=\
   -no-prefix 'Vale.Inline.X64.Fsqr_inline' \
   -no-prefix 'EverCrypt.Vale' \
   -add-include 'Hacl_Curve25519_64:"curve25519-inline.h"' \
+  -add-include 'Hacl_Impl_QTesla:"kremlin/fstar_int.h"' \
   -no-prefix 'MerkleTree.New.Low' \
   -no-prefix 'MerkleTree.New.Low.Serialization' \
   -bundle Hacl.Impl.Poly1305.Fields \
@@ -637,6 +659,7 @@ MERKLE_BUNDLE=-bundle 'MerkleTree.New.Low+MerkleTree.New.Low.Serialization=[rena
 CTR_BUNDLE=-bundle EverCrypt.CTR=EverCrypt.CTR.*
 # Disabled by default, overridden for wasm
 WASMSUPPORT_BUNDLE = -bundle WasmSupport
+QTESLA_BUNDLE=-bundle 'Hacl.Impl.QTesla=QTesla.Params,Hacl.Impl.QTesla.*'
 
 BUNDLE_FLAGS	=\
   $(HASH_BUNDLE) \
@@ -653,7 +676,9 @@ BUNDLE_FLAGS	=\
   $(WASMSUPPORT_BUNDLE) \
   $(CTR_BUNDLE) \
   $(TUTORIAL_BUNDLE) \
-  $(HPKE_BUNDLE)
+  $(HPKE_BUNDLE) \
+  $(QTESLA_BUNDLE) \
+  $(FRODO_BUNDLE)
 
 DEFAULT_FLAGS = \
   $(HAND_WRITTEN_LIB_FLAGS) \
@@ -768,7 +793,9 @@ dist/mozilla/Makefile.basic: CTR_BUNDLE =
 dist/mozilla/Makefile.basic: SHA3_BUNDLE = -bundle Hacl.SHA3
 dist/mozilla/Makefile.basic: HASH_BUNDLE = -bundle Hacl.Hash.*,Hacl.HKDF,Hacl.HMAC
 dist/mozilla/Makefile.basic: HPKE_BUNDLE = -bundle Hacl.HPKE.*
+dist/mozilla/Makefile.basic: QTESLA_BUNDLE = -bundle QTesla.*,Hacl.Impl.QTesla,Hacl.Impl.QTesla.*
 dist/mozilla/Makefile.basic: TUTORIAL_BUNDLE = -bundle Tutorial,TestLib,Hacl_Lib,Hacl_Kremlib
+dist/mozilla/Makefile.basic: FRODO_BUNDLE = -bundle Hacl.Frodo.*,Hacl.SHA3,Hacl.Keccak,Frodo.Params
 dist/mozilla/Makefile.basic: \
   BUNDLE_FLAGS += \
     -bundle EverCrypt,EverCrypt.* \
