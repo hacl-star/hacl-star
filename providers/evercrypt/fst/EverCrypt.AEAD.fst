@@ -126,7 +126,8 @@ fun r dst k ->
   let has_aesni = EverCrypt.AutoConfig2.has_aesni () in
   let has_pclmulqdq = EverCrypt.AutoConfig2.has_pclmulqdq () in
   let has_avx = EverCrypt.AutoConfig2.has_avx() in
-  if EverCrypt.TargetConfig.x64 && (has_aesni && has_pclmulqdq && has_avx) then (
+  let has_sse = EverCrypt.AutoConfig2.has_sse() in
+  if EverCrypt.TargetConfig.x64 && (has_aesni && has_pclmulqdq && has_avx && has_sse) then (
     let ek = B.malloc r 0uy (concrete_xkey_len i + 176ul) in
 
     vale_expand i k ek;

@@ -256,6 +256,8 @@ procedure aes_ctr_encrypt(
         rk1 @= xmm3; rk2 @= xmm4; rk3 @= xmm5; rk4 @= xmm6;        // Round keys
         ctr1 @= xmm2; ctr2 @= xmm12; ctr3 @= xmm13; ctr4 @= xmm14; // Counters being fed to AES
     requires
+        sse_enabled;
+
         // AES reqs
         aes_reqs(alg, key, round_keys, keys_b, key_ptr, mem, memTaint);
         ctr1 == quad32_xor(in1, rk1);
@@ -362,7 +364,7 @@ procedure aes_ctr_ghash(
         ctr1 @= xmm2; ctr2 @= xmm12; ctr3 @= xmm13; ctr4 @= xmm14; // Counters being fed to AES
         mask @= xmm8; hash @= xmm1; h @= xmm11;
     requires
-        pclmulqdq_enabled && avx_enabled;
+        pclmulqdq_enabled && avx_enabled && sse_enabled;
         0 <= count < old_num_quad_blocks;
         validDstAddrs128(mem, old_out_ptr,    out_b,   old_num_quad_blocks * 4, memTaint, Secret);
 
@@ -431,6 +433,8 @@ procedure aes_ctr_loop_body(
         ctr1 @= xmm2; ctr2 @= xmm12; ctr3 @= xmm13; ctr4 @= xmm14; // Counters being fed to AES
         tmp_xmm @= xmm7; mask @= xmm8; hash @= xmm1; h @= xmm11;
     requires
+        sse_enabled;
+
         // There's at least one block of four left to do
         0 < num_quad_blocks <= old_num_quad_blocks;
 
@@ -603,6 +607,8 @@ procedure aes_counter_loop(
         efl; mem;
 
     requires
+        sse_enabled;
+
         // There's at least one block of four left to do
         0 < num_quad_blocks && 4*num_quad_blocks < pow2_32 - 4;
 
@@ -685,6 +691,8 @@ procedure aes_counter_loop(
 
     while (num_quad_blocks > 0)
         invariant
+            sse_enabled;
+
             0 < old(num_quad_blocks) && 4*old(num_quad_blocks) < pow2_32 - 4;
             0 <= num_quad_blocks <= old(num_quad_blocks);
             count == old(num_quad_blocks) - num_quad_blocks;

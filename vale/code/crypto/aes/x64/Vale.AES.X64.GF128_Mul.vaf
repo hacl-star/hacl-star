@@ -50,6 +50,7 @@ procedure ShiftLeft128_1(ghost a:poly)
         xmm1; xmm2;
     requires
         avx_enabled;
+        sse_enabled;
         degree(a) < 128;
         xmm1 == to_quad32(a);
     ensures
@@ -71,6 +72,7 @@ procedure ShiftLeft2_128_1(ghost lo:poly, ghost hi:poly)
         xmm1; xmm2; xmm3; xmm4; xmm5;
     requires
         avx_enabled;
+        sse_enabled;
         degree(hi) < 127;
         degree(lo) <= 127;
         xmm1 == to_quad32(lo);
@@ -125,7 +127,7 @@ procedure ClmulRev64(ghost a:poly, ghost b:poly, inline dstHi:bool, inline srcHi
         efl;
         xmm1; xmm2;
     requires
-        pclmulqdq_enabled && avx_enabled;
+        pclmulqdq_enabled && avx_enabled && sse_enabled;
         degree(a) <= 63;
         degree(b) <= 63;
         reverse(a, 63) == of_double32(if dstHi then quad32_double_hi(xmm1) else quad32_double_lo(xmm1));
@@ -144,6 +146,7 @@ procedure High64ToLow(out dst:xmm, ghost a:poly)
     modifies
         efl; r12;
     requires
+        sse_enabled;
         degree(a) <= 127;
         dst == to_quad32(a);
     ensures
@@ -159,6 +162,7 @@ procedure Low64ToHigh(out dst:xmm, ghost a:poly)
     modifies
         efl; r12;
     requires
+        sse_enabled;
         degree(a) <= 127;
         dst == to_quad32(a);
     ensures
@@ -174,6 +178,7 @@ procedure AddPoly(out dst:xmm, in src:xmm, ghost a:poly, ghost b:poly)
     modifies
         efl;
     requires
+        sse_enabled;
         degree(a) <= 127;
         degree(b) <= 127;
         dst == to_quad32(a);
@@ -191,7 +196,7 @@ procedure Clmul128(ghost ab:poly, ghost cd:poly) returns(ghost lo:poly, ghost hi
         efl; r12;
         xmm1; xmm2; xmm3; xmm4; xmm5;
     requires
-        pclmulqdq_enabled;
+        pclmulqdq_enabled && sse_enabled;
         degree(ab) <= 127;
         degree(cd) <= 127;
         xmm1 == to_quad32(ab);
@@ -262,7 +267,7 @@ procedure ClmulRev128(ghost ab:poly, ghost cd:poly) returns(ghost lo:poly, ghost
         efl; r12;
         xmm1; xmm2; xmm3; xmm4; xmm5;
     requires
-        pclmulqdq_enabled && avx_enabled;
+        pclmulqdq_enabled && avx_enabled && sse_enabled;
         degree(ab) <= 127;
         degree(cd) <= 127;
         xmm1 == to_quad32(reverse(ab, 127));
@@ -289,6 +294,7 @@ procedure Gf128ModulusRev(inout dst:xmm)
     {:quick exportOnly}
     modifies
         efl; r12;
+    requires sse_enabled;
     ensures
         dst == to_quad32(reverse(gf128_modulus_low_terms, 127));
 {
@@ -304,7 +310,7 @@ procedure ReduceMulRev128(ghost a:poly, ghost b:poly)
         efl; r12;
         xmm1; xmm2; xmm3; xmm4; xmm5; xmm6;
     requires
-        pclmulqdq_enabled && avx_enabled;
+        pclmulqdq_enabled && avx_enabled && sse_enabled;
         degree(a) <= 127;
         degree(b) <= 127;
         xmm1 == to_quad32(reverse(a, 127));
@@ -354,7 +360,7 @@ procedure Gf128MulRev128()
         efl; r12;
         xmm1; xmm2; xmm3; xmm4; xmm5; xmm6;
     requires
-        pclmulqdq_enabled && avx_enabled;
+        pclmulqdq_enabled && avx_enabled && sse_enabled;
     ensures
         of_quad32(xmm1) == gf128_mul_rev(a, b);
 {

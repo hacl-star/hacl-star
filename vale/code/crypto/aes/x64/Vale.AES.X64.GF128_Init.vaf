@@ -77,7 +77,7 @@ procedure ShiftKey1_128(ghost f:poly)
         efl;
         xmm1; xmm2; xmm3;
     requires
-        avx_enabled;
+        avx_enabled && sse_enabled;
         of_quad32(xhighbit) == monomial(127);
         offset == reverse(shift(add(monomial(128), f), (-1)), 127);
     ensures
@@ -110,7 +110,7 @@ procedure ShiftKey1_gf128_power(ghost h:poly, ghost n:nat)
         efl; r12;
         xmm1; xmm2; xmm3; xmm4; xmm5;
     requires
-        avx_enabled;
+        avx_enabled && sse_enabled;
         hn == g_power(h, n);
     ensures
         of_quad32(xmm1) == gf128_power(h, n);
@@ -137,7 +137,7 @@ procedure Gf128_powers(ghost h:poly, ghost hkeys_b:buffer128)
         efl; rax; r12;
         xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6;
     requires
-        pclmulqdq_enabled && avx_enabled;
+        pclmulqdq_enabled && avx_enabled && sse_enabled;
         validDstAddrs128(mem, rcx, hkeys_b, 8, memTaint, Secret);
         of_quad32(buffer128_read(hkeys_b, 2, mem)) == h;
     ensures
@@ -233,7 +233,7 @@ procedure Keyhash_init(
         round_ptr := if win then rcx else rdi;
         hkey_ptr := if win then rdx else rsi;
     requires/ensures
-        aesni_enabled && pclmulqdq_enabled && avx_enabled;
+        aesni_enabled && pclmulqdq_enabled && avx_enabled && sse_enabled;
         alg = AES_128 || alg = AES_256;
         buffers_disjoint128(roundkeys_b, hkeys_b);
         is_aes_key_LE(alg, key);

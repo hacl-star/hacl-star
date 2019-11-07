@@ -39,6 +39,10 @@ let cpu_has_bmi2: cached_flag Vale.X64.CPU_Features_s.bmi2_enabled =
   B.gcmalloc_of_list HS.root [ false ]
 let cpu_has_adx: cached_flag Vale.X64.CPU_Features_s.adx_enabled =
   B.gcmalloc_of_list HS.root [ false ]
+let cpu_has_sse: cached_flag Vale.X64.CPU_Features_s.sse_enabled =
+  B.gcmalloc_of_list HS.root [ false ]
+let cpu_has_movbe: cached_flag Vale.X64.CPU_Features_s.movbe_enabled =
+  B.gcmalloc_of_list HS.root [ false ]
 
 let user_wants_hacl: eternal_pointer bool = B.gcmalloc_of_list HS.root [ SC.hacl ]
 let user_wants_vale: eternal_pointer bool = B.gcmalloc_of_list HS.root [ SC.vale ]
@@ -57,6 +61,8 @@ let has_avx2 = mk_getter cpu_has_avx2
 let has_avx = mk_getter cpu_has_avx
 let has_bmi2 = mk_getter cpu_has_bmi2
 let has_adx = mk_getter cpu_has_adx
+let has_sse = mk_getter cpu_has_sse
+let has_movbe = mk_getter cpu_has_movbe
 
 let wants_vale () = B.recall user_wants_vale; B.index user_wants_vale 0ul
 let wants_hacl () = B.recall user_wants_hacl; B.index user_wants_hacl 0ul
@@ -71,6 +77,8 @@ let fp () =
   B.loc_buffer cpu_has_avx `B.loc_union`
   B.loc_buffer cpu_has_bmi2 `B.loc_union`
   B.loc_buffer cpu_has_adx `B.loc_union`
+  B.loc_buffer cpu_has_sse `B.loc_union`
+  B.loc_buffer cpu_has_movbe `B.loc_union`
   B.loc_buffer user_wants_hacl `B.loc_union`
   B.loc_buffer user_wants_vale `B.loc_union`
   B.loc_buffer user_wants_openssl `B.loc_union`
@@ -84,6 +92,8 @@ let recall () =
   B.recall cpu_has_avx;
   B.recall cpu_has_bmi2;
   B.recall cpu_has_adx;
+  B.recall cpu_has_sse;
+  B.recall cpu_has_movbe;
   B.recall user_wants_hacl;
   B.recall user_wants_vale;
   B.recall user_wants_openssl;
@@ -146,6 +156,8 @@ let disable_adx () = B.recall cpu_has_adx; B.upd cpu_has_adx 0ul false
 let disable_shaext () = B.recall cpu_has_shaext; B.upd cpu_has_shaext 0ul false
 let disable_aesni () = B.recall cpu_has_aesni; B.upd cpu_has_aesni 0ul false
 let disable_pclmulqdq () = B.recall cpu_has_pclmulqdq; B.upd cpu_has_pclmulqdq 0ul false
+let disable_sse () = B.recall cpu_has_sse; B.upd cpu_has_sse 0ul false
+let disable_movbe () = B.recall cpu_has_movbe; B.upd cpu_has_movbe 0ul false
 let disable_vale = mk_disabler user_wants_vale
 let disable_hacl = mk_disabler user_wants_hacl
 let disable_openssl = mk_disabler user_wants_openssl
