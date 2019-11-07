@@ -191,7 +191,19 @@ let hmac_vectors_tmp = List.Tot.map (fun h ->
 
 %splice[] (lowstarize_toplevel "hmac_vectors_tmp" "hmac_vectors_low")
 
+/// HMAC_DRBG
 
+noextract
+let hmac_drbg_vectors_tmp = 
+  let open Spec.HMAC_DRBG.Test.Vectors in
+  List.Tot.map 
+  (fun x -> x.a, h x.entropy_input, h x.nonce, h x.personalization_string, 
+         h x.entropy_input_reseed, h x.additional_input_reseed,
+         (h x.additional_input_1, h x.additional_input_2),
+         h x.returned_bits)
+  test_vectors
+
+%splice[] (lowstarize_toplevel "hmac_drbg_vectors_tmp" "hmac_drbg_vectors_low")
 
 /// HKDF
 /// https://tools.ietf.org/html/rfc5869.html

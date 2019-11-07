@@ -51,4 +51,10 @@ val mk_compute:
   finish: D.finish_st a ->
   compute_st a
 
+val legacy_compute_sha1: compute_st SHA1
+
 val compute_sha2_256: compute_st SHA2_256
+
+val compute_sha2_384: compute_st SHA2_384
+
+val compute_sha2_512: compute_st SHA2_512
