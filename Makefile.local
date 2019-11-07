@@ -40,8 +40,10 @@ $(OUTPUT_DIR)/Vale.%.checked: FSTAR_FLAGS=$(VALE_FSTAR_FLAGS)
 	    --extract_module $(basename $(notdir $(subst .checked,,$<))) \
 	    $(notdir $(subst .checked,,$<))
 
+CODEGEN=OCaml
+
 %.ml:
-	$(FSTAR) --codegen OCaml \
+	$(FSTAR) --codegen $(CODEGEN) \
 	    --extract_module $(basename $(notdir $(subst .checked,,$<))) \
 	    $(notdir $(subst .checked,,$<))
 
@@ -63,4 +65,6 @@ $(HACL_HOME)/obj/Meta_Interface.ml: CODEGEN = Plugin
 $(HACL_HOME)/obj/Meta_Interface.ml: $(HACL_HOME)/obj/Meta.Interface.fst.checked
 
 $(HACL_HOME)/obj/Hacl.Meta.%.checked: FSTAR_FLAGS += --load Meta.Interface
-$(HACL_HOME)/obj/Hacl.Meta.%.checked: $(HACL_HOME)/obj/Meta_Interface.ml
+ifneq (,$(wildcard Hacl.Meta.*.fst))
+$(patsubst %,$(HACL_HOME)/obj/%.checked,$(wildcard Hacl.Meta.*.fst)): $(HACL_HOME)/obj/Meta_Interface.ml
+endif
