@@ -19,7 +19,7 @@ open Spec.Hash.Definitions
 
 open Test.Lowstarize
 
-// This contains hashes, hmac, hkdf, chacha20, poly1305, curve25519, chacha20poly1305
+// This contains hashes, hmac, hmac_drbg, hkdf, chacha20, poly1305, curve25519, chacha20poly1305
 open Test.NoHeap
 
 (* the following two are necessary to connect with EverCrypt.Cipher and EverCrypt.Curve25519 *)
@@ -750,8 +750,10 @@ let test_hash_body (print: C.String.t -> St unit) : St unit =
     Test.Hash.main ();
     print !$"  >>>>>>>>> Hash (Test.NoHeap)\n";
     test_hash hash_vectors_low;
-    print !$"  >>>>>>>>> Hmac (Test.NoHeap)\n";
+    print !$"  >>>>>>>>> HMAC (Test.NoHeap)\n";
     test_hmac hmac_vectors_low;
+    print !$"  >>>>>>>>> HMAC_DRBG (Test.NoHeap)\n";
+    test_hmac_drbg hmac_drbg_vectors_low;
     print !$"  >>>>>>>>> HKDF (Test.NoHeap)\n";
     test_hkdf hkdf_vectors_low
 

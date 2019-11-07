@@ -111,6 +111,65 @@ let test_one_hmac vec =
 
 let test_hmac = test_many !$"HMAC" test_one_hmac
 
+/// HMAC-DRBG
+/// ----
+
+val test_one_hmac_drbg: hmac_drbg_vector -> Stack unit (fun _ -> True) (fun _ _ _ -> True)
+let test_one_hmac_drbg vec =
+  let open Hacl.HMAC_DRBG in
+  let open EverCrypt.DRBG in
+  let open Lib.IntTypes in
+  let a,
+      LB entropy_input_len entropy_input,
+      LB nonce_len nonce,
+      LB personalization_string_len personalization_string,
+      LB entropy_input_reseed_len entropy_input_reseed,
+      LB additional_input_reseed_len additional_input_reseed,
+      (LB additional_input_1_len additional_input_1,
+       LB additional_input_2_len additional_input_2),
+      LB returned_bits_len returned_bits = vec
+  in
+  // EverCrypt.DRBG sources entropy internally.
+  // We don't use entropy_input, entropy_input_reseed, nonce, and returned_bits
+  // from the test vector, but we test safety of the API.
+  B.recall personalization_string;
+  B.recall additional_input_reseed;
+  B.recall additional_input_1;
+  B.recall additional_input_2;
+  if not (Spec.Agile.HMAC.is_supported_alg a &&
+          0ul <. returned_bits_len &&
+          returned_bits_len <. 0xFFFFFFFFul)
+  then C.exit (-1l)
+  else
+    begin
+    push_frame();
+    let output = B.alloca (u8 0) returned_bits_len in
+    let st = alloca a in
+    [@inline_let]
+    let a = Ghost.hide a in
+    let ok = instantiate a st personalization_string personalization_string_len in
+    if ok then
+      // We always provide prediction_resistance, so technically we don't need to reseed
+      let ok = reseed a st additional_input_reseed additional_input_reseed_len in
+      if ok then
+        let ok = generate a output st returned_bits_len
+                   additional_input_1 additional_input_1_len
+        in
+        if ok then
+          let ok = generate a output st returned_bits_len
+                     additional_input_2 additional_input_2_len
+          in
+          if ok then
+            TestLib.compare_and_print !$"HMAC-DRBG" output output returned_bits_len
+          else C.exit 1l
+        else C.exit 1l
+      else C.exit 1l
+    else C.exit 1l;
+    pop_frame()
+    end
+
+let test_hmac_drbg = test_many !$"HMAC-DRBG" test_one_hmac_drbg
+
 
 /// HKDF
 /// ----
@@ -303,6 +362,7 @@ let main () =
   C.String.print !$"Start WASM tests\n";
   test_hash hash_vectors_low;
   test_hmac hmac_vectors_low;
+  test_hmac_drbg hmac_drbg_vectors_low;
   test_hkdf hkdf_vectors_low;
   test_chacha20 chacha20_vectors_low;
   test_poly1305 ();
