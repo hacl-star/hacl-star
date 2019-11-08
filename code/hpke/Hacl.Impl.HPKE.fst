@@ -3,6 +3,8 @@ module Hacl.Impl.HPKE
 open FStar.HyperStack
 open FStar.HyperStack.All
 
+module MB = LowStar.Monotonic.Buffer
+
 open Lib.IntTypes
 open Lib.Buffer
 open FStar.Mul
@@ -256,17 +258,11 @@ val ks_derive_default_aux:
          live h0 info /\ live h0 o_key /\ live h0 o_nonce /\
          live h0 context /\ live h0 secret /\ live h0 pkI /\
          live h0 psk /\ live h0 tmp /\ live h0 label_key /\ live h0 label_nonce /\
-         disjoint o_key o_nonce /\ disjoint secret psk /\ disjoint secret zz /\
-         disjoint context zz /\ disjoint context psk /\ disjoint context secret /\
-         disjoint tmp label_key /\ disjoint tmp label_nonce /\ disjoint tmp context /\
-         disjoint label_key context /\ disjoint label_key secret /\
-         disjoint label_nonce o_key /\ disjoint label_nonce context /\
-         disjoint context pkE /\ disjoint context pkR /\ disjoint context pkI /\ disjoint context info /\
-         disjoint label_nonce secret /\
-         disjoint tmp zz /\ disjoint tmp psk /\
-         disjoint tmp pkE /\ disjoint tmp pkI /\ disjoint tmp pkR /\
-         disjoint secret tmp /\ disjoint o_key tmp /\ disjoint tmp info /\
-         disjoint o_key secret /\ disjoint o_nonce secret /\
+
+         MB.all_disjoint [loc o_key; loc o_nonce; loc context; loc secret; loc pkI; loc psk; loc label_key; loc label_nonce; loc tmp] /\
+         disjoint secret zz /\ disjoint context zz /\
+         disjoint context pkE /\ disjoint context pkR /\ disjoint context info /\
+         disjoint tmp zz /\ disjoint tmp pkE /\ disjoint tmp pkR /\ disjoint tmp info /\
 
          as_seq h0 label_key `Seq.equal` S.label_key /\
          as_seq h0 label_nonce `Seq.equal` S.label_nonce /\
