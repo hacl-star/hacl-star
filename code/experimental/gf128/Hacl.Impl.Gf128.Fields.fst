@@ -18,6 +18,7 @@ module GF = Spec.GaloisField
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 1"
 
+noextract
 type field_spec = gf128_spec
 
 inline_for_extraction noextract
