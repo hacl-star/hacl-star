@@ -60,7 +60,7 @@ let nsize_aead_nonce (cs:S.ciphersuite) : (s:size_t{v s == S.size_aead_nonce cs}
   | _, Spec.Agile.AEAD.AES256_GCM, _ -> 12ul
   | _, Spec.Agile.AEAD.CHACHA20_POLY1305, _ -> 12ul
 
-inline_for_extraction noextract
+noextract
 val encap:
      #cs:S.ciphersuite
   -> o_zz: key_dh_public cs
@@ -84,7 +84,7 @@ let encap #cs o_zz o_pkE skE pkR =
   DH.secret_to_public #cs o_pkE skE;
   DH.scalarmult #cs o_zz skE pkR
 
-inline_for_extraction noextract
+noextract
 val decap:
      #cs:S.ciphersuite
   -> o_pkR: key_dh_public cs
@@ -231,7 +231,7 @@ let build_context_default #cs pkE pkR pkI pskID_hash info_hash output =
     Lib.ByteSequence.nat_to_bytes_be 1 hlength `Seq.append`
     as_seq h0 info_hash))
 
-noextract inline_for_extraction
+noextract
 val ks_derive_default_aux:
      #cs:S.ciphersuite
   -> pkR:key_dh_public cs
@@ -278,7 +278,7 @@ val ks_derive_default_aux:
 
 #set-options "--z3rlimit 100"
 
-noextract inline_for_extraction
+noextract
 [@ Meta.Attribute.inline_]
 let ks_derive_default_aux #cs pkR zz pkE infolen info o_key o_nonce context_len context secret pkI psk label_key label_nonce tmp =
   let info_hash:lbuffer uint8 (nhash_length cs) = sub tmp 0ul (nhash_length cs) in
@@ -303,7 +303,7 @@ let ks_derive_default_aux #cs pkR zz pkE infolen info o_key o_nonce context_len 
   (**) assert (as_seq h2 tmp `Seq.equal` (S.label_nonce `Seq.append` as_seq h0 context));
   HKDF.hkdf_expand #cs o_nonce secret (nhash_length cs) tmp (10ul +. context_len) (nsize_aead_nonce cs)
 
-noextract inline_for_extraction
+noextract
 val ks_derive_default:
      #cs:S.ciphersuite
   -> pkR:key_dh_public cs
@@ -324,7 +324,7 @@ val ks_derive_default:
 
 #push-options "--z3rlimit 400"
 
-noextract inline_for_extraction
+noextract
 [@ Meta.Attribute.inline_]
 let ks_derive_default #cs pkR zz pkE infolen info o_key o_nonce =
   [@inline_let]
@@ -373,7 +373,7 @@ let setupBaseR #cs o_key_aead o_nonce_aead pkE skR infolen info =
   ks_derive_default pkR zz pkE infolen info o_key_aead o_nonce_aead;
   pop_frame()
 
-noextract inline_for_extraction
+noextract
 val sealBase_aux
      (#cs:S.ciphersuite)
      (skE: key_dh_secret cs)
@@ -405,7 +405,7 @@ val sealBase_aux
 
 #push-options "--z3rlimit 400"
 
-noextract inline_for_extraction
+noextract
 [@ Meta.Attribute.inline_]
 let sealBase_aux #cs skE pkR mlen m infolen info output zz pkR' k n =
   assert (v (mlen +. 16ul) == v mlen + 16);
@@ -435,7 +435,7 @@ let sealBase #cs skE pkR mlen m infolen info output =
 
 #pop-options
 
-noextract inline_for_extraction
+noextract
 val openBase_aux
      (#cs:S.ciphersuite)
      (pkE: key_dh_public cs)
@@ -468,7 +468,7 @@ val openBase_aux
          | 1ul -> None? plain
          | _ -> False))
 
-noextract inline_for_extraction
+noextract
 [@ Meta.Attribute.inline_]
 let openBase_aux #cs pkE skR inputlen input infolen info output zz k n =
   let pkE = sub input 0ul (nsize_dh_public cs) in
