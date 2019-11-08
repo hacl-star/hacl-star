@@ -753,7 +753,7 @@
         "typing_Spec.HPKE.size_dh_public", "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "9f7b46337acb1c0db63c4d1c8a34f344"
+      "c93d5d5fbb82bb3cfe01ccefb40e007b"
     ],
     [
       "Spec.HPKE.ks_derive",
@@ -773,7 +773,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "2a76c8ad4dc29fc177bf598de3febd50"
+      "a78e83b41312a1b85932d92f4a70c669"
     ],
     [
       "Spec.HPKE.ks_derive",
@@ -1112,14 +1112,14 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented",
         "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
-        "bool_inversion", "constructor_distinct_Lib.IntTypes.U32",
-        "constructor_distinct_Tm_unit", "equality_tok_Lib.IntTypes.U128@tok",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "constructor_distinct_Tm_unit", "equality_tok_Lib.IntTypes.U1@tok",
         "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
         "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
         "equation_Spec.Agile.DH.size_key",
-        "equation_Spec.Agile.DH.size_public", "equation_Spec.GF128.gf128",
-        "equation_Spec.GF128.irred", "equation_Spec.GaloisField.gf",
+        "equation_Spec.Agile.DH.size_public", "equation_Spec.GaloisField.gf",
         "equation_Spec.HPKE.max_info", "equation_Spec.HPKE.size_dh_key",
         "equation_Spec.HPKE.size_dh_public",
         "equation_Spec.Poly1305.size_block",
@@ -1132,12 +1132,10 @@
         "refinement_interpretation_Tm_refine_0ec011aea9f93256a3547ad9f0c667f1",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
-        "typing_Lib.IntTypes.unsigned", "typing_Spec.AES.gf8",
-        "typing_Spec.GF128.gf128",
-        "typing_Spec.GaloisField.__proj__GF__item__t",
+        "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t",
         "typing_Spec.HPKE.max_info", "typing_Spec.HPKE.size_dh_key",
         "typing_Spec.HPKE.size_dh_public", "typing_Spec.Poly1305.size_block",
-        "typing_Spec.Poly1305.size_key", "typing_tok_Lib.IntTypes.U128@tok"
+        "typing_Spec.Poly1305.size_key"
       ],
       0,
       "6dd709412d3fc5169e00272db5ec9a6c"
@@ -1264,7 +1262,7 @@
         "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
         "equation_Spec.Agile.DH.size_key",
         "equation_Spec.Agile.DH.size_public", "equation_Spec.GaloisField.gf",
-        "equation_Spec.HPKE.max_pskID", "equation_Spec.HPKE.size_dh_key",
+        "equation_Spec.HPKE.max_info", "equation_Spec.HPKE.size_dh_key",
         "equation_Spec.HPKE.size_dh_public",
         "equation_Spec.Poly1305.size_block",
         "equation_Spec.Poly1305.size_key", "int_inversion",
@@ -1277,7 +1275,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t",
-        "typing_Spec.HPKE.max_pskID", "typing_Spec.HPKE.size_dh_key",
+        "typing_Spec.HPKE.max_info", "typing_Spec.HPKE.size_dh_key",
         "typing_Spec.HPKE.size_dh_public", "typing_Spec.Poly1305.size_block",
         "typing_Spec.Poly1305.size_key"
       ],
@@ -1327,14 +1325,14 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented",
         "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
-        "constructor_distinct_Lib.IntTypes.U32",
-        "constructor_distinct_Lib.IntTypes.U8",
-        "constructor_distinct_Tm_unit", "equality_tok_Lib.IntTypes.U1@tok",
+        "bool_inversion", "constructor_distinct_Lib.IntTypes.U32",
+        "constructor_distinct_Tm_unit", "equality_tok_Lib.IntTypes.U128@tok",
         "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
         "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
         "equation_Spec.Agile.DH.size_key",
-        "equation_Spec.Agile.DH.size_public", "equation_Spec.GaloisField.gf",
+        "equation_Spec.Agile.DH.size_public", "equation_Spec.GF128.gf128",
+        "equation_Spec.GF128.irred", "equation_Spec.GaloisField.gf",
         "equation_Spec.HPKE.max_info", "equation_Spec.HPKE.size_dh_key",
         "equation_Spec.HPKE.size_dh_public",
         "equation_Spec.Poly1305.size_block",
@@ -1347,10 +1345,12 @@
         "refinement_interpretation_Tm_refine_0ec011aea9f93256a3547ad9f0c667f1",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
-        "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t",
+        "typing_Lib.IntTypes.unsigned", "typing_Spec.AES.gf8",
+        "typing_Spec.GF128.gf128",
+        "typing_Spec.GaloisField.__proj__GF__item__t",
         "typing_Spec.HPKE.max_info", "typing_Spec.HPKE.size_dh_key",
         "typing_Spec.HPKE.size_dh_public", "typing_Spec.Poly1305.size_block",
-        "typing_Spec.Poly1305.size_key"
+        "typing_Spec.Poly1305.size_key", "typing_tok_Lib.IntTypes.U128@tok"
       ],
       0,
       "1abd86b114b19f3aa2f6ea65c2495568"
@@ -1503,7 +1503,7 @@
         "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "2f71851afb88ef8d8d34f49a54d00b9a"
+      "123089a32a133856cfb50105b71bcb52"
     ]
   ]
 ]
