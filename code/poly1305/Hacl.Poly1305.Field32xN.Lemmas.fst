@@ -1402,7 +1402,7 @@ let lemma_subtract_p5 f f' =
   else lemma_subtract_p5_1 f f'
 
 
-inline_for_extraction
+noextract
 val subtract_p5_s:
     #w:lanes
   -> f:felem5 w{felem_fits5 f (1, 1, 1, 1, 1)}
@@ -1617,7 +1617,7 @@ let load_tup64_lemma_f2 lo hi =
   FStar.Math.Lemmas.small_modulo_lemma_1 ((v hi % pow2 14) * pow2 12) (pow2 64);
   assert (v f2 == v lo / pow2 52 + (v hi % pow2 14) * pow2 12)
 
-
+noextract
 val load_tup64_lemma: lo:uint64 -> hi:uint64 ->
   Pure tup64_5
   (requires True)
@@ -1772,7 +1772,7 @@ let lemma_tup64_mod_pow2_128 f =
   };
   assert ((as_nat5 f) % pow2 128 == tmp + (v f4 % pow2 24) * pow104)
 
-
+noextract
 val store_tup64_lemma: f:tup64_5 ->
   Pure (uint64 & uint64)
   (requires tup64_fits5 f (1, 1, 1, 1, 1))

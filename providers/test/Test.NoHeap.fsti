@@ -32,6 +32,9 @@ val test_hash: vs:L.lbuffer hash_vector -> Stack unit (fun _ -> True) (fun _ _ _
 let hmac_vector = H.alg & vec8 & vec8 & vec8
 val test_hmac: vs:L.lbuffer hmac_vector -> Stack unit (fun _ -> True) (fun _ _ _ -> True)
 
+let hmac_drbg_vector = H.alg & vec8 & vec8 & vec8 & vec8 & vec8 & (vec8 & vec8) & vec8
+val test_hmac_drbg: vs:L.lbuffer hmac_drbg_vector -> Stack unit (fun _ -> True) (fun _ _ _ -> True)
+
 let hkdf_vector = H.alg & vec8 & vec8 & vec8 & vec8 & vec8
 val test_hkdf: vs:L.lbuffer hkdf_vector -> Stack unit (fun _ -> True) (fun _ _ _ -> True)
 

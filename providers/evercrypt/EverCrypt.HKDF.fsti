@@ -111,7 +111,7 @@ val expand_sha2_512: expand_st SHA2_512
 val extract_sha2_512: extract_st SHA2_512
 
 
-/// Agile versions that dynamically dispatches between the above four
+/// Agile versions that dynamically dispatch between the above four
 
 (** @type: true
 *)

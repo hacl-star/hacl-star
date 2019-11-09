@@ -138,6 +138,9 @@ test-ml: $(subst .,_,$(patsubst %.fst,test-ml-%,$(notdir $(wildcard specs/tests/
 test-benchmark: all-unstaged
 	$(MAKE) -C tests/benchmark all
 
+mozilla-ci: mozilla-ci-staged
+mozilla-ci-unstaged: compile-mozilla test-c
+
 # Not reusing the -staged automatic target so as to export NOSHORTLOG
 ci:
 	tools/blast-staticconfig.sh wasm
@@ -708,6 +711,7 @@ WASM_FLAGS	=\
   -bundle FStar.* \
   -bundle EverCrypt.*,Hacl.*,MerkleTree.*[rename=EverCrypt] \
   -bundle LowStar.* \
+  -bundle Lib.RandomBuffer.System \
   -bundle '\*[rename=Misc]' \
   -minimal -wasm
 
@@ -791,7 +795,7 @@ dist/mozilla/Makefile.basic: E_HASH_BUNDLE =
 dist/mozilla/Makefile.basic: MERKLE_BUNDLE = -bundle MerkleTree.*
 dist/mozilla/Makefile.basic: CTR_BUNDLE =
 dist/mozilla/Makefile.basic: SHA3_BUNDLE = -bundle Hacl.SHA3
-dist/mozilla/Makefile.basic: HASH_BUNDLE = -bundle Hacl.Hash.*,Hacl.HKDF,Hacl.HMAC
+dist/mozilla/Makefile.basic: HASH_BUNDLE = -bundle Hacl.Hash.*,Hacl.HKDF,Hacl.HMAC,Hacl.HMAC_DRBG
 dist/mozilla/Makefile.basic: HPKE_BUNDLE = -bundle Hacl.HPKE.*
 dist/mozilla/Makefile.basic: QTESLA_BUNDLE = -bundle QTesla.*,Hacl.Impl.QTesla,Hacl.Impl.QTesla.*
 dist/mozilla/Makefile.basic: TUTORIAL_BUNDLE = -bundle Tutorial,TestLib,Hacl_Lib,Hacl_Kremlib

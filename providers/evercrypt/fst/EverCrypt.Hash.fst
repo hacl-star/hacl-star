@@ -97,7 +97,6 @@ let frame_invariant #a l s h0 h1 =
 
 inline_for_extraction noextract
 let alloca a =
-  let h0 = ST.get () in
   let s: state_s a =
     match a with
     | MD5 -> MD5_s (B.alloca 0ul 4ul)
@@ -110,7 +109,6 @@ let alloca a =
   B.alloca s 1ul
 
 let create_in a r =
-  let h0 = ST.get () in
   let s: state_s a =
     match a with
     | MD5 -> MD5_s (B.malloc r 0ul 4ul)
