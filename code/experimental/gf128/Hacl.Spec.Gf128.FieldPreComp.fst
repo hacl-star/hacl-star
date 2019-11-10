@@ -114,7 +114,7 @@ val get_ith_bit_lemma1: x:elem_s -> i:nat{64 <= i /\ i < 128} -> Lemma
    v ((x0 >>. (127ul -. size i)) &. u64 1) == v (GF.get_ith_bit (to_elem x) i))
 let get_ith_bit_lemma1 x i =
   let (x0, x1) = (x.[0], x.[1]) in
-  let lp0 = x0 >>. (127ul -. size i) in
+  let lp0 = if i < 64 then x1 >>. (63ul -. size i) else x0 >>. (127ul -. size i) in
   let lp = lp0 &. u64 1 in
   logand_mask lp0 (u64 1) 1;
   assert (v lp == v lp0 % pow2 1);
@@ -136,7 +136,6 @@ let get_ith_bit_lemma1 x i =
     (==) { FStar.Math.Lemmas.pow2_multiplication_modulo_lemma_1 (v x1) 1 (i - 63) }
     (v x0 / m) % pow2 1;
     }
-
 
 val get_ith_bit_lemma: x:elem_s -> i:nat{i < 128} -> Lemma
   (let (x0, x1) = (x.[0], x.[1]) in
@@ -335,15 +334,16 @@ let mask_shift_right_mod_optimized (y:elem_s) : elem_s =
   let r1 = (y.[1] >>. 1ul) ^. (u64 0xE100000000000000 &. m) in
   create2 r0 r1
 
+#push-options "--max_ifuel 1"
 val mask_shift_right_mod_optimized_lemma: y:elem_s -> Lemma
   (mask_shift_right_mod y == mask_shift_right_mod_optimized y)
 let mask_shift_right_mod_optimized_lemma y =
-  let irr = create2 (u64 0) (u64 0xE100000000000000) in
   let m = eq_mask_get_ith_bit y 127 in
   v_injective (y.[0] >>. 0ul);
   assert (m == bit_mask64 y.[0]);
   Lib.IntTypes.logand_lemma (u64 0) m;
   logxor_lemma (shift_right1 y).[0] (u64 0)
+#pop-options
 
 
 ///
