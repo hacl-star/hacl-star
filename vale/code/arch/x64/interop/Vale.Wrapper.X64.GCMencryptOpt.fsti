@@ -58,6 +58,7 @@ let length_aux5 (b:uint8_p) : Lemma
     DV.length_eq db
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+#restart-solver
 
 inline_for_extraction noextract
 let encrypt_opt_stdcall_st (a: algorithm { a = AES_128 \/ a = AES_256 }) =

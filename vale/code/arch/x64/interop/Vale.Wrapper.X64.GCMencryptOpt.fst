@@ -17,7 +17,7 @@ open Vale.Lib.BufferViewHelpers
 let wrap_slice (#a:Type0) (s:Seq.seq a) (i:int) : Seq.seq a =
   Seq.slice s 0 (if 0 <= i && i <= Seq.length s then i else 0)
 
-#set-options "--z3rlimit 500 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 500 --max_fuel 0 --max_ifuel 0"
 
 let math_aux (n:nat) : Lemma (n * 1 == n) = ()
 
@@ -53,8 +53,7 @@ val gcm128_encrypt_opt':
     (requires fun h0 ->
       B.disjoint tag_b out128x6_b /\ B.disjoint tag_b out128_b /\
       B.disjoint tag_b inout_b /\ B.disjoint tag_b hkeys_b /\
-      B.disjoint iv_b tag_b /\
-      disjoint_or_eq tag_b auth_b /\ disjoint_or_eq tag_b iv_b /\
+      B.disjoint tag_b iv_b /\ disjoint_or_eq tag_b auth_b /\
       disjoint_or_eq tag_b keys_b /\ disjoint_or_eq tag_b abytes_b /\
       disjoint_or_eq tag_b in128x6_b /\ disjoint_or_eq tag_b in128_b /\
       disjoint_or_eq tag_b scratch_b /\
@@ -63,7 +62,6 @@ val gcm128_encrypt_opt':
       B.disjoint iv_b out128x6_b /\ B.disjoint iv_b hkeys_b /\ B.disjoint iv_b in128_b /\
       B.disjoint iv_b out128_b /\ B.disjoint iv_b inout_b /\
       B.disjoint iv_b auth_b /\ B.disjoint iv_b abytes_b /\
-      disjoint_or_eq iv_b auth_b /\ disjoint_or_eq iv_b abytes_b /\
 
       B.disjoint scratch_b keys_b /\ B.disjoint scratch_b in128x6_b /\
       B.disjoint scratch_b out128x6_b /\ B.disjoint scratch_b in128_b /\
@@ -198,8 +196,7 @@ val gcm128_encrypt_opt':
       ))))
     )
 
-#push-options "--smtencoding.nl_arith_repr boxwrap"
-#restart-solver
+#push-options "--z3cliopt smt.arith.nl=true"
 inline_for_extraction
 let gcm128_encrypt_opt' key iv auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
   in128x6_b out128x6_b len128x6 in128_b out128_b len128_num inout_b plain_num scratch_b tag_b =
