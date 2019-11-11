@@ -106,22 +106,17 @@ val ins_VPxor : instr_dep [out opXmm] [opXmm; opXmm] PreserveFlags eval_VPxor
 let eval_Pand (dst src:quad32) : option quad32 = check_sse2 (Some (four_map2 (fun di si -> iand di si) dst src))
 val ins_Pand : instr_dep [inOut opXmm] [opXmm] PreserveFlags eval_Pand
 
-let eval_Paddd (src1 src2:quad32) : option quad32 = check_sse2 (
+let eval_Paddd_raw (src1 src2:quad32) : option quad32 =
   Some (Mkfour
     ((src1.lo0 + src2.lo0) % pow2_32)
     ((src1.lo1 + src2.lo1) % pow2_32)
     ((src1.hi2 + src2.hi2) % pow2_32)
     ((src1.hi3 + src2.hi3) % pow2_32))
-  )
+
+let eval_Paddd (src1 src2:quad32) : option quad32 = check_sse2 (eval_Paddd_raw src1 src2)
 val ins_Paddd : instr_dep [inOut opXmm] [opXmm] PreserveFlags eval_Paddd
 
-let eval_VPaddd (src1 src2:quad32) : option quad32 = check_avx (
-  Some (Mkfour
-    ((src1.lo0 + src2.lo0) % pow2_32)
-    ((src1.lo1 + src2.lo1) % pow2_32)
-    ((src1.hi2 + src2.hi2) % pow2_32)
-    ((src1.hi3 + src2.hi3) % pow2_32))
-  )
+let eval_VPaddd (src1 src2:quad32) : option quad32 = check_avx (eval_Paddd_raw src1 src2)
 val ins_VPaddd : instr_dep [out opXmm] [opXmm; opXmm] PreserveFlags eval_VPaddd
 
 let eval_Pslld (amt:int) (dst:quad32) : option quad32 =
@@ -141,49 +136,40 @@ let eval_Psrldq (amt:int) (dst:quad32) : option quad32 = check_sse2 (
   else None)
 val ins_Psrldq (amt:int) : instr_dep [inOut opXmm] [] PreserveFlags (eval_Psrldq amt)
 
-let eval_Palignr (amount:nat8) (src1 src2:quad32) : option quad32 = 
-  check_ssse3 (
+let eval_Palignr_raw (amount:nat8) (src1 src2:quad32) : option quad32 =
   // We only spec a restricted version sufficient for a handful of standard patterns
   if amount = 4 then
     Some (Mkfour src2.lo1 src2.hi2 src2.hi3 src1.lo0)
   else if amount = 8 then
     Some (Mkfour src2.hi2 src2.hi3 src1.lo0 src1.lo1)
-  else None)
+  else None
+
+let eval_Palignr (amount:nat8) (src1 src2:quad32) : option quad32 = 
+  check_ssse3 (eval_Palignr_raw amount src1 src2)
 val ins_Palignr (amount:nat8) :
   instr_dep [inOut opXmm] [opXmm] PreserveFlags (eval_Palignr amount)
 
 let eval_VPalignr (amount:nat8) (src1 src2:quad32) : option quad32 =
-  check_avx (
-  // We only spec a restricted version sufficient for a handful of standard patterns
-  if amount = 4 then
-    Some (Mkfour src2.lo1 src2.hi2 src2.hi3 src1.lo0)
-  else if amount = 8 then
-    Some (Mkfour src2.hi2 src2.hi3 src1.lo0 src1.lo1)
-  else None)
+  check_avx (eval_Palignr_raw amount src1 src2)
 val ins_VPalignr (amount:nat8) :
   instr_dep [out opXmm] [opXmm; opXmm] PreserveFlags (eval_VPalignr amount)
 
-let eval_Shufpd (permutation:int) (src1 src2:quad32) : option quad32 =
-  check_sse2 (
+let eval_Shufpd_raw (permutation:int) (src1 src2:quad32) : option quad32 =
   if 0 <= permutation && permutation < 4 then
     Some (Mkfour
       (if permutation % 2 = 0 then src1.lo0 else src1.hi2)
       (if permutation % 2 = 0 then src1.lo1 else src1.hi3)
       (if (permutation / 2) % 2 = 0 then src2.lo0 else src2.hi2)
       (if (permutation / 2) % 2 = 0 then src2.lo1 else src2.hi3))
-  else None)
+  else None
+
+let eval_Shufpd (permutation:int) (src1 src2:quad32) : option quad32 =
+  check_sse2 (eval_Shufpd_raw permutation src1 src2)
 val ins_Shufpd (permutation:int) :
   instr_dep [inOut opXmm] [opXmm] PreserveFlags (eval_Shufpd permutation)
 
 let eval_VShufpd (permutation:int) (src1 src2:quad32) : option quad32 =
-  check_avx (
-  if 0 <= permutation && permutation < 4 then
-    Some (Mkfour
-      (if permutation % 2 = 0 then src1.lo0 else src1.hi2)
-      (if permutation % 2 = 0 then src1.lo1 else src1.hi3)
-      (if (permutation / 2) % 2 = 0 then src2.lo0 else src2.hi2)
-      (if (permutation / 2) % 2 = 0 then src2.lo1 else src2.hi3))
-  else None)
+  check_avx (eval_Shufpd_raw permutation src1 src2)
 val ins_VShufpd (permutation:int) :
   instr_dep [out opXmm] [opXmm; opXmm] PreserveFlags (eval_VShufpd permutation)
 
@@ -211,7 +197,7 @@ let is_lower_upper_byte_reversal_mask (q:quad32) : bool =
   q.hi2 = 0x0C0D0E0F &&
   q.hi3 = 0x08090A0B
 
-let eval_Pshufb (src1 src2:quad32) : option quad32 = check_ssse3 (
+let eval_Pshufb_raw (src1 src2:quad32) : option quad32 =
   // We only spec a restricted version sufficient for a handful of standard patterns
   if is_full_byte_reversal_mask src2 then
     Some (reverse_bytes_quad32 src1)
@@ -233,32 +219,12 @@ let eval_Pshufb (src1 src2:quad32) : option quad32 = check_ssse3 (
       (reverse_bytes_nat32 src1.lo0)
       (reverse_bytes_nat32 src1.hi3)
       (reverse_bytes_nat32 src1.hi2))
-  else None)
+  else None
+
+let eval_Pshufb (src1 src2:quad32) : option quad32 = check_ssse3 (eval_Pshufb_raw src1 src2)
 val ins_Pshufb : instr_dep [inOut opXmm] [opXmm] PreserveFlags eval_Pshufb
 
-let eval_VPshufb (src1 src2:quad32) : option quad32 = check_avx (
-  // We only spec a restricted version sufficient for a handful of standard patterns
-  if is_full_byte_reversal_mask src2 then
-    Some (reverse_bytes_quad32 src1)
-  else if is_byte_reversal_mask src2 then
-    Some (Mkfour
-      (reverse_bytes_nat32 src1.lo0)
-      (reverse_bytes_nat32 src1.lo1)
-      (reverse_bytes_nat32 src1.hi2)
-      (reverse_bytes_nat32 src1.hi3))
-  else if is_high_dup_reversal_mask src2 then
-    Some (Mkfour
-      (reverse_bytes_nat32 src1.hi3)
-      (reverse_bytes_nat32 src1.hi2)
-      (reverse_bytes_nat32 src1.hi3)
-      (reverse_bytes_nat32 src1.hi2))
-  else if is_lower_upper_byte_reversal_mask src2 then
-    Some (Mkfour
-      (reverse_bytes_nat32 src1.lo1)
-      (reverse_bytes_nat32 src1.lo0)
-      (reverse_bytes_nat32 src1.hi3)
-      (reverse_bytes_nat32 src1.hi2))
-  else None)
+let eval_VPshufb (src1 src2:quad32) : option quad32 = check_avx (eval_Pshufb_raw src1 src2)
 val ins_VPshufb : instr_dep [out opXmm] [opXmm; opXmm] PreserveFlags eval_VPshufb
 
 let eval_Pshufd (permutation:nat8) (src:quad32) : option quad32 = check_sse2 (
@@ -293,19 +259,19 @@ let eval_Pinsrq (index:nat8) (dst:quad32) (src:nat64) : option quad32 =
   check_sse4_1 (Some (insert_nat64 dst src (index % 2)))
 val ins_Pinsrq (index:nat8) : instr_dep [inOut opXmm] [op64] PreserveFlags (eval_Pinsrq index)
 
-let eval_Pslldq (count:nat8) (src:quad32) : option quad32 =
+let eval_Pslldq_raw (count:nat8) (src:quad32) : option quad32 =
   // We only spec the two very special cases we need
   if count = 4 then Some (Mkfour 0 src.lo0 src.lo1 src.hi2)
   else if count = 8 then Some (Mkfour 0 0 src.lo0 src.lo1)
   else None
-let eval_VPslldq (count:nat8) (src:quad32) : option quad32 = check_avx (eval_Pslldq count src)
+let eval_VPslldq (count:nat8) (src:quad32) : option quad32 = check_avx (eval_Pslldq_raw count src)
 val ins_VPslldq (count:nat8) : instr_dep [out opXmm] [opXmm] PreserveFlags (eval_VPslldq count)
 
-let eval_Psrldq_8 (count:nat8) (src:quad32) : option quad32 =
+let eval_Psrldq_8_raw (count:nat8) (src:quad32) : option quad32 =
   // We only spec the one very special case we need
   if count = 8 then Some (Mkfour src.hi2 src.hi3 0 0)
   else None
-let eval_VPsrldq (count:nat8) (src:quad32) : option quad32 = check_avx (eval_Psrldq_8 count src)
+let eval_VPsrldq (count:nat8) (src:quad32) : option quad32 = check_avx (eval_Psrldq_8_raw count src)
 val ins_VPsrldq (count:nat8) : instr_dep [out opXmm] [opXmm] PreserveFlags (eval_VPsrldq count)
 
 let eval_Pclmulqdq (imm:int) (src1 src2:quad32) : option quad32 =
