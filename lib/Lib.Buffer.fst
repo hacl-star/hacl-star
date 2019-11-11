@@ -63,10 +63,10 @@ let recall #t #a #len b =
 let create #a clen init =
   B.alloca init (normalize_term clen)
 
+#set-options "--max_fuel 1"
+
 let createL #a init =
   B.alloca_of_list init
-
-#set-options "--max_fuel 1"
 
 let createL_global #a init =
   IB.igcmalloc_of_list #a root init

@@ -65,16 +65,7 @@ let union (l1:B.loc) (l2:B.loc) : GTot B.loc = B.loc_union l1 l2
 let ( |+| ) (l1:B.loc) (l2:B.loc) : GTot B.loc = union l1 l2
 
 (** Generalized modification clause for Buffer locations *)
-let modifies (s:B.loc) (h1 h2:HS.mem) = B.modifies s h1 h2 /\ ST.equal_domains h1 h2
-//val modifies: s:B.loc -> h1:HS.mem -> h2:HS.mem -> GTot Type0
-
-val modifies_preserves_live: #t:buftype
-  -> #a:Type0 -> b:buffer_t t a -> l:B.loc -> h0:mem -> h1:mem
-  -> Lemma
-    (requires modifies l h0 h1 /\ live h0 b)
-    (ensures  live h1 b)
-    [SMTPatOr [[SMTPat (modifies l h0 h1); SMTPat (live h0 b)];
-               [SMTPat (modifies l h0 h1); SMTPat (live h1 b)]]]
+let modifies (s:B.loc) (h1 h2:HS.mem) = B.modifies s h1 h2
 
 (** 2018.16.11 SZ: Doesn't have a pattern and isn't used anywhere in _dev; remove? *)
 val modifies_includes: l1:B.loc -> l2:B.loc -> h0:mem -> h1:mem
@@ -360,6 +351,15 @@ val createL:
   StackInline (lbuffer a (size (normalize_term (List.Tot.length init))))
     (requires fun h0 -> B.alloca_of_list_pre #a init)
     (ensures  fun h0 b h1 -> live h1 b /\ stack_allocated b h0 h1 (Seq.of_list init))
+
+let createLf:
+    #a:Type0
+  -> init:list a{normalize (List.Tot.length init <= max_size_t)} ->
+  StackInline (lbuffer a (size (normalize_term (List.Tot.length init))))
+    (requires fun h0 -> B.alloca_of_list_pre #a init)
+    (ensures  fun h0 b h1 -> live h1 b /\ stack_allocated b h0 h1 (Seq.of_list init))
+= fun #a init ->
+    B.alloca_of_list init
 
 (** Allocate a global fixed-length immutable buffer initialized to value [init] *)
 inline_for_extraction noextract
@@ -1148,3 +1148,4 @@ val map_blocks:
     (requires fun h -> h0 == h /\ live h output /\ live h inp /\ eq_or_disjoint inp output)
     (ensures  fun _ _ h1 -> modifies1 output h0 h1 /\
 	as_seq h1 output == Seq.map_blocks (v blocksize) (as_seq h0 inp) (spec_f h0) (spec_l h0))
+
