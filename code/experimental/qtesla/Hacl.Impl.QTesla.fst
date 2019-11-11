@@ -1836,14 +1836,14 @@ val qtesla_sign_do_while:
       is_poly_k_montgomery h a /\ is_s_sk h s /\ is_e_sk h e)
     (ensures fun h0 _ h1 -> modifies3 nonce smlen sm h0 h1)
 
-// -LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2
 #push-options "--z3rlimit 1000 --max_fuel 0 --max_ifuel 0 \
-                --using_facts_from '*  -FStar.Monotonic.Heap.equal_dom -LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2'"
+                --using_facts_from '* -LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2'"
+//               --using_facts_from '* -FStar.Monotonic.Heap.equal_dom -LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2'"
 //                --using_facts_from '*  -FStar.Monotonic.Heap.equal_dom'"
-//                --using_facts_from '* -LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2'"
 // --log_queries --query_stats --print_z3_statistics
 
 #push-options "--z3rlimit 500 --max_fuel 0 --max_ifuel 0"
+
 let qtesla_sign_do_while randomness randomness_input nonce a s e smlen mlen m sm =
     let hInit = ST.get () in
     push_frame();
@@ -1892,6 +1892,7 @@ let qtesla_sign_do_while randomness randomness_input nonce a s e smlen mlen m sm
 
     let h2 = ST.get () in
     assert(modifies3 v_ y nonce h0 h2);
+
     assert(is_poly_equal h1 h2 y); // for is_poly_y_sampler_output h2 y
     assert(forall (i:nat{i < v params_n}) . bget h2 s i == bget hInit s i); // for is_s_sk h2 s
 
@@ -1911,7 +1912,7 @@ let qtesla_sign_do_while randomness randomness_input nonce a s e smlen mlen m sm
          else (
               let h4 = ST.get () in
               for 0ul mlen
-              (fun h _ -> live h sm /\ live h m /\ modifies1 sm h4 h)
+              (fun h _ -> live h sm /\ live h m /\ modifies1 sm h4 h /\ equal_domains h4 h)
               (fun i -> let ix = crypto_bytes +. i in
                      assert (length sm == v (crypto_bytes +. mlen));
                      assert (v i < v mlen);
