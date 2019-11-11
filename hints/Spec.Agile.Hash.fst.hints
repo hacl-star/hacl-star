@@ -26,7 +26,7 @@
         "typing_Spec.Hash.Definitions.is_sha2"
       ],
       0,
-      "dc867a8f2c78e599b797a61e497f1c1b"
+      "b919f2f876fe6a774136d7ed1349ff61"
     ],
     [
       "Spec.Agile.Hash.update",
@@ -53,7 +53,7 @@
         "typing_Spec.Hash.Definitions.is_sha2"
       ],
       0,
-      "5410e153a083f6018434f79417b26ca4"
+      "27e9af1e2b499ea9544677a0667d6296"
     ],
     [
       "Spec.Agile.Hash.split_block",
@@ -81,7 +81,7 @@
         "refinement_interpretation_Tm_refine_f7a8f8340b3c54b659acfc982cbf3004"
       ],
       0,
-      "9c451ea809c451a9e1ca3fdb73ffef24"
+      "4e3d4d900e16ac5eb5d456ee4ad10d47"
     ],
     [
       "Spec.Agile.Hash.split_block",
@@ -96,35 +96,14 @@
         "constructor_distinct_Lib.IntTypes.U32",
         "constructor_distinct_Lib.IntTypes.U64",
         "constructor_distinct_Lib.IntTypes.U8",
-        "equation_FStar.Pervasives.Native.fst",
-        "equation_FStar.Pervasives.Native.snd",
-        "equation_FStar.Seq.Properties.split", "equation_Lib.IntTypes.uint8",
-        "equation_Prims.nat", "equation_Spec.Hash.Definitions.block_length",
+        "equation_Spec.Hash.Definitions.block_length",
         "equation_Spec.Hash.Definitions.block_word_length",
-        "equation_Spec.Hash.Definitions.bytes",
-        "equation_Spec.Hash.Definitions.bytes_blocks",
         "equation_Spec.Hash.Definitions.word_length",
         "fuel_guarded_inversion_Spec.Hash.Definitions.hash_alg",
-        "function_token_typing_Lib.IntTypes.uint8", "int_inversion",
-        "int_typing", "lemma_FStar.Seq.Base.lemma_len_slice",
-        "primitive_Prims.op_Addition", "primitive_Prims.op_Division",
-        "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Modulus",
-        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
-        "proj_equation_FStar.Pervasives.Native.Mktuple2__1",
-        "proj_equation_FStar.Pervasives.Native.Mktuple2__2",
-        "projection_inverse_BoxBool_proj_0",
-        "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
-        "refinement_interpretation_Tm_refine_076defedcc784372ac2411e8a227ef46",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_81407705a0828c2c1b1976675443f647",
-        "refinement_interpretation_Tm_refine_f6dadb4c8e10be02eb074bcec501a1ef",
-        "refinement_interpretation_Tm_refine_f7a8f8340b3c54b659acfc982cbf3004",
-        "typing_FStar.Seq.Base.length"
+        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "8ee900bbd6692cf1e6213fda9d1ba5ca"
+      "ade5b56fddf419d9469592a17617c6ab"
     ],
     [
       "Spec.Agile.Hash.split_block",
@@ -167,7 +146,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "f7dabfde6069d1166dad7109e0f5fb47"
+      "6ff5628fcc29ec1449df20599886e946"
     ],
     [
       "Spec.Agile.Hash.update_multi",
@@ -213,7 +192,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "39596273201202250def65b4d637e513"
+      "c897ed896234507bffadf2fa4021dd45"
     ],
     [
       "Spec.Agile.Hash.hash",
@@ -232,29 +211,19 @@
         "constructor_distinct_Lib.IntTypes.U32",
         "constructor_distinct_Lib.IntTypes.U64",
         "constructor_distinct_Lib.IntTypes.U8",
-        "equality_tok_Lib.IntTypes.U32@tok",
-        "equation_FStar.Seq.Base.op_At_Bar", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.uint8", "equation_Lib.IntTypes.unsigned",
-        "equation_Prims.nat", "equation_Spec.Hash.Definitions.block_length",
-        "equation_Spec.Hash.Definitions.block_word_length",
-        "equation_Spec.Hash.Definitions.bytes",
+        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
         "equation_Spec.Hash.Definitions.hash_length",
         "equation_Spec.Hash.Definitions.hash_word_length",
         "equation_Spec.Hash.Definitions.word_length",
         "fuel_guarded_inversion_Spec.Hash.Definitions.hash_alg",
-        "function_token_typing_Lib.IntTypes.uint8", "int_inversion",
-        "lemma_FStar.Seq.Base.lemma_len_append",
-        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Addition",
-        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
-        "projection_inverse_BoxInt_proj_0",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_8f4f0e1bdbf271008dd9328cde2d4929",
-        "refinement_interpretation_Tm_refine_c0dc9cef58c290502a74bf3c80bf85bc",
-        "typing_FStar.Seq.Base.length", "typing_Lib.IntTypes.bits",
-        "typing_tok_Lib.IntTypes.U32@tok"
+        "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "0300737889cef81d3c465e513f697879"
+      "1ccc6ad9db16a2d792dc1052b602f3bc"
     ],
     [
       "Spec.Agile.Hash.hash",
@@ -285,7 +254,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "310abbb9b2cbd5ddbc91e9b4ee237845"
+      "39948d7f9404cc68212a62f6c5a5d1b8"
     ]
   ]
 ]

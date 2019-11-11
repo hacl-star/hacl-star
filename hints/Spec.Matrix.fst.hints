@@ -21,7 +21,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "a2ca46043e0cc48e8a9945c0b4664f86"
+      "326814e1eddbc9c992e963075cc5baeb"
     ],
     [
       "Spec.Matrix.index_lt_s",
@@ -43,7 +43,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "d05171c4b8117b9f20902f3520ecd711"
+      "ecdef64727f2bc5086a81b3062d42bad"
     ],
     [
       "Spec.Matrix.index_neq",
@@ -64,7 +64,7 @@
         "refinement_kinding_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "ba9043e9163423a619e53424b458870d"
+      "9009a67ab64ea21c70932552c1c6c8a2"
     ],
     [
       "Spec.Matrix.index_neq",
@@ -95,7 +95,7 @@
         "unit_inversion", "unit_typing"
       ],
       0,
-      "e20467629ee22704bffe2b532472c308"
+      "21b1c7503c335c656245bef4747dea4c"
     ],
     [
       "Spec.Matrix.matrix",
@@ -110,7 +110,7 @@
         "refinement_interpretation_Tm_refine_b8224c6c43e6e9f067a2437fa08acf99"
       ],
       0,
-      "c1b50e1883786971d59c0b8400a7322e"
+      "45f725b3b535f67b935a00a9c51f1e9a"
     ],
     [
       "Spec.Matrix.create",
@@ -118,25 +118,27 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption",
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "constructor_distinct_Lib.IntTypes.S8",
         "constructor_distinct_Lib.IntTypes.U16",
-        "equality_tok_Lib.IntTypes.U16@tok", "equation_Lib.IntTypes.bits",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "equality_tok_Lib.IntTypes.U16@tok",
+        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
         "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
         "equation_Prims.nat", "equation_Prims.pos",
-        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
-        "projection_inverse_BoxInt_proj_0",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_0ec011aea9f93256a3547ad9f0c667f1",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
         "refinement_interpretation_Tm_refine_b8224c6c43e6e9f067a2437fa08acf99",
         "typing_Lib.IntTypes.bits", "typing_Prims.pow2",
-        "typing_tok_Lib.IntTypes.U16@tok"
+        "typing_tok_Lib.IntTypes.U16@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "707adfa9578dbb316e9d6710942fa5ba"
+      "c49b1b3e143bedb17dd4ec0d6ac4a42b"
     ],
     [
       "Spec.Matrix.mget",
@@ -157,7 +159,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "258b82c029218828a61f53483c5e3d7f"
+      "c4e6746ab5c4f8ae0f96429aee3113b4"
     ],
     [
       "Spec.Matrix.mset",
@@ -179,7 +181,7 @@
         "refinement_kinding_Tm_refine_f37327594b97f54132ce6bcb98ee4847"
       ],
       0,
-      "7c339e30adff175d473980b2977cc103"
+      "ca2ae77ebd92657438200dac1375179a"
     ],
     [
       "Spec.Matrix.mset",
@@ -187,18 +189,22 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query",
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "assumption_FStar.Pervasives.Native.tuple2__uu___haseq",
-        "equation_Lib.IntTypes.uint16", "equation_Lib.Sequence.lseq",
-        "equation_Lib.Sequence.seq", "equation_Prims.eqtype",
-        "equation_Prims.nat", "equation_Spec.Matrix.matrix",
-        "equation_Spec.Matrix.mget",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.uint16", "equation_Lib.IntTypes.unsigned",
+        "equation_Lib.Sequence.lseq", "equation_Lib.Sequence.seq",
+        "equation_Prims.eqtype", "equation_Prims.nat",
+        "equation_Spec.Matrix.matrix", "equation_Spec.Matrix.mget",
         "function_token_typing_Lib.IntTypes.uint16",
         "function_token_typing_Prims.int",
         "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "haseqTm_refine_c1424615841f28cac7fc34e92b7ff33c", "int_inversion",
-        "int_typing", "primitive_Prims.op_Addition",
-        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
+        "int_typing", "lemma_FStar.UInt.pow2_values",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
         "refinement_interpretation_Tm_refine_0ec011aea9f93256a3547ad9f0c667f1",
@@ -211,10 +217,11 @@
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
         "refinement_interpretation_Tm_refine_f37327594b97f54132ce6bcb98ee4847",
         "refinement_kinding_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
-        "typing_FStar.Seq.Base.length"
+        "typing_FStar.Seq.Base.length", "typing_Lib.IntTypes.bits",
+        "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "70ce37d55499d54710703cafb4f25c06"
+      "9baca5a3a8f3aeb9b5b8a9638598adff"
     ],
     [
       "Spec.Matrix.extensionality",
@@ -223,7 +230,7 @@
       0,
       [ "@query" ],
       0,
-      "ae7435c21582d104f7c5c5f62c25ff7e"
+      "a8c68e22e65d7763d584f864c0bcfad7"
     ],
     [
       "Spec.Matrix.extensionality",
@@ -231,12 +238,17 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Lib.IntTypes.uint16",
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.uint16", "equation_Lib.IntTypes.unsigned",
         "equation_Lib.Sequence.lseq", "equation_Lib.Sequence.seq",
         "equation_Lib.Sequence.to_seq", "equation_Prims.nat",
         "equation_Spec.Matrix.matrix", "equation_Spec.Matrix.mget",
         "function_token_typing_Lib.IntTypes.uint16", "int_inversion",
-        "primitive_Prims.op_Addition", "primitive_Prims.op_Multiply",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_0ec011aea9f93256a3547ad9f0c667f1",
         "refinement_interpretation_Tm_refine_2b9ac1d6c43e9e240d84837e7e466c45",
@@ -246,10 +258,11 @@
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
         "refinement_interpretation_Tm_refine_e773a42934e56ab20618507a13aa2fbd",
         "refinement_interpretation_Tm_refine_f37327594b97f54132ce6bcb98ee4847",
-        "typing_FStar.Seq.Base.length"
+        "typing_FStar.Seq.Base.length", "typing_Lib.IntTypes.bits",
+        "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "eed30fda4559fb6e7cfe9559bc503b30"
+      "09bad51be0a0b973832dbb60bed6cc15"
     ],
     [
       "Spec.Matrix.extensionality",
@@ -275,7 +288,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "e097ad07e26e00ddec17d285da3504fb"
+      "c9c70577a8b18a8a13cb8773423773d9"
     ],
     [
       "Spec.Matrix.map2",
@@ -284,7 +297,7 @@
       0,
       [ "@query" ],
       0,
-      "7411791244c4d95839bd7a4a2bd725c5"
+      "1e6402c978f0ec24ea7e1d1a004620f7"
     ],
     [
       "Spec.Matrix.map2",
@@ -313,7 +326,7 @@
         "typing_Spec.Matrix.mset"
       ],
       0,
-      "5f6201f432cc6186b01e992484e43f6b"
+      "972868e4d281eaec7e64e8c928f1d8bb"
     ],
     [
       "Spec.Matrix.add",
@@ -328,7 +341,7 @@
         "equation_Lib.IntTypes.unsigned", "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "9c0948fb965c24e7eeef146ec853e749"
+      "fd13d121a4d024e7a2fc21bc51936406"
     ],
     [
       "Spec.Matrix.add",
@@ -343,7 +356,7 @@
         "equation_Lib.IntTypes.unsigned", "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "cbe33c9eaaf2757336474f415ad81ba7"
+      "3956f3a427060247847f3f769633657c"
     ],
     [
       "Spec.Matrix.sub",
@@ -358,7 +371,7 @@
         "equation_Lib.IntTypes.unsigned", "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "5985e8cf057cc5c3655b50662e1eb62e"
+      "fc8083edd83f7753698b508bb748d26e"
     ],
     [
       "Spec.Matrix.sub",
@@ -373,7 +386,7 @@
         "equation_Lib.IntTypes.unsigned", "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "591c636fefed09ea99c7dc2f53537a05"
+      "d09080a3dbbbd8b63e1fc753b9f78bf1"
     ],
     [
       "Spec.Matrix.sum_",
@@ -405,7 +418,7 @@
         "typing_tok_Lib.IntTypes.U16@tok", "well-founded-ordering-on-nat"
       ],
       0,
-      "2386e0622eb7f64d370f1aac9cdec554"
+      "3d09201324b0c7a6d69b5f14a79c428a"
     ],
     [
       "Spec.Matrix.sum",
@@ -414,7 +427,7 @@
       0,
       [ "@query" ],
       0,
-      "cca302d4e10f19de46c97aef13919554"
+      "3612577465a6109a1fc4bdb06e4e126b"
     ],
     [
       "Spec.Matrix.sum_extensionality",
@@ -423,7 +436,7 @@
       0,
       [ "@query" ],
       0,
-      "b6b75383d5ce5e8b7201178e512d8ea5"
+      "f523680dbf51041a78842c76535f1836"
     ],
     [
       "Spec.Matrix.sum_extensionality",
@@ -456,7 +469,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "203cb8e3e4420dae4ada54c7fe48e7d1"
+      "4d11c03bb3b9c5beec7177f8bd4031b1"
     ],
     [
       "Spec.Matrix.mul_inner",
@@ -472,7 +485,7 @@
         "equation_Lib.IntTypes.unsigned", "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "444f2522d4535711341cf8e0a4317492"
+      "a2c3fb0227f19bae475cde87d39e5151"
     ],
     [
       "Spec.Matrix.mul_inner",
@@ -481,7 +494,7 @@
       0,
       [ "@query" ],
       0,
-      "cb837da69bda1d5a05e25a856cebb801"
+      "e6868279bcf6b282c415b7300f2305d6"
     ],
     [
       "Spec.Matrix.mul_inner",
@@ -528,7 +541,7 @@
         "typing_Prims.pow2", "typing_tok_Lib.IntTypes.U16@tok"
       ],
       0,
-      "9aebf2a302ae97188c2bfb2e8d3b31cd"
+      "3f5f9baef38f9a4c6e81b46a005db8da"
     ],
     [
       "Spec.Matrix.mul",
@@ -544,7 +557,7 @@
         "equation_Lib.IntTypes.unsigned", "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "c64d2ddb8b5bc8cd758db5183db50395"
+      "2bcec97037bbb5ff5b475a2da36abac0"
     ],
     [
       "Spec.Matrix.mul",
@@ -553,7 +566,7 @@
       0,
       [ "@query" ],
       0,
-      "2013beafe25b93a1b1fb5f617034ae70"
+      "61853cb0c2ddff23cd2b504c9c92ec73"
     ],
     [
       "Spec.Matrix.mul",
@@ -592,7 +605,7 @@
         "typing_Spec.Matrix.mset"
       ],
       0,
-      "ca514a8a3f128fb65a99e541184fbf34"
+      "a96403b9a8f63c27efe205581bd30995"
     ],
     [
       "Spec.Matrix.mget_s",
@@ -620,7 +633,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "81c3ecf87a97974cc1d4db1bbf1fa34e"
+      "e2181518da609b038560f8505b937e7c"
     ],
     [
       "Spec.Matrix.mul_inner_s",
@@ -636,7 +649,7 @@
         "equation_Lib.IntTypes.unsigned", "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "8b061898d8477b7f8edf11024f09e390"
+      "eafe446eb45903e4cb24a95ee9f28d3b"
     ],
     [
       "Spec.Matrix.mul_inner_s",
@@ -645,7 +658,7 @@
       0,
       [ "@query" ],
       0,
-      "df1cfb98cede86035bc20f10f509a689"
+      "9e13b42cb678bd510130d62dff10c429"
     ],
     [
       "Spec.Matrix.mul_inner_s",
@@ -692,7 +705,7 @@
         "typing_Prims.pow2", "typing_tok_Lib.IntTypes.U16@tok"
       ],
       0,
-      "892ddfc2548caf3eb373543c39c0ba5b"
+      "caec262e638523b37bf3aa9b156f26e0"
     ],
     [
       "Spec.Matrix.mul_s",
@@ -708,7 +721,7 @@
         "equation_Lib.IntTypes.unsigned", "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "bdb51c0f183e05e0d200bb0cdffaf629"
+      "f7f9efea46dd9ba498f959b8f86c3ae9"
     ],
     [
       "Spec.Matrix.mul_s",
@@ -717,7 +730,7 @@
       0,
       [ "@query" ],
       0,
-      "936791b8c91a5b1dfaed6fb5cbca8667"
+      "1c3804e9197f3dc1496941dbd4694bf8"
     ],
     [
       "Spec.Matrix.mul_s",
@@ -756,7 +769,7 @@
         "typing_Spec.Matrix.mset"
       ],
       0,
-      "17d74d8a384c2b69d985ae7fecf7b027"
+      "fc2af5ef727d1121474fe91abaa06114"
     ],
     [
       "Spec.Matrix.fold_land_",
@@ -776,7 +789,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "57051c96141a7ec89d1783573ab8c024"
+      "7bd692427aac7ab402b58190ccd28d1f"
     ],
     [
       "Spec.Matrix.eq_m",
@@ -794,7 +807,7 @@
         "refinement_interpretation_Tm_refine_0766302b68bb44ab7aff8c4d8be0b46f"
       ],
       0,
-      "261f9209b60004106263118fbfda337b"
+      "2289e13aff77a4e9f86d18d723470041"
     ],
     [
       "Spec.Matrix.matrix_eq_fc",
@@ -814,7 +827,7 @@
         "refinement_interpretation_Tm_refine_b8224c6c43e6e9f067a2437fa08acf99"
       ],
       0,
-      "2d3d698075773efac28db3b18c81f60f"
+      "f46d7ba89d8351791a094885c444e16e"
     ],
     [
       "Spec.Matrix.matrix_eq",
@@ -833,7 +846,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "2b4231f18a01120631b1e6af6014e2f4"
+      "42a8a6feb2083232b7fd04e09e9bf0d0"
     ],
     [
       "Spec.Matrix.matrix_eq",
@@ -876,12 +889,11 @@
         "refinement_interpretation_Tm_refine_e37a8a81b6e72b6dae52414929365d29",
         "refinement_interpretation_Tm_refine_e773a42934e56ab20618507a13aa2fbd",
         "refinement_interpretation_Tm_refine_febe7e5dfb824f85118cae5eb51a98a5",
-        "token_correspondence_Spec.Matrix.fold_land_.fuel_instrumented",
         "typing_FStar.Seq.Base.length", "typing_Spec.Matrix.matrix_eq_fc",
         "typing_Tm_abs_f2738f059364540e4bcc5f3fff4dccc4"
       ],
       0,
-      "f80cdcbcd820fcfdf294c6e87e188d76"
+      "2c44bef60ca39fc62c11a282ba2e3a99"
     ],
     [
       "Spec.Matrix.matrix_to_lbytes_fc",
@@ -893,17 +905,21 @@
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "constructor_distinct_Lib.IntTypes.U32",
         "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
-        "int_inversion", "lemma_FStar.UInt.pow2_values",
-        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
-        "projection_inverse_BoxInt_proj_0",
+        "equation_Lib.IntTypes.uint16", "equation_Lib.IntTypes.unsigned",
+        "equation_Lib.Sequence.lseq", "equation_Lib.Sequence.seq",
+        "equation_Prims.nat", "equation_Spec.Matrix.matrix",
+        "function_token_typing_Lib.IntTypes.uint16", "int_inversion",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_0ec011aea9f93256a3547ad9f0c667f1",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_57d7c64afe8356b54a2af469d7a5eec1",
-        "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
+        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
+        "typing_FStar.Seq.Base.length", "typing_Lib.IntTypes.bits",
+        "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "6c502ab28fea65804966b39604540c7a"
+      "3071ab80d3bb8248f19e50033ed63950"
     ],
     [
       "Spec.Matrix.matrix_to_lbytes_fc",
@@ -929,7 +945,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "a50423ed76f4d22f0b2aacc8ae6b21b8"
+      "51d28e28e40dc150fe8cbe522fdb1d69"
     ],
     [
       "Spec.Matrix.matrix_to_lbytes_fc",
@@ -969,7 +985,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "46ffe279a7b7e3c722e6b88d1e988a07"
+      "c81b0f2ae09d5e5cfbaedfe66c0cec3a"
     ],
     [
       "Spec.Matrix.lemma_matrix_to_lbytes_fc",
@@ -1001,6 +1017,7 @@
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_0ec011aea9f93256a3547ad9f0c667f1",
+        "refinement_interpretation_Tm_refine_2b9ac1d6c43e9e240d84837e7e466c45",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_57d7c64afe8356b54a2af469d7a5eec1",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
@@ -1011,7 +1028,7 @@
         "typing_Prims.pow2", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "0bcfb746a6701d78fc30e3d84d7efcbb"
+      "5ecdb0ca33e6970022919d8de74327c8"
     ],
     [
       "Spec.Matrix.lemma_matrix_to_lbytes_fc",
@@ -1037,7 +1054,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "5b1c493d7711fb30b246b361d8e358d5"
+      "3dc921fa2476d444d6b3812f5add4e41"
     ],
     [
       "Spec.Matrix.lemma_matrix_to_lbytes_fc",
@@ -1046,7 +1063,7 @@
       0,
       [ "@query", "eq2-interp", "equation_Spec.Matrix.matrix_to_lbytes_fc" ],
       0,
-      "21ad26704348049582ddce8038e8e822"
+      "bd1ecc53c2b464c575965605fdd99b32"
     ],
     [
       "Spec.Matrix.lemma_matrix_to_lbytes",
@@ -1083,7 +1100,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "a480dee89aa339e64eeceea36e118704"
+      "632fa82a0ccc8dacc94b4fe6cad4d184"
     ],
     [
       "Spec.Matrix.lemma_matrix_to_lbytes",
@@ -1109,7 +1126,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "71757805c61d917a0dbb6158c61d6c35"
+      "3d5a0e68abe83cb5dac3eb429bbbefce"
     ],
     [
       "Spec.Matrix.lemma_matrix_to_lbytes",
@@ -1147,6 +1164,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_57d7c64afe8356b54a2af469d7a5eec1",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_950acbcd94cd6fc4042932c32cc7a005",
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
         "refinement_interpretation_Tm_refine_e773a42934e56ab20618507a13aa2fbd",
@@ -1157,7 +1175,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "194b5c19e2324b3d74c8e8ea2328a4ad"
+      "5c7a0b801f804322f9f8ca5fb8cea2db"
     ],
     [
       "Spec.Matrix.lemma_matrix_to_lbytes_ext",
@@ -1187,7 +1205,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "4935d346eb20f3ca7f5c96d1a78ceaa0"
+      "b2be32ba9a064d790559cf835a107f45"
     ],
     [
       "Spec.Matrix.lemma_matrix_to_lbytes_ext",
@@ -1199,21 +1217,17 @@
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "constructor_distinct_Lib.IntTypes.U32",
         "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.uint16", "equation_Lib.IntTypes.unsigned",
-        "equation_Lib.Sequence.lseq", "equation_Lib.Sequence.seq",
-        "equation_Prims.nat", "equation_Spec.Matrix.matrix",
-        "function_token_typing_Lib.IntTypes.uint16", "int_inversion",
-        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Multiply",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
+        "int_inversion", "lemma_FStar.UInt.pow2_values",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_07b3be0baff8ffc1ef9335a83aac68b7",
         "refinement_interpretation_Tm_refine_0ec011aea9f93256a3547ad9f0c667f1",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
-        "typing_FStar.Seq.Base.length", "typing_Lib.IntTypes.bits",
-        "typing_tok_Lib.IntTypes.U32@tok"
+        "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "241016a2b1946473d648572315ec6f79"
+      "580d64f751e3ba958aa1f2b219fdfae5"
     ],
     [
       "Spec.Matrix.lemma_matrix_to_lbytes_ext",
@@ -1260,7 +1274,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "7012725b1b0009afb29a154b2bf1ac92"
+      "8bebf38c7980c4d6ef4bd7c797700848"
     ],
     [
       "Spec.Matrix.matrix_to_lbytes",
@@ -1274,20 +1288,17 @@
         "constructor_distinct_Lib.IntTypes.S8",
         "constructor_distinct_Lib.IntTypes.U32",
         "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.uint16", "equation_Lib.IntTypes.unsigned",
-        "equation_Lib.Sequence.lseq", "equation_Lib.Sequence.seq",
-        "equation_Prims.nat", "equation_Spec.Matrix.matrix",
-        "function_token_typing_Lib.IntTypes.uint16",
-        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Multiply",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
+        "int_inversion", "lemma_FStar.UInt.pow2_values",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_0ec011aea9f93256a3547ad9f0c667f1",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_57d7c64afe8356b54a2af469d7a5eec1",
-        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
-        "typing_FStar.Seq.Base.length", "typing_Lib.IntTypes.bits",
-        "typing_tok_Lib.IntTypes.U32@tok"
+        "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "a8fa1a4c584dffb5ff95e7b661beb79f"
+      "c5ae3e7f52c3f6dbecd554e8e1b1f69f"
     ],
     [
       "Spec.Matrix.matrix_to_lbytes",
@@ -1306,7 +1317,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "e847369f1653fd3e6122ab4652a0e075"
+      "0e43b4491b035b129ff39f345d407297"
     ],
     [
       "Spec.Matrix.matrix_to_lbytes",
@@ -1368,7 +1379,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "dfc3ca0fc919528c2943c86d0f7a61a3"
+      "6683c73fa2a1010120574ee4ebd2e51b"
     ],
     [
       "Spec.Matrix.matrix_from_lbytes_fc",
@@ -1389,7 +1400,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "0f01bfe3306fca6a3ffab08ba46d7fa8"
+      "ad5a49d3e3cecf72a97ed91a0901d88b"
     ],
     [
       "Spec.Matrix.matrix_from_lbytes_fc",
@@ -1397,20 +1408,14 @@
       0,
       0,
       [
-        "@MaxFuel_assumption", "@MaxIFuel_assumption",
-        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "constructor_distinct_Lib.IntTypes.U32",
-        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
-        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Multiply",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_0ec011aea9f93256a3547ad9f0c667f1",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_57d7c64afe8356b54a2af469d7a5eec1",
-        "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
+        "refinement_interpretation_Tm_refine_57d7c64afe8356b54a2af469d7a5eec1"
       ],
       0,
-      "ae5d6f3e518ea504060e6863666ec57b"
+      "c09d31f4fc7c1ed1994647173e0a7d87"
     ],
     [
       "Spec.Matrix.matrix_from_lbytes_fc",
@@ -1442,7 +1447,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "8c21230871ae1508a38e6bf7e7c51e8f"
+      "4c9b4543e1d53660683faf55ff05c245"
     ],
     [
       "Spec.Matrix.matrix_from_lbytes",
@@ -1467,7 +1472,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "b0af5e721f32e8528c91be436347726b"
+      "f66364f17e290557e1d4e3a42e0b856c"
     ],
     [
       "Spec.Matrix.matrix_from_lbytes",
@@ -1475,20 +1480,14 @@
       0,
       0,
       [
-        "@MaxFuel_assumption", "@MaxIFuel_assumption",
-        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "constructor_distinct_Lib.IntTypes.U32",
-        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
-        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Multiply",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_0ec011aea9f93256a3547ad9f0c667f1",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_57d7c64afe8356b54a2af469d7a5eec1",
-        "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
+        "refinement_interpretation_Tm_refine_57d7c64afe8356b54a2af469d7a5eec1"
       ],
       0,
-      "cbe7605503d6f2985f032fe76ddd0e31"
+      "9ce3bb29503374d282ff5c0b4322ac49"
     ],
     [
       "Spec.Matrix.matrix_from_lbytes",
@@ -1530,7 +1529,7 @@
         "typing_Lib.Sequence.upd", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "5e86c68ccc1998e090a1784656dfd735"
+      "427a383ed9235a1b3773c7f8b532de0e"
     ]
   ]
 ]

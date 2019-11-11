@@ -1,5 +1,5 @@
 [
-  "Ê‘™}7Û1*‡O+*‹Î",
+  "VJ hÇ#\fk‰Ó\u0001l²_Jê",
   [
     [
       "Vale.X64.InsSha.va_code_SHA256_rnds2",
@@ -15,7 +15,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "5cb9a09d2b5ec3939a375296766c79f7"
+      "4e2c1fc43d0a56fef52a4ba92b9c4f52"
     ],
     [
       "Vale.X64.InsSha.va_lemma_SHA256_rnds2",
@@ -36,7 +36,7 @@
         "typing_Vale.SHA.SHA_helpers.k"
       ],
       0,
-      "92a0314542b0a22e9e1ffdd66df21400"
+      "e24f7003c875f5e5be6ce40d2ff16953"
     ],
     [
       "Vale.X64.InsSha.va_lemma_SHA256_rnds2",
@@ -68,6 +68,7 @@
         "Prims_pretyping_f8666440faa91836cc5a13998af863fc",
         "Vale.X64.Flags_interpretation_Tm_arrow_59570c1b09fcfe77d38fb81f91091100",
         "Vale.X64.Flags_interpretation_Tm_arrow_cdf1f6cd0d3b8802627536b71c7dc9b7",
+        "Vale.X64.Instructions_s_interpretation_Tm_arrow_ebab5effdc550a3bbf954c4ad5a18d63",
         "Vale.X64.Machine_Semantics_s_interpretation_Tm_arrow_eabe638ef4af4b0ec65b4cf7bbb2dc65",
         "Vale.X64.Machine_Semantics_s_interpretation_Tm_arrow_ef1cb164cb5e999e95914068a32c6a77",
         "Vale.X64.Machine_s_interpretation_Tm_arrow_a3d9ef307178ed6e6eb0fe5485c5ade0",
@@ -131,6 +132,7 @@
         "equation_Vale.X64.Machine_Semantics_s.instr_eval_operand_implicit",
         "equation_Vale.X64.Machine_Semantics_s.instr_write_output_explicit",
         "equation_Vale.X64.Machine_Semantics_s.machine_eval_ins",
+        "equation_Vale.X64.Machine_Semantics_s.machine_eval_ins_st",
         "equation_Vale.X64.Machine_Semantics_s.obs_operand_explicit",
         "equation_Vale.X64.Machine_Semantics_s.obs_operand_implicit",
         "equation_Vale.X64.Machine_Semantics_s.ocmp",
@@ -175,6 +177,7 @@
         "function_token_typing_Prims.int",
         "function_token_typing_Prims.unit",
         "function_token_typing_Vale.X64.Instruction_s.instr_out",
+        "function_token_typing_Vale.X64.Instructions_s.eval_SHA256_rnds2",
         "function_token_typing_Vale.X64.Machine_Semantics_s.__proj__Mkmachine_state__item__ms_regs",
         "function_token_typing_Vale.X64.Machine_Semantics_s.machine_eval_ins_st",
         "function_token_typing_Vale.X64.Machine_s.t_reg",
@@ -184,6 +187,7 @@
         "interpretation_Tm_abs_0f87f222e83677072ac6914068ad4659",
         "interpretation_Tm_abs_14a3aa8102b38210dfdbec5a683db924",
         "interpretation_Tm_abs_191c7ec7183523a4147cc1287d574723",
+        "interpretation_Tm_abs_1f233bb62d19e8ce94de2fc1626a49a7",
         "interpretation_Tm_abs_420e19c3bc05c948529fe5a56f707d02",
         "interpretation_Tm_abs_6e92038f4a88fb2f84b2d65491e2a749",
         "interpretation_Tm_abs_9eb749ea9eba2cc8524aad77bce1df7e",
@@ -276,7 +280,6 @@
         "refinement_kinding_Tm_refine_72758763fd3a331db555502c82719e64",
         "token_correspondence_Vale.X64.Instruction_s.instr_operands_t.fuel_instrumented",
         "token_correspondence_Vale.X64.Instructions_s.eval_SHA256_rnds2",
-        "token_correspondence_Vale.X64.Machine_Semantics_s.apply_option",
         "token_correspondence_Vale.X64.Machine_Semantics_s.obs_args.fuel_instrumented",
         "token_correspondence_Vale.X64.Machine_Semantics_s.obs_inouts.fuel_instrumented",
         "token_correspondence_Vale.X64.Machine_s.t_reg",
@@ -312,7 +315,7 @@
         "typing_tok_Vale.X64.Instruction_s.PreserveFlags@tok", "unit_typing"
       ],
       0,
-      "52e468ea66738c5bf6c40c6a53b52941"
+      "5da0ba5f33715a09967e9dac124847d2"
     ],
     [
       "Vale.X64.InsSha.va_wp_SHA256_rnds2",
@@ -328,7 +331,7 @@
         "typing_Vale.SHA.SHA_helpers.k"
       ],
       0,
-      "40c9cebbcdffeb3fbd9e2f8458ef6595"
+      "75f9fac9100f5fe9585b19944c0eab70"
     ],
     [
       "Vale.X64.InsSha.va_wpProof_SHA256_rnds2",
@@ -403,7 +406,7 @@
         "typing_tok_Vale.X64.QuickCode.Mod_None@tok", "unit_typing"
       ],
       0,
-      "e7d6dcd6716b482c1ee02ce73e780e42"
+      "3c42d73e6bedbb4de37d2ba7206582e3"
     ],
     [
       "Vale.X64.InsSha.va_quick_SHA256_rnds2",
@@ -416,7 +419,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "7f9ffacd36f1fcd2b5914f64c5d26774"
+      "38805f25c16e49d06aa2c343a45ba173"
     ],
     [
       "Vale.X64.InsSha.va_code_SHA256_msg1",
@@ -432,7 +435,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "e31f381bd70649311ebd70b1aed94a82"
+      "9d92623631377fdad8d5f0de70ea485f"
     ],
     [
       "Vale.X64.InsSha.va_lemma_SHA256_msg1",
@@ -449,7 +452,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "cbdb585dac2669e1ed273e8cd98ef9b9"
+      "c51cebe123125c23c1010d45c1942c42"
     ],
     [
       "Vale.X64.InsSha.va_lemma_SHA256_msg1",
@@ -714,7 +717,7 @@
         "typing_tok_Vale.X64.Instruction_s.PreserveFlags@tok", "unit_typing"
       ],
       0,
-      "2edcdde8088dbc2bc7366b6ea0c79821"
+      "76ed50ab60678ad95f33954bc0c221b1"
     ],
     [
       "Vale.X64.InsSha.va_wp_SHA256_msg1",
@@ -731,7 +734,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "116889bc5abf7e8dacf90be7e6a0acc0"
+      "5101abd94ddb76b7f7713a8145dc4209"
     ],
     [
       "Vale.X64.InsSha.va_wpProof_SHA256_msg1",
@@ -793,7 +796,7 @@
         "typing_Vale.X64.State.update_reg_xmm", "unit_typing"
       ],
       0,
-      "91185d32b9ecf5c921956d9e5e20edbe"
+      "23b1e9d571e3c7f2b350ba2489c6ff3a"
     ],
     [
       "Vale.X64.InsSha.va_quick_SHA256_msg1",
@@ -806,7 +809,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "b6b731f3d1b25ed3c2b06316d158ea92"
+      "5c71bd8b2378bbb2488dc9f3b3e91847"
     ],
     [
       "Vale.X64.InsSha.va_code_SHA256_msg2",
@@ -822,7 +825,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "d4736c70a92450b20b0c15c7e6a1d686"
+      "95360b39b22e94cf2200bc44eab2e107"
     ],
     [
       "Vale.X64.InsSha.va_lemma_SHA256_msg2",
@@ -839,7 +842,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "a5f28bad794b372f1cb23fdf21345982"
+      "3e96da84db90588f2f8a76112b6b534c"
     ],
     [
       "Vale.X64.InsSha.va_lemma_SHA256_msg2",
@@ -967,6 +970,7 @@
         "equation_with_fuel_Vale.X64.Machine_Semantics_s.machine_eval_code.fuel_instrumented",
         "equation_with_fuel_Vale.X64.Machine_Semantics_s.obs_args.fuel_instrumented",
         "equation_with_fuel_Vale.X64.Machine_Semantics_s.obs_inouts.fuel_instrumented",
+        "fuel_guarded_inversion_Vale.X64.Machine_s.reg",
         "fuel_guarded_inversion_Vale.X64.State.vale_state",
         "function_token_typing_Prims.int",
         "function_token_typing_Prims.unit",
@@ -1105,7 +1109,7 @@
         "typing_tok_Vale.X64.Instruction_s.PreserveFlags@tok", "unit_typing"
       ],
       0,
-      "cd46e7990eb261fba9691ec248867410"
+      "9257c123b36e704e85a1f285161eb936"
     ],
     [
       "Vale.X64.InsSha.va_wp_SHA256_msg2",
@@ -1122,7 +1126,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "15905c1efe5ba6c17ffbd48568ff5e6e"
+      "064eeaefefd851dd78e144f7c16f71c9"
     ],
     [
       "Vale.X64.InsSha.va_wpProof_SHA256_msg2",
@@ -1180,7 +1184,7 @@
         "typing_Vale.X64.State.update_reg_xmm", "unit_typing"
       ],
       0,
-      "71383a853bbb421b9f6864593c8e4281"
+      "61053f30fcf132d6d5e6f39118666016"
     ],
     [
       "Vale.X64.InsSha.va_quick_SHA256_msg2",
@@ -1193,7 +1197,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "50e991ec6cd6d14f0c37fab9e6fdbe0b"
+      "de321d425225df03355b196d1cf9e95f"
     ]
   ]
 ]

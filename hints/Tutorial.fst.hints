@@ -15,7 +15,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "ed742340155527869034307ec16501c8"
+      "29ce15d8386503f1d2b5bbafe76e9ebd"
     ],
     [
       "Tutorial.reverse_inner",
@@ -24,7 +24,7 @@
       0,
       [ "@query" ],
       0,
-      "e5ffd003d01090febd38f9a9050b4e5f"
+      "301f88ef39b4e90f7ead53c3210760a7"
     ],
     [
       "Tutorial.reverse_inner",
@@ -40,7 +40,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "00445f98cb5373e3101cb59bd6937c26"
+      "12c8b2767ea31b4e1dc63b5d23cd330c"
     ],
     [
       "Tutorial.reverse_spec",
@@ -63,7 +63,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "6256c593e46652d5717feed33dfda411"
+      "c45f5018ddf242c45c62ee0a01516412"
     ],
     [
       "Tutorial.reverse",
@@ -81,7 +81,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "b0bf0ecf0a48107d2963ea3448d066f1"
+      "bb0e8d42f41778548e75e3ae7d83fad0"
     ],
     [
       "Tutorial.reverse",
@@ -151,7 +151,6 @@
         "lemma_FStar.Set.mem_complement", "lemma_FStar.Set.mem_intersect",
         "lemma_FStar.Set.mem_singleton", "lemma_FStar.Set.mem_subset",
         "lemma_FStar.Set.mem_union", "lemma_FStar.UInt32.uv_inv",
-        "lemma_Lib.Buffer.modifies_preserves_live",
         "lemma_Lib.IntTypes.sub_lemma",
         "lemma_LowStar.Monotonic.Buffer.address_liveness_insensitive_buffer",
         "lemma_LowStar.Monotonic.Buffer.fresh_frame_loc_not_unused_in_disjoint",
@@ -230,7 +229,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "97e0364969648f391f853554e471b710"
+      "fcf37eed52584615c687ffb9fea1b7d2"
     ],
     [
       "Tutorial.reverse_inplace_inner",
@@ -246,7 +245,7 @@
         "refinement_interpretation_Tm_refine_c9aa9821270e02923955e761dc82c8d3"
       ],
       0,
-      "caa72f16345586883f86853d285c8f92"
+      "10160309e9886f351ff53907161b2b52"
     ],
     [
       "Tutorial.reverse_inplace_inner",
@@ -260,7 +259,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "6928bb268a1b49d6c0541a62443344f9"
+      "90cff5a76b8d428a28a25d6ad2450889"
     ],
     [
       "Tutorial.reverse_inplace_inner",
@@ -285,7 +284,7 @@
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42"
       ],
       0,
-      "7b24ad0f701f13d984988174cffe8816"
+      "36533b2641189507f96f05202086235e"
     ],
     [
       "Tutorial.reverse_inplace_spec",
@@ -299,7 +298,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "ee402e30787d9849e5140d7aedc14215"
+      "8714b3ce5554ea0d89a1591f367939a6"
     ],
     [
       "Tutorial.reverse_inplace",
@@ -317,7 +316,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "9de7d174e7974fbc62565a20b3d4a5d6"
+      "b72a90f7f76168fdff37f65371db1c76"
     ],
     [
       "Tutorial.reverse_inplace",
@@ -388,13 +387,11 @@
         "lemma_FStar.Set.mem_complement", "lemma_FStar.Set.mem_intersect",
         "lemma_FStar.Set.mem_singleton", "lemma_FStar.Set.mem_subset",
         "lemma_FStar.Set.mem_union", "lemma_FStar.UInt.pow2_values",
-        "lemma_FStar.UInt32.uv_inv",
-        "lemma_Lib.Buffer.modifies_preserves_live",
-        "lemma_Lib.IntTypes.div_lemma", "lemma_Lib.IntTypes.sub_lemma",
+        "lemma_FStar.UInt32.uv_inv", "lemma_Lib.IntTypes.div_lemma",
+        "lemma_Lib.IntTypes.sub_lemma",
         "lemma_LowStar.Monotonic.Buffer.address_liveness_insensitive_buffer",
         "lemma_LowStar.Monotonic.Buffer.fresh_frame_loc_not_unused_in_disjoint",
         "lemma_LowStar.Monotonic.Buffer.fresh_frame_modifies",
-        "lemma_LowStar.Monotonic.Buffer.lemma_live_equal_mem_domains",
         "lemma_LowStar.Monotonic.Buffer.length_null_1",
         "lemma_LowStar.Monotonic.Buffer.length_null_2",
         "lemma_LowStar.Monotonic.Buffer.live_loc_not_unused_in",
@@ -414,8 +411,9 @@
         "lemma_LowStar.Monotonic.Buffer.modifies_remove_fresh_frame",
         "lemma_LowStar.Monotonic.Buffer.modifies_trans_linear",
         "lemma_LowStar.Monotonic.Buffer.popped_modifies",
-        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_BarBar",
-        "primitive_Prims.op_Division", "primitive_Prims.op_Equality",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
+        "primitive_Prims.op_BarBar", "primitive_Prims.op_Division",
+        "primitive_Prims.op_Equality",
         "primitive_Prims.op_GreaterThanOrEqual",
         "primitive_Prims.op_LessThan", "primitive_Prims.op_LessThanOrEqual",
         "primitive_Prims.op_Negation", "primitive_Prims.op_Subtraction",
@@ -466,7 +464,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "af6968d287978a1eeb4c67453c85914f"
+      "bf33f73f870aa25b8f3c9b9af96292a4"
     ],
     [
       "Tutorial.fib_inner",
@@ -481,7 +479,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "de9dcc495f8f0536eed4be285f5a2836"
+      "0c8542dd4f1debf385cb4a2a9e2c9026"
     ],
     [
       "Tutorial.fib_inner",
@@ -490,7 +488,7 @@
       0,
       [ "@query" ],
       0,
-      "e8bc2134558e063b2bc322986a4895d8"
+      "3cd18a127590fa36c3e0441a65884e8b"
     ],
     [
       "Tutorial.fib_inner",
@@ -505,7 +503,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "da6cc7be6bc18bdab91e2c0483161d78"
+      "73151f6cf2fc2812bd81c54e2b7f9443"
     ],
     [
       "Tutorial.fib",
@@ -575,13 +573,12 @@
         "lemma_FStar.Set.mem_complement", "lemma_FStar.Set.mem_intersect",
         "lemma_FStar.Set.mem_singleton", "lemma_FStar.Set.mem_subset",
         "lemma_FStar.Set.mem_union", "lemma_FStar.UInt.pow2_values",
-        "lemma_Lib.Buffer.bget_as_seq",
-        "lemma_Lib.Buffer.modifies_preserves_live",
-        "lemma_Lib.IntTypes.v_mk_int",
-        "lemma_LowStar.Monotonic.Buffer.lemma_live_equal_mem_domains",
+        "lemma_Lib.Buffer.bget_as_seq", "lemma_Lib.IntTypes.v_mk_int",
+        "lemma_LowStar.Monotonic.Buffer.address_liveness_insensitive_buffer",
         "lemma_LowStar.Monotonic.Buffer.length_null_1",
         "lemma_LowStar.Monotonic.Buffer.length_null_2",
         "lemma_LowStar.Monotonic.Buffer.live_loc_not_unused_in",
+        "lemma_LowStar.Monotonic.Buffer.loc_disjoint_includes_r",
         "lemma_LowStar.Monotonic.Buffer.loc_disjoint_none_r",
         "lemma_LowStar.Monotonic.Buffer.loc_disjoint_sym_",
         "lemma_LowStar.Monotonic.Buffer.loc_includes_addresses_addresses_2",
@@ -597,6 +594,7 @@
         "lemma_LowStar.Monotonic.Buffer.loc_union_comm",
         "lemma_LowStar.Monotonic.Buffer.loc_union_loc_none_r",
         "lemma_LowStar.Monotonic.Buffer.modifies_buffer_elim",
+        "lemma_LowStar.Monotonic.Buffer.modifies_liveness_insensitive_buffer",
         "lemma_LowStar.Monotonic.Buffer.modifies_liveness_insensitive_buffer_weak",
         "lemma_LowStar.Monotonic.Buffer.modifies_loc_includes",
         "lemma_LowStar.Monotonic.Buffer.modifies_remove_fresh_frame",
@@ -662,7 +660,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "bbbc96ec2f2c2c829d47aeec64ce2c90"
+      "13f329565a6e2383eec8e77ae5fd85bf"
     ],
     [
       "Tutorial.set_true_spec",
@@ -681,7 +679,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "74a2ed5845f07602eac44bd621e791bd"
+      "515f1ca64ab879d25154f70a124cded9"
     ],
     [
       "Tutorial.set_true_spec",
@@ -700,7 +698,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "acedc72f00f17f5320b62660ef84445c"
+      "88386bad7a6d4bea28d7058078000ae5"
     ],
     [
       "Tutorial.set_true_spec",
@@ -733,7 +731,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "708a1e0843d9ff29816757de969a2a19"
+      "b55de180bf2f7dfc327f45c259823023"
     ],
     [
       "Tutorial.set_true",
@@ -752,7 +750,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "e633e3e96aa77e4ff48ae52984b48154"
+      "1f10cc615bbf30c9e26d55bddb4bf258"
     ],
     [
       "Tutorial.set_true",
@@ -771,7 +769,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "90d5a7d1cecfc93ba0d3411a71464e22"
+      "d10e52f1875c0a5146d6caa973bb92b6"
     ],
     [
       "Tutorial.set_true",
@@ -827,8 +825,9 @@
         "lemma_FStar.Set.mem_intersect", "lemma_FStar.Set.mem_singleton",
         "lemma_FStar.UInt.pow2_values", "lemma_FStar.UInt32.uv_inv",
         "lemma_FStar.UInt32.vu_inv", "lemma_Lib.Buffer.bget_as_seq",
-        "lemma_Lib.Buffer.modifies_preserves_live",
         "lemma_Lib.IntTypes.v_mk_int",
+        "lemma_LowStar.Monotonic.Buffer.address_liveness_insensitive_buffer",
+        "lemma_LowStar.Monotonic.Buffer.lemma_live_equal_mem_domains",
         "lemma_LowStar.Monotonic.Buffer.length_null_1",
         "lemma_LowStar.Monotonic.Buffer.length_null_2",
         "lemma_LowStar.Monotonic.Buffer.live_region_frameOf",
@@ -897,7 +896,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "8d6da718ead531283372addb8c33c038"
+      "98bee37ea9df4fb097d23bb63804ced7"
     ],
     [
       "Tutorial.b1",
@@ -941,7 +940,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "694f4ff21221c0d1c9a9c9b81289fb89"
+      "2459d09a8e603ca8f9c13d67e7358103"
     ],
     [
       "Tutorial.b2",
@@ -997,7 +996,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "b3dc91168663ac7b71f98c750f27f854"
+      "9c4fca3b0676c84f2f15d32e09770ffe"
     ],
     [
       "Tutorial.a1",
@@ -1063,7 +1062,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "8c386f381f1c6123524865c8db2cc140"
+      "74e4efee8c23a436fee141e22325df1e"
     ],
     [
       "Tutorial.a2",
@@ -1119,7 +1118,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "0266b4cb6ea36bd4a7dac49675d0dcb8"
+      "d7d7f2ba04ac7930ceaafc0770f1e9ea"
     ],
     [
       "Tutorial.main",
@@ -1163,8 +1162,8 @@
         "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
         "equation_FStar.UInt.uint_t", "equation_Lib.Buffer.buffer_t",
         "equation_Lib.Buffer.lbuffer_t", "equation_Lib.Buffer.length",
-        "equation_Lib.Buffer.live", "equation_Lib.Buffer.loc",
-        "equation_Lib.Buffer.modifies0", "equation_Lib.Buffer.modifies1",
+        "equation_Lib.Buffer.live", "equation_Lib.Buffer.modifies",
+        "equation_Lib.Buffer.modifies0",
         "equation_Lib.Buffer.stack_allocated", "equation_Lib.IntTypes.bits",
         "equation_Lib.IntTypes.int_t", "equation_Lib.IntTypes.maxint",
         "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.pub_int_t",
@@ -1191,9 +1190,8 @@
         "lemma_FStar.Set.lemma_equal_elim", "lemma_FStar.Set.mem_complement",
         "lemma_FStar.Set.mem_intersect", "lemma_FStar.Set.mem_singleton",
         "lemma_FStar.UInt.pow2_values", "lemma_FStar.UInt32.uv_inv",
-        "lemma_FStar.UInt32.vu_inv",
-        "lemma_Lib.Buffer.modifies_preserves_live",
-        "lemma_Lib.IntTypes.pow2_3", "lemma_Lib.IntTypes.v_injective",
+        "lemma_FStar.UInt32.vu_inv", "lemma_Lib.IntTypes.pow2_3",
+        "lemma_Lib.IntTypes.v_injective",
         "lemma_LowStar.Monotonic.Buffer.lemma_live_equal_mem_domains",
         "lemma_LowStar.Monotonic.Buffer.length_null_1",
         "lemma_LowStar.Monotonic.Buffer.length_null_2",
@@ -1238,18 +1236,18 @@
         "typing_FStar.Set.complement", "typing_FStar.Set.singleton",
         "typing_FStar.Set.union", "typing_FStar.UInt.fits",
         "typing_FStar.UInt32.uint_to_t", "typing_FStar.UInt32.v",
-        "typing_Lib.Buffer.loc", "typing_Lib.IntTypes.bits",
-        "typing_Lib.IntTypes.minint", "typing_Lib.IntTypes.mk_int",
+        "typing_Lib.IntTypes.bits", "typing_Lib.IntTypes.minint",
+        "typing_Lib.IntTypes.mk_int",
         "typing_LowStar.Buffer.trivial_preorder",
         "typing_LowStar.ImmutableBuffer.immutable_preorder",
         "typing_LowStar.Monotonic.Buffer.address_liveness_insensitive_locs",
         "typing_LowStar.Monotonic.Buffer.loc_none", "typing_Tutorial.a1",
         "typing_Tutorial.a2", "typing_Tutorial.b1", "typing_Tutorial.b2",
-        "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.PUB@tok",
-        "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
+        "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok",
+        "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "c2cec8e7c9e78e61701bc1b79a06060f"
+      "f29a0c019a43d8a1766b941f1020f50f"
     ]
   ]
 ]

@@ -46,7 +46,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "821e2201dc48b0d18c1411ed6747e38f"
+      "88ff7572d54ecac348aa900bb92ab33c"
     ],
     [
       "Hacl.Impl.Ed25519.PointEqual.gte_q",
@@ -140,7 +140,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "ca313e32736baad9f6842bece0af40c5"
+      "7ed41d11bf0a9bbeae2e679005709a12"
     ],
     [
       "Hacl.Impl.Ed25519.PointEqual.lemma_equality1",
@@ -157,7 +157,7 @@
         "refinement_interpretation_Tm_refine_a62b3c06e1a0d7fc333ce8199c4c9c1e"
       ],
       0,
-      "f2288c045ba240411fe65a8b43e3cd0c"
+      "5c286a049856b28f3a94d0b42ec58c3a"
     ],
     [
       "Hacl.Impl.Ed25519.PointEqual.eq",
@@ -195,6 +195,7 @@
         "equation_Hacl.Impl.Curve25519.Fields.Core.f51_as_nat",
         "equation_Hacl.Impl.Curve25519.Fields.Core.f51_felem_fits",
         "equation_Hacl.Impl.Ed25519.Field51.as_nat",
+        "equation_Hacl.Impl.Ed25519.Field51.felem",
         "equation_Hacl.Impl.Ed25519.Field51.felem_fits",
         "equation_Hacl.Spec.Curve25519.Field51.Definition.as_nat5",
         "equation_Hacl.Spec.Curve25519.Field51.Definition.felem_fits1",
@@ -243,6 +244,7 @@
         "typing_FStar.Monotonic.HyperStack.get_hmap",
         "typing_FStar.Monotonic.HyperStack.get_tip",
         "typing_FStar.UInt.fits", "typing_FStar.UInt32.v",
+        "typing_Hacl.Impl.Ed25519.Field51.as_nat",
         "typing_Hacl.Spec.Curve25519.Field51.Definition.pow51",
         "typing_Lib.Buffer.length", "typing_Lib.IntTypes.v",
         "typing_Lib.RawIntTypes.u64_to_UInt64", "typing_Lib.Sequence.index",
@@ -253,7 +255,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "13513f8657397f7ac298f56746f56664"
+      "c431737b861a6e5e0a735a7e7e27d9ae"
     ],
     [
       "Hacl.Impl.Ed25519.PointEqual.point_equal_1",
@@ -319,14 +321,15 @@
         "int_typing", "lemma_FStar.HyperStack.ST.lemma_equal_domains_trans",
         "lemma_FStar.Map.lemma_ContainsDom", "lemma_FStar.UInt.pow2_values",
         "lemma_FStar.UInt32.uv_inv", "lemma_FStar.UInt32.vu_inv",
-        "lemma_Lib.Buffer.live_sub",
-        "lemma_Lib.Buffer.modifies_preserves_live",
-        "lemma_Lib.Buffer.modifies_sub",
+        "lemma_Lib.Buffer.live_sub", "lemma_Lib.Buffer.modifies_sub",
+        "lemma_LowStar.Monotonic.Buffer.address_liveness_insensitive_buffer",
         "lemma_LowStar.Monotonic.Buffer.as_seq_gsub",
+        "lemma_LowStar.Monotonic.Buffer.lemma_live_equal_mem_domains",
         "lemma_LowStar.Monotonic.Buffer.loc_disjoint_gsub_buffer",
         "lemma_LowStar.Monotonic.Buffer.loc_disjoint_sym_",
         "lemma_LowStar.Monotonic.Buffer.loc_includes_gsub_buffer_r_",
         "lemma_LowStar.Monotonic.Buffer.modifies_buffer_elim",
+        "lemma_LowStar.Monotonic.Buffer.modifies_liveness_insensitive_buffer_weak",
         "lemma_LowStar.Monotonic.Buffer.modifies_trans_linear",
         "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Multiply",
@@ -364,7 +367,7 @@
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "31bffba9dfd85c3f9dc69fcfe823f778"
+      "9f167fecf602ad98ff1adc821c0a227c"
     ],
     [
       "Hacl.Impl.Ed25519.PointEqual.point_equal_2",
@@ -380,7 +383,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "4c677372f44106acce7019185d9077e4"
+      "4a29ca09e14ab0818df7832aa089adde"
     ],
     [
       "Hacl.Impl.Ed25519.PointEqual.point_equal_2",
@@ -446,21 +449,21 @@
         "int_typing", "lemma_FStar.HyperStack.ST.lemma_equal_domains_trans",
         "lemma_FStar.Map.lemma_ContainsDom", "lemma_FStar.UInt.pow2_values",
         "lemma_FStar.UInt32.uv_inv", "lemma_FStar.UInt32.vu_inv",
-        "lemma_Lib.Buffer.live_sub",
-        "lemma_Lib.Buffer.modifies_preserves_live",
-        "lemma_Lib.Buffer.modifies_sub",
+        "lemma_Lib.Buffer.live_sub", "lemma_Lib.Buffer.modifies_sub",
+        "lemma_LowStar.Monotonic.Buffer.address_liveness_insensitive_buffer",
         "lemma_LowStar.Monotonic.Buffer.as_seq_gsub",
+        "lemma_LowStar.Monotonic.Buffer.lemma_live_equal_mem_domains",
         "lemma_LowStar.Monotonic.Buffer.length_null_1",
         "lemma_LowStar.Monotonic.Buffer.length_null_2",
         "lemma_LowStar.Monotonic.Buffer.loc_disjoint_gsub_buffer",
         "lemma_LowStar.Monotonic.Buffer.loc_disjoint_sym_",
         "lemma_LowStar.Monotonic.Buffer.loc_includes_gsub_buffer_r_",
         "lemma_LowStar.Monotonic.Buffer.modifies_buffer_elim",
+        "lemma_LowStar.Monotonic.Buffer.modifies_liveness_insensitive_buffer_weak",
         "lemma_LowStar.Monotonic.Buffer.modifies_trans_linear",
         "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
-        "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Modulus",
-        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
-        "primitive_Prims.op_disEquality",
+        "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction", "primitive_Prims.op_disEquality",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_FStar.Pervasives.Native.Mktuple4__2",
@@ -495,7 +498,7 @@
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "381588c7a825664323a4ccaa822c5ff2"
+      "0c3cd1b7b63192255b318e0a079dc9ff"
     ],
     [
       "Hacl.Impl.Ed25519.PointEqual.point_equal",
@@ -590,9 +593,9 @@
         "lemma_FStar.Set.mem_singleton", "lemma_FStar.Set.mem_subset",
         "lemma_FStar.Set.mem_union", "lemma_FStar.UInt.pow2_values",
         "lemma_FStar.UInt32.uv_inv", "lemma_FStar.UInt32.vu_inv",
-        "lemma_Lib.Buffer.modifies_preserves_live",
         "lemma_LowStar.Monotonic.Buffer.as_seq_gsub",
         "lemma_LowStar.Monotonic.Buffer.fresh_frame_modifies",
+        "lemma_LowStar.Monotonic.Buffer.lemma_live_equal_mem_domains",
         "lemma_LowStar.Monotonic.Buffer.length_null_1",
         "lemma_LowStar.Monotonic.Buffer.length_null_2",
         "lemma_LowStar.Monotonic.Buffer.live_gsub",
@@ -678,7 +681,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "76da4e13870913c668e7d9fcbace7fae"
+      "41ac6334d834dfad1ef3c00ef1f80519"
     ]
   ]
 ]
