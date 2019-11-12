@@ -17,7 +17,7 @@ let x64_poly1305 ctx_b inp_b len finish =
   DV.length_eq (get_downview inp_b);
   DV.length_eq (get_downview ctx_b);
   math_aux inp_b (readable_words (UInt64.v len));
-  Classical.forall_intro (bounded_buffer_addrs TUInt8 TUInt64 h0 inp_b);
+  bounded_buffer_addrs_all TUInt8 TUInt64 h0 inp_b;
   as_vale_buffer_len #TUInt8 #TUInt64 inp_b;
   let x, _ = Vale.Stdcalls.X64.Poly.x64_poly1305 ctx_b inp_b len finish () in
   let h1 = get () in

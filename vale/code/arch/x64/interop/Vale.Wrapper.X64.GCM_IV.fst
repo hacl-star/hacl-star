@@ -104,8 +104,8 @@ let compute_iv_stdcall' iv iv_b num_bytes len j0_b iv_extra_b hkeys_b =
   as_vale_buffer_len #TUInt8 #TUInt128 j0_b;
   as_vale_buffer_len #TUInt8 #TUInt128 hkeys_b;
 
-  Classical.forall_intro (bounded_buffer_addrs TUInt8 TUInt128 h0 iv_b);
-  Classical.forall_intro (bounded_buffer_addrs TUInt8 TUInt128 h0 hkeys_b);
+  bounded_buffer_addrs_all TUInt8 TUInt128 h0 iv_b;
+  bounded_buffer_addrs_all TUInt8 TUInt128 h0 hkeys_b;
 
   let x, _ = compute_iv_stdcall iv iv_b num_bytes len j0_b iv_extra_b hkeys_b () in
 

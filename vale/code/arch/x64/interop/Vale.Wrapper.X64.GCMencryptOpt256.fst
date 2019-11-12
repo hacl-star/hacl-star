@@ -269,15 +269,15 @@ let gcm256_encrypt_opt' key iv auth_b auth_bytes auth_num keys_b iv_b hkeys_b ab
   as_vale_buffer_len #TUInt8 #TUInt128 scratch_b;
   as_vale_buffer_len #TUInt8 #TUInt128 tag_b;
 
-  Classical.forall_intro (bounded_buffer_addrs TUInt8 TUInt128 h0 auth_b);
-  Classical.forall_intro (bounded_buffer_addrs TUInt8 TUInt128 h0 in128x6_b);
-  Classical.forall_intro (bounded_buffer_addrs TUInt8 TUInt128 h0 out128x6_b);
-  Classical.forall_intro (bounded_buffer_addrs TUInt8 TUInt128 h0 in128_b);
-  Classical.forall_intro (bounded_buffer_addrs TUInt8 TUInt128 h0 out128_b);
-  Classical.forall_intro (bounded_buffer_addrs TUInt8 TUInt128 h0 inout_b);
-  Classical.forall_intro (bounded_buffer_addrs TUInt8 TUInt128 h0 iv_b);
-  Classical.forall_intro (bounded_buffer_addrs TUInt8 TUInt128 h0 keys_b);
-  Classical.forall_intro (bounded_buffer_addrs TUInt8 TUInt128 h0 hkeys_b);
+  bounded_buffer_addrs_all TUInt8 TUInt128 h0 auth_b;
+  bounded_buffer_addrs_all TUInt8 TUInt128 h0 in128x6_b;
+  bounded_buffer_addrs_all TUInt8 TUInt128 h0 out128x6_b;
+  bounded_buffer_addrs_all TUInt8 TUInt128 h0 in128_b;
+  bounded_buffer_addrs_all TUInt8 TUInt128 h0 out128_b;
+  bounded_buffer_addrs_all TUInt8 TUInt128 h0 inout_b;
+  bounded_buffer_addrs_all TUInt8 TUInt128 h0 iv_b;
+  bounded_buffer_addrs_all TUInt8 TUInt128 h0 keys_b;
+  bounded_buffer_addrs_all TUInt8 TUInt128 h0 hkeys_b;
 
   let x, _ = gcm256_encrypt_opt  key iv auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
   in128x6_b out128x6_b len128x6 in128_b out128_b len128_num inout_b plain_num scratch_b tag_b () in
