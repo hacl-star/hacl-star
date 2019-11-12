@@ -39,6 +39,10 @@ let cpu_has_bmi2: cached_flag Vale.X64.CPU_Features_s.bmi2_enabled =
   B.gcmalloc_of_list HS.root [ false ]
 let cpu_has_adx: cached_flag Vale.X64.CPU_Features_s.adx_enabled =
   B.gcmalloc_of_list HS.root [ false ]
+let cpu_has_sse: cached_flag Vale.X64.CPU_Features_s.sse_enabled =
+  B.gcmalloc_of_list HS.root [ false ]
+let cpu_has_movbe: cached_flag Vale.X64.CPU_Features_s.movbe_enabled =
+  B.gcmalloc_of_list HS.root [ false ]
 
 let user_wants_hacl: eternal_pointer bool = B.gcmalloc_of_list HS.root [ SC.hacl ]
 let user_wants_vale: eternal_pointer bool = B.gcmalloc_of_list HS.root [ SC.vale ]
@@ -57,13 +61,15 @@ let has_avx2 = mk_getter cpu_has_avx2
 let has_avx = mk_getter cpu_has_avx
 let has_bmi2 = mk_getter cpu_has_bmi2
 let has_adx = mk_getter cpu_has_adx
+let has_sse = mk_getter cpu_has_sse
+let has_movbe = mk_getter cpu_has_movbe
 
 let wants_vale () = B.recall user_wants_vale; B.index user_wants_vale 0ul
 let wants_hacl () = B.recall user_wants_hacl; B.index user_wants_hacl 0ul
 let wants_openssl () = B.recall user_wants_openssl; B.index user_wants_openssl 0ul
 let wants_bcrypt () = B.recall user_wants_bcrypt; B.index user_wants_bcrypt 0ul
 
-let fp () =
+let fp_cpu_flags () =
   B.loc_buffer cpu_has_shaext `B.loc_union`
   B.loc_buffer cpu_has_aesni `B.loc_union`
   B.loc_buffer cpu_has_pclmulqdq `B.loc_union`
@@ -71,6 +77,11 @@ let fp () =
   B.loc_buffer cpu_has_avx `B.loc_union`
   B.loc_buffer cpu_has_bmi2 `B.loc_union`
   B.loc_buffer cpu_has_adx `B.loc_union`
+  B.loc_buffer cpu_has_sse `B.loc_union`
+  B.loc_buffer cpu_has_movbe
+
+let fp () =
+  fp_cpu_flags() `B.loc_union`
   B.loc_buffer user_wants_hacl `B.loc_union`
   B.loc_buffer user_wants_vale `B.loc_union`
   B.loc_buffer user_wants_openssl `B.loc_union`
@@ -84,12 +95,14 @@ let recall () =
   B.recall cpu_has_avx;
   B.recall cpu_has_bmi2;
   B.recall cpu_has_adx;
+  B.recall cpu_has_sse;
+  B.recall cpu_has_movbe;
   B.recall user_wants_hacl;
   B.recall user_wants_vale;
   B.recall user_wants_openssl;
   B.recall user_wants_bcrypt
 
-#set-options "--z3rlimit 50"
+#set-options "--z3rlimit 400"
 let init () =
   // TODO: use an && here once macros are improved
   let h0 = ST.get () in
@@ -118,10 +131,20 @@ let init () =
         B.upd cpu_has_bmi2 0ul true;
         B.recall cpu_has_adx;
         B.upd cpu_has_adx 0ul true
+      end;
+      if Vale.Wrapper.X64.Cpuid.check_sse () <> 0UL then begin
+        B.recall cpu_has_sse;
+        B.upd cpu_has_sse 0ul true
+      end;
+      if Vale.Wrapper.X64.Cpuid.check_movbe () <> 0UL then begin
+        B.recall cpu_has_movbe;
+        B.upd cpu_has_movbe 0ul true
       end
     end;
   let h1 = ST.get () in
-  assert (B.modifies (fp ()) h0 h1);
+  assert (B.modifies (fp_cpu_flags ()) h0 h1);
+  assert (B.loc_includes (fp ()) (fp_cpu_flags()));
+  assert (B.modifies (fp()) h0 h1);
   B.recall user_wants_hacl;
   B.upd user_wants_hacl 0ul SC.hacl;
   B.recall user_wants_vale;
@@ -146,6 +169,8 @@ let disable_adx () = B.recall cpu_has_adx; B.upd cpu_has_adx 0ul false
 let disable_shaext () = B.recall cpu_has_shaext; B.upd cpu_has_shaext 0ul false
 let disable_aesni () = B.recall cpu_has_aesni; B.upd cpu_has_aesni 0ul false
 let disable_pclmulqdq () = B.recall cpu_has_pclmulqdq; B.upd cpu_has_pclmulqdq 0ul false
+let disable_sse () = B.recall cpu_has_sse; B.upd cpu_has_sse 0ul false
+let disable_movbe () = B.recall cpu_has_movbe; B.upd cpu_has_movbe 0ul false
 let disable_vale = mk_disabler user_wants_vale
 let disable_hacl = mk_disabler user_wants_hacl
 let disable_openssl = mk_disabler user_wants_openssl

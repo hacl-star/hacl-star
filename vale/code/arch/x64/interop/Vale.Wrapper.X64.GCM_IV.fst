@@ -61,7 +61,7 @@ val compute_iv_stdcall':
     0 < 8 * UInt64.v num_bytes /\
     8 * UInt64.v num_bytes < pow2_64 /\
 
-    pclmulqdq_enabled /\ avx_enabled /\
+    pclmulqdq_enabled /\ avx_enabled /\ sse_enabled /\
 
     (  let db = get_downview hkeys_b in
        length_aux5 hkeys_b; DV.length_eq (get_downview hkeys_b);

@@ -34,7 +34,7 @@ let keyhash_init_st (a: algorithm { a = AES_128 \/ a = AES_256 }) =
       (Seq.equal (B.as_seq h0 roundkeys_b)
         (seq_nat8_to_seq_uint8 (le_seq_quad32_to_bytes (key_to_round_keys_LE a (Ghost.reveal key))))) /\
 
-      aesni_enabled /\ pclmulqdq_enabled /\ avx_enabled)
+      aesni_enabled /\ pclmulqdq_enabled /\ avx_enabled /\ sse_enabled)
     (ensures fun h0 _ h1 ->
       B.modifies (B.loc_buffer hkeys_b) h0 h1 /\
 

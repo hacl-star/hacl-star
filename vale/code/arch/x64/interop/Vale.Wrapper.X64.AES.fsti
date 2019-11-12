@@ -53,7 +53,7 @@ let key_expansion_st (a: algorithm { a = AES_128 \/ a = AES_256 }) =
       B.length input_key_b = key_length a /\
       B.length output_key_expansion_b = key_offset a /\
 
-      aesni_enabled && avx_enabled)
+      aesni_enabled && avx_enabled && sse_enabled)
     (ensures fun h0 _ h1 ->
       B.modifies (B.loc_buffer output_key_expansion_b) h0 h1 /\
 
