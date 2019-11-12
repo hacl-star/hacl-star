@@ -971,7 +971,7 @@ dist/test/ml/%.exe: $(ALL_CMX_FILES) dist/test/ml/%_AutoTest.ml
 # the behavior of the extracted code being platform dependent (perhaps
 # some OPAM package?).
 test-ml-Spec_Argon2i_Test: dist/test/ml/Spec_Argon2i_Test.exe
-	$< || [[ $(OS) == Windows_NT ]]
+	$< || [[ "$(OS)" == "Windows_NT" ]]
 
 test-ml-%: dist/test/ml/%.exe
 	$<
