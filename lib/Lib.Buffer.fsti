@@ -352,15 +352,6 @@ val createL:
     (requires fun h0 -> B.alloca_of_list_pre #a init)
     (ensures  fun h0 b h1 -> live h1 b /\ stack_allocated b h0 h1 (Seq.of_list init))
 
-let createLf:
-    #a:Type0
-  -> init:list a{normalize (List.Tot.length init <= max_size_t)} ->
-  StackInline (lbuffer a (size (normalize_term (List.Tot.length init))))
-    (requires fun h0 -> B.alloca_of_list_pre #a init)
-    (ensures  fun h0 b h1 -> live h1 b /\ stack_allocated b h0 h1 (Seq.of_list init))
-= fun #a init ->
-    B.alloca_of_list init
-
 (** Allocate a global fixed-length immutable buffer initialized to value [init] *)
 inline_for_extraction noextract
 val createL_global:
