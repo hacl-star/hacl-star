@@ -169,7 +169,6 @@ int main() {
   uint8_t plain[SIZE];
   uint8_t key[16];
   uint8_t nonce[12];
-  uint8_t ctr_nonce[16];
   cycles a,b;
   clock_t t1,t2;
 
@@ -229,7 +228,9 @@ int main() {
 
   memset(plain,'P',SIZE);
   memset(key,'K',16);
-  memset(ctr_nonce,'N',16);
+  uint8_t ctr_nonce[16] = { 0 };
+  ctr_nonce[0] = 1;
+  memset(ctr_nonce + (uint32_t)4U,'N',12);
 
   for (int j = 0; j < ROUNDS; j++) {
     ossl_chacha20(plain,plain,SIZE,key,ctr_nonce);
