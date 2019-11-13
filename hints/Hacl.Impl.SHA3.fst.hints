@@ -72,7 +72,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "9d44b7531e437794ec5581617e84f5a8"
+      "94c5222f4322295ae88c45a06dfd8966"
     ],
     [
       "Hacl.Impl.SHA3.keccak_piln",
@@ -135,7 +135,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "4a5f3174965df2eaa436c9e433d54765"
+      "6c248f8516bd2b743e4030d9ed08f1e7"
     ],
     [
       "Hacl.Impl.SHA3.keccak_rndc",
@@ -199,7 +199,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "0e5fff4a45d93eed577a62b2339f4329"
+      "ebbb764f767c0db68902240972981720"
     ],
     [
       "Hacl.Impl.SHA3.readLane",
@@ -260,7 +260,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "edee2be4e1f5cde0167d7342f0ded4fd"
+      "0f2b519047fde0663ee23b9f171395a4"
     ],
     [
       "Hacl.Impl.SHA3.readLane",
@@ -335,7 +335,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "34fd19ce22f3881cfecdb55fa116b746"
+      "9c3adc34eddfd5da7337e0feeb93deeb"
     ],
     [
       "Hacl.Impl.SHA3.writeLane",
@@ -397,7 +397,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "6966a710d67ecc31eeae0cbaa70c522c"
+      "ab9c5c1759ad98fc5a7875764afda946"
     ],
     [
       "Hacl.Impl.SHA3.writeLane",
@@ -470,7 +470,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "ccbbcd40a305a9353e0e492ba493c9f0"
+      "5a71bebd262ef5d170d002a7bc84c56b"
     ],
     [
       "Hacl.Impl.SHA3.rotl",
@@ -483,7 +483,7 @@
         "equation_Lib.IntTypes.unsigned", "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "ecf87a0a9f315e59de701ef30dd5f46d"
+      "1bc712cff54a65aa70dc6c8c24e6b28d"
     ],
     [
       "Hacl.Impl.SHA3.rotl",
@@ -503,7 +503,7 @@
         "refinement_interpretation_Tm_refine_2637b8c155af1b3e54200b827eb29262"
       ],
       0,
-      "8419e0acf8bfea510bbcf7243e7e4aff"
+      "c00fbe0a738332df4fc4a9578f0b2a6b"
     ],
     [
       "Hacl.Impl.SHA3.state_theta0",
@@ -561,7 +561,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "e9260a5eb364c5ee11dfc1fb729ead3f"
+      "c3c1eac81819b0c76d2842a0e83593a0"
     ],
     [
       "Hacl.Impl.SHA3.state_theta0",
@@ -607,7 +607,7 @@
         "lemma_FStar.HyperStack.ST.lemma_equal_domains_trans",
         "lemma_FStar.Map.lemma_ContainsDom", "lemma_FStar.UInt.pow2_values",
         "lemma_FStar.UInt32.uv_inv", "lemma_FStar.UInt32.vu_inv",
-        "lemma_Lib.Buffer.modifies_preserves_live",
+        "lemma_LowStar.Monotonic.Buffer.address_liveness_insensitive_buffer",
         "lemma_LowStar.Monotonic.Buffer.length_null_1",
         "lemma_LowStar.Monotonic.Buffer.length_null_2",
         "lemma_LowStar.Monotonic.Buffer.loc_disjoint_none_r",
@@ -615,6 +615,7 @@
         "lemma_LowStar.Monotonic.Buffer.loc_includes_none",
         "lemma_LowStar.Monotonic.Buffer.loc_includes_refl",
         "lemma_LowStar.Monotonic.Buffer.modifies_buffer_elim",
+        "lemma_LowStar.Monotonic.Buffer.modifies_liveness_insensitive_buffer_weak",
         "lemma_LowStar.Monotonic.Buffer.modifies_trans_linear",
         "primitive_Prims.op_AmpAmp", "primitive_Prims.op_LessThanOrEqual",
         "primitive_Prims.op_Subtraction",
@@ -637,13 +638,14 @@
         "typing_FStar.UInt.fits", "typing_FStar.UInt32.v",
         "typing_Lib.Buffer.loc", "typing_Lib.IntTypes.v",
         "typing_LowStar.Buffer.trivial_preorder",
+        "typing_LowStar.Monotonic.Buffer.address_liveness_insensitive_locs",
         "typing_LowStar.Monotonic.Buffer.len",
         "typing_LowStar.Monotonic.Buffer.loc_none",
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.PUB@tok",
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "bb6fd2bc9cc80a139101ac2a8a3b5f62"
+      "5f0e2cf686dda1a8166cf26a189c9a6c"
     ],
     [
       "Hacl.Impl.SHA3.state_theta_inner_s",
@@ -705,7 +707,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "91ecbc92cb9e81ef7ba6d4eaf24e0518"
+      "ced05105158b5a88107be8dcf54bb700"
     ],
     [
       "Hacl.Impl.SHA3.state_theta_inner_s",
@@ -759,15 +761,17 @@
         "lemma_FStar.HyperStack.ST.lemma_equal_domains_trans",
         "lemma_FStar.Map.lemma_ContainsDom", "lemma_FStar.UInt.pow2_values",
         "lemma_FStar.UInt32.uv_inv", "lemma_FStar.UInt32.vu_inv",
-        "lemma_Lib.Buffer.modifies_preserves_live",
         "lemma_Lib.IntTypes.add_mod_lemma", "lemma_Lib.IntTypes.mod_lemma",
         "lemma_Lib.IntTypes.v_injective",
+        "lemma_LowStar.Monotonic.Buffer.address_liveness_insensitive_buffer",
+        "lemma_LowStar.Monotonic.Buffer.lemma_live_equal_mem_domains",
         "lemma_LowStar.Monotonic.Buffer.length_null_1",
         "lemma_LowStar.Monotonic.Buffer.length_null_2",
         "lemma_LowStar.Monotonic.Buffer.loc_disjoint_none_r",
         "lemma_LowStar.Monotonic.Buffer.loc_includes_none",
         "lemma_LowStar.Monotonic.Buffer.loc_includes_refl",
         "lemma_LowStar.Monotonic.Buffer.modifies_buffer_elim",
+        "lemma_LowStar.Monotonic.Buffer.modifies_liveness_insensitive_buffer_weak",
         "lemma_LowStar.Monotonic.Buffer.modifies_trans_linear",
         "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_Division", "primitive_Prims.op_LessThanOrEqual",
@@ -805,7 +809,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "86e599730247b5a319ad804549c18475"
+      "d25f136ca7cceb7d98aceab8b2260b06"
     ],
     [
       "Hacl.Impl.SHA3.state_theta1",
@@ -863,7 +867,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "9f1d455890333bf8f1c36dfe08f3e5a1"
+      "35dc7afaed8215cd454cc4415b5df353"
     ],
     [
       "Hacl.Impl.SHA3.state_theta1",
@@ -894,7 +898,8 @@
         "equation_Lib.Buffer.length", "equation_Lib.Buffer.live",
         "equation_Lib.Buffer.loc", "equation_Lib.Buffer.loop1_inv",
         "equation_Lib.Buffer.modifies", "equation_Lib.Buffer.modifies1",
-        "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.minint",
+        "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.int_t",
+        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.pub_int_t",
         "equation_Lib.IntTypes.pub_int_v", "equation_Lib.IntTypes.range",
         "equation_Lib.IntTypes.uint64", "equation_Lib.IntTypes.unsigned",
         "equation_Lib.IntTypes.v", "equation_Lib.Sequence.lseq",
@@ -905,12 +910,12 @@
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Lib.IntTypes.uint64", "int_typing",
         "interpretation_Tm_abs_c37ebf223b8a4476389af4f7adf72585",
-        "lemma_FStar.HyperStack.ST.lemma_equal_domains_trans",
         "lemma_FStar.Map.lemma_ContainsDom", "lemma_FStar.UInt.pow2_values",
         "lemma_FStar.UInt32.uv_inv", "lemma_FStar.UInt32.vu_inv",
-        "lemma_Lib.Buffer.modifies_preserves_live",
+        "lemma_LowStar.Monotonic.Buffer.address_liveness_insensitive_buffer",
         "lemma_LowStar.Monotonic.Buffer.loc_includes_refl",
         "lemma_LowStar.Monotonic.Buffer.modifies_buffer_elim",
+        "lemma_LowStar.Monotonic.Buffer.modifies_liveness_insensitive_buffer_weak",
         "lemma_LowStar.Monotonic.Buffer.modifies_trans_linear",
         "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_LessThanOrEqual",
@@ -937,7 +942,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "7c1341ae72e27759b62154b4f1273a3f"
+      "cdbbcac62ad8954f4cc64d88bdc06baa"
     ],
     [
       "Hacl.Impl.SHA3.state_theta",
@@ -986,7 +991,7 @@
         "typing_Lib.Buffer.length", "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "5e8dd2800db9988199b744135ccf42a9"
+      "fc8b53d8369f0b03e4f4f8bec808d398"
     ],
     [
       "Hacl.Impl.SHA3.state_theta",
@@ -1043,7 +1048,8 @@
         "lemma_FStar.Set.mem_intersect", "lemma_FStar.Set.mem_singleton",
         "lemma_FStar.UInt.pow2_values", "lemma_FStar.UInt32.uv_inv",
         "lemma_FStar.UInt32.vu_inv",
-        "lemma_Lib.Buffer.modifies_preserves_live",
+        "lemma_LowStar.Monotonic.Buffer.address_liveness_insensitive_buffer",
+        "lemma_LowStar.Monotonic.Buffer.lemma_live_equal_mem_domains",
         "lemma_LowStar.Monotonic.Buffer.length_null_1",
         "lemma_LowStar.Monotonic.Buffer.length_null_2",
         "lemma_LowStar.Monotonic.Buffer.live_region_frameOf",
@@ -1101,7 +1107,7 @@
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "b7cd862da137d4a9929d9a842fe94923"
+      "8472e2bddbae2508d80c90d1e8538188"
     ],
     [
       "Hacl.Impl.SHA3.index_map",
@@ -1117,7 +1123,7 @@
         "@query", "lemma_FStar.List.Tot.Properties.map_lemma"
       ],
       0,
-      "378aa52be68a68d7fdc43fc7032958dd"
+      "159a26725e62a976875019dcbb10ecfc"
     ],
     [
       "Hacl.Impl.SHA3.index_map",
@@ -1133,7 +1139,7 @@
         "@query", "lemma_FStar.List.Tot.Properties.map_lemma"
       ],
       0,
-      "e3154d98613438e0b57570f9e5cc55cb"
+      "f2aac240e39f7336406bb1bb52daeced"
     ],
     [
       "Hacl.Impl.SHA3.index_map",
@@ -1181,7 +1187,7 @@
         "unit_inversion", "unit_typing"
       ],
       0,
-      "033728698af2914fc96735c36a3a3969"
+      "64655759b5d2cd4b8c7115b87ed54972"
     ],
     [
       "Hacl.Impl.SHA3.state_pi_rho_inner",
@@ -1241,7 +1247,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "44067a806985de8da9031a491f5f76e2"
+      "938fe0e888da1fa04481f80ea1c8b7db"
     ],
     [
       "Hacl.Impl.SHA3.state_pi_rho_inner",
@@ -1293,7 +1299,7 @@
         "int_typing", "lemma_FStar.HyperStack.ST.lemma_equal_domains_trans",
         "lemma_FStar.Map.lemma_ContainsDom", "lemma_FStar.UInt.pow2_values",
         "lemma_FStar.UInt32.uv_inv", "lemma_FStar.UInt32.vu_inv",
-        "lemma_Lib.Buffer.modifies_preserves_live",
+        "lemma_LowStar.Monotonic.Buffer.address_liveness_insensitive_buffer",
         "lemma_LowStar.Monotonic.Buffer.length_null_1",
         "lemma_LowStar.Monotonic.Buffer.length_null_2",
         "lemma_LowStar.Monotonic.Buffer.loc_disjoint_sym_",
@@ -1301,6 +1307,7 @@
         "lemma_LowStar.Monotonic.Buffer.loc_includes_union_l_",
         "lemma_LowStar.Monotonic.Buffer.loc_union_comm",
         "lemma_LowStar.Monotonic.Buffer.modifies_buffer_elim",
+        "lemma_LowStar.Monotonic.Buffer.modifies_liveness_insensitive_buffer_weak",
         "lemma_LowStar.Monotonic.Buffer.modifies_loc_includes",
         "lemma_LowStar.Monotonic.Buffer.modifies_trans_linear",
         "primitive_Prims.op_AmpAmp", "primitive_Prims.op_LessThanOrEqual",
@@ -1343,7 +1350,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "a18c5283863b7a21f70ceea8ad431419"
+      "83989d857f6e5e63be84ff00637551c1"
     ],
     [
       "Hacl.Impl.SHA3.state_pi_rho",
@@ -1392,7 +1399,7 @@
         "typing_Lib.Buffer.length", "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "75f195e88b28454eeb6239c60ac520e7"
+      "439cf88e3e771beec387df98f3998b8a"
     ],
     [
       "Hacl.Impl.SHA3.state_pi_rho",
@@ -1530,7 +1537,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "c063e063e5e65625db4c0b9cb20d4f11"
+      "6175e1abcb18968aa025386adc775fa6"
     ],
     [
       "Hacl.Impl.SHA3.state_chi_inner",
@@ -1592,7 +1599,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "ad6fd6f8adc31497c9006df354d6eda0"
+      "b5411751b589e29afffa0cd58f432a23"
     ],
     [
       "Hacl.Impl.SHA3.state_chi_inner",
@@ -1639,14 +1646,14 @@
         "int_typing", "lemma_FStar.HyperStack.ST.lemma_equal_domains_trans",
         "lemma_FStar.Map.lemma_ContainsDom",
         "lemma_FStar.Set.lemma_equal_elim", "lemma_FStar.UInt.pow2_values",
-        "lemma_FStar.UInt32.vu_inv",
-        "lemma_Lib.Buffer.modifies_preserves_live",
-        "lemma_Lib.IntTypes.add_mod_lemma", "lemma_Lib.IntTypes.mod_lemma",
+        "lemma_FStar.UInt32.vu_inv", "lemma_Lib.IntTypes.add_mod_lemma",
+        "lemma_Lib.IntTypes.mod_lemma",
         "lemma_LowStar.Monotonic.Buffer.length_null_1",
         "lemma_LowStar.Monotonic.Buffer.length_null_2",
         "lemma_LowStar.Monotonic.Buffer.loc_disjoint_none_r",
         "lemma_LowStar.Monotonic.Buffer.loc_includes_none",
         "lemma_LowStar.Monotonic.Buffer.modifies_buffer_elim",
+        "lemma_LowStar.Monotonic.Buffer.modifies_liveness_insensitive_buffer_weak",
         "lemma_LowStar.Monotonic.Buffer.modifies_trans_linear",
         "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_Division", "primitive_Prims.op_LessThanOrEqual",
@@ -1674,13 +1681,14 @@
         "typing_FStar.UInt.fits", "typing_FStar.UInt32.uint_to_t",
         "typing_FStar.UInt32.v", "typing_Lib.Buffer.loc",
         "typing_Lib.IntTypes.v", "typing_LowStar.Buffer.trivial_preorder",
+        "typing_LowStar.Monotonic.Buffer.address_liveness_insensitive_locs",
         "typing_LowStar.Monotonic.Buffer.len",
         "typing_LowStar.Monotonic.Buffer.loc_none",
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.PUB@tok",
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "fa58356b9743a5798c29035a4ab40e7f"
+      "9ba135333387ac310b46c3e5f8d7e7d3"
     ],
     [
       "Hacl.Impl.SHA3.state_chi_inner1",
@@ -1742,7 +1750,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "b22c3128af4653c9d45d6c54ebb84091"
+      "b64613d30b88266a84a7e93fbb2f549f"
     ],
     [
       "Hacl.Impl.SHA3.state_chi_inner1",
@@ -1783,14 +1791,14 @@
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Lib.IntTypes.uint64", "int_typing",
         "interpretation_Tm_abs_d65c1ddebcb09ff802b7eb633ec02126",
-        "lemma_FStar.HyperStack.ST.lemma_equal_domains_trans",
         "lemma_FStar.Map.lemma_ContainsDom", "lemma_FStar.UInt.pow2_values",
         "lemma_FStar.UInt32.vu_inv",
-        "lemma_Lib.Buffer.modifies_preserves_live",
+        "lemma_LowStar.Monotonic.Buffer.address_liveness_insensitive_buffer",
         "lemma_LowStar.Monotonic.Buffer.length_null_1",
         "lemma_LowStar.Monotonic.Buffer.length_null_2",
         "lemma_LowStar.Monotonic.Buffer.loc_includes_refl",
         "lemma_LowStar.Monotonic.Buffer.modifies_buffer_elim",
+        "lemma_LowStar.Monotonic.Buffer.modifies_liveness_insensitive_buffer_weak",
         "lemma_LowStar.Monotonic.Buffer.modifies_trans_linear",
         "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_LessThanOrEqual",
@@ -1819,7 +1827,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "98215b33894968aac5232c4d8d69a89c"
+      "803d6607d1a3b92863f63d6d1bed16f7"
     ],
     [
       "Hacl.Impl.SHA3.state_chi",
@@ -1868,7 +1876,7 @@
         "typing_Lib.Buffer.length", "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "eb044ebf7ad189109d31149b373005a1"
+      "83b961bfffcd61df9643faeebbec43a8"
     ],
     [
       "Hacl.Impl.SHA3.state_chi",
@@ -1928,7 +1936,7 @@
         "lemma_FStar.Set.mem_intersect", "lemma_FStar.Set.mem_singleton",
         "lemma_FStar.Set.mem_subset", "lemma_FStar.UInt.pow2_values",
         "lemma_FStar.UInt32.uv_inv", "lemma_FStar.UInt32.vu_inv",
-        "lemma_Lib.Buffer.modifies_preserves_live",
+        "lemma_LowStar.Monotonic.Buffer.address_liveness_insensitive_buffer",
         "lemma_LowStar.Monotonic.Buffer.length_null_1",
         "lemma_LowStar.Monotonic.Buffer.length_null_2",
         "lemma_LowStar.Monotonic.Buffer.live_region_frameOf",
@@ -1995,7 +2003,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "6f00e3ce1f5c6f2ccd57745bc304c5ae"
+      "b2abc450f5e16cbb4d4c211b4f3d8e0f"
     ],
     [
       "Hacl.Impl.SHA3.state_iota",
@@ -2056,7 +2064,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "42f8980a9d6a5e29944411bb90965b19"
+      "cf9d90fcd246cddc00a2a6dd38ba6798"
     ],
     [
       "Hacl.Impl.SHA3.state_iota",
@@ -2096,7 +2104,7 @@
         "lemma_FStar.HyperStack.ST.lemma_equal_domains_trans",
         "lemma_FStar.Map.lemma_ContainsDom", "lemma_FStar.UInt.pow2_values",
         "lemma_FStar.UInt32.uv_inv", "lemma_FStar.UInt32.vu_inv",
-        "lemma_Lib.Buffer.modifies_preserves_live",
+        "lemma_LowStar.Monotonic.Buffer.lemma_live_equal_mem_domains",
         "lemma_LowStar.Monotonic.Buffer.length_null_1",
         "lemma_LowStar.Monotonic.Buffer.length_null_2",
         "lemma_LowStar.Monotonic.Buffer.loc_disjoint_none_r",
@@ -2126,7 +2134,7 @@
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "c79daecefd2f7ec73eaa239bf462f8c2"
+      "be08ea5ad73a73e7c4b48d9459f9ed25"
     ],
     [
       "Hacl.Impl.SHA3.state_permute",
@@ -2175,7 +2183,7 @@
         "typing_Lib.Buffer.length", "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "30ba6b8e24053346504ff9ec268ccac2"
+      "82b445e171670ee8f0689062d3c21404"
     ],
     [
       "Hacl.Impl.SHA3.state_permute",
@@ -2202,13 +2210,14 @@
         "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
         "equation_FStar.UInt.uint_t", "equation_Hacl.Impl.SHA3.state",
         "equation_Lib.Buffer.buffer_t", "equation_Lib.Buffer.lbuffer_t",
-        "equation_Lib.Buffer.length", "equation_Lib.Buffer.loc",
-        "equation_Lib.Buffer.loop1_inv", "equation_Lib.Buffer.modifies",
-        "equation_Lib.Buffer.modifies1", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.int_t", "equation_Lib.IntTypes.pub_int_t",
-        "equation_Lib.IntTypes.pub_int_v", "equation_Lib.IntTypes.uint64",
-        "equation_Lib.IntTypes.unsigned", "equation_Lib.IntTypes.v",
-        "equation_Lib.Sequence.lseq", "equation_LowStar.Buffer.buffer",
+        "equation_Lib.Buffer.length", "equation_Lib.Buffer.live",
+        "equation_Lib.Buffer.loc", "equation_Lib.Buffer.loop1_inv",
+        "equation_Lib.Buffer.modifies", "equation_Lib.Buffer.modifies1",
+        "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.int_t",
+        "equation_Lib.IntTypes.pub_int_t", "equation_Lib.IntTypes.pub_int_v",
+        "equation_Lib.IntTypes.uint64", "equation_Lib.IntTypes.unsigned",
+        "equation_Lib.IntTypes.v", "equation_Lib.Sequence.lseq",
+        "equation_LowStar.Buffer.buffer",
         "equation_LowStar.Buffer.trivial_preorder",
         "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.nat",
         "equation_Spec.SHA3.state_permute",
@@ -2219,8 +2228,9 @@
         "lemma_FStar.HyperStack.ST.lemma_equal_domains_trans",
         "lemma_FStar.Map.lemma_ContainsDom", "lemma_FStar.UInt.pow2_values",
         "lemma_FStar.UInt32.uv_inv", "lemma_FStar.UInt32.vu_inv",
-        "lemma_Lib.Buffer.modifies_preserves_live",
+        "lemma_LowStar.Monotonic.Buffer.address_liveness_insensitive_buffer",
         "lemma_LowStar.Monotonic.Buffer.loc_includes_refl",
+        "lemma_LowStar.Monotonic.Buffer.modifies_liveness_insensitive_buffer_weak",
         "lemma_LowStar.Monotonic.Buffer.modifies_trans_linear",
         "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_LessThanOrEqual",
@@ -2244,7 +2254,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "3737478b47a30062ad6be43e2e9d4e4e"
+      "d210815c9d8038d2703e0a88767a12d8"
     ],
     [
       "Hacl.Impl.SHA3.loadState",
@@ -2300,7 +2310,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "45932d09fb2c81943cfcab9cf3808485"
+      "e42817218e0150ebe797de0d792e94f0"
     ],
     [
       "Hacl.Impl.SHA3.loadState",
@@ -2367,7 +2377,6 @@
         "lemma_FStar.Set.mem_intersect", "lemma_FStar.Set.mem_singleton",
         "lemma_FStar.Set.mem_subset", "lemma_FStar.UInt.pow2_values",
         "lemma_FStar.UInt32.uv_inv", "lemma_FStar.UInt32.vu_inv",
-        "lemma_Lib.Buffer.modifies_preserves_live",
         "lemma_Lib.IntTypes.mul_lemma", "lemma_Lib.IntTypes.v_injective",
         "lemma_LowStar.Monotonic.Buffer.address_liveness_insensitive_buffer",
         "lemma_LowStar.Monotonic.Buffer.as_seq_gsub",
@@ -2448,7 +2457,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "1d0eb463a9c67cda86c722fa19a83842"
+      "533f33eba69ce8635efb2befb35b1442"
     ],
     [
       "Hacl.Impl.SHA3.storeState_inner",
@@ -2512,7 +2521,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "cc301623cb5d9c63891c9afc83b2de3a"
+      "cb818415f35e6743fa744d2733f96cc5"
     ],
     [
       "Hacl.Impl.SHA3.storeState_inner",
@@ -2594,7 +2603,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "1d96fe072c741168e4cefe410d12969b"
+      "c11241f89465e304f6a8c1ea308b6723"
     ],
     [
       "Hacl.Impl.SHA3.storeState",
@@ -2646,7 +2655,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "ef990127fca4dbd3a7544b27ae8e61c8"
+      "ef8f56d2e3a067dfe1ea36b3c5114e3b"
     ],
     [
       "Hacl.Impl.SHA3.storeState",
@@ -2787,7 +2796,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "e56fc484b4f5903649e99e67bf41a424"
+      "7de0597f73bc1df19dd435db525f9efc"
     ],
     [
       "Hacl.Impl.SHA3.absorb_next",
@@ -2848,7 +2857,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "1404150773f4b60eabd8becf4d49c8e9"
+      "3a01490db6bad6059b1a6890d57deaad"
     ],
     [
       "Hacl.Impl.SHA3.absorb_next",
@@ -2972,7 +2981,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "15296fcfe6b9fdb9acec21cb9f0e4762"
+      "0de97e465111aaac2b3d1b6c9c2ede30"
     ],
     [
       "Hacl.Impl.SHA3.absorb_last",
@@ -3029,7 +3038,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "6c3b00ca7c02f87de251ff012dde5ac1"
+      "e53db3b580c4dbacf7d98a8f86891945"
     ],
     [
       "Hacl.Impl.SHA3.absorb_last",
@@ -3166,7 +3175,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "55f62c443ffe8e48913f393315c89626"
+      "37bcf5ec0a76882c70c934872081d961"
     ],
     [
       "Hacl.Impl.SHA3.absorb_inner",
@@ -3220,7 +3229,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "bf2a20eb2a065dba3bf418fcebd3924f"
+      "5b351bafd87d51fdfb71109f83f0caad"
     ],
     [
       "Hacl.Impl.SHA3.absorb_inner",
@@ -3228,17 +3237,23 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equality_tok_Lib.Buffer.MUT@tok",
+        "@MaxIFuel_assumption", "@query",
+        "constructor_distinct_Lib.Buffer.MUT",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "equality_tok_Lib.Buffer.MUT@tok",
         "equality_tok_Lib.IntTypes.PUB@tok",
         "equality_tok_Lib.IntTypes.U32@tok", "equation_Hacl.Impl.SHA3.state",
-        "equation_Lib.Buffer.disjoint", "equation_Lib.Buffer.lbuffer_t",
+        "equation_Lib.Buffer.buffer_t", "equation_Lib.Buffer.disjoint",
+        "equation_Lib.Buffer.lbuffer_t", "equation_Lib.Buffer.live",
         "equation_Lib.Buffer.modifies", "equation_Lib.IntTypes.uint64",
         "equation_Lib.IntTypes.uint8", "equation_Lib.IntTypes.v",
+        "equation_LowStar.Buffer.buffer",
+        "equation_LowStar.Buffer.trivial_preorder",
         "equation_Spec.SHA3.absorb_inner",
         "function_token_typing_Lib.IntTypes.uint64",
         "function_token_typing_Lib.IntTypes.uint8",
         "lemma_FStar.HyperStack.ST.lemma_equal_domains_trans",
-        "lemma_Lib.Buffer.modifies_preserves_live",
+        "lemma_LowStar.Monotonic.Buffer.lemma_live_equal_mem_domains",
         "lemma_LowStar.Monotonic.Buffer.loc_disjoint_sym_",
         "lemma_LowStar.Monotonic.Buffer.loc_includes_refl",
         "lemma_LowStar.Monotonic.Buffer.modifies_trans_linear",
@@ -3246,10 +3261,11 @@
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
         "refinement_interpretation_Tm_refine_b64671e12b7bed191ea1ef66664f5256",
         "refinement_interpretation_Tm_refine_e78736bff9ff6ab87efd9a77db3e9577",
-        "typing_Lib.Buffer.loc", "typing_tok_Lib.Buffer.MUT@tok"
+        "typing_Lib.Buffer.loc", "typing_LowStar.Buffer.trivial_preorder",
+        "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "8e06e5bccaae38c650957d73046c0973"
+      "7f06ff9f96f83d2f475095e711c948b1"
     ],
     [
       "Hacl.Impl.SHA3.absorb",
@@ -3312,7 +3328,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "a89d37c76d77124c62be95fa8c29e5a8"
+      "e4d17628611418acf71334cc1f2eced2"
     ],
     [
       "Hacl.Impl.SHA3.absorb",
@@ -3376,7 +3392,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "05a96461ff5b973d1846f046cbe2704c"
+      "1a21ce71b5626935df6b49a98ef5f077"
     ],
     [
       "Hacl.Impl.SHA3.squeeze_inner",
@@ -3452,7 +3468,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "e802f7b9af610623f9b23e15e01897f1"
+      "aba623153b04c0ee85869bcbca413742"
     ],
     [
       "Hacl.Impl.SHA3.squeeze_inner",
@@ -3483,7 +3499,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "2793b4748ac12a69ff6ce5c2c0fd303f"
+      "c878cb7865716fe3a2d5436bf1c6d58c"
     ],
     [
       "Hacl.Impl.SHA3.squeeze_inner",
@@ -3520,7 +3536,7 @@
         "function_token_typing_Lib.IntTypes.uint8", "int_typing",
         "lemma_FStar.HyperStack.ST.lemma_equal_domains_trans",
         "lemma_FStar.UInt.pow2_values", "lemma_FStar.UInt32.vu_inv",
-        "lemma_Lib.Buffer.modifies_preserves_live",
+        "lemma_LowStar.Monotonic.Buffer.address_liveness_insensitive_buffer",
         "lemma_LowStar.Monotonic.Buffer.length_null_1",
         "lemma_LowStar.Monotonic.Buffer.length_null_2",
         "lemma_LowStar.Monotonic.Buffer.loc_disjoint_sym_",
@@ -3528,6 +3544,7 @@
         "lemma_LowStar.Monotonic.Buffer.loc_includes_union_l_",
         "lemma_LowStar.Monotonic.Buffer.loc_union_comm",
         "lemma_LowStar.Monotonic.Buffer.modifies_buffer_elim",
+        "lemma_LowStar.Monotonic.Buffer.modifies_liveness_insensitive_buffer_weak",
         "lemma_LowStar.Monotonic.Buffer.modifies_loc_includes",
         "lemma_LowStar.Monotonic.Buffer.modifies_trans_linear",
         "primitive_Prims.op_AmpAmp", "primitive_Prims.op_LessThanOrEqual",
@@ -3548,7 +3565,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "a8f7c41ac5f6a8d5c0d0000776d99314"
+      "b32ce2d90a78a0c843039c8c3f6820ab"
     ],
     [
       "Hacl.Impl.SHA3.mult_plus_lt",
@@ -3563,7 +3580,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "40513b4a235db451166140f8af0d8eeb"
+      "00cc507754612574189a045358ee2785"
     ],
     [
       "Hacl.Impl.SHA3.squeeze",
@@ -3616,7 +3633,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "c075e3ccbe31079b5e2db6ffde3a5f42"
+      "5dfab9e639fa943477d7437e9fa606b2"
     ],
     [
       "Hacl.Impl.SHA3.squeeze",
@@ -3668,15 +3685,18 @@
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Lib.IntTypes.uint64",
         "function_token_typing_Lib.IntTypes.uint8", "int_inversion",
-        "int_typing", "lemma_FStar.HyperStack.ST.lemma_equal_domains_trans",
+        "int_typing",
+        "interpretation_Tm_abs_612136ee4143d24977831c80e4f470a1",
+        "lemma_FStar.HyperStack.ST.lemma_equal_domains_trans",
         "lemma_FStar.Map.lemma_ContainsDom",
         "lemma_FStar.Seq.Base.lemma_len_append",
         "lemma_FStar.UInt.pow2_values", "lemma_FStar.UInt32.uv_inv",
         "lemma_FStar.UInt32.vu_inv", "lemma_Lib.IntTypes.div_lemma",
         "lemma_Lib.IntTypes.mul_lemma", "lemma_Lib.IntTypes.sub_mod_lemma",
+        "lemma_Lib.IntTypes.v_injective",
         "lemma_LowStar.Monotonic.Buffer.address_liveness_insensitive_buffer",
         "lemma_LowStar.Monotonic.Buffer.as_seq_gsub",
-        "lemma_LowStar.Monotonic.Buffer.lemma_live_equal_mem_domains",
+        "lemma_LowStar.Monotonic.Buffer.live_gsub",
         "lemma_LowStar.Monotonic.Buffer.loc_disjoint_gsub_buffer",
         "lemma_LowStar.Monotonic.Buffer.loc_disjoint_includes_r",
         "lemma_LowStar.Monotonic.Buffer.loc_disjoint_sym_",
@@ -3687,6 +3707,7 @@
         "lemma_LowStar.Monotonic.Buffer.loc_union_comm",
         "lemma_LowStar.Monotonic.Buffer.modifies_buffer_elim",
         "lemma_LowStar.Monotonic.Buffer.modifies_liveness_insensitive_buffer",
+        "lemma_LowStar.Monotonic.Buffer.modifies_liveness_insensitive_buffer_weak",
         "lemma_LowStar.Monotonic.Buffer.modifies_loc_includes",
         "lemma_LowStar.Monotonic.Buffer.modifies_trans_linear",
         "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
@@ -3719,18 +3740,22 @@
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
         "refinement_interpretation_Tm_refine_e450d0eda8ec6ce5c9eff42d01f0e81a",
         "refinement_interpretation_Tm_refine_e5ee883ad0ecc12869f2d4cc1b01dc24",
+        "refinement_interpretation_Tm_refine_e9c32a5fb00a4e8c339597118c871180",
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
         "refinement_interpretation_Tm_refine_fb77d4109290540100357b20e0a78486",
-        "typing_FStar.Map.contains", "typing_FStar.Monotonic.HyperHeap.rid",
+        "true_interp", "typing_FStar.Map.contains",
+        "typing_FStar.Monotonic.HyperHeap.rid",
         "typing_FStar.Monotonic.HyperStack.get_hmap",
         "typing_FStar.Monotonic.HyperStack.get_tip",
         "typing_FStar.UInt.fits", "typing_FStar.UInt32.v",
-        "typing_Lib.Buffer.as_seq", "typing_Lib.Buffer.length",
-        "typing_Lib.Buffer.loc", "typing_Lib.Buffer.op_Bar_Plus_Bar",
+        "typing_Lib.Buffer.as_seq", "typing_Lib.Buffer.gsub",
+        "typing_Lib.Buffer.length", "typing_Lib.Buffer.loc",
+        "typing_Lib.Buffer.op_Bar_Plus_Bar", "typing_Lib.Buffer.union",
         "typing_Lib.IntTypes.minint", "typing_Lib.IntTypes.mk_int",
         "typing_Lib.IntTypes.mul", "typing_Lib.IntTypes.v",
         "typing_Lib.Sequence.op_At_Bar",
         "typing_LowStar.Buffer.trivial_preorder",
+        "typing_LowStar.Monotonic.Buffer.address_liveness_insensitive_locs",
         "typing_LowStar.Monotonic.Buffer.as_seq",
         "typing_LowStar.Monotonic.Buffer.len",
         "typing_LowStar.Monotonic.Buffer.loc_buffer",
@@ -3739,7 +3764,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "dc9a171df75e99adaddd103b8fcbae1f"
+      "b4389d38d668bb17fe3200d571f58d65"
     ],
     [
       "Hacl.Impl.SHA3.squeeze",
@@ -3811,7 +3836,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "a3b013e2335c1c2e75e486308b6ee60d"
+      "eecdc4997e3239eacf16b9ac1655ffc4"
     ],
     [
       "Hacl.Impl.SHA3.keccak",
@@ -3838,7 +3863,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "20a2b8d81e5b9f59ab338de14dbda863"
+      "102ebfbf4330a26b6288632640a97801"
     ],
     [
       "Hacl.Impl.SHA3.keccak",
@@ -4001,7 +4026,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "3cef3e03b4806b9c9f587682a8bc921b"
+      "3e68bc3818d9f997e1ab5c8efd69aa63"
     ]
   ]
 ]
