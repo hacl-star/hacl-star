@@ -28,6 +28,16 @@ void ossl_poly1305(uint8_t* mac, uint8_t* plain, int len, uint8_t* key){
   Poly1305_Final(&state,mac);
 }
 
+#include "impl.h"
+
+extern void poly1305_impl(
+  unsigned char *out,
+  const unsigned char *in,
+  unsigned long long inlen,
+  const unsigned char *k
+);
+
+
 typedef uint64_t cycles;
 
 static __inline__ cycles cpucycles_begin(void)
@@ -249,6 +259,23 @@ int main() {
   if (ok) printf("Success!\n");
   else printf("**FAILED**\n");
 
+  poly1305_impl(comp, in, in_len, key);
+  printf("Jasmin Result:\n");
+  printf("computed:");
+  for (int i = 0; i < 16; i++)
+    printf("%02x",comp[i]);
+  printf("\n");
+  printf("expected:");
+  for (int i = 0; i < 16; i++)
+    printf("%02x",exp[i]);
+  printf("\n");
+  ok = true;
+  for (int i = 0; i < 16; i++)
+    ok = ok & (exp[i] == comp[i]);
+  if (ok) printf("Success!\n");
+  else printf("**FAILED**\n");
+
+
   /*Hacl_Poly1305_64_poly1305_mac(comp,in2,in_len2,key2);
   printf("Poly1305 (64-bit) Result:\n");
   printf("computed:");
@@ -327,6 +354,22 @@ int main() {
   if (ok) printf("Success!\n");
   else printf("**FAILED**\n");
 
+  poly1305_impl(comp, in2, in_len2, key2);
+  printf("Jasmin Result:\n");
+  printf("computed:");
+  for (int i = 0; i < 16; i++)
+    printf("%02x",comp[i]);
+  printf("\n");
+  printf("expected:");
+  for (int i = 0; i < 16; i++)
+    printf("%02x",exp2[i]);
+  printf("\n");
+  ok = true;
+  for (int i = 0; i < 16; i++)
+    ok = ok & (exp2[i] == comp[i]);
+  if (ok) printf("Success!\n");
+  else printf("**FAILED**\n");
+  
   /*Hacl_Poly1305_64_poly1305_mac(comp,in3,in_len3,key3);
   printf("Poly1305 (64-bit) Result:\n");
   printf("computed:");
@@ -406,6 +449,22 @@ int main() {
   if (ok) printf("Success!\n");
   else printf("**FAILED**\n");
 
+  poly1305_impl(comp, in3, in_len3, key3);
+  printf("Jasmin Result:\n");
+  printf("computed:");
+  for (int i = 0; i < 16; i++)
+    printf("%02x",comp[i]);
+  printf("\n");
+  printf("expected:");
+  for (int i = 0; i < 16; i++)
+    printf("%02x",exp3[i]);
+  printf("\n");
+  ok = true;
+  for (int i = 0; i < 16; i++)
+    ok = ok & (exp3[i] == comp[i]);
+  if (ok) printf("Success!\n");
+  else printf("**FAILED**\n");
+  
   uint8_t plain[SIZE];
   uint64_t res = 0;
   uint8_t tag[16];
@@ -534,6 +593,24 @@ int main() {
   clock_t tdiff7 = t2 - t1;
   cycles cdiff7 = b - a;
 
+  
+  memset(plain,'P',SIZE);
+  memset(key,'K',16);
+  for (int j = 0; j < ROUNDS; j++) {
+    poly1305_impl(tag,plain,SIZE,key);
+  }
+
+  t1 = clock();
+  a = cpucycles_begin();
+  for (int j = 0; j < ROUNDS; j++) {
+    poly1305_impl(tag,plain,SIZE,key);
+    res ^= tag[0] ^ tag[15];
+  }
+  b = cpucycles_end();
+  t2 = clock();
+  clock_t tdiff8 = t2 - t1;
+  cycles cdiff8 = b - a;
+  
 
   
   /*printf("Poly1305 (64-bit) PERF:\n");
@@ -561,6 +638,12 @@ int main() {
   printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)cdiff7,(double)cdiff7/count);
   printf("time for %" PRIu64 " bytes: %" PRIu64 " (%.2fus/byte)\n",count,(uint64_t)tdiff7,(double)tdiff7/count);
   printf("bw %8.2f MB/s\n",(double)count/(((double)tdiff7 / CLOCKS_PER_SEC) * 1000000.0));
+
+  printf("Jasmin Poly1305 (vec) PERF:\n");
+  printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)cdiff8,(double)cdiff8/count);
+  printf("time for %" PRIu64 " bytes: %" PRIu64 " (%.2fus/byte)\n",count,(uint64_t)tdiff8,(double)tdiff8/count);
+  printf("bw %8.2f MB/s\n",(double)count/(((double)tdiff7 / CLOCKS_PER_SEC) * 1000000.0));
+
 /*
   printf("Master Poly1305 (32-bit) PERF:\n");
   printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)cdiff6,(double)cdiff6/count);
