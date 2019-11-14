@@ -980,7 +980,7 @@ procedure Loop6x_partial(
 #verbatim{:interface}
 #reset-options "--z3rlimit 50"
 #endverbatim
-#reset-options "--z3rlimit 50"
+#reset-options "--z3rlimit 100"
 procedure Loop6x(
         inline alg:algorithm,
         ghost h_LE:quad32,
