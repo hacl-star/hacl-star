@@ -10,7 +10,7 @@ test: all
 # Defines rules for producing .checked, .krml, .depend, etc.
 include ../../Makefile.local
 
-CFLAGS += -I../../../lib/c -mavx -mavx2
+CFLAGS += -I../../../lib/c -mavx -mavx2 -march=native -mtune=native -O3
 export CFLAGS
 
 # CUSTOMIZE HERE: how to produce binary objects
@@ -22,7 +22,6 @@ dist/libpoly.a: dist/Makefile.basic
 dist/Makefile.basic: $(filter-out %/prims.krml,$(ALL_KRML_FILES))
 	$(KRML) $^ -o libpoly.a $(BASE_FLAGS) $(POLY_BUNDLE) \
 	  -tmpdir dist \
-	  -ccopts -std=gnu11,-g,-O3 \
 	  -add-include '"libintvector.h"' \
 	  -add-include '<stdbool.h>' \
 	  -skip-compilation
@@ -36,7 +35,7 @@ dist/poly1305-openssl-test.exe: dist/libpoly.a
 
 
 %.exe:
-	$(CC) $^ $(KREMLIB_A) -o $@
+	$(CC) $(CFLAGS) -flto $^ $(KREMLIB_A) -o $@
 
 clean-c:
 	$(MAKE) -C dist/ -f Makefile.basic clean

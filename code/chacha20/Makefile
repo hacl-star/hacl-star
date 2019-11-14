@@ -11,7 +11,7 @@ test: all
 # Defines rules for producing .checked, .krml, .depend, etc.
 include ../../Makefile.local
 
-CFLAGS += -I../../../lib/c -mavx -mavx2
+CFLAGS += -I../../../lib/c -mavx -mavx2 -march=native -mtune=native -O3
 export CFLAGS
 
 # CUSTOMIZE HERE: how to produce binary objects
@@ -22,7 +22,6 @@ dist/libchacha.a: dist/Makefile.basic
 dist/Makefile.basic: $(filter-out %/prims.krml,$(ALL_KRML_FILES))
 	$(KRML) $^ -o libchacha.a $(BASE_FLAGS) $(CHACHA20_BUNDLE) \
 	  -tmpdir dist \
-	  -ccopts -std=gnu11,-g,-O3 \
 	  -add-include '"libintvector.h"' \
 	  -skip-compilation
 
@@ -35,7 +34,7 @@ dist/chacha20-vec-openssl-test.exe: dist/libchacha.a
 	$(KREMLIB_A) -o $@ $(OPENSSL_HOME)/libcrypto.a -lpthread -ldl
 
 %.exe:
-	$(CC) $^ $(KREMLIB_A) -o $@
+	$(CC) $(CFLAGS) -flto $^ $(KREMLIB_A) -o $@
 
 clean-c:
 	$(MAKE) -C dist/ -f Makefile.basic clean
