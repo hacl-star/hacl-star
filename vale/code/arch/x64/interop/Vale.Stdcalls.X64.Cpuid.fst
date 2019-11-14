@@ -63,3 +63,12 @@ let lowstar_sse : lowstar_sse_t  =
     (W.mk_prediction code_sse dom [] (sse_lemma code_sse IA.win))
 
 let check_sse = as_normal_t #lowstar_sse_t lowstar_sse
+
+(* And here's the check_rdrand wrapper itself *)
+let lowstar_rdrand : lowstar_rdrand_t  =
+  IX64.wrap_weak_stdcall
+    code_rdrand
+    dom
+    (W.mk_prediction code_rdrand dom [] (rdrand_lemma code_rdrand IA.win))
+
+let check_rdrand = as_normal_t #lowstar_rdrand_t lowstar_rdrand
