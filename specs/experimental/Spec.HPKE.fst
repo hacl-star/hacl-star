@@ -419,7 +419,6 @@ val sealBase:
   Tot (option bytes)
 
 let sealBase cs skE pkR m info =
-  let zz, pkR = encap cs skE pkR in
   let pkE,k,n = setupBaseI cs skE pkR info in
   match Spec.Defensive.AEAD.encrypt (aead_of_cs cs) k n m info with
   | None -> None
@@ -428,15 +427,13 @@ let sealBase cs skE pkR m info =
 
 val openBase:
     cs:ciphersuite
-  -> pkE:key_dh_public_s cs
   -> skR:key_dh_secret_s cs
   -> input:bytes{size_dh_public cs <= Seq.length input /\ Seq.length input <= max_size_t}
   -> info:bytes{Seq.length info <= max_info} ->
   Tot (option bytes)
 
-let openBase cs pkE skR input info =
-  let pkE = sub #uint8 #(Seq.length input) input 0 (size_dh_key cs) in
+let openBase cs skR input info =
+  let pkE = sub #uint8 #(Seq.length input) input 0 (size_dh_public cs) in
   let c = sub #uint8 #(Seq.length input) input (size_dh_public cs) (length input - (size_dh_public cs)) in
-  let zz = decap cs pkE skR in
   let k,n = setupBaseR cs pkE skR info in
   Spec.Defensive.AEAD.decrypt (aead_of_cs cs) k n c info
