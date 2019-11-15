@@ -679,6 +679,7 @@ BUNDLE_FLAGS	=\
   $(WASMSUPPORT_BUNDLE) \
   $(CTR_BUNDLE) \
   $(TUTORIAL_BUNDLE) \
+  $(HPKE_BUNDLE) \
   $(QTESLA_BUNDLE) \
   $(FRODO_BUNDLE)
 
@@ -779,6 +780,7 @@ dist/ccf/Makefile.basic: HAND_WRITTEN_FILES := $(filter-out %/Lib_PrintBuffer.c 
 dist/ccf/Makefile.basic: HAND_WRITTEN_H_FILES := $(filter-out %/libintvector.h,$(HAND_WRITTEN_H_FILES))
 dist/ccf/Makefile.basic: HACL_OLD_FILES =
 dist/ccf/Makefile.basic: POLY_BUNDLE =
+dist/ccf/Makefile.basic: HPKE_BUNDLE = -bundle Hacl.HPKE.*
 
 # Mozilla distribution
 # --------------------
@@ -794,6 +796,7 @@ dist/mozilla/Makefile.basic: MERKLE_BUNDLE = -bundle MerkleTree.*
 dist/mozilla/Makefile.basic: CTR_BUNDLE =
 dist/mozilla/Makefile.basic: SHA3_BUNDLE = -bundle Hacl.SHA3
 dist/mozilla/Makefile.basic: HASH_BUNDLE = -bundle Hacl.Hash.*,Hacl.HKDF,Hacl.HMAC,Hacl.HMAC_DRBG
+dist/mozilla/Makefile.basic: HPKE_BUNDLE = -bundle Hacl.HPKE.*
 dist/mozilla/Makefile.basic: QTESLA_BUNDLE = -bundle QTesla.*,Hacl.Impl.QTesla,Hacl.Impl.QTesla.*
 dist/mozilla/Makefile.basic: TUTORIAL_BUNDLE = -bundle Tutorial,TestLib,Hacl_Lib,Hacl_Kremlib
 dist/mozilla/Makefile.basic: FRODO_BUNDLE = -bundle Hacl.Frodo.*,Hacl.SHA3,Hacl.Keccak,Frodo.Params
