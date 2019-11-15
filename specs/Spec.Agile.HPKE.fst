@@ -16,7 +16,7 @@ let pow2_61 : _:unit{pow2 61 == 2305843009213693952} = assert_norm(pow2 61 == 23
 let pow2_35_less_than_pow2_61 : _:unit{pow2 32 * pow2 3 <= pow2 61 - 1} = assert_norm(pow2 32 * pow2 3 <= pow2 61 - 1)
 let pow2_35_less_than_pow2_125 : _:unit{pow2 32 * pow2 3 <= pow2 125 - 1} = assert_norm(pow2 32 * pow2 3 <= pow2 125 - 1)
 
-#set-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 1 --initial_ifuel 1"
+#set-options "--z3rlimit 20 --fuel 0 --ifuel 1"
 
 
 /// Constants
@@ -106,7 +106,9 @@ let id_of_mode m =
 /// Constants sizes
 
 inline_for_extraction
-let size_aead_nonce (cs:ciphersuite): size_nat = 12
+let size_aead_nonce (cs:ciphersuite): (n:size_nat{AEAD.iv_length (aead_of_cs cs) n}) = 
+  assert_norm (8 * 12 <= pow2 64 - 1);  
+  12
 
 inline_for_extraction
 let size_aead_key (cs:ciphersuite): size_nat = AEAD.size_key (aead_of_cs cs)
@@ -425,10 +427,11 @@ val sealBase:
   -> info:bytes{Seq.length info <= max_info} ->
   Tot bytes
 
+#set-options "--z3rlimit 50"
+
 let sealBase cs skE pkR m info =
   let zz, pkR = encap cs skE pkR in
   let pkE,k,n = setupBaseI cs skE pkR info in
-  assert_norm (8 * 12 <= pow2 64 - 1);
   Seq.append pkE (AEAD.encrypt #(aead_of_cs cs) k n info m)
 
 val openBase:
@@ -444,7 +447,6 @@ let openBase cs pkE skR input info =
   let c = sub #uint8 #(Seq.length input) input (size_dh_public cs) (length input - (size_dh_public cs)) in
   let zz = decap cs pkE skR in
   let k,n = setupBaseR cs pkE skR info in
-  assert_norm (8 * 12 <= pow2 64 - 1);
   match AEAD.decrypt #(aead_of_cs cs) k n info c with
   | None -> None
   | Some v -> Some v

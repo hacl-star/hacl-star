@@ -104,24 +104,6 @@ val decap:
 [@ Meta.Attribute.inline_ ]
 let decap #cs o_pkR pkE skR = DH.scalarmult #cs o_pkR skR pkE
 
-inline_for_extraction noextract
-val build_context_default:
-     #cs:S.ciphersuite
-  -> pkE: key_dh_public cs
-  -> pkR: key_dh_public cs
-  -> pkI: key_dh_public cs
-  -> pskID_hash:lbuffer uint8 (nhash_length cs)
-  -> info_hash:lbuffer uint8 (nhash_length cs)
-  -> output:lbuffer uint8 (size (9 + (3 * S.size_dh_public cs) + (2 * Spec.Agile.Hash.size_hash (S.hash_of_cs cs))))
-  -> ST unit
-    (requires fun h0 ->
-      live h0 pkE /\ live h0 pkR /\ live h0 pkI /\
-      live h0 pskID_hash /\ live h0 info_hash /\ live h0 output /\
-      disjoint output pkE /\ disjoint output pkR /\ disjoint output pkI /\
-      disjoint output pskID_hash /\ disjoint output info_hash)
-    (ensures fun h0 _ h1 -> modifies (loc output) h0 h1 /\
-      as_seq h1 output `Seq.equal` S.build_context S.Base cs (as_seq h0 pkE) (as_seq h0 pkR) (as_seq h0 pkI) (as_seq h0 pskID_hash) (as_seq h0 info_hash))
-
 noextract inline_for_extraction
 val id_of_cs (cs:S.ciphersuite) (output:lbuffer uint8 6ul):
   ST unit
@@ -154,6 +136,24 @@ let id_of_cs cs output =
   | DH_Curve25519, CHACHA20_POLY1305, SHA2_512 ->
       upd output 0ul (u8 7); upd output 1ul (u8 7); upd output 2ul (u8 7);
       upd output 3ul (u8 7); upd output 4ul (u8 7); upd output 5ul (u8 7)
+
+inline_for_extraction noextract
+val build_context_default:
+     #cs:S.ciphersuite
+  -> pkE: key_dh_public cs
+  -> pkR: key_dh_public cs
+  -> pkI: key_dh_public cs
+  -> pskID_hash:lbuffer uint8 (nhash_length cs)
+  -> info_hash:lbuffer uint8 (nhash_length cs)
+  -> output:lbuffer uint8 (size (9 + (3 * S.size_dh_public cs) + (2 * Spec.Agile.Hash.size_hash (S.hash_of_cs cs))))
+  -> ST unit
+    (requires fun h0 ->
+      live h0 pkE /\ live h0 pkR /\ live h0 pkI /\
+      live h0 pskID_hash /\ live h0 info_hash /\ live h0 output /\
+      disjoint output pkE /\ disjoint output pkR /\ disjoint output pkI /\
+      disjoint output pskID_hash /\ disjoint output info_hash)
+    (ensures fun h0 _ h1 -> modifies (loc output) h0 h1 /\
+      as_seq h1 output `Seq.equal` S.build_context S.Base cs (as_seq h0 pkE) (as_seq h0 pkR) (as_seq h0 pkI) (as_seq h0 pskID_hash) (as_seq h0 info_hash))
 
 #set-options "--z3rlimit 300"
 
