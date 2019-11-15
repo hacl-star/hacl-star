@@ -8,7 +8,7 @@
       0,
       [ "@query" ],
       0,
-      "385fd16fe369c65619afaf24262501ed"
+      "d70b581f9d2d80b80f9d161773f877b2"
     ],
     [
       "Hacl.Spec.Poly1305.Vec.from_elem",
@@ -17,25 +17,18 @@
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "constructor_distinct_Lib.IntTypes.U8",
-        "equality_tok_Lib.IntTypes.U1@tok",
-        "equality_tok_Lib.IntTypes.U8@tok",
         "equation_Hacl.Spec.Poly1305.Vec.lanes",
-        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.unsigned",
         "equation_Lib.IntVector.width", "equation_Prims.nat",
-        "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
-        "equation_Spec.GaloisField.gf", "int_inversion",
-        "proj_equation_Spec.GaloisField.GF_t",
+        "equation_Spec.Poly1305.size_key",
         "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_Spec.GaloisField.GF_t",
+        "refinement_interpretation_Tm_refine_0ec011aea9f93256a3547ad9f0c667f1",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_8f5bacb69a016785e5356e99e7760edf",
         "refinement_interpretation_Tm_refine_a658c976a9118ef6c4559f187aff2181",
-        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
-        "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
+        "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "1fc9b73554a869a653deb0edc12c82a6"
+      "536d328759d403db1f80465bbb0e05df"
     ],
     [
       "Hacl.Spec.Poly1305.Vec.zero",
@@ -49,7 +42,7 @@
         "typing_Spec.Poly1305.prime"
       ],
       0,
-      "faa0b43d1191186b5c1be97744aba713"
+      "decf69b0b9ddc69df71886757a1a09c6"
     ],
     [
       "Hacl.Spec.Poly1305.Vec.size_block",
@@ -57,29 +50,18 @@
       0,
       0,
       [
-        "@MaxFuel_assumption", "@MaxIFuel_assumption",
-        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "@MaxIFuel_assumption", "@query",
         "constructor_distinct_Lib.IntTypes.S16",
-        "constructor_distinct_Lib.IntTypes.S8",
         "constructor_distinct_Lib.IntTypes.U32",
-        "constructor_distinct_Lib.IntTypes.U8",
-        "equality_tok_Lib.IntTypes.U1@tok",
-        "equality_tok_Lib.IntTypes.U32@tok",
-        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.unsigned",
-        "equation_Prims.nat", "equation_Spec.AES.gf8",
-        "equation_Spec.AES.irred", "equation_Spec.GaloisField.gf",
-        "int_typing", "lemma_FStar.UInt.pow2_values",
-        "primitive_Prims.op_Subtraction",
-        "proj_equation_Spec.GaloisField.GF_t",
-        "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_Spec.GaloisField.GF_t",
+        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
+        "equation_Spec.Poly1305.size_key",
+        "refinement_interpretation_Tm_refine_0ec011aea9f93256a3547ad9f0c667f1",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
-        "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
+        "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "393ac5025bef4abc30d047941f2020a7"
+      "c5efc8e3ae7d937d12c970192d5cde54"
     ],
     [
       "Hacl.Spec.Poly1305.Vec.load_elem1",
@@ -105,7 +87,7 @@
         "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "6cefff28f95f61f627b37a1a830e4a0e"
+      "b4d9c671a11d2fc931f818a5584d036a"
     ],
     [
       "Hacl.Spec.Poly1305.Vec.load_elem2",
@@ -122,7 +104,7 @@
         "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "7748faa15d1158f48211dd82ca66fc4f"
+      "8cb7c0f91993932d2371c3f700f22a5b"
     ],
     [
       "Hacl.Spec.Poly1305.Vec.load_elem2",
@@ -159,7 +141,7 @@
         "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "47f11e8e0f4dc276e3cb92bdc8a252ae"
+      "273680a76c44f5d642557fb6d2193f92"
     ],
     [
       "Hacl.Spec.Poly1305.Vec.load_elem4",
@@ -190,7 +172,7 @@
         "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "dc825aeaab1d1a2feb5c38080545d581"
+      "77271ecb5e834f04c42a24ae2181dfec"
     ],
     [
       "Hacl.Spec.Poly1305.Vec.load_elem4",
@@ -239,7 +221,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "030596868ac9671cfbd2f5bc33683a89"
+      "7999551d7a87bf94c625b4a1c8410e2d"
     ],
     [
       "Hacl.Spec.Poly1305.Vec.load_elem",
@@ -276,7 +258,7 @@
         "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "4d731b15b3186491dd2592c2d8c3bdd3"
+      "cdf2f0ebcc973819634329af52aec794"
     ],
     [
       "Hacl.Spec.Poly1305.Vec.load_elem",
@@ -293,7 +275,7 @@
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42"
       ],
       0,
-      "3e523d8ee6be5980fe4a79ee92284b78"
+      "fdf540d46b3e1e712cfa3e432c51a5d6"
     ],
     [
       "Hacl.Spec.Poly1305.Vec.load_blocks",
@@ -330,7 +312,7 @@
         "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "e14e5a00ca66d54b8369a3f16fd0adb7"
+      "b6d969f2a405c432507756b69e889f53"
     ],
     [
       "Hacl.Spec.Poly1305.Vec.load_blocks",
@@ -349,7 +331,7 @@
         "refinement_interpretation_Tm_refine_a658c976a9118ef6c4559f187aff2181"
       ],
       0,
-      "43799a24b14ef9a120a8539d4dbef4b4"
+      "e4e9e70c0095c874b3228cba3e8030fb"
     ],
     [
       "Hacl.Spec.Poly1305.Vec.load_acc1",
@@ -363,7 +345,7 @@
         "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "16f9541fcb632a00982fe66957cb18f7"
+      "168a6f87f3a263f8a2cc60e55b626611"
     ],
     [
       "Hacl.Spec.Poly1305.Vec.load_acc2",
@@ -380,7 +362,7 @@
         "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "752e03eb763fc831fa3a891d6e81bbeb"
+      "5f02ebc2cd831eed5c561ab9c45e104e"
     ],
     [
       "Hacl.Spec.Poly1305.Vec.load_acc2",
@@ -398,7 +380,7 @@
         "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "3b126708054dd6be38f91c865db3db6f"
+      "b9cfae8a8199e4ea98017d11116b0385"
     ],
     [
       "Hacl.Spec.Poly1305.Vec.load_acc4",
@@ -429,7 +411,7 @@
         "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "75973636baecb6ece67ccc840dfb17b6"
+      "9ec988341150b51fb64e6203f0837161"
     ],
     [
       "Hacl.Spec.Poly1305.Vec.load_acc4",
@@ -447,7 +429,7 @@
         "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "76c49dc15dcb78dbd98b275b320c9785"
+      "ee80a5685e86791a2a5a469749193a11"
     ],
     [
       "Hacl.Spec.Poly1305.Vec.load_acc",
@@ -484,7 +466,7 @@
         "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "0f33ac0a1a281ce877fc25d25cb0a2f6"
+      "ecf14949dc38953d21b80213c5a9f952"
     ],
     [
       "Hacl.Spec.Poly1305.Vec.load_acc",
@@ -501,7 +483,7 @@
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42"
       ],
       0,
-      "2ea3b85ea8420e6ca661ccae4ceba6af"
+      "f12dfe0d29d18c3e8f5623c9983499b5"
     ],
     [
       "Hacl.Spec.Poly1305.Vec.normalize_1",
@@ -516,7 +498,7 @@
         "typing_Spec.Poly1305.size_block"
       ],
       0,
-      "af52150bce685c8364ab3739dbe91dc3"
+      "7a837f103d034681091e09e2cd11a117"
     ],
     [
       "Hacl.Spec.Poly1305.Vec.normalize_1",
@@ -533,7 +515,7 @@
         "typing_Spec.Poly1305.size_block", "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "768246a60dc7d00b5273e7a680df65aa"
+      "8985026895179949d496ae96e0382d68"
     ],
     [
       "Hacl.Spec.Poly1305.Vec.normalize_2",
@@ -548,7 +530,7 @@
         "typing_Spec.Poly1305.size_block"
       ],
       0,
-      "a4fcbb13f2b6374107e1cbe7aae312b3"
+      "aa9c14a5d101df7e79a01c0b50d12e73"
     ],
     [
       "Hacl.Spec.Poly1305.Vec.normalize_2",
@@ -562,7 +544,7 @@
         "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "141022398528b289a4e81090733a33f7"
+      "42317269d48c8da3d977f5d09f0afa2b"
     ],
     [
       "Hacl.Spec.Poly1305.Vec.normalize_4",
@@ -577,7 +559,7 @@
         "typing_Spec.Poly1305.size_block"
       ],
       0,
-      "23b886cf9b8578eaba39d5909644482b"
+      "a2d9485b96de552e01071e5d6cb738af"
     ],
     [
       "Hacl.Spec.Poly1305.Vec.normalize_4",
@@ -591,7 +573,7 @@
         "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "22440ee8b5938ebaab52f28ab563ea29"
+      "1f115fa6539f27cefe03d4da5eae6b09"
     ],
     [
       "Hacl.Spec.Poly1305.Vec.normalize_n",
@@ -603,12 +585,12 @@
         "equation_Hacl.Spec.Poly1305.Vec.elem",
         "equation_Hacl.Spec.Poly1305.Vec.lanes",
         "equation_Hacl.Spec.Poly1305.Vec.pfelem",
-        "equation_Lib.Sequence.lseq",
+        "equation_Lib.Sequence.lseq", "equation_Spec.Poly1305.felem",
         "refinement_interpretation_Tm_refine_a658c976a9118ef6c4559f187aff2181",
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42"
       ],
       0,
-      "9e2f90926bbc3cf8c591bf85c3f22b49"
+      "5f9b79633944e7bb7f0af22ab3805d4e"
     ],
     [
       "Hacl.Spec.Poly1305.Vec.compute_r1",
@@ -622,7 +604,7 @@
         "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "c841eda18b7a25fb028df499085aa3db"
+      "4cf43a8a9b00f3b978856248c86fc32b"
     ],
     [
       "Hacl.Spec.Poly1305.Vec.compute_r2",
@@ -636,7 +618,7 @@
         "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "f133e4eb8f587f69f2fa0d71adf7d626"
+      "98c38a995499cc4a442b23c30ec5c4ec"
     ],
     [
       "Hacl.Spec.Poly1305.Vec.compute_r4",
@@ -650,7 +632,7 @@
         "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "56baf68c28a39ed6b34f48226c876729"
+      "4353b00624aa9ca04f6a599c545bfaa1"
     ],
     [
       "Hacl.Spec.Poly1305.Vec.compute_rw",
@@ -663,7 +645,7 @@
         "refinement_interpretation_Tm_refine_a658c976a9118ef6c4559f187aff2181"
       ],
       0,
-      "908a12e81ce8142388bda6f5bf6ebaf6"
+      "e6e65e2b50305e2fb55a24a1663c6143"
     ],
     [
       "Hacl.Spec.Poly1305.Vec.poly1305_update_nblocks",
@@ -696,7 +678,7 @@
         "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "5990f8603243de874ff00e32f389c302"
+      "0b176c309f4cd32d01c9c8583ea69c38"
     ],
     [
       "Hacl.Spec.Poly1305.Vec.poly1305_update_multi",
@@ -717,7 +699,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "a535fe25c416eea00beb7c3b1d97646a"
+      "0659e5688d9eaef371efebf5f114335d"
     ],
     [
       "Hacl.Spec.Poly1305.Vec.poly1305_update_multi",
@@ -763,7 +745,7 @@
         "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "0aa37f7255674be0a3507049dbf3e80f"
+      "ec84fa1e12f27932459e836150508d63"
     ],
     [
       "Hacl.Spec.Poly1305.Vec.poly1305_update_vec",
@@ -800,12 +782,12 @@
         "refinement_interpretation_Tm_refine_8f5bacb69a016785e5356e99e7760edf",
         "refinement_interpretation_Tm_refine_a658c976a9118ef6c4559f187aff2181",
         "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
-        "typing_Lib.IntTypes.minint", "typing_Lib.Sequence.length",
-        "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t",
+        "typing_Lib.IntTypes.minint", "typing_Spec.AES.gf8",
+        "typing_Spec.GaloisField.__proj__GF__item__t",
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "7cf45f73ddcf108b6fb9871ec89946e9"
+      "cdc1e45c2a8ca71a53576e9f84ab2e3e"
     ],
     [
       "Hacl.Spec.Poly1305.Vec.poly1305_update",
@@ -822,7 +804,7 @@
         "typing_Spec.Poly1305.size_key"
       ],
       0,
-      "3dedea751a7ceb168b37cc58a6a4f114"
+      "03c327369366166963c89fe3519fc916"
     ]
   ]
 ]

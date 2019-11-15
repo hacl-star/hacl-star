@@ -8,7 +8,7 @@
       0,
       [ "@query" ],
       0,
-      "c5bb77d54602a5d610627ae1d5502fbd"
+      "d92c7b34d92c2c648d043dca82ece7b4"
     ],
     [
       "EverCrypt.Poly1305.poly1305_vale",
@@ -166,7 +166,6 @@
         "lemma_LowStar.Monotonic.Buffer.unused_in_loc_unused_in",
         "lemma_LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2",
         "lemma_Vale.Arch.BufferFriend.lemma_of_bytes_slice",
-        "lemma_Vale.Arch.BufferFriend.lemma_to_bytes_slice",
         "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_BarBar", "primitive_Prims.op_Division",
         "primitive_Prims.op_Equality",
@@ -275,7 +274,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "3783a85bf12488f93363321239715dfb"
+      "0fa91756d62882eb9cc4f339410a1103"
     ],
     [
       "EverCrypt.Poly1305.poly1305",
@@ -291,7 +290,7 @@
         "typing_LowStar.Buffer.trivial_preorder"
       ],
       0,
-      "62f01f01b7be92fc4f619a3f47fadb07"
+      "98a6d1c4ea5026a4aafb915a4edab323"
     ],
     [
       "EverCrypt.Poly1305.poly1305",
@@ -300,7 +299,7 @@
       0,
       [ "@query" ],
       0,
-      "be2310974126ef2f9eb3dbd3237e7b23"
+      "e5fd75a73f022ce38654523aab0fb57c"
     ],
     [
       "EverCrypt.Poly1305.poly1305",
@@ -329,36 +328,28 @@
         "equality_tok_Lib.IntTypes.U8@tok", "equation_FStar.Integers.int_t",
         "equation_FStar.Integers.uint_8",
         "equation_FStar.Monotonic.HyperStack.mem",
-        "equation_Hacl.Spec.Poly1305.Vec.key",
-        "equation_Hacl.Spec.Poly1305.Vec.size_block",
-        "equation_Hacl.Spec.Poly1305.Vec.size_key",
-        "equation_Hacl.Spec.Poly1305.Vec.tag", "equation_Lib.Buffer.as_seq",
-        "equation_Lib.Buffer.buffer_t", "equation_Lib.Buffer.disjoint",
-        "equation_Lib.Buffer.lbuffer_t", "equation_Lib.Buffer.length",
-        "equation_Lib.Buffer.live", "equation_Lib.Buffer.loc",
-        "equation_Lib.Buffer.modifies", "equation_Lib.IntTypes.byte_t",
-        "equation_Lib.IntTypes.int_t", "equation_Lib.IntTypes.minint",
-        "equation_Lib.IntTypes.mk_int", "equation_Lib.IntTypes.pub_int_t",
-        "equation_Lib.IntTypes.pub_int_v", "equation_Lib.IntTypes.sec_int_t",
-        "equation_Lib.IntTypes.unsigned", "equation_Lib.IntTypes.v",
-        "equation_Lib.Sequence.lseq", "equation_Lib.Sequence.seq",
+        "equation_Lib.Buffer.as_seq", "equation_Lib.Buffer.buffer_t",
+        "equation_Lib.Buffer.disjoint", "equation_Lib.Buffer.lbuffer_t",
+        "equation_Lib.Buffer.length", "equation_Lib.Buffer.live",
+        "equation_Lib.Buffer.loc", "equation_Lib.Buffer.modifies",
+        "equation_Lib.IntTypes.byte_t", "equation_Lib.IntTypes.int_t",
+        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.mk_int",
+        "equation_Lib.IntTypes.pub_int_t", "equation_Lib.IntTypes.pub_int_v",
+        "equation_Lib.IntTypes.sec_int_t", "equation_Lib.IntTypes.unsigned",
+        "equation_Lib.IntTypes.v", "equation_Lib.Sequence.seq",
         "equation_LowStar.Buffer.buffer",
         "equation_LowStar.Buffer.trivial_preorder",
         "equation_LowStar.Monotonic.Buffer.disjoint",
         "equation_LowStar.Monotonic.Buffer.length", "equation_Spec.AES.elem",
         "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
         "equation_Spec.GaloisField.felem", "equation_Spec.GaloisField.gf",
-        "equation_Spec.Poly1305.key", "equation_Spec.Poly1305.size_block",
-        "equation_Spec.Poly1305.size_key", "equation_Spec.Poly1305.tag",
         "function_token_typing_FStar.Integers.uint_8",
         "function_token_typing_FStar.UInt8.t",
         "function_token_typing_Lib.IntTypes.byte_t",
         "lemma_FStar.HyperStack.ST.lemma_equal_domains_trans",
         "lemma_FStar.UInt32.uv_inv", "lemma_Lib.IntTypes.v_injective",
-        "lemma_LowStar.Monotonic.Buffer.length_as_seq",
         "lemma_LowStar.Monotonic.Buffer.length_null_1",
         "lemma_LowStar.Monotonic.Buffer.length_null_2",
-        "lemma_LowStar.Monotonic.Buffer.loc_disjoint_none_r",
         "lemma_LowStar.Monotonic.Buffer.loc_disjoint_sym_",
         "lemma_LowStar.Monotonic.Buffer.loc_includes_none",
         "lemma_LowStar.Monotonic.Buffer.modifies_buffer_elim",
@@ -371,7 +362,6 @@
         "projection_inverse_FStar.Integers.Unsigned__0",
         "projection_inverse_Spec.GaloisField.GF_t",
         "refinement_interpretation_Tm_refine_01a1542398acaffbebae5beb0f266869",
-        "refinement_interpretation_Tm_refine_0ec011aea9f93256a3547ad9f0c667f1",
         "refinement_interpretation_Tm_refine_1a4934fe32c5e9d999b73d3a2f645a27",
         "refinement_interpretation_Tm_refine_22881c1bdbee82acc9265b4f8aecde2a",
         "refinement_interpretation_Tm_refine_3c754b844e08de09efa76d8454fb1e84",
@@ -380,10 +370,8 @@
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
         "refinement_interpretation_Tm_refine_d40b67a79cbf0325d25b160df16a89b2",
         "refinement_interpretation_Tm_refine_d4e8cf4c1df6ccb519705f5778b790de",
-        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
         "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
-        "typing_EverCrypt.TargetConfig.x64",
-        "typing_Hacl.Spec.Poly1305.Vec.size_key", "typing_Lib.Buffer.loc",
+        "typing_EverCrypt.TargetConfig.x64", "typing_Lib.Buffer.loc",
         "typing_LowStar.Buffer.trivial_preorder",
         "typing_LowStar.Monotonic.Buffer.address_liveness_insensitive_locs",
         "typing_LowStar.Monotonic.Buffer.as_seq",
@@ -391,14 +379,13 @@
         "typing_LowStar.Monotonic.Buffer.loc_buffer",
         "typing_LowStar.Monotonic.Buffer.loc_none", "typing_Spec.AES.gf8",
         "typing_Spec.GaloisField.__proj__GF__item__t",
-        "typing_Spec.Poly1305.poly1305",
         "typing_Vale.Arch.BufferFriend.of_bytes",
         "typing_Vale.Arch.BufferFriend.to_bytes",
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.PUB@tok",
         "typing_tok_Lib.IntTypes.U32@tok", "unit_inversion", "unit_typing"
       ],
       0,
-      "a931b41ef2485eecb4fbcffd781a9d3e"
+      "c4bcce831d0497b5cc34686663867163"
     ]
   ]
 ]

@@ -19,7 +19,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "e4dfbde66b7a12d1c63e1ef32e78bdd4"
+      "aa45715497c71f512161ea545d9a1519"
     ],
     [
       "Spec.P256.felem_seq_as_nat",
@@ -57,7 +57,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "1304603ebadab8457f832cf13a9546f4"
+      "48f089dd2386d1011f308ba792217868"
     ],
     [
       "Spec.P256.nat_as_seq",
@@ -99,7 +99,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "6af34b125ef0502cc2cdbd94f9d17934"
+      "00ef47cca926f19c88b60a2319cfb0e1"
     ],
     [
       "Spec.P256._point_double",
@@ -112,7 +112,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "685e873b792bc849d0b77338d7c69669"
+      "6d5bb0983cfbc9ff4db6c09903347036"
     ],
     [
       "Spec.P256._point_add",
@@ -128,7 +128,7 @@
         "true_interp"
       ],
       0,
-      "7c2a1f8beb1fccc1729e4c0a3a526ef4"
+      "7065a99b1de3223a4563ef1a836fc826"
     ],
     [
       "Spec.P256._norm",
@@ -158,16 +158,17 @@
         "token_correspondence_Prims.pow2.fuel_instrumented"
       ],
       0,
-      "34381dc09c3fe43bc0c478d4f22d16f9"
+      "0ee7800bf088b2c74f3c351efa6a8e9d"
     ],
     [
       "Spec.P256.scalar",
       1,
-      0,
+      2,
       1,
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
-        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
         "constructor_distinct_Lib.IntTypes.U32",
         "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
         "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
@@ -177,44 +178,27 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "d0072b9b7ad433821bd86e57b7fe0449"
+      "efd7236fd48def87bcf9a59448a4a3a7"
     ],
     [
       "Spec.P256.ith_bit",
       1,
-      0,
+      2,
       1,
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
-        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "constructor_distinct_Lib.IntTypes.S16",
-        "constructor_distinct_Lib.IntTypes.S8",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
         "constructor_distinct_Lib.IntTypes.U32",
-        "constructor_distinct_Lib.IntTypes.U8",
-        "equality_tok_Lib.IntTypes.PUB@tok",
-        "equality_tok_Lib.IntTypes.U32@tok",
-        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
-        "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.uint8",
-        "equation_Lib.IntTypes.unsigned", "equation_Lib.Sequence.lseq",
-        "equation_Lib.Sequence.seq", "equation_Prims.nat",
-        "equation_Spec.P256.scalar",
-        "function_token_typing_Lib.IntTypes.uint8", "int_inversion",
-        "int_typing", "lemma_FStar.UInt.pow2_values",
-        "lemma_Lib.IntTypes.v_mk_int", "primitive_Prims.op_Division",
-        "primitive_Prims.op_Modulus", "primitive_Prims.op_Subtraction",
-        "projection_inverse_BoxBool_proj_0",
+        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_31c7d3d85d92cb942c95a78642e657c7",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
-        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
-        "typing_FStar.Seq.Base.length", "typing_Lib.IntTypes.bits",
-        "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok",
-        "typing_tok_Lib.IntTypes.U8@tok"
+        "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "75242e40c5b7ae048672d751d5661f03"
+      "b64049587eb3ce52070165cd20aa60c4"
     ],
     [
       "Spec.P256.ith_bit",
@@ -253,7 +237,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "ddff75fec54a6db980038887f9fa7fd6"
+      "a645d814fe73f3bca34472047094b1dc"
     ],
     [
       "Spec.P256._ml_step",
@@ -274,7 +258,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "3a6ef669deb8ae59a6646a440ff779ba"
+      "a392db6c1daa0ff0cf7372beed8c0476"
     ],
     [
       "Spec.P256.isPointOnCurve",
@@ -283,16 +267,17 @@
       1,
       [ "@query" ],
       0,
-      "3193376b71b61a8b705e1c579cae7752"
+      "c020ec06b594220807df0fd9a7ef9258"
     ],
     [
       "Spec.P256.serialized_point",
       1,
-      0,
+      2,
       1,
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
-        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
         "constructor_distinct_Lib.IntTypes.U32",
         "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
         "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
@@ -302,7 +287,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "b84c7be7376f7ee5841e006563092a80"
+      "e564accefa5e39580c7828440c99aac5"
     ],
     [
       "Spec.P256.point_to_serialized",
@@ -336,7 +321,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "4201b15b9629397af78b14c92efa0055"
+      "74c246f5ec67a3fd0c3ed0032c778a67"
     ],
     [
       "Spec.P256.serialized_to_point",
@@ -371,7 +356,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "fe34e6e3b9bf9e3e5f19990b9f3ac405"
+      "bedea9eeb7b88d15e3e0f1d237b42c65"
     ]
   ]
 ]
