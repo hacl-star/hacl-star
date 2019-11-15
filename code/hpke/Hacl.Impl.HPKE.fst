@@ -16,6 +16,8 @@ module HKDF = Hacl.Impl.Generic.HKDF
 module AEAD = Hacl.Impl.Generic.AEAD
 module Hash = Hacl.Impl.Generic.Hash
 
+friend Spec.Agile.HPKE
+
 #set-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0"
 
 inline_for_extraction noextract
