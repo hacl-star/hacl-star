@@ -384,6 +384,7 @@ val map_blocks_multi:
   -> f:(i:nat{i < max} -> lseq a blocksize -> lseq a blocksize) ->
   Tot (out:seq a {length out == n * blocksize})
 
+#restart-solver
 val index_map_blocks_multi:
     #a:Type0
   -> bs:size_pos

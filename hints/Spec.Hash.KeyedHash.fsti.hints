@@ -1,0 +1,103 @@
+[
+  "∂ÅŸIY\u0017˚/£N›\u0015O@¨ˇ",
+  [
+    [
+      "Spec.Hash.KeyedHash.size_block",
+      1,
+      2,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "constructor_distinct_Lib.IntTypes.S16",
+        "constructor_distinct_Lib.IntTypes.S8",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "disc_equation_Spec.Hash.KeyedHash.Blake2B",
+        "disc_equation_Spec.Hash.KeyedHash.Blake2S",
+        "disc_equation_Spec.Hash.KeyedHash.SHA2_224",
+        "disc_equation_Spec.Hash.KeyedHash.SHA2_256",
+        "disc_equation_Spec.Hash.KeyedHash.SHA2_384",
+        "disc_equation_Spec.Hash.KeyedHash.SHA2_512",
+        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
+        "fuel_guarded_inversion_Spec.Hash.KeyedHash.algorithm", "int_typing",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
+      ],
+      0,
+      "4e3b9d17ea0123b7ec349bc05cb298e5"
+    ],
+    [
+      "Spec.Hash.KeyedHash.max_input",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "disc_equation_Spec.Hash.KeyedHash.Blake2B",
+        "disc_equation_Spec.Hash.KeyedHash.Blake2S",
+        "disc_equation_Spec.Hash.KeyedHash.SHA2_224",
+        "disc_equation_Spec.Hash.KeyedHash.SHA2_256",
+        "disc_equation_Spec.Hash.KeyedHash.SHA2_384",
+        "disc_equation_Spec.Hash.KeyedHash.SHA2_512", "equation_Prims.nat",
+        "equation_Prims.pos",
+        "fuel_guarded_inversion_Spec.Hash.KeyedHash.algorithm", "int_typing",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "typing_Prims.pow2"
+      ],
+      0,
+      "699bca3571eb5f13d156c72ed575c4e8"
+    ],
+    [
+      "Spec.Hash.KeyedHash.range_output",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "disc_equation_Spec.Hash.KeyedHash.Blake2B",
+        "disc_equation_Spec.Hash.KeyedHash.Blake2S",
+        "disc_equation_Spec.Hash.KeyedHash.SHA2_224",
+        "disc_equation_Spec.Hash.KeyedHash.SHA2_256",
+        "disc_equation_Spec.Hash.KeyedHash.SHA2_384",
+        "disc_equation_Spec.Hash.KeyedHash.SHA2_512",
+        "fuel_guarded_inversion_Spec.Hash.KeyedHash.algorithm"
+      ],
+      0,
+      "d0ad47c16c383551746b7e4a3e79bb6e"
+    ],
+    [
+      "Spec.Hash.KeyedHash.update_last",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_Spec.Hash.KeyedHash.size_block",
+        "refinement_interpretation_Tm_refine_0ec011aea9f93256a3547ad9f0c667f1",
+        "typing_Spec.Hash.KeyedHash.size_block"
+      ],
+      0,
+      "02cbe517bc288c9b2cb4cb73fcd74b81"
+    ],
+    [
+      "Spec.Hash.KeyedHash.hash",
+      1,
+      2,
+      1,
+      [
+        "@query", "constructor_distinct_Lib.IntTypes.U8",
+        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.unsigned",
+        "projection_inverse_BoxBool_proj_0"
+      ],
+      0,
+      "caf989b182c7400d5c5b761be34623f1"
+    ]
+  ]
+]

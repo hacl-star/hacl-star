@@ -2,12 +2,13 @@ module Test.Vectors
 
 open Test.Lowstarize
 open EverCrypt.Hash
+open Spec.Hash.Definitions
 
 /// Hash algorithms
 
 type hash_alg = EverCrypt.Hash.alg
 
-#reset-options "--max_fuel 0 --max_ifuel 0"
+#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 
 noeq noextract
 type hash_vector = {
@@ -75,74 +76,74 @@ let hash_vectors = [{
     output = h"dea356a2cddd90c7a7ecedc5ebb563934f460452";
     repeat = 10ul
   }; {
-    hash_alg = SHA256;
+    hash_alg = SHA2_256;
     input = "abc";
     output = h"ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad";
     repeat = 1ul
   }; {
-    hash_alg = SHA256;
+    hash_alg = SHA2_256;
     input = "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq";
     output = h"248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6ecedd419db06c1";
     repeat = 1ul
   }; {
-    hash_alg = SHA256;
+    hash_alg = SHA2_256;
     input = "a";
     output = h"cdc76e5c9914fb9281a1c7e284d73e67f1809a48a497200e046d39ccc7112cd0";
     repeat = 1000000ul
   }; {
-    hash_alg = SHA256;
+    hash_alg = SHA2_256;
     input = "0123456701234567012345670123456701234567012345670123456701234567";
     output = h"594847328451bdfa85056225462cc1d867d877fb388df0ce35f25ab5562bfbb5";
     repeat = 10ul
   }; {
-    hash_alg = SHA256;
+    hash_alg = SHA2_256;
     input = "\x19";
     output = h"68aa2e2ee5dff96e3355e6c7ee373e3d6a4e17f75f9518d843709c0c9bc3e3d4";
     repeat = 1ul
   };(* {
-    hash_alg = SHA256;
+    hash_alg = SHA2_256;
     // 2018.05.26: Don't know how to encode byte literals in strings; this doesn't work
     // as in OCaml
     input = "\xe3\xd7\x25\x70\xdc\xdd\x78\x7c\xe3\x88\x7a\xb2\xcd\x68\x46\x52";
     output = h"175ee69b02ba9b58e2b0a5fd13819cea573f3940a94f825128cf4209beabb4e8";
     repeat = 1ul
   }; *){
-    hash_alg = SHA384;
+    hash_alg = SHA2_384;
     input = "abc";
     output = h"cb00753f45a35e8bb5a03d699ac65007272c32ab0eded1631a8b605a43ff5bed8086072ba1e7cc2358baeca134c825a7";
     repeat = 1ul
   }; {
-    hash_alg = SHA384;
+    hash_alg = SHA2_384;
     input = "abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu";
     output = h"09330c33f71147e83d192fc782cd1b4753111b173b3b05d22fa08086e3b0f712fcc7c71a557e2db966c3e9fa91746039";
     repeat = 1ul
   }; {
-    hash_alg = SHA384;
+    hash_alg = SHA2_384;
     input = "a";
     output = h"9d0e1809716474cb086e834e310a4a1ced149e9c00f248527972cec5704c2a5b07b8b3dc38ecc4ebae97ddd87f3d8985";
     repeat = 1000000ul
   }; {
-    hash_alg = SHA384;
+    hash_alg = SHA2_384;
     input = "0123456701234567012345670123456701234567012345670123456701234567";
     output = h"2fc64a4f500ddb6828f6a3430b8dd72a368eb7f3a8322a70bc84275b9c0b3ab00d27a5cc3c2d224aa6b61a0d79fb4596";
     repeat = 10ul
   }; {
-    hash_alg = SHA512;
+    hash_alg = SHA2_512;
     input = "abc";
     output = h"ddaf35a193617abacc417349ae20413112e6fa4e89a97ea20a9eeee64b55d39a2192992a274fc1a836ba3c23a3feebbd454d4423643ce80e2a9ac94fa54ca49f";
     repeat = 1ul
   }; {
-    hash_alg = SHA512;
+    hash_alg = SHA2_512;
     input = "abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu";
     output = h"8e959b75dae313da8cf4f72814fc143f8f7779c6eb9f7fa17299aeadb6889018501d289e4900f7e4331b99dec4b5433ac7d329eeb6dd26545e96e55b874be909";
     repeat = 1ul
   }; {
-    hash_alg = SHA512;
+    hash_alg = SHA2_512;
     input = "a";
     output = h"e718483d0ce769644e2e42c7bc15b4638e1f98b13b2044285632a803afa973ebde0ff244877ea60a4cb0432ce577c31beb009c5c2c49aa2e4eadb217ad8cc09b";
     repeat = 1000000ul
   }; {
-    hash_alg = SHA512;
+    hash_alg = SHA2_512;
     input = "0123456701234567012345670123456701234567012345670123456701234567";
     output = h"89d05ba632c699c31231ded4ffc127d5a894dad412c0e024db872d1abd2ba8141a0f85072a9be1e2aa04cf33c765cb510813a39cd5a84c4acaa64d3f3fb7bae9";
     repeat = 10ul
@@ -172,12 +173,12 @@ type hmac_vector = {
 // pls extend me!
 noextract
 let hmac_vectors = [{
-    ha     = SHA256;
+    ha     = SHA2_256;
     key    = h"0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b";
     data   = h"4869205468657265";
     output = h"b0344c61d8db38535ca8afceaf0bf12b881dc200c9833da726e9376c2e32cff7";
   }; {
-    ha     = SHA384;
+    ha     = SHA2_384;
     key    = h"0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b";
     data   = h"4869205468657265";
     output = h"afd03944d84895626b0825f4ab46907f15f9dadbe4101ec682aa034c7cebc59cfaea9ea9076ede7f4af152e8b2fa9cb6";
@@ -190,11 +191,23 @@ let hmac_vectors_tmp = List.Tot.map (fun h ->
 
 %splice[] (lowstarize_toplevel "hmac_vectors_tmp" "hmac_vectors_low")
 
+/// HMAC_DRBG
 
+noextract
+let hmac_drbg_vectors_tmp = 
+  let open Spec.HMAC_DRBG.Test.Vectors in
+  List.Tot.map 
+  (fun x -> x.a, h x.entropy_input, h x.nonce, h x.personalization_string, 
+         h x.entropy_input_reseed, h x.additional_input_reseed,
+         (h x.additional_input_1, h x.additional_input_2),
+         h x.returned_bits)
+  test_vectors
+
+%splice[] (lowstarize_toplevel "hmac_drbg_vectors_tmp" "hmac_drbg_vectors_low")
 
 /// HKDF
 /// https://tools.ietf.org/html/rfc5869.html
-/// pls extend me! We miss SHA384 and SHA512 tests
+/// pls extend me! We miss SHA2_384 and SHA2_512 tests
 ///
 /// The test is in 2 steps:
 /// prk <- extract sal ikm        
@@ -206,7 +219,7 @@ type hkdf_vector = {
   ikm:  hex_encoded;  // input key materials
   salt: hex_encoded; // input salt 
   info: hex_encoded; // expansion label
-  prk:  hex_encoded;  // extracted pseudo-random key (its length is tagLen ha)
+  prk:  hex_encoded;  // extracted pseudo-random key (its length is Spec.Hash.Definitions.hash_len ha)
   okm:  hex_encoded;  // output: expanded key materials (its length is an input)
 }
 
@@ -214,7 +227,7 @@ noextract
 let hkdf_vectors = [{
     // Test Case 1
     // Basic test case with SHA-256
-    ha   = SHA256;
+    ha   = SHA2_256;
     ikm  = h"0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b";// (22 octets)
     salt = h"000102030405060708090a0b0c";// (13 octets)
     info = h"f0f1f2f3f4f5f6f7f8f9";// (10 octets)
@@ -223,7 +236,7 @@ let hkdf_vectors = [{
   }; {
     // Test Case 2
     // Test with SHA-256 and longer inputs/outputs
-    ha   = SHA256;
+    ha   = SHA2_256;
     ikm  = h"000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f";// (80 octets)
     salt = h"606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeaf";// (80 octets)
     info = h"b0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedfe0e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f2f3f4f5f6f7f8f9fafbfcfdfeff";// (80 octets)
@@ -232,7 +245,7 @@ let hkdf_vectors = [{
   }; {
     // Test Case 3
     // Test with SHA-256 and zero-length salt/info
-    ha   = SHA256;
+    ha   = SHA2_256;
     ikm  = h"0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b";// (22 octets)
     salt = h"";
     info = h"";
@@ -416,7 +429,6 @@ let aead_vectors = [
     plaintext  = h"d9313225f88406e5a55909c5aff5269a86a7a9531534f7da2e4c303d8a318a721c3c0c95956809532fcf0e2449a6b525b16aedf5aa0de657ba637b39";
     ciphertext = h"42831ec2217774244b7221b784d0d49ce3aa212f2c02a4e035c17e2329aca12e21d514b25466931c7d8f6a5aac84aa051ba30b396a0aac973d58e091";
   };
-(* Not 12 byte IV
   {
     cipher = AES_128_GCM;
     key = h"feffe9928665731c6d6a8f9467308308";
@@ -435,7 +447,6 @@ let aead_vectors = [
     plaintext  = h"d9313225f88406e5a55909c5aff5269a86a7a9531534f7da2e4c303d8a318a721c3c0c95956809532fcf0e2449a6b525b16aedf5aa0de657ba637b39";
     ciphertext = h"8ce24998625615b603a033aca13fb894be9112a5c3a211a8ba262a3cca7e2ca701e4a9a4fba43c90ccdcb281d48c7c6fd62875d2aca417034c34aee5";
   };
-*)
   {
     cipher = AES_256_GCM;
     key = h"0000000000000000000000000000000000000000000000000000000000000000";
@@ -472,7 +483,6 @@ let aead_vectors = [
     plaintext  = h"d9313225f88406e5a55909c5aff5269a86a7a9531534f7da2e4c303d8a318a721c3c0c95956809532fcf0e2449a6b525b16aedf5aa0de657ba637b39";
     ciphertext = h"522dc1f099567d07f47f37a32a84427d643a8cdcbfe5c0c97598a2bd2555d1aa8cb08e48590dbb3da7b08b1056828838c5f61e6393ba7a0abcc9f662";
   };
-(*
   {
     cipher = AES_256_GCM;
     key = h"feffe9928665731c6d6a8f9467308308feffe9928665731c6d6a8f9467308308";
@@ -491,7 +501,6 @@ let aead_vectors = [
     plaintext  = h"d9313225f88406e5a55909c5aff5269a86a7a9531534f7da2e4c303d8a318a721c3c0c95956809532fcf0e2449a6b525b16aedf5aa0de657ba637b39";
     ciphertext = h"5a8def2f0c9e53f1f75d7853659e2a20eeb2b22aafde6419a058ab4f6f746bf40fc0c3b780f244452da3ebf1c5d82cdea2418997200ef82e44ae7e3f";
   };
-*)
   {
     cipher = AES_128_GCM;
     key = h"00000000000000000000000000000000";
@@ -528,7 +537,6 @@ let aead_vectors = [
     plaintext  = h"0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
     ciphertext = h"0388dace60b6a392f328c2b971b2fe78f795aaab494b5923f7fd89ff948bc1e0200211214e7394da2089b6acd093abe0c94da219118e297d7b7ebcbcc9c388f28ade7d85a8ee35616f7124a9d527029195b84d1b96c690ff2f2de30bf2ec89e00253786e126504f0dab90c48a30321de3345e6b0461e7c9e6c6b7afedde83f40";
   };
-(*
   {
     cipher = AES_128_GCM;
     key = h"00000000000000000000000000000000";
@@ -547,7 +555,6 @@ let aead_vectors = [
     plaintext  = h"000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
     ciphertext = h"56b3373ca9ef6e4a2b64fe1e9a17b61425f10d47a75a5fce13efc6bc784af24f4141bdd48cf7c770887afd573cca5418a9aeffcd7c5ceddfc6a78397b9a85b499da558257267caab2ad0b23ca476a53cb17fb41c4b8b475cb4f3f7165094c229c9e8c4dc0a2a5ff1903e501511221376a1cdb8364c5061a20cae74bc4acd76ceb0abc9fd3217ef9f8c90be402ddf6d8697f4f880dff15bfb7a6b28241ec8fe183c2d59e3f9dfff653c7126f0acb9e64211f42bae12af462b1070bef1ab5e3606872ca10dee15b3249b1a1b958f23134c4bccb7d03200bce420a2f8eb66dcf3644d1423c1b5699003c13ecef4bf38a3b60eedc34033bac1902783dc6d89e2e774188a439c7ebcc0672dbda4ddcfb2794613b0be41315ef778708a70ee7d75165c";
   };
-*)
   {
     cipher = AES_128_GCM;
     key = h"843ffcf5d2b72694d19ed01d01249412";

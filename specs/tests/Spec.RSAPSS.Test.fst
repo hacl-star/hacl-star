@@ -9,7 +9,7 @@ open FStar.All
 
 open Spec.RSAPSS
 
-#reset-options "--z3rlimit 100 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0"
+#reset-options "--lax"
 
 (* RSASSA-PSS vector tests *)
 (* https://github.com/pyca/cryptography/blob/master/vectors/cryptography_vectors/asymmetric/RSA/pkcs-1v2-1d2-vec/pss-vect.txt *)
@@ -285,5 +285,5 @@ let test4() =
 
 let test() =
   let res = test1() && test2() && test3() && test4() in
-  if res then IO.print_string "\nSuccess!\n"
-  else IO.print_string "\nFailure"
+  if res then begin IO.print_string "\nSuccess!\n"; true end
+  else begin IO.print_string "\nFailure"; false end

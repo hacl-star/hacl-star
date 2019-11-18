@@ -8,7 +8,7 @@ open Lib.RawIntTypes
 open Lib.Sequence
 open Lib.ByteSequence
 
-module H = Spec.Hash
+module H = Spec.Agile.Hash
 module Def = Spec.Hash.Definitions
 
 //
@@ -278,8 +278,8 @@ let test () =
 
   // Composite result
   if result1 && result2 && result3 && result4
-  then IO.print_string "\nComposite result: Success! \o/ \n"
-  else IO.print_string "\nComposite result: Failure :(\n"
+  then begin IO.print_string "\nComposite result: Success! \o/ \n"; true end
+  else begin IO.print_string "\nComposite result: Failure :(\n"; false end
 
 (*
   IO.print_string "\nTEST 0 : SHA2_256(00000...) \n";

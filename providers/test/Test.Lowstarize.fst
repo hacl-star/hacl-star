@@ -2,6 +2,7 @@ module Test.Lowstarize
 
 open FStar.Tactics
 open LowStar.BufferOps
+open Lib.Meta
 
 module B = LowStar.Buffer
 module HS = FStar.HyperStack
@@ -11,56 +12,6 @@ module HS = FStar.HyperStack
 
 assume new type hex_encoded
 assume val h: string -> hex_encoded
-
-// A bunch of helpers
-noextract
-val is_hex_digit: Char.char -> bool
-let is_hex_digit = function
-  | '0'
-  | '1'
-  | '2'
-  | '3'
-  | '4'
-  | '5'
-  | '6'
-  | '7'
-  | '8'
-  | '9'
-  | 'a' | 'A'
-  | 'b' | 'B'
-  | 'c' | 'C'
-  | 'd' | 'D'
-  | 'e' | 'E'
-  | 'f' | 'F' -> true
-  | _ -> false
-
-noextract
-type hex_digit = c:Char.char{is_hex_digit c}
-
-noextract
-val int_of_hex: c:hex_digit -> int
-let int_of_hex = function
-  | '0' -> 0
-  | '1' -> 1
-  | '2' -> 2
-  | '3' -> 3
-  | '4' -> 4
-  | '5' -> 5
-  | '6' -> 6
-  | '7' -> 7
-  | '8' -> 8
-  | '9' -> 9
-  | 'a' | 'A' -> 10
-  | 'b' | 'B' -> 11
-  | 'c' | 'C' -> 12
-  | 'd' | 'D' -> 13
-  | 'e' | 'E' -> 14
-  | 'f' | 'F' -> 15
-
-noextract
-val byte_of_hex: a:hex_digit -> b:hex_digit -> int
-let byte_of_hex a b =
-  FStar.Mul.(int_of_hex a * 16 + int_of_hex b)
 
 noextract
 let mk_int (i: int): term =
@@ -87,11 +38,6 @@ let rec as_uint8s acc
       as_uint8s (mk_uint8 (byte_of_hex c1 c2) :: acc) cs
   | [] ->
       mk_list (List.rev acc)
-
-noextract unfold
-type hex_string =
-  s:string{normalize (String.strlen s % 2 = 0) /\
-           normalize (List.Tot.for_all is_hex_digit (String.list_of_string s))}
 
 noextract
 let destruct_string e =
@@ -274,16 +220,16 @@ and lowstarize_tuple (uniq: gensym) (es: list term): Tac (gensym * list sigelt *
   uniq, List.rev ses, mktuple_n es
 
 noextract
-let lowstarize_toplevel src dst: Tac unit =
+let lowstarize_toplevel src dst: Tac decls =
   // lookup_typ does not lookup a type but any arbitrary term, hence the name
-  let str = lookup_typ (cur_env ()) (cur_module () @ [ src ]) in
+  let str = lookup_typ (top_env ()) (cur_module () @ [ src ]) in
   let str = must str in
   let def = match inspect_sigelt str with Sg_Let _ _ _ _ def -> def | _ -> fail "must" in
   let _, ses, def = lowstarize_expr (dst, 0) def in
   let fv: fv = pack_fv (cur_module () @ [ dst ]) in
   let t: term = pack Tv_Unknown in
   let se: sigelt = pack_sigelt (Sg_Let false fv [] t def) in
-  exact (quote (normalize_term (ses @ [ se ])))
+  normalize_term (ses @ [ se ])
 
 
 /// Tests

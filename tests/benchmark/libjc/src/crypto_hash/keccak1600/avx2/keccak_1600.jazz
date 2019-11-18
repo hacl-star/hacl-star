@@ -1,0 +1,306 @@
+#include "crypto_core/keccakf160064bits/avx2/keccak_f1600.jazz"
+
+
+u64 g_zero = 0;
+
+
+fn keccak_init() -> reg u256[7]
+{
+  inline int i;
+  reg u256[7] state;
+
+  state[0] = #x86_VPBROADCAST_4u64(g_zero);
+
+  for i=1 to 7
+  { state[i] = state[0]; }
+
+  return state;
+}
+
+
+fn init_s_state() -> stack u64[28]
+{
+  inline int i;
+  stack u64[28] s_state;
+  reg u256 zero;
+
+  zero = #x86_VPBROADCAST_4u64(g_zero);
+  for i=0 to 7
+  { s_state[u256 i] = zero; }
+
+  return s_state;
+}
+
+
+#ifndef KECCAK_1600_ADD_FULL_BLOCK_IMPLEMENTATION
+fn add_full_block(
+  reg u256[7] state,
+  stack u64[28] s_state,
+  reg   u64 a_jagged,
+  reg u64 in inlen,
+  reg u64 rate
+) -> reg u256[7], stack u64[28], reg u64, reg u64
+{
+
+  inline int i;
+  reg u64 j l t rate8;
+  reg u8 c;
+
+  rate8 = rate;
+  rate8 >>= 3;
+  j = 0;
+  while ( j < rate8 )
+  {
+    t = [in + 8*j];
+    l = B(a_jagged, j);
+    s_state[(int) l] = t;
+    j += 1;
+  }
+
+  //
+  t = s_state[0];
+  s_state[1] = t;
+  s_state[2] = t;
+  s_state[3] = t;
+  //
+
+  for i = 0 to 7
+  { state[i] ^= s_state[u256 i]; }
+
+  in += rate;
+  inlen -= rate;
+
+  return state, s_state, in, inlen;
+}
+#endif
+
+
+fn add_final_block(
+  reg  u256[7] state,
+  stack u64[28] s_state,
+  reg   u64 a_jagged,
+  reg   u64 in inlen,
+  reg   u8  trail_byte,
+  reg   u64 rate
+) -> reg u256[7]
+{
+  inline int i;
+  reg u64 j l t inlen8;
+  reg u8 c;
+
+  s_state = init_s_state();
+
+  inlen8 = inlen;
+  inlen8 >>= 3;
+  j = 0;
+  while ( j < inlen8 )
+  {
+    t = [in + 8*j];
+    l = B(a_jagged, j);
+    s_state[(int) l] = t;
+    j += 1;
+  }
+  l = B(a_jagged, j);
+  l <<= 3;
+  j <<= 3;
+
+  while ( j < inlen )
+  {
+    c = (u8)[in + j];
+    s_state[u8 (int) l] = c;
+    j += 1;
+    l += 1;
+  }
+
+  s_state[u8 (int) l] = trail_byte;
+
+  // j  = (rate-1) >> 3; // TODO IMPROVE ME
+  j = rate; j -= 1; j >>= 3;
+  l  = B(a_jagged, j);
+  l <<= 3;
+  // l += ((rate-1) & 0x7); // TODO IMPROVE ME
+  j = rate; j -= 1; j &= 0x7;
+  l += j;
+
+  s_state[u8 (int) l] ^= 0x80;
+
+  //
+  t = s_state[0];
+  s_state[1] = t;
+  s_state[2] = t;
+  s_state[3] = t;
+  //
+
+  for i = 0 to 7
+  { state[i] ^= s_state[u256 i]; }
+
+  return state;
+}
+
+
+// obs: @pre: len <= rate_in_bytes
+fn xtr_full_block(
+  reg u256[7] state,
+  reg u64 a_jagged,
+  reg u64 out,
+  reg u64 len
+) -> reg u64
+{
+  inline int i;
+  stack u64[28] s_state;
+  reg u64 j l t len8;
+  reg u8 c;
+
+  for i = 0 to 7
+  { s_state[u256 i] = state[i]; }
+
+  len8 = len;
+  len8 >>= 3;
+  j = 0;
+  while ( j < len8 )
+  {
+    l = B(a_jagged, j);
+    t = s_state[(int) l];
+    [out + 8*j] = t;
+    j += 1;
+  }
+
+  out += len;
+
+  return out;
+}
+
+
+// obs: @pre: len <= rate_in_bytes
+fn xtr_bytes(
+  reg u256[7] state,
+  reg u64 a_jagged,
+  reg u64 out,
+  reg u64 len
+) -> reg u64
+{
+  inline int i;
+  stack u64[28] s_state;
+  reg u64 j l t len8;
+  reg u8 c;
+
+  for i = 0 to 7
+  { s_state[u256 i] = state[i]; }
+
+  len8 = len;
+  len8 >>= 3;
+  j = 0;
+  while ( j < len8 )
+  {
+    l = B(a_jagged, j);
+    t = s_state[(int) l];
+    [out + 8*j] = t;
+    j += 1;
+  }
+  l = B(a_jagged, j);
+
+  j <<= 3;
+  l <<= 3;
+
+  while ( j < len )
+  {
+    c = s_state[u8 (int) l];
+    (u8)[out + j] = c;
+    j += 1;
+    l += 1;
+  }
+
+  out += len;
+
+  return out;
+}
+
+
+fn absorb(
+  reg u256[7] state,
+  reg u64 rhotates_left rhotates_right iotas a_jagged,
+  reg u64 in inlen,
+  reg u8  trail_byte,
+  reg u64 rate
+) -> reg u256[7]
+{
+  stack u64[28] s_state;
+  s_state = init_s_state();
+
+  // intermediate blocks
+  while ( inlen >= rate )
+  {
+    state, s_state, in, inlen = add_full_block(state, s_state, a_jagged, in, inlen, rate);
+    state = __keccak_f1600_avx2(state, rhotates_left, rhotates_right, iotas);
+  }
+
+  // final block
+  state = add_final_block(state, s_state, a_jagged, in, inlen, trail_byte, rate);
+
+  return state;
+}
+
+
+fn squeeze(
+  reg u256[7] state,
+  reg u64 rhotates_left rhotates_right iotas a_jagged,
+  reg u64 out outlen,
+  reg u64 rate
+)
+{
+  // intermediate blocks
+  while ( outlen > rate )
+  {
+    state = __keccak_f1600_avx2(state, rhotates_left, rhotates_right, iotas);
+    out = xtr_full_block(state, a_jagged, out, rate);
+    outlen -= rate;
+  }
+
+  state = __keccak_f1600_avx2(state, rhotates_left, rhotates_right, iotas);
+  out = xtr_bytes(state, a_jagged, out, outlen);
+}
+
+
+fn __keccak_1600(
+  reg   u64 out outlen,
+  reg   u64 rhotates_left rhotates_right iotas a_jagged,
+  reg   u64 in inlen,
+  reg   u8  trail_byte,
+  reg   u64 rate
+)
+{
+  reg u256[7] state;
+
+  state = keccak_init();
+
+  // absorb
+  state = absorb(state,
+                 rhotates_left, rhotates_right, iotas, a_jagged,
+                 in, inlen, trail_byte, rate);
+
+  // squeeze
+  squeeze(state,
+          rhotates_left, rhotates_right, iotas, a_jagged,
+          out, outlen, rate);
+}
+
+
+export fn keccak_1600(reg u64 out outlen in inlen config glob)
+{
+  reg   u64 rhotates_left rhotates_right iotas a_jagged;
+  reg   u8  trail_byte; // no need to spill
+  reg   u64 rate;
+
+  trail_byte = (u8)[config + 8*0];
+  rate       = [config + 8*1]; // rate in bytes
+
+  rhotates_left  = [glob + 8*0];
+  rhotates_right = [glob + 8*1];
+  iotas          = [glob + 8*2];
+  a_jagged       = [glob + 8*3];
+
+  __keccak_1600(out, outlen,
+                rhotates_left, rhotates_right, iotas, a_jagged,
+                in, inlen,
+                trail_byte, rate);
+}

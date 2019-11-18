@@ -1,0 +1,37 @@
+#include "crypto_core/keccakf160064bits/avx2-openssl/keccak_f1600.jazz"
+
+//
+// TODO : rewrite to match crypto_core
+//
+export fn keccak_f1600_openssl(
+  reg u64 in
+          _rhotates_left
+          _rhotates_right
+          _iotas
+)
+{
+  reg u256 A00, A01, A20, A31,
+           A21, A41, A11;
+
+  A00 = (u256)[in +   0];
+  A01 = (u256)[in +  32];
+  A20 = (u256)[in +  64];
+  A31 = (u256)[in +  96];
+  A21 = (u256)[in + 128];
+  A41 = (u256)[in + 160];
+  A11 = (u256)[in + 192];
+
+  A00, A01, A20, A31, A21, A41, A11 = __keccak_f1600_avx2_openssl(A00, A01, A20, A31,
+                                                             A21, A41, A11,
+                                                             _rhotates_left,
+                                                             _rhotates_right,
+                                                             _iotas);
+
+  (u256)[in +   0] = A00;
+  (u256)[in +  32] = A01;
+  (u256)[in +  64] = A20;
+  (u256)[in +  96] = A31;
+  (u256)[in + 128] = A21;
+  (u256)[in + 160] = A41;
+  (u256)[in + 192] = A11;
+}

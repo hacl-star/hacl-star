@@ -7,8 +7,7 @@ open Lib.RawIntTypes
 open Lib.Sequence
 open Lib.ByteSequence
 
-module Hash = Spec.Hash
-module HMAC = Spec.HMAC
+module HMAC = Spec.Agile.HMAC
 
 
 //
@@ -688,5 +687,5 @@ let test () =
   else IO.print_string "\nHMAC SHA2 Test7 ontime: Failure :(\n";
 
 
-  if result1 && result2 && result3 && result4 && result5 && result6 && result7 then IO.print_string "\nComposite result: Success!\n"
-  else IO.print_string "\nComposite result: Failure :(\n"
+  if result1 && result2 && result3 && result4 && result5 && result6 && result7 then begin IO.print_string "\nComposite result: Success!\n"; true end
+  else begin IO.print_string "\nComposite result: Failure :(\n"; false end

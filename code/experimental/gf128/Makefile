@@ -29,8 +29,7 @@ FSTAR_INCLUDE_DIRS = \
   $(KREMLIN_HOME)/kremlib \
   $(HACL_HOME)/specs \
   $(HACL_HOME)/lib \
-  $(HACL_HOME)/lib/c \
-  $(HACL_HOME)/code/poly1305 #location of the Lib.Loops.Lemmas.fst file
+  $(HACL_HOME)/lib/c 
 
 FSTAR_FLAGS = $(OTHERFLAGS) --cmi \
   --cache_checked_modules --cache_dir $(CACHE_DIR) --odir $(OUTPUT_DIR) \
@@ -77,7 +76,7 @@ KREMLIN=$(KREMLIN_HOME)/krml
 
 # We use -drop (deprecated) only to avoid creating unnecessary .c,.h files
 $(GENERATED_DIR)/Hacl_Gf128_NI.c: $(ALL_KRML_FILES) | .depend
-	$(KREMLIN) $(KREMLIN_TESTLIB) -add-include '"vec-intrin.h"' -skip-compilation \
+	$(KREMLIN) $(KREMLIN_TESTLIB) -add-include '"libintvector.h"' -skip-compilation \
 	-bundle 'Lib.*' \
 	-bundle 'Spec.*' \
 	-bundle 'Hacl.Gf128.NI=Hacl.Impl.*,Hacl.Gf128.NI' \

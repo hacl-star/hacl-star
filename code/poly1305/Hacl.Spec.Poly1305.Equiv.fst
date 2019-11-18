@@ -7,61 +7,13 @@ open Lib.ByteSequence
 open Lib.IntVector
 
 module Loops = Lib.LoopCombinators
-module PLoops = Lib.Loops.Lemmas
+module PLoops = Lib.Sequence.Lemmas
 module Lemmas = Hacl.Spec.Poly1305.Lemmas
 module S = Spec.Poly1305
 
 include Hacl.Spec.Poly1305.Vec
 
-
 #reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
-
-val poly_update_repeat_blocks_multi_lemma2_simplify:
-  acc0:pfelem -> acc1:pfelem -> c0:pfelem -> c1:pfelem -> r:pfelem -> Lemma
-    (pfadd (pfmul (pfadd (pfmul acc0 (pfmul r r)) c0) (pfmul r r)) (pfmul (pfadd (pfmul acc1 (pfmul r r)) c1) r) ==
-    pfmul (pfadd (pfmul (pfadd (pfadd (pfmul acc0 (pfmul r r)) (pfmul acc1 r)) c0) r) c1) r)
-
-let poly_update_repeat_blocks_multi_lemma2_simplify acc0 acc1 c0 c1 r =
-  Lemmas.poly_update_repeat_blocks_multi_lemma2_simplify acc0 acc1 c0 c1 r
-
-
-val poly_update_repeat_blocks_multi_lemma4_simplify:
-    a0r4:pfelem -> a1:pfelem -> a2:pfelem -> a3:pfelem
-  -> c0:pfelem -> c1:pfelem -> c2:pfelem -> c3:pfelem
-  -> r:pfelem ->
-  Lemma
-   (pfadd (pfadd (pfadd
-     (pfmul (pfadd a0r4 c0) (pfmul (pfmul r r) (pfmul r r)))
-     (pfmul (pfadd (pfmul a1 (pfmul (pfmul r r) (pfmul r r))) c1) (pfmul (pfmul r r) r)))
-     (pfmul (pfadd (pfmul a2 (pfmul (pfmul r r) (pfmul r r))) c2) (pfmul r r)))
-     (pfmul (pfadd (pfmul a3 (pfmul (pfmul r r) (pfmul r r))) c3) r) ==
-    pfmul (pfadd (pfmul (pfadd (pfmul (pfadd (pfmul (pfadd (pfadd (pfadd (pfadd a0r4
-	  (pfmul a1 (pfmul (pfmul r r) r))) (pfmul a2 (pfmul r r))) (pfmul a3 r)) c0) r) c1) r) c2) r) c3) r)
-
-let poly_update_repeat_blocks_multi_lemma4_simplify a0r4 a1 a2 a3 c0 c1 c2 c3 r =
-  Lemmas.poly_update_repeat_blocks_multi_lemma4_simplify a0r4 a1 a2 a3 c0 c1 c2 c3 r
-
-
-val poly_update_multi_lemma_load2_simplify:
-  acc0:pfelem -> r:pfelem -> c0:pfelem -> c1:pfelem ->
-  Lemma
-    (pfmul (pfadd (pfmul (pfadd acc0 c0) r) c1) r ==
-     pfadd (pfmul (pfadd acc0 c0) (pfmul r r)) (pfmul c1 r))
-
-let poly_update_multi_lemma_load2_simplify acc0 r c0 c1 =
-  Lemmas.poly_update_multi_lemma_load2_simplify acc0 r c0 c1
-
-
-val poly_update_multi_lemma_load4_simplify:
-  acc0:pfelem -> r:pfelem -> c0:pfelem -> c1:pfelem -> c2:pfelem -> c3:pfelem ->
-  Lemma
-   (pfmul (pfadd (pfmul (pfadd (pfmul (pfadd (pfmul (pfadd acc0 c0) r) c1) r) c2) r) c3) r ==
-     pfadd (pfadd (pfadd (pfmul (pfadd acc0 c0) (pfmul (pfmul r r) (pfmul r r)))
-      (pfmul c1 (pfmul (pfmul r r) r))) (pfmul c2 (pfmul r r))) (pfmul c3 r))
-
-let poly_update_multi_lemma_load4_simplify acc0 r c0 c1 c2 c3 =
-  Lemmas.poly_update_multi_lemma_load4_simplify acc0 r c0 c1 c2 c3
-
 
 val poly_update_multi_lemma_load_acc1:
     r:pfelem
@@ -107,7 +59,7 @@ let poly_update_multi_lemma_load_acc2 r text acc0 =
   FStar.Math.Lemmas.modulo_lemma c1 prime;
   assert (acc1.[1] == c1);
   assert (acc2 == pfadd (pfmul (pfadd acc0 c0) (pfmul r r)) (pfmul c1 r));
-  poly_update_multi_lemma_load2_simplify acc0 r c0 c1
+  Lemmas.poly_update_multi_lemma_load2_simplify acc0 r c0 c1
 
 
 val poly_update_multi_lemma_load_acc4:
@@ -151,7 +103,7 @@ let poly_update_multi_lemma_load_acc4 r text acc0 =
   assert (acc3 ==
     pfadd (pfadd (pfadd (pfmul (pfadd acc0 c0) (pfmul (pfmul r r) (pfmul r r)))
       (pfmul c1 (pfmul (pfmul r r) r))) (pfmul c2 (pfmul r r))) (pfmul c3 r));
-  poly_update_multi_lemma_load4_simplify acc0 r c0 c1 c2 c3;
+  Lemmas.poly_update_multi_lemma_load4_simplify acc0 r c0 c1 c2 c3;
   assert (acc1 == acc3)
 
 
@@ -242,9 +194,11 @@ let poly_update_multi_lemma_loop2 r text i acc_vec0 =
   let c1 = pfadd (pow2 128) (nat_from_bytes_le b1) in
 
   let acc_vec1 = repeat_bf_vec i acc_vec0 in
-  poly_update_repeat_blocks_multi_lemma2_simplify acc_vec0.[0] acc_vec0.[1] c0 c1 r;
+  Lemmas.poly_update_repeat_blocks_multi_lemma2_simplify acc_vec0.[0] acc_vec0.[1] c0 c1 r;
   assert (normalize_2 r acc_vec1 == PLoops.repeat_w #pfelem 2 nb_vec repeat_bf_t1 i (normalize_n r acc_vec0))
 
+
+#set-options "--z3rlimit 150"
 
 val poly_update_multi_lemma_loop4:
     r:pfelem
@@ -298,8 +252,8 @@ let poly_update_multi_lemma_loop4 r text i acc_vec0 =
   let r4 = pfmul r2 r2 in
 
   let acc_vec1 = repeat_bf_vec i acc_vec0 in
-  poly_update_repeat_blocks_multi_lemma4_simplify
-    (pfmul acc_vec0.[0] r4) acc_vec0.[1] acc_vec0.[2] acc_vec0.[3] c0 c1 c2 c3 r;
+  Lemmas.poly_update_repeat_blocks_multi_lemma4_simplify
+    acc_vec0.[0] acc_vec0.[1] acc_vec0.[2] acc_vec0.[3] c0 c1 c2 c3 r r2 r4;
   assert (normalize_n r acc_vec1 == PLoops.repeat_w #pfelem 4 nb_vec repeat_bf_t1 i (normalize_n r acc_vec0))
 
 
@@ -396,10 +350,11 @@ let poly1305_update_vec_lemma #w text acc0 r =
   let f = S.poly1305_update1 r size_block in
   let l = S.poly1305_update_last r in
 
-  if len0 > 0 then begin
+  if len0 > 0 then
+    begin
     poly_update_multi_lemma #w t0 acc0 r;
-    PLoops.repeat_blocks_split #uint8 #pfelem size_block len0 text f l acc0 end
-  else ()
+    PLoops.repeat_blocks_split #uint8 #pfelem size_block len0 text f l acc0
+    end
 
 
 val poly1305_vec_lemma:

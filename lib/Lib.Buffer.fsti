@@ -65,16 +65,7 @@ let union (l1:B.loc) (l2:B.loc) : GTot B.loc = B.loc_union l1 l2
 let ( |+| ) (l1:B.loc) (l2:B.loc) : GTot B.loc = union l1 l2
 
 (** Generalized modification clause for Buffer locations *)
-let modifies (s:B.loc) (h1 h2:HS.mem) = B.modifies s h1 h2 /\ ST.equal_domains h1 h2
-//val modifies: s:B.loc -> h1:HS.mem -> h2:HS.mem -> GTot Type0
-
-val modifies_preserves_live: #t:buftype
-  -> #a:Type0 -> b:buffer_t t a -> l:B.loc -> h0:mem -> h1:mem
-  -> Lemma
-    (requires modifies l h0 h1 /\ live h0 b)
-    (ensures  live h1 b)
-    [SMTPatOr [[SMTPat (modifies l h0 h1); SMTPat (live h0 b)];
-               [SMTPat (modifies l h0 h1); SMTPat (live h1 b)]]]
+let modifies (s:B.loc) (h1 h2:HS.mem) = B.modifies s h1 h2
 
 (** 2018.16.11 SZ: Doesn't have a pattern and isn't used anywhere in _dev; remove? *)
 val modifies_includes: l1:B.loc -> l2:B.loc -> h0:mem -> h1:mem
@@ -1113,7 +1104,6 @@ val map_blocks_multi:
     (ensures  fun _ _ h1 -> modifies1 output h0 h1 /\
 	as_seq h1 output == Seq.map_blocks_multi (v blocksize) (v nb) (v nb) (as_seq h0 inp) (spec_f h0))
 
-#set-options "--z3rlimit 50"
 inline_for_extraction noextract
 val map_blocks:
     #t:buftype
@@ -1138,7 +1128,6 @@ val map_blocks:
         as_seq h2 oblock == ob))
   -> impl_l:(i:size_t{v i == v len / v blocksize} -> Stack unit
       (requires fun h1 ->
-	v i * v blocksize <= v len /\
         modifies (loc (gsub output 0ul (i *! blocksize))) h0 h1)
       (ensures  fun h1 _ h2 ->
 	let iblock = gsub inp (i *! blocksize) (len %. blocksize)  in
@@ -1150,3 +1139,4 @@ val map_blocks:
     (requires fun h -> h0 == h /\ live h output /\ live h inp /\ eq_or_disjoint inp output)
     (ensures  fun _ _ h1 -> modifies1 output h0 h1 /\
 	as_seq h1 output == Seq.map_blocks (v blocksize) (as_seq h0 inp) (spec_f h0) (spec_l h0))
+

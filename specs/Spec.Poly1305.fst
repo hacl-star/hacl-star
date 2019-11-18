@@ -50,7 +50,7 @@ let poly1305_init (k:key) : Tot (felem & felem) =
 
 let encode (len:size_nat{len <= size_block}) (b:lbytes len) : Tot felem =
   Math.Lemmas.pow2_le_compat 128 (8 * len);
-  assert_norm (pow2 128 < prime);
+  assert_norm (pow2 128 + pow2 128 < prime);
   fadd (pow2 (8 * len)) (nat_from_bytes_le b)
 
 let poly1305_update1 (r:felem) (len:size_nat{len <= size_block}) (b:lbytes len) (acc:felem) : Tot felem =

@@ -21,8 +21,10 @@ let modp_inv (x:elem) : Tot elem =
 let d : elem = to_elem 37095705934669439343138083508754565189542113879843219016388785533085940283555
 
 let q: n:nat{n < pow2 446} =
-  assert_norm(pow2 446 - 13818066809895115352007386748515426880336692474882178609894547503885 < prime);
-  (pow2 446 - 13818066809895115352007386748515426880336692474882178609894547503885) // Group order
+  let o = (pow2 446 - 13818066809895115352007386748515426880336692474882178609894547503885) in // Group order
+  assert_norm(o < prime);
+  admit();
+  o
 
 inline_for_extraction
 let size_label_SigEd448: size_nat = 8
@@ -38,14 +40,16 @@ let label_SigEd448_list =
 
 let label_SigEd448: lseq uint8 size_label_SigEd448 =
   assert_norm (List.Tot.length label_SigEd448_list == size_label_SigEd448);
-  of_list label_SigEd448_list
+  admit();
+  of_list #uint8 label_SigEd448_list
 
 (* let dom4 (x:nat{0 <= x /\ x <= 255}) (y:bytes{length y <= 255}) = *)
 (*   label_SigEd448 @| u8 x @| (nat_to_bytes_le (length y)) @| y *)
 
 
-let shake256_modq (len:size_nat) (s:lbytes len) : n:nat{n < pow2 256} =
-  (nat_from_bytes_le (shake256 len s 16) % q)
+let shake512_modq (len:size_nat) (s:lbytes len) : n:nat{n < pow2 256} =
+  admit();
+  (nat_from_bytes_le (Spec.SHA3.sha3_512 len s) % q)
 
 let point_add (p:ext_point) (q:ext_point) : Tot ext_point =
   let x1, y1, z1, t1 = p in
@@ -132,6 +136,7 @@ let point_compress (p:ext_point) : Tot (lbytes 32) =
   let zinv = modp_inv pz in
   let x = px *% zinv in
   let y = py *% zinv in
+  admit();
   nat_to_bytes_le 32 ((pow2 255 * (nat_mod_v x % 2)) + nat_mod_v y)
 
 let point_decompress (s:lbytes 32) : Tot (option ext_point) =
@@ -144,7 +149,7 @@ let point_decompress (s:lbytes 32) : Tot (option ext_point) =
   | _ -> None
 
 let secret_expand (secret:lbytes 32) : (lbytes 32 & lbytes 32) =
-  let h = hash512 secret in
+  let h = Spec.SHA3.sha3_512 (Seq.length secret) secret in
   let h_low : lbytes 32 = slice h 0 32 in
   let h_high : lbytes 32 = slice h 32 64 in
   let h_low0 : uint8  = h_low.[0] in
@@ -166,12 +171,13 @@ let sign (secret:lbytes 32) (len:size_nat{ 8 * len < max_size_t}) (msg:lbytes le
   let tmp = update_sub tmp 32 32 prefix in
   let tmp = update_sub tmp 64 len msg in
   let prefix_msg = sub tmp 32 (32 + len) in
-  let r = sha512_modq (32 + len) prefix_msg in
+  let r = shake512_modq (32 + len) prefix_msg in
   let r' = point_mul 32 (nat_to_bytes_le 32 r) g in
   let rs = point_compress r' in
   let tmp = update_sub tmp 0 32 rs in
   let rs_a_msg = update_sub tmp 32 32 a' in
-  let h = sha512_modq (64 + len) rs_a_msg in
+  let h = shake512_modq (64 + len) rs_a_msg in
+  admit();
   let s = (r + ((h * (nat_from_bytes_le a)) % q)) % q in
   let tmp = update_sub tmp 32 32 (nat_to_bytes_le 32 s) in
   slice tmp 0 64
@@ -201,7 +207,7 @@ let verify (public:lbytes 32) (len:size_nat{ 8 * len < max_size_t}) (msg:lbytes 
         let rs_public_msg = update_sub rs_public_msg 0 32 rs in
         let rs_public_msg = update_sub rs_public_msg 32 32 public in
         let rs_public_msg = update_sub rs_public_msg 64 len msg in
-        let h = sha512_modq (64 + len) rs_public_msg in
+        let h = shake512_modq (64 + len) rs_public_msg in
         let sB = point_mul 32 (nat_to_bytes_le 32 s) g in
         let hA = point_mul 32 (nat_to_bytes_le 32 h) a' in
         point_equal sB (point_add r' hA)

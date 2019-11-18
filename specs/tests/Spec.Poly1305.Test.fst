@@ -40,5 +40,5 @@ let test () =
   List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list expected);
   IO.print_string "\nComputed MAC:";
   List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list mac);
-  if result then   IO.print_string "\nSuccess!\n"
-  else IO.print_string "\nFailure :(\n"
+  if result then begin  IO.print_string "\nSuccess!\n"; true end
+  else begin IO.print_string "\nFailure :(\n"; false end

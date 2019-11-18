@@ -1,15 +1,16 @@
 module Hacl.Chacha20.Vec32
 
-open FStar.HyperStack
-open FStar.HyperStack.All
+open Hacl.Meta.Chacha20.Vec
 
-open Lib.IntTypes
-open Lib.Buffer
+[@CInline]
+private
+let double_round_32 = Hacl.Impl.Chacha20.Core32xN.double_round #1
+[@CInline]
+private
+let chacha20_core_32 = vec_chacha20_core_higher #1 double_round_32
+[@CInline]
+private
+let chacha20_init_32 = Hacl.Impl.Chacha20.Vec.chacha20_init #1
 
-open Hacl.Impl.Chacha20.Vec
-
-let chacha20_encrypt : chacha20_encrypt_st 1 =
-  chacha20_encrypt
-
-let chacha20_decrypt : chacha20_decrypt_st 1 =
-  chacha20_decrypt
+let chacha20_encrypt_32 = vec_chacha20_encrypt_higher #1 chacha20_init_32 chacha20_core_32
+let chacha20_decrypt_32 = vec_chacha20_decrypt_higher #1 chacha20_init_32 chacha20_core_32

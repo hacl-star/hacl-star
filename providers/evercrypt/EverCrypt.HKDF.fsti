@@ -1,147 +1,130 @@
+(** Agile HKDF *)
 module EverCrypt.HKDF
 
-open FStar.Integers
-open EverCrypt.Helpers
-open EverCrypt.Hash
+module B = LowStar.Buffer
 
-/// FUNCTIONAL SPECIFICATION:
-///
-/// * extraction is just HMAC using the salt as key and the input
-///   keying materials as text.
-///
-/// * expansion does its own formatting of input key materials.
+open Spec.Agile.HKDF
+open Spec.Hash.Definitions
 
-open FStar.Seq
+open FStar.HyperStack.ST
+open Lib.IntTypes
 
-noextract let extract a salt ikm = EverCrypt.HMAC.hmac a salt ikm
+#set-options "--max_ifuel 0 --max_fuel 0 --z3rlimit 20"
 
-// [a, prk, info] are fixed.
-// [required] is the number of bytes to be extracted
-// [count] is the number of extracted blocks so far
-// [last] is empty for count=0 then set to the prior tag for chaining.
-noextract let rec expand0 :
-  a: Hash.e_alg ->
-  prk: bytes ->
-  info: bytes ->
-  required: nat ->
-  count: nat ->
-  last: bytes {
-    let chainLength = if count = 0 then 0 else tagLength a in
-    HMAC.keysized a (Seq.length prk) /\
-    Seq.length last = chainLength /\
-    tagLength a + length info + 1 + blockLength a <= maxLength a /\
-    count < 255 /\
-    required <= (255 - count) * tagLength a } ->
-  GTot (lbytes required)
+/// Auxiliary lemmas
+
+let key_and_data_fits (a:hash_alg) : 
+  Lemma (block_length a + pow2 32 <= max_input_length a)
 =
-  fun a prk info required count last ->
-  let count = count + 1 in
-  let text = last @| info @| Seq.create 1 (UInt8.uint_to_t count) in
-  let tag = EverCrypt.HMAC.hmac a prk text in
-  if required <= tagLength a
-  then fst (split tag required)
-  else tag @| expand0 a prk info (required - tagLength a) count tag
+  let open FStar.Mul in
+  assert_norm (8 * 16 + pow2 32 < pow2 61);
+  assert_norm (pow2 61 < pow2 125)
 
-noextract let expand:
-  a: Hash.e_alg ->
-  prk: bytes ->
-  info: bytes ->
-  required: nat {
-    HMAC.keysized a (Seq.length prk) /\
-    tagLength a + length info + 1 + blockLength a <= maxLength a /\
-    required <= 255 * tagLength a } ->
-  GTot (lbytes required)
+let hash_block_length_fits (a:hash_alg) : 
+  Lemma (hash_length a + pow2 32 + block_length a < max_input_length a)
 =
-  fun a prk info required ->
-  expand0 a prk info required 0 Seq.empty
+  let open FStar.Mul in
+  assert_norm (8 * 16 + 8 * 8 + pow2 32 < pow2 61);
+  assert_norm (pow2 61 < pow2 125)
+
+/// Types for expand and extract
+/// Duplicated from Hacl.HKDF because we don't want clients to depend on Hacl.HKDF
+
+inline_for_extraction
+let extract_st (a:hash_alg) = 
+  prk     : B.buffer uint8 ->
+  salt    : B.buffer uint8 ->
+  saltlen : pub_uint32 ->
+  ikm     : B.buffer uint8 ->
+  ikmlen  : pub_uint32 -> 
+  Stack unit
+  (requires fun h0 -> 
+    B.live h0 prk /\ B.live h0 salt /\ B.live h0 ikm /\
+    B.disjoint salt prk /\ B.disjoint ikm prk /\
+    B.length prk == hash_length a /\
+    v saltlen == B.length salt /\
+    v ikmlen == B.length ikm /\
+    Spec.Agile.HMAC.keysized a (v saltlen) /\
+    B.length ikm + block_length a < pow2 32)
+  (ensures fun h0 _ h1 ->
+    key_and_data_fits a;
+    B.modifies (B.loc_buffer prk) h0 h1 /\
+    B.as_seq h1 prk == extract a (B.as_seq h0 salt) (B.as_seq h0 ikm))
+
+inline_for_extraction
+let expand_st (a:hash_alg) =
+  okm     : B.buffer uint8 ->
+  prk     : B.buffer uint8 ->
+  prklen  : pub_uint32 ->
+  info    : B.buffer uint8 ->
+  infolen : pub_uint32 ->
+  len     : pub_uint32 ->
+  Stack unit
+  (requires fun h0 -> 
+    B.live h0 okm /\ B.live h0 prk /\ B.live h0 info /\
+    B.disjoint okm prk /\
+    v prklen == B.length prk /\
+    v infolen == B.length info /\
+    v len == B.length okm /\
+    hash_length a <= v prklen /\
+    Spec.Agile.HMAC.keysized a (v prklen) /\
+    hash_length a + v infolen + 1 + block_length a < pow2 32 /\
+    v len <= FStar.Mul.(255 * hash_length a))
+  (ensures fun h0 _ h1 ->
+    hash_block_length_fits a;
+    B.modifies (B.loc_buffer okm) h0 h1 /\
+    B.as_seq h1 okm == expand a (B.as_seq h0 prk) (B.as_seq h0 info) (v len))
 
 
-(* 18-03-05 TBC, requires TLS libraries
+/// Four monomorphized variants, for callers who already know which algorithm they want
 
-/// Details specific to TLS 1.3; should move to its own module.
-///
-/// Since derivations depend on the concrete info,
-/// we will need to prove format injective.
-
-let tls13_prefix: Bytes.lbytes 6 =
-  let s = Bytes.bytes_of_string "tls_13 " in
-  assume(Bytes.length s = 6); // a bit lame; not sure how to deal with such constants
-  s
-
-let format: (
-  a: Hash.alg ->
-  label: string{length (Bytes.bytes_of_string label) < 256 - 6} ->
-  hv: uint8_p {length hv < 256} ->
-  len: UInt32.t {v len <= 255 * tagLength ha} ->
-  Tot bytes )
-=
-  fun ha label hv len ->
-  let label_bytes = tls13_prefix @| Bytes.reveal (Bytes.bytes_of_string label) in
-  // lemma_repr_bytes_values (v len);
-  // lemma_repr_bytes_values (length label_bytes);
-  // lemma_repr_bytes_values (length hv);
-  FStar.Bytes.(reveal (bytes_of_int 2 (v len) @| vlbytes 1 label_bytes @| vlbytes 1 hv))
-
-val expand_label:
-  #a: Hashing.alg ->
-  prk: hkey a ->
-  label: string{length (bytes_of_string label) < 256 - 6} -> // -9?
-  hv: bytes{length hv < 256} ->
-  length: nat {length <= 255 * tagLength a} -> luint8_p length
-let expand_label #a prk label hv length =
-  expand prk (format a label hv length) length
-
-let expand_secret #a prk label hv = expand_label prk label hv (tagLength a)
-
-/// Details specific to QUIC; could move to its own module
-
-//18-04-10 TODO code in Low* [quic_provider.quic_crypto_hkdf_quic_label]
-
+(** @type: true
 *)
+val expand_sha1: expand_st SHA1
+
+(** @type: true
+*)
+val extract_sha1: extract_st SHA1
+
+(** @type: true
+*)
+val expand_sha2_256: expand_st SHA2_256
+
+(** @type: true
+*)
+val extract_sha2_256: extract_st SHA2_256
+
+(** @type: true
+*)
+val expand_sha2_384: expand_st SHA2_384
+
+(** @type: true
+*)
+val extract_sha2_384: extract_st SHA2_384
+
+(** @type: true
+*)
+val expand_sha2_512: expand_st SHA2_512
+
+(** @type: true
+*)
+val extract_sha2_512: extract_st SHA2_512
 
 
+/// Agile versions that dynamically dispatch between the above four
 
+(** @type: true
+*)
+val expand: a:EverCrypt.HMAC.supported_alg -> expand_st a
 
-/// IMPLEMENTATION
+(** @type: true
+*)
+val extract: a:EverCrypt.HMAC.supported_alg -> extract_st a
 
-//open FStar.Ghost
-open FStar.HyperStack.All
-open LowStar.Buffer
+[@(deprecated "expand")]
+let hkdf_expand a okm prk prklen info infolen len = 
+  expand a okm prk prklen info infolen len
 
-//18-03-05 TODO drop hkdf_ prefix!
-
-val hkdf_extract :
-  a       : alg -> (
-  let a = Ghost.hide a in
-  prk     : uint8_pl (tagLength a) ->
-  salt    : uint8_p { disjoint salt prk /\ HMAC.keysized a (length salt)} ->
-  saltlen : uint8_l salt ->
-  ikm     : uint8_p { length ikm + blockLength a < pow2 32 /\ disjoint ikm prk } ->
-  ikmlen  : uint8_l ikm -> ST unit
-  (requires (fun h0 ->
-    live h0 prk /\ live h0 salt /\ live h0 ikm ))
-  (ensures  (fun h0 r h1 ->
-    live h1 prk /\ LowStar.Modifies.(modifies (loc_buffer prk) h0 h1) /\
-    length ikm + blockLength a <= maxLength a /\
-    as_seq h1 prk == HMAC.hmac a (as_seq h0 salt) (as_seq h0 ikm))))
-
-val hkdf_expand :
-  a       : alg -> (
-  let a = Ghost.hide a in
-  okm     : uint8_p ->
-  prk     : uint8_p -> prklen  : uint8_l prk ->
-  info    : uint8_p -> infolen : uint8_l info ->
-  len     : uint8_l okm {
-    disjoint okm prk /\
-    HMAC.keysized a (v prklen) /\
-    tagLength a + v infolen + 1 + blockLength a < pow2 32 /\
-    v len <= 255 * tagLength a } ->
-  ST unit
-  (requires (fun h0 -> live h0 okm /\ live h0 prk /\ live h0 info))
-  (ensures  (fun h0 r h1 ->
-    live h1 okm /\ LowStar.Modifies.(modifies (loc_buffer okm) h0 h1) /\
-    tagLength a + pow2 32 + blockLength a <= maxLength a /\ // required for v len below
-    as_seq h1 okm = expand a (as_seq h0 prk) (as_seq h0 info) (v len) )))
-
-
-/// HIGH-LEVEL WRAPPERS (TBC)
+[@(deprecated "extract")]
+let hkdf_extract a prk salt saltlen ikm ikmlen =
+  extract a prk salt saltlen ikm ikmlen

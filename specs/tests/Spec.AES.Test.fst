@@ -6,6 +6,8 @@ open Lib.Sequence
 open Spec.AES
 open Lib.LoopCombinators
 
+#set-options "--lax"
+
 let test_key = List.Tot.map u8 [
   0x2b; 0x7e; 0x15; 0x16; 0x28; 0xae; 0xd2; 0xa6;
   0xab; 0xf7; 0x15; 0x88; 0x09; 0xcf; 0x4f; 0x3c
@@ -203,10 +205,10 @@ let test_compare_buffers (msg:string) (expected:seq uint8) (computed:seq uint8) 
     for_all2 #uint8 #uint8 #(length computed) (fun x y -> uint_to_nat #U8 x = uint_to_nat #U8 y)
       computed expected
   in
-  if result then IO.print_string "\nSuccess !\n"
-  else IO.print_string "\nFailed !\n"
+  if result then begin IO.print_string "\nSuccess !\n"; true end
+  else begin IO.print_string "\nFailed !\n"; false end
 
-let test() : FStar.All.ML unit =
+let test() : FStar.All.ML bool =
   let seq = create 256 (u8 0) in
   let seqi = repeati #(lseq uint8 256) 256 (fun i s -> s.[i] <- u8 i) seq in
   (*
@@ -304,24 +306,23 @@ let test() : FStar.All.ML unit =
   IO.print_string "\n";
   IO.print_string "AES-256 TESTS 6:\n";
   let computed1 = aes_key_expansion AES256 test1_input_key1 in
-  test_compare_buffers "TEST1: key expansion" test1_output_expanded computed1;
+  let result1 = test_compare_buffers "TEST1: key expansion" test1_output_expanded computed1 in
   let test2_xkey = aes_key_expansion AES256 test2_input_key in
   let test2_computed = aes_encrypt_block AES256 test2_xkey test2_input_plaintext in
-  test_compare_buffers "TEST2: cipher" test2_output_ciphertext test2_computed;
+  let result2 = test_compare_buffers "TEST2: cipher" test2_output_ciphertext test2_computed in
   let test2_xkey = aes_dec_key_expansion AES256 test2_input_key in
   let test2_inv_computed = aes_decrypt_block AES256 test2_xkey test2_output_ciphertext in
-  test_compare_buffers "TEST3: inv_cipher" test2_input_plaintext test2_inv_computed;
+  let result3 = test_compare_buffers "TEST3: inv_cipher" test2_input_plaintext test2_inv_computed in
   let test3_xkey = aes_key_expansion AES256 test3_input_key in
   let test3_computed = aes_encrypt_block AES256 test3_xkey test3_input_plaintext in
-  test_compare_buffers "TEST4: cipher" test3_output_ciphertext test3_computed;
+  let result4 = test_compare_buffers "TEST4: cipher" test3_output_ciphertext test3_computed in
   let test3_xkey = aes_dec_key_expansion AES256 test3_input_key in
   let test3_inv_computed = aes_decrypt_block AES256 test3_xkey test3_output_ciphertext in
-  test_compare_buffers "TEST5: inv_cipher" test3_input_plaintext test3_inv_computed;
+  let result5 = test_compare_buffers "TEST5: inv_cipher" test3_input_plaintext test3_inv_computed in
   let test4_xkey = aes_key_expansion AES256 test4_input_key in
   let test4_computed = aes_encrypt_block AES256 test4_xkey test4_input_plaintext in
-  test_compare_buffers "TEST5: cipher" test4_output_ciphertext test4_computed;
+  let result6 = test_compare_buffers "TEST5: cipher" test4_output_ciphertext test4_computed in
   let test4_xkey = aes_dec_key_expansion AES256 test4_input_key in
   let test4_inv_computed = aes_decrypt_block AES256 test4_xkey  test4_output_ciphertext in
-  test_compare_buffers "TEST6: inv_cipher" test4_input_plaintext test4_inv_computed;
-  ()
-
+  let result7 = test_compare_buffers "TEST6: inv_cipher" test4_input_plaintext test4_inv_computed in
+  result1 && result2 && result3 && result4 && result5 && result6 && result7

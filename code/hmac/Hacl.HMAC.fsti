@@ -7,20 +7,20 @@ module Hacl.HMAC
 /// for an assembly-optimized HMAC version that may call into Vale, see
 /// EverCrypt.HMAC.
 
-module B = Lib.Buffer
+module B = LowStar.Buffer
 module D = Hacl.Hash.Definitions
 
-open Spec.HMAC
+open Spec.Agile.HMAC
 open Spec.Hash.Definitions
 open FStar.HyperStack.ST
-open Lib.Buffer
-open Lib.ByteBuffer
 open Lib.IntTypes
 
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 20"
 
+open EverCrypt.Helpers
+
 let key_and_data_fits (a: hash_alg): Lemma
-  (ensures (block_length a + pow2 32 < max_input_length a))
+  (ensures (block_length a + pow2 32 <= max_input_length a))
 =
   let open FStar.Integers in
   assert_norm (8 * 16 + pow2 32 < pow2 61);
@@ -28,19 +28,17 @@ let key_and_data_fits (a: hash_alg): Lemma
 
 inline_for_extraction
 let compute_st (a: hash_alg) =
-  tag: lbuffer uint8 (size (hash_length a)) ->
-  key: buffer uint8{ keysized a (B.length key) /\ B.disjoint key tag } ->
-  keylen: size_t{ v keylen = B.length key } ->
-  data: buffer uint8{ B.length data + block_length a < max_size_t } ->
-  datalen: size_t{ v datalen = B.length data } ->
+  tag: B.buffer uint8 {B.length tag == hash_length a} ->
+  key: B.buffer uint8{ keysized a (B.length key) /\ B.disjoint key tag } ->
+  keylen: UInt32.t{ UInt32.v keylen = B.length key } ->
+  data: B.buffer uint8{ B.length data + block_length a < pow2 32 } ->
+  datalen: UInt32.t{ UInt32.v datalen = B.length data } ->
   Stack unit
   (requires fun h0 -> B.live h0 tag /\ B.live h0 key /\ B.live h0 data)
-  (ensures fun h0 _ h1 -> modifies1 tag h0 h1 /\ (
-    assert_norm (pow2 32 < pow2 61 - 1);
-    assert_norm (pow2 32 < pow2 125 - 1);
-    B.as_seq h1 tag == hmac a
-      (B.as_seq #MUT #uint8 #keylen h0 key) (B.as_seq #MUT #uint8 #datalen h0 data)
-  ))
+  (ensures fun h0 _ h1 ->
+    key_and_data_fits a;
+    LowStar.Modifies.(modifies (loc_buffer tag) h0 h1) /\
+    B.as_seq h1 tag == hmac a (B.as_seq h0 key) (B.as_seq h0 data))
 
 inline_for_extraction noextract
 val mk_compute:
@@ -53,4 +51,10 @@ val mk_compute:
   finish: D.finish_st a ->
   compute_st a
 
+val legacy_compute_sha1: compute_st SHA1
+
 val compute_sha2_256: compute_st SHA2_256
+
+val compute_sha2_384: compute_st SHA2_384
+
+val compute_sha2_512: compute_st SHA2_512

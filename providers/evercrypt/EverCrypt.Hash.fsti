@@ -3,77 +3,43 @@ module EverCrypt.Hash
 open EverCrypt.Helpers
 open FStar.HyperStack.ST
 open FStar.Integers
+open Spec.Hash.Definitions
+open Hacl.Hash.Definitions
 
-/// ----------agile interface to hash specifications ----------------
-/// inlined here since EverCrypt.Hash.fst needs access to
-/// the specification implementation
-///
+#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 
-/// Agile specification of all supported hash algorithmms.
-
-//open FStar.UInt32
-// 18-07-13 move to EverCrypt.Helpers?
-let bytes = Seq.seq UInt8.t
-type lbytes (l:nat) = b:bytes{ Seq.length b = l }
+/// Algorithmic agility for hash specifications. We reuse the agile
+/// specifications from HACL*'s specs/ directory.
 
 /// SUPPORTED ALGORITHMS see e.g. https://en.wikipedia.org/wiki/SHA-1
 /// for a global comparison and lengths
 ///
-/// * SHA224 and SHA512 are not yet multiplexed.
+/// * We support all variants of SHA2.
 /// * MD5 and SHA1 are still required by TLS 1.2, included for legacy
-///   purpose only, and not provided by HACL*.
-/// * SHA3 will be provided by HACL*.
+///   purpose only
+/// * SHA3 will be provided by HACL*
+///
+/// ``hash_alg``, from Spec.Hash.Definitions, lists all supported algorithms
+unfold
+let alg = hash_alg
 
-type alg =
-  | MD5
-  | SHA1
-  | SHA224
-  | SHA256
-  | SHA384
-  | SHA512
-//| SHAKE128 of (n:nat{n >= 8})
-//| SHAKE256 of (n:nat{n >= 16})
-
+/// TODO: move this one to Hacl.Hash.Definitions
 val string_of_alg: alg -> C.String.t
 
+/// kept only for functional backward compatibility, never assumed to be secure
+type broken_alg = a:alg {a = MD5 \/ a = SHA1}
 
-/// HMAC/HKDF ALGORITHMS; secure_api makes security assumptions only
-/// for constructions based on those.
-///
-//type alg13 = a:alg {a=SHA256 \/ a=SHA384 \/ a=SHA512}
-type alg13 = alg
-type e_alg = Ghost.erased alg
+/// HMAC/HKDF ALGORITHMS; we make security assumptions only for constructions
+/// based on those.
+type alg13 = a:alg { a=SHA2_256 \/ a=SHA2_384 \/ a=SHA2_512 }
 
-
-/// Lengths for input blocks and output tags, in bytes.
-
-let blockLen = function
-  | MD5 | SHA1 | SHA224 | SHA256 ->  64ul
-  | SHA384 | SHA512              -> 128ul
-//| SHAKE128 _ -> 168 | SHAKE256 _ -> 136
-
-noextract
-let blockLength (a: e_alg): GTot nat = v (blockLen (Ghost.reveal a))
-
-let maxTagLen = 64ul
-let tagLen (a:alg) : Tot UInt32.t =
-  match a with
-  | MD5    -> 16ul
-  | SHA1   -> 20ul
-  | SHA224 -> 28ul // truncated SHA256
-  | SHA256 -> 32ul
-  | SHA384 -> 48ul // truncated SHA512
-  | SHA512 -> 64ul
-noextract
-let tagLength a = v (tagLen (Ghost.reveal a))
-let lemma_maxLen (a:alg) = assert_norm(tagLen a <= maxTagLen)
-
-/// Maximal input lengths (from hacl*); this is overly restrictive.
-
-noextract let maxLength: e_alg -> nat = fun a -> pow2 61 - 1
-noextract let lemma_maxLength (a: e_alg) = assert_norm (pow2 32 <= maxLength a)
-noextract let hashable (a: e_alg) = b: bytes{ Seq.length b <= maxLength a }
-//TODO in hacl* this was enforced more concretely using the counter.
+/// No pattern (would fire too often)!
+let uint32_fits_maxLength (a: alg) (x: UInt32.t): Lemma
+  (requires True)
+  (ensures UInt32.v x <= max_input_length a)
+=
+  assert_norm (pow2 32 < pow2 61);
+  assert_norm (pow2 61 < pow2 125)
 
 /// To specify their low-level incremental computations, we assume
 /// Merkle-Damgard/sponge-like algorithms:
@@ -81,107 +47,17 @@ noextract let hashable (a: e_alg) = b: bytes{ Seq.length b <= maxLength a }
 /// The hash state is kept in an accumulator, with
 /// - an initial value
 /// - an update function, adding a block of bytes;
-/// - an extract function, returning a hash tag.
+/// - an extract (also: "finish") function, returning a hash tag.
 ///
-/// Before hashing, some algorithm-specific padding and length
-/// encoding is appended to the input bytestring.
+/// Before hashing, some algorithm-specific padding and length encoding is
+/// appended to the input bytestring.
 ///
-/// This is not a general-purpose incremental specification, which
-/// would support adding text fragments of arbitrary lengths.
-
-//18-07-06 switching to ghosts for uniformity, but not great at the pure code actually works concretely.
-//18-07-06 a better name than repr_t?
-noextract val acc (a: e_alg): Type0
-
-(* sets the initial value of the accumulator *)
-noextract val acc0 (#a:e_alg): GTot (acc a)
-
-(* hashes one block of data into the accumulator *)
-// GTot makes noextract redundant.
-noextract val compress:
-  #a:e_alg -> acc a -> b: lbytes (blockLength a) -> GTot (acc a)
-
-(* extracts the tag from the (possibly larger) accumulator *)
-noextract val extract: #a:e_alg -> acc a -> GTot (lbytes (tagLength a))
-
-// val hash2: #a:alg -> acc a -> b:bytes {length b % blockLength a = 0} -> acc a (decreases (length b))
-noextract let rec hash2
-  (#a:e_alg)
-  (v:acc a)
-  (b:bytes {Seq.length b % blockLength a = 0}):
-  GTot (acc a) (decreases (Seq.length b))
-=
-  if Seq.length b = 0 then v
-  else
-    let c,b = Seq.split b (blockLength a) in
-    assert(Seq.length b % blockLength a = 0);
-    hash2 (compress v c) b
-
-//18-07-07 this verified interactively but not on the command line;
-//18-07-07 I suspect the hacl* specs make it harder for Z3.
-#set-options "--z3rlimit 100"
-let lemma_compress
-  (#a: e_alg)
-  (a0: acc a)
-  (c: lbytes (blockLength a)):
-  Lemma (Seq.length c % blockLength a = 0 ==> compress a0 c == hash2 a0 c) = ()
-
-//18-07-12 moved the proof to the .fst to prevent timeouts on the .fsti; now much slower.
-val lemma_hash2: #a: e_alg -> a0: acc a -> b0: bytes -> b1: bytes -> Lemma
-  (requires
-    Seq.length b0 % blockLength a = 0 /\
-    Seq.length b1 % blockLength a = 0)
-  (ensures
-    Seq.length b0 % blockLength a = 0 /\
-    Seq.length b1 % blockLength a = 0 /\
-    Seq.length (Seq.append b0 b1) % blockLength a = 0 /\
-    hash2 a0 (Seq.append b0 b1) == hash2 (hash2 a0 b0) b1)
-  (decreases (Seq.length b0))
-
-noextract let hash0 (#a:e_alg) (b:bytes {Seq.length b % blockLength a = 0}) = hash2 (acc0 #a) b
-
-/// PADDING AND LENGTH ENCODING
-/// for convenience, we treat inputs as sequences of bytes, not bits.
-/// but note that the suffix encodes the length in bits.
-private noextract
-let suffixLength (a:e_alg) (length:nat {length <= maxLength a}):
-  GTot (n:nat{ (length + n) % blockLength a = 0 /\ n <= blockLength a + 9 })
-=
-  let blocklen = blockLength a in
-  let lenlen = match Ghost.reveal a with | SHA384 | SHA512 -> 8 | _ -> 4 in
-  let required =  length + 1 + lenlen in // minimal length after padding and encoding the length
-  let zeros = // minimal extra padding for block alignment
-    if required % blocklen = 0
-    then 0
-    else blocklen - (required % blocklen) in
-    //was, harder to prove: required + blockLen a - ((required - 1) % blockLen a + 1) in
-  1 + zeros + lenlen
-
-noextract val suffix: a:e_alg -> l:nat {l <= maxLength a} -> GTot (lbytes (suffixLength a l))
-
-// would prefer to name it [hash] but already taken below
-noextract let spec (a:e_alg) (b:hashable a): GTot (lbytes (tagLength a)) =
-  let blocks = Seq.append b (suffix a (Seq.length b)) in
-  let acc = hash0 blocks in
-  let tag = extract acc in
-  tag
-
-// TODO most users of the spec would prefer a more opaque specification
-// can we use [abstract] or something similar to hide the structure?
+/// This is not a general-purpose incremental specification, which would support
+/// adding text fragments of arbitrary lengths (for that, see
+/// EverCrypt.Hash.Incremental).
 
 
-/// 18-04-07 postponing verified integration with HACL* for now. We
-/// provide below a concise definition of the Merkle-Damgard
-/// construction. The plan is to integrate it with Benjamin's
-/// algorithmic specifications. At that point, we will probably hide
-/// the construction behind the provider interface (since we don't
-/// care about the construction when using or reasoning about them).
-///
-/// ---------agile interface to hash specifications ----------------
-
-
-
-
+/// Stateful interface implementing the agile specifications.
 
 module HS = FStar.HyperStack
 module B = LowStar.Buffer
@@ -190,14 +66,26 @@ module G = FStar.Ghost
 
 open LowStar.BufferOps
 
+/// do not use as argument of ghost functions
+type e_alg = G.erased alg
+
 // abstract implementation state
-val state_s: e_alg -> Type0
-let state alg = b:B.pointer (state_s alg) { B.freeable b }
+[@CAbstractStruct]
+val state_s: alg -> Type0
+
+// pointer to abstract implementation state
+let state alg = b:B.pointer (state_s alg)
+
+// abstract freeable (deep) predicate; only needed for create/free pairs
+val freeable_s: #(a: alg) -> state_s a -> Type0
+
+let freeable (#a: alg) (h: HS.mem) (p: state a) =
+  B.freeable p /\ freeable_s (B.deref h p)
 
 // NS: note that the state is the first argument to the invariant so that we can
 // do partial applications in pre- and post-conditions
-val footprint_s: #a:e_alg -> state_s a -> GTot M.loc
-let footprint (#a: e_alg) (s: state a) (m: HS.mem) =
+val footprint_s: #a:alg -> state_s a -> GTot M.loc
+let footprint (#a:alg) (s: state a) (m: HS.mem) =
   M.(loc_union (loc_addr_of_buffer s) (footprint_s (B.deref m s)))
 
 // TR: the following pattern is necessary because, if we generically
@@ -211,7 +99,7 @@ let footprint (#a: e_alg) (s: state a) (m: HS.mem) =
 // smallest location that is not exposed to be a `loc_union`.)
 
 let loc_includes_union_l_footprint_s
-  (l1 l2: M.loc) (#a: e_alg) (s: state_s a)
+  (l1 l2: M.loc) (#a: alg) (s: state_s a)
 : Lemma
   (requires (
     M.loc_includes l1 (footprint_s s) \/ M.loc_includes l2 (footprint_s s)
@@ -220,39 +108,36 @@ let loc_includes_union_l_footprint_s
   [SMTPat (M.loc_includes (M.loc_union l1 l2) (footprint_s s))]
 = M.loc_includes_union_l l1 l2 (footprint_s s)
 
-val invariant_s: (#a: e_alg) -> state_s a -> HS.mem -> Type0
-let invariant (#a: e_alg) (s: state a) (m: HS.mem) =
+val invariant_s: (#a:alg) -> state_s a -> HS.mem -> Type0
+let invariant (#a:alg) (s: state a) (m: HS.mem) =
   B.live m s /\
   M.(loc_disjoint (loc_addr_of_buffer s) (footprint_s (B.deref m s))) /\
   invariant_s (B.get m s 0) m
 
 //18-07-06 as_acc a better name? not really a representation
-val repr: #a:e_alg -> s:state a -> h:HS.mem { invariant s h } -> GTot (acc a)
+val repr: #a:alg ->
+  s:state a -> h:HS.mem -> GTot (words_state a)
 
-// Waiting for these to land in LowStar.Modifies
-let loc_in (l: M.loc) (h: HS.mem) =
-  M.(loc_not_unused_in h `loc_includes` l)
-
-let loc_unused_in (l: M.loc) (h: HS.mem) =
-  M.(loc_unused_in h `loc_includes` l)
-
-let fresh_loc (l: M.loc) (h0 h1: HS.mem) =
-  loc_unused_in l h0 /\ loc_in l h1
+val alg_of_state: a:e_alg -> (
+  let a = G.reveal a in
+  s: state a -> Stack alg
+  (fun h0 -> invariant s h0)
+  (fun h0 a' h1 -> h0 == h1 /\ a' == a))
 
 val fresh_is_disjoint: l1:M.loc -> l2:M.loc -> h0:HS.mem -> h1:HS.mem -> Lemma
-  (requires (fresh_loc l1 h0 h1 /\ l2 `loc_in` h0))
+  (requires (B.fresh_loc l1 h0 h1 /\ l2 `B.loc_in` h0))
   (ensures (M.loc_disjoint l1 l2))
 
 // TR: this lemma is necessary to prove that the footprint is disjoint
 // from any fresh memory location.
 
 val invariant_loc_in_footprint
-  (#a: e_alg)
+  (#a: alg)
   (s: state a)
   (m: HS.mem)
 : Lemma
   (requires (invariant s m))
-  (ensures (loc_in (footprint s m) m))
+  (ensures (B.loc_in (footprint s m) m))
   [SMTPat (invariant s m)]
 
 // TR: frame_invariant, just like all lemmas eliminating `modifies`
@@ -262,119 +147,174 @@ val invariant_loc_in_footprint
 // pattern reasons (e.g. push_frame, pop_frame)
 
 // 18-07-12 why not bundling the next two lemmas?
-val frame_invariant: #a:e_alg -> l:M.loc -> s:state a -> h0:HS.mem -> h1:HS.mem -> Lemma
+val frame_invariant: #a:alg -> l:M.loc -> s:state a -> h0:HS.mem -> h1:HS.mem -> Lemma
   (requires (
     invariant s h0 /\
     M.loc_disjoint l (footprint s h0) /\
-    M.modifies_inert l h0 h1))
+    M.modifies l h0 h1))
   (ensures (
     invariant s h1 /\
     repr s h0 == repr s h1))
 
 let frame_invariant_implies_footprint_preservation
-  (#a: e_alg)
+  (#a: alg)
   (l: M.loc)
   (s: state a)
   (h0 h1: HS.mem): Lemma
   (requires (
     invariant s h0 /\
     M.loc_disjoint l (footprint s h0) /\
-    M.modifies_inert l h0 h1))
+    M.modifies l h0 h1))
   (ensures (
     footprint s h1 == footprint s h0))
 =
   ()
 
-val create: a:alg -> ST (state (G.hide a))
+let preserves_freeable #a (s: state a) (h0 h1: HS.mem): Type0 =
+  freeable h0 s ==> freeable h1 s
+
+/// This function will generally not extract properly, so it should be used with
+/// great care. Callers must:
+/// - run with evercrypt/fst in scope to benefit from the definition of this function
+/// - know, at call-site, the concrete value of a via suitable usage of inline_for_extraction
+inline_for_extraction noextract
+val alloca: a:alg -> StackInline (state a)
+  (requires (fun _ -> True))
+  (ensures (fun h0 s h1 ->
+    invariant s h1 /\
+    M.(modifies loc_none h0 h1) /\
+    B.fresh_loc (footprint s h1) h0 h1 /\
+    M.(loc_includes (loc_region_only true (HS.get_tip h1)) (footprint s h1))))
+
+(** @type: true
+*)
+val create_in: a:alg -> r:HS.rid -> ST (state a)
+  (requires (fun _ ->
+    HyperStack.ST.is_eternal_region r))
+  (ensures (fun h0 s h1 ->
+    invariant s h1 /\
+    M.(modifies loc_none h0 h1) /\
+    B.fresh_loc (footprint s h1) h0 h1 /\
+    M.(loc_includes (loc_region_only true r) (footprint s h1)) /\
+    freeable h1 s))
+
+(** @type: true
+*)
+val create: a:alg -> ST (state a)
   (requires fun h0 -> True)
   (ensures fun h0 s h1 ->
     invariant s h1 /\
     M.(modifies loc_none h0 h1) /\
-    fresh_loc (footprint s h1) h0 h1)
+    B.fresh_loc (footprint s h1) h0 h1 /\
+    freeable h1 s)
 
-// we use exists b. hashing s h b as our stateful abstract
-// invariant; the existence of b is used only to reason about the
-// internal counter.
-let hashing (#a:e_alg) (s: state a) (h: HS.mem) (b: bytes) =
-  invariant s h /\
-  Seq.length b % blockLength a = 0 /\
-  repr s h == hash0 b
-
-val init: #a:e_alg -> s:state a -> ST unit
+(** @type: true
+*)
+val init: #a:e_alg -> (
+  let a = Ghost.reveal a in
+  s: state a -> Stack unit
   (requires invariant s)
   (ensures fun h0 _ h1 ->
-    hashing s h1 (Seq.empty #UInt8.t) /\ // implies repr s h1 == acc0 #a
+    invariant s h1 /\
+    repr s h1 == Spec.Agile.Hash.init a /\
     M.(modifies (footprint s h0) h0 h1) /\
-    footprint s h0 == footprint s h1)
+    footprint s h0 == footprint s h1 /\
+    preserves_freeable s h0 h1))
+
+val update_multi_256: Hacl.Hash.Definitions.update_multi_st SHA2_256
+
+inline_for_extraction noextract
+val update_multi_224: Hacl.Hash.Definitions.update_multi_st SHA2_224
 
 // Note: this function relies implicitly on the fact that we are running with
 // code/lib/kremlin and that we know that machine integers and secret integers
 // are the same. In the long run, we should standardize on a secret integer type
 // in F*'s ulib and have evercrypt use it.
+(** @type: true
+*)
 val update:
-  #a:e_alg ->
-  b: Ghost.erased bytes ->
+  #a:e_alg -> (
+  let a = Ghost.reveal a in
   s:state a ->
-  block:uint8_p {B.length block = blockLength a} ->
+  block:B.buffer Lib.IntTypes.uint8 { B.length block = block_length a } ->
   Stack unit
   (requires fun h0 ->
-    hashing s h0 (Ghost.reveal b) /\
+    invariant s h0 /\
     B.live h0 block /\
     M.(loc_disjoint (footprint s h0) (loc_buffer block)))
   (ensures fun h0 _ h1 ->
     M.(modifies (footprint s h0) h0 h1) /\
     footprint s h0 == footprint s h1 /\
-    hashing s h1 (Seq.append (Ghost.reveal b) (B.as_seq h0 block)))
-//  repr s h1 == compress (repr s h0) (B.as_seq h0 data)
+    invariant s h1 /\
+    repr s h1 == Spec.Agile.Hash.update a (repr s h0) (B.as_seq h0 block) /\
+    preserves_freeable s h0 h1))
 
-// new calling convention: we pass the data length in bytes (rather
-// than blocks). I also removed the counter invariant, assuming we
-// will get rid of it.
+// Note that we pass the data length in bytes (rather than blocks).
+(** @type: true
+*)
 val update_multi:
-  #a:e_alg ->
-  b: Ghost.erased bytes ->
+  #a:e_alg -> (
+  let a = Ghost.reveal a in
   s:state a ->
-  blocks:uint8_p {B.length blocks % blockLength a = 0} ->
-  len: UInt32.t {v len = B.length blocks} ->
+  blocks:B.buffer Lib.IntTypes.uint8 { B.length blocks % block_length a = 0 } ->
+  len: UInt32.t { v len = B.length blocks } ->
   Stack unit
   (requires fun h0 ->
-    hashing s h0 (Ghost.reveal b) /\
+    invariant s h0 /\
     B.live h0 blocks /\
     M.(loc_disjoint (footprint s h0) (loc_buffer blocks)))
   (ensures fun h0 _ h1 ->
     M.(modifies (footprint s h0) h0 h1) /\
     footprint s h0 == footprint s h1 /\
-    hashing s h1 (Seq.append (Ghost.reveal b) (B.as_seq h0 blocks)))
+    invariant s h1 /\
+    repr s h1 == Spec.Agile.Hash.update_multi a (repr s h0) (B.as_seq h0 blocks) /\
+    preserves_freeable s h0 h1))
+
+val update_last_256: Hacl.Hash.Definitions.update_last_st SHA2_256
+
+inline_for_extraction noextract
+val update_last_224: Hacl.Hash.Definitions.update_last_st SHA2_224
 
 // 18-03-05 note the *new* length-passing convention!
 // 18-03-03 it is best to let the caller keep track of lengths.
 // 18-03-03 the last block is *never* complete so there is room for the 1st byte of padding.
+// 18-10-10 using uint64 for the length as the is the only thing that TLS needs
+//   and also saves the need for a (painful) indexed type
+// 18-10-15 a crucial bit is that this function reveals that last @| padding is a multiple of the
+//   block size; indeed, any caller will want to know this in order to reason
+//   about that sequence concatenation
+(** @type: true
+*)
 val update_last:
-  #a:e_alg ->
-  b:Ghost.erased bytes ->
+  #a:e_alg -> (
+  let a = Ghost.reveal a in
   s:state a ->
-  last:uint8_p {B.length last < blockLength a } ->
-  total_len:UInt32.t {
-    let l = v total_len in
-    l = Seq.length (Ghost.reveal b) + B.length last /\
-    l <= maxLength a } ->
+  last:B.buffer Lib.IntTypes.uint8 { B.length last < block_length a } ->
+  total_len:uint64_t {
+    v total_len <= max_input_length a /\
+    (v total_len - B.length last) % block_length a = 0 } ->
   Stack unit
   (requires fun h0 ->
-    hashing s h0 (Ghost.reveal b) /\
+    invariant s h0 /\
     B.live h0 last /\
     M.(loc_disjoint (footprint s h0) (loc_buffer last)))
   (ensures fun h0 _ h1 ->
-    let last0 = B.as_seq h0 last in
-    let rawbytes = Seq.append last0 (suffix a (v total_len)) in
-    Seq.length rawbytes % blockLength a = 0 /\
+    invariant s h1 /\
+    (B.length last + Seq.length (Spec.Hash.PadFinish.pad a (v total_len))) % block_length a = 0 /\
+    repr s h1 ==
+      Spec.Agile.Hash.update_multi a (repr s h0)
+        (Seq.append (B.as_seq h0 last) (Spec.Hash.PadFinish.pad a (v total_len))) /\
     M.(modifies (footprint s h0) h0 h1) /\
     footprint s h0 == footprint s h1 /\
-    hashing s h1 (Seq.append (Ghost.reveal b) rawbytes))
+    preserves_freeable s h0 h1))
 
+(** @type: true
+*)
 val finish:
-  #a:e_alg ->
+  #a:e_alg -> (
+  let a = Ghost.reveal a in
   s:state a ->
-  dst:uint8_p {B.length dst = tagLength a} ->
+  dst:B.buffer Lib.IntTypes.uint8 { B.length dst = hash_length a } ->
   Stack unit
   (requires fun h0 ->
     invariant s h0 /\
@@ -384,20 +324,50 @@ val finish:
     invariant s h1 /\
     M.(modifies (loc_buffer dst) h0 h1) /\
     footprint s h0 == footprint s h1 /\
-    B.as_seq h1 dst == extract (repr s h0))
+    B.as_seq h1 dst == Spec.Hash.PadFinish.finish a (repr s h0) /\
+    preserves_freeable s h0 h1))
 
-val free: #a:e_alg -> s:state a -> ST unit
-  (requires (fun h0 ->
-    invariant s h0))
-  (ensures (fun h0 _ h1 ->
+(** @type: true
+*)
+val free:
+  #a:e_alg -> (
+  let a = Ghost.reveal a in
+  s:state a -> ST unit
+  (requires fun h0 ->
+    freeable h0 s /\
+    invariant s h0)
+  (ensures fun h0 _ h1 ->
     M.(modifies (footprint s h0) h0 h1)))
 
+(** @type: true
+*)
+val copy:
+  #a:e_alg -> (
+  let a = Ghost.reveal a in
+  s_src:state a ->
+  s_dst:state a ->
+  Stack unit
+    (requires (fun h0 ->
+      invariant s_src h0 /\
+      invariant s_dst h0 /\
+      B.(loc_disjoint (footprint s_src h0) (footprint s_dst h0))))
+    (ensures fun h0 _ h1 ->
+      M.(modifies (footprint s_dst h0) h0 h1) /\
+      footprint s_dst h0 == footprint s_dst h1 /\
+      preserves_freeable s_dst h0 h1 /\
+      invariant s_dst h1 /\
+      repr s_dst h1 == repr s_src h0))
+
+val hash_256: Hacl.Hash.Definitions.hash_st SHA2_256
+val hash_224: Hacl.Hash.Definitions.hash_st SHA2_224
+
+(** @type: true
+*)
 val hash:
-  a:alg -> (
-  let a = Ghost.hide a in
-  dst:uint8_p {B.length dst = tagLength a} ->
-  input:uint8_p ->
-  len:uint32_t {B.length input = v len /\ v len <= maxLength a} ->
+  a:alg ->
+  dst:B.buffer Lib.IntTypes.uint8 {B.length dst = hash_length a} ->
+  input:B.buffer Lib.IntTypes.uint8 ->
+  len:uint32_t {B.length input = v len /\ v len <= max_input_length a} ->
   Stack unit
   (requires fun h0 ->
     B.live h0 dst /\
@@ -405,6 +375,4 @@ val hash:
     M.(loc_disjoint (loc_buffer input) (loc_buffer dst)))
   (ensures fun h0 _ h1 ->
     M.(modifies (loc_buffer dst) h0 h1) /\
-    B.as_seq h1 dst = spec a (B.as_seq h0 input)))
-
-
+    B.as_seq h1 dst == Spec.Agile.Hash.hash a (B.as_seq h0 input))

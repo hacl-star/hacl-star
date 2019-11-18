@@ -25,7 +25,7 @@ let f (x y z: uint32) : Tot uint32 =
 
 inline_for_extraction
 let g (x y z: uint32) : Tot uint32 =
-  (x &. z) |. (y &. ~. z)
+  (x &. z) |. (y &. (~. z))
 
 inline_for_extraction
 let h (x y z: uint32) : Tot uint32 =
@@ -33,7 +33,7 @@ let h (x y z: uint32) : Tot uint32 =
 
 inline_for_extraction
 let i (x y z: uint32) : Tot uint32 =
-  y ^. (x ^. ~. z)
+  y ^. (x |. ~. z)
 
 (* Table T: specified in 3.4, defined in Appendix A.3, function MD5Transform *)
 
@@ -165,7 +165,7 @@ let round1_aux (abcd: abcd_t) (x: x_t) : Tot abcd_t =
   let abcd = round1_op abcd x id ia ib ic 13 12ul 14 in
   let abcd = round1_op abcd x ic id ia ib 14 17ul 15 in
   let abcd = round1_op abcd x ib ic id ia 15 22ul 16 in
-     
+
   abcd
 
 [@"opaque_to_smt"]

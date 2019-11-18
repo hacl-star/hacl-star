@@ -1,18 +1,18 @@
 module Vale.AsLowStar.ValeSig
-open Interop.Base
+open FStar.Mul
+open Vale.Interop.Base
 module B = LowStar.Buffer
-module BS = X64.Bytes_Semantics_s
+module BS = Vale.X64.Machine_Semantics_s
 module BV = LowStar.BufferView
 module HS = FStar.HyperStack
-module ME = X64.Memory
-module TS = X64.Taint_Semantics_s
-module MS = X64.Machine_s
-module IA = Interop.Assumptions
-module V = X64.Vale.Decls
-module VS = X64.Vale.State
-module IX64 = Interop.X64
+module ME = Vale.X64.Memory
+module MS = Vale.X64.Machine_s
+module IA = Vale.Interop.Assumptions
+module V = Vale.X64.Decls
+module VS = Vale.X64.State
+module IX64 = Vale.Interop.X64
 module List = FStar.List.Tot
-open X64.MemoryAdapters
+open Vale.X64.MemoryAdapters
 
 [@__reduce__]
 let vale_pre_tl (dom:list td) =
@@ -33,22 +33,22 @@ let vale_post (dom:list td) =
     code:V.va_code ->
     vale_post_tl dom
 
-let vale_save_reg (r:MS.reg) (s0 s1:V.va_state) =
-  VS.eval_reg r s0 == VS.eval_reg r s1
+let vale_save_reg (r:MS.reg_64) (s0 s1:V.va_state) =
+  VS.eval_reg_64 r s0 == VS.eval_reg_64 r s1
 
-let vale_save_xmm (r:MS.xmm) (s0 s1:V.va_state) =
-  VS.eval_xmm r s0 == VS.eval_xmm r s1
+let vale_save_xmm (r:MS.reg_xmm) (s0 s1:V.va_state) =
+  VS.eval_reg_xmm r s0 == VS.eval_reg_xmm r s1
 
-let vale_calling_conventions 
-  (s0 s1:V.va_state) 
-  (regs_modified:MS.reg -> bool)
-  (xmms_modified:MS.xmm -> bool) =
+let vale_calling_conventions
+  (s0 s1:V.va_state)
+  (regs_modified:MS.reg_64 -> bool)
+  (xmms_modified:MS.reg_xmm -> bool) =
   let open MS in
-  s1.VS.ok /\
-  vale_save_reg MS.Rsp s0 s1 /\
-  (forall (r:MS.reg).
+  s1.VS.vs_ok /\
+  vale_save_reg MS.rRsp s0 s1 /\
+  (forall (r:MS.reg_64).
     not (regs_modified r) ==> vale_save_reg r s0 s1) /\
-  (forall (x:MS.xmm).
+  (forall (x:MS.reg_xmm).
     not (xmms_modified x) ==> vale_save_xmm x s0 s1)
 
 [@__reduce__]
@@ -63,11 +63,11 @@ let mloc_modified_args (args:list arg) : GTot ME.loc =
 
 let state_of (x:(V.va_state & V.va_fuel)) = fst x
 let fuel_of (x:(V.va_state & V.va_fuel)) = snd x
-let sprop = VS.state -> prop
+let sprop = VS.vale_state -> prop
 
 
 [@__reduce__]
-let readable_one (s:ME.mem) (arg:arg) : prop =
+let readable_one (s:ME.vale_heap) (arg:arg) : prop =
   match arg with
   | (|TD_Buffer src bt _, x |) ->
     ME.buffer_readable s (as_vale_buffer #src #bt x) /\
@@ -79,7 +79,7 @@ let readable_one (s:ME.mem) (arg:arg) : prop =
   | _ -> True
 
 [@__reduce__]
-let readable (args:list arg) (s:ME.mem) : prop =
+let readable (args:list arg) (s:ME.vale_heap) : prop =
     BigOps.big_and' (readable_one s) args
 
 
@@ -89,7 +89,7 @@ let disjoint_or_eq_1 (a:arg) (b:arg) =
     | (| TD_Buffer srcx tx {strict_disjointness=true}, xb |), (| TD_Buffer srcy ty _, yb |)
     | (| TD_Buffer srcx tx _, xb |), (| TD_Buffer srcy ty {strict_disjointness=true}, yb |) ->
       ME.loc_disjoint (ME.loc_buffer (as_vale_buffer #srcx #tx xb)) (ME.loc_buffer (as_vale_buffer #srcy #ty yb))
-    | (| TD_ImmBuffer srcx tx {strict_disjointness=true}, xb |), (| TD_ImmBuffer srcy ty _, yb |) 
+    | (| TD_ImmBuffer srcx tx {strict_disjointness=true}, xb |), (| TD_ImmBuffer srcy ty _, yb |)
     | (| TD_ImmBuffer srcx tx _, xb |), (| TD_ImmBuffer srcy ty {strict_disjointness=true}, yb |) ->
       ME.loc_disjoint (ME.loc_buffer (as_vale_immbuffer #srcx #tx xb)) (ME.loc_buffer (as_vale_immbuffer #srcy #ty yb))
     // An immutable buffer and a trivial buffer should not be equal
@@ -111,8 +111,8 @@ let disjoint_or_eq (l:list arg) =
 
 [@__reduce__] unfold
 let vale_sig_nil
-                 (regs_modified:MS.reg -> bool)
-                 (xmms_modified:MS.xmm -> bool)
+                 (regs_modified:MS.reg_64 -> bool)
+                 (xmms_modified:MS.reg_xmm -> bool)
                  (args:list arg)
                  (code:V.va_code)
                  (pre:vale_pre_tl [])
@@ -127,12 +127,12 @@ let vale_sig_nil
        V.eval_code code va_s0 f va_s1 /\
        vale_calling_conventions va_s0 va_s1 regs_modified xmms_modified /\
        elim_nil post va_s0 va_s1 f /\
-       readable args VS.(va_s1.mem) /\
-       ME.modifies (mloc_modified_args args) va_s0.VS.mem va_s1.VS.mem))
+       readable args VS.(va_s1.vs_heap) /\
+       ME.modifies (mloc_modified_args args) va_s0.VS.vs_heap va_s1.VS.vs_heap))
 
 [@__reduce__]
-let rec vale_sig_tl (regs_modified:MS.reg -> bool)
-                    (xmms_modified:MS.xmm -> bool)
+let rec vale_sig_tl (regs_modified:MS.reg_64 -> bool)
+                    (xmms_modified:MS.reg_xmm -> bool)
                     (#dom:list td)
                     (args:list arg)
                     (code:V.va_code)
@@ -149,8 +149,8 @@ let rec vale_sig_tl (regs_modified:MS.reg -> bool)
 
 [@__reduce__]
 let elim_vale_sig_nil  #code
-                       (#regs_modified:MS.reg -> bool)
-                       (#xmms_modified:MS.xmm -> bool)
+                       (#regs_modified:MS.reg_64 -> bool)
+                       (#xmms_modified:MS.reg_xmm -> bool)
                        (#args:list arg)
                        (#pre:vale_pre_tl [])
                        (#post:vale_post_tl [])
@@ -160,8 +160,8 @@ let elim_vale_sig_nil  #code
 
 [@__reduce__]
 let elim_vale_sig_cons #code
-                       (#regs_modified:MS.reg -> bool)
-                       (#xmms_modified:MS.xmm -> bool)
+                       (#regs_modified:MS.reg_64 -> bool)
+                       (#xmms_modified:MS.reg_xmm -> bool)
                        (hd:td)
                        (tl:list td)
                        (args:list arg)
@@ -174,8 +174,8 @@ let elim_vale_sig_cons #code
 
 [@__reduce__]
 let vale_sig (#dom:list td)
-             (regs_modified:MS.reg -> bool)
-             (xmms_modified:MS.xmm -> bool)
+             (regs_modified:MS.reg_64 -> bool)
+             (xmms_modified:MS.reg_xmm -> bool)
              (pre:vale_pre dom)
              (post:vale_post dom)
   : Type =
@@ -193,5 +193,5 @@ let vale_sig (#dom:list td)
 let vale_sig_stdcall #dom = vale_sig #dom IX64.regs_modified_stdcall IX64.xmms_modified_stdcall
 
 [@__reduce__]
-let vale_calling_conventions_stdcall (s0 s1:VS.state) = 
+let vale_calling_conventions_stdcall (s0 s1:VS.vale_state) =
   vale_calling_conventions s0 s1 IX64.regs_modified_stdcall IX64.xmms_modified_stdcall

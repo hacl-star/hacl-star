@@ -17,13 +17,10 @@ module BSeq = Lib.ByteSequence
 
 module Spec = Spec.Chacha20Poly1305
 module SpecPoly = Spec.Poly1305
-module ChachaVec = Hacl.Impl.Chacha20.Vec
 module Poly = Hacl.Impl.Poly1305
 
+#reset-options "--z3rlimit 150 --max_fuel 0 --max_ifuel 1 --record_options"
 
-#reset-options "--z3rlimit 150 --max_fuel 0 --max_ifuel 1"
-
-inline_for_extraction noextract
 val poly1305_do_:
     #w:field_spec
   -> k:lbuffer uint8 32ul // key
@@ -48,7 +45,7 @@ val poly1305_do_:
     let acc = SpecPoly.poly1305_update1 r 16 block_s acc in
     Poly.as_get_acc h1 ctx == acc /\ as_seq h1 block == block_s /\
     Poly.state_inv_t h1 ctx))
-
+[@Meta.Attribute.inline_]
 let poly1305_do_ #w k aadlen aad mlen m ctx block =
   Poly.poly1305_init ctx k;
   poly1305_padded ctx aadlen aad;
@@ -90,32 +87,16 @@ let poly1305_do_core_st (w:field_spec) =
     as_seq h1 out == Spec.poly1305_do (as_seq h0 k) (as_seq h0 m) (as_seq h0 aad))
 
 
-inline_for_extraction noextract
-val poly1305_do_core: #w:field_spec -> poly1305_do_core_st w
-let poly1305_do_core #w k aadlen aad mlen m out =
+noextract
+val poly1305_do: #w:field_spec -> poly1305_do_core_st w
+[@Meta.Attribute.specialize]
+let poly1305_do #w k aadlen aad mlen m out =
   push_frame();
   let ctx = create (nlimb w +! precomplen w) (limb_zero w) in
   let block = create 16ul (u8 0) in
   poly1305_do_ #w k aadlen aad mlen m ctx block;
   Poly.poly1305_finish out k ctx;
   pop_frame()
-
-
-[@CInline]
-let poly1305_do_32 : poly1305_do_core_st M32 = poly1305_do_core
-[@CInline]
-let poly1305_do_128 : poly1305_do_core_st M128 = poly1305_do_core
-[@CInline]
-let poly1305_do_256 : poly1305_do_core_st M256 = poly1305_do_core
-
-
-inline_for_extraction noextract
-val poly1305_do: #w:field_spec -> poly1305_do_core_st w
-let poly1305_do #w =
-  match w with
-  | M32 -> poly1305_do_32
-  | M128 -> poly1305_do_128
-  | M256 -> poly1305_do_256
 
 
 unfold noextract
@@ -125,9 +106,11 @@ let width_chacha20 (s:field_spec) : Hacl.Spec.Chacha20.Vec.lanes =
   | M128 -> 4
   | M256 -> 8
 
+[@ Meta.Attribute.specialize ]
+assume val chacha20_encrypt: #w:field_spec ->
+  Hacl.Impl.Chacha20.Vec.chacha20_encrypt_st (width_chacha20 w)
 
 // Derives the key, and then perform poly1305
-inline_for_extraction noextract
 val derive_key_poly1305_do:
     #w:field_spec
   -> k:lbuffer uint8 32ul
@@ -143,23 +126,77 @@ val derive_key_poly1305_do:
   (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
     (let key:LSeq.lseq uint8 64 = Spec.Chacha20.chacha20_encrypt_bytes (as_seq h0 k) (as_seq h0 n) 0 (LSeq.create 64 (u8 0)) in
     as_seq h1 out == Spec.poly1305_do (LSeq.sub key 0 32) (as_seq h0 m) (as_seq h0 aad)))
-
+[@ Meta.Attribute.inline_ ]
 let derive_key_poly1305_do #w k n aadlen aad mlen m out =
   push_frame ();
   // Create a new buffer to derive the key
   let tmp = create 64ul (u8 0) in
-  ChachaVec.chacha20_encrypt #(width_chacha20 w) 64ul tmp tmp k n 0ul;
+  chacha20_encrypt #w 64ul tmp tmp k n 0ul;
   // The derived key should only be the first 32 bytes
   let key = sub tmp 0ul 32ul in
   poly1305_do #w key aadlen aad mlen m out;
   pop_frame()
 
+inline_for_extraction noextract
+let aead_encrypt_st (w:field_spec) =
+    key:lbuffer uint8 32ul
+  -> nonce:lbuffer uint8 12ul
+  -> alen:size_t
+  -> aad:lbuffer uint8 alen
+  -> len:size_t
+  -> input:lbuffer uint8 len
+  -> output:lbuffer uint8 len
+  -> tag:lbuffer uint8 16ul ->
+  Stack unit
+  (requires fun h ->
+    live h key /\ live h nonce /\ live h aad /\
+    live h input /\ live h output /\ live h tag /\
+    disjoint key output /\ disjoint nonce output /\
+    disjoint key tag /\ disjoint nonce tag /\
+    disjoint output tag /\ eq_or_disjoint input output /\
+    disjoint aad output)
+  (ensures  fun h0 _ h1 -> modifies2 output tag h0 h1 /\
+    Seq.append (as_seq h1 output) (as_seq h1 tag) ==
+    Spec.aead_encrypt (as_seq h0 key) (as_seq h0 nonce) (as_seq h0 input) (as_seq h0 aad))
 
+noextract
+val aead_encrypt: #w:field_spec -> aead_encrypt_st w
+
+[@ Meta.Attribute.specialize ]
 let aead_encrypt #w k n aadlen aad mlen m cipher mac =
-  ChachaVec.chacha20_encrypt #(width_chacha20 w) mlen cipher m k n 1ul;
+  chacha20_encrypt #w mlen cipher m k n 1ul;
   derive_key_poly1305_do #w k n aadlen aad mlen cipher mac
 
 
+
+inline_for_extraction noextract
+let aead_decrypt_st (w:field_spec) =
+    key:lbuffer uint8 32ul
+  -> nonce:lbuffer uint8 12ul
+  -> alen:size_t
+  -> aad:lbuffer uint8 alen
+  -> len:size_t
+  -> input:lbuffer uint8 len
+  -> output:lbuffer uint8 len
+  -> mac:lbuffer uint8 16ul ->
+  Stack UInt32.t
+  (requires fun h ->
+    live h key /\ live h nonce /\ live h aad /\
+    live h input /\ live h output /\ live h mac /\
+    eq_or_disjoint input output)
+  (ensures  fun h0 z h1 -> modifies1 input h0 h1 /\
+   (let plain = Spec.aead_decrypt (as_seq h0 key) (as_seq h0 nonce) (as_seq h0 output) (as_seq h0 mac) (as_seq h0 aad) in
+    match z with
+    | 0ul -> Some? plain /\ as_seq h1 input == Some?.v plain // decryption succeeded
+    | 1ul -> None? plain
+    | _ -> false)  // decryption failed
+  )
+
+
+noextract
+val aead_decrypt: #w:field_spec -> aead_decrypt_st w
+
+[@ Meta.Attribute.specialize ]
 let aead_decrypt #w k n aadlen aad mlen m cipher mac =
   push_frame();
   let h0 = get() in
@@ -172,7 +209,7 @@ let aead_decrypt #w k n aadlen aad mlen m cipher mac =
     if lbytes_eq computed_mac mac then (
       assert (BSeq.lbytes_eq (as_seq h1 computed_mac) (as_seq h1 mac));
       // If the computed mac matches the mac given, decrypt the ciphertext and return 0
-      ChachaVec.chacha20_encrypt #(width_chacha20 w) mlen m cipher k n 1ul;
+      chacha20_encrypt #w mlen m cipher k n 1ul;
       0ul
     ) else 1ul // Macs do not agree, do not decrypt
   in

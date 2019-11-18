@@ -22,7 +22,7 @@ let proc_name : string -> platform -> string =
 
 let parse_cmdline :
   (string * (Prims.bool ->
-    (X64_Vale_Decls.ins,X64_Vale_Decls.ocmp) X64_Machine_s.precode)) list -> unit
+    (Vale_X64_Decls.ins,Vale_X64_Decls.ocmp) Vale_X64_Machine_s.precode * Vale_X64_Decls.va_pbool) * int * bool) list -> unit
   =
   fun l  ->
   let argc = Array.length Sys.argv in
@@ -52,14 +52,30 @@ let parse_cmdline :
     in
     let printer =
       match asm_choice with
-      | GCC -> X64_Vale_Decls.gcc
-      | MASM -> X64_Vale_Decls.masm
+      | GCC -> Vale_X64_Decls.gcc
+      | MASM -> Vale_X64_Decls.masm
     in
     let windows = platform_choice = Win in
-    X64_Vale_Decls.print_header printer;
-    let _ = List.fold_left (fun label_count (name, code) ->
-                           X64_Vale_Decls.print_proc (proc_name name platform_choice)
+
+    (* Ensure that we've actually got all the codes *)
+    let l = List.map (fun (name, code_and_gen, nbr_args, return_public) ->
+        let c, p = code_and_gen windows in
+        match Vale_X64_Decls.get_reason p with
+        | None -> (name, (fun _ -> c), nbr_args, return_public)
+        | Some reason ->
+          failwith ("method " ^ name ^ " cannot be safely generated. Reason: " ^ reason)) l in
+
+    (* Run taint analysis *)
+    let _ = List.iter (fun (name, code, nbr_args, return_public) ->
+      if Vale_X64_Leakage.check_if_code_is_leakage_free (code windows) (Vale_X64_Leakage.mk_analysis_taints windows (Prims.parse_int (string_of_int nbr_args))) return_public then ()
+      else failwith ("method " ^ name ^ " does not satisfy taint analysis on" ^ if windows then "Windows" else "Linux")
+    ) l in
+
+    (* Extract and print assembly code *)
+    Vale_X64_Decls.print_header printer;
+    let _ = List.fold_left (fun label_count (name, code, _, _) ->
+                           Vale_X64_Decls.print_proc (proc_name name platform_choice)
                                                        (code windows)
                                                        label_count printer)
                            (Prims.parse_int "0") l in
-    X64_Vale_Decls.print_footer printer
+    Vale_X64_Decls.print_footer printer

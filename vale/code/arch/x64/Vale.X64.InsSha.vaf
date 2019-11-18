@@ -1,0 +1,110 @@
+include "Vale.X64.InsBasic.vaf"
+include "Vale.X64.InsVector.vaf"
+include{:fstar}{:open} "Vale.Def.Words_s"
+include{:fstar}{:open} "Vale.Def.Types_s"
+include{:fstar}{:open} "Vale.Arch.Types"
+include{:fstar}{:open} "Spec.SHA2"
+include{:fstar}{:open} "Vale.SHA.SHA_helpers"
+include{:fstar}{:open} "Spec.Hash.PadFinish"
+include{:fstar}{:open} "Vale.X64.Machine_s"
+include{:fstar}{:open} "Vale.X64.State"
+include{:fstar}{:open} "Vale.X64.Decls"
+include{:fstar}{:open} "Vale.X64.QuickCode"
+include{:fstar}{:open} "Vale.X64.CPU_Features_s"
+
+module Vale.X64.InsSha
+
+#verbatim{:interface}
+open Vale.Def.Words_s
+open Vale.Def.Types_s
+open Vale.Arch.Types
+open Spec.Hash.PadFinish
+open Spec.SHA2
+open Spec.Hash.Definitions
+open Vale.SHA.SHA_helpers
+open Vale.X64.Machine_s
+open Vale.X64.State
+open Vale.X64.Decls
+open Vale.X64.QuickCode
+open Vale.X64.InsVector
+open FStar.UInt32
+
+open FStar.Seq
+open Spec.Loops
+open Vale.X64.CPU_Features_s
+#endverbatim
+
+#verbatim
+open Vale.Def.Types_s
+open Vale.X64.Machine_s
+open Vale.X64
+open Vale.X64.State
+open Vale.X64.StateLemmas
+open Vale.X64.InsLemmas
+open Vale.X64.Taint_Semantics
+open Vale.X64.Decls
+open Vale.X64.CryptoInstructions_s
+open Spec.Hash.PadFinish
+open Spec.Hash.Definitions
+open Spec.SHA2
+open Vale.X64.CPU_Features_s
+module I = Vale.X64.Instructions_s
+module S = Vale.X64.Machine_Semantics_s
+module P = Vale.X64.Print_s
+
+friend Vale.X64.Decls
+#reset-options "--initial_fuel 4 --max_fuel 4 --max_ifuel 2 --z3rlimit 20"
+#endverbatim
+
+procedure SHA256_rnds2(inout dst:xmm, in src:xmm, ghost t:counter, ghost block:block_w, ghost hash_orig:hash256)
+    {:public}
+    {:quick exportOnly}
+    {:instruction mk_ins(make_instr(I.ins_SHA256_rnds2, OReg(dst), OReg(src)))}
+    {:typecheck false}
+    reads xmm0;
+    requires
+        sha_enabled;
+        t + 1 < size_k_w_256;
+        xmm0.lo0 == add_wrap(word_to_nat32(index(k, t)),   ws_opaque(block, t));
+        xmm0.lo1 == add_wrap(word_to_nat32(index(k, t+1)), ws_opaque(block, t + 1));
+        make_hash(src, dst)      == repeat_range(0, t,   shuffle_core_opaque(block), hash_orig);
+    ensures
+        make_hash(dst, old(src)) == repeat_range(0, t+2, shuffle_core_opaque(block), hash_orig);
+{
+    lemma_sha256_rnds2(old(src), old(dst), old(xmm0), t, block, hash_orig);
+}
+
+procedure SHA256_msg1(inout dst:xmm, in src:xmm, ghost t:counter, ghost block:block_w)
+    {:public}
+    {:quick exportOnly}
+    {:instruction mk_ins(make_instr(I.ins_SHA256_msg1, OReg(dst), OReg(src)))}
+    {:typecheck false}
+    requires
+        sha_enabled;
+        16 <= t < size_k_w_256;
+        dst == ws_quad32(t-16, block);
+        src.lo0 == ws_opaque(block, t-12);
+    ensures
+        dst == ws_partial(t, block);
+{
+    lemma_sha256_msg1(old(dst), old(src), t, block);
+}
+
+procedure SHA256_msg2(inout dst:xmm, in src:xmm, ghost t:counter, ghost block:block_w)
+    {:public}
+    {:quick exportOnly}
+    {:instruction mk_ins(make_instr(I.ins_SHA256_msg2, OReg(dst), OReg(src)))}
+    {:typecheck false}
+    requires
+        sha_enabled;
+        16 <= t < size_k_w_256 - 3;
+        let step1 := ws_partial(t, block) in
+        let t_minus_7 := ws_quad32(t-7, block) in
+        dst == add_wrap_quad32(step1,t_minus_7);
+        src.hi2 == ws_opaque(block, t-2);
+        src.hi3 == ws_opaque(block, t-1);
+    ensures
+        dst == ws_quad32(t, block);
+{
+    lemma_sha256_msg2(old(dst), old(src), t, block);
+}

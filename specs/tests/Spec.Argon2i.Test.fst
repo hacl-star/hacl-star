@@ -72,5 +72,5 @@ let test () =
   IO.print_string "\nExpected ARGON2i: ";
   List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list expected);
 
-  if result then IO.print_string "\nARGON2i Test1 : Success!\n"
-  else IO.print_string "\nARGON2i Test1: Failure :(\n"
+  if result then begin IO.print_string "\nARGON2i Test1 : Success!\n"; true end
+  else begin IO.print_string "\nARGON2i Test1: Failure :(\n"; false end

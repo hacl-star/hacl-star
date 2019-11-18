@@ -8,7 +8,7 @@
 #include <unistd.h>
 #include <stdbool.h>
 #include <time.h>
-#include <vec-intrin.h>
+#include <libintvector.h>
 
 typedef uint64_t cycles;
 

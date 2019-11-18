@@ -1,10 +1,10 @@
 module Hacl.Hash.PadFinish
 
 open Lib.IntTypes
+
 module Cast = FStar.Int.Cast.Full
 module Constants = Spec.SHA2.Constants
 module Helpers = Spec.Hash.Definitions
-//module Endianness = FStar.Kremlin.Endianness
 module Math = FStar.Math.Lemmas
 module Helpers = Spec.Hash.Definitions
 
@@ -27,7 +27,7 @@ open Spec.Hash.Lemmas0
 
 (** Padding *)
 
-#set-options "--z3rlimit 100"
+#set-options "--z3rlimit 50"
 inline_for_extraction
 val store_len: a:hash_alg -> len:len_t a -> b:B.buffer uint8 ->
   ST.Stack unit
@@ -37,18 +37,19 @@ val store_len: a:hash_alg -> len:len_t a -> b:B.buffer uint8 ->
     (ensures (fun h0 _ h1 ->
       M.(modifies (loc_buffer b) h0 h1) /\ (
       match a with
-      | MD5 -> B.as_seq h1 b == Lib.ByteSequence.uint_to_bytes_le (secret len)
-      | _ -> B.as_seq h1 b == Lib.ByteSequence.uint_to_bytes_be (secret len))))
+      | MD5 -> B.as_seq h1 b == Lib.ByteSequence.uint_to_bytes_le #U64 (secret len)
+      | SHA1 | SHA2_224 | SHA2_256 -> B.as_seq h1 b == Lib.ByteSequence.uint_to_bytes_be #U64 (secret len)
+      | _ -> B.as_seq h1 b == Lib.ByteSequence.uint_to_bytes_be #U128 (secret len))))
 
 inline_for_extraction
 let store_len a len b =
   match a with
   | MD5 ->
-      Lib.ByteBuffer.uint_to_bytes_le b (secret len)
+    Lib.ByteBuffer.uint_to_bytes_le b (secret #U64 len)
   | SHA1 | SHA2_224 | SHA2_256 ->
-      Lib.ByteBuffer.uint_to_bytes_be b (secret len)
+    Lib.ByteBuffer.uint_to_bytes_be b (secret #U64 len)
   | SHA2_384 | SHA2_512 ->
-      Lib.ByteBuffer.uint_to_bytes_be b (secret len)
+    Lib.ByteBuffer.uint_to_bytes_be b (secret #U128 len)
 
 #set-options "--z3rlimit 20"
 
@@ -56,7 +57,7 @@ inline_for_extraction noextract
 let len_mod_32 (a: hash_alg) (len: len_t a):
   Tot (n:U32.t { U32.v n = len_v a len % Helpers.block_length a })
 =
-  assert (v(block_len a) <> 0);
+  assert (block_len a <> 0ul);
   match a with
   | MD5 | SHA1 | SHA2_224 | SHA2_256 ->
       Math.lemma_mod_lt (U64.v len) (U32.v (block_len a));
@@ -152,14 +153,11 @@ let pad_2 (a: hash_alg) (len: len_t a) (dst: B.buffer uint8):
   in
   C.Loops.for 0ul (pad0_len a len) inv f
 
-#reset-options "--max_fuel 1 --max_ifuel 1 --z3rlimit 200"
-
-
 inline_for_extraction
 let pad_3 (a: hash_alg) (len: len_t a) (dst: B.buffer uint8):
   ST.Stack unit
     (requires (fun h ->
-      len_v a len < max_input_length a /\
+      len_v a len <= max_input_length a /\
       B.live h dst /\ B.length dst = len_length a))
     (ensures (fun h0 _ h1 ->
       max_input_size_len a;
@@ -187,10 +185,11 @@ let pad_3 (a: hash_alg) (len: len_t a) (dst: B.buffer uint8):
       (**) assert FStar.Mul.(U128.v len * 8 < pow2 128);
       (**) assert FStar.Mul.(FStar.UInt.shift_left #128 (len_v a len) 3 < pow2 128);
       (**) assert FStar.Mul.(U128.(v (shift_left len 3ul)) = U128.v len * 8);
-      (**) assert FStar.Mul.(U128.(v (shift_left len 3ul)) = U128.v len * 8);
       let len' = U128.(len <<^ 3ul) in
       store_len a len' dst
   end
+
+#push-options "--max_fuel 1 --max_ifuel 1 --z3rlimit 200"
 
 noextract inline_for_extraction
 let pad a len dst =

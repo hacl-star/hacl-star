@@ -1,218 +1,37 @@
-FSTAR_HOME   ?= ../../../../FStar
-KREMLIN_HOME ?= ../../../../kremlin
-HACL_HOME    ?= ../../..
+HACL_HOME=../..
 
-CACHE_DIR     ?= $(HACL_HOME)/.cache
-HINT_DIR      ?= $(HACL_HOME)/.hints
-OUTPUT_DIR    ?= .output
-GENERATED_DIR ?= chacha20-c
-OUT_DIR	     ?= chacha20-c
+# CUSTOMIZE HERE: determine what is the main target of this Makefile, e.g. a C
+# test, a Low* test, or just a binary archive (like libcurve.a).
+all: dist/chacha20-test.exe dist/chacha20-vec-test.exe
 
-.PHONY: all test stage1 stage2 clean clean-c distclean
+test: all
+	dist/chacha20-test.exe
+	dist/chacha20-vec-test.exe
 
-all: test
+# Defines rules for producing .checked, .krml, .depend, etc.
+include ../../Makefile.local
 
-test:
-	rm -f .depend && $(MAKE) .depend
-	$(MAKE) stage1
-	STAGE=2 $(MAKE) stage2
+CFLAGS += -I../../../lib/c -mavx -mavx2
+export CFLAGS
 
-stage1: $(GENERATED_DIR)/Hacl_Chacha20.c \
-	$(GENERATED_DIR)/Hacl_Chacha20_Vec32.c \
-	$(GENERATED_DIR)/Hacl_Chacha20_Vec128.c \
-	$(GENERATED_DIR)/Hacl_Chacha20_Vec256.c \
-	$(GENERATED_DIR)/Hacl_Salsa20.c
+# CUSTOMIZE HERE: how to produce binary objects
+# An archive with all the compiled code in this directory.
+dist/libchacha.a: dist/Makefile.basic
+	$(MAKE) -C dist -f Makefile.basic
 
-stage2: chacha20.exe chacha20-vec.exe salsa20.exe
-	./chacha20-vec.exe
-	./chacha20.exe
-	./salsa20.exe
+dist/Makefile.basic: $(filter-out %/prims.krml,$(ALL_KRML_FILES))
+	$(KRML) $^ -o libchacha.a $(BASE_FLAGS) $(CHACHA20_BUNDLE) \
+	  -tmpdir dist \
+	  -ccopts -std=gnu11,-g,-O3 \
+	  -add-include '"libintvector.h"' \
+	  -skip-compilation
 
-FSTAR_INCLUDE_DIRS = \
-  $(HACL_KREMLIN) \
-  $(KREMLIN_HOME)/kremlib \
-  $(HACL_HOME)/specs \
-  $(HACL_HOME)/lib/c \
-  $(HACL_HOME)/lib
+dist/chacha20-test.exe: $(HACL_HOME)/tests/chacha20-test.o dist/libchacha.a
 
-FSTAR_FLAGS = $(OTHERFLAGS) --cmi \
-  --cache_checked_modules --cache_dir $(CACHE_DIR) --odir $(OUTPUT_DIR) \
-  --already_cached "'Prims+FStar+LowStar+C+Spec.Loops+TestLib+Lib'" \
-  $(addprefix --include ,$(FSTAR_INCLUDE_DIRS))
+dist/chacha20-vec-test.exe: $(HACL_HOME)/tests/chacha20-vec-test.o dist/libchacha.a
 
-FSTAR = $(FSTAR_HOME)/bin/fstar.exe $(FSTAR_FLAGS)
-
-ENABLE_HINTS = --use_hints --use_hint_hashes --record_hints --query_stats
-
-ROOTS = Hacl.Chacha20.fst Hacl.Chacha20.Vec32.fst Hacl.Chacha20.Vec128.fst Hacl.Chacha20.Vec256.fst Hacl.Salsa20.fst
-
-.PRECIOUS: %.krml
-
-$(HINT_DIR):
-	mkdir -p $@
-
-$(CACHE_DIR):
-	mkdir -p $@
-
-.depend:
-	$(FSTAR) --dep full $(ROOTS) --extract '* -Prims -FStar +FStar.UInt128 -LowStar -Spec' > $@
-
-include .depend
-
-%.checked: | .depend $(HINT_DIR) $(CACHE_DIR)
-	$(FSTAR) $< $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(notdir $*).hints && \
-	touch -c $@
-
-$(OUTPUT_DIR)/%.krml: | .depend
-	$(FSTAR) --codegen Kremlin \
-	  --extract_module $(basename $(notdir $(subst .checked,,$<))) \
-	  $(notdir $(subst .checked,,$<)) && \
-	touch $@
-
-# 2. Generation of .c files
-
-KREMLIN_TESTLIB=-funroll-loops 8 -warn-error +9 -add-include '"TestLib.h"' -add-include '"vec-intrin.h"' $(KREMLIB)/dist/generic/testlib.c
-
-KREMLIN=$(KREMLIN_HOME)/krml
-
-# We use -drop (deprecated) only to avoid creating unnecessary .c,.h files
-$(GENERATED_DIR)/Hacl_Chacha20_Vec32.c: $(ALL_KRML_FILES) | .depend
-	$(KREMLIN) $(KREMLIN_TESTLIB) -skip-compilation \
-	-bundle 'Lib.*' \
-	-bundle 'Spec.\*' \
-	-bundle 'Hacl.Chacha20_Vec32=*' \
-	-bundle 'FStar.*' \
-	-drop 'Lib.IntVector.Intrinsics,LowStar,Spec,Prims,Lib,C.Loops.*,Hacl.Spec.*,Hacl.Chacha20_Vec128,Hacl.Chacha20_Vec256,Hacl.Chacha20' \
-	-tmpdir $(GENERATED_DIR) \
-	$^
-
-$(GENERATED_DIR)/Hacl_Chacha20_Vec128.c: $(ALL_KRML_FILES) | .depend
-	$(KREMLIN) $(KREMLIN_TESTLIB) -skip-compilation \
-	-bundle 'Lib.*' \
-	-bundle 'Spec.\*' \
-	-bundle 'Hacl_Chacha20_Vec128=*' \
-	-bundle 'FStar.*' \
-	-drop 'Lib.IntVector.Intrinsics,LowStar,Spec,Prims,Lib,C.Loops.*,Hacl.Spec.*,Hacl.Chacha20_Vec32,Hacl.Chacha20_Vec256,Hacl.Chacha20' \
-	-tmpdir $(GENERATED_DIR) \
-	$^
-
-$(GENERATED_DIR)/Hacl_Chacha20_Vec256.c: $(ALL_KRML_FILES) | .depend
-	$(KREMLIN) $(KREMLIN_TESTLIB) -skip-compilation \
-	-bundle 'Lib.*' \
-	-bundle 'Spec.\*' \
-	-bundle 'Hacl_Chacha20_Vec256=*' \
-	-bundle 'FStar.*' \
-	-drop 'Lib.IntVector.Intrinsics,LowStar,Spec,Prims,Lib,C.Loops.*,Hacl.Spec.*,Hacl.Chacha20_Vec32,Hacl.Chacha20_Vec128,Hacl.Chacha20' \
-	-tmpdir $(GENERATED_DIR) \
-	$^
-
-$(GENERATED_DIR)/Hacl_Chacha20.c: $(ALL_KRML_FILES) | .depend
-	$(KREMLIN) $(KREMLIN_TESTLIB) -skip-compilation \
-	-bundle 'Lib.*' \
-	-bundle 'Spec.\*' \
-	-bundle 'Hacl_Chacha20=*' \
-	-bundle 'FStar.*' \
-	-drop 'Lib.IntVector.Intrinsics,LowStar,Spec,Prims,Lib,C.Loops.*,Hacl.Spec.*,Hacl.Chacha20_Vec32,Hacl.Chacha20_Vec128,Hacl.Chacha20_Vec256' \
-	-tmpdir $(GENERATED_DIR) \
-	$^
-
-$(GENERATED_DIR)/Hacl_Salsa20.c: $(ALL_KRML_FILES) | .depend
-	$(KREMLIN) $(KREMLIN_TESTLIB) -skip-compilation \
-	-bundle 'Lib.*' \
-	-bundle 'Spec.\*' \
-	-bundle 'Hacl_Salsa20=*' \
-	-bundle 'FStar.*' \
-	-drop 'Lib.IntVector.Intrinsics,LowStar,Spec,Prims,Lib,C.Loops.*,Hacl.Spec.*,Hacl.Chacha20_Vec32,Hacl.Chacha20_Vec128,Hacl.Chacha20_Vec256,Hacl.Chacha20' \
-	-tmpdir $(GENERATED_DIR) \
-	$^
-
-# The Makefile is manually staged because GNU Make does not understand
-# dependencies between the Makefiles we include, i.e. it won't first generate
-# the .depend, parse it, then generate Makefile.include, parse it, then
-# generate dependencies among the C files
-ifeq ($(STAGE),2)
-
-# The top-level invocation guarantees that stage1 has been run and this file is
-# there.
-#include $(GENERATED_DIR)/Makefile.include
-
-# 3. Collecting all of our source files, and generating corresponding object
-# files.
-
-# This is auto-generated by KreMLin; since the Makefile is staged via the
-# inclusion of Makefile.include, the automated dependency analysis via $(CC) -MM
-# also captures the dependencies between these files.
-#
-# KreMLin sees the fsti's for the various Lib* and LowStar modules and creates .h/.c
-# files for them in $(GENERATED_DIR). However, we are only interested in the header,
-# and drop these (mostly empty) C files.
-#ALL_OUR_FILES 	    = $(filter-out FStar_* Lib.c LowStar.c C.c, $(ALL_C_FILES))
-#ALL_GENERATED_FILES = $(addprefix $(GENERATED_DIR)/,$(ALL_OUR_FILES))
-
-ALL_SOURCES = \
-  $(GENERATED_DIR)/Hacl_Chacha20_Vec32.c \
-  $(GENERATED_DIR)/Hacl_Chacha20_Vec128.c \
-  $(GENERATED_DIR)/Hacl_Chacha20_Vec256.c
-
-ALL_OBJS = $(patsubst %.c,%.o,$(ALL_SOURCES))
-
-INCLUDE_DIRS = \
-  $(KREMLIN_HOME)/include \
-  $(KREMLIN_HOME)/kremlib \
-  $(KREMLIN_HOME)/kremlib/dist/generic \
-  $(HACL_HOME)/lib \
-  $(HACL_HOME)/lib/c
-
-CFLAGS += -O3 -march=native -mtune=native
-CFLAGS += $(addprefix -I ,$(INCLUDE_DIRS))
-#-Wall -Wextra -Werror \
-  -Wno-parentheses -Wno-unused-parameter -Wno-unused-variable
-
-# GNU Make manual section 4.14
-%.d: %.c
-	@set -e; rm -f $@; \
-	  $(CC) -MM $(CFLAGS) $< > $@.$$$$; \
-	  sed 's,\($(notdir $*)\)\.o[ :]*,$(dir $@)\1.o $@ : ,g' < $@.$$$$ > $@; \
-	  rm -f $@.$$$$
-
--include $(patsubst %.c,%.d,$(ALL_SOURCES))
-
-chacha20.exe:
-	$(CC) $(CFLAGS) $(GENERATED_DIR)/Hacl_Chacha20.c chacha20-test.c -L $(KREMLIN_HOME)/kremlib/dist/generic -lkremlib -o chacha20.exe
-	./chacha20.exe
-
-salsa20.exe:
-	$(CC) $(CFLAGS) $(GENERATED_DIR)/Hacl_Salsa20.c salsa20-test.c -L $(KREMLIN_HOME)/kremlib/dist/generic -lkremlib -o salsa20.exe
-	./salsa20.exe
-
-chacha20-vec.exe:
-	$(CC) $(CFLAGS) $(ALL_SOURCES) $(HACL_HOME)/snapshots/hacl-c/Hacl_Chacha20.c $(HACL_HOME)/snapshots/hacl-c/Hacl_Chacha20_Vec128.c chacha20-vec-test.c -L $(KREMLIN_HOME)/kremlib/dist/generic -lkremlib -o chacha20-vec.exe
-	./chacha20-vec.exe
-
-.PRECIOUS: %.o
-
-endif # STAGE=2
-
-# 5. Targets for interactive mode
-
-%.fst-in:
-	@echo $(FSTAR_FLAGS) \
-	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(basename $@).fst.hints
-
-%.fsti-in:
-	@echo $(FSTAR_FLAGS) \
-	  $(ENABLE_HINTS) --hint_file $(HINT_DIR)/$(basename $@).fsti.hints
-
-# 6. Clean targets
-
-SHELL=/bin/bash
-
-clean:
-	rm -rf $(GENERATED_DIR) $(OUT_DIR)/*.exe $(OUT_DIR)/*.a
-	rm -rf include/*.o include/*.d
+%.exe:
+	$(CC) $^ $(KREMLIB_A) -o $@
 
 clean-c:
-	rm -rf $(GENERATED_DIR)/{*.{c,h},Makefile.include}
-
-distclean: clean
-	rm -rf $(OUT_DIR) $(OUTPUT_DIR) *.checked
+	$(MAKE) -C dist/ -f Makefile.basic clean

@@ -8,9 +8,8 @@ open Lib.RawIntTypes
 open Lib.Sequence
 open Lib.ByteSequence
 
-module Hash = Spec.Hash
-module HMAC = Spec.HMAC
-module HKDF = Spec.HKDF
+module HMAC = Spec.Agile.HMAC
+module HKDF = Spec.Agile.HKDF
 
 
 //
@@ -174,9 +173,9 @@ let test () =
   let test1_expected_okm_len : size_nat = List.Tot.length test1_expected_okm in
   let test1_expected_okm : lbytes test1_expected_okm_len = of_list test1_expected_okm in
   let test1_prk : lbytes test1_expected_prk_len =
-    HKDF.hkdf_extract test1_hash test1_salt test1_ikm in
+    HKDF.extract test1_hash test1_salt test1_ikm in
   let test1_okm : lbytes test1_expected_okm_len =
-    HKDF.hkdf_expand test1_hash test1_expected_prk test1_info test1_len in
+    HKDF.expand test1_hash test1_expected_prk test1_info test1_len in
   let r1_a = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test1_expected_prk test1_prk in
   let r1_b = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test1_expected_okm test1_okm in
   IO.print_string "\nExpected PRK: ";
@@ -205,9 +204,9 @@ let test () =
   let test2_expected_okm_len : size_nat = List.Tot.length test2_expected_okm in
   let test2_expected_okm : lbytes test2_expected_okm_len = of_list test2_expected_okm in
   let test2_prk : lbytes test2_expected_prk_len =
-    HKDF.hkdf_extract test2_hash test2_salt test2_ikm in
+    HKDF.extract test2_hash test2_salt test2_ikm in
   let test2_okm : lbytes test2_expected_okm_len =
-    HKDF.hkdf_expand test2_hash test2_expected_prk test2_info test2_len in
+    HKDF.expand test2_hash test2_expected_prk test2_info test2_len in
   let r2_a = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test2_expected_prk test2_prk in
   let r2_b = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test2_expected_okm test2_okm in
   IO.print_string "\nExpected PRK: ";
@@ -237,9 +236,9 @@ let test () =
   let test3_expected_okm_len : size_nat = List.Tot.length test3_expected_okm in
   let test3_expected_okm : lbytes test3_expected_okm_len = of_list test3_expected_okm in
   let test3_prk : lbytes test3_expected_prk_len =
-    HKDF.hkdf_extract test3_hash test3_salt test3_ikm in
+    HKDF.extract test3_hash test3_salt test3_ikm in
   let test3_okm : lbytes test3_expected_okm_len =
-    HKDF.hkdf_expand test3_hash test3_expected_prk test3_info test3_len in
+    HKDF.expand test3_hash test3_expected_prk test3_info test3_len in
   let r3_a = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test3_expected_prk test3_prk in
   let r3_b = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test3_expected_okm test3_okm in
   IO.print_string "\nExpected PRK: ";
@@ -257,5 +256,5 @@ let test () =
   else IO.print_string "HKDF Expand: Failure :(\n";
 
   // Composite result
-  if r1_a && r1_b && r2_a && r2_b && r3_a && r3_b then IO.print_string "\nComposite result: Success!\n"
-  else IO.print_string "\nComposite result: Failure :(\n"
+  if r1_a && r1_b && r2_a && r2_b && r3_a && r3_b then begin IO.print_string "\nComposite result: Success!\n"; true end
+  else begin IO.print_string "\nComposite result: Failure :(\n"; false end

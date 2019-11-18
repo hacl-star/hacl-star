@@ -97,5 +97,5 @@ let test () =
   List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list expected2);
   IO.print_string "\nComputed Shared Secret:";
   List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list computed2);
-  if result2 then   IO.print_string "\nSuccess!\n"
-  else IO.print_string "\nFailure :(\n"
+  if result2 then begin  IO.print_string "\nSuccess!\n"; true end
+  else begin IO.print_string "\nFailure :(\n"; false end

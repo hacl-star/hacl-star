@@ -1273,6 +1273,7 @@ let carry_reduce_felem5_fits_lemma_i #w f i =
   FStar.Math.Lemmas.modulo_lemma ((uint64xN_v c4).[i] * 5) (pow2 64);
   assert ((uint64xN_v (vec_smul_mod c4 (u64 5))).[i] == (uint64xN_v c4).[i] * 5);
   let tmp0', c5 = carry26 tmp0 (vec_smul_mod c4 (u64 5)) in
+  assert_norm (63 * 5 < 62 * max26);
   carry_reduce_lemma_i tmp0 (vec_smul_mod c4 (u64 5)) i;
   assert (if (uint64xN_v f1).[i] < pow2 26 then (uint64xN_v c5).[i] = 0 else (uint64xN_v c5).[i] <= 63);
   let tmp1' = vec_add_mod tmp1 c5 in
@@ -1401,7 +1402,7 @@ let lemma_subtract_p5 f f' =
   else lemma_subtract_p5_1 f f'
 
 
-inline_for_extraction
+noextract
 val subtract_p5_s:
     #w:lanes
   -> f:felem5 w{felem_fits5 f (1, 1, 1, 1, 1)}
@@ -1616,7 +1617,7 @@ let load_tup64_lemma_f2 lo hi =
   FStar.Math.Lemmas.small_modulo_lemma_1 ((v hi % pow2 14) * pow2 12) (pow2 64);
   assert (v f2 == v lo / pow2 52 + (v hi % pow2 14) * pow2 12)
 
-
+noextract
 val load_tup64_lemma: lo:uint64 -> hi:uint64 ->
   Pure tup64_5
   (requires True)
@@ -1771,7 +1772,7 @@ let lemma_tup64_mod_pow2_128 f =
   };
   assert ((as_nat5 f) % pow2 128 == tmp + (v f4 % pow2 24) * pow104)
 
-
+noextract
 val store_tup64_lemma: f:tup64_5 ->
   Pure (uint64 & uint64)
   (requires tup64_fits5 f (1, 1, 1, 1, 1))

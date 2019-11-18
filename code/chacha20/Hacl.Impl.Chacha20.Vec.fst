@@ -12,15 +12,14 @@ open Lib.IntVector
 
 open Hacl.Impl.Chacha20.Core32xN
 module Spec = Hacl.Spec.Chacha20.Vec
-module Lemmas =  Hacl.Spec.Chacha20.Vec.Lemmas
 module Chacha20Equiv = Hacl.Spec.Chacha20.Equiv
 module Loop = Lib.LoopCombinators
 
 
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 200"
+#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 200 --record_options"
 //#set-options "--debug Hacl.Impl.Chacha20.Vec --debug_level ExtractNorm"
 
-inline_for_extraction
+noextract
 val rounds:
     #w:lanes
   -> st:state w ->
@@ -28,6 +27,7 @@ val rounds:
     (requires (fun h -> live h st))
     (ensures (fun h0 _ h1 -> modifies (loc st) h0 h1 /\
       as_seq h1 st == Spec.rounds (as_seq h0 st)))
+[@ Meta.Attribute.inline_ ]
 let rounds #w st =
   double_round st;
   double_round st;
@@ -40,34 +40,7 @@ let rounds #w st =
   double_round st;
   double_round st
 
-inline_for_extraction noextract
-val chacha20_core_:
-    #w:lanes
-  -> k:state w
-  -> ctx0:state w
-  -> ctr:size_t{w * v ctr <= max_size_t} ->
-  Stack unit
-    (requires (fun h -> live h ctx0 /\ live h k /\ disjoint ctx0 k))
-    (ensures (fun h0 _ h1 -> modifies (loc k) h0 h1 /\
-      as_seq h1 k == Spec.chacha20_core (v ctr) (as_seq h0 ctx0)))
-let chacha20_core_ #w k ctx ctr =
-  copy_state k ctx;
-  let ctr_u32 = u32 w *! size_to_uint32 ctr in
-  let cv = vec_load ctr_u32 w in
-  k.(12ul) <- k.(12ul) +| cv;
-  rounds k;
-  sum_state k ctx;
-  k.(12ul) <- k.(12ul) +| cv
-
-
-[@CInline]
-let chacha20_core1 = chacha20_core_ #1
-[@CInline]
-let chacha20_core4 = chacha20_core_ #4
-[@CInline]
-let chacha20_core8 = chacha20_core_ #8
-
-inline_for_extraction noextract
+noextract
 val chacha20_core:
     #w:lanes
   -> k:state w
@@ -77,11 +50,15 @@ val chacha20_core:
     (requires (fun h -> live h ctx0 /\ live h k /\ disjoint ctx0 k))
     (ensures (fun h0 _ h1 -> modifies (loc k) h0 h1 /\
       as_seq h1 k == Spec.chacha20_core (v ctr) (as_seq h0 ctx0)))
+[@ Meta.Attribute.specialize ]
 let chacha20_core #w k ctx ctr =
-  match w with
-  | 1 -> chacha20_core1 k ctx ctr
-  | 4 -> chacha20_core4 k ctx ctr
-  | 8 -> chacha20_core8 k ctx ctr
+  copy_state k ctx;
+  let ctr_u32 = u32 w *! size_to_uint32 ctr in
+  let cv = vec_load ctr_u32 w in
+  k.(12ul) <- k.(12ul) +| cv;
+  rounds k;
+  sum_state k ctx;
+  k.(12ul) <- k.(12ul) +| cv
 
 
 val chacha20_constants:
@@ -125,38 +102,6 @@ let setup1 ctx k n ctr =
 
 
 inline_for_extraction noextract
-val chacha20_init_:
-    #w:lanes
-  -> ctx:state w
-  -> k:lbuffer uint8 32ul
-  -> n:lbuffer uint8 12ul
-  -> ctr0:size_t ->
-  Stack unit
-    (requires (fun h ->
-      live h ctx /\ live h k /\ live h n /\
-      disjoint ctx k /\ disjoint ctx n /\
-      as_seq h ctx == Lib.Sequence.create 16 (vec_zero U32 w)))
-    (ensures (fun h0 _ h1 -> modifies (loc ctx) h0 h1 /\
-      as_seq h1 ctx == Spec.chacha20_init (as_seq h0 k) (as_seq h0 n) (v ctr0)))
-let chacha20_init_ #w ctx k n ctr =
-  push_frame();
-  let ctx1 = create 16ul (u32 0) in
-  setup1 ctx1 k n ctr;
-  let h0 = ST.get() in
-  mapT 16ul ctx (Spec.vec_load_i w) ctx1;
-  let ctr = vec_counter U32 w in
-  let c12 = ctx.(12ul) in
-  ctx.(12ul) <- c12 +| ctr;
-  pop_frame()
-
-[@CInline]
-let chacha20_init1 = chacha20_init_ #1
-[@CInline]
-let chacha20_init4 = chacha20_init_ #4
-[@CInline]
-let chacha20_init8 = chacha20_init_ #8
-
-inline_for_extraction noextract
 val chacha20_init:
     #w:lanes
   -> ctx:state w
@@ -170,13 +115,19 @@ val chacha20_init:
       as_seq h ctx == Lib.Sequence.create 16 (vec_zero U32 w)))
     (ensures (fun h0 _ h1 -> modifies (loc ctx) h0 h1 /\
       as_seq h1 ctx == Spec.chacha20_init (as_seq h0 k) (as_seq h0 n) (v ctr0)))
+[@ Meta.Attribute.specialize ]
 let chacha20_init #w ctx k n ctr =
-  match w with
-  | 1 -> chacha20_init1 ctx k n ctr
-  | 4 -> chacha20_init4 ctx k n ctr
-  | 8 -> chacha20_init8 ctx k n ctr
+  push_frame();
+  let ctx1 = create 16ul (u32 0) in
+  setup1 ctx1 k n ctr;
+  let h0 = ST.get() in
+  mapT 16ul ctx (Spec.vec_load_i w) ctx1;
+  let ctr = vec_counter U32 w in
+  let c12 = ctx.(12ul) in
+  ctx.(12ul) <- c12 +| ctr;
+  pop_frame()
 
-inline_for_extraction noextract
+noextract
 val chacha20_encrypt_block:
     #w:lanes
   -> ctx:state w
@@ -188,6 +139,7 @@ val chacha20_encrypt_block:
       disjoint out ctx /\ disjoint text ctx))
     (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1 /\
       as_seq h1 out == Spec.chacha20_encrypt_block (as_seq h0 ctx) (v incr) (as_seq h0 text)))
+[@ Meta.Attribute.inline_ ]
 let chacha20_encrypt_block #w ctx out incr text =
   push_frame();
   let k = create 16ul (vec_zero U32 w) in
@@ -195,7 +147,7 @@ let chacha20_encrypt_block #w ctx out incr text =
   xor_block out k text;
   pop_frame()
 
-inline_for_extraction noextract
+noextract
 val chacha20_encrypt_last:
     #w:lanes
   -> ctx:state w
@@ -208,6 +160,7 @@ val chacha20_encrypt_last:
       disjoint out ctx /\ disjoint text ctx))
     (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1 /\
       as_seq h1 out == Spec.chacha20_encrypt_last (as_seq h0 ctx) (v incr) (v len) (as_seq h0 text)))
+[@ Meta.Attribute.inline_ ]
 let chacha20_encrypt_last #w ctx len out incr text =
   push_frame();
   let plain = create (size w *! size 64) (u8 0) in
@@ -217,7 +170,7 @@ let chacha20_encrypt_last #w ctx len out incr text =
   pop_frame()
 
 
-inline_for_extraction noextract
+noextract
 val chacha20_update:
     #w:lanes
   -> ctx:state w
@@ -229,9 +182,9 @@ val chacha20_update:
       eq_or_disjoint text out /\ disjoint text ctx /\ disjoint out ctx))
     (ensures (fun h0 _ h1 -> modifies (loc ctx |+| loc out) h0 h1 /\
       as_seq h1 out == Spec.chacha20_update (as_seq h0 ctx) (as_seq h0 text)))
+[@ Meta.Attribute.inline_ ]
 let chacha20_update #w ctx len out text =
   push_frame();
-  let k = create_state w in
   assert_norm (range (v len / v (size w *. size 64)) U32);
   let blocks = len /. (size w *. size 64) in
   let rem = len %. (size w *. size 64) in
@@ -243,7 +196,7 @@ let chacha20_update #w ctx len out text =
     (fun i -> chacha20_encrypt_last ctx rem (sub out (i *! (size w *. 64ul)) rem) i (sub text (i *! (size w *. 64ul)) rem));
   pop_frame()
 
-inline_for_extraction noextract
+noextract
 val chacha20_encrypt_vec:
     #w:lanes
   -> len:size_t
@@ -257,6 +210,7 @@ val chacha20_encrypt_vec:
       live h key /\ live h n /\ live h text /\ live h out /\ eq_or_disjoint text out))
     (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1 /\
       as_seq h1 out == Spec.chacha20_encrypt_bytes #w (as_seq h0 key) (as_seq h0 n) (v ctr) (as_seq h0 text)))
+[@ Meta.Attribute.inline_ ]
 let chacha20_encrypt_vec #w len out text key n ctr =
   push_frame();
   let ctx = create_state w in
@@ -279,29 +233,15 @@ let chacha20_encrypt_st (w:lanes) =
       modifies (loc out) h0 h1 /\
       as_seq h1 out == Spec.Chacha20.chacha20_encrypt_bytes (as_seq h0 key) (as_seq h0 n) (v ctr) (as_seq h0 text))
 
-inline_for_extraction noextract
-val chacha20_encrypt_vec_: #w:lanes -> chacha20_encrypt_st w
-let chacha20_encrypt_vec_ #w len out text key n ctr =
+noextract
+val chacha20_encrypt: #w:lanes -> chacha20_encrypt_st w
+[@ Meta.Attribute.specialize ]
+let chacha20_encrypt #w len out text key n ctr =
   let h0 = ST.get () in
   chacha20_encrypt_vec #w len out text key n ctr;
-  Chacha20Equiv.chacha20_encrypt_bytes_lemma_equiv #w (as_seq h0 key) (as_seq h0 n) (v ctr) (as_seq h0 text)
+  Chacha20Equiv.lemma_chacha20_vec_equiv #w (as_seq h0 key) (as_seq h0 n) (v ctr) (as_seq h0 text)
 
-[@CInline]
-let chacha20_encrypt_32 : chacha20_encrypt_st 1 = chacha20_encrypt_vec_ #1
-[@CInline]
-let chacha20_encrypt_128 : chacha20_encrypt_st 4 = chacha20_encrypt_vec_ #4
-[@CInline]
-let chacha20_encrypt_256 : chacha20_encrypt_st 8 = chacha20_encrypt_vec_ #8
-
-inline_for_extraction noextract
-val chacha20_encrypt: #w:lanes -> chacha20_encrypt_st w
-let chacha20_encrypt #w len out text key n ctr =
-  match w with
-  | 1 -> chacha20_encrypt_32 len out text key n ctr
-  | 4 -> chacha20_encrypt_128 len out text key n ctr
-  | 8 -> chacha20_encrypt_256 len out text key n ctr
-
-inline_for_extraction noextract
+noextract
 val chacha20_decrypt_vec:
     #w:lanes
   -> len:size_t
@@ -315,6 +255,7 @@ val chacha20_decrypt_vec:
       live h key /\ live h n /\ live h cipher /\ live h out /\ eq_or_disjoint cipher out))
     (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1 /\
       as_seq h1 out == Spec.chacha20_decrypt_bytes #w (as_seq h0 key) (as_seq h0 n) (v ctr) (as_seq h0 cipher)))
+[@ Meta.Attribute.inline_ ]
 let chacha20_decrypt_vec #w len out cipher key n ctr =
   push_frame();
   let ctx = create_state w in
@@ -337,24 +278,10 @@ let chacha20_decrypt_st (w:lanes) =
       modifies (loc out) h0 h1 /\
       as_seq h1 out == Spec.Chacha20.chacha20_decrypt_bytes (as_seq h0 key) (as_seq h0 n) (v ctr) (as_seq h0 cipher))
 
-inline_for_extraction noextract
-val chacha20_decrypt_vec_: #w:lanes -> chacha20_decrypt_st w
-let chacha20_decrypt_vec_ #w len out cipher key n ctr =
+noextract
+val chacha20_decrypt: #w:lanes -> chacha20_decrypt_st w
+[@ Meta.Attribute.specialize ]
+let chacha20_decrypt #w len out cipher key n ctr =
   let h0 = ST.get () in
   chacha20_decrypt_vec #w len out cipher key n ctr;
-  Chacha20Equiv.chacha20_encrypt_bytes_lemma_equiv #w (as_seq h0 key) (as_seq h0 n) (v ctr) (as_seq h0 cipher)
-
-[@CInline]
-let chacha20_decrypt_32 : chacha20_decrypt_st 1 = chacha20_decrypt_vec_ #1
-[@CInline]
-let chacha20_decrypt_128 : chacha20_decrypt_st 4 = chacha20_decrypt_vec_ #4
-[@CInline]
-let chacha20_decrypt_256 : chacha20_decrypt_st 8 = chacha20_decrypt_vec_ #8
-
-inline_for_extraction noextract
-val chacha20_decrypt: #w:lanes -> chacha20_decrypt_st w
-let chacha20_decrypt #w len out cipher key n ctr =
-  match w with
-  | 1 -> chacha20_decrypt_32 len out cipher key n ctr
-  | 4 -> chacha20_decrypt_128 len out cipher key n ctr
-  | 8 -> chacha20_decrypt_256 len out cipher key n ctr
+  Chacha20Equiv.lemma_chacha20_vec_equiv #w (as_seq h0 key) (as_seq h0 n) (v ctr) (as_seq h0 cipher)

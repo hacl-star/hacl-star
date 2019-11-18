@@ -1,0 +1,22 @@
+#include "crypto_core/keccakf160064bits/scalar/keccak_f1600.jazz"
+
+//
+// TODO : rewrite to match crypto_core
+//
+export fn keccak_f1600(
+  reg u64 in,
+  reg u64 _iotas
+)
+{
+  inline int i;
+  _state_t state;
+  reg u64 t;
+
+  for i=0 to 25
+  { t = [in + 8*i]; B(state,i) = t; }
+
+  state, _iotas = __keccak_f1600_scalar(state, _iotas);
+
+  for i=0 to 25
+  { t = B(state,i); t = [in + 8*i]; }
+}

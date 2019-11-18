@@ -5,15 +5,22 @@ open Lib.RawIntTypes
 open Lib.Sequence
 open Spec.AES256
 open Lib.LoopCombinators
+open Lib.ByteSequence
 
-let test1_input_key1 = of_list (List.Tot.map u8 [
+#set-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
+
+let test1_input_key1_list = List.Tot.map u8 [
   0x60; 0x3d; 0xeb; 0x10; 0x15; 0xca; 0x71; 0xbe;
   0x2b; 0x73; 0xae; 0xf0; 0x85; 0x7d; 0x77; 0x81;
   0x1f; 0x35; 0x2c; 0x07; 0x3b; 0x61; 0x08; 0xd7;
   0x2d; 0x98; 0x10; 0xa3; 0x09; 0x14; 0xdf; 0xf4
-])
+]
 
-let test1_output_expanded = of_list(List.Tot.map u8 [
+let test1_input_key1 : lbytes 32 =
+  assert_norm (List.Tot.length test1_input_key1_list == 32);
+  of_list test1_input_key1_list
+
+let test1_output_expanded_list =List.Tot.map u8 [
   0x60; 0x3d; 0xeb; 0x10; 0x15; 0xca; 0x71; 0xbe;
   0x2b; 0x73; 0xae; 0xf0; 0x85; 0x7d; 0x77; 0x81;
   0x1f; 0x35; 0x2c; 0x07; 0x3b; 0x61; 0x08; 0xd7;
@@ -44,62 +51,106 @@ let test1_output_expanded = of_list(List.Tot.map u8 [
   0x9a; 0xdf; 0x6a; 0xce; 0xbd; 0x10; 0x19; 0x0d;
   0xfe; 0x48; 0x90; 0xd1; 0xe6; 0x18; 0x8d; 0x0b;
   0x04; 0x6d; 0xf3; 0x44; 0x70; 0x6c; 0x63; 0x1e
-])
+]
 
-let test2_input_key = of_list (List.Tot.map u8 [
+
+let test1_output_expanded : lbytes 240 =
+  assert_norm (List.Tot.length test1_output_expanded_list == 240);
+  of_list test1_output_expanded_list
+
+let test2_input_key_list = List.Tot.map u8 [
   0x00; 0x01; 0x02; 0x03; 0x04; 0x05; 0x06; 0x07;
   0x08; 0x09; 0x0a; 0x0b; 0x0c; 0x0d; 0x0e; 0x0f;
   0x10; 0x11; 0x12; 0x13; 0x14; 0x15; 0x16; 0x17;
   0x18; 0x19; 0x1a; 0x1b; 0x1c; 0x1d; 0x1e; 0x1f
-])
+]
 
-let test2_input_plaintext = of_list (List.Tot.map u8 [
+let test2_input_key : lbytes 32 =
+  assert_norm (List.Tot.length test2_input_key_list == 32);
+  of_list test2_input_key_list
+
+let test2_input_plaintext_list = List.Tot.map u8 [
   0x00; 0x11; 0x22; 0x33; 0x44; 0x55; 0x66; 0x77;
   0x88; 0x99; 0xaa; 0xbb; 0xcc; 0xdd; 0xee; 0xff
-])
+]
 
-let test2_output_ciphertext = of_list (List.Tot.map u8 [
+let test2_input_plaintext  : lbytes 16 =
+  assert_norm (List.Tot.length test2_input_plaintext_list == 16);
+  of_list test2_input_plaintext_list
+
+let test2_output_ciphertext_list = List.Tot.map u8 [
   0x8e; 0xa2; 0xb7; 0xca; 0x51; 0x67; 0x45; 0xbf;
   0xea; 0xfc; 0x49; 0x90; 0x4b; 0x49; 0x60; 0x89
-])
+]
 
-let test3_input_key = of_list (List.Tot.map u8 [
+let test2_output_ciphertext : lbytes 16 =
+  assert_norm (List.Tot.length test2_output_ciphertext_list == 16);
+  of_list test2_output_ciphertext_list
+
+let test3_input_key_list = List.Tot.map u8 [
   0xc4; 0x7b; 0x02; 0x94; 0xdb; 0xbb; 0xee; 0x0f;
   0xec; 0x47; 0x57; 0xf2; 0x2f; 0xfe; 0xee; 0x35;
   0x87; 0xca; 0x47; 0x30; 0xc3; 0xd3; 0x3b; 0x69;
   0x1d; 0xf3; 0x8b; 0xab; 0x07; 0x6b; 0xc5; 0x58
-])
+]
 
-let test3_input_plaintext = of_list (List.Tot.map u8 [
+let test3_input_key : lbytes 32 =
+  assert_norm (List.Tot.length test3_input_key_list == 32);
+  of_list test3_input_key_list
+
+let test3_input_plaintext_list = List.Tot.map u8 [
   0x00; 0x00; 0x00; 0x00; 0x00; 0x00; 0x00; 0x00;
   0x00; 0x00; 0x00; 0x00; 0x00; 0x00; 0x00; 0x00
-])
+]
 
-let test3_output_ciphertext = of_list (List.Tot.map u8 [
+let test3_input_plaintext : lbytes 16 =
+  assert_norm (List.Tot.length test3_input_plaintext_list == 16);
+  of_list test3_input_plaintext_list
+
+let test3_output_ciphertext_list = List.Tot.map u8 [
   0x46; 0xf2; 0xfb; 0x34; 0x2d; 0x6f; 0x0a; 0xb4;
   0x77; 0x47; 0x6f; 0xc5; 0x01; 0x24; 0x2c; 0x5f
-])
+]
 
-let test4_input_key = of_list (List.Tot.map u8 [
+let test3_output_ciphertext : lbytes 16 =
+  assert_norm (List.Tot.length test3_output_ciphertext_list == 16);
+  of_list test3_output_ciphertext_list
+
+let test4_input_key_list = List.Tot.map u8 [
   0xcc; 0xd1; 0xbc; 0x3c; 0x65; 0x9c; 0xd3; 0xc5;
   0x9b; 0xc4; 0x37; 0x48; 0x4e; 0x3c; 0x5c; 0x72;
   0x44; 0x41; 0xda; 0x8d; 0x6e; 0x90; 0xce; 0x55;
   0x6c; 0xd5; 0x7d; 0x07; 0x52; 0x66; 0x3b; 0xbc
-])
+]
 
-let test4_input_plaintext = of_list (List.Tot.map u8 [
+let test4_input_key : lbytes 32 =
+  assert_norm (List.Tot.length test4_input_key_list == 32);
+  of_list test4_input_key_list
+
+let test4_input_plaintext_list = List.Tot.map u8 [
   0x00; 0x00; 0x00; 0x00; 0x00; 0x00; 0x00; 0x00;
   0x00; 0x00; 0x00; 0x00; 0x00; 0x00; 0x00; 0x00
-])
+]
 
-let test4_output_ciphertext = of_list (List.Tot.map u8 [
+let test4_input_plaintext : lbytes 16 =
+  assert_norm (List.Tot.length test4_input_plaintext_list == 16);
+  of_list test4_input_plaintext_list
+
+let test4_output_ciphertext_list = List.Tot.map u8 [
   0x30; 0x4f; 0x81; 0xab; 0x61; 0xa8; 0x0c; 0x2e;
   0x74; 0x3b; 0x94; 0xd5; 0x00; 0x2a; 0x12; 0x6b
-])
+]
 
+let test4_output_ciphertext : lbytes 16 =
+  assert_norm (List.Tot.length test4_output_ciphertext_list == 16);
+  of_list test4_output_ciphertext_list
 
+#set-options "--max_ifuel 1"
 
-let test_compare_buffers (msg:string) (expected:seq uint8) (computed:seq uint8) =
+let test_compare_buffers
+  (msg:string)
+  (expected:seq uint8{length expected < max_size_t})
+  (computed:seq uint8{length computed == length expected}) =
   IO.print_string "\n";
   IO.print_string msg;
   IO.print_string "\nexpected (";
@@ -112,29 +163,29 @@ let test_compare_buffers (msg:string) (expected:seq uint8) (computed:seq uint8) 
   IO.print_string "):\n";
   FStar.List.iter (fun a -> IO.print_uint8_hex_pad (u8_to_UInt8 a)) (to_list computed);
   IO.print_string "\n";
-  let result =
-    for_all2 #uint8 #uint8 #(length computed) (fun x y -> uint_to_nat #U8 x = uint_to_nat #U8 y)
-      computed expected
-  in
+  let result = for_all2 #uint8 #uint8 #(length computed) (fun x y -> uint_to_nat #U8 x = uint_to_nat #U8 y)
+      computed expected in
   if result then IO.print_string "\nSuccess !\n"
-  else IO.print_string "\nFailed !\n"
+  else IO.print_string "\nFailed !\n";
+  result
 
 
-let test() : FStar.All.ML unit =
+let test() : FStar.All.ML bool =
   let computed1 = keyExpansion test1_input_key1 in
-  test_compare_buffers "TEST1: key expansion" test1_output_expanded computed1;
+  let result1 = test_compare_buffers "TEST1: key expansion" test1_output_expanded computed1 in
   let test2_xkey = keyExpansion test2_input_key in
   let test2_computed = cipher test2_input_plaintext test2_xkey in
-  test_compare_buffers "TEST2: cipher" test2_output_ciphertext test2_computed;
+  let result2 = test_compare_buffers "TEST2: cipher" test2_output_ciphertext test2_computed in
   let test2_inv_computed = inv_cipher test2_output_ciphertext test2_xkey in
-  test_compare_buffers "TEST3: inv_cipher" test2_input_plaintext test2_inv_computed;
+  let result3 = test_compare_buffers "TEST3: inv_cipher" test2_input_plaintext test2_inv_computed in
   let test3_xkey = keyExpansion test3_input_key in
   let test3_computed = cipher test3_input_plaintext test3_xkey in
-  test_compare_buffers "TEST4: cipher" test3_output_ciphertext test3_computed;
+  let result4 = test_compare_buffers "TEST4: cipher" test3_output_ciphertext test3_computed in
   let test3_inv_computed = inv_cipher test3_output_ciphertext test3_xkey in
-  test_compare_buffers "TEST5: inv_cipher" test3_input_plaintext test3_inv_computed;
+  let result5 = test_compare_buffers "TEST5: inv_cipher" test3_input_plaintext test3_inv_computed in
   let test4_xkey = keyExpansion test4_input_key in
   let test4_computed = cipher test4_input_plaintext test4_xkey in
-  test_compare_buffers "TEST5: cipher" test4_output_ciphertext test4_computed;
+  let result6 = test_compare_buffers "TEST5: cipher" test4_output_ciphertext test4_computed in
   let test4_inv_computed = inv_cipher test4_output_ciphertext test4_xkey in
-  test_compare_buffers "TEST6: inv_cipher" test4_input_plaintext test4_inv_computed
+  let result7 = test_compare_buffers "TEST6: inv_cipher" test4_input_plaintext test4_inv_computed in
+  result1 && result2 && result3 && result4 && result5 && result6 && result7

@@ -1,72 +1,42 @@
 module Spec.Agile.HMAC
 
-open FStar.Mul
+open Spec.Hash.Definitions
+open FStar.Integers
 open Lib.IntTypes
-open Lib.Sequence
-open Lib.ByteSequence
 
+#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
 
-module H = Spec.Agile.Hash
+let wrap 
+  (a: hash_alg) 
+  (key: bytes{Seq.length key <= max_input_length a})
+  : lbytes (block_length a)
+=
+  let key0 = if Seq.length key <= block_length a then key else Spec.Agile.Hash.hash a key in
+  let paddingLength = block_length a - Seq.length key0 in
+  Seq.append key0 (Seq.create paddingLength (u8 0))
 
+let xor (x: uint8) (v: bytes) : lbytes (Seq.length v) =
+  Spec.Loops.seq_map (logxor x) v
 
-(* Key wrapping function *)
-let wrap_key (a:H.algorithm) (key:bytes{length key <= H.max_input a}) =
-  let block = create (H.size_block a) (u8 0) in
-  let len = length key in
-  if len <= H.size_block a then
-    update_slice block 0 len key
-  else begin
-    let nkey = H.hash a key in
-    update_slice block 0 (H.size_hash a) nkey
-  end
+#push-options "--max_fuel 1"
 
+let rec xor_lemma (x: uint8) (v: bytes) : Lemma
+  (ensures xor x v == Spec.Loops.seq_map2 logxor (Seq.create (Seq.length v) x) v)
+  (decreases (Seq.length v)) 
+=
+  let l = Seq.length v in
+  if l > 0 then (
+    let xs  = Seq.create l x in
+    let xs' = Seq.create (l-1) x in
+    Seq.lemma_eq_intro (Seq.slice xs 1 l) xs';
+    xor_lemma x (Seq.slice v 1 l))
 
-let init (a:H.algorithm) (okey:lbytes (H.size_block a)) =
+#pop-options
 
-  (* Define ipad and opad *)
-  let ipad = create (H.size_block a) (u8 0x36) in
-
-  (* Step 2: xor "result of step 1" with ipad *)
-  let s2 = map2 (fun x y -> logxor x y) ipad okey in
-
-  (* Step 3a: feed s2 to the inner hash function *)
-  H.update_block a s2 (H.init a)
-
-
-let update_block (a:H.algorithm) block chash = H.update_block a block chash
-
-let update_last (a:H.algorithm) prev len last hash = H.update_last a prev len last hash
-
-
-let finish (a:H.algorithm) (key:lbytes (H.size_block a)) (hash:H.state a) =
-
-  (* Define opad *)
-  let opad = create (H.size_block a) (u8 0x5c) in
-
-  (* Step 4: apply H to "result of step 3" *)
-  let s4 = H.finish a hash in
-
-  (* Step 5: xor "result of step 1" with opad *)
-  let s5 = map2 (fun x y -> logxor x y) opad key in
-
-  (* Step 6: append "result of step 4" to "result of step 5" *)
-  (* Step 7: apply H to "result of step 6" *)
-  let hash0 = H.update_block a s5 (H.init a) in
-  let hash1 = H.update_last a (H.size_block a) (H.size_hash a) s4 hash0 in
-  let hash2 = H.finish a hash1 in
-  hash2
-
-
-let hmac
-  (a:H.algorithm)
-  (key:bytes{length key <= H.max_input a})
-  (input:bytes{length input + H.size_block a <= H.max_input a}) =
-
-  let klen = length key in
-  let ilen = length input in
-  let okey = wrap_key a key in
-  let hash0 = init a okey in
-  let hash1 = repeati_blocks (H.size_block a) input
-    (fun i -> update_block a)
-    (fun i -> update_last a ((i + 1) * (H.size_block a))) hash0 in
-  finish a okey hash1
+let hmac a key data =
+  assert_norm (pow2 32 < pow2 61);
+  assert_norm (pow2 32 < pow2 125);
+  let k = wrap a key in
+  let h1 = Spec.Agile.Hash.hash a (Seq.append (xor (u8 0x36) k) data) in
+  let h2 = Spec.Agile.Hash.hash a (Seq.append (xor (u8 0x5c) k) h1) in
+  h2
