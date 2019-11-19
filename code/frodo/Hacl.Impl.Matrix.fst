@@ -582,6 +582,8 @@ let matrix_from_lbytes #n1 #n2 b res =
   (fun h1 i ->
     live h1 b /\ live h1 res /\ modifies1 res h0 h1 /\
     (forall (i0:size_nat{i0 < i}). bget h1 res i0 == M.matrix_from_lbytes_fc (v n1) (v n2) (as_seq h0 b) i0))
-  (fun i -> res.(i) <- uint_from_bytes_le #U16 (sub b (size 2 *! i) (size 2)) );
+  (fun i ->
+    assert (v (size 2 *! i) = 2 * v i);
+    res.(i) <- uint_from_bytes_le #U16 (sub b (size 2 *! i) (size 2)));
   let h1 = ST.get () in
   Seq.eq_intro (as_seq h1 res) (M.matrix_from_lbytes (v n1) (v n2) (as_seq h0 b))

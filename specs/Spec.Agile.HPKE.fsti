@@ -102,7 +102,6 @@ val sealBase:
 
 val openBase:
     cs:ciphersuite
-  -> pkE:key_dh_public_s cs
   -> skR:key_dh_secret_s cs
   -> input:bytes{size_dh_public cs + size_aead_tag cs <= Seq.length input /\ Seq.length input <= max_size_t}
   -> info:bytes{Seq.length info <= max_info} ->
