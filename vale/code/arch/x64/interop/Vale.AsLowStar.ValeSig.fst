@@ -1,5 +1,6 @@
 module Vale.AsLowStar.ValeSig
 open FStar.Mul
+open Vale.Arch.HeapImpl
 open Vale.Interop.Base
 module B = LowStar.Buffer
 module BS = Vale.X64.Machine_Semantics_s
@@ -127,8 +128,8 @@ let vale_sig_nil
        V.eval_code code va_s0 f va_s1 /\
        vale_calling_conventions va_s0 va_s1 regs_modified xmms_modified /\
        elim_nil post va_s0 va_s1 f /\
-       readable args VS.(va_s1.vs_heap) /\
-       ME.modifies (mloc_modified_args args) va_s0.VS.vs_heap va_s1.VS.vs_heap))
+       readable args (ME.get_vale_heap va_s1.VS.vs_heap) /\
+       ME.modifies (mloc_modified_args args) (VS.vs_get_vale_heap va_s0) (VS.vs_get_vale_heap va_s1)))
 
 [@__reduce__]
 let rec vale_sig_tl (regs_modified:MS.reg_64 -> bool)

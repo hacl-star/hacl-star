@@ -1,5 +1,6 @@
 module Vale.X64.StateLemmas
 open FStar.Mul
+open Vale.Arch.HeapImpl
 open Vale.X64.Machine_s
 open Vale.X64.State
 module BS = Vale.X64.Machine_Semantics_s
@@ -14,12 +15,12 @@ let same_heap_types = ()
 
 #set-options "--max_ifuel 2 --initial_ifuel 2"
 let lemma_valid_mem_addr64 h ptr =
-  MS.bytes_valid64 ptr h;
+  MS.bytes_valid64 ptr (get_vale_heap h);
   MS.lemma_heap_get_heap h;
   ()
 
 let lemma_valid_mem_addr128 h ptr =
-  MS.bytes_valid128 ptr h;
+  MS.bytes_valid128 ptr (get_vale_heap h);
   MS.lemma_heap_get_heap h;
   ()
 

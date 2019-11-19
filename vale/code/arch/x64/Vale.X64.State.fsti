@@ -14,11 +14,13 @@ noeq type vale_state = {
   vs_ok: bool;
   vs_regs: Regs.t;
   vs_flags: Flags.t;
-  vs_heap: vale_heap_impl;
+  vs_heap: vale_full_heap;
   vs_stack: vale_stack;
   vs_memTaint: memtaint;
   vs_stackTaint: memtaint;
 }
+
+unfold let vs_get_vale_heap (s:vale_state) : vale_heap = get_vale_heap s.vs_heap
 
 [@va_qattr]
 unfold let eval_reg (r:reg) (s:vale_state) : t_reg r = Regs.sel r s.vs_regs
@@ -80,9 +82,9 @@ let update_flag (f:flag) (v:Flags.flag_val_t) (s:vale_state) : vale_state =
 let update_reg_xmm (r:reg_xmm) (v:quad32) (s:vale_state) : vale_state =
   update_reg (Reg 1 r) v s
 
-[@va_qattr]
-let update_mem (ptr:int) (v:nat64) (s:vale_state) : GTot vale_state =
-  {s with vs_heap = set_vale_heap s.vs_heap (store_mem64 ptr v (get_vale_heap s.vs_heap))}
+//[@va_qattr]
+//let update_mem (ptr:int) (v:nat64) (s:vale_state) : GTot vale_state =
+//  {s with vs_heap = set_vale_heap s.vs_heap (store_mem64 ptr v (get_vale_heap s.vs_heap))}
 
 [@va_qattr]
 let update_stack64 (ptr:int) (v:nat64) (s:vale_state) : GTot vale_state =
@@ -129,7 +131,7 @@ let state_eq (s0:vale_state) (s1:vale_state) : prop0 =
   s0.vs_ok == s1.vs_ok /\
   Regs.equal s0.vs_regs s1.vs_regs /\
   Flags.equal s0.vs_flags s1.vs_flags /\
-  vale_heap_impl_equal s0.vs_heap s1.vs_heap /\
+  vale_full_heap_equal s0.vs_heap s1.vs_heap /\
   s0.vs_stack == s1.vs_stack /\
   s0.vs_memTaint == s1.vs_memTaint /\
   s0.vs_stackTaint == s1.vs_stackTaint

@@ -93,11 +93,11 @@ let vm_lemma'
       V.eval_code code va_s0 f va_s1 /\
       VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
       vm_post code dst src va_s0 va_s1 f /\
-      ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_immbuffer src) /\
-      ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer dst) /\
+      ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_immbuffer src) /\
+      ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_buffer dst) /\
       ME.buffer_writeable (as_vale_buffer dst) /\
       ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer dst))
-                                ME.loc_none) va_s0.VS.vs_heap va_s1.VS.vs_heap
+                                ME.loc_none) (VS.vs_get_vale_heap va_s0) (VS.vs_get_vale_heap va_s1)
     ))
   = 
   let va_s1, f = VM.va_lemma_memcpy code va_s0 IA.win (as_vale_buffer dst) (as_vale_immbuffer src) in
@@ -343,15 +343,15 @@ let ta_lemma'
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
        ta_post code arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 va_s0 va_s1 f /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_immbuffer arg0) /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_immbuffer arg1) /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_immbuffer arg2) /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_immbuffer arg3) /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_immbuffer arg4) /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_immbuffer arg5) /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_immbuffer arg6) /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_immbuffer arg7) /\
-       ME.modifies ME.loc_none va_s0.VS.vs_heap va_s1.VS.vs_heap))
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_immbuffer arg0) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_immbuffer arg1) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_immbuffer arg2) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_immbuffer arg3) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_immbuffer arg4) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_immbuffer arg5) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_immbuffer arg6) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_immbuffer arg7) /\
+       ME.modifies ME.loc_none (VS.vs_get_vale_heap va_s0) (VS.vs_get_vale_heap va_s1)))
  =
  let va_s1, f = TA.va_lemma_test code va_s0 IA.win
       (as_vale_immbuffer arg0)

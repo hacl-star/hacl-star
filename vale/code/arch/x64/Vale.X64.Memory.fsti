@@ -6,11 +6,19 @@ open Vale.X64.Machine_s
 open Vale.Arch.HeapImpl
 
 unfold let vale_heap = vale_heap
-unfold let vale_heap_impl = vale_heap_impl
+unfold let vale_full_heap = vale_full_heap
 
-let get_vale_heap (vhi:vale_heap_impl) : vale_heap = vhi
-let set_vale_heap (vhi:vale_heap_impl) (vh:vale_heap) : vale_heap_impl = vh
-let vale_heap_impl_equal (h1 h2:vale_heap_impl) = h1 == h2
+[@"opaque_to_smt"]
+let get_vale_heap (vhi:vale_full_heap) : vale_heap = vhi.v_h
+let get_one_vale_heap (vhi:vale_full_heap) : vale_heap = vhi.v_h
+let set_vale_heap (vhi:vale_full_heap) (vh:vale_heap) : vale_full_heap = {v_h = vh}
+let lemma_set_vale_heap (vhi:vale_full_heap) (vh:vale_heap) : Lemma
+  (requires True)
+  (ensures get_vale_heap (set_vale_heap vhi vh) == vh)
+  [SMTPat (set_vale_heap vhi vh)]
+  =
+  FStar.Pervasives.reveal_opaque (`%get_vale_heap) get_vale_heap
+let vale_full_heap_equal (h1 h2:vale_full_heap) = get_one_vale_heap h1 == get_one_vale_heap h2
 
 unfold let nat8 = Vale.Def.Words_s.nat8
 unfold let nat16 = Vale.Def.Words_s.nat16

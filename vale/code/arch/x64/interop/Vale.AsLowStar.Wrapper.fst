@@ -1,4 +1,5 @@
 module Vale.AsLowStar.Wrapper
+open Vale.Arch.HeapImpl
 open Vale.X64.MemoryAdapters
 open Vale.Interop.Base
 module B = LowStar.Buffer
@@ -76,7 +77,7 @@ let readable_cons (hd:arg) (tl:list arg) (s:ME.vale_heap)
   : Lemma VSig.(readable (hd::tl) s <==> (readable_one s hd /\ readable tl s))
   = BigOps.big_and'_cons VSig.(readable_one s) hd tl
 
-let arg_is_registered_root (s:ME.vale_heap) (a:arg) =
+let arg_is_registered_root (s:ME.vale_full_heap) (a:arg) =
   match a with
   | (| TD_Buffer src bt _, x |) ->
     List.memP (mut_to_b8 src x) (ptrs_of_mem (as_mem s))
@@ -94,28 +95,28 @@ let core_create_lemma_readable
   : Lemma
       (ensures
         (let va_s = LSig.create_initial_vale_state #max_arity #arg_reg args h0 in
-         VSig.readable args VS.(va_s.vs_heap)))
+         VSig.readable args (ME.get_vale_heap va_s.VS.vs_heap)))
   =
-    let readable_registered_one (a:arg) (s:ME.vale_heap)
-      : Lemma VSig.(arg_is_registered_root s a <==> readable_one s a)
+    let readable_registered_one (a:arg) (s:ME.vale_full_heap)
+      : Lemma VSig.(arg_is_registered_root s a <==> readable_one (ME.get_vale_heap s) a)
       = match a with
         | (| TD_Buffer src bt _, x |) ->
           Vale.AsLowStar.MemoryHelpers.reveal_readable #src #bt x s;
           Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal src bt x
         | (| TD_ImmBuffer src bt ig, x |) ->
           Vale.AsLowStar.MemoryHelpers.reveal_imm_readable #src #bt x s;
-          assert_norm (ME.buffer_readable s (as_vale_immbuffer #src #bt x) <==>
-                       VSig.readable_one s (| TD_ImmBuffer src bt ig, x |))
+          assert_norm (ME.buffer_readable (ME.get_vale_heap s) (as_vale_immbuffer #src #bt x) <==>
+                       VSig.readable_one (ME.get_vale_heap s) (| TD_ImmBuffer src bt ig, x |))
         | (| TD_Base _, _ |) -> ()
     in
     let rec readable_registered_all
         (args:list arg)
-        (s:ME.vale_heap {forall x. List.memP x args ==> arg_is_registered_root s x})
-      : Lemma VSig.(readable args s)
+        (s:ME.vale_full_heap {forall x. List.memP x args ==> arg_is_registered_root s x})
+      : Lemma VSig.(readable args (ME.get_vale_heap s))
       = match args with
         | [] -> ()
         | hd::tl ->
-          readable_cons hd tl s;
+          readable_cons hd tl (ME.get_vale_heap s);
           readable_registered_one hd s;
           readable_registered_all tl s
      in
@@ -124,32 +125,32 @@ let core_create_lemma_readable
          (h:mem_roots args)
        : Lemma
            (let mem = mk_mem args h in
-            VSig.readable args (as_vale_mem mem))
+            VSig.readable args (ME.get_vale_heap (create_initial_vale_heap mem)))
        = let mem = mk_mem args h in
          FStar.Classical.forall_intro (FStar.Classical.move_requires (args_b8_lemma args));
-         readable_registered_all args (as_vale_mem mem)
+         readable_registered_all args (create_initial_vale_heap mem)
      in
      readable_mk_mem args h0
 
-let readable_live_one (m:ME.vale_heap) (a:arg)
-  : Lemma (VSig.readable_one m a ==>
+let readable_live_one (m:ME.vale_full_heap) (a:arg)
+  : Lemma (VSig.readable_one (ME.get_vale_heap m) a ==>
            live_arg (hs_of_mem (as_mem m)) a)
   = match a with
     | (| TD_Buffer src bt _, x |) ->
       Vale.AsLowStar.MemoryHelpers.readable_live #src #bt x m
     | (| TD_ImmBuffer src bt ig, x |) ->
       Vale.AsLowStar.MemoryHelpers.readable_imm_live #src #bt x m;
-      assert_norm (ME.buffer_readable m (as_vale_immbuffer #src #bt x) <==>
-                   VSig.readable_one m (| TD_ImmBuffer src bt ig, x |))
+      assert_norm (ME.buffer_readable (ME.get_vale_heap m) (as_vale_immbuffer #src #bt x) <==>
+                   VSig.readable_one (ME.get_vale_heap m) (| TD_ImmBuffer src bt ig, x |))
     | (| TD_Base _, _ |) -> ()
 
-let rec readable_all_live (m:ME.vale_heap) (args:list arg)
-  : Lemma (VSig.readable args m ==>
+let rec readable_all_live (m:ME.vale_full_heap) (args:list arg)
+  : Lemma (VSig.readable args (ME.get_vale_heap m) ==>
            all_live (hs_of_mem (as_mem m)) args)
   = match args with
     | [] -> ()
     | hd::tl ->
-      readable_cons hd tl m;
+      readable_cons hd tl (ME.get_vale_heap m);
       all_live_cons hd tl (hs_of_mem (as_mem m));
       readable_live_one m hd;
       readable_all_live m tl
@@ -264,7 +265,7 @@ let core_create_lemma_register_args
          (requires
             (forall r. VS.eval_reg_64 r s == regs r) /\
             register_args' max_arity arg_reg (List.length args) args regs /\
-            s.VS.vs_heap == as_vale_mem (mk_mem args' h0))
+            s.VS.vs_heap == create_initial_vale_heap (mk_mem args' h0))
          (ensures LSig.register_args max_arity arg_reg (List.length args) args s)
          (decreases args)
     = let n = List.length args in
@@ -478,7 +479,7 @@ let core_create_lemma
          fst (IX64.create_initial_trusted_state max_arity arg_reg args h0) == SL.state_to_S va_s /\
          LSig.mem_correspondence args h0 va_s /\
          VSig.disjoint_or_eq args /\
-         VSig.readable args VS.(va_s.vs_heap) /\
+         VSig.readable args (ME.get_vale_heap va_s.VS.vs_heap) /\
          LSig.vale_pre_hyp #max_arity #arg_reg args va_s /\
          ST.equal_domains h0 (hs_of_mem (as_mem va_s.VS.vs_heap))
   ))
@@ -501,7 +502,7 @@ let eval_code_ts (c:BS.code)
   VL.state_eq_opt (BS.machine_eval_code c f0 s0) (Some s1)
 
 let eval_code_rel (c:BS.code)
-                  (va_s0 va_s1:_) (f:V.va_fuel)
+                  (va_s0 va_s1:V.va_state) (f:V.va_fuel)
   : Lemma
      (requires (V.eval_code c va_s0 f va_s1))
      (ensures (eval_code_ts c (SL.state_to_S va_s0) (coerce f) (SL.state_to_S va_s1)))
@@ -554,16 +555,16 @@ let vale_lemma_as_prediction
        assert (va_s0.VS.vs_ok);
        assert (LSig.vale_pre_hyp #max_arity #arg_reg args va_s0);
        assert (elim_nil pre va_s0);
-       let va_s1, f = VSig.elim_vale_sig_nil v va_s0 in
+       let (va_s1, f) = VSig.elim_vale_sig_nil v va_s0 in
        assert (V.eval_code code va_s0 f va_s1);
        eval_code_rel (c_code) va_s0 va_s1 f;
        let Some s1 = BS.machine_eval_code (c_code) (coerce f) s0 in
        assert (VL.state_eq_opt (Some (SL.state_to_S va_s1)) (Some s1));
        assert (VSig.vale_calling_conventions va_s0 va_s1 regs_modified xmms_modified);
        assert (IX64.calling_conventions s0 s1 regs_modified xmms_modified);
-       assert (ME.modifies (VSig.mloc_modified_args args) va_s0.VS.vs_heap va_s1.VS.vs_heap);
-       let final_mem = va_s1.VS.vs_heap in
-       let h1= hs_of_mem (as_mem final_mem) in
+       assert (ME.modifies (VSig.mloc_modified_args args) (VS.vs_get_vale_heap va_s0) (VS.vs_get_vale_heap va_s1));
+       let final_mem = (va_s1.VS.vs_heap) in
+       let h1 = hs_of_mem (as_mem final_mem) in
        Vale.AsLowStar.MemoryHelpers.relate_modifies args va_s0.VS.vs_heap va_s1.VS.vs_heap;
        assert (B.modifies (loc_modified_args args) h0 h1);
        Vale.AsLowStar.MemoryHelpers.modifies_equal_domains
@@ -571,16 +572,16 @@ let vale_lemma_as_prediction
        Vale.AsLowStar.MemoryHelpers.modifies_same_roots
          (VSig.mloc_modified_args args) va_s0.VS.vs_heap final_mem;
        Vale.AsLowStar.MemoryHelpers.state_eq_down_mem va_s1 s1;
-       assert (heap_get (heap_of_interop (as_mem final_mem)) == heap_get s1.BS.ms_heap);
+       assert (heap_get (heap_create_from_interop (as_mem final_mem)) == heap_get s1.BS.ms_heap);
        mem_correspondence_refl args va_s1;
-       assert (VSig.readable args VS.(va_s1.vs_heap));
+       assert (VSig.readable args (ME.get_vale_heap va_s1.VS.vs_heap));
        assert (disjoint_or_eq args);
-       readable_all_live VS.(va_s1.vs_heap) args;
+       readable_all_live va_s1.VS.vs_heap args;
        assert (all_live h1 args);
        assert (mem_roots_p h1 args);
        assert (B.modifies (loc_modified_args args) h0 h1);
        assert (LSig.(to_low_post post args h0 (IX64.return_val s1) h1));
-       IX64.return_val s1, coerce f, as_mem va_s1.VS.vs_heap
+       IX64.return_val s1, coerce f, as_mem (va_s1.VS.vs_heap)
 
 [@__reduce__]
 let rec lowstar_typ

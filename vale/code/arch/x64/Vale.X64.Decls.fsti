@@ -15,7 +15,7 @@ open Vale.X64.State
 open Vale.Def.Types_s
 
 unfold let vale_heap = M.vale_heap
-unfold let vale_heap_impl = M.vale_heap_impl
+unfold let vale_full_heap = M.vale_full_heap
 unfold let quad32 = quad32
 
 val cf (flags:Flags.t) : bool
@@ -304,7 +304,7 @@ val taint_at (memTaint:M.memtaint) (addr:int) : taint
   va_upd_reg64 r (eval_reg_64 r sM) sK
 [@va_qattr] unfold let va_update_xmm (x:reg_xmm) (sM:va_state) (sK:va_state) : va_state =
   va_upd_xmm x (eval_reg_xmm x sM) sK
-[@va_qattr] unfold let va_update_mem (sM:va_state) (sK:va_state) : va_state = va_upd_mem (M.get_vale_heap sM.vs_heap) sK
+[@va_qattr] unfold let va_update_mem (sM:va_state) (sK:va_state) : va_state = va_upd_mem (M.get_one_vale_heap sM.vs_heap) sK
 [@va_qattr] unfold let va_update_stack (sM:va_state) (sK:va_state) : va_state = va_upd_stack sM.vs_stack sK
 [@va_qattr] unfold let va_update_memTaint (sM:va_state) (sK:va_state) : va_state = va_upd_memTaint sM.vs_memTaint sK
 [@va_qattr] unfold let va_update_stackTaint (sM:va_state) (sK:va_state) : va_state = va_upd_stackTaint sM.vs_stackTaint sK

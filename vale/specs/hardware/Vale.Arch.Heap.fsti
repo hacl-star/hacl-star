@@ -15,4 +15,4 @@ val heap_upd (hi:heap_impl) (mh':machine_heap) : Pure heap_impl
   (requires is_machine_heap_update (heap_get hi) mh')
   (ensures fun hi -> heap_get hi == mh')
 
-val heap_of_interop (ih:interop_heap) : GTot heap_impl
+val heap_create_from_interop (ih:interop_heap) : GTot heap_impl

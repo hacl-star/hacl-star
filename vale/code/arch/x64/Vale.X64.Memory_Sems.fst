@@ -29,9 +29,9 @@ let lemma_upd_get_heap h = I.down_up_identity (_ih h)
 
 let lemma_get_upd_heap h m = I.up_down_identity (_ih h) m
 
-let lemma_heap_get_heap h = ()
+let lemma_heap_get_heap h = FStar.Pervasives.reveal_opaque (`%get_vale_heap) get_vale_heap
 
-let lemma_heap_upd_heap h m = ()
+let lemma_heap_upd_heap h m = FStar.Pervasives.reveal_opaque (`%get_vale_heap) get_vale_heap
 
 val heap_shift (m1 m2:S.machine_heap) (base:int) (n:nat) : Lemma
   (requires (forall i. 0 <= i /\ i < n ==> m1.[base + i] == m2.[base + i]))

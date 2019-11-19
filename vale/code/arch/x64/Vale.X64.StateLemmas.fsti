@@ -17,7 +17,7 @@ open FStar.Mul
 unfold let machine_state = Ms.machine_state
 unfold let code = Ms.code
 unfold let machine_eval_code = Ms.machine_eval_code
-val same_heap_types : squash (vale_heap_impl == heap_impl)
+val same_heap_types : squash (vale_full_heap == heap_impl)
 unfold let coerce (#b #a:Type) (x:a{a == b}) : b = x
 
 let state_to_S (s:vale_state) : GTot machine_state =
@@ -45,22 +45,22 @@ let state_of_S (s:machine_state) : GTot vale_state =
     vs_stackTaint = s.ms_stackTaint;
   }
 
-val lemma_valid_mem_addr64 (h:vale_heap_impl) (ptr:int) : Lemma
+val lemma_valid_mem_addr64 (h:vale_full_heap) (ptr:int) : Lemma
   (requires valid_mem64 ptr (get_vale_heap h))
   (ensures valid_addr64 ptr (heap_get (coerce h)))
   [SMTPat (valid_mem64 ptr (get_vale_heap h))]
 
-val lemma_valid_mem_addr128 (h:vale_heap_impl) (ptr:int) : Lemma
+val lemma_valid_mem_addr128 (h:vale_full_heap) (ptr:int) : Lemma
   (requires valid_mem128 ptr (get_vale_heap h))
   (ensures valid_addr128 ptr (heap_get (coerce h)))
   [SMTPat (valid_mem128 ptr (get_vale_heap h))]
 
-val lemma_load_mem_get64 (h:vale_heap_impl) (ptr:int) : Lemma
+val lemma_load_mem_get64 (h:vale_full_heap) (ptr:int) : Lemma
   (requires valid_mem64 ptr (get_vale_heap h))
   (ensures load_mem64 ptr (get_vale_heap h) == get_heap_val64 ptr (heap_get (coerce h)))
   [SMTPat (load_mem64 ptr (get_vale_heap h))]
 
-val lemma_load_mem_get128 (h:vale_heap_impl) (ptr:int) : Lemma
+val lemma_load_mem_get128 (h:vale_full_heap) (ptr:int) : Lemma
   (requires valid_mem128 ptr (get_vale_heap h))
   (ensures load_mem128 ptr (get_vale_heap h) == get_heap_val128 ptr (heap_get (coerce h)))
   [SMTPat (load_mem128 ptr (get_vale_heap h))]

@@ -22,6 +22,7 @@ module VL = Vale.X64.Lemmas
 module ST = FStar.HyperStack.ST
 module I = Vale.Interop
 open Vale.Arch.Heap
+open Vale.Arch.HeapImpl
 open FStar.Mul
 
 val as_vale_buffer_len (#src #t:base_typ) (x:buf_t src t)
@@ -32,62 +33,62 @@ val as_vale_immbuffer_len (#src #t:base_typ) (x:ibuf_t src t)
    : Lemma (V.buffer_length (as_vale_immbuffer x) == (B.length x * view_n src) / view_n t)
            [SMTPat (V.buffer_length (as_vale_immbuffer x))]
 
-val state_eq_down_mem (va_s1:V.va_state) (s1:_)
+val state_eq_down_mem (va_s1:V.va_state) (s1:BS.machine_state)
   : Lemma
       (requires
         VL.state_eq_opt (Some (SL.state_to_S va_s1))
                         (Some s1))
       (ensures (
-        heap_get (heap_of_interop (as_mem va_s1.VS.vs_heap)) == heap_get s1.BS.ms_heap))
+        heap_get (heap_create_from_interop (as_mem (va_s1.VS.vs_heap))) == heap_get s1.BS.ms_heap))
 
-val relate_modifies (args:list arg) (m0 m1 : ME.vale_heap)
+val relate_modifies (args:list arg) (m0 m1:ME.vale_full_heap)
   : Lemma
       (requires
-        ME.modifies (VSig.mloc_modified_args args) m0 m1)
+        ME.modifies (VSig.mloc_modified_args args) (ME.get_vale_heap m0) (ME.get_vale_heap m1))
       (ensures
         B.modifies (loc_modified_args args)
                    (hs_of_mem (as_mem m0))
                    (hs_of_mem (as_mem m1)))
 
-val reveal_readable (#src #t:_) (x:buf_t src t) (s:ME.vale_heap)
+val reveal_readable (#src #t:base_typ) (x:buf_t src t) (s:ME.vale_full_heap)
   : Lemma
       ( List.memP (mut_to_b8 src x) (ptrs_of_mem (as_mem s)) <==>
-        ME.buffer_readable s (as_vale_buffer x) )
+        ME.buffer_readable (ME.get_vale_heap s) (as_vale_buffer x) )
 
-val reveal_imm_readable (#src #t:_) (x:ibuf_t src t) (s:ME.vale_heap)
+val reveal_imm_readable (#src #t:base_typ) (x:ibuf_t src t) (s:ME.vale_full_heap)
   : Lemma
       ( List.memP (imm_to_b8 src x) (ptrs_of_mem (as_mem s)) <==>
-        ME.buffer_readable s (as_vale_immbuffer x) )
+        ME.buffer_readable (ME.get_vale_heap s) (as_vale_immbuffer x) )
 
-val readable_live (#src #t:_) (x:buf_t src t) (s:ME.vale_heap)
+val readable_live (#src #t:base_typ) (x:buf_t src t) (s:ME.vale_full_heap)
   : Lemma
-      ( ME.buffer_readable s (as_vale_buffer x) ==>
+      ( ME.buffer_readable (ME.get_vale_heap s) (as_vale_buffer x) ==>
         B.live (hs_of_mem (as_mem s)) x)
 
-val readable_imm_live (#src #t:_) (x:ibuf_t src t) (s:ME.vale_heap)
+val readable_imm_live (#src #t:base_typ) (x:ibuf_t src t) (s:ME.vale_full_heap)
   : Lemma
-      ( ME.buffer_readable s (as_vale_immbuffer x) ==>
+      ( ME.buffer_readable (ME.get_vale_heap s) (as_vale_immbuffer x) ==>
         B.live (hs_of_mem (as_mem s)) x)
 
 val buffer_readable_reveal
-  (#max_arity:_)
+  (#max_arity:nat)
   (src bt:base_typ)
   (x:buf_t src bt)
   (args:IX64.arity_ok max_arity arg)
   (h0:HS.mem{mem_roots_p h0 args}) : Lemma (
     let mem = mk_mem args h0 in
-    ME.buffer_readable (as_vale_mem mem) (as_vale_buffer x) <==>
+    ME.buffer_readable (ME.get_vale_heap (create_initial_vale_heap mem)) (as_vale_buffer x) <==>
       List.memP (mut_to_b8 src x) (ptrs_of_mem mem))
 
 val get_heap_mk_mem_reveal
   (args:IX64.arg_list)
   (h0:HS.mem{mem_roots_p h0 args}) : Lemma (
    let mem = mk_mem args h0 in
-   as_vale_mem mem == coerce (heap_of_interop mem))
+   create_initial_vale_heap mem == coerce (heap_create_from_interop mem))
 
 val lemma_as_mem_as_vale_mem (h:interop_heap) : Lemma
-  (ensures as_mem (as_vale_mem h) == h)
-  [SMTPat (as_mem (as_vale_mem h))]
+  (ensures as_mem (create_initial_vale_heap h) == h)
+  [SMTPat (as_mem (create_initial_vale_heap h))]
 
 val mk_stack_reveal (stack:BS.machine_stack) : Lemma
   (VSS.stack_to_s (as_vale_stack stack) == stack /\
@@ -103,7 +104,7 @@ val buffer_as_seq_reveal
    DV.length_eq db;
    let mem = mk_mem args h0 in
    Seq.equal
-    (LSig.nat_to_uint_seq_t t (ME.buffer_as_seq (as_vale_mem mem) y))
+    (LSig.nat_to_uint_seq_t t (ME.buffer_as_seq (ME.get_vale_heap (create_initial_vale_heap mem)) y))
     (UV.as_seq h0 (UV.mk_buffer db (LSig.view_of_base_typ t))))
 
 val immbuffer_as_seq_reveal
@@ -116,7 +117,7 @@ val immbuffer_as_seq_reveal
    DV.length_eq db;
    let mem = mk_mem args h0 in
    Seq.equal
-    (LSig.nat_to_uint_seq_t t (ME.buffer_as_seq (as_vale_mem mem) y))
+    (LSig.nat_to_uint_seq_t t (ME.buffer_as_seq (ME.get_vale_heap (create_initial_vale_heap mem)) y))
     (UV.as_seq h0 (UV.mk_buffer db (LSig.view_of_base_typ t))))
 
 val buffer_as_seq_reveal2
@@ -128,7 +129,7 @@ val buffer_as_seq_reveal2
    DV.length_eq db;
    let h = hs_of_mem (as_mem va_s.VS.vs_heap) in
    Seq.equal
-    (LSig.nat_to_uint_seq_t t (ME.buffer_as_seq va_s.VS.vs_heap y))
+    (LSig.nat_to_uint_seq_t t (ME.buffer_as_seq (ME.get_vale_heap va_s.VS.vs_heap) y))
     (UV.as_seq h (UV.mk_buffer db (LSig.view_of_base_typ t))))
 
 val immbuffer_as_seq_reveal2
@@ -140,7 +141,7 @@ val immbuffer_as_seq_reveal2
    DV.length_eq db;
    let h = hs_of_mem (as_mem va_s.VS.vs_heap) in
    Seq.equal
-    (LSig.nat_to_uint_seq_t t (ME.buffer_as_seq va_s.VS.vs_heap y))
+    (LSig.nat_to_uint_seq_t t (ME.buffer_as_seq (ME.get_vale_heap va_s.VS.vs_heap) y))
     (UV.as_seq h (UV.mk_buffer db (LSig.view_of_base_typ t))))
 
 val buffer_addr_reveal
@@ -149,7 +150,7 @@ val buffer_addr_reveal
   (args:list arg)
   (h0:HS.mem{mem_roots_p h0 args}) : Lemma
   (let mem = mk_mem args h0 in
-   addrs_of_mem mem (mut_to_b8 src x) == ME.buffer_addr (as_vale_buffer x) (as_vale_mem mem))
+   addrs_of_mem mem (mut_to_b8 src x) == ME.buffer_addr (as_vale_buffer x) (ME.get_vale_heap (create_initial_vale_heap mem)))
 
 val immbuffer_addr_reveal
   (src t:ME.base_typ)
@@ -157,13 +158,13 @@ val immbuffer_addr_reveal
   (args:list arg)
   (h0:HS.mem{mem_roots_p h0 args}) : Lemma
   (let mem = mk_mem args h0 in
-   addrs_of_mem mem (imm_to_b8 src x) == ME.buffer_addr (as_vale_immbuffer x) (as_vale_mem mem))
+   addrs_of_mem mem (imm_to_b8 src x) == ME.buffer_addr (as_vale_immbuffer x) (ME.get_vale_heap (create_initial_vale_heap mem)))
 
 val fuel_eq : squash (V.va_fuel == nat)
 
 val decls_eval_code_reveal
   (c:BS.code)
-  (va_s0 va_s1:_)
+  (va_s0 va_s1:V.va_state)
   (f:V.va_fuel) : Lemma
   (requires (V.eval_code c va_s0 f va_s1))
   (ensures (VL.eval_code c va_s0 (coerce f) va_s1))
@@ -182,14 +183,14 @@ val as_vale_immbuffer_imm_disjoint (#src1 #src2 #t1 #t2:base_typ) (x:ibuf_t src1
 
 val modifies_same_roots
   (s:ME.loc)
-  (h0 h1:ME.vale_heap) : Lemma
-  (requires ME.modifies s h0 h1)
+  (h0 h1:ME.vale_full_heap) : Lemma
+  (requires ME.modifies s (ME.get_vale_heap h0) (ME.get_vale_heap h1))
   (ensures ptrs_of_mem (as_mem h0) == ptrs_of_mem (as_mem h1))
 
 val modifies_equal_domains
   (s:ME.loc)
-  (h0 h1:ME.vale_heap) : Lemma
-  (requires ME.modifies s h0 h1)
+  (h0 h1:ME.vale_full_heap) : Lemma
+  (requires ME.modifies s (ME.get_vale_heap h0) (ME.get_vale_heap h1))
   (ensures FStar.HyperStack.ST.equal_domains (hs_of_mem (as_mem h0)) (hs_of_mem (as_mem h1)))
 
 val loc_disjoint_sym (x y:ME.loc)
@@ -197,7 +198,7 @@ val loc_disjoint_sym (x y:ME.loc)
            [SMTPat (ME.loc_disjoint x y)]
 
 val core_create_lemma_taint_hyp
-    (#max_arity:_)
+    (#max_arity:nat)
     (#arg_reg:IX64.arg_reg_relation max_arity)
     (args:IX64.arg_list)
     (h0:HS.mem{mem_roots_p h0 args})
@@ -262,9 +263,9 @@ val buffer_as_seq_reveal_tuint128
   (let y = as_vale_buffer x in
    let h = hs_of_mem (as_mem va_s.VS.vs_heap) in
    Seq.equal
-    (LSig.nat_to_uint_seq_t TUInt128 (ME.buffer_as_seq va_s.VS.vs_heap y))
-    (V.buffer128_as_seq va_s.VS.vs_heap (as_vale_buffer x)))
-  [SMTPat (V.buffer128_as_seq va_s.VS.vs_heap (as_vale_buffer x))]
+    (LSig.nat_to_uint_seq_t TUInt128 (ME.buffer_as_seq (ME.get_vale_heap va_s.VS.vs_heap) y))
+    (V.buffer128_as_seq (ME.get_vale_heap va_s.VS.vs_heap) (as_vale_buffer x)))
+  [SMTPat (V.buffer128_as_seq (ME.get_vale_heap va_s.VS.vs_heap) (as_vale_buffer x))]
 
 val immbuffer_as_seq_reveal_tuint128
   (src:base_typ)
@@ -273,9 +274,9 @@ val immbuffer_as_seq_reveal_tuint128
   (let y = as_vale_immbuffer x in
    let h = hs_of_mem (as_mem va_s.VS.vs_heap) in
    Seq.equal
-    (LSig.nat_to_uint_seq_t TUInt128 (ME.buffer_as_seq va_s.VS.vs_heap y))
-    (V.buffer128_as_seq va_s.VS.vs_heap (as_vale_immbuffer x)))
-  [SMTPat (V.buffer128_as_seq va_s.VS.vs_heap (as_vale_immbuffer x))]
+    (LSig.nat_to_uint_seq_t TUInt128 (ME.buffer_as_seq (ME.get_vale_heap va_s.VS.vs_heap) y))
+    (V.buffer128_as_seq (ME.get_vale_heap va_s.VS.vs_heap) (as_vale_immbuffer x)))
+  [SMTPat (V.buffer128_as_seq (ME.get_vale_heap va_s.VS.vs_heap) (as_vale_immbuffer x))]
 
 val bounded_buffer_addrs_one (src t:base_typ) (h:HS.mem) (b:buf_t src t{B.live h b}) (s:ME.vale_heap) : Lemma
   (ME.buffer_addr #t (as_vale_buffer b) s + DV.length (get_downview b) < Vale.Def.Words_s.pow2_64)

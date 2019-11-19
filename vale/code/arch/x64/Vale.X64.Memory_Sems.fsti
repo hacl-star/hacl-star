@@ -28,13 +28,13 @@ val lemma_get_upd_heap (h:vale_heap) (m:S.machine_heap) : Lemma
 
 unfold let coerce (#b #a:Type) (x:a{a == b}) : b = x
 
-val lemma_heap_get_heap (h:vale_heap_impl) : Lemma
-  (vale_heap_impl == heap_impl /\ heap_get (coerce h) == get_heap (get_vale_heap h))
+val lemma_heap_get_heap (h:vale_full_heap) : Lemma
+  (vale_full_heap == heap_impl /\ heap_get (coerce h) == get_heap (get_vale_heap h))
   [SMTPat (heap_get (coerce h))]
 
-val lemma_heap_upd_heap (h:vale_heap_impl) (m:machine_heap) : Lemma
-  (requires is_machine_heap_update (get_heap h) m)
-  (ensures vale_heap_impl == heap_impl /\ heap_upd (coerce h) m == coerce (upd_heap (get_vale_heap h) m))
+val lemma_heap_upd_heap (h:vale_full_heap) (m:machine_heap) : Lemma
+  (requires is_machine_heap_update (get_heap (get_vale_heap h)) m)
+  (ensures vale_full_heap == heap_impl /\ heap_upd (coerce h) m == coerce (set_vale_heap h (upd_heap (get_vale_heap h) m)))
   [SMTPat (heap_upd (coerce h) m)]
 
 val bytes_valid64 (i:int) (m:vale_heap) : Lemma
