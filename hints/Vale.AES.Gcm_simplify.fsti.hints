@@ -18,7 +18,6 @@
         "function_token_typing_Vale.Def.Words_s.nat8", "int_inversion",
         "lemma_FStar.Seq.Base.lemma_init_len", "primitive_Prims.op_Equality",
         "projection_inverse_BoxBool_proj_0",
-        "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
@@ -27,7 +26,7 @@
         "typing_Tm_abs_12f0bbc5cd2aeb167bc7e771b588a4ca"
       ],
       0,
-      "d8988bac0ae9e3240108a504544ce7c2"
+      "2c33241ff75becd744091e92b066d1c1"
     ],
     [
       "Vale.AES.Gcm_simplify.gcm_simplify1",
@@ -61,6 +60,7 @@
         "lemma_LowStar.BufferView.Down.as_buffer_mk_buffer_view",
         "lemma_LowStar.BufferView.Down.get_view_mk_buffer_view",
         "primitive_Prims.op_Equality", "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
         "proj_equation_FStar.Pervasives.Mkdtuple4__1",
         "proj_equation_FStar.Pervasives.Mkdtuple4__2",
         "proj_equation_FStar.Pervasives.Mkdtuple4__3",
@@ -84,7 +84,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt8@tok"
       ],
       0,
-      "f49d01e22168f2245f61554025c65bec"
+      "b606450c6aacd3539605043051a3d68a"
     ],
     [
       "Vale.AES.Gcm_simplify.gcm_simplify2",
@@ -98,7 +98,8 @@
         "equality_tok_Vale.Arch.HeapTypes_s.TUInt128@tok",
         "equality_tok_Vale.Arch.HeapTypes_s.TUInt8@tok",
         "equation_LowStar.Buffer.buffer",
-        "equation_LowStar.Buffer.trivial_preorder", "equation_Prims.l_and",
+        "equation_LowStar.Buffer.trivial_preorder",
+        "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.l_and",
         "equation_Prims.squash", "equation_Vale.Interop.Base.buf_t",
         "equation_Vale.Interop.Types.base_typ_as_type",
         "equation_Vale.Interop.Types.down_view",
@@ -108,6 +109,7 @@
         "function_token_typing_FStar.UInt8.t", "l_and-interp",
         "lemma_LowStar.BufferView.Down.as_buffer_mk_buffer_view",
         "lemma_LowStar.BufferView.Down.get_view_mk_buffer_view",
+        "primitive_Prims.op_Division", "primitive_Prims.op_Multiply",
         "proj_equation_FStar.Pervasives.Mkdtuple4__1",
         "proj_equation_FStar.Pervasives.Mkdtuple4__2",
         "proj_equation_FStar.Pervasives.Mkdtuple4__3",
@@ -121,7 +123,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt8@tok"
       ],
       0,
-      "16461e5c0632bf4bbc1dd6ce03dd9729"
+      "1664f1e8a08479d82beea5cc91a91f20"
     ],
     [
       "Vale.AES.Gcm_simplify.gcm_simplify3",
@@ -135,7 +137,8 @@
         "equality_tok_Vale.Arch.HeapTypes_s.TUInt128@tok",
         "equality_tok_Vale.Arch.HeapTypes_s.TUInt8@tok",
         "equation_LowStar.Buffer.buffer",
-        "equation_LowStar.Buffer.trivial_preorder", "equation_Prims.l_and",
+        "equation_LowStar.Buffer.trivial_preorder",
+        "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.l_and",
         "equation_Prims.squash", "equation_Vale.Interop.Base.buf_t",
         "equation_Vale.Interop.Types.base_typ_as_type",
         "equation_Vale.Interop.Types.down_view",
@@ -145,6 +148,7 @@
         "function_token_typing_FStar.UInt8.t", "l_and-interp",
         "lemma_LowStar.BufferView.Down.as_buffer_mk_buffer_view",
         "lemma_LowStar.BufferView.Down.get_view_mk_buffer_view",
+        "primitive_Prims.op_Division", "primitive_Prims.op_Multiply",
         "proj_equation_FStar.Pervasives.Mkdtuple4__1",
         "proj_equation_FStar.Pervasives.Mkdtuple4__2",
         "proj_equation_FStar.Pervasives.Mkdtuple4__3",
@@ -158,7 +162,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt8@tok"
       ],
       0,
-      "8326db31857208d99d7f88a5a5182aa5"
+      "31c5c50ce36ae2b591a963440af282eb"
     ],
     [
       "Vale.AES.Gcm_simplify.aes_simplify1",
@@ -192,7 +196,8 @@
         "lemma_LowStar.BufferView.Down.as_buffer_mk_buffer_view",
         "lemma_LowStar.BufferView.Down.get_view_mk_buffer_view",
         "lemma_LowStar.Monotonic.Buffer.length_as_seq",
-        "primitive_Prims.op_Equality",
+        "primitive_Prims.op_Division", "primitive_Prims.op_Equality",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
         "proj_equation_FStar.Pervasives.Mkdtuple4__1",
         "proj_equation_FStar.Pervasives.Mkdtuple4__2",
         "proj_equation_FStar.Pervasives.Mkdtuple4__3",
@@ -211,7 +216,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt8@tok"
       ],
       0,
-      "cdd69020150ed36acec598a37772c80d"
+      "bb1d4ad977a2a1b47db87de2ba5afbda"
     ],
     [
       "Vale.AES.Gcm_simplify.aes_simplify2",
@@ -245,7 +250,8 @@
         "lemma_LowStar.BufferView.Down.as_buffer_mk_buffer_view",
         "lemma_LowStar.BufferView.Down.get_view_mk_buffer_view",
         "lemma_LowStar.Monotonic.Buffer.length_as_seq",
-        "primitive_Prims.op_Equality",
+        "primitive_Prims.op_Division", "primitive_Prims.op_Equality",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
         "proj_equation_FStar.Pervasives.Mkdtuple4__1",
         "proj_equation_FStar.Pervasives.Mkdtuple4__2",
         "proj_equation_FStar.Pervasives.Mkdtuple4__3",
@@ -264,7 +270,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt8@tok"
       ],
       0,
-      "d58cd0a7b15bdfaa5d2365b8fd6cad25"
+      "c16d24b743f97eebaa1dc17c5911af56"
     ],
     [
       "Vale.AES.Gcm_simplify.aes_simplify3",
@@ -290,6 +296,7 @@
         "function_token_typing_FStar.UInt8.t",
         "lemma_LowStar.BufferView.Down.as_buffer_mk_buffer_view",
         "lemma_LowStar.BufferView.Down.get_view_mk_buffer_view",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
         "proj_equation_FStar.Pervasives.Mkdtuple4__1",
         "proj_equation_FStar.Pervasives.Mkdtuple4__2",
         "proj_equation_FStar.Pervasives.Mkdtuple4__3",
@@ -301,10 +308,11 @@
         "refinement_interpretation_Tm_refine_83bd940927020bb51199658f6752ed80",
         "typing_LowStar.Buffer.trivial_preorder",
         "typing_Vale.Interop.Types.down_view",
+        "typing_Vale.Interop.Types.get_downview",
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt8@tok"
       ],
       0,
-      "4bc0d8854edb9634edaad7e2b0276c27"
+      "262dc01f7d6e5514538f790de19c3e75"
     ]
   ]
 ]

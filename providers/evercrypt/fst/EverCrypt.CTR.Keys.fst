@@ -72,7 +72,7 @@ let vale_expand (i: vale_impl) (k ek: B.buffer uint8):
   Stack unit
     (requires (fun h0 ->
       let a = cipher_alg_of_impl i in
-      Vale.X64.CPU_Features_s.(aesni_enabled /\ pclmulqdq_enabled /\ avx_enabled) /\
+      Vale.X64.CPU_Features_s.(aesni_enabled /\ pclmulqdq_enabled /\ avx_enabled /\ sse_enabled) /\
       B.live h0 k /\ B.live h0 ek /\
       B.disjoint k ek /\
       B.length k = key_length a /\

@@ -1,5 +1,5 @@
 [
-  ";dœGè…\u0001”.æ‚3^Mð­",
+  "aC–»‰Ìn3¼2\"ìô@—n",
   [
     [
       "Vale.AES.X64.GF128_Init.va_qcode_ShiftKey1_128",
@@ -15,7 +15,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "b34ed56abcd001ead58bc992b06f342e"
+      "f196dd1a001e046c0443ed2a4acd5969"
     ],
     [
       "Vale.AES.X64.GF128_Init.va_lemma_ShiftKey1_128",
@@ -120,7 +120,7 @@
         "unit_inversion", "unit_typing"
       ],
       0,
-      "bec493d25babc15687550bf82092e07c"
+      "8e85c10218eee3ea3beb3a40e754de9e"
     ],
     [
       "Vale.AES.X64.GF128_Init.va_wpProof_ShiftKey1_128",
@@ -188,7 +188,7 @@
         "unit_typing"
       ],
       0,
-      "35008f4933a047004f8b91c35e106731"
+      "4654e90682e502a51d35fe4f68ab4985"
     ],
     [
       "Vale.AES.X64.GF128_Init.va_quick_ShiftKey1_128",
@@ -200,7 +200,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "6b079935d381c6828ffa4077d0222604"
+      "b6fb12fb97586654a6c1e4c7df82c35e"
     ],
     [
       "Vale.AES.X64.GF128_Init.va_lemma_ShiftKey1_gf128_power",
@@ -276,7 +276,7 @@
         "unit_inversion", "unit_typing"
       ],
       0,
-      "d5f0dd1c3e584edc24e98134d5bf5ca9"
+      "c7f261f799822a84f4df4df6e2b20bca"
     ],
     [
       "Vale.AES.X64.GF128_Init.va_wpProof_ShiftKey1_gf128_power",
@@ -345,7 +345,7 @@
         "unit_typing"
       ],
       0,
-      "0b70d888f4fee6189dbef103d6848423"
+      "6e2a63dbc6c6a516c4e4402f876570f1"
     ],
     [
       "Vale.AES.X64.GF128_Init.va_quick_ShiftKey1_gf128_power",
@@ -357,7 +357,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "af077b72e0d312b17d710eb7db490d63"
+      "b5ac0752e3c570a35e2280fce4c55895"
     ],
     [
       "Vale.AES.X64.GF128_Init.va_lemma_Gf128_powers",
@@ -471,7 +471,7 @@
         "unit_typing"
       ],
       0,
-      "60d08ebf21e3f5e02f2a0d48458b0b8f"
+      "49139a33da5722858730e445b44c0ce3"
     ],
     [
       "Vale.AES.X64.GF128_Init.va_wpProof_Gf128_powers",
@@ -543,7 +543,7 @@
         "unit_typing"
       ],
       0,
-      "1b875792d5c3d72055ecefcb8745bc10"
+      "8c9989ee9647b9ce27267b22270f8299"
     ],
     [
       "Vale.AES.X64.GF128_Init.va_quick_Gf128_powers",
@@ -555,7 +555,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "24daba86e3e4e1ab158f534279276f59"
+      "f99044944ca038378ecd4b8b627e19f0"
     ],
     [
       "Vale.AES.X64.GF128_Init.va_req_Keyhash_init",
@@ -572,7 +572,7 @@
         "unit_typing"
       ],
       0,
-      "32e8ea45e948633592ea398d63786773"
+      "5793d6a2dba537d538d82e109755727d"
     ],
     [
       "Vale.AES.X64.GF128_Init.va_ens_Keyhash_init",
@@ -590,7 +590,7 @@
         "unit_typing"
       ],
       0,
-      "ab8b113f912eacf09a8966370f9274ae"
+      "d51f995303d206b6b8cc9b04042fdd8e"
     ],
     [
       "Vale.AES.X64.GF128_Init.va_qcode_Keyhash_init",
@@ -603,7 +603,7 @@
         "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c"
       ],
       0,
-      "533d8c73c26050b37bda486e2dcd310e"
+      "a02b22c888a4df14f4db42132ec44193"
     ],
     [
       "Vale.AES.X64.GF128_Init.va_lemma_Keyhash_init",
@@ -616,13 +616,14 @@
         "equation_Vale.X64.Decls.va_require_total",
         "equation_Vale.X64.Decls.validDstAddrs128",
         "equation_Vale.X64.Decls.validSrcAddrs128",
-        "equation_Vale.X64.Memory.get_vale_heap",
         "fuel_guarded_inversion_Vale.X64.State.vale_state",
+        "proj_equation_Vale.X64.State.Mkvale_state_vs_heap",
         "proj_equation_Vale.X64.State.Mkvale_state_vs_memTaint",
-        "refinement_interpretation_Tm_refine_9d347314a6a824751b832dcd673a78de"
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_f3164f24b09f136dda61e850558c9355"
       ],
       0,
-      "bd157dfedc40df121cc02a40e70b50b9"
+      "b657b1dda4c9e2f9bcf0f1f94f71a7e4"
     ],
     [
       "Vale.AES.X64.GF128_Init.va_lemma_Keyhash_init",
@@ -785,7 +786,7 @@
         "unit_typing"
       ],
       0,
-      "749a55896d8fe4c9449c557b21c20de6"
+      "611114593406302ffc247cb6835f758e"
     ],
     [
       "Vale.AES.X64.GF128_Init.va_wp_Keyhash_init",
@@ -794,7 +795,7 @@
       0,
       [ "@query" ],
       0,
-      "18b19cab51c8d3e25bdf7af610ab7d20"
+      "694180f70d77fb27508ccec0b276dee2"
     ],
     [
       "Vale.AES.X64.GF128_Init.va_wpProof_Keyhash_init",
@@ -877,7 +878,7 @@
         "typing_Vale.X64.State.update_reg", "unit_typing"
       ],
       0,
-      "f35fa639f7625b50350d5b3f5b737374"
+      "4bdd6ace643bc592c5b1bfa790a92cab"
     ],
     [
       "Vale.AES.X64.GF128_Init.va_quick_Keyhash_init",
@@ -889,7 +890,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "1169059243d6a5ad8d7d8b1a16161cd0"
+      "277269c3fc8b7f0c4111ce7c7999ea44"
     ]
   ]
 ]

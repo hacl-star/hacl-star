@@ -35,6 +35,7 @@
         "equation_Lib.Buffer.buffer_t", "equation_Lib.Buffer.disjoint",
         "equation_Lib.Buffer.lbuffer_t", "equation_Lib.Buffer.length",
         "equation_Lib.Buffer.live", "equation_Lib.Buffer.loc",
+        "equation_Lib.Buffer.modifies1",
         "equation_Lib.Buffer.stack_allocated", "equation_Lib.IntTypes.bits",
         "equation_Lib.IntTypes.int_t", "equation_Lib.IntTypes.maxint",
         "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.pub_int_t",
@@ -64,7 +65,9 @@
         "lemma_FStar.Set.lemma_equal_intro",
         "lemma_FStar.Set.mem_complement", "lemma_FStar.Set.mem_intersect",
         "lemma_FStar.Set.mem_singleton", "lemma_FStar.Set.mem_union",
-        "lemma_FStar.UInt32.uv_inv", "lemma_Lib.Buffer.mut_immut_disjoint",
+        "lemma_FStar.UInt32.uv_inv",
+        "lemma_Lib.Buffer.modifies_preserves_live",
+        "lemma_Lib.Buffer.mut_immut_disjoint",
         "lemma_LowStar.Monotonic.Buffer.fresh_frame_modifies",
         "lemma_LowStar.Monotonic.Buffer.lemma_live_equal_mem_domains",
         "lemma_LowStar.Monotonic.Buffer.length_null_1",
@@ -119,7 +122,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "ea481e07c901a937665c9c6c38cb563a"
+      "cb57548b49eb565402b8f46d8848cc12"
     ],
     [
       "Hacl.Test.CSHAKE.u8",
@@ -139,7 +142,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "48f31d777b06ddca20b21be43870fbdb"
+      "7bcae243b5cbef6495b3837914b84b33"
     ],
     [
       "Hacl.Test.CSHAKE.test1_plaintext",
@@ -204,7 +207,7 @@
         "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "060a3f7ff29e1f6d164180ce463c52f6"
+      "a70a05d34e4b7d8afe6c8ee054c5db28"
     ],
     [
       "Hacl.Test.CSHAKE.test1_expected",
@@ -269,7 +272,7 @@
         "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "e8b346a81c261bebf7ce181d378808d9"
+      "ed4588fa3191147cdf0497c3bb6d6cc5"
     ],
     [
       "Hacl.Test.CSHAKE.main",
@@ -331,7 +334,7 @@
         "typing_tok_Lib.Buffer.IMMUT@tok"
       ],
       0,
-      "f3f78a141f81d6d0f78efa7e3c4e8ada"
+      "90766b434850ec93d3ce86026ffa774a"
     ]
   ]
 ]

@@ -69,6 +69,7 @@ procedure preamble(ghost ctx_b:buffer128)
         Wi; abef; cdgh; tmp_xmm; bswap;
         efl;
     requires
+        sse_enabled;
         validSrcAddrs128(mem, ctx,  ctx_b,  2, memTaint, Secret);
     ensures
         // Why is this stored twice?
@@ -118,7 +119,7 @@ procedure loop_rounds_0_15(
         Wi; abef; cdgh; msg0; msg1; msg2; msg3; tmp_xmm; abef_save; cdgh_save;
         efl;
     requires
-        sha_enabled;
+        sha_enabled && sse_enabled;
         validSrcAddrsOffset128(mem, inp,   in_b, offset, 4, memTaint, Secret);
         validSrcAddrs128(mem, tbl,    k_b, 16, memTaint, Secret);
         inp + 0x40 < pow2_64;
@@ -235,7 +236,7 @@ procedure loop_rounds_16_51_body(
         Wi; abef; cdgh; msg0; msg1; msg2; msg3; tmp_xmm;
         efl;
     requires
-        sha_enabled;
+        sha_enabled && sse_enabled;
         validSrcAddrs128(mem, tbl, k_b, 16, memTaint, Secret);
 
         4 <= i /\ i < 13;
@@ -282,6 +283,7 @@ procedure msg_shift()
         Wi @= xmm0; tmp_xmm @= xmm7;
     modifies
         msg0; msg1; msg2; msg3; tmp_xmm; Wi;
+    requires sse_enabled;
     ensures
         msg0 == old(msg1);
         msg1 == old(msg2);
@@ -314,7 +316,7 @@ procedure loop_rounds_16_51_recursive(
         Wi; abef; cdgh; msg0; msg1; msg2; msg3; tmp_xmm;
         efl;
     requires
-        sha_enabled;
+        sha_enabled && sse_enabled;
         validSrcAddrs128(mem, tbl, k_b, 16, memTaint, Secret);
 
         4 <= i /\ i < 13;
@@ -359,7 +361,7 @@ procedure loop_rounds_16_51(
         Wi; abef; cdgh; msg0; msg1; msg2; msg3; tmp_xmm;
         efl;
     requires
-        sha_enabled;
+        sha_enabled && sse_enabled;
         validSrcAddrs128(mem, tbl, k_b, 16, memTaint, Secret);
 
         k_reqs(buffer128_as_seq(mem, k_b));
@@ -399,7 +401,7 @@ procedure loop_rounds_52_64(
         Wi; abef; cdgh; msg0; msg1; msg2; msg3; tmp_xmm;
         efl;
     requires
-        sha_enabled;
+        sha_enabled && sse_enabled;
         validSrcAddrs128(mem, tbl, k_b, 16, memTaint, Secret);
 
         num > 0;
@@ -479,7 +481,7 @@ procedure loop_rounds(
         Wi; abef; cdgh; msg0; msg1; msg2; msg3; tmp_xmm; abef_save; cdgh_save;
         efl;
     requires
-        sha_enabled;
+        sha_enabled && sse_enabled;
         validSrcAddrsOffset128(mem, inp,   in_b, offset, 4, memTaint, Secret);
         validSrcAddrs128(mem, tbl,    k_b, 16, memTaint, Secret);
         inp + 0x40 < pow2_64;
@@ -536,7 +538,7 @@ procedure loop(
         Wi; abef; cdgh; msg0; msg1; msg2; msg3; tmp_xmm; abef_save; cdgh_save;
         efl;
     requires
-        sha_enabled;
+        sha_enabled && sse_enabled;
         validSrcAddrs128(mem, inp,   in_b,  4*num, memTaint, Secret);
         validSrcAddrs128(mem, tbl,    k_b, 16, memTaint, Secret);
         inp + 0x40*num < pow2_64;
@@ -557,7 +559,7 @@ procedure loop(
     ghost var count:nat := 0;
     while (num > 0)
         invariant
-            sha_enabled;
+            sha_enabled && sse_enabled;
 
             validSrcAddrs128(mem, old(inp),   in_b,  4*old(num), memTaint, Secret);
             validSrcAddrs128(mem,      tbl,    k_b,          16, memTaint, Secret);
@@ -595,6 +597,7 @@ procedure epilogue(
         abef; cdgh; tmp_xmm;
         mem; efl;
     requires
+        sse_enabled;
         validDstAddrs128(mem, ctx,  ctx_b,  2, memTaint, Secret);
     ensures
         let abcd := old(Mkfour(abef.hi3, abef.hi2, cdgh.hi3, cdgh.hi2)) in
@@ -642,7 +645,7 @@ procedure sha_update(
         Wi; abef; cdgh; msg0; msg1; msg2; msg3; tmp_xmm; bswap; abef_save; cdgh_save;
         mem; efl;
     requires
-        sha_enabled;
+        sha_enabled && sse_enabled;
         validSrcAddrs128(mem, inp,   in_b,  4*num, memTaint, Secret);
         validDstAddrs128(mem, ctx,  ctx_b,  2, memTaint, Secret);
         validSrcAddrs128(mem, tbl,    k_b, 16, memTaint, Secret);
@@ -688,7 +691,7 @@ procedure sha_update_bytes(
         Wi; abef; cdgh; msg0; msg1; msg2; msg3; tmp_xmm; bswap; abef_save; cdgh_save;
         mem; efl;
     requires
-        sha_enabled;
+        sha_enabled && sse_enabled;
         validSrcAddrs128(mem, inp,   in_b,  4*num, memTaint, Secret);
         validDstAddrs128(mem, ctx,  ctx_b,  2, memTaint, Secret);
         validSrcAddrs128(mem, tbl,    k_b, 16, memTaint, Secret);
@@ -750,7 +753,7 @@ procedure sha_update_bytes_stdcall(
     requires
         rsp == init_rsp(stack);
 
-        sha_enabled;
+        sha_enabled && sse_enabled;
         locs_disjoint(list(loc_buffer(ctx_b), loc_buffer(in_b))) \/ ctx_b == in_b;
         locs_disjoint(list(loc_buffer(ctx_b), loc_buffer(k_b))) \/ ctx_b == k_b;
         locs_disjoint(list(loc_buffer(in_b), loc_buffer(k_b))) \/ in_b == k_b;

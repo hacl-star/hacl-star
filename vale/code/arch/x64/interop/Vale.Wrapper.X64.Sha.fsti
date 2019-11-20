@@ -28,7 +28,7 @@ val sha256_update
   (k_b:uint32_i)
   : Stack unit
   (requires fun h ->
-    sha_enabled /\
+    sha_enabled /\ sse_enabled /\
     B.live h ctx_b /\ B.live h in_b /\ B.live h k_b /\
     B.length k_b == 64 /\ B.length ctx_b == 8 /\
     B.length in_b = 64 * (UInt64.v num_val) /\

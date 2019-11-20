@@ -9,7 +9,7 @@
       [
         "@MaxIFuel_assumption", "@query", "constructor_distinct_Tm_unit",
         "equation_LowStar.Buffer.trivial_preorder", "equation_Prims.eqtype",
-        "equation_Vale.Interop.Base.buf_t",
+        "equation_Prims.pos", "equation_Vale.Interop.Base.buf_t",
         "equation_Vale.Interop.Base.mut_to_b8",
         "equation_Vale.Interop.Types.b8",
         "equation_Vale.Interop.Types.base_typ_as_type",
@@ -25,6 +25,7 @@
         "function_token_typing_FStar.UInt8.t",
         "lemma_LowStar.BufferView.Down.as_buffer_mk_buffer_view",
         "lemma_LowStar.BufferView.Down.get_view_mk_buffer_view",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
         "proj_equation_FStar.Pervasives.Mkdtuple4__1",
         "proj_equation_FStar.Pervasives.Mkdtuple4__2",
         "proj_equation_FStar.Pervasives.Mkdtuple4__3",
@@ -41,14 +42,18 @@
         "projection_inverse_Vale.Interop.Types.Buffer_src",
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Tm_refine_703c6f879c5b001c36b204e25e1b2371",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
         "refinement_interpretation_Tm_refine_83bd940927020bb51199658f6752ed80",
+        "typing_LowStar.BufferView.Down.__proj__View__item__n",
+        "typing_LowStar.BufferView.Down.get_view",
         "typing_Vale.Interop.Types.__proj__Buffer__item__bsrc",
         "typing_Vale.Interop.Types.__proj__Buffer__item__rel",
         "typing_Vale.Interop.Types.base_typ_as_type",
-        "typing_Vale.Interop.Types.down_view"
+        "typing_Vale.Interop.Types.down_view",
+        "typing_Vale.Interop.Types.view_n"
       ],
       0,
-      "ba4468b52a6907989ae993808175e95b"
+      "75825ac42a88147cc7e5143e072f97f6"
     ],
     [
       "Vale.X64.MemoryAdapters.as_vale_immbuffer",
@@ -58,7 +63,8 @@
       [
         "@MaxIFuel_assumption", "@query", "constructor_distinct_Tm_unit",
         "equation_LowStar.ImmutableBuffer.immutable_preorder",
-        "equation_Prims.eqtype", "equation_Vale.Interop.Base.ibuf_t",
+        "equation_Prims.eqtype", "equation_Prims.pos",
+        "equation_Vale.Interop.Base.ibuf_t",
         "equation_Vale.Interop.Base.imm_to_b8",
         "equation_Vale.Interop.Types.b8",
         "equation_Vale.Interop.Types.base_typ_as_type",
@@ -74,6 +80,7 @@
         "function_token_typing_FStar.UInt8.t",
         "lemma_LowStar.BufferView.Down.as_buffer_mk_buffer_view",
         "lemma_LowStar.BufferView.Down.get_view_mk_buffer_view",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
         "proj_equation_FStar.Pervasives.Mkdtuple4__1",
         "proj_equation_FStar.Pervasives.Mkdtuple4__2",
         "proj_equation_FStar.Pervasives.Mkdtuple4__3",
@@ -91,13 +98,17 @@
         "refinement_interpretation_Tm_refine_1665f1ce84843a1b3ee2b366c7c855b4",
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Tm_refine_703c6f879c5b001c36b204e25e1b2371",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "typing_LowStar.BufferView.Down.__proj__View__item__n",
+        "typing_LowStar.BufferView.Down.get_view",
         "typing_Vale.Interop.Types.__proj__Buffer__item__bsrc",
         "typing_Vale.Interop.Types.__proj__Buffer__item__rel",
         "typing_Vale.Interop.Types.base_typ_as_type",
-        "typing_Vale.Interop.Types.down_view"
+        "typing_Vale.Interop.Types.down_view",
+        "typing_Vale.Interop.Types.view_n"
       ],
       0,
-      "5f2ade9fad311b0dc67ac4dafd972b36"
+      "08532699d77bbc6f0617dc47d69380c2"
     ],
     [
       "Vale.X64.MemoryAdapters.stack_eq",
@@ -106,7 +117,7 @@
       0,
       [ "@query", "equation_Vale.X64.Stack_i.vale_stack" ],
       0,
-      "096448f0a714703e4beb67adaae8b8b7"
+      "5b6310e14faef88aa84bab0bded1df8c"
     ],
     [
       "Vale.X64.MemoryAdapters.as_vale_stack",
@@ -115,7 +126,7 @@
       0,
       [ "@query", "equation_Vale.X64.Stack_i.vale_stack" ],
       0,
-      "1139abb86c5aedaae8d315bca4bdd841"
+      "3bf1a4d902c869b1040c749768a648c9"
     ],
     [
       "Vale.X64.MemoryAdapters.buffer_addr_is_nat64",
@@ -159,7 +170,7 @@
         "typing_Vale.X64.State.__proj__Mkvale_state__item__vs_heap"
       ],
       0,
-      "116a4cfde8ae3006e332a5b04fa7f119"
+      "701e9cacc88102582fcb1976448a10b1"
     ],
     [
       "Vale.X64.MemoryAdapters.code_equiv",
@@ -174,7 +185,7 @@
         "equation_Vale.X64.Machine_Semantics_s.ocmp"
       ],
       0,
-      "5043ec4879b05bddc3faacb94ca7e331"
+      "a8073da17d7753267cf8096e42cdfef3"
     ],
     [
       "Vale.X64.MemoryAdapters.ins_equiv",
@@ -183,7 +194,7 @@
       0,
       [ "@query", "equation_Vale.X64.Decls.ins" ],
       0,
-      "7aa61b0312402e934c1002205ca070ca"
+      "6bf4d840044f0a449ce9f9e83fec12aa"
     ],
     [
       "Vale.X64.MemoryAdapters.ocmp_equiv",
@@ -192,7 +203,7 @@
       0,
       [ "@query", "equation_Vale.X64.Decls.ocmp" ],
       0,
-      "027668e3772c7b7b7a2868b34efde26a"
+      "2424104f7ae1770fa2c83c8aae198775"
     ]
   ]
 ]

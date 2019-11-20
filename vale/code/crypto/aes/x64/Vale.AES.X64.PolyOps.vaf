@@ -63,6 +63,7 @@ procedure PolyAnd(inout dst:xmm, in src:xmm)
         a2 := of_quad32(src);
     modifies
         efl;
+    requires sse_enabled;
     ensures
         of_quad32(dst) == poly_and(a1, a2);
 {

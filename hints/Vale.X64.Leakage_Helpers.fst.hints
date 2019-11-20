@@ -8,7 +8,7 @@
       0,
       [ "@query", "assumption_Vale.X64.Machine_s.reg__uu___haseq" ],
       0,
-      "e5aa2ad15c170a94576711dbb57ce5e7"
+      "9d80775a5549276316291763af24fd02"
     ],
     [
       "Vale.X64.Leakage_Helpers.reg_le",
@@ -24,7 +24,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "ec9d7b2540b7973405f9a271b9b469f1"
+      "dd3066b2c1eea23a65adc931b9063d0e"
     ],
     [
       "Vale.X64.Leakage_Helpers.map_to_regs",
@@ -33,7 +33,7 @@
       0,
       [ "@query", "assumption_Vale.X64.Machine_s.reg__uu___haseq" ],
       0,
-      "4a2a4e3f9e61171e583f64c447a38627"
+      "0fba7d37510a8d1996dbc2c9a175f3f5"
     ],
     [
       "Vale.X64.Leakage_Helpers.regs_to_map_rec",
@@ -42,7 +42,7 @@
       0,
       [ "@query", "assumption_Vale.X64.Machine_s.reg__uu___haseq" ],
       0,
-      "39601b5c78e9f8c8e1819804e3d00333"
+      "7eec79fbff69b713b8b78950ee1ea453"
     ],
     [
       "Vale.X64.Leakage_Helpers.regs_to_map_rec",
@@ -53,7 +53,6 @@
         "@MaxIFuel_assumption", "@query",
         "FStar.FunctionalExtensionality_interpretation_Tm_arrow_a7d5cc170be69663c495e8582d2bc62a",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "Prims_pretyping_e4836109f73687024ac3edd113084865",
         "Vale.Lib.MapTree_interpretation_Tm_arrow_c8126b87a2c25bb477df4a7a6b0eea9e",
         "Vale.X64.Leakage_Helpers_interpretation_Tm_arrow_e7d6c0927bcc4c5ac9167af4a39a70ec",
         "Vale.X64.Machine_s_pretyping_38835f297fb700457da67879cc31d6a6",
@@ -99,11 +98,10 @@
         "token_correspondence_Vale.X64.Leakage_Helpers.reg_le",
         "typing_Vale.X64.Machine_s.__proj__Reg__item__r",
         "typing_Vale.X64.Machine_s.__proj__Reg__item__rf",
-        "typing_Vale.X64.Machine_s.n_regs", "typing_tok_Prims.LexTop@tok",
-        "well-founded-ordering-on-nat"
+        "typing_Vale.X64.Machine_s.n_regs", "well-founded-ordering-on-nat"
       ],
       0,
-      "3c1eaf95f9f8ff422782649e1afd078c"
+      "8a388a7bb0317f6eacf7b004ff33e380"
     ],
     [
       "Vale.X64.Leakage_Helpers.regs_to_map",
@@ -143,7 +141,7 @@
         "typing_tok_Vale.X64.Machine_s.Public@tok"
       ],
       0,
-      "0016cce8e78a5f8a1cb715f77dad839e"
+      "b6fff9bdf38b04f03fab1a48b93e0f46"
     ],
     [
       "Vale.X64.Leakage_Helpers.__proj__AnalysisTaints__item__rts",
@@ -156,7 +154,7 @@
         "projection_inverse_Vale.X64.Leakage_Helpers.AnalysisTaints_lts"
       ],
       0,
-      "117120315a022c2bfa1c15f86f051ba5"
+      "f38a1a4cb9c19b5c7d1b23a793d3532a"
     ],
     [
       "Vale.X64.Leakage_Helpers.operand_taint",
@@ -176,7 +174,7 @@
         "fuel_guarded_inversion_Vale.X64.Machine_s.operand"
       ],
       0,
-      "fa1d4057d4a0aa4ab83edd1a22f7ad5a"
+      "11b80cfb3dbc96264bb5bb11f338d4f2"
     ],
     [
       "Vale.X64.Leakage_Helpers.operand_taint_explicit",
@@ -194,7 +192,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "c78d5ca75f0f4645001519a0f277fdd4"
+      "98c5ed31da7863d0c28ff8259e4b2a70"
     ],
     [
       "Vale.X64.Leakage_Helpers.operand_taint_implicit",
@@ -212,7 +210,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "ea1d152ddc0d2b29d3db9f6db8fca3ad"
+      "267bc885dafd1823167765f8c3f90dd9"
     ],
     [
       "Vale.X64.Leakage_Helpers.args_taint",
@@ -240,7 +238,7 @@
         "subterm_ordering_Prims.Cons"
       ],
       0,
-      "d404d3edcce43d2915c408217d8ee8b9"
+      "e868fea5e8452be743152cf03232495d"
     ],
     [
       "Vale.X64.Leakage_Helpers.inouts_taint",
@@ -287,7 +285,7 @@
         "typing_FStar.Pervasives.Native.__proj__Mktuple2__item___1"
       ],
       0,
-      "0580c9b4dbf4ad7c014b68d2aa3b6223"
+      "0f8e5c00f48589fbded3cdfdc921ac9e"
     ],
     [
       "Vale.X64.Leakage_Helpers.maddr_does_not_use_secrets",
@@ -303,7 +301,7 @@
         "fuel_guarded_inversion_Vale.X64.Machine_s.maddr"
       ],
       0,
-      "f6777c52a01051a9ec0da85e47635665"
+      "bbacb32fd05547a2c9177d8f4ddfb3e1"
     ],
     [
       "Vale.X64.Leakage_Helpers.operand_does_not_use_secrets",
@@ -319,7 +317,7 @@
         "fuel_guarded_inversion_Vale.X64.Machine_s.operand"
       ],
       0,
-      "7d87439428bb121666da6ae366e70d5c"
+      "e2415f9d508913ed811dce3be256e3d0"
     ],
     [
       "Vale.X64.Leakage_Helpers.operand_taint_allowed",
@@ -335,7 +333,7 @@
         "fuel_guarded_inversion_Vale.X64.Machine_s.operand"
       ],
       0,
-      "ff332cf0d8ee16fd38125b656745e75c"
+      "c57f22be14c7001312419010a1d1f56c"
     ],
     [
       "Vale.X64.Leakage_Helpers.set_taint",
@@ -359,7 +357,7 @@
         "projection_inverse_Vale.X64.Leakage_s.LeakageTaints_regTaint"
       ],
       0,
-      "2c2dbbb3c33bb5af3e795b320c003799"
+      "ce4a9e3f8db5b0cc9703df3aa60c705b"
     ],
     [
       "Vale.X64.Leakage_Helpers.set_taint_cf_and_flags",
@@ -371,7 +369,7 @@
         "projection_inverse_Vale.X64.Leakage_s.LeakageTaints_regTaint"
       ],
       0,
-      "d8a452d7fa6fbd34c94e93dc45b36402"
+      "e25b9254e3a2c01c195fdd87f5ce2f06"
     ],
     [
       "Vale.X64.Leakage_Helpers.set_taint_of_and_flags",
@@ -383,7 +381,7 @@
         "projection_inverse_Vale.X64.Leakage_s.LeakageTaints_regTaint"
       ],
       0,
-      "7e9c2e466dd7231d4f5df94e1fefb566"
+      "ff91509f39ff27db54faed073e3ee890"
     ],
     [
       "Vale.X64.Leakage_Helpers.registerAsExpected",
@@ -392,7 +390,7 @@
       0,
       [ "@query", "assumption_Vale.X64.Machine_s.reg__uu___haseq" ],
       0,
-      "8abc22b246b3e08abb70bc76acd3f544"
+      "f1d7389c08a845b0a182a115973dd2d5"
     ],
     [
       "Vale.X64.Leakage_Helpers.publicRegisterValuesAreAsExpected_reg_file",
@@ -401,14 +399,14 @@
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "Vale.X64.Leakage_Helpers_pretyping_27cbc7f3c05302ce277bcd7aa3471f2f",
+        "Vale.X64.Leakage_s_pretyping_ad50abf6589ef6c4087eb065e6cf08d5",
         "binder_x_25f4b27a20f72ed456cefba9461105d5_2",
-        "binder_x_27cbc7f3c05302ce277bcd7aa3471f2f_0",
-        "binder_x_27cbc7f3c05302ce277bcd7aa3471f2f_1",
         "binder_x_9bc66468c4c7ad1611e8748185d6e29f_3",
+        "binder_x_ad50abf6589ef6c4087eb065e6cf08d5_0",
+        "binder_x_ad50abf6589ef6c4087eb065e6cf08d5_1",
         "equality_tok_Prims.LexTop@tok", "equation_Prims.nat",
         "equation_Vale.X64.Machine_s.reg_file_id",
-        "fuel_guarded_inversion_Vale.X64.Leakage_Helpers.analysis_taints",
+        "fuel_guarded_inversion_Vale.X64.Leakage_s.analysis_taints",
         "int_inversion", "int_typing", "primitive_Prims.op_Equality",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_46e1d323f68f206e5b156d1cf36df4aa",
@@ -417,7 +415,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "b48b7b65e72ef4701cec7deeb63e586d"
+      "4383a70807f50ea1b870751c6d44ce37"
     ],
     [
       "Vale.X64.Leakage_Helpers.publicRegisterValuesAreAsExpected_regs",
@@ -426,12 +424,12 @@
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "Vale.X64.Leakage_Helpers_pretyping_27cbc7f3c05302ce277bcd7aa3471f2f",
-        "binder_x_27cbc7f3c05302ce277bcd7aa3471f2f_0",
-        "binder_x_27cbc7f3c05302ce277bcd7aa3471f2f_1",
+        "Vale.X64.Leakage_s_pretyping_ad50abf6589ef6c4087eb065e6cf08d5",
+        "binder_x_ad50abf6589ef6c4087eb065e6cf08d5_0",
+        "binder_x_ad50abf6589ef6c4087eb065e6cf08d5_1",
         "binder_x_b86c2548ce36a17f03fdb05cdd982de7_2",
         "equality_tok_Prims.LexTop@tok", "equation_Prims.nat",
-        "fuel_guarded_inversion_Vale.X64.Leakage_Helpers.analysis_taints",
+        "fuel_guarded_inversion_Vale.X64.Leakage_s.analysis_taints",
         "int_inversion", "int_typing", "primitive_Prims.op_Equality",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_0d7abd59d64d4ac197ae128854a17b2f",
@@ -439,7 +437,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "f3d30fe3b08504ccaf347569904951e1"
+      "84a4abac5724d8e55050988e0a567eeb"
     ],
     [
       "Vale.X64.Leakage_Helpers.publicRegisterValuesAreAsExpected",
@@ -451,7 +449,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "48396672bf0b45d1cd730cea638dc196"
+      "3a5d89ebcc4084cc854b421ceba1a062"
     ],
     [
       "Vale.X64.Leakage_Helpers.regmap",
@@ -460,7 +458,7 @@
       0,
       [ "@query", "assumption_Vale.X64.Machine_s.reg__uu___haseq" ],
       0,
-      "626639ffd913ae0e8f3d4829ca291c9a"
+      "c88b8e3d2fbd496c2b050c5ef4e56335"
     ],
     [
       "Vale.X64.Leakage_Helpers.reg_le",
@@ -476,7 +474,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "a505adde16adfec7d46d5573040fb2d3"
+      "d51a8852de4356d22a78b6e97304bcaf"
     ],
     [
       "Vale.X64.Leakage_Helpers.map_to_regs",
@@ -485,7 +483,7 @@
       0,
       [ "@query", "assumption_Vale.X64.Machine_s.reg__uu___haseq" ],
       0,
-      "d3d83bd47fa9b117e7472443baabdedf"
+      "745a6258d39e91ec972aa7e45fae945f"
     ],
     [
       "Vale.X64.Leakage_Helpers.regs_to_map_rec",
@@ -494,7 +492,7 @@
       0,
       [ "@query", "assumption_Vale.X64.Machine_s.reg__uu___haseq" ],
       0,
-      "695b1ff16c89f44b4f2c566057e65de2"
+      "eca50ceef2ad0aa688341753eba5018a"
     ],
     [
       "Vale.X64.Leakage_Helpers.regs_to_map_rec",
@@ -505,7 +503,6 @@
         "@MaxIFuel_assumption", "@query",
         "FStar.FunctionalExtensionality_interpretation_Tm_arrow_a7d5cc170be69663c495e8582d2bc62a",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "Prims_pretyping_e4836109f73687024ac3edd113084865",
         "Vale.Lib.MapTree_interpretation_Tm_arrow_c8126b87a2c25bb477df4a7a6b0eea9e",
         "Vale.X64.Leakage_Helpers_interpretation_Tm_arrow_e7d6c0927bcc4c5ac9167af4a39a70ec",
         "Vale.X64.Machine_s_pretyping_38835f297fb700457da67879cc31d6a6",
@@ -551,11 +548,10 @@
         "token_correspondence_Vale.X64.Leakage_Helpers.reg_le",
         "typing_Vale.X64.Machine_s.__proj__Reg__item__r",
         "typing_Vale.X64.Machine_s.__proj__Reg__item__rf",
-        "typing_Vale.X64.Machine_s.n_regs", "typing_tok_Prims.LexTop@tok",
-        "well-founded-ordering-on-nat"
+        "typing_Vale.X64.Machine_s.n_regs", "well-founded-ordering-on-nat"
       ],
       0,
-      "7f5772a6aef125c997498cafe4344c42"
+      "38a564d617cadfaa861b2a4d8a1aa86c"
     ],
     [
       "Vale.X64.Leakage_Helpers.regs_to_map",
@@ -595,7 +591,7 @@
         "typing_tok_Vale.X64.Machine_s.Public@tok"
       ],
       0,
-      "6514dfe08660fde73a29fac796461c3d"
+      "ebefa6983bdbb1eb0e96ce25b6fdb4cd"
     ],
     [
       "Vale.X64.Leakage_Helpers.__proj__AnalysisTaints__item__rts",
@@ -608,7 +604,7 @@
         "projection_inverse_Vale.X64.Leakage_Helpers.AnalysisTaints_lts"
       ],
       0,
-      "ae73a25b9399c12c70f537a42f506929"
+      "764e18762f32c0c44390f0ec4d2fa94b"
     ],
     [
       "Vale.X64.Leakage_Helpers.operand_taint",
@@ -628,7 +624,7 @@
         "fuel_guarded_inversion_Vale.X64.Machine_s.operand"
       ],
       0,
-      "a752926802805d534fff95964448ae66"
+      "6d6db0985206a559b17286fd3080310d"
     ],
     [
       "Vale.X64.Leakage_Helpers.operand_taint_explicit",
@@ -646,7 +642,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "cab84ee2e139789896d61a46f05cb69a"
+      "aace9baecb00fee2cc235dfe53a3f739"
     ],
     [
       "Vale.X64.Leakage_Helpers.operand_taint_implicit",
@@ -664,7 +660,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "e7a1ee6d37feea88c8bfc984d2cb102a"
+      "8d239550edc8c6e5989c1dc0cd16a6e8"
     ],
     [
       "Vale.X64.Leakage_Helpers.args_taint",
@@ -692,7 +688,7 @@
         "subterm_ordering_Prims.Cons"
       ],
       0,
-      "a0c01a32ff77afe4b65800fd7bb63c41"
+      "9ebfa8f810d7f8da0e21a7f29f23ec26"
     ],
     [
       "Vale.X64.Leakage_Helpers.inouts_taint",
@@ -739,7 +735,7 @@
         "typing_FStar.Pervasives.Native.__proj__Mktuple2__item___1"
       ],
       0,
-      "aa81870975e251a1c4543aa9ac8a191e"
+      "4c2cff6ff3e8dde6658010f54163619b"
     ],
     [
       "Vale.X64.Leakage_Helpers.maddr_does_not_use_secrets",
@@ -755,7 +751,7 @@
         "fuel_guarded_inversion_Vale.X64.Machine_s.maddr"
       ],
       0,
-      "b7369e4af8225a2dc32c8601fe3abec4"
+      "987cee3f1671188b659b66510e013111"
     ],
     [
       "Vale.X64.Leakage_Helpers.operand_does_not_use_secrets",
@@ -771,7 +767,7 @@
         "fuel_guarded_inversion_Vale.X64.Machine_s.operand"
       ],
       0,
-      "10e64d264debfc69d6fe2c21dde9a664"
+      "8422f626e61357bcd87db4d57c1fc18c"
     ],
     [
       "Vale.X64.Leakage_Helpers.operand_taint_allowed",
@@ -787,7 +783,7 @@
         "fuel_guarded_inversion_Vale.X64.Machine_s.operand"
       ],
       0,
-      "192c36b86cd37253a4cdc8ab0c7e0a50"
+      "c5c32c6de82a904550276536ccdaf7fc"
     ],
     [
       "Vale.X64.Leakage_Helpers.set_taint",
@@ -811,7 +807,7 @@
         "projection_inverse_Vale.X64.Leakage_s.LeakageTaints_regTaint"
       ],
       0,
-      "d84a844c8e161194116507137557275e"
+      "6b43862019da892a3e756f191ae631bf"
     ],
     [
       "Vale.X64.Leakage_Helpers.set_taint_cf_and_flags",
@@ -823,7 +819,7 @@
         "projection_inverse_Vale.X64.Leakage_s.LeakageTaints_regTaint"
       ],
       0,
-      "84bbb56c69f795862c4d8141e930f834"
+      "405aff5e5808bb2d43d8f0d69edcf6be"
     ],
     [
       "Vale.X64.Leakage_Helpers.set_taint_of_and_flags",
@@ -835,7 +831,7 @@
         "projection_inverse_Vale.X64.Leakage_s.LeakageTaints_regTaint"
       ],
       0,
-      "da340ebcdf6c58d16adb6aabe8581371"
+      "d7aff27af14793e991c526bc793048c5"
     ],
     [
       "Vale.X64.Leakage_Helpers.registerAsExpected",
@@ -844,7 +840,7 @@
       0,
       [ "@query", "assumption_Vale.X64.Machine_s.reg__uu___haseq" ],
       0,
-      "d758ea13a263a59aa89842db7c33c92c"
+      "b233d8fc43c6906933ffc8b33b6d569a"
     ],
     [
       "Vale.X64.Leakage_Helpers.publicRegisterValuesAreAsExpected_reg_file",
@@ -869,7 +865,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "0b83748f50eba7344d02db50dd19d7a6"
+      "8f2b33539b9dc10deb7b15e16b67ec63"
     ],
     [
       "Vale.X64.Leakage_Helpers.publicRegisterValuesAreAsExpected_regs",
@@ -891,7 +887,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "ea77af4dbd15b4c958a6e4bc54938722"
+      "db6af47549a016f1a332983c006ebbd6"
     ],
     [
       "Vale.X64.Leakage_Helpers.publicRegisterValuesAreAsExpected",
@@ -903,7 +899,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "326feaea4a3d815166d06256159f8acb"
+      "fdb2c3bab7fba0ff30addc7e8c3b55c0"
     ]
   ]
 ]

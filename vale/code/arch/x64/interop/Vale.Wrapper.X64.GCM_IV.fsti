@@ -39,7 +39,7 @@ val compute_iv
     (B.disjoint j0_b extra_b \/ j0_b == extra_b) /\
     B.disjoint j0_b hkeys_b /\ B.disjoint hkeys_b extra_b /\
 
-    pclmulqdq_enabled /\ avx_enabled /\
+    pclmulqdq_enabled /\ avx_enabled /\ sse_enabled /\
 
     is_aes_key_LE a (Ghost.reveal key) /\
     hkeys_reqs_pub (le_bytes_to_seq_quad32 (seq_uint8_to_seq_nat8 (B.as_seq h hkeys_b)))
