@@ -77,10 +77,10 @@ let sealBase_st (cs:S.ciphersuite) =
   -> ST unit
        (requires fun h0 ->
         (S.curve_of_cs cs = Spec.Agile.DH.DH_Curve25519 ==>
-          Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
+         Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
          live h0 output /\ live h0 skE /\ live h0 pkR /\
          live h0 m /\ live h0 info /\
-         disjoint output info /\ disjoint output m /\ disjoint output skE)
+         disjoint output pkR /\ disjoint output info /\ disjoint output m /\ disjoint output skE)
        (ensures fun h0 _ h1 -> modifies (loc output) h0 h1 /\
          as_seq h1 output `Seq.equal` S.sealBase cs (as_seq h0 skE) (as_seq h0 pkR) (as_seq h0 m) (as_seq h0 info))
 
@@ -101,7 +101,7 @@ let openBase_st (cs:S.ciphersuite) =
          live h0 m /\ live h0 info /\
          disjoint output info /\ disjoint output m)
        (ensures fun h0 z h1 -> modifies (loc output) h0 h1 /\
-         (let plain = S.openBase cs (as_seq h0 pkE) (as_seq h0 skR) (as_seq h0 m) (as_seq h0 info) in
+         (let plain = S.openBase cs (as_seq h0 skR) (as_seq h0 m) (as_seq h0 info) in
          match z with
          | 0ul -> Some? plain /\ as_seq h1 output == Some?.v plain
          | 1ul -> None? plain
