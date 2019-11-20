@@ -553,7 +553,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "f405dbbdd2b596ab317be109413f4301"
+      "2fbd7fb0d43d917eb9eeb0a1079c8b60"
     ],
     [
       "Lib.ByteBuffer.lbytes_eq",
@@ -1082,6 +1082,7 @@
         "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
         "refinement_interpretation_Tm_refine_9920ad7fdb83d776ac74c5ec84d5fe0e",
         "refinement_interpretation_Tm_refine_9c36b8f5a7a9b8fb80adbe9309fb4f4a",
+        "refinement_interpretation_Tm_refine_9d3fd79fd314167f1a9c213a188da3ec",
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
         "refinement_interpretation_Tm_refine_9f8f6290ae5c5057ec2ec3d3fc190a93",
         "refinement_interpretation_Tm_refine_b361ba8089a6e963921008d537e799a1",
@@ -1099,8 +1100,9 @@
         "typing_FStar.UInt32.uint_to_t", "typing_FStar.UInt32.v",
         "typing_FStar.UInt64.uint_to_t", "typing_FStar.UInt64.v",
         "typing_FStar.UInt8.uint_to_t", "typing_FStar.UInt8.v",
-        "typing_Lib.Buffer.length", "typing_Lib.IntTypes.int_t",
-        "typing_Lib.IntTypes.minint", "typing_Lib.IntTypes.numbytes",
+        "typing_Lib.Buffer.length", "typing_Lib.IntTypes.bits",
+        "typing_Lib.IntTypes.int_t", "typing_Lib.IntTypes.minint",
+        "typing_Lib.IntTypes.mk_int", "typing_Lib.IntTypes.numbytes",
         "typing_Lib.IntTypes.unsigned", "typing_Lib.IntTypes.uu___is_U1",
         "typing_Lib.RawIntTypes.uint_to_nat", "typing_Lib.Sequence.index",
         "typing_LowStar.Buffer.trivial_preorder",
@@ -1113,7 +1115,7 @@
         "typing_tok_Lib.IntTypes.U64@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "c1de514aa75ce5dbdc253dc5c07e41aa"
+      "32b209e7f9d925278256ca6f9ba4f7b6"
     ],
     [
       "Lib.ByteBuffer.uint_from_bytes_be",
@@ -1191,7 +1193,6 @@
       1,
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
-        "@fuel_correspondence_FStar.Endianness.be_to_n.fuel_instrumented",
         "@fuel_correspondence_Lib.ByteSequence.nat_from_intseq_be_.fuel_instrumented",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented",
         "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
@@ -1247,7 +1248,6 @@
         "equation_LowStar.Buffer.trivial_preorder",
         "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.nat",
         "equation_Prims.pos",
-        "equation_with_fuel_FStar.Endianness.be_to_n.fuel_instrumented",
         "equation_with_fuel_Lib.ByteSequence.nat_from_intseq_be_.fuel_instrumented",
         "equation_with_fuel_Prims.pow2.fuel_instrumented",
         "fuel_guarded_inversion_Lib.IntTypes.inttype",
@@ -1283,7 +1283,6 @@
         "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
         "refinement_interpretation_Tm_refine_9920ad7fdb83d776ac74c5ec84d5fe0e",
         "refinement_interpretation_Tm_refine_9c36b8f5a7a9b8fb80adbe9309fb4f4a",
-        "refinement_interpretation_Tm_refine_9d3fd79fd314167f1a9c213a188da3ec",
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
         "refinement_interpretation_Tm_refine_9f8f6290ae5c5057ec2ec3d3fc190a93",
         "refinement_interpretation_Tm_refine_b361ba8089a6e963921008d537e799a1",
@@ -1302,9 +1301,8 @@
         "typing_FStar.UInt64.v", "typing_FStar.UInt8.uint_to_t",
         "typing_FStar.UInt8.v", "typing_Lib.Buffer.length",
         "typing_Lib.IntTypes.bits", "typing_Lib.IntTypes.int_t",
-        "typing_Lib.IntTypes.minint", "typing_Lib.IntTypes.mk_int",
-        "typing_Lib.IntTypes.numbytes", "typing_Lib.IntTypes.unsigned",
-        "typing_Lib.IntTypes.uu___is_U1",
+        "typing_Lib.IntTypes.minint", "typing_Lib.IntTypes.numbytes",
+        "typing_Lib.IntTypes.unsigned", "typing_Lib.IntTypes.uu___is_U1",
         "typing_Lib.RawIntTypes.uint_to_nat", "typing_Lib.Sequence.index",
         "typing_LowStar.Buffer.trivial_preorder",
         "typing_LowStar.Monotonic.Buffer.as_seq",
@@ -1814,7 +1812,7 @@
         "typing_tok_Lib.IntTypes.U8@tok", "unit_inversion", "unit_typing"
       ],
       0,
-      "8797f454d146b9183e808c41fe95ef11"
+      "0e0c0e89b1642d0d1e17930ac7ec36b1"
     ],
     [
       "Lib.ByteBuffer.uint_to_bytes_be",
@@ -2044,7 +2042,7 @@
         "typing_tok_Lib.IntTypes.U8@tok", "unit_inversion", "unit_typing"
       ],
       0,
-      "d17d633a75c98a36cb8eec26089da5f3"
+      "a6e369c2c13996e41554ceeacc55f579"
     ],
     [
       "Lib.ByteBuffer.uints_from_bytes_le",
@@ -2715,7 +2713,7 @@
         "typing_tok_Lib.IntTypes.U8@tok", "unit_typing"
       ],
       0,
-      "67b522c3357b14b422d396a8accfe97b"
+      "3cfcf43d7dd99c9365037148e6148e98"
     ],
     [
       "Lib.ByteBuffer.uints_to_bytes_be",
@@ -2947,7 +2945,7 @@
         "unit_typing"
       ],
       0,
-      "ed1f819ed15a8acf71f577bbe99a3808"
+      "96b8cf1a6b31213d45f3052281890c2c"
     ],
     [
       "Lib.ByteBuffer.uint32s_to_bytes_le",
