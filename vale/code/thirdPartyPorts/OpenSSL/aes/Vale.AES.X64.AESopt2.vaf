@@ -861,13 +861,13 @@ procedure Ghash_buffer(
         ghost y_prev:quad32
         )
     {:public}
-    {:quick exportOnly}
+    {:quick}
     lets
         Xip @= r9; len @= rdx; scratch_ptr @= r11; in_ptr @= rdi; scratch_reg @= r10;
         Ii @= xmm0; T1 @= xmm1; T2 @= xmm2; Hkey @= xmm3;
         Z0 @= xmm4; Z1 @= xmm5; Z2 @= xmm6; Z3 @= xmm7;
         Xi @= xmm8; rev_mask @= xmm9;
-        h := of_quad32(reverse_bytes_quad32(h_LE));
+        h:poly := of_quad32(reverse_bytes_quad32(h_LE));
         
     reads
         Xip; in_ptr; rev_mask; mem; memTaint; 
@@ -895,7 +895,7 @@ procedure Ghash_buffer(
             scratch_ptr == in_ptr + 0x10 * index;
 
             // Copy over preconditions
-            pclmulqdq_enabled && avx_enabled;
+            pclmulqdq_enabled && avx_enabled && sse_enabled;
             hkeys_b_powers(hkeys_b, mem, memTaint, Xip - 0x20, h);
             validSrcAddrs128(mem, in_ptr, in_b, len, memTaint, Secret);
             buffer_length(in_b) == old(len);
@@ -903,7 +903,8 @@ procedure Ghash_buffer(
             Xi == reverse_bytes_quad32(ghash_incremental0(h_LE, y_prev, slice(s128(mem, in_b), 0, index)));
             rev_mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
             old(len) == 0 ==> Xi == old(Xi);
-            
+            h == of_quad32(reverse_bytes_quad32(h_LE));
+
         decreases
             len;
     {
