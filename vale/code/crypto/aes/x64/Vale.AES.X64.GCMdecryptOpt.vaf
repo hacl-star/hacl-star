@@ -609,7 +609,7 @@ procedure Gcm_blocks_wrapped(
         ghost keys_b:buffer128,
         ghost hkeys_b:buffer128,
         ghost expected_tag:seq(nat8))
-    {:quick exportOnly}
+    {:quick}
     lets
         auth_ptr @= rdi; auth_num_bytes @= rsi; auth_len @= rdx; keys_ptr @= rcx; scratch_ptr @= rbp;
         iv_ptr @= r8; Xip @= r9; hash @= xmm8;
@@ -796,7 +796,7 @@ procedure gcm_blocks_decrypt_stdcall(
 
         ghost key:seq(nat32))
     {:public}
-    {:quick exportOnly}
+    {:quick}
     {:exportSpecs}
     lets
         auth_ptr :=         if win then rcx else rdi;
@@ -1016,7 +1016,7 @@ procedure gcm_blocks_decrypt_stdcall(
     }
 
     Gcm_blocks_wrapped(alg,
-               if win then 224 + 56 else 64 + 8,
+               total_if(win, 224 + 56, 64 + 8),
                auth_b,
                abytes_b,
                in128x6_b,
@@ -1035,7 +1035,7 @@ procedure gcm_blocks_decrypt_stdcall(
                );
 
     // Auth tag is still in hash (xmm8), so load it for comparison purposes
-    Load64_stack(r15, rsp, if win then 224 + 40 + 96 else 64 + 8 + 80);
+    Load64_stack(r15, rsp, total_if(win, 224 + 40 + 96, 64 + 8 + 80));
     Load128_buffer(xmm0, r15, 0, Secret, tag_b, 0);
     assert xmm0 == buffer128_read(tag_b, 0, mem);       // OBSERVE?
     assert xmm0 == buffer128_read(tag_b, 0, old(mem));  // OBSERVE?
