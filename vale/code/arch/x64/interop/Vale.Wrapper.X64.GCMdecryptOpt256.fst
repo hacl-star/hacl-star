@@ -129,7 +129,7 @@ val gcm256_decrypt_opt':
       UInt64.v auth_num * (128/8) <= UInt64.v auth_bytes /\
       UInt64.v auth_bytes < UInt64.v auth_num * (128/8) + 128/8 /\
 
-      aesni_enabled /\ pclmulqdq_enabled /\ avx_enabled /\
+      aesni_enabled /\ pclmulqdq_enabled /\ avx_enabled /\ sse_enabled /\ movbe_enabled /\
       is_aes_key_LE AES_256 (Ghost.reveal key) /\
       (let db = get_downview keys_b in
       length_aux2 keys_b;
@@ -268,15 +268,15 @@ let gcm256_decrypt_opt' key iv auth_b auth_bytes auth_num keys_b iv_b hkeys_b ab
   as_vale_buffer_len #TUInt8 #TUInt128 scratch_b;
   as_vale_buffer_len #TUInt8 #TUInt128 tag_b;
 
-  Classical.forall_intro (bounded_buffer_addrs TUInt8 TUInt128 h0 auth_b);
-  Classical.forall_intro (bounded_buffer_addrs TUInt8 TUInt128 h0 in128x6_b);
-  Classical.forall_intro (bounded_buffer_addrs TUInt8 TUInt128 h0 out128x6_b);
-  Classical.forall_intro (bounded_buffer_addrs TUInt8 TUInt128 h0 in128_b);
-  Classical.forall_intro (bounded_buffer_addrs TUInt8 TUInt128 h0 out128_b);
-  Classical.forall_intro (bounded_buffer_addrs TUInt8 TUInt128 h0 inout_b);
-  Classical.forall_intro (bounded_buffer_addrs TUInt8 TUInt128 h0 iv_b);
-  Classical.forall_intro (bounded_buffer_addrs TUInt8 TUInt128 h0 keys_b);
-  Classical.forall_intro (bounded_buffer_addrs TUInt8 TUInt128 h0 hkeys_b);
+  bounded_buffer_addrs_all TUInt8 TUInt128 h0 auth_b;
+  bounded_buffer_addrs_all TUInt8 TUInt128 h0 in128x6_b;
+  bounded_buffer_addrs_all TUInt8 TUInt128 h0 out128x6_b;
+  bounded_buffer_addrs_all TUInt8 TUInt128 h0 in128_b;
+  bounded_buffer_addrs_all TUInt8 TUInt128 h0 out128_b;
+  bounded_buffer_addrs_all TUInt8 TUInt128 h0 inout_b;
+  bounded_buffer_addrs_all TUInt8 TUInt128 h0 iv_b;
+  bounded_buffer_addrs_all TUInt8 TUInt128 h0 keys_b;
+  bounded_buffer_addrs_all TUInt8 TUInt128 h0 hkeys_b;
 
   let x, _ = gcm256_decrypt_opt  key iv auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
   in128x6_b out128x6_b len128x6 in128_b out128_b len128_num inout_b cipher_num scratch_b tag_b () in
@@ -360,7 +360,7 @@ val gcm256_decrypt_opt_alloca:
       UInt64.v cipher_len < pow2_32 /\
       UInt64.v auth_len < pow2_32 /\
 
-      aesni_enabled /\ pclmulqdq_enabled /\ avx_enabled /\
+      aesni_enabled /\ pclmulqdq_enabled /\ avx_enabled /\ sse_enabled /\ movbe_enabled /\
       is_aes_key_LE AES_256 (Ghost.reveal key) /\
       (Seq.equal (B.as_seq h0 keys_b)
          (seq_nat8_to_seq_uint8 (le_seq_quad32_to_bytes (key_to_round_keys_LE AES_256 (Ghost.reveal key))))) /\

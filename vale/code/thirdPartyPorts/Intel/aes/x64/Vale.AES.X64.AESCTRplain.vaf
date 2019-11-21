@@ -78,6 +78,8 @@ procedure aes_ctr_loop_body(
         ctr1 @= xmm2; ctr2 @= xmm12; ctr3 @= xmm13; ctr4 @= xmm14; // Counters being fed to AES
         tmp_xmm @= xmm7;
     requires
+        sse_enabled;
+
         // There's at least one block of four left to do
         0 < num_quad_blocks <= old_num_quad_blocks;
 
@@ -238,6 +240,8 @@ procedure aes_counter_loop(
              efl; mem;
 
     requires
+        sse_enabled;
+
         // There's at least one block of four left to do
         0 < num_quad_blocks && 4*num_quad_blocks < pow2_32 - 4;
 
@@ -315,6 +319,8 @@ procedure aes_counter_loop(
 
     while (num_quad_blocks > 0)
         invariant
+            sse_enabled;
+
             0 < old(num_quad_blocks) && 4*old(num_quad_blocks) < pow2_32 - 4;
             0 <= num_quad_blocks <= old(num_quad_blocks);
             count == old(num_quad_blocks) - num_quad_blocks;

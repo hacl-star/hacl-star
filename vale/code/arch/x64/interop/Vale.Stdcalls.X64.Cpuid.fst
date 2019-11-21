@@ -45,3 +45,30 @@ let lowstar_avx2 : lowstar_avx2_t  =
     (W.mk_prediction code_avx2 dom [] (avx2_lemma code_avx2 IA.win))
 
 let check_avx2 = as_normal_t #lowstar_avx2_t lowstar_avx2
+
+(* And here's the check_movbe wrapper itself *)
+let lowstar_movbe : lowstar_movbe_t  =
+  IX64.wrap_weak_stdcall
+    code_movbe
+    dom
+    (W.mk_prediction code_movbe dom [] (movbe_lemma code_movbe IA.win))
+
+let check_movbe = as_normal_t #lowstar_movbe_t lowstar_movbe
+
+(* And here's the check_sse wrapper itself *)
+let lowstar_sse : lowstar_sse_t  =
+  IX64.wrap_weak_stdcall
+    code_sse
+    dom
+    (W.mk_prediction code_sse dom [] (sse_lemma code_sse IA.win))
+
+let check_sse = as_normal_t #lowstar_sse_t lowstar_sse
+
+(* And here's the check_rdrand wrapper itself *)
+let lowstar_rdrand : lowstar_rdrand_t  =
+  IX64.wrap_weak_stdcall
+    code_rdrand
+    dom
+    (W.mk_prediction code_rdrand dom [] (rdrand_lemma code_rdrand IA.win))
+
+let check_rdrand = as_normal_t #lowstar_rdrand_t lowstar_rdrand

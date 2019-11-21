@@ -192,6 +192,7 @@ procedure Load_two_lsb(inout dst:xmm)
     {:public}
     lets constp @= r11;
     modifies constp; efl;
+    requires sse_enabled;
     ensures  dst == Mkfour(2, 0, 0, 0);
 {
     ZeroXmm(dst);
@@ -204,6 +205,7 @@ procedure Load_0xc2_msb(out dst:xmm)
     {:quick exportOnly}
     lets constp @= r11;
     modifies constp; efl;
+    requires sse_enabled;
     ensures  dst == Mkfour(0, 0, 0, 0xc2000000);
 {
     ZeroXmm(dst);
@@ -230,6 +232,7 @@ procedure Load_one_lsb(inout dst:xmm)
     {:public}
     lets constp @= r11;
     modifies constp; efl;
+    requires sse_enabled;
     ensures  dst == Mkfour(1, 0, 0, 0);
 {
     ZeroXmm(dst);
@@ -256,7 +259,7 @@ procedure Handle_ctr32(ghost ctr_BE:quad32)
         efl;
 
     requires
-        avx_enabled;
+        avx_enabled && sse_enabled;
         T1 == reverse_bytes_quad32(ctr_BE);
     ensures
         tuple(inout1, inout2, inout3, inout4, inout5, T1) == xor_reverse_inc32lite_6(2, 1, ctr_BE, rndkey);
@@ -313,6 +316,8 @@ procedure Loop6x_ctr_update(
         efl;
 
     requires
+        sse_enabled;
+
         // AES reqs
         aes_reqs_offset(alg, key_words, round_keys, keys_b, key, mem, memTaint);
         //aes_reqs0(alg, key_words, round_keys, keys_b, key, mem, memTaint);
@@ -383,6 +388,8 @@ procedure Loop6x_plain(
         efl;
 
     requires
+        sse_enabled;
+
         @rndkey == 1 || @rndkey == 2 || @rndkey == 15;
         // AES reqs
 //        aes_reqs0(alg, key_words, round_keys, keys_b, key, mem, memTaint);
@@ -440,6 +447,8 @@ procedure Loop6x_preamble(
         mem; efl;
 
     requires
+        sse_enabled;
+
         // Valid ptrs and buffers
         validDstAddrs128(mem, rbp, stack_b, 9, memTaint, Secret);
         buffers_disjoint128(stack_b, keys_b);
@@ -523,6 +532,8 @@ procedure Loop6x_reverse128(
     modifies
         r12; r13; mem;
     requires
+        sse_enabled && movbe_enabled;
+
         validSrcAddrsOffset128(mem, in0, in0_b, start, in0_offset + 1, memTaint, Secret);
         validDstAddrs128(mem, rbp, stack_b, stack_offset + 1, memTaint, Secret);
     ensures
@@ -556,6 +567,8 @@ procedure Loop6x_round9(
     modifies
         Ii; T1; T2; Hkey; Z1; Z2; Z3; mem; efl;
     requires
+        sse_enabled;
+
         validSrcAddrsOffset128(mem, inp, in_b, count*6, 6, memTaint, Secret);
         validDstAddrs128(mem, rbp, stack_b, 8, memTaint, Secret);
 //        aes_reqs0(alg, key_words, round_keys, keys_b, key, mem, memTaint);
@@ -581,6 +594,7 @@ procedure load_one_msb()
     {:quick}
     lets constp @= r11; T2 @= xmm2;
     modifies constp; T2; efl;
+    requires sse_enabled;
     ensures  T2 == Mkfour(0, 0, 0, 0x1000000);
 {
     ZeroXmm(T2);
@@ -626,6 +640,8 @@ procedure Loop6x_final(
         mem; efl;
 
     requires
+        sse_enabled;
+
         // Valid ptrs and buffers
         validSrcAddrs128(mem, ivp, iv_b, 1, memTaint, Public);
         validDstAddrs128(mem, rbp, scratch_b, 9, memTaint, Secret);
@@ -734,7 +750,7 @@ procedure Loop6x_save_output(ghost count:nat, ghost out_b:buffer128)
 
     requires
         // Valid ptrs and buffers
-        avx_enabled;
+        avx_enabled && sse_enabled;
         validDstAddrsOffset128(mem, outp - 0x60, out_b, count*6, 6, memTaint, Secret);
 
     ensures
@@ -805,6 +821,8 @@ procedure Loop6x_partial(
         mem; efl;
 
     requires
+        sse_enabled && movbe_enabled;
+
         T2 == Mkfour(0, 0, 0, 0x1000000);
 
         // Valid ptrs and buffers
@@ -962,7 +980,7 @@ procedure Loop6x_partial(
 #verbatim{:interface}
 #reset-options "--z3rlimit 50"
 #endverbatim
-#reset-options "--z3rlimit 50"
+#reset-options "--z3rlimit 100"
 procedure Loop6x(
         inline alg:algorithm,
         ghost h_LE:quad32,
@@ -1007,6 +1025,8 @@ procedure Loop6x(
         mem; efl;
 
     requires
+        sse_enabled && movbe_enabled;
+
         count >= 2;
         len >= 6;
         T2 == Mkfour(0, 0, 0, 0x1000000);

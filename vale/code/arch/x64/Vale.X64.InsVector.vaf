@@ -86,6 +86,7 @@ procedure Paddd(inout dst:xmm, in src:xmm)
     {:quick exportOnly}
     {:instruction mk_ins(make_instr(I.ins_Paddd, OReg(dst), OReg(src)))}
     modifies efl;
+    requires sse_enabled;
     ensures
         dst == old(add_wrap_quad32(dst, src));
 {
@@ -106,6 +107,7 @@ procedure Pxor(inout dst:xmm, in src:xmm)
     {:public}
     {:quick exportOnly}
     {:instruction mk_ins(make_instr_annotate(I.ins_Pxor, S.AnnotatePxor(), OReg(dst), OReg(src)))}
+    requires sse_enabled;
     ensures
         dst == old(quad32_xor(dst, src));
 {
@@ -117,6 +119,7 @@ procedure Pand(inout dst:xmm, in src:opr128)
     {:public}
     {:quick exportOnly}
     {:instruction mk_ins(make_instr(I.ins_Pand, OReg(dst), src))}
+    requires sse_enabled;
     ensures
         dst == four_map2(fun(di:nat32, si:nat32) iand32(di, si), old(dst), old(src));
 {
@@ -137,6 +140,7 @@ procedure Pslld(inout dst:xmm, inline amt:int)
     {:quick exportOnly}
     {:instruction mk_ins(make_instr(I.ins_Pslld(amt), OReg(dst)))}
     requires
+        sse_enabled;
         0 <= amt < 32;
     ensures
         dst == four_map(fun (i:nat32) ishl32(i, amt), old(dst));
@@ -148,6 +152,7 @@ procedure Psrld(inout dst:xmm, inline amt:int)
     {:quick exportOnly}
     {:instruction mk_ins(make_instr(I.ins_Psrld(amt), OReg(dst)))}
     requires
+        sse_enabled;
         0 <= amt < 32;
     ensures
         dst == four_map(fun(i:nat32) ishr32(i, amt), old(dst));
@@ -158,6 +163,7 @@ procedure Psrldq(inout dst:xmm, inline amt:int)
     {:quick exportOnly}
     {:instruction mk_ins(make_instr(I.ins_Psrldq(amt), OReg(dst)))}
     requires
+        sse_enabled;
         0 <= amt < 16;
     ensures
         let src_bytes := le_quad32_to_bytes(old(dst));
@@ -173,6 +179,7 @@ procedure Palignr4(inout dst:xmm, in src:xmm)
     {:quick exportOnly}
     {:instruction mk_ins(make_instr(I.ins_Palignr(4), OReg(dst), OReg(src)))}
     modifies efl;
+    requires sse_enabled;
     ensures
         dst == old(Mkfour(src.lo1, src.hi2, src.hi3, dst.lo0));
 {
@@ -183,6 +190,7 @@ procedure Palignr8(inout dst:xmm, in src:xmm)
     {:quick exportOnly}
     {:instruction mk_ins(make_instr(I.ins_Palignr(8), OReg(dst), OReg(src)))}
     modifies efl;
+    requires sse_enabled;
     ensures
         dst == old(Mkfour(src.hi2, src.hi3, dst.lo0, dst.lo1));
 {
@@ -203,7 +211,7 @@ procedure Shufpd(inout dst:xmm, in src:xmm, inline permutation:nat8)
     {:public}
     {:quick exportOnly}
     {:instruction mk_ins(make_instr(I.ins_Shufpd(permutation), OReg(dst), OReg(src)))}
-    requires permutation < 4;
+    requires permutation < 4; sse_enabled;
     modifies efl;
     ensures
         dst == old(Mkfour(
@@ -236,6 +244,7 @@ procedure Pshufb(inout dst:xmm, in src:xmm)
     {:quick exportOnly}
     {:instruction mk_ins(make_instr(I.ins_Pshufb, OReg(dst), OReg(src)))}
     requires
+        sse_enabled;
         src == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
     modifies efl;
     ensures
@@ -261,6 +270,7 @@ procedure PshufbStable(inout dst:xmm, in src:xmm)
     {:quick exportOnly}
     {:instruction mk_ins(make_instr(I.ins_Pshufb, OReg(dst), OReg(src)))}
     requires
+        sse_enabled;
         src == Mkfour(0x00010203, 0x04050607, 0x08090A0B, 0x0C0D0E0F);
     modifies efl;
     ensures
@@ -277,6 +287,7 @@ procedure PshufbDup(inout dst:xmm, in src:xmm)
     {:quick exportOnly}
     {:instruction mk_ins(make_instr(I.ins_Pshufb, OReg(dst), OReg(src)))}
     requires
+        sse_enabled;
         src == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x0C0D0E0F, 0x08090A0B);
     modifies efl;
     ensures
@@ -292,6 +303,7 @@ procedure Pshufb64(inout dst:xmm, in src:xmm)
     {:quick exportOnly}
     {:instruction mk_ins(make_instr(I.ins_Pshufb, OReg(dst), OReg(src)))}
     requires
+        sse_enabled;
         src == Mkfour(0x04050607, 0x00010203, 0x0C0D0E0F, 0x08090A0B);
     modifies efl;
     ensures
@@ -307,6 +319,7 @@ procedure Pshufb(inout dst:xmm, in src:xmm)
     {:quick exportOnly}
     {:instruction mk_ins(make_instr(I.ins_Pshufb, OReg(dst), OReg(src)))}
     requires
+        sse_enabled;
         src == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203) ||
         src == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x0C0D0E0F, 0x08090A0B) ||
         src == Mkfour(0x04050607, 0x00010203, 0x0C0D0E0F, 0x08090A0B);
@@ -332,6 +345,7 @@ procedure Pshufd(inout dst:xmm, in src:xmm, inline permutation:nat8)
     {:public}
     {:quick exportOnly}
     {:instruction mk_ins(make_instr(I.ins_Pshufd(permutation), OReg(dst), OReg(src)))}
+    requires sse_enabled;
     ensures
         dst == old(Mkfour(
             select_word(src, byte_to_twobits(permutation).lo0),
@@ -345,6 +359,7 @@ procedure Pcmpeqd(inout dst:xmm, in src:xmm)
     {:public}
     {:quick exportOnly}
     {:instruction mk_ins(make_instr(I.ins_Pcmpeqd, OReg(dst), OReg(src)))}
+    requires sse_enabled;
     ensures
         dst == old(Mkfour(
             if src.lo0 = dst.lo0 then 0xFFFFFFFF else 0,
@@ -359,6 +374,7 @@ procedure Pextrq(out dst:dst_opr64, in src:xmm, inline index:nat8)
     {:quick exportOnly}
     {:instruction mk_ins(make_instr(I.ins_Pextrq(index), dst, OReg(src)))}
     requires
+        sse_enabled;
         index < 2;
     ensures
         dst == (if index = 0 then lo64(src) else hi64(src));
@@ -372,6 +388,7 @@ procedure Pinsrd(inout dst:xmm, in src:opr64, inline index:nat8)
     {:quick exportOnly}
     {:instruction mk_ins(make_instr(I.ins_Pinsrd(index), OReg(dst), src))}
     requires
+        sse_enabled;
         src < pow2_32;
         index < 4;
     ensures
@@ -383,6 +400,7 @@ procedure PinsrdImm(inout dst:xmm, inline immediate:nat32, inline index:nat8, ou
     {:public}
     {:quick exportOnly}
     requires
+        sse_enabled;
         index < 4;
     ensures
         dst == insert_nat32(old(dst), immediate, #nat2(index));
@@ -399,6 +417,7 @@ procedure Pinsrq(inout dst:xmm, in src:opr64, inline index:nat8)
     {:quick exportOnly}
     {:instruction mk_ins(make_instr(I.ins_Pinsrq(index), OReg(dst), src))}
     requires
+        sse_enabled;
         index < 2;
     ensures
         dst == insert_nat64_opaque(old(dst), src, #nat1(index));
@@ -411,6 +430,7 @@ procedure PinsrqImm(inout dst:xmm, inline immediate:nat64, inline index:nat8, ou
     {:public}
     {:quick exportOnly}
     requires
+        sse_enabled;
         index < 2;
     ensures
         dst == insert_nat64_opaque(old(dst), immediate, #nat1(index));
@@ -454,6 +474,7 @@ procedure Mov128(inout dst:xmm, in src:xmm)
     {:public}
     {:quick exportOnly}
     {:instruction mk_ins(make_instr(I.ins_Movdqu, OReg(dst), OReg(src)))}
+    requires sse_enabled;
     ensures
         dst == old(src);
 {
@@ -468,6 +489,7 @@ procedure Load128_buffer(
     reads
         mem; memTaint;
     requires
+        sse_enabled;
         valid_src_addr(mem, b, index);
         valid_taint_buf128(b, mem, memTaint, t);
         src + offset == buffer_addr(b, mem) + 16 * index;
@@ -486,6 +508,7 @@ procedure LoadBe64_buffer128(
     reads
         mem; memTaint;
     requires
+        movbe_enabled;
         valid_src_addr(mem, b, index);
         valid_taint_buf128(b, mem, memTaint, t);
         src + offset == buffer_addr(b, mem) + 16 * index + (if upper then 8 else 0);
@@ -509,6 +532,7 @@ procedure Store128_buffer(
     modifies
         mem;
     requires
+        sse_enabled;
         valid_dst_addr(mem, b, index);
         valid_taint_buf128(b, mem, memTaint, t);
         dst + offset == buffer_addr(b, mem) + 16 * index;
@@ -552,6 +576,7 @@ procedure ZeroXmm(inout dst:xmm)
     {:public}
     {:quick exportOnly}
     modifies efl;
+    requires sse_enabled;
     ensures
         dst == Mkfour(0, 0, 0, 0);
 {
@@ -563,6 +588,7 @@ procedure InitPshufbMask(inout dst:xmm, out tmp:reg_opr64)
     {:public}
     {:quick exportOnly}
     modifies efl;
+    requires sse_enabled;
     ensures
         dst == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
 {
@@ -576,6 +602,7 @@ procedure InitPshufbStableMask(inout dst:xmm, out tmp:reg_opr64)
     {:public}
     {:quick exportOnly}
     modifies efl;
+    requires sse_enabled;
     ensures
         dst == Mkfour(0x00010203, 0x04050607, 0x08090A0B, 0x0C0D0E0F);
 {
@@ -589,6 +616,7 @@ procedure InitPshufbDupMask(inout dst:xmm, out tmp:reg_opr64)
     {:public}
     {:quick exportOnly}
     modifies efl;
+    requires sse_enabled;
     ensures
         dst == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x0C0D0E0F, 0x08090A0B);
 {
@@ -602,6 +630,7 @@ procedure InitPshufb64Mask(inout dst:xmm, out tmp:reg_opr64)
     {:public}
     {:quick exportOnly}
     modifies efl;
+    requires sse_enabled;
     ensures
         dst == Mkfour(0x04050607, 0x00010203, 0x0C0D0E0F, 0x08090A0B);
 {
@@ -614,8 +643,10 @@ procedure InitPshufb64Mask(inout dst:xmm, out tmp:reg_opr64)
 // TODO: Lots of room to optimize this using bitwise operations
 procedure XmmEqual(inout x1:xmm, in x2:xmm)
     {:public}
+    {:quick exportOnly}
     lets tmp @= rdx; result @= rax;
     modifies tmp; result; efl;
+    requires sse_enabled;
     ensures
         if old(x1 = x2) then result = 0 else result > 0;
 {
@@ -646,6 +677,7 @@ procedure XmmEqual(inout x1:xmm, in x2:xmm)
 procedure XmmEqual(inout x1:xmm, x2:xmm, out tmp:reg_opr64, out result:reg_opr64)
     {:quick exportOnly}
     modifies efl;
+    requires sse_enabled;
     ensures
 //        if old(x1 = x2) then result = 0 else result > 0;
 {

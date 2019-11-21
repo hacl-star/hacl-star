@@ -628,7 +628,7 @@ let lemma_mul_qelem5 (x0 x1 x2 x3 x4 y0 y1 y2 y3 y4:nat) : Lemma
     (x2 * y4 + x3 * y3 + x4 * y2) * pow336 +
     (x3 * y4 + x4 * y3) * pow392 +
     (x4 * y4) * pow448)
-  by (Tactics.norm [delta; primops]; int_semiring ())
+  by (Tactics.norm [zeta; iota; delta; primops]; int_semiring ())
 
 
 #set-options "--z3rlimit 400"
@@ -675,7 +675,7 @@ let lemma_mul_5''' x1 x2 x3 x4 x5 y1 y2 y3 y4 y5 =
     ((x1 + pow2 56 * x2 + pow2 112 * x3 + pow2 168 * x4 + pow2 224 * x5)
     * (y1 + pow2 56 * y2 + pow2 112 * y3 + pow2 168 * y4 + pow2 224 * y5)) % pow2 264;
   (==) { _ by (Tactics.mapply (`feq #int #int (fun x -> x % pow2 264));
-              Tactics.norm [delta; primops];
+              Tactics.norm [zeta; iota; delta; primops];
               int_semiring ()) }
     (x1 * y1
     + pow2 56 * (x2 * y1 + x1 * y2)

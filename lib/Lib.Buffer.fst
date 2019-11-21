@@ -63,10 +63,10 @@ let recall #t #a #len b =
 let create #a clen init =
   B.alloca init (normalize_term clen)
 
+#set-options "--max_fuel 1"
+
 let createL #a init =
   B.alloca_of_list init
-
-#set-options "--max_fuel 1"
 
 let createL_global #a init =
   IB.igcmalloc_of_list #a root init
@@ -234,6 +234,7 @@ let loopi_blocks_f #a #b #blen bs inpLen inp spec_f f nb i w =
   Math.Lemmas.lemma_mult_lt_right (v bs) (v i) (v nb);
   assert ((v i + 1) * v bs == v i * v bs + v bs);
   assert (v i * v bs + v bs <= v nb * v bs);
+  assert (v nb * v bs <= v inpLen);
   let block = sub inp (i *! bs) bs in
   f i block w
 

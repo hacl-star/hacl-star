@@ -112,7 +112,9 @@ let buffer_as_seq_reveal_tuint128 src x va_s = ()
 
 let immbuffer_as_seq_reveal_tuint128 src x va_s = ()
 
-let bounded_buffer_addrs src t h b s = ()
+let bounded_buffer_addrs_one src t h b s = ()
+
+let bounded_buffer_addrs_all src t h b = ()
 
 let same_down_up_buffer_length src b =
   let db = get_downview b in

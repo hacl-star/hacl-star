@@ -55,7 +55,7 @@ val gctr128_bytes_stdcall':
      UInt64.v num_blocks * 128/8 <= UInt64.v num_bytes /\
      UInt64.v num_bytes < UInt64.v num_blocks * 128/8 + 128/8 /\
 
-     aesni_enabled /\ avx_enabled /\
+     aesni_enabled /\ avx_enabled /\ sse_enabled /\
      is_aes_key_LE AES_128 (Ghost.reveal key) /\
      (Seq.equal (B.as_seq h0 keys_b)
        (seq_nat8_to_seq_uint8 (le_seq_quad32_to_bytes (key_to_round_keys_LE AES_128 (Ghost.reveal key)))))
@@ -119,7 +119,7 @@ val gctr256_bytes_stdcall':
      UInt64.v num_blocks * 128/8 <= UInt64.v num_bytes /\
      UInt64.v num_bytes < UInt64.v num_blocks * 128/8 + 128/8 /\
 
-     aesni_enabled /\ avx_enabled /\
+     aesni_enabled /\ avx_enabled /\ sse_enabled /\
      is_aes_key_LE AES_256 (Ghost.reveal key) /\
      (Seq.equal (B.as_seq h0 keys_b)
        (seq_nat8_to_seq_uint8 (le_seq_quad32_to_bytes (key_to_round_keys_LE AES_256 (Ghost.reveal key)))))
@@ -178,9 +178,9 @@ let gctr128_bytes_stdcall' key in_b num_bytes out_b inout_b keys_b ctr_b num_blo
   as_vale_buffer_len #TUInt8 #TUInt128 ctr_b;
   as_vale_buffer_len #TUInt8 #TUInt128 inout_b;
 
-  Classical.forall_intro (bounded_buffer_addrs TUInt8 TUInt128 h0 in_b);
-  Classical.forall_intro (bounded_buffer_addrs TUInt8 TUInt128 h0 keys_b);
-  Classical.forall_intro (bounded_buffer_addrs TUInt8 TUInt128 h0 out_b);
+  bounded_buffer_addrs_all TUInt8 TUInt128 h0 in_b;
+  bounded_buffer_addrs_all TUInt8 TUInt128 h0 keys_b;
+  bounded_buffer_addrs_all TUInt8 TUInt128 h0 out_b;
 
   let lemma_uv_key () : Lemma
     (let db = get_downview keys_b in
@@ -231,9 +231,9 @@ let gctr256_bytes_stdcall' key in_b num_bytes out_b inout_b keys_b ctr_b num_blo
   as_vale_buffer_len #TUInt8 #TUInt128 keys_b;
   as_vale_buffer_len #TUInt8 #TUInt128 ctr_b;
 
-  Classical.forall_intro (bounded_buffer_addrs TUInt8 TUInt128 h0 in_b);
-  Classical.forall_intro (bounded_buffer_addrs TUInt8 TUInt128 h0 keys_b);
-  Classical.forall_intro (bounded_buffer_addrs TUInt8 TUInt128 h0 out_b);
+  bounded_buffer_addrs_all TUInt8 TUInt128 h0 in_b;
+  bounded_buffer_addrs_all TUInt8 TUInt128 h0 keys_b;
+  bounded_buffer_addrs_all TUInt8 TUInt128 h0 out_b;
 
   let lemma_uv_key () : Lemma
     (let db = get_downview keys_b in

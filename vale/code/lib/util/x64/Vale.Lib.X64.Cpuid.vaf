@@ -165,3 +165,99 @@ procedure check_avx2_support()
 
     Mov64(rbx, r9);     // Callee-restore
 }
+
+procedure check_movbe_support()
+    {:public}
+    {:quick}
+    modifies rax; rbx; rcx; rdx; r9; efl;
+    ensures
+        rax != 0 ==> movbe_enabled;
+        rbx == old(rbx);
+{
+    Mov64(r9, rbx);     // Callee-save
+
+    Mov64(rcx, 0);      // Dummy for taint analysis
+    Mov64(rax, 1);
+    Cpuid_Movbe();
+    lemma_iand_pow2_64(rcx, 22); // ==> rcx & pow2(22) == 0 or pow2(22)
+    Mov64(rax, rcx);
+    And64(rax, 0x400000);
+    assert_normalize(0x400000 == pow2(22));
+
+    Shr64(rax, 21);
+    lemma_ishr_pow2_diff64(1, 22); // ==> shr(pow2(22), 21) == pow2(1)
+    lemma_ishr_zero64(21);         // ==> shr(0, 22) == 0
+
+    Mov64(rbx, r9);     // Callee-restore
+}
+
+procedure check_sse_support()
+    {:public}
+    {:quick}
+    modifies rax; rbx; rcx; rdx; r9; efl;
+    ensures
+        rax != 0 ==> sse_enabled;
+        rbx == old(rbx);
+{
+    Mov64(r9, rbx);     // Callee-save
+
+    Mov64(rcx, 0);      // Dummy for taint analysis
+    Mov64(rax, 1);
+    Cpuid_Sse();
+
+    // SSSE3
+    Mov64(rax, rcx);
+
+    lemma_iand_pow2_64(rcx, 9); // ==> rcx & pow2(9) == 0 or pow2(9)
+    lemma_iand_pow2_64(rdx, 26); // ==> rdx & pow2(26) == 0 or pow2(26)
+    lemma_iand_pow2_64(rax, 19); // ==> rcx & pow2(19) == 0 or pow2(19)
+
+    And64(rax, 0x80000);
+    And64(rcx, 0x200);
+    And64(rdx, 0x4000000);
+
+    assert_normalize(0x200 == pow2(9));
+    assert_normalize(0x80000 == pow2(19));
+    assert_normalize(0x4000000 == pow2(26));
+
+    Shr64(rax, 10);
+    lemma_ishr_pow2_diff64(9, 19); // ==> shr(pow2(19), 10) == pow2(9)
+    lemma_ishr_zero64(10);         // ==> shr(0, 10) == 0;
+
+    Shr64(rdx, 17);
+    lemma_ishr_pow2_diff64(9, 26); // ==> shr(pow2(26), 17) == pow2(9)
+    lemma_ishr_zero64(17);         // ==> shr(0, 17) == 0;
+ 
+    lemma_iand_maybe_pow2_64(rax, rdx, 9);
+    lemma_iand_pow2_64(rax, 9);
+    And64(rax, rdx);
+    lemma_iand_maybe_pow2_64(rax, rcx, 9);
+    And64(rax, rcx);
+  
+    Mov64(rbx, r9);        // Callee-restore
+}
+
+procedure check_rdrand_support()
+    {:public}
+    {:quick}
+    modifies rax; rbx; rcx; rdx; r9; efl;
+    ensures
+        rax != 0 ==> rdrand_enabled;
+        rbx == old(rbx);
+{
+    Mov64(r9, rbx);     // Callee-save
+
+    Mov64(rcx, 0);      // Dummy for taint analysis
+    Mov64(rax, 1);
+    Cpuid_Rdrand();
+    lemma_iand_pow2_64(rcx, 30); // ==> rcx & pow2(30) == 0 or pow2(30)
+    Mov64(rax, rcx);
+    And64(rax, 0x40000000);
+    assert_normalize(0x40000000 == pow2(30));
+
+    Shr64(rax, 29);
+    lemma_ishr_pow2_diff64(1, 30); // ==> shr(pow2(30), 29) == pow2(1)
+    lemma_ishr_zero64(29);         // ==> shr(0, 30) == 0
+
+    Mov64(rbx, r9);     // Callee-restore
+}

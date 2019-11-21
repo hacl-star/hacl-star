@@ -7,7 +7,7 @@ open FStar.Tactics
 open FStar.Tactics.CanonCommSemiring
 open Vale.Curve25519.Fast_defs
 
-let int_canon = fun _ -> norm [delta]; int_semiring () //; dump "Final"
+let int_canon = fun _ -> norm [delta; zeta; iota]; int_semiring () //; dump "Final"
 
 let sub_carry (x y:nat64) (c:bit) : nat64 & (c':bit)
   =

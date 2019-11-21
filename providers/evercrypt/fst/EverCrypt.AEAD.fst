@@ -74,7 +74,7 @@ let invariant_s #a h (Ek i kv ek) =
   | Vale_AES128
   | Vale_AES256 ->
       EverCrypt.TargetConfig.x64 /\
-      Vale.X64.CPU_Features_s.(aesni_enabled /\ pclmulqdq_enabled /\ avx_enabled) /\
+      Vale.X64.CPU_Features_s.(aesni_enabled /\ pclmulqdq_enabled /\ avx_enabled /\ movbe_enabled /\ sse_enabled) /\
       // Expanded key length + precomputed stuff + scratch space (AES-GCM specific)
       B.length ek =
         vale_xkey_length (cipher_alg_of_supported_alg a) + 176
@@ -126,7 +126,9 @@ fun r dst k ->
   let has_aesni = EverCrypt.AutoConfig2.has_aesni () in
   let has_pclmulqdq = EverCrypt.AutoConfig2.has_pclmulqdq () in
   let has_avx = EverCrypt.AutoConfig2.has_avx() in
-  if EverCrypt.TargetConfig.x64 && (has_aesni && has_pclmulqdq && has_avx) then (
+  let has_sse = EverCrypt.AutoConfig2.has_sse() in
+  let has_movbe = EverCrypt.AutoConfig2.has_movbe() in
+  if EverCrypt.TargetConfig.x64 && (has_aesni && has_pclmulqdq && has_avx && has_sse && has_movbe) then (
     let ek = B.malloc r 0uy (concrete_xkey_len i + 176ul) in
 
     vale_expand i k ek;

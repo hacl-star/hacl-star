@@ -138,6 +138,7 @@ procedure Load_one_msb()
     {:quick}
     lets constp @= r11; T2 @= xmm2;
     modifies constp; T2; efl;
+    requires sse_enabled;
     ensures  T2 == Mkfour(0, 0, 0, 0x1000000);
 {
     ZeroXmm(T2);
@@ -178,6 +179,8 @@ procedure Ctr32_ghash_6_prelude(
         constp; mem; efl;
 
     requires
+        sse_enabled;
+
         // Valid buffers and pointers
         validDstAddrs128(mem, rbp, scratch_b, 8, memTaint, Secret);
 
@@ -237,7 +240,7 @@ procedure Handle_ctr32_2( // TODO[jb]: Would it be ok to remove this?
         efl;
 
     requires
-        avx_enabled;
+        avx_enabled && sse_enabled;
         Ii == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
         T1 == reverse_bytes_quad32(ctr_BE);
     ensures
@@ -323,6 +326,8 @@ procedure Loop6x_decrypt(
         mem; efl;
 
     requires
+        sse_enabled && movbe_enabled;
+
         len >= 6;
         T2 == Mkfour(0, 0, 0, 0x1000000);
 
@@ -561,6 +566,8 @@ procedure Loop6x_loop_decrypt(
         mem; efl;
 
     requires
+        sse_enabled && movbe_enabled;
+
         6 <= len && len + 6 < pow2_32;
         len % 6 == 0;
         T2 == Mkfour(0, 0, 0, 0x1000000);
@@ -663,6 +670,8 @@ procedure Loop6x_loop_decrypt(
     }
     while (len > 0)
         invariant
+            sse_enabled && movbe_enabled;
+
             len == old(len) - 6*iter;
 
             //len > 0 ==> in0 == old( in0) + 0x60*iter;
@@ -810,6 +819,8 @@ procedure Loop6x_loop(
         mem; efl;
 
     requires
+        sse_enabled && movbe_enabled;
+
         count >= 2;
         6 <= len && count*6 + len + 6 < pow2_32;
         len % 6 == 0;
@@ -914,6 +925,8 @@ procedure Loop6x_loop(
 
     while (len > 0)
         invariant
+            sse_enabled && movbe_enabled;
+
             len == old(len) - 6*iter;
 
              in0 == old( in0) + 0x60*iter;
@@ -1046,6 +1059,8 @@ procedure AESNI_ctr32_6x_preamble(
         efl;
 
     requires
+        sse_enabled;
+
         // AES reqs
         aes_reqs_offset(alg, key_words, round_keys, keys_b, key, mem, memTaint);
         key - 0x60 >= 0;
@@ -1141,6 +1156,8 @@ procedure AESNI_ctr32_6x_loop_body(
         efl;
 
     requires
+        sse_enabled;
+
         // AES reqs
         aes_reqs_offset(alg, key_words, round_keys, keys_b, key, mem, memTaint);
         rnd + 2 < length(round_keys);
@@ -1204,6 +1221,8 @@ procedure AESNI_ctr32_6x_loop_recursive(
         efl;
 
     requires
+        sse_enabled;
+
         // AES reqs
         aes_reqs_offset(alg, key_words, round_keys, keys_b, key, mem, memTaint);
         rnd + 2 < length(round_keys);
@@ -1269,6 +1288,8 @@ procedure AESNI_ctr32_6x_round9(
         efl;
 
     requires
+        sse_enabled;
+
         validSrcAddrsOffset128(mem, inp, in_b, count*6, 6, memTaint, Secret);
         inp + 0x60 < pow2_64;
 
@@ -1373,6 +1394,8 @@ procedure AESNI_ctr32_6x_final(
         mem; efl;
 
     requires
+        sse_enabled;
+
         validDstAddrsOffset128(mem, outp, out_b, count*6, 6, memTaint, Secret);
         outp + 0x60 < pow2_64;
 
@@ -1490,6 +1513,8 @@ procedure AESNI_ctr32_6x(
         mem; efl;
 
     requires
+        sse_enabled;
+
         // Valid buffers and pointers
         validSrcAddrsOffset128(mem, inp, in_b, count*6, 6, memTaint, Secret);
         validDstAddrsOffset128(mem, outp, out_b, count*6, 6, memTaint, Secret);
@@ -1588,7 +1613,7 @@ procedure Encrypt_save_and_shuffle_output(ghost count:nat, ghost out_b:buffer128
         mem; efl;
 
     requires
-        avx_enabled;
+        avx_enabled && sse_enabled;
         // Valid ptrs and buffers
         validDstAddrsOffset128(mem, outp - 0x60, out_b, count*6, 6, memTaint, Secret);
 
@@ -1646,6 +1671,8 @@ procedure UpdateScratch(ghost scratch_b:buffer128)
         mem; efl;
 
     requires
+        sse_enabled;
+
         // Valid ptrs and buffers
         validDstAddrs128(mem, rbp, scratch_b, 8, memTaint, Secret);
 
@@ -2169,6 +2196,8 @@ procedure AES_GCM_encrypt_6mult(
         mem; efl;
 
     requires
+        sse_enabled && movbe_enabled;
+
         // Valid buffers and pointers
         validDstAddrs128(mem,  ivp,  iv_b,   1, memTaint, Public);
         validSrcAddrs128(mem,  inp,  in_b, len, memTaint, Secret);
@@ -2375,7 +2404,7 @@ procedure DecryptPrelude(ghost in_b:buffer128, ghost scratch_b:buffer128)
         mem; efl;
 
     requires
-        avx_enabled;
+        avx_enabled && sse_enabled;
         // Valid buffers and pointers
         validSrcAddrs128(mem,  inp,  in_b, 6, memTaint, Secret);
         validDstAddrs128(mem, rbp, scratch_b, 8, memTaint, Secret);
@@ -2457,6 +2486,8 @@ procedure AES_GCM_decrypt_6mult(
         mem; efl;
 
     requires
+        sse_enabled && movbe_enabled;
+
         // Valid buffers and pointers
         validDstAddrs128(mem,  ivp,  iv_b,   1, memTaint, Public);
         validSrcAddrs128(mem,  inp,  in_b, len, memTaint, Secret);

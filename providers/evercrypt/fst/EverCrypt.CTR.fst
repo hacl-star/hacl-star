@@ -46,7 +46,7 @@ let cpu_features_invariant (i: impl): Type0 =
   match i with
   | Vale_AES128 | Vale_AES256 ->
       EverCrypt.TargetConfig.x64 /\
-      Vale.X64.CPU_Features_s.(aesni_enabled /\ pclmulqdq_enabled /\ avx_enabled)
+      Vale.X64.CPU_Features_s.(aesni_enabled /\ pclmulqdq_enabled /\ avx_enabled /\ sse_enabled)
   | Hacl_CHACHA20 ->
       True
 
@@ -104,13 +104,14 @@ fun r dst k iv iv_len c ->
   let has_aesni = EverCrypt.AutoConfig2.has_aesni () in
   let has_pclmulqdq = EverCrypt.AutoConfig2.has_pclmulqdq () in
   let has_avx = EverCrypt.AutoConfig2.has_avx() in
+  let has_sse = EverCrypt.AutoConfig2.has_sse() in
   [@inline_let]
   let a = cipher_alg_of_impl i in
 
   if iv_len `UInt32.lt` 12ul then
     InvalidIVLength
 
-  else if EverCrypt.TargetConfig.x64 && (has_aesni && has_pclmulqdq && has_avx) then
+  else if EverCrypt.TargetConfig.x64 && (has_aesni && has_pclmulqdq && has_avx && has_sse) then
     (**) let h0 = ST.get () in
     (**) let g_iv = G.hide (B.as_seq h0 iv) in
     (**) let g_key: G.erased (key a) = G.hide (B.as_seq h0 (k <: B.buffer uint8)) in
