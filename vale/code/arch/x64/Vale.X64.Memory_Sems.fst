@@ -321,7 +321,7 @@ val same_mem_get_heap_val128 (b:buffer128)
                           (mem2:S.machine_heap{IB.correct_down_p (_ih h2) mem2 b}) : Lemma
   (requires (Seq.index (buffer_as_seq h1 b) k == Seq.index (buffer_as_seq h2 b) k))
   (ensures (let ptr = buffer_addr b h1 + 16 * k in
-    forall i. {:pattern (mem1.[ptr+i])} i >= 0 /\ i < 16 ==> mem1.[ptr+i] == mem2.[ptr+i]))
+    forall i. i >= 0 /\ i < 16 ==> mem1.[ptr+i] == mem2.[ptr+i]))
 
 val same_mem_eq_slices128 (b:buffer128)
                        (i:nat{i < buffer_length b})
