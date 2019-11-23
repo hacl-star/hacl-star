@@ -643,6 +643,7 @@ procedure InitPshufb64Mask(inout dst:xmm, out tmp:reg_opr64)
 // TODO: Lots of room to optimize this using bitwise operations
 procedure XmmEqual(inout x1:xmm, in x2:xmm)
     {:public}
+    {:quick exportOnly}
     lets tmp @= rdx; result @= rax;
     modifies tmp; result; efl;
     requires sse_enabled;
