@@ -159,6 +159,7 @@ let create_in a r =
   (**)   freeable h5 p);
 
   (**) assert (ST.equal_stack_domains h1 h5);
+  (**) assert (ST.equal_stack_domains h0 h1);
 
   p
 #pop-options
@@ -186,16 +187,13 @@ let init a s =
   let h3 = ST.get () in
   Hash.frame_invariant B.(loc_buffer s) hash_state h2 h3;
   Hash.frame_invariant_implies_footprint_preservation B.(loc_buffer s) hash_state h2 h3;
-  assert (preserves_freeable #a s h1 h3);
-  assert (invariant #a h3 s);
-  assert B.(modifies (footprint #a h1 s) h1 h3);
+
   // This seems to cause insurmountable difficulties. Puzzled.
   ST.lemma_equal_domains_trans h1 h2 h3;
 
   // AR: 07/22: same old `Seq.equal` and `==` story
   assert (Seq.equal (hashed #a h3 s) Seq.empty);
 
-  assert (ST.equal_domains h1 h3);
   assert (preserves_freeable #a s h1 h3 /\
     invariant #a h3 s /\
     hashed h3 s == S.empty /\
