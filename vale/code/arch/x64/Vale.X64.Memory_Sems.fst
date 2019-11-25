@@ -321,7 +321,7 @@ val same_mem_get_heap_val128 (b:buffer128)
                           (mem2:S.machine_heap{IB.correct_down_p (_ih h2) mem2 b}) : Lemma
   (requires (Seq.index (buffer_as_seq h1 b) k == Seq.index (buffer_as_seq h2 b) k))
   (ensures (let ptr = buffer_addr b h1 + 16 * k in
-    forall i. {:pattern (mem1.[ptr+i])} i >= 0 /\ i < 16 ==> mem1.[ptr+i] == mem2.[ptr+i]))
+    forall i.{:pattern mem1.[i]} i >= ptr /\ i < ptr+16 ==> mem1.[i] == mem2.[i]))
 
 val same_mem_eq_slices128 (b:buffer128)
                        (i:nat{i < buffer_length b})
@@ -355,7 +355,7 @@ let length_up128 (b:buffer128) (h:vale_heap) (k:nat{k < buffer_length b}) (i:nat
 let same_mem_get_heap_val128 b j v k h1 h2 mem1 mem2 =
   let ptr = buffer_addr b h1 + 16 * k in
   let addr = buffer_addr b h1 in
-  let aux (i:nat{i < 16}) : Lemma (mem1.[addr+(16 * k + i)] == mem2.[addr+(16 * k +i)]) =
+  let aux (i:nat{ptr <= i /\ i < ptr+16}) : Lemma (mem1.[i] == mem2.[i]) =
     let db = get_downview b.bsrc in
     let ub = UV.mk_buffer db uint128_view in
     UV.as_seq_sel (IB.hs_of_mem (_ih h1)) ub k;
@@ -363,15 +363,15 @@ let same_mem_get_heap_val128 b j v k h1 h2 mem1 mem2 =
     same_mem_eq_slices128 b j v k h1 h2 mem1 mem2;
     let s1 = (Seq.slice (DV.as_seq (IB.hs_of_mem (_ih h1)) db) (k * 16) (k * 16 + 16)) in
     let s2 = (Seq.slice (DV.as_seq (IB.hs_of_mem (_ih h2)) db) (k * 16) (k * 16 + 16)) in
-    assert (Seq.index s1 i == Seq.index (DV.as_seq (IB.hs_of_mem (_ih h1)) db) (k * 16 + i));
-    length_up128 b h1 k i;
-    assert (mem1.[addr+(16 * k + i)] == UInt8.v (Seq.index (DV.as_seq (IB.hs_of_mem (_ih h1)) db) (k * 16 + i)));
-    assert (Seq.index s2 i == Seq.index (DV.as_seq (IB.hs_of_mem (_ih h2)) db) (k * 16 + i));
-    length_up128 b h2 k i;
-    assert (mem2.[addr+(16 * k + i)] == UInt8.v (Seq.index (DV.as_seq (IB.hs_of_mem (_ih h2)) db) (k * 16 + i)))
+    assert (Seq.index s1 (i - ptr) == Seq.index (DV.as_seq (IB.hs_of_mem (_ih h1)) db) (k * 16 + (i-ptr)));
+    length_up128 b h1 k (i-ptr);
+    assert (mem1.[i] == UInt8.v (Seq.index (DV.as_seq (IB.hs_of_mem (_ih h1)) db) (k * 16 + (i-ptr))));
+    assert (Seq.index s2 (i-ptr) == Seq.index (DV.as_seq (IB.hs_of_mem (_ih h2)) db) (k * 16 + (i-ptr)));
+    length_up128 b h2 k (i-ptr);
+    assert (mem2.[addr+(16 * k + (i-ptr))] == UInt8.v (Seq.index (DV.as_seq (IB.hs_of_mem (_ih h2)) db) (k * 16 + (i-ptr))));
+    assert (forall i. addr + (16 * k + (i-ptr)) == i)
   in
-  Classical.forall_intro aux;
-  assert (forall i. addr + (16 * k + i) == ptr + i)
+  Classical.forall_intro aux
 
 let in_bounds128 (h:vale_heap) (b:buffer128) (i:nat{i < buffer_length b}) : Lemma
   (forall j. j >= (_ih h).IB.addrs b + 16 * i /\
