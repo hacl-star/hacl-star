@@ -18,7 +18,7 @@
         "fuel_guarded_inversion_Spec.Hash.Definitions.hash_alg"
       ],
       0,
-      "b8a1f4dec42f6d856d074d6f43000aa2"
+      "6933ef5f4c944078466c6e2902f8718b"
     ],
     [
       "Spec.Hash.Test.vec",
@@ -26,18 +26,23 @@
       2,
       1,
       [
-        "@MaxIFuel_assumption", "@query", "disc_equation_Prims.Cons",
+        "@MaxIFuel_assumption", "@query",
+        "constructor_distinct_Lib.IntTypes.PUB",
+        "constructor_distinct_Lib.IntTypes.U8", "disc_equation_Prims.Cons",
         "disc_equation_Prims.Nil", "disc_equation_Spec.Hash.Definitions.MD5",
         "disc_equation_Spec.Hash.Definitions.SHA1",
         "disc_equation_Spec.Hash.Definitions.SHA2_224",
         "disc_equation_Spec.Hash.Definitions.SHA2_256",
         "disc_equation_Spec.Hash.Definitions.SHA2_384",
         "disc_equation_Spec.Hash.Definitions.SHA2_512",
+        "equality_tok_Lib.IntTypes.PUB@tok",
+        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.int_t",
+        "equation_Lib.IntTypes.pub_int_t",
         "fuel_guarded_inversion_Prims.list",
         "fuel_guarded_inversion_Spec.Hash.Definitions.hash_alg"
       ],
       0,
-      "e87e0b8791a49e31c3b898c17285aea9"
+      "81d2f0794739a06e4e46d5a18e5afa0b"
     ],
     [
       "Spec.Hash.Test.vec",
@@ -51,7 +56,7 @@
         "function_token_typing_FStar.UInt8.t"
       ],
       0,
-      "9a98335c19bb3e9f91ff7b017e8a8e97"
+      "3eade9ec566289857f7dde7d89438446"
     ],
     [
       "Spec.Hash.Test.__proj__Vec__item__plain",
@@ -64,7 +69,7 @@
         "projection_inverse_Spec.Hash.Test.Vec_a"
       ],
       0,
-      "0286f60e07190da98b98bf40ae1a028c"
+      "da9caa69dfb875698a2de58bc1d78c23"
     ],
     [
       "Spec.Hash.Test.__proj__Vec__item__hash",
@@ -77,7 +82,7 @@
         "projection_inverse_Spec.Hash.Test.Vec_a"
       ],
       0,
-      "7d1708b4dc2a5342613525501d852a0c"
+      "b02a89317fc857e7e87f21935106f366"
     ]
   ]
 ]

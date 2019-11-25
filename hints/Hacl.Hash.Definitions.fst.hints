@@ -41,7 +41,7 @@
         "typing_Spec.Hash.Definitions.word_length"
       ],
       0,
-      "a8dee660f72182182a4f19f86c6ca148"
+      "cdf9f3376e930a6041e12474a28cc175"
     ],
     [
       "Hacl.Hash.Definitions.block_len",
@@ -87,7 +87,7 @@
         "typing_Spec.Hash.Definitions.block_length"
       ],
       0,
-      "25fd0aeea9d6322ef69cfbdf2f69ac86"
+      "415ce44f5774b14dc13495806600ee1e"
     ],
     [
       "Hacl.Hash.Definitions.hash_word_len",
@@ -130,7 +130,7 @@
         "typing_Spec.Hash.Definitions.hash_word_length"
       ],
       0,
-      "c2b2cb5e15b456b8b836c17c15ce6588"
+      "9d9ff8151dd7ae41d6e1e9c39c2b71ad"
     ],
     [
       "Hacl.Hash.Definitions.hash_len",
@@ -176,7 +176,7 @@
         "typing_Spec.Hash.Definitions.hash_length"
       ],
       0,
-      "56aa5daa9eeaebbd76d031803cdf2c3d"
+      "ae921b41fbd44d191303b4ab0e1c995b"
     ],
     [
       "Hacl.Hash.Definitions.blocks_t",
@@ -185,6 +185,12 @@
       1,
       [
         "@MaxIFuel_assumption", "@query",
+        "constructor_distinct_Lib.IntTypes.U1",
+        "constructor_distinct_Lib.IntTypes.U128",
+        "constructor_distinct_Lib.IntTypes.U16",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "constructor_distinct_Lib.IntTypes.U64",
+        "constructor_distinct_Lib.IntTypes.U8",
         "equation_Spec.Hash.Definitions.block_length",
         "equation_Spec.Hash.Definitions.block_word_length",
         "equation_Spec.Hash.Definitions.word_length",
@@ -192,7 +198,7 @@
         "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "a3b2a1c322531c2267b9ea79c68310ce"
+      "8c9f4a2834c714df02a7604a454483aa"
     ],
     [
       "Hacl.Hash.Definitions.update_st",
@@ -213,7 +219,7 @@
         "typing_Spec.Hash.Definitions.word"
       ],
       0,
-      "0c63a9b179bb8df901407e13a805fd29"
+      "66888b7264e8b6a00e976f438b847efa"
     ],
     [
       "Hacl.Hash.Definitions.pad_st",
@@ -228,7 +234,7 @@
         "refinement_interpretation_Tm_refine_4b073be95c3132a5dab0a508b378f4c3"
       ],
       0,
-      "52ad98412f1377570ceccabe5b524108"
+      "1f33706276329198a6ce3adc3ebc3ea9"
     ],
     [
       "Hacl.Hash.Definitions.update_multi_st",
@@ -250,7 +256,7 @@
         "typing_Spec.Hash.Definitions.word"
       ],
       0,
-      "25133e7a493159a677276529e1a486c9"
+      "d9a25ee4cf811734063cbafef4a12c7c"
     ],
     [
       "Hacl.Hash.Definitions.update_last_st",
@@ -286,7 +292,7 @@
         "typing_Spec.Hash.Definitions.word"
       ],
       0,
-      "6fc72b929f1c3262636764e47d170c1b"
+      "08a24e527dc296a37f5702f8953a6343"
     ],
     [
       "Hacl.Hash.Definitions.finish_st",
@@ -304,7 +310,7 @@
         "typing_Spec.Hash.Definitions.word"
       ],
       0,
-      "6100b5156e0ec10510798e825624cb5a"
+      "d0b369b8ca16542cd31810e1a5af6384"
     ],
     [
       "Hacl.Hash.Definitions.hash_st",
@@ -320,7 +326,7 @@
         "typing_LowStar.Buffer.trivial_preorder"
       ],
       0,
-      "7e29044511b29d64d79b60c67827f871"
+      "cfb3078227f1e7e19e51ffc5e9bd3dc2"
     ]
   ]
 ]

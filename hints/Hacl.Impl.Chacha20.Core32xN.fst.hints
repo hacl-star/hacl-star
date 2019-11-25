@@ -22,7 +22,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "3705f7a1bb160f6ae4f2cae24b4c9e7a"
+      "bbc66ff6709200de3f490e69023e9a67"
     ],
     [
       "Hacl.Impl.Chacha20.Core32xN.create_state",
@@ -56,7 +56,7 @@
         "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "50a557b14bcb5445a44f4e1f506a80fd"
+      "3f5df65a53f13432fb62aa546606dc95"
     ],
     [
       "Hacl.Impl.Chacha20.Core32xN.create_state",
@@ -124,7 +124,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "4b49c1193ca4d41de4ddae36aafc243e"
+      "1fef6e1e8a3f473160ff06db571c3b6f"
     ],
     [
       "Hacl.Impl.Chacha20.Core32xN.load_state",
@@ -199,7 +199,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "b3c77be22831741031e7016088d1b9a0"
+      "f9abfb61a386a6f8d0fe172d8cb7f423"
     ],
     [
       "Hacl.Impl.Chacha20.Core32xN.load_state",
@@ -253,7 +253,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "898e6b530af0a38148ae97e1994ecf27"
+      "d7993bb33526417c1972eaa1010be0e2"
     ],
     [
       "Hacl.Impl.Chacha20.Core32xN.load_state",
@@ -348,7 +348,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "e422f17ec9cf474a6432491b9ee2d9f5"
+      "b0c846bff3329e468bab1a88bce86273"
     ],
     [
       "Hacl.Impl.Chacha20.Core32xN.store_state",
@@ -412,7 +412,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "0e892f82cb643bfce356463528e97a2b"
+      "38a754e45bb0e418bd374ddb636dbc74"
     ],
     [
       "Hacl.Impl.Chacha20.Core32xN.store_state",
@@ -466,7 +466,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "6973bdae8f6b19a5a90ab2abee1a8ca2"
+      "8aaf9c545b23ec9c2b5c4d776de04c3e"
     ],
     [
       "Hacl.Impl.Chacha20.Core32xN.store_state",
@@ -520,20 +520,21 @@
         "function_token_typing_Lib.IntTypes.uint8",
         "function_token_typing_Spec.AES.elem", "int_inversion", "int_typing",
         "lemma_FStar.UInt.pow2_values", "lemma_FStar.UInt32.uv_inv",
-        "lemma_FStar.UInt32.vu_inv", "lemma_Lib.IntTypes.mul_lemma",
-        "lemma_Lib.IntTypes.v_injective", "lemma_Lib.Sequence.eq_intro",
+        "lemma_FStar.UInt32.vu_inv", "lemma_Lib.Buffer.modifies_sub",
+        "lemma_Lib.IntTypes.mul_lemma", "lemma_Lib.IntTypes.v_injective",
+        "lemma_Lib.Sequence.eq_intro",
+        "lemma_LowStar.Monotonic.Buffer.address_liveness_insensitive_buffer",
         "lemma_LowStar.Monotonic.Buffer.as_seq_gsub",
-        "lemma_LowStar.Monotonic.Buffer.lemma_live_equal_mem_domains",
         "lemma_LowStar.Monotonic.Buffer.length_as_seq",
         "lemma_LowStar.Monotonic.Buffer.length_null_1",
         "lemma_LowStar.Monotonic.Buffer.length_null_2",
-        "lemma_LowStar.Monotonic.Buffer.loc_disjoint_includes_r",
         "lemma_LowStar.Monotonic.Buffer.loc_disjoint_none_r",
         "lemma_LowStar.Monotonic.Buffer.loc_disjoint_sym_",
-        "lemma_LowStar.Monotonic.Buffer.loc_includes_gsub_buffer_r_",
         "lemma_LowStar.Monotonic.Buffer.loc_includes_none",
         "lemma_LowStar.Monotonic.Buffer.loc_union_loc_none_l",
         "lemma_LowStar.Monotonic.Buffer.modifies_buffer_elim",
+        "lemma_LowStar.Monotonic.Buffer.modifies_liveness_insensitive_buffer",
+        "lemma_LowStar.Monotonic.Buffer.modifies_liveness_insensitive_buffer_weak",
         "lemma_LowStar.Monotonic.Buffer.modifies_refl",
         "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Multiply",
@@ -560,13 +561,13 @@
         "refinement_interpretation_Tm_refine_bd93acfff6e2bedbc5a17b7d94e63480",
         "refinement_interpretation_Tm_refine_c6c18a7ceb46d419c35ff8551117551e",
         "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
+        "refinement_interpretation_Tm_refine_e9c32a5fb00a4e8c339597118c871180",
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
-        "refinement_interpretation_Tm_refine_f89c8ec271996c9f4eed133d7c0d0dc8",
         "typing_FStar.UInt.fits", "typing_FStar.UInt32.uint_to_t",
         "typing_FStar.UInt32.v",
         "typing_Hacl.Impl.Chacha20.Core32xN.uint32xN",
         "typing_Lib.Buffer.as_seq", "typing_Lib.Buffer.length",
-        "typing_Lib.Buffer.loc", "typing_Lib.Buffer.op_Bar_Plus_Bar",
+        "typing_Lib.Buffer.loc", "typing_Lib.Buffer.union",
         "typing_Lib.IntTypes.minint", "typing_Lib.IntTypes.mk_int",
         "typing_Lib.IntTypes.mul", "typing_Lib.IntTypes.v",
         "typing_LowStar.Buffer.trivial_preorder",
@@ -582,7 +583,7 @@
         "unit_typing"
       ],
       0,
-      "2d4b4244b3fbd557d93821965e911d25"
+      "e765d0052a1b53460ff4abb8572b5b6b"
     ],
     [
       "Hacl.Impl.Chacha20.Core32xN.add_counter",
@@ -637,7 +638,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "9a3c6b401f6312636fbe9256654a4453"
+      "511a5d33d7a8e48665a895c9ce26d80a"
     ],
     [
       "Hacl.Impl.Chacha20.Core32xN.add_counter",
@@ -713,7 +714,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "b8e10f18ff0b901b716f9926f6f7ab66"
+      "c9f80b3285fdc927a1b13d7e39cb4b34"
     ],
     [
       "Hacl.Impl.Chacha20.Core32xN.copy_state",
@@ -735,7 +736,7 @@
         "typing_Lib.Buffer.length", "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "175713a0d0fb746c4d304563a09d8366"
+      "8153778270a1492b080a7849f0326873"
     ],
     [
       "Hacl.Impl.Chacha20.Core32xN.copy_state",
@@ -762,7 +763,7 @@
         "typing_Lib.Buffer.loc", "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "f18418bd64d8b3701560e0870e5dfb19"
+      "822b12b24fb5ebf613fd3df310a93281"
     ],
     [
       "Hacl.Impl.Chacha20.Core32xN.sum_state",
@@ -815,7 +816,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "f8da3ce3e2624aea8d0030a9ad37f9d7"
+      "2d18034268b82fd2a181eaf365b6fcfc"
     ],
     [
       "Hacl.Impl.Chacha20.Core32xN.sum_state",
@@ -878,7 +879,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "b94b85c14cac2d6d82237d579e07aadc"
+      "3fd88645bfbb69f67a9b01b0530e96cc"
     ],
     [
       "Hacl.Impl.Chacha20.Core32xN.transpose1",
@@ -928,7 +929,7 @@
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "0bb9fe7935b2c985960c37e41decc2f2"
+      "b2f2bae73e03c2b68eb7ce8cf19e8f6b"
     ],
     [
       "Hacl.Impl.Chacha20.Core32xN.transpose1",
@@ -961,7 +962,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "e13f818b6dc2c3cee07febb4fbed59ba"
+      "ecd9dba640955040b387c0b951daf57b"
     ],
     [
       "Hacl.Impl.Chacha20.Core32xN.transpose1",
@@ -1021,7 +1022,7 @@
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "cbb19143840b186e4c9b0d6ea5c6bc79"
+      "20d01bb9b4e7945845242fe2dde151b5"
     ],
     [
       "Hacl.Impl.Chacha20.Core32xN.transpose4",
@@ -1070,7 +1071,7 @@
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "3061c838269a967b20e84a1353ef9e44"
+      "5b469e9e1ae718ac3fa9030bc081ff7b"
     ],
     [
       "Hacl.Impl.Chacha20.Core32xN.transpose4",
@@ -1100,7 +1101,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "5b181765849ae26dab1e93a6554dc494"
+      "6953e02fa4a30941c45b089287cc6d03"
     ],
     [
       "Hacl.Impl.Chacha20.Core32xN.transpose4",
@@ -1135,14 +1136,15 @@
         "equation_Hacl.Spec.Chacha20.Vec.transpose4",
         "equation_Hacl.Spec.Chacha20.Vec.uint32xN",
         "equation_Lib.Buffer.buffer_t", "equation_Lib.Buffer.lbuffer_t",
-        "equation_Lib.Buffer.length", "equation_Lib.Buffer.loc",
-        "equation_Lib.Buffer.modifies", "equation_Lib.Buffer.modifies1",
-        "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.int_t",
-        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
-        "equation_Lib.IntTypes.pub_int_t", "equation_Lib.IntTypes.pub_int_v",
-        "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
-        "equation_Lib.IntTypes.v", "equation_Lib.IntVector.uint32x4",
-        "equation_Lib.Sequence.lseq", "equation_LowStar.Buffer.buffer",
+        "equation_Lib.Buffer.length", "equation_Lib.Buffer.live",
+        "equation_Lib.Buffer.loc", "equation_Lib.Buffer.modifies",
+        "equation_Lib.Buffer.modifies1", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.int_t", "equation_Lib.IntTypes.maxint",
+        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.pub_int_t",
+        "equation_Lib.IntTypes.pub_int_v", "equation_Lib.IntTypes.range",
+        "equation_Lib.IntTypes.unsigned", "equation_Lib.IntTypes.v",
+        "equation_Lib.IntVector.uint32x4", "equation_Lib.Sequence.lseq",
+        "equation_LowStar.Buffer.buffer",
         "equation_LowStar.Buffer.trivial_preorder",
         "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.nat",
         "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
@@ -1152,12 +1154,14 @@
         "int_typing", "lemma_FStar.HyperStack.ST.lemma_equal_domains_trans",
         "lemma_FStar.Map.lemma_ContainsDom", "lemma_FStar.UInt.pow2_values",
         "lemma_FStar.UInt32.uv_inv", "lemma_FStar.UInt32.vu_inv",
-        "lemma_Lib.Buffer.modifies_preserves_live",
         "lemma_Lib.IntTypes.pow2_2", "lemma_Lib.IntTypes.pow2_3",
         "lemma_Lib.Sequence.eq_elim", "lemma_Lib.Sequence.eq_intro",
+        "lemma_LowStar.Monotonic.Buffer.address_liveness_insensitive_buffer",
+        "lemma_LowStar.Monotonic.Buffer.lemma_live_equal_mem_domains",
         "lemma_LowStar.Monotonic.Buffer.length_null_1",
         "lemma_LowStar.Monotonic.Buffer.length_null_2",
         "lemma_LowStar.Monotonic.Buffer.loc_includes_refl",
+        "lemma_LowStar.Monotonic.Buffer.modifies_liveness_insensitive_buffer_weak",
         "lemma_LowStar.Monotonic.Buffer.modifies_trans_linear",
         "primitive_Prims.op_AmpAmp", "primitive_Prims.op_LessThanOrEqual",
         "primitive_Prims.op_Subtraction",
@@ -1200,7 +1204,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "32f491c77d3d54c82c976148693f028d"
+      "31b034ca8887171fdcff9bf0cc270390"
     ],
     [
       "Hacl.Impl.Chacha20.Core32xN.transpose8",
@@ -1249,7 +1253,7 @@
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "f729ba6de9185bb9f385d2bde9f1a51f"
+      "4d88d7e9bb8033c602d5da549d952c56"
     ],
     [
       "Hacl.Impl.Chacha20.Core32xN.transpose8",
@@ -1279,7 +1283,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "2f119fb891d1a970bbd65e5c472a9b1e"
+      "7bc71664b8a423ef6ff14204dc1a95ca"
     ],
     [
       "Hacl.Impl.Chacha20.Core32xN.transpose8",
@@ -1313,14 +1317,15 @@
         "equation_Hacl.Spec.Chacha20.Vec.transpose8",
         "equation_Hacl.Spec.Chacha20.Vec.uint32xN",
         "equation_Lib.Buffer.buffer_t", "equation_Lib.Buffer.lbuffer_t",
-        "equation_Lib.Buffer.length", "equation_Lib.Buffer.loc",
-        "equation_Lib.Buffer.modifies", "equation_Lib.Buffer.modifies1",
-        "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.int_t",
-        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
-        "equation_Lib.IntTypes.pub_int_t", "equation_Lib.IntTypes.pub_int_v",
-        "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
-        "equation_Lib.IntTypes.v", "equation_Lib.IntVector.uint32x8",
-        "equation_Lib.Sequence.lseq", "equation_LowStar.Buffer.buffer",
+        "equation_Lib.Buffer.length", "equation_Lib.Buffer.live",
+        "equation_Lib.Buffer.loc", "equation_Lib.Buffer.modifies",
+        "equation_Lib.Buffer.modifies1", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.int_t", "equation_Lib.IntTypes.maxint",
+        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.pub_int_t",
+        "equation_Lib.IntTypes.pub_int_v", "equation_Lib.IntTypes.range",
+        "equation_Lib.IntTypes.unsigned", "equation_Lib.IntTypes.v",
+        "equation_Lib.IntVector.uint32x8", "equation_Lib.Sequence.lseq",
+        "equation_LowStar.Buffer.buffer",
         "equation_LowStar.Buffer.trivial_preorder",
         "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.nat",
         "equation_Prims.pos", "equation_Spec.AES.gf8",
@@ -1331,9 +1336,9 @@
         "int_typing", "lemma_FStar.HyperStack.ST.lemma_equal_domains_trans",
         "lemma_FStar.Map.lemma_ContainsDom", "lemma_FStar.UInt.pow2_values",
         "lemma_FStar.UInt32.uv_inv", "lemma_FStar.UInt32.vu_inv",
-        "lemma_Lib.Buffer.modifies_preserves_live",
         "lemma_Lib.IntTypes.pow2_2", "lemma_Lib.IntTypes.pow2_3",
         "lemma_Lib.Sequence.eq_elim", "lemma_Lib.Sequence.eq_intro",
+        "lemma_LowStar.Monotonic.Buffer.lemma_live_equal_mem_domains",
         "lemma_LowStar.Monotonic.Buffer.length_null_1",
         "lemma_LowStar.Monotonic.Buffer.length_null_2",
         "lemma_LowStar.Monotonic.Buffer.loc_includes_refl",
@@ -1383,7 +1388,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "7220c382e8b36707b8a113a41179f1ae"
+      "54d775013b70030eea503b055212011b"
     ],
     [
       "Hacl.Impl.Chacha20.Core32xN.transpose",
@@ -1434,7 +1439,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "87775484c0481efc88c066406e0fdc88"
+      "9f0af7b8887f68c2ac04f34993b98aa5"
     ],
     [
       "Hacl.Impl.Chacha20.Core32xN.transpose",
@@ -1470,7 +1475,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "0264720fa2fda8b5658b522e64dc2625"
+      "02ca895b014509e53b58021b684cfca5"
     ],
     [
       "Hacl.Impl.Chacha20.Core32xN.xor_block",
@@ -1540,7 +1545,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "290776b6530a88e948bcce85da760a5c"
+      "f65eef5088c51bac6c97a4f02b6dc19d"
     ],
     [
       "Hacl.Impl.Chacha20.Core32xN.xor_block",
@@ -1597,7 +1602,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "72ea0ef6391b74f9b0ca131ecf02adf2"
+      "33cca29eee5b7ca7505869d03428efcf"
     ],
     [
       "Hacl.Impl.Chacha20.Core32xN.xor_block",
@@ -1774,7 +1779,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "2beb55fa3246f545d040045f72d3897c"
+      "707a3a31f8982b0776bf04341a03d8d8"
     ],
     [
       "Hacl.Impl.Chacha20.Core32xN.line",
@@ -1833,7 +1838,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "c8eddcc6976131d3934dcc72151e24f9"
+      "d47f4d5b5687e9740dbd76cb677c7543"
     ],
     [
       "Hacl.Impl.Chacha20.Core32xN.line",
@@ -1863,13 +1868,13 @@
         "equation_Hacl.Spec.Chacha20.Vec.line",
         "equation_Hacl.Spec.Chacha20.Vec.uint32xN",
         "equation_Lib.Buffer.buffer_t", "equation_Lib.Buffer.lbuffer_t",
-        "equation_Lib.Buffer.length", "equation_Lib.Buffer.loc",
-        "equation_Lib.Buffer.modifies", "equation_Lib.Buffer.modifies1",
-        "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.int_t",
-        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.pub_int_t",
-        "equation_Lib.IntTypes.pub_int_v", "equation_Lib.IntTypes.rotval",
-        "equation_Lib.IntTypes.unsigned", "equation_Lib.IntTypes.v",
-        "equation_Lib.IntVector.op_Hat_Bar",
+        "equation_Lib.Buffer.length", "equation_Lib.Buffer.live",
+        "equation_Lib.Buffer.loc", "equation_Lib.Buffer.modifies",
+        "equation_Lib.Buffer.modifies1", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.int_t", "equation_Lib.IntTypes.minint",
+        "equation_Lib.IntTypes.pub_int_t", "equation_Lib.IntTypes.pub_int_v",
+        "equation_Lib.IntTypes.rotval", "equation_Lib.IntTypes.unsigned",
+        "equation_Lib.IntTypes.v", "equation_Lib.IntVector.op_Hat_Bar",
         "equation_Lib.IntVector.op_Less_Less_Less_Bar",
         "equation_Lib.IntVector.op_Plus_Bar", "equation_Lib.IntVector.width",
         "equation_LowStar.Buffer.buffer",
@@ -1880,7 +1885,7 @@
         "lemma_FStar.HyperStack.ST.lemma_equal_domains_trans",
         "lemma_FStar.UInt.pow2_values", "lemma_FStar.UInt32.uv_inv",
         "lemma_FStar.UInt32.vu_inv",
-        "lemma_Lib.Buffer.modifies_preserves_live",
+        "lemma_LowStar.Monotonic.Buffer.lemma_live_equal_mem_domains",
         "lemma_LowStar.Monotonic.Buffer.loc_includes_refl",
         "lemma_LowStar.Monotonic.Buffer.modifies_trans_linear",
         "primitive_Prims.op_AmpAmp", "primitive_Prims.op_LessThanOrEqual",
@@ -1913,7 +1918,7 @@
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "2543c8199c0dc15a68dd28c6b3329076"
+      "ebedcf37cd5dd4e39f7df1202f208f48"
     ],
     [
       "Hacl.Impl.Chacha20.Core32xN.quarter_round",
@@ -1969,7 +1974,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "d5f15b9970dda6b4c8761efcc698fe4c"
+      "cb8c78c50f1ea6026d0a153fd0100b5b"
     ],
     [
       "Hacl.Impl.Chacha20.Core32xN.quarter_round",
@@ -1980,6 +1985,7 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented",
         "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "constructor_distinct_Lib.Buffer.MUT",
         "constructor_distinct_Lib.IntTypes.PUB",
         "constructor_distinct_Lib.IntTypes.U32",
         "constructor_distinct_Lib.IntTypes.U8",
@@ -1997,19 +2003,21 @@
         "equation_Hacl.Spec.Chacha20.Vec.quarter_round",
         "equation_Hacl.Spec.Chacha20.Vec.state",
         "equation_Hacl.Spec.Chacha20.Vec.uint32xN",
-        "equation_Lib.Buffer.lbuffer_t", "equation_Lib.Buffer.loc",
+        "equation_Lib.Buffer.buffer_t", "equation_Lib.Buffer.lbuffer_t",
+        "equation_Lib.Buffer.live", "equation_Lib.Buffer.loc",
         "equation_Lib.Buffer.modifies", "equation_Lib.IntTypes.bits",
         "equation_Lib.IntTypes.int_t", "equation_Lib.IntTypes.maxint",
         "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.pub_int_t",
         "equation_Lib.IntTypes.pub_int_v", "equation_Lib.IntTypes.range",
         "equation_Lib.IntTypes.unsigned", "equation_Lib.IntTypes.v",
-        "equation_Lib.IntVector.width", "equation_Prims.nat",
+        "equation_Lib.IntVector.width", "equation_LowStar.Buffer.buffer",
+        "equation_LowStar.Buffer.trivial_preorder", "equation_Prims.nat",
         "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
         "equation_Spec.Chacha20.size_nonce", "equation_Spec.GaloisField.gf",
         "function_token_typing_Hacl.Spec.Chacha20.Vec.line", "int_inversion",
         "int_typing", "lemma_FStar.HyperStack.ST.lemma_equal_domains_trans",
         "lemma_FStar.UInt.pow2_values", "lemma_FStar.UInt32.uv_inv",
-        "lemma_Lib.Buffer.modifies_preserves_live",
+        "lemma_LowStar.Monotonic.Buffer.lemma_live_equal_mem_domains",
         "lemma_LowStar.Monotonic.Buffer.loc_includes_refl",
         "lemma_LowStar.Monotonic.Buffer.modifies_trans_linear",
         "primitive_Prims.op_Subtraction",
@@ -2030,13 +2038,14 @@
         "typing_Hacl.Impl.Chacha20.Core32xN.uint32xN",
         "typing_Lib.Buffer.loc", "typing_Lib.IntTypes.bits",
         "typing_Lib.IntTypes.mk_int", "typing_Lib.IntTypes.v",
-        "typing_Spec.AES.gf8", "typing_Spec.Chacha20.size_nonce",
+        "typing_LowStar.Buffer.trivial_preorder", "typing_Spec.AES.gf8",
+        "typing_Spec.Chacha20.size_nonce",
         "typing_Spec.GaloisField.__proj__GF__item__t",
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.PUB@tok",
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "16198a63d6882bca7a6c4d20ad43af60"
+      "0858bf47fe218d89ffdf2bb557e94d7f"
     ],
     [
       "Hacl.Impl.Chacha20.Core32xN.double_round",
@@ -2087,7 +2096,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "f3d072322ec27b2e87014e53baa8d7cc"
+      "5779280f4b939f8bdb56da5aff5bf342"
     ],
     [
       "Hacl.Impl.Chacha20.Core32xN.double_round",
@@ -2098,6 +2107,7 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented",
         "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "constructor_distinct_Lib.Buffer.MUT",
         "constructor_distinct_Lib.IntTypes.U32",
         "constructor_distinct_Lib.IntTypes.U8",
         "equality_tok_Lib.Buffer.MUT@tok",
@@ -2115,20 +2125,22 @@
         "equation_Hacl.Spec.Chacha20.Vec.op_At",
         "equation_Hacl.Spec.Chacha20.Vec.quarter_round",
         "equation_Hacl.Spec.Chacha20.Vec.state",
-        "equation_Lib.Buffer.lbuffer_t", "equation_Lib.Buffer.loc",
+        "equation_Lib.Buffer.buffer_t", "equation_Lib.Buffer.lbuffer_t",
+        "equation_Lib.Buffer.live", "equation_Lib.Buffer.loc",
         "equation_Lib.Buffer.modifies", "equation_Lib.IntTypes.bits",
         "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
-        "equation_Lib.IntVector.width", "equation_Prims.nat",
+        "equation_Lib.IntVector.width", "equation_LowStar.Buffer.buffer",
+        "equation_LowStar.Buffer.trivial_preorder", "equation_Prims.nat",
         "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
         "equation_Spec.Chacha20.size_nonce", "equation_Spec.GaloisField.gf",
         "function_token_typing_Hacl.Spec.Chacha20.Vec.op_At",
         "int_inversion", "int_typing",
         "lemma_FStar.HyperStack.ST.lemma_equal_domains_trans",
-        "lemma_FStar.UInt.pow2_values",
-        "lemma_Lib.Buffer.modifies_preserves_live",
-        "lemma_Lib.IntTypes.v_mk_int",
+        "lemma_FStar.UInt.pow2_values", "lemma_Lib.IntTypes.v_mk_int",
+        "lemma_LowStar.Monotonic.Buffer.address_liveness_insensitive_buffer",
         "lemma_LowStar.Monotonic.Buffer.loc_includes_refl",
+        "lemma_LowStar.Monotonic.Buffer.modifies_liveness_insensitive_buffer_weak",
         "lemma_LowStar.Monotonic.Buffer.modifies_trans_linear",
         "primitive_Prims.op_Subtraction",
         "proj_equation_Spec.GaloisField.GF_t",
@@ -2148,13 +2160,14 @@
         "typing_Hacl.Impl.Chacha20.Core32xN.uint32xN",
         "typing_Lib.Buffer.loc", "typing_Lib.IntTypes.bits",
         "typing_Lib.IntTypes.minint", "typing_Lib.IntTypes.mk_int",
-        "typing_Spec.AES.gf8", "typing_Spec.Chacha20.size_nonce",
+        "typing_LowStar.Buffer.trivial_preorder", "typing_Spec.AES.gf8",
+        "typing_Spec.Chacha20.size_nonce",
         "typing_Spec.GaloisField.__proj__GF__item__t",
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.PUB@tok",
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "23ee1d5bc21b40940ca60fe1ecdf1d8a"
+      "8d012af8472f2a4c49f61492a548923d"
     ]
   ]
 ]

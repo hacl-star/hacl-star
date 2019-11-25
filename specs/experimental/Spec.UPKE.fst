@@ -7,10 +7,10 @@ open Lib.Sequence
 open Lib.ByteSequence
 
 module DH = Spec.Agile.DH
-module AEAD = Spec.Agile.AEAD.Hacl
+module AEAD = Spec.Agile.AEAD
 module Hash = Spec.Agile.Hash
 module HKDF = Spec.Agile.HKDF
-module HPKE = Spec.HPKE
+module HPKE = Spec.Agile.HPKE
 
 
 /// Clamp(a)
@@ -60,7 +60,7 @@ let encrypt cs deltaE skE pkR m =
   let delta = HKDF.expand (HPKE.hash_of_cs cs) deltaE (of_string "derive UPKE delta") (HPKE.size_dh_key cs) in
   let pkE,k,n = HPKE.setupBaseI cs skE pkR bytes_empty in
   let content = Seq.append deltaE m in
-  let c = AEAD.encrypt (HPKE.aead_of_cs cs) k n content lbytes_empty in
+  let c = AEAD.encrypt #(HPKE.aead_of_cs cs) k n content lbytes_empty in
   let pkR' = DH.scalarmult (HPKE.curve_of_cs cs) delta pkR in
   pkE,c,pkR'
 
@@ -82,7 +82,7 @@ val decrypt:
 let decrypt cs pkE skR ct =
   admit();
   let k,n = HPKE.setupBaseR cs pkE skR bytes_empty in
-  match AEAD.decrypt (HPKE.aead_of_cs cs) k n ct lbytes_empty with
+  match AEAD.decrypt #(HPKE.aead_of_cs cs) k n ct lbytes_empty with
   | None -> None
   | Some p ->
   let deltaE = Seq.slice p (HPKE.size_dh_key cs) (Seq.length p - (HPKE.size_dh_key cs)) in
