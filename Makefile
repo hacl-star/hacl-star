@@ -905,7 +905,8 @@ LDFLAGS 	+= -L$(OPENSSL_HOME)
 
 CFLAGS += -Wall -Wextra -g \
   -Wno-int-conversion -Wno-unused-parameter \
-  -O3 -march=native -mtune=native -I$(KREMLIN_HOME)/include
+  -O3 -march=native -mtune=native -I$(KREMLIN_HOME)/kremlib/dist/minimal \
+  -I$(KREMLIN_HOME)/include
 
 # FIXME there's a kremlin error that generates a void* -- can't use -Werror
 # Need the libraries to be present and compiled.
