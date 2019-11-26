@@ -197,11 +197,14 @@ let init a s =
   // AR: 07/22: same old `Seq.equal` and `==` story
   assert (Seq.equal (hashed #a h3 s) Seq.empty);
 
-  assert (preserves_freeable #a s h1 h3 /\
-    invariant #a h3 s /\
-    hashed h3 s == S.empty /\
-    footprint h1 s == footprint #a h3 s /\
-    B.(modifies (footprint #a h1 s) h1 h3))
+  assert (preserves_freeable #a s h1 h3);
+  assert (hashed h3 s == S.empty);
+  assert (footprint h1 s == footprint #a h3 s);
+  assert (B.(modifies (footprint #a h1 s) h1 h3));
+  assert (B.live h3 s);
+  assert (B.(loc_disjoint (loc_addr_of_buffer s) (footprint_s h3 (B.deref h3 s))));
+  assert (invariant_s h3 (B.get h3 s 0))
+
 #pop-options
 
 /// We keep the total length at run-time, on 64 bits, but require that it abides
