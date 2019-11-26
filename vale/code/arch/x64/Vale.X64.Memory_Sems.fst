@@ -379,6 +379,7 @@ let in_bounds128 (h:vale_heap) (b:buffer128) (i:nat{i < buffer_length b}) : Lemm
           j < (_ih h).IB.addrs b + DV.length (get_downview b.bsrc)) =
   length_t_eq TUInt128 b
 
+#restart-solver
 let bytes_valid128 ptr h =
   FStar.Pervasives.reveal_opaque (`%S.valid_addr128) S.valid_addr128;
   let t = TUInt128 in

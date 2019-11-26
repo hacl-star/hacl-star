@@ -1,5 +1,7 @@
 module Vale.X64.QuickCodes
 open FStar.Mul
+open Vale.Arch.HeapImpl
+module Map16 = Vale.Lib.Map16
 
 #reset-options "--initial_ifuel 1 --z3rlimit 30"
 
@@ -15,7 +17,9 @@ let state_mod_eq (m:mod_t) (s1 s2:vale_state) =
   | Mod_ok -> s1.vs_ok == s2.vs_ok
   | Mod_reg r -> eval_reg r s1 == eval_reg r s2
   | Mod_flags -> s1.vs_flags == s2.vs_flags
-  | Mod_mem -> s1.vs_heap == s2.vs_heap
+  | Mod_mem -> s1.vs_heap.vf_heap == s2.vs_heap.vf_heap
+  | Mod_mem_layout -> s1.vs_heap.vf_layout == s2.vs_heap.vf_layout
+  | Mod_mem_heaplet n -> Map16.sel s1.vs_heap.vf_heaplets n == Map16.sel s2.vs_heap.vf_heaplets n
   | Mod_stack -> s1.vs_stack == s2.vs_stack
   | Mod_memTaint -> s1.vs_memTaint == s2.vs_memTaint
   | Mod_stackTaint -> s1.vs_stackTaint == s2.vs_stackTaint
@@ -77,17 +81,24 @@ let update_state_mods_to (mods:mods_t) (s' s:vale_state) : Lemma
   let f1 (m0:mod_t) : Lemma (state_mod_eq m0 s' s'') =
     update_state_mods_to1 mods s' s m0
     in
-  f1 (Mod_ok);
-  f1 (Mod_flags);
-  f1 (Mod_mem);
-  f1 (Mod_stack);
-  f1 (Mod_memTaint);
-  f1 (Mod_stackTaint);
+  f1 Mod_ok;
+  f1 Mod_flags;
+  f1 Mod_mem;
+  f1 Mod_mem_layout;
+  f1 Mod_stack;
+  f1 Mod_memTaint;
+  f1 Mod_stackTaint;
   let f1_reg (r:reg) : Lemma
     (ensures Regs.sel r s'.vs_regs == Regs.sel r s''.vs_regs)
     [SMTPat (Regs.sel r s'.vs_regs)]
     =
     f1 (Mod_reg r)
+    in
+  let f1_heaplet (n:heaplet_id) : Lemma
+    (ensures Map16.sel s'.vs_heap.vf_heaplets n == Map16.sel s''.vs_heap.vf_heaplets n)
+    [SMTPat (Map16.sel s'.vs_heap.vf_heaplets n)]
+    =
+    f1 (Mod_mem_heaplet n)
     in
   ()
 

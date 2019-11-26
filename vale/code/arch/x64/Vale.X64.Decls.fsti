@@ -1,7 +1,9 @@
 module Vale.X64.Decls
 open FStar.Mul
+open Vale.Arch.HeapImpl
 module M = Vale.X64.Memory
 module S = Vale.X64.Stack_i
+module Map16 = Vale.Lib.Map16
 
 // This interface should hide all of Machine_Semantics_s.
 // (It should not refer to Machine_Semantics_s, directly or indirectly.)
@@ -16,6 +18,7 @@ open Vale.Def.Types_s
 
 unfold let vale_heap = M.vale_heap
 unfold let vale_full_heap = M.vale_full_heap
+unfold let heaplet_id = M.heaplet_id
 unfold let quad32 = quad32
 
 val cf (flags:Flags.t) : bool
@@ -296,6 +299,9 @@ val taint_at (memTaint:M.memtaint) (addr:int) : taint
 [@va_qattr] let va_upd_reg64 (r:reg_64) (v:nat64) (s:vale_state) : vale_state = update_reg_64 r v s
 [@va_qattr] let va_upd_xmm (x:reg_xmm) (v:quad32) (s:vale_state) : vale_state = update_reg_xmm x v s
 [@va_qattr] let va_upd_mem (mem:vale_heap) (s:vale_state) : vale_state = { s with vs_heap = M.set_vale_heap s.vs_heap mem }
+[@va_qattr] let va_upd_mem_layout (layout:vale_heap_layout) (s:vale_state) : vale_state = { s with vs_heap = { s.vs_heap with vf_layout = layout } }
+[@va_qattr] let va_upd_mem_heaplet (n:heaplet_id) (h:vale_heap) (s:vale_state) : vale_state =
+  { s with vs_heap = { s.vs_heap with vf_heaplets = Map16.upd s.vs_heap.vf_heaplets n h } }
 [@va_qattr] let va_upd_stack (stack:S.vale_stack) (s:vale_state) : vale_state = { s with vs_stack = stack }
 [@va_qattr] let va_upd_memTaint (memTaint:M.memtaint) (s:vale_state) : vale_state = { s with vs_memTaint = memTaint }
 [@va_qattr] let va_upd_stackTaint (stackTaint:M.memtaint) (s:vale_state) : vale_state = { s with vs_stackTaint = stackTaint }
@@ -311,6 +317,9 @@ val taint_at (memTaint:M.memtaint) (addr:int) : taint
 [@va_qattr] unfold let va_update_xmm (x:reg_xmm) (sM:va_state) (sK:va_state) : va_state =
   va_upd_xmm x (eval_reg_xmm x sM) sK
 [@va_qattr] unfold let va_update_mem (sM:va_state) (sK:va_state) : va_state = va_upd_mem (M.get_one_vale_heap sM.vs_heap) sK
+[@va_qattr] unfold let va_update_mem_layout (sM:va_state) (sK:va_state) : va_state = va_upd_mem_layout sM.vs_heap.vf_layout sK
+[@va_qattr] unfold let va_update_mem_heaplet (n:heaplet_id) (sM:va_state) (sK:va_state) : va_state =
+  va_upd_mem_heaplet n (Map16.sel sM.vs_heap.vf_heaplets n) sK
 [@va_qattr] unfold let va_update_stack (sM:va_state) (sK:va_state) : va_state = va_upd_stack sM.vs_stack sK
 [@va_qattr] unfold let va_update_memTaint (sM:va_state) (sK:va_state) : va_state = va_upd_memTaint sM.vs_memTaint sK
 [@va_qattr] unfold let va_update_stackTaint (sM:va_state) (sK:va_state) : va_state = va_upd_stackTaint sM.vs_stackTaint sK

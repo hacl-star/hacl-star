@@ -2,6 +2,7 @@ module Vale.X64.QuickCode
 open FStar.Mul
 open Vale.Def.Prop_s
 open Vale.X64.Machine_s
+open Vale.Arch.HeapImpl
 open Vale.X64.State
 open Vale.X64.Decls
 
@@ -13,6 +14,8 @@ type mod_t =
 | Mod_reg: reg -> mod_t
 | Mod_flags: mod_t
 | Mod_mem: mod_t
+| Mod_mem_layout: mod_t
+| Mod_mem_heaplet: heaplet_id -> mod_t
 | Mod_stack: mod_t
 | Mod_memTaint: mod_t
 | Mod_stackTaint: mod_t
@@ -24,6 +27,7 @@ unfold let mods_t = list mod_t
 [@va_qattr] unfold let va_Mod_xmm (r:reg_xmm) = Mod_reg (Reg 1 r)
 [@va_qattr] unfold let va_Mod_flags = Mod_flags
 [@va_qattr] unfold let va_Mod_mem = Mod_mem
+[@va_qattr] unfold let va_Mod_mem_layout = Mod_mem_layout
 [@va_qattr] unfold let va_Mod_stack = Mod_stack
 [@va_qattr] unfold let va_Mod_memTaint = Mod_memTaint
 [@va_qattr] unfold let va_Mod_stackTaint = Mod_stackTaint
@@ -36,6 +40,8 @@ let mod_eq (x y:mod_t) : Pure bool (requires True) (ensures fun b -> b == (x = y
   | Mod_reg rx -> (match y with Mod_reg ry -> rx = ry | _ -> false)
   | Mod_flags -> (match y with Mod_flags -> true | _ -> false)
   | Mod_mem -> (match y with Mod_mem -> true | _ -> false)
+  | Mod_mem_layout -> (match y with Mod_mem_layout -> true | _ -> false)
+  | Mod_mem_heaplet nx -> (match y with Mod_mem_heaplet ny -> nx = ny | _ -> false)
   | Mod_stack -> (match y with Mod_stack -> true | _ -> false)
   | Mod_memTaint -> (match y with Mod_memTaint -> true | _ -> false)
   | Mod_stackTaint -> (match y with Mod_stackTaint -> true | _ -> false)
@@ -48,6 +54,8 @@ let update_state_mod (m:mod_t) (sM sK:vale_state) : vale_state =
   | Mod_reg r -> va_update_reg r sM sK
   | Mod_flags -> va_update_flags sM sK
   | Mod_mem -> va_update_mem sM sK
+  | Mod_mem_layout -> va_update_mem_layout sM sK
+  | Mod_mem_heaplet n -> va_update_mem_heaplet n sM sK
   | Mod_stack -> va_update_stack sM sK
   | Mod_memTaint -> va_update_memTaint sM sK
   | Mod_stackTaint -> va_update_stackTaint sM sK

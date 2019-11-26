@@ -11,6 +11,10 @@ noeq type vale_heap =
     ih:Ghost.erased interop_heap{mh == down_mem (Ghost.reveal ih)} ->
     vale_heap
 
+noeq type vale_heap_layout : Type u#1 = {
+  vl_old_heap:vale_heap;
+}
+
 let _ih (vh:vale_heap) : GTot interop_heap = Ghost.reveal vh.ih
 
 let mi_heap_upd (vh:vale_heap) (mh':machine_heap) : Pure vale_heap

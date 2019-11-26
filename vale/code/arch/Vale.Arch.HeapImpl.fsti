@@ -11,7 +11,14 @@ Note: the untrusted memory definitions are split among 3 modules:
 This splitting is done to avoid circular module dependencies.
 *)
 
-val vale_heap : Type u#1
+let heaplet_id = n:nat{n < 16}
 
-noeq type vale_full_heap = {v_h:vale_heap}
+val vale_heap : Type u#1
+val vale_heap_layout : Type u#1
+
+noeq type vale_full_heap = {
+  vf_layout:vale_heap_layout;
+  vf_heap:vale_heap;
+  vf_heaplets:Vale.Lib.Map16.map16 vale_heap;
+}
 
