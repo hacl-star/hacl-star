@@ -18,7 +18,7 @@
 #
 # The Makefile produces:
 # - libevercrypt.so, a shared object where unused symbols have been removed
-# - libevercrypt.a, a static archive that includes libhacl.a and libkremlib.a
+# - libevercrypt.a
 
 # 1. The usual pseudo auto-configuration
 
@@ -77,14 +77,9 @@ CFLAGS		+= -Wno-parentheses -Wno-deprecated-declarations -g -std=gnu11 -O3
 Hacl_Poly1305_128.o Hacl_Chacha20_Vec128.o Hacl_Chacha20Poly1305_128.o: CFLAGS += -mavx
 Hacl_Poly1305_256.o Hacl_Chacha20_Vec256.o Hacl_Chacha20Poly1305_256.o: CFLAGS += -mavx -mavx2
 
-$(KREMLIB_A):
-	@echo "Please run make in the $(HACL_HOME)/code directory before invoking this Makefile" && false
-
-KREMLIB_A 	= $(KREMLIN_HOME)/kremlib/dist/generic/libkremlib.a
-
 all: libevercrypt.$(SO)
 
-libevercrypt.$(SO): $(OBJS) $(KREMLIB_A)
+libevercrypt.$(SO): $(OBJS)
 	$(CC) $(CFLAGS) -shared -o $@ $^ $(LDFLAGS)
 
 # 4. Compilation of OCaml bindings; conditional on the presence of the lib_gen

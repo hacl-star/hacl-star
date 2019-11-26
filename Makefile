@@ -904,7 +904,7 @@ endif
 LDFLAGS 	+= -L$(OPENSSL_HOME)
 
 CFLAGS += -Wall -Wextra -g \
-  -Wno-infinite-recursion -Wno-int-conversion -Wno-unused-parameter \
+  -Wno-int-conversion -Wno-unused-parameter \
   -O3 -march=native -mtune=native -I$(KREMLIN_HOME)/include
 
 # FIXME there's a kremlin error that generates a void* -- can't use -Werror
