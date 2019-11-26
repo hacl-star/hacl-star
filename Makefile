@@ -616,7 +616,7 @@ REQUIRED_FLAGS	=\
   $(VALE_BUNDLES) \
   -library 'Vale.Stdcalls.*' \
   -no-prefix 'Vale.Stdcalls.*' \
-  -static-header 'Vale_Inline' \
+  -static-header 'Vale.Inline.*' \
   -library 'Vale.Inline.X64.Fadd_inline' \
   -library 'Vale.Inline.X64.Fmul_inline' \
   -library 'Vale.Inline.X64.Fswap_inline' \
