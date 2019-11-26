@@ -23,6 +23,17 @@ void ossl_chacha20(uint8_t* cipher, uint8_t* plain, int len, uint8_t* key, uint8
    //EVP_CIPHER_CTX_free(ctx);
 }
 
+#include "impl.h"
+
+extern void chacha20_impl(
+  unsigned char *out,
+  const unsigned char *in,
+  unsigned long long inlen,
+  const unsigned char *k,
+  const unsigned char *n,
+  unsigned int counter
+);
+
 typedef uint64_t cycles;
 
 static __inline__ cycles cpucycles_begin(void)
@@ -165,6 +176,21 @@ int main() {
   if (ok) printf("Success!\n");
   else printf("FAILED!\n");
 
+  chacha20_impl(comp,in,in_len,k,n,1);
+  printf("Jasmin computed:");
+  for (int i = 0; i < 114; i++)
+    printf("%02x",comp[i]);
+  printf("\n");
+  printf("expected:");
+  for (int i = 0; i < 114; i++)
+    printf("%02x",exp[i]);
+  printf("\n");
+  ok = true;
+  for (int i = 0; i < 114; i++)
+    ok = ok & (exp[i] == comp[i]);
+  if (ok) printf("Success!\n");
+  else printf("FAILED!\n");
+
   uint64_t len = SIZE;
   uint8_t plain[SIZE];
   uint8_t key[16];
@@ -246,6 +272,26 @@ int main() {
   double diff6 = (double)(t2 - t1)/CLOCKS_PER_SEC;
   uint64_t cyc6 = b - a;
 
+  memset(plain,'P',SIZE);
+  memset(key,'K',16);
+  memset(nonce,'N',12);
+
+  for (int j = 0; j < ROUNDS; j++) {
+    chacha20_impl(plain,plain,SIZE,key,nonce,1);
+  }
+
+  t1 = clock();
+  a = cpucycles_begin();
+  for (int j = 0; j < ROUNDS; j++) {
+    chacha20_impl(plain,plain,SIZE,key,nonce,1);
+  }
+  b = cpucycles_end();
+  t2 = clock();
+  double diff7 = (double)(t2 - t1)/CLOCKS_PER_SEC;
+  uint64_t cyc7 = b - a;
+
+
+
   uint64_t count = ROUNDS * SIZE;
 
   printf("32-bit Chacha20\n");
@@ -263,4 +309,8 @@ int main() {
   printf("OpenSSL Chacha20\n");
   printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)cyc6,(double)cyc6/count);
   printf("bw %8.2f MB/s\n",(double)count/(diff6 * 1000000.0));
+
+  printf("Jasmin Chacha20\n");
+  printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)cyc7,(double)cyc7/count);
+  printf("bw %8.2f MB/s\n",(double)count/(diff7 * 1000000.0));
 }
