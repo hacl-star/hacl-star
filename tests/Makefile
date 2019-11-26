@@ -25,7 +25,7 @@ test: $(patsubst %.exe,%.test,$(TARGETS))
 curve64-rfc.exe: $(patsubst %.c,%.o,$(wildcard rfc7748_src/*.c))
 
 %.exe: %.o
-	$(CC) $(CFLAGS) $(LDFLAGS) $^ ../dist/compact-gcc/libevercrypt.a $(KREMLIN_HOME)/kremlib/dist/minimal/libkremlib.a -o $@
+	$(CC) $(CFLAGS) $(LDFLAGS) $^ ../dist/compact-gcc/libevercrypt.a -o $@
 
 # Running tests
 
