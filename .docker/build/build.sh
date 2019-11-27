@@ -204,6 +204,18 @@ function exec_build() {
     export_home HACL "$(pwd)"
     export_home EVERCRYPT "$(pwd)/providers"
 
+    (
+      unset KREMLIN_HOME;
+      cd dist
+      for a in *; do
+        if [[ $a != kremlin ]]; then
+          echo "Building snapshot: $a"
+          make -C $a -j $threads
+          echo
+        fi
+      done
+    )
+
     if [[ $target == "hacl-ci" || $target == "mozilla-ci" ]]; then
         echo target - >hacl-ci
         if [[ $branchname == "vale" ||  $branchname == "_vale" ]]; then

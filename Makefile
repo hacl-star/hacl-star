@@ -888,7 +888,11 @@ dist/test/c/Test.c: KRML_EXTRA=-add-include '"kremlin/internal/compat.h"'
 # C Compilation (recursive make invocation relying on KreMLin-generated Makefile) #
 ###################################################################################
 
-compile-%: dist/Makefile dist/%/Makefile.basic
+copy-kremlib:
+	mkdir -p dist/kremlin
+	(cd $(KREMLIN_HOME) && tar cvf - kremlib/dist/minimal include) | (cd dist/kremlin && tar xf -)
+
+compile-%: dist/Makefile dist/%/Makefile.basic | copy-kremlib
 	cp $< dist/$*/
 	$(MAKE) -C dist/$*
 
