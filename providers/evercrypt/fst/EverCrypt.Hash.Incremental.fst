@@ -198,11 +198,11 @@ let init a s =
   assert (Seq.equal (hashed #a h3 s) Seq.empty);
 
   assert (preserves_freeable #a s h1 h3);
-  assert (hashed h3 s == S.empty);
+  //assert (hashed h3 s == S.empty);
   assert (footprint h1 s == footprint #a h3 s);
   assert (B.(modifies (footprint #a h1 s) h1 h3));
-  assert (B.live h3 s);
-  assert (B.(loc_disjoint (loc_addr_of_buffer s) (footprint_s h3 (B.deref h3 s))));
+  //assert (B.live h3 s);
+  //assert (B.(loc_disjoint (loc_addr_of_buffer s) (footprint_s h3 (B.deref h3 s))));
   assert (invariant_s h3 (B.get h3 s 0))
 
 #pop-options
