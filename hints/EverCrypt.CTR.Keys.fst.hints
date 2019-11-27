@@ -8,7 +8,7 @@
       0,
       [ "@query" ],
       0,
-      "65e99f86c8d40aacf52ef08f39be787a"
+      "575e0d76e89bd7d572bed3645c1639da"
     ],
     [
       "EverCrypt.CTR.Keys.vale_impl",
@@ -17,7 +17,7 @@
       0,
       [ "@query", "assumption_Spec.Cipher.Expansion.impl__uu___haseq" ],
       0,
-      "fe91faa072619005547d5eec2ed6118f"
+      "c25547d288bde88f0c5b5710fedb1dbe"
     ],
     [
       "EverCrypt.CTR.Keys.vale_alg_of_vale_impl",
@@ -40,7 +40,7 @@
         "refinement_interpretation_Tm_refine_c029c44ff4b4f840d75208dea95cad35"
       ],
       0,
-      "3f2119cd8af43f4214479ca447820305"
+      "d5fea69911a0d363e6ed48a7b9ef612e"
     ],
     [
       "EverCrypt.CTR.Keys.key_offset",
@@ -76,7 +76,7 @@
         "typing_EverCrypt.CTR.Keys.vale_alg_of_vale_impl", "unit_typing"
       ],
       0,
-      "4d66c9ee37cae685bb04c9b87765fc1c"
+      "141cf42902232bc01668e5727e4d8212"
     ],
     [
       "EverCrypt.CTR.Keys.concrete_xkey_len",
@@ -161,7 +161,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "c1846219b3a1225f0ae86104e2dc9bb3"
+      "8eddf86dd8e035a10120abfd46062d81"
     ],
     [
       "EverCrypt.CTR.Keys.aes_gcm_key_expansion",
@@ -210,7 +210,7 @@
         "unit_typing"
       ],
       0,
-      "22cbeae046ed435c0b9ded6d29d7284d"
+      "77eba5e493e10315444ba351b74a205e"
     ],
     [
       "EverCrypt.CTR.Keys.aes_gcm_keyhash_init",
@@ -260,7 +260,7 @@
         "unit_typing"
       ],
       0,
-      "6bfd96354059a55cad5688cc60e994fa"
+      "953bcdab2a7fd4faeb1f44a73809166f"
     ],
     [
       "EverCrypt.CTR.Keys.vale_expand",
@@ -270,7 +270,6 @@
       [
         "@MaxIFuel_assumption", "@query",
         "FStar.Seq.Base_interpretation_Tm_arrow_44bb45ed5c2534b346e0f58ea5033251",
-        "LowStar.Monotonic.Buffer_interpretation_Tm_ghost_arrow_f0a90460b5af0ae0bd914ffe1acbca94",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "Vale.Def.Words.Two_s_interpretation_Tm_arrow_6980332764c4493a7b0df5c02f7aefbe",
         "b2t_def", "bool_inversion", "bool_typing",
@@ -356,7 +355,6 @@
         "equation_Vale.Def.Types_s.le_seq_quad32_to_bytes",
         "equation_Vale.Def.Types_s.quad32",
         "equation_Vale.Def.Words.Seq_s.seq_nat8_to_seq_nat32_LE",
-        "equation_Vale.Def.Words.Seq_s.seq_nat8_to_seq_uint8",
         "equation_Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8",
         "equation_Vale.Def.Words_s.nat32", "equation_Vale.Def.Words_s.nat8",
         "equation_Vale.Def.Words_s.natN", "equation_Vale.Lib.Seqs_s.compose",
@@ -368,7 +366,6 @@
         "function_token_typing_Lib.IntTypes.size_t",
         "function_token_typing_Lib.IntTypes.uint8",
         "function_token_typing_LowStar.Buffer.trivial_preorder",
-        "function_token_typing_LowStar.Monotonic.Buffer.mgsub",
         "function_token_typing_Prims.__cache_version_number__",
         "function_token_typing_Prims.int",
         "function_token_typing_Vale.Def.Words_s.nat32",
@@ -413,7 +410,6 @@
         "projection_inverse_FStar.Integers.Signed__0",
         "projection_inverse_FStar.Integers.Unsigned__0",
         "projection_inverse_Spec.GaloisField.GF_t",
-        "refinement_interpretation_Tm_refine_096dcb399122345db27f37346c43e5dc",
         "refinement_interpretation_Tm_refine_0ec011aea9f93256a3547ad9f0c667f1",
         "refinement_interpretation_Tm_refine_0fe8a12189cf4c417dda723cc135a9ac",
         "refinement_interpretation_Tm_refine_22031f78f7e45c35d05f7046cff619c6",
@@ -444,8 +440,7 @@
         "true_interp", "typing_EverCrypt.CTR.Keys.concrete_xkey_len",
         "typing_EverCrypt.CTR.Keys.key_offset",
         "typing_FStar.Seq.Base.append", "typing_FStar.Seq.Base.length",
-        "typing_FStar.Seq.Base.seq", "typing_FStar.Seq.Base.slice",
-        "typing_FStar.UInt.fits", "typing_FStar.UInt32.add",
+        "typing_FStar.Seq.Base.seq", "typing_FStar.UInt.fits",
         "typing_FStar.UInt32.uint_to_t", "typing_FStar.UInt32.v",
         "typing_Lib.IntTypes.bits", "typing_Lib.IntTypes.minint",
         "typing_LowStar.Buffer.trivial_preorder",
@@ -468,7 +463,6 @@
         "typing_Vale.Def.Words.Seq_s.seq_nat8_to_seq_nat32_LE",
         "typing_Vale.Def.Words.Seq_s.seq_nat8_to_seq_uint8",
         "typing_Vale.Def.Words.Seq_s.seq_to_seq_four_LE",
-        "typing_Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8",
         "typing_Vale.X64.CPU_Features_s.aesni_enabled",
         "typing_Vale.X64.CPU_Features_s.avx_enabled",
         "typing_Vale.X64.CPU_Features_s.sse4_1_enabled",
