@@ -840,7 +840,7 @@ endif
 # --------------------------
 
 .PRECIOUS: dist/%/Makefile.basic
-dist/%/Makefile.basic: $(ALL_KRML_FILES) \
+dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/LICENSE.txt \
   $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_H_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) $(VALE_ASMS) | old-extract-c
 	mkdir -p $(dir $@)
 	[ x"$(HACL_OLD_FILES)" != x ] && cp $(HACL_OLD_FILES) $(patsubst %.c,%.h,$(HACL_OLD_FILES)) $(dir $@) || true
@@ -856,6 +856,10 @@ dist/%/Makefile.basic: $(ALL_KRML_FILES) \
 	  $(notdir $(HACL_OLD_FILES)) \
 	  $(notdir $(HAND_WRITTEN_FILES)) \
 	  -o libevercrypt.a
+	echo "This code was generated with the following toolchain." > $(dir $@)/INFO.txt
+	echo "F* version: $(shell cd $(FSTAR_HOME) && git rev-parse HEAD)" >> $(dir $@)/INFO.txt
+	echo "KreMLin version: $(shell cd $(KREMLIN_HOME) && git rev-parse HEAD)" >> $(dir $@)/INFO.txt
+	echo "Vale version: $(shell cat $(VALE_HOME)/bin/.vale_version)" >> $(dir $@)/INFO.txt
 
 dist/evercrypt-external-headers/Makefile.basic: $(ALL_KRML_FILES)
 	$(KRML) -silent \
