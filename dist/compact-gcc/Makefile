@@ -13,12 +13,15 @@
 # Additionally, this Makefile works out of the box on Linux, OSX and
 # Cygwin/MinGW.
 #
-# The Makefile assumes KREMLIN_HOME and HACL_HOME to be suitably defined. When
-# using OpenSSL, it also expects OPENSSL_HOME to be defined.
+# When using OpenSSL, it also expects OPENSSL_HOME to be defined (this is a
+# temporary fix for missing algorithms).
 #
 # The Makefile produces:
 # - libevercrypt.so, a shared object where unused symbols have been removed
 # - libevercrypt.a
+
+# By default, this Makefile relies on the local checkout of kremlib
+KREMLIN_HOME ?= ../kremlin
 
 # 1. The usual pseudo auto-configuration
 

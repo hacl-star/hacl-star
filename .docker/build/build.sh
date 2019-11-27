@@ -208,7 +208,7 @@ function exec_build() {
       unset KREMLIN_HOME;
       cd dist
       for a in *; do
-        if [[ $a != kremlin ]]; then
+        if [[ $a != "kremlin" && $a != "vale" && -d $a ]]; then
           echo "Building snapshot: $a"
           make -C $a -j $threads
           echo
