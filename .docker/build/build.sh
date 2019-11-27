@@ -43,6 +43,17 @@ function hacl_test() {
         fetch_mitls &&
         fetch_vale &&
         export_home OPENSSL "$(pwd)/mlcrypto/openssl" &&
+        (
+          unset KREMLIN_HOME;
+          cd dist
+          for a in *; do
+            if [[ $a != "kremlin" && $a != "vale" && -d $a ]]; then
+              echo "Building snapshot: $a"
+              make -C $a -j $threads || (echo $a failed && return 255)
+              echo
+            fi
+          done
+        ) &&
         env VALE_SCONS_PARALLEL_OPT="-j $threads" make -j $threads $make_target -k
 }
 
@@ -203,18 +214,6 @@ function exec_build() {
 
     export_home HACL "$(pwd)"
     export_home EVERCRYPT "$(pwd)/providers"
-
-    (
-      unset KREMLIN_HOME;
-      cd dist
-      for a in *; do
-        if [[ $a != "kremlin" && $a != "vale" && -d $a ]]; then
-          echo "Building snapshot: $a"
-          make -C $a -j $threads
-          echo
-        fi
-      done
-    )
 
     if [[ $target == "hacl-ci" || $target == "mozilla-ci" ]]; then
         echo target - >hacl-ci
