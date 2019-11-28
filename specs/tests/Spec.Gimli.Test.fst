@@ -11,7 +11,7 @@ open Lib.ByteSequence
 // Test 1
 //
 
-let test1_input = List.Tot.map u8_from_UInt8 [
+let test1_input_list = List.Tot.map u8_from_UInt8 [
   0x54uy; 0x68uy; 0x65uy; 0x72uy; 0x65uy; 0x27uy; 0x73uy; 0x20uy;
   0x70uy; 0x6cuy; 0x65uy; 0x6euy; 0x74uy; 0x79uy; 0x20uy; 0x66uy;
   0x6fuy; 0x72uy; 0x20uy; 0x74uy; 0x68uy; 0x65uy; 0x20uy; 0x62uy;
@@ -22,18 +22,24 @@ let test1_input = List.Tot.map u8_from_UInt8 [
   0x6euy; 0x2euy
 ]
 
-let test1_expected = List.Tot.map u8_from_UInt8 [
+let test1_input : lbytes 58 = assert_norm(List.Tot.length test1_input_list = 58);
+    of_list test1_input_list
+
+let test1_expected_list = List.Tot.map u8_from_UInt8 [
   0x4auy; 0xfbuy; 0x3fuy; 0xf7uy; 0x84uy; 0xc7uy; 0xaduy; 0x69uy;
   0x43uy; 0xd4uy; 0x9cuy; 0xf5uy; 0xdauy; 0x79uy; 0xfauy; 0xcfuy;
   0xa7uy; 0xc4uy; 0x43uy; 0x4euy; 0x1cuy; 0xe4uy; 0x4fuy; 0x5duy;
   0xd4uy; 0xb2uy; 0x8fuy; 0x91uy; 0xa8uy; 0x4duy; 0x22uy; 0xc8uy
 ]
+let test1_expected : lbytes 32 =   assert_norm(List.Tot.length test1_expected_list = 32);
+    createL test1_expected_list
+
 
 //
 // Test 2
 //
 
-let test2_input = List.Tot.map u8_from_UInt8 [
+let test2_input_list = List.Tot.map u8_from_UInt8 [
   0x49uy; 0x66uy; 0x20uy; 0x61uy; 0x6euy; 0x79uy; 0x6fuy; 0x6euy;
   0x65uy; 0x20uy; 0x77uy; 0x61uy; 0x73uy; 0x20uy; 0x74uy; 0x6fuy;
   0x20uy; 0x61uy; 0x73uy; 0x6buy; 0x20uy; 0x66uy; 0x6fuy; 0x72uy;
@@ -49,19 +55,25 @@ let test2_input = List.Tot.map u8_from_UInt8 [
   0x61uy; 0x79uy; 0x20uy; 0x61uy; 0x72uy; 0x6fuy; 0x75uy; 0x6euy;
   0x64uy; 0x2euy
 ]
+let test2_input : lbytes 106 = assert_norm(List.Tot.length test2_input_list = 106);
+    of_list test2_input_list
 
-let test2_expected = List.Tot.map u8_from_UInt8 [
+let test2_expected_list = List.Tot.map u8_from_UInt8 [
   0xbauy; 0x82uy; 0xa1uy; 0x6auy; 0x7buy; 0x22uy; 0x4cuy; 0x15uy;
   0xbeuy; 0xd8uy; 0xe8uy; 0xbduy; 0xc8uy; 0x89uy; 0x03uy; 0xa4uy;
   0x00uy; 0x6buy; 0xc7uy; 0xbeuy; 0xdauy; 0x78uy; 0x29uy; 0x7duy;
   0x96uy; 0x02uy; 0x92uy; 0x03uy; 0xefuy; 0x08uy; 0xe0uy; 0x7cuy
 ]
 
+  let test2_expected : lbytes 32 = assert_norm(List.Tot.length test2_expected_list = 32);
+  of_list test2_expected_list
+
+
 //
 // Test 3
 //
 
-let test3_input = List.Tot.map u8_from_UInt8 [
+let test3_input_list = List.Tot.map u8_from_UInt8 [
   0x53uy; 0x70uy; 0x65uy; 0x61uy; 0x6buy; 0x20uy; 0x77uy; 0x6fuy;
   0x72uy; 0x64uy; 0x73uy; 0x20uy; 0x77uy; 0x65uy; 0x20uy; 0x63uy;
   0x61uy; 0x6euy; 0x20uy; 0x61uy; 0x6cuy; 0x6cuy; 0x20uy; 0x75uy;
@@ -69,18 +81,24 @@ let test3_input = List.Tot.map u8_from_UInt8 [
   0x64uy; 0x21uy
 ]
 
-let test3_expected = List.Tot.map u8_from_UInt8 [
+let test3_input : lbytes 34 = assert_norm(List.Tot.length test3_input_list = 34);
+    of_list test3_input_list
+
+let test3_expected_list = List.Tot.map u8_from_UInt8 [
   0x8duy; 0xd4uy; 0xd1uy; 0x32uy; 0x05uy; 0x9buy; 0x72uy; 0xf8uy;
   0xe8uy; 0x49uy; 0x3fuy; 0x9auy; 0xfbuy; 0x86uy; 0xc6uy; 0xd8uy;
   0x62uy; 0x63uy; 0xe7uy; 0x43uy; 0x9fuy; 0xc6uy; 0x4cuy; 0xbbuy;
   0x36uy; 0x1fuy; 0xcbuy; 0xccuy; 0xf8uy; 0xb0uy; 0x12uy; 0x67uy
 ]
+ let test3_expected : lbytes 32 = assert_norm(List.Tot.length test3_expected_list = 32);
+  of_list test3_expected_list
+
 
 //
 // Test 4
 //
 
-let test4_input = List.Tot.map u8_from_UInt8 [
+let test4_input_list = List.Tot.map u8_from_UInt8 [
   0x49uy; 0x74uy; 0x27uy; 0x73uy; 0x20uy; 0x74uy; 0x72uy; 0x75uy;
   0x65uy; 0x20uy; 0x79uy; 0x6fuy; 0x75uy; 0x20uy; 0x64uy; 0x6fuy;
   0x6euy; 0x27uy; 0x74uy; 0x20uy; 0x73uy; 0x65uy; 0x65uy; 0x20uy;
@@ -122,27 +140,41 @@ let test4_input = List.Tot.map u8_from_UInt8 [
   0x6fuy; 0x75uy; 0x73uy; 0x2euy
 ]
 
-let test4_expected = List.Tot.map u8_from_UInt8 [
+let test4_input : lbytes 308 = assert_norm(List.Tot.length test4_input_list = 308);
+    createL test4_input_list
+
+let test4_expected_list = List.Tot.map u8_from_UInt8 [
   0x88uy; 0x87uy; 0xa5uy; 0x36uy; 0x7duy; 0x96uy; 0x1duy; 0x67uy;
   0x34uy; 0xeeuy; 0x1auy; 0x0duy; 0x4auy; 0xeeuy; 0x09uy; 0xcauy;
   0xcauy; 0x7fuy; 0xd6uy; 0xb6uy; 0x06uy; 0x09uy; 0x6fuy; 0xf6uy;
   0x9duy; 0x8cuy; 0xe7uy; 0xb9uy; 0xa4uy; 0x96uy; 0xcduy; 0x2fuy
 ]
 
+let test4_expected : lbytes 32 = assert_norm(List.Tot.length test4_expected_list = 32);
+    of_list test4_expected_list
+
+
 //
 // Test 5
 //
 
-let test5_input = List.Tot.map u8_from_UInt8 [
+let test5_input_list = List.Tot.map u8_from_UInt8 [
 
 ]
 
-let test5_expected = List.Tot.map u8_from_UInt8 [
+let test5_input : lbytes 0 = assert_norm(List.Tot.length test5_input_list = 0);
+    of_list test5_input_list
+
+let test5_expected_list = List.Tot.map u8_from_UInt8 [
   0xb0uy; 0x63uy; 0x4buy; 0x2cuy; 0x0buy; 0x08uy; 0x2auy; 0xeduy;
   0xc5uy; 0xc0uy; 0xa2uy; 0xfeuy; 0x4euy; 0xe3uy; 0xaduy; 0xcfuy;
   0xc9uy; 0x89uy; 0xecuy; 0x05uy; 0xdeuy; 0x6fuy; 0x00uy; 0xaduy;
   0xdbuy; 0x04uy; 0xb3uy; 0xaauy; 0xacuy; 0x27uy; 0x1fuy; 0x67uy
 ]
+
+let test5_expected : lbytes 32 =   assert_norm(List.Tot.length test5_expected_list = 32);
+    of_list test5_expected_list
+
 
 //
 // Main
@@ -150,13 +182,10 @@ let test5_expected = List.Tot.map u8_from_UInt8 [
 
 let test () =
 
+    //
+    // TEST 1
+    //
   IO.print_string "\nTEST 1\n";
-  assert_norm(List.Tot.length test1_input = 58);
-  let test1_input_len : size_nat = List.Tot.length test1_input in
-  let test1_input : lbytes test1_input_len = createL test1_input in
-
-  assert_norm(List.Tot.length test1_expected = 32);
-  let test1_expected : lbytes 32 = createL test1_expected in
   let test1_result : lbytes 32 = Spec.Gimli.hash test1_input in
   let result1 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test1_expected test1_result in
 
@@ -165,5 +194,57 @@ let test () =
   IO.print_string "\nComputed Gimli : ";
   List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test1_result);
 
-  if result1 then IO.print_string "\nGimli Test1: Success!\n"
-  else IO.print_string "\nGimli Test1: Failure :(\n"
+    //
+    // TEST 2
+    //
+  IO.print_string "\nTEST 2\n";
+  let test2_result : lbytes 32 = Spec.Gimli.hash test2_input in
+  let result2 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test2_expected test2_result in
+
+  IO.print_string "\nExpected Gimli : ";
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test2_expected);
+  IO.print_string "\nComputed Gimli : ";
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test2_result);
+
+    //
+    // TEST 3
+    //
+  IO.print_string "\nTEST 3\n";
+  let test3_result : lbytes 32 = Spec.Gimli.hash test3_input in
+  let result3 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test3_expected test3_result in
+
+  IO.print_string "\nExpected Gimli : ";
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test3_expected);
+  IO.print_string "\nComputed Gimli : ";
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test3_result);
+
+
+    //
+    // TEST 4
+    //
+  IO.print_string "\nTEST 4\n";
+  let test4_result : lbytes 32 = Spec.Gimli.hash test4_input in
+  let result4 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test4_expected test4_result in
+
+  IO.print_string "\nExpected Gimli : ";
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test4_expected);
+  IO.print_string "\nComputed Gimli : ";
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test4_result);
+
+
+    //
+    // TEST 5
+    //
+  IO.print_string "\nTEST 5\n";
+  let test5_result : lbytes 32 = Spec.Gimli.hash test5_input in
+  let result5 = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) test5_expected test5_result in
+
+  IO.print_string "\nExpected Gimli : ";
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test5_expected);
+  IO.print_string "\nComputed Gimli : ";
+  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list test5_result);
+
+
+  if result1 && result2 && result3 && result4 && result5
+  then IO.print_string "\nGimli : Success!\n"
+  else IO.print_string "\nGimli : Failure :(\n"
