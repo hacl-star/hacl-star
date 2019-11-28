@@ -649,6 +649,13 @@ let update a p data len =
 inline_for_extraction noextract
 val mk_finish: a:Hash.alg -> finish_st a
 
+let total_len_leq_max_input_length
+  (n:U64.t{U64.v n < pow2 61}) (a:alg)
+: Lemma (U64.v n <= max_input_length a)
+= match a with
+  | MD5 | SHA1 | SHA2_224 | SHA2_256 -> ()
+  | SHA2_384 | SHA2_512 -> assert_norm (pow2 61 < pow2 125 - 1)
+
 #restart-solver
 #reset-options "--z3rlimit 30 --max_fuel 0 --max_ifuel 0"
 inline_for_extraction noextract
@@ -664,7 +671,7 @@ let mk_finish a p dst =
   assert (Hash.invariant hash_state h1);
 
   assert_norm (pow2 61 < pow2 125);
-  assert (U64.v total_len <= max_input_length a);
+  total_len_leq_max_input_length total_len a;
   let buf_ = B.sub buf_ 0ul (rest a total_len) in
   assert (
     let r = rest a total_len in
