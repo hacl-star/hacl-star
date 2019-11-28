@@ -50,7 +50,8 @@ test: Chacha20.exe \
 	hpke.exe \
 	sha3.exe \
 	argon2i.exe \
-	rsapss.exe
+	rsapss.exe \
+	esch.exe
 
 
 FIXME = Salsa20.exe aes128cbc.exe hmac_generic.exe hpkecfrg.exe chacha20_vec.exe poly1305_generic.exe poly1305_ml.exe qdsa.exe
@@ -229,6 +230,13 @@ random.exe: $(LIBS_FILES) tests/Spec.Random.Test.fst
 	@echo 'let _ = test()' >> random-ml/Spec_Random_Test.ml
 	$(OCAMLOPT) -package cryptokit -I random-ml -I ../lib/ml random-ml/Lib_IntTypes.ml random-ml/Lib_RawIntTypes.ml random-ml/Lib_LoopCombinators.ml random-ml/Lib_Sequence.ml ../lib/ml/Lib_RandomSequence.ml random-ml/Lib_ByteSequence.ml random-ml/Lib_PrintSequence.ml random-ml/Spec_Random_Test.ml -o random.exe
 	./random.exe
+
+esch.exe: $(LIBS_FILES) experimental/Spec.SPARKLE.fst experimental/Spec.ESCH.fst tests/experimental/Spec.ESCH.Test.fst
+	mkdir -p esch-ml
+	$(FSTAR) --codegen OCaml --lax $(LIBS_EX) --extract_module Spec.SPARKLE --extract_module Spec.ESCH --extract_module Spec.ESCH.Test --odir esch-ml $^
+	@echo 'let _ = test()' >> esch-ml/Spec_ESCH_Test.ml
+	$(OCAMLOPT) -I esch-ml $(OCAML_INCLUDES) $(addprefix esch-ml/, $(LIBS_ML)) esch-ml/Spec_SPARKLE.ml esch-ml/Spec_ESCH.ml esch-ml/Spec_ESCH_Test.ml -o esch.exe
+	./esch.exe
 
 
 # Salsa20.exe: $(LIBS_FILES) Spec.CTR.fst Spec.Salsa20.fst tests/Spec.Salsa20.Test.fst
