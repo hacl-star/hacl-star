@@ -64,8 +64,7 @@ BASE_FLAGS = \
   -bundle Lib.*[rename=Hacl_Lib] \
   -drop Lib.IntVector.Intrinsics \
   -fparentheses -fno-shadow -fcurly-braces \
-  -bundle LowStar.* \
-  -bundle Prims,C.Failure,C,C.String,C.Loops,Spec.Loops,C.Endianness,FStar.*[rename=Hacl_Kremlib] \
+  -bundle Prims,C.Failure,C,C.String,C.Loops,Spec.Loops,C.Endianness,FStar.*,LowStar.*[rename=Hacl_Kremlib] \
   -bundle 'Meta.*' \
   -minimal \
   -add-include '"kremlin/internal/types.h"' \

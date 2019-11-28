@@ -82,12 +82,13 @@ val same_mem_get_heap_val64 (b:buffer64{buffer_writeable b})
                           (mem2:S.machine_heap{IB.correct_down_p (_ih h2) mem2 b}) : Lemma
   (requires (Seq.index (buffer_as_seq h1 b) k == Seq.index (buffer_as_seq h2 b) k))
   (ensures (let ptr = buffer_addr b h1 + 8 * k in
-    forall i. {:pattern (mem1.[ptr+i])} i >= 0 /\ i < 8 ==> mem1.[ptr+i] == mem2.[ptr+i]))
+    forall (x:int).{:pattern (mem1.[x])} ptr <= x /\ x < ptr + 8 ==> mem1.[x] == mem2.[x]))
 
 let same_mem_get_heap_val64 b j v k h1 h2 mem1 mem2 =
   let ptr = buffer_addr b h1 + 8 * k in
   let addr = buffer_addr b h1 in
-  let aux (i:nat{i < 8}) : Lemma (mem1.[addr+(8 * k + i)] == mem2.[addr+(8 * k +i)]) =
+  let aux (x:int{ptr <= x /\ x < ptr + 8}) : Lemma (mem1.[x] == mem2.[x]) =
+    let i = x - ptr in
     let db = get_downview b.bsrc in
     let ub = UV.mk_buffer db uint64_view in
     UV.as_seq_sel (IB.hs_of_mem (_ih h1)) ub k;
@@ -105,7 +106,6 @@ let same_mem_get_heap_val64 b j v k h1 h2 mem1 mem2 =
   Classical.forall_intro aux;
   assert (forall i. addr + (8 * k + i) == ptr + i)
 
-#push-options "--z3cliopt smt.arith.nl=true --smtencoding.l_arith_repr boxwrap"
 let rec written_buffer_down64_aux1
   (b:buffer64{buffer_writeable b})
   (i:nat{i < buffer_length b})
@@ -156,7 +156,6 @@ let rec written_buffer_down64_aux2
       heap_shift mem1 mem2 ptr 8;
       written_buffer_down64_aux2 b i v h base n (k+1) h1 mem1 mem2
     end
-#pop-options
 
 let written_buffer_down64 (b:buffer64{buffer_writeable b}) (i:nat{i < buffer_length b}) (v:nat64) (h:vale_heap)
   : Lemma
@@ -179,7 +178,6 @@ let written_buffer_down64 (b:buffer64{buffer_writeable b}) (i:nat{i < buffer_len
     written_buffer_down64_aux1 b i v h base 0 h1 mem1 mem2;
     written_buffer_down64_aux2 b i v h base n (i+1) h1 mem1 mem2
 
-#push-options "--z3cliopt smt.arith.nl=true"
 let unwritten_buffer_down (t:base_typ) (b:buffer t{buffer_writeable b})
                           (i:nat{i < buffer_length b})
                           (v:base_typ_as_vale_type t)
@@ -214,12 +212,11 @@ let unwritten_buffer_down (t:base_typ) (b:buffer t{buffer_writeable b})
           assert (MB.disjoint a.bsrc b.bsrc);
           lemma_dv_equal (IB.down_view a.src) a.bsrc (IB.hs_of_mem (_ih h)) (IB.hs_of_mem (_ih h1));
           assert (Seq.equal s0 s1);
-          assert (forall (i:nat). {:pattern (mem1.[base + i])}
-                    i < Seq.length s0 ==> v_to_typ TUInt8 (Seq.index s0 i) == mem1.[base + i]);
+          assert (forall (j:int).{:pattern (mem1.[j])}
+            base <= j /\ j < base + Seq.length s0 ==> v_to_typ TUInt8 (Seq.index s0 (j - base)) == mem1.[j]);
           heap_shift mem1 mem2 base (DV.length db)
     in
     Classical.forall_intro aux
-#pop-options
 
 let store_buffer_down64_mem
   (b:buffer64{buffer_writeable b})
@@ -568,7 +565,6 @@ val valid_state_store_mem128_aux (i:int) (v:quad32) (h:vale_heap) : Lemma
     heap' == I.down_mem (_ih h')
   ))
 
-#push-options "--z3cliopt smt.arith.nl=true --smtencoding.nl_arith_repr boxwrap"
 #restart-solver
 let rec written_buffer_down128_aux1
   (b:buffer128{buffer_writeable b})
@@ -594,9 +590,7 @@ let rec written_buffer_down128_aux1
       heap_shift mem1 mem2 ptr 16;
       written_buffer_down128_aux1 b i v h base (k+1) h1 mem1 mem2
     end
-#pop-options
 
-#push-options "--z3cliopt smt.arith.nl=true --smtencoding.l_arith_repr boxwrap"
 #restart-solver
 let rec written_buffer_down128_aux2
   (b:buffer128{buffer_writeable b})
@@ -623,7 +617,6 @@ let rec written_buffer_down128_aux2
       heap_shift mem1 mem2 ptr 16;
       written_buffer_down128_aux2 b i v h base n (k+1) h1 mem1 mem2
     end
-#pop-options
 
 let written_buffer_down128 (b:buffer128) (i:nat{i < buffer_length b}) (v:quad32) (h:vale_heap)
   : Lemma

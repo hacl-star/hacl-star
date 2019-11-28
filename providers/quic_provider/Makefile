@@ -6,7 +6,7 @@ OPENSSL_HOME ?= $(MLCRYPTO_HOME)/openssl
 
 MARCH?=x86_64
 
-CFLAGS += -fPIC -std=c11 -Ofast -funroll-loops -g -I $(OPENSSL_HOME)/include -I $(MITLS_HOME)/libs/ffi -D_GNU_SOURCE -D_BSD_SOURCE
+CFLAGS += -fPIC -std=c11 -Ofast -funroll-loops -g -I $(OPENSSL_HOME)/include -I $(MITLS_HOME)/libs/ffi -D_GNU_SOURCE -D_BSD_SOURCE -I $(KREMLIN_HOME)/kremlib/dist/minimal
 
 ifneq ($(VS140COMNTOOLS),)
 	VS_BIN_DOSPATH=$(VS140COMNTOOLS)/../../VC/bin

@@ -23,7 +23,7 @@
         "equality_tok_Lib.IntTypes.U32@tok",
         "equation_FStar.HyperStack.ST.is_eternal_region",
         "equation_FStar.Monotonic.HyperHeap.hmap",
-        "equation_FStar.Monotonic.HyperStack.is_eternal_color",
+        "equation_FStar.Monotonic.HyperStack.is_heap_color",
         "equation_FStar.Monotonic.HyperStack.is_tip",
         "equation_FStar.Monotonic.HyperStack.is_wf_with_ctr_and_tip",
         "equation_FStar.Monotonic.HyperStack.mem",
@@ -50,7 +50,7 @@
         "lemma_FStar.UInt.pow2_values", "lemma_FStar.UInt32.uv_inv",
         "lemma_FStar.UInt32.vu_inv", "lemma_Lib.IntTypes.v_mk_int",
         "primitive_Prims.op_AmpAmp", "primitive_Prims.op_LessThanOrEqual",
-        "primitive_Prims.op_Subtraction",
+        "primitive_Prims.op_Negation", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
@@ -62,6 +62,7 @@
         "refinement_interpretation_Tm_refine_c6c18a7ceb46d419c35ff8551117551e",
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
         "typing_FStar.Map.contains", "typing_FStar.Monotonic.HyperHeap.rid",
+        "typing_FStar.Monotonic.HyperHeap.rid_freeable",
         "typing_FStar.Monotonic.HyperHeap.root",
         "typing_FStar.Monotonic.HyperStack.get_hmap",
         "typing_FStar.Monotonic.HyperStack.get_tip",
@@ -72,7 +73,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "1924cfc2735dbbb43b97350c8404c51c"
+      "1036bd8a282b9d65177dcdd05176c869"
     ],
     [
       "Hacl.Impl.SHA3.keccak_piln",
@@ -93,7 +94,7 @@
         "equality_tok_Lib.IntTypes.U32@tok",
         "equation_FStar.HyperStack.ST.is_eternal_region",
         "equation_FStar.Monotonic.HyperHeap.hmap",
-        "equation_FStar.Monotonic.HyperStack.is_eternal_color",
+        "equation_FStar.Monotonic.HyperStack.is_heap_color",
         "equation_FStar.Monotonic.HyperStack.is_tip",
         "equation_FStar.Monotonic.HyperStack.is_wf_with_ctr_and_tip",
         "equation_FStar.Monotonic.HyperStack.mem",
@@ -103,7 +104,8 @@
         "equation_Lib.Buffer.lbuffer_t", "equation_Lib.Buffer.length",
         "equation_Lib.Buffer.recallable", "equation_Lib.Buffer.witnessed",
         "equation_Lib.IntTypes.int_t", "equation_Lib.IntTypes.pub_int_t",
-        "equation_Lib.IntTypes.pub_int_v", "equation_Lib.IntTypes.v",
+        "equation_Lib.IntTypes.pub_int_v", "equation_Lib.IntTypes.unsigned",
+        "equation_Lib.IntTypes.v",
         "equation_LowStar.ImmutableBuffer.ibuffer",
         "equation_LowStar.ImmutableBuffer.immutable_preorder",
         "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.nat",
@@ -115,7 +117,7 @@
         "lemma_FStar.UInt.pow2_values", "lemma_FStar.UInt32.uv_inv",
         "lemma_FStar.UInt32.vu_inv", "lemma_Lib.IntTypes.v_injective",
         "primitive_Prims.op_AmpAmp", "primitive_Prims.op_LessThanOrEqual",
-        "primitive_Prims.op_Subtraction",
+        "primitive_Prims.op_Negation", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
@@ -126,6 +128,7 @@
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
         "refinement_kinding_Tm_refine_5a0fec4d9f0be29b6fee14fccfbb3ad6",
         "typing_FStar.Map.contains", "typing_FStar.Monotonic.HyperHeap.rid",
+        "typing_FStar.Monotonic.HyperHeap.rid_freeable",
         "typing_FStar.Monotonic.HyperHeap.root",
         "typing_FStar.Monotonic.HyperStack.get_hmap",
         "typing_FStar.Monotonic.HyperStack.get_tip",
@@ -135,7 +138,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "6e539293f005543313a6a487bda20afd"
+      "8b774ecce88779b8c6ebfe04957f29c4"
     ],
     [
       "Hacl.Impl.SHA3.keccak_rndc",
@@ -157,7 +160,7 @@
         "equality_tok_Lib.IntTypes.U64@tok",
         "equation_FStar.HyperStack.ST.is_eternal_region",
         "equation_FStar.Monotonic.HyperHeap.hmap",
-        "equation_FStar.Monotonic.HyperStack.is_eternal_color",
+        "equation_FStar.Monotonic.HyperStack.is_heap_color",
         "equation_FStar.Monotonic.HyperStack.is_tip",
         "equation_FStar.Monotonic.HyperStack.is_wf_with_ctr_and_tip",
         "equation_FStar.Monotonic.HyperStack.mem",
@@ -180,7 +183,7 @@
         "lemma_FStar.UInt.pow2_values", "lemma_FStar.UInt32.uv_inv",
         "lemma_FStar.UInt32.vu_inv", "lemma_Lib.IntTypes.v_injective",
         "primitive_Prims.op_AmpAmp", "primitive_Prims.op_LessThanOrEqual",
-        "primitive_Prims.op_Subtraction",
+        "primitive_Prims.op_Negation", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
@@ -190,6 +193,7 @@
         "refinement_interpretation_Tm_refine_c6c18a7ceb46d419c35ff8551117551e",
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
         "typing_FStar.Map.contains", "typing_FStar.Monotonic.HyperHeap.rid",
+        "typing_FStar.Monotonic.HyperHeap.rid_freeable",
         "typing_FStar.Monotonic.HyperHeap.root",
         "typing_FStar.Monotonic.HyperStack.get_hmap",
         "typing_FStar.Monotonic.HyperStack.get_tip",
@@ -199,7 +203,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "e369fa2fd465abbb8690065091e2de01"
+      "a744dca0f4c7cc554ff2b8baf08937d9"
     ],
     [
       "Hacl.Impl.SHA3.readLane",
@@ -260,7 +264,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "3ed1b9e4117395862128730dd5476764"
+      "b3e3b045822377edf297fda5e0a5e5e1"
     ],
     [
       "Hacl.Impl.SHA3.readLane",
@@ -335,7 +339,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "62713d5e67421e18ad1a059ef678f422"
+      "b1b33c1c4969b0eeafef345f42d277e6"
     ],
     [
       "Hacl.Impl.SHA3.writeLane",
@@ -397,7 +401,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "1c0e2c0eb99d5e96ceeb87128910fc32"
+      "80fdfd97ab2076cdea180f309eac2c03"
     ],
     [
       "Hacl.Impl.SHA3.writeLane",
@@ -470,7 +474,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "1ab2c296a52cff1536fe0c3b812e114f"
+      "87248bc68ef770d0dcc25e6e3c1f5277"
     ],
     [
       "Hacl.Impl.SHA3.rotl",
@@ -483,7 +487,7 @@
         "equation_Lib.IntTypes.unsigned", "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "6880478fecdbf87f9d06e3f192241adb"
+      "0b3fcfbeb84e7a13bf3c7d409998556a"
     ],
     [
       "Hacl.Impl.SHA3.rotl",
@@ -503,7 +507,7 @@
         "refinement_interpretation_Tm_refine_2637b8c155af1b3e54200b827eb29262"
       ],
       0,
-      "b54e0e09563a1465e9b0a5d1b5bca969"
+      "4bb50393e8e775a80116460f07f0666c"
     ],
     [
       "Hacl.Impl.SHA3.state_theta0",
@@ -561,7 +565,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "d09d1611ed59726b8fe71cbc211653df"
+      "f67b4ce466d5b2aa387183e73a35ed98"
     ],
     [
       "Hacl.Impl.SHA3.state_theta0",
@@ -645,7 +649,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "46d043c5bc9a59d8abab6543d158680e"
+      "aa2c3fe6d1d999bf5fa23f5d3cfc4b3c"
     ],
     [
       "Hacl.Impl.SHA3.state_theta_inner_s",
@@ -707,7 +711,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "da0841a96a132ac5c4b013c7f502afe3"
+      "192c526e63d3a75e475e6e38f0aaefa3"
     ],
     [
       "Hacl.Impl.SHA3.state_theta_inner_s",
@@ -809,7 +813,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "f7323e50c2d7ff9a01d4a9c8608ece92"
+      "bb17544cc53139d6880cc4f483aa362c"
     ],
     [
       "Hacl.Impl.SHA3.state_theta1",
@@ -867,7 +871,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "a26f7e61d685d8512cf62d1554173fe4"
+      "7596db011c7d963139ae50a09c3777db"
     ],
     [
       "Hacl.Impl.SHA3.state_theta1",
@@ -942,7 +946,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "3bc5af432c17808bf40e0ad1fcf71d9d"
+      "3f0ff8207ca3f1284886c7fa952351d8"
     ],
     [
       "Hacl.Impl.SHA3.state_theta",
@@ -991,7 +995,7 @@
         "typing_Lib.Buffer.length", "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "f3740ec17d6278b16173d32219c0bc88"
+      "f31bee40ec53dc580da497f99cbadd5c"
     ],
     [
       "Hacl.Impl.SHA3.state_theta",
@@ -1107,7 +1111,7 @@
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "e61f757ce4f55dc67c620baa9c385304"
+      "feffe75d294f988b130e7cf39d5ead96"
     ],
     [
       "Hacl.Impl.SHA3.index_map",
@@ -1123,7 +1127,7 @@
         "@query", "lemma_FStar.List.Tot.Properties.map_lemma"
       ],
       0,
-      "49145319e0c296ba507c9eb89e12d819"
+      "f8ed3017b10463cc27eefbae04265b06"
     ],
     [
       "Hacl.Impl.SHA3.index_map",
@@ -1139,7 +1143,7 @@
         "@query", "lemma_FStar.List.Tot.Properties.map_lemma"
       ],
       0,
-      "db2a92b92d681ee2ceffb9c32c87749b"
+      "54336a023c338225aca3af29d4946af9"
     ],
     [
       "Hacl.Impl.SHA3.index_map",
@@ -1187,7 +1191,7 @@
         "unit_inversion", "unit_typing"
       ],
       0,
-      "2910e5879b226253f1c2041799251919"
+      "99e2945a9851fa4e93a63f3655e5fdbd"
     ],
     [
       "Hacl.Impl.SHA3.state_pi_rho_inner",
@@ -1247,7 +1251,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "8129fbe5af17895d0492406a0d13283b"
+      "4ab21d7475daef57c5f05cf5e1082e6d"
     ],
     [
       "Hacl.Impl.SHA3.state_pi_rho_inner",
@@ -1350,7 +1354,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "e2beffd2ecf1f9c5500c92f6a804ce1b"
+      "a97e9aee53c0433285869c7670223537"
     ],
     [
       "Hacl.Impl.SHA3.state_pi_rho",
@@ -1399,7 +1403,7 @@
         "typing_Lib.Buffer.length", "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "9112b57789bca68ac6d5c59c3cb1dd97"
+      "63385c0186bc3ded71e28c611ef787b6"
     ],
     [
       "Hacl.Impl.SHA3.state_pi_rho",
@@ -1537,7 +1541,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "c920cfd5b572c163e902335ebcbba4d9"
+      "5593033366200b203da371c9b846b4c9"
     ],
     [
       "Hacl.Impl.SHA3.state_chi_inner",
@@ -1599,7 +1603,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "6decb496a70133713eae790080876aab"
+      "47a55f34c12ed733bbe0958020ade064"
     ],
     [
       "Hacl.Impl.SHA3.state_chi_inner",
@@ -1676,6 +1680,7 @@
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
         "typing_FStar.Map.contains", "typing_FStar.Map.domain",
         "typing_FStar.Monotonic.HyperHeap.rid",
+        "typing_FStar.Monotonic.HyperHeap.rid_freeable",
         "typing_FStar.Monotonic.HyperHeap.root",
         "typing_FStar.Monotonic.HyperStack.get_hmap",
         "typing_FStar.UInt.fits", "typing_FStar.UInt32.uint_to_t",
@@ -1688,7 +1693,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "6c93e45673a5f03f1b236a72c1c54936"
+      "7e76b02cc05d2edefab267e7336c762e"
     ],
     [
       "Hacl.Impl.SHA3.state_chi_inner1",
@@ -1750,7 +1755,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "175876bd53548ace23acc4ac763f7fd6"
+      "249450df7e617a3aa68dc8bbe33bfcfb"
     ],
     [
       "Hacl.Impl.SHA3.state_chi_inner1",
@@ -1827,7 +1832,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "dd7023116676e6cc3e4e88192f0b37bc"
+      "b0b3b1bec81f57a369e1a0eed164f160"
     ],
     [
       "Hacl.Impl.SHA3.state_chi",
@@ -1876,7 +1881,7 @@
         "typing_Lib.Buffer.length", "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "e977269f1671fe2a578db40f822196a4"
+      "392653e7a7881eb29ec891d6e112aa40"
     ],
     [
       "Hacl.Impl.SHA3.state_chi",
@@ -2003,7 +2008,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "0e4b3f7c05d208172adf14270ae92400"
+      "7c21d81efa4f0ee75c52bcac32b45e0b"
     ],
     [
       "Hacl.Impl.SHA3.state_iota",
@@ -2064,7 +2069,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "0df19a9e81d38955595830fbb5298863"
+      "428b9d6afc2b611a1230832b7466ac9e"
     ],
     [
       "Hacl.Impl.SHA3.state_iota",
@@ -2134,7 +2139,7 @@
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "0defd9d05bf1486ac7520d6c2c45e846"
+      "b56e7479451bcc3be37d4009ad3641a1"
     ],
     [
       "Hacl.Impl.SHA3.state_permute",
@@ -2183,7 +2188,7 @@
         "typing_Lib.Buffer.length", "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "c577be53e0020f2d1bf8bf77b6ad53f6"
+      "3ccfed63287b6fa4ae28be6297a576cc"
     ],
     [
       "Hacl.Impl.SHA3.state_permute",
@@ -2254,7 +2259,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "00368c56f26caedd8f6a795ac8c42b99"
+      "b57a968879b3589bb4198c87e9c6cf0d"
     ],
     [
       "Hacl.Impl.SHA3.loadState",
@@ -2310,7 +2315,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "8092881366d29c253a1fa35ee102f253"
+      "5a98ecfc9cef7879190ca56aa40d1993"
     ],
     [
       "Hacl.Impl.SHA3.loadState",
@@ -2321,8 +2326,7 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "assumption_FStar.Monotonic.HyperHeap.Mod_set_def", "b2t_def",
-        "bool_inversion", "bool_typing",
-        "constructor_distinct_Lib.Buffer.MUT",
+        "bool_inversion", "constructor_distinct_Lib.Buffer.MUT",
         "constructor_distinct_Lib.IntTypes.PUB",
         "constructor_distinct_Lib.IntTypes.S128",
         "constructor_distinct_Lib.IntTypes.S16",
@@ -2408,7 +2412,6 @@
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
         "refinement_interpretation_Tm_refine_0dee13256a8baf6df196c2894762731e",
-        "refinement_interpretation_Tm_refine_0f7f5bcf08e8db1ef86bd2d55b0d74fb",
         "refinement_interpretation_Tm_refine_14d505d54c728e1080d4ac176aadc9ec",
         "refinement_interpretation_Tm_refine_39ed77ca8dd76666216a8ed6e6e89b76",
         "refinement_interpretation_Tm_refine_3c86b37c66474b0eabb475649664ed49",
@@ -2433,6 +2436,8 @@
         "typing_FStar.Map.contains",
         "typing_FStar.Monotonic.HyperHeap.mod_set",
         "typing_FStar.Monotonic.HyperHeap.rid",
+        "typing_FStar.Monotonic.HyperHeap.rid_freeable",
+        "typing_FStar.Monotonic.HyperHeap.root",
         "typing_FStar.Monotonic.HyperStack.get_hmap",
         "typing_FStar.Monotonic.HyperStack.get_tip",
         "typing_FStar.Monotonic.HyperStack.live_region",
@@ -2520,7 +2525,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "a300823b0f91f1eaee4660343be975c3"
+      "348db140b7744ef3b4648d51e94c550e"
     ],
     [
       "Hacl.Impl.SHA3.storeState_inner",
@@ -2602,7 +2607,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "95876343bb10631dccbde06ab39d8fbd"
+      "bd445bcd2502953e336672548708c9b8"
     ],
     [
       "Hacl.Impl.SHA3.storeState",
@@ -2654,7 +2659,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "d058632f7c3faf307b35ac827886418e"
+      "ac3c39d391eef4596bd2a10afb191210"
     ],
     [
       "Hacl.Impl.SHA3.storeState",
@@ -2795,7 +2800,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "463bae06cfd86757f8ee57a29ad74937"
+      "af79d8158de50399ac655588c16b7520"
     ],
     [
       "Hacl.Impl.SHA3.absorb_next",
@@ -2856,7 +2861,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "36c70a9ccb107c787693ce432d17d62f"
+      "17107a77f5d7efe28fd71095ab9afd58"
     ],
     [
       "Hacl.Impl.SHA3.absorb_next",
@@ -2980,7 +2985,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "800b8ba535bf352089de30a44d7fdd27"
+      "b5c87f73a266fd5dbbe2d902eebc6d3f"
     ],
     [
       "Hacl.Impl.SHA3.absorb_last",
@@ -3037,7 +3042,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "9fe651b54f6e02e118b68deea861691f"
+      "22cfe66f3630fdee51c571e94c466f0f"
     ],
     [
       "Hacl.Impl.SHA3.absorb_last",
@@ -3174,7 +3179,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "60f3a1b3602c93e9f820d4bdde115996"
+      "0826ee5260c4d17a19eed697484e0c24"
     ],
     [
       "Hacl.Impl.SHA3.absorb_inner",
@@ -3228,7 +3233,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "f81b229514edad613a3da1b8f7e55114"
+      "5882324081ad740452ff5febf39b31a3"
     ],
     [
       "Hacl.Impl.SHA3.absorb_inner",
@@ -3264,7 +3269,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "3edbbe1f2af03184ebb169e40becfde1"
+      "20dc9999f818c9fe0badf56776d8c5e3"
     ],
     [
       "Hacl.Impl.SHA3.absorb",
@@ -3327,7 +3332,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "7a67fc0b0e68f783e7c9d7ffe20b58fd"
+      "d4f14c19b474634cbbfa1ebd8a3ce57e"
     ],
     [
       "Hacl.Impl.SHA3.absorb",
@@ -3391,7 +3396,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "563c682a43d86cb097d95742f3ec600c"
+      "1e472f79f5a1276767a7bb884471b938"
     ],
     [
       "Hacl.Impl.SHA3.squeeze_inner",
@@ -3467,7 +3472,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "fb97c9262d305810e04f882df555a91e"
+      "dc52512784a4a5bdee57372db932b20b"
     ],
     [
       "Hacl.Impl.SHA3.squeeze_inner",
@@ -3498,7 +3503,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "b7486cb7b2c22c27e046751afa1b2529"
+      "dd80165d7f69fb163dab4bf1b3e21ec7"
     ],
     [
       "Hacl.Impl.SHA3.squeeze_inner",
@@ -3564,7 +3569,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "4dfe945bbd7c2734e8276f935187387f"
+      "12dd60ebb813557ff32570c250d45c72"
     ],
     [
       "Hacl.Impl.SHA3.mult_plus_lt",
@@ -3579,7 +3584,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "f80ef308ae5c78026e001da12acd060b"
+      "1d3aa5e08cdb457d3a1d57836134e296"
     ],
     [
       "Hacl.Impl.SHA3.squeeze",
@@ -3632,7 +3637,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "22068fda646770db2ce8afbde08ac08c"
+      "a1a33738d79fc70f91757e1bca151e39"
     ],
     [
       "Hacl.Impl.SHA3.squeeze",
@@ -3763,7 +3768,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "779690e9deb2ec220889fe9e018cf72a"
+      "9c8ea90ec3a8cc13eb752c23aa8ed9ba"
     ],
     [
       "Hacl.Impl.SHA3.squeeze",
@@ -3835,7 +3840,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "b703059edafa212d7b1409d2357e7bcf"
+      "9b139d527141ab4484b1b1aec9a99519"
     ],
     [
       "Hacl.Impl.SHA3.keccak",
@@ -3862,7 +3867,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "0251cc8045ad41bc65a7ff124503cf4b"
+      "589e151d820826874afea36eceba6cca"
     ],
     [
       "Hacl.Impl.SHA3.keccak",
@@ -4025,7 +4030,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "8511959c694cf1ce08b0cca066bc3d23"
+      "3ef509b10287af8910ae9c2da97fa22e"
     ]
   ]
 ]

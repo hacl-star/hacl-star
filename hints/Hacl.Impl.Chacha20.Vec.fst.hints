@@ -49,7 +49,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "b9e32e6464cafdd2bc361be4095857aa"
+      "4c35af47e2b7aebb435ec1ae417b5979"
     ],
     [
       "Hacl.Impl.Chacha20.Vec.rounds",
@@ -85,7 +85,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "10f10e3f155f36d198fdf5de39e03923"
+      "77792e26d7d6203c4cf4f4406149f8bc"
     ],
     [
       "Hacl.Impl.Chacha20.Vec.chacha20_core",
@@ -139,7 +139,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "9c53e33b219b1580ce3deb6d2d5ba850"
+      "3ae7b38a3962d5564cb01653fc0643b2"
     ],
     [
       "Hacl.Impl.Chacha20.Vec.chacha20_core",
@@ -227,7 +227,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "2372428481554b76cb61d3d004f947e0"
+      "86dffe59db2a2c864ae6dcd260ac9ac8"
     ],
     [
       "Hacl.Impl.Chacha20.Vec.chacha20_constants",
@@ -266,7 +266,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "96ff8dcee48c232be17c0eaaacd9874e"
+      "2a24c58ad6928064d147114ea9afe52d"
     ],
     [
       "Hacl.Impl.Chacha20.Vec.chacha20_constants",
@@ -289,7 +289,7 @@
         "equality_tok_Lib.IntTypes.U8@tok",
         "equation_FStar.HyperStack.ST.is_eternal_region",
         "equation_FStar.Monotonic.HyperHeap.hmap",
-        "equation_FStar.Monotonic.HyperStack.is_eternal_color",
+        "equation_FStar.Monotonic.HyperStack.is_heap_color",
         "equation_FStar.Monotonic.HyperStack.is_tip",
         "equation_FStar.Monotonic.HyperStack.is_wf_with_ctr_and_tip",
         "equation_FStar.Monotonic.HyperStack.mem",
@@ -314,15 +314,16 @@
         "equation_Spec.Chacha20.chacha20_constants",
         "equation_Spec.GaloisField.gf",
         "function_token_typing_FStar.Monotonic.Heap.heap",
-        "function_token_typing_Lib.IntTypes.size_t",
+        "function_token_typing_Lib.IntTypes.size_t", "int_typing",
         "lemma_FStar.Map.lemma_ContainsDom",
         "lemma_FStar.Monotonic.HyperHeap.lemma_root_has_color_zero",
         "lemma_FStar.UInt.pow2_values", "lemma_FStar.UInt32.uv_inv",
         "lemma_Lib.IntTypes.v_injective",
         "lemma_LowStar.Monotonic.Buffer.length_as_seq",
-        "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Negation",
         "primitive_Prims.op_Subtraction",
         "proj_equation_Spec.GaloisField.GF_t",
+        "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_Spec.GaloisField.GF_t",
         "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
@@ -335,18 +336,19 @@
         "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
         "refinement_interpretation_Tm_refine_f2f46e59ec8203b19b1042d057b66530",
         "typing_FStar.Map.contains", "typing_FStar.Monotonic.HyperHeap.rid",
+        "typing_FStar.Monotonic.HyperHeap.rid_freeable",
         "typing_FStar.Monotonic.HyperHeap.root",
         "typing_FStar.Monotonic.HyperStack.get_hmap",
         "typing_FStar.Monotonic.HyperStack.get_tip",
         "typing_FStar.Seq.Properties.seq_of_list",
-        "typing_Lib.IntTypes.bits", "typing_Lib.Sequence.of_list",
+        "typing_Lib.Sequence.of_list",
         "typing_LowStar.ImmutableBuffer.immutable_preorder",
         "typing_LowStar.Monotonic.Buffer.len", "typing_Spec.AES.gf8",
         "typing_Spec.GaloisField.__proj__GF__item__t",
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "3d02d176dd6d84644f997d07815818a4"
+      "58e638cc92c07c9d246055df446d10c7"
     ],
     [
       "Hacl.Impl.Chacha20.Vec.setup1",
@@ -406,7 +408,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "1795210c322c6ee07d18754222efab3b"
+      "8fbd26283a74b9676417e5fb4fbceb66"
     ],
     [
       "Hacl.Impl.Chacha20.Vec.setup1",
@@ -530,7 +532,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "49012cea721c739d03fa6e6ad7b18279"
+      "3aeda2abc2c5fbd7b9d8d2e7f36b4829"
     ],
     [
       "Hacl.Impl.Chacha20.Vec.chacha20_init",
@@ -590,7 +592,7 @@
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "fbd4a94d720b506c0263b217fb068f88"
+      "317270b784feea01ae1414ad4de64aaa"
     ],
     [
       "Hacl.Impl.Chacha20.Vec.chacha20_init",
@@ -752,7 +754,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "0d06e7d172a7a66594cba117745a7c79"
+      "43706f2dbb0539b76effd40563c26856"
     ],
     [
       "Hacl.Impl.Chacha20.Vec.chacha20_encrypt_block",
@@ -833,7 +835,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "6339448bbb40c3f890baebe00a48f277"
+      "4ed974bf09bc0eb42cdf6a8dd8d0d0e9"
     ],
     [
       "Hacl.Impl.Chacha20.Vec.chacha20_encrypt_block",
@@ -894,7 +896,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "9420da875b11dce74011a021d465ea26"
+      "1e0dd54edacc89a9a0e10c443e978c3b"
     ],
     [
       "Hacl.Impl.Chacha20.Vec.chacha20_encrypt_block",
@@ -1066,7 +1068,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "3696a2a211fc107974482a837ca01755"
+      "64dfd53b7af7749809959248a4bcfbc5"
     ],
     [
       "Hacl.Impl.Chacha20.Vec.chacha20_encrypt_last",
@@ -1132,7 +1134,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "3376e810e8ad2d9e212d089df61680e9"
+      "fc97aed2c9e9cab6cc0985cc746a2c76"
     ],
     [
       "Hacl.Impl.Chacha20.Vec.chacha20_encrypt_last",
@@ -1313,7 +1315,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "7cb0730535fc5a3cf94c133e9f712c2a"
+      "263bb3c7712c938eb3b412f3eb1ede35"
     ],
     [
       "Hacl.Impl.Chacha20.Vec.chacha20_update",
@@ -1378,7 +1380,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "50bed0f243388de4e35c5132321d4d29"
+      "c4bfa195dacfbab73dec9539fe7e9a9b"
     ],
     [
       "Hacl.Impl.Chacha20.Vec.chacha20_update",
@@ -1393,7 +1395,7 @@
         "refinement_interpretation_Tm_refine_50745f4abd3b1f3a36148d2dfd3f8dde"
       ],
       0,
-      "2421f78fbdb1e826c8df0169c046f2e4"
+      "bea63fffffd04e0540880cfbde749950"
     ],
     [
       "Hacl.Impl.Chacha20.Vec.chacha20_update",
@@ -1591,7 +1593,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "df412a10dde760b57e79a2f119b7613c"
+      "2d32c9deece7ff80057dff1eff8540cf"
     ],
     [
       "Hacl.Impl.Chacha20.Vec.chacha20_encrypt_vec",
@@ -1653,7 +1655,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "746168f69dea072815e3ebef04993d4e"
+      "f959868fba0849e9e22e6a103ddc8978"
     ],
     [
       "Hacl.Impl.Chacha20.Vec.chacha20_encrypt_vec",
@@ -1824,7 +1826,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "e86e386086eea8270d798fbe4750f649"
+      "925dcba0caa8209b9a34c5d39986e7c7"
     ],
     [
       "Hacl.Impl.Chacha20.Vec.chacha20_encrypt_st",
@@ -1892,7 +1894,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "3f96182cfec8b2409f2a2e77668a37cd"
+      "a615de648a47cd45fc1b5e8a718c09a0"
     ],
     [
       "Hacl.Impl.Chacha20.Vec.chacha20_encrypt",
@@ -1975,7 +1977,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "9a7c62bfdfb60bfa5edc7a28e3b9131b"
+      "6e48de244b14d371b10f818406a169d0"
     ],
     [
       "Hacl.Impl.Chacha20.Vec.chacha20_decrypt_vec",
@@ -2037,7 +2039,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "d56b1266fa5f5499239eead53ac1d143"
+      "9c3e8a219189a4bffd97ca1c09fe458a"
     ],
     [
       "Hacl.Impl.Chacha20.Vec.chacha20_decrypt_vec",
@@ -2207,7 +2209,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "3db26b9fb348cc35a7a15a23503a45df"
+      "50745f82286fb48579b05c4cb59c3e17"
     ],
     [
       "Hacl.Impl.Chacha20.Vec.chacha20_decrypt_st",
@@ -2275,7 +2277,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "4ebb82720e84a12d939ab6c4158eb96f"
+      "13fe81a88c99938f4ed225dfa86b5224"
     ],
     [
       "Hacl.Impl.Chacha20.Vec.chacha20_decrypt",
@@ -2361,7 +2363,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "2775f7c5c1d010827a3b341ce4612516"
+      "6995e594aa7683cc3bb7f4522e667082"
     ]
   ]
 ]
