@@ -830,7 +830,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "5104a42519decaf7de32475162cfc3d6"
+      "966620f694f6f939c6487bd236bfb1fb"
     ],
     [
       "Vale.X64.Memory.modifies_buffer_elim",
@@ -1422,7 +1422,7 @@
         "typing_Vale.X64.Memory.valid_mem_aux"
       ],
       0,
-      "93fb136bb65425f754721e87cf9d7557"
+      "9f627acf630c0408c0ab5f2a322bdad9"
     ],
     [
       "Vale.X64.Memory.valid_mem",
@@ -1558,7 +1558,7 @@
         "typing_Vale.Arch.HeapImpl._ih", "typing_Vale.X64.Memory.buffer"
       ],
       0,
-      "6eb3bcc4c9fe73218847f3a8f9215355"
+      "e25ae86c773626f226b01642bcd542dc"
     ],
     [
       "Vale.X64.Memory.find_valid_buffer_aux_ps",
@@ -1616,7 +1616,6 @@
         "proj_equation_Vale.Interop.Heap_s.InteropHeap_ptrs",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_FStar.Pervasives.Native.Some_v",
         "projection_inverse_Prims.Cons_a",
         "projection_inverse_Prims.Cons_hd",
         "projection_inverse_Prims.Cons_tl", "projection_inverse_Prims.Nil_a",
@@ -1641,7 +1640,7 @@
         "typing_Vale.X64.Memory.find_valid_buffer_aux"
       ],
       0,
-      "a6978949f4f57bb1dee525c7814be231"
+      "b4221bead258edc9c7a083efc89a4631"
     ],
     [
       "Vale.X64.Memory.find_valid_buffer_aux_ps",
@@ -1704,6 +1703,7 @@
         "Vale.Interop.Types_interpretation_Tm_arrow_38b481003114a2f65ff9ca6b62dd14e3",
         "bool_inversion", "bool_typing",
         "constructor_distinct_Vale.Arch.HeapTypes_s.TUInt16",
+        "constructor_distinct_Vale.Arch.HeapTypes_s.TUInt32",
         "constructor_distinct_Vale.Arch.HeapTypes_s.TUInt8",
         "data_elim_FStar.Pervasives.Native.Some",
         "data_elim_Vale.Arch.HeapImpl.ValeHeap",
@@ -1836,7 +1836,7 @@
         "typing_Vale.X64.Memory.writeable_mem_aux"
       ],
       0,
-      "262c26f564d22633a0c7c4fbd36db88d"
+      "b05ec321956f2aa32fa6902d1bb88709"
     ],
     [
       "Vale.X64.Memory.writeable_mem",
@@ -1970,7 +1970,7 @@
         "fuel_guarded_inversion_Vale.Arch.HeapImpl.vale_heap",
         "fuel_guarded_inversion_Vale.Interop.Heap_s.interop_heap",
         "function_token_typing_Vale.Interop.Heap_s.__proj__InteropHeap__item__addrs",
-        "int_inversion", "int_typing", "lemma_FStar.Pervasives.invertOption",
+        "int_inversion", "lemma_FStar.Pervasives.invertOption",
         "primitive_Prims.op_AmpAmp",
         "proj_equation_Vale.Interop.Heap_s.InteropHeap_addrs",
         "projection_inverse_BoxBool_proj_0",
@@ -1988,7 +1988,7 @@
         "typing_Vale.X64.Memory.addr_in_ptr", "typing_Vale.X64.Memory.buffer"
       ],
       0,
-      "e443d5e9bf2000b337edacb48d755274"
+      "d986aee3391c3699af6180b2b5cd8b24"
     ],
     [
       "Vale.X64.Memory.load_mem64",
@@ -3126,7 +3126,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "f34956505098e552a379c6bbb8128fe3"
+      "25380ffa9d4a00a67086126a524bf371"
     ],
     [
       "Vale.X64.Memory.lemma_valid_taint64",
@@ -3312,7 +3312,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "5f414c939f04a4e39198b10cc54566f6"
+      "92e5fcf4ce5c1c2d006cc88aa4cd60bf"
     ],
     [
       "Vale.X64.Memory.valid_memtaint",
