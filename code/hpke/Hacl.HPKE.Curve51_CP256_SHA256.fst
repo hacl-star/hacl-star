@@ -13,7 +13,6 @@ let setupBaseI = hpke_setupBaseI_higher #cs IHK.hkdf_expand256 IHK.hkdf_extract2
 
 let setupBaseR = hpke_setupBaseR_higher #cs IHK.hkdf_expand256 IHK.hkdf_extract256 IHash.hash_sha256 IDH.scalarmult_c51 IDH.secret_to_public_c51
 
-let sealBase = hpke_sealBase_higher #cs IDH.scalarmult_c51 IDH.secret_to_public_c51
-  setupBaseI IAEAD.aead_encrypt_cp256
+let sealBase = hpke_sealBase_higher #cs setupBaseI IAEAD.aead_encrypt_cp256
 
-let openBase = hpke_openBase_higher #cs IDH.scalarmult_c51 setupBaseR IAEAD.aead_decrypt_cp256
+let openBase = hpke_openBase_higher #cs setupBaseR IAEAD.aead_decrypt_cp256

@@ -58,7 +58,7 @@ procedure KeyExpansionRound(
     requires/ensures
         validDstAddrs128(mem, rdx, dst, 11, memTaint, Secret);
     requires
-        aesni_enabled && avx_enabled;
+        aesni_enabled && avx_enabled && sse_enabled;
         0 <= round < 10;
         rcon == aes_rcon(round);
         is_aes_key_LE(AES_128, key);
@@ -98,7 +98,7 @@ procedure KeyExpansionRoundUnrolledRecursive(
     requires/ensures
         validDstAddrs128(mem, rdx, dst, 11, memTaint, Secret);
     requires
-        aesni_enabled && avx_enabled;
+        aesni_enabled && avx_enabled && sse_enabled;
         0 <= n <= 10;
         is_aes_key_LE(AES_128, key);
         key == quad32_to_seq(xmm1);
@@ -133,7 +133,7 @@ procedure KeyExpansion128Stdcall(
         key_expansion_ptr := if win then rdx else rsi;
         key := quad32_to_seq(buffer128_read(input_key_b, 0, mem));
     requires/ensures
-        aesni_enabled && avx_enabled;
+        aesni_enabled && avx_enabled && sse_enabled;
         buffers_disjoint128(input_key_b, output_key_expansion_b);
         validSrcAddrs128(mem, key_ptr, input_key_b, 1, memTaint, Secret);
         validDstAddrs128(mem, key_expansion_ptr, output_key_expansion_b, 11, memTaint, Secret);
@@ -178,7 +178,7 @@ procedure AES128EncryptRound(
     modifies
         xmm0; xmm2; efl;
     requires
-        aesni_enabled;
+        aesni_enabled && sse_enabled;
         1 <= n < 10 <= length(round_keys);
         xmm0 == rounds(init, round_keys, #nat(n - 1));
         r8 == buffer_addr(keys_buffer, mem);
@@ -204,7 +204,7 @@ procedure AES128EncryptBlock(
     modifies
         xmm0; xmm2; efl;
     requires
-        aesni_enabled;
+        aesni_enabled && sse_enabled;
         is_aes_key_LE(AES_128, key);
         length(round_keys) == 11;
         round_keys == key_to_round_keys_LE(AES_128, key);
@@ -255,7 +255,7 @@ procedure AES128EncryptBlockStdcall(
         input_ptr := if win then rdx else rsi;
         expanded_key_ptr := if win then r8 else rdx;
     requires
-        aesni_enabled;
+        aesni_enabled && sse_enabled;
         is_aes_key_LE(AES_128, key);
         buffer128_read(input_buffer, 0, mem) == input;
         expanded_key_ptr == buffer_addr(keys_buffer, mem);

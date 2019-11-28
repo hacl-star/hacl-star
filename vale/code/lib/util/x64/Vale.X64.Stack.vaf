@@ -24,18 +24,20 @@ open Vale.X64.InsStack
 open Vale.X64.InsVector
 open Vale.X64.QuickCode
 open Vale.X64.QuickCodes
+open Vale.X64.CPU_Features_s
 #endverbatim
 
 
 #reset-options "--z3rlimit 30"
 procedure callee_save_registers(inline win:bool)
     {:public}
-    {:quick exportOnly}
+    {:quick}
     requires
         rsp == init_rsp(stack); // This function should only be called in the prolog, at the very beginning of the function
     reads rbx; rbp; rdi; rsi; r12; r13; r14; r15;
           xmm6; xmm7; xmm8; xmm9; xmm10; xmm11; xmm12; xmm13; xmm14; xmm15;
     modifies stack; rsp; rax; stackTaint;
+    requires sse_enabled;
     ensures
         forall(i) (old(valid_src_stack64(i, stack)) && rsp + (if win then 224 else 64)  <= i) ==> load_stack64(i, stack) == old(load_stack64(i, stack));
 
@@ -106,6 +108,7 @@ procedure callee_restore_registers(
     {:public}
     {:quick}
     requires
+        sse_enabled;
         forall(i) rsp <= i <= rsp + (if win then 216 else 56) ==> valid_stack_slot64(i, stack, Public, stackTaint);
         rsp >= init_rsp(stack) - 4096;
         rsp + (if win then 224 else 64) <= init_rsp(stack);

@@ -140,6 +140,8 @@ procedure Gcm_extra_bytes(
         tmp; extra; Ii; T1; T2; Hkey; Z0; Z1; Z2; Z3; hash; save_xmm; mem; efl; 
 
     requires
+        sse_enabled;
+
         // GCTR reqs
         buffers_disjoint128(keys_b, inout_b);
         buffers_disjoint128(hkeys_b, inout_b);
@@ -227,6 +229,8 @@ procedure Gcm_blocks128(
         xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; xmm7; hash; icb; one; mem; efl;
 
     requires
+        sse_enabled;
+
         // GCTR reqs
         buffers_disjoint128(keys_b, out_b);
         buffers_disjoint128(hkeys_b, out_b);
@@ -320,6 +324,8 @@ procedure Gcm_blocks(
         mem; efl;
 
     requires
+        sse_enabled && movbe_enabled;
+
         // Valid buffers and pointers
         valid_stack_slot64(rsp + offset + 0, stack, Public, stackTaint);
         valid_stack_slot64(rsp + offset + 8, stack, Public, stackTaint);
@@ -603,7 +609,7 @@ procedure Gcm_blocks_wrapped(
         ghost keys_b:buffer128,
         ghost hkeys_b:buffer128,
         ghost expected_tag:seq(nat8))
-    {:quick exportOnly}
+    {:quick}
     lets
         auth_ptr @= rdi; auth_num_bytes @= rsi; auth_len @= rdx; keys_ptr @= rcx; scratch_ptr @= rbp;
         iv_ptr @= r8; Xip @= r9; hash @= xmm8;
@@ -628,6 +634,7 @@ procedure Gcm_blocks_wrapped(
         mem; efl;
 
     requires
+        sse_enabled && movbe_enabled; 
         // Valid buffers and pointers
         valid_stack_slot64(rsp + offset + 0, stack, Public, stackTaint);
         valid_stack_slot64(rsp + offset + 8, stack, Public, stackTaint);
@@ -789,7 +796,7 @@ procedure gcm_blocks_decrypt_stdcall(
 
         ghost key:seq(nat32))
     {:public}
-    {:quick exportOnly}
+    {:quick}
     {:exportSpecs}
     lets
         auth_ptr :=         if win then rcx else rdi;
@@ -820,6 +827,8 @@ procedure gcm_blocks_decrypt_stdcall(
         xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; xmm7; xmm8; xmm9; xmm10; xmm11; xmm12; xmm13; xmm14; xmm15;
         mem; efl; stack; stackTaint;
     requires
+        sse_enabled && movbe_enabled;
+
         rsp == init_rsp(stack);
 
         // Valid buffers and pointers
@@ -1007,7 +1016,7 @@ procedure gcm_blocks_decrypt_stdcall(
     }
 
     Gcm_blocks_wrapped(alg,
-               if win then 224 + 56 else 64 + 8,
+               total_if(win, 224 + 56, 64 + 8),
                auth_b,
                abytes_b,
                in128x6_b,
@@ -1026,7 +1035,7 @@ procedure gcm_blocks_decrypt_stdcall(
                );
 
     // Auth tag is still in hash (xmm8), so load it for comparison purposes
-    Load64_stack(r15, rsp, if win then 224 + 40 + 96 else 64 + 8 + 80);
+    Load64_stack(r15, rsp, total_if(win, 224 + 40 + 96, 64 + 8 + 80));
     Load128_buffer(xmm0, r15, 0, Secret, tag_b, 0);
     assert xmm0 == buffer128_read(tag_b, 0, mem);       // OBSERVE?
     assert xmm0 == buffer128_read(tag_b, 0, old(mem));  // OBSERVE?

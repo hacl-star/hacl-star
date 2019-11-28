@@ -340,14 +340,12 @@ let setupPSKAuthR cs pkE pkI skR psk pskID info =
 #set-options "--z3rlimit 50"
 
 let sealBase cs skE pkR m info =
-  let zz, pkR = encap cs skE pkR in
   let pkE,k,n = setupBaseI cs skE pkR info in
   Seq.append pkE (AEAD.encrypt #(aead_of_cs cs) k n info m)
 
-let openBase cs pkE skR input info =
+let openBase cs skR input info =
   let pkE = sub #uint8 #(Seq.length input) input 0 (size_dh_public cs) in
   let c = sub #uint8 #(Seq.length input) input (size_dh_public cs) (length input - (size_dh_public cs)) in
-  let zz = decap cs pkE skR in
   let k,n = setupBaseR cs pkE skR info in
   match AEAD.decrypt #(aead_of_cs cs) k n info c with
   | None -> None

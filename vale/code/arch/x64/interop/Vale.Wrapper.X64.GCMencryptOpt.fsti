@@ -58,6 +58,7 @@ let length_aux5 (b:uint8_p) : Lemma
     DV.length_eq db
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+#restart-solver
 
 inline_for_extraction noextract
 let encrypt_opt_stdcall_st (a: algorithm { a = AES_128 \/ a = AES_256 }) =
@@ -112,7 +113,7 @@ let encrypt_opt_stdcall_st (a: algorithm { a = AES_128 \/ a = AES_256 }) =
       B.length keys_b = Vale.Wrapper.X64.AES.key_offset a /\
       B.length scratch_b = 176 /\
 
-      aesni_enabled /\ pclmulqdq_enabled /\ avx_enabled /\
+      aesni_enabled /\ pclmulqdq_enabled /\ avx_enabled /\ sse_enabled /\ movbe_enabled /\
       is_aes_key_LE a (Ghost.reveal key) /\
       (Seq.equal (B.as_seq h0 keys_b)
         (seq_nat8_to_seq_uint8 (le_seq_quad32_to_bytes (key_to_round_keys_LE a (Ghost.reveal key))))) /\

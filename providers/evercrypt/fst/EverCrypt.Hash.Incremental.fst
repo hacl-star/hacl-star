@@ -120,13 +120,15 @@ let split_at_last_empty (a: Hash.alg): Lemma
   ()
 
 #restart-solver
-#push-options "--z3rlimit 40"
+#push-options "--z3rlimit 40 --using_facts_from '*,-LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2'"
 let create_in a r =
   (**) let h0 = ST.get () in
 
+  (**) B.loc_unused_in_not_unused_in_disjoint h0;
   let buf = B.malloc r (Lib.IntTypes.u8 0) (Hacl.Hash.Definitions.block_len a) in
   (**) let h1 = ST.get () in
   (**) assert (B.fresh_loc (B.loc_buffer buf) h0 h1);
+  (**) B.loc_unused_in_not_unused_in_disjoint h1;
 
   let hash_state = Hash.create_in a r in
   (**) let h2 = ST.get () in
@@ -135,6 +137,7 @@ let create_in a r =
   let s = State hash_state buf 0UL (G.hide S.empty) in
   (**) assert (B.fresh_loc (footprint_s h2 s) h0 h2);
 
+  (**) B.loc_unused_in_not_unused_in_disjoint h2;
   let p = B.malloc r s 1ul in
   (**) let h3 = ST.get () in
   (**) Hash.frame_invariant B.loc_none hash_state h2 h3;
@@ -159,11 +162,12 @@ let create_in a r =
   (**)   freeable h5 p);
 
   (**) assert (ST.equal_stack_domains h1 h5);
+  (**) assert (ST.equal_stack_domains h0 h1);
 
   p
 #pop-options
 
-#push-options "--z3rlimit 40"
+#push-options "--z3rlimit 40 --using_facts_from '*,-LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2'"
 #restart-solver
 
 let init a s =
@@ -186,21 +190,21 @@ let init a s =
   let h3 = ST.get () in
   Hash.frame_invariant B.(loc_buffer s) hash_state h2 h3;
   Hash.frame_invariant_implies_footprint_preservation B.(loc_buffer s) hash_state h2 h3;
-  assert (preserves_freeable #a s h1 h3);
-  assert (invariant #a h3 s);
-  assert B.(modifies (footprint #a h1 s) h1 h3);
+
   // This seems to cause insurmountable difficulties. Puzzled.
   ST.lemma_equal_domains_trans h1 h2 h3;
 
   // AR: 07/22: same old `Seq.equal` and `==` story
   assert (Seq.equal (hashed #a h3 s) Seq.empty);
 
-  assert (ST.equal_domains h1 h3);
-  assert (preserves_freeable #a s h1 h3 /\
-    invariant #a h3 s /\
-    hashed h3 s == S.empty /\
-    footprint h1 s == footprint #a h3 s /\
-    B.(modifies (footprint #a h1 s) h1 h3))
+  assert (preserves_freeable #a s h1 h3);
+  //assert (hashed h3 s == S.empty);
+  assert (footprint h1 s == footprint #a h3 s);
+  assert (B.(modifies (footprint #a h1 s) h1 h3));
+  //assert (B.live h3 s);
+  //assert (B.(loc_disjoint (loc_addr_of_buffer s) (footprint_s h3 (B.deref h3 s))));
+  assert (invariant_s h3 (B.get h3 s 0))
+
 #pop-options
 
 /// We keep the total length at run-time, on 64 bits, but require that it abides

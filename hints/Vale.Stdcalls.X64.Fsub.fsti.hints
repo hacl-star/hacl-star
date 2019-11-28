@@ -8,7 +8,7 @@
       0,
       [ "@query" ],
       0,
-      "324922bb8fe1e421192c75f586bb64ea"
+      "df5298c4b1bca6bcacc5e21b8f0d5206"
     ],
     [
       "Vale.Stdcalls.X64.Fsub.as_normal_t",
@@ -17,7 +17,7 @@
       0,
       [ "@query" ],
       0,
-      "7731f5b14a6ef1e400106ab726460ce7"
+      "2c4f49efdedd1d2b90c3c36d5bb393f1"
     ],
     [
       "Vale.Stdcalls.X64.Fsub.dom",
@@ -29,7 +29,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "c15e8ab717097691a86668d9a3ae67fd"
+      "3085f5a846728a20622bc7b9b0adf72f"
     ],
     [
       "Vale.Stdcalls.X64.Fsub.fsub_lemma'",
@@ -108,7 +108,6 @@
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
-        "projection_inverse_Vale.X64.Machine_s.Reg_r",
         "projection_inverse_Vale.X64.Machine_s.Reg_rf",
         "projection_inverse_Vale.X64.State.Mkvale_state_vs_heap",
         "projection_inverse_Vale.X64.State.Mkvale_state_vs_ok",
@@ -145,7 +144,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt64@tok"
       ],
       0,
-      "368fb13bf9c7be824b2637f9f533eac7"
+      "6e9fc640fe8c5afeefde7bf123f873a4"
     ],
     [
       "Vale.Stdcalls.X64.Fsub.fsub_lemma",
@@ -211,7 +210,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt64@tok"
       ],
       0,
-      "52f09d9fc653d2b4421e47eda6ce217b"
+      "ac4746ad9228068d2957257db01740f3"
     ],
     [
       "Vale.Stdcalls.X64.Fsub.lowstar_fsub_t",
@@ -219,16 +218,20 @@
       1,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "eq2-interp", "equation_Prims.eq2",
+        "@MaxIFuel_assumption",
+        "@fuel_correspondence_FStar.List.Tot.Base.length.fuel_instrumented",
+        "@query", "eq2-interp", "equation_Prims.eq2",
         "equation_Prims.eqtype", "equation_Prims.squash",
+        "equation_Vale.Interop.Base.arg",
         "equation_Vale.X64.Machine_Semantics_s.ins",
         "equation_Vale.X64.Machine_Semantics_s.ocmp",
         "function_token_typing_Vale.X64.MemoryAdapters.ins_equiv",
         "function_token_typing_Vale.X64.MemoryAdapters.ocmp_equiv",
+        "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c"
       ],
       0,
-      "1e19fe890694799aa218185627e79453"
+      "29d1bbbdd1c619ef3b5665f7d07ba8b7"
     ]
   ]
 ]

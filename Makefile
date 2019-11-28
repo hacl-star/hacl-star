@@ -144,7 +144,7 @@ mozilla-ci-unstaged: compile-mozilla test-c
 # Not reusing the -staged automatic target so as to export NOSHORTLOG
 ci:
 	tools/blast-staticconfig.sh wasm
-	EVERCRYPT_CONFIG=wasm $(MAKE) wasm-staged
+	EVERCRYPT_CONFIG=wasm NOSHORTLOG=1 $(MAKE) wasm-staged
 	tools/blast-staticconfig.sh
 	NOSHORTLOG=1 $(MAKE) vale-fst
 	FSTAR_DEPEND_FLAGS="--warn_error +285" NOSHORTLOG=1 $(MAKE) all-unstaged test-unstaged
@@ -616,7 +616,7 @@ REQUIRED_FLAGS	=\
   $(VALE_BUNDLES) \
   -library 'Vale.Stdcalls.*' \
   -no-prefix 'Vale.Stdcalls.*' \
-  -static-header 'Vale_Inline' \
+  -static-header 'Vale.Inline.*' \
   -library 'Vale.Inline.X64.Fadd_inline' \
   -library 'Vale.Inline.X64.Fmul_inline' \
   -library 'Vale.Inline.X64.Fswap_inline' \

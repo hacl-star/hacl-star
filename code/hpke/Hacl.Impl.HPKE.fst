@@ -382,7 +382,6 @@ val sealBase_aux
      (info: lbuffer uint8 infolen)
      (output: lbuffer uint8 (size (v mlen + S.size_dh_public cs + 16)))
      (zz:key_dh_public cs)
-     (pkR': key_dh_public cs)
      (k:key_aead cs)
      (n:nonce_aead cs) :
      ST unit
@@ -391,26 +390,25 @@ val sealBase_aux
           Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
          live h0 output /\ live h0 skE /\ live h0 pkR /\
          live h0 m /\ live h0 info /\
-         live h0 zz /\ live h0 pkR' /\ live h0 k /\ live h0 n /\
+         live h0 zz /\ live h0 k /\ live h0 n /\
          disjoint output info /\ disjoint output m /\ disjoint output skE /\
-         disjoint zz skE /\ disjoint zz pkR /\ disjoint pkR' skE /\ disjoint pkR' pkR /\ disjoint zz pkR' /\
-         disjoint info zz /\ disjoint info pkR' /\ disjoint m zz /\ disjoint m pkR' /\
+         disjoint zz skE /\ disjoint zz pkR /\
+         disjoint info zz /\ disjoint m zz /\
          disjoint info k /\ disjoint info n /\ disjoint m n /\ disjoint k m /\
-         disjoint output pkR' /\ disjoint output k /\ disjoint output n /\ disjoint k n)
+         disjoint output pkR /\ disjoint output k /\ disjoint output n /\ disjoint k n)
        (ensures fun h0 _ h1 ->
-         modifies (loc zz |+| loc pkR' |+| loc k |+| loc n |+| loc output) h0 h1 /\
+         modifies (loc zz |+| loc k |+| loc n |+| loc output) h0 h1 /\
          as_seq h1 output `Seq.equal` S.sealBase cs (as_seq h0 skE) (as_seq h0 pkR) (as_seq h0 m) (as_seq h0 info))
 
 #push-options "--z3rlimit 400"
 
 noextract
 [@ Meta.Attribute.inline_]
-let sealBase_aux #cs skE pkR mlen m infolen info output zz pkR' k n =
+let sealBase_aux #cs skE pkR mlen m infolen info output zz k n =
   assert (v (mlen +. 16ul) == v mlen + 16);
   assert (S.size_dh_public cs + v (mlen +. 16ul) == length output);
-  encap zz pkR' skE pkR;
   let pkE:key_dh_public cs = sub output 0ul (nsize_dh_public cs) in
-  setupBaseI pkE k n skE pkR' infolen info;
+  setupBaseI pkE k n skE pkR infolen info;
   let dec = sub output (nsize_dh_public cs) (mlen +. 16ul) in
   AEAD.aead_encrypt #cs k n infolen info mlen m dec;
   let h2 = get() in
@@ -422,10 +420,9 @@ let sealBase #cs skE pkR mlen m infolen info output =
   push_frame();
   (**) let h0 = get() in
   let zz = create (nsize_dh_public cs) (u8 0) in
-  let pkR' = create (nsize_dh_public cs) (u8 0) in
   let k = create (nsize_aead_key cs) (u8 0) in
   let n = create (nsize_aead_nonce cs) (u8 0) in
-  sealBase_aux #cs skE pkR mlen m infolen info output zz pkR' k n;
+  sealBase_aux #cs skE pkR mlen m infolen info output zz k n;
   (**) let h1 = get() in
   pop_frame();
   (**) let hf = get() in
@@ -436,7 +433,6 @@ let sealBase #cs skE pkR mlen m infolen info output =
 noextract
 val openBase_aux
      (#cs:S.ciphersuite)
-     (pkE: key_dh_public cs)
      (skR: key_dh_secret cs)
      (inputlen: size_t{S.size_dh_public cs + S.size_aead_tag cs <= v inputlen /\ v inputlen <= max_size_t})
      (input:lbuffer uint8 inputlen)
@@ -449,18 +445,18 @@ val openBase_aux
      ST UInt32.t
        (requires fun h0 ->
         (S.curve_of_cs cs = Spec.Agile.DH.DH_Curve25519 ==>
-          Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
-         live h0 output /\ live h0 pkE /\ live h0 skR /\
+         Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
+         live h0 output /\ live h0 skR /\
          live h0 input /\ live h0 info /\
          live h0 zz /\ live h0 k /\ live h0 n /\
          disjoint output info /\ disjoint output input /\
-         disjoint zz pkE /\ disjoint zz skR /\
+         disjoint zz skR /\
          disjoint info zz /\ disjoint input zz /\
          disjoint info k /\ disjoint info n /\ disjoint input n /\ disjoint k input /\
          disjoint output k /\ disjoint output n /\ disjoint k n)
        (ensures fun h0 z h1 ->
          modifies (loc zz |+| loc k |+| loc n |+| loc output) h0 h1 /\
-         (let plain = S.openBase cs (as_seq h0 pkE) (as_seq h0 skR) (as_seq h0 input) (as_seq h0 info) in
+         (let plain = S.openBase cs (as_seq h0 skR) (as_seq h0 input) (as_seq h0 info) in
          match z with
          | 0ul -> Some? plain /\ as_seq h1 output `Seq.equal` Some?.v plain
          | 1ul -> None? plain
@@ -468,14 +464,13 @@ val openBase_aux
 
 noextract
 [@ Meta.Attribute.inline_]
-let openBase_aux #cs pkE skR inputlen input infolen info output zz k n =
+let openBase_aux #cs skR inputlen input infolen info output zz k n =
   let pkE = sub input 0ul (nsize_dh_public cs) in
   let clen = inputlen -. nsize_dh_public cs in
   assert (v (clen -. 16ul) <= S.max_length cs);
   assert (v (clen -. 16ul) + 16 <= max_size_t);
   assert (length output == v (clen -. 16ul));
   let c = sub input (nsize_dh_public cs) clen in
-  decap zz pkE skR;
   setupBaseR k n pkE skR infolen info;
   AEAD.aead_decrypt #cs k n infolen info (clen -. 16ul) output c
 
@@ -485,6 +480,6 @@ let openBase #cs pkE skR mlen m infolen info output =
   let zz = create (nsize_dh_public cs) (u8 0) in
   let k = create (nsize_aead_key cs) (u8 0) in
   let n = create (nsize_aead_nonce cs) (u8 0) in
-  let z = openBase_aux #cs pkE skR mlen m infolen info output zz k n in
+  let z = openBase_aux #cs skR mlen m infolen info output zz k n in
   pop_frame();
   z

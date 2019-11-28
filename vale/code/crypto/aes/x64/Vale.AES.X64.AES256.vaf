@@ -61,7 +61,7 @@ procedure KeyExpansionRoundEven256(
     requires/ensures
         validDstAddrs128(mem, rdx, dst, 15, memTaint, Secret);
     requires
-        aesni_enabled && avx_enabled;
+        aesni_enabled && avx_enabled && sse_enabled;
         1 <= round < 14;
         (round + 1) % 2 == 0;
         rcon == aes_rcon((round + 1) / 2 - 1);
@@ -104,7 +104,7 @@ procedure KeyExpansionRoundOdd256(
     requires/ensures
         validDstAddrs128(mem, rdx, dst, 15, memTaint, Secret);
     requires
-        aesni_enabled && avx_enabled;
+        aesni_enabled && avx_enabled && sse_enabled;
         1 <= round < 14;
         (round + 1) % 2 != 0;
         //rcon == aes_rcon((round + 1) / 2 - 1);
@@ -147,7 +147,7 @@ procedure KeyExpansionRoundUnrolledRecursive256(
     requires/ensures
         validDstAddrs128(mem, rdx, dst, 15, memTaint, Secret);
     requires
-        aesni_enabled && avx_enabled;
+        aesni_enabled && avx_enabled && sse_enabled;
         0 < n <= 14;
         is_aes_key_LE(AES_256, key);
         xmm1 == expand_key_256(key, 0);
@@ -191,7 +191,7 @@ procedure KeyExpansion256Stdcall(
         key_expansion_ptr := if win then rdx else rsi;
         key := make_AES256_key(buffer128_read(input_key_b, 0, mem), buffer128_read(input_key_b, 1, mem));
     requires/ensures
-        aesni_enabled && avx_enabled;
+        aesni_enabled && avx_enabled && sse_enabled;
         buffers_disjoint128(input_key_b, output_key_expansion_b);
         validSrcAddrs128(mem, key_ptr, input_key_b, 2, memTaint, Secret);
         validDstAddrs128(mem, key_expansion_ptr, output_key_expansion_b, 15, memTaint, Secret);
@@ -242,7 +242,7 @@ procedure AES256EncryptRound(
     modifies
         xmm0; xmm2; efl;
     requires
-        aesni_enabled;
+        aesni_enabled && sse_enabled;
         1 <= n < 14 <= length(round_keys);
         xmm0 == rounds(init, round_keys, #nat(n - 1));
         r8 == buffer_addr(keys_buffer, mem);
@@ -268,7 +268,7 @@ procedure AES256EncryptBlock(
     modifies
         xmm0; xmm2; efl;
     requires
-        aesni_enabled;
+        aesni_enabled && sse_enabled;
         is_aes_key_LE(AES_256, key);
         length(round_keys) == 15;
         round_keys == key_to_round_keys_LE(AES_256, key);
@@ -323,7 +323,7 @@ procedure AES256EncryptBlockStdcall(
         input_ptr := if win then rdx else rsi;
         expanded_key_ptr := if win then r8 else rdx;
     requires
-        aesni_enabled;
+        aesni_enabled && sse_enabled;
         is_aes_key_LE(AES_256, key);
         buffer128_read(input_buffer, 0, mem) == input;
         expanded_key_ptr == buffer_addr(keys_buffer, mem);

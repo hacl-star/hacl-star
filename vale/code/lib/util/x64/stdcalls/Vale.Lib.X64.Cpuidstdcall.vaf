@@ -252,3 +252,138 @@ procedure check_avx2_stdcall(inline win:bool)
 {
         check_avx2_support();
 }
+
+procedure check_movbe_stdcall(inline win:bool)
+    {:public}
+    {:quick}
+    {:exportSpecs}
+    requires
+    ensures
+        rsp == old(rsp);
+
+        win ==>  rbx == old(rbx);
+        win ==>  rbp == old(rbp);
+        win ==>  rdi == old(rdi);
+        win ==>  rsi == old(rsi);
+        win ==>  r12 == old(r12);
+        win ==>  r13 == old(r13);
+        win ==>  r14 == old(r14);
+        win ==>  r15 == old(r15);
+        !win ==>  rbx == old(rbx);
+        !win ==>  rbp == old(rbp);
+        !win ==>  r12 == old(r12);
+        !win ==>  r13 == old(r13);
+        !win ==>  r14 == old(r14);
+        !win ==>  r15 == old(r15);
+        win ==>  xmm6 == old(xmm6);
+        win ==>  xmm7 == old(xmm7);
+        win ==>  xmm8 == old(xmm8);
+        win ==>  xmm9 == old(xmm9);
+        win ==>  xmm10 == old(xmm10);
+        win ==>  xmm11 == old(xmm11);
+        win ==>  xmm12 == old(xmm12);
+        win ==>  xmm13 == old(xmm13);
+        win ==>  xmm14 == old(xmm14);
+        win ==>  xmm15 == old(xmm15);
+
+        modifies_none(old(mem), mem);
+
+        rax != 0 ==> movbe_enabled;
+    reads memTaint;
+    modifies
+        rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
+        xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; xmm7; xmm8; xmm9; xmm10; xmm11; xmm12; xmm13; xmm14; xmm15;
+        efl; mem;
+{
+        check_movbe_support();
+}
+
+procedure check_sse_stdcall(inline win:bool)
+    {:public}
+    {:quick}
+    {:exportSpecs}
+    requires
+    ensures
+        rsp == old(rsp);
+
+        win ==>  rbx == old(rbx);
+        win ==>  rbp == old(rbp);
+        win ==>  rdi == old(rdi);
+        win ==>  rsi == old(rsi);
+        win ==>  r12 == old(r12);
+        win ==>  r13 == old(r13);
+        win ==>  r14 == old(r14);
+        win ==>  r15 == old(r15);
+        !win ==>  rbx == old(rbx);
+        !win ==>  rbp == old(rbp);
+        !win ==>  r12 == old(r12);
+        !win ==>  r13 == old(r13);
+        !win ==>  r14 == old(r14);
+        !win ==>  r15 == old(r15);
+        win ==>  xmm6 == old(xmm6);
+        win ==>  xmm7 == old(xmm7);
+        win ==>  xmm8 == old(xmm8);
+        win ==>  xmm9 == old(xmm9);
+        win ==>  xmm10 == old(xmm10);
+        win ==>  xmm11 == old(xmm11);
+        win ==>  xmm12 == old(xmm12);
+        win ==>  xmm13 == old(xmm13);
+        win ==>  xmm14 == old(xmm14);
+        win ==>  xmm15 == old(xmm15);
+
+        modifies_none(old(mem), mem);
+
+        rax != 0 ==> sse_enabled;
+    reads memTaint;
+    modifies
+        rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
+        xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; xmm7; xmm8; xmm9; xmm10; xmm11; xmm12; xmm13; xmm14; xmm15;
+        efl; mem;
+{
+        check_sse_support();
+}
+
+procedure check_rdrand_stdcall(inline win:bool)
+    {:public}
+    {:quick}
+    {:exportSpecs}
+    requires
+    ensures
+        rsp == old(rsp);
+
+        win ==>  rbx == old(rbx);
+        win ==>  rbp == old(rbp);
+        win ==>  rdi == old(rdi);
+        win ==>  rsi == old(rsi);
+        win ==>  r12 == old(r12);
+        win ==>  r13 == old(r13);
+        win ==>  r14 == old(r14);
+        win ==>  r15 == old(r15);
+        !win ==>  rbx == old(rbx);
+        !win ==>  rbp == old(rbp);
+        !win ==>  r12 == old(r12);
+        !win ==>  r13 == old(r13);
+        !win ==>  r14 == old(r14);
+        !win ==>  r15 == old(r15);
+        win ==>  xmm6 == old(xmm6);
+        win ==>  xmm7 == old(xmm7);
+        win ==>  xmm8 == old(xmm8);
+        win ==>  xmm9 == old(xmm9);
+        win ==>  xmm10 == old(xmm10);
+        win ==>  xmm11 == old(xmm11);
+        win ==>  xmm12 == old(xmm12);
+        win ==>  xmm13 == old(xmm13);
+        win ==>  xmm14 == old(xmm14);
+        win ==>  xmm15 == old(xmm15);
+
+        modifies_none(old(mem), mem);
+
+        rax != 0 ==> rdrand_enabled;
+    reads memTaint;
+    modifies
+        rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
+        xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; xmm7; xmm8; xmm9; xmm10; xmm11; xmm12; xmm13; xmm14; xmm15;
+        efl; mem;
+{
+        check_rdrand_support();
+}

@@ -1,14 +1,16 @@
-#HACL_HOME = ..
+all: $(HACL_HOME)/obj/hacl.cmxa $(HACL_HOME)/obj/libhacl.cmxa
 
-all: $(HACL_HOME)/obj/libhacl.cmxa
-
-include $(HACL_HOME)/code/Makefile.local
+include $(HACL_HOME)/Makefile.local
 
 # By default, we process all the files in the current directory. Here, we
 # *extend* the set of relevant files with the alternative and experimental folders.
 FSTAR_ROOTS += $(wildcard $(HACL_HOME)/lib/*.fst) $(wildcard alternative/*.fst) $(wildcard experimental/*.fst)
 
-OCAMLMKLIB = ocamlfind mklib -package fstarlib
+$(HACL_HOME)/obj/Lib_RandomSequence.cmx:
+	$(OCAMLOPT) -package cryptokit $(FSTAR_HOME)/bin/fstarlib/fstarlib.cmxa -c $(HACL_HOME)/lib/ml/Lib_RandomSequence.ml -o $@
 
-$(HACL_HOME)/obj/libhacl.cmxa: $(ALL_CMX_FILES)
-	ocamlmklib $^ -o $(HACL_HOME)/obj/libhacl
+$(HACL_HOME)/obj/hacl.cmxa: $(ALL_CMX_FILES) $(HACL_HOME)/obj/Lib_RandomSequence.cmx
+	ocamlfind mklib $^ -o $(HACL_HOME)/obj/hacl
+
+$(HACL_HOME)/obj/libhacl.cmxa: $(ALL_CMX_FILES) $(HACL_HOME)/obj/Lib_RandomSequence.cmx
+	ocamlfind mklib $^ -o $(HACL_HOME)/obj/libhacl

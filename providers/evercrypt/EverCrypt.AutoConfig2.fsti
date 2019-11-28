@@ -28,6 +28,9 @@ val has_avx2: getter Vale.X64.CPU_Features_s.avx2_enabled
 val has_avx: getter Vale.X64.CPU_Features_s.avx_enabled
 val has_bmi2: getter Vale.X64.CPU_Features_s.bmi2_enabled
 val has_adx: getter Vale.X64.CPU_Features_s.adx_enabled
+val has_sse: getter Vale.X64.CPU_Features_s.sse_enabled
+val has_movbe: getter Vale.X64.CPU_Features_s.movbe_enabled
+val has_rdrand: getter Vale.X64.CPU_Features_s.rdrand_enabled
 
 val wants_vale: unit ->
   Stack bool (requires fun _ -> True) (ensures fun h0 _ h1 -> B.(modifies loc_none h0 h1))
@@ -74,6 +77,9 @@ val disable_adx: disabler
 val disable_shaext: disabler
 val disable_aesni: disabler
 val disable_pclmulqdq: disabler
+val disable_sse: disabler
+val disable_movbe: disabler
+val disable_rdrand: disabler
 val disable_vale: disabler
 val disable_hacl: disabler
 val disable_openssl: disabler

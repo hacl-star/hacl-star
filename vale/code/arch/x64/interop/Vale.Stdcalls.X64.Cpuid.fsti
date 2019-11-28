@@ -268,6 +268,150 @@ let lowstar_avx2_t =
     _
     (W.mk_prediction code_avx2 dom [] (avx2_lemma code_avx2 IA.win))
 
+(* Need to rearrange the order of arguments *)
+[@__reduce__] noextract
+let movbe_pre : VSig.vale_pre dom =
+  fun (c:V.va_code)
+    (va_s0:V.va_state) ->
+      VC.va_req_check_movbe_stdcall c va_s0 IA.win
+
+[@__reduce__] noextract
+let movbe_post : VSig.vale_post dom =
+  fun (c:V.va_code)
+    (va_s0:V.va_state)
+    (va_s1:V.va_state)
+    (f:V.va_fuel) ->
+      VC.va_ens_check_movbe_stdcall c va_s0 IA.win va_s1 f
+
+(* The vale lemma doesn't quite suffice to prove the modifies clause
+   expected of the interop layer *)
+[@__reduce__] noextract
+let movbe_lemma'
+    (code:V.va_code)
+    (_win:bool)
+    (va_s0:V.va_state)
+ : Ghost (V.va_state & V.va_fuel)
+     (requires
+       movbe_pre code va_s0)
+     (ensures (fun (va_s1, f) ->
+       V.eval_code code va_s0 f va_s1 /\
+       VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
+       movbe_post code va_s0 va_s1 f))
+ = VC.va_lemma_check_movbe_stdcall code va_s0 IA.win
+
+(* Prove that vm_lemma' has the required type *)
+noextract
+let movbe_lemma = as_t #(VSig.vale_sig_stdcall movbe_pre movbe_post) movbe_lemma'
+noextract
+let code_movbe = VC.va_code_check_movbe_stdcall IA.win
+
+(* Here's the type expected for the check_movbe wrapper *)
+[@__reduce__] noextract
+let lowstar_movbe_t =
+  IX64.as_lowstar_sig_t_weak_stdcall
+    code_movbe
+    dom
+    []
+    _
+    _
+    (W.mk_prediction code_movbe dom [] (movbe_lemma code_movbe IA.win))
+
+(* Need to rearrange the order of arguments *)
+[@__reduce__] noextract
+let sse_pre : VSig.vale_pre dom =
+  fun (c:V.va_code)
+    (va_s0:V.va_state) ->
+      VC.va_req_check_sse_stdcall c va_s0 IA.win
+
+[@__reduce__] noextract
+let sse_post : VSig.vale_post dom =
+  fun (c:V.va_code)
+    (va_s0:V.va_state)
+    (va_s1:V.va_state)
+    (f:V.va_fuel) ->
+      VC.va_ens_check_sse_stdcall c va_s0 IA.win va_s1 f
+
+(* The vale lemma doesn't quite suffice to prove the modifies clause
+   expected of the interop layer *)
+[@__reduce__] noextract
+let sse_lemma'
+    (code:V.va_code)
+    (_win:bool)
+    (va_s0:V.va_state)
+ : Ghost (V.va_state & V.va_fuel)
+     (requires
+       sse_pre code va_s0)
+     (ensures (fun (va_s1, f) ->
+       V.eval_code code va_s0 f va_s1 /\
+       VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
+       sse_post code va_s0 va_s1 f))
+ = VC.va_lemma_check_sse_stdcall code va_s0 IA.win
+
+(* Prove that vm_lemma' has the required type *)
+noextract
+let sse_lemma = as_t #(VSig.vale_sig_stdcall sse_pre sse_post) sse_lemma'
+noextract
+let code_sse = VC.va_code_check_sse_stdcall IA.win
+
+(* Here's the type expected for the check_sse wrapper *)
+[@__reduce__] noextract
+let lowstar_sse_t =
+  IX64.as_lowstar_sig_t_weak_stdcall
+    code_sse
+    dom
+    []
+    _
+    _
+    (W.mk_prediction code_sse dom [] (sse_lemma code_sse IA.win))
+
+(* Need to rearrange the order of arguments *)
+[@__reduce__] noextract
+let rdrand_pre : VSig.vale_pre dom =
+  fun (c:V.va_code)
+    (va_s0:V.va_state) ->
+      VC.va_req_check_rdrand_stdcall c va_s0 IA.win
+
+[@__reduce__] noextract
+let rdrand_post : VSig.vale_post dom =
+  fun (c:V.va_code)
+    (va_s0:V.va_state)
+    (va_s1:V.va_state)
+    (f:V.va_fuel) ->
+      VC.va_ens_check_rdrand_stdcall c va_s0 IA.win va_s1 f
+
+(* The vale lemma doesn't quite suffice to prove the modifies clause
+   expected of the interop layer *)
+[@__reduce__] noextract
+let rdrand_lemma'
+    (code:V.va_code)
+    (_win:bool)
+    (va_s0:V.va_state)
+ : Ghost (V.va_state & V.va_fuel)
+     (requires
+       rdrand_pre code va_s0)
+     (ensures (fun (va_s1, f) ->
+       V.eval_code code va_s0 f va_s1 /\
+       VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
+       rdrand_post code va_s0 va_s1 f))
+ = VC.va_lemma_check_rdrand_stdcall code va_s0 IA.win
+
+(* Prove that vm_lemma' has the required type *)
+noextract
+let rdrand_lemma = as_t #(VSig.vale_sig_stdcall rdrand_pre rdrand_post) rdrand_lemma'
+noextract
+let code_rdrand = VC.va_code_check_rdrand_stdcall IA.win
+
+(* Here's the type expected for the check_rdrand wrapper *)
+[@__reduce__] noextract
+let lowstar_rdrand_t =
+  IX64.as_lowstar_sig_t_weak_stdcall
+    code_rdrand
+    dom
+    []
+    _
+    _
+    (W.mk_prediction code_rdrand dom [] (rdrand_lemma code_rdrand IA.win))
+
 [@ (CCConv "stdcall") ]
 val check_aesni : normal lowstar_aesni_t
 
@@ -282,3 +426,12 @@ val check_avx : normal lowstar_avx_t
 
 [@ (CCConv "stdcall") ]
 val check_avx2 : normal lowstar_avx2_t
+
+[@ (CCConv "stdcall") ]
+val check_movbe : normal lowstar_movbe_t
+
+[@ (CCConv "stdcall") ]
+val check_sse : normal lowstar_sse_t
+
+[@ (CCConv "stdcall") ]
+val check_rdrand : normal lowstar_rdrand_t

@@ -150,7 +150,7 @@ procedure MulAdd_step(
     modifies
         efl; Ii; Z0; Z2; Z3; Xi;
     requires
-        pclmulqdq_enabled && avx_enabled;
+        pclmulqdq_enabled && avx_enabled && sse_enabled;
         m < 6;
         length(data) >= 6;
         //  a0   a1   a2   a3   b    c
@@ -263,7 +263,7 @@ procedure MulAdd_unroll_i(
     modifies
         efl; scratch_ptr; Ii; T1; T2; Hkey; Z0; Z1; Z2; Z3;
     requires
-        pclmulqdq_enabled && avx_enabled;
+        pclmulqdq_enabled && avx_enabled && sse_enabled;
         length(data) >= n;
         0 <= m < n <= scratch_len;
         is_first <==> m == 0;
@@ -368,7 +368,7 @@ procedure MulAdd_unroll_n(
     modifies
         efl; scratch_ptr; Ii; T1; T2; Hkey; Z0; Z1; Z2; Z3; Xi;
     requires
-        pclmulqdq_enabled && avx_enabled;
+        pclmulqdq_enabled && avx_enabled && sse_enabled;
         exactly6 ==> n == 6;
         !exactly6 ==> 1 <= n < 6;
         n <= scratch_len;
@@ -445,7 +445,7 @@ procedure MulAdd_unroll(
     modifies
         efl; rax; Ii; T1; T2; Hkey; Z0; Z1; Z2; Z3; Xi;
     requires
-        pclmulqdq_enabled && avx_enabled;
+        pclmulqdq_enabled && avx_enabled && sse_enabled;
         length(data) == 6;
         hkeys_b_powers(hkeys_b, mem, memTaint, Xip - 0x20, h);
         scratch_b_data(true, true, scratch_b, 8, 5, mem, memTaint, rbp, data);
@@ -706,7 +706,7 @@ procedure GhashUnroll_n(
     modifies
         efl; scratch_reg; scratch_ptr; Ii; T1; T2; Hkey; Z0; Z1; Z2; Z3; Xi;
     requires
-        pclmulqdq_enabled && avx_enabled;
+        pclmulqdq_enabled && avx_enabled && sse_enabled;
         exactly6 ==> n == 6;
         !exactly6 ==> 1 <= n < 6;
         n <= scratch_len;
@@ -751,7 +751,7 @@ procedure Ghash_register(
     modifies
         efl; scratch_ptr; Ii; T1; T2; Hkey; Z0; Z1; Z2; Z3; Xi;
     requires
-        pclmulqdq_enabled && avx_enabled;
+        pclmulqdq_enabled && avx_enabled && sse_enabled;
         hkeys_b_powers(hkeys_b, mem, memTaint, Xip - 0x20, h);
         of_quad32(Xi) == prev;
     ensures
@@ -816,7 +816,7 @@ procedure Ghash_buffer_loop_body(
         scratch_ptr == in_ptr + 0x10 * index;
 
         // Copy over preconditions
-        pclmulqdq_enabled && avx_enabled;
+        pclmulqdq_enabled && avx_enabled && sse_enabled;
         hkeys_b_powers(hkeys_b, mem, memTaint, Xip - 0x20, h);
         validSrcAddrs128(mem, in_ptr, in_b, len, memTaint, Secret);
         buffer_length(in_b) == old_len;
@@ -861,20 +861,20 @@ procedure Ghash_buffer(
         ghost y_prev:quad32
         )
     {:public}
-    {:quick exportOnly}
+    {:quick}
     lets
         Xip @= r9; len @= rdx; scratch_ptr @= r11; in_ptr @= rdi; scratch_reg @= r10;
         Ii @= xmm0; T1 @= xmm1; T2 @= xmm2; Hkey @= xmm3;
         Z0 @= xmm4; Z1 @= xmm5; Z2 @= xmm6; Z3 @= xmm7;
         Xi @= xmm8; rev_mask @= xmm9;
-        h := of_quad32(reverse_bytes_quad32(h_LE));
+        h:poly := of_quad32(reverse_bytes_quad32(h_LE));
         
     reads
         Xip; in_ptr; rev_mask; mem; memTaint; 
     modifies
         len; scratch_ptr; scratch_reg; efl; Ii; T1; T2; Hkey; Z0; Z1; Z2; Z3; Xi;
     requires
-        pclmulqdq_enabled && avx_enabled;
+        pclmulqdq_enabled && avx_enabled && sse_enabled;
         hkeys_b_powers(hkeys_b, mem, memTaint, Xip - 0x20, h);
         validSrcAddrs128(mem, in_ptr, in_b, len, memTaint, Secret);
         buffer_length(in_b) == len;
@@ -895,7 +895,7 @@ procedure Ghash_buffer(
             scratch_ptr == in_ptr + 0x10 * index;
 
             // Copy over preconditions
-            pclmulqdq_enabled && avx_enabled;
+            pclmulqdq_enabled && avx_enabled && sse_enabled;
             hkeys_b_powers(hkeys_b, mem, memTaint, Xip - 0x20, h);
             validSrcAddrs128(mem, in_ptr, in_b, len, memTaint, Secret);
             buffer_length(in_b) == old(len);
@@ -903,7 +903,8 @@ procedure Ghash_buffer(
             Xi == reverse_bytes_quad32(ghash_incremental0(h_LE, y_prev, slice(s128(mem, in_b), 0, index)));
             rev_mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
             old(len) == 0 ==> Xi == old(Xi);
-            
+            h == of_quad32(reverse_bytes_quad32(h_LE));
+
         decreases
             len;
     {
@@ -952,7 +953,7 @@ procedure GhashUnroll6x(
     modifies
         efl; rax; Ii; T1; T2; Hkey; Z0; Z1; Z2; Z3; Xi;
     requires
-        pclmulqdq_enabled && avx_enabled;
+        pclmulqdq_enabled && avx_enabled && sse_enabled;
         length(data) == 6;
         hkeys_b_powers(hkeys_b, mem, memTaint, Xip - 0x20, h);
         scratch_b_data(true, true, scratch_b, 8, 5, mem, memTaint, rbp, data);

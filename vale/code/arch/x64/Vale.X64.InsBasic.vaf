@@ -409,6 +409,42 @@ procedure Cpuid_Avx2()
     cpuid_features();
 }
 
+procedure Cpuid_Sse()
+    {:public}
+    {:quick exportOnly}
+    {:instruction mk_ins(make_instr(I.ins_Cpuid))}
+    requires rax = 1;
+    modifies rax; rbx; rcx; rdx;
+    ensures 
+      (iand64(rdx, 0x4000000) > 0) == sse2_enabled;
+      (iand64(rcx, 0x80000) > 0) == sse4_1_enabled;
+      (iand64(rcx, 0x200) > 0) == ssse3_enabled;
+{
+    cpuid_features();
+}
+
+procedure Cpuid_Movbe()
+    {:public}
+    {:quick exportOnly}
+    {:instruction mk_ins(make_instr(I.ins_Cpuid))}
+    requires rax = 1;
+    modifies rax; rbx; rcx; rdx;
+    ensures (iand64(rcx, 0x400000) > 0) == movbe_enabled;
+{
+    cpuid_features();
+}
+
+procedure Cpuid_Rdrand()
+    {:public}
+    {:quick exportOnly}
+    {:instruction mk_ins(make_instr(I.ins_Cpuid))}
+    requires rax = 1;
+    modifies rax; rbx; rcx; rdx;
+    ensures (iand64(rcx, 0x40000000) > 0) == rdrand_enabled;
+{
+    cpuid_features();
+}
+
 procedure Nat64Equal(out dst:reg_opr64, inout src:reg_opr64)
     {:public}
     {:quick exportOnly}

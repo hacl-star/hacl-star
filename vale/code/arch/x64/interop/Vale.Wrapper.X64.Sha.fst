@@ -184,7 +184,7 @@ let simplify_le_bytes_to_hash_uint32 b h =
 let sha256_update ctx_b in_b num_val k_b =
   let h0 = get() in
   DV.length_eq (get_downview in_b);
-  Classical.forall_intro (bounded_buffer_addrs TUInt8 TUInt128 h0 in_b);
+  bounded_buffer_addrs_all TUInt8 TUInt128 h0 in_b;
   DV.length_eq (get_downview ctx_b);
   DV.length_eq (get_downview k_b);
   lemma_k_reqs_equiv k_b h0;

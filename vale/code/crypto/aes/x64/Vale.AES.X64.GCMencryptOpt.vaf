@@ -126,6 +126,8 @@ procedure Gctr_register(
     modifies
         icb; xmm1; xmm2; io; efl; r12;
     requires
+        sse_enabled;
+
         rev_mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
 
         // AES reqs
@@ -170,6 +172,8 @@ procedure Gctr_blocks128(
         ctr; tmp_in_ptr; tmp_out_ptr; xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; icb; one; mem; efl;
 
     requires
+        sse_enabled;
+
         // GCTR reqs
         buffers_disjoint128(keys_b, out_b);
         buffers_disjoint128(in_b, out_b) || in_b == out_b;
@@ -207,6 +211,8 @@ procedure Gctr_blocks128(
     Mov64(ctr, 0);
     while (ctr != len)
         invariant
+            sse_enabled;
+
             //////////////////// Basic indexing //////////////////////
             0 <= ctr <= len;
             tmp_in_ptr == in_ptr + 16 * ctr;
@@ -281,6 +287,8 @@ procedure Gcm_blocks128(
         xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; xmm7; hash; icb; one; mem; efl;
 
     requires
+        sse_enabled;
+
         // GCTR reqs
         buffers_disjoint128(keys_b, out_b);
         buffers_disjoint128(hkeys_b, out_b);
@@ -371,7 +379,7 @@ procedure Gcm_auth_bytes(ghost in_b:buffer128, ghost hkeys_b:buffer128, ghost h_
     modifies
         len; scratch_ptr; scratch_reg; efl; Ii; T1; T2; Hkey; Z0; Z1; Z2; Z3; hash;
     requires
-        pclmulqdq_enabled && avx_enabled;
+        pclmulqdq_enabled && avx_enabled && sse_enabled;
         hkeys_reqs_priv(s128(mem, hkeys_b), reverse_bytes_quad32(h_LE));
         validSrcAddrs128(mem, Xip - 0x20, hkeys_b, 8, memTaint, Secret);
 
@@ -409,6 +417,7 @@ procedure Gcm_make_length_quad()
     reads plain_num_bytes; auth_num_bytes;
     modifies result; rax; efl;
     requires
+        sse_enabled;
         8*plain_num_bytes < pow2_64;
         8*auth_num_bytes < pow2_64;
     ensures
@@ -434,7 +443,9 @@ procedure compute_pad_to_128_bits()
 
     reads num_bytes;
     modifies io; tmp; mask; efl;
-    requires 0 < num_bytes < 16;
+    requires
+      sse_enabled;
+      0 < num_bytes < 16;
     ensures
         let padded_bytes := pad_to_128_bits(slice(le_quad32_to_bytes(old(io)), 0, old(num_bytes)));
         length(padded_bytes) = 16 && io = le_bytes_to_quad32(padded_bytes);
@@ -509,7 +520,7 @@ procedure Ghash_extra_bytes(
 
     requires
         // GHash reqs
-        pclmulqdq_enabled && avx_enabled;
+        pclmulqdq_enabled && avx_enabled && sse_enabled;
         rev_mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
 
         hash == reverse_bytes_quad32(ghash_incremental0(h_LE, old_hash, completed_quads));
@@ -568,6 +579,8 @@ procedure Gcm_extra_bytes(
         tmp; extra; Ii; T1; T2; Hkey; Z0; Z1; Z2; Z3; hash; mem; efl; 
 
     requires
+        sse_enabled;
+
         // GCTR reqs
         buffers_disjoint128(keys_b, inout_b);
         buffers_disjoint128(hkeys_b, inout_b);
@@ -657,12 +670,14 @@ procedure Gcm_blocks_auth(
         Ii; T1; T2; Hkey; Z0; Z1; Z2; Z3; hash; rev_mask;
 
     requires
+        sse_enabled;
+
         // Valid buffers and pointers
         validSrcAddrs128(mem,     auth_ptr,     auth_b, auth_len, memTaint, Secret);
         validSrcAddrs128(mem,   abytes_ptr,   abytes_b,        1, memTaint, Secret);
         validSrcAddrs128(mem,   Xip - 0x20,    hkeys_b,        8, memTaint, Secret);
 
-            auth_ptr + 0x10*auth_len < pow2_64;
+        auth_ptr + 0x10*auth_len < pow2_64;
 
         buffer_length(auth_b) == auth_len;
         buffer_length(abytes_b) == 1;
@@ -772,6 +787,8 @@ procedure Compute_iv(
         rax; rbx; len; j0_ptr; num_bytes; extra_ptr; h_ptr; r10; r11; r12; r13; r14; r15; xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; xmm7; xmm8; xmm9; xmm11; mem; efl;
 
     requires
+        sse_enabled;
+
         validSrcAddrs128(mem, iv_ptr,    iv_b,       len, memTaint, Secret);
         validSrcAddrs128(mem, extra_ptr, iv_extra_b, 1,   memTaint, Secret);
         validDstAddrs128(mem, j0_ptr,    j0_b,       1,   memTaint, Secret);
@@ -920,6 +937,8 @@ procedure Gcm_blocks(
         mem; efl;
 
     requires
+        sse_enabled && movbe_enabled;
+
         // Valid buffers and pointers
         valid_stack_slot64(rsp + offset + 0, stack, Public, stackTaint);
         valid_stack_slot64(rsp + offset + 8, stack, Public, stackTaint);
@@ -1203,8 +1222,6 @@ procedure Gcm_blocks_wrapped(
         ghost round_keys:seq(quad32),
         ghost keys_b:buffer128,
         ghost hkeys_b:buffer128)
-    //{:quick exportOnly}
-    {:frame false}
     {:quick}
     lets
         auth_ptr @= rdi; auth_num_bytes @= rsi; auth_len @= rdx; keys_ptr @= rcx; scratch_ptr @= rbp;
@@ -1230,7 +1247,8 @@ procedure Gcm_blocks_wrapped(
         mem; efl;
 
     requires
-        ok;
+        sse_enabled && movbe_enabled;
+
         // Valid buffers and pointers
         valid_stack_slot64(rsp + offset + 0, stack, Public, stackTaint);
         valid_stack_slot64(rsp + offset + 8, stack, Public, stackTaint);
@@ -1306,12 +1324,6 @@ procedure Gcm_blocks_wrapped(
         iv_BE == compute_iv_BE(h_LE, iv);
 
     ensures
-        // Framing
-        ok;
-        rsp == old(rsp);
-        memTaint == old(memTaint);
-        stack == old(stack); 
-        stackTaint == old(stackTaint);
         modifies_mem(loc_union(loc_buffer(iv_b),
                      loc_union(loc_buffer(scratch_b),
                      loc_union(loc_buffer(out128x6_b),
@@ -1421,6 +1433,7 @@ procedure save_registers(inline win:bool)
     {:public}
     {:quick}
     requires
+        sse_enabled;
         rsp == init_rsp(stack);
     reads
         rbx; rbp; rdi; rsi; r12; r13; r14; r15;
@@ -1498,6 +1511,7 @@ procedure restore_registers(
     {:public}
     {:quick}
     requires
+        sse_enabled;
         old_rsp == init_rsp(stack);
         valid_stack_slot64s(rsp, 8 + (if win then 10*2 else 0), stack, Secret, stackTaint);
         rsp == old_rsp - 8 * (8 + (if win then 10*2 else 0));
@@ -1609,8 +1623,7 @@ procedure gcm_blocks_stdcall(
 
         ghost key:seq(nat32))
     {:public}
-    {:quick exportOnly}
-    {:frame false}
+    {:quick}
     {:exportSpecs}
     lets
         auth_ptr :=         if win then rcx else rdi;
@@ -1640,9 +1653,7 @@ procedure gcm_blocks_stdcall(
         xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; xmm7; xmm8; xmm9; xmm10; xmm11; xmm12; xmm13; xmm14; xmm15;
         mem; efl; stack; stackTaint;
     requires
-        // Manual framing
-        this.vs_ok;
-        aesni_enabled && pclmulqdq_enabled && avx_enabled;
+        aesni_enabled && pclmulqdq_enabled && avx_enabled && sse_enabled && movbe_enabled;
 
         rsp == init_rsp(stack);
 
@@ -1748,10 +1759,6 @@ procedure gcm_blocks_stdcall(
         iv_BE == compute_iv_BE(h_LE, iv);
 
     ensures
-        // Manual framing
-        this.vs_ok;
-        this.vs_memTaint == old(this.vs_memTaint);
-
         modifies_mem(loc_union(loc_buffer(tag_b),
                      loc_union(loc_buffer(iv_b),
                      loc_union(loc_buffer(scratch_b),
@@ -1837,7 +1844,7 @@ procedure gcm_blocks_stdcall(
     }
 
     Gcm_blocks_wrapped(alg,
-               if win then 224 + 56 else 64 + 8,
+               total_if(win, 224 + 56, 64 + 8),
                auth_b,
                abytes_b,
                in128x6_b,
@@ -1854,7 +1861,7 @@ procedure gcm_blocks_stdcall(
                hkeys_b);
 
     // Auth tag is still in hash (xmm8), so save it to memory
-    Load64_stack(r15, rsp, if win then 224 + 40 + 96 else 64 + 8 + 80);
+    Load64_stack(r15, rsp, total_if(win, 224 + 40 + 96, 64 + 8 + 80));
     Store128_buffer(r15, hash, 0, Secret, tag_b, 0);
 
     restore_registers(win, old(rsp), old(xmm6), old(xmm7), old(xmm8), old(xmm9), old(xmm10), old(xmm11), old(xmm12), old(xmm13), old(xmm14), old(xmm15));
@@ -1917,7 +1924,7 @@ procedure compute_iv_stdcall(
         0 < 8*num_bytes < pow2_64;
 
         // GCM
-        pclmulqdq_enabled && avx_enabled;
+        pclmulqdq_enabled && avx_enabled && sse_enabled;
         hkeys_reqs_pub(s128(mem, hkeys_b), reverse_bytes_quad32(h_LE));
 
         let iv_raw_quads := append(s128(mem, iv_b), s128(mem, iv_extra_b));

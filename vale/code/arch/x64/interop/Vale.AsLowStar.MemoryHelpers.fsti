@@ -277,8 +277,13 @@ val immbuffer_as_seq_reveal_tuint128
     (V.buffer128_as_seq va_s.VS.vs_heap (as_vale_immbuffer x)))
   [SMTPat (V.buffer128_as_seq va_s.VS.vs_heap (as_vale_immbuffer x))]
 
-val bounded_buffer_addrs (src t:base_typ) (h:HS.mem) (b:buf_t src t{B.live h b}) (s:ME.vale_heap) : Lemma
+val bounded_buffer_addrs_one (src t:base_typ) (h:HS.mem) (b:buf_t src t{B.live h b}) (s:ME.vale_heap) : Lemma
   (ME.buffer_addr #t (as_vale_buffer b) s + DV.length (get_downview b) < Vale.Def.Words_s.pow2_64)
+
+val bounded_buffer_addrs_all (src t:base_typ) (m:HS.mem) (b:buf_t src t{B.live m b}) : Lemma
+  (forall (h:ME.vale_heap) (vb:ME.buffer t).{:pattern ME.buffer_addr #t vb h}
+    vb == as_vale_buffer b ==>
+    ME.buffer_addr #t vb h + DV.length (get_downview b) < Vale.Def.Words_s.pow2_64)
 
 val same_down_up_buffer_length (src:base_typ) (b:buf_t src src) : Lemma
   (B.length b == DV.length (get_downview b) / view_n src)

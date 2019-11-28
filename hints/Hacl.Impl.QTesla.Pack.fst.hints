@@ -9,7 +9,9 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "b2t_def", "bool_inversion", "constructor_distinct_Lib.Buffer.MUT",
+        "Lib.IntTypes_interpretation_Tm_arrow_cd6e2af2c720a97ef71723e3dc123b88",
+        "b2t_def", "bool_inversion", "bool_typing",
+        "constructor_distinct_Lib.Buffer.MUT",
         "constructor_distinct_Lib.IntTypes.PUB",
         "constructor_distinct_Lib.IntTypes.S32",
         "constructor_distinct_Lib.IntTypes.U32",
@@ -39,10 +41,12 @@
         "equation_Lib.IntTypes.pub_int_v", "equation_Lib.IntTypes.range",
         "equation_Lib.IntTypes.uint8", "equation_Lib.IntTypes.unsigned",
         "equation_Lib.IntTypes.v", "equation_LowStar.Buffer.buffer",
-        "equation_LowStar.Buffer.trivial_preorder", "equation_Prims.abs",
+        "equation_LowStar.Buffer.trivial_preorder",
+        "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.abs",
         "equation_Prims.nat", "equation_Spec.QTesla.Params.params_k",
         "equation_Spec.QTesla.Params.params_n",
         "function_token_typing_FStar.Int32.t",
+        "function_token_typing_Lib.IntTypes.mul_mod",
         "function_token_typing_Lib.IntTypes.pub_int32",
         "function_token_typing_Lib.IntTypes.uint8", "int_inversion",
         "int_typing", "lemma_FStar.HyperStack.ST.lemma_equal_domains_trans",
@@ -50,7 +54,7 @@
         "lemma_Hacl.Impl.QTesla.Globals.frame_is_poly_sampler_output",
         "lemma_Lib.IntTypes.add_mod_lemma", "lemma_Lib.IntTypes.div_lemma",
         "lemma_Lib.IntTypes.lt_lemma", "lemma_Lib.IntTypes.mul_mod_lemma",
-        "lemma_Lib.IntTypes.v_mk_int",
+        "lemma_Lib.IntTypes.v_injective", "lemma_Lib.IntTypes.v_mk_int",
         "lemma_LowStar.Monotonic.Buffer.address_liveness_insensitive_buffer",
         "lemma_LowStar.Monotonic.Buffer.length_null_1",
         "lemma_LowStar.Monotonic.Buffer.length_null_2",
@@ -86,16 +90,18 @@
         "typing_Hacl.Impl.QTesla.Params.params_k",
         "typing_Hacl.Impl.QTesla.Params.params_n",
         "typing_Lib.Buffer.length", "typing_Lib.Buffer.loc",
+        "typing_Lib.IntTypes.bits", "typing_Lib.IntTypes.div",
         "typing_Lib.IntTypes.minint", "typing_Lib.IntTypes.mk_int",
         "typing_Lib.IntTypes.mul_mod",
         "typing_Lib.IntTypes.op_At_Percent_Dot", "typing_Lib.IntTypes.v",
-        "typing_LowStar.Buffer.trivial_preorder", "typing_Prims.abs",
+        "typing_LowStar.Buffer.trivial_preorder",
+        "typing_LowStar.Monotonic.Buffer.len", "typing_Prims.abs",
         "typing_Spec.QTesla.Params.params_k",
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.PUB@tok",
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "b25c7e68bbb198a725277360ced14091"
+      "7545536ba1e280fde7afcddf00a5a59b"
     ],
     [
       "Hacl.Impl.QTesla.Pack.lemma_sk_when_k_one",
@@ -154,7 +160,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "411815637a53f2b96ce870e72ba93163"
+      "b3023b545c755b89feb27f6b33174e45"
     ],
     [
       "Hacl.Impl.QTesla.Pack.encode_sk",
@@ -175,7 +181,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "20c9af64c5dbb438c9b417ce40d07e3a"
+      "692da1d3dcf4b28ebd33b01a4ef10eda"
     ],
     [
       "Hacl.Impl.QTesla.Pack.encode_sk",
@@ -196,7 +202,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "cd1910dc640d0b78acfff1721f7c779c"
+      "4db14da5e496717e3aa263ea9ac1f660"
     ],
     [
       "Hacl.Impl.QTesla.Pack.encode_sk",
@@ -315,7 +321,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "550ffa9c1c85b2bbef94ba225a9ef85f"
+      "9d99a9686666dff5bbf4ae626774cff7"
     ],
     [
       "Hacl.Impl.QTesla.Pack.decode_sk_s",
@@ -407,7 +413,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "5b7b5f56f65faa5282fc6c8f94623f1e"
+      "9f71539a28e4533636eae8826fb7074f"
     ],
     [
       "Hacl.Impl.QTesla.Pack.decode_sk",
@@ -445,7 +451,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "0621d796fe7248917e4a05d267b44b11"
+      "3746dfc56a562a459e3767603cd1d511"
     ],
     [
       "Hacl.Impl.QTesla.Pack.decode_sk",
@@ -467,7 +473,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "c216c20331267b98cf194e1c5bd02d06"
+      "4525854a05954e2b533709b8fba11d12"
     ],
     [
       "Hacl.Impl.QTesla.Pack.decode_sk",
@@ -493,8 +499,7 @@
         "equation_FStar.Monotonic.HyperStack.is_wf_with_ctr_and_tip",
         "equation_FStar.Monotonic.HyperStack.mem",
         "equation_FStar.UInt.fits", "equation_FStar.UInt.max_int",
-        "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
-        "equation_FStar.UInt.uint_t",
+        "equation_FStar.UInt.size", "equation_FStar.UInt.uint_t",
         "equation_Hacl.Impl.QTesla.Globals.is_e_sk",
         "equation_Hacl.Impl.QTesla.Globals.is_s_sk",
         "equation_Hacl.Impl.QTesla.Params.crypto_secretkeybytes",
@@ -590,7 +595,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "efa64ee913ff0872ca11eeabe1de904c"
+      "61a3d211fe34029414bb68885465324c"
     ]
   ]
 ]

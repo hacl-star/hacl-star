@@ -50,6 +50,12 @@ let va_reveal_opaque (s:string) = norm_spec [zeta; delta_only [s]]
 let va_if (#a:Type) (b:bool) (x:(_:unit{b}) -> GTot a) (y:(_:unit{~b}) -> GTot a) : GTot a =
   if b then x () else y ()
 
+let total_if (#a:Type) (b:bool) (x y:a) : a =
+  if b then x else y
+
+let total_thunk_if (#a:Type) (b:bool) (x:(_:unit{b}) -> a) (y:(_:unit{~b}) -> a) : a =
+  if b then x () else y ()
+
 (* Type aliases *)
 unfold let va_bool = bool
 unfold let va_prop = prop0

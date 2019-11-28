@@ -20,3 +20,15 @@ let check_avx () =
 let check_avx2 () =
   let x, _ = Vale.Stdcalls.X64.Cpuid.check_avx2 () in //This is a call to the interop wrapper
   x
+
+let check_movbe () =
+  let x, _ = Vale.Stdcalls.X64.Cpuid.check_movbe () in //This is a call to the interop wrapper
+  x
+
+let check_sse () =
+  let x, _ = Vale.Stdcalls.X64.Cpuid.check_sse () in //This is a call to the interop wrapper
+  x
+
+let check_rdrand () =
+  let x, _ = Vale.Stdcalls.X64.Cpuid.check_rdrand () in //This is a call to the interop wrapper
+  x

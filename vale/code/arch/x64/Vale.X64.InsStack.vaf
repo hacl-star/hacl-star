@@ -13,6 +13,7 @@ include{:fstar}{:open} "Vale.X64.Stack_Sems"
 include{:fstar}{:open} "Vale.X64.State"
 include{:fstar}{:open} "Vale.X64.Decls"
 include{:fstar}{:open} "Vale.X64.QuickCode"
+include{:fstar}{:open} "Vale.X64.CPU_Features_s"
 
 module Vale.X64.InsStack
 
@@ -31,6 +32,7 @@ open Vale.X64.Decls
 open Vale.X64.QuickCode
 open Vale.X64.InsBasic
 open Vale.X64.InsVector
+open Vale.X64.CPU_Features_s
 #endverbatim
 
 #verbatim
@@ -159,6 +161,7 @@ procedure PushXmm(in src:xmm, out tmp:reg_opr64)
     modifies
         rsp; stack; stackTaint;
     requires
+        sse_enabled;
         rsp <= init_rsp(stack);
         init_rsp(stack) - 4096 <= rsp - 16;
     ensures
@@ -180,6 +183,7 @@ procedure PopXmm(out dst:xmm, out tmp:reg_opr64, ghost expected_xmm:quad32)
     reads stackTaint;
     modifies rsp; stack;
     requires
+        sse_enabled;
         valid_src_stack64(rsp, stack);
         valid_src_stack64(rsp + 8, stack);
         valid_taint_stack64(rsp, Public, stackTaint);
@@ -206,6 +210,7 @@ procedure PushXmm_Secret(in src:xmm, out tmp:reg_opr64)
     modifies
         rsp; stack; stackTaint;
     requires
+        sse_enabled;
         rsp <= init_rsp(stack);
         init_rsp(stack) - 4096 <= rsp - 16;
     ensures
@@ -227,6 +232,7 @@ procedure PopXmm_Secret(out dst:xmm, out tmp:reg_opr64, ghost expected_xmm:quad3
     reads stackTaint;
     modifies rsp; stack;
     requires
+        sse_enabled;
         valid_src_stack64(rsp, stack);
         valid_src_stack64(rsp + 8, stack);
         valid_taint_stack64(rsp, Secret, stackTaint);
