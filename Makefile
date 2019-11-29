@@ -781,6 +781,13 @@ dist/ccf/Makefile.basic: POLY_BUNDLE =
 #
 # Disable the EverCrypt and MerkleTree layers. Only keep Chacha20, Poly1305,
 # Curve25519 for now. Everything else in Hacl is disabled.
+dist/mozilla/Makefile.basic: INTRINSIC_FLAGS = \
+  -add-include 'Hacl_Chacha20Poly1305_128:"libintvector.h"' \
+  -add-include 'Hacl_Chacha20Poly1305_256:"libintvector.h"' \
+  -add-include 'Hacl_Chacha20_Vec128:"libintvector.h"' \
+  -add-include 'Hacl_Chacha20_Vec256:"libintvector.h"' \
+  -add-include 'Hacl_Poly1305_128:"libintvector.h"' \
+  -add-include 'Hacl_Poly1305_256:"libintvector.h"'
 dist/mozilla/Makefile.basic: CURVE_BUNDLE_SLOW = -bundle Hacl.Curve25519_64_Slow
 dist/mozilla/Makefile.basic: SALSA20_BUNDLE = -bundle Hacl.Salsa20
 dist/mozilla/Makefile.basic: ED_BUNDLE = -bundle Hacl.Ed25519
