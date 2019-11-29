@@ -144,7 +144,7 @@ mozilla-ci-unstaged: compile-mozilla test-c
 # Not reusing the -staged automatic target so as to export NOSHORTLOG
 ci:
 	tools/blast-staticconfig.sh wasm
-	EVERCRYPT_CONFIG=wasm $(MAKE) wasm-staged
+	EVERCRYPT_CONFIG=wasm NOSHORTLOG=1 $(MAKE) wasm-staged
 	tools/blast-staticconfig.sh
 	NOSHORTLOG=1 $(MAKE) vale-fst
 	FSTAR_DEPEND_FLAGS="--warn_error +285" NOSHORTLOG=1 $(MAKE) all-unstaged test-unstaged
@@ -913,8 +913,9 @@ endif
 LDFLAGS 	+= -L$(OPENSSL_HOME)
 
 CFLAGS += -Wall -Wextra -g \
-  -Wno-infinite-recursion -Wno-int-conversion -Wno-unused-parameter \
-  -O3 -march=native -mtune=native -I$(KREMLIN_HOME)/include
+  -Wno-int-conversion -Wno-unused-parameter \
+  -O3 -march=native -mtune=native -I$(KREMLIN_HOME)/kremlib/dist/minimal \
+  -I$(KREMLIN_HOME)/include
 
 # FIXME there's a kremlin error that generates a void* -- can't use -Werror
 # Need the libraries to be present and compiled.

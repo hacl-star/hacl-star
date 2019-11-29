@@ -17,7 +17,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "e172ba2fdaf1f4596cca8d756cbfafc4"
+      "77f291f981f7e67c2eb8f9417aa746a0"
     ],
     [
       "Vale.Curve25519.FastUtil_helpers.lemma_sub2",
@@ -30,17 +30,19 @@
         "equation_Vale.Curve25519.FastUtil_helpers.sub_carry",
         "equation_Vale.Curve25519.Fast_defs.bit",
         "equation_Vale.Curve25519.Fast_defs.pow2_two",
-        "equation_Vale.Def.Words_s.nat64", "function_token_typing_Prims.int",
+        "equation_Vale.Def.Words_s.nat64", "equation_Vale.Def.Words_s.natN",
+        "function_token_typing_Prims.int",
         "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2", "int_inversion",
         "int_typing", "projection_inverse_BoxInt_proj_0",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_b51b45ce195a33a465eab411d92fdae9"
+        "refinement_interpretation_Tm_refine_b51b45ce195a33a465eab411d92fdae9",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "f02a6010c0ff12f02f0ce3a534e18135"
+      "a85e1378ea7522295e498133bb22d76a"
     ],
     [
       "Vale.Curve25519.FastUtil_helpers.lemma_pow2_int_23",
@@ -51,11 +53,10 @@
         "@MaxIFuel_assumption", "@query",
         "equation_Vale.Curve25519.FastUtil_helpers.pow2int_three",
         "equation_Vale.Curve25519.FastUtil_helpers.pow2int_two",
-        "int_inversion", "int_typing", "projection_inverse_BoxInt_proj_0",
-        "typing_Vale.Curve25519.FastUtil_helpers.pow2int_three"
+        "int_inversion", "int_typing", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "94363a0b9447f7fb4b78740e69581e97"
+      "792e7c40bf9c9a90a34ae033b309b64e"
     ],
     [
       "Vale.Curve25519.FastUtil_helpers.lemma_pow2_int_34",
@@ -66,10 +67,11 @@
         "@MaxIFuel_assumption", "@query",
         "equation_Vale.Curve25519.FastUtil_helpers.pow2int_four",
         "equation_Vale.Curve25519.FastUtil_helpers.pow2int_three",
-        "int_inversion", "int_typing", "projection_inverse_BoxInt_proj_0"
+        "int_inversion", "projection_inverse_BoxInt_proj_0",
+        "typing_Vale.Curve25519.FastUtil_helpers.pow2int_four"
       ],
       0,
-      "e460679e0b298518fa557217e90b7b71"
+      "009d491a6b0bec44649564935960ef3d"
     ],
     [
       "Vale.Curve25519.FastUtil_helpers.lemma_sub3",
@@ -83,7 +85,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "cb2bbac782070a3b1177de40485ee888"
+      "0078eca7ee7c51cd606ea5c571be21b7"
     ],
     [
       "Vale.Curve25519.FastUtil_helpers.lemma_sub3",
@@ -101,7 +103,7 @@
         "true_interp"
       ],
       0,
-      "70b87a0e941a199bddb4e506f1bf2455"
+      "178738a828e09e2248f4fd596f12e327"
     ],
     [
       "Vale.Curve25519.FastUtil_helpers.lemma_sub3",
@@ -124,7 +126,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "dbf47e2dba66cd1def19c78a13b42bfc"
+      "66e818e0c707caf21a0ba36bcb54f706"
     ],
     [
       "Vale.Curve25519.FastUtil_helpers.lemma_sub3",
@@ -133,7 +135,7 @@
       0,
       [ "@query" ],
       0,
-      "0c5b0a8613b30f2859dc903a55e2c45f"
+      "80c6218002aeda9b08fdec14d0c4b0f5"
     ],
     [
       "Vale.Curve25519.FastUtil_helpers.lemma_sub3",
@@ -148,7 +150,7 @@
         "refinement_interpretation_Tm_refine_548c05480199a0cca35a3fd3322151fe"
       ],
       0,
-      "012fc21ea80ea9b709a1a6cee0def2f1"
+      "a3ef8d8a33b633ff08e6251658b73e9e"
     ],
     [
       "Vale.Curve25519.FastUtil_helpers.lemma_sub",
@@ -162,7 +164,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "d55a6e5eab2c7bb2e030b5f72a88bbbe"
+      "bc37bd913b618c5820427103c89e165d"
     ],
     [
       "Vale.Curve25519.FastUtil_helpers.lemma_sub",
@@ -180,7 +182,7 @@
         "true_interp"
       ],
       0,
-      "bb184381c8abce5319f784aecd42eb1d"
+      "3394a1d314a8632aea9db5cd116a6b88"
     ],
     [
       "Vale.Curve25519.FastUtil_helpers.lemma_sub",
@@ -191,18 +193,19 @@
         "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
         "equation_Vale.Curve25519.FastUtil_helpers.sub_carry",
         "equation_Vale.Curve25519.Fast_defs.bit",
-        "equation_Vale.Def.Words_s.nat64", "int_inversion", "int_typing",
-        "projection_inverse_BoxInt_proj_0",
+        "equation_Vale.Def.Words_s.nat64", "equation_Vale.Def.Words_s.natN",
+        "int_inversion", "int_typing", "projection_inverse_BoxInt_proj_0",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
         "refinement_interpretation_Tm_refine_1443269d7eadc969721b34d6f64e8860",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_a3acfd6805ff36eae3bce4fb321c9713",
         "refinement_interpretation_Tm_refine_a415f19ed81e26742f6055320e3cb3d0",
-        "refinement_interpretation_Tm_refine_b51b45ce195a33a465eab411d92fdae9"
+        "refinement_interpretation_Tm_refine_b51b45ce195a33a465eab411d92fdae9",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "a9627307f03946f99fbc85e9d9a2fe1c"
+      "06e713fe7a5965c7b79e5e44f4ced550"
     ],
     [
       "Vale.Curve25519.FastUtil_helpers.lemma_sub",
@@ -211,7 +214,7 @@
       0,
       [ "@query" ],
       0,
-      "6630ea5cceb9c237d37a46f1a94a774c"
+      "5604d22b61714bb3f539d3a2503603e4"
     ],
     [
       "Vale.Curve25519.FastUtil_helpers.lemma_sub",
@@ -227,7 +230,7 @@
         "refinement_interpretation_Tm_refine_a415f19ed81e26742f6055320e3cb3d0"
       ],
       0,
-      "071d7a9ba98077e843678a6081f4a5b8"
+      "5a45b53b330644c6fef517138a5909e2"
     ]
   ]
 ]

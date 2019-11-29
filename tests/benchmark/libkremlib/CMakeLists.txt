@@ -13,6 +13,12 @@ endif()
 get_filename_component(KREMLIN_INC ${KREMLIN_INC} REALPATH)
 message("-- Using KreMLin at ${KREMLIN_INC}")
 
+if (NOT KREMLIB_MINIMAL)
+  set(KREMLIB_MINIMAL $ENV{KREMLIN_HOME}/include CACHE PATH "Where to find the KreMLin headers.")
+endif()
+get_filename_component(KREMLIB_MINIMAL ${KREMLIN_INC} REALPATH)
+message("-- Using KreMLin at ${KREMLIB_MINIMAL}")
+
 add_library(kremlib STATIC
   ${KREMLIB_DIR}/c.c
   ${KREMLIB_DIR}/c_string.c
@@ -33,11 +39,10 @@ add_library(kremlib STATIC
   ${KREMLIB_DIR}/fstar_uint16.c
   ${KREMLIB_DIR}/fstar_uint32.c
   ${KREMLIB_DIR}/fstar_uint64.c
-  ${KREMLIB_DIR}/FStar_UInt_8_16_32_64.c
   ${KREMLIB_DIR}/fstar_uint8.c
   ${KREMLIB_DIR}/prims.c
   ${KREMLIB_DIR}/testlib.c)
-target_include_directories(kremlib PUBLIC ${KREMLIN_INC} ${KREMLIB_DIR})
+target_include_directories(kremlib PUBLIC ${KREMLIN_INC} ${KREMLIB_DIR} ${KREMLIB_MINIMAL})
 target_compile_options(kremlib PRIVATE
   -std=c11 -fwrapv
   -Wall -Wextra -Werror
@@ -51,12 +56,6 @@ if(CMAKE_SYSTEM_NAME STREQUAL "CYGWIN")
 else()
   target_compile_options(kremlib PUBLIC -fPIC)
 endif()
-
-if(CMAKE_COMPILER_IS_MSVC)
-  target_sources(kremlib PRIVATE ${KREMLIB_DIR}/fstar_uint128_msvc.c)
-else(CMAKE_COMPILER_IS_MSVC)
-  target_sources(kremlib PRIVATE ${KREMLIB_DIR}/fstar_uint128.c)
-endif(CMAKE_COMPILER_IS_MSVC)
 
 if(ASAN)
   target_compile_options(kremlib PRIVATE -g -fsanitize=undefined,address -fno-omit-frame-pointer -fno-sanitize-recover=all -fno-sanitize=function)
