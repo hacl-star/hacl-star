@@ -39,7 +39,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "b4f6282f415b3ce680b219b45490a0fe"
+      "f5649591a40786cb8a01eba9e807847f"
     ],
     [
       "Hacl.Impl.Frodo.Gen.frodo_gen_matrix_cshake0",
@@ -73,7 +73,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "bcdc544a89add95d2af485559d549e79"
+      "171d4d5853e232193c91ddfdc42e3b63"
     ],
     [
       "Hacl.Impl.Frodo.Gen.frodo_gen_matrix_cshake0",
@@ -139,7 +139,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "85b9e7d0bc4ca6a3345349cd47b4f608"
+      "fedfa46d97af5adf0b0efd65d8a276d6"
     ],
     [
       "Hacl.Impl.Frodo.Gen.frodo_gen_matrix_cshake1",
@@ -180,7 +180,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "de1cd7c57aa79363ed735d49221c5f92"
+      "9969205fd8cad8de6c7ee85dd3e87b27"
     ],
     [
       "Hacl.Impl.Frodo.Gen.frodo_gen_matrix_cshake1",
@@ -219,7 +219,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "1ed7a42ed99c659a860f200884472bc3"
+      "7d98be7432d5b925019e4d426fc49f97"
     ],
     [
       "Hacl.Impl.Frodo.Gen.frodo_gen_matrix_cshake1",
@@ -373,7 +373,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "862e0177fdb041be3c4fc0f31302c46d"
+      "0850b93f21804b24eb6c6724c59fc07c"
     ],
     [
       "Hacl.Impl.Frodo.Gen.frodo_gen_matrix_cshake",
@@ -394,7 +394,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "79c5315b1e123fe285e816c2049cce8c"
+      "d732ff2b64ee62c6748b4aa739e97c22"
     ],
     [
       "Hacl.Impl.Frodo.Gen.frodo_gen_matrix_cshake",
@@ -403,7 +403,7 @@
       0,
       [ "@query" ],
       0,
-      "dd9bf50c83bdfaec9b058bf78a1c3d59"
+      "7f5032f66c1da131975ec4ed422a4532"
     ],
     [
       "Hacl.Impl.Frodo.Gen.frodo_gen_matrix_cshake",
@@ -425,8 +425,9 @@
         "Spec.Frodo.Gen_interpretation_Tm_arrow_3c4cde532b089bb4b26a9ea12cbb0648",
         "Spec.Frodo.Gen_interpretation_Tm_arrow_53a47b5197410448858f209d4d060609",
         "Spec.Frodo.Gen_interpretation_Tm_arrow_721ae6c1516525a5380734a8206c89d3",
-        "assumption_FStar.Monotonic.HyperHeap.Mod_set_def", "bool_inversion",
-        "bool_typing", "constructor_distinct_Lib.Buffer.MUT",
+        "assumption_FStar.Monotonic.HyperHeap.Mod_set_def", "b2t_def",
+        "bool_inversion", "bool_typing",
+        "constructor_distinct_Lib.Buffer.MUT",
         "constructor_distinct_Lib.IntTypes.PUB",
         "constructor_distinct_Lib.IntTypes.S8",
         "constructor_distinct_Lib.IntTypes.U16",
@@ -452,7 +453,10 @@
         "equation_FStar.Monotonic.HyperStack.poppable",
         "equation_FStar.Monotonic.HyperStack.popped",
         "equation_FStar.Monotonic.HyperStack.remove_elt",
-        "equation_Hacl.Impl.Matrix.elem", "equation_Hacl.Impl.Matrix.lbytes",
+        "equation_FStar.UInt.fits", "equation_FStar.UInt.max_int",
+        "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
+        "equation_FStar.UInt.uint_t", "equation_Hacl.Impl.Matrix.elem",
+        "equation_Hacl.Impl.Matrix.lbytes",
         "equation_Hacl.Impl.Matrix.matrix_t", "equation_Lib.Buffer.as_seq",
         "equation_Lib.Buffer.buffer_t", "equation_Lib.Buffer.disjoint",
         "equation_Lib.Buffer.gsub", "equation_Lib.Buffer.lbuffer_t",
@@ -518,8 +522,9 @@
         "lemma_FStar.Set.mem_complement", "lemma_FStar.Set.mem_intersect",
         "lemma_FStar.Set.mem_singleton", "lemma_FStar.Set.mem_subset",
         "lemma_FStar.Set.mem_union", "lemma_FStar.UInt.pow2_values",
-        "lemma_FStar.UInt32.uv_inv", "lemma_Lib.IntTypes.mul_lemma",
-        "lemma_Lib.IntTypes.sub_lemma", "lemma_Lib.IntTypes.v_mk_int",
+        "lemma_FStar.UInt32.uv_inv", "lemma_FStar.UInt32.vu_inv",
+        "lemma_Lib.IntTypes.mul_lemma", "lemma_Lib.IntTypes.sub_lemma",
+        "lemma_Lib.IntTypes.v_injective", "lemma_Lib.IntTypes.v_mk_int",
         "lemma_Lib.Sequence.eq_elim",
         "lemma_LowStar.Monotonic.Buffer.address_liveness_insensitive_buffer",
         "lemma_LowStar.Monotonic.Buffer.as_seq_gsub",
@@ -552,8 +557,9 @@
         "lemma_LowStar.Monotonic.Buffer.unused_in_loc_unused_in",
         "lemma_LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2",
         "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
-        "primitive_Prims.op_Equality", "primitive_Prims.op_Multiply",
-        "primitive_Prims.op_Negation", "primitive_Prims.op_Subtraction",
+        "primitive_Prims.op_Equality", "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Negation",
+        "primitive_Prims.op_Subtraction",
         "proj_equation_Spec.GaloisField.GF_t",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
@@ -569,6 +575,7 @@
         "refinement_interpretation_Tm_refine_1cc58e901e83e96dff5b4d1682343605",
         "refinement_interpretation_Tm_refine_1de8426f4795d59a42df9b22a452f23d",
         "refinement_interpretation_Tm_refine_2b9ac1d6c43e9e240d84837e7e466c45",
+        "refinement_interpretation_Tm_refine_365abba901205a01d0ef28ebf2198c47",
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Tm_refine_41aef3833b617e5c5b9322c9c48c2c29",
         "refinement_interpretation_Tm_refine_427964005be28d37845727035e1dec26",
@@ -580,7 +587,6 @@
         "refinement_interpretation_Tm_refine_66c713d37a6ed16eecfe1cdd673d1bf2",
         "refinement_interpretation_Tm_refine_695fc9bad57438f078f1918065bbd3eb",
         "refinement_interpretation_Tm_refine_6a32a668cfa99ccaca30a148b05d66f4",
-        "refinement_interpretation_Tm_refine_7e0b9b2dbca36eab00de093c1b701c6d",
         "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
         "refinement_interpretation_Tm_refine_873133828c907cbc2718aea6e8b831ae",
         "refinement_interpretation_Tm_refine_8b40f4ba53055527eadf55a24b95d6ac",
@@ -595,10 +601,12 @@
         "refinement_interpretation_Tm_refine_be316ceec231ab35ef3ab6a2c3af1264",
         "refinement_interpretation_Tm_refine_c13b644bab5aff5eb362bcfb396fb897",
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
+        "refinement_interpretation_Tm_refine_c6c18a7ceb46d419c35ff8551117551e",
         "refinement_interpretation_Tm_refine_cfc41488cee641ca406ae764563b3947",
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
         "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
         "refinement_interpretation_Tm_refine_e9c32a5fb00a4e8c339597118c871180",
+        "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
         "refinement_interpretation_Tm_refine_f2cf336029ef2bddc10058d5bbede845",
         "refinement_interpretation_Tm_refine_f37327594b97f54132ce6bcb98ee4847",
         "refinement_interpretation_Tm_refine_f82b4538c9caa8ab74d4cf6bf5a77d6a",
@@ -617,13 +625,14 @@
         "typing_FStar.Monotonic.HyperStack.remove_elt",
         "typing_FStar.Set.complement", "typing_FStar.Set.mem",
         "typing_FStar.Set.singleton", "typing_FStar.Set.union",
-        "typing_Lib.Buffer.as_seq", "typing_Lib.Buffer.gsub",
-        "typing_Lib.Buffer.length", "typing_Lib.Buffer.loc",
-        "typing_Lib.Buffer.op_Bar_Plus_Bar",
+        "typing_FStar.UInt.fits", "typing_FStar.UInt32.uint_to_t",
+        "typing_FStar.UInt32.v", "typing_Lib.Buffer.as_seq",
+        "typing_Lib.Buffer.gsub", "typing_Lib.Buffer.length",
+        "typing_Lib.Buffer.loc", "typing_Lib.Buffer.op_Bar_Plus_Bar",
         "typing_Lib.ByteSequence.uint_from_bytes_le",
-        "typing_Lib.IntTypes.bits", "typing_Lib.IntTypes.mk_int",
-        "typing_Lib.IntTypes.sub", "typing_Lib.IntTypes.unsigned",
-        "typing_Lib.IntTypes.v",
+        "typing_Lib.IntTypes.bits", "typing_Lib.IntTypes.minint",
+        "typing_Lib.IntTypes.mk_int", "typing_Lib.IntTypes.sub",
+        "typing_Lib.IntTypes.unsigned", "typing_Lib.IntTypes.v",
         "typing_Lib.LoopCombinators.repeat_gen_inductive",
         "typing_Lib.LoopCombinators.repeati_inductive_",
         "typing_Lib.Sequence.create", "typing_Lib.Sequence.lseq",
@@ -642,7 +651,8 @@
         "typing_LowStar.Monotonic.Buffer.mgsub", "typing_Spec.AES.gf8",
         "typing_Spec.AES.irred",
         "typing_Spec.GaloisField.__proj__GF__item__t",
-        "typing_Spec.Matrix.mset", "typing_Spec.SHA3.cshake128_frodo",
+        "typing_Spec.Matrix.create", "typing_Spec.Matrix.mset",
+        "typing_Spec.SHA3.cshake128_frodo",
         "typing_Tm_abs_117768405b3269eab5eb1619e555cede",
         "typing_Tm_abs_f17c1a2105556539e599f0b423163342",
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.PUB@tok",
@@ -650,7 +660,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "126063491a351f9d810e17ec86b2616f"
+      "c5b055cac05675b002fa387326ab99fe"
     ],
     [
       "Hacl.Impl.Frodo.Gen.frodo_gen_matrix_cshake_4x0",
@@ -692,7 +702,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "59e1aa4436e2c0e087b137756c317b96"
+      "d4bcbeed6fdcc000d2cb88d21d2d2f42"
     ],
     [
       "Hacl.Impl.Frodo.Gen.frodo_gen_matrix_cshake_4x0",
@@ -726,7 +736,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "fe9693e613a4bcd3fec9fb6af6c0ea40"
+      "135506d3313007aff148777d44d2733e"
     ],
     [
       "Hacl.Impl.Frodo.Gen.frodo_gen_matrix_cshake_4x0",
@@ -812,7 +822,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "f59cad5e990126685957840c288d5e94"
+      "1e29b6a4adddb812e13a1ee5318174e8"
     ],
     [
       "Hacl.Impl.Frodo.Gen.frodo_gen_matrix_cshake_4x1",
@@ -857,7 +867,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "b4d504dfe235ed1febff997c795dde65"
+      "9ce040391d46dd8964cfe2acc4674713"
     ],
     [
       "Hacl.Impl.Frodo.Gen.frodo_gen_matrix_cshake_4x1",
@@ -899,7 +909,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "d34a4d39178f5f033473e7163e15d517"
+      "04a0e8c6f2d66a0ee56bda1585c352a5"
     ],
     [
       "Hacl.Impl.Frodo.Gen.frodo_gen_matrix_cshake_4x1",
@@ -1064,7 +1074,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "c94149bffbcfad14eb569837a2f7cd45"
+      "61d38f359ee683935f194b0d72f46d65"
     ],
     [
       "Hacl.Impl.Frodo.Gen.frodo_gen_matrix_cshake_4x",
@@ -1086,7 +1096,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "e1546d94f9b64aecb184889499b57e88"
+      "2270465e5382cbdb51f6382cd342942c"
     ],
     [
       "Hacl.Impl.Frodo.Gen.frodo_gen_matrix_cshake_4x",
@@ -1095,7 +1105,7 @@
       0,
       [ "@query" ],
       0,
-      "f1643b1ec3985dfb297dc285cf32b35e"
+      "3502c82180a390389a73b4414bcb1acd"
     ],
     [
       "Hacl.Impl.Frodo.Gen.frodo_gen_matrix_cshake_4x",
@@ -1312,7 +1322,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "adde1e169d6a72384d5daf47d8dd9339"
+      "7b3b0b4ee902558eb4fe792b74b59cef"
     ],
     [
       "Hacl.Impl.Frodo.Gen.frodo_gen_matrix_aes",
@@ -1343,7 +1353,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "41de95cfc7a07a9c53fcf4d8400770bf"
+      "a1ccb6465fc3c1a6f55423d0633c1d04"
     ],
     [
       "Hacl.Impl.Frodo.Gen.frodo_gen_matrix_aes",
@@ -1352,7 +1362,7 @@
       0,
       [ "@query" ],
       0,
-      "154a58b2b603181538274a33eea63983"
+      "3a029ca383e901b488154e011c3383bc"
     ],
     [
       "Hacl.Impl.Frodo.Gen.frodo_gen_matrix_aes",
@@ -1537,7 +1547,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "6e6a6b86dcfd2df38bc2443cad0ab377"
+      "5dc75f319a2c0347c31c0653488b4552"
     ]
   ]
 ]
