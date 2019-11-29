@@ -34,10 +34,10 @@ dist/chacha20-vec-test.exe: $(HACL_HOME)/tests/chacha20-vec-test.o dist/libchach
 dist/chacha20-vec-openssl-test.exe: dist/libchacha.a
 	$(CC) $(CFLAGS) -I $(OPENSSL_HOME)/include -I $(OPENSSL_HOME)/include/crypto -I $(OPENSSL_HOME)/crypto -I $(HACL_HOME)/tests/tests-openssl/jasmin-chacha-avx2 \
 	$(HACL_HOME)/tests/tests-openssl/jasmin-chacha-avx2/chacha20.s $(HACL_HOME)/tests/tests-openssl/chacha20-vec-test.c $^ \
-	$(KREMLIB_A) -o $@ $(OPENSSL_HOME)/libcrypto.a -lpthread -ldl
+	-o $@ $(OPENSSL_HOME)/libcrypto.a -lpthread -ldl
 
 %.exe:
-	$(CC) $(CFLAGS) -flto $^ $(KREMLIB_A) -o $@
+	$(CC) $(CFLAGS) -flto $^ -o $@
 
 clean-c:
 	$(MAKE) -C dist/ -f Makefile.basic clean
