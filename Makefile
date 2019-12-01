@@ -896,8 +896,8 @@ copy-kremlib:
 	mkdir -p dist/kremlin
 	(cd $(KREMLIN_HOME) && tar cvf - kremlib/dist/minimal include) | (cd dist/kremlin && tar xf -)
 
-compile-%: dist/Makefile dist/%/Makefile.basic | copy-kremlib
-	cp $< dist/$*/
+compile-%: dist/Makefile.tmpl dist/%/Makefile.basic | copy-kremlib
+	cp $< dist/$*/Makefile
 	$(MAKE) -C dist/$*
 
 

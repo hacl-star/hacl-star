@@ -239,7 +239,10 @@ uint32_t offset_of(uint32_t i1)
   {
     return i1;
   }
-  return i1 - (uint32_t)1U;
+  else
+  {
+    return i1 - (uint32_t)1U;
+  }
 }
 
 static LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_
@@ -529,9 +532,12 @@ LowStar_Vector_insert___uint8_t_(LowStar_Vector_vector_str___uint8_t_ vec, uint8
     return
       ((LowStar_Vector_vector_str___uint8_t_){ .sz = sz + (uint32_t)1U, .cap = ncap, .vs = nvs });
   }
-  vs[sz] = v1;
-  return
-    ((LowStar_Vector_vector_str___uint8_t_){ .sz = sz + (uint32_t)1U, .cap = cap, .vs = vs });
+  else
+  {
+    vs[sz] = v1;
+    return
+      ((LowStar_Vector_vector_str___uint8_t_){ .sz = sz + (uint32_t)1U, .cap = cap, .vs = vs });
+  }
 }
 
 static LowStar_Vector_vector_str___uint8_t_
@@ -800,23 +806,26 @@ void mt_get_root(merkle_tree *mt, uint8_t *rt)
     x0 = { .dummy = NULL, .r_alloc = hash_r_alloc, .r_free = hash_r_free };
     hcpy(mroot, rt);
   }
-  construct_rhs((uint32_t)0U, hs, rhs, i1, j1, rt, false);
-  LowStar_Regional_regional___uint8_t_
-  x0 = { .dummy = NULL, .r_alloc = hash_r_alloc, .r_free = hash_r_free };
-  hcpy(rt, mroot);
-  *mt
-  =
-    (
-      (merkle_tree){
-        .offset = prefix,
-        .i = i1,
-        .j = j1,
-        .hs = hs,
-        .rhs_ok = true,
-        .rhs = rhs,
-        .mroot = mroot
-      }
-    );
+  else
+  {
+    construct_rhs((uint32_t)0U, hs, rhs, i1, j1, rt, false);
+    LowStar_Regional_regional___uint8_t_
+    x0 = { .dummy = NULL, .r_alloc = hash_r_alloc, .r_free = hash_r_free };
+    hcpy(rt, mroot);
+    *mt
+    =
+      (
+        (merkle_tree){
+          .offset = prefix,
+          .i = i1,
+          .j = j1,
+          .hs = hs,
+          .rhs_ok = true,
+          .rhs = rhs,
+          .mroot = mroot
+        }
+      );
+  }
 }
 
 void path_insert(LowStar_Vector_vector_str___uint8_t_ *p1, uint8_t *hp)
@@ -832,15 +841,21 @@ static uint32_t mt_path_length_step(uint32_t k1, uint32_t j1, bool actd)
   {
     return (uint32_t)0U;
   }
-  if (k1 % (uint32_t)2U == (uint32_t)0U)
+  else if (k1 % (uint32_t)2U == (uint32_t)0U)
   {
     if (j1 == k1 || (j1 == k1 + (uint32_t)1U && !actd))
     {
       return (uint32_t)0U;
     }
+    else
+    {
+      return (uint32_t)1U;
+    }
+  }
+  else
+  {
     return (uint32_t)1U;
   }
-  return (uint32_t)1U;
 }
 
 static uint32_t mt_path_length(uint32_t lv, uint32_t k1, uint32_t j1, bool actd)
@@ -849,12 +864,15 @@ static uint32_t mt_path_length(uint32_t lv, uint32_t k1, uint32_t j1, bool actd)
   {
     return (uint32_t)0U;
   }
-  bool nactd = actd || j1 % (uint32_t)2U == (uint32_t)1U;
-  return
-    mt_path_length_step(k1,
-      j1,
-      actd)
-    + mt_path_length(lv + (uint32_t)1U, k1 / (uint32_t)2U, j1 / (uint32_t)2U, nactd);
+  else
+  {
+    bool nactd = actd || j1 % (uint32_t)2U == (uint32_t)1U;
+    return
+      mt_path_length_step(k1,
+        j1,
+        actd)
+      + mt_path_length(lv + (uint32_t)1U, k1 / (uint32_t)2U, j1 / (uint32_t)2U, nactd);
+  }
 }
 
 static void
@@ -962,7 +980,10 @@ mt_get_path_pre(
     uint32_t idx1 = (uint32_t)diff;
     return uu____0.i <= idx1 && idx1 < uu____0.j && uu____1.sz == (uint32_t)0U;
   }
-  return false;
+  else
+  {
+    return false;
+  }
 }
 
 uint32_t
@@ -1106,7 +1127,10 @@ bool mt_flush_to_pre(merkle_tree *mt, uint64_t idx)
     uint32_t idx1 = (uint32_t)diff;
     return idx1 >= mtv.i && idx1 < mtv.j;
   }
-  return false;
+  else
+  {
+    return false;
+  }
 }
 
 void mt_flush_to(merkle_tree *mt, uint64_t idx)
@@ -1197,9 +1221,12 @@ LowStar_RVector_shrink___uint8_t_(
   {
     return rv;
   }
-  LowStar_RVector_free_elems_from___uint8_t_(rg, rv, new_size);
-  LowStar_Vector_vector_str___uint8_t_ frv = LowStar_Vector_shrink___uint8_t_(rv, new_size);
-  return frv;
+  else
+  {
+    LowStar_RVector_free_elems_from___uint8_t_(rg, rv, new_size);
+    LowStar_Vector_vector_str___uint8_t_ frv = LowStar_Vector_shrink___uint8_t_(rv, new_size);
+    return frv;
+  }
 }
 
 static void
@@ -1278,7 +1305,10 @@ bool mt_retract_to_pre(merkle_tree *mt, uint64_t r)
     uint32_t r1 = (uint32_t)diff;
     return mtv.i <= r1 && r1 < mtv.j;
   }
-  return false;
+  else
+  {
+    return false;
+  }
 }
 
 void mt_retract_to(merkle_tree *mt, uint64_t r)
@@ -1390,7 +1420,10 @@ mt_verify_pre(
     uint32_t j2 = (uint32_t)diff;
     return uu____1.sz == (uint32_t)1U + mt_path_length((uint32_t)0U, k2, j2, false);
   }
-  return false;
+  else
+  {
+    return false;
+  }
 }
 
 bool
@@ -1443,17 +1476,20 @@ serialize_bool(bool ok, bool x, uint8_t *buf1, uint32_t sz, uint32_t pos)
   {
     return ((K___bool_uint32_t){ .fst = false, .snd = (uint32_t)0U });
   }
-  uint8_t ite;
-  if (x)
-  {
-    ite = (uint8_t)1U;
-  }
   else
   {
-    ite = (uint8_t)0U;
+    uint8_t ite;
+    if (x)
+    {
+      ite = (uint8_t)1U;
+    }
+    else
+    {
+      ite = (uint8_t)0U;
+    }
+    buf1[pos] = ite;
+    return ((K___bool_uint32_t){ .fst = true, .snd = pos + (uint32_t)1U });
   }
-  buf1[pos] = ite;
-  return ((K___bool_uint32_t){ .fst = true, .snd = pos + (uint32_t)1U });
 }
 
 static K___bool_uint32_t
@@ -1463,8 +1499,11 @@ serialize_uint8_t(bool ok, uint8_t x, uint8_t *buf1, uint32_t sz, uint32_t pos)
   {
     return ((K___bool_uint32_t){ .fst = false, .snd = (uint32_t)0U });
   }
-  buf1[pos] = x;
-  return ((K___bool_uint32_t){ .fst = true, .snd = pos + (uint32_t)1U });
+  else
+  {
+    buf1[pos] = x;
+    return ((K___bool_uint32_t){ .fst = true, .snd = pos + (uint32_t)1U });
+  }
 }
 
 static K___bool_uint32_t
@@ -1555,7 +1594,10 @@ serialize_hash(bool ok, uint8_t *x, uint8_t *buf1, uint32_t sz, uint32_t pos)
   {
     return ((K___bool_uint32_t){ .fst = false, .snd = (uint32_t)0U });
   }
-  return serialize_hash_i(ok, x, buf1, sz, pos, (uint32_t)0U);
+  else
+  {
+    return serialize_hash_i(ok, x, buf1, sz, pos, (uint32_t)0U);
+  }
 }
 
 static K___bool_uint32_t
@@ -1619,14 +1661,20 @@ serialize_hash_vec(
   {
     return ((K___bool_uint32_t){ .fst = false, .snd = (uint32_t)0U });
   }
-  K___bool_uint32_t scrut = serialize_uint32_t(ok, x.sz, buf1, sz, pos);
-  bool ok1 = scrut.fst;
-  uint32_t pos1 = scrut.snd;
-  if (ok1 && x.sz > (uint32_t)0U)
+  else
   {
-    return serialize_hash_vec_i(ok1, x, buf1, sz, pos1, (uint32_t)0U);
+    K___bool_uint32_t scrut = serialize_uint32_t(ok, x.sz, buf1, sz, pos);
+    bool ok1 = scrut.fst;
+    uint32_t pos1 = scrut.snd;
+    if (ok1 && x.sz > (uint32_t)0U)
+    {
+      return serialize_hash_vec_i(ok1, x, buf1, sz, pos1, (uint32_t)0U);
+    }
+    else
+    {
+      return ((K___bool_uint32_t){ .fst = ok1, .snd = pos1 });
+    }
   }
-  return ((K___bool_uint32_t){ .fst = ok1, .snd = pos1 });
 }
 
 static uint64_t
@@ -1639,15 +1687,21 @@ hash_vv_bytes_i(
   {
     return (uint64_t)4U;
   }
-  LowStar_Vector_vector_str___uint8_t_
-  vvi = LowStar_Vector_index__LowStar_Vector_vector_str__uint8_t_(vv1, i1);
-  uint64_t r = (uint64_t)4U + (uint64_t)vvi.sz * (uint64_t)hash_size;
-  uint64_t rest = hash_vv_bytes_i(vv1, i1 + (uint32_t)1U);
-  if (uint64_max - rest < r)
+  else
   {
-    return uint64_max;
+    LowStar_Vector_vector_str___uint8_t_
+    vvi = LowStar_Vector_index__LowStar_Vector_vector_str__uint8_t_(vv1, i1);
+    uint64_t r = (uint64_t)4U + (uint64_t)vvi.sz * (uint64_t)hash_size;
+    uint64_t rest = hash_vv_bytes_i(vv1, i1 + (uint32_t)1U);
+    if (uint64_max - rest < r)
+    {
+      return uint64_max;
+    }
+    else
+    {
+      return rest + r;
+    }
   }
-  return rest + r;
 }
 
 static uint64_t
@@ -1718,14 +1772,20 @@ serialize_hash_vv(
   {
     return ((K___bool_uint32_t){ .fst = false, .snd = (uint32_t)0U });
   }
-  K___bool_uint32_t scrut = serialize_uint32_t(ok, x.sz, buf1, sz, pos);
-  bool ok1 = scrut.fst;
-  uint32_t pos1 = scrut.snd;
-  if (x.sz > (uint32_t)0U)
+  else
   {
-    return serialize_hash_vv_i(ok1, x, buf1, sz, pos1, (uint32_t)0U);
+    K___bool_uint32_t scrut = serialize_uint32_t(ok, x.sz, buf1, sz, pos);
+    bool ok1 = scrut.fst;
+    uint32_t pos1 = scrut.snd;
+    if (x.sz > (uint32_t)0U)
+    {
+      return serialize_hash_vv_i(ok1, x, buf1, sz, pos1, (uint32_t)0U);
+    }
+    else
+    {
+      return ((K___bool_uint32_t){ .fst = ok1, .snd = pos1 });
+    }
   }
-  return ((K___bool_uint32_t){ .fst = ok1, .snd = pos1 });
 }
 
 typedef struct K___bool_uint32_t_bool_s
@@ -1743,20 +1803,23 @@ deserialize_bool(bool ok, uint8_t *buf1, uint32_t sz, uint32_t pos)
   {
     return ((K___bool_uint32_t_bool){ .fst = false, .snd = pos, .thd = false });
   }
-  bool sw;
-  switch (buf1[pos])
+  else
   {
-    case 0U:
-      {
-        sw = false;
-        break;
-      }
-    default:
-      {
-        sw = true;
-      }
+    bool sw;
+    switch (buf1[pos])
+    {
+      case 0U:
+        {
+          sw = false;
+          break;
+        }
+      default:
+        {
+          sw = true;
+        }
+    }
+    return ((K___bool_uint32_t_bool){ .fst = true, .snd = pos + (uint32_t)1U, .thd = sw });
   }
-  return ((K___bool_uint32_t_bool){ .fst = true, .snd = pos + (uint32_t)1U, .thd = sw });
 }
 
 typedef struct K___bool_uint32_t_uint8_t_s
@@ -1774,8 +1837,11 @@ deserialize_uint8_t(bool ok, uint8_t *buf1, uint32_t sz, uint32_t pos)
   {
     return ((K___bool_uint32_t_uint8_t){ .fst = false, .snd = pos, .thd = (uint8_t)0U });
   }
-  return
-    ((K___bool_uint32_t_uint8_t){ .fst = true, .snd = pos + (uint32_t)1U, .thd = buf1[pos] });
+  else
+  {
+    return
+      ((K___bool_uint32_t_uint8_t){ .fst = true, .snd = pos + (uint32_t)1U, .thd = buf1[pos] });
+  }
 }
 
 typedef struct K___bool_uint32_t_uint16_t_s
@@ -1793,22 +1859,25 @@ deserialize_uint16_t(bool ok, uint8_t *buf1, uint32_t sz, uint32_t pos)
   {
     return ((K___bool_uint32_t_uint16_t){ .fst = false, .snd = pos, .thd = (uint16_t)0U });
   }
-  K___bool_uint32_t_uint8_t scrut0 = deserialize_uint8_t(ok, buf1, sz, pos);
-  bool ok1 = scrut0.fst;
-  uint32_t pos1 = scrut0.snd;
-  uint8_t b0 = scrut0.thd;
-  K___bool_uint32_t_uint8_t scrut = deserialize_uint8_t(ok1, buf1, sz, pos1);
-  bool ok2 = scrut.fst;
-  uint32_t pos2 = scrut.snd;
-  uint8_t b1 = scrut.thd;
-  return
-    (
-      (K___bool_uint32_t_uint16_t){
-        .fst = ok2,
-        .snd = pos2,
-        .thd = ((uint16_t)b0 << (uint32_t)8U) + (uint16_t)b1
-      }
-    );
+  else
+  {
+    K___bool_uint32_t_uint8_t scrut0 = deserialize_uint8_t(ok, buf1, sz, pos);
+    bool ok1 = scrut0.fst;
+    uint32_t pos1 = scrut0.snd;
+    uint8_t b0 = scrut0.thd;
+    K___bool_uint32_t_uint8_t scrut = deserialize_uint8_t(ok1, buf1, sz, pos1);
+    bool ok2 = scrut.fst;
+    uint32_t pos2 = scrut.snd;
+    uint8_t b1 = scrut.thd;
+    return
+      (
+        (K___bool_uint32_t_uint16_t){
+          .fst = ok2,
+          .snd = pos2,
+          .thd = ((uint16_t)b0 << (uint32_t)8U) + (uint16_t)b1
+        }
+      );
+  }
 }
 
 typedef struct K___bool_uint32_t_uint32_t_s
@@ -1826,22 +1895,25 @@ deserialize_uint32_t(bool ok, uint8_t *buf1, uint32_t sz, uint32_t pos)
   {
     return ((K___bool_uint32_t_uint32_t){ .fst = false, .snd = pos, .thd = (uint32_t)0U });
   }
-  K___bool_uint32_t_uint16_t scrut0 = deserialize_uint16_t(ok, buf1, sz, pos);
-  bool ok1 = scrut0.fst;
-  uint32_t pos1 = scrut0.snd;
-  uint16_t b0 = scrut0.thd;
-  K___bool_uint32_t_uint16_t scrut = deserialize_uint16_t(ok1, buf1, sz, pos1);
-  bool ok2 = scrut.fst;
-  uint32_t pos2 = scrut.snd;
-  uint16_t b1 = scrut.thd;
-  return
-    (
-      (K___bool_uint32_t_uint32_t){
-        .fst = ok2,
-        .snd = pos2,
-        .thd = ((uint32_t)b0 << (uint32_t)16U) + (uint32_t)b1
-      }
-    );
+  else
+  {
+    K___bool_uint32_t_uint16_t scrut0 = deserialize_uint16_t(ok, buf1, sz, pos);
+    bool ok1 = scrut0.fst;
+    uint32_t pos1 = scrut0.snd;
+    uint16_t b0 = scrut0.thd;
+    K___bool_uint32_t_uint16_t scrut = deserialize_uint16_t(ok1, buf1, sz, pos1);
+    bool ok2 = scrut.fst;
+    uint32_t pos2 = scrut.snd;
+    uint16_t b1 = scrut.thd;
+    return
+      (
+        (K___bool_uint32_t_uint32_t){
+          .fst = ok2,
+          .snd = pos2,
+          .thd = ((uint32_t)b0 << (uint32_t)16U) + (uint32_t)b1
+        }
+      );
+  }
 }
 
 typedef struct K___bool_uint32_t_uint64_t_s
@@ -1859,22 +1931,25 @@ deserialize_uint64_t(bool ok, uint8_t *buf1, uint32_t sz, uint32_t pos)
   {
     return ((K___bool_uint32_t_uint64_t){ .fst = false, .snd = pos, .thd = (uint64_t)0U });
   }
-  K___bool_uint32_t_uint32_t scrut0 = deserialize_uint32_t(ok, buf1, sz, pos);
-  bool ok1 = scrut0.fst;
-  uint32_t pos1 = scrut0.snd;
-  uint32_t b0 = scrut0.thd;
-  K___bool_uint32_t_uint32_t scrut = deserialize_uint32_t(ok1, buf1, sz, pos1);
-  bool ok2 = scrut.fst;
-  uint32_t pos2 = scrut.snd;
-  uint32_t b1 = scrut.thd;
-  return
-    (
-      (K___bool_uint32_t_uint64_t){
-        .fst = ok2,
-        .snd = pos2,
-        .thd = ((uint64_t)b0 << (uint32_t)32U) + (uint64_t)b1
-      }
-    );
+  else
+  {
+    K___bool_uint32_t_uint32_t scrut0 = deserialize_uint32_t(ok, buf1, sz, pos);
+    bool ok1 = scrut0.fst;
+    uint32_t pos1 = scrut0.snd;
+    uint32_t b0 = scrut0.thd;
+    K___bool_uint32_t_uint32_t scrut = deserialize_uint32_t(ok1, buf1, sz, pos1);
+    bool ok2 = scrut.fst;
+    uint32_t pos2 = scrut.snd;
+    uint32_t b1 = scrut.thd;
+    return
+      (
+        (K___bool_uint32_t_uint64_t){
+          .fst = ok2,
+          .snd = pos2,
+          .thd = ((uint64_t)b0 << (uint32_t)32U) + (uint64_t)b1
+        }
+      );
+  }
 }
 
 static K___bool_uint32_t_uint64_t
@@ -1900,17 +1975,20 @@ deserialize_hash(bool ok, uint8_t *buf1, uint32_t sz, uint32_t pos)
     x0 = { .dummy = NULL, .r_alloc = hash_r_alloc, .r_free = hash_r_free };
     return ((K___bool_uint32_t__uint8_t_){ .fst = false, .snd = pos, .thd = x0.dummy });
   }
-  if (sz - pos < hash_size)
+  else if (sz - pos < hash_size)
   {
     LowStar_Regional_regional___uint8_t_
     x0 = { .dummy = NULL, .r_alloc = hash_r_alloc, .r_free = hash_r_free };
     return ((K___bool_uint32_t__uint8_t_){ .fst = false, .snd = pos, .thd = x0.dummy });
   }
-  LowStar_Regional_regional___uint8_t_
-  x0 = { .dummy = NULL, .r_alloc = hash_r_alloc, .r_free = hash_r_free };
-  uint8_t *hash1 = x0.r_alloc();
-  memcpy(hash1, buf1 + pos, hash_size * sizeof buf1[0U]);
-  return ((K___bool_uint32_t__uint8_t_){ .fst = true, .snd = pos + hash_size, .thd = hash1 });
+  else
+  {
+    LowStar_Regional_regional___uint8_t_
+    x0 = { .dummy = NULL, .r_alloc = hash_r_alloc, .r_free = hash_r_free };
+    uint8_t *hash1 = x0.r_alloc();
+    memcpy(hash1, buf1 + pos, hash_size * sizeof buf1[0U]);
+    return ((K___bool_uint32_t__uint8_t_){ .fst = true, .snd = pos + hash_size, .thd = hash1 });
+  }
 }
 
 static K___bool_uint32_t
@@ -1999,46 +2077,52 @@ deserialize_hash_vec(bool ok, uint8_t *buf1, uint32_t sz, uint32_t pos)
         }
       );
   }
-  K___bool_uint32_t_uint32_t scrut0 = deserialize_uint32_t(ok, buf1, sz, pos);
-  bool ok1 = scrut0.fst;
-  uint32_t pos1 = scrut0.snd;
-  uint32_t n1 = scrut0.thd;
-  if (!ok1)
+  else
   {
-    return
-      (
-        (K___bool_uint32_t_LowStar_Vector_vector_str___uint8_t_){
-          .fst = false,
-          .snd = pos1,
-          .thd = { .sz = (uint32_t)0U, .cap = (uint32_t)0U, .vs = NULL }
-        }
-      );
+    K___bool_uint32_t_uint32_t scrut0 = deserialize_uint32_t(ok, buf1, sz, pos);
+    bool ok1 = scrut0.fst;
+    uint32_t pos1 = scrut0.snd;
+    uint32_t n1 = scrut0.thd;
+    if (!ok1)
+    {
+      return
+        (
+          (K___bool_uint32_t_LowStar_Vector_vector_str___uint8_t_){
+            .fst = false,
+            .snd = pos1,
+            .thd = { .sz = (uint32_t)0U, .cap = (uint32_t)0U, .vs = NULL }
+          }
+        );
+    }
+    else if (n1 == (uint32_t)0U)
+    {
+      return
+        (
+          (K___bool_uint32_t_LowStar_Vector_vector_str___uint8_t_){
+            .fst = true,
+            .snd = pos1,
+            .thd = { .sz = (uint32_t)0U, .cap = (uint32_t)0U, .vs = NULL }
+          }
+        );
+    }
+    else
+    {
+      LowStar_Regional_regional___uint8_t_
+      x0 = { .dummy = NULL, .r_alloc = hash_r_alloc, .r_free = hash_r_free };
+      LowStar_Vector_vector_str___uint8_t_ res = LowStar_Vector_alloc___uint8_t_(n1, x0.dummy);
+      K___bool_uint32_t scrut = deserialize_hash_vec_i(ok1, buf1, sz, pos1, res, (uint32_t)0U);
+      bool ok2 = scrut.fst;
+      uint32_t pos2 = scrut.snd;
+      return
+        (
+          (K___bool_uint32_t_LowStar_Vector_vector_str___uint8_t_){
+            .fst = ok2,
+            .snd = pos2,
+            .thd = res
+          }
+        );
+    }
   }
-  if (n1 == (uint32_t)0U)
-  {
-    return
-      (
-        (K___bool_uint32_t_LowStar_Vector_vector_str___uint8_t_){
-          .fst = true,
-          .snd = pos1,
-          .thd = { .sz = (uint32_t)0U, .cap = (uint32_t)0U, .vs = NULL }
-        }
-      );
-  }
-  LowStar_Regional_regional___uint8_t_
-  x0 = { .dummy = NULL, .r_alloc = hash_r_alloc, .r_free = hash_r_free };
-  LowStar_Vector_vector_str___uint8_t_ res = LowStar_Vector_alloc___uint8_t_(n1, x0.dummy);
-  K___bool_uint32_t scrut = deserialize_hash_vec_i(ok1, buf1, sz, pos1, res, (uint32_t)0U);
-  bool ok2 = scrut.fst;
-  uint32_t pos2 = scrut.snd;
-  return
-    (
-      (K___bool_uint32_t_LowStar_Vector_vector_str___uint8_t_){
-        .fst = ok2,
-        .snd = pos2,
-        .thd = res
-      }
-    );
 }
 
 static K___bool_uint32_t
@@ -2130,47 +2214,53 @@ deserialize_hash_vv(bool ok, uint8_t *buf1, uint32_t sz, uint32_t pos)
         }
       );
   }
-  K___bool_uint32_t_uint32_t scrut0 = deserialize_uint32_t(ok, buf1, sz, pos);
-  bool ok1 = scrut0.fst;
-  uint32_t pos1 = scrut0.snd;
-  uint32_t n1 = scrut0.thd;
-  if (!ok1)
+  else
   {
-    return
-      (
-        (K___bool_uint32_t_LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_){
-          .fst = false,
-          .snd = pos1,
-          .thd = { .sz = (uint32_t)0U, .cap = (uint32_t)0U, .vs = NULL }
-        }
-      );
+    K___bool_uint32_t_uint32_t scrut0 = deserialize_uint32_t(ok, buf1, sz, pos);
+    bool ok1 = scrut0.fst;
+    uint32_t pos1 = scrut0.snd;
+    uint32_t n1 = scrut0.thd;
+    if (!ok1)
+    {
+      return
+        (
+          (K___bool_uint32_t_LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_){
+            .fst = false,
+            .snd = pos1,
+            .thd = { .sz = (uint32_t)0U, .cap = (uint32_t)0U, .vs = NULL }
+          }
+        );
+    }
+    else if (n1 == (uint32_t)0U)
+    {
+      return
+        (
+          (K___bool_uint32_t_LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_){
+            .fst = true,
+            .snd = pos1,
+            .thd = { .sz = (uint32_t)0U, .cap = (uint32_t)0U, .vs = NULL }
+          }
+        );
+    }
+    else
+    {
+      LowStar_Regional_regional__LowStar_Vector_vector_str___uint8_t_
+      scrut1 = { .dummy = hash_vec_dummy, .r_alloc = hash_vec_r_alloc, .r_free = hash_vec_r_free };
+      LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_
+      res = LowStar_Vector_alloc__LowStar_Vector_vector_str__uint8_t_(n1, scrut1.dummy);
+      K___bool_uint32_t scrut = deserialize_hash_vv_i(ok1, buf1, sz, pos1, res, (uint32_t)0U);
+      bool ok2 = scrut.fst;
+      uint32_t pos2 = scrut.snd;
+      return
+        (
+          (K___bool_uint32_t_LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_){
+            .fst = ok2,
+            .snd = pos2,
+            .thd = res
+          }
+        );
+    }
   }
-  if (n1 == (uint32_t)0U)
-  {
-    return
-      (
-        (K___bool_uint32_t_LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_){
-          .fst = true,
-          .snd = pos1,
-          .thd = { .sz = (uint32_t)0U, .cap = (uint32_t)0U, .vs = NULL }
-        }
-      );
-  }
-  LowStar_Regional_regional__LowStar_Vector_vector_str___uint8_t_
-  scrut1 = { .dummy = hash_vec_dummy, .r_alloc = hash_vec_r_alloc, .r_free = hash_vec_r_free };
-  LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_
-  res = LowStar_Vector_alloc__LowStar_Vector_vector_str__uint8_t_(n1, scrut1.dummy);
-  K___bool_uint32_t scrut = deserialize_hash_vv_i(ok1, buf1, sz, pos1, res, (uint32_t)0U);
-  bool ok2 = scrut.fst;
-  uint32_t pos2 = scrut.snd;
-  return
-    (
-      (K___bool_uint32_t_LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_){
-        .fst = ok2,
-        .snd = pos2,
-        .thd = res
-      }
-    );
 }
 
 uint64_t mt_serialize_size(merkle_tree *mt)
@@ -2188,7 +2278,10 @@ uint64_t mt_serialize_size(merkle_tree *mt)
       + (uint64_t)4U + (uint64_t)rhs.sz * (uint64_t)hash_size
       + (uint64_t)hash_size;
   }
-  return uint64_max;
+  else
+  {
+    return uint64_max;
+  }
 }
 
 uint32_t mt_serialize(merkle_tree *mt, uint8_t *output, uint32_t sz)
@@ -2225,7 +2318,10 @@ uint32_t mt_serialize(merkle_tree *mt, uint8_t *output, uint32_t sz)
   {
     return pos8;
   }
-  return (uint32_t)0U;
+  else
+  {
+    return (uint32_t)0U;
+  }
 }
 
 merkle_tree *mt_deserialize(uint8_t *input, uint32_t sz)
@@ -2280,21 +2376,24 @@ merkle_tree *mt_deserialize(uint8_t *input, uint32_t sz)
   {
     return NULL;
   }
-  KRML_CHECK_SIZE(sizeof (merkle_tree), (uint32_t)1U);
-  merkle_tree *buf = KRML_HOST_MALLOC(sizeof (merkle_tree));
-  buf[0U]
-  =
-    (
-      (merkle_tree){
-        .offset = offset1,
-        .i = i1,
-        .j = j1,
-        .hs = hs,
-        .rhs_ok = rhs_ok,
-        .rhs = rhs,
-        .mroot = mroot
-      }
-    );
-  return buf;
+  else
+  {
+    KRML_CHECK_SIZE(sizeof (merkle_tree), (uint32_t)1U);
+    merkle_tree *buf = KRML_HOST_MALLOC(sizeof (merkle_tree));
+    buf[0U]
+    =
+      (
+        (merkle_tree){
+          .offset = offset1,
+          .i = i1,
+          .j = j1,
+          .hs = hs,
+          .rhs_ok = rhs_ok,
+          .rhs = rhs,
+          .mroot = mroot
+        }
+      );
+    return buf;
+  }
 }
 
