@@ -102,9 +102,9 @@ all:
 	tools/blast-staticconfig.sh $(EVERCRYPT_CONFIG)
 	$(MAKE) all-staged
 
-all-unstaged: compile-compact compile-compact-msvc compile-compact-gcc \
-  compile-evercrypt-external-headers compile-compact-c89 compile-ccf \
-  compile-portable compile-mozilla
+all-unstaged: compile-gcc-compatible compile-msvc-compatible compile-gcc64-only \
+  compile-evercrypt-external-headers compile-c89-compatible compile-ccf \
+  compile-portable-gcc-compatible compile-mozilla
 
 # Automatic staging.
 %-staged: .last_vale_version
@@ -732,11 +732,11 @@ dist/wasm/Makefile.basic: WASMSUPPORT_BUNDLE =
 # README.EverCrypt.md)
 
 # Customizations for regular, msvc and gcc flavors.
-dist/compact/Makefile.basic: DEFAULT_FLAGS += -ctypes EverCrypt.Ed25519
+dist/gcc-compatible/Makefile.basic: DEFAULT_FLAGS += -ctypes EverCrypt.Ed25519
 
-dist/compact-msvc/Makefile.basic: DEFAULT_FLAGS += -falloca -ftail-calls
+dist/msvc-compatible/Makefile.basic: DEFAULT_FLAGS += -falloca -ftail-calls
 
-dist/compact-gcc/Makefile.basic: DEFAULT_FLAGS += -fbuiltin-uint128
+dist/gcc64-only/Makefile.basic: DEFAULT_FLAGS += -fbuiltin-uint128
 
 
 # C89 distribution
@@ -744,10 +744,10 @@ dist/compact-gcc/Makefile.basic: DEFAULT_FLAGS += -fbuiltin-uint128
 #
 # - MerkleTree doesn't compile in C89 mode (FIXME?)
 # - Use C89 versions of ancient HACL code
-dist/compact-c89/Makefile.basic: MERKLE_BUNDLE = -bundle 'MerkleTree.*'
-dist/compact-c89/Makefile.basic: DEFAULT_FLAGS += \
+dist/c89-compatible/Makefile.basic: MERKLE_BUNDLE = -bundle 'MerkleTree.*'
+dist/c89-compatible/Makefile.basic: DEFAULT_FLAGS += \
   -fc89 -ccopt -std=c89 -ccopt -Wno-typedef-redefinition
-dist/compact-c89/Makefile.basic: HACL_OLD_FILES := $(subst -c,-c89,$(HACL_OLD_FILES))
+dist/c89-compatible/Makefile.basic: HACL_OLD_FILES := $(subst -c,-c89,$(HACL_OLD_FILES))
 
 
 # CCF distribution
@@ -787,6 +787,13 @@ dist/ccf/Makefile.basic: HPKE_BUNDLE = -bundle Hacl.HPKE.*
 #
 # Disable the EverCrypt and MerkleTree layers. Only keep Chacha20, Poly1305,
 # Curve25519 for now. Everything else in Hacl is disabled.
+dist/mozilla/Makefile.basic: INTRINSIC_FLAGS = \
+  -add-include 'Hacl_Chacha20Poly1305_128:"libintvector.h"' \
+  -add-include 'Hacl_Chacha20Poly1305_256:"libintvector.h"' \
+  -add-include 'Hacl_Chacha20_Vec128:"libintvector.h"' \
+  -add-include 'Hacl_Chacha20_Vec256:"libintvector.h"' \
+  -add-include 'Hacl_Poly1305_128:"libintvector.h"' \
+  -add-include 'Hacl_Poly1305_256:"libintvector.h"'
 dist/mozilla/Makefile.basic: CURVE_BUNDLE_SLOW = -bundle Hacl.Curve25519_64_Slow
 dist/mozilla/Makefile.basic: SALSA20_BUNDLE = -bundle Hacl.Salsa20
 dist/mozilla/Makefile.basic: ED_BUNDLE = -bundle Hacl.Ed25519
@@ -821,7 +828,7 @@ dist/mozilla/Makefile.basic: TARGET_H_INCLUDE = -add-include '<stdbool.h>'
 # someone can download them onto their machine for debugging. Also enforces that
 # we don't have bundle errors where, say, an sse2-required function ends up in a
 # file that is *NOT* known to require sse2.
-dist/portable/Makefile.basic: OPT_FLAGS=-ccopts -mtune=generic
+dist/portable-gcc-compatible/Makefile.basic: OPT_FLAGS=-ccopts -mtune=generic
 
 
 # EVERCRYPT_CONFIG tweaks
@@ -837,11 +844,11 @@ endif
 
 # Customizations for Kaizala. No BCrypt, no Vale.
 ifeq ($(EVERCRYPT_CONFIG),kaizala)
-dist/compact/Makefile.basic: \
+dist/gcc-compatible/Makefile.basic: \
   HAND_WRITTEN_OPTIONAL_FILES := $(filter-out %_bcrypt.c,$(HAND_WRITTEN_OPTIONAL_FILES))
-dist/compact/Makefile.basic: \
+dist/gcc-compatible/Makefile.basic: \
   HAND_WRITTEN_FILES := $(filter-out %_vale_stubs.c,$(HAND_WRITTEN_FILES))
-dist/compact/Makefile.basic: \
+dist/gcc-compatible/Makefile.basic: \
   VALE_ASMS :=
 endif
 
@@ -849,7 +856,7 @@ endif
 # --------------------------
 
 .PRECIOUS: dist/%/Makefile.basic
-dist/%/Makefile.basic: $(ALL_KRML_FILES) \
+dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/LICENSE.txt \
   $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_H_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) $(VALE_ASMS) | old-extract-c
 	mkdir -p $(dir $@)
 	[ x"$(HACL_OLD_FILES)" != x ] && cp $(HACL_OLD_FILES) $(patsubst %.c,%.h,$(HACL_OLD_FILES)) $(dir $@) || true
@@ -865,6 +872,10 @@ dist/%/Makefile.basic: $(ALL_KRML_FILES) \
 	  $(notdir $(HACL_OLD_FILES)) \
 	  $(notdir $(HAND_WRITTEN_FILES)) \
 	  -o libevercrypt.a
+	echo "This code was generated with the following toolchain." > $(dir $@)/INFO.txt
+	echo "F* version: $(shell cd $(FSTAR_HOME) && git rev-parse HEAD)" >> $(dir $@)/INFO.txt
+	echo "KreMLin version: $(shell cd $(KREMLIN_HOME) && git rev-parse HEAD)" >> $(dir $@)/INFO.txt
+	echo "Vale version: $(shell cat $(VALE_HOME)/bin/.vale_version)" >> $(dir $@)/INFO.txt
 
 dist/evercrypt-external-headers/Makefile.basic: $(ALL_KRML_FILES)
 	$(KRML) -silent \
@@ -897,8 +908,12 @@ dist/test/c/Test.c: KRML_EXTRA=-add-include '"kremlin/internal/compat.h"'
 # C Compilation (recursive make invocation relying on KreMLin-generated Makefile) #
 ###################################################################################
 
-compile-%: dist/Makefile dist/%/Makefile.basic
-	cp $< dist/$*/
+copy-kremlib:
+	mkdir -p dist/kremlin
+	(cd $(KREMLIN_HOME) && tar cvf - kremlib/dist/minimal include) | (cd dist/kremlin && tar xf -)
+
+compile-%: dist/Makefile.tmpl dist/%/Makefile.basic | copy-kremlib
+	cp $< dist/$*/Makefile
 	$(MAKE) -C dist/$*
 
 
@@ -920,11 +935,11 @@ CFLAGS += -Wall -Wextra -g \
 # FIXME there's a kremlin error that generates a void* -- can't use -Werror
 # Need the libraries to be present and compiled.
 .PRECIOUS: %.exe
-%.exe: %.o | compile-compact
+%.exe: %.o | compile-gcc-compatible
 	# Linking with full kremlib since tests may use TestLib, etc.
 	$(call run-with-log,\
 	  $(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@ \
-	    dist/compact/libevercrypt.a -lcrypto $(LDFLAGS) \
+	    dist/gcc-compatible/libevercrypt.a -lcrypto $(LDFLAGS) \
 	    $(KREMLIN_HOME)/kremlib/dist/generic/libkremlib.a \
 	  ,[LD $*],$(call to-obj-dir,$@))
 
@@ -947,7 +962,7 @@ test-c-%: dist/test/c/%.test
 # C tests (from C files) #
 ##########################
 
-test-handwritten: compile-compact-gcc
+test-handwritten: compile-gcc64-only
 	$(LD_EXTRA) KREMLIN_HOME="$(KREMLIN_HOME)" \
 	  LDFLAGS="$(LDFLAGS)" CFLAGS="$(CFLAGS)" \
 	  $(MAKE) -C tests test
