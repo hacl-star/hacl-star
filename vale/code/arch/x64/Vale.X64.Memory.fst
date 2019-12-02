@@ -305,6 +305,7 @@ let buffer_write #t b i v h =
 
 val addr_in_ptr: (#t:base_typ) -> (addr:int) -> (ptr:buffer t) -> (h:vale_heap) ->
   GTot (b:bool{ not b <==>
+    // REVIEW: what's the quantifier pattern here?
     (forall i. 0 <= i /\ i < buffer_length ptr ==>
       addr <> (buffer_addr ptr h) + (view_n t) * i)})
 
@@ -529,8 +530,8 @@ open Vale.X64.Machine_s
 
 let valid_taint_buf (b:b8) (mem:vale_heap) (memTaint:memtaint) t =
   let addr = (_ih mem).addrs b in
-  (forall (i:nat{i < DV.length (get_downview b.bsrc)}).
-    {:pattern (memTaint.[addr + i])} memTaint.[addr + i] = t)
+  (forall (i:int).{:pattern (memTaint.[i])}
+    addr <= i /\ i < addr + DV.length (get_downview b.bsrc) ==> memTaint.[i] == t)
 
 let valid_taint_buf64 b mem memTaint t = valid_taint_buf b mem memTaint t
 
@@ -612,13 +613,13 @@ let rec write_taint_lemma
   (mem:IB.interop_heap)
   (ts:b8 -> GTot taint)
   (b:b8{i <= DV.length (get_downview b.bsrc)})
-  (accu:memtaint{forall j. 0 <= j /\ j < i ==> accu.[mem.addrs b+j] = ts b})
+  (accu:memtaint{forall (j:int).{:pattern accu.[j]} mem.addrs b <= j /\ j < mem.addrs b + i ==> accu.[j] = ts b})
    : Lemma
        (ensures (
          let m = IB.write_taint i mem ts b accu in
          let addr = mem.addrs b in
-         (forall j. 0 <= j /\ j < DV.length (get_downview b.bsrc) ==>
-           m.[addr+j] = ts b) /\
+         (forall j.{:pattern m.[j]} addr <= j /\ j < addr + DV.length (get_downview b.bsrc) ==>
+           m.[j] = ts b) /\
          (forall j. {:pattern m.[j]} j < addr \/ j >= addr + DV.length (get_downview b.bsrc) ==>
            m.[j] == accu.[j])))
        (decreases %[DV.length (get_downview b.bsrc) - i])
@@ -630,7 +631,7 @@ let rec write_taint_lemma
        assert (IB.write_taint i mem ts b accu ==
                IB.write_taint (i + 1) mem ts b new_accu);
        assert (Set.equal (Map.domain new_accu) (Set.complement Set.empty));
-       assert (forall j. 0 <= j /\ j < i + 1 ==> new_accu.[addr + i] == ts b);
+       assert (forall j.{:pattern m.[j]} addr <= j /\ j < addr + i + 1 ==> new_accu.[j] == ts b);
        write_taint_lemma (i + 1) mem ts b new_accu
 
 #restart-solver
