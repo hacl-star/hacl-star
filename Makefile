@@ -102,9 +102,9 @@ all:
 	tools/blast-staticconfig.sh $(EVERCRYPT_CONFIG)
 	$(MAKE) all-staged
 
-all-unstaged: compile-compact compile-compact-msvc compile-compact-gcc \
-  compile-evercrypt-external-headers compile-compact-c89 compile-ccf \
-  compile-portable compile-mozilla
+all-unstaged: compile-gcc-compatible compile-msvc-compatible compile-gcc64-only \
+  compile-evercrypt-external-headers compile-c89-compatible compile-ccf \
+  compile-portable-gcc-compatible compile-mozilla
 
 # Automatic staging.
 %-staged: .last_vale_version
@@ -727,11 +727,11 @@ dist/wasm/Makefile.basic: WASMSUPPORT_BUNDLE =
 # README.EverCrypt.md)
 
 # Customizations for regular, msvc and gcc flavors.
-dist/compact/Makefile.basic: DEFAULT_FLAGS += -ctypes EverCrypt.Ed25519
+dist/gcc-compatible/Makefile.basic: DEFAULT_FLAGS += -ctypes EverCrypt.Ed25519
 
-dist/compact-msvc/Makefile.basic: DEFAULT_FLAGS += -falloca -ftail-calls
+dist/msvc-compatible/Makefile.basic: DEFAULT_FLAGS += -falloca -ftail-calls
 
-dist/compact-gcc/Makefile.basic: DEFAULT_FLAGS += -fbuiltin-uint128
+dist/gcc64-only/Makefile.basic: DEFAULT_FLAGS += -fbuiltin-uint128
 
 
 # C89 distribution
@@ -739,10 +739,10 @@ dist/compact-gcc/Makefile.basic: DEFAULT_FLAGS += -fbuiltin-uint128
 #
 # - MerkleTree doesn't compile in C89 mode (FIXME?)
 # - Use C89 versions of ancient HACL code
-dist/compact-c89/Makefile.basic: MERKLE_BUNDLE = -bundle 'MerkleTree.*'
-dist/compact-c89/Makefile.basic: DEFAULT_FLAGS += \
+dist/c89-compatible/Makefile.basic: MERKLE_BUNDLE = -bundle 'MerkleTree.*'
+dist/c89-compatible/Makefile.basic: DEFAULT_FLAGS += \
   -fc89 -ccopt -std=c89 -ccopt -Wno-typedef-redefinition
-dist/compact-c89/Makefile.basic: HACL_OLD_FILES := $(subst -c,-c89,$(HACL_OLD_FILES))
+dist/c89-compatible/Makefile.basic: HACL_OLD_FILES := $(subst -c,-c89,$(HACL_OLD_FILES))
 
 
 # CCF distribution
@@ -812,7 +812,7 @@ dist/mozilla/Makefile.basic: TARGET_H_INCLUDE = -add-include '<stdbool.h>'
 # someone can download them onto their machine for debugging. Also enforces that
 # we don't have bundle errors where, say, an sse2-required function ends up in a
 # file that is *NOT* known to require sse2.
-dist/portable/Makefile.basic: OPT_FLAGS=-ccopts -mtune=generic
+dist/portable-gcc-compatible/Makefile.basic: OPT_FLAGS=-ccopts -mtune=generic
 
 
 # EVERCRYPT_CONFIG tweaks
@@ -828,11 +828,11 @@ endif
 
 # Customizations for Kaizala. No BCrypt, no Vale.
 ifeq ($(EVERCRYPT_CONFIG),kaizala)
-dist/compact/Makefile.basic: \
+dist/gcc-compatible/Makefile.basic: \
   HAND_WRITTEN_OPTIONAL_FILES := $(filter-out %_bcrypt.c,$(HAND_WRITTEN_OPTIONAL_FILES))
-dist/compact/Makefile.basic: \
+dist/gcc-compatible/Makefile.basic: \
   HAND_WRITTEN_FILES := $(filter-out %_vale_stubs.c,$(HAND_WRITTEN_FILES))
-dist/compact/Makefile.basic: \
+dist/gcc-compatible/Makefile.basic: \
   VALE_ASMS :=
 endif
 
@@ -919,11 +919,11 @@ CFLAGS += -Wall -Wextra -g \
 # FIXME there's a kremlin error that generates a void* -- can't use -Werror
 # Need the libraries to be present and compiled.
 .PRECIOUS: %.exe
-%.exe: %.o | compile-compact
+%.exe: %.o | compile-gcc-compatible
 	# Linking with full kremlib since tests may use TestLib, etc.
 	$(call run-with-log,\
 	  $(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@ \
-	    dist/compact/libevercrypt.a -lcrypto $(LDFLAGS) \
+	    dist/gcc-compatible/libevercrypt.a -lcrypto $(LDFLAGS) \
 	    $(KREMLIN_HOME)/kremlib/dist/generic/libkremlib.a \
 	  ,[LD $*],$(call to-obj-dir,$@))
 
@@ -946,7 +946,7 @@ test-c-%: dist/test/c/%.test
 # C tests (from C files) #
 ##########################
 
-test-handwritten: compile-compact-gcc
+test-handwritten: compile-gcc64-only
 	$(LD_EXTRA) KREMLIN_HOME="$(KREMLIN_HOME)" \
 	  LDFLAGS="$(LDFLAGS)" CFLAGS="$(CFLAGS)" \
 	  $(MAKE) -C tests test
