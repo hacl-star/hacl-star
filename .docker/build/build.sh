@@ -147,7 +147,7 @@ function fetch_vale() {
 function refresh_hacl_hints_dist() {
     # We should not generate hints when building on Windows
     if [[ "$OS" != "Windows_NT" ]]; then
-        refresh_hints_dist "git@github.com:mitls/hacl-star.git" "true" "regenerate hints and dist" "."
+        refresh_hints_dist "git@github.com:mitls/hacl-star.git" "git ls-files dist | xargs git add" "regenerate hints and dist" "."
     fi
 }
 
@@ -168,11 +168,6 @@ function refresh_hints_dist() {
 
     # Add all the hints, even those not under version control
     find $hints_dir -iname '*.hints' -and -not -path '*/.*' -and -not -path '*/dependencies/*' | xargs git add
-
-    # Add new files from the C snapshot in dist.
-    # Remove files first that we don't want in the snapshot.
-    find dist \( -name "*.d" -o -name "*.cmi" -o -name "*.cmx" -o -name "*.ocaml" -o -name "*.cmxa" \) | xargs rm
-    git add dist
 
     # Without the eval, this was doing weird stuff such as,
     # when $2 = "git ls-files src/ocaml-output/ | xargs git add",
