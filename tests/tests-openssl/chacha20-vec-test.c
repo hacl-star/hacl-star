@@ -8,9 +8,20 @@
 #include <unistd.h>
 #include <time.h>
 #include <stdbool.h>
-//#include "openssl/chacha.h"
-
+#include <openssl/evp.h>
+#include "chacha.h"
 //#define ossl_chacha20(cipher,plain,len,nonce,key,ctr) (CRYPTO_chacha_20(cipher,plain,len,nonce,key,ctr))
+
+void ossl_chacha20(uint8_t* cipher, uint8_t* plain, int len, uint8_t* key, uint8_t* nonce){
+   ChaCha20_ctr32(cipher, plain, len, (uint32_t*)key, (uint32_t*)nonce);
+   //EVP_CIPHER_CTX *ctx;
+   //int clen;
+   //ctx = EVP_CIPHER_CTX_new();
+   //EVP_EncryptInit_ex(ctx, EVP_chacha20(), NULL, key, nonce);
+   //EVP_EncryptUpdate(ctx, cipher, &clen, plain, len);
+   //EVP_EncryptFinal_ex(ctx, cipher + clen, &clen);
+   //EVP_CIPHER_CTX_free(ctx);
+}
 
 typedef uint64_t cycles;
 
@@ -87,6 +98,11 @@ int main() {
     0xb4, 0x0b, 0x8e, 0xed, 0xf2, 0x78, 0x5e, 0x42,
     0x87, 0x4d
   };
+
+  uint8_t c_n[16] = {
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x4a, 0, 0, 0, 0
+  };
+
   uint8_t comp[114] = {0};
   Hacl_Chacha20_Vec32_chacha20_encrypt_32(in_len,comp,in,k,n,1);
   printf("computed:");
@@ -133,8 +149,8 @@ int main() {
   if (ok) printf("Success!\n");
   else printf("FAILED!\n");
 
-/*
-  ossl_chacha20(comp,in,in_len,k,n,1);
+
+  ossl_chacha20(comp,in,in_len,k,c_n);
   printf("OpenSSL computed:");
   for (int i = 0; i < 114; i++)
     printf("%02x",comp[i]);
@@ -144,11 +160,10 @@ int main() {
     printf("%02x",exp[i]);
   printf("\n");
   ok = true;
-  for (int i = 0; i < 32; i++)
+  for (int i = 0; i < 114; i++)
     ok = ok & (exp[i] == comp[i]);
   if (ok) printf("Success!\n");
   else printf("FAILED!\n");
-*/
 
   uint64_t len = SIZE;
   uint8_t plain[SIZE];
@@ -211,25 +226,25 @@ int main() {
   double diff3 = (double)(t2 - t1)/CLOCKS_PER_SEC;
   uint64_t cyc3 = b - a;
 
-/*
   memset(plain,'P',SIZE);
   memset(key,'K',16);
-  memset(nonce,'N',12);
+  uint8_t ctr_nonce[16] = { 0 };
+  ctr_nonce[0] = 1;
+  memset(ctr_nonce + (uint32_t)4U,'N',12);
 
   for (int j = 0; j < ROUNDS; j++) {
-    ossl_chacha20(plain,plain,SIZE,key,nonce,1);
+    ossl_chacha20(plain,plain,SIZE,key,ctr_nonce);
   }
 
   t1 = clock();
   a = cpucycles_begin();
   for (int j = 0; j < ROUNDS; j++) {
-    ossl_chacha20(plain,plain,SIZE,key,nonce,1);
+    ossl_chacha20(plain,plain,SIZE,key,ctr_nonce);
   }
   b = cpucycles_end();
   t2 = clock();
   double diff6 = (double)(t2 - t1)/CLOCKS_PER_SEC;
   uint64_t cyc6 = b - a;
-*/
 
   uint64_t count = ROUNDS * SIZE;
 
@@ -245,9 +260,7 @@ int main() {
   printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)cyc3,(double)cyc3/count);
   printf("bw %8.2f MB/s\n",(double)count/(diff3 * 1000000.0));
 
-/*
   printf("OpenSSL Chacha20\n");
   printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)cyc6,(double)cyc6/count);
   printf("bw %8.2f MB/s\n",(double)count/(diff6 * 1000000.0));
-  */
 }

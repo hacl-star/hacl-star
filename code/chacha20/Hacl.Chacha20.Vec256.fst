@@ -2,10 +2,13 @@ module Hacl.Chacha20.Vec256
 
 open Hacl.Meta.Chacha20.Vec
 
+[@CInline]
 private
 let double_round_256 = Hacl.Impl.Chacha20.Core32xN.double_round #8
+[@CInline]
 private
 let chacha20_core_256 = vec_chacha20_core_higher #8 double_round_256
+[@CInline]
 private
 let chacha20_init_256 = Hacl.Impl.Chacha20.Vec.chacha20_init #8
 

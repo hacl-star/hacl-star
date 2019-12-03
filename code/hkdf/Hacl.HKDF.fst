@@ -20,7 +20,7 @@ module Seq = Lib.Sequence
 
 // TODO: proofs break mysteriously when not befriending Lib.IntTypes and
 // declassifying uint8; investigate
-// assume val declassify8: squash (uint8 == UInt8.t)    
+// assume val declassify8: squash (uint8 == UInt8.t)
 
 module ST = FStar.HyperStack.ST
 
@@ -29,18 +29,18 @@ module ST = FStar.HyperStack.ST
 let mk_extract a hmac prk salt saltlen ikm ikmlen =
   hmac prk salt saltlen ikm ikmlen
 
-val hmac_input_fits: a:hash_alg -> Lemma 
-  (pow2 32 + block_length a <= max_input_length a)  
+val hmac_input_fits: a:hash_alg -> Lemma
+  (pow2 32 + block_length a <= max_input_length a)
 let hmac_input_fits a =
   allow_inversion hash_alg;
   match a with
   | MD5 ->
-    assert_norm (pow2 32 + block_length MD5 <= max_input_length MD5)  
-  | SHA1 -> 
+    assert_norm (pow2 32 + block_length MD5 <= max_input_length MD5)
+  | SHA1 ->
     assert_norm (pow2 32 + block_length SHA1 <= max_input_length SHA1)
   | SHA2_224 ->
     assert_norm (pow2 32 + block_length SHA2_224 <= max_input_length SHA2_224)
-  | SHA2_256 -> 
+  | SHA2_256 ->
     assert_norm (pow2 32 + block_length SHA2_256 <= max_input_length SHA2_256)
   | SHA2_384 ->
     assert_norm (pow2 32 + block_length SHA2_384 <= max_input_length SHA2_384)
@@ -80,8 +80,8 @@ let mk_expand a hmac okm prk prklen info infolen len =
   [@inline_let]
   let footprint (i:size_nat{i <= v n}) :
     GTot LB.(l:loc{loc_disjoint l (B.loc output) /\
-                   address_liveness_insensitive_locs `loc_includes` l}) = 
-    LB.loc_union (B.loc tag) (B.loc ctr) 
+                   address_liveness_insensitive_locs `loc_includes` l}) =
+    LB.loc_union (B.loc tag) (B.loc ctr)
   in
   [@inline_let]
   let spec h0 : GTot (i:size_nat{i < v n} -> a_spec i -> a_spec (i + 1) & Seq.lseq uint8 (v tlen)) =
@@ -104,8 +104,8 @@ let mk_expand a hmac okm prk prklen info infolen len =
       // assert (let _, t = spec h0 0 (FStar.Seq.empty #uint8) in B.as_seq h2 tag == t)
       end
     else
-      begin        
-      Seq.eq_intro 
+      begin
+      Seq.eq_intro
         (B.as_seq h1 text)
         (refl h1 (v i) @| B.as_seq h0 info @| Seq.create 1 (u8 (v i + 1)));
       hmac tag prk prklen text (tlen +! infolen +! 1ul)
@@ -115,7 +115,7 @@ let mk_expand a hmac okm prk prklen info infolen len =
       //      (B.as_seq h1 tag @| B.as_seq h0 info @| Seq.create 1 (u8 (v i + 1))));
       // assert (let _, t = spec h0 (v i) (B.as_seq h tag) in B.as_seq h2 tag == t)
       end;
-    Seq.unfold_generate_blocks 
+    Seq.unfold_generate_blocks
       (v tlen) (v n) a_spec (spec h0) (FStar.Seq.empty #uint8) (v i);
     //assert (v (i *! tlen) + v tlen <= v (n *! tlen));
     B.copy (B.sub output (i *! tlen) tlen) tag
@@ -152,7 +152,7 @@ let mk_expand a hmac okm prk prklen info infolen len =
     // let h3 = ST.get() in
     // assert (
     //   B.as_seq h3 tag ==
-    //   Spec.Agile.HMAC.hmac a (B.as_seq h0 prk) 
+    //   Spec.Agile.HMAC.hmac a (B.as_seq h0 prk)
     //     (refl h1 (v n) @| B.as_seq h0 info @| Seq.create 1 (u8 (v n + 1))))
   end;
 
@@ -162,7 +162,7 @@ let mk_expand a hmac okm prk prklen info infolen len =
       Seq.generate_blocks (v tlen) (v n) (v n) a_spec (spec h0) (FStar.Seq.empty #uint8)
     in
     // refl h1 (v n) == tag' /\ B.as_seq h1 output == output' /\
-    Seq.equal 
+    Seq.equal
       (B.as_seq h4 okm)
       (output' @| Seq.sub (B.as_seq h4 tag) 0 (v len - v n * v tlen)));
   pop_frame ()
@@ -172,3 +172,9 @@ let expand_sha2_256: expand_st SHA2_256 =
 
 let extract_sha2_256: extract_st SHA2_256 =
   mk_extract SHA2_256 Hacl.HMAC.compute_sha2_256
+
+let expand_sha2_512: expand_st SHA2_512 =
+  mk_expand SHA2_512 Hacl.HMAC.compute_sha2_512
+
+let extract_sha2_512: extract_st SHA2_512 =
+  mk_extract SHA2_512 Hacl.HMAC.compute_sha2_512

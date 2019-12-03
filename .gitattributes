@@ -1,6 +1,17 @@
+# Linguist
+*.fst linguist-language=FStar
+*.fst linguist-documentation=false
+*.fsti linguist-language=FStar
+*.fsti linguist-documentation=false
+
+# Line endings
+Makefile.* eol=lf
+Makefile eol=lf
+configure eol=lf
+.gitignore eol=lf
+.ignore eol=lf
+*.sh text eol=lf
 *.fst eol=lf
 *.fsti eol=lf
+*.ml* eol=lf
 *.hints eol=lf -diff linguist-generated
-Makefile eol=lf
-Makefile.* eol=lf
-*.sh text eol=lf
