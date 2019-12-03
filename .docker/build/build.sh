@@ -170,6 +170,8 @@ function refresh_hints_dist() {
     find $hints_dir -iname '*.hints' -and -not -path '*/.*' -and -not -path '*/dependencies/*' | xargs git add
 
     # Add new files from the C snapshot in dist.
+    # Remove files first that we don't want in the snapshot.
+    find dist \( -name "*.d" -o -name "*.cmi" -o -name "*.cmx" -o -name "*.ocaml" -o -name "*.cmxa" \) | xargs rm
     git add dist
 
     # Without the eval, this was doing weird stuff such as,
