@@ -70,8 +70,7 @@ Hacl_Impl_Matrix_matrix_mul(
         uint16_t res0 = res;
         res = res0 + aij * bjk;
       }
-      uint16_t res1 = res;
-      c[i0 * n3 + i1] = res1;
+      c[i0 * n3 + i1] = res;
     }
   }
 }
@@ -98,8 +97,7 @@ Hacl_Impl_Matrix_matrix_mul_s(
         uint16_t res0 = res;
         res = res0 + aij * bjk;
       }
-      uint16_t res1 = res;
-      c[i0 * n3 + i1] = res1;
+      c[i0 * n3 + i1] = res;
     }
   }
 }
@@ -120,8 +118,7 @@ Hacl_Impl_Matrix_matrix_eq(uint32_t n1, uint32_t n2, uint32_t m, uint16_t *a, ui
         ((uint32_t)ai & (((uint32_t)1U << m) - (uint32_t)1U))
         == ((uint32_t)bi & (((uint32_t)1U << m) - (uint32_t)1U));
   }
-  bool res1 = res;
-  return res1;
+  return res;
 }
 
 inline static void
@@ -197,8 +194,7 @@ inline static uint16_t Hacl_Impl_Frodo_Sample_frodo_sample(uint16_t r)
     sample = samplei + sample0;
   }
   uint16_t sample0 = sample;
-  uint16_t res = ((~sign + (uint16_t)1U) ^ sample0) + sign;
-  return res;
+  return ((~sign + (uint16_t)1U) ^ sample0) + sign;
 }
 
 inline static void
@@ -383,8 +379,7 @@ Hacl_Impl_Frodo_Encode_frodo_key_decode(uint32_t b, uint16_t *a, uint8_t *res)
       res1 = (aik + ((uint16_t)1U << ((uint32_t)15U - b - (uint32_t)1U))) >> ((uint32_t)15U - b);
       templong = templong | (uint64_t)(res1 & (((uint16_t)1U << b) - (uint16_t)1U)) << b * i;
     }
-    uint64_t templong1 = templong;
-    uint64_t templong0 = templong1;
+    uint64_t templong0 = templong;
     uint8_t v8[8U] = { 0U };
     store64_le(v8, templong0);
     uint8_t *tmp = v8;

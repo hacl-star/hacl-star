@@ -62,26 +62,24 @@ Hacl_Impl_Matrix_matrix_mul(
   uint16_t *c
 )
 {
-  uint32_t i;
-  for (i = (uint32_t)0U; i < n1; i = i + (uint32_t)1U)
+  uint32_t i0;
+  for (i0 = (uint32_t)0U; i0 < n1; i0 = i0 + (uint32_t)1U)
   {
-    uint32_t i0;
-    for (i0 = (uint32_t)0U; i0 < n3; i0 = i0 + (uint32_t)1U)
+    uint32_t i1;
+    for (i1 = (uint32_t)0U; i1 < n3; i1 = i1 + (uint32_t)1U)
     {
       uint16_t res = (uint16_t)0U;
-      uint16_t res1;
       {
-        uint32_t i1;
-        for (i1 = (uint32_t)0U; i1 < n2; i1 = i1 + (uint32_t)1U)
+        uint32_t i;
+        for (i = (uint32_t)0U; i < n2; i = i + (uint32_t)1U)
         {
-          uint16_t aij = a[i * n2 + i1];
-          uint16_t bjk = b[i1 * n3 + i0];
+          uint16_t aij = a[i0 * n2 + i];
+          uint16_t bjk = b[i * n3 + i1];
           uint16_t res0 = res;
           res = res0 + aij * bjk;
         }
       }
-      res1 = res;
-      c[i * n3 + i0] = res1;
+      c[i0 * n3 + i1] = res;
     }
   }
 }
@@ -96,26 +94,24 @@ Hacl_Impl_Matrix_matrix_mul_s(
   uint16_t *c
 )
 {
-  uint32_t i;
-  for (i = (uint32_t)0U; i < n1; i = i + (uint32_t)1U)
+  uint32_t i0;
+  for (i0 = (uint32_t)0U; i0 < n1; i0 = i0 + (uint32_t)1U)
   {
-    uint32_t i0;
-    for (i0 = (uint32_t)0U; i0 < n3; i0 = i0 + (uint32_t)1U)
+    uint32_t i1;
+    for (i1 = (uint32_t)0U; i1 < n3; i1 = i1 + (uint32_t)1U)
     {
       uint16_t res = (uint16_t)0U;
-      uint16_t res1;
       {
-        uint32_t i1;
-        for (i1 = (uint32_t)0U; i1 < n2; i1 = i1 + (uint32_t)1U)
+        uint32_t i;
+        for (i = (uint32_t)0U; i < n2; i = i + (uint32_t)1U)
         {
-          uint16_t aij = a[i * n2 + i1];
-          uint16_t bjk = b[i0 * n2 + i1];
+          uint16_t aij = a[i0 * n2 + i];
+          uint16_t bjk = b[i1 * n2 + i];
           uint16_t res0 = res;
           res = res0 + aij * bjk;
         }
       }
-      res1 = res;
-      c[i * n3 + i0] = res1;
+      c[i0 * n3 + i1] = res;
     }
   }
 }
@@ -125,7 +121,6 @@ Hacl_Impl_Matrix_matrix_eq(uint32_t n1, uint32_t n2, uint32_t m, uint16_t *a, ui
 {
   bool res = true;
   uint32_t n3 = n1 * n2;
-  bool res1;
   {
     uint32_t i;
     for (i = (uint32_t)0U; i < n3; i = i + (uint32_t)1U)
@@ -140,8 +135,7 @@ Hacl_Impl_Matrix_matrix_eq(uint32_t n1, uint32_t n2, uint32_t m, uint16_t *a, ui
           == ((uint32_t)bi & (((uint32_t)1U << m) - (uint32_t)1U));
     }
   }
-  res1 = res;
-  return res1;
+  return res;
 }
 
 inline static void
@@ -220,7 +214,6 @@ inline static uint16_t Hacl_Impl_Frodo_Sample_frodo_sample(uint16_t r)
   uint16_t sample = (uint16_t)0U;
   uint32_t bound = (uint32_t)11U;
   uint16_t sample00;
-  uint16_t res;
   {
     uint32_t i;
     for (i = (uint32_t)0U; i < bound; i = i + (uint32_t)1U)
@@ -232,8 +225,7 @@ inline static uint16_t Hacl_Impl_Frodo_Sample_frodo_sample(uint16_t r)
     }
   }
   sample00 = sample;
-  res = ((~sign + (uint16_t)1U) ^ sample00) + sign;
-  return res;
+  return ((~sign + (uint16_t)1U) ^ sample00) + sign;
 }
 
 inline static void
@@ -463,7 +455,6 @@ Hacl_Impl_Frodo_Encode_frodo_key_decode(uint32_t b, uint16_t *a, uint8_t *res)
   for (i = (uint32_t)0U; i < (uint32_t)8U; i = i + (uint32_t)1U)
   {
     uint64_t templong0 = (uint64_t)0U;
-    uint64_t templong1;
     uint64_t templong;
     {
       uint32_t i0;
@@ -475,8 +466,7 @@ Hacl_Impl_Frodo_Encode_frodo_key_decode(uint32_t b, uint16_t *a, uint8_t *res)
         templong0 = templong0 | (uint64_t)(res1 & (((uint16_t)1U << b) - (uint16_t)1U)) << b * i0;
       }
     }
-    templong1 = templong0;
-    templong = templong1;
+    templong = templong0;
     {
       uint8_t v8[8U] = { 0U };
       uint8_t *tmp;

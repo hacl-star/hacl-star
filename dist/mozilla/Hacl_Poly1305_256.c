@@ -2085,6 +2085,7 @@ Hacl_Poly1305_256_poly1305_update(
     acc[2U] = o2;
     acc[3U] = o3;
     acc[4U] = o4;
+    return;
   }
 }
 
