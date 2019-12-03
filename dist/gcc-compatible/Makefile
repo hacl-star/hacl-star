@@ -137,6 +137,7 @@ lib_gen/%_gen.exe:
 %.cmx: %.ml
 	$(OCAMLOPT) -c $< -o $@
 
+.PRECIOUS: lib/%_stubs.ml
 lib/%_stubs.ml: lib/%_c_stubs.c
 
 lib/%_stubs.ml lib/%_c_stubs.c: lib_gen/%_gen.exe
