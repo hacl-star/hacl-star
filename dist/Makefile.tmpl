@@ -130,11 +130,10 @@ include .depend.ocaml
 
 all: libocamlevercrypt.cmxa
 
-lib_gen/%_gen.exe: lib/%_bindings.cmx lib_gen/%_gen.cmx
-	$(OCAMLOPT) $^ -o $@
-
 %.cmx: %.ml
 	$(OCAMLOPT) -c $< -o $@
+
+lib/%_stubs.ml: lib/%_c_stubs.c
 
 lib/%_stubs.ml lib/%_c_stubs.c: lib_gen/%_gen.exe
 	$<

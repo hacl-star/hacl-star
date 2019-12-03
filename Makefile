@@ -727,7 +727,7 @@ dist/wasm/Makefile.basic: WASMSUPPORT_BUNDLE =
 # README.EverCrypt.md)
 
 # Customizations for regular, msvc and gcc flavors.
-dist/gcc-compatible/Makefile.basic: DEFAULT_FLAGS += -ctypes EverCrypt.Ed25519
+dist/gcc-compatible/Makefile.basic: DEFAULT_FLAGS += -ctypes Hacl.NaCl,EverCrypt.Curve25519,EverCrypt.HMAC,Hacl.Ed25519
 
 dist/msvc-compatible/Makefile.basic: DEFAULT_FLAGS += -falloca -ftail-calls
 
