@@ -8,7 +8,7 @@ open Lib.LoopCombinators
 open Lib.IntVector
 module Scalar = Spec.Chacha20
 
-#set-options "--max_fuel 1 --z3rlimit 200"
+#set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
 /// Constants and Types
 
@@ -189,34 +189,18 @@ let transpose (#w:lanes) (st:state w) : state w =
 //   repeati (16 / w)
 //     (fun i bl -> update_sub bl (i * w * 4) (w * 4) (vec_to_bytes_le st.[i])) bl
 
-let store_blocks_inner (#w:lanes) (st:state w) (i:nat{i < 16}) (p:unit) : unit & lseq uint8 (w * 4) =
-  (), vec_to_bytes_le st.[i]
-
-let store_blocks (#w:lanes) (st:state w) : blocks w =
-  let store_blocks_a (i:nat{i <= 16}) = unit in
-  let p,s =
-    generate_blocks (w * 4) 16 16
-    store_blocks_a
-    (store_blocks_inner #w st)
-    () in
-  s
-
-let load_blocks_inner (#w:lanes) (b:blocks w) (i:nat{i < 16}) =
-  vec_from_bytes_le U32 w (sub b (i * w * 4) (w * 4))
-
-let load_blocks (#w:lanes) (b:blocks w) : state w =
-  createi 16 (load_blocks_inner #w b)
-
 // let chacha20_key_block0 (#w:lanes) (k:key) (n:nonce) : Tot block1 =
 //   let st0 = chacha20_init #w k n 0 in
 //   let k = chacha20_core 0 st0 in
 //   store_block0 k
 
+let xor_block_f (#w:lanes) (k:state w) (i:nat{i < 16}) (b:lbytes (w * 4)) : lbytes (w * 4) =
+  let x = vec_from_bytes_le U32 w b in
+  let y = x ^| k.[i] in
+  vec_to_bytes_le y
+
 let xor_block (#w:lanes) (k:state w) (b:blocks w) : blocks w  =
-  let ib = load_blocks b in
-  let kb = transpose k in
-  let ob = map2 (^|) ib kb in
-  store_blocks ob
+  map_blocks_multi (w * 4) 16 16 b (xor_block_f #w k)
 
 val chacha20_encrypt_block:
     #w: lanes
@@ -226,6 +210,7 @@ val chacha20_encrypt_block:
   Tot (blocks w)
 let chacha20_encrypt_block #w st0 incr b =
   let k = chacha20_core incr st0 in
+  let k = transpose k in
   xor_block k b
 
 val chacha20_encrypt_last:

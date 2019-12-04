@@ -270,55 +270,14 @@ let chacha20_init_lemma_i #w k n ctr0 i =
   eq_intro res1 res2
 
 
-val load_blocks_lemma_index:
-    #w:lanes
-  -> b:blocks w
-  -> i:nat{i < w * 16} ->
-  Lemma ((vec_v (load_blocks #w b).[i / w]).[i % w] == uint_from_bytes_le (sub b (4 * i) 4))
-let load_blocks_lemma_index #w b i =
-  let j = i / w in
-  let j1 = i % w in
-  let b_j = sub b (j * w * 4) (w * 4) in
-
-  let res = load_blocks #w b in
-  assert (vec_v res.[j] == uints_from_bytes_le b_j);
-
-  index_uints_from_bytes_le #U32 b_j j1;
-  assert ((vec_v res.[j]).[j1] == uint_from_bytes_le (sub b_j (j1 * 4) 4));
-  FStar.Seq.slice_slice b (j * w * 4) (j * w * 4 + w * 4) (j1 * 4) (j1 * 4 + 4);
-  assert (j * w * 4 + j1 * 4 == 4 * i);
-  assert (j * w * 4 + j1 * 4 + 4 == 4 * (i + 1));
-  assert ((vec_v res.[j]).[j1] == uint_from_bytes_le (slice b (4 * i) (4 * (i + 1))))
-
-
-val store_blocks_lemma_index:
-    #w:lanes
-  -> st:state w
-  -> i:nat{i < w * size_block} ->
-  Lemma
-  (let j = i / 4 in
-  (store_blocks #w st).[i] == (uint_to_bytes_le (vec_v st.[j / w ]).[j % w]).[i % 4])
-let store_blocks_lemma_index #w st i =
-  let res = store_blocks #w st in
-  index_generate_blocks (w * 4) 16 16 (store_blocks_inner #w st) i;
-  let j = i / (w * 4) in
-  let _, s2 = store_blocks_inner #w st j () in
-  assert (res.[i] == (uints_to_bytes_le (vec_v st.[j])).[i % (w * 4)]);
-  index_uints_to_bytes_le (vec_v st.[j]) (i % (w * 4));
-
-  assert (res.[i] == (uint_to_bytes_le (vec_v st.[j]).[(i % (w * 4)) / 4]).[(i % (w * 4)) % 4]);
-  FStar.Math.Lemmas.modulo_modulo_lemma i 4 w;
-  assert (res.[i] == (uint_to_bytes_le (vec_v st.[j]).[(i % (w * 4)) / 4]).[i % 4]);
-  FStar.Math.Lemmas.modulo_division_lemma i 4 w
-
-
 val xor_block_scalar_lemma_index:
     k:Scalar.state
   -> b:Scalar.block
   -> i:nat{i < size_block} ->
   Lemma
   (let j = i / 4 in
-  (Scalar.xor_block k b).[i] == (uint_to_bytes_le ((uint_from_bytes_le (sub b (4 * j) 4)) ^. k.[j])).[i % 4])
+  (Scalar.xor_block k b).[i] ==
+  (uint_to_bytes_le ((uint_from_bytes_le (sub b (4 * j) 4)) ^. k.[j])).[i % 4])
 let xor_block_scalar_lemma_index k b i =
   let ib = uints_from_bytes_le b in
   let ob = map2 (^.) ib k in
@@ -330,42 +289,88 @@ let xor_block_scalar_lemma_index k b i =
   assert (ib.[i / 4] == uint_from_bytes_le (sub b (i / 4 * 4) 4));
   assert (res.[i] == (uint_to_bytes_le ((uint_from_bytes_le (sub b (i / 4 * 4) 4)) ^. k.[i / 4])).[i % 4])
 
-
-val xor_block_lemma_aux1: i:nat ->
-  Lemma (i / size_block * size_block + 4 * ((i % size_block) / 4) == 4 * (i / 4))
-let xor_block_lemma_aux1 i = ()
-
-val xor_block_lemma_aux2: i:nat ->
-  Lemma (i / size_block * size_block + 4 * ((i % size_block) / 4 + 1) == 4 * (i / 4 + 1))
-let xor_block_lemma_aux2 i = xor_block_lemma_aux1 i
-
-
 val xor_block_scalar_lemma_index_aux:
     #w:lanes
   -> k:state w
   -> b:blocks w
   -> i:nat{i < w * size_block} ->
   Lemma
-  (let j = i / 4 in
-   (Scalar.xor_block (transpose_state k).[i / size_block] (sub b (i / size_block * size_block) size_block)).[i % size_block] ==
-   (uint_to_bytes_le ((uint_from_bytes_le (sub b (4 * j) 4)) ^. ((transpose_state k).[i / size_block]).[j % 16])).[i % 4])
+  (let ki = (transpose_state k).[i / size_block] in
+   let bi = sub b (i / size_block * size_block) size_block in
+   let j = (i / 4) % 16 in
+   (Scalar.xor_block ki bi).[i % size_block] ==
+   (uint_to_bytes_le ((uint_from_bytes_le (sub bi (4 * j) 4)) ^. ki.[j])).[i % 4])
+
 let xor_block_scalar_lemma_index_aux #w k b i =
-  let j = i / size_block in
-  let j1 = i % size_block in
-  let j2 = j1 / 4 in
+  let ki = (transpose_state k).[i / size_block] in
+  let bi = sub b (i / size_block * size_block) size_block in
+  xor_block_scalar_lemma_index ki bi (i % size_block);
+  Math.Lemmas.modulo_modulo_lemma i 4 16;
+  Math.Lemmas.modulo_division_lemma i 4 16
 
-  let b_j = sub b (j * size_block) size_block in
-  let res = Scalar.xor_block (transpose_state k).[j] b_j in
-  xor_block_scalar_lemma_index (transpose_state k).[j] b_j j1;
-  assert (res.[j1] == (uint_to_bytes_le ((uint_from_bytes_le (sub b_j (4 * j2) 4)) ^. ((transpose_state k).[j]).[j2])).[j1 % 4]);
 
-  xor_block_lemma_aux1 i;
-  xor_block_lemma_aux2 i;
-  FStar.Seq.Properties.slice_slice b (j * size_block) ((j + 1) * size_block) (4 * j2) (4 * (j2 + 1));
-  assert (res.[j1] == (uint_to_bytes_le ((uint_from_bytes_le (sub b (4 * (i / 4)) 4)) ^. ((transpose_state k).[j]).[j2])).[j1 % 4]);
-  FStar.Math.Lemmas.modulo_division_lemma i 4 16;
-  FStar.Math.Lemmas.modulo_modulo_lemma i 4 16;
-  assert (res.[j1] == (uint_to_bytes_le ((uint_from_bytes_le (sub b (4 * (i / 4)) 4)) ^. ((transpose_state k).[j]).[i / 4 % 16])).[i % 4])
+val xor_block_vec_lemma_index:
+    #w:lanes
+  -> k:state w
+  -> b:blocks w
+  -> i:nat{i < w * size_block} ->
+  Lemma
+  (let bs = w * 4 in
+   let j = i / bs in
+   let bj = sub b (j * bs) bs in
+   (xor_block (transpose k) b).[i] ==
+   (uint_to_bytes_le ((uint_from_bytes_le (sub bj ((i / 4) % w * 4) 4)) ^. ((transpose_state k).[i / 64]).[(i / 4) % 16])).[i % 4])
+
+let xor_block_vec_lemma_index #w k b i =
+  let kb = transpose k in
+  let res = xor_block kb b in
+  index_map_blocks_multi (w * 4) 16 16 b (xor_block_f #w kb) i;
+  let bs = w * 4 in
+  let j = i / bs in
+  let bj = sub b (j * bs) bs in
+  assert (Seq.index res i == (uints_to_bytes_le (map2 (^.) (uints_from_bytes_le bj) (vec_v kb.[j]))).[i % bs]);
+
+  let ib = uints_from_bytes_le bj in
+  let ob = map2 (^.) ib (vec_v kb.[j]) in
+  let res1 = uints_to_bytes_le ob in
+
+  index_uints_to_bytes_le ob (i % bs);
+  assert (res1.[i % bs] == (uint_to_bytes_le ob.[(i % bs) / 4]).[(i % bs) % 4]);
+  assert (ob.[(i % bs) / 4] == ib.[(i % bs) / 4] ^. (vec_v kb.[j]).[(i % bs) / 4]);
+  index_uints_from_bytes_le #U32 #SEC #w bj ((i % bs) / 4);
+  assert (ib.[(i % bs) / 4] == uint_from_bytes_le (sub bj ((i % bs) / 4 * 4) 4));
+
+  Math.Lemmas.modulo_modulo_lemma i 4 w;
+  Math.Lemmas.modulo_division_lemma i 4 w;
+  //assert (res1.[i % bs] == (uint_to_bytes_le ((uint_from_bytes_le (sub bj ((i / 4) % w * 4) 4)) ^. (vec_v kb.[j]).[(i / 4) % w])).[i % 4]);
+
+  Lemmas.transpose_lemma_index #w k (i / 4);
+  Math.Lemmas.division_multiplication_lemma i 4 16;
+  Math.Lemmas.division_multiplication_lemma i 4 w;
+  assert ((vec_v kb.[j]).[(i / 4) % w] == ((transpose_state k).[i / 64]).[(i / 4) % 16]);
+  assert (Seq.index res i ==
+    (uint_to_bytes_le ((uint_from_bytes_le (sub bj ((i / 4) % w * 4) 4)) ^. ((transpose_state k).[i / 64]).[(i / 4) % 16])).[i % 4])
+
+val xor_block_lemma_index_aux1:
+    #w:lanes
+  -> b:blocks w
+  -> i:nat{i < w * size_block} ->
+  Lemma (sub (sub b (i / 64 * 64) 64) (4 * ((i / 4) % 16)) 4 == sub b (i / 4 * 4) 4)
+let xor_block_lemma_index_aux1 #w b i =
+  assert (i / 64 * 64 + 4 * ((i / 4) % 16) == i / 4 * 4);
+  assert (i / 64 * 64 + 4 * ((i / 4) % 16) + 4 == i / 4 * 4 + 4);
+  Seq.Properties.slice_slice b (i / 64 * 64) (i / 64 * 64 + 64) (4 * ((i / 4) % 16)) (4 * ((i / 4) % 16) + 4)
+
+val xor_block_lemma_index_aux2:
+    #w:lanes
+  -> b:blocks w
+  -> i:nat{i < w * size_block} ->
+  Lemma (sub (sub b (i / (w * 4) * (w * 4)) (w * 4)) ((i / 4) % w * 4) 4 == sub b (i / 4 * 4) 4)
+let xor_block_lemma_index_aux2 #w b i =
+  Math.Lemmas.modulo_division_lemma i 4 w;
+  assert (i / (w * 4) * (w * 4) + (i % (4 * w)) / 4 * 4 == i / 4 * 4);
+  assert (i / (w * 4) * (w * 4) + (i % (4 * w)) / 4 * 4 + 4 == i / 4 * 4 + 4);
+  Seq.Properties.slice_slice b (i / (w * 4) * (w * 4)) (i / (w * 4) * (w * 4) + w * 4) ((i / 4) % w * 4) ((i / 4) % w * 4 + 4)
 
 
 val xor_block_lemma_index:
@@ -374,30 +379,25 @@ val xor_block_lemma_index:
   -> b:blocks w
   -> i:nat{i < w * size_block} ->
   Lemma
-  ((xor_block k b).[i] ==
-   (Scalar.xor_block (transpose_state k).[i / size_block] (sub b (i / size_block * size_block) size_block)).[i % size_block])
+  (let k_i = (transpose_state k).[i / size_block] in
+   let b_i = sub b (i / size_block * size_block) size_block in
+   (xor_block (transpose k) b).[i] == (Scalar.xor_block k_i b_i).[i % size_block])
+
 let xor_block_lemma_index #w k b i =
-  let ib = load_blocks b in
   let kb = transpose k in
-  let ob = map2 (^|) ib kb in
-  let res = store_blocks ob in
-  store_blocks_lemma_index #w ob i;
-  let j = i / 4 in
-  assert (res.[i] == (uint_to_bytes_le (vec_v ob.[j / w]).[j % w]).[i % 4]);
-  assert (vec_v ob.[j / w] == vec_v (ib.[j / w] ^| kb.[j / w]));
-  assert ((vec_v ob.[j / w]).[j % w] == (vec_v ib.[j / w]).[j % w] ^. (vec_v kb.[j / w]).[j % w]);
-  load_blocks_lemma_index #w b j;
-  assert ((vec_v ib.[j / w]).[j % w] == uint_from_bytes_le (sub b (4 * j) 4));
-  assert ((vec_v ob.[j / w]).[j % w] == uint_from_bytes_le (sub b (4 * j) 4) ^. (vec_v kb.[j / w]).[j % w]);
-  assert (res.[i] == (uint_to_bytes_le (uint_from_bytes_le (sub b (4 * j) 4) ^. (vec_v kb.[j / w]).[j % w])).[i % 4]);
-  Lemmas.transpose_lemma_index #w k j;
-  FStar.Math.Lemmas.division_multiplication_lemma i 4 16;
-  assert (j / 16 == i / 64);
-  assert (res.[i] == (uint_to_bytes_le (uint_from_bytes_le (sub b (4 * j) 4) ^. ((transpose_state k).[i / 64]).[j % 16])).[i % 4]);
-  let res1 = Scalar.xor_block (transpose_state k).[i / size_block] (sub b (i / size_block * size_block) size_block) in
+  let bs = w * 4 in
+  let j = i / bs in
+  let bj = sub b (j * bs) bs in
+  let ki = (transpose_state k).[i / size_block] in
+  xor_block_vec_lemma_index #w k b i;
+  assert ((xor_block kb b).[i] == (uint_to_bytes_le ((uint_from_bytes_le (sub bj ((i / 4) % w * 4) 4)) ^. ki.[(i / 4) % 16])).[i % 4]);
+
   xor_block_scalar_lemma_index_aux #w k b i;
-  assert (res1.[i % size_block] == (uint_to_bytes_le ((uint_from_bytes_le (sub b (4 * j) 4)) ^. ((transpose_state k).[i / size_block]).[j % 16])).[i % 4]);
-  assert (res.[i] == res1.[i % size_block])
+  let bi = sub b (i / size_block * size_block) size_block in
+  assert ((Scalar.xor_block ki bi).[i % size_block] == (uint_to_bytes_le (uint_from_bytes_le (sub bi (4 * ((i / 4) % 16)) 4) ^. ki.[(i / 4) % 16])).[i % 4]);
+  xor_block_lemma_index_aux1 #w b i;
+  xor_block_lemma_index_aux2 #w b i;
+  assert (sub bj ((i / 4) % w * 4) 4 == sub bi (4 * ((i / 4) % 16)) 4)
 
 
 val add_counter_lemma_aux:
@@ -504,21 +504,18 @@ let get_last_s
   b
 
 
-#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
-val lemma_i_div_bs: w:pos -> bs:pos -> bs_v:pos{bs_v == w * bs} -> i:nat ->
+val lemma_i_div_bs: w:pos -> bs:pos -> bs_v:pos{bs_v = w * bs} -> i:nat ->
   Lemma (w * (i / bs_v) + i % bs_v / bs == i / bs)
 let lemma_i_div_bs w bs bs_v i =
   calc (==) {
-    w * (i / bs_v) + i % bs_v / bs;
-  (==) { (* hyp *) }
     w * (i / bs_v) + i % (w * bs) / bs;
-  (==) { FStar.Math.Lemmas.swap_mul w bs }
+  (==) { Math.Lemmas.swap_mul w bs }
     w * (i / bs_v) + i % (bs * w) / bs;
-  (==) { FStar.Math.Lemmas.modulo_division_lemma i bs w }
+  (==) { Math.Lemmas.modulo_division_lemma i bs w }
     w * (i / bs_v) + i / bs % w;
-  (==) { FStar.Math.Lemmas.division_multiplication_lemma i bs w }
+  (==) { Math.Lemmas.division_multiplication_lemma i bs w }
     w * ((i / bs) / w) + i / bs % w;
-  (==) { FStar.Math.Lemmas.euclidean_division_definition (i / bs) w }
+  (==) { Math.Lemmas.euclidean_division_definition (i / bs) w }
     i / bs;
   }
 
@@ -636,7 +633,7 @@ let lemma_slice_slice_g_vec_g_aux w bs bs_v len i =
   assert (i - len / bs * bs + (len % bs_v) / bs * bs == i % bs_v)
 
 
-#set-options "--max_ifuel 0"
+#reset-options "--z3rlimit 30 --max_fuel 0 --max_ifuel 0"
 
 val chacha20_encrypt_block_lemma_index:
     #w:lanes
@@ -652,7 +649,6 @@ val chacha20_encrypt_block_lemma_index:
 let chacha20_encrypt_block_lemma_index #w st0 j_v b_v j =
   let k = chacha20_core j_v st0 in
   chacha20_core_lemma_i #w j_v st0 (j / size_block);
-  let res = xor_block k b_v in
   xor_block_lemma_index #w k b_v j
 
 
