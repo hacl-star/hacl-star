@@ -49,7 +49,7 @@ let as_get_acc #s h ctx = (feval h (gsub ctx 0ul (nlimb s))).[0]
 let as_get_r #s h ctx = (feval h (gsub ctx (nlimb s) (nlimb s))).[0]
 
 let state_inv_t #s h ctx =
-  F32xN.acc_inv_t #(width s) (F32xN.as_tup5 h (gsub ctx 0ul (nlimb s))) /\
+  felem_fits h (gsub ctx 0ul (nlimb s)) (2, 2, 2, 2, 2) /\
   F32xN.load_precompute_r_post #(width s) h (gsub ctx (nlimb s) (precomplen s))
 
 
@@ -70,17 +70,6 @@ let reveal_ctx_inv #s ctx h0 h1 =
 
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq' --record_options"
-
-val lemma_felem_fits_init_post:
-    #s:field_spec
-  -> h:mem
-  -> f:felem s ->
-  Lemma
-  (requires felem_fits h f (0, 0, 0, 0, 0))
-  (ensures F32xN.acc_inv_t #(width s) (F32xN.as_tup5 h f))
-
-let lemma_felem_fits_init_post #s h f = ()
-
 
 inline_for_extraction noextract
 val poly1305_encode_block:
@@ -176,10 +165,7 @@ let poly1305_init #s ctx key =
   let pre = get_precomp_r ctx in
 
   let kr = sub key 0ul 16ul in
-  let h0 = ST.get () in
   set_zero acc;
-  let h1 = ST.get () in
-  lemma_felem_fits_init_post h1 acc;
   poly1305_encode_r #s pre kr
 
 
@@ -193,11 +179,11 @@ val update1:
   (requires fun h ->
     live h p /\ live h b /\ live h acc /\
     disjoint p acc /\ disjoint b acc /\
-    F32xN.acc_inv_t #(width s) (F32xN.as_tup5 h acc) /\
+    felem_fits h acc (2, 2, 2, 2, 2) /\
     F32xN.fmul_precomp_r_pre #(width s) h p)
   (ensures  fun h0 _ h1 ->
     modifies (loc acc) h0 h1 /\
-    F32xN.acc_inv_t #(width s) (F32xN.as_tup5 h1 acc) /\
+    felem_fits h1 acc (2, 2, 2, 2, 2) /\
     (feval h1 acc).[0] == S.poly1305_update1
       (feval h0 (gsub p 0ul 5ul)).[0] 16 (as_seq h0 b) (feval h0 acc).[0])
 
@@ -226,11 +212,11 @@ val poly1305_update_last:
   (requires fun h ->
     live h p /\ live h b /\ live h acc /\
     disjoint p acc /\ disjoint b acc /\
-    F32xN.acc_inv_t #(width s) (F32xN.as_tup5 h acc) /\
+    felem_fits h acc (2, 2, 2, 2, 2) /\
     F32xN.fmul_precomp_r_pre #(width s) h p)
   (ensures  fun h0 _ h1 ->
     modifies (loc acc) h0 h1 /\
-    F32xN.acc_inv_t #(width s) (F32xN.as_tup5 h1 acc) /\
+    felem_fits h1 acc (2, 2, 2, 2, 2) /\
     (feval h1 acc).[0] == S.poly1305_update1
       (feval h0 (gsub p 0ul 5ul)).[0] (v len) (as_seq h0 b) (feval h0 acc).[0])
 
@@ -253,11 +239,11 @@ val poly1305_update_nblocks:
   (requires fun h ->
     live h p /\ live h b /\ live h acc /\
     disjoint acc p /\ disjoint acc b /\
-    felem_fits h acc (2, 3, 2, 2, 2) /\
+    felem_fits h acc (3, 3, 3, 3, 3) /\
     F32xN.load_precompute_r_post #(width s) h p)
   (ensures  fun h0 _ h1 ->
     modifies (loc acc) h0 h1 /\
-    felem_fits h1 acc (2, 3, 2, 2, 2) /\
+    felem_fits h1 acc (3, 3, 3, 3, 3) /\
     feval h1 acc ==
       Vec.poly1305_update_nblocks #(width s) (feval h0 (gsub p 10ul 5ul)) (as_seq h0 b) (feval h0 acc))
 
@@ -283,11 +269,11 @@ val poly1305_update1_f:
   (requires fun h ->
     live h p /\ live h text /\ live h acc /\
     disjoint acc p /\ disjoint acc text /\
-    F32xN.acc_inv_t #(width s) (F32xN.as_tup5 h acc) /\
+    felem_fits h acc (2, 2, 2, 2, 2) /\
     F32xN.fmul_precomp_r_pre #(width s) h p)
   (ensures  fun h0 _ h1 ->
     modifies (loc acc) h0 h1 /\
-    F32xN.acc_inv_t #(width s) (F32xN.as_tup5 h1 acc) /\
+    felem_fits h1 acc (2, 2, 2, 2, 2) /\
     (feval h1 acc).[0] ==
     LSeq.repeat_blocks_f #uint8 #S.felem 16
       (as_seq h0 text) (S.poly1305_update1 (feval h0 (gsub p 0ul 5ul)).[0] 16) (v nb) (v i) (feval h0 acc).[0])
@@ -310,11 +296,11 @@ val poly1305_update_scalar:
   (requires fun h ->
     live h text /\ live h acc /\ live h pre /\
     disjoint acc text /\ disjoint acc pre /\
-    F32xN.acc_inv_t #(width s) (F32xN.as_tup5 h acc) /\
+    felem_fits h acc (2, 2, 2, 2, 2) /\
     F32xN.fmul_precomp_r_pre #(width s) h pre)
   (ensures  fun h0 _ h1 ->
     modifies (loc acc) h0 h1 /\
-    F32xN.acc_inv_t #(width s) (F32xN.as_tup5 h1 acc) /\
+    felem_fits h1 acc (2, 2, 2, 2, 2) /\
     (feval h1 acc).[0] ==
     S.poly1305_update (as_seq h0 text) (feval h0 acc).[0] (feval h0 (gsub pre 0ul 5ul)).[0])
 
@@ -337,7 +323,7 @@ let poly1305_update_scalar #s len text pre acc =
     modifies1 acc h0 h /\
     live h pre /\ live h text /\ live h acc /\
     disjoint acc pre /\ disjoint acc text /\
-    F32xN.acc_inv_t #(width s) (F32xN.as_tup5 h acc) /\
+    felem_fits h acc (2, 2, 2, 2, 2) /\
     F32xN.fmul_precomp_r_pre #(width s) h pre /\
     (feval h acc).[0] == Lib.LoopCombinators.repeati i (spec_fh h0) (feval h0 acc).[0] in
 
@@ -371,11 +357,11 @@ val poly1305_update_multi_f:
   (requires fun h ->
     live h p /\ live h text /\ live h acc /\
     disjoint acc p /\ disjoint acc text /\
-    felem_fits h acc (2, 3, 2, 2, 2) /\
+    felem_fits h acc (3, 3, 3, 3, 3) /\
     F32xN.load_precompute_r_post #(width s) h p)
   (ensures  fun h0 _ h1 ->
     modifies (loc acc) h0 h1 /\
-    felem_fits h1 acc (2, 3, 2, 2, 2) /\
+    felem_fits h1 acc (3, 3, 3, 3, 3) /\
     F32xN.load_precompute_r_post #(width s) h1 p /\
     feval h1 acc ==
     LSeq.repeat_blocks_f #uint8 #(Vec.elem (width s))
@@ -402,11 +388,11 @@ val poly1305_update_multi_loop:
   (requires fun h ->
     live h pre /\ live h acc /\ live h text /\
     disjoint acc text /\ disjoint acc pre /\
-    felem_fits h acc (2, 3, 2, 2, 2) /\
+    felem_fits h acc (3, 3, 3, 3, 3) /\
     F32xN.load_precompute_r_post #(width s) h pre)
   (ensures  fun h0 _ h1 ->
     modifies (loc acc) h0 h1 /\
-    felem_fits h1 acc (2, 3, 2, 2, 2) /\
+    felem_fits h1 acc (3, 3, 3, 3, 3) /\
     F32xN.load_precompute_r_post #(width s) h1 pre /\
     feval h1 acc == LSeq.repeat_blocks_multi #uint8 #(Vec.elem (width s)) (v bs) (as_seq h0 text)
       (Vec.poly1305_update_nblocks (feval h0 (gsub pre 10ul 5ul))) (feval h0 acc))
@@ -427,7 +413,7 @@ let poly1305_update_multi_loop #s bs len text pre acc =
     modifies1 acc h0 h /\
     live h pre /\ live h text /\ live h acc /\
     disjoint acc pre /\ disjoint acc text /\
-    felem_fits h acc (2, 3, 2, 2, 2) /\
+    felem_fits h acc (3, 3, 3, 3, 3) /\
     F32xN.load_precompute_r_post #(width s) h pre /\
     feval h acc == Lib.LoopCombinators.repeati i (spec_fh h0) (feval h0 acc) in
 
@@ -450,11 +436,11 @@ val poly1305_update_multi:
   (requires fun h ->
     live h pre /\ live h acc /\ live h text /\
     disjoint acc text /\ disjoint acc pre /\
-    felem_fits h acc (1, 2, 1, 1, 1) /\
+    felem_fits h acc (2, 2, 2, 2, 2) /\
     F32xN.load_precompute_r_post #(width s) h pre)
   (ensures  fun h0 _ h1 ->
     modifies (loc acc) h0 h1 /\
-    F32xN.acc_inv_t #(width s) (F32xN.as_tup5 h1 acc) /\
+    felem_fits h1 acc (2, 2, 2, 2, 2) /\
     (feval h1 acc).[0] ==
     Vec.poly1305_update_multi #(width s) (as_seq h0 text)
       (feval h0 acc).[0] (feval h0 (gsub pre 0ul 5ul)).[0])
@@ -487,11 +473,11 @@ val poly1305_update_vec:
   (requires fun h ->
     live h text /\ live h acc /\ live h pre /\
     disjoint acc text /\ disjoint acc pre /\
-    F32xN.acc_inv_t #(width s) (F32xN.as_tup5 h acc) /\
+    felem_fits h acc (2, 2, 2, 2, 2) /\
     F32xN.load_precompute_r_post #(width s) h pre)
   (ensures  fun h0 _ h1 ->
     modifies (loc acc) h0 h1 /\
-    F32xN.acc_inv_t #(width s) (F32xN.as_tup5 h1 acc) /\
+    felem_fits h1 acc (2, 2, 2, 2, 2) /\
     (feval h1 acc).[0] ==
       Vec.poly1305_update_vec #(width s) (as_seq h0 text) (feval h0 acc).[0] (feval h0 (gsub pre 0ul 5ul)).[0])
 
