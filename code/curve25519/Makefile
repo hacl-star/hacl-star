@@ -43,7 +43,7 @@ $(HACL_HOME)/tests/curve64-ours.o : dist/Makefile.basic
 dist/curve64-ours.exe: $(HACL_HOME)/tests/curve64-ours.o dist/libcurve.a
 
 %.exe:
-	$(CC) $^ $(KREMLIB_A) -o $@
+	$(CC) $^ -o $@
 
 clean-c:
 	$(MAKE) -C dist/ -f Makefile.basic clean
