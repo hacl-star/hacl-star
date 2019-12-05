@@ -279,7 +279,7 @@ let gcm256_encrypt_opt' key iv auth_b auth_bytes auth_num keys_b iv_b hkeys_b ab
   bounded_buffer_addrs_all TUInt8 TUInt128 h0 keys_b;
   bounded_buffer_addrs_all TUInt8 TUInt128 h0 hkeys_b;
 
-  let x, _ = gcm256_encrypt_opt  key iv auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
+  let (x, _) = gcm256_encrypt_opt  key iv auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
   in128x6_b out128x6_b len128x6 in128_b out128_b len128_num inout_b plain_num scratch_b tag_b () in
 
   let h1 = get() in

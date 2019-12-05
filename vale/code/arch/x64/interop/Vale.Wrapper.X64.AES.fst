@@ -18,7 +18,7 @@ let aes128_key_expansion_stdcall input_b output_b =
   DV.length_eq (get_downview input_b);
   DV.length_eq (get_downview output_b);
 
-  let x, _ = aes128_key_expansion input_b output_b () in
+  let (x, _) = aes128_key_expansion input_b output_b () in
 
   let h1 = get() in
 
@@ -50,7 +50,7 @@ let aes256_key_expansion_stdcall input_b output_b =
   DV.length_eq (get_downview input_b);
   DV.length_eq (get_downview output_b);
 
-  let x, _ = aes256_key_expansion input_b output_b () in
+  let (x, _) = aes256_key_expansion input_b output_b () in
 
   let h1 = get() in
 

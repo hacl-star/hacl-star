@@ -157,7 +157,7 @@ open Vale.AsLowStar.MemoryHelpers
 let cswap2_inline bit p0 p1
   = DV.length_eq (get_downview p0);
     DV.length_eq (get_downview p1);
-    let x, _ = lowstar_cswap_normal_t bit p0 p1 () in
+    let (x, _) = lowstar_cswap_normal_t bit p0 p1 () in
     ()
 
 let cswap2_code_inline () : FStar.All.ML int =

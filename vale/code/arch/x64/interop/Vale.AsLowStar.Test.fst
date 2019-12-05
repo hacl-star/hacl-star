@@ -166,7 +166,7 @@ let memcpy_test
 //      B.as_seq h1 dst == B.as_seq h1 src)
 //  by (T.dump "A") (* in case you want to look at the VC *)
   = IB.inhabited_immutable_buffer_is_distinct_from_buffer (UInt8.uint_to_t 0) src dst;
-    let x, _ = lowstar_memcpy_normal_t dst src () in //This is a call to the interop wrapper
+    let (x, _) = lowstar_memcpy_normal_t dst src () in //This is a call to the interop wrapper
     let h1 = get () in
     // let v = Vale.Interop.Views.up_view64 in
     // assert (DV.length_eq (get_downview dst);
@@ -260,7 +260,7 @@ let aesni_test ()
     (ensures fun h0 ret_val h1 -> (UInt64.v ret_val) =!= 0 ==> aesni_enabled /\ pclmulqdq_enabled)
 //  by (T.dump "A") (* in case you want to look at the VC *)
   =
-  let x, _ = lowstar_aesni_normal_t () in //This is a call to the interop wrapper
+  let (x, _) = lowstar_aesni_normal_t () in //This is a call to the interop wrapper
   x
 
 

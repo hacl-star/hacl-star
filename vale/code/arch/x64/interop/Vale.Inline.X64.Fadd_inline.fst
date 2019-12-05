@@ -158,7 +158,7 @@ open Vale.AsLowStar.MemoryHelpers
 let add1_inline out f1 f2
   = DV.length_eq (get_downview out);
     DV.length_eq (get_downview f1);
-    let x, _ = lowstar_add1_normal_t out f1 f2 () in
+    let (x, _) = lowstar_add1_normal_t out f1 f2 () in
     x
 
 let add1_code_inline () : FStar.All.ML int =
@@ -273,7 +273,7 @@ let fadd_inline out f1 f2
   = DV.length_eq (get_downview out);
     DV.length_eq (get_downview f1);
     DV.length_eq (get_downview f2);
-    let x, _ = lowstar_fadd_normal_t out f1 f2 () in
+    let (x, _) = lowstar_fadd_normal_t out f1 f2 () in
     ()
 
 let fadd_code_inline () : FStar.All.ML int =
@@ -387,7 +387,7 @@ let fsub_inline out f1 f2
   = DV.length_eq (get_downview out);
     DV.length_eq (get_downview f1);
     DV.length_eq (get_downview f2);
-    let x, _ = lowstar_fsub_normal_t out f1 f2 () in
+    let (x, _) = lowstar_fsub_normal_t out f1 f2 () in
     ()
 
 let fsub_code_inline () : FStar.All.ML int =

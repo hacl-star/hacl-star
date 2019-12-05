@@ -535,11 +535,22 @@ val eval_while_inv (c:va_code) (s0:va_state) (fW:va_fuel) (sW:va_state) : prop0
 [@va_qattr]
 let va_state_eq (s0:va_state) (s1:va_state) : prop0 = state_eq s0 s1
 
+val mem_inv (m:vale_heap_impl) : prop0
+val lemma_mem_inv (m:vale_heap_impl) : Lemma (mem_inv m)
+
+let state_inv (s:va_state) : prop0 = mem_inv s.vs_heap
+
+let vale_state_with_inv = s:va_state{state_inv s}
+
 let va_require_total (c0:va_code) (c1:va_code) (s0:va_state) : prop0 =
-  c0 == c1
+  c0 == c1 /\ state_inv s0
 
 let va_ensure_total (c0:va_code) (s0:va_state) (s1:va_state) (f1:va_fuel) : prop0 =
-  eval_code c0 s0 f1 s1
+  eval_code c0 s0 f1 s1 /\ state_inv s1
+
+val va_ins_lemma (c0:va_code) (s0:va_state) : Lemma
+  (requires True)
+  (ensures state_inv s0)
 
 val eval_ocmp : s:va_state -> c:ocmp -> GTot bool
 unfold let va_evalCond (b:ocmp) (s:va_state) : GTot bool = eval_ocmp s b
@@ -654,7 +665,7 @@ val va_lemma_ifElseFalse_total (ifb:ocmp) (ct:va_code) (cf:va_code) (s0:va_state
   )
 
 let va_whileInv_total (b:ocmp) (c:va_code) (s0:va_state) (sN:va_state) (f0:va_fuel) : prop0 =
-  eval_while_inv (While b c) s0 f0 sN
+  eval_while_inv (While b c) s0 f0 sN /\ state_inv s0
 
 val va_lemma_while_total (b:ocmp) (c:va_code) (s0:va_state) : Ghost (va_state & va_fuel)
   (requires True)
