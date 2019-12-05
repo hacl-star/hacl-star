@@ -23,17 +23,17 @@ module ST = FStar.HyperStack.ST
 open FStar.Mul
 open FStar.Calc
 
-let lemma_create_initial_vale_state_core
-    (#max_arity:nat)
-    (#reg_arg:IX64.arg_reg_relation max_arity)
-    (args:IX64.arg_list)
-    (h0:HS.mem{mem_roots_p h0 args})
-  : Lemma
-      (ensures (
-        let s = LSig.create_initial_vale_state #max_arity #reg_arg args h0 in
-        hs_of_mem (as_mem s.VS.vs_heap) == h0
-      ))
-  = ()
+//let lemma_create_initial_vale_state_core
+//    (#max_arity:nat)
+//    (#reg_arg:IX64.arg_reg_relation max_arity)
+//    (args:IX64.arg_list)
+//    (h0:HS.mem{mem_roots_p h0 args})
+//  : Lemma
+//      (ensures (
+//        let s = LSig.create_initial_vale_state #max_arity #reg_arg args h0 in
+//        hs_of_mem (as_mem s.VS.vs_heap) == h0
+//      ))
+//  = ()
 
 #reset-options "--initial_ifuel 2 --max_ifuel 2"
 let rec core_create_lemma_disjointness
@@ -563,7 +563,7 @@ let vale_lemma_as_prediction
        assert (VSig.vale_calling_conventions va_s0 va_s1 regs_modified xmms_modified);
        assert (IX64.calling_conventions s0 s1 regs_modified xmms_modified);
        assert (ME.modifies (VSig.mloc_modified_args args) (VS.vs_get_vale_heap va_s0) (VS.vs_get_vale_heap va_s1));
-       let final_mem = (va_s1.VS.vs_heap) in
+       let final_mem = va_s1.VS.vs_heap in
        let h1 = hs_of_mem (as_mem final_mem) in
        Vale.AsLowStar.MemoryHelpers.relate_modifies args va_s0.VS.vs_heap va_s1.VS.vs_heap;
        assert (B.modifies (loc_modified_args args) h0 h1);
@@ -581,7 +581,7 @@ let vale_lemma_as_prediction
        assert (mem_roots_p h1 args);
        assert (B.modifies (loc_modified_args args) h0 h1);
        assert (LSig.(to_low_post post args h0 (IX64.return_val s1) h1));
-       IX64.return_val s1, coerce f, as_mem (va_s1.VS.vs_heap)
+       (IX64.return_val s1, coerce f, as_mem va_s1.VS.vs_heap)
 
 [@__reduce__]
 let rec lowstar_typ

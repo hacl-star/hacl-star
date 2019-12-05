@@ -179,7 +179,7 @@ let fmul_inline tmp f1 out f2 =
     math_aux (B.length out);
     Vale.AsLowStar.MemoryHelpers.as_vale_buffer_len #TUInt64 #TUInt64 tmp;
     Vale.AsLowStar.MemoryHelpers.as_vale_buffer_len #TUInt64 #TUInt64 out;
-    let x, _ = lowstar_fmul_normal_t tmp f1 out f2 () in
+    let (x, _) = lowstar_fmul_normal_t tmp f1 out f2 () in
     ()
 
 #pop-options
@@ -290,7 +290,7 @@ let fmul2_inline tmp f1 out f2 =
     DV.length_eq (get_downview f1);
     DV.length_eq (get_downview tmp);
     DV.length_eq (get_downview f2);
-    let x, _ = lowstar_fmul2_normal_t tmp f1 out f2 () in
+    let (x, _) = lowstar_fmul2_normal_t tmp f1 out f2 () in
     ()
 
 #pop-options
@@ -417,7 +417,7 @@ open Vale.AsLowStar.MemoryHelpers
 let fmul1_inline out f1 f2
   = DV.length_eq (get_downview out);
     DV.length_eq (get_downview f1);
-    let x, _ = lowstar_fmul1_normal_t out f1 f2 () in
+    let (x, _) = lowstar_fmul1_normal_t out f1 f2 () in
     ()
 
 let fmul1_code_inline () : FStar.All.ML int =

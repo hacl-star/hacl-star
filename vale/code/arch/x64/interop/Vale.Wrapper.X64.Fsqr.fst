@@ -15,7 +15,7 @@ let fsqr tmp f1 out =
   as_vale_buffer_len #TUInt64 #TUInt64 tmp;
   as_vale_buffer_len #TUInt64 #TUInt64 f1;
   as_vale_buffer_len #TUInt64 #TUInt64 out;
-  let x, _ = Vale.Stdcalls.X64.Fsqr.fsqr tmp f1 out () in
+  let (x, _) = Vale.Stdcalls.X64.Fsqr.fsqr tmp f1 out () in
   ()
 
 #pop-options
@@ -26,7 +26,7 @@ let fsqr2 tmp f1 out =
   DV.length_eq (get_downview tmp);
   DV.length_eq (get_downview f1);
   DV.length_eq (get_downview out);
-  let x, _ = Vale.Stdcalls.X64.Fsqr.fsqr2 tmp f1 out () in
+  let (x, _) = Vale.Stdcalls.X64.Fsqr.fsqr2 tmp f1 out () in
   ()
 
 #pop-options

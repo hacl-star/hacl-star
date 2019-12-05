@@ -103,13 +103,15 @@ let t_compute (#a:Type0) (c:va_code) (wp:quickProc_wp a) : Type =
     (requires wp s0 k_true)
     (ensures fun _ -> True)
 
-let t_ensure (#a:Type0) (c:va_code) (mods:mods_t) (wp:quickProc_wp a) (s0:vale_state) (k:(vale_state -> a -> Type0)) =
-  fun (sM, f0, g) -> eval_code c s0 f0 sM /\ update_state_mods mods sM s0 == sM /\ k sM g
+let t_require (s0:va_state) = state_inv s0
+
+let t_ensure (#a:Type0) (c:va_code) (mods:mods_t) (s0:vale_state) (k:(vale_state -> a -> Type0)) =
+  fun (sM, f0, g) -> eval_code c s0 f0 sM /\ update_state_mods mods sM s0 == sM /\ state_inv sM /\ k sM g
 
 let t_proof (#a:Type0) (c:va_code) (mods:mods_t) (wp:quickProc_wp a) : Type =
   s0:vale_state -> k:(vale_state -> a -> Type0) -> Ghost (vale_state & va_fuel & a)
-    (requires wp s0 k)
-    (ensures t_ensure c mods wp s0 k)
+    (requires t_require s0 /\ wp s0 k)
+    (ensures t_ensure c mods s0 k)
 
 // Code that returns a ghost value of type a
 [@va_qattr]
