@@ -1411,7 +1411,7 @@ val lift_path_index:
                   i < V.size_of (B.get h p 0)))
         (ensures (Rgl?.r_repr hreg h (V.get h (B.get h p 0) i) ==
                  S.index (lift_path h mtr p) (U32.v i)))
-let rec lift_path_index h mtr p i =
+let lift_path_index h mtr p i =
   lift_path_index_ h (V.as_seq h (B.get h p 0))
     0 (S.length (V.as_seq h (B.get h p 0))) (U32.v i)
 
@@ -1915,7 +1915,7 @@ inline_for_extraction val path_insert:
     (requires (fun h0 ->
       path_safe h0 mtr p /\
       not (V.is_full (B.get h0 p 0)) /\
-      Rgl?.r_inv hreg h0 hp /\
+     Rgl?.r_inv hreg h0 hp /\
       HH.disjoint mtr (B.frameOf p) /\
       HH.includes mtr (B.frameOf hp)))
     (ensures (fun h0 _ h1 ->
@@ -2548,7 +2548,7 @@ val mt_flush_to:
       High.mt_flush_to (mt_lift h0 mt) (U32.v idx) == mt_lift h1 mt)))
 
 #reset-options "--z3rlimit 100 --initial_fuel 1 --max_fuel 1 --initial_ifuel 0 --max_ifuel 0"
-let rec mt_flush_to mt idx =
+let mt_flush_to mt idx =
   let hh0 = HST.get () in
   let mtv = !*mt in
   let offset = MT?.offset mtv in
@@ -2863,7 +2863,7 @@ val mt_retract_to:
       let r = split_offset off r in
       High.mt_retract_to (mt_lift h0 mt) (U32.v r) == mt_lift h1 mt)))
 #reset-options "--z3rlimit 100 --initial_fuel 1 --max_fuel 1 --initial_ifuel 0 --max_ifuel 0"
-let rec mt_retract_to mt r =
+let mt_retract_to mt r =
   let hh0 = HST.get () in
   let mtv = !*mt in
   let offset = MT?.offset mtv in
