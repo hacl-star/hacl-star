@@ -974,6 +974,7 @@ let lemma_slice_slice_g_vec_f #a #len w bs inp i =
   let j = i1 / bs in
   lemma_slice_slice_g_vec_f_aux3 w bs bs_v len i;
   assert ((j + 1) * bs <= rem);
+  FStar.Math.Lemmas.lemma_mod_lt len bs_v;
   Seq.slice_slice inp (len - rem) len (j * bs) ((j + 1) * bs);
   lemma_slice_slice_g_vec_f_aux1 w bs bs_v len i;
   assert (len - rem + j * bs == i / bs * bs);
