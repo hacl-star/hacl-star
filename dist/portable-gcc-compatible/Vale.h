@@ -34,43 +34,121 @@
 
 
 
+/* SNIPPET_START: add1 */
+
 extern uint64_t add1(uint64_t *x0, uint64_t *x1, uint64_t x2);
+
+/* SNIPPET_END: add1 */
+
+/* SNIPPET_START: fadd_ */
 
 extern uint64_t fadd_(uint64_t *x0, uint64_t *x1, uint64_t *x2);
 
+/* SNIPPET_END: fadd_ */
+
+/* SNIPPET_START: sha256_update */
+
 extern uint64_t sha256_update(uint32_t *x0, uint8_t *x1, uint64_t x2, uint32_t *x3);
+
+/* SNIPPET_END: sha256_update */
+
+/* SNIPPET_START: x64_poly1305 */
 
 extern uint64_t x64_poly1305(uint8_t *x0, uint8_t *x1, uint64_t x2, uint64_t x3);
 
+/* SNIPPET_END: x64_poly1305 */
+
+/* SNIPPET_START: check_aesni */
+
 extern uint64_t check_aesni();
+
+/* SNIPPET_END: check_aesni */
+
+/* SNIPPET_START: check_sha */
 
 extern uint64_t check_sha();
 
+/* SNIPPET_END: check_sha */
+
+/* SNIPPET_START: check_adx_bmi2 */
+
 extern uint64_t check_adx_bmi2();
+
+/* SNIPPET_END: check_adx_bmi2 */
+
+/* SNIPPET_START: check_avx */
 
 extern uint64_t check_avx();
 
+/* SNIPPET_END: check_avx */
+
+/* SNIPPET_START: check_avx2 */
+
 extern uint64_t check_avx2();
+
+/* SNIPPET_END: check_avx2 */
+
+/* SNIPPET_START: check_movbe */
 
 extern uint64_t check_movbe();
 
+/* SNIPPET_END: check_movbe */
+
+/* SNIPPET_START: check_sse */
+
 extern uint64_t check_sse();
+
+/* SNIPPET_END: check_sse */
+
+/* SNIPPET_START: check_rdrand */
 
 extern uint64_t check_rdrand();
 
+/* SNIPPET_END: check_rdrand */
+
+/* SNIPPET_START: cswap2 */
+
 extern uint64_t cswap2(uint64_t x0, uint64_t *x1, uint64_t *x2);
+
+/* SNIPPET_END: cswap2 */
+
+/* SNIPPET_START: fsqr */
 
 extern uint64_t fsqr(uint64_t *x0, uint64_t *x1, uint64_t *x2);
 
+/* SNIPPET_END: fsqr */
+
+/* SNIPPET_START: fsqr2 */
+
 extern uint64_t fsqr2(uint64_t *x0, uint64_t *x1, uint64_t *x2);
+
+/* SNIPPET_END: fsqr2 */
+
+/* SNIPPET_START: fmul_ */
 
 extern uint64_t fmul_(uint64_t *x0, uint64_t *x1, uint64_t *x2, uint64_t *x3);
 
+/* SNIPPET_END: fmul_ */
+
+/* SNIPPET_START: fmul2 */
+
 extern uint64_t fmul2(uint64_t *x0, uint64_t *x1, uint64_t *x2, uint64_t *x3);
+
+/* SNIPPET_END: fmul2 */
+
+/* SNIPPET_START: fmul1 */
 
 extern uint64_t fmul1(uint64_t *x0, uint64_t *x1, uint64_t x2);
 
+/* SNIPPET_END: fmul1 */
+
+/* SNIPPET_START: fsub_ */
+
 extern uint64_t fsub_(uint64_t *x0, uint64_t *x1, uint64_t *x2);
+
+/* SNIPPET_END: fsub_ */
+
+/* SNIPPET_START: gcm128_decrypt_opt */
 
 extern uint64_t
 gcm128_decrypt_opt(
@@ -93,6 +171,10 @@ gcm128_decrypt_opt(
   uint8_t *x16
 );
 
+/* SNIPPET_END: gcm128_decrypt_opt */
+
+/* SNIPPET_START: gcm256_decrypt_opt */
+
 extern uint64_t
 gcm256_decrypt_opt(
   uint8_t *x0,
@@ -114,9 +196,21 @@ gcm256_decrypt_opt(
   uint8_t *x16
 );
 
+/* SNIPPET_END: gcm256_decrypt_opt */
+
+/* SNIPPET_START: aes128_key_expansion */
+
 extern uint64_t aes128_key_expansion(uint8_t *x0, uint8_t *x1);
 
+/* SNIPPET_END: aes128_key_expansion */
+
+/* SNIPPET_START: aes256_key_expansion */
+
 extern uint64_t aes256_key_expansion(uint8_t *x0, uint8_t *x1);
+
+/* SNIPPET_END: aes256_key_expansion */
+
+/* SNIPPET_START: compute_iv_stdcall */
 
 extern uint64_t
 compute_iv_stdcall(
@@ -127,6 +221,10 @@ compute_iv_stdcall(
   uint8_t *x4,
   uint8_t *x5
 );
+
+/* SNIPPET_END: compute_iv_stdcall */
+
+/* SNIPPET_START: gcm128_encrypt_opt */
 
 extern uint64_t
 gcm128_encrypt_opt(
@@ -149,6 +247,10 @@ gcm128_encrypt_opt(
   uint8_t *x16
 );
 
+/* SNIPPET_END: gcm128_encrypt_opt */
+
+/* SNIPPET_START: gcm256_encrypt_opt */
+
 extern uint64_t
 gcm256_encrypt_opt(
   uint8_t *x0,
@@ -170,9 +272,21 @@ gcm256_encrypt_opt(
   uint8_t *x16
 );
 
+/* SNIPPET_END: gcm256_encrypt_opt */
+
+/* SNIPPET_START: aes128_keyhash_init */
+
 extern uint64_t aes128_keyhash_init(uint8_t *x0, uint8_t *x1);
 
+/* SNIPPET_END: aes128_keyhash_init */
+
+/* SNIPPET_START: aes256_keyhash_init */
+
 extern uint64_t aes256_keyhash_init(uint8_t *x0, uint8_t *x1);
+
+/* SNIPPET_END: aes256_keyhash_init */
+
+/* SNIPPET_START: gctr128_bytes */
 
 extern uint64_t
 gctr128_bytes(
@@ -185,6 +299,10 @@ gctr128_bytes(
   uint64_t x6
 );
 
+/* SNIPPET_END: gctr128_bytes */
+
+/* SNIPPET_START: gctr256_bytes */
+
 extern uint64_t
 gctr256_bytes(
   uint8_t *x0,
@@ -195,6 +313,8 @@ gctr256_bytes(
   uint8_t *x5,
   uint64_t x6
 );
+
+/* SNIPPET_END: gctr256_bytes */
 
 #define __Vale_H_DEFINED
 #endif

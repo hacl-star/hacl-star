@@ -24,7 +24,13 @@
 
 #include "Hacl_Poly1305_32.h"
 
+/* SNIPPET_START: Hacl_Poly1305_32_blocklen */
+
 uint32_t Hacl_Poly1305_32_blocklen = (uint32_t)16U;
+
+/* SNIPPET_END: Hacl_Poly1305_32_blocklen */
+
+/* SNIPPET_START: Hacl_Poly1305_32_poly1305_init */
 
 void Hacl_Poly1305_32_poly1305_init(uint64_t *ctx, uint8_t *key)
 {
@@ -86,6 +92,10 @@ void Hacl_Poly1305_32_poly1305_init(uint64_t *ctx, uint8_t *key)
   rn_5[3U] = r5[3U];
   rn_5[4U] = r5[4U];
 }
+
+/* SNIPPET_END: Hacl_Poly1305_32_poly1305_init */
+
+/* SNIPPET_START: Hacl_Poly1305_32_poly1305_update1 */
 
 void Hacl_Poly1305_32_poly1305_update1(uint64_t *ctx, uint8_t *text)
 {
@@ -203,6 +213,10 @@ void Hacl_Poly1305_32_poly1305_update1(uint64_t *ctx, uint8_t *text)
   acc[3U] = o3;
   acc[4U] = o4;
 }
+
+/* SNIPPET_END: Hacl_Poly1305_32_poly1305_update1 */
+
+/* SNIPPET_START: Hacl_Poly1305_32_poly1305_update */
 
 void Hacl_Poly1305_32_poly1305_update(uint64_t *ctx, uint32_t len, uint8_t *text)
 {
@@ -445,6 +459,10 @@ void Hacl_Poly1305_32_poly1305_update(uint64_t *ctx, uint32_t len, uint8_t *text
   }
 }
 
+/* SNIPPET_END: Hacl_Poly1305_32_poly1305_update */
+
+/* SNIPPET_START: Hacl_Poly1305_32_poly1305_finish */
+
 void Hacl_Poly1305_32_poly1305_finish(uint8_t *tag, uint8_t *key, uint64_t *ctx)
 {
   uint64_t *acc = ctx;
@@ -531,6 +549,10 @@ void Hacl_Poly1305_32_poly1305_finish(uint8_t *tag, uint8_t *key, uint64_t *ctx)
   store64_le(tag + (uint32_t)8U, f31);
 }
 
+/* SNIPPET_END: Hacl_Poly1305_32_poly1305_finish */
+
+/* SNIPPET_START: Hacl_Poly1305_32_poly1305_mac */
+
 void Hacl_Poly1305_32_poly1305_mac(uint8_t *tag, uint32_t len, uint8_t *text, uint8_t *key)
 {
   uint64_t ctx[25U] = { 0U };
@@ -538,4 +560,6 @@ void Hacl_Poly1305_32_poly1305_mac(uint8_t *tag, uint32_t len, uint8_t *text, ui
   Hacl_Poly1305_32_poly1305_update(ctx, len, text);
   Hacl_Poly1305_32_poly1305_finish(tag, key, ctx);
 }
+
+/* SNIPPET_END: Hacl_Poly1305_32_poly1305_mac */
 

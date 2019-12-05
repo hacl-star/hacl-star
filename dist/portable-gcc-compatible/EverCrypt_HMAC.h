@@ -37,6 +37,8 @@
 #include "EverCrypt_Hash.h"
 
 
+/* SNIPPET_START: EverCrypt_HMAC_compute_sha1 */
+
 void
 EverCrypt_HMAC_compute_sha1(
   uint8_t *dst,
@@ -45,6 +47,10 @@ EverCrypt_HMAC_compute_sha1(
   uint8_t *data,
   uint32_t data_len
 );
+
+/* SNIPPET_END: EverCrypt_HMAC_compute_sha1 */
+
+/* SNIPPET_START: EverCrypt_HMAC_compute_sha2_256 */
 
 void
 EverCrypt_HMAC_compute_sha2_256(
@@ -55,6 +61,10 @@ EverCrypt_HMAC_compute_sha2_256(
   uint32_t data_len
 );
 
+/* SNIPPET_END: EverCrypt_HMAC_compute_sha2_256 */
+
+/* SNIPPET_START: EverCrypt_HMAC_compute_sha2_384 */
+
 void
 EverCrypt_HMAC_compute_sha2_384(
   uint8_t *dst,
@@ -63,6 +73,10 @@ EverCrypt_HMAC_compute_sha2_384(
   uint8_t *data,
   uint32_t data_len
 );
+
+/* SNIPPET_END: EverCrypt_HMAC_compute_sha2_384 */
+
+/* SNIPPET_START: EverCrypt_HMAC_compute_sha2_512 */
 
 void
 EverCrypt_HMAC_compute_sha2_512(
@@ -73,9 +87,21 @@ EverCrypt_HMAC_compute_sha2_512(
   uint32_t data_len
 );
 
+/* SNIPPET_END: EverCrypt_HMAC_compute_sha2_512 */
+
+/* SNIPPET_START: EverCrypt_HMAC_is_supported_alg */
+
 bool EverCrypt_HMAC_is_supported_alg(Spec_Hash_Definitions_hash_alg uu___0_5843);
 
+/* SNIPPET_END: EverCrypt_HMAC_is_supported_alg */
+
+/* SNIPPET_START: EverCrypt_HMAC_supported_alg */
+
 typedef Spec_Hash_Definitions_hash_alg EverCrypt_HMAC_supported_alg;
+
+/* SNIPPET_END: EverCrypt_HMAC_supported_alg */
+
+/* SNIPPET_START: EverCrypt_HMAC_compute */
 
 void
 EverCrypt_HMAC_compute(
@@ -86,6 +112,8 @@ EverCrypt_HMAC_compute(
   uint8_t *data,
   uint32_t datalen
 );
+
+/* SNIPPET_END: EverCrypt_HMAC_compute */
 
 #define __EverCrypt_HMAC_H_DEFINED
 #endif

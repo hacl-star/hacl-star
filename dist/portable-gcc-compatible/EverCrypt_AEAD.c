@@ -24,6 +24,8 @@
 
 #include "EverCrypt_AEAD.h"
 
+/* SNIPPET_START: EverCrypt_AEAD_alg_of_vale_impl */
+
 static Spec_Agile_AEAD_alg EverCrypt_AEAD_alg_of_vale_impl(Spec_Cipher_Expansion_impl i1)
 {
   switch (i1)
@@ -44,6 +46,10 @@ static Spec_Agile_AEAD_alg EverCrypt_AEAD_alg_of_vale_impl(Spec_Cipher_Expansion
   }
 }
 
+/* SNIPPET_END: EverCrypt_AEAD_alg_of_vale_impl */
+
+/* SNIPPET_START: EverCrypt_AEAD_state_s */
+
 typedef struct EverCrypt_AEAD_state_s_s
 {
   Spec_Cipher_Expansion_impl impl;
@@ -51,10 +57,18 @@ typedef struct EverCrypt_AEAD_state_s_s
 }
 EverCrypt_AEAD_state_s;
 
+/* SNIPPET_END: EverCrypt_AEAD_state_s */
+
+/* SNIPPET_START: EverCrypt_AEAD_uu___is_Ek */
+
 bool EverCrypt_AEAD_uu___is_Ek(Spec_Agile_AEAD_alg a, EverCrypt_AEAD_state_s projectee)
 {
   return true;
 }
+
+/* SNIPPET_END: EverCrypt_AEAD_uu___is_Ek */
+
+/* SNIPPET_START: EverCrypt_AEAD___proj__Ek__item__impl */
 
 Spec_Cipher_Expansion_impl
 EverCrypt_AEAD___proj__Ek__item__impl(Spec_Agile_AEAD_alg a, EverCrypt_AEAD_state_s projectee)
@@ -62,11 +76,19 @@ EverCrypt_AEAD___proj__Ek__item__impl(Spec_Agile_AEAD_alg a, EverCrypt_AEAD_stat
   return projectee.impl;
 }
 
+/* SNIPPET_END: EverCrypt_AEAD___proj__Ek__item__impl */
+
+/* SNIPPET_START: EverCrypt_AEAD___proj__Ek__item__ek */
+
 uint8_t
 *EverCrypt_AEAD___proj__Ek__item__ek(Spec_Agile_AEAD_alg a, EverCrypt_AEAD_state_s projectee)
 {
   return projectee.ek;
 }
+
+/* SNIPPET_END: EverCrypt_AEAD___proj__Ek__item__ek */
+
+/* SNIPPET_START: EverCrypt_AEAD_alg_of_state */
 
 Spec_Agile_AEAD_alg EverCrypt_AEAD_alg_of_state(EverCrypt_AEAD_state_s *s)
 {
@@ -94,6 +116,10 @@ Spec_Agile_AEAD_alg EverCrypt_AEAD_alg_of_state(EverCrypt_AEAD_state_s *s)
   }
 }
 
+/* SNIPPET_END: EverCrypt_AEAD_alg_of_state */
+
+/* SNIPPET_START: EverCrypt_AEAD_create_in_chacha20_poly1305 */
+
 static EverCrypt_Error_error_code
 EverCrypt_AEAD_create_in_chacha20_poly1305(EverCrypt_AEAD_state_s **dst, uint8_t *k1)
 {
@@ -105,6 +131,10 @@ EverCrypt_AEAD_create_in_chacha20_poly1305(EverCrypt_AEAD_state_s **dst, uint8_t
   dst[0U] = p;
   return EverCrypt_Error_Success;
 }
+
+/* SNIPPET_END: EverCrypt_AEAD_create_in_chacha20_poly1305 */
+
+/* SNIPPET_START: EverCrypt_AEAD_create_in_aes128_gcm */
 
 static EverCrypt_Error_error_code
 EverCrypt_AEAD_create_in_aes128_gcm(EverCrypt_AEAD_state_s **dst, uint8_t *k1)
@@ -133,6 +163,10 @@ EverCrypt_AEAD_create_in_aes128_gcm(EverCrypt_AEAD_state_s **dst, uint8_t *k1)
   return EverCrypt_Error_UnsupportedAlgorithm;
 }
 
+/* SNIPPET_END: EverCrypt_AEAD_create_in_aes128_gcm */
+
+/* SNIPPET_START: EverCrypt_AEAD_create_in_aes256_gcm */
+
 static EverCrypt_Error_error_code
 EverCrypt_AEAD_create_in_aes256_gcm(EverCrypt_AEAD_state_s **dst, uint8_t *k1)
 {
@@ -160,6 +194,10 @@ EverCrypt_AEAD_create_in_aes256_gcm(EverCrypt_AEAD_state_s **dst, uint8_t *k1)
   return EverCrypt_Error_UnsupportedAlgorithm;
 }
 
+/* SNIPPET_END: EverCrypt_AEAD_create_in_aes256_gcm */
+
+/* SNIPPET_START: EverCrypt_AEAD_create_in */
+
 EverCrypt_Error_error_code
 EverCrypt_AEAD_create_in(Spec_Agile_AEAD_alg a, EverCrypt_AEAD_state_s **dst, uint8_t *k1)
 {
@@ -183,6 +221,10 @@ EverCrypt_AEAD_create_in(Spec_Agile_AEAD_alg a, EverCrypt_AEAD_state_s **dst, ui
       }
   }
 }
+
+/* SNIPPET_END: EverCrypt_AEAD_create_in */
+
+/* SNIPPET_START: EverCrypt_AEAD_encrypt_aes128_gcm */
 
 static EverCrypt_Error_error_code
 EverCrypt_AEAD_encrypt_aes128_gcm(
@@ -299,6 +341,10 @@ EverCrypt_AEAD_encrypt_aes128_gcm(
   return EverCrypt_Error_Success;
 }
 
+/* SNIPPET_END: EverCrypt_AEAD_encrypt_aes128_gcm */
+
+/* SNIPPET_START: EverCrypt_AEAD_encrypt_aes256_gcm */
+
 static EverCrypt_Error_error_code
 EverCrypt_AEAD_encrypt_aes256_gcm(
   EverCrypt_AEAD_state_s *s,
@@ -414,6 +460,10 @@ EverCrypt_AEAD_encrypt_aes256_gcm(
   return EverCrypt_Error_Success;
 }
 
+/* SNIPPET_END: EverCrypt_AEAD_encrypt_aes256_gcm */
+
+/* SNIPPET_START: EverCrypt_AEAD_encrypt */
+
 EverCrypt_Error_error_code
 EverCrypt_AEAD_encrypt(
   EverCrypt_AEAD_state_s *s,
@@ -478,6 +528,10 @@ EverCrypt_AEAD_encrypt(
       }
   }
 }
+
+/* SNIPPET_END: EverCrypt_AEAD_encrypt */
+
+/* SNIPPET_START: EverCrypt_AEAD_decrypt_aes128_gcm */
 
 static EverCrypt_Error_error_code
 EverCrypt_AEAD_decrypt_aes128_gcm(
@@ -604,6 +658,10 @@ EverCrypt_AEAD_decrypt_aes128_gcm(
   return EverCrypt_Error_AuthenticationFailure;
 }
 
+/* SNIPPET_END: EverCrypt_AEAD_decrypt_aes128_gcm */
+
+/* SNIPPET_START: EverCrypt_AEAD_decrypt_aes256_gcm */
+
 static EverCrypt_Error_error_code
 EverCrypt_AEAD_decrypt_aes256_gcm(
   EverCrypt_AEAD_state_s *s,
@@ -729,6 +787,10 @@ EverCrypt_AEAD_decrypt_aes256_gcm(
   return EverCrypt_Error_AuthenticationFailure;
 }
 
+/* SNIPPET_END: EverCrypt_AEAD_decrypt_aes256_gcm */
+
+/* SNIPPET_START: EverCrypt_AEAD_decrypt */
+
 EverCrypt_Error_error_code
 EverCrypt_AEAD_decrypt(
   EverCrypt_AEAD_state_s *s,
@@ -807,6 +869,10 @@ EverCrypt_AEAD_decrypt(
   }
 }
 
+/* SNIPPET_END: EverCrypt_AEAD_decrypt */
+
+/* SNIPPET_START: EverCrypt_AEAD_free */
+
 void EverCrypt_AEAD_free(EverCrypt_AEAD_state_s *s)
 {
   EverCrypt_AEAD_state_s scrut = *s;
@@ -814,4 +880,6 @@ void EverCrypt_AEAD_free(EverCrypt_AEAD_state_s *s)
   KRML_HOST_FREE(ek);
   KRML_HOST_FREE(s);
 }
+
+/* SNIPPET_END: EverCrypt_AEAD_free */
 

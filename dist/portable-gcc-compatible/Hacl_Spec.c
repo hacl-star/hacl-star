@@ -24,6 +24,8 @@
 
 #include "Hacl_Spec.h"
 
+/* SNIPPET_START: Spec_Cipher_Expansion_cipher_alg_of_impl */
+
 Spec_Agile_Cipher_cipher_alg
 Spec_Cipher_Expansion_cipher_alg_of_impl(Spec_Cipher_Expansion_impl i)
 {
@@ -48,4 +50,6 @@ Spec_Cipher_Expansion_cipher_alg_of_impl(Spec_Cipher_Expansion_impl i)
       }
   }
 }
+
+/* SNIPPET_END: Spec_Cipher_Expansion_cipher_alg_of_impl */
 

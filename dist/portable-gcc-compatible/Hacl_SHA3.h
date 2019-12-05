@@ -34,19 +34,49 @@
 #include "Hacl_Kremlib.h"
 
 
+/* SNIPPET_START: Hacl_Impl_SHA3_keccak_rotc */
+
 extern uint32_t Hacl_Impl_SHA3_keccak_rotc[24U];
+
+/* SNIPPET_END: Hacl_Impl_SHA3_keccak_rotc */
+
+/* SNIPPET_START: Hacl_Impl_SHA3_keccak_piln */
 
 extern uint32_t Hacl_Impl_SHA3_keccak_piln[24U];
 
+/* SNIPPET_END: Hacl_Impl_SHA3_keccak_piln */
+
+/* SNIPPET_START: Hacl_Impl_SHA3_keccak_rndc */
+
 extern uint64_t Hacl_Impl_SHA3_keccak_rndc[24U];
+
+/* SNIPPET_END: Hacl_Impl_SHA3_keccak_rndc */
+
+/* SNIPPET_START: Hacl_Impl_SHA3_rotl */
 
 uint64_t Hacl_Impl_SHA3_rotl(uint64_t a, uint32_t b);
 
+/* SNIPPET_END: Hacl_Impl_SHA3_rotl */
+
+/* SNIPPET_START: Hacl_Impl_SHA3_state_permute */
+
 void Hacl_Impl_SHA3_state_permute(uint64_t *s);
+
+/* SNIPPET_END: Hacl_Impl_SHA3_state_permute */
+
+/* SNIPPET_START: Hacl_Impl_SHA3_loadState */
 
 void Hacl_Impl_SHA3_loadState(uint32_t rateInBytes, uint8_t *input, uint64_t *s);
 
+/* SNIPPET_END: Hacl_Impl_SHA3_loadState */
+
+/* SNIPPET_START: Hacl_Impl_SHA3_storeState */
+
 void Hacl_Impl_SHA3_storeState(uint32_t rateInBytes, uint64_t *s, uint8_t *res);
+
+/* SNIPPET_END: Hacl_Impl_SHA3_storeState */
+
+/* SNIPPET_START: Hacl_Impl_SHA3_absorb */
 
 void
 Hacl_Impl_SHA3_absorb(
@@ -57,6 +87,10 @@ Hacl_Impl_SHA3_absorb(
   uint8_t delimitedSuffix
 );
 
+/* SNIPPET_END: Hacl_Impl_SHA3_absorb */
+
+/* SNIPPET_START: Hacl_Impl_SHA3_squeeze */
+
 void
 Hacl_Impl_SHA3_squeeze(
   uint64_t *s,
@@ -64,6 +98,10 @@ Hacl_Impl_SHA3_squeeze(
   uint32_t outputByteLen,
   uint8_t *output
 );
+
+/* SNIPPET_END: Hacl_Impl_SHA3_squeeze */
+
+/* SNIPPET_START: Hacl_Impl_SHA3_keccak */
 
 void
 Hacl_Impl_SHA3_keccak(
@@ -76,6 +114,10 @@ Hacl_Impl_SHA3_keccak(
   uint8_t *output
 );
 
+/* SNIPPET_END: Hacl_Impl_SHA3_keccak */
+
+/* SNIPPET_START: Hacl_SHA3_shake128_hacl */
+
 void
 Hacl_SHA3_shake128_hacl(
   uint32_t inputByteLen,
@@ -83,6 +125,10 @@ Hacl_SHA3_shake128_hacl(
   uint32_t outputByteLen,
   uint8_t *output
 );
+
+/* SNIPPET_END: Hacl_SHA3_shake128_hacl */
+
+/* SNIPPET_START: Hacl_SHA3_shake256_hacl */
 
 void
 Hacl_SHA3_shake256_hacl(
@@ -92,13 +138,31 @@ Hacl_SHA3_shake256_hacl(
   uint8_t *output
 );
 
+/* SNIPPET_END: Hacl_SHA3_shake256_hacl */
+
+/* SNIPPET_START: Hacl_SHA3_sha3_224 */
+
 void Hacl_SHA3_sha3_224(uint32_t inputByteLen, uint8_t *input, uint8_t *output);
+
+/* SNIPPET_END: Hacl_SHA3_sha3_224 */
+
+/* SNIPPET_START: Hacl_SHA3_sha3_256 */
 
 void Hacl_SHA3_sha3_256(uint32_t inputByteLen, uint8_t *input, uint8_t *output);
 
+/* SNIPPET_END: Hacl_SHA3_sha3_256 */
+
+/* SNIPPET_START: Hacl_SHA3_sha3_384 */
+
 void Hacl_SHA3_sha3_384(uint32_t inputByteLen, uint8_t *input, uint8_t *output);
 
+/* SNIPPET_END: Hacl_SHA3_sha3_384 */
+
+/* SNIPPET_START: Hacl_SHA3_sha3_512 */
+
 void Hacl_SHA3_sha3_512(uint32_t inputByteLen, uint8_t *input, uint8_t *output);
+
+/* SNIPPET_END: Hacl_SHA3_sha3_512 */
 
 #define __Hacl_SHA3_H_DEFINED
 #endif

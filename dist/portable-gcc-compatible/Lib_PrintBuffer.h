@@ -34,13 +34,29 @@
 
 
 
+/* SNIPPET_START: Lib_PrintBuffer_print_bytes */
+
 extern void Lib_PrintBuffer_print_bytes(uint32_t len, uint8_t *buf1);
+
+/* SNIPPET_END: Lib_PrintBuffer_print_bytes */
+
+/* SNIPPET_START: Lib_PrintBuffer_print_compare */
 
 extern void Lib_PrintBuffer_print_compare(uint32_t len, uint8_t *buf0, uint8_t *buf1);
 
+/* SNIPPET_END: Lib_PrintBuffer_print_compare */
+
+/* SNIPPET_START: Lib_PrintBuffer_print_compare_display */
+
 extern void Lib_PrintBuffer_print_compare_display(uint32_t len, uint8_t *buf0, uint8_t *buf1);
 
+/* SNIPPET_END: Lib_PrintBuffer_print_compare_display */
+
+/* SNIPPET_START: Lib_PrintBuffer_result_compare_display */
+
 extern bool Lib_PrintBuffer_result_compare_display(uint32_t len, uint8_t *buf0, uint8_t *buf1);
+
+/* SNIPPET_END: Lib_PrintBuffer_result_compare_display */
 
 #define __Lib_PrintBuffer_H_DEFINED
 #endif

@@ -39,20 +39,46 @@
 #include "Hacl_Spec.h"
 
 
+/* SNIPPET_START: EverCrypt_AEAD_state_s */
+
 typedef struct EverCrypt_AEAD_state_s_s EverCrypt_AEAD_state_s;
 
+/* SNIPPET_END: EverCrypt_AEAD_state_s */
+
+/* SNIPPET_START: EverCrypt_AEAD_uu___is_Ek */
+
 bool EverCrypt_AEAD_uu___is_Ek(Spec_Agile_AEAD_alg a, EverCrypt_AEAD_state_s projectee);
+
+/* SNIPPET_END: EverCrypt_AEAD_uu___is_Ek */
+
+/* SNIPPET_START: EverCrypt_AEAD___proj__Ek__item__impl */
 
 Spec_Cipher_Expansion_impl
 EverCrypt_AEAD___proj__Ek__item__impl(Spec_Agile_AEAD_alg a, EverCrypt_AEAD_state_s projectee);
 
+/* SNIPPET_END: EverCrypt_AEAD___proj__Ek__item__impl */
+
+/* SNIPPET_START: EverCrypt_AEAD___proj__Ek__item__ek */
+
 uint8_t
 *EverCrypt_AEAD___proj__Ek__item__ek(Spec_Agile_AEAD_alg a, EverCrypt_AEAD_state_s projectee);
 
+/* SNIPPET_END: EverCrypt_AEAD___proj__Ek__item__ek */
+
+/* SNIPPET_START: EverCrypt_AEAD_alg_of_state */
+
 Spec_Agile_AEAD_alg EverCrypt_AEAD_alg_of_state(EverCrypt_AEAD_state_s *s);
+
+/* SNIPPET_END: EverCrypt_AEAD_alg_of_state */
+
+/* SNIPPET_START: EverCrypt_AEAD_create_in */
 
 EverCrypt_Error_error_code
 EverCrypt_AEAD_create_in(Spec_Agile_AEAD_alg a, EverCrypt_AEAD_state_s **dst, uint8_t *k1);
+
+/* SNIPPET_END: EverCrypt_AEAD_create_in */
+
+/* SNIPPET_START: EverCrypt_AEAD_encrypt */
 
 EverCrypt_Error_error_code
 EverCrypt_AEAD_encrypt(
@@ -67,6 +93,10 @@ EverCrypt_AEAD_encrypt(
   uint8_t *tag
 );
 
+/* SNIPPET_END: EverCrypt_AEAD_encrypt */
+
+/* SNIPPET_START: EverCrypt_AEAD_decrypt */
+
 EverCrypt_Error_error_code
 EverCrypt_AEAD_decrypt(
   EverCrypt_AEAD_state_s *s,
@@ -80,7 +110,13 @@ EverCrypt_AEAD_decrypt(
   uint8_t *dst
 );
 
+/* SNIPPET_END: EverCrypt_AEAD_decrypt */
+
+/* SNIPPET_START: EverCrypt_AEAD_free */
+
 void EverCrypt_AEAD_free(EverCrypt_AEAD_state_s *s);
+
+/* SNIPPET_END: EverCrypt_AEAD_free */
 
 #define __EverCrypt_AEAD_H_DEFINED
 #endif

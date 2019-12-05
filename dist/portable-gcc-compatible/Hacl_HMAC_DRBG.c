@@ -24,15 +24,37 @@
 
 #include "Hacl_HMAC_DRBG.h"
 
+/* SNIPPET_START: Hacl_HMAC_DRBG_reseed_interval */
+
 uint32_t Hacl_HMAC_DRBG_reseed_interval = (uint32_t)1024U;
+
+/* SNIPPET_END: Hacl_HMAC_DRBG_reseed_interval */
+
+/* SNIPPET_START: Hacl_HMAC_DRBG_max_output_length */
 
 uint32_t Hacl_HMAC_DRBG_max_output_length = (uint32_t)65536U;
 
+/* SNIPPET_END: Hacl_HMAC_DRBG_max_output_length */
+
+/* SNIPPET_START: Hacl_HMAC_DRBG_max_length */
+
 uint32_t Hacl_HMAC_DRBG_max_length = (uint32_t)65536U;
+
+/* SNIPPET_END: Hacl_HMAC_DRBG_max_length */
+
+/* SNIPPET_START: Hacl_HMAC_DRBG_max_personalization_string_length */
 
 uint32_t Hacl_HMAC_DRBG_max_personalization_string_length = (uint32_t)65536U;
 
+/* SNIPPET_END: Hacl_HMAC_DRBG_max_personalization_string_length */
+
+/* SNIPPET_START: Hacl_HMAC_DRBG_max_additional_input_length */
+
 uint32_t Hacl_HMAC_DRBG_max_additional_input_length = (uint32_t)65536U;
+
+/* SNIPPET_END: Hacl_HMAC_DRBG_max_additional_input_length */
+
+/* SNIPPET_START: Hacl_HMAC_DRBG_min_length */
 
 uint32_t Hacl_HMAC_DRBG_min_length(Spec_Hash_Definitions_hash_alg a)
 {
@@ -62,11 +84,19 @@ uint32_t Hacl_HMAC_DRBG_min_length(Spec_Hash_Definitions_hash_alg a)
   }
 }
 
+/* SNIPPET_END: Hacl_HMAC_DRBG_min_length */
+
+/* SNIPPET_START: Hacl_HMAC_DRBG_uu___is_State */
+
 bool
 Hacl_HMAC_DRBG_uu___is_State(Spec_Hash_Definitions_hash_alg a, Hacl_HMAC_DRBG_state projectee)
 {
   return true;
 }
+
+/* SNIPPET_END: Hacl_HMAC_DRBG_uu___is_State */
+
+/* SNIPPET_START: Hacl_HMAC_DRBG___proj__State__item__k */
 
 uint8_t
 *Hacl_HMAC_DRBG___proj__State__item__k(
@@ -77,6 +107,10 @@ uint8_t
   return projectee.k;
 }
 
+/* SNIPPET_END: Hacl_HMAC_DRBG___proj__State__item__k */
+
+/* SNIPPET_START: Hacl_HMAC_DRBG___proj__State__item__v */
+
 uint8_t
 *Hacl_HMAC_DRBG___proj__State__item__v(
   Spec_Hash_Definitions_hash_alg a,
@@ -86,6 +120,10 @@ uint8_t
   return projectee.v;
 }
 
+/* SNIPPET_END: Hacl_HMAC_DRBG___proj__State__item__v */
+
+/* SNIPPET_START: Hacl_HMAC_DRBG___proj__State__item__reseed_counter */
+
 uint32_t
 *Hacl_HMAC_DRBG___proj__State__item__reseed_counter(
   Spec_Hash_Definitions_hash_alg a,
@@ -94,6 +132,10 @@ uint32_t
 {
   return projectee.reseed_counter;
 }
+
+/* SNIPPET_END: Hacl_HMAC_DRBG___proj__State__item__reseed_counter */
+
+/* SNIPPET_START: Hacl_HMAC_DRBG_create_in */
 
 Hacl_HMAC_DRBG_state Hacl_HMAC_DRBG_create_in(Spec_Hash_Definitions_hash_alg a)
 {
@@ -167,6 +209,10 @@ Hacl_HMAC_DRBG_state Hacl_HMAC_DRBG_create_in(Spec_Hash_Definitions_hash_alg a)
   ctr[0U] = (uint32_t)1U;
   return ((Hacl_HMAC_DRBG_state){ .k = k1, .v = v1, .reseed_counter = ctr });
 }
+
+/* SNIPPET_END: Hacl_HMAC_DRBG_create_in */
+
+/* SNIPPET_START: Hacl_HMAC_DRBG_instantiate */
 
 void
 Hacl_HMAC_DRBG_instantiate(
@@ -426,6 +472,10 @@ Hacl_HMAC_DRBG_instantiate(
   }
 }
 
+/* SNIPPET_END: Hacl_HMAC_DRBG_instantiate */
+
+/* SNIPPET_START: Hacl_HMAC_DRBG_reseed */
+
 void
 Hacl_HMAC_DRBG_reseed(
   Spec_Hash_Definitions_hash_alg a,
@@ -657,6 +707,10 @@ Hacl_HMAC_DRBG_reseed(
       }
   }
 }
+
+/* SNIPPET_END: Hacl_HMAC_DRBG_reseed */
+
+/* SNIPPET_START: Hacl_HMAC_DRBG_generate */
 
 bool
 Hacl_HMAC_DRBG_generate(
@@ -1077,4 +1131,6 @@ Hacl_HMAC_DRBG_generate(
       }
   }
 }
+
+/* SNIPPET_END: Hacl_HMAC_DRBG_generate */
 

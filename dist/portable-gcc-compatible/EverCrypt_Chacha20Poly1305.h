@@ -37,6 +37,8 @@
 #include "Hacl_Chacha20Poly1305_256.h"
 
 
+/* SNIPPET_START: EverCrypt_Chacha20Poly1305_aead_encrypt */
+
 void
 EverCrypt_Chacha20Poly1305_aead_encrypt(
   uint8_t *k,
@@ -49,6 +51,10 @@ EverCrypt_Chacha20Poly1305_aead_encrypt(
   uint8_t *tag
 );
 
+/* SNIPPET_END: EverCrypt_Chacha20Poly1305_aead_encrypt */
+
+/* SNIPPET_START: EverCrypt_Chacha20Poly1305_aead_decrypt */
+
 uint32_t
 EverCrypt_Chacha20Poly1305_aead_decrypt(
   uint8_t *k,
@@ -60,6 +66,8 @@ EverCrypt_Chacha20Poly1305_aead_decrypt(
   uint8_t *cipher,
   uint8_t *tag
 );
+
+/* SNIPPET_END: EverCrypt_Chacha20Poly1305_aead_decrypt */
 
 #define __EverCrypt_Chacha20Poly1305_H_DEFINED
 #endif

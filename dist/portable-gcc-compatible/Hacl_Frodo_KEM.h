@@ -37,11 +37,23 @@
 #include "Hacl_Lib.h"
 
 
+/* SNIPPET_START: Hacl_Frodo_KEM_crypto_kem_keypair */
+
 uint32_t Hacl_Frodo_KEM_crypto_kem_keypair(uint8_t *pk, uint8_t *sk);
+
+/* SNIPPET_END: Hacl_Frodo_KEM_crypto_kem_keypair */
+
+/* SNIPPET_START: Hacl_Frodo_KEM_crypto_kem_enc */
 
 uint32_t Hacl_Frodo_KEM_crypto_kem_enc(uint8_t *ct, uint8_t *ss, uint8_t *pk);
 
+/* SNIPPET_END: Hacl_Frodo_KEM_crypto_kem_enc */
+
+/* SNIPPET_START: Hacl_Frodo_KEM_crypto_kem_dec */
+
 uint32_t Hacl_Frodo_KEM_crypto_kem_dec(uint8_t *ss, uint8_t *ct, uint8_t *sk);
+
+/* SNIPPET_END: Hacl_Frodo_KEM_crypto_kem_dec */
 
 #define __Hacl_Frodo_KEM_H_DEFINED
 #endif

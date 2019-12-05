@@ -37,6 +37,8 @@
 #include "Hacl_Curve25519_51.h"
 
 
+/* SNIPPET_START: Hacl_NaCl_crypto_secretbox_detached */
+
 uint32_t
 Hacl_NaCl_crypto_secretbox_detached(
   uint8_t *c,
@@ -46,6 +48,10 @@ Hacl_NaCl_crypto_secretbox_detached(
   uint8_t *n1,
   uint8_t *k
 );
+
+/* SNIPPET_END: Hacl_NaCl_crypto_secretbox_detached */
+
+/* SNIPPET_START: Hacl_NaCl_crypto_secretbox_open_detached */
 
 uint32_t
 Hacl_NaCl_crypto_secretbox_open_detached(
@@ -57,8 +63,16 @@ Hacl_NaCl_crypto_secretbox_open_detached(
   uint8_t *k
 );
 
+/* SNIPPET_END: Hacl_NaCl_crypto_secretbox_open_detached */
+
+/* SNIPPET_START: Hacl_NaCl_crypto_secretbox_easy */
+
 uint32_t
 Hacl_NaCl_crypto_secretbox_easy(uint8_t *c, uint8_t *m, uint32_t mlen, uint8_t *n1, uint8_t *k);
+
+/* SNIPPET_END: Hacl_NaCl_crypto_secretbox_easy */
+
+/* SNIPPET_START: Hacl_NaCl_crypto_secretbox_open_easy */
 
 uint32_t
 Hacl_NaCl_crypto_secretbox_open_easy(
@@ -69,7 +83,15 @@ Hacl_NaCl_crypto_secretbox_open_easy(
   uint8_t *k
 );
 
+/* SNIPPET_END: Hacl_NaCl_crypto_secretbox_open_easy */
+
+/* SNIPPET_START: Hacl_NaCl_crypto_box_beforenm */
+
 uint32_t Hacl_NaCl_crypto_box_beforenm(uint8_t *k, uint8_t *pk, uint8_t *sk);
+
+/* SNIPPET_END: Hacl_NaCl_crypto_box_beforenm */
+
+/* SNIPPET_START: Hacl_NaCl_crypto_box_detached_afternm */
 
 uint32_t
 Hacl_NaCl_crypto_box_detached_afternm(
@@ -80,6 +102,10 @@ Hacl_NaCl_crypto_box_detached_afternm(
   uint8_t *n1,
   uint8_t *k
 );
+
+/* SNIPPET_END: Hacl_NaCl_crypto_box_detached_afternm */
+
+/* SNIPPET_START: Hacl_NaCl_crypto_box_detached */
 
 uint32_t
 Hacl_NaCl_crypto_box_detached(
@@ -92,6 +118,10 @@ Hacl_NaCl_crypto_box_detached(
   uint8_t *sk
 );
 
+/* SNIPPET_END: Hacl_NaCl_crypto_box_detached */
+
+/* SNIPPET_START: Hacl_NaCl_crypto_box_open_detached_afternm */
+
 uint32_t
 Hacl_NaCl_crypto_box_open_detached_afternm(
   uint8_t *m,
@@ -101,6 +131,10 @@ Hacl_NaCl_crypto_box_open_detached_afternm(
   uint8_t *n1,
   uint8_t *k
 );
+
+/* SNIPPET_END: Hacl_NaCl_crypto_box_open_detached_afternm */
+
+/* SNIPPET_START: Hacl_NaCl_crypto_box_open_detached */
 
 uint32_t
 Hacl_NaCl_crypto_box_open_detached(
@@ -113,6 +147,10 @@ Hacl_NaCl_crypto_box_open_detached(
   uint8_t *sk
 );
 
+/* SNIPPET_END: Hacl_NaCl_crypto_box_open_detached */
+
+/* SNIPPET_START: Hacl_NaCl_crypto_box_easy_afternm */
+
 uint32_t
 Hacl_NaCl_crypto_box_easy_afternm(
   uint8_t *c,
@@ -121,6 +159,10 @@ Hacl_NaCl_crypto_box_easy_afternm(
   uint8_t *n1,
   uint8_t *k
 );
+
+/* SNIPPET_END: Hacl_NaCl_crypto_box_easy_afternm */
+
+/* SNIPPET_START: Hacl_NaCl_crypto_box_easy */
 
 uint32_t
 Hacl_NaCl_crypto_box_easy(
@@ -132,6 +174,10 @@ Hacl_NaCl_crypto_box_easy(
   uint8_t *sk
 );
 
+/* SNIPPET_END: Hacl_NaCl_crypto_box_easy */
+
+/* SNIPPET_START: Hacl_NaCl_crypto_box_open_easy_afternm */
+
 uint32_t
 Hacl_NaCl_crypto_box_open_easy_afternm(
   uint8_t *m,
@@ -140,6 +186,10 @@ Hacl_NaCl_crypto_box_open_easy_afternm(
   uint8_t *n1,
   uint8_t *k
 );
+
+/* SNIPPET_END: Hacl_NaCl_crypto_box_open_easy_afternm */
+
+/* SNIPPET_START: Hacl_NaCl_crypto_box_open_easy */
 
 uint32_t
 Hacl_NaCl_crypto_box_open_easy(
@@ -150,6 +200,8 @@ Hacl_NaCl_crypto_box_open_easy(
   uint8_t *pk,
   uint8_t *sk
 );
+
+/* SNIPPET_END: Hacl_NaCl_crypto_box_open_easy */
 
 #define __Hacl_NaCl_H_DEFINED
 #endif

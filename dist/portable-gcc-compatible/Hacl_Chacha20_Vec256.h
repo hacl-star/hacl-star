@@ -35,6 +35,8 @@
 #include "Hacl_Kremlib.h"
 
 
+/* SNIPPET_START: Hacl_Chacha20_Vec256_chacha20_encrypt_256 */
+
 void
 Hacl_Chacha20_Vec256_chacha20_encrypt_256(
   uint32_t len,
@@ -45,6 +47,10 @@ Hacl_Chacha20_Vec256_chacha20_encrypt_256(
   uint32_t ctr
 );
 
+/* SNIPPET_END: Hacl_Chacha20_Vec256_chacha20_encrypt_256 */
+
+/* SNIPPET_START: Hacl_Chacha20_Vec256_chacha20_decrypt_256 */
+
 void
 Hacl_Chacha20_Vec256_chacha20_decrypt_256(
   uint32_t len,
@@ -54,6 +60,8 @@ Hacl_Chacha20_Vec256_chacha20_decrypt_256(
   uint8_t *n1,
   uint32_t ctr
 );
+
+/* SNIPPET_END: Hacl_Chacha20_Vec256_chacha20_decrypt_256 */
 
 #define __Hacl_Chacha20_Vec256_H_DEFINED
 #endif

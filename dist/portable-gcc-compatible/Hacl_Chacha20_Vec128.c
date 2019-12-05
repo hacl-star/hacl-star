@@ -24,6 +24,8 @@
 
 #include "Hacl_Chacha20_Vec128.h"
 
+/* SNIPPET_START: Hacl_Chacha20_Vec128_double_round_128 */
+
 static void Hacl_Chacha20_Vec128_double_round_128(Lib_IntVector_Intrinsics_vec128 *st)
 {
   st[0U] = Lib_IntVector_Intrinsics_vec128_add32(st[0U], st[4U]);
@@ -124,6 +126,10 @@ static void Hacl_Chacha20_Vec128_double_round_128(Lib_IntVector_Intrinsics_vec12
   st[4U] = Lib_IntVector_Intrinsics_vec128_rotate_left32(std30, (uint32_t)7U);
 }
 
+/* SNIPPET_END: Hacl_Chacha20_Vec128_double_round_128 */
+
+/* SNIPPET_START: Hacl_Chacha20_Vec128_chacha20_core_128 */
+
 static void
 Hacl_Chacha20_Vec128_chacha20_core_128(
   Lib_IntVector_Intrinsics_vec128 *k,
@@ -153,6 +159,10 @@ Hacl_Chacha20_Vec128_chacha20_core_128(
   }
   k[12U] = Lib_IntVector_Intrinsics_vec128_add32(k[12U], cv);
 }
+
+/* SNIPPET_END: Hacl_Chacha20_Vec128_chacha20_core_128 */
+
+/* SNIPPET_START: Hacl_Chacha20_Vec128_chacha20_init_128 */
 
 static void
 Hacl_Chacha20_Vec128_chacha20_init_128(
@@ -207,6 +217,10 @@ Hacl_Chacha20_Vec128_chacha20_init_128(
   Lib_IntVector_Intrinsics_vec128 c12 = ctx[12U];
   ctx[12U] = Lib_IntVector_Intrinsics_vec128_add32(c12, ctr1);
 }
+
+/* SNIPPET_END: Hacl_Chacha20_Vec128_chacha20_init_128 */
+
+/* SNIPPET_START: Hacl_Chacha20_Vec128_chacha20_encrypt_128 */
 
 void
 Hacl_Chacha20_Vec128_chacha20_encrypt_128(
@@ -512,6 +526,10 @@ Hacl_Chacha20_Vec128_chacha20_encrypt_128(
   }
 }
 
+/* SNIPPET_END: Hacl_Chacha20_Vec128_chacha20_encrypt_128 */
+
+/* SNIPPET_START: Hacl_Chacha20_Vec128_chacha20_decrypt_128 */
+
 void
 Hacl_Chacha20_Vec128_chacha20_decrypt_128(
   uint32_t len,
@@ -815,4 +833,6 @@ Hacl_Chacha20_Vec128_chacha20_decrypt_128(
     memcpy(uu____2, plain, rem1 * sizeof plain[0U]);
   }
 }
+
+/* SNIPPET_END: Hacl_Chacha20_Vec128_chacha20_decrypt_128 */
 

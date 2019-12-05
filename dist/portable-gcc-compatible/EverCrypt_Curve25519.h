@@ -36,11 +36,23 @@
 #include "Hacl_Curve25519_51.h"
 
 
+/* SNIPPET_START: EverCrypt_Curve25519_secret_to_public */
+
 void EverCrypt_Curve25519_secret_to_public(uint8_t *pub, uint8_t *priv);
+
+/* SNIPPET_END: EverCrypt_Curve25519_secret_to_public */
+
+/* SNIPPET_START: EverCrypt_Curve25519_scalarmult */
 
 void EverCrypt_Curve25519_scalarmult(uint8_t *shared, uint8_t *my_priv, uint8_t *their_pub);
 
+/* SNIPPET_END: EverCrypt_Curve25519_scalarmult */
+
+/* SNIPPET_START: EverCrypt_Curve25519_ecdh */
+
 bool EverCrypt_Curve25519_ecdh(uint8_t *shared, uint8_t *my_priv, uint8_t *their_pub);
+
+/* SNIPPET_END: EverCrypt_Curve25519_ecdh */
 
 #define __EverCrypt_Curve25519_H_DEFINED
 #endif

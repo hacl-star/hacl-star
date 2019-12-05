@@ -34,9 +34,19 @@
 
 
 
+/* SNIPPET_START: EverCrypt_OpenSSL_random_init */
+
 extern uint32_t EverCrypt_OpenSSL_random_init();
 
+/* SNIPPET_END: EverCrypt_OpenSSL_random_init */
+
+/* SNIPPET_START: EverCrypt_OpenSSL_random_sample */
+
 extern void EverCrypt_OpenSSL_random_sample(uint32_t len, uint8_t *out);
+
+/* SNIPPET_END: EverCrypt_OpenSSL_random_sample */
+
+/* SNIPPET_START: EverCrypt_OpenSSL_aes128_gcm_encrypt */
 
 extern void
 EverCrypt_OpenSSL_aes128_gcm_encrypt(
@@ -50,6 +60,10 @@ EverCrypt_OpenSSL_aes128_gcm_encrypt(
   uint8_t *tag
 );
 
+/* SNIPPET_END: EverCrypt_OpenSSL_aes128_gcm_encrypt */
+
+/* SNIPPET_START: EverCrypt_OpenSSL_aes128_gcm_decrypt */
+
 extern uint32_t
 EverCrypt_OpenSSL_aes128_gcm_decrypt(
   uint8_t *key,
@@ -61,6 +75,10 @@ EverCrypt_OpenSSL_aes128_gcm_decrypt(
   uint8_t *cipher,
   uint8_t *tag
 );
+
+/* SNIPPET_END: EverCrypt_OpenSSL_aes128_gcm_decrypt */
+
+/* SNIPPET_START: EverCrypt_OpenSSL_aes256_gcm_encrypt */
 
 extern void
 EverCrypt_OpenSSL_aes256_gcm_encrypt(
@@ -74,6 +92,10 @@ EverCrypt_OpenSSL_aes256_gcm_encrypt(
   uint8_t *tag
 );
 
+/* SNIPPET_END: EverCrypt_OpenSSL_aes256_gcm_encrypt */
+
+/* SNIPPET_START: EverCrypt_OpenSSL_aes256_gcm_decrypt */
+
 extern uint32_t
 EverCrypt_OpenSSL_aes256_gcm_decrypt(
   uint8_t *key,
@@ -86,13 +108,25 @@ EverCrypt_OpenSSL_aes256_gcm_decrypt(
   uint8_t *tag
 );
 
+/* SNIPPET_END: EverCrypt_OpenSSL_aes256_gcm_decrypt */
+
+/* SNIPPET_START: EverCrypt_OpenSSL_alg */
+
 #define EverCrypt_OpenSSL_AES128_GCM 0
 #define EverCrypt_OpenSSL_AES256_GCM 1
 #define EverCrypt_OpenSSL_CHACHA20_POLY1305 2
 
+/* SNIPPET_END: EverCrypt_OpenSSL_alg */
+
 typedef uint8_t EverCrypt_OpenSSL_alg;
 
+/* SNIPPET_START: EverCrypt_OpenSSL_aead_create */
+
 extern FStar_Dyn_dyn EverCrypt_OpenSSL_aead_create(EverCrypt_OpenSSL_alg alg, uint8_t *key);
+
+/* SNIPPET_END: EverCrypt_OpenSSL_aead_create */
+
+/* SNIPPET_START: EverCrypt_OpenSSL_aead_encrypt */
 
 extern void
 EverCrypt_OpenSSL_aead_encrypt(
@@ -106,6 +140,10 @@ EverCrypt_OpenSSL_aead_encrypt(
   uint8_t *tag
 );
 
+/* SNIPPET_END: EverCrypt_OpenSSL_aead_encrypt */
+
+/* SNIPPET_START: EverCrypt_OpenSSL_aead_decrypt */
+
 extern uint32_t
 EverCrypt_OpenSSL_aead_decrypt(
   FStar_Dyn_dyn key,
@@ -118,7 +156,15 @@ EverCrypt_OpenSSL_aead_decrypt(
   uint8_t *tag
 );
 
+/* SNIPPET_END: EverCrypt_OpenSSL_aead_decrypt */
+
+/* SNIPPET_START: EverCrypt_OpenSSL_aead_free */
+
 extern void EverCrypt_OpenSSL_aead_free(FStar_Dyn_dyn key);
+
+/* SNIPPET_END: EverCrypt_OpenSSL_aead_free */
+
+/* SNIPPET_START: EverCrypt_OpenSSL_dh_load_group */
 
 extern FStar_Dyn_dyn
 EverCrypt_OpenSSL_dh_load_group(
@@ -130,9 +176,21 @@ EverCrypt_OpenSSL_dh_load_group(
   uint32_t dh_q_len
 );
 
+/* SNIPPET_END: EverCrypt_OpenSSL_dh_load_group */
+
+/* SNIPPET_START: EverCrypt_OpenSSL_dh_free_group */
+
 extern void EverCrypt_OpenSSL_dh_free_group(FStar_Dyn_dyn st);
 
+/* SNIPPET_END: EverCrypt_OpenSSL_dh_free_group */
+
+/* SNIPPET_START: EverCrypt_OpenSSL_dh_keygen */
+
 extern uint32_t EverCrypt_OpenSSL_dh_keygen(FStar_Dyn_dyn st, uint8_t *out);
+
+/* SNIPPET_END: EverCrypt_OpenSSL_dh_keygen */
+
+/* SNIPPET_START: EverCrypt_OpenSSL_dh_compute */
 
 extern uint32_t
 EverCrypt_OpenSSL_dh_compute(
@@ -142,22 +200,44 @@ EverCrypt_OpenSSL_dh_compute(
   uint8_t *out
 );
 
+/* SNIPPET_END: EverCrypt_OpenSSL_dh_compute */
+
+/* SNIPPET_START: EverCrypt_OpenSSL_ec_curve */
+
 #define EverCrypt_OpenSSL_ECC_P256 0
 #define EverCrypt_OpenSSL_ECC_P384 1
 #define EverCrypt_OpenSSL_ECC_P521 2
 #define EverCrypt_OpenSSL_ECC_X25519 3
 #define EverCrypt_OpenSSL_ECC_X448 4
 
+/* SNIPPET_END: EverCrypt_OpenSSL_ec_curve */
+
 typedef uint8_t EverCrypt_OpenSSL_ec_curve;
+
+/* SNIPPET_START: EverCrypt_OpenSSL_ecdh_load_curve */
 
 extern FStar_Dyn_dyn EverCrypt_OpenSSL_ecdh_load_curve(EverCrypt_OpenSSL_ec_curve g);
 
+/* SNIPPET_END: EverCrypt_OpenSSL_ecdh_load_curve */
+
+/* SNIPPET_START: EverCrypt_OpenSSL_ecdh_free_curve */
+
 extern void EverCrypt_OpenSSL_ecdh_free_curve(FStar_Dyn_dyn st);
+
+/* SNIPPET_END: EverCrypt_OpenSSL_ecdh_free_curve */
+
+/* SNIPPET_START: EverCrypt_OpenSSL_ecdh_keygen */
 
 extern void EverCrypt_OpenSSL_ecdh_keygen(FStar_Dyn_dyn st, uint8_t *outx, uint8_t *outy);
 
+/* SNIPPET_END: EverCrypt_OpenSSL_ecdh_keygen */
+
+/* SNIPPET_START: EverCrypt_OpenSSL_ecdh_compute */
+
 extern uint32_t
 EverCrypt_OpenSSL_ecdh_compute(FStar_Dyn_dyn st, uint8_t *inx, uint8_t *iny, uint8_t *out);
+
+/* SNIPPET_END: EverCrypt_OpenSSL_ecdh_compute */
 
 #define __EverCrypt_OpenSSL_H_DEFINED
 #endif
