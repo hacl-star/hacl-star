@@ -732,7 +732,7 @@ dist/wasm/Makefile.basic: WASMSUPPORT_BUNDLE =
 # README.EverCrypt.md)
 
 # Customizations for regular, msvc and gcc flavors.
-dist/gcc-compatible/Makefile.basic: DEFAULT_FLAGS += -ctypes EverCrypt.Ed25519
+dist/gcc-compatible/Makefile.basic: DEFAULT_FLAGS += -ctypes Hacl.NaCl,EverCrypt.Curve25519,EverCrypt.HMAC,Hacl.Ed25519
 
 dist/msvc-compatible/Makefile.basic: DEFAULT_FLAGS += -falloca -ftail-calls
 
@@ -829,6 +829,7 @@ dist/mozilla/Makefile.basic: TARGET_H_INCLUDE = -add-include '<stdbool.h>'
 # we don't have bundle errors where, say, an sse2-required function ends up in a
 # file that is *NOT* known to require sse2.
 dist/portable-gcc-compatible/Makefile.basic: OPT_FLAGS=-ccopts -mtune=generic
+dist/portable-gcc-compatible/Makefile.basic: DEFAULT_FLAGS += -rst-snippets
 
 
 # EVERCRYPT_CONFIG tweaks

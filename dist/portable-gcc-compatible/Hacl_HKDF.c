@@ -24,6 +24,8 @@
 
 #include "Hacl_HKDF.h"
 
+/* SNIPPET_START: Hacl_HKDF_expand_sha2_256 */
+
 void
 Hacl_HKDF_expand_sha2_256(
   uint8_t *okm,
@@ -73,6 +75,10 @@ Hacl_HKDF_expand_sha2_256(
   }
 }
 
+/* SNIPPET_END: Hacl_HKDF_expand_sha2_256 */
+
+/* SNIPPET_START: Hacl_HKDF_extract_sha2_256 */
+
 void
 Hacl_HKDF_extract_sha2_256(
   uint8_t *prk,
@@ -84,4 +90,6 @@ Hacl_HKDF_extract_sha2_256(
 {
   Hacl_HMAC_compute_sha2_256(prk, salt, saltlen, ikm, ikmlen);
 }
+
+/* SNIPPET_END: Hacl_HKDF_extract_sha2_256 */
 

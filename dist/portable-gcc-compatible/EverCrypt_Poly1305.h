@@ -38,7 +38,11 @@
 #include "Hacl_Poly1305_128.h"
 
 
+/* SNIPPET_START: EverCrypt_Poly1305_poly1305 */
+
 void EverCrypt_Poly1305_poly1305(uint8_t *dst, uint8_t *src, uint32_t len, uint8_t *key);
+
+/* SNIPPET_END: EverCrypt_Poly1305_poly1305 */
 
 #define __EverCrypt_Poly1305_H_DEFINED
 #endif

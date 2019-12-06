@@ -34,16 +34,36 @@
 #include "Hacl_Ed25519.h"
 
 
+/* SNIPPET_START: EverCrypt_Ed25519_sign */
+
 void EverCrypt_Ed25519_sign(uint8_t *signature, uint8_t *secret1, uint32_t len, uint8_t *msg);
+
+/* SNIPPET_END: EverCrypt_Ed25519_sign */
+
+/* SNIPPET_START: EverCrypt_Ed25519_verify */
 
 bool EverCrypt_Ed25519_verify(uint8_t *output, uint32_t len, uint8_t *msg, uint8_t *signature);
 
+/* SNIPPET_END: EverCrypt_Ed25519_verify */
+
+/* SNIPPET_START: EverCrypt_Ed25519_secret_to_public */
+
 void EverCrypt_Ed25519_secret_to_public(uint8_t *output, uint8_t *secret1);
+
+/* SNIPPET_END: EverCrypt_Ed25519_secret_to_public */
+
+/* SNIPPET_START: EverCrypt_Ed25519_expand_keys */
 
 void EverCrypt_Ed25519_expand_keys(uint8_t *ks, uint8_t *secret1);
 
+/* SNIPPET_END: EverCrypt_Ed25519_expand_keys */
+
+/* SNIPPET_START: EverCrypt_Ed25519_sign_expanded */
+
 void
 EverCrypt_Ed25519_sign_expanded(uint8_t *signature, uint8_t *ks, uint32_t len, uint8_t *msg);
+
+/* SNIPPET_END: EverCrypt_Ed25519_sign_expanded */
 
 #define __EverCrypt_Ed25519_H_DEFINED
 #endif

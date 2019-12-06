@@ -143,8 +143,6 @@ Hacl_Impl_Poly1305_Field32xN_128_fmul_r2_normalize(
   Lib_IntVector_Intrinsics_vec128
   r241 = Lib_IntVector_Intrinsics_vec128_interleave_low64(r24, r14);
   Lib_IntVector_Intrinsics_vec128
-  r250 = Lib_IntVector_Intrinsics_vec128_smul64(r201, (uint64_t)5U);
-  Lib_IntVector_Intrinsics_vec128
   r251 = Lib_IntVector_Intrinsics_vec128_smul64(r211, (uint64_t)5U);
   Lib_IntVector_Intrinsics_vec128
   r252 = Lib_IntVector_Intrinsics_vec128_smul64(r221, (uint64_t)5U);
@@ -1537,6 +1535,7 @@ Hacl_Poly1305_128_poly1305_update(
     acc[2U] = o2;
     acc[3U] = o3;
     acc[4U] = o4;
+    return;
   }
 }
 

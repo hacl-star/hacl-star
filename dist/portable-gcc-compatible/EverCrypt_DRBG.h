@@ -38,28 +38,66 @@
 #include "Hacl_Lib.h"
 
 
+/* SNIPPET_START: EverCrypt_DRBG_supported_alg */
+
 typedef Spec_Hash_Definitions_hash_alg EverCrypt_DRBG_supported_alg;
+
+/* SNIPPET_END: EverCrypt_DRBG_supported_alg */
+
+/* SNIPPET_START: EverCrypt_DRBG_reseed_interval */
 
 extern uint32_t EverCrypt_DRBG_reseed_interval;
 
+/* SNIPPET_END: EverCrypt_DRBG_reseed_interval */
+
+/* SNIPPET_START: EverCrypt_DRBG_max_output_length */
+
 extern uint32_t EverCrypt_DRBG_max_output_length;
+
+/* SNIPPET_END: EverCrypt_DRBG_max_output_length */
+
+/* SNIPPET_START: EverCrypt_DRBG_max_length */
 
 extern uint32_t EverCrypt_DRBG_max_length;
 
+/* SNIPPET_END: EverCrypt_DRBG_max_length */
+
+/* SNIPPET_START: EverCrypt_DRBG_max_personalization_string_length */
+
 extern uint32_t EverCrypt_DRBG_max_personalization_string_length;
+
+/* SNIPPET_END: EverCrypt_DRBG_max_personalization_string_length */
+
+/* SNIPPET_START: EverCrypt_DRBG_max_additional_input_length */
 
 extern uint32_t EverCrypt_DRBG_max_additional_input_length;
 
+/* SNIPPET_END: EverCrypt_DRBG_max_additional_input_length */
+
+/* SNIPPET_START: EverCrypt_DRBG_min_length */
+
 uint32_t EverCrypt_DRBG_min_length(Spec_Hash_Definitions_hash_alg a);
+
+/* SNIPPET_END: EverCrypt_DRBG_min_length */
+
+/* SNIPPET_START: EverCrypt_DRBG_state_s_tags */
 
 #define EverCrypt_DRBG_SHA1_s 0
 #define EverCrypt_DRBG_SHA2_256_s 1
 #define EverCrypt_DRBG_SHA2_384_s 2
 #define EverCrypt_DRBG_SHA2_512_s 3
 
+/* SNIPPET_END: EverCrypt_DRBG_state_s_tags */
+
 typedef uint8_t EverCrypt_DRBG_state_s_tags;
 
+/* SNIPPET_START: EverCrypt_DRBG_state_s */
+
 typedef struct EverCrypt_DRBG_state_s_s EverCrypt_DRBG_state_s;
+
+/* SNIPPET_END: EverCrypt_DRBG_state_s */
+
+/* SNIPPET_START: EverCrypt_DRBG_uu___is_SHA1_s */
 
 bool
 EverCrypt_DRBG_uu___is_SHA1_s(
@@ -67,11 +105,19 @@ EverCrypt_DRBG_uu___is_SHA1_s(
   EverCrypt_DRBG_state_s projectee
 );
 
+/* SNIPPET_END: EverCrypt_DRBG_uu___is_SHA1_s */
+
+/* SNIPPET_START: EverCrypt_DRBG___proj__SHA1_s__item___0 */
+
 Hacl_HMAC_DRBG_state
 EverCrypt_DRBG___proj__SHA1_s__item___0(
   Spec_Hash_Definitions_hash_alg uu____207,
   EverCrypt_DRBG_state_s projectee
 );
+
+/* SNIPPET_END: EverCrypt_DRBG___proj__SHA1_s__item___0 */
+
+/* SNIPPET_START: EverCrypt_DRBG_uu___is_SHA2_256_s */
 
 bool
 EverCrypt_DRBG_uu___is_SHA2_256_s(
@@ -79,11 +125,19 @@ EverCrypt_DRBG_uu___is_SHA2_256_s(
   EverCrypt_DRBG_state_s projectee
 );
 
+/* SNIPPET_END: EverCrypt_DRBG_uu___is_SHA2_256_s */
+
+/* SNIPPET_START: EverCrypt_DRBG___proj__SHA2_256_s__item___0 */
+
 Hacl_HMAC_DRBG_state
 EverCrypt_DRBG___proj__SHA2_256_s__item___0(
   Spec_Hash_Definitions_hash_alg uu____282,
   EverCrypt_DRBG_state_s projectee
 );
+
+/* SNIPPET_END: EverCrypt_DRBG___proj__SHA2_256_s__item___0 */
+
+/* SNIPPET_START: EverCrypt_DRBG_uu___is_SHA2_384_s */
 
 bool
 EverCrypt_DRBG_uu___is_SHA2_384_s(
@@ -91,11 +145,19 @@ EverCrypt_DRBG_uu___is_SHA2_384_s(
   EverCrypt_DRBG_state_s projectee
 );
 
+/* SNIPPET_END: EverCrypt_DRBG_uu___is_SHA2_384_s */
+
+/* SNIPPET_START: EverCrypt_DRBG___proj__SHA2_384_s__item___0 */
+
 Hacl_HMAC_DRBG_state
 EverCrypt_DRBG___proj__SHA2_384_s__item___0(
   Spec_Hash_Definitions_hash_alg uu____357,
   EverCrypt_DRBG_state_s projectee
 );
+
+/* SNIPPET_END: EverCrypt_DRBG___proj__SHA2_384_s__item___0 */
+
+/* SNIPPET_START: EverCrypt_DRBG_uu___is_SHA2_512_s */
 
 bool
 EverCrypt_DRBG_uu___is_SHA2_512_s(
@@ -103,13 +165,25 @@ EverCrypt_DRBG_uu___is_SHA2_512_s(
   EverCrypt_DRBG_state_s projectee
 );
 
+/* SNIPPET_END: EverCrypt_DRBG_uu___is_SHA2_512_s */
+
+/* SNIPPET_START: EverCrypt_DRBG___proj__SHA2_512_s__item___0 */
+
 Hacl_HMAC_DRBG_state
 EverCrypt_DRBG___proj__SHA2_512_s__item___0(
   Spec_Hash_Definitions_hash_alg uu____432,
   EverCrypt_DRBG_state_s projectee
 );
 
+/* SNIPPET_END: EverCrypt_DRBG___proj__SHA2_512_s__item___0 */
+
+/* SNIPPET_START: EverCrypt_DRBG_create */
+
 EverCrypt_DRBG_state_s *EverCrypt_DRBG_create(Spec_Hash_Definitions_hash_alg a);
+
+/* SNIPPET_END: EverCrypt_DRBG_create */
+
+/* SNIPPET_START: EverCrypt_DRBG_instantiate_sha1 */
 
 bool
 EverCrypt_DRBG_instantiate_sha1(
@@ -118,12 +192,20 @@ EverCrypt_DRBG_instantiate_sha1(
   uint32_t personalization_string_len
 );
 
+/* SNIPPET_END: EverCrypt_DRBG_instantiate_sha1 */
+
+/* SNIPPET_START: EverCrypt_DRBG_instantiate_sha2_256 */
+
 bool
 EverCrypt_DRBG_instantiate_sha2_256(
   EverCrypt_DRBG_state_s *st,
   uint8_t *personalization_string,
   uint32_t personalization_string_len
 );
+
+/* SNIPPET_END: EverCrypt_DRBG_instantiate_sha2_256 */
+
+/* SNIPPET_START: EverCrypt_DRBG_instantiate_sha2_384 */
 
 bool
 EverCrypt_DRBG_instantiate_sha2_384(
@@ -132,12 +214,20 @@ EverCrypt_DRBG_instantiate_sha2_384(
   uint32_t personalization_string_len
 );
 
+/* SNIPPET_END: EverCrypt_DRBG_instantiate_sha2_384 */
+
+/* SNIPPET_START: EverCrypt_DRBG_instantiate_sha2_512 */
+
 bool
 EverCrypt_DRBG_instantiate_sha2_512(
   EverCrypt_DRBG_state_s *st,
   uint8_t *personalization_string,
   uint32_t personalization_string_len
 );
+
+/* SNIPPET_END: EverCrypt_DRBG_instantiate_sha2_512 */
+
+/* SNIPPET_START: EverCrypt_DRBG_reseed_sha1 */
 
 bool
 EverCrypt_DRBG_reseed_sha1(
@@ -146,12 +236,20 @@ EverCrypt_DRBG_reseed_sha1(
   uint32_t additional_input_len
 );
 
+/* SNIPPET_END: EverCrypt_DRBG_reseed_sha1 */
+
+/* SNIPPET_START: EverCrypt_DRBG_reseed_sha2_256 */
+
 bool
 EverCrypt_DRBG_reseed_sha2_256(
   EverCrypt_DRBG_state_s *st,
   uint8_t *additional_input,
   uint32_t additional_input_len
 );
+
+/* SNIPPET_END: EverCrypt_DRBG_reseed_sha2_256 */
+
+/* SNIPPET_START: EverCrypt_DRBG_reseed_sha2_384 */
 
 bool
 EverCrypt_DRBG_reseed_sha2_384(
@@ -160,12 +258,20 @@ EverCrypt_DRBG_reseed_sha2_384(
   uint32_t additional_input_len
 );
 
+/* SNIPPET_END: EverCrypt_DRBG_reseed_sha2_384 */
+
+/* SNIPPET_START: EverCrypt_DRBG_reseed_sha2_512 */
+
 bool
 EverCrypt_DRBG_reseed_sha2_512(
   EverCrypt_DRBG_state_s *st,
   uint8_t *additional_input,
   uint32_t additional_input_len
 );
+
+/* SNIPPET_END: EverCrypt_DRBG_reseed_sha2_512 */
+
+/* SNIPPET_START: EverCrypt_DRBG_generate_sha1 */
 
 bool
 EverCrypt_DRBG_generate_sha1(
@@ -176,6 +282,10 @@ EverCrypt_DRBG_generate_sha1(
   uint32_t additional_input_len
 );
 
+/* SNIPPET_END: EverCrypt_DRBG_generate_sha1 */
+
+/* SNIPPET_START: EverCrypt_DRBG_generate_sha2_256 */
+
 bool
 EverCrypt_DRBG_generate_sha2_256(
   uint8_t *output,
@@ -184,6 +294,10 @@ EverCrypt_DRBG_generate_sha2_256(
   uint8_t *additional_input,
   uint32_t additional_input_len
 );
+
+/* SNIPPET_END: EverCrypt_DRBG_generate_sha2_256 */
+
+/* SNIPPET_START: EverCrypt_DRBG_generate_sha2_384 */
 
 bool
 EverCrypt_DRBG_generate_sha2_384(
@@ -194,6 +308,10 @@ EverCrypt_DRBG_generate_sha2_384(
   uint32_t additional_input_len
 );
 
+/* SNIPPET_END: EverCrypt_DRBG_generate_sha2_384 */
+
+/* SNIPPET_START: EverCrypt_DRBG_generate_sha2_512 */
+
 bool
 EverCrypt_DRBG_generate_sha2_512(
   uint8_t *output,
@@ -203,13 +321,33 @@ EverCrypt_DRBG_generate_sha2_512(
   uint32_t additional_input_len
 );
 
+/* SNIPPET_END: EverCrypt_DRBG_generate_sha2_512 */
+
+/* SNIPPET_START: EverCrypt_DRBG_uninstantiate_sha1 */
+
 void EverCrypt_DRBG_uninstantiate_sha1(EverCrypt_DRBG_state_s *st);
+
+/* SNIPPET_END: EverCrypt_DRBG_uninstantiate_sha1 */
+
+/* SNIPPET_START: EverCrypt_DRBG_uninstantiate_sha2_256 */
 
 void EverCrypt_DRBG_uninstantiate_sha2_256(EverCrypt_DRBG_state_s *st);
 
+/* SNIPPET_END: EverCrypt_DRBG_uninstantiate_sha2_256 */
+
+/* SNIPPET_START: EverCrypt_DRBG_uninstantiate_sha2_384 */
+
 void EverCrypt_DRBG_uninstantiate_sha2_384(EverCrypt_DRBG_state_s *st);
 
+/* SNIPPET_END: EverCrypt_DRBG_uninstantiate_sha2_384 */
+
+/* SNIPPET_START: EverCrypt_DRBG_uninstantiate_sha2_512 */
+
 void EverCrypt_DRBG_uninstantiate_sha2_512(EverCrypt_DRBG_state_s *st);
+
+/* SNIPPET_END: EverCrypt_DRBG_uninstantiate_sha2_512 */
+
+/* SNIPPET_START: EverCrypt_DRBG_instantiate */
 
 bool
 EverCrypt_DRBG_instantiate(
@@ -218,12 +356,20 @@ EverCrypt_DRBG_instantiate(
   uint32_t personalization_string_len
 );
 
+/* SNIPPET_END: EverCrypt_DRBG_instantiate */
+
+/* SNIPPET_START: EverCrypt_DRBG_reseed */
+
 bool
 EverCrypt_DRBG_reseed(
   EverCrypt_DRBG_state_s *st,
   uint8_t *additional_input,
   uint32_t additional_input_len
 );
+
+/* SNIPPET_END: EverCrypt_DRBG_reseed */
+
+/* SNIPPET_START: EverCrypt_DRBG_generate */
 
 bool
 EverCrypt_DRBG_generate(
@@ -234,7 +380,13 @@ EverCrypt_DRBG_generate(
   uint32_t additional_input_len
 );
 
+/* SNIPPET_END: EverCrypt_DRBG_generate */
+
+/* SNIPPET_START: EverCrypt_DRBG_uninstantiate */
+
 void EverCrypt_DRBG_uninstantiate(EverCrypt_DRBG_state_s *st);
+
+/* SNIPPET_END: EverCrypt_DRBG_uninstantiate */
 
 #define __EverCrypt_DRBG_H_DEFINED
 #endif

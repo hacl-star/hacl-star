@@ -24,6 +24,8 @@
 
 #include "Hacl_Chacha20_Vec256.h"
 
+/* SNIPPET_START: Hacl_Chacha20_Vec256_double_round_256 */
+
 static void Hacl_Chacha20_Vec256_double_round_256(Lib_IntVector_Intrinsics_vec256 *st)
 {
   st[0U] = Lib_IntVector_Intrinsics_vec256_add32(st[0U], st[4U]);
@@ -124,6 +126,10 @@ static void Hacl_Chacha20_Vec256_double_round_256(Lib_IntVector_Intrinsics_vec25
   st[4U] = Lib_IntVector_Intrinsics_vec256_rotate_left32(std30, (uint32_t)7U);
 }
 
+/* SNIPPET_END: Hacl_Chacha20_Vec256_double_round_256 */
+
+/* SNIPPET_START: Hacl_Chacha20_Vec256_chacha20_core_256 */
+
 static void
 Hacl_Chacha20_Vec256_chacha20_core_256(
   Lib_IntVector_Intrinsics_vec256 *k,
@@ -153,6 +159,10 @@ Hacl_Chacha20_Vec256_chacha20_core_256(
   }
   k[12U] = Lib_IntVector_Intrinsics_vec256_add32(k[12U], cv);
 }
+
+/* SNIPPET_END: Hacl_Chacha20_Vec256_chacha20_core_256 */
+
+/* SNIPPET_START: Hacl_Chacha20_Vec256_chacha20_init_256 */
 
 static void
 Hacl_Chacha20_Vec256_chacha20_init_256(
@@ -211,6 +221,10 @@ Hacl_Chacha20_Vec256_chacha20_init_256(
   Lib_IntVector_Intrinsics_vec256 c12 = ctx[12U];
   ctx[12U] = Lib_IntVector_Intrinsics_vec256_add32(c12, ctr1);
 }
+
+/* SNIPPET_END: Hacl_Chacha20_Vec256_chacha20_init_256 */
+
+/* SNIPPET_START: Hacl_Chacha20_Vec256_chacha20_encrypt_256 */
 
 void
 Hacl_Chacha20_Vec256_chacha20_encrypt_256(
@@ -580,6 +594,10 @@ Hacl_Chacha20_Vec256_chacha20_encrypt_256(
   }
 }
 
+/* SNIPPET_END: Hacl_Chacha20_Vec256_chacha20_encrypt_256 */
+
+/* SNIPPET_START: Hacl_Chacha20_Vec256_chacha20_decrypt_256 */
+
 void
 Hacl_Chacha20_Vec256_chacha20_decrypt_256(
   uint32_t len,
@@ -947,4 +965,6 @@ Hacl_Chacha20_Vec256_chacha20_decrypt_256(
     memcpy(uu____2, plain, rem1 * sizeof plain[0U]);
   }
 }
+
+/* SNIPPET_END: Hacl_Chacha20_Vec256_chacha20_decrypt_256 */
 

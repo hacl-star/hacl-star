@@ -24,6 +24,8 @@
 
 #include "EverCrypt_HKDF.h"
 
+/* SNIPPET_START: EverCrypt_HKDF_expand_sha1 */
+
 void
 EverCrypt_HKDF_expand_sha1(
   uint8_t *okm,
@@ -73,6 +75,10 @@ EverCrypt_HKDF_expand_sha1(
   }
 }
 
+/* SNIPPET_END: EverCrypt_HKDF_expand_sha1 */
+
+/* SNIPPET_START: EverCrypt_HKDF_extract_sha1 */
+
 void
 EverCrypt_HKDF_extract_sha1(
   uint8_t *prk,
@@ -84,6 +90,10 @@ EverCrypt_HKDF_extract_sha1(
 {
   EverCrypt_HMAC_compute_sha1(prk, salt, saltlen, ikm, ikmlen);
 }
+
+/* SNIPPET_END: EverCrypt_HKDF_extract_sha1 */
+
+/* SNIPPET_START: EverCrypt_HKDF_expand_sha2_256 */
 
 void
 EverCrypt_HKDF_expand_sha2_256(
@@ -134,6 +144,10 @@ EverCrypt_HKDF_expand_sha2_256(
   }
 }
 
+/* SNIPPET_END: EverCrypt_HKDF_expand_sha2_256 */
+
+/* SNIPPET_START: EverCrypt_HKDF_extract_sha2_256 */
+
 void
 EverCrypt_HKDF_extract_sha2_256(
   uint8_t *prk,
@@ -145,6 +159,10 @@ EverCrypt_HKDF_extract_sha2_256(
 {
   EverCrypt_HMAC_compute_sha2_256(prk, salt, saltlen, ikm, ikmlen);
 }
+
+/* SNIPPET_END: EverCrypt_HKDF_extract_sha2_256 */
+
+/* SNIPPET_START: EverCrypt_HKDF_expand_sha2_384 */
 
 void
 EverCrypt_HKDF_expand_sha2_384(
@@ -195,6 +213,10 @@ EverCrypt_HKDF_expand_sha2_384(
   }
 }
 
+/* SNIPPET_END: EverCrypt_HKDF_expand_sha2_384 */
+
+/* SNIPPET_START: EverCrypt_HKDF_extract_sha2_384 */
+
 void
 EverCrypt_HKDF_extract_sha2_384(
   uint8_t *prk,
@@ -206,6 +228,10 @@ EverCrypt_HKDF_extract_sha2_384(
 {
   EverCrypt_HMAC_compute_sha2_384(prk, salt, saltlen, ikm, ikmlen);
 }
+
+/* SNIPPET_END: EverCrypt_HKDF_extract_sha2_384 */
+
+/* SNIPPET_START: EverCrypt_HKDF_expand_sha2_512 */
 
 void
 EverCrypt_HKDF_expand_sha2_512(
@@ -256,6 +282,10 @@ EverCrypt_HKDF_expand_sha2_512(
   }
 }
 
+/* SNIPPET_END: EverCrypt_HKDF_expand_sha2_512 */
+
+/* SNIPPET_START: EverCrypt_HKDF_extract_sha2_512 */
+
 void
 EverCrypt_HKDF_extract_sha2_512(
   uint8_t *prk,
@@ -267,6 +297,10 @@ EverCrypt_HKDF_extract_sha2_512(
 {
   EverCrypt_HMAC_compute_sha2_512(prk, salt, saltlen, ikm, ikmlen);
 }
+
+/* SNIPPET_END: EverCrypt_HKDF_extract_sha2_512 */
+
+/* SNIPPET_START: EverCrypt_HKDF_expand */
 
 void
 EverCrypt_HKDF_expand(
@@ -309,6 +343,10 @@ EverCrypt_HKDF_expand(
   }
 }
 
+/* SNIPPET_END: EverCrypt_HKDF_expand */
+
+/* SNIPPET_START: EverCrypt_HKDF_extract */
+
 void
 EverCrypt_HKDF_extract(
   Spec_Hash_Definitions_hash_alg a,
@@ -349,6 +387,10 @@ EverCrypt_HKDF_extract(
   }
 }
 
+/* SNIPPET_END: EverCrypt_HKDF_extract */
+
+/* SNIPPET_START: EverCrypt_HKDF_hkdf_expand */
+
 KRML_DEPRECATED("expand")
 
 void
@@ -365,6 +407,10 @@ EverCrypt_HKDF_hkdf_expand(
   EverCrypt_HKDF_expand(a, okm, prk, prklen, info, infolen, len);
 }
 
+/* SNIPPET_END: EverCrypt_HKDF_hkdf_expand */
+
+/* SNIPPET_START: EverCrypt_HKDF_hkdf_extract */
+
 KRML_DEPRECATED("extract")
 
 void
@@ -379,4 +425,6 @@ EverCrypt_HKDF_hkdf_extract(
 {
   EverCrypt_HKDF_extract(a, prk, salt, saltlen, ikm, ikmlen);
 }
+
+/* SNIPPET_END: EverCrypt_HKDF_hkdf_extract */
 

@@ -127,7 +127,8 @@ c89-compatible <= msvc-compatible <= gcc-compatible <= gcc64-only
   headers that you may have to provide depending on your target. It does not
   include Merkle Trees and the code is very verbose.
 - The MSVC distribution relies on `alloca` to avoid C11 VLA for the sake of
-  MSVC; relies on KreMLin for tail-call optimizations.
+  MSVC; relies on KreMLin for tail-call optimizations. It also does not use GCC
+  inline assembly for Curve25519 and uses external linkage instead.
 - The GCC distribution relies on C11 VLA and therefore does not work with MSVC.
 - The GCC64 distribution assumes a native `unsigned __int128` type which can be
   manipulated via the standard arithmetic operators. This generates very compact

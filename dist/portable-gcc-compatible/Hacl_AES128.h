@@ -34,10 +34,18 @@
 
 
 
+/* SNIPPET_START: Hacl_AES128_aes128_key_expansion */
+
 extern void Hacl_AES128_aes128_key_expansion(uint8_t *key, uint8_t *expanded_key);
+
+/* SNIPPET_END: Hacl_AES128_aes128_key_expansion */
+
+/* SNIPPET_START: Hacl_AES128_aes128_encrypt_block */
 
 extern void
 Hacl_AES128_aes128_encrypt_block(uint16_t *cipher, uint16_t *plain, uint8_t *expanded_key);
+
+/* SNIPPET_END: Hacl_AES128_aes128_encrypt_block */
 
 #define __Hacl_AES128_H_DEFINED
 #endif
