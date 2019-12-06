@@ -19,8 +19,7 @@ let rate: size_nat = 64 / 8
 inline_for_extraction
 let pa_rounds: size_nat = 12
 
-inline_for_extraction
-let max_input: nat = pow2 64 - 1
+
 
 inline_for_extraction
 let iv: uint64 = ((u64 (8 * rate)) <<. size 48) |. ((u64 pa_rounds) <<. size 40)
