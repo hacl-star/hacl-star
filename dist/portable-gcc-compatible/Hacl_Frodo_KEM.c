@@ -24,6 +24,8 @@
 
 #include "Hacl_Frodo_KEM.h"
 
+/* SNIPPET_START: Hacl_Impl_Matrix_matrix_add */
+
 inline static void
 Hacl_Impl_Matrix_matrix_add(uint32_t n1, uint32_t n2, uint16_t *a, uint16_t *b)
 {
@@ -36,6 +38,10 @@ Hacl_Impl_Matrix_matrix_add(uint32_t n1, uint32_t n2, uint16_t *a, uint16_t *b)
   }
 }
 
+/* SNIPPET_END: Hacl_Impl_Matrix_matrix_add */
+
+/* SNIPPET_START: Hacl_Impl_Matrix_matrix_sub */
+
 inline static void
 Hacl_Impl_Matrix_matrix_sub(uint32_t n1, uint32_t n2, uint16_t *a, uint16_t *b)
 {
@@ -47,6 +53,10 @@ Hacl_Impl_Matrix_matrix_sub(uint32_t n1, uint32_t n2, uint16_t *a, uint16_t *b)
     }
   }
 }
+
+/* SNIPPET_END: Hacl_Impl_Matrix_matrix_sub */
+
+/* SNIPPET_START: Hacl_Impl_Matrix_matrix_mul */
 
 inline static void
 Hacl_Impl_Matrix_matrix_mul(
@@ -70,11 +80,14 @@ Hacl_Impl_Matrix_matrix_mul(
         uint16_t res0 = res;
         res = res0 + aij * bjk;
       }
-      uint16_t res1 = res;
-      c[i0 * n3 + i1] = res1;
+      c[i0 * n3 + i1] = res;
     }
   }
 }
+
+/* SNIPPET_END: Hacl_Impl_Matrix_matrix_mul */
+
+/* SNIPPET_START: Hacl_Impl_Matrix_matrix_mul_s */
 
 inline static void
 Hacl_Impl_Matrix_matrix_mul_s(
@@ -98,11 +111,14 @@ Hacl_Impl_Matrix_matrix_mul_s(
         uint16_t res0 = res;
         res = res0 + aij * bjk;
       }
-      uint16_t res1 = res;
-      c[i0 * n3 + i1] = res1;
+      c[i0 * n3 + i1] = res;
     }
   }
 }
+
+/* SNIPPET_END: Hacl_Impl_Matrix_matrix_mul_s */
+
+/* SNIPPET_START: Hacl_Impl_Matrix_matrix_eq */
 
 inline static bool
 Hacl_Impl_Matrix_matrix_eq(uint32_t n1, uint32_t n2, uint32_t m, uint16_t *a, uint16_t *b)
@@ -120,9 +136,12 @@ Hacl_Impl_Matrix_matrix_eq(uint32_t n1, uint32_t n2, uint32_t m, uint16_t *a, ui
         ((uint32_t)ai & (((uint32_t)1U << m) - (uint32_t)1U))
         == ((uint32_t)bi & (((uint32_t)1U << m) - (uint32_t)1U));
   }
-  bool res1 = res;
-  return res1;
+  return res;
 }
+
+/* SNIPPET_END: Hacl_Impl_Matrix_matrix_eq */
+
+/* SNIPPET_START: Hacl_Impl_Matrix_matrix_to_lbytes */
 
 inline static void
 Hacl_Impl_Matrix_matrix_to_lbytes(uint32_t n1, uint32_t n2, uint16_t *m, uint8_t *res)
@@ -135,6 +154,10 @@ Hacl_Impl_Matrix_matrix_to_lbytes(uint32_t n1, uint32_t n2, uint16_t *m, uint8_t
   }
 }
 
+/* SNIPPET_END: Hacl_Impl_Matrix_matrix_to_lbytes */
+
+/* SNIPPET_START: Hacl_Impl_Matrix_matrix_from_lbytes */
+
 inline static void
 Hacl_Impl_Matrix_matrix_from_lbytes(uint32_t n1, uint32_t n2, uint8_t *b, uint16_t *res)
 {
@@ -145,6 +168,10 @@ Hacl_Impl_Matrix_matrix_from_lbytes(uint32_t n1, uint32_t n2, uint8_t *b, uint16
     res[i] = u;
   }
 }
+
+/* SNIPPET_END: Hacl_Impl_Matrix_matrix_from_lbytes */
+
+/* SNIPPET_START: Hacl_Impl_Frodo_Gen_frodo_gen_matrix_cshake */
 
 inline static void
 Hacl_Impl_Frodo_Gen_frodo_gen_matrix_cshake(
@@ -175,6 +202,10 @@ Hacl_Impl_Frodo_Gen_frodo_gen_matrix_cshake(
   }
 }
 
+/* SNIPPET_END: Hacl_Impl_Frodo_Gen_frodo_gen_matrix_cshake */
+
+/* SNIPPET_START: Hacl_Impl_Frodo_Sample_cdf_table */
+
 static uint16_t
 Hacl_Impl_Frodo_Sample_cdf_table[12U] =
   {
@@ -182,6 +213,10 @@ Hacl_Impl_Frodo_Sample_cdf_table[12U] =
     (uint16_t)31278U, (uint16_t)32176U, (uint16_t)32560U, (uint16_t)32704U, (uint16_t)32751U,
     (uint16_t)32764U, (uint16_t)32767U
   };
+
+/* SNIPPET_END: Hacl_Impl_Frodo_Sample_cdf_table */
+
+/* SNIPPET_START: Hacl_Impl_Frodo_Sample_frodo_sample */
 
 inline static uint16_t Hacl_Impl_Frodo_Sample_frodo_sample(uint16_t r)
 {
@@ -197,9 +232,12 @@ inline static uint16_t Hacl_Impl_Frodo_Sample_frodo_sample(uint16_t r)
     sample = samplei + sample0;
   }
   uint16_t sample0 = sample;
-  uint16_t res = ((~sign + (uint16_t)1U) ^ sample0) + sign;
-  return res;
+  return ((~sign + (uint16_t)1U) ^ sample0) + sign;
 }
+
+/* SNIPPET_END: Hacl_Impl_Frodo_Sample_frodo_sample */
+
+/* SNIPPET_START: Hacl_Impl_Frodo_Sample_frodo_sample_matrix */
 
 inline static void
 Hacl_Impl_Frodo_Sample_frodo_sample_matrix(
@@ -230,6 +268,10 @@ Hacl_Impl_Frodo_Sample_frodo_sample_matrix(
     }
   }
 }
+
+/* SNIPPET_END: Hacl_Impl_Frodo_Sample_frodo_sample_matrix */
+
+/* SNIPPET_START: Hacl_Impl_Frodo_Pack_frodo_pack */
 
 inline static void
 Hacl_Impl_Frodo_Pack_frodo_pack(
@@ -276,6 +318,10 @@ Hacl_Impl_Frodo_Pack_frodo_pack(
     memcpy(r, src, d * sizeof src[0U]);
   }
 }
+
+/* SNIPPET_END: Hacl_Impl_Frodo_Pack_frodo_pack */
+
+/* SNIPPET_START: Hacl_Impl_Frodo_Pack_frodo_unpack */
 
 inline static void
 Hacl_Impl_Frodo_Pack_frodo_unpack(
@@ -331,16 +377,36 @@ Hacl_Impl_Frodo_Pack_frodo_unpack(
   }
 }
 
+/* SNIPPET_END: Hacl_Impl_Frodo_Pack_frodo_unpack */
+
+/* SNIPPET_START: randombytes_ */
+
 static void randombytes_(uint32_t len, uint8_t *res)
 {
   bool b = Lib_RandomBuffer_System_randombytes(res, len);
 }
 
+/* SNIPPET_END: randombytes_ */
+
+/* SNIPPET_START: Hacl_Impl_Frodo_KEM_bytes_mu */
+
 static uint32_t Hacl_Impl_Frodo_KEM_bytes_mu = (uint32_t)16U;
+
+/* SNIPPET_END: Hacl_Impl_Frodo_KEM_bytes_mu */
+
+/* SNIPPET_START: Hacl_Impl_Frodo_KEM_crypto_publickeybytes */
 
 static uint32_t Hacl_Impl_Frodo_KEM_crypto_publickeybytes = (uint32_t)976U;
 
+/* SNIPPET_END: Hacl_Impl_Frodo_KEM_crypto_publickeybytes */
+
+/* SNIPPET_START: Hacl_Impl_Frodo_KEM_crypto_ciphertextbytes */
+
 static uint32_t Hacl_Impl_Frodo_KEM_crypto_ciphertextbytes = (uint32_t)1096U;
+
+/* SNIPPET_END: Hacl_Impl_Frodo_KEM_crypto_ciphertextbytes */
+
+/* SNIPPET_START: Hacl_Impl_Frodo_KEM_KeyGen_frodo_mul_add_as_plus_e_pack */
 
 inline static void
 Hacl_Impl_Frodo_KEM_KeyGen_frodo_mul_add_as_plus_e_pack(
@@ -380,6 +446,10 @@ Hacl_Impl_Frodo_KEM_KeyGen_frodo_mul_add_as_plus_e_pack(
   Lib_Memzero_clear_words_u16((uint32_t)512U, s_matrix);
 }
 
+/* SNIPPET_END: Hacl_Impl_Frodo_KEM_KeyGen_frodo_mul_add_as_plus_e_pack */
+
+/* SNIPPET_START: Hacl_Impl_Frodo_Encode_frodo_key_encode */
+
 inline static void
 Hacl_Impl_Frodo_Encode_frodo_key_encode(uint32_t b, uint8_t *a, uint16_t *res)
 {
@@ -399,6 +469,10 @@ Hacl_Impl_Frodo_Encode_frodo_key_encode(uint32_t b, uint8_t *a, uint16_t *res)
   }
 }
 
+/* SNIPPET_END: Hacl_Impl_Frodo_Encode_frodo_key_encode */
+
+/* SNIPPET_START: Hacl_Impl_Frodo_Encode_frodo_key_decode */
+
 inline static void
 Hacl_Impl_Frodo_Encode_frodo_key_decode(uint32_t b, uint16_t *a, uint8_t *res)
 {
@@ -412,14 +486,17 @@ Hacl_Impl_Frodo_Encode_frodo_key_decode(uint32_t b, uint16_t *a, uint8_t *res)
       res1 = (aik + ((uint16_t)1U << ((uint32_t)15U - b - (uint32_t)1U))) >> ((uint32_t)15U - b);
       templong = templong | (uint64_t)(res1 & (((uint16_t)1U << b) - (uint16_t)1U)) << b * i;
     }
-    uint64_t templong1 = templong;
-    uint64_t templong0 = templong1;
+    uint64_t templong0 = templong;
     uint8_t v8[8U] = { 0U };
     store64_le(v8, templong0);
     uint8_t *tmp = v8;
     memcpy(res + i0 * b, tmp, b * sizeof tmp[0U]);
   }
 }
+
+/* SNIPPET_END: Hacl_Impl_Frodo_Encode_frodo_key_decode */
+
+/* SNIPPET_START: Hacl_Impl_Frodo_KEM_Encaps_frodo_mul_add_sb_plus_e_plus_mu */
 
 inline static void
 Hacl_Impl_Frodo_KEM_Encaps_frodo_mul_add_sb_plus_e_plus_mu(
@@ -451,6 +528,10 @@ Hacl_Impl_Frodo_KEM_Encaps_frodo_mul_add_sb_plus_e_plus_mu(
   Hacl_Impl_Frodo_Encode_frodo_key_encode((uint32_t)2U, coins, mu_encode);
   Hacl_Impl_Matrix_matrix_add((uint32_t)8U, (uint32_t)8U, v_matrix, mu_encode);
 }
+
+/* SNIPPET_END: Hacl_Impl_Frodo_KEM_Encaps_frodo_mul_add_sb_plus_e_plus_mu */
+
+/* SNIPPET_START: Hacl_Impl_Frodo_KEM_Encaps_crypto_kem_enc_ct */
 
 inline static void
 Hacl_Impl_Frodo_KEM_Encaps_crypto_kem_enc_ct(
@@ -507,6 +588,10 @@ Hacl_Impl_Frodo_KEM_Encaps_crypto_kem_enc_ct(
   Lib_Memzero_clear_words_u16((uint32_t)512U, sp_matrix);
 }
 
+/* SNIPPET_END: Hacl_Impl_Frodo_KEM_Encaps_crypto_kem_enc_ct */
+
+/* SNIPPET_START: Hacl_Impl_Frodo_KEM_Encaps_crypto_kem_enc_ss */
+
 inline static void
 Hacl_Impl_Frodo_KEM_Encaps_crypto_kem_enc_ss(uint8_t *g, uint8_t *ct, uint8_t *ss)
 {
@@ -529,6 +614,10 @@ Hacl_Impl_Frodo_KEM_Encaps_crypto_kem_enc_ss(uint8_t *g, uint8_t *ct, uint8_t *s
   Hacl_Impl_SHA3_squeeze(s, (uint32_t)168U, (uint32_t)16U, ss);
 }
 
+/* SNIPPET_END: Hacl_Impl_Frodo_KEM_Encaps_crypto_kem_enc_ss */
+
+/* SNIPPET_START: Hacl_Frodo_KEM_crypto_kem_keypair */
+
 uint32_t Hacl_Frodo_KEM_crypto_kem_keypair(uint8_t *pk, uint8_t *sk)
 {
   uint8_t coins[48U] = { 0U };
@@ -549,6 +638,10 @@ uint32_t Hacl_Frodo_KEM_crypto_kem_keypair(uint8_t *pk, uint8_t *sk)
   memcpy(sk + (uint32_t)16U, pk, Hacl_Impl_Frodo_KEM_crypto_publickeybytes * sizeof pk[0U]);
   return (uint32_t)0U;
 }
+
+/* SNIPPET_END: Hacl_Frodo_KEM_crypto_kem_keypair */
+
+/* SNIPPET_START: Hacl_Frodo_KEM_crypto_kem_enc */
 
 uint32_t Hacl_Frodo_KEM_crypto_kem_enc(uint8_t *ct, uint8_t *ss, uint8_t *pk)
 {
@@ -574,6 +667,10 @@ uint32_t Hacl_Frodo_KEM_crypto_kem_enc(uint8_t *ct, uint8_t *ss, uint8_t *pk)
   Lib_Memzero_clear_words_u8((uint32_t)32U, g);
   return (uint32_t)0U;
 }
+
+/* SNIPPET_END: Hacl_Frodo_KEM_crypto_kem_enc */
+
+/* SNIPPET_START: Hacl_Frodo_KEM_crypto_kem_dec */
 
 uint32_t Hacl_Frodo_KEM_crypto_kem_dec(uint8_t *ss, uint8_t *ct, uint8_t *sk)
 {
@@ -705,4 +802,6 @@ uint32_t Hacl_Frodo_KEM_crypto_kem_dec(uint8_t *ss, uint8_t *ct, uint8_t *sk)
   Lib_Memzero_clear_words_u8((uint32_t)32U, g);
   return (uint32_t)0U;
 }
+
+/* SNIPPET_END: Hacl_Frodo_KEM_crypto_kem_dec */
 

@@ -35,6 +35,8 @@
 #include "Hacl_Hash.h"
 
 
+/* SNIPPET_START: Hacl_HMAC_legacy_compute_sha1 */
+
 void
 Hacl_HMAC_legacy_compute_sha1(
   uint8_t *dst,
@@ -43,6 +45,10 @@ Hacl_HMAC_legacy_compute_sha1(
   uint8_t *data,
   uint32_t data_len
 );
+
+/* SNIPPET_END: Hacl_HMAC_legacy_compute_sha1 */
+
+/* SNIPPET_START: Hacl_HMAC_compute_sha2_256 */
 
 void
 Hacl_HMAC_compute_sha2_256(
@@ -53,6 +59,10 @@ Hacl_HMAC_compute_sha2_256(
   uint32_t data_len
 );
 
+/* SNIPPET_END: Hacl_HMAC_compute_sha2_256 */
+
+/* SNIPPET_START: Hacl_HMAC_compute_sha2_384 */
+
 void
 Hacl_HMAC_compute_sha2_384(
   uint8_t *dst,
@@ -62,6 +72,10 @@ Hacl_HMAC_compute_sha2_384(
   uint32_t data_len
 );
 
+/* SNIPPET_END: Hacl_HMAC_compute_sha2_384 */
+
+/* SNIPPET_START: Hacl_HMAC_compute_sha2_512 */
+
 void
 Hacl_HMAC_compute_sha2_512(
   uint8_t *dst,
@@ -70,6 +84,8 @@ Hacl_HMAC_compute_sha2_512(
   uint8_t *data,
   uint32_t data_len
 );
+
+/* SNIPPET_END: Hacl_HMAC_compute_sha2_512 */
 
 #define __Hacl_HMAC_H_DEFINED
 #endif

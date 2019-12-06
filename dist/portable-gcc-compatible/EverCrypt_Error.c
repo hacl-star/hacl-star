@@ -24,6 +24,8 @@
 
 #include "EverCrypt_Error.h"
 
+/* SNIPPET_START: EverCrypt_Error_uu___is_Success */
+
 bool EverCrypt_Error_uu___is_Success(EverCrypt_Error_error_code projectee)
 {
   switch (projectee)
@@ -38,6 +40,10 @@ bool EverCrypt_Error_uu___is_Success(EverCrypt_Error_error_code projectee)
       }
   }
 }
+
+/* SNIPPET_END: EverCrypt_Error_uu___is_Success */
+
+/* SNIPPET_START: EverCrypt_Error_uu___is_UnsupportedAlgorithm */
 
 bool EverCrypt_Error_uu___is_UnsupportedAlgorithm(EverCrypt_Error_error_code projectee)
 {
@@ -54,6 +60,10 @@ bool EverCrypt_Error_uu___is_UnsupportedAlgorithm(EverCrypt_Error_error_code pro
   }
 }
 
+/* SNIPPET_END: EverCrypt_Error_uu___is_UnsupportedAlgorithm */
+
+/* SNIPPET_START: EverCrypt_Error_uu___is_InvalidKey */
+
 bool EverCrypt_Error_uu___is_InvalidKey(EverCrypt_Error_error_code projectee)
 {
   switch (projectee)
@@ -68,6 +78,10 @@ bool EverCrypt_Error_uu___is_InvalidKey(EverCrypt_Error_error_code projectee)
       }
   }
 }
+
+/* SNIPPET_END: EverCrypt_Error_uu___is_InvalidKey */
+
+/* SNIPPET_START: EverCrypt_Error_uu___is_AuthenticationFailure */
 
 bool EverCrypt_Error_uu___is_AuthenticationFailure(EverCrypt_Error_error_code projectee)
 {
@@ -84,6 +98,10 @@ bool EverCrypt_Error_uu___is_AuthenticationFailure(EverCrypt_Error_error_code pr
   }
 }
 
+/* SNIPPET_END: EverCrypt_Error_uu___is_AuthenticationFailure */
+
+/* SNIPPET_START: EverCrypt_Error_uu___is_InvalidIVLength */
+
 bool EverCrypt_Error_uu___is_InvalidIVLength(EverCrypt_Error_error_code projectee)
 {
   switch (projectee)
@@ -99,6 +117,10 @@ bool EverCrypt_Error_uu___is_InvalidIVLength(EverCrypt_Error_error_code projecte
   }
 }
 
+/* SNIPPET_END: EverCrypt_Error_uu___is_InvalidIVLength */
+
+/* SNIPPET_START: EverCrypt_Error_uu___is_DecodeError */
+
 bool EverCrypt_Error_uu___is_DecodeError(EverCrypt_Error_error_code projectee)
 {
   switch (projectee)
@@ -113,4 +135,6 @@ bool EverCrypt_Error_uu___is_DecodeError(EverCrypt_Error_error_code projectee)
       }
   }
 }
+
+/* SNIPPET_END: EverCrypt_Error_uu___is_DecodeError */
 

@@ -24,15 +24,37 @@
 
 #include "Hacl_HMAC_DRBG.h"
 
+/* SNIPPET_START: Hacl_HMAC_DRBG_reseed_interval */
+
 uint32_t Hacl_HMAC_DRBG_reseed_interval = (uint32_t)1024U;
+
+/* SNIPPET_END: Hacl_HMAC_DRBG_reseed_interval */
+
+/* SNIPPET_START: Hacl_HMAC_DRBG_max_output_length */
 
 uint32_t Hacl_HMAC_DRBG_max_output_length = (uint32_t)65536U;
 
+/* SNIPPET_END: Hacl_HMAC_DRBG_max_output_length */
+
+/* SNIPPET_START: Hacl_HMAC_DRBG_max_length */
+
 uint32_t Hacl_HMAC_DRBG_max_length = (uint32_t)65536U;
+
+/* SNIPPET_END: Hacl_HMAC_DRBG_max_length */
+
+/* SNIPPET_START: Hacl_HMAC_DRBG_max_personalization_string_length */
 
 uint32_t Hacl_HMAC_DRBG_max_personalization_string_length = (uint32_t)65536U;
 
+/* SNIPPET_END: Hacl_HMAC_DRBG_max_personalization_string_length */
+
+/* SNIPPET_START: Hacl_HMAC_DRBG_max_additional_input_length */
+
 uint32_t Hacl_HMAC_DRBG_max_additional_input_length = (uint32_t)65536U;
+
+/* SNIPPET_END: Hacl_HMAC_DRBG_max_additional_input_length */
+
+/* SNIPPET_START: Hacl_HMAC_DRBG_min_length */
 
 uint32_t Hacl_HMAC_DRBG_min_length(Spec_Hash_Definitions_hash_alg a)
 {
@@ -62,11 +84,19 @@ uint32_t Hacl_HMAC_DRBG_min_length(Spec_Hash_Definitions_hash_alg a)
   }
 }
 
+/* SNIPPET_END: Hacl_HMAC_DRBG_min_length */
+
+/* SNIPPET_START: Hacl_HMAC_DRBG_uu___is_State */
+
 bool
 Hacl_HMAC_DRBG_uu___is_State(Spec_Hash_Definitions_hash_alg a, Hacl_HMAC_DRBG_state projectee)
 {
   return true;
 }
+
+/* SNIPPET_END: Hacl_HMAC_DRBG_uu___is_State */
+
+/* SNIPPET_START: Hacl_HMAC_DRBG___proj__State__item__k */
 
 uint8_t
 *Hacl_HMAC_DRBG___proj__State__item__k(
@@ -77,6 +107,10 @@ uint8_t
   return projectee.k;
 }
 
+/* SNIPPET_END: Hacl_HMAC_DRBG___proj__State__item__k */
+
+/* SNIPPET_START: Hacl_HMAC_DRBG___proj__State__item__v */
+
 uint8_t
 *Hacl_HMAC_DRBG___proj__State__item__v(
   Spec_Hash_Definitions_hash_alg a,
@@ -86,6 +120,10 @@ uint8_t
   return projectee.v;
 }
 
+/* SNIPPET_END: Hacl_HMAC_DRBG___proj__State__item__v */
+
+/* SNIPPET_START: Hacl_HMAC_DRBG___proj__State__item__reseed_counter */
+
 uint32_t
 *Hacl_HMAC_DRBG___proj__State__item__reseed_counter(
   Spec_Hash_Definitions_hash_alg a,
@@ -94,6 +132,10 @@ uint32_t
 {
   return projectee.reseed_counter;
 }
+
+/* SNIPPET_END: Hacl_HMAC_DRBG___proj__State__item__reseed_counter */
+
+/* SNIPPET_START: Hacl_HMAC_DRBG_create_in */
 
 Hacl_HMAC_DRBG_state Hacl_HMAC_DRBG_create_in(Spec_Hash_Definitions_hash_alg a)
 {
@@ -167,6 +209,10 @@ Hacl_HMAC_DRBG_state Hacl_HMAC_DRBG_create_in(Spec_Hash_Definitions_hash_alg a)
   ctr[0U] = (uint32_t)1U;
   return ((Hacl_HMAC_DRBG_state){ .k = k1, .v = v1, .reseed_counter = ctr });
 }
+
+/* SNIPPET_END: Hacl_HMAC_DRBG_create_in */
+
+/* SNIPPET_START: Hacl_HMAC_DRBG_instantiate */
 
 void
 Hacl_HMAC_DRBG_instantiate(
@@ -426,6 +472,10 @@ Hacl_HMAC_DRBG_instantiate(
   }
 }
 
+/* SNIPPET_END: Hacl_HMAC_DRBG_instantiate */
+
+/* SNIPPET_START: Hacl_HMAC_DRBG_reseed */
+
 void
 Hacl_HMAC_DRBG_reseed(
   Spec_Hash_Definitions_hash_alg a,
@@ -658,6 +708,10 @@ Hacl_HMAC_DRBG_reseed(
   }
 }
 
+/* SNIPPET_END: Hacl_HMAC_DRBG_reseed */
+
+/* SNIPPET_START: Hacl_HMAC_DRBG_generate */
+
 bool
 Hacl_HMAC_DRBG_generate(
   Spec_Hash_Definitions_hash_alg a,
@@ -676,63 +730,11 @@ Hacl_HMAC_DRBG_generate(
         {
           return false;
         }
-        else
+        uint8_t *k1 = st.k;
+        uint8_t *v1 = st.v;
+        uint32_t *ctr = st.reseed_counter;
+        if (additional_input_len > (uint32_t)0U)
         {
-          uint8_t *k1 = st.k;
-          uint8_t *v1 = st.v;
-          uint32_t *ctr = st.reseed_counter;
-          if (additional_input_len > (uint32_t)0U)
-          {
-            uint32_t input_len = (uint32_t)21U + additional_input_len;
-            KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
-            uint8_t input0[input_len];
-            memset(input0, 0U, input_len * sizeof input0[0U]);
-            uint8_t *k_ = input0;
-            memcpy(k_, v1, (uint32_t)20U * sizeof v1[0U]);
-            if (additional_input_len != (uint32_t)0U)
-            {
-              memcpy(input0 + (uint32_t)21U,
-                additional_input,
-                additional_input_len * sizeof additional_input[0U]);
-            }
-            input0[20U] = (uint8_t)0U;
-            Hacl_HMAC_legacy_compute_sha1(k_, k1, (uint32_t)20U, input0, input_len);
-            Hacl_HMAC_legacy_compute_sha1(v1, k_, (uint32_t)20U, v1, (uint32_t)20U);
-            memcpy(k1, k_, (uint32_t)20U * sizeof k_[0U]);
-            if (additional_input_len != (uint32_t)0U)
-            {
-              uint32_t input_len0 = (uint32_t)21U + additional_input_len;
-              KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
-              uint8_t input[input_len0];
-              memset(input, 0U, input_len0 * sizeof input[0U]);
-              uint8_t *k_0 = input;
-              memcpy(k_0, v1, (uint32_t)20U * sizeof v1[0U]);
-              if (additional_input_len != (uint32_t)0U)
-              {
-                memcpy(input + (uint32_t)21U,
-                  additional_input,
-                  additional_input_len * sizeof additional_input[0U]);
-              }
-              input[20U] = (uint8_t)1U;
-              Hacl_HMAC_legacy_compute_sha1(k_0, k1, (uint32_t)20U, input, input_len0);
-              Hacl_HMAC_legacy_compute_sha1(v1, k_0, (uint32_t)20U, v1, (uint32_t)20U);
-              memcpy(k1, k_0, (uint32_t)20U * sizeof k_0[0U]);
-            }
-          }
-          uint8_t *output1 = output;
-          uint32_t max1 = n1 / (uint32_t)20U;
-          uint8_t *out = output1;
-          for (uint32_t i = (uint32_t)0U; i < max1; i = i + (uint32_t)1U)
-          {
-            Hacl_HMAC_legacy_compute_sha1(v1, k1, (uint32_t)20U, v1, (uint32_t)20U);
-            memcpy(out + i * (uint32_t)20U, v1, (uint32_t)20U * sizeof v1[0U]);
-          }
-          if (max1 * (uint32_t)20U < n1)
-          {
-            uint8_t *block = output1 + max1 * (uint32_t)20U;
-            Hacl_HMAC_legacy_compute_sha1(v1, k1, (uint32_t)20U, v1, (uint32_t)20U);
-            memcpy(block, v1, (n1 - max1 * (uint32_t)20U) * sizeof v1[0U]);
-          }
           uint32_t input_len = (uint32_t)21U + additional_input_len;
           KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
           uint8_t input0[input_len];
@@ -768,11 +770,59 @@ Hacl_HMAC_DRBG_generate(
             Hacl_HMAC_legacy_compute_sha1(v1, k_0, (uint32_t)20U, v1, (uint32_t)20U);
             memcpy(k1, k_0, (uint32_t)20U * sizeof k_0[0U]);
           }
-          uint32_t old_ctr = ctr[0U];
-          ctr[0U] = old_ctr + (uint32_t)1U;
-          return true;
         }
-        break;
+        uint8_t *output1 = output;
+        uint32_t max1 = n1 / (uint32_t)20U;
+        uint8_t *out = output1;
+        for (uint32_t i = (uint32_t)0U; i < max1; i = i + (uint32_t)1U)
+        {
+          Hacl_HMAC_legacy_compute_sha1(v1, k1, (uint32_t)20U, v1, (uint32_t)20U);
+          memcpy(out + i * (uint32_t)20U, v1, (uint32_t)20U * sizeof v1[0U]);
+        }
+        if (max1 * (uint32_t)20U < n1)
+        {
+          uint8_t *block = output1 + max1 * (uint32_t)20U;
+          Hacl_HMAC_legacy_compute_sha1(v1, k1, (uint32_t)20U, v1, (uint32_t)20U);
+          memcpy(block, v1, (n1 - max1 * (uint32_t)20U) * sizeof v1[0U]);
+        }
+        uint32_t input_len = (uint32_t)21U + additional_input_len;
+        KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
+        uint8_t input0[input_len];
+        memset(input0, 0U, input_len * sizeof input0[0U]);
+        uint8_t *k_ = input0;
+        memcpy(k_, v1, (uint32_t)20U * sizeof v1[0U]);
+        if (additional_input_len != (uint32_t)0U)
+        {
+          memcpy(input0 + (uint32_t)21U,
+            additional_input,
+            additional_input_len * sizeof additional_input[0U]);
+        }
+        input0[20U] = (uint8_t)0U;
+        Hacl_HMAC_legacy_compute_sha1(k_, k1, (uint32_t)20U, input0, input_len);
+        Hacl_HMAC_legacy_compute_sha1(v1, k_, (uint32_t)20U, v1, (uint32_t)20U);
+        memcpy(k1, k_, (uint32_t)20U * sizeof k_[0U]);
+        if (additional_input_len != (uint32_t)0U)
+        {
+          uint32_t input_len0 = (uint32_t)21U + additional_input_len;
+          KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
+          uint8_t input[input_len0];
+          memset(input, 0U, input_len0 * sizeof input[0U]);
+          uint8_t *k_0 = input;
+          memcpy(k_0, v1, (uint32_t)20U * sizeof v1[0U]);
+          if (additional_input_len != (uint32_t)0U)
+          {
+            memcpy(input + (uint32_t)21U,
+              additional_input,
+              additional_input_len * sizeof additional_input[0U]);
+          }
+          input[20U] = (uint8_t)1U;
+          Hacl_HMAC_legacy_compute_sha1(k_0, k1, (uint32_t)20U, input, input_len0);
+          Hacl_HMAC_legacy_compute_sha1(v1, k_0, (uint32_t)20U, v1, (uint32_t)20U);
+          memcpy(k1, k_0, (uint32_t)20U * sizeof k_0[0U]);
+        }
+        uint32_t old_ctr = ctr[0U];
+        ctr[0U] = old_ctr + (uint32_t)1U;
+        return true;
       }
     case Spec_Hash_Definitions_SHA2_256:
       {
@@ -780,63 +830,11 @@ Hacl_HMAC_DRBG_generate(
         {
           return false;
         }
-        else
+        uint8_t *k1 = st.k;
+        uint8_t *v1 = st.v;
+        uint32_t *ctr = st.reseed_counter;
+        if (additional_input_len > (uint32_t)0U)
         {
-          uint8_t *k1 = st.k;
-          uint8_t *v1 = st.v;
-          uint32_t *ctr = st.reseed_counter;
-          if (additional_input_len > (uint32_t)0U)
-          {
-            uint32_t input_len = (uint32_t)33U + additional_input_len;
-            KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
-            uint8_t input0[input_len];
-            memset(input0, 0U, input_len * sizeof input0[0U]);
-            uint8_t *k_ = input0;
-            memcpy(k_, v1, (uint32_t)32U * sizeof v1[0U]);
-            if (additional_input_len != (uint32_t)0U)
-            {
-              memcpy(input0 + (uint32_t)33U,
-                additional_input,
-                additional_input_len * sizeof additional_input[0U]);
-            }
-            input0[32U] = (uint8_t)0U;
-            Hacl_HMAC_compute_sha2_256(k_, k1, (uint32_t)32U, input0, input_len);
-            Hacl_HMAC_compute_sha2_256(v1, k_, (uint32_t)32U, v1, (uint32_t)32U);
-            memcpy(k1, k_, (uint32_t)32U * sizeof k_[0U]);
-            if (additional_input_len != (uint32_t)0U)
-            {
-              uint32_t input_len0 = (uint32_t)33U + additional_input_len;
-              KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
-              uint8_t input[input_len0];
-              memset(input, 0U, input_len0 * sizeof input[0U]);
-              uint8_t *k_0 = input;
-              memcpy(k_0, v1, (uint32_t)32U * sizeof v1[0U]);
-              if (additional_input_len != (uint32_t)0U)
-              {
-                memcpy(input + (uint32_t)33U,
-                  additional_input,
-                  additional_input_len * sizeof additional_input[0U]);
-              }
-              input[32U] = (uint8_t)1U;
-              Hacl_HMAC_compute_sha2_256(k_0, k1, (uint32_t)32U, input, input_len0);
-              Hacl_HMAC_compute_sha2_256(v1, k_0, (uint32_t)32U, v1, (uint32_t)32U);
-              memcpy(k1, k_0, (uint32_t)32U * sizeof k_0[0U]);
-            }
-          }
-          uint8_t *output1 = output;
-          uint32_t max1 = n1 / (uint32_t)32U;
-          uint8_t *out = output1;
-          for (uint32_t i = (uint32_t)0U; i < max1; i = i + (uint32_t)1U)
-          {
-            Hacl_HMAC_compute_sha2_256(v1, k1, (uint32_t)32U, v1, (uint32_t)32U);
-            memcpy(out + i * (uint32_t)32U, v1, (uint32_t)32U * sizeof v1[0U]);
-          }
-          if (max1 * (uint32_t)32U < n1)
-          {
-            uint8_t *block = output1 + max1 * (uint32_t)32U;
-            Hacl_HMAC_compute_sha2_256(v1, k1, (uint32_t)32U, v1, (uint32_t)32U);
-            memcpy(block, v1, (n1 - max1 * (uint32_t)32U) * sizeof v1[0U]);
-          }
           uint32_t input_len = (uint32_t)33U + additional_input_len;
           KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
           uint8_t input0[input_len];
@@ -872,11 +870,59 @@ Hacl_HMAC_DRBG_generate(
             Hacl_HMAC_compute_sha2_256(v1, k_0, (uint32_t)32U, v1, (uint32_t)32U);
             memcpy(k1, k_0, (uint32_t)32U * sizeof k_0[0U]);
           }
-          uint32_t old_ctr = ctr[0U];
-          ctr[0U] = old_ctr + (uint32_t)1U;
-          return true;
         }
-        break;
+        uint8_t *output1 = output;
+        uint32_t max1 = n1 / (uint32_t)32U;
+        uint8_t *out = output1;
+        for (uint32_t i = (uint32_t)0U; i < max1; i = i + (uint32_t)1U)
+        {
+          Hacl_HMAC_compute_sha2_256(v1, k1, (uint32_t)32U, v1, (uint32_t)32U);
+          memcpy(out + i * (uint32_t)32U, v1, (uint32_t)32U * sizeof v1[0U]);
+        }
+        if (max1 * (uint32_t)32U < n1)
+        {
+          uint8_t *block = output1 + max1 * (uint32_t)32U;
+          Hacl_HMAC_compute_sha2_256(v1, k1, (uint32_t)32U, v1, (uint32_t)32U);
+          memcpy(block, v1, (n1 - max1 * (uint32_t)32U) * sizeof v1[0U]);
+        }
+        uint32_t input_len = (uint32_t)33U + additional_input_len;
+        KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
+        uint8_t input0[input_len];
+        memset(input0, 0U, input_len * sizeof input0[0U]);
+        uint8_t *k_ = input0;
+        memcpy(k_, v1, (uint32_t)32U * sizeof v1[0U]);
+        if (additional_input_len != (uint32_t)0U)
+        {
+          memcpy(input0 + (uint32_t)33U,
+            additional_input,
+            additional_input_len * sizeof additional_input[0U]);
+        }
+        input0[32U] = (uint8_t)0U;
+        Hacl_HMAC_compute_sha2_256(k_, k1, (uint32_t)32U, input0, input_len);
+        Hacl_HMAC_compute_sha2_256(v1, k_, (uint32_t)32U, v1, (uint32_t)32U);
+        memcpy(k1, k_, (uint32_t)32U * sizeof k_[0U]);
+        if (additional_input_len != (uint32_t)0U)
+        {
+          uint32_t input_len0 = (uint32_t)33U + additional_input_len;
+          KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
+          uint8_t input[input_len0];
+          memset(input, 0U, input_len0 * sizeof input[0U]);
+          uint8_t *k_0 = input;
+          memcpy(k_0, v1, (uint32_t)32U * sizeof v1[0U]);
+          if (additional_input_len != (uint32_t)0U)
+          {
+            memcpy(input + (uint32_t)33U,
+              additional_input,
+              additional_input_len * sizeof additional_input[0U]);
+          }
+          input[32U] = (uint8_t)1U;
+          Hacl_HMAC_compute_sha2_256(k_0, k1, (uint32_t)32U, input, input_len0);
+          Hacl_HMAC_compute_sha2_256(v1, k_0, (uint32_t)32U, v1, (uint32_t)32U);
+          memcpy(k1, k_0, (uint32_t)32U * sizeof k_0[0U]);
+        }
+        uint32_t old_ctr = ctr[0U];
+        ctr[0U] = old_ctr + (uint32_t)1U;
+        return true;
       }
     case Spec_Hash_Definitions_SHA2_384:
       {
@@ -884,63 +930,11 @@ Hacl_HMAC_DRBG_generate(
         {
           return false;
         }
-        else
+        uint8_t *k1 = st.k;
+        uint8_t *v1 = st.v;
+        uint32_t *ctr = st.reseed_counter;
+        if (additional_input_len > (uint32_t)0U)
         {
-          uint8_t *k1 = st.k;
-          uint8_t *v1 = st.v;
-          uint32_t *ctr = st.reseed_counter;
-          if (additional_input_len > (uint32_t)0U)
-          {
-            uint32_t input_len = (uint32_t)49U + additional_input_len;
-            KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
-            uint8_t input0[input_len];
-            memset(input0, 0U, input_len * sizeof input0[0U]);
-            uint8_t *k_ = input0;
-            memcpy(k_, v1, (uint32_t)48U * sizeof v1[0U]);
-            if (additional_input_len != (uint32_t)0U)
-            {
-              memcpy(input0 + (uint32_t)49U,
-                additional_input,
-                additional_input_len * sizeof additional_input[0U]);
-            }
-            input0[48U] = (uint8_t)0U;
-            Hacl_HMAC_compute_sha2_384(k_, k1, (uint32_t)48U, input0, input_len);
-            Hacl_HMAC_compute_sha2_384(v1, k_, (uint32_t)48U, v1, (uint32_t)48U);
-            memcpy(k1, k_, (uint32_t)48U * sizeof k_[0U]);
-            if (additional_input_len != (uint32_t)0U)
-            {
-              uint32_t input_len0 = (uint32_t)49U + additional_input_len;
-              KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
-              uint8_t input[input_len0];
-              memset(input, 0U, input_len0 * sizeof input[0U]);
-              uint8_t *k_0 = input;
-              memcpy(k_0, v1, (uint32_t)48U * sizeof v1[0U]);
-              if (additional_input_len != (uint32_t)0U)
-              {
-                memcpy(input + (uint32_t)49U,
-                  additional_input,
-                  additional_input_len * sizeof additional_input[0U]);
-              }
-              input[48U] = (uint8_t)1U;
-              Hacl_HMAC_compute_sha2_384(k_0, k1, (uint32_t)48U, input, input_len0);
-              Hacl_HMAC_compute_sha2_384(v1, k_0, (uint32_t)48U, v1, (uint32_t)48U);
-              memcpy(k1, k_0, (uint32_t)48U * sizeof k_0[0U]);
-            }
-          }
-          uint8_t *output1 = output;
-          uint32_t max1 = n1 / (uint32_t)48U;
-          uint8_t *out = output1;
-          for (uint32_t i = (uint32_t)0U; i < max1; i = i + (uint32_t)1U)
-          {
-            Hacl_HMAC_compute_sha2_384(v1, k1, (uint32_t)48U, v1, (uint32_t)48U);
-            memcpy(out + i * (uint32_t)48U, v1, (uint32_t)48U * sizeof v1[0U]);
-          }
-          if (max1 * (uint32_t)48U < n1)
-          {
-            uint8_t *block = output1 + max1 * (uint32_t)48U;
-            Hacl_HMAC_compute_sha2_384(v1, k1, (uint32_t)48U, v1, (uint32_t)48U);
-            memcpy(block, v1, (n1 - max1 * (uint32_t)48U) * sizeof v1[0U]);
-          }
           uint32_t input_len = (uint32_t)49U + additional_input_len;
           KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
           uint8_t input0[input_len];
@@ -976,11 +970,59 @@ Hacl_HMAC_DRBG_generate(
             Hacl_HMAC_compute_sha2_384(v1, k_0, (uint32_t)48U, v1, (uint32_t)48U);
             memcpy(k1, k_0, (uint32_t)48U * sizeof k_0[0U]);
           }
-          uint32_t old_ctr = ctr[0U];
-          ctr[0U] = old_ctr + (uint32_t)1U;
-          return true;
         }
-        break;
+        uint8_t *output1 = output;
+        uint32_t max1 = n1 / (uint32_t)48U;
+        uint8_t *out = output1;
+        for (uint32_t i = (uint32_t)0U; i < max1; i = i + (uint32_t)1U)
+        {
+          Hacl_HMAC_compute_sha2_384(v1, k1, (uint32_t)48U, v1, (uint32_t)48U);
+          memcpy(out + i * (uint32_t)48U, v1, (uint32_t)48U * sizeof v1[0U]);
+        }
+        if (max1 * (uint32_t)48U < n1)
+        {
+          uint8_t *block = output1 + max1 * (uint32_t)48U;
+          Hacl_HMAC_compute_sha2_384(v1, k1, (uint32_t)48U, v1, (uint32_t)48U);
+          memcpy(block, v1, (n1 - max1 * (uint32_t)48U) * sizeof v1[0U]);
+        }
+        uint32_t input_len = (uint32_t)49U + additional_input_len;
+        KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
+        uint8_t input0[input_len];
+        memset(input0, 0U, input_len * sizeof input0[0U]);
+        uint8_t *k_ = input0;
+        memcpy(k_, v1, (uint32_t)48U * sizeof v1[0U]);
+        if (additional_input_len != (uint32_t)0U)
+        {
+          memcpy(input0 + (uint32_t)49U,
+            additional_input,
+            additional_input_len * sizeof additional_input[0U]);
+        }
+        input0[48U] = (uint8_t)0U;
+        Hacl_HMAC_compute_sha2_384(k_, k1, (uint32_t)48U, input0, input_len);
+        Hacl_HMAC_compute_sha2_384(v1, k_, (uint32_t)48U, v1, (uint32_t)48U);
+        memcpy(k1, k_, (uint32_t)48U * sizeof k_[0U]);
+        if (additional_input_len != (uint32_t)0U)
+        {
+          uint32_t input_len0 = (uint32_t)49U + additional_input_len;
+          KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
+          uint8_t input[input_len0];
+          memset(input, 0U, input_len0 * sizeof input[0U]);
+          uint8_t *k_0 = input;
+          memcpy(k_0, v1, (uint32_t)48U * sizeof v1[0U]);
+          if (additional_input_len != (uint32_t)0U)
+          {
+            memcpy(input + (uint32_t)49U,
+              additional_input,
+              additional_input_len * sizeof additional_input[0U]);
+          }
+          input[48U] = (uint8_t)1U;
+          Hacl_HMAC_compute_sha2_384(k_0, k1, (uint32_t)48U, input, input_len0);
+          Hacl_HMAC_compute_sha2_384(v1, k_0, (uint32_t)48U, v1, (uint32_t)48U);
+          memcpy(k1, k_0, (uint32_t)48U * sizeof k_0[0U]);
+        }
+        uint32_t old_ctr = ctr[0U];
+        ctr[0U] = old_ctr + (uint32_t)1U;
+        return true;
       }
     case Spec_Hash_Definitions_SHA2_512:
       {
@@ -988,63 +1030,11 @@ Hacl_HMAC_DRBG_generate(
         {
           return false;
         }
-        else
+        uint8_t *k1 = st.k;
+        uint8_t *v1 = st.v;
+        uint32_t *ctr = st.reseed_counter;
+        if (additional_input_len > (uint32_t)0U)
         {
-          uint8_t *k1 = st.k;
-          uint8_t *v1 = st.v;
-          uint32_t *ctr = st.reseed_counter;
-          if (additional_input_len > (uint32_t)0U)
-          {
-            uint32_t input_len = (uint32_t)65U + additional_input_len;
-            KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
-            uint8_t input0[input_len];
-            memset(input0, 0U, input_len * sizeof input0[0U]);
-            uint8_t *k_ = input0;
-            memcpy(k_, v1, (uint32_t)64U * sizeof v1[0U]);
-            if (additional_input_len != (uint32_t)0U)
-            {
-              memcpy(input0 + (uint32_t)65U,
-                additional_input,
-                additional_input_len * sizeof additional_input[0U]);
-            }
-            input0[64U] = (uint8_t)0U;
-            Hacl_HMAC_compute_sha2_512(k_, k1, (uint32_t)64U, input0, input_len);
-            Hacl_HMAC_compute_sha2_512(v1, k_, (uint32_t)64U, v1, (uint32_t)64U);
-            memcpy(k1, k_, (uint32_t)64U * sizeof k_[0U]);
-            if (additional_input_len != (uint32_t)0U)
-            {
-              uint32_t input_len0 = (uint32_t)65U + additional_input_len;
-              KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
-              uint8_t input[input_len0];
-              memset(input, 0U, input_len0 * sizeof input[0U]);
-              uint8_t *k_0 = input;
-              memcpy(k_0, v1, (uint32_t)64U * sizeof v1[0U]);
-              if (additional_input_len != (uint32_t)0U)
-              {
-                memcpy(input + (uint32_t)65U,
-                  additional_input,
-                  additional_input_len * sizeof additional_input[0U]);
-              }
-              input[64U] = (uint8_t)1U;
-              Hacl_HMAC_compute_sha2_512(k_0, k1, (uint32_t)64U, input, input_len0);
-              Hacl_HMAC_compute_sha2_512(v1, k_0, (uint32_t)64U, v1, (uint32_t)64U);
-              memcpy(k1, k_0, (uint32_t)64U * sizeof k_0[0U]);
-            }
-          }
-          uint8_t *output1 = output;
-          uint32_t max1 = n1 / (uint32_t)64U;
-          uint8_t *out = output1;
-          for (uint32_t i = (uint32_t)0U; i < max1; i = i + (uint32_t)1U)
-          {
-            Hacl_HMAC_compute_sha2_512(v1, k1, (uint32_t)64U, v1, (uint32_t)64U);
-            memcpy(out + i * (uint32_t)64U, v1, (uint32_t)64U * sizeof v1[0U]);
-          }
-          if (max1 * (uint32_t)64U < n1)
-          {
-            uint8_t *block = output1 + max1 * (uint32_t)64U;
-            Hacl_HMAC_compute_sha2_512(v1, k1, (uint32_t)64U, v1, (uint32_t)64U);
-            memcpy(block, v1, (n1 - max1 * (uint32_t)64U) * sizeof v1[0U]);
-          }
           uint32_t input_len = (uint32_t)65U + additional_input_len;
           KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
           uint8_t input0[input_len];
@@ -1080,11 +1070,59 @@ Hacl_HMAC_DRBG_generate(
             Hacl_HMAC_compute_sha2_512(v1, k_0, (uint32_t)64U, v1, (uint32_t)64U);
             memcpy(k1, k_0, (uint32_t)64U * sizeof k_0[0U]);
           }
-          uint32_t old_ctr = ctr[0U];
-          ctr[0U] = old_ctr + (uint32_t)1U;
-          return true;
         }
-        break;
+        uint8_t *output1 = output;
+        uint32_t max1 = n1 / (uint32_t)64U;
+        uint8_t *out = output1;
+        for (uint32_t i = (uint32_t)0U; i < max1; i = i + (uint32_t)1U)
+        {
+          Hacl_HMAC_compute_sha2_512(v1, k1, (uint32_t)64U, v1, (uint32_t)64U);
+          memcpy(out + i * (uint32_t)64U, v1, (uint32_t)64U * sizeof v1[0U]);
+        }
+        if (max1 * (uint32_t)64U < n1)
+        {
+          uint8_t *block = output1 + max1 * (uint32_t)64U;
+          Hacl_HMAC_compute_sha2_512(v1, k1, (uint32_t)64U, v1, (uint32_t)64U);
+          memcpy(block, v1, (n1 - max1 * (uint32_t)64U) * sizeof v1[0U]);
+        }
+        uint32_t input_len = (uint32_t)65U + additional_input_len;
+        KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
+        uint8_t input0[input_len];
+        memset(input0, 0U, input_len * sizeof input0[0U]);
+        uint8_t *k_ = input0;
+        memcpy(k_, v1, (uint32_t)64U * sizeof v1[0U]);
+        if (additional_input_len != (uint32_t)0U)
+        {
+          memcpy(input0 + (uint32_t)65U,
+            additional_input,
+            additional_input_len * sizeof additional_input[0U]);
+        }
+        input0[64U] = (uint8_t)0U;
+        Hacl_HMAC_compute_sha2_512(k_, k1, (uint32_t)64U, input0, input_len);
+        Hacl_HMAC_compute_sha2_512(v1, k_, (uint32_t)64U, v1, (uint32_t)64U);
+        memcpy(k1, k_, (uint32_t)64U * sizeof k_[0U]);
+        if (additional_input_len != (uint32_t)0U)
+        {
+          uint32_t input_len0 = (uint32_t)65U + additional_input_len;
+          KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
+          uint8_t input[input_len0];
+          memset(input, 0U, input_len0 * sizeof input[0U]);
+          uint8_t *k_0 = input;
+          memcpy(k_0, v1, (uint32_t)64U * sizeof v1[0U]);
+          if (additional_input_len != (uint32_t)0U)
+          {
+            memcpy(input + (uint32_t)65U,
+              additional_input,
+              additional_input_len * sizeof additional_input[0U]);
+          }
+          input[64U] = (uint8_t)1U;
+          Hacl_HMAC_compute_sha2_512(k_0, k1, (uint32_t)64U, input, input_len0);
+          Hacl_HMAC_compute_sha2_512(v1, k_0, (uint32_t)64U, v1, (uint32_t)64U);
+          memcpy(k1, k_0, (uint32_t)64U * sizeof k_0[0U]);
+        }
+        uint32_t old_ctr = ctr[0U];
+        ctr[0U] = old_ctr + (uint32_t)1U;
+        return true;
       }
     default:
       {
@@ -1093,4 +1131,6 @@ Hacl_HMAC_DRBG_generate(
       }
   }
 }
+
+/* SNIPPET_END: Hacl_HMAC_DRBG_generate */
 

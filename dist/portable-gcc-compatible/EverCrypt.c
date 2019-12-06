@@ -24,37 +24,42 @@
 
 #include "EverCrypt.h"
 
+/* SNIPPET_START: EverCrypt_random_init */
+
 uint32_t EverCrypt_random_init()
 {
   if (EverCrypt_AutoConfig2_wants_openssl())
   {
     return EverCrypt_OpenSSL_random_init();
   }
-  else
-  {
-    KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
-      __FILE__,
-      __LINE__,
-      "ERROR: inconsistent configuration (random_init)");
-    KRML_HOST_EXIT(255U);
-  }
+  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+    __FILE__,
+    __LINE__,
+    "ERROR: inconsistent configuration (random_init)");
+  KRML_HOST_EXIT(255U);
 }
+
+/* SNIPPET_END: EverCrypt_random_init */
+
+/* SNIPPET_START: EverCrypt_random_sample */
 
 void EverCrypt_random_sample(uint32_t len, uint8_t *out1)
 {
   if (EverCrypt_AutoConfig2_wants_openssl())
   {
     EverCrypt_OpenSSL_random_sample(len, out1);
+    return;
   }
-  else
-  {
-    KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
-      __FILE__,
-      __LINE__,
-      "ERROR: inconsistent configuration (random_sample)");
-    KRML_HOST_EXIT(255U);
-  }
+  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+    __FILE__,
+    __LINE__,
+    "ERROR: inconsistent configuration (random_sample)");
+  KRML_HOST_EXIT(255U);
 }
+
+/* SNIPPET_END: EverCrypt_random_sample */
+
+/* SNIPPET_START: EverCrypt_random_cleanup */
 
 void EverCrypt_random_cleanup()
 {
@@ -67,6 +72,10 @@ void EverCrypt_random_cleanup()
     KRML_HOST_EXIT(255U);
   }
 }
+
+/* SNIPPET_END: EverCrypt_random_cleanup */
+
+/* SNIPPET_START: EverCrypt_aes128_key_s */
 
 typedef struct EverCrypt_aes128_key_s_s
 {
@@ -91,17 +100,22 @@ typedef struct EverCrypt_aes128_key_s_s
 }
 EverCrypt_aes128_key_s;
 
+/* SNIPPET_END: EverCrypt_aes128_key_s */
+
+/* SNIPPET_START: EverCrypt_uu___is_AES128_OPENSSL */
+
 bool EverCrypt_uu___is_AES128_OPENSSL(EverCrypt_aes128_key_s projectee)
 {
   if (projectee.tag == EverCrypt_AES128_OPENSSL)
   {
     return true;
   }
-  else
-  {
-    return false;
-  }
+  return false;
 }
+
+/* SNIPPET_END: EverCrypt_uu___is_AES128_OPENSSL */
+
+/* SNIPPET_START: EverCrypt___proj__AES128_OPENSSL__item__st */
 
 FStar_Dyn_dyn EverCrypt___proj__AES128_OPENSSL__item__st(EverCrypt_aes128_key_s projectee)
 {
@@ -109,15 +123,16 @@ FStar_Dyn_dyn EverCrypt___proj__AES128_OPENSSL__item__st(EverCrypt_aes128_key_s 
   {
     return projectee.case_AES128_OPENSSL;
   }
-  else
-  {
-    KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
-      __FILE__,
-      __LINE__,
-      "unreachable (pattern matches are exhaustive in F*)");
-    KRML_HOST_EXIT(255U);
-  }
+  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+    __FILE__,
+    __LINE__,
+    "unreachable (pattern matches are exhaustive in F*)");
+  KRML_HOST_EXIT(255U);
 }
+
+/* SNIPPET_END: EverCrypt___proj__AES128_OPENSSL__item__st */
+
+/* SNIPPET_START: EverCrypt_uu___is_AES128_BCRYPT */
 
 bool EverCrypt_uu___is_AES128_BCRYPT(EverCrypt_aes128_key_s projectee)
 {
@@ -125,11 +140,12 @@ bool EverCrypt_uu___is_AES128_BCRYPT(EverCrypt_aes128_key_s projectee)
   {
     return true;
   }
-  else
-  {
-    return false;
-  }
+  return false;
 }
+
+/* SNIPPET_END: EverCrypt_uu___is_AES128_BCRYPT */
+
+/* SNIPPET_START: EverCrypt___proj__AES128_BCRYPT__item__st */
 
 FStar_Dyn_dyn EverCrypt___proj__AES128_BCRYPT__item__st(EverCrypt_aes128_key_s projectee)
 {
@@ -137,15 +153,16 @@ FStar_Dyn_dyn EverCrypt___proj__AES128_BCRYPT__item__st(EverCrypt_aes128_key_s p
   {
     return projectee.case_AES128_BCRYPT;
   }
-  else
-  {
-    KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
-      __FILE__,
-      __LINE__,
-      "unreachable (pattern matches are exhaustive in F*)");
-    KRML_HOST_EXIT(255U);
-  }
+  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+    __FILE__,
+    __LINE__,
+    "unreachable (pattern matches are exhaustive in F*)");
+  KRML_HOST_EXIT(255U);
 }
+
+/* SNIPPET_END: EverCrypt___proj__AES128_BCRYPT__item__st */
+
+/* SNIPPET_START: EverCrypt_uu___is_AES128_VALE */
 
 bool EverCrypt_uu___is_AES128_VALE(EverCrypt_aes128_key_s projectee)
 {
@@ -153,11 +170,12 @@ bool EverCrypt_uu___is_AES128_VALE(EverCrypt_aes128_key_s projectee)
   {
     return true;
   }
-  else
-  {
-    return false;
-  }
+  return false;
 }
+
+/* SNIPPET_END: EverCrypt_uu___is_AES128_VALE */
+
+/* SNIPPET_START: EverCrypt___proj__AES128_VALE__item__w */
 
 uint8_t *EverCrypt___proj__AES128_VALE__item__w(EverCrypt_aes128_key_s projectee)
 {
@@ -165,15 +183,16 @@ uint8_t *EverCrypt___proj__AES128_VALE__item__w(EverCrypt_aes128_key_s projectee
   {
     return projectee.case_AES128_VALE.w;
   }
-  else
-  {
-    KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
-      __FILE__,
-      __LINE__,
-      "unreachable (pattern matches are exhaustive in F*)");
-    KRML_HOST_EXIT(255U);
-  }
+  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+    __FILE__,
+    __LINE__,
+    "unreachable (pattern matches are exhaustive in F*)");
+  KRML_HOST_EXIT(255U);
 }
+
+/* SNIPPET_END: EverCrypt___proj__AES128_VALE__item__w */
+
+/* SNIPPET_START: EverCrypt___proj__AES128_VALE__item__sbox */
 
 uint8_t *EverCrypt___proj__AES128_VALE__item__sbox(EverCrypt_aes128_key_s projectee)
 {
@@ -181,15 +200,16 @@ uint8_t *EverCrypt___proj__AES128_VALE__item__sbox(EverCrypt_aes128_key_s projec
   {
     return projectee.case_AES128_VALE.sbox;
   }
-  else
-  {
-    KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
-      __FILE__,
-      __LINE__,
-      "unreachable (pattern matches are exhaustive in F*)");
-    KRML_HOST_EXIT(255U);
-  }
+  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+    __FILE__,
+    __LINE__,
+    "unreachable (pattern matches are exhaustive in F*)");
+  KRML_HOST_EXIT(255U);
 }
+
+/* SNIPPET_END: EverCrypt___proj__AES128_VALE__item__sbox */
+
+/* SNIPPET_START: EverCrypt_uu___is_AES128_HACL */
 
 bool EverCrypt_uu___is_AES128_HACL(EverCrypt_aes128_key_s projectee)
 {
@@ -197,11 +217,12 @@ bool EverCrypt_uu___is_AES128_HACL(EverCrypt_aes128_key_s projectee)
   {
     return true;
   }
-  else
-  {
-    return false;
-  }
+  return false;
 }
+
+/* SNIPPET_END: EverCrypt_uu___is_AES128_HACL */
+
+/* SNIPPET_START: EverCrypt___proj__AES128_HACL__item__w */
 
 uint8_t *EverCrypt___proj__AES128_HACL__item__w(EverCrypt_aes128_key_s projectee)
 {
@@ -209,15 +230,16 @@ uint8_t *EverCrypt___proj__AES128_HACL__item__w(EverCrypt_aes128_key_s projectee
   {
     return projectee.case_AES128_HACL.w;
   }
-  else
-  {
-    KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
-      __FILE__,
-      __LINE__,
-      "unreachable (pattern matches are exhaustive in F*)");
-    KRML_HOST_EXIT(255U);
-  }
+  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+    __FILE__,
+    __LINE__,
+    "unreachable (pattern matches are exhaustive in F*)");
+  KRML_HOST_EXIT(255U);
 }
+
+/* SNIPPET_END: EverCrypt___proj__AES128_HACL__item__w */
+
+/* SNIPPET_START: EverCrypt___proj__AES128_HACL__item__sbox */
 
 uint8_t *EverCrypt___proj__AES128_HACL__item__sbox(EverCrypt_aes128_key_s projectee)
 {
@@ -225,15 +247,16 @@ uint8_t *EverCrypt___proj__AES128_HACL__item__sbox(EverCrypt_aes128_key_s projec
   {
     return projectee.case_AES128_HACL.sbox;
   }
-  else
-  {
-    KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
-      __FILE__,
-      __LINE__,
-      "unreachable (pattern matches are exhaustive in F*)");
-    KRML_HOST_EXIT(255U);
-  }
+  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+    __FILE__,
+    __LINE__,
+    "unreachable (pattern matches are exhaustive in F*)");
+  KRML_HOST_EXIT(255U);
 }
+
+/* SNIPPET_END: EverCrypt___proj__AES128_HACL__item__sbox */
+
+/* SNIPPET_START: EverCrypt_aes128_create */
 
 KRML_DEPRECATED("Please use EverCrypt_CTR.h (from C) or EverCrypt.CTR.fsti (from F*) ")
 
@@ -286,6 +309,10 @@ EverCrypt_aes128_key_s *EverCrypt_aes128_create(uint8_t *k1)
   return buf;
 }
 
+/* SNIPPET_END: EverCrypt_aes128_create */
+
+/* SNIPPET_START: EverCrypt_aes128_compute */
+
 KRML_DEPRECATED("Please use EverCrypt_CTR.h (from C) or EverCrypt.CTR.fsti (from F*) ")
 
 void EverCrypt_aes128_compute(EverCrypt_aes128_key_s *k1, uint8_t *plain, uint8_t *cipher1)
@@ -298,42 +325,39 @@ void EverCrypt_aes128_compute(EverCrypt_aes128_key_s *k1, uint8_t *plain, uint8_
       uint8_t *sbox = k2.case_AES128_VALE.sbox;
       uint8_t *w1 = k2.case_AES128_VALE.w;
       aes128_encrypt_one_block(cipher1, plain, w1, sbox);
+      return;
     }
-    else
-    {
-      KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
-        __FILE__,
-        __LINE__,
-        "unreachable (pattern matches are exhaustive in F*)");
-      KRML_HOST_EXIT(255U);
-    }
+    KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+      __FILE__,
+      __LINE__,
+      "unreachable (pattern matches are exhaustive in F*)");
+    KRML_HOST_EXIT(255U);
   }
-  else if (true && EverCrypt_uu___is_AES128_HACL(k2))
+  if (true && EverCrypt_uu___is_AES128_HACL(k2))
   {
     if (k2.tag == EverCrypt_AES128_HACL)
     {
       uint8_t *sbox = k2.case_AES128_HACL.sbox;
       uint8_t *w1 = k2.case_AES128_HACL.w;
       EverCrypt_Hacl_aes128_cipher(cipher1, plain, w1, sbox);
+      return;
     }
-    else
-    {
-      KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
-        __FILE__,
-        __LINE__,
-        "unreachable (pattern matches are exhaustive in F*)");
-      KRML_HOST_EXIT(255U);
-    }
-  }
-  else
-  {
     KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
       __FILE__,
       __LINE__,
-      "ERROR: inconsistent configuration (aes128_compute)");
+      "unreachable (pattern matches are exhaustive in F*)");
     KRML_HOST_EXIT(255U);
   }
+  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+    __FILE__,
+    __LINE__,
+    "ERROR: inconsistent configuration (aes128_compute)");
+  KRML_HOST_EXIT(255U);
 }
+
+/* SNIPPET_END: EverCrypt_aes128_compute */
+
+/* SNIPPET_START: EverCrypt_aes128_free */
 
 KRML_DEPRECATED("Please use EverCrypt_CTR.h (from C) or EverCrypt.CTR.fsti (from F*) ")
 
@@ -387,6 +411,10 @@ void EverCrypt_aes128_free(EverCrypt_aes128_key_s *pk)
   KRML_HOST_FREE(pk);
 }
 
+/* SNIPPET_END: EverCrypt_aes128_free */
+
+/* SNIPPET_START: EverCrypt_aes256_key_s */
+
 typedef struct EverCrypt_aes256_key_s_s
 {
   EverCrypt_aes256_key_s_tags tag;
@@ -404,17 +432,22 @@ typedef struct EverCrypt_aes256_key_s_s
 }
 EverCrypt_aes256_key_s;
 
+/* SNIPPET_END: EverCrypt_aes256_key_s */
+
+/* SNIPPET_START: EverCrypt_uu___is_AES256_OPENSSL */
+
 bool EverCrypt_uu___is_AES256_OPENSSL(EverCrypt_aes256_key_s projectee)
 {
   if (projectee.tag == EverCrypt_AES256_OPENSSL)
   {
     return true;
   }
-  else
-  {
-    return false;
-  }
+  return false;
 }
+
+/* SNIPPET_END: EverCrypt_uu___is_AES256_OPENSSL */
+
+/* SNIPPET_START: EverCrypt___proj__AES256_OPENSSL__item__st */
 
 FStar_Dyn_dyn EverCrypt___proj__AES256_OPENSSL__item__st(EverCrypt_aes256_key_s projectee)
 {
@@ -422,15 +455,16 @@ FStar_Dyn_dyn EverCrypt___proj__AES256_OPENSSL__item__st(EverCrypt_aes256_key_s 
   {
     return projectee.case_AES256_OPENSSL;
   }
-  else
-  {
-    KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
-      __FILE__,
-      __LINE__,
-      "unreachable (pattern matches are exhaustive in F*)");
-    KRML_HOST_EXIT(255U);
-  }
+  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+    __FILE__,
+    __LINE__,
+    "unreachable (pattern matches are exhaustive in F*)");
+  KRML_HOST_EXIT(255U);
 }
+
+/* SNIPPET_END: EverCrypt___proj__AES256_OPENSSL__item__st */
+
+/* SNIPPET_START: EverCrypt_uu___is_AES256_BCRYPT */
 
 bool EverCrypt_uu___is_AES256_BCRYPT(EverCrypt_aes256_key_s projectee)
 {
@@ -438,11 +472,12 @@ bool EverCrypt_uu___is_AES256_BCRYPT(EverCrypt_aes256_key_s projectee)
   {
     return true;
   }
-  else
-  {
-    return false;
-  }
+  return false;
 }
+
+/* SNIPPET_END: EverCrypt_uu___is_AES256_BCRYPT */
+
+/* SNIPPET_START: EverCrypt___proj__AES256_BCRYPT__item__st */
 
 FStar_Dyn_dyn EverCrypt___proj__AES256_BCRYPT__item__st(EverCrypt_aes256_key_s projectee)
 {
@@ -450,15 +485,16 @@ FStar_Dyn_dyn EverCrypt___proj__AES256_BCRYPT__item__st(EverCrypt_aes256_key_s p
   {
     return projectee.case_AES256_BCRYPT;
   }
-  else
-  {
-    KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
-      __FILE__,
-      __LINE__,
-      "unreachable (pattern matches are exhaustive in F*)");
-    KRML_HOST_EXIT(255U);
-  }
+  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+    __FILE__,
+    __LINE__,
+    "unreachable (pattern matches are exhaustive in F*)");
+  KRML_HOST_EXIT(255U);
 }
+
+/* SNIPPET_END: EverCrypt___proj__AES256_BCRYPT__item__st */
+
+/* SNIPPET_START: EverCrypt_uu___is_AES256_HACL */
 
 bool EverCrypt_uu___is_AES256_HACL(EverCrypt_aes256_key_s projectee)
 {
@@ -466,11 +502,12 @@ bool EverCrypt_uu___is_AES256_HACL(EverCrypt_aes256_key_s projectee)
   {
     return true;
   }
-  else
-  {
-    return false;
-  }
+  return false;
 }
+
+/* SNIPPET_END: EverCrypt_uu___is_AES256_HACL */
+
+/* SNIPPET_START: EverCrypt___proj__AES256_HACL__item__w */
 
 uint8_t *EverCrypt___proj__AES256_HACL__item__w(EverCrypt_aes256_key_s projectee)
 {
@@ -478,15 +515,16 @@ uint8_t *EverCrypt___proj__AES256_HACL__item__w(EverCrypt_aes256_key_s projectee
   {
     return projectee.case_AES256_HACL.w;
   }
-  else
-  {
-    KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
-      __FILE__,
-      __LINE__,
-      "unreachable (pattern matches are exhaustive in F*)");
-    KRML_HOST_EXIT(255U);
-  }
+  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+    __FILE__,
+    __LINE__,
+    "unreachable (pattern matches are exhaustive in F*)");
+  KRML_HOST_EXIT(255U);
 }
+
+/* SNIPPET_END: EverCrypt___proj__AES256_HACL__item__w */
+
+/* SNIPPET_START: EverCrypt___proj__AES256_HACL__item__sbox */
 
 uint8_t *EverCrypt___proj__AES256_HACL__item__sbox(EverCrypt_aes256_key_s projectee)
 {
@@ -494,15 +532,16 @@ uint8_t *EverCrypt___proj__AES256_HACL__item__sbox(EverCrypt_aes256_key_s projec
   {
     return projectee.case_AES256_HACL.sbox;
   }
-  else
-  {
-    KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
-      __FILE__,
-      __LINE__,
-      "unreachable (pattern matches are exhaustive in F*)");
-    KRML_HOST_EXIT(255U);
-  }
+  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+    __FILE__,
+    __LINE__,
+    "unreachable (pattern matches are exhaustive in F*)");
+  KRML_HOST_EXIT(255U);
 }
+
+/* SNIPPET_END: EverCrypt___proj__AES256_HACL__item__sbox */
+
+/* SNIPPET_START: EverCrypt_aes256_create */
 
 KRML_DEPRECATED("Please use EverCrypt_CTR.h (from C) or EverCrypt.CTR.fsti (from F*) ")
 
@@ -533,6 +572,10 @@ EverCrypt_aes256_key_s *EverCrypt_aes256_create(uint8_t *k1)
   return buf;
 }
 
+/* SNIPPET_END: EverCrypt_aes256_create */
+
+/* SNIPPET_START: EverCrypt_aes256_compute */
+
 KRML_DEPRECATED("Please use EverCrypt_CTR.h (from C) or EverCrypt.CTR.fsti (from F*) ")
 
 void EverCrypt_aes256_compute(EverCrypt_aes256_key_s *k1, uint8_t *plain, uint8_t *cipher1)
@@ -545,25 +588,24 @@ void EverCrypt_aes256_compute(EverCrypt_aes256_key_s *k1, uint8_t *plain, uint8_
       uint8_t *sbox = k2.case_AES256_HACL.sbox;
       uint8_t *w1 = k2.case_AES256_HACL.w;
       EverCrypt_Hacl_aes256_cipher(cipher1, plain, w1, sbox);
+      return;
     }
-    else
-    {
-      KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
-        __FILE__,
-        __LINE__,
-        "unreachable (pattern matches are exhaustive in F*)");
-      KRML_HOST_EXIT(255U);
-    }
-  }
-  else
-  {
     KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
       __FILE__,
       __LINE__,
-      "ERROR: inconsistent configuration (aes256_compute)");
+      "unreachable (pattern matches are exhaustive in F*)");
     KRML_HOST_EXIT(255U);
   }
+  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+    __FILE__,
+    __LINE__,
+    "ERROR: inconsistent configuration (aes256_compute)");
+  KRML_HOST_EXIT(255U);
 }
+
+/* SNIPPET_END: EverCrypt_aes256_compute */
+
+/* SNIPPET_START: EverCrypt_aes256_free */
 
 KRML_DEPRECATED("Please use EverCrypt_CTR.h (from C) or EverCrypt.CTR.fsti (from F*) ")
 
@@ -598,6 +640,10 @@ void EverCrypt_aes256_free(EverCrypt_aes256_key_s *pk)
   }
   KRML_HOST_FREE(pk);
 }
+
+/* SNIPPET_END: EverCrypt_aes256_free */
+
+/* SNIPPET_START: EverCrypt_aes128_gcm_encrypt */
 
 KRML_DEPRECATED("Please use EverCrypt_AEAD.h (from C) or EverCrypt.AEAD.fsti (from F*) ")
 
@@ -651,20 +697,23 @@ EverCrypt_aes128_gcm_encrypt(
       };
     old_gcm128_encrypt(&b);
     memcpy(cipher1, cipher_, len * sizeof cipher_[0U]);
+    return;
   }
-  else if (EverCrypt_AutoConfig2_wants_openssl())
+  if (EverCrypt_AutoConfig2_wants_openssl())
   {
     EverCrypt_OpenSSL_aes128_gcm_encrypt(key, iv, ad, adlen, plaintext, len, cipher1, tag);
+    return;
   }
-  else
-  {
-    KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
-      __FILE__,
-      __LINE__,
-      "ERROR: inconsistent configuration (aes128_gcm_encrypt)");
-    KRML_HOST_EXIT(255U);
-  }
+  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+    __FILE__,
+    __LINE__,
+    "ERROR: inconsistent configuration (aes128_gcm_encrypt)");
+  KRML_HOST_EXIT(255U);
 }
+
+/* SNIPPET_END: EverCrypt_aes128_gcm_encrypt */
+
+/* SNIPPET_START: EverCrypt_aes128_gcm_decrypt */
 
 KRML_DEPRECATED("Please use EverCrypt_AEAD.h (from C) or EverCrypt.AEAD.fsti (from F*) ")
 
@@ -718,30 +767,26 @@ EverCrypt_aes128_gcm_decrypt(
       };
     uint32_t ret = old_gcm128_decrypt(&b);
     memcpy(plaintext, plaintext_, len * sizeof plaintext_[0U]);
-    uint32_t r;
     if (ret == (uint32_t)0U)
     {
-      r = (uint32_t)1U;
+      return (uint32_t)1U;
     }
-    else
-    {
-      r = (uint32_t)0U;
-    }
-    return r;
+    return (uint32_t)0U;
   }
-  else if (EverCrypt_AutoConfig2_wants_openssl())
+  if (EverCrypt_AutoConfig2_wants_openssl())
   {
     return EverCrypt_OpenSSL_aes128_gcm_decrypt(key, iv, ad, adlen, plaintext, len, cipher1, tag);
   }
-  else
-  {
-    KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
-      __FILE__,
-      __LINE__,
-      "ERROR: inconsistent configuration (aes128_gcm_decrypt)");
-    KRML_HOST_EXIT(255U);
-  }
+  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+    __FILE__,
+    __LINE__,
+    "ERROR: inconsistent configuration (aes128_gcm_decrypt)");
+  KRML_HOST_EXIT(255U);
 }
+
+/* SNIPPET_END: EverCrypt_aes128_gcm_decrypt */
+
+/* SNIPPET_START: EverCrypt_aes256_gcm_encrypt */
 
 KRML_DEPRECATED("Please use EverCrypt_AEAD.h (from C) or EverCrypt.AEAD.fsti (from F*) ")
 
@@ -795,20 +840,23 @@ EverCrypt_aes256_gcm_encrypt(
       };
     old_gcm256_encrypt(&b);
     memcpy(cipher1, cipher_, len * sizeof cipher_[0U]);
+    return;
   }
-  else if (EverCrypt_AutoConfig2_wants_openssl())
+  if (EverCrypt_AutoConfig2_wants_openssl())
   {
     EverCrypt_OpenSSL_aes256_gcm_encrypt(key, iv, ad, adlen, plaintext, len, cipher1, tag);
+    return;
   }
-  else
-  {
-    KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
-      __FILE__,
-      __LINE__,
-      "ERROR: inconsistent configuration (aes256_gcm_encrypt)");
-    KRML_HOST_EXIT(255U);
-  }
+  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+    __FILE__,
+    __LINE__,
+    "ERROR: inconsistent configuration (aes256_gcm_encrypt)");
+  KRML_HOST_EXIT(255U);
 }
+
+/* SNIPPET_END: EverCrypt_aes256_gcm_encrypt */
+
+/* SNIPPET_START: EverCrypt_aes256_gcm_decrypt */
 
 KRML_DEPRECATED("Please use EverCrypt_AEAD.h (from C) or EverCrypt.AEAD.fsti (from F*) ")
 
@@ -862,30 +910,26 @@ EverCrypt_aes256_gcm_decrypt(
       };
     uint32_t ret = old_gcm256_decrypt(&b);
     memcpy(plaintext, plaintext_, len * sizeof plaintext_[0U]);
-    uint32_t r;
     if (ret == (uint32_t)0U)
     {
-      r = (uint32_t)1U;
+      return (uint32_t)1U;
     }
-    else
-    {
-      r = (uint32_t)0U;
-    }
-    return r;
+    return (uint32_t)0U;
   }
-  else if (EverCrypt_AutoConfig2_wants_openssl())
+  if (EverCrypt_AutoConfig2_wants_openssl())
   {
     return EverCrypt_OpenSSL_aes256_gcm_decrypt(key, iv, ad, adlen, plaintext, len, cipher1, tag);
   }
-  else
-  {
-    KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
-      __FILE__,
-      __LINE__,
-      "ERROR: inconsistent configuration (aes256_gcm_decrypt)");
-    KRML_HOST_EXIT(255U);
-  }
+  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+    __FILE__,
+    __LINE__,
+    "ERROR: inconsistent configuration (aes256_gcm_decrypt)");
+  KRML_HOST_EXIT(255U);
 }
+
+/* SNIPPET_END: EverCrypt_aes256_gcm_decrypt */
+
+/* SNIPPET_START: EverCrypt_uu___is_AES128_CBC */
 
 bool EverCrypt_uu___is_AES128_CBC(EverCrypt_block_cipher_alg projectee)
 {
@@ -902,6 +946,10 @@ bool EverCrypt_uu___is_AES128_CBC(EverCrypt_block_cipher_alg projectee)
   }
 }
 
+/* SNIPPET_END: EverCrypt_uu___is_AES128_CBC */
+
+/* SNIPPET_START: EverCrypt_uu___is_AES256_CBC */
+
 bool EverCrypt_uu___is_AES256_CBC(EverCrypt_block_cipher_alg projectee)
 {
   switch (projectee)
@@ -917,6 +965,10 @@ bool EverCrypt_uu___is_AES256_CBC(EverCrypt_block_cipher_alg projectee)
   }
 }
 
+/* SNIPPET_END: EverCrypt_uu___is_AES256_CBC */
+
+/* SNIPPET_START: EverCrypt_uu___is_TDES_EDE_CBC */
+
 bool EverCrypt_uu___is_TDES_EDE_CBC(EverCrypt_block_cipher_alg projectee)
 {
   switch (projectee)
@@ -931,6 +983,10 @@ bool EverCrypt_uu___is_TDES_EDE_CBC(EverCrypt_block_cipher_alg projectee)
       }
   }
 }
+
+/* SNIPPET_END: EverCrypt_uu___is_TDES_EDE_CBC */
+
+/* SNIPPET_START: EverCrypt_block_cipher_keyLen */
 
 uint32_t EverCrypt_block_cipher_keyLen(EverCrypt_block_cipher_alg uu___0_9512)
 {
@@ -956,6 +1012,10 @@ uint32_t EverCrypt_block_cipher_keyLen(EverCrypt_block_cipher_alg uu___0_9512)
   }
 }
 
+/* SNIPPET_END: EverCrypt_block_cipher_keyLen */
+
+/* SNIPPET_START: EverCrypt_block_cipher_blockLen */
+
 uint32_t EverCrypt_block_cipher_blockLen(EverCrypt_block_cipher_alg uu___1_9522)
 {
   switch (uu___1_9522)
@@ -980,10 +1040,18 @@ uint32_t EverCrypt_block_cipher_blockLen(EverCrypt_block_cipher_alg uu___1_9522)
   }
 }
 
+/* SNIPPET_END: EverCrypt_block_cipher_blockLen */
+
+/* SNIPPET_START: EverCrypt_uu___is_RC4_128 */
+
 bool EverCrypt_uu___is_RC4_128(EverCrypt_stream_cipher_alg projectee)
 {
   return true;
 }
+
+/* SNIPPET_END: EverCrypt_uu___is_RC4_128 */
+
+/* SNIPPET_START: EverCrypt_uu___is_AES128_GCM */
 
 bool EverCrypt_uu___is_AES128_GCM(EverCrypt_aead_alg projectee)
 {
@@ -1000,6 +1068,10 @@ bool EverCrypt_uu___is_AES128_GCM(EverCrypt_aead_alg projectee)
   }
 }
 
+/* SNIPPET_END: EverCrypt_uu___is_AES128_GCM */
+
+/* SNIPPET_START: EverCrypt_uu___is_AES256_GCM */
+
 bool EverCrypt_uu___is_AES256_GCM(EverCrypt_aead_alg projectee)
 {
   switch (projectee)
@@ -1014,6 +1086,10 @@ bool EverCrypt_uu___is_AES256_GCM(EverCrypt_aead_alg projectee)
       }
   }
 }
+
+/* SNIPPET_END: EverCrypt_uu___is_AES256_GCM */
+
+/* SNIPPET_START: EverCrypt_uu___is_CHACHA20_POLY1305 */
 
 bool EverCrypt_uu___is_CHACHA20_POLY1305(EverCrypt_aead_alg projectee)
 {
@@ -1030,6 +1106,10 @@ bool EverCrypt_uu___is_CHACHA20_POLY1305(EverCrypt_aead_alg projectee)
   }
 }
 
+/* SNIPPET_END: EverCrypt_uu___is_CHACHA20_POLY1305 */
+
+/* SNIPPET_START: EverCrypt_uu___is_AES128_CCM */
+
 bool EverCrypt_uu___is_AES128_CCM(EverCrypt_aead_alg projectee)
 {
   switch (projectee)
@@ -1044,6 +1124,10 @@ bool EverCrypt_uu___is_AES128_CCM(EverCrypt_aead_alg projectee)
       }
   }
 }
+
+/* SNIPPET_END: EverCrypt_uu___is_AES128_CCM */
+
+/* SNIPPET_START: EverCrypt_uu___is_AES256_CCM */
 
 bool EverCrypt_uu___is_AES256_CCM(EverCrypt_aead_alg projectee)
 {
@@ -1060,6 +1144,10 @@ bool EverCrypt_uu___is_AES256_CCM(EverCrypt_aead_alg projectee)
   }
 }
 
+/* SNIPPET_END: EverCrypt_uu___is_AES256_CCM */
+
+/* SNIPPET_START: EverCrypt_uu___is_AES128_CCM8 */
+
 bool EverCrypt_uu___is_AES128_CCM8(EverCrypt_aead_alg projectee)
 {
   switch (projectee)
@@ -1075,6 +1163,10 @@ bool EverCrypt_uu___is_AES128_CCM8(EverCrypt_aead_alg projectee)
   }
 }
 
+/* SNIPPET_END: EverCrypt_uu___is_AES128_CCM8 */
+
+/* SNIPPET_START: EverCrypt_uu___is_AES256_CCM8 */
+
 bool EverCrypt_uu___is_AES256_CCM8(EverCrypt_aead_alg projectee)
 {
   switch (projectee)
@@ -1089,6 +1181,10 @@ bool EverCrypt_uu___is_AES256_CCM8(EverCrypt_aead_alg projectee)
       }
   }
 }
+
+/* SNIPPET_END: EverCrypt_uu___is_AES256_CCM8 */
+
+/* SNIPPET_START: EverCrypt_aead_keyLen */
 
 KRML_DEPRECATED("Please use EverCrypt_AEAD.h (from C) or EverCrypt.AEAD.fsti (from F*) ")
 
@@ -1132,6 +1228,10 @@ uint32_t EverCrypt_aead_keyLen(EverCrypt_aead_alg uu___2_9629)
   }
 }
 
+/* SNIPPET_END: EverCrypt_aead_keyLen */
+
+/* SNIPPET_START: EverCrypt_aead_tagLen */
+
 KRML_DEPRECATED("Please use EverCrypt_AEAD.h (from C) or EverCrypt.AEAD.fsti (from F*) ")
 
 uint32_t EverCrypt_aead_tagLen(EverCrypt_aead_alg uu___3_9643)
@@ -1174,12 +1274,20 @@ uint32_t EverCrypt_aead_tagLen(EverCrypt_aead_alg uu___3_9643)
   }
 }
 
+/* SNIPPET_END: EverCrypt_aead_tagLen */
+
+/* SNIPPET_START: EverCrypt_aead_ivLen */
+
 KRML_DEPRECATED("Please use EverCrypt_AEAD.h (from C) or EverCrypt.AEAD.fsti (from F*) ")
 
 uint32_t EverCrypt_aead_ivLen(EverCrypt_aead_alg a)
 {
   return (uint32_t)12U;
 }
+
+/* SNIPPET_END: EverCrypt_aead_ivLen */
+
+/* SNIPPET_START: EverCrypt__aead_state */
 
 typedef struct EverCrypt__aead_state_s
 {
@@ -1195,17 +1303,22 @@ typedef struct EverCrypt__aead_state_s
 }
 EverCrypt__aead_state;
 
+/* SNIPPET_END: EverCrypt__aead_state */
+
+/* SNIPPET_START: EverCrypt_uu___is_AEAD_OPENSSL */
+
 static bool EverCrypt_uu___is_AEAD_OPENSSL(EverCrypt__aead_state projectee)
 {
   if (projectee.tag == EverCrypt_AEAD_OPENSSL)
   {
     return true;
   }
-  else
-  {
-    return false;
-  }
+  return false;
 }
+
+/* SNIPPET_END: EverCrypt_uu___is_AEAD_OPENSSL */
+
+/* SNIPPET_START: EverCrypt_uu___is_AEAD_AES128_GCM_VALE */
 
 static bool EverCrypt_uu___is_AEAD_AES128_GCM_VALE(EverCrypt__aead_state projectee)
 {
@@ -1213,11 +1326,12 @@ static bool EverCrypt_uu___is_AEAD_AES128_GCM_VALE(EverCrypt__aead_state project
   {
     return true;
   }
-  else
-  {
-    return false;
-  }
+  return false;
 }
+
+/* SNIPPET_END: EverCrypt_uu___is_AEAD_AES128_GCM_VALE */
+
+/* SNIPPET_START: EverCrypt_uu___is_AEAD_AES256_GCM_VALE */
 
 static bool EverCrypt_uu___is_AEAD_AES256_GCM_VALE(EverCrypt__aead_state projectee)
 {
@@ -1225,11 +1339,12 @@ static bool EverCrypt_uu___is_AEAD_AES256_GCM_VALE(EverCrypt__aead_state project
   {
     return true;
   }
-  else
-  {
-    return false;
-  }
+  return false;
 }
+
+/* SNIPPET_END: EverCrypt_uu___is_AEAD_AES256_GCM_VALE */
+
+/* SNIPPET_START: EverCrypt_uu___is_AEAD_CHACHA20_POLY1305_HACL */
 
 static bool EverCrypt_uu___is_AEAD_CHACHA20_POLY1305_HACL(EverCrypt__aead_state projectee)
 {
@@ -1237,13 +1352,18 @@ static bool EverCrypt_uu___is_AEAD_CHACHA20_POLY1305_HACL(EverCrypt__aead_state 
   {
     return true;
   }
-  else
-  {
-    return false;
-  }
+  return false;
 }
 
+/* SNIPPET_END: EverCrypt_uu___is_AEAD_CHACHA20_POLY1305_HACL */
+
+/* SNIPPET_START: EverCrypt_aead_state_s */
+
 typedef EverCrypt__aead_state EverCrypt_aead_state_s;
+
+/* SNIPPET_END: EverCrypt_aead_state_s */
+
+/* SNIPPET_START: EverCrypt_aead_create */
 
 KRML_DEPRECATED("Please use EverCrypt_AEAD.h (from C) or EverCrypt.AEAD.fsti (from F*) ")
 
@@ -1387,6 +1507,10 @@ EverCrypt__aead_state *EverCrypt_aead_create(EverCrypt_aead_alg alg, uint8_t *k1
   return buf;
 }
 
+/* SNIPPET_END: EverCrypt_aead_create */
+
+/* SNIPPET_START: EverCrypt_aead_encrypt */
+
 KRML_DEPRECATED("Please use EverCrypt_AEAD.h (from C) or EverCrypt.AEAD.fsti (from F*) ")
 
 void
@@ -1438,8 +1562,9 @@ EverCrypt_aead_encrypt(
       };
     old_gcm128_encrypt(&b);
     memcpy(cipher1, cipher_, len * sizeof cipher_[0U]);
+    return;
   }
-  else if (true && EverCrypt_uu___is_AEAD_AES256_GCM_VALE(k1))
+  if (true && EverCrypt_uu___is_AEAD_AES256_GCM_VALE(k1))
   {
     uint8_t *xk;
     if (k1.tag == EverCrypt_AEAD_AES256_GCM_VALE)
@@ -1475,8 +1600,9 @@ EverCrypt_aead_encrypt(
       };
     old_gcm256_encrypt(&b);
     memcpy(cipher1, cipher_, len * sizeof cipher_[0U]);
+    return;
   }
-  else if (true && EverCrypt_uu___is_AEAD_CHACHA20_POLY1305_HACL(k1))
+  if (true && EverCrypt_uu___is_AEAD_CHACHA20_POLY1305_HACL(k1))
   {
     uint8_t *key;
     if (k1.tag == EverCrypt_AEAD_CHACHA20_POLY1305_HACL)
@@ -1488,8 +1614,9 @@ EverCrypt_aead_encrypt(
       key = KRML_EABORT(uint8_t *, "unreachable (pattern matches are exhaustive in F*)");
     }
     Hacl_Chacha20Poly1305_32_aead_encrypt(key, iv, adlen, ad, len, plaintext, cipher1, tag);
+    return;
   }
-  else if (true && EverCrypt_uu___is_AEAD_OPENSSL(k1))
+  if (true && EverCrypt_uu___is_AEAD_OPENSSL(k1))
   {
     FStar_Dyn_dyn key;
     if (k1.tag == EverCrypt_AEAD_OPENSSL)
@@ -1501,16 +1628,18 @@ EverCrypt_aead_encrypt(
       key = KRML_EABORT(FStar_Dyn_dyn, "unreachable (pattern matches are exhaustive in F*)");
     }
     EverCrypt_OpenSSL_aead_encrypt(key, iv, ad, adlen, plaintext, len, cipher1, tag);
+    return;
   }
-  else
-  {
-    KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
-      __FILE__,
-      __LINE__,
-      "ERROR: inconsistent configuration (aead_encrypt)");
-    KRML_HOST_EXIT(255U);
-  }
+  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+    __FILE__,
+    __LINE__,
+    "ERROR: inconsistent configuration (aead_encrypt)");
+  KRML_HOST_EXIT(255U);
 }
+
+/* SNIPPET_END: EverCrypt_aead_encrypt */
+
+/* SNIPPET_START: EverCrypt_aead_decrypt */
 
 KRML_DEPRECATED("Please use EverCrypt_AEAD.h (from C) or EverCrypt.AEAD.fsti (from F*) ")
 
@@ -1567,12 +1696,9 @@ EverCrypt_aead_decrypt(
     {
       return (uint32_t)1U;
     }
-    else
-    {
-      return (uint32_t)0U;
-    }
+    return (uint32_t)0U;
   }
-  else if (true && EverCrypt_uu___is_AEAD_AES256_GCM_VALE(k1))
+  if (true && EverCrypt_uu___is_AEAD_AES256_GCM_VALE(k1))
   {
     uint8_t *xk;
     if (k1.tag == EverCrypt_AEAD_AES256_GCM_VALE)
@@ -1612,12 +1738,9 @@ EverCrypt_aead_decrypt(
     {
       return (uint32_t)1U;
     }
-    else
-    {
-      return (uint32_t)0U;
-    }
+    return (uint32_t)0U;
   }
-  else if (true && EverCrypt_uu___is_AEAD_CHACHA20_POLY1305_HACL(k1))
+  if (true && EverCrypt_uu___is_AEAD_CHACHA20_POLY1305_HACL(k1))
   {
     uint8_t *key;
     if (k1.tag == EverCrypt_AEAD_CHACHA20_POLY1305_HACL)
@@ -1632,7 +1755,7 @@ EverCrypt_aead_decrypt(
     r = Hacl_Chacha20Poly1305_32_aead_decrypt(key, iv, adlen, ad, len, plaintext, cipher1, tag);
     return (uint32_t)1U - r;
   }
-  else if (true && EverCrypt_uu___is_AEAD_OPENSSL(k1))
+  if (true && EverCrypt_uu___is_AEAD_OPENSSL(k1))
   {
     FStar_Dyn_dyn key;
     if (k1.tag == EverCrypt_AEAD_OPENSSL)
@@ -1645,15 +1768,16 @@ EverCrypt_aead_decrypt(
     }
     return EverCrypt_OpenSSL_aead_decrypt(key, iv, ad, adlen, plaintext, len, cipher1, tag);
   }
-  else
-  {
-    KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
-      __FILE__,
-      __LINE__,
-      "ERROR: inconsistent configuration (aead_decrypt)");
-    KRML_HOST_EXIT(255U);
-  }
+  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+    __FILE__,
+    __LINE__,
+    "ERROR: inconsistent configuration (aead_decrypt)");
+  KRML_HOST_EXIT(255U);
 }
+
+/* SNIPPET_END: EverCrypt_aead_decrypt */
+
+/* SNIPPET_START: EverCrypt_aead_free */
 
 KRML_DEPRECATED("Please use EverCrypt_AEAD.h (from C) or EverCrypt.AEAD.fsti (from F*) ")
 
@@ -1732,6 +1856,10 @@ void EverCrypt_aead_free(EverCrypt__aead_state *pk)
   KRML_HOST_FREE(pk);
 }
 
+/* SNIPPET_END: EverCrypt_aead_free */
+
+/* SNIPPET_START: EverCrypt__dh_state */
+
 typedef struct EverCrypt__dh_state_s
 {
   EverCrypt__dh_state_tags tag;
@@ -1739,19 +1867,28 @@ typedef struct EverCrypt__dh_state_s
 }
 EverCrypt__dh_state;
 
+/* SNIPPET_END: EverCrypt__dh_state */
+
+/* SNIPPET_START: EverCrypt_uu___is_DH_OPENSSL */
+
 static bool EverCrypt_uu___is_DH_OPENSSL(EverCrypt__dh_state projectee)
 {
   if (projectee.tag == EverCrypt_DH_OPENSSL)
   {
     return true;
   }
-  else
-  {
-    return false;
-  }
+  return false;
 }
 
+/* SNIPPET_END: EverCrypt_uu___is_DH_OPENSSL */
+
+/* SNIPPET_START: EverCrypt_dh_state_s */
+
 typedef EverCrypt__dh_state EverCrypt_dh_state_s;
+
+/* SNIPPET_END: EverCrypt_dh_state_s */
+
+/* SNIPPET_START: EverCrypt_dh_load_group */
 
 EverCrypt__dh_state
 *EverCrypt_dh_load_group(
@@ -1784,6 +1921,10 @@ EverCrypt__dh_state
   return buf;
 }
 
+/* SNIPPET_END: EverCrypt_dh_load_group */
+
+/* SNIPPET_START: EverCrypt_dh_free_group */
+
 void EverCrypt_dh_free_group(EverCrypt__dh_state *st)
 {
   EverCrypt__dh_state s = *st;
@@ -1811,6 +1952,10 @@ void EverCrypt_dh_free_group(EverCrypt__dh_state *st)
   KRML_HOST_FREE(st);
 }
 
+/* SNIPPET_END: EverCrypt_dh_free_group */
+
+/* SNIPPET_START: EverCrypt_dh_keygen */
+
 uint32_t EverCrypt_dh_keygen(EverCrypt__dh_state *st, uint8_t *public)
 {
   EverCrypt__dh_state s = *st;
@@ -1827,15 +1972,16 @@ uint32_t EverCrypt_dh_keygen(EverCrypt__dh_state *st, uint8_t *public)
     }
     return EverCrypt_OpenSSL_dh_keygen(ite, public);
   }
-  else
-  {
-    KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
-      __FILE__,
-      __LINE__,
-      "ERROR: inconsistent configuration (dh_keygen)");
-    KRML_HOST_EXIT(255U);
-  }
+  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+    __FILE__,
+    __LINE__,
+    "ERROR: inconsistent configuration (dh_keygen)");
+  KRML_HOST_EXIT(255U);
 }
+
+/* SNIPPET_END: EverCrypt_dh_keygen */
+
+/* SNIPPET_START: EverCrypt_dh_compute */
 
 uint32_t
 EverCrypt_dh_compute(
@@ -1859,15 +2005,16 @@ EverCrypt_dh_compute(
     }
     return EverCrypt_OpenSSL_dh_compute(ite, public, public_len, out1);
   }
-  else
-  {
-    KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
-      __FILE__,
-      __LINE__,
-      "ERROR: inconsistent configuration (dh_compute)");
-    KRML_HOST_EXIT(255U);
-  }
+  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+    __FILE__,
+    __LINE__,
+    "ERROR: inconsistent configuration (dh_compute)");
+  KRML_HOST_EXIT(255U);
 }
+
+/* SNIPPET_END: EverCrypt_dh_compute */
+
+/* SNIPPET_START: EverCrypt_uu___is_ECC_P256 */
 
 bool EverCrypt_uu___is_ECC_P256(EverCrypt_ec_curve projectee)
 {
@@ -1884,6 +2031,10 @@ bool EverCrypt_uu___is_ECC_P256(EverCrypt_ec_curve projectee)
   }
 }
 
+/* SNIPPET_END: EverCrypt_uu___is_ECC_P256 */
+
+/* SNIPPET_START: EverCrypt_uu___is_ECC_P384 */
+
 bool EverCrypt_uu___is_ECC_P384(EverCrypt_ec_curve projectee)
 {
   switch (projectee)
@@ -1898,6 +2049,10 @@ bool EverCrypt_uu___is_ECC_P384(EverCrypt_ec_curve projectee)
       }
   }
 }
+
+/* SNIPPET_END: EverCrypt_uu___is_ECC_P384 */
+
+/* SNIPPET_START: EverCrypt_uu___is_ECC_P521 */
 
 bool EverCrypt_uu___is_ECC_P521(EverCrypt_ec_curve projectee)
 {
@@ -1914,6 +2069,10 @@ bool EverCrypt_uu___is_ECC_P521(EverCrypt_ec_curve projectee)
   }
 }
 
+/* SNIPPET_END: EverCrypt_uu___is_ECC_P521 */
+
+/* SNIPPET_START: EverCrypt_uu___is_ECC_X25519 */
+
 bool EverCrypt_uu___is_ECC_X25519(EverCrypt_ec_curve projectee)
 {
   switch (projectee)
@@ -1928,6 +2087,10 @@ bool EverCrypt_uu___is_ECC_X25519(EverCrypt_ec_curve projectee)
       }
   }
 }
+
+/* SNIPPET_END: EverCrypt_uu___is_ECC_X25519 */
+
+/* SNIPPET_START: EverCrypt_uu___is_ECC_X448 */
 
 bool EverCrypt_uu___is_ECC_X448(EverCrypt_ec_curve projectee)
 {
@@ -1944,6 +2107,10 @@ bool EverCrypt_uu___is_ECC_X448(EverCrypt_ec_curve projectee)
   }
 }
 
+/* SNIPPET_END: EverCrypt_uu___is_ECC_X448 */
+
+/* SNIPPET_START: EverCrypt__ecdh_state */
+
 typedef struct EverCrypt__ecdh_state_s
 {
   EverCrypt__ecdh_state_tags tag;
@@ -1951,19 +2118,28 @@ typedef struct EverCrypt__ecdh_state_s
 }
 EverCrypt__ecdh_state;
 
+/* SNIPPET_END: EverCrypt__ecdh_state */
+
+/* SNIPPET_START: EverCrypt_uu___is_ECDH_OPENSSL */
+
 static bool EverCrypt_uu___is_ECDH_OPENSSL(EverCrypt__ecdh_state projectee)
 {
   if (projectee.tag == EverCrypt_ECDH_OPENSSL)
   {
     return true;
   }
-  else
-  {
-    return false;
-  }
+  return false;
 }
 
+/* SNIPPET_END: EverCrypt_uu___is_ECDH_OPENSSL */
+
+/* SNIPPET_START: EverCrypt_ecdh_state_s */
+
 typedef EverCrypt__ecdh_state EverCrypt_ecdh_state_s;
+
+/* SNIPPET_END: EverCrypt_ecdh_state_s */
+
+/* SNIPPET_START: EverCrypt_ecdh_load_curve */
 
 EverCrypt__ecdh_state *EverCrypt_ecdh_load_curve(EverCrypt_ec_curve g1)
 {
@@ -2022,6 +2198,10 @@ EverCrypt__ecdh_state *EverCrypt_ecdh_load_curve(EverCrypt_ec_curve g1)
   return buf;
 }
 
+/* SNIPPET_END: EverCrypt_ecdh_load_curve */
+
+/* SNIPPET_START: EverCrypt_ecdh_free_curve */
+
 void EverCrypt_ecdh_free_curve(EverCrypt__ecdh_state *st)
 {
   EverCrypt__ecdh_state s = *st;
@@ -2049,6 +2229,10 @@ void EverCrypt_ecdh_free_curve(EverCrypt__ecdh_state *st)
   KRML_HOST_FREE(st);
 }
 
+/* SNIPPET_END: EverCrypt_ecdh_free_curve */
+
+/* SNIPPET_START: EverCrypt_ecdh_keygen */
+
 void EverCrypt_ecdh_keygen(EverCrypt__ecdh_state *st, uint8_t *outx, uint8_t *outy)
 {
   EverCrypt__ecdh_state s = *st;
@@ -2064,16 +2248,18 @@ void EverCrypt_ecdh_keygen(EverCrypt__ecdh_state *st, uint8_t *outx, uint8_t *ou
       ite = KRML_EABORT(FStar_Dyn_dyn, "unreachable (pattern matches are exhaustive in F*)");
     }
     EverCrypt_OpenSSL_ecdh_keygen(ite, outx, outy);
+    return;
   }
-  else
-  {
-    KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
-      __FILE__,
-      __LINE__,
-      "ERROR: inconsistent configuration (ecdh_keygen)");
-    KRML_HOST_EXIT(255U);
-  }
+  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+    __FILE__,
+    __LINE__,
+    "ERROR: inconsistent configuration (ecdh_keygen)");
+  KRML_HOST_EXIT(255U);
 }
+
+/* SNIPPET_END: EverCrypt_ecdh_keygen */
+
+/* SNIPPET_START: EverCrypt_ecdh_compute */
 
 uint32_t
 EverCrypt_ecdh_compute(EverCrypt__ecdh_state *st, uint8_t *inx, uint8_t *iny, uint8_t *out1)
@@ -2092,13 +2278,12 @@ EverCrypt_ecdh_compute(EverCrypt__ecdh_state *st, uint8_t *inx, uint8_t *iny, ui
     }
     return EverCrypt_OpenSSL_ecdh_compute(ite, inx, iny, out1);
   }
-  else
-  {
-    KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
-      __FILE__,
-      __LINE__,
-      "ERROR: inconsistent configuration (ecdh_compute)");
-    KRML_HOST_EXIT(255U);
-  }
+  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+    __FILE__,
+    __LINE__,
+    "ERROR: inconsistent configuration (ecdh_compute)");
+  KRML_HOST_EXIT(255U);
 }
+
+/* SNIPPET_END: EverCrypt_ecdh_compute */
 

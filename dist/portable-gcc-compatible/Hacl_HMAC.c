@@ -24,6 +24,8 @@
 
 #include "Hacl_HMAC.h"
 
+/* SNIPPET_START: Hacl_HMAC_legacy_compute_sha1 */
+
 void
 Hacl_HMAC_legacy_compute_sha1(
   uint8_t *dst,
@@ -91,6 +93,10 @@ Hacl_HMAC_legacy_compute_sha1(
   Hacl_Hash_Core_SHA1_legacy_finish(s, dst);
 }
 
+/* SNIPPET_END: Hacl_HMAC_legacy_compute_sha1 */
+
+/* SNIPPET_START: Hacl_HMAC_compute_sha2_256 */
+
 void
 Hacl_HMAC_compute_sha2_256(
   uint8_t *dst,
@@ -157,6 +163,10 @@ Hacl_HMAC_compute_sha2_256(
   Hacl_Hash_SHA2_update_last_256(s, (uint64_t)(uint32_t)64U, hash1, (uint32_t)32U);
   Hacl_Hash_Core_SHA2_finish_256(s, dst);
 }
+
+/* SNIPPET_END: Hacl_HMAC_compute_sha2_256 */
+
+/* SNIPPET_START: Hacl_HMAC_compute_sha2_384 */
 
 void
 Hacl_HMAC_compute_sha2_384(
@@ -232,6 +242,10 @@ Hacl_HMAC_compute_sha2_384(
   Hacl_Hash_Core_SHA2_finish_384(s, dst);
 }
 
+/* SNIPPET_END: Hacl_HMAC_compute_sha2_384 */
+
+/* SNIPPET_START: Hacl_HMAC_compute_sha2_512 */
+
 void
 Hacl_HMAC_compute_sha2_512(
   uint8_t *dst,
@@ -305,4 +319,6 @@ Hacl_HMAC_compute_sha2_512(
     (uint32_t)64U);
   Hacl_Hash_Core_SHA2_finish_512(s, dst);
 }
+
+/* SNIPPET_END: Hacl_HMAC_compute_sha2_512 */
 

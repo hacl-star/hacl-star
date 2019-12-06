@@ -39,10 +39,20 @@
 #include "Hacl_Spec.h"
 
 
+/* SNIPPET_START: EverCrypt_CTR_state_s */
+
 typedef struct EverCrypt_CTR_state_s_s EverCrypt_CTR_state_s;
+
+/* SNIPPET_END: EverCrypt_CTR_state_s */
+
+/* SNIPPET_START: EverCrypt_CTR_uu___is_State */
 
 bool
 EverCrypt_CTR_uu___is_State(Spec_Agile_Cipher_cipher_alg a, EverCrypt_CTR_state_s projectee);
+
+/* SNIPPET_END: EverCrypt_CTR_uu___is_State */
+
+/* SNIPPET_START: EverCrypt_CTR___proj__State__item__i */
 
 Spec_Cipher_Expansion_impl
 EverCrypt_CTR___proj__State__item__i(
@@ -50,11 +60,19 @@ EverCrypt_CTR___proj__State__item__i(
   EverCrypt_CTR_state_s projectee
 );
 
+/* SNIPPET_END: EverCrypt_CTR___proj__State__item__i */
+
+/* SNIPPET_START: EverCrypt_CTR___proj__State__item__iv */
+
 uint8_t
 *EverCrypt_CTR___proj__State__item__iv(
   Spec_Agile_Cipher_cipher_alg a,
   EverCrypt_CTR_state_s projectee
 );
+
+/* SNIPPET_END: EverCrypt_CTR___proj__State__item__iv */
+
+/* SNIPPET_START: EverCrypt_CTR___proj__State__item__iv_len */
 
 uint32_t
 EverCrypt_CTR___proj__State__item__iv_len(
@@ -62,11 +80,19 @@ EverCrypt_CTR___proj__State__item__iv_len(
   EverCrypt_CTR_state_s projectee
 );
 
+/* SNIPPET_END: EverCrypt_CTR___proj__State__item__iv_len */
+
+/* SNIPPET_START: EverCrypt_CTR___proj__State__item__xkey */
+
 uint8_t
 *EverCrypt_CTR___proj__State__item__xkey(
   Spec_Agile_Cipher_cipher_alg a,
   EverCrypt_CTR_state_s projectee
 );
+
+/* SNIPPET_END: EverCrypt_CTR___proj__State__item__xkey */
+
+/* SNIPPET_START: EverCrypt_CTR___proj__State__item__ctr */
 
 uint32_t
 EverCrypt_CTR___proj__State__item__ctr(
@@ -74,13 +100,33 @@ EverCrypt_CTR___proj__State__item__ctr(
   EverCrypt_CTR_state_s projectee
 );
 
+/* SNIPPET_END: EverCrypt_CTR___proj__State__item__ctr */
+
+/* SNIPPET_START: EverCrypt_CTR_uint8 */
+
 typedef uint8_t EverCrypt_CTR_uint8;
+
+/* SNIPPET_END: EverCrypt_CTR_uint8 */
+
+/* SNIPPET_START: EverCrypt_CTR_xor8 */
 
 uint8_t EverCrypt_CTR_xor8(uint8_t a, uint8_t b);
 
+/* SNIPPET_END: EverCrypt_CTR_xor8 */
+
+/* SNIPPET_START: EverCrypt_CTR_e_alg */
+
 typedef void *EverCrypt_CTR_e_alg;
 
+/* SNIPPET_END: EverCrypt_CTR_e_alg */
+
+/* SNIPPET_START: EverCrypt_CTR_alg_of_state */
+
 Spec_Agile_Cipher_cipher_alg EverCrypt_CTR_alg_of_state(EverCrypt_CTR_state_s *s);
+
+/* SNIPPET_END: EverCrypt_CTR_alg_of_state */
+
+/* SNIPPET_START: EverCrypt_CTR_create_in */
 
 EverCrypt_Error_error_code
 EverCrypt_CTR_create_in(
@@ -92,6 +138,10 @@ EverCrypt_CTR_create_in(
   uint32_t c
 );
 
+/* SNIPPET_END: EverCrypt_CTR_create_in */
+
+/* SNIPPET_START: EverCrypt_CTR_init */
+
 void
 EverCrypt_CTR_init(
   EverCrypt_CTR_state_s *p,
@@ -101,9 +151,19 @@ EverCrypt_CTR_init(
   uint32_t c
 );
 
+/* SNIPPET_END: EverCrypt_CTR_init */
+
+/* SNIPPET_START: EverCrypt_CTR_update_block */
+
 void EverCrypt_CTR_update_block(EverCrypt_CTR_state_s *p, uint8_t *dst, uint8_t *src);
 
+/* SNIPPET_END: EverCrypt_CTR_update_block */
+
+/* SNIPPET_START: EverCrypt_CTR_free */
+
 void EverCrypt_CTR_free(EverCrypt_CTR_state_s *p);
+
+/* SNIPPET_END: EverCrypt_CTR_free */
 
 #define __EverCrypt_CTR_H_DEFINED
 #endif
