@@ -136,7 +136,7 @@ let rec hash_vv_bytes_i (vv:hash_vv) (i:uint32_t): HST.ST uint64_t
     end
 
 private inline_for_extraction
-let rec hash_vv_bytes (vv:hash_vv{V.size_of vv = merkle_tree_size_lg}): HST.ST uint64_t
+let hash_vv_bytes (vv:hash_vv{V.size_of vv = merkle_tree_size_lg}): HST.ST uint64_t
   (requires (fun h0 -> V.live h0 vv))
   (ensures (fun h0 _ h1 -> h0 == h1))
 = hash_vv_bytes_i vv 0ul
@@ -404,7 +404,6 @@ let mt_deserialize rid input sz =
     else B.malloc rid (MT offset i j hs rhs_ok rhs mroot) 1ul
   end
 
-#set-options "--z3rlimit 1000 --query_stats"
 val mt_serialize_path: p:path -> mt:mt_p -> output:uint8_p -> sz:uint32_t -> HST.ST uint32_t
   (requires (fun h0 -> path_safe h0 (B.frameOf mt) p /\ mt_safe h0 mt /\
                        B.live h0 output /\ B.len output = sz /\
@@ -416,14 +415,14 @@ let mt_serialize_path p mt output sz =
   let phv:hash_vec = !*p in
   let h0 = HST.get() in
   let ok, pos = serialize_uint32_t true hash_size output sz 0ul in
-  let h1 = HST.get() in 
+  let h1 = HST.get() in
   assume (RV.elems_reg h1 phv);
   let ok, pos = serialize_hash_vec ok phv output sz pos in
   if ok then pos else 0ul
 
 val mt_deserialize_path: rid:HST.erid -> input:uint8_p -> sz:uint32_t{B.len input = sz} -> HST.ST (B.pointer_or_null path)
   (requires (fun h0 -> B.live h0 input /\ HS.disjoint rid (B.frameOf input)))
-  (ensures (fun h0 r h1 -> modifies B.loc_none h0 h1))
+  (ensures (fun h0 r h1 -> (modifies B.loc_none h0 h1)))
 let mt_deserialize_path rid input sz =
   let hvvrid = HST.new_region rid in
   let ok, pos, hash_size = deserialize_uint32_t true input sz 0ul in
