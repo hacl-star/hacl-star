@@ -34,8 +34,14 @@
 #include "Hacl_Kremlib.h"
 
 
+/* SNIPPET_START: Hacl_Impl_Poly1305_Field32xN_128_load_acc2 */
+
 void
 Hacl_Impl_Poly1305_Field32xN_128_load_acc2(Lib_IntVector_Intrinsics_vec128 *acc, uint8_t *b);
+
+/* SNIPPET_END: Hacl_Impl_Poly1305_Field32xN_128_load_acc2 */
+
+/* SNIPPET_START: Hacl_Impl_Poly1305_Field32xN_128_fmul_r2_normalize */
 
 void
 Hacl_Impl_Poly1305_Field32xN_128_fmul_r2_normalize(
@@ -43,13 +49,33 @@ Hacl_Impl_Poly1305_Field32xN_128_fmul_r2_normalize(
   Lib_IntVector_Intrinsics_vec128 *p
 );
 
+/* SNIPPET_END: Hacl_Impl_Poly1305_Field32xN_128_fmul_r2_normalize */
+
+/* SNIPPET_START: Hacl_Poly1305_128_blocklen */
+
 extern uint32_t Hacl_Poly1305_128_blocklen;
+
+/* SNIPPET_END: Hacl_Poly1305_128_blocklen */
+
+/* SNIPPET_START: Hacl_Poly1305_128_poly1305_ctx */
 
 typedef Lib_IntVector_Intrinsics_vec128 *Hacl_Poly1305_128_poly1305_ctx;
 
+/* SNIPPET_END: Hacl_Poly1305_128_poly1305_ctx */
+
+/* SNIPPET_START: Hacl_Poly1305_128_poly1305_init */
+
 void Hacl_Poly1305_128_poly1305_init(Lib_IntVector_Intrinsics_vec128 *ctx, uint8_t *key);
 
+/* SNIPPET_END: Hacl_Poly1305_128_poly1305_init */
+
+/* SNIPPET_START: Hacl_Poly1305_128_poly1305_update1 */
+
 void Hacl_Poly1305_128_poly1305_update1(Lib_IntVector_Intrinsics_vec128 *ctx, uint8_t *text);
+
+/* SNIPPET_END: Hacl_Poly1305_128_poly1305_update1 */
+
+/* SNIPPET_START: Hacl_Poly1305_128_poly1305_update */
 
 void
 Hacl_Poly1305_128_poly1305_update(
@@ -58,6 +84,10 @@ Hacl_Poly1305_128_poly1305_update(
   uint8_t *text
 );
 
+/* SNIPPET_END: Hacl_Poly1305_128_poly1305_update */
+
+/* SNIPPET_START: Hacl_Poly1305_128_poly1305_finish */
+
 void
 Hacl_Poly1305_128_poly1305_finish(
   uint8_t *tag,
@@ -65,7 +95,13 @@ Hacl_Poly1305_128_poly1305_finish(
   Lib_IntVector_Intrinsics_vec128 *ctx
 );
 
+/* SNIPPET_END: Hacl_Poly1305_128_poly1305_finish */
+
+/* SNIPPET_START: Hacl_Poly1305_128_poly1305_mac */
+
 void Hacl_Poly1305_128_poly1305_mac(uint8_t *tag, uint32_t len, uint8_t *text, uint8_t *key);
+
+/* SNIPPET_END: Hacl_Poly1305_128_poly1305_mac */
 
 #define __Hacl_Poly1305_128_H_DEFINED
 #endif

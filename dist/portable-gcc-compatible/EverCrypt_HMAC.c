@@ -24,6 +24,8 @@
 
 #include "EverCrypt_HMAC.h"
 
+/* SNIPPET_START: EverCrypt_HMAC_compute_sha1 */
+
 void
 EverCrypt_HMAC_compute_sha1(
   uint8_t *dst,
@@ -91,6 +93,10 @@ EverCrypt_HMAC_compute_sha1(
   Hacl_Hash_Core_SHA1_legacy_finish(s, dst);
 }
 
+/* SNIPPET_END: EverCrypt_HMAC_compute_sha1 */
+
+/* SNIPPET_START: EverCrypt_HMAC_compute_sha2_256 */
+
 void
 EverCrypt_HMAC_compute_sha2_256(
   uint8_t *dst,
@@ -157,6 +163,10 @@ EverCrypt_HMAC_compute_sha2_256(
   EverCrypt_Hash_update_last_256(s, (uint64_t)(uint32_t)64U, hash1, (uint32_t)32U);
   Hacl_Hash_Core_SHA2_finish_256(s, dst);
 }
+
+/* SNIPPET_END: EverCrypt_HMAC_compute_sha2_256 */
+
+/* SNIPPET_START: EverCrypt_HMAC_compute_sha2_384 */
 
 void
 EverCrypt_HMAC_compute_sha2_384(
@@ -232,6 +242,10 @@ EverCrypt_HMAC_compute_sha2_384(
   Hacl_Hash_Core_SHA2_finish_384(s, dst);
 }
 
+/* SNIPPET_END: EverCrypt_HMAC_compute_sha2_384 */
+
+/* SNIPPET_START: EverCrypt_HMAC_compute_sha2_512 */
+
 void
 EverCrypt_HMAC_compute_sha2_512(
   uint8_t *dst,
@@ -306,6 +320,10 @@ EverCrypt_HMAC_compute_sha2_512(
   Hacl_Hash_Core_SHA2_finish_512(s, dst);
 }
 
+/* SNIPPET_END: EverCrypt_HMAC_compute_sha2_512 */
+
+/* SNIPPET_START: EverCrypt_HMAC_is_supported_alg */
+
 bool EverCrypt_HMAC_is_supported_alg(Spec_Hash_Definitions_hash_alg uu___0_5843)
 {
   switch (uu___0_5843)
@@ -332,6 +350,10 @@ bool EverCrypt_HMAC_is_supported_alg(Spec_Hash_Definitions_hash_alg uu___0_5843)
       }
   }
 }
+
+/* SNIPPET_END: EverCrypt_HMAC_is_supported_alg */
+
+/* SNIPPET_START: EverCrypt_HMAC_compute */
 
 void
 EverCrypt_HMAC_compute(
@@ -372,4 +394,6 @@ EverCrypt_HMAC_compute(
       }
   }
 }
+
+/* SNIPPET_END: EverCrypt_HMAC_compute */
 

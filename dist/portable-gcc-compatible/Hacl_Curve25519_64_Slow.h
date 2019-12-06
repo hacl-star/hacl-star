@@ -34,11 +34,23 @@
 #include "Hacl_Kremlib.h"
 
 
+/* SNIPPET_START: Hacl_Curve25519_64_Slow_scalarmult */
+
 void Hacl_Curve25519_64_Slow_scalarmult(uint8_t *out, uint8_t *priv, uint8_t *pub);
+
+/* SNIPPET_END: Hacl_Curve25519_64_Slow_scalarmult */
+
+/* SNIPPET_START: Hacl_Curve25519_64_Slow_secret_to_public */
 
 void Hacl_Curve25519_64_Slow_secret_to_public(uint8_t *pub, uint8_t *priv);
 
+/* SNIPPET_END: Hacl_Curve25519_64_Slow_secret_to_public */
+
+/* SNIPPET_START: Hacl_Curve25519_64_Slow_ecdh */
+
 bool Hacl_Curve25519_64_Slow_ecdh(uint8_t *out, uint8_t *priv, uint8_t *pub);
+
+/* SNIPPET_END: Hacl_Curve25519_64_Slow_ecdh */
 
 #define __Hacl_Curve25519_64_Slow_H_DEFINED
 #endif

@@ -441,6 +441,7 @@ void Hacl_Poly1305_32_poly1305_update(uint64_t *ctx, uint32_t len, uint8_t *text
     acc[2U] = o2;
     acc[3U] = o3;
     acc[4U] = o4;
+    return;
   }
 }
 

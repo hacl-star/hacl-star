@@ -36,6 +36,8 @@
 #include "Hacl_Poly1305_32.h"
 
 
+/* SNIPPET_START: Hacl_Chacha20Poly1305_32_aead_encrypt */
+
 void
 Hacl_Chacha20Poly1305_32_aead_encrypt(
   uint8_t *k,
@@ -48,6 +50,10 @@ Hacl_Chacha20Poly1305_32_aead_encrypt(
   uint8_t *mac
 );
 
+/* SNIPPET_END: Hacl_Chacha20Poly1305_32_aead_encrypt */
+
+/* SNIPPET_START: Hacl_Chacha20Poly1305_32_aead_decrypt */
+
 uint32_t
 Hacl_Chacha20Poly1305_32_aead_decrypt(
   uint8_t *k,
@@ -59,6 +65,8 @@ Hacl_Chacha20Poly1305_32_aead_decrypt(
   uint8_t *cipher,
   uint8_t *mac
 );
+
+/* SNIPPET_END: Hacl_Chacha20Poly1305_32_aead_decrypt */
 
 #define __Hacl_Chacha20Poly1305_32_H_DEFINED
 #endif

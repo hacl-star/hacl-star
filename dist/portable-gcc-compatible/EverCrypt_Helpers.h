@@ -34,21 +34,53 @@
 
 
 
+/* SNIPPET_START: EverCrypt_Helpers_uint8_t */
+
 typedef uint8_t EverCrypt_Helpers_uint8_t;
+
+/* SNIPPET_END: EverCrypt_Helpers_uint8_t */
+
+/* SNIPPET_START: EverCrypt_Helpers_uint16_t */
 
 typedef uint16_t EverCrypt_Helpers_uint16_t;
 
+/* SNIPPET_END: EverCrypt_Helpers_uint16_t */
+
+/* SNIPPET_START: EverCrypt_Helpers_uint32_t */
+
 typedef uint32_t EverCrypt_Helpers_uint32_t;
+
+/* SNIPPET_END: EverCrypt_Helpers_uint32_t */
+
+/* SNIPPET_START: EverCrypt_Helpers_uint64_t */
 
 typedef uint64_t EverCrypt_Helpers_uint64_t;
 
+/* SNIPPET_END: EverCrypt_Helpers_uint64_t */
+
+/* SNIPPET_START: EverCrypt_Helpers_uint8_p */
+
 typedef uint8_t *EverCrypt_Helpers_uint8_p;
+
+/* SNIPPET_END: EverCrypt_Helpers_uint8_p */
+
+/* SNIPPET_START: EverCrypt_Helpers_uint16_p */
 
 typedef uint16_t *EverCrypt_Helpers_uint16_p;
 
+/* SNIPPET_END: EverCrypt_Helpers_uint16_p */
+
+/* SNIPPET_START: EverCrypt_Helpers_uint32_p */
+
 typedef uint32_t *EverCrypt_Helpers_uint32_p;
 
+/* SNIPPET_END: EverCrypt_Helpers_uint32_p */
+
+/* SNIPPET_START: EverCrypt_Helpers_uint64_p */
+
 typedef uint64_t *EverCrypt_Helpers_uint64_p;
+
+/* SNIPPET_END: EverCrypt_Helpers_uint64_p */
 
 #define __EverCrypt_Helpers_H_DEFINED
 #endif

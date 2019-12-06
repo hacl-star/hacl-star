@@ -24,6 +24,8 @@
 
 #include "Hacl_SHA3.h"
 
+/* SNIPPET_START: Hacl_Impl_SHA3_keccak_rotc */
+
 uint32_t
 Hacl_Impl_SHA3_keccak_rotc[24U] =
   {
@@ -33,6 +35,10 @@ Hacl_Impl_SHA3_keccak_rotc[24U] =
     (uint32_t)62U, (uint32_t)18U, (uint32_t)39U, (uint32_t)61U, (uint32_t)20U, (uint32_t)44U
   };
 
+/* SNIPPET_END: Hacl_Impl_SHA3_keccak_rotc */
+
+/* SNIPPET_START: Hacl_Impl_SHA3_keccak_piln */
+
 uint32_t
 Hacl_Impl_SHA3_keccak_piln[24U] =
   {
@@ -41,6 +47,10 @@ Hacl_Impl_SHA3_keccak_piln[24U] =
     (uint32_t)15U, (uint32_t)23U, (uint32_t)19U, (uint32_t)13U, (uint32_t)12U, (uint32_t)2U,
     (uint32_t)20U, (uint32_t)14U, (uint32_t)22U, (uint32_t)9U, (uint32_t)6U, (uint32_t)1U
   };
+
+/* SNIPPET_END: Hacl_Impl_SHA3_keccak_piln */
+
+/* SNIPPET_START: Hacl_Impl_SHA3_keccak_rndc */
 
 uint64_t
 Hacl_Impl_SHA3_keccak_rndc[24U] =
@@ -55,10 +65,18 @@ Hacl_Impl_SHA3_keccak_rndc[24U] =
     (uint64_t)0x8000000000008080U, (uint64_t)0x0000000080000001U, (uint64_t)0x8000000080008008U
   };
 
+/* SNIPPET_END: Hacl_Impl_SHA3_keccak_rndc */
+
+/* SNIPPET_START: Hacl_Impl_SHA3_rotl */
+
 inline uint64_t Hacl_Impl_SHA3_rotl(uint64_t a, uint32_t b)
 {
   return a << b | a >> ((uint32_t)64U - b);
 }
+
+/* SNIPPET_END: Hacl_Impl_SHA3_rotl */
+
+/* SNIPPET_START: Hacl_Impl_SHA3_state_permute */
 
 void Hacl_Impl_SHA3_state_permute(uint64_t *s)
 {
@@ -119,6 +137,10 @@ void Hacl_Impl_SHA3_state_permute(uint64_t *s)
   }
 }
 
+/* SNIPPET_END: Hacl_Impl_SHA3_state_permute */
+
+/* SNIPPET_START: Hacl_Impl_SHA3_loadState */
+
 void Hacl_Impl_SHA3_loadState(uint32_t rateInBytes, uint8_t *input, uint64_t *s)
 {
   uint8_t b[200U] = { 0U };
@@ -132,6 +154,10 @@ void Hacl_Impl_SHA3_loadState(uint32_t rateInBytes, uint8_t *input, uint64_t *s)
   memset(b, 0U, (uint32_t)200U * sizeof b[0U]);
 }
 
+/* SNIPPET_END: Hacl_Impl_SHA3_loadState */
+
+/* SNIPPET_START: Hacl_Impl_SHA3_storeState */
+
 void Hacl_Impl_SHA3_storeState(uint32_t rateInBytes, uint64_t *s, uint8_t *res)
 {
   uint8_t b[200U] = { 0U };
@@ -143,6 +169,10 @@ void Hacl_Impl_SHA3_storeState(uint32_t rateInBytes, uint64_t *s, uint8_t *res)
   memcpy(res, b, rateInBytes * sizeof b[0U]);
   memset(b, 0U, (uint32_t)200U * sizeof b[0U]);
 }
+
+/* SNIPPET_END: Hacl_Impl_SHA3_storeState */
+
+/* SNIPPET_START: Hacl_Impl_SHA3_absorb */
 
 void
 Hacl_Impl_SHA3_absorb(
@@ -182,6 +212,10 @@ Hacl_Impl_SHA3_absorb(
   memset(b, 0U, rateInBytes * sizeof b[0U]);
 }
 
+/* SNIPPET_END: Hacl_Impl_SHA3_absorb */
+
+/* SNIPPET_START: Hacl_Impl_SHA3_squeeze */
+
 void
 Hacl_Impl_SHA3_squeeze(
   uint64_t *s,
@@ -202,6 +236,10 @@ Hacl_Impl_SHA3_squeeze(
   Hacl_Impl_SHA3_storeState(remOut, s, last1);
 }
 
+/* SNIPPET_END: Hacl_Impl_SHA3_squeeze */
+
+/* SNIPPET_START: Hacl_Impl_SHA3_keccak */
+
 void
 Hacl_Impl_SHA3_keccak(
   uint32_t rate,
@@ -218,6 +256,10 @@ Hacl_Impl_SHA3_keccak(
   Hacl_Impl_SHA3_absorb(s, rateInBytes, inputByteLen, input, delimitedSuffix);
   Hacl_Impl_SHA3_squeeze(s, rateInBytes, outputByteLen, output);
 }
+
+/* SNIPPET_END: Hacl_Impl_SHA3_keccak */
+
+/* SNIPPET_START: Hacl_SHA3_shake128_hacl */
 
 void
 Hacl_SHA3_shake128_hacl(
@@ -236,6 +278,10 @@ Hacl_SHA3_shake128_hacl(
     output);
 }
 
+/* SNIPPET_END: Hacl_SHA3_shake128_hacl */
+
+/* SNIPPET_START: Hacl_SHA3_shake256_hacl */
+
 void
 Hacl_SHA3_shake256_hacl(
   uint32_t inputByteLen,
@@ -253,6 +299,10 @@ Hacl_SHA3_shake256_hacl(
     output);
 }
 
+/* SNIPPET_END: Hacl_SHA3_shake256_hacl */
+
+/* SNIPPET_START: Hacl_SHA3_sha3_224 */
+
 void Hacl_SHA3_sha3_224(uint32_t inputByteLen, uint8_t *input, uint8_t *output)
 {
   Hacl_Impl_SHA3_keccak((uint32_t)1152U,
@@ -263,6 +313,10 @@ void Hacl_SHA3_sha3_224(uint32_t inputByteLen, uint8_t *input, uint8_t *output)
     (uint32_t)28U,
     output);
 }
+
+/* SNIPPET_END: Hacl_SHA3_sha3_224 */
+
+/* SNIPPET_START: Hacl_SHA3_sha3_256 */
 
 void Hacl_SHA3_sha3_256(uint32_t inputByteLen, uint8_t *input, uint8_t *output)
 {
@@ -275,6 +329,10 @@ void Hacl_SHA3_sha3_256(uint32_t inputByteLen, uint8_t *input, uint8_t *output)
     output);
 }
 
+/* SNIPPET_END: Hacl_SHA3_sha3_256 */
+
+/* SNIPPET_START: Hacl_SHA3_sha3_384 */
+
 void Hacl_SHA3_sha3_384(uint32_t inputByteLen, uint8_t *input, uint8_t *output)
 {
   Hacl_Impl_SHA3_keccak((uint32_t)832U,
@@ -286,6 +344,10 @@ void Hacl_SHA3_sha3_384(uint32_t inputByteLen, uint8_t *input, uint8_t *output)
     output);
 }
 
+/* SNIPPET_END: Hacl_SHA3_sha3_384 */
+
+/* SNIPPET_START: Hacl_SHA3_sha3_512 */
+
 void Hacl_SHA3_sha3_512(uint32_t inputByteLen, uint8_t *input, uint8_t *output)
 {
   Hacl_Impl_SHA3_keccak((uint32_t)576U,
@@ -296,4 +358,6 @@ void Hacl_SHA3_sha3_512(uint32_t inputByteLen, uint8_t *input, uint8_t *output)
     (uint32_t)64U,
     output);
 }
+
+/* SNIPPET_END: Hacl_SHA3_sha3_512 */
 

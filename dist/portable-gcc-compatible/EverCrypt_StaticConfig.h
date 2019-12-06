@@ -34,13 +34,29 @@
 
 
 
+/* SNIPPET_START: EverCrypt_StaticConfig_hacl */
+
 extern bool EverCrypt_StaticConfig_hacl;
+
+/* SNIPPET_END: EverCrypt_StaticConfig_hacl */
+
+/* SNIPPET_START: EverCrypt_StaticConfig_vale */
 
 extern bool EverCrypt_StaticConfig_vale;
 
+/* SNIPPET_END: EverCrypt_StaticConfig_vale */
+
+/* SNIPPET_START: EverCrypt_StaticConfig_openssl */
+
 extern bool EverCrypt_StaticConfig_openssl;
 
+/* SNIPPET_END: EverCrypt_StaticConfig_openssl */
+
+/* SNIPPET_START: EverCrypt_StaticConfig_bcrypt */
+
 extern bool EverCrypt_StaticConfig_bcrypt;
+
+/* SNIPPET_END: EverCrypt_StaticConfig_bcrypt */
 
 #define __EverCrypt_StaticConfig_H_DEFINED
 #endif

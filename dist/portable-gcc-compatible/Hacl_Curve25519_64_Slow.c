@@ -24,6 +24,8 @@
 
 #include "Hacl_Curve25519_64_Slow.h"
 
+/* SNIPPET_START: K___uint64_t_uint64_t_uint64_t_uint64_t */
+
 typedef struct K___uint64_t_uint64_t_uint64_t_uint64_t_s
 {
   uint64_t fst;
@@ -32,6 +34,10 @@ typedef struct K___uint64_t_uint64_t_uint64_t_uint64_t_s
   uint64_t f3;
 }
 K___uint64_t_uint64_t_uint64_t_uint64_t;
+
+/* SNIPPET_END: K___uint64_t_uint64_t_uint64_t_uint64_t */
+
+/* SNIPPET_START: K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t */
 
 typedef struct K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_s
 {
@@ -46,12 +52,20 @@ typedef struct K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_
 }
 K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t;
 
+/* SNIPPET_END: K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t */
+
+/* SNIPPET_START: K___uint64_t_uint64_t */
+
 typedef struct K___uint64_t_uint64_t_s
 {
   uint64_t fst;
   uint64_t snd;
 }
 K___uint64_t_uint64_t;
+
+/* SNIPPET_END: K___uint64_t_uint64_t */
+
+/* SNIPPET_START: Hacl_Spec_Curve25519_Field64_Core_addcarry */
 
 inline static K___uint64_t_uint64_t
 Hacl_Spec_Curve25519_Field64_Core_addcarry(uint64_t x, uint64_t y, uint64_t cin)
@@ -78,6 +92,10 @@ Hacl_Spec_Curve25519_Field64_Core_addcarry(uint64_t x, uint64_t y, uint64_t cin)
   }
   return ((K___uint64_t_uint64_t){ .fst = res, .snd = c1 });
 }
+
+/* SNIPPET_END: Hacl_Spec_Curve25519_Field64_Core_addcarry */
+
+/* SNIPPET_START: Hacl_Spec_Curve25519_Field64_Core_subborrow */
 
 inline static K___uint64_t_uint64_t
 Hacl_Spec_Curve25519_Field64_Core_subborrow(uint64_t x, uint64_t y, uint64_t cin)
@@ -106,6 +124,10 @@ Hacl_Spec_Curve25519_Field64_Core_subborrow(uint64_t x, uint64_t y, uint64_t cin
   return ((K___uint64_t_uint64_t){ .fst = res, .snd = c });
 }
 
+/* SNIPPET_END: Hacl_Spec_Curve25519_Field64_Core_subborrow */
+
+/* SNIPPET_START: Hacl_Spec_Curve25519_Field64_Core_mul64 */
+
 inline static K___uint64_t_uint64_t
 Hacl_Spec_Curve25519_Field64_Core_mul64(uint64_t x, uint64_t y)
 {
@@ -118,6 +140,10 @@ Hacl_Spec_Curve25519_Field64_Core_mul64(uint64_t x, uint64_t y)
       }
     );
 }
+
+/* SNIPPET_END: Hacl_Spec_Curve25519_Field64_Core_mul64 */
+
+/* SNIPPET_START: Hacl_Spec_Curve25519_Field64_Core_add0carry */
 
 inline static K___uint64_t_uint64_t
 Hacl_Spec_Curve25519_Field64_Core_add0carry(uint64_t x, uint64_t y)
@@ -135,12 +161,20 @@ Hacl_Spec_Curve25519_Field64_Core_add0carry(uint64_t x, uint64_t y)
   return ((K___uint64_t_uint64_t){ .fst = res, .snd = c });
 }
 
+/* SNIPPET_END: Hacl_Spec_Curve25519_Field64_Core_add0carry */
+
+/* SNIPPET_START: K___uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t */
+
 typedef struct K___uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t_s
 {
   uint64_t fst;
   K___uint64_t_uint64_t_uint64_t_uint64_t snd;
 }
 K___uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t;
+
+/* SNIPPET_END: K___uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t */
+
+/* SNIPPET_START: Hacl_Spec_Curve25519_Field64_Core_add1 */
 
 static K___uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t
 Hacl_Spec_Curve25519_Field64_Core_add1(K___uint64_t_uint64_t_uint64_t_uint64_t f, uint64_t cin)
@@ -164,6 +198,10 @@ Hacl_Spec_Curve25519_Field64_Core_add1(K___uint64_t_uint64_t_uint64_t_uint64_t f
   K___uint64_t_uint64_t_uint64_t_uint64_t out = { .fst = o0, .snd = o1, .thd = o2, .f3 = o3 };
   return ((K___uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t){ .fst = c3, .snd = out });
 }
+
+/* SNIPPET_END: Hacl_Spec_Curve25519_Field64_Core_add1 */
+
+/* SNIPPET_START: Hacl_Spec_Curve25519_Field64_Core_sub1 */
 
 static K___uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t
 Hacl_Spec_Curve25519_Field64_Core_sub1(K___uint64_t_uint64_t_uint64_t_uint64_t f, uint64_t cin)
@@ -191,6 +229,10 @@ Hacl_Spec_Curve25519_Field64_Core_sub1(K___uint64_t_uint64_t_uint64_t_uint64_t f
   K___uint64_t_uint64_t_uint64_t_uint64_t out = { .fst = o0, .snd = o1, .thd = o2, .f3 = o3 };
   return ((K___uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t){ .fst = c3, .snd = out });
 }
+
+/* SNIPPET_END: Hacl_Spec_Curve25519_Field64_Core_sub1 */
+
+/* SNIPPET_START: Hacl_Spec_Curve25519_Field64_Core_mul1 */
 
 static K___uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t
 Hacl_Spec_Curve25519_Field64_Core_mul1(K___uint64_t_uint64_t_uint64_t_uint64_t f, uint64_t u)
@@ -225,6 +267,10 @@ Hacl_Spec_Curve25519_Field64_Core_mul1(K___uint64_t_uint64_t_uint64_t_uint64_t f
   uint64_t c3 = h3 + c2;
   return ((K___uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t){ .fst = c3, .snd = out });
 }
+
+/* SNIPPET_END: Hacl_Spec_Curve25519_Field64_Core_mul1 */
+
+/* SNIPPET_START: Hacl_Spec_Curve25519_Field64_Core_mul1_add */
 
 static K___uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t
 Hacl_Spec_Curve25519_Field64_Core_mul1_add(
@@ -264,6 +310,10 @@ Hacl_Spec_Curve25519_Field64_Core_mul1_add(
   return ((K___uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t){ .fst = c4, .snd = out });
 }
 
+/* SNIPPET_END: Hacl_Spec_Curve25519_Field64_Core_mul1_add */
+
+/* SNIPPET_START: Hacl_Spec_Curve25519_Field64_Core_carry_pass */
+
 static K___uint64_t_uint64_t_uint64_t_uint64_t
 Hacl_Spec_Curve25519_Field64_Core_carry_pass(
   K___uint64_t_uint64_t_uint64_t_uint64_t f,
@@ -282,6 +332,10 @@ Hacl_Spec_Curve25519_Field64_Core_carry_pass(
   return
     ((K___uint64_t_uint64_t_uint64_t_uint64_t){ .fst = o0_, .snd = o1, .thd = o2, .f3 = o3 });
 }
+
+/* SNIPPET_END: Hacl_Spec_Curve25519_Field64_Core_carry_pass */
+
+/* SNIPPET_START: Hacl_Spec_Curve25519_Field64_Core_carry_wide */
 
 static K___uint64_t_uint64_t_uint64_t_uint64_t
 Hacl_Spec_Curve25519_Field64_Core_carry_wide(
@@ -309,6 +363,10 @@ Hacl_Spec_Curve25519_Field64_Core_carry_wide(
   out1 = Hacl_Spec_Curve25519_Field64_Core_carry_pass(out0, c0);
   return out1;
 }
+
+/* SNIPPET_END: Hacl_Spec_Curve25519_Field64_Core_carry_wide */
+
+/* SNIPPET_START: Hacl_Spec_Curve25519_Field64_Core_add4 */
 
 static K___uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t
 Hacl_Spec_Curve25519_Field64_Core_add4(
@@ -341,6 +399,10 @@ Hacl_Spec_Curve25519_Field64_Core_add4(
   return ((K___uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t){ .fst = c3, .snd = out });
 }
 
+/* SNIPPET_END: Hacl_Spec_Curve25519_Field64_Core_add4 */
+
+/* SNIPPET_START: Hacl_Spec_Curve25519_Field64_Core_fadd4 */
+
 static K___uint64_t_uint64_t_uint64_t_uint64_t
 Hacl_Spec_Curve25519_Field64_Core_fadd4(
   K___uint64_t_uint64_t_uint64_t_uint64_t f1,
@@ -355,6 +417,10 @@ Hacl_Spec_Curve25519_Field64_Core_fadd4(
   out = Hacl_Spec_Curve25519_Field64_Core_carry_pass(out0, c0);
   return out;
 }
+
+/* SNIPPET_END: Hacl_Spec_Curve25519_Field64_Core_fadd4 */
+
+/* SNIPPET_START: Hacl_Spec_Curve25519_Field64_Core_sub4 */
 
 static K___uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t
 Hacl_Spec_Curve25519_Field64_Core_sub4(
@@ -387,6 +453,10 @@ Hacl_Spec_Curve25519_Field64_Core_sub4(
   return ((K___uint64_t_K___uint64_t_uint64_t_uint64_t_uint64_t){ .fst = c3, .snd = out });
 }
 
+/* SNIPPET_END: Hacl_Spec_Curve25519_Field64_Core_sub4 */
+
+/* SNIPPET_START: Hacl_Spec_Curve25519_Field64_Core_fsub4 */
+
 static K___uint64_t_uint64_t_uint64_t_uint64_t
 Hacl_Spec_Curve25519_Field64_Core_fsub4(
   K___uint64_t_uint64_t_uint64_t_uint64_t f1,
@@ -409,6 +479,10 @@ Hacl_Spec_Curve25519_Field64_Core_fsub4(
   return
     ((K___uint64_t_uint64_t_uint64_t_uint64_t){ .fst = o0_, .snd = o1, .thd = o2, .f3 = o3 });
 }
+
+/* SNIPPET_END: Hacl_Spec_Curve25519_Field64_Core_fsub4 */
+
+/* SNIPPET_START: Hacl_Spec_Curve25519_Field64_Core_mul4 */
 
 static K___uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t_uint64_t
 Hacl_Spec_Curve25519_Field64_Core_mul4(
@@ -477,6 +551,10 @@ Hacl_Spec_Curve25519_Field64_Core_mul4(
     );
 }
 
+/* SNIPPET_END: Hacl_Spec_Curve25519_Field64_Core_mul4 */
+
+/* SNIPPET_START: Hacl_Spec_Curve25519_Field64_Core_fmul4 */
+
 static K___uint64_t_uint64_t_uint64_t_uint64_t
 Hacl_Spec_Curve25519_Field64_Core_fmul4(
   K___uint64_t_uint64_t_uint64_t_uint64_t f1,
@@ -489,6 +567,10 @@ Hacl_Spec_Curve25519_Field64_Core_fmul4(
   out = Hacl_Spec_Curve25519_Field64_Core_carry_wide(tmp);
   return out;
 }
+
+/* SNIPPET_END: Hacl_Spec_Curve25519_Field64_Core_fmul4 */
+
+/* SNIPPET_START: Hacl_Spec_Curve25519_Field64_Core_fmul14 */
 
 static K___uint64_t_uint64_t_uint64_t_uint64_t
 Hacl_Spec_Curve25519_Field64_Core_fmul14(
@@ -504,6 +586,10 @@ Hacl_Spec_Curve25519_Field64_Core_fmul14(
   out1 = Hacl_Spec_Curve25519_Field64_Core_carry_pass(out0, c0);
   return out1;
 }
+
+/* SNIPPET_END: Hacl_Spec_Curve25519_Field64_Core_fmul14 */
+
+/* SNIPPET_START: Hacl_Impl_Curve25519_Field64_Hacl_add1 */
 
 inline static uint64_t
 Hacl_Impl_Curve25519_Field64_Hacl_add1(uint64_t *out, uint64_t *f1, uint64_t f2)
@@ -529,6 +615,10 @@ Hacl_Impl_Curve25519_Field64_Hacl_add1(uint64_t *out, uint64_t *f1, uint64_t f2)
   out[3U] = o3;
   return carry;
 }
+
+/* SNIPPET_END: Hacl_Impl_Curve25519_Field64_Hacl_add1 */
+
+/* SNIPPET_START: Hacl_Impl_Curve25519_Field64_Hacl_fadd */
 
 inline static void
 Hacl_Impl_Curve25519_Field64_Hacl_fadd(uint64_t *out, uint64_t *f1, uint64_t *f2)
@@ -557,6 +647,10 @@ Hacl_Impl_Curve25519_Field64_Hacl_fadd(uint64_t *out, uint64_t *f1, uint64_t *f2
   out[3U] = o3;
 }
 
+/* SNIPPET_END: Hacl_Impl_Curve25519_Field64_Hacl_fadd */
+
+/* SNIPPET_START: Hacl_Impl_Curve25519_Field64_Hacl_fsub */
+
 inline static void
 Hacl_Impl_Curve25519_Field64_Hacl_fsub(uint64_t *out, uint64_t *f1, uint64_t *f2)
 {
@@ -583,6 +677,10 @@ Hacl_Impl_Curve25519_Field64_Hacl_fsub(uint64_t *out, uint64_t *f1, uint64_t *f2
   out[2U] = o2;
   out[3U] = o3;
 }
+
+/* SNIPPET_END: Hacl_Impl_Curve25519_Field64_Hacl_fsub */
+
+/* SNIPPET_START: Hacl_Impl_Curve25519_Field64_Hacl_fmul */
 
 inline static void
 Hacl_Impl_Curve25519_Field64_Hacl_fmul(
@@ -616,6 +714,10 @@ Hacl_Impl_Curve25519_Field64_Hacl_fmul(
   out[3U] = o3;
 }
 
+/* SNIPPET_END: Hacl_Impl_Curve25519_Field64_Hacl_fmul */
+
+/* SNIPPET_START: Hacl_Impl_Curve25519_Field64_Hacl_fmul2 */
+
 inline static void
 Hacl_Impl_Curve25519_Field64_Hacl_fmul2(
   uint64_t *out,
@@ -633,6 +735,10 @@ Hacl_Impl_Curve25519_Field64_Hacl_fmul2(
   Hacl_Impl_Curve25519_Field64_Hacl_fmul(out1, f11, f21, tmp);
   Hacl_Impl_Curve25519_Field64_Hacl_fmul(out2, f12, f22, tmp);
 }
+
+/* SNIPPET_END: Hacl_Impl_Curve25519_Field64_Hacl_fmul2 */
+
+/* SNIPPET_START: Hacl_Impl_Curve25519_Field64_Hacl_fmul1 */
 
 inline static void
 Hacl_Impl_Curve25519_Field64_Hacl_fmul1(uint64_t *out, uint64_t *f1, uint64_t f2)
@@ -657,6 +763,10 @@ Hacl_Impl_Curve25519_Field64_Hacl_fmul1(uint64_t *out, uint64_t *f1, uint64_t f2
   out[3U] = o3;
 }
 
+/* SNIPPET_END: Hacl_Impl_Curve25519_Field64_Hacl_fmul1 */
+
+/* SNIPPET_START: Hacl_Impl_Curve25519_Field64_Hacl_fsqr */
+
 inline static void
 Hacl_Impl_Curve25519_Field64_Hacl_fsqr(uint64_t *out, uint64_t *f1, uint64_t *tmp)
 {
@@ -664,11 +774,19 @@ Hacl_Impl_Curve25519_Field64_Hacl_fsqr(uint64_t *out, uint64_t *f1, uint64_t *tm
   Hacl_Impl_Curve25519_Field64_Hacl_fmul(out, f1, f1, tmp1);
 }
 
+/* SNIPPET_END: Hacl_Impl_Curve25519_Field64_Hacl_fsqr */
+
+/* SNIPPET_START: Hacl_Impl_Curve25519_Field64_Hacl_fsqr2 */
+
 inline static void
 Hacl_Impl_Curve25519_Field64_Hacl_fsqr2(uint64_t *out, uint64_t *f, uint64_t *tmp)
 {
   Hacl_Impl_Curve25519_Field64_Hacl_fmul2(out, f, f, tmp);
 }
+
+/* SNIPPET_END: Hacl_Impl_Curve25519_Field64_Hacl_fsqr2 */
+
+/* SNIPPET_START: Hacl_Impl_Curve25519_Field64_Hacl_cswap2 */
 
 inline static void
 Hacl_Impl_Curve25519_Field64_Hacl_cswap2(uint64_t bit, uint64_t *p1, uint64_t *p2)
@@ -682,6 +800,10 @@ Hacl_Impl_Curve25519_Field64_Hacl_cswap2(uint64_t bit, uint64_t *p1, uint64_t *p
   }
 }
 
+/* SNIPPET_END: Hacl_Impl_Curve25519_Field64_Hacl_cswap2 */
+
+/* SNIPPET_START: Hacl_Curve25519_64_Slow_g25519 */
+
 static uint8_t
 Hacl_Curve25519_64_Slow_g25519[32U] =
   {
@@ -691,6 +813,10 @@ Hacl_Curve25519_64_Slow_g25519[32U] =
     (uint8_t)0U, (uint8_t)0U, (uint8_t)0U, (uint8_t)0U, (uint8_t)0U, (uint8_t)0U, (uint8_t)0U,
     (uint8_t)0U, (uint8_t)0U, (uint8_t)0U, (uint8_t)0U
   };
+
+/* SNIPPET_END: Hacl_Curve25519_64_Slow_g25519 */
+
+/* SNIPPET_START: Hacl_Curve25519_64_Slow_point_add_and_double */
 
 static void
 Hacl_Curve25519_64_Slow_point_add_and_double(uint64_t *q, uint64_t *p01_tmp1, uint64_t *tmp2)
@@ -736,6 +862,10 @@ Hacl_Curve25519_64_Slow_point_add_and_double(uint64_t *q, uint64_t *p01_tmp1, ui
   Hacl_Impl_Curve25519_Field64_Hacl_fmul(z3, z3, x1, tmp2);
 }
 
+/* SNIPPET_END: Hacl_Curve25519_64_Slow_point_add_and_double */
+
+/* SNIPPET_START: Hacl_Curve25519_64_Slow_point_double */
+
 static void Hacl_Curve25519_64_Slow_point_double(uint64_t *nq, uint64_t *tmp1, uint64_t *tmp2)
 {
   uint64_t *x2 = nq;
@@ -758,6 +888,10 @@ static void Hacl_Curve25519_64_Slow_point_double(uint64_t *nq, uint64_t *tmp1, u
   Hacl_Impl_Curve25519_Field64_Hacl_fadd(b, b, d);
   Hacl_Impl_Curve25519_Field64_Hacl_fmul2(nq, dc, ab, tmp2);
 }
+
+/* SNIPPET_END: Hacl_Curve25519_64_Slow_point_double */
+
+/* SNIPPET_START: Hacl_Curve25519_64_Slow_montgomery_ladder */
 
 static void
 Hacl_Curve25519_64_Slow_montgomery_ladder(uint64_t *out, uint8_t *key, uint64_t *init1)
@@ -814,6 +948,10 @@ Hacl_Curve25519_64_Slow_montgomery_ladder(uint64_t *out, uint8_t *key, uint64_t 
   memcpy(out, p0, (uint32_t)8U * sizeof p0[0U]);
 }
 
+/* SNIPPET_END: Hacl_Curve25519_64_Slow_montgomery_ladder */
+
+/* SNIPPET_START: Hacl_Curve25519_64_Slow_fsquare_times */
+
 static void
 Hacl_Curve25519_64_Slow_fsquare_times(uint64_t *o, uint64_t *inp, uint64_t *tmp, uint32_t n1)
 {
@@ -823,6 +961,10 @@ Hacl_Curve25519_64_Slow_fsquare_times(uint64_t *o, uint64_t *inp, uint64_t *tmp,
     Hacl_Impl_Curve25519_Field64_Hacl_fsqr(o, o, tmp);
   }
 }
+
+/* SNIPPET_END: Hacl_Curve25519_64_Slow_fsquare_times */
+
+/* SNIPPET_START: Hacl_Curve25519_64_Slow_finv */
 
 static void Hacl_Curve25519_64_Slow_finv(uint64_t *o, uint64_t *i, uint64_t *tmp)
 {
@@ -858,6 +1000,10 @@ static void Hacl_Curve25519_64_Slow_finv(uint64_t *o, uint64_t *i, uint64_t *tmp
   Hacl_Impl_Curve25519_Field64_Hacl_fmul(o, t0, a0, tmp);
 }
 
+/* SNIPPET_END: Hacl_Curve25519_64_Slow_finv */
+
+/* SNIPPET_START: Hacl_Curve25519_64_Slow_store_felem */
+
 static void Hacl_Curve25519_64_Slow_store_felem(uint64_t *b, uint64_t *f)
 {
   uint64_t f30 = f[3U];
@@ -891,6 +1037,10 @@ static void Hacl_Curve25519_64_Slow_store_felem(uint64_t *b, uint64_t *f)
   b[3U] = o3;
 }
 
+/* SNIPPET_END: Hacl_Curve25519_64_Slow_store_felem */
+
+/* SNIPPET_START: Hacl_Curve25519_64_Slow_encode_point */
+
 static void Hacl_Curve25519_64_Slow_encode_point(uint8_t *o, uint64_t *i)
 {
   uint64_t *x = i;
@@ -906,6 +1056,10 @@ static void Hacl_Curve25519_64_Slow_encode_point(uint8_t *o, uint64_t *i)
     store64_le(o + i0 * (uint32_t)8U, u64s[i0]);
   }
 }
+
+/* SNIPPET_END: Hacl_Curve25519_64_Slow_encode_point */
+
+/* SNIPPET_START: Hacl_Curve25519_64_Slow_scalarmult */
 
 void Hacl_Curve25519_64_Slow_scalarmult(uint8_t *out, uint8_t *priv, uint8_t *pub)
 {
@@ -936,6 +1090,10 @@ void Hacl_Curve25519_64_Slow_scalarmult(uint8_t *out, uint8_t *priv, uint8_t *pu
   Hacl_Curve25519_64_Slow_encode_point(out, init1);
 }
 
+/* SNIPPET_END: Hacl_Curve25519_64_Slow_scalarmult */
+
+/* SNIPPET_START: Hacl_Curve25519_64_Slow_secret_to_public */
+
 void Hacl_Curve25519_64_Slow_secret_to_public(uint8_t *pub, uint8_t *priv)
 {
   uint8_t basepoint[32U] = { 0U };
@@ -947,6 +1105,10 @@ void Hacl_Curve25519_64_Slow_secret_to_public(uint8_t *pub, uint8_t *priv)
   }
   Hacl_Curve25519_64_Slow_scalarmult(pub, priv, basepoint);
 }
+
+/* SNIPPET_END: Hacl_Curve25519_64_Slow_secret_to_public */
+
+/* SNIPPET_START: Hacl_Curve25519_64_Slow_ecdh */
 
 bool Hacl_Curve25519_64_Slow_ecdh(uint8_t *out, uint8_t *priv, uint8_t *pub)
 {
@@ -962,4 +1124,6 @@ bool Hacl_Curve25519_64_Slow_ecdh(uint8_t *out, uint8_t *priv, uint8_t *pub)
   bool r = z == (uint8_t)255U;
   return !r;
 }
+
+/* SNIPPET_END: Hacl_Curve25519_64_Slow_ecdh */
 

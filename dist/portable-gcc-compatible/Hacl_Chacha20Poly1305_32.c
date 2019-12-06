@@ -24,6 +24,8 @@
 
 #include "Hacl_Chacha20Poly1305_32.h"
 
+/* SNIPPET_START: Hacl_Chacha20Poly1305_32_poly1305_padded_32 */
+
 static void
 Hacl_Chacha20Poly1305_32_poly1305_padded_32(uint64_t *ctx, uint32_t len, uint8_t *text)
 {
@@ -384,8 +386,13 @@ Hacl_Chacha20Poly1305_32_poly1305_padded_32(uint64_t *ctx, uint32_t len, uint8_t
     acc[2U] = o2;
     acc[3U] = o3;
     acc[4U] = o4;
+    return;
   }
 }
+
+/* SNIPPET_END: Hacl_Chacha20Poly1305_32_poly1305_padded_32 */
+
+/* SNIPPET_START: Hacl_Chacha20Poly1305_32_poly1305_do_32 */
 
 static void
 Hacl_Chacha20Poly1305_32_poly1305_do_32(
@@ -520,6 +527,10 @@ Hacl_Chacha20Poly1305_32_poly1305_do_32(
   Hacl_Poly1305_32_poly1305_finish(out, k, ctx);
 }
 
+/* SNIPPET_END: Hacl_Chacha20Poly1305_32_poly1305_do_32 */
+
+/* SNIPPET_START: Hacl_Chacha20Poly1305_32_aead_encrypt */
+
 void
 Hacl_Chacha20Poly1305_32_aead_encrypt(
   uint8_t *k,
@@ -539,6 +550,10 @@ Hacl_Chacha20Poly1305_32_aead_encrypt(
   Hacl_Chacha20Poly1305_32_poly1305_do_32(key, aadlen, aad, mlen, cipher, mac);
 }
 
+/* SNIPPET_END: Hacl_Chacha20Poly1305_32_aead_encrypt */
+
+/* SNIPPET_START: Hacl_Chacha20Poly1305_32_aead_decrypt */
+
 uint32_t
 Hacl_Chacha20Poly1305_32_aead_decrypt(
   uint8_t *k,
@@ -556,23 +571,20 @@ Hacl_Chacha20Poly1305_32_aead_decrypt(
   Hacl_Chacha20_chacha20_encrypt((uint32_t)64U, tmp, tmp, k, n1, (uint32_t)0U);
   uint8_t *key = tmp;
   Hacl_Chacha20Poly1305_32_poly1305_do_32(key, aadlen, aad, mlen, cipher, computed_mac);
-  uint8_t res0 = (uint8_t)255U;
+  uint8_t res = (uint8_t)255U;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i = i + (uint32_t)1U)
   {
     uint8_t uu____0 = FStar_UInt8_eq_mask(computed_mac[i], mac[i]);
-    res0 = uu____0 & res0;
+    res = uu____0 & res;
   }
-  uint8_t z = res0;
-  uint32_t res;
+  uint8_t z = res;
   if (z == (uint8_t)255U)
   {
     Hacl_Chacha20_chacha20_encrypt(mlen, m, cipher, k, n1, (uint32_t)1U);
-    res = (uint32_t)0U;
+    return (uint32_t)0U;
   }
-  else
-  {
-    res = (uint32_t)1U;
-  }
-  return res;
+  return (uint32_t)1U;
 }
+
+/* SNIPPET_END: Hacl_Chacha20Poly1305_32_aead_decrypt */
 

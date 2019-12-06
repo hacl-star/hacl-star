@@ -34,6 +34,8 @@
 #include "Hacl_Kremlib.h"
 
 
+/* SNIPPET_START: Hacl_Salsa20_salsa20_encrypt */
+
 void
 Hacl_Salsa20_salsa20_encrypt(
   uint32_t len,
@@ -43,6 +45,10 @@ Hacl_Salsa20_salsa20_encrypt(
   uint8_t *n1,
   uint32_t ctr
 );
+
+/* SNIPPET_END: Hacl_Salsa20_salsa20_encrypt */
+
+/* SNIPPET_START: Hacl_Salsa20_salsa20_decrypt */
 
 void
 Hacl_Salsa20_salsa20_decrypt(
@@ -54,9 +60,19 @@ Hacl_Salsa20_salsa20_decrypt(
   uint32_t ctr
 );
 
+/* SNIPPET_END: Hacl_Salsa20_salsa20_decrypt */
+
+/* SNIPPET_START: Hacl_Salsa20_salsa20_key_block0 */
+
 void Hacl_Salsa20_salsa20_key_block0(uint8_t *out, uint8_t *key, uint8_t *n1);
 
+/* SNIPPET_END: Hacl_Salsa20_salsa20_key_block0 */
+
+/* SNIPPET_START: Hacl_Salsa20_hsalsa20 */
+
 void Hacl_Salsa20_hsalsa20(uint8_t *out, uint8_t *key, uint8_t *n1);
+
+/* SNIPPET_END: Hacl_Salsa20_hsalsa20 */
 
 #define __Hacl_Salsa20_H_DEFINED
 #endif

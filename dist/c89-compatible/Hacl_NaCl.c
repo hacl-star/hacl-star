@@ -196,17 +196,12 @@ inline static uint32_t Hacl_Impl_Box_box_beforenm(uint8_t *k, uint8_t *pk, uint8
 {
   uint8_t n0[16U] = { 0U };
   bool r = Hacl_Curve25519_51_ecdh(k, sk, pk);
-  uint32_t res;
   if (r)
   {
     Hacl_Salsa20_hsalsa20(k, k, n0);
-    res = (uint32_t)0U;
+    return (uint32_t)0U;
   }
-  else
-  {
-    res = (uint32_t)0xffffffffU;
-  }
-  return res;
+  return (uint32_t)0xffffffffU;
 }
 
 inline static uint32_t
@@ -236,16 +231,11 @@ Hacl_Impl_Box_box_detached(
 {
   uint8_t k[32U] = { 0U };
   uint32_t r = Hacl_Impl_Box_box_beforenm(k, pk, sk);
-  uint32_t res;
   if (r == (uint32_t)0U)
   {
-    res = Hacl_Impl_Box_box_detached_afternm(mlen, c, tag, k, n1, m);
+    return Hacl_Impl_Box_box_detached_afternm(mlen, c, tag, k, n1, m);
   }
-  else
-  {
-    res = (uint32_t)0xffffffffU;
-  }
-  return res;
+  return (uint32_t)0xffffffffU;
 }
 
 inline static uint32_t
@@ -274,16 +264,11 @@ Hacl_Impl_Box_box_open_detached(
 {
   uint8_t k[32U] = { 0U };
   uint32_t r = Hacl_Impl_Box_box_beforenm(k, pk, sk);
-  uint32_t res;
   if (r == (uint32_t)0U)
   {
-    res = Hacl_Impl_Box_box_open_detached_afternm(mlen, m, k, n1, c, tag);
+    return Hacl_Impl_Box_box_open_detached_afternm(mlen, m, k, n1, c, tag);
   }
-  else
-  {
-    res = (uint32_t)0xffffffffU;
-  }
-  return res;
+  return (uint32_t)0xffffffffU;
 }
 
 inline static uint32_t

@@ -24,11 +24,27 @@
 
 #include "EverCrypt_StaticConfig.h"
 
+/* SNIPPET_START: EverCrypt_StaticConfig_hacl */
+
 bool EverCrypt_StaticConfig_hacl = true;
+
+/* SNIPPET_END: EverCrypt_StaticConfig_hacl */
+
+/* SNIPPET_START: EverCrypt_StaticConfig_vale */
 
 bool EverCrypt_StaticConfig_vale = true;
 
+/* SNIPPET_END: EverCrypt_StaticConfig_vale */
+
+/* SNIPPET_START: EverCrypt_StaticConfig_openssl */
+
 bool EverCrypt_StaticConfig_openssl = true;
 
+/* SNIPPET_END: EverCrypt_StaticConfig_openssl */
+
+/* SNIPPET_START: EverCrypt_StaticConfig_bcrypt */
+
 bool EverCrypt_StaticConfig_bcrypt = false;
+
+/* SNIPPET_END: EverCrypt_StaticConfig_bcrypt */
 

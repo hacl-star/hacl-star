@@ -24,6 +24,8 @@
 
 #include "Hacl_Hash.h"
 
+/* SNIPPET_START: Hacl_Hash_MD5_legacy_update_multi */
+
 void Hacl_Hash_MD5_legacy_update_multi(uint32_t *s, uint8_t *blocks, uint32_t n_blocks)
 {
   for (uint32_t i = (uint32_t)0U; i < n_blocks; i = i + (uint32_t)1U)
@@ -33,6 +35,10 @@ void Hacl_Hash_MD5_legacy_update_multi(uint32_t *s, uint8_t *blocks, uint32_t n_
     Hacl_Hash_Core_MD5_legacy_update(s, block);
   }
 }
+
+/* SNIPPET_END: Hacl_Hash_MD5_legacy_update_multi */
+
+/* SNIPPET_START: Hacl_Hash_MD5_legacy_update_last */
 
 void
 Hacl_Hash_MD5_legacy_update_last(
@@ -66,6 +72,10 @@ Hacl_Hash_MD5_legacy_update_last(
   Hacl_Hash_MD5_legacy_update_multi(s, tmp, tmp_len / (uint32_t)64U);
 }
 
+/* SNIPPET_END: Hacl_Hash_MD5_legacy_update_last */
+
+/* SNIPPET_START: Hacl_Hash_MD5_legacy_hash */
+
 void Hacl_Hash_MD5_legacy_hash(uint8_t *input, uint32_t input_len, uint8_t *dst)
 {
   uint32_t
@@ -81,9 +91,17 @@ void Hacl_Hash_MD5_legacy_hash(uint8_t *input, uint32_t input_len, uint8_t *dst)
   Hacl_Hash_Core_MD5_legacy_finish(s, dst);
 }
 
+/* SNIPPET_END: Hacl_Hash_MD5_legacy_hash */
+
+/* SNIPPET_START: Hacl_Hash_Core_MD5__h0 */
+
 static uint32_t
 Hacl_Hash_Core_MD5__h0[4U] =
   { (uint32_t)0x67452301U, (uint32_t)0xefcdab89U, (uint32_t)0x98badcfeU, (uint32_t)0x10325476U };
+
+/* SNIPPET_END: Hacl_Hash_Core_MD5__h0 */
+
+/* SNIPPET_START: Hacl_Hash_Core_MD5__t */
 
 static uint32_t
 Hacl_Hash_Core_MD5__t[64U] =
@@ -106,6 +124,10 @@ Hacl_Hash_Core_MD5__t[64U] =
     (uint32_t)0xf7537e82U, (uint32_t)0xbd3af235U, (uint32_t)0x2ad7d2bbU, (uint32_t)0xeb86d391U
   };
 
+/* SNIPPET_END: Hacl_Hash_Core_MD5__t */
+
+/* SNIPPET_START: Hacl_Hash_Core_MD5_legacy_init */
+
 void Hacl_Hash_Core_MD5_legacy_init(uint32_t *s)
 {
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i = i + (uint32_t)1U)
@@ -113,6 +135,10 @@ void Hacl_Hash_Core_MD5_legacy_init(uint32_t *s)
     s[i] = Hacl_Hash_Core_MD5__h0[i];
   }
 }
+
+/* SNIPPET_END: Hacl_Hash_Core_MD5_legacy_init */
+
+/* SNIPPET_START: Hacl_Hash_Core_MD5_legacy_update */
 
 void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
 {
@@ -1154,6 +1180,10 @@ void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
   abcd[3U] = d + dd;
 }
 
+/* SNIPPET_END: Hacl_Hash_Core_MD5_legacy_update */
+
+/* SNIPPET_START: Hacl_Hash_Core_MD5_legacy_pad */
+
 void Hacl_Hash_Core_MD5_legacy_pad(uint64_t len, uint8_t *dst)
 {
   uint8_t *dst1 = dst;
@@ -1179,6 +1209,10 @@ void Hacl_Hash_Core_MD5_legacy_pad(uint64_t len, uint8_t *dst)
   store64_le(dst3, len << (uint32_t)3U);
 }
 
+/* SNIPPET_END: Hacl_Hash_Core_MD5_legacy_pad */
+
+/* SNIPPET_START: Hacl_Hash_Core_MD5_legacy_finish */
+
 void Hacl_Hash_Core_MD5_legacy_finish(uint32_t *s, uint8_t *dst)
 {
   uint32_t *uu____0 = s;
@@ -1187,6 +1221,10 @@ void Hacl_Hash_Core_MD5_legacy_finish(uint32_t *s, uint8_t *dst)
     store32_le(dst + i * (uint32_t)4U, uu____0[i]);
   }
 }
+
+/* SNIPPET_END: Hacl_Hash_Core_MD5_legacy_finish */
+
+/* SNIPPET_START: Hacl_Hash_SHA1_legacy_update_multi */
 
 void Hacl_Hash_SHA1_legacy_update_multi(uint32_t *s, uint8_t *blocks, uint32_t n_blocks)
 {
@@ -1197,6 +1235,10 @@ void Hacl_Hash_SHA1_legacy_update_multi(uint32_t *s, uint8_t *blocks, uint32_t n
     Hacl_Hash_Core_SHA1_legacy_update(s, block);
   }
 }
+
+/* SNIPPET_END: Hacl_Hash_SHA1_legacy_update_multi */
+
+/* SNIPPET_START: Hacl_Hash_SHA1_legacy_update_last */
 
 void
 Hacl_Hash_SHA1_legacy_update_last(
@@ -1230,6 +1272,10 @@ Hacl_Hash_SHA1_legacy_update_last(
   Hacl_Hash_SHA1_legacy_update_multi(s, tmp, tmp_len / (uint32_t)64U);
 }
 
+/* SNIPPET_END: Hacl_Hash_SHA1_legacy_update_last */
+
+/* SNIPPET_START: Hacl_Hash_SHA1_legacy_hash */
+
 void Hacl_Hash_SHA1_legacy_hash(uint8_t *input, uint32_t input_len, uint8_t *dst)
 {
   uint32_t
@@ -1248,12 +1294,20 @@ void Hacl_Hash_SHA1_legacy_hash(uint8_t *input, uint32_t input_len, uint8_t *dst
   Hacl_Hash_Core_SHA1_legacy_finish(s, dst);
 }
 
+/* SNIPPET_END: Hacl_Hash_SHA1_legacy_hash */
+
+/* SNIPPET_START: Hacl_Hash_Core_SHA1__h0 */
+
 static uint32_t
 Hacl_Hash_Core_SHA1__h0[5U] =
   {
     (uint32_t)0x67452301U, (uint32_t)0xefcdab89U, (uint32_t)0x98badcfeU, (uint32_t)0x10325476U,
     (uint32_t)0xc3d2e1f0U
   };
+
+/* SNIPPET_END: Hacl_Hash_Core_SHA1__h0 */
+
+/* SNIPPET_START: Hacl_Hash_Core_SHA1_legacy_init */
 
 void Hacl_Hash_Core_SHA1_legacy_init(uint32_t *s)
 {
@@ -1262,6 +1316,10 @@ void Hacl_Hash_Core_SHA1_legacy_init(uint32_t *s)
     s[i] = Hacl_Hash_Core_SHA1__h0[i];
   }
 }
+
+/* SNIPPET_END: Hacl_Hash_Core_SHA1_legacy_init */
+
+/* SNIPPET_START: Hacl_Hash_Core_SHA1_legacy_update */
 
 void Hacl_Hash_Core_SHA1_legacy_update(uint32_t *h, uint8_t *l)
 {
@@ -1354,6 +1412,10 @@ void Hacl_Hash_Core_SHA1_legacy_update(uint32_t *h, uint8_t *l)
   h[4U] = ste + he;
 }
 
+/* SNIPPET_END: Hacl_Hash_Core_SHA1_legacy_update */
+
+/* SNIPPET_START: Hacl_Hash_Core_SHA1_legacy_pad */
+
 void Hacl_Hash_Core_SHA1_legacy_pad(uint64_t len, uint8_t *dst)
 {
   uint8_t *dst1 = dst;
@@ -1379,6 +1441,10 @@ void Hacl_Hash_Core_SHA1_legacy_pad(uint64_t len, uint8_t *dst)
   store64_be(dst3, len << (uint32_t)3U);
 }
 
+/* SNIPPET_END: Hacl_Hash_Core_SHA1_legacy_pad */
+
+/* SNIPPET_START: Hacl_Hash_Core_SHA1_legacy_finish */
+
 void Hacl_Hash_Core_SHA1_legacy_finish(uint32_t *s, uint8_t *dst)
 {
   uint32_t *uu____0 = s;
@@ -1387,6 +1453,10 @@ void Hacl_Hash_Core_SHA1_legacy_finish(uint32_t *s, uint8_t *dst)
     store32_be(dst + i * (uint32_t)4U, uu____0[i]);
   }
 }
+
+/* SNIPPET_END: Hacl_Hash_Core_SHA1_legacy_finish */
+
+/* SNIPPET_START: Hacl_Hash_SHA2_update_multi_224 */
 
 void Hacl_Hash_SHA2_update_multi_224(uint32_t *s, uint8_t *blocks, uint32_t n_blocks)
 {
@@ -1398,6 +1468,10 @@ void Hacl_Hash_SHA2_update_multi_224(uint32_t *s, uint8_t *blocks, uint32_t n_bl
   }
 }
 
+/* SNIPPET_END: Hacl_Hash_SHA2_update_multi_224 */
+
+/* SNIPPET_START: Hacl_Hash_SHA2_update_multi_256 */
+
 void Hacl_Hash_SHA2_update_multi_256(uint32_t *s, uint8_t *blocks, uint32_t n_blocks)
 {
   for (uint32_t i = (uint32_t)0U; i < n_blocks; i = i + (uint32_t)1U)
@@ -1407,6 +1481,10 @@ void Hacl_Hash_SHA2_update_multi_256(uint32_t *s, uint8_t *blocks, uint32_t n_bl
     Hacl_Hash_Core_SHA2_update_256(s, block);
   }
 }
+
+/* SNIPPET_END: Hacl_Hash_SHA2_update_multi_256 */
+
+/* SNIPPET_START: Hacl_Hash_SHA2_update_multi_384 */
 
 void Hacl_Hash_SHA2_update_multi_384(uint64_t *s, uint8_t *blocks, uint32_t n_blocks)
 {
@@ -1418,6 +1496,10 @@ void Hacl_Hash_SHA2_update_multi_384(uint64_t *s, uint8_t *blocks, uint32_t n_bl
   }
 }
 
+/* SNIPPET_END: Hacl_Hash_SHA2_update_multi_384 */
+
+/* SNIPPET_START: Hacl_Hash_SHA2_update_multi_512 */
+
 void Hacl_Hash_SHA2_update_multi_512(uint64_t *s, uint8_t *blocks, uint32_t n_blocks)
 {
   for (uint32_t i = (uint32_t)0U; i < n_blocks; i = i + (uint32_t)1U)
@@ -1427,6 +1509,10 @@ void Hacl_Hash_SHA2_update_multi_512(uint64_t *s, uint8_t *blocks, uint32_t n_bl
     Hacl_Hash_Core_SHA2_update_512(s, block);
   }
 }
+
+/* SNIPPET_END: Hacl_Hash_SHA2_update_multi_512 */
+
+/* SNIPPET_START: Hacl_Hash_SHA2_update_last_224 */
 
 void
 Hacl_Hash_SHA2_update_last_224(
@@ -1460,6 +1546,10 @@ Hacl_Hash_SHA2_update_last_224(
   Hacl_Hash_SHA2_update_multi_224(s, tmp, tmp_len / (uint32_t)64U);
 }
 
+/* SNIPPET_END: Hacl_Hash_SHA2_update_last_224 */
+
+/* SNIPPET_START: Hacl_Hash_SHA2_update_last_256 */
+
 void
 Hacl_Hash_SHA2_update_last_256(
   uint32_t *s,
@@ -1491,6 +1581,10 @@ Hacl_Hash_SHA2_update_last_256(
   Hacl_Hash_Core_SHA2_pad_256(total_input_len, tmp_pad);
   Hacl_Hash_SHA2_update_multi_256(s, tmp, tmp_len / (uint32_t)64U);
 }
+
+/* SNIPPET_END: Hacl_Hash_SHA2_update_last_256 */
+
+/* SNIPPET_START: Hacl_Hash_SHA2_update_last_384 */
 
 void
 Hacl_Hash_SHA2_update_last_384(
@@ -1530,6 +1624,10 @@ Hacl_Hash_SHA2_update_last_384(
   Hacl_Hash_SHA2_update_multi_384(s, tmp, tmp_len / (uint32_t)128U);
 }
 
+/* SNIPPET_END: Hacl_Hash_SHA2_update_last_384 */
+
+/* SNIPPET_START: Hacl_Hash_SHA2_update_last_512 */
+
 void
 Hacl_Hash_SHA2_update_last_512(
   uint64_t *s,
@@ -1568,6 +1666,10 @@ Hacl_Hash_SHA2_update_last_512(
   Hacl_Hash_SHA2_update_multi_512(s, tmp, tmp_len / (uint32_t)128U);
 }
 
+/* SNIPPET_END: Hacl_Hash_SHA2_update_last_512 */
+
+/* SNIPPET_START: Hacl_Hash_SHA2_hash_224 */
+
 void Hacl_Hash_SHA2_hash_224(uint8_t *input, uint32_t input_len, uint8_t *dst)
 {
   uint32_t
@@ -1586,6 +1688,10 @@ void Hacl_Hash_SHA2_hash_224(uint8_t *input, uint32_t input_len, uint8_t *dst)
   Hacl_Hash_Core_SHA2_finish_224(s, dst);
 }
 
+/* SNIPPET_END: Hacl_Hash_SHA2_hash_224 */
+
+/* SNIPPET_START: Hacl_Hash_SHA2_hash_256 */
+
 void Hacl_Hash_SHA2_hash_256(uint8_t *input, uint32_t input_len, uint8_t *dst)
 {
   uint32_t
@@ -1603,6 +1709,10 @@ void Hacl_Hash_SHA2_hash_256(uint8_t *input, uint32_t input_len, uint8_t *dst)
   Hacl_Hash_SHA2_update_last_256(s, (uint64_t)blocks_len, rest, rest_len);
   Hacl_Hash_Core_SHA2_finish_256(s, dst);
 }
+
+/* SNIPPET_END: Hacl_Hash_SHA2_hash_256 */
+
+/* SNIPPET_START: Hacl_Hash_SHA2_hash_384 */
 
 void Hacl_Hash_SHA2_hash_384(uint8_t *input, uint32_t input_len, uint8_t *dst)
 {
@@ -1626,6 +1736,10 @@ void Hacl_Hash_SHA2_hash_384(uint8_t *input, uint32_t input_len, uint8_t *dst)
   Hacl_Hash_Core_SHA2_finish_384(s, dst);
 }
 
+/* SNIPPET_END: Hacl_Hash_SHA2_hash_384 */
+
+/* SNIPPET_START: Hacl_Hash_SHA2_hash_512 */
+
 void Hacl_Hash_SHA2_hash_512(uint8_t *input, uint32_t input_len, uint8_t *dst)
 {
   uint64_t
@@ -1648,6 +1762,10 @@ void Hacl_Hash_SHA2_hash_512(uint8_t *input, uint32_t input_len, uint8_t *dst)
   Hacl_Hash_Core_SHA2_finish_512(s, dst);
 }
 
+/* SNIPPET_END: Hacl_Hash_SHA2_hash_512 */
+
+/* SNIPPET_START: Hacl_Hash_Core_SHA2_h224 */
+
 static uint32_t
 Hacl_Hash_Core_SHA2_h224[8U] =
   {
@@ -1655,12 +1773,20 @@ Hacl_Hash_Core_SHA2_h224[8U] =
     (uint32_t)0xffc00b31U, (uint32_t)0x68581511U, (uint32_t)0x64f98fa7U, (uint32_t)0xbefa4fa4U
   };
 
+/* SNIPPET_END: Hacl_Hash_Core_SHA2_h224 */
+
+/* SNIPPET_START: Hacl_Hash_Core_SHA2_h256 */
+
 static uint32_t
 Hacl_Hash_Core_SHA2_h256[8U] =
   {
     (uint32_t)0x6a09e667U, (uint32_t)0xbb67ae85U, (uint32_t)0x3c6ef372U, (uint32_t)0xa54ff53aU,
     (uint32_t)0x510e527fU, (uint32_t)0x9b05688cU, (uint32_t)0x1f83d9abU, (uint32_t)0x5be0cd19U
   };
+
+/* SNIPPET_END: Hacl_Hash_Core_SHA2_h256 */
+
+/* SNIPPET_START: Hacl_Hash_Core_SHA2_h384 */
 
 static uint64_t
 Hacl_Hash_Core_SHA2_h384[8U] =
@@ -1670,6 +1796,10 @@ Hacl_Hash_Core_SHA2_h384[8U] =
     (uint64_t)0xdb0c2e0d64f98fa7U, (uint64_t)0x47b5481dbefa4fa4U
   };
 
+/* SNIPPET_END: Hacl_Hash_Core_SHA2_h384 */
+
+/* SNIPPET_START: Hacl_Hash_Core_SHA2_h512 */
+
 static uint64_t
 Hacl_Hash_Core_SHA2_h512[8U] =
   {
@@ -1677,6 +1807,10 @@ Hacl_Hash_Core_SHA2_h512[8U] =
     (uint64_t)0xa54ff53a5f1d36f1U, (uint64_t)0x510e527fade682d1U, (uint64_t)0x9b05688c2b3e6c1fU,
     (uint64_t)0x1f83d9abfb41bd6bU, (uint64_t)0x5be0cd19137e2179U
   };
+
+/* SNIPPET_END: Hacl_Hash_Core_SHA2_h512 */
+
+/* SNIPPET_START: Hacl_Hash_Core_SHA2_init_224 */
 
 void Hacl_Hash_Core_SHA2_init_224(uint32_t *s)
 {
@@ -1686,6 +1820,10 @@ void Hacl_Hash_Core_SHA2_init_224(uint32_t *s)
   }
 }
 
+/* SNIPPET_END: Hacl_Hash_Core_SHA2_init_224 */
+
+/* SNIPPET_START: Hacl_Hash_Core_SHA2_init_256 */
+
 void Hacl_Hash_Core_SHA2_init_256(uint32_t *s)
 {
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i = i + (uint32_t)1U)
@@ -1693,6 +1831,10 @@ void Hacl_Hash_Core_SHA2_init_256(uint32_t *s)
     s[i] = Hacl_Hash_Core_SHA2_h256[i];
   }
 }
+
+/* SNIPPET_END: Hacl_Hash_Core_SHA2_init_256 */
+
+/* SNIPPET_START: Hacl_Hash_Core_SHA2_init_384 */
 
 void Hacl_Hash_Core_SHA2_init_384(uint64_t *s)
 {
@@ -1702,6 +1844,10 @@ void Hacl_Hash_Core_SHA2_init_384(uint64_t *s)
   }
 }
 
+/* SNIPPET_END: Hacl_Hash_Core_SHA2_init_384 */
+
+/* SNIPPET_START: Hacl_Hash_Core_SHA2_init_512 */
+
 void Hacl_Hash_Core_SHA2_init_512(uint64_t *s)
 {
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i = i + (uint32_t)1U)
@@ -1709,6 +1855,10 @@ void Hacl_Hash_Core_SHA2_init_512(uint64_t *s)
     s[i] = Hacl_Hash_Core_SHA2_h512[i];
   }
 }
+
+/* SNIPPET_END: Hacl_Hash_Core_SHA2_init_512 */
+
+/* SNIPPET_START: Hacl_Hash_Core_SHA2_update_224 */
 
 void Hacl_Hash_Core_SHA2_update_224(uint32_t *hash1, uint8_t *block)
 {
@@ -1783,6 +1933,10 @@ void Hacl_Hash_Core_SHA2_update_224(uint32_t *hash1, uint8_t *block)
   }
 }
 
+/* SNIPPET_END: Hacl_Hash_Core_SHA2_update_224 */
+
+/* SNIPPET_START: Hacl_Hash_Core_SHA2_update_256 */
+
 void Hacl_Hash_Core_SHA2_update_256(uint32_t *hash1, uint8_t *block)
 {
   uint32_t hash11[8U] = { 0U };
@@ -1855,6 +2009,10 @@ void Hacl_Hash_Core_SHA2_update_256(uint32_t *hash1, uint8_t *block)
     hash1[i] = xi + yi;
   }
 }
+
+/* SNIPPET_END: Hacl_Hash_Core_SHA2_update_256 */
+
+/* SNIPPET_START: Hacl_Hash_Core_SHA2_update_384 */
 
 void Hacl_Hash_Core_SHA2_update_384(uint64_t *hash1, uint8_t *block)
 {
@@ -1931,6 +2089,10 @@ void Hacl_Hash_Core_SHA2_update_384(uint64_t *hash1, uint8_t *block)
   }
 }
 
+/* SNIPPET_END: Hacl_Hash_Core_SHA2_update_384 */
+
+/* SNIPPET_START: Hacl_Hash_Core_SHA2_update_512 */
+
 void Hacl_Hash_Core_SHA2_update_512(uint64_t *hash1, uint8_t *block)
 {
   uint64_t hash11[8U] = { 0U };
@@ -2006,6 +2168,10 @@ void Hacl_Hash_Core_SHA2_update_512(uint64_t *hash1, uint8_t *block)
   }
 }
 
+/* SNIPPET_END: Hacl_Hash_Core_SHA2_update_512 */
+
+/* SNIPPET_START: Hacl_Hash_Core_SHA2_pad_224 */
+
 void Hacl_Hash_Core_SHA2_pad_224(uint64_t len, uint8_t *dst)
 {
   uint8_t *dst1 = dst;
@@ -2031,6 +2197,10 @@ void Hacl_Hash_Core_SHA2_pad_224(uint64_t len, uint8_t *dst)
   store64_be(dst3, len << (uint32_t)3U);
 }
 
+/* SNIPPET_END: Hacl_Hash_Core_SHA2_pad_224 */
+
+/* SNIPPET_START: Hacl_Hash_Core_SHA2_pad_256 */
+
 void Hacl_Hash_Core_SHA2_pad_256(uint64_t len, uint8_t *dst)
 {
   uint8_t *dst1 = dst;
@@ -2055,6 +2225,10 @@ void Hacl_Hash_Core_SHA2_pad_256(uint64_t len, uint8_t *dst)
         % (uint32_t)64U;
   store64_be(dst3, len << (uint32_t)3U);
 }
+
+/* SNIPPET_END: Hacl_Hash_Core_SHA2_pad_256 */
+
+/* SNIPPET_START: Hacl_Hash_Core_SHA2_pad_384 */
 
 void Hacl_Hash_Core_SHA2_pad_384(FStar_UInt128_uint128 len, uint8_t *dst)
 {
@@ -2095,6 +2269,10 @@ void Hacl_Hash_Core_SHA2_pad_384(FStar_UInt128_uint128 len, uint8_t *dst)
   store128_be(dst3, len_);
 }
 
+/* SNIPPET_END: Hacl_Hash_Core_SHA2_pad_384 */
+
+/* SNIPPET_START: Hacl_Hash_Core_SHA2_pad_512 */
+
 void Hacl_Hash_Core_SHA2_pad_512(FStar_UInt128_uint128 len, uint8_t *dst)
 {
   uint8_t *dst1 = dst;
@@ -2134,6 +2312,10 @@ void Hacl_Hash_Core_SHA2_pad_512(FStar_UInt128_uint128 len, uint8_t *dst)
   store128_be(dst3, len_);
 }
 
+/* SNIPPET_END: Hacl_Hash_Core_SHA2_pad_512 */
+
+/* SNIPPET_START: Hacl_Hash_Core_SHA2_finish_224 */
+
 void Hacl_Hash_Core_SHA2_finish_224(uint32_t *s, uint8_t *dst)
 {
   uint32_t *uu____0 = s;
@@ -2142,6 +2324,10 @@ void Hacl_Hash_Core_SHA2_finish_224(uint32_t *s, uint8_t *dst)
     store32_be(dst + i * (uint32_t)4U, uu____0[i]);
   }
 }
+
+/* SNIPPET_END: Hacl_Hash_Core_SHA2_finish_224 */
+
+/* SNIPPET_START: Hacl_Hash_Core_SHA2_finish_256 */
 
 void Hacl_Hash_Core_SHA2_finish_256(uint32_t *s, uint8_t *dst)
 {
@@ -2152,6 +2338,10 @@ void Hacl_Hash_Core_SHA2_finish_256(uint32_t *s, uint8_t *dst)
   }
 }
 
+/* SNIPPET_END: Hacl_Hash_Core_SHA2_finish_256 */
+
+/* SNIPPET_START: Hacl_Hash_Core_SHA2_finish_384 */
+
 void Hacl_Hash_Core_SHA2_finish_384(uint64_t *s, uint8_t *dst)
 {
   uint64_t *uu____0 = s;
@@ -2161,6 +2351,10 @@ void Hacl_Hash_Core_SHA2_finish_384(uint64_t *s, uint8_t *dst)
   }
 }
 
+/* SNIPPET_END: Hacl_Hash_Core_SHA2_finish_384 */
+
+/* SNIPPET_START: Hacl_Hash_Core_SHA2_finish_512 */
+
 void Hacl_Hash_Core_SHA2_finish_512(uint64_t *s, uint8_t *dst)
 {
   uint64_t *uu____0 = s;
@@ -2169,6 +2363,10 @@ void Hacl_Hash_Core_SHA2_finish_512(uint64_t *s, uint8_t *dst)
     store64_be(dst + i * (uint32_t)8U, uu____0[i]);
   }
 }
+
+/* SNIPPET_END: Hacl_Hash_Core_SHA2_finish_512 */
+
+/* SNIPPET_START: Hacl_Hash_Core_SHA2_Constants_k224_256 */
 
 uint32_t
 Hacl_Hash_Core_SHA2_Constants_k224_256[64U] =
@@ -2190,6 +2388,10 @@ Hacl_Hash_Core_SHA2_Constants_k224_256[64U] =
     (uint32_t)0x748f82eeU, (uint32_t)0x78a5636fU, (uint32_t)0x84c87814U, (uint32_t)0x8cc70208U,
     (uint32_t)0x90befffaU, (uint32_t)0xa4506cebU, (uint32_t)0xbef9a3f7U, (uint32_t)0xc67178f2U
   };
+
+/* SNIPPET_END: Hacl_Hash_Core_SHA2_Constants_k224_256 */
+
+/* SNIPPET_START: Hacl_Hash_Core_SHA2_Constants_k384_512 */
 
 uint64_t
 Hacl_Hash_Core_SHA2_Constants_k384_512[80U] =
@@ -2222,4 +2424,6 @@ Hacl_Hash_Core_SHA2_Constants_k384_512[80U] =
     (uint64_t)0x431d67c49c100d4cU, (uint64_t)0x4cc5d4becb3e42b6U, (uint64_t)0x597f299cfc657e2aU,
     (uint64_t)0x5fcb6fab3ad6faecU, (uint64_t)0x6c44198c4a475817U
   };
+
+/* SNIPPET_END: Hacl_Hash_Core_SHA2_Constants_k384_512 */
 

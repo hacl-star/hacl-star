@@ -21,7 +21,6 @@
  * SOFTWARE.
  */
 
-#include "libintvector.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>

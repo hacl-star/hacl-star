@@ -34,19 +34,47 @@
 #include "Hacl_Kremlib.h"
 
 
+/* SNIPPET_START: Hacl_Poly1305_32_blocklen */
+
 extern uint32_t Hacl_Poly1305_32_blocklen;
+
+/* SNIPPET_END: Hacl_Poly1305_32_blocklen */
+
+/* SNIPPET_START: Hacl_Poly1305_32_poly1305_ctx */
 
 typedef uint64_t *Hacl_Poly1305_32_poly1305_ctx;
 
+/* SNIPPET_END: Hacl_Poly1305_32_poly1305_ctx */
+
+/* SNIPPET_START: Hacl_Poly1305_32_poly1305_init */
+
 void Hacl_Poly1305_32_poly1305_init(uint64_t *ctx, uint8_t *key);
+
+/* SNIPPET_END: Hacl_Poly1305_32_poly1305_init */
+
+/* SNIPPET_START: Hacl_Poly1305_32_poly1305_update1 */
 
 void Hacl_Poly1305_32_poly1305_update1(uint64_t *ctx, uint8_t *text);
 
+/* SNIPPET_END: Hacl_Poly1305_32_poly1305_update1 */
+
+/* SNIPPET_START: Hacl_Poly1305_32_poly1305_update */
+
 void Hacl_Poly1305_32_poly1305_update(uint64_t *ctx, uint32_t len, uint8_t *text);
+
+/* SNIPPET_END: Hacl_Poly1305_32_poly1305_update */
+
+/* SNIPPET_START: Hacl_Poly1305_32_poly1305_finish */
 
 void Hacl_Poly1305_32_poly1305_finish(uint8_t *tag, uint8_t *key, uint64_t *ctx);
 
+/* SNIPPET_END: Hacl_Poly1305_32_poly1305_finish */
+
+/* SNIPPET_START: Hacl_Poly1305_32_poly1305_mac */
+
 void Hacl_Poly1305_32_poly1305_mac(uint8_t *tag, uint32_t len, uint8_t *text, uint8_t *key);
+
+/* SNIPPET_END: Hacl_Poly1305_32_poly1305_mac */
 
 #define __Hacl_Poly1305_32_H_DEFINED
 #endif
