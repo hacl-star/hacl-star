@@ -1,0 +1,10 @@
+lib/Hacl_NaCl_bindings.cmx: 
+lib_gen/Hacl_NaCl_gen.exe: lib/Hacl_NaCl_bindings.cmx lib_gen/Hacl_NaCl_gen.cmx 
+lib/Hacl_Ed25519_bindings.cmx: 
+lib_gen/Hacl_Ed25519_gen.exe: lib/Hacl_Ed25519_bindings.cmx lib_gen/Hacl_Ed25519_gen.cmx 
+lib/EverCrypt_HMAC_bindings.cmx: lib/Hacl_Spec_bindings.cmx lib/Hacl_Spec_stubs.cmx
+lib_gen/EverCrypt_HMAC_gen.exe: lib/Hacl_Spec_bindings.cmx lib/Hacl_Spec_stubs.cmx lib/EverCrypt_HMAC_bindings.cmx lib_gen/EverCrypt_HMAC_gen.cmx 
+lib/Hacl_Spec_bindings.cmx: 
+lib_gen/Hacl_Spec_gen.exe: lib/Hacl_Spec_bindings.cmx lib_gen/Hacl_Spec_gen.cmx 
+lib/EverCrypt_Curve25519_bindings.cmx: 
+lib_gen/EverCrypt_Curve25519_gen.exe: lib/EverCrypt_Curve25519_bindings.cmx lib_gen/EverCrypt_Curve25519_gen.cmx 

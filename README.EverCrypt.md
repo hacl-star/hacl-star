@@ -55,7 +55,6 @@ In upcoming releases, we aim to include:
 - fallback C versions for all algorithms
 - NIST P curves
 - AES-CBC
-- an up-to-date Ed25519
 
 | Algorithm           | C version                | ASM version                | Agile API |
 | ------------------- | ------------------------ | -------------------------- | --------- |
@@ -79,7 +78,7 @@ In upcoming releases, we aim to include:
 |                     |                          |                            |           |
 | **ECC**             |                          |                            |           |
 | Curve25519          | ✔︎                        | ✔︎ (BMI2 + ADX)             |           |
-| Ed25519             | ✔︎⁵                       |                            |           |
+| Ed25519             | ✔︎                        |                            |           |
 |                     |                          |                            |           |
 | **Ciphers**         |                          |                            |           |
 | Chacha20            | ✔︎                        |                            |           |
@@ -91,7 +90,6 @@ In upcoming releases, we aim to include:
 ³: SHA2-256 only; SHA2-224, SHA2-384 and SHA2-512 are pure C  
 ⁴: HMAC and HKDF on top of the agile hash API, so HMAC-SHA2-256 and
    HKDF-SHA2-256 leverage the assembly version under the hood  
-⁵: legacy implementation 
 
 # Building or Integrating EverCrypt
 
@@ -110,40 +108,57 @@ As we work our way towards our first official release, bear in mind that:
 
 ## Finding the code EverCrypt produces
 
-Release branches (e.g.
-[evercrypt-v0.1+](https://github.com/project-everest/hacl-star/tree/evercrypt-v0.1+))
-contain a copy of the generated C/ASM code under
-version control. This is by far the easiest way to obtain a copy of EverCrypt.
+The generated code is under version control in the present repository. This is
+by far the easiest way to obtain a copy of EverCrypt.
 
 EverCrypt's C/ASM code is packaged as a set of self-contained files in one of the
 `dist/*` directories where `*` is the name of a distribution. A distribution
 corresponds to a particular flavor of generated C code.
 
-| Distribution  | GCC-like | MSVC | C89 compiler |
-| ------------- | -------- | ---- | ------------ |
-| compact-gcc¹  | ✔︎        |      |              |
-| compact       | ✔︎        |      |              |
-| compact-msvc² | ✔︎        | ✔︎    |              |
-| compact-c89³  | ✔︎        | ✔︎    | ✔︎            |
+There is a total order on distributions, where:
 
-¹: x86-64 only: assumes `unsigned __int128`  
-²: relies on `alloca` to avoid C11 VLA for the sake of MSVC; relies on KreMLin
-   for tail-call optimizations; relies on an unverified uint128 implementation
-   using compiler intrinsics for MSVC  
-³: relies on `alloca`; eliminates compound literals and enforces C89 scope to
-   generate syntactically C89-compliant code; code still relies on inttypes.h
-   and other headers that you may have to provide depending on your target; does
-   not include Merkle Trees
+```
+c89-compatible <= msvc-compatible <= gcc-compatible <= gcc64-only
+```
+
+- The C89 distribution will work with the most C compilers; it relies on
+  `alloca`; eliminates compound literals and enforces C89 scope to generate
+  syntactically C89-compliant code; code still relies on inttypes.h and other
+  headers that you may have to provide depending on your target. It does not
+  include Merkle Trees and the code is very verbose.
+- The MSVC distribution relies on `alloca` to avoid C11 VLA for the sake of
+  MSVC; relies on KreMLin for tail-call optimizations. It also does not use GCC
+  inline assembly for Curve25519 and uses external linkage instead.
+- The GCC distribution relies on C11 VLA and therefore does not work with MSVC.
+- The GCC64 distribution assumes a native `unsigned __int128` type which can be
+  manipulated via the standard arithmetic operators. This generates very compact
+  code but only works on 64-bit GCC and Clang.
+
+In addition to picking one of these distributions, you will need the
+`dist/kremlin` directory which contains all the required headers from KreMLin.
+In particular, these headers contain implementations of FStar.UInt128, the
+module for 128-bit arithmetic. The `kremlin/include/kremlin/internal/types.h`
+header will attempt to use C preprocessor macros to pick the right UInt128
+implementation for your platform:
+- 64-bit environment with GCC: hand-written implementation using `unsigned
+  __int128` (unverified)
+- MSVC: hand-written implementation using intrinsics (also unverified)
+- every other case, or when `KRML_VERIFIED_UINT128` is defined at compile-time:
+  verified (slow) implementation extracted from FStar.UInt128
+
+Other distributions are either for distinguished consumers of our code who need
+specific KreMLin compilation options (e.g. Mozilla, CCF) or for testing (e.g.
+portable-gcc-compatible, which compiles without `-march=native`, to ensure all
+our assumptions about CPU targets are explicit in our Makefile).
 
 ## Integrating EverCrypt with your code
 
 Each distribution of EverCrypt contains a GNU Makefile that generates a static
-library and a shared object. The code depends on `kremlib`, which contains
-verified, extracted C implementations of some F\* standard library functions.
-For release branches, a copy of `kremlib` is provided in `dist/kremlib`.
+library and a shared object. The code depends on KreMLin's includes, provided in
+`dist/kremlin`.
 
 - When integrating EverCrypt, one can pick a distribution, along with the
-  `kremlib` directory, thus giving a "wholesale" integration of
+  `kremlin` directory, thus giving a "wholesale" integration of
   the EverCrypt library.
 - For a more gradual integration, consumers can integrate algorithms one at a
   time, by cherry-picking the files that they are interested in. Each header
@@ -200,26 +215,14 @@ in F\*.
 
 # Applications
 
-This repository also contains two verified applications built on top of EverCrypt.
+This repository also contains one verified application built on top of EverCrypt.
 
 ## Merkle Trees
 
 We offer a Merkle Tree library, implementing fast cryptographic hashes for
 blockchains, in [secure_api/merkle_tree](secure_api/merkle_tree).
 
-The generated C code is also built as part of the container and can be found in
-`$HOME/everest/hacl-star/secure_api/merkle_tree/dist`.
-
-## TLS record layer
-
-We offer an agile cryptographic model which is the basis for proofs of
-cryptographic security of the TLS 1.3 record layer, in
-[secure_api](secure_api/).  For more details, see:
-
-[Implementing and Proving the TLS 1.3 Record Layer](https://eprint.iacr.org/2016/1178)
-Karthikeyan Bhargavan, Antoine Delignat-Lavaud, Cedric Fournet, Markulf
-Kohlweiss, Jianyang Pan, Jonathan Protzenko, Aseem Rastogi, Nikhil Swamy,
-Santiago Zanella-Beguelin, Jean-Karim Zinzindohoue
+Merkle Trees are included in every distribution except for the C89 one.
 
 # Components of EverCrypt
 
@@ -248,6 +251,12 @@ EverCrypt relies on [Low\*], a subset of F\*.  Programs written in Low\* compile
 to readable, idiomatic C code using the [KreMLin] compiler.
 
 # Research
+
+[EverCrypt: A Fast, Verified, Cross-Platform Cryptographic Provider](https://eprint.iacr.org/2019/757)  
+Jonathan Protzenko, Bryan Parno, Aymeric Fromherz, Chris Hawblitzel, Marina
+Polubelova, Karthikeyan Bhargavan, Benjamin Beurdouche, Joonwon Choi, Antoine
+Delignat-Lavaud, Cedric Fournet, Tahina Ramananandro, Aseem Rastogi, Nikhil
+Swamy, Christoph Wintersteiger and Santiago Zanella-Beguelin
 
 The HACL\* library:
 - [HACL\*: A Verified Modern Cryptographic Library](http://eprint.iacr.org/2017/536)  

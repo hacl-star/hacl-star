@@ -22,7 +22,7 @@ noturbo() {
 
 OPENSSL=openssl-1.1.1b
 PAR=-j20
-CONFIGS="gcc-7,g++-7,compact-gcc gcc-8,g++-8,compact-gcc clang-7,clang++-7,compact-gcc clang-8,clang++-8,compact-gcc"
+CONFIGS="gcc-7,g++-7,gcc64-only gcc-8,g++-8,gcc64-only clang-7,clang++-7,gcc64-only clang-8,clang++-8,gcc64-only"
 OPENSSL_CONFIGS="openssl-default, openssl-no-asm,no-asm"
 SAMPLES=1000
 
@@ -38,7 +38,7 @@ if [ "$(expr substr $(uname -s) 1 6)" == "CYGWIN" ]; then
     }
   OPENSSL_CONFIG="./Configure mingw64"
   OPENSSL_CFLAGS+=" -fno-asynchronous-unwind-tables"
-  CONFIGS="x86_64-w64-mingw32-gcc,x86_64-w64-mingw32-g++,compact-gcc"
+  CONFIGS="x86_64-w64-mingw32-gcc,x86_64-w64-mingw32-g++,gcc64-only"
   CMAKE_EXTRA="-DCMAKE_AR=/usr/bin/x86_64-w64-mingw32-ar.exe -DUSE_BCRYPT=ON"
 else
   if [ "`whoami`" != "root" ]; then

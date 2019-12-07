@@ -2,7 +2,7 @@ project(evercrypt LANGUAGES C ASM)
 cmake_minimum_required(VERSION 3.5)
 
 if (NOT EVERCRYPT_SRC_DIR)
-  set(EVERCRYPT_SRC_DIR $ENV{HACL_HOME}/dist/compact-gcc CACHE PATH "Where to find the EverCrypt sources.")
+  set(EVERCRYPT_SRC_DIR $ENV{HACL_HOME}/dist/gcc64-only CACHE PATH "Where to find the EverCrypt sources.")
 endif()
 get_filename_component(EVERCRYPT_SRC_DIR ${EVERCRYPT_SRC_DIR} ABSOLUTE)
 message("-- Using EverCrypt at ${EVERCRYPT_SRC_DIR}")
