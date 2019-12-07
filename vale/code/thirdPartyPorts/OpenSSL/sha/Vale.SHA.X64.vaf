@@ -723,10 +723,10 @@ procedure sha_update_bytes(
     let hash_out := le_bytes_to_hash(le_seq_quad32_to_bytes(new_ctx));
 
     // Lots of OBSERVE below
-    assert old(buffer128_read(ctx_b, 0, mem)) == index(old_ctx, 0);
-    assert old(buffer128_read(ctx_b, 1, mem)) == index(old_ctx, 1);
-    assert     buffer128_read(ctx_b, 0, mem)  == index(new_ctx, 0);
-    assert     buffer128_read(ctx_b, 1, mem)  == index(new_ctx, 1);
+//    assert old(buffer128_read(ctx_b, 0, mem)) == index(old_ctx, 0);
+//    assert old(buffer128_read(ctx_b, 1, mem)) == index(old_ctx, 1);
+//    assert     buffer128_read(ctx_b, 0, mem)  == index(new_ctx, 0);
+//    assert     buffer128_read(ctx_b, 1, mem)  == index(new_ctx, 1);
 
     let input_LE := slice(buffer128_as_seq(mem, in_b), 0, 4*old(num));
     let input_BE := reverse_bytes_nat32_quad32_seq(input_LE);

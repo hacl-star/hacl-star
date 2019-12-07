@@ -41,7 +41,22 @@ let mul_nat_helper x y =
 
 let va_fuel_default () = 0
 
-let va_opr_lemma_Mem s base offset b index t =
+let lemma_opr_Mem (s:va_state) (base:va_operand) (offset:int) (b:M.buffer64) (index:int) (t:taint) : Lemma
+  (requires (
+    let h = s.vs_heap.vf_heap in
+    M.mem_inv s.vs_heap /\
+    OReg? base /\
+    valid_src_addr h b index /\
+    M.valid_taint_buf64 b h s.vs_memTaint t /\
+    eval_operand base s + offset == M.buffer_addr b h + 8 * index
+  ))
+  (ensures (
+    let h = s.vs_heap.vf_heap in
+    valid_operand (va_opr_code_Mem base offset t) s /\
+    M.load_mem64 (M.buffer_addr b h + 8 * index) (s.vs_heap.vf_heap) == M.buffer_read b index h
+  ))
+  =
+  Vale.X64.Memory_Sems.reveal_mem_inv ();
   let h = M.get_vale_heap s.vs_heap in
   let t = va_opr_code_Mem base offset t in
   M.lemma_valid_mem64 b index h;
@@ -49,9 +64,22 @@ let va_opr_lemma_Mem s base offset b index t =
   assert (valid_buf_maddr64 (eval_maddr m s) h s.vs_memTaint b index t);
   M.lemma_load_mem64 b index h
 
-let va_opr_lemma_Stack s base offset t = ()
-
-let va_opr_lemma_Mem128 s base offset t b index =
+let lemma_opr_Mem128 (s:va_state) (base:va_operand) (offset:int) (t:taint) (b:M.buffer128) (index:int) : Lemma
+  (requires (
+    let h = s.vs_heap.vf_heap in
+    M.mem_inv s.vs_heap /\
+    OReg? base /\
+    valid_src_addr h b index /\
+    M.valid_taint_buf128 b h s.vs_memTaint t /\
+    eval_operand base s + offset == M.buffer_addr b h + 16 * index
+  ))
+  (ensures (
+    let h = s.vs_heap.vf_heap in
+    valid_operand128 (va_opr_code_Mem128 base offset t) s /\
+    M.load_mem128 (M.buffer_addr b h + 16 * index) (M.get_vale_heap s.vs_heap) == M.buffer_read b index h
+  ))
+  =
+  Vale.X64.Memory_Sems.reveal_mem_inv ();
   let h = M.get_vale_heap s.vs_heap in
   let t = va_opr_code_Mem128 base offset t in
   M.lemma_valid_mem128 b index h;

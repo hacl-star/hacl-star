@@ -209,20 +209,6 @@ unfold let va_opr_code_Mem (o:va_operand) (offset:int) (t:taint) : va_operand =
   | OReg r -> OMem (MReg (Reg 0 r) offset, t)
   | _ -> OMem (MConst 42, t)
 
-val va_opr_lemma_Mem (s:va_state) (base:va_operand) (offset:int) (b:M.buffer64) (index:int) (t:taint) : Lemma
-  (requires (
-    let h = M.get_vale_heap s.vs_heap in
-    OReg? base /\
-    valid_src_addr h b index /\
-    M.valid_taint_buf64 b h s.vs_memTaint t /\
-    eval_operand base s + offset == M.buffer_addr b h + 8 * index
-  ))
-  (ensures (
-    let h = M.get_vale_heap s.vs_heap in
-    valid_operand (va_opr_code_Mem base offset t) s /\
-    M.load_mem64 (M.buffer_addr b h + 8 * index) h == M.buffer_read b index h
-  ))
-
 [@va_qattr]
 unfold let va_opr_code_Stack (o:va_operand) (offset:int) (t:taint) : va_operand =
   match o with
@@ -230,32 +216,11 @@ unfold let va_opr_code_Stack (o:va_operand) (offset:int) (t:taint) : va_operand 
   | OReg r -> OStack (MReg (Reg 0 r) offset, t)
   | _ -> OStack (MConst 42, t)
 
-val va_opr_lemma_Stack (s:va_state) (base:va_operand) (offset:int) (t:taint) : Lemma
-  (requires
-    OReg? base /\
-    S.valid_stack_slot64 (eval_operand base s + offset) s.vs_stack t s.vs_stackTaint
-  )
-  (ensures True)
-
 [@va_qattr]
 unfold let va_opr_code_Mem128 (o:va_operand) (offset:int) (t:taint) : va_operand128 =
   match o with
   | OReg r -> OMem (MReg (Reg 0 r) offset, t)
   | _ -> OMem (MConst 42, t)
-
-val va_opr_lemma_Mem128 (s:va_state) (base:va_operand) (offset:int) (t:taint) (b:M.buffer128) (index:int) : Lemma
-  (requires (
-    let h = M.get_vale_heap s.vs_heap in
-    OReg? base /\
-    valid_src_addr h b index /\
-    M.valid_taint_buf128 b h s.vs_memTaint t /\
-    eval_operand base s + offset == M.buffer_addr b h + 16 * index
-  ))
-  (ensures (
-    let h = M.get_vale_heap s.vs_heap in
-    valid_operand128 (va_opr_code_Mem128 base offset t) s /\
-    M.load_mem128 (M.buffer_addr b h + 16 * index) h == M.buffer_read b index h
-  ))
 
 val taint_at (memTaint:M.memtaint) (addr:int) : taint
 
