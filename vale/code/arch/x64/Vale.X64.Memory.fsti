@@ -10,11 +10,14 @@ unfold let vale_heap = vale_heap
 unfold let vale_full_heap = vale_full_heap
 unfold let heaplet_id = heaplet_id
 
-[@"opaque_to_smt"]
+val mem_inv (h:vale_full_heap) : prop0
+
+[@va_qattr]
 let get_vale_heap (vhi:vale_full_heap) : vale_heap = vhi.vf_heap
 
 let get_one_vale_heap (vhi:vale_full_heap) : vale_heap = vhi.vf_heap
 
+[@va_qattr]
 let set_vale_heap (vfh:vale_full_heap) (vh:vale_heap) : vale_full_heap =
   {vf_layout = vfh.vf_layout; vf_heap = vh; vf_heaplets = vfh.vf_heaplets}
 

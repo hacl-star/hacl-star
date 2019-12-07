@@ -9,6 +9,7 @@ open Vale.X64.Memory
 open Vale.X64.Stack_i
 module Flags = Vale.X64.Flags
 module Regs = Vale.X64.Regs
+module Map16 = Vale.Lib.Map16
 
 noeq type vale_state = {
   vs_ok: bool;
@@ -124,7 +125,10 @@ let valid_src_operand128 (o:operand128) (s:vale_state) : prop0 =
 
 [@va_qattr]
 let state_eta (s:vale_state) : vale_state =
-  {s with vs_regs = Regs.eta s.vs_regs}
+  {s with
+    vs_regs = Regs.eta s.vs_regs;
+    vs_heap = {s.vs_heap with vf_heaplets = Map16.eta s.vs_heap.vf_heaplets};
+  }
 
 [@va_qattr]
 let state_eq (s0:vale_state) (s1:vale_state) : prop0 =

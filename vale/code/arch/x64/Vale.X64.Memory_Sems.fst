@@ -21,6 +21,8 @@ let same_domain h m = Set.equal (IB.addrs_set (_ih h)) (Map.domain m)
 
 let lemma_same_domains h m1 m2 = ()
 
+let reveal_mem_inv () = ()
+
 let get_heap h = I.down_mem (_ih h)
 
 let upd_heap h m = mi_heap_upd h m
@@ -28,6 +30,8 @@ let upd_heap h m = mi_heap_upd h m
 let lemma_upd_get_heap h = I.down_up_identity (_ih h)
 
 let lemma_get_upd_heap h m = I.up_down_identity (_ih h) m
+
+let lemma_heap_impl = ()
 
 let lemma_heap_get_heap h = FStar.Pervasives.reveal_opaque (`%get_vale_heap) get_vale_heap
 
@@ -376,6 +380,7 @@ let in_bounds128 (h:vale_heap) (b:buffer128) (i:nat{i < buffer_length b}) : Lemm
           j < (_ih h).IB.addrs b + DV.length (get_downview b.bsrc)) =
   length_t_eq TUInt128 b
 
+#push-options "--z3rlimit 20"
 #restart-solver
 let bytes_valid128 ptr h =
   FStar.Pervasives.reveal_opaque (`%S.valid_addr128) S.valid_addr128;
@@ -399,6 +404,7 @@ let bytes_valid128 ptr h =
   I.addrs_set_mem (_ih h) b (ptr+13);
   I.addrs_set_mem (_ih h) b (ptr+14);
   I.addrs_set_mem (_ih h) b (ptr+15)
+#pop-options
 
 let equiv_load_mem64 ptr h =
   let t = TUInt64 in

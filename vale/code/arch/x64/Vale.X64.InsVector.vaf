@@ -541,6 +541,7 @@ procedure Store128_buffer(
         valid_taint_buf128(b, mem, memTaint, t);
         mem == old(buffer128_write(b, index, src, mem));
 {
+    reveal_mem_inv();
     low_lemma_store_mem128(b, #nat(index), old(src), old(mem));
     lemma_valid_taint128(b, old(#memTaint_t(memTaint)), old(mem), #nat(index), t);
     same_memTaint128(b, old(mem), mem, old(#memTaint_t(memTaint)), #memTaint_t(memTaint));
@@ -565,6 +566,7 @@ procedure Store64_buffer128(
         valid_taint_buf128(b, mem, memTaint, t);
         mem == old(buffer128_write(b, index, insert_nat64_opaque(old(buffer128_read(b, index, mem)), src, if upper then 1 else 0), mem));
 {
+    reveal_mem_inv();
     low_lemma_valid_mem128_64(b, #nat(index), old(mem));
     low_lemma_store_mem128_lo64(b, #nat(index), old(src), old(mem));
     low_lemma_store_mem128_hi64(b, #nat(index), old(src), old(mem));

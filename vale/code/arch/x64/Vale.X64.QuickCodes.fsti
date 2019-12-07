@@ -2,6 +2,7 @@ module Vale.X64.QuickCodes
 // Optimized weakest precondition generation for 'quick' procedures
 open FStar.Mul
 open Vale.Def.Prop_s
+open Vale.Arch.HeapImpl
 open Vale.X64.Machine_s
 open Vale.X64.Memory
 open Vale.X64.Stack_i
@@ -377,8 +378,32 @@ let va_state_match (s0:vale_state) (s1:vale_state) : Pure Type0
 
 [@va_qattr]
 unfold let wp_sound_code_pre (#a:Type0) (#c:code) (qc:quickCode a c) (s0:vale_state) (k:(s0':vale_state{s0 == s0'}) -> vale_state -> a -> Type0) : Type0 =
-  forall (ok:bool) (regs:Regs.t) (flags:Flags.t) (mem:vale_full_heap) (stack:vale_stack) (memTaint:memtaint) (stackTaint:memtaint).
-    let s0' = {vs_ok = ok; vs_regs = regs; vs_flags = flags; vs_heap = mem; vs_stack = stack; vs_memTaint = memTaint; vs_stackTaint = stackTaint} in
+  forall
+      (ok:bool)
+      (regs:Regs.t)
+      (flags:Flags.t)
+      //(mem:vale_full_heap) // splitting mem into its components makes the VCs slightly cleaner:
+      (mem_layout:vale_heap_layout)
+      (mem_heap:vale_heap)
+      (mem_heaplets:Vale.Lib.Map16.map16 vale_heap)
+      (stack:vale_stack)
+      (memTaint:memtaint)
+      (stackTaint:memtaint)
+      .
+    let mem = {
+      vf_layout = mem_layout;
+      vf_heap = mem_heap;
+      vf_heaplets = mem_heaplets;
+    } in
+    let s0' = {
+      vs_ok = ok;
+      vs_regs = regs;
+      vs_flags = flags;
+      vs_heap = mem;
+      vs_stack = stack;
+      vs_memTaint = memTaint;
+      vs_stackTaint = stackTaint
+    } in
     s0 == s0' ==> QProc?.wp qc (state_eta s0') (k (state_eta s0'))
 
 unfold let wp_sound_code_post (#a:Type0) (#c:code) (qc:quickCode a c) (s0:vale_state) (k:(s0':vale_state{s0 == s0'}) -> vale_state -> a -> Type0) ((sN:vale_state), (fN:fuel), (gN:a)) : Type0 =
@@ -396,6 +421,9 @@ unfold let normal_steps : list string =
     `%Mkvale_state?.vs_stack;
     `%Mkvale_state?.vs_memTaint;
     `%Mkvale_state?.vs_stackTaint;
+    `%Mkvale_full_heap?.vf_layout;
+    `%Mkvale_full_heap?.vf_heap;
+    `%Mkvale_full_heap?.vf_heaplets;
     `%QProc?.wp;
     `%QProc?.mods;
     `%OConst?;

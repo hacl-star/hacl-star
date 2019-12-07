@@ -29,6 +29,8 @@ open Vale.X64.CPU_Features_s
 open Vale.X64
 open Vale.X64.StateLemmas
 open Vale.X64.InsLemmas
+open Vale.Arch.Heap
+open Vale.Arch.HeapImpl
 module I = Vale.X64.Instructions_s
 module S = Vale.X64.Machine_Semantics_s
 module P = Vale.X64.Print_s
@@ -84,6 +86,7 @@ procedure Store64_buffer(
         mem == old(buffer64_write(b, index, src, mem));
         valid_taint_buf64(b, mem, memTaint, t);
 {
+    reveal_mem_inv();
     low_lemma_store_mem64(b, #nat(index), old(src), old(mem));
     lemma_valid_taint64(b, old(#memTaint_t(memTaint)), old(mem), #nat(index), t);
     same_memTaint64(b, old(mem), mem, old(#memTaint_t(memTaint)), #memTaint_t(memTaint));
@@ -126,7 +129,9 @@ procedure StoreBe64_buffer(
         mem == old(buffer64_write(b, index, reverse_bytes_nat64(src), mem));
         valid_taint_buf64(b, mem, memTaint, t);
 {
+    reveal_mem_inv();
     low_lemma_store_mem64(b, #nat(index), old(reverse_bytes_nat64(src)), old(mem));
     lemma_valid_taint64(b, old(#memTaint_t(memTaint)), old(mem), #nat(index), t);
     same_memTaint64(b, old(mem), mem, old(#memTaint_t(memTaint)), #memTaint_t(memTaint));
 }
+

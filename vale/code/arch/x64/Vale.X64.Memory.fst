@@ -17,6 +17,9 @@ open Vale.Lib.BufferViewHelpers
 module H = FStar.Heap
 module S = Vale.X64.Machine_Semantics_s
 
+let mem_inv h =
+  h.vf_heap == Map16.sel h.vf_heaplets 0
+
 #reset-options "--initial_fuel 2 --max_fuel 2 --initial_ifuel 1 --max_ifuel 1"
 
 let b8 = IB.b8

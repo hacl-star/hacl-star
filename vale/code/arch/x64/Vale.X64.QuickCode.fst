@@ -28,6 +28,7 @@ unfold let mods_t = list mod_t
 [@va_qattr] unfold let va_Mod_flags = Mod_flags
 [@va_qattr] unfold let va_Mod_mem = Mod_mem
 [@va_qattr] unfold let va_Mod_mem_layout = Mod_mem_layout
+[@va_qattr] unfold let va_Mod_mem_heaplet (n:heaplet_id) = Mod_mem_heaplet n
 [@va_qattr] unfold let va_Mod_stack = Mod_stack
 [@va_qattr] unfold let va_Mod_memTaint = Mod_memTaint
 [@va_qattr] unfold let va_Mod_stackTaint = Mod_stackTaint

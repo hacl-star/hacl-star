@@ -617,6 +617,7 @@ let check_if_ins_consumes_fixed_time ins ts =
   | BC.Pop _ _ -> check_if_pop_consumes_fixed_time ins ts
   | BC.Alloc _ -> check_if_alloc_consumes_fixed_time ins ts
   | BC.Dealloc _ -> check_if_dealloc_consumes_fixed_time ins ts
+  | BC.HeapGhost _ -> (true, ts)
 
 #reset-options "--initial_ifuel 1 --max_ifuel 1 --initial_fuel 1 --max_fuel 1 --z3rlimit 100"
 let lemma_instr_leakage_free (ts:analysis_taints) (ins:S.ins) : Lemma
@@ -847,3 +848,4 @@ let lemma_ins_leakage_free ts ins =
   | BC.Dealloc _ -> lemma_dealloc_leakage_free ts ins
   | BC.Push _ _ -> lemma_push_leakage_free ts ins
   | BC.Pop _ _ -> lemma_pop_leakage_free ts ins
+  | BC.HeapGhost _ -> ()

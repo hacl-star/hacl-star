@@ -261,7 +261,6 @@ let create_initial_vale_state
   : IX64.state_builder_t max_arity args V.vale_state_with_inv =
   fun h0 ->
     let (t_state, mem) = IX64.create_initial_trusted_state max_arity arg_reg args h0 in
-    V.lemma_mem_inv (as_vale_mem mem);
     let open VS in
     { vs_ok = true;
       vs_regs = Vale.X64.Regs.of_fun t_state.BS.ms_regs;

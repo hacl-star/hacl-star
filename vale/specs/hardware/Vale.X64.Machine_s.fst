@@ -112,7 +112,7 @@ let operand64:eqtype = operand nat64 reg_64
 let operand128:eqtype = operand quad32 reg_xmm
 
 noeq
-type precode (t_ins:Type0) (t_ocmp:eqtype) : Type0 =
+type precode (t_ins:Type u#1) (t_ocmp:eqtype) : Type u#1 =
   | Ins: ins:t_ins -> precode t_ins t_ocmp
   | Block: block:list (precode t_ins t_ocmp) -> precode t_ins t_ocmp
   | IfElse: ifCond:t_ocmp -> ifTrue:precode t_ins t_ocmp -> ifFalse:precode t_ins t_ocmp -> precode t_ins t_ocmp

@@ -8,12 +8,17 @@ open Vale.Arch.MachineHeap_s
 open Vale.X64.Machine_s
 open Vale.X64.Memory
 module S = Vale.X64.Machine_Semantics_s
+module Map16 = Vale.Lib.Map16
 
 val same_domain (h:vale_heap) (m:S.machine_heap) : prop0
 
 val lemma_same_domains (h:vale_heap) (m1:S.machine_heap) (m2:S.machine_heap) : Lemma
   (requires same_domain h m1 /\ Set.equal (Map.domain m1) (Map.domain m2))
   (ensures same_domain h m2)
+
+val reveal_mem_inv (_:unit) : Lemma
+  (ensures (forall (h:vale_full_heap).{:pattern (mem_inv h)}
+    mem_inv h <==> h.vf_heap == Map16.sel h.vf_heaplets 0))
 
 val get_heap (h:vale_heap) : GTot (m:S.machine_heap{same_domain h m})
 
@@ -28,14 +33,23 @@ val lemma_get_upd_heap (h:vale_heap) (m:S.machine_heap) : Lemma
 
 unfold let coerce (#b #a:Type) (x:a{a == b}) : b = x
 
+val lemma_heap_impl : squash (heap_impl == vale_full_heap)
+
 val lemma_heap_get_heap (h:vale_full_heap) : Lemma
-  (vale_full_heap == heap_impl /\ heap_get (coerce h) == get_heap (get_vale_heap h))
+  (heap_get (coerce h) == get_heap (get_vale_heap h))
   [SMTPat (heap_get (coerce h))]
+
+let heap_upd_def (hi:vale_full_heap) (h':vale_heap) : vale_full_heap =
+  {
+    vf_layout = hi.vf_layout;
+    vf_heap = h';
+    vf_heaplets = Map16.upd hi.vf_heaplets 0 h';
+  }
 
 val lemma_heap_upd_heap (h:vale_full_heap) (m:machine_heap) : Lemma
   (requires is_machine_heap_update (get_heap (get_vale_heap h)) m)
-  (ensures vale_full_heap == heap_impl /\ heap_upd (coerce h) m == coerce (set_vale_heap h (upd_heap (get_vale_heap h) m)))
-  [SMTPat (heap_upd (coerce h) m)]
+  (ensures heap_upd (coerce h) m == coerce (heap_upd_def h (upd_heap h.vf_heap m)))
+  [SMTPat (upd_heap h.vf_heap m)]
 
 val bytes_valid64 (i:int) (m:vale_heap) : Lemma
   (requires valid_mem64 i m)

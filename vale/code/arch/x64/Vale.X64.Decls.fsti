@@ -66,7 +66,7 @@ unfold let va_int = int
 let va_int_at_least (k:int) = i:int{i >= k}
 let va_int_at_most (k:int) = i:int{i <= k}
 let va_int_range (k1 k2:int) = i:int{k1 <= i /\ i <= k2}
-val ins : Type0
+val ins : Type u#1
 val ocmp : eqtype
 unfold let va_code = precode ins ocmp
 unfold let va_codes = list va_code
@@ -289,6 +289,8 @@ val taint_at (memTaint:M.memtaint) (addr:int) : taint
 [@va_qattr] unfold let va_get_reg64 (r:reg_64) (s:va_state) : nat64 = eval_reg_64 r s
 [@va_qattr] unfold let va_get_xmm (x:reg_xmm) (s:va_state) : quad32 = eval_reg_xmm x s
 [@va_qattr] unfold let va_get_mem (s:va_state) : vale_heap = M.get_vale_heap s.vs_heap
+[@va_qattr] unfold let va_get_mem_layout (s:va_state) : vale_heap_layout = s.vs_heap.vf_layout
+[@va_qattr] unfold let va_get_mem_heaplet (n:heaplet_id) (s:va_state) : vale_heap = Map16.sel s.vs_heap.vf_heaplets n
 [@va_qattr] unfold let va_get_stack (s:va_state) : S.vale_stack = s.vs_stack
 [@va_qattr] unfold let va_get_memTaint (s:va_state) : M.memtaint = s.vs_memTaint
 [@va_qattr] unfold let va_get_stackTaint (s:va_state) : M.memtaint = s.vs_stackTaint
@@ -544,10 +546,7 @@ val eval_while_inv (c:va_code) (s0:va_state) (fW:va_fuel) (sW:va_state) : prop0
 [@va_qattr]
 let va_state_eq (s0:va_state) (s1:va_state) : prop0 = state_eq s0 s1
 
-val mem_inv (m:vale_heap_impl) : prop0
-val lemma_mem_inv (m:vale_heap_impl) : Lemma (mem_inv m)
-
-let state_inv (s:va_state) : prop0 = mem_inv s.vs_heap
+let state_inv (s:va_state) : prop0 = M.mem_inv s.vs_heap
 
 let vale_state_with_inv = s:va_state{state_inv s}
 
@@ -559,7 +558,7 @@ let va_ensure_total (c0:va_code) (s0:va_state) (s1:va_state) (f1:va_fuel) : prop
 
 val va_ins_lemma (c0:va_code) (s0:va_state) : Lemma
   (requires True)
-  (ensures state_inv s0)
+  (ensures True)
 
 val eval_ocmp : s:va_state -> c:ocmp -> GTot bool
 unfold let va_evalCond (b:ocmp) (s:va_state) : GTot bool = eval_ocmp s b

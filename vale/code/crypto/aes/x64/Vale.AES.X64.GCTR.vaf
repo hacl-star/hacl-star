@@ -131,6 +131,9 @@ procedure gctr_register(
     gctr_encrypt_one_block(icb_BE, old(io), alg, key);
 }
 
+#verbatim
+#restart-solver
+#endverbatim
 procedure gctr_core(
         inline alg:algorithm,
         ghost in_b:buffer128,
