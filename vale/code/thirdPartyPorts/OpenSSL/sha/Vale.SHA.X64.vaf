@@ -750,6 +750,8 @@ procedure sha_update_bytes_stdcall(
          in_ptr        := if win then rdx else rsi;
            num         := if win then r8  else rdx;
           k_ptr        := if win then r9  else rcx;
+    requires/ensures
+        mem == heap0;
     requires
         rsp == init_rsp(stack);
 
@@ -895,5 +897,6 @@ procedure sha_update_bytes_stdcall(
     let hash_in  := old(le_bytes_to_hash(le_seq_quad32_to_bytes(buffer128_as_seq(heap0, ctx_b))));
     let input_LE := seq_nat8_to_seq_uint8(le_seq_quad32_to_bytes(buffer128_as_seq(heap0, in_b)));
     lemma_update_multi_opaque_vale_is_update_multi(hash_in, input_LE);
+    DestroyHeaplets();
 }
 

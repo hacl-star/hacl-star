@@ -31,7 +31,7 @@ open Vale.X64.Memory
 open Vale.X64.State
 open Vale.X64.Decls
 open Vale.X64.InsBasic
-//open Vale.X64.InsMem
+open Vale.X64.InsMem
 open Vale.X64.InsVector
 //open Vale.X64.InsAes
 open Vale.X64.QuickCode
@@ -73,6 +73,7 @@ procedure KeyExpansionStdcall(
             if alg = AES_128 then quad32_to_seq(buffer128_read(input_key_b, 0, heap0))
             else make_AES256_key(buffer128_read(input_key_b, 0, heap0), buffer128_read(input_key_b, 1, heap0));
     requires/ensures
+        mem == heap0;
         aesni_enabled && avx_enabled && sse_enabled;
         alg = AES_128 || alg = AES_256;
         buffers_disjoint128(input_key_b, output_key_expansion_b);
@@ -88,6 +89,7 @@ procedure KeyExpansionStdcall(
     } else {
         KeyExpansion256Stdcall(win, input_key_b, output_key_expansion_b);
     }
+    DestroyHeaplets();
 }
 
 ///////////////////////////

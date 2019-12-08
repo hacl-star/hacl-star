@@ -649,6 +649,8 @@ procedure gctr_bytes_stdcall(
         keys_ptr   := if win then load_stack64(rsp + 32 + 8 + 0, stack) else r8;
         ctr_ptr   := if win then load_stack64(rsp + 32 + 8 + 8, stack) else r9;
 
+    requires/ensures
+        mem == heap0;
     requires
         rsp == init_rsp(stack);
         win ==> valid_stack_slot64(rsp + 32 + 8 + 0, stack, Public, stackTaint);
@@ -795,4 +797,5 @@ procedure gctr_bytes_stdcall(
     Pop_Secret(r13);
     Pop_Secret(r14);
     Pop_Secret(r15);
+    DestroyHeaplets();
 }

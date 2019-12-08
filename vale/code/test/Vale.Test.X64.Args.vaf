@@ -30,6 +30,8 @@ procedure test(inline win:bool,
     {:public}
     {:quick}
     {:exportSpecs}
+    requires/ensures
+        mem == heap0;
     requires
         rsp == init_rsp(stack);
         win ==> valid_src_stack64(rsp + 32 + 8 + 0, stack);
@@ -64,39 +66,34 @@ procedure test(inline win:bool,
         !win ==> load_stack64(rsp + 8 + 0, stack) == buffer_addr(arg6, heap0);
         !win ==> load_stack64(rsp + 8 + 8, stack) == buffer_addr(arg7, heap0);
     ensures
+        // These lines are for demonstration purposes only; do not copy and paste all of them unless you need all of them:
         rsp == old(rsp);
+        rbx == old(rbx);
+        rbp == old(rbp);
+        r12 == old(r12);
+        r13 == old(r13);
+        r14 == old(r14);
+        r15 == old(r15);
+        win ==> rdi == old(rdi);
+        win ==> rsi == old(rsi);
+        win ==> xmm6 == old(xmm6);
+        win ==> xmm7 == old(xmm7);
+        win ==> xmm8 == old(xmm8);
+        win ==> xmm9 == old(xmm9);
+        win ==> xmm10 == old(xmm10);
+        win ==> xmm11 == old(xmm11);
+        win ==> xmm12 == old(xmm12);
+        win ==> xmm13 == old(xmm13);
+        win ==> xmm14 == old(xmm14);
+        win ==> xmm15 == old(xmm15);
+        modifies_mem(loc_none, old(heap0), heap0); // note: not needed; for demonstration purposes only
 
-        win ==>  rbx == old(rbx);
-        win ==>  rbp == old(rbp);
-        win ==>  rdi == old(rdi);
-        win ==>  rsi == old(rsi);
-        win ==>  r12 == old(r12);
-        win ==>  r13 == old(r13);
-        win ==>  r14 == old(r14);
-        win ==>  r15 == old(r15);
-        !win ==>  rbx == old(rbx);
-        !win ==>  rbp == old(rbp);
-        !win ==>  r12 == old(r12);
-        !win ==>  r13 == old(r13);
-        !win ==>  r14 == old(r14);
-        !win ==>  r15 == old(r15);
-        win ==>  xmm6 == old(xmm6);
-        win ==>  xmm7 == old(xmm7);
-        win ==>  xmm8 == old(xmm8);
-        win ==>  xmm9 == old(xmm9);
-        win ==>  xmm10 == old(xmm10);
-        win ==>  xmm11 == old(xmm11);
-        win ==>  xmm12 == old(xmm12);
-        win ==>  xmm13 == old(xmm13);
-        win ==>  xmm14 == old(xmm14);
-        win ==>  xmm15 == old(xmm15);
-
-        modifies_none(old(heap0), heap0);
-    reads
     modifies
+        // These lines are for demonstration purposes only; do not copy and paste all of them unless you need all of them:
         rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
         xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; xmm7; xmm8; xmm9; xmm10; xmm11; xmm12; xmm13; xmm14; xmm15;
         efl; heap0;
 {
-        Mov64(rax, rbx);
+    Mov64(rax, rbx);
+    DestroyHeaplets(); // note: not needed if you don't modify memory; for demonstration purposes only
 }

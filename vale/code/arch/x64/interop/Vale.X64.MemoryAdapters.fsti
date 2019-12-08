@@ -21,7 +21,7 @@ val as_mem (h:ME.vale_full_heap) : GTot IB.interop_heap
 
 val create_initial_vale_heap (ih:IB.interop_heap) : Ghost vale_full_heap
   (requires True)
-  (ensures ME.mem_inv)
+  (ensures fun h -> ME.mem_inv h /\ h.vf_heap == Map16.sel h.vf_heaplets 0)
 
 unfold
 let as_vale_stack (st:BS.machine_stack)

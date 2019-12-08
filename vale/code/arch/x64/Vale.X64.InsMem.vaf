@@ -69,6 +69,17 @@ procedure Mem_lemma(ghost base:va_operand, ghost offset:int, ghost b:buffer64, g
     lemma_opr_Mem(this, base, offset, b, index, t);
 }
 
+procedure DestroyHeaplets()
+    {:public}
+    {:quick exportOnly}
+    reads
+        mem; heap0;
+    ensures
+        mem == heap0;
+{
+    reveal_mem_inv();
+}
+
 procedure Load64_buffer(
         out dst:dst_opr64, in src:reg_opr64, inline offset:int, inline t:taint,
         ghost b:buffer64, ghost index:int)

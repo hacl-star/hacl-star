@@ -208,6 +208,8 @@ procedure fast_add1(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB:nat64)
         rax; b; r8; r9; r10; r11;
         heap0; efl;
 
+    requires/ensures
+        mem == heap0;
     requires
         adx_enabled && bmi2_enabled;
         buffers_disjoint(dst_b, inA_b) || inA_b == dst_b;
@@ -247,6 +249,7 @@ procedure fast_add1(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB:nat64)
     Store64_buffer(dst_ptr, r10, 24, Secret, dst_b, 3);
 
     Adcx64Wrap(rax, r11);
+    DestroyHeaplets();
 }
 
 #reset-options "--z3rlimit 40"
@@ -267,6 +270,8 @@ procedure fast_add1_stdcall(
     modifies
         rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
         efl; heap0; stack; stackTaint;
+    requires/ensures
+        mem == heap0;
     requires
         rsp == init_rsp(stack);
 
@@ -333,6 +338,7 @@ procedure fast_add1_stdcall(
 
     Pop_Secret(rsi);
     Pop_Secret(rdi);
+    DestroyHeaplets();
 }
 
 #reset-options "--z3rlimit 1200"
@@ -887,6 +893,8 @@ procedure cswap2(ghost bit_in:nat64, ghost p0_b:buffer64, ghost p1_b:buffer64)
         bit; tmp0; tmp1; tmp2;
         efl; heap0;
 
+    requires/ensures
+        mem == heap0;
     requires
         bit_in == bit;
         bit <= 1;
@@ -947,6 +955,7 @@ procedure cswap2(ghost bit_in:nat64, ghost p0_b:buffer64, ghost p1_b:buffer64)
     cswap_single(5, p0_b, p1_b);
     cswap_single(6, p0_b, p1_b);
     cswap_single(7, p0_b, p1_b);
+    DestroyHeaplets();
 }
 
 procedure cswap2_stdcall(
@@ -984,6 +993,8 @@ procedure cswap2_stdcall(
     modifies
         rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
         efl; heap0; stack; stackTaint;
+    requires/ensures
+        mem == heap0;
     requires
         rsp == init_rsp(stack);
         bit_in <= 1;
@@ -1073,4 +1084,5 @@ procedure cswap2_stdcall(
         Pop_Secret(rsi);
         Pop_Secret(rdi);
     }
+    DestroyHeaplets();
 }

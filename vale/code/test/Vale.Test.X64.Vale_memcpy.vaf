@@ -21,6 +21,8 @@ procedure memcpy(inline win:bool, ghost dst:buffer64, ghost src:buffer64)
     {:public}
     {:exportSpecs}
     {:quick}
+    requires/ensures
+        mem == heap0;
     requires
         locs_disjoint(list(loc_buffer(dst), loc_buffer(src)));
         buffer_readable(heap0, dst);
@@ -87,4 +89,5 @@ procedure memcpy(inline win:bool, ghost dst:buffer64, ghost src:buffer64)
         Store64_buffer(rdi, rcx, 8, Secret, dst, 1);
     }
     assert(Seq.equal(buffer_as_seq(heap0, dst), buffer_as_seq(heap0, src)));
+    DestroyHeaplets();
 }

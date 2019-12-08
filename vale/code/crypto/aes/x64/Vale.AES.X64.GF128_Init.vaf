@@ -233,6 +233,7 @@ procedure Keyhash_init(
         round_ptr := if win then rcx else rdi;
         hkey_ptr := if win then rdx else rsi;
     requires/ensures
+        mem == heap0;
         aesni_enabled && pclmulqdq_enabled && avx_enabled && sse_enabled;
         alg = AES_128 || alg = AES_256;
         buffers_disjoint128(roundkeys_b, hkeys_b);
@@ -274,4 +275,5 @@ procedure Keyhash_init(
     Gf128_powers(of_quad32(xmm0), hkeys_b);
 
     lemma_hkeys_reqs_pub_priv(s128(heap0, hkeys_b), reverse_bytes_quad32(aes_encrypt_LE(alg, key, Mkfour(0, 0, 0, 0))));
+    DestroyHeaplets();
 }

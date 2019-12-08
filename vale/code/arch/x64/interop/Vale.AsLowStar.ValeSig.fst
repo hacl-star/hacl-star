@@ -111,12 +111,6 @@ let disjoint_or_eq_1 (a:arg) (b:arg) =
 let disjoint_or_eq (l:list arg) =
   BigOps.pairwise_and' disjoint_or_eq_1  l
 
-let reveal_mem_inv : squash
-  (forall (h:vale_full_heap).{:pattern (ME.mem_inv h)}
-    ME.mem_inv h <==> h.vf_heap == Map16.sel h.vf_heaplets 0)
-  =
-  Vale.X64.Memory_Sems.reveal_mem_inv ()
-
 [@__reduce__] unfold
 let vale_sig_nil
                  (regs_modified:MS.reg_64 -> bool)
