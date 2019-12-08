@@ -40,7 +40,7 @@ friend Vale.X64.Decls
 #endverbatim
 
 //function operator([]) #[a:Type(0), b:Type(0)](m:FStar.Map.t(a, b), key:a):b extern;
-//function operator([]) (m:mem, b:Vale.X64.Memory.buffer64):fun(int) -> nat64 extern;
+//function operator([]) (m:heap0, b:Vale.X64.Memory.buffer64):fun(int) -> nat64 extern;
 
 #reset-options "--initial_fuel 2 --max_fuel 2 --max_ifuel 2 --z3rlimit 20"
 
@@ -48,7 +48,7 @@ procedure Mem_in(in base:reg64, inline offset:int, ghost b:buffer64, ghost index
     returns(o:opr)
     {:operand}
     reads
-        mem;
+        heap0;
     extern;
 
 procedure Mem_lemma(ghost base:va_operand, ghost offset:int, ghost b:buffer64, ghost index:int, ghost t:taint)
@@ -56,15 +56,15 @@ procedure Mem_lemma(ghost base:va_operand, ghost offset:int, ghost b:buffer64, g
     {:quick exportOnly}
     {:typecheck false}
     reads
-        mem; memTaint;
+        mem; heap0; memTaint;
     requires
         base is OReg;
-        valid_src_addr(mem, b, index);
-        valid_taint_buf64(b, mem, memTaint, t);
-        eval_operand(base, this) + offset == buffer_addr(b, mem) + 8 * index;
+        valid_src_addr(heap0, b, index);
+        valid_taint_buf64(b, heap0, memTaint, t);
+        eval_operand(base, this) + offset == buffer_addr(b, heap0) + 8 * index;
     ensures
         valid_operand(va_opr_code_Mem(base, offset, t), this);
-        load_mem64(buffer_addr(b, mem) + 8 * index, mem) == buffer_read(b, index, mem);
+        load_mem64(buffer_addr(b, heap0) + 8 * index, mem) == buffer_read(b, index, heap0);
 {
     lemma_opr_Mem(this, base, offset, b, index, t);
 }
@@ -76,13 +76,13 @@ procedure Load64_buffer(
     {:quick exportOnly}
     {:instruction mk_ins(make_instr(I.ins_Mov64, dst, OMem(tuple(MReg(get_reg(src), offset), t))))}
     reads
-        mem; memTaint;
+        heap0; memTaint;
     requires
-        valid_src_addr(mem, b, index);
-        valid_taint_buf64(b, mem, memTaint, t);
-        src + offset == buffer_addr(b, mem) + 8 * index;
+        valid_src_addr(heap0, b, index);
+        valid_taint_buf64(b, heap0, memTaint, t);
+        src + offset == buffer_addr(b, heap0) + 8 * index;
     ensures
-        dst == buffer64_read(b, index, mem);
+        dst == buffer64_read(b, index, heap0);
 {
     reveal_mem_inv();
 }
@@ -95,20 +95,20 @@ procedure Store64_buffer(
     {:instruction mk_ins(make_instr(I.ins_Mov64, OMem(tuple(MReg(get_reg(dst), offset), t)), src))}
     reads memTaint;
     modifies
-        mem;
+        heap0;
     requires
-        valid_dst_addr(mem, b, index);
-        valid_taint_buf64(b, mem, memTaint, t);
-        dst + offset == buffer_addr(b, mem) + 8 * index;
+        valid_dst_addr(heap0, b, index);
+        valid_taint_buf64(b, heap0, memTaint, t);
+        dst + offset == buffer_addr(b, heap0) + 8 * index;
     ensures
-        modifies_mem(loc_buffer(b), old(mem), mem);
-        mem == old(buffer64_write(b, index, src, mem));
-        valid_taint_buf64(b, mem, memTaint, t);
+        modifies_mem(loc_buffer(b), old(heap0), heap0);
+        heap0 == old(buffer64_write(b, index, src, heap0));
+        valid_taint_buf64(b, heap0, memTaint, t);
 {
     reveal_mem_inv();
-    low_lemma_store_mem64(b, #nat(index), old(src), old(mem));
-    lemma_valid_taint64(b, old(#memTaint_t(memTaint)), old(mem), #nat(index), t);
-    same_memTaint64(b, old(mem), mem, old(#memTaint_t(memTaint)), #memTaint_t(memTaint));
+    low_lemma_store_mem64(b, #nat(index), old(src), old(heap0));
+    lemma_valid_taint64(b, old(#memTaint_t(memTaint)), old(heap0), #nat(index), t);
+    same_memTaint64(b, old(heap0), heap0, old(#memTaint_t(memTaint)), #memTaint_t(memTaint));
 }
 
 procedure LoadBe64_buffer(
@@ -118,14 +118,14 @@ procedure LoadBe64_buffer(
     {:quick exportOnly}
     {:instruction mk_ins(make_instr(I.ins_MovBe64, dst, OMem(tuple(MReg(get_reg(src), offset), t))))}
     reads
-        mem; memTaint;
+        heap0; memTaint;
     requires
         movbe_enabled;
-        valid_src_addr(mem, b, index);
-        valid_taint_buf64(b, mem, memTaint, t);
-        src + offset == buffer_addr(b, mem) + 8 * index;
+        valid_src_addr(heap0, b, index);
+        valid_taint_buf64(b, heap0, memTaint, t);
+        src + offset == buffer_addr(b, heap0) + 8 * index;
     ensures
-        dst == reverse_bytes_nat64(buffer64_read(b, index, mem));
+        dst == reverse_bytes_nat64(buffer64_read(b, index, heap0));
 {
     reveal_mem_inv();
 }
@@ -138,20 +138,20 @@ procedure StoreBe64_buffer(
     {:instruction mk_ins(make_instr(I.ins_MovBe64, OMem(tuple(MReg(get_reg(dst), offset), t)), src))}
     reads memTaint;
     modifies
-        mem;
+        heap0;
     requires
         movbe_enabled;
-        valid_dst_addr(mem, b, index);
-        valid_taint_buf64(b, mem, memTaint, t);
-        dst + offset == buffer_addr(b, mem) + 8 * index;
+        valid_dst_addr(heap0, b, index);
+        valid_taint_buf64(b, heap0, memTaint, t);
+        dst + offset == buffer_addr(b, heap0) + 8 * index;
     ensures
-        modifies_mem(loc_buffer(b), old(mem), mem);
-        mem == old(buffer64_write(b, index, reverse_bytes_nat64(src), mem));
-        valid_taint_buf64(b, mem, memTaint, t);
+        modifies_mem(loc_buffer(b), old(heap0), heap0);
+        heap0 == old(buffer64_write(b, index, reverse_bytes_nat64(src), heap0));
+        valid_taint_buf64(b, heap0, memTaint, t);
 {
     reveal_mem_inv();
-    low_lemma_store_mem64(b, #nat(index), old(reverse_bytes_nat64(src)), old(mem));
-    lemma_valid_taint64(b, old(#memTaint_t(memTaint)), old(mem), #nat(index), t);
-    same_memTaint64(b, old(mem), mem, old(#memTaint_t(memTaint)), #memTaint_t(memTaint));
+    low_lemma_store_mem64(b, #nat(index), old(reverse_bytes_nat64(src)), old(heap0));
+    lemma_valid_taint64(b, old(#memTaint_t(memTaint)), old(heap0), #nat(index), t);
+    same_memTaint64(b, old(heap0), heap0, old(#memTaint_t(memTaint)), #memTaint_t(memTaint));
 }
 

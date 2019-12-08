@@ -39,30 +39,30 @@ procedure test(inline win:bool,
         !win ==> valid_src_stack64(rsp + 8 + 0, stack);
         !win ==> valid_src_stack64(rsp + 8 + 8, stack);
 
-        buffer_readable(mem, arg0);
-        buffer_readable(mem, arg1);
-        buffer_readable(mem, arg2);
-        buffer_readable(mem, arg3);
-        buffer_readable(mem, arg4);
-        buffer_readable(mem, arg5);
-        buffer_readable(mem, arg6);
-        buffer_readable(mem, arg7);
-        win ==> rcx == buffer_addr(arg0, mem);
-        win ==> rdx == buffer_addr(arg1, mem);
-        win ==> r8 == buffer_addr(arg2, mem);
-        win ==> r9 == buffer_addr(arg3, mem);
-        win ==> load_stack64(rsp + 32 + 8 + 0, stack) == buffer_addr(arg4, mem);
-        win ==> load_stack64(rsp + 32 + 8 + 8, stack) == buffer_addr(arg5, mem);
-        win ==> load_stack64(rsp + 32 + 8 + 16, stack) == buffer_addr(arg6, mem);
-        win ==> load_stack64(rsp + 32 + 8 + 24, stack) == buffer_addr(arg7, mem);
-        !win ==> rdi == buffer_addr(arg0, mem);
-        !win ==> rsi == buffer_addr(arg1, mem);
-        !win ==> rdx == buffer_addr(arg2, mem);
-        !win ==> rcx == buffer_addr(arg3, mem);
-        !win ==> r8 == buffer_addr(arg4, mem);
-        !win ==> r9 == buffer_addr(arg5, mem);
-        !win ==> load_stack64(rsp + 8 + 0, stack) == buffer_addr(arg6, mem);
-        !win ==> load_stack64(rsp + 8 + 8, stack) == buffer_addr(arg7, mem);
+        buffer_readable(heap0, arg0);
+        buffer_readable(heap0, arg1);
+        buffer_readable(heap0, arg2);
+        buffer_readable(heap0, arg3);
+        buffer_readable(heap0, arg4);
+        buffer_readable(heap0, arg5);
+        buffer_readable(heap0, arg6);
+        buffer_readable(heap0, arg7);
+        win ==> rcx == buffer_addr(arg0, heap0);
+        win ==> rdx == buffer_addr(arg1, heap0);
+        win ==> r8 == buffer_addr(arg2, heap0);
+        win ==> r9 == buffer_addr(arg3, heap0);
+        win ==> load_stack64(rsp + 32 + 8 + 0, stack) == buffer_addr(arg4, heap0);
+        win ==> load_stack64(rsp + 32 + 8 + 8, stack) == buffer_addr(arg5, heap0);
+        win ==> load_stack64(rsp + 32 + 8 + 16, stack) == buffer_addr(arg6, heap0);
+        win ==> load_stack64(rsp + 32 + 8 + 24, stack) == buffer_addr(arg7, heap0);
+        !win ==> rdi == buffer_addr(arg0, heap0);
+        !win ==> rsi == buffer_addr(arg1, heap0);
+        !win ==> rdx == buffer_addr(arg2, heap0);
+        !win ==> rcx == buffer_addr(arg3, heap0);
+        !win ==> r8 == buffer_addr(arg4, heap0);
+        !win ==> r9 == buffer_addr(arg5, heap0);
+        !win ==> load_stack64(rsp + 8 + 0, stack) == buffer_addr(arg6, heap0);
+        !win ==> load_stack64(rsp + 8 + 8, stack) == buffer_addr(arg7, heap0);
     ensures
         rsp == old(rsp);
 
@@ -91,12 +91,12 @@ procedure test(inline win:bool,
         win ==>  xmm14 == old(xmm14);
         win ==>  xmm15 == old(xmm15);
 
-        modifies_none(old(mem), mem);
+        modifies_none(old(heap0), heap0);
     reads
     modifies
         rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
         xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; xmm7; xmm8; xmm9; xmm10; xmm11; xmm12; xmm13; xmm14; xmm15;
-        efl; mem;
+        efl; heap0;
 {
         Mov64(rax, rbx);
 }

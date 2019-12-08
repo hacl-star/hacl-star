@@ -19,24 +19,24 @@ open Vale.X64.InsMem
 procedure Copy16(inline t:taint, ghost bsrc:buffer64, ghost bdst:buffer64)
     requires/ensures
         locs_disjoint(list(loc_buffer(bsrc), loc_buffer(bdst)));
-        buffer_readable(mem, bsrc);
-        buffer_readable(mem, bdst);
+        buffer_readable(heap0, bsrc);
+        buffer_readable(heap0, bdst);
         buffer_writeable(bdst);
         buffer_length(bsrc) == 2;
         buffer_length(bdst) == 2;
-        rsi == buffer_addr(bsrc, mem);
-        rdi == buffer_addr(bdst, mem);
+        rsi == buffer_addr(bsrc, heap0);
+        rdi == buffer_addr(bdst, heap0);
     requires
-        valid_taint_buf64(bsrc, mem, memTaint, t);
-        valid_taint_buf64(bdst, mem, memTaint, t);
+        valid_taint_buf64(bsrc, heap0, memTaint, t);
+        valid_taint_buf64(bdst, heap0, memTaint, t);
     ensures
-        forall(i) 0 <= i && i < 2 ==> buffer64_read(bdst, i, mem) == buffer64_read(bsrc, i, mem);
-        modifies_mem(loc_buffer(bdst), old(mem), mem);
+        forall(i) 0 <= i && i < 2 ==> buffer64_read(bdst, i, heap0) == buffer64_read(bsrc, i, heap0);
+        modifies_mem(loc_buffer(bdst), old(heap0), heap0);
     reads
         rsi; rdi; memTaint;
     modifies
         rax; rcx;
-        mem;
+        heap0;
 {
 //    assert{:fast_block} true;
     Load64_buffer(rax, rsi, 0, t, bsrc, 0);
@@ -49,15 +49,15 @@ procedure Copy16(inline t:taint, ghost bsrc:buffer64, ghost bdst:buffer64)
 procedure Copy64()
     requires/ensures
         rsi + 64 <= rdi;
-        forall(i){Map.contains(mem, i)} rsi <= i < rsi + 64 && (i - rsi) % 8 == 0 ==> Map.contains(mem, i);
-        forall(i){Map.contains(mem, i)} rdi <= i < rdi + 64 && (i - rdi) % 8 == 0 ==> Map.contains(mem, i);
+        forall(i){Map.contains(heap0, i)} rsi <= i < rsi + 64 && (i - rsi) % 8 == 0 ==> Map.contains(heap0, i);
+        forall(i){Map.contains(heap0, i)} rdi <= i < rdi + 64 && (i - rdi) % 8 == 0 ==> Map.contains(heap0, i);
     ensures
-        forall(i) 0 <= i && i < 64 && i % 8 == 0 ==> mem[rdi + i] == mem[rsi + i];
+        forall(i) 0 <= i && i < 64 && i % 8 == 0 ==> heap0[rdi + i] == heap0[rsi + i];
     reads
         rsi; rdi;
     modifies
         rax; rbx; rcx; rdx; rbp;
-        mem;
+        heap0;
 {
     assert{:fast_block} true;
     Load64(rax, rsi, 0);
@@ -81,15 +81,15 @@ procedure Copy64()
 procedure Copy128()
     requires/ensures
         rsi + 128 <= rdi;
-        forall(i){Map.contains(mem, i)} rsi <= i < rsi + 128 && (i - rsi) % 8 == 0 ==> Map.contains(mem, i);
-        forall(i){Map.contains(mem, i)} rdi <= i < rdi + 128 && (i - rdi) % 8 == 0 ==> Map.contains(mem, i);
+        forall(i){Map.contains(heap0, i)} rsi <= i < rsi + 128 && (i - rsi) % 8 == 0 ==> Map.contains(heap0, i);
+        forall(i){Map.contains(heap0, i)} rdi <= i < rdi + 128 && (i - rdi) % 8 == 0 ==> Map.contains(heap0, i);
     ensures
-        forall(i) 0 <= i && i < 128 && i % 8 == 0 ==> mem[rdi + i] == mem[rsi + i];
+        forall(i) 0 <= i && i < 128 && i % 8 == 0 ==> heap0[rdi + i] == heap0[rsi + i];
     reads
         rsi; rdi;
     modifies
         rax; rbx; rcx; rdx; rbp;
-        mem;
+        heap0;
 {
     assert{:fast_block} true;
     Load64(rax, rsi, 0);

@@ -78,7 +78,7 @@ operand_type opr128:quad32 := xmm | Mem128;
 procedure Mem128_in(in base:reg64, inline offset:int, inline t:taint, ghost b:buffer128, ghost index:int) returns(o:opr)
     {:operand}
     reads
-        mem;
+        heap0;
     extern;
 
 procedure Mem128_lemma(ghost base:va_operand, ghost offset:int, ghost t:taint, ghost b:buffer128, ghost index:int)
@@ -86,15 +86,15 @@ procedure Mem128_lemma(ghost base:va_operand, ghost offset:int, ghost t:taint, g
     {:quick exportOnly}
     {:typecheck false}
     reads
-        mem; memTaint;
+        mem; heap0; memTaint;
     requires
         base is OReg;
-        valid_src_addr(mem, b, index);
-        valid_taint_buf128(b, mem, memTaint, t);
-        eval_operand(base, this) + offset == buffer_addr(b, mem) + 16 * index;
+        valid_src_addr(heap0, b, index);
+        valid_taint_buf128(b, heap0, memTaint, t);
+        eval_operand(base, this) + offset == buffer_addr(b, heap0) + 16 * index;
     ensures
         valid_operand128(va_opr_code_Mem128(base, offset, t), this);
-        load_mem128(buffer_addr(b, mem) + 16 * index, mem) == buffer_read(b, index, mem);
+        load_mem128(buffer_addr(b, heap0) + 16 * index, mem) == buffer_read(b, index, heap0);
 {
     lemma_opr_Mem128(this, base, offset, t, b, index);
 }
@@ -505,15 +505,15 @@ procedure Load128_buffer(
     {:quick exportOnly}
     {:instruction mk_ins(make_instr(I.ins_Movdqu, OReg(dst), OMem(tuple(MReg(get_reg(src), offset), t))))}
     reads
-        mem; memTaint;
+        heap0; memTaint;
     requires
         sse_enabled;
-        valid_src_addr(mem, b, index);
-        valid_taint_buf128(b, mem, memTaint, t);
-        src + offset == buffer_addr(b, mem) + 16 * index;
+        valid_src_addr(heap0, b, index);
+        valid_taint_buf128(b, heap0, memTaint, t);
+        src + offset == buffer_addr(b, heap0) + 16 * index;
     ensures
-        dst == buffer128_read(b, index, mem);
-//        valid_taint_buf128(b, mem, memTaint, t);  // REVIEW: Why is this needed?
+        dst == buffer128_read(b, index, heap0);
+//        valid_taint_buf128(b, heap0, memTaint, t);  // REVIEW: Why is this needed?
 {
     reveal_mem_inv();
 }
@@ -525,21 +525,21 @@ procedure LoadBe64_buffer128(
     {:quick exportOnly}
     {:instruction mk_ins(make_instr(I.ins_MovBe64, dst, OMem(tuple(MReg(get_reg(src), offset), t))))}
     reads
-        mem; memTaint;
+        heap0; memTaint;
     requires
         movbe_enabled;
-        valid_src_addr(mem, b, index);
-        valid_taint_buf128(b, mem, memTaint, t);
-        src + offset == buffer_addr(b, mem) + 16 * index + (if upper then 8 else 0);
+        valid_src_addr(heap0, b, index);
+        valid_taint_buf128(b, heap0, memTaint, t);
+        src + offset == buffer_addr(b, heap0) + 16 * index + (if upper then 8 else 0);
     ensures
-        dst == reverse_bytes_nat64(if upper then hi64(buffer128_read(b, index, mem)) else lo64(buffer128_read(b, index, mem)));
-//        valid_taint_buf128(b, mem, memTaint, t);
+        dst == reverse_bytes_nat64(if upper then hi64(buffer128_read(b, index, heap0)) else lo64(buffer128_read(b, index, heap0)));
+//        valid_taint_buf128(b, heap0, memTaint, t);
 {
     reveal_mem_inv();
-    low_lemma_valid_mem128_64(b, #nat(index), mem);
-    low_lemma_load_mem128_lo64(b, #nat(index), mem);
-    low_lemma_load_mem128_hi64(b, #nat(index), mem);
-    lemma_valid_taint128(b, #memTaint_t(memTaint), mem, #nat(index), t);
+    low_lemma_valid_mem128_64(b, #nat(index), heap0);
+    low_lemma_load_mem128_lo64(b, #nat(index), heap0);
+    low_lemma_load_mem128_hi64(b, #nat(index), heap0);
+    lemma_valid_taint128(b, #memTaint_t(memTaint), heap0, #nat(index), t);
 }
 
 procedure Store128_buffer(
@@ -550,21 +550,21 @@ procedure Store128_buffer(
     reads
         memTaint;
     modifies
-        mem;
+        heap0;
     requires
         sse_enabled;
-        valid_dst_addr(mem, b, index);
-        valid_taint_buf128(b, mem, memTaint, t);
-        dst + offset == buffer_addr(b, mem) + 16 * index;
+        valid_dst_addr(heap0, b, index);
+        valid_taint_buf128(b, heap0, memTaint, t);
+        dst + offset == buffer_addr(b, heap0) + 16 * index;
     ensures
-        modifies_mem(loc_buffer(b), old(mem), mem);
-        valid_taint_buf128(b, mem, memTaint, t);
-        mem == old(buffer128_write(b, index, src, mem));
+        modifies_mem(loc_buffer(b), old(heap0), heap0);
+        valid_taint_buf128(b, heap0, memTaint, t);
+        heap0 == old(buffer128_write(b, index, src, heap0));
 {
     reveal_mem_inv();
-    low_lemma_store_mem128(b, #nat(index), old(src), old(mem));
-    lemma_valid_taint128(b, old(#memTaint_t(memTaint)), old(mem), #nat(index), t);
-    same_memTaint128(b, old(mem), mem, old(#memTaint_t(memTaint)), #memTaint_t(memTaint));
+    low_lemma_store_mem128(b, #nat(index), old(src), old(heap0));
+    lemma_valid_taint128(b, old(#memTaint_t(memTaint)), old(heap0), #nat(index), t);
+    same_memTaint128(b, old(heap0), heap0, old(#memTaint_t(memTaint)), #memTaint_t(memTaint));
 }
 
 procedure Store64_buffer128(
@@ -576,22 +576,22 @@ procedure Store64_buffer128(
     reads
         memTaint;
     modifies
-        mem;
+        heap0;
     requires
-        valid_dst_addr(mem, b, index);
-        valid_taint_buf128(b, mem, memTaint, t);
-        dst + offset == buffer_addr(b, mem) + 16 * index + (if upper then 8 else 0);
+        valid_dst_addr(heap0, b, index);
+        valid_taint_buf128(b, heap0, memTaint, t);
+        dst + offset == buffer_addr(b, heap0) + 16 * index + (if upper then 8 else 0);
     ensures
-        modifies_mem(loc_buffer(b), old(mem), mem);
-        valid_taint_buf128(b, mem, memTaint, t);
-        mem == old(buffer128_write(b, index, insert_nat64_opaque(old(buffer128_read(b, index, mem)), src, if upper then 1 else 0), mem));
+        modifies_mem(loc_buffer(b), old(heap0), heap0);
+        valid_taint_buf128(b, heap0, memTaint, t);
+        heap0 == old(buffer128_write(b, index, insert_nat64_opaque(old(buffer128_read(b, index, heap0)), src, if upper then 1 else 0), heap0));
 {
     reveal_mem_inv();
-    low_lemma_valid_mem128_64(b, #nat(index), old(mem));
-    low_lemma_store_mem128_lo64(b, #nat(index), old(src), old(mem));
-    low_lemma_store_mem128_hi64(b, #nat(index), old(src), old(mem));
-    lemma_valid_taint128(b, old(#memTaint_t(memTaint)), old(mem), #nat(index), t);
-    same_memTaint128(b, old(mem), mem, old(#memTaint_t(memTaint)), #memTaint_t(memTaint));
+    low_lemma_valid_mem128_64(b, #nat(index), old(heap0));
+    low_lemma_store_mem128_lo64(b, #nat(index), old(src), old(heap0));
+    low_lemma_store_mem128_hi64(b, #nat(index), old(src), old(heap0));
+    lemma_valid_taint128(b, old(#memTaint_t(memTaint)), old(heap0), #nat(index), t);
+    same_memTaint128(b, old(heap0), heap0, old(#memTaint_t(memTaint)), #memTaint_t(memTaint));
 }
 
 procedure ZeroXmm(inout dst:xmm)
