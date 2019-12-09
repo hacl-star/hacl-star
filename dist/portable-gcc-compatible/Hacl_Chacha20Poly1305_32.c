@@ -26,7 +26,7 @@
 
 /* SNIPPET_START: Hacl_Chacha20Poly1305_32_poly1305_padded_32 */
 
-static void
+inline static void
 Hacl_Chacha20Poly1305_32_poly1305_padded_32(uint64_t *ctx, uint32_t len, uint8_t *text)
 {
   uint32_t n1 = len / (uint32_t)16U;
@@ -394,7 +394,7 @@ Hacl_Chacha20Poly1305_32_poly1305_padded_32(uint64_t *ctx, uint32_t len, uint8_t
 
 /* SNIPPET_START: Hacl_Chacha20Poly1305_32_poly1305_do_32 */
 
-static void
+inline static void
 Hacl_Chacha20Poly1305_32_poly1305_do_32(
   uint8_t *k,
   uint32_t aadlen,
