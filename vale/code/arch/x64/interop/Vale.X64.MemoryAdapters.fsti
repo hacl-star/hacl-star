@@ -2,6 +2,7 @@ module Vale.X64.MemoryAdapters
 
 open FStar.Mul
 open Vale.Interop.Base
+open Vale.Arch.HeapTypes_s
 open Vale.Arch.HeapImpl
 open Vale.Arch.Heap
 open Vale.Arch.MachineHeap_s
@@ -27,10 +28,10 @@ val lemma_heap_impl : squash (heap_impl == vale_full_heap)
 
 val create_initial_vale_heap (ih:IB.interop_heap) : GTot vale_heap
 
-val create_initial_vale_full_heap (ih:IB.interop_heap) : Ghost vale_full_heap
+val create_initial_vale_full_heap (ih:IB.interop_heap) (mt:memTaint_t) : Ghost vale_full_heap
   (requires True)
   (ensures fun h ->
-    h == coerce (heap_create_impl ih) /\
+    h == coerce (heap_create_impl ih mt) /\
     ME.mem_inv h /\
     h.vf_heap == create_initial_vale_heap ih /\
     h.vf_heap == Map16.sel h.vf_heaplets 0

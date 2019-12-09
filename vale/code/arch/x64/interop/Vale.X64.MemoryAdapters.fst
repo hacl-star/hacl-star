@@ -30,8 +30,8 @@ let stack_eq = ()
 
 let as_mem h = _ih h
 let lemma_heap_impl = ()
-let create_initial_vale_heap ih = (heap_create_impl ih).vf_heap
-let create_initial_vale_full_heap ih = heap_create_impl ih
+let create_initial_vale_heap ih = (heap_create_impl ih (Map.const Secret)).vf_heap
+let create_initial_vale_full_heap ih mt = heap_create_impl ih mt
 
 let buffer_addr_is_nat64 (#t:base_typ) (x:ME.buffer t) (s:VS.vale_state) = ()
 

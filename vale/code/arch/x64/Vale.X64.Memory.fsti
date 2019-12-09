@@ -15,30 +15,15 @@ val mem_inv (h:vale_full_heap) : prop0
 [@va_qattr]
 let get_vale_heap (vhi:vale_full_heap) : vale_heap = vhi.vf_heap
 
-let get_one_vale_heap (vhi:vale_full_heap) : vale_heap = vhi.vf_heap
-
 [@va_qattr]
 let set_vale_heap (vfh:vale_full_heap) (vh:vale_heap) : vale_full_heap =
-  {vf_layout = vfh.vf_layout; vf_heap = vh; vf_heaplets = vfh.vf_heaplets}
-
-let lemma_set_vale_heap (vhi:vale_full_heap) (vh:vale_heap) : Lemma
-  (requires True)
-  (ensures get_vale_heap (set_vale_heap vhi vh) == vh)
-  [SMTPat (set_vale_heap vhi vh)]
-  =
-  FStar.Pervasives.reveal_opaque (`%get_vale_heap) get_vale_heap
+  {vfh with vf_heap = vh}
 
 let vale_full_heap_equal (h1 h2:vale_full_heap) =
-  get_one_vale_heap h1 == get_one_vale_heap h2 /\
   h1.vf_layout == h2.vf_layout /\
-  Map16.equal h1.vf_heaplets h2.vf_heaplets
-
-let lemma_vale_full_heap_equal (h1 h2:vale_full_heap) : Lemma
-  (requires vale_full_heap_equal h1 h2)
-  (ensures h1 == h2)
-  [SMTPat (vale_full_heap_equal h1 h2)]
-  =
-  FStar.Pervasives.reveal_opaque (`%get_vale_heap) get_vale_heap
+  h1.vf_heap == h2.vf_heap /\
+  Map16.equal h1.vf_heaplets h2.vf_heaplets /\
+  h1.vf_taint == h2.vf_taint
 
 unfold let nat8 = Vale.Def.Words_s.nat8
 unfold let nat16 = Vale.Def.Words_s.nat16

@@ -1,6 +1,7 @@
 module Vale.Interop.X64
 open FStar.Mul
 open Vale.Interop.Base
+open Vale.Arch.HeapTypes_s
 open Vale.Arch.Heap
 module B = LowStar.Buffer
 module BS = Vale.X64.Machine_Semantics_s
@@ -135,13 +136,13 @@ let rec stack_of_args (max_arity:nat)
       BS.update_heap64 ptr v st1
 
 ////////////////////////////////////////////////////////////////////////////////
-let taint_map = b8 -> GTot MS.taint
+let taint_map = b8 -> GTot taint
 
-let upd_taint_map_b8 (taint:taint_map) (x:b8) (tnt:MS.taint)  : taint_map =
+let upd_taint_map_b8 (tm:taint_map) (x:b8) (tnt:taint) : taint_map =
    fun (y:b8) ->
      if StrongExcludedMiddle.strong_excluded_middle ((x <: b8) == y) then
         tnt
-     else taint y
+     else tm y
 
 [@__reduce__]
 let upd_taint_map_arg (a:arg) (tm:taint_map) : GTot taint_map =
@@ -153,7 +154,7 @@ let upd_taint_map_arg (a:arg) (tm:taint_map) : GTot taint_map =
     | (| TD_Base _, _ |) ->
       tm
 
-let init_taint : taint_map = fun r -> MS.Public
+let init_taint : taint_map = fun r -> Public
 
 [@__reduce__]
 let mk_taint (as:arg_list_sb) (tm:taint_map) : GTot taint_map =
@@ -228,14 +229,14 @@ let create_initial_trusted_state
     // Spill additional arguments on the stack
     let stack = stack_of_args max_arity (List.Tot.length args) init_rsp args stack in
     let mem:interop_heap = mk_mem args h0 in
+    let memTaint = create_memtaint mem (args_b8 args) (mk_taint args init_taint) in
     let (s0:BS.machine_state) = {
       BS.ms_ok = true;
       BS.ms_regs = regs;
       BS.ms_flags = flags;
-      BS.ms_heap = heap_create_impl mem;
-      BS.ms_memTaint = create_memtaint mem (args_b8 args) (mk_taint args init_taint);
+      BS.ms_heap = heap_create_impl mem memTaint;
       BS.ms_stack = BS.Machine_stack init_rsp stack;
-      BS.ms_stackTaint = Map.const MS.Public;
+      BS.ms_stackTaint = Map.const Public;
       BS.ms_trace = [];
     } in
     (s0, mem)

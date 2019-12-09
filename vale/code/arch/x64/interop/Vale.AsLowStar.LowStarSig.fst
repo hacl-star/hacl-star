@@ -204,7 +204,7 @@ let taint_hyp_arg (m:ME.vale_heap) (tm:MS.memTaint_t) (a:arg) =
 
 [@__reduce__]
 let taint_hyp (args:list arg) : VSig.sprop =
-  fun s0 -> BigOps.big_and' (taint_hyp_arg (ME.get_vale_heap s0.VS.vs_heap) s0.VS.vs_memTaint) args
+  fun s0 -> BigOps.big_and' (taint_hyp_arg (ME.get_vale_heap s0.VS.vs_heap) s0.VS.vs_heap.vf_taint) args
 
 [@__reduce__]
 let vale_pre_hyp
@@ -267,8 +267,7 @@ let create_initial_vale_state
     { vs_ok = true;
       vs_regs = Vale.X64.Regs.of_fun t_state.BS.ms_regs;
       vs_flags = Vale.X64.Flags.of_fun IA.init_flags;
-      vs_heap = create_initial_vale_full_heap mem;
-      vs_memTaint = t_state.BS.ms_memTaint;
+      vs_heap = create_initial_vale_full_heap mem (heap_taint t_state.BS.ms_heap);
       vs_stack = as_vale_stack t_state.BS.ms_stack;
       vs_stackTaint = t_state.BS.ms_stackTaint;
     }

@@ -6,6 +6,7 @@ include{:fstar}{:open} "Vale.Def.Words.Two_s"
 include{:fstar}{:open} "Vale.Def.Words.Four_s"
 include{:fstar}{:open} "Vale.Def.Types_s"
 include{:fstar}{:open} "Vale.Arch.Types"
+include{:fstar}{:open} "Vale.Arch.HeapTypes_s"
 include{:fstar}{:open} "Vale.X64.Machine_s"
 include{:fstar}{:open} "Vale.X64.State"
 include{:fstar}{:open} "Vale.X64.Decls"
@@ -22,6 +23,7 @@ open Vale.Def.Words.Two_s
 open Vale.Def.Words.Four_s
 open Vale.Def.Types_s
 open Vale.Arch.Types
+open Vale.Arch.HeapTypes_s
 open Vale.X64.Machine_s
 open Vale.X64.Memory
 open Vale.X64.Stack_i

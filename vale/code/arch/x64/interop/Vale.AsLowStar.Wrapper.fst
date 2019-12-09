@@ -292,7 +292,6 @@ let core_create_lemma_state
   = let va_s = LSig.create_initial_vale_state #max_arity #arg_reg args h0 in
     let tr_s = fst (IX64.create_initial_trusted_state max_arity arg_reg args h0) in
     let sl_s = SL.state_to_S va_s in
-    assert (tr_s.BS.ms_memTaint == va_s.VS.vs_memTaint);
     assert (tr_s.BS.ms_stackTaint == va_s.VS.vs_stackTaint);
     //SL.lemma_to_ok va_s;
     let aux_flag (f:MS.flag) : Lemma (tr_s.BS.ms_flags f == sl_s.BS.ms_flags f)

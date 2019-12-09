@@ -1,6 +1,8 @@
 module Vale.X64.InsLemmas
 
 open FStar.Mul
+open Vale.Arch.HeapTypes_s
+open Vale.Arch.HeapImpl
 open Vale.X64.StateLemmas
 open Vale.X64.Taint_Semantics
 open Vale.X64.Memory
@@ -16,7 +18,7 @@ let lemma_valid_buf_maddr128 h memTaint b i t =
   ()
 
 //let lemma_valid_taint64_operand m t s =
-//  let tainted_mem:memtaint = (state_to_S s).S.ms_memTaint in
+//  let tainted_mem:memtaint = heap_taint (state_to_S s) in
 //  let real_mem:vale_heap = get_vale_heap s.vs_heap in
 //  Vale.Lib.Meta.exists_elim2
 //    (Map.sel tainted_mem (eval_maddr m s) == t)
@@ -30,11 +32,11 @@ let lemma_valid_src_operand64_and_taint o s =
   | OMem (m, t) ->
     let addr = eval_maddr m s in
     let aux (b:buffer64) (i:int) : Lemma
-      (requires valid_buf_maddr64 addr h s.vs_memTaint b i t)
+      (requires valid_buf_maddr64 addr h s.vs_heap.vf_taint b i t)
       (ensures S.valid_src_operand64_and_taint o (state_to_S s))
       =
       lemma_heap_get_heap s.vs_heap;
-      lemma_valid_taint64 b s.vs_memTaint h i t
+      lemma_valid_taint64 b s.vs_heap.vf_taint h i t
       in
     Classical.forall_intro_2 (fun b i -> (fun b -> Classical.move_requires (aux b)) b i)
   | OStack (m, t) -> lemma_valid_taint_stack64 (eval_maddr m s) t s.vs_stackTaint
@@ -46,11 +48,11 @@ let lemma_valid_src_operand128_and_taint o s =
   | OMem (m, t) ->
     let addr = eval_maddr m s in
     let aux (b:buffer128) (i:int) : Lemma
-      (requires valid_buf_maddr128 addr h s.vs_memTaint b i t)
+      (requires valid_buf_maddr128 addr h s.vs_heap.vf_taint b i t)
       (ensures S.valid_src_operand128_and_taint o (state_to_S s))
       =
       lemma_heap_get_heap s.vs_heap;
-      lemma_valid_taint128 b s.vs_memTaint h i t
+      lemma_valid_taint128 b s.vs_heap.vf_taint h i t
       in
     Classical.forall_intro_2 (fun b i -> (fun b -> Classical.move_requires (aux b)) b i)
   | OStack (m, t) -> lemma_valid_taint_stack128 (eval_maddr m s) t s.vs_stackTaint

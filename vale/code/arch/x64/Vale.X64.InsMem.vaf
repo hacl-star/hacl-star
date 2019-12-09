@@ -1,6 +1,7 @@
 include "Vale.X64.InsBasic.vaf"
 include{:fstar}{:open} "Vale.Def.Types_s"
 include{:fstar}{:open} "Vale.Arch.Types"
+include{:fstar}{:open} "Vale.Arch.HeapTypes_s"
 include{:fstar}{:open} "Vale.X64.Machine_s"
 include{:fstar}{:open} "Vale.X64.Memory"
 include{:fstar}{:open} "Vale.X64.Stack_i"
@@ -15,6 +16,7 @@ module Vale.X64.InsMem
 
 #verbatim{:interface}
 open Vale.Def.Types_s
+open Vale.Arch.HeapTypes_s
 open Vale.X64.Machine_s
 open Vale.X64.Memory
 open Vale.X64.Stack_i

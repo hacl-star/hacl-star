@@ -25,8 +25,8 @@ let state_mod_eq (m:mod_t) (s1 s2:vale_state) =
   | Mod_mem -> s1.vs_heap.vf_heap == s2.vs_heap.vf_heap
   | Mod_mem_layout -> s1.vs_heap.vf_layout == s2.vs_heap.vf_layout
   | Mod_mem_heaplet n -> Map16.sel s1.vs_heap.vf_heaplets n == Map16.sel s2.vs_heap.vf_heaplets n
+  | Mod_memTaint -> s1.vs_heap.vf_taint == s2.vs_heap.vf_taint
   | Mod_stack -> s1.vs_stack == s2.vs_stack
-  | Mod_memTaint -> s1.vs_memTaint == s2.vs_memTaint
   | Mod_stackTaint -> s1.vs_stackTaint == s2.vs_stackTaint
 
 let rec update_state_mods_refl (mods:mods_t) (s:vale_state) : Lemma

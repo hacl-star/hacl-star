@@ -27,7 +27,6 @@ let state_to_S (s:vale_state) : GTot machine_state =
     ms_regs = F.on_dom reg (fun r -> Regs.sel r s.vs_regs);
     ms_flags = F.on_dom flag (fun f -> Flags.sel f s.vs_flags);
     ms_heap = coerce s.vs_heap;
-    ms_memTaint = s.vs_memTaint;
     ms_stack = VSS.stack_to_s s.vs_stack;
     ms_stackTaint = s.vs_stackTaint;
     ms_trace = [];
@@ -40,7 +39,6 @@ let state_of_S (s:machine_state) : GTot vale_state =
     vs_regs = Regs.of_fun s.ms_regs;
     vs_flags = Flags.of_fun s.ms_flags;
     vs_heap = coerce s.ms_heap;
-    vs_memTaint = s.ms_memTaint;
     vs_stack = VSS.stack_from_s s.ms_stack;
     vs_stackTaint = s.ms_stackTaint;
   }

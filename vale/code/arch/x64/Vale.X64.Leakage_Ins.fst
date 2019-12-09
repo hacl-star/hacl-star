@@ -838,7 +838,7 @@ let lemma_vpxor_leakage_free (ts:analysis_taints) (ins:S.ins) : Lemma
 #reset-options "--initial_ifuel 1 --max_ifuel 1 --initial_fuel 1 --max_fuel 1 --z3rlimit 20"
 
 let lemma_ins_leakage_free ts ins =
-  let b, ts' = check_if_ins_consumes_fixed_time ins ts in
+  let (b, ts') = check_if_ins_consumes_fixed_time ins ts in
   match ins with
   | BC.Instr _ _ (S.AnnotateXor64 _) -> lemma_xor_leakage_free ts ins
   | BC.Instr _ _ (S.AnnotatePxor _) -> lemma_pxor_leakage_free ts ins

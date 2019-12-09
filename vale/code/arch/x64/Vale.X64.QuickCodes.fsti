@@ -361,7 +361,6 @@ let state_match (s0:vale_state) (s1:vale_state) : Type0 =
   s0.vs_flags == s1.vs_flags /\
   s0.vs_heap == s1.vs_heap /\
   s0.vs_stack == s1.vs_stack /\
-  s0.vs_memTaint == s1.vs_memTaint /\
   s0.vs_stackTaint == s1.vs_stackTaint
 
 val lemma_state_match (s0:vale_state) (s1:vale_state) : Lemma
@@ -394,6 +393,7 @@ unfold let wp_sound_code_pre (#a:Type0) (#c:code) (qc:quickCode a c) (s0:vale_st
       vf_layout = mem_layout;
       vf_heap = mem_heap;
       vf_heaplets = mem_heaplets;
+      vf_taint = memTaint;
     } in
     let s0' = {
       vs_ok = ok;
@@ -401,7 +401,6 @@ unfold let wp_sound_code_pre (#a:Type0) (#c:code) (qc:quickCode a c) (s0:vale_st
       vs_flags = flags;
       vs_heap = mem;
       vs_stack = stack;
-      vs_memTaint = memTaint;
       vs_stackTaint = stackTaint
     } in
     s0 == s0' ==> QProc?.wp qc (state_eta s0') (k (state_eta s0'))
@@ -419,11 +418,11 @@ unfold let normal_steps : list string =
     `%Mkvale_state?.vs_flags;
     `%Mkvale_state?.vs_heap;
     `%Mkvale_state?.vs_stack;
-    `%Mkvale_state?.vs_memTaint;
     `%Mkvale_state?.vs_stackTaint;
     `%Mkvale_full_heap?.vf_layout;
     `%Mkvale_full_heap?.vf_heap;
     `%Mkvale_full_heap?.vf_heaplets;
+    `%Mkvale_full_heap?.vf_taint;
     `%QProc?.wp;
     `%QProc?.mods;
     `%OConst?;

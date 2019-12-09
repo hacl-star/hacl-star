@@ -26,12 +26,12 @@ val lemma_valid_buf_maddr128 (h:vale_heap) (memTaint:memTaint_t) (b:buffer128) (
 
 //val lemma_valid_taint64_operand (m:maddr) (t:taint) (s:va_state) : Lemma
 //  (requires valid_operand (OMem (m, t)) s)
-//  (ensures taint_at s.vs_memTaint (eval_maddr m s) == t)
+//  (ensures taint_at s.vs_heap.vf_taint (eval_maddr m s) == t)
 //  [SMTPat (eval_maddr m s); SMTPat (OMem #int #reg (m, t))]
 
 //val lemma_valid_taint128_operand (m:maddr) (t:taint) (s:va_state) : Lemma
 //  (requires valid_operand128 (OMem (m, t)) s)
-//  (ensures taint_at s.vs_memTaint (eval_maddr m s) == t)
+//  (ensures taint_at s.vs_heap.vf_taint (eval_maddr m s) == t)
 //  [SMTPat (eval_maddr m s); SMTPat (OMem #int #reg (m, t))]
 
 val lemma_valid_src_operand64_and_taint (o:operand64) (s:vale_state) : Lemma

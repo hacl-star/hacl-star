@@ -17,7 +17,6 @@ noeq type vale_state = {
   vs_flags: Flags.t;
   vs_heap: vale_full_heap;
   vs_stack: vale_stack;
-  vs_memTaint: memtaint;
   vs_stackTaint: memtaint;
 }
 
@@ -137,5 +136,4 @@ let state_eq (s0:vale_state) (s1:vale_state) : prop0 =
   Flags.equal s0.vs_flags s1.vs_flags /\
   vale_full_heap_equal s0.vs_heap s1.vs_heap /\
   s0.vs_stack == s1.vs_stack /\
-  s0.vs_memTaint == s1.vs_memTaint /\
   s0.vs_stackTaint == s1.vs_stackTaint

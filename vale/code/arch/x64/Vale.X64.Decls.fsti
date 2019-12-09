@@ -1,5 +1,6 @@
 module Vale.X64.Decls
 open FStar.Mul
+open Vale.Arch.HeapTypes_s
 open Vale.Arch.HeapImpl
 module M = Vale.X64.Memory
 module S = Vale.X64.Stack_i
@@ -154,7 +155,7 @@ let valid_mem_operand128 (addr:int) (t:taint) (s_mem:vale_heap) (s_memTaint:M.me
 let valid_operand (o:operand64) (s:vale_state) : prop0 =
   Vale.X64.State.valid_src_operand o s /\
   ( match o with
-    | OMem (m, t) -> valid_mem_operand64 (eval_maddr m s) t (M.get_vale_heap s.vs_heap) s.vs_memTaint
+    | OMem (m, t) -> valid_mem_operand64 (eval_maddr m s) t (M.get_vale_heap s.vs_heap) s.vs_heap.vf_taint
     | OStack (m, t) -> S.valid_taint_stack64 (eval_maddr m s) t s.vs_stackTaint
     | _ -> True
   )
@@ -163,7 +164,7 @@ let valid_operand (o:operand64) (s:vale_state) : prop0 =
 let valid_operand128 (o:operand128) (s:vale_state) : prop0 =
   Vale.X64.State.valid_src_operand128 o s /\
   ( match o with
-    | OMem (m, t) -> valid_mem_operand128 (eval_maddr m s) t (M.get_vale_heap s.vs_heap) s.vs_memTaint
+    | OMem (m, t) -> valid_mem_operand128 (eval_maddr m s) t (M.get_vale_heap s.vs_heap) s.vs_heap.vf_taint
     | OStack (m, t) -> S.valid_taint_stack128 (eval_maddr m s) t s.vs_stackTaint
     | _ -> True
   )
@@ -256,8 +257,8 @@ val taint_at (memTaint:M.memtaint) (addr:int) : taint
 [@va_qattr] unfold let va_get_mem (s:va_state) : vale_heap = M.get_vale_heap s.vs_heap
 [@va_qattr] unfold let va_get_mem_layout (s:va_state) : vale_heap_layout = s.vs_heap.vf_layout
 [@va_qattr] unfold let va_get_mem_heaplet (n:heaplet_id) (s:va_state) : vale_heap = Map16.sel s.vs_heap.vf_heaplets n
+[@va_qattr] unfold let va_get_memTaint (s:va_state) : M.memtaint = s.vs_heap.vf_taint
 [@va_qattr] unfold let va_get_stack (s:va_state) : S.vale_stack = s.vs_stack
-[@va_qattr] unfold let va_get_memTaint (s:va_state) : M.memtaint = s.vs_memTaint
 [@va_qattr] unfold let va_get_stackTaint (s:va_state) : M.memtaint = s.vs_stackTaint
 
 [@va_qattr] let va_upd_ok (ok:bool) (s:vale_state) : vale_state = { s with vs_ok = ok }
@@ -269,8 +270,8 @@ val taint_at (memTaint:M.memtaint) (addr:int) : taint
 [@va_qattr] let va_upd_mem_layout (layout:vale_heap_layout) (s:vale_state) : vale_state = { s with vs_heap = { s.vs_heap with vf_layout = layout } }
 [@va_qattr] let va_upd_mem_heaplet (n:heaplet_id) (h:vale_heap) (s:vale_state) : vale_state =
   { s with vs_heap = { s.vs_heap with vf_heaplets = Map16.upd s.vs_heap.vf_heaplets n h } }
+[@va_qattr] let va_upd_memTaint (memTaint:M.memtaint) (s:vale_state) : vale_state = { s with vs_heap = { s.vs_heap with vf_taint = memTaint } }
 [@va_qattr] let va_upd_stack (stack:S.vale_stack) (s:vale_state) : vale_state = { s with vs_stack = stack }
-[@va_qattr] let va_upd_memTaint (memTaint:M.memtaint) (s:vale_state) : vale_state = { s with vs_memTaint = memTaint }
 [@va_qattr] let va_upd_stackTaint (stackTaint:M.memtaint) (s:vale_state) : vale_state = { s with vs_stackTaint = stackTaint }
 
 
@@ -283,12 +284,12 @@ val taint_at (memTaint:M.memtaint) (addr:int) : taint
   va_upd_reg64 r (eval_reg_64 r sM) sK
 [@va_qattr] unfold let va_update_xmm (x:reg_xmm) (sM:va_state) (sK:va_state) : va_state =
   va_upd_xmm x (eval_reg_xmm x sM) sK
-[@va_qattr] unfold let va_update_mem (sM:va_state) (sK:va_state) : va_state = va_upd_mem (M.get_one_vale_heap sM.vs_heap) sK
+[@va_qattr] unfold let va_update_mem (sM:va_state) (sK:va_state) : va_state = va_upd_mem sM.vs_heap.vf_heap sK
 [@va_qattr] unfold let va_update_mem_layout (sM:va_state) (sK:va_state) : va_state = va_upd_mem_layout sM.vs_heap.vf_layout sK
 [@va_qattr] unfold let va_update_mem_heaplet (n:heaplet_id) (sM:va_state) (sK:va_state) : va_state =
   va_upd_mem_heaplet n (Map16.sel sM.vs_heap.vf_heaplets n) sK
+[@va_qattr] unfold let va_update_memTaint (sM:va_state) (sK:va_state) : va_state = va_upd_memTaint sM.vs_heap.vf_taint sK
 [@va_qattr] unfold let va_update_stack (sM:va_state) (sK:va_state) : va_state = va_upd_stack sM.vs_stack sK
-[@va_qattr] unfold let va_update_memTaint (sM:va_state) (sK:va_state) : va_state = va_upd_memTaint sM.vs_memTaint sK
 [@va_qattr] unfold let va_update_stackTaint (sM:va_state) (sK:va_state) : va_state = va_upd_stackTaint sM.vs_stackTaint sK
 
 [@va_qattr]

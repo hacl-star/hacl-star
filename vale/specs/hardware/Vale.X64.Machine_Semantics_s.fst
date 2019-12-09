@@ -3,14 +3,15 @@ module Vale.X64.Machine_Semantics_s
 open FStar.Mul
 open Vale.Def.Prop_s
 open Vale.Def.Opaque_s
+include Vale.Arch.MachineHeap_s
+open Vale.Arch.HeapTypes_s
+open Vale.Arch.Heap
 open Vale.X64.Machine_s
 open Vale.X64.CPU_Features_s
 open Vale.Def.Words_s
 open Vale.Def.Words.Two_s
 open Vale.Def.Words.Four_s
 open Vale.Def.Types_s
-include Vale.Arch.MachineHeap_s
-open Vale.Arch.Heap
 open Vale.X64.Instruction_s
 open Vale.X64.Instructions_s
 open FStar.Seq.Base
@@ -54,7 +55,6 @@ type machine_state = {
   ms_regs: regs_t;
   ms_flags: flags_t;
   ms_heap: heap_impl;
-  ms_memTaint: memTaint_t;
   ms_stack: machine_stack;
   ms_stackTaint: memTaint_t;
   ms_trace: list observation;
@@ -158,8 +158,9 @@ let update_mem_and_taint (ptr:int) (v:nat64) (s:machine_state) (t:taint) : machi
   Vale.Def.Opaque_s.reveal_opaque update_heap64_def;
   if valid_addr64 ptr (heap_get s.ms_heap) then
     { s with
-      ms_heap = heap_upd s.ms_heap (update_heap64 ptr v (heap_get s.ms_heap));
-      ms_memTaint = update_n ptr 8 s.ms_memTaint t;
+      ms_heap = heap_upd s.ms_heap
+        (update_heap64 ptr v (heap_get s.ms_heap))
+        (update_n ptr 8 (heap_taint s.ms_heap) t)
     }
   else s
 
@@ -169,8 +170,9 @@ let update_mem128_and_taint (ptr:int) (v:quad32) (s:machine_state) (t:taint) : m
   Vale.Def.Opaque_s.reveal_opaque update_heap128_def;
   if valid_addr128 ptr (heap_get s.ms_heap) then
     { s with
-      ms_heap = heap_upd s.ms_heap (update_heap128 ptr v (heap_get s.ms_heap));
-      ms_memTaint = update_n ptr 16 s.ms_memTaint t
+      ms_heap = heap_upd s.ms_heap
+        (update_heap128 ptr v (heap_get s.ms_heap))
+        (update_n ptr 16 (heap_taint s.ms_heap) t)
     }
   else s
 
@@ -223,7 +225,7 @@ let valid_src_operand64_and_taint (o:operand64) (s:machine_state) : bool =
   | OReg r -> true
   | OMem (m, t) ->
     let ptr = eval_maddr m s in
-    valid_addr64 ptr (heap_get s.ms_heap) && match_n ptr 8 s.ms_memTaint t
+    valid_addr64 ptr (heap_get s.ms_heap) && match_n ptr 8 (heap_taint s.ms_heap) t
   | OStack (m, t) ->
     let ptr = eval_maddr m s in
     valid_src_stack64 ptr s.ms_stack && match_n ptr 8 s.ms_stackTaint t
@@ -234,7 +236,7 @@ let valid_src_operand128_and_taint (o:operand128) (s:machine_state) : bool =
   | OReg i -> true // We leave it to the printer/assembler to object to invalid XMM indices
   | OMem (m, t) ->
     let ptr = eval_maddr m s in
-    valid_addr128 ptr (heap_get s.ms_heap) && match_n ptr 16 s.ms_memTaint t
+    valid_addr128 ptr (heap_get s.ms_heap) && match_n ptr 16 (heap_taint s.ms_heap) t
   | OStack (m, t) ->
     let ptr = eval_maddr m s in
     valid_src_stack128 ptr s.ms_stack && match_n ptr 16 s.ms_stackTaint t

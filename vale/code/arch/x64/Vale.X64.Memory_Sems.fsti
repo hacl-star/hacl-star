@@ -39,17 +39,21 @@ val lemma_heap_get_heap (h:vale_full_heap) : Lemma
   (heap_get (coerce h) == get_heap (get_vale_heap h))
   [SMTPat (heap_get (coerce h))]
 
-let heap_upd_def (hi:vale_full_heap) (h':vale_heap) : vale_full_heap =
-  {
-    vf_layout = hi.vf_layout;
+val lemma_heap_taint (h:vale_full_heap) : Lemma
+  (heap_taint (coerce h) == h.vf_taint)
+  [SMTPat (heap_taint (coerce h))]
+
+let heap_upd_def (hi:vale_full_heap) (h':vale_heap) (mt':memTaint_t) : vale_full_heap =
+  { hi with
     vf_heap = h';
     vf_heaplets = Map16.upd hi.vf_heaplets 0 h';
+    vf_taint = mt';
   }
 
-val lemma_heap_upd_heap (h:vale_full_heap) (m:machine_heap) : Lemma
-  (requires is_machine_heap_update (get_heap (get_vale_heap h)) m)
-  (ensures heap_upd (coerce h) m == coerce (heap_upd_def h (upd_heap h.vf_heap m)))
-  [SMTPat (upd_heap h.vf_heap m)]
+val lemma_heap_upd_heap (h:vale_full_heap) (mh:machine_heap) (mt:memTaint_t) : Lemma
+  (requires is_machine_heap_update (get_heap (get_vale_heap h)) mh)
+  (ensures heap_upd (coerce h) mh mt == coerce (heap_upd_def h (upd_heap h.vf_heap mh) mt))
+  [SMTPat (heap_upd (coerce h) mh mt)]
 
 val bytes_valid64 (i:int) (m:vale_heap) : Lemma
   (requires valid_mem64 i m)

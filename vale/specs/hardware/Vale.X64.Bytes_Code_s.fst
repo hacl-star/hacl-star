@@ -3,6 +3,7 @@ module Vale.X64.Bytes_Code_s
 open FStar.Mul
 open Vale.X64.Machine_s
 open Vale.X64.Instruction_s
+open Vale.Arch.HeapTypes_s
 open Vale.Arch.Heap
 
 type instr_annotation_t = instr_t_record -> Type0
@@ -20,7 +21,7 @@ noeq type instruction_t (a:instr_annotation_t) =
   | Pop        : dst:operand64 -> t:taint -> instruction_t a
   | Alloc      : n:nat64 -> instruction_t a
   | Dealloc    : n:nat64 -> instruction_t a
-  | HeapGhost  : (h1:heap_impl -> h2:heap_impl{heap_get h1 == heap_get h2}) -> instruction_t a
+  | HeapGhost  : (h1:heap_impl -> h2:heap_impl{heap_get h1 == heap_get h2 /\ heap_taint h1 == heap_taint h2}) -> instruction_t a
 
 type ocmp:eqtype =
   | OEq: o1:operand64{not (OMem? o1 || OStack? o1)} -> o2:operand64{not (OMem? o2 || OStack? o2)} -> ocmp

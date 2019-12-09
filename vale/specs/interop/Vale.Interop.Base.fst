@@ -1,4 +1,5 @@
 module Vale.Interop.Base
+open Vale.Arch.HeapTypes_s
 include Vale.Interop.Types
 include Vale.Interop.Heap_s
 module MB = LowStar.Monotonic.Buffer
@@ -52,22 +53,22 @@ let coerce (x:'a{'a == 'b}) : 'b = x
 
 type buffer_qualifiers = {
   modified:bool;
-  taint:MS.taint;
+  taint:taint;
   strict_disjointness:bool
 }
 
 [@__reduce__]
 let default_bq = {
-  modified=true;
-  taint=MS.Secret;
-  strict_disjointness=false
+  modified = true;
+  taint = Secret;
+  strict_disjointness = false
 }
 
 [@__reduce__]
 let stack_bq = {
-  modified=true;
-  taint=MS.Public;
-  strict_disjointness=true
+  modified = true;
+  taint = Public;
+  strict_disjointness = true
 }
 
 let valid_base_type = x:base_typ{x <> TUInt128}
@@ -90,7 +91,6 @@ let normal (#a:Type) (x:a) : a =
                  `%BS.Mkmachine_state?.ms_regs;
                  `%BS.Mkmachine_state?.ms_flags;
                  `%BS.Mkmachine_state?.ms_heap;
-                 `%BS.Mkmachine_state?.ms_memTaint;
                  `%BS.Mkmachine_state?.ms_stack;
                  `%BS.Mkmachine_state?.ms_stackTaint;
                  `%BS.Mkmachine_state?.ms_trace;
@@ -454,7 +454,7 @@ let rec disjoint_or_eq_fresh
 let rec write_taint
     (i:nat)
     (mem:interop_heap)
-    (ts:b8 -> GTot MS.taint)
+    (ts:b8 -> GTot taint)
     (b:b8{i <= DV.length (get_downview b.bsrc)})
     (accu:MS.memTaint_t)
   : GTot MS.memTaint_t
@@ -465,7 +465,7 @@ let rec write_taint
 let create_memtaint
     (mem:interop_heap)
     (ps:list b8)
-    (ts:b8 -> GTot MS.taint)
+    (ts:b8 -> GTot taint)
   : GTot MS.memTaint_t
-  = List.Tot.fold_right_gtot ps (write_taint 0 mem ts) (FStar.Map.const MS.Public)
+  = List.Tot.fold_right_gtot ps (write_taint 0 mem ts) (FStar.Map.const Public)
 

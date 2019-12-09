@@ -141,7 +141,6 @@ let equiv_states (s1 s2 : machine_state) : GTot Type0 =
   (cf s1.ms_flags = cf s2.ms_flags) /\
   (overflow s1.ms_flags = overflow s2.ms_flags) /\
   (s1.ms_heap == s2.ms_heap) /\
-  (s1.ms_memTaint == s2.ms_memTaint) /\
   (s1.ms_stack == s2.ms_stack) /\
   (s1.ms_stackTaint == s2.ms_stackTaint)
 
@@ -151,7 +150,6 @@ let equiv_states_ext (s1 s2 : machine_state) : GTot Type0 =
   let open FStar.FunctionalExtensionality in
   (feq s1.ms_regs s2.ms_regs) /\
   (s1.ms_heap == s2.ms_heap) /\
-  (Map.equal s1.ms_memTaint s2.ms_memTaint) /\
   (Map.equal s1.ms_stack.stack_mem s2.ms_stack.stack_mem) /\
   (Map.equal s1.ms_stackTaint s2.ms_stackTaint) /\
   (equiv_states s1 s2)
