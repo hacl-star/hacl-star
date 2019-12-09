@@ -36,28 +36,29 @@ def compress(block):
         r += ((s[i] + h[i]) & 0xffffffff).to_bytes(4, byteorder='big')
     return r
 
-def recompute(k1, j1, path, ppos, acc, actd):
-    # print([str(k1), str(j1), str(ppos), acc.hex()])
-    if j1 != 0:
-        nactd = actd or j1 % 2 == 1
-        if k1 % 2 == 0:
-            if j1 == k1 or (j1 == k1 + 1 and not actd):
-                return recompute(k1 // 2, j1 // 2, path, ppos, acc, nactd)
-            phash = path[ppos]
-            acc = compress(acc + phash)
-            return recompute(k1 // 2, j1 // 2, path, ppos + 1, acc, nactd)
-        phash = path[ppos]
-        acc = compress(phash + acc)
-        return recompute(k1 // 2, j1 // 2, path, ppos + 1, acc, nactd)
+def recompute(i, n, path, path_pos, tag, actd):
+    # print([str(k1), str(n), str(path_pos), tag.hex()])
+    if n == 0:
+        return tag
+    nactd = actd or n % 2 == 1
+    if i % 2 == 0:
+        if n == i or (n == i + 1 and not actd):
+            return recompute(i // 2, n // 2, path, path_pos, tag, nactd)
+        tag = compress(tag + path[path_pos])
     else:
-        return acc
+        tag = compress(path[path_pos] + tag)
+    return recompute(i // 2, n // 2, path, path_pos + 1, tag, nactd)
 
-# offset = mtv.offset
-def verify(offset, k1, j1, path, root):
-  k2 = k1 - offset
-  j2 = j1 - offset
-  tmp = recompute(k2, j2, path, 1, path[0], False)
-  return tmp == root
+# offset = mtv.offset 64-bit offset
+# i = index to verify
+# n = max index in tree
+# path
+# root
+def verify(offset, i, n, path, root):
+  i2 = i - offset
+  n2 = n - offset
+  tag = recompute(i2, n2, path, 1, path[0], False)
+  return tag == root
 
 
 root = bytes.fromhex("50b2a21d29533d9ab25cbde1776c76db2c4eef059ad300e20335605942edb4a9")

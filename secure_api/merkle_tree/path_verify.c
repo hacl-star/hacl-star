@@ -29,17 +29,17 @@ void print_hash(const uint8_t *hash) {
 
 #ifdef USE_OPENSSL
 void compress(const uint8_t* h1, const uint8_t* h2, uint8_t *out) {
-  uint8_t lr[HASH_SIZE*2];
-  memcpy(&lr[0], h1, HASH_SIZE);
-  memcpy(&lr[HASH_SIZE], h2, HASH_SIZE);
+  unsigned char block[HASH_SIZE*2];
+  memcpy(&block[0], h1, HASH_SIZE);
+  memcpy(&block[HASH_SIZE], h2, HASH_SIZE);
 
-  uint8_t tmp[HASH_SIZE];
   SHA256_CTX ctx;
-  SHA256_Init(&ctx);
-  SHA256_Transform(&ctx, lr);
-  SHA256_Final(tmp, &ctx);
+  if (SHA256_Init(&ctx) != 1)
+    printf("SHA256_Init error");
+  SHA256_Transform(&ctx, &block[0]);
 
-  memcpy(out, tmp, HASH_SIZE);
+  for (int i = 0; i < 8; i++)
+    ((uint32_t*)out)[i] = htobe32(((uint32_t*)ctx.h)[i]);
 }
 #else
 uint32_t constants[] = {
