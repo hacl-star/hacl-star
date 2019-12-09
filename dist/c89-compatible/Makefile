@@ -131,8 +131,8 @@ include ctypes.depend
 
 all: libocamlevercrypt.cmxa
 
-lib_gen/%_gen.exe:
-	$(OCAMLOPT) $^ -o $@
+lib_gen/%_gen.exe: libevercrypt.$(SO)
+	$(OCAMLOPT) $(filter-out libevercrypt.$(SO),$^) -o $@ -cclib -levercrypt -ccopt -L.
 
 %.cmx: %.ml
 	$(OCAMLOPT) -c $< -o $@
@@ -140,8 +140,12 @@ lib_gen/%_gen.exe:
 .PRECIOUS: lib/%_stubs.ml
 lib/%_stubs.ml: lib/%_c_stubs.c
 
+ifeq ($(shell uname -s),Darwin)
+  DY=dy
+endif
+
 lib/%_stubs.ml lib/%_c_stubs.c: lib_gen/%_gen.exe
-	$<
+	$(DY)LD_LIBRARY_PATH=. $<
 
 libocamlevercrypt.cmxa: $(ALL_BINDINGS) $(ALL_ML_STUBS) $(ALL_C_STUBS) libevercrypt.$(SO)
 	ocamlfind mklib -o ocamlevercrypt $(filter-out %.so,$^) -L. -levercrypt -L$(OPENSSL_HOME) -lcrypto

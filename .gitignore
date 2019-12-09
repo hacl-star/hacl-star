@@ -24,3 +24,7 @@ code/**/dist
 Makefile.config
 .#*
 tests/benchmark/build
+dist/**/lib/*_stubs.ml
+dist/**/lib/*_c_stubs.c
+dist/test # not under version control
+dist/wasm # not under version control FOR NOW
