@@ -878,6 +878,7 @@ dist/evercrypt-external-headers/Makefile.basic: $(ALL_KRML_FILES)
 	  -add-include '<stdbool.h>' \
 	  -add-include '<kremlin/internal/types.h>' \
 	  -add-include '<kremlin/internal/target.h>' \
+	  -header dist/LICENSE.txt \
 	  -skip-compilation \
 	  -tmpdir $(dir $@) \
 	  $^
