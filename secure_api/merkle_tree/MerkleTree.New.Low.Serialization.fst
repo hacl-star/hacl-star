@@ -405,19 +405,19 @@ let mt_deserialize rid input sz =
   end
 
 val mt_serialize_path: p:path -> mt:mt_p -> output:uint8_p -> sz:uint32_t -> HST.ST uint32_t
-  (requires (fun h0 -> path_safe h0 (B.frameOf mt) p /\ mt_safe h0 mt /\
+  (requires (fun h0 -> let phv:hash_vec = (B.get h0 p 0) in
+                       path_safe h0 (B.frameOf mt) p /\ RV.rv_inv h0 phv /\
+                       mt_safe h0 mt /\
                        B.live h0 output /\ B.len output = sz /\
                        HS.disjoint (B.frameOf output) (B.frameOf p) /\
                        HH.disjoint (B.frameOf mt) (B.frameOf p)))
   (ensures (fun h0 _ h1 -> path_safe h1 (B.frameOf mt) p /\
                            modifies (B.loc_buffer output) h0 h1))
 let mt_serialize_path p mt output sz =
-  let phv:hash_vec = !*p in
   let h0 = HST.get() in
   let ok, pos = serialize_uint32_t true hash_size output sz 0ul in
   let h1 = HST.get() in
-  assume (RV.elems_reg h1 phv);
-  let ok, pos = serialize_hash_vec ok phv output sz pos in
+  let ok, pos = serialize_hash_vec ok !*p output sz pos in
   if ok then pos else 0ul
 
 val mt_deserialize_path: rid:HST.erid -> input:uint8_p -> sz:uint32_t{B.len input = sz} -> HST.ST (B.pointer_or_null path)
