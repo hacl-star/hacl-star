@@ -267,7 +267,7 @@ let create_initial_vale_state
     { vs_ok = true;
       vs_regs = Vale.X64.Regs.of_fun t_state.BS.ms_regs;
       vs_flags = Vale.X64.Flags.of_fun IA.init_flags;
-      vs_heap = create_initial_vale_heap mem;
+      vs_heap = create_initial_vale_full_heap mem;
       vs_memTaint = t_state.BS.ms_memTaint;
       vs_stack = as_vale_stack t_state.BS.ms_stack;
       vs_stackTaint = t_state.BS.ms_stackTaint;

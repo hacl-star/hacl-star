@@ -3,6 +3,8 @@ module Vale.X64.MemoryAdapters
 open FStar.Mul
 open Vale.Interop.Base
 open Vale.Arch.HeapImpl
+open Vale.Arch.Heap
+open Vale.Arch.MachineHeap_s
 module BS = Vale.X64.Machine_Semantics_s
 module BV = LowStar.BufferView
 module HS = FStar.HyperStack
@@ -17,11 +19,22 @@ val as_vale_immbuffer (#src #t:base_typ) (i:IB.ibuf_t src t) : GTot (ME.buffer t
 
 val stack_eq : squash (BS.machine_stack == SI.vale_stack)
 
-val as_mem (h:ME.vale_full_heap) : GTot IB.interop_heap
+val as_mem (h:ME.vale_heap) : GTot IB.interop_heap
 
-val create_initial_vale_heap (ih:IB.interop_heap) : Ghost vale_full_heap
+unfold let coerce (#b #a:Type) (x:a{a == b}) : b = x
+
+val lemma_heap_impl : squash (heap_impl == vale_full_heap)
+
+val create_initial_vale_heap (ih:IB.interop_heap) : GTot vale_heap
+
+val create_initial_vale_full_heap (ih:IB.interop_heap) : Ghost vale_full_heap
   (requires True)
-  (ensures fun h -> ME.mem_inv h /\ h.vf_heap == Map16.sel h.vf_heaplets 0)
+  (ensures fun h ->
+    h == coerce (heap_create_impl ih) /\
+    ME.mem_inv h /\
+    h.vf_heap == create_initial_vale_heap ih /\
+    h.vf_heap == Map16.sel h.vf_heaplets 0
+  )
 
 unfold
 let as_vale_stack (st:BS.machine_stack)

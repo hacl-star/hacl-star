@@ -17,7 +17,10 @@ let heap_upd hi mh' =
     vf_heaplets = Map16.upd hi.vf_heaplets 0 h';
   }
 
-let heap_create_from_interop ih =
+let heap_create_machine ih =
+  down_mem ih
+
+let heap_create_impl ih =
   let vh = ValeHeap (down_mem ih) (Ghost.hide ih) in
   let vh4 = ((vh, vh), (vh, vh)) in
   let vh16 = ((vh4, vh4), (vh4, vh4)) in

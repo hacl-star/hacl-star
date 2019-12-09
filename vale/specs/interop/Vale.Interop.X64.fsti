@@ -232,7 +232,7 @@ let create_initial_trusted_state
       BS.ms_ok = true;
       BS.ms_regs = regs;
       BS.ms_flags = flags;
-      BS.ms_heap = heap_create_from_interop mem;
+      BS.ms_heap = heap_create_impl mem;
       BS.ms_memTaint = create_memtaint mem (args_b8 args) (mk_taint args init_taint);
       BS.ms_stack = BS.Machine_stack init_rsp stack;
       BS.ms_stackTaint = Map.const MS.Public;
@@ -280,14 +280,14 @@ let prediction_post
     (h0:mem_roots args)
     (s0:BS.machine_state)
     (rax_fuel_mem:(UInt64.t & nat & interop_heap)) =
-  let rax, fuel, final_mem = rax_fuel_mem in
+  let (rax, fuel, final_mem) = rax_fuel_mem in
   Some? (BS.machine_eval_code c fuel s0) /\ (
     let s1 = Some?.v (BS.machine_eval_code c fuel s0) in
     let h1 = hs_of_mem final_mem in
     FStar.HyperStack.ST.equal_domains h0 h1 /\
     B.modifies (loc_modified_args args) h0 h1 /\
     mem_roots_p h1 args /\
-    heap_get (heap_create_from_interop (mk_mem args h1)) == heap_get s1.BS.ms_heap /\
+    heap_create_machine (mk_mem args h1) == heap_get s1.BS.ms_heap /\
     calling_conventions s0 s1 regs_modified xmms_modified /\
     rax == return_val s1 /\
     post_rel h0 s0 rax_fuel_mem s1
