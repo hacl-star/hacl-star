@@ -105,6 +105,17 @@ inline static FStar_UInt128_uint128 FStar_UInt128_mul_wide(uint64_t x, uint64_t 
 
 /* SNIPPET_END: FStar_UInt128_mul_wide */
 
+/* SNIPPET_START: K___uint32_t_bool */
+
+typedef struct K___uint32_t_bool_s
+{
+  uint32_t fst;
+  bool snd;
+}
+K___uint32_t_bool;
+
+/* SNIPPET_END: K___uint32_t_bool */
+
 /* SNIPPET_START: store128_le */
 
 inline static void store128_le(uint8_t *x0, FStar_UInt128_uint128 x1);
