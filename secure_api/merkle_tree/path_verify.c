@@ -4,16 +4,31 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <endian.h>
-#include <openssl/sha.h>
+#include <assert.h>
+#include <stdint.h>
+#include <endian.h> // for be32toh, htobe32
 
+/** @file
+ * Examples of Merkle path verification
+ */
+
+/**
+ * The size of hashes in bytes
+ */
 #define HASH_SIZE 32
 
-uint8_t *parse_hash(const char *input) {
+/**
+ * Parse a hash string
+ *
+ * @param input a string to parse
+ * @return byte array of length @link HASH_SIZE
+ */
+uint8_t *parse_hash(const char *input)
+{
   uint8_t *r = (uint8_t *)malloc(sizeof(uint8_t) * HASH_SIZE);
   for (int i = 0; i < HASH_SIZE; i++) {
     unsigned tmp;
-    if (sscanf(input + 2*i, "%02x", &tmp) != 1) {
+    if (sscanf(input + 2 * i, "%02x", &tmp) != 1) {
       printf("hash parsing error\n");
       return NULL;
     }
@@ -22,14 +37,30 @@ uint8_t *parse_hash(const char *input) {
   return r;
 }
 
-void print_hash(const uint8_t *hash) {
+/**
+ * Print a hash to stdout
+ *
+ * @param hash hash to print
+ */
+void print_hash(const uint8_t *hash)
+{
   for (int i = 0; i < HASH_SIZE; i++)
     printf("%02x", hash[i] & 0xff);
 }
 
 #ifdef USE_OPENSSL
-void compress(const uint8_t* h1, const uint8_t* h2, uint8_t *out) {
-  unsigned char block[HASH_SIZE*2];
+#include <openssl/sha.h>
+
+/**
+ * SHA256 compression function (based on OpenSSL)
+ *
+ * @param h1 left block
+ * @param h2 right block
+ * @param out compressed block
+ */
+void compress(const uint8_t *h1, const uint8_t *h2, uint8_t *out)
+{
+  unsigned char block[HASH_SIZE * 2];
   memcpy(&block[0], h1, HASH_SIZE);
   memcpy(&block[HASH_SIZE], h2, HASH_SIZE);
 
@@ -39,21 +70,28 @@ void compress(const uint8_t* h1, const uint8_t* h2, uint8_t *out) {
   SHA256_Transform(&ctx, &block[0]);
 
   for (int i = 0; i < 8; i++)
-    ((uint32_t*)out)[i] = htobe32(((uint32_t*)ctx.h)[i]);
+    ((uint32_t *)out)[i] = htobe32(((uint32_t *)ctx.h)[i]);
 }
 #else
 uint32_t constants[] = {
-  0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
-  0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
-  0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
-  0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
-  0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
-  0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
-  0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
-  0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
-};
+    0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
+    0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
+    0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
+    0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
+    0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
+    0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
+    0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
+    0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2};
 
-void compress(const uint8_t* h1, const uint8_t *h2, uint8_t *out) {
+/**
+ * SHA256 compression function (custom)
+ *
+ * @param h1 left block
+ * @param h2 right block
+ * @param out compressed block
+ */
+void compress(const uint8_t *h1, const uint8_t *h2, uint8_t *out)
+{
   uint8_t block[HASH_SIZE * 2];
   memcpy(&block[0], h1, HASH_SIZE);
   memcpy(&block[HASH_SIZE], h2, HASH_SIZE);
@@ -65,7 +103,7 @@ void compress(const uint8_t* h1, const uint8_t *h2, uint8_t *out) {
   memset(cws, 0, 64);
 
   for (int i = 0; i < 16; i++)
-    cws[i] = be32toh(((int32_t*)block)[i]);
+    cws[i] = be32toh(((int32_t *)block)[i]);
 
   for (int i = 16; i < 64; i++) {
     uint32_t t16 = cws[i - 16];
@@ -109,37 +147,115 @@ void compress(const uint8_t* h1, const uint8_t *h2, uint8_t *out) {
 }
 #endif
 
-void recompute(uint32_t k1, uint32_t j1, uint8_t *const *path, uint32_t ppos, uint8_t *acc, int actd)
+/**
+ * Recursive implementation of path recomputation
+ *
+ * @param i index to recompute
+ * @param n maximum index in tree
+ * @param path neighbouring hashes along branches
+ * @param path_len length of path
+ * @param pi current path index
+ * @param tag current tag
+ * @param actd flag
+ * @return 0 for success, non-zero otherwise
+ */
+int recompute_rec(uint32_t i, uint32_t n, uint8_t *const *path, size_t path_len, size_t pi, uint8_t *tag, int actd)
 {
-  /* printf("%u %u %u ", k1, j1, ppos); print_hash(acc); printf("\n"); */
+  /* printf("%u %u %lu ", i, n, pi); print_hash(tag); printf("\n"); */
+  if (n < 0 || i > n || path_len == 0 || pi < 0 || pi > path_len)
+    return 1;
 
-  if (j1 != 0) {
-    int nactd = actd || j1 % 2 == 1;
-    if (k1 % 2 == 0) {
-      if (j1 == k1 || ((j1 == k1 + 1) && !actd)) {
-        recompute(k1 / 2, j1 / 2, path, ppos, acc, nactd);
-        return;
-      }
-      const uint8_t *phash = path[ppos];
-      compress(acc, phash, acc);
-      recompute(k1 / 2, j1 / 2, path, ppos + 1, acc, nactd);
-      return;
+  if (n != 0) {
+    int nactd = actd || n % 2 == 1;
+    if (i % 2 == 0) {
+      if (n == i || ((n == i + 1) && !actd))
+        return recompute_rec(i / 2, n / 2, path, path_len, pi, tag, nactd);
+      const uint8_t *phash = path[pi];
+      compress(tag, phash, tag);
+      return recompute_rec(i / 2, n / 2, path, path_len, pi + 1, tag, nactd);
     }
-    const uint8_t *phash = path[ppos];
-    compress(phash, acc, acc);
-    recompute(k1 / 2, j1 / 2, path, ppos + 1, acc, nactd);
-    return;
+    else {
+      const uint8_t *phash = path[pi];
+      compress(phash, tag, tag);
+    }
+    return recompute_rec(i / 2, n / 2, path, path_len, pi + 1, tag, nactd);
   }
+
+  return 0;
 }
 
-int verify(uint32_t offset, uint32_t k1, uint32_t j1, uint8_t * const * path, const uint8_t *root) {
-  uint8_t acc[HASH_SIZE];
-  memcpy(acc, path[0], HASH_SIZE);
-  recompute(k1 - offset, j1 - offset, path, 1, acc, 0);
-  return memcmp(acc, root, HASH_SIZE) != 0;
+/**
+ * Iterative implementation of path recomputation
+ *
+ * @param i index to recompute
+ * @param n maximum index in tree
+ * @param path neighbouring hashes along branches
+ * @param path_len length of path
+ * @param tag current tag
+ * @return 0 for success, non-zero otherwise
+ */
+int recompute(uint32_t i, uint32_t n, uint8_t *const *path, size_t path_len, uint8_t *tag)
+{
+  if (n < 0 || i > n || path_len == 0)
+    return 1;
+
+  memcpy(tag, path[0], HASH_SIZE);
+  size_t pi = 1;
+  int actd = 0;
+  while (n > 0) {
+    /* printf("%u %u %lu ", i, n, pi); print_hash(tag); printf("\n"); */
+    if (i % 2 == 0) {
+      if (n == i || (n == i + 1 && !actd)) {
+        i /= 2;
+        n /= 2;
+        actd |= n % 2 == 1;
+        continue;
+      }
+      assert(pi < path_len);
+      compress(tag, path[pi], tag);
+    }
+    else {
+      assert(pi < path_len);
+      compress(path[pi], tag, tag);
+    }
+    actd |= n % 2 == 1;
+    i /= 2;
+    n /= 2;
+    pi++;
+  }
+
+  return 0;
 }
 
-int main(int argc, char **argv) {
+/**
+ * Merkle path verification
+ *
+ * @param offset 64-bit offset of the internal 32-bit tree
+ * @param i index to recompute
+ * @param n maximum index in tree
+ * @param path neighbouring hashes along branches
+ * @param root root of the tree
+ * @return 0 for success, non-zero otherwise.
+ */
+int verify(uint32_t offset, uint32_t i, uint32_t n, uint8_t *const *path, size_t path_len, const uint8_t *root)
+{
+  uint8_t acc_rec[HASH_SIZE], acc_itr[HASH_SIZE];
+  memcpy(acc_rec, path[0], HASH_SIZE);
+  int r1 = recompute_rec(i - offset, n - offset, path, path_len, 1, acc_rec, 0);
+  int r2 = recompute(i - offset, n - offset, path, path_len, acc_itr);
+  if (r1 != 0 || r2 != 0) {
+    printf("Recomputation error\n");
+    return 1;
+  }
+  assert(memcmp(acc_rec, acc_itr, HASH_SIZE) == 0);
+  return memcmp(acc_itr, root, HASH_SIZE) != 0;
+}
+
+/**
+ * Various Merkle path verification tests
+ */
+int main(int argc, char **argv)
+{
   uint8_t *root = parse_hash("50b2a21d29533d9ab25cbde1776c76db2c4eef059ad300e20335605942edb4a9");
 
   uint8_t *paths[4][3] = {
@@ -165,11 +281,12 @@ int main(int argc, char **argv) {
     }
   };
 
-  for (int i = 0; i < 4; i++)
-    if (verify(0, i, 4, paths[i], root) != 0) {
+  for (int i = 0; i < 4; i++) {
+    if (verify(0, i, 4, paths[i], 3, root) != 0) {
       printf("Verification failure\n");
       exit(2);
     }
+  }
 
   printf("All ok.\n");
 

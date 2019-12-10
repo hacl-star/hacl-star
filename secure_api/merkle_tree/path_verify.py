@@ -1,3 +1,10 @@
+"""
+Examples of Merkle path verification
+"""
+
+import binascii # hexlify
+import struct # endianness conversions
+
 constants = [
     0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
     0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
@@ -10,19 +17,24 @@ constants = [
 ]
 
 def compress(block):
+    """
+    Compression function of SHA256
+
+    :param block: block to compress
+    """
     s = [ 0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
           0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19 ]
 
     cws = [ 0 ] * 64
     for i in range(16):
-        cws[i] = int.from_bytes(block[i*4:(i+1)*4], byteorder='big')
+        cws[i] = struct.unpack(">I", block[i*4:(i+1)*4])[0]
     for i in range(16, 64):
         t16, t15, t7, t2 = cws[i - 16], cws[i - 15], cws[i - 7], cws[i - 2]
         s1 = (t2 >> 17 | t2 << 15) ^ ((t2 >> 19 | t2 << 13) ^ t2 >> 10)
         s0 = (t15 >> 7 | t15 << 25) ^ ((t15 >> 18 | t15 << 14) ^ t15 >> 3)
         cws[i] = (s1 + t7 + s0 + t16) & 0xffffffff
 
-    h = s.copy()
+    h = list(s)
     for i in range(64):
         [a0, b0, c0, d0, e0, f0, g0, h03] = h
         w = cws[i]
@@ -31,54 +43,118 @@ def compress(block):
         h = [ (t1 + t2) & 0xffffffff, a0 & 0xffffffff, b0 & 0xffffffff, c0 & 0xffffffff,
               (d0 + t1) & 0xffffffff, e0 & 0xffffffff, f0 & 0xffffffff, g0 & 0xffffffff ]
 
-    r = bytes()
+    r = bytearray()
     for i in range(8):
-        r += ((s[i] + h[i]) & 0xffffffff).to_bytes(4, byteorder='big')
+        r += struct.pack(">I",(s[i] + h[i]) & 0xffffffff)
     return r
 
-def recompute(i, n, path, path_pos, tag, actd):
-    # print([str(k1), str(n), str(path_pos), tag.hex()])
+def recompute_rec(i, n, path, pi, tag, actd):
+    """
+    Recursive recomputation of tag
+
+    :param i: index to recompute
+    :param n: maximum index in tree
+    :param path: neighbouring hashes along branches
+    :param pi: current path index
+    :param tag: current tag
+    :param actd: flag
+    :returns: recomputed tag
+    """
+    if n < 0 or i > n or not len(path) or pi < 0 or pi > len(path):
+        return []
+
+    print([str(i), str(n), str(pi), binascii.hexlify(tag)])
     if n == 0:
         return tag
     nactd = actd or n % 2 == 1
     if i % 2 == 0:
         if n == i or (n == i + 1 and not actd):
-            return recompute(i // 2, n // 2, path, path_pos, tag, nactd)
-        tag = compress(tag + path[path_pos])
+            return recompute_rec(i // 2, n // 2, path, pi, tag, nactd)
+        tag = compress(tag + path[pi])
     else:
-        tag = compress(path[path_pos] + tag)
-    return recompute(i // 2, n // 2, path, path_pos + 1, tag, nactd)
+        tag = compress(path[pi] + tag)
+    return recompute_rec(i // 2, n // 2, path, pi + 1, tag, nactd)
 
-# offset = mtv.offset 64-bit offset
-# i = index to verify
-# n = max index in tree
-# path
-# root
+def recompute(i, n, path):
+    """
+    Iterative recomputation of tag
+
+    :param i: index to recompute
+    :param n: maximum index in tree
+    :param path: neighbouring hashes along branches
+    """
+    if n < 0 or i > n or not len(path):
+        return []
+
+    tag = path[0]
+    pi = 1
+    actd = False
+    while n > 0:
+        print([str(i), str(n), str(pi), binascii.hexlify(tag)])
+        if i % 2 == 0:
+            if n == i or (n == i + 1 and not actd):
+                i //= 2
+                n //= 2
+                actd |= n % 2 == 1
+                continue
+            assert (pi < len(path))
+            tag = compress(tag + path[pi])
+        else:
+            assert (pi < len(path))
+            tag = compress(path[pi] + tag)
+        actd |= n % 2 == 1
+        i //= 2
+        n //= 2
+        pi += 1
+    return tag
+
 def verify(offset, i, n, path, root):
-  i2 = i - offset
-  n2 = n - offset
-  tag = recompute(i2, n2, path, 1, path[0], False)
-  return tag == root
+    """
+    Merkle path verification
 
+    :param offset: 64-bit offset of the internal 32-bit tree
+    :param i: index to verify
+    :param n: maximum index in tree
+    :param path: neighbouring hashes along branches
+    :param root: root of the tree
+    :returns: True for success, False otherwise.
+    """
+    io = i - offset
+    no = n - offset
+    tag_rec = recompute_rec(io, no, path, 1, path[0], False)
+    tag = recompute(io, no, path)
+    assert(tag_rec == tag)
+    return tag == root
 
-root = bytes.fromhex("50b2a21d29533d9ab25cbde1776c76db2c4eef059ad300e20335605942edb4a9")
+def tests():
+    """Various test inputs"""
 
-path = [ bytes.fromhex("0000000000000000000000000000000000000000000000000000000000000000"),
-         bytes.fromhex("0000000000000000000000000000000000000000000000000000000000000001"),
-         bytes.fromhex("0fff9b7f003a6cffbe9db48e026410191e893f0e8519cc39262df228cde1f5d2") ]
-print(verify(0, 0, 4, path, root))
+    root = bytearray.fromhex("50b2a21d29533d9ab25cbde1776c76db2c4eef059ad300e20335605942edb4a9")
 
-path = [ bytes.fromhex("0000000000000000000000000000000000000000000000000000000000000001"),
-         bytes.fromhex("0000000000000000000000000000000000000000000000000000000000000000"),
-         bytes.fromhex("0fff9b7f003a6cffbe9db48e026410191e893f0e8519cc39262df228cde1f5d2") ]
-print(verify(0, 1, 4, path, root))
+    path = [ bytearray.fromhex("0000000000000000000000000000000000000000000000000000000000000000"),
+             bytearray.fromhex("0000000000000000000000000000000000000000000000000000000000000001"),
+             bytearray.fromhex("0fff9b7f003a6cffbe9db48e026410191e893f0e8519cc39262df228cde1f5d2") ]
+    v1 = verify(0, 0, 4, path, root)
 
-path = [ bytes.fromhex("0000000000000000000000000000000000000000000000000000000000000002"),
-         bytes.fromhex("0000000000000000000000000000000000000000000000000000000000000003"),
-         bytes.fromhex("b40f7ca600e9693557a6a01a2a9288c200d14c5e76329d4d0d069cae776a096d") ]
-print(verify(0, 2, 4, path, root))
+    path = [ bytearray.fromhex("0000000000000000000000000000000000000000000000000000000000000001"),
+             bytearray.fromhex("0000000000000000000000000000000000000000000000000000000000000000"),
+             bytearray.fromhex("0fff9b7f003a6cffbe9db48e026410191e893f0e8519cc39262df228cde1f5d2") ]
+    v2 = verify(0, 1, 4, path, root)
 
-path = [ bytes.fromhex("0000000000000000000000000000000000000000000000000000000000000003"),
-         bytes.fromhex("0000000000000000000000000000000000000000000000000000000000000002"),
-         bytes.fromhex("b40f7ca600e9693557a6a01a2a9288c200d14c5e76329d4d0d069cae776a096d") ]
-print(verify(0, 3, 4, path, root))
+    path = [ bytearray.fromhex("0000000000000000000000000000000000000000000000000000000000000002"),
+             bytearray.fromhex("0000000000000000000000000000000000000000000000000000000000000003"),
+             bytearray.fromhex("b40f7ca600e9693557a6a01a2a9288c200d14c5e76329d4d0d069cae776a096d") ]
+    v3 = verify(0, 2, 4, path, root)
+
+    path = [ bytearray.fromhex("0000000000000000000000000000000000000000000000000000000000000003"),
+             bytearray.fromhex("0000000000000000000000000000000000000000000000000000000000000002"),
+             bytearray.fromhex("b40f7ca600e9693557a6a01a2a9288c200d14c5e76329d4d0d069cae776a096d") ]
+    v4 = verify(0, 3, 4, path, root)
+
+    if v1 and v2 and v3 and v4:
+        print("All ok.")
+    else:
+        print("Verification failure.")
+
+if __name__ == '__main__':
+    tests()
