@@ -147,8 +147,16 @@ function fetch_vale() {
 function refresh_hacl_hints_dist() {
     # We should not generate hints when building on Windows
     if [[ "$OS" != "Windows_NT" ]]; then
-        refresh_hints_dist "git@github.com:mitls/hacl-star.git" "git ls-files dist | xargs git add" "regenerate hints and dist" "."
+        refresh_hints_dist "git@github.com:mitls/hacl-star.git" "true" "regenerate hints and dist" "."
     fi
+}
+
+# Re-build and re-test all C code.
+# Then add changes to git.
+function clean_build_dist() {
+    rm -rf dist/*/*
+    env VALE_SCONS_PARALLEL_OPT="-j $threads" make -j $threads all-unstaged -k
+    git add dist
 }
 
 # Note: this performs an _approximate_ refresh of the hints, in the sense that
@@ -173,6 +181,8 @@ function refresh_hints_dist() {
     # when $2 = "git ls-files src/ocaml-output/ | xargs git add",
     # outputting the list of files to stdout
     eval "$extra"
+
+    clean_build_dist
 
     git commit --allow-empty -m "[CI] $msg"
     # Memorize that commit
