@@ -22,8 +22,7 @@ let set_vale_heap (vfh:vale_full_heap) (vh:vale_heap) : vale_full_heap =
 let vale_full_heap_equal (h1 h2:vale_full_heap) =
   h1.vf_layout == h2.vf_layout /\
   h1.vf_heap == h2.vf_heap /\
-  Map16.equal h1.vf_heaplets h2.vf_heaplets /\
-  h1.vf_taint == h2.vf_taint
+  Map16.equal h1.vf_heaplets h2.vf_heaplets
 
 unfold let nat8 = Vale.Def.Words_s.nat8
 unfold let nat16 = Vale.Def.Words_s.nat16

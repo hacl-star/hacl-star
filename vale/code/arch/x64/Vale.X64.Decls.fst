@@ -47,7 +47,7 @@ let lemma_opr_Mem (s:va_state) (base:va_operand) (offset:int) (b:M.buffer64) (in
     M.mem_inv s.vs_heap /\
     OReg? base /\
     valid_src_addr h b index /\
-    M.valid_taint_buf64 b h s.vs_heap.vf_taint t /\
+    M.valid_taint_buf64 b h (full_heap_taint s.vs_heap) t /\
     eval_operand base s + offset == M.buffer_addr b h + 8 * index
   ))
   (ensures (
@@ -61,7 +61,7 @@ let lemma_opr_Mem (s:va_state) (base:va_operand) (offset:int) (b:M.buffer64) (in
   let t = va_opr_code_Mem base offset t in
   M.lemma_valid_mem64 b index h;
   let OMem (m, t) = t in
-  assert (valid_buf_maddr64 (eval_maddr m s) h s.vs_heap.vf_taint b index t);
+  assert (valid_buf_maddr64 (eval_maddr m s) h s.vs_heap.vf_layout b index t);
   M.lemma_load_mem64 b index h
 
 let lemma_opr_Mem128 (s:va_state) (base:va_operand) (offset:int) (t:taint) (b:M.buffer128) (index:int) : Lemma
@@ -70,7 +70,7 @@ let lemma_opr_Mem128 (s:va_state) (base:va_operand) (offset:int) (t:taint) (b:M.
     M.mem_inv s.vs_heap /\
     OReg? base /\
     valid_src_addr h b index /\
-    M.valid_taint_buf128 b h s.vs_heap.vf_taint t /\
+    M.valid_taint_buf128 b h (full_heap_taint s.vs_heap) t /\
     eval_operand base s + offset == M.buffer_addr b h + 16 * index
   ))
   (ensures (
@@ -84,7 +84,7 @@ let lemma_opr_Mem128 (s:va_state) (base:va_operand) (offset:int) (t:taint) (b:M.
   let t = va_opr_code_Mem128 base offset t in
   M.lemma_valid_mem128 b index h;
   let OMem (m, t) = t in
-  assert (valid_buf_maddr128 (eval_maddr m s) h s.vs_heap.vf_taint b index t);
+  assert (valid_buf_maddr128 (eval_maddr m s) h s.vs_heap.vf_layout b index t);
   M.lemma_load_mem128 b index h
 
 let taint_at memTaint addr = Map.sel memTaint addr

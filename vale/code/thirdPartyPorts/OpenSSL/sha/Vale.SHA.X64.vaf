@@ -31,6 +31,8 @@ open Vale.Def.Types_s
 open Vale.Def.Words_s
 open Vale.Def.Words.Seq_s
 open FStar.Seq
+open Vale.Arch.Types
+open Vale.Arch.HeapImpl
 open Vale.X64.Machine_s
 open Vale.X64.Memory
 open Vale.X64.Stack_i
@@ -43,7 +45,6 @@ open Vale.X64.InsVector
 open Vale.X64.InsSha
 open Vale.X64.QuickCode
 open Vale.X64.QuickCodes
-open Vale.Arch.Types
 open Vale.SHA.SHA_helpers
 open Spec.SHA2
 open Spec.Agile.Hash
@@ -763,9 +764,9 @@ procedure sha_update_bytes_stdcall(
         buffer_writeable(ctx_b);
         buffer_readable(heap0, in_b);
         buffer_readable(heap0, k_b);
-        valid_taint_buf128(ctx_b, heap0, memTaint, Secret);
-        valid_taint_buf128(in_b, heap0, memTaint, Secret);
-        valid_taint_buf128(k_b, heap0, memTaint, Secret);
+        valid_taint_buf128(ctx_b, heap0, memTaint.vl_taint, Secret);
+        valid_taint_buf128(in_b, heap0, memTaint.vl_taint, Secret);
+        valid_taint_buf128(k_b, heap0, memTaint.vl_taint, Secret);
         ctx_ptr == buffer_addr(ctx_b, heap0);
          in_ptr == buffer_addr(in_b, heap0);
           k_ptr == buffer_addr(k_b, heap0);

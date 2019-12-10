@@ -52,6 +52,7 @@ open Vale.Def.Words_s
 open Vale.Def.Words.Seq_s
 open Vale.Def.Types_s
 open Vale.Arch.Types
+open Vale.Arch.HeapImpl
 open Vale.AES.AES_s
 open Vale.AES.GCTR_s
 open Vale.AES.GCTR
@@ -93,14 +94,14 @@ open Vale.AES.OptPublic
 #verbatim{:interface}
 let aes_reqs
   (alg:algorithm) (key:seq nat32) (round_keys:seq quad32) (keys_b:buffer128)
-  (key_ptr:int) (heap0:vale_heap) (memTaint:memtaint) : prop0
+  (key_ptr:int) (heap0:vale_heap) (layout:vale_heap_layout) : prop0
   =
   aesni_enabled /\ avx_enabled /\
   (alg = AES_128 \/ alg = AES_256) /\
   is_aes_key_LE alg key /\
   length(round_keys) == nr(alg) + 1 /\
   round_keys == key_to_round_keys_LE alg key /\
-  validSrcAddrs128 heap0 key_ptr keys_b (nr alg + 1) memTaint Secret /\
+  validSrcAddrs128 heap0 key_ptr keys_b (nr alg + 1) layout Secret /\
   s128 heap0 keys_b == round_keys
 #endverbatim
 
@@ -109,7 +110,7 @@ open Vale.Lib.Basic
 #endverbatim
 
 function aes_reqs(alg:algorithm, key:seq(nat32), round_keys:seq(quad32), keys_b:buffer128,
-    key_ptr:int, heap0:vale_heap, memTaint:memtaint) : prop extern;
+    key_ptr:int, heap0:vale_heap, layout:vale_heap_layout) : prop extern;
 
 
 ///////////////////////////

@@ -33,6 +33,8 @@ open Vale.Def.Opaque_s
 open Vale.Def.Words_s
 open Vale.Def.Types_s
 open FStar.Seq
+open Vale.Arch.Types
+open Vale.Arch.HeapImpl
 open Vale.AES.AES_s
 open Vale.X64.Machine_s
 open Vale.X64.Memory
@@ -44,7 +46,6 @@ open Vale.X64.InsVector
 open Vale.X64.InsAes
 open Vale.X64.QuickCode
 open Vale.X64.QuickCodes
-open Vale.Arch.Types
 open Vale.AES.AES_helpers
 open Vale.Poly1305.Math    // For lemma_poly_bits64()
 open Vale.AES.GCM_helpers
@@ -59,7 +60,7 @@ open Vale.X64.CPU_Features_s
 #verbatim{:interface}
 let aes_reqs
   (alg:algorithm) (key:seq nat32) (round_keys:seq quad32) (keys_b:buffer128)
-  (key_ptr:nat64) (heap0:vale_heap) (memTaint:memtaint) : prop0
+  (key_ptr:nat64) (heap0:vale_heap) (layout:vale_heap_layout) : prop0
   =
   aesni_enabled /\ avx_enabled /\
   (alg = AES_128 || alg = AES_256) /\
@@ -67,11 +68,11 @@ let aes_reqs
   length(round_keys) == nr(alg) + 1 /\
   round_keys == key_to_round_keys_LE alg key /\
   key_ptr == buffer_addr keys_b heap0 /\
-  validSrcAddrs128 heap0 key_ptr keys_b (nr alg + 1) memTaint Secret /\
+  validSrcAddrs128 heap0 key_ptr keys_b (nr alg + 1) layout Secret /\
   buffer128_as_seq heap0 keys_b == round_keys
 #endverbatim
 function aes_reqs(alg:algorithm, key:seq(nat32), round_keys:seq(quad32), keys_b:buffer128,
-    key_ptr:nat64, heap0:vale_heap, memTaint:memtaint) : prop extern;
+    key_ptr:nat64, heap0:vale_heap, layout:vale_heap_layout) : prop extern;
 
 ghost procedure finish_aes_encrypt_le(ghost alg:algorithm, ghost input_LE:quad32, ghost key:seq(nat32))
     requires

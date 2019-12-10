@@ -11,7 +11,7 @@ noeq type vale_heap =
     ih:Ghost.erased interop_heap{mh == down_mem (Ghost.reveal ih)} ->
     vale_heap
 
-noeq type vale_heap_layout : Type u#1 = {
+noeq type vale_heap_layout_inner : Type u#1 = {
   vl_old_heap:vale_heap;
 }
 

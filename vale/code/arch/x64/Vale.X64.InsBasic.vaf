@@ -1,5 +1,6 @@
 include{:fstar}{:open} "Vale.Def.Types_s"
 include{:fstar}{:open} "Vale.Arch.Types"
+include{:fstar}{:open} "Vale.Arch.HeapImpl"
 include{:fstar}{:open} "Vale.X64.Machine_s"
 include{:fstar}{:open} "Vale.X64.State"
 include{:fstar}{:open} "Vale.X64.Decls"
@@ -11,6 +12,7 @@ module Vale.X64.InsBasic
 #verbatim{:interface}
 open FStar.Mul
 open Vale.Def.Types_s
+open Vale.Arch.HeapImpl
 open Vale.Arch.Types
 open Vale.X64.Machine_s
 open Vale.X64.State
@@ -61,7 +63,7 @@ var mem_config:int {:state mem_config()};
 var mem:vale_heap {:state mem()};
 var heap0:vale_heap {:state mem_heaplet(0)}{:updates mem};
 var stack:vale_stack {:state stack()};
-var memTaint:memtaint {:state memTaint()};
+var memTaint:vale_heap_layout {:state mem_layout()}; // TEMPORARY; will be renamed
 var stackTaint:memtaint {:state stackTaint()};
 
 operand_type reg64:nat64 :=

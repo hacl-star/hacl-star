@@ -40,14 +40,14 @@ val lemma_heap_get_heap (h:vale_full_heap) : Lemma
   [SMTPat (heap_get (coerce h))]
 
 val lemma_heap_taint (h:vale_full_heap) : Lemma
-  (heap_taint (coerce h) == h.vf_taint)
+  (heap_taint (coerce h) == full_heap_taint h)
   [SMTPat (heap_taint (coerce h))]
 
 let heap_upd_def (hi:vale_full_heap) (h':vale_heap) (mt':memTaint_t) : vale_full_heap =
   { hi with
+    vf_layout = {hi.vf_layout with vl_taint = mt'};
     vf_heap = h';
     vf_heaplets = Map16.upd hi.vf_heaplets 0 h';
-    vf_taint = mt';
   }
 
 val lemma_heap_upd_heap (h:vale_full_heap) (mh:machine_heap) (mt:memTaint_t) : Lemma

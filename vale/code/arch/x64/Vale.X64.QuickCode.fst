@@ -17,7 +17,6 @@ type mod_t =
 | Mod_mem_layout: mod_t
 | Mod_mem_heaplet: heaplet_id -> mod_t
 | Mod_stack: mod_t
-| Mod_memTaint: mod_t
 | Mod_stackTaint: mod_t
 unfold let mods_t = list mod_t
 
@@ -30,7 +29,6 @@ unfold let mods_t = list mod_t
 [@va_qattr] unfold let va_Mod_mem_layout = Mod_mem_layout
 [@va_qattr] unfold let va_Mod_mem_heaplet (n:heaplet_id) = Mod_mem_heaplet n
 [@va_qattr] unfold let va_Mod_stack = Mod_stack
-[@va_qattr] unfold let va_Mod_memTaint = Mod_memTaint
 [@va_qattr] unfold let va_Mod_stackTaint = Mod_stackTaint
 
 [@va_qattr "opaque_to_smt"]
@@ -44,7 +42,6 @@ let mod_eq (x y:mod_t) : Pure bool (requires True) (ensures fun b -> b == (x = y
   | Mod_mem_layout -> (match y with Mod_mem_layout -> true | _ -> false)
   | Mod_mem_heaplet nx -> (match y with Mod_mem_heaplet ny -> nx = ny | _ -> false)
   | Mod_stack -> (match y with Mod_stack -> true | _ -> false)
-  | Mod_memTaint -> (match y with Mod_memTaint -> true | _ -> false)
   | Mod_stackTaint -> (match y with Mod_stackTaint -> true | _ -> false)
 
 [@va_qattr]
@@ -58,7 +55,6 @@ let update_state_mod (m:mod_t) (sM sK:vale_state) : vale_state =
   | Mod_mem_layout -> va_update_mem_layout sM sK
   | Mod_mem_heaplet n -> va_update_mem_heaplet n sM sK
   | Mod_stack -> va_update_stack sM sK
-  | Mod_memTaint -> va_update_memTaint sM sK
   | Mod_stackTaint -> va_update_stackTaint sM sK
 
 [@va_qattr]

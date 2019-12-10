@@ -73,7 +73,7 @@ let core_create_lemma_taint_hyp
   =
   FStar.Pervasives.reveal_opaque (`%ME.get_vale_heap) ME.get_vale_heap;
     let va_s = LSig.create_initial_vale_state #max_arity #arg_reg args h0 in
-    let taint_map = va_s.VS.vs_heap.vf_taint in
+    let taint_map = full_heap_taint va_s.VS.vs_heap in
     let mem = ME.get_vale_heap va_s.VS.vs_heap in
 //    assert (mem == mk_mem args h0);
     let raw_taint = IX64.(mk_taint args IX64.init_taint) in

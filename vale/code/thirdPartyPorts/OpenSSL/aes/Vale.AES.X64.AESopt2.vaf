@@ -41,6 +41,8 @@ open Vale.Def.Opaque_s
 open Vale.Def.Words_s
 open Vale.Def.Types_s
 open FStar.Seq
+open Vale.Arch.Types
+open Vale.Arch.HeapImpl
 open Vale.AES.AES_s
 open Vale.X64.Machine_s
 open Vale.X64.Memory
@@ -52,7 +54,6 @@ open Vale.X64.InsVector
 open Vale.X64.InsAes
 open Vale.X64.QuickCode
 open Vale.X64.QuickCodes
-open Vale.Arch.Types
 open Vale.AES.AES_helpers
 open Vale.Poly1305.Math    // For lemma_poly_bits64()
 open Vale.AES.GCM_helpers
@@ -86,8 +87,8 @@ function operator([]) #[a:Type(0)](s:FStar.Seq.Base.seq(a), i:int):a extern;
 
 unfold let va_subscript_FStar__Seq__Base__seq = Seq.index
 
-let hkeys_b_powers (hkeys_b:buffer128) (heap0:vale_heap) (memTaint:memtaint) (ptr:int) (h:poly) =
-  validSrcAddrs128 heap0 ptr hkeys_b 8 memTaint Secret /\
+let hkeys_b_powers (hkeys_b:buffer128) (heap0:vale_heap) (layout:vale_heap_layout) (ptr:int) (h:poly) =
+  validSrcAddrs128 heap0 ptr hkeys_b 8 layout Secret /\
   of_quad32 (buffer128_read hkeys_b 0 heap0) == gf128_power h 1 /\
   of_quad32 (buffer128_read hkeys_b 1 heap0) == gf128_power h 2 /\
   of_quad32 (buffer128_read hkeys_b 3 heap0) == gf128_power h 3 /\
@@ -112,17 +113,17 @@ let scratch_b_blocks
 
 let scratch_b_data
     (rev_bytes:bool) (rev_blocks:bool) (scratch_b:buffer128) (scratch_len count:int) (heap0:vale_heap)
-    (memTaint:memtaint) (ptr:int) (data:seq quad32)
+    (layout:vale_heap_layout) (ptr:int) (data:seq quad32)
   =
-  validSrcAddrs128 heap0 ptr scratch_b scratch_len memTaint Secret /\
+  validSrcAddrs128 heap0 ptr scratch_b scratch_len layout Secret /\
   scratch_b_blocks rev_bytes rev_blocks scratch_b scratch_len count heap0 data
 #endverbatim
 
-function hkeys_b_powers(hkeys_b:buffer128, heap0:vale_heap, memTaint:memtaint, ptr:int, h:poly):prop extern;
+function hkeys_b_powers(hkeys_b:buffer128, heap0:vale_heap, layout:vale_heap_layout, ptr:int, h:poly):prop extern;
 function index_opt_rev(b:bool, len:int, n:int, i:int):int extern;
 function quad32_opt_rev(b:bool, q:quad32):quad32 extern;
 function scratch_b_data(rev_bytes:bool, rev_blocks:bool, scratch_b:buffer128, scratch_len:int,
-    count:int, heap0:vale_heap, memTaint:memtaint, ptr:int, data:seq(quad32)):prop extern;
+    count:int, heap0:vale_heap, layout:vale_heap_layout, ptr:int, data:seq(quad32)):prop extern;
 
 #reset-options "--z3rlimit 50"
 

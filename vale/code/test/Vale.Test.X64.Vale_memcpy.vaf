@@ -5,6 +5,7 @@ include "../arch/x64/Vale.X64.InsVector.vaf"
 module Vale.Test.X64.Vale_memcpy
 #verbatim{:interface}{:implementation}
 
+open Vale.Arch.HeapImpl
 open Vale.X64.Machine_s
 open Vale.X64.Memory
 open Vale.X64.State
@@ -28,8 +29,8 @@ procedure memcpy(inline win:bool, ghost dst:buffer64, ghost src:buffer64)
         buffer_readable(heap0, dst);
         buffer_readable(heap0, src);
         buffer_writeable(dst);
-        valid_taint_buf64(dst, heap0, memTaint, Secret);
-        valid_taint_buf64(src, heap0, memTaint, Secret);
+        valid_taint_buf64(dst, heap0, memTaint.vl_taint, Secret);
+        valid_taint_buf64(src, heap0, memTaint.vl_taint, Secret);
         buffer_length(src) == 2;
         buffer_length(dst) == 2;
         win ==> rcx == buffer_addr(dst, heap0);

@@ -133,29 +133,29 @@ unfold let loc_buffer(#t:M.base_typ) (b:M.buffer t) = M.loc_buffer #t b
 unfold let locs_disjoint = M.locs_disjoint
 unfold let loc_union = M.loc_union
 
-let valid_buf_maddr64 (addr:int) (s_mem:vale_heap) (s_memTaint:M.memtaint) (b:M.buffer64) (index:int) (t:taint) : prop0 =
+let valid_buf_maddr64 (addr:int) (s_mem:vale_heap) (layout:vale_heap_layout) (b:M.buffer64) (index:int) (t:taint) : prop0 =
   valid_src_addr s_mem b index /\
-  M.valid_taint_buf64 b s_mem s_memTaint t /\
+  M.valid_taint_buf64 b s_mem layout.vl_taint t /\
   addr == M.buffer_addr b s_mem + 8 * index
 
-let valid_buf_maddr128 (addr:int) (s_mem:vale_heap) (s_memTaint:M.memtaint) (b:M.buffer128) (index:int) (t:taint) : prop0 =
+let valid_buf_maddr128 (addr:int) (s_mem:vale_heap) (layout:vale_heap_layout) (b:M.buffer128) (index:int) (t:taint) : prop0 =
   valid_src_addr s_mem b index /\
-  M.valid_taint_buf128 b s_mem s_memTaint t /\
+  M.valid_taint_buf128 b s_mem layout.vl_taint t /\
   addr == M.buffer_addr b s_mem + 16 * index
 
-let valid_mem_operand64 (addr:int) (t:taint) (s_mem:vale_heap) (s_memTaint:M.memtaint) : prop0 =
-  exists (b:M.buffer64) (index:int).{:pattern (valid_buf_maddr64 addr s_mem s_memTaint b index t)}
-    valid_buf_maddr64 addr s_mem s_memTaint b index t
+let valid_mem_operand64 (addr:int) (t:taint) (s_mem:vale_heap) (layout:vale_heap_layout) : prop0 =
+  exists (b:M.buffer64) (index:int).{:pattern (valid_buf_maddr64 addr s_mem layout b index t)}
+    valid_buf_maddr64 addr s_mem layout b index t
 
-let valid_mem_operand128 (addr:int) (t:taint) (s_mem:vale_heap) (s_memTaint:M.memtaint) : prop0 =
-  exists (b:M.buffer128) (index:int).{:pattern (valid_buf_maddr128 addr s_mem s_memTaint b index t)}
-    valid_buf_maddr128 addr s_mem s_memTaint b index t
+let valid_mem_operand128 (addr:int) (t:taint) (s_mem:vale_heap) (layout:vale_heap_layout) : prop0 =
+  exists (b:M.buffer128) (index:int).{:pattern (valid_buf_maddr128 addr s_mem layout b index t)}
+    valid_buf_maddr128 addr s_mem layout b index t
 
 [@va_qattr]
 let valid_operand (o:operand64) (s:vale_state) : prop0 =
   Vale.X64.State.valid_src_operand o s /\
   ( match o with
-    | OMem (m, t) -> valid_mem_operand64 (eval_maddr m s) t (M.get_vale_heap s.vs_heap) s.vs_heap.vf_taint
+    | OMem (m, t) -> valid_mem_operand64 (eval_maddr m s) t (M.get_vale_heap s.vs_heap) s.vs_heap.vf_layout
     | OStack (m, t) -> S.valid_taint_stack64 (eval_maddr m s) t s.vs_stackTaint
     | _ -> True
   )
@@ -164,7 +164,7 @@ let valid_operand (o:operand64) (s:vale_state) : prop0 =
 let valid_operand128 (o:operand128) (s:vale_state) : prop0 =
   Vale.X64.State.valid_src_operand128 o s /\
   ( match o with
-    | OMem (m, t) -> valid_mem_operand128 (eval_maddr m s) t (M.get_vale_heap s.vs_heap) s.vs_heap.vf_taint
+    | OMem (m, t) -> valid_mem_operand128 (eval_maddr m s) t (M.get_vale_heap s.vs_heap) s.vs_heap.vf_layout
     | OStack (m, t) -> S.valid_taint_stack128 (eval_maddr m s) t s.vs_stackTaint
     | _ -> True
   )
@@ -257,7 +257,6 @@ val taint_at (memTaint:M.memtaint) (addr:int) : taint
 [@va_qattr] unfold let va_get_mem (s:va_state) : vale_heap = M.get_vale_heap s.vs_heap
 [@va_qattr] unfold let va_get_mem_layout (s:va_state) : vale_heap_layout = s.vs_heap.vf_layout
 [@va_qattr] unfold let va_get_mem_heaplet (n:heaplet_id) (s:va_state) : vale_heap = Map16.sel s.vs_heap.vf_heaplets n
-[@va_qattr] unfold let va_get_memTaint (s:va_state) : M.memtaint = s.vs_heap.vf_taint
 [@va_qattr] unfold let va_get_stack (s:va_state) : S.vale_stack = s.vs_stack
 [@va_qattr] unfold let va_get_stackTaint (s:va_state) : M.memtaint = s.vs_stackTaint
 
@@ -270,7 +269,6 @@ val taint_at (memTaint:M.memtaint) (addr:int) : taint
 [@va_qattr] let va_upd_mem_layout (layout:vale_heap_layout) (s:vale_state) : vale_state = { s with vs_heap = { s.vs_heap with vf_layout = layout } }
 [@va_qattr] let va_upd_mem_heaplet (n:heaplet_id) (h:vale_heap) (s:vale_state) : vale_state =
   { s with vs_heap = { s.vs_heap with vf_heaplets = Map16.upd s.vs_heap.vf_heaplets n h } }
-[@va_qattr] let va_upd_memTaint (memTaint:M.memtaint) (s:vale_state) : vale_state = { s with vs_heap = { s.vs_heap with vf_taint = memTaint } }
 [@va_qattr] let va_upd_stack (stack:S.vale_stack) (s:vale_state) : vale_state = { s with vs_stack = stack }
 [@va_qattr] let va_upd_stackTaint (stackTaint:M.memtaint) (s:vale_state) : vale_state = { s with vs_stackTaint = stackTaint }
 
@@ -288,7 +286,6 @@ val taint_at (memTaint:M.memtaint) (addr:int) : taint
 [@va_qattr] unfold let va_update_mem_layout (sM:va_state) (sK:va_state) : va_state = va_upd_mem_layout sM.vs_heap.vf_layout sK
 [@va_qattr] unfold let va_update_mem_heaplet (n:heaplet_id) (sM:va_state) (sK:va_state) : va_state =
   va_upd_mem_heaplet n (Map16.sel sM.vs_heap.vf_heaplets n) sK
-[@va_qattr] unfold let va_update_memTaint (sM:va_state) (sK:va_state) : va_state = va_upd_memTaint sM.vs_heap.vf_taint sK
 [@va_qattr] unfold let va_update_stack (sM:va_state) (sK:va_state) : va_state = va_upd_stack sM.vs_stack sK
 [@va_qattr] unfold let va_update_stackTaint (sM:va_state) (sK:va_state) : va_state = va_upd_stackTaint sM.vs_stackTaint sK
 
@@ -420,44 +417,44 @@ unfold let modifies_buffer128 (b:M.buffer128) (h1 h2:vale_heap) = modifies_mem (
 unfold let modifies_buffer128_2 (b1 b2:M.buffer128) (h1 h2:vale_heap) = modifies_mem (M.loc_union (loc_buffer b1) (loc_buffer b2)) h1 h2
 unfold let modifies_buffer128_3 (b1 b2 b3:M.buffer128) (h1 h2:vale_heap) = modifies_mem (M.loc_union (M.loc_union (loc_buffer b1) (loc_buffer b2)) (loc_buffer b3)) h1 h2
 
-let validSrcAddrs64 (m:vale_heap) (addr:int) (b:M.buffer64) (len:int) (memTaint:M.memtaint) (t:taint) =
-    buffer_readable m b /\
-    len <= buffer_length b /\
-    M.buffer_addr b m == addr /\
-    M.valid_taint_buf64 b m memTaint t
+let validSrcAddrs64 (m:vale_heap) (addr:int) (b:M.buffer64) (len:int) (layout:vale_heap_layout) (t:taint) =
+  buffer_readable m b /\
+  len <= buffer_length b /\
+  M.buffer_addr b m == addr /\
+  M.valid_taint_buf64 b m layout.vl_taint t
 
-let validDstAddrs64 (m:vale_heap) (addr:int) (b:M.buffer64) (len:int) (memTaint:M.memtaint) (t:taint) =
-    buffer_readable m b /\
-    buffer_writeable b /\
-    len <= buffer_length b /\
-    M.buffer_addr b m == addr /\
-    M.valid_taint_buf64 b m memTaint t
+let validDstAddrs64 (m:vale_heap) (addr:int) (b:M.buffer64) (len:int) (layout:vale_heap_layout) (t:taint) =
+  buffer_readable m b /\
+  buffer_writeable b /\
+  len <= buffer_length b /\
+  M.buffer_addr b m == addr /\
+  M.valid_taint_buf64 b m layout.vl_taint t
 
-let validSrcAddrs128 (m:vale_heap) (addr:int) (b:M.buffer128) (len:int) (memTaint:M.memtaint) (t:taint) =
-    buffer_readable m b /\
-    len <= buffer_length b /\
-    M.buffer_addr b m == addr /\
-    M.valid_taint_buf128 b m memTaint t
+let validSrcAddrs128 (m:vale_heap) (addr:int) (b:M.buffer128) (len:int) (layout:vale_heap_layout) (t:taint) =
+  buffer_readable m b /\
+  len <= buffer_length b /\
+  M.buffer_addr b m == addr /\
+  M.valid_taint_buf128 b m layout.vl_taint t
 
-let validDstAddrs128 (m:vale_heap) (addr:int) (b:M.buffer128) (len:int) (memTaint:M.memtaint) (t:taint) =
-    buffer_readable m b /\
-    buffer_writeable b /\
-    len <= buffer_length b /\
-    M.buffer_addr b m == addr /\
-    M.valid_taint_buf128 b m memTaint t
+let validDstAddrs128 (m:vale_heap) (addr:int) (b:M.buffer128) (len:int) (layout:vale_heap_layout) (t:taint) =
+  buffer_readable m b /\
+  buffer_writeable b /\
+  len <= buffer_length b /\
+  M.buffer_addr b m == addr /\
+  M.valid_taint_buf128 b m layout.vl_taint t
 
-let validSrcAddrsOffset128 (m:vale_heap) (addr:int) (b:M.buffer128) (offset len:int) (memTaint:M.memtaint) (t:taint) =
-    buffer_readable m b /\
-    offset + len <= buffer_length b /\
-    M.buffer_addr b m + 16 * offset == addr /\
-    M.valid_taint_buf128 b m memTaint t
+let validSrcAddrsOffset128 (m:vale_heap) (addr:int) (b:M.buffer128) (offset len:int) (layout:vale_heap_layout) (t:taint) =
+  buffer_readable m b /\
+  offset + len <= buffer_length b /\
+  M.buffer_addr b m + 16 * offset == addr /\
+  M.valid_taint_buf128 b m layout.vl_taint t
 
-let validDstAddrsOffset128 (m:vale_heap) (addr:int) (b:M.buffer128) (offset len:int) (memTaint:M.memtaint) (t:taint) =
-    buffer_readable m b /\
-    buffer_writeable b /\
-    offset + len <= buffer_length b /\
-    M.buffer_addr b m + 16 * offset == addr /\
-    M.valid_taint_buf128 b m memTaint t
+let validDstAddrsOffset128 (m:vale_heap) (addr:int) (b:M.buffer128) (offset len:int) (layout:vale_heap_layout) (t:taint) =
+  buffer_readable m b /\
+  buffer_writeable b /\
+  offset + len <= buffer_length b /\
+  M.buffer_addr b m + 16 * offset == addr /\
+  M.valid_taint_buf128 b m layout.vl_taint t
 
 let modifies_buffer_specific128 (b:M.buffer128) (h1 h2:vale_heap) (start last:nat) : GTot prop0 =
     modifies_buffer128 b h1 h2 /\

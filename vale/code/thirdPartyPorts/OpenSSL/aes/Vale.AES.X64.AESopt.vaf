@@ -39,6 +39,8 @@ open Vale.Def.Opaque_s
 open Vale.Def.Words_s
 open Vale.Def.Types_s
 open FStar.Seq
+open Vale.Arch.Types
+open Vale.Arch.HeapImpl
 open Vale.AES.AES_s
 open Vale.X64.Machine_s
 open Vale.X64.Memory
@@ -50,7 +52,6 @@ open Vale.X64.InsVector
 open Vale.X64.InsAes
 open Vale.X64.QuickCode
 open Vale.X64.QuickCodes
-open Vale.Arch.Types
 open Vale.AES.AES_helpers
 //open Vale.Poly1305.Math    // For lemma_poly_bits64()
 open Vale.AES.GCM_helpers
@@ -72,7 +73,7 @@ open Vale.Transformers.Transform
 open FStar.Mul
 let aes_reqs0
   (alg:algorithm) (key:seq nat32) (round_keys:seq quad32) (keys_b:buffer128)
-  (key_ptr:int) (heap0:vale_heap) (memTaint:memtaint) : prop0
+  (key_ptr:int) (heap0:vale_heap) (layout:vale_heap_layout) : prop0
   =
   aesni_enabled /\ pclmulqdq_enabled /\ avx_enabled /\
   alg = AES_128 /\
@@ -80,31 +81,31 @@ let aes_reqs0
   is_aes_key_LE alg key /\
   length(round_keys) == nr(alg) + 1 /\
   round_keys == key_to_round_keys_LE alg key /\
-  //validSrcAddrsOffset128 heap0 key_ptr keys_b 8 (nr alg + 1) memTaint Secret /\
+  //validSrcAddrsOffset128 heap0 key_ptr keys_b 8 (nr alg + 1) layout Secret /\
   // Can't use the standard Offset, since that makes the size too large and conflicts
   // with the spec below that says the entire keys_b is exactly round_keys
   buffer_readable heap0 keys_b /\
   (nr alg + 1) <= buffer_length keys_b /\
   buffer_addr keys_b heap0 + 16 * 8 == key_ptr /\
-  valid_taint_buf128 keys_b heap0 memTaint Secret /\
+  valid_taint_buf128 keys_b heap0 layout.vl_taint Secret /\
   buffer128_as_seq heap0 keys_b == round_keys
 
 let aes_reqs_offset
   (alg:algorithm) (key:seq nat32) (round_keys:seq quad32) (keys_b:buffer128)
-  (key_ptr:int) (heap0:vale_heap) (memTaint:memtaint) : prop0
+  (key_ptr:int) (heap0:vale_heap) (layout:vale_heap_layout) : prop0
   =
   aesni_enabled /\ avx_enabled /\ pclmulqdq_enabled /\
   (alg = AES_128 || alg = AES_256) /\
   is_aes_key_LE alg key /\
   length(round_keys) == nr(alg) + 1 /\
   round_keys == key_to_round_keys_LE alg key /\
-  //validSrcAddrsOffset128 heap0 key_ptr keys_b 8 (nr alg + 1) memTaint Secret /\
+  //validSrcAddrsOffset128 heap0 key_ptr keys_b 8 (nr alg + 1) layout Secret /\
   // Can't use the standard Offset, since that makes the size too large and conflicts
   // with the spec below that says the entire keys_b is exactly round_keys
   buffer_readable heap0 keys_b /\
   (nr alg + 1) <= buffer_length keys_b /\
   buffer_addr keys_b heap0 + 16 * 8 == key_ptr /\
-  valid_taint_buf128 keys_b heap0 memTaint Secret /\
+  valid_taint_buf128 keys_b heap0 layout.vl_taint Secret /\
   s128 heap0 keys_b == round_keys
 
 let six_of (a:Type0) = a & a & a & a & a & a
@@ -162,9 +163,9 @@ function rounds_opaque_6(init:quad32_6, round_keys:seq(quad32), rnd:nat):quad32_
 function xor_reverse_inc32lite_6(n:int, i0:int, ctr_BE:quad32, rndkey:quad32):quad32_6 extern;
 
 function aes_reqs0(alg:algorithm, key:seq(nat32), round_keys:seq(quad32), keys_b:buffer128,
-    key_ptr:int, heap0:vale_heap, memTaint:memtaint):prop extern;
+    key_ptr:int, heap0:vale_heap, layout:vale_heap_layout):prop extern;
 function aes_reqs_offset(alg:algorithm, key:seq(nat32), round_keys:seq(quad32), keys_b:buffer128,
-    key_ptr:int, heap0:vale_heap, memTaint:memtaint):prop extern;
+    key_ptr:int, heap0:vale_heap, layout:vale_heap_layout):prop extern;
 function scratch_reqs(scratch_b:buffer128, count:nat, heap0:vale_heap, s:seq(quad32), z3:quad32):prop
     extern;
 

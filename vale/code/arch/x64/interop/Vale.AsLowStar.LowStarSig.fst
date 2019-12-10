@@ -204,7 +204,7 @@ let taint_hyp_arg (m:ME.vale_heap) (tm:MS.memTaint_t) (a:arg) =
 
 [@__reduce__]
 let taint_hyp (args:list arg) : VSig.sprop =
-  fun s0 -> BigOps.big_and' (taint_hyp_arg (ME.get_vale_heap s0.VS.vs_heap) s0.VS.vs_heap.vf_taint) args
+  fun s0 -> BigOps.big_and' (taint_hyp_arg (ME.get_vale_heap s0.VS.vs_heap) (full_heap_taint s0.VS.vs_heap)) args
 
 [@__reduce__]
 let vale_pre_hyp

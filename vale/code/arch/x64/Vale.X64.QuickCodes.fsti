@@ -386,14 +386,12 @@ unfold let wp_sound_code_pre (#a:Type0) (#c:code) (qc:quickCode a c) (s0:vale_st
       (mem_heap:vale_heap)
       (mem_heaplets:Vale.Lib.Map16.map16 vale_heap)
       (stack:vale_stack)
-      (memTaint:memtaint)
       (stackTaint:memtaint)
       .
     let mem = {
       vf_layout = mem_layout;
       vf_heap = mem_heap;
       vf_heaplets = mem_heaplets;
-      vf_taint = memTaint;
     } in
     let s0' = {
       vs_ok = ok;
@@ -422,7 +420,6 @@ unfold let normal_steps : list string =
     `%Mkvale_full_heap?.vf_layout;
     `%Mkvale_full_heap?.vf_heap;
     `%Mkvale_full_heap?.vf_heaplets;
-    `%Mkvale_full_heap?.vf_taint;
     `%QProc?.wp;
     `%QProc?.mods;
     `%OConst?;
