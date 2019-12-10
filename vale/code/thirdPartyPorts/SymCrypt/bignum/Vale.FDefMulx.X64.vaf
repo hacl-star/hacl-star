@@ -124,15 +124,15 @@ procedure MulAdd18(
         as := s64(heap0, bA);
         rs:seq(nat64) := make_seq9(r0, r1, r2, r3, r4, r5, r6, r7, 0);
     reads pD; pA; pB;
-    modifies T0; T1; rdx; efl; heap0; memTaint;
+    modifies T0; T1; rdx; efl; heap0; memLayout;
     requires/ensures
         valid_cf(efl) && flag_cf(efl) == 0;
         valid_of(efl) && flag_of(efl) == 0;
     requires
         adx_enabled && bmi2_enabled;
-        validDstAddrs64(heap0, pA, bA, 8, memTaint, Public);
-        validSrcAddrs64(heap0, pB, bB, 1, memTaint, Public);
-        validDstAddrs64(heap0, pD, bD, 1, memTaint, Public);
+        validDstAddrs64(heap0, pA, bA, 8, memLayout, Public);
+        validSrcAddrs64(heap0, pB, bB, 1, memLayout, Public);
+        validDstAddrs64(heap0, pD, bD, 1, memLayout, Public);
         length(as) == 8;
         @r0 == operand_reg8(regRotate + 0);
         @r1 == operand_reg8(regRotate + 1);

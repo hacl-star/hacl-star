@@ -309,7 +309,7 @@ procedure Loop6x_ctr_update(
         counter @= rbx; constp @= r11;
         h := of_quad32(reverse_bytes_quad32(h_LE));
     reads
-        key; rndkey; Xip; heap0; memTaint;
+        key; rndkey; Xip; heap0; memLayout;
 
     modifies
         counter; constp; Hkey;
@@ -320,8 +320,8 @@ procedure Loop6x_ctr_update(
         sse_enabled;
 
         // AES reqs
-        aes_reqs_offset(alg, key_words, round_keys, keys_b, key, heap0, memTaint);
-        //aes_reqs0(alg, key_words, round_keys, keys_b, key, heap0, memTaint);
+        aes_reqs_offset(alg, key_words, round_keys, keys_b, key, heap0, memLayout);
+        //aes_reqs0(alg, key_words, round_keys, keys_b, key, heap0, memLayout);
         //rndkey == index(round_keys, 0);
 
         // Counter requirements
@@ -337,7 +337,7 @@ procedure Loop6x_ctr_update(
         counter + 6 < 256 ==> tuple(inout0, inout1, inout2, inout3, inout4, inout5) ==
             xor_reverse_inc32lite_6(1, 0, ctr_BE, rndkey);
 
-        hkeys_b_powers(hkeys_b, heap0, memTaint, Xip - 0x20, h);
+        hkeys_b_powers(hkeys_b, heap0, memLayout, Xip - 0x20, h);
 
     ensures
         T1 == reverse_bytes_quad32(inc32lite(ctr_BE, 6));
@@ -382,7 +382,7 @@ procedure Loop6x_plain(
 
     reads
         key;
-        heap0; memTaint;
+        heap0; memLayout;
 
     modifies
         inout0; inout1; inout2; inout3; inout4; inout5;
@@ -393,8 +393,8 @@ procedure Loop6x_plain(
 
         @rndkey == 1 || @rndkey == 2 || @rndkey == 15;
         // AES reqs
-//        aes_reqs0(alg, key_words, round_keys, keys_b, key, heap0, memTaint);
-        aes_reqs_offset(alg, key_words, round_keys, keys_b, key, heap0, memTaint);
+//        aes_reqs0(alg, key_words, round_keys, keys_b, key, heap0, memLayout);
+        aes_reqs_offset(alg, key_words, round_keys, keys_b, key, heap0, memLayout);
         rnd + 1 < length(round_keys);
         tuple(inout0, inout1, inout2, inout3, inout4, inout5) == rounds_opaque_6(init, round_keys, rnd);
 
@@ -440,7 +440,7 @@ procedure Loop6x_preamble(
     reads
         key; ivp; Xip; rbp;
         rndkey;
-        memTaint;
+        memLayout;
 
     modifies
         counter; constp; Hkey;
@@ -451,12 +451,12 @@ procedure Loop6x_preamble(
         sse_enabled;
 
         // Valid ptrs and buffers
-        validDstAddrs128(heap0, rbp, stack_b, 9, memTaint, Secret);
+        validDstAddrs128(heap0, rbp, stack_b, 9, memLayout, Secret);
         buffers_disjoint128(stack_b, keys_b);
 
         // AES reqs
-//        aes_reqs0(alg, key_words, round_keys, keys_b, key, heap0, memTaint);
-        aes_reqs_offset(alg, key_words, round_keys, keys_b, key, heap0, memTaint);
+//        aes_reqs0(alg, key_words, round_keys, keys_b, key, heap0, memLayout);
+        aes_reqs_offset(alg, key_words, round_keys, keys_b, key, heap0, memLayout);
         rndkey == index(round_keys, 0);
 
         // Counter requirements
@@ -469,7 +469,7 @@ procedure Loop6x_preamble(
         counter + 6 < 256 ==> tuple(inout0, inout1, inout2, inout3, inout4, inout5) ==
             xor_reverse_inc32lite_6(1, 0, ctr_BE, rndkey);
 
-        hkeys_b_powers(hkeys_b, heap0, memTaint, Xip - 0x20, h);
+        hkeys_b_powers(hkeys_b, heap0, memLayout, Xip - 0x20, h);
     ensures
         // Framing
         modifies_buffer_specific128(stack_b, old(heap0), heap0, 8, 8);
@@ -529,14 +529,14 @@ procedure Loop6x_reverse128(
     lets
         in0 @= r14;
     reads
-        rbp; in0; memTaint;
+        rbp; in0; memLayout;
     modifies
         r12; r13; heap0;
     requires
         sse_enabled && movbe_enabled;
 
-        validSrcAddrsOffset128(heap0, in0, in0_b, start, in0_offset + 1, memTaint, Secret);
-        validDstAddrs128(heap0, rbp, stack_b, stack_offset + 1, memTaint, Secret);
+        validSrcAddrsOffset128(heap0, in0, in0_b, start, in0_offset + 1, memLayout, Secret);
+        validDstAddrs128(heap0, rbp, stack_b, stack_offset + 1, memLayout, Secret);
     ensures
         modifies_buffer_specific128(stack_b, old(heap0), heap0, stack_offset, stack_offset);
         buffer128_read(stack_b, stack_offset, heap0) ==
@@ -564,16 +564,16 @@ procedure Loop6x_round9(
         Ii @= xmm0; T1 @= xmm1; T2 @= xmm2; Hkey @= xmm3;
         Z1 @= xmm5; Z2 @= xmm6; Z3 @= xmm7;
     reads
-        key; inp; rbp; memTaint;
+        key; inp; rbp; memLayout;
     modifies
         Ii; T1; T2; Hkey; Z1; Z2; Z3; heap0; efl;
     requires
         sse_enabled;
 
-        validSrcAddrsOffset128(heap0, inp, in_b, count*6, 6, memTaint, Secret);
-        validDstAddrs128(heap0, rbp, stack_b, 8, memTaint, Secret);
-//        aes_reqs0(alg, key_words, round_keys, keys_b, key, heap0, memTaint);
-        aes_reqs_offset(alg, key_words, round_keys, keys_b, key, heap0, memTaint);
+        validSrcAddrsOffset128(heap0, inp, in_b, count*6, 6, memLayout, Secret);
+        validDstAddrs128(heap0, rbp, stack_b, 8, memLayout, Secret);
+//        aes_reqs0(alg, key_words, round_keys, keys_b, key, heap0, memLayout);
+        aes_reqs_offset(alg, key_words, round_keys, keys_b, key, heap0, memLayout);
         T1 == buffer128_read(keys_b, #nat(nr(alg)), heap0);
     ensures
         modifies_buffer_specific128(stack_b, old(heap0), heap0, 1, 1);
@@ -633,7 +633,7 @@ procedure Loop6x_final(
 
     reads
         key; rbp; ivp;
-        memTaint;
+        memLayout;
 
     modifies
         inp; outp; constp; r12; r13;
@@ -644,15 +644,15 @@ procedure Loop6x_final(
         sse_enabled;
 
         // Valid ptrs and buffers
-        validSrcAddrs128(heap0, ivp, iv_b, 1, memTaint, Public);
-        validDstAddrs128(heap0, rbp, scratch_b, 9, memTaint, Secret);
+        validSrcAddrs128(heap0, ivp, iv_b, 1, memLayout, Public);
+        validDstAddrs128(heap0, rbp, scratch_b, 9, memLayout, Secret);
         buffers_disjoint128(scratch_b, keys_b);
          inp + 0x60 < pow2_64;
         outp + 0x60 < pow2_64;
 
         // AES reqs
-//        aes_reqs0(alg, key_words, round_keys, keys_b, key, heap0, memTaint);
-        aes_reqs_offset(alg, key_words, round_keys, keys_b, key, heap0, memTaint);
+//        aes_reqs0(alg, key_words, round_keys, keys_b, key, heap0, memLayout);
+        aes_reqs_offset(alg, key_words, round_keys, keys_b, key, heap0, memLayout);
         init == map_six_of(ctrs, fun(c:quad32) quad32_xor(c, index(round_keys, 0)));
         tuple(inout0, inout1, inout2, inout3, inout4, inout5) == rounds_opaque_6(init, round_keys, #nat(nr(alg) - 1));
 
@@ -743,7 +743,7 @@ procedure Loop6x_save_output(ghost count:nat, ghost out_b:buffer128)
     reads
         outp;
         Ii; T1; T2; Hkey; Z1; Z2; Z3; rndkey;
-        memTaint;
+        memLayout;
 
     modifies
         inout0; inout1; inout2; inout3; inout4; inout5;
@@ -752,7 +752,7 @@ procedure Loop6x_save_output(ghost count:nat, ghost out_b:buffer128)
     requires
         // Valid ptrs and buffers
         avx_enabled && sse_enabled;
-        validDstAddrsOffset128(heap0, outp - 0x60, out_b, count*6, 6, memTaint, Secret);
+        validDstAddrsOffset128(heap0, outp - 0x60, out_b, count*6, 6, memLayout, Secret);
 
     ensures
         modifies_buffer_specific128(out_b, old(heap0), heap0, count*6+0, count*6+5);
@@ -814,7 +814,7 @@ procedure Loop6x_partial(
 
     reads
         inp; key; ivp; Xip; rbp; in0;
-        memTaint;
+        memLayout;
 
     modifies
         counter; constp; r12; r13;
@@ -827,10 +827,10 @@ procedure Loop6x_partial(
         T2 == Mkfour(0, 0, 0, 0x1000000);
 
         // Valid ptrs and buffers
-        validDstAddrs128(heap0, ivp, iv_b, 1, memTaint, Public);
-        validSrcAddrsOffset128(heap0, in0, in0_b, in0_count * 6, 6, memTaint, Secret);
-        validSrcAddrsOffset128(heap0, inp, in_b, count * 6, 6, memTaint, Secret);
-        validDstAddrs128(heap0, rbp, stack_b, 9, memTaint, Secret);
+        validDstAddrs128(heap0, ivp, iv_b, 1, memLayout, Public);
+        validSrcAddrsOffset128(heap0, in0, in0_b, in0_count * 6, 6, memLayout, Secret);
+        validSrcAddrsOffset128(heap0, inp, in_b, count * 6, 6, memLayout, Secret);
+        validDstAddrs128(heap0, rbp, stack_b, 9, memLayout, Secret);
         buffers_disjoint128(iv_b, keys_b);
         buffers_disjoint128(iv_b, stack_b);
         buffers_disjoint128(iv_b, in0_b);
@@ -844,8 +844,8 @@ procedure Loop6x_partial(
         inp + 0x60 < pow2_64;
 
         // AES reqs
-        aes_reqs_offset(alg, key_words, round_keys, keys_b, key, heap0, memTaint);
-//        aes_reqs0(alg, key_words, round_keys, keys_b, key, heap0, memTaint);
+        aes_reqs_offset(alg, key_words, round_keys, keys_b, key, heap0, memLayout);
+//        aes_reqs0(alg, key_words, round_keys, keys_b, key, heap0, memLayout);
         rndkey == index(round_keys, 0);
 
         // Counter requirements
@@ -858,8 +858,8 @@ procedure Loop6x_partial(
             xor_reverse_inc32lite_6(1, 0, ctr_BE, rndkey);
 
         length(data) == 6;
-        hkeys_b_powers(hkeys_b, heap0, memTaint, Xip - 0x20, h);
-        scratch_b_data(true, true, stack_b, 8, 5, heap0, memTaint, rbp, data);
+        hkeys_b_powers(hkeys_b, heap0, memLayout, Xip - 0x20, h);
+        scratch_b_data(true, true, stack_b, 8, 5, heap0, memLayout, rbp, data);
         Z3 == reverse_bytes_quad32(data[5]);
         of_quad32(Xi) +. of_quad32(Z0) +. of_quad32(buffer128_read(stack_b, 1, heap0)) == prev;
 //        rbp + 0x10 * 8 <= pow2_64;
@@ -1018,7 +1018,7 @@ procedure Loop6x(
 
     reads
         rbp; key; ivp; Xip;
-        memTaint;
+        memLayout;
 
     modifies
         inp; outp; len; counter; constp; r12; r13; in0;
@@ -1033,12 +1033,12 @@ procedure Loop6x(
         T2 == Mkfour(0, 0, 0, 0x1000000);
 
         // Valid ptrs and buffers
-        validDstAddrs128(heap0, ivp, iv_b, 1, memTaint, Public);
-        validSrcAddrsOffset128(heap0, in0, in0_b, (count - 1) * 6, 6, memTaint, Secret);
-        validSrcAddrsOffset128(heap0, inp, in_b, count * 6, 6, memTaint, Secret);
-        validDstAddrsOffset128(heap0, outp, out_b, count * 6, 6, memTaint, Secret);
-        validDstAddrs128(heap0, rbp, scratch_b, 9, memTaint, Secret);
-        validSrcAddrs128(heap0, Xip - 0x20, hkeys_b, 8, memTaint, Secret);
+        validDstAddrs128(heap0, ivp, iv_b, 1, memLayout, Public);
+        validSrcAddrsOffset128(heap0, in0, in0_b, (count - 1) * 6, 6, memLayout, Secret);
+        validSrcAddrsOffset128(heap0, inp, in_b, count * 6, 6, memLayout, Secret);
+        validDstAddrsOffset128(heap0, outp, out_b, count * 6, 6, memLayout, Secret);
+        validDstAddrs128(heap0, rbp, scratch_b, 9, memLayout, Secret);
+        validSrcAddrs128(heap0, Xip - 0x20, hkeys_b, 8, memLayout, Secret);
         buffers_disjoint128(iv_b, keys_b);
         buffers_disjoint128(iv_b, scratch_b);
         buffers_disjoint128(iv_b, in0_b);
@@ -1058,7 +1058,7 @@ procedure Loop6x(
         outp + 0x60 < pow2_64;
 
         // AES reqs
-        aes_reqs_offset(alg, key_words, round_keys, keys_b, key, heap0, memTaint);
+        aes_reqs_offset(alg, key_words, round_keys, keys_b, key, heap0, memLayout);
         rndkey == index(round_keys, 0);
 
         // GHash reqs
@@ -1225,7 +1225,7 @@ procedure Loop6x_loop(
     reads
         rax; rbp; r9; r10; r15; xmm4; xmm8;
         key; ivp; rsp;
-        memTaint;
+        memLayout;
 
     modifies
         inp; outp; len; counter; constp; r12; r13; in0;
@@ -1240,13 +1240,13 @@ procedure Loop6x_loop(
         T2 == Mkfour(0, 0, 0, 0x1000000);
 
         // Valid ptrs and buffers
-        validDstAddrs128(heap0, ivp, iv_b, 1, memTaint, Secret);
+        validDstAddrs128(heap0, ivp, iv_b, 1, memLayout, Secret);
 
-        validSrcAddrsOffset128(heap0, in0, in0_b, (count-2)*6, len, memTaint, Secret);
-        validSrcAddrsOffset128(heap0, inp, in_b, count*6, len, memTaint, Secret);
-        validDstAddrsOffset128(heap0, outp, out_b, count*6, len, memTaint, Secret);
+        validSrcAddrsOffset128(heap0, in0, in0_b, (count-2)*6, len, memLayout, Secret);
+        validSrcAddrsOffset128(heap0, inp, in_b, count*6, len, memLayout, Secret);
+        validDstAddrsOffset128(heap0, outp, out_b, count*6, len, memLayout, Secret);
 
-        validDstAddrs128(heap0, rsp, stack_b, 8, memTaint, Secret);
+        validDstAddrs128(heap0, rsp, stack_b, 8, memLayout, Secret);
         buffers_disjoint128(iv_b, keys_b);
         buffers_disjoint128(iv_b, stack_b);
         buffers_disjoint128(iv_b, in0_b);
@@ -1264,7 +1264,7 @@ procedure Loop6x_loop(
         outp + 0x10*len < pow2_64;
 
         // AES reqs
-        aes_reqs0(alg, key_words, round_keys, keys_b, key, heap0, memTaint);
+        aes_reqs0(alg, key_words, round_keys, keys_b, key, heap0, memLayout);
         rndkey == index(round_keys, 0);
 
         // Counter requirements
@@ -1303,8 +1303,6 @@ procedure Loop6x_loop(
         xmm4 == old(xmm4);
         xmm8 == old(xmm8);
 
-        memTaint == old(memTaint);
-
         // Semantics
 
         // Pointers
@@ -1338,7 +1336,6 @@ procedure Loop6x_loop(
             r15 == old(r15);
             xmm4 == old(xmm4);
             xmm8 == old(xmm8);
-            memTaint == old(memTaint);
 
             len == old(len) - 6*iter;
 
@@ -1349,13 +1346,13 @@ procedure Loop6x_loop(
             T2 == Mkfour(0, 0, 0, 0x1000000);
 
             // Valid ptrs and buffers
-            validDstAddrs128(heap0, ivp, iv_b, 1, memTaint, Secret);
+            validDstAddrs128(heap0, ivp, iv_b, 1, memLayout, Secret);
 
-            len > 0 ==> validSrcAddrsOffset128(heap0,  in0, in0_b, (count-2)*6 + iter*6, old(len) - iter*6, memTaint, Secret);
-            len > 0 ==> validSrcAddrsOffset128(heap0,  inp,  in_b, count*6 + iter*6, old(len) - iter*6, memTaint, Secret);
-            len > 0 ==> validDstAddrsOffset128(heap0, outp, out_b, count*6 + iter*6, old(len) - iter*6, memTaint, Secret);
+            len > 0 ==> validSrcAddrsOffset128(heap0,  in0, in0_b, (count-2)*6 + iter*6, old(len) - iter*6, memLayout, Secret);
+            len > 0 ==> validSrcAddrsOffset128(heap0,  inp,  in_b, count*6 + iter*6, old(len) - iter*6, memLayout, Secret);
+            len > 0 ==> validDstAddrsOffset128(heap0, outp, out_b, count*6 + iter*6, old(len) - iter*6, memLayout, Secret);
 
-            validDstAddrs128(heap0, rsp, stack_b, 8, memTaint, Secret);
+            validDstAddrs128(heap0, rsp, stack_b, 8, memLayout, Secret);
             buffers_disjoint128(iv_b, keys_b);
             buffers_disjoint128(iv_b, stack_b);
             buffers_disjoint128(iv_b, in0_b);
@@ -1380,7 +1377,7 @@ procedure Loop6x_loop(
             buffer_modifies_specific128(iv_b,    old(heap0), heap0, 0, 0);
 
             // AES reqs
-            aes_reqs0(alg, key_words, round_keys, keys_b, key, heap0, memTaint);
+            aes_reqs0(alg, key_words, round_keys, keys_b, key, heap0, memLayout);
             rndkey == index(round_keys, 0);
 
             // Counter requirements
@@ -1446,7 +1443,7 @@ procedure AESNI_ctr32_6x_preamble(
 
     reads
         key;
-        heap0; memTaint;
+        heap0; memLayout;
 
     modifies
         constp; r12;
@@ -1455,7 +1452,7 @@ procedure AESNI_ctr32_6x_preamble(
 
     requires
         // AES reqs
-        aes_reqs0(alg, key_words, round_keys, keys_b, key, heap0, memTaint);
+        aes_reqs0(alg, key_words, round_keys, keys_b, key, heap0, memLayout);
         key - 0x60 >= 0;
 
         ctr_orig.lo0 % 256 + 6 < 256;
@@ -1530,7 +1527,7 @@ procedure AESNI_ctr32_6x_loop_body(
 
     reads
         key;
-        heap0; memTaint;
+        heap0; memLayout;
 
     modifies
         inout0; inout1; inout2; inout3; inout4; inout5; rndkey;
@@ -1538,7 +1535,7 @@ procedure AESNI_ctr32_6x_loop_body(
 
     requires
         // AES reqs
-        aes_reqs0(alg, key_words, round_keys, keys_b, key, heap0, memTaint);
+        aes_reqs0(alg, key_words, round_keys, keys_b, key, heap0, memLayout);
         rnd + 2 < length(round_keys);
         rndkey == index(round_keys, rnd+1);
 
@@ -1593,7 +1590,7 @@ procedure AESNI_ctr32_6x_loop_recursive(
 
     reads
         key;
-        heap0; memTaint;
+        heap0; memLayout;
 
     modifies
         inout0; inout1; inout2; inout3; inout4; inout5; rndkey;
@@ -1601,7 +1598,7 @@ procedure AESNI_ctr32_6x_loop_recursive(
 
     requires
         // AES reqs
-        aes_reqs0(alg, key_words, round_keys, keys_b, key, heap0, memTaint);
+        aes_reqs0(alg, key_words, round_keys, keys_b, key, heap0, memLayout);
         rnd + 2 < length(round_keys);
         rndkey == index(round_keys, 1);
 
@@ -1655,7 +1652,7 @@ procedure AESNI_ctr32_6x_round9(
 
     reads
         key;
-        heap0; memTaint;
+        heap0; memLayout;
 
     modifies
         inp;
@@ -1664,11 +1661,11 @@ procedure AESNI_ctr32_6x_round9(
         efl;
 
     requires
-        validSrcAddrsOffset128(heap0, inp, in_b, count*6, 6, memTaint, Secret);
+        validSrcAddrsOffset128(heap0, inp, in_b, count*6, 6, memLayout, Secret);
         inp + 0x60 < pow2_64;
 
         // AES reqs
-        aes_reqs0(alg, key_words, round_keys, keys_b, key, heap0, memTaint);
+        aes_reqs0(alg, key_words, round_keys, keys_b, key, heap0, memLayout);
         rndkey == index(round_keys, #nat(nr(alg)-1));
 
         inout0 == rounds_opaque(init0, round_keys, #nat(nr(alg)-2));
@@ -1754,7 +1751,7 @@ procedure AESNI_ctr32_6x_final(
 
     reads
         key;
-        memTaint;
+        memLayout;
 
     modifies
         outp;
@@ -1763,11 +1760,11 @@ procedure AESNI_ctr32_6x_final(
         heap0; efl;
 
     requires
-        validDstAddrsOffset128(heap0, outp, out_b, count*6, 6, memTaint, Secret);
+        validDstAddrsOffset128(heap0, outp, out_b, count*6, 6, memLayout, Secret);
         outp + 0x60 < pow2_64;
 
         // AES reqs
-        aes_reqs0(alg, key_words, round_keys, keys_b, key, heap0, memTaint);
+        aes_reqs0(alg, key_words, round_keys, keys_b, key, heap0, memLayout);
 
         init0 == quad32_xor(ctr0, index(round_keys, 0));
         init1 == quad32_xor(ctr1, index(round_keys, 0));
@@ -1871,7 +1868,7 @@ procedure AESNI_ctr32_6x(
 
     reads
         key;
-        memTaint;
+        memLayout;
 
     modifies
         inp; outp; constp; r12;
@@ -1881,14 +1878,14 @@ procedure AESNI_ctr32_6x(
 
     requires
         // Valid buffers and pointers
-        validSrcAddrsOffset128(heap0, inp, in_b, count*6, 6, memTaint, Secret);
-        validDstAddrsOffset128(heap0, outp, out_b, count*6, 6, memTaint, Secret);
+        validSrcAddrsOffset128(heap0, inp, in_b, count*6, 6, memLayout, Secret);
+        validDstAddrsOffset128(heap0, outp, out_b, count*6, 6, memLayout, Secret);
         partial_seq_agreement(plain_quads, buffer128_as_seq(heap0, in_b), count*6, count*6+6);
         inp  + 0x60 < pow2_64;
         outp + 0x60 < pow2_64;
 
         // AES reqs
-        aes_reqs0(alg, key_words, round_keys, keys_b, key, heap0, memTaint);
+        aes_reqs0(alg, key_words, round_keys, keys_b, key, heap0, memLayout);
         key - 0x60 >= 0;
 
         // Counter requirements
@@ -1974,7 +1971,7 @@ procedure Ctr32_ghash_6_prelude(
     reads
         key; rsp;
         T1;
-        memTaint;
+        memLayout;
 
     modifies
         T2; Z0;
@@ -1983,10 +1980,10 @@ procedure Ctr32_ghash_6_prelude(
 
     requires
         // Valid buffers and pointers
-        validDstAddrs128(heap0, rsp, stack_b, 8, memTaint, Secret);
+        validDstAddrs128(heap0, rsp, stack_b, 8, memLayout, Secret);
 
         // AES reqs
-        aes_reqs0(alg, key_words, round_keys, keys_b, key, heap0, memTaint);
+        aes_reqs0(alg, key_words, round_keys, keys_b, key, heap0, memLayout);
 
         // Counters
         ctr_orig.lo0 % 256 + 6 < 256;
@@ -2032,7 +2029,7 @@ procedure Encrypt_save_and_shuffle_output(ghost count:nat, ghost out_b:buffer128
     reads
         outp;
         Ii; Z3;
-        memTaint;
+        memLayout;
 
     modifies
         T1; inout0; inout1; inout2; inout3; inout4; inout5;
@@ -2040,7 +2037,7 @@ procedure Encrypt_save_and_shuffle_output(ghost count:nat, ghost out_b:buffer128
 
     requires
         // Valid ptrs and buffers
-        validDstAddrsOffset128(heap0, outp - 0x60, out_b, count*6, 6, memTaint, Secret);
+        validDstAddrsOffset128(heap0, outp - 0x60, out_b, count*6, 6, memLayout, Secret);
 
         Ii == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
 
@@ -2107,7 +2104,7 @@ procedure AES_GCM_encrypt(
     reads
         rax; rbp; r9; r10; r15;
         ivp; rsp;
-        memTaint;
+        memLayout;
 
     modifies
         inp; outp; len; key; counter; constp; r12; r13; in0;
@@ -2117,10 +2114,10 @@ procedure AES_GCM_encrypt(
 
     requires
         // Valid buffers and pointers
-        validDstAddrs128(heap0,  ivp,  iv_b,   1, memTaint, Secret);
-        validSrcAddrs128(heap0,  inp,  in_b, len, memTaint, Secret);
-        validDstAddrs128(heap0, outp, out_b, len, memTaint, Secret);
-        validDstAddrs128(heap0, rsp, stack_b, 8, memTaint, Secret);
+        validDstAddrs128(heap0,  ivp,  iv_b,   1, memLayout, Secret);
+        validSrcAddrs128(heap0,  inp,  in_b, len, memLayout, Secret);
+        validDstAddrs128(heap0, outp, out_b, len, memLayout, Secret);
+        validDstAddrs128(heap0, rsp, stack_b, 8, memLayout, Secret);
 
         buffers_disjoint128(iv_b, keys_b);
         buffers_disjoint128(iv_b, stack_b);
@@ -2141,7 +2138,7 @@ procedure AES_GCM_encrypt(
 
         // AES reqs
         buffer_addr(keys_b, heap0) + 0x80 < pow2_64;
-        aes_reqs0(alg, key_words, round_keys, keys_b, key + 0x80, heap0, memTaint);
+        aes_reqs0(alg, key_words, round_keys, keys_b, key + 0x80, heap0, memLayout);
 
         // Len is # of 128-bit blocks
         len % 6 == 0;

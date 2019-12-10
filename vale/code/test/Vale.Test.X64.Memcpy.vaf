@@ -28,13 +28,13 @@ procedure Copy16(inline t:taint, ghost bsrc:buffer64, ghost bdst:buffer64)
         rsi == buffer_addr(bsrc, heap0);
         rdi == buffer_addr(bdst, heap0);
     requires
-        valid_taint_buf64(bsrc, heap0, memTaint.vl_taint, t);
-        valid_taint_buf64(bdst, heap0, memTaint.vl_taint, t);
+        valid_taint_buf64(bsrc, heap0, memLayout.vl_taint, t);
+        valid_taint_buf64(bdst, heap0, memLayout.vl_taint, t);
     ensures
         forall(i) 0 <= i && i < 2 ==> buffer64_read(bdst, i, heap0) == buffer64_read(bsrc, i, heap0);
         modifies_mem(loc_buffer(bdst), old(heap0), heap0);
     reads
-        rsi; rdi; memTaint;
+        rsi; rdi; memLayout;
     modifies
         rax; rcx;
         heap0;

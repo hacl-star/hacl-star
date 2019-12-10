@@ -72,7 +72,7 @@ procedure fmul(
         inA_in := rsi;
         dst_in := rdx;
         inB_in := rcx;
-    reads memTaint;
+    reads memLayout;
     modifies
         rax; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r12; r13; r14; r15;
         efl; heap0;
@@ -87,10 +87,10 @@ procedure fmul(
         buffers_disjoint(tmp_b, inA_b);
         buffers_disjoint(tmp_b, inB_b);
 
-        validDstAddrs64(heap0, dst_in, dst_b, 4, memTaint, Secret);
-        validSrcAddrs64(heap0, inA_in, inA_b, 4, memTaint, Secret);
-        validSrcAddrs64(heap0, inB_in, inB_b, 4, memTaint, Secret);
-        validDstAddrs64(heap0, tmp_in, tmp_b, 8, memTaint, Secret);
+        validDstAddrs64(heap0, dst_in, dst_b, 4, memLayout, Secret);
+        validSrcAddrs64(heap0, inA_in, inA_b, 4, memLayout, Secret);
+        validSrcAddrs64(heap0, inB_in, inB_b, 4, memLayout, Secret);
+        validDstAddrs64(heap0, tmp_in, tmp_b, 8, memLayout, Secret);
     ensures
         let a0 := old(buffer64_read(inA_b, 0, heap0));
         let a1 := old(buffer64_read(inA_b, 1, heap0));
@@ -118,7 +118,7 @@ procedure fmul(
         //////////////////////////////////////
 
         modifies_buffer_2(dst_b, tmp_b, old(heap0), heap0);
-        validSrcAddrs64(heap0, dst_in, dst_b, 4, memTaint, Secret);
+        validSrcAddrs64(heap0, dst_in, dst_b, 4, memLayout, Secret);
 
 {
     Mov64(r15, dst_ptr); // Save dst_ptr that will be clobbered by fast_multiply
@@ -145,7 +145,7 @@ procedure fmul_stdcall(
         inA_in := (if win then rdx else rsi);
         dst_in := (if win then r8  else rdx);
         inB_in := (if win then r9  else rcx);
-    reads memTaint;
+    reads memLayout;
     modifies
         rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
         efl; heap0; stack; stackTaint;
@@ -161,10 +161,10 @@ procedure fmul_stdcall(
         buffers_disjoint(tmp_b, inA_b);
         buffers_disjoint(tmp_b, inB_b);
 
-        validDstAddrs64(heap0, dst_in, dst_b, 4, memTaint, Secret);
-        validSrcAddrs64(heap0, inA_in, inA_b, 4, memTaint, Secret);
-        validSrcAddrs64(heap0, inB_in, inB_b, 4, memTaint, Secret);
-        validDstAddrs64(heap0, tmp_in, tmp_b, 8, memTaint, Secret);
+        validDstAddrs64(heap0, dst_in, dst_b, 4, memLayout, Secret);
+        validSrcAddrs64(heap0, inA_in, inA_b, 4, memLayout, Secret);
+        validSrcAddrs64(heap0, inB_in, inB_b, 4, memLayout, Secret);
+        validDstAddrs64(heap0, tmp_in, tmp_b, 8, memLayout, Secret);
     ensures
         let a0 := old(buffer64_read(inA_b, 0, heap0));
         let a1 := old(buffer64_read(inA_b, 1, heap0));
@@ -192,7 +192,7 @@ procedure fmul_stdcall(
         //////////////////////////////////////
 
         modifies_buffer_2(dst_b, tmp_b, old(heap0), heap0);
-        validSrcAddrs64(heap0, dst_in, dst_b, 4, memTaint, Secret);
+        validSrcAddrs64(heap0, dst_in, dst_b, 4, memLayout, Secret);
 
         win ==>  rbx == old(rbx);
         win ==>  rbp == old(rbp);
@@ -258,7 +258,7 @@ procedure fmul2(
         inA_in := rsi;
         dst_in := rdx;
         inB_in := rcx;
-    reads memTaint;
+    reads memLayout;
     modifies
         rax; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r12; r13; r14; r15;
         efl; heap0;
@@ -273,10 +273,10 @@ procedure fmul2(
         buffers_disjoint(tmp_b, inA_b);
         buffers_disjoint(tmp_b, inB_b);
 
-        validDstAddrs64(heap0, dst_in, dst_b, 8, memTaint, Secret);
-        validSrcAddrs64(heap0, inA_in, inA_b, 8, memTaint, Secret);
-        validSrcAddrs64(heap0, inB_in, inB_b, 8, memTaint, Secret);
-        validDstAddrs64(heap0, tmp_in, tmp_b, 16, memTaint, Secret);
+        validDstAddrs64(heap0, dst_in, dst_b, 8, memLayout, Secret);
+        validSrcAddrs64(heap0, inA_in, inA_b, 8, memLayout, Secret);
+        validSrcAddrs64(heap0, inB_in, inB_b, 8, memLayout, Secret);
+        validDstAddrs64(heap0, tmp_in, tmp_b, 16, memLayout, Secret);
     ensures
         let a0 := old(buffer64_read(inA_b, 0, heap0));
         let a1 := old(buffer64_read(inA_b, 1, heap0));
@@ -326,7 +326,7 @@ procedure fmul2(
         //////////////////////////////////////
 
         modifies_buffer_2(dst_b, tmp_b, old(heap0), heap0);
-        validSrcAddrs64(heap0, dst_in, dst_b, 4, memTaint, Secret);
+        validSrcAddrs64(heap0, dst_in, dst_b, 4, memLayout, Secret);
 
 {
     Mov64(r15, dst_ptr); // Save dst_ptr that will be clobbered by fast_multiply
@@ -354,7 +354,7 @@ procedure fmul2_stdcall(
         inA_in := (if win then rdx else rsi);
         dst_in := (if win then r8  else rdx);
         inB_in := (if win then r9  else rcx);
-    reads memTaint;
+    reads memLayout;
     modifies
         rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
         efl; heap0; stack; stackTaint;
@@ -370,10 +370,10 @@ procedure fmul2_stdcall(
         buffers_disjoint(tmp_b, inA_b);
         buffers_disjoint(tmp_b, inB_b);
 
-        validDstAddrs64(heap0, dst_in, dst_b, 8, memTaint, Secret);
-        validSrcAddrs64(heap0, inA_in, inA_b, 8, memTaint, Secret);
-        validSrcAddrs64(heap0, inB_in, inB_b, 8, memTaint, Secret);
-        validDstAddrs64(heap0, tmp_in, tmp_b, 16, memTaint, Secret);
+        validDstAddrs64(heap0, dst_in, dst_b, 8, memLayout, Secret);
+        validSrcAddrs64(heap0, inA_in, inA_b, 8, memLayout, Secret);
+        validSrcAddrs64(heap0, inB_in, inB_b, 8, memLayout, Secret);
+        validDstAddrs64(heap0, tmp_in, tmp_b, 16, memLayout, Secret);
     ensures
         let a0 := old(buffer64_read(inA_b, 0, heap0));
         let a1 := old(buffer64_read(inA_b, 1, heap0));
@@ -482,7 +482,7 @@ procedure fsqr(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64)
         tmp_in := rdi;
         inA_in := rsi;
         dst_in := rdx;
-    reads memTaint;
+    reads memLayout;
     modifies
         rax; rbx; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r12; r13; r14; r15;
         efl; heap0;
@@ -495,9 +495,9 @@ procedure fsqr(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64)
 
         buffers_disjoint(tmp_b, inA_b);
 
-        validDstAddrs64(heap0, dst_in, dst_b, 4, memTaint, Secret);
-        validSrcAddrs64(heap0, inA_in, inA_b, 4, memTaint, Secret);
-        validDstAddrs64(heap0, tmp_in, tmp_b, 8, memTaint, Secret);
+        validDstAddrs64(heap0, dst_in, dst_b, 4, memLayout, Secret);
+        validSrcAddrs64(heap0, inA_in, inA_b, 4, memLayout, Secret);
+        validDstAddrs64(heap0, tmp_in, tmp_b, 8, memLayout, Secret);
     ensures
         let a0 := old(buffer64_read(inA_b, 0, heap0));
         let a1 := old(buffer64_read(inA_b, 1, heap0));
@@ -543,7 +543,7 @@ procedure fsqr_stdcall(
         tmp_in := (if win then rcx else rdi);
         inA_in := (if win then rdx else rsi);
         dst_in := (if win then r8  else rdx);
-    reads memTaint;
+    reads memLayout;
     modifies
         rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
         efl; heap0; stack; stackTaint;
@@ -557,9 +557,9 @@ procedure fsqr_stdcall(
 
         buffers_disjoint(tmp_b, inA_b);
 
-        validDstAddrs64(heap0, dst_in, dst_b, 4, memTaint, Secret);
-        validSrcAddrs64(heap0, inA_in, inA_b, 4, memTaint, Secret);
-        validDstAddrs64(heap0, tmp_in, tmp_b, 8, memTaint, Secret);
+        validDstAddrs64(heap0, dst_in, dst_b, 4, memLayout, Secret);
+        validSrcAddrs64(heap0, inA_in, inA_b, 4, memLayout, Secret);
+        validDstAddrs64(heap0, tmp_in, tmp_b, 8, memLayout, Secret);
     ensures
         let a0 := old(buffer64_read(inA_b, 0, heap0));
         let a1 := old(buffer64_read(inA_b, 1, heap0));
@@ -581,7 +581,7 @@ procedure fsqr_stdcall(
         //////////////////////////////////////
 
         modifies_buffer_2(dst_b, tmp_b, old(heap0), heap0);
-        validSrcAddrs64(heap0, dst_in, dst_b, 4, memTaint, Secret);
+        validSrcAddrs64(heap0, dst_in, dst_b, 4, memLayout, Secret);
 
         win ==>  rbx == old(rbx);
         win ==>  rbp == old(rbp);
@@ -642,7 +642,7 @@ procedure fsqr2(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64
         tmp_in := rdi;
         inA_in := rsi;
         dst_in := rdx;
-    reads memTaint;
+    reads memLayout;
     modifies
         rax; rbx; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r12; r13; r14; r15;
         efl; heap0;
@@ -655,9 +655,9 @@ procedure fsqr2(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64
 
         buffers_disjoint(tmp_b, inA_b);
 
-        validDstAddrs64(heap0, dst_in, dst_b, 8, memTaint, Secret);
-        validSrcAddrs64(heap0, inA_in, inA_b, 8, memTaint, Secret);
-        validDstAddrs64(heap0, tmp_in, tmp_b, 16, memTaint, Secret);
+        validDstAddrs64(heap0, dst_in, dst_b, 8, memLayout, Secret);
+        validSrcAddrs64(heap0, inA_in, inA_b, 8, memLayout, Secret);
+        validDstAddrs64(heap0, tmp_in, tmp_b, 16, memLayout, Secret);
     ensures
         let a0  := old(buffer64_read(inA_b, 0, heap0));
         let a1  := old(buffer64_read(inA_b, 1, heap0));
@@ -716,7 +716,7 @@ procedure fsqr2_stdcall(
         tmp_in := (if win then rcx else rdi);
         inA_in := (if win then rdx else rsi);
         dst_in := (if win then r8  else rdx);
-    reads memTaint;
+    reads memLayout;
     modifies
         rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
         efl; heap0; stack; stackTaint;
@@ -730,9 +730,9 @@ procedure fsqr2_stdcall(
 
         buffers_disjoint(tmp_b, inA_b);
 
-        validDstAddrs64(heap0, dst_in, dst_b, 8, memTaint, Secret);
-        validSrcAddrs64(heap0, inA_in, inA_b, 8, memTaint, Secret);
-        validDstAddrs64(heap0, tmp_in, tmp_b, 16, memTaint, Secret);
+        validDstAddrs64(heap0, dst_in, dst_b, 8, memLayout, Secret);
+        validSrcAddrs64(heap0, inA_in, inA_b, 8, memLayout, Secret);
+        validDstAddrs64(heap0, tmp_in, tmp_b, 16, memLayout, Secret);
     ensures
         let a0  := old(buffer64_read(inA_b, 0, heap0));
         let a1  := old(buffer64_read(inA_b, 1, heap0));
@@ -765,7 +765,7 @@ procedure fsqr2_stdcall(
         //////////////////////////////////////
 
         modifies_buffer_2(dst_b, tmp_b, old(heap0), heap0);
-        validSrcAddrs64(heap0, dst_in, dst_b, 8, memTaint, Secret);
+        validSrcAddrs64(heap0, dst_in, dst_b, 8, memLayout, Secret);
 
         win ==>  rbx == old(rbx);
         win ==>  rbp == old(rbp);
@@ -832,7 +832,7 @@ procedure fsqr_loop_stdcall(
         inA_in := (if win then rdx else rsi);
         dst_in := (if win then r8  else rdx);
         count_in := (if win then r9  else rcx);
-    reads memTaint;
+    reads memLayout;
     modifies
         rax; rbx; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r12; r13; r14; r15;
         rbp; rsp; efl; heap0; stack;
@@ -847,9 +847,9 @@ procedure fsqr_loop_stdcall(
 
         buffers_disjoint(tmp_b, inA_b);
 
-        validDstAddrs64(heap0, dst_in, dst_b, 4, memTaint, Secret);
-        validSrcAddrs64(heap0, inA_in, inA_b, 4, memTaint, Secret);
-        validSrcAddrs64(heap0, tmp_in, tmp_b, 8, memTaint, Secret);
+        validDstAddrs64(heap0, dst_in, dst_b, 4, memLayout, Secret);
+        validSrcAddrs64(heap0, inA_in, inA_b, 4, memLayout, Secret);
+        validSrcAddrs64(heap0, tmp_in, tmp_b, 8, memLayout, Secret);
     ensures
         let a0 := old(buffer64_read(inA_b, 0, heap0));
         let a1 := old(buffer64_read(inA_b, 1, heap0));
@@ -871,7 +871,7 @@ procedure fsqr_loop_stdcall(
         //////////////////////////////////////
 
         modifies_buffer_2(dst_b, tmp_b, old(heap0), heap0);
-        validSrcAddrs64(heap0, dst_in, dst_b, 4, memTaint, Secret);
+        validSrcAddrs64(heap0, dst_in, dst_b, 4, memLayout, Secret);
 
         win ==> rsi == old(rsi);
         r12 == old(r12);
@@ -932,8 +932,8 @@ procedure fsqr_loop_stdcall(
             buffers_disjoint(tmp_b, inA_b);
 
             saved_dst_ptr == rsi;
-            validDstAddrs64(heap0, rsi, dst_b, 4 + 0, memTaint, Secret);
-            validSrcAddrs64(heap0, tmp_ptr, tmp_b, 8 + 0*2, memTaint, Secret);
+            validDstAddrs64(heap0, rsi, dst_b, 4 + 0, memLayout, Secret);
+            validSrcAddrs64(heap0, tmp_ptr, tmp_b, 8 + 0*2, memLayout, Secret);
 
             modifies_buffer_2(dst_b, tmp_b, pre_loop_mem, heap0);
         decreases count;

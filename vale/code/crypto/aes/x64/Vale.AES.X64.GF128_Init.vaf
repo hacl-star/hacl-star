@@ -130,7 +130,7 @@ procedure ShiftKey1_gf128_power(ghost h:poly, ghost n:nat)
 procedure Gf128_powers(ghost h:poly, ghost hkeys_b:buffer128)
     {:quick}
     reads
-        memTaint;
+        memLayout;
         rcx;
     modifies
         heap0;
@@ -138,7 +138,7 @@ procedure Gf128_powers(ghost h:poly, ghost hkeys_b:buffer128)
         xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6;
     requires
         pclmulqdq_enabled && avx_enabled && sse_enabled;
-        validDstAddrs128(heap0, rcx, hkeys_b, 8, memTaint, Secret);
+        validDstAddrs128(heap0, rcx, hkeys_b, 8, memLayout, Secret);
         of_quad32(buffer128_read(hkeys_b, 2, heap0)) == h;
     ensures
         xmm6 == old(xmm6);
@@ -225,7 +225,7 @@ procedure Keyhash_init(
     {:quick}
     {:exportSpecs}
     reads
-        rsi; rdi; memTaint;
+        rsi; rdi; memLayout;
     modifies
         rax; rcx; rdx; r8; r12;
         heap0; xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; efl;
@@ -239,8 +239,8 @@ procedure Keyhash_init(
         buffers_disjoint128(roundkeys_b, hkeys_b);
         is_aes_key_LE(alg, key);
         buffer128_as_seq(heap0, roundkeys_b) == key_to_round_keys_LE(alg, key);
-        validSrcAddrs128(heap0, round_ptr, roundkeys_b, nr(alg) + 1, memTaint, Secret);
-        validDstAddrs128(heap0, hkey_ptr, hkeys_b, 8, memTaint, Secret);
+        validSrcAddrs128(heap0, round_ptr, roundkeys_b, nr(alg) + 1, memLayout, Secret);
+        validDstAddrs128(heap0, hkey_ptr, hkeys_b, 8, memLayout, Secret);
     ensures
         modifies_buffer128(hkeys_b, old(heap0), heap0);
         hkeys_reqs_pub(s128(heap0, hkeys_b), reverse_bytes_quad32(aes_encrypt_LE(alg, key, Mkfour(0, 0, 0, 0))));

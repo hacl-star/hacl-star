@@ -63,7 +63,7 @@ var mem_config:int {:state mem_config()};
 var mem:vale_heap {:state mem()};
 var heap0:vale_heap {:state mem_heaplet(0)}{:updates mem};
 var stack:vale_stack {:state stack()};
-var memTaint:vale_heap_layout {:state mem_layout()}; // TEMPORARY; will be renamed
+var memLayout:vale_heap_layout {:state mem_layout()};
 var stackTaint:memtaint {:state stackTaint()};
 
 operand_type reg64:nat64 :=

@@ -235,7 +235,7 @@ procedure Poly1305_blocks(
         n := pow2_64;
         p := n * n * 4 - 5;
     reads
-        ctx; padbit; memTaint;
+        ctx; padbit; memLayout;
     modifies
         inp; len; d1; d2; d3; r0; r1; s1; h0; h1; h2;
         rax; r15;
@@ -247,8 +247,8 @@ procedure Poly1305_blocks(
         len % 16 == 0; // REVIEW: may be stronger than necessary
         inp + len < pow2_64;
         buffers_disjoint(ctx_b, inp_b);
-        validDstAddrs64(heap0, ctx, ctx_b, 24, memTaint, Public);
-        validSrcAddrs64(heap0, inp, inp_b, len / 8, memTaint, Public);
+        validDstAddrs64(heap0, ctx, ctx_b, 24, memLayout, Public);
+        validSrcAddrs64(heap0, inp, inp_b, len / 8, memLayout, Public);
         let h0_in := buffer64_read(ctx_b, 0, heap0);
         let h1_in := buffer64_read(ctx_b, 1, heap0);
         let h2_in := buffer64_read(ctx_b, 2, heap0);
@@ -263,8 +263,8 @@ procedure Poly1305_blocks(
         padbit < 2;
     ensures
         h2 < 5;
-        validSrcAddrs64(heap0, ctx, ctx_b, 24, memTaint, Public);
-        validSrcAddrs64(heap0, old(inp), inp_b, old(len)/8, memTaint, Public);
+        validSrcAddrs64(heap0, ctx, ctx_b, 24, memLayout, Public);
+        validSrcAddrs64(heap0, old(inp), inp_b, old(len)/8, memLayout, Public);
         modifies_buffer_specific(ctx_b, old(heap0), heap0, 0, 2);
         h0 == buffer64_read(ctx_b, 0, heap0);
         h1 == buffer64_read(ctx_b, 1, heap0);
@@ -336,8 +336,8 @@ procedure Poly1305_blocks(
 
             r15 * 16 <= length;    // Not needed with Dafny version
             padbit < 2;            // Not needed with Dafny version
-            validDstAddrs64(heap0, ctx, ctx_b, 24, memTaint, Public);
-            validSrcAddrs64(heap0, old(inp), inp_b, length/8, memTaint, Public);
+            validDstAddrs64(heap0, ctx, ctx_b, 24, memLayout, Public);
+            validSrcAddrs64(heap0, old(inp), inp_b, length/8, memLayout, Public);
             ctx == old(ctx); // REVIEW: framing should add this automatically
             rcx == old(rcx); // REVIEW: framing should add this automatically
             (inp - old(inp)) % 16 == 0;             // Precondition for poly1305_heap_blocks; Not needed in Dafny version
@@ -563,15 +563,15 @@ procedure Poly1305_impl(
     lets
         ctx @= rdi; inp @= rsi; len @= rdx; r0 @= r11; r1 @= r12; h0 @= r14; h1 @= rbx; h2 @= rbp;
         n := pow2_64;
-    reads memTaint;
+    reads memLayout;
     modifies
         rax; rcx; rdx; rdi; rsi; rbx; rbp; r8; r9; r10; r11; r12; r13; r14; r15;
         efl;
         heap0;
     requires
         buffers_disjoint(ctx_b, inp_b);
-        validDstAddrs64(heap0, ctx, ctx_b, 24, memTaint, Public);
-        validSrcAddrs64(heap0, inp, inp_b, readable_words(len), memTaint, Public);
+        validDstAddrs64(heap0, ctx, ctx_b, 24, memLayout, Public);
+        validSrcAddrs64(heap0, inp, inp_b, readable_words(len), memLayout, Public);
         inp + len < pow2_64;
         let h2_in := buffer64_read(ctx_b, 2, heap0);
         let key_r0 := buffer64_read(ctx_b, 3, heap0);
@@ -584,8 +584,8 @@ procedure Poly1305_impl(
         h2_in < 5;
         finish < 2;
     ensures
-        validSrcAddrs64(heap0, ctx, ctx_b, 24, memTaint, Public);
-        validSrcAddrs64(heap0, old(inp), inp_b, readable_words(old(len)), memTaint, Public);
+        validSrcAddrs64(heap0, ctx, ctx_b, 24, memLayout, Public);
+        validSrcAddrs64(heap0, old(inp), inp_b, readable_words(old(len)), memLayout, Public);
         modifies_buffer_specific(ctx_b, old(heap0), heap0, 0, 8);
         let h0_in := buffer64_read(ctx_b, 0, old(heap0));
         let h1_in := buffer64_read(ctx_b, 1, old(heap0));
@@ -700,7 +700,7 @@ procedure Poly1305(
         inp_in := (if win then rdx else inp);
         n := 0x1_0000_0000_0000_0000;
         p := n * n * 4 - 5;
-    reads memTaint;
+    reads memLayout;
     modifies
         rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
         efl; heap0; stack; stackTaint;
@@ -710,8 +710,8 @@ procedure Poly1305(
         rsp == init_rsp(stack);
 
         buffers_disjoint(ctx_b, inp_b);
-        validDstAddrs64(heap0, ctx_in, ctx_b, 24, memTaint, Public);
-        validSrcAddrs64(heap0, inp_in, inp_b, readable_words(len_in), memTaint, Public);
+        validDstAddrs64(heap0, ctx_in, ctx_b, 24, memLayout, Public);
+        validSrcAddrs64(heap0, inp_in, inp_b, readable_words(len_in), memLayout, Public);
         len_in == (if win then r8 else len);
         finish_in == (if win then r9 else finish);
         let h2_in := buffer64_read(ctx_b, 2, heap0);
@@ -719,8 +719,8 @@ procedure Poly1305(
         inp_in + len_in < pow2_64;
         finish_in < 2;
     ensures
-        validSrcAddrs64(heap0, ctx_in, ctx_b, 24, memTaint, Public);
-        validSrcAddrs64(heap0, inp_in, inp_b, readable_words(len_in), memTaint, Public);
+        validSrcAddrs64(heap0, ctx_in, ctx_b, 24, memLayout, Public);
+        validSrcAddrs64(heap0, inp_in, inp_b, readable_words(len_in), memLayout, Public);
         modifies_buffer(ctx_b, old(heap0), heap0);
 
         let h0_in := buffer64_read(ctx_b, 0, old(heap0));

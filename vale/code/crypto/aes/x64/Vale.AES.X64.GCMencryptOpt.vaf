@@ -123,7 +123,7 @@ procedure Gctr_register(
     {:quick}
     {:public}
     lets keys_ptr @= r8; io @= xmm8; rev_mask @= xmm9; icb @= xmm0;
-    reads keys_ptr; rev_mask; heap0; memTaint;
+    reads keys_ptr; rev_mask; heap0; memLayout;
     modifies
         icb; xmm1; xmm2; io; efl; r12;
     requires
@@ -132,7 +132,7 @@ procedure Gctr_register(
         rev_mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
 
         // AES reqs
-        aes_reqs(alg, key, round_keys, keys_b, keys_ptr, heap0, memTaint);
+        aes_reqs(alg, key, round_keys, keys_b, keys_ptr, heap0, memLayout);
     ensures
         le_seq_quad32_to_bytes(create(1, io)) == gctr_encrypt_LE(old(icb), le_quad32_to_bytes(reverse_bytes_quad32(old(io))), alg, key);
         io == gctr_encrypt_block(old(icb), reverse_bytes_quad32(old(io)), alg, key, 0);
@@ -167,7 +167,7 @@ procedure Gctr_blocks128(
          icb @= xmm11; mask @= xmm9; one @= xmm10; 
 
     reads
-        keys_ptr; in_ptr; out_ptr; len; mask; memTaint;
+        keys_ptr; in_ptr; out_ptr; len; mask; memLayout;
 
     modifies
         ctr; tmp_in_ptr; tmp_out_ptr; xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; icb; one; heap0; efl;
@@ -178,8 +178,8 @@ procedure Gctr_blocks128(
         // GCTR reqs
         buffers_disjoint128(keys_b, out_b);
         buffers_disjoint128(in_b, out_b) || in_b == out_b;
-        validSrcAddrs128(heap0,  in_ptr,  in_b, len, memTaint, Secret);
-        validDstAddrs128(heap0, out_ptr, out_b, len, memTaint, Secret);
+        validSrcAddrs128(heap0,  in_ptr,  in_b, len, memLayout, Secret);
+        validDstAddrs128(heap0, out_ptr, out_b, len, memLayout, Secret);
         in_ptr  + 16 * len < pow2_64;
         out_ptr + 16 * len < pow2_64;
         buffer_length(in_b) == buffer_length(out_b) /\ buffer_length(in_b) < pow2_32;
@@ -188,7 +188,7 @@ procedure Gctr_blocks128(
         len < pow2_32;
 
         // AES reqs
-        aes_reqs(alg, key, round_keys, keys_b, keys_ptr, heap0, memTaint);
+        aes_reqs(alg, key, round_keys, keys_b, keys_ptr, heap0, memLayout);
 
         // GCM
         pclmulqdq_enabled;
@@ -224,8 +224,8 @@ procedure Gctr_blocks128(
             // GCTR reqs
             buffers_disjoint128(keys_b, out_b);
             buffers_disjoint128(in_b, out_b) || in_b == out_b;
-            validSrcAddrs128(heap0,  in_ptr,  in_b, len, memTaint, Secret);
-            validDstAddrs128(heap0, out_ptr, out_b, len, memTaint, Secret);
+            validSrcAddrs128(heap0,  in_ptr,  in_b, len, memLayout, Secret);
+            validDstAddrs128(heap0, out_ptr, out_b, len, memLayout, Secret);
             in_ptr  + 16 * len < pow2_64;
             out_ptr + 16 * len < pow2_64;
             buffer_length(in_b) == buffer_length(out_b);
@@ -233,7 +233,7 @@ procedure Gctr_blocks128(
             len < pow2_32;
 
             // AES reqs
-            aes_reqs(alg, key, round_keys, keys_b, keys_ptr, heap0, memTaint);
+            aes_reqs(alg, key, round_keys, keys_b, keys_ptr, heap0, memLayout);
 
             pclmulqdq_enabled;
             //////////////////// GCTR invariants //////////////////////
@@ -281,7 +281,7 @@ procedure Gcm_blocks128(
          icb @= xmm11; hash @= xmm8; mask @= xmm9; one @= xmm10; 
 
     reads
-        keys_ptr; Xip; in_ptr; out_ptr; mask; memTaint;
+        keys_ptr; Xip; in_ptr; out_ptr; mask; memLayout;
 
     modifies
         ctr; tmp_in_ptr; tmp_out_ptr; len; 
@@ -294,8 +294,8 @@ procedure Gcm_blocks128(
         buffers_disjoint128(keys_b, out_b);
         buffers_disjoint128(hkeys_b, out_b);
         buffers_disjoint128(in_b, out_b) || in_b == out_b;
-        validSrcAddrs128(heap0,  in_ptr,  in_b, len, memTaint, Secret);
-        validDstAddrs128(heap0, out_ptr, out_b, len, memTaint, Secret);
+        validSrcAddrs128(heap0,  in_ptr,  in_b, len, memLayout, Secret);
+        validDstAddrs128(heap0, out_ptr, out_b, len, memLayout, Secret);
         in_ptr  + 16 * len < pow2_64;
         out_ptr + 16 * len < pow2_64;
         buffer_length(in_b) == buffer_length(out_b) /\ buffer_length(in_b) < pow2_32;
@@ -304,12 +304,12 @@ procedure Gcm_blocks128(
         len < pow2_32;
 
         // AES reqs
-        aes_reqs(alg, key, round_keys, keys_b, keys_ptr, heap0, memTaint);
+        aes_reqs(alg, key, round_keys, keys_b, keys_ptr, heap0, memLayout);
 
         // GCM
         pclmulqdq_enabled;
         hkeys_reqs_priv(s128(heap0, hkeys_b), reverse_bytes_quad32(h_LE));
-        validSrcAddrs128(heap0, Xip - 0x20, hkeys_b, 8, memTaint, Secret);
+        validSrcAddrs128(heap0, Xip - 0x20, hkeys_b, 8, memLayout, Secret);
     ensures
         modifies_buffer128(out_b, old(heap0), heap0);
 
@@ -343,7 +343,7 @@ procedure Gcm_auth_bytes(ghost in_b:buffer128, ghost hkeys_b:buffer128, ghost h_
     lets auth_ptr @= rax; auth_len @= r11;
          hash @= xmm1; mask @= xmm8; h128 @= xmm11;
     reads
-        auth_len; mask; h128; heap0; memTaint;
+        auth_len; mask; h128; heap0; memLayout;
 
     modifies
         auth_ptr; rcx; rdx; r9; r12;
@@ -353,7 +353,7 @@ procedure Gcm_auth_bytes(ghost in_b:buffer128, ghost hkeys_b:buffer128, ghost h_
 
     requires
         // GCM reqs
-        validSrcAddrs128(heap0, auth_ptr,  auth_b,  auth_len, memTaint, Secret);
+        validSrcAddrs128(heap0, auth_ptr,  auth_b,  auth_len, memLayout, Secret);
         auth_ptr  + 16 * auth_len  < pow2_64;
         buffer_length(auth_b) == auth_len;
         pclmulqdq_enabled && avx_enabled;
@@ -376,15 +376,15 @@ procedure Gcm_auth_bytes(ghost in_b:buffer128, ghost hkeys_b:buffer128, ghost h_
         Z0 @= xmm4; Z1 @= xmm5; Z2 @= xmm6; Z3 @= xmm7;
         hash @= xmm8; rev_mask @= xmm9;
     reads
-        Xip; in_ptr; rev_mask; heap0; memTaint; 
+        Xip; in_ptr; rev_mask; heap0; memLayout; 
     modifies
         len; scratch_ptr; scratch_reg; efl; Ii; T1; T2; Hkey; Z0; Z1; Z2; Z3; hash;
     requires
         pclmulqdq_enabled && avx_enabled && sse_enabled;
         hkeys_reqs_priv(s128(heap0, hkeys_b), reverse_bytes_quad32(h_LE));
-        validSrcAddrs128(heap0, Xip - 0x20, hkeys_b, 8, memTaint, Secret);
+        validSrcAddrs128(heap0, Xip - 0x20, hkeys_b, 8, memLayout, Secret);
 
-        validSrcAddrs128(heap0, in_ptr, in_b, len, memTaint, Secret);
+        validSrcAddrs128(heap0, in_ptr, in_b, len, memLayout, Secret);
         buffer_length(in_b) == len;
         in_ptr + 0x10 * len < pow2_64;
         rev_mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
@@ -515,7 +515,7 @@ procedure Ghash_extra_bytes(
          Z0 @= xmm4; Z1 @= xmm5; Z2 @= xmm6; Z3 @= xmm7;
          hash @= xmm8; rev_mask @= xmm9;
     reads
-        num_bytes; Xip; rev_mask; heap0; memTaint; 
+        num_bytes; Xip; rev_mask; heap0; memLayout; 
     modifies
         tmp; extra; Ii; T1; T2; Hkey; Z0; Z1; Z2; Z3; hash; efl; 
 
@@ -526,7 +526,7 @@ procedure Ghash_extra_bytes(
 
         hash == reverse_bytes_quad32(ghash_incremental0(h_LE, old_hash, completed_quads));
         hkeys_reqs_priv(s128(heap0, hkeys_b), reverse_bytes_quad32(h_LE));
-        validSrcAddrs128(heap0, Xip - 0x20, hkeys_b, 8, memTaint, Secret);
+        validSrcAddrs128(heap0, Xip - 0x20, hkeys_b, 8, memLayout, Secret);
 
         // Extra reqs
         length(completed_quads) == total_bytes / 16;
@@ -575,7 +575,7 @@ procedure Gcm_extra_bytes(
          hash @= xmm8; rev_mask @= xmm9; icb @= xmm11;
          len := 1;
     reads
-        io_ptr; keys_ptr; num_bytes; Xip; rev_mask; icb; memTaint; 
+        io_ptr; keys_ptr; num_bytes; Xip; rev_mask; icb; memLayout; 
     modifies
         tmp; extra; Ii; T1; T2; Hkey; Z0; Z1; Z2; Z3; hash; heap0; efl; 
 
@@ -585,19 +585,19 @@ procedure Gcm_extra_bytes(
         // GCTR reqs
         buffers_disjoint128(keys_b, inout_b);
         buffers_disjoint128(hkeys_b, inout_b);
-        validSrcAddrs128(heap0,  io_ptr,  inout_b, len, memTaint, Secret);
-        validDstAddrs128(heap0,  io_ptr,  inout_b, len, memTaint, Secret);
+        validSrcAddrs128(heap0,  io_ptr,  inout_b, len, memLayout, Secret);
+        validDstAddrs128(heap0,  io_ptr,  inout_b, len, memLayout, Secret);
         //in_ptr  + 16 * len < pow2_64;
         len == buffer_length(inout_b);
         rev_mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
 
         // AES reqs
-        aes_reqs(alg, key, round_keys, keys_b, keys_ptr, heap0, memTaint);
+        aes_reqs(alg, key, round_keys, keys_b, keys_ptr, heap0, memLayout);
 
         // GCM
         pclmulqdq_enabled;
         hkeys_reqs_priv(s128(heap0, hkeys_b), reverse_bytes_quad32(h_LE));
-        validSrcAddrs128(heap0, Xip - 0x20, hkeys_b, 8, memTaint, Secret);
+        validSrcAddrs128(heap0, Xip - 0x20, hkeys_b, 8, memLayout, Secret);
 
         // Previous work requirements
         hash == reverse_bytes_quad32(ghash_incremental0(h_LE, old_hash, completed_quads));
@@ -665,7 +665,7 @@ procedure Gcm_blocks_auth(
 
     reads
         Xip; abytes_ptr; auth_ptr; auth_num_bytes;
-        heap0; memTaint; 
+        heap0; memLayout; 
     modifies
         auth_len; scratch_ptr; scratch_reg; auth_blocks_bytes; r15; efl;
         Ii; T1; T2; Hkey; Z0; Z1; Z2; Z3; hash; rev_mask;
@@ -674,9 +674,9 @@ procedure Gcm_blocks_auth(
         sse_enabled;
 
         // Valid buffers and pointers
-        validSrcAddrs128(heap0,     auth_ptr,     auth_b, auth_len, memTaint, Secret);
-        validSrcAddrs128(heap0,   abytes_ptr,   abytes_b,        1, memTaint, Secret);
-        validSrcAddrs128(heap0,   Xip - 0x20,    hkeys_b,        8, memTaint, Secret);
+        validSrcAddrs128(heap0,     auth_ptr,     auth_b, auth_len, memLayout, Secret);
+        validSrcAddrs128(heap0,   abytes_ptr,   abytes_b,        1, memLayout, Secret);
+        validSrcAddrs128(heap0,   Xip - 0x20,    hkeys_b,        8, memLayout, Secret);
 
         auth_ptr + 0x10*auth_len < pow2_64;
 
@@ -782,7 +782,7 @@ procedure Compute_iv(
         iv_ptr @= rdi; num_bytes @= rsi; len @= rdx; j0_ptr @= rcx; extra_ptr @= r8; h_ptr @= r9;
         h_LE := reverse_bytes_quad32(old(buffer128_read(hkeys_b, 2, heap0)));
     reads
-        iv_ptr; memTaint;
+        iv_ptr; memLayout;
         
     modifies
         rax; rbx; len; j0_ptr; num_bytes; extra_ptr; h_ptr; r10; r11; r12; r13; r14; r15; xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; xmm7; xmm8; xmm9; xmm11; heap0; efl;
@@ -790,10 +790,10 @@ procedure Compute_iv(
     requires
         sse_enabled;
 
-        validSrcAddrs128(heap0, iv_ptr,    iv_b,       len, memTaint, Secret);
-        validSrcAddrs128(heap0, extra_ptr, iv_extra_b, 1,   memTaint, Secret);
-        validDstAddrs128(heap0, j0_ptr,    j0_b,       1,   memTaint, Secret);
-        validSrcAddrs128(heap0, h_ptr,     hkeys_b,    8,   memTaint, Secret);
+        validSrcAddrs128(heap0, iv_ptr,    iv_b,       len, memLayout, Secret);
+        validSrcAddrs128(heap0, extra_ptr, iv_extra_b, 1,   memLayout, Secret);
+        validDstAddrs128(heap0, j0_ptr,    j0_b,       1,   memLayout, Secret);
+        validSrcAddrs128(heap0, h_ptr,     hkeys_b,    8,   memLayout, Secret);
 
         buffer_length(iv_b) == len;
         buffer_length(iv_extra_b) == 1;
@@ -929,7 +929,7 @@ procedure Gcm_blocks(
 
          h_LE := reverse_bytes_quad32(old(buffer128_read(hkeys_b, 2, heap0)));
     reads
-        rsp; memTaint; stack; stackTaint;
+        rsp; memLayout; stack; stackTaint;
 
     modifies
         rax; rbx; rcx; rdx; rdi; rsi; scratch_ptr;
@@ -951,16 +951,16 @@ procedure Gcm_blocks(
         valid_stack_slot64(rsp + offset + 56, stack, Public, stackTaint);
         valid_stack_slot64(rsp + offset + 64, stack, Public, stackTaint);
 
-        validSrcAddrs128(heap0,     auth_ptr,     auth_b, auth_len, memTaint, Secret);
-        validSrcAddrs128(heap0,   abytes_ptr,   abytes_b,        1, memTaint, Secret);
-        validDstAddrs128(heap0,       iv_ptr,       iv_b,        1, memTaint, Public);
-        validSrcAddrs128(heap0,  in128x6_ptr,  in128x6_b, len128x6, memTaint, Secret);
-        validDstAddrs128(heap0, out128x6_ptr, out128x6_b, len128x6, memTaint, Secret);
-        validSrcAddrs128(heap0,    in128_ptr,    in128_b,   len128, memTaint, Secret);
-        validDstAddrs128(heap0,   out128_ptr,   out128_b,   len128, memTaint, Secret);
-        validDstAddrs128(heap0,    inout_ptr,    inout_b,        1, memTaint, Secret);
-        validDstAddrs128(heap0,  scratch_ptr,  scratch_b,        9, memTaint, Secret);
-        validSrcAddrs128(heap0,          Xip,    hkeys_b,        8, memTaint, Secret);
+        validSrcAddrs128(heap0,     auth_ptr,     auth_b, auth_len, memLayout, Secret);
+        validSrcAddrs128(heap0,   abytes_ptr,   abytes_b,        1, memLayout, Secret);
+        validDstAddrs128(heap0,       iv_ptr,       iv_b,        1, memLayout, Public);
+        validSrcAddrs128(heap0,  in128x6_ptr,  in128x6_b, len128x6, memLayout, Secret);
+        validDstAddrs128(heap0, out128x6_ptr, out128x6_b, len128x6, memLayout, Secret);
+        validSrcAddrs128(heap0,    in128_ptr,    in128_b,   len128, memLayout, Secret);
+        validDstAddrs128(heap0,   out128_ptr,   out128_b,   len128, memLayout, Secret);
+        validDstAddrs128(heap0,    inout_ptr,    inout_b,        1, memLayout, Secret);
+        validDstAddrs128(heap0,  scratch_ptr,  scratch_b,        9, memLayout, Secret);
+        validSrcAddrs128(heap0,          Xip,    hkeys_b,        8, memLayout, Secret);
 
         buffer_disjoints128(iv_b, list(keys_b, scratch_b, in128x6_b, out128x6_b, hkeys_b, in128_b, out128_b, inout_b));
 
@@ -1004,7 +1004,7 @@ procedure Gcm_blocks(
         auth_len * (128/8) <= auth_num_bytes < auth_len * (128/8) + 128/8;
 
         // GCTR reqs
-        aes_reqs(alg, key, round_keys, keys_b, keys_ptr, heap0, memTaint);
+        aes_reqs(alg, key, round_keys, keys_b, keys_ptr, heap0, memLayout);
 
         // GCM reqs
         pclmulqdq_enabled;
@@ -1239,7 +1239,7 @@ procedure Gcm_blocks_wrapped(
         plain_num_bytes := load_stack64(rsp + offset + 64, stack);
 
     reads
-        rsp; memTaint; stack; stackTaint;
+        rsp; memLayout; stack; stackTaint;
 
     modifies
         rax; rbx; rcx; rdx; rdi; rsi; scratch_ptr;
@@ -1261,16 +1261,16 @@ procedure Gcm_blocks_wrapped(
         valid_stack_slot64(rsp + offset + 56, stack, Public, stackTaint);
         valid_stack_slot64(rsp + offset + 64, stack, Public, stackTaint);
 
-        validSrcAddrs128(heap0,     auth_ptr,     auth_b, auth_len, memTaint, Secret);
-        validSrcAddrs128(heap0,   abytes_ptr,   abytes_b,        1, memTaint, Secret);
-        validDstAddrs128(heap0,       iv_ptr,       iv_b,        1, memTaint, Public);
-        validSrcAddrs128(heap0,  in128x6_ptr,  in128x6_b, len128x6, memTaint, Secret);
-        validDstAddrs128(heap0, out128x6_ptr, out128x6_b, len128x6, memTaint, Secret);
-        validSrcAddrs128(heap0,    in128_ptr,    in128_b,   len128, memTaint, Secret);
-        validDstAddrs128(heap0,   out128_ptr,   out128_b,   len128, memTaint, Secret);
-        validDstAddrs128(heap0,    inout_ptr,    inout_b,        1, memTaint, Secret);
-        validDstAddrs128(heap0,  scratch_ptr,  scratch_b,        9, memTaint, Secret);
-        validSrcAddrs128(heap0,          Xip,    hkeys_b,        8, memTaint, Secret);
+        validSrcAddrs128(heap0,     auth_ptr,     auth_b, auth_len, memLayout, Secret);
+        validSrcAddrs128(heap0,   abytes_ptr,   abytes_b,        1, memLayout, Secret);
+        validDstAddrs128(heap0,       iv_ptr,       iv_b,        1, memLayout, Public);
+        validSrcAddrs128(heap0,  in128x6_ptr,  in128x6_b, len128x6, memLayout, Secret);
+        validDstAddrs128(heap0, out128x6_ptr, out128x6_b, len128x6, memLayout, Secret);
+        validSrcAddrs128(heap0,    in128_ptr,    in128_b,   len128, memLayout, Secret);
+        validDstAddrs128(heap0,   out128_ptr,   out128_b,   len128, memLayout, Secret);
+        validDstAddrs128(heap0,    inout_ptr,    inout_b,        1, memLayout, Secret);
+        validDstAddrs128(heap0,  scratch_ptr,  scratch_b,        9, memLayout, Secret);
+        validSrcAddrs128(heap0,          Xip,    hkeys_b,        8, memLayout, Secret);
 
         buffer_disjoints128(iv_b, list(keys_b, scratch_b, in128x6_b, out128x6_b, hkeys_b, in128_b, out128_b, inout_b));
 
@@ -1315,7 +1315,7 @@ procedure Gcm_blocks_wrapped(
         auth_len * (128/8) <= auth_num_bytes < auth_len * (128/8) + 128/8;
 
         // GCTR reqs
-        aes_reqs(alg, key, round_keys, keys_b, keys_ptr, heap0, memTaint);
+        aes_reqs(alg, key, round_keys, keys_b, keys_ptr, heap0, memLayout);
 
         // GCM reqs
         pclmulqdq_enabled;
@@ -1648,7 +1648,7 @@ procedure gcm_blocks_stdcall(
         tag_ptr         := if win then load_stack64(rsp + 40 + 96, stack) else load_stack64(rsp + 8 + 80, stack);
         
         hash @= xmm8;
-    reads memTaint;
+    reads memLayout;
     modifies
         rax; rbx; rcx; rdx; rdi; rsi; rsp; rbp; r8; r9; r10; r11; r12; r13; r14; r15;
         xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; xmm7; xmm8; xmm9; xmm10; xmm11; xmm12; xmm13; xmm14; xmm15;
@@ -1693,17 +1693,17 @@ procedure gcm_blocks_stdcall(
         len128 == len128_num;
         plain_num_bytes == plain_num;
 
-        validSrcAddrs128(heap0,     auth_ptr,     auth_b, auth_len, memTaint, Secret);
-        validSrcAddrs128(heap0,   abytes_ptr,   abytes_b,        1, memTaint, Secret);
-        validDstAddrs128(heap0,       iv_ptr,       iv_b,        1, memTaint, Public);
-        validSrcAddrs128(heap0,  in128x6_ptr,  in128x6_b, len128x6, memTaint, Secret);
-        validDstAddrs128(heap0, out128x6_ptr, out128x6_b, len128x6, memTaint, Secret);
-        validSrcAddrs128(heap0,    in128_ptr,    in128_b,   len128, memTaint, Secret);
-        validDstAddrs128(heap0,   out128_ptr,   out128_b,   len128, memTaint, Secret);
-        validDstAddrs128(heap0,    inout_ptr,    inout_b,        1, memTaint, Secret);
-        validDstAddrs128(heap0,  scratch_ptr,  scratch_b,        9, memTaint, Secret);
-        validSrcAddrs128(heap0,          xip,    hkeys_b,        8, memTaint, Secret);
-        validDstAddrs128(heap0,      tag_ptr,      tag_b,        1, memTaint, Secret);
+        validSrcAddrs128(heap0,     auth_ptr,     auth_b, auth_len, memLayout, Secret);
+        validSrcAddrs128(heap0,   abytes_ptr,   abytes_b,        1, memLayout, Secret);
+        validDstAddrs128(heap0,       iv_ptr,       iv_b,        1, memLayout, Public);
+        validSrcAddrs128(heap0,  in128x6_ptr,  in128x6_b, len128x6, memLayout, Secret);
+        validDstAddrs128(heap0, out128x6_ptr, out128x6_b, len128x6, memLayout, Secret);
+        validSrcAddrs128(heap0,    in128_ptr,    in128_b,   len128, memLayout, Secret);
+        validDstAddrs128(heap0,   out128_ptr,   out128_b,   len128, memLayout, Secret);
+        validDstAddrs128(heap0,    inout_ptr,    inout_b,        1, memLayout, Secret);
+        validDstAddrs128(heap0,  scratch_ptr,  scratch_b,        9, memLayout, Secret);
+        validSrcAddrs128(heap0,          xip,    hkeys_b,        8, memLayout, Secret);
+        validDstAddrs128(heap0,      tag_ptr,      tag_b,        1, memLayout, Secret);
 
         buffer_disjoints128(tag_b, list(out128x6_b, out128_b, inout_b, hkeys_b));
 
@@ -1753,7 +1753,7 @@ procedure gcm_blocks_stdcall(
         alg = AES_128 || alg = AES_256;
         is_aes_key_LE(alg, key);
         buffer128_as_seq(heap0, keys_b) == key_to_round_keys_LE(alg, key);
-        validSrcAddrs128(heap0, keys_ptr, keys_b, nr(alg) + 1, memTaint, Secret);
+        validSrcAddrs128(heap0, keys_ptr, keys_b, nr(alg) + 1, memLayout, Secret);
 
         // GCM reqs
         hkeys_reqs_pub(s128(heap0, hkeys_b), reverse_bytes_quad32(aes_encrypt_LE(alg, key, Mkfour(0,0,0,0))));
@@ -1896,7 +1896,7 @@ procedure compute_iv_stdcall(
 
         h_LE := reverse_bytes_quad32(old(buffer128_read(hkeys_b, 2, heap0)));
     reads
-        memTaint;
+        memLayout;
         
     modifies
         rax; rbx; rcx; rdx; rdi; rsi; rsp; rbp; r8; r9; r10; r11; r12; r13; r14; r15;
@@ -1914,10 +1914,10 @@ procedure compute_iv_stdcall(
         bytes_reg == num_bytes;
         len_reg == len;
 
-        validSrcAddrs128(heap0, iv_ptr,    iv_b,       len, memTaint, Secret);
-        validSrcAddrs128(heap0, extra_ptr, iv_extra_b, 1,   memTaint, Secret);
-        validDstAddrs128(heap0, j0_ptr,    j0_b,       1,   memTaint, Secret);
-        validSrcAddrs128(heap0, h_ptr,     hkeys_b,    8,   memTaint, Secret);
+        validSrcAddrs128(heap0, iv_ptr,    iv_b,       len, memLayout, Secret);
+        validSrcAddrs128(heap0, extra_ptr, iv_extra_b, 1,   memLayout, Secret);
+        validDstAddrs128(heap0, j0_ptr,    j0_b,       1,   memLayout, Secret);
+        validSrcAddrs128(heap0, h_ptr,     hkeys_b,    8,   memLayout, Secret);
 
         buffer_length(iv_b) == len;
         buffer_length(iv_extra_b) == 1;

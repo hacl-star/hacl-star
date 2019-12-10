@@ -60,11 +60,11 @@ procedure Mem_lemma(ghost base:va_operand, ghost offset:int, ghost b:buffer64, g
     {:quick exportOnly}
     {:typecheck false}
     reads
-        mem; heap0; memTaint;
+        mem; heap0; memLayout;
     requires
         base is OReg;
         valid_src_addr(heap0, b, index);
-        valid_taint_buf64(b, heap0, memTaint.vl_taint, t);
+        valid_taint_buf64(b, heap0, memLayout.vl_taint, t);
         eval_operand(base, this) + offset == buffer_addr(b, heap0) + 8 * index;
     ensures
         valid_operand(va_opr_code_Mem(base, offset, t), this);
@@ -91,10 +91,10 @@ procedure Load64_buffer(
     {:quick exportOnly}
     {:instruction mk_ins(make_instr(I.ins_Mov64, dst, OMem(tuple(MReg(get_reg(src), offset), t))))}
     reads
-        heap0; memTaint;
+        heap0; memLayout;
     requires
         valid_src_addr(heap0, b, index);
-        valid_taint_buf64(b, heap0, memTaint.vl_taint, t);
+        valid_taint_buf64(b, heap0, memLayout.vl_taint, t);
         src + offset == buffer_addr(b, heap0) + 8 * index;
     ensures
         dst == buffer64_read(b, index, heap0);
@@ -108,22 +108,22 @@ procedure Store64_buffer(
     {:public}
     {:quick exportOnly}
     {:instruction mk_ins(make_instr(I.ins_Mov64, OMem(tuple(MReg(get_reg(dst), offset), t)), src))}
-    reads memTaint;
+    reads memLayout;
     modifies
         heap0;
     requires
         valid_dst_addr(heap0, b, index);
-        valid_taint_buf64(b, heap0, memTaint.vl_taint, t);
+        valid_taint_buf64(b, heap0, memLayout.vl_taint, t);
         dst + offset == buffer_addr(b, heap0) + 8 * index;
     ensures
         modifies_mem(loc_buffer(b), old(heap0), heap0);
         heap0 == old(buffer64_write(b, index, src, heap0));
-        valid_taint_buf64(b, heap0, memTaint.vl_taint, t);
+        valid_taint_buf64(b, heap0, memLayout.vl_taint, t);
 {
     reveal_mem_inv();
     low_lemma_store_mem64(b, #nat(index), old(src), old(heap0));
-    lemma_valid_taint64(b, old(memTaint.vl_taint), old(heap0), #nat(index), t);
-    same_memTaint64(b, old(heap0), heap0, old(memTaint.vl_taint), memTaint.vl_taint);
+    lemma_valid_taint64(b, old(memLayout.vl_taint), old(heap0), #nat(index), t);
+    same_memTaint64(b, old(heap0), heap0, old(memLayout.vl_taint), memLayout.vl_taint);
 }
 
 procedure LoadBe64_buffer(
@@ -133,11 +133,11 @@ procedure LoadBe64_buffer(
     {:quick exportOnly}
     {:instruction mk_ins(make_instr(I.ins_MovBe64, dst, OMem(tuple(MReg(get_reg(src), offset), t))))}
     reads
-        heap0; memTaint;
+        heap0; memLayout;
     requires
         movbe_enabled;
         valid_src_addr(heap0, b, index);
-        valid_taint_buf64(b, heap0, memTaint.vl_taint, t);
+        valid_taint_buf64(b, heap0, memLayout.vl_taint, t);
         src + offset == buffer_addr(b, heap0) + 8 * index;
     ensures
         dst == reverse_bytes_nat64(buffer64_read(b, index, heap0));
@@ -151,22 +151,22 @@ procedure StoreBe64_buffer(
     {:public}
     {:quick exportOnly}
     {:instruction mk_ins(make_instr(I.ins_MovBe64, OMem(tuple(MReg(get_reg(dst), offset), t)), src))}
-    reads memTaint;
+    reads memLayout;
     modifies
         heap0;
     requires
         movbe_enabled;
         valid_dst_addr(heap0, b, index);
-        valid_taint_buf64(b, heap0, memTaint.vl_taint, t);
+        valid_taint_buf64(b, heap0, memLayout.vl_taint, t);
         dst + offset == buffer_addr(b, heap0) + 8 * index;
     ensures
         modifies_mem(loc_buffer(b), old(heap0), heap0);
         heap0 == old(buffer64_write(b, index, reverse_bytes_nat64(src), heap0));
-        valid_taint_buf64(b, heap0, memTaint.vl_taint, t);
+        valid_taint_buf64(b, heap0, memLayout.vl_taint, t);
 {
     reveal_mem_inv();
     low_lemma_store_mem64(b, #nat(index), old(reverse_bytes_nat64(src)), old(heap0));
-    lemma_valid_taint64(b, old(memTaint.vl_taint), old(heap0), #nat(index), t);
-    same_memTaint64(b, old(heap0), heap0, old(memTaint.vl_taint), memTaint.vl_taint);
+    lemma_valid_taint64(b, old(memLayout.vl_taint), old(heap0), #nat(index), t);
+    same_memTaint64(b, old(heap0), heap0, old(memLayout.vl_taint), memLayout.vl_taint);
 }
 

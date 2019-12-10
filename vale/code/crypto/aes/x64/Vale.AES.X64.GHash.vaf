@@ -135,7 +135,7 @@ procedure compute_ghash_incremental(ghost in_b:buffer128)
     lets in_ptr @= rax; len @= rcx; io @= xmm1; mask @= xmm8; h @= xmm11;
     reads
         in_ptr; len; h; mask;
-        heap0; memTaint;
+        heap0; memLayout;
 
     modifies
         rdx; r9; r12;
@@ -147,7 +147,7 @@ procedure compute_ghash_incremental(ghost in_b:buffer128)
     requires
         // GHash reqs
         pclmulqdq_enabled && avx_enabled && sse_enabled;
-        len > 0 ==> validSrcAddrs128(heap0, in_ptr, in_b, len, memTaint, Secret);
+        len > 0 ==> validSrcAddrs128(heap0, in_ptr, in_b, len, memLayout, Secret);
         len > 0 ==> in_ptr  + 16 * len < pow2_64;
         len > 0 ==> buffer_length(in_b) == len;
         mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
@@ -169,7 +169,7 @@ procedure compute_ghash_incremental(ghost in_b:buffer128)
                 //////////////////// From requires //////////////////////
                 // GHash reqs
                 pclmulqdq_enabled && avx_enabled && sse_enabled;
-                validSrcAddrs128(heap0, in_ptr, in_b, len, memTaint, Secret);
+                validSrcAddrs128(heap0, in_ptr, in_b, len, memLayout, Secret);
                 in_ptr  + 16 * len < pow2_64;
                 len > 0;
                 buffer_length(in_b) == len;
@@ -200,7 +200,7 @@ procedure compute_ghash_incremental_partial(ghost in_b:buffer128)
     lets in_ptr @= rax; len @= rcx; io @= xmm1; mask @= xmm8; h @= xmm11;
     reads
         in_ptr; len; h; mask;
-        heap0; memTaint;
+        heap0; memLayout;
 
     modifies
         rdx; r9; r12;
@@ -210,7 +210,7 @@ procedure compute_ghash_incremental_partial(ghost in_b:buffer128)
     requires
         // GHash reqs
         pclmulqdq_enabled && avx_enabled && sse_enabled;
-        len > 0 ==> validSrcAddrs128(heap0, in_ptr, in_b, len, memTaint, Secret);
+        len > 0 ==> validSrcAddrs128(heap0, in_ptr, in_b, len, memLayout, Secret);
         len > 0 ==> in_ptr  + 16 * len < pow2_64;
         len > 0 ==> buffer_length(in_b) >= len;
         mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
@@ -234,7 +234,7 @@ procedure compute_ghash_incremental_partial(ghost in_b:buffer128)
                 //////////////////// From requires //////////////////////
                 // GHash reqs
                 pclmulqdq_enabled && avx_enabled && sse_enabled;
-                validSrcAddrs128(heap0, in_ptr, in_b, len, memTaint, Secret);
+                validSrcAddrs128(heap0, in_ptr, in_b, len, memLayout, Secret);
                 in_ptr  + 16 * len < pow2_64;
                 len > 0;
                 buffer_length(in_b) >= len;
@@ -271,10 +271,10 @@ procedure ghash_incremental_bytes_no_extra(
         ghost h:quad32)
     {:public}
     {:quick exportOnly}
-    reads heap0; memTaint;
+    reads heap0; memLayout;
     requires
         // GHash reqs
-        num_bytes > 0 ==> validSrcAddrs128(heap0, old_in_ptr, in_b, bytes_to_quad_size(num_bytes), memTaint, Secret);
+        num_bytes > 0 ==> validSrcAddrs128(heap0, old_in_ptr, in_b, bytes_to_quad_size(num_bytes), memLayout, Secret);
         num_bytes > 0 ==> old_in_ptr  + 16 * bytes_to_quad_size(num_bytes) < pow2_64;
         buffer_length(in_b) == bytes_to_quad_size(num_bytes);
 
@@ -455,7 +455,7 @@ procedure ghash_incremental_bytes_extra(
     lets in_ptr @= r9; num_bytes @= rax; io @= xmm1; mask @= xmm8; h @= xmm11;
 
     reads
-        num_bytes; h; mask; in_ptr; heap0; memTaint;
+        num_bytes; h; mask; in_ptr; heap0; memLayout;
 
     modifies
         rcx; rdx; r12;
@@ -465,7 +465,7 @@ procedure ghash_incremental_bytes_extra(
         xmm2; xmm3; xmm4; xmm5; xmm6;
 
     requires/ensures
-        orig_num_bytes > 0 ==> validSrcAddrs128(heap0, orig_in_ptr, in_b, bytes_to_quad_size(orig_num_bytes), memTaint, Secret);
+        orig_num_bytes > 0 ==> validSrcAddrs128(heap0, orig_in_ptr, in_b, bytes_to_quad_size(orig_num_bytes), memLayout, Secret);
     requires
         // GHash reqs
         pclmulqdq_enabled && avx_enabled && sse_enabled;
@@ -512,7 +512,7 @@ procedure ghash_incremental_bytes(ghost in_b:buffer128)
     lets in_ptr @= rax; num_bytes @= r11; io @= xmm1; mask @= xmm8; h @= xmm11;
 
     reads
-        num_bytes; h; mask; heap0; memTaint;
+        num_bytes; h; mask; heap0; memLayout;
 
     modifies
         in_ptr; rcx; rdx; r9; r12;
@@ -522,7 +522,7 @@ procedure ghash_incremental_bytes(ghost in_b:buffer128)
         xmm2; xmm3; xmm4; xmm5; xmm6;
 
     requires/ensures
-        num_bytes > 0 ==> validSrcAddrs128(heap0, old(in_ptr), in_b, bytes_to_quad_size(num_bytes), memTaint, Secret);
+        num_bytes > 0 ==> validSrcAddrs128(heap0, old(in_ptr), in_b, bytes_to_quad_size(num_bytes), memLayout, Secret);
     requires
         // GHash reqs
         pclmulqdq_enabled && avx_enabled && sse_enabled;
@@ -568,7 +568,7 @@ procedure ghash_core(ghost in_b:buffer128)
 
     reads
         in_ptr; len; h; mask;
-        heap0; memTaint;
+        heap0; memLayout;
 
     modifies
         rdx; r9; r12;
@@ -579,7 +579,7 @@ procedure ghash_core(ghost in_b:buffer128)
     requires
         // GHash reqs
         pclmulqdq_enabled && avx_enabled && sse_enabled;
-        len > 0 ==> validSrcAddrs128(heap0, in_ptr, in_b, len, memTaint, Secret);
+        len > 0 ==> validSrcAddrs128(heap0, in_ptr, in_b, len, memLayout, Secret);
         len > 0 ==> in_ptr  + 16 * len < pow2_64;
         len > 0 ==> buffer_length(in_b) == len;
         mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
