@@ -88,5 +88,27 @@ Spec_Cipher_Expansion_cipher_alg_of_impl(Spec_Cipher_Expansion_impl i);
 
 typedef uint8_t Spec_Agile_AEAD_alg;
 
+/* SNIPPET_START: Spec_Agile_DH_algorithm */
+
+#define Spec_Agile_DH_DH_Curve25519 0
+#define Spec_Agile_DH_DH_Curve448 1
+#define Spec_Agile_DH_DH_P256 2
+
+/* SNIPPET_END: Spec_Agile_DH_algorithm */
+
+typedef uint8_t Spec_Agile_DH_algorithm;
+
+/* SNIPPET_START: K___Spec_Agile_DH_algorithm_Spec_Agile_AEAD_alg_Spec_Hash_Definitions_hash_alg */
+
+typedef struct K___Spec_Agile_DH_algorithm_Spec_Agile_AEAD_alg_Spec_Hash_Definitions_hash_alg_s
+{
+  Spec_Agile_DH_algorithm fst;
+  Spec_Agile_AEAD_alg snd;
+  Spec_Hash_Definitions_hash_alg thd;
+}
+K___Spec_Agile_DH_algorithm_Spec_Agile_AEAD_alg_Spec_Hash_Definitions_hash_alg;
+
+/* SNIPPET_END: K___Spec_Agile_DH_algorithm_Spec_Agile_AEAD_alg_Spec_Hash_Definitions_hash_alg */
+
 #define __Hacl_Spec_H_DEFINED
 #endif

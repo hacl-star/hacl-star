@@ -957,13 +957,15 @@ mt_get_path_pre(
 {
   merkle_tree uu____0 = *mt;
   LowStar_Vector_vector_str___uint8_t_ uu____1 = *p1;
-  if (idx >= uu____0.offset && idx - uu____0.offset <= offset_range_limit)
-  {
-    uint64_t diff = idx - uu____0.offset;
-    uint32_t idx1 = (uint32_t)diff;
-    return uu____0.i <= idx1 && idx1 < uu____0.j && uu____1.sz == (uint32_t)0U;
-  }
-  return false;
+  return
+    idx
+    >= uu____0.offset
+    && idx - uu____0.offset <= offset_range_limit
+    &&
+      uu____0.i
+      <= (uint32_t)(idx - uu____0.offset)
+      && (uint32_t)(idx - uu____0.offset) < uu____0.j
+      && uu____1.sz == (uint32_t)0U;
 }
 
 uint32_t
@@ -979,8 +981,7 @@ mt_get_path(
   void (*copy1)(uint8_t *x0, uint8_t *x1) = hcpy;
   mt_get_root(mt, root);
   merkle_tree mtv = *mt;
-  uint64_t diff = idx - mtv.offset;
-  uint32_t idx1 = (uint32_t)diff;
+  uint32_t idx1 = (uint32_t)(idx - mtv.offset);
   uint32_t i1 = mtv.i;
   uint32_t ofs = offset_of(mtv.i);
   uint32_t j1 = mtv.j;
@@ -1101,21 +1102,18 @@ mt_flush_to_(
 bool mt_flush_to_pre(merkle_tree *mt, uint64_t idx)
 {
   merkle_tree mtv = *mt;
-  if (idx >= mtv.offset && idx - mtv.offset <= offset_range_limit)
-  {
-    uint64_t diff = idx - mtv.offset;
-    uint32_t idx1 = (uint32_t)diff;
-    return idx1 >= mtv.i && idx1 < mtv.j;
-  }
-  return false;
+  return
+    idx
+    >= mtv.offset
+    && idx - mtv.offset <= offset_range_limit
+    && (uint32_t)(idx - mtv.offset) >= mtv.i && (uint32_t)(idx - mtv.offset) < mtv.j;
 }
 
 void mt_flush_to(merkle_tree *mt, uint64_t idx)
 {
   merkle_tree mtv = *mt;
   uint64_t offset1 = mtv.offset;
-  uint64_t diff = idx - offset1;
-  uint32_t idx1 = (uint32_t)diff;
+  uint32_t idx1 = (uint32_t)(idx - offset1);
   LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_ hs = mtv.hs;
   mt_flush_to_((uint32_t)0U, hs, mtv.i, idx1);
   *mt
@@ -1273,21 +1271,18 @@ mt_retract_to_(
 bool mt_retract_to_pre(merkle_tree *mt, uint64_t r)
 {
   merkle_tree mtv = *mt;
-  if (r >= mtv.offset && r - mtv.offset <= offset_range_limit)
-  {
-    uint64_t diff = r - mtv.offset;
-    uint32_t r1 = (uint32_t)diff;
-    return mtv.i <= r1 && r1 < mtv.j;
-  }
-  return false;
+  return
+    r
+    >= mtv.offset
+    && r - mtv.offset <= offset_range_limit
+    && mtv.i <= (uint32_t)(r - mtv.offset) && (uint32_t)(r - mtv.offset) < mtv.j;
 }
 
 void mt_retract_to(merkle_tree *mt, uint64_t r)
 {
   merkle_tree mtv = *mt;
   uint64_t offset1 = mtv.offset;
-  uint64_t diff = r - offset1;
-  uint32_t r1 = (uint32_t)diff;
+  uint32_t r1 = (uint32_t)(r - offset1);
   LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_ hs = mtv.hs;
   mt_retract_to_(hs, (uint32_t)0U, mtv.i, r1 + (uint32_t)1U, mtv.j);
   *mt
@@ -1377,21 +1372,20 @@ mt_verify_pre(
 {
   merkle_tree uu____0 = *mt;
   LowStar_Vector_vector_str___uint8_t_ uu____1 = *p1;
-  if
-  (
+  return
     k1
     < j1
     && k1 >= uu____0.offset && k1 - uu____0.offset <= offset_range_limit
     && j1 >= uu____0.offset && j1 - uu____0.offset <= offset_range_limit
-  )
-  {
-    uint64_t diff0 = k1 - uu____0.offset;
-    uint32_t k2 = (uint32_t)diff0;
-    uint64_t diff = j1 - uu____0.offset;
-    uint32_t j2 = (uint32_t)diff;
-    return uu____1.sz == (uint32_t)1U + mt_path_length((uint32_t)0U, k2, j2, false);
-  }
-  return false;
+    &&
+      uu____1.sz
+      ==
+        (uint32_t)1U
+        +
+          mt_path_length((uint32_t)0U,
+            (uint32_t)(k1 - uu____0.offset),
+            (uint32_t)(j1 - uu____0.offset),
+            false);
 }
 
 bool
@@ -1404,10 +1398,8 @@ mt_verify(
 )
 {
   merkle_tree mtv = *mt;
-  uint64_t diff0 = k1 - mtv.offset;
-  uint32_t k2 = (uint32_t)diff0;
-  uint64_t diff = j1 - mtv.offset;
-  uint32_t j2 = (uint32_t)diff;
+  uint32_t k2 = (uint32_t)(k1 - mtv.offset);
+  uint32_t j2 = (uint32_t)(j1 - mtv.offset);
   LowStar_Regional_regional___uint8_t_
   x00 = { .dummy = NULL, .r_alloc = hash_r_alloc, .r_free = hash_r_free };
   uint8_t *ih = x00.r_alloc();
@@ -1649,12 +1641,6 @@ hash_vv_bytes_i(
     return uint64_max;
   }
   return rest + r;
-}
-
-static uint64_t
-hash_vv_bytes(LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_ vv1)
-{
-  return hash_vv_bytes_i(vv1, (uint32_t)0U);
 }
 
 static K___bool_uint32_t
@@ -2179,7 +2165,7 @@ uint64_t mt_serialize_size(merkle_tree *mt)
   merkle_tree mtv = *mt;
   LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_ hs = mtv.hs;
   LowStar_Vector_vector_str___uint8_t_ rhs = mtv.rhs;
-  uint64_t hs_sz = hash_vv_bytes(hs);
+  uint64_t hs_sz = hash_vv_bytes_i(hs, (uint32_t)0U);
   if (hs_sz < (uint64_t)4294967295U)
   {
     return
@@ -2297,5 +2283,51 @@ merkle_tree *mt_deserialize(uint8_t *input, uint32_t sz)
       }
     );
   return buf;
+}
+
+uint32_t
+mt_serialize_path(
+  LowStar_Vector_vector_str___uint8_t_ *p1,
+  merkle_tree *mt,
+  uint8_t *output,
+  uint32_t sz
+)
+{
+  K___bool_uint32_t scrut = serialize_uint32_t(true, hash_size, output, sz, (uint32_t)0U);
+  bool ok = scrut.fst;
+  uint32_t pos = scrut.snd;
+  K___bool_uint32_t scrut0 = serialize_hash_vec(ok, *p1, output, sz, pos);
+  bool ok1 = scrut0.fst;
+  uint32_t pos1 = scrut0.snd;
+  if (ok1)
+  {
+    return pos1;
+  }
+  return (uint32_t)0U;
+}
+
+LowStar_Vector_vector_str___uint8_t_ **mt_deserialize_path(uint8_t *input, uint32_t sz)
+{
+  K___bool_uint32_t_uint32_t scrut0 = deserialize_uint32_t(true, input, sz, (uint32_t)0U);
+  bool ok = scrut0.fst;
+  uint32_t pos = scrut0.snd;
+  uint32_t hash_size1 = scrut0.thd;
+  K___bool_uint32_t_LowStar_Vector_vector_str___uint8_t_
+  scrut = deserialize_hash_vec(ok, input, sz, pos);
+  bool ok1 = scrut.fst;
+  LowStar_Vector_vector_str___uint8_t_ hs = scrut.thd;
+  if (!ok1 || hash_size1 != hash_size)
+  {
+    return NULL;
+  }
+  KRML_CHECK_SIZE(sizeof (LowStar_Vector_vector_str___uint8_t_), (uint32_t)1U);
+  LowStar_Vector_vector_str___uint8_t_
+  *buf = KRML_HOST_MALLOC(sizeof (LowStar_Vector_vector_str___uint8_t_));
+  buf[0U] = hs;
+  KRML_CHECK_SIZE(sizeof (LowStar_Vector_vector_str___uint8_t_ *), (uint32_t)1U);
+  LowStar_Vector_vector_str___uint8_t_
+  **buf0 = KRML_HOST_MALLOC(sizeof (LowStar_Vector_vector_str___uint8_t_ *));
+  buf0[0U] = buf;
+  return buf0;
 }
 

@@ -61,6 +61,13 @@ inline static uint64_t FStar_UInt128_uint128_to_uint64(FStar_UInt128_uint128 a);
 
 inline static FStar_UInt128_uint128 FStar_UInt128_mul_wide(uint64_t x, uint64_t y);
 
+typedef struct K___uint32_t_bool_s
+{
+  uint32_t fst;
+  bool snd;
+}
+K___uint32_t_bool;
+
 inline static void store128_le(uint8_t *x0, FStar_UInt128_uint128 x1);
 
 inline static void store128_be(uint8_t *x0, FStar_UInt128_uint128 x1);

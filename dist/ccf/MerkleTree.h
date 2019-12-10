@@ -212,5 +212,15 @@ uint32_t mt_serialize(merkle_tree *mt, uint8_t *output, uint32_t sz);
 
 merkle_tree *mt_deserialize(uint8_t *input, uint32_t sz);
 
+uint32_t
+mt_serialize_path(
+  LowStar_Vector_vector_str___uint8_t_ *p1,
+  merkle_tree *mt,
+  uint8_t *output,
+  uint32_t sz
+);
+
+LowStar_Vector_vector_str___uint8_t_ **mt_deserialize_path(uint8_t *input, uint32_t sz);
+
 #define __MerkleTree_H_DEFINED
 #endif
