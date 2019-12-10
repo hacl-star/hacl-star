@@ -33,7 +33,7 @@ $(HACL_HOME)/tests/chacha20poly1305-test.o: dist/Makefile.basic
 dist/chacha20poly1305-test.exe: $(HACL_HOME)/tests/chacha20poly1305-test.o dist/libchachapoly.a
 
 %.exe:
-	$(CC) $^ $(KREMLIB_A) -o $@
+	$(CC) $^ -o $@
 
 clean-c:
 	$(MAKE) -C dist/ -f Makefile.basic clean

@@ -414,7 +414,7 @@ let offsets_connect (x:offset_t) (y:offset_t): Tot bool = y >= x && (y - x) <= o
 
 private inline_for_extraction
 let split_offset (tree:offset_t) (index:offset_t{offsets_connect tree index}): Tot index_t =
-  let diff = U64.sub_mod index tree in
+  [@inline_let] let diff = U64.sub_mod index tree in
   assert (diff <= offset_range_limit);
   Int.Cast.uint64_to_uint32 diff
 
@@ -1411,7 +1411,7 @@ val lift_path_index:
                   i < V.size_of (B.get h p 0)))
         (ensures (Rgl?.r_repr hreg h (V.get h (B.get h p 0) i) ==
                  S.index (lift_path h mtr p) (U32.v i)))
-let rec lift_path_index h mtr p i =
+let lift_path_index h mtr p i =
   lift_path_index_ h (V.as_seq h (B.get h p 0))
     0 (S.length (V.as_seq h (B.get h p 0))) (U32.v i)
 
@@ -1915,7 +1915,7 @@ inline_for_extraction val path_insert:
     (requires (fun h0 ->
       path_safe h0 mtr p /\
       not (V.is_full (B.get h0 p 0)) /\
-      Rgl?.r_inv hreg h0 hp /\
+     Rgl?.r_inv hreg h0 hp /\
       HH.disjoint mtr (B.frameOf p) /\
       HH.includes mtr (B.frameOf hp)))
     (ensures (fun h0 _ h1 ->
@@ -2118,10 +2118,10 @@ let rec mt_get_path_ lv mtr hs rhs i j k p actd =
 #reset-options
 
 private inline_for_extraction
-val mt_get_path_pre_nst: mtv:merkle_tree -> idx:offset_t -> p:(vector hash) -> root:hash-> Tot bool
+val mt_get_path_pre_nst: mtv:merkle_tree -> idx:offset_t -> p:(vector hash) -> root:hash -> Tot bool
 let mt_get_path_pre_nst mtv idx p root =
   offsets_connect (MT?.offset mtv) idx &&
-  (let idx = split_offset (MT?.offset mtv) idx in
+  ([@inline_let] let idx = split_offset (MT?.offset mtv) idx in
    MT?.i mtv <= idx && idx < MT?.j mtv &&
    V.size_of p = 0ul)
 
@@ -2519,7 +2519,7 @@ private inline_for_extraction
 val mt_flush_to_pre_nst: mtv:merkle_tree -> idx:offset_t -> Tot bool
 let mt_flush_to_pre_nst mtv idx =
   offsets_connect (MT?.offset mtv) idx &&
-  (let idx = split_offset (MT?.offset mtv) idx in
+  ([@inline_let] let idx = split_offset (MT?.offset mtv) idx in
    idx >= MT?.i mtv &&
    idx < MT?.j mtv)
 
@@ -2548,7 +2548,7 @@ val mt_flush_to:
       High.mt_flush_to (mt_lift h0 mt) (U32.v idx) == mt_lift h1 mt)))
 
 #reset-options "--z3rlimit 100 --initial_fuel 1 --max_fuel 1 --initial_ifuel 0 --max_ifuel 0"
-let rec mt_flush_to mt idx =
+let mt_flush_to mt idx =
   let hh0 = HST.get () in
   let mtv = !*mt in
   let offset = MT?.offset mtv in
@@ -2836,7 +2836,7 @@ private inline_for_extraction
 val mt_retract_to_pre_nst: mtv:merkle_tree -> r:offset_t -> Tot bool
 let mt_retract_to_pre_nst mtv r =
   offsets_connect (MT?.offset mtv) r &&
-  (let r = split_offset (MT?.offset mtv) r in
+  ([@inline_let] let r = split_offset (MT?.offset mtv) r in
    MT?.i mtv <= r && r < MT?.j mtv)
 
 val mt_retract_to_pre: mt:mt_p -> r:offset_t -> HST.ST bool
@@ -2863,7 +2863,7 @@ val mt_retract_to:
       let r = split_offset off r in
       High.mt_retract_to (mt_lift h0 mt) (U32.v r) == mt_lift h1 mt)))
 #reset-options "--z3rlimit 100 --initial_fuel 1 --max_fuel 1 --initial_ifuel 0 --max_ifuel 0"
-let rec mt_retract_to mt r =
+let mt_retract_to mt r =
   let hh0 = HST.get () in
   let mtv = !*mt in
   let offset = MT?.offset mtv in
@@ -2969,8 +2969,8 @@ let mt_verify_pre_nst mt k j p rt =
   k < j &&
   offsets_connect (MT?.offset mt) k &&
   offsets_connect (MT?.offset mt) j &&
-  (let k = split_offset (MT?.offset mt) k in
-   let j = split_offset (MT?.offset mt) j in
+  ([@inline_let] let k = split_offset (MT?.offset mt) k in
+   [@inline_let] let j = split_offset (MT?.offset mt) j in
    // We need to add one since the first element is the hash to verify.
    V.size_of p = 1ul + mt_path_length 0ul k j false)
 

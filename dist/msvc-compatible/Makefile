@@ -106,6 +106,7 @@ ALL_ML_STUBS=$(patsubst %,lib/%_stubs.cmx,$(ALL_OCAML))
 ALL_C_STUBS=$(patsubst %,lib/%_c_stubs.o,$(ALL_OCAML))
 
 include .depend.ocaml
+include ctypes.depend
 
 .depend.ocaml:
 	$(OCAMLDEP) $(wildcard lib/*.ml) $(wildcard lib_gen/*.ml) > $@
@@ -130,11 +131,14 @@ include .depend.ocaml
 
 all: libocamlevercrypt.cmxa
 
-lib_gen/%_gen.exe: lib/%_bindings.cmx lib_gen/%_gen.cmx
+lib_gen/%_gen.exe:
 	$(OCAMLOPT) $^ -o $@
 
 %.cmx: %.ml
 	$(OCAMLOPT) -c $< -o $@
+
+.PRECIOUS: lib/%_stubs.ml
+lib/%_stubs.ml: lib/%_c_stubs.c
 
 lib/%_stubs.ml lib/%_c_stubs.c: lib_gen/%_gen.exe
 	$<

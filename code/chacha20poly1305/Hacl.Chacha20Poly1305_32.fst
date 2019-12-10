@@ -7,8 +7,11 @@ open Hacl.Poly1305_32
 
 #set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
+[@CInline]
 private
 let poly1305_padded_32 = Hacl.Impl.Chacha20Poly1305.PolyCore.poly1305_padded #M32
+
+[@CInline]
 private
 let poly1305_do_32 = chacha20poly1305_poly1305_do_higher #M32 poly1305_finish poly1305_init poly1305_padded_32
 
