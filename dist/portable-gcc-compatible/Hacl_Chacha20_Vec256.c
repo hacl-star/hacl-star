@@ -26,7 +26,7 @@
 
 /* SNIPPET_START: Hacl_Chacha20_Vec256_double_round_256 */
 
-static void Hacl_Chacha20_Vec256_double_round_256(Lib_IntVector_Intrinsics_vec256 *st)
+inline static void Hacl_Chacha20_Vec256_double_round_256(Lib_IntVector_Intrinsics_vec256 *st)
 {
   st[0U] = Lib_IntVector_Intrinsics_vec256_add32(st[0U], st[4U]);
   Lib_IntVector_Intrinsics_vec256 std = Lib_IntVector_Intrinsics_vec256_xor(st[12U], st[0U]);
@@ -130,7 +130,7 @@ static void Hacl_Chacha20_Vec256_double_round_256(Lib_IntVector_Intrinsics_vec25
 
 /* SNIPPET_START: Hacl_Chacha20_Vec256_chacha20_core_256 */
 
-static void
+inline static void
 Hacl_Chacha20_Vec256_chacha20_core_256(
   Lib_IntVector_Intrinsics_vec256 *k,
   Lib_IntVector_Intrinsics_vec256 *ctx,
@@ -164,7 +164,7 @@ Hacl_Chacha20_Vec256_chacha20_core_256(
 
 /* SNIPPET_START: Hacl_Chacha20_Vec256_chacha20_init_256 */
 
-static void
+inline static void
 Hacl_Chacha20_Vec256_chacha20_init_256(
   Lib_IntVector_Intrinsics_vec256 *ctx,
   uint8_t *k,

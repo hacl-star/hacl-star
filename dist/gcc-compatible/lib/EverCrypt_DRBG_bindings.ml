@@ -3,7 +3,6 @@ module Bindings(F:Cstubs.FOREIGN) =
   struct
     open F
     include (Hacl_HMAC_DRBG_bindings.Bindings)(Hacl_HMAC_DRBG_stubs)
-    include (EverCrypt_HMAC_bindings.Bindings)(EverCrypt_HMAC_stubs)
     type everCrypt_DRBG_supported_alg = spec_Hash_Definitions_hash_alg
     let everCrypt_DRBG_supported_alg =
       typedef spec_Hash_Definitions_hash_alg "EverCrypt_DRBG_supported_alg" 

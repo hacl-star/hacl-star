@@ -3,6 +3,7 @@
 *.d
 *.cm*
 *.so
+*.dll
 *.a
 *.exe
 *.exe.dSYM
@@ -12,12 +13,11 @@ out.krml
 *.dump
 .extracted
 .*depend*
-code/old/**/*-c
-code/old/**/*-c89
-secure_api/out
 .evercrypt_config
 code/**/dist
 !code/**/dist/Makefile
+code/old/experimental/aesgcm/aesgcm-c
+code/old/experimental/aesgcm/aesgcm-c89
 *.orig
 .didhelp
 .last_vale_version
