@@ -143,18 +143,10 @@ mozilla-ci-unstaged: compile-mozilla test-c
 
 # Not reusing the -staged automatic target so as to export NOSHORTLOG
 ci:
-	tools/blast-staticconfig.sh wasm
-	EVERCRYPT_CONFIG=wasm NOSHORTLOG=1 $(MAKE) wasm-staged
-	tools/blast-staticconfig.sh
 	NOSHORTLOG=1 $(MAKE) vale-fst
 	FSTAR_DEPEND_FLAGS="--warn_error +285" NOSHORTLOG=1 $(MAKE) all-unstaged test-unstaged
 	$(MAKE) -C providers/quic_provider # needs a checkout of miTLS, only valid on CI
 	./tools/sloccount.sh
-
-wasm: wasm-staged
-
-wasm-unstaged: dist/wasm/Makefile.basic
-	cd $(dir $<) && node main.js
 
 # Not reusing the -staged automatic target so as to export MIN_TEST
 min-test:
@@ -310,8 +302,6 @@ else ifeq ($(MAKECMDGOALS),all)
 else ifeq (,$(filter-out %-staged,$(MAKECMDGOALS)))
   SKIPDEPEND=1
 else ifeq (,$(filter-out %-verify,$(MAKECMDGOALS)))
-  SKIPDEPEND=1
-else ifeq ($(MAKECMDGOALS),wasm)
   SKIPDEPEND=1
 else ifeq ($(MAKECMDGOALS),ci)
   SKIPDEPEND=1
@@ -659,7 +649,6 @@ TARGETCONFIG_FLAGS = -add-include '"evercrypt_targetconfig.h"'
 E_HASH_BUNDLE=-bundle EverCrypt.Hash+EverCrypt.Hash.Incremental=[rename=EverCrypt_Hash]
 MERKLE_BUNDLE=-bundle 'MerkleTree.New.Low+MerkleTree.New.Low.Serialization=[rename=MerkleTree]'
 CTR_BUNDLE=-bundle EverCrypt.CTR=EverCrypt.CTR.*
-# Disabled by default, overridden for wasm
 WASMSUPPORT_BUNDLE = -bundle WasmSupport
 
 BUNDLE_FLAGS	=\
@@ -692,32 +681,48 @@ DEFAULT_FLAGS = \
 # WASM distribution
 # -----------------
 #
-# Does something different and overrides pretty much everything.
+# We disable anything that is not pure Low*; no intrinsics; no EverCrypt
 
-# Should be fixed by having KreMLin better handle imported names
-WASM_STANDALONE=Prims LowStar.Endianness C.Endianness \
-  C.String TestLib C WasmSupport
+# TODO: the way externals are handled in Wasm is nuts and they should be in a
+# single module rather than require clients to do their surgical bundling.
+WASM_STANDALONE=Prims LowStar.Endianness C.Endianness C.String TestLib
 
-# Notes: only the functions reachable via Test.NoHeap are currently enabled.
 WASM_FLAGS	=\
   $(patsubst %,-bundle %,$(WASM_STANDALONE)) \
-  -no-prefix Test.NoHeap \
-  -bundle Test.NoHeap=Test,Test.* \
   -bundle FStar.* \
-  -bundle EverCrypt.*,Hacl.*,MerkleTree.*[rename=EverCrypt] \
   -bundle LowStar.* \
   -bundle Lib.RandomBuffer.System \
-  -bundle '\*[rename=Misc]' \
-  -minimal -wasm
+  -minimal -wasm -d wasm
 
-# Customizations for WASM.
-# - only keep definitions reachable from Test.NoHeap -- this indicates what we
-#   should retain for the WASM distribution.
-dist/wasm/Makefile.basic: TEST_FLAGS = -d wasm
+# Must appear early on because of the left-to-right semantics of -bundle flagS.
 dist/wasm/Makefile.basic: HAND_WRITTEN_LIB_FLAGS = $(WASM_FLAGS)
-dist/wasm/Makefile.basic: BUNDLE_FLAGS =
-dist/wasm/Makefile.basic: WASMSUPPORT_BUNDLE =
 
+# Overriding EverCrypt.Hash so that is it no longer a live root; it will be
+# eliminated via the -bundle EverCrypt.* below
+dist/wasm/Makefile.basic: E_HASH_BUNDLE =
+
+# Doesn't work in WASM because one function has some heap allocation
+dist/wasm/Makefile.basic: HASH_BUNDLE += -bundle Hacl.HMAC_DRBG
+
+# No Vale Curve64; no "Local" Curve64 (local Makefile hack); only the slow 64
+# one
+dist/wasm/Makefile.basic: CURVE_BUNDLE = $(CURVE_BUNDLE_BASE) \
+  -bundle Hacl.Curve25519_64 \
+  -bundle Hacl.Curve25519_64_Local
+
+# Disabling vectorized stuff
+dist/wasm/Makefile.basic: CHACHA20_BUNDLE += \
+  -bundle Hacl.Chacha20_Vec128,Hacl.Chacha20_Vec256
+dist/wasm/Makefile.basic: CHACHAPOLY_BUNDLE += \
+  -bundle Hacl.Chacha20Poly1305_128,Hacl.Chacha20Poly1305_256
+dist/wasm/Makefile.basic: POLY_BUNDLE = \
+  -bundle 'Hacl.Poly1305_32=Hacl.Impl.Poly1305.Field32xN_32' \
+  -bundle 'Hacl.Poly1305_128,Hacl.Poly1305_256,Hacl.Impl.Poly1305.*'
+
+# And Merkle trees
+dist/wasm/Makefile.basic: MERKLE_BUNDLE = -bundle 'MerkleTree.*'
+dist/wasm/Makefile.basic: CTR_BUNDLE =
+dist/wasm/Makefile.basic: DEFAULT_FLAGS += -bundle 'EverCrypt,EverCrypt.*'
 
 # Compact distributions
 # ---------------------
