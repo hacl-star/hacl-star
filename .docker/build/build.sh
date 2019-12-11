@@ -59,8 +59,8 @@ function hacl_test() {
         env VALE_SCONS_PARALLEL_OPT="-j $threads" make -j $threads $make_target -k
 }
 
-function hacl_test_and_hints() {
-    hacl_test && refresh_hacl_hints
+function hacl_test_hints_dist() {
+    hacl_test && refresh_hacl_hints_dist
 }
 
 function fetch_and_make_kremlin() {
@@ -146,11 +146,24 @@ function fetch_vale() {
     export_home VALE "$(pwd)/../vale"
 }
 
-function refresh_hacl_hints() {
+function refresh_hacl_hints_dist() {
     # We should not generate hints when building on Windows
     if [[ "$OS" != "Windows_NT" ]]; then
-        refresh_hints "git@github.com:mitls/hacl-star.git" "true" "regenerate hints" "."
+        refresh_hints_dist "git@github.com:mitls/hacl-star.git" "true" "regenerate hints and dist" "."
     fi
+}
+
+# Re-build and re-test all C code.
+# Then add changes to git.
+function clean_build_dist() {
+    rm -rf dist/*/*
+    env VALE_SCONS_PARALLEL_OPT="-j $threads" make -j $threads all-unstaged -k
+    echo "Searching for a diff in dist/"
+    if ! git diff --exit-code --name-only -- dist :!dist/*/INFO.txt; then
+        echo "GIT DIFF: the files in dist/ have a git diff"
+        { echo " - dist-diff (hacl-star)" >> $ORANGE_FILE; }
+    fi
+    git add dist
 }
 
 # Note: this performs an _approximate_ refresh of the hints, in the sense that
@@ -158,7 +171,7 @@ function refresh_hacl_hints() {
 # merged to $CI_BRANCH in the meanwhile, which would invalidate some hints. So, we
 # reset to origin/$CI_BRANCH, take in our hints, and push. This is short enough that
 # the chances of someone merging in-between fetch and push are low.
-function refresh_hints() {
+function refresh_hints_dist() {
     local remote=$1
     local extra="$2"
     local msg="$3"
@@ -175,6 +188,8 @@ function refresh_hints() {
     # when $2 = "git ls-files src/ocaml-output/ | xargs git add",
     # outputting the list of files to stdout
     eval "$extra"
+
+    clean_build_dist
 
     git commit --allow-empty -m "[CI] $msg"
     # Memorize that commit
@@ -230,7 +245,7 @@ function exec_build() {
           vale_test && echo -n true >$status_file
         else
           export OTHERFLAGS="--record_hints $OTHERFLAGS --z3rlimit_factor 2"
-          hacl_test_and_hints && echo -n true >$status_file
+          hacl_test_hints_dist && echo -n true >$status_file
         fi
     else
         echo "Invalid target"
