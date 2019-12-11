@@ -46,13 +46,15 @@ function hacl_test() {
         (
           unset KREMLIN_HOME;
           cd dist
+          r=true
           for a in *; do
             if [[ $a != "kremlin" && $a != "vale" && -d $a ]]; then
               echo "Building snapshot: $a"
-              make -C $a -j $threads || (echo $a failed && return 255)
+              make -C $a -j $threads || (echo $a failed && r=false)
               echo
             fi
           done
+          $r
         ) &&
         env VALE_SCONS_PARALLEL_OPT="-j $threads" make -j $threads $make_target -k
 }
