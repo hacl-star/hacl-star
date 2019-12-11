@@ -453,5 +453,23 @@ merkle_tree *mt_deserialize(uint8_t *input, uint32_t sz);
 
 /* SNIPPET_END: mt_deserialize */
 
+/* SNIPPET_START: mt_serialize_path */
+
+uint32_t
+mt_serialize_path(
+  LowStar_Vector_vector_str___uint8_t_ *p1,
+  merkle_tree *mt,
+  uint8_t *output,
+  uint32_t sz
+);
+
+/* SNIPPET_END: mt_serialize_path */
+
+/* SNIPPET_START: mt_deserialize_path */
+
+LowStar_Vector_vector_str___uint8_t_ **mt_deserialize_path(uint8_t *input, uint32_t sz);
+
+/* SNIPPET_END: mt_deserialize_path */
+
 #define __MerkleTree_H_DEFINED
 #endif
