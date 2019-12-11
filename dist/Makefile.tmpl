@@ -60,7 +60,6 @@ endif
 ifneq (,$(wildcard EverCrypt_OpenSSL.h))
   CFLAGS	+= -I $(OPENSSL_HOME)/include
   LDFLAGS 	+= -L$(OPENSSL_HOME) -lcrypto
-  MLLDFLAGS     += -ccopt -L$(OPENSSL_HOME) -cclib -lcrypto
 ifneq ($(OS),Windows_NT)
   LDFLAGS	+= -ldl -lpthread
 endif
@@ -133,7 +132,7 @@ include ctypes.depend
 all: libocamlevercrypt.cmxa
 
 lib_gen/%_gen.exe: libevercrypt.$(SO)
-	$(OCAMLOPT) $(filter-out libevercrypt.$(SO),$^) -o $@ -cclib -levercrypt -ccopt -L. $(MLLDFLAGS)
+	$(OCAMLOPT) $(filter-out libevercrypt.$(SO),$^) -o $@ -cclib -levercrypt -ccopt -L. -ccopt -L$(OPENSSL_HOME)
 
 %.cmx: %.ml
 	$(OCAMLOPT) -c $< -o $@
@@ -153,6 +152,6 @@ lib/%_stubs.ml lib/%_c_stubs.c: lib_gen/%_gen.exe
 	$(DY)PATH=.:$(OPENSSL_HOME) $<
 
 libocamlevercrypt.cmxa: $(ALL_BINDINGS) $(ALL_ML_STUBS) $(ALL_C_STUBS) libevercrypt.$(SO)
-	ocamlfind mklib -o ocamlevercrypt $(filter-out %.so,$^) -L. -levercrypt -L$(OPENSSL_HOME) -lcrypto
+	ocamlfind mklib -o ocamlevercrypt $(filter-out %.so,$^) -L. -levercrypt -L$(OPENSSL_HOME)
 
 endif
