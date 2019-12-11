@@ -495,6 +495,11 @@ let low_lemma_store_mem64 b i v h =
   I.update_buffer_up_mem (_ih h) b heap heap'
 #pop-options
 
+let low_lemma_store_mem64_taint b i v h mt t =
+  low_lemma_store_mem64 b i v h;
+  lemma_valid_taint64 b mt h i t;
+  assert (Map.equal mt (S.update_n (buffer_addr b h + 8 * i) 8 mt t))
+
 val low_lemma_valid_mem128 (b:buffer128) (i:nat) (h:vale_heap) : Lemma
   (requires
     i < Seq.length (buffer_as_seq h b) /\
@@ -756,6 +761,11 @@ let low_lemma_store_mem128 b i v h =
   in_bounds128 h b i;
   I.update_buffer_up_mem (_ih h) b heap heap'
 
+let low_lemma_store_mem128_taint b i v h mt t =
+  low_lemma_store_mem128 b i v h;
+  lemma_valid_taint128 b mt h i t;
+  assert (Map.equal mt (S.update_n (buffer_addr b h + 16 * i) 16 mt t))
+
 #push-options "--smtencoding.l_arith_repr boxwrap"
 let low_lemma_valid_mem128_64 b i h =
   FStar.Pervasives.reveal_opaque (`%S.valid_addr64) S.valid_addr64;
@@ -827,6 +837,11 @@ let low_lemma_store_mem128_lo64 b i v h =
   Vale.Def.Opaque_s.reveal_opaque S.update_heap32_def;
   Vale.Def.Opaque_s.reveal_opaque insert_nat64
 
+let low_lemma_store_mem128_lo64_taint b i v h mt t =
+  low_lemma_store_mem128_lo64 b i v h;
+  lemma_valid_taint128 b mt h i t;
+  assert (Map.equal mt (S.update_n (buffer_addr b h + 16 * i) 8 mt t))
+
 let low_lemma_store_mem128_hi64 b i v h =
   FStar.Pervasives.reveal_opaque (`%S.valid_addr128) S.valid_addr128;
   let ptr = buffer_addr b h + 16 * i in
@@ -842,3 +857,8 @@ let low_lemma_store_mem128_hi64 b i v h =
   Vale.Def.Opaque_s.reveal_opaque S.update_heap64_def;
   Vale.Def.Opaque_s.reveal_opaque S.update_heap32_def;
   Vale.Def.Opaque_s.reveal_opaque insert_nat64
+
+let low_lemma_store_mem128_hi64_taint b i v h mt t =
+  low_lemma_store_mem128_hi64 b i v h;
+  lemma_valid_taint128 b mt h i t;
+  assert (Map.equal mt (S.update_n (buffer_addr b h + 16 * i + 8) 8 mt t))

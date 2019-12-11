@@ -565,9 +565,7 @@ procedure Store128_buffer(
         heap0 == old(buffer128_write(b, index, src, heap0));
 {
     reveal_mem_inv();
-    low_lemma_store_mem128(b, #nat(index), old(src), old(heap0));
-    lemma_valid_taint128(b, old(memLayout.vl_taint), old(heap0), #nat(index), t);
-    same_memTaint128(b, old(heap0), heap0, old(memLayout.vl_taint), memLayout.vl_taint);
+    low_lemma_store_mem128_taint(b, #nat(index), old(src), old(heap0), old(memLayout.vl_taint), t);
 }
 
 procedure Store64_buffer128(
@@ -591,10 +589,8 @@ procedure Store64_buffer128(
 {
     reveal_mem_inv();
     low_lemma_valid_mem128_64(b, #nat(index), old(heap0));
-    low_lemma_store_mem128_lo64(b, #nat(index), old(src), old(heap0));
-    low_lemma_store_mem128_hi64(b, #nat(index), old(src), old(heap0));
-    lemma_valid_taint128(b, old(memLayout.vl_taint), old(heap0), #nat(index), t);
-    same_memTaint128(b, old(heap0), heap0, old(memLayout.vl_taint), memLayout.vl_taint);
+    low_lemma_store_mem128_lo64_taint(b, #nat(index), old(src), old(heap0), old(memLayout.vl_taint), t);
+    low_lemma_store_mem128_hi64_taint(b, #nat(index), old(src), old(heap0), old(memLayout.vl_taint), t);
 }
 
 procedure ZeroXmm(inout dst:xmm)

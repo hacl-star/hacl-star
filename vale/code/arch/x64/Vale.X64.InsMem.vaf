@@ -121,9 +121,7 @@ procedure Store64_buffer(
         valid_taint_buf64(b, heap0, memLayout.vl_taint, t);
 {
     reveal_mem_inv();
-    low_lemma_store_mem64(b, #nat(index), old(src), old(heap0));
-    lemma_valid_taint64(b, old(memLayout.vl_taint), old(heap0), #nat(index), t);
-    same_memTaint64(b, old(heap0), heap0, old(memLayout.vl_taint), memLayout.vl_taint);
+    low_lemma_store_mem64_taint(b, #nat(index), old(src), old(heap0), old(memLayout.vl_taint), t);
 }
 
 procedure LoadBe64_buffer(
@@ -165,8 +163,6 @@ procedure StoreBe64_buffer(
         valid_taint_buf64(b, heap0, memLayout.vl_taint, t);
 {
     reveal_mem_inv();
-    low_lemma_store_mem64(b, #nat(index), old(reverse_bytes_nat64(src)), old(heap0));
-    lemma_valid_taint64(b, old(memLayout.vl_taint), old(heap0), #nat(index), t);
-    same_memTaint64(b, old(heap0), heap0, old(memLayout.vl_taint), memLayout.vl_taint);
+    low_lemma_store_mem64_taint(b, #nat(index), old(reverse_bytes_nat64(src)), old(heap0), old(memLayout.vl_taint), t);
 }
 

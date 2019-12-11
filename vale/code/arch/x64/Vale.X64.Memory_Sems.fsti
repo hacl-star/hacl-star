@@ -105,6 +105,21 @@ val low_lemma_store_mem64 (b:buffer64) (i:nat) (v:nat64) (h:vale_heap) : Lemma
     is_machine_heap_update (get_heap h) m /\ upd_heap h m == buffer_write b i v h
   ))
 
+val low_lemma_store_mem64_taint (b:buffer64) (i:nat) (v:nat64) (h:vale_heap) (mt:memtaint) (t:taint) : Lemma
+  (requires
+    i < Seq.length (buffer_as_seq h b) /\
+    buffer_readable h b /\
+    buffer_writeable b /\
+    valid_taint_buf64 b h mt t
+  )
+  (ensures (
+    let ptr = buffer_addr b h + 8 * i in
+    let m = S.update_heap64 ptr v (get_heap h) in
+    is_machine_heap_update (get_heap h) m /\
+    upd_heap h m == buffer_write b i v h /\
+    S.update_n ptr 8 mt t == mt
+  ))
+
 val equiv_load_mem128 (ptr:int) (m:vale_heap) : Lemma
   (requires valid_mem128 ptr m)
   (ensures load_mem128 ptr m == S.get_heap_val128 ptr (get_heap m))
@@ -125,6 +140,21 @@ val low_lemma_store_mem128 (b:buffer128) (i:nat) (v:quad32) (h:vale_heap) : Lemm
   (ensures (
     let m = S.update_heap128 (buffer_addr b h + 16 * i) v (get_heap h) in
     is_machine_heap_update (get_heap h) m /\ upd_heap h m == buffer_write b i v h
+  ))
+
+val low_lemma_store_mem128_taint (b:buffer128) (i:nat) (v:quad32) (h:vale_heap) (mt:memtaint) (t:taint) : Lemma
+  (requires
+    i < Seq.length (buffer_as_seq h b) /\
+    buffer_readable h b /\
+    buffer_writeable b /\
+    valid_taint_buf128 b h mt t
+  )
+  (ensures (
+    let ptr = buffer_addr b h + 16 * i in
+    let m = S.update_heap128 ptr v (get_heap h) in
+    is_machine_heap_update (get_heap h) m /\
+    upd_heap h m == buffer_write b i v h /\
+    S.update_n ptr 16 mt t == mt
   ))
 
 val low_lemma_valid_mem128_64: b:buffer128 -> i:nat -> h:vale_heap -> Lemma
@@ -181,6 +211,22 @@ val low_lemma_store_mem128_lo64 : b:buffer128 -> i:nat-> v:nat64 -> h:vale_heap 
     is_machine_heap_update (get_heap h) m /\ upd_heap h m == buffer_write b i v' h)
   )
 
+val low_lemma_store_mem128_lo64_taint (b:buffer128) (i:nat) (v:nat64) (h:vale_heap) (mt:memtaint) (t:taint) : Lemma
+  (requires
+    i < Seq.length (buffer_as_seq h b) /\
+    buffer_readable h b /\
+    buffer_writeable b /\
+    valid_taint_buf128 b h mt t
+  )
+  (ensures (
+    let ptr = buffer_addr b h + 16 * i in
+    let v' = insert_nat64_opaque (buffer_read b i h) v 0 in
+    let m = S.update_heap64 ptr v (get_heap h) in
+    is_machine_heap_update (get_heap h) m /\
+    upd_heap h m == buffer_write b i v' h /\
+    S.update_n ptr 8 mt t == mt
+  ))
+
 val low_lemma_store_mem128_hi64 : b:buffer128 -> i:nat-> v:nat64 -> h:vale_heap -> Lemma
   (requires
     i < Seq.length (buffer_as_seq h b) /\
@@ -192,3 +238,19 @@ val low_lemma_store_mem128_hi64 : b:buffer128 -> i:nat-> v:nat64 -> h:vale_heap 
     let m = S.update_heap64 (buffer_addr b h + 16 * i + 8) v (get_heap h) in
     is_machine_heap_update (get_heap h) m /\ upd_heap h m == buffer_write b i v' h)
   )
+
+val low_lemma_store_mem128_hi64_taint (b:buffer128) (i:nat) (v:nat64) (h:vale_heap) (mt:memtaint) (t:taint) : Lemma
+  (requires
+    i < Seq.length (buffer_as_seq h b) /\
+    buffer_readable h b /\
+    buffer_writeable b /\
+    valid_taint_buf128 b h mt t
+  )
+  (ensures (
+    let ptr = buffer_addr b h + 16 * i + 8 in
+    let v' = insert_nat64_opaque (buffer_read b i h) v 1 in
+    let m = S.update_heap64 ptr v (get_heap h) in
+    is_machine_heap_update (get_heap h) m /\
+    upd_heap h m == buffer_write b i v' h /\
+    S.update_n ptr 8 mt t == mt
+  ))
