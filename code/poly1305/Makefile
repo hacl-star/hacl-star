@@ -10,7 +10,7 @@ test: all
 # Defines rules for producing .checked, .krml, .depend, etc.
 include ../../Makefile.local
 
-CFLAGS += -I../../../lib/c -mavx -mavx2
+CFLAGS += -I../../../lib/c -march=native -mtune=native -O3
 export CFLAGS
 
 # CUSTOMIZE HERE: how to produce binary objects
@@ -22,15 +22,20 @@ dist/libpoly.a: dist/Makefile.basic
 dist/Makefile.basic: $(filter-out %/prims.krml,$(ALL_KRML_FILES))
 	$(KRML) $^ -o libpoly.a $(BASE_FLAGS) $(POLY_BUNDLE) \
 	  -tmpdir dist \
-	  -ccopts -std=gnu11,-g,-O3 \
 	  -add-include '"libintvector.h"' \
 	  -add-include '<stdbool.h>' \
 	  -skip-compilation
 
 dist/poly1305-test.exe: $(HACL_HOME)/tests/poly1305-test.o dist/libpoly.a
 
+dist/poly1305-openssl-test.exe: dist/libpoly.a
+	$(CC) $(CFLAGS) -I $(OPENSSL_HOME)/include/crypto -I $(OPENSSL_HOME)/crypto -I $(HACL_HOME)/tests/tests-openssl/jasmin-poly-avx2 \
+	$(HACL_HOME)/tests/tests-openssl/jasmin-poly-avx2/poly1305.s $(HACL_HOME)/tests/tests-openssl/poly1305-test.c $^ \
+	-o $@ $(OPENSSL_HOME)/libcrypto.a -lpthread -ldl
+
+
 %.exe:
-	$(CC) $^ $(KREMLIB_A) -o $@
+	$(CC) $(CFLAGS) -flto $^ -o $@
 
 clean-c:
 	$(MAKE) -C dist/ -f Makefile.basic clean

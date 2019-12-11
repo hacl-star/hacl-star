@@ -1,5 +1,5 @@
-Overview
-========
+The research behind
+===================
 
 What is verified software
 -------------------------
