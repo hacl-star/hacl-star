@@ -50,7 +50,7 @@ function hacl_test() {
           for a in *; do
             if [[ $a != "kremlin" && $a != "vale" && -d $a ]]; then
               echo "Building snapshot: $a"
-              make -C $a -j $threads || (echo $a failed && r=false)
+              make -C $a -j $threads || r=false
               echo
             fi
           done

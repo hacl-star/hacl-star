@@ -132,8 +132,8 @@ include ctypes.depend
 
 all: libocamlevercrypt.cmxa
 
-lib_gen/%_gen.exe: libevercrypt.$(SO)
-	$(OCAMLOPT) $(filter-out libevercrypt.$(SO),$^) -o $@ -cclib -levercrypt -ccopt -L. $(MLLDFLAGS)
+lib_gen/%_gen.exe: libevercrypt.a
+	$(OCAMLOPT) $^ -o $@ -cclib -levercrypt -ccopt -L. $(MLLDFLAGS)
 
 %.cmx: %.ml
 	$(OCAMLOPT) -c $< -o $@
