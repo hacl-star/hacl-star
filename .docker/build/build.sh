@@ -156,6 +156,11 @@ function refresh_hacl_hints_dist() {
 function clean_build_dist() {
     rm -rf dist/*/*
     env VALE_SCONS_PARALLEL_OPT="-j $threads" make -j $threads all-unstaged -k
+    echo "Searching for a diff in dist/"
+    if ! git diff --exit-code --name-only -- dist :!dist/*/INFO.txt; then
+        echo "GIT DIFF: the files in dist/ have a git diff"
+        { echo " - dist-diff (hacl-star)" >> $ORANGE_FILE; }
+    fi
     git add dist
 }
 
