@@ -156,6 +156,7 @@ function refresh_hacl_hints_dist() {
 # Re-build and re-test all C code.
 # Then add changes to git.
 function clean_build_dist() {
+    ORANGE_FILE="../orange_file.txt"
     rm -rf dist/*/*
     env VALE_SCONS_PARALLEL_OPT="-j $threads" make -j $threads all-unstaged -k
     echo "Searching for a diff in dist/"
@@ -229,6 +230,9 @@ function exec_build() {
         return
     fi
 
+    ORANGE_FILE="../orange_file.txt"
+    echo '' >$ORANGE_FILE
+
     export_home HACL "$(pwd)"
     export_home EVERCRYPT "$(pwd)/providers"
 
@@ -256,6 +260,9 @@ function exec_build() {
     if [[ $(cat $status_file) != "true" ]]; then
         echo "Build failed"
         echo Failure >$result_file
+    elif [[ $(cat $ORANGE_FILE) != "" ]]; then
+        echo "Build had breakages"
+        echo Success with breakages $(cat $ORANGE_FILE) >$result_file
     else
         echo "Build succeeded"
         echo Success >$result_file
