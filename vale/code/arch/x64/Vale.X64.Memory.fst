@@ -484,6 +484,7 @@ let lemma_store_mem (t:base_typ) (b:buffer t) (i:nat) (v:base_typ_as_vale_type t
     store_mem t (buffer_addr b h + view_n t * i) v h == buffer_write b i v h
   )
   =
+  FStar.Pervasives.reveal_opaque (`%addr_map_pred) addr_map_pred;
   let view = uint_view t in
   let addr = buffer_addr b h + view_n t * i in
   match find_writeable_buffer t addr h with
@@ -497,6 +498,7 @@ let lemma_store_mem (t:base_typ) (b:buffer t) (i:nat) (v:base_typ_as_vale_type t
     assert (a == b)
 
 let lemma_load_mem64 b i h =
+  FStar.Pervasives.reveal_opaque (`%addr_map_pred) addr_map_pred;
   let addr = buffer_addr b h + 8 * i in
   let view = uint64_view in
   match find_valid_buffer TUInt64 addr h with
@@ -515,6 +517,7 @@ let lemma_valid_mem128 b i h = ()
 let lemma_writeable_mem128 b i h = ()
 
 let lemma_load_mem128 b i h =
+  FStar.Pervasives.reveal_opaque (`%addr_map_pred) addr_map_pred;
   let addr = buffer_addr b h + 16 * i in
   let view = uint128_view in
   match find_valid_buffer TUInt128 addr h with
@@ -640,7 +643,9 @@ let rec write_taint_lemma
 #restart-solver
 let rec valid_memtaint (mem:vale_heap) (ps:list b8{IB.list_disjoint_or_eq ps}) (ts:b8 -> GTot taint)
   : Lemma (valid_taint_bufs mem (IB.create_memtaint (_ih mem) ps ts) ps ts)
-  = match ps with
+  =
+  FStar.Pervasives.reveal_opaque (`%addr_map_pred) addr_map_pred;
+  match ps with
     | [] -> ()
     | b :: q ->
       assert (List.memP b ps);

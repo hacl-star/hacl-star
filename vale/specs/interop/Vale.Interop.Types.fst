@@ -62,8 +62,11 @@ let get_downview
   (b:MB.mbuffer (base_typ_as_type src) rrel rel) =
   DV.mk_buffer_view b (down_view src)
 
-type addr_map = m:(b8 -> W.nat64){
+[@"opaque_to_smt"]
+let addr_map_pred (m:b8 -> W.nat64) =
   (forall (buf1 buf2:b8).{:pattern (m buf1); (m buf2)}
     MB.disjoint buf1.bsrc buf2.bsrc ==>
     disjoint_addr (m buf1) (DV.length (get_downview buf1.bsrc)) (m buf2) (DV.length (get_downview buf2.bsrc))) /\
-  (forall (b:b8).{:pattern (m b)} m b + DV.length (get_downview b.bsrc) < W.pow2_64)}
+  (forall (b:b8).{:pattern (m b)} m b + DV.length (get_downview b.bsrc) < W.pow2_64)
+
+type addr_map = m:(b8 -> W.nat64){addr_map_pred m}
