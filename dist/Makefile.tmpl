@@ -60,7 +60,7 @@ endif
 ifneq (,$(wildcard EverCrypt_OpenSSL.h))
   CFLAGS	+= -I $(OPENSSL_HOME)/include
   LDFLAGS 	+= -L$(OPENSSL_HOME) -lcrypto
-  MLLDFLAGS     += -cclib -L$(OPENSSL_HOME) -cclib -lcrypto
+  MLLDFLAGS     += -ccopt -L$(OPENSSL_HOME) -cclib -lcrypto
 ifneq ($(OS),Windows_NT)
   LDFLAGS	+= -ldl -lpthread
 endif
