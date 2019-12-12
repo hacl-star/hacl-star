@@ -53,7 +53,7 @@ def recompute_rec(i, n, path, pi, tag, actd):
     Recursive recomputation of tag
 
     :param i: index to recompute
-    :param n: maximum index in tree
+    :param n: size of the tree
     :param path: neighbouring hashes along branches
     :param pi: current path index
     :param tag: current tag
@@ -63,7 +63,7 @@ def recompute_rec(i, n, path, pi, tag, actd):
     if n < 0 or i > n or not len(path) or pi < 0 or pi > len(path):
         return []
 
-    print([str(i), str(n), str(pi), binascii.hexlify(tag)])
+    # print([str(i), str(n), str(pi), binascii.hexlify(tag)])
     if n == 0:
         return tag
     nactd = actd or n % 2 == 1
@@ -80,7 +80,7 @@ def recompute(i, n, path):
     Iterative recomputation of tag
 
     :param i: index to recompute
-    :param n: maximum index in tree
+    :param n: size of the tree
     :param path: neighbouring hashes along branches
     """
     if n < 0 or i > n or not len(path):
@@ -88,24 +88,21 @@ def recompute(i, n, path):
 
     tag = path[0]
     pi = 1
-    actd = False
+    inside = True
     while n > 0:
-        print([str(i), str(n), str(pi), binascii.hexlify(tag)])
-        if i % 2 == 0:
-            if n == i or (n == i + 1 and not actd):
-                i //= 2
-                n //= 2
-                actd |= n % 2 == 1
-                continue
+        # print([str(i), str(n), str(pi), binascii.hexlify(tag)])
+        left = i % 2 == 1 # going up to the left
+        skip = i == n or (i + 1 == n and inside) # no more hashes to the right
+        if left or not skip:
             assert (pi < len(path))
-            tag = compress(tag + path[pi])
-        else:
-            assert (pi < len(path))
-            tag = compress(path[pi] + tag)
-        actd |= n % 2 == 1
+            if left:
+                tag = compress(path[pi] + tag)
+            else:
+                tag = compress(tag + path[pi])
+            pi += 1
+        inside &= n % 2 == 0
         i //= 2
         n //= 2
-        pi += 1
     return tag
 
 def verify(offset, i, n, path, root):
@@ -114,7 +111,7 @@ def verify(offset, i, n, path, root):
 
     :param offset: 64-bit offset of the internal 32-bit tree
     :param i: index to verify
-    :param n: maximum index in tree
+    :param n: size of the tree
     :param path: neighbouring hashes along branches
     :param root: root of the tree
     :returns: True for success, False otherwise.
