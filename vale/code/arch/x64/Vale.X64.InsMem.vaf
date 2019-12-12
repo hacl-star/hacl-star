@@ -99,7 +99,7 @@ procedure Load64_buffer(
     ensures
         dst == buffer64_read(b, index, heap0);
 {
-    reveal_mem_inv();
+    low_lemma_load_mem64_full(b, #nat(index), this.vs_heap, t);
 }
 
 procedure Store64_buffer(
@@ -120,8 +120,7 @@ procedure Store64_buffer(
         heap0 == old(buffer64_write(b, index, src, heap0));
         valid_taint_buf64(b, heap0, memLayout.vl_taint, t);
 {
-    reveal_mem_inv();
-    low_lemma_store_mem64_taint(b, #nat(index), old(src), old(heap0), old(memLayout.vl_taint), t);
+    low_lemma_store_mem64_full(b, #nat(index), old(src), old(this).vs_heap, t);
 }
 
 procedure LoadBe64_buffer(
@@ -140,7 +139,7 @@ procedure LoadBe64_buffer(
     ensures
         dst == reverse_bytes_nat64(buffer64_read(b, index, heap0));
 {
-    reveal_mem_inv();
+    low_lemma_load_mem64_full(b, #nat(index), this.vs_heap, t);
 }
 
 procedure StoreBe64_buffer(
@@ -162,7 +161,6 @@ procedure StoreBe64_buffer(
         heap0 == old(buffer64_write(b, index, reverse_bytes_nat64(src), heap0));
         valid_taint_buf64(b, heap0, memLayout.vl_taint, t);
 {
-    reveal_mem_inv();
-    low_lemma_store_mem64_taint(b, #nat(index), old(reverse_bytes_nat64(src)), old(heap0), old(memLayout.vl_taint), t);
+    low_lemma_store_mem64_full(b, #nat(index), old(reverse_bytes_nat64(src)), old(this).vs_heap, t);
 }
 

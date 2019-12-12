@@ -34,11 +34,11 @@ let lemma_load_mem_get128 h ptr =
   MS.lemma_heap_get_heap h;
   ()
 
-let lemma_valid_buffer_read64 h b i =
-  lemma_valid_mem64 b i h
+//let lemma_valid_buffer_read64 h b i =
+//  lemma_valid_mem64 b i h
 
-let lemma_valid_buffer_read128 h b i =
-  lemma_valid_mem128 b i h
+//let lemma_valid_buffer_read128 h b i =
+//  lemma_valid_mem128 b i h
 
 let lemma_load_buffer_read64 h b i =
   lemma_load_mem64 b i h

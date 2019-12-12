@@ -324,6 +324,7 @@ let addr_in_ptr #t addr ptr h =
     else aux (i+1)
   in aux 0
 
+// TODO: what's the pattern on the exists here?
 let valid_offset (t:base_typ) (n base:nat) (addr:int) (i:nat) = exists j. i <= j /\ j < n /\ base + (view_n t) * j == addr
 
 let rec get_addr_in_ptr (t:base_typ) (n base addr:nat) (i:nat{valid_offset t n base addr i})

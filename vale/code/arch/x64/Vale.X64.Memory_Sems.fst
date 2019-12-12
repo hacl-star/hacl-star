@@ -27,7 +27,7 @@ let get_heap h = I.down_mem (_ih h)
 
 let upd_heap h m = mi_heap_upd h m
 
-let lemma_upd_get_heap h = I.down_up_identity (_ih h)
+//let lemma_upd_get_heap h = I.down_up_identity (_ih h)
 
 let lemma_get_upd_heap h m = I.up_down_identity (_ih h) m
 
@@ -37,7 +37,7 @@ let lemma_heap_get_heap h = ()
 
 let lemma_heap_taint h = ()
 
-let lemma_heap_upd_heap h mh mt = ()
+//let lemma_heap_upd_heap h mh mt = ()
 
 val heap_shift (m1 m2:S.machine_heap) (base:int) (n:nat) : Lemma
   (requires (forall i. 0 <= i /\ i < n ==> m1.[base + i] == m2.[base + i]))
@@ -481,6 +481,9 @@ let valid_state_store_mem64_aux i v h =
   in aux(); aux2();
   Map.lemma_equal_intro mem1 mem2
 
+let low_lemma_load_mem64_full b i vfh t =
+  ()
+
 #push-options "--z3rlimit 20"
 #restart-solver
 let low_lemma_store_mem64 b i v h =
@@ -495,7 +498,8 @@ let low_lemma_store_mem64 b i v h =
   I.update_buffer_up_mem (_ih h) b heap heap'
 #pop-options
 
-let low_lemma_store_mem64_taint b i v h mt t =
+let low_lemma_store_mem64_full b i v vfh t =
+  let (h, mt) = (vfh.vf_heap, vfh.vf_layout.vl_taint) in
   low_lemma_store_mem64 b i v h;
   lemma_valid_taint64 b mt h i t;
   assert (Map.equal mt (S.update_n (buffer_addr b h + 8 * i) 8 mt t))
@@ -749,6 +753,9 @@ let valid_state_store_mem128_aux i v h =
   in aux (); aux2 ();
   Map.lemma_equal_intro mem1 mem2
 
+let low_lemma_load_mem128_full b i vfh t =
+  ()
+
 let low_lemma_store_mem128 b i v h =
   lemma_valid_mem128 b i h;
   lemma_store_mem128 b i v h;
@@ -761,7 +768,9 @@ let low_lemma_store_mem128 b i v h =
   in_bounds128 h b i;
   I.update_buffer_up_mem (_ih h) b heap heap'
 
-let low_lemma_store_mem128_taint b i v h mt t =
+let low_lemma_store_mem128_full b i v vfh t =
+assert (vfh.vf_heap == Map16.get vfh.vf_heaplets 0);
+  let (h, mt) = (vfh.vf_heap, vfh.vf_layout.vl_taint) in
   low_lemma_store_mem128 b i v h;
   lemma_valid_taint128 b mt h i t;
   assert (Map.equal mt (S.update_n (buffer_addr b h + 16 * i) 16 mt t))
@@ -825,6 +834,10 @@ let update_heap128_lo (ptr:int) (v:quad32) (mem:S.machine_heap) : Lemma
   Vale.Arch.MachineHeap.update_heap32_get_heap32 (ptr+8) mem1;
   Vale.Arch.MachineHeap.update_heap32_get_heap32 (ptr+12) mem1
 
+let low_lemma_load_mem128_lo_hi_full b i vfh t =
+  low_lemma_valid_mem128_64 b i vfh.vf_heap;
+  ()
+
 let low_lemma_store_mem128_lo64 b i v h =
   let ptr = buffer_addr b h + 16 * i in
   let v128 = buffer_read b i h in
@@ -837,9 +850,11 @@ let low_lemma_store_mem128_lo64 b i v h =
   Vale.Def.Opaque_s.reveal_opaque S.update_heap32_def;
   Vale.Def.Opaque_s.reveal_opaque insert_nat64
 
-let low_lemma_store_mem128_lo64_taint b i v h mt t =
+let low_lemma_store_mem128_lo64_full b i v vfh t =
+  let (h, mt) = (vfh.vf_heap, vfh.vf_layout.vl_taint) in
   low_lemma_store_mem128_lo64 b i v h;
   lemma_valid_taint128 b mt h i t;
+  low_lemma_valid_mem128_64 b i h;
   assert (Map.equal mt (S.update_n (buffer_addr b h + 16 * i) 8 mt t))
 
 let low_lemma_store_mem128_hi64 b i v h =
@@ -858,7 +873,10 @@ let low_lemma_store_mem128_hi64 b i v h =
   Vale.Def.Opaque_s.reveal_opaque S.update_heap32_def;
   Vale.Def.Opaque_s.reveal_opaque insert_nat64
 
-let low_lemma_store_mem128_hi64_taint b i v h mt t =
+let low_lemma_store_mem128_hi64_full b i v vfh t =
+  let (h, mt) = (vfh.vf_heap, vfh.vf_layout.vl_taint) in
   low_lemma_store_mem128_hi64 b i v h;
   lemma_valid_taint128 b mt h i t;
+  low_lemma_valid_mem128_64 b i h;
   assert (Map.equal mt (S.update_n (buffer_addr b h + 16 * i + 8) 8 mt t))
+

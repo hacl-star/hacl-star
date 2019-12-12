@@ -11,21 +11,6 @@ open Vale.X64.Memory_Sems
 
 friend Vale.X64.Decls
 
-let lemma_valid_buf_maddr64 h memTaint b i t =
-  ()
-
-let lemma_valid_buf_maddr128 h memTaint b i t =
-  ()
-
-//let lemma_valid_taint64_operand m t s =
-//  let tainted_mem:memtaint = heap_taint (state_to_S s) in
-//  let real_mem:vale_heap = get_vale_heap s.vs_heap in
-//  Vale.Lib.Meta.exists_elim2
-//    (Map.sel tainted_mem (eval_maddr m s) == t)
-//    ()
-//    (fun (b:buffer64) (index:nat{valid_buf_maddr64 (eval_maddr m s) real_mem tainted_mem b index t}) ->
-//      lemma_valid_taint64 b tainted_mem real_mem index t)
-
 let lemma_valid_src_operand64_and_taint o s =
   let h = get_vale_heap s.vs_heap in
   match o with

@@ -144,11 +144,11 @@ let valid_buf_maddr128 (addr:int) (s_mem:vale_heap) (layout:vale_heap_layout) (b
   addr == M.buffer_addr b s_mem + 16 * index
 
 let valid_mem_operand64 (addr:int) (t:taint) (s_mem:vale_heap) (layout:vale_heap_layout) : prop0 =
-  exists (b:M.buffer64) (index:int).{:pattern (valid_buf_maddr64 addr s_mem layout b index t)}
+  exists (b:M.buffer64) (index:int).{:pattern (M.valid_buffer_read s_mem b index)}
     valid_buf_maddr64 addr s_mem layout b index t
 
 let valid_mem_operand128 (addr:int) (t:taint) (s_mem:vale_heap) (layout:vale_heap_layout) : prop0 =
-  exists (b:M.buffer128) (index:int).{:pattern (valid_buf_maddr128 addr s_mem layout b index t)}
+  exists (b:M.buffer128) (index:int).{:pattern (M.valid_buffer_read s_mem b index)}
     valid_buf_maddr128 addr s_mem layout b index t
 
 [@va_qattr]

@@ -63,15 +63,15 @@ val lemma_load_mem_get128 (h:vale_full_heap) (ptr:int) : Lemma
   (ensures load_mem128 ptr (get_vale_heap h) == get_heap_val128 ptr (heap_get (coerce h)))
   [SMTPat (load_mem128 ptr (get_vale_heap h))]
 
-val lemma_valid_buffer_read64 (h:vale_heap) (b:buffer64) (i:int) : Lemma
-  (requires valid_buffer_read h b i)
-  (ensures valid_mem64 (buffer_addr b h + 8 * i) h)
-  [SMTPat (valid_buffer_read h b i)]
+//val lemma_valid_buffer_read64 (h:vale_heap) (b:buffer64) (i:int) : Lemma
+//  (requires valid_buffer_read h b i)
+//  (ensures valid_mem64 (buffer_addr b h + 8 * i) h)
+//  [SMTPat (valid_buffer_read h b i)]
 
-val lemma_valid_buffer_read128 (h:vale_heap) (b:buffer128) (i:int) : Lemma
-  (requires valid_buffer_read h b i)
-  (ensures valid_mem128 (buffer_addr b h + 16 * i) h)
-  [SMTPat (valid_buffer_read h b i)]
+//val lemma_valid_buffer_read128 (h:vale_heap) (b:buffer128) (i:int) : Lemma
+//  (requires valid_buffer_read h b i)
+//  (ensures valid_mem128 (buffer_addr b h + 16 * i) h)
+//  [SMTPat (valid_buffer_read h b i)]
 
 val lemma_load_buffer_read64 (h:vale_heap) (b:buffer64) (i:int) : Lemma
   (requires valid_buffer_read h b i)
