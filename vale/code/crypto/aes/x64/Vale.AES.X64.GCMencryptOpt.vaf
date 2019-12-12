@@ -1654,7 +1654,7 @@ procedure gcm_blocks_stdcall(
         xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; xmm7; xmm8; xmm9; xmm10; xmm11; xmm12; xmm13; xmm14; xmm15;
         heap0; efl; stack; stackTaint;
     requires/ensures
-        mem == heap0;
+        vale_heap_data_eq(mem, heap0);
     requires
         aesni_enabled && pclmulqdq_enabled && avx_enabled && sse_enabled && movbe_enabled;
 
@@ -1693,17 +1693,17 @@ procedure gcm_blocks_stdcall(
         len128 == len128_num;
         plain_num_bytes == plain_num;
 
-        validSrcAddrs128(heap0,     auth_ptr,     auth_b, auth_len, memLayout, Secret);
-        validSrcAddrs128(heap0,   abytes_ptr,   abytes_b,        1, memLayout, Secret);
-        validDstAddrs128(heap0,       iv_ptr,       iv_b,        1, memLayout, Public);
-        validSrcAddrs128(heap0,  in128x6_ptr,  in128x6_b, len128x6, memLayout, Secret);
-        validDstAddrs128(heap0, out128x6_ptr, out128x6_b, len128x6, memLayout, Secret);
-        validSrcAddrs128(heap0,    in128_ptr,    in128_b,   len128, memLayout, Secret);
-        validDstAddrs128(heap0,   out128_ptr,   out128_b,   len128, memLayout, Secret);
-        validDstAddrs128(heap0,    inout_ptr,    inout_b,        1, memLayout, Secret);
-        validDstAddrs128(heap0,  scratch_ptr,  scratch_b,        9, memLayout, Secret);
-        validSrcAddrs128(heap0,          xip,    hkeys_b,        8, memLayout, Secret);
-        validDstAddrs128(heap0,      tag_ptr,      tag_b,        1, memLayout, Secret);
+        validSrcAddrs128(mem,     auth_ptr,     auth_b, auth_len, memLayout, Secret);
+        validSrcAddrs128(mem,   abytes_ptr,   abytes_b,        1, memLayout, Secret);
+        validDstAddrs128(mem,       iv_ptr,       iv_b,        1, memLayout, Public);
+        validSrcAddrs128(mem,  in128x6_ptr,  in128x6_b, len128x6, memLayout, Secret);
+        validDstAddrs128(mem, out128x6_ptr, out128x6_b, len128x6, memLayout, Secret);
+        validSrcAddrs128(mem,    in128_ptr,    in128_b,   len128, memLayout, Secret);
+        validDstAddrs128(mem,   out128_ptr,   out128_b,   len128, memLayout, Secret);
+        validDstAddrs128(mem,    inout_ptr,    inout_b,        1, memLayout, Secret);
+        validDstAddrs128(mem,  scratch_ptr,  scratch_b,        9, memLayout, Secret);
+        validSrcAddrs128(mem,          xip,    hkeys_b,        8, memLayout, Secret);
+        validDstAddrs128(mem,      tag_ptr,      tag_b,        1, memLayout, Secret);
 
         buffer_disjoints128(tag_b, list(out128x6_b, out128_b, inout_b, hkeys_b));
 
@@ -1739,7 +1739,7 @@ procedure gcm_blocks_stdcall(
         auth_num_bytes < pow2_32;
         xip + 0x20 < pow2_64;
 
-        buffer_addr(keys_b, heap0) + 0x80 < pow2_64;
+        buffer_addr(keys_b, mem) + 0x80 < pow2_64;
 
         // len128x6 is # of 128-bit blocks that come in 6-block chunks
         len128x6 % 6 == 0;
@@ -1752,13 +1752,13 @@ procedure gcm_blocks_stdcall(
         // GCTR reqs
         alg = AES_128 || alg = AES_256;
         is_aes_key_LE(alg, key);
-        buffer128_as_seq(heap0, keys_b) == key_to_round_keys_LE(alg, key);
-        validSrcAddrs128(heap0, keys_ptr, keys_b, nr(alg) + 1, memLayout, Secret);
+        buffer128_as_seq(mem, keys_b) == key_to_round_keys_LE(alg, key);
+        validSrcAddrs128(mem, keys_ptr, keys_b, nr(alg) + 1, memLayout, Secret);
 
         // GCM reqs
-        hkeys_reqs_pub(s128(heap0, hkeys_b), reverse_bytes_quad32(aes_encrypt_LE(alg, key, Mkfour(0,0,0,0))));
+        hkeys_reqs_pub(s128(mem, hkeys_b), reverse_bytes_quad32(aes_encrypt_LE(alg, key, Mkfour(0,0,0,0))));
         let h_LE  := aes_encrypt_LE(alg, key, Mkfour(0, 0, 0, 0));
-        let iv_BE := old(buffer128_read(iv_b, 0, heap0));
+        let iv_BE := old(buffer128_read(iv_b, 0, mem));
         iv_BE == compute_iv_BE(h_LE, iv);
 
     ensures
@@ -1767,19 +1767,19 @@ procedure gcm_blocks_stdcall(
                      loc_union(loc_buffer(scratch_b),
                      loc_union(loc_buffer(out128x6_b),
                      loc_union(loc_buffer(out128_b),
-                               loc_buffer(inout_b)))))), old(heap0), heap0);
+                               loc_buffer(inout_b)))))), old(mem), mem);
 
         // Semantics
         old(plain_num_bytes) < pow2_32;
         old(auth_num_bytes) < pow2_32;
 
-        let iv_BE := old(buffer128_read(iv_b, 0, heap0));
+        let iv_BE := old(buffer128_read(iv_b, 0, mem));
 
-        let auth_raw_quads := old(append(s128(heap0, auth_b), s128(heap0, abytes_b)));
+        let auth_raw_quads := old(append(s128(mem, auth_b), s128(mem, abytes_b)));
         let auth_bytes := slice(le_seq_quad32_to_bytes(auth_raw_quads), 0, old(auth_num_bytes));
-        let plain_raw_quads := old(append(append(s128(heap0, in128x6_b), s128(heap0, in128_b)), s128(heap0, inout_b)));
+        let plain_raw_quads := old(append(append(s128(mem, in128x6_b), s128(mem, in128_b)), s128(mem, inout_b)));
         let plain_bytes := slice(le_seq_quad32_to_bytes(plain_raw_quads), 0, old(plain_num_bytes));
-        let cipher_raw_quads := append(append(s128(heap0, out128x6_b), s128(heap0, out128_b)), s128(heap0, inout_b));
+        let cipher_raw_quads := append(append(s128(mem, out128x6_b), s128(mem, out128_b)), s128(mem, inout_b));
         let cipher_bytes := slice(le_seq_quad32_to_bytes(cipher_raw_quads), 0, old(plain_num_bytes));
 
         length(auth_bytes)  < pow2_32 /\
@@ -1788,7 +1788,7 @@ procedure gcm_blocks_stdcall(
         cipher_bytes ==
             gcm_encrypt_LE(alg, seq_nat32_to_seq_nat8_LE(key), iv,
                            plain_bytes, auth_bytes)._1 /\
-        le_quad32_to_bytes(buffer128_read(tag_b, 0, heap0)) ==
+        le_quad32_to_bytes(buffer128_read(tag_b, 0, mem)) ==
             gcm_encrypt_LE(alg, seq_nat32_to_seq_nat8_LE(key), iv,
                            plain_bytes, auth_bytes)._2;
 
@@ -1824,6 +1824,8 @@ procedure gcm_blocks_stdcall(
         !win ==> r14 == old(r14);
         !win ==> r15 == old(r15);
 {
+    mem_eq_all(mem, heap0);
+
     lemma_hkeys_reqs_pub_priv(s128(heap0, hkeys_b), reverse_bytes_quad32(aes_encrypt_LE(alg, key, Mkfour(0,0,0,0))));
     assert win ==> valid_src_stack64(rsp + 40, stack);
     assert !win ==> valid_src_stack64(rsp + 80, stack);
@@ -1868,7 +1870,10 @@ procedure gcm_blocks_stdcall(
     Store128_buffer(r15, hash, 0, Secret, tag_b, 0);
 
     restore_registers(win, old(rsp), old(xmm6), old(xmm7), old(xmm8), old(xmm9), old(xmm10), old(xmm11), old(xmm12), old(xmm13), old(xmm14), old(xmm15));
+
     DestroyHeaplets();
+    mem_eq_all(mem, heap0);
+    mem_eq_modifies(old(mem), mem, old(heap0), heap0);
 }
 
 procedure compute_iv_stdcall(
@@ -1894,7 +1899,7 @@ procedure compute_iv_stdcall(
         extra_ptr :=    if win then load_stack64(rsp + 32 + 8 + 0, stack) else r8;
         h_ptr :=    if win then load_stack64(rsp + 32 + 8 + 8, stack) else r9;
 
-        h_LE := reverse_bytes_quad32(old(buffer128_read(hkeys_b, 2, heap0)));
+        h_LE := reverse_bytes_quad32(old(buffer128_read(hkeys_b, 2, mem)));
     reads
         memLayout;
         
@@ -1904,7 +1909,7 @@ procedure compute_iv_stdcall(
         heap0; efl; stack; stackTaint;
 
     requires/ensures
-        mem == heap0;
+        vale_heap_data_eq(mem, heap0);
     requires
         rsp == init_rsp(stack);
         
@@ -1914,10 +1919,10 @@ procedure compute_iv_stdcall(
         bytes_reg == num_bytes;
         len_reg == len;
 
-        validSrcAddrs128(heap0, iv_ptr,    iv_b,       len, memLayout, Secret);
-        validSrcAddrs128(heap0, extra_ptr, iv_extra_b, 1,   memLayout, Secret);
-        validDstAddrs128(heap0, j0_ptr,    j0_b,       1,   memLayout, Secret);
-        validSrcAddrs128(heap0, h_ptr,     hkeys_b,    8,   memLayout, Secret);
+        validSrcAddrs128(mem, iv_ptr,    iv_b,       len, memLayout, Secret);
+        validSrcAddrs128(mem, extra_ptr, iv_extra_b, 1,   memLayout, Secret);
+        validDstAddrs128(mem, j0_ptr,    j0_b,       1,   memLayout, Secret);
+        validSrcAddrs128(mem, h_ptr,     hkeys_b,    8,   memLayout, Secret);
 
         buffer_length(iv_b) == len;
         buffer_length(iv_extra_b) == 1;
@@ -1931,17 +1936,17 @@ procedure compute_iv_stdcall(
 
         // GCM
         pclmulqdq_enabled && avx_enabled && sse_enabled;
-        hkeys_reqs_pub(s128(heap0, hkeys_b), reverse_bytes_quad32(h_LE));
+        hkeys_reqs_pub(s128(mem, hkeys_b), reverse_bytes_quad32(h_LE));
 
-        let iv_raw_quads := append(s128(heap0, iv_b), s128(heap0, iv_extra_b));
+        let iv_raw_quads := append(s128(mem, iv_b), s128(mem, iv_extra_b));
         let iv_bytes_LE:supported_iv_LE := #supported_iv_LE(slice(le_seq_quad32_to_bytes(iv_raw_quads), 0, num_bytes));
         iv_bytes_LE == iv;
 
     ensures
-        buffer128_read(j0_b, 0, heap0) == compute_iv_BE(h_LE, iv);
+        buffer128_read(j0_b, 0, mem) == compute_iv_BE(h_LE, iv);
 
         // Framing
-        modifies_buffer128(j0_b, old(heap0), heap0);
+        modifies_buffer128(j0_b, old(mem), mem);
 
         // Calling convention for caller/callee saved registers
         rsp == old(rsp);
@@ -1975,6 +1980,8 @@ procedure compute_iv_stdcall(
         !win ==> r14 == old(r14);
         !win ==> r15 == old(r15);
 {
+    mem_eq_all(mem, heap0);
+
     lemma_hkeys_reqs_pub_priv(s128(heap0, hkeys_b), reverse_bytes_quad32(h_LE));
     inline if (win) {
       if (rdx == 12) {
@@ -2031,4 +2038,6 @@ procedure compute_iv_stdcall(
     }
     
     DestroyHeaplets();
+    mem_eq_all(mem, heap0);
+    mem_eq_modifies(old(mem), mem, old(heap0), heap0);
 }

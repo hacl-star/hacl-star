@@ -79,7 +79,7 @@ procedure DestroyHeaplets()
     reads
         mem; heap0;
     ensures
-        mem == heap0;
+        vale_heap_data_eq(mem, heap0);
 {
     reveal_mem_inv();
 }
@@ -108,7 +108,8 @@ procedure Store64_buffer(
     {:public}
     {:quick exportOnly}
     {:instruction mk_ins(make_instr(I.ins_Mov64, OMem(tuple(MReg(get_reg(dst), offset), t)), src))}
-    reads memLayout;
+    reads
+        memLayout;
     modifies
         heap0;
     requires
@@ -148,7 +149,8 @@ procedure StoreBe64_buffer(
     {:public}
     {:quick exportOnly}
     {:instruction mk_ins(make_instr(I.ins_MovBe64, OMem(tuple(MReg(get_reg(dst), offset), t)), src))}
-    reads memLayout;
+    reads
+        memLayout;
     modifies
         heap0;
     requires

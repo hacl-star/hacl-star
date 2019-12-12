@@ -17,9 +17,6 @@ open Vale.Lib.BufferViewHelpers
 module H = FStar.Heap
 module S = Vale.X64.Machine_Semantics_s
 
-let mem_inv h =
-  h.vf_heap == Map16.sel h.vf_heaplets 0
-
 #reset-options "--initial_fuel 2 --max_fuel 2 --initial_ifuel 1 --max_ifuel 1"
 
 let b8 = IB.b8
@@ -300,7 +297,7 @@ let buffer_write #t b i v h =
     let hs' = UV.upd (_ih h).hs bv i (v_of_typ t v) in
     let ih' = InteropHeap (_ih h).ptrs (_ih h).addrs hs' in
     let mh' = Vale.Interop.down_mem ih' in
-    let h':vale_heap = ValeHeap mh' (Ghost.hide ih') in
+    let h':vale_heap = ValeHeap mh' (Ghost.hide ih') h.heapletId in
     seq_upd (_ih h).hs bv i (v_of_typ t v);
     assert (Seq.equal (buffer_as_seq h' b) (Seq.upd (buffer_as_seq h b) i v));
     h'
@@ -657,3 +654,22 @@ let rec valid_memtaint (mem:vale_heap) (ps:list b8{IB.list_disjoint_or_eq ps}) (
               IB.write_taint 0 (_ih mem) ts b (IB.create_memtaint (_ih mem) q ts));
       write_taint_lemma 0 (_ih mem) ts b (IB.create_memtaint (_ih mem) q ts);
       assert (forall p. List.memP p q ==> IB.disjoint_or_eq_b8 p b)
+
+let vale_heap_data_eq h1 h2 =
+  h1.mh == h2.mh /\ h1.ih == h2.ih
+
+let mem_eq_all h1 h2 =
+  let eq_buffer_as_seq (#t:base_typ) (h1 h2:vale_heap) (b:buffer t) : Lemma
+    (requires vale_heap_data_eq h1 h2)
+    (ensures buffer_as_seq h1 b == buffer_as_seq h2 b) [SMTPat (buffer_as_seq h1 b); SMTPat (buffer_as_seq h2 b)]
+    =
+    assert (Seq.equal (buffer_as_seq h1 b) (buffer_as_seq h2 b))
+  in
+  ()
+
+let mem_eq_modifies h1 h1' h2 h2' =
+  ()
+
+let mem_inv h =
+  vale_heap_data_eq h.vf_heap (Map16.sel h.vf_heaplets 0)
+

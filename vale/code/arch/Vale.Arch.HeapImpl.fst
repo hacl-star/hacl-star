@@ -9,6 +9,7 @@ noeq type vale_heap =
   | ValeHeap:
     mh:machine_heap ->
     ih:Ghost.erased interop_heap{mh == down_mem (Ghost.reveal ih)} ->
+    heapletId:option heaplet_id ->
     vale_heap
 
 noeq type vale_heap_layout_inner : Type u#1 = {
@@ -22,5 +23,5 @@ let mi_heap_upd (vh:vale_heap) (mh':machine_heap) : Pure vale_heap
   (ensures fun vh' -> vh'.mh == mh')
   =
   up_down_identity (_ih vh) mh';
-  ValeHeap mh' (Ghost.hide (up_mem mh' (_ih vh)))
+  ValeHeap mh' (Ghost.hide (up_mem mh' (_ih vh))) vh.heapletId
 

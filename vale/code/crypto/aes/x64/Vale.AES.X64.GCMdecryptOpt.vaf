@@ -828,7 +828,7 @@ procedure gcm_blocks_decrypt_stdcall(
         xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; xmm7; xmm8; xmm9; xmm10; xmm11; xmm12; xmm13; xmm14; xmm15;
         heap0; efl; stack; stackTaint;
     requires/ensures
-        mem == heap0;
+        vale_heap_data_eq(mem, heap0);
     requires
         sse_enabled && movbe_enabled;
 
@@ -867,17 +867,17 @@ procedure gcm_blocks_decrypt_stdcall(
         len128 == len128_num;
         cipher_num_bytes == cipher_num;
 
-        validSrcAddrs128(heap0,     auth_ptr,     auth_b, auth_len, memLayout, Secret);
-        validSrcAddrs128(heap0,   abytes_ptr,   abytes_b,        1, memLayout, Secret);
-        validDstAddrs128(heap0,       iv_ptr,       iv_b,        1, memLayout, Public);
-        validSrcAddrs128(heap0,  in128x6_ptr,  in128x6_b, len128x6, memLayout, Secret);
-        validDstAddrs128(heap0, out128x6_ptr, out128x6_b, len128x6, memLayout, Secret);
-        validSrcAddrs128(heap0,    in128_ptr,    in128_b,   len128, memLayout, Secret);
-        validDstAddrs128(heap0,   out128_ptr,   out128_b,   len128, memLayout, Secret);
-        validDstAddrs128(heap0,    inout_ptr,    inout_b,        1, memLayout, Secret);
-        validDstAddrs128(heap0,  scratch_ptr,  scratch_b,        9, memLayout, Secret);
-        validSrcAddrs128(heap0,          xip,    hkeys_b,        8, memLayout, Secret);
-        validDstAddrs128(heap0,      tag_ptr,      tag_b,        1, memLayout, Secret);
+        validSrcAddrs128(mem,     auth_ptr,     auth_b, auth_len, memLayout, Secret);
+        validSrcAddrs128(mem,   abytes_ptr,   abytes_b,        1, memLayout, Secret);
+        validDstAddrs128(mem,       iv_ptr,       iv_b,        1, memLayout, Public);
+        validSrcAddrs128(mem,  in128x6_ptr,  in128x6_b, len128x6, memLayout, Secret);
+        validDstAddrs128(mem, out128x6_ptr, out128x6_b, len128x6, memLayout, Secret);
+        validSrcAddrs128(mem,    in128_ptr,    in128_b,   len128, memLayout, Secret);
+        validDstAddrs128(mem,   out128_ptr,   out128_b,   len128, memLayout, Secret);
+        validDstAddrs128(mem,    inout_ptr,    inout_b,        1, memLayout, Secret);
+        validDstAddrs128(mem,  scratch_ptr,  scratch_b,        9, memLayout, Secret);
+        validSrcAddrs128(mem,          xip,    hkeys_b,        8, memLayout, Secret);
+        validDstAddrs128(mem,      tag_ptr,      tag_b,        1, memLayout, Secret);
 
         buffer_disjoints128(tag_b, list(out128x6_b, out128_b, inout_b, iv_b, scratch_b));
 
@@ -913,7 +913,7 @@ procedure gcm_blocks_decrypt_stdcall(
         auth_num_bytes < pow2_32;
         xip + 0x20 < pow2_64;
 
-        buffer_addr(keys_b, heap0) + 0x80 < pow2_64;
+        buffer_addr(keys_b, mem) + 0x80 < pow2_64;
 
         // len128x6 is # of 128-bit blocks that come in 6-block chunks
         len128x6 % 6 == 0;
@@ -924,13 +924,13 @@ procedure gcm_blocks_decrypt_stdcall(
         auth_len * (128/8) <= auth_num_bytes < auth_len * (128/8) + 128/8;
 
         // GCTR reqs
-        aes_reqs(alg, key, buffer128_as_seq(heap0, keys_b), keys_b, keys_ptr, heap0, memLayout);
+        aes_reqs(alg, key, buffer128_as_seq(mem, keys_b), keys_b, keys_ptr, mem, memLayout);
 
         // GCM reqs
         pclmulqdq_enabled;
-        hkeys_reqs_pub(s128(heap0, hkeys_b), reverse_bytes_quad32(aes_encrypt_LE(alg, key, Mkfour(0,0,0,0))));
+        hkeys_reqs_pub(s128(mem, hkeys_b), reverse_bytes_quad32(aes_encrypt_LE(alg, key, Mkfour(0,0,0,0))));
         let h_LE  := aes_encrypt_LE(alg, key, Mkfour(0, 0, 0, 0));
-        let iv_BE := old(buffer128_read(iv_b, 0, heap0));
+        let iv_BE := old(buffer128_read(iv_b, 0, mem));
         iv_BE == compute_iv_BE(h_LE, iv);
 
     ensures
@@ -938,21 +938,21 @@ procedure gcm_blocks_decrypt_stdcall(
                      loc_union(loc_buffer(scratch_b),
                      loc_union(loc_buffer(out128x6_b),
                      loc_union(loc_buffer(out128_b),
-                               loc_buffer(inout_b))))), old(heap0), heap0);
+                               loc_buffer(inout_b))))), old(mem), mem);
 
         // Semantics
         old(cipher_num_bytes) < pow2_32;
         old(auth_num_bytes) < pow2_32;
 
-        let iv_BE := old(buffer128_read(iv_b, 0, heap0));
+        let iv_BE := old(buffer128_read(iv_b, 0, mem));
 
-        let auth_raw_quads := old(append(s128(heap0, auth_b), s128(heap0, abytes_b)));
+        let auth_raw_quads := old(append(s128(mem, auth_b), s128(mem, abytes_b)));
         let auth_bytes := slice(le_seq_quad32_to_bytes(auth_raw_quads), 0, old(auth_num_bytes));
-        let cipher_raw_quads := old(append(append(s128(heap0, in128x6_b), s128(heap0, in128_b)), s128(heap0, inout_b)));
+        let cipher_raw_quads := old(append(append(s128(mem, in128x6_b), s128(mem, in128_b)), s128(mem, inout_b)));
         let cipher_bytes := slice(le_seq_quad32_to_bytes(cipher_raw_quads), 0, old(cipher_num_bytes));
-        let plain_raw_quads := append(append(s128(heap0, out128x6_b), s128(heap0, out128_b)), s128(heap0, inout_b));
+        let plain_raw_quads := append(append(s128(mem, out128x6_b), s128(mem, out128_b)), s128(mem, inout_b));
         let plain_bytes := slice(le_seq_quad32_to_bytes(plain_raw_quads), 0, old(cipher_num_bytes));
-        let expected_tag := old(le_quad32_to_bytes(buffer128_read(tag_b, 0, heap0)));
+        let expected_tag := old(le_quad32_to_bytes(buffer128_read(tag_b, 0, mem)));
 
         length(auth_bytes)  < pow2_32 /\
         length(cipher_bytes) < pow2_32 /\
@@ -996,6 +996,8 @@ procedure gcm_blocks_decrypt_stdcall(
         !win ==> r14 == old(r14);
         !win ==> r15 == old(r15);
 {
+    mem_eq_all(mem, heap0);
+
     lemma_hkeys_reqs_pub_priv(s128(heap0, hkeys_b), reverse_bytes_quad32(aes_encrypt_LE(alg, key, Mkfour(0,0,0,0))));
     assert win ==> valid_src_stack64(rsp + 40, stack);
     assert !win ==> valid_src_stack64(rsp + 80, stack);
@@ -1059,5 +1061,8 @@ procedure gcm_blocks_decrypt_stdcall(
     Mov64(rcx, rax);
     restore_registers(win, old(rsp), old(xmm6), old(xmm7), old(xmm8), old(xmm9), old(xmm10), old(xmm11), old(xmm12), old(xmm13), old(xmm14), old(xmm15));
     Mov64(rax, rcx);
+
     DestroyHeaplets();
+    mem_eq_all(mem, heap0);
+    mem_eq_modifies(old(mem), mem, old(heap0), heap0);
 }

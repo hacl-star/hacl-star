@@ -772,15 +772,15 @@ procedure fadd(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB_b:buffer64)
         inA_ptr @= rsi;
         inB_ptr @= rdx;
 
-        a0 := buffer64_read(inA_b, 0, heap0);
-        a1 := buffer64_read(inA_b, 1, heap0);
-        a2 := buffer64_read(inA_b, 2, heap0);
-        a3 := buffer64_read(inA_b, 3, heap0);
+        a0 := buffer64_read(inA_b, 0, mem);
+        a1 := buffer64_read(inA_b, 1, mem);
+        a2 := buffer64_read(inA_b, 2, mem);
+        a3 := buffer64_read(inA_b, 3, mem);
 
-        b0 := buffer64_read(inB_b, 0, heap0);
-        b1 := buffer64_read(inB_b, 1, heap0);
-        b2 := buffer64_read(inB_b, 2, heap0);
-        b3 := buffer64_read(inB_b, 3, heap0);
+        b0 := buffer64_read(inB_b, 0, mem);
+        b1 := buffer64_read(inB_b, 1, mem);
+        b2 := buffer64_read(inB_b, 2, mem);
+        b3 := buffer64_read(inB_b, 3, mem);
 
         a := pow2_four(a0, a1, a2, a3);
         b := pow2_four(b0, b1, b2, b3);
@@ -798,33 +798,38 @@ procedure fadd(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB_b:buffer64)
         heap0; efl;
 
     requires/ensures
-        mem == heap0;
+        vale_heap_data_eq(mem, heap0);
     requires
         adx_enabled && bmi2_enabled;
         buffers_disjoint(dst_b, inA_b) || dst_b == inA_b;
         buffers_disjoint(dst_b, inB_b) || dst_b == inB_b;
 
-        validDstAddrs64(heap0, dst_ptr, dst_b, 4, memLayout, Secret);
-        validSrcAddrs64(heap0, inA_ptr, inA_b, 4, memLayout, Secret);
-        validSrcAddrs64(heap0, inB_ptr, inB_b, 4, memLayout, Secret);
+        validDstAddrs64(mem, dst_ptr, dst_b, 4, memLayout, Secret);
+        validSrcAddrs64(mem, inA_ptr, inA_b, 4, memLayout, Secret);
+        validSrcAddrs64(mem, inB_ptr, inB_b, 4, memLayout, Secret);
 
     ensures
-        let d0 := buffer64_read(dst_b, 0, heap0);
-        let d1 := buffer64_read(dst_b, 1, heap0);
-        let d2 := buffer64_read(dst_b, 2, heap0);
-        let d3 := buffer64_read(dst_b, 3, heap0);
+        let d0 := buffer64_read(dst_b, 0, mem);
+        let d1 := buffer64_read(dst_b, 1, mem);
+        let d2 := buffer64_read(dst_b, 2, mem);
+        let d3 := buffer64_read(dst_b, 3, mem);
         let d := pow2_four(d0, d1, d2, d3);
         d % prime == old(a + b) % prime;
 
-        validSrcAddrs64(heap0, dst_ptr, dst_b, 4, memLayout, Secret);
-        modifies_buffer(dst_b, old(heap0), heap0);
+        validSrcAddrs64(mem, dst_ptr, dst_b, 4, memLayout, Secret);
+        modifies_buffer(dst_b, old(mem), mem);
 {
+    mem_eq_all(mem, heap0);
+
     fast_add(inA_b, inB_b);
     assert_by_tactic(
         pow2_five(tmp0, tmp1, tmp2, tmp3, bool_bit(cf(efl))) ==
         pow2_four(tmp0, tmp1, tmp2, tmp3) + bool_bit(cf(efl)) * pow2_256, int_canon);
     carry_pass(true, 0, dst_b);
+
     DestroyHeaplets();
+    mem_eq_all(mem, heap0);
+    mem_eq_modifies(old(mem), mem, old(heap0), heap0);
 }
 
 procedure fadd_stdcall(
@@ -845,31 +850,31 @@ procedure fadd_stdcall(
         rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
         efl; heap0; stack; stackTaint;
     requires/ensures
-        mem == heap0;
+        vale_heap_data_eq(mem, heap0);
     requires
         rsp == init_rsp(stack);
         adx_enabled && bmi2_enabled;
         buffers_disjoint(dst_b, inA_b) || dst_b == inA_b;
         buffers_disjoint(dst_b, inB_b) || dst_b == inB_b;
 
-        validDstAddrs64(heap0, dst_in, dst_b, 4, memLayout, Secret);
-        validSrcAddrs64(heap0, inA_in, inA_b, 4, memLayout, Secret);
-        validSrcAddrs64(heap0, inB_in, inB_b, 4, memLayout, Secret);
+        validDstAddrs64(mem, dst_in, dst_b, 4, memLayout, Secret);
+        validSrcAddrs64(mem, inA_in, inA_b, 4, memLayout, Secret);
+        validSrcAddrs64(mem, inB_in, inB_b, 4, memLayout, Secret);
     ensures
-        let a0 := old(buffer64_read(inA_b, 0, heap0));
-        let a1 := old(buffer64_read(inA_b, 1, heap0));
-        let a2 := old(buffer64_read(inA_b, 2, heap0));
-        let a3 := old(buffer64_read(inA_b, 3, heap0));
+        let a0 := old(buffer64_read(inA_b, 0, mem));
+        let a1 := old(buffer64_read(inA_b, 1, mem));
+        let a2 := old(buffer64_read(inA_b, 2, mem));
+        let a3 := old(buffer64_read(inA_b, 3, mem));
 
-        let b0 := old(buffer64_read(inB_b, 0, heap0));
-        let b1 := old(buffer64_read(inB_b, 1, heap0));
-        let b2 := old(buffer64_read(inB_b, 2, heap0));
-        let b3 := old(buffer64_read(inB_b, 3, heap0));
+        let b0 := old(buffer64_read(inB_b, 0, mem));
+        let b1 := old(buffer64_read(inB_b, 1, mem));
+        let b2 := old(buffer64_read(inB_b, 2, mem));
+        let b3 := old(buffer64_read(inB_b, 3, mem));
 
-        let d0 := buffer64_read(dst_b, 0, heap0);
-        let d1 := buffer64_read(dst_b, 1, heap0);
-        let d2 := buffer64_read(dst_b, 2, heap0);
-        let d3 := buffer64_read(dst_b, 3, heap0);
+        let d0 := buffer64_read(dst_b, 0, mem);
+        let d1 := buffer64_read(dst_b, 1, mem);
+        let d2 := buffer64_read(dst_b, 2, mem);
+        let d3 := buffer64_read(dst_b, 3, mem);
 
         let a := pow2_four(a0, a1, a2, a3);
         let b := pow2_four(b0, b1, b2, b3);
@@ -881,8 +886,8 @@ procedure fadd_stdcall(
         //   Framing
         //////////////////////////////////////
 
-        modifies_buffer(dst_b, old(heap0), heap0);
-        validSrcAddrs64(heap0, dst_in, dst_b, 4, memLayout, Secret);
+        modifies_buffer(dst_b, old(mem), mem);
+        validSrcAddrs64(mem, dst_in, dst_b, 4, memLayout, Secret);
 
         win ==>  rbx == old(rbx);
         win ==>  rbp == old(rbp);
@@ -902,6 +907,7 @@ procedure fadd_stdcall(
 
         rsp == old(rsp);
 {
+    mem_eq_all(mem, heap0);
 
     // Line up the rest of the arguments
     inline if (win)
@@ -922,6 +928,9 @@ procedure fadd_stdcall(
         Pop_Secret(rsi);
         Pop_Secret(rdi);
     }
+
+    mem_eq_all(mem, heap0);
+    mem_eq_modifies(old(mem), mem, old(heap0), heap0);
     DestroyHeaplets();
 }
 
@@ -935,15 +944,15 @@ procedure fsub(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB_b:buffer64)
         inA_ptr @= rsi;
         inB_ptr @= rdx;
 
-        a0 := buffer64_read(inA_b, 0, heap0);
-        a1 := buffer64_read(inA_b, 1, heap0);
-        a2 := buffer64_read(inA_b, 2, heap0);
-        a3 := buffer64_read(inA_b, 3, heap0);
+        a0 := buffer64_read(inA_b, 0, mem);
+        a1 := buffer64_read(inA_b, 1, mem);
+        a2 := buffer64_read(inA_b, 2, mem);
+        a3 := buffer64_read(inA_b, 3, mem);
 
-        b0 := buffer64_read(inB_b, 0, heap0);
-        b1 := buffer64_read(inB_b, 1, heap0);
-        b2 := buffer64_read(inB_b, 2, heap0);
-        b3 := buffer64_read(inB_b, 3, heap0);
+        b0 := buffer64_read(inB_b, 0, mem);
+        b1 := buffer64_read(inB_b, 1, mem);
+        b2 := buffer64_read(inB_b, 2, mem);
+        b3 := buffer64_read(inB_b, 3, mem);
 
         a := pow2_four(a0, a1, a2, a3);
         b := pow2_four(b0, b1, b2, b3);
@@ -961,31 +970,36 @@ procedure fsub(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB_b:buffer64)
         heap0; efl;
 
     requires/ensures
-        mem == heap0;
+        vale_heap_data_eq(mem, heap0);
     requires
         adx_enabled && bmi2_enabled;
         buffers_disjoint(dst_b, inA_b) || dst_b == inA_b;
         buffers_disjoint(dst_b, inB_b) || dst_b == inB_b;
 
-        validDstAddrs64(heap0, dst_ptr, dst_b, 4, memLayout, Secret);
-        validSrcAddrs64(heap0, inA_ptr, inA_b, 4, memLayout, Secret);
-        validSrcAddrs64(heap0, inB_ptr, inB_b, 4, memLayout, Secret);
+        validDstAddrs64(mem, dst_ptr, dst_b, 4, memLayout, Secret);
+        validSrcAddrs64(mem, inA_ptr, inA_b, 4, memLayout, Secret);
+        validSrcAddrs64(mem, inB_ptr, inB_b, 4, memLayout, Secret);
 
     ensures
-        let d0 := buffer64_read(dst_b, 0, heap0);
-        let d1 := buffer64_read(dst_b, 1, heap0);
-        let d2 := buffer64_read(dst_b, 2, heap0);
-        let d3 := buffer64_read(dst_b, 3, heap0);
+        let d0 := buffer64_read(dst_b, 0, mem);
+        let d1 := buffer64_read(dst_b, 1, mem);
+        let d2 := buffer64_read(dst_b, 2, mem);
+        let d3 := buffer64_read(dst_b, 3, mem);
         let d := pow2_four(d0, d1, d2, d3);
         d % prime == old(a - b) % prime;
 
-        validSrcAddrs64(heap0, dst_ptr, dst_b, 4, memLayout, Secret);
-        modifies_buffer(dst_b, old(heap0), heap0);
+        validSrcAddrs64(mem, dst_ptr, dst_b, 4, memLayout, Secret);
+        modifies_buffer(dst_b, old(mem), mem);
 {
+    mem_eq_all(mem, heap0);
+
     fast_sub(inA_b, inB_b);
     carry_sub_pass();
     store4(dst_b);
+
     DestroyHeaplets();
+    mem_eq_all(mem, heap0);
+    mem_eq_modifies(old(mem), mem, old(heap0), heap0);
 }
 
 procedure fsub_stdcall(
@@ -1006,31 +1020,31 @@ procedure fsub_stdcall(
         rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
         efl; heap0; stack; stackTaint;
     requires/ensures
-        mem == heap0;
+        vale_heap_data_eq(mem, heap0);
     requires
         rsp == init_rsp(stack);
         adx_enabled && bmi2_enabled;
         buffers_disjoint(dst_b, inA_b) || dst_b == inA_b;
         buffers_disjoint(dst_b, inB_b) || dst_b == inB_b;
 
-        validDstAddrs64(heap0, dst_in, dst_b, 4, memLayout, Secret);
-        validSrcAddrs64(heap0, inA_in, inA_b, 4, memLayout, Secret);
-        validSrcAddrs64(heap0, inB_in, inB_b, 4, memLayout, Secret);
+        validDstAddrs64(mem, dst_in, dst_b, 4, memLayout, Secret);
+        validSrcAddrs64(mem, inA_in, inA_b, 4, memLayout, Secret);
+        validSrcAddrs64(mem, inB_in, inB_b, 4, memLayout, Secret);
     ensures
-        let a0 := old(buffer64_read(inA_b, 0, heap0));
-        let a1 := old(buffer64_read(inA_b, 1, heap0));
-        let a2 := old(buffer64_read(inA_b, 2, heap0));
-        let a3 := old(buffer64_read(inA_b, 3, heap0));
+        let a0 := old(buffer64_read(inA_b, 0, mem));
+        let a1 := old(buffer64_read(inA_b, 1, mem));
+        let a2 := old(buffer64_read(inA_b, 2, mem));
+        let a3 := old(buffer64_read(inA_b, 3, mem));
 
-        let b0 := old(buffer64_read(inB_b, 0, heap0));
-        let b1 := old(buffer64_read(inB_b, 1, heap0));
-        let b2 := old(buffer64_read(inB_b, 2, heap0));
-        let b3 := old(buffer64_read(inB_b, 3, heap0));
+        let b0 := old(buffer64_read(inB_b, 0, mem));
+        let b1 := old(buffer64_read(inB_b, 1, mem));
+        let b2 := old(buffer64_read(inB_b, 2, mem));
+        let b3 := old(buffer64_read(inB_b, 3, mem));
 
-        let d0 := buffer64_read(dst_b, 0, heap0);
-        let d1 := buffer64_read(dst_b, 1, heap0);
-        let d2 := buffer64_read(dst_b, 2, heap0);
-        let d3 := buffer64_read(dst_b, 3, heap0);
+        let d0 := buffer64_read(dst_b, 0, mem);
+        let d1 := buffer64_read(dst_b, 1, mem);
+        let d2 := buffer64_read(dst_b, 2, mem);
+        let d3 := buffer64_read(dst_b, 3, mem);
 
         let a := pow2_four(a0, a1, a2, a3);
         let b := pow2_four(b0, b1, b2, b3);
@@ -1042,8 +1056,8 @@ procedure fsub_stdcall(
         //   Framing
         //////////////////////////////////////
 
-        modifies_buffer(dst_b, old(heap0), heap0);
-        validSrcAddrs64(heap0, dst_in, dst_b, 4, memLayout, Secret);
+        modifies_buffer(dst_b, old(mem), mem);
+        validSrcAddrs64(mem, dst_in, dst_b, 4, memLayout, Secret);
 
         win ==>  rbx == old(rbx);
         win ==>  rbp == old(rbp);
@@ -1063,6 +1077,7 @@ procedure fsub_stdcall(
 
         rsp == old(rsp);
 {
+    mem_eq_all(mem, heap0);
 
     // Line up the rest of the arguments
     inline if (win)
@@ -1083,7 +1098,10 @@ procedure fsub_stdcall(
         Pop_Secret(rsi);
         Pop_Secret(rdi);
     }
+
     DestroyHeaplets();
+    mem_eq_all(mem, heap0);
+    mem_eq_modifies(old(mem), mem, old(heap0), heap0);
 }
 
 #reset-options "--z3rlimit 600"
@@ -1096,10 +1114,10 @@ procedure fmul1(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB:nat64)
         inA_ptr @= rsi;
         b @= rdx;
 
-        a0 := buffer64_read(inA_b, 0, heap0);
-        a1 := buffer64_read(inA_b, 1, heap0);
-        a2 := buffer64_read(inA_b, 2, heap0);
-        a3 := buffer64_read(inA_b, 3, heap0);
+        a0 := buffer64_read(inA_b, 0, mem);
+        a1 := buffer64_read(inA_b, 1, mem);
+        a2 := buffer64_read(inA_b, 2, mem);
+        a3 := buffer64_read(inA_b, 3, mem);
 
         a := pow2_four(a0, a1, a2, a3);
 
@@ -1117,34 +1135,39 @@ procedure fmul1(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB:nat64)
         heap0; efl;
 
     requires/ensures
-        mem == heap0;
+        vale_heap_data_eq(mem, heap0);
     requires
         b == inB;
         adx_enabled && bmi2_enabled;
         buffers_disjoint(dst_b, inA_b) || dst_b == inA_b;
 
-        validDstAddrs64(heap0, dst_ptr, dst_b, 4, memLayout, Secret);
-        validSrcAddrs64(heap0, inA_ptr, inA_b, 4, memLayout, Secret);
+        validDstAddrs64(mem, dst_ptr, dst_b, 4, memLayout, Secret);
+        validSrcAddrs64(mem, inA_ptr, inA_b, 4, memLayout, Secret);
 
         b < 131072; // < pow2 17
     ensures
-        let d0 := buffer64_read(dst_b, 0, heap0);
-        let d1 := buffer64_read(dst_b, 1, heap0);
-        let d2 := buffer64_read(dst_b, 2, heap0);
-        let d3 := buffer64_read(dst_b, 3, heap0);
+        let d0 := buffer64_read(dst_b, 0, mem);
+        let d1 := buffer64_read(dst_b, 1, mem);
+        let d2 := buffer64_read(dst_b, 2, mem);
+        let d3 := buffer64_read(dst_b, 3, mem);
         let d := pow2_four(d0, d1, d2, d3);
         d % prime == old(a * b) % prime;
 
-        validSrcAddrs64(heap0, dst_ptr, dst_b, 4, memLayout, Secret);
-        modifies_buffer(dst_b, old(heap0), heap0);
+        validSrcAddrs64(mem, dst_ptr, dst_b, 4, memLayout, Secret);
+        modifies_buffer(dst_b, old(mem), mem);
 {
+    mem_eq_all(mem, heap0);
+
     fast_mul1(0, inA_b);
     lemma_fmul(old(a0), old(a1), old(a2), old(a3), old(b), tmp0, tmp1, tmp2, tmp3, rax);
     assert rax * 38 < pow2_63;
     Mov64(b, 38);
     carry_pass(false, 0, dst_b);
     //store4(dst_b);
+
     DestroyHeaplets();
+    mem_eq_all(mem, heap0);
+    mem_eq_modifies(old(mem), mem, old(heap0), heap0);
 }
 
 procedure fmul1_stdcall(
@@ -1164,7 +1187,7 @@ procedure fmul1_stdcall(
         rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
         efl; heap0; stack; stackTaint;
     requires/ensures
-        mem == heap0;
+        vale_heap_data_eq(mem, heap0);
     requires
         rsp == init_rsp(stack);
         adx_enabled && bmi2_enabled;
@@ -1172,20 +1195,20 @@ procedure fmul1_stdcall(
 
         inB_in = (if win then r8  else rdx);
 
-        validDstAddrs64(heap0, dst_in, dst_b, 4, memLayout, Secret);
-        validSrcAddrs64(heap0, inA_in, inA_b, 4, memLayout, Secret);
+        validDstAddrs64(mem, dst_in, dst_b, 4, memLayout, Secret);
+        validSrcAddrs64(mem, inA_in, inA_b, 4, memLayout, Secret);
 
         inB_in < 131072;
     ensures
-        let a0 := old(buffer64_read(inA_b, 0, heap0));
-        let a1 := old(buffer64_read(inA_b, 1, heap0));
-        let a2 := old(buffer64_read(inA_b, 2, heap0));
-        let a3 := old(buffer64_read(inA_b, 3, heap0));
+        let a0 := old(buffer64_read(inA_b, 0, mem));
+        let a1 := old(buffer64_read(inA_b, 1, mem));
+        let a2 := old(buffer64_read(inA_b, 2, mem));
+        let a3 := old(buffer64_read(inA_b, 3, mem));
 
-        let d0 := buffer64_read(dst_b, 0, heap0);
-        let d1 := buffer64_read(dst_b, 1, heap0);
-        let d2 := buffer64_read(dst_b, 2, heap0);
-        let d3 := buffer64_read(dst_b, 3, heap0);
+        let d0 := buffer64_read(dst_b, 0, mem);
+        let d1 := buffer64_read(dst_b, 1, mem);
+        let d2 := buffer64_read(dst_b, 2, mem);
+        let d3 := buffer64_read(dst_b, 3, mem);
 
         let a := pow2_four(a0, a1, a2, a3);
         let d := pow2_four(d0, d1, d2, d3);
@@ -1196,8 +1219,8 @@ procedure fmul1_stdcall(
         //   Framing
         //////////////////////////////////////
 
-        modifies_buffer(dst_b, old(heap0), heap0);
-        validSrcAddrs64(heap0, dst_in, dst_b, 4, memLayout, Secret);
+        modifies_buffer(dst_b, old(mem), mem);
+        validSrcAddrs64(mem, dst_in, dst_b, 4, memLayout, Secret);
 
         win ==>  rbx == old(rbx);
         win ==>  rbp == old(rbp);
@@ -1217,6 +1240,8 @@ procedure fmul1_stdcall(
 
         rsp == old(rsp);
 {
+    mem_eq_all(mem, heap0);
+
     // Store callee-save registers
     Push_Secret(rdi);
     Push_Secret(r12);
@@ -1240,5 +1265,8 @@ procedure fmul1_stdcall(
     Pop_Secret(r13);
     Pop_Secret(r12);
     Pop_Secret(rdi);
+
     DestroyHeaplets();
+    mem_eq_all(mem, heap0);
+    mem_eq_modifies(old(mem), mem, old(heap0), heap0);
 }

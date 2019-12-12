@@ -59,7 +59,7 @@ procedure KeyExpansionStdcall(
         ghost input_key_b:buffer128,
         ghost output_key_expansion_b:buffer128)
     {:public}
-    {:quick}
+    {:quick exportOnly} // HACK
     {:exportSpecs}
     reads
         rcx; rsi; rdi; memLayout;
@@ -70,26 +70,33 @@ procedure KeyExpansionStdcall(
         key_ptr := if win then rcx else rdi;
         key_expansion_ptr := if win then rdx else rsi;
         key :=
-            if alg = AES_128 then quad32_to_seq(buffer128_read(input_key_b, 0, heap0))
-            else make_AES256_key(buffer128_read(input_key_b, 0, heap0), buffer128_read(input_key_b, 1, heap0));
+            if alg = AES_128 then quad32_to_seq(buffer128_read(input_key_b, 0, mem))
+            else make_AES256_key(buffer128_read(input_key_b, 0, mem), buffer128_read(input_key_b, 1, mem));
     requires/ensures
-        mem == heap0;
+        vale_heap_data_eq(mem, heap0);
         aesni_enabled && avx_enabled && sse_enabled;
         alg = AES_128 || alg = AES_256;
         buffers_disjoint128(input_key_b, output_key_expansion_b);
-        validSrcAddrs128(heap0, key_ptr, input_key_b, if alg = AES_128 then 1 else 2, memLayout, Secret);
-        validDstAddrs128(heap0, key_expansion_ptr, output_key_expansion_b, nr(alg) + 1, memLayout, Secret);
+        validSrcAddrs128(mem, key_ptr, input_key_b, if alg = AES_128 then 1 else 2, memLayout, Secret);
+        validDstAddrs128(mem, key_expansion_ptr, output_key_expansion_b, nr(alg) + 1, memLayout, Secret);
     ensures
-        modifies_buffer128(output_key_expansion_b, old(heap0), heap0);
+        modifies_buffer128(output_key_expansion_b, old(mem), mem);
         forall(j) 0 <= j <= nr(alg) ==>
-            buffer128_read(output_key_expansion_b, j, heap0) == index(key_to_round_keys_LE(alg, key), j);
+            buffer128_read(output_key_expansion_b, j, mem) == index(key_to_round_keys_LE(alg, key), j);
 {
+    mem_eq_all(mem, heap0);
+
     inline if (alg = AES_128) {
         KeyExpansion128Stdcall(win, input_key_b, output_key_expansion_b);
     } else {
         KeyExpansion256Stdcall(win, input_key_b, output_key_expansion_b);
     }
+
     DestroyHeaplets();
+    assert forall(j){buffer128_read(output_key_expansion_b, j, mem)} 0 <= j <= nr(alg) ==>
+        buffer128_read(output_key_expansion_b, j, heap0) == index(key_to_round_keys_LE(alg, key), j);
+    mem_eq_all(mem, heap0);
+    mem_eq_modifies(old(mem), mem, old(heap0), heap0);
 }
 
 ///////////////////////////

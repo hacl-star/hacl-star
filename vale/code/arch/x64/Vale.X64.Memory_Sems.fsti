@@ -18,7 +18,7 @@ val lemma_same_domains (h:vale_heap) (m1:S.machine_heap) (m2:S.machine_heap) : L
 
 val reveal_mem_inv (_:unit) : Lemma
   (ensures (forall (h:vale_full_heap).{:pattern (mem_inv h)}
-    mem_inv h <==> h.vf_heap == Map16.sel h.vf_heaplets 0))
+    mem_inv h <==> vale_heap_data_eq h.vf_heap (Map16.sel h.vf_heaplets 0)))
 
 val get_heap (h:vale_heap) : GTot (m:S.machine_heap{same_domain h m})
 

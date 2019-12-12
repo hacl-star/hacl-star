@@ -30,3 +30,4 @@ noeq type vale_full_heap = {
 
 unfold let full_heap_taint (vfh:vale_full_heap) : memTaint_t =
   vfh.vf_layout.vl_taint
+

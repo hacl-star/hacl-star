@@ -10,8 +10,6 @@ unfold let vale_heap = vale_heap
 unfold let vale_full_heap = vale_full_heap
 unfold let heaplet_id = heaplet_id
 
-val mem_inv (h:vale_full_heap) : prop0
-
 [@va_qattr]
 let get_vale_heap (vhi:vale_full_heap) : vale_heap = vhi.vf_heap
 
@@ -357,3 +355,28 @@ val modifies_valid_taint128 (b:buffer128) (p:loc) (h h':vale_heap) (memTaint:mem
   (requires modifies p h h')
   (ensures valid_taint_buf128 b h memTaint t <==> valid_taint_buf128 b h' memTaint t)
   [SMTPat (modifies p h h'); SMTPat (valid_taint_buf128 b h' memTaint t)]
+
+// TODO: this is used for the current (trivial) mem_inv; it will probably be removed for the real mem_inv
+val vale_heap_data_eq (h1 h2:vale_heap) : prop
+
+val mem_eq_all (h1 h2:vale_heap) : Lemma
+  (requires vale_heap_data_eq h1 h2)
+  (ensures
+    True
+    /\ (forall (#t:base_typ) (b:buffer t).{:pattern (buffer_addr b h1) \/ (buffer_addr b h2)} buffer_addr b h1 == buffer_addr b h2)
+    /\ (forall (#t:base_typ) (b:buffer t).{:pattern (buffer_as_seq h1 b) \/ (buffer_as_seq h2 b)} buffer_as_seq h1 b == buffer_as_seq h2 b)
+    /\ (forall (#t:base_typ) (b:buffer t).{:pattern (buffer_readable h1 b) \/ (buffer_readable h2 b)} buffer_readable h1 b == buffer_readable h2 b)
+    /\ (forall (ptr:int).{:pattern (valid_mem64 ptr h1) \/ (valid_mem64 ptr h2)} valid_mem64 ptr h1 == valid_mem64 ptr h2)
+    /\ (forall (ptr:int).{:pattern (writeable_mem64 ptr h1) \/ (writeable_mem64 ptr h2)} writeable_mem64 ptr h1 == writeable_mem64 ptr h2)
+    // /\ (forall (ptr:int).{:pattern (load_mem64 ptr h1) \/ (load_mem64 ptr h2)} load_mem64 ptr h1 == load_mem64 ptr h2)
+    /\ (forall (b:buffer64) (mt:memtaint) (t:taint).{:pattern (valid_taint_buf64 b h1 mt t) \/ (valid_taint_buf64 b h2 mt t)} valid_taint_buf64 b h1 mt t <==> valid_taint_buf64 b h2 mt t) 
+    /\ (forall (b:buffer128) (mt:memtaint) (t:taint).{:pattern (valid_taint_buf128 b h1 mt t) \/ (valid_taint_buf128 b h2 mt t)} valid_taint_buf128 b h1 mt t <==> valid_taint_buf128 b h2 mt t)
+  )
+
+val mem_eq_modifies (h1 h1' h2 h2':vale_heap) : Lemma
+  (requires vale_heap_data_eq h1 h2 /\ vale_heap_data_eq h1' h2')
+  (ensures forall (l:loc).{:pattern (modifies l h1 h1') \/ (modifies l h2 h2')}
+    modifies l h1 h1' <==> modifies l h2 h2')
+
+val mem_inv (h:vale_full_heap) : prop0
+

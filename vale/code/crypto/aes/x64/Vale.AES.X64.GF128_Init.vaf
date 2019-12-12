@@ -233,21 +233,23 @@ procedure Keyhash_init(
         round_ptr := if win then rcx else rdi;
         hkey_ptr := if win then rdx else rsi;
     requires/ensures
-        mem == heap0;
+        vale_heap_data_eq(mem, heap0);
         aesni_enabled && pclmulqdq_enabled && avx_enabled && sse_enabled;
         alg = AES_128 || alg = AES_256;
         buffers_disjoint128(roundkeys_b, hkeys_b);
         is_aes_key_LE(alg, key);
-        buffer128_as_seq(heap0, roundkeys_b) == key_to_round_keys_LE(alg, key);
-        validSrcAddrs128(heap0, round_ptr, roundkeys_b, nr(alg) + 1, memLayout, Secret);
-        validDstAddrs128(heap0, hkey_ptr, hkeys_b, 8, memLayout, Secret);
+        buffer128_as_seq(mem, roundkeys_b) == key_to_round_keys_LE(alg, key);
+        validSrcAddrs128(mem, round_ptr, roundkeys_b, nr(alg) + 1, memLayout, Secret);
+        validDstAddrs128(mem, hkey_ptr, hkeys_b, 8, memLayout, Secret);
     ensures
-        modifies_buffer128(hkeys_b, old(heap0), heap0);
-        hkeys_reqs_pub(s128(heap0, hkeys_b), reverse_bytes_quad32(aes_encrypt_LE(alg, key, Mkfour(0, 0, 0, 0))));
+        modifies_buffer128(hkeys_b, old(mem), mem);
+        hkeys_reqs_pub(s128(mem, hkeys_b), reverse_bytes_quad32(aes_encrypt_LE(alg, key, Mkfour(0, 0, 0, 0))));
 
         xmm6 == old(xmm6);
         r12 == old(r12);
 {
+    mem_eq_all(mem, heap0);
+
     InitPshufbMask(xmm4, r8);
     ZeroXmm(xmm0);
     inline if (win)
@@ -275,5 +277,8 @@ procedure Keyhash_init(
     Gf128_powers(of_quad32(xmm0), hkeys_b);
 
     lemma_hkeys_reqs_pub_priv(s128(heap0, hkeys_b), reverse_bytes_quad32(aes_encrypt_LE(alg, key, Mkfour(0, 0, 0, 0))));
+
     DestroyHeaplets();
+    mem_eq_all(mem, heap0);
+    mem_eq_modifies(old(mem), mem, old(heap0), heap0);
 }

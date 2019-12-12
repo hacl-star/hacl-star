@@ -705,41 +705,41 @@ procedure Poly1305(
         rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
         efl; heap0; stack; stackTaint;
     requires/ensures
-        mem == heap0;
+        vale_heap_data_eq(mem, heap0);
     requires
         rsp == init_rsp(stack);
 
         buffers_disjoint(ctx_b, inp_b);
-        validDstAddrs64(heap0, ctx_in, ctx_b, 24, memLayout, Public);
-        validSrcAddrs64(heap0, inp_in, inp_b, readable_words(len_in), memLayout, Public);
+        validDstAddrs64(mem, ctx_in, ctx_b, 24, memLayout, Public);
+        validSrcAddrs64(mem, inp_in, inp_b, readable_words(len_in), memLayout, Public);
         len_in == (if win then r8 else len);
         finish_in == (if win then r9 else finish);
-        let h2_in := buffer64_read(ctx_b, 2, heap0);
+        let h2_in := buffer64_read(ctx_b, 2, mem);
         h2_in < 5;
         inp_in + len_in < pow2_64;
         finish_in < 2;
     ensures
-        validSrcAddrs64(heap0, ctx_in, ctx_b, 24, memLayout, Public);
-        validSrcAddrs64(heap0, inp_in, inp_b, readable_words(len_in), memLayout, Public);
-        modifies_buffer(ctx_b, old(heap0), heap0);
+        validSrcAddrs64(mem, ctx_in, ctx_b, 24, memLayout, Public);
+        validSrcAddrs64(mem, inp_in, inp_b, readable_words(len_in), memLayout, Public);
+        modifies_buffer(ctx_b, old(mem), mem);
 
-        let h0_in := buffer64_read(ctx_b, 0, old(heap0));
-        let h1_in := buffer64_read(ctx_b, 1, old(heap0));
-        let h2_in := buffer64_read(ctx_b, 2, old(heap0));
-        let key_r0 := buffer64_read(ctx_b, 3, old(heap0));
-        let key_r1 := buffer64_read(ctx_b, 4, old(heap0));
-        let key_s0 := buffer64_read(ctx_b, 5, old(heap0));
-        let key_s1 := buffer64_read(ctx_b, 6, old(heap0));
+        let h0_in := buffer64_read(ctx_b, 0, old(mem));
+        let h1_in := buffer64_read(ctx_b, 1, old(mem));
+        let h2_in := buffer64_read(ctx_b, 2, old(mem));
+        let key_r0 := buffer64_read(ctx_b, 3, old(mem));
+        let key_r1 := buffer64_read(ctx_b, 4, old(mem));
+        let key_s0 := buffer64_read(ctx_b, 5, old(mem));
+        let key_s1 := buffer64_read(ctx_b, 6, old(mem));
         let h_in := lowerUpper192_opaque(lowerUpper128_opaque(h0_in, h1_in), h2_in);
         let key_r := lowerUpper128_opaque(key_r0, key_r1);
         let key_s := lowerUpper128_opaque(key_s0, key_s1);
 
-        let h0_out := buffer64_read(ctx_b, 0, heap0);
-        let h1_out := buffer64_read(ctx_b, 1, heap0);
-        let h2_out := buffer64_read(ctx_b, 2, heap0);
+        let h0_out := buffer64_read(ctx_b, 0, mem);
+        let h1_out := buffer64_read(ctx_b, 1, mem);
+        let h2_out := buffer64_read(ctx_b, 2, mem);
         let h10 := lowerUpper128_opaque(h0_out, h1_out);
         let h210 := lowerUpper192_opaque(h10, h2_out);
-        let inp_mem := seqTo128(buffer64_as_seq(heap0, inp_b));
+        let inp_mem := seqTo128(buffer64_as_seq(mem, inp_b));
 
         finish_in == 0 ==>
             modp(h210) == poly1305_hash_blocks(modp(h_in), n * n, make_r(key_r), inp_mem, len_in / 16);
@@ -757,6 +757,8 @@ procedure Poly1305(
         r14 == old(r14);
         r15 == old(r15);
 {
+    mem_eq_all(mem, heap0);
+
     let key_r0 := buffer64_read(ctx_b, 3, heap0);
     let key_r1 := buffer64_read(ctx_b, 4, heap0);
     let key_s0 := buffer64_read(ctx_b, 5, heap0);
@@ -815,5 +817,7 @@ procedure Poly1305(
     Mov64(ctx, rax);
 
     DestroyHeaplets();
+    mem_eq_all(mem, heap0);
+    mem_eq_modifies(old(mem), mem, old(heap0), heap0);
 }
 

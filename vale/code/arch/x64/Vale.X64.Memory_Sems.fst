@@ -769,7 +769,6 @@ let low_lemma_store_mem128 b i v h =
   I.update_buffer_up_mem (_ih h) b heap heap'
 
 let low_lemma_store_mem128_full b i v vfh t =
-assert (vfh.vf_heap == Map16.get vfh.vf_heaplets 0);
   let (h, mt) = (vfh.vf_heap, vfh.vf_layout.vl_taint) in
   low_lemma_store_mem128 b i v h;
   lemma_valid_taint128 b mt h i t;

@@ -650,7 +650,7 @@ procedure gctr_bytes_stdcall(
         ctr_ptr   := if win then load_stack64(rsp + 32 + 8 + 8, stack) else r9;
 
     requires/ensures
-        mem == heap0;
+        vale_heap_data_eq(mem, heap0);
     requires
         rsp == init_rsp(stack);
         win ==> valid_stack_slot64(rsp + 32 + 8 + 0, stack, Public, stackTaint);
@@ -667,11 +667,11 @@ procedure gctr_bytes_stdcall(
         buffer_disjoints128(ctr_b, list(in_b, out_b, keys_b));
         buffer_disjoints128(inout_b, list(in_b, out_b, keys_b, ctr_b));
 
-        validSrcAddrs128(heap0,   in_ptr,   in_b,  num_blocks, memLayout, Secret);
-        validDstAddrs128(heap0,  out_ptr,  out_b,  num_blocks, memLayout, Secret);
-        validDstAddrs128(heap0,inout_ptr,inout_b,           1, memLayout, Secret);
-        validSrcAddrs128(heap0, keys_ptr, keys_b, nr(alg) + 1, memLayout, Secret);
-        validSrcAddrs128(heap0,  ctr_ptr,  ctr_b,           1, memLayout, Secret);
+        validSrcAddrs128(mem,   in_ptr,   in_b,  num_blocks, memLayout, Secret);
+        validDstAddrs128(mem,  out_ptr,  out_b,  num_blocks, memLayout, Secret);
+        validDstAddrs128(mem,inout_ptr,inout_b,           1, memLayout, Secret);
+        validSrcAddrs128(mem, keys_ptr, keys_b, nr(alg) + 1, memLayout, Secret);
+        validSrcAddrs128(mem,  ctr_ptr,  ctr_b,           1, memLayout, Secret);
 
         in_ptr  + 16 * num_blocks < pow2_64;
         out_ptr + 16 * num_blocks < pow2_64;
@@ -688,15 +688,15 @@ procedure gctr_bytes_stdcall(
         aesni_enabled && avx_enabled && sse_enabled;
         alg = AES_128 || alg = AES_256;
         is_aes_key_LE(alg, key);
-        buffer128_as_seq(heap0, keys_b) == key_to_round_keys_LE(alg, key);
+        buffer128_as_seq(mem, keys_b) == key_to_round_keys_LE(alg, key);
 
     ensures
-        modifies_buffer128_2(out_b, inout_b, old(heap0), heap0);
-        let plain_quads := append(old(s128(heap0, in_b)), old(s128(heap0, inout_b)));
+        modifies_buffer128_2(out_b, inout_b, old(mem), mem);
+        let plain_quads := append(old(s128(mem, in_b)), old(s128(mem, inout_b)));
         let plain_bytes := slice(le_seq_quad32_to_bytes(plain_quads), 0, old(num_bytes));
-        let cipher_quads := append(s128(heap0, out_b), s128(heap0, inout_b));
+        let cipher_quads := append(s128(mem, out_b), s128(mem, inout_b));
         let cipher_bytes := slice(le_seq_quad32_to_bytes(cipher_quads), 0, old(num_bytes));
-        cipher_bytes == gctr_encrypt_LE(old(buffer128_read(ctr_b, 0, heap0)), make_gctr_plain_LE(plain_bytes), alg, key);
+        cipher_bytes == gctr_encrypt_LE(old(buffer128_read(ctr_b, 0, mem)), make_gctr_plain_LE(plain_bytes), alg, key);
 
         rsp == old(rsp);
 
@@ -729,6 +729,8 @@ procedure gctr_bytes_stdcall(
         !win ==> r14 == old(r14);
         !win ==> r15 == old(r15);
 {
+    mem_eq_all(mem, heap0);
+
     Push_Secret(r15);
     Push_Secret(r14);
     Push_Secret(r13);
@@ -797,5 +799,8 @@ procedure gctr_bytes_stdcall(
     Pop_Secret(r13);
     Pop_Secret(r14);
     Pop_Secret(r15);
+
     DestroyHeaplets();
+    mem_eq_all(mem, heap0);
+    mem_eq_modifies(old(mem), mem, old(heap0), heap0);
 }
