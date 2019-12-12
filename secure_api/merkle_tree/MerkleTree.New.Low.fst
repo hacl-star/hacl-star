@@ -335,9 +335,7 @@ let hash_vv_as_seq_get_index h hvv i j = ()
 let init_hash = hash_r_alloc
 let free_hash = hash_r_free
 
-val hash_2:
-  src1:hash -> src2:hash -> dst:hash ->
-  HST.ST unit
+type hash_fun_t = src1:hash -> src2:hash -> dst:hash -> HST.ST unit
    (requires (fun h0 ->
      Rgl?.r_inv hreg h0 src1 /\
      Rgl?.r_inv hreg h0 src2 /\
@@ -348,7 +346,23 @@ val hash_2:
      Rgl?.r_inv hreg h1 dst /\
      // correctness
      S.equal (Rgl?.r_repr hreg h1 dst)
-       (High.hash_2
+       (High.hash_2 // This is SHA256 compression, we do not verify any other hash functions.
+         (Rgl?.r_repr hreg h0 src1)
+         (Rgl?.r_repr hreg h0 src2))
+         ))
+
+val hash_2: src1:hash -> src2:hash -> dst:hash -> HST.ST unit
+   (requires (fun h0 ->
+     Rgl?.r_inv hreg h0 src1 /\
+     Rgl?.r_inv hreg h0 src2 /\
+     Rgl?.r_inv hreg h0 dst))
+   (ensures (fun h0 _ h1 ->
+     // memory safety
+     modifies (B.loc_region_only false (B.frameOf dst)) h0 h1 /\
+     Rgl?.r_inv hreg h1 dst /\
+     // correctness
+     S.equal (Rgl?.r_repr hreg h1 dst)
+       (High.hash_2 // This is SHA256 compression, we do not verify any other hash functions.
          (Rgl?.r_repr hreg h0 src1)
          (Rgl?.r_repr hreg h0 src2))
          ))
@@ -449,6 +463,7 @@ noeq type merkle_tree =
       rhs_ok:bool ->
       rhs:hash_vec{V.size_of rhs = merkle_tree_size_lg} ->
       mroot:hash ->
+      hash_fun:hash_fun_t ->
       merkle_tree
 
 type mt_p = B.pointer merkle_tree
@@ -665,7 +680,7 @@ let mt_preserved mt p h0 h1 =
 // Note that the public function for creation is `mt_create` defined below,
 // which builds a tree with an initial hash.
 private
-val create_empty_mt: r:HST.erid ->
+val create_empty_mt: r:HST.erid -> hash_fun:hash_fun_t ->
   HST.ST mt_p
    (requires (fun _ -> true))
    (ensures (fun h0 mt h1 ->
@@ -678,7 +693,7 @@ val create_empty_mt: r:HST.erid ->
      mt_lift h1 mt == High.create_empty_mt () /\
      (MT?.offset (B.get h1 mt 0) = 0UL)))
 #reset-options "--z3rlimit 100"
-let create_empty_mt r =
+let create_empty_mt r hash_fun =
   let hs_region = HST.new_region r in
   let hs = RV.alloc_rid hvreg merkle_tree_size_lg hs_region in
   let h0 = HST.get () in
@@ -699,7 +714,7 @@ let create_empty_mt r =
   RV.as_seq_preserved hs loc_none h1 h2;
   RV.as_seq_preserved rhs loc_none h1 h2;
   mt_safe_elts_preserved 0ul hs 0ul 0ul loc_none h1 h2;
-  let mt = B.malloc r (MT 0UL 0ul 0ul hs false rhs mroot) 1ul in
+  let mt = B.malloc r (MT 0UL 0ul 0ul hs false rhs mroot hash_fun) 1ul in
   let h3 = HST.get () in
   RV.as_seq_preserved hs loc_none h2 h3;
   RV.as_seq_preserved rhs loc_none h2 h3;
@@ -1309,7 +1324,8 @@ let mt_insert mt v =
            (MT?.hs mtv)
            false // `rhs` is always deprecated right after an insertion.
            (MT?.rhs mtv)
-           (MT?.mroot mtv);
+           (MT?.mroot mtv)
+           (MT?.hash_fun mtv);
   let hh2 = HST.get () in
   RV.rv_inv_preserved
     (MT?.hs mtv) (B.loc_buffer mt) hh1 hh2;
@@ -1327,27 +1343,35 @@ let mt_insert mt v =
 
 // `mt_create` initiates a Merkle tree with a given initial hash `init`.
 // A valid Merkle tree should contain at least one element.
-val mt_create: r:HST.erid -> init:hash ->
-  HST.ST mt_p
+val mt_create_custom: r:HST.erid -> init:hash -> hash_fun:hash_fun_t -> HST.ST mt_p
    (requires (fun h0 ->
      Rgl?.r_inv hreg h0 init /\
      HH.disjoint r (B.frameOf init)))
    (ensures (fun h0 mt h1 ->
      // memory safety
-     modifies (loc_union
-                (mt_loc mt)
-                (B.loc_all_regions_from false (B.frameOf init)))
-              h0 h1 /\
+     modifies (loc_union (mt_loc mt) (B.loc_all_regions_from false (B.frameOf init))) h0 h1 /\
      mt_safe h1 mt /\
      // correctness
      mt_lift h1 mt == High.create_mt (Rgl?.r_repr hreg h0 init)))
 #reset-options "--z3rlimit 40"
-let mt_create r init =
+let mt_create_custom r init hash_fun =
   let hh0 = HST.get () in
-  let mt = create_empty_mt r in
+  let mt = create_empty_mt r hash_fun in
   mt_insert mt init;
   let hh2 = HST.get () in
   mt
+
+val mt_create: r:HST.erid -> init:hash -> HST.ST mt_p
+   (requires (fun h0 ->
+     Rgl?.r_inv hreg h0 init /\
+     HH.disjoint r (B.frameOf init)))
+   (ensures (fun h0 mt h1 ->
+     // memory safety
+     modifies (loc_union (mt_loc mt) (B.loc_all_regions_from false (B.frameOf init))) h0 h1 /\
+     mt_safe h1 mt /\
+     // correctness
+     mt_lift h1 mt == High.create_mt (Rgl?.r_repr hreg h0 init)))
+let mt_create r init = mt_create_custom r init hash_2
 
 /// Construction and Destruction of paths
 
@@ -1826,6 +1850,7 @@ let mt_get_root mt rt =
   let hs = MT?.hs mtv in
   let rhs = MT?.rhs mtv in
   let mroot = MT?.mroot mtv in
+  let hash_fun = MT?.hash_fun mtv in
   if MT?.rhs_ok mtv
   then begin
     Cpy?.copy hcpy mroot rt;
@@ -1897,7 +1922,7 @@ let mt_get_root mt rt =
     // correctness
     assert (Rgl?.r_repr hreg hh2 mroot == Rgl?.r_repr hreg hh1 rt);
 
-    mt *= MT prefix i j hs true rhs mroot;
+    mt *= MT prefix i j hs true rhs mroot hash_fun;
     let hh3 = HST.get () in
     // memory safety
     Rgl?.r_sep hreg rt (B.loc_buffer mt) hh2 hh3;
@@ -2600,7 +2625,7 @@ let mt_flush_to mt idx =
       (RV.rv_loc_elems hh0 hs 0ul (V.size_of hs))
       (V.loc_vector_within hs 0ul (V.size_of hs)))
     hh0 hh1;
-  mt *= MT (MT?.offset mtv) idx (MT?.j mtv) hs (MT?.rhs_ok mtv) (MT?.rhs mtv) (MT?.mroot mtv);
+  mt *= MT (MT?.offset mtv) idx (MT?.j mtv) hs (MT?.rhs_ok mtv) (MT?.rhs mtv) (MT?.mroot mtv) (MT?.hash_fun mtv);
   let hh2 = HST.get () in
   RV.rv_inv_preserved (MT?.hs mtv) (B.loc_buffer mt) hh1 hh2;
   RV.rv_inv_preserved (MT?.rhs mtv) (B.loc_buffer mt) hh1 hh2;
@@ -2915,7 +2940,7 @@ let mt_retract_to mt r =
       (RV.rv_loc_elems hh0 hs 0ul (V.size_of hs))
       (V.loc_vector_within hs 0ul (V.size_of hs)))
     hh0 hh1;
-  mt *= MT (MT?.offset mtv) (MT?.i mtv) (r+1ul) hs false (MT?.rhs mtv) (MT?.mroot mtv);
+  mt *= MT (MT?.offset mtv) (MT?.i mtv) (r+1ul) hs false (MT?.rhs mtv) (MT?.mroot mtv) (MT?.hash_fun mtv);
   let hh2 = HST.get () in
   RV.rv_inv_preserved (MT?.hs mtv) (B.loc_buffer mt) hh1 hh2;
   RV.rv_inv_preserved (MT?.rhs mtv) (B.loc_buffer mt) hh1 hh2;
