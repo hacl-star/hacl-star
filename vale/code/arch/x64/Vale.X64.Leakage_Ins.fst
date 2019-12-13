@@ -129,9 +129,9 @@ let rec lemma_args_taint
           oprs)
       in
     let f:arrow (instr_val_t i) (instr_args_t outs args) = coerce f in
-    Vale.Def.Opaque_s.reveal_opaque S.get_heap_val32_def;
-    Vale.Def.Opaque_s.reveal_opaque S.get_heap_val64_def;
-    Vale.Def.Opaque_s.reveal_opaque S.get_heap_val128_def;
+    FStar.Pervasives.reveal_opaque (`%S.get_heap_val32) S.get_heap_val32;
+    FStar.Pervasives.reveal_opaque (`%S.get_heap_val64) S.get_heap_val64;
+    FStar.Pervasives.reveal_opaque (`%S.get_heap_val128) S.get_heap_val128;
     assert (v1 == v2);
     let Some v = v1 in
     lemma_args_taint outs args (f v) oprs ts s1 s2
@@ -181,9 +181,9 @@ let rec lemma_inouts_taint
           oprs)
       in
     let f:arrow (instr_val_t i) (instr_inouts_t outs inouts args) = coerce f in
-    Vale.Def.Opaque_s.reveal_opaque S.get_heap_val32_def;
-    Vale.Def.Opaque_s.reveal_opaque S.get_heap_val64_def;
-    Vale.Def.Opaque_s.reveal_opaque S.get_heap_val128_def;
+    FStar.Pervasives.reveal_opaque (`%S.get_heap_val32) S.get_heap_val32;
+    FStar.Pervasives.reveal_opaque (`%S.get_heap_val64) S.get_heap_val64;
+    FStar.Pervasives.reveal_opaque (`%S.get_heap_val128) S.get_heap_val128;
     assert (v1 == v2);
     let Some v = v1 in
     lemma_inouts_taint outs inouts args (f v) oprs ts s1 s2
@@ -268,7 +268,7 @@ let lemma_update_heap32_val (ptr:int) (v:Vale.Def.Types_s.nat32) (mem:S.machine_
     (if ptr <= i && i < ptr + 4 then update_heap32_val ptr v i else mem.[i]))
   [SMTPat ((S.update_heap32 ptr v mem).[i])]
   =
-  Vale.Def.Opaque_s.reveal_opaque S.update_heap32_def;
+  FStar.Pervasives.reveal_opaque (`%S.update_heap32) S.update_heap32;
   FStar.Pervasives.reveal_opaque (`%update_heap32_val) update_heap32_val
 
 let lemma_update_heap32_domain (ptr:int) (v:Vale.Def.Types_s.nat32) (mem:S.machine_heap) : Lemma
@@ -276,7 +276,7 @@ let lemma_update_heap32_domain (ptr:int) (v:Vale.Def.Types_s.nat32) (mem:S.machi
   (ensures Map.domain (S.update_heap32 ptr v mem) == Map.domain mem)
   [SMTPat (Map.domain (S.update_heap32 ptr v mem))]
   =
-  Vale.Def.Opaque_s.reveal_opaque S.update_heap32_def;
+  FStar.Pervasives.reveal_opaque (`%S.update_heap32) S.update_heap32;
   assert (Set.equal (Map.domain (S.update_heap32 ptr v mem)) (Map.domain mem))
 
 [@"opaque_to_smt"]
@@ -306,7 +306,7 @@ let lemma_update_heap64_val (ptr:int) (v:nat64) (mem:S.machine_heap) (i:int) : L
   )
   [SMTPat ((S.update_heap64 ptr v mem).[i])]
   =
-  Vale.Def.Opaque_s.reveal_opaque S.update_heap64_def;
+  FStar.Pervasives.reveal_opaque (`%S.update_heap64) S.update_heap64;
   FStar.Pervasives.reveal_opaque (`%update_heap64_val) update_heap64_val
 
 let lemma_update_heap64_domain (ptr:int) (v:nat64) (mem:S.machine_heap) : Lemma
@@ -315,7 +315,7 @@ let lemma_update_heap64_domain (ptr:int) (v:nat64) (mem:S.machine_heap) : Lemma
   [SMTPat (Map.domain (S.update_heap64 ptr v mem))]
   =
   FStar.Pervasives.reveal_opaque (`%S.valid_addr64) S.valid_addr64;
-  Vale.Def.Opaque_s.reveal_opaque S.update_heap64_def;
+  FStar.Pervasives.reveal_opaque (`%S.update_heap64) S.update_heap64;
   assert (Set.equal (Map.domain (S.update_heap64 ptr v mem)) (Map.domain mem))
 
 [@"opaque_to_smt"]
@@ -342,7 +342,7 @@ let lemma_update_heap128_val (ptr:int) (v:Vale.Def.Types_s.quad32) (mem:S.machin
   )
   [SMTPat ((S.update_heap128 ptr v mem).[i])]
   =
-  Vale.Def.Opaque_s.reveal_opaque S.update_heap128_def;
+  FStar.Pervasives.reveal_opaque (`%S.update_heap128) S.update_heap128;
   FStar.Pervasives.reveal_opaque (`%update_heap128_val) update_heap128_val
 
 let lemma_update_heap128_domain (ptr:int) (v:Vale.Def.Types_s.quad32) (mem:S.machine_heap) : Lemma
@@ -350,7 +350,7 @@ let lemma_update_heap128_domain (ptr:int) (v:Vale.Def.Types_s.quad32) (mem:S.mac
   (ensures Map.domain (S.update_heap128 ptr v mem) == Map.domain mem)
   [SMTPat (S.update_heap128 ptr v mem)]
   =
-  Vale.Def.Opaque_s.reveal_opaque S.update_heap128_def;
+  FStar.Pervasives.reveal_opaque (`%S.update_heap128) S.update_heap128;
   assert (Set.equal (Map.domain (S.update_heap128 ptr v mem)) (Map.domain mem))
 
 let lemma_preserve_valid64 (m m':S.machine_heap) : Lemma
@@ -742,7 +742,7 @@ let lemma_push_leakage_free (ts:analysis_taints) (ins:S.ins) : Lemma
         let aux () : Lemma  (v1 == v2)
           = match src with
           | OConst _ | OReg _ -> ()
-          | OMem (_, _) | OStack (_, _) -> Vale.Def.Opaque_s.reveal_opaque S.get_heap_val64_def
+          | OMem (_, _) | OStack (_, _) -> FStar.Pervasives.reveal_opaque (`%S.get_heap_val64) S.get_heap_val64
         in
         aux()
       )
@@ -776,7 +776,7 @@ let lemma_pop_leakage_free (ts:analysis_taints) (ins:S.ins) : Lemma
       let v1 = S.eval_operand stack_op s1 in
       let v2 = S.eval_operand stack_op s2 in
       if t_stk = Public then (
-        Vale.Def.Opaque_s.reveal_opaque S.get_heap_val64_def;
+        FStar.Pervasives.reveal_opaque (`%S.get_heap_val64) S.get_heap_val64;
         assert (v1 == v2)
       );
       Classical.forall_intro_3 (fun s x (stack1:S.machine_heap) -> Vale.Lib.Set.lemma_sel_restrict s stack1 x);

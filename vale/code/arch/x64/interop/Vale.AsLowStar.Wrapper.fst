@@ -333,15 +333,15 @@ let frame_update_get_heap (ptr:int) (v:MS.nat64) (mem:BS.machine_heap) (j:int) :
   (requires ptr >= j + 8)
   (ensures BS.get_heap_val64 j mem == BS.get_heap_val64 j (BS.update_heap64 ptr v mem))
   =  
-  Vale.Def.Opaque_s.reveal_opaque BS.get_heap_val64_def;
-  Vale.Def.Opaque_s.reveal_opaque BS.update_heap64_def
+  FStar.Pervasives.reveal_opaque (`%BS.get_heap_val64) BS.get_heap_val64;
+  FStar.Pervasives.reveal_opaque (`%BS.update_heap64) BS.update_heap64
 
 let frame_update_valid_heap (ptr:int) (v:MS.nat64) (mem:BS.machine_heap) (j:int) : Lemma
   (requires ptr >= j + 8)
   (ensures BS.valid_addr64 j mem == BS.valid_addr64 j (BS.update_heap64 ptr v mem))
   =
   FStar.Pervasives.reveal_opaque (`%BS.valid_addr64) BS.valid_addr64;
-  Vale.Def.Opaque_s.reveal_opaque BS.update_heap64_def
+  FStar.Pervasives.reveal_opaque (`%BS.update_heap64) BS.update_heap64
 
 let rec stack_of_args_stack_args'_aux
     (max_arity:nat)
@@ -412,7 +412,7 @@ let rec stack_of_args_stack_args'
           let h_final = BS.update_heap64 ptr v accu' in
           stack_of_args_stack_args'_aux max_arity (n-1) (n-1) tl init_rsp accu' v;
           Vale.Arch.MachineHeap.correct_update_get ptr v accu';
-          Vale.Def.Opaque_s.reveal_opaque BS.update_heap64_def
+          FStar.Pervasives.reveal_opaque (`%BS.update_heap64) BS.update_heap64
         )
 
 

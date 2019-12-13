@@ -18,7 +18,7 @@ let free_stack_same_load start finish ptr h =
   let S.Machine_stack _ mem = h in
   let S.Machine_stack _ mem' = S.free_stack' start finish h in
   Classical.forall_intro (Vale.Lib.Set.remove_between_reveal (Map.domain mem) start finish);
-  Vale.Def.Opaque_s.reveal_opaque S.get_heap_val64_def
+  FStar.Pervasives.reveal_opaque (`%S.get_heap_val64) S.get_heap_val64
 
 let equiv_store_stack64 ptr v h = ()
 
@@ -37,7 +37,7 @@ let free_stack_same_load128 start finish ptr h =
   let S.Machine_stack _ mem = h in
   let S.Machine_stack _ mem' = S.free_stack' start finish h in
   Classical.forall_intro (Vale.Lib.Set.remove_between_reveal (Map.domain mem) start finish);
-  Vale.Def.Opaque_s.reveal_opaque S.get_heap_val128_def;
-  Vale.Def.Opaque_s.reveal_opaque S.get_heap_val32_def
+  FStar.Pervasives.reveal_opaque (`%S.get_heap_val128) S.get_heap_val128;
+  FStar.Pervasives.reveal_opaque (`%S.get_heap_val32) S.get_heap_val32
 
 let equiv_store_stack128 ptr v h = ()
