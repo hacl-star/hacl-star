@@ -151,7 +151,7 @@ void compress(const uint8_t *h1, const uint8_t *h2, uint8_t *out)
  * Recursive implementation of path recomputation
  *
  * @param i index to recompute
- * @param n maximum index in tree
+ * @param n size of the tree
  * @param path neighbouring hashes along branches
  * @param path_len length of path
  * @param pi current path index
@@ -188,7 +188,7 @@ int recompute_rec(uint32_t i, uint32_t n, uint8_t *const *path, size_t path_len,
  * Iterative implementation of path recomputation
  *
  * @param i index to recompute
- * @param n maximum index in tree
+ * @param n size of the tree
  * @param path neighbouring hashes along branches
  * @param path_len length of path
  * @param tag current tag
@@ -201,27 +201,24 @@ int recompute(uint32_t i, uint32_t n, uint8_t *const *path, size_t path_len, uin
 
   memcpy(tag, path[0], HASH_SIZE);
   size_t pi = 1;
-  int actd = 0;
+  int inside = 1;
   while (n > 0) {
     /* printf("%u %u %lu ", i, n, pi); print_hash(tag); printf("\n"); */
-    if (i % 2 == 0) {
-      if (n == i || (n == i + 1 && !actd)) {
-        i /= 2;
-        n /= 2;
-        actd |= n % 2 == 1;
-        continue;
-      }
+    int left = i % 2 == 1; /* going up to the left */
+    int skip = i == n || (i + 1 == n && inside); /* no more hashes to the right */
+
+    if (left || !skip) {
       assert(pi < path_len);
-      compress(tag, path[pi], tag);
+      if (left)
+          compress(path[pi], tag, tag);
+      else
+          compress(tag, path[pi], tag);
+      pi++;
     }
-    else {
-      assert(pi < path_len);
-      compress(path[pi], tag, tag);
-    }
-    actd |= n % 2 == 1;
+
+    inside &= n % 2 == 0;
     i /= 2;
     n /= 2;
-    pi++;
   }
 
   return 0;
@@ -232,7 +229,7 @@ int recompute(uint32_t i, uint32_t n, uint8_t *const *path, size_t path_len, uin
  *
  * @param offset 64-bit offset of the internal 32-bit tree
  * @param i index to recompute
- * @param n maximum index in tree
+ * @param n size of the tree
  * @param path neighbouring hashes along branches
  * @param root root of the tree
  * @return 0 for success, non-zero otherwise.
