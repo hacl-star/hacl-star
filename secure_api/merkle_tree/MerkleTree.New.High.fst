@@ -3,8 +3,6 @@ module MerkleTree.New.High
 open FStar.Ghost
 open FStar.Seq
 
-open MerkleTree.Spec
-
 module S = FStar.Seq
 
 module U32 = FStar.UInt32
@@ -28,7 +26,7 @@ let hash_ss = S.seq hash_seq
 
 noextract
 let hash_init: hash =
-  Seq.create hash_size (Lib.IntTypes.u8 0)
+  Seq.create MTS.hash_size (Lib.IntTypes.u8 0)
 
 val hash_2: src1:hash -> src2:hash -> GTot hash
 let hash_2 = MTS.hash2_raw
