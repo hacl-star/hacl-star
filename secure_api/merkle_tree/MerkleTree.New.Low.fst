@@ -1040,6 +1040,7 @@ val insert_:
     j < uint32_32_max} ->
   hs:hash_vv{V.size_of hs = merkle_tree_size_lg} ->
   acc:hash ->
+  hash_fun:hash_fun_t ->
   HST.ST unit
          (requires (fun h0 ->
            RV.rv_inv h0 hs /\
@@ -1064,7 +1065,7 @@ val insert_:
                      (RV.as_seq h0 hs) (Rgl?.r_repr hreg h0 acc)))))
          (decreases (U32.v j))
 #reset-options "--z3rlimit 800 --max_fuel 1"
-let rec insert_ lv i j hs acc =
+let rec insert_ lv i j hs acc hash_fun =
   let hh0 = HST.get () in
   hash_vv_insert_copy lv i j hs acc;
   let hh1 = HST.get () in
@@ -1088,7 +1089,7 @@ let rec insert_ lv i j hs acc =
        /// 3) Update the accumulator `acc`.
        hash_vec_rv_inv_r_inv hh1 (V.get hh1 hs lv) (V.size_of (V.get hh1 hs lv) - 2ul);
        assert (Rgl?.r_inv hreg hh1 acc);
-       hash_2 (V.index lvhs (V.size_of lvhs - 2ul)) acc acc;
+       hash_fun (V.index lvhs (V.size_of lvhs - 2ul)) acc acc;
        let hh2 = HST.get () in
 
        // 3-1) For the `modifies` postcondition
@@ -1131,7 +1132,7 @@ let rec insert_ lv i j hs acc =
        /// 4) Recursion
        insert_ (lv + 1ul)
          (Ghost.hide (Ghost.reveal i / 2ul)) (j / 2ul)
-         hs acc;
+         hs acc hash_fun;
        let hh3 = HST.get () in
 
        // 4-0) Memory safety brought from the postcondition of the recursion
@@ -1291,7 +1292,7 @@ let mt_insert mt v =
   let hh0 = HST.get () in
   let mtv = !*mt in
   let hs = MT?.hs mtv in
-  insert_ 0ul (Ghost.hide (MT?.i mtv)) (MT?.j mtv) hs v;
+  insert_ 0ul (Ghost.hide (MT?.i mtv)) (MT?.j mtv) hs v (MT?.hash_fun mtv);
   let hh1 = HST.get () in
   RV.rv_loc_elems_included hh0 (MT?.hs mtv) 0ul (V.size_of hs);
   V.loc_vector_within_included hs 0ul (V.size_of hs);
@@ -1621,6 +1622,7 @@ val construct_rhs:
   j:index_t{i <= j && U32.v j < pow2 (32 - U32.v lv)} ->
   acc:hash ->
   actd:bool ->
+  hash_fun:hash_fun_t ->
   HST.ST unit
    (requires (fun h0 ->
      RV.rv_inv h0 hs /\ RV.rv_inv h0 rhs /\
@@ -1648,7 +1650,7 @@ val construct_rhs:
      (Rgl?.r_repr hvreg h1 rhs, Rgl?.r_repr hreg h1 acc))))
    (decreases (U32.v j))
 #reset-options "--z3rlimit 400 --max_fuel 1"
-let rec construct_rhs lv hs rhs i j acc actd =
+let rec construct_rhs lv hs rhs i j acc actd hash_fun =
   let hh0 = HST.get () in
   let ofs = offset_of i in
   let copy = Cpy?.copy hcpy in
@@ -1659,7 +1661,7 @@ let rec construct_rhs lv hs rhs i j acc actd =
     then begin
       Math.Lemmas.pow2_double_mult (32 - U32.v lv - 1);
       mt_safe_elts_rec hh0 lv hs i j;
-      construct_rhs (lv + 1ul) hs rhs (i / 2ul) (j / 2ul) acc actd;
+      construct_rhs (lv + 1ul) hs rhs (i / 2ul) (j / 2ul) acc actd hash_fun;
       let hh1 = HST.get () in
       // correctness
       mt_safe_elts_spec hh0 lv hs i j;
@@ -1704,7 +1706,7 @@ let rec construct_rhs lv hs rhs i j acc actd =
                         (S.upd (RV.as_seq hh0 rhs) (U32.v lv)
                                (Rgl?.r_repr hreg hh0 acc)));
 
-        hash_2 (V.index (V.index hs lv) (j - 1ul - ofs)) acc acc;
+        hash_fun (V.index (V.index hs lv) (j - 1ul - ofs)) acc acc;
         let hh2 = HST.get () in
         // memory safety
         mt_safe_elts_preserved lv hs i j
@@ -1767,7 +1769,7 @@ let rec construct_rhs lv hs rhs i j acc actd =
                           (U32.v j - 1 - U32.v ofs)));
 
       mt_safe_elts_rec hh3 lv hs i j;
-      construct_rhs (lv + 1ul) hs rhs (i / 2ul) (j / 2ul) acc true;
+      construct_rhs (lv + 1ul) hs rhs (i / 2ul) (j / 2ul) acc true hash_fun;
       let hh4 = HST.get () in
       mt_safe_elts_spec hh3 (lv + 1ul) hs (i / 2ul) (j / 2ul);
       assert (High.construct_rhs
@@ -1865,7 +1867,7 @@ let mt_get_root mt rt =
            (mt_lift hh1 mt, Rgl?.r_repr hreg hh1 rt))
   end
   else begin
-    construct_rhs 0ul hs rhs i j rt false;
+    construct_rhs 0ul hs rhs i j rt false hash_fun;
     let hh1 = HST.get () in
     // memory safety
     assert (RV.rv_inv hh1 rhs);
@@ -2962,6 +2964,7 @@ val mt_verify_:
   ppos:uint32_t ->
   acc:hash ->
   actd:bool ->
+  hash_fun:hash_fun_t ->
   HST.ST unit
    (requires (fun h0 ->
      let p = CB.cast p in
@@ -2983,17 +2986,17 @@ val mt_verify_:
        (U32.v ppos) (Rgl?.r_repr hreg h0 acc) actd))
 #reset-options "--z3rlimit 200 --max_fuel 1"
 private
-let rec mt_verify_ k j mtr p ppos acc actd =
+let rec mt_verify_ k j mtr p ppos acc actd hash_fun =
   let ncp:path_p = CB.cast p in
   let hh0 = HST.get () in
   if j = 0ul then ()
   else (let nactd = actd || (j % 2ul = 1ul) in
        if k % 2ul = 0ul then begin
          if j = k || (j = k + 1ul && not actd) then
-           mt_verify_ (k / 2ul) (j / 2ul) mtr p ppos acc nactd
+           mt_verify_ (k / 2ul) (j / 2ul) mtr p ppos acc nactd hash_fun
          else begin
            let phash = V.index !*ncp ppos in
-           hash_2 acc phash acc;
+           hash_fun acc phash acc;
            let hh1 = HST.get () in
            path_preserved mtr ncp
              (B.loc_all_regions_from false (B.frameOf acc)) hh0 hh1;
@@ -3001,12 +3004,12 @@ let rec mt_verify_ k j mtr p ppos acc actd =
            assert (Rgl?.r_repr hreg hh1 acc ==
                   High.hash_2 (Rgl?.r_repr hreg hh0 acc)
                               (S.index (lift_path hh0 mtr ncp) (U32.v ppos)));
-           mt_verify_ (k / 2ul) (j / 2ul) mtr p (ppos + 1ul) acc nactd
+           mt_verify_ (k / 2ul) (j / 2ul) mtr p (ppos + 1ul) acc nactd hash_fun
          end
        end
        else begin
          let phash = V.index !*ncp ppos in
-         hash_2 phash acc acc;
+         hash_fun phash acc acc;
          let hh1 = HST.get () in
          path_preserved mtr ncp
            (B.loc_all_regions_from false (B.frameOf acc)) hh0 hh1;
@@ -3014,7 +3017,7 @@ let rec mt_verify_ k j mtr p ppos acc actd =
          assert (Rgl?.r_repr hreg hh1 acc ==
                 High.hash_2 (S.index (lift_path hh0 mtr ncp) (U32.v ppos))
                             (Rgl?.r_repr hreg hh0 acc));
-         mt_verify_ (k / 2ul) (j / 2ul) mtr p (ppos + 1ul) acc nactd
+         mt_verify_ (k / 2ul) (j / 2ul) mtr p (ppos + 1ul) acc nactd hash_fun
        end)
 
 private inline_for_extraction
@@ -3108,7 +3111,7 @@ let mt_verify mt k j mtr p rt =
   path_preserved mtr ncp (B.loc_all_regions_from false (B.frameOf rt)) hh0 hh1;
   lift_path_index hh0 mtr ncp 0ul;
   assert (Rgl?.r_repr hreg hh1 ih == S.index (lift_path hh0 mtr ncp) 0);
-  mt_verify_ k j mtr p 1ul ih false;
+  mt_verify_ k j mtr p 1ul ih false (MT?.hash_fun mtv);
   let hh2 = HST.get () in
   assert (Rgl?.r_repr hreg hh2 ih ==
          High.mt_verify_ (U32.v k) (U32.v j) (lift_path hh1 mtr ncp)
