@@ -146,10 +146,39 @@ function fetch_vale() {
     export_home VALE "$(pwd)/../vale"
 }
 
+function refresh_doc() {
+  git config --global user.name "Dzomo, the Everest Yak"
+  git config --global user.email "everbld@microsoft.com"
+
+  git clone git@github.com:fstarlang/fstarlang.github.io fstarlang-github-io
+
+  make -C doc/reference html
+
+  pushd fstarlang-github-io && {
+    cp -R ../doc/reference/_build/* evercrypt/ &&
+    rm -rf evercrypt/html/static &&
+    mv evercrypt/html/_static evercrypt/html/static &&
+    find evercrypt/html -type f | xargs sed -i 's/_static/static/g' &&
+    git add -A evercrypt/html/ evercrypt/index.html &&
+    if ! git diff --exit-code HEAD > /dev/null; then
+        git commit -m "[CI] Refresh HACL & EverCrypt doc" &&
+        git push
+    else
+        echo No git diff for the tutorial, not generating a commit
+    fi
+    errcode=$?
+  } &&
+  popd &&
+  return $errcode
+}
+
 function refresh_hacl_hints_dist() {
     # We should not generate hints when building on Windows
     if [[ "$OS" != "Windows_NT" ]]; then
         refresh_hints_dist "git@github.com:mitls/hacl-star.git" "true" "regenerate hints and dist" "."
+        # if [[ $branchname == "fstar-master" ]] ; then
+          refresh_doc
+        # fi
     fi
 }
 
