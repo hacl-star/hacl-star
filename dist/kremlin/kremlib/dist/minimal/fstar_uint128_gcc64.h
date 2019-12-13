@@ -24,7 +24,7 @@
 #include "FStar_UInt_8_16_32_64.h"
 #include "LowStar_Endianness.h"
 
-#if !defined(KRML_VERIFIED_UINT128) && !defined(_MSC_VER) && \
+#if !defined(KRML_VERIFIED_UINT128) && (!defined(_MSC_VER) || defined(__clang__)) && \
       (defined(__x86_64__) || defined(__x86_64) || defined(__aarch64__))
 
 /* GCC + using native unsigned __int128 support */

@@ -200,6 +200,12 @@ uint8_t *__proj__MT__item__mroot(merkle_tree projectee)
   return projectee.mroot;
 }
 
+void
+(*__proj__MT__item__hash_fun(merkle_tree projectee))(uint8_t *x0, uint8_t *x1, uint8_t *x2)
+{
+  return projectee.hash_fun;
+}
+
 bool
 merkle_tree_conditions(
   uint64_t offset1,
@@ -339,7 +345,7 @@ LowStar_RVector_alloc_rid___uint8_t_(LowStar_Regional_regional___uint8_t_ rg, ui
   return vec;
 }
 
-static merkle_tree *create_empty_mt()
+static merkle_tree *create_empty_mt(void (*hash_fun)(uint8_t *x0, uint8_t *x1, uint8_t *x2))
 {
   LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_
   hs =
@@ -376,7 +382,8 @@ static merkle_tree *create_empty_mt()
         .hs = hs,
         .rhs_ok = false,
         .rhs = rhs,
-        .mroot = mroot
+        .mroot = mroot,
+        .hash_fun = hash_fun
       }
     );
   return mt;
@@ -556,9 +563,10 @@ insert_(
   }
 }
 
-bool mt_insert_pre(merkle_tree *mt, uint8_t *v1)
+bool mt_insert_pre(const merkle_tree *mt, uint8_t *v1)
 {
-  merkle_tree uu____0 = *mt;
+  merkle_tree *mt1 = (merkle_tree *)mt;
+  merkle_tree uu____0 = *mt1;
   return
     uu____0.j
     < uint32_32_max
@@ -580,16 +588,23 @@ void mt_insert(merkle_tree *mt, uint8_t *v1)
         .hs = mtv.hs,
         .rhs_ok = false,
         .rhs = mtv.rhs,
-        .mroot = mtv.mroot
+        .mroot = mtv.mroot,
+        .hash_fun = mtv.hash_fun
       }
     );
 }
 
-merkle_tree *mt_create(uint8_t *init1)
+merkle_tree
+*mt_create_custom(uint8_t *init1, void (*hash_fun)(uint8_t *x0, uint8_t *x1, uint8_t *x2))
 {
-  merkle_tree *mt = create_empty_mt();
+  merkle_tree *mt = create_empty_mt(hash_fun);
   mt_insert(mt, init1);
   return mt;
+}
+
+merkle_tree *mt_create(uint8_t *init1)
+{
+  return mt_create_custom(init1, hash_2);
 }
 
 LowStar_Vector_vector_str___uint8_t_ *init_path()
@@ -685,21 +700,24 @@ construct_rhs(
   }
 }
 
-bool mt_get_root_pre(merkle_tree *mt, uint8_t *rt)
+bool mt_get_root_pre(const merkle_tree *mt, uint8_t *rt)
 {
-  merkle_tree uu____0 = *mt;
+  merkle_tree *mt1 = (merkle_tree *)mt;
+  merkle_tree uu____0 = *mt1;
   return true;
 }
 
-void mt_get_root(merkle_tree *mt, uint8_t *rt)
+void mt_get_root(const merkle_tree *mt, uint8_t *rt)
 {
-  merkle_tree mtv = *mt;
+  merkle_tree *mt1 = (merkle_tree *)mt;
+  merkle_tree mtv = *mt1;
   uint64_t prefix = mtv.offset;
   uint32_t i1 = mtv.i;
   uint32_t j1 = mtv.j;
   LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_ hs = mtv.hs;
   LowStar_Vector_vector_str___uint8_t_ rhs = mtv.rhs;
   uint8_t *mroot = mtv.mroot;
+  void (*hash_fun)(uint8_t *x0, uint8_t *x1, uint8_t *x2) = mtv.hash_fun;
   if (mtv.rhs_ok)
   {
     LowStar_Regional_regional___uint8_t_
@@ -711,7 +729,7 @@ void mt_get_root(merkle_tree *mt, uint8_t *rt)
   LowStar_Regional_regional___uint8_t_
   x0 = { .dummy = NULL, .r_alloc = hash_r_alloc, .r_free = hash_r_free };
   hcpy(rt, mroot);
-  *mt
+  *mt1
   =
     (
       (merkle_tree){
@@ -721,7 +739,8 @@ void mt_get_root(merkle_tree *mt, uint8_t *rt)
         .hs = hs,
         .rhs_ok = true,
         .rhs = rhs,
-        .mroot = mroot
+        .mroot = mroot,
+        .hash_fun = hash_fun
       }
     );
 }
@@ -838,14 +857,16 @@ mt_get_path_(
 
 bool
 mt_get_path_pre(
-  merkle_tree *mt,
+  const merkle_tree *mt,
   uint64_t idx,
-  LowStar_Vector_vector_str___uint8_t_ *p1,
+  const LowStar_Vector_vector_str___uint8_t_ *p1,
   uint8_t *root
 )
 {
-  merkle_tree uu____0 = *mt;
-  LowStar_Vector_vector_str___uint8_t_ uu____1 = *p1;
+  merkle_tree *mt1 = (merkle_tree *)mt;
+  LowStar_Vector_vector_str___uint8_t_ *p2 = (LowStar_Vector_vector_str___uint8_t_ *)p1;
+  merkle_tree uu____0 = *mt1;
+  LowStar_Vector_vector_str___uint8_t_ uu____1 = *p2;
   return
     idx
     >= uu____0.offset
@@ -859,17 +880,18 @@ mt_get_path_pre(
 
 uint32_t
 mt_get_path(
-  merkle_tree *mt,
+  const merkle_tree *mt,
   uint64_t idx,
   LowStar_Vector_vector_str___uint8_t_ *p1,
   uint8_t *root
 )
 {
+  merkle_tree *ncmt = (merkle_tree *)mt;
   LowStar_Regional_regional___uint8_t_
   x0 = { .dummy = NULL, .r_alloc = hash_r_alloc, .r_free = hash_r_free };
   void (*copy1)(uint8_t *x0, uint8_t *x1) = hcpy;
   mt_get_root(mt, root);
-  merkle_tree mtv = *mt;
+  merkle_tree mtv = *ncmt;
   uint32_t idx1 = (uint32_t)(idx - mtv.offset);
   uint32_t i1 = mtv.i;
   uint32_t ofs = offset_of(mtv.i);
@@ -971,9 +993,10 @@ mt_flush_to_(
   }
 }
 
-bool mt_flush_to_pre(merkle_tree *mt, uint64_t idx)
+bool mt_flush_to_pre(const merkle_tree *mt, uint64_t idx)
 {
-  merkle_tree mtv = *mt;
+  merkle_tree *mt1 = (merkle_tree *)mt;
+  merkle_tree mtv = *mt1;
   return
     idx
     >= mtv.offset
@@ -998,14 +1021,15 @@ void mt_flush_to(merkle_tree *mt, uint64_t idx)
         .hs = hs,
         .rhs_ok = mtv.rhs_ok,
         .rhs = mtv.rhs,
-        .mroot = mtv.mroot
+        .mroot = mtv.mroot,
+        .hash_fun = mtv.hash_fun
       }
     );
 }
 
-bool mt_flush_pre(merkle_tree *mt)
+bool mt_flush_pre(const merkle_tree *mt)
 {
-  merkle_tree uu____0 = *mt;
+  merkle_tree uu____0 = *(merkle_tree *)mt;
   return uu____0.j > uu____0.i;
 }
 
@@ -1104,9 +1128,10 @@ mt_retract_to_(
   }
 }
 
-bool mt_retract_to_pre(merkle_tree *mt, uint64_t r)
+bool mt_retract_to_pre(const merkle_tree *mt, uint64_t r)
 {
-  merkle_tree mtv = *mt;
+  merkle_tree *mt1 = (merkle_tree *)mt;
+  merkle_tree mtv = *mt1;
   return
     r
     >= mtv.offset
@@ -1131,7 +1156,8 @@ void mt_retract_to(merkle_tree *mt, uint64_t r)
         .hs = hs,
         .rhs_ok = false,
         .rhs = mtv.rhs,
-        .mroot = mtv.mroot
+        .mroot = mtv.mroot,
+        .hash_fun = mtv.hash_fun
       }
     );
 }
@@ -1140,12 +1166,13 @@ static void
 mt_verify_(
   uint32_t k1,
   uint32_t j1,
-  LowStar_Vector_vector_str___uint8_t_ *p1,
+  const LowStar_Vector_vector_str___uint8_t_ *p1,
   uint32_t ppos,
   uint8_t *acc,
   bool actd
 )
 {
+  LowStar_Vector_vector_str___uint8_t_ *ncp = (LowStar_Vector_vector_str___uint8_t_ *)p1;
   if (!(j1 == (uint32_t)0U))
   {
     bool nactd = actd || j1 % (uint32_t)2U == (uint32_t)1U;
@@ -1156,12 +1183,12 @@ mt_verify_(
         mt_verify_(k1 / (uint32_t)2U, j1 / (uint32_t)2U, p1, ppos, acc, nactd);
         return;
       }
-      uint8_t *phash = LowStar_Vector_index___uint8_t_(*p1, ppos);
+      uint8_t *phash = LowStar_Vector_index___uint8_t_(*ncp, ppos);
       hash_2(acc, phash, acc);
       mt_verify_(k1 / (uint32_t)2U, j1 / (uint32_t)2U, p1, ppos + (uint32_t)1U, acc, nactd);
       return;
     }
-    uint8_t *phash = LowStar_Vector_index___uint8_t_(*p1, ppos);
+    uint8_t *phash = LowStar_Vector_index___uint8_t_(*ncp, ppos);
     hash_2(phash, acc, acc);
     mt_verify_(k1 / (uint32_t)2U, j1 / (uint32_t)2U, p1, ppos + (uint32_t)1U, acc, nactd);
     return;
@@ -1170,15 +1197,17 @@ mt_verify_(
 
 bool
 mt_verify_pre(
-  merkle_tree *mt,
+  const merkle_tree *mt,
   uint64_t k1,
   uint64_t j1,
-  LowStar_Vector_vector_str___uint8_t_ *p1,
+  const LowStar_Vector_vector_str___uint8_t_ *p1,
   uint8_t *rt
 )
 {
-  merkle_tree uu____0 = *mt;
-  LowStar_Vector_vector_str___uint8_t_ uu____1 = *p1;
+  merkle_tree *mt1 = (merkle_tree *)mt;
+  LowStar_Vector_vector_str___uint8_t_ *p2 = (LowStar_Vector_vector_str___uint8_t_ *)p1;
+  merkle_tree uu____0 = *mt1;
+  LowStar_Vector_vector_str___uint8_t_ uu____1 = *p2;
   return
     k1
     < j1
@@ -1197,14 +1226,16 @@ mt_verify_pre(
 
 bool
 mt_verify(
-  merkle_tree *mt,
+  const merkle_tree *mt,
   uint64_t k1,
   uint64_t j1,
-  LowStar_Vector_vector_str___uint8_t_ *p1,
+  const LowStar_Vector_vector_str___uint8_t_ *p1,
   uint8_t *rt
 )
 {
-  merkle_tree mtv = *mt;
+  merkle_tree *ncmt = (merkle_tree *)mt;
+  LowStar_Vector_vector_str___uint8_t_ *ncp = (LowStar_Vector_vector_str___uint8_t_ *)p1;
+  merkle_tree mtv = *ncmt;
   uint32_t k2 = (uint32_t)(k1 - mtv.offset);
   uint32_t j2 = (uint32_t)(j1 - mtv.offset);
   LowStar_Regional_regional___uint8_t_
@@ -1213,7 +1244,7 @@ mt_verify(
   LowStar_Regional_regional___uint8_t_
   x01 = { .dummy = NULL, .r_alloc = hash_r_alloc, .r_free = hash_r_free };
   void (*copy1)(uint8_t *x0, uint8_t *x1) = hcpy;
-  copy1(LowStar_Vector_index___uint8_t_(*p1, (uint32_t)0U), ih);
+  copy1(LowStar_Vector_index___uint8_t_(*ncp, (uint32_t)0U), ih);
   mt_verify_(k2, j2, p1, (uint32_t)1U, ih, false);
   uint8_t res = (uint8_t)255U;
   for (uint32_t i = (uint32_t)0U; i < hash_size; i = i + (uint32_t)1U)
@@ -1458,7 +1489,7 @@ typedef struct K___bool_uint32_t_bool_s
 K___bool_uint32_t_bool;
 
 static K___bool_uint32_t_bool
-deserialize_bool(bool ok, uint8_t *buf1, uint32_t sz, uint32_t pos)
+deserialize_bool(bool ok, const uint8_t *buf1, uint32_t sz, uint32_t pos)
 {
   if (!ok || pos >= sz)
   {
@@ -1489,7 +1520,7 @@ typedef struct K___bool_uint32_t_uint8_t_s
 K___bool_uint32_t_uint8_t;
 
 static K___bool_uint32_t_uint8_t
-deserialize_uint8_t(bool ok, uint8_t *buf1, uint32_t sz, uint32_t pos)
+deserialize_uint8_t(bool ok, const uint8_t *buf1, uint32_t sz, uint32_t pos)
 {
   if (!ok || pos >= sz)
   {
@@ -1508,7 +1539,7 @@ typedef struct K___bool_uint32_t_uint16_t_s
 K___bool_uint32_t_uint16_t;
 
 static K___bool_uint32_t_uint16_t
-deserialize_uint16_t(bool ok, uint8_t *buf1, uint32_t sz, uint32_t pos)
+deserialize_uint16_t(bool ok, const uint8_t *buf1, uint32_t sz, uint32_t pos)
 {
   if (!ok || pos >= sz)
   {
@@ -1541,7 +1572,7 @@ typedef struct K___bool_uint32_t_uint32_t_s
 K___bool_uint32_t_uint32_t;
 
 static K___bool_uint32_t_uint32_t
-deserialize_uint32_t(bool ok, uint8_t *buf1, uint32_t sz, uint32_t pos)
+deserialize_uint32_t(bool ok, const uint8_t *buf1, uint32_t sz, uint32_t pos)
 {
   if (!ok || pos >= sz)
   {
@@ -1574,7 +1605,7 @@ typedef struct K___bool_uint32_t_uint64_t_s
 K___bool_uint32_t_uint64_t;
 
 static K___bool_uint32_t_uint64_t
-deserialize_uint64_t(bool ok, uint8_t *buf1, uint32_t sz, uint32_t pos)
+deserialize_uint64_t(bool ok, const uint8_t *buf1, uint32_t sz, uint32_t pos)
 {
   if (!ok || pos >= sz)
   {
@@ -1599,10 +1630,12 @@ deserialize_uint64_t(bool ok, uint8_t *buf1, uint32_t sz, uint32_t pos)
 }
 
 static K___bool_uint32_t_uint64_t
-(*deserialize_offset_t)(bool x0, uint8_t *x1, uint32_t x2, uint32_t x3) = deserialize_uint64_t;
+(*deserialize_offset_t)(bool x0, const uint8_t *x1, uint32_t x2, uint32_t x3) =
+  deserialize_uint64_t;
 
 static K___bool_uint32_t_uint32_t
-(*deserialize_index_t)(bool x0, uint8_t *x1, uint32_t x2, uint32_t x3) = deserialize_uint32_t;
+(*deserialize_index_t)(bool x0, const uint8_t *x1, uint32_t x2, uint32_t x3) =
+  deserialize_uint32_t;
 
 typedef struct K___bool_uint32_t__uint8_t__s
 {
@@ -1613,7 +1646,7 @@ typedef struct K___bool_uint32_t__uint8_t__s
 K___bool_uint32_t__uint8_t_;
 
 static K___bool_uint32_t__uint8_t_
-deserialize_hash(bool ok, uint8_t *buf1, uint32_t sz, uint32_t pos)
+deserialize_hash(bool ok, const uint8_t *buf1, uint32_t sz, uint32_t pos)
 {
   if (!ok || pos >= sz)
   {
@@ -1630,14 +1663,14 @@ deserialize_hash(bool ok, uint8_t *buf1, uint32_t sz, uint32_t pos)
   LowStar_Regional_regional___uint8_t_
   x0 = { .dummy = NULL, .r_alloc = hash_r_alloc, .r_free = hash_r_free };
   uint8_t *hash1 = x0.r_alloc();
-  memcpy(hash1, buf1 + pos, hash_size * sizeof buf1[0U]);
+  memcpy(hash1, (uint8_t *)buf1 + pos, hash_size * sizeof ((uint8_t *)buf1)[0U]);
   return ((K___bool_uint32_t__uint8_t_){ .fst = true, .snd = pos + hash_size, .thd = hash1 });
 }
 
 static K___bool_uint32_t
 deserialize_hash_vec_i(
   bool ok,
-  uint8_t *buf1,
+  const uint8_t *buf1,
   uint32_t sz,
   uint32_t pos,
   LowStar_Vector_vector_str___uint8_t_ res,
@@ -1680,7 +1713,7 @@ typedef struct K___bool_uint32_t_LowStar_Vector_vector_str___uint8_t__s
 K___bool_uint32_t_LowStar_Vector_vector_str___uint8_t_;
 
 static K___bool_uint32_t_LowStar_Vector_vector_str___uint8_t_
-deserialize_hash_vec(bool ok, uint8_t *buf1, uint32_t sz, uint32_t pos)
+deserialize_hash_vec(bool ok, const uint8_t *buf1, uint32_t sz, uint32_t pos)
 {
   if (!ok || pos >= sz)
   {
@@ -1740,7 +1773,7 @@ deserialize_hash_vec(bool ok, uint8_t *buf1, uint32_t sz, uint32_t pos)
 static K___bool_uint32_t
 deserialize_hash_vv_i(
   bool ok,
-  uint8_t *buf1,
+  const uint8_t *buf1,
   uint32_t sz,
   uint32_t pos,
   LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_ res,
@@ -1788,7 +1821,7 @@ K___bool_uint32_t_LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t
 K___bool_uint32_t_LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_;
 
 static K___bool_uint32_t_LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_
-deserialize_hash_vv(bool ok, uint8_t *buf1, uint32_t sz, uint32_t pos)
+deserialize_hash_vv(bool ok, const uint8_t *buf1, uint32_t sz, uint32_t pos)
 {
   if (!ok || pos >= sz)
   {
@@ -1844,9 +1877,9 @@ deserialize_hash_vv(bool ok, uint8_t *buf1, uint32_t sz, uint32_t pos)
     );
 }
 
-uint64_t mt_serialize_size(merkle_tree *mt)
+uint64_t mt_serialize_size(const merkle_tree *mt)
 {
-  merkle_tree mtv = *mt;
+  merkle_tree mtv = *(merkle_tree *)mt;
   LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_ hs = mtv.hs;
   LowStar_Vector_vector_str___uint8_t_ rhs = mtv.rhs;
   uint64_t hs_sz = hash_vv_bytes_i(hs, (uint32_t)0U);
@@ -1862,79 +1895,82 @@ uint64_t mt_serialize_size(merkle_tree *mt)
   return uint64_max;
 }
 
-uint32_t mt_serialize(merkle_tree *mt, uint8_t *output, uint32_t sz)
+uint64_t mt_serialize(const merkle_tree *mt, uint8_t *output, uint64_t sz)
 {
-  merkle_tree mtv = *mt;
-  K___bool_uint32_t scrut = serialize_uint8_t(true, (uint8_t)0U, output, sz, (uint32_t)0U);
+  merkle_tree *mt1 = (merkle_tree *)mt;
+  uint32_t sz1 = (uint32_t)sz;
+  merkle_tree mtv = *mt1;
+  K___bool_uint32_t scrut = serialize_uint8_t(true, (uint8_t)0U, output, sz1, (uint32_t)0U);
   bool ok = scrut.fst;
   uint32_t pos = scrut.snd;
-  K___bool_uint32_t scrut0 = serialize_uint32_t(ok, hash_size, output, sz, pos);
+  K___bool_uint32_t scrut0 = serialize_uint32_t(ok, hash_size, output, sz1, pos);
   bool ok1 = scrut0.fst;
   uint32_t pos1 = scrut0.snd;
-  K___bool_uint32_t scrut1 = serialize_offset_t(ok1, mtv.offset, output, sz, pos1);
+  K___bool_uint32_t scrut1 = serialize_offset_t(ok1, mtv.offset, output, sz1, pos1);
   bool ok2 = scrut1.fst;
   uint32_t pos2 = scrut1.snd;
-  K___bool_uint32_t scrut2 = serialize_uint32_t(ok2, mtv.i, output, sz, pos2);
+  K___bool_uint32_t scrut2 = serialize_uint32_t(ok2, mtv.i, output, sz1, pos2);
   bool ok3 = scrut2.fst;
   uint32_t pos3 = scrut2.snd;
-  K___bool_uint32_t scrut3 = serialize_uint32_t(ok3, mtv.j, output, sz, pos3);
+  K___bool_uint32_t scrut3 = serialize_uint32_t(ok3, mtv.j, output, sz1, pos3);
   bool ok4 = scrut3.fst;
   uint32_t pos4 = scrut3.snd;
-  K___bool_uint32_t scrut4 = serialize_hash_vv(ok4, mtv.hs, output, sz, pos4);
+  K___bool_uint32_t scrut4 = serialize_hash_vv(ok4, mtv.hs, output, sz1, pos4);
   bool ok5 = scrut4.fst;
   uint32_t pos5 = scrut4.snd;
-  K___bool_uint32_t scrut5 = serialize_bool(ok5, mtv.rhs_ok, output, sz, pos5);
+  K___bool_uint32_t scrut5 = serialize_bool(ok5, mtv.rhs_ok, output, sz1, pos5);
   bool ok6 = scrut5.fst;
   uint32_t pos6 = scrut5.snd;
-  K___bool_uint32_t scrut6 = serialize_hash_vec(ok6, mtv.rhs, output, sz, pos6);
+  K___bool_uint32_t scrut6 = serialize_hash_vec(ok6, mtv.rhs, output, sz1, pos6);
   bool ok7 = scrut6.fst;
   uint32_t pos7 = scrut6.snd;
-  K___bool_uint32_t scrut7 = serialize_hash(ok7, mtv.mroot, output, sz, pos7);
+  K___bool_uint32_t scrut7 = serialize_hash(ok7, mtv.mroot, output, sz1, pos7);
   bool ok8 = scrut7.fst;
   uint32_t pos8 = scrut7.snd;
   if (ok8)
   {
-    return pos8;
+    return (uint64_t)pos8;
   }
-  return (uint32_t)0U;
+  return (uint64_t)0U;
 }
 
-merkle_tree *mt_deserialize(uint8_t *input, uint32_t sz)
+merkle_tree *mt_deserialize(const uint8_t *input, uint64_t sz)
 {
-  K___bool_uint32_t_uint8_t scrut0 = deserialize_uint8_t(true, input, sz, (uint32_t)0U);
+  uint32_t sz1 = (uint32_t)sz;
+  K___bool_uint32_t_uint8_t scrut0 = deserialize_uint8_t(true, input, sz1, (uint32_t)0U);
   bool ok = scrut0.fst;
   uint32_t pos = scrut0.snd;
-  K___bool_uint32_t_uint32_t scrut1 = deserialize_uint32_t(ok, input, sz, pos);
+  K___bool_uint32_t_uint32_t scrut1 = deserialize_uint32_t(ok, input, sz1, pos);
   bool ok1 = scrut1.fst;
   uint32_t pos1 = scrut1.snd;
   uint32_t hash_size1 = scrut1.thd;
-  K___bool_uint32_t_uint64_t scrut2 = deserialize_offset_t(ok1, input, sz, pos1);
+  K___bool_uint32_t_uint64_t scrut2 = deserialize_offset_t(ok1, input, sz1, pos1);
   bool ok2 = scrut2.fst;
   uint32_t pos2 = scrut2.snd;
   uint64_t offset1 = scrut2.thd;
-  K___bool_uint32_t_uint32_t scrut3 = deserialize_index_t(ok2, input, sz, pos2);
+  K___bool_uint32_t_uint32_t scrut3 = deserialize_index_t(ok2, input, sz1, pos2);
   bool ok3 = scrut3.fst;
   uint32_t pos3 = scrut3.snd;
   uint32_t i1 = scrut3.thd;
-  K___bool_uint32_t_uint32_t scrut4 = deserialize_index_t(ok3, input, sz, pos3);
+  K___bool_uint32_t_uint32_t scrut4 = deserialize_index_t(ok3, input, sz1, pos3);
   bool ok4 = scrut4.fst;
   uint32_t pos4 = scrut4.snd;
   uint32_t j1 = scrut4.thd;
   K___bool_uint32_t_LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_
-  scrut5 = deserialize_hash_vv(ok4, input, sz, pos4);
+  scrut5 = deserialize_hash_vv(ok4, input, sz1, pos4);
   bool ok5 = scrut5.fst;
   uint32_t pos5 = scrut5.snd;
   LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_ hs = scrut5.thd;
-  K___bool_uint32_t_bool scrut6 = deserialize_bool(ok5, input, sz, pos5);
+  K___bool_uint32_t_bool scrut6 = deserialize_bool(ok5, input, sz1, pos5);
   bool ok6 = scrut6.fst;
   uint32_t pos6 = scrut6.snd;
   bool rhs_ok = scrut6.thd;
   K___bool_uint32_t_LowStar_Vector_vector_str___uint8_t_
-  scrut7 = deserialize_hash_vec(ok6, input, sz, pos6);
+  scrut7 = deserialize_hash_vec(ok6, input, sz1, pos6);
   bool ok7 = scrut7.fst;
   uint32_t pos7 = scrut7.snd;
   LowStar_Vector_vector_str___uint8_t_ rhs = scrut7.thd;
-  K___bool_uint32_t__uint8_t_ scrut = deserialize_hash(ok7, input, sz, pos7);
+  K___bool_uint32_t__uint8_t_ scrut = deserialize_hash(ok7, input, sz1, pos7);
   bool ok8 = scrut.fst;
   uint8_t *mroot = scrut.thd;
   if
@@ -1963,41 +1999,45 @@ merkle_tree *mt_deserialize(uint8_t *input, uint32_t sz)
         .hs = hs,
         .rhs_ok = rhs_ok,
         .rhs = rhs,
-        .mroot = mroot
+        .mroot = mroot,
+        .hash_fun = hash_2
       }
     );
   return buf;
 }
 
-uint32_t
+uint64_t
 mt_serialize_path(
-  LowStar_Vector_vector_str___uint8_t_ *p1,
-  merkle_tree *mt,
+  const LowStar_Vector_vector_str___uint8_t_ *p1,
+  const merkle_tree *mt,
   uint8_t *output,
-  uint32_t sz
+  uint64_t sz
 )
 {
-  K___bool_uint32_t scrut = serialize_uint32_t(true, hash_size, output, sz, (uint32_t)0U);
+  uint32_t sz1 = (uint32_t)sz;
+  LowStar_Vector_vector_str___uint8_t_ *ncp = (LowStar_Vector_vector_str___uint8_t_ *)p1;
+  K___bool_uint32_t scrut = serialize_uint32_t(true, hash_size, output, sz1, (uint32_t)0U);
   bool ok = scrut.fst;
   uint32_t pos = scrut.snd;
-  K___bool_uint32_t scrut0 = serialize_hash_vec(ok, *p1, output, sz, pos);
+  K___bool_uint32_t scrut0 = serialize_hash_vec(ok, *ncp, output, sz1, pos);
   bool ok1 = scrut0.fst;
   uint32_t pos1 = scrut0.snd;
   if (ok1)
   {
-    return pos1;
+    return (uint64_t)pos1;
   }
-  return (uint32_t)0U;
+  return (uint64_t)0U;
 }
 
-LowStar_Vector_vector_str___uint8_t_ **mt_deserialize_path(uint8_t *input, uint32_t sz)
+LowStar_Vector_vector_str___uint8_t_ *mt_deserialize_path(const uint8_t *input, uint64_t sz)
 {
-  K___bool_uint32_t_uint32_t scrut0 = deserialize_uint32_t(true, input, sz, (uint32_t)0U);
+  uint32_t sz1 = (uint32_t)sz;
+  K___bool_uint32_t_uint32_t scrut0 = deserialize_uint32_t(true, input, sz1, (uint32_t)0U);
   bool ok = scrut0.fst;
   uint32_t pos = scrut0.snd;
   uint32_t hash_size1 = scrut0.thd;
   K___bool_uint32_t_LowStar_Vector_vector_str___uint8_t_
-  scrut = deserialize_hash_vec(ok, input, sz, pos);
+  scrut = deserialize_hash_vec(ok, input, sz1, pos);
   bool ok1 = scrut.fst;
   LowStar_Vector_vector_str___uint8_t_ hs = scrut.thd;
   if (!ok1 || hash_size1 != hash_size)
@@ -2008,10 +2048,6 @@ LowStar_Vector_vector_str___uint8_t_ **mt_deserialize_path(uint8_t *input, uint3
   LowStar_Vector_vector_str___uint8_t_
   *buf = KRML_HOST_MALLOC(sizeof (LowStar_Vector_vector_str___uint8_t_));
   buf[0U] = hs;
-  KRML_CHECK_SIZE(sizeof (LowStar_Vector_vector_str___uint8_t_ *), (uint32_t)1U);
-  LowStar_Vector_vector_str___uint8_t_
-  **buf0 = KRML_HOST_MALLOC(sizeof (LowStar_Vector_vector_str___uint8_t_ *));
-  buf0[0U] = buf;
-  return buf0;
+  return buf;
 }
 
