@@ -113,6 +113,12 @@ extern void (*free_hash)(uint8_t *x0);
 
 /* SNIPPET_END: free_hash */
 
+/* SNIPPET_START: hash_fun_t */
+
+typedef void (*hash_fun_t)(uint8_t *x0, uint8_t *x1, uint8_t *x2);
+
+/* SNIPPET_END: hash_fun_t */
+
 /* SNIPPET_START: hash_2 */
 
 void hash_2(uint8_t *src1, uint8_t *src2, uint8_t *dst);
@@ -172,6 +178,7 @@ typedef struct merkle_tree_s
   bool rhs_ok;
   LowStar_Vector_vector_str___uint8_t_ rhs;
   uint8_t *mroot;
+  void (*hash_fun)(uint8_t *x0, uint8_t *x1, uint8_t *x2);
 }
 merkle_tree;
 
@@ -226,6 +233,13 @@ uint8_t *__proj__MT__item__mroot(merkle_tree projectee);
 
 /* SNIPPET_END: __proj__MT__item__mroot */
 
+/* SNIPPET_START: __proj__MT__item__hash_fun */
+
+void
+(*__proj__MT__item__hash_fun(merkle_tree projectee))(uint8_t *x0, uint8_t *x1, uint8_t *x2);
+
+/* SNIPPET_END: __proj__MT__item__hash_fun */
+
 /* SNIPPET_START: mt_p */
 
 typedef merkle_tree *mt_p;
@@ -276,6 +290,13 @@ bool mt_insert_pre(const merkle_tree *mt, uint8_t *v1);
 void mt_insert(merkle_tree *mt, uint8_t *v1);
 
 /* SNIPPET_END: mt_insert */
+
+/* SNIPPET_START: mt_create_custom */
+
+merkle_tree
+*mt_create_custom(uint8_t *init1, void (*hash_fun)(uint8_t *x0, uint8_t *x1, uint8_t *x2));
+
+/* SNIPPET_END: mt_create_custom */
 
 /* SNIPPET_START: mt_create */
 
