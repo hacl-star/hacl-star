@@ -34,7 +34,6 @@ function vale_test() {
 }
 
 function hacl_test() {
-  return 0
     make_target=ci
     if [[ $target == "mozilla-ci" ]]; then
         make_target=mozilla-ci
