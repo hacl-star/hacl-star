@@ -57,7 +57,7 @@ let lemma_k_reqs_equiv k_b h =
     //Proves
     //assert (k_seq.[i] == Vale.Interop.Views.get128 (Seq.slice down_s (i*16) (i*16+16)));
 
-    Vale.Def.Opaque_s.reveal_opaque Vale.Interop.Views.get128_def;
+    FStar.Pervasives.reveal_opaque (`%Vale.Interop.Views.get128) Vale.Interop.Views.get128;
     // We get the following by revealing the definition of get128
     // let s_slice = seq_uint8_to_seq_nat8 (Seq.slice down_s (i*16) (i*16+16)) in
     // assert (k_seq.[i] == le_bytes_to_quad32 s_slice);
@@ -81,7 +81,7 @@ let lemma_k_reqs_equiv k_b h =
     DV.put_sel h db (4*(4*i+2));
     DV.put_sel h db (4*(4*i+3));
 
-    Vale.Def.Opaque_s.reveal_opaque Vale.Interop.Views.put32_def;
+    FStar.Pervasives.reveal_opaque (`%Vale.Interop.Views.put32) Vale.Interop.Views.put32;
 
     // Apply the only lemmas without SMTPat to simplify the following patterns:
     // assert (four_to_nat 8 (
@@ -136,7 +136,7 @@ let simplify_le_bytes_to_hash_uint32 b h =
       UV.get_sel h ub i';
       FStar.Pervasives.reveal_opaque (`%seq_to_seq_four_LE) (seq_to_seq_four_LE #nat8);
 
-      Vale.Def.Opaque_s.reveal_opaque Vale.Interop.Views.get128_def;
+      FStar.Pervasives.reveal_opaque (`%Vale.Interop.Views.get128) Vale.Interop.Views.get128;
       FStar.Pervasives.reveal_opaque (`%le_bytes_to_quad32) le_bytes_to_quad32;
       // Revealing these definitions gives us the following
       assert (Vale.Interop.Views.get128 (Seq.slice (DV.as_seq h db)
@@ -157,7 +157,7 @@ let simplify_le_bytes_to_hash_uint32 b h =
       DV.put_sel h db (4*(4*i'+2));
       DV.put_sel h db (4*(4*i'+3));
 
-      Vale.Def.Opaque_s.reveal_opaque Vale.Interop.Views.put32_def;
+      FStar.Pervasives.reveal_opaque (`%Vale.Interop.Views.put32) Vale.Interop.Views.put32;
 
       // Apply the only lemmas without SMTPat to simplify the following patterns:
       // assert (four_to_nat 8 (
@@ -172,7 +172,7 @@ let simplify_le_bytes_to_hash_uint32 b h =
       seq_to_four_to_seq_LE (nat_to_four 8 (UInt32.v (Seq.index s_init (4*i'+2))));
       seq_to_four_to_seq_LE (nat_to_four 8 (UInt32.v (Seq.index s_init (4*i'+3))));
 
-      Vale.Def.Opaque_s.reveal_opaque Vale.Interop.Views.get32_128_def;
+      FStar.Pervasives.reveal_opaque (`%Vale.Interop.Views.get32_128) Vale.Interop.Views.get32_128;
       assert (UInt32.uint_to_t (four_select (Seq.index s i') (i%4)) ==
         Seq.index (Seq.slice (B.as_seq h b) (i' * 4) (i'*4+4)) (i%4));
       assert (Seq.index (B.as_seq h b) i ==

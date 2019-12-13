@@ -37,7 +37,7 @@ let same_seq_downview8 b h =
   let aux (i:nat{i < B.length b}) : Lemma (Seq.index sdb i == Seq.index s i)
     = DV.as_seq_sel h db i;
       DV.get_sel h db i;
-      Vale.Def.Opaque_s.reveal_opaque Vale.Interop.Views.put8_def
+      FStar.Pervasives.reveal_opaque (`%Vale.Interop.Views.put8) Vale.Interop.Views.put8
   in
   Classical.forall_intro aux;
   assert (Seq.equal s sdb)

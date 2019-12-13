@@ -22,7 +22,7 @@ let same_seq_downview8 (b:B.buffer UInt8.t) (h:HS.mem) : Lemma
   let aux (i:nat{i < B.length b}) : Lemma (Seq.index sdb i == Seq.index s i)
     = DV.as_seq_sel h db i;
       DV.get_sel h db i;
-      Vale.Def.Opaque_s.reveal_opaque Vale.Interop.Views.put8_def
+      FStar.Pervasives.reveal_opaque (`%Vale.Interop.Views.put8) Vale.Interop.Views.put8
   in
   Classical.forall_intro aux;
   assert (Seq.equal s sdb)
@@ -50,7 +50,7 @@ let lemma_seq_nat8_le_seq_quad32_to_bytes_uint32 b h =
     UV.get_sel h ub i';
     same_seq_downview8 b h;
     assert (Seq.index s i' == Vale.Interop.Views.get128 (Seq.slice s_init (i' * 16) (i' * 16 + 16)));
-    Vale.Def.Opaque_s.reveal_opaque Vale.Interop.Views.get128_def;
+    FStar.Pervasives.reveal_opaque (`%Vale.Interop.Views.get128) Vale.Interop.Views.get128;
     let s_slice = seq_uint8_to_seq_nat8 (Seq.slice s_init (i' * 16) (i' * 16 +16)) in
     FStar.Pervasives.reveal_opaque (`%le_bytes_to_quad32) le_bytes_to_quad32;
     assert (seq_to_four_LE (seq_map (four_to_nat 8) (seq_to_seq_four_LE s_slice)) ==

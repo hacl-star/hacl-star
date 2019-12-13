@@ -26,10 +26,10 @@ let gcm_simplify2 b h =
   let aux (i:nat{i < B.length b}) : Lemma (Seq.index s_init i == Seq.index s_down i) =
     DV.as_seq_sel h db i;
     DV.get_sel h db i;
-    Vale.Def.Opaque_s.reveal_opaque Vale.Interop.Views.get8_def
+    FStar.Pervasives.reveal_opaque (`%Vale.Interop.Views.get8) Vale.Interop.Views.get8
   in Classical.forall_intro aux;
   assert (Seq.equal (DV.as_seq h db) (B.as_seq h b));
-  Vale.Def.Opaque_s.reveal_opaque Vale.Interop.Views.get128_def;
+  FStar.Pervasives.reveal_opaque (`%Vale.Interop.Views.get128) Vale.Interop.Views.get128;
   le_quad32_to_bytes_to_quad32 (seq_uint8_to_seq_nat8 s_init)
 
 open Vale.Lib.Seqs_s
@@ -182,7 +182,7 @@ let lemma_same_seq_dv (h:HS.mem) (b:B.buffer UInt8.t) : Lemma
   let aux (i:nat{i < B.length b}) : Lemma (Seq.index (B.as_seq h b) i == Seq.index (DV.as_seq h db) i) =
     DV.as_seq_sel h db i;
     DV.get_sel h db i;
-    Vale.Def.Opaque_s.reveal_opaque Vale.Interop.Views.put8_def
+    FStar.Pervasives.reveal_opaque (`%Vale.Interop.Views.put8) Vale.Interop.Views.put8
   in Classical.forall_intro aux
 
 #reset-options "--z3rlimit 250 --max_fuel 0 --initial_ifuel 1 --max_ifuel 1"
@@ -207,12 +207,12 @@ let aes_simplify1 b h =
   let aux (i:nat{i < B.length b}) : Lemma (Seq.index s_init i == Seq.index s_down i) =
     DV.as_seq_sel h db i;
     DV.get_sel h db i;
-    Vale.Def.Opaque_s.reveal_opaque Vale.Interop.Views.get8_def
+    FStar.Pervasives.reveal_opaque (`%Vale.Interop.Views.get8) Vale.Interop.Views.get8
   in Classical.forall_intro aux;
   assert (Seq.equal (DV.as_seq h db) (B.as_seq h b));
   assert (quad32_to_seq (low_buffer_read TUInt8 TUInt128 h b 0) ==
     four_to_seq_LE (Vale.Interop.Views.get128 (B.as_seq h b)));
-  Vale.Def.Opaque_s.reveal_opaque Vale.Interop.Views.get128_def;
+  FStar.Pervasives.reveal_opaque (`%Vale.Interop.Views.get128) Vale.Interop.Views.get128;
   aes_simplify_aux (seq_uint8_to_seq_nat8 s_init)
 #pop-options
 
@@ -229,13 +229,13 @@ let aes_simplify2 b h =
   let aux (i:nat{i < B.length b}) : Lemma (Seq.index s_init i == Seq.index s_down i) =
     DV.as_seq_sel h db i;
     DV.get_sel h db i;
-    Vale.Def.Opaque_s.reveal_opaque Vale.Interop.Views.get8_def
+    FStar.Pervasives.reveal_opaque (`%Vale.Interop.Views.get8) Vale.Interop.Views.get8
   in Classical.forall_intro aux;
   assert (Seq.equal (DV.as_seq h db) (B.as_seq h b));
   UV.length_eq b_v;
   UV.get_sel h b_v 0;
   UV.get_sel h b_v 1;
-  Vale.Def.Opaque_s.reveal_opaque Vale.Interop.Views.get128_def;
+  FStar.Pervasives.reveal_opaque (`%Vale.Interop.Views.get128) Vale.Interop.Views.get128;
   aes_simplify_aux (seq_uint8_to_seq_nat8 (Seq.slice s_init 0 16));
   aes_simplify_aux (seq_uint8_to_seq_nat8 (Seq.slice s_init 16 32));
   assert (Seq.equal
