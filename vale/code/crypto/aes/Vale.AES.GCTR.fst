@@ -588,8 +588,8 @@ let quad32_xor_bytewise (q q' r:quad32) (n:nat{ n <= 16 }) : Lemma
   lemma_slices_le_quad32_to_bytes (quad32_xor q r);
   lemma_slices_le_quad32_to_bytes (quad32_xor q' r);
   lemma_slice_orig_index s s' 0 n;
-  reveal_opaque quad32_xor_def;
-  reveal_opaque reverse_bytes_nat32_def;
+  FStar.Pervasives.reveal_opaque (`%quad32_xor) quad32_xor;
+  FStar.Pervasives.reveal_opaque (`%reverse_bytes_nat32) reverse_bytes_nat32;
   if n < 4 then nat32_xor_bytewise q.lo0 q'.lo0 r.lo0 (slice s 0 4) (slice s' 0 4) (slice t 0 4) (slice t' 0 4) n
   else
   (

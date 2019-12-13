@@ -37,7 +37,7 @@ let lemma_le_bytes_to_quad32_prefix_equality (b0:seq nat8 {length b0 == 16}) (b1
   =
   let q0 = le_bytes_to_quad32 b0 in
   let q1 = le_bytes_to_quad32 b1 in
-  reveal_opaque le_bytes_to_quad32_def;
+  FStar.Pervasives.reveal_opaque (`%le_bytes_to_quad32) le_bytes_to_quad32;
 
   (*
    * AR: 06/25: Someone should review this code, is this proof supposed to work without revealing this?

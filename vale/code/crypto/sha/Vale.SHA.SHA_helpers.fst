@@ -810,7 +810,7 @@ let lemma_endian_relation (quads qs:seq quad32) (input2:seq UInt8.t) : Lemma
       slice input2 (4 * i) (4 * i + 4);
       == {}
       slice (seq_nat8_to_seq_uint8 (le_seq_quad32_to_bytes quads)) (4 * i) (4 * i + 4);
-      == {Vale.Def.Opaque_s.reveal_opaque le_seq_quad32_to_bytes_def}
+      == {FStar.Pervasives.reveal_opaque (`%le_seq_quad32_to_bytes) le_seq_quad32_to_bytes}
       slice (seq_nat8_to_seq_uint8 (seq_nat32_to_seq_nat8_LE (seq_four_to_seq_LE quads))) (4 * i) (4 * i + 4);
       equal {}
       seq_nat8_to_seq_uint8 (slice (seq_nat32_to_seq_nat8_LE (seq_four_to_seq_LE quads)) (4 * i) (4 * i + 4));
@@ -849,7 +849,7 @@ let lemma_endian_relation (quads qs:seq quad32) (input2:seq UInt8.t) : Lemma
       nat32_to_word (be_bytes_to_nat32 (four_to_seq_LE (nat_to_four 8 ni)));
       == {}
       nat32_to_word (be_bytes_to_nat32 (reverse_seq (nat32_to_be_bytes ni)));
-      == {Vale.Def.Opaque_s.reveal_opaque reverse_bytes_nat32_def}
+      == {FStar.Pervasives.reveal_opaque (`%reverse_bytes_nat32) reverse_bytes_nat32}
       nat32_to_word (reverse_bytes_nat32 ni);
       == {}
       nat32_to_word (reverse_bytes_nat32 (seq_four_to_seq_LE quads).[i]);
@@ -1037,7 +1037,7 @@ let lemma_le_bytes_to_hash_quads_part1 (s:seq quad32) : Lemma
   =
   let lhs = le_bytes_to_hash (le_seq_quad32_to_bytes s) in
   assert (lhs == Vale.Lib.Seqs_s.seq_map nat32_to_word (Vale.Def.Words.Seq_s.seq_nat8_to_seq_nat32_LE (le_seq_quad32_to_bytes s)));
-  reveal_opaque le_seq_quad32_to_bytes_def;
+  FStar.Pervasives.reveal_opaque (`%le_seq_quad32_to_bytes) le_seq_quad32_to_bytes;
   Vale.Def.Words.Seq.seq_nat8_to_seq_nat32_to_seq_nat8_LE (Vale.Def.Words.Seq_s.seq_four_to_seq_LE s);
   ()
 

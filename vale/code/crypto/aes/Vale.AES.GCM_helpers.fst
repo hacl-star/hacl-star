@@ -423,7 +423,7 @@ let lemma_slices_le_bytes_to_quad32 (s:seq16 nat8) : Lemma
   ))
   =
   FStar.Pervasives.reveal_opaque (`%seq_to_seq_four_LE) (seq_to_seq_four_LE #nat8);
-  reveal_opaque le_bytes_to_quad32_def;
+  FStar.Pervasives.reveal_opaque (`%le_bytes_to_quad32) le_bytes_to_quad32;
   ()
 
 let lemma_four_zero (_:unit) : Lemma

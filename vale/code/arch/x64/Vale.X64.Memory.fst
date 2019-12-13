@@ -101,7 +101,7 @@ let index64_heap_aux (s:Seq.lseq UInt8.t 8) (heap:S.machine_heap) (ptr:int) : Le
   FStar.Pervasives.reveal_opaque (`%seq_to_seq_four_LE) (seq_to_seq_four_LE #nat8);
   Vale.Def.Opaque_s.reveal_opaque Vale.Interop.Views.get64_def;
   FStar.Pervasives.reveal_opaque (`%S.get_heap_val64) S.get_heap_val64;
-  Vale.Def.Opaque_s.reveal_opaque Vale.Def.Types_s.le_bytes_to_nat64_def
+  FStar.Pervasives.reveal_opaque (`%Vale.Def.Types_s.le_bytes_to_nat64) Vale.Def.Types_s.le_bytes_to_nat64
 
 let index_helper (x y:int) (heap:S.machine_heap) : Lemma
   (requires x == y)
@@ -158,7 +158,7 @@ let index128_get_heap_val128_aux (s:Seq.lseq UInt8.t 16) (ptr:int) (heap:S.machi
   FStar.Pervasives.reveal_opaque (`%seq_to_seq_four_LE) (seq_to_seq_four_LE #nat8);
   FStar.Pervasives.reveal_opaque (`%S.get_heap_val32) S.get_heap_val32;
   Vale.Def.Opaque_s.reveal_opaque Vale.Interop.Views.get128_def;
-  Vale.Def.Opaque_s.reveal_opaque Vale.Def.Types_s.le_bytes_to_quad32_def
+  FStar.Pervasives.reveal_opaque (`%Vale.Def.Types_s.le_bytes_to_quad32) Vale.Def.Types_s.le_bytes_to_quad32
 
 val index128_get_heap_val128 (h:vale_heap)
                            (b:buffer128{List.memP b (_ih h).ptrs})

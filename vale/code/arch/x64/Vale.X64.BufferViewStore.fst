@@ -32,7 +32,7 @@ let get64_aux (ptr:int) (heap:machine_heap) (v:nat64) (k:nat{k < 8}) : Lemma
   (ensures heap.[ptr + k] == UInt8.v (Seq.index (put64 (UInt64.uint_to_t v)) k)) =
   FStar.Pervasives.reveal_opaque (`%get_heap_val64) get_heap_val64;
   Vale.Def.Opaque_s.reveal_opaque put64_def;
-  Vale.Def.Opaque_s.reveal_opaque le_nat64_to_bytes_def;
+  FStar.Pervasives.reveal_opaque (`%le_nat64_to_bytes) le_nat64_to_bytes;
   FStar.Pervasives.reveal_opaque (`%seq_four_to_seq_LE) (seq_four_to_seq_LE #nat8);
   four_to_nat_8_injective ();
   two_to_nat_32_injective ()

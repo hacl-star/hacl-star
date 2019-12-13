@@ -320,7 +320,7 @@ let lemma_reverse_bytes_quad32_xor (a b:quad32) : Lemma
     =
     calc (==) {
       r32 (nat32_xor a b);
-      == {reveal_opaque reverse_bytes_nat32_def}
+      == {FStar.Pervasives.reveal_opaque (`%reverse_bytes_nat32) reverse_bytes_nat32}
       be_bytes_to_nat32 (reverse_seq (nat32_to_be_bytes (nat32_xor a b)));
       == {
         let x = nat32_xor a b in
@@ -334,7 +334,7 @@ let lemma_reverse_bytes_quad32_xor (a b:quad32) : Lemma
         ()
       }
       nat32_xor (be_bytes_to_nat32 (reverse_seq (nat32_to_be_bytes a))) (be_bytes_to_nat32 (reverse_seq (nat32_to_be_bytes b)));
-      == {reveal_opaque reverse_bytes_nat32_def}
+      == {FStar.Pervasives.reveal_opaque (`%reverse_bytes_nat32) reverse_bytes_nat32}
       nat32_xor (r32 a) (r32 b);
     }
     // r32 n = be_bytes_to_nat32 (reverse_seq (nat32_to_be_bytes n))
@@ -342,7 +342,7 @@ let lemma_reverse_bytes_quad32_xor (a b:quad32) : Lemma
     in
   calc (==) {
     !!(quad32_xor a b);
-    == {reveal_opaque quad32_xor_def}
+    == {FStar.Pervasives.reveal_opaque (`%quad32_xor) quad32_xor}
     !!(four_map2 nat32_xor a b);
     == {reveal_reverse_bytes_quad32 (four_map2 nat32_xor a b)}
     four_reverse (four_map r32 (four_map2 nat32_xor a b));
@@ -360,7 +360,7 @@ let lemma_reverse_bytes_quad32_xor (a b:quad32) : Lemma
     four_map2 nat32_xor (four_reverse (four_map r32 a)) (four_reverse (four_map r32 b));
     == {reveal_reverse_bytes_quad32 a; reveal_reverse_bytes_quad32 b}
     four_map2 nat32_xor !!a !!b;
-    == {reveal_opaque quad32_xor_def}
+    == {FStar.Pervasives.reveal_opaque (`%quad32_xor) quad32_xor}
     quad32_xor !!a !!b;
   }
 

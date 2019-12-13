@@ -79,8 +79,8 @@ let rec lemma_expand_key_256 (key:seq nat32) (size:nat) =
 // SIMD version of round_key_256 is equivalent to scalar round_key_256
 #push-options "--max_fuel 3 --initial_fuel 3 --max_ifuel 3 --initial_ifuel 3"  // REVIEW: Why do we need this?
 let lemma_simd_round_key (prev0 prev1:quad32) (rcon:nat32) (round:int) =
-  reveal_opaque quad32_xor_def;
-  reveal_opaque reverse_bytes_nat32_def;
+  FStar.Pervasives.reveal_opaque (`%quad32_xor) quad32_xor;
+  FStar.Pervasives.reveal_opaque (`%reverse_bytes_nat32) reverse_bytes_nat32;
   commute_rot_word_sub_word prev1.hi3;
   Vale.Arch.Types.xor_lemmas ()
 #pop-options

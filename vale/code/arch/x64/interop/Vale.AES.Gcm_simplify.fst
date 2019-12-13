@@ -136,7 +136,7 @@ let be_quad32_to_bytes_sel q i =
 
 let reverse_nat32_four_to_nat (n:nat32) (i:nat{i < 4}) : Lemma
   (four_select (nat_to_four 8 n) i == four_select (nat_to_four 8 (reverse_bytes_nat32 n)) (3 - i))
-  = Vale.Def.Opaque_s.reveal_opaque reverse_bytes_nat32_def
+  = FStar.Pervasives.reveal_opaque (`%reverse_bytes_nat32) reverse_bytes_nat32
 
 val reverse_bytes_four_select (q:quad32) (i:nat{i < 4}) : Lemma
   (let Mkfour q0 q1 q2 q3 = q in
@@ -189,8 +189,9 @@ let lemma_same_seq_dv (h:HS.mem) (b:B.buffer UInt8.t) : Lemma
 
 let aes_simplify_aux (s:seq16 nat8) : Lemma
   (seq_nat8_to_seq_nat32_LE s == quad32_to_seq (le_bytes_to_quad32 s))
-  = Vale.Def.Opaque_s.reveal_opaque le_bytes_to_quad32_def;
-    assert (Seq.equal (seq_nat8_to_seq_nat32_LE s) (quad32_to_seq (le_bytes_to_quad32 s)))
+  =
+  FStar.Pervasives.reveal_opaque (`%le_bytes_to_quad32) le_bytes_to_quad32;
+  assert (Seq.equal (seq_nat8_to_seq_nat32_LE s) (quad32_to_seq (le_bytes_to_quad32 s)))
 
 #push-options "--z3cliopt smt.arith.nl=true"
 let aes_simplify1 b h =

@@ -46,14 +46,14 @@ let xor_lemmas () =
 
 #push-options "--max_fuel 3 --initial_fuel 3 --max_ifuel 3 --initial_ifuel 3"  // REVIEW: Why do we need this?
 let lemma_quad32_xor () =
-  reveal_opaque quad32_xor_def;
-  reveal_opaque reverse_bytes_nat32_def;
+  FStar.Pervasives.reveal_opaque (`%quad32_xor) quad32_xor;
+  FStar.Pervasives.reveal_opaque (`%reverse_bytes_nat32) reverse_bytes_nat32;
   xor_lemmas()
   (*
   let helper (q:quad32) : Lemma (quad32_xor q q == Mkfour 0 0 0 0) =
     let q' = quad32_xor q q in
-    reveal_opaque quad32_xor_def;
-    reveal_opaque reverse_bytes_nat32_def;
+    FStar.Pervasives.reveal_opaque (`%quad32_xor) quad32_xor;
+    FStar.Pervasives.reveal_opaque (`%reverse_bytes_nat32) reverse_bytes_nat32;
     // REVIEW: Why are these necessary?
     assert (q'.lo0 == nat32_xor q.lo0 q.lo0);
     assert (q'.lo1 == nat32_xor q.lo1 q.lo1);
@@ -68,15 +68,15 @@ let lemma_quad32_xor () =
 let lemma_reverse_reverse_bytes_nat32 (n:nat32) :
   Lemma (reverse_bytes_nat32 (reverse_bytes_nat32 n) == n)
   =
-  reveal_opaque reverse_bytes_nat32_def;
+  FStar.Pervasives.reveal_opaque (`%reverse_bytes_nat32) reverse_bytes_nat32;
   let r = reverse_seq (nat32_to_be_bytes n) in
   be_bytes_to_nat32_to_be_bytes r;
   ()
 
 #push-options "--max_fuel 3 --initial_fuel 3 --max_ifuel 3 --initial_ifuel 3"  // REVIEW: Why do we need this?
 let lemma_reverse_bytes_quad32 (q:quad32) =
-  reveal_opaque quad32_xor_def;
-  reveal_opaque reverse_bytes_nat32_def;
+  FStar.Pervasives.reveal_opaque (`%quad32_xor) quad32_xor;
+  FStar.Pervasives.reveal_opaque (`%reverse_bytes_nat32) reverse_bytes_nat32;
   reveal_reverse_bytes_quad32 q;
   reveal_reverse_bytes_quad32 (reverse_bytes_quad32 q);
   ()
@@ -85,7 +85,7 @@ let lemma_reverse_bytes_quad32 (q:quad32) =
 let lemma_reverse_bytes_nat32 (_:unit) : Lemma
   (reverse_bytes_nat32 0 == 0)
   =
-  reveal_opaque reverse_bytes_nat32_def;
+  FStar.Pervasives.reveal_opaque (`%reverse_bytes_nat32) reverse_bytes_nat32;
   assert_norm (nat_to_four 8 0 == Mkfour 0 0 0 0);
   ()
 
@@ -195,14 +195,13 @@ let lemma_hi64_properties (_:unit) :
 let lemma_reverse_bytes_nat64_32 (n0 n1:nat32) : Lemma
   (reverse_bytes_nat64 (two_to_nat32 (Mktwo n0 n1)) == two_to_nat32 (Mktwo (reverse_bytes_nat32 n1) (reverse_bytes_nat32 n0)))
   =
-  reveal_opaque reverse_bytes_nat64_def
+  FStar.Pervasives.reveal_opaque (`%reverse_bytes_nat64) reverse_bytes_nat64
 
 let lemma_reverse_bytes_quad32_64 (src orig final:quad32) : Lemma
   (requires final == insert_nat64_opaque (insert_nat64_opaque orig (reverse_bytes_nat64 (hi64 src)) 0) (reverse_bytes_nat64 (lo64 src)) 1)
   (ensures  final == reverse_bytes_quad32 src)
   =
-
-  reveal_opaque reverse_bytes_nat64_def;
+  FStar.Pervasives.reveal_opaque (`%reverse_bytes_nat64) reverse_bytes_nat64;
   let Mkfour x0 x1 x2 x3 = src in
 
   let two32 = (two_to_nat32 (Mktwo (reverse_bytes_nat32 x3) (reverse_bytes_nat32 x2))) in
@@ -299,12 +298,12 @@ let lemma_insrq_extrq_relations (x y:quad32) :
 open Vale.Def.Words.Two
 
 let le_bytes_to_nat64_to_bytes s =
-  Vale.Def.Opaque_s.reveal_opaque le_nat64_to_bytes_def;
-  Vale.Def.Opaque_s.reveal_opaque le_bytes_to_nat64_def
+  FStar.Pervasives.reveal_opaque (`%le_nat64_to_bytes) le_nat64_to_bytes;
+  FStar.Pervasives.reveal_opaque (`%le_bytes_to_nat64) le_bytes_to_nat64
 
 let le_nat64_to_bytes_to_nat64 n =
-  Vale.Def.Opaque_s.reveal_opaque le_nat64_to_bytes_def;
-  Vale.Def.Opaque_s.reveal_opaque le_bytes_to_nat64_def
+  FStar.Pervasives.reveal_opaque (`%le_nat64_to_bytes) le_nat64_to_bytes;
+  FStar.Pervasives.reveal_opaque (`%le_bytes_to_nat64) le_bytes_to_nat64
 
 
 let le_bytes_to_seq_quad32_empty () :
@@ -348,7 +347,7 @@ let le_bytes_to_seq_quad32_to_bytes (s:seq quad32) :
  *)
   =
   FStar.Pervasives.reveal_opaque (`%le_bytes_to_seq_quad32) le_bytes_to_seq_quad32;
-  reveal_opaque le_seq_quad32_to_bytes_def;
+  FStar.Pervasives.reveal_opaque (`%le_seq_quad32_to_bytes) le_seq_quad32_to_bytes;
   seq_to_seq_four_to_seq_LE (seq_map (nat_to_four 8) (seq_four_to_seq_LE s));
   seq_map_inverses (nat_to_four 8) (four_to_nat 8) (seq_four_to_seq_LE s);
   seq_to_seq_four_to_seq_LE (s) ;
@@ -356,7 +355,7 @@ let le_bytes_to_seq_quad32_to_bytes (s:seq quad32) :
 
 let le_seq_quad32_to_bytes_to_seq_quad32 s =
   FStar.Pervasives.reveal_opaque (`%le_bytes_to_seq_quad32) le_bytes_to_seq_quad32;
-  Vale.Def.Opaque_s.reveal_opaque le_seq_quad32_to_bytes_def;
+  FStar.Pervasives.reveal_opaque (`%le_seq_quad32_to_bytes) le_seq_quad32_to_bytes;
   calc (==) {
     le_seq_quad32_to_bytes (le_bytes_to_seq_quad32 s);
     (==) { }
@@ -376,7 +375,7 @@ seq_four_to_seq_LE (seq_map (nat_to_four 8) (four_to_seq_LE (seq_to_four_LE (seq
 let le_quad32_to_bytes_to_quad32 s =
   calc (==) {
     le_quad32_to_bytes (le_bytes_to_quad32 s);
-    == {reveal_opaque le_bytes_to_quad32_def}
+    == {FStar.Pervasives.reveal_opaque (`%le_bytes_to_quad32) le_bytes_to_quad32}
     le_quad32_to_bytes (seq_to_four_LE (seq_map (four_to_nat 8) (seq_to_seq_four_LE s)));
     == {FStar.Pervasives.reveal_opaque (`%le_quad32_to_bytes) le_quad32_to_bytes}
     seq_four_to_seq_LE (seq_map (nat_to_four 8) (four_to_seq_LE (seq_to_four_LE (seq_map (four_to_nat 8) (seq_to_seq_four_LE s)))));
@@ -391,7 +390,7 @@ let le_quad32_to_bytes_to_quad32 s =
 let le_seq_quad32_to_bytes_of_singleton (q:quad32) :
   Lemma (le_quad32_to_bytes q == le_seq_quad32_to_bytes (create 1 q))
   =
-  reveal_opaque le_seq_quad32_to_bytes_def;
+  FStar.Pervasives.reveal_opaque (`%le_seq_quad32_to_bytes) le_seq_quad32_to_bytes;
   FStar.Pervasives.reveal_opaque (`%le_quad32_to_bytes) le_quad32_to_bytes;
   four_to_seq_LE_is_seq_four_to_seq_LE q;
   ()
@@ -424,7 +423,7 @@ let le_quad32_to_bytes_injective_specific (b b':quad32) :
   le_quad32_to_bytes_injective()
 
 let le_seq_quad32_to_bytes_injective (b b':seq quad32) =
-  Vale.Def.Opaque_s.reveal_opaque le_seq_quad32_to_bytes_def;
+  FStar.Pervasives.reveal_opaque (`%le_seq_quad32_to_bytes) le_seq_quad32_to_bytes;
   seq_four_to_seq_LE_injective nat8;
   nat_to_four_8_injective();
   seq_map_injective (nat_to_four 8) (seq_four_to_seq_LE b) (seq_four_to_seq_LE b');
@@ -443,7 +442,7 @@ let le_bytes_to_seq_quad_of_singleton (q:quad32) (b:seq nat8 { length b == 16 })
   (ensures create 1 q == le_bytes_to_seq_quad32 b)
   =
   FStar.Pervasives.reveal_opaque (`%le_bytes_to_seq_quad32) le_bytes_to_seq_quad32;
-  reveal_opaque le_bytes_to_quad32_def;
+  FStar.Pervasives.reveal_opaque (`%le_bytes_to_quad32) le_bytes_to_quad32;
   seq_to_four_LE_is_seq_to_seq_four_LE (seq_map (four_to_nat 8) (seq_to_seq_four_LE b));
   // q == le_bytes_to_quad32 b
   //   == seq_to_four_LE (seq_map (four_to_nat 8) (seq_to_seq_four_LE b))
@@ -471,7 +470,7 @@ let le_bytes_to_quad32_to_bytes (q:quad32) :
 let be_bytes_to_quad32_to_bytes (q:quad32) :
   Lemma (be_bytes_to_quad32 (be_quad32_to_bytes q) == q)
   =
-  reveal_opaque be_bytes_to_quad32_def;
+  FStar.Pervasives.reveal_opaque (`%be_bytes_to_quad32) be_bytes_to_quad32;
   let q':quad32 = be_bytes_to_quad32 (be_quad32_to_bytes q) in
   seq_to_seq_four_to_seq_BE (seq_map (nat_to_four 8) (four_to_seq_BE q));
   seq_map_inverses (nat_to_four 8) (four_to_nat 8) (four_to_seq_BE q);
@@ -520,7 +519,7 @@ let slice_commutes_le_seq_quad32_to_bytes (s:seq quad32) (n:nat{n <= length s}) 
   Lemma(slice (le_seq_quad32_to_bytes s) (n * 16) (n' * 16) ==
         le_seq_quad32_to_bytes (slice s n n'))
   =
-  reveal_opaque le_seq_quad32_to_bytes_def;
+  FStar.Pervasives.reveal_opaque (`%le_seq_quad32_to_bytes) le_seq_quad32_to_bytes;
   slice_commutes_seq_four_to_seq_LE s n n';
   assert (slice (seq_four_to_seq_LE s) (n * 4) (n' * 4) == seq_four_to_seq_LE (slice s n n'));
 (*
@@ -563,7 +562,7 @@ let append_distributes_le_bytes_to_seq_quad32 (s1:seq nat8 { length s1 % 16 == 0
   ()
 
 let append_distributes_le_seq_quad32_to_bytes s1 s2 =
-  Vale.Def.Opaque_s.reveal_opaque le_seq_quad32_to_bytes_def;
+  FStar.Pervasives.reveal_opaque (`%le_seq_quad32_to_bytes) le_seq_quad32_to_bytes;
   calc (==) {
     le_seq_quad32_to_bytes (s1 @| s2);
     (==) { }
