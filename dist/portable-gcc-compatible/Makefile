@@ -136,7 +136,7 @@ lib_gen/%_gen.exe: libevercrypt.a
 	$(OCAMLOPT) $(filter-out %.a,$^) libevercrypt.a -o $@ $(MLLDFLAGS)
 
 %.cmx: %.ml
-	$(OCAMLOPT) -c $< -o $@
+	$(OCAMLOPT) -c $^ -o $@
 
 .PRECIOUS: lib/%_stubs.ml
 lib/%_stubs.ml: lib/%_c_stubs.c
