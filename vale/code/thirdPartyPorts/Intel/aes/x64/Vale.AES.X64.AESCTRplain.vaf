@@ -113,7 +113,7 @@ procedure aes_ctr_loop_body(
         iv_lower64 == lo64(iv);
 
         // GCTR progress
-        gctr_partial(alg, 4*count, old(buffer128_as_seq(mem, plain_b)), buffer128_as_seq(mem, out_b), key, icb_BE);
+        gctr_partial_def(alg, 4*count, old(buffer128_as_seq(mem, plain_b)), buffer128_as_seq(mem, out_b), key, icb_BE);
 
     reads key_ptr; iv_lower64; mask64; four; memTaint;
     modifies const2_1; const4_3; rk4; rk1; rk2; rk3; ctr1; ctr2; ctr3; ctr4;
@@ -137,7 +137,7 @@ procedure aes_ctr_loop_body(
         const4_3 == Mkfour(iv.hi2, reverse_bytes_nat32(add_wrap32(icb_BE.lo0, add_wrap32(#nat32(4 * count + 4), 3))), iv.hi2, reverse_bytes_nat32(add_wrap32(icb_BE.lo0, add_wrap32(#nat32(4 * count + 4), 2))));
 
         // GCTR progress
-        gctr_partial(alg, 4*count+4, old(buffer128_as_seq(mem, plain_b)), buffer128_as_seq(mem, out_b), key, icb_BE);
+        gctr_partial_def(alg, 4*count+4, old(buffer128_as_seq(mem, plain_b)), buffer128_as_seq(mem, out_b), key, icb_BE);
 {
     lemma_insrq_extrq_relations(ctr1, iv);
     lemma_insrq_extrq_relations(ctr2, iv);
@@ -271,7 +271,7 @@ procedure aes_counter_loop(
         mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
 
         // GCTR
-        gctr_partial(alg, 4*old(num_quad_blocks), old(buffer128_as_seq(mem, plain_b)), buffer128_as_seq(mem, out_b), key, old(iv));
+        gctr_partial_def(alg, 4*old(num_quad_blocks), old(buffer128_as_seq(mem, plain_b)), buffer128_as_seq(mem, out_b), key, old(iv));
         iv == old(inc32(iv, 4*num_quad_blocks));
 {
     // To interface with our existing code, start by reversing the IV
@@ -360,7 +360,7 @@ procedure aes_counter_loop(
 
             // GCTR progress
             length(slice(buffer128_as_seq(mem, out_b), 0, 4 * old(num_quad_blocks))) > 0;
-            gctr_partial(alg, 4*count, old(buffer128_as_seq(mem, plain_b)), buffer128_as_seq(mem, out_b), key, icb_BE);
+            gctr_partial_def(alg, 4*count, old(buffer128_as_seq(mem, plain_b)), buffer128_as_seq(mem, out_b), key, icb_BE);
         decreases num_quad_blocks;
     {
         aes_ctr_loop_body(alg, old(plain_ptr), old(out_ptr), old(num_quad_blocks), count, plain_b, out_b, key, round_keys, keys_b, icb_BE, old_iv);

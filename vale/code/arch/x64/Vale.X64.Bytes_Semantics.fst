@@ -22,7 +22,7 @@ open Vale.X64.Instruction_s
 //  =
 //  FStar.Pervasives.reveal_opaque (`%valid_addr64) valid_addr64;
 //  match dst with
-//  | OMem _ -> reveal_opaque update_heap64_def
+//  | OMem _ -> update_heap64_reveal ()
 //  | _ -> ()
 //
 //let update_operand_same_domains (dst:operand64) (ins:ins) (v:nat64) (s:machine_state) : Lemma
@@ -40,7 +40,7 @@ open Vale.X64.Instruction_s
 //  [SMTPat (update_operand128_preserve_flags'' o v s_orig s)]
 //  =
 //  FStar.Pervasives.reveal_opaque (`%valid_addr128) valid_addr128;
-//  Vale.Def.Opaque_s.reveal_opaque update_heap128_def;
+//  update_heap128_reveal ();
 //  match o with
 //  | OMem (m, t) ->
 //      let ptr = eval_maddr m s_orig in
@@ -48,7 +48,7 @@ open Vale.X64.Instruction_s
 //      else
 //        // This line is unusued, but needed
 //        let s1 = update_mem128_and_taint ptr v s t in
-//        reveal_opaque update_heap32_def;
+//        update_heap32_reveal ();
 //        let mem = update_heap32 ptr v.lo0 (heap_get s.ms_heap) in
 //        assert (Set.equal (Map.domain (heap_get s.ms_heap)) (Map.domain mem));
 //        let mem = update_heap32 (ptr+4) v.lo1 mem in
@@ -73,7 +73,7 @@ open Vale.X64.Instruction_s
 //  [SMTPat (update_operand64_preserve_flags'' dst v s_orig s)]
 //  =
 //  match dst with
-//  | OMem _ -> reveal_opaque update_heap64_def
+//  | OMem _ -> update_heap64_reveal ()
 //  | _ -> ()
 //#pop-options
 //
@@ -94,7 +94,7 @@ open Vale.X64.Instruction_s
 //    (forall x. not (Map.contains h1 x && Map.contains h x) ==> h1.[x] == h.[x]))
 //  )
 //  =
-//  reveal_opaque update_heap32_def
+//  update_heap32_reveal ()
 //
 //let update_operand128_flags_same_unspecified (o:operand128) (v:quad32) (s_orig s:machine_state) : Lemma
 //  (let s1 = update_operand128_preserve_flags'' o v s_orig s in
@@ -103,7 +103,7 @@ open Vale.X64.Instruction_s
 //  [SMTPat (update_operand128_preserve_flags'' o v s_orig s)]
 //  =
 //  FStar.Pervasives.reveal_opaque (`%valid_addr128) valid_addr128;
-//  Vale.Def.Opaque_s.reveal_opaque update_heap128_def;
+//  update_heap128_reveal ();
 //  match o with
 //  | OMem (m, t) ->
 //      let ptr = eval_maddr m s_orig in

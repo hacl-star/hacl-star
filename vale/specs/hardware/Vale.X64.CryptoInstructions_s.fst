@@ -48,8 +48,8 @@ let sha256_rnds2_spec_def (src1 src2 wk:quad32) : quad32 =
     let a2,b2,c2,d2,e2,f2,g2,h2 = sha256_rnds2_spec_update a1 b1 c1 d1 e1 f1 g1 h1 wk1 in
     let dst = Mkfour (v f2) (v e2) (v b2) (v a2) in
     dst
-
-let sha256_rnds2_spec = make_opaque sha256_rnds2_spec_def
+[@"opaque_to_smt"] let sha256_rnds2_spec = opaque_make sha256_rnds2_spec_def
+irreducible let sha256_rnds2_spec_reveal = opaque_revealer (`%sha256_rnds2_spec) sha256_rnds2_spec sha256_rnds2_spec_def
 
 let sha256_msg1_spec_def (src1 src2:quad32) : quad32 =
     let open FStar.UInt32 in   // Interop with UInt-based SHA spec
@@ -62,8 +62,8 @@ let sha256_msg1_spec_def (src1 src2:quad32) : quad32 =
            (v (add_mod w1 (_sigma0 SHA2_256 w2)))
            (v (add_mod w2 (_sigma0 SHA2_256 w3)))
            (v (add_mod w3 (_sigma0 SHA2_256 w4)))
-
-let sha256_msg1_spec = make_opaque sha256_msg1_spec_def
+[@"opaque_to_smt"] let sha256_msg1_spec = opaque_make sha256_msg1_spec_def
+irreducible let sha256_msg1_spec_reveal = opaque_revealer (`%sha256_msg1_spec) sha256_msg1_spec sha256_msg1_spec_def
 
 let sha256_msg2_spec_def (src1 src2:quad32) : quad32 =
     let open FStar.UInt32 in   // Interop with UInt-based SHA spec
@@ -74,5 +74,5 @@ let sha256_msg2_spec_def (src1 src2:quad32) : quad32 =
     let w18 = add_mod (uint_to_t src1.hi2) (_sigma1 SHA2_256 w16) in
     let w19 = add_mod (uint_to_t src1.hi3) (_sigma1 SHA2_256 w17) in
     Mkfour (v w16) (v w17) (v w18) (v w19)
-
-let sha256_msg2_spec = make_opaque sha256_msg2_spec_def
+[@"opaque_to_smt"] let sha256_msg2_spec = opaque_make sha256_msg2_spec_def
+irreducible let sha256_msg2_spec_reveal = opaque_revealer (`%sha256_msg2_spec) sha256_msg2_spec sha256_msg2_spec_def

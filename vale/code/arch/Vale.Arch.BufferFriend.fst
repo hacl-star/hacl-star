@@ -37,7 +37,7 @@ let same_seq_downview8 b h =
   let aux (i:nat{i < B.length b}) : Lemma (Seq.index sdb i == Seq.index s i)
     = DV.as_seq_sel h db i;
       DV.get_sel h db i;
-      Vale.Def.Opaque_s.reveal_opaque Vale.Interop.Views.put8_def
+      Vale.Interop.Views.put8_reveal ()
   in
   Classical.forall_intro aux;
   assert (Seq.equal s sdb)
@@ -134,7 +134,7 @@ let nat_from_bytes_le_is_le_bytes_to_nat64 b =
   };
   calc (==) {
     le_bytes_to_nat64 sn <: int;
-    == {Vale.Def.Opaque_s.reveal_opaque le_bytes_to_nat64_def}
+    == {le_bytes_to_nat64_reveal ()}
     two_to_nat 32 (seq_to_two_LE s01) <: int;
     == {assert_norm (two_to_nat 32 (seq_to_two_LE s01) == index s01 0 + pow2 32 * index s01 1)}
     index s01 0 + pow2 32 * index s01 1;

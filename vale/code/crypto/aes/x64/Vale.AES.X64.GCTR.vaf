@@ -161,7 +161,7 @@ procedure gctr_core(
         mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
 
         // GCTR
-        block_offset > 0 ==> gctr_partial(alg, block_offset, buffer128_as_seq(mem, in_b), buffer128_as_seq(mem, out_b), key, old_iv);
+        block_offset > 0 ==> gctr_partial_def(alg, block_offset, buffer128_as_seq(mem, in_b), buffer128_as_seq(mem, out_b), key, old_iv);
         icb == inc32(old_iv, block_offset);
 
         // AES reqs
@@ -176,7 +176,7 @@ procedure gctr_core(
     ensures
         modifies_buffer128(out_b, old(mem), mem);
         validSrcAddrsOffset128(mem, out_ptr, out_b, block_offset, len, memTaint, Secret);
-        gctr_partial(alg, block_offset + len, buffer128_as_seq(mem, in_b), buffer128_as_seq(mem, out_b), key, old_iv);
+        gctr_partial_def(alg, block_offset + len, buffer128_as_seq(mem, in_b), buffer128_as_seq(mem, out_b), key, old_iv);
 
         icb == inc32(old(icb), old(len));
         r9 == in_ptr + 16 * len;
@@ -222,7 +222,7 @@ procedure gctr_core(
             //////////////////// Postcondition goals //////////////////////
             modifies_buffer128(out_b, old(mem), mem);
             validSrcAddrsOffset128(mem, out_ptr, out_b, block_offset, len, memTaint, Secret);
-            gctr_partial(alg, block_offset + rdx, buffer128_as_seq(mem, in_b), buffer128_as_seq(mem, out_b), key, old_iv);
+            gctr_partial_def(alg, block_offset + rdx, buffer128_as_seq(mem, in_b), buffer128_as_seq(mem, out_b), key, old_iv);
         decreases
             len - rdx;
     {
@@ -245,6 +245,10 @@ procedure gctr_core(
 //    gctr_partial_completed(alg, buffer128_as_seq(mem, in_b), buffer128_as_seq(mem, out_b), key, icb_BE);
 }
 
+#reset-options "--z3rlimit 60"
+#verbatim
+#restart-solver
+#endverbatim
 procedure gctr_core_opt(
         inline alg:algorithm,
         ghost in_b:buffer128,
@@ -285,7 +289,7 @@ procedure gctr_core_opt(
     ensures
         modifies_buffer128(out_b, old(mem), mem);
         validSrcAddrs128(mem, old(out_ptr), out_b, old(len), memTaint, Secret);
-        gctr_partial(alg, old(len), buffer128_as_seq(mem, in_b), buffer128_as_seq(mem, out_b), key, old(icb));
+        gctr_partial_def(alg, old(len), buffer128_as_seq(mem, in_b), buffer128_as_seq(mem, out_b), key, old(icb));
 
         icb == old(inc32(icb, len));
         r9 == old(in_ptr + 16 * len);
@@ -364,7 +368,7 @@ procedure gctr_bytes_extra_work(
         in_ptr  == orig_in_ptr  + 16 * num_blocks;
         out_ptr == orig_out_ptr + 16 * num_blocks;
         //rcx == num_bytes;
-        gctr_partial(alg, num_blocks, buffer128_as_seq(mem, in_b), buffer128_as_seq(mem, out_b), key, icb_BE);
+        gctr_partial_def(alg, num_blocks, buffer128_as_seq(mem, in_b), buffer128_as_seq(mem, out_b), key, icb_BE);
         icb == inc32(icb_BE, num_blocks);
     ensures
         let num_blocks := num_bytes / 16;
@@ -445,7 +449,7 @@ procedure gctr_bytes_extra(
         in_ptr  == orig_in_ptr  + 16 * num_blocks;
         out_ptr == orig_out_ptr + 16 * num_blocks;
         //rcx == num_bytes;
-        gctr_partial(alg, num_blocks, buffer128_as_seq(mem, in_b), buffer128_as_seq(mem, out_b), key, icb_BE);
+        gctr_partial_def(alg, num_blocks, buffer128_as_seq(mem, in_b), buffer128_as_seq(mem, out_b), key, icb_BE);
         icb == inc32(icb_BE, num_blocks);
     ensures
         let num_blocks := num_bytes / 16;
@@ -513,7 +517,7 @@ procedure gctr_bytes_no_extra(
         // Extra reqs
         let num_blocks := num_bytes / 16;
         num_bytes % 16 == 0;
-        gctr_partial(alg, num_blocks, buffer128_as_seq(mem, in_b), buffer128_as_seq(mem, out_b), key, icb_BE);
+        gctr_partial_def(alg, num_blocks, buffer128_as_seq(mem, in_b), buffer128_as_seq(mem, out_b), key, icb_BE);
         //icb == inc32(icb_BE, num_blocks);
     ensures
         validSrcAddrs128(mem, orig_out_ptr, out_b, bytes_to_quad_size(num_bytes), memTaint, Secret);
@@ -598,7 +602,7 @@ procedure gctr_bytes(
     Mov64(tmp, num_blocks);
     IMul64(tmp, 16);    // # of bytes in even 128-bit blocks
     gctr_core_opt(alg, in_b, out_b, key, round_keys, keys_b);
-    assert gctr_partial(alg, old(num_blocks), s128(mem, in_b), s128(mem, out_b), key, old(icb));
+    assert gctr_partial_def(alg, old(num_blocks), s128(mem, in_b), s128(mem, out_b), key, old(icb));
     assert icb == inc32(old(icb), old(num_blocks));
 
     gctr_bytes_no_extra(alg, old(icb), in_b, out_b, key, round_keys, keys_b, old(in_ptr), old(out_ptr), old(num_blocks * 16 /* == 128/8 */));

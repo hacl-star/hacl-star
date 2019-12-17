@@ -86,7 +86,7 @@ procedure KeyExpansionRoundEven256(
 
     //assert xmm1 == simd_round_key_256(old(xmm1), old(xmm3), rcon, round + 1);
     lemma_simd_round_key(old(xmm1), old(xmm3), rcon, round + 1);
-    Vale.Def.Opaque_s.reveal_opaque(expand_key_256_def);
+    expand_key_256_reveal();
     //assert xmm1 == round_key_256_rcon(old(xmm1), old(xmm3), rcon, round + 1);
 }
 
@@ -130,7 +130,7 @@ procedure KeyExpansionRoundOdd256(
     //assert xmm1 == simd_round_key_256(old(xmm1), old(xmm3), rcon, round + 1);
     lemma_simd_round_key(old(xmm3), old(xmm1), 0, round + 1);
     lemma_round_key_256_rcon_odd(old(xmm3), old(xmm1), 0, round + 1);
-    Vale.Def.Opaque_s.reveal_opaque(expand_key_256_def);
+    expand_key_256_reveal();
 }
 
 procedure KeyExpansionRoundUnrolledRecursive256(
@@ -215,7 +215,7 @@ procedure KeyExpansion256Stdcall(
     Store128_buffer(rdx, xmm1, 0, Secret, output_key_expansion_b, 0);
     Store128_buffer(rdx, xmm3, 16, Secret, output_key_expansion_b, 1);
 
-    Vale.Def.Opaque_s.reveal_opaque(expand_key_256_def);
+    expand_key_256_reveal();
     KeyExpansionRoundUnrolledRecursive256(key, output_key_expansion_b, 14);
     lemma_expand_key_256(key, 15);
     reveal key_to_round_keys_LE;
@@ -244,12 +244,12 @@ procedure AES256EncryptRound(
     requires
         aesni_enabled && sse_enabled;
         1 <= n < 14 <= length(round_keys);
-        xmm0 == rounds(init, round_keys, #nat(n - 1));
+        xmm0 == eval_rounds_def(init, round_keys, #nat(n - 1));
         r8 == buffer_addr(keys_buffer, mem);
         validSrcAddrs128(mem, r8, keys_buffer, 15, memTaint, Secret);
         buffer128_read(keys_buffer, n, mem) == index(round_keys, n);
     ensures
-        xmm0 == rounds(init, round_keys, n);
+        xmm0 == eval_rounds_def(init, round_keys, n);
 {
     commute_sub_bytes_shift_rows(xmm0);
     Load128_buffer(xmm2, r8, 16 * n, Secret, keys_buffer, n);

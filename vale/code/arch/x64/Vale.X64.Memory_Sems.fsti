@@ -2,6 +2,8 @@ module Vale.X64.Memory_Sems
 
 open FStar.Mul
 open Vale.Def.Prop_s
+open Vale.Def.Types_s
+open Vale.Arch.Types
 open Vale.Arch.HeapImpl
 open Vale.Arch.Heap
 open Vale.Arch.MachineHeap_s
@@ -119,8 +121,6 @@ val low_lemma_valid_mem128_64: b:buffer128 -> i:nat -> h:vale_heap -> Lemma
     S.valid_addr64 (buffer_addr b h + 16 * i + 8) (get_heap h)
   )
 
-open Vale.Arch.Types
-
 val low_lemma_load_mem128_lo64 : b:buffer128 -> i:nat -> h:vale_heap -> Lemma
   (requires
     i < Seq.length (buffer_as_seq h b) /\
@@ -158,7 +158,7 @@ val low_lemma_store_mem128_lo64 : b:buffer128 -> i:nat-> v:nat64 -> h:vale_heap 
     buffer_writeable b
   )
   (ensures (
-    let v' = insert_nat64_opaque (buffer_read b i h) v 0 in
+    let v' = insert_nat64 (buffer_read b i h) v 0 in
     let m = S.update_heap64 (buffer_addr b h + 16 * i) v (get_heap h) in
     is_machine_heap_update (get_heap h) m /\ upd_heap h m == buffer_write b i v' h)
   )
@@ -170,7 +170,7 @@ val low_lemma_store_mem128_hi64 : b:buffer128 -> i:nat-> v:nat64 -> h:vale_heap 
     buffer_writeable b
   )
   (ensures (
-    let v' = insert_nat64_opaque (buffer_read b i h) v 1 in
+    let v' = insert_nat64 (buffer_read b i h) v 1 in
     let m = S.update_heap64 (buffer_addr b h + 16 * i + 8) v (get_heap h) in
     is_machine_heap_update (get_heap h) m /\ upd_heap h m == buffer_write b i v' h)
   )

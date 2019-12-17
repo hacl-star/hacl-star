@@ -126,7 +126,7 @@ procedure compute_ghash_incremental_register()
     Mov128(xmm2, h);    // Move h into the register that ReduceMul128_LE expects
 
     ReduceMul128_LE(gf128_of_quad32(reverse_bytes_quad32(io)), gf128_of_quad32(h));    // io := Y_i * H
-    Vale.Def.Opaque_s.reveal_opaque(ghash_incremental_def);
+    ghash_incremental_reveal();
 }
 
 procedure compute_ghash_incremental(ghost in_b:buffer128)
@@ -190,7 +190,7 @@ procedure compute_ghash_incremental(ghost in_b:buffer128)
 
             Add64(rdx, 1);
             Add64(r9, 16);
-            Vale.Def.Opaque_s.reveal_opaque(ghash_incremental_def);
+            ghash_incremental_reveal();
         }
     }
 }
@@ -255,7 +255,7 @@ procedure compute_ghash_incremental_partial(ghost in_b:buffer128)
 
             Add64(rdx, 1);
             Add64(r9, 16);
-            Vale.Def.Opaque_s.reveal_opaque(ghash_incremental_def);
+            ghash_incremental_reveal();
         }
     }
 }

@@ -110,7 +110,8 @@ let ws_quad32 (t:counter) (block:block_w) : quad32 =
        Mkfour 0 0 0 0
 
 val ws_partial_def (t:counter) (block:block_w) : quad32
-unfold let ws_partial = make_opaque ws_partial_def
+[@"opaque_to_smt"] let ws_partial = opaque_make ws_partial_def
+irreducible let ws_partial_reveal = opaque_revealer (`%ws_partial) ws_partial ws_partial_def
 
 // Top-level proof for the SHA256_msg1 instruction
 val lemma_sha256_msg1 (dst src:quad32) (t:counter) (block:block_w) : Lemma

@@ -62,14 +62,14 @@ val pad_to_128_bits_lower (q:quad32) (num_bytes:int) : Lemma
   (requires 1 <= num_bytes /\ num_bytes < 8)
   (ensures (let new_lo = (lo64 q) % pow2 (num_bytes * 8) in
             new_lo < pow2_64 /\
-            (let q' = insert_nat64_opaque (insert_nat64_opaque q 0 1) new_lo 0 in
+            (let q' = insert_nat64 (insert_nat64 q 0 1) new_lo 0 in
              q' == le_bytes_to_quad32 (pad_to_128_bits (slice (le_quad32_to_bytes q) 0 num_bytes)))))
 
 val pad_to_128_bits_upper (q:quad32) (num_bytes:int) : Lemma
   (requires 8 <= num_bytes /\ num_bytes < 16)
   (ensures (let new_hi = (hi64 q) % pow2 ((num_bytes - 8) * 8) in
             new_hi < pow2_64 /\
-            (let q' = insert_nat64_opaque q new_hi 1 in
+            (let q' = insert_nat64 q new_hi 1 in
              q' == le_bytes_to_quad32 (pad_to_128_bits (slice (le_quad32_to_bytes q) 0 num_bytes)))))
 
 

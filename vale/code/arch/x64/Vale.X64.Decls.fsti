@@ -38,7 +38,6 @@ val maintained_of (new_flags:Flags.t) (flags:Flags.t) : (b:bool { b <==> (
 //unfold let va_subscript = Map.sel
 unfold let va_subscript (#a:eqtype) (#b:Type) (x:Map.t a b) (y:a) : Tot b = Map.sel x y
 unfold let va_update = Map.upd
-unfold let va_make_opaque = Vale.Def.Opaque_s.make_opaque
 unfold let va_hd = Cons?.hd
 //unfold let va_tl = Cons?.tl // F* inlines "let ... = va_tl ..." more than we'd like; revised definition below suppresses this
 

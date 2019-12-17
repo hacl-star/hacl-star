@@ -510,7 +510,7 @@ let equiv_load_mem128_aux ptr h =
   let addr = buffer_addr b h in
   let contents = DV.as_seq (_ih h).IB.hs (get_downview b.bsrc) in
   let heap = get_heap h in
-  Vale.Def.Opaque_s.reveal_opaque S.get_heap_val128_def;
+  S.get_heap_val128_reveal ();
   index128_get_heap_val128 h b heap i;
   lemma_load_mem128 b i h
 
@@ -722,7 +722,7 @@ let valid_state_store_mem128_aux i v h =
   let mem2 = I.down_mem (_ih h1) in
   let aux () : Lemma (forall j. mem1.[j] == mem2.[j]) =
     Vale.Arch.MachineHeap.correct_update_get128 i v heap;
-    Vale.Def.Opaque_s.reveal_opaque Vale.X64.Machine_Semantics_s.get_heap_val128_def;
+    Vale.X64.Machine_Semantics_s.get_heap_val128_reveal ();
     Vale.Arch.MachineHeap.same_mem_get_heap_val32 i mem1 mem2;
     Vale.Arch.MachineHeap.same_mem_get_heap_val32 (i+4) mem1 mem2;
     Vale.Arch.MachineHeap.same_mem_get_heap_val32 (i+8) mem1 mem2;
@@ -761,17 +761,17 @@ open Vale.Def.Words.Four_s
 
 let low_lemma_load_mem128_lo64 b i h =
   low_lemma_load_mem128 b i h;
-  Vale.Def.Opaque_s.reveal_opaque lo64_def;
-  Vale.Def.Opaque_s.reveal_opaque S.get_heap_val128_def;
-  Vale.Def.Opaque_s.reveal_opaque S.get_heap_val64_def;
-  Vale.Def.Opaque_s.reveal_opaque S.get_heap_val32_def
+  lo64_reveal ();
+  S.get_heap_val128_reveal ();
+  S.get_heap_val64_reveal ();
+  S.get_heap_val32_reveal ()
 
 let low_lemma_load_mem128_hi64 b i h =
   low_lemma_load_mem128 b i h;
-  Vale.Def.Opaque_s.reveal_opaque hi64_def;
-  Vale.Def.Opaque_s.reveal_opaque S.get_heap_val128_def;
-  Vale.Def.Opaque_s.reveal_opaque S.get_heap_val64_def;
-  Vale.Def.Opaque_s.reveal_opaque S.get_heap_val32_def
+  hi64_reveal ();
+  S.get_heap_val128_reveal ();
+  S.get_heap_val64_reveal ();
+  S.get_heap_val32_reveal ()
 
 //let same_domain_update128_64 b i v h =
 //  low_lemma_valid_mem128_64 b i (_ih h);
@@ -783,7 +783,7 @@ open Vale.Def.Types_s
 let frame_get_heap32 (ptr:int) (mem1 mem2:S.machine_heap) : Lemma
   (requires (forall i. i >= ptr /\ i < ptr + 4 ==> mem1.[i] == mem2.[i]))
   (ensures S.get_heap_val32 ptr mem1 == S.get_heap_val32 ptr mem2) =
-  Vale.Def.Opaque_s.reveal_opaque S.get_heap_val32_def
+  S.get_heap_val32_reveal ()
 
 let update_heap128_lo (ptr:int) (v:quad32) (mem:S.machine_heap) : Lemma
   (requires
@@ -794,7 +794,7 @@ let update_heap128_lo (ptr:int) (v:quad32) (mem:S.machine_heap) : Lemma
   (ensures S.update_heap128 ptr v mem ==
     S.update_heap32 (ptr+4) v.lo1 (S.update_heap32 ptr v.lo0 mem)) =
   FStar.Pervasives.reveal_opaque (`%S.valid_addr128) S.valid_addr128;
-  Vale.Def.Opaque_s.reveal_opaque S.update_heap128_def;
+  S.update_heap128_reveal ();
   let mem0 = S.update_heap32 ptr v.lo0 mem in
   let mem1 = S.update_heap32 (ptr+4) v.lo1 mem0 in
   Vale.Arch.MachineHeap.frame_update_heap32 ptr v.lo0 mem;
@@ -809,27 +809,27 @@ let update_heap128_lo (ptr:int) (v:quad32) (mem:S.machine_heap) : Lemma
 let low_lemma_store_mem128_lo64 b i v h =
   let ptr = buffer_addr b h + 16 * i in
   let v128 = buffer_read b i h in
-  let v' = insert_nat64_opaque v128 v 0 in
+  let v' = insert_nat64 v128 v 0 in
   low_lemma_load_mem128 b i h;
   low_lemma_store_mem128 b i v' h;
-  Vale.Def.Opaque_s.reveal_opaque S.get_heap_val128_def;
+  S.get_heap_val128_reveal ();
   update_heap128_lo ptr v' (get_heap h);
-  Vale.Def.Opaque_s.reveal_opaque S.update_heap64_def;
-  Vale.Def.Opaque_s.reveal_opaque S.update_heap32_def;
-  Vale.Def.Opaque_s.reveal_opaque insert_nat64
+  S.update_heap64_reveal ();
+  S.update_heap32_reveal ();
+  insert_nat64_reveal ()
 
 let low_lemma_store_mem128_hi64 b i v h =
   FStar.Pervasives.reveal_opaque (`%S.valid_addr128) S.valid_addr128;
   let ptr = buffer_addr b h + 16 * i in
   let v128 = buffer_read b i h in
-  let v' = insert_nat64_opaque v128 v 1 in
+  let v' = insert_nat64 v128 v 1 in
   low_lemma_load_mem128 b i h;
   low_lemma_store_mem128 b i v' h;
   assert (S.valid_addr128 ptr (get_heap h));
   Vale.Arch.MachineHeap.update_heap32_get_heap32 ptr (get_heap h);
   Vale.Arch.MachineHeap.update_heap32_get_heap32 (ptr+4) (get_heap h);
-  Vale.Def.Opaque_s.reveal_opaque S.get_heap_val128_def;
-  Vale.Def.Opaque_s.reveal_opaque S.update_heap128_def;
-  Vale.Def.Opaque_s.reveal_opaque S.update_heap64_def;
-  Vale.Def.Opaque_s.reveal_opaque S.update_heap32_def;
-  Vale.Def.Opaque_s.reveal_opaque insert_nat64
+  S.get_heap_val128_reveal ();
+  S.update_heap128_reveal ();
+  S.update_heap64_reveal ();
+  S.update_heap32_reveal ();
+  insert_nat64_reveal ()
