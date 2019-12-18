@@ -218,7 +218,7 @@ val load_felem5_lemma_i:
 let load_felem5_lemma_i #w lo hi i =
   assert (as_tup64_i (load_felem5 #w lo hi) i == load_tup64_lemma (vec_v lo).[i] (vec_v hi).[i])
 
-
+noextract
 val load_tup64_4_compact: lo:uint64 -> hi:uint64 -> tup64_5
 let load_tup64_4_compact lo hi =
   let mask26 = u64 0x3ffffff in
