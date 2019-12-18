@@ -42,7 +42,7 @@ let lemma_le_bytes_to_quad32_prefix_equality (b0:seq nat8 {length b0 == 16}) (b1
   (*
    * AR: 06/25: Someone should review this code, is this proof supposed to work without revealing this?
    *)
-  FStar.Pervasives.reveal_opaque (`%seq_to_seq_four_LE) (seq_to_seq_four_LE #nat8);
+  reveal_opaque (`%seq_to_seq_four_LE) (seq_to_seq_four_LE #nat8);
 
   assert (forall (i:int). (0 <= i /\ i < 12) ==> (index b0 i == index (slice b0 0 12) i /\
                                          index b1 i == index (slice b1 0 12) i))
@@ -294,7 +294,7 @@ let gcm_blocks_helper_enc (alg:algorithm) (key:seq nat32)
     gctr_encrypt_block_offset ctr_BE_2 (index plain num_blocks) alg key num_blocks;
     assert( gctr_encrypt_block ctr_BE_2 (index plain num_blocks) alg key num_blocks ==
             gctr_encrypt_block (inc32 ctr_BE_2 num_blocks) (index plain num_blocks) alg key 0);
-    FStar.Pervasives.reveal_opaque (`%aes_encrypt_le) aes_encrypt_le;
+    reveal_opaque (`%aes_encrypt_le) aes_encrypt_le;
     gctr_partial_to_full_advanced ctr_BE_2 plain cipher alg key p_num_bytes;
     assert (cipher_bytes == gctr_encrypt_LE ctr_BE_2 plain_bytes alg key)
   ) else (
@@ -472,7 +472,7 @@ let gcm_blocks_helper (alg:algorithm) (key:seq nat32)
       gctr_encrypt_block ctr_BE_1 hash alg key 0;
       == {}
       quad32_xor hash (aes_encrypt_LE alg key (reverse_bytes_quad32 ctr_BE_1));
-      == { FStar.Pervasives.reveal_opaque (`%aes_encrypt_le) aes_encrypt_le }
+      == { reveal_opaque (`%aes_encrypt_le) aes_encrypt_le }
       quad32_xor hash (aes_encrypt_le alg key (reverse_bytes_quad32 ctr_BE_1));
       == {}
       quad32_xor hash (aes_encrypt_BE alg key ctr_BE_1);
@@ -938,7 +938,7 @@ let gcm_blocks_dec_helper (alg:algorithm) (key:seq nat32)
       gctr_encrypt_block ctr_BE_1 hash alg key 0;
       == {}
       quad32_xor hash (aes_encrypt_LE alg key (reverse_bytes_quad32 ctr_BE_1));
-      == { FStar.Pervasives.reveal_opaque (`%aes_encrypt_le) aes_encrypt_le }
+      == { reveal_opaque (`%aes_encrypt_le) aes_encrypt_le }
       quad32_xor hash (aes_encrypt_le alg key (reverse_bytes_quad32 ctr_BE_1));
       == {}
       quad32_xor hash (aes_encrypt_BE alg key ctr_BE_1);

@@ -269,7 +269,7 @@ let lemma_update_heap32_val (ptr:int) (v:Vale.Def.Types_s.nat32) (mem:S.machine_
   [SMTPat ((S.update_heap32 ptr v mem).[i])]
   =
   S.update_heap32_reveal ();
-  FStar.Pervasives.reveal_opaque (`%update_heap32_val) update_heap32_val
+  reveal_opaque (`%update_heap32_val) update_heap32_val
 
 let lemma_update_heap32_domain (ptr:int) (v:Vale.Def.Types_s.nat32) (mem:S.machine_heap) : Lemma
   (requires valid_addr32 ptr mem)
@@ -307,14 +307,14 @@ let lemma_update_heap64_val (ptr:int) (v:nat64) (mem:S.machine_heap) (i:int) : L
   [SMTPat ((S.update_heap64 ptr v mem).[i])]
   =
   S.update_heap64_reveal ();
-  FStar.Pervasives.reveal_opaque (`%update_heap64_val) update_heap64_val
+  reveal_opaque (`%update_heap64_val) update_heap64_val
 
 let lemma_update_heap64_domain (ptr:int) (v:nat64) (mem:S.machine_heap) : Lemma
   (requires S.valid_addr64 ptr mem)
   (ensures Map.domain (S.update_heap64 ptr v mem) == Map.domain mem)
   [SMTPat (Map.domain (S.update_heap64 ptr v mem))]
   =
-  FStar.Pervasives.reveal_opaque (`%S.valid_addr64) S.valid_addr64;
+  reveal_opaque (`%S.valid_addr64) S.valid_addr64;
   S.update_heap64_reveal ();
   assert (Set.equal (Map.domain (S.update_heap64 ptr v mem)) (Map.domain mem))
 
@@ -343,7 +343,7 @@ let lemma_update_heap128_val (ptr:int) (v:Vale.Def.Types_s.quad32) (mem:S.machin
   [SMTPat ((S.update_heap128 ptr v mem).[i])]
   =
   S.update_heap128_reveal ();
-  FStar.Pervasives.reveal_opaque (`%update_heap128_val) update_heap128_val
+  reveal_opaque (`%update_heap128_val) update_heap128_val
 
 let lemma_update_heap128_domain (ptr:int) (v:Vale.Def.Types_s.quad32) (mem:S.machine_heap) : Lemma
   (requires valid_addr128 ptr mem)
@@ -358,28 +358,28 @@ let lemma_preserve_valid64 (m m':S.machine_heap) : Lemma
   (ensures (forall (i:int).{:pattern (S.valid_addr64 i m')}
     S.valid_addr64 i m ==> S.valid_addr64 i m'))
   =
-  FStar.Pervasives.reveal_opaque (`%S.valid_addr64) S.valid_addr64
+  reveal_opaque (`%S.valid_addr64) S.valid_addr64
 
 let lemma_preserve_valid128 (m m':S.machine_heap) : Lemma
   (requires Set.equal (Map.domain m) (Map.domain m'))
   (ensures (forall (i:int).{:pattern (S.valid_addr128 i m')}
     S.valid_addr128 i m ==> S.valid_addr128 i m'))
   =
-  FStar.Pervasives.reveal_opaque (`%S.valid_addr128) S.valid_addr128
+  reveal_opaque (`%S.valid_addr128) S.valid_addr128
 
 let lemma_is_machine_heap_update64 (ptr:int) (v:nat64) (mh:machine_heap) : Lemma
   (requires S.valid_addr64 ptr mh)
   (ensures is_machine_heap_update mh (S.update_heap64 ptr v mh))
   [SMTPat (S.update_heap64 ptr v mh)]
   =
-  FStar.Pervasives.reveal_opaque (`%valid_addr64) valid_addr64
+  reveal_opaque (`%valid_addr64) valid_addr64
 
 let lemma_is_machine_heap_update128 (ptr:int) (v:quad32) (mh:machine_heap) : Lemma
   (requires S.valid_addr128 ptr mh)
   (ensures is_machine_heap_update mh (S.update_heap128 ptr v mh))
   [SMTPat (S.update_heap128 ptr v mh)]
   =
-  FStar.Pervasives.reveal_opaque (`%S.valid_addr128) S.valid_addr128
+  reveal_opaque (`%S.valid_addr128) S.valid_addr128
 
 let lemma_instr_set_taints_explicit
     (i:instr_operand_explicit) (v1 v2:instr_val_t (IOpEx i)) (o:instr_operand_t i)
@@ -412,7 +412,7 @@ let lemma_instr_set_taints_explicit
   lemma_preserve_valid64 (heap_get s2_orig.S.ms_heap) (heap_get s2.S.ms_heap);
   lemma_preserve_valid128 (heap_get s1_orig.S.ms_heap) (heap_get s1.S.ms_heap);
   lemma_preserve_valid128 (heap_get s2_orig.S.ms_heap) (heap_get s2.S.ms_heap);
-  FStar.Pervasives.reveal_opaque (`%S.valid_addr128) S.valid_addr128;
+  reveal_opaque (`%S.valid_addr128) S.valid_addr128;
   ()
 
 let lemma_instr_set_taints_implicit
@@ -448,7 +448,7 @@ let lemma_instr_set_taints_implicit
   lemma_preserve_valid64 (heap_get s2_orig.S.ms_heap) (heap_get s2.S.ms_heap);
   lemma_preserve_valid128 (heap_get s1_orig.S.ms_heap) (heap_get s1.S.ms_heap);
   lemma_preserve_valid128 (heap_get s2_orig.S.ms_heap) (heap_get s2.S.ms_heap);
-  FStar.Pervasives.reveal_opaque (`%S.valid_addr128) S.valid_addr128;
+  reveal_opaque (`%S.valid_addr128) S.valid_addr128;
   ()
 
 #reset-options "--z3rlimit 80"

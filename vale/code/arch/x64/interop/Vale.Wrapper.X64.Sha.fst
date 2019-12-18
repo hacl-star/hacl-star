@@ -63,7 +63,7 @@ let lemma_k_reqs_equiv k_b h =
     // assert (k_seq.[i] == le_bytes_to_quad32 s_slice);
 
     le_bytes_to_quad32_reveal ();
-    FStar.Pervasives.reveal_opaque (`%seq_to_seq_four_LE) (seq_to_seq_four_LE #nat8);
+    reveal_opaque (`%seq_to_seq_four_LE) (seq_to_seq_four_LE #nat8);
     // Revealing le_bytes_to_quad32 gives us the following
     assert (k_seq.[i] == Mkfour
                  (four_to_nat 8 (seq_to_four_LE (seq_uint8_to_seq_nat8
@@ -126,7 +126,7 @@ let simplify_le_bytes_to_hash_uint32 b h =
   // Since Seq.length s' == 32, we have the following by def of le_bytes_to_hash
   assert (sf == seq_map nat32_to_word (seq_nat8_to_seq_nat32_LE s'));
   le_seq_quad32_to_bytes_reveal ();
-  FStar.Pervasives.reveal_opaque (`%seq_four_to_seq_LE) (seq_four_to_seq_LE #nat32);
+  reveal_opaque (`%seq_four_to_seq_LE) (seq_four_to_seq_LE #nat32);
   // After revealing the previous def, the seq_nat8_to_seq_nat32_LE_to_nat8 simplifies
   assert (sf == seq_map nat32_to_word (seq_four_to_seq_LE s));
 
@@ -134,7 +134,7 @@ let simplify_le_bytes_to_hash_uint32 b h =
     = let i' = i/4 in
       UV.as_seq_sel h ub i';
       UV.get_sel h ub i';
-      FStar.Pervasives.reveal_opaque (`%seq_to_seq_four_LE) (seq_to_seq_four_LE #nat8);
+      reveal_opaque (`%seq_to_seq_four_LE) (seq_to_seq_four_LE #nat8);
 
       Vale.Interop.Views.get128_reveal ();
       le_bytes_to_quad32_reveal ();

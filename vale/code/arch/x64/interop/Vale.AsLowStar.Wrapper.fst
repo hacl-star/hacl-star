@@ -340,7 +340,7 @@ let frame_update_valid_heap (ptr:int) (v:MS.nat64) (mem:BS.machine_heap) (j:int)
   (requires ptr >= j + 8)
   (ensures BS.valid_addr64 j mem == BS.valid_addr64 j (BS.update_heap64 ptr v mem))
   =
-  FStar.Pervasives.reveal_opaque (`%BS.valid_addr64) BS.valid_addr64;
+  reveal_opaque (`%BS.valid_addr64) BS.valid_addr64;
   BS.update_heap64_reveal ()
 
 let rec stack_of_args_stack_args'_aux
@@ -386,15 +386,15 @@ let rec stack_of_args_stack_args'
     (let mem = Map.const_on Set.empty 0 in
     stack_args' max_arity n args init_rsp (IX64.stack_of_args max_arity n init_rsp args mem))
     =
-    FStar.Pervasives.reveal_opaque (`%BS.valid_addr64) BS.valid_addr64;
-    FStar.Pervasives.reveal_opaque (`%BS.valid_addr128) BS.valid_addr128;
+    reveal_opaque (`%BS.valid_addr64) BS.valid_addr64;
+    reveal_opaque (`%BS.valid_addr128) BS.valid_addr128;
     let rec aux (args:IX64.arg_list) (accu:Map.t int Vale.Def.Words_s.nat8) : Lemma (ensures (
       stack_args' max_arity (List.length args) args init_rsp
         (IX64.stack_of_args max_arity (List.length args) init_rsp args accu)))
       (decreases (List.length args))
       =
-      FStar.Pervasives.reveal_opaque (`%BS.valid_addr64) BS.valid_addr64;
-      FStar.Pervasives.reveal_opaque (`%BS.valid_addr128) BS.valid_addr128;
+      reveal_opaque (`%BS.valid_addr64) BS.valid_addr64;
+      reveal_opaque (`%BS.valid_addr128) BS.valid_addr128;
       match args with
       | [] -> ()
       | hd::tl ->

@@ -20,7 +20,7 @@ open Vale.X64.Instruction_s
 //  Set.equal (Map.domain (heap_get s.ms_heap)) (Map.domain (heap_get s1.ms_heap)))
 //  [SMTPat (update_operand64_preserve_flags'' dst v s_orig s)]
 //  =
-//  FStar.Pervasives.reveal_opaque (`%valid_addr64) valid_addr64;
+//  reveal_opaque (`%valid_addr64) valid_addr64;
 //  match dst with
 //  | OMem _ -> update_heap64_reveal ()
 //  | _ -> ()
@@ -39,7 +39,7 @@ open Vale.X64.Instruction_s
 //    Set.equal (Map.domain (heap_get s.ms_heap)) (Map.domain (heap_get s1.ms_heap)))
 //  [SMTPat (update_operand128_preserve_flags'' o v s_orig s)]
 //  =
-//  FStar.Pervasives.reveal_opaque (`%valid_addr128) valid_addr128;
+//  reveal_opaque (`%valid_addr128) valid_addr128;
 //  update_heap128_reveal ();
 //  match o with
 //  | OMem (m, t) ->
@@ -102,7 +102,7 @@ open Vale.X64.Instruction_s
 //  (forall x.{:pattern ((heap_get s.ms_heap).[x])} not (Map.contains (heap_get s1.ms_heap) x && Map.contains (heap_get s.ms_heap) x) ==> (heap_get s1.ms_heap).[x] == (heap_get s.ms_heap).[x]))
 //  [SMTPat (update_operand128_preserve_flags'' o v s_orig s)]
 //  =
-//  FStar.Pervasives.reveal_opaque (`%valid_addr128) valid_addr128;
+//  reveal_opaque (`%valid_addr128) valid_addr128;
 //  update_heap128_reveal ();
 //  match o with
 //  | OMem (m, t) ->

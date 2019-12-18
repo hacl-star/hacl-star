@@ -41,7 +41,7 @@ unfold let va_update = Map.upd
 unfold let va_hd = Cons?.hd
 //unfold let va_tl = Cons?.tl // F* inlines "let ... = va_tl ..." more than we'd like; revised definition below suppresses this
 
-// REVIEW: FStar.Pervasives.reveal_opaque doesn't include zeta, so it fails for recursive functions
+// REVIEW: reveal_opaque doesn't include zeta, so it fails for recursive functions
 [@va_qattr] unfold let va_reveal_eq (#ax:Type) (s:string) (x x':ax) = norm [zeta; delta_only [s]] #ax x == x'
 let va_reveal_opaque (s:string) = norm_spec [zeta; delta_only [s]]
 

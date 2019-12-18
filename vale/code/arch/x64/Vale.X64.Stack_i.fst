@@ -19,17 +19,17 @@ let init_rsp h = h.BS.initial_rsp
 (* Lemmas *)
 #push-options "--z3rlimit 40"
 let lemma_store_stack_same_valid64 ptr v h i =
-  FStar.Pervasives.reveal_opaque (`%BS.valid_addr64) BS.valid_addr64;
+  reveal_opaque (`%BS.valid_addr64) BS.valid_addr64;
   BS.update_heap64_reveal ()
 
 let lemma_free_stack_same_valid64 start finish ptr h =
-  FStar.Pervasives.reveal_opaque (`%BS.valid_addr64) BS.valid_addr64;
+  reveal_opaque (`%BS.valid_addr64) BS.valid_addr64;
   let BS.Machine_stack _ mem = h in
   let domain = Map.domain mem in
   Classical.forall_intro (Vale.Lib.Set.remove_between_reveal domain start finish)
 
 let lemma_store_new_valid64 ptr v h =
-  FStar.Pervasives.reveal_opaque (`%BS.valid_addr64) BS.valid_addr64;
+  reveal_opaque (`%BS.valid_addr64) BS.valid_addr64;
   BS.update_heap64_reveal ()
 #pop-options
 
@@ -43,7 +43,7 @@ let lemma_frame_store_load_stack64 ptr v h i =
   BS.get_heap_val64_reveal ()
 
 let lemma_free_stack_same_load64 start finish ptr h =
-  FStar.Pervasives.reveal_opaque (`%BS.valid_addr64) BS.valid_addr64;
+  reveal_opaque (`%BS.valid_addr64) BS.valid_addr64;
   let BS.Machine_stack _ mem = h in
   let domain = Map.domain mem in
   Classical.forall_intro (Vale.Lib.Set.remove_between_reveal domain start finish);

@@ -33,7 +33,7 @@ let get64_aux (ptr:int) (heap:machine_heap) (v:nat64) (k:nat{k < 8}) : Lemma
   get_heap_val64_reveal ();
   put64_reveal ();
   le_nat64_to_bytes_reveal ();
-  FStar.Pervasives.reveal_opaque (`%seq_four_to_seq_LE) (seq_four_to_seq_LE #nat8);
+  reveal_opaque (`%seq_four_to_seq_LE) (seq_four_to_seq_LE #nat8);
   four_to_nat_8_injective ();
   two_to_nat_32_injective ()
 
@@ -43,8 +43,8 @@ let get128_aux (ptr:int) (heap:machine_heap) (v:quad32) (k:nat{k < 16}) : Lemma
   get_heap_val128_reveal ();
   get_heap_val32_reveal ();
   put128_reveal ();
-  FStar.Pervasives.reveal_opaque (`%seq_four_to_seq_LE) (seq_four_to_seq_LE #nat8);
-  FStar.Pervasives.reveal_opaque (`%le_quad32_to_bytes) le_quad32_to_bytes;
+  reveal_opaque (`%seq_four_to_seq_LE) (seq_four_to_seq_LE #nat8);
+  reveal_opaque (`%le_quad32_to_bytes) le_quad32_to_bytes;
   four_to_nat_8_injective ()
 
 #reset-options "--max_fuel 1 --initial_fuel 1 --z3rlimit 200"

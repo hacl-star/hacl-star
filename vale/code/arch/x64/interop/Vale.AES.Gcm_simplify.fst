@@ -4,7 +4,7 @@ open FStar.Mul
 open Vale.SHA.Simplify_Sha
 
 let le_bytes_to_seq_quad32_uint8_to_nat8_length s =
-  FStar.Pervasives.reveal_opaque (`%le_bytes_to_seq_quad32) le_bytes_to_seq_quad32
+  reveal_opaque (`%le_bytes_to_seq_quad32) le_bytes_to_seq_quad32
 
 let gcm_simplify1 b h n =
   let db = get_downview b in
@@ -47,8 +47,8 @@ open FStar.Tactics
 #push-options "--z3cliopt smt.QI.EAGER_THRESHOLD=100 --z3cliopt smt.CASE_SPLIT=3 --z3cliopt smt.arith.nl=true --max_fuel 2 --initial_fuel 2 --max_ifuel 0 --smtencoding.elim_box true --smtencoding.nl_arith_repr native --z3rlimit 10"
 
 let be_quad32_to_bytes_sel q i =
-  FStar.Pervasives.reveal_opaque (`%be_quad32_to_bytes) be_quad32_to_bytes;
-  FStar.Pervasives.reveal_opaque (`%seq_four_to_seq_BE) (seq_four_to_seq_BE #nat8);
+  reveal_opaque (`%be_quad32_to_bytes) be_quad32_to_bytes;
+  reveal_opaque (`%seq_four_to_seq_BE) (seq_four_to_seq_BE #nat8);
   let Mkfour q0 q1 q2 q3 = q in
   assert (Seq.index (Vale.Def.Words.Seq_s.four_to_seq_BE q) 0 == q3);
   assert (Seq.index (Vale.Def.Words.Seq_s.four_to_seq_BE q) 1 == q2);
@@ -217,7 +217,7 @@ let aes_simplify1 b h =
 
 #push-options "--z3cliopt smt.arith.nl=true"
 let aes_simplify2 b h =
-  FStar.Pervasives.reveal_opaque (`%seq_to_seq_four_LE) (seq_to_seq_four_LE #nat8);
+  reveal_opaque (`%seq_to_seq_four_LE) (seq_to_seq_four_LE #nat8);
   let view = Vale.Interop.Views.up_view128 in
   let s_init = B.as_seq h b in
   let db = get_downview b in

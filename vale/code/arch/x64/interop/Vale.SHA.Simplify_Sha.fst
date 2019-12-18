@@ -42,9 +42,9 @@ let lemma_seq_nat8_le_seq_quad32_to_bytes_uint32 b h =
   let s_f = seq_nat8_to_seq_uint8 s' in
   UV.length_eq ub;
   let aux (i:nat{i < Seq.length s_f}) : Lemma (Seq.index s_init i == Seq.index s_f i) =
-    FStar.Pervasives.reveal_opaque (`%seq_to_seq_four_LE) (seq_to_seq_four_LE #nat8);
-    FStar.Pervasives.reveal_opaque (`%seq_four_to_seq_LE) (seq_four_to_seq_LE #nat8);
-    FStar.Pervasives.reveal_opaque (`%seq_four_to_seq_LE) (seq_four_to_seq_LE #nat32);
+    reveal_opaque (`%seq_to_seq_four_LE) (seq_to_seq_four_LE #nat8);
+    reveal_opaque (`%seq_four_to_seq_LE) (seq_four_to_seq_LE #nat8);
+    reveal_opaque (`%seq_four_to_seq_LE) (seq_four_to_seq_LE #nat32);
     let i' = i/16 in
     UV.as_seq_sel h ub i';
     UV.get_sel h ub i';

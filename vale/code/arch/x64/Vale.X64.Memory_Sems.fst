@@ -294,7 +294,7 @@ let in_bounds64 (h:vale_heap) (b:buffer64) (i:nat{i < buffer_length b})
   = length_t_eq (TUInt64) b
 
 let bytes_valid64 ptr h =
-  FStar.Pervasives.reveal_opaque (`%S.valid_addr64) S.valid_addr64;
+  reveal_opaque (`%S.valid_addr64) S.valid_addr64;
   let t = TUInt64 in
   let b = get_addr_ptr t ptr h in
   let i = get_addr_in_ptr t (buffer_length b) (buffer_addr b h) ptr 0 in
@@ -377,7 +377,7 @@ let in_bounds128 (h:vale_heap) (b:buffer128) (i:nat{i < buffer_length b}) : Lemm
   length_t_eq TUInt128 b
 
 let bytes_valid128 ptr h =
-  FStar.Pervasives.reveal_opaque (`%S.valid_addr128) S.valid_addr128;
+  reveal_opaque (`%S.valid_addr128) S.valid_addr128;
   let t = TUInt128 in
   let b = get_addr_ptr t ptr h in
   let i = get_addr_in_ptr t (buffer_length b) (buffer_addr b h) ptr 0 in
@@ -749,8 +749,8 @@ let low_lemma_store_mem128 b i v h =
 
 #push-options "--smtencoding.l_arith_repr boxwrap"
 let low_lemma_valid_mem128_64 b i h =
-  FStar.Pervasives.reveal_opaque (`%S.valid_addr64) S.valid_addr64;
-  FStar.Pervasives.reveal_opaque (`%S.valid_addr128) S.valid_addr128;
+  reveal_opaque (`%S.valid_addr64) S.valid_addr64;
+  reveal_opaque (`%S.valid_addr128) S.valid_addr128;
   low_lemma_valid_mem128 b i h;
   let ptr = buffer_addr b h + 16 * i in
   assert (buffer_addr b h + 16 * i + 8 = ptr + 8)
@@ -793,7 +793,7 @@ let update_heap128_lo (ptr:int) (v:quad32) (mem:S.machine_heap) : Lemma
   )
   (ensures S.update_heap128 ptr v mem ==
     S.update_heap32 (ptr+4) v.lo1 (S.update_heap32 ptr v.lo0 mem)) =
-  FStar.Pervasives.reveal_opaque (`%S.valid_addr128) S.valid_addr128;
+  reveal_opaque (`%S.valid_addr128) S.valid_addr128;
   S.update_heap128_reveal ();
   let mem0 = S.update_heap32 ptr v.lo0 mem in
   let mem1 = S.update_heap32 (ptr+4) v.lo1 mem0 in
@@ -819,7 +819,7 @@ let low_lemma_store_mem128_lo64 b i v h =
   insert_nat64_reveal ()
 
 let low_lemma_store_mem128_hi64 b i v h =
-  FStar.Pervasives.reveal_opaque (`%S.valid_addr128) S.valid_addr128;
+  reveal_opaque (`%S.valid_addr128) S.valid_addr128;
   let ptr = buffer_addr b h + 16 * i in
   let v128 = buffer_read b i h in
   let v' = insert_nat64 v128 v 1 in

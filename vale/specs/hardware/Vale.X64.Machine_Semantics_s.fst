@@ -154,7 +154,7 @@ let rec update_n (addr:int) (n:nat) (memTaint:memTaint_t) (t:taint)
   else update_n (addr + 1) (n - 1) (memTaint.[addr] <- t) t
 
 let update_mem_and_taint (ptr:int) (v:nat64) (s:machine_state) (t:taint) : machine_state =
-  FStar.Pervasives.reveal_opaque (`%valid_addr64) valid_addr64;
+  reveal_opaque (`%valid_addr64) valid_addr64;
   update_heap64_reveal ();
   if valid_addr64 ptr (heap_get s.ms_heap) then
     { s with
@@ -164,7 +164,7 @@ let update_mem_and_taint (ptr:int) (v:nat64) (s:machine_state) (t:taint) : machi
   else s
 
 let update_mem128_and_taint (ptr:int) (v:quad32) (s:machine_state) (t:taint) : machine_state =
-  FStar.Pervasives.reveal_opaque (`%valid_addr128) valid_addr128;
+  reveal_opaque (`%valid_addr128) valid_addr128;
   update_heap32_reveal ();
   update_heap128_reveal ();
   if valid_addr128 ptr (heap_get s.ms_heap) then

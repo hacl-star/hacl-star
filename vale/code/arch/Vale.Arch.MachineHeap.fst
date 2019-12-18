@@ -24,7 +24,7 @@ let correct_update_get ptr v mem =
   update_heap64_reveal ()
 
 let same_domain_update ptr v mem =
-  FStar.Pervasives.reveal_opaque (`%valid_addr64) valid_addr64;
+  reveal_opaque (`%valid_addr64) valid_addr64;
   update_heap64_reveal ();
   let mem2 = update_heap64 ptr v mem in
   assert (Set.equal (Map.domain mem) (Map.domain mem2))
@@ -86,7 +86,7 @@ let correct_update_get128 ptr v mem =
 #reset-options "--z3rlimit 10 --max_fuel 2 --initial_fuel 2 --max_ifuel 1 --initial_ifuel 1"
 
 let same_domain_update128 ptr v mem =
-  FStar.Pervasives.reveal_opaque (`%valid_addr128) valid_addr128;
+  reveal_opaque (`%valid_addr128) valid_addr128;
   update_heap128_reveal ();
   let memf = update_heap128 ptr v mem in
   update_heap32_reveal ();
