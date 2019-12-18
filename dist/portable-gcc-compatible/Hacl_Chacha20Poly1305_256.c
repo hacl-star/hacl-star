@@ -24,7 +24,9 @@
 
 #include "Hacl_Chacha20Poly1305_256.h"
 
-static void
+/* SNIPPET_START: Hacl_Chacha20Poly1305_256_poly1305_padded_256 */
+
+inline static void
 Hacl_Chacha20Poly1305_256_poly1305_padded_256(
   Lib_IntVector_Intrinsics_vec256 *ctx,
   uint32_t len,
@@ -969,7 +971,11 @@ Hacl_Chacha20Poly1305_256_poly1305_padded_256(
   }
 }
 
-static void
+/* SNIPPET_END: Hacl_Chacha20Poly1305_256_poly1305_padded_256 */
+
+/* SNIPPET_START: Hacl_Chacha20Poly1305_256_poly1305_do_256 */
+
+inline static void
 Hacl_Chacha20Poly1305_256_poly1305_do_256(
   uint8_t *k,
   uint32_t aadlen,
@@ -1212,6 +1218,10 @@ Hacl_Chacha20Poly1305_256_poly1305_do_256(
   Hacl_Poly1305_256_poly1305_finish(out, k, ctx);
 }
 
+/* SNIPPET_END: Hacl_Chacha20Poly1305_256_poly1305_do_256 */
+
+/* SNIPPET_START: Hacl_Chacha20Poly1305_256_aead_encrypt */
+
 void
 Hacl_Chacha20Poly1305_256_aead_encrypt(
   uint8_t *k,
@@ -1230,6 +1240,10 @@ Hacl_Chacha20Poly1305_256_aead_encrypt(
   uint8_t *key = tmp;
   Hacl_Chacha20Poly1305_256_poly1305_do_256(key, aadlen, aad, mlen, cipher, mac);
 }
+
+/* SNIPPET_END: Hacl_Chacha20Poly1305_256_aead_encrypt */
+
+/* SNIPPET_START: Hacl_Chacha20Poly1305_256_aead_decrypt */
 
 uint32_t
 Hacl_Chacha20Poly1305_256_aead_decrypt(
@@ -1262,4 +1276,6 @@ Hacl_Chacha20Poly1305_256_aead_decrypt(
   }
   return (uint32_t)1U;
 }
+
+/* SNIPPET_END: Hacl_Chacha20Poly1305_256_aead_decrypt */
 

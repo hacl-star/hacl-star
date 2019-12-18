@@ -118,8 +118,36 @@ int main() {
   print_result(comp,exp);
 
   Hacl_Chacha20_Vec256_chacha20_encrypt_256(in_len,comp,in,k,n,1);
-  printf("Chacha20 (256-bit) Result:\n");
-  print_result(comp,exp);
+  printf("computed:");
+  for (int i = 0; i < 114; i++)
+    printf("%02x",comp[i]);
+  printf("\n");
+  printf("expected:");
+  for (int i = 0; i < 114; i++)
+    printf("%02x",exp[i]);
+  printf("\n");
+  ok = true;
+  for (int i = 0; i < 114; i++)
+    ok = ok & (exp[i] == comp[i]);
+  if (ok) printf("Success!\n");
+  else printf("FAILED!\n");
+
+/*
+  ossl_chacha20(comp,in,in_len,k,n,1);
+  printf("OpenSSL computed:");
+  for (int i = 0; i < 114; i++)
+    printf("%02x",comp[i]);
+  printf("\n");
+  printf("expected:");
+  for (int i = 0; i < 114; i++)
+    printf("%02x",exp[i]);
+  printf("\n");
+  ok = true;
+  for (int i = 0; i < 32; i++)
+    ok = ok & (exp[i] == comp[i]);
+  if (ok) printf("Success!\n");
+  else printf("FAILED!\n");
+*/
 
   uint64_t len = SIZE;
   uint8_t plain[SIZE];
@@ -184,7 +212,43 @@ int main() {
   double diff3 = (double)(t2 - t1)/CLOCKS_PER_SEC;
   uint64_t cyc3 = b - a;
 
-  printf("32-bit Chacha20\n"); print_time(diff1,cyc1);
-  printf("128-bit Chacha20\n"); print_time(diff2,cyc2);
-  printf("256-bit Chacha20\n"); print_time(diff3,cyc3);
+/*
+  memset(plain,'P',SIZE);
+  memset(key,'K',16);
+  memset(nonce,'N',12);
+
+  for (int j = 0; j < ROUNDS; j++) {
+    ossl_chacha20(plain,plain,SIZE,key,nonce,1);
+  }
+
+  t1 = clock();
+  a = cpucycles_begin();
+  for (int j = 0; j < ROUNDS; j++) {
+    ossl_chacha20(plain,plain,SIZE,key,nonce,1);
+  }
+  b = cpucycles_end();
+  t2 = clock();
+  double diff6 = (double)(t2 - t1)/CLOCKS_PER_SEC;
+  uint64_t cyc6 = b - a;
+*/
+
+  uint64_t count = ROUNDS * SIZE;
+
+  printf("32-bit Chacha20\n");
+  printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)cyc1,(double)cyc1/count);
+  printf("bw %8.2f MB/s\n",(double)count/(diff1 * 1000000.0));
+
+  printf("128-bit Chacha20\n");
+  printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)cyc2,(double)cyc2/count);
+  printf("bw %8.2f MB/s\n",(double)count/(diff2 * 1000000.0));
+
+  printf("256-bit Chacha20\n");
+  printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)cyc3,(double)cyc3/count);
+  printf("bw %8.2f MB/s\n",(double)count/(diff3 * 1000000.0));
+
+/*
+  printf("OpenSSL Chacha20\n");
+  printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)cyc6,(double)cyc6/count);
+  printf("bw %8.2f MB/s\n",(double)count/(diff6 * 1000000.0));
+  */
 }

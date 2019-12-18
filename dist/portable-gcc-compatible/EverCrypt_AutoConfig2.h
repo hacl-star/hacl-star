@@ -34,67 +34,191 @@
 #include "Vale.h"
 
 
+/* SNIPPET_START: EverCrypt_AutoConfig2_has_shaext */
+
 bool EverCrypt_AutoConfig2_has_shaext();
+
+/* SNIPPET_END: EverCrypt_AutoConfig2_has_shaext */
+
+/* SNIPPET_START: EverCrypt_AutoConfig2_has_aesni */
 
 bool EverCrypt_AutoConfig2_has_aesni();
 
+/* SNIPPET_END: EverCrypt_AutoConfig2_has_aesni */
+
+/* SNIPPET_START: EverCrypt_AutoConfig2_has_pclmulqdq */
+
 bool EverCrypt_AutoConfig2_has_pclmulqdq();
+
+/* SNIPPET_END: EverCrypt_AutoConfig2_has_pclmulqdq */
+
+/* SNIPPET_START: EverCrypt_AutoConfig2_has_avx2 */
 
 bool EverCrypt_AutoConfig2_has_avx2();
 
+/* SNIPPET_END: EverCrypt_AutoConfig2_has_avx2 */
+
+/* SNIPPET_START: EverCrypt_AutoConfig2_has_avx */
+
 bool EverCrypt_AutoConfig2_has_avx();
+
+/* SNIPPET_END: EverCrypt_AutoConfig2_has_avx */
+
+/* SNIPPET_START: EverCrypt_AutoConfig2_has_bmi2 */
 
 bool EverCrypt_AutoConfig2_has_bmi2();
 
+/* SNIPPET_END: EverCrypt_AutoConfig2_has_bmi2 */
+
+/* SNIPPET_START: EverCrypt_AutoConfig2_has_adx */
+
 bool EverCrypt_AutoConfig2_has_adx();
+
+/* SNIPPET_END: EverCrypt_AutoConfig2_has_adx */
+
+/* SNIPPET_START: EverCrypt_AutoConfig2_has_sse */
 
 bool EverCrypt_AutoConfig2_has_sse();
 
+/* SNIPPET_END: EverCrypt_AutoConfig2_has_sse */
+
+/* SNIPPET_START: EverCrypt_AutoConfig2_has_movbe */
+
 bool EverCrypt_AutoConfig2_has_movbe();
+
+/* SNIPPET_END: EverCrypt_AutoConfig2_has_movbe */
+
+/* SNIPPET_START: EverCrypt_AutoConfig2_has_rdrand */
 
 bool EverCrypt_AutoConfig2_has_rdrand();
 
+/* SNIPPET_END: EverCrypt_AutoConfig2_has_rdrand */
+
+/* SNIPPET_START: EverCrypt_AutoConfig2_wants_vale */
+
 bool EverCrypt_AutoConfig2_wants_vale();
+
+/* SNIPPET_END: EverCrypt_AutoConfig2_wants_vale */
+
+/* SNIPPET_START: EverCrypt_AutoConfig2_wants_hacl */
 
 bool EverCrypt_AutoConfig2_wants_hacl();
 
+/* SNIPPET_END: EverCrypt_AutoConfig2_wants_hacl */
+
+/* SNIPPET_START: EverCrypt_AutoConfig2_wants_openssl */
+
 bool EverCrypt_AutoConfig2_wants_openssl();
+
+/* SNIPPET_END: EverCrypt_AutoConfig2_wants_openssl */
+
+/* SNIPPET_START: EverCrypt_AutoConfig2_wants_bcrypt */
 
 bool EverCrypt_AutoConfig2_wants_bcrypt();
 
+/* SNIPPET_END: EverCrypt_AutoConfig2_wants_bcrypt */
+
+/* SNIPPET_START: EverCrypt_AutoConfig2_recall */
+
 void EverCrypt_AutoConfig2_recall();
+
+/* SNIPPET_END: EverCrypt_AutoConfig2_recall */
+
+/* SNIPPET_START: EverCrypt_AutoConfig2_init */
 
 void EverCrypt_AutoConfig2_init();
 
+/* SNIPPET_END: EverCrypt_AutoConfig2_init */
+
+/* SNIPPET_START: EverCrypt_AutoConfig2_disabler */
+
 typedef void (*EverCrypt_AutoConfig2_disabler)();
+
+/* SNIPPET_END: EverCrypt_AutoConfig2_disabler */
+
+/* SNIPPET_START: EverCrypt_AutoConfig2_disable_avx2 */
 
 void EverCrypt_AutoConfig2_disable_avx2();
 
+/* SNIPPET_END: EverCrypt_AutoConfig2_disable_avx2 */
+
+/* SNIPPET_START: EverCrypt_AutoConfig2_disable_avx */
+
 void EverCrypt_AutoConfig2_disable_avx();
+
+/* SNIPPET_END: EverCrypt_AutoConfig2_disable_avx */
+
+/* SNIPPET_START: EverCrypt_AutoConfig2_disable_bmi2 */
 
 void EverCrypt_AutoConfig2_disable_bmi2();
 
+/* SNIPPET_END: EverCrypt_AutoConfig2_disable_bmi2 */
+
+/* SNIPPET_START: EverCrypt_AutoConfig2_disable_adx */
+
 void EverCrypt_AutoConfig2_disable_adx();
+
+/* SNIPPET_END: EverCrypt_AutoConfig2_disable_adx */
+
+/* SNIPPET_START: EverCrypt_AutoConfig2_disable_shaext */
 
 void EverCrypt_AutoConfig2_disable_shaext();
 
+/* SNIPPET_END: EverCrypt_AutoConfig2_disable_shaext */
+
+/* SNIPPET_START: EverCrypt_AutoConfig2_disable_aesni */
+
 void EverCrypt_AutoConfig2_disable_aesni();
+
+/* SNIPPET_END: EverCrypt_AutoConfig2_disable_aesni */
+
+/* SNIPPET_START: EverCrypt_AutoConfig2_disable_pclmulqdq */
 
 void EverCrypt_AutoConfig2_disable_pclmulqdq();
 
+/* SNIPPET_END: EverCrypt_AutoConfig2_disable_pclmulqdq */
+
+/* SNIPPET_START: EverCrypt_AutoConfig2_disable_sse */
+
 void EverCrypt_AutoConfig2_disable_sse();
+
+/* SNIPPET_END: EverCrypt_AutoConfig2_disable_sse */
+
+/* SNIPPET_START: EverCrypt_AutoConfig2_disable_movbe */
 
 void EverCrypt_AutoConfig2_disable_movbe();
 
+/* SNIPPET_END: EverCrypt_AutoConfig2_disable_movbe */
+
+/* SNIPPET_START: EverCrypt_AutoConfig2_disable_rdrand */
+
 void EverCrypt_AutoConfig2_disable_rdrand();
+
+/* SNIPPET_END: EverCrypt_AutoConfig2_disable_rdrand */
+
+/* SNIPPET_START: EverCrypt_AutoConfig2_disable_vale */
 
 void EverCrypt_AutoConfig2_disable_vale();
 
+/* SNIPPET_END: EverCrypt_AutoConfig2_disable_vale */
+
+/* SNIPPET_START: EverCrypt_AutoConfig2_disable_hacl */
+
 void EverCrypt_AutoConfig2_disable_hacl();
+
+/* SNIPPET_END: EverCrypt_AutoConfig2_disable_hacl */
+
+/* SNIPPET_START: EverCrypt_AutoConfig2_disable_openssl */
 
 void EverCrypt_AutoConfig2_disable_openssl();
 
+/* SNIPPET_END: EverCrypt_AutoConfig2_disable_openssl */
+
+/* SNIPPET_START: EverCrypt_AutoConfig2_disable_bcrypt */
+
 void EverCrypt_AutoConfig2_disable_bcrypt();
+
+/* SNIPPET_END: EverCrypt_AutoConfig2_disable_bcrypt */
 
 #define __EverCrypt_AutoConfig2_H_DEFINED
 #endif

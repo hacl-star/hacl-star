@@ -69,6 +69,8 @@ extern uint8_t *(*init_hash)();
 
 extern void (*free_hash)(uint8_t *x0);
 
+typedef void (*hash_fun_t)(uint8_t *x0, uint8_t *x1, uint8_t *x2);
+
 void hash_2(uint8_t *src1, uint8_t *src2, uint8_t *dst);
 
 typedef uint32_t index_t;
@@ -94,6 +96,7 @@ typedef struct merkle_tree_s
   bool rhs_ok;
   LowStar_Vector_vector_str___uint8_t_ rhs;
   uint8_t *mroot;
+  void (*hash_fun)(uint8_t *x0, uint8_t *x1, uint8_t *x2);
 }
 merkle_tree;
 
@@ -114,7 +117,12 @@ LowStar_Vector_vector_str___uint8_t_ __proj__MT__item__rhs(merkle_tree projectee
 
 uint8_t *__proj__MT__item__mroot(merkle_tree projectee);
 
+void
+(*__proj__MT__item__hash_fun(merkle_tree projectee))(uint8_t *x0, uint8_t *x1, uint8_t *x2);
+
 typedef merkle_tree *mt_p;
+
+typedef const merkle_tree *const_mt_p;
 
 bool
 merkle_tree_conditions(
@@ -131,13 +139,20 @@ uint32_t offset_of(uint32_t i1);
 
 void mt_free(merkle_tree *mt);
 
-bool mt_insert_pre(merkle_tree *mt, uint8_t *v1);
+bool mt_insert_pre(const merkle_tree *mt, uint8_t *v1);
 
 void mt_insert(merkle_tree *mt, uint8_t *v1);
 
+merkle_tree
+*mt_create_custom(uint8_t *init1, void (*hash_fun)(uint8_t *x0, uint8_t *x1, uint8_t *x2));
+
 merkle_tree *mt_create(uint8_t *init1);
 
-typedef LowStar_Vector_vector_str___uint8_t_ *path;
+typedef LowStar_Vector_vector_str___uint8_t_ path;
+
+typedef LowStar_Vector_vector_str___uint8_t_ *path_p;
+
+typedef const LowStar_Vector_vector_str___uint8_t_ *const_path_p;
 
 LowStar_Vector_vector_str___uint8_t_ *init_path();
 
@@ -145,55 +160,55 @@ void clear_path(LowStar_Vector_vector_str___uint8_t_ *p1);
 
 void free_path(LowStar_Vector_vector_str___uint8_t_ *p1);
 
-bool mt_get_root_pre(merkle_tree *mt, uint8_t *rt);
+bool mt_get_root_pre(const merkle_tree *mt, uint8_t *rt);
 
-void mt_get_root(merkle_tree *mt, uint8_t *rt);
+void mt_get_root(const merkle_tree *mt, uint8_t *rt);
 
 void path_insert(LowStar_Vector_vector_str___uint8_t_ *p1, uint8_t *hp);
 
 bool
 mt_get_path_pre(
-  merkle_tree *mt,
+  const merkle_tree *mt,
   uint64_t idx,
-  LowStar_Vector_vector_str___uint8_t_ *p1,
+  const LowStar_Vector_vector_str___uint8_t_ *p1,
   uint8_t *root
 );
 
 uint32_t
 mt_get_path(
-  merkle_tree *mt,
+  const merkle_tree *mt,
   uint64_t idx,
   LowStar_Vector_vector_str___uint8_t_ *p1,
   uint8_t *root
 );
 
-bool mt_flush_to_pre(merkle_tree *mt, uint64_t idx);
+bool mt_flush_to_pre(const merkle_tree *mt, uint64_t idx);
 
 void mt_flush_to(merkle_tree *mt, uint64_t idx);
 
-bool mt_flush_pre(merkle_tree *mt);
+bool mt_flush_pre(const merkle_tree *mt);
 
 void mt_flush(merkle_tree *mt);
 
-bool mt_retract_to_pre(merkle_tree *mt, uint64_t r);
+bool mt_retract_to_pre(const merkle_tree *mt, uint64_t r);
 
 void mt_retract_to(merkle_tree *mt, uint64_t r);
 
 bool
 mt_verify_pre(
-  merkle_tree *mt,
+  const merkle_tree *mt,
   uint64_t k1,
   uint64_t j1,
-  LowStar_Vector_vector_str___uint8_t_ *p1,
+  const LowStar_Vector_vector_str___uint8_t_ *p1,
   uint8_t *rt
 );
 
 bool
 mt_verify(
-  merkle_tree *mt,
+  const merkle_tree *mt,
   uint64_t k1,
   uint64_t j1,
-  LowStar_Vector_vector_str___uint8_t_ *p1,
+  const LowStar_Vector_vector_str___uint8_t_ *p1,
   uint8_t *rt
 );
 
@@ -207,11 +222,23 @@ typedef uint64_t uint64_t;
 
 typedef uint8_t *uint8_p;
 
-uint64_t mt_serialize_size(merkle_tree *mt);
+typedef const uint8_t *const_uint8_p;
 
-uint32_t mt_serialize(merkle_tree *mt, uint8_t *output, uint32_t sz);
+uint64_t mt_serialize_size(const merkle_tree *mt);
 
-merkle_tree *mt_deserialize(uint8_t *input, uint32_t sz);
+uint64_t mt_serialize(const merkle_tree *mt, uint8_t *output, uint64_t sz);
+
+merkle_tree *mt_deserialize(const uint8_t *input, uint64_t sz);
+
+uint64_t
+mt_serialize_path(
+  const LowStar_Vector_vector_str___uint8_t_ *p1,
+  const merkle_tree *mt,
+  uint8_t *output,
+  uint64_t sz
+);
+
+LowStar_Vector_vector_str___uint8_t_ *mt_deserialize_path(const uint8_t *input, uint64_t sz);
 
 #define __MerkleTree_H_DEFINED
 #endif

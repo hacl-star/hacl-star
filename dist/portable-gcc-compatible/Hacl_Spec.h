@@ -34,6 +34,8 @@
 
 
 
+/* SNIPPET_START: Spec_Hash_Definitions_hash_alg */
+
 #define Spec_Hash_Definitions_SHA2_224 0
 #define Spec_Hash_Definitions_SHA2_256 1
 #define Spec_Hash_Definitions_SHA2_384 2
@@ -41,22 +43,38 @@
 #define Spec_Hash_Definitions_SHA1 4
 #define Spec_Hash_Definitions_MD5 5
 
+/* SNIPPET_END: Spec_Hash_Definitions_hash_alg */
+
 typedef uint8_t Spec_Hash_Definitions_hash_alg;
+
+/* SNIPPET_START: Spec_Agile_Cipher_cipher_alg */
 
 #define Spec_Agile_Cipher_AES128 0
 #define Spec_Agile_Cipher_AES256 1
 #define Spec_Agile_Cipher_CHACHA20 2
 
+/* SNIPPET_END: Spec_Agile_Cipher_cipher_alg */
+
 typedef uint8_t Spec_Agile_Cipher_cipher_alg;
+
+/* SNIPPET_START: Spec_Cipher_Expansion_impl */
 
 #define Spec_Cipher_Expansion_Hacl_CHACHA20 0
 #define Spec_Cipher_Expansion_Vale_AES128 1
 #define Spec_Cipher_Expansion_Vale_AES256 2
 
+/* SNIPPET_END: Spec_Cipher_Expansion_impl */
+
 typedef uint8_t Spec_Cipher_Expansion_impl;
+
+/* SNIPPET_START: Spec_Cipher_Expansion_cipher_alg_of_impl */
 
 Spec_Agile_Cipher_cipher_alg
 Spec_Cipher_Expansion_cipher_alg_of_impl(Spec_Cipher_Expansion_impl i);
+
+/* SNIPPET_END: Spec_Cipher_Expansion_cipher_alg_of_impl */
+
+/* SNIPPET_START: Spec_Agile_AEAD_alg */
 
 #define Spec_Agile_AEAD_AES128_GCM 0
 #define Spec_Agile_AEAD_AES256_GCM 1
@@ -65,6 +83,8 @@ Spec_Cipher_Expansion_cipher_alg_of_impl(Spec_Cipher_Expansion_impl i);
 #define Spec_Agile_AEAD_AES256_CCM 4
 #define Spec_Agile_AEAD_AES128_CCM8 5
 #define Spec_Agile_AEAD_AES256_CCM8 6
+
+/* SNIPPET_END: Spec_Agile_AEAD_alg */
 
 typedef uint8_t Spec_Agile_AEAD_alg;
 

@@ -24,43 +24,75 @@
 
 #include "EverCrypt_Vale.h"
 
+/* SNIPPET_START: __proj__Mkgcm_args__item__plain */
+
 uint8_t *__proj__Mkgcm_args__item__plain(gcm_args projectee)
 {
   return projectee.plain;
 }
+
+/* SNIPPET_END: __proj__Mkgcm_args__item__plain */
+
+/* SNIPPET_START: __proj__Mkgcm_args__item__plain_len */
 
 uint64_t __proj__Mkgcm_args__item__plain_len(gcm_args projectee)
 {
   return projectee.plain_len;
 }
 
+/* SNIPPET_END: __proj__Mkgcm_args__item__plain_len */
+
+/* SNIPPET_START: __proj__Mkgcm_args__item__aad */
+
 uint8_t *__proj__Mkgcm_args__item__aad(gcm_args projectee)
 {
   return projectee.aad;
 }
+
+/* SNIPPET_END: __proj__Mkgcm_args__item__aad */
+
+/* SNIPPET_START: __proj__Mkgcm_args__item__aad_len */
 
 uint64_t __proj__Mkgcm_args__item__aad_len(gcm_args projectee)
 {
   return projectee.aad_len;
 }
 
+/* SNIPPET_END: __proj__Mkgcm_args__item__aad_len */
+
+/* SNIPPET_START: __proj__Mkgcm_args__item__iv */
+
 uint8_t *__proj__Mkgcm_args__item__iv(gcm_args projectee)
 {
   return projectee.iv;
 }
+
+/* SNIPPET_END: __proj__Mkgcm_args__item__iv */
+
+/* SNIPPET_START: __proj__Mkgcm_args__item__expanded_key */
 
 uint8_t *__proj__Mkgcm_args__item__expanded_key(gcm_args projectee)
 {
   return projectee.expanded_key;
 }
 
+/* SNIPPET_END: __proj__Mkgcm_args__item__expanded_key */
+
+/* SNIPPET_START: __proj__Mkgcm_args__item__cipher */
+
 uint8_t *__proj__Mkgcm_args__item__cipher(gcm_args projectee)
 {
   return projectee.cipher;
 }
 
+/* SNIPPET_END: __proj__Mkgcm_args__item__cipher */
+
+/* SNIPPET_START: __proj__Mkgcm_args__item__tag */
+
 uint8_t *__proj__Mkgcm_args__item__tag(gcm_args projectee)
 {
   return projectee.tag;
 }
+
+/* SNIPPET_END: __proj__Mkgcm_args__item__tag */
 

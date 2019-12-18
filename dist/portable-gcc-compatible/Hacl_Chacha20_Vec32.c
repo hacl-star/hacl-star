@@ -24,7 +24,9 @@
 
 #include "Hacl_Chacha20_Vec32.h"
 
-static void Hacl_Chacha20_Vec32_double_round_32(uint32_t *st)
+/* SNIPPET_START: Hacl_Chacha20_Vec32_double_round_32 */
+
+inline static void Hacl_Chacha20_Vec32_double_round_32(uint32_t *st)
 {
   st[0U] = st[0U] + st[4U];
   uint32_t std = st[12U] ^ st[0U];
@@ -124,7 +126,12 @@ static void Hacl_Chacha20_Vec32_double_round_32(uint32_t *st)
   st[4U] = std30 << (uint32_t)7U | std30 >> ((uint32_t)32U - (uint32_t)7U);
 }
 
-static void Hacl_Chacha20_Vec32_chacha20_core_32(uint32_t *k, uint32_t *ctx, uint32_t ctr)
+/* SNIPPET_END: Hacl_Chacha20_Vec32_double_round_32 */
+
+/* SNIPPET_START: Hacl_Chacha20_Vec32_chacha20_core_32 */
+
+inline static void
+Hacl_Chacha20_Vec32_chacha20_core_32(uint32_t *k, uint32_t *ctx, uint32_t ctr)
 {
   memcpy(k, ctx, (uint32_t)16U * sizeof ctx[0U]);
   uint32_t ctr_u32 = (uint32_t)1U * ctr;
@@ -149,7 +156,11 @@ static void Hacl_Chacha20_Vec32_chacha20_core_32(uint32_t *k, uint32_t *ctx, uin
   k[12U] = k[12U] + cv;
 }
 
-static void
+/* SNIPPET_END: Hacl_Chacha20_Vec32_chacha20_core_32 */
+
+/* SNIPPET_START: Hacl_Chacha20_Vec32_chacha20_init_32 */
+
+inline static void
 Hacl_Chacha20_Vec32_chacha20_init_32(uint32_t *ctx, uint8_t *k, uint8_t *n1, uint32_t ctr)
 {
   uint32_t ctx1[16U] = { 0U };
@@ -191,6 +202,10 @@ Hacl_Chacha20_Vec32_chacha20_init_32(uint32_t *ctx, uint8_t *k, uint8_t *n1, uin
   uint32_t c12 = ctx[12U];
   ctx[12U] = c12 + ctr1;
 }
+
+/* SNIPPET_END: Hacl_Chacha20_Vec32_chacha20_init_32 */
+
+/* SNIPPET_START: Hacl_Chacha20_Vec32_chacha20_encrypt_32 */
 
 void
 Hacl_Chacha20_Vec32_chacha20_encrypt_32(
@@ -262,6 +277,10 @@ Hacl_Chacha20_Vec32_chacha20_encrypt_32(
   }
 }
 
+/* SNIPPET_END: Hacl_Chacha20_Vec32_chacha20_encrypt_32 */
+
+/* SNIPPET_START: Hacl_Chacha20_Vec32_chacha20_decrypt_32 */
+
 void
 Hacl_Chacha20_Vec32_chacha20_decrypt_32(
   uint32_t len,
@@ -331,4 +350,6 @@ Hacl_Chacha20_Vec32_chacha20_decrypt_32(
     memcpy(uu____2, plain, rem1 * sizeof plain[0U]);
   }
 }
+
+/* SNIPPET_END: Hacl_Chacha20_Vec32_chacha20_decrypt_32 */
 

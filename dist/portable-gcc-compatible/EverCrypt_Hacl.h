@@ -34,31 +34,55 @@
 
 
 
+/* SNIPPET_START: EverCrypt_Hacl_aes128_mk_sbox */
+
 #define EverCrypt_Hacl_aes128_mk_sbox Crypto_Symmetric_AES128_mk_sbox
 
 extern void EverCrypt_Hacl_aes128_mk_sbox(uint8_t *sb);
 
+/* SNIPPET_END: EverCrypt_Hacl_aes128_mk_sbox */
+
+/* SNIPPET_START: EverCrypt_Hacl_aes128_keyExpansion */
+
 #define EverCrypt_Hacl_aes128_keyExpansion Crypto_Symmetric_AES128_keyExpansion
 
 extern void EverCrypt_Hacl_aes128_keyExpansion(uint8_t *key, uint8_t *w, uint8_t *sb);
+
+/* SNIPPET_END: EverCrypt_Hacl_aes128_keyExpansion */
+
+/* SNIPPET_START: EverCrypt_Hacl_aes128_cipher */
 
 #define EverCrypt_Hacl_aes128_cipher Crypto_Symmetric_AES128_cipher
 
 extern void
 EverCrypt_Hacl_aes128_cipher(uint8_t *cipher, uint8_t *plain, uint8_t *w, uint8_t *sb);
 
+/* SNIPPET_END: EverCrypt_Hacl_aes128_cipher */
+
+/* SNIPPET_START: EverCrypt_Hacl_aes256_mk_sbox */
+
 #define EverCrypt_Hacl_aes256_mk_sbox Crypto_Symmetric_AES_mk_sbox
 
 extern void EverCrypt_Hacl_aes256_mk_sbox(uint8_t *sb);
+
+/* SNIPPET_END: EverCrypt_Hacl_aes256_mk_sbox */
+
+/* SNIPPET_START: EverCrypt_Hacl_aes256_keyExpansion */
 
 #define EverCrypt_Hacl_aes256_keyExpansion Crypto_Symmetric_AES_keyExpansion
 
 extern void EverCrypt_Hacl_aes256_keyExpansion(uint8_t *key, uint8_t *w, uint8_t *sb);
 
+/* SNIPPET_END: EverCrypt_Hacl_aes256_keyExpansion */
+
+/* SNIPPET_START: EverCrypt_Hacl_aes256_cipher */
+
 #define EverCrypt_Hacl_aes256_cipher Crypto_Symmetric_AES_cipher
 
 extern void
 EverCrypt_Hacl_aes256_cipher(uint8_t *cipher, uint8_t *plain, uint8_t *w, uint8_t *sb);
+
+/* SNIPPET_END: EverCrypt_Hacl_aes256_cipher */
 
 #define __EverCrypt_Hacl_H_DEFINED
 #endif

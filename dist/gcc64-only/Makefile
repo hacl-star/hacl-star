@@ -60,6 +60,7 @@ endif
 ifneq (,$(wildcard EverCrypt_OpenSSL.h))
   CFLAGS	+= -I $(OPENSSL_HOME)/include
   LDFLAGS 	+= -L$(OPENSSL_HOME) -lcrypto
+  MLLDFLAGS     += -ccopt -L$(OPENSSL_HOME) -cclib -lcrypto
 ifneq ($(OS),Windows_NT)
   LDFLAGS	+= -ldl -lpthread
 endif
@@ -106,6 +107,7 @@ ALL_ML_STUBS=$(patsubst %,lib/%_stubs.cmx,$(ALL_OCAML))
 ALL_C_STUBS=$(patsubst %,lib/%_c_stubs.o,$(ALL_OCAML))
 
 include .depend.ocaml
+include ctypes.depend
 
 .depend.ocaml:
 	$(OCAMLDEP) $(wildcard lib/*.ml) $(wildcard lib_gen/*.ml) > $@
@@ -130,16 +132,27 @@ include .depend.ocaml
 
 all: libocamlevercrypt.cmxa
 
-lib_gen/%_gen.exe: lib/%_bindings.cmx lib_gen/%_gen.cmx
-	$(OCAMLOPT) $^ -o $@
+lib_gen/%_gen.exe: libevercrypt.a
+	$(OCAMLOPT) $(filter-out %.a,$^) libevercrypt.a -o $@ $(MLLDFLAGS)
 
 %.cmx: %.ml
-	$(OCAMLOPT) -c $< -o $@
+	$(OCAMLOPT) -c $^ -o $@
+
+.PRECIOUS: lib/%_stubs.ml
+lib/%_stubs.ml: lib/%_c_stubs.c
+
+ifeq ($(shell uname -s),Darwin)
+  DY=DYLD_LIBRARY_
+else ifeq ($(OS),Windows_NT)
+  DY=
+else
+  DY=LD_LIBRARY_
+endif
 
 lib/%_stubs.ml lib/%_c_stubs.c: lib_gen/%_gen.exe
-	$<
+	$(DY)PATH=.:$(OPENSSL_HOME):$$$(DY)PATH $<
 
 libocamlevercrypt.cmxa: $(ALL_BINDINGS) $(ALL_ML_STUBS) $(ALL_C_STUBS) libevercrypt.$(SO)
-	ocamlfind mklib -o ocamlevercrypt $(filter-out %.so,$^) -L. -levercrypt -L$(OPENSSL_HOME) -lcrypto
+	ocamlfind mklib -o ocamlevercrypt $(filter-out %.so,$^) libevercrypt.a $(MLLDFLAGS)
 
 endif

@@ -34,6 +34,8 @@
 #include "Hacl_Chacha20.h"
 
 
+/* SNIPPET_START: EverCrypt_Cipher_chacha20 */
+
 void
 EverCrypt_Cipher_chacha20(
   uint32_t len,
@@ -43,6 +45,8 @@ EverCrypt_Cipher_chacha20(
   uint8_t *iv,
   uint32_t ctr
 );
+
+/* SNIPPET_END: EverCrypt_Cipher_chacha20 */
 
 #define __EverCrypt_Cipher_H_DEFINED
 #endif

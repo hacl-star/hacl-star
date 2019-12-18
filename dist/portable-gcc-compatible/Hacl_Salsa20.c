@@ -24,6 +24,8 @@
 
 #include "Hacl_Salsa20.h"
 
+/* SNIPPET_START: Hacl_Impl_Salsa20_Core32_quarter_round */
+
 inline static void
 Hacl_Impl_Salsa20_Core32_quarter_round(
   uint32_t *st,
@@ -54,6 +56,10 @@ Hacl_Impl_Salsa20_Core32_quarter_round(
   uint32_t sta12 = sta3 ^ ((stb + std) << (uint32_t)18U | (stb + std) >> (uint32_t)14U);
   st[a] = sta12;
 }
+
+/* SNIPPET_END: Hacl_Impl_Salsa20_Core32_quarter_round */
+
+/* SNIPPET_START: Hacl_Impl_Salsa20_Core32_double_round */
 
 inline static void Hacl_Impl_Salsa20_Core32_double_round(uint32_t *st)
 {
@@ -99,6 +105,10 @@ inline static void Hacl_Impl_Salsa20_Core32_double_round(uint32_t *st)
     (uint32_t)14U);
 }
 
+/* SNIPPET_END: Hacl_Impl_Salsa20_Core32_double_round */
+
+/* SNIPPET_START: Hacl_Impl_Salsa20_rounds */
+
 inline static void Hacl_Impl_Salsa20_rounds(uint32_t *st)
 {
   Hacl_Impl_Salsa20_Core32_double_round(st);
@@ -112,6 +122,10 @@ inline static void Hacl_Impl_Salsa20_rounds(uint32_t *st)
   Hacl_Impl_Salsa20_Core32_double_round(st);
   Hacl_Impl_Salsa20_Core32_double_round(st);
 }
+
+/* SNIPPET_END: Hacl_Impl_Salsa20_rounds */
+
+/* SNIPPET_START: Hacl_Impl_Salsa20_salsa20_core */
 
 inline static void Hacl_Impl_Salsa20_salsa20_core(uint32_t *k, uint32_t *ctx, uint32_t ctr)
 {
@@ -127,6 +141,10 @@ inline static void Hacl_Impl_Salsa20_salsa20_core(uint32_t *k, uint32_t *ctx, ui
   }
   k[8U] = k[8U] + ctr_u32;
 }
+
+/* SNIPPET_END: Hacl_Impl_Salsa20_salsa20_core */
+
+/* SNIPPET_START: Hacl_Impl_Salsa20_salsa20_key_block0 */
 
 inline static void
 Hacl_Impl_Salsa20_salsa20_key_block0(uint8_t *out, uint8_t *key, uint8_t *n1)
@@ -170,6 +188,10 @@ Hacl_Impl_Salsa20_salsa20_key_block0(uint8_t *out, uint8_t *key, uint8_t *n1)
     store32_le(out + i * (uint32_t)4U, k[i]);
   }
 }
+
+/* SNIPPET_END: Hacl_Impl_Salsa20_salsa20_key_block0 */
+
+/* SNIPPET_START: Hacl_Impl_Salsa20_salsa20_encrypt */
 
 inline static void
 Hacl_Impl_Salsa20_salsa20_encrypt(
@@ -276,6 +298,10 @@ Hacl_Impl_Salsa20_salsa20_encrypt(
   }
 }
 
+/* SNIPPET_END: Hacl_Impl_Salsa20_salsa20_encrypt */
+
+/* SNIPPET_START: Hacl_Impl_Salsa20_salsa20_decrypt */
+
 inline static void
 Hacl_Impl_Salsa20_salsa20_decrypt(
   uint32_t len,
@@ -381,6 +407,10 @@ Hacl_Impl_Salsa20_salsa20_decrypt(
   }
 }
 
+/* SNIPPET_END: Hacl_Impl_Salsa20_salsa20_decrypt */
+
+/* SNIPPET_START: Hacl_Impl_HSalsa20_hsalsa20 */
+
 inline static void Hacl_Impl_HSalsa20_hsalsa20(uint8_t *out, uint8_t *key, uint8_t *n1)
 {
   uint32_t ctx[16U] = { 0U };
@@ -429,6 +459,10 @@ inline static void Hacl_Impl_HSalsa20_hsalsa20(uint8_t *out, uint8_t *key, uint8
   }
 }
 
+/* SNIPPET_END: Hacl_Impl_HSalsa20_hsalsa20 */
+
+/* SNIPPET_START: Hacl_Salsa20_salsa20_encrypt */
+
 void
 Hacl_Salsa20_salsa20_encrypt(
   uint32_t len,
@@ -441,6 +475,10 @@ Hacl_Salsa20_salsa20_encrypt(
 {
   Hacl_Impl_Salsa20_salsa20_encrypt(len, out, text, key, n1, ctr);
 }
+
+/* SNIPPET_END: Hacl_Salsa20_salsa20_encrypt */
+
+/* SNIPPET_START: Hacl_Salsa20_salsa20_decrypt */
 
 void
 Hacl_Salsa20_salsa20_decrypt(
@@ -455,13 +493,23 @@ Hacl_Salsa20_salsa20_decrypt(
   Hacl_Impl_Salsa20_salsa20_decrypt(len, out, cipher, key, n1, ctr);
 }
 
+/* SNIPPET_END: Hacl_Salsa20_salsa20_decrypt */
+
+/* SNIPPET_START: Hacl_Salsa20_salsa20_key_block0 */
+
 void Hacl_Salsa20_salsa20_key_block0(uint8_t *out, uint8_t *key, uint8_t *n1)
 {
   Hacl_Impl_Salsa20_salsa20_key_block0(out, key, n1);
 }
 
+/* SNIPPET_END: Hacl_Salsa20_salsa20_key_block0 */
+
+/* SNIPPET_START: Hacl_Salsa20_hsalsa20 */
+
 void Hacl_Salsa20_hsalsa20(uint8_t *out, uint8_t *key, uint8_t *n1)
 {
   Hacl_Impl_HSalsa20_hsalsa20(out, key, n1);
 }
+
+/* SNIPPET_END: Hacl_Salsa20_hsalsa20 */
 

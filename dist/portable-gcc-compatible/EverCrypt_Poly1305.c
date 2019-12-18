@@ -24,6 +24,8 @@
 
 #include "EverCrypt_Poly1305.h"
 
+/* SNIPPET_START: EverCrypt_Poly1305_poly1305_vale */
+
 static void
 EverCrypt_Poly1305_poly1305_vale(uint8_t *dst, uint8_t *src, uint32_t len, uint8_t *key)
 {
@@ -53,6 +55,10 @@ EverCrypt_Poly1305_poly1305_vale(uint8_t *dst, uint8_t *src, uint32_t len, uint8
   memcpy(dst, ctx, (uint32_t)16U * sizeof ctx[0U]);
 }
 
+/* SNIPPET_END: EverCrypt_Poly1305_poly1305_vale */
+
+/* SNIPPET_START: EverCrypt_Poly1305_poly1305 */
+
 void EverCrypt_Poly1305_poly1305(uint8_t *dst, uint8_t *src, uint32_t len, uint8_t *key)
 {
   bool avx2 = EverCrypt_AutoConfig2_has_avx2();
@@ -81,4 +87,6 @@ void EverCrypt_Poly1305_poly1305(uint8_t *dst, uint8_t *src, uint32_t len, uint8
   #endif
   Hacl_Poly1305_32_poly1305_mac(dst, len, src, key);
 }
+
+/* SNIPPET_END: EverCrypt_Poly1305_poly1305 */
 

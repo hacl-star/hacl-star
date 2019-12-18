@@ -35,19 +35,49 @@
 #include "Hacl_Spec.h"
 
 
+/* SNIPPET_START: Hacl_HMAC_DRBG_supported_alg */
+
 typedef Spec_Hash_Definitions_hash_alg Hacl_HMAC_DRBG_supported_alg;
+
+/* SNIPPET_END: Hacl_HMAC_DRBG_supported_alg */
+
+/* SNIPPET_START: Hacl_HMAC_DRBG_reseed_interval */
 
 extern uint32_t Hacl_HMAC_DRBG_reseed_interval;
 
+/* SNIPPET_END: Hacl_HMAC_DRBG_reseed_interval */
+
+/* SNIPPET_START: Hacl_HMAC_DRBG_max_output_length */
+
 extern uint32_t Hacl_HMAC_DRBG_max_output_length;
+
+/* SNIPPET_END: Hacl_HMAC_DRBG_max_output_length */
+
+/* SNIPPET_START: Hacl_HMAC_DRBG_max_length */
 
 extern uint32_t Hacl_HMAC_DRBG_max_length;
 
+/* SNIPPET_END: Hacl_HMAC_DRBG_max_length */
+
+/* SNIPPET_START: Hacl_HMAC_DRBG_max_personalization_string_length */
+
 extern uint32_t Hacl_HMAC_DRBG_max_personalization_string_length;
+
+/* SNIPPET_END: Hacl_HMAC_DRBG_max_personalization_string_length */
+
+/* SNIPPET_START: Hacl_HMAC_DRBG_max_additional_input_length */
 
 extern uint32_t Hacl_HMAC_DRBG_max_additional_input_length;
 
+/* SNIPPET_END: Hacl_HMAC_DRBG_max_additional_input_length */
+
+/* SNIPPET_START: Hacl_HMAC_DRBG_min_length */
+
 uint32_t Hacl_HMAC_DRBG_min_length(Spec_Hash_Definitions_hash_alg a);
+
+/* SNIPPET_END: Hacl_HMAC_DRBG_min_length */
+
+/* SNIPPET_START: Hacl_HMAC_DRBG_state */
 
 typedef struct Hacl_HMAC_DRBG_state_s
 {
@@ -57,8 +87,16 @@ typedef struct Hacl_HMAC_DRBG_state_s
 }
 Hacl_HMAC_DRBG_state;
 
+/* SNIPPET_END: Hacl_HMAC_DRBG_state */
+
+/* SNIPPET_START: Hacl_HMAC_DRBG_uu___is_State */
+
 bool
 Hacl_HMAC_DRBG_uu___is_State(Spec_Hash_Definitions_hash_alg a, Hacl_HMAC_DRBG_state projectee);
+
+/* SNIPPET_END: Hacl_HMAC_DRBG_uu___is_State */
+
+/* SNIPPET_START: Hacl_HMAC_DRBG___proj__State__item__k */
 
 uint8_t
 *Hacl_HMAC_DRBG___proj__State__item__k(
@@ -66,11 +104,19 @@ uint8_t
   Hacl_HMAC_DRBG_state projectee
 );
 
+/* SNIPPET_END: Hacl_HMAC_DRBG___proj__State__item__k */
+
+/* SNIPPET_START: Hacl_HMAC_DRBG___proj__State__item__v */
+
 uint8_t
 *Hacl_HMAC_DRBG___proj__State__item__v(
   Spec_Hash_Definitions_hash_alg a,
   Hacl_HMAC_DRBG_state projectee
 );
+
+/* SNIPPET_END: Hacl_HMAC_DRBG___proj__State__item__v */
+
+/* SNIPPET_START: Hacl_HMAC_DRBG___proj__State__item__reseed_counter */
 
 uint32_t
 *Hacl_HMAC_DRBG___proj__State__item__reseed_counter(
@@ -78,7 +124,15 @@ uint32_t
   Hacl_HMAC_DRBG_state projectee
 );
 
+/* SNIPPET_END: Hacl_HMAC_DRBG___proj__State__item__reseed_counter */
+
+/* SNIPPET_START: Hacl_HMAC_DRBG_create_in */
+
 Hacl_HMAC_DRBG_state Hacl_HMAC_DRBG_create_in(Spec_Hash_Definitions_hash_alg a);
+
+/* SNIPPET_END: Hacl_HMAC_DRBG_create_in */
+
+/* SNIPPET_START: Hacl_HMAC_DRBG_instantiate */
 
 void
 Hacl_HMAC_DRBG_instantiate(
@@ -92,6 +146,10 @@ Hacl_HMAC_DRBG_instantiate(
   uint8_t *personalization_string
 );
 
+/* SNIPPET_END: Hacl_HMAC_DRBG_instantiate */
+
+/* SNIPPET_START: Hacl_HMAC_DRBG_reseed */
+
 void
 Hacl_HMAC_DRBG_reseed(
   Spec_Hash_Definitions_hash_alg a,
@@ -102,6 +160,10 @@ Hacl_HMAC_DRBG_reseed(
   uint8_t *additional_input_input
 );
 
+/* SNIPPET_END: Hacl_HMAC_DRBG_reseed */
+
+/* SNIPPET_START: Hacl_HMAC_DRBG_generate */
+
 bool
 Hacl_HMAC_DRBG_generate(
   Spec_Hash_Definitions_hash_alg a,
@@ -111,6 +173,8 @@ Hacl_HMAC_DRBG_generate(
   uint32_t additional_input_len,
   uint8_t *additional_input
 );
+
+/* SNIPPET_END: Hacl_HMAC_DRBG_generate */
 
 #define __Hacl_HMAC_DRBG_H_DEFINED
 #endif

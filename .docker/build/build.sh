@@ -46,19 +46,21 @@ function hacl_test() {
         (
           unset KREMLIN_HOME;
           cd dist
+          r=true
           for a in *; do
             if [[ $a != "kremlin" && $a != "vale" && -d $a ]]; then
               echo "Building snapshot: $a"
-              make -C $a -j $threads || (echo $a failed && return 255)
+              make -C $a -j $threads || r=false
               echo
             fi
           done
+          $r
         ) &&
         env VALE_SCONS_PARALLEL_OPT="-j $threads" make -j $threads $make_target -k
 }
 
-function hacl_test_and_hints() {
-    hacl_test && refresh_hacl_hints
+function hacl_test_hints_dist() {
+    hacl_test && refresh_hacl_hints_dist
 }
 
 function fetch_and_make_kremlin() {
@@ -144,11 +146,57 @@ function fetch_vale() {
     export_home VALE "$(pwd)/../vale"
 }
 
-function refresh_hacl_hints() {
+function refresh_doc() {
+  git config --global user.name "Dzomo, the Everest Yak"
+  git config --global user.email "everbld@microsoft.com"
+
+  git clone git@github.com:fstarlang/fstarlang.github.io fstarlang-github-io
+
+  make -C doc/reference html
+
+  pushd fstarlang-github-io && {
+    cp -R ../doc/reference/_build/* evercrypt/ &&
+    rm -rf evercrypt/html/static &&
+    mv evercrypt/html/_static evercrypt/html/static &&
+    find evercrypt/html -type f | xargs sed -i 's/_static/static/g' &&
+    rm -rf evercrypt/html/images &&
+    mv evercrypt/html/_images evercrypt/html/images &&
+    find evercrypt/html -type f | xargs sed -i 's/_images/images/g' &&
+    git add -A evercrypt/html/ evercrypt/index.html &&
+    if ! git diff --exit-code HEAD > /dev/null; then
+        git commit -m "[CI] Refresh HACL & EverCrypt doc" &&
+        git push
+    else
+        echo No git diff for the tutorial, not generating a commit
+    fi
+    errcode=$?
+  } &&
+  popd &&
+  return $errcode
+}
+
+function refresh_hacl_hints_dist() {
     # We should not generate hints when building on Windows
     if [[ "$OS" != "Windows_NT" ]]; then
-        refresh_hints "git@github.com:mitls/hacl-star.git" "true" "regenerate hints" "."
+        refresh_hints_dist "git@github.com:mitls/hacl-star.git" "true" "regenerate hints and dist" "."
+        if [[ $branchname == "fstar-master" ]] ; then
+          refresh_doc
+        fi
     fi
+}
+
+# Re-build and re-test all C code.
+# Then add changes to git.
+function clean_build_dist() {
+    ORANGE_FILE="../orange_file.txt"
+    rm -rf dist/*/*
+    env VALE_SCONS_PARALLEL_OPT="-j $threads" make -j $threads all-unstaged -k
+    echo "Searching for a diff in dist/"
+    if ! git diff --exit-code --name-only -- dist :!dist/*/INFO.txt; then
+        echo "GIT DIFF: the files in dist/ have a git diff"
+        { echo " - dist-diff (hacl-star)" >> $ORANGE_FILE; }
+    fi
+    git add dist
 }
 
 # Note: this performs an _approximate_ refresh of the hints, in the sense that
@@ -156,7 +204,7 @@ function refresh_hacl_hints() {
 # merged to $CI_BRANCH in the meanwhile, which would invalidate some hints. So, we
 # reset to origin/$CI_BRANCH, take in our hints, and push. This is short enough that
 # the chances of someone merging in-between fetch and push are low.
-function refresh_hints() {
+function refresh_hints_dist() {
     local remote=$1
     local extra="$2"
     local msg="$3"
@@ -173,6 +221,8 @@ function refresh_hints() {
     # when $2 = "git ls-files src/ocaml-output/ | xargs git add",
     # outputting the list of files to stdout
     eval "$extra"
+
+    clean_build_dist
 
     git commit --allow-empty -m "[CI] $msg"
     # Memorize that commit
@@ -212,6 +262,9 @@ function exec_build() {
         return
     fi
 
+    ORANGE_FILE="../orange_file.txt"
+    echo '' >$ORANGE_FILE
+
     export_home HACL "$(pwd)"
     export_home EVERCRYPT "$(pwd)/providers"
 
@@ -228,7 +281,7 @@ function exec_build() {
           vale_test && echo -n true >$status_file
         else
           export OTHERFLAGS="--record_hints $OTHERFLAGS --z3rlimit_factor 2"
-          hacl_test_and_hints && echo -n true >$status_file
+          hacl_test_hints_dist && echo -n true >$status_file
         fi
     else
         echo "Invalid target"
@@ -239,6 +292,9 @@ function exec_build() {
     if [[ $(cat $status_file) != "true" ]]; then
         echo "Build failed"
         echo Failure >$result_file
+    elif [[ $(cat $ORANGE_FILE) != "" ]]; then
+        echo "Build had breakages"
+        echo Success with breakages $(cat $ORANGE_FILE) >$result_file
     else
         echo "Build succeeded"
         echo Success >$result_file
