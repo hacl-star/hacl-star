@@ -60,7 +60,7 @@ In upcoming releases, we aim to include:
 | ------------------- | ------------------------ | -------------------------- | --------- |
 | **AEAD**            |                          |                            |           |
 | AES-GCM             |                          | ✔︎ (AES-NI + PCLMULQDQ)     | ✔︎         |
-| ChachaPoly          | ✔︎¹                       |                            | ✔︎         |
+| ChachaPoly          | ✔︎ (+ AVX + AVX2)         |                            | ✔︎         |
 |                     |                          |                            |           |
 | **Hashes**          |                          |                            |           |
 | MD5                 | ✔︎²                       |                            | ✔︎         |
@@ -71,7 +71,7 @@ In upcoming releases, we aim to include:
 |                     |                          |                            |           |
 | **MACS**            |                          |                            |           |
 | HMAC                | ✔︎⁴                       |                            | ✔︎         |
-| Poly1305            | ✔︎  (+ AVX + AVX2)        | ✔︎ (X64)                    |           |
+| Poly1305            | ✔︎ (+ AVX + AVX2)         | ✔︎ (X64)                    |           |
 |                     |                          |                            |           |
 | **Key Derivation**  |                          |                            |           |
 | HKDF                | ✔︎⁴                       |                            | ✔︎         |
@@ -81,13 +81,12 @@ In upcoming releases, we aim to include:
 | Ed25519             | ✔︎                        |                            |           |
 |                     |                          |                            |           |
 | **Ciphers**         |                          |                            |           |
-| Chacha20            | ✔︎                        |                            |           |
+| Chacha20            | ✔︎ (+ AVX + AVX2)         |                            |           |
 | AES128, 256         |                          | ✔︎ (AES NI + PCLMULQDQ)     |           |
 | AES CTR             |                          | ✔︎ (AES NI + PCLMULQDQ)     |           |
 
-¹: does not multiplex (yet) over the underlying Poly1305 implementation  
 ²: insecure algorithms provided for legacy interop purposes  
-³: SHA2-256 only; SHA2-224, SHA2-384 and SHA2-512 are pure C  
+³: SHA2-256 and SHA2-224 only; SHA2-384 and SHA2-512 are pure C  
 ⁴: HMAC and HKDF on top of the agile hash API, so HMAC-SHA2-256 and
    HKDF-SHA2-256 leverage the assembly version under the hood  
 

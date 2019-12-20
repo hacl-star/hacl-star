@@ -144,6 +144,7 @@ let hash_vv_bytes (vv:hash_vv{V.size_of vv = merkle_tree_size_lg}): HST.ST uint6
   (ensures (fun h0 _ h1 -> h0 == h1))
 = hash_vv_bytes_i vv 0ul
 
+#push-options "--initial_fuel 1 --max_fuel 1"
 private
 let rec serialize_hash_vv_i (ok:bool) (x:hash_vv) (buf:uint8_p) (sz:uint32_t{B.len buf = sz}) (pos:uint32_t) (i:uint32_t{i < V.size_of x})
 : HST.ST (bool & uint32_t)
@@ -161,6 +162,7 @@ let rec serialize_hash_vv_i (ok:bool) (x:hash_vv) (buf:uint8_p) (sz:uint32_t{B.l
     end
     else (ok, pos)
   end
+#pop-options
 
 private
 let serialize_hash_vv (ok:bool) (x:hash_vv) (buf:uint8_p) (sz:uint32_t{B.len buf = sz}) (pos:uint32_t): HST.ST (bool & uint32_t)
@@ -175,7 +177,6 @@ let serialize_hash_vv (ok:bool) (x:hash_vv) (buf:uint8_p) (sz:uint32_t{B.len buf
     if (V.size_of x > 0ul) then serialize_hash_vv_i ok x buf sz pos 0ul
     else (ok, pos)
   end
-
 
 private
 let deserialize_bool (ok:bool) (buf:const_uint8_p) (sz:uint32_t{CB.length buf = U32.v sz}) (pos:uint32_t): HST.ST (bool & uint32_t & bool)
@@ -408,7 +409,7 @@ let mt_deserialize rid input sz =
        hash_size <> MerkleTree.New.Low.hash_size ||
        not (merkle_tree_conditions offset i j hs rhs_ok rhs mroot)
     then B.null #merkle_tree
-    else B.malloc rid (MT offset i j hs rhs_ok rhs mroot) 1ul
+    else B.malloc rid (MT offset i j hs rhs_ok rhs mroot hash_2) 1ul
   end
 
 val mt_serialize_path: p:const_path_p -> mt:const_mt_p -> output:uint8_p -> sz:uint64_t -> HST.ST uint64_t

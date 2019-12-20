@@ -728,7 +728,7 @@ dist/wasm/Makefile.basic: WASMSUPPORT_BUNDLE =
 
 # Customizations for regular, msvc and gcc flavors.
 dist/gcc-compatible/Makefile.basic: DEFAULT_FLAGS += \
-  -ctypes Hacl.NaCl,EverCrypt.Curve25519,Hacl.Ed25519,EverCrypt.DRBG,Hacl.HMAC.DRBG,EverCrypt.HMAC,EverCrypt.AEAD
+  -ctypes EverCrypt.*,Hacl.*
 
 dist/msvc-compatible/Makefile.basic: DEFAULT_FLAGS += -falloca -ftail-calls
 
@@ -860,7 +860,7 @@ dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/LICENSE.txt \
 	  $(filter %.krml,$^) \
 	  -silent \
 	  -ccopt -Wno-unused \
-	  -warn-error @4-6 \
+	  -warn-error @4-6+22 \
 	  -fparentheses \
 	  $(notdir $(HACL_OLD_FILES)) \
 	  $(notdir $(HAND_WRITTEN_FILES)) \
