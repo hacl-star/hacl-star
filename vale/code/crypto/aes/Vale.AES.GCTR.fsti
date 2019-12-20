@@ -202,7 +202,7 @@ val gctr_bytes_helper (alg:algorithm) (key:seq nat32)
            length c_bytes == 1 /\
            is_aes_key_LE alg key /\
 
-          // Ensured by gctr_core_opt
+          // Ensured by Gctr_core_opt
           gctr_partial alg (length p128) p128 c128 key iv_BE /\
           (p_num_bytes > length p128 * 16 ==>
            index c_bytes 0 == gctr_encrypt_block (inc32 iv_BE (length p128)) (index p_bytes 0) alg key 0))
