@@ -23,7 +23,7 @@ open MerkleTree.New.High.Correct.Base
 /// Correctness of insertion
 
 val mt_hashes_next_rel_insert_odd:
-  #hsz:pos -> #f:MTS.tag_fun_t #hsz ->
+  #hsz:pos -> #f:MTS.hash_fun_t #hsz ->
   j:nat{j % 2 = 1} ->
   hs:hashes #hsz {S.length hs = j} -> v:hash ->
   nhs:hashes #hsz {S.length nhs = j / 2} ->
@@ -33,7 +33,7 @@ val mt_hashes_next_rel_insert_odd:
 let mt_hashes_next_rel_insert_odd #_ #_ j hs v nhs = ()
 
 val mt_hashes_next_rel_insert_even:
-  #hsz:pos -> #f:MTS.tag_fun_t #hsz ->
+  #hsz:pos -> #f:MTS.hash_fun_t #hsz ->
   j:nat{j % 2 <> 1} ->
   hs:hashes #hsz {S.length hs = j} -> v:hash ->
   nhs:hashes #hsz {S.length nhs = j / 2} ->
@@ -42,7 +42,7 @@ val mt_hashes_next_rel_insert_even:
 let mt_hashes_next_rel_insert_even #_ #_ j hs v nhs = ()
 
 val insert_head:
-  #hsz:pos -> #f:MTS.tag_fun_t #hsz ->
+  #hsz:pos -> #f:MTS.hash_fun_t #hsz ->
   lv:nat{lv < 32} ->
   i:nat ->
   j:nat{i <= j /\ j < pow2 (32 - lv) - 1} ->
@@ -53,7 +53,7 @@ val insert_head:
 let insert_head #_ #_ lv i j hs acc = ()
 
 val insert_inv_preserved_even:
-  #hsz:pos -> #f:MTS.tag_fun_t #hsz ->
+  #hsz:pos -> #f:MTS.hash_fun_t #hsz ->
   lv:nat{lv < 32} ->
   i:nat ->
   j:nat{i <= j /\ j < pow2 (32 - lv) - 1} ->
@@ -95,7 +95,7 @@ let insert_inv_preserved_even #_ #f lv i j olds hs acc =
   end
 
 val insert_inv_preserved:
-  #hsz:pos -> #f:MTS.tag_fun_t #hsz ->
+  #hsz:pos -> #f:MTS.hash_fun_t #hsz ->
   lv:nat{lv < 32} ->
   i:nat ->
   j:nat{i <= j /\ j < pow2 (32 - lv) - 1} ->
@@ -154,16 +154,16 @@ let rec insert_inv_preserved #_ #f lv i j olds hs acc =
 val mt_insert_inv_preserved:
   #hsz:pos ->
   mt:merkle_tree #hsz {mt_wf_elts mt /\ mt_not_full mt} -> v:hash ->
-  olds:hashess #hsz {S.length olds = 32 /\ mt_olds_inv #_ #(MT?.tag_fun mt) 0 (MT?.i mt) olds} ->
+  olds:hashess #hsz {S.length olds = 32 /\ mt_olds_inv #_ #(MT?.hash_fun mt) 0 (MT?.i mt) olds} ->
   Lemma (requires (mt_inv #hsz mt olds))
         (ensures (mt_inv #hsz (mt_insert mt v) olds))
 let mt_insert_inv_preserved #_ mt v olds =
-  insert_inv_preserved #_ #(MT?.tag_fun mt) 0 (MT?.i mt) (MT?.j mt) olds (MT?.hs mt) v
+  insert_inv_preserved #_ #(MT?.hash_fun mt) 0 (MT?.i mt) (MT?.j mt) olds (MT?.hs mt) v
 
 /// Correctness of `create_mt`
 
 val empty_olds_inv:
-  #hsz:pos -> #f:MTS.tag_fun_t #hsz ->
+  #hsz:pos -> #f:MTS.hash_fun_t #hsz ->
   lv:nat{lv <= 32} ->
   Lemma (requires True)
         (ensures (mt_olds_inv #_ #f lv 0 (empty_hashes 32)))
@@ -173,7 +173,7 @@ let rec empty_olds_inv #_ #f lv =
   else empty_olds_inv #_ #f (lv + 1)
 
 val create_empty_mt_inv_ok:
-  #hsz:pos -> #f:MTS.tag_fun_t #hsz ->
+  #hsz:pos -> #f:MTS.hash_fun_t #hsz ->
   unit ->
   Lemma (empty_olds_inv #_ #f 0;
         mt_inv #hsz (create_empty_mt #_ #f ()) (empty_hashes 32))
@@ -182,7 +182,7 @@ let create_empty_mt_inv_ok #_ #f _ =
   mt_hashes_inv_empty #_ #f 0
 
 val create_mt_inv_ok:
-  #hsz:pos -> #f:MTS.tag_fun_t #hsz ->
+  #hsz:pos -> #f:MTS.hash_fun_t #hsz ->
   init:hash ->
   Lemma (empty_olds_inv #_ #f 0;
         mt_inv #hsz (mt_create hsz f init) (empty_hashes 32))

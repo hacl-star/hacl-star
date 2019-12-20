@@ -23,7 +23,7 @@ open MerkleTree.New.High.Correct.Base
 /// Correctness of flushing
 
 val mt_flush_to_olds:
-  #hsz:pos -> #f:MTS.tag_fun_t #hsz ->
+  #hsz:pos -> #f:MTS.hash_fun_t #hsz ->
   lv:nat{lv < 32} ->
   pi:nat ->
   i:nat{i >= pi} ->
@@ -47,7 +47,7 @@ let rec mt_flush_to_olds #_ #f lv pi i j olds hs =
        mt_flush_to_olds #_ #f (lv + 1) (pi / 2) (i / 2) (j / 2) nolds hs)
 
 val mt_flush_to_olds_hs_equiv:
-  #hsz:pos -> #f:MTS.tag_fun_t #hsz ->
+  #hsz:pos -> #f:MTS.hash_fun_t #hsz ->
   lv:nat{lv < 32} ->
   pi:nat ->
   i:nat{i >= pi} ->
@@ -73,7 +73,7 @@ let rec mt_flush_to_olds_hs_equiv #_ #f lv pi i j olds hs1 hs2 =
          (lv + 1) (pi / 2) (i / 2) (j / 2) nolds hs1 hs2)
 
 val mt_flush_to_merge_preserved:
-  #hsz:pos -> #f:MTS.tag_fun_t #hsz ->
+  #hsz:pos -> #f:MTS.hash_fun_t #hsz ->
   lv:nat{lv < 32} ->
   pi:nat -> i:nat{i >= pi} ->
   j:nat{j >= i /\ j < pow2 (32 - lv)} ->
@@ -114,7 +114,7 @@ let rec mt_flush_to_merge_preserved #_ #f lv pi i j olds hs =
 #reset-options
 
 val mt_flush_to_inv_preserved_:
-  #hsz:pos -> #f:MTS.tag_fun_t #hsz ->
+  #hsz:pos -> #f:MTS.hash_fun_t #hsz ->
   lv:nat{lv < 32} ->
   pi:nat -> i:nat{i >= pi} ->
   j:nat{j >= i /\ j < pow2 (32 - lv)} ->
@@ -139,22 +139,22 @@ let mt_flush_to_inv_preserved_ #_ #f lv pi i j olds hs =
 val mt_flush_to_inv_preserved:
   #hsz:pos -> 
   mt:merkle_tree{mt_wf_elts mt} ->
-  olds:hashess #hsz {S.length olds = 32 /\ mt_olds_inv #_ #(MT?.tag_fun mt) 0 (MT?.i mt) olds} ->
+  olds:hashess #hsz {S.length olds = 32 /\ mt_olds_inv #_ #(MT?.hash_fun mt) 0 (MT?.i mt) olds} ->
   idx:nat{idx >= MT?.i mt /\ idx < MT?.j mt} ->
   Lemma (requires (mt_inv mt olds))
         (ensures (mt_inv (mt_flush_to mt idx)
-                         (mt_flush_to_olds #_ #(MT?.tag_fun mt) 0 (MT?.i mt) idx (MT?.j mt) olds (MT?.hs mt))))
+                         (mt_flush_to_olds #_ #(MT?.hash_fun mt) 0 (MT?.i mt) idx (MT?.j mt) olds (MT?.hs mt))))
 let mt_flush_to_inv_preserved #hsz mt olds idx =
-  mt_flush_to_inv_preserved_ #_ #(MT?.tag_fun mt) 0 (MT?.i mt) idx (MT?.j mt) olds (MT?.hs mt);
-  mt_flush_to_merge_preserved #_ #(MT?.tag_fun mt) 0 (MT?.i mt) idx (MT?.j mt) olds (MT?.hs mt)
+  mt_flush_to_inv_preserved_ #_ #(MT?.hash_fun mt) 0 (MT?.i mt) idx (MT?.j mt) olds (MT?.hs mt);
+  mt_flush_to_merge_preserved #_ #(MT?.hash_fun mt) 0 (MT?.i mt) idx (MT?.j mt) olds (MT?.hs mt)
 
 val mt_flush_inv_preserved:
   #hsz:pos ->
   mt:merkle_tree #hsz {mt_wf_elts mt /\ MT?.j mt > MT?.i mt} ->
-  olds:hashess #hsz {S.length olds = 32 /\ mt_olds_inv #_ #(MT?.tag_fun mt) 0 (MT?.i mt) olds} ->
+  olds:hashess #hsz {S.length olds = 32 /\ mt_olds_inv #_ #(MT?.hash_fun mt) 0 (MT?.i mt) olds} ->
   Lemma (requires (mt_inv mt olds))
         (ensures (mt_inv (mt_flush mt)
-                         (mt_flush_to_olds #_ #(MT?.tag_fun mt) 
+                         (mt_flush_to_olds #_ #(MT?.hash_fun mt) 
                            0 (MT?.i mt) (MT?.j mt - 1) (MT?.j mt)
                            olds (MT?.hs mt))))
 let mt_flush_inv_preserved #hsz mt olds =

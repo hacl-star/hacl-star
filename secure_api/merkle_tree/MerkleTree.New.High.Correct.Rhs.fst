@@ -20,7 +20,7 @@ open MerkleTree.New.High.Correct.Base
 // Another version of `construct_rhs` that recursively
 // accumulates rightmost hashes.
 val construct_rhs_acc:
-  #hsz:pos -> #f:MTS.tag_fun_t #hsz ->
+  #hsz:pos -> #f:MTS.hash_fun_t #hsz ->
   j:nat ->
   fhs:hashess #hsz {
     S.length fhs = log2c j /\
@@ -45,7 +45,7 @@ let rec construct_rhs_acc #_ #f j fhs acc actd =
 #push-options "--max_ifuel 1"
 
 val construct_rhs_acc_odd:
-  #hsz:pos -> #f:MTS.tag_fun_t #hsz ->
+  #hsz:pos -> #f:MTS.hash_fun_t #hsz ->
   j:nat ->
   fhs:hashess #hsz {
     S.length fhs = log2c j /\
@@ -67,7 +67,7 @@ let construct_rhs_acc_odd #_ #f j fhs acc actd = ()
 #push-options "--max_fuel 2"
 
 val construct_rhs_acc_inv_ok_0:
-  #hsz:pos -> #f:MTS.tag_fun_t #hsz ->
+  #hsz:pos -> #f:MTS.hash_fun_t #hsz ->
   fhs:hashess #hsz {
     S.length fhs = 1 /\
     mt_hashes_lth_inv_log #_ #f 1 fhs /\
@@ -89,7 +89,7 @@ let construct_rhs_acc_inv_ok_0 #_ #f fhs acc actd = ()
 #push-options "--z3rlimit 240 --initial_fuel 1 --max_fuel 1"
 
 val construct_rhs_acc_inv_ok:
-  #hsz:pos -> #f:MTS.tag_fun_t #hsz ->
+  #hsz:pos -> #f:MTS.hash_fun_t #hsz ->
   j:nat{j > 0} ->
   fhs:hashess #hsz {
     S.length fhs = log2c j /\
@@ -176,7 +176,7 @@ let rec construct_rhs_acc_inv_ok #hsz #f j fhs acc actd =
 
 
 val rhs_equiv:
-  #hsz:pos -> #f:MTS.tag_fun_t #hsz ->
+  #hsz:pos -> #f:MTS.hash_fun_t #hsz ->
   j:nat ->
   rhs1:hashes #hsz {S.length rhs1 = log2c j} ->
   rhs2:hashes #hsz {S.length rhs2 = log2c j} ->
@@ -190,7 +190,7 @@ let rec rhs_equiv #hsz #f j rhs1 rhs2 actd =
        rhs_equiv #_ #f (j / 2) (S.tail rhs1) (S.tail rhs2) true)
 
 val rhs_equiv_inv_preserved:
-  #hsz:pos -> #f:MTS.tag_fun_t #hsz ->
+  #hsz:pos -> #f:MTS.hash_fun_t #hsz ->
   j:nat ->
   smt:MTS.merkle_tree (log2c j) ->
   rhs1:hashes #hsz {S.length rhs1 = log2c j} ->
@@ -214,10 +214,9 @@ let rec rhs_equiv_inv_preserved #_ #f j smt rhs1 rhs2 actd =
       (S.tail rhs1) (S.tail rhs2) true
   end
 
-#push-options "--z3rlimit 750 --initial_fuel 1 --max_fuel 1 --max_ifuel 1"
-
+#push-options "--z3rlimit 1000 --initial_fuel 2 --max_fuel 2 --initial_ifuel 1 --max_ifuel 1"
 val construct_rhs_acc_consistent:
-  #hsz:pos -> #f:MTS.tag_fun_t #hsz ->
+  #hsz:pos -> #f:MTS.hash_fun_t #hsz ->
   lv:nat{lv <= 32} ->
   i:nat ->
   j:nat{i <= j /\ j < pow2 (32 - lv)} ->
@@ -310,7 +309,7 @@ let rec construct_rhs_acc_consistent #_ #f lv i j olds hs rhs acc actd =
 #pop-options
 
 val construct_rhs_inv_ok:
-  #hsz:pos -> #f:MTS.tag_fun_t #hsz ->
+  #hsz:pos -> #f:MTS.hash_fun_t #hsz ->
   lv:nat{lv <= 32} ->
   i:nat ->
   j:nat{j > 0 /\ i <= j /\ j < pow2 (32 - lv)} ->
@@ -346,7 +345,7 @@ let construct_rhs_inv_ok #hsz #f lv i j olds hs rhs acc actd =
     (fst crhsf) (S.slice (fst crhs) lv (lv + log2c j)) actd
 
 val construct_rhs_base_inv_ok:
-  #hsz:pos -> #f:MTS.tag_fun_t #hsz ->
+  #hsz:pos -> #f:MTS.hash_fun_t #hsz ->
   i:nat -> j:nat{j > 0 /\ i <= j /\ j < pow2 32} ->
   olds:hashess #hsz {S.length olds = 32 /\ mt_olds_inv #_ #f 0 i olds} ->
   hs:hashess #hsz {S.length hs = 32 /\ hs_wf_elts 0 hs i j} ->
@@ -368,7 +367,7 @@ let construct_rhs_base_inv_ok #hsz #f i j olds hs rhs acc actd =
   construct_rhs_inv_ok #_ #f 0 i j olds hs rhs acc actd
 
 val construct_rhs_init_ignored:
-  #hsz:pos -> #f:MTS.tag_fun_t #hsz ->
+  #hsz:pos -> #f:MTS.hash_fun_t #hsz ->
   lv:nat{lv <= 32} ->
   hs:hashess #hsz {S.length hs = 32} ->
   rhs:hashes #hsz {S.length rhs = 32} ->
@@ -382,15 +381,17 @@ val construct_rhs_init_ignored:
                   let rr2 = construct_rhs #_ #f lv hs rhs i j acc2 false in
                   S.equal (fst rr1) (fst rr2) /\ snd rr1 == snd rr2))
         (decreases j)
+#push-options "--z3rlimit 100 --initial_fuel 1 --max_fuel 1 --max_ifuel 1"
 let rec construct_rhs_init_ignored #hsz #f lv hs rhs i j acc1 acc2 =
   if j % 2 = 0
   then construct_rhs_init_ignored #_ #f (lv + 1) hs rhs (i / 2) (j / 2) acc1 acc2
   else ()
+#pop-options
 
 val mt_get_root_inv_ok:
   #hsz:pos -> 
   mt:merkle_tree #hsz {mt_wf_elts mt} -> drt:hash ->
-  olds:hashess #hsz {S.length olds = 32 /\ mt_olds_inv #_ #(MT?.tag_fun mt) 0 (MT?.i mt) olds} ->
+  olds:hashess #hsz {S.length olds = 32 /\ mt_olds_inv #_ #(MT?.hash_fun mt) 0 (MT?.i mt) olds} ->
   Lemma (requires (mt_inv mt olds))
         (ensures (let nmt, rt = mt_get_root mt drt in
                  // Only `MT?.rhs` and `MT?.mroot` are changed.
@@ -405,10 +406,10 @@ let mt_get_root_inv_ok #hsz mt drt olds =
   if MT?.rhs_ok mt then ()
   else if MT?.j mt = 0 then ()
   else begin
-    construct_rhs_base_inv_ok #_ #(MT?.tag_fun mt)
+    construct_rhs_base_inv_ok #_ #(MT?.hash_fun mt)
       (MT?.i mt) (MT?.j mt) olds (MT?.hs mt) (MT?.rhs mt)
       hash_init false;
-    construct_rhs_init_ignored #_ #(MT?.tag_fun mt)
+    construct_rhs_init_ignored #_ #(MT?.hash_fun mt)
       0 (MT?.hs mt) (MT?.rhs mt) (MT?.i mt) (MT?.j mt)
       hash_init drt
   end

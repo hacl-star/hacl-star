@@ -32,8 +32,8 @@ val path_spec:
   k:nat ->
   j:nat{k <= j} ->
   actd:bool ->
-  p:merkle_path #hsz {S.length p = mt_path_length k j actd} ->
-  GTot (sp:S.seq (MTS.padded_tag #hsz){S.length sp = log2c j})
+  p:path #hsz {S.length p = mt_path_length k j actd} ->
+  GTot (sp:S.seq (MTS.padded_hash #hsz){S.length sp = log2c j})
        (decreases j)
 let rec path_spec #hsz k j actd p =
   if j = 0 then S.empty
@@ -62,13 +62,13 @@ let mt_get_path_step_acc #hsz j chs crh k actd =
 	    else Some (S.index chs (k + 1)))
 
 val mt_get_path_acc:
-  #hsz:pos -> #f:MTS.tag_fun_t ->
+  #hsz:pos -> #f:MTS.hash_fun_t ->
   j:nat ->
   fhs:hashess #hsz {S.length fhs = log2c j /\ mt_hashes_lth_inv_log #_ #f j fhs} ->
   rhs:hashes #hsz {S.length rhs = log2c j} ->
   k:nat{k <= j} ->
   actd:bool ->
-  GTot (np:merkle_path #hsz {S.length np = mt_path_length k j actd})
+  GTot (np:path #hsz {S.length np = mt_path_length k j actd})
        (decreases j)
 let rec mt_get_path_acc #_ #f j fhs rhs k actd =
   if j = 0 then S.empty
@@ -81,7 +81,7 @@ let rec mt_get_path_acc #_ #f j fhs rhs k actd =
     else rp)
 
 val mt_get_path_step_acc_consistent:
-  #hsz:pos -> #f:MTS.tag_fun_t ->
+  #hsz:pos -> #f:MTS.hash_fun_t ->
   lv:nat{lv <= 32} ->
   i:nat ->
   j:nat{i <= j /\ j < pow2 (32 - lv)} ->
@@ -113,7 +113,7 @@ private val seq_cons_append:
 private let seq_cons_append #a hd tl = ()
 
 val mt_get_path_acc_consistent:
-  #hsz:pos -> #f:MTS.tag_fun_t ->
+  #hsz:pos -> #f:MTS.hash_fun_t ->
   lv:nat{lv <= 32} ->
   i:nat ->
   j:nat{i <= j /\ j < pow2 (32 - lv)} ->
@@ -132,7 +132,7 @@ val mt_get_path_acc_consistent:
                     (S.slice rhs lv (lv + log2c j)) k actd)
                   (mt_get_path_ #_ lv hs rhs i j k S.empty actd)))
         (decreases j)
-#push-options "--z3rlimit 800 --max_fuel 1 --max_ifuel 0"
+#push-options "--z3rlimit 1000 --max_fuel 1 --max_ifuel 0"
 let rec mt_get_path_acc_consistent #_ #f lv i j olds hs rhs k actd =
   log2c_bound j (32 - lv);
   mt_olds_hs_lth_inv_ok #_ #f lv i j olds hs;
@@ -193,7 +193,7 @@ let rec mt_get_path_acc_consistent #_ #f lv i j olds hs rhs k actd =
 #pop-options
 
 val mt_get_path_acc_inv_ok:
-  #hsz:pos -> #f:MTS.tag_fun_t ->
+  #hsz:pos -> #f:MTS.hash_fun_t ->
   j:nat ->
   fhs:hashess #hsz {S.length fhs = log2c j} ->
   rhs:hashes #hsz {S.length rhs = log2c j} ->
@@ -239,7 +239,7 @@ let rec mt_get_path_acc_inv_ok #_ #f j fhs rhs k acc actd =
 
 #push-options "--max_fuel 1 --initial_fuel 1 --max_ifuel 0 --z3rlimit 60"
 val mt_get_path_inv_ok_:
-  #hsz:pos -> #f:MTS.tag_fun_t ->
+  #hsz:pos -> #f:MTS.hash_fun_t ->
   lv:nat{lv < 32} ->
   i:nat ->
   j:nat{j > 0 /\ i <= j /\ j < pow2 (32 - lv)} ->
@@ -247,7 +247,7 @@ val mt_get_path_inv_ok_:
   hs:hashess #hsz {S.length hs = 32 /\ hs_wf_elts lv hs i j} ->
   rhs:hashes #hsz {S.length rhs = 32} ->
   k:nat{i <= k && k <= j} ->
-  p:merkle_path #hsz ->
+  p:path #hsz ->
   acc:hash -> actd:bool ->
   Lemma (requires (log2c_div j; log2c_bound j (32 - lv);
                   mt_olds_hs_lth_inv_ok #_ #f lv i j olds hs;
@@ -278,23 +278,23 @@ let mt_get_path_inv_ok_ #_ #f lv i j olds hs rhs k p acc actd =
 val mt_get_path_inv_ok:
   #hsz:pos -> 
   mt:merkle_tree #hsz {mt_wf_elts mt} ->
-  olds:hashess #hsz {S.length olds = 32 /\ mt_olds_inv #_ #(MT?.tag_fun mt) 0 (MT?.i mt) olds} ->
+  olds:hashess #hsz {S.length olds = 32 /\ mt_olds_inv #_ #(MT?.hash_fun mt) 0 (MT?.i mt) olds} ->
   idx:nat{MT?.i mt <= idx && idx < MT?.j mt} ->
   drt:hash ->
   Lemma (requires (MT?.j mt > 0 /\ mt_inv mt olds))
         (ensures (let j, p, rt = mt_get_path mt idx drt in
                  j == MT?.j mt /\
-                 mt_root_inv #_ #(MT?.tag_fun mt) (mt_base mt olds) hash_init false rt /\
+                 mt_root_inv #_ #(MT?.hash_fun mt) (mt_base mt olds) hash_init false rt /\
                  S.head p == S.index (mt_base mt olds) idx /\
                  (assert (S.length (S.tail p) == mt_path_length idx (MT?.j mt) false);
                  S.equal (path_spec idx (MT?.j mt) false (S.tail p))
-                         (MTS.mt_get_path #_ #(MT?.tag_fun mt) #(log2c j) (mt_spec mt olds) idx))))
+                         (MTS.mt_get_path #_ #(MT?.hash_fun mt) #(log2c j) (mt_spec mt olds) idx))))
 #push-options "--z3rlimit 40"
 let mt_get_path_inv_ok #hsz mt olds idx drt =
   let j, p, rt = mt_get_path mt idx drt in
   mt_get_root_inv_ok mt drt olds;
   assert (j == MT?.j mt);
-  assert (mt_root_inv #_ #(MT?.tag_fun mt) (mt_base mt olds) hash_init false rt);
+  assert (mt_root_inv #_ #(MT?.hash_fun mt) (mt_base mt olds) hash_init false rt);
 
   let ofs = offset_of (MT?.i mt) in
   let umt, _ = mt_get_root mt drt in
@@ -306,15 +306,15 @@ let mt_get_path_inv_ok #hsz mt olds idx drt =
   assert (S.head p == S.index (mt_base mt olds) idx);
 
   assert (S.length (S.tail p) == mt_path_length idx (MT?.j mt) false);
-  mt_get_path_inv_ok_ #_ #(MT?.tag_fun mt) 0 (MT?.i umt) (MT?.j umt)
+  mt_get_path_inv_ok_ #_ #(MT?.hash_fun mt) 0 (MT?.i umt) (MT?.j umt)
     olds (MT?.hs umt) (MT?.rhs umt) idx ip hash_init false
 #pop-options
 
 val mt_verify_ok_:
-  #hsz:pos -> #f:MTS.tag_fun_t ->
+  #hsz:pos -> #f:MTS.hash_fun_t ->
   k:nat ->
   j:nat{k <= j} ->
-  p:merkle_path ->
+  p:path ->
   ppos:nat ->
   acc:hash #hsz ->
   actd:bool ->
@@ -393,10 +393,10 @@ let rec mt_verify_ok_ #hsz #f k j p ppos acc actd =
 #pop-options
 
 val mt_verify_ok:
-  #hsz:pos -> #f:MTS.tag_fun_t ->
+  #hsz:pos -> #f:MTS.hash_fun_t ->
   k:nat ->
   j:nat{k < j} ->
-  p:merkle_path #hsz {S.length p = 1 + mt_path_length k j false} ->
+  p:path #hsz {S.length p = 1 + mt_path_length k j false} ->
   rt:hash #hsz ->
   Lemma (mt_verify #_ #f k j p rt <==>
         MTS.mt_verify #_ #f #(log2c j)

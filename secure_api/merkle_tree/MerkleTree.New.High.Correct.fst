@@ -30,7 +30,7 @@ module MTS = MerkleTree.Spec
 // 5) Merkle path verification by the design and the spec give the same result.
 
 type old_hashes (#hsz:pos) (mt:merkle_tree #hsz) =
-  olds:hashess #hsz {S.length olds = 32 /\ mt_olds_inv #hsz #(MT?.tag_fun mt) 0 (MT?.i mt) olds}
+  olds:hashess #hsz {S.length olds = 32 /\ mt_olds_inv #hsz #(MT?.hash_fun mt) 0 (MT?.i mt) olds}
 
 noeq type mt_olds (#hsz:pos) =
 | MTO: mt:merkle_tree #hsz {mt_wf_elts mt} ->
@@ -55,7 +55,7 @@ let mto_spec #hsz mto =
 // `create_mt` is correct.
 
 val create_mt_ok:
-  hsz:pos -> f:MTS.tag_fun_t ->
+  hsz:pos -> f:MTS.hash_fun_t ->
   init:hash #hsz ->
   Lemma (empty_olds_inv #_ #f 0;
          mto_inv (MTO (mt_create hsz f init) (empty_hashes 32)))
@@ -80,7 +80,7 @@ val mt_flush_to_ok:
   idx:nat{idx >= MT?.i (MTO?.mt mto) /\ idx < MT?.j (MTO?.mt mto)} ->
   Lemma (requires mto_inv mto)
         (ensures  mto_inv (MTO (mt_flush_to (MTO?.mt mto) idx)
-                               (mt_flush_to_olds #hsz #(MT?.tag_fun (MTO?.mt mto)) 0 (MT?.i (MTO?.mt mto)) idx (MT?.j (MTO?.mt mto))
+                               (mt_flush_to_olds #hsz #(MT?.hash_fun (MTO?.mt mto)) 0 (MT?.i (MTO?.mt mto)) idx (MT?.j (MTO?.mt mto))
                                  (MTO?.olds mto) (MT?.hs (MTO?.mt mto)))))
 let mt_flush_to_ok #_ mto idx =
   Flushing.mt_flush_to_inv_preserved (MTO?.mt mto) (MTO?.olds mto) idx
@@ -90,7 +90,7 @@ val mt_flush_ok:
   mto:mt_olds #hsz ->
   Lemma (requires mto_inv mto /\ MT?.j (MTO?.mt mto) > MT?.i (MTO?.mt mto))
         (ensures  mto_inv (MTO (mt_flush_to (MTO?.mt mto) (MT?.j (MTO?.mt mto) - 1))
-                               (mt_flush_to_olds #hsz #(MT?.tag_fun (MTO?.mt mto)) 0 (MT?.i (MTO?.mt mto))
+                               (mt_flush_to_olds #hsz #(MT?.hash_fun (MTO?.mt mto)) 0 (MT?.i (MTO?.mt mto))
                                  (MT?.j (MTO?.mt mto) - 1) (MT?.j (MTO?.mt mto))
                                  (MTO?.olds mto) (MT?.hs (MTO?.mt mto)))))
 let mt_flush_ok #_ mto =
@@ -122,7 +122,7 @@ val mt_get_path_ok:
   idx:nat{MT?.i (MTO?.mt mto) <= idx && idx < MT?.j (MTO?.mt mto)} ->
   drt:hash ->
   Lemma (requires mto_inv mto /\ MT?.j (MTO?.mt mto) > 0)
-        (ensures (let f = (MT?.tag_fun (MTO?.mt mto)) in
+        (ensures (let f = (MT?.hash_fun (MTO?.mt mto)) in
                  let j, p, rt = mt_get_path (MTO?.mt mto) idx drt in
                  j == MT?.j (MTO?.mt mto) /\
                  mt_root_inv #_ #f (mto_base mto) hash_init false rt /\
@@ -136,10 +136,10 @@ let mt_get_path_ok #_ mto idx drt =
 // `mt_verify` is correct.
 
 val mt_verify_ok:
-  #hsz:pos -> #f:MTS.tag_fun_t ->
+  #hsz:pos -> #f:MTS.hash_fun_t ->
   k:nat ->
   j:nat{k < j} ->
-  p:merkle_path #hsz {S.length p = 1 + mt_path_length k j false} ->
+  p:path #hsz {S.length p = 1 + mt_path_length k j false} ->
   rt:hash #hsz ->
   Lemma (mt_verify #_ #f k j p rt <==>
          MTS.mt_verify #_ #f #(log2c j)
