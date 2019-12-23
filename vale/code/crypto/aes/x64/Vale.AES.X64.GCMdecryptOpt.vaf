@@ -769,7 +769,7 @@ procedure Gcm_blocks_wrapped(
 #reset-options "--z3rlimit 1600 --max_ifuel 0"
 // Using exportOnly, since verification with quick mode fails with:
 // (Error 196) Implicit argument: Expected a total term; got a ghost term
-procedure gcm_blocks_decrypt_stdcall(
+procedure Gcm_blocks_decrypt_stdcall(
         inline win:bool,
         inline alg:algorithm,
 
@@ -996,7 +996,7 @@ procedure gcm_blocks_decrypt_stdcall(
     lemma_hkeys_reqs_pub_priv(s128(mem, hkeys_b), reverse_bytes_quad32(aes_encrypt_LE(alg, key, Mkfour(0,0,0,0))));
     assert win ==> valid_src_stack64(rsp + 40, stack);
     assert !win ==> valid_src_stack64(rsp + 80, stack);
-    save_registers(win);
+    Save_registers(win);
 
     // Shuffle the incoming arguments around
     inline if (win) {
@@ -1052,8 +1052,8 @@ procedure gcm_blocks_decrypt_stdcall(
 //    assert (rax = 0) ==
 //            gcm_decrypt_LE(alg, seq_nat32_to_seq_nat8_LE(key), be_quad32_to_bytes(iv_BE),
 //                            cipher_bytes, auth_bytes, old(le_quad32_to_bytes(buffer128_read(tag_b, 0, mem))))._2;
-    // Save a copy of rax, since restore_registers clobbers it.  TODO: avoid this.
+    // Save a copy of rax, since Restore_registers clobbers it.  TODO: avoid this.
     Mov64(rcx, rax);
-    restore_registers(win, old(rsp), old(xmm6), old(xmm7), old(xmm8), old(xmm9), old(xmm10), old(xmm11), old(xmm12), old(xmm13), old(xmm14), old(xmm15));
+    Restore_registers(win, old(rsp), old(xmm6), old(xmm7), old(xmm8), old(xmm9), old(xmm10), old(xmm11), old(xmm12), old(xmm13), old(xmm14), old(xmm15));
     Mov64(rax, rcx);
 }

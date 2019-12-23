@@ -75,7 +75,7 @@ let gcm128_pre : (Ghost.erased (Seq.seq nat32)) -> (Ghost.erased supported_iv_LE
     (scratch_b:b128)
     (tag_b:b128)
     (va_s0:V.va_state) ->
-      GC.va_req_gcm_blocks_decrypt_stdcall c va_s0 IA.win AES_128
+      GC.va_req_Gcm_blocks_decrypt_stdcall c va_s0 IA.win AES_128
         (as_vale_buffer auth_b) (UInt64.v auth_bytes)
         (UInt64.v auth_num) (as_vale_buffer keys_b)
         (as_vale_buffer iv_b) (Ghost.reveal iv) (as_vale_buffer hkeys_b)
@@ -111,7 +111,7 @@ let gcm128_post : Ghost.erased (Seq.seq nat32) -> (Ghost.erased supported_iv_LE)
     (va_s0:V.va_state)
     (va_s1:V.va_state)
     (f:V.va_fuel) ->
-      GC.va_ens_gcm_blocks_decrypt_stdcall c va_s0 IA.win AES_128
+      GC.va_ens_Gcm_blocks_decrypt_stdcall c va_s0 IA.win AES_128
        (as_vale_buffer auth_b) (UInt64.v auth_bytes)
         (UInt64.v auth_num) (as_vale_buffer keys_b)
         (as_vale_buffer iv_b) (Ghost.reveal iv) (as_vale_buffer hkeys_b)
@@ -170,7 +170,7 @@ let gcm128_lemma'
        ME.buffer_writeable (as_vale_buffer scratch_b) /\
        ME.buffer_writeable (as_vale_buffer tag_b)
  )) =
-    let va_s1, f = GC.va_lemma_gcm_blocks_decrypt_stdcall code va_s0 IA.win AES_128
+    let va_s1, f = GC.va_lemma_Gcm_blocks_decrypt_stdcall code va_s0 IA.win AES_128
        (as_vale_buffer auth_b) (UInt64.v auth_bytes)
         (UInt64.v auth_num) (as_vale_buffer keys_b)
         (as_vale_buffer iv_b) (Ghost.reveal iv) (as_vale_buffer hkeys_b)
@@ -200,7 +200,7 @@ noextract
 let gcm128_lemma (s:Ghost.erased (Seq.seq nat32)) (iv:Ghost.erased supported_iv_LE) = as_t #(VSig.vale_sig_stdcall (gcm128_pre s iv) (gcm128_post s iv)) (gcm128_lemma' s iv)
 
 noextract
-let code_gcm128 = GC.va_code_gcm_blocks_decrypt_stdcall IA.win AES_128
+let code_gcm128 = GC.va_code_Gcm_blocks_decrypt_stdcall IA.win AES_128
 
 (* Here's the type expected for the gcm wrapper *)
 [@__reduce__] noextract
@@ -247,7 +247,7 @@ let gcm256_pre : (Ghost.erased (Seq.seq nat32)) -> (Ghost.erased supported_iv_LE
     (scratch_b:b128)
     (tag_b:b128)
     (va_s0:V.va_state) ->
-      GC.va_req_gcm_blocks_decrypt_stdcall c va_s0 IA.win AES_256
+      GC.va_req_Gcm_blocks_decrypt_stdcall c va_s0 IA.win AES_256
         (as_vale_buffer auth_b) (UInt64.v auth_bytes)
         (UInt64.v auth_num) (as_vale_buffer keys_b)
         (as_vale_buffer iv_b) (Ghost.reveal iv) (as_vale_buffer hkeys_b)
@@ -283,7 +283,7 @@ let gcm256_post : Ghost.erased (Seq.seq nat32) -> (Ghost.erased supported_iv_LE)
     (va_s0:V.va_state)
     (va_s1:V.va_state)
     (f:V.va_fuel) ->
-      GC.va_ens_gcm_blocks_decrypt_stdcall c va_s0 IA.win AES_256
+      GC.va_ens_Gcm_blocks_decrypt_stdcall c va_s0 IA.win AES_256
        (as_vale_buffer auth_b) (UInt64.v auth_bytes)
         (UInt64.v auth_num) (as_vale_buffer keys_b)
         (as_vale_buffer iv_b) (Ghost.reveal iv) (as_vale_buffer hkeys_b)
@@ -342,7 +342,7 @@ let gcm256_lemma'
        ME.buffer_writeable (as_vale_buffer scratch_b) /\
        ME.buffer_writeable (as_vale_buffer tag_b)
  )) =
-    let va_s1, f = GC.va_lemma_gcm_blocks_decrypt_stdcall code va_s0 IA.win AES_256
+    let va_s1, f = GC.va_lemma_Gcm_blocks_decrypt_stdcall code va_s0 IA.win AES_256
        (as_vale_buffer auth_b) (UInt64.v auth_bytes)
         (UInt64.v auth_num) (as_vale_buffer keys_b)
         (as_vale_buffer iv_b) (Ghost.reveal iv) (as_vale_buffer hkeys_b)
@@ -372,7 +372,7 @@ noextract
 let gcm256_lemma (s:Ghost.erased (Seq.seq nat32)) (iv:Ghost.erased supported_iv_LE) = as_t #(VSig.vale_sig_stdcall (gcm256_pre s iv) (gcm256_post s iv)) (gcm256_lemma' s iv)
 
 noextract
-let code_gcm256 = GC.va_code_gcm_blocks_decrypt_stdcall IA.win AES_256
+let code_gcm256 = GC.va_code_Gcm_blocks_decrypt_stdcall IA.win AES_256
 
 (* Here's the type expected for the gcm wrapper *)
 [@__reduce__] noextract

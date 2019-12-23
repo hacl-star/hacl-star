@@ -52,7 +52,7 @@ open Vale.X64.CPU_Features_s
 const int_canon:tactic extern;
 
 #reset-options "--z3rlimit 200"
-procedure fast_multiply_a0b(
+procedure Fast_multiply_a0b(
         inline offset:nat,
         ghost dst_b:buffer64,
         ghost inA_b:buffer64,
@@ -162,7 +162,7 @@ procedure fast_multiply_a0b(
 
 
 #reset-options "--z3rlimit 2000"
-procedure fast_multiply_a1b(
+procedure Fast_multiply_a1b(
         inline offset:nat,
         ghost dst_b:buffer64,
         ghost inA_b:buffer64,
@@ -286,7 +286,7 @@ procedure fast_multiply_a1b(
 }
 
 #reset-options "--z3rlimit 800"
-procedure fast_multiply_a2b(
+procedure Fast_multiply_a2b(
         inline offset:nat,
         ghost dst_b:buffer64,
         ghost inA_b:buffer64,
@@ -414,7 +414,7 @@ procedure fast_multiply_a2b(
 
 
 #reset-options "--z3rlimit 800"
-procedure fast_multiply_a3b(
+procedure Fast_multiply_a3b(
         inline offset:nat,
         ghost dst_b:buffer64,
         ghost inA_b:buffer64,
@@ -552,7 +552,7 @@ procedure fast_multiply_a3b(
 
 #reset-options "--z3rlimit 40"
 
-procedure fast_multiply(
+procedure Fast_multiply(
         inline offset:nat,
         ghost dst_b:buffer64,
         ghost inA_b:buffer64,
@@ -608,13 +608,13 @@ procedure fast_multiply(
         validSrcAddrs64(mem, dst_ptr, dst_b, 8 + offset*2, memTaint, Secret);
         modifies_buffer_specific(dst_b, old(mem), mem, 0 + offset*2, 8 + offset*2 - 1);
 {
-    fast_multiply_a0b(offset, dst_b, inA_b, inB_b);
-    fast_multiply_a1b(offset, dst_b, inA_b, inB_b);
-    fast_multiply_a2b(offset, dst_b, inA_b, inB_b);
-    fast_multiply_a3b(offset, dst_b, inA_b, inB_b);
+    Fast_multiply_a0b(offset, dst_b, inA_b, inB_b);
+    Fast_multiply_a1b(offset, dst_b, inA_b, inB_b);
+    Fast_multiply_a2b(offset, dst_b, inA_b, inB_b);
+    Fast_multiply_a3b(offset, dst_b, inA_b, inB_b);
 }
 
-procedure fast_mul_stdcall(
+procedure Fast_mul_stdcall(
         inline win:bool,
         ghost dst_b:buffer64,
         ghost inA_b:buffer64,
@@ -697,7 +697,7 @@ procedure fast_mul_stdcall(
         Mov64(inB_ptr, rdx);
     }
 
-    fast_multiply(0, dst_b, inA_b, inB_b);
+    Fast_multiply(0, dst_b, inA_b, inB_b);
 
     Pop(r14);
     Pop(r13);
@@ -705,7 +705,7 @@ procedure fast_mul_stdcall(
     Pop(rsi);
 }
 
-procedure fast_mul2_stdcall(
+procedure Fast_mul2_stdcall(
         inline win:bool,
         ghost dst_b:buffer64,
         ghost inA_b:buffer64,
@@ -814,8 +814,8 @@ procedure fast_mul2_stdcall(
         Mov64(inB_ptr, rdx);
     }
 
-    fast_multiply(0, dst_b, inA_b, inB_b);
-    fast_multiply(4, dst_b, inA_b, inB_b);
+    Fast_multiply(0, dst_b, inA_b, inB_b);
+    Fast_multiply(4, dst_b, inA_b, inB_b);
 
     inline if (win)
     {

@@ -17,7 +17,7 @@ open Vale.X64.QuickCodes
 #set-options "--z3rlimit 20"
 #endverbatim
 
-procedure memcpy(inline win:bool, ghost dst:buffer64, ghost src:buffer64)
+procedure Memcpy(inline win:bool, ghost dst:buffer64, ghost src:buffer64)
     {:public}
     {:exportSpecs}
     {:quick}
