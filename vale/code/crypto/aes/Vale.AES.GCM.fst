@@ -115,7 +115,7 @@ let lemma_compute_iv_easy (iv_b iv_extra_b:seq quad32) (iv:supported_iv_LE) (num
            (pad_to_128_bits (slice (le_quad32_to_bytes q) 0 12)) 
            (pad_to_128_bits iv) }
     set_to_one_LE (reverse_bytes_quad32 (le_bytes_to_quad32 (pad_to_128_bits iv)));
-    == {}
+    == {compute_iv_BE_reveal ()}
     compute_iv_BE h_LE iv;
   };
   ()
@@ -143,6 +143,7 @@ let lemma_compute_iv_hard (iv:supported_iv_LE) (quads:seq quad32) (length_quad h
   insert_nat64_reveal ();
   assert (length_quad == reverse_bytes_quad32 (insert_nat64_def (Mkfour 0 0 0 0) (8 * length iv) 0));
   ghash_incremental_to_ghash h_LE (append quads (create 1 length_quad));
+  compute_iv_BE_reveal ();
   ()
 
 let gcm_encrypt_LE_fst_helper (iv:supported_iv_LE) (iv_enc iv_BE:quad32) (plain auth cipher:seq nat8) (alg:algorithm) (key:seq nat32) : Lemma
@@ -294,7 +295,7 @@ let gcm_blocks_helper_enc (alg:algorithm) (key:seq nat32)
     gctr_encrypt_block_offset ctr_BE_2 (index plain num_blocks) alg key num_blocks;
     assert( gctr_encrypt_block ctr_BE_2 (index plain num_blocks) alg key num_blocks ==
             gctr_encrypt_block (inc32 ctr_BE_2 num_blocks) (index plain num_blocks) alg key 0);
-    reveal_opaque (`%aes_encrypt_le) aes_encrypt_le;
+    aes_encrypt_LE_reveal ();
     gctr_partial_to_full_advanced ctr_BE_2 plain cipher alg key p_num_bytes;
     assert (cipher_bytes == gctr_encrypt_LE ctr_BE_2 plain_bytes alg key)
   ) else (
@@ -472,8 +473,8 @@ let gcm_blocks_helper (alg:algorithm) (key:seq nat32)
       gctr_encrypt_block ctr_BE_1 hash alg key 0;
       == {}
       quad32_xor hash (aes_encrypt_LE alg key (reverse_bytes_quad32 ctr_BE_1));
-      == { reveal_opaque (`%aes_encrypt_le) aes_encrypt_le }
-      quad32_xor hash (aes_encrypt_le alg key (reverse_bytes_quad32 ctr_BE_1));
+      == { aes_encrypt_LE_reveal () }
+      quad32_xor hash (aes_encrypt_LE alg key (reverse_bytes_quad32 ctr_BE_1));
       == {}
       quad32_xor hash (aes_encrypt_BE alg key ctr_BE_1);
     };
@@ -938,8 +939,8 @@ let gcm_blocks_dec_helper (alg:algorithm) (key:seq nat32)
       gctr_encrypt_block ctr_BE_1 hash alg key 0;
       == {}
       quad32_xor hash (aes_encrypt_LE alg key (reverse_bytes_quad32 ctr_BE_1));
-      == { reveal_opaque (`%aes_encrypt_le) aes_encrypt_le }
-      quad32_xor hash (aes_encrypt_le alg key (reverse_bytes_quad32 ctr_BE_1));
+      == { aes_encrypt_LE_reveal () }
+      quad32_xor hash (aes_encrypt_LE alg key (reverse_bytes_quad32 ctr_BE_1));
       == {}
       quad32_xor hash (aes_encrypt_BE alg key ctr_BE_1);
     };

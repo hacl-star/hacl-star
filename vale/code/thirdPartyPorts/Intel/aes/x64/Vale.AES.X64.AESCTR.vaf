@@ -77,9 +77,9 @@ ghost procedure finish_aes_encrypt_le(ghost alg:algorithm, ghost input_LE:quad32
     requires
         is_aes_key_LE(alg, key);
     ensures
-        aes_encrypt_le(alg, key, input_LE) == eval_cipher(alg, input_LE, key_to_round_keys_LE(alg, key));
+        aes_encrypt_LE(alg, key, input_LE) == eval_cipher(alg, input_LE, key_to_round_keys_LE(alg, key));
 {
-    reveal aes_encrypt_le;
+    aes_encrypt_LE_reveal();
     eval_cipher_reveal();
 }
 
@@ -277,10 +277,10 @@ procedure aes_ctr_encrypt(
         // AES reqs
         aes_reqs(alg, key, round_keys, keys_b, key_ptr, mem, memTaint);
 
-        ctr1 == aes_encrypt_le(alg, key, in1);
-        ctr2 == aes_encrypt_le(alg, key, in2);
-        ctr3 == aes_encrypt_le(alg, key, in3);
-        ctr4 == aes_encrypt_le(alg, key, in4);
+        ctr1 == aes_encrypt_LE(alg, key, in1);
+        ctr2 == aes_encrypt_LE(alg, key, in2);
+        ctr3 == aes_encrypt_LE(alg, key, in3);
+        ctr4 == aes_encrypt_LE(alg, key, in4);
 {
     init_rounds_opaque(old(ctr1), round_keys);
     init_rounds_opaque(old(ctr2), round_keys);

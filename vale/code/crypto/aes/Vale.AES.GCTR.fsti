@@ -70,15 +70,12 @@ val gctr_encrypt_empty (icb_BE:quad32) (plain_LE cipher_LE:seq quad32) (alg:algo
     cipher = gctr_encrypt_LE icb_BE (make_gctr_plain_LE plain) alg key
   ))
 
-[@"opaque_to_smt"]
-let aes_encrypt_le = aes_encrypt_LE_def
-
 let aes_encrypt_BE (alg:algorithm) (key:seq nat32) (p_BE:quad32) : Pure quad32
   (requires is_aes_key_LE alg key)
   (ensures fun _ -> True)
   =
   let p_LE = reverse_bytes_quad32 p_BE in
-  aes_encrypt_le alg key p_LE
+  aes_encrypt_LE alg key p_LE
 
 let gctr_registers_def (r0 r1 r2 r3 r4 r5:quad32) (s:seq quad32) (alg:algorithm) (key:seq nat32) (ctr_BE:quad32) (i:int) : prop0 =
   0 <= i /\ i*6 + 5 < length s /\

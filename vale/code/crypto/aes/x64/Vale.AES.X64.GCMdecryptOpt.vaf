@@ -198,7 +198,7 @@ procedure Gcm_extra_bytes(
     Mov128(xmm0, icb);
     Pshufb(xmm0, rev_mask);
     AESEncryptBlock(alg, reverse_bytes_quad32(icb), key, round_keys, keys_b);
-    reveal aes_encrypt_le;
+    aes_encrypt_LE_reveal();
 
     //lemma_quad32_xor_commutes(Ii, Z0);
     Pxor(save_xmm, Ii);

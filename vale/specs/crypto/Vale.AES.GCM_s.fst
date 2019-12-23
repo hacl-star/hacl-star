@@ -17,7 +17,7 @@ unfold type gcm_auth_LE = gctr_plain_LE
 
 type supported_iv_LE:eqtype = iv:seq nat8 { 1 <= 8 * (length iv) /\ 8 * (length iv) < pow2_64 }
 
-let compute_iv_BE (h_LE:quad32) (iv:supported_iv_LE) : quad32
+let compute_iv_BE_def (h_LE:quad32) (iv:supported_iv_LE) : quad32
   =
   if 8 * (length iv) = 96 then (
     let iv_LE = le_bytes_to_quad32 (pad_to_128_bits iv) in
@@ -32,6 +32,8 @@ let compute_iv_BE (h_LE:quad32) (iv:supported_iv_LE) : quad32
     let hash_output_LE = ghash_LE h_LE hash_input_LE in
     reverse_bytes_quad32 hash_output_LE
   )
+[@"opaque_to_smt"] let compute_iv_BE = opaque_make compute_iv_BE_def
+irreducible let compute_iv_BE_reveal = opaque_revealer (`%compute_iv_BE) compute_iv_BE compute_iv_BE_def
 
 // little-endian 
 let gcm_encrypt_LE_def (alg:algorithm) (key:seq nat8) (iv:supported_iv_LE) (plain:seq nat8) (auth:seq nat8) :

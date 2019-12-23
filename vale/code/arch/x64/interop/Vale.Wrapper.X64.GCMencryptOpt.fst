@@ -1,5 +1,8 @@
 module Vale.Wrapper.X64.GCMencryptOpt
 
+#reset-options "--z3rlimit 50"
+let z3rlimit_hack x = ()
+
 open FStar.Mul
 open Vale.Stdcalls.X64.GCMencryptOpt
 open Vale.AsLowStar.MemoryHelpers
@@ -196,7 +199,8 @@ val gcm128_encrypt_opt':
       ))))
     )
 
-#push-options "--z3cliopt smt.arith.nl=true"
+#push-options "--z3cliopt smt.arith.nl=true --z3rlimit 800"
+#restart-solver
 inline_for_extraction
 let gcm128_encrypt_opt' key iv auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
   in128x6_b out128x6_b len128x6 in128_b out128_b len128_num inout_b plain_num scratch_b tag_b =

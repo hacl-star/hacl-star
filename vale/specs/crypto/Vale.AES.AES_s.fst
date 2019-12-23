@@ -136,9 +136,8 @@ let aes_encrypt_LE_def (alg:algorithm) (key:seq nat32) (input_LE:quad32) : Pure 
   (ensures fun _ -> True)
   =
   eval_cipher_def alg input_LE (key_to_round_keys_LE alg key)
-
-//let aes_encrypt_LE = make_opaque aes_encrypt_LE_def
-unfold let aes_encrypt_LE = aes_encrypt_LE_def
+[@"opaque_to_smt"] let aes_encrypt_LE = opaque_make aes_encrypt_LE_def
+irreducible let aes_encrypt_LE_reveal = opaque_revealer (`%aes_encrypt_LE) aes_encrypt_LE aes_encrypt_LE_def
 
 #push-options "--z3rlimit 20"
 let key_to_round_keys (alg:algorithm) (key:aes_key alg)

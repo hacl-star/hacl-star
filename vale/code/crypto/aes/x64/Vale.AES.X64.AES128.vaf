@@ -234,6 +234,7 @@ procedure AES128EncryptBlock(
 
     // Clear secrets out of registers
     Pxor(xmm2, xmm2);
+    aes_encrypt_LE_reveal();
 }
 
 procedure AES128EncryptBlockStdcall(

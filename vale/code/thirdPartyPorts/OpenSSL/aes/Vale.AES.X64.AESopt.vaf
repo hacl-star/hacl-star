@@ -181,9 +181,9 @@ ghost procedure finish_aes_encrypt_le(ghost alg:algorithm, ghost input_LE:quad32
     requires
         is_aes_key_LE(alg, key);
     ensures
-        aes_encrypt_le(alg, key, input_LE) == eval_cipher(alg, input_LE, key_to_round_keys_LE(alg, key));
+        aes_encrypt_LE(alg, key, input_LE) == eval_cipher(alg, input_LE, key_to_round_keys_LE(alg, key));
 {
-    reveal aes_encrypt_le;
+    aes_encrypt_LE_reveal();
     eval_cipher_reveal();
 }
 
@@ -670,7 +670,7 @@ procedure Loop6x_final(
         // Semantics
         buffer128_read(scratch_b, 7, mem) == reverse_bytes_quad32(inb);
         tuple(inout0, inout1, inout2, inout3, inout4, inout5) ==
-            map2_six_of(plain, ctrs, fun(p:quad32, c:quad32) quad32_xor(p, aes_encrypt_le(alg, key_words, c)));
+            map2_six_of(plain, ctrs, fun(p:quad32, c:quad32) quad32_xor(p, aes_encrypt_LE(alg, key_words, c)));
         rndkey == index(round_keys, 0);
 
         inp  == old(inp)  + 0x60;
@@ -1802,12 +1802,12 @@ procedure AESNI_ctr32_6x_final(
         buffer128_read(out_b, count*6 + 4, mem) == inout4;
         buffer128_read(out_b, count*6 + 5, mem) == inout5;
 
-        inout0 == quad32_xor(plain0, aes_encrypt_le(alg, key_words, ctr0));
-        inout1 == quad32_xor(plain1, aes_encrypt_le(alg, key_words, ctr1));
-        inout2 == quad32_xor(plain2, aes_encrypt_le(alg, key_words, ctr2));
-        inout3 == quad32_xor(plain3, aes_encrypt_le(alg, key_words, ctr3));
-        inout4 == quad32_xor(plain4, aes_encrypt_le(alg, key_words, ctr4));
-        inout5 == quad32_xor(plain5, aes_encrypt_le(alg, key_words, ctr5));
+        inout0 == quad32_xor(plain0, aes_encrypt_LE(alg, key_words, ctr0));
+        inout1 == quad32_xor(plain1, aes_encrypt_LE(alg, key_words, ctr1));
+        inout2 == quad32_xor(plain2, aes_encrypt_LE(alg, key_words, ctr2));
+        inout3 == quad32_xor(plain3, aes_encrypt_LE(alg, key_words, ctr3));
+        inout4 == quad32_xor(plain4, aes_encrypt_LE(alg, key_words, ctr4));
+        inout5 == quad32_xor(plain5, aes_encrypt_LE(alg, key_words, ctr5));
 
 {
     VAESNI_enc_last(inout0, inout0, Z0);
