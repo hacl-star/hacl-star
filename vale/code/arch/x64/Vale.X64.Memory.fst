@@ -1,6 +1,7 @@
 module Vale.X64.Memory
 include Vale.Interop.Types
 friend Vale.Arch.Heap
+open Vale.Def.Opaque_s
 open Vale.Arch.HeapImpl
 open Vale.Arch.Heap
 open Vale.Interop.Base
@@ -490,7 +491,7 @@ let lemma_store_mem (t:base_typ) (b:buffer t) (i:nat) (v:base_typ_as_vale_type t
     let db = get_downview b.bsrc in
     UV.length_eq (UV.mk_buffer da view);
     UV.length_eq (UV.mk_buffer db view);
-    assert (IB.disjoint_or_eq_b8 a b);
+    opaque_assert (`%list_disjoint_or_eq) list_disjoint_or_eq list_disjoint_or_eq_def (IB.disjoint_or_eq_b8 a b);
     assert (a == b)
 
 let lemma_load_mem64 b i h =
@@ -503,7 +504,7 @@ let lemma_load_mem64 b i h =
     let db = get_downview b.bsrc in
     UV.length_eq (UV.mk_buffer da view);
     UV.length_eq (UV.mk_buffer db view);
-    assert (IB.disjoint_or_eq_b8 a b);
+    opaque_assert (`%list_disjoint_or_eq) list_disjoint_or_eq list_disjoint_or_eq_def (IB.disjoint_or_eq_b8 a b);
     assert (a == b)
 
 
@@ -521,7 +522,7 @@ let lemma_load_mem128 b i h =
     let db = get_downview b.bsrc in
     UV.length_eq (UV.mk_buffer da view);
     UV.length_eq (UV.mk_buffer db view);
-    assert (IB.disjoint_or_eq_b8 a b);
+    opaque_assert (`%list_disjoint_or_eq) list_disjoint_or_eq list_disjoint_or_eq_def (IB.disjoint_or_eq_b8 a b);
     assert (a == b)
 
 let lemma_store_mem128 b i v h = lemma_store_mem TUInt128 b i v h
@@ -642,9 +643,9 @@ let rec valid_memtaint (mem:vale_heap) (ps:list b8{IB.list_disjoint_or_eq ps}) (
     | b :: q ->
       assert (List.memP b ps);
       assert (forall i. {:pattern List.memP i q} List.memP i q ==> List.memP i ps);
-      assert (IB.list_disjoint_or_eq q);
+      opaque_assert (`%list_disjoint_or_eq) list_disjoint_or_eq list_disjoint_or_eq_def (IB.list_disjoint_or_eq q);
       valid_memtaint mem q ts;
       assert (IB.create_memtaint (_ih mem) ps ts ==
               IB.write_taint 0 (_ih mem) ts b (IB.create_memtaint (_ih mem) q ts));
       write_taint_lemma 0 (_ih mem) ts b (IB.create_memtaint (_ih mem) q ts);
-      assert (forall p. List.memP p q ==> IB.disjoint_or_eq_b8 p b)
+      opaque_assert (`%list_disjoint_or_eq) list_disjoint_or_eq list_disjoint_or_eq_def (forall p. List.memP p q ==> IB.disjoint_or_eq_b8 p b)

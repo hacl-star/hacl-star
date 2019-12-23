@@ -2,6 +2,7 @@ module Vale.X64.Memory_Sems
 
 open FStar.Mul
 open Vale.Def.Prop_s
+open Vale.Def.Opaque_s
 open Vale.X64.Machine_s
 open Vale.X64.Memory
 open Vale.Def.Words_s
@@ -209,7 +210,7 @@ let unwritten_buffer_down (t:base_typ) (b:buffer t{buffer_writeable b})
           let base = (IB.addrs_of_mem (_ih h)) a in
           let s0 = DV.as_seq (IB.hs_of_mem (_ih h)) db in
           let s1 = DV.as_seq (IB.hs_of_mem (_ih h1)) db in
-          assert (MB.disjoint a.bsrc b.bsrc);
+          opaque_assert (`%IB.list_disjoint_or_eq) IB.list_disjoint_or_eq IB.list_disjoint_or_eq_def (MB.disjoint a.bsrc b.bsrc);
           lemma_dv_equal (IB.down_view a.src) a.bsrc (IB.hs_of_mem (_ih h)) (IB.hs_of_mem (_ih h1));
           assert (Seq.equal s0 s1);
           assert (forall (j:int).{:pattern (mem1.[j])}
@@ -378,6 +379,7 @@ let in_bounds128 (h:vale_heap) (b:buffer128) (i:nat{i < buffer_length b}) : Lemm
 
 let bytes_valid128 ptr h =
   reveal_opaque (`%S.valid_addr128) S.valid_addr128;
+  IB.list_disjoint_or_eq_reveal ();
   let t = TUInt128 in
   let b = get_addr_ptr t ptr h in
   let i = get_addr_in_ptr t (buffer_length b) (buffer_addr b h) ptr 0 in
