@@ -1016,8 +1016,8 @@ let mt_insert #hsz mt v =
 // `mt_create` initiates a Merkle tree with a given initial hash `init`.
 // A valid Merkle tree should contain at least one element.
 val mt_create_custom: 
-  #hsz:hash_size_t -> 
-  #hash_spec:Ghost.erased (MTS.hash_fun_t #(U32.v hsz)) ->
+  hsz:hash_size_t -> 
+  hash_spec:Ghost.erased (MTS.hash_fun_t #(U32.v hsz)) ->
   r:HST.erid -> init:hash #hsz -> hash_fun:hash_fun_t #hsz #hash_spec -> HST.ST mt_p
    (requires (fun h0 ->
      Rgl?.r_inv hreg h0 init /\
@@ -1030,7 +1030,7 @@ val mt_create_custom:
      MT?.hash_size (B.get h1 mt 0) = hsz /\     
      mt_lift h1 mt == MTH.mt_create (U32.v hsz) (Ghost.reveal hash_spec) (Rgl?.r_repr hreg h0 init)))
 #push-options "--z3rlimit 40"
-let mt_create_custom #hsz #hash_spec r init hash_fun =
+let mt_create_custom hsz hash_spec r init hash_fun =
   let hh0 = HST.get () in
   let mt = create_empty_mt #hsz #hash_spec hash_fun r in
   mt_insert mt init;
@@ -1049,7 +1049,7 @@ val mt_create: r:HST.erid -> init:hash #32ul -> HST.ST mt_p
      // correctness
      MT?.hash_size (B.get h1 mt 0) = 32ul /\
      mt_lift h1 mt == MTH.mt_create 32 MTH.sha256_compress (Rgl?.r_repr hreg h0 init)))
-let mt_create r init = mt_create_custom #32ul #(Ghost.hide MTH.sha256_compress) r init sha256_compress
+let mt_create r init = mt_create_custom 32ul (Ghost.hide MTH.sha256_compress) r init sha256_compress
 
 /// Construction and Destruction of paths
 
@@ -1755,11 +1755,13 @@ val mt_path_length:
         U32.v l = MTH.mt_path_length (U32.v k) (U32.v j) actd &&
         l <= 32ul - lv})
       (decreases (U32.v j))
+#push-options "--z3rlimit 10 --initial_fuel 1 --max_fuel 1"
 let rec mt_path_length lv k j actd =
   if j = 0ul then 0ul
   else (let nactd = actd || (j % 2ul = 1ul) in
        mt_path_length_step k j actd +
        mt_path_length (lv + 1ul) (k / 2ul) (j / 2ul) nactd)
+#pop-options
 
 inline_for_extraction private
 val mt_get_path_step:
@@ -2464,7 +2466,6 @@ val mt_retract_to_:
                (U32.v i) (U32.v s) (U32.v j)))
      ))
    (decreases (U32.v merkle_tree_size_lg - U32.v lv))
-
 #push-options "--z3rlimit 300 --initial_fuel 1 --max_fuel 1"
 private
 let rec mt_retract_to_ #hsz hs lv i s j =
@@ -2576,7 +2577,6 @@ let rec mt_retract_to_ #hsz hs lv i s j =
       (lv + 1ul) hs (i / 2ul) (j / 2ul)
       (V.loc_vector_within hs lv (lv + 1ul)) hh1 hh2;
 
-
     // 2-4) Correctness
     RV.as_seq_sub_preserved hs 0ul lv (loc_rvector retracted) hh0 hh1;
     RV.as_seq_sub_preserved hs (lv + 1ul) merkle_tree_size_lg (loc_rvector retracted) hh0 hh1;
@@ -2666,7 +2666,6 @@ let mt_retract_to_pre mt r =
   let h0 = HST.get() in
   let mtv = !*mt in
   mt_retract_to_pre_nst mtv r
-
 #push-options "--z3rlimit 100"
 val mt_retract_to:
   mt:mt_p ->
@@ -2878,7 +2877,6 @@ val mt_verify:
       b <==> MTH.mt_verify #(U32.v hsz) #hash_spec (U32.v k) (U32.v j)
              (lift_path h0 mtr p) (Rgl?.r_repr hreg h0 rt))))
 #pop-options
-
 #push-options "--z3rlimit 200 --initial_fuel 1 --max_fuel 1 --initial_ifuel 1 --max_ifuel 1"
 let mt_verify #hsz #hash_spec mt k j mtr p rt =
   let ncmt = CB.cast mt in
