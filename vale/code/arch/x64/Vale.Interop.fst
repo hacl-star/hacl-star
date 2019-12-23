@@ -195,6 +195,12 @@ let rec addrs_set_lemma_aux (addrs:addr_map) (ptrs:list b8) (acc:Set.set int) (x
 let addrs_set_lemma mem x =
   addrs_set_lemma_aux (addrs_of_mem mem) (ptrs_of_mem mem) Set.empty x
 
+let addrs_set_lemma_all () =
+  FStar.Classical.forall_intro_2 addrs_set_lemma
+
+let addrs_set_mem mem a i =
+  addrs_set_lemma_all ()
+
 let write_buffer_vale (a:b8) (heap:machine_heap) (mem:interop_heap) =
   let b = get_downview a.bsrc in
   let length = DV.length b in
@@ -280,6 +286,7 @@ let down_mem mem =
   let ptrs = ptrs_of_mem mem in
   let heap_f = down_mem_aux ptrs mem ptrs [] heap in
   let aux (x:int) : Lemma (Set.mem x (addrs_set mem) <==> Set.mem x (Map.domain heap_f)) =
+    addrs_set_lemma_all ();
     lemma_down_mem_aux_domain ptrs mem ptrs [] heap x
   in Classical.forall_intro aux;
   heap_f
@@ -326,6 +333,7 @@ val same_unspecified_down_aux:
          heap1.[i] == heap2.[i])
 
 let same_unspecified_down_aux hs1 hs2 ptrs i =
+  addrs_set_lemma_all ();
   let heap = Map.const 0 in
   let heap = Map.restrict Set.empty heap in
   let mem1 = mem_of_hs_roots ptrs hs1 in
@@ -333,8 +341,6 @@ let same_unspecified_down_aux hs1 hs2 ptrs i =
   let addrs = addrs_of_mem mem1 in
   let heapf1 = down_mem_aux ptrs mem1 ptrs [] heap in
   let heapf2 = down_mem_aux ptrs mem2 ptrs [] heap in
-  addrs_set_lemma mem1 i;
-  addrs_set_lemma mem1 i;
   Classical.move_requires (frame_down_mem_aux ptrs mem1 ptrs [] heap) i;
   Classical.move_requires (frame_down_mem_aux ptrs mem2 ptrs [] heap) i
 
@@ -418,6 +424,7 @@ let up_down_identity_aux
   (ensures Map.sel init_heap x == Map.sel (down_mem mem) x) =
   let ptrs = ptrs_of_mem mem in
   let addrs = addrs_of_mem mem in
+  addrs_set_lemma_all ();
   Classical.forall_intro
     (Classical.move_requires
       (correct_down_p_same_sel mem (down_mem mem) init_heap x)

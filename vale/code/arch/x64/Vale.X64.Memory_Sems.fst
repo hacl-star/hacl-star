@@ -242,7 +242,9 @@ let store_buffer_down64_mem
       : Lemma
           (j < base + 8 * i \/ j >= base + 8 * (i+1) ==>
            mem1.[j] == mem2.[j])
-      = if j >= base && j < base + DV.length (get_downview b.bsrc) then begin
+      =
+      I.addrs_set_lemma_all ();
+      if j >= base && j < base + DV.length (get_downview b.bsrc) then begin
           written_buffer_down64 b i v h;
           length_t_eq (TUInt64) b
         end
@@ -485,6 +487,7 @@ let low_lemma_store_mem64 b i v h =
   low_lemma_store_mem64_aux b heap i v h;
   Vale.Arch.MachineHeap.frame_update_heap (buffer_addr b h + 8 * i) v heap;
   in_bounds64 h b i;
+  I.addrs_set_lemma_all ();
   I.update_buffer_up_mem (_ih h) b heap heap'
 #pop-options
 
@@ -664,7 +667,9 @@ let store_buffer_down128_mem
       : Lemma
           (j < base + 16 * i \/ j >= base + 16 * (i+1) ==>
            mem1.[j] == mem2.[j])
-      = if j >= base && j < base + DV.length (get_downview b.bsrc) then begin
+      =
+      I.addrs_set_lemma_all ();
+      if j >= base && j < base + DV.length (get_downview b.bsrc) then begin
           written_buffer_down128 b i v h;
           length_t_eq TUInt128 b
         end
@@ -747,6 +752,7 @@ let low_lemma_store_mem128 b i v h =
   low_lemma_store_mem128_aux b heap i v h;
   Vale.Arch.MachineHeap.frame_update_heap128 (buffer_addr b h + 16 * i) v heap;
   in_bounds128 h b i;
+  I.addrs_set_lemma_all ();
   I.update_buffer_up_mem (_ih h) b heap heap'
 
 #push-options "--smtencoding.l_arith_repr boxwrap"
