@@ -29,7 +29,7 @@ open Vale.X64.CPU_Features_s
 
 
 #reset-options "--z3rlimit 30"
-procedure callee_save_registers(inline win:bool)
+procedure Callee_save_registers(inline win:bool)
     {:public}
     {:quick}
     requires
@@ -93,7 +93,7 @@ procedure callee_save_registers(inline win:bool)
     Push(rbx);
 }
 
-procedure callee_restore_registers(
+procedure Callee_restore_registers(
         inline win:bool,
         ghost old_xmm6:quad32,
         ghost old_xmm7:quad32,

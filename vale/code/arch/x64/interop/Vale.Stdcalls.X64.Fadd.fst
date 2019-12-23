@@ -42,9 +42,9 @@ let add1 //: normal lowstar_add1_t
 let lowstar_fadd : lowstar_fadd_t  =
   assert_norm (List.length fadd_dom + List.length ([]<:list arg) <= 4);
   IX64.wrap_weak_stdcall
-    code_fadd
+    code_Fadd
     fadd_dom
-    (W.mk_prediction code_fadd fadd_dom [] (fadd_lemma code_fadd IA.win))
+    (W.mk_prediction code_Fadd fadd_dom [] (fadd_lemma code_Fadd IA.win))
 
 let fadd_ //: normal lowstar_add1_t
 = as_normal_t #lowstar_fadd_t lowstar_fadd

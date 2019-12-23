@@ -437,7 +437,7 @@ procedure Gcm_make_length_quad()
     // assert result == Mkfour(#nat32(8 * plain_num_bytes), 0, #nat32(8 * auth_num_bytes), 0);     // Passes when ghost vars above are removed
 }
 
-procedure compute_pad_to_128_bits()
+procedure Compute_pad_to_128_bits()
     {:quick}
     lets io @= xmm0; num_bytes @= r10; tmp @= rcx; mask @= r11;
 
@@ -544,7 +544,7 @@ procedure Ghash_extra_bytes(
                          reverse_bytes_quad32(hash) == ghash_incremental(h_LE, old_hash, input_quads);
 {
     let final_quad := Ii;
-    compute_pad_to_128_bits();
+    Compute_pad_to_128_bits();
     let final_quad_padded := Ii;
     let y_prev := reverse_bytes_quad32(hash);
 
@@ -752,7 +752,7 @@ procedure Gcm_blocks_auth(
         assert scratch_reg == old(auth_num_bytes) % 16;
 
         //Ghash_register(hkeys_b, h_LE, y_auth);
-        //ghash_incremental_bytes_register(auth_num_bytes, y_0, s128(mem, auth_b));
+        //Ghash_incremental_bytes_register(auth_num_bytes, y_0, s128(mem, auth_b));
         Ghash_extra_bytes(hkeys_b, auth_num_bytes, y_0, h_LE, s128(mem, auth_b));
         assert equal(create(1, buffer128_read(abytes_b, 0, mem)), s128(mem, abytes_b));
         y_auth_bytes := reverse_bytes_quad32(hash);
@@ -1429,7 +1429,7 @@ procedure Gcm_blocks_wrapped(
                                  reverse_bytes_quad32(insert_nat64(insert_nat64(Mkfour(0, 0, 0, 0), #nat64(8 * old(auth_num_bytes)), 1), #nat64(8 * old(plain_num_bytes)), 0)));
 }
 
-procedure save_registers(inline win:bool)
+procedure Save_registers(inline win:bool)
     {:public}
     {:quick}
     requires
@@ -1502,7 +1502,7 @@ procedure save_registers(inline win:bool)
 }
 
 
-procedure restore_registers(
+procedure Restore_registers(
         inline win:bool, ghost old_rsp:nat,
         ghost old_xmm6:quad32, ghost old_xmm7:quad32, ghost old_xmm8:quad32,
         ghost old_xmm9:quad32, ghost old_xmm10:quad32, ghost old_xmm11:quad32,
@@ -1596,7 +1596,7 @@ procedure restore_registers(
 #reset-options "--z3rlimit 1600"
 // Using exportOnly, since verification with quick mode fails with:
 // (Error 196) Implicit argument: Expected a total term; got a ghost term
-procedure gcm_blocks_stdcall(
+procedure Gcm_blocks_stdcall(
         inline win:bool,
         inline alg:algorithm,
 
@@ -1824,7 +1824,7 @@ procedure gcm_blocks_stdcall(
     lemma_hkeys_reqs_pub_priv(s128(mem, hkeys_b), reverse_bytes_quad32(aes_encrypt_LE(alg, key, Mkfour(0,0,0,0))));
     assert win ==> valid_src_stack64(rsp + 40, stack);
     assert !win ==> valid_src_stack64(rsp + 80, stack);
-    save_registers(win);
+    Save_registers(win);
 
     // Shuffle the incoming arguments around
     inline if (win) {
@@ -1864,10 +1864,10 @@ procedure gcm_blocks_stdcall(
     Load64_stack(r15, rsp, total_if(win, 224 + 40 + 96, 64 + 8 + 80));
     Store128_buffer(r15, hash, 0, Secret, tag_b, 0);
 
-    restore_registers(win, old(rsp), old(xmm6), old(xmm7), old(xmm8), old(xmm9), old(xmm10), old(xmm11), old(xmm12), old(xmm13), old(xmm14), old(xmm15));
+    Restore_registers(win, old(rsp), old(xmm6), old(xmm7), old(xmm8), old(xmm9), old(xmm10), old(xmm11), old(xmm12), old(xmm13), old(xmm14), old(xmm15));
 }
 
-procedure compute_iv_stdcall(
+procedure Compute_iv_stdcall(
         inline win:bool,
         ghost iv:supported_iv_LE,
 
@@ -1991,7 +1991,7 @@ procedure compute_iv_stdcall(
         Pop_Secret(rdi);
 
       } else {
-        save_registers(win);
+        Save_registers(win);
 
         Mov64(rdi, rcx);
         Mov64(rsi, rdx);
@@ -2005,7 +2005,7 @@ procedure compute_iv_stdcall(
 
         Compute_iv(iv_b, iv_extra_b, iv, j0_b, hkeys_b);
 
-        restore_registers(win, old(rsp), old(xmm6), old(xmm7), old(xmm8), old(xmm9), old(xmm10), old(xmm11), old(xmm12), old(xmm13), old(xmm14), old(xmm15));
+        Restore_registers(win, old(rsp), old(xmm6), old(xmm7), old(xmm8), old(xmm9), old(xmm10), old(xmm11), old(xmm12), old(xmm13), old(xmm14), old(xmm15));
         
 
       }
@@ -2017,9 +2017,9 @@ procedure compute_iv_stdcall(
 
       } else {
       
-        save_registers(win);
+        Save_registers(win);
         Compute_iv(iv_b, iv_extra_b, iv, j0_b, hkeys_b);
-        restore_registers(win, old(rsp), old(xmm6), old(xmm7), old(xmm8), old(xmm9), old(xmm10), old(xmm11), old(xmm12), old(xmm13), old(xmm14), old(xmm15));
+        Restore_registers(win, old(rsp), old(xmm6), old(xmm7), old(xmm8), old(xmm9), old(xmm10), old(xmm11), old(xmm12), old(xmm13), old(xmm14), old(xmm15));
         
       }
     }

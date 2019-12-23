@@ -85,7 +85,7 @@ ghost procedure finish_aes_encrypt_le(ghost alg:algorithm, ghost input_LE:quad32
 
 // TODO: Write one procedure that unrolls to these variants?
 // These procedures help walk F* through the recursive definition of rounds
-procedure aes_round_4way(
+procedure Aes_round_4way(
         ghost alg:algorithm,
         ghost n:pos,
         in round_key:xmm,
@@ -126,7 +126,7 @@ procedure aes_round_4way(
     AESNI_enc(ctr4, round_key);
 }
 
-procedure aes_2rounds_4way(
+procedure Aes_2rounds_4way(
         ghost alg:algorithm,
         ghost n:pos,
         ghost init1:quad32,
@@ -158,11 +158,11 @@ procedure aes_2rounds_4way(
         ctr3 == eval_rounds(init3, round_keys, n + 1);
         ctr4 == eval_rounds(init4, round_keys, n + 1);
 {
-    aes_round_4way(alg, n,     rk1,  init1, init2, init3, init4, round_keys);
-    aes_round_4way(alg, n + 1, rk2,  init1, init2, init3, init4, round_keys);
+    Aes_round_4way(alg, n,     rk1,  init1, init2, init3, init4, round_keys);
+    Aes_round_4way(alg, n + 1, rk2,  init1, init2, init3, init4, round_keys);
 }
 
-procedure aes_3rounds_4way(
+procedure Aes_3rounds_4way(
         ghost alg:algorithm,
         ghost n:pos,
         ghost init1:quad32,
@@ -195,12 +195,12 @@ procedure aes_3rounds_4way(
         ctr3 == eval_rounds(init3, round_keys, n + 2);
         ctr4 == eval_rounds(init4, round_keys, n + 2);
 {
-    aes_round_4way(alg, n + 0, rk2,  init1, init2, init3, init4, round_keys);
-    aes_round_4way(alg, n + 1, rk3, init1, init2, init3, init4, round_keys);
-    aes_round_4way(alg, n + 2, rk4,  init1, init2, init3, init4, round_keys);
+    Aes_round_4way(alg, n + 0, rk2,  init1, init2, init3, init4, round_keys);
+    Aes_round_4way(alg, n + 1, rk3, init1, init2, init3, init4, round_keys);
+    Aes_round_4way(alg, n + 2, rk4,  init1, init2, init3, init4, round_keys);
 }
 
-procedure aes_4rounds_4way(
+procedure Aes_4rounds_4way(
         ghost alg:algorithm,
         ghost n:pos,
         ghost init1:quad32,
@@ -234,13 +234,13 @@ procedure aes_4rounds_4way(
         ctr3 == eval_rounds(init3, round_keys, n + 3);
         ctr4 == eval_rounds(init4, round_keys, n + 3);
 {
-    aes_round_4way(alg, n,     rk1,  init1, init2, init3, init4, round_keys);
-    aes_round_4way(alg, n + 1, rk2,  init1, init2, init3, init4, round_keys);
-    aes_round_4way(alg, n + 2, rk3, init1, init2, init3, init4, round_keys);
-    aes_round_4way(alg, n + 3, rk4,  init1, init2, init3, init4, round_keys);
+    Aes_round_4way(alg, n,     rk1,  init1, init2, init3, init4, round_keys);
+    Aes_round_4way(alg, n + 1, rk2,  init1, init2, init3, init4, round_keys);
+    Aes_round_4way(alg, n + 2, rk3, init1, init2, init3, init4, round_keys);
+    Aes_round_4way(alg, n + 3, rk4,  init1, init2, init3, init4, round_keys);
 }
 
-procedure aes_ctr_encrypt(
+procedure Aes_ctr_encrypt(
         inline alg:algorithm,  // Intel simply passes number of rounds (nr) as a dynamic parameter.  Saves code space but adds extra instructions to the fast path.  Maybe branch predictor is good enough for it not to matter
         ghost key:seq(nat32),
         ghost round_keys:seq(quad32),
@@ -287,7 +287,7 @@ procedure aes_ctr_encrypt(
     init_rounds_opaque(old(ctr3), round_keys);
     init_rounds_opaque(old(ctr4), round_keys);
     // Compute three AES rounds for all four counters
-    aes_3rounds_4way(alg, 1, old(ctr1), old(ctr2), old(ctr3), old(ctr4), round_keys);
+    Aes_3rounds_4way(alg, 1, old(ctr1), old(ctr2), old(ctr3), old(ctr4), round_keys);
 
     // Load the next four round key blocks
     Load128_buffer(rk1, key_ptr,  64, Secret, keys_b, 4);
@@ -300,7 +300,7 @@ procedure aes_ctr_encrypt(
     assert rk4 == index(round_keys, 7);
 
     // Do another 4 AES rounds for each of the four counters = 7 rounds total (not counting xor step)
-    aes_4rounds_4way(alg, 4, old(ctr1), old(ctr2), old(ctr3), old(ctr4), round_keys);
+    Aes_4rounds_4way(alg, 4, old(ctr1), old(ctr2), old(ctr3), old(ctr4), round_keys);
 
     // Load the next three round key blocks
     Load128_buffer(rk1, key_ptr, 128, Secret, keys_b, 8);
@@ -311,7 +311,7 @@ procedure aes_ctr_encrypt(
     assert rk3 == index(round_keys, 10);
 
     // Do another 2 AES rounds for each of the four counters = 9 rounds total (not counting xor step)
-    aes_2rounds_4way(alg, 8, old(ctr1), old(ctr2), old(ctr3), old(ctr4), round_keys);
+    Aes_2rounds_4way(alg, 8, old(ctr1), old(ctr2), old(ctr3), old(ctr4), round_keys);
 
     // TODO: AES_192 and AES_256 would do a few more rounds here
     inline if (alg = AES_256) {
@@ -326,7 +326,7 @@ procedure aes_ctr_encrypt(
         assert rk4 == index(round_keys, 13);
 
         // Do another 4 AES rounds for each of the four counters = 13 rounds total (not counting xor step)
-        aes_4rounds_4way(alg, 10, old(ctr1), old(ctr2), old(ctr3), old(ctr4), round_keys);
+        Aes_4rounds_4way(alg, 10, old(ctr1), old(ctr2), old(ctr3), old(ctr4), round_keys);
 
         // Load the final round key
         Load128_buffer(rk3, key_ptr, 224, Secret, keys_b, 14);
@@ -352,7 +352,7 @@ procedure aes_ctr_encrypt(
     finish_aes_encrypt_le(alg, in4, key);
 }
 
-procedure aes_ctr_ghash(
+procedure Aes_ctr_ghash(
         ghost old_out_ptr:nat64,
         ghost old_num_quad_blocks:nat64,
         ghost count:nat,
@@ -386,29 +386,29 @@ procedure aes_ctr_ghash(
 {
     // Compute GHash on the four outputs
     let h_in_0 := ctr1;
-    compute_ghash_incremental_register();
+    Compute_ghash_incremental_register();
     let hash0 := hash;
 
     Mov128(ctr1, ctr2);
     let h_in_1 := ctr1;
-    compute_ghash_incremental_register();
+    Compute_ghash_incremental_register();
     let hash1 := hash;
 
     Mov128(ctr1, ctr3);
     let h_in_2 := ctr1;
-    compute_ghash_incremental_register();
+    Compute_ghash_incremental_register();
     let hash2 := hash;
 
     Mov128(ctr1, ctr4);
     let h_in_3 := ctr1;
-    compute_ghash_incremental_register();
+    Compute_ghash_incremental_register();
     lemma_ghash_registers(reverse_bytes_quad32(h), hash_init, old(hash), hash0, hash1, hash2, hash, h_in_0, h_in_1, h_in_2, h_in_3, buffer128_as_seq(mem, out_b), 4*count);
 
 }
 
 #reset-options "--z3rlimit 800"
 // Intel's LOOP_4
-procedure aes_ctr_loop_body(
+procedure Aes_ctr_loop_body(
         inline alg:algorithm,  // Intel simply passes number of rounds (nr) as a dynamic parameter.  Saves code space but adds extra instructions to the fast path.  Maybe branch predictor is good enough for it not to matter
         ghost old_plain_ptr:nat64,
         ghost old_out_ptr:nat64,
@@ -552,7 +552,7 @@ procedure aes_ctr_loop_body(
     Pshufb64(const2_1, mask64);      // const2_1 = LSB: ivec_hi | bswap(6) | ivec_hi | bswap(5)
     Pshufb64(const4_3, mask64);      // const4_3 = LSB: ivec_hi | bswap(8) | ivec_hi | bswap(7)
 
-    aes_ctr_encrypt(alg, key, round_keys, keys_b, in1, in2, in3, in4);
+    Aes_ctr_encrypt(alg, key, round_keys, keys_b, in1, in2, in3, in4);
 
     // Xor the plaintext with the encrypted counter
     // TODO: Intel does this using XMM operands
@@ -577,14 +577,14 @@ procedure aes_ctr_loop_body(
     assert slice(buffer128_as_seq(mem, out_b), 0, 4 * count) == old(slice(buffer128_as_seq(mem, out_b), 0, 4 * count));   // OBSERVE
 
     // Compute GHash on the four outputs
-    aes_ctr_ghash(old_out_ptr, old_num_quad_blocks, count, out_b, hash_init);
+    Aes_ctr_ghash(old_out_ptr, old_num_quad_blocks, count, out_b, hash_init);
 
     Sub64(rdx, 1);
     Add64(plain_ptr, 64);
     Add64(out_ptr, 64);
 }
 
-procedure aes_counter_loop(
+procedure Aes_counter_loop(
         inline alg:algorithm,
         ghost plain_b:buffer128,
         ghost out_b:buffer128,
@@ -738,7 +738,7 @@ procedure aes_counter_loop(
             gctr_partial_def(alg, 4*count, old(buffer128_as_seq(mem, plain_b)), buffer128_as_seq(mem, out_b), key, icb_BE);
         decreases num_quad_blocks;
     {
-        aes_ctr_loop_body(alg, old(plain_ptr), old(out_ptr), old(num_quad_blocks), count, plain_b, out_b, key, round_keys, keys_b, icb_BE, old_iv, old(hash));
+        Aes_ctr_loop_body(alg, old(plain_ptr), old(out_ptr), old(num_quad_blocks), count, plain_b, out_b, key, round_keys, keys_b, icb_BE, old_iv, old(hash));
         count := count + 1;
     }
 

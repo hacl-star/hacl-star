@@ -55,7 +55,7 @@ open Vale.X64.CPU_Features_s
 
 #reset-options "--z3rlimit 400"
 // Intel's LOOP_4
-procedure aes_ctr_loop_body(
+procedure Aes_ctr_loop_body(
         inline alg:algorithm,  // Intel simply passes number of rounds (nr) as a dynamic parameter.  Saves code space but adds extra instructions to the fast path.  Maybe branch predictor is good enough for it not to matter
         ghost old_plain_ptr:nat64,
         ghost old_out_ptr:nat64,
@@ -191,7 +191,7 @@ procedure aes_ctr_loop_body(
     Pshufb64(const2_1, mask64);      // const2_1 = LSB: ivec_hi | bswap(6) | ivec_hi | bswap(5)
     Pshufb64(const4_3, mask64);      // const4_3 = LSB: ivec_hi | bswap(8) | ivec_hi | bswap(7)
 
-    aes_ctr_encrypt(alg, key, round_keys, keys_b, in1, in2, in3, in4);
+    Aes_ctr_encrypt(alg, key, round_keys, keys_b, in1, in2, in3, in4);
 
     // Xor the plaintext with the encrypted counter
     // TODO: Intel does this using XMM operands
@@ -220,7 +220,7 @@ procedure aes_ctr_loop_body(
     Add64(out_ptr, 64);
 }
 
-procedure aes_counter_loop(
+procedure Aes_counter_loop(
         inline alg:algorithm,
         ghost plain_b:buffer128,
         ghost out_b:buffer128,
@@ -363,7 +363,7 @@ procedure aes_counter_loop(
             gctr_partial_def(alg, 4*count, old(buffer128_as_seq(mem, plain_b)), buffer128_as_seq(mem, out_b), key, icb_BE);
         decreases num_quad_blocks;
     {
-        aes_ctr_loop_body(alg, old(plain_ptr), old(out_ptr), old(num_quad_blocks), count, plain_b, out_b, key, round_keys, keys_b, icb_BE, old_iv);
+        Aes_ctr_loop_body(alg, old(plain_ptr), old(out_ptr), old(num_quad_blocks), count, plain_b, out_b, key, round_keys, keys_b, icb_BE, old_iv);
         count := count + 1;
     }
 

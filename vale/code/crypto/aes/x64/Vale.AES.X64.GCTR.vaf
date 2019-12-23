@@ -61,7 +61,7 @@ open Vale.X64.CPU_Features_s
 // GCTR encryption
 ///////////////////////////
 
-procedure init_ctr()
+procedure Init_ctr()
     {:quick}
     modifies xmm4; efl; r12;
     requires sse_enabled;
@@ -89,7 +89,7 @@ procedure Inc32(inout dst:xmm, in one:xmm)
 }
 
 // GCTR encrypt one block
-procedure gctr_register(
+procedure Gctr_register(
         inline alg:algorithm,
         ghost key:seq(nat32),
         ghost round_keys:seq(quad32),
@@ -131,7 +131,7 @@ procedure gctr_register(
     gctr_encrypt_one_block(icb_BE, old(io), alg, key);
 }
 
-procedure gctr_core(
+procedure Gctr_core(
         inline alg:algorithm,
         ghost in_b:buffer128,
         ghost out_b:buffer128,
@@ -186,7 +186,7 @@ procedure gctr_core(
     Mov64(r9, in_ptr);
     Mov64(r10, out_ptr);
 
-    init_ctr();
+    Init_ctr();
 
     while (rdx != len)
         invariant
@@ -249,7 +249,7 @@ procedure gctr_core(
 #verbatim
 #restart-solver
 #endverbatim
-procedure gctr_core_opt(
+procedure Gctr_core_opt(
         inline alg:algorithm,
         ghost in_b:buffer128,
         ghost out_b:buffer128,
@@ -312,17 +312,17 @@ procedure gctr_core_opt(
         // TODO: Align registers to avoid all of this pointer copying
         Mov64(r9, in_ptr);
         Mov64(r10, out_ptr);
-        aes_counter_loop(alg, in_b, out_b, key, round_keys, keys_b);
+        Aes_counter_loop(alg, in_b, out_b, key, round_keys, keys_b);
         Mov64(in_ptr, r9);
         Mov64(out_ptr, r10);
     }
 
-    gctr_core(alg, in_b, out_b, 4*num_quad_blocks, old(icb), key, round_keys, keys_b);
+    Gctr_core(alg, in_b, out_b, 4*num_quad_blocks, old(icb), key, round_keys, keys_b);
 }
 
 
 #reset-options "--z3rlimit 20"
-procedure gctr_bytes_extra_work(
+procedure Gctr_bytes_extra_work(
         inline alg:algorithm,
         ghost icb_BE:quad32,
         ghost in_b:buffer128,
@@ -388,7 +388,7 @@ procedure gctr_bytes_extra_work(
 
     // Encrypt it
     Mov128(xmm1, xmm2);
-    gctr_register(alg, key, round_keys, keys_b);
+    Gctr_register(alg, key, round_keys, keys_b);
 
     //assert xmm1 == gctr_encrypt_block(icb, final_quad_LE, alg, key, 0);
     gctr_encrypt_block_offset(icb_BE, final_quad_LE, alg, key, num_blocks);
@@ -400,8 +400,9 @@ procedure gctr_bytes_extra_work(
     //assert buffer128_read(out_b, num_blocks, mem) == gctr_encrypt_block(icb_BE, buffer128_read(in_b, num_blocks, mem), alg, key, num_blocks);
 }
 
+/*
 #reset-options "--z3rlimit 20"
-procedure gctr_bytes_extra(
+procedure Gctr_bytes_extra(
         inline alg:algorithm,
         ghost icb_BE:quad32,
         ghost in_b:buffer128,
@@ -460,7 +461,7 @@ procedure gctr_bytes_extra(
         cipher == gctr_encrypt_LE(icb_BE, make_gctr_plain_LE(plain), alg, key);
         xmm1 == buffer128_read(out_b, num_blocks, mem);
 
-// TODO: Prove this inside gctr_bytes_extra_work
+// TODO: Prove this inside Gctr_bytes_extra_work
         // We modified out_b, but we didn't disrupt the work that was previously done
         let     cipher_blocks := slice(buffer128_as_seq(mem,      out_b), 0, num_blocks);
         let old_cipher_blocks := slice(buffer128_as_seq(old(mem), out_b), 0, num_blocks);
@@ -471,16 +472,17 @@ procedure gctr_bytes_extra(
                            slice(buffer128_as_seq(mem, out_b), 0, num_blocks),
                            key, icb_BE);
 
-    gctr_bytes_extra_work(alg, icb_BE, in_b, out_b, key, round_keys, keys_b, orig_in_ptr, orig_out_ptr, num_bytes);
+    Gctr_bytes_extra_work(alg, icb_BE, in_b, out_b, key, round_keys, keys_b, orig_in_ptr, orig_out_ptr, num_bytes);
 
     gctr_partial_to_full_advanced(icb_BE,
             buffer128_as_seq(mem, in_b),
             buffer128_as_seq(mem, out_b),
             alg, key, old(num_bytes));
 }
+*/
 
 #reset-options "--z3rlimit 20"
-procedure gctr_bytes_no_extra(
+procedure Gctr_bytes_no_extra(
         inline alg:algorithm,
         ghost icb_BE:quad32,
         ghost in_b:buffer128,
@@ -542,7 +544,7 @@ procedure gctr_bytes_no_extra(
 
 
 #reset-options "--z3rlimit 20"
-procedure gctr_bytes(
+procedure Gctr_bytes(
         inline alg:algorithm,
         ghost in_b:buffer128,
         ghost out_b:buffer128,
@@ -601,17 +603,17 @@ procedure gctr_bytes(
 {
     Mov64(tmp, num_blocks);
     IMul64(tmp, 16);    // # of bytes in even 128-bit blocks
-    gctr_core_opt(alg, in_b, out_b, key, round_keys, keys_b);
+    Gctr_core_opt(alg, in_b, out_b, key, round_keys, keys_b);
     assert gctr_partial_def(alg, old(num_blocks), s128(mem, in_b), s128(mem, out_b), key, old(icb));
     assert icb == inc32(old(icb), old(num_blocks));
 
-    gctr_bytes_no_extra(alg, old(icb), in_b, out_b, key, round_keys, keys_b, old(in_ptr), old(out_ptr), old(num_blocks * 16 /* == 128/8 */));
+    Gctr_bytes_no_extra(alg, old(icb), in_b, out_b, key, round_keys, keys_b, old(in_ptr), old(out_ptr), old(num_blocks * 16 /* == 128/8 */));
 
     if (plain_num_bytes > tmp)
     {
         Load128_buffer(xmm1, inout_ptr, 0, Secret, inout_b, 0);
         assert equal(create(1, xmm1), s128(mem, inout_b));
-        gctr_register(alg, key, round_keys, keys_b);
+        Gctr_register(alg, key, round_keys, keys_b);
         Store128_buffer(inout_ptr, xmm1, 0, Secret, inout_b, 0);
     }
     gctr_bytes_helper(alg, key,
@@ -622,7 +624,7 @@ procedure gctr_bytes(
 }
 
 #reset-options "--z3rlimit 40"
-procedure gctr_bytes_stdcall(
+procedure Gctr_bytes_stdcall(
         inline win:bool,
         inline alg:algorithm,
 
@@ -772,7 +774,7 @@ procedure gctr_bytes_stdcall(
         Mov64(r13, rcx);
         Load64_stack(rcx, rsp, 64+ 8);
     }
-    gctr_bytes(alg, in_b, out_b, inout_b, key, old(buffer128_as_seq(mem, keys_b)), keys_b);
+    Gctr_bytes(alg, in_b, out_b, inout_b, key, old(buffer128_as_seq(mem, keys_b)), keys_b);
 
     inline if (win)
     {
