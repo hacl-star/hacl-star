@@ -387,9 +387,9 @@ procedure Poly1305_last_block()
         n := 0x1_0000_0000_0000_0000;
         p := n * n * 4 - 5;
         r1 := rax;
-        r := lowerUpper128_opaque(r0, r1);
-        hBlocks := lowerUpper192_opaque(lowerUpper128_opaque(h0, h1), h2);
-        inpLast := lowerUpper128_opaque(r8, r9);
+        r := lowerUpper128(r0, r1);
+        hBlocks := lowerUpper192(lowerUpper128(h0, h1), h2);
+        inpLast := lowerUpper128(r8, r9);
     reads
         r0; s1; nExtra;
     modifies
@@ -404,7 +404,7 @@ procedure Poly1305_last_block()
     ensures
         h2 < 5;
         let padLast := pow2(nExtra * 8);
-        let hLast := lowerUpper192_opaque(lowerUpper128_opaque(h0, h1), h2);
+        let hLast := lowerUpper192(lowerUpper128(h0, h1), h2);
         modp(hLast) == modp((modp(hBlocks) + padLast + (inpLast % padLast)) * r);
 {
     let padLast := pow2(nExtra * 8);
@@ -426,7 +426,7 @@ procedure Poly1305_last_block()
         And64(r8, rcx);
         Mov64(r9, 0);
         assert r8 == old(r8) % padLast;
-        assert lowerUpper128_opaque(r8, r9) == inpLast % padLast;
+        assert lowerUpper128(r8, r9) == inpLast % padLast;
 
         // h += (inpLast % padLast)
         Add64Wrap(h0, r8);
@@ -445,9 +445,9 @@ procedure Poly1305_last_block()
         Mov64(rdx, 1);
         Shl64(rdx, rcx);
 
-        assert padLast == lowerUpper128_opaque(0, rdx) by {
+        assert padLast == lowerUpper128(0, rdx) by {
             lemma_power2_add64(8 * nExtra8);
-            Vale.Def.Opaque_s.reveal_opaque(lowerUpper128);
+            lowerUpper128_reveal();
         }
 
         // inpLast := (inpLast % padLast)
@@ -456,7 +456,7 @@ procedure Poly1305_last_block()
         Mov64(rcx, rdx);
         Sub64(rcx, 1);
         And64(r9, rcx);
-        assert lowerUpper128_opaque(r8, r9) == inpLast % padLast;
+        assert lowerUpper128(r8, r9) == inpLast % padLast;
 
         // h += (inpLast % padLast)
         Add64Wrap(h0, r8);
@@ -469,10 +469,10 @@ procedure Poly1305_last_block()
     }
 
     let h := hBlocks + (inpLast % padLast) + padLast;
-    assert h == h2 * (n * n) + h1 * n + h0 by { Vale.Def.Opaque_s.reveal_opaque(lowerUpper192); Vale.Def.Opaque_s.reveal_opaque(lowerUpper128); }
-    assert r == r1 * n + r0 by { Vale.Def.Opaque_s.reveal_opaque(lowerUpper128); }
+    assert h == h2 * (n * n) + h1 * n + h0 by { lowerUpper192_reveal(); lowerUpper128_reveal(); }
+    assert r == r1 * n + r0 by { lowerUpper128_reveal(); }
     let hLast := Poly1305_iteration(r1);
-    assert hLast == lowerUpper192_opaque(lowerUpper128_opaque(h0, h1), h2) by { Vale.Def.Opaque_s.reveal_opaque(lowerUpper192); Vale.Def.Opaque_s.reveal_opaque(lowerUpper128); }
+    assert hLast == lowerUpper192(lowerUpper128(h0, h1), h2) by { lowerUpper192_reveal(); lowerUpper128_reveal(); }
     lemma_poly_demod(p, hBlocks, (inpLast % padLast) + padLast, r);
     assert modp(hLast) == modp((modp(hBlocks) + padLast + (inpLast % padLast)) * r) by { reveal modp; }
 }
@@ -482,13 +482,13 @@ procedure Poly1305_reduce_last()
     {:quick}
     lets
         h0 @= r14; h1 @= rbx; h2 @= rbp;
-        h := lowerUpper192_opaque(lowerUpper128_opaque(h0, h1), h2);
+        h := lowerUpper192(lowerUpper128(h0, h1), h2);
     modifies
         r8; r9; r10; rax; h0; h1; h2; efl;
     requires
         h2 < 5;
     ensures
-        lowerUpper128_opaque(h0, h1) == mod2_128(modp(h));
+        lowerUpper128(h0, h1) == mod2_128(modp(h));
 {
     lemma_poly_bits64();
 
@@ -499,8 +499,8 @@ procedure Poly1305_reduce_last()
     Adc64Wrap(r9, 0);
     Adc64Wrap(r10, 0);
 
-    assert h + 5 == lowerUpper192_opaque(lowerUpper128_opaque(r8, r9), r10)
-        by { Vale.Def.Opaque_s.reveal_opaque(lowerUpper128); Vale.Def.Opaque_s.reveal_opaque(lowerUpper192); }
+    assert h + 5 == lowerUpper192(lowerUpper128(r8, r9), r10)
+        by { lowerUpper128_reveal(); lowerUpper192_reveal(); }
     lemma_reduce128(h, old(h2), old(h1), old(h0), h + 5, r10, r9, r8);
 
     Shr64(r10, 2);
@@ -527,14 +527,14 @@ procedure Poly1305_add_key_s()
     {:quick}
     lets
         h0 @= r14; h1 @= rbx; key_s0 @= rax; key_s1 @= rdx;
-        h_in := lowerUpper128_opaque(h0, h1);
-        key_s := lowerUpper128_opaque(key_s0, key_s1);
+        h_in := lowerUpper128(h0, h1);
+        key_s := lowerUpper128(key_s0, key_s1);
     reads
         key_s0; key_s1;
     modifies
         h0; h1; efl;
     ensures
-        lowerUpper128_opaque(h0, h1) == mod2_128(h_in + key_s);
+        lowerUpper128(h0, h1) == mod2_128(h_in + key_s);
 {
     Add64Wrap(h0, key_s0);
     Adc64Wrap(h1, key_s1);
@@ -579,8 +579,8 @@ procedure Poly1305_impl(
         let key_s0 := buffer64_read(ctx_b, 5, heap0);
         let key_s1 := buffer64_read(ctx_b, 6, heap0);
         finish == buffer64_read(ctx_b, 23, heap0);
-        key_r == lowerUpper128_opaque(key_r0, key_r1);
-        key_s == lowerUpper128_opaque(key_s0, key_s1);
+        key_r == lowerUpper128(key_r0, key_r1);
+        key_s == lowerUpper128(key_s0, key_s1);
         h2_in < 5;
         finish < 2;
     ensures
@@ -590,13 +590,13 @@ procedure Poly1305_impl(
         let h0_in := buffer64_read(ctx_b, 0, old(heap0));
         let h1_in := buffer64_read(ctx_b, 1, old(heap0));
         let h2_in := buffer64_read(ctx_b, 2, old(heap0));
-        let h_in := lowerUpper192_opaque(lowerUpper128_opaque(h0_in, h1_in), h2_in);
+        let h_in := lowerUpper192(lowerUpper128(h0_in, h1_in), h2_in);
         let inp_mem := seqTo128(buffer64_as_seq(heap0, inp_b));
-        finish == 0 ==> h == lowerUpper192_opaque(lowerUpper128_opaque(h0, h1), h2);
+        finish == 0 ==> h == lowerUpper192(lowerUpper128(h0, h1), h2);
         finish == 0 ==>
             modp(h) == poly1305_hash_blocks(modp(h_in), n * n, make_r(key_r), inp_mem, old(len) / 16);
         finish == 0 ==> h2 < 5;
-        finish == 1 ==> h == lowerUpper128_opaque(h0, h1);
+        finish == 1 ==> h == lowerUpper128(h0, h1);
         finish == 1 ==> h == poly1305_hash_all(modp(h_in), key_r, key_s, inp_mem, old(len));
         ctx == old(ctx);
 {
@@ -605,7 +605,7 @@ procedure Poly1305_impl(
     let h0_in := buffer64_read(ctx_b, 0, heap0);
     let h1_in := buffer64_read(ctx_b, 1, heap0);
     let h2_in := buffer64_read(ctx_b, 2, heap0);
-    let h_in := lowerUpper192_opaque(lowerUpper128_opaque(h0_in, h1_in), h2_in);
+    let h_in := lowerUpper192(lowerUpper128(h0_in, h1_in), h2_in);
     let key_r0 := buffer64_read(ctx_b, 3, heap0);
     let key_r1 := buffer64_read(ctx_b, 4, heap0);
     lemma_poly_bits64();
@@ -619,13 +619,13 @@ procedure Poly1305_impl(
     Store64_buffer(ctx, r0, 24, Public, ctx_b, 3);
     Store64_buffer(ctx, r1, 32, Public, ctx_b, 4);
 
-    let r:nat128 := lowerUpper128_opaque(r0, r1);
-    assert r == r0 + n * r1 by { Vale.Def.Opaque_s.reveal_opaque(lowerUpper128); }
+    let r:nat128 := lowerUpper128(r0, r1);
+    assert r == r0 + n * r1 by { lowerUpper128_reveal(); }
 
     let mask:nat128 := 0x0ffffffc_0ffffffc_0ffffffc_0fffffff; // REVIEW: why do we need to put this constant in a variable?
     assert r == iand128(key_r, mask) by
     {
-        Vale.Def.Opaque_s.reveal_opaque(lowerUpper128);
+        lowerUpper128_reveal();
         lemma_lowerUpper128_and(key_r, key_r0, key_r1, mask,
             0x0fff_fffc_0fff_ffff, 0x0fff_fffc_0fff_fffc, r, r0, r1);
     }
@@ -639,10 +639,10 @@ procedure Poly1305_impl(
     Store64_buffer(ctx, len, 64, Public, ctx_b, 8);
 
     Mov64(rcx, 1);
-    assert h_in == h2_in * (n * n) + h1_in * n + h0_in by { Vale.Def.Opaque_s.reveal_opaque(lowerUpper128); Vale.Def.Opaque_s.reveal_opaque(lowerUpper192); }
+    assert h_in == h2_in * (n * n) + h1_in * n + h0_in by { lowerUpper128_reveal(); lowerUpper192_reveal(); }
     h := Poly1305_blocks(r, h_in, ctx_b, inp_b);
-    assert h == lowerUpper192_opaque(lowerUpper128_opaque(h0, h1), h2)
-        by { Vale.Def.Opaque_s.reveal_opaque(lowerUpper192); Vale.Def.Opaque_s.reveal_opaque(lowerUpper128); }
+    assert h == lowerUpper192(lowerUpper128(h0, h1), h2)
+        by { lowerUpper192_reveal(); lowerUpper128_reveal(); }
     lemma_poly1305_heap_hash_blocks_alt(modp(h_in), n * n, r, heap0, inp_b, old(len) / 16);
 
     Load64_buffer(rax, ctx, 184, Public, ctx_b, 23);
@@ -659,20 +659,20 @@ procedure Poly1305_impl(
             Load64_buffer(r8, inp, 0, Public, inp_b, (len_in / 16) * 2);
             Load64_buffer(r9, inp, 8, Public, inp_b, (len_in / 16) * 2 + 1);
             let a := seqTo128_app(buffer64_as_seq(heap0, inp_b), len_in / 16);
-            assert lowerUpper128_opaque(r8, r9) == a
-                by { Vale.Def.Opaque_s.reveal_opaque(lowerUpper128); }
+            assert lowerUpper128(r8, r9) == a
+                by { lowerUpper128_reveal(); }
             Poly1305_last_block();
-            h := lowerUpper192_opaque(lowerUpper128_opaque(h0, h1), h2);
+            h := lowerUpper192(lowerUpper128(h0, h1), h2);
         }
 
         lemma_add_mod128(modp(h), key_s);
         Poly1305_reduce_last();
-        h := lowerUpper128_opaque(h0, h1);
+        h := lowerUpper128(h0, h1);
 
         Load64_buffer(rax, ctx, 40, Public, ctx_b, 5);
         Load64_buffer(rdx, ctx, 48, Public, ctx_b, 6);
         Poly1305_add_key_s();
-        h := lowerUpper128_opaque(h0, h1);
+        h := lowerUpper128(h0, h1);
 
         assert h == poly1305_hash_all(modp(h_in), key_r, key_s, seqTo128(buffer64_as_seq(heap0, inp_b)), len_in)
             by { reveal mod2_128; reveal modp; }
@@ -730,15 +730,15 @@ procedure Poly1305(
         let key_r1 := buffer64_read(ctx_b, 4, old(mem));
         let key_s0 := buffer64_read(ctx_b, 5, old(mem));
         let key_s1 := buffer64_read(ctx_b, 6, old(mem));
-        let h_in := lowerUpper192_opaque(lowerUpper128_opaque(h0_in, h1_in), h2_in);
-        let key_r := lowerUpper128_opaque(key_r0, key_r1);
-        let key_s := lowerUpper128_opaque(key_s0, key_s1);
+        let h_in := lowerUpper192(lowerUpper128(h0_in, h1_in), h2_in);
+        let key_r := lowerUpper128(key_r0, key_r1);
+        let key_s := lowerUpper128(key_s0, key_s1);
 
         let h0_out := buffer64_read(ctx_b, 0, mem);
         let h1_out := buffer64_read(ctx_b, 1, mem);
         let h2_out := buffer64_read(ctx_b, 2, mem);
-        let h10 := lowerUpper128_opaque(h0_out, h1_out);
-        let h210 := lowerUpper192_opaque(h10, h2_out);
+        let h10 := lowerUpper128(h0_out, h1_out);
+        let h210 := lowerUpper192(h10, h2_out);
         let inp_mem := seqTo128(buffer64_as_seq(mem, inp_b));
 
         finish_in == 0 ==>
@@ -763,8 +763,8 @@ procedure Poly1305(
     let key_r1 := buffer64_read(ctx_b, 4, heap0);
     let key_s0 := buffer64_read(ctx_b, 5, heap0);
     let key_s1 := buffer64_read(ctx_b, 6, heap0);
-    let key_r := lowerUpper128_opaque(key_r0, key_r1);
-    let key_s := lowerUpper128_opaque(key_s0, key_s1);
+    let key_r := lowerUpper128(key_r0, key_r1);
+    let key_s := lowerUpper128(key_s0, key_s1);
     Mov64(rax, ctx);
     Mov64(r11, inp);
     inline if (win)

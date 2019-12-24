@@ -55,15 +55,15 @@ val x64_poly1305
     let key_r1 = UInt64.v (MH.low_buffer_read TUInt8 TUInt64 h0 ctx_b 4) in
     let key_s0 = UInt64.v (MH.low_buffer_read TUInt8 TUInt64 h0 ctx_b 5) in
     let key_s1 = UInt64.v (MH.low_buffer_read TUInt8 TUInt64 h0 ctx_b 6) in
-    let h_in = lowerUpper192_opaque (lowerUpper128_opaque h0_in h1_in) h2_in in
-    let key_r = lowerUpper128_opaque key_r0 key_r1 in
-    let key_s = lowerUpper128_opaque key_s0 key_s1 in
+    let h_in = lowerUpper192 (lowerUpper128 h0_in h1_in) h2_in in
+    let key_r = lowerUpper128 key_r0 key_r1 in
+    let key_s = lowerUpper128 key_s0 key_s1 in
 
     let h0_out = UInt64.v (MH.low_buffer_read TUInt8 TUInt64 h1 ctx_b 0) in
     let h1_out = UInt64.v (MH.low_buffer_read TUInt8 TUInt64 h1 ctx_b 1) in
     let h2_out = UInt64.v (MH.low_buffer_read TUInt8 TUInt64 h1 ctx_b 2) in
-    let h10 = lowerUpper128_opaque h0_out h1_out in
-    let h210 = lowerUpper192_opaque h10 h2_out in
+    let h10 = lowerUpper128 h0_out h1_out in
+    let h210 = lowerUpper192 h10 h2_out in
     let db = get_downview inp_b in
     math_aux inp_b (readable_words (UInt64.v len));
     let inp_mem = seqTo128 (uint64_to_nat_seq (UV.as_seq h1 (UV.mk_buffer db Vale.Interop.Views.up_view64))) in

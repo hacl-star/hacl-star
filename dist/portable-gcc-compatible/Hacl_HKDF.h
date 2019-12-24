@@ -61,5 +61,32 @@ Hacl_HKDF_extract_sha2_256(
 
 /* SNIPPET_END: Hacl_HKDF_extract_sha2_256 */
 
+/* SNIPPET_START: Hacl_HKDF_expand_sha2_512 */
+
+void
+Hacl_HKDF_expand_sha2_512(
+  uint8_t *okm,
+  uint8_t *prk,
+  uint32_t prklen,
+  uint8_t *info,
+  uint32_t infolen,
+  uint32_t len
+);
+
+/* SNIPPET_END: Hacl_HKDF_expand_sha2_512 */
+
+/* SNIPPET_START: Hacl_HKDF_extract_sha2_512 */
+
+void
+Hacl_HKDF_extract_sha2_512(
+  uint8_t *prk,
+  uint8_t *salt,
+  uint32_t saltlen,
+  uint8_t *ikm,
+  uint32_t ikmlen
+);
+
+/* SNIPPET_END: Hacl_HKDF_extract_sha2_512 */
+
 #define __Hacl_HKDF_H_DEFINED
 #endif

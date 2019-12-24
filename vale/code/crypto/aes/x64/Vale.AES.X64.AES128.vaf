@@ -81,7 +81,7 @@ procedure KeyExpansionRound(
 
     // assert xmm1 == simd_round_key_128(old(xmm1), rcon);
     lemma_simd_round_key(old(xmm1), rcon);
-    Vale.Def.Opaque_s.reveal_opaque(expand_key_128_def);
+    expand_key_128_reveal();
 }
 
 procedure KeyExpansionRoundUnrolledRecursive(
@@ -110,7 +110,7 @@ procedure KeyExpansionRoundUnrolledRecursive(
         forall(j){buffer128_read(dst, j, heap0)} 0 <= j <= n ==>
             buffer128_read(dst, j, heap0) == expand_key_128(key, j);
 {
-    Vale.Def.Opaque_s.reveal_opaque(expand_key_128_def);
+    expand_key_128_reveal();
     inline if (0 < n <= 10) {
         KeyExpansionRoundUnrolledRecursive(key, dst, n - 1);
         KeyExpansionRound(#nat64(n - 1), #nat8(aes_rcon(n - 1)), dst, key);
@@ -180,12 +180,12 @@ procedure AES128EncryptRound(
     requires
         aesni_enabled && sse_enabled;
         1 <= n < 10 <= length(round_keys);
-        xmm0 == rounds(init, round_keys, #nat(n - 1));
+        xmm0 == eval_rounds_def(init, round_keys, #nat(n - 1));
         r8 == buffer_addr(keys_buffer, heap0);
         validSrcAddrs128(heap0, r8, keys_buffer, 11, memLayout, Secret);
         buffer128_read(keys_buffer, n, heap0) == index(round_keys, n);
     ensures
-        xmm0 == rounds(init, round_keys, n);
+        xmm0 == eval_rounds_def(init, round_keys, n);
 {
     commute_sub_bytes_shift_rows(xmm0);
     Load128_buffer(xmm2, r8, 16 * n, Secret, keys_buffer, n);
@@ -234,6 +234,7 @@ procedure AES128EncryptBlock(
 
     // Clear secrets out of registers
     Pxor(xmm2, xmm2);
+    aes_encrypt_LE_reveal();
 }
 
 procedure AES128EncryptBlockStdcall(

@@ -364,7 +364,9 @@ let rec args_b8_disjoint_or_eq (args:list arg)
   : Lemma
       (requires (disjoint_or_eq args))
       (ensures (list_disjoint_or_eq (args_b8 args)))
-  = match args with
+  =
+  list_disjoint_or_eq_reveal ();
+  match args with
     | [] -> ()
     | hd::tl ->
       disjoint_or_eq_cons hd tl;

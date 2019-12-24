@@ -54,7 +54,7 @@ open Vale.Bignum.X64
 const int_canon:tactic extern;
 
 #reset-options "--z3rlimit 600"
-procedure fast_sqr_part1(inline offset:nat, ghost inA_b:buffer64)
+procedure Fast_sqr_part1(inline offset:nat, ghost inA_b:buffer64)
     {:quick}
     lets
         inA_ptr @= rsi;
@@ -130,7 +130,7 @@ procedure fast_sqr_part1(inline offset:nat, ghost inA_b:buffer64)
 #restart-solver
 #endverbatim
 #reset-options "--z3rlimit 4000 --max_fuel 0 --max_ifuel 0"
-procedure fast_sqr_part2()
+procedure Fast_sqr_part2()
     {:quick}
     reads
         rax; rcx;
@@ -164,7 +164,7 @@ procedure fast_sqr_part2()
 }
 
 #reset-options "--z3rlimit 400"
-procedure fast_sqr_part3(inline offset:nat, ghost dst_b:buffer64, ghost inA_b:buffer64)
+procedure Fast_sqr_part3(inline offset:nat, ghost dst_b:buffer64, ghost inA_b:buffer64)
     {:quick}
     lets
         dst_ptr @= rdi;
@@ -251,7 +251,7 @@ procedure fast_sqr_part3(inline offset:nat, ghost dst_b:buffer64, ghost inA_b:bu
 }
 
 #reset-options "--z3rlimit 600"
-procedure fast_sqr(inline offset:nat, ghost dst_b:buffer64, ghost inA_b:buffer64)
+procedure Fast_sqr(inline offset:nat, ghost dst_b:buffer64, ghost inA_b:buffer64)
     {:public}
     {:quick}
     lets
@@ -305,7 +305,7 @@ procedure fast_sqr(inline offset:nat, ghost dst_b:buffer64, ghost inA_b:buffer64
             2 * mul_nats(a2, a3),
             mul_nats(a3, a3)),
         int_canon);      // PASSES
-    fast_sqr_part1(offset, inA_b);
+    Fast_sqr_part1(offset, inA_b);
 
     let old_r8  := r8;
     let old_r9  := r9;
@@ -316,7 +316,7 @@ procedure fast_sqr(inline offset:nat, ghost dst_b:buffer64, ghost inA_b:buffer64
     let old_rax := rax;
     let old_rcx := rcx;
 
-    fast_sqr_part2();
+    Fast_sqr_part2();
 
     let mid_r8  := r8;
     let mid_r9  := r9;
@@ -326,7 +326,7 @@ procedure fast_sqr(inline offset:nat, ghost dst_b:buffer64, ghost inA_b:buffer64
     let mid_r13 := r13;
     let mid_r14 := r14;
 
-    fast_sqr_part3(offset, dst_b, inA_b);
+    Fast_sqr_part3(offset, dst_b, inA_b);
 
     let d0 := buffer64_read(dst_b, 0 + offset*2, heap0);
     let d1 := buffer64_read(dst_b, 1 + offset*2, heap0);
@@ -345,7 +345,7 @@ procedure fast_sqr(inline offset:nat, ghost dst_b:buffer64, ghost inA_b:buffer64
 
 #reset-options "--z3rlimit 40"
 
-procedure fast_sqr_stdcall(inline win:bool, ghost dst_b:buffer64, ghost inA_b:buffer64)
+procedure Fast_sqr_stdcall(inline win:bool, ghost dst_b:buffer64, ghost inA_b:buffer64)
     {:public}
     {:quick}
     lets
@@ -413,7 +413,7 @@ procedure fast_sqr_stdcall(inline win:bool, ghost dst_b:buffer64, ghost inA_b:bu
         Mov64(inA_ptr, rdx);
     }
 
-    fast_sqr(0, dst_b, inA_b);
+    Fast_sqr(0, dst_b, inA_b);
 
     Pop(r14);
     Pop(r13);
@@ -424,7 +424,7 @@ procedure fast_sqr_stdcall(inline win:bool, ghost dst_b:buffer64, ghost inA_b:bu
 
 /*
 #reset-options "--z3rlimit 60"
-procedure fast_sqr_loop(inline offset:nat, ghost dst_b:buffer64, ghost inA_b:buffer64)
+procedure Fast_sqr_loop(inline offset:nat, ghost dst_b:buffer64, ghost inA_b:buffer64)
     {:quick}
     lets
         dst_ptr @= rdi;
@@ -481,14 +481,14 @@ procedure fast_sqr_loop(inline offset:nat, ghost dst_b:buffer64, ghost inA_b:buf
             modifies_buffer_specific(dst_b, old(heap0), heap0, 0 + offset*2, 8 + offset*2 - 1);
         decreases count;
     {
-        fast_sqr(offset, dst_b, inA_b);
+        Fast_sqr(offset, dst_b, inA_b);
         Sub64(count, 1);
     }
 }
 
 #reset-options "--z3rlimit 40"
 
-procedure fast_sqr_loop_stdcall(inline win:bool, ghost dst_b:buffer64, ghost inA_b:buffer64)
+procedure Fast_sqr_loop_stdcall(inline win:bool, ghost dst_b:buffer64, ghost inA_b:buffer64)
     {:public}
     {:quick}
     lets
@@ -563,7 +563,7 @@ procedure fast_sqr_loop_stdcall(inline win:bool, ghost dst_b:buffer64, ghost inA
         Mov64(count, rdx);
     }
 
-    fast_sqr(0, dst_b, inA_b);
+    Fast_sqr(0, dst_b, inA_b);
 
     Pop(r14);
     Pop(r13);
@@ -574,7 +574,7 @@ procedure fast_sqr_loop_stdcall(inline win:bool, ghost dst_b:buffer64, ghost inA
 }
 */
 
-procedure sqr2_stdcall(inline win:bool, ghost dst_b:buffer64, ghost inA_b:buffer64)
+procedure Sqr2_stdcall(inline win:bool, ghost dst_b:buffer64, ghost inA_b:buffer64)
     {:public}
     {:quick}
     lets
@@ -642,8 +642,8 @@ procedure sqr2_stdcall(inline win:bool, ghost dst_b:buffer64, ghost inA_b:buffer
         Mov64(inA_ptr, rdx);
     }
 
-    fast_sqr(0, dst_b, inA_b);
-    fast_sqr(4, dst_b, inA_b);
+    Fast_sqr(0, dst_b, inA_b);
+    Fast_sqr(4, dst_b, inA_b);
 
     inline if (win)
     {

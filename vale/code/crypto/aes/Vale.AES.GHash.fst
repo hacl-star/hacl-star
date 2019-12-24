@@ -320,7 +320,7 @@ let lemma_reverse_bytes_quad32_xor (a b:quad32) : Lemma
     =
     calc (==) {
       r32 (nat32_xor a b);
-      == {reveal_opaque reverse_bytes_nat32_def}
+      == {reverse_bytes_nat32_reveal ()}
       be_bytes_to_nat32 (reverse_seq (nat32_to_be_bytes (nat32_xor a b)));
       == {
         let x = nat32_xor a b in
@@ -334,7 +334,7 @@ let lemma_reverse_bytes_quad32_xor (a b:quad32) : Lemma
         ()
       }
       nat32_xor (be_bytes_to_nat32 (reverse_seq (nat32_to_be_bytes a))) (be_bytes_to_nat32 (reverse_seq (nat32_to_be_bytes b)));
-      == {reveal_opaque reverse_bytes_nat32_def}
+      == {reverse_bytes_nat32_reveal ()}
       nat32_xor (r32 a) (r32 b);
     }
     // r32 n = be_bytes_to_nat32 (reverse_seq (nat32_to_be_bytes n))
@@ -342,7 +342,7 @@ let lemma_reverse_bytes_quad32_xor (a b:quad32) : Lemma
     in
   calc (==) {
     !!(quad32_xor a b);
-    == {reveal_opaque quad32_xor_def}
+    == {quad32_xor_reveal ()}
     !!(four_map2 nat32_xor a b);
     == {reveal_reverse_bytes_quad32 (four_map2 nat32_xor a b)}
     four_reverse (four_map r32 (four_map2 nat32_xor a b));
@@ -360,7 +360,7 @@ let lemma_reverse_bytes_quad32_xor (a b:quad32) : Lemma
     four_map2 nat32_xor (four_reverse (four_map r32 a)) (four_reverse (four_map r32 b));
     == {reveal_reverse_bytes_quad32 a; reveal_reverse_bytes_quad32 b}
     four_map2 nat32_xor !!a !!b;
-    == {reveal_opaque quad32_xor_def}
+    == {quad32_xor_reveal ()}
     quad32_xor !!a !!b;
   }
 
@@ -375,7 +375,7 @@ let rec lemma_ghash_incremental_poly_rec (h_LE:quad32) (y_prev:quad32) (x:seq qu
   )
   (decreases (length x))
   =
-  reveal_opaque ghash_incremental_def;
+  ghash_incremental_reveal ();
   let (~~) = of_quad32 in
   let (!!) = reverse_bytes_quad32 in
   let (~!) x = ~~(!!x) in
@@ -408,7 +408,7 @@ let rec lemma_ghash_incremental_poly_rec (h_LE:quad32) (y_prev:quad32) (x:seq qu
     }
 
 let lemma_ghash_incremental_poly h_LE y_prev x =
-  reveal_opaque ghash_incremental_def;
+  ghash_incremental_reveal ();
   lemma_ghash_incremental_poly_rec h_LE y_prev x (fun_seq_quad32_LE_poly128 x)
 
 let lemma_ghash_incremental_def_0 (h_LE:quad32) (y_prev:quad32) (x:seq quad32)
@@ -417,14 +417,14 @@ let lemma_ghash_incremental_def_0 (h_LE:quad32) (y_prev:quad32) (x:seq quad32)
 
 let rec ghash_incremental_to_ghash (h:quad32) (x:seq quad32)
   =
-  reveal_opaque ghash_incremental_def;
-  reveal_opaque ghash_LE_def;
+  ghash_incremental_reveal ();
+  ghash_LE_reveal ();
   if length x = 1 then ()
   else ghash_incremental_to_ghash h (all_but_last x)
 
 let rec lemma_hash_append (h:quad32) (y_prev:quad32) (a b:ghash_plain_LE)
   =
-  reveal_opaque ghash_incremental_def;
+  ghash_incremental_reveal ();
   let ab = append a b in
   assert (last ab == last b);
   if length b = 1 then

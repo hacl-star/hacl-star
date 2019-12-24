@@ -51,7 +51,7 @@ const int_canon:tactic extern;
 
 #reset-options "--z3rlimit 600"
 
-procedure fast_mul1(ghost dst_b:buffer64, ghost inA_b:buffer64)
+procedure Fast_mul1(ghost dst_b:buffer64, ghost inA_b:buffer64)
     {:quick}
     lets
         dst_ptr @= rdi;
@@ -113,7 +113,7 @@ procedure fast_mul1(ghost dst_b:buffer64, ghost inA_b:buffer64)
 /*
 #reset-options "--z3rlimit 40"
 
-procedure fast_mul1_stdcall(inline win:bool, ghost dst_b:buffer64, ghost inA_b:buffer64)
+procedure Fast_mul1_stdcall(inline win:bool, ghost dst_b:buffer64, ghost inA_b:buffer64)
     {:public}
     {:quick}
     {:exportSpecs}
@@ -176,7 +176,7 @@ procedure fast_mul1_stdcall(inline win:bool, ghost dst_b:buffer64, ghost inA_b:b
         Mov64(b, r8);
     }
 
-    fast_mul1(dst_b, inA_b);
+    Fast_mul1(dst_b, inA_b);
 
     Pop(r14);
     Pop(r13);
@@ -186,7 +186,7 @@ procedure fast_mul1_stdcall(inline win:bool, ghost dst_b:buffer64, ghost inA_b:b
 */
 
 #reset-options "--z3rlimit 600"
-procedure fast_add1(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB:nat64)
+procedure Fast_add1(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB:nat64)
     {:public}
     {:quick}
     {:exportSpecs}
@@ -259,7 +259,7 @@ procedure fast_add1(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB:nat64)
 
 #reset-options "--z3rlimit 40"
 
-procedure fast_add1_stdcall(
+procedure Fast_add1_stdcall(
         inline win:bool,
         ghost dst_b:buffer64,
         ghost inA_b:buffer64,
@@ -341,7 +341,7 @@ procedure fast_add1_stdcall(
         Mov64(b, r8);
     }
 
-    fast_add1(dst_b, inA_b, inB_in);
+    Fast_add1(dst_b, inA_b, inB_in);
 
     Pop_Secret(rsi);
     Pop_Secret(rdi);
@@ -352,7 +352,7 @@ procedure fast_add1_stdcall(
 }
 
 #reset-options "--z3rlimit 1200"
-procedure fast_sub1(ghost dst_b:buffer64, ghost inA_b:buffer64)
+procedure Fast_sub1(ghost dst_b:buffer64, ghost inA_b:buffer64)
     {:quick}
     lets
         dst_ptr @= rdi;
@@ -420,7 +420,7 @@ procedure fast_sub1(ghost dst_b:buffer64, ghost inA_b:buffer64)
 
 /*
 #reset-options "--z3rlimit 40"
-procedure fast_sub1_stdcall(inline win:bool, ghost dst_b:buffer64, ghost inA_b:buffer64)
+procedure Fast_sub1_stdcall(inline win:bool, ghost dst_b:buffer64, ghost inA_b:buffer64)
     {:public}
     {:quick}
     {:exportSpecs}
@@ -482,14 +482,14 @@ procedure fast_sub1_stdcall(inline win:bool, ghost dst_b:buffer64, ghost inA_b:b
     }
     Mov64(rcx, rdx);
 
-    fast_sub1(dst_b, inA_b);
+    Fast_sub1(dst_b, inA_b);
 
     Pop(rsi);
 }
 */
 
 #reset-options "--z3rlimit 600"
-procedure fast_add(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB_b:buffer64)
+procedure Fast_add(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB_b:buffer64)
     {:quick}
     lets
         dst_ptr @= rdi;
@@ -559,7 +559,7 @@ procedure fast_add(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB_b:buffe
 }
 
 /*
-procedure fast_add_stdcall(
+procedure Fast_add_stdcall(
         inline win:bool,
         ghost dst_b:buffer64,
         ghost inA_b:buffer64,
@@ -636,7 +636,7 @@ procedure fast_add_stdcall(
         Mov64(inB_ptr, rdx);
     }
 
-    fast_add(dst_b, inA_b, inB_b);
+    Fast_add(dst_b, inA_b, inB_b);
 
     Pop(r12);
     Pop(rsi);
@@ -644,7 +644,7 @@ procedure fast_add_stdcall(
 */
 
 #reset-options "--z3rlimit 600"
-procedure fast_sub(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB_b:buffer64)
+procedure Fast_sub(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB_b:buffer64)
     {:quick}
     lets
         dst_ptr @= rdi;
@@ -726,7 +726,7 @@ procedure fast_sub(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB_b:buffe
 }
 
 /*
-procedure fast_sub_stdcall(
+procedure Fast_sub_stdcall(
         inline win:bool,
         ghost dst_b:buffer64,
         ghost inA_b:buffer64,
@@ -803,7 +803,7 @@ procedure fast_sub_stdcall(
         Mov64(inB_ptr, rdx);
     }
 
-    fast_sub(dst_b, inA_b, inB_b);
+    Fast_sub(dst_b, inA_b, inB_b);
 
     Pop(r12);
     Pop(rsi);
@@ -811,7 +811,7 @@ procedure fast_sub_stdcall(
 */
 
 #reset-options "--z3rlimit 40"
-procedure cswap_single(inline offset:nat, ghost p0_b:buffer64, ghost p1_b:buffer64)
+procedure Cswap_single(inline offset:nat, ghost p0_b:buffer64, ghost p1_b:buffer64)
     {:quick}
     lets
         p0_ptr @= rsi;
@@ -867,7 +867,7 @@ procedure cswap_single(inline offset:nat, ghost p0_b:buffer64, ghost p1_b:buffer
     Store64_buffer(p1_ptr, tmp1,  0 + offset * 8, Secret, p1_b, 0 + offset);
 }
 
-procedure cswap2(ghost bit_in:nat64, ghost p0_b:buffer64, ghost p1_b:buffer64)
+procedure Cswap2(ghost bit_in:nat64, ghost p0_b:buffer64, ghost p1_b:buffer64)
     {:public}
     {:quick}
     {:exportSpecs}
@@ -959,21 +959,21 @@ procedure cswap2(ghost bit_in:nat64, ghost p0_b:buffer64, ghost p1_b:buffer64)
 
     Add64Wrap(bit, 0xFFFFFFFFFFFFFFFF);
 
-    cswap_single(0, p0_b, p1_b);
-    cswap_single(1, p0_b, p1_b);
-    cswap_single(2, p0_b, p1_b);
-    cswap_single(3, p0_b, p1_b);
-    cswap_single(4, p0_b, p1_b);
-    cswap_single(5, p0_b, p1_b);
-    cswap_single(6, p0_b, p1_b);
-    cswap_single(7, p0_b, p1_b);
+    Cswap_single(0, p0_b, p1_b);
+    Cswap_single(1, p0_b, p1_b);
+    Cswap_single(2, p0_b, p1_b);
+    Cswap_single(3, p0_b, p1_b);
+    Cswap_single(4, p0_b, p1_b);
+    Cswap_single(5, p0_b, p1_b);
+    Cswap_single(6, p0_b, p1_b);
+    Cswap_single(7, p0_b, p1_b);
 
     DestroyHeaplets();
     mem_eq_all(mem, heap0);
     mem_eq_modifies(old(mem), mem, old(heap0), heap0);
 }
 
-procedure cswap2_stdcall(
+procedure Cswap2_stdcall(
         inline win:bool,
         ghost bit_in:nat64,
         ghost p0_b:buffer64,
@@ -1094,7 +1094,7 @@ procedure cswap2_stdcall(
         Mov64(p1_ptr, r8);
     }
 
-    cswap2(bit_in, p0_b, p1_b);
+    Cswap2(bit_in, p0_b, p1_b);
 
     inline if (win)
     {

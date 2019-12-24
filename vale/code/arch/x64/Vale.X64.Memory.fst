@@ -1,6 +1,7 @@
 module Vale.X64.Memory
 include Vale.Interop.Types
 friend Vale.Arch.Heap
+open Vale.Def.Opaque_s
 open Vale.Arch.HeapImpl
 open Vale.Arch.Heap
 open Vale.Interop.Base
@@ -98,10 +99,10 @@ let index64_heap_aux (s:Seq.lseq UInt8.t 8) (heap:S.machine_heap) (ptr:int) : Le
   (requires forall (j:nat{j < 8}). UInt8.v (Seq.index s j) == heap.[ptr+j])
   (ensures UInt64.v (Vale.Interop.Views.get64 s) == S.get_heap_val64 ptr heap) =
   let open Vale.Def.Words.Seq_s in
-  FStar.Pervasives.reveal_opaque (`%seq_to_seq_four_LE) (seq_to_seq_four_LE #nat8);
-  Vale.Def.Opaque_s.reveal_opaque Vale.Interop.Views.get64_def;
-  Vale.Def.Opaque_s.reveal_opaque S.get_heap_val64_def;
-  Vale.Def.Opaque_s.reveal_opaque Vale.Def.Types_s.le_bytes_to_nat64_def
+  reveal_opaque (`%seq_to_seq_four_LE) (seq_to_seq_four_LE #nat8);
+  Vale.Interop.Views.get64_reveal ();
+  S.get_heap_val64_reveal ();
+  Vale.Def.Types_s.le_bytes_to_nat64_reveal ()
 
 let index_helper (x y:int) (heap:S.machine_heap) : Lemma
   (requires x == y)
@@ -118,12 +119,12 @@ val index64_get_heap_val64 (h:vale_heap)
                            (heap:S.machine_heap{IB.correct_down (_ih h) heap})
                            (i:nat{i < buffer_length b})
    : Lemma (Seq.index (buffer_as_seq h b) i ==
-            S.get_heap_val64 (buffer_addr b h + 8 * i) heap)
+            S.get_heap_val64 (buffer_addr b h + scale8 i) heap)
 
 let index64_get_heap_val64 h b heap i =
   let db = get_downview b.bsrc in
   let ub = UV.mk_buffer db uint64_view in
-  let ptr = buffer_addr b h + 8 * i in
+  let ptr = buffer_addr b h + scale8 i in
   let s = DV.as_seq (_ih h).hs db in
   let t = TUInt64 in
   let addr = buffer_addr b h in
@@ -155,10 +156,10 @@ let index128_get_heap_val128_aux (s:Seq.lseq UInt8.t 16) (ptr:int) (heap:S.machi
     (S.get_heap_val32 (ptr+4) heap)
     (S.get_heap_val32 (ptr+8) heap)
     (S.get_heap_val32 (ptr+12) heap)) =
-  FStar.Pervasives.reveal_opaque (`%seq_to_seq_four_LE) (seq_to_seq_four_LE #nat8);
-  Vale.Def.Opaque_s.reveal_opaque S.get_heap_val32_def;
-  Vale.Def.Opaque_s.reveal_opaque Vale.Interop.Views.get128_def;
-  Vale.Def.Opaque_s.reveal_opaque Vale.Def.Types_s.le_bytes_to_quad32_def
+  reveal_opaque (`%seq_to_seq_four_LE) (seq_to_seq_four_LE #nat8);
+  S.get_heap_val32_reveal ();
+  Vale.Interop.Views.get128_reveal ();
+  Vale.Def.Types_s.le_bytes_to_quad32_reveal ()
 
 val index128_get_heap_val128 (h:vale_heap)
                            (b:buffer128{List.memP b (_ih h).ptrs})
@@ -167,16 +168,16 @@ val index128_get_heap_val128 (h:vale_heap)
 (let addr = buffer_addr b h in
  Seq.index (buffer_as_seq h b) i ==
   Mkfour
-    (S.get_heap_val32 (addr + 16 * i) heap)
-    (S.get_heap_val32 (addr + 16 * i+4) heap)
-    (S.get_heap_val32 (addr + 16 * i+8) heap)
-    (S.get_heap_val32 (addr + 16 * i +12) heap)
+    (S.get_heap_val32 (addr + scale16 i) heap)
+    (S.get_heap_val32 (addr + scale16 i+4) heap)
+    (S.get_heap_val32 (addr + scale16 i+8) heap)
+    (S.get_heap_val32 (addr + scale16 i +12) heap)
  )
 
 let index128_get_heap_val128 h b heap i =
   let db = get_downview b.bsrc in
   let vb = UV.mk_buffer db uint128_view in
-  let ptr = buffer_addr b h + 16 * i in
+  let ptr = buffer_addr b h + scale16 i in
   let s = DV.as_seq (_ih h).hs db in
   let addr = buffer_addr b h in
   UV.length_eq vb;
@@ -303,31 +304,32 @@ let buffer_write #t b i v h =
     h'
   end
 
+unfold let scale_t (t:base_typ) (index:int) : int = scale_by (view_n t) index
+
 val addr_in_ptr: (#t:base_typ) -> (addr:int) -> (ptr:buffer t) -> (h:vale_heap) ->
   GTot (b:bool{ not b <==>
-    // REVIEW: what's the quantifier pattern here?
-    (forall i. 0 <= i /\ i < buffer_length ptr ==>
-      addr <> (buffer_addr ptr h) + (view_n t) * i)})
+    (forall (i:int).{:pattern (scale_t t i)} 0 <= i /\ i < buffer_length ptr ==>
+      addr <> (buffer_addr ptr h) + scale_t t i)})
 
 // Checks if address addr corresponds to one of the elements of buffer ptr
 let addr_in_ptr #t addr ptr h =
   let n = buffer_length ptr in
   let base = buffer_addr ptr h in
   let rec aux (i:nat) : Tot (b:bool{not b <==> (forall j. i <= j /\ j < n ==>
-    addr <> base + (view_n t) * j)})
+    addr <> base + scale_t t j)})
     (decreases %[n-i]) =
     if i >= n then false
-    else if addr = base + (view_n t) * i then true
+    else if addr = base + scale_t t i then true
     else aux (i+1)
   in aux 0
 
-// TODO: what's the pattern on the exists here?
-let valid_offset (t:base_typ) (n base:nat) (addr:int) (i:nat) = exists j. i <= j /\ j < n /\ base + (view_n t) * j == addr
+let valid_offset (t:base_typ) (n base:nat) (addr:int) (i:nat) =
+  exists j.{:pattern (scale_t t j)} i <= j /\ j < n /\ base + scale_t t j == addr
 
 let rec get_addr_in_ptr (t:base_typ) (n base addr:nat) (i:nat{valid_offset t n base addr i})
-  : GTot (j:nat{base + (view_n t) * j == addr})
+  : GTot (j:nat{base + scale_t t j == addr})
     (decreases %[n-i]) =
-    if base + (view_n t) * i = addr then i
+    if base + scale_t t i = addr then i
     else get_addr_in_ptr t n base addr (i+1)
 
 let valid_buffer (t:base_typ) (addr:int) (b:b8) (h:vale_heap) : GTot bool =
@@ -479,12 +481,12 @@ let lemma_store_mem (t:base_typ) (b:buffer t) (i:nat) (v:base_typ_as_vale_type t
     buffer_writeable b
   )
   (ensures
-    store_mem t (buffer_addr b h + view_n t * i) v h == buffer_write b i v h
+    store_mem t (buffer_addr b h + scale_t t i) v h == buffer_write b i v h
   )
   =
   FStar.Pervasives.reveal_opaque (`%addr_map_pred) addr_map_pred;
   let view = uint_view t in
-  let addr = buffer_addr b h + view_n t * i in
+  let addr = buffer_addr b h + scale_t t i in
   match find_writeable_buffer t addr h with
   | None -> ()
   | Some a ->
@@ -492,12 +494,12 @@ let lemma_store_mem (t:base_typ) (b:buffer t) (i:nat) (v:base_typ_as_vale_type t
     let db = get_downview b.bsrc in
     UV.length_eq (UV.mk_buffer da view);
     UV.length_eq (UV.mk_buffer db view);
-    assert (IB.disjoint_or_eq_b8 a b);
+    opaque_assert (`%list_disjoint_or_eq) list_disjoint_or_eq list_disjoint_or_eq_def (IB.disjoint_or_eq_b8 a b);
     assert (a == b)
 
 let lemma_load_mem64 b i h =
   FStar.Pervasives.reveal_opaque (`%addr_map_pred) addr_map_pred;
-  let addr = buffer_addr b h + 8 * i in
+  let addr = buffer_addr b h + scale8 i in
   let view = uint64_view in
   match find_valid_buffer TUInt64 addr h with
   | None -> ()
@@ -506,7 +508,7 @@ let lemma_load_mem64 b i h =
     let db = get_downview b.bsrc in
     UV.length_eq (UV.mk_buffer da view);
     UV.length_eq (UV.mk_buffer db view);
-    assert (IB.disjoint_or_eq_b8 a b);
+    opaque_assert (`%list_disjoint_or_eq) list_disjoint_or_eq list_disjoint_or_eq_def (IB.disjoint_or_eq_b8 a b);
     assert (a == b)
 
 
@@ -516,7 +518,7 @@ let lemma_writeable_mem128 b i h = ()
 
 let lemma_load_mem128 b i h =
   FStar.Pervasives.reveal_opaque (`%addr_map_pred) addr_map_pred;
-  let addr = buffer_addr b h + 16 * i in
+  let addr = buffer_addr b h + scale16 i in
   let view = uint128_view in
   match find_valid_buffer TUInt128 addr h with
   | None -> ()
@@ -525,7 +527,7 @@ let lemma_load_mem128 b i h =
     let db = get_downview b.bsrc in
     UV.length_eq (UV.mk_buffer da view);
     UV.length_eq (UV.mk_buffer db view);
-    assert (IB.disjoint_or_eq_b8 a b);
+    opaque_assert (`%list_disjoint_or_eq) list_disjoint_or_eq list_disjoint_or_eq_def (IB.disjoint_or_eq_b8 a b);
     assert (a == b)
 
 let lemma_store_mem128 b i v h = lemma_store_mem TUInt128 b i v h
@@ -547,11 +549,11 @@ let apply_taint_buf (b:b8) (mem:vale_heap) (memTaint:memtaint) (t:taint) (i:nat)
 
 let lemma_valid_taint64 b memTaint mem i t =
   length_t_eq (TUInt64) b;
-  let ptr = buffer_addr b mem + 8 * i in
+  let ptr = buffer_addr b mem + scale8 i in
   let aux (i':nat) : Lemma
     (requires i' >= ptr /\ i' < ptr + 8)
     (ensures memTaint.[i'] == t) =
-    let extra = 8 * i + i' - ptr in
+    let extra = scale8 i + i' - ptr in
     assert (i' == (_ih mem).addrs b + extra);
     apply_taint_buf b mem memTaint t extra
   in
@@ -559,11 +561,11 @@ let lemma_valid_taint64 b memTaint mem i t =
 
 let lemma_valid_taint128 b memTaint mem i t =
   length_t_eq (TUInt128) b;
-  let ptr = buffer_addr b mem + 16 * i in
+  let ptr = buffer_addr b mem + scale16 i in
   let aux i' : Lemma
     (requires i' >= ptr /\ i' < ptr + 16)
     (ensures memTaint.[i'] == t) =
-    let extra = 16 * i + i' - ptr in
+    let extra = scale16 i + i' - ptr in
     assert (i' == (_ih mem).addrs b + extra);
     apply_taint_buf b mem memTaint t extra
   in
@@ -648,12 +650,12 @@ let rec valid_memtaint (mem:vale_heap) (ps:list b8{IB.list_disjoint_or_eq ps}) (
     | b :: q ->
       assert (List.memP b ps);
       assert (forall i. {:pattern List.memP i q} List.memP i q ==> List.memP i ps);
-      assert (IB.list_disjoint_or_eq q);
+      opaque_assert (`%list_disjoint_or_eq) list_disjoint_or_eq list_disjoint_or_eq_def (IB.list_disjoint_or_eq q);
       valid_memtaint mem q ts;
       assert (IB.create_memtaint (_ih mem) ps ts ==
               IB.write_taint 0 (_ih mem) ts b (IB.create_memtaint (_ih mem) q ts));
       write_taint_lemma 0 (_ih mem) ts b (IB.create_memtaint (_ih mem) q ts);
-      assert (forall p. List.memP p q ==> IB.disjoint_or_eq_b8 p b)
+      opaque_assert (`%list_disjoint_or_eq) list_disjoint_or_eq list_disjoint_or_eq_def (forall p. List.memP p q ==> IB.disjoint_or_eq_b8 p b)
 
 let vale_heap_data_eq h1 h2 =
   h1.mh == h2.mh /\ h1.ih == h2.ih

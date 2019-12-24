@@ -1,23 +1,32 @@
 #include <stdlib.h>
 #include <stdint.h>
-#include <sys/time.h>
-#include "merkle_tree_test.h"
-#include "MerkleTree.h"
+#include <assert.h>
+
 #include "EverCrypt_AutoConfig2.h"
+#include "MerkleTree.Nice.h"
+#include "merkle_tree_test.h"
 
-static struct timeval timer;
-
-void timer_start() {
-  gettimeofday(&timer, NULL);
+char hs[32U+1];
+const char* hash_to_string(const uint8_t *h) {
+  for (uint32_t i = 0; i < 32U; i++)
+    sprintf(&hs[2*i], "%02x", h[i]);
+  return hs;
 }
 
-int timer_tick() {
-  int time_cur_usec = timer.tv_usec;
-  int time_cur_sec = timer.tv_sec;
-  gettimeofday(&timer, NULL);
+void print_hash(const char *name, const uint8_t *h) {
+  const char* hs = hash_to_string(h);
+  printf("%s: %s\n", name, hs);
+}
 
-  return (timer.tv_sec * 1000000 + timer.tv_usec -
-	  time_cur_sec * 1000000 - time_cur_usec);
+void print_tree(const mt_p mt, size_t num_elts) {
+  printf("Tree:\n");
+  for (size_t lv = 0; lv < num_elts; lv++) {
+    printf("%02lu:", lv);
+    uint32_t lvsz = mt->hs.vs[lv].sz;
+    for (size_t i = 0; i < lvsz; i++)
+      printf(" %lu=%s", i, hash_to_string(mt->hs.vs[lv].vs[i]));
+    printf("\n");
+  }
 }
 
 int main(int argc, char *argv[]) {
@@ -28,98 +37,86 @@ int main(int argc, char *argv[]) {
 
   EverCrypt_AutoConfig2_init();
 
-  timer_start();
-
-  // Hash test
-  /* uint8_t *h1 = init_hash(); */
-  /* uint8_t *h2 = init_hash(); */
-  /* uint8_t *hh = init_hash(); */
-  /* hash_2(h1, h2, hh); */
-  /* for (uint32_t i = 0; i < hash_size; ++i) { */
-  /*   printf("Hash(%d): %d\n", i, hh[i]); */
-  /* } */
-
   // Creation
   uint8_t *ih = init_hash();
   mt_p mt = mt_create(ih);
+  print_hash("root", ih);
   free_hash(ih);
 
-  printf("A Merkle tree has been created!\n");
+  printf("Merkle tree created.\n");
 
   // Insertion
-  for (uint64_t i = 0; i < num_elts; i++) {
+  for (size_t i = 1; i < num_elts; i++) {
     uint8_t *hash = init_hash();
-    hash[0] = (uint8_t) (i + 1);
+    hash[hash_size-1] = (uint8_t)i;
+    print_hash("elem", hash);
     mt_insert(mt, hash);
     free_hash(hash);
   }
 
-  printf("Tree holds [%ld,%ld]\n", 0UL, num_elts);
 
-  /* uint8_t *hh = init_hash(); */
-  /* hash_2(mt->hs.vs[2].vs[0], mt->hs.vs[0].vs[4], hh); */
-  /* printf("Root: %d\n", hh[0]); */
+  printf("Tree holds [%ld,%ld]\n", 0UL, num_elts-1);
+  uint8_t *rh = init_hash();
+  mt_get_root(mt, rh);
+  print_hash("root", rh);
+  free_hash(rh);
 
-  // printf("All values are inserted: %d\n", timer_tick());
   printf("All values are inserted!\n");
 
-  /* for (uint32_t lv = 0; lv < 3; lv++) { */
-  /*   printf("Hashes at the level %d:\n", lv); */
-  /*   uint32_t lth = mt->hs.vs[lv].sz; */
-  /*   for (uint32_t i = 0; i < lth; i++) { */
-  /*     printf("Hash(%d): %d ", i, mt->hs.vs[lv].vs[i][0]); */
-  /*   } */
-  /*   printf("\n"); */
-  /* } */
+  print_tree(mt, num_elts);
 
   // Getting the Merkle path and verify it
   uint8_t *root = init_hash();
-  hash_vec *path = init_path();
+  hash_vec *cur_path = init_path();
 
-  for (uint64_t k = 0; k <= num_elts; k++) {
-    uint32_t j = mt_get_path(mt, k, path, root);
+  for (uint64_t k = 0; k < num_elts; k++) {
+    uint32_t sz = mt_get_path(mt, k, cur_path, root);
 
-    /* printf("Path(%d): ", k); */
-    /* for (uint32_t l = 0; l < path->sz; l++) { */
-    /*   printf("%d ", path->vs[l][0]); */
-    /* } */
-    /* printf("\n"); */
+    printf("path from k=%lu:\n", k);
+    uint8_t *tmp = init_hash();
+    memcpy(tmp, cur_path->vs[0], hash_size);
+    for (uint32_t l = 0; l < cur_path->sz; l++) {
+      print_hash("  elem", cur_path->vs[l]);
+      if (l > 0) {
+        hash_2(tmp, cur_path->vs[l], tmp);
+        print_hash("  tmp ", tmp);
+      }
+    }
+    free_hash(tmp);
+    print_hash("  root", root);
 
-    /* printf("Root: %d\n", root[0]); */
+    bool verified = mt_verify(mt, k, sz, cur_path, root);
+    printf("Verification with k=%ld, sz=%d: %d\n", k, sz, verified);
 
-    bool verified = mt_verify(mt, k, j, path, root);
-    printf("Verification with k(%ld), j(%d): %d\n", k, j, verified);
-
-    clear_path(path);
+    clear_path(cur_path);
   }
 
   uint64_t flush_to = num_elts / 3;
   mt_flush_to(mt, flush_to);
   printf("Flushed tree to [%ld,%ld]\n", flush_to, num_elts);
 
-  for (uint64_t k = flush_to; k <= num_elts; k++) {
-    uint32_t j = mt_get_path(mt, k, path, root);
+  for (uint64_t k = flush_to; k < num_elts; k++) {
+    uint32_t j = mt_get_path(mt, k, cur_path, root);
 
-    bool verified = mt_verify(mt, k, j, path, root);
+    bool verified = mt_verify(mt, k, j, cur_path, root);
     printf("Verification (after flushing) with k(%ld), j(%d): %d\n", k, j, verified);
 
-    clear_path(path);
+    clear_path(cur_path);
   }
 
   flush_to = num_elts / 2;
   mt_flush_to(mt, flush_to);
   printf("Flushed tree to [%ld,%ld]\n", flush_to, num_elts);
 
-  for (uint64_t k = flush_to; k <= num_elts; k++) {
-    uint32_t j = mt_get_path(mt, k, path, root);
+  for (uint64_t k = flush_to; k < num_elts; k++) {
+    uint32_t j = mt_get_path(mt, k, cur_path, root);
 
-    bool verified = mt_verify(mt, k, j, path, root);
+    bool verified = mt_verify(mt, k, j, cur_path, root);
     printf("Verification (after flushing) with k(%ld), j(%d): %d\n", k, j, verified);
 
-    clear_path(path);
+    clear_path(cur_path);
   }
 
-  // printf("All merkle paths are verified: %d\n", timer_tick());
   printf("All merkle paths are verified!\n");
 
   {
@@ -143,13 +140,23 @@ int main(int argc, char *argv[]) {
     free(buf);
 
     printf("Re-verifying paths on deserialized tree...\n");
-    for (uint64_t k = flush_to; k <= num_elts; k++) {
-      uint32_t j = mt_get_path(mtd, k, path, root);
+    for (uint64_t k = flush_to; k < num_elts; k++) {
+      uint32_t j = mt_get_path(mtd, k, cur_path, root);
 
-      bool verified = mt_verify(mtd, k, j, path, root);
-      printf("Verification with k(%ld), j(%d): %d\n", k, j, verified);
+      bool verified = mt_verify(mtd, k, j, cur_path, root);
 
-      clear_path(path);
+      uint8_t buffer[2048];
+      uint32_t spsz = mt_serialize_path(cur_path, mt, buffer, 2048);
+      assert(spsz > 0);
+      path *dpath = mt_deserialize_path(buffer, 2048);
+      assert(dpath != NULL);
+
+      bool dverified = mt_verify(mtd, k, j, dpath, root);
+      printf("Verification with k(%ld), j(%d): %d, deserialized (sz=%d): %d\n", k, j, verified, spsz, dverified);
+
+
+      clear_path(dpath);
+      clear_path(cur_path);
     }
 
     mt_free(mtd);
@@ -166,16 +173,16 @@ int main(int argc, char *argv[]) {
 
   printf("Re-verifying paths on retracted tree...\n");
   for (uint64_t k = flush_to; k <= retract_to; k++) {
-    if (!mt_get_path_pre(mt, k, path, root)) {
+    if (!mt_get_path_pre(mt, k, cur_path, root)) {
       printf("ERROR: Precondition for mt_get_path does not hold; exiting.\n");
       exit(1);
     }
-    uint32_t j = mt_get_path(mt, k, path, root);
+    uint32_t j = mt_get_path(mt, k, cur_path, root);
 
-    bool verified = mt_verify(mt, k, j, path, root);
+    bool verified = mt_verify(mt, k, j, cur_path, root);
     printf("Verification with k(%ld), j(%d): %d\n", k, j, verified);
 
-    clear_path(path);
+    clear_path(cur_path);
   }
 
   flush_to = retract_to;
@@ -183,18 +190,17 @@ int main(int argc, char *argv[]) {
   printf("Flushed tree to [%ld,%ld]\n", flush_to, retract_to);
   {
     uint64_t k = flush_to;
-    uint32_t j = mt_get_path(mt, k, path, root);
-    bool verified = mt_verify(mt, k, j, path, root);
+    uint32_t j = mt_get_path(mt, k, cur_path, root);
+    bool verified = mt_verify(mt, k, j, cur_path, root);
     printf("Final verification with k(%ld), j(%d): %d\n", k, j, verified);
-    clear_path(path);
+    clear_path(cur_path);
   }
 
   // Free
   mt_free(mt);
-  free_path(path);
+  free_path(cur_path);
   free_hash(root);
 
-  // printf("The Merkle tree is freed: %d\n", timer_tick());
   printf("The Merkle tree is freed\n");
 
   return 0;

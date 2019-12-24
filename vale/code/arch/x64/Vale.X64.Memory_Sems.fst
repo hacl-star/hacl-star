@@ -2,6 +2,7 @@ module Vale.X64.Memory_Sems
 
 open FStar.Mul
 open Vale.Def.Prop_s
+open Vale.Def.Opaque_s
 open Vale.X64.Machine_s
 open Vale.X64.Memory
 open Vale.Def.Words_s
@@ -74,7 +75,7 @@ let same_mem_eq_slices64 b i v k h1 h2 mem1 mem2 =
     UV.length_eq ub
 
 let length_up64 (b:buffer64) (h:vale_heap) (k:nat{k < buffer_length b}) (i:nat{i < 8}) : Lemma
-  (8 * k + i <= DV.length (get_downview b.bsrc)) =
+  (scale8 k + i <= DV.length (get_downview b.bsrc)) =
   let vb = UV.mk_buffer (get_downview b.bsrc) uint64_view in
   UV.length_eq vb
 
@@ -87,11 +88,11 @@ val same_mem_get_heap_val64 (b:buffer64{buffer_writeable b})
                           (mem1:S.machine_heap{IB.correct_down_p (_ih h1) mem1 b})
                           (mem2:S.machine_heap{IB.correct_down_p (_ih h2) mem2 b}) : Lemma
   (requires (Seq.index (buffer_as_seq h1 b) k == Seq.index (buffer_as_seq h2 b) k))
-  (ensures (let ptr = buffer_addr b h1 + 8 * k in
+  (ensures (let ptr = buffer_addr b h1 + scale8 k in
     forall (x:int).{:pattern (mem1.[x])} ptr <= x /\ x < ptr + 8 ==> mem1.[x] == mem2.[x]))
 
 let same_mem_get_heap_val64 b j v k h1 h2 mem1 mem2 =
-  let ptr = buffer_addr b h1 + 8 * k in
+  let ptr = buffer_addr b h1 + scale8 k in
   let addr = buffer_addr b h1 in
   let aux (x:int{ptr <= x /\ x < ptr + 8}) : Lemma (mem1.[x] == mem2.[x]) =
     let i = x - ptr in
@@ -104,13 +105,13 @@ let same_mem_get_heap_val64 b j v k h1 h2 mem1 mem2 =
     let s2 = (Seq.slice (DV.as_seq (IB.hs_of_mem (_ih h2)) db) (k * 8) (k * 8 + 8)) in
     assert (Seq.index s1 i == Seq.index (DV.as_seq (IB.hs_of_mem (_ih h1)) db) (k * 8 + i));
     length_up64 b h1 k i;
-    assert (mem1.[addr+(8 * k + i)] == UInt8.v (Seq.index (DV.as_seq (IB.hs_of_mem (_ih h1)) db) (k * 8 + i)));
+    assert (mem1.[addr+(scale8 k + i)] == UInt8.v (Seq.index (DV.as_seq (IB.hs_of_mem (_ih h1)) db) (k * 8 + i)));
     assert (Seq.index s2 i == Seq.index (DV.as_seq (IB.hs_of_mem (_ih h2)) db) (k * 8 + i));
     length_up64 b h2 k i;
-    assert (mem2.[addr+(8 * k + i)] == UInt8.v (Seq.index (DV.as_seq (IB.hs_of_mem (_ih h2)) db) (k * 8 + i)))
+    assert (mem2.[addr+(scale8 k + i)] == UInt8.v (Seq.index (DV.as_seq (IB.hs_of_mem (_ih h2)) db) (k * 8 + i)))
   in
   Classical.forall_intro aux;
-  assert (forall i. addr + (8 * k + i) == ptr + i)
+  assert (forall i. addr + (scale8 k + i) == ptr + i)
 
 let rec written_buffer_down64_aux1
   (b:buffer64{buffer_writeable b})
@@ -126,12 +127,12 @@ let rec written_buffer_down64_aux1
                  mem1.[j] == mem2.[j])})
   : Lemma
       (ensures (forall j. {:pattern (mem1.[j]) \/ (mem1.[j])}
-                  j >= base /\ j < base + 8 * i ==>
+                  j >= base /\ j < base + scale8 i ==>
                   mem1.[j] == mem2.[j]))
       (decreases %[i-k]) =
     if k >= i then ()
     else begin
-      let ptr = base + 8 * k in
+      let ptr = base + scale8 k in
       same_mem_get_heap_val64 b i v k h h1 mem1 mem2;
       heap_shift mem1 mem2 ptr 8;
       written_buffer_down64_aux1 b i v h base (k+1) h1 mem1 mem2
@@ -148,16 +149,16 @@ let rec written_buffer_down64_aux2
   (mem1:S.machine_heap{IB.correct_down (_ih h) mem1})
   (mem2:S.machine_heap{IB.correct_down (_ih h1) mem2 /\
                (forall j. {:pattern (mem1.[j]) \/ (mem2.[j])}
-                 base + 8 * (i+1) <= j /\ j < base + k * 8 ==>
+                 base + scale8 (i+1) <= j /\ j < base + k * 8 ==>
                  mem1.[j] == mem2.[j])})
   : Lemma
       (ensures (forall j. {:pattern (mem1.[j]) \/ (mem2.[j])}
-                     j >= base + 8 * (i+1) /\ j < base + 8 * n ==>
+                     j >= base + scale8 (i+1) /\ j < base + scale8 n ==>
                      mem1.[j] == mem2.[j]))
       (decreases %[n-k]) =
     if k >= n then ()
     else begin
-      let ptr = base + 8 * k in
+      let ptr = base + scale8 k in
       same_mem_get_heap_val64 b i v k h h1 mem1 mem2;
       heap_shift mem1 mem2 ptr 8;
       written_buffer_down64_aux2 b i v h base n (k+1) h1 mem1 mem2
@@ -173,8 +174,8 @@ let written_buffer_down64 (b:buffer64{buffer_writeable b}) (i:nat{i < buffer_len
           let base = buffer_addr b h in
           let n = buffer_length b in
           forall j. {:pattern (mem1.[j]) \/ (mem2.[j])}
-               (base <= j /\ j < base + 8 * i) \/
-               (base + 8 * (i+1) <= j /\ j < base + 8 * n) ==>
+               (base <= j /\ j < base + scale8 i) \/
+               (base + scale8 (i+1) <= j /\ j < base + scale8 n) ==>
                mem1.[j] == mem2.[j]))
   = let mem1 = I.down_mem (_ih h) in
     let h1 = buffer_write b i v h in
@@ -215,7 +216,7 @@ let unwritten_buffer_down (t:base_typ) (b:buffer t{buffer_writeable b})
           let base = (IB.addrs_of_mem (_ih h)) a in
           let s0 = DV.as_seq (IB.hs_of_mem (_ih h)) db in
           let s1 = DV.as_seq (IB.hs_of_mem (_ih h1)) db in
-          assert (MB.disjoint a.bsrc b.bsrc);
+          opaque_assert (`%IB.list_disjoint_or_eq) IB.list_disjoint_or_eq IB.list_disjoint_or_eq_def (MB.disjoint a.bsrc b.bsrc);
           lemma_dv_equal (IB.down_view a.src) a.bsrc (IB.hs_of_mem (_ih h)) (IB.hs_of_mem (_ih h1));
           assert (Seq.equal s0 s1);
           assert (forall (j:int).{:pattern (mem1.[j])}
@@ -236,7 +237,7 @@ let store_buffer_down64_mem
         let mem2 = I.down_mem (_ih h1) in
         let base = buffer_addr b h in
         forall (j:int). {:pattern mem1.[j] \/ mem2.[j]}
-          j < base + 8 * i \/ j >= base + 8 * (i+1) ==>
+          j < base + scale8 i \/ j >= base + scale8 (i+1) ==>
           mem1.[j] == mem2.[j]))
   = let mem1 = I.down_mem (_ih h) in
     let h1 = buffer_write b i v h in
@@ -245,9 +246,11 @@ let store_buffer_down64_mem
     let n = buffer_length b in
     let aux (j:int)
       : Lemma
-          (j < base + 8 * i \/ j >= base + 8 * (i+1) ==>
+          (j < base + scale8 i \/ j >= base + scale8 (i+1) ==>
            mem1.[j] == mem2.[j])
-      = if j >= base && j < base + DV.length (get_downview b.bsrc) then begin
+      =
+      I.addrs_set_lemma_all ();
+      if j >= base && j < base + DV.length (get_downview b.bsrc) then begin
           written_buffer_down64 b i v h;
           length_t_eq (TUInt64) b
         end
@@ -272,8 +275,8 @@ let store_buffer_aux_down64_mem (ptr:int) (v:nat64) (h:vale_heap{writeable_mem64
     length_t_eq t b;
     let i = get_addr_in_ptr t (buffer_length b) (buffer_addr b h) ptr 0 in
     store_buffer_write t ptr v h;
-    assert (buffer_addr b h + 8 * i == ptr);
-    assert (buffer_addr b h + 8 * (i+1) == ptr + 8);
+    assert (buffer_addr b h + scale8 i == ptr);
+    assert (buffer_addr b h + scale8 (i+1) == ptr + 8);
     store_buffer_down64_mem b i v h
 
 let store_buffer_aux_down64_mem2 (ptr:int) (v:nat64) (h:vale_heap{writeable_mem64 ptr h})
@@ -293,14 +296,12 @@ let store_buffer_aux_down64_mem2 (ptr:int) (v:nat64) (h:vale_heap{writeable_mem6
     index64_get_heap_val64 h1 b mem2 i
 
 let in_bounds64 (h:vale_heap) (b:buffer64) (i:nat{i < buffer_length b})
-  : Lemma
-      (ensures (forall j. (IB.addrs_of_mem (_ih h)) b + 8 * i <= j  /\
-                     j < (IB.addrs_of_mem (_ih h)) b + 8 * i + 8 ==>
-                     j < (IB.addrs_of_mem (_ih h)) b + DV.length (get_downview b.bsrc)))
-  = length_t_eq (TUInt64) b
+  : Lemma (scale8 i + 8 <= DV.length (get_downview b.bsrc))
+  =
+  length_t_eq TUInt64 b
 
 let bytes_valid64 ptr h =
-  FStar.Pervasives.reveal_opaque (`%S.valid_addr64) S.valid_addr64;
+  reveal_opaque (`%S.valid_addr64) S.valid_addr64;
   let t = TUInt64 in
   let b = get_addr_ptr t ptr h in
   let i = get_addr_in_ptr t (buffer_length b) (buffer_addr b h) ptr 0 in
@@ -323,7 +324,7 @@ val same_mem_get_heap_val128 (b:buffer128)
                           (mem1:S.machine_heap{IB.correct_down_p (_ih h1) mem1 b})
                           (mem2:S.machine_heap{IB.correct_down_p (_ih h2) mem2 b}) : Lemma
   (requires (Seq.index (buffer_as_seq h1 b) k == Seq.index (buffer_as_seq h2 b) k))
-  (ensures (let ptr = buffer_addr b h1 + 16 * k in
+  (ensures (let ptr = buffer_addr b h1 + scale16 k in
     forall i.{:pattern mem1.[i]} i >= ptr /\ i < ptr+16 ==> mem1.[i] == mem2.[i]))
 
 val same_mem_eq_slices128 (b:buffer128)
@@ -351,12 +352,12 @@ let same_mem_eq_slices128 b i v k h1 h2 mem1 mem2 =
     UV.length_eq ub
 
 let length_up128 (b:buffer128) (h:vale_heap) (k:nat{k < buffer_length b}) (i:nat{i < 16}) : Lemma
-  (16 * k + i <= DV.length (get_downview b.bsrc)) =
+  (scale16 k + i <= DV.length (get_downview b.bsrc)) =
   let vb = UV.mk_buffer (get_downview b.bsrc) uint128_view in
   UV.length_eq vb
 
 let same_mem_get_heap_val128 b j v k h1 h2 mem1 mem2 =
-  let ptr = buffer_addr b h1 + 16 * k in
+  let ptr = buffer_addr b h1 + scale16 k in
   let addr = buffer_addr b h1 in
   let aux (i:nat{ptr <= i /\ i < ptr+16}) : Lemma (mem1.[i] == mem2.[i]) =
     let db = get_downview b.bsrc in
@@ -371,21 +372,21 @@ let same_mem_get_heap_val128 b j v k h1 h2 mem1 mem2 =
     assert (mem1.[i] == UInt8.v (Seq.index (DV.as_seq (IB.hs_of_mem (_ih h1)) db) (k * 16 + (i-ptr))));
     assert (Seq.index s2 (i-ptr) == Seq.index (DV.as_seq (IB.hs_of_mem (_ih h2)) db) (k * 16 + (i-ptr)));
     length_up128 b h2 k (i-ptr);
-    assert (mem2.[addr+(16 * k + (i-ptr))] == UInt8.v (Seq.index (DV.as_seq (IB.hs_of_mem (_ih h2)) db) (k * 16 + (i-ptr))));
-    assert (forall i. addr + (16 * k + (i-ptr)) == i)
+    assert (mem2.[addr+(scale16 k + (i-ptr))] == UInt8.v (Seq.index (DV.as_seq (IB.hs_of_mem (_ih h2)) db) (k * 16 + (i-ptr))));
+    assert (forall i. addr + (scale16 k + (i-ptr)) == i)
   in
   Classical.forall_intro aux
 
 let in_bounds128 (h:vale_heap) (b:buffer128) (i:nat{i < buffer_length b}) : Lemma
-  (forall j. j >= (_ih h).IB.addrs b + 16 * i /\
-          j < (_ih h).IB.addrs b + 16 * i + 16 ==>
-          j < (_ih h).IB.addrs b + DV.length (get_downview b.bsrc)) =
+  (scale16 i + 16 <= DV.length (get_downview b.bsrc))
+  =
   length_t_eq TUInt128 b
 
 #push-options "--z3rlimit 20"
 #restart-solver
 let bytes_valid128 ptr h =
-  FStar.Pervasives.reveal_opaque (`%S.valid_addr128) S.valid_addr128;
+  reveal_opaque (`%S.valid_addr128) S.valid_addr128;
+  IB.list_disjoint_or_eq_reveal ();
   let t = TUInt128 in
   let b = get_addr_ptr t ptr h in
   let i = get_addr_in_ptr t (buffer_length b) (buffer_addr b h) ptr 0 in
@@ -420,16 +421,16 @@ let equiv_load_mem64 ptr h =
 
 //let low_lemma_valid_mem64 b i h =
 //  lemma_valid_mem64 b i h;
-//  bytes_valid64 (buffer_addr b h + 8 * i) h
+//  bytes_valid64 (buffer_addr b h + scale8 i) h
 
 //let low_lemma_load_mem64 b i h =
 //  lemma_valid_mem64 b i h;
 //  lemma_load_mem64 b i h;
-//  equiv_load_mem64 (buffer_addr b h + 8 * i) h
+//  equiv_load_mem64 (buffer_addr b h + scale8 i) h
 
 //let same_domain_update64 b i v h =
 //  low_lemma_valid_mem64 b i h;
-//  Vale.Arch.MachineHeap.same_domain_update (buffer_addr b h + 8 * i) v (get_heap h)
+//  Vale.Arch.MachineHeap.same_domain_update (buffer_addr b h + scale8 i) v (get_heap h)
 
 open Vale.X64.BufferViewStore
 
@@ -441,10 +442,10 @@ let low_lemma_store_mem64_aux
   (h:vale_heap{buffer_readable h b /\ buffer_writeable b})
   : Lemma
     (requires IB.correct_down_p (_ih h) heap b)
-    (ensures (let heap' = S.update_heap64 (buffer_addr b h + 8 * i) v heap in
-     let h' = store_mem64 (buffer_addr b h + 8 * i) v h in
+    (ensures (let heap' = S.update_heap64 (buffer_addr b h + scale8 i) v heap in
+     let h' = store_mem64 (buffer_addr b h + scale8 i) v h in
      (_ih h').IB.hs == DV.upd_seq (_ih h).IB.hs (get_downview b.bsrc) (I.get_seq_heap heap' (_ih h).IB.addrs b))) =
-   let ptr = buffer_addr b h + 8 * i in
+   let ptr = buffer_addr b h + scale8 i in
    let heap' = S.update_heap64 ptr v heap in
    let h' = store_mem64 ptr v h in
    lemma_store_mem64 b i v h;
@@ -489,12 +490,13 @@ let low_lemma_load_mem64_full b i vfh t =
 let low_lemma_store_mem64 b i v h =
   lemma_writeable_mem64 b i h;
   lemma_store_mem64 b i v h;
-  valid_state_store_mem64_aux (buffer_addr b h + 8 * i) v h;
+  valid_state_store_mem64_aux (buffer_addr b h + scale8 i) v h;
   let heap = get_heap h in
-  let heap' = S.update_heap64 (buffer_addr b h + 8 * i) v heap in
+  let heap' = S.update_heap64 (buffer_addr b h + scale8 i) v heap in
   low_lemma_store_mem64_aux b heap i v h;
-  Vale.Arch.MachineHeap.frame_update_heap (buffer_addr b h + 8 * i) v heap;
+  Vale.Arch.MachineHeap.frame_update_heap (buffer_addr b h + scale8 i) v heap;
   in_bounds64 h b i;
+  I.addrs_set_lemma_all ();
   I.update_buffer_up_mem (_ih h) b heap heap'
 #pop-options
 
@@ -510,12 +512,12 @@ val low_lemma_valid_mem128 (b:buffer128) (i:nat) (h:vale_heap) : Lemma
     buffer_readable h b
   )
   (ensures
-    S.valid_addr128 (buffer_addr b h + 16 * i) (get_heap h)
+    S.valid_addr128 (buffer_addr b h + scale16 i) (get_heap h)
   )
 
 let low_lemma_valid_mem128 b i h =
   lemma_valid_mem128 b i h;
-  bytes_valid128 (buffer_addr b h + 16 * i) h
+  bytes_valid128 (buffer_addr b h + scale16 i) h
 
 val equiv_load_mem128_aux: (ptr:int) -> (h:vale_heap) -> Lemma
   (requires valid_mem128 ptr h)
@@ -528,7 +530,7 @@ let equiv_load_mem128_aux ptr h =
   let addr = buffer_addr b h in
   let contents = DV.as_seq (_ih h).IB.hs (get_downview b.bsrc) in
   let heap = get_heap h in
-  Vale.Def.Opaque_s.reveal_opaque S.get_heap_val128_def;
+  S.get_heap_val128_reveal ();
   index128_get_heap_val128 h b heap i;
   lemma_load_mem128 b i h
 
@@ -541,17 +543,17 @@ val low_lemma_load_mem128 (b:buffer128) (i:nat) (h:vale_heap) : Lemma
     buffer_readable h b
   )
   (ensures
-    S.get_heap_val128 (buffer_addr b h + 16 * i) (get_heap h) == buffer_read b i h
+    S.get_heap_val128 (buffer_addr b h + scale16 i) (get_heap h) == buffer_read b i h
   )
 
 let low_lemma_load_mem128 b i h =
   lemma_valid_mem128 b i h;
   lemma_load_mem128 b i h;
-  equiv_load_mem128_aux (buffer_addr b h + 16 * i) h
+  equiv_load_mem128_aux (buffer_addr b h + scale16 i) h
 
 //let same_domain_update128 b i v h =
 //  low_lemma_valid_mem128 b i h;
-//  Vale.Arch.MachineHeap.same_domain_update128 (buffer_addr b h + 16 * i) v (get_heap h)
+//  Vale.Arch.MachineHeap.same_domain_update128 (buffer_addr b h + scale16 i) v (get_heap h)
 
 let low_lemma_store_mem128_aux
   (b:buffer128)
@@ -561,10 +563,10 @@ let low_lemma_store_mem128_aux
   (h:vale_heap{buffer_readable h b /\ buffer_writeable b})
   : Lemma
     (requires IB.correct_down_p (_ih h) heap b)
-    (ensures (let heap' = S.update_heap128 (buffer_addr b h + 16 * i) v heap in
-     let h' = store_mem128 (buffer_addr b h + 16 * i) v h in
+    (ensures (let heap' = S.update_heap128 (buffer_addr b h + scale16 i) v heap in
+     let h' = store_mem128 (buffer_addr b h + scale16 i) v h in
      (_ih h').IB.hs == DV.upd_seq (_ih h).IB.hs (get_downview b.bsrc) (I.get_seq_heap heap' (_ih h).IB.addrs b))) =
-   let ptr = buffer_addr b h + 16 * i in
+   let ptr = buffer_addr b h + scale16 i in
    let heap' = S.update_heap128 ptr v heap in
    let h' = store_mem128 ptr v h in
    lemma_store_mem128 b i v h;
@@ -598,12 +600,12 @@ let rec written_buffer_down128_aux1
                  mem1.[j] == mem2.[j])})
   : Lemma
       (ensures (forall j. {:pattern (mem1.[j]) \/ (mem1.[j])}
-                  j >= base /\ j < base + 16 * i ==>
+                  j >= base /\ j < base + scale16 i ==>
                   mem1.[j] == mem2.[j]))
       (decreases %[i-k]) =
     if k >= i then ()
     else begin
-      let ptr = base + 16 * k in
+      let ptr = base + scale16 k in
       same_mem_get_heap_val128 b i v k h h1 mem1 mem2;
       heap_shift mem1 mem2 ptr 16;
       written_buffer_down128_aux1 b i v h base (k+1) h1 mem1 mem2
@@ -621,16 +623,16 @@ let rec written_buffer_down128_aux2
   (mem1:S.machine_heap{IB.correct_down (_ih h) mem1})
   (mem2:S.machine_heap{IB.correct_down (_ih h1) mem2 /\
                (forall j. {:pattern (mem1.[j]) \/ (mem2.[j])}
-                 base + 16 * (i+1) <= j /\ j < base + k * 16 ==>
+                 base + scale16 (i+1) <= j /\ j < base + k * 16 ==>
                  mem1.[j] == mem2.[j])})
   : Lemma
       (ensures (forall j. {:pattern (mem1.[j]) \/ (mem2.[j])}
-                     j >= base + 16 * (i+1) /\ j < base + 16 * n ==>
+                     j >= base + scale16 (i+1) /\ j < base + scale16 n ==>
                      mem1.[j] == mem2.[j]))
       (decreases %[n-k]) =
     if k >= n then ()
     else begin
-      let ptr = base + 16 * k in
+      let ptr = base + scale16 k in
       same_mem_get_heap_val128 b i v k h h1 mem1 mem2;
       heap_shift mem1 mem2 ptr 16;
       written_buffer_down128_aux2 b i v h base n (k+1) h1 mem1 mem2
@@ -646,8 +648,8 @@ let written_buffer_down128 (b:buffer128) (i:nat{i < buffer_length b}) (v:quad32)
           let base = buffer_addr b h in
           let n = buffer_length b in
           forall j. {:pattern (mem1.[j]) \/ (mem2.[j])}
-               (base <= j /\ j < base + 16 * i) \/
-               (base + 16 * (i+1) <= j /\ j < base + 16 * n) ==>
+               (base <= j /\ j < base + scale16 i) \/
+               (base + scale16 (i+1) <= j /\ j < base + scale16 n) ==>
                mem1.[j] == mem2.[j]))
   = let mem1 = I.down_mem (_ih h) in
     let h1 = buffer_write b i v h in
@@ -669,7 +671,7 @@ let store_buffer_down128_mem
         let mem2 = I.down_mem (_ih h1) in
         let base = buffer_addr b h in
         forall (j:int). {:pattern mem1.[j] \/ mem2.[j]}
-          j < base + 16 * i \/ j >= base + 16 * (i+1) ==>
+          j < base + scale16 i \/ j >= base + scale16 (i+1) ==>
           mem1.[j] == mem2.[j]))
   = let mem1 = I.down_mem (_ih h) in
     let h1 = buffer_write b i v h in
@@ -678,9 +680,11 @@ let store_buffer_down128_mem
     let n = buffer_length b in
     let aux (j:int)
       : Lemma
-          (j < base + 16 * i \/ j >= base + 16 * (i+1) ==>
+          (j < base + scale16 i \/ j >= base + scale16 (i+1) ==>
            mem1.[j] == mem2.[j])
-      = if j >= base && j < base + DV.length (get_downview b.bsrc) then begin
+      =
+      I.addrs_set_lemma_all ();
+      if j >= base && j < base + DV.length (get_downview b.bsrc) then begin
           written_buffer_down128 b i v h;
           length_t_eq TUInt128 b
         end
@@ -705,8 +709,8 @@ let store_buffer_aux_down128_mem (ptr:int) (v:quad32) (h:vale_heap{writeable_mem
     length_t_eq t b;
     let i = get_addr_in_ptr t (buffer_length b) (buffer_addr b h) ptr 0 in
     store_buffer_write t ptr v h;
-    assert (buffer_addr b h + 16 * i == ptr);
-    assert (buffer_addr b h + 16 * (i+1) == ptr + 16);
+    assert (buffer_addr b h + scale16 i == ptr);
+    assert (buffer_addr b h + scale16 (i+1) == ptr + 16);
     store_buffer_down128_mem b i v h
 
 let store_buffer_aux_down128_mem2 (ptr:int) (v:quad32) (h:vale_heap{writeable_mem128 ptr h})
@@ -740,7 +744,7 @@ let valid_state_store_mem128_aux i v h =
   let mem2 = I.down_mem (_ih h1) in
   let aux () : Lemma (forall j. mem1.[j] == mem2.[j]) =
     Vale.Arch.MachineHeap.correct_update_get128 i v heap;
-    Vale.Def.Opaque_s.reveal_opaque Vale.X64.Machine_Semantics_s.get_heap_val128_def;
+    Vale.X64.Machine_Semantics_s.get_heap_val128_reveal ();
     Vale.Arch.MachineHeap.same_mem_get_heap_val32 i mem1 mem2;
     Vale.Arch.MachineHeap.same_mem_get_heap_val32 (i+4) mem1 mem2;
     Vale.Arch.MachineHeap.same_mem_get_heap_val32 (i+8) mem1 mem2;
@@ -759,13 +763,14 @@ let low_lemma_load_mem128_full b i vfh t =
 let low_lemma_store_mem128 b i v h =
   lemma_valid_mem128 b i h;
   lemma_store_mem128 b i v h;
-  valid_state_store_mem128_aux (buffer_addr b h + 16 * i) v h;
+  valid_state_store_mem128_aux (buffer_addr b h + scale16 i) v h;
   let heap = get_heap h in
-  let heap' = S.update_heap128 (buffer_addr b h + 16 * i) v heap in
-  let h' = store_mem128 (buffer_addr b h + 16 * i) v h in
+  let heap' = S.update_heap128 (buffer_addr b h + scale16 i) v heap in
+  let h' = store_mem128 (buffer_addr b h + scale16 i) v h in
   low_lemma_store_mem128_aux b heap i v h;
-  Vale.Arch.MachineHeap.frame_update_heap128 (buffer_addr b h + 16 * i) v heap;
+  Vale.Arch.MachineHeap.frame_update_heap128 (buffer_addr b h + scale16 i) v heap;
   in_bounds128 h b i;
+  I.addrs_set_lemma_all ();
   I.update_buffer_up_mem (_ih h) b heap heap'
 
 let low_lemma_store_mem128_full b i v vfh t =
@@ -776,11 +781,11 @@ let low_lemma_store_mem128_full b i v vfh t =
 
 #push-options "--smtencoding.l_arith_repr boxwrap"
 let low_lemma_valid_mem128_64 b i h =
-  FStar.Pervasives.reveal_opaque (`%S.valid_addr64) S.valid_addr64;
-  FStar.Pervasives.reveal_opaque (`%S.valid_addr128) S.valid_addr128;
+  reveal_opaque (`%S.valid_addr64) S.valid_addr64;
+  reveal_opaque (`%S.valid_addr128) S.valid_addr128;
   low_lemma_valid_mem128 b i h;
-  let ptr = buffer_addr b h + 16 * i in
-  assert (buffer_addr b h + 16 * i + 8 = ptr + 8)
+  let ptr = buffer_addr b h + scale16 i in
+  assert (buffer_addr b h + scale16 i + 8 = ptr + 8)
 #pop-options
 
 open Vale.Def.Words.Two_s
@@ -788,29 +793,29 @@ open Vale.Def.Words.Four_s
 
 let low_lemma_load_mem128_lo64 b i h =
   low_lemma_load_mem128 b i h;
-  Vale.Def.Opaque_s.reveal_opaque lo64_def;
-  Vale.Def.Opaque_s.reveal_opaque S.get_heap_val128_def;
-  Vale.Def.Opaque_s.reveal_opaque S.get_heap_val64_def;
-  Vale.Def.Opaque_s.reveal_opaque S.get_heap_val32_def
+  lo64_reveal ();
+  S.get_heap_val128_reveal ();
+  S.get_heap_val64_reveal ();
+  S.get_heap_val32_reveal ()
 
 let low_lemma_load_mem128_hi64 b i h =
   low_lemma_load_mem128 b i h;
-  Vale.Def.Opaque_s.reveal_opaque hi64_def;
-  Vale.Def.Opaque_s.reveal_opaque S.get_heap_val128_def;
-  Vale.Def.Opaque_s.reveal_opaque S.get_heap_val64_def;
-  Vale.Def.Opaque_s.reveal_opaque S.get_heap_val32_def
+  hi64_reveal ();
+  S.get_heap_val128_reveal ();
+  S.get_heap_val64_reveal ();
+  S.get_heap_val32_reveal ()
 
 //let same_domain_update128_64 b i v h =
 //  low_lemma_valid_mem128_64 b i (_ih h);
-//  Vale.Arch.MachineHeap.same_domain_update (buffer_addr b h + 16 * i) v (get_heap h);
-//  Vale.Arch.MachineHeap.same_domain_update (buffer_addr b h + 16 * i + 8) v (get_heap h)
+//  Vale.Arch.MachineHeap.same_domain_update (buffer_addr b h + scale16 i) v (get_heap h);
+//  Vale.Arch.MachineHeap.same_domain_update (buffer_addr b h + scale16 i + 8) v (get_heap h)
 
 open Vale.Def.Types_s
 
 let frame_get_heap32 (ptr:int) (mem1 mem2:S.machine_heap) : Lemma
   (requires (forall i. i >= ptr /\ i < ptr + 4 ==> mem1.[i] == mem2.[i]))
   (ensures S.get_heap_val32 ptr mem1 == S.get_heap_val32 ptr mem2) =
-  Vale.Def.Opaque_s.reveal_opaque S.get_heap_val32_def
+  S.get_heap_val32_reveal ()
 
 let update_heap128_lo (ptr:int) (v:quad32) (mem:S.machine_heap) : Lemma
   (requires
@@ -820,8 +825,8 @@ let update_heap128_lo (ptr:int) (v:quad32) (mem:S.machine_heap) : Lemma
   )
   (ensures S.update_heap128 ptr v mem ==
     S.update_heap32 (ptr+4) v.lo1 (S.update_heap32 ptr v.lo0 mem)) =
-  FStar.Pervasives.reveal_opaque (`%S.valid_addr128) S.valid_addr128;
-  Vale.Def.Opaque_s.reveal_opaque S.update_heap128_def;
+  reveal_opaque (`%S.valid_addr128) S.valid_addr128;
+  S.update_heap128_reveal ();
   let mem0 = S.update_heap32 ptr v.lo0 mem in
   let mem1 = S.update_heap32 (ptr+4) v.lo1 mem0 in
   Vale.Arch.MachineHeap.frame_update_heap32 ptr v.lo0 mem;
@@ -838,39 +843,42 @@ let low_lemma_load_mem128_lo_hi_full b i vfh t =
   ()
 
 let low_lemma_store_mem128_lo64 b i v h =
-  let ptr = buffer_addr b h + 16 * i in
+  let ptr = buffer_addr b h + scale16 i in
   let v128 = buffer_read b i h in
-  let v' = insert_nat64_opaque v128 v 0 in
+  let v' = insert_nat64 v128 v 0 in
   low_lemma_load_mem128 b i h;
   low_lemma_store_mem128 b i v' h;
-  Vale.Def.Opaque_s.reveal_opaque S.get_heap_val128_def;
+  S.get_heap_val128_reveal ();
   update_heap128_lo ptr v' (get_heap h);
-  Vale.Def.Opaque_s.reveal_opaque S.update_heap64_def;
-  Vale.Def.Opaque_s.reveal_opaque S.update_heap32_def;
-  Vale.Def.Opaque_s.reveal_opaque insert_nat64
+  S.update_heap64_reveal ();
+  S.update_heap32_reveal ();
+  insert_nat64_reveal ()
 
 let low_lemma_store_mem128_lo64_full b i v vfh t =
   let (h, mt) = (vfh.vf_heap, vfh.vf_layout.vl_taint) in
   low_lemma_store_mem128_lo64 b i v h;
   lemma_valid_taint128 b mt h i t;
   low_lemma_valid_mem128_64 b i h;
-  assert (Map.equal mt (S.update_n (buffer_addr b h + 16 * i) 8 mt t))
+  assert (Map.equal mt (S.update_n (buffer_addr b h + scale16 i) 8 mt t))
 
+#push-options "--z3rlimit 20 --using_facts_from '* -LowStar.Monotonic.Buffer.loc_disjoint_includes_r'"
+#restart-solver
 let low_lemma_store_mem128_hi64 b i v h =
-  FStar.Pervasives.reveal_opaque (`%S.valid_addr128) S.valid_addr128;
-  let ptr = buffer_addr b h + 16 * i in
+  reveal_opaque (`%S.valid_addr128) S.valid_addr128;
+  let ptr = buffer_addr b h + scale16 i in
   let v128 = buffer_read b i h in
-  let v' = insert_nat64_opaque v128 v 1 in
+  let v' = insert_nat64 v128 v 1 in
   low_lemma_load_mem128 b i h;
   low_lemma_store_mem128 b i v' h;
   assert (S.valid_addr128 ptr (get_heap h));
   Vale.Arch.MachineHeap.update_heap32_get_heap32 ptr (get_heap h);
   Vale.Arch.MachineHeap.update_heap32_get_heap32 (ptr+4) (get_heap h);
-  Vale.Def.Opaque_s.reveal_opaque S.get_heap_val128_def;
-  Vale.Def.Opaque_s.reveal_opaque S.update_heap128_def;
-  Vale.Def.Opaque_s.reveal_opaque S.update_heap64_def;
-  Vale.Def.Opaque_s.reveal_opaque S.update_heap32_def;
-  Vale.Def.Opaque_s.reveal_opaque insert_nat64
+  S.get_heap_val128_reveal ();
+  S.update_heap128_reveal ();
+  S.update_heap64_reveal ();
+  S.update_heap32_reveal ();
+  insert_nat64_reveal ()
+#pop-options
 
 let low_lemma_store_mem128_hi64_full b i v vfh t =
   let (h, mt) = (vfh.vf_heap, vfh.vf_layout.vl_taint) in

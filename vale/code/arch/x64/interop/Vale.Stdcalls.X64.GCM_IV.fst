@@ -59,7 +59,7 @@ let compute_iv_pre : (Ghost.erased supported_iv_LE) -> VSig.vale_pre dom =
     (iv_extra_b:b128)
     (hkeys_b:b128)
     (va_s0:V.va_state) ->
-      GC.va_req_compute_iv_stdcall c va_s0 IA.win (Ghost.reveal iv)
+      GC.va_req_Compute_iv_stdcall c va_s0 IA.win (Ghost.reveal iv)
         (as_vale_buffer iv_b) (UInt64.v num_bytes)
         (UInt64.v len) (as_vale_buffer j0_b)
         (as_vale_buffer iv_extra_b) (as_vale_buffer hkeys_b)
@@ -77,7 +77,7 @@ let compute_iv_post : (Ghost.erased supported_iv_LE) -> VSig.vale_post dom =
     (va_s0:V.va_state)
     (va_s1:V.va_state)
     (f:V.va_fuel) ->
-      GC.va_ens_compute_iv_stdcall c va_s0 IA.win (Ghost.reveal iv)
+      GC.va_ens_Compute_iv_stdcall c va_s0 IA.win (Ghost.reveal iv)
         (as_vale_buffer iv_b) (UInt64.v num_bytes)
         (UInt64.v len) (as_vale_buffer j0_b)
         (as_vale_buffer iv_extra_b) (as_vale_buffer hkeys_b)
@@ -107,7 +107,7 @@ let compute_iv_lemma'
       ME.buffer_writeable (as_vale_buffer hkeys_b) /\
       ME.buffer_writeable (as_vale_buffer iv_extra_b) /\
       ME.buffer_writeable (as_vale_buffer j0_b))
-   ) = let va_s1, f = GC.va_lemma_compute_iv_stdcall code va_s0 IA.win (Ghost.reveal iv)
+   ) = let va_s1, f = GC.va_lemma_Compute_iv_stdcall code va_s0 IA.win (Ghost.reveal iv)
         (as_vale_buffer iv_b) (UInt64.v num_bytes)
         (UInt64.v len) (as_vale_buffer j0_b)
         (as_vale_buffer iv_extra_b) (as_vale_buffer hkeys_b) in
@@ -124,7 +124,7 @@ let compute_iv_lemma (iv:Ghost.erased supported_iv_LE) = as_t
    (compute_iv_lemma' iv)
 
 noextract 
-let code_compute_iv = GC.va_code_compute_iv_stdcall IA.win
+let code_compute_iv = GC.va_code_Compute_iv_stdcall IA.win
 
 
 (* Here's the type expected for the compute_iv wrapper *)

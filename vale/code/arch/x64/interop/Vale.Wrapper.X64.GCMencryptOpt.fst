@@ -1,5 +1,8 @@
 module Vale.Wrapper.X64.GCMencryptOpt
 
+#reset-options "--z3rlimit 50"
+let z3rlimit_hack x = ()
+
 open FStar.Mul
 open Vale.Stdcalls.X64.GCMencryptOpt
 open Vale.AsLowStar.MemoryHelpers
@@ -196,7 +199,8 @@ val gcm128_encrypt_opt':
       ))))
     )
 
-#push-options "--z3cliopt smt.arith.nl=true"
+#push-options "--z3cliopt smt.arith.nl=true --z3rlimit 800"
+#restart-solver
 inline_for_extraction
 let gcm128_encrypt_opt' key iv auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
   in128x6_b out128x6_b len128x6 in128_b out128_b len128_num inout_b plain_num scratch_b tag_b =
@@ -414,7 +418,7 @@ let lemma_same_seq_dv (h:HS.mem) (b:uint8_p) : Lemma
   let aux (i:nat{i < B.length b}) : Lemma (Seq.index (B.as_seq h b) i == Seq.index (DV.as_seq h db) i) =
     DV.as_seq_sel h db i;
     DV.get_sel h db i;
-    Vale.Def.Opaque_s.reveal_opaque Vale.Interop.Views.put8_def
+    Vale.Interop.Views.put8_reveal ()
   in Classical.forall_intro aux
 
 let lemma_uv_split (h:HS.mem) (b:uint8_p) (n:UInt32.t) : Lemma

@@ -30,21 +30,21 @@ let map_aux (ptr1 ptr2:int) (v:int) (m:machine_heap) : Lemma
 let get64_aux (ptr:int) (heap:machine_heap) (v:nat64) (k:nat{k < 8}) : Lemma
   (requires get_heap_val64 ptr heap == v)
   (ensures heap.[ptr + k] == UInt8.v (Seq.index (put64 (UInt64.uint_to_t v)) k)) =
-  Vale.Def.Opaque_s.reveal_opaque get_heap_val64_def;
-  Vale.Def.Opaque_s.reveal_opaque put64_def;
-  Vale.Def.Opaque_s.reveal_opaque le_nat64_to_bytes_def;
-  FStar.Pervasives.reveal_opaque (`%seq_four_to_seq_LE) (seq_four_to_seq_LE #nat8);
+  get_heap_val64_reveal ();
+  put64_reveal ();
+  le_nat64_to_bytes_reveal ();
+  reveal_opaque (`%seq_four_to_seq_LE) (seq_four_to_seq_LE #nat8);
   four_to_nat_8_injective ();
   two_to_nat_32_injective ()
 
 let get128_aux (ptr:int) (heap:machine_heap) (v:quad32) (k:nat{k < 16}) : Lemma
   (requires get_heap_val128 ptr heap == v)
   (ensures heap.[ptr + k] == UInt8.v (Seq.index (put128 v) k)) =
-  Vale.Def.Opaque_s.reveal_opaque get_heap_val128_def;
-  Vale.Def.Opaque_s.reveal_opaque get_heap_val32_def;
-  Vale.Def.Opaque_s.reveal_opaque put128_def;
-  FStar.Pervasives.reveal_opaque (`%seq_four_to_seq_LE) (seq_four_to_seq_LE #nat8);
-  FStar.Pervasives.reveal_opaque (`%le_quad32_to_bytes) le_quad32_to_bytes;
+  get_heap_val128_reveal ();
+  get_heap_val32_reveal ();
+  put128_reveal ();
+  reveal_opaque (`%seq_four_to_seq_LE) (seq_four_to_seq_LE #nat8);
+  reveal_opaque (`%le_quad32_to_bytes) le_quad32_to_bytes;
   four_to_nat_8_injective ()
 
 #reset-options "--max_fuel 1 --initial_fuel 1 --z3rlimit 200"

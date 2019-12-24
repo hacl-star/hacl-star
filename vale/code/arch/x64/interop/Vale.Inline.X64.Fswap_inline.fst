@@ -51,7 +51,7 @@ let cswap_pre : VSig.vale_pre cswap_dom =
     (p0:b64)
     (p1:b64)
     (va_s0:V.va_state) ->
-      FU.va_req_cswap2 c va_s0
+      FU.va_req_Cswap2 c va_s0
         (UInt64.v bit) (as_vale_buffer p0) (as_vale_buffer p1)
 
 [@__reduce__]
@@ -63,7 +63,7 @@ let cswap_post : VSig.vale_post cswap_dom =
     (va_s0:V.va_state)
     (va_s1:V.va_state)
     (f:V.va_fuel) ->
-      FU.va_ens_cswap2 c va_s0 (UInt64.v bit) (as_vale_buffer p0) (as_vale_buffer p1) va_s1 f
+      FU.va_ens_Cswap2 c va_s0 (UInt64.v bit) (as_vale_buffer p0) (as_vale_buffer p1) va_s1 f
 
 #set-options "--z3rlimit 50"
 
@@ -97,7 +97,7 @@ let cswap_lemma'
                    (ME.loc_union (ME.loc_buffer (as_vale_buffer p1))
                                  ME.loc_none)) (VS.vs_get_vale_heap va_s0) (VS.vs_get_vale_heap va_s1)
  )) =
-   let va_s1, f = FU.va_lemma_cswap2 code va_s0 (UInt64.v bit) (as_vale_buffer p0) (as_vale_buffer p1) in
+   let va_s1, f = FU.va_lemma_Cswap2 code va_s0 (UInt64.v bit) (as_vale_buffer p0) (as_vale_buffer p1) in
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 p0;
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 p1;
    (va_s1, f)
@@ -105,7 +105,7 @@ let cswap_lemma'
 (* Prove that cswap_lemma' has the required type *)
 let cswap_lemma = as_t #(VSig.vale_sig cswap_regs_modified cswap_xmms_modified cswap_pre cswap_post) cswap_lemma'
 
-let code_cswap = FU.va_code_cswap2 ()
+let code_cswap = FU.va_code_Cswap2 ()
 
 let of_reg (r:MS.reg_64) : option (IX64.reg_nat 3) = match r with
   | 5 -> Some 0 // rdi

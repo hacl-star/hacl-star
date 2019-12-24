@@ -1,9 +1,11 @@
 # A minimalistic Makefile for all testing options.
 
-TARGETS = $(patsubst %.c,%.exe,$(wildcard *.c))
+# Add GF128 tests once code/experimental/gf128 is promoted to code
+TARGETS = $(filter-out gf128-%, $(patsubst %.c,%.exe,$(wildcard *.c)))
 
 CFLAGS += -I$(KREMLIN_HOME)/include -I../dist/gcc64-only \
   -I$(KREMLIN_HOME)/kremlib/dist/minimal \
+  -I../secure_api/merkle_tree \
   -O3 -march=native -mtune=native
 
 all: $(TARGETS)

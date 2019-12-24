@@ -727,7 +727,8 @@ dist/wasm/Makefile.basic: WASMSUPPORT_BUNDLE =
 # README.EverCrypt.md)
 
 # Customizations for regular, msvc and gcc flavors.
-dist/gcc-compatible/Makefile.basic: DEFAULT_FLAGS += -ctypes Hacl.NaCl,EverCrypt.Curve25519,EverCrypt.HMAC,Hacl.Ed25519
+dist/gcc-compatible/Makefile.basic: DEFAULT_FLAGS += \
+  -ctypes EverCrypt.*,Hacl.*
 
 dist/msvc-compatible/Makefile.basic: DEFAULT_FLAGS += -falloca -ftail-calls
 
@@ -859,7 +860,7 @@ dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/LICENSE.txt \
 	  $(filter %.krml,$^) \
 	  -silent \
 	  -ccopt -Wno-unused \
-	  -warn-error @4-6 \
+	  -warn-error @4-6+22 \
 	  -fparentheses \
 	  $(notdir $(HACL_OLD_FILES)) \
 	  $(notdir $(HAND_WRITTEN_FILES)) \
@@ -878,6 +879,7 @@ dist/evercrypt-external-headers/Makefile.basic: $(ALL_KRML_FILES)
 	  -add-include '<stdbool.h>' \
 	  -add-include '<kremlin/internal/types.h>' \
 	  -add-include '<kremlin/internal/target.h>' \
+	  -header dist/LICENSE.txt \
 	  -skip-compilation \
 	  -tmpdir $(dir $@) \
 	  $^

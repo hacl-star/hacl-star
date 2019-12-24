@@ -58,7 +58,7 @@ open Vale.Curve25519.X64.FastHybrid
 
 #reset-options "--z3rlimit 60"
 
-procedure fmul(
+procedure Fmul(
         ghost tmp_b:buffer64,
         ghost inA_b:buffer64,
         ghost dst_b:buffer64,
@@ -123,11 +123,11 @@ procedure fmul(
 {
     mem_eq_all(mem, heap0);
 
-    Mov64(r15, dst_ptr); // Save dst_ptr that will be clobbered by fast_multiply
-    fast_multiply(0, tmp_b, inA_b, inB_b);
+    Mov64(r15, dst_ptr); // Save dst_ptr that will be clobbered by Fast_multiply
+    Fast_multiply(0, tmp_b, inA_b, inB_b);
     Mov64(inA_ptr, tmp_ptr);
     Mov64(rdi, r15); // Restore dst_ptr
-    carry_wide(0, dst_b, tmp_b);
+    Carry_wide(0, dst_b, tmp_b);
 
     DestroyHeaplets();
     mem_eq_all(mem, heap0);
@@ -135,7 +135,7 @@ procedure fmul(
 }
 
 
-procedure fmul_stdcall(
+procedure Fmul_stdcall(
         inline win:bool,
         ghost tmp_b:buffer64,
         ghost inA_b:buffer64,
@@ -236,7 +236,7 @@ procedure fmul_stdcall(
         Mov64(inB_ptr, r9);
     }
 
-    fmul(tmp_b, inA_b, dst_b, inB_b);
+    Fmul(tmp_b, inA_b, dst_b, inB_b);
 
     inline if (win) {
         Pop_Secret(rdi);
@@ -254,7 +254,7 @@ procedure fmul_stdcall(
 }
 
 #reset-options "--z3rlimit 60"
-procedure fmul2(
+procedure Fmul2(
         ghost tmp_b:buffer64,
         ghost inA_b:buffer64,
         ghost dst_b:buffer64,
@@ -341,20 +341,20 @@ procedure fmul2(
 {
     mem_eq_all(mem, heap0);
 
-    Mov64(r15, dst_ptr); // Save dst_ptr that will be clobbered by fast_multiply
-    fast_multiply(0, tmp_b, inA_b, inB_b);
-    fast_multiply(4, tmp_b, inA_b, inB_b);
+    Mov64(r15, dst_ptr); // Save dst_ptr that will be clobbered by Fast_multiply
+    Fast_multiply(0, tmp_b, inA_b, inB_b);
+    Fast_multiply(4, tmp_b, inA_b, inB_b);
     Mov64(inA_ptr, tmp_ptr);
     Mov64(rdi, r15); // Restore dst_ptr
-    carry_wide(0, dst_b, tmp_b);
-    carry_wide(4, dst_b, tmp_b);
+    Carry_wide(0, dst_b, tmp_b);
+    Carry_wide(4, dst_b, tmp_b);
 
     DestroyHeaplets();
     mem_eq_all(mem, heap0);
     mem_eq_modifies(old(mem), mem, old(heap0), heap0);
 }
 
-procedure fmul2_stdcall(
+procedure Fmul2_stdcall(
         inline win:bool,
         ghost tmp_b:buffer64,
         ghost inA_b:buffer64,
@@ -476,7 +476,7 @@ procedure fmul2_stdcall(
         Mov64(inB_ptr, r9);
     }
 
-    fmul2(tmp_b, inA_b, dst_b, inB_b);
+    Fmul2(tmp_b, inA_b, dst_b, inB_b);
 
     inline if (win) {
         Pop_Secret(rdi);
@@ -493,7 +493,7 @@ procedure fmul2_stdcall(
     mem_eq_modifies(old(mem), mem, old(heap0), heap0);
 }
 
-procedure fsqr(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64)
+procedure Fsqr(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64)
     {:public}
     {:quick}
     {:exportSpecs}
@@ -543,11 +543,11 @@ procedure fsqr(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64)
 {
     mem_eq_all(mem, heap0);
 
-    Mov64(rbx, dst_ptr); // Save dst_ptr that will be clobbered by fast_sqr
-    fast_sqr(0, tmp_b, inA_b);
+    Mov64(rbx, dst_ptr); // Save dst_ptr that will be clobbered by Fast_sqr
+    Fast_sqr(0, tmp_b, inA_b);
     Mov64(inA_ptr, tmp_ptr);
     Mov64(rdi, rbx); // Restore dst_ptr
-    carry_wide(0, dst_b, tmp_b);
+    Carry_wide(0, dst_b, tmp_b);
 
     DestroyHeaplets();
     mem_eq_all(mem, heap0);
@@ -555,7 +555,7 @@ procedure fsqr(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64)
 }
 
 
-procedure fsqr_stdcall(
+procedure Fsqr_stdcall(
         inline win:bool,
         ghost tmp_b:buffer64,
         ghost inA_b:buffer64,
@@ -645,7 +645,7 @@ procedure fsqr_stdcall(
         Mov64(dst_ptr, r8);
     }
 
-    fsqr(tmp_b, inA_b, dst_b);
+    Fsqr(tmp_b, inA_b, dst_b);
 
     inline if (win) {
         Pop_Secret(rdi);
@@ -663,7 +663,7 @@ procedure fsqr_stdcall(
     mem_eq_modifies(old(mem), mem, old(heap0), heap0);
 }
 
-procedure fsqr2(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64)
+procedure Fsqr2(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64)
     {:public}
     {:quick}
     {:exportSpecs}
@@ -724,13 +724,13 @@ procedure fsqr2(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64
 {
     mem_eq_all(mem, heap0);
 
-    Mov64(rbx, dst_ptr); // Save dst_ptr that will be clobbered by fast_sqr
-    fast_sqr(0, tmp_b, inA_b);
-    fast_sqr(4, tmp_b, inA_b);
+    Mov64(rbx, dst_ptr); // Save dst_ptr that will be clobbered by Fast_sqr
+    Fast_sqr(0, tmp_b, inA_b);
+    Fast_sqr(4, tmp_b, inA_b);
     Mov64(inA_ptr, tmp_ptr);
     Mov64(rdi, rbx); // Restore dst_ptr
-    carry_wide(0, dst_b, tmp_b);
-    carry_wide(4, dst_b, tmp_b);
+    Carry_wide(0, dst_b, tmp_b);
+    Carry_wide(4, dst_b, tmp_b);
 
     DestroyHeaplets();
     mem_eq_all(mem, heap0);
@@ -738,7 +738,7 @@ procedure fsqr2(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64
 }
 
 
-procedure fsqr2_stdcall(
+procedure Fsqr2_stdcall(
         inline win:bool,
         ghost tmp_b:buffer64,
         ghost inA_b:buffer64,
@@ -839,7 +839,7 @@ procedure fsqr2_stdcall(
         Mov64(dst_ptr, r8);
     }
 
-    fsqr2(tmp_b, inA_b, dst_b);
+    Fsqr2(tmp_b, inA_b, dst_b);
 
     inline if (win) {
         Pop_Secret(rdi);
@@ -859,7 +859,7 @@ procedure fsqr2_stdcall(
 
 
 /*
-procedure fsqr_loop_stdcall(
+procedure Fsqr_loop_stdcall(
         inline win:bool,
         ghost dst_b:buffer64,
         ghost inA_b:buffer64,
@@ -936,25 +936,25 @@ procedure fsqr_loop_stdcall(
 
         Mov64(tmp_ptr, rcx);
         Mov64(inA_ptr, rdx);
-        Mov64(saved_dst_ptr, r8);    // Save dst_ptr, since fast_multiply will clobber it
+        Mov64(saved_dst_ptr, r8);    // Save dst_ptr, since Fast_multiply will clobber it
         Mov64(count, r9);
     } else {
-        Mov64(saved_dst_ptr, rdx);   // Save dst_ptr, since fast_multiply will clobber it
+        Mov64(saved_dst_ptr, rdx);   // Save dst_ptr, since Fast_multiply will clobber it
         Mov64(count, rcx);
     }
 
     // rdi = tmp_ptr
     // rsi = inA_ptr
-    fast_sqr(0, tmp_b, inA_b);
+    Fast_sqr(0, tmp_b, inA_b);
 
-    // Align arguments to carry_wide, which expects rdi = saved_dst_ptr, and rsi = tmp buffer
+    // Align arguments to Carry_wide, which expects rdi = saved_dst_ptr, and rsi = tmp buffer
     Mov64(inA_ptr, tmp_ptr);
     Mov64(rdi, saved_dst_ptr);
-    carry_wide(0, dst_b, tmp_b);
+    Carry_wide(0, dst_b, tmp_b);
 
     // Prepare for loop, which repeatedly squares dst
     // Need: rdi = tmp_ptr, and rsi = dst_ptr
-    Mov64(rdi, rsi);    // Restore tmp_ptr (in preparaton for another iteration of fast_sqr)
+    Mov64(rdi, rsi);    // Restore tmp_ptr (in preparaton for another iteration of Fast_sqr)
     Mov64(rsi, saved_dst_ptr);
 
     Sub64(count, 1);
@@ -978,12 +978,12 @@ procedure fsqr_loop_stdcall(
             modifies_buffer_2(dst_b, tmp_b, pre_loop_mem, mem);
         decreases count;
     {
-        fast_sqr(0, tmp_b, dst_b);
-        // Align arguments to carry_wide
+        Fast_sqr(0, tmp_b, dst_b);
+        // Align arguments to Carry_wide
         Mov64(inA_ptr, tmp_ptr);
         Mov64(rdi, saved_dst_ptr);
-        carry_wide(0, dst_b, tmp_b);
-        Mov64(tmp_ptr, inA_ptr);    // Restore tmp_ptr (in preparaton for another iteration of fast_sqr)
+        Carry_wide(0, dst_b, tmp_b);
+        Mov64(tmp_ptr, inA_ptr);    // Restore tmp_ptr (in preparaton for another iteration of Fast_sqr)
         Mov64(inA_ptr, saved_dst_ptr);        // Restore dst
         Sub64(count, 1);
     }

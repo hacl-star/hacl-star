@@ -26,7 +26,7 @@
 
 /* SNIPPET_START: Hacl_Chacha20_Vec128_double_round_128 */
 
-static void Hacl_Chacha20_Vec128_double_round_128(Lib_IntVector_Intrinsics_vec128 *st)
+inline static void Hacl_Chacha20_Vec128_double_round_128(Lib_IntVector_Intrinsics_vec128 *st)
 {
   st[0U] = Lib_IntVector_Intrinsics_vec128_add32(st[0U], st[4U]);
   Lib_IntVector_Intrinsics_vec128 std = Lib_IntVector_Intrinsics_vec128_xor(st[12U], st[0U]);
@@ -130,7 +130,7 @@ static void Hacl_Chacha20_Vec128_double_round_128(Lib_IntVector_Intrinsics_vec12
 
 /* SNIPPET_START: Hacl_Chacha20_Vec128_chacha20_core_128 */
 
-static void
+inline static void
 Hacl_Chacha20_Vec128_chacha20_core_128(
   Lib_IntVector_Intrinsics_vec128 *k,
   Lib_IntVector_Intrinsics_vec128 *ctx,
@@ -164,7 +164,7 @@ Hacl_Chacha20_Vec128_chacha20_core_128(
 
 /* SNIPPET_START: Hacl_Chacha20_Vec128_chacha20_init_128 */
 
-static void
+inline static void
 Hacl_Chacha20_Vec128_chacha20_init_128(
   Lib_IntVector_Intrinsics_vec128 *ctx,
   uint8_t *k,

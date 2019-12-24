@@ -55,7 +55,7 @@ let fmul_pre : VSig.vale_pre fmul_dom =
     (out:b64)
     (f2:b64)
     (va_s0:V.va_state) ->
-      FW.va_req_fmul c va_s0
+      FW.va_req_Fmul c va_s0
         (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) (as_vale_buffer f2)
 
 [@__reduce__]
@@ -68,7 +68,7 @@ let fmul_post : VSig.vale_post fmul_dom =
     (va_s0:V.va_state)
     (va_s1:V.va_state)
     (f:V.va_fuel) ->
-      FW.va_ens_fmul c va_s0 (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) (as_vale_buffer f2) va_s1 f
+      FW.va_ens_Fmul c va_s0 (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) (as_vale_buffer f2) va_s1 f
 
 let fmul_regs_modified: MS.reg_64 -> bool = fun (r:MS.reg_64) ->
   let open MS in
@@ -107,7 +107,7 @@ let fmul_lemma'
                    (ME.loc_union (ME.loc_buffer (as_vale_buffer tmp))
                                  ME.loc_none)) (VS.vs_get_vale_heap va_s0) (VS.vs_get_vale_heap va_s1)
  )) =
-   let va_s1, f = FW.va_lemma_fmul code va_s0 (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) (as_vale_buffer f2) in
+   let va_s1, f = FW.va_lemma_Fmul code va_s0 (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) (as_vale_buffer f2) in
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 out;
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 f1;
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 f2;
@@ -116,7 +116,7 @@ let fmul_lemma'
 
 (* Prove that fmul_lemma' has the required type *)
 let fmul_lemma = as_t #(VSig.vale_sig fmul_regs_modified fmul_xmms_modified fmul_pre fmul_post) fmul_lemma'
-let code_fmul = FW.va_code_fmul ()
+let code_Fmul = FW.va_code_Fmul ()
 
 let fmul_of_reg (r:MS.reg_64) : option (IX64.reg_nat 4) = match r with
   | 5 -> Some 0 // rdi
@@ -142,12 +142,12 @@ let lowstar_fmul_t =
     fmul_arg_reg
     fmul_regs_modified
     fmul_xmms_modified
-    code_fmul
+    code_Fmul
     fmul_dom
     []
     _
     _
-    (W.mk_prediction code_fmul fmul_dom [] (fmul_lemma code_fmul IA.win))
+    (W.mk_prediction code_Fmul fmul_dom [] (fmul_lemma code_Fmul IA.win))
 
 (* And here's the fmul wrapper itself *)
 let lowstar_fmul : lowstar_fmul_t  =
@@ -157,9 +157,9 @@ let lowstar_fmul : lowstar_fmul_t  =
     fmul_arg_reg
     fmul_regs_modified
     fmul_xmms_modified
-    code_fmul
+    code_Fmul
     fmul_dom
-    (W.mk_prediction code_fmul fmul_dom [] (fmul_lemma code_fmul IA.win))
+    (W.mk_prediction code_Fmul fmul_dom [] (fmul_lemma code_Fmul IA.win))
 
 let lowstar_fmul_normal_t : normal lowstar_fmul_t
   = as_normal_t #lowstar_fmul_t lowstar_fmul
@@ -185,7 +185,7 @@ let fmul_inline tmp f1 out f2 =
 #pop-options
 
 let fmul_code_inline () : FStar.All.ML int =
-  PR.print_inline "fmul_inline" 0 None (List.length fmul_dom) fmul_dom code_fmul fmul_of_arg fmul_regs_modified
+  PR.print_inline "fmul_inline" 0 None (List.length fmul_dom) fmul_dom code_Fmul fmul_of_arg fmul_regs_modified
 
 (* Need to rearrange the order of arguments *)
 [@__reduce__]
@@ -196,7 +196,7 @@ let fmul2_pre : VSig.vale_pre fmul_dom =
     (out:b64)
     (f2:b64)
     (va_s0:V.va_state) ->
-      FW.va_req_fmul2 c va_s0
+      FW.va_req_Fmul2 c va_s0
         (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) (as_vale_buffer f2)
 
 [@__reduce__]
@@ -209,7 +209,7 @@ let fmul2_post : VSig.vale_post fmul_dom =
     (va_s0:V.va_state)
     (va_s1:V.va_state)
     (f:V.va_fuel) ->
-      FW.va_ens_fmul2 c va_s0 (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) (as_vale_buffer f2) va_s1 f
+      FW.va_ens_Fmul2 c va_s0 (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) (as_vale_buffer f2) va_s1 f
 
 #set-options "--z3rlimit 200"
 
@@ -241,7 +241,7 @@ let fmul2_lemma'
                    (ME.loc_union (ME.loc_buffer (as_vale_buffer tmp))
                                  ME.loc_none)) (VS.vs_get_vale_heap va_s0) (VS.vs_get_vale_heap va_s1)
  )) =
-   let va_s1, f = FW.va_lemma_fmul2 code va_s0 (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) (as_vale_buffer f2) in
+   let va_s1, f = FW.va_lemma_Fmul2 code va_s0 (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) (as_vale_buffer f2) in
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 out;
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 f1;
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 f2;
@@ -250,7 +250,7 @@ let fmul2_lemma'
 
 (* Prove that fmul2_lemma' has the required type *)
 let fmul2_lemma = as_t #(VSig.vale_sig fmul_regs_modified fmul_xmms_modified fmul2_pre fmul2_post) fmul2_lemma'
-let code_fmul2 = FW.va_code_fmul2 ()
+let code_Fmul2 = FW.va_code_Fmul2 ()
 
 (* Here's the type expected for the fmul wrapper *)
 [@__reduce__]
@@ -261,12 +261,12 @@ let lowstar_fmul2_t =
     fmul_arg_reg
     fmul_regs_modified
     fmul_xmms_modified
-    code_fmul2
+    code_Fmul2
     fmul_dom
     []
     _
     _
-    (W.mk_prediction code_fmul2 fmul_dom [] (fmul2_lemma code_fmul2 IA.win))
+    (W.mk_prediction code_Fmul2 fmul_dom [] (fmul2_lemma code_Fmul2 IA.win))
 
 (* And here's the fmul2 wrapper itself *)
 let lowstar_fmul2 : lowstar_fmul2_t  =
@@ -276,9 +276,9 @@ let lowstar_fmul2 : lowstar_fmul2_t  =
     fmul_arg_reg
     fmul_regs_modified
     fmul_xmms_modified
-    code_fmul2
+    code_Fmul2
     fmul_dom
-    (W.mk_prediction code_fmul2 fmul_dom [] (fmul2_lemma code_fmul2 IA.win))
+    (W.mk_prediction code_Fmul2 fmul_dom [] (fmul2_lemma code_Fmul2 IA.win))
 
 let lowstar_fmul2_normal_t : normal lowstar_fmul2_t
   = as_normal_t #lowstar_fmul2_t lowstar_fmul2
@@ -296,7 +296,7 @@ let fmul2_inline tmp f1 out f2 =
 #pop-options
 
 let fmul2_code_inline () : FStar.All.ML int =
-  PR.print_inline "fmul2_inline" 0 None (List.length fmul_dom) fmul_dom code_fmul2 fmul_of_arg fmul_regs_modified
+  PR.print_inline "fmul2_inline" 0 None (List.length fmul_dom) fmul_dom code_Fmul2 fmul_of_arg fmul_regs_modified
 
 [@__reduce__]
 let fmul1_dom: IX64.arity_ok 3 td =
@@ -312,7 +312,7 @@ let fmul1_pre : VSig.vale_pre fmul1_dom =
     (f1:b64)
     (f2:uint64)
     (va_s0:V.va_state) ->
-      FH.va_req_fmul1 c va_s0
+      FH.va_req_Fmul1 c va_s0
         (as_vale_buffer out) (as_vale_buffer f1) (UInt64.v f2)
 
 [@__reduce__]
@@ -324,7 +324,7 @@ let fmul1_post : VSig.vale_post fmul1_dom =
     (va_s0:V.va_state)
     (va_s1:V.va_state)
     (f:V.va_fuel) ->
-      FH.va_ens_fmul1 c va_s0 (as_vale_buffer out) (as_vale_buffer f1) (UInt64.v f2) va_s1 f
+      FH.va_ens_Fmul1 c va_s0 (as_vale_buffer out) (as_vale_buffer f1) (UInt64.v f2) va_s1 f
 
 #set-options "--z3rlimit 200"
 
@@ -357,7 +357,7 @@ let fmul1_lemma'
        ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer out))
                                  ME.loc_none) (VS.vs_get_vale_heap va_s0) (VS.vs_get_vale_heap va_s1)
  )) =
-   let va_s1, f = FH.va_lemma_fmul1 code va_s0 (as_vale_buffer out) (as_vale_buffer f1) (UInt64.v f2) in
+   let va_s1, f = FH.va_lemma_Fmul1 code va_s0 (as_vale_buffer out) (as_vale_buffer f1) (UInt64.v f2) in
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 out;
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 f1;
    (va_s1, f)
@@ -365,7 +365,7 @@ let fmul1_lemma'
 (* Prove that fmul1_lemma' has the required type *)
 let fmul1_lemma = as_t #(VSig.vale_sig fmul1_regs_modified fmul1_xmms_modified fmul1_pre fmul1_post) fmul1_lemma'
 
-let code_fmul1 = FH.va_code_fmul1 ()
+let code_Fmul1 = FH.va_code_Fmul1 ()
 
 let of_reg (r:MS.reg_64) : option (IX64.reg_nat 3) = match r with
   | 5 -> Some 0 // rdi
@@ -389,13 +389,13 @@ let lowstar_fmul1_t =
     arg_reg
     fmul1_regs_modified
     fmul1_xmms_modified
-    code_fmul1
+    code_Fmul1
     fmul1_dom
     []
     _
     _
     // The boolean here doesn't matter
-    (W.mk_prediction code_fmul1 fmul1_dom [] (fmul1_lemma code_fmul1 IA.win))
+    (W.mk_prediction code_Fmul1 fmul1_dom [] (fmul1_lemma code_Fmul1 IA.win))
 
 (* And here's the fmul1 wrapper itself *)
 let lowstar_fmul1 : lowstar_fmul1_t  =
@@ -405,9 +405,9 @@ let lowstar_fmul1 : lowstar_fmul1_t  =
     arg_reg
     fmul1_regs_modified
     fmul1_xmms_modified
-    code_fmul1
+    code_Fmul1
     fmul1_dom
-    (W.mk_prediction code_fmul1 fmul1_dom [] (fmul1_lemma code_fmul1 IA.win))
+    (W.mk_prediction code_Fmul1 fmul1_dom [] (fmul1_lemma code_Fmul1 IA.win))
 
 let lowstar_fmul1_normal_t : normal lowstar_fmul1_t
   = as_normal_t #lowstar_fmul1_t lowstar_fmul1
@@ -421,4 +421,4 @@ let fmul1_inline out f1 f2
     ()
 
 let fmul1_code_inline () : FStar.All.ML int =
-  PR.print_inline "fmul1_inline" 0 None (List.length fmul1_dom) fmul1_dom code_fmul1 of_arg fmul1_regs_modified
+  PR.print_inline "fmul1_inline" 0 None (List.length fmul1_dom) fmul1_dom code_Fmul1 of_arg fmul1_regs_modified

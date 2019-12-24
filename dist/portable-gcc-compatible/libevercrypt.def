@@ -200,11 +200,13 @@ EXPORTS
   __proj__MT__item__rhs_ok
   __proj__MT__item__rhs
   __proj__MT__item__mroot
+  __proj__MT__item__hash_fun
   merkle_tree_conditions
   offset_of
   mt_free
   mt_insert_pre
   mt_insert
+  mt_create_custom
   mt_create
   init_path
   clear_path
@@ -225,6 +227,8 @@ EXPORTS
   mt_serialize_size
   mt_serialize
   mt_deserialize
+  mt_serialize_path
+  mt_deserialize_path
   EverCrypt_Error_uu___is_Success
   EverCrypt_Error_uu___is_UnsupportedAlgorithm
   EverCrypt_Error_uu___is_InvalidKey
@@ -368,6 +372,8 @@ EXPORTS
   Hacl_HMAC_compute_sha2_512
   Hacl_HKDF_expand_sha2_256
   Hacl_HKDF_extract_sha2_256
+  Hacl_HKDF_expand_sha2_512
+  Hacl_HKDF_extract_sha2_512
   Hacl_HMAC_DRBG_min_length
   Hacl_HMAC_DRBG_uu___is_State
   Hacl_HMAC_DRBG___proj__State__item__k

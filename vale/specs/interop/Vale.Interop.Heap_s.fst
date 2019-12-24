@@ -1,5 +1,6 @@
 module Vale.Interop.Heap_s
 open FStar.Mul
+open Vale.Def.Opaque_s
 open Vale.Def.Words_s
 open Vale.Arch.MachineHeap_s
 include Vale.Interop.Types
@@ -13,10 +14,12 @@ let disjoint_or_eq_b8 (ptr1 ptr2:b8) =
   B.loc_disjoint (B.loc_buffer ptr1.bsrc) (B.loc_buffer ptr2.bsrc) \/
   ptr1 == ptr2
 
-let list_disjoint_or_eq (ptrs:list b8) =
+let list_disjoint_or_eq_def (ptrs:list b8) =
   forall (p1 p2:b8).{:pattern (L.memP p1 ptrs); (L.memP p2 ptrs)}
     L.memP p1 ptrs /\
     L.memP p2 ptrs ==> disjoint_or_eq_b8 p1 p2
+[@"opaque_to_smt"] let list_disjoint_or_eq = opaque_make list_disjoint_or_eq_def
+irreducible let list_disjoint_or_eq_reveal = opaque_revealer (`%list_disjoint_or_eq) list_disjoint_or_eq list_disjoint_or_eq_def
 
 unfold
 let list_live mem (ptrs:list b8) =

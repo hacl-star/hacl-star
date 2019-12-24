@@ -75,7 +75,7 @@ let get_last_slice_workaround (s:seq quad32) (start_pos end_pos:int)  =
 // GHash
 ///////////////////////////
 
-procedure compute_Y0()
+procedure Compute_Y0()
     {:quick}
     modifies xmm1; efl;
     requires sse_enabled;
@@ -107,7 +107,7 @@ procedure ReduceMul128_LE(ghost a:poly, ghost b:poly)
     Pshufb(xmm1, mask);
 }
 
-procedure compute_ghash_incremental_register()
+procedure Compute_ghash_incremental_register()
     {:public}
     {:quick}
     lets input @= xmm2; io @= xmm1; mask @= xmm8; h @= xmm11;
@@ -126,10 +126,10 @@ procedure compute_ghash_incremental_register()
     Mov128(xmm2, h);    // Move h into the register that ReduceMul128_LE expects
 
     ReduceMul128_LE(gf128_of_quad32(reverse_bytes_quad32(io)), gf128_of_quad32(h));    // io := Y_i * H
-    Vale.Def.Opaque_s.reveal_opaque(ghash_incremental_def);
+    ghash_incremental_reveal();
 }
 
-procedure compute_ghash_incremental(ghost in_b:buffer128)
+procedure Compute_ghash_incremental(ghost in_b:buffer128)
     {:public}
     {:quick}
     lets in_ptr @= rax; len @= rcx; io @= xmm1; mask @= xmm8; h @= xmm11;
@@ -190,12 +190,12 @@ procedure compute_ghash_incremental(ghost in_b:buffer128)
 
             Add64(rdx, 1);
             Add64(r9, 16);
-            Vale.Def.Opaque_s.reveal_opaque(ghash_incremental_def);
+            ghash_incremental_reveal();
         }
     }
 }
 
-procedure compute_ghash_incremental_partial(ghost in_b:buffer128)
+procedure Compute_ghash_incremental_partial(ghost in_b:buffer128)
     {:quick}
     lets in_ptr @= rax; len @= rcx; io @= xmm1; mask @= xmm8; h @= xmm11;
     reads
@@ -255,14 +255,14 @@ procedure compute_ghash_incremental_partial(ghost in_b:buffer128)
 
             Add64(rdx, 1);
             Add64(r9, 16);
-            Vale.Def.Opaque_s.reveal_opaque(ghash_incremental_def);
+            ghash_incremental_reveal();
         }
     }
 }
 
 #reset-options "--z3rlimit 10"
 // Purely proof work to show that when there are no extra bytes, there's no work left to do
-procedure ghash_incremental_bytes_no_extra(
+procedure Ghash_incremental_bytes_no_extra(
         ghost in_b:buffer128,
         ghost old_io:quad32,
         ghost old_in_ptr:nat64,
@@ -329,7 +329,7 @@ procedure ghash_incremental_bytes_no_extra(
  *     but Vale currently doesn't support switch statements
  */
 #reset-options "--z3rlimit 40"
-procedure compute_pad_to_128_bits()
+procedure Compute_pad_to_128_bits()
     {:quick}
     lets io @= xmm2; num_bytes @= rax; tmp @= rcx; mask @= rdx;
 
@@ -393,7 +393,7 @@ procedure compute_pad_to_128_bits()
 }
 
 #reset-options "--z3rlimit 10"
-procedure ghash_incremental_bytes_register(
+procedure Ghash_incremental_bytes_register(
         ghost total_bytes:nat,
         ghost old_hash:quad32,
         ghost completed_quads:seq(quad32))
@@ -436,16 +436,16 @@ procedure ghash_incremental_bytes_register(
 {
     let final_quad := xmm2;
 
-    compute_pad_to_128_bits();
+    Compute_pad_to_128_bits();
     let final_quad_padded := xmm2;
 
-    compute_ghash_incremental_register();
+    Compute_ghash_incremental_register();
 
     lemma_ghash_incremental_bytes_extra_helper_alt(reverse_bytes_quad32(h), old_hash, old(io), io, completed_quads, final_quad, final_quad_padded, total_bytes);
 }
 
 #reset-options "--z3rlimit 10"
-procedure ghash_incremental_bytes_extra(
+procedure Ghash_incremental_bytes_extra(
         ghost in_b:buffer128,
         ghost orig_in_ptr:nat64,
         ghost old_io:quad32,
@@ -497,16 +497,16 @@ procedure ghash_incremental_bytes_extra(
     Load128_buffer(xmm2, in_ptr, 0, Secret, in_b, num_blocks);
     let final_quad := xmm2;
 
-    compute_pad_to_128_bits();
+    Compute_pad_to_128_bits();
     let final_quad_padded := xmm2;
 
-    compute_ghash_incremental_register();
+    Compute_ghash_incremental_register();
 
     lemma_ghash_incremental_bytes_extra_helper(reverse_bytes_quad32(h), old_io, old(io), io, buffer128_as_seq(heap0, in_b), final_quad, final_quad_padded, orig_num_bytes);
 }
 
 #reset-options "--z3rlimit 10"
-procedure ghash_incremental_bytes(ghost in_b:buffer128)
+procedure Ghash_incremental_bytes(ghost in_b:buffer128)
     {:public}
     {:quick}
     lets in_ptr @= rax; num_bytes @= r11; io @= xmm1; mask @= xmm8; h @= xmm11;
@@ -548,21 +548,21 @@ procedure ghash_incremental_bytes(ghost in_b:buffer128)
         Shr64(rcx, 4);
         assert rcx == num_blocks;
 
-        compute_ghash_incremental_partial(in_b);
+        Compute_ghash_incremental_partial(in_b);
 
         Mov64(rax, num_bytes);
         And64(rax, 15);
         assert rax == num_bytes % 16;
 
         if (rax == 0) {
-            ghash_incremental_bytes_no_extra(in_b, old(io), old(in_ptr), old(num_bytes), io, reverse_bytes_quad32(h));
+            Ghash_incremental_bytes_no_extra(in_b, old(io), old(in_ptr), old(num_bytes), io, reverse_bytes_quad32(h));
         } else {
-            ghash_incremental_bytes_extra(in_b, old(in_ptr), old(io), old(num_bytes));
+            Ghash_incremental_bytes_extra(in_b, old(in_ptr), old(io), old(num_bytes));
         }
     }
 }
 
-procedure ghash_core(ghost in_b:buffer128)
+procedure Ghash_core(ghost in_b:buffer128)
     {:quick}
     lets in_ptr @= rax; len @= rcx; output @= xmm1; mask @= xmm8; h @= xmm11;
 
@@ -590,8 +590,8 @@ procedure ghash_core(ghost in_b:buffer128)
                     output == ghash_LE(reverse_bytes_quad32(h), #ghash_plain_LE(buffer128_as_seq(heap0, in_b)));
 {
     if (len != 0) {
-        compute_Y0();
-        compute_ghash_incremental(in_b);
+        Compute_Y0();
+        Compute_ghash_incremental(in_b);
         ghash_incremental_to_ghash(reverse_bytes_quad32(h), buffer128_as_seq(heap0, in_b));
     }
 }

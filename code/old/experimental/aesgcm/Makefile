@@ -16,6 +16,7 @@ aesgcm-c/Hacl_AES.c: aesgcm-c/out.krml
 	  -bundle 'Crypto.Symmetric.AES+Crypto.Symmetric.AES128=*[rename=Hacl_AES]' \
 	  -tmpdir aesgcm-c \
 	  -minimal -add-include '"kremlib.h"' \
+	  -header $(HACL_HOME)/dist/LICENSE.txt \
 	  -skip-compilation $<
 
 aesgcm-c89/Hacl_AES.c: aesgcm-c/out.krml
@@ -24,4 +25,5 @@ aesgcm-c89/Hacl_AES.c: aesgcm-c/out.krml
 	  -tmpdir aesgcm-c89 \
 	  -fc89 \
 	  -minimal -add-include '"kremlib.h"' \
+	  -header $(HACL_HOME)/dist/LICENSE.txt \
 	  -skip-compilation $<

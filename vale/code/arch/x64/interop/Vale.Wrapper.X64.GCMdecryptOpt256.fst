@@ -414,7 +414,7 @@ let lemma_same_seq_dv (h:HS.mem) (b:uint8_p) : Lemma
   let aux (i:nat{i < B.length b}) : Lemma (Seq.index (B.as_seq h b) i == Seq.index (DV.as_seq h db) i) =
     DV.as_seq_sel h db i;
     DV.get_sel h db i;
-    Vale.Def.Opaque_s.reveal_opaque Vale.Interop.Views.put8_def
+    Vale.Interop.Views.put8_reveal ()
   in Classical.forall_intro aux
 
 let lemma_uv_split (h:HS.mem) (b:uint8_p) (n:UInt32.t) : Lemma

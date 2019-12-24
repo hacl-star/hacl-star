@@ -26,7 +26,7 @@ open Vale.Lib.Meta
 open Vale.Lib.X64.Cpuid
 #endverbatim
 
-procedure check_aesni_stdcall(inline win:bool)
+procedure Check_aesni_stdcall(inline win:bool)
     {:public}
     {:quick}
     {:exportSpecs}
@@ -38,10 +38,11 @@ procedure check_aesni_stdcall(inline win:bool)
         rax != 0 ==> aesni_enabled && pclmulqdq_enabled;
         rbx == old(rbx);
 {
-    check_aesni_support();
+    Check_aesni_support();
 }
 
-procedure check_sha_stdcall(inline win:bool)
+
+procedure Check_sha_stdcall(inline win:bool)
     {:public}
     {:quick}
     {:exportSpecs}
@@ -51,10 +52,10 @@ procedure check_sha_stdcall(inline win:bool)
         rax != 0 ==> sha_enabled;
         rbx == old(rbx);
 {
-    check_sha_support();
+    Check_sha_support();
 }
 
-procedure check_adx_bmi2_stdcall(inline win:bool)
+procedure Check_adx_bmi2_stdcall(inline win:bool)
     {:public}
     {:quick}
     {:exportSpecs}
@@ -64,10 +65,10 @@ procedure check_adx_bmi2_stdcall(inline win:bool)
         rax != 0 ==> adx_enabled && bmi2_enabled;
         rbx == old(rbx);
 {
-    check_adx_bmi2_support();
+    Check_adx_bmi2_support();
 }
 
-procedure check_avx_stdcall(inline win:bool)
+procedure Check_avx_stdcall(inline win:bool)
     {:public}
     {:quick}
     {:exportSpecs}
@@ -77,10 +78,10 @@ procedure check_avx_stdcall(inline win:bool)
         rax != 0 ==> avx_enabled;
         rbx == old(rbx);
 {
-    check_avx_support();
+    Check_avx_support();
 }
 
-procedure check_avx2_stdcall(inline win:bool)
+procedure Check_avx2_stdcall(inline win:bool)
     {:public}
     {:quick}
     {:exportSpecs}
@@ -90,10 +91,10 @@ procedure check_avx2_stdcall(inline win:bool)
         rax != 0 ==> avx2_enabled;
         rbx == old(rbx);
 {
-    check_avx2_support();
+    Check_avx2_support();
 }
 
-procedure check_movbe_stdcall(inline win:bool)
+procedure Check_movbe_stdcall(inline win:bool)
     {:public}
     {:quick}
     {:exportSpecs}
@@ -103,10 +104,10 @@ procedure check_movbe_stdcall(inline win:bool)
         rax != 0 ==> movbe_enabled;
         rbx == old(rbx);
 {
-    check_movbe_support();
+    Check_movbe_support();
 }
 
-procedure check_sse_stdcall(inline win:bool)
+procedure Check_sse_stdcall(inline win:bool)
     {:public}
     {:quick}
     {:exportSpecs}
@@ -116,10 +117,10 @@ procedure check_sse_stdcall(inline win:bool)
         rax != 0 ==> sse_enabled;
         rbx == old(rbx);
 {
-    check_sse_support();
+    Check_sse_support();
 }
 
-procedure check_rdrand_stdcall(inline win:bool)
+procedure Check_rdrand_stdcall(inline win:bool)
     {:public}
     {:quick}
     {:exportSpecs}
@@ -129,5 +130,5 @@ procedure check_rdrand_stdcall(inline win:bool)
         rax != 0 ==> rdrand_enabled;
         rbx == old(rbx);
 {
-    check_rdrand_support();
+    Check_rdrand_support();
 }

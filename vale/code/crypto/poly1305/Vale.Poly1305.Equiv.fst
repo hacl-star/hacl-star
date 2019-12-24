@@ -146,12 +146,12 @@ let lemma_poly1305_equiv_r (k:key) : Lemma
   let v_mask1:nat64 = 0x0ffffffc0ffffffc in
   let v_lo:nat64 = uint_v lo in
   let v_hi:nat64 = uint_v hi in
-  let lowerUpper128_opaque = Vale.Poly1305.Math.lowerUpper128_opaque in
-  let v_lo_hi:nat128 = lowerUpper128_opaque v_lo v_hi in
-  let v_mask_0_1:nat128 = lowerUpper128_opaque v_mask0 v_mask1 in
+  let lowerUpper128 = Vale.Poly1305.Math.lowerUpper128 in
+  let v_lo_hi:nat128 = lowerUpper128 v_lo v_hi in
+  let v_mask_0_1:nat128 = lowerUpper128 v_mask0 v_mask1 in
   let z0 = iand v_lo v_mask0 in
   let z1 = iand v_hi v_mask1 in
-  let z = lowerUpper128_opaque z0 z1 in
+  let z = lowerUpper128 z0 z1 in
   let and64 = UInt.logand #64 in
   calc (==) {
     rv;
@@ -159,11 +159,11 @@ let lemma_poly1305_equiv_r (k:key) : Lemma
     iand key_r mask;
     == {Hacl.Impl.Poly1305.Lemmas.uint_from_bytes_le_lemma key_bytes}
     iand (pow2 64 * v_hi + v_lo) mask;
-    == {Vale.Def.Opaque_s.reveal_opaque Vale.Poly1305.Math.lowerUpper128}
+    == {Vale.Poly1305.Math.lowerUpper128_reveal ()}
     iand v_lo_hi v_mask_0_1;
     == {Vale.Poly1305.Math.lemma_lowerUpper128_and v_lo_hi v_lo v_hi v_mask_0_1 v_mask0 v_mask1 z z0 z1}
     z;
-    == {Vale.Def.Opaque_s.reveal_opaque Vale.Poly1305.Math.lowerUpper128}
+    == {Vale.Poly1305.Math.lowerUpper128_reveal ()}
     z1 * pow2 64 + z0;
     == {Vale.Arch.TypesNative.reveal_iand_all 64}
     and64 v_hi v_mask1 * pow2 64 + and64 v_lo v_mask0;

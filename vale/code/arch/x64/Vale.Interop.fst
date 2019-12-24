@@ -163,6 +163,7 @@ let correct_down_p_frame (mem:interop_heap) (heap:machine_heap) (p:b8) : Lemma
     let contents = DV.as_seq (hs_of_mem mem) b in
     let addr = addrs_of_mem mem p in
     let new_heap = write_vale_mem contents length addr 0 heap in
+    reveal_opaque (`%addr_map_pred) addr_map_pred;
     Classical.forall_intro (Classical.move_requires (frame_write_vale_mem contents length addr 0 heap))
   in
   Classical.forall_intro aux
@@ -195,6 +196,12 @@ let rec addrs_set_lemma_aux (addrs:addr_map) (ptrs:list b8) (acc:Set.set int) (x
 let addrs_set_lemma mem x =
   addrs_set_lemma_aux (addrs_of_mem mem) (ptrs_of_mem mem) Set.empty x
 
+let addrs_set_lemma_all () =
+  FStar.Classical.forall_intro_2 addrs_set_lemma
+
+let addrs_set_mem mem a i =
+  addrs_set_lemma_all ()
+
 let write_buffer_vale (a:b8) (heap:machine_heap) (mem:interop_heap) =
   let b = get_downview a.bsrc in
   let length = DV.length b in
@@ -222,6 +229,7 @@ let rec down_mem_aux
       load_store_write_vale_mem contents length addr 0 h;
       correct_down_p_cancel mem h a;
       correct_down_p_frame mem h a;
+      list_disjoint_or_eq_reveal ();
       down_mem_aux ptrs mem q (a::accu) new_heap
 
 let lemma_write_buffer_domain (a:b8) (heap:machine_heap) (mem:interop_heap) : Lemma
@@ -269,6 +277,7 @@ let rec lemma_down_mem_aux_domain
     load_store_write_vale_mem contents length addr 0 h;
     correct_down_p_cancel mem h a;
     correct_down_p_frame mem h a;
+    list_disjoint_or_eq_reveal ();
     lemma_down_mem_aux_domain ptrs mem tl (a::accu) new_heap x
 
 let down_mem mem =
@@ -278,6 +287,7 @@ let down_mem mem =
   let ptrs = ptrs_of_mem mem in
   let heap_f = down_mem_aux ptrs mem ptrs [] heap in
   let aux (x:int) : Lemma (Set.mem x (addrs_set mem) <==> Set.mem x (Map.domain heap_f)) =
+    addrs_set_lemma_all ();
     lemma_down_mem_aux_domain ptrs mem ptrs [] heap x
   in Classical.forall_intro aux;
   heap_f
@@ -305,6 +315,7 @@ let rec frame_down_mem_aux (ptrs:list b8{list_disjoint_or_eq ptrs})
     load_store_write_vale_mem contents length addr 0 h;
     correct_down_p_cancel mem h a;
     correct_down_p_frame mem h a;
+    list_disjoint_or_eq_reveal ();
     frame_down_mem_aux ptrs mem q (a::accu) new_heap i;
     frame_write_vale_mem contents length addr 0 h i
 
@@ -323,6 +334,7 @@ val same_unspecified_down_aux:
          heap1.[i] == heap2.[i])
 
 let same_unspecified_down_aux hs1 hs2 ptrs i =
+  addrs_set_lemma_all ();
   let heap = Map.const 0 in
   let heap = Map.restrict Set.empty heap in
   let mem1 = mem_of_hs_roots ptrs hs1 in
@@ -330,8 +342,6 @@ let same_unspecified_down_aux hs1 hs2 ptrs i =
   let addrs = addrs_of_mem mem1 in
   let heapf1 = down_mem_aux ptrs mem1 ptrs [] heap in
   let heapf2 = down_mem_aux ptrs mem2 ptrs [] heap in
-  addrs_set_lemma mem1 i;
-  addrs_set_lemma mem1 i;
   Classical.move_requires (frame_down_mem_aux ptrs mem1 ptrs [] heap) i;
   Classical.move_requires (frame_down_mem_aux ptrs mem2 ptrs [] heap) i
 
@@ -366,6 +376,7 @@ let rec up_mem_aux
       (ensures DV.as_seq (hs_of_mem m) (get_downview p.bsrc) == DV.as_seq m' (get_downview p.bsrc))
       = lemma_dv_equal (down_view p.src) p.bsrc (hs_of_mem m) m'
     in Classical.forall_intro (Classical.move_requires aux1);
+    list_disjoint_or_eq_reveal ();
     up_mem_aux h tl (hd::accu) (InteropHeap m.ptrs m.addrs m')
 
 let up_mem heap mem = up_mem_aux heap (ptrs_of_mem mem) [] mem
@@ -406,7 +417,7 @@ let correct_down_p_same_sel
     assert (heap1.[x] == UInt8.v (Seq.index (DV.as_seq (hs_of_mem mem) (get_downview b.bsrc)) i));
     assert (heap2.[x] == UInt8.v (Seq.index (DV.as_seq (hs_of_mem mem) (get_downview b.bsrc)) i))
 
-let rec up_down_identity_aux
+let up_down_identity_aux
   (mem:interop_heap)
   (init_heap:machine_heap{correct_down mem init_heap})
   (x:int) : Lemma
@@ -414,6 +425,7 @@ let rec up_down_identity_aux
   (ensures Map.sel init_heap x == Map.sel (down_mem mem) x) =
   let ptrs = ptrs_of_mem mem in
   let addrs = addrs_of_mem mem in
+  addrs_set_lemma_all ();
   Classical.forall_intro
     (Classical.move_requires
       (correct_down_p_same_sel mem (down_mem mem) init_heap x)
@@ -467,9 +479,11 @@ let rec update_buffer_up_mem_aux
       (ensures DV.as_seq (hs_of_mem m) (get_downview p.bsrc) == DV.as_seq m' (get_downview p.bsrc))
       = lemma_dv_equal (down_view p.src) p.bsrc (hs_of_mem m) m'
     in Classical.forall_intro (Classical.move_requires aux1);
+    list_disjoint_or_eq_reveal ();
     let aux2 () : Lemma
       (requires hd =!= b)
       (ensures DV.as_seq mem db == get_seq_heap h2 addrs hd) =
+      reveal_opaque (`%addr_map_pred) addr_map_pred;
       get_seq_heap_as_seq h1 h2 m hd
     in Classical.move_requires aux2 ();
     update_buffer_up_mem_aux h1 h2 tl (hd::accu) b (InteropHeap ptrs addrs m')

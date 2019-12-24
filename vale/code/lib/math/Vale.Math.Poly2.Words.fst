@@ -33,7 +33,7 @@ let lemma_add128 a b =
     to_quad32 (poly128_of_nat32s (ixor a0 b0) (ixor a1 b1) (ixor a2 b2) (ixor a3 b3));
     == {lemma_quad32_of_nat32s (ixor a0 b0) (ixor a1 b1) (ixor a2 b2) (ixor a3 b3)}
     Mkfour (ixor a0 b0) (ixor a1 b1) (ixor a2 b2) (ixor a3 b3);
-    == {Vale.Def.Opaque_s.reveal_opaque quad32_xor_def}
+    == {quad32_xor_reveal ()}
     quad32_xor (to_quad32 a) (to_quad32 b);
   }
 

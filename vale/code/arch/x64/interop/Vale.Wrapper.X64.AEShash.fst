@@ -69,7 +69,7 @@ let aes128_keyhash_init_stdcall key roundkeys_b hkeys_b =
   in lemma_aux2 ()
 #pop-options
 
-#push-options "--z3cliopt 'smt.arith.nl=true'"
+#push-options "--z3cliopt smt.arith.nl=true"
 inline_for_extraction
 let aes256_keyhash_init_stdcall key roundkeys_b hkeys_b =
   let h0 = get() in
