@@ -253,7 +253,7 @@ EverCrypt_aes128_key_s *EverCrypt_aes128_create(uint8_t *k1)
 
 KRML_DEPRECATED("Please use EverCrypt_CTR.h (from C) or EverCrypt.CTR.fsti (from F*) ")
 
-void EverCrypt_aes128_compute(EverCrypt_aes128_key_s *k1, uint8_t *plain, uint8_t *cipher1)
+void EverCrypt_aes128_compute(EverCrypt_aes128_key_s *k1, uint8_t *plain, uint8_t *cipher)
 {
   EverCrypt_aes128_key_s k2 = *k1;
   if (true && EverCrypt_uu___is_AES128_VALE(k2))
@@ -262,7 +262,7 @@ void EverCrypt_aes128_compute(EverCrypt_aes128_key_s *k1, uint8_t *plain, uint8_
     {
       uint8_t *sbox = k2.case_AES128_VALE.sbox;
       uint8_t *w1 = k2.case_AES128_VALE.w;
-      aes128_encrypt_one_block(cipher1, plain, w1, sbox);
+      aes128_encrypt_one_block(cipher, plain, w1, sbox);
       return;
     }
     KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
@@ -277,7 +277,7 @@ void EverCrypt_aes128_compute(EverCrypt_aes128_key_s *k1, uint8_t *plain, uint8_
     {
       uint8_t *sbox = k2.case_AES128_HACL.sbox;
       uint8_t *w1 = k2.case_AES128_HACL.w;
-      EverCrypt_Hacl_aes128_cipher(cipher1, plain, w1, sbox);
+      EverCrypt_Hacl_aes128_cipher(cipher, plain, w1, sbox);
       return;
     }
     KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
@@ -472,7 +472,7 @@ EverCrypt_aes256_key_s *EverCrypt_aes256_create(uint8_t *k1)
 
 KRML_DEPRECATED("Please use EverCrypt_CTR.h (from C) or EverCrypt.CTR.fsti (from F*) ")
 
-void EverCrypt_aes256_compute(EverCrypt_aes256_key_s *k1, uint8_t *plain, uint8_t *cipher1)
+void EverCrypt_aes256_compute(EverCrypt_aes256_key_s *k1, uint8_t *plain, uint8_t *cipher)
 {
   EverCrypt_aes256_key_s k2 = *k1;
   if (true && EverCrypt_uu___is_AES256_HACL(k2))
@@ -481,7 +481,7 @@ void EverCrypt_aes256_compute(EverCrypt_aes256_key_s *k1, uint8_t *plain, uint8_
     {
       uint8_t *sbox = k2.case_AES256_HACL.sbox;
       uint8_t *w1 = k2.case_AES256_HACL.w;
-      EverCrypt_Hacl_aes256_cipher(cipher1, plain, w1, sbox);
+      EverCrypt_Hacl_aes256_cipher(cipher, plain, w1, sbox);
       return;
     }
     KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
@@ -541,7 +541,7 @@ EverCrypt_aes128_gcm_encrypt(
   uint32_t adlen,
   uint8_t *plaintext,
   uint32_t len,
-  uint8_t *cipher1,
+  uint8_t *cipher,
   uint8_t *tag
 )
 {
@@ -582,12 +582,12 @@ EverCrypt_aes128_gcm_encrypt(
         .iv = iv_, .expanded_key = expanded, .cipher = cipher_, .tag = tag
       };
     old_gcm128_encrypt(&b);
-    memcpy(cipher1, cipher_, len * sizeof cipher_[0U]);
+    memcpy(cipher, cipher_, len * sizeof cipher_[0U]);
     return;
   }
   if (EverCrypt_AutoConfig2_wants_openssl())
   {
-    EverCrypt_OpenSSL_aes128_gcm_encrypt(key, iv, ad, adlen, plaintext, len, cipher1, tag);
+    EverCrypt_OpenSSL_aes128_gcm_encrypt(key, iv, ad, adlen, plaintext, len, cipher, tag);
     return;
   }
   KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
@@ -607,7 +607,7 @@ EverCrypt_aes128_gcm_decrypt(
   uint32_t adlen,
   uint8_t *plaintext,
   uint32_t len,
-  uint8_t *cipher1,
+  uint8_t *cipher,
   uint8_t *tag
 )
 {
@@ -639,7 +639,7 @@ EverCrypt_aes128_gcm_decrypt(
     uint8_t ad_[(adlen + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U];
     memset(ad_, 0U, (adlen + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof ad_[0U]);
     memcpy(iv_, iv, (uint32_t)12U * sizeof iv[0U]);
-    memcpy(cipher_, cipher1, len * sizeof cipher1[0U]);
+    memcpy(cipher_, cipher, len * sizeof cipher[0U]);
     memcpy(ad_, ad, adlen * sizeof ad[0U]);
     gcm_args
     b =
@@ -657,7 +657,7 @@ EverCrypt_aes128_gcm_decrypt(
   }
   if (EverCrypt_AutoConfig2_wants_openssl())
   {
-    return EverCrypt_OpenSSL_aes128_gcm_decrypt(key, iv, ad, adlen, plaintext, len, cipher1, tag);
+    return EverCrypt_OpenSSL_aes128_gcm_decrypt(key, iv, ad, adlen, plaintext, len, cipher, tag);
   }
   KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
     __FILE__,
@@ -676,7 +676,7 @@ EverCrypt_aes256_gcm_encrypt(
   uint32_t adlen,
   uint8_t *plaintext,
   uint32_t len,
-  uint8_t *cipher1,
+  uint8_t *cipher,
   uint8_t *tag
 )
 {
@@ -717,12 +717,12 @@ EverCrypt_aes256_gcm_encrypt(
         .iv = iv_, .expanded_key = expanded, .cipher = cipher_, .tag = tag
       };
     old_gcm256_encrypt(&b);
-    memcpy(cipher1, cipher_, len * sizeof cipher_[0U]);
+    memcpy(cipher, cipher_, len * sizeof cipher_[0U]);
     return;
   }
   if (EverCrypt_AutoConfig2_wants_openssl())
   {
-    EverCrypt_OpenSSL_aes256_gcm_encrypt(key, iv, ad, adlen, plaintext, len, cipher1, tag);
+    EverCrypt_OpenSSL_aes256_gcm_encrypt(key, iv, ad, adlen, plaintext, len, cipher, tag);
     return;
   }
   KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
@@ -742,7 +742,7 @@ EverCrypt_aes256_gcm_decrypt(
   uint32_t adlen,
   uint8_t *plaintext,
   uint32_t len,
-  uint8_t *cipher1,
+  uint8_t *cipher,
   uint8_t *tag
 )
 {
@@ -774,7 +774,7 @@ EverCrypt_aes256_gcm_decrypt(
     uint8_t ad_[(adlen + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U];
     memset(ad_, 0U, (adlen + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof ad_[0U]);
     memcpy(iv_, iv, (uint32_t)12U * sizeof iv[0U]);
-    memcpy(cipher_, cipher1, len * sizeof cipher1[0U]);
+    memcpy(cipher_, cipher, len * sizeof cipher[0U]);
     memcpy(ad_, ad, adlen * sizeof ad[0U]);
     gcm_args
     b =
@@ -792,7 +792,7 @@ EverCrypt_aes256_gcm_decrypt(
   }
   if (EverCrypt_AutoConfig2_wants_openssl())
   {
-    return EverCrypt_OpenSSL_aes256_gcm_decrypt(key, iv, ad, adlen, plaintext, len, cipher1, tag);
+    return EverCrypt_OpenSSL_aes256_gcm_decrypt(key, iv, ad, adlen, plaintext, len, cipher, tag);
   }
   KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
     __FILE__,
@@ -1299,7 +1299,7 @@ EverCrypt_aead_encrypt(
   uint32_t adlen,
   uint8_t *plaintext,
   uint32_t len,
-  uint8_t *cipher1,
+  uint8_t *cipher,
   uint8_t *tag
 )
 {
@@ -1339,7 +1339,7 @@ EverCrypt_aead_encrypt(
         .iv = iv_, .expanded_key = xk, .cipher = cipher_, .tag = tag
       };
     old_gcm128_encrypt(&b);
-    memcpy(cipher1, cipher_, len * sizeof cipher_[0U]);
+    memcpy(cipher, cipher_, len * sizeof cipher_[0U]);
     return;
   }
   if (true && EverCrypt_uu___is_AEAD_AES256_GCM_VALE(k1))
@@ -1377,7 +1377,7 @@ EverCrypt_aead_encrypt(
         .iv = iv_, .expanded_key = xk, .cipher = cipher_, .tag = tag
       };
     old_gcm256_encrypt(&b);
-    memcpy(cipher1, cipher_, len * sizeof cipher_[0U]);
+    memcpy(cipher, cipher_, len * sizeof cipher_[0U]);
     return;
   }
   if (true && EverCrypt_uu___is_AEAD_CHACHA20_POLY1305_HACL(k1))
@@ -1391,7 +1391,7 @@ EverCrypt_aead_encrypt(
     {
       key = KRML_EABORT(uint8_t *, "unreachable (pattern matches are exhaustive in F*)");
     }
-    Hacl_Chacha20Poly1305_32_aead_encrypt(key, iv, adlen, ad, len, plaintext, cipher1, tag);
+    Hacl_Chacha20Poly1305_32_aead_encrypt(key, iv, adlen, ad, len, plaintext, cipher, tag);
     return;
   }
   if (true && EverCrypt_uu___is_AEAD_OPENSSL(k1))
@@ -1405,7 +1405,7 @@ EverCrypt_aead_encrypt(
     {
       key = KRML_EABORT(FStar_Dyn_dyn, "unreachable (pattern matches are exhaustive in F*)");
     }
-    EverCrypt_OpenSSL_aead_encrypt(key, iv, ad, adlen, plaintext, len, cipher1, tag);
+    EverCrypt_OpenSSL_aead_encrypt(key, iv, ad, adlen, plaintext, len, cipher, tag);
     return;
   }
   KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
@@ -1425,7 +1425,7 @@ EverCrypt_aead_decrypt(
   uint32_t adlen,
   uint8_t *plaintext,
   uint32_t len,
-  uint8_t *cipher1,
+  uint8_t *cipher,
   uint8_t *tag
 )
 {
@@ -1456,7 +1456,7 @@ EverCrypt_aead_decrypt(
     uint8_t ad_[(adlen + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U];
     memset(ad_, 0U, (adlen + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof ad_[0U]);
     memcpy(iv_, iv, (uint32_t)12U * sizeof iv[0U]);
-    memcpy(cipher_, cipher1, len * sizeof cipher1[0U]);
+    memcpy(cipher_, cipher, len * sizeof cipher[0U]);
     memcpy(ad_, ad, adlen * sizeof ad[0U]);
     gcm_args
     b =
@@ -1498,7 +1498,7 @@ EverCrypt_aead_decrypt(
     uint8_t ad_[(adlen + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U];
     memset(ad_, 0U, (adlen + (uint32_t)15U) / (uint32_t)16U * (uint32_t)16U * sizeof ad_[0U]);
     memcpy(iv_, iv, (uint32_t)12U * sizeof iv[0U]);
-    memcpy(cipher_, cipher1, len * sizeof cipher1[0U]);
+    memcpy(cipher_, cipher, len * sizeof cipher[0U]);
     memcpy(ad_, ad, adlen * sizeof ad[0U]);
     gcm_args
     b =
@@ -1526,7 +1526,7 @@ EverCrypt_aead_decrypt(
       key = KRML_EABORT(uint8_t *, "unreachable (pattern matches are exhaustive in F*)");
     }
     uint32_t
-    r = Hacl_Chacha20Poly1305_32_aead_decrypt(key, iv, adlen, ad, len, plaintext, cipher1, tag);
+    r = Hacl_Chacha20Poly1305_32_aead_decrypt(key, iv, adlen, ad, len, plaintext, cipher, tag);
     return (uint32_t)1U - r;
   }
   if (true && EverCrypt_uu___is_AEAD_OPENSSL(k1))
@@ -1540,7 +1540,7 @@ EverCrypt_aead_decrypt(
     {
       key = KRML_EABORT(FStar_Dyn_dyn, "unreachable (pattern matches are exhaustive in F*)");
     }
-    return EverCrypt_OpenSSL_aead_decrypt(key, iv, ad, adlen, plaintext, len, cipher1, tag);
+    return EverCrypt_OpenSSL_aead_decrypt(key, iv, ad, adlen, plaintext, len, cipher, tag);
   }
   KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
     __FILE__,

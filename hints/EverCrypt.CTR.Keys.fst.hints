@@ -8,7 +8,7 @@
       0,
       [ "@query" ],
       0,
-      "56cb47a58bc7ae39855d0095fc00d1b0"
+      "a5cac2e4795f914750c9ce09b471ca97"
     ],
     [
       "EverCrypt.CTR.Keys.vale_impl",
@@ -17,7 +17,7 @@
       0,
       [ "@query", "assumption_Spec.Cipher.Expansion.impl__uu___haseq" ],
       0,
-      "6789fc7c331a72aa23bc082a041d3827"
+      "29b92ab3cc8933d43b180f9c6f14b556"
     ],
     [
       "EverCrypt.CTR.Keys.vale_alg_of_vale_impl",
@@ -40,7 +40,7 @@
         "refinement_interpretation_Tm_refine_c029c44ff4b4f840d75208dea95cad35"
       ],
       0,
-      "1683bb6e6f7f77a9adeea8c00a484be4"
+      "3d1ae8f7c7c17b0420e9b52f608548b0"
     ],
     [
       "EverCrypt.CTR.Keys.key_offset",
@@ -76,7 +76,7 @@
         "typing_EverCrypt.CTR.Keys.vale_alg_of_vale_impl", "unit_typing"
       ],
       0,
-      "9570dc3296812bc22ee98585e8404f97"
+      "2fa7537bb2bcc29f98d8ea74ceddbf45"
     ],
     [
       "EverCrypt.CTR.Keys.concrete_xkey_len",
@@ -161,7 +161,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "b7dffaa0150c1d24b83788b8381795d1"
+      "88112f8124c25ce88dc3692217fa7ceb"
     ],
     [
       "EverCrypt.CTR.Keys.aes_gcm_key_expansion",
@@ -210,7 +210,7 @@
         "unit_typing"
       ],
       0,
-      "c423910ceadb0fcc702643bea6426485"
+      "6eea851c4469f85de7b412e26fabf65c"
     ],
     [
       "EverCrypt.CTR.Keys.aes_gcm_keyhash_init",
@@ -260,7 +260,7 @@
         "unit_typing"
       ],
       0,
-      "85d9de78deaaf81891ba88d2a277b52c"
+      "f1abdd31253d8e8a5f4daa28edc1684d"
     ],
     [
       "EverCrypt.CTR.Keys.vale_expand",
@@ -352,9 +352,9 @@
         "equation_Spec.Cipher.Expansion.vale_xkey_length",
         "equation_Spec.GaloisField.felem", "equation_Spec.GaloisField.gf",
         "equation_Vale.AES.AES_s.is_aes_key_LE",
-        "equation_Vale.Def.Types_s.le_seq_quad32_to_bytes",
         "equation_Vale.Def.Types_s.quad32",
         "equation_Vale.Def.Words.Seq_s.seq_nat8_to_seq_nat32_LE",
+        "equation_Vale.Def.Words.Seq_s.seq_nat8_to_seq_uint8",
         "equation_Vale.Def.Words.Seq_s.seq_uint8_to_seq_nat8",
         "equation_Vale.Def.Words_s.nat32", "equation_Vale.Def.Words_s.nat8",
         "equation_Vale.Def.Words_s.natN", "equation_Vale.Lib.Seqs_s.compose",
@@ -412,13 +412,13 @@
         "projection_inverse_Spec.GaloisField.GF_t",
         "refinement_interpretation_Tm_refine_0ec011aea9f93256a3547ad9f0c667f1",
         "refinement_interpretation_Tm_refine_0fe8a12189cf4c417dda723cc135a9ac",
-        "refinement_interpretation_Tm_refine_22031f78f7e45c35d05f7046cff619c6",
         "refinement_interpretation_Tm_refine_35a0739c434508f48d0bb1d5cd5df9e8",
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Tm_refine_4541e819c92681ed9a776d05a593cda6",
         "refinement_interpretation_Tm_refine_4fa8e2dd96f8bb1e23e6574326e9e019",
         "refinement_interpretation_Tm_refine_507ed4c55777344d5e25694fb1d7ecf2",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_5ec32f80f1ef8635750d443333dbe93a",
         "refinement_interpretation_Tm_refine_779c54d3413fe40c75b3220acf1a3dba",
         "refinement_interpretation_Tm_refine_79f1f8b4d6774015af27e4432311c913",
         "refinement_interpretation_Tm_refine_7a82ef654f8b681bd9a3571401dece6c",
@@ -455,7 +455,7 @@
         "typing_Spec.Cipher.Expansion.concrete_xkey_length",
         "typing_Spec.GaloisField.__proj__GF__item__t",
         "typing_Tm_abs_12f0bbc5cd2aeb167bc7e771b588a4ca",
-        "typing_Vale.AES.AES_s.aes_encrypt_LE_def",
+        "typing_Vale.AES.AES_s.aes_encrypt_LE",
         "typing_Vale.AES.AES_s.key_to_round_keys_LE",
         "typing_Vale.AES.OptPublic.get_hkeys_reqs",
         "typing_Vale.Def.Types_s.le_seq_quad32_to_bytes",
@@ -474,7 +474,7 @@
         "typing_tok_Vale.AES.AES_s.AES_256@tok"
       ],
       0,
-      "ac04670080e875243b548973d5fc2296"
+      "a4209be62f6104a102a1893269c8d5a1"
     ]
   ]
 ]
