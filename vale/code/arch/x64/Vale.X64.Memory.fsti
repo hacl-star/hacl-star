@@ -26,6 +26,12 @@ let base_typ_as_vale_type (t:base_typ) : Tot eqtype =
   | TUInt64 -> nat64
   | TUInt128 -> quad32
 
+let scale_by (scale index:int) : int = scale * index
+unfold let scale2 (index:int) : int = scale_by 2 index
+unfold let scale4 (index:int) : int = scale_by 4 index
+unfold let scale8 (index:int) : int = scale_by 8 index
+unfold let scale16 (index:int) : int = scale_by 16 index
+
 val buffer (t:base_typ) : Type u#1
 val buffer_as_seq (#t:base_typ) (h:vale_heap) (b:buffer t) : GTot (Seq.seq (base_typ_as_vale_type t))
 val buffer_readable (#t:base_typ) (h:vale_heap) (b:buffer t) : GTot prop0
@@ -213,7 +219,7 @@ val lemma_valid_mem64 (b:buffer64) (i:nat) (h:vale_heap) : Lemma
     buffer_readable h b
   )
   (ensures
-    valid_mem64 (buffer_addr b h + 8 * i) h
+    valid_mem64 (buffer_addr b h + scale8 i) h
   )
 
 val lemma_writeable_mem64 (b:buffer64) (i:nat) (h:vale_heap) : Lemma
@@ -223,7 +229,7 @@ val lemma_writeable_mem64 (b:buffer64) (i:nat) (h:vale_heap) : Lemma
     buffer_writeable b
   )
   (ensures
-    writeable_mem64 (buffer_addr b h + 8 * i) h
+    writeable_mem64 (buffer_addr b h + scale8 i) h
   )
 
 val lemma_load_mem64 (b:buffer64) (i:nat) (h:vale_heap) : Lemma
@@ -232,7 +238,7 @@ val lemma_load_mem64 (b:buffer64) (i:nat) (h:vale_heap) : Lemma
     buffer_readable h b
   )
   (ensures
-    load_mem64 (buffer_addr b h + 8 * i) h == buffer_read b i h
+    load_mem64 (buffer_addr b h + scale8 i) h == buffer_read b i h
   )
 
 val lemma_store_mem64 (b:buffer64) (i:nat) (v:nat64) (h:vale_heap) : Lemma
@@ -242,7 +248,7 @@ val lemma_store_mem64 (b:buffer64) (i:nat) (v:nat64) (h:vale_heap) : Lemma
     buffer_writeable b
   )
   (ensures
-    store_mem64 (buffer_addr b h + 8 * i) v h == buffer_write b i v h
+    store_mem64 (buffer_addr b h + scale8 i) v h == buffer_write b i v h
   )
 
 val lemma_valid_mem128 (b:buffer128) (i:nat) (h:vale_heap) : Lemma
@@ -251,7 +257,7 @@ val lemma_valid_mem128 (b:buffer128) (i:nat) (h:vale_heap) : Lemma
     buffer_readable h b
   )
   (ensures
-    valid_mem128 (buffer_addr b h + 16 * i) h
+    valid_mem128 (buffer_addr b h + scale16 i) h
   )
 
 val lemma_writeable_mem128 (b:buffer128) (i:nat) (h:vale_heap) : Lemma
@@ -261,7 +267,7 @@ val lemma_writeable_mem128 (b:buffer128) (i:nat) (h:vale_heap) : Lemma
     buffer_writeable b
   )
   (ensures
-    writeable_mem128 (buffer_addr b h + 16 * i) h
+    writeable_mem128 (buffer_addr b h + scale16 i) h
   )
 
 val lemma_load_mem128 (b:buffer128) (i:nat) (h:vale_heap) : Lemma
@@ -270,7 +276,7 @@ val lemma_load_mem128 (b:buffer128) (i:nat) (h:vale_heap) : Lemma
     buffer_readable h b
   )
   (ensures
-    load_mem128 (buffer_addr b h + 16 * i) h == buffer_read b i h
+    load_mem128 (buffer_addr b h + scale16 i) h == buffer_read b i h
   )
 
 val lemma_store_mem128 (b:buffer128) (i:nat) (v:quad32) (h:vale_heap) : Lemma
@@ -280,7 +286,7 @@ val lemma_store_mem128 (b:buffer128) (i:nat) (v:quad32) (h:vale_heap) : Lemma
     buffer_writeable b
   )
   (ensures
-    store_mem128 (buffer_addr b h + 16 * i) v h == buffer_write b i v h
+    store_mem128 (buffer_addr b h + scale16 i) v h == buffer_write b i v h
   )
 
 //Memtaint related functions
@@ -299,7 +305,7 @@ val lemma_valid_taint64
   : Lemma
   (requires valid_taint_buf64 b vale_heap memTaint t /\ buffer_readable vale_heap b)
   (ensures (
-    let ptr = buffer_addr b vale_heap + 8 * i in
+    let ptr = buffer_addr b vale_heap + scale8 i in
     forall i'.{:pattern Map.sel memTaint i'} i' >= ptr /\ i' < ptr + 8 ==> Map.sel memTaint i' == t))
 
 val lemma_valid_taint128
@@ -311,7 +317,7 @@ val lemma_valid_taint128
   : Lemma
   (requires valid_taint_buf128 b vale_heap memTaint t /\ buffer_readable vale_heap b)
   (ensures (
-    let ptr = buffer_addr b vale_heap + 16 * i in
+    let ptr = buffer_addr b vale_heap + scale16 i in
     forall i'.{:pattern Map.sel memTaint i'} i' >= ptr /\ i' < ptr + 16 ==> Map.sel memTaint i' == t))
 
 val same_memTaint64
