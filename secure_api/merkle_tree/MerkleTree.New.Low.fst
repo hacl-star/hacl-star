@@ -1698,6 +1698,7 @@ val path_insert:
       V.size_of (B.get h1 p 0) = V.size_of (B.get h0 p 0) + 1ul /\
       S.equal (lift_path h1 mtr p)
               (MTH.path_insert (lift_path h0 mtr p) (Rgl?.r_repr hreg h0 hp))))
+#push-options "--z3rlimit 10 --initial_fuel 1 --max_fuel 1"
 let path_insert #hsz mtr p hp =
   let pv = B.index p 0ul in
   let hh0 = HST.get () in
@@ -1726,6 +1727,7 @@ let path_insert #hsz mtr p hp =
                     0 (S.length (V.as_seq hh1 ipv))));
   lift_path_eq hh1 (S.snoc (V.as_seq hh0 pv) hp) (V.as_seq hh0 pv)
     0 (S.length (V.as_seq hh0 pv))
+#pop-options
 
 // For given a target index `k`, the number of elements (in the tree) `j`,
 // and a boolean flag (to check the existence of rightmost hashes), we can
@@ -1795,6 +1797,7 @@ val mt_get_path_step:
              (MTH.mt_get_path_step
                (U32.v lv) (RV.as_seq h0 hs) (RV.as_seq h0 rhs)
                (U32.v i) (U32.v j) (U32.v k) (lift_path h0 mtr p) actd))))
+#push-options "--z3rlimit 100 --initial_fuel 1 --max_fuel 1 --initial_ifuel 2 --max_ifuel 2"
 let mt_get_path_step #hsz lv mtr hs rhs i j k p actd =
   let hh0 = HST.get () in
   let ofs = offset_of i in
@@ -1816,6 +1819,7 @@ let mt_get_path_step #hsz lv mtr hs rhs i j k p actd =
                   (B.frameOf (V.get hh0 (V.get hh0 hs lv) (k + 1ul - ofs))));
          path_insert mtr p (V.index (V.index hs lv) (k + 1ul - ofs)))
   end
+#pop-options
 
 private
 val mt_get_path_:
@@ -1848,7 +1852,7 @@ val mt_get_path_:
              (MTH.mt_get_path_ (U32.v lv) (RV.as_seq h0 hs) (RV.as_seq h0 rhs)
                (U32.v i) (U32.v j) (U32.v k) (lift_path h0 mtr p) actd))))
    (decreases (32 - U32.v lv))
-#push-options "--z3rlimit 300 --max_ifuel 2 --initial_ifuel 2"
+#push-options "--z3rlimit 300 --initial_fuel 1 --max_fuel 1 --max_ifuel 2 --initial_ifuel 2"
 let rec mt_get_path_ #hsz lv mtr hs rhs i j k p actd =
   let hh0 = HST.get () in
   mt_safe_elts_spec hh0 lv hs i j;
