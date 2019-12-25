@@ -1,4 +1,4 @@
-module Hacl.Spec.Bignum.Montgomery.Lemmas
+module Hacl.Spec.Montgomery.Lemmas
 
 open FStar.Mul
 
@@ -12,6 +12,53 @@ https://eprint.iacr.org/2017/1057.pdf *)
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
+val eea_pow2_odd: a:nat -> n:pos ->
+  Pure (tuple2 nat nat)
+  (requires n % 2 = 1)
+  (ensures  fun (d, k) -> pow2 a * d == 1 + k * n)
+let eea_pow2_odd a n = admit()
+
+
+val mont_preconditions_d: rLen:nat -> n:pos{n > 1} -> Lemma
+  (requires  n % 2 = 1)
+  (ensures  (let d, k = eea_pow2_odd (64 * rLen) n in pow2 (64 * rLen) * d % n == 1))
+
+let mont_preconditions_d rLen n =
+  let d, k = eea_pow2_odd (64 * rLen) n in
+  calc (==) {
+    pow2 (64 * rLen) * d % n;
+    (==) { }
+    (1 + k * n) % n;
+    (==) { Math.Lemmas.modulo_addition_lemma 1 n k }
+    1 % n;
+    (==) { Math.Lemmas.small_mod 1 n }
+    1;
+  };
+  assert (pow2 (64 * rLen) * d % n == 1)
+
+
+val mont_preconditions_n0: n:pos{n > 1} -> mu:nat -> Lemma
+  (requires (1 + (n % pow2 64) * mu) % pow2 64 == 0)
+  (ensures  (1 + n * mu) % pow2 64 == 0)
+
+let mont_preconditions_n0 n mu =
+  calc (==) {
+    (1 + n * mu) % pow2 64;
+    (==) { Math.Lemmas.lemma_mod_plus_distr_r 1 (n * mu) (pow2 64) }
+    (1 + n * mu % pow2 64) % pow2 64;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_l n mu (pow2 64) }
+    (1 + n % pow2 64 * mu % pow2 64) % pow2 64;
+    (==) { Math.Lemmas.lemma_mod_plus_distr_r 1 (n % pow2 64 * mu) (pow2 64) }
+    (1 + n % pow2 64 * mu) % pow2 64;
+    (==) { assert ((1 + (n % pow2 64) * mu) % pow2 64 == 0) }
+    0;
+  };
+  assert ((1 + n * mu) % pow2 64 == 0)
+
+///
+///  High-level specification of Montgomery arithmetic
+///
+
 val smont_reduction_f: rLen:nat -> n:pos -> mu:nat -> i:nat{i < rLen} -> c:nat -> nat
 let smont_reduction_f rLen n mu i c =
   let c_i = c / pow2 (64 * i) % pow2 64 in
@@ -19,10 +66,35 @@ let smont_reduction_f rLen n mu i c =
   let res = c + n * q_i * pow2 (64 * i) in
   res
 
+val mont_reduction: rLen:nat -> n:pos -> mu:nat -> c:nat -> res:nat
+let mont_reduction rLen n mu c =
+  let res = repeati rLen (smont_reduction_f rLen n mu) c in
+  res / pow2 (64 * rLen)
 
-val mont_reduction_lemma_step_bound_aux: rLen:nat -> n:pos -> q_i:nat{q_i < pow2 64} -> i:pos{i <= rLen} -> c:nat -> res0:nat -> Lemma
-   (requires res0 <= c + (pow2 (64 * (i - 1)) - 1) * n)
-   (ensures (res0 + n * q_i * pow2 (64 * (i - 1)) <= c + (pow2 (64 * i) - 1) * n))
+val to_mont: rLen:nat -> n:pos -> mu:nat -> a:nat -> aM:nat
+let to_mont rLen n mu a =
+  let r2 = pow2 (128 * rLen) % n in
+  let c = a * r2 in
+  mont_reduction rLen n mu c
+
+val from_mont: rLen:nat -> n:pos -> mu:nat -> aM:nat -> a:nat
+let from_mont rLen n mu aM = mont_reduction rLen n mu aM
+
+val mont_mul: rLen:nat -> n:pos -> mu:nat -> a:nat -> b:nat -> res:nat
+let mont_mul rLen n mu a b =
+  let c = a * b in
+  mont_reduction rLen n mu c
+
+
+///
+///  Lemma (mont_reduction rLen n mu c % n == c * d % n)
+///
+
+
+val mont_reduction_lemma_step_bound_aux:
+  rLen:nat -> n:pos -> q_i:nat{q_i < pow2 64} -> i:pos{i <= rLen} -> c:nat -> res0:nat -> Lemma
+  (requires res0 <= c + (pow2 (64 * (i - 1)) - 1) * n)
+  (ensures  res0 + n * q_i * pow2 (64 * (i - 1)) <= c + (pow2 (64 * i) - 1) * n)
 
 let mont_reduction_lemma_step_bound_aux rLen n q_i i c res0 =
   calc (<=) {
@@ -48,9 +120,10 @@ let mont_reduction_lemma_step_bound_aux rLen n q_i i c res0 =
   }
 
 
-val mont_reduction_lemma_step_bound: rLen:nat -> n:pos -> mu:nat -> i:pos{i <= rLen} -> c:nat -> res0:nat -> Lemma
-   (requires res0 <= c + (pow2 (64 * (i - 1)) - 1) * n)
-   (ensures (let res = smont_reduction_f rLen n mu (i - 1) res0 in res <= c + (pow2 (64 * i) - 1) * n))
+val mont_reduction_lemma_step_bound:
+  rLen:nat -> n:pos -> mu:nat -> i:pos{i <= rLen} -> c:nat -> res0:nat -> Lemma
+  (requires res0 <= c + (pow2 (64 * (i - 1)) - 1) * n)
+  (ensures  smont_reduction_f rLen n mu (i - 1) res0 <= c + (pow2 (64 * i) - 1) * n)
 
 let mont_reduction_lemma_step_bound rLen n mu i c res0 =
   let res = smont_reduction_f rLen n mu (i - 1) res0 in
@@ -61,9 +134,10 @@ let mont_reduction_lemma_step_bound rLen n mu i c res0 =
   assert (res <= c + (pow2 (64 * i) - 1) * n)
 
 
-val mont_reduction_lemma_step_modr: rLen:nat -> n:pos -> mu:nat -> i:pos{i <= rLen} -> c:nat -> res0:nat -> Lemma
-   (requires (res0 % pow2 (64 * (i - 1)) == 0 /\ (1 + n * mu) % pow2 64 == 0))
-   (ensures (let res = smont_reduction_f rLen n mu (i - 1) res0 in res % pow2 (64 * i) == 0))
+val mont_reduction_lemma_step_modr:
+  rLen:nat -> n:pos -> mu:nat -> i:pos{i <= rLen} -> c:nat -> res0:nat -> Lemma
+  (requires res0 % pow2 (64 * (i - 1)) == 0 /\ (1 + n * mu) % pow2 64 == 0)
+  (ensures  smont_reduction_f rLen n mu (i - 1) res0 % pow2 (64 * i) == 0)
 
 let mont_reduction_lemma_step_modr rLen n mu i c res0 =
   let res = smont_reduction_f rLen n mu (i - 1) res0 in
@@ -102,9 +176,10 @@ let mont_reduction_lemma_step_modr rLen n mu i c res0 =
   assert (res % pow2 (64 * i) == 0)
 
 
-val mont_reduction_lemma_step_modn: rLen:nat -> n:pos -> mu:nat -> i:pos{i <= rLen} -> c:nat -> res0:nat -> Lemma
-   (requires res0 % n == c % n)
-   (ensures (let res = smont_reduction_f rLen n mu (i - 1) res0 in res % n == c % n))
+val mont_reduction_lemma_step_modn:
+  rLen:nat -> n:pos -> mu:nat -> i:pos{i <= rLen} -> c:nat -> res0:nat -> Lemma
+  (requires res0 % n == c % n)
+  (ensures  smont_reduction_f rLen n mu (i - 1) res0 % n == c % n)
 
 let mont_reduction_lemma_step_modn rLen n mu i c res0 =
   let res = smont_reduction_f rLen n mu (i - 1) res0 in
@@ -115,11 +190,13 @@ let mont_reduction_lemma_step_modn rLen n mu i c res0 =
   Math.Lemmas.modulo_addition_lemma res0 n (q_i * pow2 (64 * (i - 1)))
 
 
-val mont_reduction_lemma_step: rLen:nat -> n:pos -> mu:nat -> i:pos{i <= rLen} -> c:nat -> res0:nat -> Lemma
-   (requires (res0 % n == c % n /\ res0 % pow2 (64 * (i - 1)) == 0 /\
-     res0 <= c + (pow2 (64 * (i - 1)) - 1) * n /\ (1 + n * mu) % pow2 64 == 0))
-   (ensures  (let res = smont_reduction_f rLen n mu (i - 1) res0 in
-     res % n == c % n /\ res % pow2 (64 * i) == 0 /\ res <= c + (pow2 (64 * i) - 1) * n))
+val mont_reduction_lemma_step:
+  rLen:nat -> n:pos -> mu:nat -> i:pos{i <= rLen} -> c:nat -> res0:nat -> Lemma
+  (requires
+    res0 % n == c % n /\ res0 % pow2 (64 * (i - 1)) == 0 /\
+    res0 <= c + (pow2 (64 * (i - 1)) - 1) * n /\ (1 + n * mu) % pow2 64 == 0)
+  (ensures  (let res = smont_reduction_f rLen n mu (i - 1) res0 in
+    res % n == c % n /\ res % pow2 (64 * i) == 0 /\ res <= c + (pow2 (64 * i) - 1) * n))
 
 let mont_reduction_lemma_step rLen n mu i c res0 =
   mont_reduction_lemma_step_bound rLen n mu i c res0;
@@ -130,30 +207,22 @@ let mont_reduction_lemma_step rLen n mu i c res0 =
 val mont_reduction_loop_lemma: rLen:nat -> n:pos -> mu:nat -> i:nat{i <= rLen} -> c:nat -> Lemma
   (requires (1 + n * mu) % pow2 64 == 0)
   (ensures  (let res = repeati i (smont_reduction_f rLen n mu) c in
-   res % n == c % n /\ res % pow2 (64 * i) == 0 /\ res <= c + (pow2 (64 * i) - 1) * n))
+    res % n == c % n /\ res % pow2 (64 * i) == 0 /\ res <= c + (pow2 (64 * i) - 1) * n))
 
 let rec mont_reduction_loop_lemma rLen n mu i c =
   let res : nat = repeati i (smont_reduction_f rLen n mu) c in
-  if i = 0 then begin
-    eq_repeati0 i (smont_reduction_f rLen n mu) c;
-    () end
+  if i = 0 then
+    eq_repeati0 i (smont_reduction_f rLen n mu) c
   else begin
     unfold_repeati i (smont_reduction_f rLen n mu) c (i - 1);
     let res0 : nat = repeati (i - 1) (smont_reduction_f rLen n mu) c in
     mont_reduction_loop_lemma rLen n mu (i - 1) c;
-    mont_reduction_lemma_step rLen n mu i c res0;
-    () end
-
-
-val mont_reduction: rLen:nat -> n:pos -> mu:nat -> c:nat -> res:nat
-let mont_reduction rLen n mu c =
-  let res = repeati rLen (smont_reduction_f rLen n mu) c in
-  res / pow2 (64 * rLen)
+    mont_reduction_lemma_step rLen n mu i c res0 end
 
 
 val mont_reduction_lemma: rLen:nat -> n:pos -> d:nat-> mu:nat -> c:nat -> Lemma
   (requires (1 + n * mu) % pow2 64 == 0 /\ pow2 (64 * rLen) * d % n == 1)
-  (ensures  (let res = mont_reduction rLen n mu c in res % n == c * d % n))
+  (ensures  mont_reduction rLen n mu c % n == c * d % n)
 
 let mont_reduction_lemma rLen n d mu c =
   let r = pow2 (64 * rLen) in
@@ -180,16 +249,13 @@ let mont_reduction_lemma rLen n d mu c =
   assert (res / r % n == c * d % n)
 
 
-val to_mont: rLen:nat -> n:pos -> mu:nat -> a:nat -> aM:nat
-let to_mont rLen n mu a =
-  let r2 = pow2 (128 * rLen) % n in
-  let c = a * r2 in
-  mont_reduction rLen n mu c
+///
+///  Lemma (to_mont rLen n mu a % n == a * pow2 (64 * rLen) % n)
+///
 
-
-val to_mont_lemma_aux: a:nat -> b:nat -> c:nat -> n:pos -> Lemma
+val lemma_mod_mul_distr3: a:nat -> b:nat -> c:nat -> n:pos -> Lemma
   (a * (b % n) * c % n == a * b * c % n)
-let to_mont_lemma_aux a b c n =
+let lemma_mod_mul_distr3 a b c n =
   calc (==) {
     a * (b % n) * c % n;
     (==) { }
@@ -205,7 +271,7 @@ let to_mont_lemma_aux a b c n =
 
 val to_mont_lemma: rLen:nat -> n:pos -> d:nat-> mu:nat -> a:nat -> Lemma
   (requires (1 + n * mu) % pow2 64 == 0 /\ pow2 (64 * rLen) * d % n == 1)
-  (ensures  (let aM = to_mont rLen n mu a in aM % n == a * pow2 (64 * rLen) % n))
+  (ensures  to_mont rLen n mu a % n == a * pow2 (64 * rLen) % n)
 
 let to_mont_lemma rLen n d mu a =
   let r = pow2 (64 * rLen) in
@@ -221,7 +287,7 @@ let to_mont_lemma rLen n d mu a =
     a * r2 * d % n;
     (==) { Math.Lemmas.pow2_plus (64 * rLen) (64 * rLen) }
     a * (r * r % n) * d % n;
-    (==) { to_mont_lemma_aux a (r * r) d n }
+    (==) { lemma_mod_mul_distr3 a (r * r) d n }
     a * (r * r) * d % n;
     (==) { Math.Lemmas.paren_mul_right a r r }
     a * r * r * d % n;
@@ -234,43 +300,69 @@ let to_mont_lemma rLen n d mu a =
     };
   assert (aM % n == a * r % n)
 
-
-val from_mont: rLen:nat -> n:pos -> mu:nat -> aM:nat -> a:nat
-let from_mont rLen n mu aM = mont_reduction rLen n mu aM
-
+///
+///  Lemma (from_mont rLen n mu aM % n == aM * d % n)
+///
 
 val from_mont_lemma: rLen:nat -> n:pos -> d:nat -> mu:nat -> aM:nat -> Lemma
   (requires (1 + n * mu) % pow2 64 == 0 /\ pow2 (64 * rLen) * d % n == 1)
-  (ensures  (let a = from_mont rLen n mu aM in a % n == aM * d % n))
+  (ensures  from_mont rLen n mu aM % n == aM * d % n)
 
 let from_mont_lemma rLen n d mu aM =
   mont_reduction_lemma rLen n d mu aM
 
 
+///
+///  Fits-related lemmas
+///
+
 (* To avoid the conditional subtraction, we need to select R s.t. 4 * N < R *)
 (* It means that the montgomery multiplication will take 0 <= A, B < 2 * N and
    return C % N = A * B * R % N /\ C < 2 * N *)
 
-val lemma_mult_lt_right: a:pos -> b:pos -> c:pos -> Lemma
-  (requires b < c)
-  (ensures  b * a < c * a)
-let lemma_mult_lt_right a b c = ()
+val mont_preconditions_rLen: nLen:nat -> n:pos{n < pow2 (64 * nLen)} ->
+  Lemma (4 * n < pow2 (64 * (nLen + 1)))
+
+let mont_preconditions_rLen nLen n =
+  calc (<) {
+    4 * n;
+    (<) { Math.Lemmas.lemma_mult_lt_left 4 n (pow2 (64 * nLen)) }
+    4 * pow2 (64 * nLen);
+    (==) { assert_norm (pow2 2 = 4) }
+    pow2 2 * pow2 (64 * nLen);
+    (==) { Math.Lemmas.pow2_plus 2 (64 * nLen) }
+    pow2 (2 + 64 * nLen);
+    (<) { Math.Lemmas.pow2_lt_compat (64 + 64 * nLen) (2 + 64 * nLen) }
+    pow2 (64 + 64 * nLen);
+    (==) { Math.Lemmas.distributivity_add_right 64 1 nLen }
+    pow2 (64 * (nLen + 1));
+  };
+  assert (4 * n < pow2 (64 * (nLen + 1)))
 
 
-val div_mul_lt: b:pos -> a:int -> n:int -> Lemma
-  (requires a < n * b)
-  (ensures  a / b < n)
-let div_mul_lt b a n = ()
+val mont_preconditions:
+  nLen:nat -> n:pos{1 < n /\ n < pow2 (64 * nLen)} -> mu:nat -> Lemma
+  (requires n % 2 = 1 /\ (1 + (n % pow2 64) * mu) % pow2 64 == 0)
+  (ensures
+    (let r = pow2 (64 * (nLen + 1)) in
+     let d, _ = eea_pow2_odd (64 * (nLen + 1)) n in
+     r * d % n == 1 /\ 4 * n < r /\ (1 + n * mu) % pow2 64 == 0))
 
+let mont_preconditions nLen n mu =
+  mont_preconditions_d (nLen + 1) n;
+  mont_preconditions_n0 n mu;
+  mont_preconditions_rLen nLen n
+
+///
+///  Lemma (mont_reduction rLen n mu c < 2 * n)
+///
 
 val lemma_fits_aux: c:nat -> r:pos -> n:pos -> Lemma
   (requires c < 4 * n * n /\ 4 * n < r)
   (ensures (c - n) / r < n)
 
 let lemma_fits_aux c r n =
-  lemma_mult_lt_right n (4 * n) r;
   assert (c < r * n);
-  div_mul_lt r c n;
   assert (c / r < n);
   Math.Lemmas.lemma_div_le (c - n) c r
 
@@ -278,8 +370,8 @@ let lemma_fits_aux c r n =
 val mont_mult_lemma_fits: rLen:nat -> n:pos -> d:nat-> mu:nat -> c:nat -> Lemma
   (requires
     (1 + n * mu) % pow2 64 == 0 /\ pow2 (64 * rLen) * d % n == 1 /\
-    4 * n < pow2 (64 * rLen) /\ c < 4 * n * n)
-  (ensures (let res = mont_reduction rLen n mu c in res < 2 * n))
+     4 * n < pow2 (64 * rLen) /\ c < 4 * n * n)
+  (ensures mont_reduction rLen n mu c < 2 * n)
 
 let mont_mult_lemma_fits rLen n d mu c =
   let r = pow2 (64 * rLen) in
@@ -300,11 +392,15 @@ let mont_mult_lemma_fits rLen n d mu c =
   assert (res / r < 2 * n)
 
 
+///
+///  Lemma (to_mont rLen n mu a < 2 * n)
+///
+
 val to_mont_lemma_fits: rLen:nat -> n:pos -> d:nat-> mu:nat -> a:nat -> Lemma
   (requires
     (1 + n * mu) % pow2 64 == 0 /\ pow2 (64 * rLen) * d % n == 1 /\
     4 * n < pow2 (64 * rLen) /\ a < n)
-  (ensures (let aM = to_mont rLen n mu a in aM < 2 * n))
+  (ensures to_mont rLen n mu a < 2 * n)
 
 let to_mont_lemma_fits rLen n d mu a =
   let r2 = pow2 (128 * rLen) % n in
@@ -314,6 +410,10 @@ let to_mont_lemma_fits rLen n d mu a =
   assert (a * r2 < 4 * n * n);
   mont_mult_lemma_fits rLen n d mu c
 
+
+///
+///  Lemma (from_mont rLen n mu aM <= n)
+///
 
 val lemma_fits_aux1: aM:nat -> r:pos -> n:pos -> Lemma
   (requires aM < 2 * n /\ 4 * n < r)
@@ -329,7 +429,7 @@ val from_mont_lemma_fits: rLen:nat -> n:pos -> d:nat-> mu:nat -> aM:nat -> Lemma
   (requires
     (1 + n * mu) % pow2 64 == 0 /\ pow2 (64 * rLen) * d % n == 1 /\
     4 * n < pow2 (64 * rLen) /\ aM < 2 * n)
-  (ensures (let a = from_mont rLen n mu aM in a <= n))
+  (ensures from_mont rLen n mu aM <= n)
 
 let from_mont_lemma_fits rLen n d mu aM =
   let r = pow2 (64 * rLen) in
@@ -350,18 +450,17 @@ let from_mont_lemma_fits rLen n d mu aM =
   assert (res / r <= n)
 
 
-val mont_mul: rLen:nat -> n:pos -> mu:nat -> a:nat -> b:nat -> res:nat
-let mont_mul rLen n mu a b =
-  let c = a * b in
-  mont_reduction rLen n mu c
-
+///
+///  Lemma (mont_mul rLen n mu a b < 2 * n)
+///
 
 val mont_mul_lemma_fits: rLen:nat -> n:pos -> d:nat-> mu:nat -> a:nat -> b:nat -> Lemma
   (requires
     (1 + n * mu) % pow2 64 == 0 /\ pow2 (64 * rLen) * d % n == 1 /\
     4 * n < pow2 (64 * rLen) /\ a < 2 * n /\ b < 2 * n)
-  (ensures (let res = mont_mul rLen n mu a b in res < 2 * n))
+  (ensures mont_mul rLen n mu a b < 2 * n)
 
 let mont_mul_lemma_fits rLen n d mu a b =
   let c = a * b in
+  assert (c < 4 * n * n);
   mont_mult_lemma_fits rLen n d mu c

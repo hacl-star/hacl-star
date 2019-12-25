@@ -1,22 +1,78 @@
-module Hacl.Spec.Bignum.Lemmas
+module Hacl.Spec.Exponentiation.Lemmas
 
 open FStar.Mul
 
 module S = Spec.RSAPSS
-module M = Hacl.Spec.Bignum.Montgomery.Lemmas
+module M = Hacl.Spec.Montgomery.Lemmas
 module Loops = Lib.LoopCombinators
 
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
+///
+///  Generic math lemmas
+///
 val lemma_mul_ass3: a:nat -> b:nat -> c:nat -> Lemma
   (a * b * c == a * c * b)
 let lemma_mul_ass3 a b c = ()
+
+val lemma_mul_ass5_aux: a:nat -> b:nat -> c:nat -> d:nat -> e:nat -> Lemma
+  (a * b * c * d * e == a * b * (c * d * e))
+let lemma_mul_ass5_aux a b c d e =
+  calc (==) {
+    a * b * c * d * e;
+    (==) { Math.Lemmas.paren_mul_right (a * b) c d }
+    a * b * (c * d) * e;
+    (==) { Math.Lemmas.paren_mul_right (a * b) (c * d) e }
+    a * b * (c * d * e);
+  }
+
+
+val lemma_mul_ass5: a:nat -> b:nat -> c:nat -> d:nat -> e:nat -> Lemma
+  (a * b * (c * d) * e == a * c * (b * d * e))
+let lemma_mul_ass5 a b c d e =
+  calc (==) {
+    a * b * (c * d) * e;
+    (==) { Math.Lemmas.paren_mul_right (a * b) (c * d) e }
+    a * b * ((c * d) * e);
+    (==) { Math.Lemmas.paren_mul_right c d e }
+    a * b * (c * d * e);
+    (==) { lemma_mul_ass5_aux a b c d e }
+    a * b * c * d * e;
+    (==) { lemma_mul_ass3 a b c }
+    a * c * b * d * e;
+    (==) { lemma_mul_ass5_aux a c b d e }
+    a * c * (b * d * e);
+  }
+
+val lemma_mod_mul_distr_aux: a:nat -> b:nat -> c:nat -> n:pos -> Lemma
+  (a * b * c % n == a % n * (b % n) * c % n)
+let lemma_mod_mul_distr_aux a b c n =
+  calc (==) {
+    a * b * c % n;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_l (a * b) c n }
+    a * b % n * c % n;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_l a b n }
+    a % n * b % n * c % n;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_r (a % n) b n }
+    a % n * (b % n) % n * c % n;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_l (a % n * (b % n)) c n }
+    a % n * (b % n) * c % n;
+  }
+
+
+///
+///  Definition of pow
+///
 
 val pow: x:nat -> n:nat -> Tot nat
 let rec pow x n =
   if n = 0 then 1
   else x * pow x (n - 1)
+
+///
+///  Lemma (S.fpow #n a b == pow a b % n)
+///
 
 #set-options "--max_fuel 2"
 
@@ -119,9 +175,10 @@ val lemma_fpow_unfold1: n:pos -> a:nat{a < n} -> b:pos{1 < b /\ b % 2 = 1} -> Le
   (S.fpow #n a b == S.fmul a (S.fpow (S.fmul a a) (b / 2)))
 let lemma_fpow_unfold1 n a b = ()
 
-
 val lemma_pow_mod_n_is_fpow: n:pos -> a:nat{a < n} -> b:pos -> Lemma
-  (ensures (S.fpow #n a b == pow a b % n)) (decreases b)
+  (ensures (S.fpow #n a b == pow a b % n))
+  (decreases b)
+
 let rec lemma_pow_mod_n_is_fpow n a b =
   if b = 1 then ()
   else begin
@@ -164,57 +221,15 @@ let rec lemma_pow_mod_n_is_fpow n a b =
 
 #set-options "--max_fuel 0"
 
-val lemma_mul_ass5_aux: a:nat -> b:nat -> c:nat -> d:nat -> e:nat -> Lemma
-  (a * b * c * d * e == a * b * (c * d * e))
-let lemma_mul_ass5_aux a b c d e =
-  calc (==) {
-    a * b * c * d * e;
-    (==) { Math.Lemmas.paren_mul_right (a * b) c d }
-    a * b * (c * d) * e;
-    (==) { Math.Lemmas.paren_mul_right (a * b) (c * d) e }
-    a * b * (c * d * e);
-  }
-
-
-val lemma_mul_ass5: a:nat -> b:nat -> c:nat -> d:nat -> e:nat -> Lemma
-  (a * b * (c * d) * e == a * c * (b * d * e))
-let lemma_mul_ass5 a b c d e =
-  calc (==) {
-    a * b * (c * d) * e;
-    (==) { Math.Lemmas.paren_mul_right (a * b) (c * d) e }
-    a * b * ((c * d) * e);
-    (==) { Math.Lemmas.paren_mul_right c d e }
-    a * b * (c * d * e);
-    (==) { lemma_mul_ass5_aux a b c d e }
-    a * b * c * d * e;
-    (==) { lemma_mul_ass3 a b c }
-    a * c * b * d * e;
-    (==) { lemma_mul_ass5_aux a c b d e }
-    a * c * (b * d * e);
-  }
-
-val lemma_mod_mul_distr_aux: a:nat -> b:nat -> c:nat -> n:pos -> Lemma
-  (a * b * c % n == a % n * (b % n) * c % n)
-let lemma_mod_mul_distr_aux a b c n =
-  calc (==) {
-    a * b * c % n;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_l (a * b) c n }
-    a * b % n * c % n;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_l a b n }
-    a % n * b % n * c % n;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_r (a % n) b n }
-    a % n * (b % n) % n * c % n;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_l (a % n * (b % n)) c n }
-    a % n * (b % n) * c % n;
-  }
-
+///
+///  High-level specification of Montgomery exponentiation
+///
 
 val mod_exp_f: n:pos -> d:pos -> bBits:nat -> b:nat{b < pow2 bBits} -> i:nat{i < bBits} -> tuple2 nat nat -> tuple2 nat nat
 let mod_exp_f n d bBits b i (aM, accM) =
   let accM = if (b / pow2 i % 2 = 1) then accM * aM * d % n else accM in
   let aM = aM * aM * d % n in
   (aM, accM)
-
 
 val mod_exp_mont: n:pos -> r:pos -> d:pos{r * d % n == 1} -> a:nat -> bBits:nat -> b:nat{b < pow2 bBits} -> res:nat
 let mod_exp_mont n r d a bBits b =
@@ -224,8 +239,9 @@ let mod_exp_mont n r d a bBits b =
   let acc = accM * d % n in
   acc
 
+
 ///
-///  Lemma (mod_exp_mont n r d a bBits b == S.fpow #n a b)
+///  Lemma (mod_exp_mont n r d a bBits b == pow a b % n)
 ///
 
 val mod_exp_mont_lemma_step_a:
@@ -401,6 +417,8 @@ let rec mod_exp_mont_lemma n d bBits b i aM0 accM0 =
     mod_exp_mont_lemma_step_acc n d bBits b i aM0 accM0 aM1 accM1
   end
 
+
+
 val lemma_mont_aux: n:pos -> r:pos -> d:pos{r * d % n == 1} -> a:nat -> Lemma
   (a * r % n * d % n == a % n)
 let lemma_mont_aux n r d a =
@@ -455,9 +473,13 @@ let mont_mod_exp_lemma_after_to_mont n r d bBits b a =
     pow a b * accM0 % n * d % n;
     (==) { Math.Lemmas.lemma_mod_mul_distr_l (pow a b * accM0) d n }
     pow a b * accM0 * d % n;
-    (==) { Math.Lemmas.paren_mul_right (pow a b) accM0 d; Math.Lemmas.lemma_mod_mul_distr_r (pow a b) (accM0 * d) n }
+    (==) { Math.Lemmas.paren_mul_right (pow a b) accM0 d }
+    pow a b * (accM0 * d) % n;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_r (pow a b) (accM0 * d) n }
     pow a b * (accM0 * d % n) % n;
     (==) { lemma_mont_aux n r d 1 }
+    pow a b * (1 % n) % n;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_r (pow a b) 1 n }
     pow a b % n;
   }
 
@@ -485,14 +507,9 @@ let mod_exp_lemma n r d a bBits b =
   };
   assert (accM1 * d % n == pow a b % n)
 
-
-// val mod_exp_lemma_s: n:pos -> r:pos -> d:pos{r * d % n == 1} -> a:nat{a < n} -> bBits:nat -> b:pos{b < pow2 bBits} -> Lemma
-//   (mod_exp_mont n r d a bBits b == S.fpow #n a b)
-
-// let mod_exp_lemma_s n r d a bBits b =
-//   mod_exp_lemma n r d a bBits b;
-//   lemma_pow_mod_n_is_fpow n a b
-
+///
+///  High-level specification of Montgomery exponentiation using functions defined in Hacl.Spec.Montgomery.Lemmas
+///
 
 val mod_exp_f_ll: rLen:nat -> n:pos -> mu:nat -> bBits:nat -> b:nat{b < pow2 bBits} -> i:nat{i < bBits} -> tuple2 nat nat -> tuple2 nat nat
 let mod_exp_f_ll rLen n mu bBits b i (aM, accM) =
@@ -506,8 +523,11 @@ let mod_exp_mont_ll rLen n mu a bBits b =
   let accM = M.to_mont rLen n mu 1 in
   let (aM, accM) = Loops.repeati bBits (mod_exp_f_ll rLen n mu bBits b) (aM, accM) in
   let acc = M.from_mont rLen n mu accM in
-  acc
+  if acc = n then 0 else acc
 
+///
+///  Lemma (mod_exp_mont_ll rLen n mu a bBits b % n == pow a b % n)
+///
 
 val mod_exp_mont_ll_lemma_loop_step_a:
     rLen:nat -> n:pos -> d:nat -> mu:nat -> bBits:nat -> b:pos{b < pow2 bBits}
@@ -610,7 +630,8 @@ let mod_exp_mont_ll_lemma_loop_step rLen n d mu bBits b i aM3 accM3 aM4 accM4 =
 
 
 val mod_exp_mont_ll_lemma_loop:
-  rLen:nat -> n:pos -> d:nat -> mu:nat -> bBits:nat -> b:pos{b < pow2 bBits} -> i:nat{i <= bBits} -> aM0:nat -> accM0:nat -> Lemma
+    rLen:nat -> n:pos -> d:nat -> mu:nat -> bBits:nat -> b:pos{b < pow2 bBits}
+  -> i:nat{i <= bBits} -> aM0:nat -> accM0:nat -> Lemma
   (requires (1 + n * mu) % pow2 64 == 0 /\ pow2 (64 * rLen) * d % n == 1)
   (ensures
     (let aM1, accM1 = Loops.repeati i (mod_exp_f_ll rLen n mu bBits b) (aM0, accM0) in
@@ -638,11 +659,12 @@ let rec mod_exp_mont_ll_lemma_loop rLen n d mu bBits b i aM0 accM0 =
     () end
 
 
-val mod_exp_mont_ll_lemma: rLen:nat -> n:pos -> d:nat -> mu:nat -> a:nat -> bBits:nat -> b:pos{b < pow2 bBits} -> Lemma
+val mod_exp_mont_ll_lemma_eval:
+  rLen:nat -> n:pos -> d:nat -> mu:nat -> a:nat -> bBits:nat -> b:pos{b < pow2 bBits} -> Lemma
   (requires (1 + n * mu) % pow2 64 == 0 /\ pow2 (64 * rLen) * d % n == 1)
   (ensures  mod_exp_mont_ll rLen n mu a bBits b % n == pow a b % n)
 
-let mod_exp_mont_ll_lemma rLen n d mu a bBits b =
+let mod_exp_mont_ll_lemma_eval rLen n d mu a bBits b =
   let r = pow2 (64 * rLen) in
   let aM0 = M.to_mont rLen n mu a in
   let accM0 = M.to_mont rLen n mu 1 in
@@ -688,9 +710,13 @@ let mod_exp_mont_ll_lemma rLen n d mu a bBits b =
   };
   assert (accM1 * d % n == pow a b % n)
 
+///
+///  Fits-related lemmas
+///
 
 val mod_exp_mont_ll_lemma_fits_loop_step:
-  rLen:nat -> n:pos -> d:nat -> mu:nat -> bBits:nat -> b:pos{b < pow2 bBits} -> i:nat{i < bBits} -> aM2:nat -> accM2:nat -> Lemma
+    rLen:nat -> n:pos -> d:nat -> mu:nat -> bBits:nat -> b:pos{b < pow2 bBits}
+  -> i:nat{i < bBits} -> aM2:nat -> accM2:nat -> Lemma
   (requires
     (1 + n * mu) % pow2 64 == 0 /\ pow2 (64 * rLen) * d % n == 1 /\
     4 * n < pow2 (64 * rLen) /\ aM2 < 2 * n /\ accM2 < 2 * n)
@@ -711,7 +737,8 @@ let mod_exp_mont_ll_lemma_fits_loop_step rLen n d mu bBits b i aM2 accM2 =
 
 
 val mod_exp_mont_ll_lemma_fits_loop:
-  rLen:nat -> n:pos -> d:nat -> mu:nat -> bBits:nat -> b:pos{b < pow2 bBits} -> i:nat{i <= bBits} -> aM0:nat -> accM0:nat -> Lemma
+    rLen:nat -> n:pos -> d:nat -> mu:nat -> bBits:nat -> b:pos{b < pow2 bBits}
+  -> i:nat{i <= bBits} -> aM0:nat -> accM0:nat -> Lemma
   (requires
     (1 + n * mu) % pow2 64 == 0 /\ pow2 (64 * rLen) * d % n == 1 /\
     4 * n < pow2 (64 * rLen) /\ aM0 < 2 * n /\ accM0 < 2 * n)
@@ -721,9 +748,8 @@ val mod_exp_mont_ll_lemma_fits_loop:
 
 let rec mod_exp_mont_ll_lemma_fits_loop rLen n d mu bBits b i aM0 accM0 =
   let (aM1, accM1) = Loops.repeati i (mod_exp_f_ll rLen n mu bBits b) (aM0, accM0) in
-  if i = 0 then begin
-    Loops.eq_repeati0 i (mod_exp_f_ll rLen n mu bBits b) (aM0, accM0);
-    () end
+  if i = 0 then
+    Loops.eq_repeati0 i (mod_exp_f_ll rLen n mu bBits b) (aM0, accM0)
   else begin
     Loops.unfold_repeati i (mod_exp_f_ll rLen n mu bBits b) (aM0, accM0) (i - 1);
     let (aM2, accM2) = Loops.repeati (i - 1) (mod_exp_f_ll rLen n mu bBits b) (aM0, accM0) in
@@ -740,7 +766,7 @@ val mod_exp_mont_ll_lemma_fits:
   (requires
     (1 + n * mu) % pow2 64 == 0 /\ pow2 (64 * rLen) * d % n == 1 /\
     4 * n < pow2 (64 * rLen) /\ a < n)
-  (ensures  mod_exp_mont_ll rLen n mu a bBits b <= n)
+  (ensures mod_exp_mont_ll rLen n mu a bBits b < n)
 
 let mod_exp_mont_ll_lemma_fits rLen n d mu a bBits b =
   let r = pow2 (64 * rLen) in
@@ -755,110 +781,22 @@ let mod_exp_mont_ll_lemma_fits rLen n d mu a bBits b =
   assert (aM1 < 2 * n /\ accM1 < 2 * n);
   let res = M.from_mont rLen n mu accM1 in
   M.from_mont_lemma_fits rLen n d mu accM1;
-  assert (res <= n)
+  assert (res <= n);
+  let res1 = if res = n then 0 else res in
+  assert (res1 < n)
 
 ///
-///  Lemma (mod_exp_mont_ll_final_sub rLen n mu a bBits b == S.fpow #n a b)
+///  Lemma (mod_exp_mont_ll rLen n mu a bBits b == S.fpow #n a b)
 ///
 
-val mod_exp_mont_ll_final_sub: rLen:nat -> n:pos -> mu:nat -> a:nat -> bBits:nat -> b:pos{b < pow2 bBits} -> res:nat
-let mod_exp_mont_ll_final_sub rLen n mu a bBits b =
-  let res = mod_exp_mont_ll rLen n mu a bBits b in
-  if res = n then 0 else res
-
-
-val mod_exp_mont_ll_lemma_eq:
+val mod_exp_mont_ll_lemma:
   rLen:nat -> n:pos -> d:nat -> mu:nat -> a:nat -> bBits:nat -> b:pos{b < pow2 bBits} -> Lemma
   (requires
     (1 + n * mu) % pow2 64 == 0 /\ pow2 (64 * rLen) * d % n == 1 /\
     4 * n < pow2 (64 * rLen) /\ a < n)
-  (ensures  mod_exp_mont_ll_final_sub rLen n mu a bBits b == S.fpow #n a b)
+  (ensures mod_exp_mont_ll rLen n mu a bBits b == S.fpow #n a b)
 
-let mod_exp_mont_ll_lemma_eq rLen n d mu a bBits b =
-  let res1 = mod_exp_mont_ll_final_sub rLen n mu a bBits b in
-  let res = mod_exp_mont_ll rLen n mu a bBits b in
-  calc (==) {
-    res % n;
-    (==) { mod_exp_mont_ll_lemma rLen n d mu a bBits b }
-    pow a b % n;
-    (==) { lemma_pow_mod_n_is_fpow n a b }
-    S.fpow #n a b;
-  };
-  assert (res % n == S.fpow #n a b);
-  if res = n then begin
-    assert (res1 = 0);
-    Math.Lemmas.cancel_mul_mod 1 n end
-  else begin
-    assert (res1 == res);
-    mod_exp_mont_ll_lemma_fits rLen n d mu a bBits b;
-    assert (res < n);
-    Math.Lemmas.small_mod res n;
-    () end
-
-
-val eea_pow2_odd: a:nat -> n:pos ->
-  Pure (tuple2 nat nat)
-  (requires n % 2 = 1)
-  (ensures  fun (d, k) -> pow2 a * d == 1 + k * n)
-let eea_pow2_odd a n = admit()
-
-
-val mod_exp_mont_preconditions:
-  rLen:nat -> n:pos{n > 1} -> mu:nat -> Lemma
-  (requires (1 + (n % pow2 64) * mu) % pow2 64 == 0 /\ n % 2 = 1)
-  (ensures  (let d, k = eea_pow2_odd (64 * rLen) n in (1 + n * mu) % pow2 64 == 0 /\ pow2 (64 * rLen) * d % n == 1))
-
-let mod_exp_mont_preconditions rLen n mu =
-  calc (==) {
-    (1 + n * mu) % pow2 64;
-    (==) { Math.Lemmas.lemma_mod_plus_distr_r 1 (n * mu) (pow2 64) }
-    (1 + n * mu % pow2 64) % pow2 64;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_l n mu (pow2 64) }
-    (1 + n % pow2 64 * mu % pow2 64) % pow2 64;
-    (==) { Math.Lemmas.lemma_mod_plus_distr_r 1 (n % pow2 64 * mu) (pow2 64) }
-    (1 + n % pow2 64 * mu) % pow2 64;
-    (==) { assert ((1 + (n % pow2 64) * mu) % pow2 64 == 0) }
-    0;
-  };
-  assert ((1 + n * mu) % pow2 64 == 0);
-
-  let d, k = eea_pow2_odd (64 * rLen) n in
-  calc (==) {
-    pow2 (64 * rLen) * d % n;
-    (==) { }
-    (1 + k * n) % n;
-    (==) { Math.Lemmas.modulo_addition_lemma 1 n k }
-    1 % n;
-    (==) { Math.Lemmas.small_mod 1 n }
-    1;
-  };
-  assert (pow2 (64 * rLen) * d % n == 1)
-
-
-val mod_exp_mont_ll_lemma_eq_simplify:
-  rLen:nat -> n:pos{n > 1} -> mu:nat -> a:nat -> bBits:nat -> b:pos{b < pow2 bBits} -> Lemma
-  (requires (1 + (n % pow2 64) * mu) % pow2 64 == 0 /\ 4 * n < pow2 (64 * rLen) /\ a < n /\ n % 2 = 1)
-  (ensures  mod_exp_mont_ll_final_sub rLen n mu a bBits b == S.fpow #n a b)
-
-let mod_exp_mont_ll_lemma_eq_simplify rLen n mu a bBits b =
-  let d, k = eea_pow2_odd (64 * rLen) n in
-  mod_exp_mont_preconditions rLen n mu;
-  mod_exp_mont_ll_lemma_eq rLen n d mu a bBits b
-
-
-val mod_exp_mont_preconditions_rLen: nLen:nat -> n:pos{n < pow2 (64 * nLen)} -> Lemma (4 * n < pow2 (64 * (nLen + 1)))
-let mod_exp_mont_preconditions_rLen nLen n =
-  calc (<) {
-    4 * n;
-    (<) { Math.Lemmas.lemma_mult_lt_left 4 n (pow2 (64 * nLen)) }
-    4 * pow2 (64 * nLen);
-    (==) { assert_norm (pow2 2 = 4) }
-    pow2 2 * pow2 (64 * nLen);
-    (==) { Math.Lemmas.pow2_plus 2 (64 * nLen) }
-    pow2 (2 + 64 * nLen);
-    (<) { Math.Lemmas.pow2_lt_compat (64 + 64 * nLen) (2 + 64 * nLen) }
-    pow2 (64 + 64 * nLen);
-    (==) { Math.Lemmas.distributivity_add_right 64 1 nLen }
-    pow2 (64 * (nLen + 1));
-  };
-  assert (4 * n < pow2 (64 * (nLen + 1)))
+let mod_exp_mont_ll_lemma rLen n d mu a bBits b =
+  mod_exp_mont_ll_lemma_eval rLen n d mu a bBits b;
+  lemma_pow_mod_n_is_fpow n a b;
+  mod_exp_mont_ll_lemma_fits rLen n d mu a bBits b
