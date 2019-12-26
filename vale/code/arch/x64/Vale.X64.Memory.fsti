@@ -372,6 +372,7 @@ val mem_eq_all (h1 h2:vale_heap) : Lemma
     /\ (forall (#t:base_typ) (b:buffer t).{:pattern (buffer_addr b h1) \/ (buffer_addr b h2)} buffer_addr b h1 == buffer_addr b h2)
     /\ (forall (#t:base_typ) (b:buffer t).{:pattern (buffer_as_seq h1 b) \/ (buffer_as_seq h2 b)} buffer_as_seq h1 b == buffer_as_seq h2 b)
     /\ (forall (#t:base_typ) (b:buffer t).{:pattern (buffer_readable h1 b) \/ (buffer_readable h2 b)} buffer_readable h1 b == buffer_readable h2 b)
+    /\ (forall (#t:base_typ) (b:buffer t) (i:int).{:pattern (buffer_read b i h1) \/ (buffer_read b i h2)} buffer_read b i h1 == buffer_read b i h2)
     /\ (forall (ptr:int).{:pattern (valid_mem64 ptr h1) \/ (valid_mem64 ptr h2)} valid_mem64 ptr h1 == valid_mem64 ptr h2)
     /\ (forall (ptr:int).{:pattern (writeable_mem64 ptr h1) \/ (writeable_mem64 ptr h2)} writeable_mem64 ptr h1 == writeable_mem64 ptr h2)
     // /\ (forall (ptr:int).{:pattern (load_mem64 ptr h1) \/ (load_mem64 ptr h2)} load_mem64 ptr h1 == load_mem64 ptr h2)

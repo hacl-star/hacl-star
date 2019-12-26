@@ -59,7 +59,7 @@ procedure KeyExpansionStdcall(
         ghost input_key_b:buffer128,
         ghost output_key_expansion_b:buffer128)
     {:public}
-    {:quick exportOnly} // HACK
+    {:quick}
     {:exportSpecs}
     reads
         rcx; rsi; rdi; memLayout;
@@ -93,8 +93,6 @@ procedure KeyExpansionStdcall(
     }
 
     DestroyHeaplets();
-    assert forall(j){buffer128_read(output_key_expansion_b, j, mem)} 0 <= j <= nr(alg) ==>
-        buffer128_read(output_key_expansion_b, j, heap0) == index(key_to_round_keys_LE(alg, key), j);
     mem_eq_all(mem, heap0);
     mem_eq_modifies(old(mem), mem, old(heap0), heap0);
 }
