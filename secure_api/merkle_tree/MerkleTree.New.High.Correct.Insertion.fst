@@ -57,7 +57,7 @@ val insert_inv_preserved_even:
   lv:nat{lv < 32} ->
   i:nat ->
   j:nat{i <= j /\ j < pow2 (32 - lv) - 1} ->
-  olds:hashess #hsz {S.length olds = 32 /\ mt_olds_inv #_ #f lv i olds} ->
+  olds:hashess #hsz {S.length olds = 32 /\ mt_olds_inv #hsz lv i olds} ->
   hs:hashess #hsz {S.length hs = 32 /\ hs_wf_elts lv hs i j} ->
   acc:hash ->
   Lemma (requires (j % 2 <> 1 /\ mt_olds_hs_inv #_ #f lv i j olds hs))
@@ -99,7 +99,7 @@ val insert_inv_preserved:
   lv:nat{lv < 32} ->
   i:nat ->
   j:nat{i <= j /\ j < pow2 (32 - lv) - 1} ->
-  olds:hashess #hsz {S.length olds = 32 /\ mt_olds_inv #_ #f lv i olds} ->
+  olds:hashess #hsz {S.length olds = 32 /\ mt_olds_inv #hsz lv i olds} ->
   hs:hashess #hsz {S.length hs = 32 /\ hs_wf_elts lv hs i j} ->
   acc:hash ->
   Lemma (requires (mt_olds_hs_inv #_ #f lv i j olds hs))
@@ -154,7 +154,7 @@ let rec insert_inv_preserved #_ #f lv i j olds hs acc =
 val mt_insert_inv_preserved:
   #hsz:pos ->
   mt:merkle_tree #hsz {mt_wf_elts mt /\ mt_not_full mt} -> v:hash ->
-  olds:hashess #hsz {S.length olds = 32 /\ mt_olds_inv #_ #(MT?.hash_fun mt) 0 (MT?.i mt) olds} ->
+  olds:hashess #hsz {S.length olds = 32 /\ mt_olds_inv #hsz 0 (MT?.i mt) olds} ->
   Lemma (requires (mt_inv #hsz mt olds))
         (ensures (mt_inv #hsz (mt_insert mt v) olds))
 let mt_insert_inv_preserved #_ mt v olds =
@@ -166,7 +166,7 @@ val empty_olds_inv:
   #hsz:pos -> #f:MTS.hash_fun_t #hsz ->
   lv:nat{lv <= 32} ->
   Lemma (requires True)
-        (ensures (mt_olds_inv #_ #f lv 0 (empty_hashes 32)))
+        (ensures (mt_olds_inv #hsz lv 0 (empty_hashes 32)))
         (decreases (32 - lv))
 let rec empty_olds_inv #_ #f lv =
   if lv = 32 then ()
@@ -186,7 +186,7 @@ val create_mt_inv_ok:
   init:hash ->
   Lemma (empty_olds_inv #_ #f 0;
         mt_inv #hsz (mt_create hsz f init) (empty_hashes 32))
-let create_mt_inv_ #hsz #f ok init =
+let create_mt_inv_ok #hsz #f init =
   create_empty_mt_inv_ok #_ #f ();
   empty_olds_inv #_ #f 0;
   mt_insert_inv_preserved #_ (create_empty_mt #hsz #f ()) init (empty_hashes 32)

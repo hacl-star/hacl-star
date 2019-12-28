@@ -28,12 +28,12 @@ val mt_flush_to_olds:
   pi:nat ->
   i:nat{i >= pi} ->
   j:nat{j >= i /\ j < pow2 (32 - lv)} ->
-  olds:hashess #hsz {S.length olds = 32 /\ mt_olds_inv #_ #f lv pi olds} ->
+  olds:hashess #hsz {S.length olds = 32 /\ mt_olds_inv #hsz lv pi olds} ->
   hs:hashess #hsz {S.length hs = 32 /\ hs_wf_elts lv hs pi j} ->
   GTot (folds:hashess #hsz {
          S.length folds = 32 /\
          S.equal (S.slice olds 0 lv) (S.slice folds 0 lv) /\
-         mt_olds_inv #_ #f lv i folds})
+         mt_olds_inv #hsz lv i folds})
        (decreases i)
 let rec mt_flush_to_olds #_ #f lv pi i j olds hs =
   let oi = offset_of i in
@@ -52,7 +52,7 @@ val mt_flush_to_olds_hs_equiv:
   pi:nat ->
   i:nat{i >= pi} ->
   j:nat{j >= i /\ j < pow2 (32 - lv)} ->
-  olds:hashess #hsz {S.length olds = 32 /\ mt_olds_inv #_ #f lv pi olds} ->
+  olds:hashess #hsz {S.length olds = 32 /\ mt_olds_inv #hsz lv pi olds} ->
   hs1:hashess #hsz {S.length hs1 = 32 /\ hs_wf_elts lv hs1 pi j} ->
   hs2:hashess #hsz {S.length hs2 = 32 /\ hs_wf_elts lv hs2 pi j} ->
   Lemma (requires (S.equal (S.slice hs1 lv 32) (S.slice hs2 lv 32)))
@@ -77,7 +77,7 @@ val mt_flush_to_merge_preserved:
   lv:nat{lv < 32} ->
   pi:nat -> i:nat{i >= pi} ->
   j:nat{j >= i /\ j < pow2 (32 - lv)} ->
-  olds:hashess #hsz {S.length olds = 32 /\ mt_olds_inv #_ #f lv pi olds} ->
+  olds:hashess #hsz {S.length olds = 32 /\ mt_olds_inv #hsz lv pi olds} ->
   hs:hashess #hsz {S.length hs = 32 /\ hs_wf_elts lv hs pi j} ->
   Lemma (requires True)
         (ensures (S.equal (merge_hs #_ #f olds hs)
@@ -118,7 +118,7 @@ val mt_flush_to_inv_preserved_:
   lv:nat{lv < 32} ->
   pi:nat -> i:nat{i >= pi} ->
   j:nat{j >= i /\ j < pow2 (32 - lv)} ->
-  olds:hashess #hsz {S.length olds = 32 /\ mt_olds_inv #_ #f lv pi olds} ->
+  olds:hashess #hsz {S.length olds = 32 /\ mt_olds_inv #hsz lv pi olds} ->
   hs:hashess #hsz {S.length hs = 32 /\ hs_wf_elts lv hs pi j} ->
   Lemma (requires (mt_olds_hs_inv #_ #f lv pi j olds hs))
         (ensures (mt_olds_hs_inv #_ #f lv i j 
@@ -139,7 +139,7 @@ let mt_flush_to_inv_preserved_ #_ #f lv pi i j olds hs =
 val mt_flush_to_inv_preserved:
   #hsz:pos -> 
   mt:merkle_tree{mt_wf_elts mt} ->
-  olds:hashess #hsz {S.length olds = 32 /\ mt_olds_inv #_ #(MT?.hash_fun mt) 0 (MT?.i mt) olds} ->
+  olds:hashess #hsz {S.length olds = 32 /\ mt_olds_inv #hsz 0 (MT?.i mt) olds} ->
   idx:nat{idx >= MT?.i mt /\ idx < MT?.j mt} ->
   Lemma (requires (mt_inv mt olds))
         (ensures (mt_inv (mt_flush_to mt idx)
@@ -151,7 +151,7 @@ let mt_flush_to_inv_preserved #hsz mt olds idx =
 val mt_flush_inv_preserved:
   #hsz:pos ->
   mt:merkle_tree #hsz {mt_wf_elts mt /\ MT?.j mt > MT?.i mt} ->
-  olds:hashess #hsz {S.length olds = 32 /\ mt_olds_inv #_ #(MT?.hash_fun mt) 0 (MT?.i mt) olds} ->
+  olds:hashess #hsz {S.length olds = 32 /\ mt_olds_inv #hsz 0 (MT?.i mt) olds} ->
   Lemma (requires (mt_inv mt olds))
         (ensures (mt_inv (mt_flush mt)
                          (mt_flush_to_olds #_ #(MT?.hash_fun mt) 

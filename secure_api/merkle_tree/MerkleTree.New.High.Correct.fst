@@ -30,7 +30,7 @@ module MTS = MerkleTree.Spec
 // 5) Merkle path verification by the design and the spec give the same result.
 
 type old_hashes (#hsz:pos) (mt:merkle_tree #hsz) =
-  olds:hashess #hsz {S.length olds = 32 /\ mt_olds_inv #hsz #(MT?.hash_fun mt) 0 (MT?.i mt) olds}
+  olds:hashess #hsz {S.length olds = 32 /\ mt_olds_inv #hsz 0 (MT?.i mt) olds}
 
 noeq type mt_olds (#hsz:pos) =
 | MTO: mt:merkle_tree #hsz {mt_wf_elts mt} ->

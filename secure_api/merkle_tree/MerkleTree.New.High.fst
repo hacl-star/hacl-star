@@ -149,10 +149,11 @@ let rec hs_wf_elts_empty #hsz lv =
 
 // NOTE: the public function is `create_mt` defined below, which
 // builds a tree with an initial hash.
+noextract inline_for_extraction
 val create_empty_mt (#hsz:pos) (#f:MTS.hash_fun_t #hsz): unit -> GTot (mt:merkle_tree #hsz {mt_wf_elts #hsz mt})
 let create_empty_mt #hsz #f _ =
   hs_wf_elts_empty #hsz 0;
-  MT 0 0 (S.create 32 S.empty) false (S.create 32 hash_init) (hash_init #hsz) f
+  MT 0 0 (S.create 32 S.empty) false (S.create 32 (hash_init #hsz)) (hash_init #hsz) f
 
 /// Insertion
 

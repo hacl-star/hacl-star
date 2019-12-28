@@ -38,25 +38,25 @@ open MerkleTree.New.Low.Datastructures
 
 #set-options "--z3rlimit 10 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
 
-let init_hash (#hsz:hash_size_t) = hash_r_alloc #hsz
-let free_hash (#hsz:hash_size_t) = hash_r_free #hsz
+let init_hash (hsz:hash_size_t) = hash_r_alloc #hsz
+let free_hash (hsz:hash_size_t) = hash_r_free #hsz
 
-inline_for_extraction
-type hash_fun_t (#hsz:hash_size_t) (#hash_spec:MTS.hash_fun_t #(U32.v hsz)) = src1:hash #hsz -> src2:hash #hsz -> dst:hash #hsz -> HST.ST unit
+noextract inline_for_extraction unfold
+type hash_fun_t (#hsz:hash_size_t) (#hash_spec:Ghost.erased (MTS.hash_fun_t #(U32.v hsz))) = src1:hash #hsz -> src2:hash #hsz -> dst:hash #hsz -> HST.ST unit
    (requires (fun h0 ->
-     Rgl?.r_inv hreg h0 src1 /\
-     Rgl?.r_inv hreg h0 src2 /\
-     Rgl?.r_inv hreg h0 dst))
+     Rgl?.r_inv (hreg hsz) h0 src1 /\
+     Rgl?.r_inv (hreg hsz) h0 src2 /\
+     Rgl?.r_inv (hreg hsz) h0 dst))
    (ensures (fun h0 _ h1 ->
      // memory safety
      modifies (B.loc_region_only false (B.frameOf dst)) h0 h1 /\
-     Rgl?.r_inv hreg h1 dst /\
+     Rgl?.r_inv (hreg hsz) h1 dst /\
      // correctness
-     S.equal (Rgl?.r_repr hreg h1 dst)
-             (hash_spec (Rgl?.r_repr hreg h0 src1) (Rgl?.r_repr hreg h0 src2))
+     S.equal (Rgl?.r_repr (hreg hsz) h1 dst)
+             ((Ghost.reveal hash_spec) (Rgl?.r_repr (hreg hsz) h0 src1) (Rgl?.r_repr (hreg hsz) h0 src2))
      ))
 
-val sha256_compress: hash_fun_t #32ul #MTH.sha256_compress
+val sha256_compress: hash_fun_t #32ul #(Ghost.hide MTH.sha256_compress)
 #push-options "--z3rlimit 40 --max_fuel 0"
 let sha256_compress src1 src2 dst =
   let hash_size = 32ul in
@@ -73,8 +73,8 @@ let sha256_compress src1 src2 dst =
   EHS.init #(Ghost.hide hash_alg) st;
   let hh1 = HST.get () in
   assert (S.equal (S.append
-                    (Rgl?.r_repr hreg hh0 src1)
-                    (Rgl?.r_repr hreg hh0 src2))
+                    (Rgl?.r_repr(hreg hash_size) hh0 src1)
+                    (Rgl?.r_repr(hreg hash_size) hh0 src2))
                   (B.as_seq hh1 cb));
 
   EHS.update #(Ghost.hide hash_alg) st cb;
@@ -91,13 +91,13 @@ let sha256_compress src1 src2 dst =
                   (Spec.Hash.PadFinish.finish hash_alg (Spec.Agile.Hash.update hash_alg (Spec.Agile.Hash.init hash_alg) (B.as_seq hh1 cb))));
   assert (S.equal (B.as_seq hh3 dst)
                   (MTH.sha256_compress
-                    (Rgl?.r_repr hreg hh0 src1)
-                    (Rgl?.r_repr hreg hh0 src2)));
+                    (Rgl?.r_repr(hreg hash_size) hh0 src1)
+                    (Rgl?.r_repr(hreg hash_size) hh0 src2)));
   HST.pop_frame ();
 
   let hh4 = HST.get () in
   assert (S.equal (B.as_seq hh4 dst)
                   (MTH.sha256_compress
-                    (Rgl?.r_repr hreg hh0 src1)
-                    (Rgl?.r_repr hreg hh0 src2)))
+                    (Rgl?.r_repr(hreg hash_size) hh0 src1)
+                    (Rgl?.r_repr(hreg hash_size) hh0 src2)))
 #pop-options

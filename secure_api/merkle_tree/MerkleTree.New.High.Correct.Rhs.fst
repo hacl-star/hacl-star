@@ -11,11 +11,9 @@ open MerkleTree.New.High
 open MerkleTree.New.High.Correct.Base
 
 
-#set-options "--z3rlimit 40 --max_fuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 10 --initial_fuel 1 --max_fuel 1 --initial_ifuel 0 --max_ifuel 0"
 
 /// Correctness of rightmost hashes
-
-#push-options "--max_fuel 1"
 
 // Another version of `construct_rhs` that recursively
 // accumulates rightmost hashes.
@@ -24,7 +22,7 @@ val construct_rhs_acc:
   j:nat ->
   fhs:hashess #hsz {
     S.length fhs = log2c j /\
-    mt_hashes_lth_inv_log #_ #f j fhs} ->
+    mt_hashes_lth_inv_log #hsz j fhs} ->
   acc:hash #hsz ->
   actd:bool ->
   GTot (rhs:hashes #hsz {S.length rhs = log2c j} * hash #hsz) (decreases j)
@@ -42,14 +40,13 @@ let rec construct_rhs_acc #_ #f j fhs acc actd =
          (S.cons rhd (fst nrhsh), snd nrhsh))
   end
 
-#push-options "--max_ifuel 1"
-
+#push-options "--initial_ifuel 1 --max_ifuel 1"
 val construct_rhs_acc_odd:
   #hsz:pos -> #f:MTS.hash_fun_t #hsz ->
   j:nat ->
   fhs:hashess #hsz {
     S.length fhs = log2c j /\
-    mt_hashes_lth_inv_log #_ #f j fhs} ->
+    mt_hashes_lth_inv_log #hsz j fhs} ->
   acc:hash #hsz ->
   actd:bool ->
   Lemma (requires (j % 2 <> 0))
@@ -61,16 +58,14 @@ val construct_rhs_acc_odd:
                  S.equal (S.tail (fst rrf)) (fst nrrf) /\
                  snd rrf == snd nrrf))
 let construct_rhs_acc_odd #_ #f j fhs acc actd = ()
-
 #pop-options
 
-#push-options "--max_fuel 2"
-
+#push-options "--initial_fuel 2 --max_fuel 2"
 val construct_rhs_acc_inv_ok_0:
   #hsz:pos -> #f:MTS.hash_fun_t #hsz ->
   fhs:hashess #hsz {
     S.length fhs = 1 /\
-    mt_hashes_lth_inv_log #_ #f 1 fhs /\
+    mt_hashes_lth_inv_log #hsz 1 fhs /\
     mt_hashes_inv_log #_ #f 1 fhs} ->
   acc:hash #hsz ->
   actd:bool ->
@@ -83,17 +78,15 @@ val construct_rhs_acc_inv_ok_0:
                    (hash_seq_spec_full #_ #f (S.head fhs) acc actd) ==
                  MTS.HRaw #hsz (snd crhs)))
 let construct_rhs_acc_inv_ok_0 #_ #f fhs acc actd = ()
-
 #pop-options
 
-#push-options "--z3rlimit 240 --initial_fuel 1 --max_fuel 1"
-
+#push-options "--z3rlimit 240"
 val construct_rhs_acc_inv_ok:
   #hsz:pos -> #f:MTS.hash_fun_t #hsz ->
   j:nat{j > 0} ->
   fhs:hashess #hsz {
     S.length fhs = log2c j /\
-    mt_hashes_lth_inv_log #_ #f j fhs /\
+    mt_hashes_lth_inv_log #hsz j fhs /\
     mt_hashes_inv_log #_ #f j fhs} ->
   acc:hash #hsz ->
   actd:bool ->
@@ -107,8 +100,8 @@ val construct_rhs_acc_inv_ok:
                  MTS.HRaw (snd crhs)))
         (decreases j)
 let rec construct_rhs_acc_inv_ok #hsz #f j fhs acc actd =
-  if j = 1 then construct_rhs_acc_inv_ok_0 #_ #f fhs acc actd
-
+  if j = 1 then 
+    construct_rhs_acc_inv_ok_0 #_ #f fhs acc actd
   else if j % 2 = 0 then begin
     construct_rhs_acc_inv_ok #_ #f (j / 2) (S.tail fhs) acc actd;
     let rcrhs = construct_rhs_acc #_ #f (j / 2) (S.tail fhs) acc actd in
@@ -171,23 +164,22 @@ let rec construct_rhs_acc_inv_ok #hsz #f j fhs acc actd =
              (hash_seq_spec_full #_ #f (S.head fhs) acc actd) ==
            MTS.HRaw (snd crhs))
   end
-
 #pop-options
 
 
 val rhs_equiv:
-  #hsz:pos -> #f:MTS.hash_fun_t #hsz ->
+  #hsz:pos ->
   j:nat ->
   rhs1:hashes #hsz {S.length rhs1 = log2c j} ->
   rhs2:hashes #hsz {S.length rhs2 = log2c j} ->
   actd:bool ->
   GTot Type0 (decreases j)
-let rec rhs_equiv #hsz #f j rhs1 rhs2 actd =
+let rec rhs_equiv #hsz j rhs1 rhs2 actd =
   if j = 0 then true
   else if j % 2 = 0
-  then rhs_equiv #_ #f (j / 2) (S.tail rhs1) (S.tail rhs2) actd
+  then rhs_equiv #hsz (j / 2) (S.tail rhs1) (S.tail rhs2) actd
   else ((if actd then S.head rhs1 == S.head rhs2 else true) /\
-       rhs_equiv #_ #f (j / 2) (S.tail rhs1) (S.tail rhs2) true)
+       rhs_equiv #hsz (j / 2) (S.tail rhs1) (S.tail rhs2) true)
 
 val rhs_equiv_inv_preserved:
   #hsz:pos -> #f:MTS.hash_fun_t #hsz ->
@@ -197,7 +189,7 @@ val rhs_equiv_inv_preserved:
   rhs2:hashes #hsz {S.length rhs2 = log2c j} ->
   actd:bool ->
   Lemma (requires (mt_rhs_inv #_ #f j smt rhs1 actd /\
-                  rhs_equiv #_ #f j rhs1 rhs2 actd))
+                  rhs_equiv #hsz j rhs1 rhs2 actd))
         (ensures (mt_rhs_inv #_ #f j smt rhs2 actd))
         (decreases j)
 let rec rhs_equiv_inv_preserved #_ #f j smt rhs1 rhs2 actd =
@@ -214,13 +206,12 @@ let rec rhs_equiv_inv_preserved #_ #f j smt rhs1 rhs2 actd =
       (S.tail rhs1) (S.tail rhs2) true
   end
 
-#push-options "--z3rlimit 1000 --initial_fuel 2 --max_fuel 2 --initial_ifuel 1 --max_ifuel 1"
 val construct_rhs_acc_consistent:
   #hsz:pos -> #f:MTS.hash_fun_t #hsz ->
   lv:nat{lv <= 32} ->
   i:nat ->
   j:nat{i <= j /\ j < pow2 (32 - lv)} ->
-  olds:hashess #hsz {S.length olds = 32 /\ mt_olds_inv #_ #f lv i olds} ->
+  olds:hashess #hsz {S.length olds = 32 /\ mt_olds_inv #hsz lv i olds} ->
   hs:hashess #hsz {S.length hs = 32 /\ hs_wf_elts lv hs i j} ->
   rhs:hashes #hsz {S.length rhs = 32} ->
   acc:hash #hsz ->
@@ -233,11 +224,14 @@ val construct_rhs_acc_consistent:
           (let rrf = construct_rhs_acc #_ #f j
                        (S.slice (merge_hs #_ #f olds hs) lv (lv + log2c j)) acc actd in
           let rr = construct_rhs #_ #f lv hs rhs i j acc actd in
-          rhs_equiv #_ #f j (fst rrf) (S.slice (fst rr) lv (lv + log2c j)) actd /\
+          rhs_equiv #hsz j (fst rrf) (S.slice (fst rr) lv (lv + log2c j)) actd /\
           snd rrf == snd rr)))
         (decreases j)
-let rec construct_rhs_acc_consistent #_ #f lv i j olds hs rhs acc actd =
+
+#push-options "--z3rlimit 250 --initial_ifuel 1 --max_ifuel 1"
+let rec construct_rhs_acc_consistent #hsz #f lv i j olds hs rhs acc actd =
   assert (j < pow2 (32 - lv));
+  assert (j <> 0 ==> j / 2 < pow2 (32 - (lv + 1)));
   log2c_bound j (32 - lv);
   mt_olds_hs_lth_inv_ok #_ #f lv i j olds hs;
   mt_hashes_lth_inv_log_converted_ #_ #f lv j (merge_hs #_ #f olds hs);
@@ -249,13 +243,23 @@ let rec construct_rhs_acc_consistent #_ #f lv i j olds hs rhs acc actd =
 
   if j = 0 then ()
   else begin
-    log2c_div j; log2c_bound (j / 2) (32 - (lv + 1));
+    log2c_div j; 
+    assert (32 - (lv + 1) >= 0);
+    log2c_bound (j / 2) (32 - (lv + 1));
     mt_olds_hs_lth_inv_ok #_ #f (lv + 1) (i / 2) (j / 2) olds hs;
     mt_hashes_lth_inv_log_converted_ #_ #f (lv + 1) (j / 2) (merge_hs #_ #f olds hs);
-
+    
     if j % 2 = 0 then begin
       construct_rhs_acc_consistent #_ #f (lv + 1) (i / 2) (j / 2)
-        olds hs rhs acc actd
+        olds hs rhs acc actd;
+      log2c_bound (j/2) (32 - (lv + 1));
+      mt_olds_hs_lth_inv_ok #hsz #f (lv+1) (i/2) (j/2) olds hs;
+      mt_hashes_lth_inv_log_converted_ #_ #f lv j (merge_hs #_ #f olds hs);
+      let rrf = construct_rhs_acc #_ #f j
+                (S.slice (merge_hs #_ #f olds hs) lv (lv + log2c j)) acc actd in
+      let rr = construct_rhs #_ #f lv hs rhs i j acc actd in
+      assert (rhs_equiv #hsz j (fst rrf) (S.slice (fst rr) lv (lv + log2c j)) actd);
+      assert (snd rrf == snd rr)
     end
     else
     begin
@@ -285,7 +289,7 @@ let rec construct_rhs_acc_consistent #_ #f lv i j olds hs rhs acc actd =
       // Recursion for the proof
       construct_rhs_acc_consistent #_ #f (lv + 1) (i / 2) (j / 2)
         olds hs nrhs nacc true;
-      assert (rhs_equiv #_ #f (j / 2) (fst nrrf)
+      assert (rhs_equiv #hsz (j / 2) (fst nrrf)
                (S.slice (fst nrr) (lv + 1) (lv + 1 + log2c (j / 2))) true);
       assert (snd nrrf == snd nrr);
 
@@ -299,21 +303,19 @@ let rec construct_rhs_acc_consistent #_ #f lv i j olds hs rhs acc actd =
       else ());
 
       assert (if actd then S.head (fst rrf) == S.index (fst rr) lv else true);
-      assert (rhs_equiv #_ #f (j / 2) (S.tail (fst rrf))
+      assert (rhs_equiv #hsz (j / 2) (S.tail (fst rrf))
                (S.slice (fst rr) (lv + 1) (lv + 1 + log2c (j / 2))) true);
-      assert (rhs_equiv #_ #f j (fst rrf) (S.slice (fst rr) lv (lv + log2c j)) actd);
+      assert (rhs_equiv #hsz j (fst rrf) (S.slice (fst rr) lv (lv + log2c j)) actd);
       assert (snd rrf == snd rr)
     end
   end
-
-#pop-options
 
 val construct_rhs_inv_ok:
   #hsz:pos -> #f:MTS.hash_fun_t #hsz ->
   lv:nat{lv <= 32} ->
   i:nat ->
   j:nat{j > 0 /\ i <= j /\ j < pow2 (32 - lv)} ->
-  olds:hashess #hsz {S.length olds = 32 /\ mt_olds_inv #_ #f lv i olds} ->
+  olds:hashess #hsz {S.length olds = 32 /\ mt_olds_inv #hsz lv i olds} ->
   hs:hashess #hsz {S.length hs = 32 /\ hs_wf_elts lv hs i j} ->
   rhs:hashes #hsz {S.length rhs = 32} ->
   acc:hash #hsz ->
@@ -343,11 +345,12 @@ let construct_rhs_inv_ok #hsz #f lv i j olds hs rhs acc actd =
   rhs_equiv_inv_preserved #_ #f j
     (hash_seq_spec_full #_ #f (S.index (merge_hs #_ #f olds hs) lv) acc actd)
     (fst crhsf) (S.slice (fst crhs) lv (lv + log2c j)) actd
+#pop-options
 
 val construct_rhs_base_inv_ok:
   #hsz:pos -> #f:MTS.hash_fun_t #hsz ->
   i:nat -> j:nat{j > 0 /\ i <= j /\ j < pow2 32} ->
-  olds:hashess #hsz {S.length olds = 32 /\ mt_olds_inv #_ #f 0 i olds} ->
+  olds:hashess #hsz {S.length olds = 32 /\ mt_olds_inv #hsz 0 i olds} ->
   hs:hashess #hsz {S.length hs = 32 /\ hs_wf_elts 0 hs i j} ->
   rhs:hashes #hsz {S.length rhs = 32} ->
   acc:hash #hsz ->
@@ -381,7 +384,7 @@ val construct_rhs_init_ignored:
                   let rr2 = construct_rhs #_ #f lv hs rhs i j acc2 false in
                   S.equal (fst rr1) (fst rr2) /\ snd rr1 == snd rr2))
         (decreases j)
-#push-options "--z3rlimit 100 --initial_fuel 1 --max_fuel 1 --max_ifuel 1"
+#push-options "--z3rlimit 100 --initial_fuel 1 --max_fuel 1 --initial_ifuel 1 --max_ifuel 1"
 let rec construct_rhs_init_ignored #hsz #f lv hs rhs i j acc1 acc2 =
   if j % 2 = 0
   then construct_rhs_init_ignored #_ #f (lv + 1) hs rhs (i / 2) (j / 2) acc1 acc2
@@ -391,7 +394,7 @@ let rec construct_rhs_init_ignored #hsz #f lv hs rhs i j acc1 acc2 =
 val mt_get_root_inv_ok:
   #hsz:pos -> 
   mt:merkle_tree #hsz {mt_wf_elts mt} -> drt:hash ->
-  olds:hashess #hsz {S.length olds = 32 /\ mt_olds_inv #_ #(MT?.hash_fun mt) 0 (MT?.i mt) olds} ->
+  olds:hashess #hsz {S.length olds = 32 /\ mt_olds_inv #hsz 0 (MT?.i mt) olds} ->
   Lemma (requires (mt_inv mt olds))
         (ensures (let nmt, rt = mt_get_root mt drt in
                  // Only `MT?.rhs` and `MT?.mroot` are changed.
