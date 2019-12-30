@@ -28,9 +28,10 @@ and the `Wireguard VPN <https://lwn.net/Articles/770750/>`_.
   code. Vale code is not intended to be called from C by end users.
 - EverCrypt brings HACL* and Vale under an abstract, high-level API
   that automatically picks the best Vale or HACL* implementation depending on
-  the machine the code is running on. EverCrypt also offers a single API for all
-  algorithms from the same family (e.g. AEAD, hashes), allowing clients to
-  reconfigure their choice of algorithm dynamically without recompiling.
+  the machine the code is running on (multiplexing). EverCrypt also offers a
+  single API for all algorithms from the same family (e.g. AEAD, hashes),
+  allowing clients to reconfigure their choice of algorithm dynamically without
+  recompiling (agility).
 
 All of our code is verified using the F* programming language; once verified,
 our code is extracted to a mixture of C and ASM.
@@ -54,6 +55,7 @@ present repository, but also an implementation of the Signal protocol in F*.
    Supported
    Overview
    Obtaining
+   General
    HaclDoc
    EverCryptDoc
    Merkle
