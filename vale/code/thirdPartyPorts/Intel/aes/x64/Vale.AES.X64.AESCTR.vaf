@@ -77,10 +77,10 @@ ghost procedure finish_aes_encrypt_le(ghost alg:algorithm, ghost input_LE:quad32
     requires
         is_aes_key_LE(alg, key);
     ensures
-        aes_encrypt_le(alg, key, input_LE) == cipher_opaque(alg, input_LE, key_to_round_keys_LE(alg, key));
+        aes_encrypt_LE(alg, key, input_LE) == eval_cipher(alg, input_LE, key_to_round_keys_LE(alg, key));
 {
-    reveal aes_encrypt_le;
-    Vale.Def.Opaque_s.reveal_opaque(cipher);
+    aes_encrypt_LE_reveal();
+    eval_cipher_reveal();
 }
 
 // TODO: Write one procedure that unrolls to these variants?
@@ -103,22 +103,22 @@ procedure Aes_round_4way(
     requires
         aesni_enabled;
         1 <= n < nr(alg) <= length(round_keys);
-        ctr1 == rounds_opaque(init1, round_keys, n - 1);
-        ctr2 == rounds_opaque(init2, round_keys, n - 1);
-        ctr3 == rounds_opaque(init3, round_keys, n - 1);
-        ctr4 == rounds_opaque(init4, round_keys, n - 1);
+        ctr1 == eval_rounds(init1, round_keys, n - 1);
+        ctr2 == eval_rounds(init2, round_keys, n - 1);
+        ctr3 == eval_rounds(init3, round_keys, n - 1);
+        ctr4 == eval_rounds(init4, round_keys, n - 1);
         round_key == index(round_keys, n);
          2 != @round_key;
         12 != @round_key;
         13 != @round_key;
         14 != @round_key;
     ensures
-        ctr1 == rounds_opaque(init1, round_keys, n);
-        ctr2 == rounds_opaque(init2, round_keys, n);
-        ctr3 == rounds_opaque(init3, round_keys, n);
-        ctr4 == rounds_opaque(init4, round_keys, n);
+        ctr1 == eval_rounds(init1, round_keys, n);
+        ctr2 == eval_rounds(init2, round_keys, n);
+        ctr3 == eval_rounds(init3, round_keys, n);
+        ctr4 == eval_rounds(init4, round_keys, n);
 {
-    Vale.Def.Opaque_s.reveal_opaque(rounds);
+    eval_rounds_reveal();
     commute_sub_bytes_shift_rows_forall();
     AESNI_enc(ctr1, round_key);
     AESNI_enc(ctr2, round_key);
@@ -146,17 +146,17 @@ procedure Aes_2rounds_4way(
     requires
         aesni_enabled;
         1 <= n < nr(alg) - 1 && nr(alg) <= length(round_keys);
-        ctr1 == rounds_opaque(init1, round_keys, n - 1);
-        ctr2 == rounds_opaque(init2, round_keys, n - 1);
-        ctr3 == rounds_opaque(init3, round_keys, n - 1);
-        ctr4 == rounds_opaque(init4, round_keys, n - 1);
+        ctr1 == eval_rounds(init1, round_keys, n - 1);
+        ctr2 == eval_rounds(init2, round_keys, n - 1);
+        ctr3 == eval_rounds(init3, round_keys, n - 1);
+        ctr4 == eval_rounds(init4, round_keys, n - 1);
         rk1  == index(round_keys, n);
         rk2  == index(round_keys, n + 1);
     ensures
-        ctr1 == rounds_opaque(init1, round_keys, n + 1);
-        ctr2 == rounds_opaque(init2, round_keys, n + 1);
-        ctr3 == rounds_opaque(init3, round_keys, n + 1);
-        ctr4 == rounds_opaque(init4, round_keys, n + 1);
+        ctr1 == eval_rounds(init1, round_keys, n + 1);
+        ctr2 == eval_rounds(init2, round_keys, n + 1);
+        ctr3 == eval_rounds(init3, round_keys, n + 1);
+        ctr4 == eval_rounds(init4, round_keys, n + 1);
 {
     Aes_round_4way(alg, n,     rk1,  init1, init2, init3, init4, round_keys);
     Aes_round_4way(alg, n + 1, rk2,  init1, init2, init3, init4, round_keys);
@@ -182,18 +182,18 @@ procedure Aes_3rounds_4way(
     requires
         aesni_enabled;
         1 <= n < nr(alg) - 2 && nr(alg) <= length(round_keys);
-        ctr1 == rounds_opaque(init1, round_keys, n - 1);
-        ctr2 == rounds_opaque(init2, round_keys, n - 1);
-        ctr3 == rounds_opaque(init3, round_keys, n - 1);
-        ctr4 == rounds_opaque(init4, round_keys, n - 1);
+        ctr1 == eval_rounds(init1, round_keys, n - 1);
+        ctr2 == eval_rounds(init2, round_keys, n - 1);
+        ctr3 == eval_rounds(init3, round_keys, n - 1);
+        ctr4 == eval_rounds(init4, round_keys, n - 1);
         rk2  == index(round_keys, n + 0);
         rk3 == index(round_keys, n + 1);
         rk4  == index(round_keys, n + 2);
     ensures
-        ctr1 == rounds_opaque(init1, round_keys, n + 2);
-        ctr2 == rounds_opaque(init2, round_keys, n + 2);
-        ctr3 == rounds_opaque(init3, round_keys, n + 2);
-        ctr4 == rounds_opaque(init4, round_keys, n + 2);
+        ctr1 == eval_rounds(init1, round_keys, n + 2);
+        ctr2 == eval_rounds(init2, round_keys, n + 2);
+        ctr3 == eval_rounds(init3, round_keys, n + 2);
+        ctr4 == eval_rounds(init4, round_keys, n + 2);
 {
     Aes_round_4way(alg, n + 0, rk2,  init1, init2, init3, init4, round_keys);
     Aes_round_4way(alg, n + 1, rk3, init1, init2, init3, init4, round_keys);
@@ -220,19 +220,19 @@ procedure Aes_4rounds_4way(
     requires
         aesni_enabled;
         1 <= n < nr(alg) - 3 && nr(alg) <= length(round_keys);
-        ctr1 == rounds_opaque(init1, round_keys, n - 1);
-        ctr2 == rounds_opaque(init2, round_keys, n - 1);
-        ctr3 == rounds_opaque(init3, round_keys, n - 1);
-        ctr4 == rounds_opaque(init4, round_keys, n - 1);
+        ctr1 == eval_rounds(init1, round_keys, n - 1);
+        ctr2 == eval_rounds(init2, round_keys, n - 1);
+        ctr3 == eval_rounds(init3, round_keys, n - 1);
+        ctr4 == eval_rounds(init4, round_keys, n - 1);
         rk1  == index(round_keys, n);
         rk2  == index(round_keys, n + 1);
         rk3 == index(round_keys, n + 2);
         rk4  == index(round_keys, n + 3);
     ensures
-        ctr1 == rounds_opaque(init1, round_keys, n + 3);
-        ctr2 == rounds_opaque(init2, round_keys, n + 3);
-        ctr3 == rounds_opaque(init3, round_keys, n + 3);
-        ctr4 == rounds_opaque(init4, round_keys, n + 3);
+        ctr1 == eval_rounds(init1, round_keys, n + 3);
+        ctr2 == eval_rounds(init2, round_keys, n + 3);
+        ctr3 == eval_rounds(init3, round_keys, n + 3);
+        ctr4 == eval_rounds(init4, round_keys, n + 3);
 {
     Aes_round_4way(alg, n,     rk1,  init1, init2, init3, init4, round_keys);
     Aes_round_4way(alg, n + 1, rk2,  init1, init2, init3, init4, round_keys);
@@ -277,10 +277,10 @@ procedure Aes_ctr_encrypt(
         // AES reqs
         aes_reqs(alg, key, round_keys, keys_b, key_ptr, mem, memTaint);
 
-        ctr1 == aes_encrypt_le(alg, key, in1);
-        ctr2 == aes_encrypt_le(alg, key, in2);
-        ctr3 == aes_encrypt_le(alg, key, in3);
-        ctr4 == aes_encrypt_le(alg, key, in4);
+        ctr1 == aes_encrypt_LE(alg, key, in1);
+        ctr2 == aes_encrypt_LE(alg, key, in2);
+        ctr3 == aes_encrypt_LE(alg, key, in3);
+        ctr4 == aes_encrypt_LE(alg, key, in4);
 {
     init_rounds_opaque(old(ctr1), round_keys);
     init_rounds_opaque(old(ctr2), round_keys);
@@ -334,7 +334,7 @@ procedure Aes_ctr_encrypt(
     }
 
     // Intel's LAST_4
-    //assert ctr1 == rounds(quad32_xor(old_ctr1, index(round_keys, 0), round_keys, nr(alg) - 1));
+    //assert ctr1 == eval_rounds_def(quad32_xor(old_ctr1, index(round_keys, 0), round_keys, nr(alg) - 1));
 
     // Compute the last AES round for each of the four counters
     AESNI_enc_last(ctr1, rk3);
@@ -470,7 +470,7 @@ procedure Aes_ctr_loop_body(
         iv_lower64 == lo64(iv);
 
         // GCTR progress
-        gctr_partial(alg, 4*count, old(buffer128_as_seq(mem, plain_b)), buffer128_as_seq(mem, out_b), key, icb_BE);
+        gctr_partial_def(alg, 4*count, old(buffer128_as_seq(mem, plain_b)), buffer128_as_seq(mem, out_b), key, icb_BE);
         hash == ghash_incremental0(reverse_bytes_quad32(h), hash_init, slice(buffer128_as_seq(mem, out_b), 0, 4 * count));
 
     reads key_ptr; iv_lower64; mask; mask64; four; memTaint; h;
@@ -497,7 +497,7 @@ procedure Aes_ctr_loop_body(
         const4_3 == Mkfour(iv.hi2, reverse_bytes_nat32(add_wrap32(icb_BE.lo0, add_wrap32(#nat32(4 * count + 4), 3))), iv.hi2, reverse_bytes_nat32(add_wrap32(icb_BE.lo0, add_wrap32(#nat32(4 * count + 4), 2))));
 
         // GCTR progress
-        gctr_partial(alg, 4*count+4, old(buffer128_as_seq(mem, plain_b)), buffer128_as_seq(mem, out_b), key, icb_BE);
+        gctr_partial_def(alg, 4*count+4, old(buffer128_as_seq(mem, plain_b)), buffer128_as_seq(mem, out_b), key, icb_BE);
         hash == ghash_incremental(reverse_bytes_quad32(h), hash_init, slice(buffer128_as_seq(mem, out_b), 0, 4 * (count+1)));
 {
     lemma_insrq_extrq_relations(ctr1, iv);
@@ -639,7 +639,7 @@ procedure Aes_counter_loop(
         mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
 
         // GCTR
-        gctr_partial(alg, 4*old(num_quad_blocks), old(buffer128_as_seq(mem, plain_b)), buffer128_as_seq(mem, out_b), key, old(iv));
+        gctr_partial_def(alg, 4*old(num_quad_blocks), old(buffer128_as_seq(mem, plain_b)), buffer128_as_seq(mem, out_b), key, old(iv));
         iv == old(inc32(iv, 4*num_quad_blocks));
 
         // GHash
@@ -735,7 +735,7 @@ procedure Aes_counter_loop(
             // GCTR progress
             length(slice(buffer128_as_seq(mem, out_b), 0, 4 * old(num_quad_blocks))) > 0;
             hash == ghash_incremental0(reverse_bytes_quad32(h), old(hash), slice(buffer128_as_seq(mem, out_b), 0, 4 * count));
-            gctr_partial(alg, 4*count, old(buffer128_as_seq(mem, plain_b)), buffer128_as_seq(mem, out_b), key, icb_BE);
+            gctr_partial_def(alg, 4*count, old(buffer128_as_seq(mem, plain_b)), buffer128_as_seq(mem, out_b), key, icb_BE);
         decreases num_quad_blocks;
     {
         Aes_ctr_loop_body(alg, old(plain_ptr), old(out_ptr), old(num_quad_blocks), count, plain_b, out_b, key, round_keys, keys_b, icb_BE, old_iv, old(hash));

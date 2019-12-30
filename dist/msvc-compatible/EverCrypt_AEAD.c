@@ -193,7 +193,7 @@ EverCrypt_AEAD_encrypt_aes128_gcm(
   uint32_t ad_len,
   uint8_t *plain,
   uint32_t plain_len,
-  uint8_t *cipher1,
+  uint8_t *cipher,
   uint8_t *tag
 )
 {
@@ -225,7 +225,7 @@ EverCrypt_AEAD_encrypt_aes128_gcm(
   uint32_t plain_len_ = (uint32_t)(uint64_t)plain_len / (uint32_t)16U * (uint32_t)16U;
   uint32_t auth_len_ = (uint32_t)(uint64_t)ad_len / (uint32_t)16U * (uint32_t)16U;
   uint8_t *plain_b_ = plain;
-  uint8_t *out_b_ = cipher1;
+  uint8_t *out_b_ = cipher;
   uint8_t *auth_b_ = ad;
   memcpy(inout_b,
     plain + plain_len_,
@@ -293,7 +293,7 @@ EverCrypt_AEAD_encrypt_aes128_gcm(
         scratch_b1,
         tag);
   }
-  memcpy(cipher1 + (uint32_t)(uint64_t)plain_len / (uint32_t)16U * (uint32_t)16U,
+  memcpy(cipher + (uint32_t)(uint64_t)plain_len / (uint32_t)16U * (uint32_t)16U,
     inout_b,
     (uint32_t)(uint64_t)plain_len % (uint32_t)16U * sizeof inout_b[0U]);
   return EverCrypt_Error_Success;
@@ -308,7 +308,7 @@ EverCrypt_AEAD_encrypt_aes256_gcm(
   uint32_t ad_len,
   uint8_t *plain,
   uint32_t plain_len,
-  uint8_t *cipher1,
+  uint8_t *cipher,
   uint8_t *tag
 )
 {
@@ -340,7 +340,7 @@ EverCrypt_AEAD_encrypt_aes256_gcm(
   uint32_t plain_len_ = (uint32_t)(uint64_t)plain_len / (uint32_t)16U * (uint32_t)16U;
   uint32_t auth_len_ = (uint32_t)(uint64_t)ad_len / (uint32_t)16U * (uint32_t)16U;
   uint8_t *plain_b_ = plain;
-  uint8_t *out_b_ = cipher1;
+  uint8_t *out_b_ = cipher;
   uint8_t *auth_b_ = ad;
   memcpy(inout_b,
     plain + plain_len_,
@@ -408,7 +408,7 @@ EverCrypt_AEAD_encrypt_aes256_gcm(
         scratch_b1,
         tag);
   }
-  memcpy(cipher1 + (uint32_t)(uint64_t)plain_len / (uint32_t)16U * (uint32_t)16U,
+  memcpy(cipher + (uint32_t)(uint64_t)plain_len / (uint32_t)16U * (uint32_t)16U,
     inout_b,
     (uint32_t)(uint64_t)plain_len % (uint32_t)16U * sizeof inout_b[0U]);
   return EverCrypt_Error_Success;
@@ -423,7 +423,7 @@ EverCrypt_AEAD_encrypt(
   uint32_t ad_len,
   uint8_t *plain,
   uint32_t plain_len,
-  uint8_t *cipher1,
+  uint8_t *cipher,
   uint8_t *tag
 )
 {
@@ -446,7 +446,7 @@ EverCrypt_AEAD_encrypt(
             ad_len,
             plain,
             plain_len,
-            cipher1,
+            cipher,
             tag);
       }
     case Spec_Cipher_Expansion_Vale_AES256:
@@ -459,7 +459,7 @@ EverCrypt_AEAD_encrypt(
             ad_len,
             plain,
             plain_len,
-            cipher1,
+            cipher,
             tag);
       }
     case Spec_Cipher_Expansion_Hacl_CHACHA20:
@@ -468,7 +468,7 @@ EverCrypt_AEAD_encrypt(
         {
           return EverCrypt_Error_InvalidIVLength;
         }
-        EverCrypt_Chacha20Poly1305_aead_encrypt(ek, iv, ad_len, ad, plain_len, plain, cipher1, tag);
+        EverCrypt_Chacha20Poly1305_aead_encrypt(ek, iv, ad_len, ad, plain_len, plain, cipher, tag);
         return EverCrypt_Error_Success;
       }
     default:
@@ -486,7 +486,7 @@ EverCrypt_AEAD_decrypt_aes128_gcm(
   uint32_t iv_len,
   uint8_t *ad,
   uint32_t ad_len,
-  uint8_t *cipher1,
+  uint8_t *cipher,
   uint32_t cipher_len,
   uint8_t *tag,
   uint8_t *dst
@@ -519,12 +519,12 @@ EverCrypt_AEAD_decrypt_aes128_gcm(
   uint8_t *scratch_b1 = scratch_b + (uint32_t)32U;
   uint32_t cipher_len_ = (uint32_t)(uint64_t)cipher_len / (uint32_t)16U * (uint32_t)16U;
   uint32_t auth_len_ = (uint32_t)(uint64_t)ad_len / (uint32_t)16U * (uint32_t)16U;
-  uint8_t *cipher_b_ = cipher1;
+  uint8_t *cipher_b_ = cipher;
   uint8_t *out_b_ = dst;
   uint8_t *auth_b_ = ad;
   memcpy(inout_b,
-    cipher1 + cipher_len_,
-    (uint32_t)(uint64_t)cipher_len % (uint32_t)16U * sizeof cipher1[0U]);
+    cipher + cipher_len_,
+    (uint32_t)(uint64_t)cipher_len % (uint32_t)16U * sizeof cipher[0U]);
   memcpy(abytes_b, ad + auth_len_, (uint32_t)(uint64_t)ad_len % (uint32_t)16U * sizeof ad[0U]);
   uint64_t len128x6 = (uint64_t)cipher_len / (uint64_t)96U * (uint64_t)96U;
   uint64_t c;
@@ -611,7 +611,7 @@ EverCrypt_AEAD_decrypt_aes256_gcm(
   uint32_t iv_len,
   uint8_t *ad,
   uint32_t ad_len,
-  uint8_t *cipher1,
+  uint8_t *cipher,
   uint32_t cipher_len,
   uint8_t *tag,
   uint8_t *dst
@@ -644,12 +644,12 @@ EverCrypt_AEAD_decrypt_aes256_gcm(
   uint8_t *scratch_b1 = scratch_b + (uint32_t)32U;
   uint32_t cipher_len_ = (uint32_t)(uint64_t)cipher_len / (uint32_t)16U * (uint32_t)16U;
   uint32_t auth_len_ = (uint32_t)(uint64_t)ad_len / (uint32_t)16U * (uint32_t)16U;
-  uint8_t *cipher_b_ = cipher1;
+  uint8_t *cipher_b_ = cipher;
   uint8_t *out_b_ = dst;
   uint8_t *auth_b_ = ad;
   memcpy(inout_b,
-    cipher1 + cipher_len_,
-    (uint32_t)(uint64_t)cipher_len % (uint32_t)16U * sizeof cipher1[0U]);
+    cipher + cipher_len_,
+    (uint32_t)(uint64_t)cipher_len % (uint32_t)16U * sizeof cipher[0U]);
   memcpy(abytes_b, ad + auth_len_, (uint32_t)(uint64_t)ad_len % (uint32_t)16U * sizeof ad[0U]);
   uint64_t len128x6 = (uint64_t)cipher_len / (uint64_t)96U * (uint64_t)96U;
   uint64_t c;
@@ -736,7 +736,7 @@ EverCrypt_AEAD_decrypt(
   uint32_t iv_len,
   uint8_t *ad,
   uint32_t ad_len,
-  uint8_t *cipher1,
+  uint8_t *cipher,
   uint32_t cipher_len,
   uint8_t *tag,
   uint8_t *dst
@@ -759,7 +759,7 @@ EverCrypt_AEAD_decrypt(
             iv_len,
             ad,
             ad_len,
-            cipher1,
+            cipher,
             cipher_len,
             tag,
             dst);
@@ -772,7 +772,7 @@ EverCrypt_AEAD_decrypt(
             iv_len,
             ad,
             ad_len,
-            cipher1,
+            cipher,
             cipher_len,
             tag,
             dst);
@@ -791,7 +791,7 @@ EverCrypt_AEAD_decrypt(
             ad,
             cipher_len,
             dst,
-            cipher1,
+            cipher,
             tag);
         if (r == (uint32_t)0U)
         {

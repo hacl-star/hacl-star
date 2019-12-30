@@ -379,8 +379,8 @@ procedure Pextrq(out dst:dst_opr64, in src:xmm, inline index:nat8)
     ensures
         dst == (if index = 0 then lo64(src) else hi64(src));
 {
-    Vale.Def.Opaque_s.reveal_opaque(lo64_def);
-    Vale.Def.Opaque_s.reveal_opaque(hi64_def);
+    lo64_reveal();
+    hi64_reveal();
 }
 
 procedure Pinsrd(inout dst:xmm, in src:opr64, inline index:nat8)
@@ -420,10 +420,10 @@ procedure Pinsrq(inout dst:xmm, in src:opr64, inline index:nat8)
         sse_enabled;
         index < 2;
     ensures
-        dst == insert_nat64_opaque(old(dst), src, #nat1(index));
+        dst == insert_nat64(old(dst), src, #nat1(index));
 {
-    Vale.Def.Opaque_s.reveal_opaque(insert_nat64);
-    assert dst == insert_nat64(old(dst), src, #nat1(index));
+    insert_nat64_reveal();
+    assert dst == insert_nat64_def(old(dst), src, #nat1(index));
 }
 
 procedure PinsrqImm(inout dst:xmm, inline immediate:nat64, inline index:nat8, out tmp:reg_opr64)
@@ -433,7 +433,7 @@ procedure PinsrqImm(inout dst:xmm, inline immediate:nat64, inline index:nat8, ou
         sse_enabled;
         index < 2;
     ensures
-        dst == insert_nat64_opaque(old(dst), immediate, #nat1(index));
+        dst == insert_nat64(old(dst), immediate, #nat1(index));
 {
     Mov64(tmp, immediate);
     Pinsrq(dst, tmp, index);
@@ -563,7 +563,7 @@ procedure Store64_buffer128(
     ensures
         modifies_mem(loc_buffer(b), old(mem), mem);
         valid_taint_buf128(b, mem, memTaint, t);
-        mem == old(buffer128_write(b, index, insert_nat64_opaque(old(buffer128_read(b, index, mem)), src, if upper then 1 else 0), mem));
+        mem == old(buffer128_write(b, index, insert_nat64(old(buffer128_read(b, index, mem)), src, if upper then 1 else 0), mem));
 {
     low_lemma_valid_mem128_64(b, #nat(index), old(mem));
     low_lemma_store_mem128_lo64(b, #nat(index), old(src), old(mem));
@@ -595,7 +595,7 @@ procedure InitPshufbMask(inout dst:xmm, out tmp:reg_opr64)
     lemma_nat_to_two32();
     PinsrqImm(dst, 0x08090A0B0C0D0E0F, 0, tmp);
     PinsrqImm(dst, 0x0001020304050607, 1, tmp);
-    Vale.Def.Opaque_s.reveal_opaque(insert_nat64);
+    insert_nat64_reveal();
 }
 
 procedure InitPshufbStableMask(inout dst:xmm, out tmp:reg_opr64)
@@ -609,7 +609,7 @@ procedure InitPshufbStableMask(inout dst:xmm, out tmp:reg_opr64)
     lemma_nat_to_two32();
     PinsrqImm(dst, 0x0405060700010203, 0, tmp);
     PinsrqImm(dst, 0x0C0D0E0F08090A0B, 1, tmp);
-    Vale.Def.Opaque_s.reveal_opaque(insert_nat64);
+    insert_nat64_reveal();
 }
 
 procedure InitPshufbDupMask(inout dst:xmm, out tmp:reg_opr64)
@@ -623,7 +623,7 @@ procedure InitPshufbDupMask(inout dst:xmm, out tmp:reg_opr64)
     lemma_nat_to_two32();
     PinsrqImm(dst, 0x08090A0B0C0D0E0F, 0, tmp);
     PinsrqImm(dst, 0x08090A0B0C0D0E0F, 1, tmp);
-    Vale.Def.Opaque_s.reveal_opaque(insert_nat64);
+    insert_nat64_reveal();
 }
 
 procedure InitPshufb64Mask(inout dst:xmm, out tmp:reg_opr64)
@@ -637,7 +637,7 @@ procedure InitPshufb64Mask(inout dst:xmm, out tmp:reg_opr64)
     lemma_nat_to_two32();
     PinsrqImm(dst, 0x0001020304050607, 0, tmp);
     PinsrqImm(dst, 0x08090A0B0C0D0E0F, 1, tmp);
-    Vale.Def.Opaque_s.reveal_opaque(insert_nat64);
+    insert_nat64_reveal();
 }
 
 // TODO: Lots of room to optimize this using bitwise operations

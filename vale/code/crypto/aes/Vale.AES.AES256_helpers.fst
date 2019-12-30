@@ -7,13 +7,13 @@ let lemma_reveal_expand_key_256 (key:aes_key_LE AES_256) (round:nat) : Lemma
     else round_key_256 (expand_key_256 key (round - 2)) (expand_key_256 key (round - 1)) round
   ))
   =
-  reveal_opaque expand_key_256_def
+  expand_key_256_reveal ()
 
 #reset-options "--initial_fuel 8 --max_fuel 8 --max_ifuel 0"
 let lemma_expand_key_256_0 (key:aes_key_LE AES_256) : Lemma
   (equal key (expand_key AES_256 key 8))
   =
-  reveal_opaque expand_key_def
+  expand_key_reveal ()
 
 open FStar.Mul
 #reset-options "--initial_fuel 1 --max_fuel 1 --max_ifuel 0 --z3rlimit 40 --using_facts_from '* -FStar.Seq.Properties'"
@@ -31,7 +31,7 @@ let lemma_expand_key_256_i (key:aes_key_LE AES_256) (i:nat) : Lemma
     round_key_256 prev0 prev1 i == Mkfour w.[n + 0] w.[n + 1] w.[n + 2] w.[n + 3]  // NextQuad == Next 4 words
   ))
   =
-  reveal_opaque expand_key_def;
+  expand_key_reveal ();
   let n = 4 * i in
   // unfold expand_key 8 times (could use fuel, but that unfolds everything):
   let _ = expand_key AES_256 key (n + 1) in
@@ -53,7 +53,7 @@ let rec lemma_expand_append (key:aes_key_LE AES_256) (size1:nat) (size2:nat) : L
   (ensures equal (expand_key AES_256 key size1) (slice (expand_key AES_256 key size2) 0 size1))
   (decreases size2)
   =
-  reveal_opaque expand_key_def;
+  expand_key_reveal ();
   if size1 < size2 then lemma_expand_append key size1 (size2 - 1)
 
 // quad32 key expansion is equivalent to nat32 key expansion
@@ -79,8 +79,8 @@ let rec lemma_expand_key_256 (key:seq nat32) (size:nat) =
 // SIMD version of round_key_256 is equivalent to scalar round_key_256
 #push-options "--max_fuel 3 --initial_fuel 3 --max_ifuel 3 --initial_ifuel 3"  // REVIEW: Why do we need this?
 let lemma_simd_round_key (prev0 prev1:quad32) (rcon:nat32) (round:int) =
-  reveal_opaque quad32_xor_def;
-  reveal_opaque reverse_bytes_nat32_def;
+  quad32_xor_reveal ();
+  reverse_bytes_nat32_reveal ();
   commute_rot_word_sub_word prev1.hi3;
   Vale.Arch.Types.xor_lemmas ()
 #pop-options

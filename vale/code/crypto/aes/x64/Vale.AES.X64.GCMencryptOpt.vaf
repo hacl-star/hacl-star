@@ -139,7 +139,7 @@ procedure Gctr_register(
     assert inc32(icb, 0) == icb;
     Pshufb(xmm0, rev_mask);
     AESEncryptBlock(alg, icb, key, round_keys, keys_b);
-    reveal aes_encrypt_le;
+    aes_encrypt_LE_reveal();
     assert xmm0 == aes_encrypt_LE(alg, key, reverse_bytes_quad32(old(icb)));
 
     Pshufb(io, rev_mask);
@@ -195,7 +195,7 @@ procedure Gctr_blocks128(
         modifies_buffer128(out_b, old(mem), mem);
 
         // GCTR
-        gctr_partial_opaque(alg, len, old(s128(mem, in_b)), s128(mem, out_b), key, old(icb));
+        gctr_partial(alg, len, old(s128(mem, in_b)), s128(mem, out_b), key, old(icb));
         icb == inc32lite(old(icb), old(len));
         len == 0 ==> s128(mem, out_b) == old(s128(mem, out_b));
 {
@@ -241,7 +241,7 @@ procedure Gctr_blocks128(
 
             //////////////////// Postcondition goals //////////////////////
             modifies_buffer128(out_b, old(mem), mem);
-            gctr_partial(alg, ctr, plain_quads, s128(mem, out_b), key, old(icb));
+            gctr_partial_def(alg, ctr, plain_quads, s128(mem, out_b), key, old(icb));
             len == 0 ==> s128(mem, out_b) == old(s128(mem, out_b));
         decreases
             len - ctr;
@@ -250,7 +250,7 @@ procedure Gctr_blocks128(
         Mov128(xmm0, icb);
         Pshufb(xmm0, mask);
         AESEncryptBlock(alg, reverse_bytes_quad32(icb), key, round_keys, keys_b);
-        reveal aes_encrypt_le;
+        aes_encrypt_LE_reveal();
 
         Load128_buffer(xmm2, tmp_in_ptr, 0, Secret, in_b, ctr);
         Pxor(xmm2, xmm0);
@@ -261,7 +261,7 @@ procedure Gctr_blocks128(
         Add64(tmp_out_ptr, 16);
         Inc32(icb, one);
     }
-    Vale.Def.Opaque_s.reveal_opaque(gctr_partial);
+    gctr_partial_reveal();
 }
 
 #reset-options "--z3rlimit 10"
@@ -316,7 +316,7 @@ procedure Gcm_blocks128(
 //        r10 == out_ptr + 16 * len;
 
         // GCTR
-        gctr_partial_opaque(alg, old(len), old(s128(mem, in_b)), s128(mem, out_b), key, old(icb));
+        gctr_partial(alg, old(len), old(s128(mem, in_b)), s128(mem, out_b), key, old(icb));
         icb == inc32lite(old(icb), old(len));
 
         // GHash
@@ -424,7 +424,7 @@ procedure Gcm_make_length_quad()
         8*old(plain_num_bytes)< pow2_64;
         8*old(auth_num_bytes) < pow2_64;
         // NOTE: Caller will need to reverse this to get a properly ordered length_quad
-        result == insert_nat64_opaque(insert_nat64_opaque(Mkfour(0, 0, 0, 0), #nat64(8 * old(auth_num_bytes)), 1), #nat64(8 * old(plain_num_bytes)), 0);
+        result == insert_nat64(insert_nat64(Mkfour(0, 0, 0, 0), #nat64(8 * old(auth_num_bytes)), 1), #nat64(8 * old(plain_num_bytes)), 0);
 {
     // Prepare length fields
     ZeroXmm(result);
@@ -613,7 +613,7 @@ procedure Gcm_extra_bytes(
         modifies_buffer128(inout_b, old(mem), mem);
 
         // GCTR
-        gctr_partial_opaque(alg, len, old(s128(mem, inout_b)), s128(mem, inout_b), key, old(icb));
+        gctr_partial(alg, len, old(s128(mem, inout_b)), s128(mem, inout_b), key, old(icb));
 
         // GHash
         let raw_quads := append(completed_quads, s128(mem, inout_b));
@@ -628,7 +628,7 @@ procedure Gcm_extra_bytes(
     Mov128(xmm0, icb);
     Pshufb(xmm0, rev_mask);
     AESEncryptBlock(alg, reverse_bytes_quad32(icb), key, round_keys, keys_b);
-    reveal aes_encrypt_le;
+    aes_encrypt_LE_reveal();
 
     Load128_buffer(Z0, io_ptr, 0, Secret, inout_b, 0); // borrow Z0
     lemma_quad32_xor_commutes(Ii, Z0);
@@ -640,7 +640,7 @@ procedure Gcm_extra_bytes(
     Ghash_extra_bytes(hkeys_b, total_bytes, old_hash, h_LE, completed_quads);
 
     assert equal(s128(mem, inout_b), create(1, hash_input));      // OBSERVE
-    Vale.Def.Opaque_s.reveal_opaque(gctr_partial);
+    gctr_partial_reveal();
 }
 
 
@@ -876,7 +876,7 @@ procedure Compute_iv(
         Mov64(r11, 0);
         Mov64(r13, num_bytes); 
 
-        // Compute: xmm1 == hash(length_LE = reverse_bytes_quad32 (insert_nat64 (Mkfour 0 0 0 0) (8 * length iv) 0 ))
+        // Compute: xmm1 == hash(length_LE = reverse_bytes_quad32 (insert_nat64_def (Mkfour 0 0 0 0) (8 * length iv) 0 ))
         Gcm_make_length_quad();
         let length_quad := reverse_bytes_quad32(xmm0);
 
@@ -1049,11 +1049,11 @@ procedure Gcm_blocks(
                                 old(len128x6) + old(len128) + 1
                             else
                                 old(len128x6) + old(len128);
-        gctr_partial_opaque(alg, cipher_bound, plain_in, cipher_out, key, ctr_BE_2);
+        gctr_partial(alg, cipher_bound, plain_in, cipher_out, key, ctr_BE_2);
 
         // Hashing results
         //let h:quad32 := reverse_bytes_quad32(buffer128_read(hkeys_b, 2, mem));
-        let length_quad:quad32 := reverse_bytes_quad32(insert_nat64_opaque(insert_nat64_opaque(Mkfour(0, 0, 0, 0), #nat64(8 * old(auth_num_bytes)), 1), #nat64(8 * old(plain_num_bytes)), 0));
+        let length_quad:quad32 := reverse_bytes_quad32(insert_nat64(insert_nat64(Mkfour(0, 0, 0, 0), #nat64(8 * old(auth_num_bytes)), 1), #nat64(8 * old(plain_num_bytes)), 0));
 
         let raw_auth_quads:seq(quad32) := if (old(auth_num_bytes) > old(auth_len * 128/8)) then
                                 append(old(s128(mem, auth_b)), old(s128(mem, abytes_b)))
@@ -1159,7 +1159,7 @@ procedure Gcm_blocks(
         cipher_byte_seq := s128(mem, inout_b);
     }
 //    assert y_inout == ghash_incremental0(h_LE, y_0, auth_in);
-//    assert gctr_partial_opaque(alg, length(plain_byte_seq), plain_byte_seq, cipher_byte_seq, key, xmm7);
+//    assert gctr_partial(alg, length(plain_byte_seq), plain_byte_seq, cipher_byte_seq, key, xmm7);
 
     // Line up length arguments
     Mov64(r11, r15);        // r11 := auth_num_bytes
@@ -1391,7 +1391,7 @@ procedure Gcm_blocks_wrapped(
 
     // Hashing results
     let h:quad32 := reverse_bytes_quad32(buffer128_read(hkeys_b, 2, mem));
-    let length_quad:quad32 := reverse_bytes_quad32(insert_nat64_opaque(insert_nat64_opaque(Mkfour(0, 0, 0, 0), #nat64(8 * old(auth_num_bytes)), 1), #nat64(8 * old(plain_num_bytes)), 0));
+    let length_quad:quad32 := reverse_bytes_quad32(insert_nat64(insert_nat64(Mkfour(0, 0, 0, 0), #nat64(8 * old(auth_num_bytes)), 1), #nat64(8 * old(plain_num_bytes)), 0));
 
     let raw_auth_quads:seq(quad32) := if (old(auth_num_bytes) > old(auth_len * 128/8)) then
                             append(old(s128(mem, auth_b)), old(s128(mem, abytes_b)))
@@ -1426,7 +1426,7 @@ procedure Gcm_blocks_wrapped(
                                  iv, old(buffer128_read(iv_b, 0, mem)),
                                  reverse_bytes_quad32(buffer128_read(hkeys_b, 2, mem)),
                                  hash,
-                                 reverse_bytes_quad32(insert_nat64_opaque(insert_nat64_opaque(Mkfour(0, 0, 0, 0), #nat64(8 * old(auth_num_bytes)), 1), #nat64(8 * old(plain_num_bytes)), 0)));
+                                 reverse_bytes_quad32(insert_nat64(insert_nat64(Mkfour(0, 0, 0, 0), #nat64(8 * old(auth_num_bytes)), 1), #nat64(8 * old(plain_num_bytes)), 0)));
 }
 
 procedure Save_registers(inline win:bool)

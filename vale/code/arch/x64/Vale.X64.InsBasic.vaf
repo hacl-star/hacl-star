@@ -162,7 +162,7 @@ procedure Adc64Wrap(inout dst:dst_opr64, in src:opr64)
 {
 }
 
-#reset-options "--initial_fuel 5 --max_fuel 5 --max_ifuel 2 --z3rlimit 20 --z3cliopt smt.arith.nl=true"
+#reset-options "--initial_fuel 5 --max_fuel 5 --max_ifuel 2 --z3rlimit 20 --smtencoding.nl_arith_repr boxwrap"
 procedure Adcx64Wrap(inout dst:dst_opr64, in src:opr64)
     {:public}
     {:quick exportOnly}

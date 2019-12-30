@@ -25,5 +25,5 @@ let rec ghash_LE_def (h_LE:quad32) (x:ghash_plain_LE) : Tot quad32 (decreases %[
   let x_i = last x in
   let xor_LE = quad32_xor y_i_minus_1 x_i in
   gf128_mul_LE xor_LE h_LE
-
-let ghash_LE = make_opaque ghash_LE_def
+[@"opaque_to_smt"] let ghash_LE = opaque_make ghash_LE_def
+irreducible let ghash_LE_reveal = opaque_revealer (`%ghash_LE) ghash_LE ghash_LE_def

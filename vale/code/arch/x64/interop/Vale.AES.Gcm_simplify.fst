@@ -4,7 +4,7 @@ open FStar.Mul
 open Vale.SHA.Simplify_Sha
 
 let le_bytes_to_seq_quad32_uint8_to_nat8_length s =
-  FStar.Pervasives.reveal_opaque (`%le_bytes_to_seq_quad32) le_bytes_to_seq_quad32
+  reveal_opaque (`%le_bytes_to_seq_quad32) le_bytes_to_seq_quad32
 
 let gcm_simplify1 b h n =
   let db = get_downview b in
@@ -26,10 +26,10 @@ let gcm_simplify2 b h =
   let aux (i:nat{i < B.length b}) : Lemma (Seq.index s_init i == Seq.index s_down i) =
     DV.as_seq_sel h db i;
     DV.get_sel h db i;
-    Vale.Def.Opaque_s.reveal_opaque Vale.Interop.Views.get8_def
+    Vale.Interop.Views.get8_reveal ()
   in Classical.forall_intro aux;
   assert (Seq.equal (DV.as_seq h db) (B.as_seq h b));
-  Vale.Def.Opaque_s.reveal_opaque Vale.Interop.Views.get128_def;
+  Vale.Interop.Views.get128_reveal ();
   le_quad32_to_bytes_to_quad32 (seq_uint8_to_seq_nat8 s_init)
 
 open Vale.Lib.Seqs_s
@@ -47,8 +47,8 @@ open FStar.Tactics
 #push-options "--z3cliopt smt.QI.EAGER_THRESHOLD=100 --z3cliopt smt.CASE_SPLIT=3 --z3cliopt smt.arith.nl=true --max_fuel 2 --initial_fuel 2 --max_ifuel 0 --smtencoding.elim_box true --smtencoding.nl_arith_repr native --z3rlimit 10"
 
 let be_quad32_to_bytes_sel q i =
-  FStar.Pervasives.reveal_opaque (`%be_quad32_to_bytes) be_quad32_to_bytes;
-  FStar.Pervasives.reveal_opaque (`%seq_four_to_seq_BE) (seq_four_to_seq_BE #nat8);
+  reveal_opaque (`%be_quad32_to_bytes) be_quad32_to_bytes;
+  reveal_opaque (`%seq_four_to_seq_BE) (seq_four_to_seq_BE #nat8);
   let Mkfour q0 q1 q2 q3 = q in
   assert (Seq.index (Vale.Def.Words.Seq_s.four_to_seq_BE q) 0 == q3);
   assert (Seq.index (Vale.Def.Words.Seq_s.four_to_seq_BE q) 1 == q2);
@@ -136,7 +136,7 @@ let be_quad32_to_bytes_sel q i =
 
 let reverse_nat32_four_to_nat (n:nat32) (i:nat{i < 4}) : Lemma
   (four_select (nat_to_four 8 n) i == four_select (nat_to_four 8 (reverse_bytes_nat32 n)) (3 - i))
-  = Vale.Def.Opaque_s.reveal_opaque reverse_bytes_nat32_def
+  = reverse_bytes_nat32_reveal ()
 
 val reverse_bytes_four_select (q:quad32) (i:nat{i < 4}) : Lemma
   (let Mkfour q0 q1 q2 q3 = q in
@@ -182,14 +182,14 @@ let lemma_same_seq_dv (h:HS.mem) (b:B.buffer UInt8.t) : Lemma
   let aux (i:nat{i < B.length b}) : Lemma (Seq.index (B.as_seq h b) i == Seq.index (DV.as_seq h db) i) =
     DV.as_seq_sel h db i;
     DV.get_sel h db i;
-    Vale.Def.Opaque_s.reveal_opaque Vale.Interop.Views.put8_def
+    Vale.Interop.Views.put8_reveal ()
   in Classical.forall_intro aux
 
 #reset-options "--z3rlimit 250 --max_fuel 0 --initial_ifuel 1 --max_ifuel 1"
 
 let aes_simplify_aux (s:seq16 nat8) : Lemma
   (seq_nat8_to_seq_nat32_LE s == quad32_to_seq (le_bytes_to_quad32 s))
-  = Vale.Def.Opaque_s.reveal_opaque le_bytes_to_quad32_def;
+  = le_bytes_to_quad32_reveal ();
     assert (Seq.equal (seq_nat8_to_seq_nat32_LE s) (quad32_to_seq (le_bytes_to_quad32 s)))
 
 #push-options "--z3cliopt smt.arith.nl=true"
@@ -206,18 +206,18 @@ let aes_simplify1 b h =
   let aux (i:nat{i < B.length b}) : Lemma (Seq.index s_init i == Seq.index s_down i) =
     DV.as_seq_sel h db i;
     DV.get_sel h db i;
-    Vale.Def.Opaque_s.reveal_opaque Vale.Interop.Views.get8_def
+    Vale.Interop.Views.get8_reveal ()
   in Classical.forall_intro aux;
   assert (Seq.equal (DV.as_seq h db) (B.as_seq h b));
   assert (quad32_to_seq (low_buffer_read TUInt8 TUInt128 h b 0) ==
     four_to_seq_LE (Vale.Interop.Views.get128 (B.as_seq h b)));
-  Vale.Def.Opaque_s.reveal_opaque Vale.Interop.Views.get128_def;
+  Vale.Interop.Views.get128_reveal ();
   aes_simplify_aux (seq_uint8_to_seq_nat8 s_init)
 #pop-options
 
 #push-options "--z3cliopt smt.arith.nl=true"
 let aes_simplify2 b h =
-  FStar.Pervasives.reveal_opaque (`%seq_to_seq_four_LE) (seq_to_seq_four_LE #nat8);
+  reveal_opaque (`%seq_to_seq_four_LE) (seq_to_seq_four_LE #nat8);
   let view = Vale.Interop.Views.up_view128 in
   let s_init = B.as_seq h b in
   let db = get_downview b in
@@ -228,13 +228,13 @@ let aes_simplify2 b h =
   let aux (i:nat{i < B.length b}) : Lemma (Seq.index s_init i == Seq.index s_down i) =
     DV.as_seq_sel h db i;
     DV.get_sel h db i;
-    Vale.Def.Opaque_s.reveal_opaque Vale.Interop.Views.get8_def
+    Vale.Interop.Views.get8_reveal ()
   in Classical.forall_intro aux;
   assert (Seq.equal (DV.as_seq h db) (B.as_seq h b));
   UV.length_eq b_v;
   UV.get_sel h b_v 0;
   UV.get_sel h b_v 1;
-  Vale.Def.Opaque_s.reveal_opaque Vale.Interop.Views.get128_def;
+  Vale.Interop.Views.get128_reveal ();
   aes_simplify_aux (seq_uint8_to_seq_nat8 (Seq.slice s_init 0 16));
   aes_simplify_aux (seq_uint8_to_seq_nat8 (Seq.slice s_init 16 32));
   assert (Seq.equal
