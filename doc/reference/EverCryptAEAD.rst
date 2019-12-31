@@ -61,10 +61,27 @@ Encryption and decryption
 Both encryption and decryption take a piece of state which holds the key; a
 piece of state may be reused as many times as desired.
 
+Encryption has a substantial amount of preconditions; see ``encrypt_pre`` in
+``EverCrypt.AEAD.fsti``, and :ref:`reading-preconditions` for a primer on
+deciphering F* code.
+
+At the time of writing, ``encrypt`` may return either ``Success`` or
+``InvalidKey``. The latter is returned if and only if the ``s`` parameter is
+``NULL``.
+
 .. literalinclude:: ../../dist/portable-gcc-compatible/EverCrypt_AEAD.h
     :language: c
     :start-after: SNIPPET_START: EverCrypt_AEAD_encrypt
     :end-before: SNIPPET_END: EverCrypt_AEAD_encrypt
+
+.. note::
+
+  There is no length parameter for the tag; looking at the source
+  ``EverCrypt.AEAD.fsti``, one can see a precondition of the form ``B.length tag
+  = tag_length a``, i.e. the length of the ``tag`` array must be of a suitable
+  length for the algorithm ``a``. See ``Spec.Agile.AEAD.fsti`` for the
+  definition of ``tag_length``. **Unverified clients are strongly encouraged
+  to perform a run-time check!**
 
 .. literalinclude:: ../../dist/portable-gcc-compatible/EverCrypt_AEAD.h
     :language: c
