@@ -152,7 +152,7 @@ function refresh_doc() {
 
   git clone git@github.com:fstarlang/fstarlang.github.io fstarlang-github-io
 
-  (cd doc/reference && ./ci.sh ../../fstarlang-github-io)
+  (cd doc/reference && ./ci.sh ../../fstarlang-github-io/evercrypt/html/)
 
   pushd fstarlang-github-io && {
     git add -A . &&
