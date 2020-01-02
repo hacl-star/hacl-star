@@ -10,7 +10,7 @@ This API is:
 
 Possible values for the agility argument (``Hacl_Spec.h``) :
 
-.. literalinclude:: ../../dist/portable-gcc-compatible/Hacl_Spec.h
+.. literalinclude:: ../dist/portable-gcc-compatible/Hacl_Spec.h
     :language: c
     :start-after: SNIPPET_START: Spec_Agile_AEAD_alg
     :end-before: SNIPPET_END: Spec_Agile_AEAD_alg
@@ -24,7 +24,7 @@ State management
 Clients are first expected to allocate persistent state, which performs key
 expansion and precomputes internal data for AES-GCM.
 
-.. literalinclude:: ../../dist/portable-gcc-compatible/EverCrypt_AEAD.h
+.. literalinclude:: ../dist/portable-gcc-compatible/EverCrypt_AEAD.h
     :language: c
     :start-after: SNIPPET_START: EverCrypt_AEAD_create_in
     :end-before: SNIPPET_END: EverCrypt_AEAD_create_in
@@ -50,7 +50,7 @@ platform (e.g. AES-GCM without ADX+BMI2).
 
 State **must** be freed via the ``free`` function:
 
-.. literalinclude:: ../../dist/portable-gcc-compatible/EverCrypt_AEAD.h
+.. literalinclude:: ../dist/portable-gcc-compatible/EverCrypt_AEAD.h
     :language: c
     :start-after: SNIPPET_START: EverCrypt_AEAD_free
     :end-before: SNIPPET_END: EverCrypt_AEAD_free
@@ -69,7 +69,7 @@ At the time of writing, ``encrypt`` may return either ``Success`` or
 ``InvalidKey``. The latter is returned if and only if the ``s`` parameter is
 ``NULL``.
 
-.. literalinclude:: ../../dist/portable-gcc-compatible/EverCrypt_AEAD.h
+.. literalinclude:: ../dist/portable-gcc-compatible/EverCrypt_AEAD.h
     :language: c
     :start-after: SNIPPET_START: EverCrypt_AEAD_encrypt
     :end-before: SNIPPET_END: EverCrypt_AEAD_encrypt
@@ -83,7 +83,7 @@ At the time of writing, ``encrypt`` may return either ``Success`` or
   definition of ``tag_length``. **Unverified clients are strongly encouraged
   to perform a run-time check!**
 
-.. literalinclude:: ../../dist/portable-gcc-compatible/EverCrypt_AEAD.h
+.. literalinclude:: ../dist/portable-gcc-compatible/EverCrypt_AEAD.h
     :language: c
     :start-after: SNIPPET_START: EverCrypt_AEAD_decrypt
     :end-before: SNIPPET_END: EverCrypt_AEAD_decrypt

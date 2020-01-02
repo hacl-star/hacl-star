@@ -22,7 +22,7 @@ https://arxiv.org/abs/1703.00053
 
 # Warning
 
-While HACL* is used in several products such as Mozilla Firefox or Wireguard,
+Although *HACL* is already used in several products such as Mozilla Firefox or Wireguard,
 we highly recommand to consult the authors before using HACL* in production systems.
 
 # Supported Cryptographic Algorithms
@@ -31,13 +31,13 @@ The primitives and constructions supported currently are:
 
 * Stream ciphers: Chacha20, Salsa20
 * MACs: Poly1305, HMAC
-* Elliptic Curves: Curve25519
+* Elliptic Curve Diffie-Hellman: X25519
 * Elliptic Curves Signatures: Ed25519
-* Hash functions: SHA2 (256,384,512)
+* Hash functions: SHA2 (256,384,512), SHA-3
 * NaCl API: secret_box, box, sign
-* TLS API: IETF Chacha20Poly1305 AEAD
+* AEAD API: IETF Chacha20Poly1305 AEAD
 
-Developers can use HACL* through the [NaCl API].
+Developers can use HACL* through the [NaCl API] or via the API provided by each primitive.
 In particular, we implement the same C API as [libsodium] for the
 NaCl constructions, so any application that relies on
 libsodium only for these constructions can be immediately ported to use the verified code in HACL*
@@ -45,10 +45,7 @@ instead. (Warning: libsodium also implements other algorithms not in NaCl
 that are not implemented by HACL*)
 
 The verified primitives can also be used to support larger F* verification projects.
-For example, HACL* code is used through the agile cryptographic model developed in
-[secure_api/] as the basis for cryptographic proofs of the TLS record layer in [miTLS].
-A detailed description of the code in [secure_api/] and its formal security guarantees
-appears in the IEEE S&P 2017 paper: https://eprint.iacr.org/2016/1178.pdf
+For example, HACL* code is used as the basis for cryptographic proofs of TLS 1.3 in [miTLS].
 
 [F\*]: https://github.com/FStarLang/FStar
 [KreMLin]: https://github.com/FStarLang/kremlin
@@ -56,22 +53,19 @@ appears in the IEEE S&P 2017 paper: https://eprint.iacr.org/2016/1178.pdf
 [NaCl API]: https://nacl.cr.yp.to
 [libsodium]: https://github.com/jedisct1/libsodium
 [Project Everest]: https://github.com/project-everest
-[secure_api/]: https://github.com/mitls/hacl-star/tree/master/secure_api
 
 # Licenses
 
 All F* source code is released under Apache 2.0.
-
 All generated C, OCaml, Javascript and Web Assembly code is released under MIT.
 
 
 # Authors and Maintainers
 
-HACL* was originially developed as part of the Ph.D. thesis of Jean Karim Zinzindohoué
-in the [Prosecco](http://prosecco.inria.fr) team at [INRIA Paris](https://www.inria.fr/en/centre/paris).
-It contains contributions from many researchers at INRIA and Microsoft Research, and is
-being actively developed and maintained within [Project Everest].
+HACL* contains contributions from many students and researchers at INRIA, Microsoft Research and CMU,
+and is being actively developed and maintained in this repository. Each primitive comes with an AUTHORS.md
+file with the list of primary authors for that primitive.
 
-For questions and comments, or if you want to contribute to the project, do contact the current maintainers at:
-* Benjamin Beurdouche (benjamin.beurdouche@inria.fr)
-* Karthikeyan Bhargavan (karthikeyan.bhargavan@inria.fr)
+For questions and comments, or if you want to contribute to the project, do contact the current maintainers at hacl-star-maintainers@lists.gforge.inria.fr.
+To contribute to the project, contact Karthikeyan Bhargavan at karthikeyan.bhargavan@inria.fr
+

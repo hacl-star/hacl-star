@@ -9,7 +9,7 @@ This API is:
 
 Possible values for the agility argument (``Hacl_Spec.h``) :
 
-.. literalinclude:: ../../dist/portable-gcc-compatible/Hacl_Spec.h
+.. literalinclude:: ../dist/portable-gcc-compatible/Hacl_Spec.h
     :language: c
     :start-after: SNIPPET_START: Spec_Hash_Definitions_hash_alg
     :end-before: SNIPPET_END: Spec_Hash_Definitions_hash_alg
@@ -58,14 +58,14 @@ and as such does not return an error code. This is possible because i) we always
 have a fallback portable C implementation available for all algorithms and ii)
 we do not yet model allocation failures.
 
-.. literalinclude:: ../../dist/portable-gcc-compatible/EverCrypt_Hash.h
+.. literalinclude:: ../dist/portable-gcc-compatible/EverCrypt_Hash.h
     :language: c
     :start-after: SNIPPET_START: EverCrypt_Hash_Incremental_create_in
     :end-before: SNIPPET_END: EverCrypt_Hash_Incremental_create_in
 
 Clients can feed an arbitrary amount of data via ``update``:
 
-.. literalinclude:: ../../dist/portable-gcc-compatible/EverCrypt_Hash.h
+.. literalinclude:: ../dist/portable-gcc-compatible/EverCrypt_Hash.h
     :language: c
     :start-after: SNIPPET_START: EverCrypt_Hash_Incremental_update
     :end-before: SNIPPET_END: EverCrypt_Hash_Incremental_update
@@ -73,7 +73,7 @@ Clients can feed an arbitrary amount of data via ``update``:
 A hash can be extracted at any time by the client without invalidating the
 state:
 
-.. literalinclude:: ../../dist/portable-gcc-compatible/EverCrypt_Hash.h
+.. literalinclude:: ../dist/portable-gcc-compatible/EverCrypt_Hash.h
     :language: c
     :start-after: SNIPPET_START: EverCrypt_Hash_Incremental_finish
     :end-before: SNIPPET_END: EverCrypt_Hash_Incremental_finish
@@ -81,7 +81,7 @@ state:
 Once done, clients should use ``free`` which frees all internal buffers and
 underlying non-incremental state:
 
-.. literalinclude:: ../../dist/portable-gcc-compatible/EverCrypt_Hash.h
+.. literalinclude:: ../dist/portable-gcc-compatible/EverCrypt_Hash.h
     :language: c
     :start-after: SNIPPET_START: EverCrypt_Hash_Incremental_free
     :end-before: SNIPPET_END: EverCrypt_Hash_Incremental_free

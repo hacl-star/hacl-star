@@ -1,4 +1,4 @@
-EverCrypt documentation
+HACL* documentation
 =======================
 
 This documentation requires sphinx. Use: `pip3 install sphinx-rtd-theme`.

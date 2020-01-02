@@ -51,7 +51,7 @@ look up ``providers/evercrypt/EverCrypt.AEAD.fsti``. The ``encrypt_pre``
 definition lists all the properties that must hold for a call to ``encrypt`` to
 be valid.
 
-.. literalinclude:: ../../providers/evercrypt/EverCrypt.AEAD.fsti
+.. literalinclude:: ../providers/evercrypt/EverCrypt.AEAD.fsti
     :start-after: SNIPPET_START: encrypt_pre
     :end-before: SNIPPET_END: encrypt_pre
 
@@ -90,7 +90,7 @@ HACL* APIs are specialized for a given architecture revision and do not have any
 agility overhead. Consider, for instance, Chacha-Poly encryption from
 ``Hacl_Chacha20Poly1305_256.h``:
 
-.. literalinclude:: ../../dist/portable-gcc-compatible/Hacl_Chacha20Poly1305_256.h
+.. literalinclude:: ../dist/portable-gcc-compatible/Hacl_Chacha20Poly1305_256.h
     :language: c
     :start-after: SNIPPET_START: Hacl_Chacha20Poly1305_256_aead_encrypt
     :end-before: SNIPPET_END: Hacl_Chacha20Poly1305_256_aead_encrypt
@@ -104,7 +104,7 @@ not allocate any intermediary state.
 EverCrypt APIs, on the other hand, can do CPU detection for clients, via a helper
 function found in ``EverCrypt_AutoConfig2.h``.
 
-.. literalinclude:: ../../dist/portable-gcc-compatible/EverCrypt_AutoConfig2.h
+.. literalinclude:: ../dist/portable-gcc-compatible/EverCrypt_AutoConfig2.h
     :language: c
     :start-after: SNIPPET_START: EverCrypt_AutoConfig2_init
     :end-before: SNIPPET_END: EverCrypt_AutoConfig2_init
@@ -118,14 +118,14 @@ This means that the EverCrypt API for Chacha-Poly is found in
 ``EverCrypt_AEAD.h``; clients are expected to first allocate state, passing in
 the desired AEAD algorithm as a parameter (agility):
 
-.. literalinclude:: ../../dist/portable-gcc-compatible/EverCrypt_AEAD.h
+.. literalinclude:: ../dist/portable-gcc-compatible/EverCrypt_AEAD.h
     :language: c
     :start-after: SNIPPET_START: EverCrypt_AEAD_create_in
     :end-before: SNIPPET_END: EverCrypt_AEAD_create_in
 
 Then, will clients be able to encrypt:
 
-.. literalinclude:: ../../dist/portable-gcc-compatible/EverCrypt_AEAD.h
+.. literalinclude:: ../dist/portable-gcc-compatible/EverCrypt_AEAD.h
     :language: c
     :start-after: SNIPPET_START: EverCrypt_AEAD_encrypt
     :end-before: SNIPPET_END: EverCrypt_AEAD_encrypt

@@ -12,7 +12,7 @@ Chacha20 comes in three different variants.
 The AVX variant is found in file ``Hacl_Chacha20_Vec128.h`` and exposes two
 functions.
 
-.. literalinclude:: ../../dist/portable-gcc-compatible/Hacl_Chacha20_Vec128.h
+.. literalinclude:: ../dist/portable-gcc-compatible/Hacl_Chacha20_Vec128.h
     :language: c
     :start-after: SNIPPET_START: Hacl_Chacha20_Vec128_chacha20_encrypt_128
     :end-before: SNIPPET_END: Hacl_Chacha20_Vec128_chacha20_encrypt_128
@@ -28,7 +28,7 @@ Randomness
 HACL* is equipped with a randomness function implemented with
 platform dependant code for Unix and Windows.
 
-.. literalinclude:: ../../dist/portable-gcc-compatible/Lib_RandomBuffer_System.h
+.. literalinclude:: ../dist/portable-gcc-compatible/Lib_RandomBuffer_System.h
     :language: c
     :start-after: SNIPPET_START: Lib_RandomBuffer_System_randombytes
     :end-before: SNIPPET_END: Lib_RandomBuffer_System_randombytes

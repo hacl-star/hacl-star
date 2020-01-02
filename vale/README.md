@@ -16,11 +16,11 @@ which aims to build and deploy a verified HTTPS stack.
 
 # Installation
 
-See the [INSTALL](./vale/INSTALL.md) file for installing Vale and its dependencies.
+See the [INSTALL](./INSTALL.md) file for installing Vale and its dependencies.
 
 # Code Organization
 
-See the [CODE](./vale/CODE.md) file for more details on the various files in this directory.
+See the [CODE](./CODE.md) file for more details on the various files in this directory.
 
 # Documentation
 
