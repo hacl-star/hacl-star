@@ -36,6 +36,7 @@ open Vale.Def.Words.Four_s
 open Vale.Def.Types_s
 open FStar.Seq
 open Vale.Arch.Types
+open Vale.Arch.HeapImpl
 open Vale.Math.Poly2_s
 open Vale.Math.Poly2
 open Vale.Math.Poly2.Bits_s
@@ -225,10 +226,10 @@ procedure Keyhash_init(
     {:quick}
     {:exportSpecs}
     reads
-        rsi; rdi; memLayout;
+        rsi; rdi;
     modifies
         rax; rcx; rdx; r8; r12;
-        heap0; xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; efl;
+        heap0; memLayout; xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; efl;
     lets
         round_ptr := if win then rcx else rdi;
         hkey_ptr := if win then rdx else rsi;

@@ -13,6 +13,7 @@ noeq type vale_heap =
     vale_heap
 
 noeq type vale_heap_layout_inner : Type u#1 = {
+  vl_n_buffers:nat;
   vl_old_heap:vale_heap;
 }
 

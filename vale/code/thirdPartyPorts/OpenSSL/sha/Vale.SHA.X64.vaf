@@ -747,15 +747,14 @@ procedure Sha_update_bytes_stdcall(
     {:quick}
     {:exportSpecs}
     lets
-        ctx_ptr        := if win then rcx else rdi;
-         in_ptr        := if win then rdx else rsi;
-           num         := if win then r8  else rdx;
-          k_ptr        := if win then r9  else rcx;
-    reads memLayout;
+        ctx_ptr     := if win then rcx else rdi;
+        in_ptr      := if win then rdx else rsi;
+        num         := if win then r8  else rdx;
+        k_ptr       := if win then r9  else rcx;
     modifies
         rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
         xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; xmm7; xmm8; xmm9; xmm10; xmm11; xmm12; xmm13; xmm14; xmm15;
-        efl; heap0; stack; stackTaint;
+        efl; heap0; memLayout; stack; stackTaint;
     requires/ensures
         vale_heap_data_eq(mem, heap0);
     requires
@@ -826,7 +825,8 @@ procedure Sha_update_bytes_stdcall(
     mem_eq_all(mem, heap0);
 
     // Save registers
-    inline if (win) {
+    inline if (win)
+    {
         PushXmm_Secret(xmm15, rax);
         PushXmm_Secret(xmm14, rax);
         PushXmm_Secret(xmm13, rax);
@@ -845,7 +845,9 @@ procedure Sha_update_bytes_stdcall(
         Push_Secret(rdi);
         Push_Secret(rbp);
         Push_Secret(rbx);
-    } else {
+    }
+    else
+    {
         Push_Secret(r15);
         Push_Secret(r14);
         Push_Secret(r13);
@@ -856,7 +858,8 @@ procedure Sha_update_bytes_stdcall(
         Push_Secret(rbx);
     }
 
-    inline if (win) {
+    inline if (win)
+    {
         Mov64(rdi, rcx);
         Mov64(rsi, rdx);
         Mov64(rdx, r8);
@@ -886,7 +889,9 @@ procedure Sha_update_bytes_stdcall(
         PopXmm_Secret(xmm13, rax, old(xmm13));
         PopXmm_Secret(xmm14, rax, old(xmm14));
         PopXmm_Secret(xmm15, rax, old(xmm15));
-    } else {
+    }
+    else
+    {
         Pop_Secret(rbx);
         Pop_Secret(rbp);
         Pop_Secret(rdi);

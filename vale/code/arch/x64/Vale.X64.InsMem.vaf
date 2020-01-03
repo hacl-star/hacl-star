@@ -73,12 +73,35 @@ procedure Mem_lemma(ghost base:va_operand, ghost offset:int, ghost b:buffer64, g
     lemma_opr_Mem(this, base, offset, b, index, t);
 }
 
+#verbatim
+let create_heaplets_f (h1:heap_impl) : h2:heap_impl{heap_get h1 == heap_get h2 /\ heap_taint h1 == heap_taint h2} =
+  coerce #heap_impl (Vale.X64.Memory_Sems.create_heaplets (coerce h1))
+
+let destroy_heaplets_f (h1:heap_impl) : h2:heap_impl{heap_get h1 == heap_get h2 /\ heap_taint h1 == heap_taint h2} =
+  coerce #heap_impl (Vale.X64.Memory_Sems.destroy_heaplets (coerce h1))
+#endverbatim
+
+procedure CreateHeaplets()
+    {:public}
+    {:quick exportOnly}
+    {:instruction mk_ins(Vale.X64.Bytes_Code_s.HeapGhost(create_heaplets_f))}
+    modifies
+        memLayout;
+    ensures
+        memLayout.vl_taint == old(memLayout.vl_taint);
+{
+}
+
 procedure DestroyHeaplets()
     {:public}
     {:quick exportOnly}
+    {:instruction mk_ins(Vale.X64.Bytes_Code_s.HeapGhost(destroy_heaplets_f))}
     reads
         mem; heap0;
+    modifies
+        memLayout;
     ensures
+        memLayout.vl_taint == old(memLayout.vl_taint);
         vale_heap_data_eq(mem, heap0);
 {
     reveal_mem_inv();

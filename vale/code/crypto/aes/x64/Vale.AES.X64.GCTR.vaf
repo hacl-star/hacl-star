@@ -31,6 +31,7 @@ open Vale.Def.Opaque_s
 open Vale.Def.Words_s
 open Vale.Def.Types_s
 open Vale.Arch.Types
+open Vale.Arch.HeapImpl
 open FStar.Seq
 open Vale.AES.AES_s
 open Vale.AES.X64.AES
@@ -643,11 +644,10 @@ procedure Gctr_bytes_stdcall(
     {:public}
     {:quick}
     {:exportSpecs}
-    reads memLayout;
     modifies
         rax; rbx; rcx; rdx; rdi; rsi; rsp; rbp; r8; r9; r10; r11; r12; r13; r14; r15;
         xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; xmm7; xmm8; xmm9; xmm10; xmm11; xmm12; xmm13; xmm14; xmm15;
-        heap0; efl; stack; stackTaint;
+        heap0; memLayout; efl; stack; stackTaint;
     lets
         in_ptr    := if win then rcx else rdi;
         out_ptr   := if win then r8 else rdx;

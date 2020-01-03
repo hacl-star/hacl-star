@@ -31,7 +31,23 @@ let stack_eq = ()
 let as_mem h = _ih h
 let lemma_heap_impl = ()
 let create_initial_vale_heap ih = (heap_create_impl ih (Map.const Secret)).vf_heap
-let create_initial_vale_full_heap ih mt = heap_create_impl ih mt
+let create_initial_vale_full_heap ih mt =
+  let vfh = heap_create_impl ih mt in
+  let vfh:(vfh:vale_full_heap{
+    vfh.vf_heap.mh == (Map16.sel vfh.vf_heaplets 0).mh /\ 
+    vfh.vf_heap.ih == (Map16.sel vfh.vf_heaplets 0).ih})
+    =
+    vfh
+    in
+
+  let h = vfh in
+  let h1 = h.vf_heap in
+  let h2 = (Map16.sel h.vf_heaplets 0) in
+  assert (h1.mh == h2.mh);
+  assert (h1.ih == h2.ih);
+  assert (ME.vale_heap_data_eq h.vf_heap (Map16.sel h.vf_heaplets 0));
+  assert (ME.mem_inv vfh);
+  heap_create_impl ih mt
 
 let buffer_addr_is_nat64 (#t:base_typ) (x:ME.buffer t) (s:VS.vale_state) = ()
 

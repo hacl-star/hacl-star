@@ -20,7 +20,7 @@ val lemma_same_domains (h:vale_heap) (m1:S.machine_heap) (m2:S.machine_heap) : L
 
 val reveal_mem_inv (_:unit) : Lemma
   (ensures (forall (h:vale_full_heap).{:pattern (mem_inv h)}
-    mem_inv h <==> vale_heap_data_eq h.vf_heap (Map16.sel h.vf_heaplets 0)))
+    mem_inv h ==> vale_heap_data_eq h.vf_heap (Map16.sel h.vf_heaplets 0)))
 
 val get_heap (h:vale_heap) : GTot (m:S.machine_heap{same_domain h m})
 
@@ -56,6 +56,28 @@ let is_full_update (mh':machine_heap) (mt':memtaint) (vfh:vale_full_heap) (h':va
     mem_inv vfh' /\
     vfh'.vf_layout == vfh.vf_layout /\
     vfh'.vf_heaplets == Map16.upd vfh.vf_heaplets 0 h'
+  )
+
+val create_heaplets (h1:vale_full_heap) : Pure vale_full_heap
+  (requires True)
+  (ensures fun h2 ->
+    heap_get (coerce h1) == heap_get (coerce h2) /\
+    heap_taint (coerce h1) == heap_taint (coerce h2) /\
+    h1.vf_heap == h2.vf_heap /\
+    h1.vf_heaplets == h2.vf_heaplets /\
+    h1.vf_layout.vl_taint == h2.vf_layout.vl_taint /\
+    (mem_inv h1 ==> mem_inv h2)
+  )
+
+val destroy_heaplets (h1:vale_full_heap) : Pure vale_full_heap
+  (requires True)
+  (ensures fun h2 ->
+    heap_get (coerce h1) == heap_get (coerce h2) /\
+    heap_taint (coerce h1) == heap_taint (coerce h2) /\
+    h1.vf_heap == h2.vf_heap /\
+    h1.vf_heaplets == h2.vf_heaplets /\
+    h1.vf_layout.vl_taint == h2.vf_layout.vl_taint /\
+    (mem_inv h1 ==> mem_inv h2)
   )
 
 //let heap_upd_def (hi:vale_full_heap) (h':vale_heap) (mt':memTaint_t) : vale_full_heap =

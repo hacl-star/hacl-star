@@ -1648,11 +1648,10 @@ procedure Gcm_blocks_stdcall(
         tag_ptr         := if win then load_stack64(rsp + 40 + 96, stack) else load_stack64(rsp + 8 + 80, stack);
         
         hash @= xmm8;
-    reads memLayout;
     modifies
         rax; rbx; rcx; rdx; rdi; rsi; rsp; rbp; r8; r9; r10; r11; r12; r13; r14; r15;
         xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; xmm7; xmm8; xmm9; xmm10; xmm11; xmm12; xmm13; xmm14; xmm15;
-        heap0; efl; stack; stackTaint;
+        heap0; memLayout; efl; stack; stackTaint;
     requires/ensures
         vale_heap_data_eq(mem, heap0);
     requires
@@ -1895,18 +1894,13 @@ procedure Compute_iv_stdcall(
         bytes_reg :=    if win then rdx else rsi;
         len_reg   :=    if win then r8 else rdx;
         j0_ptr    :=    if win then r9 else rcx;
-
         extra_ptr :=    if win then load_stack64(rsp + 32 + 8 + 0, stack) else r8;
         h_ptr :=    if win then load_stack64(rsp + 32 + 8 + 8, stack) else r9;
-
         h_LE := reverse_bytes_quad32(old(buffer128_read(hkeys_b, 2, mem)));
-    reads
-        memLayout;
-        
     modifies
         rax; rbx; rcx; rdx; rdi; rsi; rsp; rbp; r8; r9; r10; r11; r12; r13; r14; r15;
         xmm0; xmm1; xmm2; xmm3; xmm4; xmm5; xmm6; xmm7; xmm8; xmm9; xmm10; xmm11; xmm12; xmm13; xmm14; xmm15;
-        heap0; efl; stack; stackTaint;
+        heap0; memLayout; efl; stack; stackTaint;
 
     requires/ensures
         vale_heap_data_eq(mem, heap0);
@@ -1983,58 +1977,60 @@ procedure Compute_iv_stdcall(
     mem_eq_all(mem, heap0);
 
     lemma_hkeys_reqs_pub_priv(s128(heap0, hkeys_b), reverse_bytes_quad32(h_LE));
-    inline if (win) {
-      if (rdx == 12) {
-        Push_Secret(rdi);
-        Push_Secret(rsi);
+    inline if (win)
+    {
+        if (rdx == 12)
+        {
+            Push_Secret(rdi);
+            Push_Secret(rsi);
 
-        Mov64(rdi, rcx);
-        Mov64(rsi, rdx);
-        Mov64(rdx, r8);
-        Mov64(rcx, r9);
+            Mov64(rdi, rcx);
+            Mov64(rsi, rdx);
+            Mov64(rdx, r8);
+            Mov64(rcx, r9);
 
-        assert rsp + 16 == old(rsp);
-        assert valid_src_stack64(rsp + 16 + 40, stack);     
-        Load64_stack(r8, rsp, 16 + 40 + 0);
-        Load64_stack(r9, rsp, 16 + 40 + 8);
+            assert rsp + 16 == old(rsp);
+            assert valid_src_stack64(rsp + 16 + 40, stack);     
+            Load64_stack(r8, rsp, 16 + 40 + 0);
+            Load64_stack(r9, rsp, 16 + 40 + 8);
 
-        Compute_iv(iv_b, iv_extra_b, iv, j0_b, hkeys_b);
+            Compute_iv(iv_b, iv_extra_b, iv, j0_b, hkeys_b);
 
-        Pop_Secret(rsi);
-        Pop_Secret(rdi);
+            Pop_Secret(rsi);
+            Pop_Secret(rdi);
+        }
+        else
+        {
+            Save_registers(win);
 
-      } else {
-        Save_registers(win);
+            Mov64(rdi, rcx);
+            Mov64(rsi, rdx);
+            Mov64(rdx, r8);
+            Mov64(rcx, r9);
 
-        Mov64(rdi, rcx);
-        Mov64(rsi, rdx);
-        Mov64(rdx, r8);
-        Mov64(rcx, r9);
+            assert rsp + 224 == old(rsp);
+            assert valid_src_stack64(rsp + 224 + 40, stack);     
+            Load64_stack(r8, rsp, 224 + 40 + 0);
+            Load64_stack(r9, rsp, 224 + 40 + 8);
 
-        assert rsp + 224 == old(rsp);
-        assert valid_src_stack64(rsp + 224 + 40, stack);     
-        Load64_stack(r8, rsp, 224 + 40 + 0);
-        Load64_stack(r9, rsp, 224 + 40 + 8);
+            Compute_iv(iv_b, iv_extra_b, iv, j0_b, hkeys_b);
 
-        Compute_iv(iv_b, iv_extra_b, iv, j0_b, hkeys_b);
-
-        Restore_registers(win, old(rsp), old(xmm6), old(xmm7), old(xmm8), old(xmm9), old(xmm10), old(xmm11), old(xmm12), old(xmm13), old(xmm14), old(xmm15));
-        
-
-      }
-    } else {
-      // Linux
-      if (rsi == 12) {
-
-        Compute_iv(iv_b, iv_extra_b, iv, j0_b, hkeys_b);
-
-      } else {
-      
-        Save_registers(win);
-        Compute_iv(iv_b, iv_extra_b, iv, j0_b, hkeys_b);
-        Restore_registers(win, old(rsp), old(xmm6), old(xmm7), old(xmm8), old(xmm9), old(xmm10), old(xmm11), old(xmm12), old(xmm13), old(xmm14), old(xmm15));
-        
-      }
+            Restore_registers(win, old(rsp), old(xmm6), old(xmm7), old(xmm8), old(xmm9), old(xmm10), old(xmm11), old(xmm12), old(xmm13), old(xmm14), old(xmm15));
+        }
+    }
+    else
+    {
+        // Linux
+        if (rsi == 12)
+        {
+            Compute_iv(iv_b, iv_extra_b, iv, j0_b, hkeys_b);
+        }
+        else
+        {
+            Save_registers(win);
+            Compute_iv(iv_b, iv_extra_b, iv, j0_b, hkeys_b);
+            Restore_registers(win, old(rsp), old(xmm6), old(xmm7), old(xmm8), old(xmm9), old(xmm10), old(xmm11), old(xmm12), old(xmm13), old(xmm14), old(xmm15));
+        }
     }
     
     DestroyHeaplets();

@@ -1,6 +1,7 @@
 module Vale.Arch.HeapImpl
 open FStar.Mul
 open Vale.Arch.HeapTypes_s
+module Map16 = Vale.Lib.Map16
 
 (**
 Define abstract (or mostly abstract) types for use by Vale.X64.Decls.fsti.
@@ -25,7 +26,7 @@ noeq type vale_heap_layout : Type u#1 = {
 noeq type vale_full_heap = {
   vf_layout:vale_heap_layout;
   vf_heap:vale_heap;
-  vf_heaplets:Vale.Lib.Map16.map16 vale_heap;
+  vf_heaplets:Map16.map16 vale_heap;
 }
 
 unfold let full_heap_taint (vfh:vale_full_heap) : memTaint_t =

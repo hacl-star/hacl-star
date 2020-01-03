@@ -23,16 +23,30 @@ let heap_upd hi mh' mt' =
 let heap_create_machine ih =
   down_mem ih
 
-let heap_create_impl ih mt =
-  let vh = ValeHeap (down_mem ih) (Ghost.hide ih) None in
+let one_heaplet (ih:interop_heap) (id:option heaplet_id) : GTot vale_heap =
+  let m = down_mem ih in
+  let g = Ghost.hide ih in
+  ValeHeap m g id
+
+let rec make_heaplets (ih:interop_heap) (n:nat) : Ghost (Map16.map16 vale_heap)
+  (requires n <= 16)
+  (ensures fun h -> forall (i:nat).{:pattern Map16.sel h i} i < n ==> Map16.sel h i == one_heaplet ih (Some i))
+  =
+  let vh = one_heaplet ih None in
   let vh4 = ((vh, vh), (vh, vh)) in
   let vh16 = ((vh4, vh4), (vh4, vh4)) in
+  if n = 0 then vh16 else
+  Map16.upd (make_heaplets ih (n - 1)) (n - 1) (one_heaplet ih (Some (n - 1)))
+
+let heap_create_impl ih mt =
+  let vh = one_heaplet ih None in
   let layout_inner = {
+    vl_n_buffers = 0;
     vl_old_heap = vh;
   } in
   let layout = {vl_inner = layout_inner; vl_taint = mt;} in
   {
     vf_layout = layout;
     vf_heap = vh;
-    vf_heaplets = Map16.upd vh16 0 vh;
+    vf_heaplets = make_heaplets ih 16;
   }

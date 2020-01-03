@@ -17,6 +17,7 @@ module Vale.Curve25519.X64.FastWide
 #verbatim{:interface}
 open Vale.Def.Types_s
 open Vale.Arch.Types
+open Vale.Arch.HeapImpl
 open Vale.X64.Machine_s
 open Vale.X64.Memory
 open Vale.X64.Stack_i
@@ -72,10 +73,9 @@ procedure Fmul(
         inA_in := rsi;
         dst_in := rdx;
         inB_in := rcx;
-    reads memLayout;
     modifies
         rax; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r12; r13; r14; r15;
-        efl; heap0;
+        efl; heap0; memLayout;
     requires/ensures
         vale_heap_data_eq(mem, heap0);
     requires
@@ -150,10 +150,9 @@ procedure Fmul_stdcall(
         inA_in := (if win then rdx else rsi);
         dst_in := (if win then r8  else rdx);
         inB_in := (if win then r9  else rcx);
-    reads memLayout;
     modifies
         rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
-        efl; heap0; stack; stackTaint;
+        efl; heap0; memLayout; stack; stackTaint;
     requires/ensures
         vale_heap_data_eq(mem, heap0);
     requires
@@ -225,7 +224,8 @@ procedure Fmul_stdcall(
     Push_Secret(r15);
 
     // Line up the rest of the arguments
-    inline if (win) {
+    inline if (win)
+    {
         // Store callee-save registers
         Push_Secret(rsi);
         Push_Secret(rdi);
@@ -238,7 +238,8 @@ procedure Fmul_stdcall(
 
     Fmul(tmp_b, inA_b, dst_b, inB_b);
 
-    inline if (win) {
+    inline if (win)
+    {
         Pop_Secret(rdi);
         Pop_Secret(rsi);
     }
@@ -268,10 +269,9 @@ procedure Fmul2(
         inA_in := rsi;
         dst_in := rdx;
         inB_in := rcx;
-    reads memLayout;
     modifies
         rax; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r12; r13; r14; r15;
-        efl; heap0;
+        efl; heap0; memLayout;
     requires/ensures
         vale_heap_data_eq(mem, heap0);
     requires
@@ -369,10 +369,9 @@ procedure Fmul2_stdcall(
         inA_in := (if win then rdx else rsi);
         dst_in := (if win then r8  else rdx);
         inB_in := (if win then r9  else rcx);
-    reads memLayout;
     modifies
         rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
-        efl; heap0; stack; stackTaint;
+        efl; heap0; memLayout; stack; stackTaint;
     requires/ensures
         vale_heap_data_eq(mem, heap0);
     requires
@@ -465,7 +464,8 @@ procedure Fmul2_stdcall(
     Push_Secret(r15);
 
     // Line up the rest of the arguments
-    inline if (win) {
+    inline if (win)
+    {
         // Store callee-save registers
         Push_Secret(rsi);
         Push_Secret(rdi);
@@ -478,7 +478,8 @@ procedure Fmul2_stdcall(
 
     Fmul2(tmp_b, inA_b, dst_b, inB_b);
 
-    inline if (win) {
+    inline if (win)
+    {
         Pop_Secret(rdi);
         Pop_Secret(rsi);
     }
@@ -502,10 +503,9 @@ procedure Fsqr(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64)
         tmp_in := rdi;
         inA_in := rsi;
         dst_in := rdx;
-    reads memLayout;
     modifies
         rax; rbx; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r12; r13; r14; r15;
-        efl; heap0;
+        efl; heap0; memLayout;
     requires/ensures
         vale_heap_data_eq(mem, heap0);
     requires
@@ -568,10 +568,9 @@ procedure Fsqr_stdcall(
         tmp_in := (if win then rcx else rdi);
         inA_in := (if win then rdx else rsi);
         dst_in := (if win then r8  else rdx);
-    reads memLayout;
     modifies
         rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
-        efl; heap0; stack; stackTaint;
+        efl; heap0; memLayout; stack; stackTaint;
     requires/ensures
         vale_heap_data_eq(mem, heap0);
     requires
@@ -606,7 +605,7 @@ procedure Fsqr_stdcall(
         //////////////////////////////////////
 
         modifies_buffer_2(dst_b, tmp_b, old(mem), mem);
-        validSrcAddrs64(mem, dst_in, dst_b, 4, memLayout, Secret);
+//        validSrcAddrs64(mem, dst_in, dst_b, 4, memLayout, Secret);
 
         win ==>  rbx == old(rbx);
         win ==>  rbp == old(rbp);
@@ -626,8 +625,6 @@ procedure Fsqr_stdcall(
 
         rsp == old(rsp);
 {
-    mem_eq_all(mem, heap0);
-
     Push_Secret(r15);
     Push_Secret(r12);
     Push_Secret(r13);
@@ -635,7 +632,8 @@ procedure Fsqr_stdcall(
     Push_Secret(rbx);
 
     // Line up the rest of the arguments
-    inline if (win) {
+    inline if (win)
+    {
         // Store callee-save registers
         Push_Secret(rsi);
         Push_Secret(rdi);
@@ -647,7 +645,8 @@ procedure Fsqr_stdcall(
 
     Fsqr(tmp_b, inA_b, dst_b);
 
-    inline if (win) {
+    inline if (win)
+    {
         Pop_Secret(rdi);
         Pop_Secret(rsi);
     }
@@ -657,10 +656,6 @@ procedure Fsqr_stdcall(
     Pop_Secret(r13);
     Pop_Secret(r12);
     Pop_Secret(r15);
-
-    DestroyHeaplets();
-    mem_eq_all(mem, heap0);
-    mem_eq_modifies(old(mem), mem, old(heap0), heap0);
 }
 
 procedure Fsqr2(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64)
@@ -672,10 +667,9 @@ procedure Fsqr2(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64
         tmp_in := rdi;
         inA_in := rsi;
         dst_in := rdx;
-    reads memLayout;
     modifies
         rax; rbx; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r12; r13; r14; r15;
-        efl; heap0;
+        efl; heap0; memLayout;
     requires/ensures
         vale_heap_data_eq(mem, heap0);
     requires
@@ -720,7 +714,6 @@ procedure Fsqr2(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64
         //////////////////////////////////////
 
         modifies_buffer_2(dst_b, tmp_b, old(mem), mem);
-
 {
     mem_eq_all(mem, heap0);
 
@@ -751,10 +744,9 @@ procedure Fsqr2_stdcall(
         tmp_in := (if win then rcx else rdi);
         inA_in := (if win then rdx else rsi);
         dst_in := (if win then r8  else rdx);
-    reads memLayout;
     modifies
         rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
-        efl; heap0; stack; stackTaint;
+        efl; heap0; memLayout; stack; stackTaint;
     requires/ensures
         vale_heap_data_eq(mem, heap0);
     requires
@@ -800,7 +792,7 @@ procedure Fsqr2_stdcall(
         //////////////////////////////////////
 
         modifies_buffer_2(dst_b, tmp_b, old(mem), mem);
-        validSrcAddrs64(mem, dst_in, dst_b, 8, memLayout, Secret);
+//        validSrcAddrs64(mem, dst_in, dst_b, 8, memLayout, Secret);
 
         win ==>  rbx == old(rbx);
         win ==>  rbp == old(rbp);
@@ -820,8 +812,6 @@ procedure Fsqr2_stdcall(
 
         rsp == old(rsp);
 {
-    mem_eq_all(mem, heap0);
-
     Push_Secret(r15);
     Push_Secret(r12);
     Push_Secret(r13);
@@ -829,7 +819,8 @@ procedure Fsqr2_stdcall(
     Push_Secret(rbx);
 
     // Line up the rest of the arguments
-    inline if (win) {
+    inline if (win)
+    {
         // Store callee-save registers
         Push_Secret(rsi);
         Push_Secret(rdi);
@@ -841,7 +832,8 @@ procedure Fsqr2_stdcall(
 
     Fsqr2(tmp_b, inA_b, dst_b);
 
-    inline if (win) {
+    inline if (win)
+    {
         Pop_Secret(rdi);
         Pop_Secret(rsi);
     }
@@ -851,10 +843,6 @@ procedure Fsqr2_stdcall(
     Pop_Secret(r13);
     Pop_Secret(r12);
     Pop_Secret(r15);
-
-    DestroyHeaplets();
-    mem_eq_all(mem, heap0);
-    mem_eq_modifies(old(mem), mem, old(heap0), heap0);
 }
 
 

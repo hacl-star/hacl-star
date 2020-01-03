@@ -14,6 +14,7 @@ module Vale.Curve25519.X64.FastUtil
 #verbatim{:interface}
 open Vale.Def.Types_s
 open Vale.Arch.Types
+open Vale.Arch.HeapImpl
 open Vale.X64.Machine_s
 open Vale.X64.Memory
 open Vale.X64.Stack_i
@@ -202,11 +203,11 @@ procedure Fast_add1(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB:nat64)
 
         a := pow2_four(a0, a1, a2, a3);
     reads
-        dst_ptr; inA_ptr; memLayout;
+        dst_ptr; inA_ptr;
 
     modifies
         rax; b; r8; r9; r10; r11;
-        heap0; efl;
+        heap0; memLayout; efl;
 
     requires/ensures
         vale_heap_data_eq(mem, heap0);
@@ -271,10 +272,9 @@ procedure Fast_add1_stdcall(
         dst_ptr @= rdi; inA_ptr @= rsi; b @= rdx;
         dst_in := (if win then rcx else rdi);
         inA_in := (if win then rdx else rsi);
-    reads memLayout;
     modifies
         rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
-        efl; heap0; stack; stackTaint;
+        efl; heap0; memLayout; stack; stackTaint;
     requires/ensures
         vale_heap_data_eq(mem, heap0);
     requires
@@ -898,10 +898,10 @@ procedure Cswap2(ghost bit_in:nat64, ghost p0_b:buffer64, ghost p1_b:buffer64)
         old_p1_6 := buffer64_read(p1_b, 6, mem);
         old_p1_7 := buffer64_read(p1_b, 7, mem);
     reads
-        p0_ptr; p1_ptr; memLayout;
+        p0_ptr; p1_ptr;
     modifies
         bit; tmp0; tmp1; tmp2;
-        efl; heap0;
+        efl; heap0; memLayout;
 
     requires/ensures
         vale_heap_data_eq(mem, heap0);
@@ -1004,10 +1004,9 @@ procedure Cswap2_stdcall(
         old_p1_6 := buffer64_read(p1_b, 6, mem);
         old_p1_7 := buffer64_read(p1_b, 7, mem);
 
-    reads memLayout;
     modifies
         rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
-        efl; heap0; stack; stackTaint;
+        efl; heap0; memLayout; stack; stackTaint;
     requires/ensures
         vale_heap_data_eq(mem, heap0);
     requires

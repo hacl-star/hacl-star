@@ -40,6 +40,20 @@ let lemma_heap_taint h = ()
 
 //let lemma_heap_upd_heap h mh mt = ()
 
+let create_heaplets h1 =
+  let layout = h1.vf_layout in
+  let l = layout.vl_inner in
+  let l = {l with vl_n_buffers = 1} in
+  let layout = {layout with vl_inner = l} in
+  {h1 with vf_layout = layout}
+
+let destroy_heaplets h1 =
+  let layout = h1.vf_layout in
+  let l = layout.vl_inner in
+  let l = {l with vl_n_buffers = 0} in
+  let layout = {layout with vl_inner = l} in
+  {h1 with vf_layout = layout}
+
 val heap_shift (m1 m2:S.machine_heap) (base:int) (n:nat) : Lemma
   (requires (forall i. 0 <= i /\ i < n ==> m1.[base + i] == m2.[base + i]))
   (ensures (forall i. {:pattern (m1.[i])} base <= i /\ i < base + n ==> m1.[i] == m2.[i]))

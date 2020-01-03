@@ -672,6 +672,11 @@ let mem_eq_all h1 h2 =
 let mem_eq_modifies h1 h1' h2 h2' =
   ()
 
+let inv_heaplets (hs:Map16.map16 vale_heap) =
+  forall (i:heaplet_id).{:pattern Map16.sel hs i} (Map16.sel hs i).heapletId == Some i
+
 let mem_inv h =
-  vale_heap_data_eq h.vf_heap (Map16.sel h.vf_heaplets 0)
+  vale_heap_data_eq h.vf_heap (Map16.sel h.vf_heaplets 0) /\
+  inv_heaplets h.vf_heaplets /\
+  True
 

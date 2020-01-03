@@ -44,6 +44,7 @@ module Vale.Poly1305.X64
 open Vale.Def.Opaque_s
 open Vale.Def.Types_s
 open Vale.Arch.Types
+open Vale.Arch.HeapImpl
 open Vale.X64.Machine_s
 open Vale.X64.Memory
 open Vale.X64.Stack_i
@@ -700,10 +701,9 @@ procedure Poly1305(
         inp_in := (if win then rdx else inp);
         n := 0x1_0000_0000_0000_0000;
         p := n * n * 4 - 5;
-    reads memLayout;
     modifies
         rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
-        efl; heap0; stack; stackTaint;
+        efl; heap0; memLayout; stack; stackTaint;
     requires/ensures
         vale_heap_data_eq(mem, heap0);
     requires
