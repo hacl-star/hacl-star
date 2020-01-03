@@ -1,11 +1,12 @@
-Obtaining the source code
+Using the crypto library
 =========================
 
 Picking a distribution
 ----------------------
 
-Building the present repository verifies the source F* code, then proceeds to
-extract it to C and ASM. We provide the results of this process in the ``dist/``
+Building the full ``hacl-star`` repository verifies the source F* and Vale code,
+then proceeds to extract it to C and assembly. However, users do not have to use
+this full build process: we provide the generated code in the ``dist/``
 directory, under version control to facilitate obtaining the source code.
 
 Each subdirectory corresponds to a *distribution*, i.e. a particular set of
@@ -33,8 +34,8 @@ specific KreMLin compilation options (e.g. Mozilla, CCF) or for testing (e.g.
 portable-gcc-compatible, which compiles without ``-march=native``, to ensure all
 our assumptions about CPU targets are explicit in our Makefile).
 
-Building the resulting code
----------------------------
+Compiling a full distribution
+-----------------------------
 
 Each distribution comes with its own Makefile. It builds a static object
 (libevercrypt.a) and a dynamic object (libevercrypt.{so,dll}) along with the
@@ -44,22 +45,27 @@ cross-compilers. The `dist/compact-msvc` distribution works with the Microsoft
 compilers, but we provide no build support (i.e. no Visual Studio project, no
 NMake-compatible makefile).
 
-Integrating the resulting code
-------------------------------
+Integrating the code
+--------------------
 
-- When integrating EverCrypt, one can pick a distribution, along with the
-  `kremlin` directory, thus giving a "wholesale" integration of
-  the EverCrypt library.
-- For a more gradual integration, consumers can integrate algorithms one at a
-  time, by cherry-picking the files that they are interested in. Each header
-  file contains the list of other headers (and implementations) it depends on so
-  it's easy to integrate, say, an individual algorithm from the HACL API.
+To incoroporate our verified crypto code into a C software project, a developer
+has two choices.
 
-In addition, you will need the ``dist/kremlin`` directory which contains all the
-required headers from KreMLin.  In particular, these headers contain
-implementations of FStar.UInt128, the module for 128-bit arithmetic. The
-``kremlin/include/kremlin/internal/types.h`` header will attempt to use C
-preprocessor macros to pick the right UInt128 implementation for your platform:
+- Pick a full EverCrypt distribution, along with the
+  `dist/kremlin` directory, thus giving a "wholesale" integration of
+  the EverCrypt library, including all supported algorithms from HACL* and Vale.
+- For a more selective integration, cherry-pick the C or assembly
+  files for specific versions of specific algorithms.  Each header
+  file contains the list of other headers (and implementations) it
+  depends on so it's easy to integrate, say, an individual algorithm
+  from the HACL API without taking the full library.
+
+The ``dist/kremlin`` directory contains all the required headers from
+KreMLin.  In particular, these headers contain implementations of
+FStar.UInt128, the module for 128-bit arithmetic. The
+``kremlin/include/kremlin/internal/types.h`` header will attempt to
+use C preprocessor macros to pick the right UInt128 implementation for
+your platform:
 
 - 64-bit environment with GCC/Clang: hand-written implementation using
   ``unsigned __int128`` (unverified)

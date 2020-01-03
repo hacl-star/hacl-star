@@ -17,7 +17,7 @@ import sys
 
 # -- Project information -----------------------------------------------------
 
-project = u'The HACL and EverCrypt reference documentation'
+project = u'HACL* and EverCrypt Manual'
 copyright = u'2019, INRIA, Microsoft Research, CMU'
 author = u'Karthik Bhargavan, Jonathan Protzenko'
 

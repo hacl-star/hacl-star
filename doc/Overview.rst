@@ -1,10 +1,10 @@
-The research behind
+Underlying research
 ===================
 
-What is verified software
--------------------------
+What is verified software?
+--------------------------
 
-Our libraries' formal verification involves using software tools to analyze **all
+Formal verification involves using software tools to analyze **all
 possible behaviors** of a program and prove mathematically that they comply with
 the code's specification (i.e., a machine-readable description of the
 developer's intentions). Unlike software testing, formal verification provides
@@ -26,15 +26,17 @@ Our specifications cover a range of properties, including:
   characterized by simple mathematical functions derived directly
   from the official cryptographic standards (e.g., from NIST or the IETF).
 
-* Side-channel resistance: Observations about our code's low-level behavior
+* Secret Independence: Observations about our code's low-level behavior
   (specifically, the time it takes to execute or the memory addresses that it
   accesses) are independent of the secrets manipulated by the library. Hence, an
   adversary monitoring these "side-channels" learns nothing about the secrets.
 
-All of these guarantees *do not* prevent our code from achieving good performance!
-EverCrypt meets or beats the performance of most existing cryptographic implementations in C,
-and for certain targeted platforms meets or beats the performance of state-of-the-art
-libraries that rely on hand-tuned assembly code.
+All of these guarantees *do not* prevent our code from achieving good
+performance!  HACL* meets or beats the performance of most existing
+cryptographic implementations in C, and on certain platforms, Vale
+code meets or beats the performance of hand-tuned assembly code in
+state-of-the-art libraries.  By bringing them together, the EverCrypt
+provider provides best-in-class performance on most platforms.
 
 
 History and publications
@@ -51,7 +53,7 @@ verified libraries, but extracted to OCaml and had substandard performance.
 More on this early work be found in J-K Zinzindohoué's `Ph.D. thesis
 <https://www.theses.fr/s175861>`_.
 
-To deliver greater performance, we established a C-like subset of F* that would
+To deliver better performance, we established a C-like subset of F* that would
 compile to C, called Low*. Its foundations were presented at ICFP 2017:
 `Verified Low-Level Programming Embedded in F\*
 <https://arxiv.org/abs/1703.00053)>`_ (Jonathan Protzenko, Jean-Karim
@@ -66,8 +68,8 @@ first version of the HACL* library at CCS 2017:
 <http://eprint.iacr.org/2017/536>`_ (Jean-Karim Zinzindohoué, Karthikeyan
 Bhargavan, Jonathan Protzenko, Benjamin Beurdouche).
 
-In parallel, we set out to design a DSL for assembly programming, for those algorithms
-which could not achieve maximal performance unless written in hand-tuned
+In parallel to work on HACL*, the Vale team set out to design a DSL for assembly programming,
+for those algorithms which could not achieve maximal performance unless written in hand-tuned
 assembly. The first version of Vale, which used Dafny as its verified backend,
 was presented at Usenix 2017 (distinguished paper award): `Vale: Verifying
 High-Performance Cryptographic Assembly Code
@@ -94,15 +96,16 @@ Polubelova, Karthikeyan Bhargavan, Benjamin Beurdouche, Joonwon Choi, Antoine
 Delignat-Lavaud, Cedric Fournet, Tahina Ramananandro, Aseem Rastogi, Nikhil
 Swamy, Christoph Wintersteiger and Santiago Zanella-Beguelin).
 
-The tools we use
-----------------
+Our Verification Tools
+----------------------
 
-HACL*, the Vale cryptographic libraries and EverCrypt are written and verified
+HACL* and EverCrypt are written and verified
 using the `F* <https://github.com/FStarLang/kremlin/>`_ language, then compiled
-to a mixture of C (using a dedicated compiler, KreMLin_) and assembly.
+to a mixture of C (using a dedicated compiler, KreMLin_).
 
-We also use the Vale_ tool, which compiles the Vale DSL to F*, and is
-responsible for printing Vale assembly to concrete syntax.
+The Vale cryptographic libraries (used in EverCrypt) rely on the
+Vale_ tool, which compiles the Vale DSL to F*, and is
+responsible for compiling the Vale code to assembly.
 
 .. _Vale: https://github.com/project-everest/vale/
 .. _KreMLin: https://github.com/FStarLang/kremlin/

@@ -3,48 +3,38 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-The HACL and EverCrypt reference manual
-=======================================
+HACL*: High Assurance Cryptographic Library
+===========================================
 
-This manual describes the HACL*, Vale and EverCrypt formally verified
-cryptographic libraries.
+HACL* is a formally verified cryptographic library written in `F*
+<https://github.com/FStarLang/FStar>`_ and compiled to C, developed as a collaboration
+between the `Prosecco <http://prosecco.inria.fr>`_ team at INRIA
+Paris, `Microsoft Research <http://research.microsoft.com>`_, and
+`Carnegie Mellon University <https://www.csd.cs.cmu.edu/>`_. The
+library, its applications, and the verification tools it relies on are
+being actively developed and maintained as part of `Project Everest
+<https://github.com/project-everest>`_.
 
-Parts of these libraries appear in `Firefox
-<https://bugzilla.mozilla.org/show_bug.cgi?id=1387183>`_, the Windows kernel,
-the Linux kernel,
-the `Tezos blockchain
+HACL* is an open source project hosted at `hacl-star <https://github.com/project-everest/hacl-star/>`_.  This
+repository also contains verified assembly code for cryptographic
+primitives from the `Vale <https://github.com/project-everest/vale/>`_
+project. The full crypto library is distributed as a collection of C
+and assembly files that can either be directly used as standalone components
+or via a verified cryptographic provider called EverCrypt.
+
+This manual describes the various cryptographic code components in
+the HACL* repository, focusing mainly on the HACL* and EverCrypt APIs.
+
+Code from HACL* has been incorporated into `Firefox
+<https://bugzilla.mozilla.org/show_bug.cgi?id=1387183>`_, the Windows
+kernel, the Linux kernel, the `Tezos blockchain
 <https://www.reddit.com/r/tezos/comments/8hrsz2/tezos_switches_cryptographic_libraries_from/>`_,
-the Microsoft MSQuic implementation of the QUIC protocol,
-and the `Wireguard VPN <https://lwn.net/Articles/770750/>`_.
-
-.. image:: /diagram.png
-   :width: 80%
-   :align: center
-
-- HACL* provides a set of highly efficient, pure C implementations of complete
-  cryptographic primitives. Each algorithm comes with its own API callable from
-  C clients.
-- Vale provides optimized assembly (ASM) core routines for performance-critical
-  code. Vale code is not intended to be called from C by end users.
-- EverCrypt brings HACL* and Vale under an abstract, high-level API
-  that automatically picks the best Vale or HACL* implementation depending on
-  the machine the code is running on (multiplexing). EverCrypt also offers a
-  single API for all algorithms from the same family (e.g. AEAD, hashes),
-  allowing clients to reconfigure their choice of algorithm dynamically without
-  recompiling (agility).
-
-All of our code is verified using the F* programming language; once verified,
-our code is extracted to a mixture of C and ASM.
-
-Our code is callable from C clients, and from OCaml, via ctypes bindings. A
-subset of our code (the HACL API) compiles to WebAssembly via a dedicated,
-formalized codepath of the KreMLin_ compiler and can be used for any Web context
-(e.g. Electron, website) where modern, trustworthy cryptography is in order.
-
-In addition to unverified clients, verified clients can be built atop the
-EverCrypt API. These include a library of Merkle Trees, distributed in the
-present repository, but also an implementation of the Signal protocol in F*.
-
+the Microsoft MSQuic implementation of the QUIC protocol, and the
+`Wireguard VPN <https://lwn.net/Articles/770750/>`_. Still,
+HACL*, Vale, and EverCrypt remain ongoing research projects and should
+be treated as such. If you want to integrate this code into a production environment,
+or if you have any questions, comments, or feature requests for HACL*, Vale,
+or EverCrypt, initiate a conversation with the `HACL* maintainers <mailto:hacl-star-maintainers@lists.gforge.inria.fr>`_
 
 .. _KreMLin: https://github.com/FStarLang/kremlin/
 
@@ -52,15 +42,17 @@ present repository, but also an implementation of the Signal protocol in F*.
    :maxdepth: 2
    :caption: Contents:
 
+   HaclValeEverCrypt
    Supported
    Overview
    Obtaining
    General
+   API
    HaclDoc
    EverCryptDoc
-   Merkle
-   WasmDoc
-   OCamlDoc
+..   Merkle
+..   WasmDoc
+..   OCamlDoc
 
 
 Indices and tables
