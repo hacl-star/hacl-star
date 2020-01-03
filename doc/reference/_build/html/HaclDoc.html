@@ -1,0 +1,264 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>HACL APIs &mdash; The HACL and EverCrypt reference documentation  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="EverCrypt APIs" href="EverCryptDoc.html" />
+    <link rel="prev" title="General recommendations" href="General.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> The HACL and EverCrypt reference documentation
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Supported.html">List of supported algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Overview.html">The research behind</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Obtaining.html">Obtaining the source code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="General.html">General recommendations</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">HACL APIs</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#stream-ciphers">Stream ciphers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#chacha20">Chacha20</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#randomness">Randomness</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="EverCryptDoc.html">EverCrypt APIs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Merkle.html">Merkle Tree API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="WasmDoc.html">WebAssembly bindings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="OCamlDoc.html">OCaml bindings</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">The HACL and EverCrypt reference documentation</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>HACL APIs</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/HaclDoc.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="hacl-apis">
+<h1>HACL APIs<a class="headerlink" href="#hacl-apis" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="stream-ciphers">
+<h2>Stream ciphers<a class="headerlink" href="#stream-ciphers" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="chacha20">
+<h3>Chacha20<a class="headerlink" href="#chacha20" title="Permalink to this headline">¶</a></h3>
+<p>Chacha20 comes in three different variants.</p>
+<p>The AVX variant is found in file <code class="docutils literal notranslate"><span class="pre">Hacl_Chacha20_Vec128.h</span></code> and exposes two
+functions.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span>
+<span class="kt">void</span>
+<span class="nf">Hacl_Chacha20_Vec128_chacha20_encrypt_128</span><span class="p">(</span>
+  <span class="kt">uint32_t</span> <span class="n">len</span><span class="p">,</span>
+  <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">out</span><span class="p">,</span>
+  <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">text</span><span class="p">,</span>
+  <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">key</span><span class="p">,</span>
+  <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">n1</span><span class="p">,</span>
+  <span class="kt">uint32_t</span> <span class="n">ctr</span>
+<span class="p">);</span>
+
+</pre></div>
+</div>
+<p>In addition to the encryption, there’s also
+<code class="docutils literal notranslate"><span class="pre">Hacl_Chacha20_Vec128_chacha20_decrypt_128</span></code> but since they do exactly the same
+thing I’m not sure why there’s two variants.</p>
+</div>
+</div>
+<div class="section" id="randomness">
+<h2>Randomness<a class="headerlink" href="#randomness" title="Permalink to this headline">¶</a></h2>
+<p>HACL* is equipped with a randomness function implemented with
+platform dependant code for Unix and Windows.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span>
+<span class="k">extern</span> <span class="kt">bool</span> <span class="nf">Lib_RandomBuffer_System_randombytes</span><span class="p">(</span><span class="kt">uint8_t</span> <span class="o">*</span><span class="n">buf1</span><span class="p">,</span> <span class="kt">uint32_t</span> <span class="n">len</span><span class="p">);</span>
+
+</pre></div>
+</div>
+<p>It takes a pointer to a memory location and a number of random bytes
+to be written from that location. Beware of not asking for more bytes
+than owned.</p>
+<p>Internally, <code class="docutils literal notranslate"><span class="pre">read_random_bytes</span></code> is implemented using
+<code class="docutils literal notranslate"><span class="pre">CryptGenRandom</span></code> for Microsoft Windows and using <code class="docutils literal notranslate"><span class="pre">/dev/urandom</span></code>
+for Unix platforms.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This file is handwritten and is part of the TCB, hence it
+should be minimally reviewed before being used.</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="EverCryptDoc.html" class="btn btn-neutral float-right" title="EverCrypt APIs" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="General.html" class="btn btn-neutral float-left" title="General recommendations" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, INRIA, Microsoft Research, CMU
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

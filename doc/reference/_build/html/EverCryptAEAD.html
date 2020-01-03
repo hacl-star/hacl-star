@@ -1,0 +1,335 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>AEAD (EverCrypt_AEAD.h) &mdash; The HACL and EverCrypt reference documentation  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="CTR-mode encryption" href="EverCryptCTR.html" />
+    <link rel="prev" title="CPU autodetection (EverCrypt_AutoConfig2.h)" href="EverCryptAutoConfig.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> The HACL and EverCrypt reference documentation
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Supported.html">List of supported algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Overview.html">The research behind</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Obtaining.html">Obtaining the source code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="General.html">General recommendations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="HaclDoc.html">HACL APIs</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="EverCryptDoc.html">EverCrypt APIs</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="EverCryptAutoConfig.html">CPU autodetection (<code class="docutils literal notranslate"><span class="pre">EverCrypt_AutoConfig2.h</span></code>)</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">AEAD (<code class="docutils literal notranslate"><span class="pre">EverCrypt_AEAD.h</span></code>)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#state-management">State management</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#encryption-and-decryption">Encryption and decryption</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="EverCryptCTR.html">CTR-mode encryption</a></li>
+<li class="toctree-l2"><a class="reference internal" href="EverCryptHash.html">Hashing (<code class="docutils literal notranslate"><span class="pre">EverCrypt_Hash.h</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="EverCryptHMAC.html">HMAC (<code class="docutils literal notranslate"><span class="pre">EverCrypt_HMAC.h</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="EverCryptHKDF.html">HKDF (<code class="docutils literal notranslate"><span class="pre">EverCrypt_HKDF.h</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="EverCryptDRBG.html">HMAC-DRBG (<code class="docutils literal notranslate"><span class="pre">EverCrypt_DRBG.h</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="EverCryptDeprecated.html">Deprecated block cipher API (<code class="docutils literal notranslate"><span class="pre">EverCrypt_Cipher.h</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="EverCryptLegacy.html">Legacy EverCrypt headers (<code class="docutils literal notranslate"><span class="pre">EverCrypt.h</span></code>, <code class="docutils literal notranslate"><span class="pre">EverCrypt_Hacl.h</span></code>, <code class="docutils literal notranslate"><span class="pre">EverCrypt_Vale.h</span></code>)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Merkle.html">Merkle Tree API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="WasmDoc.html">WebAssembly bindings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="OCamlDoc.html">OCaml bindings</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">The HACL and EverCrypt reference documentation</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="EverCryptDoc.html">EverCrypt APIs</a> &raquo;</li>
+        
+      <li>AEAD (<code class="docutils literal notranslate"><span class="pre">EverCrypt_AEAD.h</span></code>)</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/EverCryptAEAD.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="aead-evercrypt-aead-h">
+<h1>AEAD (<code class="docutils literal notranslate"><span class="pre">EverCrypt_AEAD.h</span></code>)<a class="headerlink" href="#aead-evercrypt-aead-h" title="Permalink to this headline">¶</a></h1>
+<p>This API is:</p>
+<ul class="simple">
+<li><p><strong>agile</strong></p></li>
+<li><p><strong>multiplexing</strong>: portable C (Chacha-Poly only); AVX (Chacha-Poly); AVX2
+(Chacha-Poly); ADX + BMI2 (AES128-GCM, AES256-GCM)</p></li>
+<li><p><strong>stateful</strong></p></li>
+</ul>
+<p>Possible values for the agility argument (<code class="docutils literal notranslate"><span class="pre">Hacl_Spec.h</span></code>) :</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span>
+<span class="cp">#define Spec_Agile_AEAD_AES128_GCM 0</span>
+<span class="cp">#define Spec_Agile_AEAD_AES256_GCM 1</span>
+<span class="cp">#define Spec_Agile_AEAD_CHACHA20_POLY1305 2</span>
+<span class="cp">#define Spec_Agile_AEAD_AES128_CCM 3</span>
+<span class="cp">#define Spec_Agile_AEAD_AES256_CCM 4</span>
+<span class="cp">#define Spec_Agile_AEAD_AES128_CCM8 5</span>
+<span class="cp">#define Spec_Agile_AEAD_AES256_CCM8 6</span>
+
+</pre></div>
+</div>
+<p>Supported values for the agility argument: <code class="docutils literal notranslate"><span class="pre">Spec_Agile_AEAD_AES128_GCM</span></code>,
+<code class="docutils literal notranslate"><span class="pre">Spec_Agile_AEAD_AES256_GCM</span></code>, <code class="docutils literal notranslate"><span class="pre">Spec_Agile_AEAD_CHACHA20_POLY1305</span></code></p>
+<div class="section" id="state-management">
+<h2>State management<a class="headerlink" href="#state-management" title="Permalink to this headline">¶</a></h2>
+<p>Clients are first expected to allocate persistent state, which performs key
+expansion and precomputes internal data for AES-GCM. <code class="docutils literal notranslate"><span class="pre">EverCrypt.AEAD</span></code> supports
+IV reduction, meaning that IV lengths must satisfy the <code class="docutils literal notranslate"><span class="pre">iv_length</span></code> predicate
+in <code class="docutils literal notranslate"><span class="pre">Spec.Agile.AEAD.fsti</span></code>.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span>
+<span class="n">EverCrypt_Error_error_code</span>
+<span class="nf">EverCrypt_AEAD_create_in</span><span class="p">(</span><span class="n">Spec_Agile_AEAD_alg</span> <span class="n">a</span><span class="p">,</span> <span class="n">EverCrypt_AEAD_state_s</span> <span class="o">**</span><span class="n">dst</span><span class="p">,</span> <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">k1</span><span class="p">);</span>
+
+</pre></div>
+</div>
+<p>The type <code class="docutils literal notranslate"><span class="pre">EverCrypt_AEAD_state_s</span></code> is a C abstract type which cannot be
+allocated by clients, as is it an incomplete struct type. Therefore, the
+expected usage for initialization is:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">EverCrypt_AEAD_state_s</span> <span class="o">*</span><span class="n">dst</span><span class="p">;</span>
+<span class="n">EverCrypt_Error_error</span> <span class="n">ret</span> <span class="o">=</span>
+  <span class="n">EverCrypt_AEAD_create_in</span><span class="p">(</span><span class="n">Spec_Agile_AEAD_CHACHA20_POLY1305</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">dst</span><span class="p">,</span> <span class="n">key</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Possible error codes can be determined by looking at the original F* signature
+for <code class="docutils literal notranslate"><span class="pre">create_in</span></code>; at the time of writing, the function may return <code class="docutils literal notranslate"><span class="pre">Success</span></code>,
+or <code class="docutils literal notranslate"><span class="pre">UnsupportedAlgorithm</span></code>. All other cases are eliminated via the <code class="docutils literal notranslate"><span class="pre">_</span> <span class="pre">-&gt;</span>
+<span class="pre">False</span></code> in the post-condition.</p>
+<p><code class="docutils literal notranslate"><span class="pre">UnsupportedAlgorithm</span></code> may be returned because of an unsupported algorithm
+(e.g. AES-CCM) , or because no implementation is available for the target
+platform (e.g. AES-GCM without ADX+BMI2).</p>
+<p>State <strong>must</strong> be freed via the <code class="docutils literal notranslate"><span class="pre">free</span></code> function:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span>
+<span class="kt">void</span> <span class="nf">EverCrypt_AEAD_free</span><span class="p">(</span><span class="n">EverCrypt_AEAD_state_s</span> <span class="o">*</span><span class="n">s</span><span class="p">);</span>
+
+</pre></div>
+</div>
+</div>
+<div class="section" id="encryption-and-decryption">
+<h2>Encryption and decryption<a class="headerlink" href="#encryption-and-decryption" title="Permalink to this headline">¶</a></h2>
+<p>Both encryption and decryption take a piece of state which holds the key; a
+piece of state may be reused as many times as desired.</p>
+<p>Encryption has a substantial amount of preconditions; see <code class="docutils literal notranslate"><span class="pre">encrypt_pre</span></code> in
+<code class="docutils literal notranslate"><span class="pre">EverCrypt.AEAD.fsti</span></code>, and <a class="reference internal" href="General.html#reading-preconditions"><span class="std std-ref">Reading F* preconditions</span></a> for a primer on
+deciphering F* code.</p>
+<p>At the time of writing, <code class="docutils literal notranslate"><span class="pre">encrypt</span></code> may return either <code class="docutils literal notranslate"><span class="pre">Success</span></code> or
+<code class="docutils literal notranslate"><span class="pre">InvalidKey</span></code>. The latter is returned if and only if the <code class="docutils literal notranslate"><span class="pre">s</span></code> parameter is
+<code class="docutils literal notranslate"><span class="pre">NULL</span></code>.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span>
+<span class="n">EverCrypt_Error_error_code</span>
+<span class="nf">EverCrypt_AEAD_encrypt</span><span class="p">(</span>
+  <span class="n">EverCrypt_AEAD_state_s</span> <span class="o">*</span><span class="n">s</span><span class="p">,</span>
+  <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">iv</span><span class="p">,</span>
+  <span class="kt">uint32_t</span> <span class="n">iv_len</span><span class="p">,</span>
+  <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">ad</span><span class="p">,</span>
+  <span class="kt">uint32_t</span> <span class="n">ad_len</span><span class="p">,</span>
+  <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">plain</span><span class="p">,</span>
+  <span class="kt">uint32_t</span> <span class="n">plain_len</span><span class="p">,</span>
+  <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">cipher</span><span class="p">,</span>
+  <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">tag</span>
+<span class="p">);</span>
+
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>There is no length parameter for the tag; looking at the source
+<code class="docutils literal notranslate"><span class="pre">EverCrypt.AEAD.fsti</span></code>, one can see a precondition of the form <code class="docutils literal notranslate"><span class="pre">B.length</span> <span class="pre">tag</span>
+<span class="pre">=</span> <span class="pre">tag_length</span> <span class="pre">a</span></code>, i.e. the length of the <code class="docutils literal notranslate"><span class="pre">tag</span></code> array must be of a suitable
+length for the algorithm <code class="docutils literal notranslate"><span class="pre">a</span></code>. See <code class="docutils literal notranslate"><span class="pre">Spec.Agile.AEAD.fsti</span></code> for the
+definition of <code class="docutils literal notranslate"><span class="pre">tag_length</span></code>. <strong>Unverified clients are strongly encouraged
+to perform a run-time check!</strong></p>
+</div>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span>
+<span class="n">EverCrypt_Error_error_code</span>
+<span class="nf">EverCrypt_AEAD_decrypt</span><span class="p">(</span>
+  <span class="n">EverCrypt_AEAD_state_s</span> <span class="o">*</span><span class="n">s</span><span class="p">,</span>
+  <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">iv</span><span class="p">,</span>
+  <span class="kt">uint32_t</span> <span class="n">iv_len</span><span class="p">,</span>
+  <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">ad</span><span class="p">,</span>
+  <span class="kt">uint32_t</span> <span class="n">ad_len</span><span class="p">,</span>
+  <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">cipher</span><span class="p">,</span>
+  <span class="kt">uint32_t</span> <span class="n">cipher_len</span><span class="p">,</span>
+  <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">tag</span><span class="p">,</span>
+  <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">dst</span>
+<span class="p">);</span>
+
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="EverCryptCTR.html" class="btn btn-neutral float-right" title="CTR-mode encryption" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="EverCryptAutoConfig.html" class="btn btn-neutral float-left" title="CPU autodetection (EverCrypt_AutoConfig2.h)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, INRIA, Microsoft Research, CMU
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

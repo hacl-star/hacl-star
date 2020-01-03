@@ -1,27 +1,38 @@
-# High Performance Verified Cryptographic Code
+# A High-Assurance Cryptographic Library
 
-This repository contains code from several related projects developed as part of
-[Project Everest](https://project-everest.github.io/), which aims to build and
-deploy a verified HTTPS stack.
+This repository contains verified code for a library of modern
+cryptographic algorithms, including Curve25519, Ed25519, AES-GCM,
+Chacha20, Poly1305, SHA-2, SHA-3, HMAC, and HKDF. This set of algorithms
+is enough to support the full NaCl API and several TLS 1.3 ciphersuites.
 
-We are actively developing and integrating our code on the
-[fstar-master](https://github.com/project-everest/hacl-star/tree/fstar-master/)
-branch, which tracks F\*'s `master` branch. See
-[releases](https://github.com/project-everest/hacl-star/releases) for a preview
-of our C and assembly code, including EverCrypt 0.1 (currently in **alpha**).
+The code for all of these algorithms is formally verified using the
+[F\*](https://fstarlang.github.io/) verification framework for memory
+safety, functional correctness, and secret independence (resistance to
+timing side-channels).
+
+More detailed documentation on the library and our verification method
+can be found at [hacl-star.github.io](https://hacl-star.github.io).
+
+The code in this repository is divided into three closely-related sub-projects,
+all developed as part of [Project Everest](https://project-everest.github.io/).
 
 ## HACL\*
 
-[HACL\*](README.HACL.md), the High-Assurance Cryptographic Library, is a
-formally verified cryptographic library in [F\*](https://www.fstar-lang.org).
-The goal of this library is to develop highly efficient, pure C implementations
-for popular cryptographic primitives and to verify them for memory safety,
-functional correctness, and secret independence.
+[HACL\*](code/) is a formally verified library
+of modern cryptographic algorithms written in a subset of
+[F\*](https://fstarlang.github.io) called Low\* and compiled to C
+using a compiler called
+[KreMLin](https://github.com/FStarLang/kremlin). The Low\* source code
+for each primitive is verified for memory safety, functional
+correctness, and secret independence. The compiler generates
+efficient, readable, standalone C code for each algorithm that
+can be easily integrated into any C project.  We include the current C code for various HACL\*
+algorithms in the [dist](dist/) directory. HACL\* can also be compiled to WebAssembly.
 
 ## Vale-Crypto
 
-[Vale-Crypto](README.Vale.md) provides formally verified high-performance
-cryptographic code in assembly language. It relies on the 
+[Vale-Crypto](vale/) provides formally verified high-performance
+cryptographic code for some primitives in aassembly language. It relies on the
 [Vale tool](https://github.com/project-everest/vale) to produce
 code and proofs in [F\*](https://github.com/FStarLang/FStar). Vale supports
 multiple platforms and proves that its implementations are memory safe,
@@ -30,9 +41,35 @@ independent.
 
 ## EverCrypt
 
-[EverCrypt](README.EverCrypt.md) is a high-performance, cross-platform, formally
-verified modern cryptographic provider. EverCrypt packages implementations from
+[EverCrypt](providers/evercrypt/) is a high-performance, cross-platform, formally
+verified modern cryptographic provider that packages implementations from
 HACL\* and Vale-Crypto, and automatically picks the fastest one available,
 depending on processor support and the target execution environment
 (*multiplexing*). Furthermore, EverCrypt offers an (*agile*) API that makes it
 simple to switch between algorithms (e.g., from SHA2 to SHA3).
+
+## Status
+
+*Warning*: Although some of our code is already used in several products such as Mozilla Firefox or Wireguard,
+we highly recommand to consult the authors before using HACL* in production systems.
+
+We are actively developing and integrating our code on the
+[master](https://github.com/project-everest/hacl-star/tree/master/)
+branch, which tracks F\*'s `master` branch. Ongoing developments on new
+cryptographic primitives happen in the [dev](https://github.com/project-everest/hacl-star/tree/dev/)
+branch, which runs a little ahead of master. Also see
+[releases](https://github.com/project-everest/hacl-star/releases) for a preview
+of our C and assembly code, including EverCrypt 0.1 (currently in **alpha**).
+
+# Licenses
+
+All the code in this repository is released under Apache 2.0.
+The generated C code from HACL\* is also released under MIT.
+Contact the maintainers if you have other licensing requirements.
+
+## Contact or Contribute
+
+This repository contains contributions from many students and researchers at INRIA, Microsoft Research, and CMU,
+and is under active development. The primary authors of each verified algorithm are noted in the corrsponding AUTHORS.md file.
+For questions and comments, or if you want to contribute to the project, contact the current maintainers at hacl-star-maintainers@lists.gforge.inria.fr.
+
