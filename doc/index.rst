@@ -47,9 +47,9 @@ or EverCrypt, initiate a conversation with the `HACL* maintainers <mailto:hacl-s
    Overview
    Obtaining
    General
-   API
    HaclDoc
    EverCryptDoc
+   API
 ..   Merkle
 ..   WasmDoc
 ..   OCamlDoc
