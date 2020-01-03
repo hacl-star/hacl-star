@@ -152,17 +152,10 @@ function refresh_doc() {
 
   git clone git@github.com:fstarlang/fstarlang.github.io fstarlang-github-io
 
-  make -C doc/reference html
+  (cd doc/reference && ./ci.sh ../../fstarlang-github-io/evercrypt/html/)
 
   pushd fstarlang-github-io && {
-    cp -R ../doc/reference/_build/* evercrypt/ &&
-    rm -rf evercrypt/html/static &&
-    mv evercrypt/html/_static evercrypt/html/static &&
-    find evercrypt/html -type f | xargs sed -i 's/_static/static/g' &&
-    rm -rf evercrypt/html/images &&
-    mv evercrypt/html/_images evercrypt/html/images &&
-    find evercrypt/html -type f | xargs sed -i 's/_images/images/g' &&
-    git add -A evercrypt/html/ evercrypt/index.html &&
+    git add -A . &&
     if ! git diff --exit-code HEAD > /dev/null; then
         git commit -m "[CI] Refresh HACL & EverCrypt doc" &&
         git push
