@@ -1,5 +1,5 @@
 ECDH: X25519
-============
+------------
 
 HACL* implements the X25519 Elliptic Curve Diffie Hellman (ECDH)
 construction `IETF RFC 7748 <https://tools.ietf.org/html/rfc7748>`_.
@@ -19,7 +19,7 @@ Both versions provide functions that can be used to generate Curve25519 keypairs
 and use them to compute ECDH shared secrets.
 
 Key Generation
---------------
+^^^^^^^^^^^^^^
 
 Any 32 byte array can be used as a Curve25519 private key. In
 practice, private keys should be generated using a cryptographically
@@ -44,7 +44,7 @@ The first argument is a pointer to the ouput public key ``pub``;
 the second argument is a pointer to the input private key ``priv``.
 
 ECDH Shared Secret
-------------------
+^^^^^^^^^^^^^^^^^^
 
 The ECDH operation is implemented by the following function:
 
@@ -71,7 +71,7 @@ then the function ``ecdh`` returns false to indicate that the operation failed.
 Otherwise, it returns true.
 
 Other Curves: P-256
--------------------
+^^^^^^^^^^^^^^^^^^^
 
 A development branch includes a verified implementation of P-256,
 which has not yet been merged to master. Contact the HACL* maintainers

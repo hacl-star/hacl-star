@@ -1,5 +1,5 @@
 AEAD: Chacha20-Poly1305
-=======================
+-----------------------
 
 HACL* implements the Chacha20-Poly1305 Authenticated Encryption
 with Associated Data (AEAD) construction
@@ -20,7 +20,7 @@ all with the same API, but meant for use on different platforms:
 All three versions provide a similar API for AEAD encryption and decryption:
 
 AEAD Encryption
----------------
+^^^^^^^^^^^^^^^
 
 .. literalinclude:: ../dist/portable-gcc-compatible/Hacl_Chacha20Poly1305_32.h
     :language: c
@@ -36,7 +36,7 @@ and `Hacl_Chacha20Poly1305_256_aead_encrypt`.
 
 
 AEAD Decryption
----------------
+^^^^^^^^^^^^^^^
 
 The AEAD decryption function has the following type:
 
@@ -54,7 +54,7 @@ except that they are called `Hacl_Chacha20Poly1305_128_aead_decrypt`
 and `Hacl_Chacha20Poly1305_256_aead_decrypt`.
 
 Chacha20 and Poly1305
----------------------
+^^^^^^^^^^^^^^^^^^^^^
 
 The implementation of each version of Chacha20Poly1305 relies
 internally on corresponding implementations of the Chacha20 cipher and

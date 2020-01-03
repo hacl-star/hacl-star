@@ -1,8 +1,8 @@
 Hashing: SHA-2, SHA-3
-=====================
+---------------------
 
 SHA-2
------
+^^^^^
 
 HACL* implements the SHA-2 suite of hash functions
 as described in the NIST publication `FIPS PUB 180-4: Secure Hash Standard  <https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf>`_. The API
@@ -34,7 +34,7 @@ allocated with (at least) 32 bytes, for SHA-384, it must have 48 bytes, and for 
 
 
 SHA-3
------
+^^^^^
 
 HACL* also implements the SHA-3 suite of hash algorithms
 described in the NIST publication `FIPS PUB 202: SHA-3 Standard  <https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.202.pdf>`_. The API for
@@ -62,7 +62,7 @@ is the ``ouput`` of the hash function. The size of ``output``
 matches that of SHA-2 (32/48/64 bytes.)
 
 SHAKE
------
+^^^^^
 
 In addition to the above functions, ``Hacl_SHA3.h`` also provides
 the general ``keccak`` function and the two SHAKE constructions
@@ -82,7 +82,7 @@ an ``outputByteLen`` as argument. These functions expect the
 
 
 Other Hash Functions: Blake-2, MD5, SHA-1
------------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 A development branch of HACL* contains verified implementations of Blake2s and Blake2b. Contact the HACL* maintainers if you wish to use these implementations.
 
