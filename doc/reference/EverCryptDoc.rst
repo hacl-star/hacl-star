@@ -5,8 +5,11 @@ EverCrypt APIs
 
    EverCryptAutoConfig
    EverCryptAEAD
+   EverCryptCTR
    EverCryptHash
    EverCryptHMAC
    EverCryptHKDF
+   EverCryptDRBG
+   EverCryptNonAgile
    EverCryptDeprecated
    EverCryptLegacy

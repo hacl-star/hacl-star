@@ -22,7 +22,9 @@ State management
 ^^^^^^^^^^^^^^^^
 
 Clients are first expected to allocate persistent state, which performs key
-expansion and precomputes internal data for AES-GCM.
+expansion and precomputes internal data for AES-GCM. ``EverCrypt.AEAD`` supports
+IV reduction, meaning that IV lengths must satisfy the ``iv_length`` predicate
+in ``Spec.Agile.AEAD.fsti``.
 
 .. literalinclude:: ../../dist/portable-gcc-compatible/EverCrypt_AEAD.h
     :language: c

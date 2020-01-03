@@ -16,11 +16,11 @@ Possible values for the agility argument (``Hacl_Spec.h``) :
 
 Supported values for the agility argument: all
 
-Non-incremental API
-^^^^^^^^^^^^^^^^^^^
+Block-based API
+^^^^^^^^^^^^^^^
 
-The ``EverCrypt_Hash_*`` functions are **non-incremental** and require the
-client to follow this exact state machine:
+The block-based functions require the client to follow this exact state
+machine:
 
 1. one call to ``EverCrypt_Hash_create_in``
 2. one call to ``EverCrypt_Hash_init``
@@ -34,24 +34,26 @@ client to follow this exact state machine:
 
 Clients may jump to state 2 at any point before state 6.
 
-This API does not allow feeding more data into the hash function after
-``update_last`` has been called, the client must proceed with ``finish`` or
-erase the state with ``init``.
+As evidenced by the state machine, this API requires clients to buffer data and
+chunk it along the block size ("block-based"). Furthermore, this API does
+not allow feeding more data into the hash function after ``update_last`` has
+been called: the client must either proceed with ``finish`` or reset the state
+with ``init``.
 
 .. warning::
 
   This API is error-prone and is not recommended for unverified clients. We
-  advise clients use the incremental API described below.
+  advise clients use the streaming API described below.
 
-Incremental API
-^^^^^^^^^^^^^^^
+Streaming API
+^^^^^^^^^^^^^
 
-The incremental hash API wraps the non-incremental API with an internal buffer
+The streaming hash API wraps the block-based API with an internal buffer
 (at the expense of an extra indirection) and relieves the client from having to
 perform modulo computations and block-size management. Furthermore, the
-incremental API allows extracting intermediary hashes without invalidating the
-state, meaning clients can keep feeding data into the hash function (at the
-expense of a state copy).
+block-based API allows extracting intermediary hashes without invalidating the
+state, meaning clients can compute a hash, then later feed more data into the
+hash function (at the expense of a state copy).
 
 Clients can allocate state via ``create_in``. This is a non-faillible function
 and as such does not return an error code. This is possible because i) we always
@@ -79,7 +81,7 @@ state:
     :end-before: SNIPPET_END: EverCrypt_Hash_Incremental_finish
 
 Once done, clients should use ``free`` which frees all internal buffers and
-underlying non-incremental state:
+underlying block-based state:
 
 .. literalinclude:: ../../dist/portable-gcc-compatible/EverCrypt_Hash.h
     :language: c
@@ -88,6 +90,31 @@ underlying non-incremental state:
 
 .. note::
 
-  There is no incremental HACL* API for hashes, i.e. clients must go through
-  agility and multiplexing to enjoy the incremental hash API.
+  There is no streaming HACL* API for hashes, i.e. clients must go through
+  agility and multiplexing to enjoy the streaming hash API.
 
+One-shot API
+^^^^^^^^^^^^
+
+If all data is available at once, clients can use the (slightly more efficient),
+agile, multiplexing ``EverCrypt_Hash_hash`` function.
+
+.. literalinclude:: ../../dist/portable-gcc-compatible/EverCrypt_Hash.h
+    :language: c
+    :start-after: SNIPPET_START: EverCrypt_Hash_hash *
+    :end-before: SNIPPET_END: EverCrypt_Hash_hash
+
+This function merely dispatches onto one of the numerous non-agile specialized
+variants. As such, the cost of agility is one test.
+
+For SHA2-256 and SHA2-224, the EverCrypt API provides non-agile, multiplexing
+variants:
+
+.. literalinclude:: ../../dist/portable-gcc-compatible/EverCrypt_Hash.h
+    :language: c
+    :start-after: SNIPPET_START: EverCrypt_Hash_hash_256
+    :end-before: SNIPPET_END: EverCrypt_Hash_hash_256
+
+For other hash algorithms, for which only one implementation (portable C) is
+currently available, clients can use the non-agile, non-multiplexing HACL Hash
+API.
