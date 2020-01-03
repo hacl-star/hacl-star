@@ -99,7 +99,7 @@ One-shot API
 If all data is available at once, clients can use the (slightly more efficient),
 agile, multiplexing ``EverCrypt_Hash_hash`` function.
 
-.. literalinclude:: ../../dist/portable-gcc-compatible/EverCrypt_Hash.h
+.. literalinclude:: ../dist/portable-gcc-compatible/EverCrypt_Hash.h
     :language: c
     :start-after: SNIPPET_START: EverCrypt_Hash_hash *
     :end-before: SNIPPET_END: EverCrypt_Hash_hash
@@ -110,7 +110,7 @@ variants. As such, the cost of agility is one test.
 For SHA2-256 and SHA2-224, the EverCrypt API provides non-agile, multiplexing
 variants:
 
-.. literalinclude:: ../../dist/portable-gcc-compatible/EverCrypt_Hash.h
+.. literalinclude:: ../dist/portable-gcc-compatible/EverCrypt_Hash.h
     :language: c
     :start-after: SNIPPET_START: EverCrypt_Hash_hash_256
     :end-before: SNIPPET_END: EverCrypt_Hash_hash_256

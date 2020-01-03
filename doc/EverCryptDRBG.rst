@@ -9,7 +9,7 @@ This API is:
 
 Possible values for the agility argument (``Hacl_Spec.h``) :
 
-.. literalinclude:: ../../dist/portable-gcc-compatible/Hacl_Spec.h
+.. literalinclude:: ../dist/portable-gcc-compatible/Hacl_Spec.h
     :language: c
     :start-after: SNIPPET_START: Spec_Hash_Definitions_hash_alg
     :end-before: SNIPPET_END: Spec_Hash_Definitions_hash_alg

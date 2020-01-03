@@ -18,7 +18,7 @@ This API is:
 
 Possible values for the agility argument (``Hacl_Spec.h``) :
 
-.. literalinclude:: ../../dist/portable-gcc-compatible/Hacl_Spec.h
+.. literalinclude:: ../dist/portable-gcc-compatible/Hacl_Spec.h
     :language: c
     :start-after: SNIPPET_START: Spec_Agile_Cipher_cipher_alg
     :end-before: SNIPPET_END: Spec_Agile_Cipher_cipher_alg
@@ -31,7 +31,7 @@ State management
 Clients are first expected to allocate persistent state via ``create_in``, which
 stores the expanded key along with the current value of the counter.
 
-.. literalinclude:: ../../dist/portable-gcc-compatible/EverCrypt_CTR.h
+.. literalinclude:: ../dist/portable-gcc-compatible/EverCrypt_CTR.h
     :language: c
     :start-after: SNIPPET_START: EverCrypt_CTR_create_in
     :end-before: SNIPPET_END: EverCrypt_CTR_create_in
@@ -44,7 +44,7 @@ expected to pass the initial value of the counter.
 State can be reset to a different IV and counter value using the ``init``
 function. (This function really should be called ``reset``.)
 
-.. literalinclude:: ../../dist/portable-gcc-compatible/EverCrypt_CTR.h
+.. literalinclude:: ../dist/portable-gcc-compatible/EverCrypt_CTR.h
     :language: c
     :start-after: SNIPPET_START: EverCrypt_CTR_init
     :end-before: SNIPPET_END: EverCrypt_CTR_init
@@ -57,7 +57,7 @@ CTR mode of operation
 The ``update_block`` function encrypts a block-sized piece of data using the CTR
 mode, and internally increments the state by one.
 
-.. literalinclude:: ../../dist/portable-gcc-compatible/EverCrypt_CTR.h
+.. literalinclude:: ../dist/portable-gcc-compatible/EverCrypt_CTR.h
     :language: c
     :start-after: SNIPPET_START: EverCrypt_CTR_update_block
     :end-before: SNIPPET_END: EverCrypt_CTR_update_block

@@ -1,3 +1,5 @@
+.. _hacl-aead:
+
 AEAD: Chacha20-Poly1305
 -----------------------
 
