@@ -3,8 +3,8 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-HACL*: High Assurance Cryptographic Library
-===========================================
+A High Assurance Cryptographic Library
+======================================
 
 HACL* is a formally verified cryptographic library written in `F*
 <https://github.com/FStarLang/FStar>`_ and compiled to C, developed as a collaboration
@@ -15,15 +15,21 @@ library, its applications, and the verification tools it relies on are
 being actively developed and maintained as part of `Project Everest
 <https://github.com/project-everest>`_.
 
-HACL* is an open source project hosted at `hacl-star <https://github.com/project-everest/hacl-star/>`_.  This
-repository also contains verified assembly code for cryptographic
-primitives from the `Vale <https://github.com/project-everest/vale/>`_
-project. The full crypto library is distributed as a collection of C
-and assembly files that can either be directly used as standalone components
-or via a verified cryptographic provider called EverCrypt.
+EverCrypt is a cryptographic *provider* that into a single library combines
+HACL*, described above, and ValeCrypto, a collection of verified assembly
+code for cryptographic primitives.
 
-This manual describes the various cryptographic code components in
-the HACL* repository, focusing mainly on the HACL* and EverCrypt APIs.
+This manual describes the HACL* and EverCrypt APIs. Read
+:ref:`hacl-vale-evercrypt` for a detailed description of how they relate to each
+other.
+
+HACL* is an open source project hosted at `hacl-star
+<https://github.com/project-everest/hacl-star/>`_, along with ValeCrypto_
+and `EverCrypt <https://github.com/project-everest/hacl-star/tree/master/evercrypt>`_.
+
+HACL*, Vale and EverCrypt are distributed together as a collection of C and
+assembly files. These can be used either as individual components, or as a
+full-fledged library through the EverCrypt provider.
 
 Code from HACL* has been incorporated into `Firefox
 <https://bugzilla.mozilla.org/show_bug.cgi?id=1387183>`_, the Windows
@@ -37,6 +43,7 @@ or if you have any questions, comments, or feature requests for HACL*, Vale,
 or EverCrypt, initiate a conversation with the `HACL* maintainers <mailto:hacl-star-maintainers@lists.gforge.inria.fr>`_
 
 .. _KreMLin: https://github.com/FStarLang/kremlin/
+.. _ValeCrypto: https://github.com/project-everest/hacl-star/tree/master/vale
 
 .. toctree::
    :maxdepth: 2

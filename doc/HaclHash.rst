@@ -30,7 +30,8 @@ to an array of bytes of length ``input_len`` (the second argument).
 The last argument is a pointer ``dst`` to an array of bytes where
 the result will be written. All pointers (``input``, ``dst``) must be
 live (non-null, non-freed). For SHA-256, ``dst`` must point to an array
-allocated with (at least) 32 bytes, for SHA-384, it must have 48 bytes, and for SHA-512 it must have 64 bytes. The ``input`` array is limited to 2^32 bytes.
+allocated with (at least) 32 bytes, for SHA-384, it must have 48 bytes, and for
+SHA-512 it must have 64 bytes. The ``input`` array is limited to 2^32 bytes.
 
 
 SHA-3
@@ -84,8 +85,10 @@ an ``outputByteLen`` as argument. These functions expect the
 Other Hash Functions: Blake-2, MD5, SHA-1
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-A development branch of HACL* contains verified implementations of Blake2s and Blake2b. Contact the HACL* maintainers if you wish to use these implementations.
+A development branch of HACL* contains verified implementations of Blake2s and
+Blake2b. Contact the HACL* maintainers if you wish to use these implementations.
 
-HACL* also includes implementations of MD5 and SHA1 for backwards compatibility, but we strongly recommend against using these algorithms.
+HACL* also includes implementations of MD5 and SHA1 for backwards compatibility,
+but we strongly recommend against using these algorithms.
 
 

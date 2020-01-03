@@ -1,3 +1,5 @@
+.. _hacl-vale-evercrypt:
+
 HACL*, Vale, and EverCrypt
 =======================================
 

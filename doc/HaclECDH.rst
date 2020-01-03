@@ -42,7 +42,7 @@ using the ``secret_to_public`` function:
     :start-after: SNIPPET_START: Hacl_Curve25519_64_secret_to_public
     :end-before: SNIPPET_END: Hacl_Curve25519_64_secret_to_public
 
-The first argument is a pointer to the ouput public key ``pub``;
+The first argument is a pointer to the output public key ``pub``;
 the second argument is a pointer to the input private key ``priv``.
 
 ECDH Shared Secret

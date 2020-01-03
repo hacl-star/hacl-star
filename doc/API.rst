@@ -27,7 +27,7 @@ function found in ``EverCrypt_AutoConfig2.h``.
 EverCrypt APIs are generally agile, i.e. clients only need to change one
 argument to a function call in order to use a different algorithm; furthermore,
 those APIs are multiplexing, i.e. they automatically pick the most suitable
-implementation based ont he results of target CPU detection.
+implementation based on he results of target CPU detection.
 
 This means that the EverCrypt API for Chacha-Poly is found in
 ``EverCrypt_AEAD.h``; clients are expected to first allocate state, passing in

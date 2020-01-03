@@ -24,7 +24,7 @@ using the ``secret_to_public`` function:
     :start-after: SNIPPET_START: Hacl_Ed25519_secret_to_public
     :end-before: SNIPPET_END: Hacl_Ed25519_secret_to_public
 
-The first argument is a pointer to the ouput public key ``output`` (64 bytes);
+The first argument is a pointer to the output public key ``output`` (64 bytes);
 the second argument is a pointer to the input private key ``secret1`` (32 bytes).
 
 EdDSA Signing
