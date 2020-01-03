@@ -9,7 +9,7 @@ This API is:
 
 Possible values for the agility argument (``Hacl_Spec.h``) :
 
-.. literalinclude:: ../../dist/portable-gcc-compatible/Hacl_Spec.h
+.. literalinclude:: ../dist/portable-gcc-compatible/Hacl_Spec.h
     :language: c
     :start-after: SNIPPET_START: Spec_Hash_Definitions_hash_alg
     :end-before: SNIPPET_END: Spec_Hash_Definitions_hash_alg
@@ -25,7 +25,7 @@ Agile API
 
 The ``compute`` function is agile and multiplexing:
 
-.. literalinclude:: ../../dist/portable-gcc-compatible/EverCrypt_HMAC.h
+.. literalinclude:: ../dist/portable-gcc-compatible/EverCrypt_HMAC.h
     :language: c
     :start-after: SNIPPET_START: EverCrypt_HMAC_compute *
     :end-before: SNIPPET_END: EverCrypt_HMAC_compute
@@ -45,7 +45,7 @@ Non-agile API
 
 The ``compute_*`` functions are **non-agile** and multiplexing:
 
-.. literalinclude:: ../../dist/portable-gcc-compatible/EverCrypt_HMAC.h
+.. literalinclude:: ../dist/portable-gcc-compatible/EverCrypt_HMAC.h
     :language: c
     :start-after: SNIPPET_START: EverCrypt_HMAC_compute_sha2_256
     :end-before: SNIPPET_END: EverCrypt_HMAC_compute_sha2_256
