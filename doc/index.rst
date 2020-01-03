@@ -50,9 +50,7 @@ or EverCrypt, initiate a conversation with the `HACL* maintainers <mailto:hacl-s
    HaclDoc
    EverCryptDoc
    API
-..   Merkle
-..   WasmDoc
-..   OCamlDoc
+   Applications
 
 
 Indices and tables

@@ -73,3 +73,16 @@ your platform:
 - every other case, or when ``KRML_VERIFIED_UINT128`` is defined at compile-time:
   verified (slow) implementation extracted from FStar.UInt128
 
+
+Bindings for Other Languages
+----------------------------
+
+HACL* and EverCrypt are designed to primarily be used either within
+verification-oriented projects in F* or as part of larger C
+developments.  In addition to these use cases, the library developers
+and other HACL* users have also developed bindings for other programming languages:
+
+- OCaml: In a development branch, we have an OCaml wrapper for the full EverCrypt API
+- WebAssembly: The HACL* library has been compiled to `WebAssembly <https://github.com/Inria-Prosecco/hacl-wasm>`_
+
+Various users have also published Rust crates for HACL*, but these have not been vetted by the HACL maintainers.
