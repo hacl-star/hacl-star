@@ -16,7 +16,7 @@ inline_for_extraction
 val expand: #a:Type0 -> #len:size_nat_tuple -> b:lbuffer a (size len) ->
   Stack (ltuple a len)
   (requires (fun h -> live h b))
-  (ensures  (fun h0 r h1 -> r == Lib.ByteSequence.Tuples.expand (as_seq h0 b)))
+  (ensures  (fun h0 r h1 -> h0 == h1 /\ r == Lib.ByteSequence.Tuples.expand (as_seq h0 b)))
 
 inline_for_extraction
 val collapse: #a:Type0 -> #len:size_nat_tuple -> b:lbuffer a (size len) -> zero:a -> lt:ltuple a len ->
