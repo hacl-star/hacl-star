@@ -8,7 +8,7 @@ is enough to support the full NaCl API and several TLS 1.3 ciphersuites.
 The code for all of these algorithms is formally verified using the
 [F\*](https://fstarlang.github.io/) verification framework for memory
 safety, functional correctness, and secret independence (resistance to
-timing side-channels).
+some types of timing side-channels).
 
 More detailed documentation on the library and our verification method
 can be found at [hacl-star.github.io](https://hacl-star.github.io).
@@ -32,7 +32,7 @@ algorithms in the [dist](dist/) directory. HACL\* can also be compiled to WebAss
 ## Vale-Crypto
 
 [Vale-Crypto](vale/) provides formally verified high-performance
-cryptographic code for some primitives in aassembly language. It relies on the
+cryptographic code for selected primitives in assembly language. It relies on the
 [Vale tool](https://github.com/project-everest/vale) to produce
 code and proofs in [F\*](https://github.com/FStarLang/FStar). Vale supports
 multiple platforms and proves that its implementations are memory safe,
@@ -50,16 +50,16 @@ simple to switch between algorithms (e.g., from SHA2 to SHA3).
 
 ## Status
 
-*Warning*: Although some of our code is already used in several products such as Mozilla Firefox or Wireguard,
-we highly recommand to consult the authors before using HACL* in production systems.
+*Warning*: This is a research project. Although some of our code is currently used in popular products like Mozilla Firefox and Wireguard,
+we highly recommend users to consult the HACL* maintainers before using this code in production systems.
 
 We are actively developing and integrating our code on the
 [master](https://github.com/project-everest/hacl-star/tree/master/)
 branch, which tracks F\*'s `master` branch. Ongoing developments on new
 cryptographic primitives happen in the [dev](https://github.com/project-everest/hacl-star/tree/dev/)
-branch, which runs a little ahead of master. Also see
-[releases](https://github.com/project-everest/hacl-star/releases) for a preview
-of our C and assembly code, including EverCrypt 0.1 (currently in **alpha**).
+branch, which runs a little ahead of master. You can find a current snapshot
+of our C and assembly code in the [dist](dist/); stable releases of the full library,
+can be found in [releases](https://github.com/project-everest/hacl-star/releases), including EverCrypt 0.1 (currently in **alpha**).
 
 # Licenses
 
@@ -70,6 +70,6 @@ Contact the maintainers if you have other licensing requirements.
 ## Contact or Contribute
 
 This repository contains contributions from many students and researchers at INRIA, Microsoft Research, and CMU,
-and is under active development. The primary authors of each verified algorithm are noted in the corrsponding AUTHORS.md file.
+and is under active development. The primary authors of each verified algorithm are noted in the corresponding AUTHORS.md file.
 For questions and comments, or if you want to contribute to the project, contact the current maintainers at hacl-star-maintainers@lists.gforge.inria.fr.
 
