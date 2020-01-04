@@ -70,7 +70,6 @@ let sbox s t =
   let s2 = s2 &. t3 in
   let s3 = s3 &. t4 in
   let s4 = s4 &. t0 in
-  let s4 = s4 &. t0 in
   collapse s (u64 0) (s0,s1,s2,s3,s4);
   admit()
 
