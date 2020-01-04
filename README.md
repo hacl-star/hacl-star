@@ -4,7 +4,6 @@ This repository contains verified code for a library of modern
 cryptographic algorithms, including Curve25519, Ed25519, AES-GCM,
 Chacha20, Poly1305, SHA-2, SHA-3, HMAC, and HKDF. This set of algorithms
 is enough to support the full NaCl API and several TLS 1.3 ciphersuites.
-
 The code for all of these algorithms is formally verified using the
 [F\*](https://fstarlang.github.io/) verification framework for memory
 safety, functional correctness, and secret independence (resistance to
@@ -51,7 +50,7 @@ simple to switch between algorithms (e.g., from SHA2 to SHA3).
 ## Status
 
 *Warning*: This is a research project. Although some of our code is currently used in popular products like Mozilla Firefox and Wireguard,
-we highly recommend users to consult the HACL* maintainers before using this code in production systems.
+we highly recommend that users consult with the HACL* maintainers before using this code in production systems.
 
 We are actively developing and integrating our code on the
 [master](https://github.com/project-everest/hacl-star/tree/master/)
