@@ -60,7 +60,7 @@ branch, which runs a little ahead of master. You can find a current snapshot
 of our C and assembly code in the [dist](dist/); stable releases of the full library,
 can be found in [releases](https://github.com/project-everest/hacl-star/releases), including EverCrypt 0.1 (currently in **alpha**).
 
-# Licenses
+## License
 
 All the code in this repository is released under Apache 2.0.
 The generated C code from HACL\* is also released under MIT.
