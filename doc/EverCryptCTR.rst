@@ -18,7 +18,7 @@ CTR-mode encryption (``EverCrypt_CTR.h``)
 This API is:
 
 - **agile**
-- **multiplexing**: portable C (Chacha); ADX + BMI2 (AES128-GCM, AES256-GCM)
+- **multiplexing**: portable C (Chacha); AESNI + CLMUL (AES128, AES256)
 - **stateful**
 
 Possible values for the agility argument (``Hacl_Spec.h``) :

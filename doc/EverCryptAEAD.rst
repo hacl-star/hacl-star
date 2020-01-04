@@ -5,7 +5,7 @@ This API is:
 
 - **agile**
 - **multiplexing**: portable C (Chacha-Poly only); AVX (Chacha-Poly); AVX2
-  (Chacha-Poly); ADX + BMI2 (AES128-GCM, AES256-GCM)
+  (Chacha-Poly); AESNI + CLMUL (AES128-GCM, AES256-GCM)
 - **stateful**
 
 Possible values for the agility argument (``Hacl_Spec.h``) :
