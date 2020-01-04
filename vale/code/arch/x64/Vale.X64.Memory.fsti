@@ -42,7 +42,7 @@ unfold let scale4 (index:int) : int = scale_by 4 index
 unfold let scale8 (index:int) : int = scale_by 8 index
 unfold let scale16 (index:int) : int = scale_by 16 index
 
-val buffer (t:base_typ) : Type u#1
+val buffer (t:base_typ) : Type0
 val buffer_as_seq (#t:base_typ) (h:vale_heap) (b:buffer t) : GTot (Seq.seq (base_typ_as_vale_type t))
 val buffer_readable (#t:base_typ) (h:vale_heap) (b:buffer t) : GTot prop0
 val buffer_writeable (#t:base_typ) (b:buffer t) : GTot prop0

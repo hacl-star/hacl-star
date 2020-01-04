@@ -37,14 +37,10 @@ let default_v_of_typ (t:base_typ) : (base_typ_as_type t) = match t with
 
 
 let imm_to_b8 (src:base_typ) (b:IB.ibuffer (base_typ_as_type src)) : GTot b8 =
-  let x:b8' = Buffer b false in
-  let s1 = Seq.create 1 (default_v_of_typ src) in
-  lemma_seq_neq_intro s1 Seq.empty;
-  Classical.exists_intro (fun s -> ~ (x.rel s Seq.empty)) s1;
-  x
+  Buffer false b
 
 let mut_to_b8 (src:base_typ) (b:B.buffer (base_typ_as_type src)) : GTot b8 =
-  Buffer b true
+  Buffer true b
 
 [@__reduce__]
 let coerce (x:'a{'a == 'b}) : 'b = x
@@ -388,7 +384,7 @@ let rec args_b8_live (hs:HS.mem) (args:list arg{all_live hs args})
         assert (args_b8 args == args_b8 tl)
       | (| TD_Buffer t _ _, x |) ->
         assert (B.live hs x);
-        assert (args_b8 args == Buffer x true :: args_b8 tl)
+        assert (args_b8 args == Buffer true x :: args_b8 tl)
       | (| TD_ImmBuffer t _ _, x |) ->
         assert (B.live hs x);
         assert (args_b8 args == imm_to_b8 t x :: args_b8 tl)

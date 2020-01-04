@@ -84,7 +84,7 @@ let arg_as_nat64 (a:arg) : GTot MS.nat64 =
   | TD_Base TUInt64 ->
      UInt64.v x
   | TD_Buffer src _ _ ->
-    let b:b8 = Buffer (x <: B.buffer (base_typ_as_type src)) true in
+    let b:b8 = Buffer true (x <: B.buffer (base_typ_as_type src)) in
     global_addrs_map b
   | TD_ImmBuffer src _ _ -> global_addrs_map (imm_to_b8 src x)
 
@@ -148,7 +148,7 @@ let upd_taint_map_b8 (tm:taint_map) (x:b8) (tnt:taint) : taint_map =
 let upd_taint_map_arg (a:arg) (tm:taint_map) : GTot taint_map =
     match a with
     | (| TD_Buffer _ _ {taint=tnt}, x |) ->
-      upd_taint_map_b8 tm (Buffer x true) tnt
+      upd_taint_map_b8 tm (Buffer true x) tnt
     | (| TD_ImmBuffer src _ {taint=tnt}, x |) ->
       upd_taint_map_b8 tm (imm_to_b8 src x) tnt
     | (| TD_Base _, _ |) ->
@@ -172,7 +172,7 @@ let taint_of_arg (a:arg) =
 let taint_arg_b8 (a:arg{Some? (taint_of_arg a)}) : GTot b8 =
   let (| tag, x |) = a in
   match tag with
-  | TD_Buffer src _ _ -> Buffer (x <: B.buffer (base_typ_as_type src)) true
+  | TD_Buffer src _ _ -> Buffer true (x <: B.buffer (base_typ_as_type src))
   | TD_ImmBuffer src _ _ -> imm_to_b8 src x
 
 let rec taint_arg_args_b8_mem (args:arg_list) (a:arg)
