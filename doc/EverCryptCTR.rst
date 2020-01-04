@@ -3,17 +3,22 @@ CTR-mode encryption (``EverCrypt_CTR.h``)
 
 .. warning::
 
+  Using encryption without a MAC is potentially **dangerous**. We recommend users
+  stick with the AEAD API.
+
+.. warning::
+
   **This API is a work-in-progress and is not fully verified.** If you need it
   for something serious, let us know and we'll prioritize.
 
-  - It doesn't multiplex across all implementations of Chacha-Poly
+  - It doesn't multiplex across all implementations of Chacha
   - It doesn't offer complete encryption, only block-by-block
   - It has no streaming API
 
 This API is:
 
 - **agile**
-- **multiplexing**: portable C (Chacha-Poly); ADX + BMI2 (AES128-GCM, AES256-GCM)
+- **multiplexing**: portable C (Chacha); ADX + BMI2 (AES128-GCM, AES256-GCM)
 - **stateful**
 
 Possible values for the agility argument (``Hacl_Spec.h``) :

@@ -12,4 +12,3 @@ EverCrypt APIs
    EverCryptDRBG
    EverCryptNonAgile
    EverCryptDeprecated
-   EverCryptLegacy

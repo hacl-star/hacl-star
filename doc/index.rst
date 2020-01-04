@@ -17,16 +17,13 @@ being actively developed and maintained as part of `Project Everest
 
 EverCrypt is a cryptographic *provider* that into a single library combines
 HACL*, described above, and ValeCrypto, a collection of verified assembly
-code for cryptographic primitives.
-
-This manual describes the HACL* and EverCrypt APIs. Read
+code for cryptographic primitives. This manual describes the HACL* and EverCrypt APIs. Read
 :ref:`hacl-vale-evercrypt` for a detailed description of how they relate to each
 other.
 
 HACL* is an open source project hosted at `hacl-star
 <https://github.com/project-everest/hacl-star/>`_, along with ValeCrypto_
 and `EverCrypt <https://github.com/project-everest/hacl-star/tree/master/evercrypt>`_.
-
 HACL*, Vale and EverCrypt are distributed together as a collection of C and
 assembly files. These can be used either as individual components, or as a
 full-fledged library through the EverCrypt provider.
