@@ -27,7 +27,11 @@ let size_rc: size_t = size Spec.vsize_rc
 (* Define the Ascon state *)
 type state_p = lbuffer uint64 size_state
 
+val as_state_s: mem -> state_p -> GTot Spec.state_s
+let as_state_s h s = as_seq h s
 
+
+(* Define a table of constants *)
 let rcTable : x:ilbuffer (rotval U64) 10ul{witnessed x Spec.rc /\ recallable x} =
   createL_global Spec.rc_list
 
@@ -45,7 +49,8 @@ let create_state () = create #uint64 size_state (u64 0)
 val sbox: s:state_p -> t:state_p ->
   Stack unit
   (requires (fun h -> live h s /\ live h t /\ disjoint s t))
-  (ensures  (fun h0 _ h1 -> modifies2 s t h0 h1))
+  (ensures  (fun h0 _ h1 -> modifies1 s h0 h1
+                       /\ as_state_s h1 s == Spec.sbox (as_state_s h0 s) (as_state_s h0 t)))
 
 let sbox s t =
   let t0,t1,t2,t3,t4 = expand t in
@@ -65,6 +70,7 @@ let sbox s t =
   let s2 = s2 &. t3 in
   let s3 = s3 &. t4 in
   let s4 = s4 &. t0 in
+  let s4 = s4 &. t0 in
   collapse s (u64 0) (s0,s1,s2,s3,s4);
   admit()
 
@@ -73,7 +79,8 @@ let sbox s t =
 val round: c:uint8 -> s:state_p ->
   Stack unit
   (requires (fun h -> live h s))
-  (ensures  (fun h0 _ h1 -> modifies1 s h0 h1))
+  (ensures  (fun h0 _ h1 -> modifies1 s h0 h1
+                       /\ as_state_s h1 s == Spec.round c (as_state_s h0 s)))
 
 let round c s =
   push_frame ();
@@ -121,7 +128,8 @@ let round c s =
 val p12: s:state_p ->
   Stack unit
   (requires (fun h -> live h s))
-  (ensures  (fun h0 _ h1 -> modifies1 s h0 h1))
+  (ensures  (fun h0 _ h1 -> modifies1 s h0 h1
+                       /\ as_state_s h1 s == Spec.Ascon.p12 (as_state_s h0 s)))
 let p12 s =
   round (u8 0xf0) s;
   round (u8 0xe1) s;
@@ -140,7 +148,8 @@ let p12 s =
 val p8: s:state_p ->
   Stack unit
   (requires (fun h -> live h s))
-  (ensures  (fun h0 _ h1 -> modifies1 s h0 h1))
+  (ensures  (fun h0 _ h1 -> modifies1 s h0 h1
+                       /\ as_state_s h1 s == Spec.Ascon.p8 (as_state_s h0 s)))
 let p8 s =
   round (u8 0xb4) s;
   round (u8 0xa5) s;
@@ -155,7 +164,8 @@ let p8 s =
 val p6: s:state_p ->
   Stack unit
   (requires (fun h -> live h s))
-  (ensures  (fun h0 _ h1 -> modifies1 s h0 h1))
+  (ensures  (fun h0 _ h1 -> modifies1 s h0 h1
+                       /\ as_state_s h1 s == Spec.Ascon.p6 (as_state_s h0 s)))
 let p6 s =
   round (u8 0x96) s;
   round (u8 0x87) s;
