@@ -50,25 +50,25 @@ simple to switch between algorithms (e.g., from SHA2 to SHA3).
 ## Status
 
 *Warning*: This is a research project. Although some of our code is currently used in popular products like Mozilla Firefox and Wireguard,
-we highly recommend that users consult with the HACL* maintainers before using this code in production systems.
+we highly recommend that users consult with the HACL\* maintainers before using this code in production systems.
 
 We are actively developing and integrating our code on the
 [master](https://github.com/project-everest/hacl-star/tree/master/)
 branch, which tracks F\*'s `master` branch. Ongoing developments on new
 cryptographic primitives happen in the [dev](https://github.com/project-everest/hacl-star/tree/dev/)
 branch, which runs a little ahead of master. You can find a current snapshot
-of our C and assembly code in the [dist](dist/); stable releases of the full library,
-can be found in [releases](https://github.com/project-everest/hacl-star/releases), including EverCrypt 0.1 (currently in **alpha**).
+of our C and assembly code in the [dist](dist/) directory; stable releases of the full library
+can be found in the [releases](https://github.com/project-everest/hacl-star/releases) directory, including EverCrypt 0.1 (currently in **alpha**).
 
 ## License
 
-All the code in this repository is released under Apache 2.0.
-The generated C code from HACL\* is also released under MIT.
+All the code in this repository is released under an Apache 2.0 license.
+The generated C code from HACL\* is also released under an MIT license.
 Contact the maintainers if you have other licensing requirements.
 
 ## Contact or Contribute
 
-This repository contains contributions from many students and researchers at INRIA, Microsoft Research, and CMU,
-and is under active development. The primary authors of each verified algorithm are noted in the corresponding AUTHORS.md file.
+This repository contains contributions from many students and researchers at INRIA, Microsoft Research, and Carnegie Mellon University,
+and it is under active development. The primary authors of each verified algorithm are noted in the corresponding AUTHORS.md file.
 For questions and comments, or if you want to contribute to the project, contact the current maintainers at hacl-star-maintainers@lists.gforge.inria.fr.
 
