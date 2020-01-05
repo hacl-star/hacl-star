@@ -4,9 +4,9 @@ HACL APIs
 .. toctree::
 
    HaclAEAD
+   HaclHash
    HaclECDH
    HaclSig
    HaclNaCl
-   HaclHash
    Randomness
 

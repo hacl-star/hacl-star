@@ -5,7 +5,7 @@ Signatures: Ed25519
 
 HACL* implements the Edwards-Curve Digital Signature Algorithm (EdDSA)
 construction for the Ed25519 elliptic curve as specified in `IETF RFC 8032 <https://tools.ietf.org/html/rfc8032>`_.
-The API for this signature algorithm is in `Hacl_Ed25519.h`.
+The API for this signature algorithm is in ``Hacl_Ed25519.h``.
 
 Key Generation
 ^^^^^^^^^^^^^^
