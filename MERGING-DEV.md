@@ -1,4 +1,4 @@
-The following experimental, deprecated, and alternative folders in `dev` are not tracked in `fstar-master`:
+The following experimental, deprecated, and alternative folders in `dev` are not tracked in `master`:
 
 - code/code-with-previous-libraries
 - code/curve25519/experimental
@@ -20,9 +20,9 @@ The following changes are only in `dev` and will need to be ported explicitly (t
 (To check out a specific file or folder from a branch, use e.g.
  `git checkout origin/dev -- path/to/file`.)
 
-Soon `dist` will be refreshed in `dev` and `fstar-master` as part of CI in the same way as hints. In the meantime, rather than merging it manually, it's easier to rebuild `dist` after merging the rest of the files. If in a hurry, use `git checkout --ours dist` to ignore all changes in `dist` and continue the merge.
+Soon `dist` will be refreshed in `dev` and `master` as part of CI in the same way as hints. In the meantime, rather than merging it manually, it's easier to rebuild `dist` after merging the rest of the files. If in a hurry, use `git checkout --ours dist` to ignore all changes in `dist` and continue the merge.
 
-The following files in `dev` are untracked in `fstar-master` and will need to be ported explicitly (they won't appear in a merge unless they change in between):
+The following files in `dev` are untracked in `master` and will need to be ported explicitly (they won't appear in a merge unless they change in between):
 
 - CONVENTIONS.md
 - code/Dockerfile

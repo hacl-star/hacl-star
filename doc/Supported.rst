@@ -43,7 +43,7 @@ Poly1305             ✔︎ (+ AVX,AVX2)            ✔︎ (X64)
 
 Points of interest:
 
-- Some C implemenations also have verified vectorized versions optimized for
+- Some C implementations also have verified vectorized versions optimized for
   Intel AVX and AVX2 using compiler intrinsics (there is no inline assembly)
 - MD5 and SHA1 are provided for legacy purposes and backwards-compatibility
   (e.g. TLS applications); no particular effort has been made to make them

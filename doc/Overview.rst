@@ -47,7 +47,7 @@ through `Project Everest <https://project-everest.github.io/>`_.
 
 Early attempts at verifying cryptographic code in F* were presented at CSF 2016:
 `A Verified Extensible Library of Elliptic Curves
-<https://hal.inria.fr/hal-01425957)>`_ (Jean Karim Zinzindohoué, Evmorfia-Iro
+<https://hal.inria.fr/hal-01425957>`_ (Jean Karim Zinzindohoué, Evmorfia-Iro
 Bartzia, Karthikeyan Bhargavan). This work established an initial body of
 verified libraries, but extracted to OCaml and had substandard performance.
 More on this early work be found in J-K Zinzindohoué's `Ph.D. thesis
@@ -56,7 +56,7 @@ More on this early work be found in J-K Zinzindohoué's `Ph.D. thesis
 To deliver better performance, we established a C-like subset of F* that would
 compile to C, called Low*. Its foundations were presented at ICFP 2017:
 `Verified Low-Level Programming Embedded in F\*
-<https://arxiv.org/abs/1703.00053)>`_ (Jonathan Protzenko, Jean-Karim
+<https://arxiv.org/abs/1703.00053>`_ (Jonathan Protzenko, Jean-Karim
 Zinzindohoué, Aseem Rastogi, Tahina Ramananandro, Peng Wang, Santiago
 Zanella-Béguelin, Antoine Delignat-Lavaud, Cătălin Hriţcu, Karthikeyan
 Bhargavan, Cédric Fournet, and Nikhil Swamy).
@@ -90,7 +90,7 @@ the codebase written in C and those written in assembly. Connecting C and ASM al
 enabled implementation multiplexing and algorithmic agility, while establishing
 strong abstraction boundaries to serve as a foundation for other verified
 clients. We call the result EverCrypt: `EverCrypt: A Fast, Verified,
-Cross-Platform Cryptographic Provider <https://eprint.iacr.org/2019/757)>`_
+Cross-Platform Cryptographic Provider <https://eprint.iacr.org/2019/757>`_
 (Jonathan Protzenko, Bryan Parno, Aymeric Fromherz, Chris Hawblitzel, Marina
 Polubelova, Karthikeyan Bhargavan, Benjamin Beurdouche, Joonwon Choi, Antoine
 Delignat-Lavaud, Cedric Fournet, Tahina Ramananandro, Aseem Rastogi, Nikhil
