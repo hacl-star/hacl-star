@@ -6,6 +6,7 @@ HACL APIs
    HaclAEAD
    HaclECDH
    HaclSig
+   HaclNaCl
    HaclHash
    Randomness
 
