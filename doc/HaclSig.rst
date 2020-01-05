@@ -24,8 +24,8 @@ using the ``secret_to_public`` function:
     :start-after: SNIPPET_START: Hacl_Ed25519_secret_to_public
     :end-before: SNIPPET_END: Hacl_Ed25519_secret_to_public
 
-The first argument is a pointer to the output public key ``output`` (64 bytes);
-the second argument is a pointer to the input private key ``secret1`` (32 bytes).
+The first argument is a pointer to the output public key ``pub`` (64 bytes);
+the second argument is a pointer to the input private key ``priv`` (32 bytes).
 
 EdDSA Signing
 ^^^^^^^^^^^^^
@@ -39,7 +39,7 @@ The signature  operation is implemented by the following function:
     :end-before: SNIPPET_END: Hacl_Ed25519_sign
 
 The first argument is a pointer to the output signature ``signature``;
-the second argument is the private key of the signer ``secret1``;
+the second argument is the private key of the signer ``priv``;
 the third argument is the length ``len`` of the message to be signed ``msg``.
 The size of ``signature`` must be (at least) 64 bytes; the size of the private
 key is 32 bytes.
@@ -55,11 +55,11 @@ To verify an Ed25519 signature, one may call the following function:
     :start-after: SNIPPET_START: Hacl_Ed25519_verify
     :end-before: SNIPPET_END: Hacl_Ed25519_verify
 
-The first argument is a pointer to the public key ``output`` (64 bytes);
+The first argument is a pointer to the public key ``pub`` (64 bytes);
 the second argument is the length ``len`` of the message to be signed ``msg``;
 the last argument is the input signature ``signature``.
-If the signature verification succeeds the function returns the boolean `true`,
-otherwise it returns `false`.
+If the signature verification succeeds the function returns the boolean ``true``,
+otherwise it returns ``false``.
 
 EdDSA Sign Expanded
 ^^^^^^^^^^^^^^^^^^^
@@ -67,8 +67,8 @@ EdDSA Sign Expanded
 In situations where a signer needs to sign many times with the same
 signature key, a part of the signature computation can be shared
 between these invocations for efficiency. The caller first calls
-`Hacl_Ed25519_expand_keys` to compute an expanded signing key `ks`,
-and then can use `ks` to call `Hacl_Ed25519_sign_expanded` multiple
+``Hacl_Ed25519_expand_keys`` to compute an expanded signing key ``ks``,
+and then can use ``ks`` to call ``Hacl_Ed25519_sign_expanded`` multiple
 times with different arguments.
 
 
