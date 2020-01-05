@@ -28,9 +28,9 @@ efficient, readable, standalone C code for each algorithm that
 can be easily integrated into any C project.  We include the current C code for various HACL\*
 algorithms in the [dist](dist/) directory. HACL\* can also be compiled to WebAssembly.
 
-## Vale-Crypto
+## ValeCrypt
 
-[Vale-Crypto](vale/) provides formally verified high-performance
+[ValeCrypt](vale/) provides formally verified high-performance
 cryptographic code for selected primitives in assembly language. It relies on the
 [Vale tool](https://github.com/project-everest/vale) to produce
 code and proofs in [F\*](https://github.com/FStarLang/FStar). Vale supports
@@ -42,7 +42,7 @@ independent.
 
 [EverCrypt](providers/evercrypt/) is a high-performance, cross-platform, formally
 verified modern cryptographic provider that packages implementations from
-HACL\* and Vale-Crypto, and automatically picks the fastest one available,
+HACL\* and ValeCrypt, and automatically picks the fastest one available,
 depending on processor support and the target execution environment
 (*multiplexing*). Furthermore, EverCrypt offers an (*agile*) API that makes it
 simple to switch between algorithms (e.g., from SHA2 to SHA3).
