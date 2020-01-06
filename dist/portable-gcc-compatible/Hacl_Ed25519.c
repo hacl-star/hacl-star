@@ -2278,13 +2278,13 @@ static bool Hacl_Impl_Ed25519_PointEqual_point_equal(uint64_t *p, uint64_t *q1)
 
 /* SNIPPET_START: Hacl_Ed25519_sign */
 
-void Hacl_Ed25519_sign(uint8_t *signature, uint8_t *secret1, uint32_t len, uint8_t *msg)
+void Hacl_Ed25519_sign(uint8_t *signature, uint8_t *priv, uint32_t len, uint8_t *msg)
 {
   uint8_t tmp_bytes[352U] = { 0U };
   uint64_t tmp_ints[65U] = { 0U };
   uint8_t *rs_ = tmp_bytes + (uint32_t)160U;
   uint8_t *s_ = tmp_bytes + (uint32_t)192U;
-  Hacl_Impl_Ed25519_Sign_Steps_sign_step_1(secret1, tmp_bytes);
+  Hacl_Impl_Ed25519_Sign_Steps_sign_step_1(priv, tmp_bytes);
   Hacl_Impl_Ed25519_Sign_Steps_sign_step_2(len, msg, tmp_bytes, tmp_ints);
   Hacl_Impl_Ed25519_Sign_Steps_sign_step_3(tmp_bytes, tmp_ints);
   Hacl_Impl_Ed25519_Sign_Steps_sign_step_4(len, msg, tmp_bytes, tmp_ints);
@@ -2297,13 +2297,13 @@ void Hacl_Ed25519_sign(uint8_t *signature, uint8_t *secret1, uint32_t len, uint8
 
 /* SNIPPET_START: Hacl_Ed25519_verify */
 
-bool Hacl_Ed25519_verify(uint8_t *output, uint32_t len, uint8_t *msg, uint8_t *signature)
+bool Hacl_Ed25519_verify(uint8_t *pub, uint32_t len, uint8_t *msg, uint8_t *signature)
 {
   uint64_t tmp[45U] = { 0U };
   uint8_t tmp_[32U] = { 0U };
   uint64_t *a_ = tmp;
   uint64_t *r_ = tmp + (uint32_t)20U;
-  bool b = Hacl_Impl_Ed25519_PointDecompress_point_decompress(a_, output);
+  bool b = Hacl_Impl_Ed25519_PointDecompress_point_decompress(a_, pub);
   bool res;
   if (b)
   {
@@ -2324,7 +2324,7 @@ bool Hacl_Ed25519_verify(uint8_t *output, uint32_t len, uint8_t *msg, uint8_t *s
       else
       {
         uint64_t r_2[5U] = { 0U };
-        Hacl_Impl_SHA512_ModQ_sha512_modq_pre_pre2(r_2, rs1, output, len, msg);
+        Hacl_Impl_SHA512_ModQ_sha512_modq_pre_pre2(r_2, rs1, pub, len, msg);
         Hacl_Impl_Store56_store_56(tmp_, r_2);
         uint8_t *uu____0 = signature + (uint32_t)32U;
         uint64_t tmp1[60U] = { 0U };
@@ -2356,19 +2356,19 @@ bool Hacl_Ed25519_verify(uint8_t *output, uint32_t len, uint8_t *msg, uint8_t *s
 
 /* SNIPPET_START: Hacl_Ed25519_secret_to_public */
 
-void Hacl_Ed25519_secret_to_public(uint8_t *output, uint8_t *secret1)
+void Hacl_Ed25519_secret_to_public(uint8_t *pub, uint8_t *priv)
 {
-  Hacl_Impl_Ed25519_SecretToPublic_secret_to_public(output, secret1);
+  Hacl_Impl_Ed25519_SecretToPublic_secret_to_public(pub, priv);
 }
 
 /* SNIPPET_END: Hacl_Ed25519_secret_to_public */
 
 /* SNIPPET_START: Hacl_Ed25519_expand_keys */
 
-void Hacl_Ed25519_expand_keys(uint8_t *ks, uint8_t *secret1)
+void Hacl_Ed25519_expand_keys(uint8_t *ks, uint8_t *priv)
 {
-  Hacl_Impl_Ed25519_SecretExpand_secret_expand(ks + (uint32_t)32U, secret1);
-  Hacl_Impl_Ed25519_SecretToPublic_secret_to_public(ks, secret1);
+  Hacl_Impl_Ed25519_SecretExpand_secret_expand(ks + (uint32_t)32U, priv);
+  Hacl_Impl_Ed25519_SecretToPublic_secret_to_public(ks, priv);
 }
 
 /* SNIPPET_END: Hacl_Ed25519_expand_keys */
