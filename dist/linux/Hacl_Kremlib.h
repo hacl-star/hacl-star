@@ -55,8 +55,6 @@ inline static u64 FStar_UInt128_uint128_to_uint64(uint128_t a);
 
 inline static uint128_t FStar_UInt128_mul_wide(u64 x, u64 y);
 
-inline static void store128_le(u8 *x0, uint128_t x1);
-
 inline static void store128_be(u8 *x0, uint128_t x1);
 
 inline static uint128_t load128_be(u8 *x0);

@@ -35,12 +35,6 @@
 
 extern u32 Hacl_Impl_Chacha20_Vec_chacha20_constants[4U];
 
-void Hacl_Impl_Chacha20_chacha20_init(u32 *ctx, u8 *k, u8 *n1, u32 ctr);
-
-void Hacl_Impl_Chacha20_chacha20_encrypt_block(u32 *ctx, u8 *out, u32 incr1, u8 *text);
-
-void Hacl_Impl_Chacha20_chacha20_update(u32 *ctx, u32 len, u8 *out, u8 *text);
-
 void Hacl_Chacha20_chacha20_encrypt(u32 len, u8 *out, u8 *text, u8 *key, u8 *n1, u32 ctr);
 
 void Hacl_Chacha20_chacha20_decrypt(u32 len, u8 *out, u8 *cipher, u8 *key, u8 *n1, u32 ctr);

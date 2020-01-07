@@ -751,7 +751,13 @@ dist/linux/Makefile.basic: MERKLE_BUNDLE = -bundle 'MerkleTree.*'
 dist/linux/Makefile.basic: TARGETCONFIG_FLAGS =
 dist/linux/Makefile.basic: DEFAULT_FLAGS += \
   -fc89-scope -fbuiltin-uint128 -flinux-ints -ccopt -Wno-typedef-redefinition
-
+dist/linux/Makefile.basic: CTR_BUNDLE =
+dist/linux/Makefile.basic: E_HASH_BUNDLE =
+dist/linux/Makefile.basic: DEFAULT_FLAGS += -bundle 'EverCrypt,EverCrypt.*'
+dist/linux/Makefile.basic: VALE_ASMS := $(filter-out $(HACL_HOME)/secure_api/%,$(VALE_ASMS))
+dist/linux/Makefile.basic: HAND_WRITTEN_FILES := $(filter-out providers/evercrypt/c/%,$(HAND_WRITTEN_FILES))
+dist/linux/Makefile.basic: HAND_WRITTEN_H_FILES := $(filter-out %/evercrypt_targetconfig.h,$(HAND_WRITTEN_H_FILES))
+dist/linux/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES =
 
 # CCF distribution
 # ----------------
