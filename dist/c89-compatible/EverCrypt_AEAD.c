@@ -216,12 +216,14 @@ EverCrypt_AEAD_encrypt_aes128_gcm(
   {
     return EverCrypt_Error_InvalidKey;
   }
+  else
   {
     Spec_Agile_AEAD_alg a = EverCrypt_AEAD_alg_of_vale_impl(Spec_Cipher_Expansion_Vale_AES128);
     if (iv_len == (uint32_t)0U)
     {
       return EverCrypt_Error_InvalidIVLength;
     }
+    else
     {
       EverCrypt_AEAD_state_s scrut = *s;
       uint8_t *ek = scrut.ek;
@@ -341,12 +343,14 @@ EverCrypt_AEAD_encrypt_aes256_gcm(
   {
     return EverCrypt_Error_InvalidKey;
   }
+  else
   {
     Spec_Agile_AEAD_alg a = EverCrypt_AEAD_alg_of_vale_impl(Spec_Cipher_Expansion_Vale_AES256);
     if (iv_len == (uint32_t)0U)
     {
       return EverCrypt_Error_InvalidIVLength;
     }
+    else
     {
       EverCrypt_AEAD_state_s scrut = *s;
       uint8_t *ek = scrut.ek;
@@ -466,6 +470,7 @@ EverCrypt_AEAD_encrypt(
   {
     return EverCrypt_Error_InvalidKey;
   }
+  else
   {
     EverCrypt_AEAD_state_s scrut = *s;
     Spec_Cipher_Expansion_impl i1 = scrut.impl;
@@ -504,15 +509,19 @@ EverCrypt_AEAD_encrypt(
           {
             return EverCrypt_Error_InvalidIVLength;
           }
-          EverCrypt_Chacha20Poly1305_aead_encrypt(ek,
-            iv,
-            ad_len,
-            ad,
-            plain_len,
-            plain,
-            cipher,
-            tag);
-          return EverCrypt_Error_Success;
+          else
+          {
+            EverCrypt_Chacha20Poly1305_aead_encrypt(ek,
+              iv,
+              ad_len,
+              ad,
+              plain_len,
+              plain,
+              cipher,
+              tag);
+            return EverCrypt_Error_Success;
+          }
+          break;
         }
       default:
         {
@@ -540,10 +549,11 @@ EverCrypt_AEAD_decrypt_aes128_gcm(
   {
     return EverCrypt_Error_InvalidKey;
   }
-  if (iv_len == (uint32_t)0U)
+  else if (iv_len == (uint32_t)0U)
   {
     return EverCrypt_Error_InvalidIVLength;
   }
+  else
   {
     Spec_Agile_AEAD_alg a = EverCrypt_AEAD_alg_of_vale_impl(Spec_Cipher_Expansion_Vale_AES128);
     EverCrypt_AEAD_state_s scrut = *s;
@@ -649,7 +659,10 @@ EverCrypt_AEAD_decrypt_aes128_gcm(
           {
             return EverCrypt_Error_Success;
           }
-          return EverCrypt_Error_AuthenticationFailure;
+          else
+          {
+            return EverCrypt_Error_AuthenticationFailure;
+          }
         }
       }
     }
@@ -673,10 +686,11 @@ EverCrypt_AEAD_decrypt_aes256_gcm(
   {
     return EverCrypt_Error_InvalidKey;
   }
-  if (iv_len == (uint32_t)0U)
+  else if (iv_len == (uint32_t)0U)
   {
     return EverCrypt_Error_InvalidIVLength;
   }
+  else
   {
     Spec_Agile_AEAD_alg a = EverCrypt_AEAD_alg_of_vale_impl(Spec_Cipher_Expansion_Vale_AES256);
     EverCrypt_AEAD_state_s scrut = *s;
@@ -782,7 +796,10 @@ EverCrypt_AEAD_decrypt_aes256_gcm(
           {
             return EverCrypt_Error_Success;
           }
-          return EverCrypt_Error_AuthenticationFailure;
+          else
+          {
+            return EverCrypt_Error_AuthenticationFailure;
+          }
         }
       }
     }
@@ -806,6 +823,7 @@ EverCrypt_AEAD_decrypt(
   {
     return EverCrypt_Error_InvalidKey;
   }
+  else
   {
     EverCrypt_AEAD_state_s scrut = *s;
     Spec_Cipher_Expansion_impl i1 = scrut.impl;
@@ -844,6 +862,7 @@ EverCrypt_AEAD_decrypt(
           {
             return EverCrypt_Error_InvalidIVLength;
           }
+          else
           {
             uint32_t
             r =
@@ -859,7 +878,10 @@ EverCrypt_AEAD_decrypt(
             {
               return EverCrypt_Error_Success;
             }
-            return EverCrypt_Error_AuthenticationFailure;
+            else
+            {
+              return EverCrypt_Error_AuthenticationFailure;
+            }
           }
           break;
         }

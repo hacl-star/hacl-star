@@ -140,7 +140,10 @@ Hacl_Impl_SecretBox_secretbox_open_detached(
     Hacl_Salsa20_salsa20_decrypt(mlen1, m1, c1, subkey, n11, (uint32_t)1U);
     return (uint32_t)0U;
   }
-  return (uint32_t)0xffffffffU;
+  else
+  {
+    return (uint32_t)0xffffffffU;
+  }
 }
 
 /* SNIPPET_END: Hacl_Impl_SecretBox_secretbox_open_detached */
@@ -192,7 +195,10 @@ inline static uint32_t Hacl_Impl_Box_box_beforenm(uint8_t *k, uint8_t *pk, uint8
     Hacl_Salsa20_hsalsa20(k, k, n0);
     return (uint32_t)0U;
   }
-  return (uint32_t)0xffffffffU;
+  else
+  {
+    return (uint32_t)0xffffffffU;
+  }
 }
 
 /* SNIPPET_END: Hacl_Impl_Box_box_beforenm */
@@ -234,7 +240,10 @@ Hacl_Impl_Box_box_detached(
   {
     return Hacl_Impl_Box_box_detached_afternm(mlen, c, tag, k, n1, m);
   }
-  return (uint32_t)0xffffffffU;
+  else
+  {
+    return (uint32_t)0xffffffffU;
+  }
 }
 
 /* SNIPPET_END: Hacl_Impl_Box_box_detached */
@@ -275,7 +284,10 @@ Hacl_Impl_Box_box_open_detached(
   {
     return Hacl_Impl_Box_box_open_detached_afternm(mlen, m, k, n1, c, tag);
   }
-  return (uint32_t)0xffffffffU;
+  else
+  {
+    return (uint32_t)0xffffffffU;
+  }
 }
 
 /* SNIPPET_END: Hacl_Impl_Box_box_open_detached */

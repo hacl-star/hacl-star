@@ -201,7 +201,10 @@ inline static uint32_t Hacl_Impl_Box_box_beforenm(uint8_t *k, uint8_t *pk, uint8
     Hacl_Salsa20_hsalsa20(k, k, n0);
     return (uint32_t)0U;
   }
-  return (uint32_t)0xffffffffU;
+  else
+  {
+    return (uint32_t)0xffffffffU;
+  }
 }
 
 inline static uint32_t
@@ -235,7 +238,10 @@ Hacl_Impl_Box_box_detached(
   {
     return Hacl_Impl_Box_box_detached_afternm(mlen, c, tag, k, n1, m);
   }
-  return (uint32_t)0xffffffffU;
+  else
+  {
+    return (uint32_t)0xffffffffU;
+  }
 }
 
 inline static uint32_t
@@ -268,7 +274,10 @@ Hacl_Impl_Box_box_open_detached(
   {
     return Hacl_Impl_Box_box_open_detached_afternm(mlen, m, k, n1, c, tag);
   }
-  return (uint32_t)0xffffffffU;
+  else
+  {
+    return (uint32_t)0xffffffffU;
+  }
 }
 
 inline static uint32_t
