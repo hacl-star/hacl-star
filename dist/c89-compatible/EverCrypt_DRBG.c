@@ -85,10 +85,7 @@ EverCrypt_DRBG_uu___is_SHA1_s(
   {
     return true;
   }
-  else
-  {
-    return false;
-  }
+  return false;
 }
 
 Hacl_HMAC_DRBG_state
@@ -101,14 +98,11 @@ EverCrypt_DRBG___proj__SHA1_s__item___0(
   {
     return projectee.val.case_SHA1_s;
   }
-  else
-  {
-    KRML_HOST_PRINTF("KreMLin abort at %s:%d\n%s\n",
-      __FILE__,
-      __LINE__,
-      "unreachable (pattern matches are exhaustive in F*)");
-    KRML_HOST_EXIT(255U);
-  }
+  KRML_HOST_PRINTF("KreMLin abort at %s:%d\n%s\n",
+    __FILE__,
+    __LINE__,
+    "unreachable (pattern matches are exhaustive in F*)");
+  KRML_HOST_EXIT(255U);
 }
 
 bool
@@ -121,10 +115,7 @@ EverCrypt_DRBG_uu___is_SHA2_256_s(
   {
     return true;
   }
-  else
-  {
-    return false;
-  }
+  return false;
 }
 
 Hacl_HMAC_DRBG_state
@@ -137,14 +128,11 @@ EverCrypt_DRBG___proj__SHA2_256_s__item___0(
   {
     return projectee.val.case_SHA2_256_s;
   }
-  else
-  {
-    KRML_HOST_PRINTF("KreMLin abort at %s:%d\n%s\n",
-      __FILE__,
-      __LINE__,
-      "unreachable (pattern matches are exhaustive in F*)");
-    KRML_HOST_EXIT(255U);
-  }
+  KRML_HOST_PRINTF("KreMLin abort at %s:%d\n%s\n",
+    __FILE__,
+    __LINE__,
+    "unreachable (pattern matches are exhaustive in F*)");
+  KRML_HOST_EXIT(255U);
 }
 
 bool
@@ -157,10 +145,7 @@ EverCrypt_DRBG_uu___is_SHA2_384_s(
   {
     return true;
   }
-  else
-  {
-    return false;
-  }
+  return false;
 }
 
 Hacl_HMAC_DRBG_state
@@ -173,14 +158,11 @@ EverCrypt_DRBG___proj__SHA2_384_s__item___0(
   {
     return projectee.val.case_SHA2_384_s;
   }
-  else
-  {
-    KRML_HOST_PRINTF("KreMLin abort at %s:%d\n%s\n",
-      __FILE__,
-      __LINE__,
-      "unreachable (pattern matches are exhaustive in F*)");
-    KRML_HOST_EXIT(255U);
-  }
+  KRML_HOST_PRINTF("KreMLin abort at %s:%d\n%s\n",
+    __FILE__,
+    __LINE__,
+    "unreachable (pattern matches are exhaustive in F*)");
+  KRML_HOST_EXIT(255U);
 }
 
 bool
@@ -193,10 +175,7 @@ EverCrypt_DRBG_uu___is_SHA2_512_s(
   {
     return true;
   }
-  else
-  {
-    return false;
-  }
+  return false;
 }
 
 Hacl_HMAC_DRBG_state
@@ -209,14 +188,11 @@ EverCrypt_DRBG___proj__SHA2_512_s__item___0(
   {
     return projectee.val.case_SHA2_512_s;
   }
-  else
-  {
-    KRML_HOST_PRINTF("KreMLin abort at %s:%d\n%s\n",
-      __FILE__,
-      __LINE__,
-      "unreachable (pattern matches are exhaustive in F*)");
-    KRML_HOST_EXIT(255U);
-  }
+  KRML_HOST_PRINTF("KreMLin abort at %s:%d\n%s\n",
+    __FILE__,
+    __LINE__,
+    "unreachable (pattern matches are exhaustive in F*)");
+  KRML_HOST_EXIT(255U);
 }
 
 EverCrypt_DRBG_state_s *EverCrypt_DRBG_create(Spec_Hash_Definitions_hash_alg a)
@@ -329,7 +305,6 @@ EverCrypt_DRBG_instantiate_sha1(
   {
     return false;
   }
-  else
   {
     uint32_t entropy_input_len = Hacl_HMAC_DRBG_min_length(Spec_Hash_Definitions_SHA1);
     uint32_t nonce_len = Hacl_HMAC_DRBG_min_length(Spec_Hash_Definitions_SHA1) / (uint32_t)2U;
@@ -344,7 +319,6 @@ EverCrypt_DRBG_instantiate_sha1(
         {
           return false;
         }
-        else
         {
           uint8_t *entropy_input = entropy;
           uint8_t *nonce = entropy + entropy_input_len;
@@ -463,7 +437,6 @@ EverCrypt_DRBG_instantiate_sha2_256(
   {
     return false;
   }
-  else
   {
     uint32_t entropy_input_len = Hacl_HMAC_DRBG_min_length(Spec_Hash_Definitions_SHA2_256);
     uint32_t nonce_len = Hacl_HMAC_DRBG_min_length(Spec_Hash_Definitions_SHA2_256) / (uint32_t)2U;
@@ -478,7 +451,6 @@ EverCrypt_DRBG_instantiate_sha2_256(
         {
           return false;
         }
-        else
         {
           uint8_t *entropy_input = entropy;
           uint8_t *nonce = entropy + entropy_input_len;
@@ -605,7 +577,6 @@ EverCrypt_DRBG_instantiate_sha2_384(
   {
     return false;
   }
-  else
   {
     uint32_t entropy_input_len = Hacl_HMAC_DRBG_min_length(Spec_Hash_Definitions_SHA2_384);
     uint32_t nonce_len = Hacl_HMAC_DRBG_min_length(Spec_Hash_Definitions_SHA2_384) / (uint32_t)2U;
@@ -620,7 +591,6 @@ EverCrypt_DRBG_instantiate_sha2_384(
         {
           return false;
         }
-        else
         {
           uint8_t *entropy_input = entropy;
           uint8_t *nonce = entropy + entropy_input_len;
@@ -747,7 +717,6 @@ EverCrypt_DRBG_instantiate_sha2_512(
   {
     return false;
   }
-  else
   {
     uint32_t entropy_input_len = Hacl_HMAC_DRBG_min_length(Spec_Hash_Definitions_SHA2_512);
     uint32_t nonce_len = Hacl_HMAC_DRBG_min_length(Spec_Hash_Definitions_SHA2_512) / (uint32_t)2U;
@@ -762,7 +731,6 @@ EverCrypt_DRBG_instantiate_sha2_512(
         {
           return false;
         }
-        else
         {
           uint8_t *entropy_input = entropy;
           uint8_t *nonce = entropy + entropy_input_len;
@@ -889,7 +857,6 @@ EverCrypt_DRBG_reseed_sha1(
   {
     return false;
   }
-  else
   {
     uint32_t entropy_input_len = Hacl_HMAC_DRBG_min_length(Spec_Hash_Definitions_SHA1);
     KRML_CHECK_SIZE(sizeof (uint8_t), entropy_input_len);
@@ -902,7 +869,6 @@ EverCrypt_DRBG_reseed_sha1(
         {
           return false;
         }
-        else
         {
           EverCrypt_DRBG_state_s st_s = *st;
           KRML_CHECK_SIZE(sizeof (uint8_t), entropy_input_len + additional_input_len);
@@ -997,7 +963,6 @@ EverCrypt_DRBG_reseed_sha2_256(
   {
     return false;
   }
-  else
   {
     uint32_t entropy_input_len = Hacl_HMAC_DRBG_min_length(Spec_Hash_Definitions_SHA2_256);
     KRML_CHECK_SIZE(sizeof (uint8_t), entropy_input_len);
@@ -1010,7 +975,6 @@ EverCrypt_DRBG_reseed_sha2_256(
         {
           return false;
         }
-        else
         {
           EverCrypt_DRBG_state_s st_s = *st;
           KRML_CHECK_SIZE(sizeof (uint8_t), entropy_input_len + additional_input_len);
@@ -1113,7 +1077,6 @@ EverCrypt_DRBG_reseed_sha2_384(
   {
     return false;
   }
-  else
   {
     uint32_t entropy_input_len = Hacl_HMAC_DRBG_min_length(Spec_Hash_Definitions_SHA2_384);
     KRML_CHECK_SIZE(sizeof (uint8_t), entropy_input_len);
@@ -1126,7 +1089,6 @@ EverCrypt_DRBG_reseed_sha2_384(
         {
           return false;
         }
-        else
         {
           EverCrypt_DRBG_state_s st_s = *st;
           KRML_CHECK_SIZE(sizeof (uint8_t), entropy_input_len + additional_input_len);
@@ -1229,7 +1191,6 @@ EverCrypt_DRBG_reseed_sha2_512(
   {
     return false;
   }
-  else
   {
     uint32_t entropy_input_len = Hacl_HMAC_DRBG_min_length(Spec_Hash_Definitions_SHA2_512);
     KRML_CHECK_SIZE(sizeof (uint8_t), entropy_input_len);
@@ -1242,7 +1203,6 @@ EverCrypt_DRBG_reseed_sha2_512(
         {
           return false;
         }
-        else
         {
           EverCrypt_DRBG_state_s st_s = *st;
           KRML_CHECK_SIZE(sizeof (uint8_t), entropy_input_len + additional_input_len);
@@ -1352,7 +1312,6 @@ EverCrypt_DRBG_generate_sha1(
   {
     return false;
   }
-  else
   {
     uint32_t entropy_input_len = Hacl_HMAC_DRBG_min_length(Spec_Hash_Definitions_SHA1);
     bool ok0;
@@ -1462,7 +1421,6 @@ EverCrypt_DRBG_generate_sha1(
     {
       return false;
     }
-    else
     {
       EverCrypt_DRBG_state_s st_s = *st;
       Hacl_HMAC_DRBG_state x1;
@@ -1638,7 +1596,6 @@ EverCrypt_DRBG_generate_sha2_256(
   {
     return false;
   }
-  else
   {
     uint32_t entropy_input_len = Hacl_HMAC_DRBG_min_length(Spec_Hash_Definitions_SHA2_256);
     bool ok0;
@@ -1756,7 +1713,6 @@ EverCrypt_DRBG_generate_sha2_256(
     {
       return false;
     }
-    else
     {
       EverCrypt_DRBG_state_s st_s = *st;
       Hacl_HMAC_DRBG_state x1;
@@ -1940,7 +1896,6 @@ EverCrypt_DRBG_generate_sha2_384(
   {
     return false;
   }
-  else
   {
     uint32_t entropy_input_len = Hacl_HMAC_DRBG_min_length(Spec_Hash_Definitions_SHA2_384);
     bool ok0;
@@ -2058,7 +2013,6 @@ EverCrypt_DRBG_generate_sha2_384(
     {
       return false;
     }
-    else
     {
       EverCrypt_DRBG_state_s st_s = *st;
       Hacl_HMAC_DRBG_state x1;
@@ -2242,7 +2196,6 @@ EverCrypt_DRBG_generate_sha2_512(
   {
     return false;
   }
-  else
   {
     uint32_t entropy_input_len = Hacl_HMAC_DRBG_min_length(Spec_Hash_Definitions_SHA2_512);
     bool ok0;
@@ -2360,7 +2313,6 @@ EverCrypt_DRBG_generate_sha2_512(
     {
       return false;
     }
-    else
     {
       EverCrypt_DRBG_state_s st_s = *st;
       Hacl_HMAC_DRBG_state x1;
@@ -2642,35 +2594,32 @@ EverCrypt_DRBG_instantiate(
   {
     return EverCrypt_DRBG_instantiate_sha1(st, personalization_string, personalization_string_len);
   }
-  else if (scrut.tag == EverCrypt_DRBG_SHA2_256_s)
+  if (scrut.tag == EverCrypt_DRBG_SHA2_256_s)
   {
     return
       EverCrypt_DRBG_instantiate_sha2_256(st,
         personalization_string,
         personalization_string_len);
   }
-  else if (scrut.tag == EverCrypt_DRBG_SHA2_384_s)
+  if (scrut.tag == EverCrypt_DRBG_SHA2_384_s)
   {
     return
       EverCrypt_DRBG_instantiate_sha2_384(st,
         personalization_string,
         personalization_string_len);
   }
-  else if (scrut.tag == EverCrypt_DRBG_SHA2_512_s)
+  if (scrut.tag == EverCrypt_DRBG_SHA2_512_s)
   {
     return
       EverCrypt_DRBG_instantiate_sha2_512(st,
         personalization_string,
         personalization_string_len);
   }
-  else
-  {
-    KRML_HOST_PRINTF("KreMLin abort at %s:%d\n%s\n",
-      __FILE__,
-      __LINE__,
-      "unreachable (pattern matches are exhaustive in F*)");
-    KRML_HOST_EXIT(255U);
-  }
+  KRML_HOST_PRINTF("KreMLin abort at %s:%d\n%s\n",
+    __FILE__,
+    __LINE__,
+    "unreachable (pattern matches are exhaustive in F*)");
+  KRML_HOST_EXIT(255U);
 }
 
 bool
@@ -2685,26 +2634,23 @@ EverCrypt_DRBG_reseed(
   {
     return EverCrypt_DRBG_reseed_sha1(st, additional_input, additional_input_len);
   }
-  else if (scrut.tag == EverCrypt_DRBG_SHA2_256_s)
+  if (scrut.tag == EverCrypt_DRBG_SHA2_256_s)
   {
     return EverCrypt_DRBG_reseed_sha2_256(st, additional_input, additional_input_len);
   }
-  else if (scrut.tag == EverCrypt_DRBG_SHA2_384_s)
+  if (scrut.tag == EverCrypt_DRBG_SHA2_384_s)
   {
     return EverCrypt_DRBG_reseed_sha2_384(st, additional_input, additional_input_len);
   }
-  else if (scrut.tag == EverCrypt_DRBG_SHA2_512_s)
+  if (scrut.tag == EverCrypt_DRBG_SHA2_512_s)
   {
     return EverCrypt_DRBG_reseed_sha2_512(st, additional_input, additional_input_len);
   }
-  else
-  {
-    KRML_HOST_PRINTF("KreMLin abort at %s:%d\n%s\n",
-      __FILE__,
-      __LINE__,
-      "unreachable (pattern matches are exhaustive in F*)");
-    KRML_HOST_EXIT(255U);
-  }
+  KRML_HOST_PRINTF("KreMLin abort at %s:%d\n%s\n",
+    __FILE__,
+    __LINE__,
+    "unreachable (pattern matches are exhaustive in F*)");
+  KRML_HOST_EXIT(255U);
 }
 
 bool
@@ -2721,7 +2667,7 @@ EverCrypt_DRBG_generate(
   {
     return EverCrypt_DRBG_generate_sha1(output, st, n1, additional_input, additional_input_len);
   }
-  else if (scrut.tag == EverCrypt_DRBG_SHA2_256_s)
+  if (scrut.tag == EverCrypt_DRBG_SHA2_256_s)
   {
     return
       EverCrypt_DRBG_generate_sha2_256(output,
@@ -2730,7 +2676,7 @@ EverCrypt_DRBG_generate(
         additional_input,
         additional_input_len);
   }
-  else if (scrut.tag == EverCrypt_DRBG_SHA2_384_s)
+  if (scrut.tag == EverCrypt_DRBG_SHA2_384_s)
   {
     return
       EverCrypt_DRBG_generate_sha2_384(output,
@@ -2739,7 +2685,7 @@ EverCrypt_DRBG_generate(
         additional_input,
         additional_input_len);
   }
-  else if (scrut.tag == EverCrypt_DRBG_SHA2_512_s)
+  if (scrut.tag == EverCrypt_DRBG_SHA2_512_s)
   {
     return
       EverCrypt_DRBG_generate_sha2_512(output,
@@ -2748,14 +2694,11 @@ EverCrypt_DRBG_generate(
         additional_input,
         additional_input_len);
   }
-  else
-  {
-    KRML_HOST_PRINTF("KreMLin abort at %s:%d\n%s\n",
-      __FILE__,
-      __LINE__,
-      "unreachable (pattern matches are exhaustive in F*)");
-    KRML_HOST_EXIT(255U);
-  }
+  KRML_HOST_PRINTF("KreMLin abort at %s:%d\n%s\n",
+    __FILE__,
+    __LINE__,
+    "unreachable (pattern matches are exhaustive in F*)");
+  KRML_HOST_EXIT(255U);
 }
 
 void EverCrypt_DRBG_uninstantiate(EverCrypt_DRBG_state_s *st)
@@ -2764,26 +2707,27 @@ void EverCrypt_DRBG_uninstantiate(EverCrypt_DRBG_state_s *st)
   if (scrut.tag == EverCrypt_DRBG_SHA1_s)
   {
     EverCrypt_DRBG_uninstantiate_sha1(st);
+    return;
   }
-  else if (scrut.tag == EverCrypt_DRBG_SHA2_256_s)
+  if (scrut.tag == EverCrypt_DRBG_SHA2_256_s)
   {
     EverCrypt_DRBG_uninstantiate_sha2_256(st);
+    return;
   }
-  else if (scrut.tag == EverCrypt_DRBG_SHA2_384_s)
+  if (scrut.tag == EverCrypt_DRBG_SHA2_384_s)
   {
     EverCrypt_DRBG_uninstantiate_sha2_384(st);
+    return;
   }
-  else if (scrut.tag == EverCrypt_DRBG_SHA2_512_s)
+  if (scrut.tag == EverCrypt_DRBG_SHA2_512_s)
   {
     EverCrypt_DRBG_uninstantiate_sha2_512(st);
+    return;
   }
-  else
-  {
-    KRML_HOST_PRINTF("KreMLin abort at %s:%d\n%s\n",
-      __FILE__,
-      __LINE__,
-      "unreachable (pattern matches are exhaustive in F*)");
-    KRML_HOST_EXIT(255U);
-  }
+  KRML_HOST_PRINTF("KreMLin abort at %s:%d\n%s\n",
+    __FILE__,
+    __LINE__,
+    "unreachable (pattern matches are exhaustive in F*)");
+  KRML_HOST_EXIT(255U);
 }
 

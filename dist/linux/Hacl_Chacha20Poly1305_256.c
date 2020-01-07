@@ -1033,6 +1033,7 @@ Hacl_Chacha20Poly1305_256_poly1305_padded_256(
         acc[2U] = o2;
         acc[3U] = o3;
         acc[4U] = o4;
+        return;
       }
     }
   }
@@ -1392,9 +1393,7 @@ Hacl_Chacha20Poly1305_256_aead_decrypt(
       res = (u32)0U;
     }
     else
-    {
       res = (u32)1U;
-    }
     return res;
   }
 }

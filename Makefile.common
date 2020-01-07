@@ -63,7 +63,7 @@ BASE_FLAGS = \
   -bundle Hacl.Spec.*,Spec.*[rename=Hacl_Spec] \
   -bundle Lib.*[rename=Hacl_Lib] \
   -drop Lib.IntVector.Intrinsics \
-  -fparentheses -fno-shadow -fcurly-braces \
+  -fparentheses -fno-shadow -fcurly-braces -fnoreturn-else \
   -bundle Prims,C.Failure,C,C.String,C.Loops,Spec.Loops,C.Endianness,FStar.*,LowStar.*[rename=Hacl_Kremlib] \
   -bundle 'Meta.*' \
   -minimal \

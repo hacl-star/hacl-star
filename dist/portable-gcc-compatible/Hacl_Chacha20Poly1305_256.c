@@ -908,6 +908,7 @@ Hacl_Chacha20Poly1305_256_poly1305_padded_256(
     acc[2U] = o2;
     acc[3U] = o3;
     acc[4U] = o4;
+    return;
   }
 }
 
@@ -1200,10 +1201,7 @@ Hacl_Chacha20Poly1305_256_aead_decrypt(
     Hacl_Chacha20_Vec256_chacha20_encrypt_256(mlen, m, cipher, k, n1, (uint32_t)1U);
     return (uint32_t)0U;
   }
-  else
-  {
-    return (uint32_t)1U;
-  }
+  return (uint32_t)1U;
 }
 
 /* SNIPPET_END: Hacl_Chacha20Poly1305_256_aead_decrypt */

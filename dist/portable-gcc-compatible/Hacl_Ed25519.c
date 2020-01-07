@@ -2177,38 +2177,35 @@ static bool Hacl_Impl_Ed25519_PointEqual_gte_q(uint64_t *s)
   {
     return true;
   }
-  else if (s4 < (uint64_t)0x00000010000000U)
+  if (s4 < (uint64_t)0x00000010000000U)
   {
     return false;
   }
-  else if (s3 > (uint64_t)0x00000000000000U)
+  if (s3 > (uint64_t)0x00000000000000U)
   {
     return true;
   }
-  else if (s2 > (uint64_t)0x000000000014deU)
+  if (s2 > (uint64_t)0x000000000014deU)
   {
     return true;
   }
-  else if (s2 < (uint64_t)0x000000000014deU)
+  if (s2 < (uint64_t)0x000000000014deU)
   {
     return false;
   }
-  else if (s1 > (uint64_t)0xf9dea2f79cd658U)
+  if (s1 > (uint64_t)0xf9dea2f79cd658U)
   {
     return true;
   }
-  else if (s1 < (uint64_t)0xf9dea2f79cd658U)
+  if (s1 < (uint64_t)0xf9dea2f79cd658U)
   {
     return false;
   }
-  else if (s0 >= (uint64_t)0x12631a5cf5d3edU)
+  if (s0 >= (uint64_t)0x12631a5cf5d3edU)
   {
     return true;
   }
-  else
-  {
-    return false;
-  }
+  return false;
 }
 
 /* SNIPPET_END: Hacl_Impl_Ed25519_PointEqual_gte_q */
@@ -2274,10 +2271,7 @@ static bool Hacl_Impl_Ed25519_PointEqual_point_equal(uint64_t *p, uint64_t *q1)
   {
     return Hacl_Impl_Ed25519_PointEqual_point_equal_2(p, q1, tmp);
   }
-  else
-  {
-    return false;
-  }
+  return false;
 }
 
 /* SNIPPET_END: Hacl_Impl_Ed25519_PointEqual_point_equal */

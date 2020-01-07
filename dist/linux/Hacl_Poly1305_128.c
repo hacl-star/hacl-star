@@ -1720,6 +1720,7 @@ void Hacl_Poly1305_128_poly1305_update(Lib_IntVector_Intrinsics_vec128 *ctx, u32
       acc[2U] = o2;
       acc[3U] = o3;
       acc[4U] = o4;
+      return;
     }
   }
 }

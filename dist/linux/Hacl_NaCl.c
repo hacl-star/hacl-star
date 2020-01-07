@@ -47,13 +47,9 @@ Hacl_Impl_SecretBox_secretbox_detached(u32 mlen, u8 *c, u8 *tag, u8 *k, u8 *n1, 
     u8 *ekey0 = xkeys + (u32)64U;
     u32 mlen0;
     if (mlen <= (u32)32U)
-    {
       mlen0 = mlen;
-    }
     else
-    {
       mlen0 = (u32)32U;
-    }
     {
       u32 mlen1 = mlen - mlen0;
       u8 *m0 = m;
@@ -110,13 +106,9 @@ Hacl_Impl_SecretBox_secretbox_open_detached(u32 mlen, u8 *m, u8 *k, u8 *n1, u8 *
         u8 *n11 = n1 + (u32)16U;
         u32 mlen0;
         if (mlen <= (u32)32U)
-        {
           mlen0 = mlen;
-        }
         else
-        {
           mlen0 = (u32)32U;
-        }
         {
           u32 mlen1 = mlen - mlen0;
           u8 *c0 = c;
@@ -142,9 +134,7 @@ Hacl_Impl_SecretBox_secretbox_open_detached(u32 mlen, u8 *m, u8 *k, u8 *n1, u8 *
         }
       }
       else
-      {
         res = (u32)0xffffffffU;
-      }
       return res;
     }
   }
@@ -173,10 +163,7 @@ inline static u32 Hacl_Impl_Box_box_beforenm(u8 *k, u8 *pk, u8 *sk)
     Hacl_Salsa20_hsalsa20(k, k, n0);
     return (u32)0U;
   }
-  else
-  {
-    return (u32)0xffffffffU;
-  }
+  return (u32)0xffffffffU;
 }
 
 inline static u32
@@ -192,13 +179,8 @@ Hacl_Impl_Box_box_detached(u32 mlen, u8 *c, u8 *tag, u8 *sk, u8 *pk, u8 *n1, u8 
   u8 k[32U] = { 0U };
   u32 r = Hacl_Impl_Box_box_beforenm(k, pk, sk);
   if (r == (u32)0U)
-  {
     return Hacl_Impl_Box_box_detached_afternm(mlen, c, tag, k, n1, m);
-  }
-  else
-  {
-    return (u32)0xffffffffU;
-  }
+  return (u32)0xffffffffU;
 }
 
 inline static u32
@@ -213,13 +195,8 @@ Hacl_Impl_Box_box_open_detached(u32 mlen, u8 *m, u8 *pk, u8 *sk, u8 *n1, u8 *c, 
   u8 k[32U] = { 0U };
   u32 r = Hacl_Impl_Box_box_beforenm(k, pk, sk);
   if (r == (u32)0U)
-  {
     return Hacl_Impl_Box_box_open_detached_afternm(mlen, m, k, n1, c, tag);
-  }
-  else
-  {
-    return (u32)0xffffffffU;
-  }
+  return (u32)0xffffffffU;
 }
 
 inline static u32 Hacl_Impl_Box_box_easy_afternm(u32 mlen, u8 *c, u8 *k, u8 *n1, u8 *m)

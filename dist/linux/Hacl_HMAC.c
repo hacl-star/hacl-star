@@ -34,23 +34,15 @@ void Hacl_HMAC_legacy_compute_sha1(u8 *dst, u8 *key, u32 key_len, u8 *data, u32 
     {
       u32 i1;
       if (key_len <= (u32)64U)
-      {
         i1 = key_len;
-      }
       else
-      {
         i1 = (u32)20U;
-      }
       {
         u8 *nkey = key_block;
         if (key_len <= (u32)64U)
-        {
           memcpy(nkey, key, key_len * sizeof key[0U]);
-        }
         else
-        {
           Hacl_Hash_SHA1_legacy_hash(key, key_len, nkey);
-        }
         KRML_CHECK_SIZE(sizeof (u8), l);
         {
           u8 ipad[l];
@@ -114,23 +106,15 @@ void Hacl_HMAC_compute_sha2_256(u8 *dst, u8 *key, u32 key_len, u8 *data, u32 dat
     {
       u32 i1;
       if (key_len <= (u32)64U)
-      {
         i1 = key_len;
-      }
       else
-      {
         i1 = (u32)32U;
-      }
       {
         u8 *nkey = key_block;
         if (key_len <= (u32)64U)
-        {
           memcpy(nkey, key, key_len * sizeof key[0U]);
-        }
         else
-        {
           Hacl_Hash_SHA2_hash_256(key, key_len, nkey);
-        }
         KRML_CHECK_SIZE(sizeof (u8), l);
         {
           u8 ipad[l];
@@ -197,23 +181,15 @@ void Hacl_HMAC_compute_sha2_384(u8 *dst, u8 *key, u32 key_len, u8 *data, u32 dat
     {
       u32 i1;
       if (key_len <= (u32)128U)
-      {
         i1 = key_len;
-      }
       else
-      {
         i1 = (u32)48U;
-      }
       {
         u8 *nkey = key_block;
         if (key_len <= (u32)128U)
-        {
           memcpy(nkey, key, key_len * sizeof key[0U]);
-        }
         else
-        {
           Hacl_Hash_SHA2_hash_384(key, key_len, nkey);
-        }
         KRML_CHECK_SIZE(sizeof (u8), l);
         {
           u8 ipad[l];
@@ -280,23 +256,15 @@ void Hacl_HMAC_compute_sha2_512(u8 *dst, u8 *key, u32 key_len, u8 *data, u32 dat
     {
       u32 i1;
       if (key_len <= (u32)128U)
-      {
         i1 = key_len;
-      }
       else
-      {
         i1 = (u32)64U;
-      }
       {
         u8 *nkey = key_block;
         if (key_len <= (u32)128U)
-        {
           memcpy(nkey, key, key_len * sizeof key[0U]);
-        }
         else
-        {
           Hacl_Hash_SHA2_hash_512(key, key_len, nkey);
-        }
         KRML_CHECK_SIZE(sizeof (u8), l);
         {
           u8 ipad[l];

@@ -152,9 +152,7 @@ inline static void Hacl_Impl_Salsa20_salsa20_key_block0(u8 *out, u8 *key, u8 *n1
   {
     u32 i;
     for (i = (u32)0U; i < (u32)16U; i = i + (u32)1U)
-    {
       store32_le(out + i * (u32)4U, k[i]);
-    }
   }
 }
 
@@ -240,9 +238,7 @@ Hacl_Impl_Salsa20_salsa20_encrypt(u32 len, u8 *out, u8 *text, u8 *key, u8 *n1, u
           {
             u32 i;
             for (i = (u32)0U; i < (u32)16U; i = i + (u32)1U)
-            {
               store32_le(uu____0 + i * (u32)4U, bl[i]);
-            }
           }
         }
       }
@@ -282,9 +278,7 @@ Hacl_Impl_Salsa20_salsa20_encrypt(u32 len, u8 *out, u8 *text, u8 *key, u8 *n1, u
           {
             u32 i;
             for (i = (u32)0U; i < (u32)16U; i = i + (u32)1U)
-            {
               store32_le(plain + i * (u32)4U, bl[i]);
-            }
           }
           memcpy(uu____2, plain, rem1 * sizeof plain[0U]);
         }
@@ -375,9 +369,7 @@ Hacl_Impl_Salsa20_salsa20_decrypt(u32 len, u8 *out, u8 *cipher, u8 *key, u8 *n1,
           {
             u32 i;
             for (i = (u32)0U; i < (u32)16U; i = i + (u32)1U)
-            {
               store32_le(uu____0 + i * (u32)4U, bl[i]);
-            }
           }
         }
       }
@@ -417,9 +409,7 @@ Hacl_Impl_Salsa20_salsa20_decrypt(u32 len, u8 *out, u8 *cipher, u8 *key, u8 *n1,
           {
             u32 i;
             for (i = (u32)0U; i < (u32)16U; i = i + (u32)1U)
-            {
               store32_le(plain + i * (u32)4U, bl[i]);
-            }
           }
           memcpy(uu____2, plain, rem1 * sizeof plain[0U]);
         }
@@ -497,9 +487,7 @@ inline static void Hacl_Impl_HSalsa20_hsalsa20(u8 *out, u8 *key, u8 *n1)
   {
     u32 i;
     for (i = (u32)0U; i < (u32)8U; i = i + (u32)1U)
-    {
       store32_le(out + i * (u32)4U, res[i]);
-    }
   }
 }
 

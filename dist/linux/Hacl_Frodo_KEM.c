@@ -31,9 +31,7 @@ inline static void Hacl_Impl_Matrix_matrix_add(u32 n1, u32 n2, u16 *a, u16 *b)
   {
     u32 i0;
     for (i0 = (u32)0U; i0 < n2; i0 = i0 + (u32)1U)
-    {
       a[i * n2 + i0] = a[i * n2 + i0] + b[i * n2 + i0];
-    }
   }
 }
 
@@ -44,9 +42,7 @@ inline static void Hacl_Impl_Matrix_matrix_sub(u32 n1, u32 n2, u16 *a, u16 *b)
   {
     u32 i0;
     for (i0 = (u32)0U; i0 < n2; i0 = i0 + (u32)1U)
-    {
       b[i * n2 + i0] = a[i * n2 + i0] - b[i * n2 + i0];
-    }
   }
 }
 
@@ -223,14 +219,12 @@ Hacl_Impl_Frodo_Sample_frodo_sample_matrix(
         u32 i0;
         for (i0 = (u32)0U; i0 < n1; i0 = i0 + (u32)1U)
         {
+          u32 i;
+          for (i = (u32)0U; i < n2; i = i + (u32)1U)
           {
-            u32 i;
-            for (i = (u32)0U; i < n2; i = i + (u32)1U)
-            {
-              u8 *resij = r + (u32)2U * (n2 * i0 + i);
-              u16 u = load16_le(resij);
-              res[i0 * n2 + i] = Hacl_Impl_Frodo_Sample_frodo_sample(u);
-            }
+            u8 *resij = r + (u32)2U * (n2 * i0 + i);
+            u16 u = load16_le(resij);
+            res[i0 * n2 + i] = Hacl_Impl_Frodo_Sample_frodo_sample(u);
           }
         }
       }
@@ -669,13 +663,9 @@ u32 Hacl_Frodo_KEM_crypto_kem_dec(u8 *ss, u8 *ct, u8 *sk)
                   kp = g + (u32)16U;
                   s = sk;
                   if (b)
-                  {
                     kp_s = kp;
-                  }
                   else
-                  {
                     kp_s = s;
-                  }
                   {
                     u8 *c12 = ct;
                     u8 *d = ct + Hacl_Impl_Frodo_KEM_crypto_ciphertextbytes - (u32)16U;

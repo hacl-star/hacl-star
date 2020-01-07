@@ -850,7 +850,6 @@ Hacl_HMAC_DRBG_generate(
         {
           return false;
         }
-        else
         {
           uint8_t *k1 = st.k;
           uint8_t *v1 = st.v;
@@ -979,7 +978,6 @@ Hacl_HMAC_DRBG_generate(
         {
           return false;
         }
-        else
         {
           uint8_t *k1 = st.k;
           uint8_t *v1 = st.v;
@@ -1108,7 +1106,6 @@ Hacl_HMAC_DRBG_generate(
         {
           return false;
         }
-        else
         {
           uint8_t *k1 = st.k;
           uint8_t *v1 = st.v;
@@ -1237,7 +1234,6 @@ Hacl_HMAC_DRBG_generate(
         {
           return false;
         }
-        else
         {
           uint8_t *k1 = st.k;
           uint8_t *v1 = st.v;

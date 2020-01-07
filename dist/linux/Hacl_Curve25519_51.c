@@ -739,9 +739,7 @@ void Hacl_Curve25519_51_fsquare_times(u64 *o, u64 *inp, uint128_t *tmp, u32 n1)
   u32 i;
   Hacl_Impl_Curve25519_Field51_fsqr(o, inp, tmp);
   for (i = (u32)0U; i < n1 - (u32)1U; i = i + (u32)1U)
-  {
     Hacl_Impl_Curve25519_Field51_fsqr(o, o, tmp);
-  }
 }
 
 void Hacl_Curve25519_51_finv(u64 *o, u64 *i, uint128_t *tmp)
@@ -798,9 +796,7 @@ static void Hacl_Curve25519_51_encode_point(u8 *o, u64 *i)
   {
     u32 i0;
     for (i0 = (u32)0U; i0 < (u32)4U; i0 = i0 + (u32)1U)
-    {
       store64_le(o + i0 * (u32)8U, u64s[i0]);
-    }
   }
 }
 

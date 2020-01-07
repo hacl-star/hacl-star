@@ -44,13 +44,9 @@ void Hacl_HKDF_expand_sha2_256(u8 *okm, u8 *prk, u32 prklen, u8 *info, u32 infol
         {
           ctr[0U] = (u8)(i + (u32)1U);
           if (i == (u32)0U)
-          {
             Hacl_HMAC_compute_sha2_256(tag, prk, prklen, text0, infolen + (u32)1U);
-          }
           else
-          {
             Hacl_HMAC_compute_sha2_256(tag, prk, prklen, text, tlen + infolen + (u32)1U);
-          }
           memcpy(output + i * tlen, tag, tlen * sizeof tag[0U]);
         }
       }
@@ -58,13 +54,9 @@ void Hacl_HKDF_expand_sha2_256(u8 *okm, u8 *prk, u32 prklen, u8 *info, u32 infol
       {
         ctr[0U] = (u8)(n1 + (u32)1U);
         if (n1 == (u32)0U)
-        {
           Hacl_HMAC_compute_sha2_256(tag, prk, prklen, text0, infolen + (u32)1U);
-        }
         else
-        {
           Hacl_HMAC_compute_sha2_256(tag, prk, prklen, text, tlen + infolen + (u32)1U);
-        }
         {
           u8 *block = okm + n1 * tlen;
           memcpy(block, tag, (len - n1 * tlen) * sizeof tag[0U]);
@@ -99,13 +91,9 @@ void Hacl_HKDF_expand_sha2_512(u8 *okm, u8 *prk, u32 prklen, u8 *info, u32 infol
         {
           ctr[0U] = (u8)(i + (u32)1U);
           if (i == (u32)0U)
-          {
             Hacl_HMAC_compute_sha2_512(tag, prk, prklen, text0, infolen + (u32)1U);
-          }
           else
-          {
             Hacl_HMAC_compute_sha2_512(tag, prk, prklen, text, tlen + infolen + (u32)1U);
-          }
           memcpy(output + i * tlen, tag, tlen * sizeof tag[0U]);
         }
       }
@@ -113,13 +101,9 @@ void Hacl_HKDF_expand_sha2_512(u8 *okm, u8 *prk, u32 prklen, u8 *info, u32 infol
       {
         ctr[0U] = (u8)(n1 + (u32)1U);
         if (n1 == (u32)0U)
-        {
           Hacl_HMAC_compute_sha2_512(tag, prk, prklen, text0, infolen + (u32)1U);
-        }
         else
-        {
           Hacl_HMAC_compute_sha2_512(tag, prk, prklen, text, tlen + infolen + (u32)1U);
-        }
         {
           u8 *block = okm + n1 * tlen;
           memcpy(block, tag, (len - n1 * tlen) * sizeof tag[0U]);

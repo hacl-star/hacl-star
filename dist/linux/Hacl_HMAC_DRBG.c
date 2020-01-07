@@ -219,12 +219,10 @@ Hacl_HMAC_DRBG_instantiate(
                   u8 *k_ = input0;
                   memcpy(k_, v1, (u32)20U * sizeof v1[0U]);
                   if (entropy_input_len + nonce_len + personalization_string_len != (u32)0U)
-                  {
                     memcpy(input0 + (u32)21U,
                       seed_material,
                       (entropy_input_len + nonce_len + personalization_string_len)
                       * sizeof seed_material[0U]);
-                  }
                   input0[20U] = (u8)0U;
                   Hacl_HMAC_legacy_compute_sha1(k_, k1, (u32)20U, input0, input_len);
                   Hacl_HMAC_legacy_compute_sha1(v1, k_, (u32)20U, v1, (u32)20U);
@@ -243,12 +241,10 @@ Hacl_HMAC_DRBG_instantiate(
                         u8 *k_0 = input;
                         memcpy(k_0, v1, (u32)20U * sizeof v1[0U]);
                         if (entropy_input_len + nonce_len + personalization_string_len != (u32)0U)
-                        {
                           memcpy(input + (u32)21U,
                             seed_material,
                             (entropy_input_len + nonce_len + personalization_string_len)
                             * sizeof seed_material[0U]);
-                        }
                         input[20U] = (u8)1U;
                         Hacl_HMAC_legacy_compute_sha1(k_0, k1, (u32)20U, input, input_len0);
                         Hacl_HMAC_legacy_compute_sha1(v1, k_0, (u32)20U, v1, (u32)20U);
@@ -296,12 +292,10 @@ Hacl_HMAC_DRBG_instantiate(
                   u8 *k_ = input0;
                   memcpy(k_, v1, (u32)32U * sizeof v1[0U]);
                   if (entropy_input_len + nonce_len + personalization_string_len != (u32)0U)
-                  {
                     memcpy(input0 + (u32)33U,
                       seed_material,
                       (entropy_input_len + nonce_len + personalization_string_len)
                       * sizeof seed_material[0U]);
-                  }
                   input0[32U] = (u8)0U;
                   Hacl_HMAC_compute_sha2_256(k_, k1, (u32)32U, input0, input_len);
                   Hacl_HMAC_compute_sha2_256(v1, k_, (u32)32U, v1, (u32)32U);
@@ -320,12 +314,10 @@ Hacl_HMAC_DRBG_instantiate(
                         u8 *k_0 = input;
                         memcpy(k_0, v1, (u32)32U * sizeof v1[0U]);
                         if (entropy_input_len + nonce_len + personalization_string_len != (u32)0U)
-                        {
                           memcpy(input + (u32)33U,
                             seed_material,
                             (entropy_input_len + nonce_len + personalization_string_len)
                             * sizeof seed_material[0U]);
-                        }
                         input[32U] = (u8)1U;
                         Hacl_HMAC_compute_sha2_256(k_0, k1, (u32)32U, input, input_len0);
                         Hacl_HMAC_compute_sha2_256(v1, k_0, (u32)32U, v1, (u32)32U);
@@ -373,12 +365,10 @@ Hacl_HMAC_DRBG_instantiate(
                   u8 *k_ = input0;
                   memcpy(k_, v1, (u32)48U * sizeof v1[0U]);
                   if (entropy_input_len + nonce_len + personalization_string_len != (u32)0U)
-                  {
                     memcpy(input0 + (u32)49U,
                       seed_material,
                       (entropy_input_len + nonce_len + personalization_string_len)
                       * sizeof seed_material[0U]);
-                  }
                   input0[48U] = (u8)0U;
                   Hacl_HMAC_compute_sha2_384(k_, k1, (u32)48U, input0, input_len);
                   Hacl_HMAC_compute_sha2_384(v1, k_, (u32)48U, v1, (u32)48U);
@@ -397,12 +387,10 @@ Hacl_HMAC_DRBG_instantiate(
                         u8 *k_0 = input;
                         memcpy(k_0, v1, (u32)48U * sizeof v1[0U]);
                         if (entropy_input_len + nonce_len + personalization_string_len != (u32)0U)
-                        {
                           memcpy(input + (u32)49U,
                             seed_material,
                             (entropy_input_len + nonce_len + personalization_string_len)
                             * sizeof seed_material[0U]);
-                        }
                         input[48U] = (u8)1U;
                         Hacl_HMAC_compute_sha2_384(k_0, k1, (u32)48U, input, input_len0);
                         Hacl_HMAC_compute_sha2_384(v1, k_0, (u32)48U, v1, (u32)48U);
@@ -450,12 +438,10 @@ Hacl_HMAC_DRBG_instantiate(
                   u8 *k_ = input0;
                   memcpy(k_, v1, (u32)64U * sizeof v1[0U]);
                   if (entropy_input_len + nonce_len + personalization_string_len != (u32)0U)
-                  {
                     memcpy(input0 + (u32)65U,
                       seed_material,
                       (entropy_input_len + nonce_len + personalization_string_len)
                       * sizeof seed_material[0U]);
-                  }
                   input0[64U] = (u8)0U;
                   Hacl_HMAC_compute_sha2_512(k_, k1, (u32)64U, input0, input_len);
                   Hacl_HMAC_compute_sha2_512(v1, k_, (u32)64U, v1, (u32)64U);
@@ -474,12 +460,10 @@ Hacl_HMAC_DRBG_instantiate(
                         u8 *k_0 = input;
                         memcpy(k_0, v1, (u32)64U * sizeof v1[0U]);
                         if (entropy_input_len + nonce_len + personalization_string_len != (u32)0U)
-                        {
                           memcpy(input + (u32)65U,
                             seed_material,
                             (entropy_input_len + nonce_len + personalization_string_len)
                             * sizeof seed_material[0U]);
-                        }
                         input[64U] = (u8)1U;
                         Hacl_HMAC_compute_sha2_512(k_0, k1, (u32)64U, input, input_len0);
                         Hacl_HMAC_compute_sha2_512(v1, k_0, (u32)64U, v1, (u32)64U);
@@ -545,11 +529,9 @@ Hacl_HMAC_DRBG_reseed(
                   u8 *k_ = input0;
                   memcpy(k_, v1, (u32)20U * sizeof v1[0U]);
                   if (entropy_input_len + additional_input_input_len != (u32)0U)
-                  {
                     memcpy(input0 + (u32)21U,
                       seed_material,
                       (entropy_input_len + additional_input_input_len) * sizeof seed_material[0U]);
-                  }
                   input0[20U] = (u8)0U;
                   Hacl_HMAC_legacy_compute_sha1(k_, k1, (u32)20U, input0, input_len);
                   Hacl_HMAC_legacy_compute_sha1(v1, k_, (u32)20U, v1, (u32)20U);
@@ -565,12 +547,10 @@ Hacl_HMAC_DRBG_reseed(
                         u8 *k_0 = input;
                         memcpy(k_0, v1, (u32)20U * sizeof v1[0U]);
                         if (entropy_input_len + additional_input_input_len != (u32)0U)
-                        {
                           memcpy(input + (u32)21U,
                             seed_material,
                             (entropy_input_len + additional_input_input_len)
                             * sizeof seed_material[0U]);
-                        }
                         input[20U] = (u8)1U;
                         Hacl_HMAC_legacy_compute_sha1(k_0, k1, (u32)20U, input, input_len0);
                         Hacl_HMAC_legacy_compute_sha1(v1, k_0, (u32)20U, v1, (u32)20U);
@@ -617,11 +597,9 @@ Hacl_HMAC_DRBG_reseed(
                   u8 *k_ = input0;
                   memcpy(k_, v1, (u32)32U * sizeof v1[0U]);
                   if (entropy_input_len + additional_input_input_len != (u32)0U)
-                  {
                     memcpy(input0 + (u32)33U,
                       seed_material,
                       (entropy_input_len + additional_input_input_len) * sizeof seed_material[0U]);
-                  }
                   input0[32U] = (u8)0U;
                   Hacl_HMAC_compute_sha2_256(k_, k1, (u32)32U, input0, input_len);
                   Hacl_HMAC_compute_sha2_256(v1, k_, (u32)32U, v1, (u32)32U);
@@ -637,12 +615,10 @@ Hacl_HMAC_DRBG_reseed(
                         u8 *k_0 = input;
                         memcpy(k_0, v1, (u32)32U * sizeof v1[0U]);
                         if (entropy_input_len + additional_input_input_len != (u32)0U)
-                        {
                           memcpy(input + (u32)33U,
                             seed_material,
                             (entropy_input_len + additional_input_input_len)
                             * sizeof seed_material[0U]);
-                        }
                         input[32U] = (u8)1U;
                         Hacl_HMAC_compute_sha2_256(k_0, k1, (u32)32U, input, input_len0);
                         Hacl_HMAC_compute_sha2_256(v1, k_0, (u32)32U, v1, (u32)32U);
@@ -689,11 +665,9 @@ Hacl_HMAC_DRBG_reseed(
                   u8 *k_ = input0;
                   memcpy(k_, v1, (u32)48U * sizeof v1[0U]);
                   if (entropy_input_len + additional_input_input_len != (u32)0U)
-                  {
                     memcpy(input0 + (u32)49U,
                       seed_material,
                       (entropy_input_len + additional_input_input_len) * sizeof seed_material[0U]);
-                  }
                   input0[48U] = (u8)0U;
                   Hacl_HMAC_compute_sha2_384(k_, k1, (u32)48U, input0, input_len);
                   Hacl_HMAC_compute_sha2_384(v1, k_, (u32)48U, v1, (u32)48U);
@@ -709,12 +683,10 @@ Hacl_HMAC_DRBG_reseed(
                         u8 *k_0 = input;
                         memcpy(k_0, v1, (u32)48U * sizeof v1[0U]);
                         if (entropy_input_len + additional_input_input_len != (u32)0U)
-                        {
                           memcpy(input + (u32)49U,
                             seed_material,
                             (entropy_input_len + additional_input_input_len)
                             * sizeof seed_material[0U]);
-                        }
                         input[48U] = (u8)1U;
                         Hacl_HMAC_compute_sha2_384(k_0, k1, (u32)48U, input, input_len0);
                         Hacl_HMAC_compute_sha2_384(v1, k_0, (u32)48U, v1, (u32)48U);
@@ -761,11 +733,9 @@ Hacl_HMAC_DRBG_reseed(
                   u8 *k_ = input0;
                   memcpy(k_, v1, (u32)64U * sizeof v1[0U]);
                   if (entropy_input_len + additional_input_input_len != (u32)0U)
-                  {
                     memcpy(input0 + (u32)65U,
                       seed_material,
                       (entropy_input_len + additional_input_input_len) * sizeof seed_material[0U]);
-                  }
                   input0[64U] = (u8)0U;
                   Hacl_HMAC_compute_sha2_512(k_, k1, (u32)64U, input0, input_len);
                   Hacl_HMAC_compute_sha2_512(v1, k_, (u32)64U, v1, (u32)64U);
@@ -781,12 +751,10 @@ Hacl_HMAC_DRBG_reseed(
                         u8 *k_0 = input;
                         memcpy(k_0, v1, (u32)64U * sizeof v1[0U]);
                         if (entropy_input_len + additional_input_input_len != (u32)0U)
-                        {
                           memcpy(input + (u32)65U,
                             seed_material,
                             (entropy_input_len + additional_input_input_len)
                             * sizeof seed_material[0U]);
-                        }
                         input[64U] = (u8)1U;
                         Hacl_HMAC_compute_sha2_512(k_0, k1, (u32)64U, input, input_len0);
                         Hacl_HMAC_compute_sha2_512(v1, k_0, (u32)64U, v1, (u32)64U);
@@ -825,10 +793,7 @@ Hacl_HMAC_DRBG_generate(
     case Spec_Hash_Definitions_SHA1:
       {
         if (st.reseed_counter[0U] > Hacl_HMAC_DRBG_reseed_interval)
-        {
           return false;
-        }
-        else
         {
           u8 *k1 = st.k;
           u8 *v1 = st.v;
@@ -844,11 +809,9 @@ Hacl_HMAC_DRBG_generate(
                 u8 *k_ = input0;
                 memcpy(k_, v1, (u32)20U * sizeof v1[0U]);
                 if (additional_input_len != (u32)0U)
-                {
                   memcpy(input0 + (u32)21U,
                     additional_input,
                     additional_input_len * sizeof additional_input[0U]);
-                }
                 input0[20U] = (u8)0U;
                 Hacl_HMAC_legacy_compute_sha1(k_, k1, (u32)20U, input0, input_len);
                 Hacl_HMAC_legacy_compute_sha1(v1, k_, (u32)20U, v1, (u32)20U);
@@ -864,11 +827,9 @@ Hacl_HMAC_DRBG_generate(
                       u8 *k_0 = input;
                       memcpy(k_0, v1, (u32)20U * sizeof v1[0U]);
                       if (additional_input_len != (u32)0U)
-                      {
                         memcpy(input + (u32)21U,
                           additional_input,
                           additional_input_len * sizeof additional_input[0U]);
-                      }
                       input[20U] = (u8)1U;
                       Hacl_HMAC_legacy_compute_sha1(k_0, k1, (u32)20U, input, input_len0);
                       Hacl_HMAC_legacy_compute_sha1(v1, k_0, (u32)20U, v1, (u32)20U);
@@ -907,11 +868,9 @@ Hacl_HMAC_DRBG_generate(
                   u8 *k_ = input0;
                   memcpy(k_, v1, (u32)20U * sizeof v1[0U]);
                   if (additional_input_len != (u32)0U)
-                  {
                     memcpy(input0 + (u32)21U,
                       additional_input,
                       additional_input_len * sizeof additional_input[0U]);
-                  }
                   input0[20U] = (u8)0U;
                   Hacl_HMAC_legacy_compute_sha1(k_, k1, (u32)20U, input0, input_len);
                   Hacl_HMAC_legacy_compute_sha1(v1, k_, (u32)20U, v1, (u32)20U);
@@ -927,11 +886,9 @@ Hacl_HMAC_DRBG_generate(
                         u8 *k_0 = input;
                         memcpy(k_0, v1, (u32)20U * sizeof v1[0U]);
                         if (additional_input_len != (u32)0U)
-                        {
                           memcpy(input + (u32)21U,
                             additional_input,
                             additional_input_len * sizeof additional_input[0U]);
-                        }
                         input[20U] = (u8)1U;
                         Hacl_HMAC_legacy_compute_sha1(k_0, k1, (u32)20U, input, input_len0);
                         Hacl_HMAC_legacy_compute_sha1(v1, k_0, (u32)20U, v1, (u32)20U);
@@ -954,10 +911,7 @@ Hacl_HMAC_DRBG_generate(
     case Spec_Hash_Definitions_SHA2_256:
       {
         if (st.reseed_counter[0U] > Hacl_HMAC_DRBG_reseed_interval)
-        {
           return false;
-        }
-        else
         {
           u8 *k1 = st.k;
           u8 *v1 = st.v;
@@ -973,11 +927,9 @@ Hacl_HMAC_DRBG_generate(
                 u8 *k_ = input0;
                 memcpy(k_, v1, (u32)32U * sizeof v1[0U]);
                 if (additional_input_len != (u32)0U)
-                {
                   memcpy(input0 + (u32)33U,
                     additional_input,
                     additional_input_len * sizeof additional_input[0U]);
-                }
                 input0[32U] = (u8)0U;
                 Hacl_HMAC_compute_sha2_256(k_, k1, (u32)32U, input0, input_len);
                 Hacl_HMAC_compute_sha2_256(v1, k_, (u32)32U, v1, (u32)32U);
@@ -993,11 +945,9 @@ Hacl_HMAC_DRBG_generate(
                       u8 *k_0 = input;
                       memcpy(k_0, v1, (u32)32U * sizeof v1[0U]);
                       if (additional_input_len != (u32)0U)
-                      {
                         memcpy(input + (u32)33U,
                           additional_input,
                           additional_input_len * sizeof additional_input[0U]);
-                      }
                       input[32U] = (u8)1U;
                       Hacl_HMAC_compute_sha2_256(k_0, k1, (u32)32U, input, input_len0);
                       Hacl_HMAC_compute_sha2_256(v1, k_0, (u32)32U, v1, (u32)32U);
@@ -1036,11 +986,9 @@ Hacl_HMAC_DRBG_generate(
                   u8 *k_ = input0;
                   memcpy(k_, v1, (u32)32U * sizeof v1[0U]);
                   if (additional_input_len != (u32)0U)
-                  {
                     memcpy(input0 + (u32)33U,
                       additional_input,
                       additional_input_len * sizeof additional_input[0U]);
-                  }
                   input0[32U] = (u8)0U;
                   Hacl_HMAC_compute_sha2_256(k_, k1, (u32)32U, input0, input_len);
                   Hacl_HMAC_compute_sha2_256(v1, k_, (u32)32U, v1, (u32)32U);
@@ -1056,11 +1004,9 @@ Hacl_HMAC_DRBG_generate(
                         u8 *k_0 = input;
                         memcpy(k_0, v1, (u32)32U * sizeof v1[0U]);
                         if (additional_input_len != (u32)0U)
-                        {
                           memcpy(input + (u32)33U,
                             additional_input,
                             additional_input_len * sizeof additional_input[0U]);
-                        }
                         input[32U] = (u8)1U;
                         Hacl_HMAC_compute_sha2_256(k_0, k1, (u32)32U, input, input_len0);
                         Hacl_HMAC_compute_sha2_256(v1, k_0, (u32)32U, v1, (u32)32U);
@@ -1083,10 +1029,7 @@ Hacl_HMAC_DRBG_generate(
     case Spec_Hash_Definitions_SHA2_384:
       {
         if (st.reseed_counter[0U] > Hacl_HMAC_DRBG_reseed_interval)
-        {
           return false;
-        }
-        else
         {
           u8 *k1 = st.k;
           u8 *v1 = st.v;
@@ -1102,11 +1045,9 @@ Hacl_HMAC_DRBG_generate(
                 u8 *k_ = input0;
                 memcpy(k_, v1, (u32)48U * sizeof v1[0U]);
                 if (additional_input_len != (u32)0U)
-                {
                   memcpy(input0 + (u32)49U,
                     additional_input,
                     additional_input_len * sizeof additional_input[0U]);
-                }
                 input0[48U] = (u8)0U;
                 Hacl_HMAC_compute_sha2_384(k_, k1, (u32)48U, input0, input_len);
                 Hacl_HMAC_compute_sha2_384(v1, k_, (u32)48U, v1, (u32)48U);
@@ -1122,11 +1063,9 @@ Hacl_HMAC_DRBG_generate(
                       u8 *k_0 = input;
                       memcpy(k_0, v1, (u32)48U * sizeof v1[0U]);
                       if (additional_input_len != (u32)0U)
-                      {
                         memcpy(input + (u32)49U,
                           additional_input,
                           additional_input_len * sizeof additional_input[0U]);
-                      }
                       input[48U] = (u8)1U;
                       Hacl_HMAC_compute_sha2_384(k_0, k1, (u32)48U, input, input_len0);
                       Hacl_HMAC_compute_sha2_384(v1, k_0, (u32)48U, v1, (u32)48U);
@@ -1165,11 +1104,9 @@ Hacl_HMAC_DRBG_generate(
                   u8 *k_ = input0;
                   memcpy(k_, v1, (u32)48U * sizeof v1[0U]);
                   if (additional_input_len != (u32)0U)
-                  {
                     memcpy(input0 + (u32)49U,
                       additional_input,
                       additional_input_len * sizeof additional_input[0U]);
-                  }
                   input0[48U] = (u8)0U;
                   Hacl_HMAC_compute_sha2_384(k_, k1, (u32)48U, input0, input_len);
                   Hacl_HMAC_compute_sha2_384(v1, k_, (u32)48U, v1, (u32)48U);
@@ -1185,11 +1122,9 @@ Hacl_HMAC_DRBG_generate(
                         u8 *k_0 = input;
                         memcpy(k_0, v1, (u32)48U * sizeof v1[0U]);
                         if (additional_input_len != (u32)0U)
-                        {
                           memcpy(input + (u32)49U,
                             additional_input,
                             additional_input_len * sizeof additional_input[0U]);
-                        }
                         input[48U] = (u8)1U;
                         Hacl_HMAC_compute_sha2_384(k_0, k1, (u32)48U, input, input_len0);
                         Hacl_HMAC_compute_sha2_384(v1, k_0, (u32)48U, v1, (u32)48U);
@@ -1212,10 +1147,7 @@ Hacl_HMAC_DRBG_generate(
     case Spec_Hash_Definitions_SHA2_512:
       {
         if (st.reseed_counter[0U] > Hacl_HMAC_DRBG_reseed_interval)
-        {
           return false;
-        }
-        else
         {
           u8 *k1 = st.k;
           u8 *v1 = st.v;
@@ -1231,11 +1163,9 @@ Hacl_HMAC_DRBG_generate(
                 u8 *k_ = input0;
                 memcpy(k_, v1, (u32)64U * sizeof v1[0U]);
                 if (additional_input_len != (u32)0U)
-                {
                   memcpy(input0 + (u32)65U,
                     additional_input,
                     additional_input_len * sizeof additional_input[0U]);
-                }
                 input0[64U] = (u8)0U;
                 Hacl_HMAC_compute_sha2_512(k_, k1, (u32)64U, input0, input_len);
                 Hacl_HMAC_compute_sha2_512(v1, k_, (u32)64U, v1, (u32)64U);
@@ -1251,11 +1181,9 @@ Hacl_HMAC_DRBG_generate(
                       u8 *k_0 = input;
                       memcpy(k_0, v1, (u32)64U * sizeof v1[0U]);
                       if (additional_input_len != (u32)0U)
-                      {
                         memcpy(input + (u32)65U,
                           additional_input,
                           additional_input_len * sizeof additional_input[0U]);
-                      }
                       input[64U] = (u8)1U;
                       Hacl_HMAC_compute_sha2_512(k_0, k1, (u32)64U, input, input_len0);
                       Hacl_HMAC_compute_sha2_512(v1, k_0, (u32)64U, v1, (u32)64U);
@@ -1294,11 +1222,9 @@ Hacl_HMAC_DRBG_generate(
                   u8 *k_ = input0;
                   memcpy(k_, v1, (u32)64U * sizeof v1[0U]);
                   if (additional_input_len != (u32)0U)
-                  {
                     memcpy(input0 + (u32)65U,
                       additional_input,
                       additional_input_len * sizeof additional_input[0U]);
-                  }
                   input0[64U] = (u8)0U;
                   Hacl_HMAC_compute_sha2_512(k_, k1, (u32)64U, input0, input_len);
                   Hacl_HMAC_compute_sha2_512(v1, k_, (u32)64U, v1, (u32)64U);
@@ -1314,11 +1240,9 @@ Hacl_HMAC_DRBG_generate(
                         u8 *k_0 = input;
                         memcpy(k_0, v1, (u32)64U * sizeof v1[0U]);
                         if (additional_input_len != (u32)0U)
-                        {
                           memcpy(input + (u32)65U,
                             additional_input,
                             additional_input_len * sizeof additional_input[0U]);
-                        }
                         input[64U] = (u8)1U;
                         Hacl_HMAC_compute_sha2_512(k_0, k1, (u32)64U, input, input_len0);
                         Hacl_HMAC_compute_sha2_512(v1, k_0, (u32)64U, v1, (u32)64U);

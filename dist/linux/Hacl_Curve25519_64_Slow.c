@@ -58,24 +58,16 @@ inline static K___u64_u64 Hacl_Spec_Curve25519_Field64_Core_addcarry(u64 x, u64 
   u64 res1 = x + cin;
   u64 c;
   if (res1 < cin)
-  {
     c = (u64)1U;
-  }
   else
-  {
     c = (u64)0U;
-  }
   {
     u64 res = res1 + y;
     u64 c1;
     if (res < res1)
-    {
       c1 = c + (u64)1U;
-    }
     else
-    {
       c1 = c;
-    }
     return ((K___u64_u64){ .fst = res, .snd = c1 });
   }
 }
@@ -85,24 +77,14 @@ inline static K___u64_u64 Hacl_Spec_Curve25519_Field64_Core_subborrow(u64 x, u64
   u64 res = x - y - cin;
   u64 c;
   if (cin == (u64)1U)
-  {
     if (x <= y)
-    {
       c = (u64)1U;
-    }
     else
-    {
       c = (u64)0U;
-    }
-  }
   else if (x < y)
-  {
     c = (u64)1U;
-  }
   else
-  {
     c = (u64)0U;
-  }
   return ((K___u64_u64){ .fst = res, .snd = c });
 }
 
@@ -117,13 +99,9 @@ inline static K___u64_u64 Hacl_Spec_Curve25519_Field64_Core_add0carry(u64 x, u64
   u64 res = x + y;
   u64 c;
   if (res < x)
-  {
     c = (u64)1U;
-  }
   else
-  {
     c = (u64)0U;
-  }
   return ((K___u64_u64){ .fst = res, .snd = c });
 }
 
@@ -761,9 +739,7 @@ static void Hacl_Curve25519_64_Slow_fsquare_times(u64 *o, u64 *inp, u64 *tmp, u3
   u32 i;
   Hacl_Impl_Curve25519_Field64_Hacl_fsqr(o, inp, tmp);
   for (i = (u32)0U; i < n1 - (u32)1U; i = i + (u32)1U)
-  {
     Hacl_Impl_Curve25519_Field64_Hacl_fsqr(o, o, tmp);
-  }
 }
 
 static void Hacl_Curve25519_64_Slow_finv(u64 *o, u64 *i, u64 *tmp)
@@ -869,9 +845,7 @@ static void Hacl_Curve25519_64_Slow_encode_point(u8 *o, u64 *i)
   {
     u32 i0;
     for (i0 = (u32)0U; i0 < (u32)4U; i0 = i0 + (u32)1U)
-    {
       store64_le(o + i0 * (u32)8U, u64s[i0]);
-    }
   }
 }
 

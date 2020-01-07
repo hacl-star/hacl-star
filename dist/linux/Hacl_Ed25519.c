@@ -1666,9 +1666,7 @@ static bool Hacl_Impl_Ed25519_RecoverX_recover_x(u64 *x, u64 *y, u64 sign1)
     && x4 == (u64)0x7ffffffffffffU;
   bool res;
   if (b)
-  {
     res = false;
-  }
   else
   {
     u64 tmp1[25U] = { 0U };
@@ -1693,7 +1691,6 @@ static bool Hacl_Impl_Ed25519_RecoverX_recover_x(u64 *x, u64 *y, u64 sign1)
       bool x2_is_0 = Hacl_Impl_Ed25519_RecoverX_is_0(x2);
       u8 z;
       if (x2_is_0)
-      {
         if (sign1 == (u64)0U)
         {
           x[0U] = (u64)0U;
@@ -1704,22 +1701,13 @@ static bool Hacl_Impl_Ed25519_RecoverX_recover_x(u64 *x, u64 *y, u64 sign1)
           z = (u8)1U;
         }
         else
-        {
           z = (u8)0U;
-        }
-      }
       else
-      {
         z = (u8)2U;
-      }
       if (z == (u8)0U)
-      {
         res = false;
-      }
       else if (z == (u8)1U)
-      {
         res = true;
-      }
       else
       {
         u64 *x210 = tmp;
@@ -1735,9 +1723,7 @@ static bool Hacl_Impl_Ed25519_RecoverX_recover_x(u64 *x, u64 *y, u64 sign1)
         {
           bool t1_is_0 = Hacl_Impl_Ed25519_RecoverX_is_0(t10);
           if (!t1_is_0)
-          {
             Hacl_Impl_Ed25519_RecoverX_mul_modp_sqrt_m1(x31);
-          }
           {
             u64 *x211 = tmp;
             u64 *x3 = tmp + (u32)5U;
@@ -1751,9 +1737,7 @@ static bool Hacl_Impl_Ed25519_RecoverX_recover_x(u64 *x, u64 *y, u64 sign1)
             {
               bool z1 = Hacl_Impl_Ed25519_RecoverX_is_0(t1);
               if (z1 == false)
-              {
                 res = false;
-              }
               else
               {
                 u64 *x32 = tmp + (u32)5U;
@@ -1803,9 +1787,7 @@ static bool Hacl_Impl_Ed25519_PointDecompress_point_decompress(u64 *out, u8 *s)
   Hacl_Bignum25519_load_51(y, s);
   z = Hacl_Impl_Ed25519_RecoverX_recover_x(x, y, sign1);
   if (z == false)
-  {
     res0 = false;
-  }
   else
   {
     u64 *outx = out;
@@ -1834,41 +1816,22 @@ static bool Hacl_Impl_Ed25519_PointEqual_gte_q(u64 *s)
   u64 s3 = s[3U];
   u64 s4 = s[4U];
   if (s4 > (u64)0x00000010000000U)
-  {
     return true;
-  }
-  else if (s4 < (u64)0x00000010000000U)
-  {
+  if (s4 < (u64)0x00000010000000U)
     return false;
-  }
-  else if (s3 > (u64)0x00000000000000U)
-  {
+  if (s3 > (u64)0x00000000000000U)
     return true;
-  }
-  else if (s2 > (u64)0x000000000014deU)
-  {
+  if (s2 > (u64)0x000000000014deU)
     return true;
-  }
-  else if (s2 < (u64)0x000000000014deU)
-  {
+  if (s2 < (u64)0x000000000014deU)
     return false;
-  }
-  else if (s1 > (u64)0xf9dea2f79cd658U)
-  {
+  if (s1 > (u64)0xf9dea2f79cd658U)
     return true;
-  }
-  else if (s1 < (u64)0xf9dea2f79cd658U)
-  {
+  if (s1 < (u64)0xf9dea2f79cd658U)
     return false;
-  }
-  else if (s0 >= (u64)0x12631a5cf5d3edU)
-  {
+  if (s0 >= (u64)0x12631a5cf5d3edU)
     return true;
-  }
-  else
-  {
-    return false;
-  }
+  return false;
 }
 
 static bool Hacl_Impl_Ed25519_PointEqual_eq(u64 *a, u64 *b)
@@ -1913,13 +1876,8 @@ static bool Hacl_Impl_Ed25519_PointEqual_point_equal(u64 *p, u64 *q1)
   u64 tmp[20U] = { 0U };
   bool b = Hacl_Impl_Ed25519_PointEqual_point_equal_1(p, q1, tmp);
   if (b)
-  {
     return Hacl_Impl_Ed25519_PointEqual_point_equal_2(p, q1, tmp);
-  }
-  else
-  {
-    return false;
-  }
+  return false;
 }
 
 void Hacl_Ed25519_sign(u8 *signature, u8 *priv, u32 len, u8 *msg)
@@ -1959,9 +1917,7 @@ bool Hacl_Ed25519_verify(u8 *pub, u32 len, u8 *msg, u8 *signature)
       {
         bool b__ = Hacl_Impl_Ed25519_PointEqual_gte_q(s1);
         if (b__)
-        {
           res = false;
-        }
         else
         {
           u64 r_2[5U] = { 0U };
@@ -1986,14 +1942,10 @@ bool Hacl_Ed25519_verify(u8 *pub, u32 len, u8 *msg, u8 *signature)
       }
     }
     else
-    {
       res = false;
-    }
   }
   else
-  {
     res = false;
-  }
   {
     bool res0 = res;
     return res0;

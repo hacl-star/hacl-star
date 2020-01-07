@@ -203,9 +203,7 @@ Hacl_Impl_Chacha20_chacha20_encrypt_block(u32 *ctx, u8 *out, u32 incr1, u8 *text
     {
       u32 i;
       for (i = (u32)0U; i < (u32)16U; i = i + (u32)1U)
-      {
         store32_le(out + i * (u32)4U, bl[i]);
-      }
     }
   }
 }
@@ -227,18 +225,14 @@ inline static void Hacl_Impl_Chacha20_chacha20_update(u32 *ctx, u32 len, u8 *out
   {
     u32 i;
     for (i = (u32)0U; i < nb; i = i + (u32)1U)
-    {
       Hacl_Impl_Chacha20_chacha20_encrypt_block(ctx, out + i * (u32)64U, i, text + i * (u32)64U);
-    }
   }
   if (rem2 > (u32)0U)
-  {
     Hacl_Impl_Chacha20_chacha20_encrypt_last(ctx,
       rem1,
       out + nb * (u32)64U,
       nb,
       text + nb * (u32)64U);
-  }
 }
 
 void Hacl_Chacha20_chacha20_encrypt(u32 len, u8 *out, u8 *text, u8 *key, u8 *n1, u32 ctr)
