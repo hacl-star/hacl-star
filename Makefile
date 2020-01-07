@@ -104,7 +104,7 @@ all:
 
 all-unstaged: compile-gcc-compatible compile-msvc-compatible compile-gcc64-only \
   compile-evercrypt-external-headers compile-c89-compatible compile-ccf \
-  compile-portable-gcc-compatible compile-mozilla
+  compile-portable-gcc-compatible compile-mozilla dist/linux/Makefile.basic
 
 # Automatic staging.
 %-staged: .last_vale_version
@@ -744,6 +744,13 @@ dist/c89-compatible/Makefile.basic: MERKLE_BUNDLE = -bundle 'MerkleTree.*'
 dist/c89-compatible/Makefile.basic: DEFAULT_FLAGS += \
   -fc89 -ccopt -std=c89 -ccopt -Wno-typedef-redefinition
 dist/c89-compatible/Makefile.basic: HACL_OLD_FILES := $(subst -c,-c89,$(HACL_OLD_FILES))
+
+# Linux distribution (not compiled on CI)
+# ---------------------------------------
+dist/linux/Makefile.basic: MERKLE_BUNDLE = -bundle 'MerkleTree.*'
+dist/linux/Makefile.basic: TARGETCONFIG_FLAGS =
+dist/linux/Makefile.basic: DEFAULT_FLAGS += \
+  -fc89-scope -fbuiltin-uint128 -flinux-ints -ccopt -Wno-typedef-redefinition
 
 
 # CCF distribution

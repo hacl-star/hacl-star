@@ -182,34 +182,38 @@ EverCrypt_CTR_create_in(
         {
           return EverCrypt_Error_InvalidIVLength;
         }
-        #if EVERCRYPT_TARGETCONFIG_X64
-        if (has_aesni1 && has_pclmulqdq1 && has_avx1 && has_sse1)
+        else
         {
-          uint8_t *ek = KRML_HOST_CALLOC((uint32_t)304U, sizeof (uint8_t));
-          uint8_t *keys_b = ek;
-          uint8_t *hkeys_b = ek + (uint32_t)176U;
-          uint64_t scrut = aes128_key_expansion(k1, keys_b);
-          uint64_t scrut0 = aes128_keyhash_init(keys_b, hkeys_b);
-          uint8_t *iv_ = KRML_HOST_CALLOC((uint32_t)16U, sizeof (uint8_t));
-          memcpy(iv_, iv, iv_len * sizeof iv[0U]);
-          KRML_CHECK_SIZE(sizeof (EverCrypt_CTR_state_s), (uint32_t)1U);
-          EverCrypt_CTR_state_s *p = KRML_HOST_MALLOC(sizeof (EverCrypt_CTR_state_s));
-          p[0U]
-          =
-            (
-              (EverCrypt_CTR_state_s){
-                .i = EverCrypt_CTR_vale_impl_of_alg(Spec_Cipher_Expansion_cipher_alg_of_impl(Spec_Cipher_Expansion_Vale_AES128)),
-                .iv = iv_,
-                .iv_len = iv_len,
-                .xkey = ek,
-                .ctr = c
-              }
-            );
-          *dst = p;
-          return EverCrypt_Error_Success;
+          #if EVERCRYPT_TARGETCONFIG_X64
+          if (has_aesni1 && has_pclmulqdq1 && has_avx1 && has_sse1)
+          {
+            uint8_t *ek = KRML_HOST_CALLOC((uint32_t)304U, sizeof (uint8_t));
+            uint8_t *keys_b = ek;
+            uint8_t *hkeys_b = ek + (uint32_t)176U;
+            uint64_t scrut = aes128_key_expansion(k1, keys_b);
+            uint64_t scrut0 = aes128_keyhash_init(keys_b, hkeys_b);
+            uint8_t *iv_ = KRML_HOST_CALLOC((uint32_t)16U, sizeof (uint8_t));
+            memcpy(iv_, iv, iv_len * sizeof iv[0U]);
+            KRML_CHECK_SIZE(sizeof (EverCrypt_CTR_state_s), (uint32_t)1U);
+            EverCrypt_CTR_state_s *p = KRML_HOST_MALLOC(sizeof (EverCrypt_CTR_state_s));
+            p[0U]
+            =
+              (
+                (EverCrypt_CTR_state_s){
+                  .i = EverCrypt_CTR_vale_impl_of_alg(Spec_Cipher_Expansion_cipher_alg_of_impl(Spec_Cipher_Expansion_Vale_AES128)),
+                  .iv = iv_,
+                  .iv_len = iv_len,
+                  .xkey = ek,
+                  .ctr = c
+                }
+              );
+            *dst = p;
+            return EverCrypt_Error_Success;
+          }
+          #endif
+          return EverCrypt_Error_UnsupportedAlgorithm;
         }
-        #endif
-        return EverCrypt_Error_UnsupportedAlgorithm;
+        break;
       }
     case Spec_Agile_Cipher_AES256:
       {
@@ -221,34 +225,38 @@ EverCrypt_CTR_create_in(
         {
           return EverCrypt_Error_InvalidIVLength;
         }
-        #if EVERCRYPT_TARGETCONFIG_X64
-        if (has_aesni1 && has_pclmulqdq1 && has_avx1 && has_sse1)
+        else
         {
-          uint8_t *ek = KRML_HOST_CALLOC((uint32_t)368U, sizeof (uint8_t));
-          uint8_t *keys_b = ek;
-          uint8_t *hkeys_b = ek + (uint32_t)240U;
-          uint64_t scrut = aes256_key_expansion(k1, keys_b);
-          uint64_t scrut0 = aes256_keyhash_init(keys_b, hkeys_b);
-          uint8_t *iv_ = KRML_HOST_CALLOC((uint32_t)16U, sizeof (uint8_t));
-          memcpy(iv_, iv, iv_len * sizeof iv[0U]);
-          KRML_CHECK_SIZE(sizeof (EverCrypt_CTR_state_s), (uint32_t)1U);
-          EverCrypt_CTR_state_s *p = KRML_HOST_MALLOC(sizeof (EverCrypt_CTR_state_s));
-          p[0U]
-          =
-            (
-              (EverCrypt_CTR_state_s){
-                .i = EverCrypt_CTR_vale_impl_of_alg(Spec_Cipher_Expansion_cipher_alg_of_impl(Spec_Cipher_Expansion_Vale_AES256)),
-                .iv = iv_,
-                .iv_len = iv_len,
-                .xkey = ek,
-                .ctr = c
-              }
-            );
-          *dst = p;
-          return EverCrypt_Error_Success;
+          #if EVERCRYPT_TARGETCONFIG_X64
+          if (has_aesni1 && has_pclmulqdq1 && has_avx1 && has_sse1)
+          {
+            uint8_t *ek = KRML_HOST_CALLOC((uint32_t)368U, sizeof (uint8_t));
+            uint8_t *keys_b = ek;
+            uint8_t *hkeys_b = ek + (uint32_t)240U;
+            uint64_t scrut = aes256_key_expansion(k1, keys_b);
+            uint64_t scrut0 = aes256_keyhash_init(keys_b, hkeys_b);
+            uint8_t *iv_ = KRML_HOST_CALLOC((uint32_t)16U, sizeof (uint8_t));
+            memcpy(iv_, iv, iv_len * sizeof iv[0U]);
+            KRML_CHECK_SIZE(sizeof (EverCrypt_CTR_state_s), (uint32_t)1U);
+            EverCrypt_CTR_state_s *p = KRML_HOST_MALLOC(sizeof (EverCrypt_CTR_state_s));
+            p[0U]
+            =
+              (
+                (EverCrypt_CTR_state_s){
+                  .i = EverCrypt_CTR_vale_impl_of_alg(Spec_Cipher_Expansion_cipher_alg_of_impl(Spec_Cipher_Expansion_Vale_AES256)),
+                  .iv = iv_,
+                  .iv_len = iv_len,
+                  .xkey = ek,
+                  .ctr = c
+                }
+              );
+            *dst = p;
+            return EverCrypt_Error_Success;
+          }
+          #endif
+          return EverCrypt_Error_UnsupportedAlgorithm;
         }
-        #endif
-        return EverCrypt_Error_UnsupportedAlgorithm;
+        break;
       }
     case Spec_Agile_Cipher_CHACHA20:
       {

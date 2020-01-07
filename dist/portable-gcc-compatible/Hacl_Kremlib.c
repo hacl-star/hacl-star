@@ -44,7 +44,10 @@ uint32_t LowStar_Vector_new_capacity(uint32_t cap)
   {
     return LowStar_Vector_max_uint32;
   }
-  return cap * LowStar_Vector_resize_ratio;
+  else
+  {
+    return cap * LowStar_Vector_resize_ratio;
+  }
 }
 
 /* SNIPPET_END: LowStar_Vector_new_capacity */
