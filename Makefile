@@ -758,6 +758,7 @@ dist/linux/Makefile.basic: VALE_ASMS := $(filter-out $(HACL_HOME)/secure_api/%,$
 dist/linux/Makefile.basic: HAND_WRITTEN_FILES := $(filter-out providers/evercrypt/c/%,$(HAND_WRITTEN_FILES))
 dist/linux/Makefile.basic: HAND_WRITTEN_H_FILES := $(filter-out %/evercrypt_targetconfig.h,$(HAND_WRITTEN_H_FILES))
 dist/linux/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES =
+dist/linux/Makefile.basic: BASE_FLAGS := $(filter-out -fcurly-braces,$(BASE_FLAGS))
 
 # CCF distribution
 # ----------------
