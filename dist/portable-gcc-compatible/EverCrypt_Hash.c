@@ -788,6 +788,7 @@ void EverCrypt_Hash_copy(EverCrypt_Hash_state_s *s_src, EverCrypt_Hash_state_s *
       p_dst = KRML_EABORT(uint32_t *, "unreachable (pattern matches are exhaustive in F*)");
     }
     memcpy(p_dst, p_src, (uint32_t)4U * sizeof p_src[0U]);
+    return;
   }
   if (scrut.tag == EverCrypt_Hash_SHA1_s)
   {
@@ -803,6 +804,7 @@ void EverCrypt_Hash_copy(EverCrypt_Hash_state_s *s_src, EverCrypt_Hash_state_s *
       p_dst = KRML_EABORT(uint32_t *, "unreachable (pattern matches are exhaustive in F*)");
     }
     memcpy(p_dst, p_src, (uint32_t)5U * sizeof p_src[0U]);
+    return;
   }
   if (scrut.tag == EverCrypt_Hash_SHA2_224_s)
   {
@@ -818,6 +820,7 @@ void EverCrypt_Hash_copy(EverCrypt_Hash_state_s *s_src, EverCrypt_Hash_state_s *
       p_dst = KRML_EABORT(uint32_t *, "unreachable (pattern matches are exhaustive in F*)");
     }
     memcpy(p_dst, p_src, (uint32_t)8U * sizeof p_src[0U]);
+    return;
   }
   if (scrut.tag == EverCrypt_Hash_SHA2_256_s)
   {
@@ -833,6 +836,7 @@ void EverCrypt_Hash_copy(EverCrypt_Hash_state_s *s_src, EverCrypt_Hash_state_s *
       p_dst = KRML_EABORT(uint32_t *, "unreachable (pattern matches are exhaustive in F*)");
     }
     memcpy(p_dst, p_src, (uint32_t)8U * sizeof p_src[0U]);
+    return;
   }
   if (scrut.tag == EverCrypt_Hash_SHA2_384_s)
   {
@@ -848,6 +852,7 @@ void EverCrypt_Hash_copy(EverCrypt_Hash_state_s *s_src, EverCrypt_Hash_state_s *
       p_dst = KRML_EABORT(uint64_t *, "unreachable (pattern matches are exhaustive in F*)");
     }
     memcpy(p_dst, p_src, (uint32_t)8U * sizeof p_src[0U]);
+    return;
   }
   if (scrut.tag == EverCrypt_Hash_SHA2_512_s)
   {
@@ -863,6 +868,7 @@ void EverCrypt_Hash_copy(EverCrypt_Hash_state_s *s_src, EverCrypt_Hash_state_s *
       p_dst = KRML_EABORT(uint64_t *, "unreachable (pattern matches are exhaustive in F*)");
     }
     memcpy(p_dst, p_src, (uint32_t)8U * sizeof p_src[0U]);
+    return;
   }
   KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
     __FILE__,
