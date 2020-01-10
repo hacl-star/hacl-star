@@ -24,5 +24,5 @@
 
 #include "Vale.h"
 
-typedef u64 K___u64___;
+typedef u64 __u64___;
 

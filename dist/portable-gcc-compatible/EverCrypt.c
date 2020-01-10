@@ -1305,9 +1305,9 @@ EverCrypt__aead_state;
 
 /* SNIPPET_END: EverCrypt__aead_state */
 
-/* SNIPPET_START: EverCrypt_uu___is_AEAD_OPENSSL */
+/* SNIPPET_START: uu___is_AEAD_OPENSSL */
 
-static bool EverCrypt_uu___is_AEAD_OPENSSL(EverCrypt__aead_state projectee)
+static bool uu___is_AEAD_OPENSSL(EverCrypt__aead_state projectee)
 {
   if (projectee.tag == EverCrypt_AEAD_OPENSSL)
   {
@@ -1316,11 +1316,11 @@ static bool EverCrypt_uu___is_AEAD_OPENSSL(EverCrypt__aead_state projectee)
   return false;
 }
 
-/* SNIPPET_END: EverCrypt_uu___is_AEAD_OPENSSL */
+/* SNIPPET_END: uu___is_AEAD_OPENSSL */
 
-/* SNIPPET_START: EverCrypt_uu___is_AEAD_AES128_GCM_VALE */
+/* SNIPPET_START: uu___is_AEAD_AES128_GCM_VALE */
 
-static bool EverCrypt_uu___is_AEAD_AES128_GCM_VALE(EverCrypt__aead_state projectee)
+static bool uu___is_AEAD_AES128_GCM_VALE(EverCrypt__aead_state projectee)
 {
   if (projectee.tag == EverCrypt_AEAD_AES128_GCM_VALE)
   {
@@ -1329,11 +1329,11 @@ static bool EverCrypt_uu___is_AEAD_AES128_GCM_VALE(EverCrypt__aead_state project
   return false;
 }
 
-/* SNIPPET_END: EverCrypt_uu___is_AEAD_AES128_GCM_VALE */
+/* SNIPPET_END: uu___is_AEAD_AES128_GCM_VALE */
 
-/* SNIPPET_START: EverCrypt_uu___is_AEAD_AES256_GCM_VALE */
+/* SNIPPET_START: uu___is_AEAD_AES256_GCM_VALE */
 
-static bool EverCrypt_uu___is_AEAD_AES256_GCM_VALE(EverCrypt__aead_state projectee)
+static bool uu___is_AEAD_AES256_GCM_VALE(EverCrypt__aead_state projectee)
 {
   if (projectee.tag == EverCrypt_AEAD_AES256_GCM_VALE)
   {
@@ -1342,11 +1342,11 @@ static bool EverCrypt_uu___is_AEAD_AES256_GCM_VALE(EverCrypt__aead_state project
   return false;
 }
 
-/* SNIPPET_END: EverCrypt_uu___is_AEAD_AES256_GCM_VALE */
+/* SNIPPET_END: uu___is_AEAD_AES256_GCM_VALE */
 
-/* SNIPPET_START: EverCrypt_uu___is_AEAD_CHACHA20_POLY1305_HACL */
+/* SNIPPET_START: uu___is_AEAD_CHACHA20_POLY1305_HACL */
 
-static bool EverCrypt_uu___is_AEAD_CHACHA20_POLY1305_HACL(EverCrypt__aead_state projectee)
+static bool uu___is_AEAD_CHACHA20_POLY1305_HACL(EverCrypt__aead_state projectee)
 {
   if (projectee.tag == EverCrypt_AEAD_CHACHA20_POLY1305_HACL)
   {
@@ -1355,7 +1355,7 @@ static bool EverCrypt_uu___is_AEAD_CHACHA20_POLY1305_HACL(EverCrypt__aead_state 
   return false;
 }
 
-/* SNIPPET_END: EverCrypt_uu___is_AEAD_CHACHA20_POLY1305_HACL */
+/* SNIPPET_END: uu___is_AEAD_CHACHA20_POLY1305_HACL */
 
 /* SNIPPET_START: EverCrypt_aead_state_s */
 
@@ -1526,7 +1526,7 @@ EverCrypt_aead_encrypt(
 )
 {
   EverCrypt__aead_state k1 = *pkey;
-  if (true && EverCrypt_uu___is_AEAD_AES128_GCM_VALE(k1))
+  if (true && uu___is_AEAD_AES128_GCM_VALE(k1))
   {
     uint8_t *xk;
     if (k1.tag == EverCrypt_AEAD_AES128_GCM_VALE)
@@ -1564,7 +1564,7 @@ EverCrypt_aead_encrypt(
     memcpy(cipher, cipher_, len * sizeof cipher_[0U]);
     return;
   }
-  if (true && EverCrypt_uu___is_AEAD_AES256_GCM_VALE(k1))
+  if (true && uu___is_AEAD_AES256_GCM_VALE(k1))
   {
     uint8_t *xk;
     if (k1.tag == EverCrypt_AEAD_AES256_GCM_VALE)
@@ -1602,7 +1602,7 @@ EverCrypt_aead_encrypt(
     memcpy(cipher, cipher_, len * sizeof cipher_[0U]);
     return;
   }
-  if (true && EverCrypt_uu___is_AEAD_CHACHA20_POLY1305_HACL(k1))
+  if (true && uu___is_AEAD_CHACHA20_POLY1305_HACL(k1))
   {
     uint8_t *key;
     if (k1.tag == EverCrypt_AEAD_CHACHA20_POLY1305_HACL)
@@ -1616,7 +1616,7 @@ EverCrypt_aead_encrypt(
     Hacl_Chacha20Poly1305_32_aead_encrypt(key, iv, adlen, ad, len, plaintext, cipher, tag);
     return;
   }
-  if (true && EverCrypt_uu___is_AEAD_OPENSSL(k1))
+  if (true && uu___is_AEAD_OPENSSL(k1))
   {
     FStar_Dyn_dyn key;
     if (k1.tag == EverCrypt_AEAD_OPENSSL)
@@ -1656,7 +1656,7 @@ EverCrypt_aead_decrypt(
 )
 {
   EverCrypt__aead_state k1 = *pkey;
-  if (true && EverCrypt_uu___is_AEAD_AES128_GCM_VALE(k1))
+  if (true && uu___is_AEAD_AES128_GCM_VALE(k1))
   {
     uint8_t *xk;
     if (k1.tag == EverCrypt_AEAD_AES128_GCM_VALE)
@@ -1698,7 +1698,7 @@ EverCrypt_aead_decrypt(
     }
     return (uint32_t)0U;
   }
-  if (true && EverCrypt_uu___is_AEAD_AES256_GCM_VALE(k1))
+  if (true && uu___is_AEAD_AES256_GCM_VALE(k1))
   {
     uint8_t *xk;
     if (k1.tag == EverCrypt_AEAD_AES256_GCM_VALE)
@@ -1740,7 +1740,7 @@ EverCrypt_aead_decrypt(
     }
     return (uint32_t)0U;
   }
-  if (true && EverCrypt_uu___is_AEAD_CHACHA20_POLY1305_HACL(k1))
+  if (true && uu___is_AEAD_CHACHA20_POLY1305_HACL(k1))
   {
     uint8_t *key;
     if (k1.tag == EverCrypt_AEAD_CHACHA20_POLY1305_HACL)
@@ -1755,7 +1755,7 @@ EverCrypt_aead_decrypt(
     r = Hacl_Chacha20Poly1305_32_aead_decrypt(key, iv, adlen, ad, len, plaintext, cipher, tag);
     return (uint32_t)1U - r;
   }
-  if (true && EverCrypt_uu___is_AEAD_OPENSSL(k1))
+  if (true && uu___is_AEAD_OPENSSL(k1))
   {
     FStar_Dyn_dyn key;
     if (k1.tag == EverCrypt_AEAD_OPENSSL)
@@ -1784,7 +1784,7 @@ KRML_DEPRECATED("Please use EverCrypt_AEAD.h (from C) or EverCrypt.AEAD.fsti (fr
 void EverCrypt_aead_free(EverCrypt__aead_state *pk)
 {
   EverCrypt__aead_state k1 = *pk;
-  if (true && EverCrypt_uu___is_AEAD_AES128_GCM_VALE(k1))
+  if (true && uu___is_AEAD_AES128_GCM_VALE(k1))
   {
     if (k1.tag == EverCrypt_AEAD_AES128_GCM_VALE)
     {
@@ -1800,7 +1800,7 @@ void EverCrypt_aead_free(EverCrypt__aead_state *pk)
       KRML_HOST_EXIT(255U);
     }
   }
-  else if (true && EverCrypt_uu___is_AEAD_AES256_GCM_VALE(k1))
+  else if (true && uu___is_AEAD_AES256_GCM_VALE(k1))
   {
     if (k1.tag == EverCrypt_AEAD_AES256_GCM_VALE)
     {
@@ -1816,7 +1816,7 @@ void EverCrypt_aead_free(EverCrypt__aead_state *pk)
       KRML_HOST_EXIT(255U);
     }
   }
-  else if (true && EverCrypt_uu___is_AEAD_CHACHA20_POLY1305_HACL(k1))
+  else if (true && uu___is_AEAD_CHACHA20_POLY1305_HACL(k1))
   {
     if (k1.tag == EverCrypt_AEAD_CHACHA20_POLY1305_HACL)
     {
@@ -1832,7 +1832,7 @@ void EverCrypt_aead_free(EverCrypt__aead_state *pk)
       KRML_HOST_EXIT(255U);
     }
   }
-  else if (true && EverCrypt_uu___is_AEAD_OPENSSL(k1))
+  else if (true && uu___is_AEAD_OPENSSL(k1))
   {
     FStar_Dyn_dyn ite;
     if (k1.tag == EverCrypt_AEAD_OPENSSL)
@@ -1869,9 +1869,9 @@ EverCrypt__dh_state;
 
 /* SNIPPET_END: EverCrypt__dh_state */
 
-/* SNIPPET_START: EverCrypt_uu___is_DH_OPENSSL */
+/* SNIPPET_START: uu___is_DH_OPENSSL */
 
-static bool EverCrypt_uu___is_DH_OPENSSL(EverCrypt__dh_state projectee)
+static bool uu___is_DH_OPENSSL(EverCrypt__dh_state projectee)
 {
   if (projectee.tag == EverCrypt_DH_OPENSSL)
   {
@@ -1880,7 +1880,7 @@ static bool EverCrypt_uu___is_DH_OPENSSL(EverCrypt__dh_state projectee)
   return false;
 }
 
-/* SNIPPET_END: EverCrypt_uu___is_DH_OPENSSL */
+/* SNIPPET_END: uu___is_DH_OPENSSL */
 
 /* SNIPPET_START: EverCrypt_dh_state_s */
 
@@ -1928,7 +1928,7 @@ EverCrypt__dh_state
 void EverCrypt_dh_free_group(EverCrypt__dh_state *st)
 {
   EverCrypt__dh_state s = *st;
-  if (true && EverCrypt_uu___is_DH_OPENSSL(s))
+  if (true && uu___is_DH_OPENSSL(s))
   {
     FStar_Dyn_dyn ite;
     if (s.tag == EverCrypt_DH_OPENSSL)
@@ -1959,7 +1959,7 @@ void EverCrypt_dh_free_group(EverCrypt__dh_state *st)
 uint32_t EverCrypt_dh_keygen(EverCrypt__dh_state *st, uint8_t *public)
 {
   EverCrypt__dh_state s = *st;
-  if (true && EverCrypt_uu___is_DH_OPENSSL(s))
+  if (true && uu___is_DH_OPENSSL(s))
   {
     FStar_Dyn_dyn ite;
     if (s.tag == EverCrypt_DH_OPENSSL)
@@ -1992,7 +1992,7 @@ EverCrypt_dh_compute(
 )
 {
   EverCrypt__dh_state s = *st;
-  if (true && EverCrypt_uu___is_DH_OPENSSL(s))
+  if (true && uu___is_DH_OPENSSL(s))
   {
     FStar_Dyn_dyn ite;
     if (s.tag == EverCrypt_DH_OPENSSL)
@@ -2120,9 +2120,9 @@ EverCrypt__ecdh_state;
 
 /* SNIPPET_END: EverCrypt__ecdh_state */
 
-/* SNIPPET_START: EverCrypt_uu___is_ECDH_OPENSSL */
+/* SNIPPET_START: uu___is_ECDH_OPENSSL */
 
-static bool EverCrypt_uu___is_ECDH_OPENSSL(EverCrypt__ecdh_state projectee)
+static bool uu___is_ECDH_OPENSSL(EverCrypt__ecdh_state projectee)
 {
   if (projectee.tag == EverCrypt_ECDH_OPENSSL)
   {
@@ -2131,7 +2131,7 @@ static bool EverCrypt_uu___is_ECDH_OPENSSL(EverCrypt__ecdh_state projectee)
   return false;
 }
 
-/* SNIPPET_END: EverCrypt_uu___is_ECDH_OPENSSL */
+/* SNIPPET_END: uu___is_ECDH_OPENSSL */
 
 /* SNIPPET_START: EverCrypt_ecdh_state_s */
 
@@ -2205,7 +2205,7 @@ EverCrypt__ecdh_state *EverCrypt_ecdh_load_curve(EverCrypt_ec_curve g1)
 void EverCrypt_ecdh_free_curve(EverCrypt__ecdh_state *st)
 {
   EverCrypt__ecdh_state s = *st;
-  if (true && EverCrypt_uu___is_ECDH_OPENSSL(s))
+  if (true && uu___is_ECDH_OPENSSL(s))
   {
     FStar_Dyn_dyn ite;
     if (s.tag == EverCrypt_ECDH_OPENSSL)
@@ -2236,7 +2236,7 @@ void EverCrypt_ecdh_free_curve(EverCrypt__ecdh_state *st)
 void EverCrypt_ecdh_keygen(EverCrypt__ecdh_state *st, uint8_t *outx, uint8_t *outy)
 {
   EverCrypt__ecdh_state s = *st;
-  if (true && EverCrypt_uu___is_ECDH_OPENSSL(s))
+  if (true && uu___is_ECDH_OPENSSL(s))
   {
     FStar_Dyn_dyn ite;
     if (s.tag == EverCrypt_ECDH_OPENSSL)
@@ -2265,7 +2265,7 @@ uint32_t
 EverCrypt_ecdh_compute(EverCrypt__ecdh_state *st, uint8_t *inx, uint8_t *iny, uint8_t *out1)
 {
   EverCrypt__ecdh_state s = *st;
-  if (true && EverCrypt_uu___is_ECDH_OPENSSL(s))
+  if (true && uu___is_ECDH_OPENSSL(s))
   {
     FStar_Dyn_dyn ite;
     if (s.tag == EverCrypt_ECDH_OPENSSL)
