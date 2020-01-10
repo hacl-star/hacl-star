@@ -99,12 +99,12 @@ let hash (input: bytes) : Tot (lbytes 32) =
     (fun i block st -> update_block block st)
     (fun i rem block st -> update_last block st) st0
   in
-  let w3 = sub st 0 3 in
-  let w3 = uints_to_bytes_be #U32 #SEC w3 in
-  let output = update_sub output 0 (3 * numbytes U32) w3 in
+  let w4 = sub st 0 4 in
+  let w4 = uints_to_bytes_be #U32 #SEC w4 in
+  let output = update_sub output 0 (4 * numbytes U32) w4 in
   let st = gimli st in
 
-  let w3 = sub st 0 3 in
-  let w3 = uints_to_bytes_be #U32 #SEC w3 in
-  let output = update_sub output (3 * numbytes U32) (3 * numbytes U32) w3 in
+  let w4 = sub st 0 4 in
+  let w4 = uints_to_bytes_be #U32 #SEC w4 in
+  let output = update_sub output (4 * numbytes U32) (4 * numbytes U32) w4 in
   output
