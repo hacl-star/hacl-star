@@ -164,33 +164,27 @@ let lemma_whileFalse_total (b:ocmp) (c:code) (s0:vale_state) (sW:vale_state) (fW
   assert (eval_code (While b c) s0 f1 sW);
   (sW, f1)
 
-#reset-options "--initial_fuel 2 --max_fuel 2 --z3rlimit 30"
+#restart-solver
 let lemma_whileMerge_total (c:code) (s0:vale_state) (f0:fuel) (sM:vale_state) (fM:fuel) (sN:vale_state) =
   let fN:nat = f0 + fM + 1 in
-  let lForall () : Lemma
-    (forall (f:nat).{:pattern (BS.machine_eval_code c f (state_to_S sN))}
-      Some? (BS.machine_eval_code c f (state_to_S sN)) ==>
-      state_eq_opt (BS.machine_eval_code c (f + fN) (state_to_S s0)) (BS.machine_eval_code c f (state_to_S sN))
-    ) =
-    let fForall (f:nat) : Lemma
-      (requires Some? (BS.machine_eval_code c f (state_to_S sN)))
-      (ensures state_eq_opt (BS.machine_eval_code c (f + fN) (state_to_S s0)) (BS.machine_eval_code c f (state_to_S sN))) =
-      let Some sZ = BS.machine_eval_code c f (state_to_S sN) in
-      let fZ = if f > fM then f else fM in
-      increase_fuel (While?.whileBody c) (state_to_S sM) fM (state_to_S sN) fZ;
+  let fForall (f:nat) : Lemma
+    (requires Some? (BS.machine_eval_code c f (state_to_S sN)))
+    (ensures state_eq_opt (BS.machine_eval_code c (f + fN) (state_to_S s0)) (BS.machine_eval_code c f (state_to_S sN)))
+    [SMTPat (BS.machine_eval_code c f (state_to_S sN))]
+    =
+    let Some sZ = BS.machine_eval_code c f (state_to_S sN) in
+    let fZ = if f > fM then f else fM in
+    increase_fuel (While?.whileBody c) (state_to_S sM) fM (state_to_S sN) fZ;
 
-      increase_fuel c (state_to_S sN) f sZ fZ;
+    increase_fuel c (state_to_S sN) f sZ fZ;
 
-      assert (state_eq_opt (BS.machine_eval_code c (fZ + 1) (state_to_S sM)) (Some sZ)); // via eval_code for While
-      assert (state_eq_opt (BS.machine_eval_code c (fZ + 1) (state_to_S sM)) (BS.machine_eval_code c (fZ + 1 + f0) (state_to_S s0))); // via eval_while_inv, choosing f = fZ + 1
+    assert (state_eq_opt (BS.machine_eval_code c (fZ + 1) (state_to_S sM)) (Some sZ)); // via eval_code for While
+    assert (state_eq_opt (BS.machine_eval_code c (fZ + 1) (state_to_S sM)) (BS.machine_eval_code c (fZ + 1 + f0) (state_to_S s0))); // via eval_while_inv, choosing f = fZ + 1
 
-      // Two assertions above prove (BS.machine_eval_code c (fZ + 1 + f0) (state_to_S s0)) equals (Some sZ)
-      // increase_fuel c s0 (fZ + 1 + f0) (state_of_S s0 sZ) (f + fN);
-      increase_fuel c (state_to_S s0) (fZ + 1 + f0) sZ (f + fN);
-      assert (state_eq_opt (BS.machine_eval_code c (f + fN) (state_to_S s0)) (Some sZ));
-      ()
-      in
-    Classical.ghost_lemma fForall
+    // Two assertions above prove (BS.machine_eval_code c (fZ + 1 + f0) (state_to_S s0)) equals (Some sZ)
+    // increase_fuel c s0 (fZ + 1 + f0) (state_of_S s0 sZ) (f + fN);
+    increase_fuel c (state_to_S s0) (fZ + 1 + f0) sZ (f + fN);
+    assert (state_eq_opt (BS.machine_eval_code c (f + fN) (state_to_S s0)) (Some sZ));
+    ()
     in
-  lForall ();
   fN
