@@ -472,9 +472,12 @@ procedure Fsqr(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64)
         dst_in := rdx;
     reads memTaint;
     modifies
-        rax; rbx; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r12; r13; r14; r15;
-        efl; mem;
+        rax; rcx; rdx; rdi; rsi; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
+        efl; mem; stack; stackTaint;
     requires
+        rsp <= init_rsp(stack);
+        init_rsp(stack) - 4096 <= rsp - 8;
+
         adx_enabled && bmi2_enabled;
         buffers_disjoint(dst_b, inA_b) || dst_b == inA_b;
         buffers_disjoint(dst_b, tmp_b) || dst_b == tmp_b;
@@ -506,11 +509,18 @@ procedure Fsqr(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64)
 
         modifies_buffer_2(dst_b, tmp_b, old(mem), mem);
 
+        rsp >= 8;
+        modifies_stack(#nat(rsp-8), rsp, old(stack), stack);
+        modifies_stacktaint(#nat(rsp-8), rsp, old(stackTaint), stackTaint);
+
+        rsp == old(rsp);
+        init_rsp(stack) == init_rsp(old(stack));
+
 {
-    Mov64(rbx, dst_ptr); // Save dst_ptr that will be clobbered by Fast_sqr
+    Push(dst_ptr); // Save dst_ptr that will be clobbered by Fast_sqr
     Fast_sqr(0, tmp_b, inA_b);
     Mov64(inA_ptr, tmp_ptr);
-    Mov64(rdi, rbx); // Restore dst_ptr
+    Pop(rdi);
     Carry_wide(0, dst_b, tmp_b);
 }
 
@@ -626,9 +636,12 @@ procedure Fsqr2(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64
         dst_in := rdx;
     reads memTaint;
     modifies
-        rax; rbx; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r12; r13; r14; r15;
-        efl; mem;
+        rax; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r12; r13; r14; r15; rsp;
+        efl; mem; stack; stackTaint;
     requires
+        rsp <= init_rsp(stack);
+        init_rsp(stack) - 4096 <= rsp - 8;
+
         adx_enabled && bmi2_enabled;
         buffers_disjoint(dst_b, inA_b) || dst_b == inA_b;
         buffers_disjoint(dst_b, tmp_b) || dst_b == tmp_b;
@@ -670,13 +683,19 @@ procedure Fsqr2(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64
         //////////////////////////////////////
 
         modifies_buffer_2(dst_b, tmp_b, old(mem), mem);
+        rsp >= 8;
+        modifies_stack(#nat(rsp-8), rsp, old(stack), stack);
+        modifies_stacktaint(#nat(rsp-8), rsp, old(stackTaint), stackTaint);
+
+        rsp == old(rsp);
+        init_rsp(stack) == init_rsp(old(stack));
 
 {
-    Mov64(rbx, dst_ptr); // Save dst_ptr that will be clobbered by Fast_sqr
+    Push(dst_ptr); // Save dst_ptr that will be clobbered by Fast_sqr
     Fast_sqr(0, tmp_b, inA_b);
     Fast_sqr(4, tmp_b, inA_b);
     Mov64(inA_ptr, tmp_ptr);
-    Mov64(rdi, rbx); // Restore dst_ptr
+    Pop(rdi);
     Carry_wide(0, dst_b, tmp_b);
     Carry_wide(4, dst_b, tmp_b);
 }
