@@ -367,20 +367,6 @@ let lemma_preserve_valid128 (m m':S.machine_heap) : Lemma
   =
   reveal_opaque (`%S.valid_addr128) S.valid_addr128
 
-let lemma_is_machine_heap_update64 (ptr:int) (v:nat64) (mh:machine_heap) : Lemma
-  (requires S.valid_addr64 ptr mh)
-  (ensures is_machine_heap_update mh (S.update_heap64 ptr v mh))
-  [SMTPat (S.update_heap64 ptr v mh)]
-  =
-  reveal_opaque (`%valid_addr64) valid_addr64
-
-let lemma_is_machine_heap_update128 (ptr:int) (v:quad32) (mh:machine_heap) : Lemma
-  (requires S.valid_addr128 ptr mh)
-  (ensures is_machine_heap_update mh (S.update_heap128 ptr v mh))
-  [SMTPat (S.update_heap128 ptr v mh)]
-  =
-  reveal_opaque (`%S.valid_addr128) S.valid_addr128
-
 let lemma_instr_set_taints_explicit
     (i:instr_operand_explicit) (v1 v2:instr_val_t (IOpEx i)) (o:instr_operand_t i)
     (ts_orig ts:analysis_taints) (t_out:taint)
