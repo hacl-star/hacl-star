@@ -71,15 +71,25 @@ let gimli (st:state) : state =
 ///
 
 let vsize_block = 16
+type mode =
+  | ENC
+  | DEC
 
-let update_block (block: lbytes vsize_block) (st:state): Tot state =
+let update_block (m:mode) (block: lbytes vsize_block) (st:state): Tot (state & lbytes vsize_block) =
+
   let st8 = uints_to_bytes_be st in
-  let x = map2 (fun a b -> a ^. b) block (sub st8 0 vsize_block) in
+  let x:lbytes vsize_block = map2 (fun a b -> a ^. b) block (sub st8 0 vsize_block) in
   let st8 = update_sub st8 0 vsize_block x in
   let st32 = uints_from_bytes_be #U32 #SEC st8 in
-  gimli st
+  let st = match m with
+  | ENC -> st32
+  | DEC ->
+    let st8 = update_sub st8 0 vsize_block block in
+    uints_from_bytes_be #U32 #SEC st8
+  in
+  gimli st, x
 
-let update_last (last:bytes{length last < vsize_block}) (st:state): Tot state =
+let update_last (m:mode) (last:bytes{length last < vsize_block}) (st:state): Tot (state & lbytes (length last)) =
   let len = length last in
   let block = create 48 (u8 0) in
   let block = update_sub block 0 len last in
@@ -88,16 +98,23 @@ let update_last (last:bytes{length last < vsize_block}) (st:state): Tot state =
   let st8 = uints_to_bytes_be st in
   let st8 = map2 (fun a b -> a ^. b) block st8 in
   let st32 = uints_from_bytes_be #U32 #SEC #size_state st8 in
-  gimli st
+  let st = match m with
+  | ENC -> st32
+  | DEC ->
+    let st8 = update_sub st8 0 len last in
+    uints_from_bytes_be #U32 #SEC st8
+  in
+  gimli st, sub st8 0 len
+
 
 let hash (input: bytes) : Tot (lbytes 32) =
-  let n = (length input) / vsize_block in
-  let rem = length input % vsize_block in
+  (* let n = (length input) / vsize_block in *)
+  (* let rem = length input % vsize_block in *)
   let output = create 32 (u8 0) in
   let st0 = create size_state (u32 0) in
   let st = repeati_blocks vsize_block input
-    (fun i block st -> update_block block st)
-    (fun i rem block st -> update_last block st) st0
+    (fun i block st -> let s,b = update_block ENC block st in s)
+    (fun i _ block st -> let s,b = update_last ENC block st in s) st0
   in
   let w4 = sub st 0 4 in
   let w4 = uints_to_bytes_be #U32 #SEC w4 in
@@ -108,3 +125,70 @@ let hash (input: bytes) : Tot (lbytes 32) =
   let w4 = uints_to_bytes_be #U32 #SEC w4 in
   let output = update_sub output (4 * numbytes U32) (4 * numbytes U32) w4 in
   output
+
+
+
+///
+/// AEAD
+///
+
+let encrypt (input:bytes{length input + 16 < max_size_t}) (ad:bytes) (key:lbytes 32) (nonce:lbytes 16) : Tot bytes =
+  let olen = length input + 16 in
+  (* let nad = (length ad) / vsize_block in *)
+  (* let remad = length ad % vsize_block in *)
+  (* let remi = length input % vsize_block in *)
+
+  let st = create size_state (u32 0) in
+
+  let w4 = uints_from_bytes_be nonce in
+  let st = update_sub st 0 4 w4 in
+
+  let w8 = uints_from_bytes_be #U32 #SEC #8 key in
+  let st = update_sub st 4 8 w8 in
+
+  let st = gimli st in
+
+  let st = repeati_blocks vsize_block ad
+    (fun i block st -> let st,b = update_block ENC block st in st)
+    (fun i _ block st -> let st,b = update_last ENC block st in st) st
+  in
+
+  let st,output = repeati_blocks vsize_block input
+    (fun i block (st0,b0) -> let st1,b1 = update_block ENC block st0 in st1, b0 @| b1)
+    (fun i _ block (st0,b0) -> let st1,b1 = update_last ENC block st0 in st1, b0 @| b1) (st,lbytes_empty)
+  in
+
+  let tag = sub st 0 4 in
+  let tag = uints_to_bytes_be #U32 #SEC w4 in
+  output @| tag
+
+
+
+let decrypt (input:bytes{16 <= length input}) (ad:bytes) (key:lbytes 32) (nonce:lbytes 16) : Tot option (lbytes (length input - 16)) =
+  let mlen = length input - 16 in
+  let ciphertext = sub input 0 mlen in
+  let tag = sub input mlen 16 in
+
+  let w4 = uints_from_bytes_be nonce in
+  let st = update_sub st 0 4 w4 in
+
+  let w12 = uints_from_bytes_be key in
+  let st = update_sub st 4 12 w12 in
+
+  let st = gimli st in
+
+  let st = repeati_blocks vsize_block ad
+    (fun i block st -> let st,b = update_block DEC block st in st)
+    (fun i _ block st -> let st,b = update_last DEC block st in st) st
+  in
+
+  let st,plaintext = repeati_blocks vsize_block ciphertext
+    (fun i block (st0,b0) -> let st,b1 = update_block DEC block st0 in st1, b0 @| b1)
+    (fun i _ block (st0,b0) -> let st1,b1 = update_last DEC block st0 in st1, b0 @| b1) (st,empty)
+  in
+
+  let tag' = sub st 0 4 in
+  let tag' = uints_to_bytes_be #U32 #SEC w4 in
+
+  if lbytes_eq tag tag' then Some plaintext else None
+
