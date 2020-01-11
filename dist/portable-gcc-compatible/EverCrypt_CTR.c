@@ -133,10 +133,9 @@ Spec_Agile_Cipher_cipher_alg EverCrypt_CTR_alg_of_state(EverCrypt_CTR_state_s *s
 
 /* SNIPPET_END: EverCrypt_CTR_alg_of_state */
 
-/* SNIPPET_START: EverCrypt_CTR_vale_impl_of_alg */
+/* SNIPPET_START: vale_impl_of_alg */
 
-static Spec_Cipher_Expansion_impl
-EverCrypt_CTR_vale_impl_of_alg(Spec_Agile_Cipher_cipher_alg a)
+static Spec_Cipher_Expansion_impl vale_impl_of_alg(Spec_Agile_Cipher_cipher_alg a)
 {
   switch (a)
   {
@@ -156,7 +155,7 @@ EverCrypt_CTR_vale_impl_of_alg(Spec_Agile_Cipher_cipher_alg a)
   }
 }
 
-/* SNIPPET_END: EverCrypt_CTR_vale_impl_of_alg */
+/* SNIPPET_END: vale_impl_of_alg */
 
 /* SNIPPET_START: EverCrypt_CTR_create_in */
 
@@ -198,7 +197,7 @@ EverCrypt_CTR_create_in(
           =
             (
               (EverCrypt_CTR_state_s){
-                .i = EverCrypt_CTR_vale_impl_of_alg(Spec_Cipher_Expansion_cipher_alg_of_impl(Spec_Cipher_Expansion_Vale_AES128)),
+                .i = vale_impl_of_alg(Spec_Cipher_Expansion_cipher_alg_of_impl(Spec_Cipher_Expansion_Vale_AES128)),
                 .iv = iv_,
                 .iv_len = iv_len,
                 .xkey = ek,
@@ -237,7 +236,7 @@ EverCrypt_CTR_create_in(
           =
             (
               (EverCrypt_CTR_state_s){
-                .i = EverCrypt_CTR_vale_impl_of_alg(Spec_Cipher_Expansion_cipher_alg_of_impl(Spec_Cipher_Expansion_Vale_AES256)),
+                .i = vale_impl_of_alg(Spec_Cipher_Expansion_cipher_alg_of_impl(Spec_Cipher_Expansion_Vale_AES256)),
                 .iv = iv_,
                 .iv_len = iv_len,
                 .xkey = ek,
