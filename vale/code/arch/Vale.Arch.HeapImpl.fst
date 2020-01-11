@@ -17,6 +17,17 @@ noeq type vale_heap_layout_inner : Type u#1 = {
   vl_old_heap:vale_heap;
 }
 
+let empty_vale_heap_layout_inner h = {
+  vl_n_buffers = 0;
+  vl_old_heap = h;
+}
+
+let empty_heaplet (h:vale_heap) (n:nat{n < 16}) : vale_heap =
+  let ValeHeap mh ih _ = h in ValeHeap mh ih (Some n)
+
+let empty_vale_heaplets h =
+  Map16.init vale_heap (empty_heaplet h)
+
 let _ih (vh:vale_heap) : GTot interop_heap = Ghost.reveal vh.ih
 
 let mi_heap_upd (vh:vale_heap) (mh':machine_heap) : Pure vale_heap

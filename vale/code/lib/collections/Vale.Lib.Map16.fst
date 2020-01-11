@@ -72,3 +72,32 @@ let lemma_equal_intro #a m1 m2 =
 
 let lemma_equal_elim #a m1 m2 =
   ()
+
+let rec init_rec (a:Type) (f:(i:nat{i < 16}) -> a) (n:nat) : Pure (map16 a)
+  (requires n <= 16)
+  (ensures fun m -> forall (i:nat).{:pattern sel m i} i < n ==> sel m i == f i)
+  =
+  if n = 0 then
+    let m1 = f 0 in
+    let m4 = ((m1, m1), (m1, m1)) in
+    ((m4, m4), (m4, m4))
+  else
+    upd (init_rec a f (n - 1)) (n - 1) (f (n - 1))
+
+let init a f =
+  init_rec a f 16
+
+let rec init_ghost_rec (a:Type) (f:(i:nat{i < 16}) -> GTot a) (n:nat) : Ghost (map16 a)
+  (requires n <= 16)
+  (ensures fun m -> forall (i:nat).{:pattern sel m i} i < n ==> sel m i == f i)
+  =
+  if n = 0 then
+    let m1 = f 0 in
+    let m4 = ((m1, m1), (m1, m1)) in
+    ((m4, m4), (m4, m4))
+  else
+    upd (init_ghost_rec a f (n - 1)) (n - 1) (f (n - 1))
+
+let init_ghost a f =
+  init_ghost_rec a f 16
+

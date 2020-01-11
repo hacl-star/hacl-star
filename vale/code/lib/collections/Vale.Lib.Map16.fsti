@@ -117,3 +117,11 @@ val lemma_equal_elim (#a:Type) (m1 m2:map16 a) : Lemma
   (requires equal m1 m2)
   (ensures m1 == m2)
   [SMTPat (equal m1 m2)]
+
+val init (a:Type) (f:(i:nat{i < 16}) -> a) : Pure (map16 a)
+  (requires True)
+  (ensures fun m -> forall (i:int).{:pattern (sel m i)} 0 <= i /\ i < 16 ==> sel m i == f i)
+
+val init_ghost (a:Type) (f:(i:nat{i < 16}) -> GTot a) : Ghost (map16 a)
+  (requires True)
+  (ensures fun m -> forall (i:int).{:pattern (sel m i)} 0 <= i /\ i < 16 ==> sel m i == f i)
