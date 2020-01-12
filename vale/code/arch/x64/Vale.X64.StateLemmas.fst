@@ -13,6 +13,8 @@ friend Vale.X64.Memory
 
 let same_heap_types = ()
 
+let use_machine_state_equal () = ()
+
 #set-options "--max_ifuel 2 --initial_ifuel 2"
 let lemma_valid_mem_addr64 h ptr =
   MS.bytes_valid64 ptr (get_vale_heap h);

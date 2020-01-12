@@ -142,12 +142,6 @@ let rw_set_of_ins i =
       loc_writes = [ALocStack; ALocReg (Reg 0 rRsp)];
       loc_constant_writes = [];
     }
-  | HeapGhost _ ->
-    {
-      loc_reads = [];
-      loc_writes = [];
-      loc_constant_writes = [];
-    }
 
 (* See fsti *)
 let locations_of_ocmp o =

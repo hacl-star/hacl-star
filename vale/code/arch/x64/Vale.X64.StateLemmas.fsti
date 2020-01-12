@@ -20,6 +20,25 @@ unfold let machine_eval_code = Ms.machine_eval_code
 val same_heap_types : squash (vale_full_heap == heap_impl)
 unfold let coerce (#b #a:Type) (x:a{a == b}) : b = x
 
+let machine_state_eq (s1 s2:machine_state) =
+  s1 == s2
+
+let machine_state_equal (s1 s2:machine_state) =
+  let open Vale.X64.Machine_Semantics_s in
+  s1.ms_ok == s2.ms_ok /\
+  F.feq s1.ms_regs s2.ms_regs /\
+  F.feq s1.ms_flags s2.ms_flags /\
+  s1.ms_heap == s2.ms_heap /\
+  s1.ms_stack == s2.ms_stack /\
+  s1.ms_stackTaint == s2.ms_stackTaint /\
+  s1.ms_trace == s2.ms_trace /\
+  True
+
+val use_machine_state_equal (_:unit) : Lemma
+  (requires True)
+  (ensures forall (s1 s2:machine_state).{:pattern machine_state_eq s1 s2}
+    machine_state_equal s1 s2 ==> machine_state_eq s1 s2)
+
 let state_to_S (s:vale_state) : GTot machine_state =
   let open Ms in
   {

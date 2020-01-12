@@ -354,5 +354,8 @@ let eval_SHA256_msg2 (src1 src2:quad32) : option quad32 =
   if sha_enabled then Some (sha256_msg2_spec src1 src2) else None
 val ins_SHA256_msg2 : instr_dep [inOut opXmm] [opXmm] PreserveFlags eval_SHA256_msg2
 
+let eval_Ghost : option unit = Some ()
+val ins_Ghost : instr_dep [] [] PreserveFlags eval_Ghost
+
 let eval_Comment : option unit = Some ()
-val ins_Comment : string -> instr_dep [] [] PreserveFlags eval_Comment
+val ins_Comment (_:string) : instr_dep [] [] PreserveFlags eval_Comment

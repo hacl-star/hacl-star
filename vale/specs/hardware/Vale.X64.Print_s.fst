@@ -232,7 +232,6 @@ let print_ins (ins:ins) (p:printer) : string =
   | Pop dst _      -> p.ins_name "  pop"  [dst] ^ print_operand dst p
   | Alloc n       -> p.ins_name "  sub" [OReg rRsp; OConst n] ^ print_ops (OReg rRsp) (OConst n)
   | Dealloc n       -> p.ins_name "  add" [OReg rRsp; OConst n] ^ print_ops (OReg rRsp) (OConst n)
-  | HeapGhost _ -> ""
 
 let print_cmp (c:ocmp) (counter:int) (p:printer) : string =
   let print_ops (o1:operand64) (o2:operand64) : string =
@@ -256,7 +255,6 @@ let rec print_block (b:codes) (n:int) (p:printer) : string & int =
     head_str ^ rest, n''
 and print_code (c:code) (n:int) (p:printer) : string & int =
   match c with
-  | Ins (HeapGhost _ ) -> ("", n)
   | Ins ins -> (print_ins ins p ^ "\n", n)
   | Block b -> print_block b n p
   | IfElse cond true_code false_code ->

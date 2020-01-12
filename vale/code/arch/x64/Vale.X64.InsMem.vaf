@@ -74,28 +74,33 @@ procedure Mem_lemma(ghost base:va_operand, ghost offset:int, ghost b:buffer64, g
 }
 
 #verbatim
-let create_heaplets_f (h1:heap_impl) : h2:heap_impl{heap_get h1 == heap_get h2 /\ heap_taint h1 == heap_taint h2} =
-  coerce #heap_impl (Vale.X64.Memory_Sems.create_heaplets (coerce h1))
+let create_heaplets_this (s:vale_state) : GTot vale_state =
+  {s with vs_heap = Vale.X64.Memory_Sems.create_heaplets s.vs_heap}
 
-let destroy_heaplets_f (h1:heap_impl) : h2:heap_impl{heap_get h1 == heap_get h2 /\ heap_taint h1 == heap_taint h2} =
-  coerce #heap_impl (Vale.X64.Memory_Sems.destroy_heaplets (coerce h1))
+let destroy_heaplets_this (s:vale_state) : GTot vale_state =
+  {s with vs_heap = Vale.X64.Memory_Sems.destroy_heaplets s.vs_heap}
 #endverbatim
+function create_heaplets_this(s:vale_state):vale_state extern;
+function destroy_heaplets_this(s:vale_state):vale_state extern;
+ghost procedure Vale.X64.StateLemmas.use_machine_state_equal() extern;
 
 procedure CreateHeaplets()
     {:public}
     {:quick exportOnly}
-    {:instruction mk_ins(Vale.X64.Bytes_Code_s.HeapGhost(create_heaplets_f))}
+    {:instruction mk_ins(make_instr_annotate(I.ins_Ghost, S.AnnotateGhost()))}
     modifies
         memLayout;
     ensures
         memLayout.vl_taint == old(memLayout.vl_taint);
 {
+    this := create_heaplets_this(this);
+    Vale.X64.StateLemmas.use_machine_state_equal();
 }
 
 procedure DestroyHeaplets()
     {:public}
     {:quick exportOnly}
-    {:instruction mk_ins(Vale.X64.Bytes_Code_s.HeapGhost(destroy_heaplets_f))}
+    {:instruction mk_ins(make_instr_annotate(I.ins_Ghost, S.AnnotateGhost()))}
     reads
         mem; heap0;
     modifies
@@ -105,6 +110,8 @@ procedure DestroyHeaplets()
         vale_heap_data_eq(mem, heap0);
 {
     reveal_mem_inv();
+    this := destroy_heaplets_this(this);
+    Vale.X64.StateLemmas.use_machine_state_equal();
 }
 
 procedure Load64_buffer(

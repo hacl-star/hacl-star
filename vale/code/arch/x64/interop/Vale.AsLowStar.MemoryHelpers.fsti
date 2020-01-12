@@ -36,7 +36,7 @@ val as_vale_immbuffer_len (#src #t:base_typ) (x:ibuf_t src t)
 val state_eq_down_mem (va_s1:V.va_state) (s1:BS.machine_state)
   : Lemma
       (requires
-        VL.state_eq_opt (Some (SL.state_to_S va_s1))
+        VL.state_eq_opt true (Some (SL.state_to_S va_s1))
                         (Some s1))
       (ensures (
         heap_create_machine (as_mem va_s1.VS.vs_heap.vf_heap) == heap_get s1.BS.ms_heap))

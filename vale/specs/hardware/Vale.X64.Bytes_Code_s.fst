@@ -21,7 +21,6 @@ noeq type instruction_t (a:instr_annotation_t) =
   | Pop        : dst:operand64 -> t:taint -> instruction_t a
   | Alloc      : n:nat64 -> instruction_t a
   | Dealloc    : n:nat64 -> instruction_t a
-  | HeapGhost  : (h1:heap_impl -> h2:heap_impl{heap_get h1 == heap_get h2 /\ heap_taint h1 == heap_taint h2}) -> instruction_t a
 
 type ocmp:eqtype =
   | OEq: o1:operand64{not (OMem? o1 || OStack? o1)} -> o2:operand64{not (OMem? o2 || OStack? o2)} -> ocmp

@@ -26,14 +26,14 @@ val lemma_valid_src_operand128_and_taint (o:operand128) (s:vale_state) : Lemma
   [SMTPat (S.valid_src_operand128_and_taint o (state_to_S s))]
 
 [@instr_attr]
-let rec make_instr_t_args (args:list instr_operand) : Type u#1 =
+let rec make_instr_t_args (args:list instr_operand) : Type0 =
   match normal args with
   | [] -> S.ins
   | (IOpEx i)::args -> arrow (instr_operand_t i) (make_instr_t_args args)
   | (IOpIm _)::args -> make_instr_t_args args
 
 [@instr_attr]
-let rec make_instr_t (outs:list instr_out) (args:list instr_operand) : Type u#1 =
+let rec make_instr_t (outs:list instr_out) (args:list instr_operand) : Type0 =
   match normal outs with
   | [] -> make_instr_t_args args
   | (_, IOpEx i)::outs -> arrow (instr_operand_t i) (make_instr_t outs args)

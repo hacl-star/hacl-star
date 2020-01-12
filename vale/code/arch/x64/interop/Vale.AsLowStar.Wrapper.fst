@@ -498,7 +498,7 @@ let eval_code_ts (c:BS.code)
                  (s0:BS.machine_state)
                  (f0:nat)
                  (s1:BS.machine_state) : Type0 =
-  VL.state_eq_opt (BS.machine_eval_code c f0 s0) (Some s1)
+  VL.state_eq_opt true (BS.machine_eval_code c f0 s0) (Some s1)
 
 let eval_code_rel (c:BS.code)
                   (va_s0 va_s1:V.va_state) (f:V.va_fuel)
@@ -558,7 +558,7 @@ let vale_lemma_as_prediction
        assert (V.eval_code code va_s0 f va_s1);
        eval_code_rel (c_code) va_s0 va_s1 f;
        let Some s1 = BS.machine_eval_code (c_code) (coerce f) s0 in
-       assert (VL.state_eq_opt (Some (SL.state_to_S va_s1)) (Some s1));
+       assert (VL.state_eq_opt true (Some (SL.state_to_S va_s1)) (Some s1));
        assert (VSig.vale_calling_conventions va_s0 va_s1 regs_modified xmms_modified);
        assert (IX64.calling_conventions s0 s1 regs_modified xmms_modified);
        assert (ME.modifies (VSig.mloc_modified_args args) (VS.vs_get_vale_heap va_s0) (VS.vs_get_vale_heap va_s1));

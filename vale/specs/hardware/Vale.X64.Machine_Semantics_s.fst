@@ -31,6 +31,7 @@ noeq type instr_annotation (it:instr_t_record) =
   | AnnotateXor64 : equals_instr it (InstrTypeRecord ins_Xor64) -> instr_annotation it
   | AnnotatePxor : equals_instr it (InstrTypeRecord ins_Pxor) -> instr_annotation it
   | AnnotateVPxor : equals_instr it (InstrTypeRecord ins_VPxor) -> instr_annotation it
+  | AnnotateGhost : equals_instr it (InstrTypeRecord ins_Ghost) -> instr_annotation it
 
 let ins = BC.instruction_t instr_annotation
 let ocmp = BC.ocmp
@@ -517,7 +518,7 @@ let ins_obs (ins:ins) (s:machine_state) : list observation =
   | BC.Instr (InstrTypeRecord #outs #args _) oprs _ -> obs_inouts outs args oprs s
   | BC.Push src _ -> operand_obs s src
   | BC.Pop dst _ -> operand_obs s dst
-  | BC.Alloc _ | BC.Dealloc _ | BC.HeapGhost _ -> []
+  | BC.Alloc _ | BC.Dealloc _ -> []
 
 [@instr_attr]
 let instr_eval_operand_explicit (i:instr_operand_explicit) (o:instr_operand_t i) (s:machine_state) : option (instr_val_t (IOpEx i)) =
@@ -688,9 +689,6 @@ let machine_eval_ins_st (ins:ins) : st unit =
     update_rsp new_rsp;;
     // The deallocated stack memory should now be considered invalid
     free_stack old_rsp new_rsp
-
-  | BC.HeapGhost f ->
-    set ({s with ms_heap = f s.ms_heap})
 
 [@instr_attr]
 let machine_eval_ins (i:ins) (s:machine_state) : machine_state =

@@ -163,7 +163,10 @@ procedure Fast_sqr_part2()
                            Adcx_64(r14, r14);
 }
 
-#reset-options "--z3rlimit 400"
+#reset-options "--z3rlimit 1000"
+#verbatim
+#restart-solver
+#endverbatim
 procedure Fast_sqr_part3(inline offset:nat, ghost dst_b:buffer64, ghost inA_b:buffer64)
     {:quick}
     lets

@@ -123,6 +123,8 @@ let ins_SHA256_msg1 = make_ins (fun dst src -> print "sha256msg1" [PXmm dst; PXm
 
 let ins_SHA256_msg2 = make_ins (fun dst src -> print "sha256msg2" [PXmm dst; PXmm src])
 
+let ins_Ghost = make_ins (print "" [])
+
 let ins_Comment s = make_ins (print (";# " ^ s) [])
 (* XXX[jb]: This syntax is a valid line comment in both GCC and
             MASM. Unfortunately, `;` is not a valid line comment
