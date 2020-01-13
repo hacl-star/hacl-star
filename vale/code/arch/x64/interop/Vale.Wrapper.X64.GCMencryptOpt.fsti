@@ -1,5 +1,8 @@
 module Vale.Wrapper.X64.GCMencryptOpt
 
+val z3rlimit_hack (x:nat) : squash (x < x + x + 1)
+#reset-options "--z3rlimit 50"
+
 open Vale.X64.CPU_Features_s
 open FStar.HyperStack.ST
 module B = LowStar.Buffer

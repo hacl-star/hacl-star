@@ -1,0 +1,295 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>HMAC (EverCrypt_HMAC.h) &mdash; The HACL and EverCrypt reference documentation  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="HKDF (EverCrypt_HKDF.h)" href="EverCryptHKDF.html" />
+    <link rel="prev" title="Hashing (EverCrypt_Hash.h)" href="EverCryptHash.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> The HACL and EverCrypt reference documentation
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Supported.html">List of supported algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Overview.html">The research behind</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Obtaining.html">Obtaining the source code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="General.html">General recommendations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="HaclDoc.html">HACL APIs</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="EverCryptDoc.html">EverCrypt APIs</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="EverCryptAutoConfig.html">CPU autodetection (<code class="docutils literal notranslate"><span class="pre">EverCrypt_AutoConfig2.h</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="EverCryptAEAD.html">AEAD (<code class="docutils literal notranslate"><span class="pre">EverCrypt_AEAD.h</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="EverCryptCTR.html">CTR-mode encryption</a></li>
+<li class="toctree-l2"><a class="reference internal" href="EverCryptHash.html">Hashing (<code class="docutils literal notranslate"><span class="pre">EverCrypt_Hash.h</span></code>)</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">HMAC (<code class="docutils literal notranslate"><span class="pre">EverCrypt_HMAC.h</span></code>)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#agile-api">Agile API</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#non-agile-api">Non-agile API</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="EverCryptHKDF.html">HKDF (<code class="docutils literal notranslate"><span class="pre">EverCrypt_HKDF.h</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="EverCryptDRBG.html">HMAC-DRBG (<code class="docutils literal notranslate"><span class="pre">EverCrypt_DRBG.h</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="EverCryptDeprecated.html">Deprecated block cipher API (<code class="docutils literal notranslate"><span class="pre">EverCrypt_Cipher.h</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="EverCryptLegacy.html">Legacy EverCrypt headers (<code class="docutils literal notranslate"><span class="pre">EverCrypt.h</span></code>, <code class="docutils literal notranslate"><span class="pre">EverCrypt_Hacl.h</span></code>, <code class="docutils literal notranslate"><span class="pre">EverCrypt_Vale.h</span></code>)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Merkle.html">Merkle Tree API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="WasmDoc.html">WebAssembly bindings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="OCamlDoc.html">OCaml bindings</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">The HACL and EverCrypt reference documentation</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="EverCryptDoc.html">EverCrypt APIs</a> &raquo;</li>
+        
+      <li>HMAC (<code class="docutils literal notranslate"><span class="pre">EverCrypt_HMAC.h</span></code>)</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/EverCryptHMAC.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="hmac-evercrypt-hmac-h">
+<h1>HMAC (<code class="docutils literal notranslate"><span class="pre">EverCrypt_HMAC.h</span></code>)<a class="headerlink" href="#hmac-evercrypt-hmac-h" title="Permalink to this headline">¶</a></h1>
+<p>This API is:</p>
+<ul class="simple">
+<li><p><strong>agile</strong></p></li>
+<li><p><strong>multiplexing</strong>: portable C (all); SHAEXT (SHA2-256)</p></li>
+<li><p><strong>NOT</strong> stateful</p></li>
+</ul>
+<p>Possible values for the agility argument (<code class="docutils literal notranslate"><span class="pre">Hacl_Spec.h</span></code>) :</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span>
+<span class="cp">#define Spec_Hash_Definitions_SHA2_224 0</span>
+<span class="cp">#define Spec_Hash_Definitions_SHA2_256 1</span>
+<span class="cp">#define Spec_Hash_Definitions_SHA2_384 2</span>
+<span class="cp">#define Spec_Hash_Definitions_SHA2_512 3</span>
+<span class="cp">#define Spec_Hash_Definitions_SHA1 4</span>
+<span class="cp">#define Spec_Hash_Definitions_MD5 5</span>
+
+</pre></div>
+</div>
+<p>Supported values for the agility argument: SHA1; SHA2_256; SHA2_384; SHA2_512.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>As always, the source is authoritative and you should check <code class="docutils literal notranslate"><span class="pre">is_supported_alg</span></code>
+in <code class="docutils literal notranslate"><span class="pre">EverCrypt.HMAC.fsti</span></code>.</p>
+</div>
+<div class="section" id="agile-api">
+<h2>Agile API<a class="headerlink" href="#agile-api" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">compute</span></code> function is agile and multiplexing:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span>
+<span class="kt">void</span>
+<span class="nf">EverCrypt_HMAC_compute</span><span class="p">(</span>
+  <span class="n">Spec_Hash_Definitions_hash_alg</span> <span class="n">a</span><span class="p">,</span>
+  <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">mac</span><span class="p">,</span>
+  <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">key</span><span class="p">,</span>
+  <span class="kt">uint32_t</span> <span class="n">keylen</span><span class="p">,</span>
+  <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">data</span><span class="p">,</span>
+  <span class="kt">uint32_t</span> <span class="n">datalen</span>
+<span class="p">);</span>
+
+</pre></div>
+</div>
+<p>It dynamically dispatches onto one of the specialized, non-agile versions below.
+As such, the cost of agility is one test.</p>
+<ul class="simple">
+<li><p>The <code class="docutils literal notranslate"><span class="pre">mac</span></code> argument must have a suitable hash length for the choice of
+algorithm; see <code class="docutils literal notranslate"><span class="pre">hash_length</span></code> in <code class="docutils literal notranslate"><span class="pre">Spec.Agile.Hash.fsti</span></code></p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">keylen</span></code> approaches 4GB then you need to make sure it satisfies
+<code class="docutils literal notranslate"><span class="pre">keysized</span></code> in <code class="docutils literal notranslate"><span class="pre">Spec.Agile.HMAC.fsti</span></code></p></li>
+<li><p>If your <code class="docutils literal notranslate"><span class="pre">datalen</span></code> approaches 4GB then you need to check the refinement on
+the <code class="docutils literal notranslate"><span class="pre">data</span></code> parameter of <code class="docutils literal notranslate"><span class="pre">compute_st</span></code>, in <code class="docutils literal notranslate"><span class="pre">EverCrypt.HMAC.fsti</span></code>.</p></li>
+</ul>
+</div>
+<div class="section" id="non-agile-api">
+<h2>Non-agile API<a class="headerlink" href="#non-agile-api" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">compute_*</span></code> functions are <strong>non-agile</strong> and multiplexing:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span>
+<span class="kt">void</span>
+<span class="nf">EverCrypt_HMAC_compute_sha2_256</span><span class="p">(</span>
+  <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">dst</span><span class="p">,</span>
+  <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">key</span><span class="p">,</span>
+  <span class="kt">uint32_t</span> <span class="n">key_len</span><span class="p">,</span>
+  <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">data</span><span class="p">,</span>
+  <span class="kt">uint32_t</span> <span class="n">data_len</span>
+<span class="p">);</span>
+
+</pre></div>
+</div>
+<p>A non-agile, non-multiplexing copy of this API exists in <code class="docutils literal notranslate"><span class="pre">Hacl_HMAC.h</span></code>.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="EverCryptHKDF.html" class="btn btn-neutral float-right" title="HKDF (EverCrypt_HKDF.h)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="EverCryptHash.html" class="btn btn-neutral float-left" title="Hashing (EverCrypt_Hash.h)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, INRIA, Microsoft Research, CMU
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

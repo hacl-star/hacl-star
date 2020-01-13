@@ -56,7 +56,7 @@ open Vale.X64.CPU_Features_s
 
 #reset-options "--z3rlimit 20"
 
-procedure preamble(ghost ctx_b:buffer128)
+procedure Preamble(ghost ctx_b:buffer128)
     {:quick}
     lets
         ctx @= rdi; tmp_reg @= rax;
@@ -102,7 +102,7 @@ procedure preamble(ghost ctx_b:buffer128)
 }
 
 #reset-options "--z3rlimit 40"
-procedure loop_rounds_0_15(
+procedure Loop_rounds_0_15(
         ghost in_b:buffer128,
         ghost k_b:buffer128,
         ghost offset:nat)
@@ -219,7 +219,7 @@ procedure loop_rounds_0_15(
     SHA256_rnds2(abef, cdgh, 14, block, hash_orig);
 }
 
-procedure loop_rounds_16_51_body(
+procedure Loop_rounds_16_51_body(
         inline i:nat,
         ghost k_b:buffer128,
         ghost block:block_w,
@@ -276,7 +276,7 @@ procedure loop_rounds_16_51_body(
 // TODO: OpenSSL does this without any moves by renaming variables.
 //       We can do the same once Vale quick-mode supports that,
 //       or we can rewrite the procedure above in non-quick mode
-procedure msg_shift()
+procedure Msg_shift()
     {:quick}
     lets
         msg0 @= xmm3; msg1 @= xmm4; msg2 @= xmm5; msg3 @= xmm6;
@@ -299,7 +299,7 @@ procedure msg_shift()
 }
 
 // REVIEW: Vale wouldn't let me make this an exportOnly, so I duplicated it below :(
-procedure loop_rounds_16_51_recursive(
+procedure Loop_rounds_16_51_recursive(
         inline i:nat,
         ghost k_b:buffer128,
         ghost block:block_w,
@@ -339,13 +339,13 @@ procedure loop_rounds_16_51_recursive(
         msg3 == ws_quad32(4*(i), block);
 {
     inline if (i > 4) {
-        loop_rounds_16_51_recursive((#(nat)(i-1)), k_b, block, hash_orig);
+        Loop_rounds_16_51_recursive((#(nat)(i-1)), k_b, block, hash_orig);
     }
-    loop_rounds_16_51_body(i, k_b, block, hash_orig);
-    msg_shift();
+    Loop_rounds_16_51_body(i, k_b, block, hash_orig);
+    Msg_shift();
 }
 
-procedure loop_rounds_16_51(
+procedure Loop_rounds_16_51(
         ghost k_b:buffer128,
         ghost block:block_w,
         ghost hash_orig:hash256)
@@ -382,10 +382,10 @@ procedure loop_rounds_16_51(
         msg2 == ws_partial(4*(i+3), block);
         msg3 == ws_quad32(4*(i), block);
 {
-    loop_rounds_16_51_recursive(12, k_b, block, hash_orig);
+    Loop_rounds_16_51_recursive(12, k_b, block, hash_orig);
 }
 
-procedure loop_rounds_52_64(
+procedure Loop_rounds_52_64(
         ghost k_b:buffer128,
         ghost block:block_w)
     {:quick}
@@ -463,7 +463,7 @@ procedure loop_rounds_52_64(
 }
 
 
-procedure loop_rounds(
+procedure Loop_rounds(
         ghost in_b:buffer128,
         ghost k_b:buffer128,
         ghost offset:nat,
@@ -514,15 +514,15 @@ procedure loop_rounds(
 
     let hash_init := make_hash(abef, cdgh);
 
-    loop_rounds_0_15(in_b, k_b, offset);
-    loop_rounds_16_51(k_b, block, hash_init);
-    loop_rounds_52_64(k_b, block);
+    Loop_rounds_0_15(in_b, k_b, offset);
+    Loop_rounds_16_51(k_b, block, hash_init);
+    Loop_rounds_52_64(k_b, block);
 
     lemma_update_multi_quads(buffer128_as_seq(mem, in_b), hash_orig, offset);
 }
 
 #reset-options "--z3rlimit 40"
-procedure loop(
+procedure Loop(
         ghost in_b:buffer128,
         ghost k_b:buffer128)
     {:quick}
@@ -579,12 +579,12 @@ procedure loop(
             make_hash(abef, cdgh) == update_multi_quads(input_BE, hash_orig);
         decreases num;
     {
-        loop_rounds(in_b, k_b, count*4, hash_orig);
+        Loop_rounds(in_b, k_b, count*4, hash_orig);
         count := count + 1;
     }
 }
 
-procedure epilogue(
+procedure Epilogue(
         ghost ctx_b:buffer128)
     {:quick}
     lets
@@ -628,7 +628,7 @@ procedure epilogue(
 }
 
 
-procedure sha_update(
+procedure Sha_update(
         ghost ctx_b:buffer128,
         ghost in_b:buffer128,
         ghost k_b:buffer128)
@@ -668,13 +668,13 @@ procedure sha_update(
         // Framing
         modifies_buffer128(ctx_b, old(mem), mem);
 {
-    preamble(ctx_b);
-    loop(in_b, k_b);
-    epilogue(ctx_b);
+    Preamble(ctx_b);
+    Loop(in_b, k_b);
+    Epilogue(ctx_b);
 }
 
 #reset-options "--z3rlimit 80 --z3refresh"
-procedure sha_update_bytes(
+procedure Sha_update_bytes(
         ghost ctx_b:buffer128,
         ghost in_b:buffer128,
         ghost k_b:buffer128)
@@ -714,7 +714,7 @@ procedure sha_update_bytes(
         // Framing
         modifies_buffer128(ctx_b, old(mem), mem);
 {
-    sha_update(ctx_b, in_b, k_b);
+    Sha_update(ctx_b, in_b, k_b);
     let old_ctx:seq(four(nat32)) := old(buffer128_as_seq(mem, ctx_b));
     let new_ctx:seq(four(nat32)) :=     buffer128_as_seq(mem, ctx_b);
     lemma_hash_to_bytes(old_ctx);
@@ -736,7 +736,7 @@ procedure sha_update_bytes(
 }
 
 #reset-options "--z3rlimit 40"
-procedure sha_update_bytes_stdcall(
+procedure Sha_update_bytes_stdcall(
         inline win:bool,
         ghost ctx_b:buffer128,
         ghost in_b:buffer128,
@@ -858,7 +858,7 @@ procedure sha_update_bytes_stdcall(
         Mov64(rcx, r9);
     }
 
-    sha_update_bytes(ctx_b, in_b, k_b);
+    Sha_update_bytes(ctx_b, in_b, k_b);
 
     // Restore registers
     inline if (win) {

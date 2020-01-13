@@ -274,16 +274,16 @@ let lemma_bytes_shift_power2 y =
   lemma_bytes_power2 ()
 
 
-// val lowerUpper128: l:uint_t 64 -> u:uint_t 64 -> Tot (uint_t 128)
-// let lowerUpper128 l u = l + (0x10000000000000000 * u)
+// val lowerUpper128_def: l:uint_t 64 -> u:uint_t 64 -> Tot (uint_t 128)
+// let lowerUpper128_def l u = l + (0x10000000000000000 * u)
 
 // val lemma_lowerUpper128_and: x:uint_t 128 -> x0:uint_t 64 -> x1:uint_t 64 ->
 //   y:uint_t 128 -> y0:uint_t 64 -> y1:uint_t 64 ->
 //   z:uint_t 128 -> z0:uint_t 64 -> z1:uint_t 64 ->
 //   Lemma (requires (z0 == logand #64 x0 y0 /\
 //                    z1 == logand #64 x1 y1 /\
-//                    x == lowerUpper128 x1 x0 /\
-//                    y == lowerUpper128 y1 y0 /\
-//                    z == lowerUpper128 z1 z0))
+//                    x == lowerUpper128_def x1 x0 /\
+//                    y == lowerUpper128_def y1 y0 /\
+//                    z == lowerUpper128_def z1 z0))
 //         (ensures (z == logand #128 x y))
 // let lemma_lowerUpper128_and x x0 x1 y y0 y1 z z0 z1 = ()

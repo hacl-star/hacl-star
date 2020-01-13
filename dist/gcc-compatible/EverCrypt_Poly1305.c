@@ -24,8 +24,7 @@
 
 #include "EverCrypt_Poly1305.h"
 
-static void
-EverCrypt_Poly1305_poly1305_vale(uint8_t *dst, uint8_t *src, uint32_t len, uint8_t *key)
+static void poly1305_vale(uint8_t *dst, uint8_t *src, uint32_t len, uint8_t *key)
 {
   uint8_t ctx[192U] = { 0U };
   memcpy(ctx + (uint32_t)24U, key, (uint32_t)32U * sizeof key[0U]);
@@ -75,7 +74,7 @@ void EverCrypt_Poly1305_poly1305(uint8_t *dst, uint8_t *src, uint32_t len, uint8
   #if EVERCRYPT_TARGETCONFIG_X64
   if (vale)
   {
-    EverCrypt_Poly1305_poly1305_vale(dst, src, len, key);
+    poly1305_vale(dst, src, len, key);
     return;
   }
   #endif

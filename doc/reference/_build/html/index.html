@@ -1,0 +1,291 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>The HACL and EverCrypt reference manual &mdash; The HACL and EverCrypt reference documentation  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="List of supported algorithms" href="Supported.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="#" class="icon icon-home"> The HACL and EverCrypt reference documentation
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Supported.html">List of supported algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Overview.html">The research behind</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Obtaining.html">Obtaining the source code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="General.html">General recommendations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="HaclDoc.html">HACL APIs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="EverCryptDoc.html">EverCrypt APIs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Merkle.html">Merkle Tree API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="WasmDoc.html">WebAssembly bindings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="OCamlDoc.html">OCaml bindings</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">The HACL and EverCrypt reference documentation</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="#">Docs</a> &raquo;</li>
+        
+      <li>The HACL and EverCrypt reference manual</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="the-hacl-and-evercrypt-reference-manual">
+<h1>The HACL and EverCrypt reference manual<a class="headerlink" href="#the-hacl-and-evercrypt-reference-manual" title="Permalink to this headline">¶</a></h1>
+<p>This manual describes the HACL*, Vale and EverCrypt formally verified
+cryptographic libraries.</p>
+<p>Parts of these libraries appear in <a class="reference external" href="https://bugzilla.mozilla.org/show_bug.cgi?id=1387183">Firefox</a>, the Windows kernel,
+the Linux kernel,
+the <a class="reference external" href="https://www.reddit.com/r/tezos/comments/8hrsz2/tezos_switches_cryptographic_libraries_from/">Tezos blockchain</a>,
+the Microsoft MSQuic implementation of the QUIC protocol,
+and the <a class="reference external" href="https://lwn.net/Articles/770750/">Wireguard VPN</a>.</p>
+<a class="reference internal image-reference" href="_images/diagram.png"><img alt="_images/diagram.png" class="align-center" src="_images/diagram.png" style="width: 80%;" /></a>
+<ul class="simple">
+<li><p>HACL* provides a set of highly efficient, pure C implementations of complete
+cryptographic primitives. Each algorithm comes with its own API callable from
+C clients.</p></li>
+<li><p>Vale provides optimized assembly (ASM) core routines for performance-critical
+code. Vale code is not intended to be called from C by end users.</p></li>
+<li><p>EverCrypt brings HACL* and Vale under an abstract, high-level API
+that automatically picks the best Vale or HACL* implementation depending on
+the machine the code is running on (multiplexing). EverCrypt also offers a
+single API for all algorithms from the same family (e.g. AEAD, hashes),
+allowing clients to reconfigure their choice of algorithm dynamically without
+recompiling (agility).</p></li>
+</ul>
+<p>All of our code is verified using the F* programming language; once verified,
+our code is extracted to a mixture of C and ASM.</p>
+<p>Our code is callable from C clients, and from OCaml, via ctypes bindings. A
+subset of our code (the HACL API) compiles to WebAssembly via a dedicated,
+formalized codepath of the <a class="reference external" href="https://github.com/FStarLang/kremlin/">KreMLin</a> compiler and can be used for any Web context
+(e.g. Electron, website) where modern, trustworthy cryptography is in order.</p>
+<p>In addition to unverified clients, verified clients can be built atop the
+EverCrypt API. These include a library of Merkle Trees, distributed in the
+present repository, but also an implementation of the Signal protocol in F*.</p>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="Supported.html">List of supported algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Overview.html">The research behind</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Overview.html#what-is-verified-software">What is verified software</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Overview.html#history-and-publications">History and publications</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Overview.html#the-tools-we-use">The tools we use</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Obtaining.html">Obtaining the source code</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="Obtaining.html#picking-a-distribution">Picking a distribution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Obtaining.html#building-the-resulting-code">Building the resulting code</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Obtaining.html#integrating-the-resulting-code">Integrating the resulting code</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="General.html">General recommendations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="General.html#finding-the-source">Finding the source</a></li>
+<li class="toctree-l2"><a class="reference internal" href="General.html#reading-f-preconditions">Reading F* preconditions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="General.html#static-vs-run-time-checks">Static vs. run-time checks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="General.html#which-api-to-use">Which API to use</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="HaclDoc.html">HACL APIs</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="HaclDoc.html#stream-ciphers">Stream ciphers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HaclDoc.html#randomness">Randomness</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="EverCryptDoc.html">EverCrypt APIs</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="EverCryptAutoConfig.html">CPU autodetection (<code class="docutils literal notranslate"><span class="pre">EverCrypt_AutoConfig2.h</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="EverCryptAEAD.html">AEAD (<code class="docutils literal notranslate"><span class="pre">EverCrypt_AEAD.h</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="EverCryptCTR.html">CTR-mode encryption (<code class="docutils literal notranslate"><span class="pre">EverCrypt_CTR.h</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="EverCryptHash.html">Hashing (<code class="docutils literal notranslate"><span class="pre">EverCrypt_Hash.h</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="EverCryptHMAC.html">HMAC (<code class="docutils literal notranslate"><span class="pre">EverCrypt_HMAC.h</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="EverCryptHKDF.html">HKDF (<code class="docutils literal notranslate"><span class="pre">EverCrypt_HKDF.h</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="EverCryptDRBG.html">HMAC-DRBG (<code class="docutils literal notranslate"><span class="pre">EverCrypt_DRBG.h</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="EverCryptDeprecated.html">Deprecated block cipher API (<code class="docutils literal notranslate"><span class="pre">EverCrypt_Cipher.h</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="EverCryptLegacy.html">Legacy EverCrypt headers (<code class="docutils literal notranslate"><span class="pre">EverCrypt.h</span></code>, <code class="docutils literal notranslate"><span class="pre">EverCrypt_Hacl.h</span></code>, <code class="docutils literal notranslate"><span class="pre">EverCrypt_Vale.h</span></code>)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Merkle.html">Merkle Tree API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="WasmDoc.html">WebAssembly bindings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="OCamlDoc.html">OCaml bindings</a></li>
+</ul>
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="Supported.html" class="btn btn-neutral float-right" title="List of supported algorithms" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, INRIA, Microsoft Research, CMU
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

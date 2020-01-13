@@ -1,0 +1,279 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Obtaining the source code &mdash; The HACL and EverCrypt reference documentation  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="General recommendations" href="General.html" />
+    <link rel="prev" title="The research behind" href="Overview.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> The HACL and EverCrypt reference documentation
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Supported.html">List of supported algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Overview.html">The research behind</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Obtaining the source code</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#picking-a-distribution">Picking a distribution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#building-the-resulting-code">Building the resulting code</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#integrating-the-resulting-code">Integrating the resulting code</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="General.html">General recommendations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="HaclDoc.html">HACL APIs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="EverCryptDoc.html">EverCrypt APIs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Merkle.html">Merkle Tree API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="WasmDoc.html">WebAssembly bindings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="OCamlDoc.html">OCaml bindings</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">The HACL and EverCrypt reference documentation</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Obtaining the source code</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/Obtaining.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="obtaining-the-source-code">
+<h1>Obtaining the source code<a class="headerlink" href="#obtaining-the-source-code" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="picking-a-distribution">
+<h2>Picking a distribution<a class="headerlink" href="#picking-a-distribution" title="Permalink to this headline">¶</a></h2>
+<p>Building the present repository verifies the source F* code, then proceeds to
+extract it to C and ASM. We provide the results of this process in the <code class="docutils literal notranslate"><span class="pre">dist/</span></code>
+directory, under version control to facilitate obtaining the source code.</p>
+<p>Each subdirectory corresponds to a <em>distribution</em>, i.e. a particular set of
+options passed to KreMLin (the F*-to-C compiler) that influence how the
+generated C code looks like.</p>
+<p>There is a total order on distributions:
+<code class="docutils literal notranslate"><span class="pre">c89-compatible</span> <span class="pre">&lt;=</span> <span class="pre">msvc-compatible</span> <span class="pre">&lt;=</span> <span class="pre">gcc-compatible</span> <span class="pre">&lt;=</span> <span class="pre">gcc64-only</span></code></p>
+<ul class="simple">
+<li><p>The C89 distribution will work with the most C compilers; it relies on
+<code class="docutils literal notranslate"><span class="pre">alloca</span></code>; eliminates compound literals and enforces C89 scope to generate
+syntactically C89-compliant code; code still relies on inttypes.h and other
+headers that you may have to provide depending on your target. It does not
+include Merkle Trees and the code is incredibly verbose.</p></li>
+<li><p>The MSVC distribution relies on <code class="docutils literal notranslate"><span class="pre">alloca</span></code> to avoid C11 VLA for the sake of
+MSVC; relies on KreMLin for tail-call optimizations. It also does not use GCC
+inline assembly for Curve25519 and uses external linkage instead.</p></li>
+<li><p>The GCC distribution relies on C11 VLA and therefore does not work with MSVC.</p></li>
+<li><p>The GCC64 distribution assumes a native <code class="docutils literal notranslate"><span class="pre">unsigned</span> <span class="pre">__int128</span></code> type which can be
+manipulated via the standard arithmetic operators. This generates very compact
+code but only works on 64-bit GCC and Clang.</p></li>
+</ul>
+<p>Other distributions are either for distinguished consumers of our code who need
+specific KreMLin compilation options (e.g. Mozilla, CCF) or for testing (e.g.
+portable-gcc-compatible, which compiles without <code class="docutils literal notranslate"><span class="pre">-march=native</span></code>, to ensure all
+our assumptions about CPU targets are explicit in our Makefile).</p>
+</div>
+<div class="section" id="building-the-resulting-code">
+<h2>Building the resulting code<a class="headerlink" href="#building-the-resulting-code" title="Permalink to this headline">¶</a></h2>
+<p>Each distribution comes with its own Makefile. It builds a static object
+(libevercrypt.a) and a dynamic object (libevercrypt.{so,dll}) along with the
+import library for Windows systems (libevercrypt.dll.a). On Windows, the
+Makefile has been tested in a Cygwin environment equipped with the MinGW
+cross-compilers. The <cite>dist/compact-msvc</cite> distribution works with the Microsoft
+compilers, but we provide no build support (i.e. no Visual Studio project, no
+NMake-compatible makefile).</p>
+</div>
+<div class="section" id="integrating-the-resulting-code">
+<h2>Integrating the resulting code<a class="headerlink" href="#integrating-the-resulting-code" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>When integrating EverCrypt, one can pick a distribution, along with the
+<cite>kremlin</cite> directory, thus giving a “wholesale” integration of
+the EverCrypt library.</p></li>
+<li><p>For a more gradual integration, consumers can integrate algorithms one at a
+time, by cherry-picking the files that they are interested in. Each header
+file contains the list of other headers (and implementations) it depends on so
+it’s easy to integrate, say, an individual algorithm from the HACL API.</p></li>
+</ul>
+<p>In addition, you will need the <code class="docutils literal notranslate"><span class="pre">dist/kremlin</span></code> directory which contains all the
+required headers from KreMLin.  In particular, these headers contain
+implementations of FStar.UInt128, the module for 128-bit arithmetic. The
+<code class="docutils literal notranslate"><span class="pre">kremlin/include/kremlin/internal/types.h</span></code> header will attempt to use C
+preprocessor macros to pick the right UInt128 implementation for your platform:</p>
+<ul class="simple">
+<li><p>64-bit environment with GCC/Clang: hand-written implementation using
+<code class="docutils literal notranslate"><span class="pre">unsigned</span> <span class="pre">__int128</span></code> (unverified)</p></li>
+<li><p>MSVC: hand-written implementation using intrinsics (also unverified)</p></li>
+<li><p>every other case, or when <code class="docutils literal notranslate"><span class="pre">KRML_VERIFIED_UINT128</span></code> is defined at compile-time:
+verified (slow) implementation extracted from FStar.UInt128</p></li>
+</ul>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="General.html" class="btn btn-neutral float-right" title="General recommendations" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="Overview.html" class="btn btn-neutral float-left" title="The research behind" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, INRIA, Microsoft Research, CMU
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

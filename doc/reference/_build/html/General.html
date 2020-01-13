@@ -1,0 +1,382 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>General recommendations &mdash; The HACL and EverCrypt reference documentation  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="HACL APIs" href="HaclDoc.html" />
+    <link rel="prev" title="Obtaining the source code" href="Obtaining.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> The HACL and EverCrypt reference documentation
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Supported.html">List of supported algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Overview.html">The research behind</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Obtaining.html">Obtaining the source code</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">General recommendations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#finding-the-source">Finding the source</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#reading-f-preconditions">Reading F* preconditions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#static-vs-run-time-checks">Static vs. run-time checks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#which-api-to-use">Which API to use</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="HaclDoc.html">HACL APIs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="EverCryptDoc.html">EverCrypt APIs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Merkle.html">Merkle Tree API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="WasmDoc.html">WebAssembly bindings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="OCamlDoc.html">OCaml bindings</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">The HACL and EverCrypt reference documentation</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>General recommendations</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/General.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="general-recommendations">
+<h1>General recommendations<a class="headerlink" href="#general-recommendations" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="finding-the-source">
+<h2>Finding the source<a class="headerlink" href="#finding-the-source" title="Permalink to this headline">¶</a></h2>
+<p>Looking at the original F* files allows the user to identify any preconditions or
+remarks that may have been left in there (work is in progress to forward
+source-level comments to the generated C code). Indeed, our C code is generated;
+as such, some information is lost in the translation process.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>It is almost always a good idea to look at F* interface files (<code class="docutils literal notranslate"><span class="pre">.fsti</span></code>) rather
+than implementations (<code class="docutils literal notranslate"><span class="pre">.fst</span></code>). These typically have the most up-to-date
+comments, as well as a wealth of information regarding preconditions, such as
+length of arrays, disjointness, etc. that C clients MUST obey.</p>
+</div>
+<p>There are some general rules for mapping a <code class="docutils literal notranslate"><span class="pre">.h</span></code> file to an <code class="docutils literal notranslate"><span class="pre">.fsti</span></code> file.</p>
+<ul class="simple">
+<li><p>Files that start with <code class="docutils literal notranslate"><span class="pre">Hacl_</span></code> are found in the <code class="docutils literal notranslate"><span class="pre">code/</span></code> subdirectory; for
+instance, <code class="docutils literal notranslate"><span class="pre">Hacl_HKDF.h</span></code> comes from <code class="docutils literal notranslate"><span class="pre">code/hkdf/Hacl.HKDF.fsti</span></code>. Some <code class="docutils literal notranslate"><span class="pre">.h</span></code>
+files may combine multiple source F* files (known as “bundling”); for
+instance, <code class="docutils literal notranslate"><span class="pre">Hacl_Hash.h</span></code> combines all files from <code class="docutils literal notranslate"><span class="pre">code/hash</span></code> along with
+<code class="docutils literal notranslate"><span class="pre">code/sha3</span></code>.</p></li>
+<li><p>Files that start with <code class="docutils literal notranslate"><span class="pre">Lib_</span></code> are found in the <code class="docutils literal notranslate"><span class="pre">lib/c</span></code> directory; they are
+hand-written and are assumed to faithfully implement a given F* signature;
+these should be carefully reviewed before any integration. In particular,
+for zero-ing out memory and randomness, we only have basic implementations;
+pull requests welcome.</p></li>
+<li><p>Files that start with <code class="docutils literal notranslate"><span class="pre">EverCrypt_</span></code> are found in the <code class="docutils literal notranslate"><span class="pre">providers/evercrypt</span></code>
+directory.</p></li>
+</ul>
+<p>In case finding a particular declaration is important: if a function is named
+<code class="docutils literal notranslate"><span class="pre">Foo_Bar_baz</span></code>, then you want to find <code class="docutils literal notranslate"><span class="pre">Foo.Bar.fst{,i}</span></code>.</p>
+</div>
+<div class="section" id="reading-f-preconditions">
+<span id="reading-preconditions"></span><h2>Reading F* preconditions<a class="headerlink" href="#reading-f-preconditions" title="Permalink to this headline">¶</a></h2>
+<p>It is important to be able to read <em>some</em> amount of F* code in order to
+successfully use an API. For instance, looking at AEAD encryption, there are
+various pre-conditions that client must satisfy, related to liveness,
+disjointness and array lengths. We expect unverified C clients to abide by these
+preconditions; otherwise, none of our verification guarantees hold! As such, it
+is up to the user to read the preconditions and make sure they are satisfied.</p>
+<p>As an example, consider <code class="docutils literal notranslate"><span class="pre">EverCrypt_AEAD_encrypt</span></code>. Per the section above, we
+look up <code class="docutils literal notranslate"><span class="pre">providers/evercrypt/EverCrypt.AEAD.fsti</span></code>. The <code class="docutils literal notranslate"><span class="pre">encrypt_pre</span></code>
+definition lists all the properties that must hold for a call to <code class="docutils literal notranslate"><span class="pre">encrypt</span></code> to
+be valid.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">let</span> <span class="n">encrypt_pre</span> <span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">supported_alg</span><span class="p">)</span>
+  <span class="p">(</span><span class="n">s</span><span class="p">:</span><span class="n">B</span><span class="o">.</span><span class="n">pointer_or_null</span> <span class="p">(</span><span class="n">state_s</span> <span class="n">a</span><span class="p">))</span>
+  <span class="p">(</span><span class="n">iv</span><span class="p">:</span><span class="n">iv_p</span> <span class="n">a</span><span class="p">)</span>
+  <span class="p">(</span><span class="n">iv_len</span><span class="p">:</span> <span class="n">UInt32</span><span class="o">.</span><span class="n">t</span><span class="p">)</span>
+  <span class="p">(</span><span class="n">ad</span><span class="p">:</span><span class="n">ad_p</span> <span class="n">a</span><span class="p">)</span>
+  <span class="p">(</span><span class="n">ad_len</span><span class="p">:</span> <span class="n">UInt32</span><span class="o">.</span><span class="n">t</span><span class="p">)</span>
+  <span class="p">(</span><span class="n">plain</span><span class="p">:</span> <span class="n">plain_p</span> <span class="n">a</span><span class="p">)</span>
+  <span class="p">(</span><span class="n">plain_len</span><span class="p">:</span> <span class="n">UInt32</span><span class="o">.</span><span class="n">t</span><span class="p">)</span>
+  <span class="p">(</span><span class="n">cipher</span><span class="p">:</span> <span class="n">B</span><span class="o">.</span><span class="n">buffer</span> <span class="n">uint8</span><span class="p">)</span>
+  <span class="p">(</span><span class="n">tag</span><span class="p">:</span> <span class="n">B</span><span class="o">.</span><span class="n">buffer</span> <span class="n">uint8</span><span class="p">)</span>
+  <span class="p">(</span><span class="n">h0</span><span class="p">:</span> <span class="n">HS</span><span class="o">.</span><span class="n">mem</span><span class="p">)</span>
+<span class="o">=</span>
+  <span class="n">v</span> <span class="n">iv_len</span> <span class="o">=</span> <span class="n">B</span><span class="o">.</span><span class="n">length</span> <span class="n">iv</span> <span class="o">/</span>\ <span class="n">v</span> <span class="n">iv_len</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="o">/</span>\
+  <span class="n">v</span> <span class="n">ad_len</span> <span class="o">=</span> <span class="n">B</span><span class="o">.</span><span class="n">length</span> <span class="n">ad</span> <span class="o">/</span>\ <span class="n">v</span> <span class="n">ad_len</span> <span class="o">&lt;=</span> <span class="n">pow2</span> <span class="mi">31</span> <span class="o">/</span>\
+  <span class="n">v</span> <span class="n">plain_len</span> <span class="o">=</span> <span class="n">B</span><span class="o">.</span><span class="n">length</span> <span class="n">plain</span> <span class="o">/</span>\ <span class="n">v</span> <span class="n">plain_len</span> <span class="o">&lt;=</span> <span class="n">max_length</span> <span class="n">a</span> <span class="o">/</span>\
+  <span class="n">B</span><span class="o">.</span><span class="n">length</span> <span class="n">cipher</span> <span class="o">=</span> <span class="n">B</span><span class="o">.</span><span class="n">length</span> <span class="n">plain</span> <span class="o">/</span>\
+  <span class="n">B</span><span class="o">.</span><span class="n">length</span> <span class="n">tag</span> <span class="o">=</span> <span class="n">tag_length</span> <span class="n">a</span> <span class="o">/</span>\ <span class="p">(</span>
+  <span class="ow">not</span> <span class="p">(</span><span class="n">B</span><span class="o">.</span><span class="n">g_is_null</span> <span class="n">s</span><span class="p">)</span> <span class="o">==&gt;</span>
+    <span class="n">invariant</span> <span class="n">h0</span> <span class="n">s</span> <span class="o">/</span>\
+    <span class="n">B</span><span class="o">.</span><span class="p">(</span><span class="n">loc_disjoint</span> <span class="p">(</span><span class="n">footprint</span> <span class="n">h0</span> <span class="n">s</span><span class="p">)</span> <span class="p">(</span><span class="n">loc_buffer</span> <span class="n">iv</span><span class="p">))</span> <span class="o">/</span>\
+    <span class="n">B</span><span class="o">.</span><span class="p">(</span><span class="n">loc_disjoint</span> <span class="p">(</span><span class="n">footprint</span> <span class="n">h0</span> <span class="n">s</span><span class="p">)</span> <span class="p">(</span><span class="n">loc_buffer</span> <span class="n">ad</span><span class="p">))</span> <span class="o">/</span>\
+    <span class="n">B</span><span class="o">.</span><span class="p">(</span><span class="n">loc_disjoint</span> <span class="p">(</span><span class="n">footprint</span> <span class="n">h0</span> <span class="n">s</span><span class="p">)</span> <span class="p">(</span><span class="n">loc_buffer</span> <span class="n">tag</span><span class="p">))</span> <span class="o">/</span>\
+    <span class="n">B</span><span class="o">.</span><span class="p">(</span><span class="n">loc_disjoint</span> <span class="p">(</span><span class="n">footprint</span> <span class="n">h0</span> <span class="n">s</span><span class="p">)</span> <span class="p">(</span><span class="n">loc_buffer</span> <span class="n">plain</span><span class="p">))</span> <span class="o">/</span>\
+    <span class="n">B</span><span class="o">.</span><span class="p">(</span><span class="n">loc_disjoint</span> <span class="p">(</span><span class="n">footprint</span> <span class="n">h0</span> <span class="n">s</span><span class="p">)</span> <span class="p">(</span><span class="n">loc_buffer</span> <span class="n">cipher</span><span class="p">))</span> <span class="o">/</span>\
+    <span class="n">MB</span><span class="o">.</span><span class="p">(</span><span class="n">all_live</span> <span class="n">h0</span> <span class="p">[</span> <span class="n">buf</span> <span class="n">iv</span><span class="p">;</span> <span class="n">buf</span> <span class="n">ad</span><span class="p">;</span> <span class="n">buf</span> <span class="n">plain</span><span class="p">;</span> <span class="n">buf</span> <span class="n">cipher</span><span class="p">;</span> <span class="n">buf</span> <span class="n">tag</span> <span class="p">])</span> <span class="o">/</span>\
+    <span class="p">(</span><span class="n">B</span><span class="o">.</span><span class="n">disjoint</span> <span class="n">plain</span> <span class="n">cipher</span> \<span class="o">/</span> <span class="n">plain</span> <span class="o">==</span> <span class="n">cipher</span><span class="p">)</span> <span class="o">/</span>\
+    <span class="n">B</span><span class="o">.</span><span class="n">disjoint</span> <span class="n">cipher</span> <span class="n">tag</span> <span class="o">/</span>\
+    <span class="n">B</span><span class="o">.</span><span class="n">disjoint</span> <span class="n">iv</span> <span class="n">cipher</span> <span class="o">/</span>\ <span class="n">B</span><span class="o">.</span><span class="n">disjoint</span> <span class="n">iv</span> <span class="n">tag</span> <span class="o">/</span>\
+    <span class="n">B</span><span class="o">.</span><span class="n">disjoint</span> <span class="n">plain</span> <span class="n">tag</span> <span class="o">/</span>\
+    <span class="n">B</span><span class="o">.</span><span class="n">disjoint</span> <span class="n">plain</span> <span class="n">ad</span> <span class="o">/</span>\
+    <span class="n">B</span><span class="o">.</span><span class="n">disjoint</span> <span class="n">ad</span> <span class="n">cipher</span> <span class="o">/</span>\ <span class="n">B</span><span class="o">.</span><span class="n">disjoint</span> <span class="n">ad</span> <span class="n">tag</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Here are some examples:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">B.length</span></code> denotes the length of a C array; we see that <code class="docutils literal notranslate"><span class="pre">iv_len</span></code> <strong>must</strong>
+be the length of the pointer <code class="docutils literal notranslate"><span class="pre">iv</span></code>, and that this length must be strictly
+positive</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">loc_disjoint</span></code> or <code class="docutils literal notranslate"><span class="pre">B.disjoint</span></code> state that memory chunks <strong>shall</strong> not overlap;
+we see that no overlap is tolerated between <code class="docutils literal notranslate"><span class="pre">cipher</span></code> and <code class="docutils literal notranslate"><span class="pre">tag</span></code>, but that
+<code class="docutils literal notranslate"><span class="pre">plain</span></code> and <code class="docutils literal notranslate"><span class="pre">cipher</span></code> must be either the same pointer, or non-overlapping
+memory allocations</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">all_live</span></code> means that all of the pointers in the list <strong>must</strong> be valid
+allocations that have not yet been freed</p></li>
+</ul>
+<p>A few lines below, we see from the signature of <code class="docutils literal notranslate"><span class="pre">encrypt</span></code> that the only two
+possible errors are <code class="docutils literal notranslate"><span class="pre">Success</span></code> and <code class="docutils literal notranslate"><span class="pre">InvalidKey</span></code>.</p>
+</div>
+<div class="section" id="static-vs-run-time-checks">
+<h2>Static vs. run-time checks<a class="headerlink" href="#static-vs-run-time-checks" title="Permalink to this headline">¶</a></h2>
+<p>We sometimes perform additional run-time checks for violations of the API that
+are ruled out for verified clients; for instance, continuing with the
+<code class="docutils literal notranslate"><span class="pre">encrypt</span></code> example, we <strong>do</strong> perform a check at run-time for zero-length IVs,
+even though no F* client would be allowed to do that.</p>
+<p>C clients should not rely on those details, since i) this is best-effort and we
+do not offer any guarantee as to which preconditions we check for and ii) the
+error that is returned is not captured in the post-condition, since it cannot
+happen for verified clients.</p>
+</div>
+<div class="section" id="which-api-to-use">
+<h2>Which API to use<a class="headerlink" href="#which-api-to-use" title="Permalink to this headline">¶</a></h2>
+<p>HACL* APIs are specialized for a given architecture revision and do not have any
+agility overhead. Consider, for instance, Chacha-Poly encryption from
+<code class="docutils literal notranslate"><span class="pre">Hacl_Chacha20Poly1305_256.h</span></code>:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span>
+<span class="kt">void</span>
+<span class="nf">Hacl_Chacha20Poly1305_256_aead_encrypt</span><span class="p">(</span>
+  <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">k</span><span class="p">,</span>
+  <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">n1</span><span class="p">,</span>
+  <span class="kt">uint32_t</span> <span class="n">aadlen</span><span class="p">,</span>
+  <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">aad</span><span class="p">,</span>
+  <span class="kt">uint32_t</span> <span class="n">mlen</span><span class="p">,</span>
+  <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">m</span><span class="p">,</span>
+  <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">cipher</span><span class="p">,</span>
+  <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">mac</span>
+<span class="p">);</span>
+
+</pre></div>
+</div>
+<p>In order to use this function, you must ascertain that the architecture you’re
+running on supports 256-bit vector instructions (AVX2 + SSE4); furthermore, your
+code will have to be changed if you need another AEAD algorithm such as AES-GCM.
+This is an efficient API, as it does not require any extra API calls and does
+not allocate any intermediary state.</p>
+<p>EverCrypt APIs, on the other hand, can do CPU detection for clients, via a helper
+function found in <code class="docutils literal notranslate"><span class="pre">EverCrypt_AutoConfig2.h</span></code>.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span>
+<span class="kt">void</span> <span class="nf">EverCrypt_AutoConfig2_init</span><span class="p">();</span>
+
+</pre></div>
+</div>
+<p>EverCrypt APIs are generally agile, i.e. clients only need to change one
+argument to a function call in order to use a different algorithm; furthermore,
+those APIs are multiplexing, i.e. they automatically pick the most suitable
+implementation based ont he results of target CPU detection.</p>
+<p>This means that the EverCrypt API for Chacha-Poly is found in
+<code class="docutils literal notranslate"><span class="pre">EverCrypt_AEAD.h</span></code>; clients are expected to first allocate state, passing in
+the desired AEAD algorithm as a parameter (agility):</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span>
+<span class="n">EverCrypt_Error_error_code</span>
+<span class="nf">EverCrypt_AEAD_create_in</span><span class="p">(</span><span class="n">Spec_Agile_AEAD_alg</span> <span class="n">a</span><span class="p">,</span> <span class="n">EverCrypt_AEAD_state_s</span> <span class="o">**</span><span class="n">dst</span><span class="p">,</span> <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">k1</span><span class="p">);</span>
+
+</pre></div>
+</div>
+<p>Then, will clients be able to encrypt:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span>
+<span class="n">EverCrypt_Error_error_code</span>
+<span class="nf">EverCrypt_AEAD_encrypt</span><span class="p">(</span>
+  <span class="n">EverCrypt_AEAD_state_s</span> <span class="o">*</span><span class="n">s</span><span class="p">,</span>
+  <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">iv</span><span class="p">,</span>
+  <span class="kt">uint32_t</span> <span class="n">iv_len</span><span class="p">,</span>
+  <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">ad</span><span class="p">,</span>
+  <span class="kt">uint32_t</span> <span class="n">ad_len</span><span class="p">,</span>
+  <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">plain</span><span class="p">,</span>
+  <span class="kt">uint32_t</span> <span class="n">plain_len</span><span class="p">,</span>
+  <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">cipher</span><span class="p">,</span>
+  <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">tag</span>
+<span class="p">);</span>
+
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="HaclDoc.html" class="btn btn-neutral float-right" title="HACL APIs" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="Obtaining.html" class="btn btn-neutral float-left" title="Obtaining the source code" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, INRIA, Microsoft Research, CMU
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

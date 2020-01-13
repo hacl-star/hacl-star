@@ -16,6 +16,10 @@ val vec_t: t:v_inttype -> w:width -> Type0
 inline_for_extraction noextract
 val vec_v: #t:v_inttype -> #w:width -> vec_t t w -> vec_v_t t w
 
+val vecv_extensionality: #t:v_inttype -> #w:width -> f1:vec_t t w -> f2:vec_t t w -> Lemma
+  (requires vec_v f1 == vec_v f2)
+  (ensures f1 == f2)
+
 inline_for_extraction noextract
 val vec_zero: t:v_inttype -> w:width -> v:vec_t t w{vec_v v == create w (mk_int 0)}
 
@@ -285,6 +289,14 @@ val vec_interleave_high_n_lemma_uint32_8_4: v1:vec_t U32 8 -> v2:vec_t U32 8 -> 
 
 val vec_interleave_high_n_lemma_uint64_4_2: v1:vec_t U64 4 -> v2:vec_t U64 4 -> Lemma
   (ensures (vec_v (vec_interleave_high_n 2 v1 v2) == create4 (vec_v v1).[2] (vec_v v1).[3] (vec_v v2).[2] (vec_v v2).[3]))
+
+val vec_shift_right_uint128_small2: v1:vec_t U64 4 -> s:shiftval U128{uint_v s % 8 == 0 /\ 0 < uint_v s /\ uint_v s < 64} -> Lemma
+  (let v2 = cast U64 4 (vec_shift_right (cast U128 2 v1) s) in
+   vec_v v2 == create4
+     (((vec_v v1).[0] >>. s) |. ((vec_v v1).[1] <<. (64ul -! s)))
+      ((vec_v v1).[1] >>. s)
+     (((vec_v v1).[2] >>. s) |. ((vec_v v1).[3] <<. (64ul -! s)))
+      ((vec_v v1).[3] >>. s))
 
 inline_for_extraction noextract
 val vec_permute2: #t:v_inttype -> v1:vec_t t 2

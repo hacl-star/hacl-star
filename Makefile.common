@@ -77,7 +77,7 @@ BASE_FLAGS = \
   -add-include '"kremlin/internal/types.h"' \
   -add-include '"kremlin/lowstar_endianness.h"' \
   -add-include '<string.h>' \
-  -header dist/LICENSE.txt
+  -header $(HACL_HOME)/dist/LICENSE.txt
 
 CURVE_BUNDLE_SLOW= \
   -bundle 'Hacl.Curve25519_64_Slow=Hacl.Impl.Curve25519.Field64.Hacl,Hacl.Spec.Curve25519,Hacl.Spec.Curve25519.\*'
