@@ -23,7 +23,7 @@ let print_basetype (t:base_typ) = match t with
 // Returns "uint8_t arg2" or "uint64_t* arg0" for instance
 let print_arg (a:td) (i:nat) = match a with
   | TD_Base src -> print_basetype src ^ " arg" ^ string_of_int i
-  | TD_Buffer src _ _ | TD_ImmBuffer src _ _ -> print_basetype src ^ "* arg" ^ string_of_int i
+  | TD_Buffer src _ _ | TD_ImmBuffer src _ _ -> print_basetype src ^ " *arg" ^ string_of_int i
 
 // Prints a list of args with their types, separated by a comma
 let rec print_args (args:list td) (i:nat) = match args with
@@ -201,15 +201,15 @@ let print_modified_registers
     else "\"%" ^ P.print_reg_name a ^ "\", " ^ aux q
   in aux [rRax; rRbx; rRcx; rRdx; rRsi; rRdi; rRbp; rRsp; rR8; rR9; rR10; rR11; rR12; rR13; rR14; rR15]
 
-// Prints "register uint64_t* argi_r asm("[reg]") = argi;\n"
+// Prints "register uint64_t *argi_r asm("[reg]") = argi;\n"
 let print_explicit_register_arg (n:nat) (a:td) (i:nat{i < n}) (of_arg:reg_nat n -> reg_64) (reserved:reg_64 -> bool) =
   let ty = match a with
-    | TD_Base _ -> "uint64_t"
-    | _ -> "uint64_t*"
+    | TD_Base _ -> "uint64_t "
+    | _ -> "uint64_t *"
   in
   if reserved (of_arg i) then
     // If the associated register is reserved, we really this argument in it. For instance if it is Rdx and we have Mul(x) instructions
-    "  register " ^ ty ^ " arg" ^ string_of_int i ^ "_r asm(\"" ^ P.print_reg_name (of_arg i) ^ "\") = arg" ^ string_of_int i ^ ";\n"
+    "  register " ^ ty ^ "arg" ^ string_of_int i ^ "_r asm(\"" ^ P.print_reg_name (of_arg i) ^ "\") = arg" ^ string_of_int i ^ ";\n"
   else ""
 
 
@@ -218,10 +218,10 @@ let rec print_explicit_register_args (n:nat) (args:list td) (i:nat{i + List.leng
   | [] -> ""
   | a::q -> print_explicit_register_arg n a i of_arg reserved ^ print_explicit_register_args n q (i+1) of_arg reserved
 
-// If we have a return parameter with a reserved register, print "register uint64_t* [name] asm("rax");\n"
+// If we have a return parameter with a reserved register, print "register uint64_t *[name] asm("rax");\n"
 let print_register_ret (reserved:reg_64 -> bool) = function
   | None -> ""
-  | Some name -> if reserved rRax then "  register uint64_t " ^ name ^ " asm(\"rax\");\n" else "  uint64_t " ^ name ^ ";\n"
+  | Some name -> if reserved rRax then "  register uint64_t *" ^ name ^ " asm(\"rax\");\n" else "  uint64_t " ^ name ^ ";\n"
 
 (* This is a copy from X64.Print_s, and should remain in sync. The difference is that
    each line should be in quotes, and end by a semicolon in inline assembly *)
@@ -284,7 +284,7 @@ let print_inline
   let reserved_regs = build_reserved_args code (fun _ -> false) in
 
   // Signature: static inline (void | uint64_t) [name] (arg1, arg2???) {
-  let header = "static inline " ^ print_rettype ret_val ^ " " ^ name ^ " (" ^ print_args args 0 ^ ") {\n" in
+  let header = "static inline " ^ print_rettype ret_val ^ " " ^ name ^ " (" ^ print_args args 0 ^ ") \n{\n" in
 
   // If we have a return value, declare a variable for it
   let ret_reg = print_register_ret reserved_regs ret_val in
@@ -317,7 +317,7 @@ let print_inline
   // Every modified register that wasn't used for the inputs/outputs should be specified in the modified line
   let modified_str = "  : " ^ print_modified_registers n ret_val of_arg regs_mod reserved_regs args in
 
-  let close_code = "  );\n" ^ (if Some? ret_val then "\nreturn " ^ Some?.v ret_val ^ ";\n" else "") ^ "}\n\n" in
+  let close_code = "  );\n" ^ (if Some? ret_val then "\n  return " ^ Some?.v ret_val ^ ";\n" else "") ^ "}\n\n" in
 
   print_string (header ^ ret_reg ^ explicit_regs ^ start_code ^ code_str ^ output_str ^ input_str ^ modified_str ^ close_code);
   final_label
