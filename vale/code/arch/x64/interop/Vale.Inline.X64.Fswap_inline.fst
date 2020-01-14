@@ -160,5 +160,7 @@ let cswap2_inline bit p0 p1
     let x, _ = lowstar_cswap_normal_t bit p0 p1 () in
     ()
 
+let cswap2_comments : list string = []
+
 let cswap2_code_inline () : FStar.All.ML int =
-  PR.print_inline "cswap2_inline" 0 None (List.length cswap_dom) cswap_dom code_cswap of_arg cswap_regs_modified
+  PR.print_inline "cswap2_inline" 0 None (List.length cswap_dom) cswap_dom code_cswap of_arg cswap_regs_modified cswap2_comments

@@ -169,8 +169,10 @@ let fsqr_inline tmp f1 out =
     let x, _ = lowstar_Fsqr_normal_t tmp f1 out () in
     ()
 
+let fsqr_comments : list string = []
+
 let fsqr_code_inline () : FStar.All.ML int =
-  PR.print_inline "fsqr_inline" 0 None (List.length fsqr_dom) fsqr_dom code_Fsqr of_arg fsqr_regs_modified
+  PR.print_inline "fsqr_inline" 0 None (List.length fsqr_dom) fsqr_dom code_Fsqr of_arg fsqr_regs_modified fsqr_comments
 
 (* Need to rearrange the order of arguments *)
 [@__reduce__]
@@ -271,5 +273,7 @@ let fsqr2_inline tmp f1 out =
     let x, _ = lowstar_Fsqr2_normal_t tmp f1 out () in
     ()
 
+let fsqr2_comments : list string = []
+
 let fsqr2_code_inline () : FStar.All.ML int =
-  PR.print_inline "fsqr2_inline" 0 None (List.length fsqr_dom) fsqr_dom code_Fsqr2 of_arg fsqr_regs_modified
+  PR.print_inline "fsqr2_inline" 0 None (List.length fsqr_dom) fsqr_dom code_Fsqr2 of_arg fsqr_regs_modified fsqr2_comments

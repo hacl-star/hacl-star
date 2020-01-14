@@ -184,8 +184,11 @@ let fmul_inline tmp f1 out f2 =
 
 #pop-options
 
+let fmul_comments : list string =
+  ["Computes a field multiplication: dst <- src1 * src2"]
+
 let fmul_code_inline () : FStar.All.ML int =
-  PR.print_inline "fmul_inline" 0 None (List.length fmul_dom) fmul_dom code_Fmul fmul_of_arg fmul_regs_modified
+  PR.print_inline "fmul_inline" 0 None (List.length fmul_dom) fmul_dom code_Fmul fmul_of_arg fmul_regs_modified fmul_comments
 
 (* Need to rearrange the order of arguments *)
 [@__reduce__]
@@ -295,8 +298,10 @@ let fmul2_inline tmp f1 out f2 =
 
 #pop-options
 
+let fmul2_comments : list string = []
+
 let fmul2_code_inline () : FStar.All.ML int =
-  PR.print_inline "fmul2_inline" 0 None (List.length fmul_dom) fmul_dom code_Fmul2 fmul_of_arg fmul_regs_modified
+  PR.print_inline "fmul2_inline" 0 None (List.length fmul_dom) fmul_dom code_Fmul2 fmul_of_arg fmul_regs_modified fmul2_comments
 
 [@__reduce__]
 let fmul1_dom: IX64.arity_ok 3 td =
@@ -420,5 +425,7 @@ let fmul1_inline out f1 f2
     let x, _ = lowstar_fmul1_normal_t out f1 f2 () in
     ()
 
+let fmul1_comments : list string = []
+
 let fmul1_code_inline () : FStar.All.ML int =
-  PR.print_inline "fmul1_inline" 0 None (List.length fmul1_dom) fmul1_dom code_Fmul1 of_arg fmul1_regs_modified
+  PR.print_inline "fmul1_inline" 0 None (List.length fmul1_dom) fmul1_dom code_Fmul1 of_arg fmul1_regs_modified fmul1_comments

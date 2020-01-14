@@ -270,6 +270,9 @@ and print_code (c:code) (n:int) (p:P.printer) : string * int =
     let cmp = print_cmp cond n1 p in
     jmp ^ label1 ^ body_str ^ label2 ^ cmp, n'
 
+let rec print_fn_comments = function
+  | [] -> ""
+  | hd::tl -> "// " ^ hd ^ "\n" ^ print_fn_comments tl
 
 let print_inline
   (name:string)
@@ -280,7 +283,10 @@ let print_inline
   (code:code)
   (of_arg:reg_nat (List.length args) -> reg_64)
   (regs_mod:reg_64 -> bool)
+  (fn_comments:list string)
   : FStar.All.ML int =
+  let comments = print_fn_comments fn_comments in
+
   let reserved_regs = build_reserved_args code (fun _ -> false) in
 
   // Signature: static inline (void | uint64_t) [name] (arg1, arg2???) {
@@ -319,5 +325,5 @@ let print_inline
 
   let close_code = "  );\n" ^ (if Some? ret_val then "\n  return " ^ Some?.v ret_val ^ ";\n" else "") ^ "}\n\n" in
 
-  print_string (header ^ ret_reg ^ explicit_regs ^ start_code ^ code_str ^ output_str ^ input_str ^ modified_str ^ close_code);
+  print_string (comments ^ header ^ ret_reg ^ explicit_regs ^ start_code ^ code_str ^ output_str ^ input_str ^ modified_str ^ close_code);
   final_label
