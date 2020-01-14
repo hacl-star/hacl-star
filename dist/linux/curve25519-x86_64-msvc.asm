@@ -6,11 +6,14 @@ add1 proc
   mov rdi, rcx
   mov rsi, rdx
   mov rdx, r8
+;# Clear registers to propagate the carry bit
   xor r8, r8
   xor r9, r9
   xor r10, r10
   xor r11, r11
   xor rax, rax
+
+;# Begin addition chain
   add rdx, qword ptr [rsi + 0]
   mov qword ptr [rdi + 0], rdx
   adcx r8, qword ptr [rsi + 8]
@@ -19,6 +22,8 @@ add1 proc
   mov qword ptr [rdi + 16], r9
   adcx r10, qword ptr [rsi + 24]
   mov qword ptr [rdi + 24], r10
+
+;# Return the carry bit in a register
   adcx rax, r11
   pop rsi
   pop rdi
@@ -140,20 +145,28 @@ fmul_ proc
   mov rsi, rdx
   mov rdx, r8
   mov rcx, r9
+;# Save dst_ptr which will be clobbered by Fast_multiply
   mov r15, rdx
+;# Compute the raw multiplication: tmp <- src1 * src2
+;# Compute src1[0] * src2
   mov rdx, qword ptr [rsi + 0]
   mulx r9, r8, qword ptr [rcx + 0]
   xor r10, r10
   mov qword ptr [rdi + 0], r8
+
   mulx r11, r10, qword ptr [rcx + 8]
   adox r10, r9
   mov qword ptr [rdi + 8], r10
+
   mulx r13, r12, qword ptr [rcx + 16]
   adox r12, r11
   mulx rdx, r14, qword ptr [rcx + 24]
   adox r14, r13
   mov rax, 0
   adox rax, rdx
+
+
+;# Compute src1[1] * src2
   mov rdx, qword ptr [rsi + 8]
   mulx r9, r8, qword ptr [rcx + 0]
   xor r10, r10
@@ -173,6 +186,9 @@ fmul_ proc
   mov rax, 0
   adox rax, rdx
   adcx rax, r8
+
+
+;# Compute src1[2] * src2
   mov rdx, qword ptr [rsi + 16]
   mulx r9, r8, qword ptr [rcx + 0]
   xor r10, r10
@@ -192,6 +208,9 @@ fmul_ proc
   mov rax, 0
   adox rax, rdx
   adcx rax, r8
+
+
+;# Compute src1[3] * src2
   mov rdx, qword ptr [rsi + 24]
   mulx r9, r8, qword ptr [rcx + 0]
   xor r10, r10
@@ -214,8 +233,13 @@ fmul_ proc
   adox rax, rdx
   adcx rax, r8
   mov qword ptr [rdi + 56], rax
+
   mov rsi, rdi
+
+;# Restore dst_ptr
   mov rdi, r15
+;# Wrap the result back into the field
+;# Step1: Compute dst + carry == tmp_hi * 38 + tmp_lo
   mov rdx, 38
   mulx r13, r8, qword ptr [rsi + 32]
   xor rcx, rcx
@@ -231,6 +255,8 @@ fmul_ proc
   adox r11, qword ptr [rsi + 24]
   adcx rax, rcx
   adox rax, rcx
+
+;# Step2: Fold the carry back into dst
   imul rax, rdx
   add r8, rax
   adcx r9, rcx
@@ -264,19 +290,25 @@ fmul2 proc
   mov rdx, r8
   mov rcx, r9
   mov r15, rdx
+;# Compute src1[0] * src2
   mov rdx, qword ptr [rsi + 0]
   mulx r9, r8, qword ptr [rcx + 0]
   xor r10, r10
   mov qword ptr [rdi + 0], r8
+
   mulx r11, r10, qword ptr [rcx + 8]
   adox r10, r9
   mov qword ptr [rdi + 8], r10
+
   mulx r13, r12, qword ptr [rcx + 16]
   adox r12, r11
   mulx rdx, r14, qword ptr [rcx + 24]
   adox r14, r13
   mov rax, 0
   adox rax, rdx
+
+
+;# Compute src1[1] * src2
   mov rdx, qword ptr [rsi + 8]
   mulx r9, r8, qword ptr [rcx + 0]
   xor r10, r10
@@ -296,6 +328,9 @@ fmul2 proc
   mov rax, 0
   adox rax, rdx
   adcx rax, r8
+
+
+;# Compute src1[2] * src2
   mov rdx, qword ptr [rsi + 16]
   mulx r9, r8, qword ptr [rcx + 0]
   xor r10, r10
@@ -315,6 +350,9 @@ fmul2 proc
   mov rax, 0
   adox rax, rdx
   adcx rax, r8
+
+
+;# Compute src1[3] * src2
   mov rdx, qword ptr [rsi + 24]
   mulx r9, r8, qword ptr [rcx + 0]
   xor r10, r10
@@ -337,19 +375,26 @@ fmul2 proc
   adox rax, rdx
   adcx rax, r8
   mov qword ptr [rdi + 56], rax
+
+;# Compute src1[0] * src2
   mov rdx, qword ptr [rsi + 32]
   mulx r9, r8, qword ptr [rcx + 32]
   xor r10, r10
   mov qword ptr [rdi + 64], r8
+
   mulx r11, r10, qword ptr [rcx + 40]
   adox r10, r9
   mov qword ptr [rdi + 72], r10
+
   mulx r13, r12, qword ptr [rcx + 48]
   adox r12, r11
   mulx rdx, r14, qword ptr [rcx + 56]
   adox r14, r13
   mov rax, 0
   adox rax, rdx
+
+
+;# Compute src1[1] * src2
   mov rdx, qword ptr [rsi + 40]
   mulx r9, r8, qword ptr [rcx + 32]
   xor r10, r10
@@ -369,6 +414,9 @@ fmul2 proc
   mov rax, 0
   adox rax, rdx
   adcx rax, r8
+
+
+;# Compute src1[2] * src2
   mov rdx, qword ptr [rsi + 48]
   mulx r9, r8, qword ptr [rcx + 32]
   xor r10, r10
@@ -388,6 +436,9 @@ fmul2 proc
   mov rax, 0
   adox rax, rdx
   adcx rax, r8
+
+
+;# Compute src1[3] * src2
   mov rdx, qword ptr [rsi + 56]
   mulx r9, r8, qword ptr [rcx + 32]
   xor r10, r10
@@ -410,8 +461,10 @@ fmul2 proc
   adox rax, rdx
   adcx rax, r8
   mov qword ptr [rdi + 120], rax
+
   mov rsi, rdi
   mov rdi, r15
+;# Step1: Compute dst + carry == tmp_hi * 38 + tmp_lo
   mov rdx, 38
   mulx r13, r8, qword ptr [rsi + 32]
   xor rcx, rcx
@@ -427,6 +480,8 @@ fmul2 proc
   adox r11, qword ptr [rsi + 24]
   adcx rax, rcx
   adox rax, rcx
+
+;# Step2: Fold the carry back into dst
   imul rax, rdx
   add r8, rax
   adcx r9, rcx
@@ -439,6 +494,7 @@ fmul2 proc
   cmovc rax, rdx
   add r8, rax
   mov qword ptr [rdi + 0], r8
+;# Step1: Compute dst + carry == tmp_hi * 38 + tmp_lo
   mov rdx, 38
   mulx r13, r8, qword ptr [rsi + 96]
   xor rcx, rcx
@@ -454,6 +510,8 @@ fmul2 proc
   adox r11, qword ptr [rsi + 88]
   adcx rax, rcx
   adox rax, rcx
+
+;# Step2: Fold the carry back into dst
   imul rax, rdx
   add r8, rax
   adcx r9, rcx
@@ -541,6 +599,7 @@ fsqr proc
   mov qword ptr [rdi + 56], r14
   mov rsi, rdi
   mov rdi, rbx
+;# Step1: Compute dst + carry == tmp_hi * 38 + tmp_lo
   mov rdx, 38
   mulx r13, r8, qword ptr [rsi + 32]
   xor rcx, rcx
@@ -556,6 +615,8 @@ fsqr proc
   adox r11, qword ptr [rsi + 24]
   adcx rax, rcx
   adox rax, rcx
+
+;# Step2: Fold the carry back into dst
   imul rax, rdx
   add r8, rax
   adcx r9, rcx
@@ -696,6 +757,7 @@ fsqr2 proc
   mov qword ptr [rdi + 120], r14
   mov rsi, rdi
   mov rdi, rbx
+;# Step1: Compute dst + carry == tmp_hi * 38 + tmp_lo
   mov rdx, 38
   mulx r13, r8, qword ptr [rsi + 32]
   xor rcx, rcx
@@ -711,6 +773,8 @@ fsqr2 proc
   adox r11, qword ptr [rsi + 24]
   adcx rax, rcx
   adox rax, rcx
+
+;# Step2: Fold the carry back into dst
   imul rax, rdx
   add r8, rax
   adcx r9, rcx
@@ -723,6 +787,7 @@ fsqr2 proc
   cmovc rax, rdx
   add r8, rax
   mov qword ptr [rdi + 0], r8
+;# Step1: Compute dst + carry == tmp_hi * 38 + tmp_lo
   mov rdx, 38
   mulx r13, r8, qword ptr [rsi + 96]
   xor rcx, rcx
@@ -738,6 +803,8 @@ fsqr2 proc
   adox r11, qword ptr [rsi + 88]
   adcx rax, rcx
   adox rax, rcx
+
+;# Step2: Fold the carry back into dst
   imul rax, rdx
   add r8, rax
   adcx r9, rcx

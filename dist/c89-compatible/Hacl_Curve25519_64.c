@@ -57,10 +57,10 @@ Hacl_Impl_Curve25519_Field64_Vale_fsub(uint64_t *out1, uint64_t *f1, uint64_t *f
 
 inline static void
 Hacl_Impl_Curve25519_Field64_Vale_fmul(
-  uint64_t *out1,
+  uint64_t *tmp,
   uint64_t *f1,
-  uint64_t *f2,
-  uint64_t *tmp
+  uint64_t *out1,
+  uint64_t *f2
 )
 {
   #if EVERCRYPT_TARGETCONFIG_GCC
@@ -72,10 +72,10 @@ Hacl_Impl_Curve25519_Field64_Vale_fmul(
 
 inline static void
 Hacl_Impl_Curve25519_Field64_Vale_fmul2(
-  uint64_t *out1,
+  uint64_t *tmp,
   uint64_t *f1,
-  uint64_t *f2,
-  uint64_t *tmp
+  uint64_t *out1,
+  uint64_t *f2
 )
 {
   #if EVERCRYPT_TARGETCONFIG_GCC
@@ -96,7 +96,7 @@ Hacl_Impl_Curve25519_Field64_Vale_fmul1(uint64_t *out1, uint64_t *f1, uint64_t f
 }
 
 inline static void
-Hacl_Impl_Curve25519_Field64_Vale_fsqr(uint64_t *out1, uint64_t *f1, uint64_t *tmp)
+Hacl_Impl_Curve25519_Field64_Vale_fsqr(uint64_t *tmp, uint64_t *f1, uint64_t *out1)
 {
   #if EVERCRYPT_TARGETCONFIG_GCC
   fsqr_inline(tmp, f1, out1);
@@ -106,7 +106,7 @@ Hacl_Impl_Curve25519_Field64_Vale_fsqr(uint64_t *out1, uint64_t *f1, uint64_t *t
 }
 
 inline static void
-Hacl_Impl_Curve25519_Field64_Vale_fsqr2(uint64_t *out1, uint64_t *f, uint64_t *tmp)
+Hacl_Impl_Curve25519_Field64_Vale_fsqr2(uint64_t *tmp, uint64_t *f, uint64_t *out1)
 {
   #if EVERCRYPT_TARGETCONFIG_GCC
   fsqr2_inline(tmp, f, out1);
@@ -167,7 +167,7 @@ Hacl_Curve25519_64_point_add_and_double(uint64_t *q, uint64_t *p01_tmp1, uint64_
   c0 = dc + (uint32_t)4U;
   Hacl_Impl_Curve25519_Field64_Vale_fadd(c0, x3, z31);
   Hacl_Impl_Curve25519_Field64_Vale_fsub(d0, x3, z31);
-  Hacl_Impl_Curve25519_Field64_Vale_fmul2(dc, dc, ab, tmp2);
+  Hacl_Impl_Curve25519_Field64_Vale_fmul2(tmp2, dc, dc, ab);
   Hacl_Impl_Curve25519_Field64_Vale_fadd(x3, d0, c0);
   Hacl_Impl_Curve25519_Field64_Vale_fsub(z31, d0, c0);
   a1 = tmp1;
@@ -176,8 +176,8 @@ Hacl_Curve25519_64_point_add_and_double(uint64_t *q, uint64_t *p01_tmp1, uint64_
   c = tmp1 + (uint32_t)12U;
   ab1 = tmp1;
   dc1 = tmp1 + (uint32_t)8U;
-  Hacl_Impl_Curve25519_Field64_Vale_fsqr2(dc1, ab1, tmp2);
-  Hacl_Impl_Curve25519_Field64_Vale_fsqr2(nq_p1, nq_p1, tmp2);
+  Hacl_Impl_Curve25519_Field64_Vale_fsqr2(tmp2, ab1, dc1);
+  Hacl_Impl_Curve25519_Field64_Vale_fsqr2(tmp2, nq_p1, nq_p1);
   a1[0U] = c[0U];
   a1[1U] = c[1U];
   a1[2U] = c[2U];
@@ -185,8 +185,8 @@ Hacl_Curve25519_64_point_add_and_double(uint64_t *q, uint64_t *p01_tmp1, uint64_
   Hacl_Impl_Curve25519_Field64_Vale_fsub(c, d, c);
   Hacl_Impl_Curve25519_Field64_Vale_fmul1(b1, c, (uint64_t)121665U);
   Hacl_Impl_Curve25519_Field64_Vale_fadd(b1, b1, d);
-  Hacl_Impl_Curve25519_Field64_Vale_fmul2(nq, dc1, ab1, tmp2);
-  Hacl_Impl_Curve25519_Field64_Vale_fmul(z3, z3, x1, tmp2);
+  Hacl_Impl_Curve25519_Field64_Vale_fmul2(tmp2, dc1, nq, ab1);
+  Hacl_Impl_Curve25519_Field64_Vale_fmul(tmp2, z3, z3, x1);
 }
 
 static void Hacl_Curve25519_64_point_double(uint64_t *nq, uint64_t *tmp1, uint64_t *tmp2)
@@ -201,7 +201,7 @@ static void Hacl_Curve25519_64_point_double(uint64_t *nq, uint64_t *tmp1, uint64
   uint64_t *dc = tmp1 + (uint32_t)8U;
   Hacl_Impl_Curve25519_Field64_Vale_fadd(a, x2, z2);
   Hacl_Impl_Curve25519_Field64_Vale_fsub(b, x2, z2);
-  Hacl_Impl_Curve25519_Field64_Vale_fsqr2(dc, ab, tmp2);
+  Hacl_Impl_Curve25519_Field64_Vale_fsqr2(tmp2, ab, dc);
   a[0U] = c[0U];
   a[1U] = c[1U];
   a[2U] = c[2U];
@@ -209,7 +209,7 @@ static void Hacl_Curve25519_64_point_double(uint64_t *nq, uint64_t *tmp1, uint64
   Hacl_Impl_Curve25519_Field64_Vale_fsub(c, d, c);
   Hacl_Impl_Curve25519_Field64_Vale_fmul1(b, c, (uint64_t)121665U);
   Hacl_Impl_Curve25519_Field64_Vale_fadd(b, b, d);
-  Hacl_Impl_Curve25519_Field64_Vale_fmul2(nq, dc, ab, tmp2);
+  Hacl_Impl_Curve25519_Field64_Vale_fmul2(tmp2, dc, nq, ab);
 }
 
 static void Hacl_Curve25519_64_montgomery_ladder(uint64_t *out, uint8_t *key, uint64_t *init1)
@@ -283,10 +283,10 @@ static void
 Hacl_Curve25519_64_fsquare_times(uint64_t *o, uint64_t *inp, uint64_t *tmp, uint32_t n1)
 {
   uint32_t i;
-  Hacl_Impl_Curve25519_Field64_Vale_fsqr(o, inp, tmp);
+  Hacl_Impl_Curve25519_Field64_Vale_fsqr(tmp, inp, o);
   for (i = (uint32_t)0U; i < n1 - (uint32_t)1U; i = i + (uint32_t)1U)
   {
-    Hacl_Impl_Curve25519_Field64_Vale_fsqr(o, o, tmp);
+    Hacl_Impl_Curve25519_Field64_Vale_fsqr(tmp, o, o);
   }
 }
 
@@ -302,28 +302,28 @@ static void Hacl_Curve25519_64_finv(uint64_t *o, uint64_t *i, uint64_t *tmp)
   uint64_t *t0;
   Hacl_Curve25519_64_fsquare_times(a0, i, tmp1, (uint32_t)1U);
   Hacl_Curve25519_64_fsquare_times(t00, a0, tmp1, (uint32_t)2U);
-  Hacl_Impl_Curve25519_Field64_Vale_fmul(b, t00, i, tmp);
-  Hacl_Impl_Curve25519_Field64_Vale_fmul(a0, b, a0, tmp);
+  Hacl_Impl_Curve25519_Field64_Vale_fmul(tmp, t00, b, i);
+  Hacl_Impl_Curve25519_Field64_Vale_fmul(tmp, b, a0, a0);
   Hacl_Curve25519_64_fsquare_times(t00, a0, tmp1, (uint32_t)1U);
-  Hacl_Impl_Curve25519_Field64_Vale_fmul(b, t00, b, tmp);
+  Hacl_Impl_Curve25519_Field64_Vale_fmul(tmp, t00, b, b);
   Hacl_Curve25519_64_fsquare_times(t00, b, tmp1, (uint32_t)5U);
-  Hacl_Impl_Curve25519_Field64_Vale_fmul(b, t00, b, tmp);
+  Hacl_Impl_Curve25519_Field64_Vale_fmul(tmp, t00, b, b);
   Hacl_Curve25519_64_fsquare_times(t00, b, tmp1, (uint32_t)10U);
-  Hacl_Impl_Curve25519_Field64_Vale_fmul(c, t00, b, tmp);
+  Hacl_Impl_Curve25519_Field64_Vale_fmul(tmp, t00, c, b);
   Hacl_Curve25519_64_fsquare_times(t00, c, tmp1, (uint32_t)20U);
-  Hacl_Impl_Curve25519_Field64_Vale_fmul(t00, t00, c, tmp);
+  Hacl_Impl_Curve25519_Field64_Vale_fmul(tmp, t00, t00, c);
   Hacl_Curve25519_64_fsquare_times(t00, t00, tmp1, (uint32_t)10U);
-  Hacl_Impl_Curve25519_Field64_Vale_fmul(b, t00, b, tmp);
+  Hacl_Impl_Curve25519_Field64_Vale_fmul(tmp, t00, b, b);
   Hacl_Curve25519_64_fsquare_times(t00, b, tmp1, (uint32_t)50U);
-  Hacl_Impl_Curve25519_Field64_Vale_fmul(c, t00, b, tmp);
+  Hacl_Impl_Curve25519_Field64_Vale_fmul(tmp, t00, c, b);
   Hacl_Curve25519_64_fsquare_times(t00, c, tmp1, (uint32_t)100U);
-  Hacl_Impl_Curve25519_Field64_Vale_fmul(t00, t00, c, tmp);
+  Hacl_Impl_Curve25519_Field64_Vale_fmul(tmp, t00, t00, c);
   Hacl_Curve25519_64_fsquare_times(t00, t00, tmp1, (uint32_t)50U);
-  Hacl_Impl_Curve25519_Field64_Vale_fmul(t00, t00, b, tmp);
+  Hacl_Impl_Curve25519_Field64_Vale_fmul(tmp, t00, t00, b);
   Hacl_Curve25519_64_fsquare_times(t00, t00, tmp1, (uint32_t)5U);
   a = t1;
   t0 = t1 + (uint32_t)12U;
-  Hacl_Impl_Curve25519_Field64_Vale_fmul(o, t0, a, tmp);
+  Hacl_Impl_Curve25519_Field64_Vale_fmul(tmp, t0, o, a);
 }
 
 static void Hacl_Curve25519_64_store_felem(uint64_t *b, uint64_t *f)
@@ -388,7 +388,7 @@ static void Hacl_Curve25519_64_encode_point(uint8_t *o, uint64_t *i)
   uint64_t u64s[4U] = { 0U };
   uint64_t tmp_w[16U] = { 0U };
   Hacl_Curve25519_64_finv(tmp, z, tmp_w);
-  Hacl_Impl_Curve25519_Field64_Vale_fmul(tmp, tmp, x, tmp_w);
+  Hacl_Impl_Curve25519_Field64_Vale_fmul(tmp_w, tmp, tmp, x);
   Hacl_Curve25519_64_store_felem(u64s, tmp);
   {
     uint32_t i0;

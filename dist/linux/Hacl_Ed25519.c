@@ -47,7 +47,7 @@ static void Hacl_Bignum25519_fmul(u64 *output, u64 *input, u64 *input2)
     for (_i = 0U; _i < (u32)10U; ++_i)
       tmp[_i] = (uint128_t)(u64)0U;
   }
-  Hacl_Impl_Curve25519_Field51_fmul(output, input, input2, tmp);
+  Hacl_Impl_Curve25519_Field51_fmul(tmp, input, output, input2);
 }
 
 static void Hacl_Bignum25519_times_2(u64 *out, u64 *a)
@@ -99,7 +99,7 @@ static void Hacl_Bignum25519_fsquare(u64 *out, u64 *a)
     for (_i = 0U; _i < (u32)5U; ++_i)
       tmp[_i] = (uint128_t)(u64)0U;
   }
-  Hacl_Impl_Curve25519_Field51_fsqr(out, a, tmp);
+  Hacl_Impl_Curve25519_Field51_fsqr(tmp, a, out);
 }
 
 static void Hacl_Bignum25519_fsquare_times(u64 *output, u64 *input, u32 count1)

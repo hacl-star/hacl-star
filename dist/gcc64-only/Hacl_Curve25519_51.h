@@ -40,15 +40,15 @@ void Hacl_Impl_Curve25519_Field51_fsub(uint64_t *out, uint64_t *f1, uint64_t *f2
 
 void
 Hacl_Impl_Curve25519_Field51_fmul(
-  uint64_t *out,
+  uint128_t *uu____2956,
   uint64_t *f1,
-  uint64_t *f2,
-  uint128_t *uu____2959
+  uint64_t *out,
+  uint64_t *f2
 );
 
 void Hacl_Impl_Curve25519_Field51_fmul1(uint64_t *out, uint64_t *f1, uint64_t f2);
 
-void Hacl_Impl_Curve25519_Field51_fsqr(uint64_t *out, uint64_t *f, uint128_t *uu____6941);
+void Hacl_Impl_Curve25519_Field51_fsqr(uint128_t *uu____6939, uint64_t *f, uint64_t *out);
 
 void Hacl_Curve25519_51_fsquare_times(uint64_t *o, uint64_t *inp, uint128_t *tmp, uint32_t n1);
 
