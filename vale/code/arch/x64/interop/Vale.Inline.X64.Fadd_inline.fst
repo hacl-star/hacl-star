@@ -162,7 +162,7 @@ let add1_inline out f1 f2
     x
 
 let add1_comments : list string =
-  ["Computes the addition of four-element src with value in y0"; "and returns the carry (if any)"]
+  ["Computes the addition of four-element f1 with value in f2"; "and returns the carry (if any)"]
 
 let add1_names (n:nat) =
   match n with

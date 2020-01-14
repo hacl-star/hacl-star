@@ -119,7 +119,7 @@ procedure Fmul(
         validSrcAddrs64(mem, dst_in, dst_b, 4, memTaint, Secret);
 
 {
-    Comment("Save dst_ptr which will be clobbered by Fast_multiply");
+    Comment("Save dst_ptr which will be clobbered by the raw multiplication");
     Mov64(r15, dst_ptr); 
     LargeComment("Compute the raw multiplication: tmp <- src1 * src2");
     Fast_multiply(0, tmp_b, inA_b, inB_b);
