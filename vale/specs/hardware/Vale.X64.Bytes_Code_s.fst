@@ -6,13 +6,6 @@ open Vale.X64.Instruction_s
 
 type instr_annotation_t = instr_t_record -> Type0
 
-type noop =
-  | Comment: string -> noop
-  | LargeComment: string -> noop
-  | NoNewline
-  | Newline
-  | Space: nat -> noop
-
 noeq type instruction_t (a:instr_annotation_t) =
   // Generic instruction (should be able to express most instructions)
   | Instr :
@@ -25,7 +18,6 @@ noeq type instruction_t (a:instr_annotation_t) =
   | Pop        : dst:operand64 -> t:taint -> instruction_t a
   | Alloc      : n:nat64 -> instruction_t a
   | Dealloc    : n:nat64 -> instruction_t a
-  | Noop       : n:noop -> instruction_t a
 
 type ocmp:eqtype =
   | OEq: o1:operand64{not (OMem? o1 || OStack? o1)} -> o2:operand64{not (OMem? o2 || OStack? o2)} -> ocmp

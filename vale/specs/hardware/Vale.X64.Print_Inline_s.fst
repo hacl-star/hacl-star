@@ -246,22 +246,18 @@ let rec print_spaces (n:nat) : string =
 (* Overriding printer for formatting instructions *)
 let print_ins (ins:ins) (p:P.printer) : string =
   match ins with
-  | Noop (Comment s) -> "    // " ^ s
-  | Noop (LargeComment s) -> "\n    /////// " ^ s ^ " ////// \n"
+  | Instr _ _ (AnnotateComment s) -> "    // " ^ s
+  | Instr _ _ (AnnotateLargeComment s) -> "\n    /////// " ^ s ^ " ////// \n"
   | _ -> "    \"" ^ P.print_ins ins p ^ ";\""
 
 let rec print_block (b:codes) (n:int) (p:P.printer) : string * int =
   match b with
   | Nil -> "", n
-  | Ins (Noop NoNewline) :: Ins i :: tail ->
+  | Ins (Instr _ _ (AnnotateSpace spaces)) :: Ins i :: tail ->
     let head_str = print_ins i p in
     let rest, n' = print_block tail n p in
-    head_str ^ rest, n' 
-  | Ins (Noop (Space spaces)) :: Ins i :: tail ->
-    let head_str = print_ins i p in
-    let rest, n' = print_block tail n p in
-    print_spaces spaces ^ head_str ^ rest, n' 
-  | Ins (Noop Newline) :: tail ->
+    print_spaces spaces ^ head_str ^ rest, n'
+  | Ins (Instr _ _ (AnnotateNewline _)) :: tail ->
     let rest, n' = print_block tail n p in
     "\n" ^ rest, n'
   | head :: tail ->

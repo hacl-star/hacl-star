@@ -232,20 +232,6 @@ let print_ins (ins:ins) (p:printer) : string =
   | Pop dst _      -> p.ins_name "  pop"  [dst] ^ print_operand dst p
   | Alloc n       -> p.ins_name "  sub" [OReg rRsp; OConst n] ^ print_ops (OReg rRsp) (OConst n)
   | Dealloc n       -> p.ins_name "  add" [OReg rRsp; OConst n] ^ print_ops (OReg rRsp) (OConst n)
-  | Noop NoNewline | Noop Newline | Noop (Space _) -> ""
-  | Noop (Comment s) | Noop (LargeComment s) -> ";# " ^ s
-  (* XXX[jb]: This syntax is a valid line comment in both GCC and
-            MASM. Unfortunately, `;` is not a valid line comment
-            starter in GCC (it is a statement separator), and `#` is
-            not a valid line comment starter in MASM. Fortunately
-            though, a semicolon on a line by itself is valid in GCC,
-            which means that we can place the MASM comment character,
-            followed by the GCC comment character, and get a valid
-            comment line on both. A cleaner approach, of course, would
-            be selectively choose the correct comment
-            character. However, that would require a larger scale
-            change to the code. *)
-
 
 let print_cmp (c:ocmp) (counter:int) (p:printer) : string =
   let print_ops (o1:operand64) (o2:operand64) : string =
@@ -263,7 +249,7 @@ let print_cmp (c:ocmp) (counter:int) (p:printer) : string =
 let rec print_block (b:codes) (n:int) (p:printer) : string * int =
   match b with
   | Nil -> "", n
-  | Ins (Noop NoNewline) :: tail | Ins (Noop (Space _)) :: tail -> print_block tail n p
+  | Ins (Instr _ _ (AnnotateSpace _)) :: tail -> print_block tail n p
   | head :: tail ->
     let head_str, n' = print_code head n p in
     let rest, n'' = print_block tail n' p in

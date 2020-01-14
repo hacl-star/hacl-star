@@ -31,7 +31,6 @@ open Vale.X64.Memory
 open Vale.X64.Stack_i
 module I = Vale.X64.Instructions_s
 module S = Vale.X64.Machine_Semantics_s
-module BC = Vale.X64.Bytes_Code_s
 friend Vale.X64.Decls
 #endverbatim
 
@@ -460,7 +459,7 @@ procedure Nat64Equal(out dst:reg_opr64, inout src:reg_opr64)
 procedure Comment(inline c:string)
     {:public}
     {:quick exportOnly}
-    {:instruction Ins(BC.Noop(BC.Comment(c)))}
+    {:instruction mk_ins(make_instr_annotate(I.ins_Comment(c), S.AnnotateComment(c)))}
 {
     // Do nothing. This is a no-op.
 }
@@ -468,7 +467,7 @@ procedure Comment(inline c:string)
 procedure LargeComment(inline c:string)
     {:public}
     {:quick exportOnly}
-    {:instruction Ins(BC.Noop(BC.LargeComment(c)))}
+    {:instruction mk_ins(make_instr_annotate(I.ins_LargeComment(c), S.AnnotateLargeComment(c)))}
 {
     // Do nothing. This is a no-op.
 }
@@ -476,7 +475,7 @@ procedure LargeComment(inline c:string)
 procedure NoNewline()
     {:public}
     {:quick exportOnly}
-    {:instruction Ins(BC.Noop(BC.NoNewline))}
+    {:instruction mk_ins(make_instr_annotate(I.ins_Space(0), S.AnnotateSpace(0)))}
 {
     // Do nothing. This is a no-op.
 }
@@ -484,7 +483,7 @@ procedure NoNewline()
 procedure Newline()
     {:public}
     {:quick exportOnly}
-    {:instruction Ins(BC.Noop(BC.Newline))}
+    {:instruction mk_ins(make_instr_annotate(I.ins_Newline, S.AnnotateNewline()))}
 {
     // Do nothing. This is a no-op.
 }
@@ -492,7 +491,7 @@ procedure Newline()
 procedure Space(inline n:nat)
     {:public}
     {:quick exportOnly}
-    {:instruction Ins(BC.Noop(BC.Space(n)))}
+    {:instruction mk_ins(make_instr_annotate(I.ins_Space(n), S.AnnotateSpace(n)))}
 {
     // Do nothing. This is a no-op.
 }
