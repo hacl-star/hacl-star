@@ -185,10 +185,18 @@ let fmul_inline tmp f1 out f2 =
 #pop-options
 
 let fmul_comments : list string =
-  ["Computes a field multiplication: dst <- src1 * src2"]
+  ["Computes a field multiplication: out <- f1 * f2"]
+
+let fmul_names (n:nat) =
+  match n with
+  | 0 -> "tmp"
+  | 1 -> "f1"
+  | 2 -> "out"
+  | 3 -> "f2"
+  | _ -> ""
 
 let fmul_code_inline () : FStar.All.ML int =
-  PR.print_inline "fmul_inline" 0 None (List.length fmul_dom) fmul_dom code_Fmul fmul_of_arg fmul_regs_modified fmul_comments
+  PR.print_inline "fmul_inline" 0 None (List.length fmul_dom) fmul_dom fmul_names code_Fmul fmul_of_arg fmul_regs_modified fmul_comments
 
 (* Need to rearrange the order of arguments *)
 [@__reduce__]
@@ -300,8 +308,16 @@ let fmul2_inline tmp f1 out f2 =
 
 let fmul2_comments : list string = []
 
+let fmul2_names (n:nat) =
+  match n with
+  | 0 -> "tmp"
+  | 1 -> "f1"
+  | 2 -> "out1"
+  | 3 -> "f2"
+  | _ -> ""
+
 let fmul2_code_inline () : FStar.All.ML int =
-  PR.print_inline "fmul2_inline" 0 None (List.length fmul_dom) fmul_dom code_Fmul2 fmul_of_arg fmul_regs_modified fmul2_comments
+  PR.print_inline "fmul2_inline" 0 None (List.length fmul_dom) fmul_dom fmul2_names code_Fmul2 fmul_of_arg fmul_regs_modified fmul2_comments
 
 [@__reduce__]
 let fmul1_dom: IX64.arity_ok 3 td =
@@ -427,5 +443,12 @@ let fmul1_inline out f1 f2
 
 let fmul1_comments : list string = []
 
+let fmul1_names (n:nat) =
+  match n with
+  | 0 -> "out1"
+  | 1 -> "f1"
+  | 2 -> "f2"
+  | _ -> ""
+
 let fmul1_code_inline () : FStar.All.ML int =
-  PR.print_inline "fmul1_inline" 0 None (List.length fmul1_dom) fmul1_dom code_Fmul1 of_arg fmul1_regs_modified fmul1_comments
+  PR.print_inline "fmul1_inline" 0 None (List.length fmul1_dom) fmul1_dom fmul1_names code_Fmul1 of_arg fmul1_regs_modified fmul1_comments

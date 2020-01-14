@@ -21,15 +21,15 @@ let print_basetype (t:base_typ) = match t with
   | TUInt128 -> "ERROR"
 
 // Returns "uint8_t arg2" or "uint64_t* arg0" for instance
-let print_arg (a:td) (i:nat) = match a with
-  | TD_Base src -> print_basetype src ^ " arg" ^ string_of_int i
-  | TD_Buffer src _ _ | TD_ImmBuffer src _ _ -> print_basetype src ^ " *arg" ^ string_of_int i
+let print_arg (a:td) (i:nat) (names:nat -> string) = match a with
+  | TD_Base src -> print_basetype src ^ " " ^ names i
+  | TD_Buffer src _ _ | TD_ImmBuffer src _ _ -> print_basetype src ^ " *" ^ names i
 
 // Prints a list of args with their types, separated by a comma
-let rec print_args (args:list td) (i:nat) = match args with
+let rec print_args (args:list td) (i:nat) (names:nat -> string) = match args with
   | [] -> ""
-  | [a] -> print_arg a i
-  | a::q -> print_arg a i ^ ", " ^ print_args q (i+1)
+  | [a] -> print_arg a i names
+  | a::q -> print_arg a i names ^ ", " ^ print_args q (i+1) names
 
 let rec build_reserved_args_outs (l:list instr_out) (reserved:reg_64 -> bool)
   : Tot (reg_64 -> bool)
@@ -107,9 +107,9 @@ let print_output_ret ret_val (reg_names:reg_64 -> string) (counter:nat) : list s
 // If the register in which a is passed is modified, we should specify `"+&r" (name)`
 let print_modified_input
   (n:nat) (a:td) (i:nat{i < n}) (of_arg:reg_nat n -> reg_64) (regs_mod:reg_64 -> bool) (reserved_regs:reg_64 -> bool)
-  (reg_names:reg_64 -> string) (counter:nat) : list string * (reg_64 -> string) * nat =
+  (reg_names:reg_64 -> string) (counter:nat) (arg_names:nat -> string) : list string * (reg_64 -> string) * nat =
    if regs_mod (of_arg i) then
-    (["\"+&r\" (arg" ^ string_of_int i ^ (if reserved_regs (of_arg i) then "_r)" else ")")],
+    (["\"+&r\" (" ^ arg_names i ^ (if reserved_regs (of_arg i) then "_r)" else ")")],
      (fun r -> if r = of_arg i && not (reserved_regs r) then string_of_int counter else reg_names r),
      counter + 1
      ) else ([], reg_names, counter)
@@ -118,14 +118,13 @@ let print_modified_input
 let rec get_modified_input_strings
   (n:nat) (of_arg:reg_nat n -> reg_64) (regs_mod:reg_64 -> bool) (reserved_regs:reg_64 -> bool)
   (args:list td) (i:nat{i + List.Tot.length args <= n}) (ret_val:option string)
-  (reg_names:reg_64 -> string) (counter:nat) : list string * (reg_64 -> string) * nat
+  (reg_names:reg_64 -> string) (counter:nat) (arg_names:nat -> string) : list string * (reg_64 -> string) * nat
   = match args with
   | [] -> print_output_ret ret_val reg_names counter
   | a::q ->
-      let output, reg_names, counter = print_modified_input n a i of_arg regs_mod reserved_regs reg_names counter in
-      let outputs, reg_names, counter = get_modified_input_strings n of_arg regs_mod reserved_regs q (i+1) ret_val reg_names counter in
+      let output, reg_names, counter = print_modified_input n a i of_arg regs_mod reserved_regs reg_names counter arg_names in
+      let outputs, reg_names, counter = get_modified_input_strings n of_arg regs_mod reserved_regs q (i+1) ret_val reg_names counter arg_names in
       output @ outputs, reg_names, counter
-
 
 // Print the list of modified inputs, separated by commas
 let print_modified_inputs
@@ -136,44 +135,45 @@ let print_modified_inputs
   (args:list td{List.Tot.length args <= n})
   (ret_val:option string)
   (reg_names:reg_64 -> string)
-  (counter:nat) =
+  (counter:nat)
+  (arg_names:nat -> string) =
   let rec aux = function
   | [] -> "\n"
   | [a] -> a ^ "\n"
   | a :: q -> a ^ ", " ^ aux q
   in
-  let outputs, output_reg_names, output_nbr = get_modified_input_strings n of_arg regs_mod reserved_regs args 0 ret_val reg_names counter in
+  let outputs, output_reg_names, output_nbr = get_modified_input_strings n of_arg regs_mod reserved_regs args 0 ret_val reg_names counter arg_names in
   aux outputs, output_reg_names, output_nbr
 
 // If the register in which an arg is passed is not modified, we should specify it as `"r" (name)`
 let print_nonmodified_input
   (n:nat) (of_arg:reg_nat n -> reg_64) (regs_mod:reg_64 -> bool) (reserved_regs:reg_64 -> bool)
-  (a:td) (i:nat{i < n}) (reg_names:reg_64 -> string) (counter:nat)  : list string * (reg_64 -> string) * nat =
+  (a:td) (i:nat{i < n}) (reg_names:reg_64 -> string) (counter:nat) (arg_names:nat -> string) : list string * (reg_64 -> string) * nat =
    if regs_mod (of_arg i) then ([], reg_names, counter) else
-     (["\"r\" (arg" ^ string_of_int i ^ (if reserved_regs (of_arg i) then "_r)" else  ")")],
+     (["\"r\" (" ^ arg_names i ^ (if reserved_regs (of_arg i) then "_r)" else  ")")],
      (fun r -> if r = of_arg i && not (reserved_regs r) then string_of_int counter else reg_names r),
      counter + 1)
 
 // Get a list of strings corresponding to modified inputs
 let rec get_nonmodified_input_strings
   (n:nat) (of_arg:reg_nat n -> reg_64) (regs_mod:reg_64 -> bool) (reserved_regs:reg_64 -> bool)
-  (args:list td) (i:nat{List.Tot.length args + i <= n}) (reg_names:reg_64 -> string) (counter:nat)
+  (args:list td) (i:nat{List.Tot.length args + i <= n}) (reg_names:reg_64 -> string) (counter:nat) (arg_names:nat -> string)
   = match args with
   | [] -> [], reg_names, counter
   | a::q ->
-    let input, reg_names, counter = print_nonmodified_input n of_arg regs_mod reserved_regs a i reg_names counter in
-    let inputs, reg_names, counter = get_nonmodified_input_strings n of_arg regs_mod reserved_regs q (i+1) reg_names counter in
+    let input, reg_names, counter = print_nonmodified_input n of_arg regs_mod reserved_regs a i reg_names counter arg_names in
+    let inputs, reg_names, counter = get_nonmodified_input_strings n of_arg regs_mod reserved_regs q (i+1) reg_names counter arg_names in
     input @ inputs, reg_names, counter
 
 let print_nonmodified_inputs
   (n:nat) (of_arg:reg_nat n -> reg_64) (regs_mod:reg_64 -> bool) (reserved_regs:reg_64 -> bool)
-  (args:list td{List.Tot.length args <= n}) (reg_names:reg_64 -> string) (counter:nat) =
+  (args:list td{List.Tot.length args <= n}) (reg_names:reg_64 -> string) (counter:nat) (arg_names:nat -> string) =
   let rec aux = function
   | [] -> "\n"
   | [a] -> a ^ "\n"
   | a :: q -> a ^ ", " ^ aux q
   in
-  let inputs, input_reg_names, counter = get_nonmodified_input_strings n of_arg regs_mod reserved_regs args 0 reg_names counter in
+  let inputs, input_reg_names, counter = get_nonmodified_input_strings n of_arg regs_mod reserved_regs args 0 reg_names counter arg_names in
   aux inputs, input_reg_names, counter
 
 // Print the list of modified registers, + memory and cc
@@ -202,21 +202,21 @@ let print_modified_registers
   in aux [rRax; rRbx; rRcx; rRdx; rRsi; rRdi; rRbp; rRsp; rR8; rR9; rR10; rR11; rR12; rR13; rR14; rR15]
 
 // Prints "register uint64_t *argi_r asm("[reg]") = argi;\n"
-let print_explicit_register_arg (n:nat) (a:td) (i:nat{i < n}) (of_arg:reg_nat n -> reg_64) (reserved:reg_64 -> bool) =
+let print_explicit_register_arg (n:nat) (a:td) (i:nat{i < n}) (of_arg:reg_nat n -> reg_64) (reserved:reg_64 -> bool) (names:nat -> string) =
   let ty = match a with
     | TD_Base _ -> "uint64_t "
     | _ -> "uint64_t *"
   in
   if reserved (of_arg i) then
     // If the associated register is reserved, we really this argument in it. For instance if it is Rdx and we have Mul(x) instructions
-    "  register " ^ ty ^ "arg" ^ string_of_int i ^ "_r asm(\"" ^ P.print_reg_name (of_arg i) ^ "\") = arg" ^ string_of_int i ^ ";\n"
+    "  register " ^ ty ^ names i ^ "_r asm(\"" ^ P.print_reg_name (of_arg i) ^ "\") = " ^ names i ^ ";\n"
   else ""
 
 
-let rec print_explicit_register_args (n:nat) (args:list td) (i:nat{i + List.length args = n}) (of_arg:reg_nat n -> reg_64) (reserved:reg_64 -> bool) =
+let rec print_explicit_register_args (n:nat) (args:list td) (i:nat{i + List.length args = n}) (of_arg:reg_nat n -> reg_64) (reserved:reg_64 -> bool) (names:nat -> string) =
   match args with
   | [] -> ""
-  | a::q -> print_explicit_register_arg n a i of_arg reserved ^ print_explicit_register_args n q (i+1) of_arg reserved
+  | a::q -> print_explicit_register_arg n a i of_arg reserved names ^ print_explicit_register_args n q (i+1) of_arg reserved names
 
 // If we have a return parameter with a reserved register, print "register uint64_t *[name] asm("rax");\n"
 let print_register_ret (reserved:reg_64 -> bool) = function
@@ -280,6 +280,7 @@ let print_inline
   (ret_val:option string)
   (n:nat)
   (args:list td{List.length args = n})
+  (arg_names:nat -> string)
   (code:code)
   (of_arg:reg_nat (List.length args) -> reg_64)
   (regs_mod:reg_64 -> bool)
@@ -290,12 +291,12 @@ let print_inline
   let reserved_regs = build_reserved_args code (fun _ -> false) in
 
   // Signature: static inline (void | uint64_t) [name] (arg1, arg2???) {
-  let header = "static inline " ^ print_rettype ret_val ^ " " ^ name ^ " (" ^ print_args args 0 ^ ") \n{\n" in
+  let header = "static inline " ^ print_rettype ret_val ^ " " ^ name ^ " (" ^ print_args args 0 arg_names ^ ") \n{\n" in
 
   // If we have a return value, declare a variable for it
   let ret_reg = print_register_ret reserved_regs ret_val in
   // Explicitly allocate registers when needed
-  let explicit_regs = print_explicit_register_args n args 0 of_arg reserved_regs in
+  let explicit_regs = print_explicit_register_args n args 0 of_arg reserved_regs arg_names in
 
   // Start printing the code, need the asm volatile header
   let start_code = "\n  asm volatile(\n" in
@@ -306,11 +307,11 @@ let print_inline
 
   // Each *modified* input should be specified as "+r" (name) in the output line
   // If we have a return value, it should be written only and specified as "=r" (name)
-  let output_str, output_reg_names, output_nbr =  print_modified_inputs n of_arg regs_mod reserved_regs args ret_val init_reg_names 0 in
+  let output_str, output_reg_names, output_nbr =  print_modified_inputs n of_arg regs_mod reserved_regs args ret_val init_reg_names 0 arg_names in
   let output_str = "  : " ^ output_str in
 
   // Each *non-modified* input should be specified as `"r" (name)` in the input line
-  let input_str, inlined_reg_names, _ = print_nonmodified_inputs n of_arg regs_mod reserved_regs args output_reg_names output_nbr in
+  let input_str, inlined_reg_names, _ = print_nonmodified_inputs n of_arg regs_mod reserved_regs args output_reg_names output_nbr arg_names in
   let input_str = "  : " ^ input_str in
 
   // In inline assembly, operands are prefixed by "%%" instead of "%" in regular GCC assembly

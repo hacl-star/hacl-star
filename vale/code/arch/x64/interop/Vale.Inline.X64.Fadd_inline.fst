@@ -164,8 +164,15 @@ let add1_inline out f1 f2
 let add1_comments : list string =
   ["Computes the addition of four-element src with value in y0"; "and returns the carry (if any)"]
 
+let add1_names (n:nat) =
+  match n with
+  | 0 -> "out1"
+  | 1 -> "f1"
+  | 2 -> "f2"
+  | _ -> ""
+
 let add1_code_inline () : FStar.All.ML int =
-  PR.print_inline "add1_inline" 0 (Some "carry_r") (List.length dom) dom code_add1 of_arg add1_regs_modified add1_comments
+  PR.print_inline "add1_inline" 0 (Some "carry_r") (List.length dom) dom add1_names code_add1 of_arg add1_regs_modified add1_comments
 
 
 [@__reduce__]
@@ -281,8 +288,15 @@ let fadd_inline out f1 f2
 
 let fadd_comments : list string = []
 
+let fadd_names (n:nat) =
+  match n with
+  | 0 -> "out1"
+  | 1 -> "f1"
+  | 2 -> "f2"
+  | _ -> ""
+
 let fadd_code_inline () : FStar.All.ML int =
-  PR.print_inline "fadd_inline" 0 None (List.length fadd_dom) fadd_dom code_Fadd of_arg fadd_regs_modified fadd_comments
+  PR.print_inline "fadd_inline" 0 None (List.length fadd_dom) fadd_dom fadd_names code_Fadd of_arg fadd_regs_modified fadd_comments
 
 [@__reduce__]
 let fsub_dom: IX64.arity_ok_stdcall td =
@@ -397,5 +411,12 @@ let fsub_inline out f1 f2
 
 let fsub_comments : list string = []
 
+let fsub_names (n:nat) =
+  match n with
+  | 0 -> "out1"
+  | 1 -> "f1"
+  | 2 -> "f2"
+  | _ -> ""
+
 let fsub_code_inline () : FStar.All.ML int =
-  PR.print_inline "fsub_inline" 0 None (List.length fsub_dom) fsub_dom code_Fsub of_arg fsub_regs_modified fsub_comments
+  PR.print_inline "fsub_inline" 0 None (List.length fsub_dom) fsub_dom fsub_names code_Fsub of_arg fsub_regs_modified fsub_comments
