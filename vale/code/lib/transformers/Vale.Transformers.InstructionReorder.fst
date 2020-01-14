@@ -404,6 +404,8 @@ let lemma_machine_eval_ins_st_equiv_states (i : ins) (s1 s2 : machine_state) :
     assert_spinoff (equiv_states_ext s1_final s2_final)
   | Dealloc _ ->
     assert_spinoff (equiv_states_ext s1_final s2_final)
+  | Noop _ ->
+    assert_spinoff (equiv_states_ext s1_final s2_final)
 #pop-options
 
 let lemma_eval_ins_equiv_states (i : ins) (s1 s2 : machine_state) :

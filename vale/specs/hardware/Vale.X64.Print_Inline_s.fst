@@ -238,6 +238,11 @@ let print_cmp (c:ocmp) (counter:int) (p:P.printer) : string =
   | OLt o1 o2 -> "    \"" ^ print_ops o1 o2 ^ "  jb " ^ "L" ^ string_of_int counter ^ ";\"\n"
   | OGt o1 o2 -> "    \"" ^ print_ops o1 o2 ^ "  ja " ^ "L" ^ string_of_int counter ^ ";\"\n"
 
+(* Overriding printer for formatting instructions *)
+let print_ins (ins:ins) (p:P.printer) : string =
+  match ins with
+  | Noop (Comment s) -> "    // " ^ s ^ "\n"
+  | _ -> "    \"" ^ P.print_ins ins p ^ ";\"\n"
 
 let rec print_block (b:codes) (n:int) (p:P.printer) : string * int =
   match b with
@@ -248,7 +253,7 @@ let rec print_block (b:codes) (n:int) (p:P.printer) : string * int =
     head_str ^ rest, n''
 and print_code (c:code) (n:int) (p:P.printer) : string * int =
   match c with
-  | Ins ins -> ("    \"" ^ P.print_ins ins p ^ ";\"\n", n)
+  | Ins ins -> (print_ins ins p, n)
   | Block b -> print_block b n p
   | IfElse cond true_code false_code ->
     let n1 = n in
