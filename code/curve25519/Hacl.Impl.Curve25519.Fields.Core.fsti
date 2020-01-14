@@ -205,10 +205,10 @@ let state_inv_t (#s:field_spec) (h:mem) (f:felem s): Type0 =
 
 inline_for_extraction
 let fmul_t (s:field_spec) =
-    out:felem s
+    tmp:felem_wide2 s
   -> f1:felem s
+  -> out:felem s
   -> f2:felem s
-  -> tmp:felem_wide2 s
   -> Stack unit
     (requires fun h ->
       live h out /\ live h f1 /\ live h f2 /\ live h tmp /\
@@ -244,10 +244,10 @@ let fmul2_fsqr2_post (#s:field_spec) (h:mem) (out:felem2 s): Type0 =
 
 inline_for_extraction
 let fmul2_t (s:field_spec) =
-    out:felem2 s
+    tmp:felem_wide2 s
   -> f1:felem2 s
+  -> out:felem2 s
   -> f2:felem2 s
-  -> tmp:felem_wide2 s
   -> Stack unit
     (requires fun h ->
       live h out /\ live h f1 /\ live h f2 /\ live h tmp /\
@@ -310,9 +310,9 @@ let fsqr_disjoint (#s:field_spec) (out f1:felem s) (tmp:felem_wide s): Type0 =
 
 inline_for_extraction
 let fsqr_t (s:field_spec) =
-    out:felem s
+    tmp:felem_wide s
   -> f1:felem s
-  -> tmp:felem_wide s
+  -> out:felem s
   -> Stack unit
     (requires fun h ->
       live h out /\ live h f1 /\ live h tmp /\
@@ -337,9 +337,9 @@ let fsqr2_pre (#s:field_spec) (h:mem) (f:felem2 s): Type0 =
 
 inline_for_extraction
 let fsqr2_t (s:field_spec) =
-    out:felem2 s
+    tmp:felem_wide2 s
   -> f:felem2 s
-  -> tmp:felem_wide2 s
+  -> out:felem2 s
   -> Stack unit
     (requires fun h ->
       live h out /\ live h f /\ live h tmp /\

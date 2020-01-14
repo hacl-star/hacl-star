@@ -6,11 +6,14 @@ add1:
   mov %rcx, %rdi
   mov %rdx, %rsi
   mov %r8, %rdx
+;# Clear registers to propagate the carry bit
   xor %r8, %r8
   xor %r9, %r9
   xor %r10, %r10
   xor %r11, %r11
   xor %rax, %rax
+
+;# Begin addition chain
   addq 0(%rsi), %rdx
   movq %rdx, 0(%rdi)
   adcxq 8(%rsi), %r8
@@ -19,6 +22,8 @@ add1:
   movq %r9, 16(%rdi)
   adcxq 24(%rsi), %r10
   movq %r10, 24(%rdi)
+
+;# Return the carry bit in a register
   adcx %r11, %rax
   pop %rsi
   pop %rdi
@@ -140,20 +145,28 @@ fmul_:
   mov %rdx, %rsi
   mov %r8, %rdx
   mov %r9, %rcx
+;# Save dst_ptr which will be clobbered by Fast_multiply
   mov %rdx, %r15
+;# Compute the raw multiplication: tmp <- src1 * src2
+;# Compute src1[0] * src2
   movq 0(%rsi), %rdx
   mulxq 0(%rcx), %r8, %r9
   xor %r10, %r10
   movq %r8, 0(%rdi)
+
   mulxq 8(%rcx), %r10, %r11
   adox %r9, %r10
   movq %r10, 8(%rdi)
+
   mulxq 16(%rcx), %r12, %r13
   adox %r11, %r12
   mulxq 24(%rcx), %r14, %rdx
   adox %r13, %r14
   mov $0, %rax
   adox %rdx, %rax
+
+
+;# Compute src1[1] * src2
   movq 8(%rsi), %rdx
   mulxq 0(%rcx), %r8, %r9
   xor %r10, %r10
@@ -173,6 +186,9 @@ fmul_:
   mov $0, %rax
   adox %rdx, %rax
   adcx %r8, %rax
+
+
+;# Compute src1[2] * src2
   movq 16(%rsi), %rdx
   mulxq 0(%rcx), %r8, %r9
   xor %r10, %r10
@@ -192,6 +208,9 @@ fmul_:
   mov $0, %rax
   adox %rdx, %rax
   adcx %r8, %rax
+
+
+;# Compute src1[3] * src2
   movq 24(%rsi), %rdx
   mulxq 0(%rcx), %r8, %r9
   xor %r10, %r10
@@ -214,8 +233,13 @@ fmul_:
   adox %rdx, %rax
   adcx %r8, %rax
   movq %rax, 56(%rdi)
+
   mov %rdi, %rsi
+
+;# Restore dst_ptr
   mov %r15, %rdi
+;# Wrap the result back into the field
+;# Step1: Compute dst + carry == tmp_hi * 38 + tmp_lo
   mov $38, %rdx
   mulxq 32(%rsi), %r8, %r13
   xor %rcx, %rcx
@@ -231,6 +255,8 @@ fmul_:
   adoxq 24(%rsi), %r11
   adcx %rcx, %rax
   adox %rcx, %rax
+
+;# Step2: Fold the carry back into dst
   imul %rdx, %rax
   add %rax, %r8
   adcx %rcx, %r9
@@ -264,19 +290,25 @@ fmul2:
   mov %r8, %rdx
   mov %r9, %rcx
   mov %rdx, %r15
+;# Compute src1[0] * src2
   movq 0(%rsi), %rdx
   mulxq 0(%rcx), %r8, %r9
   xor %r10, %r10
   movq %r8, 0(%rdi)
+
   mulxq 8(%rcx), %r10, %r11
   adox %r9, %r10
   movq %r10, 8(%rdi)
+
   mulxq 16(%rcx), %r12, %r13
   adox %r11, %r12
   mulxq 24(%rcx), %r14, %rdx
   adox %r13, %r14
   mov $0, %rax
   adox %rdx, %rax
+
+
+;# Compute src1[1] * src2
   movq 8(%rsi), %rdx
   mulxq 0(%rcx), %r8, %r9
   xor %r10, %r10
@@ -296,6 +328,9 @@ fmul2:
   mov $0, %rax
   adox %rdx, %rax
   adcx %r8, %rax
+
+
+;# Compute src1[2] * src2
   movq 16(%rsi), %rdx
   mulxq 0(%rcx), %r8, %r9
   xor %r10, %r10
@@ -315,6 +350,9 @@ fmul2:
   mov $0, %rax
   adox %rdx, %rax
   adcx %r8, %rax
+
+
+;# Compute src1[3] * src2
   movq 24(%rsi), %rdx
   mulxq 0(%rcx), %r8, %r9
   xor %r10, %r10
@@ -337,19 +375,26 @@ fmul2:
   adox %rdx, %rax
   adcx %r8, %rax
   movq %rax, 56(%rdi)
+
+;# Compute src1[0] * src2
   movq 32(%rsi), %rdx
   mulxq 32(%rcx), %r8, %r9
   xor %r10, %r10
   movq %r8, 64(%rdi)
+
   mulxq 40(%rcx), %r10, %r11
   adox %r9, %r10
   movq %r10, 72(%rdi)
+
   mulxq 48(%rcx), %r12, %r13
   adox %r11, %r12
   mulxq 56(%rcx), %r14, %rdx
   adox %r13, %r14
   mov $0, %rax
   adox %rdx, %rax
+
+
+;# Compute src1[1] * src2
   movq 40(%rsi), %rdx
   mulxq 32(%rcx), %r8, %r9
   xor %r10, %r10
@@ -369,6 +414,9 @@ fmul2:
   mov $0, %rax
   adox %rdx, %rax
   adcx %r8, %rax
+
+
+;# Compute src1[2] * src2
   movq 48(%rsi), %rdx
   mulxq 32(%rcx), %r8, %r9
   xor %r10, %r10
@@ -388,6 +436,9 @@ fmul2:
   mov $0, %rax
   adox %rdx, %rax
   adcx %r8, %rax
+
+
+;# Compute src1[3] * src2
   movq 56(%rsi), %rdx
   mulxq 32(%rcx), %r8, %r9
   xor %r10, %r10
@@ -410,8 +461,10 @@ fmul2:
   adox %rdx, %rax
   adcx %r8, %rax
   movq %rax, 120(%rdi)
+
   mov %rdi, %rsi
   mov %r15, %rdi
+;# Step1: Compute dst + carry == tmp_hi * 38 + tmp_lo
   mov $38, %rdx
   mulxq 32(%rsi), %r8, %r13
   xor %rcx, %rcx
@@ -427,6 +480,8 @@ fmul2:
   adoxq 24(%rsi), %r11
   adcx %rcx, %rax
   adox %rcx, %rax
+
+;# Step2: Fold the carry back into dst
   imul %rdx, %rax
   add %rax, %r8
   adcx %rcx, %r9
@@ -439,6 +494,7 @@ fmul2:
   cmovc %rdx, %rax
   add %rax, %r8
   movq %r8, 0(%rdi)
+;# Step1: Compute dst + carry == tmp_hi * 38 + tmp_lo
   mov $38, %rdx
   mulxq 96(%rsi), %r8, %r13
   xor %rcx, %rcx
@@ -454,6 +510,8 @@ fmul2:
   adoxq 88(%rsi), %r11
   adcx %rcx, %rax
   adox %rcx, %rax
+
+;# Step2: Fold the carry back into dst
   imul %rdx, %rax
   add %rax, %r8
   adcx %rcx, %r9
@@ -541,6 +599,7 @@ fsqr:
   movq %r14, 56(%rdi)
   mov %rdi, %rsi
   mov %rbx, %rdi
+;# Step1: Compute dst + carry == tmp_hi * 38 + tmp_lo
   mov $38, %rdx
   mulxq 32(%rsi), %r8, %r13
   xor %rcx, %rcx
@@ -556,6 +615,8 @@ fsqr:
   adoxq 24(%rsi), %r11
   adcx %rcx, %rax
   adox %rcx, %rax
+
+;# Step2: Fold the carry back into dst
   imul %rdx, %rax
   add %rax, %r8
   adcx %rcx, %r9
@@ -696,6 +757,7 @@ fsqr2:
   movq %r14, 120(%rdi)
   mov %rdi, %rsi
   mov %rbx, %rdi
+;# Step1: Compute dst + carry == tmp_hi * 38 + tmp_lo
   mov $38, %rdx
   mulxq 32(%rsi), %r8, %r13
   xor %rcx, %rcx
@@ -711,6 +773,8 @@ fsqr2:
   adoxq 24(%rsi), %r11
   adcx %rcx, %rax
   adox %rcx, %rax
+
+;# Step2: Fold the carry back into dst
   imul %rdx, %rax
   add %rax, %r8
   adcx %rcx, %r9
@@ -723,6 +787,7 @@ fsqr2:
   cmovc %rdx, %rax
   add %rax, %r8
   movq %r8, 0(%rdi)
+;# Step1: Compute dst + carry == tmp_hi * 38 + tmp_lo
   mov $38, %rdx
   mulxq 96(%rsi), %r8, %r13
   xor %rcx, %rcx
@@ -738,6 +803,8 @@ fsqr2:
   adoxq 88(%rsi), %r11
   adcx %rcx, %rax
   adox %rcx, %rax
+
+;# Step2: Fold the carry back into dst
   imul %rdx, %rax
   add %rax, %r8
   adcx %rcx, %r9

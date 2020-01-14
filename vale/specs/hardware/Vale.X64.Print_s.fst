@@ -1,5 +1,4 @@
 module Vale.X64.Print_s
-open FStar.Mul
 
 // Trusted code for producing assembly code
 
@@ -10,12 +9,13 @@ open Vale.X64.Machine_Semantics_s
 open FStar.IO
 
 noeq type printer = {
+  print_reg_name: reg_64 -> string;
   reg_prefix : unit -> string;
   mem_prefix : string -> string;
-  maddr      : string -> option (string & string) -> string -> string;
+  maddr      : string -> option(string * string) -> string -> string;
   const      : int -> string;
   ins_name   : string -> list operand64 -> string;
-  op_order   : string -> string -> string & string;
+  op_order   : string -> string -> string * string;
   align      : unit -> string;
   header     : unit -> string;
   footer     : unit -> string;
@@ -44,7 +44,7 @@ let print_reg_name (r:reg_64) : string =
   | 15 -> "r15"
 
 let print_reg64 (r:reg_64) (p:printer) : string =
-  p.reg_prefix() ^ print_reg_name r
+  p.reg_prefix() ^ p.print_reg_name r
 
 let print_reg32 (r:reg_64) (p:printer) : string =
   p.reg_prefix() ^
@@ -232,6 +232,20 @@ let print_ins (ins:ins) (p:printer) : string =
   | Pop dst _      -> p.ins_name "  pop"  [dst] ^ print_operand dst p
   | Alloc n       -> p.ins_name "  sub" [OReg rRsp; OConst n] ^ print_ops (OReg rRsp) (OConst n)
   | Dealloc n       -> p.ins_name "  add" [OReg rRsp; OConst n] ^ print_ops (OReg rRsp) (OConst n)
+  | Noop NoNewline | Noop Newline | Noop (Space _) -> ""
+  | Noop (Comment s) | Noop (LargeComment s) -> ";# " ^ s
+  (* XXX[jb]: This syntax is a valid line comment in both GCC and
+            MASM. Unfortunately, `;` is not a valid line comment
+            starter in GCC (it is a statement separator), and `#` is
+            not a valid line comment starter in MASM. Fortunately
+            though, a semicolon on a line by itself is valid in GCC,
+            which means that we can place the MASM comment character,
+            followed by the GCC comment character, and get a valid
+            comment line on both. A cleaner approach, of course, would
+            be selectively choose the correct comment
+            character. However, that would require a larger scale
+            change to the code. *)
+
 
 let print_cmp (c:ocmp) (counter:int) (p:printer) : string =
   let print_ops (o1:operand64) (o2:operand64) : string =
@@ -246,14 +260,15 @@ let print_cmp (c:ocmp) (counter:int) (p:printer) : string =
   | OLt o1 o2 -> print_ops o1 o2 ^ "  jb " ^ "L" ^ string_of_int counter ^ "\n"
   | OGt o1 o2 -> print_ops o1 o2 ^ "  ja " ^ "L" ^ string_of_int counter ^ "\n"
 
-let rec print_block (b:codes) (n:int) (p:printer) : string & int =
+let rec print_block (b:codes) (n:int) (p:printer) : string * int =
   match b with
   | Nil -> "", n
+  | Ins (Noop NoNewline) :: tail | Ins (Noop (Space _)) :: tail -> print_block tail n p
   | head :: tail ->
     let head_str, n' = print_code head n p in
     let rest, n'' = print_block tail n' p in
     head_str ^ rest, n''
-and print_code (c:code) (n:int) (p:printer) : string & int =
+and print_code (c:code) (n:int) (p:printer) : string * int =
   match c with
   | Ins ins -> (print_ins ins p ^ "\n", n)
   | Block b -> print_block b n p
@@ -295,7 +310,7 @@ let print_footer (p:printer) =
 let masm : printer =
   let reg_prefix unit = "" in
   let mem_prefix (ptr_type:string) = ptr_type ^ " ptr " in
-  let maddr (base:string) (adj:option(string & string)) (offset:string) =
+  let maddr (base:string) (adj:option(string * string)) (offset:string) =
     match adj with
     | None -> "[" ^ base ^ " + " ^ offset ^ "]"
     | Some (scale, index) -> "[" ^ base ^ " + " ^ scale ^ " * " ^ index ^ " + " ^ offset ^ "]"
@@ -309,6 +324,7 @@ let masm : printer =
   let proc_name (name:string) = "ALIGN 16\n" ^ name ^ " proc\n" in
   let ret (name:string) = "  ret\n" ^ name ^ " endp\n" in
   {
+  print_reg_name = print_reg_name;
   reg_prefix = reg_prefix;
   mem_prefix = mem_prefix;
   maddr      = maddr;
@@ -326,7 +342,7 @@ let masm : printer =
 let gcc : printer =
   let reg_prefix unit = "%" in
   let mem_prefix (ptr_type:string) = "" in
-  let maddr (base:string) (adj:option(string & string)) (offset:string) =
+  let maddr (base:string) (adj:option(string * string)) (offset:string) =
     match adj with
     | None -> offset ^ "(" ^ base ^ ")"
     | Some (scale, index) -> offset ^ " (" ^ base ^ ", " ^ scale ^ ", " ^ index ^ ")"
@@ -345,6 +361,7 @@ let gcc : printer =
   let proc_name (name:string) = ".global " ^ name ^ "\n" ^ name ^ ":\n" in
   let ret (name:string) = "  ret\n\n" in
   {
+  print_reg_name = print_reg_name;
   reg_prefix = reg_prefix;
   mem_prefix = mem_prefix;
   maddr      = maddr;

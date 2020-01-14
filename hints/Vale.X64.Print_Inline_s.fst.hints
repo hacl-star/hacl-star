@@ -1,5 +1,5 @@
 [
-  "\u0012Šå_=T«È\u0010ÁYŸa\u0003ÚÍ",
+  "®§%éÖ·œèÖá…\u0010RË¨†",
   [
     [
       "Vale.X64.Print_Inline_s.print_rettype",
@@ -15,7 +15,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "2b501c506264535e99cf5e78884c06d9"
+      "950253615f0a7545a9f9eb0677c1ad55"
     ],
     [
       "Vale.X64.Print_Inline_s.print_basetype",
@@ -32,7 +32,7 @@
         "fuel_guarded_inversion_Vale.Arch.HeapTypes_s.base_typ"
       ],
       0,
-      "be9e3393c21fd2abc48886b95c952347"
+      "51b80ff2e34a4f01ecf62aae96b68e34"
     ],
     [
       "Vale.X64.Print_Inline_s.print_arg",
@@ -47,7 +47,7 @@
         "fuel_guarded_inversion_Vale.Interop.Base.td"
       ],
       0,
-      "76b9e978b4a1533f038c025797c18d2f"
+      "5ad512a64dd79c4efc791813400fe499"
     ],
     [
       "Vale.X64.Print_Inline_s.print_args",
@@ -66,50 +66,92 @@
         "subterm_ordering_Prims.Cons"
       ],
       0,
-      "ae965d7819299d12a114c914f7fbeba4"
+      "865ce1a8c396c6c724622d935f45e93f"
     ],
     [
-      "Vale.X64.Print_Inline_s.print_register_args",
+      "Vale.X64.Print_Inline_s.build_reserved_args_outs",
       1,
       1,
       1,
       [
-        "@MaxFuel_assumption", "@MaxIFuel_assumption",
-        "@fuel_correspondence_FStar.List.Tot.Base.length.fuel_instrumented",
-        "@fuel_irrelevance_FStar.List.Tot.Base.length.fuel_instrumented",
-        "@query", "binder_x_539449a65710b411a0d6ba2b5dcd2e3e_1",
-        "binder_x_bb4e1c9af0265270f8e7a5f250f730e2_0",
-        "binder_x_d8e0a811ee956adac6013299c2512a9a_2",
+        "@MaxIFuel_assumption", "@query",
+        "binder_x_9480187c8e85713ad9eae72e33c57410_0",
         "disc_equation_Prims.Cons", "disc_equation_Prims.Nil",
-        "equation_Prims.nat",
-        "equation_with_fuel_FStar.List.Tot.Base.length.fuel_instrumented",
-        "fuel_guarded_inversion_Prims.list", "int_inversion",
-        "kinding_Vale.Interop.Base.td@tok", "primitive_Prims.op_Addition",
-        "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_Prims.Cons_tl",
-        "refinement_interpretation_Tm_refine_42b5134d89fdef4c4901f1c35f67bdf4",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "subterm_ordering_Prims.Cons",
-        "token_correspondence_FStar.List.Tot.Base.length.fuel_instrumented"
+        "equality_tok_Prims.LexTop@tok", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Vale.X64.Instruction_s.instr_out",
+        "equation_Vale.X64.Machine_s.reg_64",
+        "fuel_guarded_inversion_Prims.list",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "haseqTm_refine_c365eb902b454950de62fba701d9049d",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "subterm_ordering_Prims.Cons"
       ],
       0,
-      "3e4b23412be66da279d0e8bba66e8d79"
+      "fe2131c58cc032e778080457b40b5156"
     ],
     [
-      "Vale.X64.Print_Inline_s.print_register_ret",
+      "Vale.X64.Print_Inline_s.build_reserved_args_ins",
       1,
       1,
-      0,
+      1,
       [
-        "@MaxIFuel_assumption", "@query", "bool_inversion", "bool_typing",
-        "disc_equation_FStar.Pervasives.Native.None",
-        "disc_equation_FStar.Pervasives.Native.Some",
-        "equation_Prims.eqtype", "function_token_typing_Prims.string",
-        "lemma_FStar.Pervasives.invertOption",
-        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+        "@MaxIFuel_assumption", "@query",
+        "binder_x_5b8a55910a662c783b1ed3212549410e_0",
+        "disc_equation_Prims.Cons", "disc_equation_Prims.Nil",
+        "equality_tok_Prims.LexTop@tok", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Vale.X64.Machine_s.reg_64",
+        "fuel_guarded_inversion_Prims.list",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "haseqTm_refine_c365eb902b454950de62fba701d9049d",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "subterm_ordering_Prims.Cons"
       ],
       0,
-      "ad0b46c15474a66cad7d3104faa0dc13"
+      "08e132a5b56530c965256a18d764b3b8"
+    ],
+    [
+      "Vale.X64.Print_Inline_s.build_reserved_args",
+      1,
+      1,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "binder_x_97ef5ff619e486c846fe112d821f649f_0",
+        "disc_equation_Vale.X64.Machine_s.Block",
+        "disc_equation_Vale.X64.Machine_s.IfElse",
+        "disc_equation_Vale.X64.Machine_s.Ins",
+        "disc_equation_Vale.X64.Machine_s.While",
+        "equality_tok_Prims.LexTop@tok",
+        "equation_Vale.X64.Bytes_Code_s.code_t",
+        "equation_Vale.X64.Bytes_Code_s.codes_t",
+        "equation_Vale.X64.Machine_Semantics_s.code",
+        "fuel_guarded_inversion_Vale.X64.Machine_s.precode",
+        "subterm_ordering_Vale.X64.Machine_s.Block",
+        "subterm_ordering_Vale.X64.Machine_s.IfElse",
+        "subterm_ordering_Vale.X64.Machine_s.While"
+      ],
+      0,
+      "8e3d031ddeaac6b5514dd7580522bdaf"
+    ],
+    [
+      "Vale.X64.Print_Inline_s.build_reserved_args",
+      2,
+      1,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "binder_x_2688c4ddad8f27b859182f67b9ff5f3f_0",
+        "disc_equation_Prims.Cons", "disc_equation_Prims.Nil",
+        "equality_tok_Prims.LexTop@tok",
+        "equation_Vale.X64.Machine_Semantics_s.code",
+        "fuel_guarded_inversion_Prims.list",
+        "projection_inverse_Prims.Cons_hd",
+        "projection_inverse_Prims.Cons_tl", "subterm_ordering_Prims.Cons"
+      ],
+      0,
+      "bff2a1c51e3157fdb913c4e5d2494d94"
     ],
     [
       "Vale.X64.Print_Inline_s.print_output_ret",
@@ -120,12 +162,34 @@
         "@MaxIFuel_assumption", "@query", "bool_inversion", "bool_typing",
         "disc_equation_FStar.Pervasives.Native.None",
         "disc_equation_FStar.Pervasives.Native.Some",
-        "equation_Prims.eqtype", "function_token_typing_Prims.string",
+        "equation_Prims.eqtype", "equation_Prims.nat",
+        "function_token_typing_Prims.string",
         "lemma_FStar.Pervasives.invertOption",
-        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "typing_FStar.Pervasives.Native.uu___is_Some"
       ],
       0,
-      "9cc8f828192af3b52e2bcbc8000147ee"
+      "25ab725ddca0fccf65eaeaa78bd149d1"
+    ],
+    [
+      "Vale.X64.Print_Inline_s.print_modified_input",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Vale.X64.Machine_s.reg_64",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "haseqTm_refine_c365eb902b454950de62fba701d9049d",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "7cf89b6392b723612f416770b0a2273f"
     ],
     [
       "Vale.X64.Print_Inline_s.get_modified_input_strings",
@@ -136,8 +200,8 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_FStar.List.Tot.Base.length.fuel_instrumented",
         "@fuel_irrelevance_FStar.List.Tot.Base.length.fuel_instrumented",
-        "@query", "binder_x_21e2ef8932e88c165f562e02ef17af8c_4",
-        "binder_x_539449a65710b411a0d6ba2b5dcd2e3e_3",
+        "@query", "binder_x_1509371d1b5a6f204fda34ca2a4efb2d_5",
+        "binder_x_539449a65710b411a0d6ba2b5dcd2e3e_4",
         "binder_x_bb4e1c9af0265270f8e7a5f250f730e2_0",
         "disc_equation_Prims.Cons", "disc_equation_Prims.Nil",
         "equation_Prims.nat",
@@ -147,12 +211,12 @@
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_Prims.Cons_tl",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_aa8da35817d2c78bc1af917f61324dce",
+        "refinement_interpretation_Tm_refine_b4bbb890777a0193c26dcc2561794610",
         "subterm_ordering_Prims.Cons",
         "token_correspondence_FStar.List.Tot.Base.length.fuel_instrumented"
       ],
       0,
-      "07c22ec4a111a78eff7b26eee3f38477"
+      "d2ef042125254bda0f28ecd94fcf4a7e"
     ],
     [
       "Vale.X64.Print_Inline_s.print_modified_inputs",
@@ -166,7 +230,25 @@
         "subterm_ordering_Prims.Cons"
       ],
       0,
-      "d8c1ca26c3412eb6fb06a2b0b2a94acb"
+      "f20bef4cca5a23e53bd750eaf6761a47"
+    ],
+    [
+      "Vale.X64.Print_Inline_s.print_nonmodified_input",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Vale.X64.Machine_s.reg_64",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "haseqTm_refine_c365eb902b454950de62fba701d9049d",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "8c82f78898d267266b5a90f75928b19b"
     ],
     [
       "Vale.X64.Print_Inline_s.get_nonmodified_input_strings",
@@ -177,8 +259,8 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_FStar.List.Tot.Base.length.fuel_instrumented",
         "@fuel_irrelevance_FStar.List.Tot.Base.length.fuel_instrumented",
-        "@query", "binder_x_10dccc2e0ed4433b89615be7a05100d0_4",
-        "binder_x_539449a65710b411a0d6ba2b5dcd2e3e_3",
+        "@query", "binder_x_00b42d3b09bb729d63245f173e8161e1_5",
+        "binder_x_539449a65710b411a0d6ba2b5dcd2e3e_4",
         "binder_x_bb4e1c9af0265270f8e7a5f250f730e2_0",
         "disc_equation_Prims.Cons", "disc_equation_Prims.Nil",
         "equation_Prims.nat",
@@ -187,13 +269,13 @@
         "kinding_Vale.Interop.Base.td@tok", "primitive_Prims.op_Addition",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_Prims.Cons_tl",
+        "refinement_interpretation_Tm_refine_2a011aad32d8ef637a6bc79389cf28df",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_f26ca869a38ee2eeafdc6869fbea4a34",
         "subterm_ordering_Prims.Cons",
         "token_correspondence_FStar.List.Tot.Base.length.fuel_instrumented"
       ],
       0,
-      "0fc8fe77f168f2458bb69eea8363654b"
+      "223dc6f363816f8e0cbb2407119e7bed"
     ],
     [
       "Vale.X64.Print_Inline_s.print_nonmodified_inputs",
@@ -207,7 +289,7 @@
         "subterm_ordering_Prims.Cons"
       ],
       0,
-      "a582c046230dd848077f73d316f7c615"
+      "6a9541effe770c9e25d07be5a2dd5183"
     ],
     [
       "Vale.X64.Print_Inline_s.print_modified_registers",
@@ -233,7 +315,50 @@
         "subterm_ordering_Prims.Cons", "well-founded-ordering-on-nat"
       ],
       0,
-      "e80443e0fafd443cb402710c3cd4e244"
+      "8e6b75bb2274a2540202e15d4bada12e"
+    ],
+    [
+      "Vale.X64.Print_Inline_s.print_explicit_register_args",
+      1,
+      1,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_FStar.List.Tot.Base.length.fuel_instrumented",
+        "@fuel_irrelevance_FStar.List.Tot.Base.length.fuel_instrumented",
+        "@query", "binder_x_539449a65710b411a0d6ba2b5dcd2e3e_1",
+        "binder_x_bb4e1c9af0265270f8e7a5f250f730e2_0",
+        "binder_x_d8e0a811ee956adac6013299c2512a9a_2",
+        "disc_equation_Prims.Cons", "disc_equation_Prims.Nil",
+        "equation_Prims.nat",
+        "equation_with_fuel_FStar.List.Tot.Base.length.fuel_instrumented",
+        "fuel_guarded_inversion_Prims.list", "int_inversion",
+        "kinding_Vale.Interop.Base.td@tok", "primitive_Prims.op_Addition",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_Prims.Cons_tl",
+        "refinement_interpretation_Tm_refine_42b5134d89fdef4c4901f1c35f67bdf4",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "subterm_ordering_Prims.Cons",
+        "token_correspondence_FStar.List.Tot.Base.length.fuel_instrumented"
+      ],
+      0,
+      "a30184cfc960857adc83353be3f5cf8d"
+    ],
+    [
+      "Vale.X64.Print_Inline_s.print_register_ret",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "bool_inversion", "bool_typing",
+        "disc_equation_FStar.Pervasives.Native.None",
+        "disc_equation_FStar.Pervasives.Native.Some",
+        "equation_Prims.eqtype", "function_token_typing_Prims.string",
+        "lemma_FStar.Pervasives.invertOption",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+      ],
+      0,
+      "38d24b4706953711dd3dc5314c3ec8c3"
     ],
     [
       "Vale.X64.Print_Inline_s.print_cmp",
@@ -252,7 +377,21 @@
         "fuel_guarded_inversion_Vale.X64.Bytes_Code_s.ocmp"
       ],
       0,
-      "e603f72249288eb76f8449c223f9100a"
+      "57a3b6a7b9354ae879f53b8a572eb0f6"
+    ],
+    [
+      "Vale.X64.Print_Inline_s.print_spaces",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "int_inversion", "int_typing", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "well-founded-ordering-on-nat"
+      ],
+      0,
+      "24b0f2a04989a728fe71dea40a3d4d04"
     ],
     [
       "Vale.X64.Print_Inline_s.print_block",
@@ -262,14 +401,19 @@
       [
         "@MaxIFuel_assumption", "@query",
         "binder_x_69b3af25a4334715774d1242034fc6f2_0",
-        "disc_equation_Prims.Cons", "disc_equation_Prims.Nil",
-        "equation_Vale.X64.Bytes_Code_s.codes_t",
+        "data_elim_Prims.Cons", "disc_equation_Prims.Cons",
+        "disc_equation_Prims.Nil", "equation_Vale.X64.Bytes_Code_s.codes_t",
         "equation_Vale.X64.Machine_Semantics_s.code",
         "equation_Vale.X64.Machine_Semantics_s.codes",
-        "fuel_guarded_inversion_Prims.list", "subterm_ordering_Prims.Cons"
+        "fuel_guarded_inversion_Prims.list", "proj_equation_Prims.Cons_tl",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_Prims.Cons_hd",
+        "projection_inverse_Prims.Cons_tl",
+        "refinement_interpretation_Tm_refine_7aac12c24449a22c34d98a0ea8ed4a32",
+        "subterm_ordering_Prims.Cons"
       ],
       0,
-      "8752e00836f5dbd4e77555314e4043b4"
+      "c7347a978db598c24f037109bc21ae44"
     ],
     [
       "Vale.X64.Print_Inline_s.print_block",
@@ -292,7 +436,21 @@
         "subterm_ordering_Vale.X64.Machine_s.While"
       ],
       0,
-      "5ed4ca2ebc4cb97d318f676e33e6c3ab"
+      "669cdc3561b56c465cbb48cde4f4c7a9"
+    ],
+    [
+      "Vale.X64.Print_Inline_s.print_fn_comments",
+      1,
+      1,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "binder_x_dce109b66917edb1ca83b9408101b740_0",
+        "disc_equation_Prims.Cons", "disc_equation_Prims.Nil",
+        "fuel_guarded_inversion_Prims.list", "subterm_ordering_Prims.Cons"
+      ],
+      0,
+      "21f542cf0055ac48b7e034b361383ebe"
     ],
     [
       "Vale.X64.Print_Inline_s.print_inline",
@@ -306,7 +464,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "27e0eb709dfd07cb4565bee6b93dc9d7"
+      "807c4de0dec6268e362c05af66f51b2f"
     ],
     [
       "Vale.X64.Print_Inline_s.print_inline",
@@ -320,7 +478,7 @@
         "refinement_interpretation_Tm_refine_cc23b6c17ac7ae8cd6a2d1fc5edeaf0c"
       ],
       0,
-      "874e04010553b0404958e51120f47c91"
+      "bf222d5bd293af584d79e075b2fd5c03"
     ],
     [
       "Vale.X64.Print_Inline_s.print_rettype",
@@ -336,7 +494,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "ee2fcefbda1a5ca07b458a3afae88e7f"
+      "cf7b4c87232bae6f65011f49ed2912f7"
     ],
     [
       "Vale.X64.Print_Inline_s.print_basetype",
@@ -353,7 +511,7 @@
         "fuel_guarded_inversion_Vale.Arch.HeapTypes_s.base_typ"
       ],
       0,
-      "4e76c9dbba910545a4349036398569d2"
+      "f1c5b9e16bbfc413e20779b1c06e1088"
     ],
     [
       "Vale.X64.Print_Inline_s.print_arg",
@@ -368,7 +526,7 @@
         "fuel_guarded_inversion_Vale.Interop.Base.td"
       ],
       0,
-      "be0928df273ea82c89629463dc9798ef"
+      "f297e101774400bbb40d7527503926fc"
     ],
     [
       "Vale.X64.Print_Inline_s.print_args",
@@ -387,50 +545,92 @@
         "subterm_ordering_Prims.Cons"
       ],
       0,
-      "a5191d1185fcf661a801c3145d6c00a7"
+      "e79d8e08f0079f4fb383cba75da6eca6"
     ],
     [
-      "Vale.X64.Print_Inline_s.print_register_args",
+      "Vale.X64.Print_Inline_s.build_reserved_args_outs",
       2,
       1,
       1,
       [
-        "@MaxFuel_assumption", "@MaxIFuel_assumption",
-        "@fuel_correspondence_FStar.List.Tot.Base.length.fuel_instrumented",
-        "@fuel_irrelevance_FStar.List.Tot.Base.length.fuel_instrumented",
-        "@query", "binder_x_539449a65710b411a0d6ba2b5dcd2e3e_1",
-        "binder_x_bb4e1c9af0265270f8e7a5f250f730e2_0",
-        "binder_x_d8e0a811ee956adac6013299c2512a9a_2",
+        "@MaxIFuel_assumption", "@query",
+        "binder_x_9480187c8e85713ad9eae72e33c57410_0",
         "disc_equation_Prims.Cons", "disc_equation_Prims.Nil",
-        "equation_Prims.nat",
-        "equation_with_fuel_FStar.List.Tot.Base.length.fuel_instrumented",
-        "fuel_guarded_inversion_Prims.list", "int_inversion",
-        "kinding_Vale.Interop.Base.td@tok", "primitive_Prims.op_Addition",
-        "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_Prims.Cons_tl",
-        "refinement_interpretation_Tm_refine_42b5134d89fdef4c4901f1c35f67bdf4",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "subterm_ordering_Prims.Cons",
-        "token_correspondence_FStar.List.Tot.Base.length.fuel_instrumented"
+        "equality_tok_Prims.LexTop@tok", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Vale.X64.Instruction_s.instr_out",
+        "equation_Vale.X64.Machine_s.reg_64",
+        "fuel_guarded_inversion_Prims.list",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "haseqTm_refine_c365eb902b454950de62fba701d9049d",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "subterm_ordering_Prims.Cons"
       ],
       0,
-      "5cfc681e0781c10bd57c24d01308e4e3"
+      "79231995cdd493651fad20170f37535e"
     ],
     [
-      "Vale.X64.Print_Inline_s.print_register_ret",
+      "Vale.X64.Print_Inline_s.build_reserved_args_ins",
       2,
       1,
-      0,
+      1,
       [
-        "@MaxIFuel_assumption", "@query", "bool_inversion", "bool_typing",
-        "disc_equation_FStar.Pervasives.Native.None",
-        "disc_equation_FStar.Pervasives.Native.Some",
-        "equation_Prims.eqtype", "function_token_typing_Prims.string",
-        "lemma_FStar.Pervasives.invertOption",
-        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+        "@MaxIFuel_assumption", "@query",
+        "binder_x_5b8a55910a662c783b1ed3212549410e_0",
+        "disc_equation_Prims.Cons", "disc_equation_Prims.Nil",
+        "equality_tok_Prims.LexTop@tok", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Vale.X64.Machine_s.reg_64",
+        "fuel_guarded_inversion_Prims.list",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "haseqTm_refine_c365eb902b454950de62fba701d9049d",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "subterm_ordering_Prims.Cons"
       ],
       0,
-      "20b54a851a930f43824d094469c8ca29"
+      "69414e9250efdfc896ae6c7eae905d2a"
+    ],
+    [
+      "Vale.X64.Print_Inline_s.build_reserved_args",
+      3,
+      1,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "binder_x_97ef5ff619e486c846fe112d821f649f_0",
+        "disc_equation_Vale.X64.Machine_s.Block",
+        "disc_equation_Vale.X64.Machine_s.IfElse",
+        "disc_equation_Vale.X64.Machine_s.Ins",
+        "disc_equation_Vale.X64.Machine_s.While",
+        "equality_tok_Prims.LexTop@tok",
+        "equation_Vale.X64.Bytes_Code_s.code_t",
+        "equation_Vale.X64.Bytes_Code_s.codes_t",
+        "equation_Vale.X64.Machine_Semantics_s.code",
+        "fuel_guarded_inversion_Vale.X64.Machine_s.precode",
+        "subterm_ordering_Vale.X64.Machine_s.Block",
+        "subterm_ordering_Vale.X64.Machine_s.IfElse",
+        "subterm_ordering_Vale.X64.Machine_s.While"
+      ],
+      0,
+      "8f5eb49d92dd4c318e289215b114bc34"
+    ],
+    [
+      "Vale.X64.Print_Inline_s.build_reserved_args",
+      4,
+      1,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "binder_x_2688c4ddad8f27b859182f67b9ff5f3f_0",
+        "disc_equation_Prims.Cons", "disc_equation_Prims.Nil",
+        "equality_tok_Prims.LexTop@tok",
+        "equation_Vale.X64.Machine_Semantics_s.code",
+        "fuel_guarded_inversion_Prims.list",
+        "projection_inverse_Prims.Cons_hd",
+        "projection_inverse_Prims.Cons_tl", "subterm_ordering_Prims.Cons"
+      ],
+      0,
+      "6fc88692a1a7a414ea079edba372150b"
     ],
     [
       "Vale.X64.Print_Inline_s.print_output_ret",
@@ -441,12 +641,34 @@
         "@MaxIFuel_assumption", "@query", "bool_inversion", "bool_typing",
         "disc_equation_FStar.Pervasives.Native.None",
         "disc_equation_FStar.Pervasives.Native.Some",
-        "equation_Prims.eqtype", "function_token_typing_Prims.string",
+        "equation_Prims.eqtype", "equation_Prims.nat",
+        "function_token_typing_Prims.string",
         "lemma_FStar.Pervasives.invertOption",
-        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "typing_FStar.Pervasives.Native.uu___is_Some"
       ],
       0,
-      "25f76a6d8e0fad6be243f4049fd732e6"
+      "e0300f8bea29c48daec5c530dbaa9d56"
+    ],
+    [
+      "Vale.X64.Print_Inline_s.print_modified_input",
+      2,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Vale.X64.Machine_s.reg_64",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "haseqTm_refine_c365eb902b454950de62fba701d9049d",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "d77b1b65450250d3c632b24044b6bd07"
     ],
     [
       "Vale.X64.Print_Inline_s.get_modified_input_strings",
@@ -457,8 +679,8 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_FStar.List.Tot.Base.length.fuel_instrumented",
         "@fuel_irrelevance_FStar.List.Tot.Base.length.fuel_instrumented",
-        "@query", "binder_x_21e2ef8932e88c165f562e02ef17af8c_4",
-        "binder_x_539449a65710b411a0d6ba2b5dcd2e3e_3",
+        "@query", "binder_x_1509371d1b5a6f204fda34ca2a4efb2d_5",
+        "binder_x_539449a65710b411a0d6ba2b5dcd2e3e_4",
         "binder_x_bb4e1c9af0265270f8e7a5f250f730e2_0",
         "disc_equation_Prims.Cons", "disc_equation_Prims.Nil",
         "equation_Prims.nat",
@@ -468,12 +690,12 @@
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_Prims.Cons_tl",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_aa8da35817d2c78bc1af917f61324dce",
+        "refinement_interpretation_Tm_refine_b4bbb890777a0193c26dcc2561794610",
         "subterm_ordering_Prims.Cons",
         "token_correspondence_FStar.List.Tot.Base.length.fuel_instrumented"
       ],
       0,
-      "8c162f9f841cc6088297112c33ef419b"
+      "38617dac0c21250227ea123afd0a803d"
     ],
     [
       "Vale.X64.Print_Inline_s.print_modified_inputs",
@@ -487,7 +709,25 @@
         "subterm_ordering_Prims.Cons"
       ],
       0,
-      "038574dc9d5323f6c986a9dd15fa7cd0"
+      "8cf0ae3318a795aaf657f0f3c9ed89a6"
+    ],
+    [
+      "Vale.X64.Print_Inline_s.print_nonmodified_input",
+      2,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Vale.X64.Machine_s.reg_64",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "haseqTm_refine_c365eb902b454950de62fba701d9049d",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "491367bc6dd409581851770a8373880b"
     ],
     [
       "Vale.X64.Print_Inline_s.get_nonmodified_input_strings",
@@ -498,8 +738,8 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_FStar.List.Tot.Base.length.fuel_instrumented",
         "@fuel_irrelevance_FStar.List.Tot.Base.length.fuel_instrumented",
-        "@query", "binder_x_10dccc2e0ed4433b89615be7a05100d0_4",
-        "binder_x_539449a65710b411a0d6ba2b5dcd2e3e_3",
+        "@query", "binder_x_00b42d3b09bb729d63245f173e8161e1_5",
+        "binder_x_539449a65710b411a0d6ba2b5dcd2e3e_4",
         "binder_x_bb4e1c9af0265270f8e7a5f250f730e2_0",
         "disc_equation_Prims.Cons", "disc_equation_Prims.Nil",
         "equation_Prims.nat",
@@ -508,13 +748,13 @@
         "kinding_Vale.Interop.Base.td@tok", "primitive_Prims.op_Addition",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_Prims.Cons_tl",
+        "refinement_interpretation_Tm_refine_2a011aad32d8ef637a6bc79389cf28df",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_f26ca869a38ee2eeafdc6869fbea4a34",
         "subterm_ordering_Prims.Cons",
         "token_correspondence_FStar.List.Tot.Base.length.fuel_instrumented"
       ],
       0,
-      "68d4b9d1f24f8a71c953da9ceeb47789"
+      "75ab96e92d48010e360f0f4f008810ca"
     ],
     [
       "Vale.X64.Print_Inline_s.print_nonmodified_inputs",
@@ -528,7 +768,7 @@
         "subterm_ordering_Prims.Cons"
       ],
       0,
-      "8e8f647b6a4c84fc7d05c6c3a0064142"
+      "5c5229b41de76e77892fcf161439c9c1"
     ],
     [
       "Vale.X64.Print_Inline_s.print_modified_registers",
@@ -554,7 +794,50 @@
         "subterm_ordering_Prims.Cons", "well-founded-ordering-on-nat"
       ],
       0,
-      "ef8fa519dfc357f0f50bc7082a6d305a"
+      "3c065960d2684733348124d04cff31db"
+    ],
+    [
+      "Vale.X64.Print_Inline_s.print_explicit_register_args",
+      2,
+      1,
+      1,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_FStar.List.Tot.Base.length.fuel_instrumented",
+        "@fuel_irrelevance_FStar.List.Tot.Base.length.fuel_instrumented",
+        "@query", "binder_x_539449a65710b411a0d6ba2b5dcd2e3e_1",
+        "binder_x_bb4e1c9af0265270f8e7a5f250f730e2_0",
+        "binder_x_d8e0a811ee956adac6013299c2512a9a_2",
+        "disc_equation_Prims.Cons", "disc_equation_Prims.Nil",
+        "equation_Prims.nat",
+        "equation_with_fuel_FStar.List.Tot.Base.length.fuel_instrumented",
+        "fuel_guarded_inversion_Prims.list", "int_inversion",
+        "kinding_Vale.Interop.Base.td@tok", "primitive_Prims.op_Addition",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_Prims.Cons_tl",
+        "refinement_interpretation_Tm_refine_42b5134d89fdef4c4901f1c35f67bdf4",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "subterm_ordering_Prims.Cons",
+        "token_correspondence_FStar.List.Tot.Base.length.fuel_instrumented"
+      ],
+      0,
+      "06256259b2a30fe615da46d547676d36"
+    ],
+    [
+      "Vale.X64.Print_Inline_s.print_register_ret",
+      2,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "bool_inversion", "bool_typing",
+        "disc_equation_FStar.Pervasives.Native.None",
+        "disc_equation_FStar.Pervasives.Native.Some",
+        "equation_Prims.eqtype", "function_token_typing_Prims.string",
+        "lemma_FStar.Pervasives.invertOption",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+      ],
+      0,
+      "e46642bd5b390bcbda7544a0c0da9205"
     ],
     [
       "Vale.X64.Print_Inline_s.print_cmp",
@@ -573,7 +856,21 @@
         "fuel_guarded_inversion_Vale.X64.Bytes_Code_s.ocmp"
       ],
       0,
-      "e32dd82aeaeb6f32dc19201b5fc8483b"
+      "291882ed613bff402bd00a4740d6cb51"
+    ],
+    [
+      "Vale.X64.Print_Inline_s.print_spaces",
+      2,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "int_inversion", "int_typing", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "well-founded-ordering-on-nat"
+      ],
+      0,
+      "6c9851f83bb46441817f610a608e47ea"
     ],
     [
       "Vale.X64.Print_Inline_s.print_block",
@@ -583,14 +880,19 @@
       [
         "@MaxIFuel_assumption", "@query",
         "binder_x_69b3af25a4334715774d1242034fc6f2_0",
-        "disc_equation_Prims.Cons", "disc_equation_Prims.Nil",
-        "equation_Vale.X64.Bytes_Code_s.codes_t",
+        "data_elim_Prims.Cons", "disc_equation_Prims.Cons",
+        "disc_equation_Prims.Nil", "equation_Vale.X64.Bytes_Code_s.codes_t",
         "equation_Vale.X64.Machine_Semantics_s.code",
         "equation_Vale.X64.Machine_Semantics_s.codes",
-        "fuel_guarded_inversion_Prims.list", "subterm_ordering_Prims.Cons"
+        "fuel_guarded_inversion_Prims.list", "proj_equation_Prims.Cons_tl",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_Prims.Cons_hd",
+        "projection_inverse_Prims.Cons_tl",
+        "refinement_interpretation_Tm_refine_7aac12c24449a22c34d98a0ea8ed4a32",
+        "subterm_ordering_Prims.Cons"
       ],
       0,
-      "4d2d5371659662a899d1cc889d9f9b2b"
+      "6cb7bc99371f2e6f7cc84949b22f576e"
     ],
     [
       "Vale.X64.Print_Inline_s.print_block",
@@ -613,7 +915,21 @@
         "subterm_ordering_Vale.X64.Machine_s.While"
       ],
       0,
-      "acb528468cd0e263651eaa687232c612"
+      "c5f8e07da8cf8a9b57f28da4b412b2ff"
+    ],
+    [
+      "Vale.X64.Print_Inline_s.print_fn_comments",
+      2,
+      1,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "binder_x_dce109b66917edb1ca83b9408101b740_0",
+        "disc_equation_Prims.Cons", "disc_equation_Prims.Nil",
+        "fuel_guarded_inversion_Prims.list", "subterm_ordering_Prims.Cons"
+      ],
+      0,
+      "fb8c15d8e376e52e18f0002bbafacca6"
     ],
     [
       "Vale.X64.Print_Inline_s.print_inline",
@@ -627,7 +943,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "af8dd41d4d808993dfefd7de9ddb7d2d"
+      "638ec74d0c64dd4552ce1ca96f819d53"
     ]
   ]
 ]

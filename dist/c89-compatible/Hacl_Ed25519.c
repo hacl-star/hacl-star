@@ -47,7 +47,7 @@ static void fmul(uint64_t *output, uint64_t *input, uint64_t *input2)
     for (_i = 0U; _i < (uint32_t)10U; ++_i)
       tmp[_i] = FStar_UInt128_uint64_to_uint128((uint64_t)0U);
   }
-  Hacl_Impl_Curve25519_Field51_fmul(output, input, input2, tmp);
+  Hacl_Impl_Curve25519_Field51_fmul(tmp, input, output, input2);
 }
 
 static void times_2(uint64_t *out, uint64_t *a)
@@ -99,7 +99,7 @@ static void fsquare(uint64_t *out, uint64_t *a)
     for (_i = 0U; _i < (uint32_t)5U; ++_i)
       tmp[_i] = FStar_UInt128_uint64_to_uint128((uint64_t)0U);
   }
-  Hacl_Impl_Curve25519_Field51_fsqr(out, a, tmp);
+  Hacl_Impl_Curve25519_Field51_fsqr(tmp, a, out);
 }
 
 static void fsquare_times(uint64_t *output, uint64_t *input, uint32_t count1)

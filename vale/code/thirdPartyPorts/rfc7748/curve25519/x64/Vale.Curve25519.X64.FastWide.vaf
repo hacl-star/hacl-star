@@ -119,10 +119,15 @@ procedure Fmul(
         validSrcAddrs64(mem, dst_in, dst_b, 4, memTaint, Secret);
 
 {
-    Mov64(r15, dst_ptr); // Save dst_ptr that will be clobbered by Fast_multiply
+    Comment("Save dst_ptr which will be clobbered by the raw multiplication");
+    Mov64(r15, dst_ptr); 
+    LargeComment("Compute the raw multiplication: tmp <- src1 * src2");
     Fast_multiply(0, tmp_b, inA_b, inB_b);
     Mov64(inA_ptr, tmp_ptr);
-    Mov64(rdi, r15); // Restore dst_ptr
+    Newline();
+    Comment("Restore dst_ptr");
+    Mov64(rdi, r15);
+    LargeComment("Wrap the result back into the field");
     Carry_wide(0, dst_b, tmp_b);
 }
 
@@ -510,7 +515,7 @@ procedure Fsqr(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64)
     Mov64(rbx, dst_ptr); // Save dst_ptr that will be clobbered by Fast_sqr
     Fast_sqr(0, tmp_b, inA_b);
     Mov64(inA_ptr, tmp_ptr);
-    Mov64(rdi, rbx); // Restore dst_ptr
+    Mov64(rdi, rbx);
     Carry_wide(0, dst_b, tmp_b);
 }
 
@@ -676,7 +681,7 @@ procedure Fsqr2(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64
     Fast_sqr(0, tmp_b, inA_b);
     Fast_sqr(4, tmp_b, inA_b);
     Mov64(inA_ptr, tmp_ptr);
-    Mov64(rdi, rbx); // Restore dst_ptr
+    Mov64(rdi, rbx);
     Carry_wide(0, dst_b, tmp_b);
     Carry_wide(4, dst_b, tmp_b);
 }
