@@ -512,6 +512,7 @@ procedure Carry_wide(inline offset:nat, ghost dst_b:buffer64, ghost inA_b:buffer
         validSrcAddrs64(mem, dst_ptr, dst_b, 4 + offset, memTaint, Secret);
         modifies_buffer_specific(dst_b, old(mem), mem, 0 + offset, 4 + offset - 1);
 {
+    Comment("Step1: Compute dst + carry == tmp_hi * 38 + tmp_lo");
     Mov64(rdx, 38);
 
     Fast_mul1_add(offset*2, inA_b);   // Gives d+carry == a' * 38 + a
@@ -520,6 +521,9 @@ procedure Carry_wide(inline offset:nat, ghost dst_b:buffer64, ghost inA_b:buffer
     let d2_mid := tmp2;
     let d3_mid := tmp3;
     let carry_mid := rax;
+    
+    Newline();
+    Comment("Step2: Fold the carry back into dst");
     Carry_pass(false, offset, dst_b); // Gives d % prime == old (d + carry * pow2_256) % prime
 
     let d0 := buffer64_read(dst_b, 0 + offset, mem);

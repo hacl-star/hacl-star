@@ -244,6 +244,7 @@ procedure Fast_multiply_a1b(
         validSrcAddrs64(mem, dst_ptr, dst_b, 8 + offset*2, memTaint, Secret);
         modifies_buffer_specific(dst_b, old(mem), mem, 0 + offset*2, 8 + offset*2 - 1);
 {
+    Comment("Compute src1[1] * src2");
     xor_lemmas();
 
     let a0b_0 := buffer64_read(dst_b, 0 + offset*2, mem);
@@ -262,29 +263,42 @@ procedure Fast_multiply_a1b(
 
     Load64_buffer(rdx, inA_ptr,  8 + offset*8, Secret, inA_b, 1 + offset);     /* A[1] */
 
+    NoNewline();
     Mulx64( r9,  r8, Mem(inB_ptr,  0 + offset*8, inB_b, 0 + offset, Secret));  /* A[1]*B[0] */ lemma_prod_bounds(r9, r8, a1, b0);
+    Space(3);
     Xor64(r10, r10);  let a1b_0 := r8;
+    Space(1);
     Adcx64Wrap(r8, Mem(dst_ptr,  8 + offset*16, dst_b, 1 + offset*2, Secret));
     Store64_buffer(dst_ptr, r8,  8 + offset*16, Secret, dst_b, 1 + offset*2);  // REVIEW: Why not combine the Adcx with the Store?
 
+    NoNewline();
     Mulx64(r11, r10, Mem(inB_ptr,  8 + offset*8, inB_b, 1 + offset, Secret));  /* A[1]*B[1] */ lemma_prod_bounds(r11, r10, a1, b1);  lemma_overflow(r11, r10, r9, bool_bit(overflow(efl)));
     assert valid_of(efl); // OBSERVE
+    Space(1);
     Adox64Wrap(r10,  r9);  let a1b_1 := r10;      // At this point, overflow = 0, r9 < 2^64 - 1, and (r10 is <= 1 (so no new overflow), or r11 < 2^64-2)
+    Space(1);
     Adcx64Wrap(r10, r12);
     Store64_buffer(dst_ptr, r10, 16 + offset*16, Secret, dst_b, 2 + offset*2);
 
+    NoNewline();
     Mulx64(r13, r12, Mem(inB_ptr, 16 + offset*8, inB_b, 2 + offset, Secret));  /* A[1]*B[2] */ lemma_prod_bounds(r13, r12, a1, b2);  lemma_overflow(r13, r12, r11, bool_bit(overflow(efl)));
+    NoNewline();
     Adox64Wrap(r12, r11);  let a1b_2 := r12;      // At this point, either r13 < 2^64-2 or (r12 <= 1, and (overflow = 0 or r11 < 2^64 - 2)).  RHS of the first or means no overflow
+    NoNewline();
     Adcx64Wrap(r12, r14);
     Mov64( r8, 0);
 
+    NoNewline();
     Mulx64(rdx, r14, Mem(inB_ptr, 24 + offset*8, inB_b, 3 + offset, Secret));  /* A[1]*B[3] */ lemma_prod_bounds(rdx, r14, a1, b3);  lemma_overflow(rdx, r14, r13, bool_bit(overflow(efl)));
     let old_carry    := bool_bit(cf(efl));
     let old_overflow := bool_bit(overflow(efl));
+    NoNewline();
     Adox64Wrap(r14, r13);  let a1b_3 := r14;      // If rdx = 2^64 - 1, then we know r14 <= 1.  If r13 < 2^64-2, then no new overflow.  Else there wasn't any previous overflow, so r13 can absorb the 1 from r14 without overflowing.
+    NoNewline();
     Adcx64Wrap(r14, rax);
     Mov64(rax, 0);
-    /*******************************************/  Adox64Wrap(rax, rdx);  let a1b_4 := rax;  let overflow_bit := bool_bit(overflow(efl));  Adcx64Wrap(rax, r8);
+
+    /*******************************************/  Space(35); Adox64Wrap(rax, rdx);  let a1b_4 := rax;  let overflow_bit := bool_bit(overflow(efl));  Adcx64Wrap(rax, r8);
 
     assert overflow_bit == 0;
 
@@ -366,6 +380,7 @@ procedure Fast_multiply_a2b(
         validSrcAddrs64(mem, dst_ptr, dst_b, 8 + offset*2, memTaint, Secret);
         modifies_buffer_specific(dst_b, old(mem), mem, 0 + offset*2, 8 + offset*2 - 1);
 {
+    Comment("Compute src1[2] * src2");
     xor_lemmas();
 
     let a0a1b_0 := buffer64_read(dst_b, 0 + offset*2, mem);
@@ -386,28 +401,42 @@ procedure Fast_multiply_a2b(
 
     Load64_buffer(rdx, inA_ptr,  16 + offset*8, Secret, inA_b, 2 + offset);     /* A[2] */
 
+    NoNewline();
     Mulx64( r9,  r8, Mem(inB_ptr,  0 + offset*8, inB_b, 0 + offset, Secret));  /* A[2]*B[0] */ lemma_prod_bounds(r9, r8, a2, b0);
+    Space(3);
     Xor64(r10, r10);  let a2b_0 := r8;
+    NoNewline();
     Adcx64Wrap(r8, Mem(dst_ptr,  16 + offset*16, dst_b, 2 + offset*2, Secret));
     Store64_buffer(dst_ptr, r8,  16 + offset*16, Secret, dst_b, 2 + offset*2);  // REVIEW: Why not combine the Adcx with the Store?
 
+    NoNewline();
     Mulx64(r11, r10, Mem(inB_ptr,  8 + offset*8, inB_b, 1 + offset, Secret));  /* A[2]*B[1] */ lemma_prod_bounds(r11, r10, a2, b1);  lemma_overflow(r11, r10, r9, bool_bit(overflow(efl)));
+    Space(1);
     Adox64Wrap(r10,  r9);  let a2b_1 := r10;
+    Space(1);
     Adcx64Wrap(r10, r12);
     Store64_buffer(dst_ptr, r10, 24 + offset*16, Secret, dst_b, 3 + offset*2);
 
+    NoNewline();
     Mulx64(r13, r12, Mem(inB_ptr, 16 + offset*8, inB_b, 2 + offset, Secret));  /* A[2]*B[2] */ lemma_prod_bounds(r13, r12, a2, b2);  lemma_overflow(r13, r12, r11, bool_bit(overflow(efl)));
+    NoNewline();
     Adox64Wrap(r12, r11);  let a2b_2 := r12;
+    NoNewline();
     Adcx64Wrap(r12, r14);
     Mov64( r8, 0);
 
+    NoNewline();
     Mulx64(rdx, r14, Mem(inB_ptr, 24 + offset*8, inB_b, 3 + offset, Secret));  /* A[2]*B[3] */ lemma_prod_bounds(rdx, r14, a2, b3);  lemma_overflow(rdx, r14, r13, bool_bit(overflow(efl)));
     let old_carry    := bool_bit(cf(efl));
     let old_overflow := bool_bit(overflow(efl));
+    NoNewline();
     Adox64Wrap(r14, r13);  let a2b_3 := r14;
+    NoNewline();
     Adcx64Wrap(r14, rax);
     Mov64(rax, 0);
-    /*******************************************/  Adox64Wrap(rax, rdx);  let a2b_4 := rax;    Adcx64Wrap(rax, r8);
+
+    /*******************************************/ Space(35);  Adox64Wrap(rax, rdx);  
+    let a2b_4 := rax;    Adcx64Wrap(rax, r8);
 
     let carry_bit    := bool_bit(cf(efl));
     let overflow_bit := bool_bit(overflow(efl));
@@ -499,6 +528,7 @@ procedure Fast_multiply_a3b(
         validSrcAddrs64(mem, dst_ptr, dst_b, 8 + offset*2, memTaint, Secret);
         modifies_buffer_specific(dst_b, old(mem), mem, 0 + offset*2, 8 + offset*2 - 1);
 {
+    Comment("Compute src1[3] * src2");
     xor_lemmas();
 
     let a0a1a2b_0 := buffer64_read(dst_b, 0 + offset*2, mem);
@@ -520,30 +550,48 @@ procedure Fast_multiply_a3b(
 
     Load64_buffer(rdx, inA_ptr,  24 + offset*8, Secret, inA_b, 3 + offset);     /* A[3] */
 
+    NoNewline();
     Mulx64( r9,  r8, Mem(inB_ptr,  0 + offset*8, inB_b, 0 + offset, Secret));  /* A[3]*B[0] */ lemma_prod_bounds(r9, r8, a3, b0);
+    Space(3);
     Xor64(r10, r10);  let a3b_0 := r8;
+    NoNewline();
     Adcx64Wrap(r8, Mem(dst_ptr,  24 + offset*16, dst_b, 3 + offset*2, Secret));
     Store64_buffer(dst_ptr, r8,  24 + offset*16, Secret, dst_b, 3 + offset*2);  // REVIEW: Why not combine the Adcx with the Store?
 
+    NoNewline();
     Mulx64(r11, r10, Mem(inB_ptr,  8 + offset*8, inB_b, 1 + offset, Secret));  /* A[3]*B[1] */ lemma_prod_bounds(r11, r10, a3, b1);  lemma_overflow(r11, r10, r9, bool_bit(overflow(efl)));
+    Space(1);
     Adox64Wrap(r10,  r9);  let a3b_1 := r10;
+    Space(1);
     Adcx64Wrap(r10, r12);
     Store64_buffer(dst_ptr, r10, 32 + offset*16, Secret, dst_b, 4 + offset*2);
 
+    NoNewline(); 
     Mulx64(r13, r12, Mem(inB_ptr, 16 + offset*8, inB_b, 2 + offset, Secret));  /* A[3]*B[2] */ lemma_prod_bounds(r13, r12, a3, b2);  lemma_overflow(r13, r12, r11, bool_bit(overflow(efl)));
+    NoNewline();
     Adox64Wrap(r12, r11);  let a3b_2 := r12;
+    NoNewline();
     Adcx64Wrap(r12, r14);
+    NoNewline();
     Store64_buffer(dst_ptr, r12, 40 + offset*16, Secret, dst_b, 5 + offset*2);
     Mov64( r8, 0);
 
+    NoNewline();
     Mulx64(rdx, r14, Mem(inB_ptr, 24 + offset*8, inB_b, 3 + offset, Secret));  /* A[3]*B[3] */ lemma_prod_bounds(rdx, r14, a3, b3);  lemma_overflow(rdx, r14, r13, bool_bit(overflow(efl)));
     let old_carry    := bool_bit(cf(efl));
     let old_overflow := bool_bit(overflow(efl));
+    NoNewline();
     Adox64Wrap(r14, r13);  let a3b_3 := r14;
+    NoNewline();
     Adcx64Wrap(r14, rax);
+    NoNewline();
     Store64_buffer(dst_ptr, r14, 48 + offset*16, Secret, dst_b, 6 + offset*2);
     Mov64(rax, 0);
-    /*******************************************/  Adox64Wrap(rax, rdx);  let a3b_4 := rax;    Adcx64Wrap(rax, r8);
+
+    /*******************************************/  Space(35); Adox64Wrap(rax, rdx);  
+    NoNewline();
+    let a3b_4 := rax;    Adcx64Wrap(rax, r8);
+    Space(1);
     Store64_buffer(dst_ptr, rax, 56 + offset*16, Secret, dst_b, 7 + offset*2);
 
     let carry_bit    := bool_bit(cf(efl));
@@ -638,8 +686,13 @@ procedure Fast_multiply(
     Newline();
     Newline();
     Fast_multiply_a1b(offset, dst_b, inA_b, inB_b);
+    Newline();
+    Newline();
     Fast_multiply_a2b(offset, dst_b, inA_b, inB_b);
+    Newline();
+    Newline();
     Fast_multiply_a3b(offset, dst_b, inA_b, inB_b);
+    Newline();
 }
 
 procedure Fast_mul_stdcall(

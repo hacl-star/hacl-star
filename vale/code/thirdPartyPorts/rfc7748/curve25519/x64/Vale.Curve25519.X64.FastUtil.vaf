@@ -228,12 +228,15 @@ procedure Fast_add1(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB:nat64)
         modifies_buffer(dst_b, old(mem), mem);
 {
     xor_lemmas();
+    Comment("Clear registers to propagate the carry bit");
     Xor64( r8,  r8);
     Xor64( r9,  r9);
     Xor64(r10, r10);
     Xor64(r11, r11);
     Xor64(rax, rax);
 
+    Newline();
+    Comment("Begin addition chain");
     Add64Wrap(b, Mem(inA_ptr,  0, inA_b, 0, Secret));
     Store64_buffer(dst_ptr, b,  0, Secret, dst_b, 0);
 
@@ -246,6 +249,8 @@ procedure Fast_add1(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB:nat64)
     Adcx64Wrap(r10, Mem(inA_ptr, 24, inA_b, 3, Secret));
     Store64_buffer(dst_ptr, r10, 24, Secret, dst_b, 3);
 
+    Newline();
+    Comment("Return the carry bit in a register");
     Adcx64Wrap(rax, r11);
 }
 
