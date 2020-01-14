@@ -2,7 +2,7 @@
 #pragma once
 #include <inttypes.h>
 
-// Computes the addition of four-element src with value in y0
+// Computes the addition of four-element f1 with value in f2
 // and returns the carry (if any)
 static inline uint64_t add1_inline (uint64_t *out1, uint64_t *f1, uint64_t f2) 
 {
@@ -107,7 +107,7 @@ static inline void fmul_inline (uint64_t *tmp, uint64_t *f1, uint64_t *out, uint
   register uint64_t *out_r asm("rdx") = out;
 
   asm volatile(
-    // Save dst_ptr which will be clobbered by Fast_multiply
+    // Save dst_ptr which will be clobbered by the raw multiplication
     "  mov %%rdx, %%r15;"
 
     /////// Compute the raw multiplication: tmp <- src1 * src2 ////// 

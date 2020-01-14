@@ -747,6 +747,16 @@ dist/c89-compatible/Makefile.basic: HACL_OLD_FILES := $(subst -c,-c89,$(HACL_OLD
 
 # Linux distribution (not compiled on CI)
 # ---------------------------------------
+#
+# We do something unverified and dangerous, i.e. we blast away the whole
+# Field64.Vale HACL* module (which dispatches between inline and extern versions
+# of the ASM) and rely on in-scope declarations from curve25519-inline.h to have
+# i) the same names: this works because Vale.Inline.* is eliminated from the
+#    call-graph (via the -library option), meaning that the subsequent
+#    -no-prefix can use the short names (e.g. fadd) without conflicting with the
+#    inline assembly version of those names
+# ii) the same order of arguments between, say, Field64.Vale.fadd and
+#     Vale.Inline.Fadd.fadd
 dist/linux/Makefile.basic: MERKLE_BUNDLE = -bundle 'MerkleTree.*'
 dist/linux/Makefile.basic: TARGETCONFIG_FLAGS =
 dist/linux/Makefile.basic: DEFAULT_FLAGS += \
@@ -759,6 +769,12 @@ dist/linux/Makefile.basic: HAND_WRITTEN_FILES := $(filter-out providers/evercryp
 dist/linux/Makefile.basic: HAND_WRITTEN_H_FILES := $(filter-out %/evercrypt_targetconfig.h,$(HAND_WRITTEN_H_FILES))
 dist/linux/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES =
 dist/linux/Makefile.basic: BASE_FLAGS := $(filter-out -fcurly-braces,$(BASE_FLAGS))
+dist/linux/Makefile.basic: CURVE_BUNDLE = \
+  $(CURVE_BUNDLE_BASE) \
+  -bundle Hacl.Curve25519_64_Local \
+  -library Hacl.Impl.Curve25519.Field64.Vale \
+  -no-prefix Hacl.Impl.Curve25519.Field64.Vale \
+  -drop Hacl_Curve_Leftovers
 
 # CCF distribution
 # ----------------

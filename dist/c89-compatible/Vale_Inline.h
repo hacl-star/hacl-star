@@ -34,23 +34,23 @@
 
 
 
-extern void cswap2_inline(uint64_t bit, uint64_t *p0, uint64_t *p1);
+inline static void cswap2_inline(uint64_t bit, uint64_t *p0, uint64_t *p1);
 
-extern void fsqr_inline(uint64_t *tmp, uint64_t *f1, uint64_t *out1);
+inline static void fsqr_inline(uint64_t *tmp, uint64_t *f1, uint64_t *out1);
 
-extern void fsqr2_inline(uint64_t *tmp, uint64_t *f1, uint64_t *out1);
+inline static void fsqr2_inline(uint64_t *tmp, uint64_t *f1, uint64_t *out1);
 
-extern void fmul_inline(uint64_t *tmp, uint64_t *f1, uint64_t *out1, uint64_t *f2);
+inline static void fmul_inline(uint64_t *tmp, uint64_t *f1, uint64_t *out1, uint64_t *f2);
 
-extern void fmul2_inline(uint64_t *tmp, uint64_t *f1, uint64_t *out1, uint64_t *f2);
+inline static void fmul2_inline(uint64_t *tmp, uint64_t *f1, uint64_t *out1, uint64_t *f2);
 
-extern void fmul1_inline(uint64_t *out1, uint64_t *f1, uint64_t f2);
+inline static void fmul1_inline(uint64_t *out1, uint64_t *f1, uint64_t f2);
 
-extern uint64_t add1_inline(uint64_t *out1, uint64_t *f1, uint64_t f2);
+inline static uint64_t add1_inline(uint64_t *out1, uint64_t *f1, uint64_t f2);
 
-extern void fadd_inline(uint64_t *out1, uint64_t *f1, uint64_t *f2);
+inline static void fadd_inline(uint64_t *out1, uint64_t *f1, uint64_t *f2);
 
-extern void fsub_inline(uint64_t *out1, uint64_t *f1, uint64_t *f2);
+inline static void fsub_inline(uint64_t *out1, uint64_t *f1, uint64_t *f2);
 
 #define __Vale_Inline_H_DEFINED
 #endif

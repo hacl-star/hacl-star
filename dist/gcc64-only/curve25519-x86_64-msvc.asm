@@ -145,7 +145,7 @@ fmul_ proc
   mov rsi, rdx
   mov rdx, r8
   mov rcx, r9
-;# Save dst_ptr which will be clobbered by Fast_multiply
+;# Save dst_ptr which will be clobbered by the raw multiplication
   mov r15, rdx
 ;# Compute the raw multiplication: tmp <- src1 * src2
 ;# Compute src1[0] * src2

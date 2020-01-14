@@ -66,7 +66,7 @@ inline static void fsub(uint64_t *out1, uint64_t *f1, uint64_t *f2)
 
 /* SNIPPET_START: fmul */
 
-inline static void fmul(uint64_t *out1, uint64_t *f1, uint64_t *f2, uint64_t *tmp)
+inline static void fmul(uint64_t *tmp, uint64_t *f1, uint64_t *out1, uint64_t *f2)
 {
   #if EVERCRYPT_TARGETCONFIG_GCC
   fmul_inline(tmp, f1, out1, f2);
@@ -79,7 +79,7 @@ inline static void fmul(uint64_t *out1, uint64_t *f1, uint64_t *f2, uint64_t *tm
 
 /* SNIPPET_START: fmul20 */
 
-inline static void fmul20(uint64_t *out1, uint64_t *f1, uint64_t *f2, uint64_t *tmp)
+inline static void fmul20(uint64_t *tmp, uint64_t *f1, uint64_t *out1, uint64_t *f2)
 {
   #if EVERCRYPT_TARGETCONFIG_GCC
   fmul2_inline(tmp, f1, out1, f2);
@@ -105,7 +105,7 @@ inline static void fmul10(uint64_t *out1, uint64_t *f1, uint64_t f2)
 
 /* SNIPPET_START: fsqr0 */
 
-inline static void fsqr0(uint64_t *out1, uint64_t *f1, uint64_t *tmp)
+inline static void fsqr0(uint64_t *tmp, uint64_t *f1, uint64_t *out1)
 {
   #if EVERCRYPT_TARGETCONFIG_GCC
   fsqr_inline(tmp, f1, out1);
@@ -118,7 +118,7 @@ inline static void fsqr0(uint64_t *out1, uint64_t *f1, uint64_t *tmp)
 
 /* SNIPPET_START: fsqr20 */
 
-inline static void fsqr20(uint64_t *out1, uint64_t *f, uint64_t *tmp)
+inline static void fsqr20(uint64_t *tmp, uint64_t *f, uint64_t *out1)
 {
   #if EVERCRYPT_TARGETCONFIG_GCC
   fsqr2_inline(tmp, f, out1);
@@ -179,7 +179,7 @@ static void point_add_and_double(uint64_t *q, uint64_t *p01_tmp1, uint64_t *tmp2
   uint64_t *c0 = dc + (uint32_t)4U;
   fadd(c0, x3, z31);
   fsub(d0, x3, z31);
-  fmul20(dc, dc, ab, tmp2);
+  fmul20(tmp2, dc, dc, ab);
   fadd(x3, d0, c0);
   fsub(z31, d0, c0);
   uint64_t *a1 = tmp1;
@@ -188,8 +188,8 @@ static void point_add_and_double(uint64_t *q, uint64_t *p01_tmp1, uint64_t *tmp2
   uint64_t *c = tmp1 + (uint32_t)12U;
   uint64_t *ab1 = tmp1;
   uint64_t *dc1 = tmp1 + (uint32_t)8U;
-  fsqr20(dc1, ab1, tmp2);
-  fsqr20(nq_p1, nq_p1, tmp2);
+  fsqr20(tmp2, ab1, dc1);
+  fsqr20(tmp2, nq_p1, nq_p1);
   a1[0U] = c[0U];
   a1[1U] = c[1U];
   a1[2U] = c[2U];
@@ -197,8 +197,8 @@ static void point_add_and_double(uint64_t *q, uint64_t *p01_tmp1, uint64_t *tmp2
   fsub(c, d, c);
   fmul10(b1, c, (uint64_t)121665U);
   fadd(b1, b1, d);
-  fmul20(nq, dc1, ab1, tmp2);
-  fmul(z3, z3, x1, tmp2);
+  fmul20(tmp2, dc1, nq, ab1);
+  fmul(tmp2, z3, z3, x1);
 }
 
 /* SNIPPET_END: point_add_and_double */
@@ -217,7 +217,7 @@ static void point_double(uint64_t *nq, uint64_t *tmp1, uint64_t *tmp2)
   uint64_t *dc = tmp1 + (uint32_t)8U;
   fadd(a, x2, z2);
   fsub(b, x2, z2);
-  fsqr20(dc, ab, tmp2);
+  fsqr20(tmp2, ab, dc);
   a[0U] = c[0U];
   a[1U] = c[1U];
   a[2U] = c[2U];
@@ -225,7 +225,7 @@ static void point_double(uint64_t *nq, uint64_t *tmp1, uint64_t *tmp2)
   fsub(c, d, c);
   fmul10(b, c, (uint64_t)121665U);
   fadd(b, b, d);
-  fmul20(nq, dc, ab, tmp2);
+  fmul20(tmp2, dc, nq, ab);
 }
 
 /* SNIPPET_END: point_double */
@@ -292,10 +292,10 @@ static void montgomery_ladder(uint64_t *out, uint8_t *key, uint64_t *init1)
 
 static void fsquare_times(uint64_t *o, uint64_t *inp, uint64_t *tmp, uint32_t n1)
 {
-  fsqr0(o, inp, tmp);
+  fsqr0(tmp, inp, o);
   for (uint32_t i = (uint32_t)0U; i < n1 - (uint32_t)1U; i = i + (uint32_t)1U)
   {
-    fsqr0(o, o, tmp);
+    fsqr0(tmp, o, o);
   }
 }
 
@@ -313,28 +313,28 @@ static void finv(uint64_t *o, uint64_t *i, uint64_t *tmp)
   uint64_t *tmp1 = tmp;
   fsquare_times(a, i, tmp1, (uint32_t)1U);
   fsquare_times(t00, a, tmp1, (uint32_t)2U);
-  fmul(b, t00, i, tmp);
-  fmul(a, b, a, tmp);
+  fmul(tmp, t00, b, i);
+  fmul(tmp, b, a, a);
   fsquare_times(t00, a, tmp1, (uint32_t)1U);
-  fmul(b, t00, b, tmp);
+  fmul(tmp, t00, b, b);
   fsquare_times(t00, b, tmp1, (uint32_t)5U);
-  fmul(b, t00, b, tmp);
+  fmul(tmp, t00, b, b);
   fsquare_times(t00, b, tmp1, (uint32_t)10U);
-  fmul(c, t00, b, tmp);
+  fmul(tmp, t00, c, b);
   fsquare_times(t00, c, tmp1, (uint32_t)20U);
-  fmul(t00, t00, c, tmp);
+  fmul(tmp, t00, t00, c);
   fsquare_times(t00, t00, tmp1, (uint32_t)10U);
-  fmul(b, t00, b, tmp);
+  fmul(tmp, t00, b, b);
   fsquare_times(t00, b, tmp1, (uint32_t)50U);
-  fmul(c, t00, b, tmp);
+  fmul(tmp, t00, c, b);
   fsquare_times(t00, c, tmp1, (uint32_t)100U);
-  fmul(t00, t00, c, tmp);
+  fmul(tmp, t00, t00, c);
   fsquare_times(t00, t00, tmp1, (uint32_t)50U);
-  fmul(t00, t00, b, tmp);
+  fmul(tmp, t00, t00, b);
   fsquare_times(t00, t00, tmp1, (uint32_t)5U);
   uint64_t *a0 = t1;
   uint64_t *t0 = t1 + (uint32_t)12U;
-  fmul(o, t0, a0, tmp);
+  fmul(tmp, t0, o, a0);
 }
 
 /* SNIPPET_END: finv */
@@ -386,7 +386,7 @@ static void encode_point(uint8_t *o, uint64_t *i)
   uint64_t u64s[4U] = { 0U };
   uint64_t tmp_w[16U] = { 0U };
   finv(tmp, z, tmp_w);
-  fmul(tmp, tmp, x, tmp_w);
+  fmul(tmp_w, tmp, tmp, x);
   store_felem(u64s, tmp);
   for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)4U; i0 = i0 + (uint32_t)1U)
   {
