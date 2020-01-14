@@ -113,11 +113,25 @@ procedure Fast_multiply_a0b(
 //    "mulx 24(B), %%r14, %%rdx; " /* A[0]*B[3] */    "adox %%r13, %%r14 ;"                                                       "movq $0, %%rax ;"
 //    /*******************************************/   "adox %%rdx, %%rax ;"
 
+    Comment("Compute src1[0] * src2");
     Load64_buffer(rdx, inA_ptr,  0 + 8*offset, Secret, inA_b, 0 + offset);     /* A[0] */
     /* The Xo64 clears the flags used for carry bits; NOTE: Original code uses xorl with r10d, maybe produces smaller code? */
-    Mulx64( r9,  r8, Mem(inB_ptr,  0 + offset*8, inB_b, 0 + offset, Secret));  /* A[0]*B[0] */ Xor64(r10, r10);     lemma_prod_bounds(r9, r8, a0, b0);      Store64_buffer(dst_ptr,  r8, 0 + offset*16, Secret, dst_b, 0 + offset*2);
+    NoNewline();
+    Mulx64( r9,  r8, Mem(inB_ptr,  0 + offset*8, inB_b, 0 + offset, Secret));  /* A[0]*B[0] */ 
+    Space(3);
+    Xor64(r10, r10);     
+    lemma_prod_bounds(r9, r8, a0, b0);   
+    Space(1);
+    Store64_buffer(dst_ptr,  r8, 0 + offset*16, Secret, dst_b, 0 + offset*2);
 
-    Mulx64(r11, r10, Mem(inB_ptr,  8 + offset*8, inB_b, 1 + offset, Secret));  /* A[0]*B[1] */ let a0b1_lo := r10; lemma_prod_bounds(r11, r10, a0, b1);  Adox64Wrap(r10,  r9);    Store64_buffer(dst_ptr, r10, 8 + offset*16, Secret, dst_b, 1 + offset*2);
+    Newline();
+    NoNewline();
+    Mulx64(r11, r10, Mem(inB_ptr,  8 + offset*8, inB_b, 1 + offset, Secret));  /* A[0]*B[1] */ 
+    let a0b1_lo := r10; lemma_prod_bounds(r11, r10, a0, b1);
+    Space(1);
+    Adox64Wrap(r10,  r9);
+    Space(1);
+    Store64_buffer(dst_ptr, r10, 8 + offset*16, Secret, dst_b, 1 + offset*2);
 
     let d0 := buffer64_read(dst_b, 0 + offset*2, mem);
     let d1 := buffer64_read(dst_b, 1 + offset*2, mem);
@@ -132,11 +146,23 @@ procedure Fast_multiply_a0b(
 //    assert a0b0b1 == a0 * (b0 + pow2_64 * b1);
 
     //assert_by_tactic(a0b0b1 == a0 * (b0 + pow2_64 * b1), int_canon);   // FAILS
-    Mulx64(r13, r12, Mem(inB_ptr, 16 + offset*8, inB_b, 2 + offset, Secret));  /* A[0]*B[2] */ let a0b2_lo := r12; lemma_prod_bounds(r13, r12, a0, b2);  Adox64Wrap(r12, r11);
+    Newline();
+    NoNewline();    
+    Mulx64(r13, r12, Mem(inB_ptr, 16 + offset*8, inB_b, 2 + offset, Secret));  /* A[0]*B[2] */ 
+    let a0b2_lo := r12; lemma_prod_bounds(r13, r12, a0, b2); 
+    Adox64Wrap(r12, r11);
+
     let overflow1 := overflow(efl);
-    Mulx64(rdx, r14, Mem(inB_ptr, 24 + offset*8, inB_b, 3 + offset, Secret));  /* A[0]*B[3] */ let a0b3_lo := r14; lemma_prod_bounds(rdx, r14, a0, b3);  Adox64Wrap(r14, r13);    Mov64(rax, 0);
+    NoNewline();
+    Mulx64(rdx, r14, Mem(inB_ptr, 24 + offset*8, inB_b, 3 + offset, Secret));  /* A[0]*B[3] */ 
+    let a0b3_lo := r14; lemma_prod_bounds(rdx, r14, a0, b3); 
+    NoNewline();
+    Adox64Wrap(r14, r13);
+    Mov64(rax, 0);
     let overflow2 := overflow(efl);
-    /*******************************************/                  Adox64Wrap(rax, rdx);
+
+
+    /*******************************************/  Space(35);  Adox64Wrap(rax, rdx);
 
     carry := if overflow2 then 1 else 0;
     let carry_new := if overflow(efl) then 1 else 0;
@@ -609,6 +635,8 @@ procedure Fast_multiply(
         modifies_buffer_specific(dst_b, old(mem), mem, 0 + offset*2, 8 + offset*2 - 1);
 {
     Fast_multiply_a0b(offset, dst_b, inA_b, inB_b);
+    Newline();
+    Newline();
     Fast_multiply_a1b(offset, dst_b, inA_b, inB_b);
     Fast_multiply_a2b(offset, dst_b, inA_b, inB_b);
     Fast_multiply_a3b(offset, dst_b, inA_b, inB_b);

@@ -464,3 +464,35 @@ procedure Comment(inline c:string)
 {
     // Do nothing. This is a no-op.
 }
+
+procedure LargeComment(inline c:string)
+    {:public}
+    {:quick exportOnly}
+    {:instruction Ins(BC.Noop(BC.LargeComment(c)))}
+{
+    // Do nothing. This is a no-op.
+}
+
+procedure NoNewline()
+    {:public}
+    {:quick exportOnly}
+    {:instruction Ins(BC.Noop(BC.NoNewline))}
+{
+    // Do nothing. This is a no-op.
+}
+
+procedure Newline()
+    {:public}
+    {:quick exportOnly}
+    {:instruction Ins(BC.Noop(BC.Newline))}
+{
+    // Do nothing. This is a no-op.
+}
+
+procedure Space(inline n:nat)
+    {:public}
+    {:quick exportOnly}
+    {:instruction Ins(BC.Noop(BC.Space(n)))}
+{
+    // Do nothing. This is a no-op.
+}

@@ -8,6 +8,10 @@ type instr_annotation_t = instr_t_record -> Type0
 
 type noop =
   | Comment: string -> noop
+  | LargeComment: string -> noop
+  | NoNewline
+  | Newline
+  | Space: nat -> noop
 
 noeq type instruction_t (a:instr_annotation_t) =
   // Generic instruction (should be able to express most instructions)

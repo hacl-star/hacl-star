@@ -121,6 +121,7 @@ procedure Fmul(
 {
     Comment("Save dst_ptr which will be clobbered by Fast_multiply");
     Mov64(r15, dst_ptr); 
+    LargeComment("Compute the raw multiplication: tmp <- src1 * src2");
     Fast_multiply(0, tmp_b, inA_b, inB_b);
     Mov64(inA_ptr, tmp_ptr);
     Mov64(rdi, r15); // Restore dst_ptr
