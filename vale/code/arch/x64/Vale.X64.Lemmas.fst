@@ -31,6 +31,7 @@ val eval_while_eq_all (g:bool) (c:code) (f:fuel) : Lemma
 
 #reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 50"
 
+#restart-solver
 let rec lemma_eq_instr_apply_eval_args
     (outs:list instr_out) (args:list instr_operand)
     (f:instr_args_t outs args) (oprs:instr_operands_t_args args) (s1 s2:machine_state)
@@ -57,6 +58,7 @@ let rec lemma_eq_instr_apply_eval_args
         | Some v -> lemma_eq_instr_apply_eval_args outs args (f v) oprs s1 s2
     )
 
+#restart-solver
 let rec lemma_eq_instr_apply_eval_inouts
     (outs inouts:list instr_out) (args:list instr_operand)
     (f:instr_inouts_t outs inouts args) (oprs:instr_operands_t inouts args) (s1 s2:machine_state)
@@ -90,6 +92,7 @@ let rec lemma_eq_instr_apply_eval_inouts
       | Some v -> lemma_eq_instr_apply_eval_inouts outs inouts args (f v) oprs s1 s2
     )
 
+#restart-solver
 let rec lemma_eq_instr_write_outputs
     (outs:list instr_out) (args:list instr_operand)
     (vs:instr_ret_t outs) (oprs:instr_operands_t outs args) (s1_orig s1 s2_orig s2:machine_state)
@@ -128,6 +131,7 @@ let rec lemma_eq_instr_write_outputs
         lemma_eq_instr_write_outputs outs args vs (coerce oprs) s1_orig s1 s2_orig s2
     )
 
+#restart-solver
 let eval_ins_eq_instr (inst:BS.ins) (s1 s2:machine_state) : Lemma
   (requires Instr? inst /\ state_eq_S true s1 s2)
   (ensures state_eq_S true (BS.machine_eval_ins inst s1) (BS.machine_eval_ins inst s2))
@@ -154,6 +158,7 @@ let eval_code_eq_instr (inst:BS.ins) (f:fuel) (s1 s2:machine_state) : Lemma
   =
   eval_ins_eq_instr inst ({s1 with BS.ms_trace = []}) ({s2 with BS.ms_trace = []})
 
+#restart-solver
 let eval_code_eq_ins (i:BS.ins) (f:fuel) (s1 s2:machine_state) : Lemma
   (requires state_eq_S true s1 s2)
   (ensures state_eq_opt true (BS.machine_eval_code (Ins i) f s1) (BS.machine_eval_code (Ins i) f s2))
@@ -167,6 +172,7 @@ let eval_code_eq_ins (i:BS.ins) (f:fuel) (s1 s2:machine_state) : Lemma
 
 #reset-options "--initial_fuel 2 --max_fuel 2 --z3rlimit 30"
 
+#restart-solver
 let rec eval_code_eq_all g c f =
   match c with
   | Ins i ->

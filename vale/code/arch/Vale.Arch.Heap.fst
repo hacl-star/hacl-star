@@ -11,13 +11,22 @@ let heap_get hi = hi.vf_heap.mh
 
 let heap_taint hi = hi.vf_layout.vl_taint
 
+// Update heaplet k with mh', but only for the addresses that k owns (addresses not owned by k remain unmodified)
+let heaplet_upd_f (vfh:vale_full_heap) (mh':machine_heap) (k:heaplet_id) : vale_heap =
+  let hk = Map16.sel vfh.vf_heaplets k in
+  let mhk = hk.mh in
+  let dom_upd = Set.intersect (vfh.vf_layout.vl_inner.vl_heaplet_sets k) (Map.domain mhk) in
+  let mhk' = Map.concat mhk (Map.restrict dom_upd mh') in
+  mi_heap_upd hk mhk'
+
 let heap_upd hi mh' mt' =
   let h' = mi_heap_upd hi.vf_heap mh' in
-  let hh' = ValeHeap h'.mh h'.ih (Map16.sel hi.vf_heaplets 0).heapletId in
+  let hs' = Map16.init vale_heap (heaplet_upd_f hi mh') in
   {
     vf_layout = {hi.vf_layout with vl_taint = mt'};
     vf_heap = h';
-    vf_heaplets = Map16.upd hi.vf_heaplets 0 hh';
+//    vf_heaplets = hs';
+    vf_heaplets = Map16.upd hi.vf_heaplets 0 (ValeHeap h'.mh h'.ih (Map16.sel hi.vf_heaplets 0).heapletId);
   }
 
 let heap_create_machine ih =

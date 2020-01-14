@@ -385,5 +385,33 @@ val mem_eq_modifies (h1 h1' h2 h2':vale_heap) : Lemma
   (ensures forall (l:loc).{:pattern (modifies l h1 h1') \/ (modifies l h2 h2')}
     modifies l h1 h1' <==> modifies l h2 h2')
 
+type mutability = | Mutable | Immutable
+
+// Buffer information for heaplets
+noeq type buffer_info : Type0 = {
+  bi_typ:base_typ;
+  bi_buffer:buffer bi_typ;
+  bi_heaplet:heaplet_id;
+  bi_taint:taint;
+  bi_mutable:mutability;
+}
+
+// Buffers in different heaplets are disjoint
+let buffer_info_disjoint (bi1 bi2:buffer_info) =
+  bi1.bi_typ =!= bi2.bi_typ \/ bi1.bi_heaplet =!= bi2.bi_heaplet ==>
+  loc_disjoint (loc_buffer bi1.bi_buffer) (loc_buffer bi2.bi_buffer)
+
+// Requirements for enabling heaplets
+let init_heaplets_req (h:vale_heap) (bs:Seq.seq buffer_info) (modloc:loc) =
+  (forall (i:nat).{:pattern (Seq.index bs i)} i < Seq.length bs ==>
+    buffer_readable h (Seq.index bs i).bi_buffer /\
+    ((Seq.index bs i).bi_mutable == Mutable ==> loc_includes modloc (loc_buffer (Seq.index bs i).bi_buffer))) /\
+  (forall (i1 i2:nat).{:pattern (Seq.index bs i1); (Seq.index bs i2)}
+    i1 < Seq.length bs /\ i2 < Seq.length bs ==> buffer_info_disjoint (Seq.index bs i1) (Seq.index bs i2))
+
+// Initial memory state
+val is_initial_heap (layout:vale_heap_layout) (h:vale_heap) : prop0
+
+// Invariant that is always true in Vale procedures
 val mem_inv (h:vale_full_heap) : prop0
 

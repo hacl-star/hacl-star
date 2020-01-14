@@ -33,6 +33,7 @@ val create_initial_vale_full_heap (ih:IB.interop_heap) (mt:memTaint_t) : Ghost v
   (ensures fun h ->
     h == coerce (heap_create_impl ih mt) /\
     ME.mem_inv h /\
+    ME.is_initial_heap h.vf_layout h.vf_heap /\
     h.vf_heap == create_initial_vale_heap ih /\
     ME.vale_heap_data_eq h.vf_heap (Map16.sel h.vf_heaplets 0)
   )

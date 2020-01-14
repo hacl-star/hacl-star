@@ -12,10 +12,12 @@ include{:fstar}{:open} "Vale.X64.State"
 include{:fstar}{:open} "Vale.X64.Decls"
 include{:fstar}{:open} "Vale.X64.QuickCode"
 include{:fstar}{:open} "Vale.X64.CPU_Features_s"
+include{:/*TODO*/fstar}{:open Seq} "FStar.Seq.Base"
 
 module Vale.X64.InsMem
 
 #verbatim{:interface}
+open FStar.Seq
 open Vale.Def.Types_s
 open Vale.Arch.HeapTypes_s
 open Vale.Arch.HeapImpl
@@ -74,26 +76,31 @@ procedure Mem_lemma(ghost base:va_operand, ghost offset:int, ghost b:buffer64, g
 }
 
 #verbatim
-let create_heaplets_this (s:vale_state) : GTot vale_state =
-  {s with vs_heap = Vale.X64.Memory_Sems.create_heaplets s.vs_heap}
+let create_heaplets_this (bs:Seq.seq buffer_info) (modloc:loc) (s:vale_state) : GTot vale_state =
+  {s with vs_heap = Vale.X64.Memory_Sems.create_heaplets bs modloc s.vs_heap}
 
 let destroy_heaplets_this (s:vale_state) : GTot vale_state =
   {s with vs_heap = Vale.X64.Memory_Sems.destroy_heaplets s.vs_heap}
 #endverbatim
-function create_heaplets_this(s:vale_state):vale_state extern;
+
+function create_heaplets_this(buffers:Seq.seq(buffer_info), modloc:loc, s:vale_state):vale_state extern;
 function destroy_heaplets_this(s:vale_state):vale_state extern;
 ghost procedure Vale.X64.StateLemmas.use_machine_state_equal() extern;
 
-procedure CreateHeaplets()
+procedure CreateHeaplets(ghost buffers:Seq.seq(buffer_info), ghost modloc:loc)
     {:public}
     {:quick exportOnly}
     {:instruction mk_ins(make_instr_annotate(I.ins_Ghost, S.AnnotateGhost()))}
     modifies
         memLayout;
+    requires
+        is_initial_heap(memLayout, mem);
+        init_heaplets_req(mem, buffers, modloc);
     ensures
         memLayout.vl_taint == old(memLayout.vl_taint);
 {
-    this := create_heaplets_this(this);
+    this := create_heaplets_this(buffers, modloc, this);
+    lemma_create_heaplets(buffers, modloc, old(this).vs_heap);
     Vale.X64.StateLemmas.use_machine_state_equal();
 }
 

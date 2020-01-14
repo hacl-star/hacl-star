@@ -1030,7 +1030,10 @@ procedure Loop6x_loop(
 }
 
 
-#reset-options " --z3rlimit 40"
+#reset-options " --z3rlimit 80"
+#verbatim
+#restart-solver
+#endverbatim
 procedure AESNI_ctr32_6x_preamble(
         inline alg:algorithm,  // OpenSSL includes the number of rounds (nr) as a dynamic parameter (stored with the key).  Saves code space but adds extra instructions to the fast path.  Maybe branch predictor is good enough for it not to matter
         ghost key_words:seq(nat32),

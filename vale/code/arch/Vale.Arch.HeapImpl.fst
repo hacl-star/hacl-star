@@ -13,15 +13,22 @@ noeq type vale_heap =
     vale_heap
 
 noeq type vale_heap_layout_inner : Type u#1 = {
-  vl_n_buffers:nat;
-  vl_old_heap:vale_heap;
+  vl_heaplets_initialized:bool;
+  vl_heaplet_map:int -> option heaplet_id; // each address is owned by at most one heaplet
+  vl_heaplet_sets:heaplet_id -> Set.set int; // addresses owned by each heaplet (redundant with vl_heaplet_map, but convenient)
+  vl_old_heap:vale_heap; // would go in vl_v, but can't because it is Type u#1
+  vl_t:Type0;
+  vl_v:vl_t; // rest of fields are defined by Vale.X64.Memory
 }
 
-let empty_vale_heap_layout_inner (h:vale_heap) : vale_heap_layout_inner =
-  {
-    vl_n_buffers = 0;
-    vl_old_heap = h;
-  }
+let empty_vale_heap_layout_inner (h:vale_heap) : vale_heap_layout_inner = {
+  vl_heaplets_initialized = false;
+  vl_heaplet_map = (fun _ -> None);
+  vl_heaplet_sets = (fun _ -> Set.empty);
+  vl_old_heap = h;
+  vl_t = unit;
+  vl_v = ();
+}
 
 let empty_heaplet (h:vale_heap) (n:nat{n < 16}) : vale_heap =
   let ValeHeap mh ih _ = h in ValeHeap mh ih (Some n)

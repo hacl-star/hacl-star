@@ -384,7 +384,7 @@ unfold let wp_sound_code_pre (#a:Type0) (#c:code) (qc:quickCode a c) (s0:vale_st
       //(mem:vale_full_heap) // splitting mem into its components makes the VCs slightly cleaner:
       (mem_layout:vale_heap_layout)
       (mem_heap:vale_heap)
-      (mem_heaplets:Vale.Lib.Map16.map16 vale_heap)
+      (mem_heaplets:vale_heaplets)
       (stack:vale_stack)
       (stackTaint:memtaint)
       .

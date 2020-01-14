@@ -70,9 +70,7 @@ let buffer t = (b:b8{DV.length (get_downview b.bsrc) % view_n t == 0})
 
 let buffer_as_seq #t h b =
   let s = UV.as_seq (IB.hs_of_mem (_ih h)) (UV.mk_buffer (get_downview b.bsrc) (uint_view t)) in
-  let len = Seq.length s in
-  let contents (i:nat{i < len}) : base_typ_as_vale_type t = v_to_typ t (Seq.index s i) in
-  Seq.init len contents
+  Vale.Lib.Seqs_s.seq_map (v_to_typ t) s
 
 let buffer_readable #t h b = List.memP b (IB.ptrs_of_mem (_ih h))
 let buffer_writeable #t b = b.writeable
@@ -672,11 +670,85 @@ let mem_eq_all h1 h2 =
 let mem_eq_modifies h1 h1' h2 h2' =
   ()
 
-let inv_heaplets (hs:Map16.map16 vale_heap) =
+noeq type layout_data : Type0 = {
+  vl_buffers:Seq.seq buffer_info;
+  vl_mod_loc:loc;
+}
+
+let valid_layout_data_buffer (t:base_typ) (b:buffer t) (ld:layout_data) (hid:heaplet_id) =
+  exists (n:nat).{:pattern (Seq.index ld.vl_buffers n)} n < Seq.length ld.vl_buffers /\ (
+    let bi = Seq.index ld.vl_buffers n in
+    t == bi.bi_typ /\
+    b == bi.bi_buffer /\
+    hid == bi.bi_heaplet)
+
+[@"opaque_to_smt"]
+let valid_layout_buffer_id (t:base_typ) (b:buffer t) (layout:vale_heap_layout) (h_id:option heaplet_id) =
+  match h_id with
+  | None -> True
+  | Some hid ->
+    layout.vl_inner.vl_heaplets_initialized /\
+    layout.vl_inner.vl_t == layout_data /\
+    valid_layout_data_buffer t b (coerce layout.vl_inner.vl_v) hid
+
+let valid_layout_buffer (#t:base_typ) (b:buffer t) (layout:vale_heap_layout) (h:vale_heap) =
+  valid_layout_buffer_id t b layout h.heapletId
+
+let inv_heaplet_ids (hs:vale_heaplets) =
   forall (i:heaplet_id).{:pattern Map16.sel hs i} (Map16.sel hs i).heapletId == Some i
 
-let mem_inv h =
-  vale_heap_data_eq h.vf_heap (Map16.sel h.vf_heaplets 0) /\
-  inv_heaplets h.vf_heaplets /\
+let inv_heaplet (ld:layout_data) (owns:Set.set int) (h hi:vale_heap) =
+  h.ih.IB.ptrs == hi.ih.IB.ptrs /\
+  Map.domain h.mh == Map.domain hi.mh /\
+  (forall (i:int).{:pattern Set.mem i owns \/ Set.mem i (Map.domain h.mh) \/ Map.sel h.mh i \/ Map.sel hi.mh i}
+    Set.mem i owns ==>
+      Set.mem i (Map.domain h.mh) /\
+      Map.sel h.mh i == Map.sel hi.mh i
+  ) /\
   True
 
+// heaplet state matches heap state
+let inv_buffer_info (bi:buffer_info) (owners:heaplet_id -> Set.set int) (h:vale_heap) (hs:vale_heaplets) (mt:memTaint_t) (modloc:loc) =
+  let t = bi.bi_typ in
+  let hid = bi.bi_heaplet in
+  let hi = Map16.get hs hid in
+  let b = bi.bi_buffer in
+  let owns = owners hid in
+  (bi.bi_mutable == Mutable ==> loc_includes modloc (loc_buffer b)) /\
+  buffer_readable h b /\
+  buffer_as_seq hi b == buffer_as_seq h b /\
+  (valid_taint_buf b hi mt bi.bi_taint <==> valid_taint_buf b h mt bi.bi_taint) /\
+  (forall (i:int).{:pattern Set.mem i owns}
+    buffer_addr b h <= i /\ i < buffer_addr b h + DV.length (get_downview b.bsrc) ==> Set.mem i owns)
+
+let inv_heaplets (layout:vale_heap_layout_inner) (ld:layout_data) (h:vale_heap) (hs:vale_heaplets) (mt:memTaint_t) =
+  let {vl_buffers = bs; vl_mod_loc = modloc} = ld in
+//TODO:  modifies ld.vl_mod_loc layout.vl_old_heap h /\  // modifies for entire heap
+  (forall (i:heaplet_id) (a:int).{:pattern Set.mem a (layout.vl_heaplet_sets i)}
+    layout.vl_heaplet_map a == Some i <==> Set.mem a (layout.vl_heaplet_sets i)
+  ) /\
+  (forall (i:heaplet_id).{:pattern (Map16.sel hs i)}
+    inv_heaplet ld (layout.vl_heaplet_sets i) h (Map16.sel hs i)) /\
+  (forall (i:nat).{:pattern (Seq.index bs i)} i < Seq.length bs ==>
+    inv_buffer_info (Seq.index bs i) layout.vl_heaplet_sets h hs mt modloc) /\
+  (forall (i1 i2:nat).{:pattern (Seq.index bs i1); (Seq.index bs i2)}
+    i1 < Seq.length bs /\ i2 < Seq.length bs ==> buffer_info_disjoint (Seq.index bs i1) (Seq.index bs i2)) /\
+  True
+
+let is_initial_heap layout h =
+  h == layout.vl_inner.vl_old_heap /\
+  not layout.vl_inner.vl_heaplets_initialized
+
+let mem_inv h =
+  vale_heap_data_eq h.vf_heap (Map16.sel h.vf_heaplets 0)
+(*
+  inv_heaplet_ids h.vf_heaplets /\
+  (if h.vf_layout.vl_inner.vl_heaplets_initialized
+    then
+      h.vf_layout.vl_inner.vl_t == layout_data /\
+      inv_heaplets h.vf_layout.vl_inner (coerce h.vf_layout.vl_inner.vl_v) h.vf_heap
+        h.vf_heaplets h.vf_layout.vl_taint
+    else
+      h.vf_heaplets == empty_vale_heaplets h.vf_layout.vl_inner.vl_old_heap
+  )
+*)

@@ -214,6 +214,7 @@ let vale_pre_hyp
   : VSig.sprop =
     fun s0 ->
       V.state_inv s0 /\
+      ME.is_initial_heap s0.VS.vs_heap.vf_layout s0.VS.vs_heap.vf_heap /\
       ME.vale_heap_data_eq s0.VS.vs_heap.vf_heap (Map16.sel s0.VS.vs_heap.vf_heaplets 0) /\
       VSig.disjoint_or_eq args /\
       VSig.readable args (ME.get_vale_heap s0.VS.vs_heap) /\

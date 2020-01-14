@@ -58,16 +58,21 @@ let is_full_update (mh':machine_heap) (mt':memtaint) (vfh:vale_full_heap) (h':va
     vfh'.vf_heaplets == Map16.upd vfh.vf_heaplets 0 h'
   )
 
-val create_heaplets (h1:vale_full_heap) : Pure vale_full_heap
-  (requires True)
-  (ensures fun h2 ->
-    heap_get (coerce h1) == heap_get (coerce h2) /\
-    heap_taint (coerce h1) == heap_taint (coerce h2) /\
+val create_heaplets (bs:Seq.seq buffer_info) (modloc:loc) (h1:vale_full_heap) : GTot vale_full_heap
+
+val lemma_create_heaplets (bs:Seq.seq buffer_info) (modloc:loc) (h1:vale_full_heap) : Lemma
+  (requires
+    mem_inv h1 /\
+    is_initial_heap h1.vf_layout h1.vf_heap /\
+    init_heaplets_req h1.vf_heap bs modloc
+  )
+  (ensures (
+    let h2 = create_heaplets bs modloc h1 in
     h1.vf_heap == h2.vf_heap /\
     h1.vf_heaplets == h2.vf_heaplets /\
     h1.vf_layout.vl_taint == h2.vf_layout.vl_taint /\
-    (mem_inv h1 ==> mem_inv h2)
-  )
+    mem_inv h2
+  ))
 
 val destroy_heaplets (h1:vale_full_heap) : Pure vale_full_heap
   (requires True)

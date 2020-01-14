@@ -22,7 +22,8 @@ let same_domain h m = Set.equal (IB.addrs_set (_ih h)) (Map.domain m)
 
 let lemma_same_domains h m1 m2 = ()
 
-let reveal_mem_inv () = ()
+let reveal_mem_inv () =
+  ()
 
 let get_heap h = I.down_mem (_ih h)
 
@@ -40,19 +41,122 @@ let lemma_heap_taint h = ()
 
 //let lemma_heap_upd_heap h mh mt = ()
 
-let create_heaplets h1 =
-  let layout = h1.vf_layout in
-  let l = layout.vl_inner in
-  let l = {l with vl_n_buffers = 1} in
-  let layout = {layout with vl_inner = l} in
-  {h1 with vf_layout = layout}
+[@"opaque_to_smt"]
+let rec set_of_range (a:int) (n:nat) : Pure (Set.set int)
+  (requires True)
+  (ensures fun s -> (forall (i:int).{:pattern Set.mem i s} Set.mem i s <==> a <= i /\ i < a + n))
+  =
+  if n = 0 then Set.empty else Set.union (set_of_range a (n - 1)) (Set.singleton (a + n - 1))
+
+let buffer_info_has_addr (bi:buffer_info) (a:int) =
+  let b = bi.bi_buffer in
+  let addr = Vale.Interop.Heap_s.global_addrs_map b in
+  let len = DV.length (get_downview b.bsrc) in
+  addr <= a /\ a < addr + len
+
+let buffer_info_has_addr_opt (bi:option buffer_info) (a:int) =
+  match bi with
+  | None -> False
+  | Some bi -> buffer_info_has_addr bi a
+
+#set-options "--z3rlimit 100"
+let rec make_owns_rec (h:vale_heap) (bs:Seq.seq buffer_info) (n:nat{n <= Seq.length bs}) :
+  GTot ((int -> option (n:nat{n < Seq.length bs})) & (heaplet_id -> Set.set int))
+  =
+  if n = 0 then ((fun _ -> None), (fun _ -> Set.empty)) else
+  let (m0, s0) = make_owns_rec h bs (n - 1) in
+  let bi = Seq.index bs (n - 1) in
+  let b = bi.bi_buffer in
+  let hi = bi.bi_heaplet in
+  let addr = Vale.Interop.Heap_s.global_addrs_map b in
+  let len = DV.length (get_downview b.bsrc) in
+  let s_b = set_of_range addr len in
+  let s i = if i = hi then Set.union (s0 i) s_b else s0 i in
+  let m a = if addr <= a && a < addr + len then Some (n - 1) else m0 a in
+  (m, s)
+
+[@"opaque_to_smt"]
+let make_owns (h:vale_heap) (bs:Seq.seq buffer_info) (n:nat{n <= Seq.length bs}) :
+  GTot ((int -> option (n:nat{n < Seq.length bs})) & (heaplet_id -> Set.set int))
+  =
+  make_owns_rec h bs n
+
+let rec lemma_make_owns (h:vale_heap) (bs:Seq.seq buffer_info) (n:nat) : Lemma
+  (requires
+    n <= Seq.length bs /\
+    (forall (i:nat).{:pattern Seq.index bs i} i < Seq.length bs ==> buffer_readable h (Seq.index bs i).bi_buffer) /\
+    (forall (i1 i2:nat).{:pattern (Seq.index bs i1); (Seq.index bs i2)}
+      i1 < Seq.length bs /\ i2 < Seq.length bs ==> buffer_info_disjoint (Seq.index bs i1) (Seq.index bs i2))
+  )
+  (ensures (
+    let (m, s) = make_owns h bs n in
+    (forall (i:heaplet_id) (a:int).{:pattern Set.mem a (s i)}
+      (Set.mem a (s i) <==> Option.mapTot (fun n -> (Seq.index bs n).bi_heaplet) (m a) == Some i) /\
+      (Set.mem a (s i) ==> buffer_info_has_addr_opt (Option.mapTot (fun n -> Seq.index bs n) (m a)) a) /\
+      (Set.mem a (s i) ==> Set.mem a (Map.domain h.mh))
+    ) /\
+    (forall (k:nat) (a:int).{:pattern Set.mem a (s (Seq.index bs k).bi_heaplet)}
+      k < n /\ buffer_info_has_addr (Seq.index bs k) a ==> Set.mem a (s (Seq.index bs k).bi_heaplet))
+  ))
+  =
+  reveal_opaque (`%make_owns) make_owns;
+  if n = 0 then () else
+  let _ = make_owns h bs (n - 1) in
+  let (m, s) = make_owns h bs n in
+  lemma_make_owns h bs (n - 1);
+  let bi = Seq.index bs (n - 1) in
+  let b = bi.bi_buffer in
+  let hi = bi.bi_heaplet in
+  let addr = Vale.Interop.Heap_s.global_addrs_map b in
+  let len = DV.length (get_downview b.bsrc) in
+  let s_b = set_of_range addr len in
+  let lem1 (a:int) : Lemma
+    (requires Set.mem a s_b)
+    (ensures Set.mem a (Map.domain h.mh))
+    [SMTPat (Set.mem a (Map.domain h.mh))]
+    =
+    I.addrs_set_mem h.ih b a
+    in
+  let lem2 (i:heaplet_id) (a:int) : Lemma
+    (requires i =!= hi /\ Set.mem a (Set.intersect s_b (s i)))
+    (ensures False)
+    [SMTPat (Set.mem a (s i))]
+    =
+    reveal_opaque (`%addr_map_pred) addr_map_pred
+    in
+  ()
+
+let create_heaplets bs modloc h1 =
+  let layout1 = h1.vf_layout in
+  let layin1 = layout1.vl_inner in
+  let ld = {
+    vl_buffers = bs;
+    vl_mod_loc = modloc;
+  } in
+  let (hmap, hsets) = make_owns h1.vf_heap bs (Seq.length bs) in
+  let hmap a = Option.mapTot (fun n -> (Seq.index bs n).bi_heaplet) (hmap a) in
+  let l = {
+    vl_heaplets_initialized = true;
+    vl_heaplet_map = hmap;
+    vl_heaplet_sets = hsets;
+    vl_old_heap = h1.vf_heap;
+    vl_t = layout_data;
+    vl_v = ld;
+  } in
+  let layout2 = {layout1 with vl_inner = l} in
+  let h2 = {
+    vf_layout = layout2;
+    vf_heap = h1.vf_heap;
+    vf_heaplets = h1.vf_heaplets;
+  } in
+  h2
+
+let lemma_create_heaplets bs modloc h1 =
+  lemma_make_owns h1.vf_heap bs (Seq.length bs);
+  ()
 
 let destroy_heaplets h1 =
-  let layout = h1.vf_layout in
-  let l = layout.vl_inner in
-  let l = {l with vl_n_buffers = 0} in
-  let layout = {layout with vl_inner = l} in
-  {h1 with vf_layout = layout}
+  h1
 
 val heap_shift (m1 m2:S.machine_heap) (base:int) (n:nat) : Lemma
   (requires (forall i. 0 <= i /\ i < n ==> m1.[base + i] == m2.[base + i]))
@@ -497,6 +601,7 @@ let valid_state_store_mem64_aux i v h =
   Map.lemma_equal_intro mem1 mem2
 
 let low_lemma_load_mem64_full b i vfh t =
+  reveal_opaque (`%valid_layout_buffer_id) valid_layout_buffer_id;
   ()
 
 #push-options "--z3rlimit 20"
@@ -514,7 +619,10 @@ let low_lemma_store_mem64 b i v h =
   I.update_buffer_up_mem (_ih h) b heap heap'
 #pop-options
 
+#set-options "--z3rlimit 100"
+#restart-solver
 let low_lemma_store_mem64_full b i v vfh t =
+  reveal_opaque (`%valid_layout_buffer_id) valid_layout_buffer_id;
   let (h, mt) = (vfh.vf_heap, vfh.vf_layout.vl_taint) in
   low_lemma_store_mem64 b i v h;
   lemma_valid_taint64 b mt h i t;
@@ -772,6 +880,7 @@ let valid_state_store_mem128_aux i v h =
   Map.lemma_equal_intro mem1 mem2
 
 let low_lemma_load_mem128_full b i vfh t =
+  reveal_opaque (`%valid_layout_buffer_id) valid_layout_buffer_id;
   ()
 
 let low_lemma_store_mem128 b i v h =
@@ -788,6 +897,7 @@ let low_lemma_store_mem128 b i v h =
   I.update_buffer_up_mem (_ih h) b heap heap'
 
 let low_lemma_store_mem128_full b i v vfh t =
+  reveal_opaque (`%valid_layout_buffer_id) valid_layout_buffer_id;
   let (h, mt) = (vfh.vf_heap, vfh.vf_layout.vl_taint) in
   low_lemma_store_mem128 b i v h;
   lemma_valid_taint128 b mt h i t;
@@ -853,6 +963,7 @@ let update_heap128_lo (ptr:int) (v:quad32) (mem:S.machine_heap) : Lemma
   Vale.Arch.MachineHeap.update_heap32_get_heap32 (ptr+12) mem1
 
 let low_lemma_load_mem128_lo_hi_full b i vfh t =
+  reveal_opaque (`%valid_layout_buffer_id) valid_layout_buffer_id;
   low_lemma_valid_mem128_64 b i vfh.vf_heap;
   ()
 
@@ -869,6 +980,7 @@ let low_lemma_store_mem128_lo64 b i v h =
   insert_nat64_reveal ()
 
 let low_lemma_store_mem128_lo64_full b i v vfh t =
+  reveal_opaque (`%valid_layout_buffer_id) valid_layout_buffer_id;
   let (h, mt) = (vfh.vf_heap, vfh.vf_layout.vl_taint) in
   low_lemma_store_mem128_lo64 b i v h;
   lemma_valid_taint128 b mt h i t;
@@ -895,6 +1007,7 @@ let low_lemma_store_mem128_hi64 b i v h =
 #pop-options
 
 let low_lemma_store_mem128_hi64_full b i v vfh t =
+  reveal_opaque (`%valid_layout_buffer_id) valid_layout_buffer_id;
   let (h, mt) = (vfh.vf_heap, vfh.vf_layout.vl_taint) in
   low_lemma_store_mem128_hi64 b i v h;
   lemma_valid_taint128 b mt h i t;

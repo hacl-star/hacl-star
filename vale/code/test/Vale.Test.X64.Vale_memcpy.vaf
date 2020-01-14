@@ -74,7 +74,7 @@ procedure Memcpy(inline win:bool, ghost dst:buffer64, ghost src:buffer64)
     //    forall(i) 0 <= i && i < 2 ==> buffer64_read(dst, i, mem) == buffer64_read(src, i, mem);
         modifies_mem(loc_buffer(dst), old(mem), mem);
 {
-    CreateHeaplets();
+    //CreateHeaplets();
     mem_eq_all(mem, heap0);
 
     inline if (win)
