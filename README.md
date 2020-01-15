@@ -9,7 +9,7 @@ The code for all of these algorithms is formally verified using the
 safety, functional correctness, and secret independence (resistance to
 some types of timing side-channels).
 
-More detailed documentation on the library and our verification method
+**Documentation**: More detailed documentation on the library and our verification method
 can be found at [hacl-star.github.io](https://hacl-star.github.io).
 
 The code in this repository is divided into three closely-related sub-projects,
