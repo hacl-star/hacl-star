@@ -1,0 +1,109 @@
+[
+  "—¸ŸÃüŒ¾Æ\u0011º˜(ƒ\"Ç\u0007",
+  [
+    [
+      "Hacl.Spec.P256.MontgomeryMultiplication.PointAdd.lemma_pointAddToSpecification",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_Hacl.Spec.P256.Definitions.prime256",
+        "equation_Hacl.Spec.P256.MontgomeryMultiplication.PointAdd.prime",
+        "equation_Prims.pos", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "typing_Hacl.Spec.P256.Definitions.prime256"
+      ],
+      0,
+      "eff5f5a40aa2baff959a851283278037"
+    ],
+    [
+      "Hacl.Spec.P256.MontgomeryMultiplication.PointAdd.lemma_pointAddToSpecification",
+      2,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_Hacl.Spec.P256.Definitions.prime256",
+        "equation_Hacl.Spec.P256.MontgomeryMultiplication.PointAdd.prime",
+        "equation_Hacl.Spec.P256._point_add", "equation_Prims.nat",
+        "equation_Prims.pos", "int_typing",
+        "lemma_Hacl.Spec.P256.MontgomeryMultiplication.lemmaToDomainAndBackIsTheSame",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple3__1",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple3__2",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple3__3",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_ae5bc5e47bcfeee1c1f1d89b14e02c69",
+        "true_interp", "typing_Hacl.Spec.P256.Definitions.prime256"
+      ],
+      0,
+      "c5cf2b19806c1131e5a3375ed270e628"
+    ],
+    [
+      "Hacl.Spec.P256.MontgomeryMultiplication.PointAdd.lemma_pointAddToSpecification",
+      3,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "int_inversion", "int_typing",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Multiply",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "0dc65e6c4355ae525999c5695d0a45e2"
+    ],
+    [
+      "Hacl.Spec.P256.MontgomeryMultiplication.PointAdd.lemma_point_add_0",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
+      0,
+      "bfaa7e58f33b6787b0d20f2ddf86ea2b"
+    ],
+    [
+      "Hacl.Spec.P256.MontgomeryMultiplication.PointAdd.lemma_point_add_0",
+      2,
+      2,
+      1,
+      [ "@query" ],
+      0,
+      "f75fce8885c3a9bbf4a6caa541c11c73"
+    ],
+    [
+      "Hacl.Spec.P256.MontgomeryMultiplication.PointAdd.lemma_point_add_1",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
+      0,
+      "97c814b4482ccc814f477ced5c6109bf"
+    ],
+    [
+      "Hacl.Spec.P256.MontgomeryMultiplication.PointAdd.lemma_point_add_1",
+      2,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "int_inversion", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Minus", "primitive_Prims.op_Modulus",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
+      0,
+      "fe65aa465e3ac988068c753dab8edeee"
+    ]
+  ]
+]
