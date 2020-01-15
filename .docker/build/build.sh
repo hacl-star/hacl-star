@@ -48,7 +48,7 @@ function hacl_test() {
           cd dist
           r=true
           for a in *; do
-            if [[ $a != "kremlin" && $a != "vale" && -d $a ]]; then
+            if [[ $a != "kremlin" && $a != "vale" && $a != "linux" && -d $a ]]; then
               echo "Building snapshot: $a"
               make -C $a -j $threads || r=false
               echo
@@ -152,7 +152,7 @@ function refresh_doc() {
 
   git clone git@github.com:fstarlang/fstarlang.github.io fstarlang-github-io
 
-  (cd doc/reference && ./ci.sh ../../fstarlang-github-io/evercrypt/html/)
+  (cd doc && ./ci.sh ../fstarlang-github-io/evercrypt/html/)
 
   pushd fstarlang-github-io && {
     git add -A . &&

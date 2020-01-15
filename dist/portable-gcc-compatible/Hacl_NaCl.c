@@ -24,9 +24,9 @@
 
 #include "Hacl_NaCl.h"
 
-/* SNIPPET_START: Hacl_Impl_SecretBox_secretbox_init */
+/* SNIPPET_START: secretbox_init */
 
-static void Hacl_Impl_SecretBox_secretbox_init(uint8_t *xkeys, uint8_t *k, uint8_t *n1)
+static void secretbox_init(uint8_t *xkeys, uint8_t *k, uint8_t *n1)
 {
   uint8_t *subkey = xkeys;
   uint8_t *aekey = xkeys + (uint32_t)32U;
@@ -36,12 +36,12 @@ static void Hacl_Impl_SecretBox_secretbox_init(uint8_t *xkeys, uint8_t *k, uint8
   Hacl_Salsa20_salsa20_key_block0(aekey, subkey, n11);
 }
 
-/* SNIPPET_END: Hacl_Impl_SecretBox_secretbox_init */
+/* SNIPPET_END: secretbox_init */
 
-/* SNIPPET_START: Hacl_Impl_SecretBox_secretbox_detached */
+/* SNIPPET_START: secretbox_detached */
 
 static void
-Hacl_Impl_SecretBox_secretbox_detached(
+secretbox_detached(
   uint32_t mlen,
   uint8_t *c,
   uint8_t *tag,
@@ -51,7 +51,7 @@ Hacl_Impl_SecretBox_secretbox_detached(
 )
 {
   uint8_t xkeys[96U] = { 0U };
-  Hacl_Impl_SecretBox_secretbox_init(xkeys, k, n1);
+  secretbox_init(xkeys, k, n1);
   uint8_t *mkey = xkeys + (uint32_t)32U;
   uint8_t *n11 = n1 + (uint32_t)16U;
   uint8_t *subkey = xkeys;
@@ -83,12 +83,12 @@ Hacl_Impl_SecretBox_secretbox_detached(
   Hacl_Poly1305_32_poly1305_mac(tag, mlen, c, mkey);
 }
 
-/* SNIPPET_END: Hacl_Impl_SecretBox_secretbox_detached */
+/* SNIPPET_END: secretbox_detached */
 
-/* SNIPPET_START: Hacl_Impl_SecretBox_secretbox_open_detached */
+/* SNIPPET_START: secretbox_open_detached */
 
 static uint32_t
-Hacl_Impl_SecretBox_secretbox_open_detached(
+secretbox_open_detached(
   uint32_t mlen,
   uint8_t *m,
   uint8_t *k,
@@ -98,7 +98,7 @@ Hacl_Impl_SecretBox_secretbox_open_detached(
 )
 {
   uint8_t xkeys[96U] = { 0U };
-  Hacl_Impl_SecretBox_secretbox_init(xkeys, k, n1);
+  secretbox_init(xkeys, k, n1);
   uint8_t *mkey = xkeys + (uint32_t)32U;
   uint8_t tag_[16U] = { 0U };
   Hacl_Poly1305_32_poly1305_mac(tag_, mlen, c, mkey);
@@ -143,47 +143,34 @@ Hacl_Impl_SecretBox_secretbox_open_detached(
   return (uint32_t)0xffffffffU;
 }
 
-/* SNIPPET_END: Hacl_Impl_SecretBox_secretbox_open_detached */
+/* SNIPPET_END: secretbox_open_detached */
 
-/* SNIPPET_START: Hacl_Impl_SecretBox_secretbox_easy */
+/* SNIPPET_START: secretbox_easy */
 
-static void
-Hacl_Impl_SecretBox_secretbox_easy(
-  uint32_t mlen,
-  uint8_t *c,
-  uint8_t *k,
-  uint8_t *n1,
-  uint8_t *m
-)
+static void secretbox_easy(uint32_t mlen, uint8_t *c, uint8_t *k, uint8_t *n1, uint8_t *m)
 {
   uint8_t *tag = c;
   uint8_t *cip = c + (uint32_t)16U;
-  Hacl_Impl_SecretBox_secretbox_detached(mlen, cip, tag, k, n1, m);
+  secretbox_detached(mlen, cip, tag, k, n1, m);
 }
 
-/* SNIPPET_END: Hacl_Impl_SecretBox_secretbox_easy */
+/* SNIPPET_END: secretbox_easy */
 
-/* SNIPPET_START: Hacl_Impl_SecretBox_secretbox_open_easy */
+/* SNIPPET_START: secretbox_open_easy */
 
 static uint32_t
-Hacl_Impl_SecretBox_secretbox_open_easy(
-  uint32_t mlen,
-  uint8_t *m,
-  uint8_t *k,
-  uint8_t *n1,
-  uint8_t *c
-)
+secretbox_open_easy(uint32_t mlen, uint8_t *m, uint8_t *k, uint8_t *n1, uint8_t *c)
 {
   uint8_t *tag = c;
   uint8_t *cip = c + (uint32_t)16U;
-  return Hacl_Impl_SecretBox_secretbox_open_detached(mlen, m, k, n1, cip, tag);
+  return secretbox_open_detached(mlen, m, k, n1, cip, tag);
 }
 
-/* SNIPPET_END: Hacl_Impl_SecretBox_secretbox_open_easy */
+/* SNIPPET_END: secretbox_open_easy */
 
-/* SNIPPET_START: Hacl_Impl_Box_box_beforenm */
+/* SNIPPET_START: box_beforenm */
 
-inline static uint32_t Hacl_Impl_Box_box_beforenm(uint8_t *k, uint8_t *pk, uint8_t *sk)
+inline static uint32_t box_beforenm(uint8_t *k, uint8_t *pk, uint8_t *sk)
 {
   uint8_t n0[16U] = { 0U };
   bool r = Hacl_Curve25519_51_ecdh(k, sk, pk);
@@ -195,12 +182,12 @@ inline static uint32_t Hacl_Impl_Box_box_beforenm(uint8_t *k, uint8_t *pk, uint8
   return (uint32_t)0xffffffffU;
 }
 
-/* SNIPPET_END: Hacl_Impl_Box_box_beforenm */
+/* SNIPPET_END: box_beforenm */
 
-/* SNIPPET_START: Hacl_Impl_Box_box_detached_afternm */
+/* SNIPPET_START: box_detached_afternm */
 
 inline static uint32_t
-Hacl_Impl_Box_box_detached_afternm(
+box_detached_afternm(
   uint32_t mlen,
   uint8_t *c,
   uint8_t *tag,
@@ -209,16 +196,16 @@ Hacl_Impl_Box_box_detached_afternm(
   uint8_t *m
 )
 {
-  Hacl_Impl_SecretBox_secretbox_detached(mlen, c, tag, k, n1, m);
+  secretbox_detached(mlen, c, tag, k, n1, m);
   return (uint32_t)0U;
 }
 
-/* SNIPPET_END: Hacl_Impl_Box_box_detached_afternm */
+/* SNIPPET_END: box_detached_afternm */
 
-/* SNIPPET_START: Hacl_Impl_Box_box_detached */
+/* SNIPPET_START: box_detached */
 
 inline static uint32_t
-Hacl_Impl_Box_box_detached(
+box_detached(
   uint32_t mlen,
   uint8_t *c,
   uint8_t *tag,
@@ -229,20 +216,20 @@ Hacl_Impl_Box_box_detached(
 )
 {
   uint8_t k[32U] = { 0U };
-  uint32_t r = Hacl_Impl_Box_box_beforenm(k, pk, sk);
+  uint32_t r = box_beforenm(k, pk, sk);
   if (r == (uint32_t)0U)
   {
-    return Hacl_Impl_Box_box_detached_afternm(mlen, c, tag, k, n1, m);
+    return box_detached_afternm(mlen, c, tag, k, n1, m);
   }
   return (uint32_t)0xffffffffU;
 }
 
-/* SNIPPET_END: Hacl_Impl_Box_box_detached */
+/* SNIPPET_END: box_detached */
 
-/* SNIPPET_START: Hacl_Impl_Box_box_open_detached_afternm */
+/* SNIPPET_START: box_open_detached_afternm */
 
 inline static uint32_t
-Hacl_Impl_Box_box_open_detached_afternm(
+box_open_detached_afternm(
   uint32_t mlen,
   uint8_t *m,
   uint8_t *k,
@@ -251,15 +238,15 @@ Hacl_Impl_Box_box_open_detached_afternm(
   uint8_t *tag
 )
 {
-  return Hacl_Impl_SecretBox_secretbox_open_detached(mlen, m, k, n1, c, tag);
+  return secretbox_open_detached(mlen, m, k, n1, c, tag);
 }
 
-/* SNIPPET_END: Hacl_Impl_Box_box_open_detached_afternm */
+/* SNIPPET_END: box_open_detached_afternm */
 
-/* SNIPPET_START: Hacl_Impl_Box_box_open_detached */
+/* SNIPPET_START: box_open_detached */
 
 inline static uint32_t
-Hacl_Impl_Box_box_open_detached(
+box_open_detached(
   uint32_t mlen,
   uint8_t *m,
   uint8_t *pk,
@@ -270,85 +257,65 @@ Hacl_Impl_Box_box_open_detached(
 )
 {
   uint8_t k[32U] = { 0U };
-  uint32_t r = Hacl_Impl_Box_box_beforenm(k, pk, sk);
+  uint32_t r = box_beforenm(k, pk, sk);
   if (r == (uint32_t)0U)
   {
-    return Hacl_Impl_Box_box_open_detached_afternm(mlen, m, k, n1, c, tag);
+    return box_open_detached_afternm(mlen, m, k, n1, c, tag);
   }
   return (uint32_t)0xffffffffU;
 }
 
-/* SNIPPET_END: Hacl_Impl_Box_box_open_detached */
+/* SNIPPET_END: box_open_detached */
 
-/* SNIPPET_START: Hacl_Impl_Box_box_easy_afternm */
+/* SNIPPET_START: box_easy_afternm */
 
 inline static uint32_t
-Hacl_Impl_Box_box_easy_afternm(uint32_t mlen, uint8_t *c, uint8_t *k, uint8_t *n1, uint8_t *m)
+box_easy_afternm(uint32_t mlen, uint8_t *c, uint8_t *k, uint8_t *n1, uint8_t *m)
 {
   uint8_t *tag = c;
   uint8_t *cip = c + (uint32_t)16U;
-  uint32_t res = Hacl_Impl_Box_box_detached_afternm(mlen, cip, tag, k, n1, m);
+  uint32_t res = box_detached_afternm(mlen, cip, tag, k, n1, m);
   return res;
 }
 
-/* SNIPPET_END: Hacl_Impl_Box_box_easy_afternm */
+/* SNIPPET_END: box_easy_afternm */
 
-/* SNIPPET_START: Hacl_Impl_Box_box_easy */
+/* SNIPPET_START: box_easy */
 
 inline static uint32_t
-Hacl_Impl_Box_box_easy(
-  uint32_t mlen,
-  uint8_t *c,
-  uint8_t *sk,
-  uint8_t *pk,
-  uint8_t *n1,
-  uint8_t *m
-)
+box_easy(uint32_t mlen, uint8_t *c, uint8_t *sk, uint8_t *pk, uint8_t *n1, uint8_t *m)
 {
   uint8_t *tag = c;
   uint8_t *cip = c + (uint32_t)16U;
-  uint32_t res = Hacl_Impl_Box_box_detached(mlen, cip, tag, sk, pk, n1, m);
+  uint32_t res = box_detached(mlen, cip, tag, sk, pk, n1, m);
   return res;
 }
 
-/* SNIPPET_END: Hacl_Impl_Box_box_easy */
+/* SNIPPET_END: box_easy */
 
-/* SNIPPET_START: Hacl_Impl_Box_box_open_easy_afternm */
+/* SNIPPET_START: box_open_easy_afternm */
 
 inline static uint32_t
-Hacl_Impl_Box_box_open_easy_afternm(
-  uint32_t mlen,
-  uint8_t *m,
-  uint8_t *k,
-  uint8_t *n1,
-  uint8_t *c
-)
+box_open_easy_afternm(uint32_t mlen, uint8_t *m, uint8_t *k, uint8_t *n1, uint8_t *c)
 {
   uint8_t *tag = c;
   uint8_t *cip = c + (uint32_t)16U;
-  return Hacl_Impl_Box_box_open_detached_afternm(mlen, m, k, n1, cip, tag);
+  return box_open_detached_afternm(mlen, m, k, n1, cip, tag);
 }
 
-/* SNIPPET_END: Hacl_Impl_Box_box_open_easy_afternm */
+/* SNIPPET_END: box_open_easy_afternm */
 
-/* SNIPPET_START: Hacl_Impl_Box_box_open_easy */
+/* SNIPPET_START: box_open_easy */
 
 inline static uint32_t
-Hacl_Impl_Box_box_open_easy(
-  uint32_t mlen,
-  uint8_t *m,
-  uint8_t *pk,
-  uint8_t *sk,
-  uint8_t *n1,
-  uint8_t *c
-)
+box_open_easy(uint32_t mlen, uint8_t *m, uint8_t *pk, uint8_t *sk, uint8_t *n1, uint8_t *c)
 {
   uint8_t *tag = c;
   uint8_t *cip = c + (uint32_t)16U;
-  return Hacl_Impl_Box_box_open_detached(mlen, m, pk, sk, n1, cip, tag);
+  return box_open_detached(mlen, m, pk, sk, n1, cip, tag);
 }
 
-/* SNIPPET_END: Hacl_Impl_Box_box_open_easy */
+/* SNIPPET_END: box_open_easy */
 
 /* SNIPPET_START: Hacl_NaCl_crypto_secretbox_detached */
 
@@ -362,7 +329,7 @@ Hacl_NaCl_crypto_secretbox_detached(
   uint8_t *k
 )
 {
-  Hacl_Impl_SecretBox_secretbox_detached(mlen, c, tag, k, n1, m);
+  secretbox_detached(mlen, c, tag, k, n1, m);
   return (uint32_t)0U;
 }
 
@@ -380,7 +347,7 @@ Hacl_NaCl_crypto_secretbox_open_detached(
   uint8_t *k
 )
 {
-  return Hacl_Impl_SecretBox_secretbox_open_detached(mlen, m, k, n1, c, tag);
+  return secretbox_open_detached(mlen, m, k, n1, c, tag);
 }
 
 /* SNIPPET_END: Hacl_NaCl_crypto_secretbox_open_detached */
@@ -390,7 +357,7 @@ Hacl_NaCl_crypto_secretbox_open_detached(
 uint32_t
 Hacl_NaCl_crypto_secretbox_easy(uint8_t *c, uint8_t *m, uint32_t mlen, uint8_t *n1, uint8_t *k)
 {
-  Hacl_Impl_SecretBox_secretbox_easy(mlen, c, k, n1, m);
+  secretbox_easy(mlen, c, k, n1, m);
   return (uint32_t)0U;
 }
 
@@ -407,7 +374,7 @@ Hacl_NaCl_crypto_secretbox_open_easy(
   uint8_t *k
 )
 {
-  return Hacl_Impl_SecretBox_secretbox_open_easy(clen - (uint32_t)16U, m, k, n1, c);
+  return secretbox_open_easy(clen - (uint32_t)16U, m, k, n1, c);
 }
 
 /* SNIPPET_END: Hacl_NaCl_crypto_secretbox_open_easy */
@@ -416,7 +383,7 @@ Hacl_NaCl_crypto_secretbox_open_easy(
 
 uint32_t Hacl_NaCl_crypto_box_beforenm(uint8_t *k, uint8_t *pk, uint8_t *sk)
 {
-  return Hacl_Impl_Box_box_beforenm(k, pk, sk);
+  return box_beforenm(k, pk, sk);
 }
 
 /* SNIPPET_END: Hacl_NaCl_crypto_box_beforenm */
@@ -433,7 +400,7 @@ Hacl_NaCl_crypto_box_detached_afternm(
   uint8_t *k
 )
 {
-  return Hacl_Impl_Box_box_detached_afternm(mlen, c, tag, k, n1, m);
+  return box_detached_afternm(mlen, c, tag, k, n1, m);
 }
 
 /* SNIPPET_END: Hacl_NaCl_crypto_box_detached_afternm */
@@ -451,7 +418,7 @@ Hacl_NaCl_crypto_box_detached(
   uint8_t *sk
 )
 {
-  return Hacl_Impl_Box_box_detached(mlen, c, tag, sk, pk, n1, m);
+  return box_detached(mlen, c, tag, sk, pk, n1, m);
 }
 
 /* SNIPPET_END: Hacl_NaCl_crypto_box_detached */
@@ -468,7 +435,7 @@ Hacl_NaCl_crypto_box_open_detached_afternm(
   uint8_t *k
 )
 {
-  return Hacl_Impl_Box_box_open_detached_afternm(mlen, m, k, n1, c, tag);
+  return box_open_detached_afternm(mlen, m, k, n1, c, tag);
 }
 
 /* SNIPPET_END: Hacl_NaCl_crypto_box_open_detached_afternm */
@@ -486,7 +453,7 @@ Hacl_NaCl_crypto_box_open_detached(
   uint8_t *sk
 )
 {
-  return Hacl_Impl_Box_box_open_detached(mlen, m, pk, sk, n1, c, tag);
+  return box_open_detached(mlen, m, pk, sk, n1, c, tag);
 }
 
 /* SNIPPET_END: Hacl_NaCl_crypto_box_open_detached */
@@ -502,7 +469,7 @@ Hacl_NaCl_crypto_box_easy_afternm(
   uint8_t *k
 )
 {
-  return Hacl_Impl_Box_box_easy_afternm(mlen, c, k, n1, m);
+  return box_easy_afternm(mlen, c, k, n1, m);
 }
 
 /* SNIPPET_END: Hacl_NaCl_crypto_box_easy_afternm */
@@ -519,7 +486,7 @@ Hacl_NaCl_crypto_box_easy(
   uint8_t *sk
 )
 {
-  return Hacl_Impl_Box_box_easy(mlen, c, sk, pk, n1, m);
+  return box_easy(mlen, c, sk, pk, n1, m);
 }
 
 /* SNIPPET_END: Hacl_NaCl_crypto_box_easy */
@@ -535,7 +502,7 @@ Hacl_NaCl_crypto_box_open_easy_afternm(
   uint8_t *k
 )
 {
-  return Hacl_Impl_Box_box_open_easy_afternm(clen - (uint32_t)16U, m, k, n1, c);
+  return box_open_easy_afternm(clen - (uint32_t)16U, m, k, n1, c);
 }
 
 /* SNIPPET_END: Hacl_NaCl_crypto_box_open_easy_afternm */
@@ -552,7 +519,7 @@ Hacl_NaCl_crypto_box_open_easy(
   uint8_t *sk
 )
 {
-  return Hacl_Impl_Box_box_open_easy(clen - (uint32_t)16U, m, pk, sk, n1, c);
+  return box_open_easy(clen - (uint32_t)16U, m, pk, sk, n1, c);
 }
 
 /* SNIPPET_END: Hacl_NaCl_crypto_box_open_easy */

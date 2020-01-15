@@ -690,6 +690,7 @@ void EverCrypt_Hash_copy(EverCrypt_Hash_state_s *s_src, EverCrypt_Hash_state_s *
       p_dst = KRML_EABORT(uint32_t *, "unreachable (pattern matches are exhaustive in F*)");
     }
     memcpy(p_dst, p_src, (uint32_t)4U * sizeof p_src[0U]);
+    return;
   }
   if (scrut.tag == EverCrypt_Hash_SHA1_s)
   {
@@ -705,6 +706,7 @@ void EverCrypt_Hash_copy(EverCrypt_Hash_state_s *s_src, EverCrypt_Hash_state_s *
       p_dst = KRML_EABORT(uint32_t *, "unreachable (pattern matches are exhaustive in F*)");
     }
     memcpy(p_dst, p_src, (uint32_t)5U * sizeof p_src[0U]);
+    return;
   }
   if (scrut.tag == EverCrypt_Hash_SHA2_224_s)
   {
@@ -720,6 +722,7 @@ void EverCrypt_Hash_copy(EverCrypt_Hash_state_s *s_src, EverCrypt_Hash_state_s *
       p_dst = KRML_EABORT(uint32_t *, "unreachable (pattern matches are exhaustive in F*)");
     }
     memcpy(p_dst, p_src, (uint32_t)8U * sizeof p_src[0U]);
+    return;
   }
   if (scrut.tag == EverCrypt_Hash_SHA2_256_s)
   {
@@ -735,6 +738,7 @@ void EverCrypt_Hash_copy(EverCrypt_Hash_state_s *s_src, EverCrypt_Hash_state_s *
       p_dst = KRML_EABORT(uint32_t *, "unreachable (pattern matches are exhaustive in F*)");
     }
     memcpy(p_dst, p_src, (uint32_t)8U * sizeof p_src[0U]);
+    return;
   }
   if (scrut.tag == EverCrypt_Hash_SHA2_384_s)
   {
@@ -750,6 +754,7 @@ void EverCrypt_Hash_copy(EverCrypt_Hash_state_s *s_src, EverCrypt_Hash_state_s *
       p_dst = KRML_EABORT(uint64_t *, "unreachable (pattern matches are exhaustive in F*)");
     }
     memcpy(p_dst, p_src, (uint32_t)8U * sizeof p_src[0U]);
+    return;
   }
   if (scrut.tag == EverCrypt_Hash_SHA2_512_s)
   {
@@ -765,6 +770,7 @@ void EverCrypt_Hash_copy(EverCrypt_Hash_state_s *s_src, EverCrypt_Hash_state_s *
       p_dst = KRML_EABORT(uint64_t *, "unreachable (pattern matches are exhaustive in F*)");
     }
     memcpy(p_dst, p_src, (uint32_t)8U * sizeof p_src[0U]);
+    return;
   }
   KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
     __FILE__,
@@ -981,12 +987,7 @@ void EverCrypt_Hash_Incremental_init(EverCrypt_Hash_Incremental_state_s *s)
     );
 }
 
-static void
-EverCrypt_Hash_Incremental_update_small(
-  EverCrypt_Hash_Incremental_state_s *p1,
-  uint8_t *data,
-  uint32_t len
-)
+static void update_small(EverCrypt_Hash_Incremental_state_s *p1, uint8_t *data, uint32_t len)
 {
   EverCrypt_Hash_Incremental_state_s s = *p1;
   EverCrypt_Hash_state_s *hash_state = s.hash_state;
@@ -1048,11 +1049,7 @@ EverCrypt_Hash_Incremental_update_small(
 }
 
 static void
-EverCrypt_Hash_Incremental_update_empty_buf(
-  EverCrypt_Hash_Incremental_state_s *p1,
-  uint8_t *data,
-  uint32_t len
-)
+update_empty_buf(EverCrypt_Hash_Incremental_state_s *p1, uint8_t *data, uint32_t len)
 {
   EverCrypt_Hash_Incremental_state_s s = *p1;
   EverCrypt_Hash_state_s *hash_state = s.hash_state;
@@ -1196,12 +1193,7 @@ EverCrypt_Hash_Incremental_update_empty_buf(
     );
 }
 
-static void
-EverCrypt_Hash_Incremental_update_round(
-  EverCrypt_Hash_Incremental_state_s *p1,
-  uint8_t *data,
-  uint32_t len
-)
+static void update_round(EverCrypt_Hash_Incremental_state_s *p1, uint8_t *data, uint32_t len)
 {
   EverCrypt_Hash_Incremental_state_s s = *p1;
   EverCrypt_Hash_state_s *hash_state = s.hash_state;
@@ -1434,12 +1426,12 @@ EverCrypt_Hash_Incremental_update(
   }
   if (len < sw - sz)
   {
-    EverCrypt_Hash_Incremental_update_small(p1, data, len);
+    update_small(p1, data, len);
     return;
   }
   if (sz == (uint32_t)0U)
   {
-    EverCrypt_Hash_Incremental_update_empty_buf(p1, data, len);
+    update_empty_buf(p1, data, len);
     return;
   }
   uint32_t sw1;
@@ -1484,12 +1476,11 @@ EverCrypt_Hash_Incremental_update(
   uint32_t diff = sw1 - sz;
   uint8_t *data1 = data;
   uint8_t *data2 = data + diff;
-  EverCrypt_Hash_Incremental_update_round(p1, data1, diff);
-  EverCrypt_Hash_Incremental_update_empty_buf(p1, data2, len - diff);
+  update_round(p1, data1, diff);
+  update_empty_buf(p1, data2, len - diff);
 }
 
-static void
-EverCrypt_Hash_Incremental_finish_md5(EverCrypt_Hash_Incremental_state_s *p1, uint8_t *dst)
+static void finish_md5(EverCrypt_Hash_Incremental_state_s *p1, uint8_t *dst)
 {
   EverCrypt_Hash_Incremental_state_s scrut = *p1;
   EverCrypt_Hash_state_s *hash_state = scrut.hash_state;
@@ -1504,8 +1495,7 @@ EverCrypt_Hash_Incremental_finish_md5(EverCrypt_Hash_Incremental_state_s *p1, ui
   EverCrypt_Hash_finish(&tmp_hash_state, dst);
 }
 
-static void
-EverCrypt_Hash_Incremental_finish_sha1(EverCrypt_Hash_Incremental_state_s *p1, uint8_t *dst)
+static void finish_sha1(EverCrypt_Hash_Incremental_state_s *p1, uint8_t *dst)
 {
   EverCrypt_Hash_Incremental_state_s scrut = *p1;
   EverCrypt_Hash_state_s *hash_state = scrut.hash_state;
@@ -1520,8 +1510,7 @@ EverCrypt_Hash_Incremental_finish_sha1(EverCrypt_Hash_Incremental_state_s *p1, u
   EverCrypt_Hash_finish(&tmp_hash_state, dst);
 }
 
-static void
-EverCrypt_Hash_Incremental_finish_sha224(EverCrypt_Hash_Incremental_state_s *p1, uint8_t *dst)
+static void finish_sha224(EverCrypt_Hash_Incremental_state_s *p1, uint8_t *dst)
 {
   EverCrypt_Hash_Incremental_state_s scrut = *p1;
   EverCrypt_Hash_state_s *hash_state = scrut.hash_state;
@@ -1536,8 +1525,7 @@ EverCrypt_Hash_Incremental_finish_sha224(EverCrypt_Hash_Incremental_state_s *p1,
   EverCrypt_Hash_finish(&tmp_hash_state, dst);
 }
 
-static void
-EverCrypt_Hash_Incremental_finish_sha256(EverCrypt_Hash_Incremental_state_s *p1, uint8_t *dst)
+static void finish_sha256(EverCrypt_Hash_Incremental_state_s *p1, uint8_t *dst)
 {
   EverCrypt_Hash_Incremental_state_s scrut = *p1;
   EverCrypt_Hash_state_s *hash_state = scrut.hash_state;
@@ -1552,8 +1540,7 @@ EverCrypt_Hash_Incremental_finish_sha256(EverCrypt_Hash_Incremental_state_s *p1,
   EverCrypt_Hash_finish(&tmp_hash_state, dst);
 }
 
-static void
-EverCrypt_Hash_Incremental_finish_sha384(EverCrypt_Hash_Incremental_state_s *p1, uint8_t *dst)
+static void finish_sha384(EverCrypt_Hash_Incremental_state_s *p1, uint8_t *dst)
 {
   EverCrypt_Hash_Incremental_state_s scrut = *p1;
   EverCrypt_Hash_state_s *hash_state = scrut.hash_state;
@@ -1568,8 +1555,7 @@ EverCrypt_Hash_Incremental_finish_sha384(EverCrypt_Hash_Incremental_state_s *p1,
   EverCrypt_Hash_finish(&tmp_hash_state, dst);
 }
 
-static void
-EverCrypt_Hash_Incremental_finish_sha512(EverCrypt_Hash_Incremental_state_s *p1, uint8_t *dst)
+static void finish_sha512(EverCrypt_Hash_Incremental_state_s *p1, uint8_t *dst)
 {
   EverCrypt_Hash_Incremental_state_s scrut = *p1;
   EverCrypt_Hash_state_s *hash_state = scrut.hash_state;
@@ -1593,32 +1579,32 @@ void EverCrypt_Hash_Incremental_finish(EverCrypt_Hash_Incremental_state_s *s, ui
   {
     case Spec_Hash_Definitions_MD5:
       {
-        EverCrypt_Hash_Incremental_finish_md5(s, dst);
+        finish_md5(s, dst);
         break;
       }
     case Spec_Hash_Definitions_SHA1:
       {
-        EverCrypt_Hash_Incremental_finish_sha1(s, dst);
+        finish_sha1(s, dst);
         break;
       }
     case Spec_Hash_Definitions_SHA2_224:
       {
-        EverCrypt_Hash_Incremental_finish_sha224(s, dst);
+        finish_sha224(s, dst);
         break;
       }
     case Spec_Hash_Definitions_SHA2_256:
       {
-        EverCrypt_Hash_Incremental_finish_sha256(s, dst);
+        finish_sha256(s, dst);
         break;
       }
     case Spec_Hash_Definitions_SHA2_384:
       {
-        EverCrypt_Hash_Incremental_finish_sha384(s, dst);
+        finish_sha384(s, dst);
         break;
       }
     case Spec_Hash_Definitions_SHA2_512:
       {
-        EverCrypt_Hash_Incremental_finish_sha512(s, dst);
+        finish_sha512(s, dst);
         break;
       }
     default:

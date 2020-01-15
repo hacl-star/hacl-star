@@ -24,8 +24,7 @@
 
 #include "Hacl_Frodo_KEM.h"
 
-inline static void
-Hacl_Impl_Matrix_matrix_add(uint32_t n1, uint32_t n2, uint16_t *a, uint16_t *b)
+inline static void matrix_add(uint32_t n1, uint32_t n2, uint16_t *a, uint16_t *b)
 {
   uint32_t i;
   for (i = (uint32_t)0U; i < n1; i = i + (uint32_t)1U)
@@ -38,8 +37,7 @@ Hacl_Impl_Matrix_matrix_add(uint32_t n1, uint32_t n2, uint16_t *a, uint16_t *b)
   }
 }
 
-inline static void
-Hacl_Impl_Matrix_matrix_sub(uint32_t n1, uint32_t n2, uint16_t *a, uint16_t *b)
+inline static void matrix_sub(uint32_t n1, uint32_t n2, uint16_t *a, uint16_t *b)
 {
   uint32_t i;
   for (i = (uint32_t)0U; i < n1; i = i + (uint32_t)1U)
@@ -53,14 +51,7 @@ Hacl_Impl_Matrix_matrix_sub(uint32_t n1, uint32_t n2, uint16_t *a, uint16_t *b)
 }
 
 inline static void
-Hacl_Impl_Matrix_matrix_mul(
-  uint32_t n1,
-  uint32_t n2,
-  uint32_t n3,
-  uint16_t *a,
-  uint16_t *b,
-  uint16_t *c
-)
+matrix_mul(uint32_t n1, uint32_t n2, uint32_t n3, uint16_t *a, uint16_t *b, uint16_t *c)
 {
   uint32_t i0;
   for (i0 = (uint32_t)0U; i0 < n1; i0 = i0 + (uint32_t)1U)
@@ -85,14 +76,7 @@ Hacl_Impl_Matrix_matrix_mul(
 }
 
 inline static void
-Hacl_Impl_Matrix_matrix_mul_s(
-  uint32_t n1,
-  uint32_t n2,
-  uint32_t n3,
-  uint16_t *a,
-  uint16_t *b,
-  uint16_t *c
-)
+matrix_mul_s(uint32_t n1, uint32_t n2, uint32_t n3, uint16_t *a, uint16_t *b, uint16_t *c)
 {
   uint32_t i0;
   for (i0 = (uint32_t)0U; i0 < n1; i0 = i0 + (uint32_t)1U)
@@ -116,8 +100,7 @@ Hacl_Impl_Matrix_matrix_mul_s(
   }
 }
 
-inline static bool
-Hacl_Impl_Matrix_matrix_eq(uint32_t n1, uint32_t n2, uint32_t m, uint16_t *a, uint16_t *b)
+inline static bool matrix_eq(uint32_t n1, uint32_t n2, uint32_t m, uint16_t *a, uint16_t *b)
 {
   bool res = true;
   uint32_t n3 = n1 * n2;
@@ -138,8 +121,7 @@ Hacl_Impl_Matrix_matrix_eq(uint32_t n1, uint32_t n2, uint32_t m, uint16_t *a, ui
   return res;
 }
 
-inline static void
-Hacl_Impl_Matrix_matrix_to_lbytes(uint32_t n1, uint32_t n2, uint16_t *m, uint8_t *res)
+inline static void matrix_to_lbytes(uint32_t n1, uint32_t n2, uint16_t *m, uint8_t *res)
 {
   uint32_t n3 = n1 * n2;
   uint32_t i;
@@ -150,8 +132,7 @@ Hacl_Impl_Matrix_matrix_to_lbytes(uint32_t n1, uint32_t n2, uint16_t *m, uint8_t
   }
 }
 
-inline static void
-Hacl_Impl_Matrix_matrix_from_lbytes(uint32_t n1, uint32_t n2, uint8_t *b, uint16_t *res)
+inline static void matrix_from_lbytes(uint32_t n1, uint32_t n2, uint8_t *b, uint16_t *res)
 {
   uint32_t n3 = n1 * n2;
   uint32_t i;
@@ -163,12 +144,7 @@ Hacl_Impl_Matrix_matrix_from_lbytes(uint32_t n1, uint32_t n2, uint8_t *b, uint16
 }
 
 inline static void
-Hacl_Impl_Frodo_Gen_frodo_gen_matrix_cshake(
-  uint32_t n1,
-  uint32_t seed_len,
-  uint8_t *seed,
-  uint16_t *res
-)
+frodo_gen_matrix_cshake(uint32_t n1, uint32_t seed_len, uint8_t *seed, uint16_t *res)
 {
   KRML_CHECK_SIZE(sizeof (uint8_t), (uint32_t)2U * n1);
   {
@@ -200,14 +176,14 @@ Hacl_Impl_Frodo_Gen_frodo_gen_matrix_cshake(
 }
 
 static uint16_t
-Hacl_Impl_Frodo_Sample_cdf_table[12U] =
+cdf_table[12U] =
   {
     (uint16_t)4727U, (uint16_t)13584U, (uint16_t)20864U, (uint16_t)26113U, (uint16_t)29434U,
     (uint16_t)31278U, (uint16_t)32176U, (uint16_t)32560U, (uint16_t)32704U, (uint16_t)32751U,
     (uint16_t)32764U, (uint16_t)32767U
   };
 
-inline static uint16_t Hacl_Impl_Frodo_Sample_frodo_sample(uint16_t r)
+inline static uint16_t frodo_sample(uint16_t r)
 {
   uint16_t prnd = r >> (uint32_t)1U;
   uint16_t sign = r & (uint16_t)1U;
@@ -219,7 +195,7 @@ inline static uint16_t Hacl_Impl_Frodo_Sample_frodo_sample(uint16_t r)
     for (i = (uint32_t)0U; i < bound; i = i + (uint32_t)1U)
     {
       uint16_t sample0 = sample;
-      uint16_t ti = Hacl_Impl_Frodo_Sample_cdf_table[i];
+      uint16_t ti = cdf_table[i];
       uint16_t samplei = (uint16_t)(uint32_t)(ti - prnd) >> (uint32_t)15U;
       sample = samplei + sample0;
     }
@@ -229,7 +205,7 @@ inline static uint16_t Hacl_Impl_Frodo_Sample_frodo_sample(uint16_t r)
 }
 
 inline static void
-Hacl_Impl_Frodo_Sample_frodo_sample_matrix(
+frodo_sample_matrix(
   uint32_t n1,
   uint32_t n2,
   uint32_t seed_len,
@@ -259,7 +235,7 @@ Hacl_Impl_Frodo_Sample_frodo_sample_matrix(
             {
               uint8_t *resij = r + (uint32_t)2U * (n2 * i0 + i);
               uint16_t u = load16_le(resij);
-              res[i0 * n2 + i] = Hacl_Impl_Frodo_Sample_frodo_sample(u);
+              res[i0 * n2 + i] = frodo_sample(u);
             }
           }
         }
@@ -268,14 +244,7 @@ Hacl_Impl_Frodo_Sample_frodo_sample_matrix(
   }
 }
 
-inline static void
-Hacl_Impl_Frodo_Pack_frodo_pack(
-  uint32_t n1,
-  uint32_t n2,
-  uint32_t d,
-  uint16_t *a,
-  uint8_t *res
-)
+inline static void frodo_pack(uint32_t n1, uint32_t n2, uint32_t d, uint16_t *a, uint8_t *res)
 {
   uint32_t n3 = n1 * n2 / (uint32_t)8U;
   uint32_t i;
@@ -317,13 +286,7 @@ Hacl_Impl_Frodo_Pack_frodo_pack(
 }
 
 inline static void
-Hacl_Impl_Frodo_Pack_frodo_unpack(
-  uint32_t n1,
-  uint32_t n2,
-  uint32_t d,
-  uint8_t *b,
-  uint16_t *res
-)
+frodo_unpack(uint32_t n1, uint32_t n2, uint32_t d, uint8_t *b, uint16_t *res)
 {
   uint32_t n3 = n1 * n2 / (uint32_t)8U;
   uint32_t i;
@@ -378,54 +341,43 @@ static void randombytes_(uint32_t len, uint8_t *res)
   bool b = Lib_RandomBuffer_System_randombytes(res, len);
 }
 
-static uint32_t Hacl_Impl_Frodo_KEM_bytes_mu = (uint32_t)16U;
+static uint32_t bytes_mu = (uint32_t)16U;
 
-static uint32_t Hacl_Impl_Frodo_KEM_crypto_publickeybytes = (uint32_t)976U;
+static uint32_t crypto_publickeybytes = (uint32_t)976U;
 
-static uint32_t Hacl_Impl_Frodo_KEM_crypto_ciphertextbytes = (uint32_t)1096U;
+static uint32_t crypto_ciphertextbytes = (uint32_t)1096U;
 
 inline static void
-Hacl_Impl_Frodo_KEM_KeyGen_frodo_mul_add_as_plus_e_pack(
-  uint8_t *seed_a,
-  uint8_t *seed_e,
-  uint8_t *b,
-  uint8_t *s
-)
+frodo_mul_add_as_plus_e_pack(uint8_t *seed_a, uint8_t *seed_e, uint8_t *b, uint8_t *s)
 {
   uint16_t s_matrix[512U] = { 0U };
-  Hacl_Impl_Frodo_Sample_frodo_sample_matrix((uint32_t)64U,
+  frodo_sample_matrix((uint32_t)64U,
     (uint32_t)8U,
     (uint32_t)16U,
     seed_e,
     (uint16_t)1U,
     s_matrix);
-  Hacl_Impl_Matrix_matrix_to_lbytes((uint32_t)64U, (uint32_t)8U, s_matrix, s);
+  matrix_to_lbytes((uint32_t)64U, (uint32_t)8U, s_matrix, s);
   {
     uint16_t b_matrix[512U] = { 0U };
     uint16_t a_matrix[4096U] = { 0U };
     uint16_t e_matrix[512U] = { 0U };
-    Hacl_Impl_Frodo_Gen_frodo_gen_matrix_cshake((uint32_t)64U, (uint32_t)16U, seed_a, a_matrix);
-    Hacl_Impl_Frodo_Sample_frodo_sample_matrix((uint32_t)64U,
+    frodo_gen_matrix_cshake((uint32_t)64U, (uint32_t)16U, seed_a, a_matrix);
+    frodo_sample_matrix((uint32_t)64U,
       (uint32_t)8U,
       (uint32_t)16U,
       seed_e,
       (uint16_t)2U,
       e_matrix);
-    Hacl_Impl_Matrix_matrix_mul_s((uint32_t)64U,
-      (uint32_t)64U,
-      (uint32_t)8U,
-      a_matrix,
-      s_matrix,
-      b_matrix);
-    Hacl_Impl_Matrix_matrix_add((uint32_t)64U, (uint32_t)8U, b_matrix, e_matrix);
+    matrix_mul_s((uint32_t)64U, (uint32_t)64U, (uint32_t)8U, a_matrix, s_matrix, b_matrix);
+    matrix_add((uint32_t)64U, (uint32_t)8U, b_matrix, e_matrix);
     Lib_Memzero_clear_words_u16((uint32_t)512U, e_matrix);
-    Hacl_Impl_Frodo_Pack_frodo_pack((uint32_t)64U, (uint32_t)8U, (uint32_t)15U, b_matrix, b);
+    frodo_pack((uint32_t)64U, (uint32_t)8U, (uint32_t)15U, b_matrix, b);
     Lib_Memzero_clear_words_u16((uint32_t)512U, s_matrix);
   }
 }
 
-inline static void
-Hacl_Impl_Frodo_Encode_frodo_key_encode(uint32_t b, uint8_t *a, uint16_t *res)
+inline static void frodo_key_encode(uint32_t b, uint8_t *a, uint16_t *res)
 {
   uint32_t i0;
   for (i0 = (uint32_t)0U; i0 < (uint32_t)8U; i0 = i0 + (uint32_t)1U)
@@ -448,8 +400,7 @@ Hacl_Impl_Frodo_Encode_frodo_key_encode(uint32_t b, uint8_t *a, uint16_t *res)
   }
 }
 
-inline static void
-Hacl_Impl_Frodo_Encode_frodo_key_decode(uint32_t b, uint16_t *a, uint8_t *res)
+inline static void frodo_key_decode(uint32_t b, uint16_t *a, uint8_t *res)
 {
   uint32_t i;
   for (i = (uint32_t)0U; i < (uint32_t)8U; i = i + (uint32_t)1U)
@@ -478,7 +429,7 @@ Hacl_Impl_Frodo_Encode_frodo_key_decode(uint32_t b, uint16_t *a, uint8_t *res)
 }
 
 inline static void
-Hacl_Impl_Frodo_KEM_Encaps_frodo_mul_add_sb_plus_e_plus_mu(
+frodo_mul_add_sb_plus_e_plus_mu(
   uint8_t *b,
   uint8_t *seed_e,
   uint8_t *coins,
@@ -488,35 +439,24 @@ Hacl_Impl_Frodo_KEM_Encaps_frodo_mul_add_sb_plus_e_plus_mu(
 {
   uint16_t b_matrix[512U] = { 0U };
   uint16_t epp_matrix[64U] = { 0U };
-  Hacl_Impl_Frodo_Pack_frodo_unpack((uint32_t)64U, (uint32_t)8U, (uint32_t)15U, b, b_matrix);
-  Hacl_Impl_Frodo_Sample_frodo_sample_matrix((uint32_t)8U,
+  frodo_unpack((uint32_t)64U, (uint32_t)8U, (uint32_t)15U, b, b_matrix);
+  frodo_sample_matrix((uint32_t)8U,
     (uint32_t)8U,
     (uint32_t)16U,
     seed_e,
     (uint16_t)6U,
     epp_matrix);
-  Hacl_Impl_Matrix_matrix_mul((uint32_t)8U,
-    (uint32_t)64U,
-    (uint32_t)8U,
-    sp_matrix,
-    b_matrix,
-    v_matrix);
-  Hacl_Impl_Matrix_matrix_add((uint32_t)8U, (uint32_t)8U, v_matrix, epp_matrix);
+  matrix_mul((uint32_t)8U, (uint32_t)64U, (uint32_t)8U, sp_matrix, b_matrix, v_matrix);
+  matrix_add((uint32_t)8U, (uint32_t)8U, v_matrix, epp_matrix);
   Lib_Memzero_clear_words_u16((uint32_t)64U, epp_matrix);
   {
     uint16_t mu_encode[64U] = { 0U };
-    Hacl_Impl_Frodo_Encode_frodo_key_encode((uint32_t)2U, coins, mu_encode);
-    Hacl_Impl_Matrix_matrix_add((uint32_t)8U, (uint32_t)8U, v_matrix, mu_encode);
+    frodo_key_encode((uint32_t)2U, coins, mu_encode);
+    matrix_add((uint32_t)8U, (uint32_t)8U, v_matrix, mu_encode);
   }
 }
 
-inline static void
-Hacl_Impl_Frodo_KEM_Encaps_crypto_kem_enc_ct(
-  uint8_t *pk,
-  uint8_t *g,
-  uint8_t *coins,
-  uint8_t *ct
-)
+inline static void crypto_kem_enc_ct(uint8_t *pk, uint8_t *g, uint8_t *coins, uint8_t *ct)
 {
   uint8_t *seed_a = pk;
   uint8_t *b = pk + (uint32_t)16U;
@@ -527,7 +467,7 @@ Hacl_Impl_Frodo_KEM_Encaps_crypto_kem_enc_ct(
   uint32_t c2Len;
   uint32_t c12Len;
   uint8_t *c1;
-  Hacl_Impl_Frodo_Sample_frodo_sample_matrix((uint32_t)8U,
+  frodo_sample_matrix((uint32_t)8U,
     (uint32_t)64U,
     (uint32_t)16U,
     seed_e,
@@ -542,31 +482,22 @@ Hacl_Impl_Frodo_KEM_Encaps_crypto_kem_enc_ct(
     uint16_t a_matrix[4096U] = { 0U };
     uint16_t ep_matrix[512U] = { 0U };
     uint8_t *c2;
-    Hacl_Impl_Frodo_Gen_frodo_gen_matrix_cshake((uint32_t)64U, (uint32_t)16U, seed_a, a_matrix);
-    Hacl_Impl_Frodo_Sample_frodo_sample_matrix((uint32_t)8U,
+    frodo_gen_matrix_cshake((uint32_t)64U, (uint32_t)16U, seed_a, a_matrix);
+    frodo_sample_matrix((uint32_t)8U,
       (uint32_t)64U,
       (uint32_t)16U,
       seed_e,
       (uint16_t)5U,
       ep_matrix);
-    Hacl_Impl_Matrix_matrix_mul((uint32_t)8U,
-      (uint32_t)64U,
-      (uint32_t)64U,
-      sp_matrix,
-      a_matrix,
-      bp_matrix);
-    Hacl_Impl_Matrix_matrix_add((uint32_t)8U, (uint32_t)64U, bp_matrix, ep_matrix);
+    matrix_mul((uint32_t)8U, (uint32_t)64U, (uint32_t)64U, sp_matrix, a_matrix, bp_matrix);
+    matrix_add((uint32_t)8U, (uint32_t)64U, bp_matrix, ep_matrix);
     Lib_Memzero_clear_words_u16((uint32_t)512U, ep_matrix);
-    Hacl_Impl_Frodo_Pack_frodo_pack((uint32_t)8U, (uint32_t)64U, (uint32_t)15U, bp_matrix, c1);
+    frodo_pack((uint32_t)8U, (uint32_t)64U, (uint32_t)15U, bp_matrix, c1);
     c2 = ct + c1Len;
     {
       uint16_t v_matrix[64U] = { 0U };
-      Hacl_Impl_Frodo_KEM_Encaps_frodo_mul_add_sb_plus_e_plus_mu(b,
-        seed_e,
-        coins,
-        sp_matrix,
-        v_matrix);
-      Hacl_Impl_Frodo_Pack_frodo_pack((uint32_t)8U, (uint32_t)8U, (uint32_t)15U, v_matrix, c2);
+      frodo_mul_add_sb_plus_e_plus_mu(b, seed_e, coins, sp_matrix, v_matrix);
+      frodo_pack((uint32_t)8U, (uint32_t)8U, (uint32_t)15U, v_matrix, c2);
       Lib_Memzero_clear_words_u16((uint32_t)64U, v_matrix);
       memcpy(ct + c12Len, d, (uint32_t)16U * sizeof d[0U]);
       Lib_Memzero_clear_words_u16((uint32_t)512U, sp_matrix);
@@ -574,10 +505,9 @@ Hacl_Impl_Frodo_KEM_Encaps_crypto_kem_enc_ct(
   }
 }
 
-inline static void
-Hacl_Impl_Frodo_KEM_Encaps_crypto_kem_enc_ss(uint8_t *g, uint8_t *ct, uint8_t *ss)
+inline static void crypto_kem_enc_ss(uint8_t *g, uint8_t *ct, uint8_t *ss)
 {
-  uint32_t ss_init_len = Hacl_Impl_Frodo_KEM_crypto_ciphertextbytes + (uint32_t)16U;
+  uint32_t ss_init_len = crypto_ciphertextbytes + (uint32_t)16U;
   KRML_CHECK_SIZE(sizeof (uint8_t), ss_init_len);
   {
     uint8_t ss_init[ss_init_len];
@@ -585,12 +515,8 @@ Hacl_Impl_Frodo_KEM_Encaps_crypto_kem_enc_ss(uint8_t *g, uint8_t *ct, uint8_t *s
     {
       uint8_t *c12 = ct;
       uint8_t *kd = g + (uint32_t)16U;
-      memcpy(ss_init,
-        c12,
-        (Hacl_Impl_Frodo_KEM_crypto_ciphertextbytes - (uint32_t)16U) * sizeof c12[0U]);
-      memcpy(ss_init + Hacl_Impl_Frodo_KEM_crypto_ciphertextbytes - (uint32_t)16U,
-        kd,
-        (uint32_t)32U * sizeof kd[0U]);
+      memcpy(ss_init, c12, (crypto_ciphertextbytes - (uint32_t)16U) * sizeof c12[0U]);
+      memcpy(ss_init + crypto_ciphertextbytes - (uint32_t)16U, kd, (uint32_t)32U * sizeof kd[0U]);
       {
         uint64_t s[25U] = { 0U };
         s[0U] = (uint64_t)0x10010001a801U | (uint64_t)(uint16_t)7U << (uint32_t)48U;
@@ -623,10 +549,10 @@ uint32_t Hacl_Frodo_KEM_crypto_kem_keypair(uint8_t *pk, uint8_t *sk)
     Hacl_Impl_SHA3_absorb(s1, (uint32_t)168U, (uint32_t)16U, z, (uint8_t)0x04U);
     Hacl_Impl_SHA3_squeeze(s1, (uint32_t)168U, (uint32_t)16U, seed_a);
     b = pk + (uint32_t)16U;
-    s_bytes = sk + (uint32_t)16U + Hacl_Impl_Frodo_KEM_crypto_publickeybytes;
-    Hacl_Impl_Frodo_KEM_KeyGen_frodo_mul_add_as_plus_e_pack(seed_a, seed_e, b, s_bytes);
+    s_bytes = sk + (uint32_t)16U + crypto_publickeybytes;
+    frodo_mul_add_as_plus_e_pack(seed_a, seed_e, b, s_bytes);
     memcpy(sk, s, (uint32_t)16U * sizeof s[0U]);
-    memcpy(sk + (uint32_t)16U, pk, Hacl_Impl_Frodo_KEM_crypto_publickeybytes * sizeof pk[0U]);
+    memcpy(sk + (uint32_t)16U, pk, crypto_publickeybytes * sizeof pk[0U]);
     return (uint32_t)0U;
   }
 }
@@ -634,26 +560,24 @@ uint32_t Hacl_Frodo_KEM_crypto_kem_keypair(uint8_t *pk, uint8_t *sk)
 uint32_t Hacl_Frodo_KEM_crypto_kem_enc(uint8_t *ct, uint8_t *ss, uint8_t *pk)
 {
   uint8_t coins[16U] = { 0U };
-  randombytes_(Hacl_Impl_Frodo_KEM_bytes_mu, coins);
+  randombytes_(bytes_mu, coins);
   {
     uint8_t g[48U] = { 0U };
     uint8_t pk_coins[992U] = { 0U };
-    memcpy(pk_coins, pk, Hacl_Impl_Frodo_KEM_crypto_publickeybytes * sizeof pk[0U]);
-    memcpy(pk_coins + Hacl_Impl_Frodo_KEM_crypto_publickeybytes,
-      coins,
-      Hacl_Impl_Frodo_KEM_bytes_mu * sizeof coins[0U]);
+    memcpy(pk_coins, pk, crypto_publickeybytes * sizeof pk[0U]);
+    memcpy(pk_coins + crypto_publickeybytes, coins, bytes_mu * sizeof coins[0U]);
     {
       uint64_t s[25U] = { 0U };
       s[0U] = (uint64_t)0x10010001a801U | (uint64_t)(uint16_t)3U << (uint32_t)48U;
       Hacl_Impl_SHA3_state_permute(s);
       Hacl_Impl_SHA3_absorb(s,
         (uint32_t)168U,
-        Hacl_Impl_Frodo_KEM_crypto_publickeybytes + Hacl_Impl_Frodo_KEM_bytes_mu,
+        crypto_publickeybytes + bytes_mu,
         pk_coins,
         (uint8_t)0x04U);
       Hacl_Impl_SHA3_squeeze(s, (uint32_t)168U, (uint32_t)48U, g);
-      Hacl_Impl_Frodo_KEM_Encaps_crypto_kem_enc_ct(pk, g, coins, ct);
-      Hacl_Impl_Frodo_KEM_Encaps_crypto_kem_enc_ss(g, ct, ss);
+      crypto_kem_enc_ct(pk, g, coins, ct);
+      crypto_kem_enc_ss(g, ct, ss);
       Lib_Memzero_clear_words_u8((uint32_t)32U, g);
       return (uint32_t)0U;
     }
@@ -669,36 +593,30 @@ uint32_t Hacl_Frodo_KEM_crypto_kem_dec(uint8_t *ss, uint8_t *ct, uint8_t *sk)
   uint8_t *c1 = ct;
   uint8_t *c2 = ct + c1Len;
   uint8_t *s_bytes;
-  Hacl_Impl_Frodo_Pack_frodo_unpack((uint32_t)8U, (uint32_t)64U, (uint32_t)15U, c1, bp_matrix);
-  Hacl_Impl_Frodo_Pack_frodo_unpack((uint32_t)8U, (uint32_t)8U, (uint32_t)15U, c2, c_matrix);
-  s_bytes = sk + (uint32_t)16U + Hacl_Impl_Frodo_KEM_crypto_publickeybytes;
+  frodo_unpack((uint32_t)8U, (uint32_t)64U, (uint32_t)15U, c1, bp_matrix);
+  frodo_unpack((uint32_t)8U, (uint32_t)8U, (uint32_t)15U, c2, c_matrix);
+  s_bytes = sk + (uint32_t)16U + crypto_publickeybytes;
   {
     uint8_t mu_decode1[16U] = { 0U };
     uint16_t s_matrix[512U] = { 0U };
     uint16_t m_matrix[64U] = { 0U };
-    Hacl_Impl_Matrix_matrix_from_lbytes((uint32_t)64U, (uint32_t)8U, s_bytes, s_matrix);
-    Hacl_Impl_Matrix_matrix_mul_s((uint32_t)8U,
-      (uint32_t)64U,
-      (uint32_t)8U,
-      bp_matrix,
-      s_matrix,
-      m_matrix);
-    Hacl_Impl_Matrix_matrix_sub((uint32_t)8U, (uint32_t)8U, c_matrix, m_matrix);
-    Hacl_Impl_Frodo_Encode_frodo_key_decode((uint32_t)2U, m_matrix, mu_decode1);
+    matrix_from_lbytes((uint32_t)64U, (uint32_t)8U, s_bytes, s_matrix);
+    matrix_mul_s((uint32_t)8U, (uint32_t)64U, (uint32_t)8U, bp_matrix, s_matrix, m_matrix);
+    matrix_sub((uint32_t)8U, (uint32_t)8U, c_matrix, m_matrix);
+    frodo_key_decode((uint32_t)2U, m_matrix, mu_decode1);
     {
       uint8_t g[48U] = { 0U };
-      uint32_t
-      pk_mu_decode_len = Hacl_Impl_Frodo_KEM_crypto_publickeybytes + Hacl_Impl_Frodo_KEM_bytes_mu;
+      uint32_t pk_mu_decode_len = crypto_publickeybytes + bytes_mu;
       KRML_CHECK_SIZE(sizeof (uint8_t), pk_mu_decode_len);
       {
         uint8_t pk_mu_decode[pk_mu_decode_len];
         memset(pk_mu_decode, 0U, pk_mu_decode_len * sizeof pk_mu_decode[0U]);
         {
           uint8_t *pk0 = sk + (uint32_t)16U;
-          memcpy(pk_mu_decode, pk0, Hacl_Impl_Frodo_KEM_crypto_publickeybytes * sizeof pk0[0U]);
-          memcpy(pk_mu_decode + Hacl_Impl_Frodo_KEM_crypto_publickeybytes,
+          memcpy(pk_mu_decode, pk0, crypto_publickeybytes * sizeof pk0[0U]);
+          memcpy(pk_mu_decode + crypto_publickeybytes,
             mu_decode1,
-            Hacl_Impl_Frodo_KEM_bytes_mu * sizeof mu_decode1[0U]);
+            bytes_mu * sizeof mu_decode1[0U]);
           {
             uint64_t s0[25U] = { 0U };
             s0[0U] = (uint64_t)0x10010001a801U | (uint64_t)(uint16_t)3U << (uint32_t)48U;
@@ -711,7 +629,7 @@ uint32_t Hacl_Frodo_KEM_crypto_kem_dec(uint8_t *ss, uint8_t *ct, uint8_t *sk)
             Hacl_Impl_SHA3_squeeze(s0, (uint32_t)168U, (uint32_t)48U, g);
             {
               uint8_t *dp = g + (uint32_t)32U;
-              uint8_t *d0 = ct + Hacl_Impl_Frodo_KEM_crypto_ciphertextbytes - (uint32_t)16U;
+              uint8_t *d0 = ct + crypto_ciphertextbytes - (uint32_t)16U;
               uint16_t bpp_matrix[512U] = { 0U };
               uint16_t cp_matrix[64U] = { 0U };
               uint8_t *pk = sk + (uint32_t)16U;
@@ -719,7 +637,7 @@ uint32_t Hacl_Frodo_KEM_crypto_kem_dec(uint8_t *ss, uint8_t *ct, uint8_t *sk)
               uint8_t *b0 = pk + (uint32_t)16U;
               uint8_t *seed_ep = g;
               uint16_t sp_matrix[512U] = { 0U };
-              Hacl_Impl_Frodo_Sample_frodo_sample_matrix((uint32_t)8U,
+              frodo_sample_matrix((uint32_t)8U,
                 (uint32_t)64U,
                 (uint32_t)16U,
                 seed_ep,
@@ -728,29 +646,22 @@ uint32_t Hacl_Frodo_KEM_crypto_kem_dec(uint8_t *ss, uint8_t *ct, uint8_t *sk)
               {
                 uint16_t a_matrix[4096U] = { 0U };
                 uint16_t ep_matrix[512U] = { 0U };
-                Hacl_Impl_Frodo_Gen_frodo_gen_matrix_cshake((uint32_t)64U,
-                  (uint32_t)16U,
-                  seed_a,
-                  a_matrix);
-                Hacl_Impl_Frodo_Sample_frodo_sample_matrix((uint32_t)8U,
+                frodo_gen_matrix_cshake((uint32_t)64U, (uint32_t)16U, seed_a, a_matrix);
+                frodo_sample_matrix((uint32_t)8U,
                   (uint32_t)64U,
                   (uint32_t)16U,
                   seed_ep,
                   (uint16_t)5U,
                   ep_matrix);
-                Hacl_Impl_Matrix_matrix_mul((uint32_t)8U,
+                matrix_mul((uint32_t)8U,
                   (uint32_t)64U,
                   (uint32_t)64U,
                   sp_matrix,
                   a_matrix,
                   bpp_matrix);
-                Hacl_Impl_Matrix_matrix_add((uint32_t)8U, (uint32_t)64U, bpp_matrix, ep_matrix);
+                matrix_add((uint32_t)8U, (uint32_t)64U, bpp_matrix, ep_matrix);
                 Lib_Memzero_clear_words_u16((uint32_t)512U, ep_matrix);
-                Hacl_Impl_Frodo_KEM_Encaps_frodo_mul_add_sb_plus_e_plus_mu(b0,
-                  seed_ep,
-                  mu_decode1,
-                  sp_matrix,
-                  cp_matrix);
+                frodo_mul_add_sb_plus_e_plus_mu(b0, seed_ep, mu_decode1, sp_matrix, cp_matrix);
                 Lib_Memzero_clear_words_u16((uint32_t)512U, sp_matrix);
                 {
                   uint8_t res = (uint8_t)255U;
@@ -773,18 +684,8 @@ uint32_t Hacl_Frodo_KEM_crypto_kem_dec(uint8_t *ss, uint8_t *ct, uint8_t *sk)
                   }
                   z = res;
                   b1 = z == (uint8_t)255U;
-                  b2 =
-                    Hacl_Impl_Matrix_matrix_eq((uint32_t)8U,
-                      (uint32_t)64U,
-                      (uint32_t)15U,
-                      bp_matrix,
-                      bpp_matrix);
-                  b3 =
-                    Hacl_Impl_Matrix_matrix_eq((uint32_t)8U,
-                      (uint32_t)8U,
-                      (uint32_t)15U,
-                      c_matrix,
-                      cp_matrix);
+                  b2 = matrix_eq((uint32_t)8U, (uint32_t)64U, (uint32_t)15U, bp_matrix, bpp_matrix);
+                  b3 = matrix_eq((uint32_t)8U, (uint32_t)8U, (uint32_t)15U, c_matrix, cp_matrix);
                   b4 = b1 && b2 && b3;
                   b = b4;
                   kp = g + (uint32_t)16U;
@@ -799,22 +700,19 @@ uint32_t Hacl_Frodo_KEM_crypto_kem_dec(uint8_t *ss, uint8_t *ct, uint8_t *sk)
                   }
                   {
                     uint8_t *c12 = ct;
-                    uint8_t *d = ct + Hacl_Impl_Frodo_KEM_crypto_ciphertextbytes - (uint32_t)16U;
-                    uint32_t
-                    ss_init_len = Hacl_Impl_Frodo_KEM_crypto_ciphertextbytes + (uint32_t)16U;
+                    uint8_t *d = ct + crypto_ciphertextbytes - (uint32_t)16U;
+                    uint32_t ss_init_len = crypto_ciphertextbytes + (uint32_t)16U;
                     KRML_CHECK_SIZE(sizeof (uint8_t), ss_init_len);
                     {
                       uint8_t ss_init[ss_init_len];
                       memset(ss_init, 0U, ss_init_len * sizeof ss_init[0U]);
                       memcpy(ss_init,
                         c12,
-                        (Hacl_Impl_Frodo_KEM_crypto_ciphertextbytes - (uint32_t)16U)
-                        * sizeof c12[0U]);
-                      memcpy(ss_init + Hacl_Impl_Frodo_KEM_crypto_ciphertextbytes - (uint32_t)16U,
+                        (crypto_ciphertextbytes - (uint32_t)16U) * sizeof c12[0U]);
+                      memcpy(ss_init + crypto_ciphertextbytes - (uint32_t)16U,
                         kp_s,
                         (uint32_t)16U * sizeof kp_s[0U]);
-                      memcpy(ss_init
-                        + Hacl_Impl_Frodo_KEM_crypto_ciphertextbytes - (uint32_t)16U + (uint32_t)16U,
+                      memcpy(ss_init + crypto_ciphertextbytes - (uint32_t)16U + (uint32_t)16U,
                         d,
                         (uint32_t)16U * sizeof d[0U]);
                       {
