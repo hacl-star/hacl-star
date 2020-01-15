@@ -115,13 +115,13 @@ let code_Fsqr = FW.va_code_Fsqr ()
 let of_reg (r:MS.reg_64) : option (IX64.reg_nat 3) = match r with
   | 5 -> Some 0 // rdi
   | 4 -> Some 1 // rsi
-  | 3 -> Some 2 // rdx
+  | 1 -> Some 2 // rbx
   | _ -> None
 
 let of_arg (i:IX64.reg_nat 3) : MS.reg_64 = match i with
   | 0 -> MS.rRdi
   | 1 -> MS.rRsi
-  | 2 -> MS.rRdx
+  | 2 -> MS.rRbx
 
 let arg_reg : IX64.arg_reg_relation 3 = IX64.Rel of_reg of_arg
 

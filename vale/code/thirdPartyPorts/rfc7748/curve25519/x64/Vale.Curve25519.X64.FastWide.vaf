@@ -67,10 +67,10 @@ procedure Fmul(
     {:quick}
     {:exportSpecs}
     lets
-        tmp_ptr @= rdi; inA_ptr @= rsi; dst_ptr @= rdx; inB_ptr @= rcx;
+        tmp_ptr @= rdi; inA_ptr @= rsi; dst_ptr @= r15; inB_ptr @= rcx;
         tmp_in := rdi;
         inA_in := rsi;
-        dst_in := rdx;
+        dst_in := r15;
         inB_in := rcx;
     reads memTaint;
     modifies
@@ -119,13 +119,11 @@ procedure Fmul(
         validSrcAddrs64(mem, dst_in, dst_b, 4, memTaint, Secret);
 
 {
-    Comment("Save dst_ptr which will be clobbered by the raw multiplication");
-    Mov64(r15, dst_ptr); 
     LargeComment("Compute the raw multiplication: tmp <- src1 * src2");
     Fast_multiply(0, tmp_b, inA_b, inB_b);
     Mov64(inA_ptr, tmp_ptr);
     Newline();
-    Comment("Restore dst_ptr");
+    Comment("Line up pointers");
     Mov64(rdi, r15);
     LargeComment("Wrap the result back into the field");
     Carry_wide(0, dst_b, tmp_b);
@@ -142,7 +140,7 @@ procedure Fmul_stdcall(
     {:quick}
     {:exportSpecs}
     lets
-        tmp_ptr @= rdi; inA_ptr @= rsi; dst_ptr @= rdx; inB_ptr @= rcx;
+        tmp_ptr @= rdi; inA_ptr @= rsi; dst_ptr @= r15; inB_ptr @= rcx;
         tmp_in := (if win then rcx else rdi);
         inA_in := (if win then rdx else rsi);
         dst_in := (if win then r8  else rdx);
@@ -227,6 +225,8 @@ procedure Fmul_stdcall(
         Mov64(inA_ptr, rdx);
         Mov64(dst_ptr, r8);
         Mov64(inB_ptr, r9);
+    } else {
+        Mov64(dst_ptr, rdx);
     }
 
     Fmul(tmp_b, inA_b, dst_b, inB_b);
@@ -252,10 +252,10 @@ procedure Fmul2(
     {:quick}
     {:exportSpecs}
     lets
-        tmp_ptr @= rdi; inA_ptr @= rsi; dst_ptr @= rdx; inB_ptr @= rcx;
+        tmp_ptr @= rdi; inA_ptr @= rsi; dst_ptr @= r15; inB_ptr @= rcx;
         tmp_in := rdi;
         inA_in := rsi;
-        dst_in := rdx;
+        dst_in := r15;
         inB_in := rcx;
     reads memTaint;
     modifies
@@ -326,7 +326,6 @@ procedure Fmul2(
         validSrcAddrs64(mem, dst_in, dst_b, 4, memTaint, Secret);
 
 {
-    Mov64(r15, dst_ptr); // Save dst_ptr that will be clobbered by Fast_multiply
     Fast_multiply(0, tmp_b, inA_b, inB_b);
     Fast_multiply(4, tmp_b, inA_b, inB_b);
     Mov64(inA_ptr, tmp_ptr);
@@ -345,7 +344,7 @@ procedure Fmul2_stdcall(
     {:quick}
     {:exportSpecs}
     lets
-        tmp_ptr @= rdi; inA_ptr @= rsi; dst_ptr @= rdx; inB_ptr @= rcx;
+        tmp_ptr @= rdi; inA_ptr @= rsi; dst_ptr @= r15; inB_ptr @= rcx;
         tmp_in := (if win then rcx else rdi);
         inA_in := (if win then rdx else rsi);
         dst_in := (if win then r8  else rdx);
@@ -451,6 +450,8 @@ procedure Fmul2_stdcall(
         Mov64(inA_ptr, rdx);
         Mov64(dst_ptr, r8);
         Mov64(inB_ptr, r9);
+    } else {
+        Mov64(dst_ptr, rdx);
     }
 
     Fmul2(tmp_b, inA_b, dst_b, inB_b);
@@ -471,10 +472,10 @@ procedure Fsqr(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64)
     {:quick}
     {:exportSpecs}
     lets
-        tmp_ptr @= rdi; inA_ptr @= rsi; dst_ptr @= rdx;
+        tmp_ptr @= rdi; inA_ptr @= rsi; dst_ptr @= rbx;
         tmp_in := rdi;
         inA_in := rsi;
-        dst_in := rdx;
+        dst_in := rbx;
     reads memTaint;
     modifies
         rax; rbx; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r12; r13; r14; r15;
@@ -512,7 +513,6 @@ procedure Fsqr(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64)
         modifies_buffer_2(dst_b, tmp_b, old(mem), mem);
 
 {
-    Mov64(rbx, dst_ptr); // Save dst_ptr that will be clobbered by Fast_sqr
     Fast_sqr(0, tmp_b, inA_b);
     Mov64(inA_ptr, tmp_ptr);
     Mov64(rdi, rbx);
@@ -529,7 +529,7 @@ procedure Fsqr_stdcall(
     {:quick}
     {:exportSpecs}
     lets
-        tmp_ptr @= rdi; inA_ptr @= rsi; dst_ptr @= rdx;
+        tmp_ptr @= rdi; inA_ptr @= rsi; dst_ptr @= rbx;
         tmp_in := (if win then rcx else rdi);
         inA_in := (if win then rdx else rsi);
         dst_in := (if win then r8  else rdx);
@@ -604,6 +604,8 @@ procedure Fsqr_stdcall(
         Mov64(tmp_ptr, rcx);
         Mov64(inA_ptr, rdx);
         Mov64(dst_ptr, r8);
+    } else {
+        Mov64(dst_ptr, rdx);
     }
 
     Fsqr(tmp_b, inA_b, dst_b);
@@ -625,10 +627,10 @@ procedure Fsqr2(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64
     {:quick}
     {:exportSpecs}
     lets
-        tmp_ptr @= rdi; inA_ptr @= rsi; dst_ptr @= rdx;
+        tmp_ptr @= rdi; inA_ptr @= rsi; dst_ptr @= rbx;
         tmp_in := rdi;
         inA_in := rsi;
-        dst_in := rdx;
+        dst_in := rbx;
     reads memTaint;
     modifies
         rax; rbx; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r12; r13; r14; r15;
@@ -677,7 +679,6 @@ procedure Fsqr2(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64
         modifies_buffer_2(dst_b, tmp_b, old(mem), mem);
 
 {
-    Mov64(rbx, dst_ptr); // Save dst_ptr that will be clobbered by Fast_sqr
     Fast_sqr(0, tmp_b, inA_b);
     Fast_sqr(4, tmp_b, inA_b);
     Mov64(inA_ptr, tmp_ptr);
@@ -696,7 +697,7 @@ procedure Fsqr2_stdcall(
     {:quick}
     {:exportSpecs}
     lets
-        tmp_ptr @= rdi; inA_ptr @= rsi; dst_ptr @= rdx;
+        tmp_ptr @= rdi; inA_ptr @= rsi; dst_ptr @= rbx;
         tmp_in := (if win then rcx else rdi);
         inA_in := (if win then rdx else rsi);
         dst_in := (if win then r8  else rdx);
@@ -782,6 +783,8 @@ procedure Fsqr2_stdcall(
         Mov64(tmp_ptr, rcx);
         Mov64(inA_ptr, rdx);
         Mov64(dst_ptr, r8);
+    } else {
+        Mov64(dst_ptr, rdx);
     }
 
     Fsqr2(tmp_b, inA_b, dst_b);

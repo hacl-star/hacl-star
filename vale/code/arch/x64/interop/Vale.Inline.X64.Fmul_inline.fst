@@ -121,14 +121,14 @@ let code_Fmul = FW.va_code_Fmul ()
 let fmul_of_reg (r:MS.reg_64) : option (IX64.reg_nat 4) = match r with
   | 5 -> Some 0 // rdi
   | 4 -> Some 1 // rsi
-  | 3 -> Some 2 // rdx
+  | 15 -> Some 2 // r15
   | 2 -> Some 3 // rcx
   | _ -> None
 
 let fmul_of_arg (i:IX64.reg_nat 4) : MS.reg_64 = match i with
   | 0 -> MS.rRdi
   | 1 -> MS.rRsi
-  | 2 -> MS.rRdx
+  | 2 -> MS.rR15
   | 3 -> MS.rRcx
 
 let fmul_arg_reg : IX64.arg_reg_relation 4 = IX64.Rel fmul_of_reg fmul_of_arg
