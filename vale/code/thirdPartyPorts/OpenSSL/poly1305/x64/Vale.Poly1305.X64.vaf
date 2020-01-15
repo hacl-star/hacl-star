@@ -719,8 +719,6 @@ procedure Poly1305(
         inp_in + len_in < pow2_64;
         finish_in < 2;
     ensures
-        validSrcAddrs64(mem, ctx_in, ctx_b, 24, memLayout, Public);
-        validSrcAddrs64(mem, inp_in, inp_b, readable_words(len_in), memLayout, Public);
         modifies_buffer(ctx_b, old(mem), mem);
 
         let h0_in := buffer64_read(ctx_b, 0, old(mem));
@@ -757,7 +755,7 @@ procedure Poly1305(
         r14 == old(r14);
         r15 == old(r15);
 {
-    mem_eq_all(mem, heap0);
+    CreateNoHeaplets(); mem_eq_all(mem, heap0);
 
     let key_r0 := buffer64_read(ctx_b, 3, heap0);
     let key_r1 := buffer64_read(ctx_b, 4, heap0);

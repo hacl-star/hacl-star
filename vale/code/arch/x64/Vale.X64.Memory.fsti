@@ -22,6 +22,8 @@ let vale_full_heap_equal (h1 h2:vale_full_heap) =
   h1.vf_heap == h2.vf_heap /\
   Map16.equal h1.vf_heaplets h2.vf_heaplets
 
+val get_heaplet_id (h:vale_heap) : option heaplet_id
+
 unfold let nat8 = Vale.Def.Words_s.nat8
 unfold let nat16 = Vale.Def.Words_s.nat16
 unfold let nat32 = Vale.Def.Words_s.nat32
@@ -209,6 +211,7 @@ val buffer_write (#t:base_typ) (b:buffer t) (i:int) (v:base_typ_as_vale_type t) 
   (ensures (fun h' ->
     0 <= i /\ i < buffer_length b /\ buffer_readable h b ==>
     modifies (loc_buffer b) h h' /\
+    get_heaplet_id h' == get_heaplet_id h /\
     buffer_readable h' b /\
     buffer_as_seq h' b == Seq.upd (buffer_as_seq h b) i v
   ))
@@ -362,28 +365,13 @@ val modifies_valid_taint128 (b:buffer128) (p:loc) (h h':vale_heap) (memTaint:mem
   (ensures valid_taint_buf128 b h memTaint t <==> valid_taint_buf128 b h' memTaint t)
   [SMTPat (modifies p h h'); SMTPat (valid_taint_buf128 b h' memTaint t)]
 
+val modifies_same_heaplet_id (l:loc) (h1 h2:vale_heap) : Lemma
+  (requires modifies l h1 h2)
+  (ensures get_heaplet_id h1 == get_heaplet_id h2)
+  [SMTPat (modifies l h1 h2); SMTPat (get_heaplet_id h2)]
+
 // TODO: this is used for the current (trivial) mem_inv; it will probably be removed for the real mem_inv
 val vale_heap_data_eq (h1 h2:vale_heap) : prop
-
-val mem_eq_all (h1 h2:vale_heap) : Lemma
-  (requires vale_heap_data_eq h1 h2)
-  (ensures
-    True
-    /\ (forall (#t:base_typ) (b:buffer t).{:pattern (buffer_addr b h1) \/ (buffer_addr b h2)} buffer_addr b h1 == buffer_addr b h2)
-    /\ (forall (#t:base_typ) (b:buffer t).{:pattern (buffer_as_seq h1 b) \/ (buffer_as_seq h2 b)} buffer_as_seq h1 b == buffer_as_seq h2 b)
-    /\ (forall (#t:base_typ) (b:buffer t).{:pattern (buffer_readable h1 b) \/ (buffer_readable h2 b)} buffer_readable h1 b == buffer_readable h2 b)
-    /\ (forall (#t:base_typ) (b:buffer t) (i:int).{:pattern (buffer_read b i h1) \/ (buffer_read b i h2)} buffer_read b i h1 == buffer_read b i h2)
-    /\ (forall (ptr:int).{:pattern (valid_mem64 ptr h1) \/ (valid_mem64 ptr h2)} valid_mem64 ptr h1 == valid_mem64 ptr h2)
-    /\ (forall (ptr:int).{:pattern (writeable_mem64 ptr h1) \/ (writeable_mem64 ptr h2)} writeable_mem64 ptr h1 == writeable_mem64 ptr h2)
-    // /\ (forall (ptr:int).{:pattern (load_mem64 ptr h1) \/ (load_mem64 ptr h2)} load_mem64 ptr h1 == load_mem64 ptr h2)
-    /\ (forall (b:buffer64) (mt:memtaint) (t:taint).{:pattern (valid_taint_buf64 b h1 mt t) \/ (valid_taint_buf64 b h2 mt t)} valid_taint_buf64 b h1 mt t <==> valid_taint_buf64 b h2 mt t) 
-    /\ (forall (b:buffer128) (mt:memtaint) (t:taint).{:pattern (valid_taint_buf128 b h1 mt t) \/ (valid_taint_buf128 b h2 mt t)} valid_taint_buf128 b h1 mt t <==> valid_taint_buf128 b h2 mt t)
-  )
-
-val mem_eq_modifies (h1 h1' h2 h2':vale_heap) : Lemma
-  (requires vale_heap_data_eq h1 h2 /\ vale_heap_data_eq h1' h2')
-  (ensures forall (l:loc).{:pattern (modifies l h1 h1') \/ (modifies l h2 h2')}
-    modifies l h1 h1' <==> modifies l h2 h2')
 
 type mutability = | Mutable | Immutable
 
@@ -409,9 +397,40 @@ let init_heaplets_req (h:vale_heap) (bs:Seq.seq buffer_info) (modloc:loc) =
   (forall (i1 i2:nat).{:pattern (Seq.index bs i1); (Seq.index bs i2)}
     i1 < Seq.length bs /\ i2 < Seq.length bs ==> buffer_info_disjoint (Seq.index bs i1) (Seq.index bs i2))
 
+// Buffer b belongs to heaplet h
+val valid_layout_buffer_id (t:base_typ) (b:buffer t) (layout:vale_heap_layout) (h_id:option heaplet_id) : prop0
+let valid_layout_buffer (#t:base_typ) (b:buffer t) (layout:vale_heap_layout) (h:vale_heap) =
+  valid_layout_buffer_id t b layout (get_heaplet_id h)
+
 // Initial memory state
 val is_initial_heap (layout:vale_heap_layout) (h:vale_heap) : prop0
 
 // Invariant that is always true in Vale procedures
 val mem_inv (h:vale_full_heap) : prop0
+
+// TODO: this is used for the current (trivial) mem_inv; it will probably be removed for the real mem_inv
+val mem_eq_all (h1 h2:vale_heap) : Lemma
+  (requires vale_heap_data_eq h1 h2)
+  (ensures
+    True
+    /\ (forall (#t:base_typ) (b:buffer t).{:pattern (buffer_addr b h1) \/ (buffer_addr b h2)} buffer_addr b h1 == buffer_addr b h2)
+    /\ (forall (#t:base_typ) (b:buffer t).{:pattern (buffer_as_seq h1 b) \/ (buffer_as_seq h2 b)} buffer_as_seq h1 b == buffer_as_seq h2 b)
+    /\ (forall (#t:base_typ) (b:buffer t).{:pattern (buffer_readable h1 b) \/ (buffer_readable h2 b)} buffer_readable h1 b == buffer_readable h2 b)
+    /\ (forall (#t:base_typ) (b:buffer t) (i:int).{:pattern (buffer_read b i h1) \/ (buffer_read b i h2)} buffer_read b i h1 == buffer_read b i h2)
+    /\ (forall (ptr:int).{:pattern (valid_mem64 ptr h1) \/ (valid_mem64 ptr h2)} valid_mem64 ptr h1 == valid_mem64 ptr h2)
+    /\ (forall (ptr:int).{:pattern (writeable_mem64 ptr h1) \/ (writeable_mem64 ptr h2)} writeable_mem64 ptr h1 == writeable_mem64 ptr h2)
+    // /\ (forall (ptr:int).{:pattern (load_mem64 ptr h1) \/ (load_mem64 ptr h2)} load_mem64 ptr h1 == load_mem64 ptr h2)
+    /\ (forall (b:buffer64) (mt:memtaint) (t:taint).{:pattern (valid_taint_buf64 b h1 mt t) \/ (valid_taint_buf64 b h2 mt t)} valid_taint_buf64 b h1 mt t <==> valid_taint_buf64 b h2 mt t) 
+    /\ (forall (b:buffer128) (mt:memtaint) (t:taint).{:pattern (valid_taint_buf128 b h1 mt t) \/ (valid_taint_buf128 b h2 mt t)} valid_taint_buf128 b h1 mt t <==> valid_taint_buf128 b h2 mt t)
+    /\ (forall (#t:base_typ) (b:buffer t) (layout:vale_heap_layout).{:pattern (valid_layout_buffer b layout h1) \/ (valid_layout_buffer b layout h2)} valid_layout_buffer b layout h1 <==> valid_layout_buffer b layout h2)
+  )
+
+// TODO: this is used for the current (trivial) mem_inv; it will probably be removed for the real mem_inv
+val mem_eq_modifies (h1 h1' h2 h2':vale_heap) : Lemma
+  (requires
+    vale_heap_data_eq h1 h2 /\
+    vale_heap_data_eq h1' h2' /\
+    get_heaplet_id h1 == get_heaplet_id h1')
+  (ensures forall (l:loc).{:pattern (modifies l h1 h1') \/ (modifies l h2 h2')}
+    modifies l h2 h2' ==> modifies l h1 h1')
 

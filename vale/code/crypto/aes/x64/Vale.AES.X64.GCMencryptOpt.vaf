@@ -1823,7 +1823,7 @@ procedure Gcm_blocks_stdcall(
         !win ==> r14 == old(r14);
         !win ==> r15 == old(r15);
 {
-    mem_eq_all(mem, heap0);
+    CreateNoHeaplets(); mem_eq_all(mem, heap0);
 
     lemma_hkeys_reqs_pub_priv(s128(heap0, hkeys_b), reverse_bytes_quad32(aes_encrypt_LE(alg, key, Mkfour(0,0,0,0))));
     assert win ==> valid_src_stack64(rsp + 40, stack);
@@ -1974,7 +1974,7 @@ procedure Compute_iv_stdcall(
         !win ==> r14 == old(r14);
         !win ==> r15 == old(r15);
 {
-    mem_eq_all(mem, heap0);
+    CreateNoHeaplets(); mem_eq_all(mem, heap0);
 
     lemma_hkeys_reqs_pub_priv(s128(heap0, hkeys_b), reverse_bytes_quad32(h_LE));
     inline if (win)

@@ -93,6 +93,7 @@ procedure Mem128_lemma(ghost base:va_operand, ghost offset:int, ghost t:taint, g
     requires
         base is OReg;
         valid_src_addr(heap0, b, index);
+        valid_layout_buffer(b, memLayout, heap0);
         valid_taint_buf128(b, heap0, memLayout.vl_taint, t);
         eval_operand(base, this) + offset == buffer_addr(b, heap0) + 16 * index;
     ensures
@@ -512,6 +513,7 @@ procedure Load128_buffer(
     requires
         sse_enabled;
         valid_src_addr(heap0, b, index);
+        valid_layout_buffer(b, memLayout, heap0);
         valid_taint_buf128(b, heap0, memLayout.vl_taint, t);
         src + offset == buffer_addr(b, heap0) + 16 * index;
     ensures
@@ -531,6 +533,7 @@ procedure LoadBe64_buffer128(
     requires
         movbe_enabled;
         valid_src_addr(heap0, b, index);
+        valid_layout_buffer(b, memLayout, heap0);
         valid_taint_buf128(b, heap0, memLayout.vl_taint, t);
         src + offset == buffer_addr(b, heap0) + 16 * index + (if upper then 8 else 0);
     ensures
@@ -554,6 +557,7 @@ procedure Store128_buffer(
     requires
         sse_enabled;
         valid_dst_addr(heap0, b, index);
+        valid_layout_buffer(b, memLayout, heap0);
         valid_taint_buf128(b, heap0, memLayout.vl_taint, t);
         dst + offset == buffer_addr(b, heap0) + 16 * index;
     ensures
@@ -576,6 +580,7 @@ procedure Store64_buffer128(
         heap0;
     requires
         valid_dst_addr(heap0, b, index);
+        valid_layout_buffer(b, memLayout, heap0);
         valid_taint_buf128(b, heap0, memLayout.vl_taint, t);
         dst + offset == buffer_addr(b, heap0) + 16 * index + (if upper then 8 else 0);
     ensures

@@ -47,6 +47,7 @@ let lemma_opr_Mem (s:va_state) (base:va_operand) (offset:int) (b:M.buffer64) (in
     M.mem_inv s.vs_heap /\
     OReg? base /\
     valid_src_addr h b index /\
+    M.valid_layout_buffer b (s.vs_heap.vf_layout) h /\
     M.valid_taint_buf64 b h (full_heap_taint s.vs_heap) t /\
     eval_operand base s + offset == M.buffer_addr b h + 8 * index
   ))
@@ -70,6 +71,7 @@ let lemma_opr_Mem128 (s:va_state) (base:va_operand) (offset:int) (t:taint) (b:M.
     M.mem_inv s.vs_heap /\
     OReg? base /\
     valid_src_addr h b index /\
+    M.valid_layout_buffer b (s.vs_heap.vf_layout) h /\
     M.valid_taint_buf128 b h (full_heap_taint s.vs_heap) t /\
     eval_operand base s + offset == M.buffer_addr b h + 16 * index
   ))

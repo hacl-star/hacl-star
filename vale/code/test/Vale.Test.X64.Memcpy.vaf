@@ -20,16 +20,8 @@ open Vale.X64.InsMem
 procedure Copy16(inline t:taint, ghost bsrc:buffer64, ghost bdst:buffer64)
     requires/ensures
         locs_disjoint(list(loc_buffer(bsrc), loc_buffer(bdst)));
-        buffer_readable(heap0, bsrc);
-        buffer_readable(heap0, bdst);
-        buffer_writeable(bdst);
-        buffer_length(bsrc) == 2;
-        buffer_length(bdst) == 2;
-        rsi == buffer_addr(bsrc, heap0);
-        rdi == buffer_addr(bdst, heap0);
-    requires
-        valid_taint_buf64(bsrc, heap0, memLayout.vl_taint, t);
-        valid_taint_buf64(bdst, heap0, memLayout.vl_taint, t);
+        validSrcAddrs64(heap0, rsi, bsrc, 2, memLayout, t);
+        validDstAddrs64(heap0, rdi, bdst, 2, memLayout, t);
     ensures
         forall(i) 0 <= i && i < 2 ==> buffer64_read(bdst, i, heap0) == buffer64_read(bsrc, i, heap0);
         modifies_mem(loc_buffer(bdst), old(heap0), heap0);
@@ -39,7 +31,6 @@ procedure Copy16(inline t:taint, ghost bsrc:buffer64, ghost bdst:buffer64)
         rax; rcx;
         heap0;
 {
-//    assert{:fast_block} true;
     Load64_buffer(rax, rsi, 0, t, bsrc, 0);
     Load64_buffer(rcx, rsi, 8, t, bsrc, 1);
     Store64_buffer(rdi, rax, 0, t, bdst, 0);

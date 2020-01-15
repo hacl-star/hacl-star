@@ -118,10 +118,8 @@ procedure Fmul(
         //////////////////////////////////////
 
         modifies_buffer_2(dst_b, tmp_b, old(mem), mem);
-        validSrcAddrs64(mem, dst_in, dst_b, 4, memLayout, Secret);
-
 {
-    mem_eq_all(mem, heap0);
+    CreateNoHeaplets(); mem_eq_all(mem, heap0);
 
     Mov64(r15, dst_ptr); // Save dst_ptr that will be clobbered by Fast_multiply
     Fast_multiply(0, tmp_b, inA_b, inB_b);
@@ -196,7 +194,6 @@ procedure Fmul_stdcall(
         //////////////////////////////////////
 
         modifies_buffer_2(dst_b, tmp_b, old(mem), mem);
-        validSrcAddrs64(mem, dst_in, dst_b, 4, memLayout, Secret);
 
         win ==>  rbx == old(rbx);
         win ==>  rbp == old(rbp);
@@ -216,7 +213,7 @@ procedure Fmul_stdcall(
 
         rsp == old(rsp);
 {
-    mem_eq_all(mem, heap0);
+    CreateNoHeaplets(); mem_eq_all(mem, heap0);
 
     Push_Secret(r12);
     Push_Secret(r13);
@@ -336,10 +333,8 @@ procedure Fmul2(
         //////////////////////////////////////
 
         modifies_buffer_2(dst_b, tmp_b, old(mem), mem);
-        validSrcAddrs64(mem, dst_in, dst_b, 4, memLayout, Secret);
-
 {
-    mem_eq_all(mem, heap0);
+    CreateNoHeaplets(); mem_eq_all(mem, heap0);
 
     Mov64(r15, dst_ptr); // Save dst_ptr that will be clobbered by Fast_multiply
     Fast_multiply(0, tmp_b, inA_b, inB_b);
@@ -456,7 +451,7 @@ procedure Fmul2_stdcall(
 
         rsp == old(rsp);
 {
-    mem_eq_all(mem, heap0);
+    CreateNoHeaplets(); mem_eq_all(mem, heap0);
 
     Push_Secret(r12);
     Push_Secret(r13);
@@ -541,7 +536,7 @@ procedure Fsqr(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64)
         modifies_buffer_2(dst_b, tmp_b, old(mem), mem);
 
 {
-    mem_eq_all(mem, heap0);
+    CreateNoHeaplets(); mem_eq_all(mem, heap0);
 
     Mov64(rbx, dst_ptr); // Save dst_ptr that will be clobbered by Fast_sqr
     Fast_sqr(0, tmp_b, inA_b);
@@ -715,7 +710,7 @@ procedure Fsqr2(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64
 
         modifies_buffer_2(dst_b, tmp_b, old(mem), mem);
 {
-    mem_eq_all(mem, heap0);
+    CreateNoHeaplets(); mem_eq_all(mem, heap0);
 
     Mov64(rbx, dst_ptr); // Save dst_ptr that will be clobbered by Fast_sqr
     Fast_sqr(0, tmp_b, inA_b);

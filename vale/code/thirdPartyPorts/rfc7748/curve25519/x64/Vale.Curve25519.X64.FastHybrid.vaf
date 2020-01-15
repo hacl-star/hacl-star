@@ -817,10 +817,9 @@ procedure Fadd(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB_b:buffer64)
         let d := pow2_four(d0, d1, d2, d3);
         d % prime == old(a + b) % prime;
 
-        validSrcAddrs64(mem, dst_ptr, dst_b, 4, memLayout, Secret);
         modifies_buffer(dst_b, old(mem), mem);
 {
-    mem_eq_all(mem, heap0);
+    CreateNoHeaplets(); mem_eq_all(mem, heap0);
 
     Fast_add(inA_b, inB_b);
     assert_by_tactic(
@@ -887,7 +886,6 @@ procedure Fadd_stdcall(
         //////////////////////////////////////
 
         modifies_buffer(dst_b, old(mem), mem);
-        validSrcAddrs64(mem, dst_in, dst_b, 4, memLayout, Secret);
 
         win ==>  rbx == old(rbx);
         win ==>  rbp == old(rbp);
@@ -907,7 +905,7 @@ procedure Fadd_stdcall(
 
         rsp == old(rsp);
 {
-    mem_eq_all(mem, heap0);
+    CreateNoHeaplets(); mem_eq_all(mem, heap0);
 
     // Line up the rest of the arguments
     inline if (win)
@@ -988,10 +986,9 @@ procedure Fsub(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB_b:buffer64)
         let d := pow2_four(d0, d1, d2, d3);
         d % prime == old(a - b) % prime;
 
-        validSrcAddrs64(mem, dst_ptr, dst_b, 4, memLayout, Secret);
         modifies_buffer(dst_b, old(mem), mem);
 {
-    mem_eq_all(mem, heap0);
+    CreateNoHeaplets(); mem_eq_all(mem, heap0);
 
     Fast_sub(inA_b, inB_b);
     Carry_sub_pass();
@@ -1056,7 +1053,6 @@ procedure Fsub_stdcall(
         //////////////////////////////////////
 
         modifies_buffer(dst_b, old(mem), mem);
-        validSrcAddrs64(mem, dst_in, dst_b, 4, memLayout, Secret);
 
         win ==>  rbx == old(rbx);
         win ==>  rbp == old(rbp);
@@ -1076,7 +1072,7 @@ procedure Fsub_stdcall(
 
         rsp == old(rsp);
 {
-    mem_eq_all(mem, heap0);
+    CreateNoHeaplets(); mem_eq_all(mem, heap0);
 
     // Line up the rest of the arguments
     inline if (win)
@@ -1152,10 +1148,9 @@ procedure Fmul1(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB:nat64)
         let d := pow2_four(d0, d1, d2, d3);
         d % prime == old(a * b) % prime;
 
-        validSrcAddrs64(mem, dst_ptr, dst_b, 4, memLayout, Secret);
         modifies_buffer(dst_b, old(mem), mem);
 {
-    mem_eq_all(mem, heap0);
+    CreateNoHeaplets(); mem_eq_all(mem, heap0);
 
     Fast_mul1(0, inA_b);
     lemma_fmul(old(a0), old(a1), old(a2), old(a3), old(b), tmp0, tmp1, tmp2, tmp3, rax);
@@ -1218,7 +1213,6 @@ procedure Fmul1_stdcall(
         //////////////////////////////////////
 
         modifies_buffer(dst_b, old(mem), mem);
-        validSrcAddrs64(mem, dst_in, dst_b, 4, memLayout, Secret);
 
         win ==>  rbx == old(rbx);
         win ==>  rbp == old(rbp);
@@ -1238,7 +1232,7 @@ procedure Fmul1_stdcall(
 
         rsp == old(rsp);
 {
-    mem_eq_all(mem, heap0);
+    CreateNoHeaplets(); mem_eq_all(mem, heap0);
 
     // Store callee-save registers
     Push_Secret(rdi);

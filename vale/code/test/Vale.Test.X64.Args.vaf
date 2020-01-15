@@ -93,7 +93,7 @@ procedure Test(inline win:bool,
         win ==> xmm15 == old(xmm15);
         modifies_mem(loc_none, old(mem), mem); // note: not needed; for demonstration purposes only
 {
-    mem_eq_all(mem, heap0);
+    CreateNoHeaplets(); mem_eq_all(mem, heap0);
 
     Mov64(rax, rbx);
 

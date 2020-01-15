@@ -735,7 +735,7 @@ procedure Gctr_bytes_stdcall(
         !win ==> r14 == old(r14);
         !win ==> r15 == old(r15);
 {
-    mem_eq_all(mem, heap0);
+    CreateNoHeaplets(); mem_eq_all(mem, heap0);
 
     Push_Secret(r15);
     Push_Secret(r14);

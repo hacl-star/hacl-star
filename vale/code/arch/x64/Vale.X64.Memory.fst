@@ -25,6 +25,9 @@ let b8 = IB.b8
 unfold let (.[]) = Map.sel
 unfold let (.[]<-) = Map.upd
 
+let get_heaplet_id h =
+  h.heapletId
+
 let tuint8 = UInt8.t
 let tuint16 = UInt16.t
 let tuint32 = UInt32.t
@@ -83,6 +86,7 @@ let loc_disjoint = M.loc_disjoint
 let loc_includes = M.loc_includes
 let modifies s h h' =
   M.modifies s (_ih h).hs (_ih h').hs /\
+  h.heapletId == h'.heapletId /\
   (_ih h).ptrs == (_ih h').ptrs /\
   (_ih h).addrs == (_ih h').addrs /\
   HST.equal_domains (_ih h).hs (_ih h').hs
@@ -608,6 +612,9 @@ let modifies_valid_taint ty b p h h' memTaint t =
 let modifies_valid_taint64 b p h h' memTaint t = modifies_valid_taint TUInt64 b p h h' memTaint t
 let modifies_valid_taint128 b p h h' memTaint t = modifies_valid_taint TUInt128 b p h h' memTaint t
 
+let modifies_same_heaplet_id l h1 h2 =
+  ()
+
 let valid_taint_bufs (mem:vale_heap) (memTaint:memtaint) (ps:list b8) (ts:b8 -> GTot taint) =
   forall b.{:pattern List.memP b ps} List.memP b ps ==> valid_taint_buf b mem memTaint (ts b)
 
@@ -658,18 +665,6 @@ let rec valid_memtaint (mem:vale_heap) (ps:list b8{IB.list_disjoint_or_eq ps}) (
 let vale_heap_data_eq h1 h2 =
   h1.mh == h2.mh /\ h1.ih == h2.ih
 
-let mem_eq_all h1 h2 =
-  let eq_buffer_as_seq (#t:base_typ) (h1 h2:vale_heap) (b:buffer t) : Lemma
-    (requires vale_heap_data_eq h1 h2)
-    (ensures buffer_as_seq h1 b == buffer_as_seq h2 b) [SMTPat (buffer_as_seq h1 b); SMTPat (buffer_as_seq h2 b)]
-    =
-    assert (Seq.equal (buffer_as_seq h1 b) (buffer_as_seq h2 b))
-  in
-  ()
-
-let mem_eq_modifies h1 h1' h2 h2' =
-  ()
-
 noeq type layout_data : Type0 = {
   vl_buffers:Seq.seq buffer_info;
   vl_mod_loc:loc;
@@ -686,13 +681,10 @@ let valid_layout_data_buffer (t:base_typ) (b:buffer t) (ld:layout_data) (hid:hea
 let valid_layout_buffer_id (t:base_typ) (b:buffer t) (layout:vale_heap_layout) (h_id:option heaplet_id) =
   match h_id with
   | None -> True
-  | Some hid ->
-    layout.vl_inner.vl_heaplets_initialized /\
-    layout.vl_inner.vl_t == layout_data /\
-    valid_layout_data_buffer t b (coerce layout.vl_inner.vl_v) hid
-
-let valid_layout_buffer (#t:base_typ) (b:buffer t) (layout:vale_heap_layout) (h:vale_heap) =
-  valid_layout_buffer_id t b layout h.heapletId
+  | Some hid -> True // TODO:
+//    layout.vl_inner.vl_heaplets_initialized /\
+//    layout.vl_inner.vl_t == layout_data /\
+//    valid_layout_data_buffer t b (coerce layout.vl_inner.vl_v) hid
 
 let inv_heaplet_ids (hs:vale_heaplets) =
   forall (i:heaplet_id).{:pattern Map16.sel hs i} (Map16.sel hs i).heapletId == Some i
@@ -740,9 +732,10 @@ let is_initial_heap layout h =
   not layout.vl_inner.vl_heaplets_initialized
 
 let mem_inv h =
+  h.vf_heap.heapletId == None /\
+  inv_heaplet_ids h.vf_heaplets /\
   vale_heap_data_eq h.vf_heap (Map16.sel h.vf_heaplets 0)
 (*
-  inv_heaplet_ids h.vf_heaplets /\
   (if h.vf_layout.vl_inner.vl_heaplets_initialized
     then
       h.vf_layout.vl_inner.vl_t == layout_data /\
@@ -752,3 +745,17 @@ let mem_inv h =
       h.vf_heaplets == empty_vale_heaplets h.vf_layout.vl_inner.vl_old_heap
   )
 *)
+
+let mem_eq_all h1 h2 =
+  reveal_opaque (`%valid_layout_buffer_id) valid_layout_buffer_id;
+  let eq_buffer_as_seq (#t:base_typ) (h1 h2:vale_heap) (b:buffer t) : Lemma
+    (requires vale_heap_data_eq h1 h2)
+    (ensures buffer_as_seq h1 b == buffer_as_seq h2 b) [SMTPat (buffer_as_seq h1 b); SMTPat (buffer_as_seq h2 b)]
+    =
+    assert (Seq.equal (buffer_as_seq h1 b) (buffer_as_seq h2 b))
+  in
+  ()
+
+let mem_eq_modifies h1 h1' h2 h2' =
+  reveal_opaque (`%valid_layout_buffer_id) valid_layout_buffer_id
+

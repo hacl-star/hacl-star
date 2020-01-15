@@ -764,23 +764,15 @@ procedure Sha_update_bytes_stdcall(
         locs_disjoint(list(loc_buffer(ctx_b), loc_buffer(in_b))) \/ ctx_b == in_b;
         locs_disjoint(list(loc_buffer(ctx_b), loc_buffer(k_b))) \/ ctx_b == k_b;
         locs_disjoint(list(loc_buffer(in_b), loc_buffer(k_b))) \/ in_b == k_b;
-        buffer_readable(mem, ctx_b);
-        buffer_writeable(ctx_b);
-        buffer_readable(mem, in_b);
-        buffer_readable(mem, k_b);
-        valid_taint_buf128(ctx_b, mem, memLayout.vl_taint, Secret);
-        valid_taint_buf128(in_b, mem, memLayout.vl_taint, Secret);
-        valid_taint_buf128(k_b, mem, memLayout.vl_taint, Secret);
-        ctx_ptr == buffer_addr(ctx_b, mem);
-         in_ptr == buffer_addr(in_b, mem);
-          k_ptr == buffer_addr(k_b, mem);
+        validDstAddrs128(mem, ctx_ptr, ctx_b, 2, memLayout, Secret);
+        validSrcAddrs128(mem, in_ptr, in_b, 4 * num, memLayout, Secret);
+        validSrcAddrs128(mem, k_ptr, k_b, 16, memLayout, Secret);
         num_val == num;
 
-        buffer_length(k_b) >= 16;
-        in_ptr + 0x40*num < pow2_64;
+        in_ptr + 0x40 * num < pow2_64;
         buffers_disjoint128(ctx_b, in_b);
         buffer_length(ctx_b) == 2;
-        buffer_length(in_b) == 4*num;
+        buffer_length(in_b) == 4 * num;
 
         k_reqs(buffer128_as_seq(mem, k_b));
 
@@ -822,7 +814,7 @@ procedure Sha_update_bytes_stdcall(
         win ==>  xmm14 == old(xmm14);
         win ==>  xmm15 == old(xmm15);
 {
-    mem_eq_all(mem, heap0);
+    CreateNoHeaplets(); mem_eq_all(mem, heap0);
 
     // Save registers
     inline if (win)
