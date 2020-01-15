@@ -942,15 +942,39 @@ procedure Cswap2(ghost bit_in:nat64, ghost p0_b:buffer64, ghost p1_b:buffer64)
         p1_6 == (if old(bit) = 1 then old_p0_6 else old_p1_6);
         p1_7 == (if old(bit) = 1 then old_p0_7 else old_p1_7);
 {
+    Comment("Invert the polarity of bit to match cmov expectations");
     Add64Wrap(bit, 0xFFFFFFFFFFFFFFFF);
-
+    
+    Newline();
+    Comment("cswap p1[0], p2[0]");
     Cswap_single(0, p0_b, p1_b);
+
+    Newline();
+    Comment("cswap p1[1], p2[1]");
     Cswap_single(1, p0_b, p1_b);
+
+    Newline();
+    Comment("cswap p1[2], p2[2]");
     Cswap_single(2, p0_b, p1_b);
+
+    Newline();
+    Comment("cswap p1[3], p2[3]");
     Cswap_single(3, p0_b, p1_b);
+
+    Newline();
+    Comment("cswap p1[4], p2[4]");
     Cswap_single(4, p0_b, p1_b);
+
+    Newline();
+    Comment("cswap p1[5], p2[5]");
     Cswap_single(5, p0_b, p1_b);
+
+    Newline();
+    Comment("cswap p1[6], p2[6]");
     Cswap_single(6, p0_b, p1_b);
+
+    Newline();
+    Comment("cswap p1[7], p2[7]");
     Cswap_single(7, p0_b, p1_b);
 }
 

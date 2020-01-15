@@ -36,10 +36,12 @@ static inline uint64_t add1_inline (uint64_t *out1, uint64_t *f1, uint64_t f2)
   return carry_r;
 }
 
+// Computes the field addition of two field elements
 static inline void fadd_inline (uint64_t *out1, uint64_t *f1, uint64_t *f2) 
 {
 
   asm volatile(
+    // Compute the raw addition of f1 + f2
     "  movq 0(%0), %%r8;"
     "  addq 0(%2), %%r8;"
     "  movq 8(%0), %%r9;"
@@ -48,9 +50,15 @@ static inline void fadd_inline (uint64_t *out1, uint64_t *f1, uint64_t *f2)
     "  adcxq 16(%2), %%r10;"
     "  movq 24(%0), %%r11;"
     "  adcxq 24(%2), %%r11;"
+
+    /////// Wrap the result back into the field ////// 
+
+    // Step 1: Compute carry*38
     "  mov $0, %%rax;"
     "  mov $38, %0;"
     "  cmovc %0, %%rax;"
+
+    // Step 2: Add carry*38 to the original sum
     "  xor %%rcx, %%rcx;"
     "  add %%rax, %%r8;"
     "  adcx %%rcx, %%r9;"
@@ -59,6 +67,8 @@ static inline void fadd_inline (uint64_t *out1, uint64_t *f1, uint64_t *f2)
     "  movq %%r10, 16(%1);"
     "  adcx %%rcx, %%r11;"
     "  movq %%r11, 24(%1);"
+
+    // Step 3: Fold the carry bit back in; guaranteed not to carry at this point
     "  mov $0, %%rax;"
     "  cmovc %0, %%rax;"
     "  add %%rax, %%r8;"
@@ -69,10 +79,12 @@ static inline void fadd_inline (uint64_t *out1, uint64_t *f1, uint64_t *f2)
   );
 }
 
+// Computes the field substraction of two field elements
 static inline void fsub_inline (uint64_t *out1, uint64_t *f1, uint64_t *f2) 
 {
 
   asm volatile(
+    // Compute the raw substraction of f1-f2
     "  movq 0(%1), %%r8;"
     "  subq 0(%2), %%r8;"
     "  movq 8(%1), %%r9;"
@@ -81,16 +93,26 @@ static inline void fsub_inline (uint64_t *out1, uint64_t *f1, uint64_t *f2)
     "  sbbq 16(%2), %%r10;"
     "  movq 24(%1), %%r11;"
     "  sbbq 24(%2), %%r11;"
+
+    /////// Wrap the result back into the field ////// 
+
+    // Step 1: Compute carry*38
     "  mov $0, %%rax;"
     "  mov $38, %%rcx;"
     "  cmovc %%rcx, %%rax;"
+
+    // Step 2: Substract carry*38 from the original difference
     "  sub %%rax, %%r8;"
     "  sbb $0, %%r9;"
     "  sbb $0, %%r10;"
     "  sbb $0, %%r11;"
+
+    // Step 3: Fold the carry bit back in; guaranteed not to carry at this point
     "  mov $0, %%rax;"
     "  cmovc %%rcx, %%rax;"
     "  sub %%rax, %%r8;"
+
+    // Store the result
     "  movq %%r8, 0(%0);"
     "  movq %%r9, 8(%0);"
     "  movq %%r10, 16(%0);"
@@ -102,13 +124,11 @@ static inline void fsub_inline (uint64_t *out1, uint64_t *f1, uint64_t *f2)
 }
 
 // Computes a field multiplication: out <- f1 * f2
+// Uses the 8-element buffer tmp for intermediate results
 static inline void fmul_inline (uint64_t *tmp, uint64_t *f1, uint64_t *out, uint64_t *f2) 
 {
-  register uint64_t *out_r asm("rdx") = out;
 
   asm volatile(
-    // Save dst_ptr which will be clobbered by the raw multiplication
-    "  mov %%rdx, %%r15;"
 
     /////// Compute the raw multiplication: tmp <- src1 * src2 ////// 
 
@@ -145,14 +165,14 @@ static inline void fmul_inline (uint64_t *tmp, uint64_t *f1, uint64_t *out, uint
     "  mulxq 16(%3), %%r12, %%r13;"    "  adox %%r11, %%r12;"    "  adcx %%r14, %%r12;"    "  movq %%r12, 40(%0);"    "  mov $0, %%r8;"
     "  mulxq 24(%3), %%r14, %%rdx;"    "  adox %%r13, %%r14;"    "  adcx %%rax, %%r14;"    "  movq %%r14, 48(%0);"    "  mov $0, %%rax;"
                                        "  adox %%rdx, %%rax;"    "  adcx %%r8, %%rax;"     "  movq %%rax, 56(%0);"
-    "  mov %0, %1;"
 
-    // Restore dst_ptr
-    "  mov %%r15, %0;"
+    // Line up pointers
+    "  mov %0, %1;"
+    "  mov %2, %0;"
 
     /////// Wrap the result back into the field ////// 
 
-    // Step1: Compute dst + carry == tmp_hi * 38 + tmp_lo
+    // Step 1: Compute dst + carry == tmp_hi * 38 + tmp_lo
     "  mov $38, %%rdx;"
     "  mulxq 32(%1), %%r8, %%r13;"
     "  xor %3, %3;"
@@ -168,9 +188,9 @@ static inline void fmul_inline (uint64_t *tmp, uint64_t *f1, uint64_t *out, uint
     "  adoxq 24(%1), %%r11;"
     "  adcx %3, %%rax;"
     "  adox %3, %%rax;"
-
-    // Step2: Fold the carry back into dst
     "  imul %%rdx, %%rax;"
+
+    // Step 2: Fold the carry back into dst
     "  add %%rax, %%r8;"
     "  adcx %3, %%r9;"
     "  movq %%r9, 8(%0);"
@@ -178,22 +198,29 @@ static inline void fmul_inline (uint64_t *tmp, uint64_t *f1, uint64_t *out, uint
     "  movq %%r10, 16(%0);"
     "  adcx %3, %%r11;"
     "  movq %%r11, 24(%0);"
+
+    // Step 3: Fold the carry bit back in; guaranteed not to carry at this point
     "  mov $0, %%rax;"
     "  cmovc %%rdx, %%rax;"
     "  add %%rax, %%r8;"
     "  movq %%r8, 0(%0);"
-  : "+&r" (tmp), "+&r" (f1), "+&r" (out_r), "+&r" (f2)
+  : "+&r" (tmp), "+&r" (f1), "+&r" (out), "+&r" (f2)
   : 
-  : "%rax", "%r8", "%r9", "%r10", "%r11", "%r12", "%r13", "%r14", "%r15", "memory", "cc"
+  : "%rax", "%rdx", "%r8", "%r9", "%r10", "%r11", "%r12", "%r13", "%r14", "memory", "cc"
   );
 }
 
+// Computes two field multiplications:
+//   out[0] <- f1[0] * f2[0]
+//   out[1] <- f1[1] * f2[1]
+// Uses the 16-element buffer tmp for intermediate results:
 static inline void fmul2_inline (uint64_t *tmp, uint64_t *f1, uint64_t *out1, uint64_t *f2) 
 {
-  register uint64_t *out1_r asm("rdx") = out1;
 
   asm volatile(
-    "  mov %%rdx, %%r15;"
+
+    /////// Compute the raw multiplication tmp[0] <- f1[0] * f2[0] ////// 
+
     // Compute src1[0] * src2
     "  movq 0(%1), %%rdx;"
     "  mulxq 0(%3), %%r8, %%r9;"       "  xor %%r10, %%r10;"     "  movq %%r8, 0(%0);"
@@ -227,6 +254,9 @@ static inline void fmul2_inline (uint64_t *tmp, uint64_t *f1, uint64_t *out1, ui
     "  mulxq 16(%3), %%r12, %%r13;"    "  adox %%r11, %%r12;"    "  adcx %%r14, %%r12;"    "  movq %%r12, 40(%0);"    "  mov $0, %%r8;"
     "  mulxq 24(%3), %%r14, %%rdx;"    "  adox %%r13, %%r14;"    "  adcx %%rax, %%r14;"    "  movq %%r14, 48(%0);"    "  mov $0, %%rax;"
                                        "  adox %%rdx, %%rax;"    "  adcx %%r8, %%rax;"     "  movq %%rax, 56(%0);"
+
+    /////// Compute the raw multiplication tmp[1] <- f1[1] * f2[1] ////// 
+
     // Compute src1[0] * src2
     "  movq 32(%1), %%rdx;"
     "  mulxq 32(%3), %%r8, %%r9;"       "  xor %%r10, %%r10;"     "  movq %%r8, 64(%0);"
@@ -260,9 +290,14 @@ static inline void fmul2_inline (uint64_t *tmp, uint64_t *f1, uint64_t *out1, ui
     "  mulxq 48(%3), %%r12, %%r13;"    "  adox %%r11, %%r12;"    "  adcx %%r14, %%r12;"    "  movq %%r12, 104(%0);"    "  mov $0, %%r8;"
     "  mulxq 56(%3), %%r14, %%rdx;"    "  adox %%r13, %%r14;"    "  adcx %%rax, %%r14;"    "  movq %%r14, 112(%0);"    "  mov $0, %%rax;"
                                        "  adox %%rdx, %%rax;"    "  adcx %%r8, %%rax;"     "  movq %%rax, 120(%0);"
+
+    // Line up pointers
     "  mov %0, %1;"
-    "  mov %%r15, %0;"
-    // Step1: Compute dst + carry == tmp_hi * 38 + tmp_lo
+    "  mov %2, %0;"
+
+    /////// Wrap the results back into the field ////// 
+
+    // Step 1: Compute dst + carry == tmp_hi * 38 + tmp_lo
     "  mov $38, %%rdx;"
     "  mulxq 32(%1), %%r8, %%r13;"
     "  xor %3, %3;"
@@ -278,9 +313,9 @@ static inline void fmul2_inline (uint64_t *tmp, uint64_t *f1, uint64_t *out1, ui
     "  adoxq 24(%1), %%r11;"
     "  adcx %3, %%rax;"
     "  adox %3, %%rax;"
-
-    // Step2: Fold the carry back into dst
     "  imul %%rdx, %%rax;"
+
+    // Step 2: Fold the carry back into dst
     "  add %%rax, %%r8;"
     "  adcx %3, %%r9;"
     "  movq %%r9, 8(%0);"
@@ -288,11 +323,14 @@ static inline void fmul2_inline (uint64_t *tmp, uint64_t *f1, uint64_t *out1, ui
     "  movq %%r10, 16(%0);"
     "  adcx %3, %%r11;"
     "  movq %%r11, 24(%0);"
+
+    // Step 3: Fold the carry bit back in; guaranteed not to carry at this point
     "  mov $0, %%rax;"
     "  cmovc %%rdx, %%rax;"
     "  add %%rax, %%r8;"
     "  movq %%r8, 0(%0);"
-    // Step1: Compute dst + carry == tmp_hi * 38 + tmp_lo
+
+    // Step 1: Compute dst + carry == tmp_hi * 38 + tmp_lo
     "  mov $38, %%rdx;"
     "  mulxq 96(%1), %%r8, %%r13;"
     "  xor %3, %3;"
@@ -308,9 +346,9 @@ static inline void fmul2_inline (uint64_t *tmp, uint64_t *f1, uint64_t *out1, ui
     "  adoxq 88(%1), %%r11;"
     "  adcx %3, %%rax;"
     "  adox %3, %%rax;"
-
-    // Step2: Fold the carry back into dst
     "  imul %%rdx, %%rax;"
+
+    // Step 2: Fold the carry back into dst
     "  add %%rax, %%r8;"
     "  adcx %3, %%r9;"
     "  movq %%r9, 40(%0);"
@@ -318,32 +356,42 @@ static inline void fmul2_inline (uint64_t *tmp, uint64_t *f1, uint64_t *out1, ui
     "  movq %%r10, 48(%0);"
     "  adcx %3, %%r11;"
     "  movq %%r11, 56(%0);"
+
+    // Step 3: Fold the carry bit back in; guaranteed not to carry at this point
     "  mov $0, %%rax;"
     "  cmovc %%rdx, %%rax;"
     "  add %%rax, %%r8;"
     "  movq %%r8, 32(%0);"
-  : "+&r" (tmp), "+&r" (f1), "+&r" (out1_r), "+&r" (f2)
+  : "+&r" (tmp), "+&r" (f1), "+&r" (out1), "+&r" (f2)
   : 
-  : "%rax", "%r8", "%r9", "%r10", "%r11", "%r12", "%r13", "%r14", "%r15", "memory", "cc"
+  : "%rax", "%rdx", "%r8", "%r9", "%r10", "%r11", "%r12", "%r13", "%r14", "memory", "cc"
   );
 }
 
+// Computes the field multiplication of four-element f1 with value in f2
 static inline void fmul1_inline (uint64_t *out1, uint64_t *f1, uint64_t f2) 
 {
   register uint64_t f2_r asm("rdx") = f2;
 
   asm volatile(
-    "  mulxq 0(%2), %%r8, %%rcx;"
-    "  mulxq 8(%2), %%r9, %%r12;"
+    // Compute the raw multiplication of f1*f2
+    "  mulxq 0(%2), %%r8, %%rcx;"      // f1[0]*f2
+    "  mulxq 8(%2), %%r9, %%r12;"      // f1[1]*f2
     "  add %%rcx, %%r9;"
     "  mov $0, %%rcx;"
-    "  mulxq 16(%2), %%r10, %%r13;"
+    "  mulxq 16(%2), %%r10, %%r13;"    // f1[2]*f2
     "  adcx %%r12, %%r10;"
-    "  mulxq 24(%2), %%r11, %%rax;"
+    "  mulxq 24(%2), %%r11, %%rax;"    // f1[3]*f2
     "  adcx %%r13, %%r11;"
     "  adcx %%rcx, %%rax;"
+
+    /////// Wrap the result back into the field ////// 
+
+    // Step 1: Compute carry*38
     "  mov $38, %%rdx;"
     "  imul %%rdx, %%rax;"
+
+    // Step 2: Fold the carry back into dst
     "  add %%rax, %%r8;"
     "  adcx %%rcx, %%r9;"
     "  movq %%r9, 8(%1);"
@@ -351,6 +399,8 @@ static inline void fmul1_inline (uint64_t *out1, uint64_t *f1, uint64_t f2)
     "  movq %%r10, 16(%1);"
     "  adcx %%rcx, %%r11;"
     "  movq %%r11, 24(%1);"
+
+    // Step 3: Fold the carry bit back in; guaranteed not to carry at this point
     "  mov $0, %%rax;"
     "  cmovc %%rdx, %%rax;"
     "  add %%rax, %%r8;"
@@ -361,11 +411,15 @@ static inline void fmul1_inline (uint64_t *out1, uint64_t *f1, uint64_t f2)
   );
 }
 
+// Computes p1 <- bit ? p2 : p1 in constant time
 static inline void cswap2_inline (uint64_t bit, uint64_t *p1, uint64_t *p2) 
 {
 
   asm volatile(
+    // Invert the polarity of bit to match cmov expectations
     "  add $18446744073709551615, %0;"
+
+    // cswap p1[0], p2[0]
     "  movq 0(%1), %%r8;"
     "  movq 0(%2), %%r9;"
     "  mov %%r8, %%r10;"
@@ -373,6 +427,8 @@ static inline void cswap2_inline (uint64_t bit, uint64_t *p1, uint64_t *p2)
     "  cmovc %%r10, %%r9;"
     "  movq %%r8, 0(%1);"
     "  movq %%r9, 0(%2);"
+
+    // cswap p1[1], p2[1]
     "  movq 8(%1), %%r8;"
     "  movq 8(%2), %%r9;"
     "  mov %%r8, %%r10;"
@@ -380,6 +436,8 @@ static inline void cswap2_inline (uint64_t bit, uint64_t *p1, uint64_t *p2)
     "  cmovc %%r10, %%r9;"
     "  movq %%r8, 8(%1);"
     "  movq %%r9, 8(%2);"
+
+    // cswap p1[2], p2[2]
     "  movq 16(%1), %%r8;"
     "  movq 16(%2), %%r9;"
     "  mov %%r8, %%r10;"
@@ -387,6 +445,8 @@ static inline void cswap2_inline (uint64_t bit, uint64_t *p1, uint64_t *p2)
     "  cmovc %%r10, %%r9;"
     "  movq %%r8, 16(%1);"
     "  movq %%r9, 16(%2);"
+
+    // cswap p1[3], p2[3]
     "  movq 24(%1), %%r8;"
     "  movq 24(%2), %%r9;"
     "  mov %%r8, %%r10;"
@@ -394,6 +454,8 @@ static inline void cswap2_inline (uint64_t bit, uint64_t *p1, uint64_t *p2)
     "  cmovc %%r10, %%r9;"
     "  movq %%r8, 24(%1);"
     "  movq %%r9, 24(%2);"
+
+    // cswap p1[4], p2[4]
     "  movq 32(%1), %%r8;"
     "  movq 32(%2), %%r9;"
     "  mov %%r8, %%r10;"
@@ -401,6 +463,8 @@ static inline void cswap2_inline (uint64_t bit, uint64_t *p1, uint64_t *p2)
     "  cmovc %%r10, %%r9;"
     "  movq %%r8, 32(%1);"
     "  movq %%r9, 32(%2);"
+
+    // cswap p1[5], p2[5]
     "  movq 40(%1), %%r8;"
     "  movq 40(%2), %%r9;"
     "  mov %%r8, %%r10;"
@@ -408,6 +472,8 @@ static inline void cswap2_inline (uint64_t bit, uint64_t *p1, uint64_t *p2)
     "  cmovc %%r10, %%r9;"
     "  movq %%r8, 40(%1);"
     "  movq %%r9, 40(%2);"
+
+    // cswap p1[6], p2[6]
     "  movq 48(%1), %%r8;"
     "  movq 48(%2), %%r9;"
     "  mov %%r8, %%r10;"
@@ -415,6 +481,8 @@ static inline void cswap2_inline (uint64_t bit, uint64_t *p1, uint64_t *p2)
     "  cmovc %%r10, %%r9;"
     "  movq %%r8, 48(%1);"
     "  movq %%r9, 48(%2);"
+
+    // cswap p1[7], p2[7]
     "  movq 56(%1), %%r8;"
     "  movq 56(%2), %%r9;"
     "  mov %%r8, %%r10;"
@@ -428,28 +496,27 @@ static inline void cswap2_inline (uint64_t bit, uint64_t *p1, uint64_t *p2)
   );
 }
 
-static inline void fsqr_inline (uint64_t *tmp, uint64_t *f1, uint64_t *out1) 
+// Computes the square of a field element: out <- f * f
+// Uses the 8-element buffer tmp for intermediate results
+static inline void fsqr_inline (uint64_t *tmp, uint64_t *f, uint64_t *out) 
 {
-  register uint64_t *out1_r asm("rdx") = out1;
 
   asm volatile(
-    "  mov %%rdx, %%rbx;"
-    "  movq 0(%1), %%rdx;"
-    "  mulxq 8(%1), %%r8, %%r14;"
-    "  xor %%r15, %%r15;"
-    "  mulxq 16(%1), %%r9, %%r10;"
-    "  adcx %%r14, %%r9;"
-    "  mulxq 24(%1), %%rax, %%rcx;"
-    "  adcx %%rax, %%r10;"
-    "  movq 24(%1), %%rdx;"
-    "  mulxq 8(%1), %%r11, %%r12;"
-    "  adcx %%rcx, %%r11;"
-    "  mulxq 16(%1), %%rax, %%r13;"
-    "  adcx %%rax, %%r12;"
-    "  movq 8(%1), %%rdx;"
-    "  adcx %%r15, %%r13;"
-    "  mulxq 16(%1), %%rax, %%rcx;"
-    "  mov $0, %%r14;"
+
+    /////// Compute the raw multiplication: tmp <- f * f ////// 
+
+    // Step 1: Compute all partial products
+    "  movq 0(%1), %%rdx;"                                       // f[0]
+    "  mulxq 8(%1), %%r8, %%r14;"      "  xor %%r15, %%r15;"     // f[1]*f[0]
+    "  mulxq 16(%1), %%r9, %%r10;"     "  adcx %%r14, %%r9;"     // f[2]*f[0]
+    "  mulxq 24(%1), %%rax, %%rcx;"    "  adcx %%rax, %%r10;"    // f[3]*f[0]
+    "  movq 24(%1), %%rdx;"                                      // f[3]
+    "  mulxq 8(%1), %%r11, %%r12;"     "  adcx %%rcx, %%r11;"    // f[1]*f[3]
+    "  mulxq 16(%1), %%rax, %%r13;"    "  adcx %%rax, %%r12;"    // f[2]*f[3]
+    "  movq 8(%1), %%rdx;"             "  adcx %%r15, %%r13;"    // f1
+    "  mulxq 16(%1), %%rax, %%rcx;"    "  mov $0, %%r14;"        // f[2]*f[1]
+
+    // Step 2: Compute two parallel carry chains
     "  xor %%r15, %%r15;"
     "  adox %%rax, %%r10;"
     "  adcx %%r8, %%r8;"
@@ -463,32 +530,28 @@ static inline void fsqr_inline (uint64_t *tmp, uint64_t *f1, uint64_t *out1)
     "  adcx %%r12, %%r12;"
     "  adcx %%r13, %%r13;"
     "  adcx %%r14, %%r14;"
-    "  movq 0(%1), %%rdx;"
-    "  mulx %%rdx, %%rax, %%rcx;"
-    "  movq %%rax, 0(%0);"
-    "  add %%rcx, %%r8;"
-    "  movq %%r8, 8(%0);"
-    "  movq 8(%1), %%rdx;"
-    "  mulx %%rdx, %%rax, %%rcx;"
-    "  adcx %%rax, %%r9;"
-    "  movq %%r9, 16(%0);"
-    "  adcx %%rcx, %%r10;"
-    "  movq %%r10, 24(%0);"
-    "  movq 16(%1), %%rdx;"
-    "  mulx %%rdx, %%rax, %%rcx;"
-    "  adcx %%rax, %%r11;"
-    "  movq %%r11, 32(%0);"
-    "  adcx %%rcx, %%r12;"
-    "  movq %%r12, 40(%0);"
-    "  movq 24(%1), %%rdx;"
-    "  mulx %%rdx, %%rax, %%rcx;"
-    "  adcx %%rax, %%r13;"
-    "  movq %%r13, 48(%0);"
-    "  adcx %%rcx, %%r14;"
-    "  movq %%r14, 56(%0);"
+
+    // Step 3: Compute intermediate squares
+    "  movq 0(%1), %%rdx;"     "  mulx %%rdx, %%rax, %%rcx;"    // f[0]^2
+                               "  movq %%rax, 0(%0);"
+    "  add %%rcx, %%r8;"       "  movq %%r8, 8(%0);"
+    "  movq 8(%1), %%rdx;"     "  mulx %%rdx, %%rax, %%rcx;"    // f[1]^2
+    "  adcx %%rax, %%r9;"      "  movq %%r9, 16(%0);"
+    "  adcx %%rcx, %%r10;"     "  movq %%r10, 24(%0);"
+    "  movq 16(%1), %%rdx;"    "  mulx %%rdx, %%rax, %%rcx;"    // f[2]^2
+    "  adcx %%rax, %%r11;"     "  movq %%r11, 32(%0);"
+    "  adcx %%rcx, %%r12;"     "  movq %%r12, 40(%0);"
+    "  movq 24(%1), %%rdx;"    "  mulx %%rdx, %%rax, %%rcx;"    // f[3]^2
+    "  adcx %%rax, %%r13;"     "  movq %%r13, 48(%0);"
+    "  adcx %%rcx, %%r14;"     "  movq %%r14, 56(%0);"
+
+    // Line up pointers
     "  mov %0, %1;"
-    "  mov %%rbx, %0;"
-    // Step1: Compute dst + carry == tmp_hi * 38 + tmp_lo
+    "  mov %2, %0;"
+
+    /////// Wrap the result back into the field ////// 
+
+    // Step 1: Compute dst + carry == tmp_hi * 38 + tmp_lo
     "  mov $38, %%rdx;"
     "  mulxq 32(%1), %%r8, %%r13;"
     "  xor %%rcx, %%rcx;"
@@ -504,9 +567,9 @@ static inline void fsqr_inline (uint64_t *tmp, uint64_t *f1, uint64_t *out1)
     "  adoxq 24(%1), %%r11;"
     "  adcx %%rcx, %%rax;"
     "  adox %%rcx, %%rax;"
-
-    // Step2: Fold the carry back into dst
     "  imul %%rdx, %%rax;"
+
+    // Step 2: Fold the carry back into dst
     "  add %%rax, %%r8;"
     "  adcx %%rcx, %%r9;"
     "  movq %%r9, 8(%0);"
@@ -514,38 +577,38 @@ static inline void fsqr_inline (uint64_t *tmp, uint64_t *f1, uint64_t *out1)
     "  movq %%r10, 16(%0);"
     "  adcx %%rcx, %%r11;"
     "  movq %%r11, 24(%0);"
+
+    // Step 3: Fold the carry bit back in; guaranteed not to carry at this point
     "  mov $0, %%rax;"
     "  cmovc %%rdx, %%rax;"
     "  add %%rax, %%r8;"
     "  movq %%r8, 0(%0);"
-  : "+&r" (tmp), "+&r" (f1), "+&r" (out1_r)
+  : "+&r" (tmp), "+&r" (f), "+&r" (out)
   : 
-  : "%rax", "%rbx", "%rcx", "%r8", "%r9", "%r10", "%r11", "%r12", "%r13", "%r14", "%r15", "memory", "cc"
+  : "%rax", "%rcx", "%rdx", "%r8", "%r9", "%r10", "%r11", "%r12", "%r13", "%r14", "%r15", "memory", "cc"
   );
 }
 
+// Computes two field squarings:
+//   out[0] <- f[0] * f[0]
+//   out[1] <- f[1] * f[1]
+// Uses the 16-element buffer tmp for intermediate results
 static inline void fsqr2_inline (uint64_t *tmp, uint64_t *f, uint64_t *out1) 
 {
-  register uint64_t *out1_r asm("rdx") = out1;
 
   asm volatile(
-    "  mov %%rdx, %%rbx;"
-    "  movq 0(%1), %%rdx;"
-    "  mulxq 8(%1), %%r8, %%r14;"
-    "  xor %%r15, %%r15;"
-    "  mulxq 16(%1), %%r9, %%r10;"
-    "  adcx %%r14, %%r9;"
-    "  mulxq 24(%1), %%rax, %%rcx;"
-    "  adcx %%rax, %%r10;"
-    "  movq 24(%1), %%rdx;"
-    "  mulxq 8(%1), %%r11, %%r12;"
-    "  adcx %%rcx, %%r11;"
-    "  mulxq 16(%1), %%rax, %%r13;"
-    "  adcx %%rax, %%r12;"
-    "  movq 8(%1), %%rdx;"
-    "  adcx %%r15, %%r13;"
-    "  mulxq 16(%1), %%rax, %%rcx;"
-    "  mov $0, %%r14;"
+    // Step 1: Compute all partial products
+    "  movq 0(%1), %%rdx;"                                       // f[0]
+    "  mulxq 8(%1), %%r8, %%r14;"      "  xor %%r15, %%r15;"     // f[1]*f[0]
+    "  mulxq 16(%1), %%r9, %%r10;"     "  adcx %%r14, %%r9;"     // f[2]*f[0]
+    "  mulxq 24(%1), %%rax, %%rcx;"    "  adcx %%rax, %%r10;"    // f[3]*f[0]
+    "  movq 24(%1), %%rdx;"                                      // f[3]
+    "  mulxq 8(%1), %%r11, %%r12;"     "  adcx %%rcx, %%r11;"    // f[1]*f[3]
+    "  mulxq 16(%1), %%rax, %%r13;"    "  adcx %%rax, %%r12;"    // f[2]*f[3]
+    "  movq 8(%1), %%rdx;"             "  adcx %%r15, %%r13;"    // f1
+    "  mulxq 16(%1), %%rax, %%rcx;"    "  mov $0, %%r14;"        // f[2]*f[1]
+
+    // Step 2: Compute two parallel carry chains
     "  xor %%r15, %%r15;"
     "  adox %%rax, %%r10;"
     "  adcx %%r8, %%r8;"
@@ -559,45 +622,33 @@ static inline void fsqr2_inline (uint64_t *tmp, uint64_t *f, uint64_t *out1)
     "  adcx %%r12, %%r12;"
     "  adcx %%r13, %%r13;"
     "  adcx %%r14, %%r14;"
-    "  movq 0(%1), %%rdx;"
-    "  mulx %%rdx, %%rax, %%rcx;"
-    "  movq %%rax, 0(%0);"
-    "  add %%rcx, %%r8;"
-    "  movq %%r8, 8(%0);"
-    "  movq 8(%1), %%rdx;"
-    "  mulx %%rdx, %%rax, %%rcx;"
-    "  adcx %%rax, %%r9;"
-    "  movq %%r9, 16(%0);"
-    "  adcx %%rcx, %%r10;"
-    "  movq %%r10, 24(%0);"
-    "  movq 16(%1), %%rdx;"
-    "  mulx %%rdx, %%rax, %%rcx;"
-    "  adcx %%rax, %%r11;"
-    "  movq %%r11, 32(%0);"
-    "  adcx %%rcx, %%r12;"
-    "  movq %%r12, 40(%0);"
-    "  movq 24(%1), %%rdx;"
-    "  mulx %%rdx, %%rax, %%rcx;"
-    "  adcx %%rax, %%r13;"
-    "  movq %%r13, 48(%0);"
-    "  adcx %%rcx, %%r14;"
-    "  movq %%r14, 56(%0);"
-    "  movq 32(%1), %%rdx;"
-    "  mulxq 40(%1), %%r8, %%r14;"
-    "  xor %%r15, %%r15;"
-    "  mulxq 48(%1), %%r9, %%r10;"
-    "  adcx %%r14, %%r9;"
-    "  mulxq 56(%1), %%rax, %%rcx;"
-    "  adcx %%rax, %%r10;"
-    "  movq 56(%1), %%rdx;"
-    "  mulxq 40(%1), %%r11, %%r12;"
-    "  adcx %%rcx, %%r11;"
-    "  mulxq 48(%1), %%rax, %%r13;"
-    "  adcx %%rax, %%r12;"
-    "  movq 40(%1), %%rdx;"
-    "  adcx %%r15, %%r13;"
-    "  mulxq 48(%1), %%rax, %%rcx;"
-    "  mov $0, %%r14;"
+
+    // Step 3: Compute intermediate squares
+    "  movq 0(%1), %%rdx;"     "  mulx %%rdx, %%rax, %%rcx;"    // f[0]^2
+                               "  movq %%rax, 0(%0);"
+    "  add %%rcx, %%r8;"       "  movq %%r8, 8(%0);"
+    "  movq 8(%1), %%rdx;"     "  mulx %%rdx, %%rax, %%rcx;"    // f[1]^2
+    "  adcx %%rax, %%r9;"      "  movq %%r9, 16(%0);"
+    "  adcx %%rcx, %%r10;"     "  movq %%r10, 24(%0);"
+    "  movq 16(%1), %%rdx;"    "  mulx %%rdx, %%rax, %%rcx;"    // f[2]^2
+    "  adcx %%rax, %%r11;"     "  movq %%r11, 32(%0);"
+    "  adcx %%rcx, %%r12;"     "  movq %%r12, 40(%0);"
+    "  movq 24(%1), %%rdx;"    "  mulx %%rdx, %%rax, %%rcx;"    // f[3]^2
+    "  adcx %%rax, %%r13;"     "  movq %%r13, 48(%0);"
+    "  adcx %%rcx, %%r14;"     "  movq %%r14, 56(%0);"
+
+    // Step 1: Compute all partial products
+    "  movq 32(%1), %%rdx;"                                       // f[0]
+    "  mulxq 40(%1), %%r8, %%r14;"      "  xor %%r15, %%r15;"     // f[1]*f[0]
+    "  mulxq 48(%1), %%r9, %%r10;"     "  adcx %%r14, %%r9;"     // f[2]*f[0]
+    "  mulxq 56(%1), %%rax, %%rcx;"    "  adcx %%rax, %%r10;"    // f[3]*f[0]
+    "  movq 56(%1), %%rdx;"                                      // f[3]
+    "  mulxq 40(%1), %%r11, %%r12;"     "  adcx %%rcx, %%r11;"    // f[1]*f[3]
+    "  mulxq 48(%1), %%rax, %%r13;"    "  adcx %%rax, %%r12;"    // f[2]*f[3]
+    "  movq 40(%1), %%rdx;"             "  adcx %%r15, %%r13;"    // f1
+    "  mulxq 48(%1), %%rax, %%rcx;"    "  mov $0, %%r14;"        // f[2]*f[1]
+
+    // Step 2: Compute two parallel carry chains
     "  xor %%r15, %%r15;"
     "  adox %%rax, %%r10;"
     "  adcx %%r8, %%r8;"
@@ -611,32 +662,26 @@ static inline void fsqr2_inline (uint64_t *tmp, uint64_t *f, uint64_t *out1)
     "  adcx %%r12, %%r12;"
     "  adcx %%r13, %%r13;"
     "  adcx %%r14, %%r14;"
-    "  movq 32(%1), %%rdx;"
-    "  mulx %%rdx, %%rax, %%rcx;"
-    "  movq %%rax, 64(%0);"
-    "  add %%rcx, %%r8;"
-    "  movq %%r8, 72(%0);"
-    "  movq 40(%1), %%rdx;"
-    "  mulx %%rdx, %%rax, %%rcx;"
-    "  adcx %%rax, %%r9;"
-    "  movq %%r9, 80(%0);"
-    "  adcx %%rcx, %%r10;"
-    "  movq %%r10, 88(%0);"
-    "  movq 48(%1), %%rdx;"
-    "  mulx %%rdx, %%rax, %%rcx;"
-    "  adcx %%rax, %%r11;"
-    "  movq %%r11, 96(%0);"
-    "  adcx %%rcx, %%r12;"
-    "  movq %%r12, 104(%0);"
-    "  movq 56(%1), %%rdx;"
-    "  mulx %%rdx, %%rax, %%rcx;"
-    "  adcx %%rax, %%r13;"
-    "  movq %%r13, 112(%0);"
-    "  adcx %%rcx, %%r14;"
-    "  movq %%r14, 120(%0);"
+
+    // Step 3: Compute intermediate squares
+    "  movq 32(%1), %%rdx;"     "  mulx %%rdx, %%rax, %%rcx;"    // f[0]^2
+                               "  movq %%rax, 64(%0);"
+    "  add %%rcx, %%r8;"       "  movq %%r8, 72(%0);"
+    "  movq 40(%1), %%rdx;"     "  mulx %%rdx, %%rax, %%rcx;"    // f[1]^2
+    "  adcx %%rax, %%r9;"      "  movq %%r9, 80(%0);"
+    "  adcx %%rcx, %%r10;"     "  movq %%r10, 88(%0);"
+    "  movq 48(%1), %%rdx;"    "  mulx %%rdx, %%rax, %%rcx;"    // f[2]^2
+    "  adcx %%rax, %%r11;"     "  movq %%r11, 96(%0);"
+    "  adcx %%rcx, %%r12;"     "  movq %%r12, 104(%0);"
+    "  movq 56(%1), %%rdx;"    "  mulx %%rdx, %%rax, %%rcx;"    // f[3]^2
+    "  adcx %%rax, %%r13;"     "  movq %%r13, 112(%0);"
+    "  adcx %%rcx, %%r14;"     "  movq %%r14, 120(%0);"
+
+    // Line up pointers
     "  mov %0, %1;"
-    "  mov %%rbx, %0;"
-    // Step1: Compute dst + carry == tmp_hi * 38 + tmp_lo
+    "  mov %2, %0;"
+
+    // Step 1: Compute dst + carry == tmp_hi * 38 + tmp_lo
     "  mov $38, %%rdx;"
     "  mulxq 32(%1), %%r8, %%r13;"
     "  xor %%rcx, %%rcx;"
@@ -652,9 +697,9 @@ static inline void fsqr2_inline (uint64_t *tmp, uint64_t *f, uint64_t *out1)
     "  adoxq 24(%1), %%r11;"
     "  adcx %%rcx, %%rax;"
     "  adox %%rcx, %%rax;"
-
-    // Step2: Fold the carry back into dst
     "  imul %%rdx, %%rax;"
+
+    // Step 2: Fold the carry back into dst
     "  add %%rax, %%r8;"
     "  adcx %%rcx, %%r9;"
     "  movq %%r9, 8(%0);"
@@ -662,11 +707,14 @@ static inline void fsqr2_inline (uint64_t *tmp, uint64_t *f, uint64_t *out1)
     "  movq %%r10, 16(%0);"
     "  adcx %%rcx, %%r11;"
     "  movq %%r11, 24(%0);"
+
+    // Step 3: Fold the carry bit back in; guaranteed not to carry at this point
     "  mov $0, %%rax;"
     "  cmovc %%rdx, %%rax;"
     "  add %%rax, %%r8;"
     "  movq %%r8, 0(%0);"
-    // Step1: Compute dst + carry == tmp_hi * 38 + tmp_lo
+
+    // Step 1: Compute dst + carry == tmp_hi * 38 + tmp_lo
     "  mov $38, %%rdx;"
     "  mulxq 96(%1), %%r8, %%r13;"
     "  xor %%rcx, %%rcx;"
@@ -682,9 +730,9 @@ static inline void fsqr2_inline (uint64_t *tmp, uint64_t *f, uint64_t *out1)
     "  adoxq 88(%1), %%r11;"
     "  adcx %%rcx, %%rax;"
     "  adox %%rcx, %%rax;"
-
-    // Step2: Fold the carry back into dst
     "  imul %%rdx, %%rax;"
+
+    // Step 2: Fold the carry back into dst
     "  add %%rax, %%r8;"
     "  adcx %%rcx, %%r9;"
     "  movq %%r9, 40(%0);"
@@ -692,13 +740,15 @@ static inline void fsqr2_inline (uint64_t *tmp, uint64_t *f, uint64_t *out1)
     "  movq %%r10, 48(%0);"
     "  adcx %%rcx, %%r11;"
     "  movq %%r11, 56(%0);"
+
+    // Step 3: Fold the carry bit back in; guaranteed not to carry at this point
     "  mov $0, %%rax;"
     "  cmovc %%rdx, %%rax;"
     "  add %%rax, %%r8;"
     "  movq %%r8, 32(%0);"
-  : "+&r" (tmp), "+&r" (f), "+&r" (out1_r)
+  : "+&r" (tmp), "+&r" (f), "+&r" (out1)
   : 
-  : "%rax", "%rbx", "%rcx", "%r8", "%r9", "%r10", "%r11", "%r12", "%r13", "%r14", "%r15", "memory", "cc"
+  : "%rax", "%rcx", "%rdx", "%r8", "%r9", "%r10", "%r11", "%r12", "%r13", "%r14", "%r15", "memory", "cc"
   );
 }
 

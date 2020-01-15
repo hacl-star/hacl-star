@@ -185,7 +185,8 @@ let fmul_inline tmp f1 out f2 =
 #pop-options
 
 let fmul_comments : list string =
-  ["Computes a field multiplication: out <- f1 * f2"]
+  ["Computes a field multiplication: out <- f1 * f2";
+   "Uses the 8-element buffer tmp for intermediate results"]
 
 let fmul_names (n:nat) =
   match n with
@@ -306,7 +307,11 @@ let fmul2_inline tmp f1 out f2 =
 
 #pop-options
 
-let fmul2_comments : list string = []
+let fmul2_comments : list string = [
+  "Computes two field multiplications:";
+  "  out[0] <- f1[0] * f2[0]";
+  "  out[1] <- f1[1] * f2[1]";
+  "Uses the 16-element buffer tmp for intermediate results:"]
 
 let fmul2_names (n:nat) =
   match n with
@@ -441,7 +446,8 @@ let fmul1_inline out f1 f2
     let x, _ = lowstar_fmul1_normal_t out f1 f2 () in
     ()
 
-let fmul1_comments : list string = []
+let fmul1_comments : list string = 
+  ["Computes the field multiplication of four-element f1 with value in f2"]
 
 let fmul1_names (n:nat) =
   match n with

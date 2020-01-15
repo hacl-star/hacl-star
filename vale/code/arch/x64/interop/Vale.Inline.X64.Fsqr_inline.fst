@@ -169,13 +169,15 @@ let fsqr_inline tmp f1 out =
     let x, _ = lowstar_Fsqr_normal_t tmp f1 out () in
     ()
 
-let fsqr_comments : list string = []
+let fsqr_comments : list string = 
+  ["Computes the square of a field element: out <- f * f";
+   "Uses the 8-element buffer tmp for intermediate results"]
 
 let fsqr_names (n:nat) =
   match n with
   | 0 -> "tmp"
-  | 1 -> "f1"
-  | 2 -> "out1"
+  | 1 -> "f"
+  | 2 -> "out"
   | _ -> ""
 
 let fsqr_code_inline () : FStar.All.ML int =
@@ -280,7 +282,12 @@ let fsqr2_inline tmp f1 out =
     let x, _ = lowstar_Fsqr2_normal_t tmp f1 out () in
     ()
 
-let fsqr2_comments : list string = []
+let fsqr2_comments : list string = 
+  ["Computes two field squarings:";
+   "  out[0] <- f[0] * f[0]";
+   "  out[1] <- f[1] * f[1]";
+   "Uses the 16-element buffer tmp for intermediate results"
+  ]
 
 let fsqr2_names (n:nat) : string =
   match n with

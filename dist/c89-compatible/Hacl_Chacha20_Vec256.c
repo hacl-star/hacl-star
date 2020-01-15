@@ -24,7 +24,7 @@
 
 #include "Hacl_Chacha20_Vec256.h"
 
-inline static void double_round_256(Lib_IntVector_Intrinsics_vec256 *st)
+inline static void Hacl_Chacha20_Vec256_double_round_256(Lib_IntVector_Intrinsics_vec256 *st)
 {
   Lib_IntVector_Intrinsics_vec256 std0;
   Lib_IntVector_Intrinsics_vec256 std1;
@@ -157,7 +157,7 @@ inline static void double_round_256(Lib_IntVector_Intrinsics_vec256 *st)
 }
 
 inline static void
-chacha20_core_256(
+Hacl_Chacha20_Vec256_chacha20_core_256(
   Lib_IntVector_Intrinsics_vec256 *k,
   Lib_IntVector_Intrinsics_vec256 *ctx,
   uint32_t ctr
@@ -169,16 +169,16 @@ chacha20_core_256(
   ctr_u32 = (uint32_t)8U * ctr;
   cv = Lib_IntVector_Intrinsics_vec256_load32(ctr_u32);
   k[12U] = Lib_IntVector_Intrinsics_vec256_add32(k[12U], cv);
-  double_round_256(k);
-  double_round_256(k);
-  double_round_256(k);
-  double_round_256(k);
-  double_round_256(k);
-  double_round_256(k);
-  double_round_256(k);
-  double_round_256(k);
-  double_round_256(k);
-  double_round_256(k);
+  Hacl_Chacha20_Vec256_double_round_256(k);
+  Hacl_Chacha20_Vec256_double_round_256(k);
+  Hacl_Chacha20_Vec256_double_round_256(k);
+  Hacl_Chacha20_Vec256_double_round_256(k);
+  Hacl_Chacha20_Vec256_double_round_256(k);
+  Hacl_Chacha20_Vec256_double_round_256(k);
+  Hacl_Chacha20_Vec256_double_round_256(k);
+  Hacl_Chacha20_Vec256_double_round_256(k);
+  Hacl_Chacha20_Vec256_double_round_256(k);
+  Hacl_Chacha20_Vec256_double_round_256(k);
   {
     uint32_t i;
     for (i = (uint32_t)0U; i < (uint32_t)16U; i = i + (uint32_t)1U)
@@ -192,7 +192,12 @@ chacha20_core_256(
 }
 
 inline static void
-chacha20_init_256(Lib_IntVector_Intrinsics_vec256 *ctx, uint8_t *k, uint8_t *n1, uint32_t ctr)
+Hacl_Chacha20_Vec256_chacha20_init_256(
+  Lib_IntVector_Intrinsics_vec256 *ctx,
+  uint8_t *k,
+  uint8_t *n1,
+  uint32_t ctr
+)
 {
   uint32_t ctx1[16U] = { 0U };
   uint32_t *uu____0 = ctx1;
@@ -279,7 +284,7 @@ Hacl_Chacha20_Vec256_chacha20_encrypt_256(
     uint32_t rem1;
     uint32_t nb;
     uint32_t rem2;
-    chacha20_init_256(ctx, key, n1, ctr);
+    Hacl_Chacha20_Vec256_chacha20_init_256(ctx, key, n1, ctr);
     rem1 = len % (uint32_t)512U;
     nb = len / (uint32_t)512U;
     rem2 = len % (uint32_t)512U;
@@ -295,7 +300,7 @@ Hacl_Chacha20_Vec256_chacha20_encrypt_256(
           for (_i = 0U; _i < (uint32_t)16U; ++_i)
             k[_i] = Lib_IntVector_Intrinsics_vec256_zero;
         }
-        chacha20_core_256(k, ctx, i);
+        Hacl_Chacha20_Vec256_chacha20_core_256(k, ctx, i);
         {
           Lib_IntVector_Intrinsics_vec256 v00 = k[0U];
           Lib_IntVector_Intrinsics_vec256 v16 = k[1U];
@@ -467,7 +472,7 @@ Hacl_Chacha20_Vec256_chacha20_encrypt_256(
           for (_i = 0U; _i < (uint32_t)16U; ++_i)
             k[_i] = Lib_IntVector_Intrinsics_vec256_zero;
         }
-        chacha20_core_256(k, ctx, nb);
+        Hacl_Chacha20_Vec256_chacha20_core_256(k, ctx, nb);
         {
           Lib_IntVector_Intrinsics_vec256 v00 = k[0U];
           Lib_IntVector_Intrinsics_vec256 v16 = k[1U];
@@ -650,7 +655,7 @@ Hacl_Chacha20_Vec256_chacha20_decrypt_256(
     uint32_t rem1;
     uint32_t nb;
     uint32_t rem2;
-    chacha20_init_256(ctx, key, n1, ctr);
+    Hacl_Chacha20_Vec256_chacha20_init_256(ctx, key, n1, ctr);
     rem1 = len % (uint32_t)512U;
     nb = len / (uint32_t)512U;
     rem2 = len % (uint32_t)512U;
@@ -666,7 +671,7 @@ Hacl_Chacha20_Vec256_chacha20_decrypt_256(
           for (_i = 0U; _i < (uint32_t)16U; ++_i)
             k[_i] = Lib_IntVector_Intrinsics_vec256_zero;
         }
-        chacha20_core_256(k, ctx, i);
+        Hacl_Chacha20_Vec256_chacha20_core_256(k, ctx, i);
         {
           Lib_IntVector_Intrinsics_vec256 v00 = k[0U];
           Lib_IntVector_Intrinsics_vec256 v16 = k[1U];
@@ -838,7 +843,7 @@ Hacl_Chacha20_Vec256_chacha20_decrypt_256(
           for (_i = 0U; _i < (uint32_t)16U; ++_i)
             k[_i] = Lib_IntVector_Intrinsics_vec256_zero;
         }
-        chacha20_core_256(k, ctx, nb);
+        Hacl_Chacha20_Vec256_chacha20_core_256(k, ctx, nb);
         {
           Lib_IntVector_Intrinsics_vec256 v00 = k[0U];
           Lib_IntVector_Intrinsics_vec256 v16 = k[1U];

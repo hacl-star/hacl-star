@@ -249,11 +249,16 @@ let print_ins (ins:ins) (p:P.printer) : string =
   match ins with
   | Instr _ _ (AnnotateComment s) -> "    // " ^ s
   | Instr _ _ (AnnotateLargeComment s) -> "\n    /////// " ^ s ^ " ////// \n"
+  | Instr _ _ (AnnotateSpace n) -> print_spaces n
   | _ -> "    \"" ^ P.print_ins ins p ^ ";\""
 
 let rec print_block (b:codes) (n:int) (p:P.printer) : string & int =
   match b with
   | Nil -> "", n
+  | Ins (Instr _ _ (AnnotateSpace spaces)) :: Ins (Instr _ _ (AnnotateComment s)) :: tail ->
+    let head_str =  "    // " ^ s ^ "\n" in
+    let rest, n' = print_block tail n p in
+    print_spaces spaces ^ head_str ^ rest, n'
   | Ins (Instr _ _ (AnnotateSpace spaces)) :: Ins i :: tail ->
     let head_str = print_ins i p in
     let rest, n' = print_block tail n p in

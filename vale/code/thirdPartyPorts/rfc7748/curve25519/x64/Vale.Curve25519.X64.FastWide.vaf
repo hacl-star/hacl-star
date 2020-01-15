@@ -121,9 +121,9 @@ procedure Fmul(
 {
     LargeComment("Compute the raw multiplication: tmp <- src1 * src2");
     Fast_multiply(0, tmp_b, inA_b, inB_b);
-    Mov64(inA_ptr, tmp_ptr);
     Newline();
     Comment("Line up pointers");
+    Mov64(inA_ptr, tmp_ptr);
     Mov64(rdi, r15);
     LargeComment("Wrap the result back into the field");
     Carry_wide(0, dst_b, tmp_b);
@@ -326,11 +326,17 @@ procedure Fmul2(
         validSrcAddrs64(mem, dst_in, dst_b, 4, memTaint, Secret);
 
 {
+    LargeComment("Compute the raw multiplication tmp[0] <- f1[0] * f2[0]"); 
     Fast_multiply(0, tmp_b, inA_b, inB_b);
+    LargeComment("Compute the raw multiplication tmp[1] <- f1[1] * f2[1]"); 
     Fast_multiply(4, tmp_b, inA_b, inB_b);
+    Newline();
+    Comment("Line up pointers");
     Mov64(inA_ptr, tmp_ptr);
     Mov64(rdi, r15); // Restore dst_ptr
+    LargeComment("Wrap the results back into the field");
     Carry_wide(0, dst_b, tmp_b);
+    Newline();
     Carry_wide(4, dst_b, tmp_b);
 }
 
@@ -513,9 +519,15 @@ procedure Fsqr(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64)
         modifies_buffer_2(dst_b, tmp_b, old(mem), mem);
 
 {
+    LargeComment("Compute the raw multiplication: tmp <- f * f");
     Fast_sqr(0, tmp_b, inA_b);
+
+    Newline();
+    Comment("Line up pointers");
     Mov64(inA_ptr, tmp_ptr);
     Mov64(rdi, rbx);
+
+    LargeComment("Wrap the result back into the field");
     Carry_wide(0, dst_b, tmp_b);
 }
 
@@ -680,10 +692,15 @@ procedure Fsqr2(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64
 
 {
     Fast_sqr(0, tmp_b, inA_b);
+    Newline();
     Fast_sqr(4, tmp_b, inA_b);
+    Newline();
+    Comment("Line up pointers");
     Mov64(inA_ptr, tmp_ptr);
     Mov64(rdi, rbx);
+    Newline();
     Carry_wide(0, dst_b, tmp_b);
+    Newline();
     Carry_wide(4, dst_b, tmp_b);
 }
 

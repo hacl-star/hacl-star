@@ -25,7 +25,11 @@
 #include "Hacl_Chacha20Poly1305_128.h"
 
 inline static void
-poly1305_padded_128(Lib_IntVector_Intrinsics_vec128 *ctx, uint32_t len, uint8_t *text)
+Hacl_Chacha20Poly1305_128_poly1305_padded_128(
+  Lib_IntVector_Intrinsics_vec128 *ctx,
+  uint32_t len,
+  uint8_t *text
+)
 {
   uint32_t n1 = len / (uint32_t)16U;
   uint32_t r = len % (uint32_t)16U;
@@ -1031,7 +1035,7 @@ poly1305_padded_128(Lib_IntVector_Intrinsics_vec128 *ctx, uint32_t len, uint8_t 
 }
 
 inline static void
-poly1305_do_128(
+Hacl_Chacha20Poly1305_128_poly1305_do_128(
   uint8_t *k,
   uint32_t aadlen,
   uint8_t *aad,
@@ -1051,8 +1055,8 @@ poly1305_do_128(
     Lib_IntVector_Intrinsics_vec128 *pre;
     Lib_IntVector_Intrinsics_vec128 *acc;
     Hacl_Poly1305_128_poly1305_init(ctx, k);
-    poly1305_padded_128(ctx, aadlen, aad);
-    poly1305_padded_128(ctx, mlen, m);
+    Hacl_Chacha20Poly1305_128_poly1305_padded_128(ctx, aadlen, aad);
+    Hacl_Chacha20Poly1305_128_poly1305_padded_128(ctx, mlen, m);
     store64_le(block, (uint64_t)aadlen);
     store64_le(block + (uint32_t)8U, (uint64_t)mlen);
     pre = ctx + (uint32_t)5U;
@@ -1350,7 +1354,7 @@ Hacl_Chacha20Poly1305_128_aead_encrypt(
     uint8_t *key;
     Hacl_Chacha20_Vec128_chacha20_encrypt_128((uint32_t)64U, tmp, tmp, k, n1, (uint32_t)0U);
     key = tmp;
-    poly1305_do_128(key, aadlen, aad, mlen, cipher, mac);
+    Hacl_Chacha20Poly1305_128_poly1305_do_128(key, aadlen, aad, mlen, cipher, mac);
   }
 }
 
@@ -1371,7 +1375,7 @@ Hacl_Chacha20Poly1305_128_aead_decrypt(
   uint8_t *key;
   Hacl_Chacha20_Vec128_chacha20_encrypt_128((uint32_t)64U, tmp, tmp, k, n1, (uint32_t)0U);
   key = tmp;
-  poly1305_do_128(key, aadlen, aad, mlen, cipher, computed_mac);
+  Hacl_Chacha20Poly1305_128_poly1305_do_128(key, aadlen, aad, mlen, cipher, computed_mac);
   {
     uint8_t res0 = (uint8_t)255U;
     uint8_t z;

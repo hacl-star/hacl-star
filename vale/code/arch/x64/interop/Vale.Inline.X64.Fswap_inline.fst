@@ -160,7 +160,8 @@ let cswap2_inline bit p0 p1
     let x, _ = lowstar_cswap_normal_t bit p0 p1 () in
     ()
 
-let cswap_comments : list string = []
+let cswap_comments : list string = 
+  ["Computes p1 <- bit ? p2 : p1 in constant time"]
 
 let cswap_names (n:nat) : string =
   match n with

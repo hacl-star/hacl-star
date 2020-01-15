@@ -286,7 +286,7 @@ let fadd_inline out f1 f2
     let x, _ = lowstar_fadd_normal_t out f1 f2 () in
     ()
 
-let fadd_comments : list string = []
+let fadd_comments : list string = ["Computes the field addition of two field elements"]
 
 let fadd_names (n:nat) =
   match n with
@@ -409,7 +409,7 @@ let fsub_inline out f1 f2
     let x, _ = lowstar_Fsub_normal_t out f1 f2 () in
     ()
 
-let fsub_comments : list string = []
+let fsub_comments : list string = ["Computes the field substraction of two field elements"]
 
 let fsub_names (n:nat) =
   match n with

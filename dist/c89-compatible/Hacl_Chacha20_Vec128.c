@@ -24,7 +24,7 @@
 
 #include "Hacl_Chacha20_Vec128.h"
 
-inline static void double_round_128(Lib_IntVector_Intrinsics_vec128 *st)
+inline static void Hacl_Chacha20_Vec128_double_round_128(Lib_IntVector_Intrinsics_vec128 *st)
 {
   Lib_IntVector_Intrinsics_vec128 std0;
   Lib_IntVector_Intrinsics_vec128 std1;
@@ -157,7 +157,7 @@ inline static void double_round_128(Lib_IntVector_Intrinsics_vec128 *st)
 }
 
 inline static void
-chacha20_core_128(
+Hacl_Chacha20_Vec128_chacha20_core_128(
   Lib_IntVector_Intrinsics_vec128 *k,
   Lib_IntVector_Intrinsics_vec128 *ctx,
   uint32_t ctr
@@ -169,16 +169,16 @@ chacha20_core_128(
   ctr_u32 = (uint32_t)4U * ctr;
   cv = Lib_IntVector_Intrinsics_vec128_load32(ctr_u32);
   k[12U] = Lib_IntVector_Intrinsics_vec128_add32(k[12U], cv);
-  double_round_128(k);
-  double_round_128(k);
-  double_round_128(k);
-  double_round_128(k);
-  double_round_128(k);
-  double_round_128(k);
-  double_round_128(k);
-  double_round_128(k);
-  double_round_128(k);
-  double_round_128(k);
+  Hacl_Chacha20_Vec128_double_round_128(k);
+  Hacl_Chacha20_Vec128_double_round_128(k);
+  Hacl_Chacha20_Vec128_double_round_128(k);
+  Hacl_Chacha20_Vec128_double_round_128(k);
+  Hacl_Chacha20_Vec128_double_round_128(k);
+  Hacl_Chacha20_Vec128_double_round_128(k);
+  Hacl_Chacha20_Vec128_double_round_128(k);
+  Hacl_Chacha20_Vec128_double_round_128(k);
+  Hacl_Chacha20_Vec128_double_round_128(k);
+  Hacl_Chacha20_Vec128_double_round_128(k);
   {
     uint32_t i;
     for (i = (uint32_t)0U; i < (uint32_t)16U; i = i + (uint32_t)1U)
@@ -192,7 +192,12 @@ chacha20_core_128(
 }
 
 inline static void
-chacha20_init_128(Lib_IntVector_Intrinsics_vec128 *ctx, uint8_t *k, uint8_t *n1, uint32_t ctr)
+Hacl_Chacha20_Vec128_chacha20_init_128(
+  Lib_IntVector_Intrinsics_vec128 *ctx,
+  uint8_t *k,
+  uint8_t *n1,
+  uint32_t ctr
+)
 {
   uint32_t ctx1[16U] = { 0U };
   uint32_t *uu____0 = ctx1;
@@ -275,7 +280,7 @@ Hacl_Chacha20_Vec128_chacha20_encrypt_128(
     uint32_t rem1;
     uint32_t nb;
     uint32_t rem2;
-    chacha20_init_128(ctx, key, n1, ctr);
+    Hacl_Chacha20_Vec128_chacha20_init_128(ctx, key, n1, ctr);
     rem1 = len % (uint32_t)256U;
     nb = len / (uint32_t)256U;
     rem2 = len % (uint32_t)256U;
@@ -291,7 +296,7 @@ Hacl_Chacha20_Vec128_chacha20_encrypt_128(
           for (_i = 0U; _i < (uint32_t)16U; ++_i)
             k[_i] = Lib_IntVector_Intrinsics_vec128_zero;
         }
-        chacha20_core_128(k, ctx, i);
+        Hacl_Chacha20_Vec128_chacha20_core_128(k, ctx, i);
         {
           Lib_IntVector_Intrinsics_vec128 v00 = k[0U];
           Lib_IntVector_Intrinsics_vec128 v16 = k[1U];
@@ -431,7 +436,7 @@ Hacl_Chacha20_Vec128_chacha20_encrypt_128(
           for (_i = 0U; _i < (uint32_t)16U; ++_i)
             k[_i] = Lib_IntVector_Intrinsics_vec128_zero;
         }
-        chacha20_core_128(k, ctx, nb);
+        Hacl_Chacha20_Vec128_chacha20_core_128(k, ctx, nb);
         {
           Lib_IntVector_Intrinsics_vec128 v00 = k[0U];
           Lib_IntVector_Intrinsics_vec128 v16 = k[1U];
@@ -582,7 +587,7 @@ Hacl_Chacha20_Vec128_chacha20_decrypt_128(
     uint32_t rem1;
     uint32_t nb;
     uint32_t rem2;
-    chacha20_init_128(ctx, key, n1, ctr);
+    Hacl_Chacha20_Vec128_chacha20_init_128(ctx, key, n1, ctr);
     rem1 = len % (uint32_t)256U;
     nb = len / (uint32_t)256U;
     rem2 = len % (uint32_t)256U;
@@ -598,7 +603,7 @@ Hacl_Chacha20_Vec128_chacha20_decrypt_128(
           for (_i = 0U; _i < (uint32_t)16U; ++_i)
             k[_i] = Lib_IntVector_Intrinsics_vec128_zero;
         }
-        chacha20_core_128(k, ctx, i);
+        Hacl_Chacha20_Vec128_chacha20_core_128(k, ctx, i);
         {
           Lib_IntVector_Intrinsics_vec128 v00 = k[0U];
           Lib_IntVector_Intrinsics_vec128 v16 = k[1U];
@@ -738,7 +743,7 @@ Hacl_Chacha20_Vec128_chacha20_decrypt_128(
           for (_i = 0U; _i < (uint32_t)16U; ++_i)
             k[_i] = Lib_IntVector_Intrinsics_vec128_zero;
         }
-        chacha20_core_128(k, ctx, nb);
+        Hacl_Chacha20_Vec128_chacha20_core_128(k, ctx, nb);
         {
           Lib_IntVector_Intrinsics_vec128 v00 = k[0U];
           Lib_IntVector_Intrinsics_vec128 v16 = k[1U];

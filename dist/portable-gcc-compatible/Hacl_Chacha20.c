@@ -32,9 +32,16 @@ Hacl_Impl_Chacha20_Vec_chacha20_constants[4U] =
 
 /* SNIPPET_END: Hacl_Impl_Chacha20_Vec_chacha20_constants */
 
-/* SNIPPET_START: quarter_round */
+/* SNIPPET_START: Hacl_Impl_Chacha20_Core32_quarter_round */
 
-inline static void quarter_round(uint32_t *st, uint32_t a, uint32_t b, uint32_t c, uint32_t d)
+inline static void
+Hacl_Impl_Chacha20_Core32_quarter_round(
+  uint32_t *st,
+  uint32_t a,
+  uint32_t b,
+  uint32_t c,
+  uint32_t d
+)
 {
   uint32_t sta = st[a];
   uint32_t stb0 = st[b];
@@ -70,50 +77,82 @@ inline static void quarter_round(uint32_t *st, uint32_t a, uint32_t b, uint32_t 
   st[b] = std22;
 }
 
-/* SNIPPET_END: quarter_round */
+/* SNIPPET_END: Hacl_Impl_Chacha20_Core32_quarter_round */
 
-/* SNIPPET_START: double_round */
+/* SNIPPET_START: Hacl_Impl_Chacha20_Core32_double_round */
 
-inline static void double_round(uint32_t *st)
+inline static void Hacl_Impl_Chacha20_Core32_double_round(uint32_t *st)
 {
-  quarter_round(st, (uint32_t)0U, (uint32_t)4U, (uint32_t)8U, (uint32_t)12U);
-  quarter_round(st, (uint32_t)1U, (uint32_t)5U, (uint32_t)9U, (uint32_t)13U);
-  quarter_round(st, (uint32_t)2U, (uint32_t)6U, (uint32_t)10U, (uint32_t)14U);
-  quarter_round(st, (uint32_t)3U, (uint32_t)7U, (uint32_t)11U, (uint32_t)15U);
-  quarter_round(st, (uint32_t)0U, (uint32_t)5U, (uint32_t)10U, (uint32_t)15U);
-  quarter_round(st, (uint32_t)1U, (uint32_t)6U, (uint32_t)11U, (uint32_t)12U);
-  quarter_round(st, (uint32_t)2U, (uint32_t)7U, (uint32_t)8U, (uint32_t)13U);
-  quarter_round(st, (uint32_t)3U, (uint32_t)4U, (uint32_t)9U, (uint32_t)14U);
+  Hacl_Impl_Chacha20_Core32_quarter_round(st,
+    (uint32_t)0U,
+    (uint32_t)4U,
+    (uint32_t)8U,
+    (uint32_t)12U);
+  Hacl_Impl_Chacha20_Core32_quarter_round(st,
+    (uint32_t)1U,
+    (uint32_t)5U,
+    (uint32_t)9U,
+    (uint32_t)13U);
+  Hacl_Impl_Chacha20_Core32_quarter_round(st,
+    (uint32_t)2U,
+    (uint32_t)6U,
+    (uint32_t)10U,
+    (uint32_t)14U);
+  Hacl_Impl_Chacha20_Core32_quarter_round(st,
+    (uint32_t)3U,
+    (uint32_t)7U,
+    (uint32_t)11U,
+    (uint32_t)15U);
+  Hacl_Impl_Chacha20_Core32_quarter_round(st,
+    (uint32_t)0U,
+    (uint32_t)5U,
+    (uint32_t)10U,
+    (uint32_t)15U);
+  Hacl_Impl_Chacha20_Core32_quarter_round(st,
+    (uint32_t)1U,
+    (uint32_t)6U,
+    (uint32_t)11U,
+    (uint32_t)12U);
+  Hacl_Impl_Chacha20_Core32_quarter_round(st,
+    (uint32_t)2U,
+    (uint32_t)7U,
+    (uint32_t)8U,
+    (uint32_t)13U);
+  Hacl_Impl_Chacha20_Core32_quarter_round(st,
+    (uint32_t)3U,
+    (uint32_t)4U,
+    (uint32_t)9U,
+    (uint32_t)14U);
 }
 
-/* SNIPPET_END: double_round */
+/* SNIPPET_END: Hacl_Impl_Chacha20_Core32_double_round */
 
-/* SNIPPET_START: rounds */
+/* SNIPPET_START: Hacl_Impl_Chacha20_rounds */
 
-inline static void rounds(uint32_t *st)
+inline static void Hacl_Impl_Chacha20_rounds(uint32_t *st)
 {
-  double_round(st);
-  double_round(st);
-  double_round(st);
-  double_round(st);
-  double_round(st);
-  double_round(st);
-  double_round(st);
-  double_round(st);
-  double_round(st);
-  double_round(st);
+  Hacl_Impl_Chacha20_Core32_double_round(st);
+  Hacl_Impl_Chacha20_Core32_double_round(st);
+  Hacl_Impl_Chacha20_Core32_double_round(st);
+  Hacl_Impl_Chacha20_Core32_double_round(st);
+  Hacl_Impl_Chacha20_Core32_double_round(st);
+  Hacl_Impl_Chacha20_Core32_double_round(st);
+  Hacl_Impl_Chacha20_Core32_double_round(st);
+  Hacl_Impl_Chacha20_Core32_double_round(st);
+  Hacl_Impl_Chacha20_Core32_double_round(st);
+  Hacl_Impl_Chacha20_Core32_double_round(st);
 }
 
-/* SNIPPET_END: rounds */
+/* SNIPPET_END: Hacl_Impl_Chacha20_rounds */
 
-/* SNIPPET_START: chacha20_core */
+/* SNIPPET_START: Hacl_Impl_Chacha20_chacha20_core */
 
-inline static void chacha20_core(uint32_t *k, uint32_t *ctx, uint32_t ctr)
+inline static void Hacl_Impl_Chacha20_chacha20_core(uint32_t *k, uint32_t *ctx, uint32_t ctr)
 {
   memcpy(k, ctx, (uint32_t)16U * sizeof ctx[0U]);
   uint32_t ctr_u32 = ctr;
   k[12U] = k[12U] + ctr_u32;
-  rounds(k);
+  Hacl_Impl_Chacha20_rounds(k);
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i = i + (uint32_t)1U)
   {
     uint32_t *os = k;
@@ -123,15 +162,15 @@ inline static void chacha20_core(uint32_t *k, uint32_t *ctx, uint32_t ctr)
   k[12U] = k[12U] + ctr_u32;
 }
 
-/* SNIPPET_END: chacha20_core */
+/* SNIPPET_END: Hacl_Impl_Chacha20_chacha20_core */
 
-/* SNIPPET_START: chacha20_constants */
+/* SNIPPET_START: Hacl_Impl_Chacha20_chacha20_constants */
 
 static uint32_t
-chacha20_constants[4U] =
+Hacl_Impl_Chacha20_chacha20_constants[4U] =
   { (uint32_t)0x61707865U, (uint32_t)0x3320646eU, (uint32_t)0x79622d32U, (uint32_t)0x6b206574U };
 
-/* SNIPPET_END: chacha20_constants */
+/* SNIPPET_END: Hacl_Impl_Chacha20_chacha20_constants */
 
 /* SNIPPET_START: Hacl_Impl_Chacha20_chacha20_init */
 
@@ -142,7 +181,7 @@ Hacl_Impl_Chacha20_chacha20_init(uint32_t *ctx, uint8_t *k, uint8_t *n1, uint32_
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i = i + (uint32_t)1U)
   {
     uint32_t *os = uu____0;
-    uint32_t x = chacha20_constants[i];
+    uint32_t x = Hacl_Impl_Chacha20_chacha20_constants[i];
     os[i] = x;
   }
   uint32_t *uu____1 = ctx + (uint32_t)4U;
@@ -181,7 +220,7 @@ Hacl_Impl_Chacha20_chacha20_encrypt_block(
 )
 {
   uint32_t k[16U] = { 0U };
-  chacha20_core(k, ctx, incr1);
+  Hacl_Impl_Chacha20_chacha20_core(k, ctx, incr1);
   uint32_t bl[16U] = { 0U };
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i = i + (uint32_t)1U)
   {
@@ -206,10 +245,16 @@ Hacl_Impl_Chacha20_chacha20_encrypt_block(
 
 /* SNIPPET_END: Hacl_Impl_Chacha20_chacha20_encrypt_block */
 
-/* SNIPPET_START: chacha20_encrypt_last */
+/* SNIPPET_START: Hacl_Impl_Chacha20_chacha20_encrypt_last */
 
 inline static void
-chacha20_encrypt_last(uint32_t *ctx, uint32_t len, uint8_t *out, uint32_t incr1, uint8_t *text)
+Hacl_Impl_Chacha20_chacha20_encrypt_last(
+  uint32_t *ctx,
+  uint32_t len,
+  uint8_t *out,
+  uint32_t incr1,
+  uint8_t *text
+)
 {
   uint8_t plain[64U] = { 0U };
   memcpy(plain, text, len * sizeof text[0U]);
@@ -217,7 +262,7 @@ chacha20_encrypt_last(uint32_t *ctx, uint32_t len, uint8_t *out, uint32_t incr1,
   memcpy(out, plain, len * sizeof plain[0U]);
 }
 
-/* SNIPPET_END: chacha20_encrypt_last */
+/* SNIPPET_END: Hacl_Impl_Chacha20_chacha20_encrypt_last */
 
 /* SNIPPET_START: Hacl_Impl_Chacha20_chacha20_update */
 
@@ -236,7 +281,11 @@ Hacl_Impl_Chacha20_chacha20_update(uint32_t *ctx, uint32_t len, uint8_t *out, ui
   }
   if (rem2 > (uint32_t)0U)
   {
-    chacha20_encrypt_last(ctx, rem1, out + nb * (uint32_t)64U, nb, text + nb * (uint32_t)64U);
+    Hacl_Impl_Chacha20_chacha20_encrypt_last(ctx,
+      rem1,
+      out + nb * (uint32_t)64U,
+      nb,
+      text + nb * (uint32_t)64U);
   }
 }
 
