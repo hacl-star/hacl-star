@@ -1,5 +1,6 @@
 module Vale.X64.Print_Inline_s
 
+open FStar.Mul
 open Vale.X64.Machine_s
 open Vale.X64.Bytes_Code_s
 open Vale.X64.Machine_Semantics_s
@@ -96,7 +97,7 @@ and build_reserved_args_block (l:list code) (reserved:reg_64 -> bool)
   )
 
 // Prints `"=&r" (name)` if an output is specified
-let print_output_ret ret_val (reg_names:reg_64 -> string) (counter:nat) : list string * (reg_64 -> string) * nat
+let print_output_ret ret_val (reg_names:reg_64 -> string) (counter:nat) : list string & (reg_64 -> string) & nat
   = match ret_val with
   | None -> [], reg_names, counter
   | Some name -> (["\"=&r\" (" ^ name ^ ")"],
@@ -107,7 +108,7 @@ let print_output_ret ret_val (reg_names:reg_64 -> string) (counter:nat) : list s
 // If the register in which a is passed is modified, we should specify `"+&r" (name)`
 let print_modified_input
   (n:nat) (a:td) (i:nat{i < n}) (of_arg:reg_nat n -> reg_64) (regs_mod:reg_64 -> bool) (reserved_regs:reg_64 -> bool)
-  (reg_names:reg_64 -> string) (counter:nat) (arg_names:nat -> string) : list string * (reg_64 -> string) * nat =
+  (reg_names:reg_64 -> string) (counter:nat) (arg_names:nat -> string) : list string & (reg_64 -> string) & nat =
    if regs_mod (of_arg i) then
     (["\"+&r\" (" ^ arg_names i ^ (if reserved_regs (of_arg i) then "_r)" else ")")],
      (fun r -> if r = of_arg i && not (reserved_regs r) then string_of_int counter else reg_names r),
@@ -118,7 +119,7 @@ let print_modified_input
 let rec get_modified_input_strings
   (n:nat) (of_arg:reg_nat n -> reg_64) (regs_mod:reg_64 -> bool) (reserved_regs:reg_64 -> bool)
   (args:list td) (i:nat{i + List.Tot.length args <= n}) (ret_val:option string)
-  (reg_names:reg_64 -> string) (counter:nat) (arg_names:nat -> string) : list string * (reg_64 -> string) * nat
+  (reg_names:reg_64 -> string) (counter:nat) (arg_names:nat -> string) : list string & (reg_64 -> string) & nat
   = match args with
   | [] -> print_output_ret ret_val reg_names counter
   | a::q ->
@@ -148,7 +149,7 @@ let print_modified_inputs
 // If the register in which an arg is passed is not modified, we should specify it as `"r" (name)`
 let print_nonmodified_input
   (n:nat) (of_arg:reg_nat n -> reg_64) (regs_mod:reg_64 -> bool) (reserved_regs:reg_64 -> bool)
-  (a:td) (i:nat{i < n}) (reg_names:reg_64 -> string) (counter:nat) (arg_names:nat -> string) : list string * (reg_64 -> string) * nat =
+  (a:td) (i:nat{i < n}) (reg_names:reg_64 -> string) (counter:nat) (arg_names:nat -> string) : list string & (reg_64 -> string) & nat =
    if regs_mod (of_arg i) then ([], reg_names, counter) else
      (["\"r\" (" ^ arg_names i ^ (if reserved_regs (of_arg i) then "_r)" else  ")")],
      (fun r -> if r = of_arg i && not (reserved_regs r) then string_of_int counter else reg_names r),
@@ -250,7 +251,7 @@ let print_ins (ins:ins) (p:P.printer) : string =
   | Instr _ _ (AnnotateLargeComment s) -> "\n    /////// " ^ s ^ " ////// \n"
   | _ -> "    \"" ^ P.print_ins ins p ^ ";\""
 
-let rec print_block (b:codes) (n:int) (p:P.printer) : string * int =
+let rec print_block (b:codes) (n:int) (p:P.printer) : string & int =
   match b with
   | Nil -> "", n
   | Ins (Instr _ _ (AnnotateSpace spaces)) :: Ins i :: tail ->
@@ -264,7 +265,7 @@ let rec print_block (b:codes) (n:int) (p:P.printer) : string * int =
     let head_str, n' = print_code head n p in
     let rest, n'' = print_block tail n' p in
     head_str ^ rest, n''
-and print_code (c:code) (n:int) (p:P.printer) : string * int =
+and print_code (c:code) (n:int) (p:P.printer) : string & int =
   match c with
   | Ins ins -> (print_ins ins p ^ "\n", n)
   | Block b -> print_block b n p
