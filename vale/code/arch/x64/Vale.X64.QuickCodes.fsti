@@ -34,13 +34,13 @@ let precedes_wrap (a:lex_t) (b:lex_t) : GTot Type0 = precedes a b
 let lexCons (#a:Type) (h:a) (t:lex_t) : lex_t = LexCons h t
 
 [@va_qattr]
-let rec mods_contains1 (allowed:mods_t) (found:mod_t) : bool =
+let rec mods_contains1 (allowed:mods_t) (found:mod_t) : Tot bool (decreases allowed) =
   match allowed with
   | [] -> mod_eq Mod_None found
   | h::t -> mod_eq h found || mods_contains1 t found
 
 [@va_qattr]
-let rec mods_contains (allowed:mods_t) (found:mods_t) : bool =
+let rec mods_contains (allowed:mods_t) (found:mods_t) : Tot bool (decreases found) =
   match found with
   | [] -> true
   | h::t -> mods_contains1 allowed h && mods_contains allowed t
@@ -325,14 +325,14 @@ val wp_sound_code (#a:Type0) (c:code) (qc:quickCode a c) (k:vale_state -> a -> T
   (ensures fun (sN, fN, gN) -> eval_code c s0 fN sN /\ update_state_mods qc.mods sN s0 == sN /\ k sN gN)
 
 [@va_qattr]
-let rec regs_match_file (r0:Regs.t) (r1:Regs.t) (rf:reg_file_id) (k:nat{k <= n_regs rf}) : Type0 =
+let rec regs_match_file (r0:Regs.t) (r1:Regs.t) (rf:reg_file_id) (k:nat{k <= n_regs rf}) : Tot Type0 (decreases k) =
   if k = 0 then True
   else
     let r = Reg rf (k - 1) in
     Regs.sel r r0 == Regs.sel r r1 /\ regs_match_file r0 r1 rf (k - 1)
 
 [@va_qattr]
-let rec regs_match (r0:Regs.t) (r1:Regs.t) (k:nat{k <= n_reg_files}) : Type0 =
+let rec regs_match (r0:Regs.t) (r1:Regs.t) (k:nat{k <= n_reg_files}) : Tot Type0 (decreases k) =
   if k = 0 then True
   else regs_match_file r0 r1 (k - 1) (n_regs (k - 1)) /\ regs_match r0 r1 (k - 1)
 
@@ -391,7 +391,7 @@ unfold let normal_steps : list string =
     `%FStar.FunctionalExtensionality.on_dom;
   ]
 
-unfold let normal (x:Type0) : Type0 = norm [iota; zeta; simplify; primops; delta_attr [`%va_qattr]; delta_only normal_steps] x
+unfold let normal (x:Type0) : Type0 = norm [nbe; iota; zeta; simplify; primops; delta_attr [`%va_qattr]; delta_only normal_steps] x
 
 val wp_sound_code_norm (#a:Type0) (c:code) (qc:quickCode a c) (s0:vale_state) (k:(s0':vale_state{s0 == s0'}) -> vale_state -> a -> Type0) :
   Ghost (vale_state & fuel & a)

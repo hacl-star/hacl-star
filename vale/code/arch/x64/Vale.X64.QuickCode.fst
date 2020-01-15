@@ -53,14 +53,14 @@ let update_state_mod (m:mod_t) (sM sK:vale_state) : vale_state =
   | Mod_stackTaint -> va_update_stackTaint sM sK
 
 [@va_qattr]
-let rec update_state_mods (mods:mods_t) (sM sK:vale_state) : vale_state =
+let rec update_state_mods (mods:mods_t) (sM sK:vale_state) : Tot vale_state (decreases mods) =
   match mods with
   | [] -> sK
   | m::mods -> update_state_mod m sM (update_state_mods mods sM sK)
 
 [@va_qattr]
 unfold let update_state_mods_norm (mods:mods_t) (sM sK:vale_state) : vale_state =
-  norm [iota; zeta; delta_attr [`%qmodattr]; delta_only [`%update_state_mods; `%update_state_mod]] (update_state_mods mods sM sK)
+  norm [nbe; iota; zeta; delta_attr [`%qmodattr]; delta_only [`%update_state_mods; `%update_state_mod]] (update_state_mods mods sM sK)
 
 let lemma_norm_mods (mods:mods_t) (sM sK:vale_state) : Lemma
   (ensures update_state_mods mods sM sK == update_state_mods_norm mods sM sK)
