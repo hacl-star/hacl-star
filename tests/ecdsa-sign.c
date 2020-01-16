@@ -14,6 +14,7 @@
 
 #include <unistd.h>
 
+#include "Hacl_Impl_ECDSA.h"
 
 extern uint64_t Hacl_Impl_ECDSA_ecdsa_p256_sha2_sign_nist(
   uint8_t *result,

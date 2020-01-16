@@ -14,6 +14,8 @@
 
 #include <unistd.h>
 
+#include "Hacl_Impl_ECDSA.h"
+
 extern bool
 Hacl_Impl_ECDSA_ecdsa_p256_sha2_verify(
   uint32_t mLen,

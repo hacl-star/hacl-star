@@ -25,6 +25,8 @@ dist/Makefile.basic: $(filter-out %/prims.krml,$(ALL_KRML_FILES))
 	  -tmpdir dist \
 	  -skip-compilation
 
+$(HACL_HOME)/tests/ecdsa-common.o: dist/Makefile.basic
+
 dist/ecdsa-test.exe: $(HACL_HOME)/tests/ecdsa-common.o dist/libecdsa.a
 
 %.exe:
