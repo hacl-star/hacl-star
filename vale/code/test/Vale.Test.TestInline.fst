@@ -28,7 +28,39 @@ let print_function
   let _ = print_inline name 0 ret_val len arg_types arg_names c arg_regs regs_mod [] in
   ()
 
-let test_inline1 () : FStar.All.ML unit =
+let test_inline_mov_input () : FStar.All.ML unit =
+  let args = [
+    ("first_arg", TD_Base TUInt64, rR15);
+    ] in
+  let regs_mod r = (r = rRax || r = rRdx) in
+  let c = Block [
+    Ins (make_instr ins_Mov64 (OReg rRax) (OReg rR15));
+    ] in
+  print_function "test_inline_mov_input" (Some "result") args regs_mod c
+
+let test_inline_mov_add_input () : FStar.All.ML unit =
+  let args = [
+    ("first_arg", TD_Base TUInt64, rR15);
+    ] in
+  let regs_mod r = (r = rRax || r = rRdx) in
+  let c = Block [
+    Ins (make_instr ins_Mov64 (OReg rRax) (OReg rR15));
+    Ins (make_instr ins_Add64 (OReg rRax) (OConst 1));
+    ] in
+  print_function "test_inline_mov_add_input" (Some "result") args regs_mod c
+
+let test_inline_mul_inputs () : FStar.All.ML unit =
+  let args = [
+    ("first_arg", TD_Base TUInt64, rRax);
+    ("second_arg", TD_Base TUInt64, rR15);
+    ] in
+  let regs_mod r = (r = rRax || r = rRdx) in
+  let c = Block [
+    Ins (make_instr ins_Mul64 (OReg rR15));
+    ] in
+  print_function "test_inline_mul_inputs" (Some "result") args regs_mod c
+
+let test_inline_mov_mul_rax_100 () : FStar.All.ML unit =
   let args = [
     ("first_arg", TD_Base TUInt64, rRax);
     ] in
@@ -37,8 +69,38 @@ let test_inline1 () : FStar.All.ML unit =
     Ins (make_instr ins_Mov64 (OReg rRcx) (OConst 100));
     Ins (make_instr ins_Mul64 (OReg rRcx));
     ] in
-  print_function "test_inline1" (Some "result") args regs_mod c
+  print_function "test_inline_mov_mul_rax_100" (Some "result") args regs_mod c
+
+let test_inline_mov_mul_inputs () : FStar.All.ML unit =
+  let args = [
+    ("first_arg", TD_Base TUInt64, rRax);
+    ("second_arg", TD_Base TUInt64, rR15);
+    ] in
+  let regs_mod r = (r = rRax || r = rRcx || r = rRdx) in
+  let c = Block [
+    Ins (make_instr ins_Mov64 (OReg rRcx) (OReg rR15));
+    Ins (make_instr ins_Mul64 (OReg rRcx));
+    ] in
+  print_function "test_inline_mov_mul_inputs" (Some "result") args regs_mod c
+
+let test_inline_mov_add_input_dummy_mul () : FStar.All.ML unit =
+  let args = [
+    ("first_arg", TD_Base TUInt64, rR15);
+    ] in
+  let regs_mod r = (r = rRax || r = rRdx) in
+  let c = Block [
+    Ins (make_instr ins_Mov64 (OReg rRax) (OReg rR15));
+    Ins (make_instr ins_Mul64 (OReg rR15));
+    Ins (make_instr ins_Mov64 (OReg rRax) (OReg rR15));
+    Ins (make_instr ins_Add64 (OReg rRax) (OConst 1));
+    ] in
+  print_function "test_inline_mov_add_input_dummy_mul" (Some "result") args regs_mod c
 
 let test_inline () : FStar.All.ML unit =
-  test_inline1 ();
+  test_inline_mov_input ();
+  test_inline_mov_add_input ();
+  test_inline_mul_inputs ();
+  test_inline_mov_mul_rax_100 ();
+  test_inline_mov_mul_inputs ();
+  test_inline_mov_add_input_dummy_mul ();
   ()
