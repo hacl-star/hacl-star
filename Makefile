@@ -507,6 +507,10 @@ obj/vale-curve25519.exe: vale/code/crypto/ecc/curve25519/Main25519.ml
 obj/vale-poly1305.exe: vale/code/crypto/poly1305/x64/PolyMain.ml
 
 obj/inline-vale-curve25519.exe: vale/code/crypto/ecc/curve25519/Inline25519.ml
+obj/inline-vale-testInline.exe: vale/code/test/TestInlineMain.ml
+
+obj/vale_testInline.h: obj/inline-vale-testInline.exe
+	$< > $@
 
 obj/CmdLineParser.ml: vale/code/lib/util/CmdLineParser.ml
 	cp $< $@
@@ -991,6 +995,10 @@ test-handwritten: compile-gcc64-only
 	  LDFLAGS="$(LDFLAGS)" CFLAGS="$(CFLAGS)" \
 	  $(MAKE) -C tests test
 
+obj/vale_testInline.exe: vale/code/test/TestInline.c obj/vale_testInline.h
+	$(CC) $(CFLAGS) $(LDFLAGS) $< -Iobj -o $@
+vale_testInline: obj/vale_testInline.exe
+	$<
 
 #######################
 # OCaml tests (specs) #
