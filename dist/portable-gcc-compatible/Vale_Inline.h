@@ -36,55 +36,55 @@
 
 /* SNIPPET_START: cswap2_inline */
 
-inline static void cswap2_inline(uint64_t bit, uint64_t *p0, uint64_t *p1);
+extern void cswap2_inline(uint64_t bit, uint64_t *p0, uint64_t *p1);
 
 /* SNIPPET_END: cswap2_inline */
 
 /* SNIPPET_START: fsqr_inline */
 
-inline static void fsqr_inline(uint64_t *tmp, uint64_t *f1, uint64_t *out1);
+extern void fsqr_inline(uint64_t *tmp, uint64_t *f1, uint64_t *out1);
 
 /* SNIPPET_END: fsqr_inline */
 
 /* SNIPPET_START: fsqr2_inline */
 
-inline static void fsqr2_inline(uint64_t *tmp, uint64_t *f1, uint64_t *out1);
+extern void fsqr2_inline(uint64_t *tmp, uint64_t *f1, uint64_t *out1);
 
 /* SNIPPET_END: fsqr2_inline */
 
 /* SNIPPET_START: fmul_inline */
 
-inline static void fmul_inline(uint64_t *tmp, uint64_t *f1, uint64_t *out1, uint64_t *f2);
+extern void fmul_inline(uint64_t *tmp, uint64_t *f1, uint64_t *out1, uint64_t *f2);
 
 /* SNIPPET_END: fmul_inline */
 
 /* SNIPPET_START: fmul2_inline */
 
-inline static void fmul2_inline(uint64_t *tmp, uint64_t *f1, uint64_t *out1, uint64_t *f2);
+extern void fmul2_inline(uint64_t *tmp, uint64_t *f1, uint64_t *out1, uint64_t *f2);
 
 /* SNIPPET_END: fmul2_inline */
 
 /* SNIPPET_START: fmul1_inline */
 
-inline static void fmul1_inline(uint64_t *out1, uint64_t *f1, uint64_t f2);
+extern void fmul1_inline(uint64_t *out1, uint64_t *f1, uint64_t f2);
 
 /* SNIPPET_END: fmul1_inline */
 
 /* SNIPPET_START: add1_inline */
 
-inline static uint64_t add1_inline(uint64_t *out1, uint64_t *f1, uint64_t f2);
+extern uint64_t add1_inline(uint64_t *out1, uint64_t *f1, uint64_t f2);
 
 /* SNIPPET_END: add1_inline */
 
 /* SNIPPET_START: fadd_inline */
 
-inline static void fadd_inline(uint64_t *out1, uint64_t *f1, uint64_t *f2);
+extern void fadd_inline(uint64_t *out1, uint64_t *f1, uint64_t *f2);
 
 /* SNIPPET_END: fadd_inline */
 
 /* SNIPPET_START: fsub_inline */
 
-inline static void fsub_inline(uint64_t *out1, uint64_t *f1, uint64_t *f2);
+extern void fsub_inline(uint64_t *out1, uint64_t *f1, uint64_t *f2);
 
 /* SNIPPET_END: fsub_inline */
 

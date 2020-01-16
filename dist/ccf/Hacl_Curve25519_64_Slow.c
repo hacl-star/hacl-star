@@ -522,7 +522,7 @@ inline static void fsub(uint64_t *out, uint64_t *f1, uint64_t *f2)
   out[3U] = o3;
 }
 
-inline static void fmul(uint64_t *out, uint64_t *f1, uint64_t *f2)
+inline static void fmul(uint64_t *out, uint64_t *f1, uint64_t *f2, uint64_t *tmp)
 {
   uint64_t f10 = f1[0U];
   uint64_t f11 = f1[1U];
@@ -556,8 +556,8 @@ inline static void fmul20(uint64_t *out, uint64_t *f1, uint64_t *f2, uint64_t *t
   uint64_t *f12 = f1 + (uint32_t)4U;
   uint64_t *f21 = f2;
   uint64_t *f22 = f2 + (uint32_t)4U;
-  fmul(out1, f11, f21);
-  fmul(out2, f12, f22);
+  fmul(out1, f11, f21, tmp);
+  fmul(out2, f12, f22, tmp);
 }
 
 inline static void fmul10(uint64_t *out, uint64_t *f1, uint64_t f2)
@@ -582,10 +582,10 @@ inline static void fmul10(uint64_t *out, uint64_t *f1, uint64_t f2)
   out[3U] = o3;
 }
 
-inline static void fsqr0(uint64_t *out, uint64_t *f1)
+inline static void fsqr0(uint64_t *out, uint64_t *f1, uint64_t *tmp)
 {
   uint64_t tmp1[16U] = { 0U };
-  fmul(out, f1, f1);
+  fmul(out, f1, f1, tmp1);
 }
 
 inline static void fsqr20(uint64_t *out, uint64_t *f, uint64_t *tmp)
@@ -604,7 +604,15 @@ inline static void cswap20(uint64_t bit, uint64_t *p1, uint64_t *p2)
   }
 }
 
-static uint8_t g25519[32U] = { (uint8_t)9U };
+static uint8_t
+g25519[32U] =
+  {
+    (uint8_t)9U, (uint8_t)0U, (uint8_t)0U, (uint8_t)0U, (uint8_t)0U, (uint8_t)0U, (uint8_t)0U,
+    (uint8_t)0U, (uint8_t)0U, (uint8_t)0U, (uint8_t)0U, (uint8_t)0U, (uint8_t)0U, (uint8_t)0U,
+    (uint8_t)0U, (uint8_t)0U, (uint8_t)0U, (uint8_t)0U, (uint8_t)0U, (uint8_t)0U, (uint8_t)0U,
+    (uint8_t)0U, (uint8_t)0U, (uint8_t)0U, (uint8_t)0U, (uint8_t)0U, (uint8_t)0U, (uint8_t)0U,
+    (uint8_t)0U, (uint8_t)0U, (uint8_t)0U, (uint8_t)0U
+  };
 
 static void point_add_and_double(uint64_t *q, uint64_t *p01_tmp1, uint64_t *tmp2)
 {
@@ -646,7 +654,7 @@ static void point_add_and_double(uint64_t *q, uint64_t *p01_tmp1, uint64_t *tmp2
   fmul10(b1, c, (uint64_t)121665U);
   fadd(b1, b1, d);
   fmul20(nq, dc1, ab1, tmp2);
-  fmul(z3, z3, x1);
+  fmul(z3, z3, x1, tmp2);
 }
 
 static void point_double(uint64_t *nq, uint64_t *tmp1, uint64_t *tmp2)
@@ -728,10 +736,10 @@ static void montgomery_ladder(uint64_t *out, uint8_t *key, uint64_t *init1)
 
 static void fsquare_times(uint64_t *o, uint64_t *inp, uint64_t *tmp, uint32_t n1)
 {
-  fsqr0(o, inp);
+  fsqr0(o, inp, tmp);
   for (uint32_t i = (uint32_t)0U; i < n1 - (uint32_t)1U; i = i + (uint32_t)1U)
   {
-    fsqr0(o, o);
+    fsqr0(o, o, tmp);
   }
 }
 
@@ -745,28 +753,28 @@ static void finv(uint64_t *o, uint64_t *i, uint64_t *tmp)
   uint64_t *tmp1 = tmp;
   fsquare_times(a, i, tmp1, (uint32_t)1U);
   fsquare_times(t00, a, tmp1, (uint32_t)2U);
-  fmul(b, t00, i);
-  fmul(a, b, a);
+  fmul(b, t00, i, tmp);
+  fmul(a, b, a, tmp);
   fsquare_times(t00, a, tmp1, (uint32_t)1U);
-  fmul(b, t00, b);
+  fmul(b, t00, b, tmp);
   fsquare_times(t00, b, tmp1, (uint32_t)5U);
-  fmul(b, t00, b);
+  fmul(b, t00, b, tmp);
   fsquare_times(t00, b, tmp1, (uint32_t)10U);
-  fmul(c, t00, b);
+  fmul(c, t00, b, tmp);
   fsquare_times(t00, c, tmp1, (uint32_t)20U);
-  fmul(t00, t00, c);
+  fmul(t00, t00, c, tmp);
   fsquare_times(t00, t00, tmp1, (uint32_t)10U);
-  fmul(b, t00, b);
+  fmul(b, t00, b, tmp);
   fsquare_times(t00, b, tmp1, (uint32_t)50U);
-  fmul(c, t00, b);
+  fmul(c, t00, b, tmp);
   fsquare_times(t00, c, tmp1, (uint32_t)100U);
-  fmul(t00, t00, c);
+  fmul(t00, t00, c, tmp);
   fsquare_times(t00, t00, tmp1, (uint32_t)50U);
-  fmul(t00, t00, b);
+  fmul(t00, t00, b, tmp);
   fsquare_times(t00, t00, tmp1, (uint32_t)5U);
   uint64_t *a0 = t1;
   uint64_t *t0 = t1 + (uint32_t)12U;
-  fmul(o, t0, a0);
+  fmul(o, t0, a0, tmp);
 }
 
 static void store_felem(uint64_t *b, uint64_t *f)
@@ -810,7 +818,7 @@ static void encode_point(uint8_t *o, uint64_t *i)
   uint64_t u64s[4U] = { 0U };
   uint64_t tmp_w[16U] = { 0U };
   finv(tmp, z, tmp_w);
-  fmul(tmp, tmp, x);
+  fmul(tmp, tmp, x, tmp_w);
   store_felem(u64s, tmp);
   for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)4U; i0 = i0 + (uint32_t)1U)
   {
