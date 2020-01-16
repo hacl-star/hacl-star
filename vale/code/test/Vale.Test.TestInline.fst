@@ -32,7 +32,7 @@ let test_inline1 () : FStar.All.ML unit =
   let args = [
     ("first_arg", TD_Base TUInt64, rRax);
     ] in
-  let regs_mod r = (r = rRcx) in
+  let regs_mod r = (r = rRax || r = rRcx || r = rRdx) in
   let c = Block [
     Ins (make_instr ins_Mov64 (OReg rRcx) (OConst 100));
     Ins (make_instr ins_Mul64 (OReg rRcx));
