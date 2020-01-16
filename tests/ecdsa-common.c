@@ -9,9 +9,6 @@
 #include <stdbool.h>
 #include <time.h>
 
-#include "ecdsa-sign.c"
-#include "ecdsa-ver.c"
-
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -19,23 +16,6 @@
 
 #include "Hacl_Impl_ECDSA.h"
 
-
-extern uint64_t Hacl_Impl_ECDSA_ecdsa_p256_sha2_sign_nist(
-  uint8_t *result,
-  uint8_t *m,
-  uint8_t *privKey,
-  uint8_t *k
-);
-
-
-extern bool
-Hacl_Impl_ECDSA_ecdsa_p256_sha2_verify(
-  uint32_t mLen,
-  uint8_t *m,
-  uint64_t *pubKey,
-  uint64_t *r,
-  uint64_t *s1
-);
 
 void testEcdsaSignature0()
 {
@@ -2860,10 +2840,10 @@ int main()
     testEcdsaSignature8();
     testEcdsaSignature9();
 
+    testEcdsaVerification0();
     testEcdsaVerification1();
     testEcdsaVerification2();
     testEcdsaVerification3();
     testEcdsaVerification4();
-    testEcdsaVerification5();
 
 }
