@@ -28,15 +28,17 @@ let print_function
   let _ = print_inline name 0 ret_val len arg_types arg_names c arg_regs regs_mod [] in
   ()
 
-let test_inline () : FStar.All.ML unit =
-  let len = 1 in
+let test_inline1 () : FStar.All.ML unit =
   let args = [
-    ("first_arg", TD_Base TUInt64, 0);
+    ("first_arg", TD_Base TUInt64, rRax);
     ] in
-  let regs_mod r = r = 2 in
+  let regs_mod r = (r = rRcx) in
   let c = Block [
-    Ins (make_instr ins_Mov64 (OReg 2) (OConst 100));
-    Ins (make_instr ins_Mul64 (OReg 2));
+    Ins (make_instr ins_Mov64 (OReg rRcx) (OConst 100));
+    Ins (make_instr ins_Mul64 (OReg rRcx));
     ] in
   print_function "test_inline1" (Some "result") args regs_mod c
 
+let test_inline () : FStar.All.ML unit =
+  test_inline1 ();
+  ()
