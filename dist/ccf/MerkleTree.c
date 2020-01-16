@@ -460,11 +460,7 @@ insert___uint8_t_(LowStar_Vector_vector_str___uint8_t_ vec, uint8_t *v1)
 }
 
 static LowStar_Vector_vector_str___uint8_t_
-insert___uint8_t_0(
-  regional___uint8_t_ rg,
-  LowStar_Vector_vector_str___uint8_t_ rv,
-  uint8_t *v1
-)
+insert___uint8_t_0(LowStar_Vector_vector_str___uint8_t_ rv, uint8_t *v1)
 {
   LowStar_Vector_vector_str___uint8_t_ irv = insert___uint8_t_(rv, v1);
   return irv;
@@ -481,12 +477,11 @@ insert_copy___uint8_t_(
   uint8_t *nv = rg.r_alloc();
   void (*copy)(uint8_t *x0, uint8_t *x1) = cp;
   copy(v1, nv);
-  return insert___uint8_t_0(rg, rv, nv);
+  return insert___uint8_t_0(rv, nv);
 }
 
 static void
 assign__LowStar_Vector_vector_str__uint8_t_0(
-  regional__LowStar_Vector_vector_str___uint8_t_ rg,
   LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_ rv,
   uint32_t i1,
   LowStar_Vector_vector_str___uint8_t_ v1
@@ -514,16 +509,7 @@ insert_(
       hcpy,
       uu____0,
       acc);
-  assign__LowStar_Vector_vector_str__uint8_t_0((
-      (regional__LowStar_Vector_vector_str___uint8_t_){
-        .dummy = hash_vec_dummy,
-        .r_alloc = hash_vec_r_alloc,
-        .r_free = hash_vec_r_free
-      }
-    ),
-    hs,
-    lv,
-    ihv);
+  assign__LowStar_Vector_vector_str__uint8_t_0(hs, lv, ihv);
   if (j1 % (uint32_t)2U == (uint32_t)1U)
   {
     LowStar_Vector_vector_str___uint8_t_ lvhs = index__LowStar_Vector_vector_str__uint8_t_(hs, lv);
@@ -606,7 +592,6 @@ void free_path(LowStar_Vector_vector_str___uint8_t_ *p1)
 
 static void
 assign_copy___uint8_t_(
-  regional___uint8_t_ rg,
   void (*cp)(uint8_t *x0, uint8_t *x1),
   LowStar_Vector_vector_str___uint8_t_ rv,
   uint32_t i1,
@@ -648,13 +633,9 @@ construct_rhs(
     }
     if (actd)
     {
-      assign_copy___uint8_t_((
-          (regional___uint8_t_){ .dummy = NULL, .r_alloc = hash_r_alloc, .r_free = hash_r_free }
-        ),
-        hcpy,
-        rhs,
-        lv,
-        acc);
+      regional___uint8_t_
+      unused = { .dummy = NULL, .r_alloc = hash_r_alloc, .r_free = hash_r_free };
+      assign_copy___uint8_t_(hcpy, rhs, lv, acc);
       hash_fun(index___uint8_t_(index__LowStar_Vector_vector_str__uint8_t_(hs, lv),
           j1 - (uint32_t)1U - ofs),
         acc,
@@ -937,16 +918,7 @@ mt_flush_to_(
         ),
         hvec,
         ofs);
-    assign__LowStar_Vector_vector_str__uint8_t_0((
-        (regional__LowStar_Vector_vector_str___uint8_t_){
-          .dummy = hash_vec_dummy,
-          .r_alloc = hash_vec_r_alloc,
-          .r_free = hash_vec_r_free
-        }
-      ),
-      hs,
-      lv,
-      flushed);
+    assign__LowStar_Vector_vector_str__uint8_t_0(hs, lv, flushed);
     mt_flush_to_(lv + (uint32_t)1U, hs, pi / (uint32_t)2U, i1 / (uint32_t)2U);
     return;
   }
@@ -1063,16 +1035,7 @@ mt_retract_to_(
         ),
         hvec,
         new_len);
-    assign__LowStar_Vector_vector_str__uint8_t_0((
-        (regional__LowStar_Vector_vector_str___uint8_t_){
-          .dummy = hash_vec_dummy,
-          .r_alloc = hash_vec_r_alloc,
-          .r_free = hash_vec_r_free
-        }
-      ),
-      hs,
-      lv,
-      retracted);
+    assign__LowStar_Vector_vector_str__uint8_t_0(hs, lv, retracted);
     if (lv + (uint32_t)1U < hs.sz)
     {
       mt_retract_to_(hs, lv + (uint32_t)1U, i1 / (uint32_t)2U, s / (uint32_t)2U, j1 / (uint32_t)2U);

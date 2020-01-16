@@ -1476,7 +1476,7 @@ static void keyExpansion_aux_0(uint8_t *w, uint8_t *temp, uint8_t *sbox, uint32_
   }
 }
 
-static void keyExpansion_aux_1(uint8_t *w, uint8_t *temp, uint8_t *sbox, uint32_t j)
+static void keyExpansion_aux_1(uint8_t *w, uint8_t *temp, uint32_t j)
 {
   uint32_t i = (uint32_t)4U * j;
   uint8_t w0 = w[i + (uint32_t)0U - (uint32_t)32U];
@@ -1498,7 +1498,7 @@ static void keyExpansion_aux(uint8_t *w, uint8_t *temp, uint8_t *sbox, uint32_t 
   if (j < (uint32_t)60U)
   {
     keyExpansion_aux_0(w, temp, sbox, j);
-    keyExpansion_aux_1(w, temp, sbox, j);
+    keyExpansion_aux_1(w, temp, j);
     keyExpansion_aux(w, temp, sbox, j + (uint32_t)1U);
   }
 }
@@ -3058,7 +3058,7 @@ static void keyExpansion_aux_00(uint8_t *w, uint8_t *temp, uint8_t *sbox, uint32
   }
 }
 
-static void keyExpansion_aux_10(uint8_t *w, uint8_t *temp, uint8_t *sbox, uint32_t j)
+static void keyExpansion_aux_10(uint8_t *w, uint8_t *temp, uint32_t j)
 {
   uint32_t i = (uint32_t)4U * j;
   uint8_t w0 = w[i + (uint32_t)0U - (uint32_t)16U];
@@ -3080,7 +3080,7 @@ static void keyExpansion_aux0(uint8_t *w, uint8_t *temp, uint8_t *sbox, uint32_t
   if (j < (uint32_t)44U)
   {
     keyExpansion_aux_00(w, temp, sbox, j);
-    keyExpansion_aux_10(w, temp, sbox, j);
+    keyExpansion_aux_10(w, temp, j);
     keyExpansion_aux0(w, temp, sbox, j + (uint32_t)1U);
   }
 }
