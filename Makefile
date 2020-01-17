@@ -121,7 +121,7 @@ all-unstaged: compile-gcc-compatible compile-msvc-compatible compile-gcc64-only 
 	cp $< $@
 
 test: test-staged
-test-unstaged: test-handwritten test-c test-ml
+test-unstaged: test-handwritten test-c test-ml vale_testInline
 
 ifneq ($(OS),Windows_NT)
 test-unstaged: test-benchmark
@@ -998,6 +998,7 @@ test-handwritten: compile-gcc64-only
 obj/vale_testInline.exe: vale/code/test/TestInline.c obj/vale_testInline.h
 	$(CC) $(CFLAGS) $(LDFLAGS) $< -Iobj -o $@
 vale_testInline: obj/vale_testInline.exe
+	@echo "Testing Vale inline assembly printer"
 	$<
 
 #######################
