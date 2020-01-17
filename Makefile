@@ -104,7 +104,8 @@ all:
 
 all-unstaged: compile-gcc-compatible compile-msvc-compatible compile-gcc64-only \
   compile-evercrypt-external-headers compile-c89-compatible compile-ccf \
-  compile-portable-gcc-compatible compile-mozilla dist/linux/Makefile.basic
+  compile-portable-gcc-compatible compile-mozilla dist/linux/Makefile.basic \
+  dist/wasm/Makefile.basic # TODO: no Makefile.basic is generated for wasm...
 
 # Automatic staging.
 %-staged: .last_vale_version
