@@ -152,6 +152,9 @@ let create_heaplets bs modloc h1 =
   h2
 
 let lemma_create_heaplets bs modloc h1 =
+  let h2 = create_heaplets bs modloc h1 in
+  let ld:layout_data = h2.vf_layout.vl_inner.vl_v in
+  assert (ld.vl_buffers == bs);
   lemma_make_owns h1.vf_heap bs (Seq.length bs);
   reveal_opaque (`%valid_layout_buffer_id) valid_layout_buffer_id;
   ()

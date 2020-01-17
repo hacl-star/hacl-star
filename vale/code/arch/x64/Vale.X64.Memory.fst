@@ -681,10 +681,10 @@ let valid_layout_data_buffer (t:base_typ) (b:buffer t) (ld:layout_data) (hid:hea
 let valid_layout_buffer_id (t:base_typ) (b:buffer t) (layout:vale_heap_layout) (h_id:option heaplet_id) =
   match h_id with
   | None -> True
-  | Some hid -> True // TODO:
-//    layout.vl_inner.vl_heaplets_initialized /\
-//    layout.vl_inner.vl_t == layout_data /\
-//    valid_layout_data_buffer t b (coerce layout.vl_inner.vl_v) hid
+  | Some hid ->
+    layout.vl_inner.vl_heaplets_initialized /\
+    layout.vl_inner.vl_t == layout_data /\
+    valid_layout_data_buffer t b (coerce layout.vl_inner.vl_v) hid
 
 let inv_heaplet_ids (hs:vale_heaplets) =
   forall (i:heaplet_id).{:pattern Map16.sel hs i} (Map16.sel hs i).heapletId == Some i

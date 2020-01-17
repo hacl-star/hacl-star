@@ -421,7 +421,7 @@ val mem_eq_all (h1 h2:vale_heap) : Lemma
     // /\ (forall (ptr:int).{:pattern (load_mem64 ptr h1) \/ (load_mem64 ptr h2)} load_mem64 ptr h1 == load_mem64 ptr h2)
     /\ (forall (b:buffer64) (mt:memtaint) (t:taint).{:pattern (valid_taint_buf64 b h1 mt t) \/ (valid_taint_buf64 b h2 mt t)} valid_taint_buf64 b h1 mt t <==> valid_taint_buf64 b h2 mt t) 
     /\ (forall (b:buffer128) (mt:memtaint) (t:taint).{:pattern (valid_taint_buf128 b h1 mt t) \/ (valid_taint_buf128 b h2 mt t)} valid_taint_buf128 b h1 mt t <==> valid_taint_buf128 b h2 mt t)
-    /\ (forall (#t:base_typ) (b:buffer t) (layout:vale_heap_layout).{:pattern (valid_layout_buffer b layout h1) \/ (valid_layout_buffer b layout h2)} valid_layout_buffer b layout h1 <==> valid_layout_buffer b layout h2)
+//    /\ (forall (#t:base_typ) (b:buffer t) (layout:vale_heap_layout).{:pattern (valid_layout_buffer b layout h1) \/ (valid_layout_buffer b layout h2)} valid_layout_buffer b layout h1 <==> valid_layout_buffer b layout h2)
   )
 
 // TODO: this is used for the current (trivial) mem_inv; it will probably be removed for the real mem_inv
