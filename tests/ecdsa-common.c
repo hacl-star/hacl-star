@@ -17,184 +17,16 @@
 #include "Hacl_ECDSA.h"
 
 
-void testEcdsaSignature0()
+bool testEcdsaSignature0()
 {
-    uint8_t* m = (uint8_t *) malloc (sizeof (uint8_t) * 32);
-    uint8_t* privateKey = (uint8_t *) malloc (sizeof (uint8_t) * 32);
-    uint8_t* k = (uint8_t *) malloc (sizeof (uint8_t) * 32);
 
     uint8_t* result = (uint8_t *) malloc (sizeof (uint8_t) * 64);
 
-    uint8_t* expectedR = (uint8_t*) malloc (sizeof (uint8_t) * 32);
-    uint8_t* expectedS = (uint8_t*) malloc (sizeof (uint8_t) * 32);
-
-        m[31] = 0x44;
-        m[30] = 0xac;
-        m[29] = 0xf6;
-        m[28] = 0xb7;
-        m[27] = 0xe3;
-        m[26] = 0x6c;
-        m[25] = 0x13;
-        m[24] = 0x42;
-        m[23] = 0xc2;
-        m[22] = 0xc5;
-        m[21] = 0x89;
-        m[20] = 0x72;
-        m[19] = 0x04;
-        m[18] = 0xfe;
-        m[17] = 0x09;
-        m[16] = 0x50;
-        m[15] = 0x4e;
-        m[14] = 0x1e;
-        m[13] = 0x2e;
-        m[12] = 0xfb;
-        m[11] = 0x1a;
-        m[10] = 0x90;
-        m[9] = 0x03;
-        m[8] = 0x77;
-        m[7] = 0xdb;
-        m[6] = 0xc4;
-        m[5] = 0xe7;
-        m[4] = 0xa6;
-        m[3] = 0xa1;
-        m[2] = 0x33;
-        m[1] = 0xec;
-        m[0] = 0x56;
-        
-        privateKey[31] = 0x51;
-        privateKey[30] = 0x9b;
-        privateKey[29] = 0x42;
-        privateKey[28] = 0x3d;
-        privateKey[27] = 0x71;
-        privateKey[26] = 0x5f;
-        privateKey[25] = 0x8b;
-        privateKey[24] = 0x58;
-        privateKey[23] = 0x1f;
-        privateKey[22] = 0x4f;
-        privateKey[21] = 0xa8;
-        privateKey[20] = 0xee;
-        privateKey[19] = 0x59;
-        privateKey[18] = 0xf4;
-        privateKey[17] = 0x77;
-        privateKey[16] = 0x1a;
-        privateKey[15] = 0x5b;
-        privateKey[14] = 0x44;
-        privateKey[13] = 0xc8;
-        privateKey[12] = 0x13;
-        privateKey[11] = 0x0b;
-        privateKey[10] = 0x4e;
-        privateKey[9] = 0x3e;
-        privateKey[8] = 0xac;
-        privateKey[7] = 0xca;
-        privateKey[6] = 0x54;
-        privateKey[5] = 0xa5;
-        privateKey[4] = 0x6d;
-        privateKey[3] = 0xda;
-        privateKey[2] = 0x72;
-        privateKey[1] = 0xb4;
-        privateKey[0] = 0x64;
-    
-
-        k[31] = 0x94;
-        k[30] = 0xa1;
-        k[29] = 0xbb;
-        k[28] = 0xb1;
-        k[27] = 0x4b;
-        k[26] = 0x90;
-        k[25] = 0x6a;
-        k[24] = 0x61;
-        k[23] = 0xa2;
-        k[22] = 0x80;
-        k[21] = 0xf2;
-        k[20] = 0x45;
-        k[19] = 0xf9;
-        k[18] = 0xe9;
-        k[17] = 0x3c;
-        k[16] = 0x7f;
-        k[15] = 0x3b;
-        k[14] = 0x4a;
-        k[13] = 0x62;
-        k[12] = 0x47;
-        k[11] = 0x82;
-        k[10] = 0x4f;
-        k[9] = 0x5d;
-        k[8] = 0x33;
-        k[7] = 0xb9;
-        k[6] = 0x67;
-        k[5] = 0x07;
-        k[4] = 0x87;
-        k[3] = 0x64;
-        k[2] = 0x2a;
-        k[1] = 0x68;
-        k[0] = 0xde;
-    
-       
-        expectedR[31] = 0xf3;
-        expectedR[30] = 0xac;
-        expectedR[29] = 0x80;
-        expectedR[28] = 0x61;
-        expectedR[27] = 0xb5;
-        expectedR[26] = 0x14;
-        expectedR[25] = 0x79;
-        expectedR[24] = 0x5b;
-        expectedR[23] = 0x88;
-        expectedR[22] = 0x43;
-        expectedR[21] = 0xe3;
-        expectedR[20] = 0xd6;
-        expectedR[19] = 0x62;
-        expectedR[18] = 0x95;
-        expectedR[17] = 0x27;
-        expectedR[16] = 0xed;
-        expectedR[15] = 0x2a;
-        expectedR[14] = 0xfd;
-        expectedR[13] = 0x6b;
-        expectedR[12] = 0x1f;
-        expectedR[11] = 0x6a;
-        expectedR[10] = 0x55;
-        expectedR[9] = 0x5a;
-        expectedR[8] = 0x7a;
-        expectedR[7] = 0xca;
-        expectedR[6] = 0xbb;
-        expectedR[5] = 0x5e;
-        expectedR[4] = 0x6f;
-        expectedR[3] = 0x79;
-        expectedR[2] = 0xc8;
-        expectedR[1] = 0xc2;
-        expectedR[0] = 0xac;
-
-        expectedS[31] = 0x8b;
-        expectedS[30] = 0xf7;
-        expectedS[29] = 0x78;
-        expectedS[28] = 0x19;
-        expectedS[27] = 0xca;
-        expectedS[26] = 0x05;
-        expectedS[25] = 0xa6;
-        expectedS[24] = 0xb2;
-        expectedS[23] = 0x78;
-        expectedS[22] = 0x6c;
-        expectedS[21] = 0x76;
-        expectedS[20] = 0x26;
-        expectedS[19] = 0x2b;
-        expectedS[18] = 0xf7;
-        expectedS[17] = 0x37;
-        expectedS[16] = 0x1c;
-        expectedS[15] = 0xef;
-        expectedS[14] = 0x97;
-        expectedS[13] = 0xb2;
-        expectedS[12] = 0x18;
-        expectedS[11] = 0xe9;
-        expectedS[10] = 0x6f;
-        expectedS[9] = 0x17;
-        expectedS[8] = 0x5a;
-        expectedS[7] = 0x3c;
-        expectedS[6] = 0xcd;
-        expectedS[5] = 0xda;
-        expectedS[4] = 0x2a;
-        expectedS[3] = 0xcc;
-        expectedS[2] = 0x05;
-        expectedS[1] = 0x89;
-        expectedS[0] = 0x03;
-          
+    uint8_t m[32] = {0x56,  0xec,  0x33,  0xa1,  0xa6,  0xe7,  0xc4,  0xdb,  0x77,  0x03,  0x90,  0x1a,  0xfb,  0x2e,  0x1e,  0x4e,  0x50,  0x09,  0xfe,  0x04,  0x72,  0x89,  0xc5,  0xc2,  0x42,  0x13,  0x6c,  0xe3,  0xb7,  0xf6,  0xac,  0x44};
+    uint8_t privateKey[32] = {0x64,  0xb4,  0x72,  0xda,  0x6d,  0xa5,  0x54,  0xca,  0xac,  0x3e,  0x4e,  0x0b,  0x13,  0xc8,  0x44,  0x5b,  0x1a,  0x77,  0xf4,  0x59,  0xee,  0xa8,  0x4f,  0x1f,  0x58,  0x8b,  0x5f,  0x71,  0x3d,  0x42,  0x9b,  0x51};
+    uint8_t k[32] = {0xde,  0x68,  0x2a,  0x64,  0x87,  0x07,  0x67,  0xb9,  0x33,  0x5d,  0x4f,  0x82,  0x47,  0x62,  0x4a,  0x3b,  0x7f,  0x3c,  0xe9,  0xf9,  0x45,  0xf2,  0x80,  0xa2,  0x61,  0x6a,  0x90,  0x4b,  0xb1,  0xbb,  0xa1,  0x94};
+    uint8_t expectedR[32] = {0xac,  0xc2,  0xc8,  0x79,  0x6f,  0x5e,  0xbb,  0xca,  0x7a,  0x5a,  0x55,  0x6a,  0x1f,  0x6b,  0xfd,  0x2a,  0xed,  0x27,  0x95,  0x62,  0xd6,  0xe3,  0x43,  0x88,  0x5b,  0x79,  0x14,  0xb5,  0x61,  0x80,  0xac,  0xf3};
+    uint8_t expectedS[32] = {0x03,  0x89,  0x05,  0xcc,  0x2a,  0xda,  0xcd,  0x3c,  0x5a,  0x17,  0x6f,  0xe9,  0x18,  0xb2,  0x97,  0xef,  0x1c,  0x37,  0xf7,  0x2b,  0x26,  0x76,  0x6c,  0x78,  0xb2,  0xa6,  0x05,  0xca,  0x19,  0x78,  0xf7,  0x8b};
 
     uint64_t flag = Hacl_Impl_ECDSA_ecdsa_p256_sha2_sign_nist(result, m, privateKey, k);
     
@@ -208,11 +40,7 @@ void testEcdsaSignature0()
 
 
     uint64_t expectedResult = 0x0;
-      if (flag == expectedResult && flagCorrectR && flagCorrectS)
-        printf("%s\n", "Test0: passed");
-      else
-        printf("%s\n", "Test0: failed");
-
+    return expectedResult && flagCorrectR && flagCorrectS;
 }
 
 void testEcdsaSignature1()
@@ -2829,6 +2657,10 @@ void testEcdsaVerification4()
 
 int main()
 {
+    if (!testEcdsaSignature0())
+        return EXIT_FAILURE;
+    return EXIT_SUCCESS;
+    
     testEcdsaSignature0();
     testEcdsaSignature1();
     testEcdsaSignature2();
