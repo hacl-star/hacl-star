@@ -18,16 +18,11 @@ echo .
 
 cd $HACL_HOME/..
 
-if [ ! -d hacl-star ]; then
-  echo \$HACL_HOME/../hacl-star does not exist
-  exit 1
-fi
-
 if [ ! -d vale ]; then
   mkdir vale
 fi
 
-vale_version=$(<hacl-star/vale/.vale_version)
+vale_version=$(<$HACL_HOME/vale/.vale_version)
 vale_version=${vale_version%$'\r'}  # remove Windows carriage return, if it exists
 
 old_vale_version=none

@@ -18,14 +18,6 @@ let is_machine_heap_update (mh mh':machine_heap) =
   (forall (i:int).{:pattern Map.sel mh i \/ Map.sel mh' i}
     not (Map.contains mh i) ==> Map.sel mh i == Map.sel mh' i)
 
-let get_heap_val64_def (ptr:int) (mem:machine_heap) : nat64 =
-  two_to_nat 32
-  (Mktwo
-    (four_to_nat 8 (Mkfour mem.[ptr] mem.[ptr + 1] mem.[ptr + 2] mem.[ptr + 3]))
-    (four_to_nat 8 (Mkfour mem.[ptr + 4] mem.[ptr + 5] mem.[ptr + 6] mem.[ptr + 7]))
-  )
-let get_heap_val64 = make_opaque get_heap_val64_def
-
 let get_heap_val32_def (ptr:int) (mem:machine_heap) : nat32 =
   four_to_nat 8
   (Mkfour
@@ -33,15 +25,25 @@ let get_heap_val32_def (ptr:int) (mem:machine_heap) : nat32 =
     mem.[ptr + 1]
     mem.[ptr + 2]
     mem.[ptr + 3])
+[@"opaque_to_smt"] let get_heap_val32 = opaque_make get_heap_val32_def
+irreducible let get_heap_val32_reveal = opaque_revealer (`%get_heap_val32) get_heap_val32 get_heap_val32_def
 
-let get_heap_val32 = make_opaque get_heap_val32_def
+let get_heap_val64_def (ptr:int) (mem:machine_heap) : nat64 =
+  two_to_nat 32
+  (Mktwo
+    (four_to_nat 8 (Mkfour mem.[ptr] mem.[ptr + 1] mem.[ptr + 2] mem.[ptr + 3]))
+    (four_to_nat 8 (Mkfour mem.[ptr + 4] mem.[ptr + 5] mem.[ptr + 6] mem.[ptr + 7]))
+  )
+[@"opaque_to_smt"] let get_heap_val64 = opaque_make get_heap_val64_def
+irreducible let get_heap_val64_reveal = opaque_revealer (`%get_heap_val64) get_heap_val64 get_heap_val64_def
 
 let get_heap_val128_def (ptr:int) (mem:machine_heap) : quad32 = Mkfour
   (get_heap_val32 ptr mem)
   (get_heap_val32 (ptr + 4) mem)
   (get_heap_val32 (ptr + 8) mem)
   (get_heap_val32 (ptr + 12) mem)
-let get_heap_val128 = make_opaque get_heap_val128_def
+[@"opaque_to_smt"] let get_heap_val128 = opaque_make get_heap_val128_def
+irreducible let get_heap_val128_reveal = opaque_revealer (`%get_heap_val128) get_heap_val128 get_heap_val128_def
 
 let update_heap32_def (ptr:int) (v:nat32) (mem:machine_heap) : machine_heap =
   let v = nat_to_four 8 v in
@@ -50,7 +52,8 @@ let update_heap32_def (ptr:int) (v:nat32) (mem:machine_heap) : machine_heap =
   let mem = mem.[ptr + 2] <- v.hi2 in
   let mem = mem.[ptr + 3] <- v.hi3 in
   mem
-let update_heap32 = make_opaque update_heap32_def
+[@"opaque_to_smt"] let update_heap32 = opaque_make update_heap32_def
+irreducible let update_heap32_reveal = opaque_revealer (`%update_heap32) update_heap32 update_heap32_def
 
 let update_heap64_def (ptr:int) (v:nat64) (mem:machine_heap) : machine_heap =
   let v = nat_to_two 32 v in
@@ -65,7 +68,8 @@ let update_heap64_def (ptr:int) (v:nat64) (mem:machine_heap) : machine_heap =
   let mem = mem.[ptr + 6] <- hi.hi2 in
   let mem = mem.[ptr + 7] <- hi.hi3 in
   mem
-let update_heap64 = make_opaque update_heap64_def
+[@"opaque_to_smt"] let update_heap64 = opaque_make update_heap64_def
+irreducible let update_heap64_reveal = opaque_revealer (`%update_heap64) update_heap64 update_heap64_def
 
 let update_heap128_def (ptr:int) (v:quad32) (mem:machine_heap) =
   let mem = update_heap32 ptr v.lo0 mem in
@@ -73,7 +77,8 @@ let update_heap128_def (ptr:int) (v:quad32) (mem:machine_heap) =
   let mem = update_heap32 (ptr + 8) v.hi2 mem in
   let mem = update_heap32 (ptr + 12) v.hi3 mem in
   mem
-let update_heap128 = make_opaque update_heap128_def
+[@"opaque_to_smt"] let update_heap128 = opaque_make update_heap128_def
+irreducible let update_heap128_reveal = opaque_revealer (`%update_heap128) update_heap128 update_heap128_def
 
 let valid_addr (ptr:int) (mem:machine_heap) : bool =
   Map.contains mem ptr

@@ -1,5 +1,5 @@
 [
-  "\b^6‰MëŽü@=\u0007bþÁô˜",
+  "T±°\u0006Æyé¹­KÚ2Ï€Í\b",
   [
     [
       "Vale.X64.BufferViewStore.math_aux",
@@ -8,7 +8,7 @@
       1,
       [ "@query" ],
       0,
-      "ce1d0ef194b70e811b910c438d8113b5"
+      "98358134e4f1461fbc3a7d0b0fa6f6fd"
     ],
     [
       "Vale.X64.BufferViewStore.map_aux",
@@ -17,7 +17,7 @@
       1,
       [ "@query" ],
       0,
-      "ce9125e594ba124f4373d0a56cea9665"
+      "430561619cab4bbbcf9f9eda9cc719f9"
     ],
     [
       "Vale.X64.BufferViewStore.get64_aux",
@@ -41,10 +41,8 @@
         "equation_FStar.UInt.size", "equation_FStar.UInt.uint_t",
         "equation_Prims.eq2", "equation_Prims.nat", "equation_Prims.pos",
         "equation_Prims.squash",
-        "equation_Vale.Arch.MachineHeap_s.get_heap_val64",
         "equation_Vale.Arch.MachineHeap_s.get_heap_val64_def",
         "equation_Vale.Arch.MachineHeap_s.machine_heap",
-        "equation_Vale.Def.Types_s.le_nat64_to_bytes",
         "equation_Vale.Def.Types_s.le_nat64_to_bytes_def",
         "equation_Vale.Def.Words.Four_s.four_select",
         "equation_Vale.Def.Words.Seq_s.seq2",
@@ -54,7 +52,6 @@
         "equation_Vale.Def.Words.Two_s.nat_to_two",
         "equation_Vale.Def.Words_s.nat32", "equation_Vale.Def.Words_s.nat64",
         "equation_Vale.Def.Words_s.nat8", "equation_Vale.Def.Words_s.natN",
-        "equation_Vale.Interop.Views.put64",
         "equation_Vale.Interop.Views.put64_def",
         "equation_Vale.Lib.Seqs_s.compose",
         "equation_Vale.Lib.Seqs_s.seq_map",
@@ -63,11 +60,13 @@
         "function_token_typing_FStar.UInt8.v",
         "function_token_typing_Prims.__cache_version_number__",
         "function_token_typing_Prims.int",
-        "function_token_typing_Vale.Def.Opaque_s.make_opaque",
+        "function_token_typing_Vale.Arch.MachineHeap_s.get_heap_val64",
+        "function_token_typing_Vale.Def.Types_s.le_nat64_to_bytes",
         "function_token_typing_Vale.Def.Words.Four_s.nat_to_four",
         "function_token_typing_Vale.Def.Words.Seq_s.seq_four_to_seq_LE",
         "function_token_typing_Vale.Def.Words_s.nat32",
-        "function_token_typing_Vale.Def.Words_s.nat8", "int_inversion",
+        "function_token_typing_Vale.Def.Words_s.nat8",
+        "function_token_typing_Vale.Interop.Views.put64", "int_inversion",
         "int_typing",
         "interpretation_Tm_abs_12f0bbc5cd2aeb167bc7e771b588a4ca",
         "interpretation_Tm_abs_4f03474956a6a2311e7d7bb19e902da5",
@@ -127,7 +126,7 @@
         "typing_Vale.Lib.Seqs_s.seq_map"
       ],
       0,
-      "51dd253bb1eb5feaff19d231a838340e"
+      "b87b9a02ee40c257d26ad9e12ccf01fd"
     ],
     [
       "Vale.X64.BufferViewStore.get128_aux",
@@ -149,9 +148,7 @@
         "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
         "equation_FStar.UInt.size", "equation_FStar.UInt.uint_t",
         "equation_Prims.nat", "equation_Prims.pos",
-        "equation_Vale.Arch.MachineHeap_s.get_heap_val128",
         "equation_Vale.Arch.MachineHeap_s.get_heap_val128_def",
-        "equation_Vale.Arch.MachineHeap_s.get_heap_val32",
         "equation_Vale.Arch.MachineHeap_s.get_heap_val32_def",
         "equation_Vale.Arch.MachineHeap_s.machine_heap",
         "equation_Vale.Def.Types_s.quad32",
@@ -161,7 +158,6 @@
         "equation_Vale.Def.Words.Seq_s.seqn",
         "equation_Vale.Def.Words_s.nat32", "equation_Vale.Def.Words_s.nat8",
         "equation_Vale.Def.Words_s.natN",
-        "equation_Vale.Interop.Views.put128",
         "equation_Vale.Interop.Views.put128_def",
         "equation_Vale.Lib.Seqs_s.compose",
         "equation_Vale.Lib.Seqs_s.seq_map",
@@ -171,11 +167,13 @@
         "function_token_typing_FStar.UInt8.v",
         "function_token_typing_Prims.__cache_version_number__",
         "function_token_typing_Prims.int",
-        "function_token_typing_Vale.Def.Opaque_s.make_opaque",
+        "function_token_typing_Vale.Arch.MachineHeap_s.get_heap_val128",
+        "function_token_typing_Vale.Arch.MachineHeap_s.get_heap_val32",
         "function_token_typing_Vale.Def.Types_s.le_quad32_to_bytes",
         "function_token_typing_Vale.Def.Words.Seq_s.seq_four_to_seq_LE",
         "function_token_typing_Vale.Def.Words_s.nat32",
-        "function_token_typing_Vale.Def.Words_s.nat8", "int_inversion",
+        "function_token_typing_Vale.Def.Words_s.nat8",
+        "function_token_typing_Vale.Interop.Views.put128", "int_inversion",
         "int_typing",
         "interpretation_Tm_abs_12f0bbc5cd2aeb167bc7e771b588a4ca",
         "interpretation_Tm_abs_4f03474956a6a2311e7d7bb19e902da5",
@@ -226,7 +224,7 @@
         "typing_Vale.Def.Words_s.natN", "typing_Vale.Interop.Views.put128"
       ],
       0,
-      "34580af4eb83b360f91f43572c7b4807"
+      "2f6a9bbce52d0c4db3b6211906fc48f1"
     ],
     [
       "Vale.X64.BufferViewStore.bv_upd_update_heap64",
@@ -290,7 +288,7 @@
         "typing_Vale.Interop.Types.down_view"
       ],
       0,
-      "6074e4217b5a0f9a190441875fb05453"
+      "67112a8cb82a3099ba1f16f1fd961b71"
     ],
     [
       "Vale.X64.BufferViewStore.bv_upd_update_heap64",
@@ -436,7 +434,7 @@
         "typing_Vale.Interop.Types.down_view"
       ],
       0,
-      "73971d41f28bb9483f37eb43c56cc7a3"
+      "4ab347ee4b46dc5fb79dd22f12802822"
     ],
     [
       "Vale.X64.BufferViewStore.bv_upd_update_heap128",
@@ -489,7 +487,7 @@
         "typing_Vale.Interop.Types.down_view"
       ],
       0,
-      "113e28a074a6324e1d4ff11d6045a8fb"
+      "c2c66319ae9846507345ca5257582a7c"
     ],
     [
       "Vale.X64.BufferViewStore.bv_upd_update_heap128",
@@ -642,7 +640,7 @@
         "typing_Vale.Interop.Views.put128"
       ],
       0,
-      "418f1bfee503d6b03a872a3f362d3442"
+      "ec717fb79c23eba0dab52e9cee8c2ef8"
     ]
   ]
 ]

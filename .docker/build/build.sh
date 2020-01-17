@@ -48,7 +48,7 @@ function hacl_test() {
           cd dist
           r=true
           for a in *; do
-            if [[ $a != "kremlin" && $a != "vale" && -d $a ]]; then
+            if [[ $a != "kremlin" && $a != "vale" && $a != "linux" && -d $a ]]; then
               echo "Building snapshot: $a"
               make -C $a -j $threads || r=false
               echo
@@ -146,16 +146,42 @@ function fetch_vale() {
     export_home VALE "$(pwd)/../vale"
 }
 
+function refresh_doc() {
+  git config --global user.name "Dzomo, the Everest Yak"
+  git config --global user.email "everbld@microsoft.com"
+
+  git clone git@github.com:fstarlang/fstarlang.github.io fstarlang-github-io
+
+  (cd doc && ./ci.sh ../fstarlang-github-io/evercrypt/html/)
+
+  pushd fstarlang-github-io && {
+    git add -A . &&
+    if ! git diff --exit-code HEAD > /dev/null; then
+        git commit -m "[CI] Refresh HACL & EverCrypt doc" &&
+        git push
+    else
+        echo No git diff for the tutorial, not generating a commit
+    fi
+    errcode=$?
+  } &&
+  popd &&
+  return $errcode
+}
+
 function refresh_hacl_hints_dist() {
     # We should not generate hints when building on Windows
     if [[ "$OS" != "Windows_NT" ]]; then
         refresh_hints_dist "git@github.com:mitls/hacl-star.git" "true" "regenerate hints and dist" "."
+        if [[ $branchname == "master" ]] ; then
+          refresh_doc
+        fi
     fi
 }
 
 # Re-build and re-test all C code.
 # Then add changes to git.
 function clean_build_dist() {
+    ORANGE_FILE="../orange_file.txt"
     rm -rf dist/*/*
     env VALE_SCONS_PARALLEL_OPT="-j $threads" make -j $threads all-unstaged -k
     echo "Searching for a diff in dist/"
@@ -229,6 +255,9 @@ function exec_build() {
         return
     fi
 
+    ORANGE_FILE="../orange_file.txt"
+    echo '' >$ORANGE_FILE
+
     export_home HACL "$(pwd)"
     export_home EVERCRYPT "$(pwd)/providers"
 
@@ -256,6 +285,9 @@ function exec_build() {
     if [[ $(cat $status_file) != "true" ]]; then
         echo "Build failed"
         echo Failure >$result_file
+    elif [[ $(cat $ORANGE_FILE) != "" ]]; then
+        echo "Build had breakages"
+        echo Success with breakages $(cat $ORANGE_FILE) >$result_file
     else
         echo "Build succeeded"
         echo Success >$result_file

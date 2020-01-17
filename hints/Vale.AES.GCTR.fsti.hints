@@ -1,5 +1,5 @@
 [
-  "R-GZ¾¦¨\u0011Ð†øp†\u001c‡©",
+  "\u0014ªÇ\\– 8ðÁ×ª!MÓ\fE",
   [
     [
       "Vale.AES.GCTR.inc32lite",
@@ -22,7 +22,7 @@
         "typing_Vale.Def.Words_s.__proj__Mkfour__item__lo0"
       ],
       0,
-      "2c12e4ef133aeab26f8cc63f305d4095"
+      "f5da60a48fe12d35b9899304f322e30d"
     ],
     [
       "Vale.AES.GCTR.partial_seq_agreement",
@@ -34,7 +34,7 @@
         "refinement_interpretation_Tm_refine_21b1463d18ebbb1eb97818a4f59e4000"
       ],
       0,
-      "f6f308a0cdedf95cd04948207890b538"
+      "2b27291a87aee24360bade9822e5d582"
     ],
     [
       "Vale.AES.GCTR.gctr_encrypt_block_offset",
@@ -47,7 +47,7 @@
         "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c"
       ],
       0,
-      "3e92488a8e37ce428f937c2a767699f1"
+      "ebe8c6edd4ed8a0e51e06da2243d2bd6"
     ],
     [
       "Vale.AES.GCTR.gctr_encrypt_empty",
@@ -78,7 +78,7 @@
         "typing_Vale.Def.Types_s.le_seq_quad32_to_bytes"
       ],
       0,
-      "fd2da521b5092045728e59348c786476"
+      "50f5de8594147d368eb01d1113acff1d"
     ],
     [
       "Vale.AES.GCTR.aes_encrypt_BE",
@@ -87,7 +87,7 @@
       0,
       [ "@query" ],
       0,
-      "4beeaa35dfb2ab1f76d62c418cb8ba7b"
+      "7b2841413922a7d37a3fd7c0ad6c8cb8"
     ],
     [
       "Vale.AES.GCTR.gctr_registers_def",
@@ -96,10 +96,19 @@
       0,
       [ "@query" ],
       0,
-      "469f301a861bf2dfe31775d8200e3ab2"
+      "4cca5419bf8677d266683977b5a4145d"
     ],
     [
-      "Vale.AES.GCTR.gctr_partial",
+      "Vale.AES.GCTR.gctr_registers_reveal",
+      1,
+      1,
+      0,
+      [ "@query" ],
+      0,
+      "cd13913c3d968b883f946641e5796ed7"
+    ],
+    [
+      "Vale.AES.GCTR.gctr_partial_def",
       1,
       1,
       0,
@@ -108,7 +117,16 @@
         "refinement_interpretation_Tm_refine_21b1463d18ebbb1eb97818a4f59e4000"
       ],
       0,
-      "dbf71378dbafc4019ebeba680dc89ff7"
+      "c90582c08939324dfed05592dfd2dcd4"
+    ],
+    [
+      "Vale.AES.GCTR.gctr_partial_reveal",
+      1,
+      1,
+      0,
+      [ "@query" ],
+      0,
+      "6911399b9a25f3fe842fa443d7be8569"
     ],
     [
       "Vale.AES.GCTR.lemma_gctr_partial_append",
@@ -146,7 +164,7 @@
         "token_correspondence_Vale.AES.GCTR.gctr_partial"
       ],
       0,
-      "bf073c61a2cd0c67e59f5489a623969f"
+      "66955ca4900983feee6af3da4f35ae77"
     ],
     [
       "Vale.AES.GCTR.gctr_partial_opaque_ignores_postfix",
@@ -181,7 +199,7 @@
         "token_correspondence_Vale.AES.GCTR.gctr_partial"
       ],
       0,
-      "beff76c4ca8cc16a8c2a9fcfbf19413e"
+      "a591a46bd0cae694d4a2ec96caf39b46"
     ],
     [
       "Vale.AES.GCTR.gctr_partial_extend6",
@@ -194,7 +212,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "0af67760e80fdea0cffc1d9bc3757fd1"
+      "48ec7201eed030c9b68bdaeea99cc627"
     ],
     [
       "Vale.AES.GCTR.gctr_partial_completed",
@@ -208,7 +226,7 @@
         "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c"
       ],
       0,
-      "b6ef024c2ffb3419d234f8b64b4b64d8"
+      "f418f16a9079e6ab371f66b70045f6da"
     ],
     [
       "Vale.AES.GCTR.gctr_partial_opaque_completed",
@@ -221,7 +239,7 @@
         "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c"
       ],
       0,
-      "cfda31ef8854cad74a19a42c60e4f469"
+      "c24e7d158926f163770d6ce6f0edd6f1"
     ],
     [
       "Vale.AES.GCTR.gctr_partial_to_full_basic",
@@ -237,7 +255,7 @@
         "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c"
       ],
       0,
-      "707d181bfc108b65cdeb2bb7de1b3945"
+      "6d1f6495687201f194e34956c4b391e2"
     ],
     [
       "Vale.AES.GCTR.gctr_partial_to_full_advanced",
@@ -265,7 +283,7 @@
         "typing_Vale.Def.Types_s.le_seq_quad32_to_bytes"
       ],
       0,
-      "82b09b0f7bb5620d40aeebffad7d6fdf"
+      "350c64401130e7eaf6cc8c94f02a6cba"
     ],
     [
       "Vale.AES.GCTR.gctr_encrypt_one_block",
@@ -281,7 +299,7 @@
         "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c"
       ],
       0,
-      "f73266fccbfd86bb802a455bd9d8d0c2"
+      "c1ecd5354e45bf57b6dd899b4e368dd3"
     ],
     [
       "Vale.AES.GCTR.gctr_bytes_helper",
@@ -308,7 +326,7 @@
         "typing_FStar.Seq.Base.append"
       ],
       0,
-      "c6adbda82482749cd64867cb22bd497d"
+      "a659b267ce9e72b952e419d1342763cd"
     ]
   ]
 ]

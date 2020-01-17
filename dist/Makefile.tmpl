@@ -31,7 +31,7 @@ ifeq ($(UNAME),Darwin)
   VARIANT	= -darwin
   SO		= so
 else ifeq ($(UNAME),Linux)
-  CFLAGS	+= -fPIC -fstack-check
+  CFLAGS	+= -fPIC
   VARIANT	= -linux
   SO 		= so
   LDFLAGS	+= -Xlinker -z -Xlinker noexecstack -Xlinker --unresolved-symbols=report-all
@@ -136,7 +136,7 @@ lib_gen/%_gen.exe: libevercrypt.a
 	$(OCAMLOPT) $(filter-out %.a,$^) libevercrypt.a -o $@ $(MLLDFLAGS)
 
 %.cmx: %.ml
-	$(OCAMLOPT) -c $< -o $@
+	$(OCAMLOPT) -c $^ -o $@
 
 .PRECIOUS: lib/%_stubs.ml
 lib/%_stubs.ml: lib/%_c_stubs.c
@@ -153,6 +153,6 @@ lib/%_stubs.ml lib/%_c_stubs.c: lib_gen/%_gen.exe
 	$(DY)PATH=.:$(OPENSSL_HOME):$$$(DY)PATH $<
 
 libocamlevercrypt.cmxa: $(ALL_BINDINGS) $(ALL_ML_STUBS) $(ALL_C_STUBS) libevercrypt.$(SO)
-	ocamlfind mklib -o ocamlevercrypt $(filter-out %.so,$^) -L. -levercrypt $(MLLDFLAGS)
+	ocamlfind mklib -o ocamlevercrypt $(filter-out %.so,$^) libevercrypt.a $(MLLDFLAGS)
 
 endif

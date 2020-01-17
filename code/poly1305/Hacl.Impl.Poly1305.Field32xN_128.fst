@@ -26,12 +26,12 @@ val load_acc2:
   -> Stack unit
     (requires fun h ->
       live h acc /\ live h b /\ disjoint acc b /\
-      felem_fits h acc (1, 2, 1, 1, 1))
+      felem_fits h acc (2, 2, 2, 2, 2))
     (ensures  fun h0 _ h1 ->
       modifies (loc acc) h0 h1 /\
-      felem_fits h1 acc (2, 3, 2, 2, 2) /\
+      felem_fits h1 acc (3, 3, 3, 3, 3) /\
       feval h1 acc == Vec.load_acc2 (as_seq h0 b) (feval h0 acc).[0])
-
+[@CInline]
 let load_acc2 acc b =
   push_frame();
   let e = create 5ul (zero 2) in
@@ -64,14 +64,14 @@ val fmul_r2_normalize:
   -> Stack unit
     (requires fun h ->
       live h out /\ live h p /\
-      felem_fits h out (2,3,2,2,2) /\
+      felem_fits h out (3, 3, 3, 3, 3) /\
       load_precompute_r_post h p)
     (ensures  fun h0 _ h1 ->
       modifies (loc out) h0 h1 /\
-      acc_inv_t (as_tup5 h1 out) /\
+      felem_fits h1 out (2, 2, 2, 2, 2) /\
      (let r = feval h0 (gsub p 0ul 5ul) in
       (feval h1 out).[0] == Vec.normalize_2 r.[0] (feval h0 out)))
-
+[@CInline]
 let fmul_r2_normalize out p =
   let r = sub p 0ul 5ul in
   let r2 = sub p 10ul 5ul in

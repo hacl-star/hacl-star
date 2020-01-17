@@ -1,5 +1,5 @@
 [
-  "ï%¤k†‡ž²icÛv›r4ñ",
+  "\tB*ÌÃò]¸·\u0016'LÎŸ¥´",
   [
     [
       "Vale.SHA.Simplify_Sha.same_seq_downview8",
@@ -53,7 +53,7 @@
         "typing_Vale.Interop.Views.down_view8"
       ],
       0,
-      "2da963cbccb517808793528e7d69d5eb"
+      "2e9fb63f4d2573d240598561e4a0294c"
     ],
     [
       "Vale.SHA.Simplify_Sha.lemma_seq_nat8_le_seq_quad32_to_bytes_uint32",
@@ -96,7 +96,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt8@tok"
       ],
       0,
-      "76c2b944bddc52a5a5e3bef5279eceee"
+      "8c190a6de641a302fe29369d2fe8507b"
     ],
     [
       "Vale.SHA.Simplify_Sha.lemma_seq_nat8_le_seq_quad32_to_bytes_uint32",
@@ -132,9 +132,8 @@
         "equation_LowStar.Buffer.buffer",
         "equation_LowStar.Buffer.trivial_preorder",
         "equation_LowStar.BufferView.Down.as_buffer_t", "equation_Prims.nat",
-        "equation_Prims.pos", "equation_Vale.Def.Types_s.le_bytes_to_quad32",
+        "equation_Prims.pos",
         "equation_Vale.Def.Types_s.le_bytes_to_quad32_def",
-        "equation_Vale.Def.Types_s.le_seq_quad32_to_bytes",
         "equation_Vale.Def.Types_s.le_seq_quad32_to_bytes_def",
         "equation_Vale.Def.Types_s.quad32",
         "equation_Vale.Def.Words.Four_s.four_select",
@@ -148,7 +147,6 @@
         "equation_Vale.Interop.Types.down_view",
         "equation_Vale.Interop.Types.get_downview",
         "equation_Vale.Interop.Views.down_view8",
-        "equation_Vale.Interop.Views.get128",
         "equation_Vale.Interop.Views.get128_def",
         "equation_Vale.Interop.Views.up_view128",
         "equation_Vale.Lib.Seqs_s.compose",
@@ -157,8 +155,8 @@
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_FStar.Seq.Base.index",
         "function_token_typing_FStar.UInt8.t",
-        "function_token_typing_FStar.UInt8.uint_to_t",
-        "function_token_typing_Vale.Def.Opaque_s.make_opaque",
+        "function_token_typing_Vale.Def.Types_s.le_bytes_to_quad32",
+        "function_token_typing_Vale.Def.Types_s.le_seq_quad32_to_bytes",
         "function_token_typing_Vale.Def.Words.Seq_s.seq_four_to_seq_LE",
         "function_token_typing_Vale.Def.Words.Seq_s.seq_to_seq_four_LE",
         "function_token_typing_Vale.Def.Words_s.nat32",
@@ -208,10 +206,13 @@
         "projection_inverse_Vale.Def.Words_s.Mkfour_lo0",
         "projection_inverse_Vale.Def.Words_s.Mkfour_lo1",
         "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
+        "refinement_interpretation_Tm_refine_0fe8a12189cf4c417dda723cc135a9ac",
         "refinement_interpretation_Tm_refine_12cfdc5e5e9b4a21e137c684eae73d5b",
+        "refinement_interpretation_Tm_refine_26cd5d3afe4c12b7ef7a2cd00ae508d9",
         "refinement_interpretation_Tm_refine_32a927c4be2ea7459bf10eff6091102f",
         "refinement_interpretation_Tm_refine_35a0739c434508f48d0bb1d5cd5df9e8",
         "refinement_interpretation_Tm_refine_3c856770b7b89a811b59ec4664452b5d",
+        "refinement_interpretation_Tm_refine_4541e819c92681ed9a776d05a593cda6",
         "refinement_interpretation_Tm_refine_528966909e656beff90629dc95073b2d",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_553972523c0ad0511a59f7cdbdcafe94",
@@ -233,7 +234,6 @@
         "token_correspondence_FStar.UInt8.v",
         "token_correspondence_LowStar.BufferView.Up.__proj__View__item__get",
         "token_correspondence_Prims.pow2.fuel_instrumented",
-        "token_correspondence_Vale.Def.Opaque_s.make_opaque",
         "token_correspondence_Vale.Def.Types_s.le_bytes_to_quad32_def",
         "token_correspondence_Vale.Def.Types_s.le_seq_quad32_to_bytes_def",
         "token_correspondence_Vale.Def.Words.Four_s.four_to_nat",
@@ -244,7 +244,7 @@
         "typing_FStar.Monotonic.HyperStack.get_hmap",
         "typing_FStar.Monotonic.HyperStack.get_tip",
         "typing_FStar.Seq.Base.index", "typing_FStar.Seq.Base.init",
-        "typing_FStar.Seq.Base.length",
+        "typing_FStar.Seq.Base.length", "typing_FStar.Seq.Base.slice",
         "typing_LowStar.Buffer.trivial_preorder",
         "typing_LowStar.BufferView.Down.as_buffer",
         "typing_LowStar.Monotonic.Buffer.length",
@@ -256,11 +256,12 @@
         "typing_Vale.Def.Types_s.le_seq_quad32_to_bytes",
         "typing_Vale.Def.Words.Seq_s.seq_four_to_seq_LE",
         "typing_Vale.Def.Words.Seq_s.seq_nat8_to_seq_uint8",
+        "typing_Vale.Def.Words.Seq_s.seq_to_seq_four_LE",
         "typing_Vale.Interop.Types.down_view",
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt8@tok"
       ],
       0,
-      "002ba042f8936b744eae87b57cace6c0"
+      "9e9d33838b673c629ea4c3835bfbc000"
     ]
   ]
 ]

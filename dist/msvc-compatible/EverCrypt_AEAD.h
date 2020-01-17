@@ -63,7 +63,7 @@ EverCrypt_AEAD_encrypt(
   uint32_t ad_len,
   uint8_t *plain,
   uint32_t plain_len,
-  uint8_t *cipher1,
+  uint8_t *cipher,
   uint8_t *tag
 );
 
@@ -74,7 +74,7 @@ EverCrypt_AEAD_decrypt(
   uint32_t iv_len,
   uint8_t *ad,
   uint32_t ad_len,
-  uint8_t *cipher1,
+  uint8_t *cipher,
   uint32_t cipher_len,
   uint8_t *tag,
   uint8_t *dst

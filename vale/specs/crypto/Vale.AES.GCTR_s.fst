@@ -67,5 +67,5 @@ let gctr_encrypt_LE_def (icb_BE:quad32) (plain:seq nat8) (alg:algorithm) (key:se
     let final_cipher_bytes_LE = slice (le_quad32_to_bytes final_cipher_quad_LE) 0 num_extra in
 
     cipher_bytes_full_LE @| final_cipher_bytes_LE
-
-let gctr_encrypt_LE = make_opaque gctr_encrypt_LE_def
+[@"opaque_to_smt"] let gctr_encrypt_LE  = opaque_make gctr_encrypt_LE_def
+irreducible let gctr_encrypt_LE_reveal = opaque_revealer (`%gctr_encrypt_LE) gctr_encrypt_LE gctr_encrypt_LE_def

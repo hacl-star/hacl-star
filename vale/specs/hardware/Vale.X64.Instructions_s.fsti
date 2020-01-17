@@ -256,7 +256,7 @@ let eval_Pinsrd (index:nat8) (dst:quad32) (src:nat64) : option quad32 =
 val ins_Pinsrd (index:nat8) : instr_dep [inOut opXmm] [op64] PreserveFlags (eval_Pinsrd index)
 
 let eval_Pinsrq (index:nat8) (dst:quad32) (src:nat64) : option quad32 =
-  check_sse4_1 (Some (insert_nat64 dst src (index % 2)))
+  check_sse4_1 (Some (insert_nat64_def dst src (index % 2)))
 val ins_Pinsrq (index:nat8) : instr_dep [inOut opXmm] [op64] PreserveFlags (eval_Pinsrq index)
 
 let eval_Pslldq_raw (count:nat8) (src:quad32) : option quad32 =

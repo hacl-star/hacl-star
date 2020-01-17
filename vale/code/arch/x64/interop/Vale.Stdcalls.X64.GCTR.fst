@@ -60,7 +60,7 @@ let gctr128_pre : (Ghost.erased (Seq.seq nat32)) -> VSig.vale_pre dom =
     (ctr_b:b128)
     (num_blocks:uint64)
     (va_s0:V.va_state) ->
-      GC.va_req_gctr_bytes_stdcall c va_s0 IA.win AES_128
+      GC.va_req_Gctr_bytes_stdcall c va_s0 IA.win AES_128
         (as_vale_buffer in_b) (UInt64.v num_bytes)
         (as_vale_buffer out_b) (as_vale_buffer inout_b) (as_vale_buffer keys_b)
         (as_vale_buffer ctr_b) (UInt64.v num_blocks) (Ghost.reveal s)
@@ -80,7 +80,7 @@ let gctr128_post : (Ghost.erased (Seq.seq nat32)) -> VSig.vale_post dom =
     (va_s0:V.va_state)
     (va_s1:V.va_state)
     (f:V.va_fuel) ->
-      GC.va_ens_gctr_bytes_stdcall c va_s0 IA.win AES_128
+      GC.va_ens_Gctr_bytes_stdcall c va_s0 IA.win AES_128
         (as_vale_buffer in_b) (UInt64.v num_bytes)
         (as_vale_buffer out_b) (as_vale_buffer inout_b) (as_vale_buffer keys_b)
         (as_vale_buffer ctr_b) (UInt64.v num_blocks) (Ghost.reveal s) va_s1 f
@@ -113,7 +113,7 @@ let gctr128_lemma'
        ME.buffer_writeable (as_vale_buffer inout_b) /\
        ME.buffer_writeable (as_vale_buffer out_b)
  )) =
-   let va_s1, f = GC.va_lemma_gctr_bytes_stdcall code va_s0 IA.win AES_128
+   let va_s1, f = GC.va_lemma_Gctr_bytes_stdcall code va_s0 IA.win AES_128
         (as_vale_buffer in_b) (UInt64.v num_bytes)
         (as_vale_buffer out_b) (as_vale_buffer inout_b) (as_vale_buffer keys_b)
         (as_vale_buffer ctr_b) (UInt64.v num_blocks) (Ghost.reveal s) in
@@ -128,7 +128,7 @@ noextract
 let gctr128_lemma (s:Ghost.erased (Seq.seq nat32)) = as_t #(VSig.vale_sig_stdcall (gctr128_pre s)  (gctr128_post s)) (gctr128_lemma' s)
 
 noextract
-let code_gctr128 = GC.va_code_gctr_bytes_stdcall IA.win AES_128
+let code_gctr128 = GC.va_code_Gctr_bytes_stdcall IA.win AES_128
 
 [@__reduce__] noextract
 let lowstar_gctr128_t (s:Ghost.erased (Seq.seq nat32)) =
@@ -163,7 +163,7 @@ let gctr256_pre : (Ghost.erased (Seq.seq nat32)) -> VSig.vale_pre dom =
     (ctr_b:b128)
     (num_blocks:uint64)
     (va_s0:V.va_state) ->
-      GC.va_req_gctr_bytes_stdcall c va_s0 IA.win AES_256
+      GC.va_req_Gctr_bytes_stdcall c va_s0 IA.win AES_256
         (as_vale_buffer in_b) (UInt64.v num_bytes)
         (as_vale_buffer out_b) (as_vale_buffer inout_b) (as_vale_buffer keys_b)
         (as_vale_buffer ctr_b) (UInt64.v num_blocks) (Ghost.reveal s)
@@ -183,7 +183,7 @@ let gctr256_post : (Ghost.erased (Seq.seq nat32)) -> VSig.vale_post dom =
     (va_s0:V.va_state)
     (va_s1:V.va_state)
     (f:V.va_fuel) ->
-      GC.va_ens_gctr_bytes_stdcall c va_s0 IA.win AES_256
+      GC.va_ens_Gctr_bytes_stdcall c va_s0 IA.win AES_256
         (as_vale_buffer in_b) (UInt64.v num_bytes)
         (as_vale_buffer out_b) (as_vale_buffer inout_b) (as_vale_buffer keys_b)
         (as_vale_buffer ctr_b) (UInt64.v num_blocks) (Ghost.reveal s) va_s1 f
@@ -216,7 +216,7 @@ let gctr256_lemma'
        ME.buffer_writeable (as_vale_buffer inout_b) /\
        ME.buffer_writeable (as_vale_buffer out_b)
  )) =
-   let va_s1, f = GC.va_lemma_gctr_bytes_stdcall code va_s0 IA.win AES_256
+   let va_s1, f = GC.va_lemma_Gctr_bytes_stdcall code va_s0 IA.win AES_256
         (as_vale_buffer in_b) (UInt64.v num_bytes)
         (as_vale_buffer out_b) (as_vale_buffer inout_b) (as_vale_buffer keys_b)
         (as_vale_buffer ctr_b) (UInt64.v num_blocks) (Ghost.reveal s) in
@@ -231,7 +231,7 @@ noextract
 let gctr256_lemma (s:Ghost.erased (Seq.seq nat32)) = as_t #(VSig.vale_sig_stdcall (gctr256_pre s)  (gctr256_post s)) (gctr256_lemma' s)
 
 noextract
-let code_gctr256 = GC.va_code_gctr_bytes_stdcall IA.win AES_256
+let code_gctr256 = GC.va_code_Gctr_bytes_stdcall IA.win AES_256
 
 [@__reduce__] noextract
 let lowstar_gctr256_t (s:Ghost.erased (Seq.seq nat32)) =

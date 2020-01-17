@@ -1,5 +1,5 @@
 [
-  "þàh;’¤ó˜”\b¼¼ö\u0013<û",
+  "€\u001cXò˜hÈ·ôÿ~Ë¦˜\u000f4",
   [
     [
       "Vale.Def.Types_s.add_wrap",
@@ -17,7 +17,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "a33d7e2e3704f192ce05415173081d98"
+      "01fc6d5c9de4fa57826af7c84cc097c5"
     ],
     [
       "Vale.Def.Types_s.sub_wrap",
@@ -36,7 +36,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "b4f0c4786038875a7c6259f49e5ba48f"
+      "3a881555d3bc8fcbfd82f44bc18e8fd9"
     ],
     [
       "Vale.Def.Types_s.twobits",
@@ -52,7 +52,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "447b2d788815d4b12bc49c36d4390d31"
+      "edb5652ba0a98fa8ccb976d357020266"
     ],
     [
       "Vale.Def.Types_s.bits_of_byte",
@@ -69,7 +69,7 @@
         "typing_Vale.Def.Types_s.twobits"
       ],
       0,
-      "fa077d017a5571bfb768ea66f6baaca1"
+      "42cd38b1a157523854bb04832471f7de"
     ],
     [
       "Vale.Def.Types_s.double32",
@@ -88,7 +88,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "cc653ba3aaa74eecb46458047ffdf66e"
+      "cdbeedda96662ef4d559a11649391414"
     ],
     [
       "Vale.Def.Types_s.quad32",
@@ -107,7 +107,25 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "478427796f3a5bf98d17455cf55c158e"
+      "369f44ec8a4a2c35a36153c5beefef9f"
+    ],
+    [
+      "Vale.Def.Types_s.quad32_xor_reveal",
+      1,
+      1,
+      0,
+      [ "@query" ],
+      0,
+      "b4b8d75428d287067cd56af7949ad8f7"
+    ],
+    [
+      "Vale.Def.Types_s.insert_nat64_reveal",
+      1,
+      1,
+      0,
+      [ "@query" ],
+      0,
+      "2b4121c21cfcd1e2d1e16a95c5e5f64a"
     ],
     [
       "Vale.Def.Types_s.nat32_to_le_bytes",
@@ -116,7 +134,7 @@
       0,
       [ "@query" ],
       0,
-      "671328a3909ba4920a3fd265818e84ab"
+      "6d01b2dd9c989a1b6390365a43add2fe"
     ],
     [
       "Vale.Def.Types_s.nat32_to_be_bytes",
@@ -125,7 +143,7 @@
       0,
       [ "@query" ],
       0,
-      "ddb28062d3b1aca022a5f33db167b7bd"
+      "3e80292068aeeba937db2a8c3e0e998e"
     ],
     [
       "Vale.Def.Types_s.le_bytes_to_nat64_def",
@@ -154,7 +172,16 @@
         "typing_Vale.Def.Words.Seq_s.seq_to_seq_four_LE"
       ],
       0,
-      "3eb55ef0d2dd6e99352b9bdbfb9597be"
+      "cd6990a422186dd1fee16b934d697293"
+    ],
+    [
+      "Vale.Def.Types_s.le_bytes_to_nat64_reveal",
+      1,
+      1,
+      0,
+      [ "@query" ],
+      0,
+      "e75ea4a55d763ca00d1ed9833d714809"
     ],
     [
       "Vale.Def.Types_s.le_nat64_to_bytes_def",
@@ -187,7 +214,16 @@
         "typing_Vale.Def.Words.Seq_s.seq_four_to_seq_LE"
       ],
       0,
-      "c164d3e2029cec02d121520bd4121d22"
+      "30651523859375f121dbe73d4b6aca08"
+    ],
+    [
+      "Vale.Def.Types_s.le_nat64_to_bytes_reveal",
+      1,
+      1,
+      0,
+      [ "@query" ],
+      0,
+      "d61ddff205165cd8e1704c19653ca12d"
     ],
     [
       "Vale.Def.Types_s.le_bytes_to_quad32_def",
@@ -214,7 +250,16 @@
         "typing_Tm_abs_12f0bbc5cd2aeb167bc7e771b588a4ca"
       ],
       0,
-      "d53545679af10e908d95a215fd92d5c8"
+      "2c6709aad8007a8efc1d65934c267b0b"
+    ],
+    [
+      "Vale.Def.Types_s.le_bytes_to_quad32_reveal",
+      1,
+      1,
+      0,
+      [ "@query" ],
+      0,
+      "02a944e69c33f81e6aa585f4a722a41d"
     ],
     [
       "Vale.Def.Types_s.be_bytes_to_quad32_def",
@@ -241,7 +286,16 @@
         "typing_Tm_abs_12f0bbc5cd2aeb167bc7e771b588a4ca"
       ],
       0,
-      "c105e0e094a166b2e8fe7f555b2d2aaa"
+      "1dd57a6c30dc9d5de4a719e1302184ad"
+    ],
+    [
+      "Vale.Def.Types_s.be_bytes_to_quad32_reveal",
+      1,
+      1,
+      0,
+      [ "@query" ],
+      0,
+      "15e168af54499e67e461b2cbb82dbab0"
     ],
     [
       "Vale.Def.Types_s.le_quad32_to_bytes",
@@ -274,7 +328,16 @@
         "typing_Vale.Def.Words.Seq_s.four_to_seq_LE"
       ],
       0,
-      "5f3d7ef072bcbaa42c3292254690462b"
+      "e0622ec47317e62731e1648c2a251915"
+    ],
+    [
+      "Vale.Def.Types_s.le_seq_quad32_to_bytes_reveal",
+      1,
+      1,
+      0,
+      [ "@query" ],
+      0,
+      "1e670fbdb1853d952421d9321232c142"
     ],
     [
       "Vale.Def.Types_s.le_seq_quad32_to_bytes_length",
@@ -285,14 +348,13 @@
         "@MaxIFuel_assumption", "@query",
         "FStar.FunctionalExtensionality_interpretation_Tm_arrow_6980332764c4493a7b0df5c02f7aefbe",
         "FStar.Seq.Base_interpretation_Tm_arrow_44bb45ed5c2534b346e0f58ea5033251",
-        "equation_Vale.Def.Types_s.le_seq_quad32_to_bytes",
         "equation_Vale.Def.Types_s.le_seq_quad32_to_bytes_def",
         "equation_Vale.Def.Types_s.quad32",
         "equation_Vale.Def.Words.Seq_s.seq_nat32_to_seq_nat8_LE",
         "equation_Vale.Def.Words_s.nat32", "equation_Vale.Def.Words_s.nat8",
         "equation_Vale.Lib.Seqs_s.compose",
         "equation_Vale.Lib.Seqs_s.seq_map",
-        "function_token_typing_Vale.Def.Opaque_s.make_opaque",
+        "function_token_typing_Vale.Def.Types_s.le_seq_quad32_to_bytes",
         "function_token_typing_Vale.Def.Words_s.nat32",
         "function_token_typing_Vale.Def.Words_s.nat8",
         "kinding_Vale.Def.Words_s.four@tok",
@@ -307,7 +369,7 @@
         "typing_Vale.Def.Words.Seq_s.seq_four_to_seq_LE"
       ],
       0,
-      "69e327471ee418735ddd38fd31290524"
+      "a2227e2c89267858b750659526c6588e"
     ],
     [
       "Vale.Def.Types_s.le_bytes_to_seq_quad32",
@@ -336,7 +398,7 @@
         "typing_Vale.Def.Words.Seq_s.seq_to_seq_four_LE"
       ],
       0,
-      "4ad0944c76677613b459c318f63c7a84"
+      "de5e6f2b5a0c59e382981a192022d49a"
     ],
     [
       "Vale.Def.Types_s.be_bytes_to_seq_quad32",
@@ -365,7 +427,7 @@
         "typing_Vale.Def.Words.Seq_s.seq_to_seq_four_BE"
       ],
       0,
-      "f06e141ec0ed1e152693d317101be56b"
+      "037da65d4fe9a82579aee9371d17206e"
     ],
     [
       "Vale.Def.Types_s.reverse_bytes_nat32_def",
@@ -393,7 +455,16 @@
         "typing_Vale.Def.Types_s.nat32_to_be_bytes"
       ],
       0,
-      "d9ca1db79dc19af7b0170fe862775d29"
+      "314130de379f8d3127392d374dacc668"
+    ],
+    [
+      "Vale.Def.Types_s.reverse_bytes_nat32_reveal",
+      1,
+      1,
+      0,
+      [ "@query" ],
+      0,
+      "29b151bf777607d8957d980d1385d7aa"
     ],
     [
       "Vale.Def.Types_s.reverse_bytes_nat64_def",
@@ -402,7 +473,16 @@
       0,
       [ "@query" ],
       0,
-      "471c2beefc6ab1f68658564493691b4f"
+      "2c9393371ccdaa1e3ee23172399feca6"
+    ],
+    [
+      "Vale.Def.Types_s.reverse_bytes_nat64_reveal",
+      1,
+      1,
+      0,
+      [ "@query" ],
+      0,
+      "9a50a68d9af55f5f14d05bf1ce7add33"
     ],
     [
       "Vale.Def.Types_s.add_wrap",
@@ -418,7 +498,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "25296d5b4b039d6689c69e428fe9fbd5"
+      "8ae0d725be27d3229541744fe965e8c0"
     ],
     [
       "Vale.Def.Types_s.sub_wrap",
@@ -435,7 +515,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "cdac274794b45362049b11d7a7f9fad6"
+      "3c05d21e62167a2b0174501cbf2ad990"
     ],
     [
       "Vale.Def.Types_s.twobits",
@@ -451,7 +531,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "530e2587f02f8ca8067bba5c2462518c"
+      "bae743eece8d78be63f21acdaf1586e9"
     ],
     [
       "Vale.Def.Types_s.bits_of_byte",
@@ -468,7 +548,7 @@
         "typing_Vale.Def.Types_s.twobits"
       ],
       0,
-      "e873a18ffa5db84272444f8a412c229c"
+      "6eb46bc1af49ee7fe01f6a6c76fa2682"
     ],
     [
       "Vale.Def.Types_s.double32",
@@ -487,7 +567,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "b6ede050fdc4a9ab01cb50517bed4e8b"
+      "32459245dff31631db958eef9501debf"
     ],
     [
       "Vale.Def.Types_s.quad32",
@@ -506,7 +586,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "452237ebff017bbe28c27b2910f55af3"
+      "d7fae646ffef44550b23d483c5acd846"
     ],
     [
       "Vale.Def.Types_s.nat32_to_le_bytes",
@@ -515,7 +595,7 @@
       0,
       [ "@query" ],
       0,
-      "f647ffa61b29d36f9d51af25bdc118db"
+      "0e2eb887746a0daee703b584afdd93b0"
     ],
     [
       "Vale.Def.Types_s.nat32_to_be_bytes",
@@ -524,7 +604,7 @@
       0,
       [ "@query" ],
       0,
-      "4dd5c991174f7710960ac2ee3ceff2c2"
+      "b8371d41ee474d90dd22fabca36d57f3"
     ],
     [
       "Vale.Def.Types_s.le_bytes_to_nat64_def",
@@ -553,7 +633,7 @@
         "typing_Vale.Def.Words.Seq_s.seq_to_seq_four_LE"
       ],
       0,
-      "152154615ccb2c627afe6e3aa198e467"
+      "dddd0ed6a1fea21e446c793ad2c982d5"
     ],
     [
       "Vale.Def.Types_s.le_nat64_to_bytes_def",
@@ -587,7 +667,7 @@
         "typing_Vale.Def.Words.Seq_s.seq_four_to_seq_LE"
       ],
       0,
-      "43919f15dad9a28bd811cbe3758f08ab"
+      "30818919cba07b78f73283910b1debb2"
     ],
     [
       "Vale.Def.Types_s.le_bytes_to_quad32_def",
@@ -614,7 +694,7 @@
         "typing_Tm_abs_12f0bbc5cd2aeb167bc7e771b588a4ca"
       ],
       0,
-      "32af5a3c030f2fcf74bf0ac7caa77e84"
+      "90940789c60483f7eea9f6ad8e13b101"
     ],
     [
       "Vale.Def.Types_s.be_bytes_to_quad32_def",
@@ -641,7 +721,7 @@
         "typing_Tm_abs_12f0bbc5cd2aeb167bc7e771b588a4ca"
       ],
       0,
-      "cfd6fb6a3057da67e41b176192d0f5f0"
+      "efa05694066c00d14ead53da65f2e130"
     ],
     [
       "Vale.Def.Types_s.le_quad32_to_bytes",
@@ -675,7 +755,7 @@
         "typing_Vale.Def.Words.Seq_s.four_to_seq_LE"
       ],
       0,
-      "ea5ebc65e3bc652e392e54c3d46da68a"
+      "5898b12863d6ca3dddd0f596d7d3099a"
     ],
     [
       "Vale.Def.Types_s.le_bytes_to_seq_quad32",
@@ -704,7 +784,7 @@
         "typing_Vale.Def.Words.Seq_s.seq_to_seq_four_LE"
       ],
       0,
-      "15c06b839b01b0c705c803f614252826"
+      "97de081209740aa76bad21e4b8e2e96b"
     ],
     [
       "Vale.Def.Types_s.be_bytes_to_seq_quad32",
@@ -733,7 +813,7 @@
         "typing_Vale.Def.Words.Seq_s.seq_to_seq_four_BE"
       ],
       0,
-      "936bc1d2f8f6ce9421daa1351f45308b"
+      "15d79889fbc1f2b4880689aabbab17e1"
     ],
     [
       "Vale.Def.Types_s.reverse_bytes_nat32_def",
@@ -761,7 +841,7 @@
         "typing_Vale.Def.Types_s.nat32_to_be_bytes"
       ],
       0,
-      "746177319da544231984cf6b5867c669"
+      "e39323f90c4435087ff68c232b4cb019"
     ],
     [
       "Vale.Def.Types_s.reverse_bytes_nat64_def",
@@ -770,7 +850,7 @@
       0,
       [ "@query" ],
       0,
-      "6e74bfa685c164e4af2a253fcff580b9"
+      "7e64ef9d5bf3820ee40537decc9284b1"
     ]
   ]
 ]

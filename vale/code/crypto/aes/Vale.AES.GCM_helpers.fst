@@ -140,7 +140,7 @@ let slice_le_quad32_to_bytes_is_mod (q:quad32) (num_bytes:int) : Lemma
   ()
 
 let insert_0_is_padding (q:quad32) :
-  Lemma (let q' = insert_nat64 q 0 1 in
+  Lemma (let q' = insert_nat64_def q 0 1 in
          q' == le_bytes_to_quad32 (pad_to_128_bits (slice (le_quad32_to_bytes q) 0 8)))
   =
   ()
@@ -149,7 +149,7 @@ let insert_0_is_padding (q:quad32) :
 
 #reset-options "--z3cliopt smt.QI.EAGER_THRESHOLD=100 --z3cliopt smt.CASE_SPLIT=3 --z3cliopt smt.arith.nl=true --max_fuel 2 --initial_fuel 2 --max_ifuel 0 --smtencoding.elim_box true --smtencoding.nl_arith_repr native --z3rlimit 10"
 let le_quad32_to_bytes_sel (q : quad32) (i:nat{i < 16}) =
-  FStar.Pervasives.reveal_opaque (`%le_quad32_to_bytes) le_quad32_to_bytes;
+  reveal_opaque (`%le_quad32_to_bytes) le_quad32_to_bytes;
   let Mkfour q0 q1 q2 q3 = q in
   assert (index (Vale.Def.Words.Seq_s.four_to_seq_LE q) 0 == q0);
   assert (index (Vale.Def.Words.Seq_s.four_to_seq_LE q) 1 == q1);
@@ -282,7 +282,7 @@ let lemma_mod_n_8_lower1 (q:quad32) (n:nat) : Lemma
   (requires n <= 4)
   (ensures lo64 q % pow2 (8 * n) == q.lo0 % pow2 (8 * n))
   =
-  reveal_opaque lo64_def;
+  lo64_reveal ();
   let Mkfour _ _ _ _ = q in // avoid ifuel
   let f (n:nat{n <= 4}) = lo64_def q % pow2 (8 * n) == q.lo0 % pow2 (8 * n) in
   assert_norm (f 0);
@@ -296,7 +296,7 @@ let lemma_mod_n_8_lower2_helper (q:quad32) (n:nat) : Lemma
   (requires n <= 2)
   (ensures lo64 q % pow2 (8 * (4 + n)) == q.lo0 + 0x100000000 * (q.lo1 % pow2 (8 * n)))
   =
-  reveal_opaque lo64_def;
+  lo64_reveal ();
   let Mkfour _ _ _ _ = q in // avoid ifuel
   let f (n:nat{n <= 4}) = lo64_def q % pow2 (8 * (4 + n)) == q.lo0 + 0x100000000 * (q.lo1 % pow2 (8 * n)) in
   assert_norm (f 2);
@@ -308,7 +308,7 @@ let lemma_mod_n_8_lower2 (q:quad32) (n:nat) : Lemma
   (requires n <= 4)
   (ensures lo64 q % pow2 (8 * (4 + n)) == q.lo0 + 0x100000000 * (q.lo1 % pow2 (8 * n)))
   =
-  reveal_opaque lo64_def;
+  lo64_reveal ();
   if n <= 2 then lemma_mod_n_8_lower2_helper q n else
   let Mkfour _ _ _ _ = q in // avoid ifuel
   let f (n:nat{n <= 4}) = lo64_def q % pow2 (8 * (4 + n)) == q.lo0 + 0x100000000 * (q.lo1 % pow2 (8 * n)) in
@@ -320,8 +320,8 @@ let lemma_mod_n_8_upper1 (q:quad32) (n:nat) : Lemma
   (requires n <= 4)
   (ensures hi64 q % pow2 (8 * n) == q.hi2 % pow2 (8 * n))
   =
-  reveal_opaque hi64_def;
-  reveal_opaque lo64_def;
+  hi64_reveal ();
+  lo64_reveal ();
   let Mkfour _ _ q2 q3 = q in
   lemma_mod_n_8_lower1 (Mkfour q2 q3 0 0) n
 
@@ -329,8 +329,8 @@ let lemma_mod_n_8_upper2 (q:quad32) (n:nat) : Lemma
   (requires n <= 4)
   (ensures hi64 q % pow2 (8 * (4 + n)) == q.hi2 + 0x100000000 * (q.hi3 % pow2 (8 * n)))
   =
-  reveal_opaque hi64_def;
-  reveal_opaque lo64_def;
+  hi64_reveal ();
+  lo64_reveal ();
   let Mkfour _ _ q2 q3 = q in
   lemma_mod_n_8_lower2 (Mkfour q2 q3 0 0) n
 
@@ -409,8 +409,8 @@ let lemma_slices_le_quad32_to_bytes (q:quad32) : Lemma
     q.hi3 == four_to_nat 8 (seq_to_four_LE (slice s 12 16))
   ))
   =
-  FStar.Pervasives.reveal_opaque (`%seq_four_to_seq_LE) (seq_four_to_seq_LE #nat8);
-  FStar.Pervasives.reveal_opaque (`%le_quad32_to_bytes) le_quad32_to_bytes;
+  reveal_opaque (`%seq_four_to_seq_LE) (seq_four_to_seq_LE #nat8);
+  reveal_opaque (`%le_quad32_to_bytes) le_quad32_to_bytes;
   ()
 
 let lemma_slices_le_bytes_to_quad32 (s:seq16 nat8) : Lemma
@@ -422,8 +422,8 @@ let lemma_slices_le_bytes_to_quad32 (s:seq16 nat8) : Lemma
     q.hi3 == four_to_nat 8 (seq_to_four_LE (slice s 12 16))
   ))
   =
-  FStar.Pervasives.reveal_opaque (`%seq_to_seq_four_LE) (seq_to_seq_four_LE #nat8);
-  reveal_opaque le_bytes_to_quad32_def;
+  reveal_opaque (`%seq_to_seq_four_LE) (seq_to_seq_four_LE #nat8);
+  le_bytes_to_quad32_reveal ();
   ()
 
 let lemma_four_zero (_:unit) : Lemma
@@ -439,8 +439,8 @@ let pad_to_128_bits_lower (q:quad32) (num_bytes:int) =
   pow2_lt_compat 64 (n * 8);
   let s = le_quad32_to_bytes q in
   let s' = slice s 0 n in
-  let q' = insert_nat64 (insert_nat64 q 0 1) new_lo 0 in
-  reveal_opaque insert_nat64;
+  let q' = insert_nat64_def (insert_nat64_def q 0 1) new_lo 0 in
+  insert_nat64_reveal ();
   let s'' = pad_to_128_bits s' in
   let q'' = le_bytes_to_quad32 s'' in
 
@@ -488,8 +488,8 @@ let pad_to_128_bits_upper (q:quad32) (num_bytes:int) =
   pow2_lt_compat 64 ((n - 8) * 8);
   let s = le_quad32_to_bytes q in
   let s' = slice s 0 n in
-  let q' = insert_nat64 q new_hi 1 in
-  reveal_opaque insert_nat64;
+  let q' = insert_nat64_def q new_hi 1 in
+  insert_nat64_reveal ();
   let s'' = pad_to_128_bits s' in
   let q'' = le_bytes_to_quad32 s'' in
 
