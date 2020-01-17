@@ -22,7 +22,7 @@ let as_nat (b:B.buffer UInt64.t{B.length b == 4}) (h:HS.mem) : GTot nat =
   let s3 = UInt64.v (Seq.index s 3) in
   pow2_four s0 s1 s2 s3
 
-val fmul_inline
+val fmul
   (tmp:u512)
   (f1:u256)
   (out:u256)
@@ -42,7 +42,7 @@ val fmul_inline
       B.modifies (B.loc_union (B.loc_buffer out) (B.loc_buffer tmp)) h0 h1 /\
       (as_nat out h1) % prime == (as_nat f1 h0 * as_nat f2 h0) % prime)
 
-val fmul2_inline
+val fmul2
   (tmp:u1024)
   (f1:u512)
   (out:u512)
@@ -69,7 +69,7 @@ val fmul2_inline
       (as_nat out0 h1) % prime == (as_nat f10 h0 * as_nat f20 h0) % prime /\
       (as_nat out1 h1) % prime == (as_nat f11 h0 * as_nat f21 h0) % prime))
 
-val fmul1_inline
+val fmul_scalar
   (out:u256)
   (f1:u256)
   (f2:UInt64.t{UInt64.v f2 < 131072})

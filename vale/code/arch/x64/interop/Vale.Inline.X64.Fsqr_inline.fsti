@@ -8,7 +8,7 @@ open Vale.Curve25519.Fast_defs
 open FStar.Mul
 open Vale.Wrapper.X64.Fadd
 
-val fsqr_inline
+val fsqr
   (tmp:u512)
   (f1:u256)
   (out:u256)
@@ -24,7 +24,7 @@ val fsqr_inline
       B.modifies (B.loc_union (B.loc_buffer out) (B.loc_buffer tmp)) h0 h1 /\
       (as_nat out h1) % prime == (as_nat f1 h0 * as_nat f1 h0) % prime)
 
-val fsqr2_inline
+val fsqr2
   (tmp:u1024)
   (f1:u512)
   (out:u512)
