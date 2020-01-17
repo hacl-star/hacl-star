@@ -159,7 +159,11 @@ Hacl_Impl_Curve25519_Field51_fmul(
 
 /* SNIPPET_START: fmul20 */
 
+<<<<<<< HEAD
 static inline void fmul20(uint64_t *out, uint64_t *f1, uint64_t *f2)
+=======
+inline static void fmul20(uint64_t *out, uint64_t *f1, uint64_t *f2)
+>>>>>>> master
 {
   uint64_t f10 = f1[0U];
   uint64_t f11 = f1[1U];
@@ -453,7 +457,11 @@ Hacl_Impl_Curve25519_Field51_fsqr(
 
 /* SNIPPET_START: fsqr20 */
 
+<<<<<<< HEAD
 static inline void fsqr20(uint64_t *out, uint64_t *f)
+=======
+inline static void fsqr20(uint64_t *out, uint64_t *f)
+>>>>>>> master
 {
   uint64_t f10 = f[0U];
   uint64_t f11 = f[1U];

@@ -1,0 +1,20 @@
+
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>KreMLin main driver</title>
+    
+    <script type="application/javascript">
+      var my_modules = ["WasmSupport", "FStar", "LowStar_Endianness", "C_String", "TestLib", "C", "Lib_RandomBuffer_System", "EverCrypt", "Test_NoHeap"];
+    </script>
+    <script type="application/javascript" src="browser.js"></script>
+    <script type="application/javascript" src="loader.js"></script>
+    <script type="application/javascript">
+      window.addEventListener("load", kremlin_start);
+    </script>
+  </head>
+  <body>
+    <pre id="terminal"></pre>
+  </body>
+</html>

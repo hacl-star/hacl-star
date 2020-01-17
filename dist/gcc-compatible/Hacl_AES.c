@@ -1491,8 +1491,12 @@ Crypto_Symmetric_AES_keyExpansion_aux_0(uint8_t *w, uint8_t *temp, uint8_t *sbox
   }
 }
 
+<<<<<<< HEAD
 static void
 Crypto_Symmetric_AES_keyExpansion_aux_1(uint8_t *w, uint8_t *temp, uint8_t *sbox, uint32_t j)
+=======
+static void keyExpansion_aux_1(uint8_t *w, uint8_t *temp, uint32_t j)
+>>>>>>> master
 {
   uint32_t i = (uint32_t)4U * j;
   uint8_t w0 = w[i + (uint32_t)0U - (uint32_t)32U];
@@ -1514,9 +1518,15 @@ Crypto_Symmetric_AES_keyExpansion_aux(uint8_t *w, uint8_t *temp, uint8_t *sbox, 
 {
   if (j < (uint32_t)60U)
   {
+<<<<<<< HEAD
     Crypto_Symmetric_AES_keyExpansion_aux_0(w, temp, sbox, j);
     Crypto_Symmetric_AES_keyExpansion_aux_1(w, temp, sbox, j);
     Crypto_Symmetric_AES_keyExpansion_aux(w, temp, sbox, j + (uint32_t)1U);
+=======
+    keyExpansion_aux_0(w, temp, sbox, j);
+    keyExpansion_aux_1(w, temp, j);
+    keyExpansion_aux(w, temp, sbox, j + (uint32_t)1U);
+>>>>>>> master
   }
 }
 
@@ -3122,6 +3132,7 @@ Crypto_Symmetric_AES128_keyExpansion_aux_0(
   }
 }
 
+<<<<<<< HEAD
 static void
 Crypto_Symmetric_AES128_keyExpansion_aux_1(
   uint8_t *w,
@@ -3129,6 +3140,9 @@ Crypto_Symmetric_AES128_keyExpansion_aux_1(
   uint8_t *sbox,
   uint32_t j
 )
+=======
+static void keyExpansion_aux_10(uint8_t *w, uint8_t *temp, uint32_t j)
+>>>>>>> master
 {
   uint32_t i = (uint32_t)4U * j;
   uint8_t w0 = w[i + (uint32_t)0U - (uint32_t)16U];
@@ -3150,9 +3164,15 @@ Crypto_Symmetric_AES128_keyExpansion_aux(uint8_t *w, uint8_t *temp, uint8_t *sbo
 {
   if (j < (uint32_t)44U)
   {
+<<<<<<< HEAD
     Crypto_Symmetric_AES128_keyExpansion_aux_0(w, temp, sbox, j);
     Crypto_Symmetric_AES128_keyExpansion_aux_1(w, temp, sbox, j);
     Crypto_Symmetric_AES128_keyExpansion_aux(w, temp, sbox, j + (uint32_t)1U);
+=======
+    keyExpansion_aux_00(w, temp, sbox, j);
+    keyExpansion_aux_10(w, temp, j);
+    keyExpansion_aux0(w, temp, sbox, j + (uint32_t)1U);
+>>>>>>> master
   }
 }
 

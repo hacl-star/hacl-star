@@ -24,6 +24,91 @@
 
 #include "Hacl_Curve25519_64.h"
 
+<<<<<<< HEAD
+=======
+inline static u64 add10(u64 *out1, u64 *f1, u64 f2)
+{
+  #if EVERCRYPT_TARGETCONFIG_GCC
+  return add1_inline(out1, f1, f2);
+  #else
+  u64 scrut = add1(out1, f1, f2);
+  return scrut;
+  #endif
+}
+
+inline static void fadd(u64 *out1, u64 *f1, u64 *f2)
+{
+  #if EVERCRYPT_TARGETCONFIG_GCC
+  fadd_inline(out1, f1, f2);
+  #else
+  u64 uu____0 = fadd_(out1, f1, f2);
+  #endif
+}
+
+inline static void fsub(u64 *out1, u64 *f1, u64 *f2)
+{
+  #if EVERCRYPT_TARGETCONFIG_GCC
+  fsub_inline(out1, f1, f2);
+  #else
+  u64 uu____0 = fsub_(out1, f1, f2);
+  #endif
+}
+
+inline static void fmul(u64 *out1, u64 *f1, u64 *f2, u64 *tmp)
+{
+  #if EVERCRYPT_TARGETCONFIG_GCC
+  fmul_inline(tmp, f1, out1, f2);
+  #else
+  u64 uu____0 = fmul_(tmp, f1, out1, f2);
+  #endif
+}
+
+inline static void fmul20(u64 *out1, u64 *f1, u64 *f2, u64 *tmp)
+{
+  #if EVERCRYPT_TARGETCONFIG_GCC
+  fmul2_inline(tmp, f1, out1, f2);
+  #else
+  u64 uu____0 = fmul2(tmp, f1, out1, f2);
+  #endif
+}
+
+inline static void fmul10(u64 *out1, u64 *f1, u64 f2)
+{
+  #if EVERCRYPT_TARGETCONFIG_GCC
+  fmul1_inline(out1, f1, f2);
+  #else
+  u64 uu____0 = fmul1(out1, f1, f2);
+  #endif
+}
+
+inline static void fsqr0(u64 *out1, u64 *f1, u64 *tmp)
+{
+  #if EVERCRYPT_TARGETCONFIG_GCC
+  fsqr_inline(tmp, f1, out1);
+  #else
+  u64 uu____0 = fsqr(tmp, f1, out1);
+  #endif
+}
+
+inline static void fsqr20(u64 *out1, u64 *f, u64 *tmp)
+{
+  #if EVERCRYPT_TARGETCONFIG_GCC
+  fsqr2_inline(tmp, f, out1);
+  #else
+  u64 uu____0 = fsqr2(tmp, f, out1);
+  #endif
+}
+
+inline static void cswap20(u64 bit, u64 *p1, u64 *p2)
+{
+  #if EVERCRYPT_TARGETCONFIG_GCC
+  cswap2_inline(bit, p1, p2);
+  #else
+  u64 uu____0 = cswap2(bit, p1, p2);
+  #endif
+}
+
+>>>>>>> master
 static u8 g25519[32U] = { (u8)9U };
 
 static void point_add_and_double(u64 *q, u64 *p01_tmp1, u64 *tmp2)

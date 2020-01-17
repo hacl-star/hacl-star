@@ -36,55 +36,91 @@
 
 /* SNIPPET_START: cswap2 */
 
+<<<<<<< HEAD
 static inline void cswap2(uint64_t bit, uint64_t *p0, uint64_t *p1);
+=======
+inline static void cswap2_inline(uint64_t bit, uint64_t *p0, uint64_t *p1);
+>>>>>>> master
 
 /* SNIPPET_END: cswap2 */
 
 /* SNIPPET_START: fsqr */
 
+<<<<<<< HEAD
 static inline void fsqr(uint64_t *out1, uint64_t *f1, uint64_t *tmp);
+=======
+inline static void fsqr_inline(uint64_t *tmp, uint64_t *f1, uint64_t *out1);
+>>>>>>> master
 
 /* SNIPPET_END: fsqr */
 
 /* SNIPPET_START: fsqr2 */
 
+<<<<<<< HEAD
 static inline void fsqr2(uint64_t *out1, uint64_t *f1, uint64_t *tmp);
+=======
+inline static void fsqr2_inline(uint64_t *tmp, uint64_t *f1, uint64_t *out1);
+>>>>>>> master
 
 /* SNIPPET_END: fsqr2 */
 
 /* SNIPPET_START: fmul */
 
+<<<<<<< HEAD
 static inline void fmul(uint64_t *out1, uint64_t *f1, uint64_t *f2, uint64_t *tmp);
+=======
+inline static void fmul_inline(uint64_t *tmp, uint64_t *f1, uint64_t *out1, uint64_t *f2);
+>>>>>>> master
 
 /* SNIPPET_END: fmul */
 
 /* SNIPPET_START: fmul2 */
 
+<<<<<<< HEAD
 static inline void fmul2(uint64_t *out1, uint64_t *f1, uint64_t *f2, uint64_t *tmp);
+=======
+inline static void fmul2_inline(uint64_t *tmp, uint64_t *f1, uint64_t *out1, uint64_t *f2);
+>>>>>>> master
 
 /* SNIPPET_END: fmul2 */
 
 /* SNIPPET_START: fmul_scalar */
 
+<<<<<<< HEAD
 static inline void fmul_scalar(uint64_t *out1, uint64_t *f1, uint64_t f2);
+=======
+inline static void fmul1_inline(uint64_t *out1, uint64_t *f1, uint64_t f2);
+>>>>>>> master
 
 /* SNIPPET_END: fmul_scalar */
 
 /* SNIPPET_START: add_scalar */
 
+<<<<<<< HEAD
 static inline uint64_t add_scalar(uint64_t *out1, uint64_t *f1, uint64_t f2);
+=======
+inline static uint64_t add1_inline(uint64_t *out1, uint64_t *f1, uint64_t f2);
+>>>>>>> master
 
 /* SNIPPET_END: add_scalar */
 
 /* SNIPPET_START: fadd */
 
+<<<<<<< HEAD
 static inline void fadd(uint64_t *out1, uint64_t *f1, uint64_t *f2);
+=======
+inline static void fadd_inline(uint64_t *out1, uint64_t *f1, uint64_t *f2);
+>>>>>>> master
 
 /* SNIPPET_END: fadd */
 
 /* SNIPPET_START: fsub */
 
+<<<<<<< HEAD
 static inline void fsub(uint64_t *out1, uint64_t *f1, uint64_t *f2);
+=======
+inline static void fsub_inline(uint64_t *out1, uint64_t *f1, uint64_t *f2);
+>>>>>>> master
 
 /* SNIPPET_END: fsub */
 
