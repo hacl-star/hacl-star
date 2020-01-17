@@ -219,10 +219,10 @@ let rec print_explicit_register_args (n:nat) (args:list td) (i:nat{i + List.leng
   | [] -> ""
   | a::q -> print_explicit_register_arg n a i of_arg reserved names ^ print_explicit_register_args n q (i+1) of_arg reserved names
 
-// If we have a return parameter with a reserved register, print "register uint64_t *[name] asm("rax");\n"
+// If we have a return parameter with a reserved register, print "register uint64_t [name] asm("rax");\n"
 let print_register_ret (reserved:reg_64 -> bool) = function
   | None -> ""
-  | Some name -> if reserved rRax then "  register uint64_t *" ^ name ^ " asm(\"rax\");\n" else "  uint64_t " ^ name ^ ";\n"
+  | Some name -> if reserved rRax then "  register uint64_t " ^ name ^ " asm(\"rax\");\n" else "  uint64_t " ^ name ^ ";\n"
 
 (* This is a copy from X64.Print_s, and should remain in sync. The difference is that
    each line should be in quotes, and end by a semicolon in inline assembly *)
