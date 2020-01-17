@@ -1,6 +1,6 @@
 .text
-.global _add1
-_add1:
+.global _add_scalar_e
+_add_scalar_e:
   push %rdi
   push %rsi
   ;# Clear registers to propagate the carry bit
@@ -26,8 +26,8 @@ _add1:
   pop %rdi
   ret
 
-.global _fadd_
-_fadd_:
+.global _fadd_e
+_fadd_e:
   ;# Compute the raw addition of f1 + f2
   movq 0(%rdx), %r8
   addq 0(%rsi), %r8
@@ -60,8 +60,8 @@ _fadd_:
   movq %r8, 0(%rdi)
   ret
 
-.global _fsub_
-_fsub_:
+.global _fsub_e
+_fsub_e:
   ;# Compute the raw substraction of f1-f2
   movq 0(%rsi), %r8
   subq 0(%rdx), %r8
@@ -95,8 +95,8 @@ _fsub_:
   movq %r11, 24(%rdi)
   ret
 
-.global _fmul1
-_fmul1:
+.global _fmul_scalar_e
+_fmul_scalar_e:
   push %rdi
   push %r12
   push %r13
@@ -138,8 +138,8 @@ _fmul1:
   pop %rdi
   ret
 
-.global _fmul_
-_fmul_:
+.global _fmul_e
+_fmul_e:
   push %r12
   push %r13
   push %r14
@@ -275,8 +275,8 @@ _fmul_:
   pop %r12
   ret
 
-.global _fmul2
-_fmul2:
+.global _fmul2_e
+_fmul2_e:
   push %r12
   push %r13
   push %r14
@@ -532,8 +532,8 @@ _fmul2:
   pop %r12
   ret
 
-.global _fsqr
-_fsqr:
+.global _fsqr_e
+_fsqr_e:
   push %r15
   push %r12
   push %r13
@@ -663,8 +663,8 @@ _fsqr:
   pop %r15
   ret
 
-.global _fsqr2
-_fsqr2:
+.global _fsqr2_e
+_fsqr2_e:
   push %r15
   push %r12
   push %r13
@@ -905,8 +905,8 @@ _fsqr2:
   pop %r15
   ret
 
-.global _cswap2
-_cswap2:
+.global _cswap2_e
+_cswap2_e:
   ;# Invert the polarity of bit to match cmov expectations
   add $18446744073709551615, %rdi
   

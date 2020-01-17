@@ -1,6 +1,6 @@
 .text
-.global add1
-add1:
+.global add_scalar_e
+add_scalar_e:
   push %rdi
   push %rsi
   mov %rcx, %rdi
@@ -29,8 +29,8 @@ add1:
   pop %rdi
   ret
 
-.global fadd_
-fadd_:
+.global fadd_e
+fadd_e:
   push %rdi
   push %rsi
   mov %rcx, %rdi
@@ -70,8 +70,8 @@ fadd_:
   pop %rdi
   ret
 
-.global fsub_
-fsub_:
+.global fsub_e
+fsub_e:
   push %rdi
   push %rsi
   mov %rcx, %rdi
@@ -112,8 +112,8 @@ fsub_:
   pop %rdi
   ret
 
-.global fmul1
-fmul1:
+.global fmul_scalar_e
+fmul_scalar_e:
   push %rdi
   push %r12
   push %r13
@@ -160,8 +160,8 @@ fmul1:
   pop %rdi
   ret
 
-.global fmul_
-fmul_:
+.global fmul_e
+fmul_e:
   push %r12
   push %r13
   push %r14
@@ -304,8 +304,8 @@ fmul_:
   pop %r12
   ret
 
-.global fmul2
-fmul2:
+.global fmul2_e
+fmul2_e:
   push %r12
   push %r13
   push %r14
@@ -568,8 +568,8 @@ fmul2:
   pop %r12
   ret
 
-.global fsqr
-fsqr:
+.global fsqr_e
+fsqr_e:
   push %r15
   push %r12
   push %r13
@@ -705,8 +705,8 @@ fsqr:
   pop %r15
   ret
 
-.global fsqr2
-fsqr2:
+.global fsqr2_e
+fsqr2_e:
   push %r15
   push %r12
   push %r13
@@ -953,8 +953,8 @@ fsqr2:
   pop %r15
   ret
 
-.global cswap2
-cswap2:
+.global cswap2_e
+cswap2_e:
   push %rdi
   push %rsi
   mov %rcx, %rdi

@@ -4,7 +4,7 @@
 
 // Computes the addition of four-element f1 with value in f2
 // and returns the carry (if any)
-static inline uint64_t add1_inline (uint64_t *out1, uint64_t *f1, uint64_t f2) 
+static inline uint64_t add_scalar (uint64_t *out1, uint64_t *f1, uint64_t f2) 
 {
   uint64_t carry_r;
 
@@ -37,7 +37,7 @@ static inline uint64_t add1_inline (uint64_t *out1, uint64_t *f1, uint64_t f2)
 }
 
 // Computes the field addition of two field elements
-static inline void fadd_inline (uint64_t *out1, uint64_t *f1, uint64_t *f2) 
+static inline void fadd (uint64_t *out1, uint64_t *f1, uint64_t *f2) 
 {
   asm volatile(
     // Compute the raw addition of f1 + f2
@@ -79,7 +79,7 @@ static inline void fadd_inline (uint64_t *out1, uint64_t *f1, uint64_t *f2)
 }
 
 // Computes the field substraction of two field elements
-static inline void fsub_inline (uint64_t *out1, uint64_t *f1, uint64_t *f2) 
+static inline void fsub (uint64_t *out1, uint64_t *f1, uint64_t *f2) 
 {
   asm volatile(
     // Compute the raw substraction of f1-f2
@@ -123,7 +123,7 @@ static inline void fsub_inline (uint64_t *out1, uint64_t *f1, uint64_t *f2)
 
 // Computes a field multiplication: out <- f1 * f2
 // Uses the 8-element buffer tmp for intermediate results
-static inline void fmul_inline (uint64_t *tmp, uint64_t *f1, uint64_t *out, uint64_t *f2) 
+static inline void fmul (uint64_t *tmp, uint64_t *f1, uint64_t *out, uint64_t *f2) 
 {
   asm volatile(
 
@@ -211,7 +211,7 @@ static inline void fmul_inline (uint64_t *tmp, uint64_t *f1, uint64_t *out, uint
 //   out[0] <- f1[0] * f2[0]
 //   out[1] <- f1[1] * f2[1]
 // Uses the 16-element buffer tmp for intermediate results:
-static inline void fmul2_inline (uint64_t *tmp, uint64_t *f1, uint64_t *out1, uint64_t *f2) 
+static inline void fmul2 (uint64_t *tmp, uint64_t *f1, uint64_t *out1, uint64_t *f2) 
 {
   asm volatile(
 
@@ -365,7 +365,7 @@ static inline void fmul2_inline (uint64_t *tmp, uint64_t *f1, uint64_t *out1, ui
 }
 
 // Computes the field multiplication of four-element f1 with value in f2
-static inline void fmul1_inline (uint64_t *out1, uint64_t *f1, uint64_t f2) 
+static inline void fmul_scalar (uint64_t *out1, uint64_t *f1, uint64_t f2) 
 {
   register uint64_t f2_r asm("rdx") = f2;
 
@@ -408,7 +408,7 @@ static inline void fmul1_inline (uint64_t *out1, uint64_t *f1, uint64_t f2)
 }
 
 // Computes p1 <- bit ? p2 : p1 in constant time
-static inline void cswap2_inline (uint64_t bit, uint64_t *p1, uint64_t *p2) 
+static inline void cswap2 (uint64_t bit, uint64_t *p1, uint64_t *p2) 
 {
   asm volatile(
     // Invert the polarity of bit to match cmov expectations
@@ -493,7 +493,7 @@ static inline void cswap2_inline (uint64_t bit, uint64_t *p1, uint64_t *p2)
 
 // Computes the square of a field element: out <- f * f
 // Uses the 8-element buffer tmp for intermediate results
-static inline void fsqr_inline (uint64_t *tmp, uint64_t *f, uint64_t *out) 
+static inline void fsqr (uint64_t *tmp, uint64_t *f, uint64_t *out) 
 {
   asm volatile(
 
@@ -587,7 +587,7 @@ static inline void fsqr_inline (uint64_t *tmp, uint64_t *f, uint64_t *out)
 //   out[0] <- f[0] * f[0]
 //   out[1] <- f[1] * f[1]
 // Uses the 16-element buffer tmp for intermediate results
-static inline void fsqr2_inline (uint64_t *tmp, uint64_t *f, uint64_t *out1) 
+static inline void fsqr2 (uint64_t *tmp, uint64_t *f, uint64_t *out1) 
 {
   asm volatile(
     // Step 1: Compute all partial products

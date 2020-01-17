@@ -1,6 +1,6 @@
 .code
 ALIGN 16
-add1 proc
+add_scalar_e proc
   push rdi
   push rsi
   mov rdi, rcx
@@ -28,9 +28,9 @@ add1 proc
   pop rsi
   pop rdi
   ret
-add1 endp
+add_scalar_e endp
 ALIGN 16
-fadd_ proc
+fadd_e proc
   push rdi
   push rsi
   mov rdi, rcx
@@ -69,9 +69,9 @@ fadd_ proc
   pop rsi
   pop rdi
   ret
-fadd_ endp
+fadd_e endp
 ALIGN 16
-fsub_ proc
+fsub_e proc
   push rdi
   push rsi
   mov rdi, rcx
@@ -111,9 +111,9 @@ fsub_ proc
   pop rsi
   pop rdi
   ret
-fsub_ endp
+fsub_e endp
 ALIGN 16
-fmul1 proc
+fmul_scalar_e proc
   push rdi
   push r12
   push r13
@@ -159,9 +159,9 @@ fmul1 proc
   pop r12
   pop rdi
   ret
-fmul1 endp
+fmul_scalar_e endp
 ALIGN 16
-fmul_ proc
+fmul_e proc
   push r12
   push r13
   push r14
@@ -303,9 +303,9 @@ fmul_ proc
   pop r13
   pop r12
   ret
-fmul_ endp
+fmul_e endp
 ALIGN 16
-fmul2 proc
+fmul2_e proc
   push r12
   push r13
   push r14
@@ -567,9 +567,9 @@ fmul2 proc
   pop r13
   pop r12
   ret
-fmul2 endp
+fmul2_e endp
 ALIGN 16
-fsqr proc
+fsqr_e proc
   push r15
   push r12
   push r13
@@ -704,9 +704,9 @@ fsqr proc
   pop r12
   pop r15
   ret
-fsqr endp
+fsqr_e endp
 ALIGN 16
-fsqr2 proc
+fsqr2_e proc
   push r15
   push r12
   push r13
@@ -952,9 +952,9 @@ fsqr2 proc
   pop r12
   pop r15
   ret
-fsqr2 endp
+fsqr2_e endp
 ALIGN 16
-cswap2 proc
+cswap2_e proc
   push rdi
   push rsi
   mov rdi, rcx
@@ -1037,5 +1037,5 @@ cswap2 proc
   pop rsi
   pop rdi
   ret
-cswap2 endp
+cswap2_e endp
 end

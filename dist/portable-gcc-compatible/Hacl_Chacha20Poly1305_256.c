@@ -24,14 +24,10 @@
 
 #include "Hacl_Chacha20Poly1305_256.h"
 
-/* SNIPPET_START: Hacl_Chacha20Poly1305_256_poly1305_padded_256 */
+/* SNIPPET_START: poly1305_padded_256 */
 
-inline static void
-Hacl_Chacha20Poly1305_256_poly1305_padded_256(
-  Lib_IntVector_Intrinsics_vec256 *ctx,
-  uint32_t len,
-  uint8_t *text
-)
+static inline void
+poly1305_padded_256(Lib_IntVector_Intrinsics_vec256 *ctx, uint32_t len, uint8_t *text)
 {
   uint32_t n1 = len / (uint32_t)16U;
   uint32_t r = len % (uint32_t)16U;
@@ -50,7 +46,7 @@ Hacl_Chacha20Poly1305_256_poly1305_padded_256(
     uint32_t len1 = len0 - bs;
     uint8_t *text1 = t00 + bs;
     uint32_t nb = len1 / bs;
-    for (uint32_t i = (uint32_t)0U; i < nb; i = i + (uint32_t)1U)
+    for (uint32_t i = (uint32_t)0U; i < nb; i++)
     {
       uint8_t *block = text1 + i * bs;
       Lib_IntVector_Intrinsics_vec256 e[5U];
@@ -277,7 +273,7 @@ Hacl_Chacha20Poly1305_256_poly1305_padded_256(
   uint8_t *t10 = blocks + len0;
   uint32_t nb = len1 / (uint32_t)16U;
   uint32_t rem2 = len1 % (uint32_t)16U;
-  for (uint32_t i = (uint32_t)0U; i < nb; i = i + (uint32_t)1U)
+  for (uint32_t i = (uint32_t)0U; i < nb; i++)
   {
     uint8_t *block = t10 + i * (uint32_t)16U;
     Lib_IntVector_Intrinsics_vec256 e[5U];
@@ -493,7 +489,7 @@ Hacl_Chacha20Poly1305_256_poly1305_padded_256(
     for (uint32_t _i = 0U; _i < (uint32_t)5U; ++_i)
       e[_i] = Lib_IntVector_Intrinsics_vec256_zero;
     uint8_t tmp[16U] = { 0U };
-    memcpy(tmp, last1, rem2 * sizeof last1[0U]);
+    memcpy(tmp, last1, rem2 * sizeof (last1[0U]));
     uint64_t u0 = load64_le(tmp);
     uint64_t lo = u0;
     uint64_t u = load64_le(tmp + (uint32_t)8U);
@@ -698,7 +694,7 @@ Hacl_Chacha20Poly1305_256_poly1305_padded_256(
     acc0[4U] = o4;
   }
   uint8_t tmp[16U] = { 0U };
-  memcpy(tmp, rem1, r * sizeof rem1[0U]);
+  memcpy(tmp, rem1, r * sizeof (rem1[0U]));
   if (r > (uint32_t)0U)
   {
     Lib_IntVector_Intrinsics_vec256 *pre = ctx + (uint32_t)5U;
@@ -912,12 +908,12 @@ Hacl_Chacha20Poly1305_256_poly1305_padded_256(
   }
 }
 
-/* SNIPPET_END: Hacl_Chacha20Poly1305_256_poly1305_padded_256 */
+/* SNIPPET_END: poly1305_padded_256 */
 
-/* SNIPPET_START: Hacl_Chacha20Poly1305_256_poly1305_do_256 */
+/* SNIPPET_START: poly1305_do_256 */
 
-inline static void
-Hacl_Chacha20Poly1305_256_poly1305_do_256(
+static inline void
+poly1305_do_256(
   uint8_t *k,
   uint32_t aadlen,
   uint8_t *aad,
@@ -931,8 +927,8 @@ Hacl_Chacha20Poly1305_256_poly1305_do_256(
     ctx[_i] = Lib_IntVector_Intrinsics_vec256_zero;
   uint8_t block[16U] = { 0U };
   Hacl_Poly1305_256_poly1305_init(ctx, k);
-  Hacl_Chacha20Poly1305_256_poly1305_padded_256(ctx, aadlen, aad);
-  Hacl_Chacha20Poly1305_256_poly1305_padded_256(ctx, mlen, m);
+  poly1305_padded_256(ctx, aadlen, aad);
+  poly1305_padded_256(ctx, mlen, m);
   store64_le(block, (uint64_t)aadlen);
   store64_le(block + (uint32_t)8U, (uint64_t)mlen);
   Lib_IntVector_Intrinsics_vec256 *pre = ctx + (uint32_t)5U;
@@ -1145,7 +1141,7 @@ Hacl_Chacha20Poly1305_256_poly1305_do_256(
   Hacl_Poly1305_256_poly1305_finish(out, k, ctx);
 }
 
-/* SNIPPET_END: Hacl_Chacha20Poly1305_256_poly1305_do_256 */
+/* SNIPPET_END: poly1305_do_256 */
 
 /* SNIPPET_START: Hacl_Chacha20Poly1305_256_aead_encrypt */
 
@@ -1165,7 +1161,7 @@ Hacl_Chacha20Poly1305_256_aead_encrypt(
   uint8_t tmp[64U] = { 0U };
   Hacl_Chacha20_Vec256_chacha20_encrypt_256((uint32_t)64U, tmp, tmp, k, n1, (uint32_t)0U);
   uint8_t *key = tmp;
-  Hacl_Chacha20Poly1305_256_poly1305_do_256(key, aadlen, aad, mlen, cipher, mac);
+  poly1305_do_256(key, aadlen, aad, mlen, cipher, mac);
 }
 
 /* SNIPPET_END: Hacl_Chacha20Poly1305_256_aead_encrypt */
@@ -1188,9 +1184,9 @@ Hacl_Chacha20Poly1305_256_aead_decrypt(
   uint8_t tmp[64U] = { 0U };
   Hacl_Chacha20_Vec256_chacha20_encrypt_256((uint32_t)64U, tmp, tmp, k, n1, (uint32_t)0U);
   uint8_t *key = tmp;
-  Hacl_Chacha20Poly1305_256_poly1305_do_256(key, aadlen, aad, mlen, cipher, computed_mac);
+  poly1305_do_256(key, aadlen, aad, mlen, cipher, computed_mac);
   uint8_t res = (uint8_t)255U;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i = i + (uint32_t)1U)
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
   {
     uint8_t uu____0 = FStar_UInt8_eq_mask(computed_mac[i], mac[i]);
     res = uu____0 & res;

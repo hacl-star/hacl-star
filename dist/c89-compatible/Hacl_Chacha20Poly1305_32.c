@@ -24,8 +24,7 @@
 
 #include "Hacl_Chacha20Poly1305_32.h"
 
-inline static void
-Hacl_Chacha20Poly1305_32_poly1305_padded_32(uint64_t *ctx, uint32_t len, uint8_t *text)
+static inline void poly1305_padded_32(uint64_t *ctx, uint32_t len, uint8_t *text)
 {
   uint32_t n1 = len / (uint32_t)16U;
   uint32_t r = len % (uint32_t)16U;
@@ -37,7 +36,7 @@ Hacl_Chacha20Poly1305_32_poly1305_padded_32(uint64_t *ctx, uint32_t len, uint8_t
   uint32_t rem2 = n1 * (uint32_t)16U % (uint32_t)16U;
   {
     uint32_t i;
-    for (i = (uint32_t)0U; i < nb; i = i + (uint32_t)1U)
+    for (i = (uint32_t)0U; i < nb; i++)
     {
       uint8_t *block = blocks + i * (uint32_t)16U;
       uint64_t e[5U] = { 0U };
@@ -167,7 +166,7 @@ Hacl_Chacha20Poly1305_32_poly1305_padded_32(uint64_t *ctx, uint32_t len, uint8_t
     uint8_t *last1 = blocks + nb * (uint32_t)16U;
     uint64_t e[5U] = { 0U };
     uint8_t tmp[16U] = { 0U };
-    memcpy(tmp, last1, rem2 * sizeof last1[0U]);
+    memcpy(tmp, last1, rem2 * sizeof (last1[0U]));
     {
       uint64_t u0 = load64_le(tmp);
       uint64_t lo = u0;
@@ -292,7 +291,7 @@ Hacl_Chacha20Poly1305_32_poly1305_padded_32(uint64_t *ctx, uint32_t len, uint8_t
   }
   {
     uint8_t tmp[16U] = { 0U };
-    memcpy(tmp, rem1, r * sizeof rem1[0U]);
+    memcpy(tmp, rem1, r * sizeof (rem1[0U]));
     if (r > (uint32_t)0U)
     {
       uint64_t *pre = ctx + (uint32_t)5U;
@@ -506,8 +505,8 @@ Hacl_Chacha20Poly1305_32_poly1305_padded_32(uint64_t *ctx, uint32_t len, uint8_t
   }
 }
 
-inline static void
-Hacl_Chacha20Poly1305_32_poly1305_do_32(
+static inline void
+poly1305_do_32(
   uint8_t *k,
   uint32_t aadlen,
   uint8_t *aad,
@@ -521,8 +520,8 @@ Hacl_Chacha20Poly1305_32_poly1305_do_32(
   uint64_t *pre;
   uint64_t *acc;
   Hacl_Poly1305_32_poly1305_init(ctx, k);
-  Hacl_Chacha20Poly1305_32_poly1305_padded_32(ctx, aadlen, aad);
-  Hacl_Chacha20Poly1305_32_poly1305_padded_32(ctx, mlen, m);
+  poly1305_padded_32(ctx, aadlen, aad);
+  poly1305_padded_32(ctx, mlen, m);
   store64_le(block, (uint64_t)aadlen);
   store64_le(block + (uint32_t)8U, (uint64_t)mlen);
   pre = ctx + (uint32_t)5U;
@@ -754,7 +753,7 @@ Hacl_Chacha20Poly1305_32_aead_encrypt(
     uint8_t *key;
     Hacl_Chacha20_chacha20_encrypt((uint32_t)64U, tmp, tmp, k, n1, (uint32_t)0U);
     key = tmp;
-    Hacl_Chacha20Poly1305_32_poly1305_do_32(key, aadlen, aad, mlen, cipher, mac);
+    poly1305_do_32(key, aadlen, aad, mlen, cipher, mac);
   }
 }
 
@@ -775,14 +774,14 @@ Hacl_Chacha20Poly1305_32_aead_decrypt(
   uint8_t *key;
   Hacl_Chacha20_chacha20_encrypt((uint32_t)64U, tmp, tmp, k, n1, (uint32_t)0U);
   key = tmp;
-  Hacl_Chacha20Poly1305_32_poly1305_do_32(key, aadlen, aad, mlen, cipher, computed_mac);
+  poly1305_do_32(key, aadlen, aad, mlen, cipher, computed_mac);
   {
     uint8_t res0 = (uint8_t)255U;
     uint8_t z;
     uint32_t res;
     {
       uint32_t i;
-      for (i = (uint32_t)0U; i < (uint32_t)16U; i = i + (uint32_t)1U)
+      for (i = (uint32_t)0U; i < (uint32_t)16U; i++)
       {
         uint8_t uu____0 = FStar_UInt8_eq_mask(computed_mac[i], mac[i]);
         res0 = uu____0 & res0;

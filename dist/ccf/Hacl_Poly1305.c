@@ -24,7 +24,7 @@
 
 #include "Hacl_Poly1305.h"
 
-static void Hacl_Poly1305_32_poly1305_init(uint64_t *ctx, uint8_t *key)
+static void poly1305_init(uint64_t *ctx, uint8_t *key)
 {
   uint64_t *acc = ctx;
   uint64_t *pre = ctx + (uint32_t)5U;
@@ -85,13 +85,13 @@ static void Hacl_Poly1305_32_poly1305_init(uint64_t *ctx, uint8_t *key)
   rn_5[4U] = r5[4U];
 }
 
-static void Hacl_Poly1305_32_poly1305_update(uint64_t *ctx, uint32_t len, uint8_t *text)
+static void poly1305_update(uint64_t *ctx, uint32_t len, uint8_t *text)
 {
   uint64_t *pre = ctx + (uint32_t)5U;
   uint64_t *acc = ctx;
   uint32_t nb = len / (uint32_t)16U;
   uint32_t rem1 = len % (uint32_t)16U;
-  for (uint32_t i = (uint32_t)0U; i < nb; i = i + (uint32_t)1U)
+  for (uint32_t i = (uint32_t)0U; i < nb; i++)
   {
     uint8_t *block = text + i * (uint32_t)16U;
     uint64_t e[5U] = { 0U };
@@ -216,7 +216,7 @@ static void Hacl_Poly1305_32_poly1305_update(uint64_t *ctx, uint32_t len, uint8_
     uint8_t *last1 = text + nb * (uint32_t)16U;
     uint64_t e[5U] = { 0U };
     uint8_t tmp[16U] = { 0U };
-    memcpy(tmp, last1, rem1 * sizeof last1[0U]);
+    memcpy(tmp, last1, rem1 * sizeof (last1[0U]));
     uint64_t u0 = load64_le(tmp);
     uint64_t lo = u0;
     uint64_t u = load64_le(tmp + (uint32_t)8U);
@@ -336,7 +336,7 @@ static void Hacl_Poly1305_32_poly1305_update(uint64_t *ctx, uint32_t len, uint8_
   }
 }
 
-static void Hacl_Poly1305_32_poly1305_finish(uint8_t *tag, uint8_t *key, uint64_t *ctx)
+static void poly1305_finish(uint8_t *tag, uint8_t *key, uint64_t *ctx)
 {
   uint64_t *acc = ctx;
   uint8_t *ks = key + (uint32_t)16U;
@@ -442,8 +442,8 @@ static void Hacl_Poly1305_32_poly1305_finish(uint8_t *tag, uint8_t *key, uint64_
 void Hacl_Poly1305_32_poly1305_mac(uint8_t *tag, uint32_t len, uint8_t *text, uint8_t *key)
 {
   uint64_t ctx[25U] = { 0U };
-  Hacl_Poly1305_32_poly1305_init(ctx, key);
-  Hacl_Poly1305_32_poly1305_update(ctx, len, text);
-  Hacl_Poly1305_32_poly1305_finish(tag, key, ctx);
+  poly1305_init(ctx, key);
+  poly1305_update(ctx, len, text);
+  poly1305_finish(tag, key, ctx);
 }
 

@@ -36,7 +36,7 @@ Hacl_HMAC_legacy_compute_sha1(
   uint32_t l = (uint32_t)64U;
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t *key_block = alloca(l * sizeof (uint8_t));
-  memset(key_block, 0U, l * sizeof key_block[0U]);
+  memset(key_block, 0U, l * sizeof (key_block[0U]));
   uint32_t i1;
   if (key_len <= (uint32_t)64U)
   {
@@ -49,7 +49,7 @@ Hacl_HMAC_legacy_compute_sha1(
   uint8_t *nkey = key_block;
   if (key_len <= (uint32_t)64U)
   {
-    memcpy(nkey, key, key_len * sizeof key[0U]);
+    memcpy(nkey, key, key_len * sizeof (key[0U]));
   }
   else
   {
@@ -57,8 +57,8 @@ Hacl_HMAC_legacy_compute_sha1(
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t *ipad = alloca(l * sizeof (uint8_t));
-  memset(ipad, (uint8_t)0x36U, l * sizeof ipad[0U]);
-  for (uint32_t i = (uint32_t)0U; i < l; i = i + (uint32_t)1U)
+  memset(ipad, (uint8_t)0x36U, l * sizeof (ipad[0U]));
+  for (uint32_t i = (uint32_t)0U; i < l; i++)
   {
     uint8_t xi = ipad[i];
     uint8_t yi = key_block[i];
@@ -66,8 +66,8 @@ Hacl_HMAC_legacy_compute_sha1(
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t *opad = alloca(l * sizeof (uint8_t));
-  memset(opad, (uint8_t)0x5cU, l * sizeof opad[0U]);
-  for (uint32_t i = (uint32_t)0U; i < l; i = i + (uint32_t)1U)
+  memset(opad, (uint8_t)0x5cU, l * sizeof (opad[0U]));
+  for (uint32_t i = (uint32_t)0U; i < l; i++)
   {
     uint8_t xi = opad[i];
     uint8_t yi = key_block[i];
@@ -103,7 +103,7 @@ Hacl_HMAC_compute_sha2_256(
   uint32_t l = (uint32_t)64U;
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t *key_block = alloca(l * sizeof (uint8_t));
-  memset(key_block, 0U, l * sizeof key_block[0U]);
+  memset(key_block, 0U, l * sizeof (key_block[0U]));
   uint32_t i1;
   if (key_len <= (uint32_t)64U)
   {
@@ -116,7 +116,7 @@ Hacl_HMAC_compute_sha2_256(
   uint8_t *nkey = key_block;
   if (key_len <= (uint32_t)64U)
   {
-    memcpy(nkey, key, key_len * sizeof key[0U]);
+    memcpy(nkey, key, key_len * sizeof (key[0U]));
   }
   else
   {
@@ -124,8 +124,8 @@ Hacl_HMAC_compute_sha2_256(
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t *ipad = alloca(l * sizeof (uint8_t));
-  memset(ipad, (uint8_t)0x36U, l * sizeof ipad[0U]);
-  for (uint32_t i = (uint32_t)0U; i < l; i = i + (uint32_t)1U)
+  memset(ipad, (uint8_t)0x36U, l * sizeof (ipad[0U]));
+  for (uint32_t i = (uint32_t)0U; i < l; i++)
   {
     uint8_t xi = ipad[i];
     uint8_t yi = key_block[i];
@@ -133,8 +133,8 @@ Hacl_HMAC_compute_sha2_256(
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t *opad = alloca(l * sizeof (uint8_t));
-  memset(opad, (uint8_t)0x5cU, l * sizeof opad[0U]);
-  for (uint32_t i = (uint32_t)0U; i < l; i = i + (uint32_t)1U)
+  memset(opad, (uint8_t)0x5cU, l * sizeof (opad[0U]));
+  for (uint32_t i = (uint32_t)0U; i < l; i++)
   {
     uint8_t xi = opad[i];
     uint8_t yi = key_block[i];
@@ -170,7 +170,7 @@ Hacl_HMAC_compute_sha2_384(
   uint32_t l = (uint32_t)128U;
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t *key_block = alloca(l * sizeof (uint8_t));
-  memset(key_block, 0U, l * sizeof key_block[0U]);
+  memset(key_block, 0U, l * sizeof (key_block[0U]));
   uint32_t i1;
   if (key_len <= (uint32_t)128U)
   {
@@ -183,7 +183,7 @@ Hacl_HMAC_compute_sha2_384(
   uint8_t *nkey = key_block;
   if (key_len <= (uint32_t)128U)
   {
-    memcpy(nkey, key, key_len * sizeof key[0U]);
+    memcpy(nkey, key, key_len * sizeof (key[0U]));
   }
   else
   {
@@ -191,8 +191,8 @@ Hacl_HMAC_compute_sha2_384(
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t *ipad = alloca(l * sizeof (uint8_t));
-  memset(ipad, (uint8_t)0x36U, l * sizeof ipad[0U]);
-  for (uint32_t i = (uint32_t)0U; i < l; i = i + (uint32_t)1U)
+  memset(ipad, (uint8_t)0x36U, l * sizeof (ipad[0U]));
+  for (uint32_t i = (uint32_t)0U; i < l; i++)
   {
     uint8_t xi = ipad[i];
     uint8_t yi = key_block[i];
@@ -200,8 +200,8 @@ Hacl_HMAC_compute_sha2_384(
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t *opad = alloca(l * sizeof (uint8_t));
-  memset(opad, (uint8_t)0x5cU, l * sizeof opad[0U]);
-  for (uint32_t i = (uint32_t)0U; i < l; i = i + (uint32_t)1U)
+  memset(opad, (uint8_t)0x5cU, l * sizeof (opad[0U]));
+  for (uint32_t i = (uint32_t)0U; i < l; i++)
   {
     uint8_t xi = opad[i];
     uint8_t yi = key_block[i];
@@ -244,7 +244,7 @@ Hacl_HMAC_compute_sha2_512(
   uint32_t l = (uint32_t)128U;
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t *key_block = alloca(l * sizeof (uint8_t));
-  memset(key_block, 0U, l * sizeof key_block[0U]);
+  memset(key_block, 0U, l * sizeof (key_block[0U]));
   uint32_t i1;
   if (key_len <= (uint32_t)128U)
   {
@@ -257,7 +257,7 @@ Hacl_HMAC_compute_sha2_512(
   uint8_t *nkey = key_block;
   if (key_len <= (uint32_t)128U)
   {
-    memcpy(nkey, key, key_len * sizeof key[0U]);
+    memcpy(nkey, key, key_len * sizeof (key[0U]));
   }
   else
   {
@@ -265,8 +265,8 @@ Hacl_HMAC_compute_sha2_512(
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t *ipad = alloca(l * sizeof (uint8_t));
-  memset(ipad, (uint8_t)0x36U, l * sizeof ipad[0U]);
-  for (uint32_t i = (uint32_t)0U; i < l; i = i + (uint32_t)1U)
+  memset(ipad, (uint8_t)0x36U, l * sizeof (ipad[0U]));
+  for (uint32_t i = (uint32_t)0U; i < l; i++)
   {
     uint8_t xi = ipad[i];
     uint8_t yi = key_block[i];
@@ -274,8 +274,8 @@ Hacl_HMAC_compute_sha2_512(
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t *opad = alloca(l * sizeof (uint8_t));
-  memset(opad, (uint8_t)0x5cU, l * sizeof opad[0U]);
-  for (uint32_t i = (uint32_t)0U; i < l; i = i + (uint32_t)1U)
+  memset(opad, (uint8_t)0x5cU, l * sizeof (opad[0U]));
+  for (uint32_t i = (uint32_t)0U; i < l; i++)
   {
     uint8_t xi = opad[i];
     uint8_t yi = key_block[i];

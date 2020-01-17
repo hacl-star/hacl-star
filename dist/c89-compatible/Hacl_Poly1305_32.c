@@ -334,7 +334,7 @@ void Hacl_Poly1305_32_poly1305_update(uint64_t *ctx, uint32_t len, uint8_t *text
   uint32_t rem1 = len % (uint32_t)16U;
   {
     uint32_t i;
-    for (i = (uint32_t)0U; i < nb; i = i + (uint32_t)1U)
+    for (i = (uint32_t)0U; i < nb; i++)
     {
       uint8_t *block = text + i * (uint32_t)16U;
       uint64_t e[5U] = { 0U };
@@ -568,7 +568,7 @@ void Hacl_Poly1305_32_poly1305_update(uint64_t *ctx, uint32_t len, uint8_t *text
     uint64_t o2;
     uint64_t o3;
     uint64_t o4;
-    memcpy(tmp, last1, rem1 * sizeof last1[0U]);
+    memcpy(tmp, last1, rem1 * sizeof (last1[0U]));
     u0 = load64_le(tmp);
     lo = u0;
     u = load64_le(tmp + (uint32_t)8U);
