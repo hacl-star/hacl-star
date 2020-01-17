@@ -210,14 +210,17 @@ let print_explicit_register_arg (n:nat) (a:td) (i:nat{i < n}) (of_arg:reg_nat n 
   in
   if reserved (of_arg i) then
     // If the associated register is reserved, we really this argument in it. For instance if it is Rdx and we have Mul(x) instructions
-    "  register " ^ ty ^ names i ^ "_r asm(\"" ^ P.print_reg_name (of_arg i) ^ "\") = " ^ names i ^ ";\n"
-  else ""
+    true, "  register " ^ ty ^ names i ^ "_r asm(\"" ^ P.print_reg_name (of_arg i) ^ "\") = " ^ names i ^ ";\n"
+  else false, ""
 
 
 let rec print_explicit_register_args (n:nat) (args:list td) (i:nat{i + List.length args = n}) (of_arg:reg_nat n -> reg_64) (reserved:reg_64 -> bool) (names:nat -> string) =
   match args with
-  | [] -> ""
-  | a::q -> print_explicit_register_arg n a i of_arg reserved names ^ print_explicit_register_args n q (i+1) of_arg reserved names
+  | [] -> false, ""
+  | a::q -> 
+    let was_explicit, explicit_str = print_explicit_register_arg n a i of_arg reserved names in
+    let are_explicit, rest_str = print_explicit_register_args n q (i+1) of_arg reserved names in
+    was_explicit || are_explicit, explicit_str ^ rest_str
 
 // If we have a return parameter with a reserved register, print "register uint64_t [name] asm("rax");\n"
 let print_register_ret (reserved:reg_64 -> bool) = function
@@ -320,10 +323,10 @@ let print_inline
   // If we have a return value, declare a variable for it
   let ret_reg = print_register_ret reserved_regs ret_val in
   // Explicitly allocate registers when needed
-  let explicit_regs = print_explicit_register_args n args 0 of_arg reserved_regs arg_names in
+  let has_explicit, explicit_regs = print_explicit_register_args n args 0 of_arg reserved_regs arg_names in
 
   // Start printing the code, need the asm volatile header
-  let start_code = "\n  asm volatile(\n" in
+  let start_code = (if Some? ret_val || has_explicit then "\n" else "") ^ "  asm volatile(\n" in
 
   // Initially, the register names are the same as in assembly
   // This function will be modified to address arguments by their number instead of explicitly allocating them

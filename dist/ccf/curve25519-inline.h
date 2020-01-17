@@ -39,7 +39,6 @@ static inline uint64_t add1_inline (uint64_t *out1, uint64_t *f1, uint64_t f2)
 // Computes the field addition of two field elements
 static inline void fadd_inline (uint64_t *out1, uint64_t *f1, uint64_t *f2) 
 {
-
   asm volatile(
     // Compute the raw addition of f1 + f2
     "  movq 0(%0), %%r8;"
@@ -82,7 +81,6 @@ static inline void fadd_inline (uint64_t *out1, uint64_t *f1, uint64_t *f2)
 // Computes the field substraction of two field elements
 static inline void fsub_inline (uint64_t *out1, uint64_t *f1, uint64_t *f2) 
 {
-
   asm volatile(
     // Compute the raw substraction of f1-f2
     "  movq 0(%1), %%r8;"
@@ -127,7 +125,6 @@ static inline void fsub_inline (uint64_t *out1, uint64_t *f1, uint64_t *f2)
 // Uses the 8-element buffer tmp for intermediate results
 static inline void fmul_inline (uint64_t *tmp, uint64_t *f1, uint64_t *out, uint64_t *f2) 
 {
-
   asm volatile(
 
     /////// Compute the raw multiplication: tmp <- src1 * src2 ////// 
@@ -216,7 +213,6 @@ static inline void fmul_inline (uint64_t *tmp, uint64_t *f1, uint64_t *out, uint
 // Uses the 16-element buffer tmp for intermediate results:
 static inline void fmul2_inline (uint64_t *tmp, uint64_t *f1, uint64_t *out1, uint64_t *f2) 
 {
-
   asm volatile(
 
     /////// Compute the raw multiplication tmp[0] <- f1[0] * f2[0] ////// 
@@ -414,7 +410,6 @@ static inline void fmul1_inline (uint64_t *out1, uint64_t *f1, uint64_t f2)
 // Computes p1 <- bit ? p2 : p1 in constant time
 static inline void cswap2_inline (uint64_t bit, uint64_t *p1, uint64_t *p2) 
 {
-
   asm volatile(
     // Invert the polarity of bit to match cmov expectations
     "  add $18446744073709551615, %0;"
@@ -500,7 +495,6 @@ static inline void cswap2_inline (uint64_t bit, uint64_t *p1, uint64_t *p2)
 // Uses the 8-element buffer tmp for intermediate results
 static inline void fsqr_inline (uint64_t *tmp, uint64_t *f, uint64_t *out) 
 {
-
   asm volatile(
 
     /////// Compute the raw multiplication: tmp <- f * f ////// 
@@ -595,7 +589,6 @@ static inline void fsqr_inline (uint64_t *tmp, uint64_t *f, uint64_t *out)
 // Uses the 16-element buffer tmp for intermediate results
 static inline void fsqr2_inline (uint64_t *tmp, uint64_t *f, uint64_t *out1) 
 {
-
   asm volatile(
     // Step 1: Compute all partial products
     "  movq 0(%1), %%rdx;"                                       // f[0]
