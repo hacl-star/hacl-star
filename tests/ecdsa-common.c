@@ -14,7 +14,7 @@
 
 #include <unistd.h>
 
-#include "Hacl_Impl_ECDSA.h"
+#include "Hacl_ECDSA.h"
 
 
 void testEcdsaSignature0()
