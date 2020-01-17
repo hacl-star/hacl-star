@@ -64,7 +64,7 @@ val lemma_create_heaplets (bs:Seq.seq buffer_info) (modloc:loc) (h1:vale_full_he
   (requires
     mem_inv h1 /\
     is_initial_heap h1.vf_layout h1.vf_heap /\
-    init_heaplets_req h1.vf_heap bs modloc
+    init_heaplets_req h1.vf_heap bs
   )
   (ensures (
     let h2 = create_heaplets bs modloc h1 in
@@ -72,6 +72,11 @@ val lemma_create_heaplets (bs:Seq.seq buffer_info) (modloc:loc) (h1:vale_full_he
     h1.vf_heaplets == h2.vf_heaplets /\
     h1.vf_layout.vl_taint == h2.vf_layout.vl_taint /\
     get_heaplet_id h1.vf_heap == None /\
+    (forall (i:heaplet_id).{:pattern Map16.sel h2.vf_heaplets i}
+      get_heaplet_id (Map16.sel h2.vf_heaplets i) == Some i) /\
+    (forall (i:nat).{:pattern Seq.index bs i} i < Seq.length bs ==> (
+      let Mkbuffer_info t b hid _ _ = Seq.index bs i in
+      valid_layout_buffer_id t b h2.vf_layout (Some hid))) /\
     mem_inv h2
   ))
 

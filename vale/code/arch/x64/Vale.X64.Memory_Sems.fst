@@ -153,6 +153,7 @@ let create_heaplets bs modloc h1 =
 
 let lemma_create_heaplets bs modloc h1 =
   lemma_make_owns h1.vf_heap bs (Seq.length bs);
+  reveal_opaque (`%valid_layout_buffer_id) valid_layout_buffer_id;
   ()
 
 let destroy_heaplets h1 =

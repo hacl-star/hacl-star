@@ -12,6 +12,7 @@ include{:fstar}{:open} "Vale.X64.State"
 include{:fstar}{:open} "Vale.X64.Decls"
 include{:fstar}{:open} "Vale.X64.QuickCode"
 include{:fstar}{:open} "Vale.X64.CPU_Features_s"
+include{:fstar}{:open} "Vale.Lib.Seqs"
 include{:/*TODO*/fstar}{:open Seq} "FStar.Seq.Base"
 
 module Vale.X64.InsMem
@@ -29,6 +30,7 @@ open Vale.X64.Decls
 open Vale.X64.QuickCode
 open Vale.X64.InsBasic
 open Vale.X64.CPU_Features_s
+open Vale.Lib.Seqs
 #endverbatim
 
 #verbatim
@@ -90,11 +92,29 @@ let destroy_heaplets_this (s:vale_state) : Ghost vale_state
 #verbatim{:interface}
 let heaplet_id_is_none (h:vale_heap) =
   get_heaplet_id h == None
+
+let heaplet_id_is_some (h:vale_heap) (i:heaplet_id) =
+  get_heaplet_id h == Some i
+
+unfold let norm_list (p:prop) : prop =
+  norm [zeta; iota; delta_only [`%list_to_seq_post]] p
+
+let declare_buffer64 (b:buffer TUInt64) (hid:heaplet_id) (t:taint) (mut:mutability) =
+  Mkbuffer_info TUInt64 b hid t mut
+
+let create_post (layout:vale_heap_layout) (bs:Seq.seq buffer_info) =
+  forall (i:nat).{:pattern Seq.index bs i} i < Seq.length bs ==> (
+    let Mkbuffer_info t b hid _ _ = Seq.index bs i in
+    valid_layout_buffer_id t b layout (Some hid))
 #endverbatim
 
 function create_heaplets_this(buffers:Seq.seq(buffer_info), modloc:loc, s:vale_state):vale_state extern;
 function destroy_heaplets_this(s:vale_state):vale_state extern;
 function heaplet_id_is_none(h:vale_heap):prop extern;
+function heaplet_id_is_some(h:vale_heap, heaplet_id:int):prop extern;
+function norm_list(p:prop):prop extern;
+function declare_buffer64(b:buffer64, hid:heaplet_id, t:taint, mut:mutability):buffer_info extern;
+function create_post(layout:vale_heap_layout, bs:Seq.seq(buffer_info)):prop extern;
 ghost procedure Vale.X64.StateLemmas.use_machine_state_equal() extern;
 
 // TODO: this is used for the current (trivial) mem_inv; it will probably be removed for the real mem_inv
@@ -110,23 +130,30 @@ procedure CreateNoHeaplets()
     let dummy := destroy_heaplets_this(this);
 }
 
-procedure CreateHeaplets(ghost buffers:Seq.seq(buffer_info), ghost modloc:loc)
+procedure CreateHeaplets(ghost buffers:list(buffer_info))
     {:public}
     {:quick exportOnly}
     {:instruction mk_ins(make_instr_annotate(I.ins_Ghost, S.AnnotateGhost()))}
+    lets
+        bs := list_to_seq(buffers);
     reads
-        mem;
+        mem; heap0;
     modifies
         memLayout;
     requires
         is_initial_heap(memLayout, mem);
-        init_heaplets_req(mem, buffers, modloc);
+        norm_list(list_to_seq_post(buffers, bs, 0)) ==> init_heaplets_req(mem, bs);
     ensures
+        norm_list(list_to_seq_post(buffers, bs, 0));
+        create_post(memLayout, bs);
         memLayout.vl_taint == old(memLayout.vl_taint);
         heaplet_id_is_none(mem);
+        heaplet_id_is_some(heap0, 0);
 {
-    this := create_heaplets_this(buffers, modloc, this);
-    lemma_create_heaplets(buffers, modloc, old(this).vs_heap);
+    let modloc := loc_none;
+    lemma_list_to_seq(buffers);
+    this := create_heaplets_this(bs, modloc, this);
+    lemma_create_heaplets(bs, modloc, old(this).vs_heap);
     Vale.X64.StateLemmas.use_machine_state_equal();
 }
 

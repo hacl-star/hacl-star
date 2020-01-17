@@ -30,6 +30,7 @@ procedure Memcpy(inline win:bool, ghost dst:buffer64, ghost src:buffer64)
     requires/ensures
         vale_heap_data_eq(mem, heap0);
     requires
+        is_initial_heap(memLayout, mem);
         locs_disjoint(list(loc_buffer(dst), loc_buffer(src)));
         validSrcAddrs64(mem, (if win then rdx else rsi), src, 2, memLayout, Secret);
         validDstAddrs64(mem, (if win then rcx else rdi), dst, 2, memLayout, Secret);
@@ -40,8 +41,10 @@ procedure Memcpy(inline win:bool, ghost dst:buffer64, ghost src:buffer64)
     //    forall(i) 0 <= i && i < 2 ==> buffer64_read(dst, i, mem) == buffer64_read(src, i, mem);
         modifies_mem(loc_buffer(dst), old(mem), mem);
 {
-    CreateNoHeaplets(); mem_eq_all(mem, heap0);
-
+    CreateHeaplets(list(
+        declare_buffer64(dst, 0, Secret, Mutable),
+        declare_buffer64(src, 0, Secret, Immutable)));
+    mem_eq_all(mem, heap0);
     inline if (win)
     {
         Load64_buffer(rax, rdx, 0, Secret, src, 0);
