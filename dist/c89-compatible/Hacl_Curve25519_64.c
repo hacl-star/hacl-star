@@ -24,7 +24,7 @@
 
 #include "Hacl_Curve25519_64.h"
 
-static inline uint64_t add1(uint64_t *out1, uint64_t *f1, uint64_t f2)
+static inline uint64_t add_scalar0(uint64_t *out1, uint64_t *f1, uint64_t f2)
 {
   #if EVERCRYPT_TARGETCONFIG_GCC
   return add_scalar(out1, f1, f2);
@@ -70,7 +70,7 @@ static inline void fmul20(uint64_t *out1, uint64_t *f1, uint64_t *f2, uint64_t *
   #endif
 }
 
-static inline void fmul1(uint64_t *out1, uint64_t *f1, uint64_t f2)
+static inline void fmul_scalar0(uint64_t *out1, uint64_t *f1, uint64_t f2)
 {
   #if EVERCRYPT_TARGETCONFIG_GCC
   fmul_scalar(out1, f1, f2);
@@ -155,7 +155,7 @@ static void point_add_and_double(uint64_t *q, uint64_t *p01_tmp1, uint64_t *tmp2
   a1[2U] = c[2U];
   a1[3U] = c[3U];
   fsub0(c, d, c);
-  fmul1(b1, c, (uint64_t)121665U);
+  fmul_scalar0(b1, c, (uint64_t)121665U);
   fadd0(b1, b1, d);
   fmul20(nq, dc1, ab1, tmp2);
   fmul0(z3, z3, x1, tmp2);
@@ -179,7 +179,7 @@ static void point_double(uint64_t *nq, uint64_t *tmp1, uint64_t *tmp2)
   a[2U] = c[2U];
   a[3U] = c[3U];
   fsub0(c, d, c);
-  fmul1(b, c, (uint64_t)121665U);
+  fmul_scalar0(b, c, (uint64_t)121665U);
   fadd0(b, b, d);
   fmul20(nq, dc, ab, tmp2);
 }
@@ -323,11 +323,11 @@ static void store_felem(uint64_t *b, uint64_t *f)
   uint64_t o2;
   uint64_t o3;
   f[3U] = f30 & (uint64_t)0x7fffffffffffffffU;
-  carry0 = add1(f, f, (uint64_t)19U * top_bit0);
+  carry0 = add_scalar0(f, f, (uint64_t)19U * top_bit0);
   f31 = f[3U];
   top_bit = f31 >> (uint32_t)63U;
   f[3U] = f31 & (uint64_t)0x7fffffffffffffffU;
-  carry = add1(f, f, (uint64_t)19U * top_bit);
+  carry = add_scalar0(f, f, (uint64_t)19U * top_bit);
   f0 = f[0U];
   f1 = f[1U];
   f2 = f[2U];

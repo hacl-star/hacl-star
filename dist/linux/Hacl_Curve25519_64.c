@@ -73,7 +73,7 @@ static void point_add_and_double(u64 *q, u64 *p01_tmp1, u64 *tmp2)
   a1[2U] = c[2U];
   a1[3U] = c[3U];
   fsub(c, d, c);
-  fmul1(b1, c, (u64)121665U);
+  fmul_scalar(b1, c, (u64)121665U);
   fadd(b1, b1, d);
   fmul2(nq, dc1, ab1, tmp2);
   fmul(z3, z3, x1, tmp2);
@@ -97,7 +97,7 @@ static void point_double(u64 *nq, u64 *tmp1, u64 *tmp2)
   a[2U] = c[2U];
   a[3U] = c[3U];
   fsub(c, d, c);
-  fmul1(b, c, (u64)121665U);
+  fmul_scalar(b, c, (u64)121665U);
   fadd(b, b, d);
   fmul2(nq, dc, ab, tmp2);
 }
@@ -234,11 +234,11 @@ static void store_felem(u64 *b, u64 *f)
   u64 o2;
   u64 o3;
   f[3U] = f30 & (u64)0x7fffffffffffffffU;
-  carry0 = add1(f, f, (u64)19U * top_bit0);
+  carry0 = add_scalar(f, f, (u64)19U * top_bit0);
   f31 = f[3U];
   top_bit = f31 >> (u32)63U;
   f[3U] = f31 & (u64)0x7fffffffffffffffU;
-  carry = add1(f, f, (u64)19U * top_bit);
+  carry = add_scalar(f, f, (u64)19U * top_bit);
   f0 = f[0U];
   f1 = f[1U];
   f2 = f[2U];

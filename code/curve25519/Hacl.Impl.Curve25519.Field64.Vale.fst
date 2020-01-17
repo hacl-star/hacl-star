@@ -48,7 +48,7 @@ let _: squash (Vale.Curve25519.Fast_defs.prime = Spec.Curve25519.prime) =
 // This one only goes through in a reasonable amount of rlimit thanks to
 // ``as_nat_is_as_nat`` and ``buffer_is_buffer`` above.
 [@ CInline]
-let add1 out f1 f2 =
+let add_scalar out f1 f2 =
   if EverCrypt.TargetConfig.gcc then//
     Vale.Inline.X64.Fadd_inline.add_scalar out f1 f2
   else
@@ -155,7 +155,7 @@ let fmul2 out f1 f2 tmp =
     Vale.Wrapper.X64.Fmul.fmul2_e tmp f1 out f2
 
 [@ CInline]
-let fmul1 out f1 f2 =
+let fmul_scalar out f1 f2 =
   let h0 = ST.get() in
   let aux () : Lemma (P.fmul (F64.fevalh h0 f1) (v f2) == (FA.as_nat f1 h0 * v f2) % Vale.Curve25519.Fast_defs.prime) =
     let a = P.fmul (F64.fevalh h0 f1) (v f2) in
