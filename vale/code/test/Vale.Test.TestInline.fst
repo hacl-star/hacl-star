@@ -99,6 +99,48 @@ let test_inline_mov_add_input_dummy_mul () : FStar.All.ML unit =
     ] in
   print_function "test_inline_mov_add_input_dummy_mul" (Some "result") args regs_mod c
 
+let test_inline_comment_add () : FStar.All.ML unit =
+  let args = [
+    ("first_arg", TD_Base TUInt64, rR15);
+  ] in
+  let regs_mod r = (r = rR15 || r = rRax) in
+  let s = "This is a comment" in
+  let c = Block [
+    Ins (make_instr_annotate (ins_Comment s) (AnnotateComment s));
+    Ins (make_instr ins_Add64 (OReg rR15) (OReg rR15));
+    Ins (make_instr ins_Mov64 (OReg rRax) (OReg rR15));
+  ] in
+  print_function "test_inline_comment_add" (Some "result") args regs_mod c
+
+let test_inline_same_line () : FStar.All.ML unit =
+  let args = [
+    ("first_arg", TD_Base TUInt64, rR15);
+  ] in
+  let regs_mod r = (r = rR15 || r = rRax) in
+  let c = Block [
+    Ins (make_instr_annotate (ins_Space 0) (AnnotateSpace 0));
+    Ins (make_instr ins_Add64 (OReg rR15) (OReg rR15));
+    Ins (make_instr ins_Mov64 (OReg rRax) (OReg rR15));
+  ] in
+  print_function "test_inline_same_line" (Some "result") args regs_mod c
+
+let test_inline_same_line_newline () : FStar.All.ML unit =
+  let args = [
+    ("first_arg", TD_Base TUInt64, rR15);
+  ] in
+  let regs_mod r = (r = rR15 || r = rRax) in
+  let c = Block [
+    Ins (make_instr_annotate (ins_Space 4) (AnnotateSpace 4));
+    Ins (make_instr ins_Mov64 (OReg rRax) (OReg rR15));
+    Ins (make_instr ins_Add64 (OReg rR15) (OReg rR15));
+    Ins (make_instr_annotate ins_Newline (AnnotateNewline ()));
+    Ins (make_instr_annotate (ins_Space 4) (AnnotateSpace 4));
+    Ins (make_instr ins_Add64 (OReg rR15) (OReg rRax));
+    Ins (make_instr ins_Mov64 (OReg rRax) (OReg rR15));
+  ] in
+  print_function "test_inline_same_line_newline" (Some "result") args regs_mod c
+
+
 let test_inline () : FStar.All.ML unit =
   test_inline_mov_input ();
   test_inline_mov_add_input ();
@@ -106,4 +148,7 @@ let test_inline () : FStar.All.ML unit =
   test_inline_mov_mul_rax_100 ();
   test_inline_mov_mul_inputs ();
   test_inline_mov_add_input_dummy_mul ();
+  test_inline_comment_add ();
+  test_inline_same_line ();
+  test_inline_same_line_newline ();
   ()

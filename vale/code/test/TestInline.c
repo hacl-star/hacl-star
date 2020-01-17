@@ -17,5 +17,8 @@ int main()
 // This test only succeeds on gcc >= 9 because of a bug in previous versions. 
 // See comment in Vale.Test.Testinline.fst
 //    if (test_inline_mov_add_input_dummy_mul(50) != 51) {return fail("test_inline_mov_add_input_dummy_mul");}
+    if (test_inline_comment_add(4) != 8) {return fail("test_inline_comment_add");}
+    if (test_inline_same_line(4) != 8) {return fail("test_inline_same_line");}
+    if (test_inline_same_line_newline(4) != 12) {return fail("test_inline_same_line_newline");}
     return 0;
 }
