@@ -708,6 +708,7 @@ procedure Poly1305(
         vale_heap_data_eq(mem, heap0);
     requires
         rsp == init_rsp(stack);
+        is_initial_heap(memLayout, mem);
 
         buffers_disjoint(ctx_b, inp_b);
         validDstAddrs64(mem, ctx_in, ctx_b, 24, memLayout, Public);
@@ -755,7 +756,10 @@ procedure Poly1305(
         r14 == old(r14);
         r15 == old(r15);
 {
-    CreateNoHeaplets(); mem_eq_all(mem, heap0);
+    CreateHeaplets(list(
+        declare_buffer64(ctx_b, 0, Public, Mutable),
+        declare_buffer64(inp_b, 0, Public, Immutable)));
+    mem_eq_all(mem, heap0);
 
     let key_r0 := buffer64_read(ctx_b, 3, heap0);
     let key_r1 := buffer64_read(ctx_b, 4, heap0);

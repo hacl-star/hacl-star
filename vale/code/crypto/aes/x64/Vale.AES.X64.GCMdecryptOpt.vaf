@@ -832,6 +832,7 @@ procedure Gcm_blocks_decrypt_stdcall(
         sse_enabled && movbe_enabled;
 
         rsp == init_rsp(stack);
+        is_initial_heap(memLayout, mem);
 
         // Valid buffers and pointers
         !win ==> valid_stack_slot64(rsp + 8 + 0, stack, Public, stackTaint);
@@ -995,7 +996,20 @@ procedure Gcm_blocks_decrypt_stdcall(
         !win ==> r14 == old(r14);
         !win ==> r15 == old(r15);
 {
-    CreateNoHeaplets(); mem_eq_all(mem, heap0);
+    CreateHeaplets(list(
+        declare_buffer128(    auth_b, 0, Secret, Immutable),
+        declare_buffer128(  abytes_b, 0, Secret, Immutable),
+        declare_buffer128(      iv_b, 0, Public, Mutable),
+        declare_buffer128( in128x6_b, 0, Secret, Immutable),
+        declare_buffer128(out128x6_b, 0, Secret, Mutable),
+        declare_buffer128(   in128_b, 0, Secret, Immutable),
+        declare_buffer128(  out128_b, 0, Secret, Mutable),
+        declare_buffer128(   inout_b, 0, Secret, Mutable),
+        declare_buffer128( scratch_b, 0, Secret, Mutable),
+        declare_buffer128(   hkeys_b, 0, Secret, Immutable),
+        declare_buffer128(     tag_b, 0, Secret, Immutable),
+        declare_buffer128(    keys_b, 0, Secret, Immutable)));
+    mem_eq_all(mem, heap0);
 
     lemma_hkeys_reqs_pub_priv(s128(heap0, hkeys_b), reverse_bytes_quad32(aes_encrypt_LE(alg, key, Mkfour(0,0,0,0))));
     assert win ==> valid_src_stack64(rsp + 40, stack);

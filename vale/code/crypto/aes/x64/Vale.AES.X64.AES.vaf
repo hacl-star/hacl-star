@@ -74,6 +74,7 @@ procedure KeyExpansionStdcall(
             if alg = AES_128 then quad32_to_seq(buffer128_read(input_key_b, 0, mem))
             else make_AES256_key(buffer128_read(input_key_b, 0, mem), buffer128_read(input_key_b, 1, mem));
     requires
+        is_initial_heap(memLayout, mem);
         vale_heap_data_eq(mem, heap0);
         aesni_enabled && avx_enabled && sse_enabled;
         alg = AES_128 || alg = AES_256;
@@ -85,7 +86,10 @@ procedure KeyExpansionStdcall(
         forall(j) 0 <= j <= nr(alg) ==>
             buffer128_read(output_key_expansion_b, j, mem) == index(key_to_round_keys_LE(alg, key), j);
 {
-    CreateNoHeaplets(); mem_eq_all(mem, heap0);
+    CreateHeaplets(list(
+        declare_buffer128(input_key_b, 0, Secret, Immutable),
+        declare_buffer128(output_key_expansion_b, 0, Secret, Mutable)));
+    mem_eq_all(mem, heap0);
 
     inline if (alg = AES_128) {
         KeyExpansion128Stdcall(win, input_key_b, output_key_expansion_b);

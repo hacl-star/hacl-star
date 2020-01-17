@@ -234,6 +234,7 @@ procedure Keyhash_init(
         round_ptr := if win then rcx else rdi;
         hkey_ptr := if win then rdx else rsi;
     requires
+        is_initial_heap(memLayout, mem);
         vale_heap_data_eq(mem, heap0);
         aesni_enabled && pclmulqdq_enabled && avx_enabled && sse_enabled;
         alg = AES_128 || alg = AES_256;
@@ -249,7 +250,10 @@ procedure Keyhash_init(
         xmm6 == old(xmm6);
         r12 == old(r12);
 {
-    CreateNoHeaplets(); mem_eq_all(mem, heap0);
+    CreateHeaplets(list(
+        declare_buffer128(roundkeys_b, 0, Secret, Immutable),
+        declare_buffer128(hkeys_b, 0, Secret, Mutable)));
+    mem_eq_all(mem, heap0);
 
     InitPshufbMask(xmm4, r8);
     ZeroXmm(xmm0);

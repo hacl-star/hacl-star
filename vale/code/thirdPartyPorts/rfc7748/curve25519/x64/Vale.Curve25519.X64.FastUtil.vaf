@@ -213,6 +213,7 @@ procedure Fast_add1(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB:nat64)
         vale_heap_data_eq(mem, heap0);
     requires
         adx_enabled && bmi2_enabled;
+        is_initial_heap(memLayout, mem);
         buffers_disjoint(dst_b, inA_b) || inA_b == dst_b;
 
         validDstAddrs64(mem, dst_ptr, dst_b, 4, memLayout, Secret);
@@ -229,7 +230,10 @@ procedure Fast_add1(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB:nat64)
 
         modifies_buffer(dst_b, old(mem), mem);
 {
-    CreateNoHeaplets(); mem_eq_all(mem, heap0);
+    CreateHeaplets(list(
+        declare_buffer64(dst_b, 0, Secret, Mutable),
+        declare_buffer64(inA_b, 0, Secret, Immutable)));
+    mem_eq_all(mem, heap0);
 
     xor_lemmas();
     Xor64( r8,  r8);
@@ -278,6 +282,7 @@ procedure Fast_add1_stdcall(
         vale_heap_data_eq(mem, heap0);
     requires
         rsp == init_rsp(stack);
+        is_initial_heap(memLayout, mem);
 
         adx_enabled && bmi2_enabled;
         buffers_disjoint(dst_b, inA_b) || inA_b == dst_b;
@@ -326,8 +331,6 @@ procedure Fast_add1_stdcall(
 
         rsp == old(rsp);
 {
-    CreateNoHeaplets(); mem_eq_all(mem, heap0);
-
     // Store callee-save registers
     Push_Secret(rdi);
     Push_Secret(rsi);
@@ -343,10 +346,6 @@ procedure Fast_add1_stdcall(
 
     Pop_Secret(rsi);
     Pop_Secret(rdi);
-
-    DestroyHeaplets();
-    mem_eq_all(mem, heap0);
-    mem_eq_modifies(old(mem), mem, old(heap0), heap0);
 }
 
 #reset-options "--z3rlimit 1200"
@@ -904,6 +903,7 @@ procedure Cswap2(ghost bit_in:nat64, ghost p0_b:buffer64, ghost p1_b:buffer64)
     requires/ensures
         vale_heap_data_eq(mem, heap0);
     requires
+        is_initial_heap(memLayout, mem);
         bit_in == bit;
         bit <= 1;
         buffers_disjoint(p1_b, p0_b) || p1_b == p0_b;
@@ -950,7 +950,10 @@ procedure Cswap2(ghost bit_in:nat64, ghost p0_b:buffer64, ghost p1_b:buffer64)
         p1_6 == (if old(bit) = 1 then old_p0_6 else old_p1_6);
         p1_7 == (if old(bit) = 1 then old_p0_7 else old_p1_7);
 {
-    CreateNoHeaplets(); mem_eq_all(mem, heap0);
+    CreateHeaplets(list(
+        declare_buffer64(p0_b, 0, Secret, Mutable),
+        declare_buffer64(p1_b, 0, Secret, Mutable)));
+    mem_eq_all(mem, heap0);
 
     Add64Wrap(bit, 0xFFFFFFFFFFFFFFFF);
 
@@ -1008,6 +1011,7 @@ procedure Cswap2_stdcall(
         vale_heap_data_eq(mem, heap0);
     requires
         rsp == init_rsp(stack);
+        is_initial_heap(memLayout, mem);
         bit_in <= 1;
         bit_in = (if win then rcx else rdi);
         //adx_enabled && bmi2_enabled;
@@ -1061,8 +1065,6 @@ procedure Cswap2_stdcall(
         win ==>  rsi == old(rsi);
         rsp == old(rsp);
 {
-    CreateNoHeaplets(); mem_eq_all(mem, heap0);
-
     // Line up the rest of the arguments
     inline if (win)
     {
@@ -1081,8 +1083,4 @@ procedure Cswap2_stdcall(
         Pop_Secret(rsi);
         Pop_Secret(rdi);
     }
-
-    DestroyHeaplets();
-    mem_eq_all(mem, heap0);
-    mem_eq_modifies(old(mem), mem, old(heap0), heap0);
 }

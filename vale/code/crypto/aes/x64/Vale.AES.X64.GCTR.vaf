@@ -659,6 +659,7 @@ procedure Gctr_bytes_stdcall(
         vale_heap_data_eq(mem, heap0);
     requires
         rsp == init_rsp(stack);
+        is_initial_heap(memLayout, mem);
         win ==> valid_stack_slot64(rsp + 32 + 8 + 0, stack, Public, stackTaint);
         win ==> valid_stack_slot64(rsp + 32 + 8 + 8, stack, Public, stackTaint);
         win ==> valid_stack_slot64(rsp + 32 + 8 + 16, stack, Public, stackTaint);
@@ -735,7 +736,13 @@ procedure Gctr_bytes_stdcall(
         !win ==> r14 == old(r14);
         !win ==> r15 == old(r15);
 {
-    CreateNoHeaplets(); mem_eq_all(mem, heap0);
+    CreateHeaplets(list(
+        declare_buffer128(   in_b, 0, Secret, Immutable),
+        declare_buffer128(  out_b, 0, Secret, Mutable),
+        declare_buffer128(inout_b, 0, Secret, Mutable),
+        declare_buffer128( keys_b, 0, Secret, Immutable),
+        declare_buffer128(  ctr_b, 0, Secret, Immutable)));
+    mem_eq_all(mem, heap0);
 
     Push_Secret(r15);
     Push_Secret(r14);

@@ -736,7 +736,7 @@ procedure Sha_update_bytes(
                                   seq_nat8_to_seq_uint8(le_seq_quad32_to_bytes(input_LE)));
 }
 
-#reset-options "--z3rlimit 40"
+#reset-options "--z3rlimit 80"
 procedure Sha_update_bytes_stdcall(
         inline win:bool,
         ghost ctx_b:buffer128,
@@ -759,6 +759,7 @@ procedure Sha_update_bytes_stdcall(
         vale_heap_data_eq(mem, heap0);
     requires
         rsp == init_rsp(stack);
+        is_initial_heap(memLayout, mem);
 
         sha_enabled && sse_enabled;
         locs_disjoint(list(loc_buffer(ctx_b), loc_buffer(in_b))) \/ ctx_b == in_b;
@@ -814,7 +815,11 @@ procedure Sha_update_bytes_stdcall(
         win ==>  xmm14 == old(xmm14);
         win ==>  xmm15 == old(xmm15);
 {
-    CreateNoHeaplets(); mem_eq_all(mem, heap0);
+    CreateHeaplets(list(
+        declare_buffer128(ctx_b, 0, Secret, Mutable),
+        declare_buffer128(in_b, 0, Secret, Immutable),
+        declare_buffer128(k_b, 0, Secret, Immutable)));
+    mem_eq_all(mem, heap0);
 
     // Save registers
     inline if (win)

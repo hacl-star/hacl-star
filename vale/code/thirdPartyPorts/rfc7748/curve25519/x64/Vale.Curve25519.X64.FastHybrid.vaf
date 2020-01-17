@@ -802,6 +802,7 @@ procedure Fadd(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB_b:buffer64)
         vale_heap_data_eq(mem, heap0);
     requires
         adx_enabled && bmi2_enabled;
+        is_initial_heap(memLayout, mem);
         buffers_disjoint(dst_b, inA_b) || dst_b == inA_b;
         buffers_disjoint(dst_b, inB_b) || dst_b == inB_b;
 
@@ -819,7 +820,11 @@ procedure Fadd(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB_b:buffer64)
 
         modifies_buffer(dst_b, old(mem), mem);
 {
-    CreateNoHeaplets(); mem_eq_all(mem, heap0);
+    CreateHeaplets(list(
+        declare_buffer64(dst_b, 0, Secret, Mutable),
+        declare_buffer64(inA_b, 0, Secret, Immutable),
+        declare_buffer64(inB_b, 0, Secret, Immutable)));
+    mem_eq_all(mem, heap0);
 
     Fast_add(inA_b, inB_b);
     assert_by_tactic(
@@ -852,6 +857,7 @@ procedure Fadd_stdcall(
         vale_heap_data_eq(mem, heap0);
     requires
         rsp == init_rsp(stack);
+        is_initial_heap(memLayout, mem);
         adx_enabled && bmi2_enabled;
         buffers_disjoint(dst_b, inA_b) || dst_b == inA_b;
         buffers_disjoint(dst_b, inB_b) || dst_b == inB_b;
@@ -905,8 +911,6 @@ procedure Fadd_stdcall(
 
         rsp == old(rsp);
 {
-    CreateNoHeaplets(); mem_eq_all(mem, heap0);
-
     // Line up the rest of the arguments
     inline if (win)
     {
@@ -926,10 +930,6 @@ procedure Fadd_stdcall(
         Pop_Secret(rsi);
         Pop_Secret(rdi);
     }
-
-    mem_eq_all(mem, heap0);
-    mem_eq_modifies(old(mem), mem, old(heap0), heap0);
-    DestroyHeaplets();
 }
 
 #reset-options "--z3rlimit 60"
@@ -971,6 +971,7 @@ procedure Fsub(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB_b:buffer64)
         vale_heap_data_eq(mem, heap0);
     requires
         adx_enabled && bmi2_enabled;
+        is_initial_heap(memLayout, mem);
         buffers_disjoint(dst_b, inA_b) || dst_b == inA_b;
         buffers_disjoint(dst_b, inB_b) || dst_b == inB_b;
 
@@ -988,7 +989,11 @@ procedure Fsub(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB_b:buffer64)
 
         modifies_buffer(dst_b, old(mem), mem);
 {
-    CreateNoHeaplets(); mem_eq_all(mem, heap0);
+    CreateHeaplets(list(
+        declare_buffer64(dst_b, 0, Secret, Mutable),
+        declare_buffer64(inA_b, 0, Secret, Immutable),
+        declare_buffer64(inB_b, 0, Secret, Immutable)));
+    mem_eq_all(mem, heap0);
 
     Fast_sub(inA_b, inB_b);
     Carry_sub_pass();
@@ -1019,6 +1024,7 @@ procedure Fsub_stdcall(
         vale_heap_data_eq(mem, heap0);
     requires
         rsp == init_rsp(stack);
+        is_initial_heap(memLayout, mem);
         adx_enabled && bmi2_enabled;
         buffers_disjoint(dst_b, inA_b) || dst_b == inA_b;
         buffers_disjoint(dst_b, inB_b) || dst_b == inB_b;
@@ -1072,8 +1078,6 @@ procedure Fsub_stdcall(
 
         rsp == old(rsp);
 {
-    CreateNoHeaplets(); mem_eq_all(mem, heap0);
-
     // Line up the rest of the arguments
     inline if (win)
     {
@@ -1093,10 +1097,6 @@ procedure Fsub_stdcall(
         Pop_Secret(rsi);
         Pop_Secret(rdi);
     }
-
-    DestroyHeaplets();
-    mem_eq_all(mem, heap0);
-    mem_eq_modifies(old(mem), mem, old(heap0), heap0);
 }
 
 #reset-options "--z3rlimit 600"
@@ -1132,6 +1132,7 @@ procedure Fmul1(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB:nat64)
     requires/ensures
         vale_heap_data_eq(mem, heap0);
     requires
+        is_initial_heap(memLayout, mem);
         b == inB;
         adx_enabled && bmi2_enabled;
         buffers_disjoint(dst_b, inA_b) || dst_b == inA_b;
@@ -1150,7 +1151,10 @@ procedure Fmul1(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB:nat64)
 
         modifies_buffer(dst_b, old(mem), mem);
 {
-    CreateNoHeaplets(); mem_eq_all(mem, heap0);
+    CreateHeaplets(list(
+        declare_buffer64(dst_b, 0, Secret, Mutable),
+        declare_buffer64(inA_b, 0, Secret, Immutable)));
+    mem_eq_all(mem, heap0);
 
     Fast_mul1(0, inA_b);
     lemma_fmul(old(a0), old(a1), old(a2), old(a3), old(b), tmp0, tmp1, tmp2, tmp3, rax);
@@ -1183,6 +1187,7 @@ procedure Fmul1_stdcall(
         vale_heap_data_eq(mem, heap0);
     requires
         rsp == init_rsp(stack);
+        is_initial_heap(memLayout, mem);
         adx_enabled && bmi2_enabled;
         buffers_disjoint(dst_b, inA_b) || inA_b == dst_b;
 
@@ -1232,8 +1237,6 @@ procedure Fmul1_stdcall(
 
         rsp == old(rsp);
 {
-    CreateNoHeaplets(); mem_eq_all(mem, heap0);
-
     // Store callee-save registers
     Push_Secret(rdi);
     Push_Secret(r12);
@@ -1257,8 +1260,4 @@ procedure Fmul1_stdcall(
     Pop_Secret(r13);
     Pop_Secret(r12);
     Pop_Secret(rdi);
-
-    DestroyHeaplets();
-    mem_eq_all(mem, heap0);
-    mem_eq_modifies(old(mem), mem, old(heap0), heap0);
 }

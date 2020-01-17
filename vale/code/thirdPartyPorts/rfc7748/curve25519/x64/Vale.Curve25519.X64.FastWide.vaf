@@ -80,6 +80,7 @@ procedure Fmul(
         vale_heap_data_eq(mem, heap0);
     requires
         adx_enabled && bmi2_enabled;
+        is_initial_heap(memLayout, mem);
         buffers_disjoint(dst_b, inA_b) || dst_b == inA_b;
         buffers_disjoint(dst_b, inB_b) || dst_b == inB_b;
         buffers_disjoint(dst_b, tmp_b) || dst_b == tmp_b;
@@ -119,7 +120,12 @@ procedure Fmul(
 
         modifies_buffer_2(dst_b, tmp_b, old(mem), mem);
 {
-    CreateNoHeaplets(); mem_eq_all(mem, heap0);
+    CreateHeaplets(list(
+        declare_buffer64(dst_b, 0, Secret, Mutable),
+        declare_buffer64(inA_b, 0, Secret, Immutable),
+        declare_buffer64(inB_b, 0, Secret, Immutable),
+        declare_buffer64(tmp_b, 0, Secret, Mutable)));
+    mem_eq_all(mem, heap0);
 
     Mov64(r15, dst_ptr); // Save dst_ptr that will be clobbered by Fast_multiply
     Fast_multiply(0, tmp_b, inA_b, inB_b);
@@ -155,6 +161,7 @@ procedure Fmul_stdcall(
         vale_heap_data_eq(mem, heap0);
     requires
         rsp == init_rsp(stack);
+        is_initial_heap(memLayout, mem);
         adx_enabled && bmi2_enabled;
         buffers_disjoint(dst_b, inA_b) || dst_b == inA_b;
         buffers_disjoint(dst_b, inB_b) || dst_b == inB_b;
@@ -213,8 +220,6 @@ procedure Fmul_stdcall(
 
         rsp == old(rsp);
 {
-    CreateNoHeaplets(); mem_eq_all(mem, heap0);
-
     Push_Secret(r12);
     Push_Secret(r13);
     Push_Secret(r14);
@@ -245,10 +250,6 @@ procedure Fmul_stdcall(
     Pop_Secret(r14);
     Pop_Secret(r13);
     Pop_Secret(r12);
-
-    DestroyHeaplets();
-    mem_eq_all(mem, heap0);
-    mem_eq_modifies(old(mem), mem, old(heap0), heap0);
 }
 
 #reset-options "--z3rlimit 60"
@@ -273,6 +274,7 @@ procedure Fmul2(
         vale_heap_data_eq(mem, heap0);
     requires
         adx_enabled && bmi2_enabled;
+        is_initial_heap(memLayout, mem);
         buffers_disjoint(dst_b, inA_b) || dst_b == inA_b;
         buffers_disjoint(dst_b, inB_b) || dst_b == inB_b;
         buffers_disjoint(dst_b, tmp_b) || dst_b == tmp_b;
@@ -334,7 +336,12 @@ procedure Fmul2(
 
         modifies_buffer_2(dst_b, tmp_b, old(mem), mem);
 {
-    CreateNoHeaplets(); mem_eq_all(mem, heap0);
+    CreateHeaplets(list(
+        declare_buffer64(dst_b, 0, Secret, Mutable),
+        declare_buffer64(inA_b, 0, Secret, Immutable),
+        declare_buffer64(inB_b, 0, Secret, Immutable),
+        declare_buffer64(tmp_b, 0, Secret, Mutable)));
+    mem_eq_all(mem, heap0);
 
     Mov64(r15, dst_ptr); // Save dst_ptr that will be clobbered by Fast_multiply
     Fast_multiply(0, tmp_b, inA_b, inB_b);
@@ -371,6 +378,7 @@ procedure Fmul2_stdcall(
         vale_heap_data_eq(mem, heap0);
     requires
         rsp == init_rsp(stack);
+        is_initial_heap(memLayout, mem);
         adx_enabled && bmi2_enabled;
         buffers_disjoint(dst_b, inA_b) || dst_b == inA_b;
         buffers_disjoint(dst_b, inB_b) || dst_b == inB_b;
@@ -451,8 +459,6 @@ procedure Fmul2_stdcall(
 
         rsp == old(rsp);
 {
-    CreateNoHeaplets(); mem_eq_all(mem, heap0);
-
     Push_Secret(r12);
     Push_Secret(r13);
     Push_Secret(r14);
@@ -483,10 +489,6 @@ procedure Fmul2_stdcall(
     Pop_Secret(r14);
     Pop_Secret(r13);
     Pop_Secret(r12);
-
-    DestroyHeaplets();
-    mem_eq_all(mem, heap0);
-    mem_eq_modifies(old(mem), mem, old(heap0), heap0);
 }
 
 procedure Fsqr(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64)
@@ -505,6 +507,7 @@ procedure Fsqr(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64)
         vale_heap_data_eq(mem, heap0);
     requires
         adx_enabled && bmi2_enabled;
+        is_initial_heap(memLayout, mem);
         buffers_disjoint(dst_b, inA_b) || dst_b == inA_b;
         buffers_disjoint(dst_b, tmp_b) || dst_b == tmp_b;
 
@@ -536,7 +539,11 @@ procedure Fsqr(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64)
         modifies_buffer_2(dst_b, tmp_b, old(mem), mem);
 
 {
-    CreateNoHeaplets(); mem_eq_all(mem, heap0);
+    CreateHeaplets(list(
+        declare_buffer64(dst_b, 0, Secret, Mutable),
+        declare_buffer64(inA_b, 0, Secret, Immutable),
+        declare_buffer64(tmp_b, 0, Secret, Mutable)));
+    mem_eq_all(mem, heap0);
 
     Mov64(rbx, dst_ptr); // Save dst_ptr that will be clobbered by Fast_sqr
     Fast_sqr(0, tmp_b, inA_b);
@@ -570,6 +577,7 @@ procedure Fsqr_stdcall(
         vale_heap_data_eq(mem, heap0);
     requires
         rsp == init_rsp(stack);
+        is_initial_heap(memLayout, mem);
         adx_enabled && bmi2_enabled;
         buffers_disjoint(dst_b, inA_b) || dst_b == inA_b;
         buffers_disjoint(dst_b, tmp_b) || dst_b == tmp_b;
@@ -669,6 +677,7 @@ procedure Fsqr2(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64
         vale_heap_data_eq(mem, heap0);
     requires
         adx_enabled && bmi2_enabled;
+        is_initial_heap(memLayout, mem);
         buffers_disjoint(dst_b, inA_b) || dst_b == inA_b;
         buffers_disjoint(dst_b, tmp_b) || dst_b == tmp_b;
 
@@ -710,7 +719,11 @@ procedure Fsqr2(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64
 
         modifies_buffer_2(dst_b, tmp_b, old(mem), mem);
 {
-    CreateNoHeaplets(); mem_eq_all(mem, heap0);
+    CreateHeaplets(list(
+        declare_buffer64(dst_b, 0, Secret, Mutable),
+        declare_buffer64(inA_b, 0, Secret, Immutable),
+        declare_buffer64(tmp_b, 0, Secret, Mutable)));
+    mem_eq_all(mem, heap0);
 
     Mov64(rbx, dst_ptr); // Save dst_ptr that will be clobbered by Fast_sqr
     Fast_sqr(0, tmp_b, inA_b);
@@ -746,6 +759,7 @@ procedure Fsqr2_stdcall(
         vale_heap_data_eq(mem, heap0);
     requires
         rsp == init_rsp(stack);
+        is_initial_heap(memLayout, mem);
         adx_enabled && bmi2_enabled;
         buffers_disjoint(dst_b, inA_b) || dst_b == inA_b;
         buffers_disjoint(dst_b, tmp_b) || dst_b == tmp_b;

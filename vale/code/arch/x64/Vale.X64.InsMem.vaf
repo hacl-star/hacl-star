@@ -102,6 +102,9 @@ unfold let norm_list (p:prop) : prop =
 let declare_buffer64 (b:buffer TUInt64) (hid:heaplet_id) (t:taint) (mut:mutability) =
   Mkbuffer_info TUInt64 b hid t mut
 
+let declare_buffer128 (b:buffer TUInt128) (hid:heaplet_id) (t:taint) (mut:mutability) =
+  Mkbuffer_info TUInt128 b hid t mut
+
 let create_post (layout:vale_heap_layout) (bs:Seq.seq buffer_info) =
   forall (i:nat).{:pattern Seq.index bs i} i < Seq.length bs ==> (
     let Mkbuffer_info t b hid _ _ = Seq.index bs i in
@@ -114,21 +117,9 @@ function heaplet_id_is_none(h:vale_heap):prop extern;
 function heaplet_id_is_some(h:vale_heap, heaplet_id:int):prop extern;
 function norm_list(p:prop):prop extern;
 function declare_buffer64(b:buffer64, hid:heaplet_id, t:taint, mut:mutability):buffer_info extern;
+function declare_buffer128(b:buffer128, hid:heaplet_id, t:taint, mut:mutability):buffer_info extern;
 function create_post(layout:vale_heap_layout, bs:Seq.seq(buffer_info)):prop extern;
 ghost procedure Vale.X64.StateLemmas.use_machine_state_equal() extern;
-
-// TODO: this is used for the current (trivial) mem_inv; it will probably be removed for the real mem_inv
-procedure CreateNoHeaplets()
-    {:public}
-    {:quick exportOnly}
-    {:instruction mk_ins(make_instr_annotate(I.ins_Ghost, S.AnnotateGhost()))}
-    reads
-        mem;
-    ensures
-        heaplet_id_is_none(mem);
-{
-    let dummy := destroy_heaplets_this(this);
-}
 
 procedure CreateHeaplets(ghost buffers:list(buffer_info))
     {:public}
