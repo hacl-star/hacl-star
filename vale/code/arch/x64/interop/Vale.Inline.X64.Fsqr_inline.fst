@@ -159,7 +159,7 @@ let lowstar_Fsqr_normal_t : normal lowstar_Fsqr_t
 
 open Vale.AsLowStar.MemoryHelpers
 
-let fsqr_inline tmp f1 out =
+let fsqr tmp f1 out =
     DV.length_eq (get_downview tmp);
     DV.length_eq (get_downview f1);
     DV.length_eq (get_downview out);
@@ -181,7 +181,7 @@ let fsqr_names (n:nat) =
   | _ -> ""
 
 let fsqr_code_inline () : FStar.All.ML int =
-  PR.print_inline "fsqr_inline" 0 None (List.length fsqr_dom) fsqr_dom fsqr_names code_Fsqr of_arg fsqr_regs_modified fsqr_comments
+  PR.print_inline "fsqr" 0 None (List.length fsqr_dom) fsqr_dom fsqr_names code_Fsqr of_arg fsqr_regs_modified fsqr_comments
 
 (* Need to rearrange the order of arguments *)
 [@__reduce__]
@@ -275,7 +275,7 @@ let lowstar_Fsqr2_normal_t : normal lowstar_Fsqr2_t
 
 open Vale.AsLowStar.MemoryHelpers
 
-let fsqr2_inline tmp f1 out =
+let fsqr2 tmp f1 out =
     DV.length_eq (get_downview tmp);
     DV.length_eq (get_downview f1);
     DV.length_eq (get_downview out);
@@ -297,4 +297,4 @@ let fsqr2_names (n:nat) : string =
   | _ -> ""
 
 let fsqr2_code_inline () : FStar.All.ML int =
-  PR.print_inline "fsqr2_inline" 0 None (List.length fsqr_dom) fsqr_dom fsqr2_names code_Fsqr2 of_arg fsqr_regs_modified fsqr2_comments
+  PR.print_inline "fsqr2" 0 None (List.length fsqr_dom) fsqr_dom fsqr2_names code_Fsqr2 of_arg fsqr_regs_modified fsqr2_comments

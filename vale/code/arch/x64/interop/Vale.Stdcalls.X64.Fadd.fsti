@@ -203,7 +203,7 @@ let lowstar_fadd_t =
     (W.mk_prediction code_Fadd fadd_dom [] (fadd_lemma code_Fadd IA.win))
 
 [@ (CCConv "stdcall") ]
-val add1 : normal lowstar_add1_t
+val add_scalar_e : normal lowstar_add1_t
 
 [@ (CCConv "stdcall") ]
-val fadd_ : normal lowstar_fadd_t
+val fadd_e : normal lowstar_fadd_t

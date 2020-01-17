@@ -170,7 +170,7 @@ open Vale.AsLowStar.MemoryHelpers
 
 let math_aux (n:nat) : Lemma ((n*8)/8 = n) = ()
 
-let fmul_inline tmp f1 out f2 =
+let fmul tmp f1 out f2 =
     DV.length_eq (get_downview out);
     DV.length_eq (get_downview f1);
     DV.length_eq (get_downview tmp);
@@ -197,7 +197,7 @@ let fmul_names (n:nat) =
   | _ -> ""
 
 let fmul_code_inline () : FStar.All.ML int =
-  PR.print_inline "fmul_inline" 0 None (List.length fmul_dom) fmul_dom fmul_names code_Fmul fmul_of_arg fmul_regs_modified fmul_comments
+  PR.print_inline "fmul" 0 None (List.length fmul_dom) fmul_dom fmul_names code_Fmul fmul_of_arg fmul_regs_modified fmul_comments
 
 (* Need to rearrange the order of arguments *)
 [@__reduce__]
@@ -297,7 +297,7 @@ let lowstar_fmul2_normal_t : normal lowstar_fmul2_t
 
 #push-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 200"
 
-let fmul2_inline tmp f1 out f2 =
+let fmul2 tmp f1 out f2 =
     DV.length_eq (get_downview out);
     DV.length_eq (get_downview f1);
     DV.length_eq (get_downview tmp);
@@ -322,7 +322,7 @@ let fmul2_names (n:nat) =
   | _ -> ""
 
 let fmul2_code_inline () : FStar.All.ML int =
-  PR.print_inline "fmul2_inline" 0 None (List.length fmul_dom) fmul_dom fmul2_names code_Fmul2 fmul_of_arg fmul_regs_modified fmul2_comments
+  PR.print_inline "fmul2" 0 None (List.length fmul_dom) fmul_dom fmul2_names code_Fmul2 fmul_of_arg fmul_regs_modified fmul2_comments
 
 [@__reduce__]
 let fmul1_dom: IX64.arity_ok 3 td =
@@ -440,7 +440,7 @@ let lowstar_fmul1_normal_t : normal lowstar_fmul1_t
 
 open Vale.AsLowStar.MemoryHelpers
 
-let fmul1_inline out f1 f2
+let fmul_scalar out f1 f2
   = DV.length_eq (get_downview out);
     DV.length_eq (get_downview f1);
     let x, _ = lowstar_fmul1_normal_t out f1 f2 () in
@@ -457,4 +457,4 @@ let fmul1_names (n:nat) =
   | _ -> ""
 
 let fmul1_code_inline () : FStar.All.ML int =
-  PR.print_inline "fmul1_inline" 0 None (List.length fmul1_dom) fmul1_dom fmul1_names code_Fmul1 of_arg fmul1_regs_modified fmul1_comments
+  PR.print_inline "fmul_scalar" 0 None (List.length fmul1_dom) fmul1_dom fmul1_names code_Fmul1 of_arg fmul1_regs_modified fmul1_comments
