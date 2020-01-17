@@ -942,7 +942,7 @@ procedure Cswap2(ghost bit_in:nat64, ghost p0_b:buffer64, ghost p1_b:buffer64)
         p1_6 == (if old(bit) = 1 then old_p0_6 else old_p1_6);
         p1_7 == (if old(bit) = 1 then old_p0_7 else old_p1_7);
 {
-    Comment("Invert the polarity of bit to match cmov expectations");
+    Comment("Transfer bit into CF flag");
     Add64Wrap(bit, 0xFFFFFFFFFFFFFFFF);
     
     Newline();
