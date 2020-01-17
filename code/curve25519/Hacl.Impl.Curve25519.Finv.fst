@@ -44,7 +44,7 @@ val fsqr_s:
       feval h1 out == P.fmul (feval h0 f1) (feval h0 f1))
 [@ Meta.Attribute.inline_ ]
 let fsqr_s #s out f1 tmp =
-  C.fsqr #s tmp f1 out
+  C.fsqr #s out f1 tmp
 
 noextract
 val fmuls_pre: #s:field_spec -> h:mem -> f1:felem s -> f2:felem s -> Type0
@@ -74,7 +74,7 @@ val fmul_s:
       feval h1 out == P.fmul (feval h0 f1) (feval h0 f2))
 [@ Meta.Attribute.inline_ ]
 let fmul_s #s out f1 f2 tmp =
-  C.fmul #s tmp f1 out f2
+  C.fmul #s out f1 f2 tmp
 
 val fsquare_times:
     #s:field_spec

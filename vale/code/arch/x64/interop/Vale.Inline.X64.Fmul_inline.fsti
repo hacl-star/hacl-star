@@ -23,10 +23,10 @@ let as_nat (b:B.buffer UInt64.t{B.length b == 4}) (h:HS.mem) : GTot nat =
   pow2_four s0 s1 s2 s3
 
 val fmul
-  (tmp:u512)
-  (f1:u256)
   (out:u256)
+  (f1:u256)
   (f2:u256)
+  (tmp:u512)
   : Stack unit
     (requires fun h ->
       adx_enabled /\ bmi2_enabled /\
@@ -43,10 +43,10 @@ val fmul
       (as_nat out h1) % prime == (as_nat f1 h0 * as_nat f2 h0) % prime)
 
 val fmul2
-  (tmp:u1024)
-  (f1:u512)
   (out:u512)
+  (f1:u512)
   (f2:u512)
+  (tmp:u1024)
   : Stack unit
     (requires fun h ->
       adx_enabled /\ bmi2_enabled /\

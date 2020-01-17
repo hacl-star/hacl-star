@@ -83,7 +83,7 @@ let point_add_and_double0 #s nq_p1 ab dc tmp2 =
   (* CAN RUN IN PARALLEL *)
   //fmul d d a;   // d = da = d * a
   //fmul c c b;   // c = cb = c * b
-  fmul2 tmp2 dc dc ab;   // d|c = d*a|c*b
+  fmul2 dc dc ab tmp2;   // d|c = d*a|c*b
   fadd x3 d c;  // x3 = da + cb
   fsub z3 d c  // z3 = da - cb
 
@@ -127,11 +127,11 @@ let point_add_and_double1 #s nq nq_p1 tmp1 tmp2 =
   (* CAN RUN IN PARALLEL *)
   //fsqr d a;     // d = aa = a^2
   //fsqr c b;     // c = bb = b^2
-  fsqr2 tmp2 ab dc;     // d|c = aa | bb
+  fsqr2 dc ab tmp2;     // d|c = aa | bb
   (* CAN RUN IN PARALLEL *)
   //fsqr x3 x3;   // x3 = (da + cb) ^ 2
   //fsqr z3 z3;   // z3 = (da - cb) ^ 2
-  fsqr2 tmp2 nq_p1 nq_p1;   // x3|z3 = x3*x3|z3*z3
+  fsqr2 nq_p1 nq_p1 tmp2;   // x3|z3 = x3*x3|z3*z3
 
   copy_felem a c;                           // a = bb
   fsub c d c;   // c = e = aa - bb
@@ -142,7 +142,7 @@ let point_add_and_double1 #s nq nq_p1 tmp1 tmp2 =
   (* CAN RUN IN PARALLEL *)
   //fmul x2 d a;  // x2 = aa * bb
   //fmul z2 c b;  // z2 = e * (aa + (e * 121665))
-  fmul2 tmp2 dc nq ab  // x2|z2 = aa * bb | e * (aa + (e * 121665))
+  fmul2 nq dc ab tmp2  // x2|z2 = aa * bb | e * (aa + (e * 121665))
 
 val point_add_and_double:
     #s:field_spec
@@ -190,7 +190,7 @@ let point_add_and_double #s q p01_tmp1 tmp2 =
 
   point_add_and_double0 #s nq_p1 ab dc tmp2;
   point_add_and_double1 #s nq nq_p1 tmp1 tmp2;
-  fmul tmp2 z3 z3 x1; // z3 = x1 * (da - cb) ^ 2
+  fmul z3 z3 x1 tmp2; // z3 = x1 * (da - cb) ^ 2
   S.lemma_add_and_double (fget_xz h0 q) (fget_xz h0 nq) (fget_xz h0 nq_p1)
 
 val point_double:
@@ -234,7 +234,7 @@ let point_double #s nq tmp1 tmp2 =
   (* CAN RUN IN PARALLEL *)
   //fsqr d a;     // d = aa = a^2
   //fsqr c b;     // c = bb = b^2
-  fsqr2 tmp2 ab dc;     // d|c = aa | bb
+  fsqr2 dc ab tmp2;     // d|c = aa | bb
   copy_felem a c;                           // a = bb
   fsub c d c;   // c = e = aa - bb
   assert_norm (121665 < pow2 17);
@@ -244,4 +244,4 @@ let point_double #s nq tmp1 tmp2 =
   (* CAN RUN IN PARALLEL *)
   //fmul x2 d a;  // x2 = aa * bb
   //fmul z2 c b;  // z2 = e * (aa + (e * 121665))
-  fmul2 tmp2 dc nq ab  // x2|z2 = aa * bb | e * (aa + (e * 121665))
+  fmul2 nq dc ab tmp2  // x2|z2 = aa * bb | e * (aa + (e * 121665))

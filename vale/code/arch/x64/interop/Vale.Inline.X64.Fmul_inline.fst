@@ -42,7 +42,7 @@ let tuint64 = TD_Base TUInt64
 
 [@__reduce__]
 let fmul_dom: IX64.arity_ok 4 td =
-  let y = [t64_mod; t64_no_mod; t64_mod; t64_no_mod] in
+  let y = [t64_mod; t64_no_mod; t64_no_mod; t64_mod] in
   assert_norm (List.length y = 4);
   y
 
@@ -50,10 +50,10 @@ let fmul_dom: IX64.arity_ok 4 td =
 [@__reduce__]
 let fmul_pre : VSig.vale_pre fmul_dom =
   fun (c:V.va_code)
-    (tmp:b64)
-    (f1:b64)
     (out:b64)
+    (f1:b64)
     (f2:b64)
+    (tmp:b64)
     (va_s0:V.va_state) ->
       FW.va_req_Fmul c va_s0
         (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) (as_vale_buffer f2)
@@ -61,10 +61,10 @@ let fmul_pre : VSig.vale_pre fmul_dom =
 [@__reduce__]
 let fmul_post : VSig.vale_post fmul_dom =
   fun (c:V.va_code)
-    (tmp:b64)
-    (f1:b64)
     (out:b64)
+    (f1:b64)
     (f2:b64)
+    (tmp:b64)
     (va_s0:V.va_state)
     (va_s1:V.va_state)
     (f:V.va_fuel) ->
@@ -83,18 +83,18 @@ let fmul_xmms_modified = fun _ -> false
 let fmul_lemma'
     (code:V.va_code)
     (_win:bool)
-    (tmp:b64)
-    (f1:b64)
     (out:b64)
+    (f1:b64)
     (f2:b64)
+    (tmp:b64)
     (va_s0:V.va_state)
  : Ghost (V.va_state & V.va_fuel)
      (requires
-       fmul_pre code tmp f1 out f2 va_s0)
+       fmul_pre code out f1 f2 tmp va_s0)
      (ensures (fun (va_s1, f) ->
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions va_s0 va_s1 fmul_regs_modified fmul_xmms_modified /\
-       fmul_post code tmp f1 out f2 va_s0 va_s1 f /\
+       fmul_post code out f1 f2 tmp va_s0 va_s1 f /\
        ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer out) /\
        ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer f1) /\
        ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer f2) /\
@@ -119,17 +119,17 @@ let fmul_lemma = as_t #(VSig.vale_sig fmul_regs_modified fmul_xmms_modified fmul
 let code_Fmul = FW.va_code_Fmul ()
 
 let fmul_of_reg (r:MS.reg_64) : option (IX64.reg_nat 4) = match r with
-  | 5 -> Some 0 // rdi
+  | 15 -> Some 0 // r15
   | 4 -> Some 1 // rsi
-  | 15 -> Some 2 // r15
-  | 2 -> Some 3 // rcx
+  | 2 -> Some 2 // rcx
+  | 5 -> Some 3 // rdi
   | _ -> None
 
 let fmul_of_arg (i:IX64.reg_nat 4) : MS.reg_64 = match i with
-  | 0 -> MS.rRdi
+  | 0 -> MS.rR15
   | 1 -> MS.rRsi
-  | 2 -> MS.rR15
-  | 3 -> MS.rRcx
+  | 2 -> MS.rRcx
+  | 3 -> MS.rRdi
 
 let fmul_arg_reg : IX64.arg_reg_relation 4 = IX64.Rel fmul_of_reg fmul_of_arg
 
@@ -170,7 +170,7 @@ open Vale.AsLowStar.MemoryHelpers
 
 let math_aux (n:nat) : Lemma ((n*8)/8 = n) = ()
 
-let fmul tmp f1 out f2 =
+let fmul out f1 f2 tmp =
     DV.length_eq (get_downview out);
     DV.length_eq (get_downview f1);
     DV.length_eq (get_downview tmp);
@@ -179,7 +179,7 @@ let fmul tmp f1 out f2 =
     math_aux (B.length out);
     Vale.AsLowStar.MemoryHelpers.as_vale_buffer_len #TUInt64 #TUInt64 tmp;
     Vale.AsLowStar.MemoryHelpers.as_vale_buffer_len #TUInt64 #TUInt64 out;
-    let x, _ = lowstar_fmul_normal_t tmp f1 out f2 () in
+    let x, _ = lowstar_fmul_normal_t out f1 f2 tmp () in
     ()
 
 #pop-options
@@ -190,10 +190,10 @@ let fmul_comments : list string =
 
 let fmul_names (n:nat) =
   match n with
-  | 0 -> "tmp"
+  | 0 -> "out"
   | 1 -> "f1"
-  | 2 -> "out"
-  | 3 -> "f2"
+  | 2 -> "f2"
+  | 3 -> "tmp"
   | _ -> ""
 
 let fmul_code_inline () : FStar.All.ML int =
@@ -203,10 +203,10 @@ let fmul_code_inline () : FStar.All.ML int =
 [@__reduce__]
 let fmul2_pre : VSig.vale_pre fmul_dom =
   fun (c:V.va_code)
-    (tmp:b64)
-    (f1:b64)
     (out:b64)
+    (f1:b64)
     (f2:b64)
+    (tmp:b64)
     (va_s0:V.va_state) ->
       FW.va_req_Fmul2 c va_s0
         (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) (as_vale_buffer f2)
@@ -214,10 +214,10 @@ let fmul2_pre : VSig.vale_pre fmul_dom =
 [@__reduce__]
 let fmul2_post : VSig.vale_post fmul_dom =
   fun (c:V.va_code)
-    (tmp:b64)
-    (f1:b64)
     (out:b64)
+    (f1:b64)
     (f2:b64)
+    (tmp:b64)
     (va_s0:V.va_state)
     (va_s1:V.va_state)
     (f:V.va_fuel) ->
@@ -229,18 +229,18 @@ let fmul2_post : VSig.vale_post fmul_dom =
 let fmul2_lemma'
     (code:V.va_code)
     (_win:bool)
-    (tmp:b64)
-    (f1:b64)
     (out:b64)
+    (f1:b64)
     (f2:b64)
+    (tmp:b64)
     (va_s0:V.va_state)
  : Ghost (V.va_state & V.va_fuel)
      (requires
-       fmul2_pre code tmp f1 out f2 va_s0)
+       fmul2_pre code out f1 f2 tmp va_s0)
      (ensures (fun (va_s1, f) ->
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions va_s0 va_s1 fmul_regs_modified fmul_xmms_modified /\
-       fmul2_post code tmp f1 out f2 va_s0 va_s1 f /\
+       fmul2_post code out f1 f2 tmp va_s0 va_s1 f /\
        ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer out) /\
        ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer f1) /\
        ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer f2) /\
@@ -297,12 +297,12 @@ let lowstar_fmul2_normal_t : normal lowstar_fmul2_t
 
 #push-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 200"
 
-let fmul2 tmp f1 out f2 =
+let fmul2 out f1 f2 tmp =
     DV.length_eq (get_downview out);
     DV.length_eq (get_downview f1);
     DV.length_eq (get_downview tmp);
     DV.length_eq (get_downview f2);
-    let x, _ = lowstar_fmul2_normal_t tmp f1 out f2 () in
+    let x, _ = lowstar_fmul2_normal_t out f1 f2 tmp () in
     ()
 
 #pop-options
@@ -315,10 +315,10 @@ let fmul2_comments : list string = [
 
 let fmul2_names (n:nat) =
   match n with
-  | 0 -> "tmp"
+  | 0 -> "out"
   | 1 -> "f1"
-  | 2 -> "out1"
-  | 3 -> "f2"
+  | 2 -> "f2"
+  | 3 -> "tmp"
   | _ -> ""
 
 let fmul2_code_inline () : FStar.All.ML int =
@@ -451,7 +451,7 @@ let fmul1_comments : list string =
 
 let fmul1_names (n:nat) =
   match n with
-  | 0 -> "out1"
+  | 0 -> "out"
   | 1 -> "f1"
   | 2 -> "f2"
   | _ -> ""

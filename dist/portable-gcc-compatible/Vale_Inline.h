@@ -42,25 +42,25 @@ static inline void cswap2(uint64_t bit, uint64_t *p0, uint64_t *p1);
 
 /* SNIPPET_START: fsqr */
 
-static inline void fsqr(uint64_t *tmp, uint64_t *f1, uint64_t *out1);
+static inline void fsqr(uint64_t *out1, uint64_t *f1, uint64_t *tmp);
 
 /* SNIPPET_END: fsqr */
 
 /* SNIPPET_START: fsqr2 */
 
-static inline void fsqr2(uint64_t *tmp, uint64_t *f1, uint64_t *out1);
+static inline void fsqr2(uint64_t *out1, uint64_t *f1, uint64_t *tmp);
 
 /* SNIPPET_END: fsqr2 */
 
 /* SNIPPET_START: fmul */
 
-static inline void fmul(uint64_t *tmp, uint64_t *f1, uint64_t *out1, uint64_t *f2);
+static inline void fmul(uint64_t *out1, uint64_t *f1, uint64_t *f2, uint64_t *tmp);
 
 /* SNIPPET_END: fmul */
 
 /* SNIPPET_START: fmul2 */
 
-static inline void fmul2(uint64_t *tmp, uint64_t *f1, uint64_t *out1, uint64_t *f2);
+static inline void fmul2(uint64_t *out1, uint64_t *f1, uint64_t *f2, uint64_t *tmp);
 
 /* SNIPPET_END: fmul2 */
 

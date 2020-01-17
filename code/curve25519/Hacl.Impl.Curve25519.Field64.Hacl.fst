@@ -68,7 +68,7 @@ let fsub_ out f1 f2 =
   out.(3ul) <- o3
 
 [@CInline]
-let fmul_ tmp f1 out f2 =
+let fmul_ out f1 f2 tmp =
   let f10 = f1.(0ul) in
   let f11 = f1.(1ul) in
   let f12 = f1.(2ul) in
@@ -87,15 +87,15 @@ let fmul_ tmp f1 out f2 =
   out.(3ul) <- o3
 
 [@CInline]
-let fmul2_ tmp f1 out f2 =
+let fmul2_ out f1 f2 tmp =
   let out1 = B.sub out 0ul 4ul in
   let out2 = B.sub out 4ul 4ul in
   let f11 = B.sub f1 0ul 4ul in
   let f12 = B.sub f1 4ul 4ul in
   let f21 = B.sub f2 0ul 4ul in
   let f22 = B.sub f2 4ul 4ul in
-  fmul_ tmp f11 out1 f21;
-  fmul_ tmp f12 out2 f22
+  fmul_ out1 f11 f21 tmp;
+  fmul_ out2 f12 f22 tmp
 
 [@CInline]
 let fmul1_ out f1 f2 =
@@ -111,15 +111,15 @@ let fmul1_ out f1 f2 =
   out.(3ul) <- o3
 
 [@CInline]
-let fsqr_ tmp f1 out =
+let fsqr_ out f1 tmp =
   push_frame ();
   let tmp = create 16ul (u64 0) in
-  fmul_ tmp f1 out f1;
+  fmul_ out f1 f1 tmp;
   pop_frame ()
 
 [@CInline]
-let fsqr2_ tmp f out =
-  fmul2_ tmp f out f
+let fsqr2_ out f tmp =
+  fmul2_ out f f tmp
 
 val lemma_cswap2_step:
     bit:uint64{v bit <= 1}

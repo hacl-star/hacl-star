@@ -177,7 +177,7 @@ let fsub out f1 f2 =
 
 val fmul: C.(fmul_t M51)
 [@ CInline]
-let fmul _ f1 out f2 =
+let fmul out f1 f2 _ =
   let f10 = f1.(0ul) in
   let f11 = f1.(1ul) in
   let f12 = f1.(2ul) in
@@ -202,7 +202,7 @@ val fmul2: C.(fmul2_t M51)
 #set-options "--z3rlimit 100"
 
 [@ CInline]
-let fmul2 _ f1 out f2 =
+let fmul2 out f1 f2 _ =
   let f10 = f1.(0ul) in
   let f11 = f1.(1ul) in
   let f12 = f1.(2ul) in
@@ -260,7 +260,7 @@ let fmul1 out f1 f2 =
 
 val fsqr: C.(fsqr_t M51)
 [@ CInline]
-let fsqr _ f out =
+let fsqr out f _ =
   let f0 = f.(0ul) in
   let f1 = f.(1ul) in
   let f2 = f.(2ul) in
@@ -275,7 +275,7 @@ let fsqr _ f out =
 
 val fsqr2: C.(fsqr2_t M51)
 [@ CInline]
-let fsqr2 _ f out =
+let fsqr2 out f _ =
   let f10 = f.(0ul) in
   let f11 = f.(1ul) in
   let f12 = f.(2ul) in

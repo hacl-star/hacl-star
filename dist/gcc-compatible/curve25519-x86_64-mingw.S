@@ -960,7 +960,7 @@ cswap2_e:
   mov %rcx, %rdi
   mov %rdx, %rsi
   mov %r8, %rdx
-  ;# Invert the polarity of bit to match cmov expectations
+  ;# Transfer bit into CF flag
   add $18446744073709551615, %rdi
   
   ;# cswap p1[0], p2[0]

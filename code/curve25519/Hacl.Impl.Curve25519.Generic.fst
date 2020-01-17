@@ -103,7 +103,7 @@ let encode_point #s o i =
   let tmp_w = create (2ul `FStar.UInt32.mul` ((nwide s) <: FStar.UInt32.t)) (wide_zero s) in
   let h0 = ST.get () in
   finv tmp z tmp_w;
-  fmul tmp_w tmp tmp x;
+  fmul tmp tmp x tmp_w;
   let h1 = ST.get () in
   assert (feval h1 tmp == S.fmul (S.fpow (feval h0 z) (pow2 255 - 21)) (feval h0 x));
   assert (feval h1 tmp == S.fmul (feval h0 x) (S.fpow (feval h0 z) (pow2 255 - 21)));

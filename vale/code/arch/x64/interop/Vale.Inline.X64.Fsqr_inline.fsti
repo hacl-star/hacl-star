@@ -9,9 +9,9 @@ open FStar.Mul
 open Vale.Wrapper.X64.Fadd
 
 val fsqr
-  (tmp:u512)
-  (f1:u256)
   (out:u256)
+  (f1:u256)
+  (tmp:u512)
   : Stack unit
     (requires fun h ->
     adx_enabled /\ bmi2_enabled /\
@@ -25,9 +25,9 @@ val fsqr
       (as_nat out h1) % prime == (as_nat f1 h0 * as_nat f1 h0) % prime)
 
 val fsqr2
-  (tmp:u1024)
-  (f1:u512)
   (out:u512)
+  (f1:u512)
+  (tmp:u1024)
   : Stack unit
     (requires fun h ->
       adx_enabled /\ bmi2_enabled /\

@@ -134,23 +134,23 @@ let lemma_fmul_equiv (h0:HS.mem) (f1 f2:F64.u256) : Lemma
 #pop-options
 
 [@ CInline]
-let fmul tmp f1 out f2 =
+let fmul out f1 f2 tmp =
   let h0 = ST.get() in
   lemma_fmul_equiv h0 f1 f2;
   if EverCrypt.TargetConfig.gcc then (
     assert (disjoint f1 (gsub tmp 0ul 8ul));
     assert (disjoint f2 (gsub tmp 0ul 8ul));
-    Vale.Inline.X64.Fmul_inline.fmul (sub tmp 0ul 8ul) f1 out f2
+    Vale.Inline.X64.Fmul_inline.fmul out f1 f2 (sub tmp 0ul 8ul)
   ) else
     Vale.Wrapper.X64.Fmul.fmul_e (sub tmp 0ul 8ul) f1 out f2
 
 [@ CInline]
-let fmul2 tmp f1 out f2 =
+let fmul2 out f1 f2 tmp =
   let h0 = ST.get() in
   lemma_fmul_equiv h0 (gsub f1 0ul 4ul) (gsub f2 0ul 4ul);
   lemma_fmul_equiv h0 (gsub f1 4ul 4ul) (gsub f2 4ul 4ul);
   if EverCrypt.TargetConfig.gcc then
-    Vale.Inline.X64.Fmul_inline.fmul2 tmp f1 out f2
+    Vale.Inline.X64.Fmul_inline.fmul2 out f1 f2 tmp
   else
     Vale.Wrapper.X64.Fmul.fmul2_e tmp f1 out f2
 
@@ -179,21 +179,21 @@ let fmul1 out f1 f2 =
     Vale.Wrapper.X64.Fmul.fmul_scalar_e out f1 f2
 
 [@ CInline]
-let fsqr tmp f1 out =
+let fsqr out f1 tmp =
   let h0 = ST.get() in
   lemma_fmul_equiv h0 f1 f1;
   if EverCrypt.TargetConfig.gcc then
-    Vale.Inline.X64.Fsqr_inline.fsqr tmp f1 out
+    Vale.Inline.X64.Fsqr_inline.fsqr out f1 tmp
   else
     Vale.Wrapper.X64.Fsqr.fsqr_e tmp f1 out
 
 [@ CInline]
-let fsqr2 tmp f out =
+let fsqr2 out f tmp =
   let h0 = ST.get() in
   lemma_fmul_equiv h0 (gsub f 0ul 4ul) (gsub f 0ul 4ul);
   lemma_fmul_equiv h0 (gsub f 4ul 4ul) (gsub f 4ul 4ul);
   if EverCrypt.TargetConfig.gcc then
-    Vale.Inline.X64.Fsqr_inline.fsqr2 tmp f out
+    Vale.Inline.X64.Fsqr_inline.fsqr2 out f tmp
   else
     Vale.Wrapper.X64.Fsqr.fsqr2_e tmp f out
 

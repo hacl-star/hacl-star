@@ -600,7 +600,7 @@ let reduce_ out =
 let fmul output input input2 =
   push_frame();
   let tmp = create 10ul (u128 0) in
-  BN.fmul tmp input output input2;
+  BN.fmul output input input2 tmp;
   pop_frame()
 
 let times_2 out a =
@@ -686,7 +686,7 @@ let times_2d out a =
 let fsquare out a =
   push_frame();
   let tmp = create 5ul (u128 0) in
-  BN.fsqr tmp a out;
+  BN.fsqr out a tmp;
   pop_frame()
 
 inline_for_extraction noextract

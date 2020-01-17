@@ -166,7 +166,7 @@ let add1_comments : list string =
 
 let add1_names (n:nat) =
   match n with
-  | 0 -> "out1"
+  | 0 -> "out"
   | 1 -> "f1"
   | 2 -> "f2"
   | _ -> ""
@@ -290,7 +290,7 @@ let fadd_comments : list string = ["Computes the field addition of two field ele
 
 let fadd_names (n:nat) =
   match n with
-  | 0 -> "out1"
+  | 0 -> "out"
   | 1 -> "f1"
   | 2 -> "f2"
   | _ -> ""
@@ -413,7 +413,7 @@ let fsub_comments : list string = ["Computes the field substraction of two field
 
 let fsub_names (n:nat) =
   match n with
-  | 0 -> "out1"
+  | 0 -> "out"
   | 1 -> "f1"
   | 2 -> "f2"
   | _ -> ""

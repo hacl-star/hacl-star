@@ -907,7 +907,7 @@ fsqr2_e:
 
 .global cswap2_e
 cswap2_e:
-  ;# Invert the polarity of bit to match cmov expectations
+  ;# Transfer bit into CF flag
   add $18446744073709551615, %rdi
   
   ;# cswap p1[0], p2[0]
