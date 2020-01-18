@@ -741,10 +741,10 @@ procedure Gctr_bytes_stdcall(
 {
     CreateHeaplets(list(
         declare_buffer128(   in_b, 0, Secret, Immutable),
-        declare_buffer128(  out_b, 0, Secret, Mutable),
-        declare_buffer128(inout_b, 0, Secret, Mutable),
         declare_buffer128( keys_b, 0, Secret, Immutable),
-        declare_buffer128(  ctr_b, 0, Secret, Immutable)));
+        declare_buffer128(  ctr_b, 0, Secret, Immutable),
+        declare_buffer128(  out_b, 0, Secret, Mutable),
+        declare_buffer128(inout_b, 0, Secret, Mutable)));
     mem_eq_all(mem, heap0);
 
     Push_Secret(r15);
@@ -818,5 +818,4 @@ procedure Gctr_bytes_stdcall(
 
     DestroyHeaplets();
     mem_eq_all(mem, heap0);
-    mem_eq_modifies(old(mem), mem, old(heap0), heap0);
 }

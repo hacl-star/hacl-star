@@ -757,8 +757,8 @@ procedure Poly1305(
         r15 == old(r15);
 {
     CreateHeaplets(list(
-        declare_buffer64(ctx_b, 0, Public, Mutable),
-        declare_buffer64(inp_b, 0, Public, Immutable)));
+        declare_buffer64(inp_b, 0, Public, Immutable),
+        declare_buffer64(ctx_b, 0, Public, Mutable)));
     mem_eq_all(mem, heap0);
 
     let key_r0 := buffer64_read(ctx_b, 3, heap0);
@@ -820,6 +820,5 @@ procedure Poly1305(
 
     DestroyHeaplets();
     mem_eq_all(mem, heap0);
-    mem_eq_modifies(old(mem), mem, old(heap0), heap0);
 }
 

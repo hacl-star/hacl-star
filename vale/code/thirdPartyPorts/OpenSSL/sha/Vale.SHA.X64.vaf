@@ -816,9 +816,9 @@ procedure Sha_update_bytes_stdcall(
         win ==>  xmm15 == old(xmm15);
 {
     CreateHeaplets(list(
-        declare_buffer128(ctx_b, 0, Secret, Mutable),
         declare_buffer128(in_b, 0, Secret, Immutable),
-        declare_buffer128(k_b, 0, Secret, Immutable)));
+        declare_buffer128(k_b, 0, Secret, Immutable),
+        declare_buffer128(ctx_b, 0, Secret, Mutable)));
     mem_eq_all(mem, heap0);
 
     // Save registers
@@ -905,6 +905,5 @@ procedure Sha_update_bytes_stdcall(
 
     DestroyHeaplets();
     mem_eq_all(mem, heap0);
-    mem_eq_modifies(old(mem), mem, old(heap0), heap0);
 }
 

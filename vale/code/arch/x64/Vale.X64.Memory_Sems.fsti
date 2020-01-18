@@ -74,6 +74,10 @@ val lemma_create_heaplets (buffers:list buffer_info) (h1:vale_full_heap) : Lemma
     h1.vf_heaplets == h2.vf_heaplets /\
     h1.vf_layout.vl_taint == h2.vf_layout.vl_taint /\
     get_heaplet_id h1.vf_heap == None /\
+    layout_heaplets_initialized h2.vf_layout.vl_inner /\
+    layout_modifies_loc h2.vf_layout.vl_inner == loc_mutable_buffers buffers /\
+    layout_old_heap h2.vf_layout.vl_inner == h1.vf_heap /\
+    layout_buffers h2.vf_layout.vl_inner == bs /\
     (forall (i:heaplet_id).{:pattern Map16.sel h2.vf_heaplets i}
       get_heaplet_id (Map16.sel h2.vf_heaplets i) == Some i) /\
     (forall (i:nat).{:pattern Seq.index bs i} i < Seq.length bs ==> (
@@ -83,17 +87,24 @@ val lemma_create_heaplets (buffers:list buffer_info) (h1:vale_full_heap) : Lemma
     mem_inv h2
   ))
 
-val destroy_heaplets (h1:vale_full_heap) : Pure vale_full_heap
-  (requires mem_inv h1)
-  (ensures fun h2 ->
+val destroy_heaplets (h1:vale_full_heap) : GTot vale_full_heap
+
+val lemma_destroy_heaplets (h1:vale_full_heap) : Lemma
+  (requires
+    mem_inv h1 /\
+    layout_heaplets_initialized h1.vf_layout.vl_inner
+  )
+  (ensures (
+    let h2 = destroy_heaplets h1 in
     heap_get (coerce h1) == heap_get (coerce h2) /\
     heap_taint (coerce h1) == heap_taint (coerce h2) /\
     h1.vf_heap == h2.vf_heap /\
     h1.vf_heaplets == h2.vf_heaplets /\
     h1.vf_layout.vl_taint == h2.vf_layout.vl_taint /\
     get_heaplet_id h1.vf_heap == None /\
+    modifies (layout_modifies_loc h1.vf_layout.vl_inner) (layout_old_heap h1.vf_layout.vl_inner) h2.vf_heap /\
     (mem_inv h1 ==> mem_inv h2)
-  )
+  ))
 
 //let heap_upd_def (hi:vale_full_heap) (h':vale_heap) (mt':memTaint_t) : vale_full_heap =
 //  { hi with

@@ -126,6 +126,7 @@ let rec lemma_make_owns (h:vale_heap) (bs:Seq.seq buffer_info) (n:nat) : Lemma
     in
   ()
 
+#push-options "--initial_fuel 1 --max_fuel 1 --initial_ifuel 2 --max_ifuel 2"
 let rec lemma_loc_mutable_buffers_rec (l:list buffer_info) (s:Seq.seq buffer_info) (n:nat) : Lemma
   (requires
     n + List.length l == Seq.length s /\
@@ -142,6 +143,7 @@ let rec lemma_loc_mutable_buffers_rec (l:list buffer_info) (s:Seq.seq buffer_inf
   match l with
   | [] -> ()
   | h::t -> lemma_loc_mutable_buffers_rec t s (n + 1)
+#pop-options
 
 let lemma_loc_mutable_buffers (l:list buffer_info) : Lemma
   (ensures (
@@ -188,6 +190,9 @@ let lemma_create_heaplets buffers h1 =
 
 let destroy_heaplets h1 =
   h1
+
+let lemma_destroy_heaplets h1 =
+  ()
 
 val heap_shift (m1 m2:S.machine_heap) (base:int) (n:nat) : Lemma
   (requires (forall i. 0 <= i /\ i < n ==> m1.[base + i] == m2.[base + i]))

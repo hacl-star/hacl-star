@@ -99,10 +99,17 @@ let heaplet_id_is_some (h:vale_heap) (i:heaplet_id) =
 unfold let norm_list (p:prop) : prop =
   norm [zeta; iota; delta_only [`%list_to_seq_post]] p
 
-let declare_buffer64 (b:buffer TUInt64) (hid:heaplet_id) (t:taint) (mut:mutability) =
+irreducible let norm_loc_attr = ()
+
+unfold let norm_loc (l:loc) : loc =
+  norm [zeta; iota; delta_only [`%loc_mutable_buffers]; delta_attr [`%norm_loc_attr]] l
+
+[@norm_loc_attr]
+unfold let declare_buffer64 (b:buffer TUInt64) (hid:heaplet_id) (t:taint) (mut:mutability) =
   Mkbuffer_info TUInt64 b hid t mut
 
-let declare_buffer128 (b:buffer TUInt128) (hid:heaplet_id) (t:taint) (mut:mutability) =
+[@norm_loc_attr]
+unfold let declare_buffer128 (b:buffer TUInt128) (hid:heaplet_id) (t:taint) (mut:mutability) =
   Mkbuffer_info TUInt128 b hid t mut
 
 let create_post (layout:vale_heap_layout) (bs:Seq.seq buffer_info) =
@@ -117,11 +124,18 @@ function destroy_heaplets_this(s:vale_state):vale_state extern;
 function heaplet_id_is_none(h:vale_heap):prop extern;
 function heaplet_id_is_some(h:vale_heap, heaplet_id:int):prop extern;
 function norm_list(p:prop):prop extern;
+function norm_loc(l:loc):loc extern;
 function declare_buffer64(b:buffer64, hid:heaplet_id, t:taint, mut:mutability):buffer_info extern;
 function declare_buffer128(b:buffer128, hid:heaplet_id, t:taint, mut:mutability):buffer_info extern;
 function create_post(layout:vale_heap_layout, bs:Seq.seq(buffer_info)):prop extern;
 ghost procedure Vale.X64.StateLemmas.use_machine_state_equal() extern;
 
+// For efficiency, when calling CreateHeaplets, write 'buffers' so that
+// the mutable buffers are last and are in the same order as in the modifies location.
+// Write the modifies location as:
+//   loc_union (loc_buffer b1) (loc_union (loc_buffer b2) (loc_union (... (loc_buffer bn)...).
+// CreateHeaplets and DestroyHeaplets will ensure a modifies of exactly this form.
+// Matching the modifies exactly will minimize reliance on the loc_includes lemmas in Vale.X64.Memory.
 procedure CreateHeaplets(ghost buffers:list(buffer_info))
     {:public}
     {:quick exportOnly}
@@ -137,6 +151,10 @@ procedure CreateHeaplets(ghost buffers:list(buffer_info))
         norm_list(list_to_seq_post(buffers, bs, 0)) ==> init_heaplets_req(mem, bs);
     ensures
         norm_list(list_to_seq_post(buffers, bs, 0));
+        layout_modifies_loc(memLayout.vl_inner) == norm_loc(loc_mutable_buffers(buffers));
+        layout_old_heap(memLayout.vl_inner) == old(mem);
+        layout_buffers(memLayout.vl_inner) == bs;
+        layout_heaplets_initialized(memLayout.vl_inner);
         create_post(memLayout, bs);
         memLayout.vl_taint == old(memLayout.vl_taint);
         heaplet_id_is_none(mem);
@@ -156,13 +174,17 @@ procedure DestroyHeaplets()
         mem; heap0;
     modifies
         memLayout;
+    requires
+        layout_heaplets_initialized(memLayout.vl_inner);
     ensures
+        modifies_mem(layout_modifies_loc(old(memLayout).vl_inner), layout_old_heap(old(memLayout).vl_inner), mem);
         memLayout.vl_taint == old(memLayout.vl_taint);
         heaplet_id_is_none(mem);
         vale_heap_data_eq(mem, heap0);
 {
     reveal_mem_inv();
     this := destroy_heaplets_this(this);
+    lemma_destroy_heaplets(old(this).vs_heap);
     Vale.X64.StateLemmas.use_machine_state_equal();
 }
 

@@ -231,8 +231,8 @@ procedure Fast_add1(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB:nat64)
         modifies_buffer(dst_b, old(mem), mem);
 {
     CreateHeaplets(list(
-        declare_buffer64(dst_b, 0, Secret, Mutable),
-        declare_buffer64(inA_b, 0, Secret, Immutable)));
+        declare_buffer64(inA_b, 0, Secret, Immutable),
+        declare_buffer64(dst_b, 0, Secret, Mutable)));
     mem_eq_all(mem, heap0);
 
     xor_lemmas();
@@ -258,7 +258,6 @@ procedure Fast_add1(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB:nat64)
 
     DestroyHeaplets();
     mem_eq_all(mem, heap0);
-    mem_eq_modifies(old(mem), mem, old(heap0), heap0);
 }
 
 #reset-options "--z3rlimit 40"
@@ -968,7 +967,6 @@ procedure Cswap2(ghost bit_in:nat64, ghost p0_b:buffer64, ghost p1_b:buffer64)
 
     DestroyHeaplets();
     mem_eq_all(mem, heap0);
-    mem_eq_modifies(old(mem), mem, old(heap0), heap0);
 }
 
 procedure Cswap2_stdcall(

@@ -121,9 +121,9 @@ procedure Fmul(
         modifies_buffer_2(dst_b, tmp_b, old(mem), mem);
 {
     CreateHeaplets(list(
-        declare_buffer64(dst_b, 0, Secret, Mutable),
         declare_buffer64(inA_b, 0, Secret, Immutable),
         declare_buffer64(inB_b, 0, Secret, Immutable),
+        declare_buffer64(dst_b, 0, Secret, Mutable),
         declare_buffer64(tmp_b, 0, Secret, Mutable)));
     mem_eq_all(mem, heap0);
 
@@ -135,7 +135,6 @@ procedure Fmul(
 
     DestroyHeaplets();
     mem_eq_all(mem, heap0);
-    mem_eq_modifies(old(mem), mem, old(heap0), heap0);
 }
 
 
@@ -337,9 +336,9 @@ procedure Fmul2(
         modifies_buffer_2(dst_b, tmp_b, old(mem), mem);
 {
     CreateHeaplets(list(
-        declare_buffer64(dst_b, 0, Secret, Mutable),
         declare_buffer64(inA_b, 0, Secret, Immutable),
         declare_buffer64(inB_b, 0, Secret, Immutable),
+        declare_buffer64(dst_b, 0, Secret, Mutable),
         declare_buffer64(tmp_b, 0, Secret, Mutable)));
     mem_eq_all(mem, heap0);
 
@@ -353,7 +352,6 @@ procedure Fmul2(
 
     DestroyHeaplets();
     mem_eq_all(mem, heap0);
-    mem_eq_modifies(old(mem), mem, old(heap0), heap0);
 }
 
 procedure Fmul2_stdcall(
@@ -540,8 +538,8 @@ procedure Fsqr(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64)
 
 {
     CreateHeaplets(list(
-        declare_buffer64(dst_b, 0, Secret, Mutable),
         declare_buffer64(inA_b, 0, Secret, Immutable),
+        declare_buffer64(dst_b, 0, Secret, Mutable),
         declare_buffer64(tmp_b, 0, Secret, Mutable)));
     mem_eq_all(mem, heap0);
 
@@ -553,7 +551,6 @@ procedure Fsqr(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64)
 
     DestroyHeaplets();
     mem_eq_all(mem, heap0);
-    mem_eq_modifies(old(mem), mem, old(heap0), heap0);
 }
 
 
@@ -720,8 +717,8 @@ procedure Fsqr2(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64
         modifies_buffer_2(dst_b, tmp_b, old(mem), mem);
 {
     CreateHeaplets(list(
-        declare_buffer64(dst_b, 0, Secret, Mutable),
         declare_buffer64(inA_b, 0, Secret, Immutable),
+        declare_buffer64(dst_b, 0, Secret, Mutable),
         declare_buffer64(tmp_b, 0, Secret, Mutable)));
     mem_eq_all(mem, heap0);
 
@@ -735,7 +732,6 @@ procedure Fsqr2(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64
 
     DestroyHeaplets();
     mem_eq_all(mem, heap0);
-    mem_eq_modifies(old(mem), mem, old(heap0), heap0);
 }
 
 

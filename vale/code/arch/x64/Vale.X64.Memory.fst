@@ -738,6 +738,11 @@ let mem_inv h =
       h.vf_heaplets == empty_vale_heaplets h.vf_layout.vl_inner.vl_old_heap
   )
 
+let layout_heaplets_initialized layout = layout.vl_heaplets_initialized
+let layout_old_heap layout = layout.vl_old_heap
+let layout_modifies_loc layout = layout.vl_mod_loc
+let layout_buffers layout = layout.vl_buffers
+
 let mem_eq_all h1 h2 =
   reveal_opaque (`%valid_layout_buffer_id) valid_layout_buffer_id;
   let eq_buffer_as_seq (#t:base_typ) (h1 h2:vale_heap) (b:buffer t) : Lemma
@@ -747,7 +752,4 @@ let mem_eq_all h1 h2 =
     assert (Seq.equal (buffer_as_seq h1 b) (buffer_as_seq h2 b))
   in
   ()
-
-let mem_eq_modifies h1 h1' h2 h2' =
-  reveal_opaque (`%valid_layout_buffer_id) valid_layout_buffer_id
 

@@ -29,7 +29,7 @@ val eval_while_eq_all (g:bool) (c:code) (f:fuel) : Lemma
   ))
   (decreases %[f; c; 0])
 
-#reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 50"
+#reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 100"
 
 #restart-solver
 let rec lemma_eq_instr_apply_eval_args

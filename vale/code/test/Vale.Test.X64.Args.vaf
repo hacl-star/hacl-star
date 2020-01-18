@@ -93,5 +93,4 @@ procedure Test(inline win:bool,
 
     DestroyHeaplets(); // note: not needed if you don't modify memory; for demonstration purposes only
     mem_eq_all(mem, heap0);
-    mem_eq_modifies(old(mem), mem, old(heap0), heap0);
 }

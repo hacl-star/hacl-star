@@ -410,11 +410,15 @@ let rec buffers_readable (h: vale_heap) (l: list M.buffer64) : GTot prop0 (decre
     | b :: l'  -> buffer_readable h b /\ buffers_readable h l'
 
 unfold let modifies_buffer (b:M.buffer64) (h1 h2:vale_heap) = modifies_mem (loc_buffer b) h1 h2
-unfold let modifies_buffer_2 (b1 b2:M.buffer64) (h1 h2:vale_heap) =modifies_mem (M.loc_union (loc_buffer b1) (loc_buffer b2)) h1 h2
-unfold let modifies_buffer_3 (b1 b2 b3:M.buffer64) (h1 h2:vale_heap) =modifies_mem (M.loc_union (M.loc_union (loc_buffer b1) (loc_buffer b2)) (loc_buffer b3)) h1 h2
+unfold let modifies_buffer_2 (b1 b2:M.buffer64) (h1 h2:vale_heap) =
+  modifies_mem (M.loc_union (loc_buffer b1) (loc_buffer b2)) h1 h2
+unfold let modifies_buffer_3 (b1 b2 b3:M.buffer64) (h1 h2:vale_heap) =
+  modifies_mem (M.loc_union (loc_buffer b1) (M.loc_union (loc_buffer b2) (loc_buffer b3))) h1 h2
 unfold let modifies_buffer128 (b:M.buffer128) (h1 h2:vale_heap) = modifies_mem (loc_buffer b) h1 h2
-unfold let modifies_buffer128_2 (b1 b2:M.buffer128) (h1 h2:vale_heap) = modifies_mem (M.loc_union (loc_buffer b1) (loc_buffer b2)) h1 h2
-unfold let modifies_buffer128_3 (b1 b2 b3:M.buffer128) (h1 h2:vale_heap) = modifies_mem (M.loc_union (M.loc_union (loc_buffer b1) (loc_buffer b2)) (loc_buffer b3)) h1 h2
+unfold let modifies_buffer128_2 (b1 b2:M.buffer128) (h1 h2:vale_heap) =
+  modifies_mem (M.loc_union (loc_buffer b1) (loc_buffer b2)) h1 h2
+unfold let modifies_buffer128_3 (b1 b2 b3:M.buffer128) (h1 h2:vale_heap) =
+  modifies_mem (M.loc_union (loc_buffer b1) (M.loc_union (loc_buffer b2) (loc_buffer b3))) h1 h2
 
 let validSrcAddrs64 (m:vale_heap) (addr:int) (b:M.buffer64) (len:int) (layout:vale_heap_layout) (t:taint) =
   buffer_readable m b /\

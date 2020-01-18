@@ -1827,16 +1827,16 @@ procedure Gcm_blocks_stdcall(
     CreateHeaplets(list(
         declare_buffer128(    auth_b, 0, Secret, Immutable),
         declare_buffer128(  abytes_b, 0, Secret, Immutable),
-        declare_buffer128(      iv_b, 0, Public, Mutable),
         declare_buffer128( in128x6_b, 0, Secret, Immutable),
-        declare_buffer128(out128x6_b, 0, Secret, Mutable),
         declare_buffer128(   in128_b, 0, Secret, Immutable),
-        declare_buffer128(  out128_b, 0, Secret, Mutable),
-        declare_buffer128(   inout_b, 0, Secret, Mutable),
-        declare_buffer128( scratch_b, 0, Secret, Mutable),
         declare_buffer128(   hkeys_b, 0, Secret, Immutable),
+        declare_buffer128(    keys_b, 0, Secret, Immutable),
         declare_buffer128(     tag_b, 0, Secret, Mutable),
-        declare_buffer128(    keys_b, 0, Secret, Immutable)));
+        declare_buffer128(      iv_b, 0, Public, Mutable),
+        declare_buffer128( scratch_b, 0, Secret, Mutable),
+        declare_buffer128(out128x6_b, 0, Secret, Mutable),
+        declare_buffer128(  out128_b, 0, Secret, Mutable),
+        declare_buffer128(   inout_b, 0, Secret, Mutable)));
     mem_eq_all(mem, heap0);
 
     lemma_hkeys_reqs_pub_priv(s128(heap0, hkeys_b), reverse_bytes_quad32(aes_encrypt_LE(alg, key, Mkfour(0,0,0,0))));
@@ -1886,7 +1886,6 @@ procedure Gcm_blocks_stdcall(
 
     DestroyHeaplets();
     mem_eq_all(mem, heap0);
-    mem_eq_modifies(old(mem), mem, old(heap0), heap0);
 }
 
 procedure Compute_iv_stdcall(
@@ -1992,8 +1991,8 @@ procedure Compute_iv_stdcall(
     CreateHeaplets(list(
         declare_buffer128(iv_b,       0, Secret, Immutable),
         declare_buffer128(iv_extra_b, 0, Secret, Immutable),
-        declare_buffer128(j0_b,       0, Secret, Mutable),
-        declare_buffer128(hkeys_b,    0, Secret, Immutable)));
+        declare_buffer128(hkeys_b,    0, Secret, Immutable),
+        declare_buffer128(j0_b,       0, Secret, Mutable)));
     mem_eq_all(mem, heap0);
 
     lemma_hkeys_reqs_pub_priv(s128(heap0, hkeys_b), reverse_bytes_quad32(h_LE));
@@ -2055,5 +2054,4 @@ procedure Compute_iv_stdcall(
     
     DestroyHeaplets();
     mem_eq_all(mem, heap0);
-    mem_eq_modifies(old(mem), mem, old(heap0), heap0);
 }

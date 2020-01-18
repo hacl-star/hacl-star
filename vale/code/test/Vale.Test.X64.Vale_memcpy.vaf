@@ -42,8 +42,8 @@ procedure Memcpy(inline win:bool, ghost dst:buffer64, ghost src:buffer64)
         modifies_mem(loc_buffer(dst), old(mem), mem);
 {
     CreateHeaplets(list(
-        declare_buffer64(dst, 0, Secret, Mutable),
-        declare_buffer64(src, 0, Secret, Immutable)));
+        declare_buffer64(src, 0, Secret, Immutable),
+        declare_buffer64(dst, 0, Secret, Mutable)));
     mem_eq_all(mem, heap0);
     inline if (win)
     {
@@ -63,5 +63,4 @@ procedure Memcpy(inline win:bool, ghost dst:buffer64, ghost src:buffer64)
 
     DestroyHeaplets();
     mem_eq_all(mem, heap0);
-    mem_eq_modifies(old(mem), mem, old(heap0), heap0);
 }

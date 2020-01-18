@@ -389,12 +389,9 @@ let init_heaplets_req (h:vale_heap) (bs:Seq.seq buffer_info) =
 let rec loc_mutable_buffers (buffers:list buffer_info) : GTot loc =
   match buffers with
   | [] -> loc_none
-  | h::t ->
-    (
-      match h.bi_mutable with
-      | Immutable -> loc_mutable_buffers t
-      | Mutable -> loc_union (loc_buffer h.bi_buffer) (loc_mutable_buffers t)
-    )
+  | [{bi_mutable = Mutable; bi_buffer = b}] -> loc_buffer b
+  | ({bi_mutable = Immutable})::t -> loc_mutable_buffers t
+  | ({bi_mutable = Mutable; bi_buffer = b})::t -> loc_union (loc_buffer b) (loc_mutable_buffers t)
 
 // Buffer b belongs to heaplet h
 val valid_layout_buffer_id (t:base_typ) (b:buffer t) (layout:vale_heap_layout) (h_id:option heaplet_id) (write:bool) : prop0
@@ -407,6 +404,12 @@ val is_initial_heap (layout:vale_heap_layout) (h:vale_heap) : prop0
 
 // Invariant that is always true in Vale procedures
 val mem_inv (h:vale_full_heap) : prop0
+
+// Layout data
+val layout_heaplets_initialized (layout:vale_heap_layout_inner) : bool
+val layout_old_heap (layout:vale_heap_layout_inner) : vale_heap
+val layout_modifies_loc (layout:vale_heap_layout_inner) : loc
+val layout_buffers (layout:vale_heap_layout_inner) : Seq.seq buffer_info
 
 // TODO: this is used for the current (trivial) mem_inv; it will probably be removed for the real mem_inv
 val mem_eq_all (h1 h2:vale_heap) : Lemma
@@ -424,13 +427,4 @@ val mem_eq_all (h1 h2:vale_heap) : Lemma
     /\ (forall (b:buffer128) (mt:memtaint) (t:taint).{:pattern (valid_taint_buf128 b h1 mt t) \/ (valid_taint_buf128 b h2 mt t)} valid_taint_buf128 b h1 mt t <==> valid_taint_buf128 b h2 mt t)
 //    /\ (forall (#t:base_typ) (b:buffer t) (layout:vale_heap_layout).{:pattern (valid_layout_buffer b layout h1) \/ (valid_layout_buffer b layout h2)} valid_layout_buffer b layout h1 <==> valid_layout_buffer b layout h2)
   )
-
-// TODO: this is used for the current (trivial) mem_inv; it will probably be removed for the real mem_inv
-val mem_eq_modifies (h1 h1' h2 h2':vale_heap) : Lemma
-  (requires
-    vale_heap_data_eq h1 h2 /\
-    vale_heap_data_eq h1' h2' /\
-    get_heaplet_id h1 == get_heaplet_id h1')
-  (ensures forall (l:loc).{:pattern (modifies l h1 h1') \/ (modifies l h2 h2')}
-    modifies l h2 h2' ==> modifies l h1 h1')
 
