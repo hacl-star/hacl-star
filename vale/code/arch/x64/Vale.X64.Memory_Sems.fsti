@@ -9,6 +9,7 @@ open Vale.Arch.Heap
 open Vale.Arch.MachineHeap_s
 open Vale.X64.Machine_s
 open Vale.X64.Memory
+open Vale.Lib.Seqs
 module S = Vale.X64.Machine_Semantics_s
 module Map16 = Vale.Lib.Map16
 
@@ -58,16 +59,17 @@ let is_full_update (mh':machine_heap) (mt':memtaint) (vfh:vale_full_heap) (h':va
     vfh'.vf_heaplets == Map16.upd vfh.vf_heaplets 0 h'
   )
 
-val create_heaplets (bs:Seq.seq buffer_info) (modloc:loc) (h1:vale_full_heap) : GTot vale_full_heap
+val create_heaplets (buffers:list buffer_info) (h1:vale_full_heap) : GTot vale_full_heap
 
-val lemma_create_heaplets (bs:Seq.seq buffer_info) (modloc:loc) (h1:vale_full_heap) : Lemma
+val lemma_create_heaplets (buffers:list buffer_info) (h1:vale_full_heap) : Lemma
   (requires
     mem_inv h1 /\
     is_initial_heap h1.vf_layout h1.vf_heap /\
-    init_heaplets_req h1.vf_heap bs
+    init_heaplets_req h1.vf_heap (list_to_seq buffers)
   )
   (ensures (
-    let h2 = create_heaplets bs modloc h1 in
+    let h2 = create_heaplets buffers h1 in
+    let bs = list_to_seq buffers in
     h1.vf_heap == h2.vf_heap /\
     h1.vf_heaplets == h2.vf_heaplets /\
     h1.vf_layout.vl_taint == h2.vf_layout.vl_taint /\
@@ -75,8 +77,9 @@ val lemma_create_heaplets (bs:Seq.seq buffer_info) (modloc:loc) (h1:vale_full_he
     (forall (i:heaplet_id).{:pattern Map16.sel h2.vf_heaplets i}
       get_heaplet_id (Map16.sel h2.vf_heaplets i) == Some i) /\
     (forall (i:nat).{:pattern Seq.index bs i} i < Seq.length bs ==> (
-      let Mkbuffer_info t b hid _ _ = Seq.index bs i in
-      valid_layout_buffer_id t b h2.vf_layout (Some hid))) /\
+      let Mkbuffer_info t b hid _ mut = Seq.index bs i in
+      valid_layout_buffer_id t b h2.vf_layout (Some hid) false /\
+      valid_layout_buffer_id t b h2.vf_layout (Some hid) (mut = Mutable))) /\
     mem_inv h2
   ))
 
@@ -148,7 +151,7 @@ val low_lemma_load_mem64_full (b:buffer64) (i:nat) (vfh:vale_full_heap) (t:taint
     let (h, mt) = (Map16.get vfh.vf_heaplets 0, vfh.vf_layout.vl_taint) in
     i < Seq.length (buffer_as_seq h b) /\
     buffer_readable h b /\
-    valid_layout_buffer b vfh.vf_layout h /\
+    valid_layout_buffer b vfh.vf_layout h false /\
     valid_taint_buf64 b h mt t /\
     mem_inv vfh
   ))
@@ -178,7 +181,7 @@ val low_lemma_store_mem64_full (b:buffer64) (i:nat) (v:nat64) (vfh:vale_full_hea
     i < Seq.length (buffer_as_seq h b) /\
     buffer_readable h b /\
     buffer_writeable b /\
-    valid_layout_buffer b vfh.vf_layout h /\
+    valid_layout_buffer b vfh.vf_layout h true /\
     valid_taint_buf64 b h mt t /\
     mem_inv vfh
   ))
@@ -211,7 +214,7 @@ val low_lemma_load_mem128_full (b:buffer128) (i:nat) (vfh:vale_full_heap) (t:tai
     let (h, mt) = (Map16.get vfh.vf_heaplets 0, vfh.vf_layout.vl_taint) in
     i < Seq.length (buffer_as_seq h b) /\
     buffer_readable h b /\
-    valid_layout_buffer b vfh.vf_layout h /\
+    valid_layout_buffer b vfh.vf_layout h false /\
     valid_taint_buf128 b h mt t /\
     mem_inv vfh
   ))
@@ -240,7 +243,7 @@ val low_lemma_store_mem128_full (b:buffer128) (i:nat) (v:quad32) (vfh:vale_full_
     i < Seq.length (buffer_as_seq h b) /\
     buffer_readable h b /\
     buffer_writeable b /\
-    valid_layout_buffer b vfh.vf_layout h /\
+    valid_layout_buffer b vfh.vf_layout h true /\
     valid_taint_buf128 b h mt t /\
     mem_inv vfh
   ))
@@ -301,7 +304,7 @@ val low_lemma_load_mem128_lo_hi_full (b:buffer128) (i:nat) (vfh:vale_full_heap) 
     let (h, mt) = (Map16.get vfh.vf_heaplets 0, vfh.vf_layout.vl_taint) in
     i < Seq.length (buffer_as_seq h b) /\
     buffer_readable h b /\
-    valid_layout_buffer b vfh.vf_layout h /\
+    valid_layout_buffer b vfh.vf_layout h false /\
     valid_taint_buf128 b h mt t /\
     mem_inv vfh
   ))
@@ -333,7 +336,7 @@ val low_lemma_store_mem128_lo64_full (b:buffer128) (i:nat) (v:nat64) (vfh:vale_f
     i < Seq.length (buffer_as_seq h b) /\
     buffer_readable h b /\
     buffer_writeable b /\
-    valid_layout_buffer b vfh.vf_layout h /\
+    valid_layout_buffer b vfh.vf_layout h true /\
     valid_taint_buf128 b h mt t /\
     mem_inv vfh
   ))
@@ -368,7 +371,7 @@ val low_lemma_store_mem128_hi64_full (b:buffer128) (i:nat) (v:nat64) (vfh:vale_f
     i < Seq.length (buffer_as_seq h b) /\
     buffer_readable h b /\
     buffer_writeable b /\
-    valid_layout_buffer b vfh.vf_layout h /\
+    valid_layout_buffer b vfh.vf_layout h true /\
     valid_taint_buf128 b h mt t /\
     mem_inv vfh
   ))

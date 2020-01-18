@@ -2160,11 +2160,11 @@ procedure GCM_finalize(
 #verbatim
 #restart-solver
 #endverbatim
-#reset-options "--z3rlimit 4000 --z3refresh --max_ifuel 0"
+#reset-options "--z3rlimit 40000 --z3refresh --max_ifuel 0 --z3seed 7"
 #verbatim
 #restart-solver
 #endverbatim
-#reset-options "--z3rlimit 4000 --z3refresh --max_ifuel 0"
+#reset-options "--z3rlimit 40000 --z3refresh --max_ifuel 0 --z3seed 7"
 procedure AES_GCM_encrypt_6mult(
         inline alg:algorithm,
         ghost h_LE:quad32,

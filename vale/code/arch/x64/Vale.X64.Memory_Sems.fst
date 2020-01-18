@@ -126,7 +126,37 @@ let rec lemma_make_owns (h:vale_heap) (bs:Seq.seq buffer_info) (n:nat) : Lemma
     in
   ()
 
-let create_heaplets bs modloc h1 =
+let rec lemma_loc_mutable_buffers_rec (l:list buffer_info) (s:Seq.seq buffer_info) (n:nat) : Lemma
+  (requires
+    n + List.length l == Seq.length s /\
+    list_to_seq_post l s n
+  )
+  (ensures (
+    let modloc = loc_mutable_buffers l in
+    forall (i:nat).{:pattern Seq.index s i} n <= i /\ i < Seq.length s ==> (
+      let bi = Seq.index s i in
+      bi.bi_mutable == Mutable ==> loc_includes modloc (loc_buffer bi.bi_buffer))
+  ))
+  (decreases l)
+  =
+  match l with
+  | [] -> ()
+  | h::t -> lemma_loc_mutable_buffers_rec t s (n + 1)
+
+let lemma_loc_mutable_buffers (l:list buffer_info) : Lemma
+  (ensures (
+    let s = list_to_seq l in
+    forall (i:nat).{:pattern Seq.index s i} i < Seq.length s ==> (
+      let bi = Seq.index s i in
+      bi.bi_mutable == Mutable ==> loc_includes (loc_mutable_buffers l) (loc_buffer bi.bi_buffer))
+  ))
+  =
+  lemma_list_to_seq l;
+  lemma_loc_mutable_buffers_rec l (list_to_seq l) 0
+
+let create_heaplets buffers h1 =
+  let bs = list_to_seq buffers in
+  let modloc = loc_mutable_buffers buffers in
   let layout1 = h1.vf_layout in
   let layin1 = layout1.vl_inner in
   let ld = {
@@ -151,11 +181,13 @@ let create_heaplets bs modloc h1 =
   } in
   h2
 
-let lemma_create_heaplets bs modloc h1 =
-  let h2 = create_heaplets bs modloc h1 in
+let lemma_create_heaplets buffers h1 =
+  let bs = list_to_seq buffers in
+  let h2 = create_heaplets buffers h1 in
   let ld:layout_data = h2.vf_layout.vl_inner.vl_v in
   assert (ld.vl_buffers == bs);
   lemma_make_owns h1.vf_heap bs (Seq.length bs);
+  lemma_loc_mutable_buffers buffers;
   reveal_opaque (`%valid_layout_buffer_id) valid_layout_buffer_id;
   ()
 

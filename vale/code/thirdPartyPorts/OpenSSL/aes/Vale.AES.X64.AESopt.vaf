@@ -87,7 +87,7 @@ let aes_reqs0
   buffer_readable heap0 keys_b /\
   (nr alg + 1) <= buffer_length keys_b /\
   buffer_addr keys_b heap0 + 16 * 8 == key_ptr /\
-  valid_layout_buffer keys_b layout heap0 /\
+  valid_layout_buffer keys_b layout heap0 false /\
   valid_taint_buf128 keys_b heap0 layout.vl_taint Secret /\
   buffer128_as_seq heap0 keys_b == round_keys
 
@@ -106,7 +106,7 @@ let aes_reqs_offset
   buffer_readable heap0 keys_b /\
   (nr alg + 1) <= buffer_length keys_b /\
   buffer_addr keys_b heap0 + 16 * 8 == key_ptr /\
-  valid_layout_buffer keys_b layout heap0 /\
+  valid_layout_buffer keys_b layout heap0 false /\
   valid_taint_buf128 keys_b heap0 layout.vl_taint Secret /\
   s128 heap0 keys_b == round_keys
 

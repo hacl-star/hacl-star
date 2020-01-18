@@ -68,7 +68,7 @@ procedure Mem_lemma(ghost base:va_operand, ghost offset:int, ghost b:buffer64, g
     requires
         base is OReg;
         valid_src_addr(heap0, b, index);
-        valid_layout_buffer(b, memLayout, heap0);
+        valid_layout_buffer(b, memLayout, heap0, false);
         valid_taint_buf64(b, heap0, memLayout.vl_taint, t);
         eval_operand(base, this) + offset == buffer_addr(b, heap0) + 8 * index;
     ensures
@@ -79,8 +79,8 @@ procedure Mem_lemma(ghost base:va_operand, ghost offset:int, ghost b:buffer64, g
 }
 
 #verbatim
-let create_heaplets_this (bs:Seq.seq buffer_info) (modloc:loc) (s:vale_state) : GTot vale_state =
-  {s with vs_heap = Vale.X64.Memory_Sems.create_heaplets bs modloc s.vs_heap}
+let create_heaplets_this (buffers:list buffer_info) (s:vale_state) : GTot vale_state =
+  {s with vs_heap = Vale.X64.Memory_Sems.create_heaplets buffers s.vs_heap}
 
 let destroy_heaplets_this (s:vale_state) : Ghost vale_state
   (requires state_inv s)
@@ -107,11 +107,12 @@ let declare_buffer128 (b:buffer TUInt128) (hid:heaplet_id) (t:taint) (mut:mutabi
 
 let create_post (layout:vale_heap_layout) (bs:Seq.seq buffer_info) =
   forall (i:nat).{:pattern Seq.index bs i} i < Seq.length bs ==> (
-    let Mkbuffer_info t b hid _ _ = Seq.index bs i in
-    valid_layout_buffer_id t b layout (Some hid))
+    let Mkbuffer_info t b hid _ mut = Seq.index bs i in
+    valid_layout_buffer_id t b layout (Some hid) false /\
+    valid_layout_buffer_id t b layout (Some hid) (mut = Mutable))
 #endverbatim
 
-function create_heaplets_this(buffers:Seq.seq(buffer_info), modloc:loc, s:vale_state):vale_state extern;
+function create_heaplets_this(buffers:list(buffer_info), s:vale_state):vale_state extern;
 function destroy_heaplets_this(s:vale_state):vale_state extern;
 function heaplet_id_is_none(h:vale_heap):prop extern;
 function heaplet_id_is_some(h:vale_heap, heaplet_id:int):prop extern;
@@ -141,10 +142,9 @@ procedure CreateHeaplets(ghost buffers:list(buffer_info))
         heaplet_id_is_none(mem);
         heaplet_id_is_some(heap0, 0);
 {
-    let modloc := loc_none;
     lemma_list_to_seq(buffers);
-    this := create_heaplets_this(bs, modloc, this);
-    lemma_create_heaplets(bs, modloc, old(this).vs_heap);
+    this := create_heaplets_this(buffers, this);
+    lemma_create_heaplets(buffers, old(this).vs_heap);
     Vale.X64.StateLemmas.use_machine_state_equal();
 }
 
@@ -176,7 +176,7 @@ procedure Load64_buffer(
         heap0; memLayout;
     requires
         valid_src_addr(heap0, b, index);
-        valid_layout_buffer(b, memLayout, heap0);
+        valid_layout_buffer(b, memLayout, heap0, false);
         valid_taint_buf64(b, heap0, memLayout.vl_taint, t);
         src + offset == buffer_addr(b, heap0) + 8 * index;
     ensures
@@ -197,7 +197,7 @@ procedure Store64_buffer(
         heap0;
     requires
         valid_dst_addr(heap0, b, index);
-        valid_layout_buffer(b, memLayout, heap0);
+        valid_layout_buffer(b, memLayout, heap0, true);
         valid_taint_buf64(b, heap0, memLayout.vl_taint, t);
         dst + offset == buffer_addr(b, heap0) + 8 * index;
     ensures
@@ -219,7 +219,7 @@ procedure LoadBe64_buffer(
     requires
         movbe_enabled;
         valid_src_addr(heap0, b, index);
-        valid_layout_buffer(b, memLayout, heap0);
+        valid_layout_buffer(b, memLayout, heap0, false);
         valid_taint_buf64(b, heap0, memLayout.vl_taint, t);
         src + offset == buffer_addr(b, heap0) + 8 * index;
     ensures
@@ -241,7 +241,7 @@ procedure StoreBe64_buffer(
     requires
         movbe_enabled;
         valid_dst_addr(heap0, b, index);
-        valid_layout_buffer(b, memLayout, heap0);
+        valid_layout_buffer(b, memLayout, heap0, true);
         valid_taint_buf64(b, heap0, memLayout.vl_taint, t);
         dst + offset == buffer_addr(b, heap0) + 8 * index;
     ensures

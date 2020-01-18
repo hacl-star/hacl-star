@@ -181,6 +181,6 @@ let same_immbuffer_same_upviews #src #bt b h0 h1 =
     DV.length_eq dv;
     Vale.Lib.BufferViewHelpers.lemma_uv_equal (LSig.view_of_base_typ bt) dv h0 h1
 
-let lemma_valid_layout_buffer_id t b layout =
+let lemma_valid_layout_buffer_id t b layout write =
   reveal_opaque (`%ME.valid_layout_buffer_id) ME.valid_layout_buffer_id
 

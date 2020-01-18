@@ -396,10 +396,22 @@ let init_heaplets_req (h:vale_heap) (bs:Seq.seq buffer_info) =
   (forall (i1 i2:nat).{:pattern (Seq.index bs i1); (Seq.index bs i2)}
     i1 < Seq.length bs /\ i2 < Seq.length bs ==> buffer_info_disjoint (Seq.index bs i1) (Seq.index bs i2))
 
+// Location containing all mutable buffers
+let rec loc_mutable_buffers (buffers:list buffer_info) : GTot loc =
+  match buffers with
+  | [] -> loc_none
+  | h::t ->
+    (
+      match h.bi_mutable with
+      | Immutable -> loc_mutable_buffers t
+      | Mutable -> loc_union (loc_buffer h.bi_buffer) (loc_mutable_buffers t)
+    )
+
 // Buffer b belongs to heaplet h
-val valid_layout_buffer_id (t:base_typ) (b:buffer t) (layout:vale_heap_layout) (h_id:option heaplet_id) : prop0
-let valid_layout_buffer (#t:base_typ) (b:buffer t) (layout:vale_heap_layout) (h:vale_heap) =
-  valid_layout_buffer_id t b layout (get_heaplet_id h)
+val valid_layout_buffer_id (t:base_typ) (b:buffer t) (layout:vale_heap_layout) (h_id:option heaplet_id) (write:bool) : prop0
+let valid_layout_buffer (#t:base_typ) (b:buffer t) (layout:vale_heap_layout) (h:vale_heap) (write:bool) =
+  valid_layout_buffer_id t b layout (get_heaplet_id h) false /\
+  valid_layout_buffer_id t b layout (get_heaplet_id h) write
 
 // Initial memory state
 val is_initial_heap (layout:vale_heap_layout) (h:vale_heap) : prop0

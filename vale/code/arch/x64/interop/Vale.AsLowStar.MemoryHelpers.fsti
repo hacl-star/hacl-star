@@ -310,7 +310,7 @@ val same_immbuffer_same_upviews (#src #bt:base_typ) (b:ibuf_t src bt) (h0 h1:HS.
     let ub = UV.mk_buffer db (LSig.view_of_base_typ bt) in
     Seq.equal (UV.as_seq h0 ub) (UV.as_seq h1 ub)))
 
-val lemma_valid_layout_buffer_id (t:base_typ) (b:ME.buffer t) (layout:vale_heap_layout) : Lemma
+val lemma_valid_layout_buffer_id (t:base_typ) (b:ME.buffer t) (layout:vale_heap_layout) (write:bool) : Lemma
   (requires True)
-  (ensures ME.valid_layout_buffer_id t b layout None)
-  [SMTPat (ME.valid_layout_buffer_id t b layout None)]
+  (ensures ME.valid_layout_buffer_id t b layout None write)
+  [SMTPat (ME.valid_layout_buffer_id t b layout None write)]

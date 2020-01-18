@@ -420,7 +420,7 @@ let validSrcAddrs64 (m:vale_heap) (addr:int) (b:M.buffer64) (len:int) (layout:va
   buffer_readable m b /\
   len <= buffer_length b /\
   M.buffer_addr b m == addr /\
-  M.valid_layout_buffer b layout m /\
+  M.valid_layout_buffer b layout m false /\
   M.valid_taint_buf64 b m layout.vl_taint t
 
 let validDstAddrs64 (m:vale_heap) (addr:int) (b:M.buffer64) (len:int) (layout:vale_heap_layout) (t:taint) =
@@ -428,14 +428,14 @@ let validDstAddrs64 (m:vale_heap) (addr:int) (b:M.buffer64) (len:int) (layout:va
   buffer_writeable b /\
   len <= buffer_length b /\
   M.buffer_addr b m == addr /\
-  M.valid_layout_buffer b layout m /\
+  M.valid_layout_buffer b layout m true /\
   M.valid_taint_buf64 b m layout.vl_taint t
 
 let validSrcAddrs128 (m:vale_heap) (addr:int) (b:M.buffer128) (len:int) (layout:vale_heap_layout) (t:taint) =
   buffer_readable m b /\
   len <= buffer_length b /\
   M.buffer_addr b m == addr /\
-  M.valid_layout_buffer b layout m /\
+  M.valid_layout_buffer b layout m false /\
   M.valid_taint_buf128 b m layout.vl_taint t
 
 let validDstAddrs128 (m:vale_heap) (addr:int) (b:M.buffer128) (len:int) (layout:vale_heap_layout) (t:taint) =
@@ -443,14 +443,14 @@ let validDstAddrs128 (m:vale_heap) (addr:int) (b:M.buffer128) (len:int) (layout:
   buffer_writeable b /\
   len <= buffer_length b /\
   M.buffer_addr b m == addr /\
-  M.valid_layout_buffer b layout m /\
+  M.valid_layout_buffer b layout m true /\
   M.valid_taint_buf128 b m layout.vl_taint t
 
 let validSrcAddrsOffset128 (m:vale_heap) (addr:int) (b:M.buffer128) (offset len:int) (layout:vale_heap_layout) (t:taint) =
   buffer_readable m b /\
   offset + len <= buffer_length b /\
   M.buffer_addr b m + 16 * offset == addr /\
-  M.valid_layout_buffer b layout m /\
+  M.valid_layout_buffer b layout m false /\
   M.valid_taint_buf128 b m layout.vl_taint t
 
 let validDstAddrsOffset128 (m:vale_heap) (addr:int) (b:M.buffer128) (offset len:int) (layout:vale_heap_layout) (t:taint) =
@@ -458,7 +458,7 @@ let validDstAddrsOffset128 (m:vale_heap) (addr:int) (b:M.buffer128) (offset len:
   buffer_writeable b /\
   offset + len <= buffer_length b /\
   M.buffer_addr b m + 16 * offset == addr /\
-  M.valid_layout_buffer b layout m /\
+  M.valid_layout_buffer b layout m true /\
   M.valid_taint_buf128 b m layout.vl_taint t
 
 let modifies_buffer_specific128 (b:M.buffer128) (h1 h2:vale_heap) (start last:nat) : GTot prop0 =

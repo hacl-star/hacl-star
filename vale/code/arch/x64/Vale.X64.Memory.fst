@@ -670,21 +670,22 @@ noeq type layout_data : Type0 = {
   vl_mod_loc:loc;
 }
 
-let valid_layout_data_buffer (t:base_typ) (b:buffer t) (ld:layout_data) (hid:heaplet_id) =
+let valid_layout_data_buffer (t:base_typ) (b:buffer t) (ld:layout_data) (hid:heaplet_id) (write:bool) =
   exists (n:nat).{:pattern (Seq.index ld.vl_buffers n)} n < Seq.length ld.vl_buffers /\ (
     let bi = Seq.index ld.vl_buffers n in
     t == bi.bi_typ /\
     b == bi.bi_buffer /\
+    (write ==> bi.bi_mutable == Mutable) /\
     hid == bi.bi_heaplet)
 
 [@"opaque_to_smt"]
-let valid_layout_buffer_id (t:base_typ) (b:buffer t) (layout:vale_heap_layout) (h_id:option heaplet_id) =
+let valid_layout_buffer_id t b layout h_id write =
   match h_id with
   | None -> True
   | Some hid ->
     layout.vl_inner.vl_heaplets_initialized /\
     layout.vl_inner.vl_t == layout_data /\
-    valid_layout_data_buffer t b (coerce layout.vl_inner.vl_v) hid
+    valid_layout_data_buffer t b (coerce layout.vl_inner.vl_v) hid write
 
 let inv_heaplet_ids (hs:vale_heaplets) =
   forall (i:heaplet_id).{:pattern Map16.sel hs i} (Map16.sel hs i).heapletId == Some i
@@ -695,7 +696,8 @@ let inv_heaplet (ld:layout_data) (owns:Set.set int) (h hi:vale_heap) =
   (forall (i:int).{:pattern Set.mem i owns \/ Set.mem i (Map.domain h.mh) \/ Map.sel h.mh i \/ Map.sel hi.mh i}
     Set.mem i owns ==>
       Set.mem i (Map.domain h.mh) /\
-      Map.sel h.mh i == Map.sel hi.mh i
+//      Map.sel h.mh i == Map.sel hi.mh i /\
+      True
   ) /\
   True
 
@@ -711,11 +713,12 @@ let inv_buffer_info (bi:buffer_info) (owners:heaplet_id -> Set.set int) (h:vale_
   buffer_as_seq hi b == buffer_as_seq h b /\
   (valid_taint_buf b hi mt bi.bi_taint <==> valid_taint_buf b h mt bi.bi_taint) /\
   (forall (i:int).{:pattern Set.mem i owns}
-    buffer_addr b h <= i /\ i < buffer_addr b h + DV.length (get_downview b.bsrc) ==> Set.mem i owns)
+    buffer_addr b h <= i /\ i < buffer_addr b h + DV.length (get_downview b.bsrc) ==> Set.mem i owns) /\
+  True
 
 let inv_heaplets (layout:vale_heap_layout_inner) (ld:layout_data) (h:vale_heap) (hs:vale_heaplets) (mt:memTaint_t) =
   let {vl_buffers = bs; vl_mod_loc = modloc} = ld in
-//TODO:  modifies ld.vl_mod_loc layout.vl_old_heap h /\  // modifies for entire heap
+  modifies ld.vl_mod_loc layout.vl_old_heap h /\  // modifies for entire heap
   (forall (i:heaplet_id) (a:int).{:pattern Set.mem a (layout.vl_heaplet_sets i)}
     layout.vl_heaplet_map a == Some i <==> Set.mem a (layout.vl_heaplet_sets i)
   ) /\
@@ -734,8 +737,7 @@ let is_initial_heap layout h =
 let mem_inv h =
   h.vf_heap.heapletId == None /\
   inv_heaplet_ids h.vf_heaplets /\
-  vale_heap_data_eq h.vf_heap (Map16.sel h.vf_heaplets 0)
-(*
+  vale_heap_data_eq h.vf_heap (Map16.sel h.vf_heaplets 0) /\ // TODO: get rid of this
   (if h.vf_layout.vl_inner.vl_heaplets_initialized
     then
       h.vf_layout.vl_inner.vl_t == layout_data /\
@@ -744,7 +746,6 @@ let mem_inv h =
     else
       h.vf_heaplets == empty_vale_heaplets h.vf_layout.vl_inner.vl_old_heap
   )
-*)
 
 let mem_eq_all h1 h2 =
   reveal_opaque (`%valid_layout_buffer_id) valid_layout_buffer_id;
