@@ -56,10 +56,10 @@ static void secretbox_detached(u32 mlen, u8 *c, u8 *tag, u8 *k, u8 *n1, u8 *m)
       u8 block0[32U] = { 0U };
       u8 *c0;
       u8 *c1;
-      memcpy(block0, m0, mlen0 * sizeof m0[0U]);
+      memcpy(block0, m0, mlen0 * sizeof (m0[0U]));
       {
         u32 i;
-        for (i = (u32)0U; i < (u32)32U; i = i + (u32)1U)
+        for (i = (u32)0U; i < (u32)32U; i++)
         {
           u8 *os = block0;
           u8 x = block0[i] ^ ekey0[i];
@@ -68,7 +68,7 @@ static void secretbox_detached(u32 mlen, u8 *c, u8 *tag, u8 *k, u8 *n1, u8 *m)
       }
       c0 = c;
       c1 = c + mlen0;
-      memcpy(c0, block0, mlen0 * sizeof block0[0U]);
+      memcpy(c0, block0, mlen0 * sizeof (block0[0U]));
       Hacl_Salsa20_salsa20_encrypt(mlen1, c1, m1, subkey, n11, (u32)1U);
       Hacl_Poly1305_32_poly1305_mac(tag, mlen, c, mkey);
     }
@@ -90,7 +90,7 @@ static u32 secretbox_open_detached(u32 mlen, u8 *m, u8 *k, u8 *n1, u8 *c, u8 *ta
       u32 res;
       {
         u32 i;
-        for (i = (u32)0U; i < (u32)16U; i = i + (u32)1U)
+        for (i = (u32)0U; i < (u32)16U; i++)
         {
           u8 uu____0 = FStar_UInt8_eq_mask(tag[i], tag_[i]);
           res0 = uu____0 & res0;
@@ -112,10 +112,10 @@ static u32 secretbox_open_detached(u32 mlen, u8 *m, u8 *k, u8 *n1, u8 *c, u8 *ta
           u8 *c0 = c;
           u8 *c1 = c + mlen0;
           u8 block0[32U] = { 0U };
-          memcpy(block0, c0, mlen0 * sizeof c0[0U]);
+          memcpy(block0, c0, mlen0 * sizeof (c0[0U]));
           {
             u32 i;
-            for (i = (u32)0U; i < (u32)32U; i = i + (u32)1U)
+            for (i = (u32)0U; i < (u32)32U; i++)
             {
               u8 *os = block0;
               u8 x = block0[i] ^ ekey0[i];
@@ -125,7 +125,7 @@ static u32 secretbox_open_detached(u32 mlen, u8 *m, u8 *k, u8 *n1, u8 *c, u8 *ta
           {
             u8 *m0 = m;
             u8 *m1 = m + mlen0;
-            memcpy(m0, block0, mlen0 * sizeof block0[0U]);
+            memcpy(m0, block0, mlen0 * sizeof (block0[0U]));
             Hacl_Salsa20_salsa20_decrypt(mlen1, m1, c1, subkey, n11, (u32)1U);
             res = (u32)0U;
           }
@@ -152,7 +152,7 @@ static u32 secretbox_open_easy(u32 mlen, u8 *m, u8 *k, u8 *n1, u8 *c)
   return secretbox_open_detached(mlen, m, k, n1, cip, tag);
 }
 
-inline static u32 box_beforenm(u8 *k, u8 *pk, u8 *sk)
+static inline u32 box_beforenm(u8 *k, u8 *pk, u8 *sk)
 {
   u8 n0[16U] = { 0U };
   bool r = Hacl_Curve25519_51_ecdh(k, sk, pk);
@@ -164,13 +164,13 @@ inline static u32 box_beforenm(u8 *k, u8 *pk, u8 *sk)
   return (u32)0xffffffffU;
 }
 
-inline static u32 box_detached_afternm(u32 mlen, u8 *c, u8 *tag, u8 *k, u8 *n1, u8 *m)
+static inline u32 box_detached_afternm(u32 mlen, u8 *c, u8 *tag, u8 *k, u8 *n1, u8 *m)
 {
   secretbox_detached(mlen, c, tag, k, n1, m);
   return (u32)0U;
 }
 
-inline static u32 box_detached(u32 mlen, u8 *c, u8 *tag, u8 *sk, u8 *pk, u8 *n1, u8 *m)
+static inline u32 box_detached(u32 mlen, u8 *c, u8 *tag, u8 *sk, u8 *pk, u8 *n1, u8 *m)
 {
   u8 k[32U] = { 0U };
   u32 r = box_beforenm(k, pk, sk);
@@ -179,12 +179,12 @@ inline static u32 box_detached(u32 mlen, u8 *c, u8 *tag, u8 *sk, u8 *pk, u8 *n1,
   return (u32)0xffffffffU;
 }
 
-inline static u32 box_open_detached_afternm(u32 mlen, u8 *m, u8 *k, u8 *n1, u8 *c, u8 *tag)
+static inline u32 box_open_detached_afternm(u32 mlen, u8 *m, u8 *k, u8 *n1, u8 *c, u8 *tag)
 {
   return secretbox_open_detached(mlen, m, k, n1, c, tag);
 }
 
-inline static u32 box_open_detached(u32 mlen, u8 *m, u8 *pk, u8 *sk, u8 *n1, u8 *c, u8 *tag)
+static inline u32 box_open_detached(u32 mlen, u8 *m, u8 *pk, u8 *sk, u8 *n1, u8 *c, u8 *tag)
 {
   u8 k[32U] = { 0U };
   u32 r = box_beforenm(k, pk, sk);
@@ -193,7 +193,7 @@ inline static u32 box_open_detached(u32 mlen, u8 *m, u8 *pk, u8 *sk, u8 *n1, u8 
   return (u32)0xffffffffU;
 }
 
-inline static u32 box_easy_afternm(u32 mlen, u8 *c, u8 *k, u8 *n1, u8 *m)
+static inline u32 box_easy_afternm(u32 mlen, u8 *c, u8 *k, u8 *n1, u8 *m)
 {
   u8 *tag = c;
   u8 *cip = c + (u32)16U;
@@ -201,7 +201,7 @@ inline static u32 box_easy_afternm(u32 mlen, u8 *c, u8 *k, u8 *n1, u8 *m)
   return res;
 }
 
-inline static u32 box_easy(u32 mlen, u8 *c, u8 *sk, u8 *pk, u8 *n1, u8 *m)
+static inline u32 box_easy(u32 mlen, u8 *c, u8 *sk, u8 *pk, u8 *n1, u8 *m)
 {
   u8 *tag = c;
   u8 *cip = c + (u32)16U;
@@ -209,14 +209,14 @@ inline static u32 box_easy(u32 mlen, u8 *c, u8 *sk, u8 *pk, u8 *n1, u8 *m)
   return res;
 }
 
-inline static u32 box_open_easy_afternm(u32 mlen, u8 *m, u8 *k, u8 *n1, u8 *c)
+static inline u32 box_open_easy_afternm(u32 mlen, u8 *m, u8 *k, u8 *n1, u8 *c)
 {
   u8 *tag = c;
   u8 *cip = c + (u32)16U;
   return box_open_detached_afternm(mlen, m, k, n1, cip, tag);
 }
 
-inline static u32 box_open_easy(u32 mlen, u8 *m, u8 *pk, u8 *sk, u8 *n1, u8 *c)
+static inline u32 box_open_easy(u32 mlen, u8 *m, u8 *pk, u8 *sk, u8 *n1, u8 *c)
 {
   u8 *tag = c;
   u8 *cip = c + (u32)16U;

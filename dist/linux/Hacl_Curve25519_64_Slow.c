@@ -53,7 +53,7 @@ typedef struct __u64_u64_s
 }
 __u64_u64;
 
-inline static __u64_u64 addcarry(u64 x, u64 y, u64 cin)
+static inline __u64_u64 addcarry(u64 x, u64 y, u64 cin)
 {
   u64 res1 = x + cin;
   u64 c;
@@ -72,7 +72,7 @@ inline static __u64_u64 addcarry(u64 x, u64 y, u64 cin)
   }
 }
 
-inline static __u64_u64 subborrow(u64 x, u64 y, u64 cin)
+static inline __u64_u64 subborrow(u64 x, u64 y, u64 cin)
 {
   u64 res = x - y - cin;
   u64 c;
@@ -88,13 +88,13 @@ inline static __u64_u64 subborrow(u64 x, u64 y, u64 cin)
   return ((__u64_u64){ .fst = res, .snd = c });
 }
 
-inline static __u64_u64 mul64(u64 x, u64 y)
+static inline __u64_u64 mul64(u64 x, u64 y)
 {
   uint128_t res = (uint128_t)x * y;
   return ((__u64_u64){ .fst = (uint64_t)res, .snd = (uint64_t)(res >> (u32)64U) });
 }
 
-inline static __u64_u64 add0carry(u64 x, u64 y)
+static inline __u64_u64 add0carry(u64 x, u64 y)
 {
   u64 res = x + y;
   u64 c;
@@ -399,7 +399,7 @@ static __u64_u64_u64_u64 fmul14(__u64_u64_u64_u64 f1, u64 f2)
   return out1;
 }
 
-inline static u64 add10(u64 *out, u64 *f1, u64 f2)
+static inline u64 add10(u64 *out, u64 *f1, u64 f2)
 {
   u64 f10 = f1[0U];
   u64 f11 = f1[1U];
@@ -419,7 +419,7 @@ inline static u64 add10(u64 *out, u64 *f1, u64 f2)
   return carry;
 }
 
-inline static void fadd(u64 *out, u64 *f1, u64 *f2)
+static inline void fadd(u64 *out, u64 *f1, u64 *f2)
 {
   u64 f10 = f1[0U];
   u64 f11 = f1[1U];
@@ -443,7 +443,7 @@ inline static void fadd(u64 *out, u64 *f1, u64 *f2)
   out[3U] = o3;
 }
 
-inline static void fsub(u64 *out, u64 *f1, u64 *f2)
+static inline void fsub(u64 *out, u64 *f1, u64 *f2)
 {
   u64 f10 = f1[0U];
   u64 f11 = f1[1U];
@@ -467,7 +467,7 @@ inline static void fsub(u64 *out, u64 *f1, u64 *f2)
   out[3U] = o3;
 }
 
-inline static void fmul(u64 *out, u64 *f1, u64 *f2)
+static inline void fmul(u64 *out, u64 *f1, u64 *f2)
 {
   u64 f10 = f1[0U];
   u64 f11 = f1[1U];
@@ -491,7 +491,7 @@ inline static void fmul(u64 *out, u64 *f1, u64 *f2)
   out[3U] = o3;
 }
 
-inline static void fmul2(u64 *out, u64 *f1, u64 *f2, u64 *tmp)
+static inline void fmul2(u64 *out, u64 *f1, u64 *f2, u64 *tmp)
 {
   u64 *out1 = out;
   u64 *out2 = out + (u32)4U;
@@ -503,7 +503,7 @@ inline static void fmul2(u64 *out, u64 *f1, u64 *f2, u64 *tmp)
   fmul(out2, f12, f22);
 }
 
-inline static void fmul1(u64 *out, u64 *f1, u64 f2)
+static inline void fmul1(u64 *out, u64 *f1, u64 f2)
 {
   u64 f10 = f1[0U];
   u64 f11 = f1[1U];
@@ -521,22 +521,22 @@ inline static void fmul1(u64 *out, u64 *f1, u64 f2)
   out[3U] = o3;
 }
 
-inline static void fsqr(u64 *out, u64 *f1)
+static inline void fsqr(u64 *out, u64 *f1)
 {
   u64 tmp1[16U] = { 0U };
   fmul(out, f1, f1);
 }
 
-inline static void fsqr2(u64 *out, u64 *f, u64 *tmp)
+static inline void fsqr2(u64 *out, u64 *f, u64 *tmp)
 {
   fmul2(out, f, f, tmp);
 }
 
-inline static void cswap2(u64 bit, u64 *p1, u64 *p2)
+static inline void cswap2(u64 bit, u64 *p1, u64 *p2)
 {
   u64 mask = (u64)0U - bit;
   u32 i;
-  for (i = (u32)0U; i < (u32)8U; i = i + (u32)1U)
+  for (i = (u32)0U; i < (u32)8U; i++)
   {
     u64 dummy = mask & (p1[i] ^ p2[i]);
     p1[i] = p1[i] ^ dummy;
@@ -640,7 +640,7 @@ static void montgomery_ladder(u64 *out, u8 *key, u64 *init1)
   u64 sw0;
   u64 *nq1;
   u64 *tmp1;
-  memcpy(p11, init1, (u32)8U * sizeof init1[0U]);
+  memcpy(p11, init1, (u32)8U * sizeof (init1[0U]));
   x0 = p03;
   z0 = p03 + (u32)4U;
   x0[0U] = (u64)1U;
@@ -661,7 +661,7 @@ static void montgomery_ladder(u64 *out, u8 *key, u64 *init1)
   swap1[0U] = (u64)1U;
   {
     u32 i;
-    for (i = (u32)0U; i < (u32)251U; i = i + (u32)1U)
+    for (i = (u32)0U; i < (u32)251U; i++)
     {
       u64 *p01_tmp12 = p01_tmp1_swap;
       u64 *swap2 = p01_tmp1_swap + (u32)32U;
@@ -681,14 +681,14 @@ static void montgomery_ladder(u64 *out, u8 *key, u64 *init1)
   point_double(nq1, tmp1, tmp2);
   point_double(nq1, tmp1, tmp2);
   point_double(nq1, tmp1, tmp2);
-  memcpy(out, p0, (u32)8U * sizeof p0[0U]);
+  memcpy(out, p0, (u32)8U * sizeof (p0[0U]));
 }
 
 static void fsquare_times(u64 *o, u64 *inp, u64 *tmp, u32 n1)
 {
   u32 i;
   fsqr(o, inp);
-  for (i = (u32)0U; i < n1 - (u32)1U; i = i + (u32)1U)
+  for (i = (u32)0U; i < n1 - (u32)1U; i++)
     fsqr(o, o);
 }
 
@@ -794,7 +794,7 @@ static void encode_point(u8 *o, u64 *i)
   store_felem(u64s, tmp);
   {
     u32 i0;
-    for (i0 = (u32)0U; i0 < (u32)4U; i0 = i0 + (u32)1U)
+    for (i0 = (u32)0U; i0 < (u32)4U; i0++)
       store64_le(o + i0 * (u32)8U, u64s[i0]);
   }
 }
@@ -808,7 +808,7 @@ void Hacl_Curve25519_64_Slow_scalarmult(u8 *out, u8 *priv, u8 *pub)
   u64 *z;
   {
     u32 i;
-    for (i = (u32)0U; i < (u32)4U; i = i + (u32)1U)
+    for (i = (u32)0U; i < (u32)4U; i++)
     {
       u64 *os = tmp;
       u8 *bj = pub + i * (u32)8U;
@@ -839,7 +839,7 @@ void Hacl_Curve25519_64_Slow_secret_to_public(u8 *pub, u8 *priv)
   u8 basepoint[32U] = { 0U };
   {
     u32 i;
-    for (i = (u32)0U; i < (u32)32U; i = i + (u32)1U)
+    for (i = (u32)0U; i < (u32)32U; i++)
     {
       u8 *os = basepoint;
       u8 x = g25519[i];
@@ -859,7 +859,7 @@ bool Hacl_Curve25519_64_Slow_ecdh(u8 *out, u8 *priv, u8 *pub)
     bool r;
     {
       u32 i;
-      for (i = (u32)0U; i < (u32)32U; i = i + (u32)1U)
+      for (i = (u32)0U; i < (u32)32U; i++)
       {
         u8 uu____0 = FStar_UInt8_eq_mask(out[i], zeros1[i]);
         res = uu____0 & res;

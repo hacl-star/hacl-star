@@ -148,7 +148,7 @@ EverCrypt_CTR_create_in(
           uint64_t scrut = aes128_key_expansion(k1, keys_b);
           uint64_t scrut0 = aes128_keyhash_init(keys_b, hkeys_b);
           uint8_t *iv_ = KRML_HOST_CALLOC((uint32_t)16U, sizeof (uint8_t));
-          memcpy(iv_, iv, iv_len * sizeof iv[0U]);
+          memcpy(iv_, iv, iv_len * sizeof (iv[0U]));
           {
             EverCrypt_CTR_state_s lit;
             lit.i =
@@ -188,7 +188,7 @@ EverCrypt_CTR_create_in(
           uint64_t scrut = aes256_key_expansion(k1, keys_b);
           uint64_t scrut0 = aes256_keyhash_init(keys_b, hkeys_b);
           uint8_t *iv_ = KRML_HOST_CALLOC((uint32_t)16U, sizeof (uint8_t));
-          memcpy(iv_, iv, iv_len * sizeof iv[0U]);
+          memcpy(iv_, iv, iv_len * sizeof (iv[0U]));
           {
             EverCrypt_CTR_state_s lit;
             lit.i =
@@ -212,11 +212,11 @@ EverCrypt_CTR_create_in(
     case Spec_Agile_Cipher_CHACHA20:
       {
         uint8_t *ek = KRML_HOST_CALLOC((uint32_t)32U, sizeof (uint8_t));
-        memcpy(ek, k1, (uint32_t)32U * sizeof k1[0U]);
+        memcpy(ek, k1, (uint32_t)32U * sizeof (k1[0U]));
         KRML_CHECK_SIZE(sizeof (uint8_t), iv_len);
         {
           uint8_t *iv_ = KRML_HOST_CALLOC(iv_len, sizeof (uint8_t));
-          memcpy(iv_, iv, iv_len * sizeof iv[0U]);
+          memcpy(iv_, iv, iv_len * sizeof (iv[0U]));
           {
             EverCrypt_CTR_state_s lit;
             lit.i = Spec_Cipher_Expansion_Hacl_CHACHA20;
@@ -256,7 +256,7 @@ EverCrypt_CTR_init(
   uint8_t *ek = scrut0.xkey;
   uint8_t *iv_ = scrut0.iv;
   Spec_Cipher_Expansion_impl i1 = scrut0.i;
-  memcpy(iv_, iv, iv_len * sizeof iv[0U]);
+  memcpy(iv_, iv, iv_len * sizeof (iv[0U]));
   switch (i1)
   {
     case Spec_Cipher_Expansion_Vale_AES128:
@@ -277,7 +277,7 @@ EverCrypt_CTR_init(
       }
     case Spec_Cipher_Expansion_Hacl_CHACHA20:
       {
-        memcpy(ek, k1, (uint32_t)32U * sizeof k1[0U]);
+        memcpy(ek, k1, (uint32_t)32U * sizeof (k1[0U]));
         break;
       }
     default:
@@ -328,7 +328,7 @@ void EverCrypt_CTR_update_block(EverCrypt_CTR_state_s *p, uint8_t *dst, uint8_t 
           FStar_UInt128_uint128 uu____0;
           FStar_UInt128_uint128 c;
           uint8_t *uu____1;
-          memcpy(ctr_block1, iv10, iv_len10 * sizeof iv10[0U]);
+          memcpy(ctr_block1, iv10, iv_len10 * sizeof (iv10[0U]));
           uu____0 = load128_be(ctr_block1);
           c = FStar_UInt128_add_mod(uu____0, FStar_UInt128_uint64_to_uint128((uint64_t)c020));
           store128_le(ctr_block1, c);
@@ -343,7 +343,7 @@ void EverCrypt_CTR_update_block(EverCrypt_CTR_state_s *p, uint8_t *dst, uint8_t 
             uint32_t c4;
             memcpy(inout_b,
               src + num_bytes_,
-              (uint32_t)(uint64_t)16U % (uint32_t)16U * sizeof src[0U]);
+              (uint32_t)(uint64_t)16U % (uint32_t)16U * sizeof (src[0U]));
             scrut =
               gctr128_bytes(in_b_,
                 (uint64_t)16U,
@@ -354,7 +354,7 @@ void EverCrypt_CTR_update_block(EverCrypt_CTR_state_s *p, uint8_t *dst, uint8_t 
                 (uint64_t)num_blocks);
             memcpy(dst + num_bytes_,
               inout_b,
-              (uint32_t)(uint64_t)16U % (uint32_t)16U * sizeof inout_b[0U]);
+              (uint32_t)(uint64_t)16U % (uint32_t)16U * sizeof (inout_b[0U]));
             c4 = c020 + (uint32_t)1U;
             {
               EverCrypt_CTR_state_s lit;
@@ -381,7 +381,7 @@ void EverCrypt_CTR_update_block(EverCrypt_CTR_state_s *p, uint8_t *dst, uint8_t 
           FStar_UInt128_uint128 uu____2;
           FStar_UInt128_uint128 c;
           uint8_t *uu____3;
-          memcpy(ctr_block1, iv1, iv_len1 * sizeof iv1[0U]);
+          memcpy(ctr_block1, iv1, iv_len1 * sizeof (iv1[0U]));
           uu____2 = load128_be(ctr_block1);
           c = FStar_UInt128_add_mod(uu____2, FStar_UInt128_uint64_to_uint128((uint64_t)c02));
           store128_le(ctr_block1, c);
@@ -396,7 +396,7 @@ void EverCrypt_CTR_update_block(EverCrypt_CTR_state_s *p, uint8_t *dst, uint8_t 
             uint32_t c4;
             memcpy(inout_b,
               src + num_bytes_,
-              (uint32_t)(uint64_t)16U % (uint32_t)16U * sizeof src[0U]);
+              (uint32_t)(uint64_t)16U % (uint32_t)16U * sizeof (src[0U]));
             scrut =
               gctr256_bytes(in_b_,
                 (uint64_t)16U,
@@ -407,7 +407,7 @@ void EverCrypt_CTR_update_block(EverCrypt_CTR_state_s *p, uint8_t *dst, uint8_t 
                 (uint64_t)num_blocks);
             memcpy(dst + num_bytes_,
               inout_b,
-              (uint32_t)(uint64_t)16U % (uint32_t)16U * sizeof inout_b[0U]);
+              (uint32_t)(uint64_t)16U % (uint32_t)16U * sizeof (inout_b[0U]));
             c4 = c02 + (uint32_t)1U;
             {
               EverCrypt_CTR_state_s lit;

@@ -24,7 +24,7 @@
 
 #include "Hacl_Curve25519_64.h"
 
-inline static u64 add10(u64 *out1, u64 *f1, u64 f2)
+static inline u64 add10(u64 *out1, u64 *f1, u64 f2)
 {
   #if EVERCRYPT_TARGETCONFIG_GCC
   return add1_inline(out1, f1, f2);
@@ -34,7 +34,7 @@ inline static u64 add10(u64 *out1, u64 *f1, u64 f2)
   #endif
 }
 
-inline static void fadd(u64 *out1, u64 *f1, u64 *f2)
+static inline void fadd(u64 *out1, u64 *f1, u64 *f2)
 {
   #if EVERCRYPT_TARGETCONFIG_GCC
   fadd_inline(out1, f1, f2);
@@ -43,7 +43,7 @@ inline static void fadd(u64 *out1, u64 *f1, u64 *f2)
   #endif
 }
 
-inline static void fsub(u64 *out1, u64 *f1, u64 *f2)
+static inline void fsub(u64 *out1, u64 *f1, u64 *f2)
 {
   #if EVERCRYPT_TARGETCONFIG_GCC
   fsub_inline(out1, f1, f2);
@@ -52,7 +52,7 @@ inline static void fsub(u64 *out1, u64 *f1, u64 *f2)
   #endif
 }
 
-inline static void fmul(u64 *out1, u64 *f1, u64 *f2, u64 *tmp)
+static inline void fmul(u64 *out1, u64 *f1, u64 *f2, u64 *tmp)
 {
   #if EVERCRYPT_TARGETCONFIG_GCC
   fmul_inline(tmp, f1, out1, f2);
@@ -61,7 +61,7 @@ inline static void fmul(u64 *out1, u64 *f1, u64 *f2, u64 *tmp)
   #endif
 }
 
-inline static void fmul20(u64 *out1, u64 *f1, u64 *f2, u64 *tmp)
+static inline void fmul20(u64 *out1, u64 *f1, u64 *f2, u64 *tmp)
 {
   #if EVERCRYPT_TARGETCONFIG_GCC
   fmul2_inline(tmp, f1, out1, f2);
@@ -70,7 +70,7 @@ inline static void fmul20(u64 *out1, u64 *f1, u64 *f2, u64 *tmp)
   #endif
 }
 
-inline static void fmul10(u64 *out1, u64 *f1, u64 f2)
+static inline void fmul10(u64 *out1, u64 *f1, u64 f2)
 {
   #if EVERCRYPT_TARGETCONFIG_GCC
   fmul1_inline(out1, f1, f2);
@@ -79,7 +79,7 @@ inline static void fmul10(u64 *out1, u64 *f1, u64 f2)
   #endif
 }
 
-inline static void fsqr0(u64 *out1, u64 *f1, u64 *tmp)
+static inline void fsqr0(u64 *out1, u64 *f1, u64 *tmp)
 {
   #if EVERCRYPT_TARGETCONFIG_GCC
   fsqr_inline(tmp, f1, out1);
@@ -88,7 +88,7 @@ inline static void fsqr0(u64 *out1, u64 *f1, u64 *tmp)
   #endif
 }
 
-inline static void fsqr20(u64 *out1, u64 *f, u64 *tmp)
+static inline void fsqr20(u64 *out1, u64 *f, u64 *tmp)
 {
   #if EVERCRYPT_TARGETCONFIG_GCC
   fsqr2_inline(tmp, f, out1);
@@ -97,7 +97,7 @@ inline static void fsqr20(u64 *out1, u64 *f, u64 *tmp)
   #endif
 }
 
-inline static void cswap20(u64 bit, u64 *p1, u64 *p2)
+static inline void cswap20(u64 bit, u64 *p1, u64 *p2)
 {
   #if EVERCRYPT_TARGETCONFIG_GCC
   cswap2_inline(bit, p1, p2);
@@ -202,7 +202,7 @@ static void montgomery_ladder(u64 *out, u8 *key, u64 *init1)
   u64 sw0;
   u64 *nq1;
   u64 *tmp1;
-  memcpy(p11, init1, (u32)8U * sizeof init1[0U]);
+  memcpy(p11, init1, (u32)8U * sizeof (init1[0U]));
   x0 = p03;
   z0 = p03 + (u32)4U;
   x0[0U] = (u64)1U;
@@ -223,7 +223,7 @@ static void montgomery_ladder(u64 *out, u8 *key, u64 *init1)
   swap1[0U] = (u64)1U;
   {
     u32 i;
-    for (i = (u32)0U; i < (u32)251U; i = i + (u32)1U)
+    for (i = (u32)0U; i < (u32)251U; i++)
     {
       u64 *p01_tmp12 = p01_tmp1_swap;
       u64 *swap2 = p01_tmp1_swap + (u32)32U;
@@ -243,14 +243,14 @@ static void montgomery_ladder(u64 *out, u8 *key, u64 *init1)
   point_double(nq1, tmp1, tmp2);
   point_double(nq1, tmp1, tmp2);
   point_double(nq1, tmp1, tmp2);
-  memcpy(out, p0, (u32)8U * sizeof p0[0U]);
+  memcpy(out, p0, (u32)8U * sizeof (p0[0U]));
 }
 
 static void fsquare_times(u64 *o, u64 *inp, u64 *tmp, u32 n1)
 {
   u32 i;
   fsqr0(o, inp, tmp);
-  for (i = (u32)0U; i < n1 - (u32)1U; i = i + (u32)1U)
+  for (i = (u32)0U; i < n1 - (u32)1U; i++)
     fsqr0(o, o, tmp);
 }
 
@@ -356,7 +356,7 @@ static void encode_point(u8 *o, u64 *i)
   store_felem(u64s, tmp);
   {
     u32 i0;
-    for (i0 = (u32)0U; i0 < (u32)4U; i0 = i0 + (u32)1U)
+    for (i0 = (u32)0U; i0 < (u32)4U; i0++)
       store64_le(o + i0 * (u32)8U, u64s[i0]);
   }
 }
@@ -370,7 +370,7 @@ void Hacl_Curve25519_64_scalarmult(u8 *out, u8 *priv, u8 *pub)
   u64 *z;
   {
     u32 i;
-    for (i = (u32)0U; i < (u32)4U; i = i + (u32)1U)
+    for (i = (u32)0U; i < (u32)4U; i++)
     {
       u64 *os = tmp;
       u8 *bj = pub + i * (u32)8U;
@@ -401,7 +401,7 @@ void Hacl_Curve25519_64_secret_to_public(u8 *pub, u8 *priv)
   u8 basepoint[32U] = { 0U };
   {
     u32 i;
-    for (i = (u32)0U; i < (u32)32U; i = i + (u32)1U)
+    for (i = (u32)0U; i < (u32)32U; i++)
     {
       u8 *os = basepoint;
       u8 x = g25519[i];
@@ -421,7 +421,7 @@ bool Hacl_Curve25519_64_ecdh(u8 *out, u8 *priv, u8 *pub)
     bool r;
     {
       u32 i;
-      for (i = (u32)0U; i < (u32)32U; i = i + (u32)1U)
+      for (i = (u32)0U; i < (u32)32U; i++)
       {
         u8 uu____0 = FStar_UInt8_eq_mask(out[i], zeros1[i]);
         res = uu____0 & res;
