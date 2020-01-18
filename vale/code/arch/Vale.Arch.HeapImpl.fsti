@@ -15,6 +15,19 @@ This splitting is done to avoid circular module dependencies.
 
 let heaplet_id = n:nat{n < 16}
 
+val buffer (t:base_typ) : Type0
+
+type mutability = | Mutable | Immutable
+
+// Buffer information for heaplets
+noeq type buffer_info : Type0 = {
+  bi_typ:base_typ;
+  bi_buffer:buffer bi_typ;
+  bi_heaplet:heaplet_id;
+  bi_taint:taint;
+  bi_mutable:mutability;
+}
+
 val vale_heap : Type u#1
 val vale_heap_layout_inner : Type u#1
 

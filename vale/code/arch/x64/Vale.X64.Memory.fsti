@@ -44,7 +44,7 @@ unfold let scale4 (index:int) : int = scale_by 4 index
 unfold let scale8 (index:int) : int = scale_by 8 index
 unfold let scale16 (index:int) : int = scale_by 16 index
 
-val buffer (t:base_typ) : Type0
+unfold let buffer (t:base_typ) : Type0 = Vale.Arch.HeapImpl.buffer t
 val buffer_as_seq (#t:base_typ) (h:vale_heap) (b:buffer t) : GTot (Seq.seq (base_typ_as_vale_type t))
 val buffer_readable (#t:base_typ) (h:vale_heap) (b:buffer t) : GTot prop0
 val buffer_writeable (#t:base_typ) (b:buffer t) : GTot prop0
@@ -372,17 +372,6 @@ val modifies_same_heaplet_id (l:loc) (h1 h2:vale_heap) : Lemma
 
 // TODO: this is used for the current (trivial) mem_inv; it will probably be removed for the real mem_inv
 val vale_heap_data_eq (h1 h2:vale_heap) : prop
-
-type mutability = | Mutable | Immutable
-
-// Buffer information for heaplets
-noeq type buffer_info : Type0 = {
-  bi_typ:base_typ;
-  bi_buffer:buffer bi_typ;
-  bi_heaplet:heaplet_id;
-  bi_taint:taint;
-  bi_mutable:mutability;
-}
 
 // Buffers in different heaplets are disjoint
 let buffer_info_disjoint (bi1 bi2:buffer_info) =

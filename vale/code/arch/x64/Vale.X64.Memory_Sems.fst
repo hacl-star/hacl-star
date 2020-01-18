@@ -159,10 +159,6 @@ let create_heaplets buffers h1 =
   let modloc = loc_mutable_buffers buffers in
   let layout1 = h1.vf_layout in
   let layin1 = layout1.vl_inner in
-  let ld = {
-    vl_buffers = bs;
-    vl_mod_loc = modloc;
-  } in
   let (hmap, hsets) = make_owns h1.vf_heap bs (Seq.length bs) in
   let hmap a = Option.mapTot (fun n -> (Seq.index bs n).bi_heaplet) (hmap a) in
   let l = {
@@ -170,8 +166,8 @@ let create_heaplets buffers h1 =
     vl_heaplet_map = hmap;
     vl_heaplet_sets = hsets;
     vl_old_heap = h1.vf_heap;
-    vl_t = layout_data;
-    vl_v = ld;
+    vl_buffers = bs;
+    vl_mod_loc = modloc;
   } in
   let layout2 = {layout1 with vl_inner = l} in
   let h2 = {
@@ -184,8 +180,7 @@ let create_heaplets buffers h1 =
 let lemma_create_heaplets buffers h1 =
   let bs = list_to_seq buffers in
   let h2 = create_heaplets buffers h1 in
-  let ld:layout_data = h2.vf_layout.vl_inner.vl_v in
-  assert (ld.vl_buffers == bs);
+  assert (h2.vf_layout.vl_inner.vl_buffers == bs); // REVIEW: why is this necessary, even with extra ifuel?
   lemma_make_owns h1.vf_heap bs (Seq.length bs);
   lemma_loc_mutable_buffers buffers;
   reveal_opaque (`%valid_layout_buffer_id) valid_layout_buffer_id;

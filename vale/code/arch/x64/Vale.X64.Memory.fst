@@ -69,8 +69,6 @@ let uint_view = function
   | TUInt64 -> uint64_view
   | TUInt128 -> uint128_view
 
-let buffer t = (b:b8{DV.length (get_downview b.bsrc) % view_n t == 0})
-
 let buffer_as_seq #t h b =
   let s = UV.as_seq (IB.hs_of_mem (_ih h)) (UV.mk_buffer (get_downview b.bsrc) (uint_view t)) in
   Vale.Lib.Seqs_s.seq_map (v_to_typ t) s
@@ -665,14 +663,9 @@ let rec valid_memtaint (mem:vale_heap) (ps:list b8{IB.list_disjoint_or_eq ps}) (
 let vale_heap_data_eq h1 h2 =
   h1.mh == h2.mh /\ h1.ih == h2.ih
 
-noeq type layout_data : Type0 = {
-  vl_buffers:Seq.seq buffer_info;
-  vl_mod_loc:loc;
-}
-
-let valid_layout_data_buffer (t:base_typ) (b:buffer t) (ld:layout_data) (hid:heaplet_id) (write:bool) =
-  exists (n:nat).{:pattern (Seq.index ld.vl_buffers n)} n < Seq.length ld.vl_buffers /\ (
-    let bi = Seq.index ld.vl_buffers n in
+let valid_layout_data_buffer (t:base_typ) (b:buffer t) (layout:vale_heap_layout_inner) (hid:heaplet_id) (write:bool) =
+  exists (n:nat).{:pattern (Seq.index layout.vl_buffers n)} n < Seq.length layout.vl_buffers /\ (
+    let bi = Seq.index layout.vl_buffers n in
     t == bi.bi_typ /\
     b == bi.bi_buffer /\
     (write ==> bi.bi_mutable == Mutable) /\
@@ -684,13 +677,12 @@ let valid_layout_buffer_id t b layout h_id write =
   | None -> True
   | Some hid ->
     layout.vl_inner.vl_heaplets_initialized /\
-    layout.vl_inner.vl_t == layout_data /\
-    valid_layout_data_buffer t b (coerce layout.vl_inner.vl_v) hid write
+    valid_layout_data_buffer t b layout.vl_inner hid write
 
 let inv_heaplet_ids (hs:vale_heaplets) =
   forall (i:heaplet_id).{:pattern Map16.sel hs i} (Map16.sel hs i).heapletId == Some i
 
-let inv_heaplet (ld:layout_data) (owns:Set.set int) (h hi:vale_heap) =
+let inv_heaplet (owns:Set.set int) (h hi:vale_heap) =
   h.ih.IB.ptrs == hi.ih.IB.ptrs /\
   Map.domain h.mh == Map.domain hi.mh /\
   (forall (i:int).{:pattern Set.mem i owns \/ Set.mem i (Map.domain h.mh) \/ Map.sel h.mh i \/ Map.sel hi.mh i}
@@ -716,16 +708,16 @@ let inv_buffer_info (bi:buffer_info) (owners:heaplet_id -> Set.set int) (h:vale_
     buffer_addr b h <= i /\ i < buffer_addr b h + DV.length (get_downview b.bsrc) ==> Set.mem i owns) /\
   True
 
-let inv_heaplets (layout:vale_heap_layout_inner) (ld:layout_data) (h:vale_heap) (hs:vale_heaplets) (mt:memTaint_t) =
-  let {vl_buffers = bs; vl_mod_loc = modloc} = ld in
-  modifies ld.vl_mod_loc layout.vl_old_heap h /\  // modifies for entire heap
+let inv_heaplets (layout:vale_heap_layout_inner) (h:vale_heap) (hs:vale_heaplets) (mt:memTaint_t) =
+  let bs = layout.vl_buffers in
+  modifies layout.vl_mod_loc layout.vl_old_heap h /\  // modifies for entire heap
   (forall (i:heaplet_id) (a:int).{:pattern Set.mem a (layout.vl_heaplet_sets i)}
     layout.vl_heaplet_map a == Some i <==> Set.mem a (layout.vl_heaplet_sets i)
   ) /\
   (forall (i:heaplet_id).{:pattern (Map16.sel hs i)}
-    inv_heaplet ld (layout.vl_heaplet_sets i) h (Map16.sel hs i)) /\
+    inv_heaplet (layout.vl_heaplet_sets i) h (Map16.sel hs i)) /\
   (forall (i:nat).{:pattern (Seq.index bs i)} i < Seq.length bs ==>
-    inv_buffer_info (Seq.index bs i) layout.vl_heaplet_sets h hs mt modloc) /\
+    inv_buffer_info (Seq.index bs i) layout.vl_heaplet_sets h hs mt layout.vl_mod_loc) /\
   (forall (i1 i2:nat).{:pattern (Seq.index bs i1); (Seq.index bs i2)}
     i1 < Seq.length bs /\ i2 < Seq.length bs ==> buffer_info_disjoint (Seq.index bs i1) (Seq.index bs i2)) /\
   True
@@ -740,8 +732,7 @@ let mem_inv h =
   vale_heap_data_eq h.vf_heap (Map16.sel h.vf_heaplets 0) /\ // TODO: get rid of this
   (if h.vf_layout.vl_inner.vl_heaplets_initialized
     then
-      h.vf_layout.vl_inner.vl_t == layout_data /\
-      inv_heaplets h.vf_layout.vl_inner (coerce h.vf_layout.vl_inner.vl_v) h.vf_heap
+      inv_heaplets h.vf_layout.vl_inner h.vf_heap
         h.vf_heaplets h.vf_layout.vl_taint
     else
       h.vf_heaplets == empty_vale_heaplets h.vf_layout.vl_inner.vl_old_heap
