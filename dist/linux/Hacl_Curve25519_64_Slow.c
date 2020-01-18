@@ -467,11 +467,7 @@ static inline void fsub_(u64 *out, u64 *f1, u64 *f2)
   out[3U] = o3;
 }
 
-<<<<<<< HEAD
 static inline void fmul_(u64 *out, u64 *f1, u64 *f2)
-=======
-inline static void fmul(u64 *out, u64 *f1, u64 *f2)
->>>>>>> master
 {
   u64 f10 = f1[0U];
   u64 f11 = f1[1U];
@@ -503,13 +499,8 @@ static inline void fmul2_(u64 *out, u64 *f1, u64 *f2, u64 *tmp)
   u64 *f12 = f1 + (u32)4U;
   u64 *f21 = f2;
   u64 *f22 = f2 + (u32)4U;
-<<<<<<< HEAD
   fmul_(out1, f11, f21);
   fmul_(out2, f12, f22);
-=======
-  fmul(out1, f11, f21);
-  fmul(out2, f12, f22);
->>>>>>> master
 }
 
 static inline void fmul1_(u64 *out, u64 *f1, u64 f2)
@@ -530,17 +521,10 @@ static inline void fmul1_(u64 *out, u64 *f1, u64 f2)
   out[3U] = o3;
 }
 
-<<<<<<< HEAD
 static inline void fsqr_(u64 *out, u64 *f1)
 {
   u64 tmp1[16U] = { 0U };
   fmul_(out, f1, f1);
-=======
-inline static void fsqr(u64 *out, u64 *f1)
-{
-  u64 tmp1[16U] = { 0U };
-  fmul(out, f1, f1);
->>>>>>> master
 }
 
 static inline void fsqr2_(u64 *out, u64 *f, u64 *tmp)
@@ -608,19 +592,11 @@ static void point_add_and_double(u64 *q, u64 *p01_tmp1, u64 *tmp2)
   a1[1U] = c[1U];
   a1[2U] = c[2U];
   a1[3U] = c[3U];
-<<<<<<< HEAD
   fsub_(c, d, c);
   fmul1_(b1, c, (u64)121665U);
   fadd_(b1, b1, d);
   fmul2_(nq, dc1, ab1, tmp2);
   fmul_(z3, z3, x1);
-=======
-  fsub(c, d, c);
-  fmul1(b1, c, (u64)121665U);
-  fadd(b1, b1, d);
-  fmul2(nq, dc1, ab1, tmp2);
-  fmul(z3, z3, x1);
->>>>>>> master
 }
 
 static void point_double(u64 *nq, u64 *tmp1, u64 *tmp2)
@@ -711,15 +687,9 @@ static void montgomery_ladder(u64 *out, u8 *key, u64 *init1)
 static void fsquare_times(u64 *o, u64 *inp, u64 *tmp, u32 n1)
 {
   u32 i;
-<<<<<<< HEAD
   fsqr_(o, inp);
   for (i = (u32)0U; i < n1 - (u32)1U; i++)
     fsqr_(o, o);
-=======
-  fsqr(o, inp);
-  for (i = (u32)0U; i < n1 - (u32)1U; i = i + (u32)1U)
-    fsqr(o, o);
->>>>>>> master
 }
 
 static void finv(u64 *o, u64 *i, u64 *tmp)
@@ -734,7 +704,6 @@ static void finv(u64 *o, u64 *i, u64 *tmp)
   u64 *t0;
   fsquare_times(a0, i, tmp1, (u32)1U);
   fsquare_times(t00, a0, tmp1, (u32)2U);
-<<<<<<< HEAD
   fmul_(b, t00, i);
   fmul_(a0, b, a0);
   fsquare_times(t00, a0, tmp1, (u32)1U);
@@ -757,30 +726,6 @@ static void finv(u64 *o, u64 *i, u64 *tmp)
   a = t1;
   t0 = t1 + (u32)12U;
   fmul_(o, t0, a);
-=======
-  fmul(b, t00, i);
-  fmul(a0, b, a0);
-  fsquare_times(t00, a0, tmp1, (u32)1U);
-  fmul(b, t00, b);
-  fsquare_times(t00, b, tmp1, (u32)5U);
-  fmul(b, t00, b);
-  fsquare_times(t00, b, tmp1, (u32)10U);
-  fmul(c, t00, b);
-  fsquare_times(t00, c, tmp1, (u32)20U);
-  fmul(t00, t00, c);
-  fsquare_times(t00, t00, tmp1, (u32)10U);
-  fmul(b, t00, b);
-  fsquare_times(t00, b, tmp1, (u32)50U);
-  fmul(c, t00, b);
-  fsquare_times(t00, c, tmp1, (u32)100U);
-  fmul(t00, t00, c);
-  fsquare_times(t00, t00, tmp1, (u32)50U);
-  fmul(t00, t00, b);
-  fsquare_times(t00, t00, tmp1, (u32)5U);
-  a = t1;
-  t0 = t1 + (u32)12U;
-  fmul(o, t0, a);
->>>>>>> master
 }
 
 static void store_felem(u64 *b, u64 *f)
@@ -845,11 +790,7 @@ static void encode_point(u8 *o, u64 *i)
   u64 u64s[4U] = { 0U };
   u64 tmp_w[16U] = { 0U };
   finv(tmp, z, tmp_w);
-<<<<<<< HEAD
   fmul_(tmp, tmp, x);
-=======
-  fmul(tmp, tmp, x);
->>>>>>> master
   store_felem(u64s, tmp);
   {
     u32 i0;

@@ -1029,11 +1029,7 @@ mt_flush_to_(
           hvec,
           ofs);
       assign__LowStar_Vector_vector_str__uint8_t_0(hs, lv, flushed);
-<<<<<<< HEAD
       lv++;
-=======
-      lv = lv + (uint32_t)1U;
->>>>>>> master
       pi = pi / (uint32_t)2U;
       i1 = i1 / (uint32_t)2U;
     }
