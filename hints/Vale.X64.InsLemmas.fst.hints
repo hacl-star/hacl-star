@@ -8,7 +8,7 @@
       0,
       [ "@query", "equation_Vale.X64.Decls.valid_buf_maddr64" ],
       0,
-      "e369be74afd3a471573b224bb39b8a83"
+      "38d38b6c53fc2549397b86642a77406a"
     ],
     [
       "Vale.X64.InsLemmas.lemma_valid_buf_maddr128",
@@ -17,7 +17,7 @@
       0,
       [ "@query", "equation_Vale.X64.Decls.valid_buf_maddr128" ],
       0,
-      "c4febd694aa94d489432986d87b39ed7"
+      "23233b443520bb14e7dbf9bbe43908fe"
     ],
     [
       "Vale.X64.InsLemmas.lemma_valid_src_operand64_and_taint",
@@ -56,6 +56,7 @@
         "equation_Vale.X64.Machine_s.reg_64",
         "equation_Vale.X64.Memory.get_vale_heap",
         "equation_Vale.X64.Memory.memtaint",
+        "equation_Vale.X64.Memory.scale_by",
         "equation_Vale.X64.Memory.valid_buffer_read",
         "equation_Vale.X64.State.eval_maddr",
         "equation_Vale.X64.State.valid_maddr",
@@ -116,7 +117,7 @@
         "typing_Vale.X64.StateLemmas.state_to_S"
       ],
       0,
-      "b3e8d1471b8c3761fa7baf99e2a68259"
+      "ef7d1f2f47e41a1c9630460f23a2abe6"
     ],
     [
       "Vale.X64.InsLemmas.lemma_valid_src_operand128_and_taint",
@@ -155,6 +156,7 @@
         "equation_Vale.X64.Machine_s.reg_xmm",
         "equation_Vale.X64.Memory.get_vale_heap",
         "equation_Vale.X64.Memory.memtaint",
+        "equation_Vale.X64.Memory.scale_by",
         "equation_Vale.X64.Memory.valid_buffer_read",
         "equation_Vale.X64.State.eval_maddr",
         "equation_Vale.X64.State.valid_maddr128",
@@ -215,7 +217,7 @@
         "typing_Vale.X64.StateLemmas.state_to_S"
       ],
       0,
-      "c94c6564169924591fd678ff31b4d2eb"
+      "7d21d708fd74dcf2603c45894d6ac6de"
     ],
     [
       "Vale.X64.InsLemmas.make_instr_t_args",
@@ -236,7 +238,7 @@
         "subterm_ordering_Prims.Cons", "typing_Prims.__proj__Cons__item__hd"
       ],
       0,
-      "79f9762bc06a0c47399e251b555b967e"
+      "cac6343cf8a245fd5b5817913c2f9562"
     ],
     [
       "Vale.X64.InsLemmas.make_instr_t",
@@ -264,7 +266,7 @@
         "typing_FStar.Pervasives.Native.__proj__Mktuple2__item___2"
       ],
       0,
-      "3635664318781c6be9d4eba3de0633d6"
+      "e71b9880e8f791afbc56eb990881bf1c"
     ],
     [
       "Vale.X64.InsLemmas.make_instr_args",
@@ -302,7 +304,7 @@
         "typing_Tm_abs_e682630a535575e1da5f42ea8f39afbd", "unit_typing"
       ],
       0,
-      "b3ea97b1a1efd709d44a4452923e30f7"
+      "794ae1ab250a2d7caa0f2c1e673b156a"
     ],
     [
       "Vale.X64.InsLemmas.make_instr_outs",
@@ -349,7 +351,7 @@
         "typing_Tm_abs_9479633f5fb2d9990211f1d2c283caf2"
       ],
       0,
-      "6c60007a05f2da4774cdd44815e87d29"
+      "8206b44b3a8192724525bec3a2d01788"
     ]
   ]
 ]

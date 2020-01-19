@@ -22,6 +22,8 @@ let vec_t t w =
 
 let vec_v #t #w x = admit()
 
+let vecv_extensionality #t #w f1 f2 = admit()
+
 let vec_zero (t:v_inttype) (w:width) =
   match t,w with
   | U128,1 -> vec128_zero
@@ -321,6 +323,7 @@ let vec_interleave_high_n_lemma_uint32_4_2 v1 v2 = admit()
 let vec_interleave_high_n_lemma_uint32_8_2 v1 v2 = admit()
 let vec_interleave_high_n_lemma_uint32_8_4 v1 v2 = admit()
 let vec_interleave_high_n_lemma_uint64_4_2 v1 v2 = admit()
+let vec_shift_right_uint128_small2 v1 s = admit()
 
 let vec_permute2 #t v i1 i2 =
   match t with

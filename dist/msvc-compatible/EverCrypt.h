@@ -81,7 +81,7 @@ EverCrypt_aes128_key_s *EverCrypt_aes128_create(uint8_t *k1);
 
 KRML_DEPRECATED("Please use EverCrypt_CTR.h (from C) or EverCrypt.CTR.fsti (from F*) ")
 
-void EverCrypt_aes128_compute(EverCrypt_aes128_key_s *k1, uint8_t *plain, uint8_t *cipher1);
+void EverCrypt_aes128_compute(EverCrypt_aes128_key_s *k1, uint8_t *plain, uint8_t *cipher);
 
 KRML_DEPRECATED("Please use EverCrypt_CTR.h (from C) or EverCrypt.CTR.fsti (from F*) ")
 
@@ -117,7 +117,7 @@ EverCrypt_aes256_key_s *EverCrypt_aes256_create(uint8_t *k1);
 
 KRML_DEPRECATED("Please use EverCrypt_CTR.h (from C) or EverCrypt.CTR.fsti (from F*) ")
 
-void EverCrypt_aes256_compute(EverCrypt_aes256_key_s *k1, uint8_t *plain, uint8_t *cipher1);
+void EverCrypt_aes256_compute(EverCrypt_aes256_key_s *k1, uint8_t *plain, uint8_t *cipher);
 
 KRML_DEPRECATED("Please use EverCrypt_CTR.h (from C) or EverCrypt.CTR.fsti (from F*) ")
 
@@ -133,7 +133,7 @@ EverCrypt_aes128_gcm_encrypt(
   uint32_t adlen,
   uint8_t *plaintext,
   uint32_t len,
-  uint8_t *cipher1,
+  uint8_t *cipher,
   uint8_t *tag
 );
 
@@ -147,7 +147,7 @@ EverCrypt_aes128_gcm_decrypt(
   uint32_t adlen,
   uint8_t *plaintext,
   uint32_t len,
-  uint8_t *cipher1,
+  uint8_t *cipher,
   uint8_t *tag
 );
 
@@ -161,7 +161,7 @@ EverCrypt_aes256_gcm_encrypt(
   uint32_t adlen,
   uint8_t *plaintext,
   uint32_t len,
-  uint8_t *cipher1,
+  uint8_t *cipher,
   uint8_t *tag
 );
 
@@ -175,7 +175,7 @@ EverCrypt_aes256_gcm_decrypt(
   uint32_t adlen,
   uint8_t *plaintext,
   uint32_t len,
-  uint8_t *cipher1,
+  uint8_t *cipher,
   uint8_t *tag
 );
 
@@ -265,7 +265,7 @@ EverCrypt_aead_encrypt(
   uint32_t adlen,
   uint8_t *plaintext,
   uint32_t len,
-  uint8_t *cipher1,
+  uint8_t *cipher,
   uint8_t *tag
 );
 
@@ -279,7 +279,7 @@ EverCrypt_aead_decrypt(
   uint32_t adlen,
   uint8_t *plaintext,
   uint32_t len,
-  uint8_t *cipher1,
+  uint8_t *cipher,
   uint8_t *tag
 );
 
