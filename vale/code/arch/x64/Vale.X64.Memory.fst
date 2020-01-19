@@ -743,13 +743,18 @@ let layout_old_heap layout = layout.vl_old_heap
 let layout_modifies_loc layout = layout.vl_mod_loc
 let layout_buffers layout = layout.vl_buffers
 
-let mem_eq_all h1 h2 =
-  reveal_opaque (`%valid_layout_buffer_id) valid_layout_buffer_id;
-  let eq_buffer_as_seq (#t:base_typ) (h1 h2:vale_heap) (b:buffer t) : Lemma
-    (requires vale_heap_data_eq h1 h2)
-    (ensures buffer_as_seq h1 b == buffer_as_seq h2 b) [SMTPat (buffer_as_seq h1 b); SMTPat (buffer_as_seq h2 b)]
-    =
-    assert (Seq.equal (buffer_as_seq h1 b) (buffer_as_seq h2 b))
-  in
+let heaps_match bs mt h1 h2 id =
+  forall (i:nat).{:pattern Seq.index bs i} i < Seq.length bs ==> (
+    let Mkbuffer_info t b hid tn _ = Seq.index bs i in
+    hid == id ==>
+    buffer_as_seq h1 b == buffer_as_seq h2 b /\
+    buffer_addr b h1 == buffer_addr b h2 /\
+    buffer_readable h1 b == buffer_readable h2 b /\
+    (t == TUInt64 ==> (valid_taint_buf64 b h1 mt tn <==> valid_taint_buf64 b h2 mt tn)) /\
+    (t == TUInt128 ==> (valid_taint_buf128 b h1 mt tn <==> valid_taint_buf128 b h2 mt tn)) /\
+    (forall (i:int).{:pattern (buffer_read b i h1) \/ (buffer_read b i h2)}
+      buffer_read b i h1 == buffer_read b i h2))
+
+let lemma_heaps_match bs mt h1 h2 id i =
   ()
 

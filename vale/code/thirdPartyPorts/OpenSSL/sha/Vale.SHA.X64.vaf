@@ -819,7 +819,6 @@ procedure Sha_update_bytes_stdcall(
         declare_buffer128(in_b, 0, Secret, Immutable),
         declare_buffer128(k_b, 0, Secret, Immutable),
         declare_buffer128(ctx_b, 0, Secret, Mutable)));
-    mem_eq_all(mem, heap0);
 
     // Save registers
     inline if (win)
@@ -904,6 +903,5 @@ procedure Sha_update_bytes_stdcall(
     lemma_update_multi_opaque_vale_is_update_multi(hash_in, input_LE);
 
     DestroyHeaplets();
-    mem_eq_all(mem, heap0);
 }
 

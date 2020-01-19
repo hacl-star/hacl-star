@@ -1009,7 +1009,6 @@ procedure Gcm_blocks_decrypt_stdcall(
         declare_buffer128(out128x6_b, 0, Secret, Mutable),
         declare_buffer128(  out128_b, 0, Secret, Mutable),
         declare_buffer128(   inout_b, 0, Secret, Mutable)));
-    mem_eq_all(mem, heap0);
 
     lemma_hkeys_reqs_pub_priv(s128(heap0, hkeys_b), reverse_bytes_quad32(aes_encrypt_LE(alg, key, Mkfour(0,0,0,0))));
     assert win ==> valid_src_stack64(rsp + 40, stack);
@@ -1079,5 +1078,4 @@ procedure Gcm_blocks_decrypt_stdcall(
     Mov64(rax, rcx);
 
     DestroyHeaplets();
-    mem_eq_all(mem, heap0);
 }

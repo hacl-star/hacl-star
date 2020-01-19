@@ -824,7 +824,6 @@ procedure Fadd(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB_b:buffer64)
         declare_buffer64(inA_b, 0, Secret, Immutable),
         declare_buffer64(inB_b, 0, Secret, Immutable),
         declare_buffer64(dst_b, 0, Secret, Mutable)));
-    mem_eq_all(mem, heap0);
 
     Fast_add(inA_b, inB_b);
     assert_by_tactic(
@@ -833,7 +832,6 @@ procedure Fadd(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB_b:buffer64)
     Carry_pass(true, 0, dst_b);
 
     DestroyHeaplets();
-    mem_eq_all(mem, heap0);
 }
 
 procedure Fadd_stdcall(
@@ -992,14 +990,12 @@ procedure Fsub(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB_b:buffer64)
         declare_buffer64(inA_b, 0, Secret, Immutable),
         declare_buffer64(inB_b, 0, Secret, Immutable),
         declare_buffer64(dst_b, 0, Secret, Mutable)));
-    mem_eq_all(mem, heap0);
 
     Fast_sub(inA_b, inB_b);
     Carry_sub_pass();
     Store4(dst_b);
 
     DestroyHeaplets();
-    mem_eq_all(mem, heap0);
 }
 
 procedure Fsub_stdcall(
@@ -1152,7 +1148,6 @@ procedure Fmul1(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB:nat64)
     CreateHeaplets(list(
         declare_buffer64(inA_b, 0, Secret, Immutable),
         declare_buffer64(dst_b, 0, Secret, Mutable)));
-    mem_eq_all(mem, heap0);
 
     Fast_mul1(0, inA_b);
     lemma_fmul(old(a0), old(a1), old(a2), old(a3), old(b), tmp0, tmp1, tmp2, tmp3, rax);
@@ -1162,7 +1157,6 @@ procedure Fmul1(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB:nat64)
     //Store4(dst_b);
 
     DestroyHeaplets();
-    mem_eq_all(mem, heap0);
 }
 
 procedure Fmul1_stdcall(

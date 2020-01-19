@@ -745,7 +745,6 @@ procedure Gctr_bytes_stdcall(
         declare_buffer128(  ctr_b, 0, Secret, Immutable),
         declare_buffer128(  out_b, 0, Secret, Mutable),
         declare_buffer128(inout_b, 0, Secret, Mutable)));
-    mem_eq_all(mem, heap0);
 
     Push_Secret(r15);
     Push_Secret(r14);
@@ -817,5 +816,4 @@ procedure Gctr_bytes_stdcall(
     Pop_Secret(r15);
 
     DestroyHeaplets();
-    mem_eq_all(mem, heap0);
 }

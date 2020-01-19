@@ -44,7 +44,6 @@ procedure Memcpy(inline win:bool, ghost dst:buffer64, ghost src:buffer64)
     CreateHeaplets(list(
         declare_buffer64(src, 0, Secret, Immutable),
         declare_buffer64(dst, 0, Secret, Mutable)));
-    mem_eq_all(mem, heap0);
     inline if (win)
     {
         Load64_buffer(rax, rdx, 0, Secret, src, 0);
@@ -62,5 +61,4 @@ procedure Memcpy(inline win:bool, ghost dst:buffer64, ghost src:buffer64)
     assert(Seq.equal(buffer_as_seq(heap0, dst), buffer_as_seq(heap0, src)));
 
     DestroyHeaplets();
-    mem_eq_all(mem, heap0);
 }

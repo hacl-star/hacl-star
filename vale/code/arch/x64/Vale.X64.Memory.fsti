@@ -411,20 +411,22 @@ val layout_old_heap (layout:vale_heap_layout_inner) : vale_heap
 val layout_modifies_loc (layout:vale_heap_layout_inner) : loc
 val layout_buffers (layout:vale_heap_layout_inner) : Seq.seq buffer_info
 
-// TODO: this is used for the current (trivial) mem_inv; it will probably be removed for the real mem_inv
-val mem_eq_all (h1 h2:vale_heap) : Lemma
-  (requires vale_heap_data_eq h1 h2)
-  (ensures
-    True
-    /\ (forall (#t:base_typ) (b:buffer t).{:pattern (buffer_addr b h1) \/ (buffer_addr b h2)} buffer_addr b h1 == buffer_addr b h2)
-    /\ (forall (#t:base_typ) (b:buffer t).{:pattern (buffer_as_seq h1 b) \/ (buffer_as_seq h2 b)} buffer_as_seq h1 b == buffer_as_seq h2 b)
-    /\ (forall (#t:base_typ) (b:buffer t).{:pattern (buffer_readable h1 b) \/ (buffer_readable h2 b)} buffer_readable h1 b == buffer_readable h2 b)
-    /\ (forall (#t:base_typ) (b:buffer t) (i:int).{:pattern (buffer_read b i h1) \/ (buffer_read b i h2)} buffer_read b i h1 == buffer_read b i h2)
-    /\ (forall (ptr:int).{:pattern (valid_mem64 ptr h1) \/ (valid_mem64 ptr h2)} valid_mem64 ptr h1 == valid_mem64 ptr h2)
-    /\ (forall (ptr:int).{:pattern (writeable_mem64 ptr h1) \/ (writeable_mem64 ptr h2)} writeable_mem64 ptr h1 == writeable_mem64 ptr h2)
-    // /\ (forall (ptr:int).{:pattern (load_mem64 ptr h1) \/ (load_mem64 ptr h2)} load_mem64 ptr h1 == load_mem64 ptr h2)
-    /\ (forall (b:buffer64) (mt:memtaint) (t:taint).{:pattern (valid_taint_buf64 b h1 mt t) \/ (valid_taint_buf64 b h2 mt t)} valid_taint_buf64 b h1 mt t <==> valid_taint_buf64 b h2 mt t) 
-    /\ (forall (b:buffer128) (mt:memtaint) (t:taint).{:pattern (valid_taint_buf128 b h1 mt t) \/ (valid_taint_buf128 b h2 mt t)} valid_taint_buf128 b h1 mt t <==> valid_taint_buf128 b h2 mt t)
-//    /\ (forall (#t:base_typ) (b:buffer t) (layout:vale_heap_layout).{:pattern (valid_layout_buffer b layout h1) \/ (valid_layout_buffer b layout h2)} valid_layout_buffer b layout h1 <==> valid_layout_buffer b layout h2)
-  )
+let buffer_info_has_id (bs:Seq.seq buffer_info) (i:nat) (id:heaplet_id) =
+  i < Seq.length bs /\ (Seq.index bs i).bi_heaplet == id
+
+val heaps_match (bs:Seq.seq buffer_info) (mt:memtaint) (h1 h2:vale_heap) (id:heaplet_id) : prop0
+
+val lemma_heaps_match (bs:Seq.seq buffer_info) (mt:memtaint) (h1 h2:vale_heap) (id:heaplet_id) (i:nat) : Lemma
+  (requires buffer_info_has_id bs i id /\ heaps_match bs mt h1 h2 id)
+  (ensures (
+    let Mkbuffer_info t b hid tn _ = Seq.index bs i in
+    buffer_as_seq h1 b == buffer_as_seq h2 b /\
+    buffer_addr b h1 == buffer_addr b h2 /\
+    buffer_readable h1 b == buffer_readable h2 b /\
+    (t == TUInt64 ==> (valid_taint_buf64 b h1 mt tn <==> valid_taint_buf64 b h2 mt tn)) /\
+    (t == TUInt128 ==> (valid_taint_buf128 b h1 mt tn <==> valid_taint_buf128 b h2 mt tn)) /\
+    (forall (i:int).{:pattern (buffer_read b i h1) \/ (buffer_read b i h2)}
+      buffer_read b i h1 == buffer_read b i h2)
+  ))
+  [SMTPat (buffer_info_has_id bs i id); SMTPat (heaps_match bs mt h1 h2 id)]
 

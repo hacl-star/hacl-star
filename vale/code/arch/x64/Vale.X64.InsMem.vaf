@@ -143,7 +143,7 @@ procedure CreateHeaplets(ghost buffers:list(buffer_info))
     lets
         bs := list_to_seq(buffers);
     reads
-        mem; heap0;
+        mem;
     modifies
         memLayout;
     requires
@@ -156,9 +156,12 @@ procedure CreateHeaplets(ghost buffers:list(buffer_info))
         layout_buffers(memLayout.vl_inner) == bs;
         layout_heaplets_initialized(memLayout.vl_inner);
         create_post(memLayout, bs);
+        heaps_match(bs, memLayout.vl_taint, mem, va_get_mem_heaplet(0, this), 0);
         memLayout.vl_taint == old(memLayout.vl_taint);
         heaplet_id_is_none(mem);
-        heaplet_id_is_some(heap0, 0);
+        heaplet_id_is_some(va_get_mem_heaplet(0, this), 0);
+        forall(i:nat){Seq.index(bs, i)} i < Seq.length(bs) ==>
+            buffer_info_has_id(bs, i, Seq.index(bs, i).bi_heaplet);
 {
     lemma_list_to_seq(buffers);
     this := create_heaplets_this(buffers, this);
@@ -171,16 +174,17 @@ procedure DestroyHeaplets()
     {:quick exportOnly}
     {:instruction mk_ins(make_instr_annotate(I.ins_Ghost, S.AnnotateGhost()))}
     reads
-        mem; heap0;
+        mem;
     modifies
         memLayout;
     requires
         layout_heaplets_initialized(memLayout.vl_inner);
     ensures
         modifies_mem(layout_modifies_loc(old(memLayout).vl_inner), layout_old_heap(old(memLayout).vl_inner), mem);
+        heaps_match(layout_buffers(old(memLayout).vl_inner), memLayout.vl_taint, mem, va_get_mem_heaplet(0, this), 0);
         memLayout.vl_taint == old(memLayout.vl_taint);
         heaplet_id_is_none(mem);
-        vale_heap_data_eq(mem, heap0);
+        vale_heap_data_eq(mem, va_get_mem_heaplet(0, this));
 {
     reveal_mem_inv();
     this := destroy_heaplets_this(this);

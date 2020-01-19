@@ -253,7 +253,6 @@ procedure Keyhash_init(
     CreateHeaplets(list(
         declare_buffer128(roundkeys_b, 0, Secret, Immutable),
         declare_buffer128(hkeys_b, 0, Secret, Mutable)));
-    mem_eq_all(mem, heap0);
 
     InitPshufbMask(xmm4, r8);
     ZeroXmm(xmm0);
@@ -284,5 +283,4 @@ procedure Keyhash_init(
     lemma_hkeys_reqs_pub_priv(s128(heap0, hkeys_b), reverse_bytes_quad32(aes_encrypt_LE(alg, key, Mkfour(0, 0, 0, 0))));
 
     DestroyHeaplets();
-    mem_eq_all(mem, heap0);
 }

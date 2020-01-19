@@ -233,7 +233,6 @@ procedure Fast_add1(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB:nat64)
     CreateHeaplets(list(
         declare_buffer64(inA_b, 0, Secret, Immutable),
         declare_buffer64(dst_b, 0, Secret, Mutable)));
-    mem_eq_all(mem, heap0);
 
     xor_lemmas();
     Xor64( r8,  r8);
@@ -257,7 +256,6 @@ procedure Fast_add1(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB:nat64)
     Adcx64Wrap(rax, r11);
 
     DestroyHeaplets();
-    mem_eq_all(mem, heap0);
 }
 
 #reset-options "--z3rlimit 40"
@@ -952,7 +950,6 @@ procedure Cswap2(ghost bit_in:nat64, ghost p0_b:buffer64, ghost p1_b:buffer64)
     CreateHeaplets(list(
         declare_buffer64(p0_b, 0, Secret, Mutable),
         declare_buffer64(p1_b, 0, Secret, Mutable)));
-    mem_eq_all(mem, heap0);
 
     Add64Wrap(bit, 0xFFFFFFFFFFFFFFFF);
 
@@ -966,7 +963,6 @@ procedure Cswap2(ghost bit_in:nat64, ghost p0_b:buffer64, ghost p1_b:buffer64)
     Cswap_single(7, p0_b, p1_b);
 
     DestroyHeaplets();
-    mem_eq_all(mem, heap0);
 }
 
 procedure Cswap2_stdcall(

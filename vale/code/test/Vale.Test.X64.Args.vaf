@@ -87,10 +87,8 @@ procedure Test(inline win:bool,
         declare_buffer64(arg5, 0, Secret, Immutable),
         declare_buffer64(arg6, 0, Secret, Immutable),
         declare_buffer64(arg7, 0, Secret, Immutable)));
-    mem_eq_all(mem, heap0);
 
     Mov64(rax, rbx);
 
     DestroyHeaplets(); // note: not needed if you don't modify memory; for demonstration purposes only
-    mem_eq_all(mem, heap0);
 }

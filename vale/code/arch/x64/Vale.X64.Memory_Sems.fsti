@@ -84,6 +84,7 @@ val lemma_create_heaplets (buffers:list buffer_info) (h1:vale_full_heap) : Lemma
       let Mkbuffer_info t b hid _ mut = Seq.index bs i in
       valid_layout_buffer_id t b h2.vf_layout (Some hid) false /\
       valid_layout_buffer_id t b h2.vf_layout (Some hid) (mut = Mutable))) /\
+    heaps_match bs h1.vf_layout.vl_taint h1.vf_heap (Map16.sel h2.vf_heaplets 0) 0 /\
     mem_inv h2
   ))
 
@@ -103,6 +104,7 @@ val lemma_destroy_heaplets (h1:vale_full_heap) : Lemma
     h1.vf_layout.vl_taint == h2.vf_layout.vl_taint /\
     get_heaplet_id h1.vf_heap == None /\
     modifies (layout_modifies_loc h1.vf_layout.vl_inner) (layout_old_heap h1.vf_layout.vl_inner) h2.vf_heap /\
+    heaps_match (layout_buffers h1.vf_layout.vl_inner) h1.vf_layout.vl_taint h2.vf_heap (Map16.sel h1.vf_heaplets 0) 0 /\
     (mem_inv h1 ==> mem_inv h2)
   ))
 
