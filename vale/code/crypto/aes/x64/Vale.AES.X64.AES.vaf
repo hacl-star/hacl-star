@@ -75,7 +75,6 @@ procedure KeyExpansionStdcall(
             else make_AES256_key(buffer128_read(input_key_b, 0, mem), buffer128_read(input_key_b, 1, mem));
     requires
         is_initial_heap(memLayout, mem);
-        vale_heap_data_eq(mem, heap0);
         aesni_enabled && avx_enabled && sse_enabled;
         alg = AES_128 || alg = AES_256;
         buffers_disjoint128(input_key_b, output_key_expansion_b);

@@ -658,8 +658,6 @@ procedure Gctr_bytes_stdcall(
         keys_ptr   := if win then load_stack64(rsp + 32 + 8 + 0, stack) else r8;
         ctr_ptr   := if win then load_stack64(rsp + 32 + 8 + 8, stack) else r9;
 
-    requires/ensures
-        vale_heap_data_eq(mem, heap0);
     requires
         rsp == init_rsp(stack);
         is_initial_heap(memLayout, mem);

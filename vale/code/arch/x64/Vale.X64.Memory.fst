@@ -610,13 +610,13 @@ let modifies_valid_taint ty b p h h' memTaint t =
 let modifies_valid_taint64 b p h h' memTaint t = modifies_valid_taint TUInt64 b p h h' memTaint t
 let modifies_valid_taint128 b p h h' memTaint t = modifies_valid_taint TUInt128 b p h h' memTaint t
 
+#set-options "--initial_fuel 1 --max_fuel 1 --initial_ifuel 1 --max_ifuel 1"
 let modifies_same_heaplet_id l h1 h2 =
   ()
 
 let valid_taint_bufs (mem:vale_heap) (memTaint:memtaint) (ps:list b8) (ts:b8 -> GTot taint) =
   forall b.{:pattern List.memP b ps} List.memP b ps ==> valid_taint_buf b mem memTaint (ts b)
 
-#set-options "--initial_fuel 1 --max_fuel 1 --initial_ifuel 1 --max_ifuel 1"
 let rec write_taint_lemma
   (i:nat)
   (mem:IB.interop_heap)
@@ -659,9 +659,6 @@ let rec valid_memtaint (mem:vale_heap) (ps:list b8{IB.list_disjoint_or_eq ps}) (
               IB.write_taint 0 (_ih mem) ts b (IB.create_memtaint (_ih mem) q ts));
       write_taint_lemma 0 (_ih mem) ts b (IB.create_memtaint (_ih mem) q ts);
       opaque_assert (`%list_disjoint_or_eq) list_disjoint_or_eq list_disjoint_or_eq_def (forall p. List.memP p q ==> IB.disjoint_or_eq_b8 p b)
-
-let vale_heap_data_eq h1 h2 =
-  h1.mh == h2.mh /\ h1.ih == h2.ih
 
 let valid_layout_data_buffer (t:base_typ) (b:buffer t) (layout:vale_heap_layout_inner) (hid:heaplet_id) (write:bool) =
   exists (n:nat).{:pattern (Seq.index layout.vl_buffers n)} n < Seq.length layout.vl_buffers /\ (
@@ -726,10 +723,13 @@ let is_initial_heap layout h =
   h == layout.vl_inner.vl_old_heap /\
   not layout.vl_inner.vl_heaplets_initialized
 
+// TODO: this is used for the current (trivial) mem_inv; it will probably be removed for the real mem_inv
+let vale_heap_data_eq (h1 h2:vale_heap) = h1.mh == h2.mh /\ h1.ih == h2.ih
+
 let mem_inv h =
+  vale_heap_data_eq h.vf_heap (Map16.sel h.vf_heaplets 0) /\ // TODO: get rid of this, get rid of vale_heap_data_eq
   h.vf_heap.heapletId == None /\
   inv_heaplet_ids h.vf_heaplets /\
-  vale_heap_data_eq h.vf_heap (Map16.sel h.vf_heaplets 0) /\ // TODO: get rid of this
   (if h.vf_layout.vl_inner.vl_heaplets_initialized
     then
       inv_heaplets h.vf_layout.vl_inner h.vf_heap

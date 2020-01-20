@@ -45,7 +45,6 @@ let create_initial_vale_full_heap ih mt =
   let h2 = (Map16.sel h.vf_heaplets 0) in
   assert (h1.mh == h2.mh);
   assert (h1.ih == h2.ih);
-  assert (ME.vale_heap_data_eq h.vf_heap (Map16.sel h.vf_heaplets 0));
   assert (ME.mem_inv vfh);
   heap_create_impl ih mt
 

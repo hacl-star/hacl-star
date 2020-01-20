@@ -185,9 +185,7 @@ procedure DestroyHeaplets()
         heaps_match(layout_buffers(old(memLayout).vl_inner), memLayout.vl_taint, mem, va_get_mem_heaplet(0, this), 0);
         memLayout.vl_taint == old(memLayout.vl_taint);
         heaplet_id_is_none(mem);
-        vale_heap_data_eq(mem, va_get_mem_heaplet(0, this));
 {
-    reveal_mem_inv();
     this := destroy_heaplets_this(this);
     lemma_destroy_heaplets(old(this).vs_heap);
     Vale.X64.StateLemmas.use_machine_state_equal();

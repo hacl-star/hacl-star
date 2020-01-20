@@ -27,8 +27,6 @@ procedure Memcpy(inline win:bool, ghost dst:buffer64, ghost src:buffer64)
     modifies
         rax; rcx; r9;
         heap0; memLayout;
-    requires/ensures
-        vale_heap_data_eq(mem, heap0);
     requires
         is_initial_heap(memLayout, mem);
         locs_disjoint(list(loc_buffer(dst), loc_buffer(src)));

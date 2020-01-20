@@ -370,9 +370,6 @@ val modifies_same_heaplet_id (l:loc) (h1 h2:vale_heap) : Lemma
   (ensures get_heaplet_id h1 == get_heaplet_id h2)
   [SMTPat (modifies l h1 h2); SMTPat (get_heaplet_id h2)]
 
-// TODO: this is used for the current (trivial) mem_inv; it will probably be removed for the real mem_inv
-val vale_heap_data_eq (h1 h2:vale_heap) : prop
-
 // Buffers in different heaplets are disjoint
 let buffer_info_disjoint (bi1 bi2:buffer_info) =
   bi1.bi_typ =!= bi2.bi_typ \/ bi1.bi_heaplet =!= bi2.bi_heaplet ==>

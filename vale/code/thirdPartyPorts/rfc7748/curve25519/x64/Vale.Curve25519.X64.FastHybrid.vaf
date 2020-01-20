@@ -798,8 +798,6 @@ procedure Fadd(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB_b:buffer64)
         tmp0; tmp1; tmp2; tmp3;
         heap0; memLayout; efl;
 
-    requires/ensures
-        vale_heap_data_eq(mem, heap0);
     requires
         adx_enabled && bmi2_enabled;
         is_initial_heap(memLayout, mem);
@@ -850,8 +848,6 @@ procedure Fadd_stdcall(
     modifies
         rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
         efl; heap0; memLayout; stack; stackTaint;
-    requires/ensures
-        vale_heap_data_eq(mem, heap0);
     requires
         rsp == init_rsp(stack);
         is_initial_heap(memLayout, mem);
@@ -964,8 +960,6 @@ procedure Fsub(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB_b:buffer64)
         tmp0; tmp1; tmp2; tmp3;
         heap0; memLayout; efl;
 
-    requires/ensures
-        vale_heap_data_eq(mem, heap0);
     requires
         adx_enabled && bmi2_enabled;
         is_initial_heap(memLayout, mem);
@@ -1014,8 +1008,6 @@ procedure Fsub_stdcall(
     modifies
         rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
         efl; heap0; memLayout; stack; stackTaint;
-    requires/ensures
-        vale_heap_data_eq(mem, heap0);
     requires
         rsp == init_rsp(stack);
         is_initial_heap(memLayout, mem);
@@ -1123,8 +1115,6 @@ procedure Fmul1(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB:nat64)
         r12; r13;
         heap0; memLayout; efl;
 
-    requires/ensures
-        vale_heap_data_eq(mem, heap0);
     requires
         is_initial_heap(memLayout, mem);
         b == inB;
@@ -1174,8 +1164,6 @@ procedure Fmul1_stdcall(
     modifies
         rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
         efl; heap0; memLayout; stack; stackTaint;
-    requires/ensures
-        vale_heap_data_eq(mem, heap0);
     requires
         rsp == init_rsp(stack);
         is_initial_heap(memLayout, mem);

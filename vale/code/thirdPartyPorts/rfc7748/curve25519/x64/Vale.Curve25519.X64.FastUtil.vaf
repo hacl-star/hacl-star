@@ -209,8 +209,6 @@ procedure Fast_add1(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB:nat64)
         rax; b; r8; r9; r10; r11;
         heap0; memLayout; efl;
 
-    requires/ensures
-        vale_heap_data_eq(mem, heap0);
     requires
         adx_enabled && bmi2_enabled;
         is_initial_heap(memLayout, mem);
@@ -275,8 +273,6 @@ procedure Fast_add1_stdcall(
     modifies
         rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
         efl; heap0; memLayout; stack; stackTaint;
-    requires/ensures
-        vale_heap_data_eq(mem, heap0);
     requires
         rsp == init_rsp(stack);
         is_initial_heap(memLayout, mem);
@@ -897,8 +893,6 @@ procedure Cswap2(ghost bit_in:nat64, ghost p0_b:buffer64, ghost p1_b:buffer64)
         bit; tmp0; tmp1; tmp2;
         efl; heap0; memLayout;
 
-    requires/ensures
-        vale_heap_data_eq(mem, heap0);
     requires
         is_initial_heap(memLayout, mem);
         bit_in == bit;
@@ -1001,8 +995,6 @@ procedure Cswap2_stdcall(
     modifies
         rdx; rsi; rdi; rsp; r8; r9; r10;
         efl; heap0; memLayout; stack; stackTaint;
-    requires/ensures
-        vale_heap_data_eq(mem, heap0);
     requires
         rsp == init_rsp(stack);
         is_initial_heap(memLayout, mem);

@@ -35,8 +35,7 @@ val create_initial_vale_full_heap (ih:IB.interop_heap) (mt:memTaint_t) : Ghost v
     ME.mem_inv h /\
     ME.is_initial_heap h.vf_layout h.vf_heap /\
     ME.get_heaplet_id h.vf_heap == None /\
-    h.vf_heap == create_initial_vale_heap ih /\
-    ME.vale_heap_data_eq h.vf_heap (Map16.sel h.vf_heaplets 0)
+    h.vf_heap == create_initial_vale_heap ih
   )
 
 unfold

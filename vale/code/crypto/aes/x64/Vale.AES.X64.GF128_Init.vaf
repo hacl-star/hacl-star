@@ -235,7 +235,6 @@ procedure Keyhash_init(
         hkey_ptr := if win then rdx else rsi;
     requires
         is_initial_heap(memLayout, mem);
-        vale_heap_data_eq(mem, heap0);
         aesni_enabled && pclmulqdq_enabled && avx_enabled && sse_enabled;
         alg = AES_128 || alg = AES_256;
         buffers_disjoint128(roundkeys_b, hkeys_b);

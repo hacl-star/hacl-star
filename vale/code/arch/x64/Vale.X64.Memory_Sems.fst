@@ -22,9 +22,6 @@ let same_domain h m = Set.equal (IB.addrs_set (_ih h)) (Map.domain m)
 
 let lemma_same_domains h m1 m2 = ()
 
-let reveal_mem_inv () =
-  ()
-
 let get_heap h = I.down_mem (_ih h)
 
 let upd_heap h m = mi_heap_upd h m
