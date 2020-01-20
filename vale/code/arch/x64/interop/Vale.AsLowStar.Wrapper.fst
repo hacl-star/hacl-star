@@ -411,7 +411,7 @@ let rec stack_of_args_stack_args'
           let v = IX64.arg_as_nat64 hd in // We will store the arg hd
           let h_final = BS.update_heap64 ptr v accu' in
           stack_of_args_stack_args'_aux max_arity (n-1) (n-1) tl init_rsp accu' v;
-          Vale.Arch.MachineHeap.correct_update_get ptr v accu';
+          Vale.Arch.MachineHeap.correct_update_get64 ptr v accu';
           BS.update_heap64_reveal ()
         )
 

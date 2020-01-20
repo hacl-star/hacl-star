@@ -581,7 +581,7 @@ let equiv_load_mem64 ptr h =
 
 //let same_domain_update64 b i v h =
 //  low_lemma_valid_mem64 b i h;
-//  Vale.Arch.MachineHeap.same_domain_update (buffer_addr b h + scale8 i) v (get_heap h)
+//  Vale.Arch.MachineHeap.same_domain_update64 (buffer_addr b h + scale8 i) v (get_heap h)
 
 open Vale.X64.BufferViewStore
 
@@ -624,12 +624,12 @@ let valid_state_store_mem64_aux i v h =
   let mem1 = heap' in
   let mem2 = I.down_mem (_ih h1) in
   let aux () : Lemma (forall j. mem1.[j] == mem2.[j]) =
-    Vale.Arch.MachineHeap.same_mem_get_heap_val i mem1 mem2;
-    Vale.Arch.MachineHeap.correct_update_get i v heap;
-    Vale.Arch.MachineHeap.frame_update_heap i v heap
+    Vale.Arch.MachineHeap.same_mem_get_heap_val64 i mem1 mem2;
+    Vale.Arch.MachineHeap.correct_update_get64 i v heap;
+    Vale.Arch.MachineHeap.frame_update_heap64 i v heap
   in let aux2 () : Lemma (Set.equal (Map.domain mem1) (Map.domain mem2)) =
     bytes_valid64 i h;
-    Vale.Arch.MachineHeap.same_domain_update i v heap
+    Vale.Arch.MachineHeap.same_domain_update64 i v heap
   in aux(); aux2();
   Map.lemma_equal_intro mem1 mem2
 
@@ -646,7 +646,7 @@ let low_lemma_store_mem64 b i v h =
   let heap = get_heap h in
   let heap' = S.update_heap64 (buffer_addr b h + scale8 i) v heap in
   low_lemma_store_mem64_aux b heap i v h;
-  Vale.Arch.MachineHeap.frame_update_heap (buffer_addr b h + scale8 i) v heap;
+  Vale.Arch.MachineHeap.frame_update_heap64 (buffer_addr b h + scale8 i) v heap;
   in_bounds64 h b i;
   I.addrs_set_lemma_all ();
   I.update_buffer_up_mem (_ih h) b heap heap'
@@ -964,8 +964,8 @@ let low_lemma_load_mem128_hi64 b i h =
 
 //let same_domain_update128_64 b i v h =
 //  low_lemma_valid_mem128_64 b i (_ih h);
-//  Vale.Arch.MachineHeap.same_domain_update (buffer_addr b h + scale16 i) v (get_heap h);
-//  Vale.Arch.MachineHeap.same_domain_update (buffer_addr b h + scale16 i + 8) v (get_heap h)
+//  Vale.Arch.MachineHeap.same_domain_update64 (buffer_addr b h + scale16 i) v (get_heap h);
+//  Vale.Arch.MachineHeap.same_domain_update64 (buffer_addr b h + scale16 i + 8) v (get_heap h)
 
 open Vale.Def.Types_s
 
