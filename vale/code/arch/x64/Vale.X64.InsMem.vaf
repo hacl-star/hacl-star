@@ -66,7 +66,6 @@ procedure Mem64_lemma(ghost h:heaplet_id, ghost base:va_operand, ghost offset:in
     reads
         mem; memLayout;
     requires
-        h == 0;
         base is OReg;
         valid_src_addr(heap_h, b, index);
         valid_layout_buffer(b, memLayout, heap_h, false);
@@ -200,7 +199,6 @@ procedure Load64_buffer(
     reads
         memLayout;
     requires
-        @h == 0;
         valid_src_addr(h, b, index);
         valid_layout_buffer(b, memLayout, h, false);
         valid_taint_buf64(b, h, memLayout.vl_taint, t);
@@ -208,7 +206,7 @@ procedure Load64_buffer(
     ensures
         dst == buffer64_read(b, index, h);
 {
-    low_lemma_load_mem64_full(b, #nat(index), this.vs_heap, t);
+    low_lemma_load_mem64_full(b, #nat(index), this.vs_heap, t, @h);
 }
 
 procedure Store64_buffer(
@@ -222,7 +220,6 @@ procedure Store64_buffer(
     modifies
         mem;
     requires
-        @h == 0;
         valid_dst_addr(h, b, index);
         valid_layout_buffer(b, memLayout, h, true);
         valid_taint_buf64(b, h, memLayout.vl_taint, t);
@@ -232,7 +229,7 @@ procedure Store64_buffer(
         h == old(buffer64_write(b, index, src, h));
         valid_taint_buf64(b, h, memLayout.vl_taint, t);
 {
-    low_lemma_store_mem64_full(b, #nat(index), old(src), old(this).vs_heap, t);
+    low_lemma_store_mem64_full(b, #nat(index), old(src), old(this).vs_heap, t, @h);
 }
 
 procedure LoadBe64_buffer(
@@ -244,7 +241,6 @@ procedure LoadBe64_buffer(
     reads
         memLayout;
     requires
-        @h == 0;
         movbe_enabled;
         valid_src_addr(h, b, index);
         valid_layout_buffer(b, memLayout, h, false);
@@ -253,7 +249,7 @@ procedure LoadBe64_buffer(
     ensures
         dst == reverse_bytes_nat64(buffer64_read(b, index, h));
 {
-    low_lemma_load_mem64_full(b, #nat(index), this.vs_heap, t);
+    low_lemma_load_mem64_full(b, #nat(index), this.vs_heap, t, @h);
 }
 
 procedure StoreBe64_buffer(
@@ -267,7 +263,6 @@ procedure StoreBe64_buffer(
     modifies
         mem;
     requires
-        @h == 0;
         movbe_enabled;
         valid_dst_addr(h, b, index);
         valid_layout_buffer(b, memLayout, h, true);
@@ -278,6 +273,6 @@ procedure StoreBe64_buffer(
         h == old(buffer64_write(b, index, reverse_bytes_nat64(src), h));
         valid_taint_buf64(b, h, memLayout.vl_taint, t);
 {
-    low_lemma_store_mem64_full(b, #nat(index), old(reverse_bytes_nat64(src)), old(this).vs_heap, t);
+    low_lemma_store_mem64_full(b, #nat(index), old(reverse_bytes_nat64(src)), old(this).vs_heap, t, @h);
 }
 

@@ -92,7 +92,6 @@ procedure Mem128_lemma(ghost h:heaplet_id, ghost base:va_operand, ghost offset:i
     reads
         mem; memLayout;
     requires
-        h == 0;
         base is OReg;
         valid_src_addr(heap_h, b, index);
         valid_layout_buffer(b, memLayout, heap_h, false);
@@ -513,7 +512,6 @@ procedure Load128_buffer(
     reads
         memLayout;
     requires
-        @h == 0;
         sse_enabled;
         valid_src_addr(h, b, index);
         valid_layout_buffer(b, memLayout, h, false);
@@ -522,7 +520,7 @@ procedure Load128_buffer(
     ensures
         dst == buffer128_read(b, index, h);
 {
-    low_lemma_load_mem128_full(b, #nat(index), this.vs_heap, t);
+    low_lemma_load_mem128_full(b, #nat(index), this.vs_heap, t, @h);
 }
 
 procedure LoadBe64_buffer128(
@@ -534,7 +532,6 @@ procedure LoadBe64_buffer128(
     reads
         memLayout;
     requires
-        @h == 0;
         movbe_enabled;
         valid_src_addr(h, b, index);
         valid_layout_buffer(b, memLayout, h, false);
@@ -543,7 +540,7 @@ procedure LoadBe64_buffer128(
     ensures
         dst == reverse_bytes_nat64(if upper then hi64(buffer128_read(b, index, h)) else lo64(buffer128_read(b, index, h)));
 {
-    low_lemma_load_mem128_lo_hi_full(b, #nat(index), this.vs_heap, t);
+    low_lemma_load_mem128_lo_hi_full(b, #nat(index), this.vs_heap, t, @h);
     low_lemma_load_mem128_lo64(b, #nat(index), this.vs_heap.vf_heap);
     low_lemma_load_mem128_hi64(b, #nat(index), this.vs_heap.vf_heap);
     lemma_valid_taint128(b, memLayout.vl_taint, this.vs_heap.vf_heap, #nat(index), t);
@@ -560,7 +557,6 @@ procedure Store128_buffer(
     modifies
         mem;
     requires
-        @h == 0;
         sse_enabled;
         valid_dst_addr(h, b, index);
         valid_layout_buffer(b, memLayout, h, true);
@@ -571,7 +567,7 @@ procedure Store128_buffer(
         valid_taint_buf128(b, h, memLayout.vl_taint, t);
         h == old(buffer128_write(b, index, src, h));
 {
-    low_lemma_store_mem128_full(b, #nat(index), old(src), old(this).vs_heap, t);
+    low_lemma_store_mem128_full(b, #nat(index), old(src), old(this).vs_heap, t, @h);
 }
 
 procedure Store64_buffer128(
@@ -585,7 +581,6 @@ procedure Store64_buffer128(
     modifies
         mem;
     requires
-        @h == 0;
         valid_dst_addr(h, b, index);
         valid_layout_buffer(b, memLayout, h, true);
         valid_taint_buf128(b, h, memLayout.vl_taint, t);
@@ -595,8 +590,8 @@ procedure Store64_buffer128(
         valid_taint_buf128(b, h, memLayout.vl_taint, t);
         h == old(buffer128_write(b, index, insert_nat64(old(buffer128_read(b, index, h)), src, if upper then 1 else 0), h));
 {
-    low_lemma_store_mem128_lo64_full(b, #nat(index), old(src), old(this).vs_heap, t);
-    low_lemma_store_mem128_hi64_full(b, #nat(index), old(src), old(this).vs_heap, t);
+    low_lemma_store_mem128_lo64_full(b, #nat(index), old(src), old(this).vs_heap, t, @h);
+    low_lemma_store_mem128_hi64_full(b, #nat(index), old(src), old(this).vs_heap, t, @h);
 }
 
 procedure ZeroXmm(inout dst:xmm)

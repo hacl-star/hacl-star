@@ -25,8 +25,7 @@ let heap_upd hi mh' mt' =
   {
     vf_layout = {hi.vf_layout with vl_taint = mt'};
     vf_heap = h';
-//    vf_heaplets = hs';
-    vf_heaplets = Map16.upd hi.vf_heaplets 0 (ValeHeap h'.mh h'.ih (Map16.sel hi.vf_heaplets 0).heapletId);
+    vf_heaplets = hs';
   }
 
 let heap_create_machine ih =

@@ -685,7 +685,7 @@ let inv_heaplet (owns:Set.set int) (h hi:vale_heap) =
   (forall (i:int).{:pattern Set.mem i owns \/ Set.mem i (Map.domain h.mh) \/ Map.sel h.mh i \/ Map.sel hi.mh i}
     Set.mem i owns ==>
       Set.mem i (Map.domain h.mh) /\
-//      Map.sel h.mh i == Map.sel hi.mh i /\
+      Map.sel h.mh i == Map.sel hi.mh i /\
       True
   ) /\
   True
@@ -723,11 +723,7 @@ let is_initial_heap layout h =
   h == layout.vl_inner.vl_old_heap /\
   not layout.vl_inner.vl_heaplets_initialized
 
-// TODO: this is used for the current (trivial) mem_inv; it will probably be removed for the real mem_inv
-let vale_heap_data_eq (h1 h2:vale_heap) = h1.mh == h2.mh /\ h1.ih == h2.ih
-
 let mem_inv h =
-  vale_heap_data_eq h.vf_heap (Map16.sel h.vf_heaplets 0) /\ // TODO: get rid of this, get rid of vale_heap_data_eq
   h.vf_heap.heapletId == None /\
   inv_heaplet_ids h.vf_heaplets /\
   (if h.vf_layout.vl_inner.vl_heaplets_initialized

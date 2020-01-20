@@ -47,12 +47,12 @@ let is_full_read (#t:base_typ) (h1 h2:vale_heap) (b:buffer t) (i:int) =
   buffer_read b i h1 == buffer_read b i h2 /\
   valid_buffer_read h1 b i  // needed to trigger "index = i" in valid_mem_operand64/valid_mem_operand128
 
-let is_full_update (mh':machine_heap) (mt':memtaint) (vfh:vale_full_heap) (h':vale_heap) =
+let is_full_update (vfh:vale_full_heap) (h':vale_heap) (hid:heaplet_id) (mh':machine_heap) (mt':memtaint) =
   is_machine_heap_update (heap_get (coerce vfh)) mh' /\ (
     let vfh' = coerce (heap_upd (coerce vfh) mh' mt') in
     mem_inv vfh' /\
     vfh'.vf_layout == vfh.vf_layout /\
-    vfh'.vf_heaplets == Map16.upd vfh.vf_heaplets 0 h'
+    vfh'.vf_heaplets == Map16.upd vfh.vf_heaplets hid h'
   )
 
 val create_heaplets (buffers:list buffer_info) (h1:vale_full_heap) : GTot vale_full_heap
@@ -155,9 +155,9 @@ val equiv_load_mem64 (ptr:int) (m:vale_heap) : Lemma
 //  )
 //  (ensures same_domain h (S.update_heap64 (buffer_addr b h + scale8 i) v (get_heap h)))
 
-val low_lemma_load_mem64_full (b:buffer64) (i:nat) (vfh:vale_full_heap) (t:taint) : Lemma
+val low_lemma_load_mem64_full (b:buffer64) (i:nat) (vfh:vale_full_heap) (t:taint) (hid:heaplet_id) : Lemma
   (requires (
-    let (h, mt) = (Map16.get vfh.vf_heaplets 0, vfh.vf_layout.vl_taint) in
+    let (h, mt) = (Map16.get vfh.vf_heaplets hid, vfh.vf_layout.vl_taint) in
     i < Seq.length (buffer_as_seq h b) /\
     buffer_readable h b /\
     valid_layout_buffer b vfh.vf_layout h false /\
@@ -165,7 +165,7 @@ val low_lemma_load_mem64_full (b:buffer64) (i:nat) (vfh:vale_full_heap) (t:taint
     mem_inv vfh
   ))
   (ensures (
-    let (h, mt) = (Map16.get vfh.vf_heaplets 0, vfh.vf_layout.vl_taint) in
+    let (h, mt) = (Map16.get vfh.vf_heaplets hid, vfh.vf_layout.vl_taint) in
     let ptr = buffer_addr b h + scale8 i in
     is_full_read vfh.vf_heap h b i /\
 //    valid_addr64 ptr (heap_get (coerce vfh)) /\
@@ -184,9 +184,9 @@ val low_lemma_store_mem64 (b:buffer64) (i:nat) (v:nat64) (h:vale_heap) : Lemma
     is_machine_heap_update (get_heap h) m /\ upd_heap h m == buffer_write b i v h
   ))
 
-val low_lemma_store_mem64_full (b:buffer64) (i:nat) (v:nat64) (vfh:vale_full_heap) (t:taint) : Lemma
+val low_lemma_store_mem64_full (b:buffer64) (i:nat) (v:nat64) (vfh:vale_full_heap) (t:taint) (hid:heaplet_id) : Lemma
   (requires (
-    let (h, mt) = (Map16.get vfh.vf_heaplets 0, vfh.vf_layout.vl_taint) in
+    let (h, mt) = (Map16.get vfh.vf_heaplets hid, vfh.vf_layout.vl_taint) in
     i < Seq.length (buffer_as_seq h b) /\
     buffer_readable h b /\
     buffer_writeable b /\
@@ -195,16 +195,14 @@ val low_lemma_store_mem64_full (b:buffer64) (i:nat) (v:nat64) (vfh:vale_full_hea
     mem_inv vfh
   ))
   (ensures (
-    let h = Map16.get vfh.vf_heaplets 0 in
+    let h = Map16.get vfh.vf_heaplets hid in
     let h' = buffer_write b i v h in
     let ptr = buffer_addr b h + scale8 i in
     buffer_addr b vfh.vf_heap == buffer_addr b h /\
     valid_addr64 ptr (heap_get (coerce vfh)) /\
-    is_full_update
+    is_full_update vfh h' hid
       (S.update_heap64 ptr v (heap_get (coerce vfh)))
       (S.update_n ptr 8 (heap_taint (coerce vfh)) t)
-      vfh
-      h'
   ))
 
 val equiv_load_mem128 (ptr:int) (m:vale_heap) : Lemma
@@ -218,9 +216,9 @@ val equiv_load_mem128 (ptr:int) (m:vale_heap) : Lemma
 //  )
 //  (ensures same_domain h (S.update_heap128 (buffer_addr b h + scale16 i) v (get_heap h)))
 
-val low_lemma_load_mem128_full (b:buffer128) (i:nat) (vfh:vale_full_heap) (t:taint) : Lemma
+val low_lemma_load_mem128_full (b:buffer128) (i:nat) (vfh:vale_full_heap) (t:taint) (hid:heaplet_id) : Lemma
   (requires (
-    let (h, mt) = (Map16.get vfh.vf_heaplets 0, vfh.vf_layout.vl_taint) in
+    let (h, mt) = (Map16.get vfh.vf_heaplets hid, vfh.vf_layout.vl_taint) in
     i < Seq.length (buffer_as_seq h b) /\
     buffer_readable h b /\
     valid_layout_buffer b vfh.vf_layout h false /\
@@ -228,7 +226,7 @@ val low_lemma_load_mem128_full (b:buffer128) (i:nat) (vfh:vale_full_heap) (t:tai
     mem_inv vfh
   ))
   (ensures (
-    let (h, mt) = (Map16.get vfh.vf_heaplets 0, vfh.vf_layout.vl_taint) in
+    let (h, mt) = (Map16.get vfh.vf_heaplets hid, vfh.vf_layout.vl_taint) in
     let ptr = buffer_addr b h + scale16 i in
     is_full_read vfh.vf_heap h b i /\
     valid_mem128 ptr vfh.vf_heap /\
@@ -246,9 +244,9 @@ val low_lemma_store_mem128 (b:buffer128) (i:nat) (v:quad32) (h:vale_heap) : Lemm
     is_machine_heap_update (get_heap h) m /\ upd_heap h m == buffer_write b i v h
   ))
 
-val low_lemma_store_mem128_full (b:buffer128) (i:nat) (v:quad32) (vfh:vale_full_heap) (t:taint) : Lemma
+val low_lemma_store_mem128_full (b:buffer128) (i:nat) (v:quad32) (vfh:vale_full_heap) (t:taint) (hid:heaplet_id) : Lemma
   (requires (
-    let (h, mt) = (Map16.get vfh.vf_heaplets 0, vfh.vf_layout.vl_taint) in
+    let (h, mt) = (Map16.get vfh.vf_heaplets hid, vfh.vf_layout.vl_taint) in
     i < Seq.length (buffer_as_seq h b) /\
     buffer_readable h b /\
     buffer_writeable b /\
@@ -257,18 +255,16 @@ val low_lemma_store_mem128_full (b:buffer128) (i:nat) (v:quad32) (vfh:vale_full_
     mem_inv vfh
   ))
   (ensures (
-    let h = Map16.get vfh.vf_heaplets 0 in
+    let h = Map16.get vfh.vf_heaplets hid in
     let ptr = buffer_addr b h + scale16 i in
     buffer_addr b vfh.vf_heap == buffer_addr b h /\
     valid_addr128 ptr (heap_get (coerce vfh)) /\
-    is_full_update
+    is_full_update vfh (buffer_write b i v h) hid
       (S.update_heap128 ptr v (heap_get (coerce vfh)))
       (S.update_n ptr 16 (heap_taint (coerce vfh)) t)
-      vfh
-      (buffer_write b i v h)
   ))
 
-val low_lemma_valid_mem128_64: b:buffer128 -> i:nat -> h:vale_heap -> Lemma
+val low_lemma_valid_mem128_64 (b:buffer128) (i:nat) (h:vale_heap) : Lemma
   (requires
     i < Seq.length (buffer_as_seq h b) /\
     buffer_readable h b
@@ -278,7 +274,7 @@ val low_lemma_valid_mem128_64: b:buffer128 -> i:nat -> h:vale_heap -> Lemma
     S.valid_addr64 (buffer_addr b h + scale16 i + 8) (get_heap h)
   )
 
-val low_lemma_load_mem128_lo64 : b:buffer128 -> i:nat -> h:vale_heap -> Lemma
+val low_lemma_load_mem128_lo64 (b:buffer128) (i:nat) (h:vale_heap) : Lemma
   (requires
     i < Seq.length (buffer_as_seq h b) /\
     buffer_readable h b
@@ -288,7 +284,7 @@ val low_lemma_load_mem128_lo64 : b:buffer128 -> i:nat -> h:vale_heap -> Lemma
       lo64 (buffer_read b i h)
   )
 
-val low_lemma_load_mem128_hi64 : b:buffer128 -> i:nat -> h:vale_heap -> Lemma
+val low_lemma_load_mem128_hi64 (b:buffer128) (i:nat) (h:vale_heap) : Lemma
   (requires
     i < Seq.length (buffer_as_seq h b) /\
     buffer_readable h b
@@ -298,7 +294,7 @@ val low_lemma_load_mem128_hi64 : b:buffer128 -> i:nat -> h:vale_heap -> Lemma
       hi64 (buffer_read b i h)
   )
 
-//val same_domain_update128_64: b:buffer128 -> i:nat -> v:nat64 -> h:vale_heap -> Lemma
+//val same_domain_update128_64 (b:buffer128) (i:nat) (v:nat64) (h:vale_heap) : Lemma
 //  (requires
 //    i < Seq.length (buffer_as_seq h b) /\
 //    buffer_readable h b
@@ -308,9 +304,9 @@ val low_lemma_load_mem128_hi64 : b:buffer128 -> i:nat -> h:vale_heap -> Lemma
 //    same_domain h (S.update_heap64 (buffer_addr b h + scale16 i + 8) v (get_heap h))
 //  )
 
-val low_lemma_load_mem128_lo_hi_full (b:buffer128) (i:nat) (vfh:vale_full_heap) (t:taint) : Lemma
+val low_lemma_load_mem128_lo_hi_full (b:buffer128) (i:nat) (vfh:vale_full_heap) (t:taint) (hid:heaplet_id) : Lemma
   (requires (
-    let (h, mt) = (Map16.get vfh.vf_heaplets 0, vfh.vf_layout.vl_taint) in
+    let (h, mt) = (Map16.get vfh.vf_heaplets hid, vfh.vf_layout.vl_taint) in
     i < Seq.length (buffer_as_seq h b) /\
     buffer_readable h b /\
     valid_layout_buffer b vfh.vf_layout h false /\
@@ -318,7 +314,7 @@ val low_lemma_load_mem128_lo_hi_full (b:buffer128) (i:nat) (vfh:vale_full_heap) 
     mem_inv vfh
   ))
   (ensures (
-    let (h, mt) = (Map16.get vfh.vf_heaplets 0, vfh.vf_layout.vl_taint) in
+    let (h, mt) = (Map16.get vfh.vf_heaplets hid, vfh.vf_layout.vl_taint) in
     let ptr = buffer_addr b h + scale16 i in
     is_full_read vfh.vf_heap h b i /\
     valid_addr64 ptr (heap_get (coerce vfh)) /\
@@ -336,12 +332,12 @@ val low_lemma_store_mem128_lo64 (b:buffer128) (i:nat) (v:nat64) (h:vale_heap) : 
   (ensures (
     let v' = insert_nat64 (buffer_read b i h) v 0 in
     let m = S.update_heap64 (buffer_addr b h + scale16 i) v (get_heap h) in
-    is_machine_heap_update (get_heap h) m /\ upd_heap h m == buffer_write b i v' h)
-  )
+    is_machine_heap_update (get_heap h) m /\ upd_heap h m == buffer_write b i v' h
+  ))
 
-val low_lemma_store_mem128_lo64_full (b:buffer128) (i:nat) (v:nat64) (vfh:vale_full_heap) (t:taint) : Lemma
+val low_lemma_store_mem128_lo64_full (b:buffer128) (i:nat) (v:nat64) (vfh:vale_full_heap) (t:taint) (hid:heaplet_id) : Lemma
   (requires (
-    let (h, mt) = (Map16.get vfh.vf_heaplets 0, vfh.vf_layout.vl_taint) in
+    let (h, mt) = (Map16.get vfh.vf_heaplets hid, vfh.vf_layout.vl_taint) in
     i < Seq.length (buffer_as_seq h b) /\
     buffer_readable h b /\
     buffer_writeable b /\
@@ -350,16 +346,14 @@ val low_lemma_store_mem128_lo64_full (b:buffer128) (i:nat) (v:nat64) (vfh:vale_f
     mem_inv vfh
   ))
   (ensures (
-    let h = Map16.get vfh.vf_heaplets 0 in
+    let h = Map16.get vfh.vf_heaplets hid in
     let ptr = buffer_addr b h + scale16 i in
     let v' = insert_nat64 (buffer_read b i h) v 0 in
     buffer_addr b vfh.vf_heap == buffer_addr b h /\
     valid_addr64 ptr (heap_get (coerce vfh)) /\
-    is_full_update
+    is_full_update vfh (buffer_write b i v' h) hid
       (S.update_heap64 ptr v (heap_get (coerce vfh)))
       (S.update_n ptr 8 (heap_taint (coerce vfh)) t)
-      vfh
-      (buffer_write b i v' h)
   ))
 
 val low_lemma_store_mem128_hi64 (b:buffer128) (i:nat) (v:nat64) (h:vale_heap) : Lemma
@@ -374,9 +368,9 @@ val low_lemma_store_mem128_hi64 (b:buffer128) (i:nat) (v:nat64) (h:vale_heap) : 
     is_machine_heap_update (get_heap h) m /\ upd_heap h m == buffer_write b i v' h)
   )
 
-val low_lemma_store_mem128_hi64_full (b:buffer128) (i:nat) (v:nat64) (vfh:vale_full_heap) (t:taint) : Lemma
+val low_lemma_store_mem128_hi64_full (b:buffer128) (i:nat) (v:nat64) (vfh:vale_full_heap) (t:taint) (hid:heaplet_id) : Lemma
   (requires (
-    let (h, mt) = (Map16.get vfh.vf_heaplets 0, vfh.vf_layout.vl_taint) in
+    let (h, mt) = (Map16.get vfh.vf_heaplets hid, vfh.vf_layout.vl_taint) in
     i < Seq.length (buffer_as_seq h b) /\
     buffer_readable h b /\
     buffer_writeable b /\
@@ -385,14 +379,12 @@ val low_lemma_store_mem128_hi64_full (b:buffer128) (i:nat) (v:nat64) (vfh:vale_f
     mem_inv vfh
   ))
   (ensures (
-    let h = Map16.get vfh.vf_heaplets 0 in
+    let h = Map16.get vfh.vf_heaplets hid in
     let ptr = buffer_addr b h + scale16 i + 8 in
     let v' = insert_nat64 (buffer_read b i h) v 1 in
     buffer_addr b vfh.vf_heap == buffer_addr b h /\
     valid_addr64 ptr (heap_get (coerce vfh)) /\
-    is_full_update
+    is_full_update vfh (buffer_write b i v' h) hid
       (S.update_heap64 ptr v (heap_get (coerce vfh)))
       (S.update_n ptr 8 (heap_taint (coerce vfh)) t)
-      vfh
-      (buffer_write b i v' h)
   ))
