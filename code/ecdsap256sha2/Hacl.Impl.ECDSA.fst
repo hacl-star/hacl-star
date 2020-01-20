@@ -128,9 +128,11 @@ val ecdsa_p256_sha2_verify: mLen: size_t ->  m: lbuffer uint8 mLen {uint_v mLen 
 
 let ecdsa_p256_sha2_verify mLen m pubKey r s = ecdsa_verification pubKey r s mLen m
 
-val ecdsa_p256_sha2_verify_u8: pubKey: lbuffer uint8 (size 64) -> r: lbuffer uint8 (size 32) -> s: lbuffer uint8 (size 32) -> 
-  mLen: size_t ->
-  m: lbuffer uint8 mLen {uint_v mLen < Spec.Hash.Definitions.max_input_length (Spec.Hash.Definitions.SHA2_256)} ->
+
+val ecdsa_p256_sha2_verify_u8:  mLen: size_t ->  m: lbuffer uint8 mLen {uint_v mLen < Spec.Hash.Definitions.max_input_length (Spec.Hash.Definitions.SHA2_256)} ->
+  pubKey: lbuffer uint8 (size 64) -> 
+  r: lbuffer uint8 (size 32) -> 
+  s: lbuffer uint8 (size 32) ->
   Stack bool
       (requires fun h -> 
 	live h pubKey /\ live h r /\ live h s /\ live h m /\
@@ -146,4 +148,4 @@ val ecdsa_p256_sha2_verify_u8: pubKey: lbuffer uint8 (size 64) -> r: lbuffer uin
     )
   )
 
-let ecdsa_p256_sha2_verify_u8 pubKey r s mLen m = ecdsa_verification_u8 pubKey r s mLen m
+let ecdsa_p256_sha2_verify_u8 mLen m pubKey r s = ecdsa_verification_u8 pubKey r s mLen m
