@@ -87,8 +87,8 @@ procedure Preamble(ghost ctx_b:buffer128)
     // but SHA spec is big endian, so we need to do some swaps
     let abcd := buffer128_read(ctx_b, 0, heap0);
     let efgh := buffer128_read(ctx_b, 1, heap0);
-    Load128_buffer(abef, ctx,  0, Secret, ctx_b, 0);  // abef := LSB: ABCD
-    Load128_buffer(cdgh, ctx, 16, Secret, ctx_b, 1);  // cdgh := LSB: EFGH
+    Load128_buffer(heap0, abef, ctx,  0, Secret, ctx_b, 0);  // abef := LSB: ABCD
+    Load128_buffer(heap0, cdgh, ctx, 16, Secret, ctx_b, 1);  // cdgh := LSB: EFGH
     InitPshufbStableMask(tmp_xmm, tmp_reg);
 
     Pshufd(Wi, abef, 0x1b);                           //   Wi := LSB: DCBA
@@ -159,14 +159,14 @@ procedure Loop_rounds_0_15(
     let ks := buffer128_as_seq(heap0, k_b);
 
     // Load 4 128-bit message chunks == 16 32-bit chunks
-    Load128_buffer(msg0, inp,  0, Secret, in_b, offset+0);
-    Load128_buffer(msg1, inp, 16, Secret, in_b, offset+1);
-    Load128_buffer(msg2, inp, 32, Secret, in_b, offset+2);
+    Load128_buffer(heap0, msg0, inp,  0, Secret, in_b, offset+0);
+    Load128_buffer(heap0, msg1, inp, 16, Secret, in_b, offset+1);
+    Load128_buffer(heap0, msg2, inp, 32, Secret, in_b, offset+2);
     PshufbStable(msg0, tmp_xmm);       // Convert msg0 to big endian
     assert msg0 == index(input_BE, 0);   // OBSERVE: TODO: Better trigger for lemma_quads_to_block?
-    Load128_buffer(msg3, inp, 48, Secret, in_b, offset+3);
+    Load128_buffer(heap0, msg3, inp, 48, Secret, in_b, offset+3);
 
-    Load128_buffer(Wi, tbl, 0, Secret, k_b, 0);  // Load K values from memory
+    Load128_buffer(heap0, Wi, tbl, 0, Secret, k_b, 0);  // Load K values from memory
     assert Wi == index(ks, 0);
     Paddd(Wi, msg0);            // Combine the round constant with the message block
 
@@ -181,7 +181,7 @@ procedure Loop_rounds_0_15(
     SHA256_rnds2(abef, cdgh, 2, block, hash_orig);
 
     // Repeat above, except we also do some message expansion
-    Load128_buffer(Wi, tbl, 16, Secret, k_b, 1);  // Load K values from memory
+    Load128_buffer(heap0, Wi, tbl, 16, Secret, k_b, 1);  // Load K values from memory
     assert Wi == index(ks, 1);
     Paddd(Wi, msg1);
     PshufbStable(msg2, tmp_xmm);
@@ -193,7 +193,7 @@ procedure Loop_rounds_0_15(
     SHA256_rnds2(abef, cdgh, 6, block, hash_orig);
 
     // Repeat again
-    Load128_buffer(Wi, tbl, 32, Secret, k_b, 2);  // Load K values from memory
+    Load128_buffer(heap0, Wi, tbl, 32, Secret, k_b, 2);  // Load K values from memory
     assert Wi == index(ks, 2);
     Paddd(Wi, msg2);
     PshufbStable(msg3, tmp_xmm);
@@ -207,7 +207,7 @@ procedure Loop_rounds_0_15(
     SHA256_rnds2(abef, cdgh, 10, block, hash_orig);
 
     // Repeat a final time
-    Load128_buffer(Wi, tbl, 48, Secret, k_b, 3);  // Load K values from memory
+    Load128_buffer(heap0, Wi, tbl, 48, Secret, k_b, 3);  // Load K values from memory
     assert Wi == index(ks, 3);
     Paddd(Wi, msg3);
     SHA256_msg2(msg0, msg3, 16, block);      // Finalize the message expansion
@@ -260,7 +260,7 @@ procedure Loop_rounds_16_51_body(
         msg0 == ws_quad32(4*(i), block);
 {
     let ks := buffer128_as_seq(heap0, k_b);
-    Load128_buffer(Wi, tbl, 16*i, Secret, k_b, i);  // Load K values from memory
+    Load128_buffer(heap0, Wi, tbl, 16*i, Secret, k_b, i);  // Load K values from memory
     assert Wi == index(ks, i);
 
     Paddd(Wi, msg0);
@@ -425,7 +425,7 @@ procedure Loop_rounds_52_64(
     let hash_orig := make_hash(abef_save, cdgh_save);
 
     let ks := buffer128_as_seq(heap0, k_b);
-    Load128_buffer(Wi, tbl, 16*13, Secret, k_b, 13);  // Load K values from memory
+    Load128_buffer(heap0, Wi, tbl, 16*13, Secret, k_b, 13);  // Load K values from memory
     assert Wi == index(ks, 13);
     Paddd(Wi, msg0);
     SHA256_msg2(msg1, msg0, 4*(13+1), block);
@@ -436,7 +436,7 @@ procedure Loop_rounds_52_64(
     SHA256_rnds2(abef, cdgh, 4*13+2, block, hash_orig);
     Paddd(msg2, tmp_xmm);
 
-    Load128_buffer(Wi, tbl, 16*14, Secret, k_b, 14);  // Load K values from memory
+    Load128_buffer(heap0, Wi, tbl, 16*14, Secret, k_b, 14);  // Load K values from memory
     assert Wi == index(ks, 14);
     Paddd(Wi, msg1);
     SHA256_rnds2(cdgh, abef, 4*14, block, hash_orig);
@@ -445,7 +445,7 @@ procedure Loop_rounds_52_64(
     Mov128(tmp_xmm, bswap);
     SHA256_rnds2(abef, cdgh, 4*14+2, block, hash_orig);
 
-    Load128_buffer(Wi, tbl, 16*15, Secret, k_b, 15);  // Load K values from memory
+    Load128_buffer(heap0, Wi, tbl, 16*15, Secret, k_b, 15);  // Load K values from memory
     assert Wi == index(ks, 15);
     Paddd(Wi, msg2);
     SHA256_rnds2(cdgh, abef, 4*15, block, hash_orig);
@@ -621,8 +621,8 @@ procedure Epilogue(
     Shufpd(abef, cdgh, 3);          // abef := LSB: ABCD
     Palignr8(cdgh, tmp_xmm);        // cdgh := LSB: EFGH
 
-    Store128_buffer(ctx, abef, 0, Secret, ctx_b, 0);
-    Store128_buffer(ctx, cdgh, 16, Secret, ctx_b, 1);
+    Store128_buffer(heap0, ctx, abef, 0, Secret, ctx_b, 0);
+    Store128_buffer(heap0, ctx, cdgh, 16, Secret, ctx_b, 1);
     let abcd := buffer128_read(ctx_b, 0, heap0);
     let efgh := buffer128_read(ctx_b, 1, heap0);
     assert equal(#(seq(Vale.SHA.SHA_helpers.word))(make_hash(old(abef), old(cdgh))), #(seq(Vale.SHA.SHA_helpers.word))(make_ordered_hash(abcd, efgh)));

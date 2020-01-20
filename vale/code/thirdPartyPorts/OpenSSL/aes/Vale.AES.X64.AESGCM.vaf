@@ -211,14 +211,14 @@ procedure Ctr32_ghash_6_prelude(
     Load_one_msb();   // # borrow $T2, .Lone_msb
     VPxor(Z0, Z0, Z0);  // # $Z0   = 0
     lemma_quad32_xor();
-    Load128_buffer(rndkey, key, 0x00-0x80, Secret, keys_b, 0);
+    Load128_buffer(heap0, rndkey, key, 0x00-0x80, Secret, keys_b, 0);
     VPaddd(inout1, T1, T2);      lemma_incr_msb(inc32lite(ctr_orig, 0), old(T1), inout1, 1);
     VPaddd(inout2, inout1, T2);  lemma_incr_msb(inc32lite(ctr_orig, 0), old(T1), inout2, 2);
     VPaddd(inout3, inout2, T2);  lemma_incr_msb(inc32lite(ctr_orig, 0), old(T1), inout3, 3);
     VPaddd(inout4, inout3, T2);  lemma_incr_msb(inc32lite(ctr_orig, 0), old(T1), inout4, 4);
     VPaddd(inout5, inout4, T2);  lemma_incr_msb(inc32lite(ctr_orig, 0), old(T1), inout5, 5);
     VPxor(inout0, T1, rndkey);
-    Store128_buffer(rbp, Z0, 0x10, Secret, scratch_b, 1);     // # "$Z3" = 0
+    Store128_buffer(heap0, rbp, Z0, 0x10, Secret, scratch_b, 1);     // # "$Z3" = 0
 }
 
 #reset-options " --z3rlimit 20"
@@ -495,7 +495,7 @@ procedure Loop6x_decrypt(
 //        assert equal(slice(s128(heap0,      out_b), 0, (count - 1) * 6),
 //                     slice(s128(mem_snap, out_b), 0, (count - 1) * 6));    // OBSERVE
 
-        Load128_buffer(Z3, rbp, 0x20, Secret, scratch_b, 2);   // # I[5]
+        Load128_buffer(heap0, Z3, rbp, 0x20, Secret, scratch_b, 2);   // # I[5]
 
         let plain := old(s128(heap0, in_b));
         let cipher := s128(heap0, out_b);
@@ -515,7 +515,7 @@ procedure Loop6x_decrypt(
     else
     {
         assert eventual_Xi == of_quad32(reverse_bytes_quad32(ghash_incremental(h_LE, y_prev, data)));
-        VPolyAdd(Xi, Xi, Mem128(rbp, 0x10, Secret, scratch_b, 1));  // # modulo-scheduled
+        VPolyAdd(Xi, Xi, Mem128(heap0, rbp, 0x10, Secret, scratch_b, 1));  // # modulo-scheduled
         VPolyAdd(Xi, Xi, Z0);                                    // # modulo-scheduled
         assert of_quad32(Xi) == of_quad32(reverse_bytes_quad32(ghash_incremental(h_LE, y_prev, data)));
         assert to_quad32(of_quad32(Xi)) == to_quad32(of_quad32(reverse_bytes_quad32(ghash_incremental(h_LE, y_prev, data))));
@@ -1088,9 +1088,9 @@ procedure AESNI_ctr32_6x_preamble(
 
         rndkey == index(round_keys, 1);
 {
-    Load128_buffer(Z0,     key, 0x00-0x80, Secret, keys_b, 0);  // # borrow $Z0 for $rndkey
+    Load128_buffer(heap0, Z0,     key, 0x00-0x80, Secret, keys_b, 0);  // # borrow $Z0 for $rndkey
     Load_one_msb();                                             // # borrow $T2, .Lone_msb
-    Load128_buffer(rndkey, key, 0x10-0x80, Secret, keys_b, 1);
+    Load128_buffer(heap0, rndkey, key, 0x10-0x80, Secret, keys_b, 1);
 
     //OpenSSL uses AddLea64(r12, key, 0x20-0x80) instead of the next two instructions
     Mov64(r12, key);
@@ -1192,7 +1192,7 @@ procedure AESNI_ctr32_6x_loop_body(
 
     eval_rounds_reveal();
     commute_sub_bytes_shift_rows_forall();
-    Load128_buffer(rndkey, key, 16*(rnd+2)-0x80, Secret, keys_b, rnd+2);
+    Load128_buffer(heap0, rndkey, key, 16*(rnd+2)-0x80, Secret, keys_b, rnd+2);
 }
 
 procedure AESNI_ctr32_6x_loop_recursive(
@@ -1326,23 +1326,23 @@ procedure AESNI_ctr32_6x_round9(
         inp == old(inp) + 0x60;
 {
     inline if (alg = AES_128) {
-      Load128_buffer(Hkey, key, 0xa0-0x80, Secret, keys_b, 10);  // # last round key
+      Load128_buffer(heap0, Hkey, key, 0xa0-0x80, Secret, keys_b, 10);  // # last round key
     } else {
-      Load128_buffer(Hkey, key, 0xe0-0x80, Secret, keys_b, 14);  // # last round key
+      Load128_buffer(heap0, Hkey, key, 0xe0-0x80, Secret, keys_b, 14);  // # last round key
     }
 
     VAESNI_enc(inout0, inout0, rndkey);
-    VPxor(Z0, Hkey, Mem128(inp, 0x00, Secret, in_b, count*6 + 0));
+    VPxor(Z0, Hkey, Mem128(heap0, inp, 0x00, Secret, in_b, count*6 + 0));
     VAESNI_enc(inout1, inout1, rndkey);
-    VPxor(Z1, Hkey, Mem128(inp, 0x10, Secret, in_b, count*6 + 1));
+    VPxor(Z1, Hkey, Mem128(heap0, inp, 0x10, Secret, in_b, count*6 + 1));
     VAESNI_enc(inout2, inout2, rndkey);
-    VPxor(Z2, Hkey, Mem128(inp, 0x20, Secret, in_b, count*6 + 2));
+    VPxor(Z2, Hkey, Mem128(heap0, inp, 0x20, Secret, in_b, count*6 + 2));
     VAESNI_enc(inout3, inout3, rndkey);
-    VPxor(Xi, Hkey, Mem128(inp, 0x30, Secret, in_b, count*6 + 3));
+    VPxor(Xi, Hkey, Mem128(heap0, inp, 0x30, Secret, in_b, count*6 + 3));
     VAESNI_enc(inout4, inout4, rndkey);
-    VPxor(T2, Hkey, Mem128(inp, 0x40, Secret, in_b, count*6 + 4));
+    VPxor(T2, Hkey, Mem128(heap0, inp, 0x40, Secret, in_b, count*6 + 4));
     VAESNI_enc(inout5, inout5, rndkey);
-    VPxor(Hkey, Hkey, Mem128(inp, 0x50, Secret, in_b, count*6 + 5));
+    VPxor(Hkey, Hkey, Mem128(heap0, inp, 0x50, Secret, in_b, count*6 + 5));
 
     eval_rounds_reveal();
     commute_sub_bytes_shift_rows_forall();
@@ -1454,12 +1454,12 @@ procedure AESNI_ctr32_6x_final(
     VAESNI_enc_last(inout4, inout4, T2);
     VAESNI_enc_last(inout5, inout5, Hkey);
 
-    Store128_buffer(outp, inout0, 0x00, Secret, out_b, count*6 + 0);
-    Store128_buffer(outp, inout1, 0x10, Secret, out_b, count*6 + 1);
-    Store128_buffer(outp, inout2, 0x20, Secret, out_b, count*6 + 2);
-    Store128_buffer(outp, inout3, 0x30, Secret, out_b, count*6 + 3);
-    Store128_buffer(outp, inout4, 0x40, Secret, out_b, count*6 + 4);
-    Store128_buffer(outp, inout5, 0x50, Secret, out_b, count*6 + 5);
+    Store128_buffer(heap0, outp, inout0, 0x00, Secret, out_b, count*6 + 0);
+    Store128_buffer(heap0, outp, inout1, 0x10, Secret, out_b, count*6 + 1);
+    Store128_buffer(heap0, outp, inout2, 0x20, Secret, out_b, count*6 + 2);
+    Store128_buffer(heap0, outp, inout3, 0x30, Secret, out_b, count*6 + 3);
+    Store128_buffer(heap0, outp, inout4, 0x40, Secret, out_b, count*6 + 4);
+    Store128_buffer(heap0, outp, inout5, 0x50, Secret, out_b, count*6 + 5);
 
     AddLea64(outp, outp, 0x60);
 
@@ -1642,18 +1642,18 @@ procedure Encrypt_save_and_shuffle_output(ghost count:nat, ghost out_b:buffer128
         inout5 == reverse_bytes_quad32(old(inout5));
 
 {
-    Store128_buffer(outp, inout0, 0-0x60, Secret, out_b, count*6 + 0);
+    Store128_buffer(heap0, outp, inout0, 0-0x60, Secret, out_b, count*6 + 0);
     VPshufb(inout0, inout0, Ii);
     VPxor(T1, T1, Z3);
-    Store128_buffer(outp, inout1, 0-0x50, Secret, out_b, count*6 + 1);
+    Store128_buffer(heap0, outp, inout1, 0-0x50, Secret, out_b, count*6 + 1);
     VPshufb(inout1, inout1, Ii);
-    Store128_buffer(outp, inout2, 0-0x40, Secret, out_b, count*6 + 2);
+    Store128_buffer(heap0, outp, inout2, 0-0x40, Secret, out_b, count*6 + 2);
     VPshufb(inout2, inout2, Ii);
-    Store128_buffer(outp, inout3, 0-0x30, Secret, out_b, count*6 + 3);
+    Store128_buffer(heap0, outp, inout3, 0-0x30, Secret, out_b, count*6 + 3);
     VPshufb(inout3, inout3, Ii);
-    Store128_buffer(outp, inout4, 0-0x20, Secret, out_b, count*6 + 4);
+    Store128_buffer(heap0, outp, inout4, 0-0x20, Secret, out_b, count*6 + 4);
     VPshufb(inout4, inout4, Ii);
-    Store128_buffer(outp, inout5, 0-0x10, Secret, out_b, count*6 + 5);
+    Store128_buffer(heap0, outp, inout5, 0-0x10, Secret, out_b, count*6 + 5);
     VPshufb(inout5, inout5, Ii);
 }
 
@@ -1695,12 +1695,12 @@ procedure UpdateScratch(ghost scratch_b:buffer128)
 {
     ZeroXmm(Z0);
     Mov128(Z3, inout5);
-    Store128_buffer(rbp, Z0,     0x10, Secret, scratch_b, 1);
-    Store128_buffer(rbp, inout4, 0x30, Secret, scratch_b, 3);
-    Store128_buffer(rbp, inout3, 0x40, Secret, scratch_b, 4);
-    Store128_buffer(rbp, inout2, 0x50, Secret, scratch_b, 5);
-    Store128_buffer(rbp, inout1, 0x60, Secret, scratch_b, 6);
-    Store128_buffer(rbp, inout0, 0x70, Secret, scratch_b, 7);
+    Store128_buffer(heap0, rbp, Z0,     0x10, Secret, scratch_b, 1);
+    Store128_buffer(heap0, rbp, inout4, 0x30, Secret, scratch_b, 3);
+    Store128_buffer(heap0, rbp, inout3, 0x40, Secret, scratch_b, 4);
+    Store128_buffer(heap0, rbp, inout2, 0x50, Secret, scratch_b, 5);
+    Store128_buffer(heap0, rbp, inout1, 0x60, Secret, scratch_b, 6);
+    Store128_buffer(heap0, rbp, inout0, 0x70, Secret, scratch_b, 7);
 }
 /*
 #reset-options " "
@@ -1741,10 +1741,10 @@ procedure GCM_finalize(
         validSrcAddrs128(heap0, Xip - 0x20, hkeys_b, 8, memLayout, Secret);
 {
 //  vmovdqu 0x30(%rbp),$Z2  # I[4]
-    Load128_buffer(Z2, rbp, 0x30, Secret, scratch_b, 3);   // # I[4]
+    Load128_buffer(heap0, Z2, rbp, 0x30, Secret, scratch_b, 3);   // # I[4]
 
 //  vmovdqu 0x10-0x20($Xip),$Ii # borrow $Ii for $Hkey^2
-    Load128_buffer(Ii, Xip, 0x10-0x20, Secret, hkeys_b, 1);   // # $Hkey^1
+    Load128_buffer(heap0, Ii, Xip, 0x10-0x20, Secret, hkeys_b, 1);   // # $Hkey^1
 
 //  vpunpckhqdq $Z2,$Z2,$T2
     VSwap(T2, Z2);
@@ -1762,13 +1762,13 @@ procedure GCM_finalize(
     VPolyMul(T1, T1, HK, false, false);
 
 //  vmovdqu 0x40(%rbp),$T3  # I[3]
-    Load128_buffer(T3, rbp, 0x40, Secret, scratch_b, 4);   // # I[3]
+    Load128_buffer(heap0, T3, rbp, 0x40, Secret, scratch_b, 4);   // # I[3]
 
 // vpclmulqdq \$0x00,$Ii,$Z2,$Z0
     VPolyMul(Z0, Z2, Ii, false, false);
 
 //  vmovdqu 0x30-0x20($Xip),$Hkey # $Hkey^3
-    Load128_buffer(Hkey, Xip, 0x30-0x20, Secret, hkeys_b, 3);   // # $Hkey^3
+    Load128_buffer(heap0, Hkey, Xip, 0x30-0x20, Secret, hkeys_b, 3);   // # $Hkey^3
 
 // vpxor  $Z1,$Z0,$Z0
     VPolyAdd(Z0, Z0, Z1);
@@ -1789,19 +1789,19 @@ procedure GCM_finalize(
     VPolyMul(T2, T2, HK, false, true);
 
 //  vmovdqu 0x50-0x20($Xip),$HK
-    Load128_buffer(HK, Xip, 0x50-0x20, Secret, hkeys_b, 5);
+    Load128_buffer(heap0, HK, Xip, 0x50-0x20, Secret, hkeys_b, 5);
 
 // vpxor  $T1,$T2,$T2
     VPolyAdd(T2, T2, T1);
 
 //  vmovdqu 0x50(%rbp),$T1  # I[2]
-    Load128_buffer(T1, rbp, 0x50, Secret, scratch_b, 5);   // # I[2]
+    Load128_buffer(heap0, T1, rbp, 0x50, Secret, scratch_b, 5);   // # I[2]
 
 // vpclmulqdq \$0x00,$Hkey,$T3,$Z3
     VPolyMul(Z3, T3, Hkey, false, false);
 
 //  vmovdqu 0x40-0x20($Xip),$Ii # borrow $Ii for $Hkey^4
-    Load128_buffer(Ii, Xip, 0x40-0x20, Secret, hkeys_b, 4);   // # borrow $Ii for $Hkey^4
+    Load128_buffer(heap0, Ii, Xip, 0x40-0x20, Secret, hkeys_b, 4);   // # borrow $Ii for $Hkey^4
 
 // vpxor  $Z0,$Z3,$Z3
     VPolyAdd(Z3, Z3, Z0);
@@ -1825,13 +1825,13 @@ procedure GCM_finalize(
     VPolyAdd(Z1, Z1, T2);
 
 //  vmovdqu 0x60(%rbp),$T2  # I[1]
-    Load128_buffer(T2, rbp, 0x60, Secret, scratch_b, 6);   // # I[1]
+    Load128_buffer(heap0, T2, rbp, 0x60, Secret, scratch_b, 6);   // # I[1]
 
 // vpclmulqdq \$0x00,$Ii,$T1,$Z2
     VPolyMul(Z1, T1, Ii, false, false);
 
 //  vmovdqu 0x60-0x20($Xip),$Hkey # $Hkey^5
-    Load128_buffer(Hkey, Xip, 0x60-0x20, Secret, hkeys_b, 6);   // # $Hkey^5
+    Load128_buffer(heap0, Hkey, Xip, 0x60-0x20, Secret, hkeys_b, 6);   // # $Hkey^5
 
 // vpxor  $Z3,$Z2,$Z2
     VPolyAdd(Z2, Z2, Z3);
@@ -1852,19 +1852,19 @@ procedure GCM_finalize(
     VPolyMul(Z0, Z0, HK, false, true);
 
 //  vmovdqu 0x80-0x20($Xip),$HK
-//    Load128_buffer(HK, Xip, 0x80-0x20, Secret, hkeys_b, 8);   // ??
+//    Load128_buffer(heap0, HK, Xip, 0x80-0x20, Secret, hkeys_b, 8);   // ??
 
 // vpxor  $Z1,$Z0,$Z0
     VPolyAdd(Z0, Z0, Z1);
 
 //  vpxor  0x70(%rbp),$Xi,$Xi # accumulate I[0]
-    VPolyAdd(Xi, Xi, Mem128(rbp, 0x70, Secret, scratch_b, 7));    // # accumulate I[0]
+    VPolyAdd(Xi, Xi, Mem128(heap0, rbp, 0x70, Secret, scratch_b, 7));    // # accumulate I[0]
 
 // vpclmulqdq \$0x00,$Hkey,$T2,$Z1
     VPolyMul(Z1, T2, Hkey, false, false);
 
 //  vmovdqu 0x70-0x20($Xip),$Ii # borrow $Ii for $Hkey^6
-    Load128_buffer(Ii, Xip, 0x70-0x20, Secret, hkeys_b, 7);   // # borrow $Ii for $Hkey^6
+    Load128_buffer(heap0, Ii, Xip, 0x70-0x20, Secret, hkeys_b, 7);   // # borrow $Ii for $Hkey^6
 
 //  vpunpckhqdq $Xi,$Xi,$T3
     VSwap(T3, Xi);
@@ -1891,7 +1891,7 @@ procedure GCM_finalize(
     VPolyMul(Z2, Xi, Ii, false, false);
 
 //  vmovdqu 0x00-0x20($Xip),$Hkey # $Hkey^1
-    Load128_buffer(Hkey, Xip, 0x00-0x20, Secret, hkeys_b, 0);   // # $Hkey^1
+    Load128_buffer(heap0, Hkey, Xip, 0x00-0x20, Secret, hkeys_b, 0);   // # $Hkey^1
 
 //  vpunpckhqdq $inout5,$inout5,$T1
     VSwap(T1, inout5);
@@ -1909,7 +1909,7 @@ procedure GCM_finalize(
     VPolyMul(T3, T3, HK, false, true);
 
 //  vmovdqu 0x20-0x20($Xip),$HK
-    Load128_buffer(HK, Xip, 0x20-0x20, Secret, hkeys_b, 2);
+    Load128_buffer(heap0, HK, Xip, 0x20-0x20, Secret, hkeys_b, 2);
 
 // vpxor  $T2,$Xi,$Z3
     VPolyAdd(Z3, Xi, T2);
@@ -1918,7 +1918,7 @@ procedure GCM_finalize(
     VPolyAdd(Z2, T3, Z0);
 
 //  vmovdqu 0x10-0x20($Xip),$Ii # borrow $Ii for $Hkey^2
-    Load128_buffer(Ii, Xip, 0x10-0x20, Secret, hkeys_b, 1);   // # borrow $Ii for $Hkey^2
+    Load128_buffer(heap0, Ii, Xip, 0x10-0x20, Secret, hkeys_b, 1);   // # borrow $Ii for $Hkey^2
 
 //   vpxor  $Z1,$Z3,$T3  # aggregated Karatsuba post-processing
     VPolyAdd(T3, Z3, Z1);   // # aggregated Karatsuba post-processing
@@ -1957,7 +1957,7 @@ procedure GCM_finalize(
     VPolyMul(Z1, inout4, Ii, false, false);
 
 //  vmovdqu 0x30-0x20($Xip),$Hkey # $Hkey^3
-    Load128_buffer(Hkey, Xip, 0x30-0x20, Secret, hkeys_b, 3);   // # $Hkey^3
+    Load128_buffer(heap0, Hkey, Xip, 0x30-0x20, Secret, hkeys_b, 3);   // # $Hkey^3
 
 // vpxor  $Z0,$Z1,$Z1
     VPolyAdd(Z1, Z1, Z0);
@@ -1981,7 +1981,7 @@ procedure GCM_finalize(
     VPolyMul(T2, T2, HK, false, true);
 
 //  vmovdqu 0x50-0x20($Xip),$HK
-    Load128_buffer(HK, Xip, 0x50-0x20, Secret, hkeys_b, 5);
+    Load128_buffer(heap0, HK, Xip, 0x50-0x20, Secret, hkeys_b, 5);
 
 // vpxor  $T1,$T2,$T2
     VPolyAdd(T2, T2, T1);
@@ -1990,7 +1990,7 @@ procedure GCM_finalize(
     VPolyMul(Z0, inout3, Hkey, false, false);
 
 //  vmovdqu 0x40-0x20($Xip),$Ii # borrow $Ii for $Hkey^4
-    Load128_buffer(Ii, Xip, 0x40-0x20, Secret, hkeys_b, 4);   // # borrow $Ii for $Hkey^4
+    Load128_buffer(heap0, Ii, Xip, 0x40-0x20, Secret, hkeys_b, 4);   // # borrow $Ii for $Hkey^4
 
 // vpxor  $Z1,$Z0,$Z0
     VPolyAdd(Z0, Z0, Z1);
@@ -2008,7 +2008,7 @@ procedure GCM_finalize(
     VPolyAdd(inout3, inout3, inout4);
 
 //   vxorps 0x10(%rbp),$Z3,$Z3 # accumulate $inout0
-    VPxor(Z3, Z3, Mem128(rbp, 0x10, Secret, scratch_b, 1));    // # accumulate $inout0
+    VPxor(Z3, Z3, Mem128(heap0, rbp, 0x10, Secret, scratch_b, 1));    // # accumulate $inout0
 
 // vpclmulqdq \$0x00,$HK,$T3,$T3
     VPolyMul(T3, T3, HK, false, false);
@@ -2028,7 +2028,7 @@ procedure GCM_finalize(
     VPolyMul(Z1, inout2, Ii, false, false);
 
 //  vmovdqu 0x60-0x20($Xip),$Hkey # $Hkey^5
-    Load128_buffer(Hkey, Xip, 0x60-0x20, Secret, hkeys_b, 6);   // # $Hkey^5
+    Load128_buffer(heap0, Hkey, Xip, 0x60-0x20, Secret, hkeys_b, 6);   // # $Hkey^5
 
 // vpxor  $Z0,$Z1,$Z1
     VPolyAdd(Z1, Z1, Z0);
@@ -2052,7 +2052,7 @@ procedure GCM_finalize(
     VPolyMul(T1, T1, HK, false, true);
 
 //  vmovdqu 0x80-0x20($Xip),$HK
-//    Load128_buffer(HK, Xip, 0x80-0x20, Secret, hkeys_b, 8);   // ??
+//    Load128_buffer(heap0, HK, Xip, 0x80-0x20, Secret, hkeys_b, 8);   // ??
 
 // vpxor  $T3,$T1,$T1
     VPolyAdd(T1, T1, T3);
@@ -2072,7 +2072,7 @@ procedure GCM_finalize(
     VPolyMul(Z0, inout1, Hkey, false, false);
 
 //  vmovdqu 0x70-0x20($Xip),$Ii # borrow $Ii for $Hkey^6
-    Load128_buffer(Ii, Xip, 0x70-0x20, Secret, hkeys_b, 7);   // # borrow $Ii for $Hkey^6
+    Load128_buffer(heap0, Ii, Xip, 0x70-0x20, Secret, hkeys_b, 7);   // # borrow $Ii for $Hkey^6
 
 // vpxor  $Z1,$Z0,$Z0
     VPolyAdd(Z0, Z0, Z1);
@@ -2268,15 +2268,15 @@ procedure AES_GCM_encrypt_6mult(
     if (len == 0) {
         //AddLea64(Xip, Xip, 0x20);   // # size optimization
         VPshufb(T1, T1, Ii);
-        Store128_buffer(rbp, T1, 0x20, Secret, scratch_b, 2);  // TODO: Optimize away this store (and matching load)?
+        Store128_buffer(heap0, rbp, T1, 0x20, Secret, scratch_b, 2);  // TODO: Optimize away this store (and matching load)?
         gctr_partial_opaque_init(alg, s128(heap0, in_b), s128(heap0, out_b), key_words, old(T1));
     } else {
         let plain_quads := s128(heap0, in_b);
 
-        //Load128_buffer(T1, ivp, 0, Public, iv_b, 0);    // # input counter value
+        //Load128_buffer(heap0, T1, ivp, 0, Public, iv_b, 0);    // # input counter value
         //VPshufb(Xi, Xi, Ii);        // TODO: Why do we need a reverse here and at the end?
         let y_orig := reverse_bytes_quad32(Xi);
-        Store128_buffer(rbp, Xi, 0x20, Secret, scratch_b, 2); // Save a copy of the interm. hash in Xi
+        Store128_buffer(heap0, rbp, Xi, 0x20, Secret, scratch_b, 2); // Save a copy of the interm. hash in Xi
         //let iv_LE := T1;
         Add64(key, 0x80);           // # size optimization
         // TODO: Replace all of this with a single PinsrdImm(T1, 0x02000000, 3, counter)
@@ -2299,20 +2299,20 @@ procedure AES_GCM_encrypt_6mult(
         // # save bswapped output on stack
         VPshufb(Xi, inout0, Ii);
         VPshufb(T2, inout1, Ii);
-        Store128_buffer(rbp, Xi, 0x70, Secret, scratch_b, 7);
+        Store128_buffer(heap0, rbp, Xi, 0x70, Secret, scratch_b, 7);
         VPshufb(Z0, inout2, Ii);
-        Store128_buffer(rbp, T2, 0x60, Secret, scratch_b, 6);
+        Store128_buffer(heap0, rbp, T2, 0x60, Secret, scratch_b, 6);
         VPshufb(Z1, inout3, Ii);
-        Store128_buffer(rbp, Z0, 0x50, Secret, scratch_b, 5);
+        Store128_buffer(heap0, rbp, Z0, 0x50, Secret, scratch_b, 5);
         VPshufb(Z2, inout4, Ii);
-        Store128_buffer(rbp, Z1, 0x40, Secret, scratch_b, 4);
+        Store128_buffer(heap0, rbp, Z1, 0x40, Secret, scratch_b, 4);
         VPshufb(Z3, inout5, Ii);                // # passed to _aesni_ctr32_ghash_6x
-        Store128_buffer(rbp, Z2, 0x30, Secret, scratch_b, 3);
+        Store128_buffer(heap0, rbp, Z2, 0x30, Secret, scratch_b, 3);
 
         AESNI_ctr32_6x(alg, 1, in_b, out_b, plain_quads, key_words, round_keys, keys_b, inc32(ctr_BE, 6), ctr_BE);
         Sub64(len, 12);
-        //Load128_buffer(Xi, Xip, 0, Secret, hkeys_b, 0); // # load Xi
-        Load128_buffer(Xi, rbp, 0x20, Secret, scratch_b, 2);      // # load interm. hash (Xi)
+        //Load128_buffer(heap0, Xi, Xip, 0, Secret, hkeys_b, 0); // # load Xi
+        Load128_buffer(heap0, Xi, rbp, 0x20, Secret, scratch_b, 2);      // # load interm. hash (Xi)
         //AddLea64(Xip, Xip, 0x20);   // # size optimization    // Now handled by the caller
 
         Ctr32_ghash_6_prelude(alg, scratch_b, key_words, round_keys, keys_b, inc32(ctr_BE, 12));
@@ -2329,14 +2329,14 @@ procedure AES_GCM_encrypt_6mult(
         let y_new := Loop6x_loop(alg, h_LE, reverse_bytes_quad32(Xi), reverse_bytes_quad32(Xi), 2, iv_b, out_b, in_b, out_b, scratch_b, old(s128(heap0, in_b)), key_words, round_keys, keys_b, hkeys_b, ctr_BE, inc32(ctr_BE, 12));
 
         let out_snapshot := s128(heap0, out_b);
-        Load128_buffer(Z3, rbp, 0x20, Secret, scratch_b, 2); // # I[5]
+        Load128_buffer(heap0, Z3, rbp, 0x20, Secret, scratch_b, 2); // # I[5]
 
         //test(T1, ctr_BE, mid_len);
-        Store128_buffer(rbp, T1, 0x20, Secret, scratch_b, 2);
+        Store128_buffer(heap0, rbp, T1, 0x20, Secret, scratch_b, 2);
 
         // TODO: Update AESOpt2 so we can skip these steps (borow rndkey, for example, instead of scratch_b[1])
         ZeroXmm(Z0);
-        Store128_buffer(rbp, Z0, 0x10, Secret, scratch_b, 1);
+        Store128_buffer(heap0, rbp, Z0, 0x10, Secret, scratch_b, 1);
         lemma_add_zero(of_quad32(Xi));
 
         ghost var data := slice(s128(heap0, out_b), #nat(old(len)-12), #nat(old(len)-6));
@@ -2351,9 +2351,9 @@ procedure AES_GCM_encrypt_6mult(
 
         InitPshufbMask(Ii, r12);    // # borrow $Ii for .Lbswap_mask
 // Not needed for now, since we're using GhashUnroll6x
-//        Load128_buffer(Hkey, Xip, 0x00-0x20, Secret, hkeys_b, 0);   // # $Hkey^1
+//        Load128_buffer(heap0, Hkey, Xip, 0x00-0x20, Secret, hkeys_b, 0);   // # $Hkey^1
 //        VShufpd(T1, Z3, Z3, 0);     // =?= vpunpckhqdq $Z3,$Z3,$T1
-//        Load128_buffer(rndkey, Xip, 0x20-0x20, Secret, hkeys_b, 2);   // # borrow $rndkey for $HK
+//        Load128_buffer(heap0, rndkey, Xip, 0x20-0x20, Secret, hkeys_b, 2);   // # borrow $rndkey for $HK
 //        VPolyAdd(T1, T1, Z3);   // Moved up two instructions compared to OpenSSL, to avoid mixing with Encrypt_save_and_shuffle_output
 
         let offset_in := #nat((old(len) / 6) - 1);
@@ -2433,24 +2433,24 @@ procedure DecryptPrelude(ghost in_b:buffer128, ghost scratch_b:buffer128)
 //        Z0 == reverse_bytes_quad32(buffer128_read(in_b, 4, heap0));
 //        Z3 == reverse_bytes_quad32(buffer128_read(in_b, 5, heap0));
 {
-    Load128_buffer(Z3, inp, 0x50, Secret, in_b, 5);     // # I[5]
-    Load128_buffer(Z0, inp, 0x40, Secret, in_b, 4);
-    Load128_buffer(Z1, inp, 0x30, Secret, in_b, 3);
-    Load128_buffer(Z2, inp, 0x20, Secret, in_b, 2);
+    Load128_buffer(heap0, Z3, inp, 0x50, Secret, in_b, 5);     // # I[5]
+    Load128_buffer(heap0, Z0, inp, 0x40, Secret, in_b, 4);
+    Load128_buffer(heap0, Z1, inp, 0x30, Secret, in_b, 3);
+    Load128_buffer(heap0, Z2, inp, 0x20, Secret, in_b, 2);
 
     VPshufb(Z3, Z3, Ii); // # passed to _aesni_ctr32_ghash_6x
-    Load128_buffer(T2, inp, 0x10, Secret, in_b, 1);
+    Load128_buffer(heap0, T2, inp, 0x10, Secret, in_b, 1);
     VPshufb(Z0, Z0, Ii);
-    Load128_buffer(Hkey, inp, 0x00, Secret, in_b, 0);
+    Load128_buffer(heap0, Hkey, inp, 0x00, Secret, in_b, 0);
     VPshufb(Z1, Z1, Ii);
-    Store128_buffer(rbp, Z0, 0x30, Secret, scratch_b, 3);
+    Store128_buffer(heap0, rbp, Z0, 0x30, Secret, scratch_b, 3);
     VPshufb(Z2, Z2, Ii);
-    Store128_buffer(rbp, Z1, 0x40, Secret, scratch_b, 4);
+    Store128_buffer(heap0, rbp, Z1, 0x40, Secret, scratch_b, 4);
     VPshufb(T2, T2, Ii);
-    Store128_buffer(rbp, Z2, 0x50, Secret, scratch_b, 5);
+    Store128_buffer(heap0, rbp, Z2, 0x50, Secret, scratch_b, 5);
     VPshufb(Hkey, Hkey, Ii);
-    Store128_buffer(rbp, T2, 0x60, Secret, scratch_b, 6);
-    Store128_buffer(rbp, Hkey, 0x70, Secret, scratch_b, 7);
+    Store128_buffer(heap0, rbp, T2, 0x60, Secret, scratch_b, 6);
+    Store128_buffer(heap0, rbp, Hkey, 0x70, Secret, scratch_b, 7);
 }
 
 
@@ -2555,21 +2555,21 @@ procedure AES_GCM_decrypt_6mult(
 {
     if (len == 0) {
         //AddLea64(Xip, Xip, 0x20);   // # size optimization
-//        Load128_buffer(T1, ivp, 0, Public, iv_b, 0);    // # input counter value
+//        Load128_buffer(heap0, T1, ivp, 0, Public, iv_b, 0);    // # input counter value
 //        // TODO: Replace all of this with a single PinsrdImm(T1, 0x02000000, 3, counter)
 //        InitPshufbMask(Ii, r12);    // # borrow $Ii for .Lbswap_mask
 //        VPshufb(T1, T1, Ii);
 //        PinsrdImm(T1, 2, 0, counter);   // Directly set the counter in T1.lo0 (and counter) to 2, rather than read the existing value as OpenSSL does
 //        ctr_BE := T1;
         VPshufb(T1, T1, Ii);
-        Store128_buffer(rbp, T1, 0x20, Secret, scratch_b, 2);  // TODO: Optimize away this store (and matching load)?
+        Store128_buffer(heap0, rbp, T1, 0x20, Secret, scratch_b, 2);  // TODO: Optimize away this store (and matching load)?
         gctr_partial_opaque_init(alg, s128(heap0, in_b), s128(heap0, out_b), key_words, old(T1));
     } else {
         let plain_quads := s128(heap0, in_b);
 
         //VPshufb(Xi, Xi, Ii);        // TODO: Why do we need a reverse here and at the end?
         let y_orig := reverse_bytes_quad32(Xi);
-        Store128_buffer(rbp, Xi, 0x20, Secret, scratch_b, 2); // Save a copy of the interm. hash in Xi
+        Store128_buffer(heap0, rbp, Xi, 0x20, Secret, scratch_b, 2); // Save a copy of the interm. hash in Xi
         Add64(key, 0x80);           // # size optimization
         let ctr_BE := T1;
         Pextrq(counter, T1, 0);
@@ -2582,8 +2582,8 @@ procedure AES_GCM_decrypt_6mult(
         //Mov64(in0, inp); // OpenSSL uses this, and then does complicated in0 manipulation inside Loop6x
         AddLea64(in0, inp, 96); // 96 == 128/8*6
 
-        //Load128_buffer(Xi, Xip, 0, Secret, hkeys_b, 0); // # load Xi
-        Load128_buffer(Xi, rbp, 0x20, Secret, scratch_b, 2);      // # load interm. hash (Xi)
+        //Load128_buffer(heap0, Xi, Xip, 0, Secret, hkeys_b, 0); // # load Xi
+        Load128_buffer(heap0, Xi, rbp, 0x20, Secret, scratch_b, 2);      // # load interm. hash (Xi)
         //AddLea64(Xip, Xip, 0x20);   // # size optimization    // Now handled by the caller
 
         DecryptPrelude(in_b, scratch_b);
@@ -2596,16 +2596,16 @@ procedure AES_GCM_decrypt_6mult(
         assert to_quad32(of_quad32(Xi)) == Xi;
         let y_new := Loop6x_loop_decrypt(alg, h_LE, reverse_bytes_quad32(Xi), reverse_bytes_quad32(Xi), iv_b, in_b, in_b, out_b, scratch_b, key_words, round_keys, keys_b, hkeys_b, ctr_BE, inc32(ctr_BE, 0));
 
-        Store128_buffer(rbp, T1, 0x20, Secret, scratch_b, 2);
+        Store128_buffer(heap0, rbp, T1, 0x20, Secret, scratch_b, 2);
 
         let out_snapshot := s128(heap0, out_b);
 
-        Store128_buffer(outp, inout0, 0-0x60, Secret, out_b, old(len)-6+0);
-        Store128_buffer(outp, inout1, 0-0x50, Secret, out_b, old(len)-6+1);
-        Store128_buffer(outp, inout2, 0-0x40, Secret, out_b, old(len)-6+2);
-        Store128_buffer(outp, inout3, 0-0x30, Secret, out_b, old(len)-6+3);
-        Store128_buffer(outp, inout4, 0-0x20, Secret, out_b, old(len)-6+4);
-        Store128_buffer(outp, inout5, 0-0x10, Secret, out_b, old(len)-6+5);
+        Store128_buffer(heap0, outp, inout0, 0-0x60, Secret, out_b, old(len)-6+0);
+        Store128_buffer(heap0, outp, inout1, 0-0x50, Secret, out_b, old(len)-6+1);
+        Store128_buffer(heap0, outp, inout2, 0-0x40, Secret, out_b, old(len)-6+2);
+        Store128_buffer(heap0, outp, inout3, 0-0x30, Secret, out_b, old(len)-6+3);
+        Store128_buffer(heap0, outp, inout4, 0-0x20, Secret, out_b, old(len)-6+4);
+        Store128_buffer(heap0, outp, inout5, 0-0x10, Secret, out_b, old(len)-6+5);
 
         gctr_partial_opaque_ignores_postfix(alg, #nat32(mid_len - 6), old(s128(heap0, in_b)), old(s128(heap0, in_b)), out_snapshot, s128(heap0, out_b),key_words, ctr_BE);
         gctr_partial_extend6(alg, #nat32(mid_len - 6), old(s128(heap0, in_b)), s128(heap0, out_b), key_words, ctr_BE);

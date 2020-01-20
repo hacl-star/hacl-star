@@ -74,10 +74,14 @@ operand_type reg64:nat64 :=
 ;
 operand_type shift_amt64:nat64 := in rcx | const;
 operand_type reg_opr64:nat64 @ va_operand := reg64;
-operand_type Mem(in base:reg64, inline offset:int, ghost b:buffer64, ghost index:int, inline t:taint):int;
+operand_type Mem64(in h:heaplet, in base:reg64, inline offset:int, ghost b:buffer64, ghost index:int, inline t:taint):int;
 operand_type Stack(in base:reg64, inline offset:int, inline t:taint):int;
-operand_type dst_opr64:nat64 @ va_operand := reg_opr64 | Mem | Stack;
+operand_type dst_opr64:nat64 @ va_operand := reg_opr64 | Mem64 | Stack;
 operand_type opr64:nat64 @ va_operand := dst_opr64 | const;
+
+operand_type heaplet:vale_heap @ heaplet_id :=
+| inout heap0
+;
 
 procedure Mov64(inout dst:dst_opr64, in src:opr64)
     {:public}

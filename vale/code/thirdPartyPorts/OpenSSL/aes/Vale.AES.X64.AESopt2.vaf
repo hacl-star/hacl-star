@@ -204,11 +204,11 @@ procedure MulAdd_step(
         lemma_add_commute(~~a1, ~~a2);
         VPolyAdd(Z2, a2, a1);
         VPolyAdd(Xi, Xi, Z0);
-        VPolyAdd(Xi, Xi, Mem128(rbp, 0x10, Secret, scratch_b, 1));
+        VPolyAdd(Xi, Xi, Mem128(heap0, rbp, 0x10, Secret, scratch_b, 1));
     }
     else
     {
-        Load128_buffer(c, Xip, 0x10 * power_index - 0x20, Secret, hkeys_b, power_index);
+        Load128_buffer(heap0, c, Xip, 0x10 * power_index - 0x20, Secret, hkeys_b, power_index);
         VPolyMul(a0, b, c, false, false);
         inline if (m = 1)
         {
@@ -226,12 +226,12 @@ procedure MulAdd_step(
         VPolyAdd(Z3, Z3, a3);
         inline if (m = 4)
         {
-            VPolyAdd(Xi, Xi, Mem128(rbp, 0x70, Secret, scratch_b, 7));
+            VPolyAdd(Xi, Xi, Mem128(heap0, rbp, 0x70, Secret, scratch_b, 7));
         }
     }
     inline if (m < 4)
     {
-        Load128_buffer(Ii, rbp, 0x30 + 0x10 * m, Secret, scratch_b, 3 + m);
+        Load128_buffer(heap0, Ii, rbp, 0x30 + 0x10 * m, Secret, scratch_b, 3 + m);
     }
 }
 
@@ -309,7 +309,7 @@ procedure MulAdd_unroll_i(
 
     inline if (!is_last)
     {
-        Load128_buffer(Ii, scratch_ptr, 0, Secret, scratch_b, scratch_index);
+        Load128_buffer(heap0, Ii, scratch_ptr, 0, Secret, scratch_b, scratch_index);
         inline if (!rev_bytes)
         {
             Pshufb(Ii, rev_mask);
@@ -325,7 +325,7 @@ procedure MulAdd_unroll_i(
     }
     inline if (!is_last)
     {
-        Load128_buffer(T1, Xip, 0x10 * power_index - 0x20, Secret, hkeys_b, power_index);
+        Load128_buffer(heap0, T1, Xip, 0x10 * power_index - 0x20, Secret, hkeys_b, power_index);
     }
     inline if (is_first)
     {
@@ -385,9 +385,9 @@ procedure MulAdd_unroll_n(
             ghash_unroll_back(h, prev, pdata, 0, n, #nat(n - 1));
         exactly6 /\ !rev_blocks ==> scratch_ptr == old(scratch_ptr) - 0x50;
 {
-    Load128_buffer(Z1, Xip, (-0x20), Secret, hkeys_b, 0);
+    Load128_buffer(heap0, Z1, Xip, (-0x20), Secret, hkeys_b, 0);
     // assert of_quad32(Z1) == gf128_power(h, 1);
-    Load128_buffer(Ii, scratch_ptr, 0, Secret, scratch_b, scratch_index);
+    Load128_buffer(heap0, Ii, scratch_ptr, 0, Secret, scratch_b, scratch_index);
     inline if (!rev_bytes)
     {
         Pshufb(Ii, rev_mask);
@@ -466,10 +466,10 @@ procedure MulAdd_unroll(
     let data5 := #poly(pdata(5));
 
     // 1
-    Load128_buffer(Hkey, Xip, (-0x20), Secret, hkeys_b, 0);
+    Load128_buffer(heap0, Hkey, Xip, (-0x20), Secret, hkeys_b, 0);
     VPolyMul(T1, Z3, Hkey, false, false);
     VPolyMul(Z1, Z3, Hkey, false, true);
-    Load128_buffer(Ii, rbp, 0x30, Secret, scratch_b, 3);
+    Load128_buffer(heap0, Ii, rbp, 0x30, Secret, scratch_b, 3);
     VPolyMul(Z2, Z3, Hkey, true, false);
     VPolyMul(Z3, Z3, Hkey, true, true);
     lemma_Mul128(data5, gf128_power(h, 1));
@@ -479,7 +479,7 @@ procedure MulAdd_unroll(
     lemma_add_commute(~~Z1, ~~Z2);
     // assert z == ~~T1 +. shift(~~Z2 +. ~~Z1, 64) +. shift(~~Z3, 128);
 
-    Load128_buffer(Hkey, Xip, (-0x10), Secret, hkeys_b, 1);
+    Load128_buffer(heap0, Hkey, Xip, (-0x10), Secret, hkeys_b, 1);
     VPolyAdd(Z2, Z2, Z1);
     let z0 := ~~T1;
     // assert z == z0 +. shift(~~Z2, 64) +. shift(~~Z3, 128);
@@ -490,7 +490,7 @@ procedure MulAdd_unroll(
     VPolyAdd(Z0, T1, Z1);
     VPolyMul(T1, Ii, Hkey, false, true);
     VPolyMul(T2, Ii, Hkey, true, false);
-    VPolyAdd(Xi, Xi, Mem128(rbp, 0x10, Secret, scratch_b, 1));
+    VPolyAdd(Xi, Xi, Mem128(heap0, rbp, 0x10, Secret, scratch_b, 1));
     // assert ~~Xi == prev;
     VPolyMul(Hkey, Ii, Hkey, true, true);
     lemma_Mul128_accum(z0, ~~Z2, ~~Z3, data4, gf128_power(h, 2));
@@ -498,8 +498,8 @@ procedure MulAdd_unroll(
     assert z == ghash_unroll_back(h, prev, pdata, 0, 6, 1);
     // assert z == ~~Z0 +. shift(~~Z2 +. ~~T1 +. ~~T2, 64) +. shift(~~Z3 +. ~~Hkey, 128);
 
-    Load128_buffer(Ii, rbp, 0x40, Secret, scratch_b, 4);
-    Load128_buffer(Z1, Xip, 0x10, Secret, hkeys_b, 3);
+    Load128_buffer(heap0, Ii, rbp, 0x40, Secret, scratch_b, 4);
+    Load128_buffer(heap0, Z1, Xip, 0x10, Secret, hkeys_b, 3);
     VPolyAdd(Z2, Z2, T1);
     // assert z == ~~Z0 +. shift(~~Z2 +. ~~T2, 64) +. shift(~~Z3 +. ~~Hkey, 128);
 
@@ -517,10 +517,10 @@ procedure MulAdd_unroll(
     assert z == ghash_unroll_back(h, prev, pdata, 0, 6, 2);
     // assert z == (~~Z0 +. ~~T1) +. shift(~~Z2 +. ~~T2 +. ~~Hkey, 64) +. shift(~~Z3 +. ~~Z1, 128);
 
-    Load128_buffer(Ii, rbp, 0x50, Secret, scratch_b, 5);
+    Load128_buffer(heap0, Ii, rbp, 0x50, Secret, scratch_b, 5);
     VPolyAdd(Z0, Z0, T1);
     // assert z == ~~Z0 +. shift(~~Z2 +. ~~T2 +. ~~Hkey, 64) +. shift(~~Z3 +. ~~Z1, 128);
-    Load128_buffer(T1, Xip, 0x20, Secret, hkeys_b, 4);
+    Load128_buffer(heap0, T1, Xip, 0x20, Secret, hkeys_b, 4);
     VPolyAdd(Z2, Z2, T2);
     // assert z == ~~Z0 +. shift(~~Z2 +. ~~Hkey, 64) +. shift(~~Z3 +. ~~Z1, 128);
 
@@ -538,10 +538,10 @@ procedure MulAdd_unroll(
     assert z == ghash_unroll_back(h, prev, pdata, 0, 6, 3);
     // assert z == (~~Z0 +. ~~T2) +. shift(~~Z2 +. ~~Hkey +. ~~Z1, 64) +. shift(~~Z3 +. ~~T1, 128);
 
-    Load128_buffer(Ii, rbp, 0x60, Secret, scratch_b, 6);
+    Load128_buffer(heap0, Ii, rbp, 0x60, Secret, scratch_b, 6);
     VPolyAdd(Z0, Z0, T2);
     // assert z == ~~Z0 +. shift(~~Z2 +. ~~Hkey +. ~~Z1, 64) +. shift(~~Z3 +. ~~T1, 128);
-    Load128_buffer(T2, Xip, 0x40, Secret, hkeys_b, 6);
+    Load128_buffer(heap0, T2, Xip, 0x40, Secret, hkeys_b, 6);
     VPolyAdd(Z2, Z2, Hkey);
     // assert z == ~~Z0 +. shift(~~Z2 +. ~~Z1, 64) +. shift(~~Z3 +. ~~T1, 128);
 
@@ -553,7 +553,7 @@ procedure MulAdd_unroll(
     VPolyAdd(Z3, Z3, T1);
     // assert z == ~~Z0 +. shift(~~Z2, 64) +. shift(~~Z3, 128);
     VPolyMul(T1, Ii, T2, true, false);
-    VPolyAdd(Xi, Xi, Mem128(rbp, 0x70, Secret, scratch_b, 7));
+    VPolyAdd(Xi, Xi, Mem128(heap0, rbp, 0x70, Secret, scratch_b, 7));
     VPolyMul(T2, Ii, T2, true, true);
     lemma_Mul128_accum(~~Z0, ~~Z2, ~~Z3, data1, gf128_power(h, 5));
     z := z +. data1 *. gf128_power(h, 5);
@@ -562,7 +562,7 @@ procedure MulAdd_unroll(
 
     VPolyAdd(Z0, Z0, Hkey);
     // assert z == ~~Z0 +. shift(~~Z2 +. ~~Z1 +. ~~T1, 64) +. shift(~~Z3 +. ~~T2, 128);
-    Load128_buffer(Hkey, Xip, 0x50, Secret, hkeys_b, 7);
+    Load128_buffer(heap0, Hkey, Xip, 0x50, Secret, hkeys_b, 7);
     VPolyAdd(Z2, Z2, Z1);
     // assert z == ~~Z0 +. shift(~~Z2 +. ~~T1, 64) +. shift(~~Z3 +. ~~T2, 128);
 
@@ -758,7 +758,7 @@ procedure Ghash_register(
     ensures
         Xi == reverse_bytes_quad32(ghash_incremental(h_LE, y_prev, old(data)));
 {
-    Load128_buffer(Z1, Xip, (-0x20), Secret, hkeys_b, 0);
+    Load128_buffer(heap0, Z1, Xip, (-0x20), Secret, hkeys_b, 0);
     assert of_quad32(Z1) == gf128_power(h, 1);
 
     assert Ii == reverse_bytes_quad32(index(data, #nat(0)));

@@ -235,9 +235,9 @@ procedure Gctr_core(
         AESEncryptBlock(alg, reverse_bytes_quad32(icb), key, round_keys, keys_b);
         aes_encrypt_LE_reveal();
 
-        Load128_buffer(xmm2, r9, 0, Secret, in_b, block_offset + rdx);
+        Load128_buffer(heap0, xmm2, r9, 0, Secret, in_b, block_offset + rdx);
         Pxor(xmm2, xmm0);
-        Store128_buffer(r10, xmm2, 0, Secret, out_b, block_offset + rdx);
+        Store128_buffer(heap0, r10, xmm2, 0, Secret, out_b, block_offset + rdx);
 
         Add64(rdx, 1);
         Add64(r9, 16);
@@ -386,7 +386,7 @@ procedure Gctr_bytes_extra_work(
     let num_blocks := num_bytes / 16;
 
     // Grab the last quad
-    Load128_buffer(xmm2, r9, 0, Secret, in_b, num_blocks);
+    Load128_buffer(heap0, xmm2, r9, 0, Secret, in_b, num_blocks);
     assert xmm2 == buffer128_read(in_b, num_blocks, heap0);
     let final_quad_LE := xmm2;
 
@@ -399,7 +399,7 @@ procedure Gctr_bytes_extra_work(
     //assert xmm1 == gctr_encrypt_block(icb_BE, final_quad_LE, alg, key, num_blocks);
 
     // Write it back out
-    Store128_buffer(r10, xmm1, 0, Secret, out_b, num_blocks);
+    Store128_buffer(heap0, r10, xmm1, 0, Secret, out_b, num_blocks);
     assert buffer128_read(out_b, num_blocks, heap0) == xmm1;
     //assert buffer128_read(out_b, num_blocks, heap0) == gctr_encrypt_block(icb_BE, buffer128_read(in_b, num_blocks, heap0), alg, key, num_blocks);
 }
@@ -615,10 +615,10 @@ procedure Gctr_bytes(
 
     if (plain_num_bytes > tmp)
     {
-        Load128_buffer(xmm1, inout_ptr, 0, Secret, inout_b, 0);
+        Load128_buffer(heap0, xmm1, inout_ptr, 0, Secret, inout_b, 0);
         assert equal(create(1, xmm1), s128(heap0, inout_b));
         Gctr_register(alg, key, round_keys, keys_b);
-        Store128_buffer(inout_ptr, xmm1, 0, Secret, inout_b, 0);
+        Store128_buffer(heap0, inout_ptr, xmm1, 0, Secret, inout_b, 0);
     }
     gctr_bytes_helper(alg, key,
                       old(s128(heap0,  in_b)), old(s128(heap0, inout_b)),
@@ -773,7 +773,7 @@ procedure Gctr_bytes_stdcall(
     {
         // Load ptr for ctr_b
         Load64_stack(rax, rsp, 224 + 32 + 8 + 8);
-        Load128_buffer(xmm7, rax, 0, Secret, ctr_b, 0);
+        Load128_buffer(heap0, xmm7, rax, 0, Secret, ctr_b, 0);
 
         Mov64(rax, rcx);
         Mov64(rbx, r8);
@@ -784,7 +784,7 @@ procedure Gctr_bytes_stdcall(
     }
     else
     {
-        Load128_buffer(xmm7, r9, 0, Secret, ctr_b, 0);
+        Load128_buffer(heap0, xmm7, r9, 0, Secret, ctr_b, 0);
         Mov64(rax, rdi);
         Mov64(rbx, rdx);
         Mov64(r13, rcx);

@@ -175,13 +175,13 @@ procedure KeyInversionRound(
 {
 //    assert heap0[k_b].quads[rdx + 16*(round+1)].v == Quadword(w[(round+1)*4], w[(round+1)*4 + 1], w[(round+1)*4 + 2], w[(round+1)*4 + 3]);
 
-    Load128_buffer(xmm1, rdx, 16*(round+1), k_b, round+1);
+    Load128_buffer(heap0, xmm1, rdx, 16*(round+1), k_b, round+1);
 //    assert xmm1 == Quadword(w[(round+1)*4], w[(round+1)*4 + 1], w[(round+1)*4 + 2], w[(round+1)*4 + 3]);
 //    let ws := SeqRange(w, (round+1)*4, (round+1)*4 + 4);
 //    assert ws[0] == w[(round+1)*4] && ws[1] == w[(round+1)*4+1] && ws[2] == w[(round+1)*4+2] && ws[3] == w[(round+1)*4+3];
 //    assert xmm1 == seq_to_Quadword(ws);
     AESNI_imc(xmm1, xmm1);
-    Store128_buffer(rdx, xmm1, 16*(round+1), k_b, round+1);
+    Store128_buffer(heap0, rdx, xmm1, 16*(round+1), k_b, round+1);
 
 //    dw_out := dw_in + Quadword_to_seq(xmm1);
 //    lemma_KeyInversionRoundHelper(round+1, key, w, dw_in, dw_out);
@@ -317,11 +317,11 @@ procedure KeyExpansionAndInversionStdcall(
 //    LoadStack(eax, 0);                                     // eax := key_ptr (from stack position 0)
     inline if (win)
     {
-        Load128_buffer(xmm1, rcx, 0, input_key_b, 0);
+        Load128_buffer(heap0, xmm1, rcx, 0, input_key_b, 0);
     }
     else
     {
-        Load128_buffer(xmm1, rdi, 0, input_key_b, 0);
+        Load128_buffer(heap0, xmm1, rdi, 0, input_key_b, 0);
         Mov64(rdx, rsi);
     }
 //    let w := KeyExpansionImpl(key, taint, output_key_expansion_id); // expand key from xmm1 to region pointed to by rdx

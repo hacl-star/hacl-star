@@ -253,9 +253,9 @@ procedure Gctr_blocks128(
         AESEncryptBlock(alg, reverse_bytes_quad32(icb), key, round_keys, keys_b);
         aes_encrypt_LE_reveal();
 
-        Load128_buffer(xmm2, tmp_in_ptr, 0, Secret, in_b, ctr);
+        Load128_buffer(heap0, xmm2, tmp_in_ptr, 0, Secret, in_b, ctr);
         Pxor(xmm2, xmm0);
-        Store128_buffer(tmp_out_ptr, xmm2, 0, Secret, out_b, ctr);
+        Store128_buffer(heap0, tmp_out_ptr, xmm2, 0, Secret, out_b, ctr);
 
         Add64(ctr, 1);
         Add64(tmp_in_ptr, 16);
@@ -631,10 +631,10 @@ procedure Gcm_extra_bytes(
     AESEncryptBlock(alg, reverse_bytes_quad32(icb), key, round_keys, keys_b);
     aes_encrypt_LE_reveal();
 
-    Load128_buffer(Z0, io_ptr, 0, Secret, inout_b, 0); // borrow Z0
+    Load128_buffer(heap0, Z0, io_ptr, 0, Secret, inout_b, 0); // borrow Z0
     lemma_quad32_xor_commutes(Ii, Z0);
     Pxor(Ii, Z0);
-    Store128_buffer(io_ptr, Ii, 0, Secret, inout_b, 0);
+    Store128_buffer(heap0, io_ptr, Ii, 0, Secret, inout_b, 0);
 
     // Update our hash
     let hash_input := Ii;
@@ -724,7 +724,7 @@ procedure Gcm_blocks_auth(
 //    Mov64(r8, rcx);
 //    Mov64(r11, rdx);
 //
-//    Load128_buffer(xmm11, Xip, 0x20, Secret, hkeys_b, 2); // Load h instead of computing it
+//    Load128_buffer(heap0, xmm11, Xip, 0x20, Secret, hkeys_b, 2); // Load h instead of computing it
 //    let h := reverse_bytes_quad32(xmm11);
 
     let h_LE := reverse_bytes_quad32(old(buffer128_read(hkeys_b, 2, heap0)));
@@ -746,7 +746,7 @@ procedure Gcm_blocks_auth(
 
     if (auth_num_bytes > auth_blocks_bytes) {
         // Ghash the extra auth bytes
-        Load128_buffer(Ii, abytes_ptr, 0, Secret, abytes_b, 0);
+        Load128_buffer(heap0, Ii, abytes_ptr, 0, Secret, abytes_b, 0);
         lemma_poly_bits64();
         Mov64(scratch_reg, auth_num_bytes); // Recycle scratch_reg
         And64(scratch_reg, 15);
@@ -842,7 +842,7 @@ procedure Compute_iv(
             xmm11 == old(xmm11);
 {
     if (num_bytes == 12 /* == 96/8 */) {
-        Load128_buffer(xmm0, extra_ptr, 0, Secret, iv_extra_b, 0);
+        Load128_buffer(heap0, xmm0, extra_ptr, 0, Secret, iv_extra_b, 0);
         ghost var iv_LE := xmm0;
         assert iv_LE == index(s128(heap0, iv_extra_b), 0);
         InitPshufbMask(xmm1, rax);
@@ -853,7 +853,7 @@ procedure Compute_iv(
         assert xmm0 == set_to_one_LE(iv_BE);
         let j0 := xmm0;
         //Pshufb(xmm0, xmm1);
-        Store128_buffer(j0_ptr, xmm0, 0, Secret, j0_b, 0);
+        Store128_buffer(heap0, j0_ptr, xmm0, 0, Secret, j0_b, 0);
         lemma_compute_iv_easy(old(s128(heap0, iv_b)), old(s128(heap0, iv_extra_b)), iv, num_bytes, reverse_bytes_quad32(old(buffer128_read(hkeys_b, 2, heap0))), j0);
     } else {
         let raw_quads:seq(quad32) := 
@@ -888,7 +888,7 @@ procedure Compute_iv(
         lemma_hash_append2(h_LE, Mkfour(0,0,0,0), y_mid, y_final, auth_quad_seq, length_quad);
 
         lemma_compute_iv_hard(iv, auth_quad_seq, length_quad, h_LE, reverse_bytes_quad32(xmm8));
-        Store128_buffer(j0_ptr, xmm8, 0, Secret, j0_b, 0);
+        Store128_buffer(heap0, j0_ptr, xmm8, 0, Secret, j0_b, 0);
     }
 }
 
@@ -1099,9 +1099,9 @@ procedure Gcm_blocks(
     let ctr_BE_1:quad32 := iv_BE;
     let ctr_BE_2:quad32 := inc32(iv_BE, 1);
 
-    Load128_buffer(xmm1, iv_ptr, 0, Public, iv_b, 0);       // Load the j0 value (i.e., the result of calling compute_iv_BE)
+    Load128_buffer(heap0, xmm1, iv_ptr, 0, Public, iv_b, 0);       // Load the j0 value (i.e., the result of calling compute_iv_BE)
 
-    Store128_buffer(rbp, xmm1, 0x00, Secret, scratch_b, 0); // Save a copy, since we'll need it at the end to encrypt the hash
+    Store128_buffer(heap0, rbp, xmm1, 0x00, Secret, scratch_b, 0); // Save a copy, since we'll need it at the end to encrypt the hash
     ghost var j0 := xmm1;
     Load_one_lsb(xmm10);
 
@@ -1114,7 +1114,7 @@ procedure Gcm_blocks(
     auth_in := append(auth_in, s128(heap0, out128x6_b));
 
     // Line up arguments for Gcm_blocks128 for remaining 128-bit blocks
-    Load128_buffer(icb, rbp, 0x20, Secret, scratch_b, 2);
+    Load128_buffer(heap0, icb, rbp, 0x20, Secret, scratch_b, 2);
     Mov64(r8, keys_ptr);
     Load64_stack(rax, rsp, offset + 32);
     Load64_stack(rdi, rsp, offset + 40);
@@ -1170,7 +1170,7 @@ procedure Gcm_blocks(
     Ghash_register(hkeys_b, h_LE, y_inout);
     let y_final := reverse_bytes_quad32(hash);
 
-    Load128_buffer(xmm0, rbp, 0, Secret, scratch_b, 0);       // Reload j0
+    Load128_buffer(heap0, xmm0, rbp, 0, Secret, scratch_b, 0);       // Reload j0
 
     // Encrypt the hash using j0 for the IV/ctr; result goes in hash 
     Gctr_register(alg, key, round_keys, keys_b); 
@@ -1879,7 +1879,7 @@ procedure Gcm_blocks_stdcall(
 
     // Auth tag is still in hash (xmm8), so save it to memory
     Load64_stack(r15, rsp, total_if(win, 224 + 40 + 96, 64 + 8 + 80));
-    Store128_buffer(r15, hash, 0, Secret, tag_b, 0);
+    Store128_buffer(heap0, r15, hash, 0, Secret, tag_b, 0);
 
     Restore_registers(win, old(rsp), old(xmm6), old(xmm7), old(xmm8), old(xmm9), old(xmm10), old(xmm11), old(xmm12), old(xmm13), old(xmm14), old(xmm15));
 

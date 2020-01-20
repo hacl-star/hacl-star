@@ -291,10 +291,10 @@ procedure Aes_ctr_encrypt(
     Aes_3rounds_4way(alg, 1, old(ctr1), old(ctr2), old(ctr3), old(ctr4), round_keys);
 
     // Load the next four round key blocks
-    Load128_buffer(rk1, key_ptr,  64, Secret, keys_b, 4);
-    Load128_buffer(rk2, key_ptr,  80, Secret, keys_b, 5);
-    Load128_buffer(rk3, key_ptr,  96, Secret, keys_b, 6);
-    Load128_buffer(rk4, key_ptr, 112, Secret, keys_b, 7);
+    Load128_buffer(heap0, rk1, key_ptr,  64, Secret, keys_b, 4);
+    Load128_buffer(heap0, rk2, key_ptr,  80, Secret, keys_b, 5);
+    Load128_buffer(heap0, rk3, key_ptr,  96, Secret, keys_b, 6);
+    Load128_buffer(heap0, rk4, key_ptr, 112, Secret, keys_b, 7);
     assert rk1 == index(round_keys, 4);
     assert rk2 == index(round_keys, 5);
     assert rk3 == index(round_keys, 6);
@@ -304,9 +304,9 @@ procedure Aes_ctr_encrypt(
     Aes_4rounds_4way(alg, 4, old(ctr1), old(ctr2), old(ctr3), old(ctr4), round_keys);
 
     // Load the next three round key blocks
-    Load128_buffer(rk1, key_ptr, 128, Secret, keys_b, 8);
-    Load128_buffer(rk2, key_ptr, 144, Secret, keys_b, 9);
-    Load128_buffer(rk3, key_ptr, 160, Secret, keys_b, 10);
+    Load128_buffer(heap0, rk1, key_ptr, 128, Secret, keys_b, 8);
+    Load128_buffer(heap0, rk2, key_ptr, 144, Secret, keys_b, 9);
+    Load128_buffer(heap0, rk3, key_ptr, 160, Secret, keys_b, 10);
     assert rk1  == index(round_keys, 8);
     assert rk2  == index(round_keys, 9);
     assert rk3 == index(round_keys, 10);
@@ -318,9 +318,9 @@ procedure Aes_ctr_encrypt(
     inline if (alg = AES_256) {
         // Load 3 more round keys and shuffle the one in rk3 to rk1 (Intel does this by reloading from memory -- why?)
         Mov128(rk1, rk3);
-        Load128_buffer(rk2, key_ptr, 176, Secret, keys_b, 11);
-        Load128_buffer(rk3, key_ptr, 192, Secret, keys_b, 12);
-        Load128_buffer(rk4, key_ptr, 208, Secret, keys_b, 13);
+        Load128_buffer(heap0, rk2, key_ptr, 176, Secret, keys_b, 11);
+        Load128_buffer(heap0, rk3, key_ptr, 192, Secret, keys_b, 12);
+        Load128_buffer(heap0, rk4, key_ptr, 208, Secret, keys_b, 13);
         assert rk1 == index(round_keys, 10);
         assert rk2 == index(round_keys, 11);
         assert rk3 == index(round_keys, 12);
@@ -330,7 +330,7 @@ procedure Aes_ctr_encrypt(
         Aes_4rounds_4way(alg, 10, old(ctr1), old(ctr2), old(ctr3), old(ctr4), round_keys);
 
         // Load the final round key
-        Load128_buffer(rk3, key_ptr, 224, Secret, keys_b, 14);
+        Load128_buffer(heap0, rk3, key_ptr, 224, Secret, keys_b, 14);
         assert rk3 == index(round_keys, 14);
     }
 
@@ -524,10 +524,10 @@ procedure Aes_ctr_loop_body(
     Pshufb64(const4_3, mask64);     // const4_3 = LSB: 4 | bswap(ivec_hi) | 3 | bswap(ivec_hi)
 
     // Load the next four round key blocks
-    Load128_buffer(rk1,  key_ptr,  0, Secret, keys_b, 0);
-    Load128_buffer(rk2,  key_ptr, 16, Secret, keys_b, 1);
-    Load128_buffer(rk3, key_ptr, 32, Secret, keys_b, 2);
-    Load128_buffer(rk4,  key_ptr, 48, Secret, keys_b, 3);
+    Load128_buffer(heap0, rk1,  key_ptr,  0, Secret, keys_b, 0);
+    Load128_buffer(heap0, rk2,  key_ptr, 16, Secret, keys_b, 1);
+    Load128_buffer(heap0, rk3, key_ptr, 32, Secret, keys_b, 2);
+    Load128_buffer(heap0, rk4,  key_ptr, 48, Secret, keys_b, 3);
     assert rk1  == index(round_keys, 0);
     assert rk2  == index(round_keys, 1);
     assert rk3 == index(round_keys, 2);
@@ -556,20 +556,20 @@ procedure Aes_ctr_loop_body(
 
     // Xor the plaintext with the encrypted counter
     // TODO: Intel does this using XMM operands
-    Load128_buffer(tmp_xmm, plain_ptr,  0, Secret, plain_b, 4*count + 0);
+    Load128_buffer(heap0, tmp_xmm, plain_ptr,  0, Secret, plain_b, 4*count + 0);
     Pxor(ctr1, tmp_xmm);
-    Load128_buffer(tmp_xmm, plain_ptr, 16, Secret, plain_b, 4*count + 1);
+    Load128_buffer(heap0, tmp_xmm, plain_ptr, 16, Secret, plain_b, 4*count + 1);
     Pxor(ctr2, tmp_xmm);
-    Load128_buffer(tmp_xmm, plain_ptr, 32, Secret, plain_b, 4*count + 2);
+    Load128_buffer(heap0, tmp_xmm, plain_ptr, 32, Secret, plain_b, 4*count + 2);
     Pxor(ctr3, tmp_xmm);
-    Load128_buffer(tmp_xmm, plain_ptr, 48, Secret, plain_b, 4*count + 3);
+    Load128_buffer(heap0, tmp_xmm, plain_ptr, 48, Secret, plain_b, 4*count + 3);
     Pxor(ctr4, tmp_xmm);
 
     // Store the cipher text in output
-    Store128_buffer(out_ptr, ctr1,  0, Secret, out_b, 4*count + 0);
-    Store128_buffer(out_ptr, ctr2, 16, Secret, out_b, 4*count + 1);
-    Store128_buffer(out_ptr, ctr3, 32, Secret, out_b, 4*count + 2);
-    Store128_buffer(out_ptr, ctr4, 48, Secret, out_b, 4*count + 3);
+    Store128_buffer(heap0, out_ptr, ctr1,  0, Secret, out_b, 4*count + 0);
+    Store128_buffer(heap0, out_ptr, ctr2, 16, Secret, out_b, 4*count + 1);
+    Store128_buffer(heap0, out_ptr, ctr3, 32, Secret, out_b, 4*count + 2);
+    Store128_buffer(heap0, out_ptr, ctr4, 48, Secret, out_b, 4*count + 3);
 
     lemma_quad32_xor_commutes_forall();
     //commute_sub_bytes_shift_rows_forall();

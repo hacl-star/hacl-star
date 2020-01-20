@@ -182,7 +182,7 @@ procedure Compute_ghash_incremental(ghost in_b:buffer128)
             decreases
                 len - rdx;
         {
-            Load128_buffer(xmm2, r9, 0, Secret, in_b, rdx);
+            Load128_buffer(heap0, xmm2, r9, 0, Secret, in_b, rdx);
             Pxor(io, xmm2);        // Y_i := Y_{i-1} ^ x
             Mov128(xmm2, h);       // xmm2 := H
 
@@ -247,7 +247,7 @@ procedure Compute_ghash_incremental_partial(ghost in_b:buffer128)
             decreases
                 len - rdx;
         {
-            Load128_buffer(xmm2, r9, 0, Secret, in_b, rdx);
+            Load128_buffer(heap0, xmm2, r9, 0, Secret, in_b, rdx);
             Pxor(io, xmm2);        // Y_i := Y_{i-1} ^ x
             Mov128(xmm2, h);       // xmm2 := H
 
@@ -494,7 +494,7 @@ procedure Ghash_incremental_bytes_extra(
 {
     let num_blocks := orig_num_bytes / 16;
 
-    Load128_buffer(xmm2, in_ptr, 0, Secret, in_b, num_blocks);
+    Load128_buffer(heap0, xmm2, in_ptr, 0, Secret, in_b, num_blocks);
     let final_quad := xmm2;
 
     Compute_pad_to_128_bits();

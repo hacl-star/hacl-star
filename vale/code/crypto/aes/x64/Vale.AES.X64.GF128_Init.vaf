@@ -158,12 +158,12 @@ procedure Gf128_powers(ghost h:poly, ghost hkeys_b:buffer128)
     Mov128(xmm0, xmm6);
     Mov64(rax, r12);
 
-    Load128_buffer(xmm1, rcx, 0x20, Secret, hkeys_b, 2);
+    Load128_buffer(heap0, xmm1, rcx, 0x20, Secret, hkeys_b, 2);
     lemma_g_power_1(h); // assert of_quad32(xmm1) == g_power(h, 1);
     Mov128(xmm6, xmm1);
     Mov128(xmm3, xmm1);
     ShiftKey1_gf128_power(h, 1);
-    Store128_buffer(rcx, xmm1, 0x00, Secret, hkeys_b, 0);
+    Store128_buffer(heap0, rcx, xmm1, 0x00, Secret, hkeys_b, 0);
 
     Mov128(xmm1, xmm6);
     Mov128(xmm2, xmm6);
@@ -172,43 +172,43 @@ procedure Gf128_powers(ghost h:poly, ghost hkeys_b:buffer128)
     Mov128(xmm6, xmm1);
     Mov128(xmm3, xmm1);
     ShiftKey1_gf128_power(h, 2);
-    Store128_buffer(rcx, xmm1, 0x10, Secret, hkeys_b, 1);
+    Store128_buffer(heap0, rcx, xmm1, 0x10, Secret, hkeys_b, 1);
 
     Mov128(xmm2, xmm6);
-    Load128_buffer(xmm1, rcx, 0x20, Secret, hkeys_b, 2);
+    Load128_buffer(heap0, xmm1, rcx, 0x20, Secret, hkeys_b, 2);
     Gf128MulRev128();
     lemma_g_power_n(h, 2); // assert of_quad32(xmm1) == g_power(h, 3);
     Mov128(xmm6, xmm1);
     Mov128(xmm3, xmm1);
     ShiftKey1_gf128_power(h, 3);
-    Store128_buffer(rcx, xmm1, 0x30, Secret, hkeys_b, 3);
+    Store128_buffer(heap0, rcx, xmm1, 0x30, Secret, hkeys_b, 3);
 
     Mov128(xmm2, xmm6);
-    Load128_buffer(xmm1, rcx, 0x20, Secret, hkeys_b, 2);
+    Load128_buffer(heap0, xmm1, rcx, 0x20, Secret, hkeys_b, 2);
     Gf128MulRev128();
     lemma_g_power_n(h, 3); // assert of_quad32(xmm1) == g_power(h, 4);
     Mov128(xmm6, xmm1);
     Mov128(xmm3, xmm1);
     ShiftKey1_gf128_power(h, 4);
-    Store128_buffer(rcx, xmm1, 0x40, Secret, hkeys_b, 4);
+    Store128_buffer(heap0, rcx, xmm1, 0x40, Secret, hkeys_b, 4);
 
     Mov128(xmm2, xmm6);
-    Load128_buffer(xmm1, rcx, 0x20, Secret, hkeys_b, 2);
+    Load128_buffer(heap0, xmm1, rcx, 0x20, Secret, hkeys_b, 2);
     Gf128MulRev128();
     lemma_g_power_n(h, 4); // assert of_quad32(xmm1) == g_power(h, 5);
     Mov128(xmm6, xmm1);
     Mov128(xmm3, xmm1);
     ShiftKey1_gf128_power(h, 5);
-    Store128_buffer(rcx, xmm1, 0x60, Secret, hkeys_b, 6);
+    Store128_buffer(heap0, rcx, xmm1, 0x60, Secret, hkeys_b, 6);
 
     Mov128(xmm2, xmm6);
-    Load128_buffer(xmm1, rcx, 0x20, Secret, hkeys_b, 2);
+    Load128_buffer(heap0, xmm1, rcx, 0x20, Secret, hkeys_b, 2);
     Gf128MulRev128();
     lemma_g_power_n(h, 5); // assert of_quad32(xmm1) == g_power(h, 6);
     Mov128(xmm6, xmm1);
     Mov128(xmm3, xmm1);
     ShiftKey1_gf128_power(h, 6);
-    Store128_buffer(rcx, xmm1, 0x70, Secret, hkeys_b, 7);
+    Store128_buffer(heap0, rcx, xmm1, 0x70, Secret, hkeys_b, 7);
 
     Mov128(xmm6, xmm0);
     Mov64(r12, rax);
@@ -258,12 +258,12 @@ procedure Keyhash_init(
     ZeroXmm(xmm0);
     inline if (win)
     {
-        Store128_buffer(rdx, xmm0, 0x50, Secret, hkeys_b, 5); // Store 0 into 5th element
+        Store128_buffer(heap0, rdx, xmm0, 0x50, Secret, hkeys_b, 5); // Store 0 into 5th element
         Mov64(r8, rcx);
     }
     else
     {
-        Store128_buffer(rsi, xmm0, 0x50, Secret, hkeys_b, 5); // Store 0 into 5th element
+        Store128_buffer(heap0, rsi, xmm0, 0x50, Secret, hkeys_b, 5); // Store 0 into 5th element
         Mov64(r8, rdi);
     }
     AESEncryptBlock(alg, xmm0, key, old(buffer128_as_seq(heap0, roundkeys_b)), roundkeys_b); // h = xmm0 = aes_encrypt_LE alg key (Mkfour 0 0 0 0) in
@@ -276,7 +276,7 @@ procedure Keyhash_init(
     {
         Mov64(rcx, rsi);
     }
-    Store128_buffer(rcx, xmm0, 0x20, Secret, hkeys_b, 2);
+    Store128_buffer(heap0, rcx, xmm0, 0x20, Secret, hkeys_b, 2);
 
     Gf128_powers(of_quad32(xmm0), hkeys_b);
 

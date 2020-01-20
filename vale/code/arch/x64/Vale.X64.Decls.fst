@@ -41,9 +41,10 @@ let mul_nat_helper x y =
 
 let va_fuel_default () = 0
 
-let lemma_opr_Mem (s:va_state) (base:va_operand) (offset:int) (b:M.buffer64) (index:int) (t:taint) : Lemma
+let lemma_opr_Mem64 (id:heaplet_id) (s:va_state) (base:va_operand) (offset:int) (b:M.buffer64) (index:int) (t:taint) : Lemma
   (requires (
     let h = Map16.sel s.vs_heap.vf_heaplets 0 in
+    id == 0 /\
     M.mem_inv s.vs_heap /\
     OReg? base /\
     valid_src_addr h b index /\
@@ -53,21 +54,22 @@ let lemma_opr_Mem (s:va_state) (base:va_operand) (offset:int) (b:M.buffer64) (in
   ))
   (ensures (
     let h = Map16.sel s.vs_heap.vf_heaplets 0 in
-    valid_operand (va_opr_code_Mem base offset t) s /\
+    valid_operand (va_opr_code_Mem64 id base offset t) s /\
     M.load_mem64 (M.buffer_addr b h + 8 * index) (s.vs_heap.vf_heap) == M.buffer_read b index h
   ))
   =
   Vale.X64.Memory_Sems.low_lemma_load_mem64_full b index s.vs_heap t;
   let h = M.get_vale_heap s.vs_heap in
-  let t = va_opr_code_Mem base offset t in
+  let t = va_opr_code_Mem64 id base offset t in
   M.lemma_valid_mem64 b index h;
   let OMem (m, t) = t in
   assert (valid_buf_maddr64 (eval_maddr m s) h s.vs_heap.vf_layout b index t);
   M.lemma_load_mem64 b index h
 
-let lemma_opr_Mem128 (s:va_state) (base:va_operand) (offset:int) (t:taint) (b:M.buffer128) (index:int) : Lemma
+let lemma_opr_Mem128 (id:heaplet_id) (s:va_state) (base:va_operand) (offset:int) (t:taint) (b:M.buffer128) (index:int) : Lemma
   (requires (
     let h = Map16.sel s.vs_heap.vf_heaplets 0 in
+    id == 0 /\
     M.mem_inv s.vs_heap /\
     OReg? base /\
     valid_src_addr h b index /\
@@ -77,13 +79,13 @@ let lemma_opr_Mem128 (s:va_state) (base:va_operand) (offset:int) (t:taint) (b:M.
   ))
   (ensures (
     let h = Map16.sel s.vs_heap.vf_heaplets 0 in
-    valid_operand128 (va_opr_code_Mem128 base offset t) s /\
+    valid_operand128 (va_opr_code_Mem128 id base offset t) s /\
     M.load_mem128 (M.buffer_addr b h + 16 * index) (M.get_vale_heap s.vs_heap) == M.buffer_read b index h
   ))
   =
   Vale.X64.Memory_Sems.low_lemma_load_mem128_full b index s.vs_heap t;
   let h = M.get_vale_heap s.vs_heap in
-  let t = va_opr_code_Mem128 base offset t in
+  let t = va_opr_code_Mem128 id base offset t in
   M.lemma_valid_mem128 b index h;
   let OMem (m, t) = t in
   assert (valid_buf_maddr128 (eval_maddr m s) h s.vs_heap.vf_layout b index t);

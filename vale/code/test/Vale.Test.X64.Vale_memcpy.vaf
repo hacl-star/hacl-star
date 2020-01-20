@@ -46,17 +46,17 @@ procedure Memcpy(inline win:bool, ghost dst:buffer64, ghost src:buffer64)
         declare_buffer64(dst, 0, Secret, Mutable)));
     inline if (win)
     {
-        Load64_buffer(rax, rdx, 0, Secret, src, 0);
-        Load64_buffer(r9, rdx, 8, Secret, src, 1);
-        Store64_buffer(rcx, rax, 0, Secret, dst, 0);
-        Store64_buffer(rcx, r9, 8, Secret, dst, 1);
+        Load64_buffer(heap0, rax, rdx, 0, Secret, src, 0);
+        Load64_buffer(heap0, r9, rdx, 8, Secret, src, 1);
+        Store64_buffer(heap0, rcx, rax, 0, Secret, dst, 0);
+        Store64_buffer(heap0, rcx, r9, 8, Secret, dst, 1);
     }
     else
     {
-        Load64_buffer(rax, rsi, 0, Secret, src, 0);
-        Load64_buffer(rcx, rsi, 8, Secret, src, 1);
-        Store64_buffer(rdi, rax, 0, Secret, dst, 0);
-        Store64_buffer(rdi, rcx, 8, Secret, dst, 1);
+        Mov64(rax, Mem64(heap0, rsi, 0, src, 0, Secret));
+        Mov64(rcx, Mem64(heap0, rsi, 8, src, 1, Secret));
+        Store64_buffer(heap0, rdi, rax, 0, Secret, dst, 0);
+        Store64_buffer(heap0, rdi, rcx, 8, Secret, dst, 1);
     }
     assert(Seq.equal(buffer_as_seq(heap0, dst), buffer_as_seq(heap0, src)));
 

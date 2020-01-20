@@ -163,10 +163,10 @@ procedure Aes_ctr_loop_body(
     Pshufb64(const4_3, mask64);     // const4_3 = LSB: 4 | bswap(ivec_hi) | 3 | bswap(ivec_hi)
 
     // Load the next four round key blocks
-    Load128_buffer(rk1,  key_ptr,  0, Secret, keys_b, 0);
-    Load128_buffer(rk2,  key_ptr, 16, Secret, keys_b, 1);
-    Load128_buffer(rk3, key_ptr, 32, Secret, keys_b, 2);
-    Load128_buffer(rk4,  key_ptr, 48, Secret, keys_b, 3);
+    Load128_buffer(heap0, rk1,  key_ptr,  0, Secret, keys_b, 0);
+    Load128_buffer(heap0, rk2,  key_ptr, 16, Secret, keys_b, 1);
+    Load128_buffer(heap0, rk3, key_ptr, 32, Secret, keys_b, 2);
+    Load128_buffer(heap0, rk4,  key_ptr, 48, Secret, keys_b, 3);
     assert rk1  == index(round_keys, 0);
     assert rk2  == index(round_keys, 1);
     assert rk3 == index(round_keys, 2);
@@ -195,20 +195,20 @@ procedure Aes_ctr_loop_body(
 
     // Xor the plaintext with the encrypted counter
     // TODO: Intel does this using XMM operands
-    Load128_buffer(tmp_xmm, plain_ptr,  0, Secret, plain_b, 4*count + 0);
+    Load128_buffer(heap0, tmp_xmm, plain_ptr,  0, Secret, plain_b, 4*count + 0);
     Pxor(ctr1, tmp_xmm);
-    Load128_buffer(tmp_xmm, plain_ptr, 16, Secret, plain_b, 4*count + 1);
+    Load128_buffer(heap0, tmp_xmm, plain_ptr, 16, Secret, plain_b, 4*count + 1);
     Pxor(ctr2, tmp_xmm);
-    Load128_buffer(tmp_xmm, plain_ptr, 32, Secret, plain_b, 4*count + 2);
+    Load128_buffer(heap0, tmp_xmm, plain_ptr, 32, Secret, plain_b, 4*count + 2);
     Pxor(ctr3, tmp_xmm);
-    Load128_buffer(tmp_xmm, plain_ptr, 48, Secret, plain_b, 4*count + 3);
+    Load128_buffer(heap0, tmp_xmm, plain_ptr, 48, Secret, plain_b, 4*count + 3);
     Pxor(ctr4, tmp_xmm);
 
     // Store the cipher text in output
-    Store128_buffer(out_ptr, ctr1,  0, Secret, out_b, 4*count + 0);
-    Store128_buffer(out_ptr, ctr2, 16, Secret, out_b, 4*count + 1);
-    Store128_buffer(out_ptr, ctr3, 32, Secret, out_b, 4*count + 2);
-    Store128_buffer(out_ptr, ctr4, 48, Secret, out_b, 4*count + 3);
+    Store128_buffer(heap0, out_ptr, ctr1,  0, Secret, out_b, 4*count + 0);
+    Store128_buffer(heap0, out_ptr, ctr2, 16, Secret, out_b, 4*count + 1);
+    Store128_buffer(heap0, out_ptr, ctr3, 32, Secret, out_b, 4*count + 2);
+    Store128_buffer(heap0, out_ptr, ctr4, 48, Secret, out_b, 4*count + 3);
 
     lemma_quad32_xor_commutes_forall();
     //commute_sub_bytes_shift_rows_forall();

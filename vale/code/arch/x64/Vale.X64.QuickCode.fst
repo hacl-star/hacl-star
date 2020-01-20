@@ -85,6 +85,7 @@ let va_mod_reg_opr64 (o:va_reg_operand) : mod_t =
   | OReg r -> Mod_reg (Reg 0 r)
 
 [@va_qattr qmodattr] let va_mod_xmm (x:reg_xmm) : mod_t = Mod_reg (Reg 1 x)
+[@va_qattr qmodattr] let va_mod_heaplet (h:heaplet_id) : mod_t = Mod_mem_heaplet h
 
 let quickProc_wp (a:Type0) : Type u#1 = (s0:vale_state) -> (wp_continue:vale_state -> a -> Type0) -> Type0
 

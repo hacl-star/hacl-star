@@ -31,10 +31,10 @@ procedure Copy16(inline t:taint, ghost bsrc:buffer64, ghost bdst:buffer64)
         rax; rcx;
         heap0;
 {
-    Load64_buffer(rax, rsi, 0, t, bsrc, 0);
-    Load64_buffer(rcx, rsi, 8, t, bsrc, 1);
-    Store64_buffer(rdi, rax, 0, t, bdst, 0);
-    Store64_buffer(rdi, rcx, 8, t, bdst, 1);
+    Load64_buffer(heap0, rax, rsi, 0, t, bsrc, 0);
+    Load64_buffer(heap0, rcx, rsi, 8, t, bsrc, 1);
+    Store64_buffer(heap0, rdi, rax, 0, t, bdst, 0);
+    Store64_buffer(heap0, rdi, rcx, 8, t, bdst, 1);
 }
 
 /*

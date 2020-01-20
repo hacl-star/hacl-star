@@ -52,30 +52,31 @@ friend Vale.X64.Decls
 
 #reset-options "--initial_fuel 2 --max_fuel 2 --max_ifuel 2 --z3rlimit 20"
 
-procedure Mem_in(in base:reg64, inline offset:int, ghost b:buffer64, ghost index:int, inline t:taint)
+procedure Mem64_in(in h:heaplet, in base:reg64, inline offset:int, ghost b:buffer64, ghost index:int, inline t:taint)
     returns(o:opr)
     {:operand}
-    reads
-        heap0;
     extern;
 
-procedure Mem_lemma(ghost base:va_operand, ghost offset:int, ghost b:buffer64, ghost index:int, ghost t:taint)
+procedure Mem64_lemma(ghost h:heaplet_id, ghost base:va_operand, ghost offset:int, ghost b:buffer64, ghost index:int, ghost t:taint)
     {:public}
     {:quick exportOnly}
     {:typecheck false}
+    lets
+        heap_h := va_get_mem_heaplet(h, this);
     reads
-        mem; heap0; memLayout;
+        mem; memLayout;
     requires
+        h == 0;
         base is OReg;
-        valid_src_addr(heap0, b, index);
-        valid_layout_buffer(b, memLayout, heap0, false);
-        valid_taint_buf64(b, heap0, memLayout.vl_taint, t);
-        eval_operand(base, this) + offset == buffer_addr(b, heap0) + 8 * index;
+        valid_src_addr(heap_h, b, index);
+        valid_layout_buffer(b, memLayout, heap_h, false);
+        valid_taint_buf64(b, heap_h, memLayout.vl_taint, t);
+        eval_operand(base, this) + offset == buffer_addr(b, heap_h) + 8 * index;
     ensures
-        valid_operand(va_opr_code_Mem(base, offset, t), this);
-        load_mem64(buffer_addr(b, heap0) + 8 * index, mem) == buffer_read(b, index, heap0);
+        valid_operand(va_opr_code_Mem64(h, base, offset, t), this);
+        load_mem64(buffer_addr(b, heap_h) + 8 * index, mem) == buffer_read(b, index, heap_h);
 {
-    lemma_opr_Mem(this, base, offset, b, index, t);
+    lemma_opr_Mem64(h, this, base, offset, b, index, t);
 }
 
 #verbatim
@@ -193,69 +194,72 @@ procedure DestroyHeaplets()
 }
 
 procedure Load64_buffer(
-        out dst:dst_opr64, in src:reg_opr64, inline offset:int, inline t:taint,
+        in h:heaplet, out dst:dst_opr64, in src:reg_opr64, inline offset:int, inline t:taint,
         ghost b:buffer64, ghost index:int)
     {:public}
     {:quick exportOnly}
     {:instruction mk_ins(make_instr(I.ins_Mov64, dst, OMem(tuple(MReg(get_reg(src), offset), t))))}
     reads
-        heap0; memLayout;
+        memLayout;
     requires
-        valid_src_addr(heap0, b, index);
-        valid_layout_buffer(b, memLayout, heap0, false);
-        valid_taint_buf64(b, heap0, memLayout.vl_taint, t);
-        src + offset == buffer_addr(b, heap0) + 8 * index;
+        @h == 0;
+        valid_src_addr(h, b, index);
+        valid_layout_buffer(b, memLayout, h, false);
+        valid_taint_buf64(b, h, memLayout.vl_taint, t);
+        src + offset == buffer_addr(b, h) + 8 * index;
     ensures
-        dst == buffer64_read(b, index, heap0);
+        dst == buffer64_read(b, index, h);
 {
     low_lemma_load_mem64_full(b, #nat(index), this.vs_heap, t);
 }
 
 procedure Store64_buffer(
-        in dst:reg_opr64, in src:reg_opr64, inline offset:int, inline t:taint,
+        inout h:heaplet, in dst:reg_opr64, in src:reg_opr64, inline offset:int, inline t:taint,
         ghost b:buffer64, ghost index:int)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_ins(make_instr(I.ins_Mov64, OMem(tuple(MReg(get_reg(dst), offset), t)), src))}
+    {:instruction mk_ins(make_instr(Vale.X64.Instructions_s.ins_Mov64, OMem(tuple(MReg(get_reg(dst), offset), t)), src))}
     reads
         memLayout;
     modifies
-        heap0;
+        mem;
     requires
-        valid_dst_addr(heap0, b, index);
-        valid_layout_buffer(b, memLayout, heap0, true);
-        valid_taint_buf64(b, heap0, memLayout.vl_taint, t);
-        dst + offset == buffer_addr(b, heap0) + 8 * index;
+        @h == 0;
+        valid_dst_addr(h, b, index);
+        valid_layout_buffer(b, memLayout, h, true);
+        valid_taint_buf64(b, h, memLayout.vl_taint, t);
+        dst + offset == buffer_addr(b, h) + 8 * index;
     ensures
-        modifies_mem(loc_buffer(b), old(heap0), heap0);
-        heap0 == old(buffer64_write(b, index, src, heap0));
-        valid_taint_buf64(b, heap0, memLayout.vl_taint, t);
+        modifies_mem(loc_buffer(b), old(h), h);
+        h == old(buffer64_write(b, index, src, h));
+        valid_taint_buf64(b, h, memLayout.vl_taint, t);
 {
     low_lemma_store_mem64_full(b, #nat(index), old(src), old(this).vs_heap, t);
 }
 
 procedure LoadBe64_buffer(
-        out dst:dst_opr64, in src:reg_opr64, inline offset:int, inline t:taint,
+        in h:heaplet, out dst:dst_opr64, in src:reg_opr64, inline offset:int, inline t:taint,
         ghost b:buffer64, ghost index:int)
     {:public}
     {:quick exportOnly}
     {:instruction mk_ins(make_instr(I.ins_MovBe64, dst, OMem(tuple(MReg(get_reg(src), offset), t))))}
     reads
-        heap0; memLayout;
+        memLayout;
     requires
+        @h == 0;
         movbe_enabled;
-        valid_src_addr(heap0, b, index);
-        valid_layout_buffer(b, memLayout, heap0, false);
-        valid_taint_buf64(b, heap0, memLayout.vl_taint, t);
-        src + offset == buffer_addr(b, heap0) + 8 * index;
+        valid_src_addr(h, b, index);
+        valid_layout_buffer(b, memLayout, h, false);
+        valid_taint_buf64(b, h, memLayout.vl_taint, t);
+        src + offset == buffer_addr(b, h) + 8 * index;
     ensures
-        dst == reverse_bytes_nat64(buffer64_read(b, index, heap0));
+        dst == reverse_bytes_nat64(buffer64_read(b, index, h));
 {
     low_lemma_load_mem64_full(b, #nat(index), this.vs_heap, t);
 }
 
 procedure StoreBe64_buffer(
-        in dst:reg_opr64, in src:reg_opr64, inline offset:int, inline t:taint,
+        inout h:heaplet, in dst:reg_opr64, in src:reg_opr64, inline offset:int, inline t:taint,
         ghost b:buffer64, ghost index:int)
     {:public}
     {:quick exportOnly}
@@ -263,17 +267,18 @@ procedure StoreBe64_buffer(
     reads
         memLayout;
     modifies
-        heap0;
+        mem;
     requires
+        @h == 0;
         movbe_enabled;
-        valid_dst_addr(heap0, b, index);
-        valid_layout_buffer(b, memLayout, heap0, true);
-        valid_taint_buf64(b, heap0, memLayout.vl_taint, t);
-        dst + offset == buffer_addr(b, heap0) + 8 * index;
+        valid_dst_addr(h, b, index);
+        valid_layout_buffer(b, memLayout, h, true);
+        valid_taint_buf64(b, h, memLayout.vl_taint, t);
+        dst + offset == buffer_addr(b, h) + 8 * index;
     ensures
-        modifies_mem(loc_buffer(b), old(heap0), heap0);
-        heap0 == old(buffer64_write(b, index, reverse_bytes_nat64(src), heap0));
-        valid_taint_buf64(b, heap0, memLayout.vl_taint, t);
+        modifies_mem(loc_buffer(b), old(h), h);
+        h == old(buffer64_write(b, index, reverse_bytes_nat64(src), h));
+        valid_taint_buf64(b, h, memLayout.vl_taint, t);
 {
     low_lemma_store_mem64_full(b, #nat(index), old(reverse_bytes_nat64(src)), old(this).vs_heap, t);
 }

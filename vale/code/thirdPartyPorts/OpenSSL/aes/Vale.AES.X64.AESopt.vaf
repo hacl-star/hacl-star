@@ -353,11 +353,11 @@ procedure Loop6x_ctr_update(
     // which handles wrap and control flow more efficiently
     Add64(counter, 6);
     if (counter >= 256) {
-        Load128_buffer(Hkey, Xip, 0x00-0x20, Secret, hkeys_b, 0);   // # $Hkey^1
+        Load128_buffer(heap0, Hkey, Xip, 0x00-0x20, Secret, hkeys_b, 0);   // # $Hkey^1
         Handle_ctr32(ctr_BE); //, counter);
         Sub64(counter, 256);
     } else {
-        Load128_buffer(Hkey, Xip, 0x00-0x20, Secret, hkeys_b, 0);   // # $Hkey^1
+        Load128_buffer(heap0, Hkey, Xip, 0x00-0x20, Secret, hkeys_b, 0);   // # $Hkey^1
         VPaddd(T1, T2, inout5); // OpenSSL uses VPaddb
         VPxor(inout1, inout1, rndkey);
         VPxor(inout2, inout2, rndkey);
@@ -403,7 +403,7 @@ procedure Loop6x_plain(
     ensures
         tuple(inout0, inout1, inout2, inout3, inout4, inout5) == rounds_opaque_6(init, round_keys, rnd + 1);
 {
-    Load128_buffer(rndkey, key, 16*(rnd+1)-0x80, Secret, keys_b, rnd+1);
+    Load128_buffer(heap0, rndkey, key, 16*(rnd+1)-0x80, Secret, keys_b, rnd+1);
     VAESNI_enc(inout0, inout0, rndkey);
     VAESNI_enc(inout1, inout1, rndkey);
     VAESNI_enc(inout2, inout2, rndkey);
@@ -513,7 +513,7 @@ procedure Loop6x_preamble(
     init_rounds_opaque(inout2, round_keys);
     */
 
-    Store128_buffer(rbp, T1, 0x80, Secret, stack_b, 8); // # save next counter value /* XXX[jb]: Changed from Store128_buffer(ivp, T1, 0, Secret, iv_b, 0); */
+    Store128_buffer(heap0, rbp, T1, 0x80, Secret, stack_b, 8); // # save next counter value /* XXX[jb]: Changed from Store128_buffer(heap0, ivp, T1, 0, Secret, iv_b, 0); */
     VPxor(inout3, inout3, rndkey); init_rounds_opaque(inout3, round_keys);
     VPxor(inout4, inout4, rndkey); init_rounds_opaque(inout4, round_keys);
     VPxor(inout5, inout5, rndkey); init_rounds_opaque(inout5, round_keys);
@@ -544,10 +544,10 @@ procedure Loop6x_reverse128(
         buffer128_read(stack_b, stack_offset, heap0) ==
             old(reverse_bytes_quad32(buffer128_read(in0_b, start + in0_offset, heap0)));
 {
-    LoadBe64_buffer128(r13, in0, in0_offset * 16 + 8,  Secret, true,  in0_b, start + in0_offset);
-    LoadBe64_buffer128(r12, in0, in0_offset * 16,      Secret, false, in0_b, start + in0_offset);
-    Store64_buffer128(rbp, r13, stack_offset * 16,     Secret, false, stack_b, stack_offset);
-    Store64_buffer128(rbp, r12, stack_offset * 16 + 8, Secret, true,  stack_b, stack_offset);
+    LoadBe64_buffer128(heap0, r13, in0, in0_offset * 16 + 8,  Secret, true,  in0_b, start + in0_offset);
+    LoadBe64_buffer128(heap0, r12, in0, in0_offset * 16,      Secret, false, in0_b, start + in0_offset);
+    Store64_buffer128(heap0, rbp, r13, stack_offset * 16,     Secret, false, stack_b, stack_offset);
+    Store64_buffer128(heap0, rbp, r12, stack_offset * 16 + 8, Secret, true,  stack_b, stack_offset);
     lemma_reverse_bytes_quad32_64(old(buffer128_read(in0_b, start + in0_offset, heap0)),
         old(buffer128_read(stack_b, stack_offset, heap0)), buffer128_read(stack_b, stack_offset, heap0));
 }
@@ -583,14 +583,14 @@ procedure Loop6x_round9(
             quad32_xor(index(round_keys, #nat(nr(alg))), buffer128_read(in_b, count * 6 + i, heap0)));
         buffer128_read(stack_b, 1, heap0) == old(Z3);
 {
-    /* XXX[jb]: The Load128_buffer(T1, key, 0xa0-0x80, Secret, keys_b, 10); has been removed from here to allow for even cleaner code to verify :) */
-    Store128_buffer(rbp, Z3, 0x10, Secret, stack_b, 1);  // # postpone vpxor $Z3,$Xi,$Xi
-    VPxor(T2, T1, Mem128(inp, 0x00, Secret, in_b, count*6 + 0));
-    VPxor(Ii, T1, Mem128(inp, 0x10, Secret, in_b, count*6 + 1));
-    VPxor(Z1, T1, Mem128(inp, 0x20, Secret, in_b, count*6 + 2));
-    VPxor(Z2, T1, Mem128(inp, 0x30, Secret, in_b, count*6 + 3));
-    VPxor(Z3, T1, Mem128(inp, 0x40, Secret, in_b, count*6 + 4));
-    VPxor(Hkey, T1, Mem128(inp, 0x50, Secret, in_b, count*6 + 5));
+    /* XXX[jb]: The Load128_buffer(heap0, T1, key, 0xa0-0x80, Secret, keys_b, 10); has been removed from here to allow for even cleaner code to verify :) */
+    Store128_buffer(heap0, rbp, Z3, 0x10, Secret, stack_b, 1);  // # postpone vpxor $Z3,$Xi,$Xi
+    VPxor(T2, T1, Mem128(heap0, inp, 0x00, Secret, in_b, count*6 + 0));
+    VPxor(Ii, T1, Mem128(heap0, inp, 0x10, Secret, in_b, count*6 + 1));
+    VPxor(Z1, T1, Mem128(heap0, inp, 0x20, Secret, in_b, count*6 + 2));
+    VPxor(Z2, T1, Mem128(heap0, inp, 0x30, Secret, in_b, count*6 + 3));
+    VPxor(Z3, T1, Mem128(heap0, inp, 0x40, Secret, in_b, count*6 + 4));
+    VPxor(Hkey, T1, Mem128(heap0, inp, 0x50, Secret, in_b, count*6 + 5));
 }
 
 procedure load_one_msb()
@@ -687,20 +687,20 @@ procedure Loop6x_final(
             xor_reverse_inc32lite_6(0, 0, ctr_orig, rndkey);
 {
     lemma_quad32_xor_commutes_forall();
-//    Load128_buffer(T1, ivp, 0, Public, iv_b, 0); // # load next counter value
-    Load128_buffer(T1, rbp, 0x80, Secret, scratch_b, 8); // # load next counter value
+//    Load128_buffer(heap0, T1, ivp, 0, Public, iv_b, 0); // # load next counter value
+    Load128_buffer(heap0, T1, rbp, 0x80, Secret, scratch_b, 8); // # load next counter value
 
     VAESNI_enc_last(inout0, inout0, T2);
     load_one_msb();                              // # borrow $T2, .Lone_msb
     VAESNI_enc_last(inout1, inout1, Ii);
     VPaddd(Ii, T1, T2);
-    Store64_buffer128(rbp, r13, 7 * 16, Secret, false, scratch_b, 7);  // OpenSSL is further offset by 8 (to account for return addr?)
+    Store64_buffer128(heap0, rbp, r13, 7 * 16, Secret, false, scratch_b, 7);  // OpenSSL is further offset by 8 (to account for return addr?)
     AddLea64(inp, inp, 0x60);
     VAESNI_enc_last(inout2, inout2, Z1);
     VPaddd(Z1, Ii, T2);
-    Store64_buffer128(rbp, r12, 7 * 16 + 8, Secret, true, scratch_b, 7);   // OpenSSL is further offset by 8 (to account for return addr?)
+    Store64_buffer128(heap0, rbp, r12, 7 * 16 + 8, Secret, true, scratch_b, 7);   // OpenSSL is further offset by 8 (to account for return addr?)
     AddLea64(outp, outp, 0x60);
-    Load128_buffer(rndkey, key, 0x00 - 0x80, Secret, keys_b, 0);
+    Load128_buffer(heap0, rndkey, key, 0x00 - 0x80, Secret, keys_b, 0);
 
     VAESNI_enc_last(inout3, inout3, Z2);
     VPaddd(Z2, Z1, T2);
@@ -764,17 +764,17 @@ procedure Loop6x_save_output(ghost count:nat, ghost out_b:buffer128)
         tuple(inout0, inout1, inout2, inout3, inout4, inout5) ==
             tuple(quad32_xor(T1, rndkey), Ii, Z1, Z2, Z3, Hkey);
 {
-    Store128_buffer(outp, inout0, 0-0x60, Secret, out_b, count*6 + 0);
+    Store128_buffer(heap0, outp, inout0, 0-0x60, Secret, out_b, count*6 + 0);
     VPxor(inout0, T1, rndkey);
-    Store128_buffer(outp, inout1, 0-0x50, Secret, out_b, count*6 + 1);
+    Store128_buffer(heap0, outp, inout1, 0-0x50, Secret, out_b, count*6 + 1);
     Mov128(inout1, Ii);
-    Store128_buffer(outp, inout2, 0-0x40, Secret, out_b, count*6 + 2);
+    Store128_buffer(heap0, outp, inout2, 0-0x40, Secret, out_b, count*6 + 2);
     Mov128(inout2, Z1);
-    Store128_buffer(outp, inout3, 0-0x30, Secret, out_b, count*6 + 3);
+    Store128_buffer(heap0, outp, inout3, 0-0x30, Secret, out_b, count*6 + 3);
     Mov128(inout3, Z2);
-    Store128_buffer(outp, inout4, 0-0x20, Secret, out_b, count*6 + 4);
+    Store128_buffer(heap0, outp, inout4, 0-0x20, Secret, out_b, count*6 + 4);
     Mov128(inout4, Z3);
-    Store128_buffer(outp, inout5, 0-0x10, Secret, out_b, count*6 + 5);
+    Store128_buffer(heap0, outp, inout5, 0-0x10, Secret, out_b, count*6 + 5);
     Mov128(inout5, Hkey);
 }
 
@@ -926,8 +926,8 @@ procedure Loop6x_partial(
     Loop6x_plain(alg, 6, key_words, round_keys, keys_b, init, rndkey);
     Loop6x_reverse128(1, 6, start, in0_b, stack_b);
     Loop6x_plain(alg, 7, key_words, round_keys, keys_b, init, T1);
-    LoadBe64_buffer128(r13, in0, 0 * 16 + 8, Secret, true,  in0_b, in0_count * 6 + 0);
-    LoadBe64_buffer128(r12, in0, 0 * 16,     Secret, false, in0_b, in0_count * 6 + 0);
+    LoadBe64_buffer128(heap0, r13, in0, 0 * 16 + 8, Secret, true,  in0_b, in0_count * 6 + 0);
+    LoadBe64_buffer128(heap0, r12, in0, 0 * 16,     Secret, false, in0_b, in0_count * 6 + 0);
     Loop6x_plain(alg, 8, key_words, round_keys, keys_b, init, rndkey);
 
      /* XXX[jb] Moved from Loop6x_round9 */
@@ -944,7 +944,7 @@ procedure Loop6x_partial(
                 things we already have in this file :) */
 
         /* XXX[jb]: This chunk of code could be made part of Loop6x_plain. The only difference is rndkey<-->T1. */
-        Load128_buffer(T1, key, 0xa0-0x80, Secret, keys_b, 10);
+        Load128_buffer(heap0, T1, key, 0xa0-0x80, Secret, keys_b, 10);
         VAESNI_enc(inout0, inout0, T1);
         VAESNI_enc(inout1, inout1, T1);
         VAESNI_enc(inout2, inout2, T1);
@@ -957,7 +957,7 @@ procedure Loop6x_partial(
         Loop6x_plain(alg, 10, key_words, round_keys, keys_b, init, rndkey);
 
         /* XXX[jb]: This chunk of code could be made part of Loop6x_plain. The only difference is rndkey<-->T1. */
-        Load128_buffer(T1, key, 0xc0-0x80, Secret, keys_b, 12);
+        Load128_buffer(heap0, T1, key, 0xc0-0x80, Secret, keys_b, 12);
         VAESNI_enc(inout0, inout0, T1);
         VAESNI_enc(inout1, inout1, T1);
         VAESNI_enc(inout2, inout2, T1);
@@ -970,11 +970,11 @@ procedure Loop6x_partial(
 
     inline if (alg = AES_256)
     {
-        Load128_buffer(T1, key, 0xe0-0x80, Secret, keys_b, 14);
+        Load128_buffer(heap0, T1, key, 0xe0-0x80, Secret, keys_b, 14);
     }
     else
     {
-        Load128_buffer(T1, key, 0xa0-0x80, Secret, keys_b, 10);
+        Load128_buffer(heap0, T1, key, 0xa0-0x80, Secret, keys_b, 10);
     }
 
     Loop6x_round9(alg, count, in_b, stack_b, key_words, round_keys, keys_b);
@@ -1172,7 +1172,7 @@ procedure Loop6x(
         assert equal(
             slice(s128(heap0,      out_b), 0, #nat(count - 1) * 6),
             slice(s128(mem_snap, out_b), 0, #nat(count - 1) * 6));
-        Load128_buffer(Z3, rbp, 0x20, Secret, scratch_b, 2);   // # I[5]
+        Load128_buffer(heap0, Z3, rbp, 0x20, Secret, scratch_b, 2);   // # I[5]
 
         let plain := old(s128(heap0, in_b));
         let cipher := s128(heap0, out_b);
@@ -1186,7 +1186,7 @@ procedure Loop6x(
     }
     else
     {
-        VPolyAdd(Xi, Xi, Mem128(rbp, 0x10, Secret, scratch_b, 1));
+        VPolyAdd(Xi, Xi, Mem128(heap0, rbp, 0x10, Secret, scratch_b, 1));
         VPolyAdd(Xi, Xi, Z0);
         assert of_quad32(Xi) == of_quad32(reverse_bytes_quad32(ghash_incremental(h_LE, y_prev, data)));
         assert to_quad32(of_quad32(Xi)) == to_quad32(of_quad32(reverse_bytes_quad32(ghash_incremental(h_LE, y_prev, data))));
@@ -1471,9 +1471,9 @@ procedure AESNI_ctr32_6x_preamble(
 
         rndkey == index(round_keys, 1);
 {
-    Load128_buffer(Z0,     key, 0x00-0x80, Secret, keys_b, 0);  // # borrow $Z0 for $rndkey
+    Load128_buffer(heap0, Z0,     key, 0x00-0x80, Secret, keys_b, 0);  // # borrow $Z0 for $rndkey
     load_one_msb();                                             // # borrow $T2, .Lone_msb
-    Load128_buffer(rndkey, key, 0x10-0x80, Secret, keys_b, 1);
+    Load128_buffer(heap0, rndkey, key, 0x10-0x80, Secret, keys_b, 1);
 
     //OpenSSL uses AddLea64(r12, key, 0x20-0x80) instead of the next two instructions
     Mov64(r12, key);
@@ -1566,7 +1566,7 @@ procedure AESNI_ctr32_6x_loop_body(
 
     eval_rounds_reveal();
     commute_sub_bytes_shift_rows_forall();
-    Load128_buffer(rndkey, key, 16*(rnd+2)-0x80, Secret, keys_b, rnd+2);
+    Load128_buffer(heap0, rndkey, key, 16*(rnd+2)-0x80, Secret, keys_b, rnd+2);
 }
 
 procedure AESNI_ctr32_6x_loop_recursive(
@@ -1694,20 +1694,20 @@ procedure AESNI_ctr32_6x_round9(
 
         inp == old(inp) + 0x60;
 {
-    Load128_buffer(Hkey, key, 0xa0-0x80, Secret, keys_b, 10);  // # last round key
+    Load128_buffer(heap0, Hkey, key, 0xa0-0x80, Secret, keys_b, 10);  // # last round key
 
     VAESNI_enc(inout0, inout0, rndkey);
-    VPxor(Z0, Hkey, Mem128(inp, 0x00, Secret, in_b, count*6 + 0));
+    VPxor(Z0, Hkey, Mem128(heap0, inp, 0x00, Secret, in_b, count*6 + 0));
     VAESNI_enc(inout1, inout1, rndkey);
-    VPxor(Z1, Hkey, Mem128(inp, 0x10, Secret, in_b, count*6 + 1));
+    VPxor(Z1, Hkey, Mem128(heap0, inp, 0x10, Secret, in_b, count*6 + 1));
     VAESNI_enc(inout2, inout2, rndkey);
-    VPxor(Z2, Hkey, Mem128(inp, 0x20, Secret, in_b, count*6 + 2));
+    VPxor(Z2, Hkey, Mem128(heap0, inp, 0x20, Secret, in_b, count*6 + 2));
     VAESNI_enc(inout3, inout3, rndkey);
-    VPxor(Xi, Hkey, Mem128(inp, 0x30, Secret, in_b, count*6 + 3));
+    VPxor(Xi, Hkey, Mem128(heap0, inp, 0x30, Secret, in_b, count*6 + 3));
     VAESNI_enc(inout4, inout4, rndkey);
-    VPxor(T2, Hkey, Mem128(inp, 0x40, Secret, in_b, count*6 + 4));
+    VPxor(T2, Hkey, Mem128(heap0, inp, 0x40, Secret, in_b, count*6 + 4));
     VAESNI_enc(inout5, inout5, rndkey);
-    VPxor(Hkey, Hkey, Mem128(inp, 0x50, Secret, in_b, count*6 + 5));
+    VPxor(Hkey, Hkey, Mem128(heap0, inp, 0x50, Secret, in_b, count*6 + 5));
 
     eval_rounds_reveal();
     commute_sub_bytes_shift_rows_forall();
@@ -1816,12 +1816,12 @@ procedure AESNI_ctr32_6x_final(
     VAESNI_enc_last(inout4, inout4, T2);
     VAESNI_enc_last(inout5, inout5, Hkey);
 
-    Store128_buffer(outp, inout0, 0x00, Secret, out_b, count*6 + 0);
-    Store128_buffer(outp, inout1, 0x10, Secret, out_b, count*6 + 1);
-    Store128_buffer(outp, inout2, 0x20, Secret, out_b, count*6 + 2);
-    Store128_buffer(outp, inout3, 0x30, Secret, out_b, count*6 + 3);
-    Store128_buffer(outp, inout4, 0x40, Secret, out_b, count*6 + 4);
-    Store128_buffer(outp, inout5, 0x50, Secret, out_b, count*6 + 5);
+    Store128_buffer(heap0, outp, inout0, 0x00, Secret, out_b, count*6 + 0);
+    Store128_buffer(heap0, outp, inout1, 0x10, Secret, out_b, count*6 + 1);
+    Store128_buffer(heap0, outp, inout2, 0x20, Secret, out_b, count*6 + 2);
+    Store128_buffer(heap0, outp, inout3, 0x30, Secret, out_b, count*6 + 3);
+    Store128_buffer(heap0, outp, inout4, 0x40, Secret, out_b, count*6 + 4);
+    Store128_buffer(heap0, outp, inout5, 0x50, Secret, out_b, count*6 + 5);
 
     AddLea64(outp, outp, 0x60);
 
@@ -2007,14 +2007,14 @@ procedure Ctr32_ghash_6_prelude(
     load_one_msb();   // # borrow $T2, .Lone_msb
     VPxor(Z0, Z0, Z0);  // # $Z0   = 0
     lemma_quad32_xor();
-    Load128_buffer(rndkey, key, 0x00-0x80, Secret, keys_b, 0);
+    Load128_buffer(heap0, rndkey, key, 0x00-0x80, Secret, keys_b, 0);
     VPaddd(inout1, T1, T2);      lemma_incr_msb(inc32lite(ctr_orig, 0), old(T1), inout1, 1);
     VPaddd(inout2, inout1, T2);  lemma_incr_msb(inc32lite(ctr_orig, 0), old(T1), inout2, 2);
     VPaddd(inout3, inout2, T2);  lemma_incr_msb(inc32lite(ctr_orig, 0), old(T1), inout3, 3);
     VPaddd(inout4, inout3, T2);  lemma_incr_msb(inc32lite(ctr_orig, 0), old(T1), inout4, 4);
     VPaddd(inout5, inout4, T2);  lemma_incr_msb(inc32lite(ctr_orig, 0), old(T1), inout5, 5);
     VPxor(inout0, T1, rndkey);
-    Store128_buffer(rsp, Z0, 0x10, Secret, stack_b, 1);     // # "$Z3" = 0
+    Store128_buffer(heap0, rsp, Z0, 0x10, Secret, stack_b, 1);     // # "$Z3" = 0
 }
 
 #reset-options ""
@@ -2062,18 +2062,18 @@ procedure Encrypt_save_and_shuffle_output(ghost count:nat, ghost out_b:buffer128
         inout5 == reverse_bytes_quad32(old(inout5));
 
 {
-    Store128_buffer(outp, inout0, 0-0x60, Secret, out_b, count*6 + 0);
+    Store128_buffer(heap0, outp, inout0, 0-0x60, Secret, out_b, count*6 + 0);
     VPshufb(inout0, inout0, Ii);
     VPxor(T1, T1, Z3);
-    Store128_buffer(outp, inout1, 0-0x50, Secret, out_b, count*6 + 1);
+    Store128_buffer(heap0, outp, inout1, 0-0x50, Secret, out_b, count*6 + 1);
     VPshufb(inout1, inout1, Ii);
-    Store128_buffer(outp, inout2, 0-0x40, Secret, out_b, count*6 + 2);
+    Store128_buffer(heap0, outp, inout2, 0-0x40, Secret, out_b, count*6 + 2);
     VPshufb(inout2, inout2, Ii);
-    Store128_buffer(outp, inout3, 0-0x30, Secret, out_b, count*6 + 3);
+    Store128_buffer(heap0, outp, inout3, 0-0x30, Secret, out_b, count*6 + 3);
     VPshufb(inout3, inout3, Ii);
-    Store128_buffer(outp, inout4, 0-0x20, Secret, out_b, count*6 + 4);
+    Store128_buffer(heap0, outp, inout4, 0-0x20, Secret, out_b, count*6 + 4);
     VPshufb(inout4, inout4, Ii);
-    Store128_buffer(outp, inout5, 0-0x10, Secret, out_b, count*6 + 5);
+    Store128_buffer(heap0, outp, inout5, 0-0x10, Secret, out_b, count*6 + 5);
     VPshufb(inout5, inout5, Ii);
 }
 
@@ -2155,7 +2155,7 @@ procedure AES_GCM_encrypt(
         le_seq_quad32_to_bytes(buffer128_as_seq(heap0, out_b)) == gctr_encrypt_LE(ctr_BE, le_seq_quad32_to_bytes(old(buffer128_as_seq(heap0, in_b))), alg, key_words);
 {
     let plain_quads := buffer128_as_seq(heap0, in_b);
-    Load128_buffer(T1, ivp, 0, Secret, iv_b, 0);    // # input counter value
+    Load128_buffer(heap0, T1, ivp, 0, Secret, iv_b, 0);    // # input counter value
     let iv_LE := T1;
     //assert iv_LE == old(buffer128_read(iv_b, 0, heap0));
 
@@ -2179,15 +2179,15 @@ procedure AES_GCM_encrypt(
     // # save bswapped output on stack
     VPshufb(Xi, inout0, Ii);
     VPshufb(T2, inout1, Ii);
-    Store128_buffer(rsp, Xi, 0x70, Secret, stack_b, 7);
+    Store128_buffer(heap0, rsp, Xi, 0x70, Secret, stack_b, 7);
     VPshufb(Z0, inout2, Ii);
-    Store128_buffer(rsp, T2, 0x60, Secret, stack_b, 6);
+    Store128_buffer(heap0, rsp, T2, 0x60, Secret, stack_b, 6);
     VPshufb(Z1, inout3, Ii);
-    Store128_buffer(rsp, Z0, 0x50, Secret, stack_b, 5);
+    Store128_buffer(heap0, rsp, Z0, 0x50, Secret, stack_b, 5);
     VPshufb(Z2, inout4, Ii);
-    Store128_buffer(rsp, Z1, 0x40, Secret, stack_b, 4);
+    Store128_buffer(heap0, rsp, Z1, 0x40, Secret, stack_b, 4);
     VPshufb(Z3, inout5, Ii);                // # passed to _aesni_ctr32_ghash_6x
-    Store128_buffer(rsp, Z2, 0x30, Secret, stack_b, 3);
+    Store128_buffer(heap0, rsp, Z2, 0x30, Secret, stack_b, 3);
 
     AESNI_ctr32_6x(alg, 1, in_b, out_b, plain_quads, key_words, round_keys, keys_b, inc32(ctr_BE, 6), ctr_BE);
     Sub64(len, 12);
