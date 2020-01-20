@@ -121,4 +121,4 @@ let lowstar_cswap_t =
     (W.mk_prediction code_cswap cswap_dom [] (cswap_lemma code_cswap IA.win))
 
 [@ (CCConv "stdcall") ]
-val cswap2 : normal lowstar_cswap_t
+val cswap2_e : normal lowstar_cswap_t
