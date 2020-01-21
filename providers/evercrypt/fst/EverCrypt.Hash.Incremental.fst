@@ -18,7 +18,7 @@ open FStar.HyperStack.ST
 open Spec.Hash.Definitions
 friend Spec.Agile.Hash
 
-#set-options "--max_fuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
 
 let _: squash (inversion Hash.alg) = allow_inversion Hash.alg
 
@@ -167,7 +167,7 @@ let create_in a r =
   p
 #pop-options
 
-#push-options "--z3rlimit 40 --using_facts_from '*,-LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2'"
+#push-options "--z3rlimit 100 --using_facts_from '*,-LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2'"
 #restart-solver
 
 let init a s =
