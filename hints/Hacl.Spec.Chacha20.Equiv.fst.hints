@@ -35,7 +35,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "38b57fd6b3a5384c2ba39aee225cd8a0"
+      "8dd894c9aa5f2f7cac7b4ccf9fb5c433"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.line_lemma_i",
@@ -48,11 +48,11 @@
         "FStar.FunctionalExtensionality_interpretation_Tm_arrow_6980332764c4493a7b0df5c02f7aefbe",
         "FStar.Seq.Base_interpretation_Tm_arrow_44bb45ed5c2534b346e0f58ea5033251",
         "Hacl.Spec.Chacha20.Vec_interpretation_Tm_arrow_a4060274569c7f2a838e81ea9e2cc28d",
+        "Lib.IntTypes_interpretation_Tm_arrow_8d531434920b1f664c07622b1f3aa2cb",
         "Lib.IntTypes_interpretation_Tm_arrow_b6c7b131dcab59a8eb8f50c70226d5b9",
         "Lib.IntTypes_interpretation_Tm_arrow_f4a9562bad893d799188b75efefcbe4b",
-        "Lib.IntVector_interpretation_Tm_arrow_482eb33911baac489a07b9cc662d9bf6",
-        "Lib.IntVector_interpretation_Tm_arrow_68d67bb0259d50d0d9424fa27aae3b83",
         "Lib.IntVector_interpretation_Tm_arrow_760746993345c1327f70c87a340d60e0",
+        "Lib.IntVector_interpretation_Tm_arrow_7b2d4cb76dfa35c3112c1f89e30b501c",
         "Lib.Sequence_interpretation_Tm_arrow_31983ce7bb3fa3288ec94b088df0f02a",
         "constructor_distinct_Lib.IntTypes.U128",
         "constructor_distinct_Lib.IntTypes.U32",
@@ -69,12 +69,13 @@
         "equation_Hacl.Spec.Chacha20.Vec.transpose_state",
         "equation_Hacl.Spec.Chacha20.Vec.uint32xN",
         "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.maxint",
-        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.rotval",
-        "equation_Lib.IntTypes.uint32", "equation_Lib.IntTypes.unsigned",
+        "equation_Lib.IntTypes.minint",
+        "equation_Lib.IntTypes.rotate_left_i",
+        "equation_Lib.IntTypes.rotval", "equation_Lib.IntTypes.uint32",
+        "equation_Lib.IntTypes.unsigned",
         "equation_Lib.IntVector.op_Hat_Bar",
         "equation_Lib.IntVector.op_Less_Less_Less_Bar",
         "equation_Lib.IntVector.op_Plus_Bar",
-        "equation_Lib.IntVector.rotate_left_i",
         "equation_Lib.IntVector.v_inttype", "equation_Lib.IntVector.vec_v_t",
         "equation_Lib.IntVector.width", "equation_Lib.Sequence.lseq",
         "equation_Lib.Sequence.seq", "equation_Lib.Sequence.to_seq",
@@ -84,8 +85,8 @@
         "equation_Spec.GaloisField.gf",
         "function_token_typing_Lib.IntTypes.add_mod",
         "function_token_typing_Lib.IntTypes.logxor",
+        "function_token_typing_Lib.IntTypes.rotate_left_i",
         "function_token_typing_Lib.IntTypes.uint32",
-        "function_token_typing_Lib.IntVector.rotate_left_i",
         "function_token_typing_Lib.IntVector.vec_add_mod",
         "function_token_typing_Lib.IntVector.vec_rotate_left",
         "function_token_typing_Lib.IntVector.vec_xor",
@@ -94,8 +95,8 @@
         "interpretation_Tm_abs_3793b4f96245cfe1e81e7e80d9407e7d",
         "lemma_FStar.Seq.Base.lemma_eq_refl",
         "lemma_FStar.Seq.Base.lemma_index_upd2",
-        "lemma_FStar.UInt.pow2_values", "lemma_Lib.IntTypes.pow2_2",
-        "lemma_Lib.IntTypes.pow2_3", "lemma_Lib.IntVector.vec_add_mod_lemma",
+        "lemma_FStar.UInt.pow2_values", "lemma_Lib.IntTypes.pow2_3",
+        "lemma_Lib.IntVector.vec_add_mod_lemma",
         "lemma_Lib.IntVector.vec_xor_lemma", "lemma_Lib.Sequence.eq_elim",
         "primitive_Prims.op_Subtraction",
         "proj_equation_Spec.GaloisField.GF_t",
@@ -104,10 +105,10 @@
         "projection_inverse_Spec.GaloisField.GF_t",
         "refinement_interpretation_Tm_refine_0da46ef8643a6f8ea97a3358bc923338",
         "refinement_interpretation_Tm_refine_0ec011aea9f93256a3547ad9f0c667f1",
+        "refinement_interpretation_Tm_refine_1dec5441ce9f916105531fb1b3368c6f",
         "refinement_interpretation_Tm_refine_2b9ac1d6c43e9e240d84837e7e466c45",
         "refinement_interpretation_Tm_refine_387e6d282145573240ab7b8a4b94cce5",
         "refinement_interpretation_Tm_refine_40d37ebab7c1b683bff04f4efbb0b134",
-        "refinement_interpretation_Tm_refine_453a2deff8562f39b97413b210c77d79",
         "refinement_interpretation_Tm_refine_50745f4abd3b1f3a36148d2dfd3f8dde",
         "refinement_interpretation_Tm_refine_53af704c67e4c6f767327345fbad8fa5",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
@@ -129,11 +130,12 @@
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
         "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
         "refinement_interpretation_Tm_refine_df81b3f17797c6f405c1dbb191651292",
+        "refinement_interpretation_Tm_refine_fe1f2b0fb92318a15c076125042e53a3",
         "token_correspondence_Lib.IntTypes.logxor",
+        "token_correspondence_Lib.IntTypes.rotate_left_i",
         "token_correspondence_Lib.IntVector.op_Hat_Bar",
         "token_correspondence_Lib.IntVector.op_Less_Less_Less_Bar",
         "token_correspondence_Lib.IntVector.op_Plus_Bar",
-        "token_correspondence_Lib.IntVector.rotate_left_i",
         "token_correspondence_Lib.IntVector.vec_add_mod",
         "token_correspondence_Lib.IntVector.vec_rotate_left",
         "token_correspondence_Lib.IntVector.vec_xor",
@@ -153,7 +155,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "eec1b1baff634a2d4177f41c335a9069"
+      "5cf2559d3982d501a768ee23ea3c2e41"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.quarter_round_lemma_i",
@@ -187,7 +189,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "71f266c589f2c5ba29f60a1e87292da8"
+      "c75a3705727e024cc221e4a27b61bf4d"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.quarter_round_lemma_i",
@@ -259,7 +261,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "f55f640b7ffe4e6670b37158d2c11c13"
+      "639f186f9a517b4ed8b0b7e98ea8addc"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.column_round_lemma_i",
@@ -293,7 +295,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "05aa77aa1de207862483094578b14112"
+      "5ccb576583c6c3ea476dc39d3196e34d"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.column_round_lemma_i",
@@ -366,7 +368,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "9e6036af3f691aaa385b814071091869"
+      "21a02cbd81c1e0c9fb3daa764f10899a"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.diagonal_round_lemma_i",
@@ -400,7 +402,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "09d4be092eec4eead6fec6686c52338e"
+      "e4b17284df4def6ff1c6f964bd6ef236"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.diagonal_round_lemma_i",
@@ -474,7 +476,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "20821df890693c2768175921ae0f087b"
+      "c86d678149e91970b07e5ec1e2dadda5"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.double_round_map_lemma_i",
@@ -508,7 +510,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "9ea2217566d3f07c5b94b52534757697"
+      "a31ba636dca21b78f0a12cc6a01b6c0a"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.double_round_map_lemma_i",
@@ -555,7 +557,7 @@
         "typing_Tm_abs_3793b4f96245cfe1e81e7e80d9407e7d"
       ],
       0,
-      "96f06a8560d20bf352cddb899dde43fa"
+      "37a4130da49e2faa718d6cf21ea5bf8d"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.scalar_rounds_unroll_lemma",
@@ -575,7 +577,7 @@
         "typing_Hacl.Spec.Chacha20.Equiv.scalar_rounds"
       ],
       0,
-      "41463957663592929678ea6d1cec496a"
+      "f43441def8883bc3643bb639ad51a938"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.rounds_lemma_i",
@@ -609,7 +611,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "6661f1729ac870c8ff6729f236af5793"
+      "97d08e4457ea102b142a5c9d39e0dae7"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.rounds_lemma_i",
@@ -668,7 +670,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "a28f3998b204a60d36dc7b526a97aa65"
+      "064be4693cdc3acb88d6833762b12b94"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.sum_state_lemma_i",
@@ -702,7 +704,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "2a85f18a9a7211bda157ae20fee52d93"
+      "062c90187258e511d59b5c46e54fe114"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.sum_state_lemma_i",
@@ -784,7 +786,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "68a8401e5dd5c5840798324605baac2c"
+      "015522e3ea12ea3af713a50263989f77"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.add_counter_lemma_i",
@@ -823,7 +825,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "d6e5d1a18ad74c8a8c6921ae7424028c"
+      "10d08cf387e88e291f2fc2372e1fbe3b"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.add_counter_lemma_i",
@@ -924,7 +926,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "5deeee4304f063e358c60b3ceab49858"
+      "400cc1159ff4a25a07b00a43ed32f8c8"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.chacha20_core_lemma_i",
@@ -963,7 +965,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "71ad03db46c27f8ade0a8d17342c5cf1"
+      "8a406c0e04367981928733daba612558"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.chacha20_core_lemma_i",
@@ -1043,7 +1045,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "efaf840423a23be2fcd5ba85dd634a92"
+      "47798d614557383a7422a455f3d3e577"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.chacha20_init_equiv_lemma",
@@ -1084,7 +1086,7 @@
         "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "d3b75e8cc696e16717fbd138f55d39b0"
+      "babd78f65bc53f175ea35f5ccc943218"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.chacha20_init_equiv_lemma",
@@ -1207,7 +1209,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "039342dc6bafb090ad24b3ace0a6586a"
+      "344c3fa6de87ba90e08375c3c1058c20"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.chacha20_init_lemma_i",
@@ -1251,7 +1253,7 @@
         "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "a22366b2a270c3930fc3fad1c1257b99"
+      "e1d01d5761a53ad2cb03e2d9278e0d4e"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.chacha20_init_lemma_i",
@@ -1410,7 +1412,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "ec8f6919e77cf2b00982fd289c404035"
+      "d62d9bcdb00a0963a070ce0877d1c621"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.xor_block_scalar_lemma_index",
@@ -1453,7 +1455,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "0f7daa06dc648b56d974d8eb1c82c437"
+      "1f4098cec5c27a4e10ffcd7f52d61488"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.xor_block_scalar_lemma_index",
@@ -1498,7 +1500,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "99398742a054426c969c99e931b4fae8"
+      "13c11c8b71c332b6707d3d9208b7ca19"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.xor_block_scalar_lemma_index_aux",
@@ -1550,7 +1552,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "b6c9375ae642ecf97098100a39f4971a"
+      "c8dd5cb52bb66920fe0b82a5ce49cbec"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.xor_block_scalar_lemma_index_aux",
@@ -1596,7 +1598,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "a15a13accfd0b032cbb04ebf0b5df590"
+      "db426d25988f8129cc56fe1f148001d5"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.xor_block_vec_lemma_index",
@@ -1643,7 +1645,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "205121feffc9ff0760e04758d4065f36"
+      "c35facfb2240e10863b3c2a690bc3b35"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.xor_block_vec_lemma_index",
@@ -1728,7 +1730,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "0d19e64fe324e729ecb4da120226a37e"
+      "e2b0086474f2b384f2513fe1f85d3466"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.xor_block_lemma_index_aux1",
@@ -1774,7 +1776,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "79ddf7ab66ee9ddeba39b93083ce72e7"
+      "78b5966dea9fb4052e687ae6de642b38"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.xor_block_lemma_index_aux1",
@@ -1822,7 +1824,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "f1b01b82a47dc0c3d1b874b962230132"
+      "c34da70a3953db1b8b1d73a33659e313"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.xor_block_lemma_index_aux2",
@@ -1869,7 +1871,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "3c0ee162880a5cfed2b2f997d3e06b53"
+      "5054c7f80ff7e7f13eb03f20301b9582"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.xor_block_lemma_index_aux2",
@@ -1916,7 +1918,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "2e76c3b34058486320f0913f979bdc4b"
+      "fa7d3218ab673b8821a94625984f139c"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.xor_block_lemma_index",
@@ -1968,7 +1970,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "230fc8324ce02b6ecf33a5d720464c25"
+      "0556f67d42c95dda473e81346d4f078e"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.xor_block_lemma_index",
@@ -2036,7 +2038,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "779e8498ba3e252c4af6738775106073"
+      "114fc9c44967546be14db9378caa6d64"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.add_counter_lemma_aux",
@@ -2075,7 +2077,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "36ba981696d2c35d2bf3ad63c3a695cb"
+      "14c4f68fd96df7afb717cca2d823ec0b"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.add_counter_lemma_aux",
@@ -2125,7 +2127,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "2a0dae5878c7f2702c3b74537811c71d"
+      "6c642b685a82e8d6a5591ac199ec022d"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.chacha20_core_equiv_lemma",
@@ -2166,7 +2168,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "3bb667271057e95a1ded14d96fb326f1"
+      "53dff1063207830b3a014be0dc14125c"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.chacha20_core_equiv_lemma",
@@ -2240,7 +2242,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "b971b9e7ea046b58129723ca780aed3f"
+      "5860c47f3c35f1320b5475eaaed0af10"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.chacha20_encrypt_block_equiv_lemma_i",
@@ -2284,7 +2286,7 @@
         "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "8de646bde59b2fa47bdbe43c9778ea5e"
+      "a6d48f0faaa14c83794c30db8d84f8c2"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.chacha20_encrypt_block_equiv_lemma_i",
@@ -2413,7 +2415,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "5879145b56544b7472a6da2574d41aa1"
+      "7d67fa4017b96b806383a9e3dd0712bf"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.get_block_s",
@@ -2422,7 +2424,7 @@
       0,
       [ "@query" ],
       0,
-      "0b0c963a46b1a5c9ab5986249f1212e6"
+      "18615a001e415a66eb326061962e0806"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.get_block_s",
@@ -2449,7 +2451,7 @@
         "refinement_interpretation_Tm_refine_c37230a0b45bfa733513e4ce89ef34d6"
       ],
       0,
-      "35e40bff786fa7add303ee40739e568b"
+      "ca16202344ccfed76d87d136069808ff"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.get_last_s",
@@ -2474,7 +2476,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "8b930f85e9477b08773a1d304750969b"
+      "b16c4f8488c7a9309b1bec57b9d0cc2c"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.lemma_i_div_bs",
@@ -2497,7 +2499,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "2b9969fed869a7159ec916d63c68ef12"
+      "00dda0e95e2baaeb46fc5808b508de68"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.lemma_i_div_bs",
@@ -2529,7 +2531,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "3b73bfbdcf2f4d20713eadf73fa9d438"
+      "891a352b441a5090a3e6ae3778d43324"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.lemma_i_div_bs1",
@@ -2553,7 +2555,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "e6c1a4ed295db1a84b72760c02e04930"
+      "2abe61e11783a30c86f3650a51380128"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.lemma_i_div_bs1",
@@ -2562,7 +2564,7 @@
       0,
       [ "@query" ],
       0,
-      "0606bee7617ab8c4a79d72e5d621f4d1"
+      "43a70cf38c4929cbdba23e5e19dc600c"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.lemma_i_div_bs1",
@@ -2588,7 +2590,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "8d6877db366670fa5ecb4822de9626ee"
+      "7539ae82799d4129567ebf75e01170d0"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.lemma_i_div_bs2",
@@ -2612,7 +2614,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "576087a006a91676a927ce0b2da8f7e8"
+      "4316fa80b6f26ce4b51a1ea13a28f0bc"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.lemma_i_div_bs2",
@@ -2621,7 +2623,7 @@
       0,
       [ "@query" ],
       0,
-      "41613f0a8fb01c37bc1d23e14aae833d"
+      "5f4d734d2f46da974c3bab60c470d5a6"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.lemma_i_div_bs2",
@@ -2647,7 +2649,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "d10947e1eb1c61a664f349390e46efb2"
+      "539e72def7bfa08d7ec799ac2d74403f"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.lemma_slice_slice_f_vec_f_aux1",
@@ -2671,7 +2673,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "3dd757f21e99c4c8c3a1eb3496ac7330"
+      "344a95b25bf1bc4882d7f89a48231858"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.lemma_slice_slice_f_vec_f_aux1",
@@ -2695,7 +2697,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "5d1cf6e81c123b6833c73e6d823c99a2"
+      "73e02187cafc3630154a38e2d8450c86"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.lemma_slice_slice_f_vec_f_aux2",
@@ -2719,7 +2721,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "b7b491efb75aabbc763351c6c63afb4c"
+      "0b78540351903e9f5d13161c437f1228"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.lemma_slice_slice_f_vec_f_aux2",
@@ -2736,7 +2738,7 @@
         "refinement_interpretation_Tm_refine_87f61a1c9454204cabed82a4561b9462"
       ],
       0,
-      "7c4279eb4e89038f327ca998c2d0d87f"
+      "128560f33ca62b4c22f88ac99a9f80ce"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.lemma_slice_slice_f_vec_f_aux3",
@@ -2760,7 +2762,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "b7a06902c8ba19157c49e5174f8d16da"
+      "18906d72ae9e7a5a23bc2194301f4364"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.lemma_slice_slice_f_vec_f_aux3",
@@ -2776,7 +2778,7 @@
         "refinement_interpretation_Tm_refine_87f61a1c9454204cabed82a4561b9462"
       ],
       0,
-      "9aeb4b542833a7d3bfcade914a3d1910"
+      "58b8a1d9f643f078f4f34022952a0d62"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.lemma_slice_slice_f_vec_f_aux4",
@@ -2801,7 +2803,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "e7267af77640d83e3be56a458e3352bb"
+      "049d08ae975dc4e890cc858a1b7b023e"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.lemma_slice_slice_f_vec_f_aux4",
@@ -2814,7 +2816,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "1b3740cddd0b5b82b563082fdbdf2e9b"
+      "92a27c1591e46ddec75c4ecd4994b19c"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.lemma_slice_slice_f_vec_f_aux4",
@@ -2840,7 +2842,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "2536edcec9006786564b75c8844030cd"
+      "4eafaefdd023452ea0554adf44d64db6"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.lemma_slice_slice_g_vec_f_aux1",
@@ -2864,7 +2866,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "2a895e5d52947b062cf3fd34d154f6be"
+      "7977196408e599bfa4da2230db55624e"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.lemma_slice_slice_g_vec_f_aux1",
@@ -2888,7 +2890,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "23f0abd09c529c6dbf66ddd2b20475f0"
+      "23962299a161d04a25ca638613e760ca"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.lemma_slice_slice_g_vec_f_aux1",
@@ -2917,7 +2919,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "e1e12173fac35c5f8d7fb46859080a73"
+      "b5693755e1b753c467d89ee59273a20a"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.lemma_slice_slice_g_vec_f_aux2",
@@ -2941,7 +2943,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "fe8d90dca357a5071cffa78fb404fcac"
+      "096529fbbad631b2359463b0aa583e71"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.lemma_slice_slice_g_vec_f_aux2",
@@ -2965,7 +2967,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "206e9406512a6330d55a2e220786d33f"
+      "de390b233505ddb709921e78e2beae18"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.lemma_slice_slice_g_vec_f_aux2",
@@ -2992,7 +2994,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "e1cc8b2cdc70dcd49a0a2179ae58dcdd"
+      "aaf3e275a90ff02b25a8993c46e6862f"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.lemma_slice_slice_g_vec_f_aux3",
@@ -3016,7 +3018,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "42b2ac5ca8295c26d69f9e45c0b936a4"
+      "ca7c1e94bd4df3316cac2474ddeacc1f"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.lemma_slice_slice_g_vec_f_aux3",
@@ -3040,7 +3042,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "23cdda58aa29cabbb5102162ba58355c"
+      "8432a394131cbc39e2d3cc403c56c5f3"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.lemma_slice_slice_g_vec_f_aux3",
@@ -3069,7 +3071,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "c224a084d01bace7bf4c456561169ab7"
+      "9c2c22ddaa17ffaa25c8486955199f0e"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.lemma_slice_slice_g_vec_f_aux4",
@@ -3093,7 +3095,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "afa2f5dd72ae805fed35c6f163bf13c2"
+      "2a15d46b2c200dac900101cb38c2e10c"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.lemma_slice_slice_g_vec_f_aux4",
@@ -3117,7 +3119,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "92d2bb826dc715766c48be4410fe525b"
+      "51e61334e65d7393888227e8ea5ce3f8"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.lemma_slice_slice_g_vec_f_aux4",
@@ -3146,7 +3148,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "e0018ff4290fa243fd6b6dea362558fe"
+      "25906fed15023beaf5ae08de57ac617b"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.lemma_slice_slice_g_vec_g_aux",
@@ -3170,7 +3172,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "b2723953e690f5e9a1a768d1577de36a"
+      "7ff3d44f0112c07ef6cc09a68a3a64b7"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.lemma_slice_slice_g_vec_g_aux",
@@ -3179,7 +3181,7 @@
       0,
       [ "@query" ],
       0,
-      "3b16cb2c239fbe36821816ac9cc65b24"
+      "3677a163318d7063ead36499d1cac9a1"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.lemma_slice_slice_g_vec_g_aux",
@@ -3208,7 +3210,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "9d7733d6b3af794f5c1ff6db8259fe96"
+      "2f2e69a83f5c7c32947fee51d91069b7"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.chacha20_encrypt_block_lemma_index",
@@ -3254,7 +3256,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "583672d37d9c783dfd6927853edb3cca"
+      "94759de61458ff6238c21acb9d4c2f22"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.chacha20_encrypt_block_lemma_index",
@@ -3339,7 +3341,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "3f6e00b0294e9302d4326b868fd98f85"
+      "b3dbf47c5964a3e3bda7f0e9a59fac1c"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.chacha20_encrypt_block_equiv_lemma_index",
@@ -3388,7 +3390,7 @@
         "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "8a6344eb34f54852b5641f64f4ca36f5"
+      "68fe24eb24d436329e2bfcd25e27120d"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.chacha20_encrypt_block_equiv_lemma_index",
@@ -3460,7 +3462,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "5d1eb0d64996325f7388f7bf0dbd3a00"
+      "cc9ac9fa9def2348db89a39f66d6aedc"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.chacha20_encrypt_block_equiv_lemma_index1",
@@ -3506,7 +3508,7 @@
         "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "f903a6a15471819ac0ddcce8a94afda6"
+      "90582e348846cb7bf77228c708c85826"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.chacha20_encrypt_block_equiv_lemma_index1",
@@ -3554,7 +3556,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "46efe39d21387ba6cba2f275b39869a9"
+      "f5f598779501e56acffb510937543f9b"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.chacha20_encrypt_last_equiv_lemma_i",
@@ -3599,7 +3601,7 @@
         "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "2274ba6c60cd5743d655ad356474c0c6"
+      "5be1aa1ce4ff75cd698a493e7166656c"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.chacha20_encrypt_last_equiv_lemma_i",
@@ -3696,7 +3698,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "d86ec1e47b35ca452341047aaf239601"
+      "f37f8558ecc44e546a3cb66e04aa4ad0"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.chacha20_encrypt_last_lemma_index_aux",
@@ -3754,7 +3756,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "fe7d40bf732ebdf641f8c335196fb6a7"
+      "d46fe37947eacbb99fbf7e6cd4a84f67"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.chacha20_encrypt_last_lemma_index_aux",
@@ -3855,7 +3857,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "b41fb31d160db7d87c0122b3b5be58d8"
+      "a9235e7fe182d778752d61ca94546d33"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.chacha20_encrypt_last_lemma_index",
@@ -3910,7 +3912,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "4a37551d47baf0c90b7d15018616dedb"
+      "e94337f63c5aeec43119121a2284a613"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.chacha20_encrypt_last_lemma_index",
@@ -3989,7 +3991,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "1c3f5cdeed0273ccc148cb553b420934"
+      "f16b9edbd0cd54771df6ecc0464fc037"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.chacha20_encrypt_last_equiv_lemma_index",
@@ -4046,7 +4048,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "387955466dbd4dee9dce13be7b371608"
+      "a3c1727cb80bbf5d992db763e0922d9a"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.chacha20_encrypt_last_equiv_lemma_index",
@@ -4143,7 +4145,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "e218271e42be67b3811c399c1c715ab6"
+      "1abf55d1521addf34e5f30b4025b70bf"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.chacha20_encrypt_last_equiv_lemma_index1",
@@ -4198,7 +4200,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "8f36019ef6ed3d7230bfc9f00e48bb52"
+      "f66d62cb8146445e930c8d8b1b41df3a"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.chacha20_encrypt_last_equiv_lemma_index1",
@@ -4234,7 +4236,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "1dd791da3d1f28aeac2a754f13bd1ff8"
+      "6bbdbecbd7690320cc895f1e206108b2"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.chacha20_encrypt_last_equiv_lemma_index1",
@@ -4277,7 +4279,7 @@
         "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "fd4f267186c3c4b4c229502a75a1e933"
+      "43ad4a447de65315fb477d5e5c343b5f"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.chacha20_encrypt_last_equiv_lemma_index2",
@@ -4334,7 +4336,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "676695441e96321adfaee5811b243dc9"
+      "c7b2deca6211d49e65e9ac1d8bb55726"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.chacha20_encrypt_last_equiv_lemma_index2",
@@ -4370,7 +4372,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "5fcbf94cba3d92a21a1c65eddde616e8"
+      "68948044e5aadfd53b68034f93ac6fbb"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.chacha20_encrypt_last_equiv_lemma_index2",
@@ -4418,7 +4420,7 @@
         "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "5ea394507fdc627cb51db3e02e0c6336"
+      "6d20cd8df5a360ec132bff58f73da84e"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.lemma_slice_slice_f_vec_f",
@@ -4457,7 +4459,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "cb7508dddaa107361a1bd117d1501971"
+      "066fd3b0bfa1d821d7a2957fc3130716"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.lemma_slice_slice_f_vec_f",
@@ -4490,7 +4492,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "31bb5689e7fa7bfe7ed952c867a3932d"
+      "a1570b77c4e24c6ad58b374a3594502d"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.lemma_slice_slice_f_vec_f",
@@ -4534,7 +4536,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "41bb1c028615b935d65bf2dcc9ca07b8"
+      "e0c5ecf5fb3eb3e1daf16bebbc785ffd"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.lemma_slice_slice_g_vec_f",
@@ -4564,7 +4566,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "9851ced64379493acf5441f83a0fa515"
+      "0b8ddb3270aeeb9672a6f77688e5491a"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.lemma_slice_slice_g_vec_f",
@@ -4597,7 +4599,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "4b9b4531e0bf213fbfc10db458683545"
+      "00a09235d9244e5c3ea0673b4af2f382"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.lemma_slice_slice_g_vec_f",
@@ -4642,7 +4644,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "34a1d2c54ac8037691c4b8ed0b85420f"
+      "6f6ed5989b088293fc38cc531519a0d6"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.lemma_slice_slice_g_vec_g",
@@ -4678,7 +4680,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "feec71f1853ed3471976f4b5e60d9595"
+      "7c93eeb1b29f8783854bc61b793afaa7"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.lemma_slice_slice_g_vec_g",
@@ -4719,7 +4721,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "1e301c600272bddc9838df549572f29e"
+      "0fd01d770d16eeb4803c0da0e98faeb9"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.chacha20_vec_equiv_pre",
@@ -4763,7 +4765,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "6a6ec11235b0b29b0d1f941a2d35a75a"
+      "3052b841350d05ec33b782ce58888379"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.lemma_chacha20_vec_equiv_pre_f_vec_f",
@@ -4795,7 +4797,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "c268bb34f533b864438cb0560e9f2bff"
+      "286f0658fdd4e5322705dcbfb6c393c3"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.lemma_chacha20_vec_equiv_pre_f_vec_f",
@@ -4830,7 +4832,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "27d55c8444ef55debb1e4cef324427cd"
+      "0fc07f71971ae52f119be58601c8c04e"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.lemma_chacha20_vec_equiv_pre_f_vec_f",
@@ -4900,7 +4902,7 @@
         "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "a0cb269025ce45ff336adaceb56af6c3"
+      "bb1d8c8d91768cf60cba8d3e2b609092"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.lemma_chacha20_vec_equiv_pre_g_vec_f",
@@ -4935,7 +4937,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "ea1505f5422cc889f0cbb81d63c1051c"
+      "72ae04aadc1e80095fb4f22f652d3a0e"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.lemma_chacha20_vec_equiv_pre_g_vec_f",
@@ -4970,7 +4972,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "dedb7c919f9905e8d2fca7bb9ab7948f"
+      "6b5d1077ebcd6610248a76bca00b5da2"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.lemma_chacha20_vec_equiv_pre_g_vec_f",
@@ -5039,7 +5041,7 @@
         "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "a53fa7cc0f0b9140e8e9abbb7e01fc3f"
+      "74587098ffa0ef4607d267983f97e49c"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.lemma_chacha20_vec_equiv_pre_g_vec_g",
@@ -5051,7 +5053,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "0288cd41780210f41c5a9cb10c1333ff"
+      "cb9bd1be5638230aa4665e44f9417297"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.lemma_chacha20_vec_equiv_pre_g_vec_g",
@@ -5063,7 +5065,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "e2c8fbf4bd14bb89564bca939aa019ee"
+      "fe8911bb0e19dd0cce3b5310405a07c8"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.lemma_chacha20_vec_equiv_pre_g_vec_g",
@@ -5134,7 +5136,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "cd1e47d624e05aa8a98afda4663ba09e"
+      "b76ba19b65331d6065a88d191809b697"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.lemma_chacha20_vec_equiv_pre",
@@ -5173,7 +5175,7 @@
         "unit_inversion", "unit_typing"
       ],
       0,
-      "cfd7507d4ba11fc2e464c4efeccc0169"
+      "01f656bb8d88310e982f40f5a0a2d0d7"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.lemma_chacha20_vec_equiv",
@@ -5196,7 +5198,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "cf8d5c4845a75d168061bd3d8c811c04"
+      "f22672c29c66c70bdd1741f964809251"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.lemma_chacha20_vec_equiv",
@@ -5249,7 +5251,7 @@
         "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "1b7a7ac0578dccaa37991bd9f791a347"
+      "ec40d152c640b03d4c93ffe830de89b6"
     ]
   ]
 ]

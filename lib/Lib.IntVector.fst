@@ -219,7 +219,10 @@ let vec_rotate_right (#t:v_inttype) (#w:width) (x:vec_t t w) (y:rotval t) =
   match t,w with
   | U32,4 -> vec128_rotate_right32 x y
   | U32,8 -> vec256_rotate_right32 x y
+  | U64,4 -> vec256_rotate_right64 x y
   | _,_ ->  vec_or (vec_shift_left x (size (bits t) -. y)) (vec_shift_right x y)
+
+let vec_rotate_right_lemma (#t:v_inttype) (#w:width) (x:vec_t t w) (y:rotval t) = ()
 
 let vec_rotate_left (#t:v_inttype) (#w:width) (x:vec_t t w) (y:rotval t) =
   match t,w with
@@ -330,10 +333,14 @@ let vec_permute2 #t v i1 i2 =
   | U64 -> vec128_shuffle64 v i1 i2
   | U128 -> vec256_shuffle128 v i1 i2
 
+let vec_permute2_lemma #t v i1 i2 = ()
+
 let vec_permute4 #t v i1 i2 i3 i4 =
   match t with
   | U32 -> vec128_shuffle32 v i1 i2 i3 i4
   | U64 -> vec256_shuffle64 v i1 i2 i3 i4
+
+let vec_permute4_lemma #t v i1 i2 i3 i4 = ()
 
 let vec_permute8 #t v i1 i2 i3 i4 i5 i6 i7 i8 = admit()
 let vec_permute16 #t = admit()

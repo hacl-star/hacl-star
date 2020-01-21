@@ -216,6 +216,8 @@ val vec256_rotate_left32: vec256 -> size_t -> vec256
 noextract
 val vec256_rotate_right32: vec256 -> size_t -> vec256
 noextract
+val vec256_rotate_right64: vec256 -> size_t -> vec256
+noextract
 val vec256_shuffle128: vec256 -> size_t -> size_t -> vec256
 noextract
 val vec256_shuffle64: vec256 -> size_t -> size_t -> size_t -> size_t -> vec256
