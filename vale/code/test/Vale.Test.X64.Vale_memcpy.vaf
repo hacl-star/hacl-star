@@ -24,9 +24,10 @@ procedure Memcpy(inline win:bool, ghost dst:buffer64, ghost src:buffer64)
     {:quick}
     reads
         rdx; rsi; rdi;
+        heap0;
     modifies
         rax; rcx; r9;
-        heap0; memLayout;
+        memLayout; heap1;
     requires
         is_initial_heap(memLayout, mem);
         locs_disjoint(list(loc_buffer(dst), loc_buffer(src)));
@@ -41,22 +42,22 @@ procedure Memcpy(inline win:bool, ghost dst:buffer64, ghost src:buffer64)
 {
     CreateHeaplets(list(
         declare_buffer64(src, 0, Secret, Immutable),
-        declare_buffer64(dst, 0, Secret, Mutable)));
+        declare_buffer64(dst, 1, Secret, Mutable)));
     inline if (win)
     {
         Load64_buffer(heap0, rax, rdx, 0, Secret, src, 0);
         Load64_buffer(heap0, r9, rdx, 8, Secret, src, 1);
-        Store64_buffer(heap0, rcx, rax, 0, Secret, dst, 0);
-        Store64_buffer(heap0, rcx, r9, 8, Secret, dst, 1);
+        Store64_buffer(heap1, rcx, rax, 0, Secret, dst, 0);
+        Store64_buffer(heap1, rcx, r9, 8, Secret, dst, 1);
     }
     else
     {
         Mov64(rax, Mem64(heap0, rsi, 0, src, 0, Secret));
         Mov64(rcx, Mem64(heap0, rsi, 8, src, 1, Secret));
-        Store64_buffer(heap0, rdi, rax, 0, Secret, dst, 0);
-        Store64_buffer(heap0, rdi, rcx, 8, Secret, dst, 1);
+        Store64_buffer(heap1, rdi, rax, 0, Secret, dst, 0);
+        Store64_buffer(heap1, rdi, rcx, 8, Secret, dst, 1);
     }
-    assert(Seq.equal(buffer_as_seq(heap0, dst), buffer_as_seq(heap0, src)));
+    assert(Seq.equal(buffer_as_seq(heap1, dst), buffer_as_seq(heap0, src)));
 
     DestroyHeaplets();
 }

@@ -236,7 +236,7 @@ procedure Poly1305_blocks(
         n := pow2_64;
         p := n * n * 4 - 5;
     reads
-        ctx; padbit; memLayout;
+        ctx; padbit; memLayout; heap1;
     modifies
         inp; len; d1; d2; d3; r0; r1; s1; h0; h1; h2;
         rax; r15;
@@ -247,9 +247,8 @@ procedure Poly1305_blocks(
         // Len is measured in bytes
         len % 16 == 0; // REVIEW: may be stronger than necessary
         inp + len < pow2_64;
-        buffers_disjoint(ctx_b, inp_b);
         validDstAddrs64(heap0, ctx, ctx_b, 24, memLayout, Public);
-        validSrcAddrs64(heap0, inp, inp_b, len / 8, memLayout, Public);
+        validSrcAddrs64(heap1, inp, inp_b, len / 8, memLayout, Public);
         let h0_in := buffer64_read(ctx_b, 0, heap0);
         let h1_in := buffer64_read(ctx_b, 1, heap0);
         let h2_in := buffer64_read(ctx_b, 2, heap0);
@@ -265,7 +264,7 @@ procedure Poly1305_blocks(
     ensures
         h2 < 5;
         validSrcAddrs64(heap0, ctx, ctx_b, 24, memLayout, Public);
-        validSrcAddrs64(heap0, old(inp), inp_b, old(len)/8, memLayout, Public);
+        validSrcAddrs64(heap1, old(inp), inp_b, old(len)/8, memLayout, Public);
         modifies_buffer_specific(ctx_b, old(heap0), heap0, 0, 2);
         h0 == buffer64_read(ctx_b, 0, heap0);
         h1 == buffer64_read(ctx_b, 1, heap0);
@@ -282,7 +281,7 @@ procedure Poly1305_blocks(
         let r0_in := buffer64_read(ctx_b, 3, heap0);
         let r1_in := buffer64_read(ctx_b, 4, heap0);
         h == h2 * (pow2_64 * pow2_64) + h1 * pow2_64 + h0;
-        modp(h) == poly1305_heap_blocks(modp(h_in), padbit * (n * n), r, buffer64_as_seq(heap0, inp_b), old(len) / 8);
+        modp(h) == poly1305_heap_blocks(modp(h_in), padbit * (n * n), r, buffer64_as_seq(heap1, inp_b), old(len) / 8);
 {
     lemma_poly_bits64();
 
@@ -306,10 +305,10 @@ procedure Poly1305_blocks(
     Add64(s1, r1); // s1 = r1 + (r1 >> 2)
 
     h := h_in;
-    assert modp(h) == poly1305_heap_blocks(modp(h_in), padbit * (n * n), r, buffer64_as_seq(heap0, inp_b), 0) by
+    assert modp(h) == poly1305_heap_blocks(modp(h_in), padbit * (n * n), r, buffer64_as_seq(heap1, inp_b), 0) by
     {
         reveal modp;
-        reveal_poly1305_heap_blocks(modp(h_in), padbit * (n * n), r, buffer64_as_seq(heap0, inp_b), 0);
+        reveal_poly1305_heap_blocks(modp(h_in), padbit * (n * n), r, buffer64_as_seq(heap1, inp_b), 0);
     }
 
     ghost var word_index:nat := 0;
@@ -333,27 +332,27 @@ procedure Poly1305_blocks(
 
             r15 != 0 ==> 8 * (word_index + 1) <= length;
             16 * r15 + 8 * word_index == length;
-            inp + 0 /* offset */ == buffer_addr(inp_b, heap0) + 8 * word_index;
+            inp + 0 /* offset */ == buffer_addr(inp_b, heap1) + 8 * word_index;
 
             r15 * 16 <= length;    // Not needed with Dafny version
             padbit < 2;            // Not needed with Dafny version
             validDstAddrs64(heap0, ctx, ctx_b, 24, memLayout, Public);
-            validSrcAddrs64(heap0, old(inp), inp_b, length/8, memLayout, Public);
+            validSrcAddrs64(heap1, old(inp), inp_b, length/8, memLayout, Public);
             ctx == old(ctx); // REVIEW: framing should add this automatically
             rcx == old(rcx); // REVIEW: framing should add this automatically
             (inp - old(inp)) % 16 == 0;             // Precondition for poly1305_heap_blocks; Not needed in Dafny version
-            modp(h) == poly1305_heap_blocks(modp(h_in), padbit * (n * n), r, buffer64_as_seq(heap0, inp_b), word_index);
+            modp(h) == poly1305_heap_blocks(modp(h_in), padbit * (n * n), r, buffer64_as_seq(heap1, inp_b), word_index);
             heap0 == old(heap0);
         decreases
             r15;
     {
         let nn := pow2_64;
         let hp := h;
-        h := h + nn * nn * padbit + nn * buffer64_read(inp_b, word_index + 1, heap0) + buffer64_read(inp_b, word_index, heap0);
+        h := h + nn * nn * padbit + nn * buffer64_read(inp_b, word_index + 1, heap1) + buffer64_read(inp_b, word_index, heap1);
         let hq := h;
 
-        Add64Wrap(h0, Mem64(heap0, inp, 0, inp_b, word_index, Public)); // accumulate input
-        Adc64Wrap(h1, Mem64(heap0, inp, 8, inp_b, word_index+1, Public));
+        Add64Wrap(h0, Mem64(heap1, inp, 0, inp_b, word_index, Public)); // accumulate input
+        Adc64Wrap(h1, Mem64(heap1, inp, 8, inp_b, word_index + 1, Public));
         AddLea64(inp, inp, 16);
         Adc64Wrap(h2, padbit);
 
@@ -365,10 +364,10 @@ procedure Poly1305_blocks(
         Sub64(r15, 1); // len-=16
         word_index := word_index + 2;
 
-        assert modp(h) == poly1305_heap_blocks(modp(h_in), padbit * (nn * nn), r, buffer64_as_seq(heap0, inp_b), word_index) by
+        assert modp(h) == poly1305_heap_blocks(modp(h_in), padbit * (nn * nn), r, buffer64_as_seq(heap1, inp_b), word_index) by
         {
-            reveal_poly1305_heap_blocks(modp(h_in), padbit * (nn * nn), r, buffer64_as_seq(heap0, inp_b), word_index);
-            reveal_poly1305_heap_blocks(modp(h_in), padbit * (nn * nn), r, buffer64_as_seq(heap0, inp_b), word_index - 2);
+            reveal_poly1305_heap_blocks(modp(h_in), padbit * (nn * nn), r, buffer64_as_seq(heap1, inp_b), word_index);
+            reveal_poly1305_heap_blocks(modp(h_in), padbit * (nn * nn), r, buffer64_as_seq(heap1, inp_b), word_index - 2);
             reveal modp;
             lemma_poly_demod(p, hp, hq - hp, r);
         }
@@ -564,15 +563,15 @@ procedure Poly1305_impl(
     lets
         ctx @= rdi; inp @= rsi; len @= rdx; r0 @= r11; r1 @= r12; h0 @= r14; h1 @= rbx; h2 @= rbp;
         n := pow2_64;
-    reads memLayout;
+    reads
+        memLayout; heap1;
     modifies
         rax; rcx; rdx; rdi; rsi; rbx; rbp; r8; r9; r10; r11; r12; r13; r14; r15;
         efl;
         heap0;
     requires
-        buffers_disjoint(ctx_b, inp_b);
         validDstAddrs64(heap0, ctx, ctx_b, 24, memLayout, Public);
-        validSrcAddrs64(heap0, inp, inp_b, readable_words(len), memLayout, Public);
+        validSrcAddrs64(heap1, inp, inp_b, readable_words(len), memLayout, Public);
         inp + len < pow2_64;
         let h2_in := buffer64_read(ctx_b, 2, heap0);
         let key_r0 := buffer64_read(ctx_b, 3, heap0);
@@ -586,13 +585,12 @@ procedure Poly1305_impl(
         finish < 2;
     ensures
         validSrcAddrs64(heap0, ctx, ctx_b, 24, memLayout, Public);
-        validSrcAddrs64(heap0, old(inp), inp_b, readable_words(old(len)), memLayout, Public);
         modifies_buffer_specific(ctx_b, old(heap0), heap0, 0, 8);
         let h0_in := buffer64_read(ctx_b, 0, old(heap0));
         let h1_in := buffer64_read(ctx_b, 1, old(heap0));
         let h2_in := buffer64_read(ctx_b, 2, old(heap0));
         let h_in := lowerUpper192(lowerUpper128(h0_in, h1_in), h2_in);
-        let inp_mem := seqTo128(buffer64_as_seq(heap0, inp_b));
+        let inp_mem := seqTo128(buffer64_as_seq(heap1, inp_b));
         finish == 0 ==> h == lowerUpper192(lowerUpper128(h0, h1), h2);
         finish == 0 ==>
             modp(h) == poly1305_hash_blocks(modp(h_in), n * n, make_r(key_r), inp_mem, old(len) / 16);
@@ -644,7 +642,7 @@ procedure Poly1305_impl(
     h := Poly1305_blocks(r, h_in, ctx_b, inp_b);
     assert h == lowerUpper192(lowerUpper128(h0, h1), h2)
         by { lowerUpper192_reveal(); lowerUpper128_reveal(); }
-    lemma_poly1305_heap_hash_blocks_alt(modp(h_in), n * n, r, heap0, inp_b, old(len) / 16);
+    lemma_poly1305_heap_hash_blocks_alt(modp(h_in), n * n, r, heap1, inp_b, old(len) / 16);
 
     Load64_buffer(heap0, rax, ctx, 184, Public, ctx_b, 23);
     if (rax == 1) // finish == 1
@@ -657,9 +655,9 @@ procedure Poly1305_impl(
         if (r15 != 0)
         {
             Load64_buffer(heap0, rax, ctx, 32, Public, ctx_b, 4);
-            Load64_buffer(heap0, r8, inp, 0, Public, inp_b, (len_in / 16) * 2);
-            Load64_buffer(heap0, r9, inp, 8, Public, inp_b, (len_in / 16) * 2 + 1);
-            let a := seqTo128_app(buffer64_as_seq(heap0, inp_b), len_in / 16);
+            Load64_buffer(heap1, r8, inp, 0, Public, inp_b, (len_in / 16) * 2);
+            Load64_buffer(heap1, r9, inp, 8, Public, inp_b, (len_in / 16) * 2 + 1);
+            let a := seqTo128_app(buffer64_as_seq(heap1, inp_b), len_in / 16);
             assert lowerUpper128(r8, r9) == a
                 by { lowerUpper128_reveal(); }
             Poly1305_last_block();
@@ -675,7 +673,7 @@ procedure Poly1305_impl(
         Poly1305_add_key_s();
         h := lowerUpper128(h0, h1);
 
-        assert h == poly1305_hash_all(modp(h_in), key_r, key_s, seqTo128(buffer64_as_seq(heap0, inp_b)), len_in)
+        assert h == poly1305_hash_all(modp(h_in), key_r, key_s, seqTo128(buffer64_as_seq(heap1, inp_b)), len_in)
             by { reveal mod2_128; reveal modp; }
     }
 }
@@ -701,6 +699,8 @@ procedure Poly1305(
         inp_in := (if win then rdx else inp);
         n := 0x1_0000_0000_0000_0000;
         p := n * n * 4 - 5;
+    reads
+        heap1;
     modifies
         rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
         efl; heap0; memLayout; stack; stackTaint;
@@ -755,7 +755,7 @@ procedure Poly1305(
         r15 == old(r15);
 {
     CreateHeaplets(list(
-        declare_buffer64(inp_b, 0, Public, Immutable),
+        declare_buffer64(inp_b, 1, Public, Immutable),
         declare_buffer64(ctx_b, 0, Public, Mutable)));
 
     let key_r0 := buffer64_read(ctx_b, 3, heap0);

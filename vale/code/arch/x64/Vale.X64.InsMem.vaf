@@ -104,17 +104,20 @@ irreducible let norm_loc_attr = ()
 unfold let norm_loc (l:loc) : loc =
   norm [zeta; iota; delta_only [`%loc_mutable_buffers]; delta_attr [`%norm_loc_attr]] l
 
+let trigger_create_heaplet (h:heaplet_id) = True
+
 [@norm_loc_attr]
-unfold let declare_buffer64 (b:buffer TUInt64) (hid:heaplet_id) (t:taint) (mut:mutability) =
+unfold let declare_buffer64 (b:buffer TUInt64) (hid:heaplet_id) (t:taint) (mut:mutability) : buffer_info =
   Mkbuffer_info TUInt64 b hid t mut
 
 [@norm_loc_attr]
-unfold let declare_buffer128 (b:buffer TUInt128) (hid:heaplet_id) (t:taint) (mut:mutability) =
+unfold let declare_buffer128 (b:buffer TUInt128) (hid:heaplet_id) (t:taint) (mut:mutability) : buffer_info =
   Mkbuffer_info TUInt128 b hid t mut
 
 let create_post (layout:vale_heap_layout) (bs:Seq.seq buffer_info) =
   forall (i:nat).{:pattern Seq.index bs i} i < Seq.length bs ==> (
     let Mkbuffer_info t b hid _ mut = Seq.index bs i in
+    trigger_create_heaplet hid /\
     valid_layout_buffer_id t b layout (Some hid) false /\
     valid_layout_buffer_id t b layout (Some hid) (mut = Mutable))
 #endverbatim
@@ -125,6 +128,7 @@ function heaplet_id_is_none(h:vale_heap):prop extern;
 function heaplet_id_is_some(h:vale_heap, heaplet_id:int):prop extern;
 function norm_list(p:prop):prop extern;
 function norm_loc(l:loc):loc extern;
+function trigger_create_heaplet(h:heaplet_id):prop extern;
 function declare_buffer64(b:buffer64, hid:heaplet_id, t:taint, mut:mutability):buffer_info extern;
 function declare_buffer128(b:buffer128, hid:heaplet_id, t:taint, mut:mutability):buffer_info extern;
 function create_post(layout:vale_heap_layout, bs:Seq.seq(buffer_info)):prop extern;
@@ -155,11 +159,12 @@ procedure CreateHeaplets(ghost buffers:list(buffer_info))
         layout_old_heap(memLayout.vl_inner) == old(mem);
         layout_buffers(memLayout.vl_inner) == bs;
         layout_heaplets_initialized(memLayout.vl_inner);
-        create_post(memLayout, bs);
-        heaps_match(bs, memLayout.vl_taint, mem, va_get_mem_heaplet(0, this), 0);
         memLayout.vl_taint == old(memLayout.vl_taint);
+        create_post(memLayout, bs);
         heaplet_id_is_none(mem);
-        heaplet_id_is_some(va_get_mem_heaplet(0, this), 0);
+        forall(h:heaplet_id){trigger_create_heaplet(h)} trigger_create_heaplet(h) ==>
+            heaplet_id_is_some(va_get_mem_heaplet(h, this), h) &&
+            heaps_match(bs, memLayout.vl_taint, mem, va_get_mem_heaplet(h, this), h);
         forall(i:nat){Seq.index(bs, i)} i < Seq.length(bs) ==>
             buffer_info_has_id(bs, i, Seq.index(bs, i).bi_heaplet);
 {
@@ -181,9 +186,10 @@ procedure DestroyHeaplets()
         layout_heaplets_initialized(memLayout.vl_inner);
     ensures
         modifies_mem(layout_modifies_loc(old(memLayout).vl_inner), layout_old_heap(old(memLayout).vl_inner), mem);
-        heaps_match(layout_buffers(old(memLayout).vl_inner), memLayout.vl_taint, mem, va_get_mem_heaplet(0, this), 0);
         memLayout.vl_taint == old(memLayout.vl_taint);
         heaplet_id_is_none(mem);
+        forall(h:heaplet_id){trigger_create_heaplet(h)} trigger_create_heaplet(h) ==>
+            heaps_match(layout_buffers(old(memLayout).vl_inner), memLayout.vl_taint, mem, va_get_mem_heaplet(h, this), h);
 {
     this := destroy_heaplets_this(this);
     lemma_destroy_heaplets(old(this).vs_heap);

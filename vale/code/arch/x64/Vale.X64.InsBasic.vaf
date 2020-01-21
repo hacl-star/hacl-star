@@ -61,7 +61,22 @@ var r15:nat64 {:state reg64(rR15)};
 var efl:Vale.X64.Flags.t {:state flags()};
 var mem_config:int {:state mem_config()};
 var mem:vale_heap {:state mem()};
-var heap0:vale_heap {:state mem_heaplet(0)}{:updates mem};
+var heap0 :vale_heap {:state mem_heaplet(0 )}{:updates mem};
+var heap1 :vale_heap {:state mem_heaplet(1 )}{:updates mem};
+var heap2 :vale_heap {:state mem_heaplet(2 )}{:updates mem};
+var heap3 :vale_heap {:state mem_heaplet(3 )}{:updates mem};
+var heap4 :vale_heap {:state mem_heaplet(4 )}{:updates mem};
+var heap5 :vale_heap {:state mem_heaplet(5 )}{:updates mem};
+var heap6 :vale_heap {:state mem_heaplet(6 )}{:updates mem};
+var heap7 :vale_heap {:state mem_heaplet(7 )}{:updates mem};
+var heap8 :vale_heap {:state mem_heaplet(8 )}{:updates mem};
+var heap9 :vale_heap {:state mem_heaplet(9 )}{:updates mem};
+var heap10:vale_heap {:state mem_heaplet(10)}{:updates mem};
+var heap11:vale_heap {:state mem_heaplet(11)}{:updates mem};
+var heap12:vale_heap {:state mem_heaplet(12)}{:updates mem};
+var heap13:vale_heap {:state mem_heaplet(13)}{:updates mem};
+var heap14:vale_heap {:state mem_heaplet(14)}{:updates mem};
+var heap15:vale_heap {:state mem_heaplet(15)}{:updates mem};
 var stack:vale_stack {:state stack()};
 var memLayout:vale_heap_layout {:state mem_layout()};
 var stackTaint:memtaint {:state stackTaint()};
@@ -80,7 +95,10 @@ operand_type dst_opr64:nat64 @ va_operand := reg_opr64 | Mem64 | Stack;
 operand_type opr64:nat64 @ va_operand := dst_opr64 | const;
 
 operand_type heaplet:vale_heap @ heaplet_id :=
-| inout heap0
+| inout heap0 | inout heap1 | inout heap2 | inout heap3
+| inout heap4 | inout heap5 | inout heap6 | inout heap7
+| inout heap8 | inout heap9 | inout heap10 | inout heap11
+| inout heap12 | inout heap13 | inout heap14 | inout heap15
 ;
 
 procedure Mov64(inout dst:dst_opr64, in src:opr64)

@@ -413,7 +413,7 @@ procedure Carry_pass(inline use_cf:bool, inline offset:nat, ghost dst_b:buffer64
         !use_cf ==> zero == 0 && tmp == 38;
         use_cf ==> valid_cf(efl);
 
-     validDstAddrs64(heap0, dst_ptr, dst_b, 4 + offset, memLayout, Secret);
+        validDstAddrs64(heap0, dst_ptr, dst_b, 4 + offset, memLayout, Secret);
     ensures
         let d0 := buffer64_read(dst_b, 0 + offset, heap0);
         let d1 := buffer64_read(dst_b, 1 + offset, heap0);
