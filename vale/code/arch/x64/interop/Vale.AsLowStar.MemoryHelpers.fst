@@ -79,8 +79,8 @@ let core_create_lemma_taint_hyp
     let raw_taint = IX64.(mk_taint args IX64.init_taint) in
 //    assert (taint_map == create_memtaint (_ih mem) (args_b8 args) raw_taint);
     ME.valid_memtaint mem (args_b8 args) raw_taint;
-//    assert (forall x. List.memP x (args_b8 args) ==> ME.valid_taint_buf x mem taint_map (raw_taint x));
-    assert (forall x. List.memP x (args_b8 args) ==> ME.valid_taint_buf x mem taint_map (raw_taint x));
+//    assert (forall x. List.memP x (args_b8 args) ==> ME.valid_taint_b8 x mem taint_map (raw_taint x));
+    assert (forall x. List.memP x (args_b8 args) ==> ME.valid_taint_b8 x mem taint_map (raw_taint x));
     Classical.forall_intro (IX64.mk_taint_equiv args);
     assert (forall (a:arg). List.memP a args /\ Some? (IX64.taint_of_arg a) ==>
             Some?.v (IX64.taint_of_arg a) == raw_taint (IX64.taint_arg_b8 a));

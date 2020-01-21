@@ -81,14 +81,7 @@ let aes_reqs0
   is_aes_key_LE alg key /\
   length(round_keys) == nr(alg) + 1 /\
   round_keys == key_to_round_keys_LE alg key /\
-  //validSrcAddrsOffset128 heap0 key_ptr keys_b 8 (nr alg + 1) layout Secret /\
-  // Can't use the standard Offset, since that makes the size too large and conflicts
-  // with the spec below that says the entire keys_b is exactly round_keys
-  buffer_readable heap0 keys_b /\
-  (nr alg + 1) <= buffer_length keys_b /\
-  buffer_addr keys_b heap0 + 16 * 8 == key_ptr /\
-  valid_layout_buffer keys_b layout heap0 false /\
-  valid_taint_buf128 keys_b heap0 layout.vl_taint Secret /\
+  validSrcAddrsOffset128 heap0 key_ptr keys_b 8 (nr alg + 1 - 8) layout Secret /\
   buffer128_as_seq heap0 keys_b == round_keys
 
 let aes_reqs_offset
@@ -100,14 +93,7 @@ let aes_reqs_offset
   is_aes_key_LE alg key /\
   length(round_keys) == nr(alg) + 1 /\
   round_keys == key_to_round_keys_LE alg key /\
-  //validSrcAddrsOffset128 heap0 key_ptr keys_b 8 (nr alg + 1) layout Secret /\
-  // Can't use the standard Offset, since that makes the size too large and conflicts
-  // with the spec below that says the entire keys_b is exactly round_keys
-  buffer_readable heap0 keys_b /\
-  (nr alg + 1) <= buffer_length keys_b /\
-  buffer_addr keys_b heap0 + 16 * 8 == key_ptr /\
-  valid_layout_buffer keys_b layout heap0 false /\
-  valid_taint_buf128 keys_b heap0 layout.vl_taint Secret /\
+  validSrcAddrsOffset128 heap0 key_ptr keys_b 8 (nr alg + 1 - 8) layout Secret /\
   s128 heap0 keys_b == round_keys
 
 let six_of (a:Type0) = a & a & a & a & a & a

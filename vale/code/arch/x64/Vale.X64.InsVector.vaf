@@ -35,6 +35,12 @@ open Vale.X64.QuickCodes
 open Vale.X64.InsBasic
 open Vale.X64.InsMem
 open Vale.X64.CPU_Features_s
+
+let buffer128_write (b:buffer128) (i:int) (v:quad32) (h:vale_heap) : Ghost vale_heap
+  (requires buffer_readable h b /\ buffer_writeable b)
+  (ensures fun _ -> True)
+  =
+  buffer_write b i v h
 #endverbatim
 
 #verbatim
@@ -49,6 +55,8 @@ module I = Vale.X64.Instructions_s
 module S = Vale.X64.Machine_Semantics_s
 friend Vale.X64.Decls
 #endverbatim
+
+function buffer128_write(b:buffer128, i:int, v:quad32, h:vale_heap):vale_heap extern;
 
 #reset-options "--initial_fuel 2 --max_fuel 4 --max_ifuel 2 --z3rlimit 50"
 

@@ -90,6 +90,12 @@ let destroy_heaplets_this (s:vale_state) : Ghost vale_state
 #endverbatim
 
 #verbatim{:interface}
+let buffer64_write (b:buffer64) (i:int) (v:nat64) (h:vale_heap) : Ghost vale_heap
+  (requires buffer_readable h b /\ buffer_writeable b)
+  (ensures fun _ -> True)
+  =
+  buffer_write b i v h
+
 let heaplet_id_is_none (h:vale_heap) =
   get_heaplet_id h == None
 
@@ -124,6 +130,7 @@ let create_post (layout:vale_heap_layout) (bs:Seq.seq buffer_info) =
 
 function create_heaplets_this(buffers:list(buffer_info), s:vale_state):vale_state extern;
 function destroy_heaplets_this(s:vale_state):vale_state extern;
+function buffer64_write(b:buffer64, i:int, v:nat64, h:vale_heap):vale_heap extern;
 function heaplet_id_is_none(h:vale_heap):prop extern;
 function heaplet_id_is_some(h:vale_heap, heaplet_id:int):prop extern;
 function norm_list(p:prop):prop extern;

@@ -120,14 +120,8 @@ unfold let buffer128_as_seq (m:vale_heap) (b:M.buffer128) : GTot (Seq.seq quad32
 unfold let s128 (m:vale_heap) (b:M.buffer128) : GTot (Seq.seq quad32) = buffer128_as_seq m b
 unfold let valid_src_addr (#t:M.base_typ) (m:vale_heap) (b:M.buffer t) (i:int) : prop0 = M.valid_buffer_read m b i
 unfold let valid_dst_addr (#t:M.base_typ) (m:vale_heap) (b:M.buffer t) (i:int) : prop0 = M.valid_buffer_write m b i
-unfold let buffer64_read (b:M.buffer64) (i:int) (m:vale_heap) : GTot nat64 = M.buffer_read b i m
-let buffer64_write (b:M.buffer64) (i:int) (v:nat64) (m:vale_heap) : GTot vale_heap =
-  if FStar.StrongExcludedMiddle.strong_excluded_middle (buffer_readable m b /\ buffer_writeable b) then
-    M.buffer_write b i v m else m
-unfold let buffer128_read (b:M.buffer128) (i:int) (m:vale_heap) : GTot quad32 = M.buffer_read b i m
-let buffer128_write (b:M.buffer128) (i:int) (v:quad32) (m:vale_heap) : GTot vale_heap =
-  if FStar.StrongExcludedMiddle.strong_excluded_middle (buffer_readable m b /\ buffer_writeable b) then
-    M.buffer_write b i v m else m
+unfold let buffer64_read (b:M.buffer64) (i:int) (h:vale_heap) : GTot nat64 = M.buffer_read b i h
+unfold let buffer128_read (b:M.buffer128) (i:int) (h:vale_heap) : GTot quad32 = M.buffer_read b i h
 unfold let modifies_mem (s:M.loc) (h1 h2:vale_heap) : GTot prop0 = M.modifies s h1 h2
 unfold let loc_buffer(#t:M.base_typ) (b:M.buffer t) = M.loc_buffer #t b
 unfold let locs_disjoint = M.locs_disjoint
@@ -432,50 +426,35 @@ unfold let modifies_buffer128_2 (b1 b2:M.buffer128) (h1 h2:vale_heap) =
 unfold let modifies_buffer128_3 (b1 b2 b3:M.buffer128) (h1 h2:vale_heap) =
   modifies_mem (M.loc_union (loc_buffer b1) (M.loc_union (loc_buffer b2) (loc_buffer b3))) h1 h2
 
-let validSrcAddrs64 (m:vale_heap) (addr:int) (b:M.buffer64) (len:int) (layout:vale_heap_layout) (t:taint) =
-  buffer_readable m b /\
+let validSrcAddrs (#t:base_typ) (h:vale_heap) (addr:int) (b:M.buffer t) (len:int) (layout:vale_heap_layout) (tn:taint) =
+  buffer_readable h b /\
   len <= buffer_length b /\
-  M.buffer_addr b m == addr /\
-  M.valid_layout_buffer b layout m false /\
-  M.valid_taint_buf64 b m layout.vl_taint t
+  M.buffer_addr b h == addr /\
+  M.valid_layout_buffer_id t b layout (M.get_heaplet_id h) false /\
+  M.valid_taint_buf b h layout.vl_taint tn
 
-let validDstAddrs64 (m:vale_heap) (addr:int) (b:M.buffer64) (len:int) (layout:vale_heap_layout) (t:taint) =
-  buffer_readable m b /\
-  buffer_writeable b /\
-  len <= buffer_length b /\
-  M.buffer_addr b m == addr /\
-  M.valid_layout_buffer b layout m true /\
-  M.valid_taint_buf64 b m layout.vl_taint t
+let validDstAddrs (#t:base_typ) (h:vale_heap) (addr:int) (b:M.buffer t) (len:int) (layout:vale_heap_layout) (tn:taint) =
+  validSrcAddrs h addr b len layout tn /\
+  M.valid_layout_buffer_id t b layout (M.get_heaplet_id h) true /\
+  buffer_writeable b
 
-let validSrcAddrs128 (m:vale_heap) (addr:int) (b:M.buffer128) (len:int) (layout:vale_heap_layout) (t:taint) =
-  buffer_readable m b /\
-  len <= buffer_length b /\
-  M.buffer_addr b m == addr /\
-  M.valid_layout_buffer b layout m false /\
-  M.valid_taint_buf128 b m layout.vl_taint t
+let validSrcAddrs64 (h:vale_heap) (addr:int) (b:M.buffer64) (len:int) (layout:vale_heap_layout) (tn:taint) =
+  validSrcAddrs h addr b len layout tn
 
-let validDstAddrs128 (m:vale_heap) (addr:int) (b:M.buffer128) (len:int) (layout:vale_heap_layout) (t:taint) =
-  buffer_readable m b /\
-  buffer_writeable b /\
-  len <= buffer_length b /\
-  M.buffer_addr b m == addr /\
-  M.valid_layout_buffer b layout m true /\
-  M.valid_taint_buf128 b m layout.vl_taint t
+let validDstAddrs64 (h:vale_heap) (addr:int) (b:M.buffer64) (len:int) (layout:vale_heap_layout) (tn:taint) =
+  validDstAddrs h addr b len layout tn
 
-let validSrcAddrsOffset128 (m:vale_heap) (addr:int) (b:M.buffer128) (offset len:int) (layout:vale_heap_layout) (t:taint) =
-  buffer_readable m b /\
-  offset + len <= buffer_length b /\
-  M.buffer_addr b m + 16 * offset == addr /\
-  M.valid_layout_buffer b layout m false /\
-  M.valid_taint_buf128 b m layout.vl_taint t
+let validSrcAddrs128 (h:vale_heap) (addr:int) (b:M.buffer128) (len:int) (layout:vale_heap_layout) (tn:taint) =
+  validSrcAddrs h addr b len layout tn
 
-let validDstAddrsOffset128 (m:vale_heap) (addr:int) (b:M.buffer128) (offset len:int) (layout:vale_heap_layout) (t:taint) =
-  buffer_readable m b /\
-  buffer_writeable b /\
-  offset + len <= buffer_length b /\
-  M.buffer_addr b m + 16 * offset == addr /\
-  M.valid_layout_buffer b layout m true /\
-  M.valid_taint_buf128 b m layout.vl_taint t
+let validDstAddrs128 (h:vale_heap) (addr:int) (b:M.buffer128) (len:int) (layout:vale_heap_layout) (tn:taint) =
+  validDstAddrs h addr b len layout tn
+
+let validSrcAddrsOffset128 (h:vale_heap) (addr:int) (b:M.buffer128) (offset len:int) (layout:vale_heap_layout) (tn:taint) =
+  validSrcAddrs h (addr - 16 * offset) b (len + offset) layout tn
+
+let validDstAddrsOffset128 (h:vale_heap) (addr:int) (b:M.buffer128) (offset len:int) (layout:vale_heap_layout) (tn:taint) =
+  validDstAddrs h (addr - 16 * offset) b (len + offset) layout tn
 
 let modifies_buffer_specific128 (b:M.buffer128) (h1 h2:vale_heap) (start last:nat) : GTot prop0 =
     modifies_buffer128 b h1 h2 /\

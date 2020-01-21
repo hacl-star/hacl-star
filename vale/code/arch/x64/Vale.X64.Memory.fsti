@@ -306,8 +306,11 @@ val lemma_store_mem128 (b:buffer128) (i:nat) (v:quad32) (h:vale_heap) : Lemma
 
 type memtaint = memTaint_t
 
-val valid_taint_buf64 (b:buffer64) (vale_heap:vale_heap) (memTaint:memtaint) (t:taint) : GTot prop0
-val valid_taint_buf128 (b:buffer128) (vale_heap:vale_heap) (memTaint:memtaint) (t:taint) : GTot prop0
+val valid_taint_buf (#t:base_typ) (b:buffer t) (h:vale_heap) (mt:memtaint) (tn:taint) : GTot prop0
+let valid_taint_buf64 (b:buffer64) (h:vale_heap) (mt:memtaint) (tn:taint) : GTot prop0 =
+  valid_taint_buf b h mt tn
+let valid_taint_buf128 (b:buffer128) (h:vale_heap) (mt:memtaint) (tn:taint) : GTot prop0 =
+  valid_taint_buf b h mt tn
 
 val lemma_valid_taint64
     (b:buffer64)
@@ -355,15 +358,10 @@ val same_memTaint128
     (forall p.{:pattern Map.sel memtaint0 p \/ Map.sel memtaint1 p} Map.sel memtaint0 p == Map.sel memtaint1 p)))
   (ensures memtaint0 == memtaint1)
 
-val modifies_valid_taint64 (b:buffer64) (p:loc) (h h':vale_heap) (memTaint:memtaint) (t:taint) : Lemma
+val modifies_valid_taint (#t:base_typ) (b:buffer t) (p:loc) (h h':vale_heap) (mt:memtaint) (tn:taint) : Lemma
   (requires modifies p h h')
-  (ensures valid_taint_buf64 b h memTaint t <==> valid_taint_buf64 b h' memTaint t)
-  [SMTPat (modifies p h h'); SMTPat (valid_taint_buf64 b h' memTaint t)]
-
-val modifies_valid_taint128 (b:buffer128) (p:loc) (h h':vale_heap) (memTaint:memtaint) (t:taint) : Lemma
-  (requires modifies p h h')
-  (ensures valid_taint_buf128 b h memTaint t <==> valid_taint_buf128 b h' memTaint t)
-  [SMTPat (modifies p h h'); SMTPat (valid_taint_buf128 b h' memTaint t)]
+  (ensures valid_taint_buf b h mt tn <==> valid_taint_buf b h' mt tn)
+  [SMTPat (modifies p h h'); SMTPat (valid_taint_buf b h' mt tn)]
 
 val modifies_same_heaplet_id (l:loc) (h1 h2:vale_heap) : Lemma
   (requires modifies l h1 h2)

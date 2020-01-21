@@ -52,7 +52,8 @@ let v_to_typ (t:base_typ) (v:base_typ_as_type t) : base_typ_as_vale_type t =
 let lemma_v_to_of_typ (t:base_typ) (v:base_typ_as_vale_type t) : Lemma
   (ensures v_to_typ t (v_of_typ t v) == v)
   [SMTPat (v_to_typ t (v_of_typ t v))]
-  = ()
+  =
+  ()
 
 let uint8_view = Vale.Interop.Views.up_view8
 let uint16_view = Vale.Interop.Views.up_view16
@@ -60,9 +61,8 @@ let uint32_view = Vale.Interop.Views.up_view32
 let uint64_view = Vale.Interop.Views.up_view64
 let uint128_view = Vale.Interop.Views.up_view128
 
-val uint_view (t:base_typ) : (v:UV.view UInt8.t (IB.base_typ_as_type t){UV.View?.n v == view_n t})
-
-let uint_view = function
+let uint_view (t:base_typ) : (v:UV.view UInt8.t (IB.base_typ_as_type t){UV.View?.n v == view_n t}) =
+  match t with
   | TUInt8 -> uint8_view
   | TUInt16 -> uint16_view
   | TUInt32 -> uint32_view
@@ -106,7 +106,9 @@ let index64_heap_aux (s:Seq.lseq UInt8.t 8) (heap:S.machine_heap) (ptr:int) : Le
 
 let index_helper (x y:int) (heap:S.machine_heap) : Lemma
   (requires x == y)
-  (ensures heap.[x] == heap.[y]) = ()
+  (ensures heap.[x] == heap.[y])
+  =
+  ()
 
 let index_mul_helper (addr i n j:int) : Lemma
   (addr + (i * n + j) == addr + n * i + j) =
@@ -114,14 +116,13 @@ let index_mul_helper (addr i n j:int) : Lemma
 
 #set-options "--max_fuel 0 --max_ifuel 0"
 
-val index64_get_heap_val64 (h:vale_heap)
-                           (b:buffer64{List.memP b (_ih h).ptrs})
-                           (heap:S.machine_heap{IB.correct_down (_ih h) heap})
-                           (i:nat{i < buffer_length b})
-   : Lemma (Seq.index (buffer_as_seq h b) i ==
-            S.get_heap_val64 (buffer_addr b h + scale8 i) heap)
-
-let index64_get_heap_val64 h b heap i =
+let index64_get_heap_val64
+    (h:vale_heap)
+    (b:buffer64{List.memP b (_ih h).ptrs})
+    (heap:S.machine_heap{IB.correct_down (_ih h) heap})
+    (i:nat{i < buffer_length b})
+  : Lemma (Seq.index (buffer_as_seq h b) i == S.get_heap_val64 (buffer_addr b h + scale8 i) heap)
+  =
   let db = get_downview b.bsrc in
   let ub = UV.mk_buffer db uint64_view in
   let ptr = buffer_addr b h + scale8 i in
@@ -161,20 +162,22 @@ let index128_get_heap_val128_aux (s:Seq.lseq UInt8.t 16) (ptr:int) (heap:S.machi
   Vale.Interop.Views.get128_reveal ();
   Vale.Def.Types_s.le_bytes_to_quad32_reveal ()
 
-val index128_get_heap_val128 (h:vale_heap)
-                           (b:buffer128{List.memP b (_ih h).ptrs})
-                           (heap:S.machine_heap{IB.correct_down (_ih h) heap})
-                           (i:nat{i < buffer_length b}) : Lemma
-(let addr = buffer_addr b h in
- Seq.index (buffer_as_seq h b) i ==
-  Mkfour
-    (S.get_heap_val32 (addr + scale16 i) heap)
-    (S.get_heap_val32 (addr + scale16 i+4) heap)
-    (S.get_heap_val32 (addr + scale16 i+8) heap)
-    (S.get_heap_val32 (addr + scale16 i +12) heap)
- )
-
-let index128_get_heap_val128 h b heap i =
+let index128_get_heap_val128
+    (h:vale_heap)
+    (b:buffer128{List.memP b (_ih h).ptrs})
+    (heap:S.machine_heap{IB.correct_down (_ih h) heap})
+    (i:nat{i < buffer_length b})
+  : Lemma
+    (ensures (
+      let addr = buffer_addr b h in
+      Seq.index (buffer_as_seq h b) i ==
+        Mkfour
+          (S.get_heap_val32 (addr + scale16 i) heap)
+          (S.get_heap_val32 (addr + scale16 i+4) heap)
+          (S.get_heap_val32 (addr + scale16 i+8) heap)
+          (S.get_heap_val32 (addr + scale16 i +12) heap)
+    ))
+  =
   let db = get_downview b.bsrc in
   let vb = UV.mk_buffer db uint128_view in
   let ptr = buffer_addr b h + scale16 i in
@@ -197,11 +200,10 @@ let lemma_modifies_goal_directed s h1 h2 = ()
 
 let buffer_length_buffer_as_seq #t h b = ()
 
-val same_underlying_seq (#t:base_typ) (h1 h2:vale_heap) (b:buffer t) : Lemma
+let same_underlying_seq (#t:base_typ) (h1 h2:vale_heap) (b:buffer t) : Lemma
   (requires Seq.equal (DV.as_seq (_ih h1).hs (get_downview b.bsrc)) (DV.as_seq (_ih h2).hs (get_downview b.bsrc)))
   (ensures Seq.equal (buffer_as_seq h1 b) (buffer_as_seq h2 b))
-
-let same_underlying_seq #t h1 h2 b =
+  =
   let db = get_downview b.bsrc in
   let rec aux (i:nat{i <= buffer_length b}) : Lemma
     (requires (forall (j:nat{j < i}). Seq.index (buffer_as_seq h1 b) j == Seq.index (buffer_as_seq h2 b) j) /\
@@ -261,16 +263,17 @@ let buffer_read #t b i h =
   if i < 0 || i >= buffer_length b then default_of_typ t else
   Seq.index (buffer_as_seq h b) i
 
-val seq_upd (#b:_)
-            (h:HS.mem)
-            (vb:UV.buffer b{UV.live h vb})
-            (i:nat{i < UV.length vb})
-            (x:b)
-  : Lemma (Seq.equal
+let seq_upd
+    (#b:_)
+    (h:HS.mem)
+    (vb:UV.buffer b{UV.live h vb})
+    (i:nat{i < UV.length vb})
+    (x:b)
+  : Lemma
+    (Seq.equal
       (Seq.upd (UV.as_seq h vb) i x)
       (UV.as_seq (UV.upd h vb i x) vb))
-
-let seq_upd #b h vb i x =
+  =
   let old_s = UV.as_seq h vb in
   let new_s = UV.as_seq (UV.upd h vb i x) vb in
   let upd_s = Seq.upd old_s i x in
@@ -306,13 +309,13 @@ let buffer_write #t b i v h =
 
 unfold let scale_t (t:base_typ) (index:int) : int = scale_by (view_n t) index
 
-val addr_in_ptr: (#t:base_typ) -> (addr:int) -> (ptr:buffer t) -> (h:vale_heap) ->
-  GTot (b:bool{ not b <==>
-    (forall (i:int).{:pattern (scale_t t i)} 0 <= i /\ i < buffer_length ptr ==>
-      addr <> (buffer_addr ptr h) + scale_t t i)})
-
 // Checks if address addr corresponds to one of the elements of buffer ptr
-let addr_in_ptr #t addr ptr h =
+let addr_in_ptr (#t:base_typ) (addr:int) (ptr:buffer t) (h:vale_heap) : Ghost bool
+  (requires True)
+  (ensures fun b -> not b <==>
+    (forall (i:int).{:pattern (scale_t t i)} 0 <= i /\ i < buffer_length ptr ==>
+      addr <> (buffer_addr ptr h) + scale_t t i))
+  =
   let n = buffer_length ptr in
   let base = buffer_addr ptr h in
   let rec aux (i:nat) : Tot (b:bool{not b <==> (forall j. i <= j /\ j < n ==>
@@ -326,11 +329,13 @@ let addr_in_ptr #t addr ptr h =
 let valid_offset (t:base_typ) (n base:nat) (addr:int) (i:nat) =
   exists j.{:pattern (scale_t t j)} i <= j /\ j < n /\ base + scale_t t j == addr
 
-let rec get_addr_in_ptr (t:base_typ) (n base addr:nat) (i:nat{valid_offset t n base addr i})
-  : GTot (j:nat{base + scale_t t j == addr})
-    (decreases %[n-i]) =
-    if base + scale_t t i = addr then i
-    else get_addr_in_ptr t n base addr (i+1)
+let rec get_addr_in_ptr (t:base_typ) (n base addr:nat) (i:nat) : Ghost nat
+  (requires valid_offset t n base addr i)
+  (ensures fun j -> base + scale_t t j == addr)
+  (decreases %[n - i])
+  =
+  if base + scale_t t i = addr then i
+  else get_addr_in_ptr t n base addr (i + 1)
 
 let valid_buffer (t:base_typ) (addr:int) (b:b8) (h:vale_heap) : GTot bool =
   DV.length (get_downview b.bsrc) % (view_n t) = 0 &&
@@ -342,70 +347,84 @@ let writeable_buffer (t:base_typ) (addr:int) (b:b8) (h:vale_heap) : GTot bool =
 #set-options "--max_fuel 1 --max_ifuel 1"
 let sub_list (p1 p2:list 'a) = forall x. {:pattern List.memP x p2} List.memP x p1 ==> List.memP x p2
 
-let rec valid_mem_aux (t:base_typ) addr (ps:list b8) (h:vale_heap {sub_list ps (_ih h).ptrs})
-  : GTot (b:bool{
-           b <==>
-           (exists (x:buffer t). {:pattern (List.memP x ps) \/ (valid_buffer t addr x h)}
-             List.memP x ps /\ valid_buffer t addr x h)})
-  = match ps with
-    | [] -> false
-    | a::q -> valid_buffer t addr a h || valid_mem_aux t addr q h
+let rec valid_mem_aux (t:base_typ) addr (ps:list b8) (h:vale_heap) : Ghost bool
+  (requires sub_list ps (_ih h).ptrs)
+  (ensures fun b ->
+    b <==> (exists (x:buffer t). {:pattern (List.memP x ps) \/ (valid_buffer t addr x h)}
+      List.memP x ps /\ valid_buffer t addr x h))
+  =
+  match ps with
+  | [] -> false
+  | a::q -> valid_buffer t addr a h || valid_mem_aux t addr q h
 let valid_mem (t:base_typ) addr (h:vale_heap) = valid_mem_aux t addr (_ih h).ptrs h
 let valid_mem64 ptr h = valid_mem (TUInt64) ptr h
 
-let rec find_valid_buffer_aux (t:base_typ) (addr:int) (ps:list b8) (h:vale_heap{sub_list ps (_ih h).ptrs})
-  : GTot (o:option (buffer t){
+let rec find_valid_buffer_aux (t:base_typ) (addr:int) (ps:list b8) (h:vale_heap) : Ghost (option (buffer t))
+  (requires sub_list ps (_ih h).ptrs)
+  (ensures fun o ->
     match o with
     | None -> not (valid_mem_aux t addr ps h)
-    | Some a -> valid_buffer t addr a h /\ List.memP a ps})
-  = match ps with
-    | [] -> None
-    | a::q -> if valid_buffer t addr a h then Some a else find_valid_buffer_aux t addr q h
+    | Some a -> valid_buffer t addr a h /\ List.memP a ps)
+  =
+  match ps with
+  | [] -> None
+  | a::q -> if valid_buffer t addr a h then Some a else find_valid_buffer_aux t addr q h
 
 let find_valid_buffer (t:base_typ) (addr:int) (h:vale_heap) = find_valid_buffer_aux t addr (_ih h).ptrs h
 
-let rec find_valid_buffer_aux_ps (t:base_typ) (addr:int) (ps:list b8) (h1:vale_heap) (h2:vale_heap{(_ih h1).ptrs == (_ih h2).ptrs /\ sub_list ps (_ih h1).ptrs})
-  : Lemma (find_valid_buffer_aux t addr ps h1 == find_valid_buffer_aux t addr ps h2)
-  = match ps with
-    | [] -> ()
-    | a::q -> find_valid_buffer_aux_ps t addr q h1 h2
+let rec find_valid_buffer_aux_ps (t:base_typ) (addr:int) (ps:list b8) (h1:vale_heap) (h2:vale_heap) : Lemma
+  (requires (_ih h1).ptrs == (_ih h2).ptrs /\ sub_list ps (_ih h1).ptrs)
+  (ensures find_valid_buffer_aux t addr ps h1 == find_valid_buffer_aux t addr ps h2)
+  =
+  match ps with
+  | [] -> ()
+  | a::q -> find_valid_buffer_aux_ps t addr q h1 h2
 
-let find_valid_buffer_ps (t:base_typ) (addr:int) (h1:vale_heap) (h2:vale_heap{(_ih h1).ptrs==(_ih h2).ptrs})
-  : Lemma (find_valid_buffer t addr h1 == find_valid_buffer t addr h2)
-  = find_valid_buffer_aux_ps t addr (_ih h1).ptrs h1 h2
+let find_valid_buffer_ps (t:base_typ) (addr:int) (h1:vale_heap) (h2:vale_heap) : Lemma
+  (requires (_ih h1).ptrs == (_ih h2).ptrs)
+  (ensures find_valid_buffer t addr h1 == find_valid_buffer t addr h2)
+  =
+  find_valid_buffer_aux_ps t addr (_ih h1).ptrs h1 h2
 
-let find_valid_buffer_valid_offset (t:base_typ) (addr:int) (h:vale_heap)
-  : Lemma (match find_valid_buffer t addr h with
-           | None -> True
-           | Some a ->
-             let base = buffer_addr a h in
-             valid_offset t (buffer_length a) base addr 0)
-  = ()
+let find_valid_buffer_valid_offset (t:base_typ) (addr:int) (h:vale_heap) : Lemma
+  (ensures (
+    match find_valid_buffer t addr h with
+    | None -> True
+    | Some a ->
+      let base = buffer_addr a h in
+      valid_offset t (buffer_length a) base addr 0
+  ))
+  =
+  ()
 
-let rec writeable_mem_aux (t:base_typ) addr (ps:list b8) (h:vale_heap {sub_list ps (_ih h).ptrs})
-  : GTot (b:bool{
-           b <==>
-           (exists (x:buffer t). {:pattern (List.memP x ps) \/ (valid_buffer t addr x h) \/ buffer_writeable x}
-             List.memP x ps /\ valid_buffer t addr x h /\ buffer_writeable x)})
-  = match ps with
-    | [] -> false
-    | a::q -> writeable_buffer t addr a h || writeable_mem_aux t addr q h
+let rec writeable_mem_aux (t:base_typ) addr (ps:list b8) (h:vale_heap) : Ghost bool
+  (requires sub_list ps (_ih h).ptrs)
+  (ensures fun b -> b <==>
+    (exists (x:buffer t). {:pattern (List.memP x ps) \/ (valid_buffer t addr x h) \/ buffer_writeable x}
+      List.memP x ps /\ valid_buffer t addr x h /\ buffer_writeable x))
+  =
+  match ps with
+  | [] -> false
+  | a::q -> writeable_buffer t addr a h || writeable_mem_aux t addr q h
 let writeable_mem (t:base_typ) addr (h:vale_heap) = writeable_mem_aux t addr (_ih h).ptrs h
 let writeable_mem64 ptr h = writeable_mem (TUInt64) ptr h
 
-let rec find_writeable_buffer_aux (t:base_typ) (addr:int) (ps:list b8) (h:vale_heap{sub_list ps (_ih h).ptrs})
-  : GTot (o:option (buffer t){
+let rec find_writeable_buffer_aux (t:base_typ) (addr:int) (ps:list b8) (h:vale_heap) : Ghost (option (buffer t))
+  (requires sub_list ps (_ih h).ptrs)
+  (ensures fun o -> (
     match o with
     | None -> not (writeable_mem_aux t addr ps h)
-    | Some a -> writeable_buffer t addr a h /\ List.memP a ps})
-  = match ps with
-    | [] -> None
-    | a::q -> if writeable_buffer t addr a h then Some a else find_writeable_buffer_aux t addr q h
+    | Some a -> writeable_buffer t addr a h /\ List.memP a ps
+  ))
+  =
+  match ps with
+  | [] -> None
+  | a::q -> if writeable_buffer t addr a h then Some a else find_writeable_buffer_aux t addr q h
 
-let find_writeable_buffer (t:base_typ) (addr:int) (h:vale_heap) = find_writeable_buffer_aux t addr (_ih h).ptrs h
+let find_writeable_buffer (t:base_typ) (addr:int) (h:vale_heap) =
+  find_writeable_buffer_aux t addr (_ih h).ptrs h
 
-let load_mem (t:base_typ) addr (h:vale_heap)
-  : GTot (base_typ_as_vale_type t) =
+let load_mem (t:base_typ) (addr:int) (h:vale_heap) : GTot (base_typ_as_vale_type t) =
   match find_valid_buffer t addr h with
   | None -> default_of_typ t
   | Some a ->
@@ -424,43 +443,50 @@ let length_t_eq (t:base_typ) (b:buffer t) :
   assert (buffer_length b == DV.length db / (view_n t));
   FStar.Math.Lib.lemma_div_def (DV.length db) (view_n t)
 
-let get_addr_ptr (t:base_typ) (ptr:int) (h:vale_heap{valid_mem t ptr h})
-  : GTot (b:buffer t{List.memP b (_ih h).ptrs /\ valid_buffer t ptr b h})
-  = Some?.v (find_valid_buffer t ptr h)
+let get_addr_ptr (t:base_typ) (ptr:int) (h:vale_heap) : Ghost (buffer t)
+  (requires valid_mem t ptr h)
+  (ensures fun b -> List.memP b (_ih h).ptrs /\ valid_buffer t ptr b h)
+  =
+  Some?.v (find_valid_buffer t ptr h)
 
 #reset-options "--max_fuel 0 --max_ifuel 0 --initial_fuel 0 --initial_ifuel 0 --z3rlimit 20"
-val load_buffer_read
-          (t:base_typ)
-          (ptr:int)
-          (h:vale_heap{valid_mem t ptr h})
- : Lemma
-    (ensures (let b = get_addr_ptr t ptr h in
-              let i = get_addr_in_ptr t (buffer_length b) (buffer_addr b h) ptr 0 in
-              load_mem t ptr h == buffer_read #t b i h))
-let load_buffer_read t ptr h = ()
+let load_buffer_read (t:base_typ) (ptr:int) (h:vale_heap) : Lemma
+  (requires valid_mem t ptr h)
+  (ensures (
+    let b = get_addr_ptr t ptr h in
+    let i = get_addr_in_ptr t (buffer_length b) (buffer_addr b h) ptr 0 in
+    load_mem t ptr h == buffer_read #t b i h
+  ))
+  =
+  ()
 
-let store_mem (t:base_typ) addr (v:base_typ_as_vale_type t) (h:vale_heap)
-  : GTot (h1:vale_heap{(_ih h).addrs == (_ih h1).addrs /\ (_ih h).ptrs == (_ih h1).ptrs })
-  = match find_writeable_buffer t addr h with
-    | None -> h
-    | Some a ->
-      let base = buffer_addr a h in
-      buffer_write a (get_addr_in_ptr t (buffer_length a) base addr 0) v h
+let store_mem (t:base_typ) (addr:int) (v:base_typ_as_vale_type t) (h:vale_heap) : Ghost vale_heap
+  (requires True)
+  (ensures fun h1 -> (_ih h).addrs == (_ih h1).addrs /\ (_ih h).ptrs == (_ih h1).ptrs)
+  =
+  match find_writeable_buffer t addr h with
+  | None -> h
+  | Some a ->
+    let base = buffer_addr a h in
+    buffer_write a (get_addr_in_ptr t (buffer_length a) base addr 0) v h
 
 let store_mem64 i v h =
   if not (valid_mem64 i h) then h
   else store_mem (TUInt64) i v h
 
-val store_buffer_write
-          (t:base_typ)
-          (ptr:int)
-          (v:base_typ_as_vale_type t)
-          (h:vale_heap{writeable_mem t ptr h})
+let store_buffer_write
+    (t:base_typ)
+    (ptr:int)
+    (v:base_typ_as_vale_type t)
+    (h:vale_heap{writeable_mem t ptr h})
   : Lemma
-      (let b = Some?.v (find_writeable_buffer t ptr h) in
-       let i = get_addr_in_ptr t (buffer_length b) (buffer_addr b h) ptr 0 in
-       store_mem t ptr v h == buffer_write b i v h)
-let store_buffer_write t ptr v h = ()
+    (ensures (
+      let b = Some?.v (find_writeable_buffer t ptr h) in
+      let i = get_addr_in_ptr t (buffer_length b) (buffer_addr b h) ptr 0 in
+      store_mem t ptr v h == buffer_write b i v h
+    ))
+  =
+  ()
 
 let valid_mem128 ptr h = valid_mem_aux (TUInt128) ptr (_ih h).ptrs h
 let writeable_mem128 ptr h = writeable_mem_aux (TUInt128) ptr (_ih h).ptrs h
@@ -511,7 +537,6 @@ let lemma_load_mem64 b i h =
     opaque_assert (`%list_disjoint_or_eq) list_disjoint_or_eq list_disjoint_or_eq_def (IB.disjoint_or_eq_b8 a b);
     assert (a == b)
 
-
 let lemma_store_mem64 b i v h = lemma_store_mem TUInt64 b i v h
 let lemma_valid_mem128 b i h = ()
 let lemma_writeable_mem128 b i h = ()
@@ -534,18 +559,19 @@ let lemma_store_mem128 b i v h = lemma_store_mem TUInt128 b i v h
 
 open Vale.X64.Machine_s
 
-let valid_taint_buf (b:b8) (mem:vale_heap) (memTaint:memtaint) t =
-  let addr = (_ih mem).addrs b in
-  (forall (i:int).{:pattern (memTaint.[i])}
-    addr <= i /\ i < addr + DV.length (get_downview b.bsrc) ==> memTaint.[i] == t)
+let valid_taint_b8 (b:b8) (h:vale_heap) (mt:memtaint) (tn:taint) : GTot prop0 =
+  let addr = (_ih h).addrs b in
+  (forall (i:int).{:pattern (mt.[i])}
+    addr <= i /\ i < addr + DV.length (get_downview b.bsrc) ==> mt.[i] == tn)
 
-let valid_taint_buf64 b mem memTaint t = valid_taint_buf b mem memTaint t
+let valid_taint_buf #t b h mt tn =
+  valid_taint_b8 b h mt tn
 
-let valid_taint_buf128 b mem memTaint t = valid_taint_buf b mem memTaint t
-
-let apply_taint_buf (b:b8) (mem:vale_heap) (memTaint:memtaint) (t:taint) (i:nat) : Lemma
-  (requires i < DV.length (get_downview b.bsrc) /\ valid_taint_buf b mem memTaint t)
-  (ensures memTaint.[(_ih mem).addrs b + i] = t) = ()
+let apply_taint_buf (#t:base_typ) (b:buffer t) (mem:vale_heap) (memTaint:memtaint) (tn:taint) (i:nat) : Lemma
+  (requires i < DV.length (get_downview b.bsrc) /\ valid_taint_buf b mem memTaint tn)
+  (ensures memTaint.[(_ih mem).addrs b + i] == tn)
+  =
+  ()
 
 let lemma_valid_taint64 b memTaint mem i t =
   length_t_eq (TUInt64) b;
@@ -583,69 +609,59 @@ let same_memTaint64 b mem0 mem1 memtaint0 memtaint1 =
 let same_memTaint128 b mem0 mem1 memtaint0 memtaint1 =
   same_memTaint (TUInt128) b mem0 mem1 memtaint0 memtaint1
 
-val modifies_valid_taint (ty:base_typ) (b:buffer ty) (p:loc) (h h':vale_heap) (memTaint:memtaint) (t:taint) : Lemma
-  (requires
-    modifies p h h'
-  )
-  (ensures valid_taint_buf b h memTaint t <==> valid_taint_buf b h' memTaint t)
-
-let modifies_valid_taint ty b p h h' memTaint t =
+let modifies_valid_taint #t b p h h' mt tn =
   let dv = get_downview b.bsrc in
   let imp_left () : Lemma
-    (requires valid_taint_buf b h memTaint t)
-    (ensures valid_taint_buf b h' memTaint t) =
-    let aux (i:nat{i < DV.length dv}) : Lemma (memTaint.[(_ih h').addrs b + i] = t) =
-      apply_taint_buf b h memTaint t i
+    (requires valid_taint_buf b h mt tn)
+    (ensures valid_taint_buf b h' mt tn) =
+    let aux (i:nat{i < DV.length dv}) : Lemma (mt.[(_ih h').addrs b + i] = tn) =
+      apply_taint_buf b h mt tn i
     in Classical.forall_intro aux
   in let imp_right () : Lemma
-    (requires valid_taint_buf b h' memTaint t)
-    (ensures valid_taint_buf b h memTaint t) =
-    let aux (i:nat{i < DV.length dv}) : Lemma (memTaint.[(_ih h).addrs b + i] = t) =
-      apply_taint_buf b h' memTaint t i
+    (requires valid_taint_buf b h' mt tn)
+    (ensures valid_taint_buf b h mt tn) =
+    let aux (i:nat{i < DV.length dv}) : Lemma (mt.[(_ih h).addrs b + i] = tn) =
+      apply_taint_buf b h' mt tn i
     in Classical.forall_intro aux
   in
   (Classical.move_requires imp_left());
   (Classical.move_requires imp_right())
-
-let modifies_valid_taint64 b p h h' memTaint t = modifies_valid_taint TUInt64 b p h h' memTaint t
-let modifies_valid_taint128 b p h h' memTaint t = modifies_valid_taint TUInt128 b p h h' memTaint t
 
 #set-options "--initial_fuel 1 --max_fuel 1 --initial_ifuel 1 --max_ifuel 1"
 let modifies_same_heaplet_id l h1 h2 =
   ()
 
 let valid_taint_bufs (mem:vale_heap) (memTaint:memtaint) (ps:list b8) (ts:b8 -> GTot taint) =
-  forall b.{:pattern List.memP b ps} List.memP b ps ==> valid_taint_buf b mem memTaint (ts b)
+  forall b.{:pattern List.memP b ps} List.memP b ps ==> valid_taint_b8 b mem memTaint (ts b)
 
-let rec write_taint_lemma
-  (i:nat)
-  (mem:IB.interop_heap)
-  (ts:b8 -> GTot taint)
-  (b:b8{i <= DV.length (get_downview b.bsrc)})
-  (accu:memtaint{forall (j:int).{:pattern accu.[j]} mem.addrs b <= j /\ j < mem.addrs b + i ==> accu.[j] = ts b})
-   : Lemma
-       (ensures (
-         let m = IB.write_taint i mem ts b accu in
-         let addr = mem.addrs b in
-         (forall j.{:pattern m.[j]} addr <= j /\ j < addr + DV.length (get_downview b.bsrc) ==>
-           m.[j] = ts b) /\
-         (forall j. {:pattern m.[j]} j < addr \/ j >= addr + DV.length (get_downview b.bsrc) ==>
-           m.[j] == accu.[j])))
-       (decreases %[DV.length (get_downview b.bsrc) - i])
-   = let m = IB.write_taint i mem ts b accu in
-     let addr = mem.addrs b in
-     if i >= DV.length (get_downview b.bsrc) then ()
-     else
-       let new_accu = accu.[addr+i] <- ts b in
-       assert (IB.write_taint i mem ts b accu ==
-               IB.write_taint (i + 1) mem ts b new_accu);
-       assert (Set.equal (Map.domain new_accu) (Set.complement Set.empty));
-       assert (forall j.{:pattern m.[j]} addr <= j /\ j < addr + i + 1 ==> new_accu.[j] == ts b);
-       write_taint_lemma (i + 1) mem ts b new_accu
+let rec write_taint_lemma (i:nat) (mem:IB.interop_heap) (ts:b8 -> GTot taint) (b:b8) (accu:memtaint) : Lemma
+  (requires
+    i <= DV.length (get_downview b.bsrc) /\
+    (forall (j:int).{:pattern accu.[j]} mem.addrs b <= j /\ j < mem.addrs b + i ==> accu.[j] = ts b)
+  )
+  (ensures (
+    let m = IB.write_taint i mem ts b accu in
+    let addr = mem.addrs b in
+    (forall j.{:pattern m.[j]} addr <= j /\ j < addr + DV.length (get_downview b.bsrc) ==>
+      m.[j] = ts b) /\
+    (forall j. {:pattern m.[j]} j < addr \/ j >= addr + DV.length (get_downview b.bsrc) ==>
+      m.[j] == accu.[j])))
+  (decreases %[DV.length (get_downview b.bsrc) - i])
+  =
+  let m = IB.write_taint i mem ts b accu in
+  let addr = mem.addrs b in
+  if i >= DV.length (get_downview b.bsrc) then ()
+  else
+    let new_accu = accu.[addr+i] <- ts b in
+    assert (IB.write_taint i mem ts b accu == IB.write_taint (i + 1) mem ts b new_accu);
+    assert (Set.equal (Map.domain new_accu) (Set.complement Set.empty));
+    assert (forall j.{:pattern m.[j]} addr <= j /\ j < addr + i + 1 ==> new_accu.[j] == ts b);
+    write_taint_lemma (i + 1) mem ts b new_accu
 
 #restart-solver
-let rec valid_memtaint (mem:vale_heap) (ps:list b8{IB.list_disjoint_or_eq ps}) (ts:b8 -> GTot taint)
-  : Lemma (valid_taint_bufs mem (IB.create_memtaint (_ih mem) ps ts) ps ts)
+let rec valid_memtaint (mem:vale_heap) (ps:list b8) (ts:b8 -> GTot taint) : Lemma
+  (requires IB.list_disjoint_or_eq ps)
+  (ensures valid_taint_bufs mem (IB.create_memtaint (_ih mem) ps ts) ps ts)
   =
   FStar.Pervasives.reveal_opaque (`%addr_map_pred) addr_map_pred;
   match ps with
