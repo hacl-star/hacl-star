@@ -20,7 +20,7 @@ let _ =
   assert (Bigstring.size test_tag = tag_len)
 
 let _ =
-  let open EverCrypt_Bindings.AEAD in
+  let open EverCrypt.AEAD in
 
   let st = alloc_t () in
   let ct = Bigstring.create msg_len in

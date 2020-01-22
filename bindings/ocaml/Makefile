@@ -1,6 +1,3 @@
-# all:
-# 	OCAMLPATH=$(HACL_HOME)/dist/gcc-compatible ocamlbuild -use-ocamlfind ocamlopt -I . -I lib -I lib_gen -package hacl,ctypes,ctypes.foreign,bigstring -cclib -Wl,-E -ccopt -L. -cclib -levercrypt ocamlevercrypt.cmxa EverCryptHigh.mli EverCryptHigh.ml aead_test.ml -o aead_test.native
-
 all:
 	OCAMLPATH=$(HACL_HOME)/dist/gcc-compatible/ ocamlbuild -use-ocamlfind -package ocamlevercrypt,bigstring aead_test.native
 	LD_LIBRARY_PATH=. ./aead_test.native
