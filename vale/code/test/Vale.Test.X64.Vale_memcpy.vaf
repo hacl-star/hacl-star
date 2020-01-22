@@ -18,6 +18,30 @@ open Vale.X64.QuickCodes
 #set-options "--z3rlimit 20"
 #endverbatim
 
+procedure InnerMemcpy(ghost dst:buffer64, ghost src:buffer64)
+    {:quick}
+    reads
+        rdx;
+        memLayout; heap0;
+    modifies
+        rax; rcx; r9;
+        heap1;
+    requires
+        validSrcAddrs64(heap0, rdx, src, 2, memLayout, Secret);
+        validDstAddrs64(heap1, rcx, dst, 2, memLayout, Secret);
+        buffer_length(src) == 2;
+        buffer_length(dst) == 2;
+    ensures
+        buffer_as_seq(heap1, dst) == buffer_as_seq(heap0, src);
+        modifies_mem(loc_buffer(dst), old(heap1), heap1);
+{
+    Load64_buffer(heap0, rax, rdx, 0, Secret, src, 0);
+    Load64_buffer(heap0, r9, rdx, 8, Secret, src, 1);
+    Store64_buffer(heap1, rcx, rax, 0, Secret, dst, 0);
+    Store64_buffer(heap1, rcx, r9, 8, Secret, dst, 1);
+    assert(Seq.equal(buffer_as_seq(heap1, dst), buffer_as_seq(heap0, src)));
+}
+
 procedure Memcpy(inline win:bool, ghost dst:buffer64, ghost src:buffer64)
     {:public}
     {:exportSpecs}
@@ -43,12 +67,10 @@ procedure Memcpy(inline win:bool, ghost dst:buffer64, ghost src:buffer64)
     CreateHeaplets(list(
         declare_buffer64(src, 0, Secret, Immutable),
         declare_buffer64(dst, 1, Secret, Mutable)));
+
     inline if (win)
     {
-        Load64_buffer(heap0, rax, rdx, 0, Secret, src, 0);
-        Load64_buffer(heap0, r9, rdx, 8, Secret, src, 1);
-        Store64_buffer(heap1, rcx, rax, 0, Secret, dst, 0);
-        Store64_buffer(heap1, rcx, r9, 8, Secret, dst, 1);
+        InnerMemcpy(dst, src);
     }
     else
     {
