@@ -238,9 +238,7 @@ procedure Store64_buffer(
         valid_taint_buf64(b, h, memLayout.vl_taint, t);
         dst + offset == buffer_addr(b, h) + 8 * index;
     ensures
-        modifies_mem(loc_buffer(b), old(h), h);
         h == old(buffer64_write(b, index, src, h));
-        valid_taint_buf64(b, h, memLayout.vl_taint, t);
 {
     low_lemma_store_mem64_full(b, #nat(index), old(src), old(this).vs_heap, t, @h);
 }
@@ -282,9 +280,7 @@ procedure StoreBe64_buffer(
         valid_taint_buf64(b, h, memLayout.vl_taint, t);
         dst + offset == buffer_addr(b, h) + 8 * index;
     ensures
-        modifies_mem(loc_buffer(b), old(h), h);
         h == old(buffer64_write(b, index, reverse_bytes_nat64(src), h));
-        valid_taint_buf64(b, h, memLayout.vl_taint, t);
 {
     low_lemma_store_mem64_full(b, #nat(index), old(reverse_bytes_nat64(src)), old(this).vs_heap, t, @h);
 }
