@@ -389,7 +389,7 @@ void EverCrypt_Hash_update_multi_256(uint32_t *s, uint8_t *blocks, uint32_t n1)
   if (true && has_shaext1 && has_sse1)
   {
     uint64_t n2 = (uint64_t)n1;
-    uint64_t scrut = sha256_update(s, blocks, n2, Hacl_Hash_Core_SHA2_Constants_k224_256);
+    uint64_t scrut = sha256_update(s, blocks, n2, k224_256);
     return;
   }
   Hacl_Hash_SHA2_update_multi_256(s, blocks, n1);

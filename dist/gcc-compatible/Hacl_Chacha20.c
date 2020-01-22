@@ -24,8 +24,8 @@
 
 #include "Hacl_Chacha20.h"
 
-uint32_t
-Hacl_Impl_Chacha20_Vec_chacha20_constants[4U] =
+static uint32_t
+chacha20_constants[4U] =
   { (uint32_t)0x61707865U, (uint32_t)0x3320646eU, (uint32_t)0x79622d32U, (uint32_t)0x6b206574U };
 
 static inline void quarter_round(uint32_t *st, uint32_t a, uint32_t b, uint32_t c, uint32_t d)
@@ -106,7 +106,7 @@ static inline void chacha20_core(uint32_t *k, uint32_t *ctx, uint32_t ctr)
 }
 
 static uint32_t
-chacha20_constants[4U] =
+chacha20_constants0[4U] =
   { (uint32_t)0x61707865U, (uint32_t)0x3320646eU, (uint32_t)0x79622d32U, (uint32_t)0x6b206574U };
 
 inline void
@@ -116,7 +116,7 @@ Hacl_Impl_Chacha20_chacha20_init(uint32_t *ctx, uint8_t *k, uint8_t *n1, uint32_
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
   {
     uint32_t *os = uu____0;
-    uint32_t x = chacha20_constants[i];
+    uint32_t x = chacha20_constants0[i];
     os[i] = x;
   }
   uint32_t *uu____1 = ctx + (uint32_t)4U;

@@ -167,8 +167,7 @@ let create_in a r =
   p
 #pop-options
 
-#push-options "--z3rlimit 100 --using_facts_from '*,-LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2'"
-#restart-solver
+#push-options "--z3rlimit 100"
 
 let init a s =
   let open LowStar.BufferOps in
