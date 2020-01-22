@@ -12,7 +12,7 @@ open Lib.LoopCombinators
 module ST = FStar.HyperStack.ST
 module Seq = Lib.Sequence
 module Loops = Lib.LoopCombinators
-module Spec = Spec.Blake2_Vec
+module Spec = Spec.Blake2
 
 open Hacl.Impl.Blake2.Constants
 open Hacl.Impl.Blake2.Core

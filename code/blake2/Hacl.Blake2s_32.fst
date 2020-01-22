@@ -1,6 +1,6 @@
 module Hacl.Blake2s_32
 
-module Spec = Spec.Blake2_Vec
+module Spec = Spec.Blake2
 module Impl = Hacl.Impl.Blake2.Generic
 module Core = Hacl.Impl.Blake2.Core
 

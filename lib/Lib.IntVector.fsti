@@ -187,26 +187,13 @@ val vec_rotate_right: #t:v_inttype -> #w:width
 
 val vec_rotate_right_lemma: #t:v_inttype -> #w:width
   -> v1:vec_t t w -> s:rotval t{t <> U128 \/ uint_v s % 8 == 0} ->
-  Lemma (ensures (vec_v (vec_rotate_right #t #w v1 s) == map (rotate_right_i s) (vec_v v1)))
+  Lemma (ensures (vec_v (vec_rotate_right v1 s) == map (rotate_right_i s) (vec_v v1)))
 	[SMTPat (vec_v (vec_rotate_right #t #w v1 s))]
 
 inline_for_extraction noextract
 val vec_rotate_left: #t:v_inttype -> #w:width
   -> v1:vec_t t w -> s:rotval t{t <> U128 \/ uint_v s % 8 == 0} ->
   v2:vec_t t w{vec_v v2 == map (rotate_left_i s) (vec_v v1)}
-
-inline_for_extraction noextract
-let shift_right_i (#t:v_inttype) (s:shiftval t) (u:uint_t t SEC) : uint_t t SEC = shift_right u s
-
-inline_for_extraction noextract
-let shift_left_i (#t:v_inttype) (s:shiftval t) (u:uint_t t SEC) : uint_t t SEC = shift_left u s
-
-inline_for_extraction noextract
-let rotate_right_i (#t:v_inttype) (s:rotval t) (u:uint_t t SEC) : uint_t t SEC = rotate_right u s
-
-inline_for_extraction noextract
-let rotate_left_i (#t:v_inttype) (s:rotval t) (u:uint_t t SEC) : uint_t t SEC = rotate_left u s
-
 
 inline_for_extraction noextract
 val vec_eq_mask: #t:v_inttype -> #w:width -> v1:vec_t t w -> v2:vec_t t w -> v3:vec_t t w{vec_v v3 == map2 eq_mask (vec_v v1) (vec_v v2)}

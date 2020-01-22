@@ -9,7 +9,7 @@ open Lib.Buffer
 open Lib.ByteBuffer
 open Lib.IntVector
 
-module Spec = Spec.Blake2_Vec
+module Spec = Spec.Blake2
 
 type m_spec =
   | M32
@@ -183,8 +183,8 @@ val store_row: #a:Spec.alg -> #m:m_spec -> b:lbuffer uint8 (size_row a) -> r:row
 inline_for_extraction
 let size_block (a:Spec.alg) : x:size_t{v x = 16 * Spec.size_word a} =
   match a with
-  | Spec.Blake2_Vec.Blake2S -> 64ul
-  | Spec.Blake2_Vec.Blake2B -> 128ul
+  | Spec.Blake2.Blake2S -> 64ul
+  | Spec.Blake2.Blake2B -> 128ul
 
 
 inline_for_extraction

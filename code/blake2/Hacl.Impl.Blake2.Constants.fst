@@ -11,7 +11,7 @@ open Lib.LoopCombinators
 module ST = FStar.HyperStack.ST
 module Seq = Lib.Sequence
 module Loops = Lib.LoopCombinators
-module Spec = Spec.Blake2_Vec
+module Spec = Spec.Blake2
 
 let sigmaTable : x:ilbuffer Spec.sigma_elt_t 160ul{witnessed x Spec.sigmaTable /\ recallable x} =
   createL_global Spec.list_sigma

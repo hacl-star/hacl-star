@@ -9,7 +9,7 @@ open Lib.Buffer
 open Lib.ByteBuffer
 open Lib.IntVector
 
-module Spec = Spec.Blake2_Vec
+module Spec = Spec.Blake2
 
 inline_for_extraction
 let zero_element (a:Spec.alg) (m:m_spec) : element_t a m =
@@ -133,6 +133,7 @@ let add_row #a #m r1 r2 =
   | _ -> map2T 4ul r1 (add_mod #(Spec.wt a) #SEC) r1 r2
 
 
+#push-options "--z3rlimit 200"
 inline_for_extraction
 let ror_row #a #m r1 r2 =
   match a,m with
@@ -144,8 +145,8 @@ let ror_row #a #m r1 r2 =
     r1.(0ul) <- vec_rotate_right #U64 #4 r1.(0ul) r2
   | _ ->
     let r1:lbuffer (Spec.word_t a) 4ul = r1 in
-    mapT 4ul r1 (rotate_right_i #(Spec.wt a) #SEC r2) r1
-
+    mapT 4ul r1 (rotate_right_i  r2) r1
+#pop-options
 
 #push-options "--z3rlimit 50"
 inline_for_extraction
