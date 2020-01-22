@@ -447,7 +447,7 @@ let fmul_scalar out f1 f2
     ()
 
 let fmul1_comments : list string = 
-  ["Computes the field multiplication of four-element f1 with value in f2"]
+  ["Computes the field multiplication of four-element f1 with value in f2"; "Requires f2 to be smaller than 2^17"]
 
 let fmul1_names (n:nat) =
   match n with
