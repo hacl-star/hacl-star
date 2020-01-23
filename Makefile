@@ -46,8 +46,6 @@ include Makefile.common
 # Catching setup errors #
 #########################
 
-# This was needed once because of the shortest stem rule. I don't think it's
-# needed anymore, but better be safe.
 ifeq (3.81,$(MAKE_VERSION))
   $(error You seem to be using the OSX antiquated Make version. Hint: brew \
     install make, then invoke gmake instead of make)
