@@ -24,7 +24,7 @@
 
 #include "Hacl_Chacha20Poly1305_32.h"
 
-inline static void poly1305_padded_32(u64 *ctx, u32 len, u8 *text)
+static inline void poly1305_padded_32(u64 *ctx, u32 len, u8 *text)
 {
   u32 n1 = len / (u32)16U;
   u32 r = len % (u32)16U;
@@ -36,7 +36,7 @@ inline static void poly1305_padded_32(u64 *ctx, u32 len, u8 *text)
   u32 rem2 = n1 * (u32)16U % (u32)16U;
   {
     u32 i;
-    for (i = (u32)0U; i < nb; i = i + (u32)1U)
+    for (i = (u32)0U; i < nb; i++)
     {
       u8 *block = blocks + i * (u32)16U;
       u64 e[5U] = { 0U };
@@ -166,7 +166,7 @@ inline static void poly1305_padded_32(u64 *ctx, u32 len, u8 *text)
     u8 *last1 = blocks + nb * (u32)16U;
     u64 e[5U] = { 0U };
     u8 tmp[16U] = { 0U };
-    memcpy(tmp, last1, rem2 * sizeof last1[0U]);
+    memcpy(tmp, last1, rem2 * sizeof (last1[0U]));
     {
       u64 u0 = load64_le(tmp);
       u64 lo = u0;
@@ -291,7 +291,7 @@ inline static void poly1305_padded_32(u64 *ctx, u32 len, u8 *text)
   }
   {
     u8 tmp[16U] = { 0U };
-    memcpy(tmp, rem1, r * sizeof rem1[0U]);
+    memcpy(tmp, rem1, r * sizeof (rem1[0U]));
     if (r > (u32)0U)
     {
       u64 *pre = ctx + (u32)5U;
@@ -505,7 +505,7 @@ inline static void poly1305_padded_32(u64 *ctx, u32 len, u8 *text)
   }
 }
 
-inline static void poly1305_do_32(u8 *k, u32 aadlen, u8 *aad, u32 mlen, u8 *m, u8 *out)
+static inline void poly1305_do_32(u8 *k, u32 aadlen, u8 *aad, u32 mlen, u8 *m, u8 *out)
 {
   u64 ctx[25U] = { 0U };
   u8 block[16U] = { 0U };
@@ -773,7 +773,7 @@ Hacl_Chacha20Poly1305_32_aead_decrypt(
     u32 res;
     {
       u32 i;
-      for (i = (u32)0U; i < (u32)16U; i = i + (u32)1U)
+      for (i = (u32)0U; i < (u32)16U; i++)
       {
         u8 uu____0 = FStar_UInt8_eq_mask(computed_mac[i], mac[i]);
         res0 = uu____0 & res0;

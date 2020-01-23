@@ -26,7 +26,7 @@
 
 /* SNIPPET_START: has_adx_bmi2 */
 
-inline static bool has_adx_bmi2()
+static inline bool has_adx_bmi2()
 {
   bool has_bmi21 = EverCrypt_AutoConfig2_has_bmi2();
   bool has_adx1 = EverCrypt_AutoConfig2_has_adx();

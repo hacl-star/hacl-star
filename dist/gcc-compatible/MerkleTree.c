@@ -40,7 +40,7 @@ void hash_r_free(uint8_t *v1)
 
 void hash_copy(uint8_t *src, uint8_t *dst)
 {
-  memcpy(dst, src, hash_size * sizeof src[0U]);
+  memcpy(dst, src, hash_size * sizeof (src[0U]));
 }
 
 #define Cpy 0
@@ -128,8 +128,8 @@ void (*free_hash)(uint8_t *x0) = hash_r_free;
 void hash_2(uint8_t *src1, uint8_t *src2, uint8_t *dst)
 {
   uint8_t cb[64U] = { 0U };
-  memcpy(cb, src1, hash_size * sizeof src1[0U]);
-  memcpy(cb + (uint32_t)32U, src2, hash_size * sizeof src2[0U]);
+  memcpy(cb, src1, hash_size * sizeof (src1[0U]));
+  memcpy(cb + (uint32_t)32U, src2, hash_size * sizeof (src2[0U]));
   uint32_t buf[8U] = { 0U };
   EverCrypt_Hash_state_s s = { .tag = EverCrypt_Hash_SHA2_256_s, { .case_SHA2_256_s = buf } };
   EverCrypt_Hash_state_s st = s;
@@ -448,7 +448,7 @@ insert___uint8_t_(LowStar_Vector_vector_str___uint8_t_ vec, uint8_t *v1)
     uint8_t **nvs = KRML_HOST_MALLOC(sizeof (uint8_t *) * ncap);
     for (uint32_t _i = 0U; _i < ncap; ++_i)
       nvs[_i] = v1;
-    memcpy(nvs, vs, sz * sizeof vs[0U]);
+    memcpy(nvs, vs, sz * sizeof (vs[0U]));
     nvs[sz] = v1;
     KRML_HOST_FREE(vs);
     return
@@ -460,11 +460,7 @@ insert___uint8_t_(LowStar_Vector_vector_str___uint8_t_ vec, uint8_t *v1)
 }
 
 static LowStar_Vector_vector_str___uint8_t_
-insert___uint8_t_0(
-  regional___uint8_t_ rg,
-  LowStar_Vector_vector_str___uint8_t_ rv,
-  uint8_t *v1
-)
+insert___uint8_t_0(LowStar_Vector_vector_str___uint8_t_ rv, uint8_t *v1)
 {
   LowStar_Vector_vector_str___uint8_t_ irv = insert___uint8_t_(rv, v1);
   return irv;
@@ -481,12 +477,11 @@ insert_copy___uint8_t_(
   uint8_t *nv = rg.r_alloc();
   void (*copy)(uint8_t *x0, uint8_t *x1) = cp;
   copy(v1, nv);
-  return insert___uint8_t_0(rg, rv, nv);
+  return insert___uint8_t_0(rv, nv);
 }
 
 static void
 assign__LowStar_Vector_vector_str__uint8_t_0(
-  regional__LowStar_Vector_vector_str___uint8_t_ rg,
   LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_ rv,
   uint32_t i1,
   LowStar_Vector_vector_str___uint8_t_ v1
@@ -514,16 +509,7 @@ insert_(
       hcpy,
       uu____0,
       acc);
-  assign__LowStar_Vector_vector_str__uint8_t_0((
-      (regional__LowStar_Vector_vector_str___uint8_t_){
-        .dummy = hash_vec_dummy,
-        .r_alloc = hash_vec_r_alloc,
-        .r_free = hash_vec_r_free
-      }
-    ),
-    hs,
-    lv,
-    ihv);
+  assign__LowStar_Vector_vector_str__uint8_t_0(hs, lv, ihv);
   if (j1 % (uint32_t)2U == (uint32_t)1U)
   {
     LowStar_Vector_vector_str___uint8_t_ lvhs = index__LowStar_Vector_vector_str__uint8_t_(hs, lv);
@@ -606,7 +592,6 @@ void free_path(LowStar_Vector_vector_str___uint8_t_ *p1)
 
 static void
 assign_copy___uint8_t_(
-  regional___uint8_t_ rg,
   void (*cp)(uint8_t *x0, uint8_t *x1),
   LowStar_Vector_vector_str___uint8_t_ rv,
   uint32_t i1,
@@ -648,13 +633,9 @@ construct_rhs(
     }
     if (actd)
     {
-      assign_copy___uint8_t_((
-          (regional___uint8_t_){ .dummy = NULL, .r_alloc = hash_r_alloc, .r_free = hash_r_free }
-        ),
-        hcpy,
-        rhs,
-        lv,
-        acc);
+      regional___uint8_t_
+      unused = { .dummy = NULL, .r_alloc = hash_r_alloc, .r_free = hash_r_free };
+      assign_copy___uint8_t_(hcpy, rhs, lv, acc);
       hash_fun(index___uint8_t_(index__LowStar_Vector_vector_str__uint8_t_(hs, lv),
           j1 - (uint32_t)1U - ofs),
         acc,
@@ -900,7 +881,7 @@ flush___uint8_t_(LowStar_Vector_vector_str___uint8_t_ vec, uint8_t *ia, uint32_t
   uint8_t **fvs = KRML_HOST_MALLOC(sizeof (uint8_t *) * asz);
   for (uint32_t _i = 0U; _i < asz; ++_i)
     fvs[_i] = ia;
-  memcpy(fvs, vs + i1, fsz * sizeof vs[0U]);
+  memcpy(fvs, vs + i1, fsz * sizeof (vs[0U]));
   KRML_HOST_FREE(vs);
   return ((LowStar_Vector_vector_str___uint8_t_){ .sz = fsz, .cap = asz, .vs = fvs });
 }
@@ -937,16 +918,7 @@ mt_flush_to_(
         ),
         hvec,
         ofs);
-    assign__LowStar_Vector_vector_str__uint8_t_0((
-        (regional__LowStar_Vector_vector_str___uint8_t_){
-          .dummy = hash_vec_dummy,
-          .r_alloc = hash_vec_r_alloc,
-          .r_free = hash_vec_r_free
-        }
-      ),
-      hs,
-      lv,
-      flushed);
+    assign__LowStar_Vector_vector_str__uint8_t_0(hs, lv, flushed);
     mt_flush_to_(lv + (uint32_t)1U, hs, pi / (uint32_t)2U, i1 / (uint32_t)2U);
     return;
   }
@@ -1063,16 +1035,7 @@ mt_retract_to_(
         ),
         hvec,
         new_len);
-    assign__LowStar_Vector_vector_str__uint8_t_0((
-        (regional__LowStar_Vector_vector_str___uint8_t_){
-          .dummy = hash_vec_dummy,
-          .r_alloc = hash_vec_r_alloc,
-          .r_free = hash_vec_r_free
-        }
-      ),
-      hs,
-      lv,
-      retracted);
+    assign__LowStar_Vector_vector_str__uint8_t_0(hs, lv, retracted);
     if (lv + (uint32_t)1U < hs.sz)
     {
       mt_retract_to_(hs, lv + (uint32_t)1U, i1 / (uint32_t)2U, s / (uint32_t)2U, j1 / (uint32_t)2U);
@@ -1212,7 +1175,7 @@ mt_verify(
   copy1(index___uint8_t_(*ncp, (uint32_t)0U), ih);
   mt_verify_(k2, j2, p1, (uint32_t)1U, ih, false, mtv.hash_fun);
   uint8_t res = (uint8_t)255U;
-  for (uint32_t i = (uint32_t)0U; i < hash_size; i = i + (uint32_t)1U)
+  for (uint32_t i = (uint32_t)0U; i < hash_size; i++)
   {
     uint8_t uu____0 = FStar_UInt8_eq_mask(ih[i], rt[i]);
     res = uu____0 & res;
@@ -1619,7 +1582,7 @@ deserialize_hash(bool ok, const uint8_t *buf1, uint32_t sz, uint32_t pos)
   }
   regional___uint8_t_ x0 = { .dummy = NULL, .r_alloc = hash_r_alloc, .r_free = hash_r_free };
   uint8_t *hash1 = x0.r_alloc();
-  memcpy(hash1, (uint8_t *)buf1 + pos, hash_size * sizeof ((uint8_t *)buf1)[0U]);
+  memcpy(hash1, (uint8_t *)buf1 + pos, hash_size * sizeof (((uint8_t *)buf1)[0U]));
   return ((__bool_uint32_t__uint8_t_){ .fst = true, .snd = pos + hash_size, .thd = hash1 });
 }
 

@@ -1296,7 +1296,7 @@ Hacl_Poly1305_256_poly1305_update(
     uint32_t len1 = len0 - bs;
     uint8_t *text1 = t0 + bs;
     uint32_t nb = len1 / bs;
-    for (uint32_t i = (uint32_t)0U; i < nb; i = i + (uint32_t)1U)
+    for (uint32_t i = (uint32_t)0U; i < nb; i++)
     {
       uint8_t *block = text1 + i * bs;
       Lib_IntVector_Intrinsics_vec256 e[5U];
@@ -1523,7 +1523,7 @@ Hacl_Poly1305_256_poly1305_update(
   uint8_t *t1 = text + len0;
   uint32_t nb = len1 / (uint32_t)16U;
   uint32_t rem1 = len1 % (uint32_t)16U;
-  for (uint32_t i = (uint32_t)0U; i < nb; i = i + (uint32_t)1U)
+  for (uint32_t i = (uint32_t)0U; i < nb; i++)
   {
     uint8_t *block = t1 + i * (uint32_t)16U;
     Lib_IntVector_Intrinsics_vec256 e[5U];
@@ -1739,7 +1739,7 @@ Hacl_Poly1305_256_poly1305_update(
     for (uint32_t _i = 0U; _i < (uint32_t)5U; ++_i)
       e[_i] = Lib_IntVector_Intrinsics_vec256_zero;
     uint8_t tmp[16U] = { 0U };
-    memcpy(tmp, last1, rem1 * sizeof last1[0U]);
+    memcpy(tmp, last1, rem1 * sizeof (last1[0U]));
     uint64_t u0 = load64_le(tmp);
     uint64_t lo = u0;
     uint64_t u = load64_le(tmp + (uint32_t)8U);

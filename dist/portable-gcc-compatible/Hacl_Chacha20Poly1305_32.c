@@ -26,7 +26,7 @@
 
 /* SNIPPET_START: poly1305_padded_32 */
 
-inline static void poly1305_padded_32(uint64_t *ctx, uint32_t len, uint8_t *text)
+static inline void poly1305_padded_32(uint64_t *ctx, uint32_t len, uint8_t *text)
 {
   uint32_t n1 = len / (uint32_t)16U;
   uint32_t r = len % (uint32_t)16U;
@@ -36,7 +36,7 @@ inline static void poly1305_padded_32(uint64_t *ctx, uint32_t len, uint8_t *text
   uint64_t *acc0 = ctx;
   uint32_t nb = n1 * (uint32_t)16U / (uint32_t)16U;
   uint32_t rem2 = n1 * (uint32_t)16U % (uint32_t)16U;
-  for (uint32_t i = (uint32_t)0U; i < nb; i = i + (uint32_t)1U)
+  for (uint32_t i = (uint32_t)0U; i < nb; i++)
   {
     uint8_t *block = blocks + i * (uint32_t)16U;
     uint64_t e[5U] = { 0U };
@@ -161,7 +161,7 @@ inline static void poly1305_padded_32(uint64_t *ctx, uint32_t len, uint8_t *text
     uint8_t *last1 = blocks + nb * (uint32_t)16U;
     uint64_t e[5U] = { 0U };
     uint8_t tmp[16U] = { 0U };
-    memcpy(tmp, last1, rem2 * sizeof last1[0U]);
+    memcpy(tmp, last1, rem2 * sizeof (last1[0U]));
     uint64_t u0 = load64_le(tmp);
     uint64_t lo = u0;
     uint64_t u = load64_le(tmp + (uint32_t)8U);
@@ -279,7 +279,7 @@ inline static void poly1305_padded_32(uint64_t *ctx, uint32_t len, uint8_t *text
     acc0[4U] = o4;
   }
   uint8_t tmp[16U] = { 0U };
-  memcpy(tmp, rem1, r * sizeof rem1[0U]);
+  memcpy(tmp, rem1, r * sizeof (rem1[0U]));
   if (r > (uint32_t)0U)
   {
     uint64_t *pre = ctx + (uint32_t)5U;
@@ -408,7 +408,7 @@ inline static void poly1305_padded_32(uint64_t *ctx, uint32_t len, uint8_t *text
 
 /* SNIPPET_START: poly1305_do_32 */
 
-inline static void
+static inline void
 poly1305_do_32(
   uint8_t *k,
   uint32_t aadlen,
@@ -591,7 +591,7 @@ Hacl_Chacha20Poly1305_32_aead_decrypt(
   uint8_t *key = tmp;
   poly1305_do_32(key, aadlen, aad, mlen, cipher, computed_mac);
   uint8_t res = (uint8_t)255U;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i = i + (uint32_t)1U)
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
   {
     uint8_t uu____0 = FStar_UInt8_eq_mask(computed_mac[i], mac[i]);
     res = uu____0 & res;

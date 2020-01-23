@@ -24,95 +24,7 @@
 
 #include "Hacl_Curve25519_64.h"
 
-inline static u64 add10(u64 *out1, u64 *f1, u64 f2)
-{
-  #if EVERCRYPT_TARGETCONFIG_GCC
-  return add1_inline(out1, f1, f2);
-  #else
-  u64 scrut = add1(out1, f1, f2);
-  return scrut;
-  #endif
-}
-
-inline static void fadd(u64 *out1, u64 *f1, u64 *f2)
-{
-  #if EVERCRYPT_TARGETCONFIG_GCC
-  fadd_inline(out1, f1, f2);
-  #else
-  u64 uu____0 = fadd_(out1, f1, f2);
-  #endif
-}
-
-inline static void fsub(u64 *out1, u64 *f1, u64 *f2)
-{
-  #if EVERCRYPT_TARGETCONFIG_GCC
-  fsub_inline(out1, f1, f2);
-  #else
-  u64 uu____0 = fsub_(out1, f1, f2);
-  #endif
-}
-
-inline static void fmul(u64 *out1, u64 *f1, u64 *f2, u64 *tmp)
-{
-  #if EVERCRYPT_TARGETCONFIG_GCC
-  fmul_inline(tmp, f1, out1, f2);
-  #else
-  u64 uu____0 = fmul_(tmp, f1, out1, f2);
-  #endif
-}
-
-inline static void fmul20(u64 *out1, u64 *f1, u64 *f2, u64 *tmp)
-{
-  #if EVERCRYPT_TARGETCONFIG_GCC
-  fmul2_inline(tmp, f1, out1, f2);
-  #else
-  u64 uu____0 = fmul2(tmp, f1, out1, f2);
-  #endif
-}
-
-inline static void fmul10(u64 *out1, u64 *f1, u64 f2)
-{
-  #if EVERCRYPT_TARGETCONFIG_GCC
-  fmul1_inline(out1, f1, f2);
-  #else
-  u64 uu____0 = fmul1(out1, f1, f2);
-  #endif
-}
-
-inline static void fsqr0(u64 *out1, u64 *f1, u64 *tmp)
-{
-  #if EVERCRYPT_TARGETCONFIG_GCC
-  fsqr_inline(tmp, f1, out1);
-  #else
-  u64 uu____0 = fsqr(tmp, f1, out1);
-  #endif
-}
-
-inline static void fsqr20(u64 *out1, u64 *f, u64 *tmp)
-{
-  #if EVERCRYPT_TARGETCONFIG_GCC
-  fsqr2_inline(tmp, f, out1);
-  #else
-  u64 uu____0 = fsqr2(tmp, f, out1);
-  #endif
-}
-
-inline static void cswap20(u64 bit, u64 *p1, u64 *p2)
-{
-  #if EVERCRYPT_TARGETCONFIG_GCC
-  cswap2_inline(bit, p1, p2);
-  #else
-  u64 uu____0 = cswap2(bit, p1, p2);
-  #endif
-}
-
-static u8
-g25519[32U] =
-  {
-    (u8)9U, (u8)0U, (u8)0U, (u8)0U, (u8)0U, (u8)0U, (u8)0U, (u8)0U, (u8)0U, (u8)0U, (u8)0U, (u8)0U,
-    (u8)0U, (u8)0U, (u8)0U, (u8)0U, (u8)0U, (u8)0U, (u8)0U, (u8)0U, (u8)0U, (u8)0U, (u8)0U, (u8)0U,
-    (u8)0U, (u8)0U, (u8)0U, (u8)0U, (u8)0U, (u8)0U, (u8)0U, (u8)0U
-  };
+static u8 g25519[32U] = { (u8)9U };
 
 static void point_add_and_double(u64 *q, u64 *p01_tmp1, u64 *tmp2)
 {
@@ -145,7 +57,7 @@ static void point_add_and_double(u64 *q, u64 *p01_tmp1, u64 *tmp2)
   c0 = dc + (u32)4U;
   fadd(c0, x3, z31);
   fsub(d0, x3, z31);
-  fmul20(dc, dc, ab, tmp2);
+  fmul2(dc, dc, ab, tmp2);
   fadd(x3, d0, c0);
   fsub(z31, d0, c0);
   a1 = tmp1;
@@ -154,16 +66,16 @@ static void point_add_and_double(u64 *q, u64 *p01_tmp1, u64 *tmp2)
   c = tmp1 + (u32)12U;
   ab1 = tmp1;
   dc1 = tmp1 + (u32)8U;
-  fsqr20(dc1, ab1, tmp2);
-  fsqr20(nq_p1, nq_p1, tmp2);
+  fsqr2(dc1, ab1, tmp2);
+  fsqr2(nq_p1, nq_p1, tmp2);
   a1[0U] = c[0U];
   a1[1U] = c[1U];
   a1[2U] = c[2U];
   a1[3U] = c[3U];
   fsub(c, d, c);
-  fmul10(b1, c, (u64)121665U);
+  fmul_scalar(b1, c, (u64)121665U);
   fadd(b1, b1, d);
-  fmul20(nq, dc1, ab1, tmp2);
+  fmul2(nq, dc1, ab1, tmp2);
   fmul(z3, z3, x1, tmp2);
 }
 
@@ -179,15 +91,15 @@ static void point_double(u64 *nq, u64 *tmp1, u64 *tmp2)
   u64 *dc = tmp1 + (u32)8U;
   fadd(a, x2, z2);
   fsub(b, x2, z2);
-  fsqr20(dc, ab, tmp2);
+  fsqr2(dc, ab, tmp2);
   a[0U] = c[0U];
   a[1U] = c[1U];
   a[2U] = c[2U];
   a[3U] = c[3U];
   fsub(c, d, c);
-  fmul10(b, c, (u64)121665U);
+  fmul_scalar(b, c, (u64)121665U);
   fadd(b, b, d);
-  fmul20(nq, dc, ab, tmp2);
+  fmul2(nq, dc, ab, tmp2);
 }
 
 static void montgomery_ladder(u64 *out, u8 *key, u64 *init1)
@@ -208,7 +120,7 @@ static void montgomery_ladder(u64 *out, u8 *key, u64 *init1)
   u64 sw0;
   u64 *nq1;
   u64 *tmp1;
-  memcpy(p11, init1, (u32)8U * sizeof init1[0U]);
+  memcpy(p11, init1, (u32)8U * sizeof (init1[0U]));
   x0 = p03;
   z0 = p03 + (u32)4U;
   x0[0U] = (u64)1U;
@@ -224,12 +136,12 @@ static void montgomery_ladder(u64 *out, u8 *key, u64 *init1)
   nq10 = p01_tmp1_swap;
   nq_p11 = p01_tmp1_swap + (u32)8U;
   swap1 = p01_tmp1_swap + (u32)32U;
-  cswap20((u64)1U, nq10, nq_p11);
+  cswap2((u64)1U, nq10, nq_p11);
   point_add_and_double(init1, p01_tmp11, tmp2);
   swap1[0U] = (u64)1U;
   {
     u32 i;
-    for (i = (u32)0U; i < (u32)251U; i = i + (u32)1U)
+    for (i = (u32)0U; i < (u32)251U; i++)
     {
       u64 *p01_tmp12 = p01_tmp1_swap;
       u64 *swap2 = p01_tmp1_swap + (u32)32U;
@@ -237,27 +149,27 @@ static void montgomery_ladder(u64 *out, u8 *key, u64 *init1)
       u64 *nq_p12 = p01_tmp12 + (u32)8U;
       u64 bit = (u64)(key[((u32)253U - i) / (u32)8U] >> ((u32)253U - i) % (u32)8U & (u8)1U);
       u64 sw = swap2[0U] ^ bit;
-      cswap20(sw, nq2, nq_p12);
+      cswap2(sw, nq2, nq_p12);
       point_add_and_double(init1, p01_tmp12, tmp2);
       swap2[0U] = bit;
     }
   }
   sw0 = swap1[0U];
-  cswap20(sw0, nq10, nq_p11);
+  cswap2(sw0, nq10, nq_p11);
   nq1 = p01_tmp1;
   tmp1 = p01_tmp1 + (u32)16U;
   point_double(nq1, tmp1, tmp2);
   point_double(nq1, tmp1, tmp2);
   point_double(nq1, tmp1, tmp2);
-  memcpy(out, p0, (u32)8U * sizeof p0[0U]);
+  memcpy(out, p0, (u32)8U * sizeof (p0[0U]));
 }
 
 static void fsquare_times(u64 *o, u64 *inp, u64 *tmp, u32 n1)
 {
   u32 i;
-  fsqr0(o, inp, tmp);
-  for (i = (u32)0U; i < n1 - (u32)1U; i = i + (u32)1U)
-    fsqr0(o, o, tmp);
+  fsqr(o, inp, tmp);
+  for (i = (u32)0U; i < n1 - (u32)1U; i++)
+    fsqr(o, o, tmp);
 }
 
 static void finv(u64 *o, u64 *i, u64 *tmp)
@@ -322,11 +234,11 @@ static void store_felem(u64 *b, u64 *f)
   u64 o2;
   u64 o3;
   f[3U] = f30 & (u64)0x7fffffffffffffffU;
-  carry0 = add10(f, f, (u64)19U * top_bit0);
+  carry0 = add_scalar(f, f, (u64)19U * top_bit0);
   f31 = f[3U];
   top_bit = f31 >> (u32)63U;
   f[3U] = f31 & (u64)0x7fffffffffffffffU;
-  carry = add10(f, f, (u64)19U * top_bit);
+  carry = add_scalar(f, f, (u64)19U * top_bit);
   f0 = f[0U];
   f1 = f[1U];
   f2 = f[2U];
@@ -362,7 +274,7 @@ static void encode_point(u8 *o, u64 *i)
   store_felem(u64s, tmp);
   {
     u32 i0;
-    for (i0 = (u32)0U; i0 < (u32)4U; i0 = i0 + (u32)1U)
+    for (i0 = (u32)0U; i0 < (u32)4U; i0++)
       store64_le(o + i0 * (u32)8U, u64s[i0]);
   }
 }
@@ -376,7 +288,7 @@ void Hacl_Curve25519_64_scalarmult(u8 *out, u8 *priv, u8 *pub)
   u64 *z;
   {
     u32 i;
-    for (i = (u32)0U; i < (u32)4U; i = i + (u32)1U)
+    for (i = (u32)0U; i < (u32)4U; i++)
     {
       u64 *os = tmp;
       u8 *bj = pub + i * (u32)8U;
@@ -407,7 +319,7 @@ void Hacl_Curve25519_64_secret_to_public(u8 *pub, u8 *priv)
   u8 basepoint[32U] = { 0U };
   {
     u32 i;
-    for (i = (u32)0U; i < (u32)32U; i = i + (u32)1U)
+    for (i = (u32)0U; i < (u32)32U; i++)
     {
       u8 *os = basepoint;
       u8 x = g25519[i];
@@ -427,7 +339,7 @@ bool Hacl_Curve25519_64_ecdh(u8 *out, u8 *priv, u8 *pub)
     bool r;
     {
       u32 i;
-      for (i = (u32)0U; i < (u32)32U; i = i + (u32)1U)
+      for (i = (u32)0U; i < (u32)32U; i++)
       {
         u8 uu____0 = FStar_UInt8_eq_mask(out[i], zeros1[i]);
         res = uu____0 & res;
