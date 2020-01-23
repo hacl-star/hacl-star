@@ -1,3 +1,5 @@
+open Hacl
+
 type aead_test =
   { alg: EverCrypt.AEAD.alg;
     key_len: int; msg_len: int; iv_len: int ; ad_len: int; tag_len: int;
@@ -24,9 +26,11 @@ let validate_test (v: aead_test) =
   assert (Bigstring.size v.test_ct = v.msg_len);
   assert (Bigstring.size v.test_tag = v.tag_len)
 
+let print_result t r = Printf.printf "[%s] %s\n" t r
 
-let test (v: aead_test) =
+let test_evercrypt (v: aead_test) =
   let open EverCrypt.AEAD in
+  let print_result = print_result "EverCrypt.AEAD" in
 
   validate_test v;
   let st = alloc_t () in
@@ -40,38 +44,64 @@ let test (v: aead_test) =
       match encrypt st v.test_iv v.iv_len v.test_ad v.ad_len v.test_pt v.msg_len ct tag with
       | Success -> begin
           if Bigstring.compare tag v.test_tag = 0 && Bigstring.compare ct v.test_ct = 0 then
-            Printf.printf "Encryption success\n"
+            print_result "Encryption success"
           else
-            Printf.printf "Failure: wrong ciphertext/mac\n";
+            print_result "Failure: wrong ciphertext/mac";
           let dt = Bigstring.create v.msg_len in
           Bigstring.fill dt '\x00';
           match decrypt st v.test_iv v.iv_len v.test_ad v.ad_len ct v.msg_len v.test_tag dt with
           | Success ->
             if Bigstring.compare v.test_pt dt = 0 then
-              Printf.printf "Decryption success\n"
+              print_result "Decryption success"
             else
-              Printf.printf "Failure: decrypted and plaintext do not match\n"
-          | Error n -> Printf.printf "Decryption error %d\n" n
+              print_result "Failure: decrypted and plaintext do not match"
+          | Error n -> print_result (Printf.sprintf "Decryption error %d" n)
         end
-      | Error n -> Printf.printf "Encryption error %d\n" n
+      | Error n -> print_result (Printf.sprintf "Encryption error %d" n)
     end
-  | Error n -> Printf.printf "Init error %d\n" n
+  | Error n -> print_result (Printf.sprintf "Init error %d" n)
 
+
+let test_hacl (v: aead_test) t encrypt decrypt =
+  let print_result = print_result t in
+
+  let ct = Bigstring.create v.msg_len in
+  let tag = Bigstring.create v.tag_len in
+  Bigstring.fill ct '\x00';
+  Bigstring.fill tag '\x00';
+
+  encrypt v.test_key v.test_iv v.ad_len v.test_ad v.msg_len v.test_pt ct tag;
+  if Bigstring.compare tag v.test_tag = 0 && Bigstring.compare ct v.test_ct = 0 then
+    print_result "Encryption success"
+  else
+    print_result
+      (Printf.sprintf "Failure: wrong ciphertext/mac %d %d \n" (Bigstring.compare ct v.test_ct) (Bigstring.compare tag v.test_tag));
+  let dt = Bigstring.create v.msg_len in
+  Bigstring.fill dt '\x00';
+  if decrypt v.test_key v.test_iv v.ad_len v.test_ad v.msg_len dt ct tag then
+    if Bigstring.compare v.test_pt dt = 0 then
+      print_result "Decryption success"
+    else
+      print_result "Failure: decrypted and plaintext do not match"
+  else print_result "Decryption error"
 
 let _ =
   EverCrypt.AutoConfig2.init ();
   Printf.printf "has_shaext: %b\n" (EverCrypt.AutoConfig2.has_shaext ());
-  Printf.printf "has_aesni %b\n" (EverCrypt.AutoConfig2.has_aesni ());
-  Printf.printf "has_pclmulqdq %b\n" (EverCrypt.AutoConfig2.has_pclmulqdq ());
-  Printf.printf "has_avx2 %b\n" (EverCrypt.AutoConfig2.has_avx2 ());
-  Printf.printf "has_avx %b\n" (EverCrypt.AutoConfig2.has_avx ());
-  Printf.printf "has_bmi2 %b\n" (EverCrypt.AutoConfig2.has_bmi2 ());
-  Printf.printf "has_adx %b\n" (EverCrypt.AutoConfig2.has_adx ());
-  Printf.printf "has_sse %b\n" (EverCrypt.AutoConfig2.has_sse ());
-  Printf.printf "has_movbe %b\n" (EverCrypt.AutoConfig2.has_movbe ());
-  Printf.printf "has_rdrand %b\n" (EverCrypt.AutoConfig2.has_rdrand ());
-  Printf.printf "wants_vale %b\n" (EverCrypt.AutoConfig2.wants_vale ());
-  Printf.printf "wants_hacl %b\n" (EverCrypt.AutoConfig2.wants_hacl ());
-  Printf.printf "wants_openssl %b\n" (EverCrypt.AutoConfig2.wants_openssl ());
-  Printf.printf "wants_bcrypt %b\n" (EverCrypt.AutoConfig2.wants_bcrypt ());
-  test chacha20poly1305_test
+  Printf.printf "has_aesni: %b\n" (EverCrypt.AutoConfig2.has_aesni ());
+  Printf.printf "has_pclmulqdq: %b\n" (EverCrypt.AutoConfig2.has_pclmulqdq ());
+  Printf.printf "has_avx2: %b\n" (EverCrypt.AutoConfig2.has_avx2 ());
+  Printf.printf "has_avx: %b\n" (EverCrypt.AutoConfig2.has_avx ());
+  Printf.printf "has_bmi2: %b\n" (EverCrypt.AutoConfig2.has_bmi2 ());
+  Printf.printf "has_adx: %b\n" (EverCrypt.AutoConfig2.has_adx ());
+  Printf.printf "has_sse: %b\n" (EverCrypt.AutoConfig2.has_sse ());
+  Printf.printf "has_movbe: %b\n" (EverCrypt.AutoConfig2.has_movbe ());
+  Printf.printf "has_rdrand: %b\n" (EverCrypt.AutoConfig2.has_rdrand ());
+  Printf.printf "wants_vale: %b\n" (EverCrypt.AutoConfig2.wants_vale ());
+  Printf.printf "wants_hacl: %b\n" (EverCrypt.AutoConfig2.wants_hacl ());
+  Printf.printf "wants_openssl: %b\n" (EverCrypt.AutoConfig2.wants_openssl ());
+  Printf.printf "wants_bcrypt: %b\n" (EverCrypt.AutoConfig2.wants_bcrypt ());
+  test_evercrypt chacha20poly1305_test;
+  test_hacl chacha20poly1305_test "Hacl.Chacha20_Poly1305_32" Hacl.Chacha20_Poly1305_32.encrypt Chacha20_Poly1305_32.decrypt;
+  test_hacl chacha20poly1305_test "Hacl.Chacha20_Poly1305_128" Hacl.Chacha20_Poly1305_128.encrypt Chacha20_Poly1305_128.decrypt;
+  test_hacl chacha20poly1305_test "Hacl.Chacha20_Poly1305_256" Hacl.Chacha20_Poly1305_256.encrypt Chacha20_Poly1305_256.decrypt

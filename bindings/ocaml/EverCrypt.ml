@@ -1,11 +1,12 @@
 open Ctypes
 open PosixTypes
 open Foreign
+open Unsigned
+
+open Utils
 
 module EverCrypt_AEAD = EverCrypt_AEAD_bindings.Bindings(EverCrypt_AEAD_stubs)
 module EverCrypt_AutoConfig2 = EverCrypt_AutoConfig2_bindings.Bindings(EverCrypt_AutoConfig2_stubs)
-
-let uint8_ptr_of_bigstring buf = from_voidp uint8_t (to_voidp (bigarray_start array1 buf))
 
 module AutoConfig2 = struct
   open EverCrypt_AutoConfig2
@@ -66,7 +67,7 @@ module AEAD = struct
       | CHACHA20_POLY1305 -> spec_Agile_AEAD_alg_Spec_Agile_AEAD_CHACHA20_POLY1305
     in
     let res = everCrypt_AEAD_create_in alg st key in
-    match Unsigned.UInt8.to_int res with
+    match UInt8.to_int res with
     | 0 -> Success
     | n -> Error n
 
@@ -76,11 +77,11 @@ module AEAD = struct
     let pt = uint8_ptr_of_bigstring pt in
     let ct = uint8_ptr_of_bigstring ct in
     let tag = uint8_ptr_of_bigstring tag in
-    match Unsigned.UInt8.to_int
+    match UInt8.to_int
             (everCrypt_AEAD_encrypt (!@st)
-               iv (Unsigned.UInt32.of_int iv_len)
-               ad (Unsigned.UInt32.of_int ad_len)
-               pt (Unsigned.UInt32.of_int pt_len) ct tag) with
+               iv (UInt32.of_int iv_len)
+               ad (UInt32.of_int ad_len)
+               pt (UInt32.of_int pt_len) ct tag) with
     | 0 -> Success
     | n -> Error n
 
@@ -90,11 +91,11 @@ module AEAD = struct
     let ct = uint8_ptr_of_bigstring ct in
     let tag = uint8_ptr_of_bigstring tag in
     let dt = uint8_ptr_of_bigstring dt in
-    match Unsigned.UInt8.to_int
+    match UInt8.to_int
             (everCrypt_AEAD_decrypt (!@st)
-               iv (Unsigned.UInt32.of_int iv_len)
-               ad (Unsigned.UInt32.of_int ad_len)
-               ct (Unsigned.UInt32.of_int ct_len) tag dt) with
+               iv (UInt32.of_int iv_len)
+               ad (UInt32.of_int ad_len)
+               ct (UInt32.of_int ct_len) tag dt) with
     | 0 -> Success
     | n -> Error n
 
