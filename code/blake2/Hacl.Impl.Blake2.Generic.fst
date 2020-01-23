@@ -109,7 +109,7 @@ let size_to_limb al s = match al with
 
 inline_for_extraction noextract
 val g1: #al:Spec.alg -> #m:m_spec -> wv:state_p al m -> a:index_t -> b:index_t -> r:rotval (Spec.wt al) ->
-  Stack unit
+  ST unit
     (requires (fun h -> live h wv /\ a <> b))
     (ensures  (fun h0 _ h1 -> modifies (loc wv) h0 h1
                          /\ (state_v h1 wv) == Spec.g1 al (state_v h0 wv) (v a) (v b) r))
@@ -124,11 +124,10 @@ let g1 #al #m wv a b r =
   Lib.Sequence.eq_intro (state_v h2 wv) (Spec.g1 al (state_v h0 wv) (v a) (v b) r)
 
 
-
 #push-options "--z3rlimit 100 --max_fuel 1 --max_ifuel 1"
 inline_for_extraction noextract
 val g2: #al:Spec.alg -> #m:m_spec -> wv:state_p al m -> a:index_t -> b:index_t -> x:row_p al m ->
-  Stack unit
+  ST unit
     (requires (fun h -> live h wv /\ live h x /\ disjoint wv x /\ a <> b))
     (ensures  (fun h0 _ h1 -> modifies (loc wv) h0 h1
                          /\ state_v h1 wv == Spec.g2 al (state_v h0 wv) (v a) (v b) (row_v h0 x)))
@@ -144,7 +143,7 @@ let g2 #al #m wv a b x =
 
 inline_for_extraction noextract
 val blake2_mixing : #al:Spec.alg -> #m:m_spec -> wv:state_p al m -> x:row_p al m -> y:row_p al m ->
-  Stack unit
+  ST unit
     (requires (fun h -> live h wv /\ live h x /\ live h y /\ disjoint wv x /\ disjoint wv y))
     (ensures  (fun h0 _ h1 -> modifies (loc wv) h0 h1
                          /\ state_v h1 wv == Spec.blake2_mixing al (state_v h0 wv) (row_v h0 x) (row_v h0 y)))
@@ -252,7 +251,7 @@ let gather_state #a #ms st m start =
 
 inline_for_extraction noextract
 val blake2_round : #al:Spec.alg -> #ms:m_spec -> wv:state_p al ms ->  m:lbuffer uint8 (size_block al) -> i:size_t ->
-  Stack unit
+  ST unit
     (requires (fun h -> live h wv /\ live h m /\ disjoint wv m))
     (ensures  (fun h0 _ h1 -> modifies (loc wv) h0 h1
                          /\ state_v h1 wv == Spec.blake2_round al (as_seq h0 m) (v i) (state_v h0 wv)))
@@ -293,7 +292,7 @@ val blake2_compress1:
   -> s_iv: state_p al m
   -> offset: Spec.limb_t al
   -> flag: bool ->
-  Stack unit
+  ST unit
     (requires (fun h -> live h wv /\ live h s_iv /\ disjoint wv s_iv))
     (ensures  (fun h0 _ h1 -> modifies (loc wv) h0 h1
                          /\ state_v h1 wv == Spec.blake2_compress1 al (state_v h0 s_iv) offset flag))
@@ -323,11 +322,12 @@ val blake2_compress2 :
   -> #ms:m_spec
   -> wv: state_p al ms
   -> m: block_p al ->
-  Stack unit
+  ST unit
     (requires (fun h -> live h wv /\ live h m /\ disjoint wv m))
     (ensures  (fun h0 _ h1 -> modifies1 wv h0 h1
                          /\ state_v h1 wv == Spec.blake2_compress2 al (state_v h0 wv) (as_seq h0 m)))
 
+#push-options "--z3rlimit 400"
 let blake2_compress2 #al #ms wv m =
   let h0 = ST.get () in
   [@inline_let]
@@ -342,7 +342,7 @@ let blake2_compress2 #al #ms wv m =
   (fun i ->
     Loops.unfold_repeati (Spec.rounds al) (spec h0) (state_v h0 wv) (v i);
     blake2_round wv m i)
-
+#pop-options
 
 inline_for_extraction noextract
 val blake2_compress3 :
@@ -350,7 +350,7 @@ val blake2_compress3 :
   -> #ms:m_spec
   -> s_iv:state_p al ms
   -> wv:state_p al ms ->
-  Stack unit
+  ST unit
     (requires (fun h -> live h s_iv /\ live h wv /\ disjoint s_iv wv))
     (ensures  (fun h0 _ h1 -> modifies (loc s_iv) h0 h1
                          /\ state_v h1 s_iv == Spec.blake2_compress3 al (state_v h0 wv) (state_v h0 s_iv)))
@@ -397,7 +397,7 @@ let compress_t (al:Spec.alg) (ms:m_spec) =
   -> m: block_p al
   -> offset: Spec.limb_t al
   -> flag: bool ->
-  Stack unit
+  ST unit
     (requires (fun h -> live h s /\ live h m /\ disjoint s m))
     (ensures  (fun h0 _ h1 -> modifies (loc s) h0 h1
                          /\ state_v h1 s == Spec.blake2_compress al (state_v h0 s) h0.[|m|] offset flag))
@@ -423,7 +423,7 @@ let blake2_update_block_t (al:Spec.alg) (ms:m_spec) =
   -> flag: bool
   -> totlen: Spec.limb_t al{v totlen <= Spec.max_limb al}
   -> d: block_p al ->
-  Stack unit
+  ST unit
     (requires (fun h -> live h hash /\ live h d /\ disjoint hash d))
     (ensures  (fun h0 _ h1 -> modifies (loc hash) h0 h1
                          /\ state_v h1 hash == Spec.blake2_update_block al flag (v totlen) h0.[|d|] (state_v h0 hash)))
@@ -442,7 +442,7 @@ let blake2_update1_t (al:Spec.alg) (ms:m_spec) =
   -> prev: Spec.limb_t al{v prev + v len <= Spec.max_limb al}
   -> d: lbuffer uint8 len
   -> i: size_t{v i < length d / Spec.size_block al} ->
-  Stack unit
+  ST unit
     (requires (fun h -> live h hash /\ live h d /\ disjoint hash d))
     (ensures  (fun h0 _ h1 -> modifies (loc hash) h0 h1
                          /\ state_v h1 hash == Spec.blake2_update1 al (v prev) h0.[|d|] (v i) (state_v h0 hash)))
@@ -464,7 +464,7 @@ let blake2_update_last_t (al:Spec.alg) (ms:m_spec) =
   -> hash: state_p al ms
   -> prev: Spec.limb_t al{v prev + v len <= Spec.max_limb al}
   -> d: lbuffer uint8 len ->
-  Stack unit
+  ST unit
     (requires (fun h -> live h hash /\ live h d /\ disjoint hash d))
     (ensures  (fun h0 _ h1 -> modifies (loc hash) h0 h1
                          /\ state_v h1 hash == Spec.blake2_update_last al (v prev) h0.[|d|] (state_v h0 hash)))
@@ -500,7 +500,7 @@ val blake2_init_hash:
   -> hash: state_p al ms
   -> kk: size_t{v kk <= Spec.max_key al}
   -> nn: size_t{1 <= v nn /\ v nn <= Spec.max_output al} ->
-  Stack unit
+  ST unit
      (requires (fun h -> live h hash))
      (ensures  (fun h0 _ h1 -> modifies (loc hash) h0 h1
                           /\ state_v h1 hash == Spec.blake2_init_hash al (v kk) (v nn)))
@@ -536,7 +536,7 @@ let blake2_init_t  (al:Spec.alg) (ms:m_spec) =
   -> kk: size_t{v kk <= Spec.max_key al}
   -> k: lbuffer uint8 kk
   -> nn: size_t{1 <= v nn /\ v nn <= Spec.max_output al} ->
-  Stack unit
+  ST unit
     (requires (fun h -> live h hash /\ live h k /\ disjoint hash k))
     (ensures  (fun h0 _ h1 -> modifies (loc hash) h0 h1 /\
 			   state_v h1 hash == Spec.blake2_init al (v kk) h0.[|k|] (v nn)))
@@ -584,7 +584,7 @@ val blake2_update_blocks:
   -> hash: state_p al ms
   -> prev: Spec.limb_t al{v prev + v len <= Spec.max_limb al}
   -> blocks: lbuffer uint8 len ->
-  Stack unit
+  ST unit
     (requires (fun h -> live h hash /\ live h blocks /\ disjoint hash blocks))
     (ensures  (fun h0 _ h1 -> modifies (loc hash) h0 h1 /\
 			   state_v h1 hash ==
@@ -613,7 +613,7 @@ let blake2_finish_t (al:Spec.alg) (ms:m_spec) =
     nn: size_t{1 <= v nn /\ v nn <= Spec.max_output al}
   -> output: lbuffer uint8 nn
   -> hash: state_p al ms ->
-  Stack unit
+  ST unit
     (requires (fun h -> live h hash /\ live h output /\ disjoint output hash))
     (ensures  (fun h0 _ h1 -> modifies (loc output) h0 h1
                          /\ h1.[|output|] == Spec.blake2_finish al (state_v h0 hash) (v nn)))
@@ -642,7 +642,7 @@ let blake2_t (al:Spec.alg) (ms:m_spec) =
   -> d: lbuffer uint8 ll
   -> kk: size_t{v kk <= Spec.max_key al /\ (if v kk = 0 then v ll <= max_size_t else v ll + Spec.size_block al <= max_size_t)}
   -> k: lbuffer uint8 kk ->
-  Stack unit
+  ST unit
     (requires (fun h -> live h output /\ live h d /\ live h k
                    /\ disjoint output d /\ disjoint output k /\ disjoint d k))
     (ensures  (fun h0 _ h1 -> modifies1 output h0 h1

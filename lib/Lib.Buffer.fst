@@ -18,7 +18,6 @@ module ByteSeq = Lib.ByteSequence
 
 #reset-options "--z3rlimit 350 --max_fuel 0 --max_ifuel 0"
 
-let modifies_preserves_live #t #a b l h0 h1 = ()
 let modifies_includes l1 l2 h0 h1 = ()
 let modifies_trans l1 l2 h0 h1 h2 = ()
 let live_sub #t #a #len b start n h = ()
@@ -161,6 +160,10 @@ let loop_range_nospec #h0 #a #len start n buf impl =
 
 let loop h0 n a_spec refl footprint spec impl =
   let inv h i = loop_inv h0 n a_spec refl footprint spec i h in
+  Lib.Loops.for (size 0) n inv impl
+
+let loop_refl h0 n a_spec refl footprint spec impl =
+  let inv h i = loop_refl_inv h0 n a_spec refl footprint spec i h in
   Lib.Loops.for (size 0) n inv impl
 
 let loop1 #b #blen h0 n acc spec impl =
