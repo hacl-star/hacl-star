@@ -54,9 +54,9 @@ procedure KeyExpansionRound(
     reads
         rdx; memLayout;
     modifies
-        heap0; xmm1; xmm2; xmm3; efl;
+        heap1; xmm1; xmm2; xmm3; efl;
     requires/ensures
-        validDstAddrs128(heap0, rdx, dst, 11, memLayout, Secret);
+        validDstAddrs128(heap1, rdx, dst, 11, memLayout, Secret);
     requires
         aesni_enabled && avx_enabled && sse_enabled;
         0 <= round < 10;
@@ -64,9 +64,9 @@ procedure KeyExpansionRound(
         is_aes_key_LE(AES_128, key);
         xmm1 == expand_key_128(key, round);
     ensures
-        xmm1 == buffer128_read(dst, round + 1, heap0);
+        xmm1 == buffer128_read(dst, round + 1, heap1);
         xmm1 == expand_key_128(key, round + 1);
-        modifies_buffer_specific128(dst, old(heap0), heap0, round + 1, round + 1);
+        modifies_buffer_specific128(dst, old(heap1), heap1, round + 1, round + 1);
 {
     AESNI_keygen_assist(xmm2, xmm1, rcon);
     Pshufd(xmm2, xmm2, 255);
@@ -77,7 +77,7 @@ procedure KeyExpansionRound(
     VPslldq4(xmm3, xmm1);
     Pxor(xmm1,xmm3);
     Pxor(xmm1,xmm2);
-    Store128_buffer(heap0, rdx, xmm1, 16 * (round + 1), Secret, dst, round + 1);
+    Store128_buffer(heap1, rdx, xmm1, 16 * (round + 1), Secret, dst, round + 1);
 
     // assert xmm1 == simd_round_key_128(old(xmm1), rcon);
     lemma_simd_round_key(old(xmm1), rcon);
@@ -94,21 +94,21 @@ procedure KeyExpansionRoundUnrolledRecursive(
     reads
         rdx; memLayout;
     modifies
-        heap0; xmm1; xmm2; xmm3; efl;
+        heap1; xmm1; xmm2; xmm3; efl;
     requires/ensures
-        validDstAddrs128(heap0, rdx, dst, 11, memLayout, Secret);
+        validDstAddrs128(heap1, rdx, dst, 11, memLayout, Secret);
     requires
         aesni_enabled && avx_enabled && sse_enabled;
         0 <= n <= 10;
         is_aes_key_LE(AES_128, key);
         key == quad32_to_seq(xmm1);
-        xmm1 == buffer128_read(dst, 0, heap0);
-        rdx == buffer_addr(dst, heap0);
+        xmm1 == buffer128_read(dst, 0, heap1);
+        rdx == buffer_addr(dst, heap1);
     ensures
-        modifies_buffer128(dst, old(heap0), heap0);
-        xmm1 == buffer128_read(dst, n, heap0);
-        forall(j){buffer128_read(dst, j, heap0)} 0 <= j <= n ==>
-            buffer128_read(dst, j, heap0) == expand_key_128(key, j);
+        modifies_buffer128(dst, old(heap1), heap1);
+        xmm1 == buffer128_read(dst, n, heap1);
+        forall(j){buffer128_read(dst, j, heap1)} 0 <= j <= n ==>
+            buffer128_read(dst, j, heap1) == expand_key_128(key, j);
 {
     expand_key_128_reveal();
     inline if (0 < n <= 10) {
@@ -124,23 +124,22 @@ procedure KeyExpansion128Stdcall(
     {:public}
     {:quick}
     reads
-        rcx; rsi; rdi; memLayout;
+        rcx; rsi; rdi; memLayout; heap0;
     modifies
         rdx;
-        heap0; xmm1; xmm2; xmm3; efl;
+        heap1; xmm1; xmm2; xmm3; efl;
     lets
         key_ptr := if win then rcx else rdi;
         key_expansion_ptr := if win then rdx else rsi;
         key := quad32_to_seq(buffer128_read(input_key_b, 0, heap0));
     requires/ensures
         aesni_enabled && avx_enabled && sse_enabled;
-        buffers_disjoint128(input_key_b, output_key_expansion_b);
         validSrcAddrs128(heap0, key_ptr, input_key_b, 1, memLayout, Secret);
-        validDstAddrs128(heap0, key_expansion_ptr, output_key_expansion_b, 11, memLayout, Secret);
+        validDstAddrs128(heap1, key_expansion_ptr, output_key_expansion_b, 11, memLayout, Secret);
     ensures
-        modifies_buffer128(output_key_expansion_b, old(heap0), heap0);
-        forall(j){buffer128_read(output_key_expansion_b, j, heap0)} 0 <= j <= 10 ==>
-            buffer128_read(output_key_expansion_b, j, heap0) == index(key_to_round_keys_LE(AES_128, key), j);
+        modifies_buffer128(output_key_expansion_b, old(heap1), heap1);
+        forall(j){buffer128_read(output_key_expansion_b, j, heap1)} 0 <= j <= 10 ==>
+            buffer128_read(output_key_expansion_b, j, heap1) == index(key_to_round_keys_LE(AES_128, key), j);
 {
     inline if (win)
     {
@@ -152,7 +151,7 @@ procedure KeyExpansion128Stdcall(
         Mov64(rdx, rsi);
     }
 
-    Store128_buffer(heap0, rdx, xmm1, 0, Secret, output_key_expansion_b, 0);
+    Store128_buffer(heap1, rdx, xmm1, 0, Secret, output_key_expansion_b, 0);
     KeyExpansionRoundUnrolledRecursive(key, output_key_expansion_b, 10);
     lemma_expand_key_128(key, 11);
     reveal key_to_round_keys_LE;
@@ -247,10 +246,10 @@ procedure AES128EncryptBlockStdcall(
     {:public}
     {:quick}
     reads
-        rcx; rdx; rsi; rdi; memLayout;
+        rcx; rdx; rsi; rdi; memLayout; heap0;
     modifies
         r8;
-        heap0; xmm0; xmm2; efl;
+        heap1; xmm0; xmm2; efl;
     lets
         output_ptr := if win then rcx else rdi;
         input_ptr := if win then rdx else rsi;
@@ -261,14 +260,14 @@ procedure AES128EncryptBlockStdcall(
         buffer128_read(input_buffer, 0, heap0) == input;
         expanded_key_ptr == buffer_addr(keys_buffer, heap0);
         validSrcAddrs128(heap0, input_ptr, input_buffer, 1, memLayout, Secret);
-        validDstAddrs128(heap0, output_ptr, output_buffer, 1, memLayout, Secret);
+        validDstAddrs128(heap1, output_ptr, output_buffer, 1, memLayout, Secret);
         validSrcAddrs128(heap0, expanded_key_ptr, keys_buffer, 11, memLayout, Secret);
         forall(i:nat) i < 11 ==>
             buffer128_read(keys_buffer, i, heap0) == index(key_to_round_keys_LE(AES_128, key), i);
     ensures
-        modifies_mem(loc_buffer(output_buffer), old(heap0), heap0);
-        validSrcAddrs128(heap0, output_ptr, output_buffer, 1, memLayout, Secret);
-        buffer128_read(output_buffer, 0, heap0) == aes_encrypt_LE(AES_128, key, input);
+        modifies_mem(loc_buffer(output_buffer), old(heap1), heap1);
+        validSrcAddrs128(heap1, output_ptr, output_buffer, 1, memLayout, Secret);
+        buffer128_read(output_buffer, 0, heap1) == aes_encrypt_LE(AES_128, key, input);
 {
     inline if (win)
     {
@@ -284,11 +283,11 @@ procedure AES128EncryptBlockStdcall(
 
     inline if (win)
     {
-        Store128_buffer(heap0, rcx, xmm0, 0, Secret, output_buffer, 0);
+        Store128_buffer(heap1, rcx, xmm0, 0, Secret, output_buffer, 0);
     }
     else
     {
-        Store128_buffer(heap0, rdi, xmm0, 0, Secret, output_buffer, 0);
+        Store128_buffer(heap1, rdi, xmm0, 0, Secret, output_buffer, 0);
     }
 }
 

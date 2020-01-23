@@ -88,13 +88,12 @@ procedure Aes_ctr_loop_body(
 
         // Valid ptrs and buffers
         validSrcAddrs128(heap0, old_plain_ptr,  plain_b, old_num_quad_blocks * 4, memLayout, Secret);
-        validDstAddrs128(heap0, old_out_ptr,    out_b,   old_num_quad_blocks * 4, memLayout, Secret);
+        validDstAddrs128(heap1, old_out_ptr,    out_b,   old_num_quad_blocks * 4, memLayout, Secret);
         plain_ptr == old_plain_ptr + count * 64;
         out_ptr == old_out_ptr + count * 64;
         old_plain_ptr + old_num_quad_blocks * 64 < pow2_64;
         old_out_ptr + old_num_quad_blocks * 64 < pow2_64;
         buffer_length(plain_b)  <= buffer_length(out_b);
-        buffers_disjoint128(out_b, keys_b);
 
         // XMM constants are correct
         mask64 == Mkfour(0x04050607, 0x00010203, 0x0C0D0E0F, 0x08090A0B);
@@ -113,18 +112,18 @@ procedure Aes_ctr_loop_body(
         iv_lower64 == lo64(iv);
 
         // GCTR progress
-        gctr_partial_def(alg, 4*count, old(buffer128_as_seq(heap0, plain_b)), buffer128_as_seq(heap0, out_b), key, icb_BE);
+        gctr_partial_def(alg, 4*count, buffer128_as_seq(heap0, plain_b), buffer128_as_seq(heap1, out_b), key, icb_BE);
 
-    reads key_ptr; iv_lower64; mask64; four; memLayout;
+    reads key_ptr; iv_lower64; mask64; four; memLayout; heap0;
     modifies const2_1; const4_3; rk4; rk1; rk2; rk3; ctr1; ctr2; ctr3; ctr4;
-             tmp_xmm; plain_ptr; num_quad_blocks; out_ptr; r12; efl; heap0;
+             tmp_xmm; plain_ptr; num_quad_blocks; out_ptr; r12; efl; heap1;
     ensures
         // Framing
-        modifies_buffer128(out_b, old(heap0), heap0);
+        modifies_buffer128(out_b, old(heap1), heap1);
 
         // Valid ptrs and buffers
         validSrcAddrs128(heap0, old_plain_ptr,  plain_b, old_num_quad_blocks * 4, memLayout, Secret);
-        validDstAddrs128(heap0, old_out_ptr,    out_b,   old_num_quad_blocks * 4, memLayout, Secret);
+        validDstAddrs128(heap1, old_out_ptr,    out_b,   old_num_quad_blocks * 4, memLayout, Secret);
         plain_ptr == old(plain_ptr) + 64;
         out_ptr   == old(out_ptr)   + 64;
         num_quad_blocks == old(num_quad_blocks) - 1;
@@ -137,7 +136,7 @@ procedure Aes_ctr_loop_body(
         const4_3 == Mkfour(iv.hi2, reverse_bytes_nat32(add_wrap32(icb_BE.lo0, add_wrap32(#nat32(4 * count + 4), 3))), iv.hi2, reverse_bytes_nat32(add_wrap32(icb_BE.lo0, add_wrap32(#nat32(4 * count + 4), 2))));
 
         // GCTR progress
-        gctr_partial_def(alg, 4*count+4, old(buffer128_as_seq(heap0, plain_b)), buffer128_as_seq(heap0, out_b), key, icb_BE);
+        gctr_partial_def(alg, 4*count+4, buffer128_as_seq(heap0, plain_b), buffer128_as_seq(heap1, out_b), key, icb_BE);
 {
     lemma_insrq_extrq_relations(ctr1, iv);
     lemma_insrq_extrq_relations(ctr2, iv);
@@ -205,15 +204,15 @@ procedure Aes_ctr_loop_body(
     Pxor(ctr4, tmp_xmm);
 
     // Store the cipher text in output
-    Store128_buffer(heap0, out_ptr, ctr1,  0, Secret, out_b, 4*count + 0);
-    Store128_buffer(heap0, out_ptr, ctr2, 16, Secret, out_b, 4*count + 1);
-    Store128_buffer(heap0, out_ptr, ctr3, 32, Secret, out_b, 4*count + 2);
-    Store128_buffer(heap0, out_ptr, ctr4, 48, Secret, out_b, 4*count + 3);
+    Store128_buffer(heap1, out_ptr, ctr1,  0, Secret, out_b, 4*count + 0);
+    Store128_buffer(heap1, out_ptr, ctr2, 16, Secret, out_b, 4*count + 1);
+    Store128_buffer(heap1, out_ptr, ctr3, 32, Secret, out_b, 4*count + 2);
+    Store128_buffer(heap1, out_ptr, ctr4, 48, Secret, out_b, 4*count + 3);
 
     lemma_quad32_xor_commutes_forall();
     //commute_sub_bytes_shift_rows_forall();
 
-    assert slice(buffer128_as_seq(heap0, out_b), 0, 4 * count) == old(slice(buffer128_as_seq(heap0, out_b), 0, 4 * count));   // OBSERVE
+    assert slice(buffer128_as_seq(heap1, out_b), 0, 4 * count) == old(slice(buffer128_as_seq(heap1, out_b), 0, 4 * count));   // OBSERVE
 
     Sub64(rdx, 1);
     Add64(plain_ptr, 64);
@@ -234,10 +233,10 @@ procedure Aes_counter_loop(
          rk1 @= xmm3; rk2 @= xmm4; rk3 @= xmm5; rk4 @= xmm6;        // Round keys
          ctr1 @= xmm2; ctr2 @= xmm12; ctr3 @= xmm13; ctr4 @= xmm14; // Counters being fed to AES
 
-    reads key_ptr; mask; memLayout;
+    reads key_ptr; mask; memLayout; heap0;
     modifies mask64; four; iv; const2_1; const4_3; rk4; rk1; rk2; rk3; ctr1; ctr2; ctr3; ctr4;
              rax; plain_ptr; num_quad_blocks; out_ptr; iv_lower64; r12;
-             efl; heap0;
+             efl; heap1;
 
     requires
         sse_enabled;
@@ -247,13 +246,10 @@ procedure Aes_counter_loop(
 
         // Valid ptrs and buffers
         validSrcAddrs128(heap0, plain_ptr,  plain_b, num_quad_blocks * 4, memLayout, Secret);
-        validDstAddrs128(heap0, out_ptr,    out_b,   num_quad_blocks * 4, memLayout, Secret);
+        validDstAddrs128(heap1, out_ptr,    out_b,   num_quad_blocks * 4, memLayout, Secret);
         plain_ptr + num_quad_blocks * 64 < pow2_64;
         out_ptr   + num_quad_blocks * 64 < pow2_64;
         buffer_length(plain_b)  <= buffer_length(out_b);
-
-        buffers_disjoint128(out_b, keys_b);
-        buffers_disjoint128(plain_b, out_b);        // TODO: Remove this requirement
 
         // AES reqs
         aes_reqs(alg, key, round_keys, keys_b, key_ptr, heap0, memLayout);
@@ -262,8 +258,7 @@ procedure Aes_counter_loop(
         mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
 
     ensures
-        modifies_buffer128(out_b, old(heap0), heap0);
-        validSrcAddrs128(heap0, old(out_ptr), out_b, old(num_quad_blocks) * 4, memLayout, Secret);
+        modifies_buffer128(out_b, old(heap1), heap1);
 
         plain_ptr == old(plain_ptr) + 64 * old(num_quad_blocks);
         out_ptr   == old(out_ptr)   + 64 * old(num_quad_blocks);
@@ -271,7 +266,7 @@ procedure Aes_counter_loop(
         mask == Mkfour(0x0C0D0E0F, 0x08090A0B, 0x04050607, 0x00010203);
 
         // GCTR
-        gctr_partial_def(alg, 4*old(num_quad_blocks), old(buffer128_as_seq(heap0, plain_b)), buffer128_as_seq(heap0, out_b), key, old(iv));
+        gctr_partial_def(alg, 4*old(num_quad_blocks), buffer128_as_seq(heap0, plain_b), buffer128_as_seq(heap1, out_b), key, old(iv));
         iv == old(inc32(iv, 4*num_quad_blocks));
 {
     // To interface with our existing code, start by reversing the IV
@@ -327,19 +322,16 @@ procedure Aes_counter_loop(
             0 <= count <= pow2_32 - 4;
 
             // Framing
-            modifies_buffer128(out_b, old(heap0), heap0);
-            buffer128_as_seq(heap0, plain_b) == old(buffer128_as_seq(heap0, plain_b));  // REVIEW: Shouldn't this follow from above + disjoint?
+            modifies_buffer128(out_b, old(heap1), heap1);
 
             // Valid ptrs and buffers
             validSrcAddrs128(heap0, old(plain_ptr),  plain_b, old(num_quad_blocks * 4), memLayout, Secret);
-            validDstAddrs128(heap0, old(out_ptr),    out_b,   old(num_quad_blocks * 4), memLayout, Secret);
+            validDstAddrs128(heap1, old(out_ptr),    out_b,   old(num_quad_blocks * 4), memLayout, Secret);
             plain_ptr == old(plain_ptr) + count * 64;
             out_ptr == old(out_ptr) + count * 64;
             old(plain_ptr) + old(num_quad_blocks) * 64 < pow2_64;
             old(out_ptr) + old(num_quad_blocks) * 64 < pow2_64;
             buffer_length(plain_b)  <= buffer_length(out_b);
-            buffers_disjoint128(out_b, keys_b);
-            buffers_disjoint128(plain_b, out_b);        // TODO: Remove this requirement
 
             // XMM constants are correct
             mask64 == Mkfour(0x04050607, 0x00010203, 0x0C0D0E0F, 0x08090A0B);
@@ -359,8 +351,8 @@ procedure Aes_counter_loop(
             iv_lower64 == lo64(old_iv);
 
             // GCTR progress
-            length(slice(buffer128_as_seq(heap0, out_b), 0, 4 * old(num_quad_blocks))) > 0;
-            gctr_partial_def(alg, 4*count, old(buffer128_as_seq(heap0, plain_b)), buffer128_as_seq(heap0, out_b), key, icb_BE);
+            length(slice(buffer128_as_seq(heap1, out_b), 0, 4 * old(num_quad_blocks))) > 0;
+            gctr_partial_def(alg, 4*count, buffer128_as_seq(heap0, plain_b), buffer128_as_seq(heap1, out_b), key, icb_BE);
         decreases num_quad_blocks;
     {
         Aes_ctr_loop_body(alg, old(plain_ptr), old(out_ptr), old(num_quad_blocks), count, plain_b, out_b, key, round_keys, keys_b, icb_BE, old_iv);

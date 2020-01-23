@@ -63,10 +63,10 @@ procedure KeyExpansionStdcall(
     {:quick}
     {:exportSpecs}
     reads
-        rcx; rsi; rdi;
+        rcx; rsi; rdi; heap0;
     modifies
         rdx;
-        heap0; memLayout; xmm1; xmm2; xmm3; xmm4; efl;
+        heap1; memLayout; xmm1; xmm2; xmm3; xmm4; efl;
     lets
         key_ptr := if win then rcx else rdi;
         key_expansion_ptr := if win then rdx else rsi;
@@ -87,7 +87,7 @@ procedure KeyExpansionStdcall(
 {
     CreateHeaplets(list(
         declare_buffer128(input_key_b, 0, Secret, Immutable),
-        declare_buffer128(output_key_expansion_b, 0, Secret, Mutable)));
+        declare_buffer128(output_key_expansion_b, 1, Secret, Mutable)));
 
     inline if (alg = AES_128) {
         KeyExpansion128Stdcall(win, input_key_b, output_key_expansion_b);
