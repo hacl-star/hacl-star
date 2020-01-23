@@ -3,11 +3,48 @@ open PosixTypes
 open Foreign
 
 module EverCrypt_AEAD = EverCrypt_AEAD_bindings.Bindings(EverCrypt_AEAD_stubs)
+module EverCrypt_AutoConfig2 = EverCrypt_AutoConfig2_bindings.Bindings(EverCrypt_AutoConfig2_stubs)
 
 let uint8_ptr_of_bigstring buf = from_voidp uint8_t (to_voidp (bigarray_start array1 buf))
 
+module AutoConfig2 = struct
+  open EverCrypt_AutoConfig2
+  let has_shaext () = everCrypt_AutoConfig2_has_shaext ()
+  let has_aesni () = everCrypt_AutoConfig2_has_aesni ()
+  let has_pclmulqdq () = everCrypt_AutoConfig2_has_pclmulqdq ()
+  let has_avx2 () = everCrypt_AutoConfig2_has_avx2 ()
+  let has_avx () = everCrypt_AutoConfig2_has_avx ()
+  let has_bmi2 () = everCrypt_AutoConfig2_has_bmi2 ()
+  let has_adx () = everCrypt_AutoConfig2_has_adx ()
+  let has_sse () = everCrypt_AutoConfig2_has_sse ()
+  let has_movbe () = everCrypt_AutoConfig2_has_movbe ()
+  let has_rdrand () = everCrypt_AutoConfig2_has_rdrand ()
+  let wants_vale () = everCrypt_AutoConfig2_wants_vale ()
+  let wants_hacl () = everCrypt_AutoConfig2_wants_hacl ()
+  let wants_openssl () = everCrypt_AutoConfig2_wants_openssl ()
+  let wants_bcrypt () = everCrypt_AutoConfig2_wants_bcrypt ()
+  let recall () = everCrypt_AutoConfig2_recall ()
+  let init () = everCrypt_AutoConfig2_init ()
+  let disable_avx2 () = everCrypt_AutoConfig2_disable_avx2 ()
+  let disable_avx () = everCrypt_AutoConfig2_disable_avx ()
+  let disable_bmi2 () = everCrypt_AutoConfig2_disable_bmi2 ()
+  let disable_adx () = everCrypt_AutoConfig2_disable_adx ()
+  let disable_shaext () = everCrypt_AutoConfig2_disable_shaext ()
+  let disable_aesni () = everCrypt_AutoConfig2_disable_aesni ()
+  let disable_pclmulqdq () = everCrypt_AutoConfig2_disable_pclmulqdq ()
+  let disable_sse () = everCrypt_AutoConfig2_disable_sse ()
+  let disable_movbe () = everCrypt_AutoConfig2_disable_movbe ()
+  let disable_rdrand () = everCrypt_AutoConfig2_disable_rdrand ()
+  let disable_vale () = everCrypt_AutoConfig2_disable_vale ()
+  let disable_hacl () = everCrypt_AutoConfig2_disable_hacl ()
+  let disable_openssl () = everCrypt_AutoConfig2_disable_openssl ()
+  let disable_bcrypt () = everCrypt_AutoConfig2_disable_bcrypt ()
+end
+
 module AEAD = struct
-  type t = (EverCrypt_AEAD.everCrypt_AEAD_state_s ptr) ptr
+  open EverCrypt_AEAD
+
+  type t = (everCrypt_AEAD_state_s ptr) ptr
 
   type alg =
     | AES128_GCM
@@ -19,16 +56,16 @@ module AEAD = struct
     | Success
 
   let alloc_t () =
-    allocate (ptr EverCrypt_AEAD.everCrypt_AEAD_state_s) (from_voidp EverCrypt_AEAD.everCrypt_AEAD_state_s null)
+    allocate (ptr everCrypt_AEAD_state_s) (from_voidp everCrypt_AEAD_state_s null)
 
   let create_in alg st key =
     let key = uint8_ptr_of_bigstring key in
     let alg = match alg with
-      | AES128_GCM -> EverCrypt_AEAD.spec_Agile_AEAD_alg_Spec_Agile_AEAD_AES128_GCM
-      | AES256_GCM -> EverCrypt_AEAD.spec_Agile_AEAD_alg_Spec_Agile_AEAD_AES256_GCM
-      | CHACHA20_POLY1305 -> EverCrypt_AEAD.spec_Agile_AEAD_alg_Spec_Agile_AEAD_CHACHA20_POLY1305
+      | AES128_GCM -> spec_Agile_AEAD_alg_Spec_Agile_AEAD_AES128_GCM
+      | AES256_GCM -> spec_Agile_AEAD_alg_Spec_Agile_AEAD_AES256_GCM
+      | CHACHA20_POLY1305 -> spec_Agile_AEAD_alg_Spec_Agile_AEAD_CHACHA20_POLY1305
     in
-    let res = EverCrypt_AEAD.everCrypt_AEAD_create_in alg st key in
+    let res = everCrypt_AEAD_create_in alg st key in
     match Unsigned.UInt8.to_int res with
     | 0 -> Success
     | n -> Error n
@@ -39,10 +76,11 @@ module AEAD = struct
     let pt = uint8_ptr_of_bigstring pt in
     let ct = uint8_ptr_of_bigstring ct in
     let tag = uint8_ptr_of_bigstring tag in
-    match Unsigned.UInt8.to_int (EverCrypt_AEAD.everCrypt_AEAD_encrypt (!@st)
-                                   iv (Unsigned.UInt32.of_int iv_len)
-                                   ad (Unsigned.UInt32.of_int ad_len)
-                                   pt (Unsigned.UInt32.of_int pt_len) ct tag) with
+    match Unsigned.UInt8.to_int
+            (everCrypt_AEAD_encrypt (!@st)
+               iv (Unsigned.UInt32.of_int iv_len)
+               ad (Unsigned.UInt32.of_int ad_len)
+               pt (Unsigned.UInt32.of_int pt_len) ct tag) with
     | 0 -> Success
     | n -> Error n
 
@@ -52,10 +90,11 @@ module AEAD = struct
     let ct = uint8_ptr_of_bigstring ct in
     let tag = uint8_ptr_of_bigstring tag in
     let dt = uint8_ptr_of_bigstring dt in
-    match Unsigned.UInt8.to_int (EverCrypt_AEAD.everCrypt_AEAD_decrypt (!@st)
-                                   iv (Unsigned.UInt32.of_int iv_len)
-                                   ad (Unsigned.UInt32.of_int ad_len)
-                                   ct (Unsigned.UInt32.of_int ct_len) tag dt) with
+    match Unsigned.UInt8.to_int
+            (everCrypt_AEAD_decrypt (!@st)
+               iv (Unsigned.UInt32.of_int iv_len)
+               ad (Unsigned.UInt32.of_int ad_len)
+               ct (Unsigned.UInt32.of_int ct_len) tag dt) with
     | 0 -> Success
     | n -> Error n
 
