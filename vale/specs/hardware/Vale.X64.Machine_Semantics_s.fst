@@ -30,6 +30,10 @@ noeq type instr_annotation (it:instr_t_record) =
   | AnnotateXor64 : equals_instr it (InstrTypeRecord ins_Xor64) -> instr_annotation it
   | AnnotatePxor : equals_instr it (InstrTypeRecord ins_Pxor) -> instr_annotation it
   | AnnotateVPxor : equals_instr it (InstrTypeRecord ins_VPxor) -> instr_annotation it
+  | AnnotateComment : s:string{it == (InstrTypeRecord (ins_Comment s))} -> instr_annotation it
+  | AnnotateLargeComment : s:string{it == (InstrTypeRecord (ins_LargeComment s))} -> instr_annotation it
+  | AnnotateNewline : equals_instr it (InstrTypeRecord ins_Newline) -> instr_annotation it
+  | AnnotateSpace : n:nat{it == (InstrTypeRecord (ins_Space n))} -> instr_annotation it
 
 let ins = BC.instruction_t instr_annotation
 let ocmp = BC.ocmp

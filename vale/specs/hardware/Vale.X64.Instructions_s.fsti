@@ -144,7 +144,7 @@ let eval_Palignr_raw (amount:nat8) (src1 src2:quad32) : option quad32 =
     Some (Mkfour src2.hi2 src2.hi3 src1.lo0 src1.lo1)
   else None
 
-let eval_Palignr (amount:nat8) (src1 src2:quad32) : option quad32 = 
+let eval_Palignr (amount:nat8) (src1 src2:quad32) : option quad32 =
   check_ssse3 (eval_Palignr_raw amount src1 src2)
 val ins_Palignr (amount:nat8) :
   instr_dep [inOut opXmm] [opXmm] PreserveFlags (eval_Palignr amount)
@@ -356,3 +356,12 @@ val ins_SHA256_msg2 : instr_dep [inOut opXmm] [opXmm] PreserveFlags eval_SHA256_
 
 let eval_Comment : option unit = Some ()
 val ins_Comment : string -> instr_dep [] [] PreserveFlags eval_Comment
+
+let eval_LargeComment : option unit = Some ()
+val ins_LargeComment : string -> instr_dep [] [] PreserveFlags eval_LargeComment
+
+let eval_Newline : option unit = Some ()
+val ins_Newline : instr_dep [] [] PreserveFlags eval_Newline
+
+let eval_Space : option unit = Some ()
+val ins_Space : nat -> instr_dep [] [] PreserveFlags eval_Space

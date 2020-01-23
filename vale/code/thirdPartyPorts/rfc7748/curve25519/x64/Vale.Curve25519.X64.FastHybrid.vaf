@@ -96,15 +96,20 @@ procedure Fast_mul1(inline offset:nat, ghost inA_b:buffer64)
         carry < pow2_64 - 1;
         tmp0 == 0;
 {
+    Comment("Compute the raw multiplication of f1*f2");
     xor_lemmas();
 
-    Mulx64( tmp0,  d0, Mem(inA_ptr, 0 + 8 * offset, inA_b, 0 + offset, Secret));  /* A[0]*B */ lemma_prod_bounds(tmp0, d0, b, a0);
-    Mulx64(tmp1, d1, Mem(inA_ptr,  8 + 8 * offset, inA_b, 1 + offset, Secret));  /* A[1]*B */ lemma_prod_bounds(tmp1, d1, b, a1);
+    NoNewline();
+    Mulx64( tmp0,  d0, Mem(inA_ptr, 0 + 8 * offset, inA_b, 0 + offset, Secret));  /* A[0]*B */ lemma_prod_bounds(tmp0, d0, b, a0); Space(2); Comment("f1[0]*f2");
+    NoNewline();
+    Mulx64(tmp1, d1, Mem(inA_ptr,  8 + 8 * offset, inA_b, 1 + offset, Secret));  /* A[1]*B */ lemma_prod_bounds(tmp1, d1, b, a1); Space(2); Comment("f1[1]*f2");
     Add64Wrap(d1, tmp0);
     Mov64(tmp0, 0);
-    Mulx64(tmp2, d2, Mem(inA_ptr, 16 + 8 * offset, inA_b, 2 + offset, Secret));  /* A[2]*B */ lemma_prod_bounds(tmp2, d2, b, a2);
+    NoNewline();
+    Mulx64(tmp2, d2, Mem(inA_ptr, 16 + 8 * offset, inA_b, 2 + offset, Secret));  /* A[2]*B */ lemma_prod_bounds(tmp2, d2, b, a2); Comment("f1[2]*f2");
     Adcx64Wrap(d2, tmp1);
-    Mulx64(carry, d3, Mem(inA_ptr, 24 + 8 * offset, inA_b, 3 + offset, Secret));  /* A[3]*B */ lemma_prod_bounds(carry, d3, b, a3);
+    NoNewline();
+    Mulx64(carry, d3, Mem(inA_ptr, 24 + 8 * offset, inA_b, 3 + offset, Secret));  /* A[3]*B */ lemma_prod_bounds(carry, d3, b, a3); Comment("f1[3]*f2");
     Adcx64Wrap(d3, tmp2);
     Adcx64Wrap(carry, tmp0);
 
@@ -361,6 +366,8 @@ procedure Store4(ghost dst_b:buffer64)
         modifies_buffer(dst_b, old(mem), mem);
         validSrcAddrs64(mem, dst_ptr, dst_b, 4, memTaint, Secret);
 {
+    Newline();
+    Comment("Store the result");
     Store64_buffer(dst_ptr, d0,  0, Secret, dst_b, 0);
     Store64_buffer(dst_ptr, d1,  8, Secret, dst_b, 1);
     Store64_buffer(dst_ptr, d2, 16, Secret, dst_b, 2);
@@ -426,15 +433,20 @@ procedure Carry_pass(inline use_cf:bool, inline offset:nat, ghost dst_b:buffer64
 {
     inline if (use_cf)
     {
+        Comment("Step 1: Compute carry*38");
         Mov64(carry, 0);
         Carry_times_38(tmp);
 
+        Newline();
+        Comment("Step 2: Add carry*38 to the original sum");
         xor_lemmas();
         Xor64( zero,  zero);
     }
     else
     {
         IMul64(carry, tmp);
+        Newline();
+        Comment("Step 2: Fold the carry back into dst");
     }
 
     Add64Wrap(a0, carry);
@@ -451,6 +463,8 @@ procedure Carry_pass(inline use_cf:bool, inline offset:nat, ghost dst_b:buffer64
     lemma_carry_prime(old(a0), old(a1), old(a2), old(a3), a0, a1, a2, a3, old(carry_in), new_carry);
     let a0' := a0;
 
+    Newline();
+    Comment("Step 3: Fold the carry bit back in; guaranteed not to carry at this point");
     Mov64(carry, 0);
     Cmovc64(carry, tmp);
     Add64Wrap(a0, carry);
@@ -512,6 +526,7 @@ procedure Carry_wide(inline offset:nat, ghost dst_b:buffer64, ghost inA_b:buffer
         validSrcAddrs64(mem, dst_ptr, dst_b, 4 + offset, memTaint, Secret);
         modifies_buffer_specific(dst_b, old(mem), mem, 0 + offset, 4 + offset - 1);
 {
+    Comment("Step 1: Compute dst + carry == tmp_hi * 38 + tmp_lo");
     Mov64(rdx, 38);
 
     Fast_mul1_add(offset*2, inA_b);   // Gives d+carry == a' * 38 + a
@@ -520,6 +535,7 @@ procedure Carry_wide(inline offset:nat, ghost dst_b:buffer64, ghost inA_b:buffer
     let d2_mid := tmp2;
     let d3_mid := tmp3;
     let carry_mid := rax;
+    
     Carry_pass(false, offset, dst_b); // Gives d % prime == old (d + carry * pow2_256) % prime
 
     let d0 := buffer64_read(dst_b, 0 + offset, mem);
@@ -622,14 +638,21 @@ procedure Carry_sub_pass()
     ensures
        pow2_four(a0, a1, a2, a3) % prime == old(pow2_four(a0, a1, a2, a3) - bool_bit(cf(efl)) * pow2_256) % prime;
 {
+    LargeComment("Wrap the result back into the field");
+
+    Comment("Step 1: Compute carry*38");
     Mov64(carry, 0);
     Carry_times_38(tmp);
 
+    Newline();
+    Comment("Step 2: Substract carry*38 from the original difference");
     Sub64Wrap(a0, carry);
     Sbb64(a1, 0);
     Sbb64(a2, 0);
     Sbb64(a3, 0);
 
+    Newline();
+    Comment("Step 3: Fold the carry bit back in; guaranteed not to carry at this point");
     let old_carry := old(bool_bit(cf(efl)));
     assert pow2_four(a0, a1, a2, a3) - bool_bit(cf(efl))*pow2_256 == old(pow2_four(a0, a1, a2, a3) - old_carry * 38);
     let sum:int := old(pow2_four(a0, a1, a2, a3) - old_carry * 38);
@@ -741,6 +764,7 @@ procedure Fast_sub(ghost inA_b:buffer64, ghost inB_b:buffer64)
         d - bool_bit(cf(efl)) * pow2_256 == old(a - b);
         valid_cf(efl);
 {
+    Comment("Compute the raw substraction of f1-f2");
     xor_lemmas();
 //    lemma_sub_carry_equiv_forall();
 
@@ -817,10 +841,12 @@ procedure Fadd(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB_b:buffer64)
         validSrcAddrs64(mem, dst_ptr, dst_b, 4, memTaint, Secret);
         modifies_buffer(dst_b, old(mem), mem);
 {
+    Comment("Compute the raw addition of f1 + f2");
     Fast_add(inA_b, inB_b);
     assert_by_tactic(
         pow2_five(tmp0, tmp1, tmp2, tmp3, bool_bit(cf(efl))) ==
         pow2_four(tmp0, tmp1, tmp2, tmp3) + bool_bit(cf(efl)) * pow2_256, int_canon);
+    LargeComment("Wrap the result back into the field");
     Carry_pass(true, 0, dst_b);
 }
 
@@ -1127,6 +1153,8 @@ procedure Fmul1(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB:nat64)
     Fast_mul1(0, inA_b);
     lemma_fmul(old(a0), old(a1), old(a2), old(a3), old(b), tmp0, tmp1, tmp2, tmp3, rax);
     assert rax * 38 < pow2_63;
+    LargeComment("Wrap the result back into the field");
+    Comment("Step 1: Compute carry*38");
     Mov64(b, 38);
     Carry_pass(false, 0, dst_b);
     //Store4(dst_b);
