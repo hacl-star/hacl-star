@@ -5,8 +5,8 @@ open Unsigned
 
 open Utils
 
-module EverCrypt_AEAD = EverCrypt_AEAD_bindings.Bindings(EverCrypt_AEAD_stubs)
 module EverCrypt_AutoConfig2 = EverCrypt_AutoConfig2_bindings.Bindings(EverCrypt_AutoConfig2_stubs)
+module EverCrypt_AEAD = EverCrypt_AEAD_bindings.Bindings(EverCrypt_AEAD_stubs)
 
 module AutoConfig2 = struct
   open EverCrypt_AutoConfig2
@@ -42,61 +42,60 @@ module AutoConfig2 = struct
   let disable_bcrypt () = everCrypt_AutoConfig2_disable_bcrypt ()
 end
 
+module Error = struct
+  type error_code =
+    | UnsupportedAlgorithm
+    | InvalidKey
+    | AuthenticationFailure
+    | InvalidIVLength
+    | DecodeError
+  type result =
+    | Success
+    | Error of error_code
+  let error n =
+    let err = match n with
+      | 1 -> UnsupportedAlgorithm
+      | 2 -> InvalidKey
+      | 3 -> AuthenticationFailure
+      | 4 -> InvalidIVLength
+      | 5 -> DecodeError
+      | _ -> failwith "Impossible"
+    in
+    Error err
+  let get_result r = match UInt8.to_int r with
+    | 0 -> Success
+    | n -> error n
+end
+
 module AEAD = struct
+  open Error
   open EverCrypt_AEAD
 
   type t = (everCrypt_AEAD_state_s ptr) ptr
-
   type alg =
     | AES128_GCM
     | AES256_GCM
     | CHACHA20_POLY1305
-
-  type result =
-    | Error of int
-    | Success
-
-  let alloc_t () =
-    allocate (ptr everCrypt_AEAD_state_s) (from_voidp everCrypt_AEAD_state_s null)
-
-  let create_in alg st key =
-    let key = uint8_ptr_of_bigstring key in
+  type result_init =
+    | Success of t
+    | Err of int
+  let init alg key : result_init =
+    let st = allocate (ptr everCrypt_AEAD_state_s) (from_voidp everCrypt_AEAD_state_s null) in
     let alg = match alg with
       | AES128_GCM -> spec_Agile_AEAD_alg_Spec_Agile_AEAD_AES128_GCM
       | AES256_GCM -> spec_Agile_AEAD_alg_Spec_Agile_AEAD_AES256_GCM
       | CHACHA20_POLY1305 -> spec_Agile_AEAD_alg_Spec_Agile_AEAD_CHACHA20_POLY1305
     in
-    let res = everCrypt_AEAD_create_in alg st key in
-    match UInt8.to_int res with
-    | 0 -> Success
-    | n -> Error n
-
-  let encrypt st iv iv_len ad ad_len pt pt_len ct tag =
-    let iv = uint8_ptr_of_bigstring iv in
-    let ad = uint8_ptr_of_bigstring ad in
-    let pt = uint8_ptr_of_bigstring pt in
-    let ct = uint8_ptr_of_bigstring ct in
-    let tag = uint8_ptr_of_bigstring tag in
     match UInt8.to_int
-            (everCrypt_AEAD_encrypt (!@st)
-               iv (UInt32.of_int iv_len)
-               ad (UInt32.of_int ad_len)
-               pt (UInt32.of_int pt_len) ct tag) with
-    | 0 -> Success
-    | n -> Error n
-
-  let decrypt st iv iv_len ad ad_len ct ct_len tag dt =
-    let iv = uint8_ptr_of_bigstring iv in
-    let ad = uint8_ptr_of_bigstring ad in
-    let ct = uint8_ptr_of_bigstring ct in
-    let tag = uint8_ptr_of_bigstring tag in
-    let dt = uint8_ptr_of_bigstring dt in
-    match UInt8.to_int
-            (everCrypt_AEAD_decrypt (!@st)
-               iv (UInt32.of_int iv_len)
-               ad (UInt32.of_int ad_len)
-               ct (UInt32.of_int ct_len) tag dt) with
-    | 0 -> Success
-    | n -> Error n
-
+            (everCrypt_AEAD_create_in alg st (uint8_ptr key)) with
+    | 0 -> Success st
+    | n -> Err n
+  let encrypt st iv ad pt ct tag : result =
+    get_result (everCrypt_AEAD_encrypt (!@st)
+                  (uint8_ptr iv) (size_uint32 iv) (uint8_ptr ad) (size_uint32 ad)
+                  (uint8_ptr pt) (size_uint32 pt) (uint8_ptr ct) (uint8_ptr tag))
+  let decrypt st iv ad ct tag dt : result =
+    get_result (everCrypt_AEAD_decrypt (!@st)
+                  (uint8_ptr iv) (size_uint32 iv) (uint8_ptr ad) (size_uint32 ad)
+                  (uint8_ptr ct) (size_uint32 ct) (uint8_ptr tag) (uint8_ptr dt))
 end

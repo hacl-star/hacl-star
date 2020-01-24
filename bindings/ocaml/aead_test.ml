@@ -1,4 +1,4 @@
-open Hacl
+open EverCrypt.Error
 
 type aead_test =
   { alg: EverCrypt.AEAD.alg;
@@ -8,7 +8,7 @@ type aead_test =
   }
 
 let chacha20poly1305_test: aead_test =
-  { alg = CHACHA20_POLY1305; key_len = 32; msg_len = 114; iv_len = 12; ad_len = 12; tag_len = 16;
+  { alg = EverCrypt.AEAD.CHACHA20_POLY1305; key_len = 32; msg_len = 114; iv_len = 12; ad_len = 12; tag_len = 16;
     test_key = Bigstring.of_string "\x80\x81\x82\x83\x84\x85\x86\x87\x88\x89\x8a\x8b\x8c\x8d\x8e\x8f\x90\x91\x92\x93\x94\x95\x96\x97\x98\x99\x9a\x9b\x9c\x9d\x9e\x9f";
     test_iv = Bigstring.of_string "\x07\x00\x00\x00\x40\x41\x42\x43\x44\x45\x46\x47";
     test_ad = Bigstring.of_string "\x50\x51\x52\x53\xc0\xc1\xc2\xc3\xc4\xc5\xc6\xc7";
@@ -28,20 +28,26 @@ let validate_test (v: aead_test) =
 
 let print_result t r = Printf.printf "[%s] %s\n" t r
 
+let print_error = function
+  | UnsupportedAlgorithm -> "Unsupported algorithm"
+  | InvalidKey -> "Invalid key"
+  | AuthenticationFailure -> "Authentication failure"
+  | InvalidIVLength -> "Invalid IV length"
+  | DecodeError -> "Decode error"
+
 let test_evercrypt (v: aead_test) =
   let open EverCrypt.AEAD in
   let print_result = print_result "EverCrypt.AEAD" in
 
   validate_test v;
-  let st = alloc_t () in
   let ct = Bigstring.create v.msg_len in
   let tag = Bigstring.create v.tag_len in
   Bigstring.fill ct '\x00';
   Bigstring.fill tag '\x00';
 
-  match create_in v.alg st v.test_key with
-  | Success -> begin
-      match encrypt st v.test_iv v.iv_len v.test_ad v.ad_len v.test_pt v.msg_len ct tag with
+  match init v.alg v.test_key with
+  | Success st -> begin
+      match encrypt st v.test_iv v.test_ad v.test_pt ct tag with
       | Success -> begin
           if Bigstring.compare tag v.test_tag = 0 && Bigstring.compare ct v.test_ct = 0 then
             print_result "Encryption success"
@@ -49,17 +55,17 @@ let test_evercrypt (v: aead_test) =
             print_result "Failure: wrong ciphertext/mac";
           let dt = Bigstring.create v.msg_len in
           Bigstring.fill dt '\x00';
-          match decrypt st v.test_iv v.iv_len v.test_ad v.ad_len ct v.msg_len v.test_tag dt with
+          match decrypt st v.test_iv v.test_ad ct v.test_tag dt with
           | Success ->
             if Bigstring.compare v.test_pt dt = 0 then
               print_result "Decryption success"
             else
               print_result "Failure: decrypted and plaintext do not match"
-          | Error n -> print_result (Printf.sprintf "Decryption error %d" n)
+          | Error err -> print_result (Printf.sprintf "Decryption error %s" (print_error err))
         end
-      | Error n -> print_result (Printf.sprintf "Encryption error %d" n)
+      | Error err -> print_result (Printf.sprintf "Encryption error %s" (print_error err))
     end
-  | Error n -> print_result (Printf.sprintf "Init error %d" n)
+  | Err n -> print_result (Printf.sprintf "Init error %d" n)
 
 
 let test_hacl (v: aead_test) t encrypt decrypt =
@@ -70,7 +76,7 @@ let test_hacl (v: aead_test) t encrypt decrypt =
   Bigstring.fill ct '\x00';
   Bigstring.fill tag '\x00';
 
-  encrypt v.test_key v.test_iv v.ad_len v.test_ad v.msg_len v.test_pt ct tag;
+  encrypt v.test_key v.test_iv v.test_ad v.test_pt ct tag;
   if Bigstring.compare tag v.test_tag = 0 && Bigstring.compare ct v.test_ct = 0 then
     print_result "Encryption success"
   else
@@ -78,7 +84,7 @@ let test_hacl (v: aead_test) t encrypt decrypt =
       (Printf.sprintf "Failure: wrong ciphertext/mac %d %d \n" (Bigstring.compare ct v.test_ct) (Bigstring.compare tag v.test_tag));
   let dt = Bigstring.create v.msg_len in
   Bigstring.fill dt '\x00';
-  if decrypt v.test_key v.test_iv v.ad_len v.test_ad v.msg_len dt ct tag then
+  if decrypt v.test_key v.test_iv v.test_ad dt ct tag then
     if Bigstring.compare v.test_pt dt = 0 then
       print_result "Decryption success"
     else
@@ -102,6 +108,6 @@ let _ =
   Printf.printf "wants_openssl: %b\n" (EverCrypt.AutoConfig2.wants_openssl ());
   Printf.printf "wants_bcrypt: %b\n" (EverCrypt.AutoConfig2.wants_bcrypt ());
   test_evercrypt chacha20poly1305_test;
-  test_hacl chacha20poly1305_test "Hacl.Chacha20_Poly1305_32" Hacl.Chacha20_Poly1305_32.encrypt Chacha20_Poly1305_32.decrypt;
-  test_hacl chacha20poly1305_test "Hacl.Chacha20_Poly1305_128" Hacl.Chacha20_Poly1305_128.encrypt Chacha20_Poly1305_128.decrypt;
-  test_hacl chacha20poly1305_test "Hacl.Chacha20_Poly1305_256" Hacl.Chacha20_Poly1305_256.encrypt Chacha20_Poly1305_256.decrypt
+  test_hacl chacha20poly1305_test "Hacl.Chacha20_Poly1305_32" Hacl.Chacha20_Poly1305_32.encrypt Hacl.Chacha20_Poly1305_32.decrypt;
+  test_hacl chacha20poly1305_test "Hacl.Chacha20_Poly1305_128" Hacl.Chacha20_Poly1305_128.encrypt Hacl.Chacha20_Poly1305_128.decrypt;
+  test_hacl chacha20poly1305_test "Hacl.Chacha20_Poly1305_256" Hacl.Chacha20_Poly1305_256.encrypt Hacl.Chacha20_Poly1305_256.decrypt

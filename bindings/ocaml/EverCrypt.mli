@@ -31,17 +31,28 @@ module AutoConfig2 : sig
   val disable_bcrypt : unit -> unit
 end
 
+module Error : sig
+  type error_code =
+    | UnsupportedAlgorithm
+    | InvalidKey
+    | AuthenticationFailure
+    | InvalidIVLength
+    | DecodeError
+  type result =
+    | Success
+    | Error of error_code
+end
+
 module AEAD : sig
   type t
   type alg =
     | AES128_GCM
     | AES256_GCM
     | CHACHA20_POLY1305
-  type result =
-    | Error of int
-    | Success
-  val alloc_t : unit -> t
-  val create_in : alg -> t -> Bigstring.t -> result
-  val encrypt : t -> Bigstring.t -> int -> Bigstring.t -> int -> Bigstring.t -> int -> Bigstring.t -> Bigstring.t -> result
-  val decrypt : t -> Bigstring.t -> int -> Bigstring.t -> int -> Bigstring.t -> int -> Bigstring.t -> Bigstring.t -> result
+  type result_init =
+    | Success of t
+    | Err of int
+  val init : alg -> Bigstring.t -> result_init
+  val encrypt : t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> Error.result
+  val decrypt : t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> Error.result
 end

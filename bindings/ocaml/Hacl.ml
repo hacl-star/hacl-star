@@ -11,8 +11,8 @@ module Hacl_Chacha20Poly1305_128 = Hacl_Chacha20Poly1305_128_bindings.Bindings(H
 module Hacl_Chacha20Poly1305_256 = Hacl_Chacha20Poly1305_256_bindings.Bindings(Hacl_Chacha20Poly1305_256_stubs)
 
 module type Chacha20_Poly1305 = sig
-  val encrypt: Bigstring.t -> Bigstring.t -> int -> Bigstring.t -> int -> Bigstring.t -> Bigstring.t -> Bigstring.t -> unit
-  val decrypt: Bigstring.t -> Bigstring.t -> int -> Bigstring.t -> int -> Bigstring.t -> Bigstring.t -> Bigstring.t -> bool
+  val encrypt: Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> unit
+  val decrypt: Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> bool
 end
 
 module Make_Chacha20_Poly1305 (Impl : sig
@@ -20,23 +20,14 @@ module Make_Chacha20_Poly1305 (Impl : sig
     val decrypt : uint8 ptr -> uint8 ptr -> uint32 -> uint8 ptr -> uint32 -> uint8 ptr -> uint8 ptr -> uint8 ptr -> uint32
 end)
   = struct
-    let encrypt key iv ad_len ad pt_len pt ct tag =
-      let key = uint8_ptr_of_bigstring key in
-      let iv = uint8_ptr_of_bigstring iv in
-      let ad = uint8_ptr_of_bigstring ad in
-      let pt = uint8_ptr_of_bigstring pt in
-      let ct = uint8_ptr_of_bigstring ct in
-      let tag = uint8_ptr_of_bigstring tag in
-      Impl.encrypt key iv (UInt32.of_int ad_len) ad (UInt32.of_int pt_len) pt ct tag
+    let encrypt key iv ad pt ct tag =
+      Impl.encrypt (uint8_ptr key) (uint8_ptr iv) (size_uint32 ad) (uint8_ptr ad)
+        (size_uint32 pt) (uint8_ptr pt) (uint8_ptr ct) (uint8_ptr tag)
 
-    let decrypt key iv ad_len ad pt_len pt ct tag =
-      let key = uint8_ptr_of_bigstring key in
-      let iv = uint8_ptr_of_bigstring iv in
-      let ad = uint8_ptr_of_bigstring ad in
-      let pt = uint8_ptr_of_bigstring pt in
-      let ct = uint8_ptr_of_bigstring ct in
-      let tag = uint8_ptr_of_bigstring tag in
-      let result = Impl.decrypt key iv (UInt32.of_int ad_len) ad (UInt32.of_int pt_len) pt ct tag in
+    let decrypt key iv ad pt ct tag =
+      let result = Impl.decrypt (uint8_ptr key) (uint8_ptr iv) (size_uint32 ad) (uint8_ptr ad)
+          (size_uint32 pt) (uint8_ptr pt) (uint8_ptr ct) (uint8_ptr tag)
+      in
       UInt32.to_int result = 0
 end
 
