@@ -1,5 +1,7 @@
 open EverCrypt.Error
 
+open Test_utils
+
 type aead_test =
   { alg: EverCrypt.AEAD.alg;
     key_len: int; msg_len: int; iv_len: int ; ad_len: int; tag_len: int;
@@ -25,15 +27,6 @@ let validate_test (v: aead_test) =
   assert (Bigstring.size v.test_pt = v.msg_len);
   assert (Bigstring.size v.test_ct = v.msg_len);
   assert (Bigstring.size v.test_tag = v.tag_len)
-
-let print_result t r = Printf.printf "[%s] %s\n" t r
-
-let print_error = function
-  | UnsupportedAlgorithm -> "Unsupported algorithm"
-  | InvalidKey -> "Invalid key"
-  | AuthenticationFailure -> "Authentication failure"
-  | InvalidIVLength -> "Invalid IV length"
-  | DecodeError -> "Decode error"
 
 let test_agile (v: aead_test) =
   let open EverCrypt.AEAD in
@@ -107,6 +100,7 @@ let _ =
   Printf.printf "wants_hacl: %b\n" (EverCrypt.AutoConfig2.wants_hacl ());
   Printf.printf "wants_openssl: %b\n" (EverCrypt.AutoConfig2.wants_openssl ());
   Printf.printf "wants_bcrypt: %b\n" (EverCrypt.AutoConfig2.wants_bcrypt ());
+  (* EverCrypt.AutoConfig2.disable_aesni (); *)
   test_agile chacha20poly1305_test;
   test_nonagile chacha20poly1305_test "Hacl.Chacha20_Poly1305_32" Hacl.Chacha20_Poly1305_32.encrypt Hacl.Chacha20_Poly1305_32.decrypt;
   test_nonagile chacha20poly1305_test "Hacl.Chacha20_Poly1305_128" Hacl.Chacha20_Poly1305_128.encrypt Hacl.Chacha20_Poly1305_128.decrypt;

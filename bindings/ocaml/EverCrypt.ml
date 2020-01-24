@@ -7,6 +7,7 @@ open Shared
 module EverCrypt_AutoConfig2 = EverCrypt_AutoConfig2_bindings.Bindings(EverCrypt_AutoConfig2_stubs)
 module EverCrypt_AEAD = EverCrypt_AEAD_bindings.Bindings(EverCrypt_AEAD_stubs)
 module EverCrypt_Chacha20Poly1305 = EverCrypt_Chacha20Poly1305_bindings.Bindings(EverCrypt_Chacha20Poly1305_stubs)
+module EverCrypt_Curve25519 = EverCrypt_Curve25519_bindings.Bindings(EverCrypt_Curve25519_stubs)
 
 
 module AutoConfig2 = struct
@@ -105,4 +106,11 @@ module Chacha20_Poly1305 : Chacha20_Poly1305 =
   Make_Chacha20_Poly1305 (struct
     let encrypt = EverCrypt_Chacha20Poly1305.everCrypt_Chacha20Poly1305_aead_encrypt
     let decrypt = EverCrypt_Chacha20Poly1305.everCrypt_Chacha20Poly1305_aead_decrypt
+  end)
+
+module Curve25519 : Curve25519 =
+  Make_Curve25519 (struct
+    let secret_to_public = EverCrypt_Curve25519.everCrypt_Curve25519_secret_to_public
+    let scalarmult = EverCrypt_Curve25519.everCrypt_Curve25519_scalarmult
+    let ecdh = EverCrypt_Curve25519.everCrypt_Curve25519_ecdh
   end)

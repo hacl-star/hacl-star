@@ -60,3 +60,5 @@ module AEAD : sig
 end
 
 module Chacha20_Poly1305 : Chacha20_Poly1305
+
+module Curve25519 : Curve25519
