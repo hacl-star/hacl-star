@@ -1,3 +1,5 @@
+open Shared
+
 module AutoConfig2 : sig
   val has_shaext : unit -> bool
   val has_aesni : unit -> bool
@@ -56,3 +58,5 @@ module AEAD : sig
   val encrypt : t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> Error.result
   val decrypt : t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> Error.result
 end
+
+module Chacha20_Poly1305 : Chacha20_Poly1305

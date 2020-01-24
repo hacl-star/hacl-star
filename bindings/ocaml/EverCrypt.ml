@@ -1,12 +1,13 @@
 open Ctypes
-open PosixTypes
-open Foreign
 open Unsigned
 
 open Utils
+open Shared
 
 module EverCrypt_AutoConfig2 = EverCrypt_AutoConfig2_bindings.Bindings(EverCrypt_AutoConfig2_stubs)
 module EverCrypt_AEAD = EverCrypt_AEAD_bindings.Bindings(EverCrypt_AEAD_stubs)
+module EverCrypt_Chacha20Poly1305 = EverCrypt_Chacha20Poly1305_bindings.Bindings(EverCrypt_Chacha20Poly1305_stubs)
+
 
 module AutoConfig2 = struct
   open EverCrypt_AutoConfig2
@@ -99,3 +100,9 @@ module AEAD = struct
                   (uint8_ptr iv) (size_uint32 iv) (uint8_ptr ad) (size_uint32 ad)
                   (uint8_ptr ct) (size_uint32 ct) (uint8_ptr tag) (uint8_ptr dt))
 end
+
+module Chacha20_Poly1305 : Chacha20_Poly1305 =
+  Make_Chacha20_Poly1305 (struct
+    let encrypt = EverCrypt_Chacha20Poly1305.everCrypt_Chacha20Poly1305_aead_encrypt
+    let decrypt = EverCrypt_Chacha20Poly1305.everCrypt_Chacha20Poly1305_aead_decrypt
+  end)

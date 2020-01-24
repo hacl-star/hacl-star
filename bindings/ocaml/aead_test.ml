@@ -35,7 +35,7 @@ let print_error = function
   | InvalidIVLength -> "Invalid IV length"
   | DecodeError -> "Decode error"
 
-let test_evercrypt (v: aead_test) =
+let test_agile (v: aead_test) =
   let open EverCrypt.AEAD in
   let print_result = print_result "EverCrypt.AEAD" in
 
@@ -68,7 +68,7 @@ let test_evercrypt (v: aead_test) =
   | Err n -> print_result (Printf.sprintf "Init error %d" n)
 
 
-let test_hacl (v: aead_test) t encrypt decrypt =
+let test_nonagile (v: aead_test) t encrypt decrypt =
   let print_result = print_result t in
 
   let ct = Bigstring.create v.msg_len in
@@ -107,7 +107,8 @@ let _ =
   Printf.printf "wants_hacl: %b\n" (EverCrypt.AutoConfig2.wants_hacl ());
   Printf.printf "wants_openssl: %b\n" (EverCrypt.AutoConfig2.wants_openssl ());
   Printf.printf "wants_bcrypt: %b\n" (EverCrypt.AutoConfig2.wants_bcrypt ());
-  test_evercrypt chacha20poly1305_test;
-  test_hacl chacha20poly1305_test "Hacl.Chacha20_Poly1305_32" Hacl.Chacha20_Poly1305_32.encrypt Hacl.Chacha20_Poly1305_32.decrypt;
-  test_hacl chacha20poly1305_test "Hacl.Chacha20_Poly1305_128" Hacl.Chacha20_Poly1305_128.encrypt Hacl.Chacha20_Poly1305_128.decrypt;
-  test_hacl chacha20poly1305_test "Hacl.Chacha20_Poly1305_256" Hacl.Chacha20_Poly1305_256.encrypt Hacl.Chacha20_Poly1305_256.decrypt
+  test_agile chacha20poly1305_test;
+  test_nonagile chacha20poly1305_test "Hacl.Chacha20_Poly1305_32" Hacl.Chacha20_Poly1305_32.encrypt Hacl.Chacha20_Poly1305_32.decrypt;
+  test_nonagile chacha20poly1305_test "Hacl.Chacha20_Poly1305_128" Hacl.Chacha20_Poly1305_128.encrypt Hacl.Chacha20_Poly1305_128.decrypt;
+  test_nonagile chacha20poly1305_test "Hacl.Chacha20_Poly1305_256" Hacl.Chacha20_Poly1305_256.encrypt Hacl.Chacha20_Poly1305_256.decrypt;
+  test_nonagile chacha20poly1305_test "EverCrypt.Chacha20_Poly1305_256" EverCrypt.Chacha20_Poly1305.encrypt EverCrypt.Chacha20_Poly1305.decrypt
