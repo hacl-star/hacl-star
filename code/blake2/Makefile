@@ -14,11 +14,10 @@ export CFLAGS
 
 # CUSTOMIZE HERE: how to produce binary objects
 # An archive with all the compiled code in this directory.
-BLAKE2B_BUNDLE=-bundle Hacl.Blake2b_256=Hacl.Impl.Blake2.Constants,Hacl.Impl.Blake2.Core,Hacl.Impl.Blake2.Generic,Hacl.Impl.Blake2b_256 -bundle Hacl.Blake2b_32=Hacl.Impl.Blake2.Constants,Hacl.Impl.Blake2.Core,Hacl.Impl.Blake2.Generic,Hacl.Impl.Blake2b_32
-BLAKE2S_BUNDLE=-bundle Hacl.Blake2s_128=Hacl.Impl.Blake2.Constants,Hacl.Impl.Blake2.Core,Hacl.Impl.Blake2.Generic,Hacl.Impl.Blake2s_128 -bundle Hacl.Blake2s_32=Hacl.Impl.Blake2.Constants,Hacl.Impl.Blake2.Core,Hacl.Impl.Blake2.Generic,Hacl.Impl.Blake2s_32
+BLAKE2_BUNDLE=-bundle Hacl.Impl.Blake2.Constants -static-header Hacl.Impl.Blake2.Constants -bundle 'Hacl.Impl.Blake2.\*'
 
 dist/Makefile.basic: $(filter-out %/prims.krml,$(ALL_KRML_FILES))
-	$(KRML) $^  $(BASE_FLAGS) $(BLAKE2S_BUNDLE) $(BLAKE2B_BUNDLE) \
+	$(KRML) $^  $(BASE_FLAGS) $(BLAKE2_BUNDLE) \
 	  -funroll-loops 8 \
 	  -fbuiltin-uint128 \
 	  -tmpdir dist \
