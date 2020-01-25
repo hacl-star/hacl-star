@@ -1759,7 +1759,7 @@ void Hacl_Hash_Core_SHA2_update_224(uint32_t *hash1, uint8_t *block)
         ((e0 >> (uint32_t)6U | e0 << (uint32_t)26U)
         ^ ((e0 >> (uint32_t)11U | e0 << (uint32_t)21U) ^ (e0 >> (uint32_t)25U | e0 << (uint32_t)7U)))
       + ((e0 & f0) ^ (~e0 & g0))
-      + k224_256[i]
+      + Hacl_Hash_Core_SHA2_Constants_k224_256[i]
       + w;
     uint32_t
     t2 =
@@ -1832,7 +1832,7 @@ void Hacl_Hash_Core_SHA2_update_256(uint32_t *hash1, uint8_t *block)
         ((e0 >> (uint32_t)6U | e0 << (uint32_t)26U)
         ^ ((e0 >> (uint32_t)11U | e0 << (uint32_t)21U) ^ (e0 >> (uint32_t)25U | e0 << (uint32_t)7U)))
       + ((e0 & f0) ^ (~e0 & g0))
-      + k224_256[i]
+      + Hacl_Hash_Core_SHA2_Constants_k224_256[i]
       + w;
     uint32_t
     t2 =
@@ -1907,7 +1907,7 @@ void Hacl_Hash_Core_SHA2_update_384(uint64_t *hash1, uint8_t *block)
           ((e0 >> (uint32_t)18U | e0 << (uint32_t)46U)
           ^ (e0 >> (uint32_t)41U | e0 << (uint32_t)23U)))
       + ((e0 & f0) ^ (~e0 & g0))
-      + k384_512[i]
+      + Hacl_Hash_Core_SHA2_Constants_k384_512[i]
       + w;
     uint64_t
     t2 =
@@ -1982,7 +1982,7 @@ void Hacl_Hash_Core_SHA2_update_512(uint64_t *hash1, uint8_t *block)
           ((e0 >> (uint32_t)18U | e0 << (uint32_t)46U)
           ^ (e0 >> (uint32_t)41U | e0 << (uint32_t)23U)))
       + ((e0 & f0) ^ (~e0 & g0))
-      + k384_512[i]
+      + Hacl_Hash_Core_SHA2_Constants_k384_512[i]
       + w;
     uint64_t
     t2 =
@@ -2170,8 +2170,8 @@ void Hacl_Hash_Core_SHA2_finish_512(uint64_t *s, uint8_t *dst)
   }
 }
 
-static uint32_t
-k224_256[64U] =
+uint32_t
+Hacl_Hash_Core_SHA2_Constants_k224_256[64U] =
   {
     (uint32_t)0x428a2f98U, (uint32_t)0x71374491U, (uint32_t)0xb5c0fbcfU, (uint32_t)0xe9b5dba5U,
     (uint32_t)0x3956c25bU, (uint32_t)0x59f111f1U, (uint32_t)0x923f82a4U, (uint32_t)0xab1c5ed5U,
@@ -2191,8 +2191,8 @@ k224_256[64U] =
     (uint32_t)0x90befffaU, (uint32_t)0xa4506cebU, (uint32_t)0xbef9a3f7U, (uint32_t)0xc67178f2U
   };
 
-static uint64_t
-k384_512[80U] =
+uint64_t
+Hacl_Hash_Core_SHA2_Constants_k384_512[80U] =
   {
     (uint64_t)0x428a2f98d728ae22U, (uint64_t)0x7137449123ef65cdU, (uint64_t)0xb5c0fbcfec4d3b2fU,
     (uint64_t)0xe9b5dba58189dbbcU, (uint64_t)0x3956c25bf348b538U, (uint64_t)0x59f111f1b605d019U,

@@ -162,7 +162,7 @@ chacha20_init_256(Lib_IntVector_Intrinsics_vec256 *ctx, uint8_t *k, uint8_t *n1,
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
   {
     uint32_t *os = uu____0;
-    uint32_t x = chacha20_constants[i];
+    uint32_t x = Hacl_Impl_Chacha20_Vec_chacha20_constants[i];
     os[i] = x;
   }
   uint32_t *uu____1 = ctx1 + (uint32_t)4U;

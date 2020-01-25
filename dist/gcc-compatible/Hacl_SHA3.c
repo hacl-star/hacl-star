@@ -24,8 +24,8 @@
 
 #include "Hacl_SHA3.h"
 
-static uint32_t
-keccak_rotc[24U] =
+uint32_t
+Hacl_Impl_SHA3_keccak_rotc[24U] =
   {
     (uint32_t)1U, (uint32_t)3U, (uint32_t)6U, (uint32_t)10U, (uint32_t)15U, (uint32_t)21U,
     (uint32_t)28U, (uint32_t)36U, (uint32_t)45U, (uint32_t)55U, (uint32_t)2U, (uint32_t)14U,
@@ -33,8 +33,8 @@ keccak_rotc[24U] =
     (uint32_t)62U, (uint32_t)18U, (uint32_t)39U, (uint32_t)61U, (uint32_t)20U, (uint32_t)44U
   };
 
-static uint32_t
-keccak_piln[24U] =
+uint32_t
+Hacl_Impl_SHA3_keccak_piln[24U] =
   {
     (uint32_t)10U, (uint32_t)7U, (uint32_t)11U, (uint32_t)17U, (uint32_t)18U, (uint32_t)3U,
     (uint32_t)5U, (uint32_t)16U, (uint32_t)8U, (uint32_t)21U, (uint32_t)24U, (uint32_t)4U,
@@ -42,8 +42,8 @@ keccak_piln[24U] =
     (uint32_t)20U, (uint32_t)14U, (uint32_t)22U, (uint32_t)9U, (uint32_t)6U, (uint32_t)1U
   };
 
-static uint64_t
-keccak_rndc[24U] =
+uint64_t
+Hacl_Impl_SHA3_keccak_rndc[24U] =
   {
     (uint64_t)0x0000000000000001U, (uint64_t)0x0000000000008082U, (uint64_t)0x800000000000808aU,
     (uint64_t)0x8000000080008000U, (uint64_t)0x000000000000808bU, (uint64_t)0x0000000080000001U,
@@ -90,8 +90,8 @@ void Hacl_Impl_SHA3_state_permute(uint64_t *s)
     uint64_t b = x;
     for (uint32_t i = (uint32_t)0U; i < (uint32_t)24U; i++)
     {
-      uint32_t _Y = keccak_piln[i];
-      uint32_t r = keccak_rotc[i];
+      uint32_t _Y = Hacl_Impl_SHA3_keccak_piln[i];
+      uint32_t r = Hacl_Impl_SHA3_keccak_rotc[i];
       uint64_t temp = s[_Y];
       s[_Y] = Hacl_Impl_SHA3_rotl(b, r);
       b = temp;
@@ -114,7 +114,7 @@ void Hacl_Impl_SHA3_state_permute(uint64_t *s)
       }
     }
     memset(b1, 0U, (uint32_t)25U * sizeof (b1[0U]));
-    uint64_t c = keccak_rndc[i0];
+    uint64_t c = Hacl_Impl_SHA3_keccak_rndc[i0];
     s[0U] = s[0U] ^ c;
   }
 }

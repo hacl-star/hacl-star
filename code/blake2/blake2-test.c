@@ -27,26 +27,6 @@ static __inline__ cycles cpucycles_end(void)
 
 
 extern void
-Hacl_Blake2s_blake2s(
-  uint32_t nn,
-  uint8_t *output,
-  uint32_t ll,
-  uint8_t *d,
-  uint32_t kk,
-  uint8_t *k
-);
-
-extern void
-Hacl_Blake2b_blake2b(
-  uint32_t nn,
-  uint8_t *output,
-  uint32_t ll,
-  uint8_t *d,
-  uint32_t kk,
-  uint8_t *k
-);
-
-extern void
 Hacl_Blake2s_32_blake2s(
   uint32_t nn,
   uint8_t *output,
@@ -350,83 +330,6 @@ int main()
   uint8_t comp_s[64] = {0};
   uint8_t comp_b[64] = {0};
   bool ok = true;
-  printf("testing blake2s scalar:\n");
-  Hacl_Blake2s_blake2s(32,comp_s,blake2s_test1_size_plaintext,blake2s_test1_plaintext,blake2s_test1_size_key,blake2s_test1_key);
-  printf("computed:");
-  for (int i = 0; i < 32; i++)
-    printf("%02x",comp_s[i]);
-  printf("\n");
-  printf("expected:");
-  for (int i = 0; i < 32; i++)
-    printf("%02x",blake2s_test1_expected[i]);
-  printf("\n");
-  for (int i = 0; i < 32; i++)
-    ok = ok & (blake2s_test1_expected[i] == comp_s[i]);
-  if (ok) printf("Success!\n");
-  else printf("FAILED!\n");
-
-  Hacl_Blake2s_blake2s(32,comp_s,blake2s_test2_size_plaintext,blake2s_test2_plaintext,blake2s_test2_size_key,blake2s_test2_key);
-  printf("computed:");
-  for (int i = 0; i < 32; i++)
-    printf("%02x",comp_s[i]);
-  printf("\n");
-  printf("expected:");
-  for (int i = 0; i < 32; i++)
-    printf("%02x",blake2s_test2_expected[i]);
-  printf("\n");
-  ok = true;
-  for (int i = 0; i < 32; i++)
-    ok = ok & (blake2s_test2_expected[i] == comp_s[i]);
-  if (ok) printf("Success!\n");
-  else printf("FAILED!\n");
-
-  Hacl_Blake2s_blake2s(32,comp_s,blake2s_test3_size_plaintext,blake2s_test3_plaintext,blake2s_test3_size_key,blake2s_test3_key);
-  printf("computed:");
-  for (int i = 0; i < 32; i++)
-    printf("%02x",comp_s[i]);
-  printf("\n");
-  printf("expected:");
-  for (int i = 0; i < 32; i++)
-    printf("%02x",blake2s_test3_expected[i]);
-  printf("\n");
-  ok = true;
-  for (int i = 0; i < 32; i++)
-    ok = ok & (blake2s_test3_expected[i] == comp_s[i]);
-  if (ok) printf("Success!\n");
-  else printf("FAILED!\n");
-
-  Hacl_Blake2s_blake2s(32,comp_s,blake2s_test4_size_plaintext,blake2s_test4_plaintext,blake2s_test4_size_key,blake2s_test4_key);
-  printf("computed:");
-  for (int i = 0; i < 32; i++)
-    printf("%02x",comp_s[i]);
-  printf("\n");
-  printf("expected:");
-  for (int i = 0; i < 32; i++)
-    printf("%02x",blake2s_test4_expected[i]);
-  printf("\n");
-  ok = true;
-  for (int i = 0; i < 32; i++)
-    ok = ok & (blake2s_test4_expected[i] == comp_s[i]);
-  if (ok) printf("Success!\n");
-  else printf("FAILED!\n");
-
-
-  printf("testing blake2b scalar:\n");
-  Hacl_Blake2b_blake2b(64,comp_b,blake2b_test1_size_plaintext,blake2b_test1_plaintext,blake2b_test1_size_key,blake2b_test1_key);
-  printf("computed:");
-  for (int i = 0; i < 64; i++)
-    printf("%02x",comp_b[i]);
-  printf("\n");
-  printf("expected:");
-  for (int i = 0; i < 64; i++)
-    printf("%02x",blake2b_test1_expected[i]);
-  printf("\n");
-  ok = true;
-  for (int i = 0; i < 64; i++)
-    ok = ok & (blake2b_test1_expected[i] == comp_b[i]);
-  if (ok) printf("Success!\n");
-  else printf("FAILED!\n");
-
   printf("testing blake2s vec-32:\n");
   Hacl_Blake2s_32_blake2s(32,comp_s,blake2s_test4_size_plaintext,blake2s_test4_plaintext,blake2s_test4_size_key,blake2s_test4_key);
   printf("computed:");
@@ -498,32 +401,6 @@ int main()
   memset(plain,'P',SIZE);
 
   for (int j = 0; j < ROUNDS; j++) {
-    Hacl_Blake2s_blake2s(32,plain,SIZE,plain,0,NULL);
-  }
-  t1 = clock();
-  a = cpucycles_begin();
-  for (int j = 0; j < ROUNDS; j++) {
-    Hacl_Blake2s_blake2s(32,plain,SIZE,plain,0,NULL);
-  }
-  b = cpucycles_end();
-  t2 = clock();
-  double cdiff1 = b - a;
-  double tdiff1 = (double)(t2 - t1)/CLOCKS_PER_SEC;
-
-  for (int j = 0; j < ROUNDS; j++) {
-    Hacl_Blake2b_blake2b(64,plain,SIZE,plain,0,NULL);
-  }
-  t1 = clock();
-  a = cpucycles_begin();
-  for (int j = 0; j < ROUNDS; j++) {
-    Hacl_Blake2b_blake2b(64,plain,SIZE,plain,0,NULL);
-  }
-  b = cpucycles_end();
-  t2 = clock();
-  double cdiff2 = b - a;
-  double tdiff2 = (double)(t2 - t1)/CLOCKS_PER_SEC;
-
-  for (int j = 0; j < ROUNDS; j++) {
     Hacl_Blake2s_32_blake2s(32,plain,SIZE,plain,0,NULL);
   }
   t1 = clock();
@@ -576,16 +453,6 @@ int main()
   double tdiff6 = (double)(t2 - t1)/CLOCKS_PER_SEC;
 
   uint64_t count = ROUNDS * SIZE;
-  printf("Blake2S (32-bit):\n");
-  printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)cdiff1,(double)cdiff1/count);
-  printf("time for %" PRIu64 " bytes: %" PRIu64 " (%.2fus/byte)\n",count,(uint64_t)tdiff1,(double)tdiff1/count);
-  printf("bw %8.2f MB/s\n",(double)count/(tdiff1 * 1000000.0));
-
-  printf("Blake2B (64-bit):\n");
-  printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)cdiff2,(double)cdiff2/count);
-  printf("time for %" PRIu64 " bytes: %" PRIu64 " (%.2fus/byte)\n",count,(uint64_t)tdiff2,(double)tdiff2/count);
-  printf("bw %8.2f MB/s\n",(double)count/(tdiff2 * 1000000.0));
-
   printf("Blake2S (Vec 32-bit):\n");
   printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)cdiff3,(double)cdiff3/count);
   printf("time for %" PRIu64 " bytes: %" PRIu64 " (%.2fus/byte)\n",count,(uint64_t)tdiff3,(double)tdiff3/count);
