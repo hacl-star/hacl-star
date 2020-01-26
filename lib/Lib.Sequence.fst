@@ -338,6 +338,8 @@ let index_map_blocks #a bs inp f g i =
     end
   else index_map_blocks_multi #a bs nb nb blocks f i
 
+let lemma_map_blocks #a blocksize inp f g = ()
+
 let eq_generate_blocks0 #t len n a f acc0 =
   let a0  = (acc0, (Seq.empty <: s:seq t{length s == 0 * len}))  in
   assert (generate_blocks #t len n 0 a f acc0 ==

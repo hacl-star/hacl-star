@@ -455,7 +455,7 @@ let xor_block_lemma_i #w k b i =
 ///
 ///   let f_v = chacha20_encrypt_block st_v0 in
 ///   let f = Scalar.chacha20_encrypt_block st0 in
-///   map_blocks_vec_equiv_pre_f_v #_ #(length msg) w blocksize (w * blocksize) f f_v i b_v
+///   map_blocks_ctr_vec_equiv_pre #_ #(length msg) w blocksize (w * blocksize) f f_v i b_v
 ///
 
 val encrypt_block_scalar_lemma_i:
@@ -503,7 +503,7 @@ val encrypt_block_lemma_bs_i:
   -> k:key
   -> n:nonce
   -> c0:counter{c0 + w <= max_size_t}
-  -> c:counter{w * (c + 1) <= max_size_t}
+  -> c:counter{w * c <= max_size_t}
   -> b_v:blocks w
   -> j:nat{j < w * blocksize} ->
   Lemma
@@ -526,11 +526,12 @@ let encrypt_block_lemma_bs_i #w k n c0 c b_v j =
 
 val encrypt_block_lemma_i:
     #w:lanes
+  -> #len:nat{len / blocksize <= max_size_t}
   -> k:key
   -> n:nonce
   -> c0:counter{c0 + w <= max_size_t}
   -> b_v:blocks w
-  -> i:size_nat ->
+  -> i:nat{i <= len} ->
   Lemma
   (let st_v0 = chacha20_init #w k n c0 in
    let st0 = Scalar.chacha20_init k n c0 in
@@ -540,7 +541,7 @@ val encrypt_block_lemma_i:
    (chacha20_encrypt_block st_v0 (i / (w * blocksize)) b_v).[j] ==
    (Scalar.chacha20_encrypt_block st0 (i / blocksize) b).[i % blocksize])
 
-let encrypt_block_lemma_i #w k n c0 b_v i =
+let encrypt_block_lemma_i #w #len k n c0 b_v i =
   let st_v0 = chacha20_init #w k n c0 in
   let st0 = Scalar.chacha20_init k n c0 in
 
@@ -555,328 +556,105 @@ let encrypt_block_lemma_i #w k n c0 b_v i =
   Math.Lemmas.modulo_modulo_lemma i blocksize w
 
 
-val map_blocks_vec_equiv_pre_f_v_lemma:
+val map_blocks_ctr_vec_equiv_pre_lemma:
     #w:lanes
   -> k:key
   -> n:nonce
   -> c0:counter{c0 + w <= max_size_t}
-  -> msg:seq uint8{length msg <= max_size_t}
-  -> i:nat{i < length msg / (w * blocksize) * (w * blocksize)}
+  -> msg:seq uint8{length msg / blocksize <= max_size_t}
+  -> i:nat{i <= length msg}
   -> b_v:lseq uint8 (w * blocksize) -> Lemma
   (let st_v0 = chacha20_init #w k n c0 in
    let st0 = Scalar.chacha20_init k n c0 in
 
    let f_v = chacha20_encrypt_block st_v0 in
    let f = Scalar.chacha20_encrypt_block st0 in
-   map_blocks_vec_equiv_pre_f_v #_ #(length msg) w blocksize (w * blocksize) f f_v i b_v)
+   map_blocks_ctr_vec_equiv_pre #_ #(length msg) w blocksize (w * blocksize) f f_v i b_v)
 
-let map_blocks_vec_equiv_pre_f_v_lemma #w k n c0 msg i b_v =
-  let len = length msg in
-  let blocksize_v = w * blocksize in
-
-  lemma_div_bs_v_le len w blocksize;
-  div_mul_lt blocksize i (len / blocksize);
-  div_mul_lt blocksize_v i (len / blocksize_v);
-  encrypt_block_lemma_i #w k n c0 b_v i
-
-
-///
-///  Lemma
-///   let st_v0 = chacha20_init #w k n c0 in
-///   let st0 = Scalar.chacha20_init k n c0 in
-///
-///   let g_v = chacha20_encrypt_last st_v0 in
-///   let f = Scalar.chacha20_encrypt_block st0 in
-///   let g = Scalar.chacha20_encrypt_last st0 in
-///   map_blocks_vec_equiv_pre_g_v #uint8 #(length msg) w blocksize (w * blocksize) f g g_v i b_v)
-///
-
-val update_sub_get_block_lemma:
-    #w:lanes
-  -> len:nat{len < w * blocksize}
-  -> b_v:lseq uint8 len
-  -> j:nat{j < len / blocksize * blocksize} -> Lemma
-  (let blocksize_v = w * blocksize in
-   let plain = create blocksize_v (u8 0) in
-   let plain = update_sub plain 0 len b_v in
-   div_mul_lt blocksize j w;
-   Math.Lemmas.cancel_mul_div w blocksize;
-   get_block_s #uint8 #blocksize_v blocksize plain j ==
-   get_block_s #uint8 #len blocksize b_v j)
-
-let update_sub_get_block_lemma #w len b_v j =
-  let blocksize_v = w * blocksize in
-  let plain = create blocksize_v (u8 0) in
-  let plain = update_sub plain 0 len b_v in
-  assert (slice plain 0 len == b_v);
-  div_mul_lt blocksize j w;
-  Math.Lemmas.cancel_mul_div w blocksize;
-  //assert (j / blocksize < w);
-  //assert (j < blocksize_v / blocksize * blocksize);
-  let b_p = get_block_s #uint8 #blocksize_v blocksize plain j in
-  //assert (j / blocksize * blocksize + blocksize <= len);
-  Seq.Properties.slice_slice plain 0 len (j / blocksize * blocksize) (j / blocksize * blocksize + blocksize);
-  let b = get_block_s #uint8 #len blocksize b_v j in
-  eq_intro b b_p
-
-
-val encrypt_last_lemma_i_f:
-    #w:lanes
-  -> blocksize_v:size_pos{blocksize_v == w * blocksize}
-  -> k:key
-  -> n:nonce
-  -> c0:counter{c0 + w <= max_size_t}
-  -> len:size_nat
-  -> b_v:lseq uint8 (len % blocksize_v)
-  -> i:nat{i % blocksize_v < (len % blocksize_v) / blocksize * blocksize /\
-        len / blocksize_v * blocksize_v <= i /\ i < len} -> Lemma
-  (let st_v0 = chacha20_init #w k n c0 in
-   let st0 = Scalar.chacha20_init k n c0 in
-
-   let j = i % blocksize_v in
-   let rem = len % blocksize_v in
-   let b = get_block_s #uint8 #rem blocksize b_v j in
-   (chacha20_encrypt_last st_v0 (len / blocksize_v) rem b_v).[j] ==
-   (Scalar.chacha20_encrypt_block st0 (i / blocksize) b).[i % blocksize])
-
-let encrypt_last_lemma_i_f #w blocksize_v k n c0 len b_v i =
-  let st_v0 = chacha20_init #w k n c0 in
-  let st0 = Scalar.chacha20_init k n c0 in
-  let j = i % blocksize_v in
-  let rem = len % blocksize_v in
-
-  let plain = create blocksize_v (u8 0) in
-  let plain = update_sub plain 0 rem b_v in
-  let c = i / blocksize_v in
-  div_interval blocksize_v (len / blocksize_v) i;
-  assert (i / blocksize_v == len / blocksize_v);
-  let res = chacha20_encrypt_last st_v0 c rem b_v in
-  assert (res == sub (chacha20_encrypt_block st_v0 c plain) 0 rem);
-  encrypt_block_lemma_i #w k n c0 plain i;
-  Math.Lemmas.multiple_division_lemma w blocksize;
-  let b = get_block_s #uint8 #blocksize_v blocksize plain j in
-  assert ((chacha20_encrypt_block st_v0 c plain).[j] ==
-    (Scalar.chacha20_encrypt_block st0 (i / blocksize) b).[i % blocksize]);
-  update_sub_get_block_lemma #w rem b_v j
-
-
-val update_sub_get_last_lemma:
-    #w:lanes
-  -> len:nat{len < w * blocksize}
-  -> b_v:lseq uint8 len
-  -> j:nat{len / blocksize * blocksize <= j /\ j < len} -> Lemma
-  (let blocksize_v = w * blocksize in
-   let plain = create blocksize_v (u8 0) in
-   let plain = update_sub plain 0 len b_v in
-   div_mul_lt blocksize j w;
-   Math.Lemmas.cancel_mul_div w blocksize;
-
-   let b_last = get_last_s #uint8 #len blocksize b_v in
-   let plain1 = create blocksize (u8 0) in
-   let plain1 = update_sub plain1 0 (len % blocksize) b_last in
-
-   get_block_s #uint8 #blocksize_v blocksize plain j == plain1)
-
-let update_sub_get_last_lemma #w len b_v j =
-  let blocksize_v = w * blocksize in
-  let plain = create blocksize_v (u8 0) in
-  let plain = update_sub plain 0 len b_v in
-  div_mul_lt blocksize j w;
-  Math.Lemmas.cancel_mul_div w blocksize;
-  let lp = get_block_s #uint8 #blocksize_v blocksize plain j in
-  let zeros = create (blocksize_v - len) (u8 0) in
-  Seq.Properties.lemma_split plain len;
-  Seq.Properties.lemma_split (Seq.append b_v zeros) len;
-  eq_intro plain (Seq.append b_v zeros);
-  assert (plain == Seq.append b_v zeros);
-
-  let rem = len % blocksize in
-  let b_last = get_last_s #uint8 #len blocksize b_v in
-  let plain1 = create blocksize (u8 0) in
-  let plain1 = update_sub plain1 0 rem b_last in
-  let zeros_l = create (blocksize - rem) (u8 0) in
-  Seq.Properties.lemma_split plain1 rem;
-  Seq.Properties.lemma_split (Seq.append b_last zeros_l) rem;
-  eq_intro plain1 (Seq.append b_last zeros_l);
-  assert (plain1 == Seq.append b_last zeros_l);
-
-  eq_intro plain1 lp
-
-
-val encrypt_last_lemma_i_g_aux:
-    #w:lanes
-  -> blocksize_v:size_pos{blocksize_v == w * blocksize}
-  -> k:key
-  -> n:nonce
-  -> c0:counter{c0 + w <= max_size_t}
-  -> len:size_nat
-  -> b_v:lseq uint8 (len % blocksize_v)
-  -> i:nat{(len % blocksize_v) / blocksize * blocksize <= i % blocksize_v /\
-         i % blocksize_v < len % blocksize_v /\
-         len / blocksize_v * blocksize_v <= i /\ i < len} ->
-  Lemma
-  (let rem = len % blocksize_v in
-   lemma_mod_bs_v_bs len w blocksize;
-   assert (rem % blocksize == len % blocksize);
-   let plain = create blocksize_v (u8 0) in
-   let plain = update_sub plain 0 rem b_v in
-
-   let st0 = Scalar.chacha20_init k n c0 in
-   let j = i % blocksize_v in
-   Math.Lemmas.multiple_division_lemma w blocksize;
-   let b = get_block_s #_ #blocksize_v blocksize plain j in
-   let b_last = get_last_s #uint8 #rem blocksize b_v in
-   lemma_i_mod_bs_lt w blocksize len i;
-   assert (i % blocksize < rem % blocksize);
-   (Scalar.chacha20_encrypt_block st0 (len / blocksize) b).[i % blocksize] ==
-   (Scalar.chacha20_encrypt_last st0 (len / blocksize) (rem % blocksize) b_last).[i % blocksize])
-
-let encrypt_last_lemma_i_g_aux #w blocksize_v k n c0 len b_v i =
-  let rem = len % blocksize_v in
-  lemma_mod_bs_v_bs len w blocksize;
-  let b_last = get_last_s #uint8 #rem blocksize b_v in
-  let st0 = Scalar.chacha20_init k n c0 in
-  let rp = Scalar.chacha20_encrypt_last st0 (len / blocksize) (rem % blocksize) b_last in
-
-  let plain1 = create blocksize (u8 0) in
-  let plain1 = update_sub plain1 0 (rem % blocksize) b_last in
-  let lp = Scalar.chacha20_encrypt_block st0 (len / blocksize) plain1 in
-  lemma_i_mod_bs_lt w blocksize len i;
-  assert (lp.[i % blocksize] == rp.[i % blocksize]);
-
-  let j = i % blocksize_v in
-  Math.Lemmas.multiple_division_lemma w blocksize;
-  let plain = create blocksize_v (u8 0) in
-  let plain = update_sub plain 0 rem b_v in
-  let b = get_block_s #_ #blocksize_v blocksize plain j in
-
-  update_sub_get_last_lemma #w rem b_v j;
-  assert (plain1 `Seq.equal` b)
-
-
-val lemma_i_div_bs_g: w:pos -> bs:pos -> bs_v:pos{bs_v == w * bs} -> len:nat -> i:nat -> Lemma
-  (requires
-    (len % bs_v) / bs * bs <= i % bs_v /\
-     i % bs_v < len % bs_v /\
-     len / bs_v * bs_v <= i /\ i < len)
-  (ensures i / bs == len / bs)
-
-let lemma_i_div_bs_g w bs bs_v len i =
-  calc (<=) {
-    len / bs * bs;
-    (==) { lemma_i_div_bs w bs len }
-    (w * (len / (w * bs)) + len % (w * bs) / bs) * bs;
-    (==) { Math.Lemmas.distributivity_add_left (w * (len / (w * bs))) (len % (w * bs) / bs) bs }
-    w * (len / (w * bs)) * bs + len % (w * bs) / bs * bs;
-    (==) { Math.Lemmas.paren_mul_right (len / (w * bs)) w bs }
-    len / bs_v * bs_v + len % bs_v / bs * bs;
-    (==) { div_interval bs_v (len / bs_v) i }
-    i / bs_v * bs_v + len % bs_v / bs * bs;
-    (<=) { }
-    i / bs_v * bs_v + i % bs_v;
-    (==) { Math.Lemmas.euclidean_division_definition i bs_v }
-    i;
-  };
-  assert (len / bs * bs <= i);
-  div_interval bs (len / bs) i;
-  assert (i / bs == len / bs)
-
-
-val encrypt_last_lemma_i_g:
-    #w:lanes
-  -> blocksize_v:size_pos{blocksize_v == w * blocksize}
-  -> k:key
-  -> n:nonce
-  -> c0:counter{c0 + w <= max_size_t}
-  -> len:size_nat
-  -> b_v:lseq uint8 (len % blocksize_v)
-  -> i:nat{(len % blocksize_v) / blocksize * blocksize <= i % blocksize_v /\
-          i % blocksize_v < len % blocksize_v /\
-          len / blocksize_v * blocksize_v <= i /\ i < len} -> Lemma
-  (let st_v0 = chacha20_init #w k n c0 in
-   let st0 = Scalar.chacha20_init k n c0 in
-
-   let j = i % blocksize_v in
-   let rem = len % blocksize_v in
-   lemma_mod_bs_v_bs len w blocksize;
-   lemma_i_mod_bs_lt w blocksize len i;
-   let b : lseq uint8 (rem % blocksize) = get_last_s #uint8 #rem blocksize b_v in
-   let rp : lseq uint8 (rem % blocksize) = Scalar.chacha20_encrypt_last st0 (len / blocksize) (rem % blocksize) b in
-   (chacha20_encrypt_last st_v0 (len / blocksize_v) rem b_v).[j] == rp.[i % blocksize])
-
-let encrypt_last_lemma_i_g #w blocksize_v k n c0 len b_v i =
-  let st_v0 = chacha20_init #w k n c0 in
-  let st0 = Scalar.chacha20_init k n c0 in
-  let j = i % blocksize_v in
-  let rem = len % blocksize_v in
-
-  let plain = create blocksize_v (u8 0) in
-  let plain = update_sub plain 0 rem b_v in
-  let c = i / blocksize_v in
-  div_interval blocksize_v (len / blocksize_v) i;
-  assert (i / blocksize_v == len / blocksize_v);
-  let res = chacha20_encrypt_last st_v0 c rem b_v in
-  assert (res == sub (chacha20_encrypt_block st_v0 c plain) 0 rem);
-
-  lemma_i_div_bs_g w blocksize blocksize_v len i;
-  assert (i / blocksize == len / blocksize);
-
-  encrypt_block_lemma_i #w k n c0 plain i;
-  Math.Lemmas.multiple_division_lemma w blocksize;
-  let b_last = get_block_s #_ #blocksize_v blocksize plain j in
-  assert ((chacha20_encrypt_block st_v0 c plain).[j] ==
-    (Scalar.chacha20_encrypt_block st0 (len / blocksize) b_last).[i % blocksize]);
-  encrypt_last_lemma_i_g_aux #w blocksize_v k n c0 len b_v i
-
-
-val map_blocks_vec_equiv_pre_g_v_lemma:
-    #w:lanes
-  -> k:key
-  -> n:nonce
-  -> c0:counter{c0 + w <= max_size_t}
-  -> msg:seq uint8{length msg <= max_size_t}
-  -> i:nat{length msg / (w * blocksize) * (w * blocksize) <= i /\ i < length msg}
-  -> b_v:lseq uint8 (length msg % (w * blocksize)) -> Lemma
-  (let st_v0 = chacha20_init #w k n c0 in
-   let st0 = Scalar.chacha20_init k n c0 in
-
-   let g_v = chacha20_encrypt_last st_v0 in
-   let f = Scalar.chacha20_encrypt_block st0 in
-   let g = Scalar.chacha20_encrypt_last st0 in
-   map_blocks_vec_equiv_pre_g_v #uint8 #(length msg) w blocksize (w * blocksize) f g g_v i b_v)
-
-let map_blocks_vec_equiv_pre_g_v_lemma #w k n c0 msg i b_v =
-  let len = length msg in
-  let blocksize_v = w * blocksize in
-  let rem_v = len % blocksize_v in
-  let rem = len % blocksize in
-  lemma_mod_bs_v_bs len w blocksize;
-  assert (rem_v % blocksize = rem);
-
-  let j = i % blocksize_v in
-  if j < (rem_v / blocksize) * blocksize then
-    encrypt_last_lemma_i_f #w blocksize_v k n c0 len b_v i
-  else begin
-    mod_div_lt blocksize_v i len;
-    assert (i % blocksize_v < len % blocksize_v);
-    lemma_i_mod_bs_lt w blocksize len i;
-    assert (i % blocksize < rem);
-    encrypt_last_lemma_i_g #w blocksize_v k n c0 len b_v i end
+let map_blocks_ctr_vec_equiv_pre_lemma #w k n c0 msg i b_v =
+  encrypt_block_lemma_i #w #(length msg) k n c0 b_v i
 
 ///
 ///  Lemma
 ///    chacha20_encrypt_bytes #w k n c0 msg == Scalar.chacha20_encrypt_bytes k n c0 msg
 ///
 
+val map_blocks_ctr_lemma_vec_aux:
+    #w:lanes
+  -> k:key
+  -> n:nonce
+  -> c0:counter{c0 + w <= max_size_t}
+  -> msg:seq uint8{length msg / blocksize <= max_size_t} ->
+  Lemma (
+    let zero = u8 0 in
+    let blocksize_v = w * blocksize in
+
+    let st_v0 = chacha20_init #w k n c0 in
+    let f_v = chacha20_encrypt_block st_v0 in
+    let g_v = chacha20_encrypt_last st_v0 in
+
+    map_blocks blocksize_v msg f_v g_v `Seq.equal`
+    map_blocks_ctr blocksize_v msg f_v zero)
+
+let map_blocks_ctr_lemma_vec_aux #w k n c0 msg =
+  let zero = u8 0 in
+  let len = length msg in
+  let blocksize_v = w * blocksize in
+  assert (len / blocksize_v <= max_size_t);
+
+  let st_v0 = chacha20_init #w k n c0 in
+  let f_v = chacha20_encrypt_block st_v0 in
+  let g_v = chacha20_encrypt_last st_v0 in
+  let vc = map_blocks blocksize_v msg f_v g_v in
+  let vc1 = map_blocks_ctr blocksize_v msg f_v zero in
+  lemma_map_blocks blocksize_v msg f_v g_v;
+  lemma_map_blocks blocksize_v msg f_v (f_last_ctr #uint8 #len blocksize_v f_v zero);
+  assert (vc == vc1)
+
+
+val map_blocks_ctr_lemma_scalar_aux:
+    k:key
+  -> n:nonce
+  -> c0:counter
+  -> msg:seq uint8{length msg / blocksize <= max_size_t} ->
+  Lemma (
+    let zero = u8 0 in
+    let st0 = Scalar.chacha20_init k n c0 in
+    let f = Scalar.chacha20_encrypt_block st0 in
+    let g = Scalar.chacha20_encrypt_last st0 in
+
+    map_blocks blocksize msg f g `Seq.equal`
+    map_blocks_ctr blocksize msg f zero)
+
+let map_blocks_ctr_lemma_scalar_aux k n c0 msg =
+  let zero = u8 0 in
+  let len = length msg in
+
+  let st0 = Scalar.chacha20_init k n c0 in
+  let f = Scalar.chacha20_encrypt_block st0 in
+  let g = Scalar.chacha20_encrypt_last st0 in
+
+  let sc = map_blocks blocksize msg f g in
+  let sc1 = map_blocks_ctr blocksize msg f zero in
+  lemma_map_blocks blocksize msg f g;
+  lemma_map_blocks blocksize msg f (f_last_ctr #uint8 #len blocksize f zero);
+  assert (sc1 == sc)
+
+
 val lemma_chacha20_vec_equiv:
     #w:lanes
   -> k:key
   -> n:nonce
-  -> c0:counter
-  -> msg:seq uint8{length msg <= max_size_t /\ c0 + w <= max_size_t} ->
+  -> c0:counter{c0 + w <= max_size_t}
+  -> msg:seq uint8{length msg / blocksize <= max_size_t} ->
   Lemma (chacha20_encrypt_bytes #w k n c0 msg `Seq.equal` Scalar.chacha20_encrypt_bytes k n c0 msg)
 
 let lemma_chacha20_vec_equiv #w k n c0 msg =
+  let zero = u8 0 in
+  let len = length msg in
+  let blocksize_v = w * blocksize in
+  assert (len / blocksize_v <= max_size_t);
+
   let st_v0 = chacha20_init #w k n c0 in
   let st0 = Scalar.chacha20_init k n c0 in
 
@@ -886,7 +664,16 @@ let lemma_chacha20_vec_equiv #w k n c0 msg =
   let f = Scalar.chacha20_encrypt_block st0 in
   let g = Scalar.chacha20_encrypt_last st0 in
 
-  Classical.forall_intro_2 (map_blocks_vec_equiv_pre_f_v_lemma #w k n c0 msg);
-  Classical.forall_intro_2 (map_blocks_vec_equiv_pre_g_v_lemma #w k n c0 msg);
+  let sc = map_blocks blocksize msg f g in
+  let sc1 = map_blocks_ctr blocksize msg f zero in
+  map_blocks_ctr_lemma_scalar_aux k n c0 msg;
+  assert (sc1 == sc);
 
-  lemma_map_blocks_vec #uint8 #(length msg) w blocksize msg f g f_v g_v
+  let vc = map_blocks blocksize_v msg f_v g_v in
+  let vc1 = map_blocks_ctr blocksize_v msg f_v zero in
+  map_blocks_ctr_lemma_vec_aux #w k n c0 msg;
+  assert (vc == vc1);
+
+  Classical.forall_intro_2 (map_blocks_ctr_vec_equiv_pre_lemma #w k n c0 msg);
+  lemma_map_blocks_ctr_vec #uint8 #len w blocksize msg f f_v zero;
+  assert (vc1 == sc1)

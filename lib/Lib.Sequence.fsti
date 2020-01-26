@@ -468,6 +468,23 @@ val index_map_blocks:
   )
 
 
+val lemma_map_blocks:
+    #a:Type0
+  -> blocksize:size_pos
+  -> inp:seq a
+  -> f:(block (length inp) blocksize -> lseq a blocksize -> lseq a blocksize)
+  -> g:(last (length inp) blocksize -> rem:size_nat{rem < blocksize} -> s:lseq a rem -> lseq a rem) ->
+  Lemma (
+    let len = length inp in
+    let nb = len / blocksize in
+    let rem = len % blocksize in
+    let blocks = Seq.slice inp 0 (nb * blocksize) in
+    let last = Seq.slice inp (nb * blocksize) len in
+    let bs = map_blocks_multi #a blocksize nb nb blocks f in
+    let br = if (rem > 0) then Seq.append bs (g nb rem last) else bs in
+    br == map_blocks #a blocksize inp f g)
+
+
 val eq_generate_blocks0:
     #t:Type0
   -> len:size_nat

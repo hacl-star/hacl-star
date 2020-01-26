@@ -162,6 +162,71 @@ val lemma_map_blocks_vec:
     map_blocks (w * blocksize) inp f_v g_v `Seq.equal` map_blocks blocksize inp f g)
 
 
+///
+///  Special case of the lemma_map_blocks_vec lemma which is used in the CTR mode
+///
+
+unfold
+let block_ctr (len:nat) (blocksize:size_pos) = i:nat{i <= len / blocksize}
+
+let f_last_ctr (#a:Type0) (#len:nat)
+  (blocksize:size_pos)
+  (f:(block_ctr len blocksize -> lseq a blocksize -> lseq a blocksize))
+  (zero:a)
+  (c:block_ctr len blocksize)
+  (rem:nat{rem < blocksize})
+  (r:lseq a rem) : lseq a rem
+ =
+  let b = create blocksize zero in
+  let b = update_sub b 0 rem r in
+  sub (f c b) 0 rem
+
+let map_blocks_ctr (#a:Type0)
+  (blocksize:size_pos)
+  (inp:seq a{length inp / blocksize <= max_size_t})
+  (f:(block_ctr (length inp) blocksize -> lseq a blocksize -> lseq a blocksize))
+  (zero:a) : out:seq a{length out == length inp}
+ =
+  map_blocks blocksize inp f (f_last_ctr #a #(length inp) blocksize f zero)
+
+
+let map_blocks_ctr_vec_equiv_pre
+  (#a:Type)
+  (#len:nat)
+  (w:size_pos)
+  (blocksize:size_pos)
+  (blocksize_v:size_pos{blocksize_v == w * blocksize})
+  (f:(block_ctr len blocksize -> lseq a blocksize -> lseq a blocksize))
+  (f_v:(block_ctr len blocksize_v -> lseq a blocksize_v -> lseq a blocksize_v))
+  (i:nat{i <= len})
+  (b_v:lseq a blocksize_v)
+  : prop
+=
+  Math.Lemmas.modulo_range_lemma i blocksize_v;
+  Math.Lemmas.multiple_division_lemma w blocksize;
+  let b = get_block_s #_ #blocksize_v blocksize b_v (i % blocksize_v) in
+  Math.Lemmas.lemma_div_le i len blocksize;
+  Math.Lemmas.lemma_div_le i len blocksize_v;
+  (f_v (i / blocksize_v) b_v).[i % blocksize_v] == (f (i / blocksize) b).[i % blocksize]
+
+
+val lemma_map_blocks_ctr_vec:
+     #a:Type
+  -> #len:nat
+  -> w:size_pos
+  -> blocksize:size_pos{w * blocksize <= max_size_t}
+  -> inp:seq a{length inp == len /\ len / blocksize <= max_size_t /\ len / (w * blocksize) <= max_size_t}
+  -> f:(block_ctr len blocksize -> lseq a blocksize -> lseq a blocksize)
+  -> f_v:(block_ctr len (w * blocksize) -> lseq a (w * blocksize) -> lseq a (w * blocksize))
+  -> zero:a ->
+  Lemma
+  (requires
+    (forall (i:nat{i <= len}) (b_v:lseq a (w * blocksize)).
+      map_blocks_ctr_vec_equiv_pre #a #len w blocksize (w * blocksize) f f_v i b_v))
+  (ensures
+    map_blocks_ctr (w * blocksize) inp f_v zero `Seq.equal` map_blocks_ctr blocksize inp f zero)
+
+
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
 val repeati_extensionality:
