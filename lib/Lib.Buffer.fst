@@ -263,7 +263,7 @@ val loopi_blocks_f_nospec:
     (requires fun h -> live h inp /\ live h w /\ disjoint inp w)
     (ensures  fun h0 _ h1 -> modifies (loc w) h0 h1)
 
-#set-options "--z3rlimit 100 --max_fuel 0"
+#set-options "--z3rlimit 200 --max_fuel 0"
 
 let loopi_blocks_f_nospec #a #b #blen bs inpLen inp f nb i w =
   assert ((v i + 1) * v bs <= v nb * v bs);
@@ -325,6 +325,8 @@ let loop_blocks_f #a #b #blen bs inpLen inp spec_f f nb i w =
   let block = sub inp (i *! bs) bs in
   f block w
 
+#set-options "--z3rlimit 400 --max_fuel 1"
+
 let loop_blocks #a #b #blen bs inpLen inp spec_f spec_l f l w =
   let nb = inpLen /. bs in
   let rem = inpLen %. bs in
@@ -338,7 +340,6 @@ let loop_blocks #a #b #blen bs inpLen inp spec_f spec_l f l w =
   let last = sub inp (nb *! bs) rem in
   l rem last w
 
-#set-options "--z3rlimit 400 --max_fuel 1"
 
 let fill_blocks #t h0 len n output a_spec refl footprint spec impl =
   [@inline_let]

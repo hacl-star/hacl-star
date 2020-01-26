@@ -5,10 +5,13 @@
 
 #define Lib_IntVector_Intrinsics_bit_mask64(x) -((x) & 1)
 
-#if defined(__AVX__)
+#if defined(__x86_64__) || defined(_M_X64)
+
+// The following functions are only available on machines that support Intel AVX
 
 #include <emmintrin.h>
 #include <tmmintrin.h>
+#include <smmintrin.h>
 
 typedef __m128i Lib_IntVector_Intrinsics_vec128;
 
@@ -186,13 +189,10 @@ typedef __m128i Lib_IntVector_Intrinsics_vec128;
 #define Lib_IntVector_Intrinsics_vec128_interleave_high64(x1, x2) \
   (_mm_unpackhi_epi64(x1, x2)) 
 
+// The following functions are only available on machines that support Intel AVX2
 
-#if defined(__AVX__)
-
-#include <wmmintrin.h>
-#include <smmintrin.h>
 #include <immintrin.h>
-
+#include <wmmintrin.h>
 
 typedef __m256i Lib_IntVector_Intrinsics_vec256;
 
@@ -365,8 +365,7 @@ typedef __m256i Lib_IntVector_Intrinsics_vec256;
 #define Lib_IntVector_Intrinsics_vec256_interleave_high128(x1, x2) \
   (_mm256_permute2x128_si256(x1, x2, 0x31)) 
 
-#endif
-#elif defined(__ARM_NEON__) || defined(__ARM_NEON)
+#elif defined(__aarch64__) || defined(_M_ARM64) || defined(__arm__) || defined(_M_ARM)
 #include <arm_neon.h>
 
 typedef uint32x4_t Lib_IntVector_Intrinsics_vec128;
