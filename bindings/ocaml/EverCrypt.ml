@@ -52,8 +52,8 @@ module Error = struct
     | AuthenticationFailure
     | InvalidIVLength
     | DecodeError
-  type result =
-    | Success
+  type 'a result =
+    | Success of 'a
     | Error of error_code
   let error n =
     let err = match n with
@@ -66,7 +66,7 @@ module Error = struct
     in
     Error err
   let get_result r = match UInt8.to_int r with
-    | 0 -> Success
+    | 0 -> Success ()
     | n -> error n
 end
 
@@ -79,10 +79,7 @@ module AEAD = struct
     | AES128_GCM
     | AES256_GCM
     | CHACHA20_POLY1305
-  type result_init =
-    | Success of t
-    | Err of int
-  let init alg key : result_init =
+  let init alg key : t result =
     let st = allocate (ptr everCrypt_AEAD_state_s) (from_voidp everCrypt_AEAD_state_s null) in
     let alg = match alg with
       | AES128_GCM -> spec_Agile_AEAD_alg_Spec_Agile_AEAD_AES128_GCM
@@ -92,12 +89,12 @@ module AEAD = struct
     match UInt8.to_int
             (everCrypt_AEAD_create_in alg st (uint8_ptr key)) with
     | 0 -> Success st
-    | n -> Err n
-  let encrypt st iv ad pt ct tag : result =
+    | n -> error n
+  let encrypt st iv ad pt ct tag : unit result =
     get_result (everCrypt_AEAD_encrypt (!@st)
                   (uint8_ptr iv) (size_uint32 iv) (uint8_ptr ad) (size_uint32 ad)
                   (uint8_ptr pt) (size_uint32 pt) (uint8_ptr ct) (uint8_ptr tag))
-  let decrypt st iv ad ct tag dt : result =
+  let decrypt st iv ad ct tag dt : unit result =
     get_result (everCrypt_AEAD_decrypt (!@st)
                   (uint8_ptr iv) (size_uint32 iv) (uint8_ptr ad) (size_uint32 ad)
                   (uint8_ptr ct) (size_uint32 ct) (uint8_ptr tag) (uint8_ptr dt))

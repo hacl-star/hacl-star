@@ -41,7 +41,7 @@ let test_agile (v: aead_test) =
   match init v.alg v.test_key with
   | Success st -> begin
       match encrypt st v.test_iv v.test_ad v.test_pt ct tag with
-      | Success -> begin
+      | Success () -> begin
           if Bigstring.compare tag v.test_tag = 0 && Bigstring.compare ct v.test_ct = 0 then
             print_result "Encryption success"
           else
@@ -49,16 +49,16 @@ let test_agile (v: aead_test) =
           let dt = Bigstring.create v.msg_len in
           Bigstring.fill dt '\x00';
           match decrypt st v.test_iv v.test_ad ct v.test_tag dt with
-          | Success ->
+          | Success () ->
             if Bigstring.compare v.test_pt dt = 0 then
               print_result "Decryption success"
             else
               print_result "Failure: decrypted and plaintext do not match"
-          | Error err -> print_result (Printf.sprintf "Decryption error %s" (print_error err))
+          | Error err -> print_result (Printf.sprintf "Decryption error: %s" (print_error err))
         end
-      | Error err -> print_result (Printf.sprintf "Encryption error %s" (print_error err))
+      | Error err -> print_result (Printf.sprintf "Encryption error: %s" (print_error err))
     end
-  | Err n -> print_result (Printf.sprintf "Init error %d" n)
+  | Error err -> print_result (Printf.sprintf "Init error: %s" (print_error err))
 
 
 let test_nonagile (v: aead_test) t encrypt decrypt =

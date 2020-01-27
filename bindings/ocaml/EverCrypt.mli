@@ -40,8 +40,8 @@ module Error : sig
     | AuthenticationFailure
     | InvalidIVLength
     | DecodeError
-  type result =
-    | Success
+  type 'a result =
+    | Success of 'a
     | Error of error_code
 end
 
@@ -51,12 +51,9 @@ module AEAD : sig
     | AES128_GCM
     | AES256_GCM
     | CHACHA20_POLY1305
-  type result_init =
-    | Success of t
-    | Err of int
-  val init : alg -> Bigstring.t -> result_init
-  val encrypt : t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> Error.result
-  val decrypt : t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> Error.result
+  val init : alg -> Bigstring.t -> t Error.result
+  val encrypt : t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> unit Error.result
+  val decrypt : t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> unit Error.result
 end
 
 module Chacha20_Poly1305 : Chacha20_Poly1305
