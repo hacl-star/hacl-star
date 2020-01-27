@@ -47,28 +47,6 @@ let toUint64ChangeEndian i o =
   changeEndian o
 
 
-val toUint64: i: lbuffer uint8 (32ul) -> o: felem -> Stack unit
-  (requires fun h -> live h i /\ live h o /\ disjoint i o)
-  (ensures fun h0 _ h1 -> 
-    modifies (loc o) h0 h1 /\ 
-    as_seq h1 o == Lib.ByteSequence.uints_from_bytes_le (as_seq h0 i)
-  )
-
-let toUint64 i o = 
-  Lib.ByteBuffer.uints_from_bytes_le o i
-
-
-val toUint8: i: felem ->  o: lbuffer uint8 (32ul) -> Stack unit
-  (requires fun h -> live h i /\ live h o /\ disjoint i o)
-  (ensures fun h0 _ h1 -> 
-    modifies (loc o) h0 h1 /\ 
-    as_seq h1 o == Lib.ByteSequence.uints_to_bytes_le #_ #_ #4 (as_seq h0 i)
-  )
-
-let toUint8 i o = 
-  Lib.ByteBuffer.uints_to_bytes_le (size 4) o i
-
-
 val lemma_core_0: a: lbuffer uint64 (size 4) -> h: mem -> Lemma (nat_from_intseq_le (as_seq h a) == as_nat h a)
 
 let lemma_core_0 a h = 

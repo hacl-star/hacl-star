@@ -127,10 +127,9 @@ let isPointAtInfinityPrivate p =
      eq_mask_lemma z2 (u64 0);
      eq_mask_lemma z3 (u64 0);   
   let r = logand(logand z0_zero z1_zero) (logand z2_zero z3_zero) in 
-
     lemma_pointAtInfInDomain (as_nat h0 (gsub p (size 0) (size 4))) (as_nat h0 (gsub p (size 4) (size 4))) (as_nat h0 (gsub p (size 8) (size 4)));
-
   r
+
 
 [@ CInline]
 val cswap: bit:uint64{v bit <= 1} -> p:point -> q:point
@@ -869,3 +868,24 @@ let isPointOnCurvePublic p =
      pop_frame();
      z
 
+
+let ecp256dh result scalar = 
+  push_frame();
+    let tempBuffer = create (size 100) (u64 0) in 
+    let resultBuffer = create (size 12) (u64 0) in
+    let resultBufferX = sub resultBuffer (size 0) (size 4) in 
+    let resultBufferY = sub resultBuffer (size 4) (size 4) in 
+    
+    let resultX = sub result (size 0) (size 32) in 
+    let resultY = sub result (size 32) (size 32) in 
+
+    secretToPublic resultBuffer scalar tempBuffer; 
+    let flag = isPointAtInfinityPrivate resultBuffer in 
+  let h2 = ST.get() in
+    toUint8 resultBufferX resultX;
+      Hacl.Impl.ECDSA.P256SHA256.Common.lemma_core_1 resultBufferX h2;
+      Hacl.Impl.ECDSA.P256SHA256.Common.lemma_core_1 resultBufferY h2;
+    toUint8 resultBufferY resultY;
+  pop_frame();
+    flag
+  

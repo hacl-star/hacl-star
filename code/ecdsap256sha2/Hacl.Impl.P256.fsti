@@ -79,17 +79,19 @@ val pointFromDomain: p: point -> result: point-> Stack unit
 
 val isPointAtInfinityPrivate: p: point -> Stack uint64
   (requires fun h -> live h p /\ as_nat h (gsub p (size 8) (size 4)) < prime)
-  (ensures fun h0 r h1 -> modifies0 h0 h1 /\          
+  (ensures fun h0 r h1 -> modifies0 h0 h1 /\      
     (
       (uint_v r == 0 \/ uint_v r == maxint U64) /\ 
       (
-	let x = fromDomain_(as_nat h0 (gsub p (size 0) (size 4))) in 
-	let y = fromDomain_(as_nat h0 (gsub p (size 4) (size 4))) in 
-	let z = fromDomain_(as_nat h0 (gsub p (size 8) (size 4))) in 
-	let rr =  Hacl.Spec.P256.isPointAtInfinity (x, y, z) in 
-	if uint_v r = 0 then rr = false else rr = true))
-    )
-
+	let x, y, z = fromDomainPoint(point_prime_to_coordinates (as_seq h0 p)) in 
+	if Hacl.Spec.P256.isPointAtInfinity (x, y, z) then uint_v r = maxint U64 else uint_v r = 0
+      ) /\
+      (
+	let x, y, z = point_prime_to_coordinates (as_seq h0 p) in 
+	if Hacl.Spec.P256.isPointAtInfinity (x, y, z) then uint_v r = maxint U64 else uint_v r = 0
+      )
+   )
+  )
 
 val norm: p: point -> resultPoint: point -> tempBuffer: lbuffer uint64 (size 88) -> Stack unit
   (requires fun h -> live h p /\ live h resultPoint /\ live h tempBuffer /\ disjoint p tempBuffer /\ disjoint tempBuffer resultPoint /\ 
@@ -225,9 +227,7 @@ val isPointAtInfinityPublic: p: point -> Stack bool
   (requires fun h -> live h p)
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\ 
     (
-      let x = as_nat h0 (gsub p (size 0) (size 4)) in 
-      let y = as_nat h0 (gsub p (size 4) (size 4)) in 
-      let z = as_nat h0 (gsub p (size 8) (size 4)) in 
+      let x, y, z = point_prime_to_coordinates (as_seq h0 p) in 
       r == Hacl.Spec.P256.isPointAtInfinity (x, y, z)
     )
   ) 
@@ -252,3 +252,22 @@ val isPointOnCurvePublic: p: point -> Stack bool
       as_nat h1 (gsub p (size 0) (size 4)), as_nat h1 (gsub p (size 4) (size 4)), as_nat h1 (gsub p (size 8) (size 4))
   ) 
 )
+
+
+(* un clé privée d (un nombre entier choisi de manière aléatoire dans l'intervalle  [1,n-1] *) 
+val ecp256dh: result: lbuffer uint8 (size 64) -> scalar: lbuffer uint8 (size 32) -> Stack uint64
+  (requires fun h -> live h result /\ live h scalar /\ disjoint result scalar /\
+    Lib.ByteSequence.nat_from_bytes_le (as_seq h scalar) >= 1 /\
+    Lib.ByteSequence.nat_from_bytes_le (as_seq h scalar) < Hacl.Spec.ECDSAP256.Definition.prime_p256_order
+  
+  )
+  (ensures fun h0 r h1 -> modifies (loc result) h0 h1 /\
+    (
+      let xN, yN, zN = secret_to_public (as_seq h0 scalar) in 
+      let resultX = gsub result (size 0) (size 32) in 
+      let resultY = gsub result (size 32) (size 32) in 
+      if isPointAtInfinity (xN, yN, zN) then uint_v r = maxint U64 else uint_v r = 0 /\
+      Lib.ByteSequence.nat_from_bytes_le (as_seq h1 resultX) == xN /\
+      Lib.ByteSequence.nat_from_bytes_le (as_seq h1 resultY) == yN
+    )  
+  )
