@@ -39,3 +39,26 @@ module Make_Curve25519 (Impl : sig
   let scalarmult shared my_priv their_pub = Impl.scalarmult (uint8_ptr shared) (uint8_ptr my_priv) (uint8_ptr their_pub)
   let ecdh shared my_priv their_pub = Impl.ecdh (uint8_ptr shared) (uint8_ptr my_priv) (uint8_ptr their_pub)
 end
+
+module type EdDSA = sig
+  val secret_to_public : Bigstring.t -> Bigstring.t -> unit
+  val sign : Bigstring.t -> Bigstring.t -> Bigstring.t -> unit
+  val verify : Bigstring.t -> Bigstring.t -> Bigstring.t -> bool
+  val expand_keys : Bigstring.t -> Bigstring.t -> unit
+  val sign_expanded : Bigstring.t -> Bigstring.t -> Bigstring.t -> unit
+end
+
+module Make_EdDSA (Impl : sig
+  val secret_to_public : uint8 ptr -> uint8 ptr -> unit
+  val sign : uint8 ptr -> uint8 ptr -> uint32 -> uint8 ptr -> unit
+  val verify : uint8 ptr ->uint32 -> uint8 ptr -> uint8 ptr -> bool
+  val expand_keys : uint8 ptr -> uint8 ptr -> unit
+  val sign_expanded : uint8 ptr -> uint8 ptr -> uint32 -> uint8 ptr -> unit
+  end)
+= struct
+  let secret_to_public pub priv = Impl.secret_to_public (uint8_ptr pub) (uint8_ptr priv)
+  let sign signature priv msg = Impl.sign (uint8_ptr signature) (uint8_ptr priv) (size_uint32 msg) (uint8_ptr msg)
+  let verify pub msg signature = Impl.verify (uint8_ptr pub) (size_uint32 msg) (uint8_ptr msg) (uint8_ptr signature)
+  let expand_keys ks priv = Impl.expand_keys (uint8_ptr ks) (uint8_ptr priv)
+  let sign_expanded signature ks msg = Impl.sign_expanded (uint8_ptr signature) (uint8_ptr ks) (size_uint32 msg) (uint8_ptr msg)
+end

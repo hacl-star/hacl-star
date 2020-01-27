@@ -16,3 +16,5 @@ module Curve25519_51_Internal : sig
   val fsub : Bigstring.t -> Bigstring.t -> Bigstring.t -> unit
   val fmul1 : Bigstring.t -> Bigstring.t -> uint64 -> unit
 end
+
+module Ed25519 : EdDSA

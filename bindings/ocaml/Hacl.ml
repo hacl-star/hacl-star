@@ -7,6 +7,7 @@ module Hacl_Chacha20Poly1305_256 = Hacl_Chacha20Poly1305_256_bindings.Bindings(H
 module Hacl_Curve25519_51 = Hacl_Curve25519_51_bindings.Bindings(Hacl_Curve25519_51_stubs)
 module Hacl_Curve25519_64 = Hacl_Curve25519_64_bindings.Bindings(Hacl_Curve25519_64_stubs)
 module Hacl_Curve25519_64_Slow = Hacl_Curve25519_64_Slow_bindings.Bindings(Hacl_Curve25519_64_Slow_stubs)
+module Hacl_Ed25519 = Hacl_Ed25519_bindings.Bindings(Hacl_Ed25519_stubs)
 
 
 module Chacha20_Poly1305_32 : Chacha20_Poly1305 =
@@ -54,3 +55,12 @@ module Curve25519_51_Internal = struct
   let fsub out f1 f2 = Hacl_Curve25519_51.hacl_Impl_Curve25519_Field51_fsub (uint64_ptr out) (uint64_ptr f1) (uint64_ptr f2)
   let fmul1 out f1 f2 = Hacl_Curve25519_51.hacl_Impl_Curve25519_Field51_fmul1 (uint64_ptr out) (uint64_ptr f1) f2
 end
+
+module Ed25519 : EdDSA =
+  Make_EdDSA (struct
+  let secret_to_public = Hacl_Ed25519.hacl_Ed25519_secret_to_public
+  let sign = Hacl_Ed25519.hacl_Ed25519_sign
+  let verify = Hacl_Ed25519.hacl_Ed25519_verify
+  let expand_keys = Hacl_Ed25519.hacl_Ed25519_expand_keys
+  let sign_expanded = Hacl_Ed25519.hacl_Ed25519_sign_expanded
+  end)
