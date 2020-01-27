@@ -62,3 +62,14 @@ module Make_EdDSA (Impl : sig
   let expand_keys ks priv = Impl.expand_keys (uint8_ptr ks) (uint8_ptr priv)
   let sign_expanded signature ks msg = Impl.sign_expanded (uint8_ptr signature) (uint8_ptr ks) (size_uint32 msg) (uint8_ptr msg)
 end
+
+module type Hash = sig
+  val hash : Bigstring.t -> Bigstring.t -> unit
+end
+
+module Make_Hash (Impl : sig
+    val hash : uint8 ptr -> uint32 -> uint8 ptr -> unit
+  end)
+= struct
+  let hash input output = Impl.hash (uint8_ptr input) (size_uint32 input) (uint8_ptr output)
+end

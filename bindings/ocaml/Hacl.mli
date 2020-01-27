@@ -18,3 +18,14 @@ module Curve25519_51_Internal : sig
 end
 
 module Ed25519 : EdDSA
+
+module SHA2_224 : Hash
+module SHA2_256 : Hash
+module SHA2_384 : Hash
+module SHA2_512 : Hash
+
+(* TODO: SHAKE *)
+module SHA3_224 : Hash
+module SHA3_256 : Hash
+module SHA3_384 : Hash
+module SHA3_512 : Hash

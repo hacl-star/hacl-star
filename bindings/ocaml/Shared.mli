@@ -38,3 +38,11 @@ module Make_EdDSA (Impl : sig
   val expand_keys : uint8 ptr -> uint8 ptr -> unit
   val sign_expanded : uint8 ptr -> uint8 ptr -> uint32 -> uint8 ptr -> unit
   end) : EdDSA
+
+module type Hash = sig
+  val hash : Bigstring.t -> Bigstring.t -> unit
+end
+
+module Make_Hash (Impl : sig
+    val hash : uint8 ptr -> uint32 -> uint8 ptr -> unit
+  end) : Hash

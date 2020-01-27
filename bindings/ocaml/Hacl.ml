@@ -1,6 +1,7 @@
 open Utils
 open Shared
 
+
 module Hacl_Chacha20Poly1305_32 = Hacl_Chacha20Poly1305_32_bindings.Bindings(Hacl_Chacha20Poly1305_32_stubs)
 module Hacl_Chacha20Poly1305_128 = Hacl_Chacha20Poly1305_128_bindings.Bindings(Hacl_Chacha20Poly1305_128_stubs)
 module Hacl_Chacha20Poly1305_256 = Hacl_Chacha20Poly1305_256_bindings.Bindings(Hacl_Chacha20Poly1305_256_stubs)
@@ -8,6 +9,8 @@ module Hacl_Curve25519_51 = Hacl_Curve25519_51_bindings.Bindings(Hacl_Curve25519
 module Hacl_Curve25519_64 = Hacl_Curve25519_64_bindings.Bindings(Hacl_Curve25519_64_stubs)
 module Hacl_Curve25519_64_Slow = Hacl_Curve25519_64_Slow_bindings.Bindings(Hacl_Curve25519_64_Slow_stubs)
 module Hacl_Ed25519 = Hacl_Ed25519_bindings.Bindings(Hacl_Ed25519_stubs)
+module Hacl_Hash = Hacl_Hash_bindings.Bindings(Hacl_Hash_stubs)
+module Hacl_SHA3 = Hacl_SHA3_bindings.Bindings(Hacl_SHA3_stubs)
 
 
 module Chacha20_Poly1305_32 : Chacha20_Poly1305 =
@@ -64,3 +67,43 @@ module Ed25519 : EdDSA =
   let expand_keys = Hacl_Ed25519.hacl_Ed25519_expand_keys
   let sign_expanded = Hacl_Ed25519.hacl_Ed25519_sign_expanded
   end)
+
+module SHA2_224 : Hash =
+  Make_Hash (struct
+    let hash = Hacl_Hash.hacl_Hash_SHA2_hash_224
+end)
+
+module SHA2_256 : Hash =
+  Make_Hash (struct
+    let hash = Hacl_Hash.hacl_Hash_SHA2_hash_256
+end)
+
+module SHA2_384 : Hash =
+  Make_Hash (struct
+    let hash = Hacl_Hash.hacl_Hash_SHA2_hash_384
+end)
+
+module SHA2_512 : Hash =
+  Make_Hash (struct
+    let hash = Hacl_Hash.hacl_Hash_SHA2_hash_512
+end)
+
+module SHA3_224 : Hash =
+  Make_Hash (struct
+    let hash input input_len output = Hacl_SHA3.hacl_SHA3_sha3_224 input_len input output
+end)
+
+module SHA3_256 : Hash =
+  Make_Hash (struct
+    let hash input input_len output = Hacl_SHA3.hacl_SHA3_sha3_256 input_len input output
+end)
+
+module SHA3_384 : Hash =
+  Make_Hash (struct
+    let hash input input_len output = Hacl_SHA3.hacl_SHA3_sha3_384 input_len input output
+end)
+
+module SHA3_512 : Hash =
+  Make_Hash (struct
+    let hash input input_len output = Hacl_SHA3.hacl_SHA3_sha3_512 input_len input output
+end)

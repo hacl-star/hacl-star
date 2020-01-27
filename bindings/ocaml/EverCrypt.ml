@@ -8,6 +8,7 @@ module EverCrypt_AutoConfig2 = EverCrypt_AutoConfig2_bindings.Bindings(EverCrypt
 module EverCrypt_AEAD = EverCrypt_AEAD_bindings.Bindings(EverCrypt_AEAD_stubs)
 module EverCrypt_Chacha20Poly1305 = EverCrypt_Chacha20Poly1305_bindings.Bindings(EverCrypt_Chacha20Poly1305_stubs)
 module EverCrypt_Curve25519 = EverCrypt_Curve25519_bindings.Bindings(EverCrypt_Curve25519_stubs)
+module EverCrypt_Hash = EverCrypt_Hash_bindings.Bindings(EverCrypt_Hash_stubs)
 
 
 module AutoConfig2 = struct
@@ -114,3 +115,43 @@ module Curve25519 : Curve25519 =
     let scalarmult = EverCrypt_Curve25519.everCrypt_Curve25519_scalarmult
     let ecdh = EverCrypt_Curve25519.everCrypt_Curve25519_ecdh
   end)
+
+module Hash = struct
+  open EverCrypt_Hash
+
+  type t = everCrypt_Hash_Incremental_state_s ptr
+  type alg =
+    | SHA2_224
+    | SHA2_256
+    | SHA2_384
+    | SHA2_512
+  let alg_definition = function
+    | SHA2_224 -> spec_Hash_Definitions_hash_alg_Spec_Hash_Definitions_SHA2_224
+    | SHA2_256 -> spec_Hash_Definitions_hash_alg_Spec_Hash_Definitions_SHA2_256
+    | SHA2_384 -> spec_Hash_Definitions_hash_alg_Spec_Hash_Definitions_SHA2_384
+    | SHA2_512 -> spec_Hash_Definitions_hash_alg_Spec_Hash_Definitions_SHA2_512
+  let init alg =
+    let alg = alg_definition alg in
+    let st = everCrypt_Hash_Incremental_create_in alg in
+    everCrypt_Hash_Incremental_init st;
+    st
+  let update st data =
+    everCrypt_Hash_Incremental_update st (uint8_ptr data) (size_uint32 data)
+  let finish st dst =
+    everCrypt_Hash_Incremental_finish st (uint8_ptr dst)
+  let free st =
+    everCrypt_Hash_Incremental_free st
+  let hash alg dst input =
+    everCrypt_Hash_hash (alg_definition alg) (uint8_ptr dst) (uint8_ptr input) (size_uint32 input)
+end
+
+module SHA2_224 : Hash =
+  Make_Hash (struct
+    let hash = EverCrypt_Hash.everCrypt_Hash_hash_224
+end)
+
+module SHA2_256 : Hash =
+  Make_Hash (struct
+    let hash = EverCrypt_Hash.everCrypt_Hash_hash_256
+end)
+

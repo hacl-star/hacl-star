@@ -62,3 +62,21 @@ end
 module Chacha20_Poly1305 : Chacha20_Poly1305
 
 module Curve25519 : Curve25519
+
+module Hash : sig
+  type t
+  type alg =
+    | SHA2_224
+    | SHA2_256
+    | SHA2_384
+    | SHA2_512
+  val init : alg -> t
+  val update : t -> Bigstring.t -> unit
+  val finish : t -> Bigstring.t -> unit
+  val free : t -> unit
+  val hash : alg -> Bigstring.t -> Bigstring.t -> unit
+end
+
+module SHA2_224 : Hash
+
+module SHA2_256 : Hash
