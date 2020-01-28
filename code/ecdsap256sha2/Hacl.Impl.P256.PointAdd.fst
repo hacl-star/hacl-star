@@ -384,8 +384,8 @@ let point_add_if_second_branch_impl result p q u1 u2 s1 s2 r h uh hCube tempBuff
   assert_norm (modp_inv2 (pow2 256) > 0);
   assert_norm (modp_inv2 (pow2 256) % prime <> 0); 
 
-  lemma_multiplication_not_mod_prime (as_nat h0 pZ) (modp_inv2 (pow2 256));
-  lemma_multiplication_not_mod_prime (as_nat h0 qZ) (modp_inv2 (pow2 256));
+  lemma_multiplication_not_mod_prime (as_nat h0 pZ);
+  lemma_multiplication_not_mod_prime (as_nat h0 qZ);
   lemmaFromDomain (as_nat h0 pZ);
   lemmaFromDomain (as_nat h0 qZ)
 

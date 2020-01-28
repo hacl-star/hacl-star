@@ -102,18 +102,18 @@ val lemma_pointAtInfInDomain: x: nat -> y: nat -> z: nat {z < prime256} ->
   Lemma (isPointAtInfinity (x, y, z) == isPointAtInfinity ((fromDomain_ x), (fromDomain_ y), (fromDomain_ z)))
 
 let lemma_pointAtInfInDomain x y z =
-  assert(if isPointAtInfinity (x, y, z) then z == 0 else z <> 0);
+  assert (if isPointAtInfinity (x, y, z) then z == 0 else z <> 0);
   assert_norm (modp_inv2 (pow2 256) % prime256 <> 0);
   lemmaFromDomain z;
-  assert(fromDomain_ z == (z * modp_inv2 (pow2 256) % prime256));
-  assert_norm((0 * modp_inv2 (pow2 256)) % prime256 == 0);
-  assert(if z = 0 then (z * modp_inv2 (pow2 256)) % prime256  == 0 else 
-    begin   lemma_multiplication_not_mod_prime z (modp_inv2 (pow2 256)); 
-    fromDomain_ z <> 0 end)
+  assert (fromDomain_ z == (z * modp_inv2 (pow2 256) % prime256));
+  assert_norm (0 * modp_inv2 (pow2 256) % prime256 == 0);
+  lemma_multiplication_not_mod_prime z;
+  assert (if z = 0 then z * modp_inv2 (pow2 256) % prime256 == 0
+                   else fromDomain_ z <> 0)
 
 
 let isPointAtInfinityPrivate p =  
-    let h0 = ST.get() in 
+  let h0 = ST.get() in
   let z0 = index p (size 8) in 
   let z1 = index p (size 9) in 
   let z2 = index p (size 10) in 
@@ -541,13 +541,9 @@ let lemma_pif_to_domain h p =
   lemmaFromDomain x;
   lemmaFromDomain y;
   lemmaFromDomain z;
-  assert_norm (modp_inv2 (pow2 256) % prime256 <> 0);
-  assert_norm (modp_inv2 (pow2 256) > 0);
-  lemma_multiplication_not_mod_prime x (modp_inv2 (pow2 256)); 
-  assert_norm(pow2 256 > 0);
-  assert_norm (modp_inv2 (pow2 256) > 0);
-  lemma_multiplication_not_mod_prime y (modp_inv2 (pow2 256));
-  lemma_multiplication_not_mod_prime z (modp_inv2 (pow2 256))
+  lemma_multiplication_not_mod_prime x; 
+  lemma_multiplication_not_mod_prime y;
+  lemma_multiplication_not_mod_prime z
 
 
 val lemma_coord: h3: mem -> q: point -> Lemma (

@@ -477,22 +477,6 @@ let lemma_minus_distr a b =
   lemma_mod_add_distr (- b) a prime256
 
 
-val lemma_multiplication_not_mod_prime: a: nat{a < prime256} -> b: nat {b > 0 /\ b % prime256 <> 0} -> 
-  Lemma ((a * b) % prime256 == 0 <==> a == 0)
-
-let lemma_multiplication_not_mod_prime a b = admit()
-
-(*If k a ≡ k b (mod n) and k is coprime with n, then a ≡ b (mod n) *)
-
-val lemma_modular_multiplication_p256: a: nat{a < prime256} -> b: nat{b < prime256} -> 
-  Lemma 
-  (a * modp_inv2 (pow2 256) % prime256 = b * modp_inv2 (pow2 256) % prime256  ==> a == b)
-
-(*If k a ≡ k b (mod n) and k is coprime with n, then a ≡ b (mod n) *)
-
-let lemma_modular_multiplication_p256 a b = admit()
-
-
 val lemma_mod_sub_distr (a:int) (b:int) (n:pos) : Lemma ((a - b % n) % n = (a - b) % n)
 
 let lemma_mod_sub_distr (a:int) (b:int) (n:pos) =
