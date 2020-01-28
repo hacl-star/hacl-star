@@ -253,13 +253,12 @@ val isPointOnCurvePublic: p: point -> Stack bool
   ) 
 )
 
-
+(*)
 (* un clé privée d (un nombre entier choisi de manière aléatoire dans l'intervalle  [1,n-1] *) 
-val ecp256dh: result: lbuffer uint8 (size 64) -> scalar: lbuffer uint8 (size 32) -> Stack uint64
+val ecp256dh_i: result: lbuffer uint8 (size 64) -> scalar: lbuffer uint8 (size 32) -> Stack uint64
   (requires fun h -> live h result /\ live h scalar /\ disjoint result scalar /\
     Lib.ByteSequence.nat_from_bytes_le (as_seq h scalar) >= 1 /\
     Lib.ByteSequence.nat_from_bytes_le (as_seq h scalar) < Hacl.Spec.ECDSAP256.Definition.prime_p256_order
-  
   )
   (ensures fun h0 r h1 -> modifies (loc result) h0 h1 /\
     (
@@ -271,3 +270,13 @@ val ecp256dh: result: lbuffer uint8 (size 64) -> scalar: lbuffer uint8 (size 32)
       Lib.ByteSequence.nat_from_bytes_le (as_seq h1 resultY) == yN
     )  
   )
+
+(*
+val ecp256dh_r: result: lbuffer uint8 (size 64) -> p: lbuffer uint8 (size 64) -> scalar: lbuffer uint8 (size 32) -> Stack uint64 
+  (requires fun h -> live h result /\ live h p /\ live h scalar /\ 
+    disjoint result p /\ disjoint result scalar /\ disjoint p scalar /\
+    Lib.ByteSequence.nat_from_bytes_le (as_seq h scalar) >= 1 /\
+    Lib.ByteSequence.nat_from_bytes_le (as_seq h scalar) < Hacl.Spec.ECDSAP256.Definition.prime_p256_order
+  )
+  (ensures fun h0 r h1 -> True)
+*)

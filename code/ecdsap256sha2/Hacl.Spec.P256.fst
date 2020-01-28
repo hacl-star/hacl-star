@@ -160,3 +160,7 @@ val point_prime_to_coordinates: p: point_seq -> Tot (r: tuple3 nat nat nat {
 let point_prime_to_coordinates p  =  
    felem_seq_as_nat (Lib.Sequence.sub p 0 4), felem_seq_as_nat (Lib.Sequence.sub p 4 4), felem_seq_as_nat (Lib.Sequence.sub p 8 4) 
 
+
+val toJacobianCoordinates: tuple2 nat nat -> Tot (tuple3 nat nat nat)
+
+let toJacobianCoordinates (r0, r1) = (r0, r1, 1)

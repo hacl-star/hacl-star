@@ -22,7 +22,7 @@ open Hacl.Spec.P256.Lemmas
 open Hacl.Impl.P256.PointAdd
 open Hacl.Impl.P256.LowLevel
 
-open Hacl.Impl.ECDSA.P256SHA256.Common
+open Hacl.Impl.P256.Signature.Common
 open Lib.ByteSequence
 
 open FStar.Mul 

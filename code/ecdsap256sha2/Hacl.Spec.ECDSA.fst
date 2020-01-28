@@ -172,7 +172,7 @@ let _exp_step k i (p, q) =
 val _exponent_spec: k: lseq uint8 32  -> tuple2 nat_prime nat_prime -> Tot (tuple2 nat_prime nat_prime)
 
 let _exponent_spec k (p, q) = 
-  Lib.LoopCombinators.repeati 256  (_exp_step k) (p, q)
+  Lib.LoopCombinators.repeati 256 (_exp_step k) (p, q)
 
 
 unfold let prime_p256_order_inverse_list: list uint8 = 
@@ -209,9 +209,6 @@ let exponent_spec a =
     admit();
     a0
 
-val toJacobianCoordinates: tuple2 nat nat -> Tot (tuple3 nat nat nat)
-
-let toJacobianCoordinates (r0, r1) = (r0, r1, 1)
 
 val changeEndian: i: felem_seq -> Tot felem_seq
 

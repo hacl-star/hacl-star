@@ -26,7 +26,7 @@ open Hacl.Impl.P256
 open Hacl.Impl.ECDSA.MM.Exponent
 open Hacl.Impl.ECDSA.MontgomeryMultiplication
 
-open Hacl.Impl.ECDSA.P256SHA256.Common
+open Hacl.Impl.P256.Signature.Common
 
 module H = Spec.Agile.Hash
 module Def = Spec.Hash.Definitions
