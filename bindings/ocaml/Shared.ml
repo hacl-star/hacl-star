@@ -73,3 +73,21 @@ module Make_HashFunction (Impl : sig
 = struct
   let hash input output = Impl.hash (uint8_ptr input) (size_uint32 input) (uint8_ptr output)
 end
+
+module type MAC = sig
+  val mac : Bigstring.t -> Bigstring.t -> Bigstring.t -> unit
+end
+
+module Make_Poly1305 (Impl : sig
+    val mac : uint8 ptr -> uint32 -> uint8 ptr -> uint8 ptr -> unit
+  end)
+= struct
+  let mac dst key data = Impl.mac (uint8_ptr dst) (size_uint32 data) (uint8_ptr data) (uint8_ptr key)
+end
+
+module Make_HMAC (Impl : sig
+    val mac : uint8 ptr -> uint8 ptr -> uint32 -> uint8 ptr -> uint32 -> unit
+  end)
+= struct
+  let mac dst key data = Impl.mac (uint8_ptr dst) (uint8_ptr key) (size_uint32 key) (uint8_ptr data) (size_uint32 data)
+end

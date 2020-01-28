@@ -11,6 +11,10 @@ module Hacl_Curve25519_64_Slow = Hacl_Curve25519_64_Slow_bindings.Bindings(Hacl_
 module Hacl_Ed25519 = Hacl_Ed25519_bindings.Bindings(Hacl_Ed25519_stubs)
 module Hacl_Hash = Hacl_Hash_bindings.Bindings(Hacl_Hash_stubs)
 module Hacl_SHA3 = Hacl_SHA3_bindings.Bindings(Hacl_SHA3_stubs)
+module Hacl_HMAC = Hacl_HMAC_bindings.Bindings(Hacl_HMAC_stubs)
+module Hacl_Poly1305_32 = Hacl_Poly1305_32_bindings.Bindings(Hacl_Poly1305_32_stubs)
+module Hacl_Poly1305_128 = Hacl_Poly1305_128_bindings.Bindings(Hacl_Poly1305_128_stubs)
+module Hacl_Poly1305_256 = Hacl_Poly1305_256_bindings.Bindings(Hacl_Poly1305_256_stubs)
 
 
 module Chacha20_Poly1305_32 : Chacha20_Poly1305 =
@@ -106,4 +110,34 @@ end)
 module SHA3_512 : HashFunction =
   Make_HashFunction (struct
     let hash input input_len output = Hacl_SHA3.hacl_SHA3_sha3_512 input_len input output
+end)
+
+module HMAC_SHA2_256 : MAC =
+  Make_HMAC (struct
+    let mac = Hacl_HMAC.hacl_HMAC_compute_sha2_256
+end)
+
+module HMAC_SHA2_384 : MAC =
+  Make_HMAC (struct
+    let mac = Hacl_HMAC.hacl_HMAC_compute_sha2_384
+end)
+
+module HMAC_SHA2_512 : MAC =
+  Make_HMAC (struct
+    let mac = Hacl_HMAC.hacl_HMAC_compute_sha2_512
+end)
+
+module Poly1305_32 : MAC =
+  Make_Poly1305 (struct
+    let mac = Hacl_Poly1305_32.hacl_Poly1305_32_poly1305_mac
+end)
+
+module Poly1305_128 : MAC =
+  Make_Poly1305 (struct
+    let mac = Hacl_Poly1305_128.hacl_Poly1305_128_poly1305_mac
+end)
+
+module Poly1305_256 : MAC =
+  Make_Poly1305 (struct
+    let mac = Hacl_Poly1305_256.hacl_Poly1305_256_poly1305_mac
 end)

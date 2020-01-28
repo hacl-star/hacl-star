@@ -9,6 +9,8 @@ module EverCrypt_AEAD = EverCrypt_AEAD_bindings.Bindings(EverCrypt_AEAD_stubs)
 module EverCrypt_Chacha20Poly1305 = EverCrypt_Chacha20Poly1305_bindings.Bindings(EverCrypt_Chacha20Poly1305_stubs)
 module EverCrypt_Curve25519 = EverCrypt_Curve25519_bindings.Bindings(EverCrypt_Curve25519_stubs)
 module EverCrypt_Hash = EverCrypt_Hash_bindings.Bindings(EverCrypt_Hash_stubs)
+module EverCrypt_HMAC = EverCrypt_HMAC_bindings.Bindings(EverCrypt_HMAC_stubs)
+module EverCrypt_Poly1305 = EverCrypt_Poly1305_bindings.Bindings(EverCrypt_Poly1305_stubs)
 
 
 module AutoConfig2 = struct
@@ -152,3 +154,30 @@ module SHA2_256 : HashFunction =
     let hash = EverCrypt_Hash.everCrypt_Hash_hash_256
 end)
 
+module HMAC = struct
+  open EverCrypt_HMAC
+
+  let is_supported_alg alg = everCrypt_HMAC_is_supported_alg (Hash.alg_definition alg)
+  let mac alg dst key data =
+    everCrypt_HMAC_compute (Hash.alg_definition alg) (uint8_ptr dst) (uint8_ptr key) (size_uint32 key) (uint8_ptr data) (size_uint32 data)
+end
+
+module HMAC_SHA2_256 : MAC =
+  Make_HMAC (struct
+    let mac = EverCrypt_HMAC.everCrypt_HMAC_compute_sha2_256
+end)
+
+module HMAC_SHA2_384 : MAC =
+  Make_HMAC (struct
+    let mac = EverCrypt_HMAC.everCrypt_HMAC_compute_sha2_384
+end)
+
+module HMAC_SHA2_512 : MAC =
+  Make_HMAC (struct
+    let mac = EverCrypt_HMAC.everCrypt_HMAC_compute_sha2_512
+end)
+
+module Poly1305 : MAC =
+  Make_Poly1305 (struct
+    let mac dst data_len data key = EverCrypt_Poly1305.everCrypt_Poly1305_poly1305 dst data data_len key
+end)

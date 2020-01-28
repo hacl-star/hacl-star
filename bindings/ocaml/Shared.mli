@@ -46,3 +46,16 @@ end
 module Make_HashFunction (Impl : sig
     val hash : uint8 ptr -> uint32 -> uint8 ptr -> unit
   end) : HashFunction
+
+module type MAC = sig
+  val mac : Bigstring.t -> Bigstring.t -> Bigstring.t -> unit
+end
+
+module Make_Poly1305 (Impl : sig
+    val mac : uint8 ptr -> uint32 -> uint8 ptr -> uint8 ptr -> unit
+  end) : MAC
+
+module Make_HMAC (Impl : sig
+    val mac : uint8 ptr -> uint8 ptr -> uint32 -> uint8 ptr -> uint32 -> unit
+  end) : MAC
+

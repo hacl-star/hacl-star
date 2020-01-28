@@ -29,3 +29,11 @@ module SHA3_224 : HashFunction
 module SHA3_256 : HashFunction
 module SHA3_384 : HashFunction
 module SHA3_512 : HashFunction
+
+module HMAC_SHA2_256 : MAC
+module HMAC_SHA2_384 : MAC
+module HMAC_SHA2_512 : MAC
+
+module Poly1305_32 : MAC
+module Poly1305_128 : MAC
+module Poly1305_256 : MAC

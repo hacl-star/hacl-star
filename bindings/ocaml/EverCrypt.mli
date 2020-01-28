@@ -77,3 +77,16 @@ end
 module SHA2_224 : HashFunction
 
 module SHA2_256 : HashFunction
+
+module HMAC : sig
+  val is_supported_alg : Hash.alg -> bool
+  val mac : Hash.alg -> Bigstring.t -> Bigstring.t -> Bigstring.t -> unit
+end
+
+module HMAC_SHA2_256 : MAC
+
+module HMAC_SHA2_384 : MAC
+
+module HMAC_SHA2_512 : MAC
+
+module Poly1305 : MAC
