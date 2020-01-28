@@ -1,4 +1,3 @@
-
 module Hacl.Spec.P256.SolinasReduction
 
 open Lib.IntTypes 
@@ -21,10 +20,9 @@ val c8_reduction: c8: _uint32  ->
   Lemma((c8 * pow2 256) % prime == (c8 * pow2 (7 * 32) - c8 *  pow2 (6 * 32) - c8 *  pow2 (3 * 32) + c8) % prime)
 
 let c8_reduction c8 = 
-  assert_norm(pow2 256 % prime = pow2 224 - pow2 192 - pow2 96 + 1);
+  assert_norm(pow2 256 % prime == pow2 (7 * 32) - pow2 (6 * 32) - pow2 (3 * 32) + 1);
   lemma_mod_mul_distr_r c8 (pow2 256) prime;
-  lemma_mod_mul_distr_r c8 (pow2 224 - pow2 192 - pow2 96 + 1) prime
-
+  assert((c8 * pow2 256) % prime == (c8 * (pow2 (7 * 32) - pow2 (6 * 32) - pow2 (3 * 32) + 1)) % prime)
 
 val c9_reduction: c9: _uint32 -> 
   Lemma (c9 * pow2 (9 * 32) % prime == (- c9 *  pow2 (6 * 32) - c9 * pow2 (4 * 32) - c9 *  pow2 (3 * 32) + c9 * pow2 (1 * 32) + c9) % prime)
@@ -46,7 +44,11 @@ let c10_reduction c10 =
 val c11_reduction: c11: _uint32  -> Lemma (c11 * pow2 (11 * 32) % prime == (2 * c11 * pow2 (3 * 32) + c11 * pow2 (2 * 32) - c11 - c11 * pow2 (32 * 7) - c11 * pow2 (5 * 32)) % prime)
 
 let c11_reduction c11  = 
-  assert_norm((pow2 (11 * 32) % prime == (2 * pow2 96 + pow2 64 - 1 - pow2 224 - pow2 160) % prime));
+  assert_norm((pow2 (11 * 32) % prime == (2 * pow2 (3 * 32) + pow2 (2 * 32) - 1 - pow2 (7 * 32) - pow2 (5 * 32)) % prime));
+  calc (==) {
+  c11 * (2 * pow2 (3 * 32) + pow2 (2 * 32) - 1 - pow2 (32 * 7) - pow2 (5 * 32)); == {}
+  2 * c11 * pow2 (3 * 32) + c11 * pow2 (2 * 32) - c11 - c11 * pow2 (32 * 7) - c11 * pow2 (5 * 32);};
+  
   lemma_mod_mul_distr_r c11 (pow2 (11 * 32)) prime;
   lemma_mod_mul_distr_r c11 (2 * pow2 96 + pow2 64 - 1 - pow2 224 - pow2 160) prime
 
@@ -54,15 +56,25 @@ let c11_reduction c11  =
 val c12_reduction: c12: _uint32-> Lemma (c12 * pow2 (12 * 32) % prime == (2 * c12 * pow2 (4 * 32) + 2 * c12 * pow2 (3 * 32) - c12 * pow2 32 - c12 - c12 * pow2 (7 * 32)) % prime)
 
 let c12_reduction c12 = 
-  assert_norm (pow2 (12 * 32) % prime == (2 * pow2 (4 * 32) + 2 * pow2 (3 * 32) - pow2 32 - 1 - pow2 (7 * 32))% prime);
+  assert_norm (pow2 (12 * 32) % prime == (2 * pow2 (4 * 32) + 2 * pow2 (3 * 32) - pow2 32 - 1 - pow2 (7 * 32)) % prime); 
+  
+  calc (==) {
+    c12 * (2 * pow2 (4 * 32) + 2 * pow2 (3 * 32) - pow2 32 - 1 - pow2 (7 * 32)); == {}
+    2 * c12 * pow2 (4 * 32) + 2 * c12 * pow2 (3 * 32) - c12 * pow2 32 - c12 - c12 * pow2 (7 * 32);};
+  
   lemma_mod_mul_distr_r c12 (pow2 (12 * 32)) prime;
-  lemma_mod_mul_distr_r c12 (2 * pow2 (4 * 32) + 2 * pow2 (3 * 32) - pow2 32 - 1 - pow2 (7 * 32)) prime
-
+  lemma_mod_mul_distr_r c12 ((2 * pow2 (4 * 32) + 2 * pow2 (3 * 32) - pow2 32 - 1 - pow2 (7 * 32))) prime
+  
 
 val c13_reduction: c13: _uint32-> Lemma (c13 * pow2 (13 * 32) % prime == (2 * c13 * pow2 (5 * 32) + 2 * c13 * pow2 (4 * 32) + c13 * pow2 (3 * 32) + c13 *  pow2 (6 * 32) - c13 * pow2 (2 * 32) - c13 *  pow2 32 - c13 - c13 * pow2 (7 * 32)) % prime)
 
 let c13_reduction c13 = 
-  assert_norm (pow2 (13 * 32) % prime == (2 *  pow2 (5 * 32) + 2 * pow2 (4 * 32) +  pow2 (3 * 32) + pow2 (6 * 32) - pow2 (2 * 32) - pow2 32 - 1 -  pow2 (7 * 32)) % prime);
+  assert_norm (pow2 (13 * 32) % prime == (2 * pow2 (5 * 32) + 2 * pow2 (4 * 32) +  pow2 (3 * 32) + pow2 (6 * 32) - pow2 (2 * 32) - pow2 32 - 1 -  pow2 (7 * 32)) % prime);
+  calc (==) {
+    c13 * (2 * pow2 (5 * 32) + 2 * pow2 (4 * 32) + pow2 (3 * 32) + pow2 (6 * 32) - pow2 (2 * 32) - pow2 32 - 1 - pow2 (7 * 32)); == {}
+    2 * c13 * pow2 (5 * 32) + 2 * c13 * pow2 (4 * 32) + c13 * pow2 (3 * 32) + c13 *  pow2 (6 * 32) - c13 * pow2 (2 * 32) - c13 *  pow2 32 - c13 - c13 * pow2 (7 * 32);
+    };
+    
   lemma_mod_mul_distr_r c13 (pow2 (13 * 32)) prime;
   lemma_mod_mul_distr_r c13 (2 *  pow2 (5 * 32) + 2 * pow2 (4 * 32) +  pow2 (3 * 32) + pow2 (6 * 32) - pow2 (2 * 32) - pow2 32 - 1 -  pow2 (7 * 32)) prime
 
@@ -71,14 +83,23 @@ val c14_reduction: c14: _uint32 -> Lemma (c14 * pow2 (14 * 32) % prime == (2 * c
 
 let c14_reduction c14 = 
   assert_norm (pow2 (14 * 32) % prime == (2 * pow2 (6 * 32) + 2 * pow2 (5 * 32) +  pow2 (6 * 32) + pow2 (4 * 32) - pow2 (2 * 32) - pow2 32 - 1) % prime);
+  calc (==) {
+    c14 * (2 * pow2 (6 * 32) + 2 * pow2 (5 * 32) + pow2 (6 * 32) + pow2 (4 * 32) - pow2 (2 * 32) - pow2 32 - 1); == {}
+    2 * c14 * pow2 (6 * 32) + 2 * c14 * pow2 (5 * 32) + c14 * pow2 (6 * 32) + c14 * pow2 (4 * 32) - c14 * pow2 (2 * 32) - c14 * pow2 32 - c14;
+    };
   lemma_mod_mul_distr_r c14 (pow2 (14 * 32)) prime;
   lemma_mod_mul_distr_r c14 (2 * pow2 (6 * 32) + 2 * pow2 (5 * 32) +  pow2 (6 * 32) + pow2 (4 * 32) - pow2 (2 * 32) - pow2 32 - 1) prime
 
 
-val c15_reduction: c15: _uint32 -> Lemma (c15 * pow2 (15 * 32) % prime == (2 * c15 * pow2 (7 * 32) + 2 * c15 * pow2 (6 * 32) + c15 * pow2 (7 * 32) + c15 * pow2 (5 * 32) - c15 * pow2 (3 * 32) - c15 * pow2 (2 * 32) - c15 * pow2 32)% prime)
+val c15_reduction: c15: _uint32 -> Lemma (c15 * pow2 (15 * 32) % prime == (2 * c15 * pow2 (7 * 32) + 2 * c15 * pow2 (6 * 32) + c15 * pow2 (7 * 32) + c15 * pow2 (5 * 32) - c15 * pow2 (3 * 32) - c15 * pow2 (2 * 32) - c15 * pow2 32) % prime)
 
 let c15_reduction c15 = 
   assert_norm (pow2 (15 * 32) % prime ==  (2 * pow2 (7 * 32) + 2 * pow2 (6 * 32) +pow2 (7 * 32) + pow2 (5 * 32) -  pow2 (3 * 32) - pow2 (2 * 32) - pow2 32) % prime);
+  calc (==) {
+  c15 * (2 * pow2 (7 * 32) + 2 * pow2 (6 * 32) + pow2 (7 * 32) + pow2 (5 * 32) - pow2 (3 * 32) - pow2 (2 * 32) - pow2 32); == {}
+  2 * c15 * pow2 (7 * 32) + 2 * c15 * pow2 (6 * 32) + c15 * pow2 (7 * 32) + c15 * pow2 (5 * 32) - c15 * pow2 (3 * 32) - c15 * pow2 (2 * 32) - c15 * pow2 32;
+};
+
   lemma_mod_mul_distr_r c15 (pow2 (15 * 32)) prime;
   lemma_mod_mul_distr_r c15  (2 * pow2 (7 * 32) + 2 * pow2 (6 * 32) +pow2 (7 * 32) + pow2 (5 * 32) -  pow2 (3 * 32) - pow2 (2 * 32) - pow2 32) prime
 
@@ -211,7 +232,6 @@ val solinas_reduction_mod:
   s8: int {s8 = (c14_n + c15_n * pow2 32 + c9_n * pow2 (3 * 32) + c10_n * pow2 (4* 32) + c11_n * pow2 (5 * 32) + c13_n * pow2 (7 * 32)) % prime} -> 
   n: int {n = (s0 + 2 * s1 + 2 * s2 + s3 + s4 - s5 - s6 - s7 - s8) % prime} -> 
 Lemma (n % prime == (c0_n + c1_n * pow2 32 + c2_n * pow2 (2 * 32) + c3_n * pow2 (3 * 32) + c4_n * pow2 (4 * 32) + c5_n * pow2 (5 * 32) + c6_n * pow2 (6 * 32) + c7_n * pow2 (7 * 32) + c8_n * pow2 256 + c9_n * pow2 288 + c10_n * pow2 (10 * 32)  + c11_n * pow2 (11 * 32) + c12_n * pow2 (12 * 32) + c13_n* pow2 (13 * 32) + c14_n * pow2 (14 * 32) + c15_n * pow2 (15 * 32)) % prime)
-
 
 
 #reset-options "--z3refresh --z3rlimit 500"
