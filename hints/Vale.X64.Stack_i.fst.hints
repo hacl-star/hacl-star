@@ -1,5 +1,5 @@
 [
-  "–\u0004Sçöã<\u001bFj ¥áBÅz",
+  "\u001b¨ˆ\u000b\u0005<â=£Ë˙1ë&.v",
   [
     [
       "Vale.X64.Stack_i.lemma_store_stack_same_valid64",
@@ -66,7 +66,7 @@
         "typing_Vale.X64.Stack_i.valid_src_stack64"
       ],
       0,
-      "a196247136d91c74e2af13b4720b5fb7"
+      "20b26cd5115ea8ac10637c3a2d72f621"
     ],
     [
       "Vale.X64.Stack_i.lemma_free_stack_same_valid64",
@@ -100,7 +100,7 @@
         "typing_Vale.X64.Stack_i.valid_src_stack64"
       ],
       0,
-      "067b1e6cce0804608a13b3f5b52f66f9"
+      "f4d7987855ef7280ea807f4adbb08503"
     ],
     [
       "Vale.X64.Stack_i.lemma_store_new_valid64",
@@ -165,7 +165,7 @@
         "typing_Vale.Def.Words_s.__proj__Mkfour__item__lo1"
       ],
       0,
-      "5de7c3a85b0f831c8302a3f4266ef4dd"
+      "f56fb1e13875c5839292a485f3ce2b19"
     ],
     [
       "Vale.X64.Stack_i.lemma_correct_store_load_stack64",
@@ -180,7 +180,7 @@
         "projection_inverse_Vale.X64.Machine_Semantics_s.Machine_stack_stack_mem"
       ],
       0,
-      "99eedb6ba199b40b79b47f064cfb1745"
+      "a5f2b67049e227b2f47e154750294c2a"
     ],
     [
       "Vale.X64.Stack_i.lemma_frame_store_load_stack64",
@@ -199,7 +199,7 @@
         "token_correspondence_Vale.Arch.MachineHeap_s.get_heap_val64_def"
       ],
       0,
-      "173649bc3e0b23e8f12006e55162eb83"
+      "0dd847dba408e4d9dc55e2699687eb0a"
     ],
     [
       "Vale.X64.Stack_i.lemma_free_stack_same_load64",
@@ -237,7 +237,7 @@
         "typing_Vale.X64.Stack_i.valid_src_stack64"
       ],
       0,
-      "c55b60c2ef1da014812c776f3b5656c5"
+      "b4444bd5e90cf783f6919507be4890b7"
     ],
     [
       "Vale.X64.Stack_i.lemma_compose_free_stack64",
@@ -268,7 +268,7 @@
         "typing_FStar.Map.restrict", "typing_Vale.Lib.Set.remove_between"
       ],
       0,
-      "dd6642afa9ad6a58f350b3d221ff068f"
+      "dbabfc55f4a881935c842a2a6e546886"
     ],
     [
       "Vale.X64.Stack_i.lemma_same_init_rsp_free_stack64",
@@ -277,7 +277,7 @@
       0,
       [ "@query" ],
       0,
-      "2a4c44705d07b1c10657a07ce4b3bc2f"
+      "395e4d73c32a9aa5eabf50f2585328a0"
     ],
     [
       "Vale.X64.Stack_i.lemma_same_init_rsp_free_stack64",
@@ -296,7 +296,7 @@
         "projection_inverse_Vale.X64.Machine_Semantics_s.Machine_stack_initial_rsp"
       ],
       0,
-      "33a4e7b8e4dc68915ec607cbbe7ea552"
+      "b7bca6ded65062bfd1654b03b0c7c17f"
     ],
     [
       "Vale.X64.Stack_i.lemma_same_init_rsp_store_stack64",
@@ -305,7 +305,7 @@
       0,
       [ "@query" ],
       0,
-      "cc9776464715f21ece355013a90c2593"
+      "9d4df2cfba6d3c97e09f0b886190952d"
     ],
     [
       "Vale.X64.Stack_i.lemma_same_init_rsp_store_stack64",
@@ -322,7 +322,7 @@
         "projection_inverse_Vale.X64.Machine_Semantics_s.Machine_stack_initial_rsp"
       ],
       0,
-      "21a643de0ae0cfa9b6b69680e4bd5c92"
+      "5839cf57766506e6b54f92117ac15a05"
     ],
     [
       "Vale.X64.Stack_i.lemma_valid_taint_stack64",
@@ -336,7 +336,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "b1210656b40c01ae3ad010e29b666ffc"
+      "597f8d71fc0d4378467104ed331a5c09"
     ],
     [
       "Vale.X64.Stack_i.lemma_valid_taint_stack128",
@@ -355,7 +355,7 @@
         "typing_tok_Vale.X64.Machine_s.Public@tok"
       ],
       0,
-      "836107e0e1bff6b870bf3c430c9cd529"
+      "bb4aceb532bfdd16b52edb27eaae8fc2"
     ],
     [
       "Vale.X64.Stack_i.lemma_valid_taint_stack64_reveal",
@@ -373,7 +373,7 @@
         "typing_tok_Vale.X64.Machine_s.Public@tok"
       ],
       0,
-      "8f97adbbeb97b039d0da839fe834cb46"
+      "b5290fc75c1bd84bbb449de301866ba3"
     ],
     [
       "Vale.X64.Stack_i.lemma_correct_store_load_taint_stack64",
@@ -382,21 +382,21 @@
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "Vale.X64.Machine_s_pretyping_38835f297fb700457da67879cc31d6a6",
-        "b2t_def", "equality_tok_Vale.X64.Machine_s.Public@tok",
+        "Vale.Arch.HeapTypes_s_pretyping_b2ecc36deaf346c775ae2b728a51b51e",
+        "b2t_def", "equality_tok_Vale.Arch.HeapTypes_s.Public@tok",
         "equation_Prims.nat", "equation_Vale.X64.Memory.memtaint",
         "equation_Vale.X64.Stack_i.store_taint_stack64",
         "equation_Vale.X64.Stack_i.valid_taint_stack64", "int_inversion",
         "int_typing", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_Equality", "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_21546bbfcd6f29a8d6a0b4798ed975a5",
+        "refinement_interpretation_Tm_refine_0030c490ddf8a8ae33d539152b909139",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "typing_Vale.X64.Machine_Semantics_s.update_n",
-        "typing_tok_Vale.X64.Machine_s.Public@tok"
+        "typing_tok_Vale.Arch.HeapTypes_s.Public@tok"
       ],
       0,
-      "66a1bb618f83a77d6d9412444e2cb1e9"
+      "2d548d448b90a3be4f6a5665860d11f7"
     ],
     [
       "Vale.X64.Stack_i.lemma_frame_store_load_taint_stack64",
@@ -409,12 +409,12 @@
         "equation_Vale.X64.Stack_i.store_taint_stack64",
         "equation_Vale.X64.Stack_i.valid_taint_stack64", "int_inversion",
         "int_typing", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_21546bbfcd6f29a8d6a0b4798ed975a5",
+        "refinement_interpretation_Tm_refine_0030c490ddf8a8ae33d539152b909139",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "typing_Vale.X64.Machine_Semantics_s.update_n"
       ],
       0,
-      "b670f7271dfe1c0102a1b6b8ec1c1fcd"
+      "ad13a7870b4bf4e588f6c68474ae5c66"
     ]
   ]
 ]
