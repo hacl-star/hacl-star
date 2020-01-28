@@ -91,12 +91,12 @@ let add1_lemma'
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
        add1_post code out f1 f2 va_s0 va_s1 f /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer f1) /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer out) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_buffer f1) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_buffer out) /\
        ME.buffer_writeable (as_vale_buffer out) /\
        ME.buffer_writeable (as_vale_buffer f1) /\
        ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer out))
-                                 ME.loc_none) va_s0.VS.vs_heap va_s1.VS.vs_heap
+                                 ME.loc_none) (VS.vs_get_vale_heap va_s0) (VS.vs_get_vale_heap va_s1)
  )) =
    let va_s1, f = FU.va_lemma_Fast_add1_stdcall code va_s0 IA.win (as_vale_buffer out) (as_vale_buffer f1) (UInt64.v f2) in
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 out;
@@ -168,14 +168,14 @@ let fadd_lemma'
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
        fadd_post code out f1 f2 va_s0 va_s1 f /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer out) /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer f1) /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer f2) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_buffer out) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_buffer f1) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_buffer f2) /\
        ME.buffer_writeable (as_vale_buffer out) /\
        ME.buffer_writeable (as_vale_buffer f1) /\
        ME.buffer_writeable (as_vale_buffer f2) /\
        ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer out))
-                                 ME.loc_none) va_s0.VS.vs_heap va_s1.VS.vs_heap
+                                 ME.loc_none) (VS.vs_get_vale_heap va_s0) (VS.vs_get_vale_heap va_s1)
  )) =
    let va_s1, f = FH.va_lemma_Fadd_stdcall code va_s0 IA.win (as_vale_buffer out) (as_vale_buffer f1) (as_vale_buffer f2) in
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 out;
@@ -203,7 +203,7 @@ let lowstar_fadd_t =
     (W.mk_prediction code_Fadd fadd_dom [] (fadd_lemma code_Fadd IA.win))
 
 [@ (CCConv "stdcall") ]
-val add1 : normal lowstar_add1_t
+val add_scalar_e : normal lowstar_add1_t
 
 [@ (CCConv "stdcall") ]
-val fadd_ : normal lowstar_fadd_t
+val fadd_e : normal lowstar_fadd_t

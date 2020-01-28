@@ -1,10 +1,14 @@
 module Vale.X64.Lemmas
 open FStar.Mul
+open Vale.Arch.Heap
+open Vale.Arch.HeapImpl
+open Vale.Arch.HeapLemmas
 open Vale.X64.Machine_s
 open Vale.X64.State
 open Vale.X64.StateLemmas
-module BC = Vale.X64.Bytes_Code_s
+open Vale.X64.Bytes_Code_s
 module BS = Vale.X64.Machine_Semantics_s
+module Map16 = Vale.Lib.Map16
 unfold let code = BS.code
 unfold let codes = BS.codes
 unfold let ocmp = BS.ocmp
@@ -18,16 +22,36 @@ let update_of (flags:Flags.t) (new_of:bool) = Flags.upd fOverflow (Some new_of) 
 unfold let machine_state = BS.machine_state
 unfold let machine_eval_code = BS.machine_eval_code
 
-let state_eq_S (s1 s2:machine_state) =
-  s1 == {s2 with BS.ms_trace = s1.BS.ms_trace}
+let rec code_modifies_ghost (c:code) : bool =
+  match c with
+  | Ins (Instr _ _ (BS.AnnotateGhost _)) -> true
+  | Ins _ -> false
+  | Block cs -> codes_modifies_ghost cs
+  | IfElse _ c1 c2 -> code_modifies_ghost c1 || code_modifies_ghost c2
+  | While _ c -> code_modifies_ghost c
+and codes_modifies_ghost (cs:codes) : bool =
+  match cs with
+  | [] -> false
+  | c::cs -> code_modifies_ghost c || codes_modifies_ghost cs
 
-let state_eq_opt (s1 s2:option BS.machine_state) =
+let state_eq_S (ignore_ghost:bool) (s1 s2:machine_state) =
+  let s1 = {s1 with
+    BS.ms_trace = [];
+    BS.ms_heap = if ignore_ghost then heap_ignore_ghost_machine s1.BS.ms_heap else s1.BS.ms_heap
+  } in
+  let s2 = {s2 with
+    BS.ms_trace = [];
+    BS.ms_heap = if ignore_ghost then heap_ignore_ghost_machine s2.BS.ms_heap else s2.BS.ms_heap;
+  } in
+  machine_state_eq s1 s2
+
+let state_eq_opt (ignore_ghost:bool) (s1 s2:option BS.machine_state) =
   match (s1, s2) with
-  | (Some s1, Some s2) -> state_eq_S s1 s2
+  | (Some s1, Some s2) -> state_eq_S ignore_ghost s1 s2
   | _ -> s1 == s2
 
 let eval_code (c:code) (s0:vale_state) (f0:fuel) (s1:vale_state) : Type0 =
-  state_eq_opt (machine_eval_code c f0 (state_to_S s0)) (Some (state_to_S s1))
+  state_eq_opt (code_modifies_ghost c) (machine_eval_code c f0 (state_to_S s0)) (Some (state_to_S s1))
 
 let eval_ins (c:code) (s0:vale_state) : Ghost (vale_state & fuel)
   (requires Ins? c)
@@ -48,52 +72,52 @@ let ensure_valid_ocmp (c:ocmp) (s:vale_state) : GTot vale_state =
   state_of_S ts
 
 val lemma_cmp_eq (s:vale_state) (o1:operand64{not (OMem? o1 || OStack? o1)}) (o2:operand64{not (OMem? o2 || OStack? o2)}) : Lemma
-  (ensures eval_ocmp s (BC.OEq o1 o2) <==> eval_operand o1 s == eval_operand o2 s)
-  [SMTPat (eval_ocmp s (BC.OEq o1 o2))]
+  (ensures eval_ocmp s (OEq o1 o2) <==> eval_operand o1 s == eval_operand o2 s)
+  [SMTPat (eval_ocmp s (OEq o1 o2))]
 
 val lemma_cmp_ne (s:vale_state) (o1:operand64{not (OMem? o1 || OStack? o1)}) (o2:operand64{not (OMem? o2 || OStack? o2)}) : Lemma
-  (ensures eval_ocmp s (BC.ONe o1 o2) <==> eval_operand o1 s <> eval_operand o2 s)
-  [SMTPat (eval_ocmp s (BC.ONe o1 o2))]
+  (ensures eval_ocmp s (ONe o1 o2) <==> eval_operand o1 s <> eval_operand o2 s)
+  [SMTPat (eval_ocmp s (ONe o1 o2))]
 
 val lemma_cmp_le (s:vale_state) (o1:operand64{not (OMem? o1 || OStack? o1)}) (o2:operand64{not (OMem? o2 || OStack? o2)}) : Lemma
-  (ensures eval_ocmp s (BC.OLe o1 o2) <==> eval_operand o1 s <= eval_operand o2 s)
-  [SMTPat (eval_ocmp s (BC.OLe o1 o2))]
+  (ensures eval_ocmp s (OLe o1 o2) <==> eval_operand o1 s <= eval_operand o2 s)
+  [SMTPat (eval_ocmp s (OLe o1 o2))]
 
 val lemma_cmp_ge (s:vale_state) (o1:operand64{not (OMem? o1 || OStack? o1)}) (o2:operand64{not (OMem? o2 || OStack? o2)}) : Lemma
-  (ensures eval_ocmp s (BC.OGe o1 o2) <==> eval_operand o1 s >= eval_operand o2 s)
-  [SMTPat (eval_ocmp s (BC.OGe o1 o2))]
+  (ensures eval_ocmp s (OGe o1 o2) <==> eval_operand o1 s >= eval_operand o2 s)
+  [SMTPat (eval_ocmp s (OGe o1 o2))]
 
 val lemma_cmp_lt (s:vale_state) (o1:operand64{not (OMem? o1 || OStack? o1)}) (o2:operand64{not (OMem? o2 || OStack? o2)}) : Lemma
-  (ensures eval_ocmp s (BC.OLt o1 o2) <==> eval_operand o1 s < eval_operand o2 s)
-  [SMTPat (eval_ocmp s (BC.OLt o1 o2))]
+  (ensures eval_ocmp s (OLt o1 o2) <==> eval_operand o1 s < eval_operand o2 s)
+  [SMTPat (eval_ocmp s (OLt o1 o2))]
 
 val lemma_cmp_gt (s:vale_state) (o1:operand64{not (OMem? o1 || OStack? o1)}) (o2:operand64{not (OMem? o2 || OStack? o2)}) : Lemma
-  (ensures eval_ocmp s (BC.OGt o1 o2) <==> eval_operand o1 s > eval_operand o2 s)
-  [SMTPat (eval_ocmp s (BC.OGt o1 o2))]
+  (ensures eval_ocmp s (OGt o1 o2) <==> eval_operand o1 s > eval_operand o2 s)
+  [SMTPat (eval_ocmp s (OGt o1 o2))]
 
 val lemma_valid_cmp_eq (s:vale_state) (o1:operand64{not (OMem? o1 || OStack? o1)}) (o2:operand64{not (OMem? o2 || OStack? o2)}) : Lemma
-  (ensures valid_src_operand o1 s /\ valid_src_operand o2 s ==> valid_ocmp (BC.OEq o1 o2) s)
-  [SMTPat (valid_ocmp (BC.OEq o1 o2) s)]
+  (ensures valid_src_operand o1 s /\ valid_src_operand o2 s ==> valid_ocmp (OEq o1 o2) s)
+  [SMTPat (valid_ocmp (OEq o1 o2) s)]
 
 val lemma_valid_cmp_ne (s:vale_state) (o1:operand64{not (OMem? o1 || OStack? o1)}) (o2:operand64{not (OMem? o2 || OStack? o2)}) : Lemma
-  (ensures valid_src_operand o1 s /\ valid_src_operand o2 s ==> valid_ocmp (BC.ONe o1 o2) s)
-  [SMTPat (valid_ocmp (BC.ONe o1 o2) s)]
+  (ensures valid_src_operand o1 s /\ valid_src_operand o2 s ==> valid_ocmp (ONe o1 o2) s)
+  [SMTPat (valid_ocmp (ONe o1 o2) s)]
 
 val lemma_valid_cmp_le (s:vale_state) (o1:operand64{not (OMem? o1 || OStack? o1)}) (o2:operand64{not (OMem? o2 || OStack? o2)}) : Lemma
-  (ensures valid_src_operand o1 s /\ valid_src_operand o2 s ==> valid_ocmp (BC.OLe o1 o2) s)
-  [SMTPat (valid_ocmp (BC.OLe o1 o2) s)]
+  (ensures valid_src_operand o1 s /\ valid_src_operand o2 s ==> valid_ocmp (OLe o1 o2) s)
+  [SMTPat (valid_ocmp (OLe o1 o2) s)]
 
 val lemma_valid_cmp_ge (s:vale_state) (o1:operand64{not (OMem? o1 || OStack? o1)}) (o2:operand64{not (OMem? o2 || OStack? o2)}) : Lemma
-  (ensures valid_src_operand o1 s /\ valid_src_operand o2 s ==> valid_ocmp (BC.OGe o1 o2) s)
-  [SMTPat (valid_ocmp (BC.OGe o1 o2) s)]
+  (ensures valid_src_operand o1 s /\ valid_src_operand o2 s ==> valid_ocmp (OGe o1 o2) s)
+  [SMTPat (valid_ocmp (OGe o1 o2) s)]
 
 val lemma_valid_cmp_lt (s:vale_state) (o1:operand64{not (OMem? o1 || OStack? o1)}) (o2:operand64{not (OMem? o2 || OStack? o2)}) : Lemma
-  (ensures valid_src_operand o1 s /\ valid_src_operand o2 s ==> valid_ocmp (BC.OLt o1 o2) s)
-  [SMTPat (valid_ocmp (BC.OLt o1 o2) s)]
+  (ensures valid_src_operand o1 s /\ valid_src_operand o2 s ==> valid_ocmp (OLt o1 o2) s)
+  [SMTPat (valid_ocmp (OLt o1 o2) s)]
 
 val lemma_valid_cmp_gt (s:vale_state) (o1:operand64{not (OMem? o1 || OStack? o1)}) (o2:operand64{not (OMem? o2 || OStack? o2)}) : Lemma
-  (ensures valid_src_operand o1 s /\ valid_src_operand o2 s ==> valid_ocmp (BC.OGt o1 o2) s)
-  [SMTPat (valid_ocmp (BC.OGt o1 o2) s)]
+  (ensures valid_src_operand o1 s /\ valid_src_operand o2 s ==> valid_ocmp (OGt o1 o2) s)
+  [SMTPat (valid_ocmp (OGt o1 o2) s)]
 
 val compute_merge_total (f0:fuel) (fM:fuel) : fuel
 

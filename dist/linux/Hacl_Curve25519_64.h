@@ -32,8 +32,6 @@
 #define __Hacl_Curve25519_64_H
 
 #include "Hacl_Kremlib.h"
-#include "Vale.h"
-#include "Vale_Inline.h"
 
 
 void Hacl_Curve25519_64_scalarmult(u8 *out, u8 *priv, u8 *pub);

@@ -68,10 +68,10 @@ secretbox_detached(
       uint8_t block0[32U] = { 0U };
       uint8_t *c0;
       uint8_t *c1;
-      memcpy(block0, m0, mlen0 * sizeof m0[0U]);
+      memcpy(block0, m0, mlen0 * sizeof (m0[0U]));
       {
         uint32_t i;
-        for (i = (uint32_t)0U; i < (uint32_t)32U; i = i + (uint32_t)1U)
+        for (i = (uint32_t)0U; i < (uint32_t)32U; i++)
         {
           uint8_t *os = block0;
           uint8_t x = block0[i] ^ ekey0[i];
@@ -80,7 +80,7 @@ secretbox_detached(
       }
       c0 = c;
       c1 = c + mlen0;
-      memcpy(c0, block0, mlen0 * sizeof block0[0U]);
+      memcpy(c0, block0, mlen0 * sizeof (block0[0U]));
       Hacl_Salsa20_salsa20_encrypt(mlen1, c1, m1, subkey, n11, (uint32_t)1U);
       Hacl_Poly1305_32_poly1305_mac(tag, mlen, c, mkey);
     }
@@ -110,7 +110,7 @@ secretbox_open_detached(
       uint32_t res;
       {
         uint32_t i;
-        for (i = (uint32_t)0U; i < (uint32_t)16U; i = i + (uint32_t)1U)
+        for (i = (uint32_t)0U; i < (uint32_t)16U; i++)
         {
           uint8_t uu____0 = FStar_UInt8_eq_mask(tag[i], tag_[i]);
           res0 = uu____0 & res0;
@@ -136,10 +136,10 @@ secretbox_open_detached(
           uint8_t *c0 = c;
           uint8_t *c1 = c + mlen0;
           uint8_t block0[32U] = { 0U };
-          memcpy(block0, c0, mlen0 * sizeof c0[0U]);
+          memcpy(block0, c0, mlen0 * sizeof (c0[0U]));
           {
             uint32_t i;
-            for (i = (uint32_t)0U; i < (uint32_t)32U; i = i + (uint32_t)1U)
+            for (i = (uint32_t)0U; i < (uint32_t)32U; i++)
             {
               uint8_t *os = block0;
               uint8_t x = block0[i] ^ ekey0[i];
@@ -149,7 +149,7 @@ secretbox_open_detached(
           {
             uint8_t *m0 = m;
             uint8_t *m1 = m + mlen0;
-            memcpy(m0, block0, mlen0 * sizeof block0[0U]);
+            memcpy(m0, block0, mlen0 * sizeof (block0[0U]));
             Hacl_Salsa20_salsa20_decrypt(mlen1, m1, c1, subkey, n11, (uint32_t)1U);
             res = (uint32_t)0U;
           }
@@ -179,7 +179,7 @@ secretbox_open_easy(uint32_t mlen, uint8_t *m, uint8_t *k, uint8_t *n1, uint8_t 
   return secretbox_open_detached(mlen, m, k, n1, cip, tag);
 }
 
-inline static uint32_t box_beforenm(uint8_t *k, uint8_t *pk, uint8_t *sk)
+static inline uint32_t box_beforenm(uint8_t *k, uint8_t *pk, uint8_t *sk)
 {
   uint8_t n0[16U] = { 0U };
   bool r = Hacl_Curve25519_51_ecdh(k, sk, pk);
@@ -191,7 +191,7 @@ inline static uint32_t box_beforenm(uint8_t *k, uint8_t *pk, uint8_t *sk)
   return (uint32_t)0xffffffffU;
 }
 
-inline static uint32_t
+static inline uint32_t
 box_detached_afternm(
   uint32_t mlen,
   uint8_t *c,
@@ -205,7 +205,7 @@ box_detached_afternm(
   return (uint32_t)0U;
 }
 
-inline static uint32_t
+static inline uint32_t
 box_detached(
   uint32_t mlen,
   uint8_t *c,
@@ -225,7 +225,7 @@ box_detached(
   return (uint32_t)0xffffffffU;
 }
 
-inline static uint32_t
+static inline uint32_t
 box_open_detached_afternm(
   uint32_t mlen,
   uint8_t *m,
@@ -238,7 +238,7 @@ box_open_detached_afternm(
   return secretbox_open_detached(mlen, m, k, n1, c, tag);
 }
 
-inline static uint32_t
+static inline uint32_t
 box_open_detached(
   uint32_t mlen,
   uint8_t *m,
@@ -258,7 +258,7 @@ box_open_detached(
   return (uint32_t)0xffffffffU;
 }
 
-inline static uint32_t
+static inline uint32_t
 box_easy_afternm(uint32_t mlen, uint8_t *c, uint8_t *k, uint8_t *n1, uint8_t *m)
 {
   uint8_t *tag = c;
@@ -267,7 +267,7 @@ box_easy_afternm(uint32_t mlen, uint8_t *c, uint8_t *k, uint8_t *n1, uint8_t *m)
   return res;
 }
 
-inline static uint32_t
+static inline uint32_t
 box_easy(uint32_t mlen, uint8_t *c, uint8_t *sk, uint8_t *pk, uint8_t *n1, uint8_t *m)
 {
   uint8_t *tag = c;
@@ -276,7 +276,7 @@ box_easy(uint32_t mlen, uint8_t *c, uint8_t *sk, uint8_t *pk, uint8_t *n1, uint8
   return res;
 }
 
-inline static uint32_t
+static inline uint32_t
 box_open_easy_afternm(uint32_t mlen, uint8_t *m, uint8_t *k, uint8_t *n1, uint8_t *c)
 {
   uint8_t *tag = c;
@@ -284,7 +284,7 @@ box_open_easy_afternm(uint32_t mlen, uint8_t *m, uint8_t *k, uint8_t *n1, uint8_
   return box_open_detached_afternm(mlen, m, k, n1, cip, tag);
 }
 
-inline static uint32_t
+static inline uint32_t
 box_open_easy(uint32_t mlen, uint8_t *m, uint8_t *pk, uint8_t *sk, uint8_t *n1, uint8_t *c)
 {
   uint8_t *tag = c;

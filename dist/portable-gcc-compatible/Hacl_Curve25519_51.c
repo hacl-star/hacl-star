@@ -159,7 +159,7 @@ Hacl_Impl_Curve25519_Field51_fmul(
 
 /* SNIPPET_START: fmul20 */
 
-inline static void fmul20(uint64_t *out, uint64_t *f1, uint64_t *f2)
+static inline void fmul20(uint64_t *out, uint64_t *f1, uint64_t *f2)
 {
   uint64_t f10 = f1[0U];
   uint64_t f11 = f1[1U];
@@ -453,7 +453,7 @@ Hacl_Impl_Curve25519_Field51_fsqr(
 
 /* SNIPPET_START: fsqr20 */
 
-inline static void fsqr20(uint64_t *out, uint64_t *f)
+static inline void fsqr20(uint64_t *out, uint64_t *f)
 {
   uint64_t f10 = f[0U];
   uint64_t f11 = f[1U];
@@ -675,10 +675,10 @@ static void store_felem(uint64_t *u64s, uint64_t *f)
 
 /* SNIPPET_START: cswap20 */
 
-inline static void cswap20(uint64_t bit, uint64_t *p1, uint64_t *p2)
+static inline void cswap20(uint64_t bit, uint64_t *p1, uint64_t *p2)
 {
   uint64_t mask = (uint64_t)0U - bit;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)10U; i = i + (uint32_t)1U)
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)10U; i++)
   {
     uint64_t dummy = mask & (p1[i] ^ p2[i]);
     p1[i] = p1[i] ^ dummy;
@@ -782,7 +782,7 @@ static void montgomery_ladder(uint64_t *out, uint8_t *key, uint64_t *init1)
   uint64_t *p01 = p01_tmp1_swap;
   uint64_t *p03 = p01;
   uint64_t *p11 = p01 + (uint32_t)10U;
-  memcpy(p11, init1, (uint32_t)10U * sizeof init1[0U]);
+  memcpy(p11, init1, (uint32_t)10U * sizeof (init1[0U]));
   uint64_t *x0 = p03;
   uint64_t *z0 = p03 + (uint32_t)5U;
   x0[0U] = (uint64_t)1U;
@@ -803,7 +803,7 @@ static void montgomery_ladder(uint64_t *out, uint8_t *key, uint64_t *init1)
   cswap20((uint64_t)1U, nq1, nq_p11);
   point_add_and_double(init1, p01_tmp11, tmp2);
   swap1[0U] = (uint64_t)1U;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)251U; i = i + (uint32_t)1U)
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)251U; i++)
   {
     uint64_t *p01_tmp12 = p01_tmp1_swap;
     uint64_t *swap2 = p01_tmp1_swap + (uint32_t)40U;
@@ -827,7 +827,7 @@ static void montgomery_ladder(uint64_t *out, uint8_t *key, uint64_t *init1)
   point_double(nq10, tmp1, tmp2);
   point_double(nq10, tmp1, tmp2);
   point_double(nq10, tmp1, tmp2);
-  memcpy(out, p0, (uint32_t)10U * sizeof p0[0U]);
+  memcpy(out, p0, (uint32_t)10U * sizeof (p0[0U]));
 }
 
 /* SNIPPET_END: montgomery_ladder */
@@ -843,7 +843,7 @@ Hacl_Curve25519_51_fsquare_times(
 )
 {
   Hacl_Impl_Curve25519_Field51_fsqr(o, inp, tmp);
-  for (uint32_t i = (uint32_t)0U; i < n1 - (uint32_t)1U; i = i + (uint32_t)1U)
+  for (uint32_t i = (uint32_t)0U; i < n1 - (uint32_t)1U; i++)
   {
     Hacl_Impl_Curve25519_Field51_fsqr(o, o, tmp);
   }
@@ -903,7 +903,7 @@ static void encode_point(uint8_t *o, uint64_t *i)
   Hacl_Curve25519_51_finv(tmp, z, tmp_w);
   Hacl_Impl_Curve25519_Field51_fmul(tmp, tmp, x, tmp_w);
   store_felem(u64s, tmp);
-  for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)4U; i0 = i0 + (uint32_t)1U)
+  for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)4U; i0++)
   {
     store64_le(o + i0 * (uint32_t)8U, u64s[i0]);
   }
@@ -917,7 +917,7 @@ void Hacl_Curve25519_51_scalarmult(uint8_t *out, uint8_t *priv, uint8_t *pub)
 {
   uint64_t init1[10U] = { 0U };
   uint64_t tmp[4U] = { 0U };
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i = i + (uint32_t)1U)
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
   {
     uint64_t *os = tmp;
     uint8_t *bj = pub + i * (uint32_t)8U;
@@ -959,7 +959,7 @@ void Hacl_Curve25519_51_scalarmult(uint8_t *out, uint8_t *priv, uint8_t *pub)
 void Hacl_Curve25519_51_secret_to_public(uint8_t *pub, uint8_t *priv)
 {
   uint8_t basepoint[32U] = { 0U };
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)32U; i = i + (uint32_t)1U)
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)32U; i++)
   {
     uint8_t *os = basepoint;
     uint8_t x = g25519[i];
@@ -977,7 +977,7 @@ bool Hacl_Curve25519_51_ecdh(uint8_t *out, uint8_t *priv, uint8_t *pub)
   uint8_t zeros1[32U] = { 0U };
   Hacl_Curve25519_51_scalarmult(out, priv, pub);
   uint8_t res = (uint8_t)255U;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)32U; i = i + (uint32_t)1U)
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)32U; i++)
   {
     uint8_t uu____0 = FStar_UInt8_eq_mask(out[i], zeros1[i]);
     res = uu____0 & res;

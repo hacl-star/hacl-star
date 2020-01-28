@@ -28,7 +28,7 @@ u32
 Hacl_Impl_Chacha20_Vec_chacha20_constants[4U] =
   { (u32)0x61707865U, (u32)0x3320646eU, (u32)0x79622d32U, (u32)0x6b206574U };
 
-inline static void quarter_round(u32 *st, u32 a, u32 b, u32 c, u32 d)
+static inline void quarter_round(u32 *st, u32 a, u32 b, u32 c, u32 d)
 {
   u32 sta0 = st[a];
   u32 stb0 = st[b];
@@ -82,7 +82,7 @@ inline static void quarter_round(u32 *st, u32 a, u32 b, u32 c, u32 d)
   st[b] = std2;
 }
 
-inline static void double_round(u32 *st)
+static inline void double_round(u32 *st)
 {
   quarter_round(st, (u32)0U, (u32)4U, (u32)8U, (u32)12U);
   quarter_round(st, (u32)1U, (u32)5U, (u32)9U, (u32)13U);
@@ -94,7 +94,7 @@ inline static void double_round(u32 *st)
   quarter_round(st, (u32)3U, (u32)4U, (u32)9U, (u32)14U);
 }
 
-inline static void rounds(u32 *st)
+static inline void rounds(u32 *st)
 {
   double_round(st);
   double_round(st);
@@ -108,16 +108,16 @@ inline static void rounds(u32 *st)
   double_round(st);
 }
 
-inline static void chacha20_core(u32 *k, u32 *ctx, u32 ctr)
+static inline void chacha20_core(u32 *k, u32 *ctx, u32 ctr)
 {
   u32 ctr_u32;
-  memcpy(k, ctx, (u32)16U * sizeof ctx[0U]);
+  memcpy(k, ctx, (u32)16U * sizeof (ctx[0U]));
   ctr_u32 = ctr;
   k[12U] = k[12U] + ctr_u32;
   rounds(k);
   {
     u32 i;
-    for (i = (u32)0U; i < (u32)16U; i = i + (u32)1U)
+    for (i = (u32)0U; i < (u32)16U; i++)
     {
       u32 *os = k;
       u32 x = k[i] + ctx[i];
@@ -131,7 +131,7 @@ static u32
 chacha20_constants[4U] =
   { (u32)0x61707865U, (u32)0x3320646eU, (u32)0x79622d32U, (u32)0x6b206574U };
 
-inline static void chacha20_init(u32 *ctx, u8 *k, u8 *n1, u32 ctr)
+static inline void chacha20_init(u32 *ctx, u8 *k, u8 *n1, u32 ctr)
 {
   u32 *uu____0 = ctx;
   u32 *uu____1;
@@ -139,7 +139,7 @@ inline static void chacha20_init(u32 *ctx, u8 *k, u8 *n1, u32 ctr)
   u32 i;
   {
     u32 i0;
-    for (i0 = (u32)0U; i0 < (u32)4U; i0 = i0 + (u32)1U)
+    for (i0 = (u32)0U; i0 < (u32)4U; i0++)
     {
       u32 *os = uu____0;
       u32 x = chacha20_constants[i0];
@@ -149,7 +149,7 @@ inline static void chacha20_init(u32 *ctx, u8 *k, u8 *n1, u32 ctr)
   uu____1 = ctx + (u32)4U;
   {
     u32 i0;
-    for (i0 = (u32)0U; i0 < (u32)8U; i0 = i0 + (u32)1U)
+    for (i0 = (u32)0U; i0 < (u32)8U; i0++)
     {
       u32 *os = uu____1;
       u8 *bj = k + i0 * (u32)4U;
@@ -161,7 +161,7 @@ inline static void chacha20_init(u32 *ctx, u8 *k, u8 *n1, u32 ctr)
   }
   ctx[12U] = ctr;
   uu____2 = ctx + (u32)13U;
-  for (i = (u32)0U; i < (u32)3U; i = i + (u32)1U)
+  for (i = (u32)0U; i < (u32)3U; i++)
   {
     u32 *os = uu____2;
     u8 *bj = n1 + i * (u32)4U;
@@ -172,7 +172,7 @@ inline static void chacha20_init(u32 *ctx, u8 *k, u8 *n1, u32 ctr)
   }
 }
 
-inline static void chacha20_encrypt_block(u32 *ctx, u8 *out, u32 incr1, u8 *text)
+static inline void chacha20_encrypt_block(u32 *ctx, u8 *out, u32 incr1, u8 *text)
 {
   u32 k[16U] = { 0U };
   chacha20_core(k, ctx, incr1);
@@ -180,7 +180,7 @@ inline static void chacha20_encrypt_block(u32 *ctx, u8 *out, u32 incr1, u8 *text
     u32 bl[16U] = { 0U };
     {
       u32 i;
-      for (i = (u32)0U; i < (u32)16U; i = i + (u32)1U)
+      for (i = (u32)0U; i < (u32)16U; i++)
       {
         u32 *os = bl;
         u8 *bj = text + i * (u32)4U;
@@ -192,7 +192,7 @@ inline static void chacha20_encrypt_block(u32 *ctx, u8 *out, u32 incr1, u8 *text
     }
     {
       u32 i;
-      for (i = (u32)0U; i < (u32)16U; i = i + (u32)1U)
+      for (i = (u32)0U; i < (u32)16U; i++)
       {
         u32 *os = bl;
         u32 x = bl[i] ^ k[i];
@@ -201,28 +201,28 @@ inline static void chacha20_encrypt_block(u32 *ctx, u8 *out, u32 incr1, u8 *text
     }
     {
       u32 i;
-      for (i = (u32)0U; i < (u32)16U; i = i + (u32)1U)
+      for (i = (u32)0U; i < (u32)16U; i++)
         store32_le(out + i * (u32)4U, bl[i]);
     }
   }
 }
 
-inline static void chacha20_encrypt_last(u32 *ctx, u32 len, u8 *out, u32 incr1, u8 *text)
+static inline void chacha20_encrypt_last(u32 *ctx, u32 len, u8 *out, u32 incr1, u8 *text)
 {
   u8 plain[64U] = { 0U };
-  memcpy(plain, text, len * sizeof text[0U]);
+  memcpy(plain, text, len * sizeof (text[0U]));
   chacha20_encrypt_block(ctx, plain, incr1, plain);
-  memcpy(out, plain, len * sizeof plain[0U]);
+  memcpy(out, plain, len * sizeof (plain[0U]));
 }
 
-inline static void chacha20_update(u32 *ctx, u32 len, u8 *out, u8 *text)
+static inline void chacha20_update(u32 *ctx, u32 len, u8 *out, u8 *text)
 {
   u32 rem1 = len % (u32)64U;
   u32 nb = len / (u32)64U;
   u32 rem2 = len % (u32)64U;
   {
     u32 i;
-    for (i = (u32)0U; i < nb; i = i + (u32)1U)
+    for (i = (u32)0U; i < nb; i++)
       chacha20_encrypt_block(ctx, out + i * (u32)64U, i, text + i * (u32)64U);
   }
   if (rem2 > (u32)0U)

@@ -10,6 +10,7 @@ open Vale.X64.Machine_Semantics_s
 open FStar.IO
 
 noeq type printer = {
+  print_reg_name: reg_64 -> string;
   reg_prefix : unit -> string;
   mem_prefix : string -> string;
   maddr      : string -> option (string & string) -> string -> string;
@@ -44,7 +45,7 @@ let print_reg_name (r:reg_64) : string =
   | 15 -> "r15"
 
 let print_reg64 (r:reg_64) (p:printer) : string =
-  p.reg_prefix() ^ print_reg_name r
+  p.reg_prefix() ^ p.print_reg_name r
 
 let print_reg32 (r:reg_64) (p:printer) : string =
   p.reg_prefix() ^
@@ -248,11 +249,13 @@ let print_cmp (c:ocmp) (counter:int) (p:printer) : string =
 
 let rec print_block (b:codes) (n:int) (p:printer) : string & int =
   match b with
-  | Nil -> "", n
+  | Nil -> ("", n)
+  | Ins (Instr _ _ (AnnotateSpace _)) :: tail -> print_block tail n p
+  | Ins (Instr _ _ (AnnotateGhost _)) :: tail -> print_block tail n p
   | head :: tail ->
-    let head_str, n' = print_code head n p in
-    let rest, n'' = print_block tail n' p in
-    head_str ^ rest, n''
+    let (head_str, n') = print_code head n p in
+    let (rest, n'') = print_block tail n' p in
+    (head_str ^ rest, n'')
 and print_code (c:code) (n:int) (p:printer) : string & int =
   match c with
   | Ins ins -> (print_ins ins p ^ "\n", n)
@@ -261,21 +264,21 @@ and print_code (c:code) (n:int) (p:printer) : string & int =
     let n1 = n in
     let n2 = n + 1 in
     let cmp = print_cmp (cmp_not cond) n1 p in
-    let true_str, n' = print_code true_code (n + 2) p in
+    let (true_str, n') = print_code true_code (n + 2) p in
     let jmp = "  jmp L" ^ string_of_int n2 ^ "\n" in
     let label1 = "L" ^ string_of_int n1 ^ ":\n" in
-    let false_str, n' = print_code false_code n' p in
+    let (false_str, n') = print_code false_code n' p in
     let label2 = "L" ^ string_of_int n2 ^ ":\n" in
-    cmp ^ true_str ^ jmp ^ label1 ^ false_str ^ label2, n'
+    (cmp ^ true_str ^ jmp ^ label1 ^ false_str ^ label2, n')
   | While cond body ->
     let n1 = n in
     let n2 = n + 1 in
     let jmp = "  jmp L" ^ string_of_int n2 ^ "\n" in
     let label1 = p.align() ^ " 16\nL" ^ string_of_int n1 ^ ":\n" in
-    let body_str, n' = print_code body (n + 2) p in
+    let (body_str, n') = print_code body (n + 2) p in
     let label2 = p.align() ^ " 16\nL" ^ string_of_int n2 ^ ":\n" in
     let cmp = print_cmp cond n1 p in
-    jmp ^ label1 ^ body_str ^ label2 ^ cmp, n'
+    (jmp ^ label1 ^ body_str ^ label2 ^ cmp, n')
 
 let print_header (p:printer) =
   print_string (p.header())
@@ -309,6 +312,7 @@ let masm : printer =
   let proc_name (name:string) = "ALIGN 16\n" ^ name ^ " proc\n" in
   let ret (name:string) = "  ret\n" ^ name ^ " endp\n" in
   {
+  print_reg_name = print_reg_name;
   reg_prefix = reg_prefix;
   mem_prefix = mem_prefix;
   maddr      = maddr;
@@ -345,6 +349,7 @@ let gcc : printer =
   let proc_name (name:string) = ".global " ^ name ^ "\n" ^ name ^ ":\n" in
   let ret (name:string) = "  ret\n\n" in
   {
+  print_reg_name = print_reg_name;
   reg_prefix = reg_prefix;
   mem_prefix = mem_prefix;
   maddr      = maddr;
