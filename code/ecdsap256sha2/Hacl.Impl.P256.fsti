@@ -252,31 +252,3 @@ val isPointOnCurvePublic: p: point -> Stack bool
       as_nat h1 (gsub p (size 0) (size 4)), as_nat h1 (gsub p (size 4) (size 4)), as_nat h1 (gsub p (size 8) (size 4))
   ) 
 )
-
-(*)
-(* un clé privée d (un nombre entier choisi de manière aléatoire dans l'intervalle  [1,n-1] *) 
-val ecp256dh_i: result: lbuffer uint8 (size 64) -> scalar: lbuffer uint8 (size 32) -> Stack uint64
-  (requires fun h -> live h result /\ live h scalar /\ disjoint result scalar /\
-    Lib.ByteSequence.nat_from_bytes_le (as_seq h scalar) >= 1 /\
-    Lib.ByteSequence.nat_from_bytes_le (as_seq h scalar) < Hacl.Spec.ECDSAP256.Definition.prime_p256_order
-  )
-  (ensures fun h0 r h1 -> modifies (loc result) h0 h1 /\
-    (
-      let xN, yN, zN = secret_to_public (as_seq h0 scalar) in 
-      let resultX = gsub result (size 0) (size 32) in 
-      let resultY = gsub result (size 32) (size 32) in 
-      if isPointAtInfinity (xN, yN, zN) then uint_v r = maxint U64 else uint_v r = 0 /\
-      Lib.ByteSequence.nat_from_bytes_le (as_seq h1 resultX) == xN /\
-      Lib.ByteSequence.nat_from_bytes_le (as_seq h1 resultY) == yN
-    )  
-  )
-
-(*
-val ecp256dh_r: result: lbuffer uint8 (size 64) -> p: lbuffer uint8 (size 64) -> scalar: lbuffer uint8 (size 32) -> Stack uint64 
-  (requires fun h -> live h result /\ live h p /\ live h scalar /\ 
-    disjoint result p /\ disjoint result scalar /\ disjoint p scalar /\
-    Lib.ByteSequence.nat_from_bytes_le (as_seq h scalar) >= 1 /\
-    Lib.ByteSequence.nat_from_bytes_le (as_seq h scalar) < Hacl.Spec.ECDSAP256.Definition.prime_p256_order
-  )
-  (ensures fun h0 r h1 -> True)
-*)
