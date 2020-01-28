@@ -341,6 +341,6 @@ let assert_normal (p:Type) : Lemma
   =
   ()
 
-let wp_sound_code_norm #a c qc s0 k =
+let va_wp_sound_code_norm #a c qc s0 k =
   assert_normal (wp_sound_code_pre qc s0 k);
   wp_sound_code_wrap c qc s0 k

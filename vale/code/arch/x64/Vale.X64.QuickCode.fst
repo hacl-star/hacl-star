@@ -19,6 +19,7 @@ type mod_t =
 | Mod_stack: mod_t
 | Mod_stackTaint: mod_t
 unfold let mods_t = list mod_t
+unfold let va_mods_t = mods_t
 
 [@va_qattr] unfold let va_Mod_None = Mod_None
 [@va_qattr] unfold let va_Mod_ok = Mod_ok
@@ -67,7 +68,7 @@ let rec update_state_mods (mods:mods_t) (sM sK:vale_state) : vale_state =
 unfold let update_state_mods_norm (mods:mods_t) (sM sK:vale_state) : vale_state =
   norm [iota; zeta; delta_attr [`%qmodattr]; delta_only [`%update_state_mods; `%update_state_mod]] (update_state_mods mods sM sK)
 
-let lemma_norm_mods (mods:mods_t) (sM sK:vale_state) : Lemma
+let va_lemma_norm_mods (mods:mods_t) (sM sK:vale_state) : Lemma
   (ensures update_state_mods mods sM sK == update_state_mods_norm mods sM sK)
   = ()
 
@@ -102,14 +103,15 @@ let t_compute (#a:Type0) (c:va_code) (wp:quickProc_wp a) : Type =
     (ensures fun _ -> True)
 
 let t_require (s0:va_state) = state_inv s0
+unfold let va_t_require = t_require
 
-let t_ensure (#a:Type0) (c:va_code) (mods:mods_t) (s0:vale_state) (k:(vale_state -> a -> Type0)) =
+let va_t_ensure (#a:Type0) (c:va_code) (mods:mods_t) (s0:vale_state) (k:(vale_state -> a -> Type0)) =
   fun (sM, f0, g) -> eval_code c s0 f0 sM /\ update_state_mods mods sM s0 == sM /\ state_inv sM /\ k sM g
 
 let t_proof (#a:Type0) (c:va_code) (mods:mods_t) (wp:quickProc_wp a) : Type =
   s0:vale_state -> k:(vale_state -> a -> Type0) -> Ghost (vale_state & va_fuel & a)
     (requires t_require s0 /\ wp s0 k)
-    (ensures t_ensure c mods s0 k)
+    (ensures va_t_ensure c mods s0 k)
 
 // Code that returns a ghost value of type a
 [@va_qattr]
@@ -121,6 +123,8 @@ noeq type quickCode (a:Type0) : va_code -> Type =
     proof:t_proof c mods wp ->
     quickCode a c
 
+[@va_qattr]
 unfold let va_quickCode = quickCode
+
 [@va_qattr]
 unfold let va_QProc = QProc

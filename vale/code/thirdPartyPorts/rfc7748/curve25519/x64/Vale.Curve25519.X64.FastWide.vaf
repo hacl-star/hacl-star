@@ -124,7 +124,6 @@ procedure Fmul(
         declare_buffer64(dst_b, 0, Secret, Mutable),
         declare_buffer64(tmp_b, 0, Secret, Mutable)));
 
-    Mov64(r15, dst_ptr); // Save dst_ptr that will be clobbered by Fast_multiply
     LargeComment("Compute the raw multiplication: tmp <- src1 * src2");
     Fast_multiply(0, tmp_b, inA_b, inB_b);
     Newline();
@@ -233,7 +232,9 @@ procedure Fmul_stdcall(
         Mov64(inA_ptr, rdx);
         Mov64(dst_ptr, r8);
         Mov64(inB_ptr, r9);
-    } else {
+    }
+    else
+    {
         Mov64(dst_ptr, rdx);
     }
 
@@ -339,7 +340,6 @@ procedure Fmul2(
         declare_buffer64(dst_b, 0, Secret, Mutable),
         declare_buffer64(tmp_b, 0, Secret, Mutable)));
 
-    Mov64(r15, dst_ptr); // Save dst_ptr that will be clobbered by Fast_multiply
     LargeComment("Compute the raw multiplication tmp[0] <- f1[0] * f2[0]"); 
     Fast_multiply(0, tmp_b, inA_b, inB_b);
     LargeComment("Compute the raw multiplication tmp[1] <- f1[1] * f2[1]"); 
@@ -473,7 +473,9 @@ procedure Fmul2_stdcall(
         Mov64(inA_ptr, rdx);
         Mov64(dst_ptr, r8);
         Mov64(inB_ptr, r9);
-    } else {
+    }
+    else
+    {
         Mov64(dst_ptr, rdx);
     }
 
@@ -542,7 +544,6 @@ procedure Fsqr(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64)
         declare_buffer64(dst_b, 0, Secret, Mutable),
         declare_buffer64(tmp_b, 0, Secret, Mutable)));
 
-    Mov64(rbx, dst_ptr); // Save dst_ptr that will be clobbered by Fast_sqr
     LargeComment("Compute the raw multiplication: tmp <- f * f");
     Fast_sqr(0, tmp_b, inA_b);
 
@@ -643,7 +644,9 @@ procedure Fsqr_stdcall(
         Mov64(tmp_ptr, rcx);
         Mov64(inA_ptr, rdx);
         Mov64(dst_ptr, r8);
-    } else {
+    }
+    else
+    {
         Mov64(dst_ptr, rdx);
     }
 
@@ -835,7 +838,9 @@ procedure Fsqr2_stdcall(
         Mov64(tmp_ptr, rcx);
         Mov64(inA_ptr, rdx);
         Mov64(dst_ptr, r8);
-    } else {
+    }
+    else
+    {
         Mov64(dst_ptr, rdx);
     }
 
@@ -927,7 +932,8 @@ procedure Fsqr_loop_stdcall(
     Push(r14);
 
     // Line up the rest of the arguments
-    inline if (win) {
+    inline if (win)
+    {
         // Store callee-save registers
         Push(rsi);
 
@@ -935,7 +941,9 @@ procedure Fsqr_loop_stdcall(
         Mov64(inA_ptr, rdx);
         Mov64(saved_dst_ptr, r8);    // Save dst_ptr, since Fast_multiply will clobber it
         Mov64(count, r9);
-    } else {
+    }
+    else
+    {
         Mov64(saved_dst_ptr, rdx);   // Save dst_ptr, since Fast_multiply will clobber it
         Mov64(count, rcx);
     }
@@ -985,7 +993,8 @@ procedure Fsqr_loop_stdcall(
         Sub64(count, 1);
     }
 
-    inline if (win) {
+    inline if (win)
+    {
         Pop(rsi);
     }
 

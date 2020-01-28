@@ -354,7 +354,7 @@ obj/Vale.Lib.Operator.fst: VALE_FLAGS=
 %.fst:
 	$(call run-with-log,\
 	  $(MONO) $(VALE_HOME)/bin/vale.exe -fstarText -quickMods \
-	    -typecheck -include $*.types.vaf \
+	    -include $*.types.vaf \
 	    $(VALE_FLAGS) \
 	    -in $< -out $@ -outi $@i && touch -c $@i \
 	  ,[VALE] $(notdir $*),$(call to-obj-dir,$@))
