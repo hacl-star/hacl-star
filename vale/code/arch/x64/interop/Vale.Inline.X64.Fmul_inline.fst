@@ -95,17 +95,17 @@ let fmul_lemma'
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions va_s0 va_s1 fmul_regs_modified fmul_xmms_modified /\
        fmul_post code out f1 f2 tmp va_s0 va_s1 f /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer out) /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer f1) /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer f2) /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer tmp) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_buffer out) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_buffer f1) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_buffer f2) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_buffer tmp) /\
        ME.buffer_writeable (as_vale_buffer out) /\
        ME.buffer_writeable (as_vale_buffer f1) /\
        ME.buffer_writeable (as_vale_buffer f2) /\
        ME.buffer_writeable (as_vale_buffer tmp) /\
        ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer out))
                    (ME.loc_union (ME.loc_buffer (as_vale_buffer tmp))
-                                 ME.loc_none)) va_s0.VS.vs_heap va_s1.VS.vs_heap
+                                 ME.loc_none)) (VS.vs_get_vale_heap va_s0) (VS.vs_get_vale_heap va_s1)
  )) =
    let va_s1, f = FW.va_lemma_Fmul code va_s0 (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) (as_vale_buffer f2) in
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 out;
@@ -179,7 +179,7 @@ let fmul out f1 f2 tmp =
     math_aux (B.length out);
     Vale.AsLowStar.MemoryHelpers.as_vale_buffer_len #TUInt64 #TUInt64 tmp;
     Vale.AsLowStar.MemoryHelpers.as_vale_buffer_len #TUInt64 #TUInt64 out;
-    let x, _ = lowstar_fmul_normal_t out f1 f2 tmp () in
+    let (x, _) = lowstar_fmul_normal_t out f1 f2 tmp () in
     ()
 
 #pop-options
@@ -241,17 +241,17 @@ let fmul2_lemma'
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions va_s0 va_s1 fmul_regs_modified fmul_xmms_modified /\
        fmul2_post code out f1 f2 tmp va_s0 va_s1 f /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer out) /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer f1) /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer f2) /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer tmp) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_buffer out) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_buffer f1) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_buffer f2) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_buffer tmp) /\
        ME.buffer_writeable (as_vale_buffer out) /\
        ME.buffer_writeable (as_vale_buffer f1) /\
        ME.buffer_writeable (as_vale_buffer f2) /\
        ME.buffer_writeable (as_vale_buffer tmp) /\
        ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer out))
                    (ME.loc_union (ME.loc_buffer (as_vale_buffer tmp))
-                                 ME.loc_none)) va_s0.VS.vs_heap va_s1.VS.vs_heap
+                                 ME.loc_none)) (VS.vs_get_vale_heap va_s0) (VS.vs_get_vale_heap va_s1)
  )) =
    let va_s1, f = FW.va_lemma_Fmul2 code va_s0 (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) (as_vale_buffer f2) in
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 out;
@@ -302,7 +302,7 @@ let fmul2 out f1 f2 tmp =
     DV.length_eq (get_downview f1);
     DV.length_eq (get_downview tmp);
     DV.length_eq (get_downview f2);
-    let x, _ = lowstar_fmul2_normal_t out f1 f2 tmp () in
+    let (x, _) = lowstar_fmul2_normal_t out f1 f2 tmp () in
     ()
 
 #pop-options
@@ -376,12 +376,12 @@ let fmul1_lemma'
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions va_s0 va_s1 fmul1_regs_modified fmul1_xmms_modified /\
        fmul1_post code out f1 f2 va_s0 va_s1 f /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer f1) /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer out) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_buffer f1) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_buffer out) /\
        ME.buffer_writeable (as_vale_buffer out) /\
        ME.buffer_writeable (as_vale_buffer f1) /\
        ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer out))
-                                 ME.loc_none) va_s0.VS.vs_heap va_s1.VS.vs_heap
+                                 ME.loc_none) (VS.vs_get_vale_heap va_s0) (VS.vs_get_vale_heap va_s1)
  )) =
    let va_s1, f = FH.va_lemma_Fmul1 code va_s0 (as_vale_buffer out) (as_vale_buffer f1) (UInt64.v f2) in
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 out;
@@ -443,7 +443,7 @@ open Vale.AsLowStar.MemoryHelpers
 let fmul_scalar out f1 f2
   = DV.length_eq (get_downview out);
     DV.length_eq (get_downview f1);
-    let x, _ = lowstar_fmul1_normal_t out f1 f2 () in
+    let (x, _) = lowstar_fmul1_normal_t out f1 f2 () in
     ()
 
 let fmul1_comments : list string = 

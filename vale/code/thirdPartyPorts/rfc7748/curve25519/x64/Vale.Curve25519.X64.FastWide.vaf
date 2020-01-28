@@ -17,6 +17,7 @@ module Vale.Curve25519.X64.FastWide
 #verbatim{:interface}
 open Vale.Def.Types_s
 open Vale.Arch.Types
+open Vale.Arch.HeapImpl
 open Vale.X64.Machine_s
 open Vale.X64.Memory
 open Vale.X64.Stack_i
@@ -72,12 +73,12 @@ procedure Fmul(
         inA_in := rsi;
         dst_in := r15;
         inB_in := rcx;
-    reads memTaint;
     modifies
         rax; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r12; r13; r14; r15;
-        efl; mem;
+        efl; heap0; memLayout;
     requires
         adx_enabled && bmi2_enabled;
+        is_initial_heap(memLayout, mem);
         buffers_disjoint(dst_b, inA_b) || dst_b == inA_b;
         buffers_disjoint(dst_b, inB_b) || dst_b == inB_b;
         buffers_disjoint(dst_b, tmp_b) || dst_b == tmp_b;
@@ -85,10 +86,10 @@ procedure Fmul(
         buffers_disjoint(tmp_b, inA_b);
         buffers_disjoint(tmp_b, inB_b);
 
-        validDstAddrs64(mem, dst_in, dst_b, 4, memTaint, Secret);
-        validSrcAddrs64(mem, inA_in, inA_b, 4, memTaint, Secret);
-        validSrcAddrs64(mem, inB_in, inB_b, 4, memTaint, Secret);
-        validDstAddrs64(mem, tmp_in, tmp_b, 8, memTaint, Secret);
+        validDstAddrs64(mem, dst_in, dst_b, 4, memLayout, Secret);
+        validSrcAddrs64(mem, inA_in, inA_b, 4, memLayout, Secret);
+        validSrcAddrs64(mem, inB_in, inB_b, 4, memLayout, Secret);
+        validDstAddrs64(mem, tmp_in, tmp_b, 8, memLayout, Secret);
     ensures
         let a0 := old(buffer64_read(inA_b, 0, mem));
         let a1 := old(buffer64_read(inA_b, 1, mem));
@@ -116,9 +117,13 @@ procedure Fmul(
         //////////////////////////////////////
 
         modifies_buffer_2(dst_b, tmp_b, old(mem), mem);
-        validSrcAddrs64(mem, dst_in, dst_b, 4, memTaint, Secret);
-
 {
+    CreateHeaplets(list(
+        declare_buffer64(inA_b, 0, Secret, Immutable),
+        declare_buffer64(inB_b, 0, Secret, Immutable),
+        declare_buffer64(dst_b, 0, Secret, Mutable),
+        declare_buffer64(tmp_b, 0, Secret, Mutable)));
+
     LargeComment("Compute the raw multiplication: tmp <- src1 * src2");
     Fast_multiply(0, tmp_b, inA_b, inB_b);
     Newline();
@@ -127,6 +132,8 @@ procedure Fmul(
     Mov64(rdi, r15);
     LargeComment("Wrap the result back into the field");
     Carry_wide(0, dst_b, tmp_b);
+
+    DestroyHeaplets();
 }
 
 
@@ -145,12 +152,12 @@ procedure Fmul_stdcall(
         inA_in := (if win then rdx else rsi);
         dst_in := (if win then r8  else rdx);
         inB_in := (if win then r9  else rcx);
-    reads memTaint;
     modifies
         rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
-        efl; mem; stack; stackTaint;
+        efl; heap0; memLayout; stack; stackTaint;
     requires
         rsp == init_rsp(stack);
+        is_initial_heap(memLayout, mem);
         adx_enabled && bmi2_enabled;
         buffers_disjoint(dst_b, inA_b) || dst_b == inA_b;
         buffers_disjoint(dst_b, inB_b) || dst_b == inB_b;
@@ -159,10 +166,10 @@ procedure Fmul_stdcall(
         buffers_disjoint(tmp_b, inA_b);
         buffers_disjoint(tmp_b, inB_b);
 
-        validDstAddrs64(mem, dst_in, dst_b, 4, memTaint, Secret);
-        validSrcAddrs64(mem, inA_in, inA_b, 4, memTaint, Secret);
-        validSrcAddrs64(mem, inB_in, inB_b, 4, memTaint, Secret);
-        validDstAddrs64(mem, tmp_in, tmp_b, 8, memTaint, Secret);
+        validDstAddrs64(mem, dst_in, dst_b, 4, memLayout, Secret);
+        validSrcAddrs64(mem, inA_in, inA_b, 4, memLayout, Secret);
+        validSrcAddrs64(mem, inB_in, inB_b, 4, memLayout, Secret);
+        validDstAddrs64(mem, tmp_in, tmp_b, 8, memLayout, Secret);
     ensures
         let a0 := old(buffer64_read(inA_b, 0, mem));
         let a1 := old(buffer64_read(inA_b, 1, mem));
@@ -190,7 +197,6 @@ procedure Fmul_stdcall(
         //////////////////////////////////////
 
         modifies_buffer_2(dst_b, tmp_b, old(mem), mem);
-        validSrcAddrs64(mem, dst_in, dst_b, 4, memTaint, Secret);
 
         win ==>  rbx == old(rbx);
         win ==>  rbp == old(rbp);
@@ -216,7 +222,8 @@ procedure Fmul_stdcall(
     Push_Secret(r15);
 
     // Line up the rest of the arguments
-    inline if (win) {
+    inline if (win)
+    {
         // Store callee-save registers
         Push_Secret(rsi);
         Push_Secret(rdi);
@@ -225,13 +232,16 @@ procedure Fmul_stdcall(
         Mov64(inA_ptr, rdx);
         Mov64(dst_ptr, r8);
         Mov64(inB_ptr, r9);
-    } else {
+    }
+    else
+    {
         Mov64(dst_ptr, rdx);
     }
 
     Fmul(tmp_b, inA_b, dst_b, inB_b);
 
-    inline if (win) {
+    inline if (win)
+    {
         Pop_Secret(rdi);
         Pop_Secret(rsi);
     }
@@ -257,12 +267,12 @@ procedure Fmul2(
         inA_in := rsi;
         dst_in := r15;
         inB_in := rcx;
-    reads memTaint;
     modifies
         rax; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r12; r13; r14; r15;
-        efl; mem;
+        efl; heap0; memLayout;
     requires
         adx_enabled && bmi2_enabled;
+        is_initial_heap(memLayout, mem);
         buffers_disjoint(dst_b, inA_b) || dst_b == inA_b;
         buffers_disjoint(dst_b, inB_b) || dst_b == inB_b;
         buffers_disjoint(dst_b, tmp_b) || dst_b == tmp_b;
@@ -270,10 +280,10 @@ procedure Fmul2(
         buffers_disjoint(tmp_b, inA_b);
         buffers_disjoint(tmp_b, inB_b);
 
-        validDstAddrs64(mem, dst_in, dst_b, 8, memTaint, Secret);
-        validSrcAddrs64(mem, inA_in, inA_b, 8, memTaint, Secret);
-        validSrcAddrs64(mem, inB_in, inB_b, 8, memTaint, Secret);
-        validDstAddrs64(mem, tmp_in, tmp_b, 16, memTaint, Secret);
+        validDstAddrs64(mem, dst_in, dst_b, 8, memLayout, Secret);
+        validSrcAddrs64(mem, inA_in, inA_b, 8, memLayout, Secret);
+        validSrcAddrs64(mem, inB_in, inB_b, 8, memLayout, Secret);
+        validDstAddrs64(mem, tmp_in, tmp_b, 16, memLayout, Secret);
     ensures
         let a0 := old(buffer64_read(inA_b, 0, mem));
         let a1 := old(buffer64_read(inA_b, 1, mem));
@@ -323,9 +333,13 @@ procedure Fmul2(
         //////////////////////////////////////
 
         modifies_buffer_2(dst_b, tmp_b, old(mem), mem);
-        validSrcAddrs64(mem, dst_in, dst_b, 4, memTaint, Secret);
-
 {
+    CreateHeaplets(list(
+        declare_buffer64(inA_b, 0, Secret, Immutable),
+        declare_buffer64(inB_b, 0, Secret, Immutable),
+        declare_buffer64(dst_b, 0, Secret, Mutable),
+        declare_buffer64(tmp_b, 0, Secret, Mutable)));
+
     LargeComment("Compute the raw multiplication tmp[0] <- f1[0] * f2[0]"); 
     Fast_multiply(0, tmp_b, inA_b, inB_b);
     LargeComment("Compute the raw multiplication tmp[1] <- f1[1] * f2[1]"); 
@@ -338,6 +352,8 @@ procedure Fmul2(
     Carry_wide(0, dst_b, tmp_b);
     Newline();
     Carry_wide(4, dst_b, tmp_b);
+
+    DestroyHeaplets();
 }
 
 procedure Fmul2_stdcall(
@@ -355,12 +371,12 @@ procedure Fmul2_stdcall(
         inA_in := (if win then rdx else rsi);
         dst_in := (if win then r8  else rdx);
         inB_in := (if win then r9  else rcx);
-    reads memTaint;
     modifies
         rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
-        efl; mem; stack; stackTaint;
+        efl; heap0; memLayout; stack; stackTaint;
     requires
         rsp == init_rsp(stack);
+        is_initial_heap(memLayout, mem);
         adx_enabled && bmi2_enabled;
         buffers_disjoint(dst_b, inA_b) || dst_b == inA_b;
         buffers_disjoint(dst_b, inB_b) || dst_b == inB_b;
@@ -369,10 +385,10 @@ procedure Fmul2_stdcall(
         buffers_disjoint(tmp_b, inA_b);
         buffers_disjoint(tmp_b, inB_b);
 
-        validDstAddrs64(mem, dst_in, dst_b, 8, memTaint, Secret);
-        validSrcAddrs64(mem, inA_in, inA_b, 8, memTaint, Secret);
-        validSrcAddrs64(mem, inB_in, inB_b, 8, memTaint, Secret);
-        validDstAddrs64(mem, tmp_in, tmp_b, 16, memTaint, Secret);
+        validDstAddrs64(mem, dst_in, dst_b, 8, memLayout, Secret);
+        validSrcAddrs64(mem, inA_in, inA_b, 8, memLayout, Secret);
+        validSrcAddrs64(mem, inB_in, inB_b, 8, memLayout, Secret);
+        validDstAddrs64(mem, tmp_in, tmp_b, 16, memLayout, Secret);
     ensures
         let a0 := old(buffer64_read(inA_b, 0, mem));
         let a1 := old(buffer64_read(inA_b, 1, mem));
@@ -447,7 +463,8 @@ procedure Fmul2_stdcall(
     Push_Secret(r15);
 
     // Line up the rest of the arguments
-    inline if (win) {
+    inline if (win)
+    {
         // Store callee-save registers
         Push_Secret(rsi);
         Push_Secret(rdi);
@@ -456,13 +473,16 @@ procedure Fmul2_stdcall(
         Mov64(inA_ptr, rdx);
         Mov64(dst_ptr, r8);
         Mov64(inB_ptr, r9);
-    } else {
+    }
+    else
+    {
         Mov64(dst_ptr, rdx);
     }
 
     Fmul2(tmp_b, inA_b, dst_b, inB_b);
 
-    inline if (win) {
+    inline if (win)
+    {
         Pop_Secret(rdi);
         Pop_Secret(rsi);
     }
@@ -482,20 +502,20 @@ procedure Fsqr(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64)
         tmp_in := rdi;
         inA_in := rsi;
         dst_in := rbx;
-    reads memTaint;
     modifies
         rax; rbx; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r12; r13; r14; r15;
-        efl; mem;
+        efl; heap0; memLayout;
     requires
         adx_enabled && bmi2_enabled;
+        is_initial_heap(memLayout, mem);
         buffers_disjoint(dst_b, inA_b) || dst_b == inA_b;
         buffers_disjoint(dst_b, tmp_b) || dst_b == tmp_b;
 
         buffers_disjoint(tmp_b, inA_b);
 
-        validDstAddrs64(mem, dst_in, dst_b, 4, memTaint, Secret);
-        validSrcAddrs64(mem, inA_in, inA_b, 4, memTaint, Secret);
-        validDstAddrs64(mem, tmp_in, tmp_b, 8, memTaint, Secret);
+        validDstAddrs64(mem, dst_in, dst_b, 4, memLayout, Secret);
+        validSrcAddrs64(mem, inA_in, inA_b, 4, memLayout, Secret);
+        validDstAddrs64(mem, tmp_in, tmp_b, 8, memLayout, Secret);
     ensures
         let a0 := old(buffer64_read(inA_b, 0, mem));
         let a1 := old(buffer64_read(inA_b, 1, mem));
@@ -519,6 +539,11 @@ procedure Fsqr(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64)
         modifies_buffer_2(dst_b, tmp_b, old(mem), mem);
 
 {
+    CreateHeaplets(list(
+        declare_buffer64(inA_b, 0, Secret, Immutable),
+        declare_buffer64(dst_b, 0, Secret, Mutable),
+        declare_buffer64(tmp_b, 0, Secret, Mutable)));
+
     LargeComment("Compute the raw multiplication: tmp <- f * f");
     Fast_sqr(0, tmp_b, inA_b);
 
@@ -529,6 +554,8 @@ procedure Fsqr(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64)
 
     LargeComment("Wrap the result back into the field");
     Carry_wide(0, dst_b, tmp_b);
+
+    DestroyHeaplets();
 }
 
 
@@ -545,21 +572,21 @@ procedure Fsqr_stdcall(
         tmp_in := (if win then rcx else rdi);
         inA_in := (if win then rdx else rsi);
         dst_in := (if win then r8  else rdx);
-    reads memTaint;
     modifies
         rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
-        efl; mem; stack; stackTaint;
+        efl; heap0; memLayout; stack; stackTaint;
     requires
         rsp == init_rsp(stack);
+        is_initial_heap(memLayout, mem);
         adx_enabled && bmi2_enabled;
         buffers_disjoint(dst_b, inA_b) || dst_b == inA_b;
         buffers_disjoint(dst_b, tmp_b) || dst_b == tmp_b;
 
         buffers_disjoint(tmp_b, inA_b);
 
-        validDstAddrs64(mem, dst_in, dst_b, 4, memTaint, Secret);
-        validSrcAddrs64(mem, inA_in, inA_b, 4, memTaint, Secret);
-        validDstAddrs64(mem, tmp_in, tmp_b, 8, memTaint, Secret);
+        validDstAddrs64(mem, dst_in, dst_b, 4, memLayout, Secret);
+        validSrcAddrs64(mem, inA_in, inA_b, 4, memLayout, Secret);
+        validDstAddrs64(mem, tmp_in, tmp_b, 8, memLayout, Secret);
     ensures
         let a0 := old(buffer64_read(inA_b, 0, mem));
         let a1 := old(buffer64_read(inA_b, 1, mem));
@@ -581,7 +608,7 @@ procedure Fsqr_stdcall(
         //////////////////////////////////////
 
         modifies_buffer_2(dst_b, tmp_b, old(mem), mem);
-        validSrcAddrs64(mem, dst_in, dst_b, 4, memTaint, Secret);
+//        validSrcAddrs64(mem, dst_in, dst_b, 4, memLayout, Secret);
 
         win ==>  rbx == old(rbx);
         win ==>  rbp == old(rbp);
@@ -608,7 +635,8 @@ procedure Fsqr_stdcall(
     Push_Secret(rbx);
 
     // Line up the rest of the arguments
-    inline if (win) {
+    inline if (win)
+    {
         // Store callee-save registers
         Push_Secret(rsi);
         Push_Secret(rdi);
@@ -616,13 +644,16 @@ procedure Fsqr_stdcall(
         Mov64(tmp_ptr, rcx);
         Mov64(inA_ptr, rdx);
         Mov64(dst_ptr, r8);
-    } else {
+    }
+    else
+    {
         Mov64(dst_ptr, rdx);
     }
 
     Fsqr(tmp_b, inA_b, dst_b);
 
-    inline if (win) {
+    inline if (win)
+    {
         Pop_Secret(rdi);
         Pop_Secret(rsi);
     }
@@ -643,20 +674,20 @@ procedure Fsqr2(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64
         tmp_in := rdi;
         inA_in := rsi;
         dst_in := rbx;
-    reads memTaint;
     modifies
         rax; rbx; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r12; r13; r14; r15;
-        efl; mem;
+        efl; heap0; memLayout;
     requires
         adx_enabled && bmi2_enabled;
+        is_initial_heap(memLayout, mem);
         buffers_disjoint(dst_b, inA_b) || dst_b == inA_b;
         buffers_disjoint(dst_b, tmp_b) || dst_b == tmp_b;
 
         buffers_disjoint(tmp_b, inA_b);
 
-        validDstAddrs64(mem, dst_in, dst_b, 8, memTaint, Secret);
-        validSrcAddrs64(mem, inA_in, inA_b, 8, memTaint, Secret);
-        validDstAddrs64(mem, tmp_in, tmp_b, 16, memTaint, Secret);
+        validDstAddrs64(mem, dst_in, dst_b, 8, memLayout, Secret);
+        validSrcAddrs64(mem, inA_in, inA_b, 8, memLayout, Secret);
+        validDstAddrs64(mem, tmp_in, tmp_b, 16, memLayout, Secret);
     ensures
         let a0  := old(buffer64_read(inA_b, 0, mem));
         let a1  := old(buffer64_read(inA_b, 1, mem));
@@ -689,8 +720,12 @@ procedure Fsqr2(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64
         //////////////////////////////////////
 
         modifies_buffer_2(dst_b, tmp_b, old(mem), mem);
-
 {
+    CreateHeaplets(list(
+        declare_buffer64(inA_b, 0, Secret, Immutable),
+        declare_buffer64(dst_b, 0, Secret, Mutable),
+        declare_buffer64(tmp_b, 0, Secret, Mutable)));
+
     Fast_sqr(0, tmp_b, inA_b);
     Newline();
     Fast_sqr(4, tmp_b, inA_b);
@@ -702,6 +737,8 @@ procedure Fsqr2(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64
     Carry_wide(0, dst_b, tmp_b);
     Newline();
     Carry_wide(4, dst_b, tmp_b);
+
+    DestroyHeaplets();
 }
 
 
@@ -718,21 +755,21 @@ procedure Fsqr2_stdcall(
         tmp_in := (if win then rcx else rdi);
         inA_in := (if win then rdx else rsi);
         dst_in := (if win then r8  else rdx);
-    reads memTaint;
     modifies
         rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
-        efl; mem; stack; stackTaint;
+        efl; heap0; memLayout; stack; stackTaint;
     requires
         rsp == init_rsp(stack);
+        is_initial_heap(memLayout, mem);
         adx_enabled && bmi2_enabled;
         buffers_disjoint(dst_b, inA_b) || dst_b == inA_b;
         buffers_disjoint(dst_b, tmp_b) || dst_b == tmp_b;
 
         buffers_disjoint(tmp_b, inA_b);
 
-        validDstAddrs64(mem, dst_in, dst_b, 8, memTaint, Secret);
-        validSrcAddrs64(mem, inA_in, inA_b, 8, memTaint, Secret);
-        validDstAddrs64(mem, tmp_in, tmp_b, 16, memTaint, Secret);
+        validDstAddrs64(mem, dst_in, dst_b, 8, memLayout, Secret);
+        validSrcAddrs64(mem, inA_in, inA_b, 8, memLayout, Secret);
+        validDstAddrs64(mem, tmp_in, tmp_b, 16, memLayout, Secret);
     ensures
         let a0  := old(buffer64_read(inA_b, 0, mem));
         let a1  := old(buffer64_read(inA_b, 1, mem));
@@ -765,7 +802,7 @@ procedure Fsqr2_stdcall(
         //////////////////////////////////////
 
         modifies_buffer_2(dst_b, tmp_b, old(mem), mem);
-        validSrcAddrs64(mem, dst_in, dst_b, 8, memTaint, Secret);
+//        validSrcAddrs64(mem, dst_in, dst_b, 8, memLayout, Secret);
 
         win ==>  rbx == old(rbx);
         win ==>  rbp == old(rbp);
@@ -792,7 +829,8 @@ procedure Fsqr2_stdcall(
     Push_Secret(rbx);
 
     // Line up the rest of the arguments
-    inline if (win) {
+    inline if (win)
+    {
         // Store callee-save registers
         Push_Secret(rsi);
         Push_Secret(rdi);
@@ -800,13 +838,16 @@ procedure Fsqr2_stdcall(
         Mov64(tmp_ptr, rcx);
         Mov64(inA_ptr, rdx);
         Mov64(dst_ptr, r8);
-    } else {
+    }
+    else
+    {
         Mov64(dst_ptr, rdx);
     }
 
     Fsqr2(tmp_b, inA_b, dst_b);
 
-    inline if (win) {
+    inline if (win)
+    {
         Pop_Secret(rdi);
         Pop_Secret(rsi);
     }
@@ -833,10 +874,10 @@ procedure Fsqr_loop_stdcall(
         inA_in := (if win then rdx else rsi);
         dst_in := (if win then r8  else rdx);
         count_in := (if win then r9  else rcx);
-    reads memTaint;
+    reads memLayout;
     modifies
         rax; rbx; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r12; r13; r14; r15;
-        rbp; rsp; efl; mem; stack;
+        rbp; rsp; efl; heap0; stack;
     requires
         rsp == init_rsp(stack);
         adx_enabled && bmi2_enabled;
@@ -848,9 +889,9 @@ procedure Fsqr_loop_stdcall(
 
         buffers_disjoint(tmp_b, inA_b);
 
-        validDstAddrs64(mem, dst_in, dst_b, 4, memTaint, Secret);
-        validSrcAddrs64(mem, inA_in, inA_b, 4, memTaint, Secret);
-        validSrcAddrs64(mem, tmp_in, tmp_b, 8, memTaint, Secret);
+        validDstAddrs64(mem, dst_in, dst_b, 4, memLayout, Secret);
+        validSrcAddrs64(mem, inA_in, inA_b, 4, memLayout, Secret);
+        validSrcAddrs64(mem, tmp_in, tmp_b, 8, memLayout, Secret);
     ensures
         let a0 := old(buffer64_read(inA_b, 0, mem));
         let a1 := old(buffer64_read(inA_b, 1, mem));
@@ -872,7 +913,7 @@ procedure Fsqr_loop_stdcall(
         //////////////////////////////////////
 
         modifies_buffer_2(dst_b, tmp_b, old(mem), mem);
-        validSrcAddrs64(mem, dst_in, dst_b, 4, memTaint, Secret);
+        validSrcAddrs64(mem, dst_in, dst_b, 4, memLayout, Secret);
 
         win ==> rsi == old(rsi);
         r12 == old(r12);
@@ -891,7 +932,8 @@ procedure Fsqr_loop_stdcall(
     Push(r14);
 
     // Line up the rest of the arguments
-    inline if (win) {
+    inline if (win)
+    {
         // Store callee-save registers
         Push(rsi);
 
@@ -899,7 +941,9 @@ procedure Fsqr_loop_stdcall(
         Mov64(inA_ptr, rdx);
         Mov64(saved_dst_ptr, r8);    // Save dst_ptr, since Fast_multiply will clobber it
         Mov64(count, r9);
-    } else {
+    }
+    else
+    {
         Mov64(saved_dst_ptr, rdx);   // Save dst_ptr, since Fast_multiply will clobber it
         Mov64(count, rcx);
     }
@@ -920,7 +964,7 @@ procedure Fsqr_loop_stdcall(
 
     Sub64(count, 1);
 
-    let pre_loop_mem := mem;
+    let pre_loop_mem := heap0;
     while (count > 0)
         invariant
             0 <= count < old(count_in);
@@ -933,8 +977,8 @@ procedure Fsqr_loop_stdcall(
             buffers_disjoint(tmp_b, inA_b);
 
             saved_dst_ptr == rsi;
-            validDstAddrs64(mem, rsi, dst_b, 4 + 0, memTaint, Secret);
-            validSrcAddrs64(mem, tmp_ptr, tmp_b, 8 + 0*2, memTaint, Secret);
+            validDstAddrs64(mem, rsi, dst_b, 4 + 0, memLayout, Secret);
+            validSrcAddrs64(mem, tmp_ptr, tmp_b, 8 + 0*2, memLayout, Secret);
 
             modifies_buffer_2(dst_b, tmp_b, pre_loop_mem, mem);
         decreases count;
@@ -949,7 +993,8 @@ procedure Fsqr_loop_stdcall(
         Sub64(count, 1);
     }
 
-    inline if (win) {
+    inline if (win)
+    {
         Pop(rsi);
     }
 

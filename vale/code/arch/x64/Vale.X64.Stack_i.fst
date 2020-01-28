@@ -35,11 +35,11 @@ let lemma_store_new_valid64 ptr v h =
 
 let lemma_correct_store_load_stack64 ptr v h =
   let BS.Machine_stack _ mem = h in
-  correct_update_get ptr v mem
+  correct_update_get64 ptr v mem
 
 let lemma_frame_store_load_stack64 ptr v h i =
   let BS.Machine_stack _ mem = h in
-  frame_update_heap ptr v mem;
+  frame_update_heap64 ptr v mem;
   BS.get_heap_val64_reveal ()
 
 let lemma_free_stack_same_load64 start finish ptr h =
