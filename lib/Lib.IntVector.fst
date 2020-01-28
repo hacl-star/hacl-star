@@ -40,11 +40,11 @@ let vec_counter (t:v_inttype) (w:width) =
   match t,w with
   | U128,1 -> vec128_zero
   | _,1 -> mk_int #t #SEC 0
-  | U32,4 -> vec128_load32s (u32 3) (u32 2) (u32 1) (u32 0)
-  | U64,2 -> vec128_load64s (u64 1) (u64 0)
-  | U32,8 -> vec256_load32s (u32 7) (u32 6) (u32 5) (u32 4) (u32 3) (u32 2) (u32 1) (u32 0)
-  | U64,4 -> vec256_load64s (u64 3) (u64 2) (u64 1) (u64 0)
-  | U128,2 -> vec256_load128s (u128 1) (u128 0)
+  | U32,4 -> vec128_load32s (u32 0) (u32 1) (u32 2) (u32 3)
+  | U64,2 -> vec128_load64s (u64 0) (u64 1)
+  | U32,8 -> vec256_load32s (u32 0) (u32 1) (u32 2) (u32 3) (u32 4) (u32 5) (u32 6) (u32 7)
+  | U64,4 -> vec256_load64s (u64 0) (u64 1) (u64 2) (u64 3)
+  | U128,2 -> vec256_load128s (u128 0) (u128 1)
 
 let create2 #a x0 x1 = admit()
 let create4 #a x0 x1 x2 x3 = admit()
@@ -62,19 +62,19 @@ let vec_load (#t:v_inttype) (x:uint_t t SEC) (w:width) =
   | U64,4 -> vec256_load64 x
   | U128,2 -> vec256_load128 x
 
-let vec_load2 #t x1 x0 =
+let vec_load2 #t x0 x1 =
   match t with
-  | U64 -> vec128_load64s x1 x0
-  | U128 -> vec256_load128s x1 x0
+  | U64 -> vec128_load64s x0 x1
+  | U128 -> vec256_load128s x0 x1
 
-let vec_load4 #t x3 x2 x1 x0 =
+let vec_load4 #t x0 x1 x2 x3 =
   match t with
-  | U32 -> vec128_load32s x3 x2 x1 x0
-  | U64 -> vec256_load64s x3 x2 x1 x0
+  | U32 -> vec128_load32s x0 x1 x2 x3
+  | U64 -> vec256_load64s x0 x1 x2 x3
 
-let vec_load8 #t x7 x6 x5 x4 x3 x2 x1 x0 =
+let vec_load8 #t x0 x1 x2 x3 x4 x5 x6 x7 =
   match t with
-  | U32 -> vec256_load32s x7 x6 x5 x4 x3 x2 x1 x0
+  | U32 -> vec256_load32s x0 x1 x2 x3 x4 x5 x6 x7 
 
 let vec_load16 #a x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 x14 x15 = admit()
 let vec_load32 #a x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 x14 x15 y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14 y15  = admit()
