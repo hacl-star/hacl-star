@@ -154,11 +154,21 @@ let lowstar_cswap_normal_t : normal lowstar_cswap_t
 
 open Vale.AsLowStar.MemoryHelpers
 
-let cswap2_inline bit p0 p1
+let cswap2 bit p0 p1
   = DV.length_eq (get_downview p0);
     DV.length_eq (get_downview p1);
     let (x, _) = lowstar_cswap_normal_t bit p0 p1 () in
     ()
 
+let cswap_comments : list string = 
+  ["Computes p1 <- bit ? p2 : p1 in constant time"]
+
+let cswap_names (n:nat) : string =
+  match n with
+  | 0 -> "bit"
+  | 1 -> "p1"
+  | 2 -> "p2"
+  | _ -> ""
+
 let cswap2_code_inline () : FStar.All.ML int =
-  PR.print_inline "cswap2_inline" 0 None (List.length cswap_dom) cswap_dom code_cswap of_arg cswap_regs_modified
+  PR.print_inline "cswap2" 0 None (List.length cswap_dom) cswap_dom cswap_names code_cswap of_arg cswap_regs_modified cswap_comments

@@ -197,7 +197,7 @@ let lowstar_Fsqr2_t =
     (W.mk_prediction code_Fsqr2 fsqr_dom [] (fsqr2_lemma code_Fsqr2 IA.win))
 
 [@ (CCConv "stdcall") ]
-val fsqr : normal lowstar_Fsqr_t
+val fsqr_e : normal lowstar_Fsqr_t
 
 [@ (CCConv "stdcall") ]
-val fsqr2 : normal lowstar_Fsqr2_t
+val fsqr2_e : normal lowstar_Fsqr2_t

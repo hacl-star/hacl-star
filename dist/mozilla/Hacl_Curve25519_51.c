@@ -24,7 +24,7 @@
 
 #include "Hacl_Curve25519_51.h"
 
-static inline void fadd(uint64_t *out, uint64_t *f1, uint64_t *f2)
+static inline void fadd0(uint64_t *out, uint64_t *f1, uint64_t *f2)
 {
   uint64_t f10 = f1[0U];
   uint64_t f20 = f2[0U];
@@ -43,7 +43,7 @@ static inline void fadd(uint64_t *out, uint64_t *f1, uint64_t *f2)
   out[4U] = f14 + f24;
 }
 
-static inline void fsub(uint64_t *out, uint64_t *f1, uint64_t *f2)
+static inline void fsub0(uint64_t *out, uint64_t *f1, uint64_t *f2)
 {
   uint64_t f10 = f1[0U];
   uint64_t f20 = f2[0U];
@@ -62,7 +62,7 @@ static inline void fsub(uint64_t *out, uint64_t *f1, uint64_t *f2)
   out[4U] = f14 + (uint64_t)0x3ffffffffffff8U - f24;
 }
 
-static inline void fmul(uint64_t *out, uint64_t *f1, uint64_t *f2)
+static inline void fmul0(uint64_t *out, uint64_t *f1, uint64_t *f2)
 {
   uint64_t f10 = f1[0U];
   uint64_t f11 = f1[1U];
@@ -299,7 +299,7 @@ static inline void fmul20(uint64_t *out, uint64_t *f1, uint64_t *f2)
   out[9U] = o24;
 }
 
-static inline void fmul10(uint64_t *out, uint64_t *f1, uint64_t f2)
+static inline void fmul1(uint64_t *out, uint64_t *f1, uint64_t f2)
 {
   uint64_t f10 = f1[0U];
   uint64_t f11 = f1[1U];
@@ -656,17 +656,17 @@ static void point_add_and_double(uint64_t *q, uint64_t *p01_tmp1, FStar_UInt128_
   uint64_t *b = tmp1 + (uint32_t)5U;
   uint64_t *ab = tmp1;
   uint64_t *dc = tmp1 + (uint32_t)10U;
-  fadd(a, x2, z2);
-  fsub(b, x2, z2);
+  fadd0(a, x2, z2);
+  fsub0(b, x2, z2);
   uint64_t *x3 = nq_p1;
   uint64_t *z31 = nq_p1 + (uint32_t)5U;
   uint64_t *d0 = dc;
   uint64_t *c0 = dc + (uint32_t)5U;
-  fadd(c0, x3, z31);
-  fsub(d0, x3, z31);
+  fadd0(c0, x3, z31);
+  fsub0(d0, x3, z31);
   fmul20(dc, dc, ab);
-  fadd(x3, d0, c0);
-  fsub(z31, d0, c0);
+  fadd0(x3, d0, c0);
+  fsub0(z31, d0, c0);
   uint64_t *a1 = tmp1;
   uint64_t *b1 = tmp1 + (uint32_t)5U;
   uint64_t *d = tmp1 + (uint32_t)10U;
@@ -680,11 +680,11 @@ static void point_add_and_double(uint64_t *q, uint64_t *p01_tmp1, FStar_UInt128_
   a1[2U] = c[2U];
   a1[3U] = c[3U];
   a1[4U] = c[4U];
-  fsub(c, d, c);
-  fmul10(b1, c, (uint64_t)121665U);
-  fadd(b1, b1, d);
+  fsub0(c, d, c);
+  fmul1(b1, c, (uint64_t)121665U);
+  fadd0(b1, b1, d);
   fmul20(nq, dc1, ab1);
-  fmul(z3, z3, x1);
+  fmul0(z3, z3, x1);
 }
 
 static void point_double(uint64_t *nq, uint64_t *tmp1, FStar_UInt128_uint128 *tmp2)
@@ -697,17 +697,17 @@ static void point_double(uint64_t *nq, uint64_t *tmp1, FStar_UInt128_uint128 *tm
   uint64_t *c = tmp1 + (uint32_t)15U;
   uint64_t *ab = tmp1;
   uint64_t *dc = tmp1 + (uint32_t)10U;
-  fadd(a, x2, z2);
-  fsub(b, x2, z2);
+  fadd0(a, x2, z2);
+  fsub0(b, x2, z2);
   fsqr20(dc, ab);
   a[0U] = c[0U];
   a[1U] = c[1U];
   a[2U] = c[2U];
   a[3U] = c[3U];
   a[4U] = c[4U];
-  fsub(c, d, c);
-  fmul10(b, c, (uint64_t)121665U);
-  fadd(b, b, d);
+  fsub0(c, d, c);
+  fmul1(b, c, (uint64_t)121665U);
+  fadd0(b, b, d);
   fmul20(nq, dc, ab);
 }
 
@@ -788,28 +788,28 @@ static void finv(uint64_t *o, uint64_t *i, FStar_UInt128_uint128 *tmp)
   FStar_UInt128_uint128 *tmp1 = tmp;
   fsquare_times(a, i, tmp1, (uint32_t)1U);
   fsquare_times(t00, a, tmp1, (uint32_t)2U);
-  fmul(b, t00, i);
-  fmul(a, b, a);
+  fmul0(b, t00, i);
+  fmul0(a, b, a);
   fsquare_times(t00, a, tmp1, (uint32_t)1U);
-  fmul(b, t00, b);
+  fmul0(b, t00, b);
   fsquare_times(t00, b, tmp1, (uint32_t)5U);
-  fmul(b, t00, b);
+  fmul0(b, t00, b);
   fsquare_times(t00, b, tmp1, (uint32_t)10U);
-  fmul(c, t00, b);
+  fmul0(c, t00, b);
   fsquare_times(t00, c, tmp1, (uint32_t)20U);
-  fmul(t00, t00, c);
+  fmul0(t00, t00, c);
   fsquare_times(t00, t00, tmp1, (uint32_t)10U);
-  fmul(b, t00, b);
+  fmul0(b, t00, b);
   fsquare_times(t00, b, tmp1, (uint32_t)50U);
-  fmul(c, t00, b);
+  fmul0(c, t00, b);
   fsquare_times(t00, c, tmp1, (uint32_t)100U);
-  fmul(t00, t00, c);
+  fmul0(t00, t00, c);
   fsquare_times(t00, t00, tmp1, (uint32_t)50U);
-  fmul(t00, t00, b);
+  fmul0(t00, t00, b);
   fsquare_times(t00, t00, tmp1, (uint32_t)5U);
   uint64_t *a0 = t1;
   uint64_t *t0 = t1 + (uint32_t)15U;
-  fmul(o, t0, a0);
+  fmul0(o, t0, a0);
 }
 
 static void encode_point(uint8_t *o, uint64_t *i)
@@ -822,7 +822,7 @@ static void encode_point(uint8_t *o, uint64_t *i)
   for (uint32_t _i = 0U; _i < (uint32_t)10U; ++_i)
     tmp_w[_i] = FStar_UInt128_uint64_to_uint128((uint64_t)0U);
   finv(tmp, z, tmp_w);
-  fmul(tmp, tmp, x);
+  fmul0(tmp, tmp, x);
   store_felem(u64s, tmp);
   for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)4U; i0++)
   {

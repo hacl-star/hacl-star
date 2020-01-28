@@ -65,9 +65,6 @@ EXPORTS
   Hacl_Curve25519_64_Slow_scalarmult
   Hacl_Curve25519_64_Slow_secret_to_public
   Hacl_Curve25519_64_Slow_ecdh
-  Hacl_Curve25519_64_scalarmult
-  Hacl_Curve25519_64_secret_to_public
-  Hacl_Curve25519_64_ecdh
   Hacl_Impl_Curve25519_Field51_fadd
   Hacl_Impl_Curve25519_Field51_fsub
   Hacl_Impl_Curve25519_Field51_fmul
@@ -141,6 +138,9 @@ EXPORTS
   Hacl_HMAC_DRBG_instantiate
   Hacl_HMAC_DRBG_reseed
   Hacl_HMAC_DRBG_generate
+  Hacl_Curve25519_64_scalarmult
+  Hacl_Curve25519_64_secret_to_public
+  Hacl_Curve25519_64_ecdh
   Hacl_Chacha20Poly1305_32_aead_encrypt
   Hacl_Chacha20Poly1305_32_aead_decrypt
   Hacl_Chacha20_Vec256_chacha20_encrypt_256

@@ -9,7 +9,7 @@ open FStar.Mul
 open Vale.Wrapper.X64.Fadd
 
 inline_for_extraction
-val fsub
+val fsub_e
   (out:u256)
   (f1:u256)
   (f2:u256)

@@ -68,10 +68,10 @@ procedure Fmul(
     {:quick}
     {:exportSpecs}
     lets
-        tmp_ptr @= rdi; inA_ptr @= rsi; dst_ptr @= rdx; inB_ptr @= rcx;
+        tmp_ptr @= rdi; inA_ptr @= rsi; dst_ptr @= r15; inB_ptr @= rcx;
         tmp_in := rdi;
         inA_in := rsi;
-        dst_in := rdx;
+        dst_in := r15;
         inB_in := rcx;
     modifies
         rax; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r12; r13; r14; r15;
@@ -125,9 +125,13 @@ procedure Fmul(
         declare_buffer64(tmp_b, 0, Secret, Mutable)));
 
     Mov64(r15, dst_ptr); // Save dst_ptr that will be clobbered by Fast_multiply
+    LargeComment("Compute the raw multiplication: tmp <- src1 * src2");
     Fast_multiply(0, tmp_b, inA_b, inB_b);
+    Newline();
+    Comment("Line up pointers");
     Mov64(inA_ptr, tmp_ptr);
-    Mov64(rdi, r15); // Restore dst_ptr
+    Mov64(rdi, r15);
+    LargeComment("Wrap the result back into the field");
     Carry_wide(0, dst_b, tmp_b);
 
     DestroyHeaplets();
@@ -144,7 +148,7 @@ procedure Fmul_stdcall(
     {:quick}
     {:exportSpecs}
     lets
-        tmp_ptr @= rdi; inA_ptr @= rsi; dst_ptr @= rdx; inB_ptr @= rcx;
+        tmp_ptr @= rdi; inA_ptr @= rsi; dst_ptr @= r15; inB_ptr @= rcx;
         tmp_in := (if win then rcx else rdi);
         inA_in := (if win then rdx else rsi);
         dst_in := (if win then r8  else rdx);
@@ -229,6 +233,8 @@ procedure Fmul_stdcall(
         Mov64(inA_ptr, rdx);
         Mov64(dst_ptr, r8);
         Mov64(inB_ptr, r9);
+    } else {
+        Mov64(dst_ptr, rdx);
     }
 
     Fmul(tmp_b, inA_b, dst_b, inB_b);
@@ -255,10 +261,10 @@ procedure Fmul2(
     {:quick}
     {:exportSpecs}
     lets
-        tmp_ptr @= rdi; inA_ptr @= rsi; dst_ptr @= rdx; inB_ptr @= rcx;
+        tmp_ptr @= rdi; inA_ptr @= rsi; dst_ptr @= r15; inB_ptr @= rcx;
         tmp_in := rdi;
         inA_in := rsi;
-        dst_in := rdx;
+        dst_in := r15;
         inB_in := rcx;
     modifies
         rax; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r12; r13; r14; r15;
@@ -334,11 +340,17 @@ procedure Fmul2(
         declare_buffer64(tmp_b, 0, Secret, Mutable)));
 
     Mov64(r15, dst_ptr); // Save dst_ptr that will be clobbered by Fast_multiply
+    LargeComment("Compute the raw multiplication tmp[0] <- f1[0] * f2[0]"); 
     Fast_multiply(0, tmp_b, inA_b, inB_b);
+    LargeComment("Compute the raw multiplication tmp[1] <- f1[1] * f2[1]"); 
     Fast_multiply(4, tmp_b, inA_b, inB_b);
+    Newline();
+    Comment("Line up pointers");
     Mov64(inA_ptr, tmp_ptr);
     Mov64(rdi, r15); // Restore dst_ptr
+    LargeComment("Wrap the results back into the field");
     Carry_wide(0, dst_b, tmp_b);
+    Newline();
     Carry_wide(4, dst_b, tmp_b);
 
     DestroyHeaplets();
@@ -354,7 +366,7 @@ procedure Fmul2_stdcall(
     {:quick}
     {:exportSpecs}
     lets
-        tmp_ptr @= rdi; inA_ptr @= rsi; dst_ptr @= rdx; inB_ptr @= rcx;
+        tmp_ptr @= rdi; inA_ptr @= rsi; dst_ptr @= r15; inB_ptr @= rcx;
         tmp_in := (if win then rcx else rdi);
         inA_in := (if win then rdx else rsi);
         dst_in := (if win then r8  else rdx);
@@ -461,6 +473,8 @@ procedure Fmul2_stdcall(
         Mov64(inA_ptr, rdx);
         Mov64(dst_ptr, r8);
         Mov64(inB_ptr, r9);
+    } else {
+        Mov64(dst_ptr, rdx);
     }
 
     Fmul2(tmp_b, inA_b, dst_b, inB_b);
@@ -482,10 +496,10 @@ procedure Fsqr(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64)
     {:quick}
     {:exportSpecs}
     lets
-        tmp_ptr @= rdi; inA_ptr @= rsi; dst_ptr @= rdx;
+        tmp_ptr @= rdi; inA_ptr @= rsi; dst_ptr @= rbx;
         tmp_in := rdi;
         inA_in := rsi;
-        dst_in := rdx;
+        dst_in := rbx;
     modifies
         rax; rbx; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r12; r13; r14; r15;
         efl; heap0; memLayout;
@@ -529,9 +543,15 @@ procedure Fsqr(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64)
         declare_buffer64(tmp_b, 0, Secret, Mutable)));
 
     Mov64(rbx, dst_ptr); // Save dst_ptr that will be clobbered by Fast_sqr
+    LargeComment("Compute the raw multiplication: tmp <- f * f");
     Fast_sqr(0, tmp_b, inA_b);
+
+    Newline();
+    Comment("Line up pointers");
     Mov64(inA_ptr, tmp_ptr);
-    Mov64(rdi, rbx); // Restore dst_ptr
+    Mov64(rdi, rbx);
+
+    LargeComment("Wrap the result back into the field");
     Carry_wide(0, dst_b, tmp_b);
 
     DestroyHeaplets();
@@ -547,7 +567,7 @@ procedure Fsqr_stdcall(
     {:quick}
     {:exportSpecs}
     lets
-        tmp_ptr @= rdi; inA_ptr @= rsi; dst_ptr @= rdx;
+        tmp_ptr @= rdi; inA_ptr @= rsi; dst_ptr @= rbx;
         tmp_in := (if win then rcx else rdi);
         inA_in := (if win then rdx else rsi);
         dst_in := (if win then r8  else rdx);
@@ -623,6 +643,8 @@ procedure Fsqr_stdcall(
         Mov64(tmp_ptr, rcx);
         Mov64(inA_ptr, rdx);
         Mov64(dst_ptr, r8);
+    } else {
+        Mov64(dst_ptr, rdx);
     }
 
     Fsqr(tmp_b, inA_b, dst_b);
@@ -645,10 +667,10 @@ procedure Fsqr2(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64
     {:quick}
     {:exportSpecs}
     lets
-        tmp_ptr @= rdi; inA_ptr @= rsi; dst_ptr @= rdx;
+        tmp_ptr @= rdi; inA_ptr @= rsi; dst_ptr @= rbx;
         tmp_in := rdi;
         inA_in := rsi;
-        dst_in := rdx;
+        dst_in := rbx;
     modifies
         rax; rbx; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r12; r13; r14; r15;
         efl; heap0; memLayout;
@@ -701,12 +723,16 @@ procedure Fsqr2(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64
         declare_buffer64(dst_b, 0, Secret, Mutable),
         declare_buffer64(tmp_b, 0, Secret, Mutable)));
 
-    Mov64(rbx, dst_ptr); // Save dst_ptr that will be clobbered by Fast_sqr
     Fast_sqr(0, tmp_b, inA_b);
+    Newline();
     Fast_sqr(4, tmp_b, inA_b);
+    Newline();
+    Comment("Line up pointers");
     Mov64(inA_ptr, tmp_ptr);
-    Mov64(rdi, rbx); // Restore dst_ptr
+    Mov64(rdi, rbx);
+    Newline();
     Carry_wide(0, dst_b, tmp_b);
+    Newline();
     Carry_wide(4, dst_b, tmp_b);
 
     DestroyHeaplets();
@@ -722,7 +748,7 @@ procedure Fsqr2_stdcall(
     {:quick}
     {:exportSpecs}
     lets
-        tmp_ptr @= rdi; inA_ptr @= rsi; dst_ptr @= rdx;
+        tmp_ptr @= rdi; inA_ptr @= rsi; dst_ptr @= rbx;
         tmp_in := (if win then rcx else rdi);
         inA_in := (if win then rdx else rsi);
         dst_in := (if win then r8  else rdx);
@@ -809,6 +835,8 @@ procedure Fsqr2_stdcall(
         Mov64(tmp_ptr, rcx);
         Mov64(inA_ptr, rdx);
         Mov64(dst_ptr, r8);
+    } else {
+        Mov64(dst_ptr, rdx);
     }
 
     Fsqr2(tmp_b, inA_b, dst_b);

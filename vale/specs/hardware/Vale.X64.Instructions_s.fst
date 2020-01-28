@@ -137,3 +137,9 @@ let ins_Comment s = make_ins (print (";# " ^ s) [])
             be selectively choose the correct comment
             character. However, that would require a larger scale
             change to the code. *)
+
+let ins_LargeComment s = make_ins (print (";# " ^ s) [])
+
+let ins_Newline = make_ins (print "" [])
+
+let ins_Space n = make_ins (print "" [])

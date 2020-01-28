@@ -233,14 +233,17 @@ procedure Fast_add1(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB:nat64)
         declare_buffer64(dst_b, 0, Secret, Mutable)));
 
     xor_lemmas();
+    Comment("Clear registers to propagate the carry bit");
     Xor64( r8,  r8);
     Xor64( r9,  r9);
     Xor64(r10, r10);
     Xor64(r11, r11);
     Xor64(rax, rax);
 
-    Add64Wrap(b, Mem64(heap0, inA_ptr,  0, inA_b, 0, Secret));
-    Store64_buffer(heap0, dst_ptr, b,  0, Secret, dst_b, 0);
+    Newline();
+    Comment("Begin addition chain");
+    Add64Wrap(b, Mem64(heap0, inA_ptr, 0, inA_b, 0, Secret));
+    Store64_buffer(heap0, dst_ptr, b, 0, Secret, dst_b, 0);
 
     Adcx64Wrap(r8, Mem64(heap0, inA_ptr,  8, inA_b, 1, Secret));
     Store64_buffer(heap0, dst_ptr, r8,  8, Secret, dst_b, 1);
@@ -251,6 +254,8 @@ procedure Fast_add1(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB:nat64)
     Adcx64Wrap(r10, Mem64(heap0, inA_ptr, 24, inA_b, 3, Secret));
     Store64_buffer(heap0, dst_ptr, r10, 24, Secret, dst_b, 3);
 
+    Newline();
+    Comment("Return the carry bit in a register");
     Adcx64Wrap(rax, r11);
 
     DestroyHeaplets();
@@ -945,15 +950,39 @@ procedure Cswap2(ghost bit_in:nat64, ghost p0_b:buffer64, ghost p1_b:buffer64)
         declare_buffer64(p0_b, 0, Secret, Mutable),
         declare_buffer64(p1_b, 0, Secret, Mutable)));
 
+    Comment("Transfer bit into CF flag");
     Add64Wrap(bit, 0xFFFFFFFFFFFFFFFF);
-
+    
+    Newline();
+    Comment("cswap p1[0], p2[0]");
     Cswap_single(0, p0_b, p1_b);
+
+    Newline();
+    Comment("cswap p1[1], p2[1]");
     Cswap_single(1, p0_b, p1_b);
+
+    Newline();
+    Comment("cswap p1[2], p2[2]");
     Cswap_single(2, p0_b, p1_b);
+
+    Newline();
+    Comment("cswap p1[3], p2[3]");
     Cswap_single(3, p0_b, p1_b);
+
+    Newline();
+    Comment("cswap p1[4], p2[4]");
     Cswap_single(4, p0_b, p1_b);
+
+    Newline();
+    Comment("cswap p1[5], p2[5]");
     Cswap_single(5, p0_b, p1_b);
+
+    Newline();
+    Comment("cswap p1[6], p2[6]");
     Cswap_single(6, p0_b, p1_b);
+
+    Newline();
+    Comment("cswap p1[7], p2[7]");
     Cswap_single(7, p0_b, p1_b);
 
     DestroyHeaplets();

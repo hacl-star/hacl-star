@@ -292,10 +292,10 @@ let lowstar_fmul1_t =
     (W.mk_prediction code_Fmul1 fmul1_dom [] (fmul1_lemma code_Fmul1 IA.win))
 
 [@ (CCConv "stdcall") ]
-val fmul_ : normal lowstar_fmul_t
+val fmul_e : normal lowstar_fmul_t
 
 [@ (CCConv "stdcall") ]
-val fmul2 : normal lowstar_fmul2_t
+val fmul2_e : normal lowstar_fmul2_t
 
 [@ (CCConv "stdcall") ]
-val fmul1 : normal lowstar_fmul1_t
+val fmul_scalar_e : normal lowstar_fmul1_t

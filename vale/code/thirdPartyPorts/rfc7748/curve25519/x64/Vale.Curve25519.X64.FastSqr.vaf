@@ -99,25 +99,37 @@ procedure Fast_sqr_part1(inline offset:nat, ghost inA_b:buffer64)
 //    "mulx 16(%1), %%rax, %%rcx ;" /* A[2]*A[1] */  "movq    $0, %%r14 ;"
 //    /*******************************************/  "adcx %%r15, %%r14 ;"
 
-    Load64_buffer(heap0, rdx, inA_ptr,  0 + offset*8, Secret, inA_b, 0 + offset);     /* A[0] */
-    /* The Xor64 clears the flags used for carry bits; NOTE: Original code uses xorl with r15d, maybe produces smaller code? */
-    Mulx64(r14, r8, Mem64(heap0, inA_ptr,  8 + offset*8, inA_b, 1 + offset, Secret));  /* A[0]*A[1] */ lemma_prod_bounds(r14,  r8, a0, a1);  Xor64(r15, r15);
+    NoNewline();
+    Load64_buffer(heap0, rdx, inA_ptr, 0 + offset * 8, Secret, inA_b, 0 + offset);     /* A[0] */
+    /* The Xor64 clears the flags used for carry bits; NOTE: Original code uses xorl with r15d, maybe produces smaller code? */ Space(35); Comment("f[0]");
+    
+    NoNewline();
+    Mulx64(r14, r8, Mem64(heap0, inA_ptr, 8 + offset * 8, inA_b, 1 + offset, Secret));  /* A[0]*A[1] */ lemma_prod_bounds(r14,  r8, a0, a1);  Space(2); Xor64(r15, r15); Space(1); Comment("f[1]*f[0]");
 
-    Mulx64(r10, r9, Mem64(heap0, inA_ptr, 16 + offset*8, inA_b, 2 + offset, Secret));  /* A[0]*A[2] */ lemma_prod_bounds(r10,  r9, a0, a2);  Adcx64Wrap( r9, r14);
+    NoNewline();
+    Mulx64(r10, r9, Mem64(heap0, inA_ptr, 16 + offset * 8, inA_b, 2 + offset, Secret));  /* A[0]*A[2] */ lemma_prod_bounds(r10,  r9, a0, a2); Space(1); Adcx64Wrap( r9, r14); Space(1); Comment("f[2]*f[0]");
 
-    Mulx64(rcx,rax, Mem64(heap0, inA_ptr, 24 + offset*8, inA_b, 3 + offset, Secret));  /* A[0]*A[3] */ lemma_prod_bounds(rcx, rax, a0, a3);  Adcx64Wrap(r10, rax);
+    NoNewline();
+    Mulx64(rcx, rax, Mem64(heap0, inA_ptr, 24 + offset * 8, inA_b, 3 + offset, Secret));  /* A[0]*A[3] */ lemma_prod_bounds(rcx, rax, a0, a3);  NoNewline(); Adcx64Wrap(r10, rax); Comment("f[3]*f[0]");
 
-    Load64_buffer(heap0, rdx, inA_ptr,  24 + offset*8, Secret, inA_b, 3 + offset);     /* A[3] */
+    NoNewline();
+    Load64_buffer(heap0, rdx, inA_ptr, 24 + offset * 8, Secret, inA_b, 3 + offset);     /* A[3] */
+    Space(34); Comment("f[3]");
 
-    Mulx64(r12,r11, Mem64(heap0, inA_ptr,  8 + offset*8, inA_b, 1 + offset, Secret));  /* A[3]*A[1] */ lemma_prod_bounds(r12, r11, a3, a1);  Adcx64Wrap(r11, rcx);
+    NoNewline();
+    Mulx64(r12, r11, Mem64(heap0, inA_ptr, 8 + offset * 8, inA_b, 1 + offset, Secret));  /* A[3]*A[1] */ lemma_prod_bounds(r12, r11, a3, a1); Space(1); Adcx64Wrap(r11, rcx); Comment("f[1]*f[3]");
 
-    Mulx64(r13,rax, Mem64(heap0, inA_ptr, 16 + offset*8, inA_b, 2 + offset, Secret));  /* A[3]*A[2] */ lemma_prod_bounds(r13, rax, a3, a2);  Adcx64Wrap(r12, rax);
+    NoNewline();
+    Mulx64(r13, rax, Mem64(heap0, inA_ptr, 16 + offset * 8, inA_b, 2 + offset, Secret));  /* A[3]*A[2] */ lemma_prod_bounds(r13, rax, a3, a2);  NoNewline(); Adcx64Wrap(r12, rax); Comment("f[2]*f[3]");
 
-    Load64_buffer(heap0, rdx, inA_ptr,   8 + offset*8, Secret, inA_b, 1 + offset);     /* A[1] */                                          Adcx64Wrap(r13, r15);  // r15 = 0, r13 < pow2_64 - 1, so this wraps the carry into r13
+    NoNewline();
+    Load64_buffer(heap0, rdx, inA_ptr, 8 + offset * 8, Secret, inA_b, 1 + offset);     /* A[1] */
+    Space(9); Adcx64Wrap(r13, r15); Comment("f1"); // r15 = 0, r13 < pow2_64 - 1, so this wraps the carry into r13
 
 //    assert !cf(efl);
 
-    Mulx64(rcx,rax, Mem64(heap0, inA_ptr, 16 + offset*8, inA_b, 2 + offset, Secret));  /* A[1]*A[2] */ lemma_prod_bounds(rcx, rax, a1, a2);  Mov64(r14, 0);
+    NoNewline();
+    Mulx64(rcx,rax, Mem64(heap0, inA_ptr, 16 + offset*8, inA_b, 2 + offset, Secret));  /* A[1]*A[2] */ lemma_prod_bounds(rcx, rax, a1, a2); NoNewline(); Mov64(r14, 0); Space(4); Comment("f[2]*f[1]");
 
 //    assert r14 == 0;
 //    assert r15 == 0;
@@ -159,8 +171,7 @@ procedure Fast_sqr_part2()
     Adox_64(r12, r15);     Adcx_64(r10, r10);
     Adox_64(r13, r15);     Adcx_64(r11, r11);
     Adox_64(r14, r15);     Adcx_64(r12, r12);
-                           Adcx_64(r13, r13);
-                           Adcx_64(r14, r14);
+    Adcx_64(r13, r13);     Adcx_64(r14, r14);
 }
 
 #reset-options "--z3rlimit 1000"
@@ -227,18 +238,42 @@ procedure Fast_sqr_part3(inline offset:nat, ghost dst_b:buffer64, ghost inA_b:bu
 //    "adcq %%rax, %%r13 ;"   "movq %%r13, 48(%0) ;"
 //    "adcq %%rcx, %%r14 ;"   "movq %%r14, 56(%0) ;"
 
-    Load64_buffer(heap0, rdx, inA_ptr,  0 + offset*8, Secret, inA_b, 0 + offset);   Mulx64(rcx, rax, rdx);  /* A[0]^2 */                let a0_sqr_hi := rcx; let a0_sqr_lo := rax;
-    /********************/                               Store64_buffer(heap0, dst_ptr, rax,  0 + offset*16, Secret, dst_b, 0 + offset*2);
-    Add64Wrap(r8, rcx);                                  Store64_buffer(heap0, dst_ptr,  r8,  8 + offset*16, Secret, dst_b, 1 + offset*2);
-    Load64_buffer(heap0, rdx, inA_ptr,  8 + offset*8, Secret, inA_b, 1 + offset);   Mulx64(rcx, rax, rdx);  /* A[1]^2 */                let a1_sqr_hi := rcx; let a1_sqr_lo := rax;
-    Adcx64Wrap( r9, rax);                                Store64_buffer(heap0, dst_ptr,  r9, 16 + offset*16, Secret, dst_b, 2 + offset*2);
-    Adcx64Wrap(r10, rcx);                                Store64_buffer(heap0, dst_ptr, r10, 24 + offset*16, Secret, dst_b, 3 + offset*2);
-    Load64_buffer(heap0, rdx, inA_ptr, 16 + offset*8, Secret, inA_b, 2 + offset);   Mulx64(rcx, rax, rdx);  /* A[2]^2 */                let a2_sqr_hi := rcx; let a2_sqr_lo := rax;
-    Adcx64Wrap(r11, rax);                                Store64_buffer(heap0, dst_ptr, r11, 32 + offset*16, Secret, dst_b, 4 + offset*2);
-    Adcx64Wrap(r12, rcx);                                Store64_buffer(heap0, dst_ptr, r12, 40 + offset*16, Secret, dst_b, 5 + offset*2);
-    Load64_buffer(heap0, rdx, inA_ptr, 24 + offset*8, Secret, inA_b, 3 + offset);   Mulx64(rcx, rax, rdx);  /* A[3]^2 */       lemma_prod_bounds(rcx, rax, rdx, rdx);                let a3_sqr_hi := rcx; let a3_sqr_lo := rax;
-    Adcx64Wrap(r13, rax);                                Store64_buffer(heap0, dst_ptr, r13, 48 + offset*16, Secret, dst_b, 6 + offset*2);
-    Adcx64Wrap(r14, rcx);                                Store64_buffer(heap0, dst_ptr, r14, 56 + offset*16, Secret, dst_b, 7 + offset*2);
+    NoNewline();
+    Load64_buffer(heap0, rdx, inA_ptr, 0 + offset * 8, Secret, inA_b, 0 + offset); Space(1);  Mulx64(rcx, rax, rdx);  /* A[0]^2 */  Comment("f[0]^2");
+    let a0_sqr_hi := rcx; let a0_sqr_lo := rax;
+    /********************/    Space(27);                 Store64_buffer(heap0, dst_ptr, rax, 0 + offset * 16, Secret, dst_b, 0 + offset * 2);
+    Newline();
+    NoNewline();
+    Add64Wrap(r8, rcx);    Space(3);                     Store64_buffer(heap0, dst_ptr, r8, 8 + offset * 16, Secret, dst_b, 1 + offset * 2);
+    Newline();
+    NoNewline();
+    Load64_buffer(heap0, rdx, inA_ptr,  8 + offset * 8, Secret, inA_b, 1 + offset); Space(1); Mulx64(rcx, rax, rdx);  /* A[1]^2 */ Comment("f[1]^2");
+    let a1_sqr_hi := rcx; let a1_sqr_lo := rax;
+    NoNewline();
+    Adcx64Wrap(r9, rax);   Space(2);                     Store64_buffer(heap0, dst_ptr, r9, 16 + offset * 16, Secret, dst_b, 2 + offset * 2);
+    Newline();
+    NoNewline();
+    Adcx64Wrap(r10, rcx);   Space(1);                     Store64_buffer(heap0, dst_ptr, r10, 24 + offset * 16, Secret, dst_b, 3 + offset * 2);
+    Newline();
+    NoNewline();
+    Load64_buffer(heap0, rdx, inA_ptr, 16 + offset * 8, Secret, inA_b, 2 + offset); NoNewline();   Mulx64(rcx, rax, rdx);  /* A[2]^2 */ Comment("f[2]^2");
+    let a2_sqr_hi := rcx; let a2_sqr_lo := rax;
+    NoNewline();
+    Adcx64Wrap(r11, rax);   Space(1);                    Store64_buffer(heap0, dst_ptr, r11, 32 + offset * 16, Secret, dst_b, 4 + offset * 2);
+    Newline();
+    NoNewline();
+    Adcx64Wrap(r12, rcx);   Space(1);                    Store64_buffer(heap0, dst_ptr, r12, 40 + offset * 16, Secret, dst_b, 5 + offset * 2);
+    Newline();
+    NoNewline();
+    Load64_buffer(heap0, rdx, inA_ptr, 24 + offset * 8, Secret, inA_b, 3 + offset); NoNewline();  Mulx64(rcx, rax, rdx);  /* A[3]^2 */  Comment("f[3]^2");
+    lemma_prod_bounds(rcx, rax, rdx, rdx);
+    let a3_sqr_hi := rcx; let a3_sqr_lo := rax;
+    NoNewline();
+    Adcx64Wrap(r13, rax);    Space(1);                   Store64_buffer(heap0, dst_ptr, r13, 48 + offset * 16, Secret, dst_b, 6 + offset * 2);
+    Newline();
+    NoNewline();
+    Adcx64Wrap(r14, rcx);    Space(1);                   Store64_buffer(heap0, dst_ptr, r14, 56 + offset * 16, Secret, dst_b, 7 + offset * 2);
+    Newline();
 
     lemma_sqr_part3(a, a0, a1, a2, a3, a0_sqr_hi, a0_sqr_lo, a1_sqr_hi, a1_sqr_lo, a2_sqr_hi, a2_sqr_lo, a3_sqr_hi, a3_sqr_lo,
                     old(r8), old(r9), old(r10), old(r11), old(r12), old(r13), old(r14),
@@ -308,6 +343,7 @@ procedure Fast_sqr(inline offset:nat, ghost dst_b:buffer64, ghost inA_b:buffer64
             2 * mul_nats(a2, a3),
             mul_nats(a3, a3)),
         int_canon);      // PASSES
+    Comment("Step 1: Compute all partial products");
     Fast_sqr_part1(offset, inA_b);
 
     let old_r8  := r8;
@@ -319,6 +355,8 @@ procedure Fast_sqr(inline offset:nat, ghost dst_b:buffer64, ghost inA_b:buffer64
     let old_rax := rax;
     let old_rcx := rcx;
 
+    Newline();
+    Comment("Step 2: Compute two parallel carry chains");
     Fast_sqr_part2();
 
     let mid_r8  := r8;
@@ -329,6 +367,8 @@ procedure Fast_sqr(inline offset:nat, ghost dst_b:buffer64, ghost inA_b:buffer64
     let mid_r13 := r13;
     let mid_r14 := r14;
 
+    Newline();
+    Comment("Step 3: Compute intermediate squares");
     Fast_sqr_part3(offset, dst_b, inA_b);
 
     let d0 := buffer64_read(dst_b, 0 + offset*2, heap0);

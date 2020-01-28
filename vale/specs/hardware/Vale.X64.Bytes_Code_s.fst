@@ -16,7 +16,6 @@ noeq type instruction_t (a:instr_annotation_t) =
       annotation:a i ->
       instruction_t a
   // Stack operations
-  // TODO: taint analysis for these
   | Push       : src:operand64 -> t:taint -> instruction_t a
   | Pop        : dst:operand64 -> t:taint -> instruction_t a
   | Alloc      : n:nat64 -> instruction_t a
