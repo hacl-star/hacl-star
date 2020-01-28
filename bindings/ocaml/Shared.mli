@@ -39,10 +39,10 @@ module Make_EdDSA (Impl : sig
   val sign_expanded : uint8 ptr -> uint8 ptr -> uint32 -> uint8 ptr -> unit
   end) : EdDSA
 
-module type Hash = sig
+module type HashFunction = sig
   val hash : Bigstring.t -> Bigstring.t -> unit
 end
 
-module Make_Hash (Impl : sig
+module Make_HashFunction (Impl : sig
     val hash : uint8 ptr -> uint32 -> uint8 ptr -> unit
-  end) : Hash
+  end) : HashFunction

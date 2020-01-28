@@ -74,6 +74,6 @@ module Hash : sig
   val hash : alg -> Bigstring.t -> Bigstring.t -> unit
 end
 
-module SHA2_224 : Hash
+module SHA2_224 : HashFunction
 
-module SHA2_256 : Hash
+module SHA2_256 : HashFunction

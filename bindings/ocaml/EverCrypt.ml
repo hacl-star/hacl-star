@@ -142,13 +142,13 @@ module Hash = struct
     everCrypt_Hash_hash (alg_definition alg) (uint8_ptr dst) (uint8_ptr input) (size_uint32 input)
 end
 
-module SHA2_224 : Hash =
-  Make_Hash (struct
+module SHA2_224 : HashFunction =
+  Make_HashFunction (struct
     let hash = EverCrypt_Hash.everCrypt_Hash_hash_224
 end)
 
-module SHA2_256 : Hash =
-  Make_Hash (struct
+module SHA2_256 : HashFunction =
+  Make_HashFunction (struct
     let hash = EverCrypt_Hash.everCrypt_Hash_hash_256
 end)
 

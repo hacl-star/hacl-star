@@ -19,13 +19,13 @@ end
 
 module Ed25519 : EdDSA
 
-module SHA2_224 : Hash
-module SHA2_256 : Hash
-module SHA2_384 : Hash
-module SHA2_512 : Hash
+module SHA2_224 : HashFunction
+module SHA2_256 : HashFunction
+module SHA2_384 : HashFunction
+module SHA2_512 : HashFunction
 
 (* TODO: SHAKE *)
-module SHA3_224 : Hash
-module SHA3_256 : Hash
-module SHA3_384 : Hash
-module SHA3_512 : Hash
+module SHA3_224 : HashFunction
+module SHA3_256 : HashFunction
+module SHA3_384 : HashFunction
+module SHA3_512 : HashFunction
