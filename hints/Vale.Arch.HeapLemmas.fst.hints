@@ -1,0 +1,67 @@
+[
+  "褯󺧑E�7塡u001cP菾n�",
+  [
+    [
+      "Vale.Arch.HeapLemmas.lemma_heap_impl",
+      1,
+      1,
+      0,
+      [ "@query", "equation_Vale.Arch.Heap.heap_impl" ],
+      0,
+      "d0a0d0e995a41d00376f13f1862b8419"
+    ],
+    [
+      "Vale.Arch.HeapLemmas.coerce",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_754b00004f4a881ff74d076ab276dfe1"
+      ],
+      0,
+      "778371d8d2bf2beed9c79241fad04f75"
+    ],
+    [
+      "Vale.Arch.HeapLemmas.heap_ignore_ghost_machine",
+      1,
+      1,
+      0,
+      [ "@query", "equation_Vale.Arch.Heap.heap_impl" ],
+      0,
+      "76b92d8210122a6669188fcfa18095ac"
+    ],
+    [
+      "Vale.Arch.HeapLemmas.lemma_heap_ignore_ghost_machine",
+      1,
+      1,
+      0,
+      [ "@query" ],
+      0,
+      "ac734d646369abd2c18e02ed004fc247"
+    ],
+    [
+      "Vale.Arch.HeapLemmas.lemma_heap_ignore_ghost_machine",
+      2,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Vale.Arch.Heap.heap_get",
+        "equation_Vale.Arch.Heap.heap_impl",
+        "equation_Vale.Arch.Heap.heap_taint",
+        "equation_Vale.Arch.Heap.heap_upd",
+        "equation_Vale.Arch.HeapLemmas.heap_ignore_ghost",
+        "equation_Vale.Arch.HeapLemmas.heap_ignore_ghost_machine",
+        "fuel_guarded_inversion_Vale.Arch.HeapImpl.vale_full_heap",
+        "proj_equation_Vale.Arch.HeapImpl.Mkvale_full_heap_vf_heap",
+        "proj_equation_Vale.Arch.HeapImpl.Mkvale_full_heap_vf_layout",
+        "proj_equation_Vale.Arch.HeapImpl.Mkvale_heap_layout_vl_taint",
+        "projection_inverse_Vale.Arch.HeapImpl.Mkvale_full_heap_vf_heap",
+        "projection_inverse_Vale.Arch.HeapImpl.Mkvale_full_heap_vf_layout",
+        "projection_inverse_Vale.Arch.HeapImpl.Mkvale_heap_layout_vl_taint"
+      ],
+      0,
+      "753b6ac6f436f28f104360ed025fc447"
+    ]
+  ]
+]
