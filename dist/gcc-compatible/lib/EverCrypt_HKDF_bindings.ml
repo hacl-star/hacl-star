@@ -2,7 +2,8 @@ open Ctypes
 module Bindings(F:Cstubs.FOREIGN) =
   struct
     open F
-    include (Hacl_Spec_bindings.Bindings)(Hacl_Spec_stubs)
+    module Hacl_Spec_applied = (Hacl_Spec_bindings.Bindings)(Hacl_Spec_stubs)
+    open Hacl_Spec_applied
     let everCrypt_HKDF_expand_sha1 =
       foreign "EverCrypt_HKDF_expand_sha1"
         ((ptr uint8_t) @->
