@@ -1,6 +1,8 @@
 How to submit a pull request with minimal amounts of noise
 ==========================================================
 
+Make sure you have the latest F\* and kremlin.
+
 Discarding your local changes to dist/ and hints/
 -------------------------------------------------
 
@@ -57,10 +59,21 @@ git add hints/Hacl.Poly1305.UnstableLemmas.fst.hints
 git commit -m "Selected hints for failing files"
 ```
 
-Push again and verify that you pass CI.
+Push again and verify that you pass CI. Don't use `git commit -a`!
 
 Adding the snapshot
 -------------------
+
+At this stage you should see whether you forgot to tweak some bundles, e.g.
+Mozilla only wants a subset of our algorithms and maybe you want to disable
+yours for the time being so that it doesn't appear in the dist/mozilla
+directory. Use `git status` to see what's up. Iterate as follows:
+
+```
+rm -rf dist/*/Makefile.basic && git clean -fdx dist && NODEPEND=1 make -j
+```
+
+This will force just the regeneration of the snapshots.
 
 Once you have a successful local build, review the diff in `dist`:
 
