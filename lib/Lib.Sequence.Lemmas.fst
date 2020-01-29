@@ -6,7 +6,7 @@ open Lib.Sequence
 
 // This is unnecessary because the same pragma is interleaved from the interface
 #set-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 \
-             --using_facts_from '-* +Prims +Lib.Sequence.Lemmas +Lib.Sequence +FStar.Seq'"
+             --using_facts_from '-* +Prims +Lib.Sequence.Lemmas +Lib.Sequence +FStar.Seq +FStar.Seq.Properties'"
 
 let lemma_i_div_bs w bs i =
   let bs_v = w * bs in
@@ -101,8 +101,6 @@ let lemma_i_div_bs_mul_bs_lt bs len i =
   }
 
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
-
 val lemma_slice_slice_f_vec_f:
     #a:Type
   -> #len:nat
@@ -124,25 +122,25 @@ let lemma_slice_slice_f_vec_f #a #len w bs inp i =
   let j_v = i / bs_v in
   let j = i % bs_v / bs in
 
-  let aux () : Lemma ((j_v + 1) * bs_v <= len) =
+  let pre1 () : Lemma ((j_v + 1) * bs_v <= len) =
     lemma_i_div_bs_mul_bs_lt bs_v len i in
 
-  let aux1 () : Lemma ((j + 1) * bs <= bs_v) =
+  let pre2 () : Lemma ((j + 1) * bs <= bs_v) =
     Math.Lemmas.swap_mul w bs;
     Math.Lemmas.modulo_division_lemma i bs w;
     assert (j < w);
     Math.Lemmas.lemma_mult_le_right bs (j + 1) w in
 
-  let aux3 () : Lemma (j_v * bs_v + (j + 1) * bs == (i / bs + 1) * bs) =
+  let post1 () : Lemma (j_v * bs_v + (j + 1) * bs == (i / bs + 1) * bs) =
     Math.Lemmas.distributivity_add_left j 1 bs;
     lemma_i_div_bs_mul_bs bs w bs_v i;
     Math.Lemmas.distributivity_add_left (i / bs) 1 bs in
 
-  aux ();
-  aux1 ();
+  pre1 ();
+  pre2 ();
   Seq.slice_slice inp (j_v * bs_v) ((j_v + 1) * bs_v) (j * bs) ((j + 1) * bs);
   lemma_i_div_bs_mul_bs bs w bs_v i;
-  aux3 ()
+  post1 ()
 
 
 val lemma_slice_slice_g_vec_f:
@@ -166,13 +164,7 @@ let lemma_slice_slice_g_vec_f #a #len w bs inp i =
   let rem = len % bs_v in
   let j = i % bs_v / bs in
 
-  let aux1 () : Lemma (0 <= len - rem /\ len - rem <= len) =
-    Math.Lemmas.euclidean_division_definition len bs_v;
-    assert (len - rem = len / bs_v * bs_v);
-    Math.Lemmas.nat_times_nat_is_nat (len / bs_v) bs_v;
-    () in
-
-  let aux2 () : Lemma (len - rem + j * bs == i / bs * bs) =
+  let post1 () : Lemma (len - rem + j * bs == i / bs * bs) =
     calc (==) {
       i / bs * bs;
       (==) { lemma_i_div_bs_mul_bs bs w bs_v i }
@@ -183,32 +175,35 @@ let lemma_slice_slice_g_vec_f #a #len w bs inp i =
       len - rem + j * bs;
     } in
 
-  let aux3 () : Lemma (len - rem + (j + 1) * bs == (i / bs + 1) * bs) =
+  let post2 () : Lemma (len - rem + (j + 1) * bs == (i / bs + 1) * bs) =
     Math.Lemmas.distributivity_add_left j 1 bs;
-    aux2 ();
-    //assert (len - rem + j * bs + bs == i / bs * bs + bs);
+    post1 ();
     Math.Lemmas.distributivity_add_left (i / bs) 1 bs;
     () in
 
-  let aux4 () : Lemma ((j + 1) * bs <= rem) =
+  let pre1 () : Lemma ((j + 1) * bs <= rem) =
     calc (<=) {
       (j + 1) * bs;
-      (==) { aux3 () }
-      (i / bs + 1) * bs - len + rem;
+      (==) { Math.Lemmas.distributivity_add_left j 1 bs }
+      j * bs + bs;
+      (==) { post1 () }
+      i / bs * bs - len + rem + bs;
       (==) { Math.Lemmas.distributivity_add_left (i / bs) 1 bs }
-      i / bs * bs + bs - len + rem;
-      (<=) { div_mul_lt bs i (len / bs);
-	Math.Lemmas.lemma_mult_le_right bs (i / bs + 1) (len / bs) }
+      (i / bs + 1) * bs - len + rem;
+      (<=) { div_mul_lt bs i (len / bs); Math.Lemmas.lemma_mult_le_right bs (i / bs + 1) (len / bs) }
       len / bs * bs - len + rem;
+      (==) { }
+      rem - (len - len / bs * bs);
       (<=) { Math.Lemmas.multiply_fractions len bs }
       rem;
     } in
 
-  aux1 ();
-  aux4 ();
+  pre1 ();
+  assert ((j + 1) * bs <= rem);
   Seq.slice_slice inp (len - rem) len (j * bs) ((j + 1) * bs);
-  aux2 ();
-  aux3 ()
+  post1 ();
+  assert (len - rem + j * bs = i / bs * bs);
+  post2 ()
 
 
 val lemma_slice_slice_g_vec_g:
@@ -241,8 +236,8 @@ val lemma_map_blocks_multi_vec_i_aux:
   -> blocksize_v:size_pos{blocksize_v = w * blocksize}
   -> inp:seq a{length inp == len}
   -> f:(block len blocksize -> lseq a blocksize -> lseq a blocksize)
-  -> f_v:(block len (w * blocksize) -> lseq a (w * blocksize) -> lseq a (w * blocksize))
-  -> pre:squash (forall (i:nat{i < len / blocksize_v * blocksize_v}) (b_v:lseq a (w * blocksize)).
+  -> f_v:(block len blocksize_v -> lseq a blocksize_v -> lseq a blocksize_v)
+  -> pre:squash (forall (i:nat{i < len / blocksize_v * blocksize_v}) (b_v:lseq a blocksize_v).
          map_blocks_vec_equiv_pre_f_v #a #len w blocksize blocksize_v f f_v i b_v)
   -> i:nat{i < len / blocksize_v * blocksize_v} ->
   Lemma
@@ -273,12 +268,12 @@ val lemma_map_blocks_multi_vec_i:
   -> blocksize_v:size_pos{blocksize_v == w * blocksize}
   -> inp:seq a{length inp == len /\ len % blocksize_v = 0 /\ len % blocksize = 0}
   -> f:(block len blocksize -> lseq a blocksize -> lseq a blocksize)
-  -> f_v:(block len (w * blocksize) -> lseq a (w * blocksize) -> lseq a (w * blocksize))
-  -> pre:squash (forall (i:nat{i < len}) (b_v:lseq a (w * blocksize)).
-         map_blocks_vec_equiv_pre_f_v #a #len w blocksize (w * blocksize) f f_v i b_v)
+  -> f_v:(block len blocksize_v -> lseq a blocksize_v -> lseq a blocksize_v)
+  -> pre:squash (forall (i:nat{i < len}) (b_v:lseq a blocksize_v).
+         map_blocks_vec_equiv_pre_f_v #a #len w blocksize blocksize_v f f_v i b_v)
   -> i:nat{i < len} ->
   Lemma
-   (Math.Lemmas.div_exact_r len (w * blocksize);
+   (Math.Lemmas.div_exact_r len blocksize_v;
     let nb_v = len / blocksize_v in
     let nb = len / blocksize in
 
@@ -287,7 +282,6 @@ val lemma_map_blocks_multi_vec_i:
     Seq.index v i == Seq.index s i)
 
 let lemma_map_blocks_multi_vec_i #a #len w blocksize blocksize_v inp f f_v pre i =
-  let blocksize_v = w * blocksize in
   let nb_v = len / blocksize_v in
   let nb = len / blocksize in
   index_map_blocks_multi blocksize nb nb inp f i;
@@ -320,7 +314,7 @@ val lemma_map_blocks_vec_g_v_f_i:
   -> inp:seq a{length inp == len}
   -> f:(block len blocksize -> lseq a blocksize -> lseq a blocksize)
   -> g:(last len blocksize -> rem:size_nat{rem < blocksize} -> lseq a rem -> lseq a rem)
-  -> g_v:(last len (w * blocksize) -> rem:size_nat{rem < w * blocksize} -> lseq a rem -> lseq a rem)
+  -> g_v:(last len blocksize_v -> rem:size_nat{rem < blocksize_v} -> lseq a rem -> lseq a rem)
   -> pre:squash ((forall (i:nat{len / blocksize_v * blocksize_v <= i /\ i < len}) (b_v:lseq a (len % blocksize_v)).
       map_blocks_vec_equiv_pre_g_v #a #len w blocksize blocksize_v f g g_v i b_v))
   -> i:nat{len / blocksize_v * blocksize_v <= i /\ i < len / blocksize * blocksize /\
@@ -344,7 +338,7 @@ val lemma_map_blocks_vec_g_v_g_i:
   -> inp:seq a{length inp == len}
   -> f:(block len blocksize -> lseq a blocksize -> lseq a blocksize)
   -> g:(last len blocksize -> rem:size_nat{rem < blocksize} -> lseq a rem -> lseq a rem)
-  -> g_v:(last len (w * blocksize) -> rem:size_nat{rem < w * blocksize} -> lseq a rem -> lseq a rem)
+  -> g_v:(last len blocksize_v -> rem:size_nat{rem < blocksize_v} -> lseq a rem -> lseq a rem)
   -> pre:squash (forall (i:nat{len / blocksize_v * blocksize_v <= i /\ i < len}) (b_v:lseq a (len % blocksize_v)).
       map_blocks_vec_equiv_pre_g_v #a #len w blocksize blocksize_v f g g_v i b_v)
   -> i:nat{len / blocksize * blocksize <= i /\ i < len /\
@@ -391,8 +385,8 @@ val lemma_map_blocks_vec_i:
   -> inp:seq a{length inp == len}
   -> f:(block len blocksize -> lseq a blocksize -> lseq a blocksize)
   -> g:(last len blocksize -> rem:size_nat{rem < blocksize} -> lseq a rem -> lseq a rem)
-  -> f_v:(block len (w * blocksize) -> lseq a (w * blocksize) -> lseq a (w * blocksize))
-  -> g_v:(last len (w * blocksize) -> rem:size_nat{rem < w * blocksize} -> lseq a rem -> lseq a rem)
+  -> f_v:(block len blocksize_v -> lseq a blocksize_v -> lseq a blocksize_v)
+  -> g_v:(last len blocksize_v -> rem:size_nat{rem < blocksize_v} -> lseq a rem -> lseq a rem)
   -> pre1:squash (forall (i:nat{i < len / blocksize_v * blocksize_v}) (b_v:lseq a blocksize_v).
       map_blocks_vec_equiv_pre_f_v #a #len w blocksize blocksize_v f f_v i b_v)
   -> pre2:squash (forall (i:nat{len / blocksize_v * blocksize_v <= i /\ i < len}) (b_v:lseq a (len % blocksize_v)).
@@ -406,7 +400,7 @@ val lemma_map_blocks_vec_i:
 let lemma_map_blocks_vec_i #a #len w bs bs_v inp f g f_v g_v pre1 pre2 i =
   let aux1 (i:nat{(len / bs_v) * bs_v <= i /\ i < (len / bs) * bs}) : Lemma (i % bs_v < (len % bs_v) / bs * bs) =
     Math.Lemmas.multiply_fractions len bs;
-    assert ((len / bs_v) * bs_v <= i /\ i < len);
+    assert (len / bs_v * bs_v <= i /\ i < len);
     lemma_i_mod_bs_v len bs w bs_v i;
     () in
 
@@ -456,6 +450,7 @@ val update_sub_is_append:
    (let i = create len zero in
     let zeros = create (len - n) zero in
     update_sub #a #len i 0 n x == Seq.append x zeros)
+
 let update_sub_is_append #a #len n x zero =
   let i = create len zero in
   let i = update_sub #a #len i 0 n x in
@@ -581,16 +576,18 @@ val fv_last_ctr_lemma_i_f:
   -> pre:squash (forall (i:nat{i <= len}) (b_v:lseq a blocksize_v).
          map_blocks_ctr_vec_equiv_pre #a #len w blocksize blocksize_v f f_v i b_v)
   -> b_v:lseq a (len % blocksize_v)
-  -> i:nat{i % blocksize_v < (len % blocksize_v) / blocksize * blocksize /\
-        len / blocksize_v * blocksize_v <= i /\ i <= len} -> Lemma
-  (let j = i % blocksize_v in
-   let rem = len % blocksize_v in
-   let b = get_block_s #a #rem blocksize b_v j in
-   let lp : lseq a rem = f_last_ctr #a #len blocksize_v f_v zero (len / blocksize_v) rem b_v in
+  -> i:nat{len / blocksize_v * blocksize_v <= i /\ i < len /\
+         i % blocksize_v < (len % blocksize_v) / blocksize * blocksize} -> Lemma
+  (let rem = len % blocksize_v in
+   let j = i % blocksize_v in
+   let g_v = f_last_ctr #a #len blocksize_v f_v zero in
+
    Math.Lemmas.lemma_div_le i len blocksize;
    assert (i / blocksize <= len / blocksize);
+
+   let b = get_block_s #a #rem blocksize b_v j in
    let rp : lseq a blocksize = f (i / blocksize) b in
-   lp.[j] == rp.[i % blocksize])
+   (g_v (len / blocksize_v) rem b_v).[j] == rp.[i % blocksize])
 
 let fv_last_ctr_lemma_i_f #a w blocksize blocksize_v len f f_v zero pre b_v i =
   let j = i % blocksize_v in
@@ -598,21 +595,19 @@ let fv_last_ctr_lemma_i_f #a w blocksize blocksize_v len f f_v zero pre b_v i =
 
   let plain = create blocksize_v zero in
   let plain = update_sub plain 0 rem b_v in
-  let c = i / blocksize_v in
-  div_interval blocksize_v (len / blocksize_v) i;
-  assert (i / blocksize_v == len / blocksize_v);
-  let res = f_last_ctr #a #len blocksize_v f_v zero (len / blocksize_v) rem b_v in
-  assert (res == sub (f_v c plain) 0 rem);
-  assert (res.[j] == (f_v c plain).[j]);
-
   assert (map_blocks_ctr_vec_equiv_pre #a #len w blocksize blocksize_v f f_v i plain);
-  Math.Lemmas.multiple_division_lemma w blocksize;
-  let b = get_block_s #a #blocksize_v blocksize plain j in
-  Math.Lemmas.lemma_div_le i len blocksize;
-  assert (i / blocksize <= len / blocksize);
-  assert ((f_v c plain).[j] == (f (i / blocksize) b).[i % blocksize]);
+  //Math.Lemmas.modulo_range_lemma i blocksize_v;
+  //Math.Lemmas.multiple_division_lemma w blocksize;
+  //let b = get_block_s #_ #blocksize_v blocksize plain j in
+  //Math.Lemmas.lemma_div_le i len blocksize;
+  //Math.Lemmas.lemma_div_le i len blocksize_v;
+  //assert ((f_v (i / blocksize_v) plain).[j] == (f (i / blocksize) b).[i % blocksize]);
 
-  update_sub_get_block_lemma #a w blocksize zero rem b_v j
+  //let g_v = f_last_ctr #a #len blocksize_v f_v zero in
+  //assert ((g_v (i / blocksize_v) rem b_v).[j] == (f_v (i / blocksize_v) plain).[j]);
+  //assert ((g_v (i / blocksize_v) rem b_v).[j] == (f (i / blocksize) b).[i % blocksize]);
+  update_sub_get_block_lemma #a w blocksize zero rem b_v j;
+  div_interval blocksize_v (len / blocksize_v) i
 
 
 val fv_last_ctr_lemma_i_g_aux:
@@ -739,8 +734,8 @@ let map_blocks_vec_equiv_pre_g_v_lemma #a w blocksize blocksize_v len inp f f_v 
   assert (rem_v % blocksize = rem);
 
   let j = i % blocksize_v in
-  if j < (rem_v / blocksize) * blocksize then
-    fv_last_ctr_lemma_i_f #a w blocksize blocksize_v len f f_v zero pre b_v i
+  if j < (rem_v / blocksize) * blocksize then begin
+    fv_last_ctr_lemma_i_f #a w blocksize blocksize_v len f f_v zero pre b_v i end
   else begin
     mod_div_lt blocksize_v i len;
     assert (i % blocksize_v < len % blocksize_v);
@@ -779,6 +774,151 @@ let lemma_map_blocks_ctr_vec #a #len w blocksize inp f f_v zero =
 
   lemma_map_blocks_vec #a #len w blocksize inp f g f_v g_v
 
+
+val lemma_aux: blocksize:pos -> len:nat -> len0:nat ->
+  Lemma
+  (requires len0 <= len /\ len0 % blocksize == 0)
+  (ensures  len0 / blocksize + (len - len0) / blocksize == len / blocksize)
+
+let lemma_aux bs len len0 =
+  calc (==) {
+    len0 / bs + (len - len0) / bs;
+    == { FStar.Math.Lemmas.lemma_div_exact len0 bs }
+    len0 / bs + (len - len0 / bs * bs) / bs;
+    == { FStar.Math.Lemmas.lemma_div_plus len (- len0 / bs) bs }
+    len0 / bs + len / bs - len0 / bs;
+    == { }
+    len / bs;
+  }
+
+
+val lemma_aux2: blocksize:pos -> len:nat -> len0:nat -> i:nat ->
+  Lemma
+  (requires len0 <= len /\ len0 % blocksize == 0 /\ i < (len - len0) / blocksize)
+  (ensures  len0 + i * blocksize + blocksize <= len)
+
+let lemma_aux2 blocksize len len0 i =
+  let len1 = len - len0 in
+  FStar.Math.Lemmas.lemma_mult_le_right blocksize (i + 1) (len1 / blocksize);
+  assert (len0 + (i + 1) * blocksize <= len0 + len1 / blocksize * blocksize);
+  FStar.Math.Lemmas.multiply_fractions len blocksize;
+  assert (len1 / blocksize * blocksize <= len1);
+  assert (len0 + (i + 1) * blocksize <= len)
+
+
+val lemma_aux3: blocksize:pos -> len:nat -> len0:nat -> i:nat ->
+  Lemma
+  (requires len0 <= len /\ len0 % blocksize == 0)
+  (ensures  (len0 / blocksize + i) * blocksize == len0 + i * blocksize)
+
+let lemma_aux3 blocksize len len0 i =
+  calc (==) {
+    (len0 / blocksize + i) * blocksize;
+    (==) { FStar.Math.Lemmas.distributivity_add_left (len0 / blocksize) i blocksize }
+    len0 / blocksize * blocksize + i * blocksize;
+    (==) { FStar.Math.Lemmas.lemma_div_exact len0 blocksize }
+    len0 + i * blocksize;
+  }
+
+
+val lemma_aux4: blocksize:pos -> len:nat -> len0:nat ->
+  Lemma
+  (requires len0 <= len /\ len0 % blocksize == 0)
+  (ensures  len0 + (len - len0) / blocksize * blocksize == len / blocksize * blocksize)
+
+let lemma_aux4 bs len len0 =
+  calc (==) {
+    len0 + (len - len0) / bs * bs;
+    == { FStar.Math.Lemmas.lemma_div_exact len0 bs }
+    len0 + (len - len0 / bs * bs) / bs * bs;
+    == { FStar.Math.Lemmas.lemma_div_plus len (- len0 / bs) bs }
+    len0 + (len / bs - len0 / bs) * bs;
+    == { FStar.Math.Lemmas.distributivity_sub_left (len / bs) (len0 / bs) bs }
+    len0 + len / bs * bs - len0 / bs * bs;
+    == { FStar.Math.Lemmas.lemma_div_exact len0 bs }
+    len0 + len / bs * bs - len0;
+    == { }
+    len / bs * bs;
+    }
+
+
+val lemma_aux5: w:pos -> bs:pos -> bs_v:pos{bs_v == w * bs} -> len:nat -> i:nat ->
+  Lemma
+  (requires len % bs_v = 0 /\ len % bs = 0 /\ i < len / (w * bs))
+  (ensures  (i + 1) * bs_v <= len / bs_v * bs_v)
+let lemma_aux5 w bs bs_v len i = ()
+
+val lemma_aux6: w:pos -> bs:pos -> bs_v:pos{bs_v == w * bs} -> j:nat{j < w} ->
+  Lemma (j * bs + bs <= bs_v)
+let lemma_aux6 w bs bs_v j =
+  Math.Lemmas.distributivity_add_left j 1 bs;
+  Math.Lemmas.lemma_mult_le_right bs (j + 1) w
+
+val lemma_aux7: w:pos -> bs:pos -> bs_v:pos{bs_v == w * bs} -> len:nat -> i:nat -> j:nat{j < w} ->
+  Lemma
+  (requires len % bs_v = 0 /\ len % bs = 0 /\ i < len / (w * bs))
+  (ensures  (w * i + j) * bs + bs <= len)
+let lemma_aux7 w bs bs_v len i j =
+  calc (<=) {
+    (w * i + j) * bs + bs;
+    (==) { Math.Lemmas.distributivity_add_left (w * i + j) 1 bs }
+    (w * i + j + 1) * bs;
+    (<=) { }
+    (w * i + w) * bs;
+    (==) { Math.Lemmas.distributivity_add_left i 1 w }
+    (i + 1) * w * bs;
+    (==) { Math.Lemmas.paren_mul_right (i + 1) w bs }
+    (i + 1) * bs_v;
+    (<=) { Math.Lemmas.lemma_mult_le_right bs_v (i + 1) (len / bs_v) }
+    len / bs_v * bs_v;
+    (==) { Math.Lemmas.div_exact_r len bs_v }
+    len;
+  }
+
+
+val lemma_aux8: w:pos -> blocksize:pos -> len:nat ->
+  Lemma
+  (requires len % (w * blocksize) = 0 /\ len % blocksize = 0)
+  (ensures  len / blocksize == len / (w * blocksize) * w)
+
+let lemma_aux8 w blocksize len =
+  let blocksize_v = w * blocksize in
+  calc (==) {
+    len / blocksize;
+    (==) { Math.Lemmas.lemma_div_exact len blocksize_v }
+    (len / blocksize_v * blocksize_v) / blocksize;
+    (==) { Math.Lemmas.paren_mul_right (len / blocksize_v) w blocksize_v }
+    ((len / blocksize_v * w) * blocksize) / blocksize;
+    (==) { Math.Lemmas.multiple_division_lemma (len / blocksize_v * w) blocksize }
+    len / blocksize_v * w;
+  }
+
+
+val lemma_slice_slice_f_vec_f1:
+    #a:Type0
+  -> w:size_pos
+  -> blocksize:size_pos{w * blocksize <= max_size_t}
+  -> inp:seq a{length inp % (w * blocksize) = 0 /\ length inp % blocksize = 0}
+  -> i:nat{i < length inp / (w * blocksize)}
+  -> j:nat{j < w} -> Lemma
+  (let blocksize_v = w * blocksize in
+   lemma_aux5 w blocksize blocksize_v (length inp) i;
+   //assert ((i + 1) * blocksize_v <= length inp / blocksize_v * blocksize_v);
+   let block = Seq.slice inp (i * blocksize_v) (i * blocksize_v + blocksize_v) in
+   lemma_aux6 w blocksize blocksize_v j;
+   //assert (j * blocksize + blocksize <= blocksize_v);
+   let b1 = Seq.slice block (j * blocksize) (j * blocksize + blocksize) in
+   lemma_aux7 w blocksize blocksize_v (length inp) i j;
+   //assert ((w * i + j) * blocksize + blocksize <= length inp);
+   let b2 = Seq.slice inp ((w * i + j) * blocksize) ((w * i + j) * blocksize + blocksize) in
+   b1 == b2)
+
+let lemma_slice_slice_f_vec_f1 #a w blocksize inp i j =
+  let blocksize_v = w * blocksize in
+  lemma_aux5 w blocksize blocksize_v (length inp) i;
+  lemma_aux6 w blocksize blocksize_v j;
+  lemma_aux7 w blocksize blocksize_v (length inp) i j;
+  Seq.Properties.slice_slice inp (i * blocksize_v) (i * blocksize_v + blocksize_v) (j * blocksize) (j * blocksize + blocksize)
 
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
@@ -830,53 +970,6 @@ let aux_repeat_bf_s0 #a #b blocksize len0 inp f i acc =
   let block = Seq.slice inp (i * blocksize) (i * blocksize + blocksize) in
   assert (repeat_bf_s0 i acc == f block acc);
   assert (repeat_bf_t i acc == f block acc)
-
-
-#restart-solver
-val lemma_aux: blocksize:pos -> len:nat -> len0:nat ->
-  Lemma
-  (requires len0 <= len /\ len0 % blocksize == 0)
-  (ensures  len0 / blocksize + (len - len0) / blocksize == len / blocksize)
-
-let lemma_aux bs len len0 =
-  calc (==) {
-    len0 / bs + (len - len0) / bs;
-    == { FStar.Math.Lemmas.lemma_div_exact len0 bs }
-    len0 / bs + (len - len0 / bs * bs) / bs;
-    == { FStar.Math.Lemmas.lemma_div_plus len (- len0 / bs) bs }
-    len0 / bs + len / bs - len0 / bs;
-    == { }
-    len / bs;
-  }
-
-
-val lemma_aux2: blocksize:pos -> len:nat -> len0:nat -> i:nat ->
-  Lemma
-  (requires len0 <= len /\ len0 % blocksize == 0 /\ i < (len - len0) / blocksize)
-  (ensures  len0 + i * blocksize + blocksize <= len)
-
-let lemma_aux2 blocksize len len0 i =
-  let len1 = len - len0 in
-  FStar.Math.Lemmas.lemma_mult_le_right blocksize (i + 1) (len1 / blocksize);
-  assert (len0 + (i + 1) * blocksize <= len0 + len1 / blocksize * blocksize);
-  FStar.Math.Lemmas.multiply_fractions len blocksize;
-  assert (len1 / blocksize * blocksize <= len1);
-  assert (len0 + (i + 1) * blocksize <= len)
-
-
-val lemma_aux3: blocksize:pos -> len:nat -> len0:nat -> i:nat ->
-  Lemma
-  (requires len0 <= len /\ len0 % blocksize == 0 /\ i < (len - len0) / blocksize)
-  (ensures  (len0 / blocksize + i) * blocksize == len0 + i * blocksize)
-
-let lemma_aux3 blocksize len len0 i =
-  calc (==) {
-    (len0 / blocksize + i) * blocksize;
-    (==) { FStar.Math.Lemmas.distributivity_add_left (len0 / blocksize) i blocksize }
-    len0 / blocksize * blocksize + i * blocksize;
-    (==) { FStar.Math.Lemmas.lemma_div_exact len0 blocksize }
-    len0 + i * blocksize;
-  }
 
 
 val aux_repeat_bf_s1:
@@ -989,29 +1082,6 @@ let repeat_blocks_split12 #a #b blocksize len0 inp f acc0 =
     }
 
 
-#reset-options "--z3rlimit 200 --max_fuel 1 --max_ifuel 1"
-
-val lemma_aux4: blocksize:pos -> len:nat -> len0:nat ->
-  Lemma
-  (requires len0 <= len /\ len0 % blocksize == 0)
-  (ensures  len0 + (len - len0) / blocksize * blocksize == len / blocksize * blocksize)
-
-let lemma_aux4 bs len len0 =
-  calc (==) {
-    len0 + (len - len0) / bs * bs;
-    == { FStar.Math.Lemmas.lemma_div_exact len0 bs }
-    len0 + (len - len0 / bs * bs) / bs * bs;
-    == { FStar.Math.Lemmas.lemma_div_plus len (- len0 / bs) bs }
-    len0 + (len / bs - len0 / bs) * bs;
-    == { FStar.Math.Lemmas.distributivity_sub_left (len / bs) (len0 / bs) bs }
-    len0 + len / bs * bs - len0 / bs * bs;
-    == { FStar.Math.Lemmas.lemma_div_exact len0 bs }
-    len0 + len / bs * bs - len0;
-    == { }
-    len / bs * bs;
-    }
-
-
 let repeat_blocks_multi_split #a #b blocksize len0 inp f acc0 =
   let len = length inp in
   let len1 = len - len0 in
@@ -1043,9 +1113,7 @@ let repeat_blocks_multi_split #a #b blocksize len0 inp f acc0 =
   assert (repeat_blocks_multi blocksize t1 f acc1 == repeat_blocks_multi blocksize inp f acc0)
 
 
-#set-options "--z3rlimit 150 --initial_ifuel 1 --max_ifuel 1"
-#restart-solver
-let repeat_blocks_split #a #b blocksize len0 inp f l acc0 =
+let repeat_blocks_split #a #b #c blocksize len0 inp f l acc0 =
   let len = length inp in
   let len1 = len - len0 in
   FStar.Math.Lemmas.modulo_addition_lemma len blocksize (- len0 / blocksize);
@@ -1083,135 +1151,209 @@ let repeat_blocks_split #a #b blocksize len0 inp f l acc0 =
   assert (repeat_blocks blocksize t1 f l acc1 == repeat_blocks blocksize inp f l acc0)
 
 
-let unfold_repeatw #a w n f acc =
-  match w with
-  | 1 ->
-    Loops.unfold_repeati n f acc (n-1)
-  | 2 ->
-    Loops.unfold_repeati (2*n) f acc (2*n-2);
-    Loops.unfold_repeati (2*n) f acc (2*n-1)
-  | 4 ->
-    Loops.unfold_repeati (4*n) f acc (4*n-4);
-    Loops.unfold_repeati (4*n) f acc (4*n-3);
-    Loops.unfold_repeati (4*n) f acc (4*n-2);
-    Loops.unfold_repeati (4*n) f acc (4*n-1)
+val lemma_repeati_vec_:
+    #a:Type0
+  -> #a_vec:Type0
+  -> w:pos
+  -> n:nat
+  -> normalize_v:(a_vec -> a)
+  -> f:(i:nat{i < n * w} -> a -> a)
+  -> f_v:(i:nat{i < n} -> a_vec -> a_vec)
+  -> acc_v0:a_vec ->
+  Lemma
+  (requires (forall (i:nat{i < n}) (acc_v:a_vec).
+   (assert (w * (i + 1) <= w * n);
+   normalize_v (f_v i acc_v) == Loops.repeat_right (w * i) (w * (i + 1)) (Loops.fixed_a a) f (normalize_v acc_v))))
+  (ensures
+    normalize_v (Loops.repeat_right 0 n (Loops.fixed_a a_vec) f_v acc_v0) ==
+    Loops.repeat_right 0 (w * n) (Loops.fixed_a a) f (normalize_v acc_v0))
 
-
-let rec lemma_repeati_vec #a #a_vec w n normalize_n f f_vec acc0_vec =
+let rec lemma_repeati_vec_ #a #a_vec w n normalize_v f f_v acc_v0 =
   if n = 0 then begin
-    Loops.eq_repeati0 n f_vec acc0_vec;
-    Loops.eq_repeati0 (w * n) f (normalize_n acc0_vec) end
+    Loops.eq_repeat_right 0 n (Loops.fixed_a a_vec) f_v acc_v0;
+    Loops.eq_repeat_right 0 (w * n) (Loops.fixed_a a) f (normalize_v acc_v0);
+    () end
   else begin
-    let acc0 = normalize_n acc0_vec in
-    lemma_repeati_vec #a #a_vec w (n-1) normalize_n f f_vec acc0_vec;
-    let next_p = Loops.repeati (n-1) f_vec acc0_vec in
-    let next_v = Loops.repeati (w*(n-1)) f acc0 in
-    assert (normalize_n next_p == next_v);
-
-    let res1 = Loops.repeati n f_vec acc0_vec in
-    let res2 = Loops.repeati (w*n) f acc0 in
-    Loops.unfold_repeati n f_vec acc0_vec (n-1);
-    assert (res1 == f_vec (n-1) next_p);
-    unfold_repeatw w n f acc0;
-    assert (res2 == repeat_w w n f (n-1) next_v);
-    assert (normalize_n res1 == res2)
-  end
+    lemma_repeati_vec_ #a #a_vec w (n - 1) normalize_v f f_v acc_v0;
+    let next_p : a_vec = Loops.repeat_right 0 (n - 1) (Loops.fixed_a a_vec) f_v acc_v0 in
+    let next_v = Loops.repeat_right 0 (w * (n - 1)) (Loops.fixed_a a) f (normalize_v acc_v0) in
+    assert (normalize_v next_p == next_v);
+    let res1 = Loops.repeat_right 0 n (Loops.fixed_a a_vec) f_v acc_v0 in
+    let res2 = Loops.repeat_right 0 (w * n) (Loops.fixed_a a) f (normalize_v acc_v0) in
+    Loops.unfold_repeat_right 0 n (Loops.fixed_a a_vec) f_v acc_v0 (n - 1);
+    assert (res1 == f_v (n - 1) next_p);
+    Loops.repeat_right_plus 0 (w * (n - 1)) (w * n) (Loops.fixed_a a) f (normalize_v acc_v0);
+    assert (res2 == Loops.repeat_right (w * (n - 1)) (w * n) (Loops.fixed_a a) f next_v);
+    assert (normalize_v res1 == Loops.repeat_right (w * (n - 1)) (w * n) (Loops.fixed_a a) f next_v)
+    end
 
 
-#reset-options "--z3refresh --z3rlimit 300 --max_fuel 0 --max_ifuel 0"
+let lemma_repeati_vec #a #a_vec w n normalize_v f f_v acc_v0 =
+  lemma_repeati_vec_ #a #a_vec w n normalize_v f f_v acc_v0;
+  Loops.repeati_def n f_v acc_v0;
+  Loops.repeati_def (w * n) f (normalize_v acc_v0)
 
-val lemma_repeat_blocks_multi_load_acc:
+
+val repeat_blocks_multi_vec_step2:
+    #a:Type0
+  -> #b:Type0
+  -> w:size_pos
+  -> blocksize:size_pos{w * blocksize <= max_size_t}
+  -> inp:seq a{length inp % (w * blocksize) = 0 /\ length inp % blocksize = 0}
+  -> f:(lseq a blocksize -> b -> b)
+  -> i:nat{i < length inp / (w * blocksize)}
+  -> j:nat{j < w}
+  -> acc:b -> Lemma
+  (let len = length inp in
+   let blocksize_v = w * blocksize in
+   let nb_v = len / blocksize_v in
+   let nb = len / blocksize in
+   lemma_aux8 w blocksize len;
+   assert (nb == w * nb_v);
+
+   let repeat_bf_s = repeat_blocks_f blocksize inp f nb in
+   lemma_aux5 w blocksize blocksize_v len i;
+   assert ((i + 1) * blocksize_v <= nb_v * blocksize_v);
+   let block = Seq.slice inp (i * blocksize_v) (i * blocksize_v + blocksize_v) in
+   FStar.Math.Lemmas.cancel_mul_mod w blocksize;
+   let repeat_bf_s1 = repeat_blocks_f blocksize block f w in
+
+   repeat_bf_s1 j acc == repeat_bf_s (w * i + j) acc)
+
+let repeat_blocks_multi_vec_step2 #a #b w blocksize inp f i j acc =
+  lemma_slice_slice_f_vec_f1 #a w blocksize inp i j
+
+#restart-solver
+
+val repeat_blocks_multi_vec_step1:
+    #a:Type0
+  -> #b:Type0
+  -> w:size_pos
+  -> blocksize:size_pos{w * blocksize <= max_size_t}
+  -> inp:seq a{length inp % (w * blocksize) = 0 /\ length inp % blocksize = 0}
+  -> f:(lseq a blocksize -> b -> b)
+  -> i:nat{i < length inp / (w * blocksize)}
+  -> acc:b -> Lemma
+  (let len = length inp in
+   let blocksize_v = w * blocksize in
+   let nb_v = len / blocksize_v in
+   let nb = len / blocksize in
+   lemma_aux8 w blocksize len;
+   assert (nb == w * nb_v);
+
+   let repeat_bf_s = repeat_blocks_f blocksize inp f nb in
+   lemma_aux5 w blocksize blocksize_v len i;
+   assert ((i + 1) * blocksize_v <= nb_v * blocksize_v);
+   let block = Seq.slice inp (i * blocksize_v) (i * blocksize_v + blocksize_v) in
+   FStar.Math.Lemmas.cancel_mul_mod w blocksize;
+   let repeat_bf_s1 = repeat_blocks_f blocksize block f w in
+
+   let lp = Loops.repeat_right 0 w (Loops.fixed_a b) repeat_bf_s1 acc in
+   let rp = Loops.repeat_right (w * i) (w * i + w) (Loops.fixed_a b) repeat_bf_s acc in
+   lp == rp)
+
+let repeat_blocks_multi_vec_step1 #a #b w blocksize inp f i acc =
+  let len = length inp in
+  let blocksize_v = w * blocksize in
+  let nb_v = len / blocksize_v in
+  let nb = len / blocksize in
+  lemma_aux8 w blocksize len;
+  assert (nb == w * nb_v);
+
+  let repeat_bf_s = repeat_blocks_f blocksize inp f nb in
+  lemma_aux5 w blocksize blocksize_v len i;
+  assert ((i + 1) * blocksize_v <= nb_v * blocksize_v);
+  let block = Seq.slice inp (i * blocksize_v) (i * blocksize_v + blocksize_v) in
+  FStar.Math.Lemmas.cancel_mul_mod w blocksize;
+  let repeat_bf_s1 = repeat_blocks_f blocksize block f w in
+
+  //let lp = Loops.repeat_right 0 w (Loops.fixed_a b) repeat_bf_s1 acc in
+  //let rp = Loops.repeat_right (w * i) (w * i + w) (Loops.fixed_a b) repeat_bf_s acc in
+  Classical.forall_intro_2
+    #(j:nat{j < w})
+    #(fun _ -> b)
+    #(fun j acc -> repeat_bf_s1 j acc == repeat_bf_s (w * i + j) acc)
+    (repeat_blocks_multi_vec_step2 #a #b w blocksize inp f i);
+  repeati_right_extensionality w (w * i) (w * i + w) repeat_bf_s1 repeat_bf_s acc
+
+
+val repeat_blocks_multi_vec_step:
     #a:Type0
   -> #b:Type0
   -> #b_vec:Type0
-  -> w:lanes
+  -> w:size_pos
   -> blocksize:size_pos{w * blocksize <= max_size_t}
-  -> inp:seq a{w * blocksize <= length inp /\ length inp % (w * blocksize) = 0 /\ length inp % blocksize = 0}
+  -> inp:seq a{length inp % (w * blocksize) = 0 /\ length inp % blocksize = 0}
   -> f:(lseq a blocksize -> b -> b)
-  -> normalize_n:(b_vec -> b)
-  -> load_acc:(lseq a (w * blocksize) -> b -> b_vec)
-  -> acc0:b ->
-  Lemma
-  (requires
-   (let len0 = w * blocksize in
-    let t0 = Seq.slice inp 0 len0 in
-    let repeat_bf_t0 = repeat_blocks_f blocksize t0 f w in
-    normalize_n (load_acc t0 acc0) == repeat_w #b w 1 repeat_bf_t0 0 acc0))
-  (ensures
-   (let len0 = w * blocksize in
-    let t0 = Seq.slice inp 0 len0 in
-    normalize_n (load_acc t0 acc0) == repeat_blocks_multi #a #b blocksize t0 f acc0))
+  -> f_v:(lseq a (w * blocksize) -> b_vec -> b_vec)
+  -> normalize_v:(b_vec -> b)
+  -> pre:squash (forall (b_v:lseq a (w * blocksize)) (acc_v:b_vec).
+      repeat_blocks_multi_vec_equiv_pre w blocksize (w * blocksize) f f_v normalize_v b_v acc_v)
+  -> i:nat{i < length inp / (w * blocksize)}
+  -> acc_v:b_vec -> Lemma
+  (let len = length inp in
+   let blocksize_v = w * blocksize in
+   let nb_v = len / blocksize_v in
+   let nb = len / blocksize in
+   lemma_aux8 w blocksize len;
+   assert (nb == w * nb_v);
 
-let lemma_repeat_blocks_multi_load_acc #a #b #b_vec w blocksize inp f normalize_n load_acc acc0 =
-  let len0 = w * blocksize in
-  let t0 = Seq.slice inp 0 len0 in
-  let repeat_bf_t0 = repeat_blocks_f blocksize t0 f w in
-  let acc1 = load_acc t0 acc0 in
-  calc (==) {
-    normalize_n acc1;
-    (==) { }
-    repeat_w #b w 1 repeat_bf_t0 0 acc0;
-    (==) { unfold_repeatw #b w 1 repeat_bf_t0 acc0; Loops.eq_repeati0 1 repeat_bf_t0 acc0 }
-    Loops.repeati w repeat_bf_t0 acc0;
-    (==) { lemma_repeat_blocks_multi #a #b blocksize t0 f acc0 }
-    repeat_blocks_multi #a #b blocksize t0 f acc0;
-  };
-  assert (normalize_n acc1 == repeat_blocks_multi #a #b blocksize t0 f acc0)
+   let repeat_bf_v = repeat_blocks_f blocksize_v inp f_v nb_v in
+   let repeat_bf_s = repeat_blocks_f blocksize inp f nb in
+
+   normalize_v (repeat_bf_v i acc_v) ==
+   Loops.repeat_right (w * i) (w * (i + 1)) (Loops.fixed_a b) repeat_bf_s (normalize_v acc_v))
 
 
-let lemma_aux1 w blocksize len =
-  let sb = w * blocksize in
-  let len1 = len - w * blocksize in
-  FStar.Math.Lemmas.modulo_addition_lemma len sb (- 1);
-  assert (len % sb == len1 % sb);
-
-  calc (==) {
-    len1 / blocksize;
-    (==) { FStar.Math.Lemmas.lemma_div_exact len1 sb }
-    (len1 / sb * sb) / blocksize;
-    (==) { FStar.Math.Lemmas.paren_mul_right (len1 / sb) w sb }
-    ((len1 / sb * w) * blocksize) / blocksize;
-    (==) { FStar.Math.Lemmas.multiple_division_lemma (len1 / sb * w) blocksize }
-    len1 / sb * w;
-    (==) { FStar.Math.Lemmas.swap_mul (len1 / sb) w}
-    w * (len1 / sb);
-  };
-  assert (len1 / blocksize == w * (len1 / sb))
-
-
-#set-options "--z3rlimit 300 --z3seed 1"
-let lemma_repeat_blocks_multi_vec #a #b #b_vec w blocksize inp f f_vec normalize_n load_acc acc0 =
+let repeat_blocks_multi_vec_step #a #b #b_vec w blocksize inp f f_v normalize_v pre i acc_v =
   let len = length inp in
-  let len0 = w * blocksize in
-  let len1 = len - len0 in
-  FStar.Math.Lemmas.modulo_addition_lemma len len0 (- 1);
-  assert (len % len0 == len1 % len0);
-  FStar.Math.Lemmas.modulo_addition_lemma len blocksize (- w);
-  assert (len % blocksize == len1 % blocksize);
+  let blocksize_v = w * blocksize in
+  let nb_v = len / blocksize_v in
+  let nb = len / blocksize in
+  lemma_aux8 w blocksize len;
+  assert (nb == w * nb_v);
 
-  let t0 = Seq.slice inp 0 len0 in
-  let t1 = Seq.slice inp len0 len in
+  let repeat_bf_v = repeat_blocks_f blocksize_v inp f_v nb_v in
+  let repeat_bf_s = repeat_blocks_f blocksize inp f nb in
 
-  let nb_vec = len1 / (w * blocksize) in
-  let nb = len1 / blocksize in
-  lemma_aux1 w blocksize len;
-  assert (nb == w * nb_vec);
+  lemma_aux5 w blocksize blocksize_v len i;
+  assert ((i + 1) * blocksize_v <= nb_v * blocksize_v);
+  let block = Seq.slice inp (i * blocksize_v) (i * blocksize_v + blocksize_v) in
+  FStar.Math.Lemmas.cancel_mul_mod w blocksize;
+  let repeat_bf_s1 = repeat_blocks_f blocksize block f w in
 
-  let repeat_bf_vec = repeat_blocks_f (w * blocksize) t1 f_vec nb_vec in
-  let repeat_bf_t0 = repeat_blocks_f blocksize t0 f w in
-  let repeat_bf_t1 = repeat_blocks_f blocksize t1 f nb in
-
-  let acc1 = load_acc t0 acc0 in
   calc (==) {
-    normalize_n (repeat_blocks_multi (w * blocksize) t1 f_vec acc1);
-    (==) { lemma_repeat_blocks_multi (w * blocksize) t1 f_vec acc1 }
-    normalize_n (Loops.repeati nb_vec repeat_bf_vec acc1);
-    (==) { lemma_repeati_vec w nb_vec normalize_n repeat_bf_t1 repeat_bf_vec acc1 }
-    Loops.repeati nb repeat_bf_t1 (normalize_n acc1);
-    (==) { lemma_repeat_blocks_multi blocksize t1 f (normalize_n acc1) }
-    repeat_blocks_multi blocksize t1 f (normalize_n acc1);
-    (==) { lemma_repeat_blocks_multi_load_acc #a #b #b_vec w blocksize inp f normalize_n load_acc acc0 }
-    repeat_blocks_multi blocksize t1 f (repeat_blocks_multi #a #b blocksize t0 f acc0);
-    (==) { repeat_blocks_multi_split blocksize len0 inp f acc0 }
-    repeat_blocks_multi blocksize inp f acc0;
+    normalize_v (repeat_bf_v i acc_v);
+    (==) { }
+    normalize_v (f_v block acc_v);
+    (==) { assert (repeat_blocks_multi_vec_equiv_pre w blocksize (w * blocksize) f f_v normalize_v block acc_v) }
+    repeat_blocks_multi blocksize block f (normalize_v acc_v);
+    (==) { lemma_repeat_blocks_multi blocksize block f (normalize_v acc_v) }
+    Loops.repeati w repeat_bf_s1 (normalize_v acc_v);
+    (==) { Loops.repeati_def w repeat_bf_s1 (normalize_v acc_v) }
+    Loops.repeat_right 0 w (Loops.fixed_a b) repeat_bf_s1 (normalize_v acc_v);
+    };
+  repeat_blocks_multi_vec_step1 #a #b w blocksize inp f i (normalize_v acc_v)
+
+
+let lemma_repeat_blocks_multi_vec #a #b #b_vec w blocksize inp f f_v normalize_v acc_v0 =
+  let len = length inp in
+  let blocksize_v = w * blocksize in
+  let nb_v = len / blocksize_v in
+  let nb = len / blocksize in
+  lemma_aux8 w blocksize len;
+  assert (nb == w * nb_v);
+
+  let repeat_bf_v = repeat_blocks_f blocksize_v inp f_v nb_v in
+  let repeat_bf_s = repeat_blocks_f blocksize inp f nb in
+
+  calc (==) {
+    normalize_v (repeat_blocks_multi blocksize_v inp f_v acc_v0);
+    (==) { lemma_repeat_blocks_multi blocksize_v inp f_v acc_v0 }
+    normalize_v (Loops.repeati nb_v repeat_bf_v acc_v0);
+    (==) { Classical.forall_intro_2 (repeat_blocks_multi_vec_step w blocksize inp f f_v normalize_v ());
+      lemma_repeati_vec w nb_v normalize_v repeat_bf_s repeat_bf_v acc_v0}
+    Loops.repeati nb repeat_bf_s (normalize_v acc_v0);
+    (==) { lemma_repeat_blocks_multi blocksize inp f (normalize_v acc_v0) }
+    repeat_blocks_multi blocksize inp f (normalize_v acc_v0);
   }

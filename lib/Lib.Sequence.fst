@@ -175,7 +175,7 @@ let repeati_blocks #a #b bs inp f g init =
   let last = seq_sub inp (nb * bs) rem in
   g nb rem last acc
 
-let repeat_blocks #a #b bs inp f l init =
+let repeat_blocks #a #b #c bs inp f l init =
   let len = length inp in
   let nb = len / bs in
   let rem = len % bs in
@@ -183,7 +183,7 @@ let repeat_blocks #a #b bs inp f l init =
   let last = seq_sub inp (nb * bs) rem in
   l rem last acc
 
-let lemma_repeat_blocks #a #b bs inp f l init = ()
+let lemma_repeat_blocks #a #b #c bs inp f l init = ()
 
 let repeat_blocks_multi #a #b bs inp f init =
   let len = length inp in
