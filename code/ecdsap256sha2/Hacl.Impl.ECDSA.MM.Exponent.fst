@@ -107,13 +107,7 @@ let montgomery_ladder_exponent_step a b scalar i =
   cswap bit a b;
   montgomery_ladder_exponent_step0 a b;
   cswap bit a b;
-  Hacl.Spec.ECDSA.lemma_swaped_steps (fromDomain_ (as_nat h0 a)) (fromDomain_ (as_nat h0 b)); 
-    [@inline_let]
-  let k: Lib.Sequence.lseq uint8 32 = as_seq h0 scalar in 
-  let open Lib.RawIntTypes in 
-    [@inline_let]
-  let bit_ = ith_bit k (255 - (uint_v i)) in 
-  ()
+  Hacl.Spec.ECDSA.lemma_swaped_steps (fromDomain_ (as_nat h0 a)) (fromDomain_ (as_nat h0 b))
 
 
 inline_for_extraction noextract 
