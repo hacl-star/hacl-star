@@ -2,8 +2,11 @@ open Ctypes
 module Bindings(F:Cstubs.FOREIGN) =
   struct
     open F
-    include (Hacl_Spec_bindings.Bindings)(Hacl_Spec_stubs)
-    include (EverCrypt_Error_bindings.Bindings)(EverCrypt_Error_stubs)
+    module Hacl_Spec_applied = (Hacl_Spec_bindings.Bindings)(Hacl_Spec_stubs)
+    open Hacl_Spec_applied
+    module EverCrypt_Error_applied =
+      (EverCrypt_Error_bindings.Bindings)(EverCrypt_Error_stubs)
+    open EverCrypt_Error_applied
     type everCrypt_AEAD_state_s = [ `everCrypt_AEAD_state_s ] structure
     let (everCrypt_AEAD_state_s : [ `everCrypt_AEAD_state_s ] structure typ)
       = structure "EverCrypt_AEAD_state_s_s" 
