@@ -250,10 +250,10 @@ let poly_update_multi_lemma #w text acc0 r =
   PLoops.repeat_blocks_multi_split size_block blocksize_v text f acc0
 
 
-val poly_update_vec_lemma: #w:lanes -> text:bytes -> acc0:pfelem -> r:pfelem ->
+val poly1305_update_vec_lemma: #w:lanes -> text:bytes -> acc0:pfelem -> r:pfelem ->
   Lemma (poly1305_update #w text acc0 r == S.poly1305_update text acc0 r)
 
-let poly_update_vec_lemma #w text acc0 r =
+let poly1305_update_vec_lemma #w text acc0 r =
   let len = length text in
   let blocksize_v = w * size_block in
   let len0 = len / blocksize_v * blocksize_v in
@@ -275,4 +275,4 @@ val poly1305_vec_lemma: #w:lanes -> msg:bytes -> k:S.key ->
 
 let poly1305_vec_lemma #w msg k =
   let acc0, r = S.poly1305_init k in
-  poly_update_vec_lemma #w msg acc0 r
+  poly1305_update_vec_lemma #w msg acc0 r

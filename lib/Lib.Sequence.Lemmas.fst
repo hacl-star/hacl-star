@@ -143,6 +143,8 @@ let lemma_slice_slice_f_vec_f #a #len w bs inp i =
   post1 ()
 
 
+#reset-options "--z3rlimit 150 --max_fuel 0 --max_ifuel 0"
+
 val lemma_slice_slice_g_vec_f:
     #a:Type
  -> #len:nat
@@ -154,8 +156,8 @@ val lemma_slice_slice_g_vec_f:
   Lemma
   (let bs_v = w * bs in
    let rem = len % bs_v in
-   let b_v: lseq a rem = get_last_s #a #len bs_v inp in
    let b: lseq a bs = get_block_s #a #len bs inp i in
+   let b_v: lseq a rem = get_last_s #a #len bs_v inp in
    let b1: lseq a bs = get_block_s #a #rem bs b_v (i % bs_v) in
    b1 == b)
 
@@ -198,11 +200,18 @@ let lemma_slice_slice_g_vec_f #a #len w bs inp i =
       rem;
     } in
 
+  let pre2 () : Lemma (0 <= len - rem) =
+    Math.Lemmas.euclidean_division_definition len bs_v;
+    assert (len - rem == len / bs_v * bs_v);
+    Math.Lemmas.nat_times_nat_is_nat (len / bs_v) bs_v;
+    () in
+
   pre1 ();
-  assert ((j + 1) * bs <= rem);
-  Seq.slice_slice inp (len - rem) len (j * bs) ((j + 1) * bs);
+  //assert ((j + 1) * bs <= rem);
+  pre2 ();
+  //assert (0 <= len - rem);
+  Seq.slice_slice inp (len - rem) len (j * bs) (j * bs + bs);
   post1 ();
-  assert (len - rem + j * bs = i / bs * bs);
   post2 ()
 
 
@@ -1277,6 +1286,8 @@ let repeat_blocks_multi_vec_step1 #a #b w blocksize inp f i acc =
   repeati_right_extensionality w (w * i) (w * i + w) repeat_bf_s1 repeat_bf_s acc
 
 
+#reset-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 0"
+
 val repeat_blocks_multi_vec_step:
     #a:Type0
   -> #b:Type0
@@ -1304,7 +1315,6 @@ val repeat_blocks_multi_vec_step:
    normalize_v (repeat_bf_v i acc_v) ==
    Loops.repeat_right (w * i) (w * (i + 1)) (Loops.fixed_a b) repeat_bf_s (normalize_v acc_v))
 
-
 let repeat_blocks_multi_vec_step #a #b #b_vec w blocksize inp f f_v normalize_v pre i acc_v =
   let len = length inp in
   let blocksize_v = w * blocksize in
@@ -1321,19 +1331,14 @@ let repeat_blocks_multi_vec_step #a #b #b_vec w blocksize inp f f_v normalize_v 
   let block = Seq.slice inp (i * blocksize_v) (i * blocksize_v + blocksize_v) in
   FStar.Math.Lemmas.cancel_mul_mod w blocksize;
   let repeat_bf_s1 = repeat_blocks_f blocksize block f w in
+  let acc = normalize_v acc_v in
 
-  calc (==) {
-    normalize_v (repeat_bf_v i acc_v);
-    (==) { }
-    normalize_v (f_v block acc_v);
-    (==) { assert (repeat_blocks_multi_vec_equiv_pre w blocksize (w * blocksize) f f_v normalize_v block acc_v) }
-    repeat_blocks_multi blocksize block f (normalize_v acc_v);
-    (==) { lemma_repeat_blocks_multi blocksize block f (normalize_v acc_v) }
-    Loops.repeati w repeat_bf_s1 (normalize_v acc_v);
-    (==) { Loops.repeati_def w repeat_bf_s1 (normalize_v acc_v) }
-    Loops.repeat_right 0 w (Loops.fixed_a b) repeat_bf_s1 (normalize_v acc_v);
-    };
-  repeat_blocks_multi_vec_step1 #a #b w blocksize inp f i (normalize_v acc_v)
+  assert (repeat_blocks_multi_vec_equiv_pre w blocksize blocksize_v f f_v normalize_v block acc_v);
+  //assert (normalize_v (repeat_bf_v i acc_v) == repeat_blocks_multi blocksize block f acc);
+  lemma_repeat_blocks_multi blocksize block f acc;
+  //assert (normalize_v (repeat_bf_v i acc_v) == Loops.repeati w repeat_bf_s1 acc);
+  Loops.repeati_def w repeat_bf_s1 acc;
+  repeat_blocks_multi_vec_step1 w blocksize inp f i acc
 
 
 let lemma_repeat_blocks_multi_vec #a #b #b_vec w blocksize inp f f_v normalize_v acc_v0 =

@@ -119,6 +119,8 @@ let map_blocks_vec_equiv_pre_g_v
     (g (len / blocksize) rem b).[i % blocksize] == gv_b.[j] end
 
 
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+
 val lemma_map_blocks_multi_vec:
      #a:Type
   -> #len:nat
