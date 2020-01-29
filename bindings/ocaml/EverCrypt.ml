@@ -4,6 +4,8 @@ open Unsigned
 open Utils
 open Shared
 
+module Hacl_Spec = Hacl_Spec_bindings.Bindings(Hacl_Spec_stubs)
+
 module EverCrypt_AutoConfig2 = EverCrypt_AutoConfig2_bindings.Bindings(EverCrypt_AutoConfig2_stubs)
 module EverCrypt_AEAD = EverCrypt_AEAD_bindings.Bindings(EverCrypt_AEAD_stubs)
 module EverCrypt_Chacha20Poly1305 = EverCrypt_Chacha20Poly1305_bindings.Bindings(EverCrypt_Chacha20Poly1305_stubs)
@@ -74,6 +76,7 @@ end
 
 module AEAD = struct
   open Error
+  open Hacl_Spec
   open EverCrypt_AEAD
 
   type t = (everCrypt_AEAD_state_s ptr) ptr
@@ -116,6 +119,7 @@ module Curve25519 : Curve25519 =
   end)
 
 module Hash = struct
+  open Hacl_Spec
   open EverCrypt_Hash
 
   type t = everCrypt_Hash_Incremental_state_s ptr
