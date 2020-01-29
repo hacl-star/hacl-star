@@ -301,6 +301,24 @@ let rec print_fn_comments = function
   | [] -> ""
   | hd::tl -> "// " ^ hd ^ "\n" ^ print_fn_comments tl
 
+let rec remove_blank (c:code) : code =
+  match c with
+  | Ins _ -> c
+  | Block b -> Block (remove_blanks b)
+  | IfElse cond ct cf -> IfElse cond (remove_blank ct) (remove_blank cf)
+  | While cond cb -> While cond (remove_blank cb)
+and remove_blanks (b:codes) : codes =
+  match b with
+  | [] -> []
+  | Ins (Instr _ _ (AnnotateGhost _)) :: cs -> remove_blanks cs
+  | Block b :: cs ->
+    (
+      match remove_blanks b with
+      | [] -> remove_blanks cs
+      | b -> Block b :: remove_blanks cs
+    )
+  | c :: cs -> c :: remove_blanks cs
+
 let print_inline
   (name:string)
   (label:int)
@@ -345,7 +363,7 @@ let print_inline
   let printer = {P.gcc with P.print_reg_name = inlined_reg_names } in
 
   // The assembly should be compliant with gcc
-  let code_str, final_label = print_code code label printer in
+  let (code_str, final_label) = print_code (remove_blank code) label printer in
 
 
   // Every modified register that wasn't used for the inputs/outputs should be specified in the modified line

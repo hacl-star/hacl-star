@@ -46,8 +46,6 @@ include Makefile.common
 # Catching setup errors #
 #########################
 
-# This was needed once because of the shortest stem rule. I don't think it's
-# needed anymore, but better be safe.
 ifeq (3.81,$(MAKE_VERSION))
   $(error You seem to be using the OSX antiquated Make version. Hint: brew \
     install make, then invoke gmake instead of make)
@@ -356,7 +354,7 @@ obj/Vale.Lib.Operator.fst: VALE_FLAGS=
 %.fst:
 	$(call run-with-log,\
 	  $(MONO) $(VALE_HOME)/bin/vale.exe -fstarText -quickMods \
-	    -typecheck -include $*.types.vaf \
+	    -include $*.types.vaf \
 	    $(VALE_FLAGS) \
 	    -in $< -out $@ -outi $@i && touch -c $@i \
 	  ,[VALE] $(notdir $*),$(call to-obj-dir,$@))

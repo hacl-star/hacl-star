@@ -34,7 +34,6 @@ let equiv_states (s1 s2:va_state) =
   Vale.X64.Flags.sel fOverflow s1.vs_flags == Vale.X64.Flags.sel fOverflow s2.vs_flags /\
   s1.vs_heap == s2.vs_heap /\
   s1.vs_stack == s2.vs_stack /\
-  s1.vs_memTaint == s2.vs_memTaint /\
   s1.vs_stackTaint == s2.vs_stackTaint
 
 /// The Instruction Reordering Transformation

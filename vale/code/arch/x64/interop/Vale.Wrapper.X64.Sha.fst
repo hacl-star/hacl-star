@@ -190,7 +190,7 @@ let sha256_update ctx_b in_b num_val k_b =
   lemma_k_reqs_equiv k_b h0;
   math_aux (UInt64.v num_val);
   as_vale_buffer_len #TUInt8 #TUInt128 in_b;
-  let x, _ = Vale.Stdcalls.X64.Sha.sha256_update ctx_b in_b num_val k_b () in
+  let (x, _) = Vale.Stdcalls.X64.Sha.sha256_update ctx_b in_b num_val k_b () in
   let h1 = get() in
   reveal_word();
   simplify_le_bytes_to_hash_uint32 ctx_b h0;

@@ -3,6 +3,8 @@ module Vale.X64.Bytes_Code_s
 open FStar.Mul
 open Vale.X64.Machine_s
 open Vale.X64.Instruction_s
+open Vale.Arch.HeapTypes_s
+open Vale.Arch.Heap
 
 type instr_annotation_t = instr_t_record -> Type0
 

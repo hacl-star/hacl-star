@@ -1,6 +1,11 @@
 # A shared set of local definitions for local Makefiles. See curve25519/Makefile
 # for comments.
 
+ifeq (3.81,$(MAKE_VERSION))
+  $(error You seem to be using the OSX antiquated Make version. Hint: brew \
+    install make, then invoke gmake instead of make)
+endif
+
 HACL_HOME ?= .
 
 OUTPUT_DIR=$(HACL_HOME)/obj

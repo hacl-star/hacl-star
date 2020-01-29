@@ -1,5 +1,7 @@
 module Vale.X64.QuickCodes
 open FStar.Mul
+open Vale.Arch.HeapImpl
+module Map16 = Vale.Lib.Map16
 
 #reset-options "--initial_ifuel 1 --z3rlimit 30"
 
@@ -9,15 +11,21 @@ let lemma_label_Type0 (r:range) (msg:string) (p:Type0) : Lemma
 
 let lemma_label_bool r msg b = lemma_label_Type0 r msg b
 
+let rec empty_list_is_small #a x =
+  match x with
+  | [] -> ()
+  | h::t -> empty_list_is_small t
+
 let state_mod_eq (m:mod_t) (s1 s2:vale_state) =
   match m with
   | Mod_None -> True
   | Mod_ok -> s1.vs_ok == s2.vs_ok
   | Mod_reg r -> eval_reg r s1 == eval_reg r s2
   | Mod_flags -> s1.vs_flags == s2.vs_flags
-  | Mod_mem -> s1.vs_heap == s2.vs_heap
+  | Mod_mem -> s1.vs_heap.vf_heap == s2.vs_heap.vf_heap
+  | Mod_mem_layout -> s1.vs_heap.vf_layout == s2.vs_heap.vf_layout
+  | Mod_mem_heaplet n -> Map16.sel s1.vs_heap.vf_heaplets n == Map16.sel s2.vs_heap.vf_heaplets n
   | Mod_stack -> s1.vs_stack == s2.vs_stack
-  | Mod_memTaint -> s1.vs_memTaint == s2.vs_memTaint
   | Mod_stackTaint -> s1.vs_stackTaint == s2.vs_stackTaint
 
 let rec update_state_mods_refl (mods:mods_t) (s:vale_state) : Lemma
@@ -77,17 +85,23 @@ let update_state_mods_to (mods:mods_t) (s' s:vale_state) : Lemma
   let f1 (m0:mod_t) : Lemma (state_mod_eq m0 s' s'') =
     update_state_mods_to1 mods s' s m0
     in
-  f1 (Mod_ok);
-  f1 (Mod_flags);
-  f1 (Mod_mem);
-  f1 (Mod_stack);
-  f1 (Mod_memTaint);
-  f1 (Mod_stackTaint);
+  f1 Mod_ok;
+  f1 Mod_flags;
+  f1 Mod_mem;
+  f1 Mod_mem_layout;
+  f1 Mod_stack;
+  f1 Mod_stackTaint;
   let f1_reg (r:reg) : Lemma
     (ensures Regs.sel r s'.vs_regs == Regs.sel r s''.vs_regs)
     [SMTPat (Regs.sel r s'.vs_regs)]
     =
     f1 (Mod_reg r)
+    in
+  let f1_heaplet (n:heaplet_id) : Lemma
+    (ensures Map16.sel s'.vs_heap.vf_heaplets n == Map16.sel s''.vs_heap.vf_heaplets n)
+    [SMTPat (Map16.sel s'.vs_heap.vf_heaplets n)]
+    =
+    f1 (Mod_mem_heaplet n)
     in
   ()
 
@@ -200,6 +214,10 @@ let rec wp_sound #a cs qcs mods k s0 =
       let (sN, fN, gN) = wp_sound cs (qcs' g) mods k s0 in
       let fN' = va_lemma_merge_total (c::cs) s0 fM sM fN sN in
       (sN, fN', gN)
+  | QAssertBy r msg p qcsBy qcs ->
+      empty_list_is_small cs;
+      let _ = wp_sound [] qcsBy mods (k_AssertBy p) s0 in
+      wp_sound cs qcs mods k s0
 
 let qblock_proof #a #cs qcs mods s0 k =
   wp_sound cs (qcs s0) mods k s0
@@ -247,12 +265,13 @@ let rec qWhile_proof_rec
     (dec:vale_state -> a -> d) (s0 s1:vale_state) (g1:a) (f1:fuel) (k:vale_state -> a -> Type0)
   : Ghost (vale_state & va_fuel & a)
   (requires
+    state_inv s1 /\
     wp_While b qc mods inv dec g1 s1 k /\
     eval_while_inv (While (cmp_to_ocmp b) c) s0 f1 s1 /\
     update_state_mods mods s1 s0 == s1)
   (ensures fun (s2, f2, g2) ->
     eval_code (While (cmp_to_ocmp b) c) s0 f2 s2 /\
-    update_state_mods mods s2 s0 == s2 /\ k s2 g2
+    update_state_mods mods s2 s0 == s2 /\ state_inv s2 /\ k s2 g2
   )
   (decreases (dec s1 g1))
   =
@@ -284,8 +303,8 @@ let qAssertLemma p = fun () -> ()
 let qAssumeLemma p = fun () -> assume p
 let qAssertSquashLemma p = fun () -> ()
 
-let qAssertByLemma #a p qcs mods s0 =
-  fun () -> let _ = wp_sound [] qcs mods (fun _ _ -> p) s0 in ()
+//let qAssertByLemma #a p qcs mods s0 =
+//  fun () -> let _ = wp_sound [] qcs mods (fun _ _ -> p) s0 in ()
 
 let wp_sound_code #a c qc k s0 =
   let QProc c _ wp proof = qc in
@@ -311,7 +330,7 @@ let lemma_state_match s0 s1 =
 
 let wp_sound_code_wrap (#a:Type0) (c:code) (qc:quickCode a c) (s0:vale_state) (k:(s0':vale_state{s0 == s0'}) -> vale_state -> a -> Type0) :
   Ghost (vale_state & fuel & a)
-    (wp_sound_code_pre qc s0 k)
+    (t_require s0 /\ wp_sound_code_pre qc s0 k)
     (wp_sound_code_post qc s0 k)
   =
   wp_sound_code c qc (k s0) s0
@@ -322,6 +341,6 @@ let assert_normal (p:Type) : Lemma
   =
   ()
 
-let wp_sound_code_norm #a c qc s0 k =
+let va_wp_sound_code_norm #a c qc s0 k =
   assert_normal (wp_sound_code_pre qc s0 k);
   wp_sound_code_wrap c qc s0 k
