@@ -51,52 +51,55 @@ val gcm256_encrypt_opt':
 
   Stack unit
     (requires fun h0 ->
-      B.disjoint tag_b out128x6_b /\ B.disjoint tag_b out128_b /\
-      B.disjoint tag_b inout_b /\ B.disjoint tag_b hkeys_b /\
-      B.disjoint tag_b iv_b /\ disjoint_or_eq tag_b auth_b /\
-      disjoint_or_eq tag_b keys_b /\ disjoint_or_eq tag_b abytes_b /\
-      disjoint_or_eq tag_b in128x6_b /\ disjoint_or_eq tag_b in128_b /\
-      disjoint_or_eq tag_b scratch_b /\
+      B.disjoint tag_b keys_b /\ B.disjoint tag_b auth_b /\
+      B.disjoint tag_b abytes_b /\ B.disjoint tag_b iv_b /\
+      B.disjoint tag_b in128x6_b /\ B.disjoint tag_b out128x6_b /\
+      B.disjoint tag_b in128_b /\ B.disjoint tag_b out128_b /\
+      B.disjoint tag_b inout_b /\ B.disjoint tag_b scratch_b /\
+      B.disjoint tag_b hkeys_b /\
 
-      B.disjoint iv_b keys_b /\ B.disjoint iv_b scratch_b /\ B.disjoint iv_b in128x6_b /\
-      B.disjoint iv_b out128x6_b /\ B.disjoint iv_b hkeys_b /\ B.disjoint iv_b in128_b /\
+      B.disjoint iv_b keys_b /\ B.disjoint iv_b auth_b /\
+      B.disjoint iv_b abytes_b /\ B.disjoint iv_b in128x6_b /\
+      B.disjoint iv_b out128x6_b /\ B.disjoint iv_b in128_b /\
       B.disjoint iv_b out128_b /\ B.disjoint iv_b inout_b /\
-      B.disjoint iv_b auth_b /\ B.disjoint iv_b abytes_b /\
+      B.disjoint iv_b scratch_b /\ B.disjoint iv_b hkeys_b /\
 
-      B.disjoint scratch_b keys_b /\ B.disjoint scratch_b in128x6_b /\
+      B.disjoint scratch_b keys_b /\ B.disjoint scratch_b auth_b /\
+      B.disjoint scratch_b abytes_b /\ B.disjoint scratch_b in128x6_b /\
       B.disjoint scratch_b out128x6_b /\ B.disjoint scratch_b in128_b /\
       B.disjoint scratch_b out128_b /\ B.disjoint scratch_b inout_b /\
       B.disjoint scratch_b hkeys_b /\
-      disjoint_or_eq scratch_b auth_b /\ disjoint_or_eq scratch_b abytes_b /\
 
-      B.disjoint out128x6_b keys_b /\ B.disjoint out128x6_b hkeys_b /\
+      B.disjoint inout_b keys_b /\ B.disjoint inout_b auth_b /\
+      B.disjoint inout_b abytes_b /\ B.disjoint inout_b in128x6_b /\
+      B.disjoint inout_b out128x6_b /\ B.disjoint inout_b in128_b /\
+      B.disjoint inout_b out128_b /\ B.disjoint inout_b hkeys_b /\
+
+      B.disjoint out128x6_b keys_b /\ B.disjoint out128x6_b auth_b /\
+      B.disjoint out128x6_b abytes_b /\ B.disjoint out128x6_b hkeys_b /\
       B.disjoint out128x6_b in128_b /\ B.disjoint out128x6_b inout_b /\
-      B.disjoint out128x6_b out128_b /\
-      disjoint_or_eq out128x6_b in128x6_b /\
-      disjoint_or_eq out128x6_b auth_b /\ disjoint_or_eq out128x6_b abytes_b /\
 
-      B.disjoint out128_b keys_b /\ B.disjoint out128_b hkeys_b /\
+      B.disjoint in128x6_b keys_b /\ B.disjoint in128x6_b auth_b /\
+      B.disjoint in128x6_b abytes_b /\ B.disjoint in128x6_b hkeys_b /\
+      B.disjoint in128x6_b in128_b /\ B.disjoint in128x6_b inout_b /\
+
+      B.disjoint out128_b keys_b /\ B.disjoint out128_b auth_b /\
+      B.disjoint out128_b abytes_b /\ B.disjoint out128_b hkeys_b /\
+      B.disjoint out128_b in128x6_b /\ B.disjoint out128_b out128x6_b /\
       B.disjoint out128_b inout_b /\
-      disjoint_or_eq out128_b in128_b /\ disjoint_or_eq out128_b in128x6_b /\
-      disjoint_or_eq out128_b auth_b /\ disjoint_or_eq out128_b abytes_b /\
 
-      B.disjoint inout_b keys_b /\ B.disjoint inout_b hkeys_b /\
-      disjoint_or_eq inout_b in128_b /\ disjoint_or_eq inout_b in128x6_b /\
-      disjoint_or_eq inout_b auth_b /\ disjoint_or_eq inout_b abytes_b /\
+      B.disjoint in128_b keys_b /\ B.disjoint in128_b auth_b /\
+      B.disjoint in128_b abytes_b /\ B.disjoint in128_b hkeys_b /\
+      B.disjoint in128_b in128x6_b /\ B.disjoint in128_b out128x6_b /\
+      B.disjoint in128_b inout_b /\
 
+      B.disjoint keys_b abytes_b /\ B.disjoint hkeys_b auth_b /\
+      B.disjoint hkeys_b abytes_b /\ B.disjoint auth_b abytes_b /\
+      B.disjoint keys_b auth_b /\
+
+      disjoint_or_eq in128x6_b out128x6_b /\
+      disjoint_or_eq in128_b out128_b /\
       disjoint_or_eq keys_b hkeys_b /\
-      disjoint_or_eq keys_b in128x6_b /\ disjoint_or_eq keys_b in128_b /\
-      disjoint_or_eq keys_b auth_b /\ disjoint_or_eq keys_b abytes_b /\
-
-      disjoint_or_eq hkeys_b in128_b /\ disjoint_or_eq hkeys_b in128x6_b /\
-      disjoint_or_eq hkeys_b auth_b /\ disjoint_or_eq hkeys_b abytes_b /\
-
-      disjoint_or_eq in128_b in128x6_b /\ disjoint_or_eq in128_b auth_b /\
-      disjoint_or_eq in128_b abytes_b /\
-
-      disjoint_or_eq in128x6_b auth_b /\ disjoint_or_eq in128x6_b abytes_b /\
-
-      disjoint_or_eq auth_b abytes_b /\
 
       B.live h0 auth_b /\ B.live h0 abytes_b /\ B.live h0 keys_b /\
       B.live h0 iv_b /\ B.live h0 hkeys_b /\
@@ -279,7 +282,7 @@ let gcm256_encrypt_opt' key iv auth_b auth_bytes auth_num keys_b iv_b hkeys_b ab
   bounded_buffer_addrs_all TUInt8 TUInt128 h0 keys_b;
   bounded_buffer_addrs_all TUInt8 TUInt128 h0 hkeys_b;
 
-  let x, _ = gcm256_encrypt_opt  key iv auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
+  let (x, _) = gcm256_encrypt_opt  key iv auth_b auth_bytes auth_num keys_b iv_b hkeys_b abytes_b
   in128x6_b out128x6_b len128x6 in128_b out128_b len128_num inout_b plain_num scratch_b tag_b () in
 
   let h1 = get() in

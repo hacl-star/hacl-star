@@ -10,20 +10,20 @@ open Vale.Def.Words.Seq
 open Vale.Def.Types_s
 open Vale.Arch.Types
 
-let same_mem_get_heap_val ptr mem1 mem2 =
+let same_mem_get_heap_val64 ptr mem1 mem2 =
   get_heap_val64_reveal ();
   four_to_nat_8_injective ();
   two_to_nat_32_injective ()
 
-let frame_update_heap ptr v mem =
+let frame_update_heap64 ptr v mem =
   get_heap_val64_reveal ();
   update_heap64_reveal ()
 
-let correct_update_get ptr v mem =
+let correct_update_get64 ptr v mem =
   get_heap_val64_reveal ();
   update_heap64_reveal ()
 
-let same_domain_update ptr v mem =
+let same_domain_update64 ptr v mem =
   reveal_opaque (`%valid_addr64) valid_addr64;
   update_heap64_reveal ();
   let mem2 = update_heap64 ptr v mem in

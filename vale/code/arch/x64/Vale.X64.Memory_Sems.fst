@@ -26,13 +26,170 @@ let get_heap h = I.down_mem (_ih h)
 
 let upd_heap h m = mi_heap_upd h m
 
-let lemma_upd_get_heap h = I.down_up_identity (_ih h)
+//let lemma_upd_get_heap h = I.down_up_identity (_ih h)
 
 let lemma_get_upd_heap h m = I.up_down_identity (_ih h) m
 
+let lemma_heap_impl = ()
+
 let lemma_heap_get_heap h = ()
 
-let lemma_heap_upd_heap h m = ()
+let lemma_heap_taint h = ()
+
+//let lemma_heap_upd_heap h mh mt = ()
+
+[@"opaque_to_smt"]
+let rec set_of_range (a:int) (n:nat) : Pure (Set.set int)
+  (requires True)
+  (ensures fun s -> (forall (i:int).{:pattern Set.mem i s} Set.mem i s <==> a <= i /\ i < a + n))
+  =
+  if n = 0 then Set.empty else Set.union (set_of_range a (n - 1)) (Set.singleton (a + n - 1))
+
+let buffer_info_has_addr (bi:buffer_info) (a:int) =
+  let b = bi.bi_buffer in
+  let addr = Vale.Interop.Heap_s.global_addrs_map b in
+  let len = DV.length (get_downview b.bsrc) in
+  addr <= a /\ a < addr + len
+
+let buffer_info_has_addr_opt (bi:option buffer_info) (a:int) =
+  match bi with
+  | None -> False
+  | Some bi -> buffer_info_has_addr bi a
+
+#set-options "--z3rlimit 100"
+let rec make_owns_rec (h:vale_heap) (bs:Seq.seq buffer_info) (n:nat{n <= Seq.length bs}) :
+  GTot ((int -> option (n:nat{n < Seq.length bs})) & (heaplet_id -> Set.set int))
+  =
+  if n = 0 then ((fun _ -> None), (fun _ -> Set.empty)) else
+  let (m0, s0) = make_owns_rec h bs (n - 1) in
+  let bi = Seq.index bs (n - 1) in
+  let b = bi.bi_buffer in
+  let hi = bi.bi_heaplet in
+  let addr = Vale.Interop.Heap_s.global_addrs_map b in
+  let len = DV.length (get_downview b.bsrc) in
+  let s_b = set_of_range addr len in
+  let s i = if i = hi then Set.union (s0 i) s_b else s0 i in
+  let m a = if addr <= a && a < addr + len then Some (n - 1) else m0 a in
+  (m, s)
+
+[@"opaque_to_smt"]
+let make_owns (h:vale_heap) (bs:Seq.seq buffer_info) (n:nat{n <= Seq.length bs}) :
+  GTot ((int -> option (n:nat{n < Seq.length bs})) & (heaplet_id -> Set.set int))
+  =
+  make_owns_rec h bs n
+
+let rec lemma_make_owns (h:vale_heap) (bs:Seq.seq buffer_info) (n:nat) : Lemma
+  (requires
+    n <= Seq.length bs /\
+    (forall (i:nat).{:pattern Seq.index bs i} i < Seq.length bs ==> buffer_readable h (Seq.index bs i).bi_buffer) /\
+    (forall (i1 i2:nat).{:pattern (Seq.index bs i1); (Seq.index bs i2)}
+      i1 < Seq.length bs /\ i2 < Seq.length bs ==> buffer_info_disjoint (Seq.index bs i1) (Seq.index bs i2))
+  )
+  (ensures (
+    let (m, s) = make_owns h bs n in
+    (forall (i:heaplet_id) (a:int).{:pattern Set.mem a (s i)}
+      (Set.mem a (s i) <==> Option.mapTot (fun n -> (Seq.index bs n).bi_heaplet) (m a) == Some i) /\
+      (Set.mem a (s i) ==> buffer_info_has_addr_opt (Option.mapTot (fun n -> Seq.index bs n) (m a)) a) /\
+      (Set.mem a (s i) ==> Set.mem a (Map.domain h.mh))
+    ) /\
+    (forall (k:nat) (a:int).{:pattern Set.mem a (s (Seq.index bs k).bi_heaplet)}
+      k < n /\ buffer_info_has_addr (Seq.index bs k) a ==> Set.mem a (s (Seq.index bs k).bi_heaplet))
+  ))
+  =
+  reveal_opaque (`%make_owns) make_owns;
+  if n = 0 then () else
+  let _ = make_owns h bs (n - 1) in
+  let (m, s) = make_owns h bs n in
+  lemma_make_owns h bs (n - 1);
+  let bi = Seq.index bs (n - 1) in
+  let b = bi.bi_buffer in
+  let hi = bi.bi_heaplet in
+  let addr = Vale.Interop.Heap_s.global_addrs_map b in
+  let len = DV.length (get_downview b.bsrc) in
+  let s_b = set_of_range addr len in
+  let lem1 (a:int) : Lemma
+    (requires Set.mem a s_b)
+    (ensures Set.mem a (Map.domain h.mh))
+    [SMTPat (Set.mem a (Map.domain h.mh))]
+    =
+    I.addrs_set_mem h.ih b a
+    in
+  let lem2 (i:heaplet_id) (a:int) : Lemma
+    (requires i =!= hi /\ Set.mem a (Set.intersect s_b (s i)))
+    (ensures False)
+    [SMTPat (Set.mem a (s i))]
+    =
+    reveal_opaque (`%addr_map_pred) addr_map_pred
+    in
+  ()
+
+#push-options "--initial_fuel 1 --max_fuel 1 --initial_ifuel 2 --max_ifuel 2"
+let rec lemma_loc_mutable_buffers_rec (l:list buffer_info) (s:Seq.seq buffer_info) (n:nat) : Lemma
+  (requires
+    n + List.length l == Seq.length s /\
+    list_to_seq_post l s n
+  )
+  (ensures (
+    let modloc = loc_mutable_buffers l in
+    forall (i:nat).{:pattern Seq.index s i} n <= i /\ i < Seq.length s ==> (
+      let bi = Seq.index s i in
+      bi.bi_mutable == Mutable ==> loc_includes modloc (loc_buffer bi.bi_buffer))
+  ))
+  (decreases l)
+  =
+  match l with
+  | [] -> ()
+  | h::t -> lemma_loc_mutable_buffers_rec t s (n + 1)
+#pop-options
+
+let lemma_loc_mutable_buffers (l:list buffer_info) : Lemma
+  (ensures (
+    let s = list_to_seq l in
+    forall (i:nat).{:pattern Seq.index s i} i < Seq.length s ==> (
+      let bi = Seq.index s i in
+      bi.bi_mutable == Mutable ==> loc_includes (loc_mutable_buffers l) (loc_buffer bi.bi_buffer))
+  ))
+  =
+  lemma_list_to_seq l;
+  lemma_loc_mutable_buffers_rec l (list_to_seq l) 0
+
+let create_heaplets buffers h1 =
+  let bs = list_to_seq buffers in
+  let modloc = loc_mutable_buffers buffers in
+  let layout1 = h1.vf_layout in
+  let layin1 = layout1.vl_inner in
+  let (hmap, hsets) = make_owns h1.vf_heap bs (Seq.length bs) in
+  let hmap a = Option.mapTot (fun n -> (Seq.index bs n).bi_heaplet) (hmap a) in
+  let l = {
+    vl_heaplets_initialized = true;
+    vl_heaplet_map = hmap;
+    vl_heaplet_sets = hsets;
+    vl_old_heap = h1.vf_heap;
+    vl_buffers = bs;
+    vl_mod_loc = modloc;
+  } in
+  let layout2 = {layout1 with vl_inner = l} in
+  let h2 = {
+    vf_layout = layout2;
+    vf_heap = h1.vf_heap;
+    vf_heaplets = h1.vf_heaplets;
+  } in
+  h2
+
+let lemma_create_heaplets buffers h1 =
+  let bs = list_to_seq buffers in
+  let h2 = create_heaplets buffers h1 in
+  assert (h2.vf_layout.vl_inner.vl_buffers == bs); // REVIEW: why is this necessary, even with extra ifuel?
+  lemma_make_owns h1.vf_heap bs (Seq.length bs);
+  lemma_loc_mutable_buffers buffers;
+  reveal_opaque (`%valid_layout_buffer_id) valid_layout_buffer_id;
+  ()
+
+let destroy_heaplets h1 =
+  h1
+
+let lemma_destroy_heaplets h1 =
+  ()
 
 val heap_shift (m1 m2:S.machine_heap) (base:int) (n:nat) : Lemma
   (requires (forall i. 0 <= i /\ i < n ==> m1.[base + i] == m2.[base + i]))
@@ -376,6 +533,8 @@ let in_bounds128 (h:vale_heap) (b:buffer128) (i:nat{i < buffer_length b}) : Lemm
   =
   length_t_eq TUInt128 b
 
+#push-options "--z3rlimit 20"
+#restart-solver
 let bytes_valid128 ptr h =
   reveal_opaque (`%S.valid_addr128) S.valid_addr128;
   IB.list_disjoint_or_eq_reveal ();
@@ -399,6 +558,7 @@ let bytes_valid128 ptr h =
   I.addrs_set_mem (_ih h) b (ptr+13);
   I.addrs_set_mem (_ih h) b (ptr+14);
   I.addrs_set_mem (_ih h) b (ptr+15)
+#pop-options
 
 let equiv_load_mem64 ptr h =
   let t = TUInt64 in
@@ -421,7 +581,7 @@ let equiv_load_mem64 ptr h =
 
 //let same_domain_update64 b i v h =
 //  low_lemma_valid_mem64 b i h;
-//  Vale.Arch.MachineHeap.same_domain_update (buffer_addr b h + scale8 i) v (get_heap h)
+//  Vale.Arch.MachineHeap.same_domain_update64 (buffer_addr b h + scale8 i) v (get_heap h)
 
 open Vale.X64.BufferViewStore
 
@@ -464,14 +624,18 @@ let valid_state_store_mem64_aux i v h =
   let mem1 = heap' in
   let mem2 = I.down_mem (_ih h1) in
   let aux () : Lemma (forall j. mem1.[j] == mem2.[j]) =
-    Vale.Arch.MachineHeap.same_mem_get_heap_val i mem1 mem2;
-    Vale.Arch.MachineHeap.correct_update_get i v heap;
-    Vale.Arch.MachineHeap.frame_update_heap i v heap
+    Vale.Arch.MachineHeap.same_mem_get_heap_val64 i mem1 mem2;
+    Vale.Arch.MachineHeap.correct_update_get64 i v heap;
+    Vale.Arch.MachineHeap.frame_update_heap64 i v heap
   in let aux2 () : Lemma (Set.equal (Map.domain mem1) (Map.domain mem2)) =
     bytes_valid64 i h;
-    Vale.Arch.MachineHeap.same_domain_update i v heap
+    Vale.Arch.MachineHeap.same_domain_update64 i v heap
   in aux(); aux2();
   Map.lemma_equal_intro mem1 mem2
+
+let low_lemma_load_mem64_full b i vfh t hid =
+  reveal_opaque (`%valid_layout_buffer_id) valid_layout_buffer_id;
+  ()
 
 #push-options "--z3rlimit 20"
 #restart-solver
@@ -482,11 +646,80 @@ let low_lemma_store_mem64 b i v h =
   let heap = get_heap h in
   let heap' = S.update_heap64 (buffer_addr b h + scale8 i) v heap in
   low_lemma_store_mem64_aux b heap i v h;
-  Vale.Arch.MachineHeap.frame_update_heap (buffer_addr b h + scale8 i) v heap;
+  Vale.Arch.MachineHeap.frame_update_heap64 (buffer_addr b h + scale8 i) v heap;
   in_bounds64 h b i;
   I.addrs_set_lemma_all ();
   I.update_buffer_up_mem (_ih h) b heap heap'
 #pop-options
+
+#set-options "--z3rlimit 100"
+#restart-solver
+let lemma_is_full_update
+    (vfh:vale_full_heap) (h hk hk':vale_heap) (k:heaplet_id) (mh mh' mhk mhk':machine_heap) (mt mt':memtaint)
+    (t:base_typ) (b:buffer t) (ptr:int) (v_size:nat)
+    (index:nat) (v:base_typ_as_vale_type t) (tn:taint)
+  : Lemma
+  (requires
+    vfh.vf_layout.vl_inner.vl_heaplets_initialized /\
+    mem_inv vfh /\
+    buffer_readable hk b /\
+    buffer_writeable b /\
+    index < Seq.length (buffer_as_seq hk b) /\
+    mt == vfh.vf_layout.vl_taint /\
+    h == vfh.vf_heap /\
+    hk == Map16.sel vfh.vf_heaplets k /\
+    mh == h.mh /\
+    mhk == hk.mh /\
+    ptr == buffer_addr b hk + scale_by v_size index /\
+    mt' == S.update_n ptr v_size (heap_taint (coerce vfh)) tn /\
+    hk' == buffer_write b index v hk /\
+    valid_layout_buffer b vfh.vf_layout hk true /\
+    valid_taint_buf b hk mt tn /\
+    is_machine_heap_update mh mh' /\ upd_heap h mh' == buffer_write b index v h /\
+    is_machine_heap_update mhk mhk' /\ upd_heap hk mhk' == buffer_write b index v hk /\
+    (forall j.{:pattern mh.[j] \/ mh'.[j]} j < ptr \/ j >= ptr + v_size ==> mh.[j] == mh'.[j]) /\
+    (forall j.{:pattern mhk.[j] \/ mhk'.[j]} j < ptr \/ j >= ptr + v_size ==> mhk.[j] == mhk'.[j]) /\
+    0 <= scale_by v_size index /\ scale_by v_size index + v_size <= DV.length (get_downview b.bsrc) /\
+    (forall i.{:pattern mh'.[i] \/ mhk'.[i]} i >= ptr /\ i < ptr + v_size ==> mh'.[i] == mhk'.[i]) /\
+    True
+  )
+  (ensures is_full_update vfh hk' k mh' mt')
+  =
+  reveal_opaque (`%valid_layout_buffer_id) valid_layout_buffer_id;
+  let vfh' = coerce (heap_upd (coerce vfh) mh' mt') in
+  let dom_upd = Set.intersect (vfh.vf_layout.vl_inner.vl_heaplet_sets k) (Map.domain mhk) in
+  let mhk'' = Map.concat mhk (Map.restrict dom_upd mh') in
+  assert (Map.equal mhk'' mhk');
+  let unchanged (j:heaplet_id) : Lemma
+    (requires j =!= k)
+    (ensures Map16.sel vfh'.vf_heaplets j == Map16.sel vfh.vf_heaplets j)
+    [SMTPat (Map16.sel vfh'.vf_heaplets j)]
+    =
+    assert (Map.equal (Map16.sel vfh'.vf_heaplets j).mh (Map16.sel vfh.vf_heaplets j).mh);
+    I.down_up_identity (Map16.sel vfh.vf_heaplets j).ih;
+    ()
+  in
+  assert (Map16.equal vfh'.vf_heaplets (Map16.upd vfh.vf_heaplets k hk'));
+  assert (Map.equal mt' mt);
+  Vale.Interop.Heap_s.list_disjoint_or_eq_reveal ();
+  ()
+
+let low_lemma_store_mem64_full b i v vfh t hid =
+  let (h, mt, hk) = (vfh.vf_heap, vfh.vf_layout.vl_taint, Map16.get vfh.vf_heaplets hid) in
+  let ptr = buffer_addr b hk + scale8 i in
+  let mh' = S.update_heap64 ptr v (heap_get (coerce vfh)) in
+  let mt' = S.update_n ptr 8 (heap_taint (coerce vfh)) t in
+  let hk' = buffer_write b i v hk in
+  let mhk' = S.update_heap64 ptr v (get_heap hk) in
+  reveal_opaque (`%valid_layout_buffer_id) valid_layout_buffer_id;
+  low_lemma_store_mem64 b i v h;
+  low_lemma_store_mem64 b i v (Map16.get vfh.vf_heaplets hid);
+  Vale.Arch.MachineHeap.frame_update_heap64 ptr v h.mh;
+  Vale.Arch.MachineHeap.frame_update_heap64 ptr v hk.mh;
+  in_bounds64 hk b i;
+  Vale.Arch.MachineHeap.same_mem_get_heap_val64 ptr mh' mhk';
+  lemma_is_full_update vfh h hk hk' hid h.mh mh' hk.mh mhk' mt mt' TUInt64 b ptr 8 i v t;
+  ()
 
 val low_lemma_valid_mem128 (b:buffer128) (i:nat) (h:vale_heap) : Lemma
   (requires
@@ -739,6 +972,10 @@ let valid_state_store_mem128_aux i v h =
   in aux (); aux2 ();
   Map.lemma_equal_intro mem1 mem2
 
+let low_lemma_load_mem128_full b i vfh t hid =
+  reveal_opaque (`%valid_layout_buffer_id) valid_layout_buffer_id;
+  ()
+
 let low_lemma_store_mem128 b i v h =
   lemma_valid_mem128 b i h;
   lemma_store_mem128 b i v h;
@@ -751,6 +988,23 @@ let low_lemma_store_mem128 b i v h =
   in_bounds128 h b i;
   I.addrs_set_lemma_all ();
   I.update_buffer_up_mem (_ih h) b heap heap'
+
+let low_lemma_store_mem128_full b i v vfh t hid =
+  let (h, mt, hk) = (vfh.vf_heap, vfh.vf_layout.vl_taint, Map16.get vfh.vf_heaplets hid) in
+  let ptr = buffer_addr b hk + scale16 i in
+  let mh' = S.update_heap128 ptr v (heap_get (coerce vfh)) in
+  let mt' = S.update_n ptr 16 (heap_taint (coerce vfh)) t in
+  let hk' = buffer_write b i v hk in
+  let mhk' = S.update_heap128 ptr v (get_heap hk) in
+  reveal_opaque (`%valid_layout_buffer_id) valid_layout_buffer_id;
+  low_lemma_store_mem128 b i v h;
+  low_lemma_store_mem128 b i v (Map16.get vfh.vf_heaplets hid);
+  Vale.Arch.MachineHeap.frame_update_heap128 ptr v h.mh;
+  Vale.Arch.MachineHeap.frame_update_heap128 ptr v hk.mh;
+  in_bounds128 hk b i;
+  Vale.Arch.MachineHeap.same_mem_get_heap_val128 ptr mh' mhk';
+  lemma_is_full_update vfh h hk hk' hid h.mh mh' hk.mh mhk' mt mt' TUInt128 b ptr 16 i v t;
+  ()
 
 #push-options "--smtencoding.l_arith_repr boxwrap"
 let low_lemma_valid_mem128_64 b i h =
@@ -780,8 +1034,8 @@ let low_lemma_load_mem128_hi64 b i h =
 
 //let same_domain_update128_64 b i v h =
 //  low_lemma_valid_mem128_64 b i (_ih h);
-//  Vale.Arch.MachineHeap.same_domain_update (buffer_addr b h + scale16 i) v (get_heap h);
-//  Vale.Arch.MachineHeap.same_domain_update (buffer_addr b h + scale16 i + 8) v (get_heap h)
+//  Vale.Arch.MachineHeap.same_domain_update64 (buffer_addr b h + scale16 i) v (get_heap h);
+//  Vale.Arch.MachineHeap.same_domain_update64 (buffer_addr b h + scale16 i + 8) v (get_heap h)
 
 open Vale.Def.Types_s
 
@@ -811,6 +1065,11 @@ let update_heap128_lo (ptr:int) (v:quad32) (mem:S.machine_heap) : Lemma
   Vale.Arch.MachineHeap.update_heap32_get_heap32 (ptr+8) mem1;
   Vale.Arch.MachineHeap.update_heap32_get_heap32 (ptr+12) mem1
 
+let low_lemma_load_mem128_lo_hi_full b i vfh t hid =
+  reveal_opaque (`%valid_layout_buffer_id) valid_layout_buffer_id;
+  low_lemma_valid_mem128_64 b i vfh.vf_heap;
+  ()
+
 let low_lemma_store_mem128_lo64 b i v h =
   let ptr = buffer_addr b h + scale16 i in
   let v128 = buffer_read b i h in
@@ -822,6 +1081,27 @@ let low_lemma_store_mem128_lo64 b i v h =
   S.update_heap64_reveal ();
   S.update_heap32_reveal ();
   insert_nat64_reveal ()
+
+let low_lemma_store_mem128_lo64_full b i v vfh t hid =
+  let (h, mt, hk) = (vfh.vf_heap, vfh.vf_layout.vl_taint, Map16.get vfh.vf_heaplets hid) in
+  let v' = insert_nat64 (buffer_read b i hk) v 0 in
+  let ptr = buffer_addr b hk + scale16 i in
+  let mh' = S.update_heap128 ptr v' (heap_get (coerce vfh)) in
+  let mt' = S.update_n ptr 16 (heap_taint (coerce vfh)) t in
+  let hk' = buffer_write b i v' hk in
+  let mhk' = S.update_heap128 ptr v' (get_heap hk) in
+  reveal_opaque (`%valid_layout_buffer_id) valid_layout_buffer_id;
+  low_lemma_store_mem128 b i v' h;
+  low_lemma_store_mem128 b i v' (Map16.get vfh.vf_heaplets hid);
+  Vale.Arch.MachineHeap.frame_update_heap128 ptr v' h.mh;
+  Vale.Arch.MachineHeap.frame_update_heap128 ptr v' hk.mh;
+  in_bounds128 hk b i;
+  Vale.Arch.MachineHeap.same_mem_get_heap_val128 ptr mh' mhk';
+  lemma_is_full_update vfh h hk hk' hid h.mh mh' hk.mh mhk' mt mt' TUInt128 b ptr 16 i v' t;
+  low_lemma_store_mem128_lo64 b i v h;
+  low_lemma_valid_mem128_64 b i h;
+  assert (Map.equal mt (S.update_n (buffer_addr b h + scale16 i) 8 mt t));
+  ()
 
 #push-options "--z3rlimit 20 --using_facts_from '* -LowStar.Monotonic.Buffer.loc_disjoint_includes_r'"
 #restart-solver
@@ -841,3 +1121,26 @@ let low_lemma_store_mem128_hi64 b i v h =
   S.update_heap32_reveal ();
   insert_nat64_reveal ()
 #pop-options
+
+let low_lemma_store_mem128_hi64_full b i v vfh t hid =
+  reveal_opaque (`%valid_layout_buffer_id) valid_layout_buffer_id;
+  let (h, mt, hk) = (vfh.vf_heap, vfh.vf_layout.vl_taint, Map16.get vfh.vf_heaplets hid) in
+  let v' = insert_nat64 (buffer_read b i h) v 1 in
+  let ptr = buffer_addr b hk + scale16 i in
+  let mh' = S.update_heap128 ptr v' (heap_get (coerce vfh)) in
+  let mt' = S.update_n ptr 16 (heap_taint (coerce vfh)) t in
+  let hk' = buffer_write b i v' hk in
+  let mhk' = S.update_heap128 ptr v' (get_heap hk) in
+  reveal_opaque (`%valid_layout_buffer_id) valid_layout_buffer_id;
+  low_lemma_store_mem128 b i v' h;
+  low_lemma_store_mem128 b i v' (Map16.get vfh.vf_heaplets hid);
+  Vale.Arch.MachineHeap.frame_update_heap128 ptr v' h.mh;
+  Vale.Arch.MachineHeap.frame_update_heap128 ptr v' hk.mh;
+  in_bounds128 hk b i;
+  Vale.Arch.MachineHeap.same_mem_get_heap_val128 ptr mh' mhk';
+  lemma_is_full_update vfh h hk hk' hid h.mh mh' hk.mh mhk' mt mt' TUInt128 b ptr 16 i v' t;
+  low_lemma_store_mem128_hi64 b i v h;
+  low_lemma_valid_mem128_64 b i h;
+  assert (Map.equal mt (S.update_n (buffer_addr b h + 16 * i + 8) 8 mt t));
+  ()
+
