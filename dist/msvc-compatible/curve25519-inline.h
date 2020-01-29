@@ -365,6 +365,7 @@ static inline void fmul2 (uint64_t *out, uint64_t *f1, uint64_t *f2, uint64_t *t
 }
 
 // Computes the field multiplication of four-element f1 with value in f2
+// Requires f2 to be smaller than 2^17
 static inline void fmul_scalar (uint64_t *out, uint64_t *f1, uint64_t f2) 
 {
   register uint64_t f2_r asm("rdx") = f2;

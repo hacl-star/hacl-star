@@ -1,5 +1,5 @@
 [
-  "«Ìzk¹\u0013hv<ùûY¿\u0005\u0001",
+  "¼0õÍ\u0013bLwYo:{ËÇ",
   [
     [
       "Vale.AES.X64.GF128_Init.va_req_Keyhash_init",
@@ -16,7 +16,7 @@
         "unit_typing"
       ],
       0,
-      "3dfff187373cb33413e10790d7d27c9f"
+      "b029d7fc18c38350e1e48789fcc4d79e"
     ],
     [
       "Vale.AES.X64.GF128_Init.va_ens_Keyhash_init",
@@ -27,14 +27,16 @@
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_f8666440faa91836cc5a13998af863fc", "bool_inversion",
         "equation_Prims.l_and", "equation_Prims.squash",
-        "equation_Prims.subtype_of", "equation_Vale.X64.Decls.va_state_eq",
+        "equation_Prims.subtype_of",
+        "equation_Vale.AES.X64.GF128_Init.va_req_Keyhash_init",
+        "equation_Vale.X64.Decls.va_state_eq",
         "fuel_guarded_inversion_Vale.X64.State.vale_state",
         "l_quant_interp_5b2993f9f2c0eba3627049a3b4167c7a",
         "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c",
         "unit_typing"
       ],
       0,
-      "7af11d1e1a3223ba6e33ed11b018bfb1"
+      "436a908b18da4881ba5902346c165949"
     ],
     [
       "Vale.AES.X64.GF128_Init.va_lemma_Keyhash_init",
@@ -42,19 +44,13 @@
       1,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "bool_inversion", "eq2-interp",
-        "equality_tok_Vale.X64.Machine_s.Secret@tok",
+        "@MaxIFuel_assumption", "@query", "bool_inversion",
         "equation_Vale.X64.Decls.va_require_total",
-        "equation_Vale.X64.Decls.validDstAddrs128",
-        "equation_Vale.X64.Decls.validSrcAddrs128",
         "fuel_guarded_inversion_Vale.X64.State.vale_state",
-        "proj_equation_Vale.X64.State.Mkvale_state_vs_heap",
-        "proj_equation_Vale.X64.State.Mkvale_state_vs_memTaint",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_f3164f24b09f136dda61e850558c9355"
+        "refinement_interpretation_Tm_refine_a5c7b042be3094d09e1325f52034d356"
       ],
       0,
-      "845fb0820dc4438d47408dfc11785db2"
+      "4435b15a6db919e8242b22c3e7958115"
     ],
     [
       "Vale.AES.X64.GF128_Init.va_wp_Keyhash_init",
@@ -63,7 +59,7 @@
       0,
       [ "@query" ],
       0,
-      "d1fc03934ee09842b9b8b65122a7fdab"
+      "e8dc1f36b9e89d4dbd99bba5b88cc16f"
     ],
     [
       "Vale.AES.X64.GF128_Init.va_quick_Keyhash_init",
@@ -75,7 +71,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "2ac7c2fd82e3dc67fc648a673b6b4cf0"
+      "14e7dad8d639c67b694dffeb189ebea7"
     ]
   ]
 ]

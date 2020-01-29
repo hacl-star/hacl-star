@@ -2,7 +2,8 @@ open Ctypes
 module Bindings(F:Cstubs.FOREIGN) =
   struct
     open F
-    include (Hacl_Spec_bindings.Bindings)(Hacl_Spec_stubs)
+    module Hacl_Spec_applied = (Hacl_Spec_bindings.Bindings)(Hacl_Spec_stubs)
+    open Hacl_Spec_applied
     type everCrypt_Hash_alg = spec_Hash_Definitions_hash_alg
     let everCrypt_Hash_alg =
       typedef spec_Hash_Definitions_hash_alg "EverCrypt_Hash_alg" 
