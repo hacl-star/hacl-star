@@ -13,6 +13,7 @@ module EverCrypt_Curve25519 = EverCrypt_Curve25519_bindings.Bindings(EverCrypt_C
 module EverCrypt_Hash = EverCrypt_Hash_bindings.Bindings(EverCrypt_Hash_stubs)
 module EverCrypt_HMAC = EverCrypt_HMAC_bindings.Bindings(EverCrypt_HMAC_stubs)
 module EverCrypt_Poly1305 = EverCrypt_Poly1305_bindings.Bindings(EverCrypt_Poly1305_stubs)
+module EverCrypt_HKDF = EverCrypt_HKDF_bindings.Bindings(EverCrypt_HKDF_stubs)
 
 
 module AutoConfig2 = struct
@@ -185,3 +186,29 @@ module Poly1305 : MAC =
   Make_Poly1305 (struct
     let mac dst data_len data key = EverCrypt_Poly1305.everCrypt_Poly1305_poly1305 dst data data_len key
 end)
+
+module HKDF = struct
+  open EverCrypt_HKDF
+
+  let expand alg okm prk info = everCrypt_HKDF_expand (Hash.alg_definition alg) (uint8_ptr okm) (uint8_ptr prk) (size_uint32 prk) (uint8_ptr info) (size_uint32 info) (size_uint32 okm)
+  let extract alg prk salt ikm = everCrypt_HKDF_extract (Hash.alg_definition alg) (uint8_ptr prk) (uint8_ptr salt) (size_uint32 salt) (uint8_ptr ikm) (size_uint32 ikm)
+end
+
+module HKDF_SHA2_256 : HKDF =
+  Make_HKDF (struct
+    let expand = EverCrypt_HKDF.everCrypt_HKDF_expand_sha2_256
+    let extract = EverCrypt_HKDF.everCrypt_HKDF_extract_sha2_256
+  end)
+
+module HKDF_SHA2_384 : HKDF =
+  Make_HKDF (struct
+    let expand = EverCrypt_HKDF.everCrypt_HKDF_expand_sha2_384
+    let extract = EverCrypt_HKDF.everCrypt_HKDF_extract_sha2_384
+  end)
+
+module HKDF_SHA2_512 : HKDF =
+  Make_HKDF (struct
+    let expand = EverCrypt_HKDF.everCrypt_HKDF_expand_sha2_512
+    let extract = EverCrypt_HKDF.everCrypt_HKDF_extract_sha2_512
+  end)
+

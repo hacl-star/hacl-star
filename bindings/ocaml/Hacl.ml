@@ -15,6 +15,7 @@ module Hacl_HMAC = Hacl_HMAC_bindings.Bindings(Hacl_HMAC_stubs)
 module Hacl_Poly1305_32 = Hacl_Poly1305_32_bindings.Bindings(Hacl_Poly1305_32_stubs)
 module Hacl_Poly1305_128 = Hacl_Poly1305_128_bindings.Bindings(Hacl_Poly1305_128_stubs)
 module Hacl_Poly1305_256 = Hacl_Poly1305_256_bindings.Bindings(Hacl_Poly1305_256_stubs)
+module Hacl_HKDF = Hacl_HKDF_bindings.Bindings(Hacl_HKDF_stubs)
 
 
 module Chacha20_Poly1305_32 : Chacha20_Poly1305 =
@@ -141,3 +142,16 @@ module Poly1305_256 : MAC =
   Make_Poly1305 (struct
     let mac = Hacl_Poly1305_256.hacl_Poly1305_256_poly1305_mac
 end)
+
+module HKDF_SHA2_256 : HKDF =
+  Make_HKDF (struct
+    let expand = Hacl_HKDF.hacl_HKDF_expand_sha2_256
+    let extract = Hacl_HKDF.hacl_HKDF_extract_sha2_256
+  end)
+
+module HKDF_SHA2_512 : HKDF =
+  Make_HKDF (struct
+    let expand = Hacl_HKDF.hacl_HKDF_expand_sha2_512
+    let extract = Hacl_HKDF.hacl_HKDF_extract_sha2_512
+  end)
+

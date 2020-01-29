@@ -37,3 +37,6 @@ module HMAC_SHA2_512 : MAC
 module Poly1305_32 : MAC
 module Poly1305_128 : MAC
 module Poly1305_256 : MAC
+
+module HKDF_SHA2_256 : HKDF
+module HKDF_SHA2_512 : HKDF

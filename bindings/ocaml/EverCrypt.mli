@@ -90,3 +90,14 @@ module HMAC_SHA2_384 : MAC
 module HMAC_SHA2_512 : MAC
 
 module Poly1305 : MAC
+
+module HKDF : sig
+  val expand : Hash.alg -> Bigstring.t -> Bigstring.t -> Bigstring.t -> unit
+  val extract : Hash.alg -> Bigstring.t -> Bigstring.t -> Bigstring.t -> unit
+end
+
+module HKDF_SHA2_256 : HKDF
+
+module HKDF_SHA2_384 : HKDF
+
+module HKDF_SHA2_512 : HKDF

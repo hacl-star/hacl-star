@@ -91,3 +91,17 @@ module Make_HMAC (Impl : sig
 = struct
   let mac dst key data = Impl.mac (uint8_ptr dst) (uint8_ptr key) (size_uint32 key) (uint8_ptr data) (size_uint32 data)
 end
+
+module type HKDF = sig
+  val expand: Bigstring.t -> Bigstring.t -> Bigstring.t -> unit
+  val extract: Bigstring.t -> Bigstring.t -> Bigstring.t -> unit
+end
+
+module Make_HKDF (Impl: sig
+    val expand : uint8 ptr -> uint8 ptr -> uint32 -> uint8 ptr -> uint32 -> uint32 -> unit
+    val extract : uint8 ptr -> uint8 ptr -> uint32 -> uint8 ptr -> uint32 -> unit
+  end)
+  = struct
+    let expand okm prk info = Impl.expand (uint8_ptr okm) (uint8_ptr prk) (size_uint32 prk) (uint8_ptr info) (size_uint32 info) (size_uint32 okm)
+    let extract prk salt ikm = Impl.extract (uint8_ptr prk) (uint8_ptr salt) (size_uint32 salt) (uint8_ptr ikm) (size_uint32 ikm)
+end

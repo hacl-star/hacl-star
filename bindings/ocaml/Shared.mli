@@ -59,3 +59,13 @@ module Make_HMAC (Impl : sig
     val mac : uint8 ptr -> uint8 ptr -> uint32 -> uint8 ptr -> uint32 -> unit
   end) : MAC
 
+
+module type HKDF = sig
+  val expand: Bigstring.t -> Bigstring.t -> Bigstring.t -> unit
+  val extract: Bigstring.t -> Bigstring.t -> Bigstring.t -> unit
+end
+
+module Make_HKDF (Impl: sig
+    val expand : uint8 ptr -> uint8 ptr -> uint32 -> uint8 ptr -> uint32 -> uint32 -> unit
+    val extract : uint8 ptr -> uint8 ptr -> uint32 -> uint8 ptr -> uint32 -> unit
+end) : HKDF
