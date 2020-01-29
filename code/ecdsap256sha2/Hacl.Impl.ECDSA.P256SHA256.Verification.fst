@@ -27,6 +27,7 @@ open Hacl.Hash.SHA2
 
 open Hacl.Impl.P256.Signature.Common
 open Lib.ByteSequence
+open Lib.IntVector.Intrinsics
 
 open FStar.Mul 
 
@@ -34,6 +35,49 @@ module H = Spec.Agile.Hash
 module Def = Spec.Hash.Definitions
 
 #set-options "--z3rlimit 300"
+
+(* This code is not side channel resistant *)
+inline_for_extraction noextract
+val isZero_uint64_nCT: f: felem -> Stack bool
+  (requires fun h -> live h f)
+  (ensures fun h0 r h1 -> modifies0 h0 h1 /\ (if as_nat h0 f = 0 then r == true else r == false))
+
+(* This code is not side channel resistant *)
+let isZero_uint64_nCT f =        
+    let f0 = index f (size 0) in  
+    let f1 = index f (size 1) in 
+    let f2 = index f (size 2) in 
+    let f3 = index f (size 3) in 
+
+    let z0_zero = eq_0_u64 f0 in 
+    let z1_zero = eq_0_u64 f1 in 
+    let z2_zero = eq_0_u64 f2 in 
+    let z3_zero = eq_0_u64 f3 in 
+  
+    z0_zero && z1_zero && z2_zero && z3_zero
+
+
+val isMoreThanZeroLessThanOrderMinusOne: f: felem -> Stack bool
+  (requires fun h -> live h f)
+  (ensures fun h0 result h1 -> modifies0 h0 h1 /\
+    (
+      if as_nat h0 f > 0 && as_nat h0 f < prime_p256_order then result == true else result == false
+    )  
+  )
+
+let isMoreThanZeroLessThanOrderMinusOne f = 
+  push_frame();
+    let tempBuffer = create (size 4) (u64 0) in 
+        recall_contents prime256order_buffer (Lib.Sequence.of_list p256_order_prime_list);
+    let carry = sub4_il f prime256order_buffer tempBuffer in  
+    let less = eq_u64_nCT carry (u64 1) in
+    let more = isZero_uint64_nCT f in 
+    let result = less && not more in 
+  pop_frame();  
+    result
+
+
+
 
 (* Verify that {\displaystyle r} r and {\displaystyle s} s are integers in {\displaystyle [1,n-1]} [1,n-1]. If not, the signature is invalid. *)
 
@@ -230,7 +274,7 @@ let ecdsa_verification_step5 x pubKeyAsPoint u1 u2 tempBuffer =
   push_frame();
     let pointSum = create (size 12) (u64 0) in
     ecdsa_verification_step5_1 pointSum pubKeyAsPoint u1 u2 tempBuffer;
-    let resultIsPAI = Hacl.Impl.P256.isPointAtInfinityPublic pointSum in 
+    let resultIsPAI = isPointAtInfinityPublic pointSum in 
     let xCoordinateSum = sub pointSum (size 0) (size 4) in 
     copy x xCoordinateSum;
   pop_frame(); 

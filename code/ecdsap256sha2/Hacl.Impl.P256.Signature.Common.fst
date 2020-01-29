@@ -16,13 +16,38 @@ open Hacl.Spec.ECDSA
 open Hacl.Spec.ECDSAP256.Definition
 
 open Hacl.Impl.LowLevel
+open Hacl.Impl.P256.MontgomeryMultiplication
 open Hacl.Impl.ECDSA.MontgomeryMultiplication
 
 open Hacl.Impl.P256.LowLevel
 open Hacl.Impl.P256
 
+open Hacl.Math
+open FStar.Math.Lemmas
+open FStar.Mul
+
+open Hacl.Impl.P256.Arithmetics
+
 
 #set-options "--z3rlimit 100"
+
+(* This code is not side channel resistant *)
+(* inline_for_extraction noextract *)
+val eq_u64_nCT:a:uint64 -> b:uint64 -> Tot (r: bool {if uint_v a = uint_v b then r == true else r == false})
+
+(* This code is not side channel resistant *)
+let eq_u64_nCT a b =
+  let open Lib.RawIntTypes in
+  FStar.UInt64.(u64_to_UInt64 a =^ u64_to_UInt64 b)
+
+
+(* This code is not side channel resistant *)
+(* inline_for_extraction noextract *)
+val eq_0_u64: a: uint64 -> Tot (r: bool {if uint_v a = 0 then r == true else r == false})
+
+(* This code is not side channel resistant *)
+let eq_0_u64 a = eq_u64_nCT a (u64 0)
+
 
 val changeEndian: i: felem -> Stack unit 
   (requires fun h -> live h i)
@@ -101,35 +126,178 @@ let bufferToJac p result =
   upd result (size 11) (u64 0)
 
 
+
+inline_for_extraction noextract
+val y_2: y: felem -> r: felem -> Stack unit
+  (requires fun h -> as_nat h y < prime /\  live h y /\ live h r /\ eq_or_disjoint y r)
+  (ensures fun h0 _ h1 -> modifies (loc r) h0 h1 /\ as_nat h1 r == toDomain_ ((as_nat h0 y) * (as_nat h0 y) % prime))
+
+let y_2 y r = 
+  toDomain y r;
+  montgomery_multiplication_buffer r r r
+
+
+inline_for_extraction noextract
+val upload_p256_point_on_curve_constant: x: felem -> Stack unit
+  (requires fun h -> live h x)
+  (ensures fun h0 _ h1 -> modifies (loc x) h0 h1 /\ 
+    as_nat h1 x == toDomain_ (41058363725152142129326129780047268409114441015993725554835256314039467401291) /\
+    as_nat h1 x < prime
+ )
+
+let upload_p256_point_on_curve_constant x = 
+  upd x (size 0) (u64 15608596021259845087);
+  upd x (size 1) (u64 12461466548982526096);
+  upd x (size 2) (u64 16546823903870267094);
+  upd x (size 3) (u64 15866188208926050356);
+    let h1 = ST.get() in 
+  assert_norm (
+    15608596021259845087 + 12461466548982526096 * pow2 64 + 
+    16546823903870267094 * pow2 64 * pow2 64 + 
+    15866188208926050356 * pow2 64 * pow2 64 * pow2 64 == (41058363725152142129326129780047268409114441015993725554835256314039467401291 * pow2 256) % prime)
+
+
+val lemma_xcube: x_: nat {x_ < prime} -> Lemma 
+  (((x_ * x_ * x_ % prime) - (3 * x_ % prime)) % prime == (x_ * x_ * x_ - 3* x_) % prime)
+
+let lemma_xcube x_ = 
+  lemma_mod_add_distr (- (3 * x_ % prime)) (x_ * x_ * x_) prime;
+  lemma_mod_sub_distr (x_ * x_ * x_ ) (3 * x_) prime
+
+
+val lemma_xcube2: x_ : nat {x_ < prime} -> Lemma 
+  (toDomain_ ((((((x_ * x_ * x_) - (3 * x_)) % prime)) + 41058363725152142129326129780047268409114441015993725554835256314039467401291) % prime) == 
+    toDomain_ ((x_ * x_ * x_ - 3 * x_ + 41058363725152142129326129780047268409114441015993725554835256314039467401291) % prime))
+
+let lemma_xcube2 x_ = 
+  lemma_mod_add_distr 41058363725152142129326129780047268409114441015993725554835256314039467401291 ((x_ * x_ * x_) - (3 * x_)) prime;
+  assert(((((x_ * x_ * x_) - (3 * x_)) % prime) + 41058363725152142129326129780047268409114441015993725554835256314039467401291) % prime == (x_ * x_ * x_ - 3 * x_ + 41058363725152142129326129780047268409114441015993725554835256314039467401291) % prime)
+
+
+inline_for_extraction noextract
+val xcube_minus_x: x: felem ->r: felem -> Stack unit 
+  (requires fun h -> as_nat h x < prime /\ live h x  /\ live h r /\ eq_or_disjoint x r)
+  (ensures fun h0 _ h1 -> 
+    modifies (loc r) h0 h1 /\
+    (
+      let x_ = as_nat h0 x in 
+      as_nat h1 r =  toDomain_((x_ * x_ * x_ - 3 * x_ + 41058363725152142129326129780047268409114441015993725554835256314039467401291) % prime))
+  )
+
+
+let xcube_minus_x x r = 
+  push_frame();
+      let h0 = ST.get() in 
+    let xToDomainBuffer = create (size 4) (u64 0) in 
+    let minusThreeXBuffer = create (size 4) (u64 0) in 
+    let p256_constant = create (size 4) (u64 0) in 
+  toDomain x xToDomainBuffer;
+  montgomery_multiplication_buffer xToDomainBuffer xToDomainBuffer r;
+  montgomery_multiplication_buffer r xToDomainBuffer r;
+    lemma_mod_mul_distr_l ((as_nat h0 x) * (as_nat h0 x)) (as_nat h0 x) prime;
+  multByThree xToDomainBuffer minusThreeXBuffer;
+  p256_sub r minusThreeXBuffer r;
+    upload_p256_point_on_curve_constant p256_constant;
+  p256_add r p256_constant r;
+  pop_frame(); 
+  
+    let x_ = as_nat h0 x in 
+    assert_norm (41058363725152142129326129780047268409114441015993725554835256314039467401291 < prime);
+    lemma_xcube x_;
+    lemma_mod_add_distr 41058363725152142129326129780047268409114441015993725554835256314039467401291 ((x_ * x_ * x_) - (3 * x_)) prime;
+    lemma_xcube2 x_
+
+
+
+val isPointAtInfinityPublic: p: point -> Stack bool
+  (requires fun h -> live h p)
+  (ensures fun h0 r h1 -> modifies0 h0 h1 /\ 
+    (
+      let x, y, z = point_prime_to_coordinates (as_seq h0 p) in 
+      r == Hacl.Spec.P256.isPointAtInfinity (x, y, z)
+    )
+  ) 
+
+
+let isPointAtInfinityPublic p =  
+  let z0 = index p (size 8) in 
+  let z1 = index p (size 9) in 
+  let z2 = index p (size 10) in 
+  let z3 = index p (size 11) in 
+  let z0_zero = eq_0_u64 z0 in 
+  let z1_zero = eq_0_u64 z1 in 
+  let z2_zero = eq_0_u64 z2 in 
+  let z3_zero = eq_0_u64 z3 in 
+  z0_zero && z1_zero && z2_zero && z3_zero
+
+
+val lemma_modular_multiplication_p256_2_d: a: nat{a < prime256} -> b: nat {b < prime256} -> 
+  Lemma 
+    (toDomain_ a = toDomain_ b <==> a == b)
+
+let lemma_modular_multiplication_p256_2_d a b = 
+   lemmaToDomain a;
+     assert(toDomain_ a = a * pow2 256 % prime);
+   lemmaToDomain b;
+     assert(toDomain_ b = b * pow2 256 % prime);
+   lemma_modular_multiplication_p256_2 a b;
+     assert(toDomain_ a = toDomain_ b ==> a == b)
+
+
+val isPointOnCurvePublic: p: point -> Stack bool
+  (requires fun h -> live h p /\    
+    as_nat h (gsub p (size 0) (size 4)) < prime /\ 
+    as_nat h (gsub p (size 4) (size 4)) < prime /\
+    as_nat h (gsub p (size 8) (size 4)) == 1)
+
+  (ensures fun h0 r h1 ->      
+    modifies0 h0 h1 /\ 
+    (
+      let x = gsub p (size 0) (size 4) in 
+      let y = gsub p (size 4) (size 4) in 
+      let x_ = as_nat h0 x in  
+      if r = false 
+  then (as_nat h0 y) * (as_nat h0 y) % prime <>  (x_ * x_ * x_ - 3 * x_ + 41058363725152142129326129780047268409114441015993725554835256314039467401291) % prime
+       else (as_nat h0 y) * (as_nat h0 y) % prime == (x_ * x_ * x_ - 3 * x_ + 41058363725152142129326129780047268409114441015993725554835256314039467401291) % prime) /\
+      r == isPointOnCurve (
+      as_nat h1 (gsub p (size 0) (size 4)), as_nat h1 (gsub p (size 4) (size 4)), as_nat h1 (gsub p (size 8) (size 4))
+  ) 
+)
+
+let isPointOnCurvePublic p = 
+   push_frame(); 
+     let y2Buffer = create (size 4) (u64 0) in 
+     let xBuffer = create (size 4) (u64 0) in 
+       let h0 = ST.get() in 
+     let x = sub p (size 0) (size 4) in 
+     let y = sub p (size 4) (size 4) in 
+     y_2 y y2Buffer;
+     xcube_minus_x x xBuffer;
+       let h1 = ST.get() in 
+     let r = compare_felem y2Buffer xBuffer in 
+     let z = eq_0_u64 r in 
+     assert(if uint_v r = pow2 64 -1 then as_nat h1 y2Buffer == as_nat h1 xBuffer else as_nat h1 y2Buffer <> as_nat h1 xBuffer);
+     lemma_modular_multiplication_p256_2_d ((as_nat h0 y) * (as_nat h0 y) % prime) 
+       (let x_ = as_nat h0 x in (x_ * x_ * x_ - 3 * x_ + 41058363725152142129326129780047268409114441015993725554835256314039467401291) % prime);
+     assert(let x_ = as_nat h0 x in 
+       if uint_v r = pow2 64 - 1 then   
+    (as_nat h0 y) * (as_nat h0 y) % prime ==  (x_ * x_ * x_ - 3 * x_ + 41058363725152142129326129780047268409114441015993725554835256314039467401291) % prime else    
+    (as_nat h0 y) * (as_nat h0 y) % prime <>  (x_ * x_ * x_ - 3 * x_ + 41058363725152142129326129780047268409114441015993725554835256314039467401291) % prime);
+     let z = not(eq_0_u64 r) in 
+     pop_frame();
+     z
+
+
+
 (* 
   checks whether the coordinates are valid = 
   all of them are less than prime 
 *) 
 
-
 (* checks whether the intefer f is between 1 and (n- 1) (incl).  *)
 (* [1, n - 1] <==> a > 0 /\ a < n) *)
 
-val isMoreThanZeroLessThanOrderMinusOne: f: felem -> Stack bool
-  (requires fun h -> live h f)
-  (ensures fun h0 result h1 -> modifies0 h0 h1 /\
-    (
-      if as_nat h0 f > 0 && as_nat h0 f < prime_p256_order then result == true else result == false
-    )  
-  )
-
-let isMoreThanZeroLessThanOrderMinusOne f = 
-  push_frame();
-    let tempBuffer = create (size 4) (u64 0) in 
-        recall_contents prime256order_buffer (Lib.Sequence.of_list p256_order_prime_list);
-    let carry = sub4_il f prime256order_buffer tempBuffer in  
-    let less = eq_u64_nCT carry (u64 1) in
-    let more = isZero_uint64_nCT f in 
-    let result = less && not more in 
-  pop_frame();  
-    result
-
-
+(* This code is not side channel resistant *)
 (* we require the coordinate to be in affine representation of jac coordinate *)
 val isCoordinateValid: p: point -> Stack bool 
   (requires fun h -> live h p /\ point_z_as_nat h p == 1)
@@ -229,7 +397,7 @@ let isOrderCorrect p tempBuffer =
   push_frame(); 
     let multResult = create (size 12) (u64 0) in 
     multByOrder2 multResult p tempBuffer;
-    let result = Hacl.Impl.P256.isPointAtInfinityPublic multResult in  
+    let result = isPointAtInfinityPublic multResult in  
    pop_frame();
      result
 
@@ -240,8 +408,9 @@ For Bob to authenticate Alice's signature, he must have a copy of her public-key
 Check that {\displaystyle Q_{A}} Q_{A} is not equal to the identity element {\displaystyle O} O, and its coordinates are otherwise valid
 Check that {\displaystyle Q_{A}} Q_{A} lies on the curve
 Check that {\displaystyle n\times Q_{A}=O} n\times Q_{A}=O
- *)
- 
+*)
+
+(* This code is not side channel resistant *) 
 val verifyQValidCurvePoint: pubKeyAsPoint: point -> tempBuffer: lbuffer uint64 (size 100) -> Stack bool
   (requires fun h -> 
     live h pubKeyAsPoint /\ live h tempBuffer /\
@@ -256,8 +425,10 @@ val verifyQValidCurvePoint: pubKeyAsPoint: point -> tempBuffer: lbuffer uint64 (
 let verifyQValidCurvePoint pubKeyAsPoint tempBuffer = 
     let coordinatesValid = isCoordinateValid pubKeyAsPoint in 
       if not coordinatesValid then false else
-    let belongsToCurve =  Hacl.Impl.P256.isPointOnCurvePublic pubKeyAsPoint in 
+    let belongsToCurve = isPointOnCurvePublic pubKeyAsPoint in 
     let orderCorrect = isOrderCorrect pubKeyAsPoint tempBuffer in 
     if coordinatesValid && belongsToCurve && orderCorrect 
       then true 
     else false  
+
+

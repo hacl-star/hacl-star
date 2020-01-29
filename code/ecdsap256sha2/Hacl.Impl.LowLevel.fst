@@ -23,24 +23,6 @@ open Lib.IntVector.Intrinsics
 
 #reset-options "--z3rlimit 400"
 
-(* This code is not side channel resistant *)
-(* inline_for_extraction noextract *)
-val eq_u64_nCT:a:uint64 -> b:uint64 -> Tot (r: bool {if uint_v a = uint_v b then r == true else r == false})
-
-(* This code is not side channel resistant *)
-let eq_u64_nCT a b =
-  let open Lib.RawIntTypes in
-  FStar.UInt64.(u64_to_UInt64 a =^ u64_to_UInt64 b)
-
-
-(* This code is not side channel resistant *)
-(* inline_for_extraction noextract *)
-val eq_0_u64: a: uint64 -> Tot (r: bool {if uint_v a = 0 then r == true else r == false})
-
-(* This code is not side channel resistant *)
-let eq_0_u64 a = eq_u64_nCT a (u64 0)
-
-
 val eq0_u64: a: uint64 -> Tot (r: uint64 {if uint_v a = 0 then uint_v r == pow2 64 - 1 else uint_v r == 0})
 
 let eq0_u64 a = 
@@ -79,27 +61,6 @@ let isZero_uint64_CT f =
   r
 
 
-(* This code is not side channel resistant *)
-inline_for_extraction noextract
-val isZero_uint64_nCT: f: felem -> Stack bool
-  (requires fun h -> live h f)
-  (ensures fun h0 r h1 -> modifies0 h0 h1 /\ (if as_nat h0 f = 0 then r == true else r == false))
-
-(* This code is not side channel resistant *)
-let isZero_uint64_nCT f =        
-    let f0 = index f (size 0) in  
-    let f1 = index f (size 1) in 
-    let f2 = index f (size 2) in 
-    let f3 = index f (size 3) in 
-
-    let z0_zero = eq_0_u64 f0 in 
-    let z1_zero = eq_0_u64 f1 in 
-    let z2_zero = eq_0_u64 f2 in 
-    let z3_zero = eq_0_u64 f3 in 
-  
-    z0_zero && z1_zero && z2_zero && z3_zero
-
-
 val compare_felem: a: felem -> b: felem -> Stack uint64
   (requires fun h -> live h a /\ live h b) 
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\ (if as_nat h0 a = as_nat h0 b then uint_v r == pow2 64 - 1 else uint_v r = 0))
@@ -133,21 +94,6 @@ let compare_felem a b =
       logand_lemma r01 r23;
       lemma_equality (a_0, a_1, a_2, a_3) (b_0, b_1, b_2, b_3); 
   r
-
-
-inline_for_extraction noextract
-val lt_u64:a:uint64 -> b:uint64 -> Tot bool
-let lt_u64 a b =
-  let open Lib.RawIntTypes in
-  FStar.UInt64.(u64_to_UInt64 a <^ u64_to_UInt64 b)
-
-
-inline_for_extraction noextract
-val le_u64:a:uint64 -> b:uint64 -> Tot bool
-let le_u64 a b =
-  let open Lib.RawIntTypes in
-  FStar.UInt64.(u64_to_UInt64 a <=^ u64_to_UInt64 b)
-
 
 inline_for_extraction noextract
 val load_buffer8: 
@@ -224,45 +170,6 @@ let copy_conditional out x mask =
   lemma_eq_funct_ (as_seq h1 out) (as_seq h0 out);
   lemma_eq_funct_ (as_seq h1 out) (as_seq h0 x)
 
-val add_carry_u64_: cin: uint64 -> x: uint64 -> y: uint64 -> r: lbuffer uint64 (size 1) -> 
-  Stack uint64 
-    (requires fun h -> live h r) 
-    (ensures fun h0 c h1 -> modifies1 r h0 h1 /\ uint_v c <= 2 /\ 
-      (
-	let r = Seq.index (as_seq h1 r) 0 in 
-	uint_v r + uint_v c * pow2 64 == uint_v x + uint_v y + uint_v cin)
-      )
-
-let add_carry_u64_ cin x y result1 = 
-  let res1 = x +. cin in 
-  let c = if lt_u64 res1 cin then u64 1 else u64 0 in
-  let res = res1 +. y in
-  let c = if lt_u64 res res1 then c +. u64 1 else c in
-  Lib.Buffer.upd result1 (size 0) res;
-  c
-
-(*
-val add_carry_u64: cin: uint64 -> x: uint64 -> y: uint64 -> r: lbuffer uint64 (size 1) -> 
-  Stack uint64 
-    (requires fun h -> live h r)
-    (ensures fun h0 c h1 -> modifies1 r h0 h1 /\ uint_v c <= 2 /\
-      (
-	let r = Seq.index (as_seq h1 r) 0 in 
-	uint_v r + uint_v c * pow2 64 == uint_v x + uint_v y + uint_v cin)
-    )
-    
-let add_carry_u64 cin x y result1 = 
-  let res1 = x +. cin in 
-  let mask1 = Lib.IntTypes.lt_mask res1 cin in 
-    Lib.IntTypes.lt_mask_lemma res1 cin;
-  let c = copy_conditional_u64 (u64 0) (u64 1) mask1 in 
-  let res = res1 +. y in 
-  let mask2 = Lib.IntTypes.lt_mask res res1 in 
-    Lib.IntTypes.lt_mask_lemma res res1;
-  Lib.Buffer.upd result1 (size 0) res;
-  let c1 = copy_conditional_u64 (u64 0) (u64 1) mask2 in 
-  c +. c1
-*)  
 
 val add4: x: felem -> y: felem -> result: felem -> 
   Stack uint64

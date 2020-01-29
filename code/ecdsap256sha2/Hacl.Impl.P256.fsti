@@ -28,6 +28,12 @@ module B = LowStar.Buffer
 open FStar.Mul
 
 
+inline_for_extraction noextract 
+val toDomain: value: felem -> result: felem ->  Stack unit 
+  (requires fun h ->  as_nat h value < prime /\ live h value /\live h result /\ eq_or_disjoint value result)
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ as_nat h1 result = toDomain_ (as_nat h0 value))
+ 
+
 noextract 
 let point_x_as_nat (h: mem) (e: point) : GTot nat = 
   let open Lib.Sequence in 
@@ -222,33 +228,3 @@ val secretToPublicWithoutNorm: result: point -> scalar: lbuffer uint8 (size 32) 
 	let rN, _ = montgomery_ladder_spec (as_seq h0 scalar) ((0, 0, 0), basePoint) in 
 	rN == p1))  
 
-
-val isPointAtInfinityPublic: p: point -> Stack bool
-  (requires fun h -> live h p)
-  (ensures fun h0 r h1 -> modifies0 h0 h1 /\ 
-    (
-      let x, y, z = point_prime_to_coordinates (as_seq h0 p) in 
-      r == Hacl.Spec.P256.isPointAtInfinity (x, y, z)
-    )
-  ) 
-
-
-val isPointOnCurvePublic: p: point -> Stack bool
-  (requires fun h -> live h p /\    
-    as_nat h (gsub p (size 0) (size 4)) < prime /\ 
-    as_nat h (gsub p (size 4) (size 4)) < prime /\
-    as_nat h (gsub p (size 8) (size 4)) == 1)
-
-  (ensures fun h0 r h1 ->      
-    modifies0 h0 h1 /\ 
-    (
-      let x = gsub p (size 0) (size 4) in 
-      let y = gsub p (size 4) (size 4) in 
-      let x_ = as_nat h0 x in  
-      if r = false 
-	then (as_nat h0 y) * (as_nat h0 y) % prime <>  (x_ * x_ * x_ - 3 * x_ + 41058363725152142129326129780047268409114441015993725554835256314039467401291) % prime
-       else (as_nat h0 y) * (as_nat h0 y) % prime == (x_ * x_ * x_ - 3 * x_ + 41058363725152142129326129780047268409114441015993725554835256314039467401291) % prime) /\
-      r == isPointOnCurve (
-      as_nat h1 (gsub p (size 0) (size 4)), as_nat h1 (gsub p (size 4) (size 4)), as_nat h1 (gsub p (size 8) (size 4))
-  ) 
-)
