@@ -6,7 +6,7 @@ open FStar.Mul
 
 open Hacl.Spec.P256.Lemmas
 
-#set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 200"
 
 noextract
 let prime256: (p: pos {p > 3}) =
@@ -32,19 +32,21 @@ let mod_same n = ()
 val euclid: n:pos -> a:int -> b:int -> r:int -> s:int -> Lemma
   (requires (a * b) % n = 0 /\ r * n + s * a = 1)
   (ensures  b % n = 0)
+
 let euclid n a b r s =
-  assert (r * n * b + s * (a * b) = b);
   calc (==) {
     b % n;
-    == { }
+    == { FStar.Math.Lemmas.distributivity_add_left (r * n) (s * a) b }
+    (r * n * b + s * a * b) % n;
+    == { FStar.Math.Lemmas.paren_mul_right s a b }    
     (r * n * b + s * (a * b)) % n;
     == { FStar.Math.Lemmas.modulo_distributivity (r * n * b) (s * (a * b)) n }
     ((r * n * b) % n + s * (a * b) % n) % n;
     == { FStar.Math.Lemmas.lemma_mod_mul_distr_r s (a * b) n }
-    ((r * n * b) % n + s * ((a * b) % n) % n) % n;
-    == { }
+    ((r * n * b) % n + s * ((a * b) % n) % n) % n;  
+    == { assert (a * b % n = 0) }
     ((r * n * b) % n + s * 0 % n) % n;
-    == { }
+    == { assert (s * 0 == 0) }
     ((r * n * b) % n + 0 % n) % n;
     == { FStar.Math.Lemmas.modulo_lemma 0 n }
     ((r * n * b) % n) % n;
@@ -55,10 +57,13 @@ let euclid n a b r s =
     == { FStar.Math.Lemmas.lemma_mod_mul_distr_l n (r * b) n}
     n % n * (r * b) % n;
     == { mod_same n }
-    (0 * r * b) % n;
-    == { }
+    (0 * (r * b)) % n;
+    == { assert (0 * (r * b) == 0) }
+    0 % n;
+    == { FStar.Math.Lemmas.modulo_lemma 0 n }
     0;
   }
+
 
 val lemma_modular_multiplication_p256_2_left:
   a:nat{a < prime256} -> b:nat{b < prime256} -> Lemma

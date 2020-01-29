@@ -8,7 +8,7 @@ open Hacl.Spec.P256.Definitions
 open FStar.Mul
 open Lib.Sequence
 
-#reset-options "--fuel 0 --ifuel 0 --z3rlimit 100"
+#reset-options "--fuel 0 --ifuel 0 --z3rlimit 200"
 
 let prime = prime256
 
