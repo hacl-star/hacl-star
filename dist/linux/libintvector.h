@@ -338,13 +338,13 @@ typedef __m256i Lib_IntVector_Intrinsics_vec256;
 #define Lib_IntVector_Intrinsics_vec256_load32(x) \
   (_mm256_set1_epi32(x)) 
 
-#define Lib_IntVector_Intrinsics_vec256_load32s(x7,x6,x5,x4,x3, x2, x1, x0) \
-  (_mm256_set_epi32(x0, x1, x2, x3, x4, x5, x6, x7)) /* hi lo */
+#define Lib_IntVector_Intrinsics_vec256_load32s(x0,x1,x2,x3,x4, x5, x6, x7) \
+  (_mm256_set_epi32(x7, x6, x5, x4, x3, x2, x1, x0)) /* hi lo */
 
 #define Lib_IntVector_Intrinsics_vec256_load128(x) \
   (_mm256_set_m128i((__m128i)x))
 
-#define Lib_IntVector_Intrinsics_vec256_load128s(x1,x0) \
+#define Lib_IntVector_Intrinsics_vec256_load128s(x0,x1) \
   (_mm256_set_m128i((__m128i)x1,(__m128i)x0))
 
 #define Lib_IntVector_Intrinsics_vec256_interleave_low32(x1, x2) \

@@ -246,7 +246,7 @@ chacha20_init_128(Lib_IntVector_Intrinsics_vec128 *ctx, u8 *k, u8 *n1, u32 ctr)
       os[i] = x0;
     }
   }
-  ctr1 = Lib_IntVector_Intrinsics_vec128_load32s((u32)3U, (u32)2U, (u32)1U, (u32)0U);
+  ctr1 = Lib_IntVector_Intrinsics_vec128_load32s((u32)0U, (u32)1U, (u32)2U, (u32)3U);
   c12 = ctx[12U];
   ctx[12U] = Lib_IntVector_Intrinsics_vec128_add32(c12, ctr1);
 }
