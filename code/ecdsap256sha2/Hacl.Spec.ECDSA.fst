@@ -224,47 +224,53 @@ let changeEndian i =
 	  Lib.Sequence.upd o 3 zero
 
 
-
-val verifyQValidCurvePointSpec: publicKey: tuple3 nat nat nat -> bool
+val verifyQValidCurvePointSpec: 
+  publicKey:tuple3 nat nat nat{~(isPointAtInfinity publicKey)} -> bool
 
 let verifyQValidCurvePointSpec publicKey = 
-  let (x, y, z) = publicKey in 
-  if x < prime256 && y < prime256 && z < prime256 && isPointOnCurve (x,y, z) &&
-    isPointAtInfinity (scalar_multiplication prime_p256_order_seq publicKey) then true else false
+  let x, y, z = publicKey in 
+  x < prime256 && 
+  y < prime256 && 
+  z < prime256 && 
+  isPointOnCurve (x, y, z) &&
+  isPointAtInfinity (scalar_multiplication prime_p256_order_seq publicKey)
+
 
 val checkCoordinates: r: nat -> s: nat -> bool
 
-let checkCoordinates r s = 
+let checkCoordinates r s =
   if r > 0 && r < prime_p256_order && s > 0 && s < prime_p256_order then true else false
 
 
-val ecdsa_verification: publicKey: tuple2 nat nat -> r: nat -> s: nat -> 
-  mLen: size_nat{mLen < Spec.Hash.Definitions.max_input_length Spec.Hash.Definitions.SHA2_256} -> input: lseq uint8 mLen -> Tot bool
+val ecdsa_verification: publicKey:tuple2 nat nat -> r:nat -> s:nat
+  -> mLen:size_nat{mLen < Spec.Hash.Definitions.(max_input_length SHA2_256)}
+  -> input:lseq uint8 mLen
+  -> bool
 
+let ecdsa_verification publicKey r s mLen input =
+  let publicJacobian = toJacobianCoordinates publicKey in
+  if not (verifyQValidCurvePointSpec publicJacobian) then false
+  else
+    begin
+    if not (checkCoordinates r s) then false
+    else
+      begin
+      let open Lib.ByteSequence in
+      let hashResult = H.hash Def.SHA2_256 input in
+      let hashNat = nat_from_intseq_le (changeEndian(uints_from_bytes_be hashResult)) % prime_p256_order in
+      let u1 = nat_to_bytes_le 32 (pow s (prime_p256_order - 2) * hashNat % prime_p256_order) in
+      let u2 = nat_to_bytes_le 32 (pow s (prime_p256_order - 2) * r % prime_p256_order) in
 
-let ecdsa_verification publicKey r s mLen input = 
-  let publicJacobian = toJacobianCoordinates publicKey in 
-  let qValid = verifyQValidCurvePointSpec publicJacobian in 
-    if qValid = false then false else begin
-  let step1 = checkCoordinates r s in if step1 = false then false else begin
-
-  let hashResult = H.hash Def.SHA2_256 input in 
-  let hashNat = Lib.ByteSequence.nat_from_intseq_le (changeEndian(Lib.ByteSequence.uints_from_bytes_be hashResult)) % prime_p256_order in 
-
-  let u1 = Lib.ByteSequence.nat_to_bytes_le 32 (pow s (prime_p256_order - 2) * hashNat % prime_p256_order) in 
-  let u2 = Lib.ByteSequence.nat_to_bytes_le 32 (pow s (prime_p256_order - 2) * r % prime_p256_order) in 
-
-  let basePoint = (0x6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296, 0x4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5, 1) in 
-  let pointAtInfinity = (0, 0, 0) in 
-
-   let u1D, _ = montgomery_ladder_spec u1 (pointAtInfinity, basePoint) in 
-   let u2D, _ = montgomery_ladder_spec u2 (pointAtInfinity, publicJacobian) in 
-   let sumPoints = _point_add u1D u2D in 
-   let pointNorm = _norm sumPoints in 
-   let (xResult, yResult, zResult) = pointNorm in 
-   if Hacl.Spec.P256.isPointAtInfinity pointNorm = true then false else 
-   xResult = r
-end end   
+      let basePoint = (0x6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296, 0x4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5, 1) in
+      let pointAtInfinity = (0, 0, 0) in
+      let u1D, _ = montgomery_ladder_spec u1 (pointAtInfinity, basePoint) in
+      let u2D, _ = montgomery_ladder_spec u2 (pointAtInfinity, publicJacobian) in
+      let sumPoints = _point_add u1D u2D in
+      let pointNorm = _norm sumPoints in
+      let x, y, z = pointNorm in
+      if Hacl.Spec.P256.isPointAtInfinity pointNorm then false else x = r
+    end
+  end
 
 
 val ecdsa_signature_nist_compliant: 
