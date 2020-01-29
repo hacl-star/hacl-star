@@ -16,6 +16,7 @@ open Hacl.Impl.LowLevel
 open FStar.Math.Lemmas
 
 open FStar.Mul
+open Lib.IntVector.Intrinsics
 
 #reset-options " --z3rlimit 300"
 
@@ -46,7 +47,7 @@ let reduction_prime256_2prime256_with_carry_impl cin x result =
   let h0 = ST.get() in 
       assert(uint_v c <= 1);
       assert(if uint_v c = 0 then as_nat h0 x >= prime256 else as_nat h0 x < prime256);
-    let carry = sub_borrow c cin (u64 0) tempBufferForSubborrow in 
+    let carry = sub_borrow_u64 c cin (u64 0) tempBufferForSubborrow in 
     cmovznz4 carry tempBuffer x result;
   let h1 = ST.get() in 
       assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
@@ -84,7 +85,7 @@ let reduction_prime256_2prime256_8_with_carry_impl x result =
     let x_ = Lib.Buffer.sub x (size 0) (size 4) in 
       recall_contents prime256_buffer (Lib.Sequence.of_list p256_prime_list); 
     let c = Hacl.Impl.LowLevel.sub4_il x_ prime256_buffer tempBuffer in 
-    let carry = sub_borrow c cin (u64 0) tempBufferForSubborrow in 
+    let carry = sub_borrow_u64 c cin (u64 0) tempBufferForSubborrow in 
     cmovznz4 carry tempBuffer x_ result; 
       let h4 = ST.get() in 
       assert_norm (pow2 256 > prime256);

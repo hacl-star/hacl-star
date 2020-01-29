@@ -17,6 +17,7 @@ open FStar.Tactics
 open FStar.Tactics.Canon 
 
 open FStar.Mul
+open Lib.IntVector.Intrinsics
 
 #reset-options "--z3rlimit 200"
 
@@ -237,7 +238,7 @@ let reduction_prime_2prime_with_carry x result  =
 
       assert(if uint_v c = 0 then as_nat h0 x_ >= prime_p256_order else as_nat h0 x_ < prime_p256_order);
       assert(wide_as_nat h0 x = as_nat h0 x_ + uint_v cin * pow2 256);
-    let carry = sub_borrow c cin (u64 0) tempBufferForSubborrow in 
+    let carry = sub_borrow_u64 c cin (u64 0) tempBufferForSubborrow in 
       let h2 = ST.get() in 
       assert(if (as_nat h0 x_ >= prime_p256_order) then uint_v carry = 0 
 	else if uint_v cin < uint_v c then uint_v carry = 1 
@@ -254,7 +255,7 @@ let reduction_prime_2prime_with_carry2 cin x result  =
     let tempBufferForSubborrow = create (size 1) (u64 0) in 
         recall_contents prime256order_buffer (Lib.Sequence.of_list p256_order_prime_list);
     let c = Hacl.Impl.LowLevel.sub4_il x prime256order_buffer tempBuffer in
-    let carry = sub_borrow c cin (u64 0) tempBufferForSubborrow in 
+    let carry = sub_borrow_u64 c cin (u64 0) tempBufferForSubborrow in 
     cmovznz4 carry tempBuffer x result;
  pop_frame()      
 

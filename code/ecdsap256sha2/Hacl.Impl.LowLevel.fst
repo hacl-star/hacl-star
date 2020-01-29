@@ -19,6 +19,7 @@ open FStar.Tactics
 open FStar.Tactics.Canon 
 
 open Hacl.Spec.P256.Lemmas
+open Lib.IntVector.Intrinsics
 
 #reset-options "--z3rlimit 400"
 
@@ -178,8 +179,52 @@ let load_buffer8 a0 a1 a2 a3 a4 a5 a6 a7  o =
   upd o (size 6) a6;
   upd o (size 7) a7
 
+inline_for_extraction noextract
+val copy_conditional_u64: a: uint64 -> b: uint64 -> mask: uint64 {uint_v mask = 0 \/ uint_v mask = pow2 64 - 1} -> 
+  Tot (r: uint64 {if uint_v mask = 0 then uint_v r = uint_v a else uint_v r = uint_v b})
 
-val add_carry: cin: uint64 -> x: uint64 -> y: uint64 -> r: lbuffer uint64 (size 1) -> 
+let copy_conditional_u64 a b mask = 
+  lemma_xor_copy_cond a b mask;
+  logxor a (logand mask (logxor a b))
+
+val copy_conditional: out: felem -> x: felem -> mask: uint64{uint_v mask = 0 \/ uint_v mask = pow2 64 - 1} -> Stack unit 
+  (requires fun h -> live h out /\ live h x)
+  (ensures fun h0 _ h1 -> modifies (loc out) h0 h1 /\ 
+    (if uint_v mask = 0 then as_seq h1 out == as_seq h0 out else as_seq h1 out == as_seq h0 x)
+  ) 
+
+let copy_conditional out x mask = 
+    let h0 = ST.get() in 
+  let out_0 = index out (size 0) in 
+  let out_1 = index out (size 1) in 
+  let out_2 = index out (size 2) in 
+  let out_3 = index out (size 3) in 
+
+  let x_0 = index x (size 0) in 
+  let x_1 = index x (size 1) in 
+  let x_2 = index x (size 2) in 
+  let x_3 = index x (size 3) in 
+
+  let r_0 = logxor out_0 (logand mask (logxor out_0 x_0)) in 
+  let r_1 = logxor out_1 (logand mask (logxor out_1 x_1)) in 
+  let r_2 = logxor out_2 (logand mask (logxor out_2 x_2)) in 
+  let r_3 = logxor out_3 (logand mask (logxor out_3 x_3)) in 
+
+  lemma_xor_copy_cond out_0 x_0 mask;
+  lemma_xor_copy_cond out_1 x_1 mask;
+  lemma_xor_copy_cond out_2 x_2 mask;
+  lemma_xor_copy_cond out_3 x_3 mask;
+
+  upd out (size 0) r_0;
+  upd out (size 1) r_1;
+  upd out (size 2) r_2;
+  upd out (size 3) r_3;
+    let h1 = ST.get() in 
+
+  lemma_eq_funct_ (as_seq h1 out) (as_seq h0 out);
+  lemma_eq_funct_ (as_seq h1 out) (as_seq h0 x)
+
+val add_carry_u64_: cin: uint64 -> x: uint64 -> y: uint64 -> r: lbuffer uint64 (size 1) -> 
   Stack uint64 
     (requires fun h -> live h r) 
     (ensures fun h0 c h1 -> modifies1 r h0 h1 /\ uint_v c <= 2 /\ 
@@ -188,7 +233,7 @@ val add_carry: cin: uint64 -> x: uint64 -> y: uint64 -> r: lbuffer uint64 (size 
 	uint_v r + uint_v c * pow2 64 == uint_v x + uint_v y + uint_v cin)
       )
 
-let add_carry cin x y result1 = 
+let add_carry_u64_ cin x y result1 = 
   let res1 = x +. cin in 
   let c = if lt_u64 res1 cin then u64 1 else u64 0 in
   let res = res1 +. y in
@@ -196,6 +241,28 @@ let add_carry cin x y result1 =
   Lib.Buffer.upd result1 (size 0) res;
   c
 
+(*
+val add_carry_u64: cin: uint64 -> x: uint64 -> y: uint64 -> r: lbuffer uint64 (size 1) -> 
+  Stack uint64 
+    (requires fun h -> live h r)
+    (ensures fun h0 c h1 -> modifies1 r h0 h1 /\ uint_v c <= 2 /\
+      (
+	let r = Seq.index (as_seq h1 r) 0 in 
+	uint_v r + uint_v c * pow2 64 == uint_v x + uint_v y + uint_v cin)
+    )
+    
+let add_carry_u64 cin x y result1 = 
+  let res1 = x +. cin in 
+  let mask1 = Lib.IntTypes.lt_mask res1 cin in 
+    Lib.IntTypes.lt_mask_lemma res1 cin;
+  let c = copy_conditional_u64 (u64 0) (u64 1) mask1 in 
+  let res = res1 +. y in 
+  let mask2 = Lib.IntTypes.lt_mask res res1 in 
+    Lib.IntTypes.lt_mask_lemma res res1;
+  Lib.Buffer.upd result1 (size 0) res;
+  let c1 = copy_conditional_u64 (u64 0) (u64 1) mask2 in 
+  c +. c1
+*)  
 
 val add4: x: felem -> y: felem -> result: felem -> 
   Stack uint64
@@ -216,10 +283,10 @@ let add4 x y result =
     assert(let r3_0 = as_seq h0 r3 in let r0_ = as_seq h0 result in Seq.index r0_ 3 == Seq.index r3_0 0);   
 
     
-  let cc0 = add_carry (u64 0) x.(0ul) y.(0ul) r0 in 
-  let cc1 = add_carry cc0 x.(1ul) y.(1ul) r1 in 
-  let cc2 = add_carry cc1 x.(2ul) y.(2ul) r2 in 
-  let cc3 = add_carry cc2 x.(3ul) y.(3ul) r3 in 
+  let cc0 = add_carry_u64 (u64 0) x.(0ul) y.(0ul) r0 in 
+  let cc1 = add_carry_u64 cc0 x.(1ul) y.(1ul) r1 in 
+  let cc2 = add_carry_u64 cc1 x.(2ul) y.(2ul) r2 in 
+  let cc3 = add_carry_u64 cc2 x.(3ul) y.(3ul) r3 in 
 
   assert_norm (pow2 64 * pow2 64 = pow2 128);
   assert_norm (pow2 64 * pow2 64 * pow2 64 = pow2 192);
@@ -243,10 +310,10 @@ let add4_with_carry c x y result =
     let r2 = sub result (size 2) (size 1) in 
     let r3 = sub result (size 3) (size 1) in 
     
-    let cc = add_carry c x.(0ul) y.(0ul) r0 in 
-    let cc = add_carry cc x.(1ul) y.(1ul) r1 in 
-    let cc = add_carry cc x.(2ul) y.(2ul) r2 in 
-    let cc = add_carry cc x.(3ul) y.(3ul) r3 in   
+    let cc = add_carry_u64 c x.(0ul) y.(0ul) r0 in 
+    let cc = add_carry_u64 cc x.(1ul) y.(1ul) r1 in 
+    let cc = add_carry_u64 cc x.(2ul) y.(2ul) r2 in 
+    let cc = add_carry_u64 cc x.(3ul) y.(3ul) r3 in   
     
       assert(let r1_0 = as_seq h0 r1 in let r0_ = as_seq h0 result in Seq.index r0_ 1 == Seq.index r1_0 0);
       assert(let r2_0 = as_seq h0 r2 in let r0_ = as_seq h0 result in Seq.index r0_ 2 == Seq.index r2_0 0);
@@ -330,10 +397,10 @@ let add4_variables x cin y0 y1 y2 y3 result =
     let r2 = sub result (size 2) (size 1) in 
     let r3 = sub result (size 3) (size 1) in 
 
-    let cc = add_carry cin x.(0ul) y0 r0 in 
-    let cc = add_carry cc x.(1ul) y1 r1 in 
-    let cc = add_carry cc x.(2ul) y2 r2 in 
-    let cc = add_carry cc x.(3ul) y3 r3 in 
+    let cc = add_carry_u64 cin x.(0ul) y0 r0 in 
+    let cc = add_carry_u64 cc x.(1ul) y1 r1 in 
+    let cc = add_carry_u64 cc x.(2ul) y2 r2 in 
+    let cc = add_carry_u64 cc x.(3ul) y3 r3 in 
       
 
   assert_norm (pow2 64 * pow2 64 = pow2 128);
@@ -344,24 +411,6 @@ let add4_variables x cin y0 y1 y2 y3 result =
     assert(let r2_0 = as_seq h0 r2 in let r0_ = as_seq h0 result in Seq.index r0_ 2 == Seq.index r2_0 0);
     assert(let r3_0 = as_seq h0 r3 in let r0_ = as_seq h0 result in Seq.index r0_ 3 == Seq.index r3_0 0);
     cc
-
-
-val sub_borrow: cin: uint64{uint_v cin <= 1} -> x: uint64 -> y: uint64 -> r: lbuffer uint64 (size 1) -> 
-  Stack uint64
-    (requires fun h -> live h r)
-    (ensures fun h0 c h1 -> modifies1 r h0 h1 /\ 
-      (let r = Seq.index (as_seq h1 r) 0 in v r - v c * pow2 64 == v x - v y - v cin))
-
-let sub_borrow cin x y result1 = 
-  let res = x -. y -. cin in
-  let c =
-    if eq_u64_nCT cin (u64 1) then
-      (if le_u64 x y then u64 1 else u64 0)
-    else
-      (if lt_u64 x y then u64 1 else u64 0) in
-  Lib.Buffer.upd result1 (size 0) res;
-  c
-
 
 val sub4_il: x: felem -> y: ilbuffer uint64 (size 4) -> result: felem -> 
   Stack uint64
@@ -379,10 +428,10 @@ let sub4_il x y result =
     let r2 = sub result (size 2) (size 1) in 
     let r3 = sub result (size 3) (size 1) in 
 
-    let cc = sub_borrow (u64 0) x.(size 0) y.(size 0) r0 in 
-    let cc = sub_borrow cc x.(size 1) y.(size 1) r1 in 
-    let cc = sub_borrow cc x.(size 2) y.(size 2) r2 in 
-    let cc = sub_borrow cc x.(size 3) y.(size 3) r3 in 
+    let cc = sub_borrow_u64 (u64 0) x.(size 0) y.(size 0) r0 in 
+    let cc = sub_borrow_u64 cc x.(size 1) y.(size 1) r1 in 
+    let cc = sub_borrow_u64 cc x.(size 2) y.(size 2) r2 in 
+    let cc = sub_borrow_u64 cc x.(size 3) y.(size 3) r3 in 
 
       assert_norm (pow2 64 * pow2 64 = pow2 128);
       assert_norm (pow2 64 * pow2 64 * pow2 64 = pow2 192);
@@ -404,10 +453,10 @@ let sub4 x y result =
   let r2 = sub result (size 2) (size 1) in 
   let r3 = sub result (size 3) (size 1) in 
       
-  let cc = sub_borrow (u64 0) x.(size 0) y.(size 0) r0 in 
-  let cc = sub_borrow cc x.(size 1) y.(size 1) r1 in 
-  let cc = sub_borrow cc x.(size 2) y.(size 2) r2 in 
-  let cc = sub_borrow cc x.(size 3) y.(size 3) r3 in 
+  let cc = sub_borrow_u64 (u64 0) x.(size 0) y.(size 0) r0 in 
+  let cc = sub_borrow_u64 cc x.(size 1) y.(size 1) r1 in 
+  let cc = sub_borrow_u64 cc x.(size 2) y.(size 2) r2 in 
+  let cc = sub_borrow_u64 cc x.(size 3) y.(size 3) r3 in 
     
     assert(let r1_0 = as_seq h0 r1 in let r0_ = as_seq h0 result in Seq.index r0_ 1 == Seq.index r1_0 0);
     assert(let r2_0 = as_seq h0 r2 in let r0_ = as_seq h0 result in Seq.index r0_ 2 == Seq.index r2_0 0);
@@ -478,7 +527,7 @@ let mult64_c x u cin result temp =
   let h = index temp (size 0) in 
   mul64 x u result temp;
   let l = index result (size 0) in     
-  add_carry cin l h result
+  add_carry_u64 cin l h result
 
 
 val mul1_il: f:  ilbuffer uint64 (size 4) -> u: uint64 -> result: lbuffer uint64 (size 4) -> Stack uint64
@@ -788,45 +837,6 @@ let uploadOneImpl f =
   upd f (size 1) (u64 0);
   upd f (size 2) (u64 0);
   upd f (size 3) (u64 0)
-
-
-val copy_conditional: out: felem -> x: felem -> mask: uint64{uint_v mask = 0 \/ uint_v mask = pow2 64 - 1} -> Stack unit 
-  (requires fun h -> live h out /\ live h x)
-  (ensures fun h0 _ h1 -> modifies (loc out) h0 h1 /\ 
-    (if uint_v mask = 0 then as_seq h1 out == as_seq h0 out else as_seq h1 out == as_seq h0 x)
-  ) 
-
-let copy_conditional out x mask = 
-    let h0 = ST.get() in 
-  let out_0 = index out (size 0) in 
-  let out_1 = index out (size 1) in 
-  let out_2 = index out (size 2) in 
-  let out_3 = index out (size 3) in 
-
-  let x_0 = index x (size 0) in 
-  let x_1 = index x (size 1) in 
-  let x_2 = index x (size 2) in 
-  let x_3 = index x (size 3) in 
-
-  let r_0 = logxor out_0 (logand mask (logxor out_0 x_0)) in 
-  let r_1 = logxor out_1 (logand mask (logxor out_1 x_1)) in 
-  let r_2 = logxor out_2 (logand mask (logxor out_2 x_2)) in 
-  let r_3 = logxor out_3 (logand mask (logxor out_3 x_3)) in 
-
-  lemma_xor_copy_cond out_0 x_0 mask;
-  lemma_xor_copy_cond out_1 x_1 mask;
-  lemma_xor_copy_cond out_2 x_2 mask;
-  lemma_xor_copy_cond out_3 x_3 mask;
-
-  upd out (size 0) r_0;
-  upd out (size 1) r_1;
-  upd out (size 2) r_2;
-  upd out (size 3) r_3;
-    let h1 = ST.get() in 
-
-  lemma_eq_funct_ (as_seq h1 out) (as_seq h0 out);
-  lemma_eq_funct_ (as_seq h1 out) (as_seq h0 x)
-
 
 
 val toUint64: i: lbuffer uint8 (32ul) -> o: felem -> Stack unit
