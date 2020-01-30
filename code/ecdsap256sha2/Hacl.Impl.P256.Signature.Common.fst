@@ -16,9 +16,8 @@ open Hacl.Spec.ECDSA
 open Hacl.Spec.ECDSAP256.Definition
 
 open Hacl.Impl.LowLevel
-
 open Hacl.Impl.P256.MontgomeryMultiplication
-open Hacl.Spec.P256.MontgomeryMultiplication
+open Hacl.Impl.ECDSA.MontgomeryMultiplication
 
 open Hacl.Impl.P256.LowLevel
 open Hacl.Impl.P256
@@ -28,10 +27,10 @@ open FStar.Math.Lemmas
 open FStar.Mul
 
 open Hacl.Impl.P256.Arithmetics
+open Hacl.Spec.P256.MontgomeryMultiplication
+friend Hacl.Spec.P256.MontgomeryMultiplication
 
-friend Hacl.Impl.P256
-
-#set-options "--z3rlimit 300"
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 
 let eq_u64_nCT a b =
   let open Lib.RawIntTypes in
@@ -40,6 +39,11 @@ let eq_u64_nCT a b =
 
 let eq_0_u64 a = eq_u64_nCT a (u64 0)
 
+
+val changeEndian: i:felem -> Stack unit 
+  (requires fun h -> live h i)
+  (ensures  fun h0 _ h1 -> modifies1 i h0 h1 /\ 
+    as_seq h1 i == Hacl.Spec.ECDSA.changeEndian (as_seq h0 i)) 
 
 let changeEndian i = 
   let zero = index i (size 0) in 
@@ -78,8 +82,9 @@ let lemma_core_1 a h=
   let n = nat_from_intseq_le (as_seq h a) in 
   uints_to_bytes_le_nat_lemma #U64 #SEC 4 n;
   lemma_nat_to_from_bytes_le_preserves_value #SEC (uints_to_bytes_le #U64 #SEC #4 (as_seq h a)) 32 (as_nat h a)
- 
-    
+
+#push-options "--ifuel 1"
+
 let bufferToJac p result = 
   let partPoint = sub result (size 0) (size 8) in 
   copy partPoint p;
@@ -88,16 +93,25 @@ let bufferToJac p result =
   upd result (size 10) (u64 0);
   upd result (size 11) (u64 0)
 
+#pop-options
 
 inline_for_extraction noextract
 val y_2: y: felem -> r: felem -> Stack unit
-  (requires fun h -> as_nat h y < prime256 /\  live h y /\ live h r /\ eq_or_disjoint y r)
+  (requires fun h -> as_nat h y < prime /\  live h y /\ live h r /\ eq_or_disjoint y r)
   (ensures fun h0 _ h1 -> modifies (loc r) h0 h1 /\ as_nat h1 r == toDomain_ ((as_nat h0 y) * (as_nat h0 y) % prime))
 
 let y_2 y r = 
   toDomain y r;
   montgomery_multiplication_buffer r r r
 
+
+inline_for_extraction noextract
+val upload_p256_point_on_curve_constant: x: felem -> Stack unit
+  (requires fun h -> live h x)
+  (ensures fun h0 _ h1 -> modifies (loc x) h0 h1 /\ 
+    as_nat h1 x == toDomain_ (41058363725152142129326129780047268409114441015993725554835256314039467401291) /\
+    as_nat h1 x < prime
+ )
 
 let upload_p256_point_on_curve_constant x = 
   upd x (size 0) (u64 15608596021259845087);
@@ -138,7 +152,6 @@ val xcube_minus_x: x: felem ->r: felem -> Stack unit
       as_nat h1 r =  toDomain_((x_ * x_ * x_ - 3 * x_ + 41058363725152142129326129780047268409114441015993725554835256314039467401291) % prime))
   )
 
-
 let xcube_minus_x x r = 
   push_frame();
       let h0 = ST.get() in 
@@ -161,6 +174,7 @@ let xcube_minus_x x r =
     lemma_mod_add_distr 41058363725152142129326129780047268409114441015993725554835256314039467401291 ((x_ * x_ * x_) - (3 * x_)) prime;
     lemma_xcube2 x_
 
+
 let isPointAtInfinityPublic p =  
   let z0 = index p (size 8) in 
   let z1 = index p (size 9) in 
@@ -173,9 +187,8 @@ let isPointAtInfinityPublic p =
   z0_zero && z1_zero && z2_zero && z3_zero
 
 
-val lemma_modular_multiplication_p256_2_d: a: nat{a < prime256} -> b: nat {b < prime256} -> 
-  Lemma 
-    (toDomain_ a = toDomain_ b <==> a == b)
+val lemma_modular_multiplication_p256_2_d: a:nat{a < prime256} -> b:nat{b < prime256} -> 
+  Lemma (toDomain_ a = toDomain_ b <==> a == b)
 
 let lemma_modular_multiplication_p256_2_d a b = 
    lemmaToDomain a;
@@ -210,7 +223,6 @@ let isPointOnCurvePublic p =
      z
 
 
-
 (* 
   checks whether the coordinates are valid = 
   all of them are less than prime 
@@ -221,24 +233,29 @@ let isPointOnCurvePublic p =
 
 (* This code is not side channel resistant *)
 (* we require the coordinate to be in affine representation of jac coordinate *)
-
+val isCoordinateValid: p: point -> Stack bool 
+  (requires fun h -> live h p /\ point_z_as_nat h p == 1)
+  (ensures fun h0 r h1 -> 
+    modifies0 h0 h1 /\ 
+    r == (point_x_as_nat h0 p < prime256 && point_y_as_nat h0 p < prime256 && point_z_as_nat h0 p < prime256)
+  )
 
 let isCoordinateValid p = 
   push_frame();
-    let tempBuffer = create (size 4) (u64 0) in 
-      recall_contents prime256_buffer (Lib.Sequence.of_list p256_prime_list);
-    let x = sub p (size 0) (size 4) in 
-    let y = sub p (size 4) (size 4) in 
-    
-    let carryX = sub4_il x prime256_buffer tempBuffer in
-    let carryY = sub4_il y prime256_buffer tempBuffer in 
-    
-    let lessX = eq_u64_nCT carryX (u64 1) in   
-    let lessY = eq_u64_nCT carryY (u64 1) in 
+  let tempBuffer = create (size 4) (u64 0) in 
+  recall_contents prime256_buffer (Lib.Sequence.of_list p256_prime_list);
+  let x = sub p (size 0) (size 4) in 
+  let y = sub p (size 4) (size 4) in 
+  
+  let carryX = sub4_il x prime256_buffer tempBuffer in
+  let carryY = sub4_il y prime256_buffer tempBuffer in 
+  
+  let lessX = eq_u64_nCT carryX (u64 1) in   
+  let lessY = eq_u64_nCT carryY (u64 1) in 
 
-    let r = lessX && lessY in 
+  let r = lessX && lessY in 
   pop_frame();
-    r  
+  r  
 
 
 inline_for_extraction noextract
@@ -261,8 +278,8 @@ val multByOrder: result: point ->  p: point -> tempBuffer: lbuffer uint64 (size 
 
 let multByOrder result p tempBuffer =
   push_frame();
-      recall_contents order_buffer prime_p256_order_seq;
-    scalarMultiplication p result order_buffer tempBuffer;
+  recall_contents order_buffer prime_p256_order_seq;
+  scalarMultiplication p result order_buffer tempBuffer;
   pop_frame()
 
 
@@ -285,28 +302,40 @@ val multByOrder2: result: point ->  p: point -> tempBuffer: lbuffer uint64 (size
 
 let multByOrder2 result p tempBuffer = 
   push_frame();
-    let pBuffer = create (size 12) (u64 0) in 
-    copy pBuffer p;
-    multByOrder result pBuffer tempBuffer;
+  let pBuffer = create (size 12) (u64 0) in 
+  copy pBuffer p;
+  multByOrder result pBuffer tempBuffer;
   pop_frame()  
     
 
+(* This code is not side channel resistant *) 
+(* Checks whether the base point * order is point at infinity *)
+val isOrderCorrect: p: point -> tempBuffer: lbuffer uint64 (size 100) -> Stack bool
+  (requires fun h -> 
+    live h p /\ live h tempBuffer /\ 
+    disjoint p tempBuffer /\
+    point_x_as_nat h p < prime256 /\ 
+    point_y_as_nat h p < prime256 /\
+    point_z_as_nat h p < prime256
+  )
+  (ensures fun h0 r h1 -> 
+    modifies(loc tempBuffer) h0 h1 /\ 
+    (let (xN, yN, zN) = scalar_multiplication prime_p256_order_seq (point_prime_to_coordinates (as_seq h0 p)) in 
+     r == Hacl.Spec.P256.isPointAtInfinity (xN, yN, zN))
+  )
+
 let isOrderCorrect p tempBuffer = 
   push_frame(); 
-    let multResult = create (size 12) (u64 0) in 
-    multByOrder2 multResult p tempBuffer;
-    let result = isPointAtInfinityPublic multResult in  
-   pop_frame();
-     result
+  let multResult = create (size 12) (u64 0) in 
+  multByOrder2 multResult p tempBuffer;
+  let result = isPointAtInfinityPublic multResult in  
+  pop_frame();
+  result
 
 
 let verifyQValidCurvePoint pubKeyAsPoint tempBuffer = 
-    let coordinatesValid = isCoordinateValid pubKeyAsPoint in 
-      if not coordinatesValid then false else
+  let coordinatesValid = isCoordinateValid pubKeyAsPoint in 
+  if not coordinatesValid then false else
     let belongsToCurve = isPointOnCurvePublic pubKeyAsPoint in 
     let orderCorrect = isOrderCorrect pubKeyAsPoint tempBuffer in 
-    if coordinatesValid && belongsToCurve && orderCorrect 
-      then true 
-    else false  
-
-
+    coordinatesValid && belongsToCurve && orderCorrect 
