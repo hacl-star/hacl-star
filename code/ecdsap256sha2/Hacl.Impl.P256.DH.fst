@@ -49,6 +49,7 @@ let ecp256dh_i result scalar =
     flag
 
 
+(* This code is not constant-time on pubKey *)
 val _ecp256dh_r: result: lbuffer uint64 (size 12) -> pubKey: lbuffer uint64 (size 8) -> scalar: lbuffer uint8 (size 32) -> 
   Stack uint64 
     (requires fun h -> live h result /\ live h pubKey /\ live h scalar /\ 
@@ -96,6 +97,7 @@ let _ecp256dh_r result pubKey scalar =
       end
 
 
+(* This code is not constant-time on pubKey *)
 let ecp256dh_r result pubKey scalar = 
   push_frame(); 
     let h0 = ST.get() in 
@@ -128,4 +130,3 @@ let ecp256dh_r result pubKey scalar =
 	lemma_core_1 resultBufferFelemY h2;
       pop_frame();
       flag
-      

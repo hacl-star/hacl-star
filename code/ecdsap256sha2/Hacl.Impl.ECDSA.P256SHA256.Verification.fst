@@ -42,7 +42,6 @@ val isZero_uint64_nCT: f: felem -> Stack bool
   (requires fun h -> live h f)
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\ (if as_nat h0 f = 0 then r == true else r == false))
 
-(* This code is not side channel resistant *)
 let isZero_uint64_nCT f =        
     let f0 = index f (size 0) in  
     let f1 = index f (size 1) in 
@@ -57,6 +56,7 @@ let isZero_uint64_nCT f =
     z0_zero && z1_zero && z2_zero && z3_zero
 
 
+(* This code is not side channel resistant *)
 val isMoreThanZeroLessThanOrderMinusOne: f: felem -> Stack bool
   (requires fun h -> live h f)
   (ensures fun h0 result h1 -> modifies0 h0 h1 /\
@@ -244,6 +244,7 @@ let ecdsa_verification_step5_1 pointSum pubKeyAsPoint u1 u2 tempBuffer =
   pop_frame()
 
 
+(* This code is not side channel resistant *) 
 inline_for_extraction noextract
 val ecdsa_verification_step5: x: felem -> pubKeyAsPoint: point -> u1: lbuffer uint8 (size 32) -> u2: lbuffer uint8 (size 32) -> 
   tempBuffer: lbuffer uint64 (size 100) -> 
@@ -346,7 +347,7 @@ let ecdsa_verification_core publicKeyBuffer hashAsFelem r s mLen m xBuffer tempB
   pop_frame(); 
     r
 
-
+(* This code is not side channel resistant *)
 val ecdsa_verification: pubKey: lbuffer uint64 (size 8) -> r: lbuffer uint64 (size 4) -> s: lbuffer uint64 (size 4) ->
   mLen: size_t ->
   m: lbuffer uint8 mLen {uint_v mLen < Spec.Hash.Definitions.max_input_length (Spec.Hash.Definitions.SHA2_256)} ->

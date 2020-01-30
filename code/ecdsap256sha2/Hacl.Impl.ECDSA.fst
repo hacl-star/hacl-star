@@ -108,6 +108,7 @@ val ecdsa_p256_sha2_sign_nist: result: lbuffer uint8 (size 64) -> m: lbuffer uin
 let ecdsa_p256_sha2_sign_nist result m privKey k = ecdsa_signature_nist_compliant result m privKey k
 
 
+(* This code is not side channel resistant *) 
 val ecdsa_p256_sha2_verify: mLen: size_t ->  m: lbuffer uint8 mLen {uint_v mLen < Spec.Hash.Definitions.max_input_length (Spec.Hash.Definitions.SHA2_256)} ->
   pubKey: lbuffer uint64 (size 8) -> 
   r: lbuffer uint64 (size 4) -> 
@@ -129,6 +130,7 @@ val ecdsa_p256_sha2_verify: mLen: size_t ->  m: lbuffer uint8 mLen {uint_v mLen 
 let ecdsa_p256_sha2_verify mLen m pubKey r s = ecdsa_verification pubKey r s mLen m
 
 
+(* This code is not side channel resistant *) 
 val ecdsa_p256_sha2_verify_u8:  mLen: size_t ->  m: lbuffer uint8 mLen {uint_v mLen < Spec.Hash.Definitions.max_input_length (Spec.Hash.Definitions.SHA2_256)} ->
   pubKey: lbuffer uint8 (size 64) -> 
   r: lbuffer uint8 (size 32) -> 

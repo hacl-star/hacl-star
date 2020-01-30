@@ -35,7 +35,6 @@ open Hacl.Impl.P256.Arithmetics
 (* inline_for_extraction noextract *)
 val eq_u64_nCT:a:uint64 -> b:uint64 -> Tot (r: bool {if uint_v a = uint_v b then r == true else r == false})
 
-(* This code is not side channel resistant *)
 let eq_u64_nCT a b =
   let open Lib.RawIntTypes in
   FStar.UInt64.(u64_to_UInt64 a =^ u64_to_UInt64 b)
@@ -45,7 +44,6 @@ let eq_u64_nCT a b =
 (* inline_for_extraction noextract *)
 val eq_0_u64: a: uint64 -> Tot (r: bool {if uint_v a = 0 then r == true else r == false})
 
-(* This code is not side channel resistant *)
 let eq_0_u64 a = eq_u64_nCT a (u64 0)
 
 
@@ -208,7 +206,7 @@ let xcube_minus_x x r =
     lemma_xcube2 x_
 
 
-
+(* This code is not side channel resistant *)
 val isPointAtInfinityPublic: p: point -> Stack bool
   (requires fun h -> live h p)
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\ 
@@ -217,7 +215,6 @@ val isPointAtInfinityPublic: p: point -> Stack bool
       r == Hacl.Spec.P256.isPointAtInfinity (x, y, z)
     )
   ) 
-
 
 let isPointAtInfinityPublic p =  
   let z0 = index p (size 8) in 
@@ -244,6 +241,8 @@ let lemma_modular_multiplication_p256_2_d a b =
      assert(toDomain_ a = toDomain_ b ==> a == b)
 
 
+(* This code is not side channel resistant *)
+(* This is unused internally and not exposed in the top-level API *)
 val isPointOnCurvePublic: p: point -> Stack bool
   (requires fun h -> live h p /\    
     as_nat h (gsub p (size 0) (size 4)) < prime /\ 
@@ -376,7 +375,8 @@ let multByOrder2 result p tempBuffer =
   pop_frame()  
     
 
-(*checks whether the base point * order is point at infinity *)
+(* This code is not side channel resistant *) 
+(* Checks whether the base point * order is point at infinity *)
 val isOrderCorrect: p: point -> tempBuffer: lbuffer uint64 (size 100) -> Stack bool
   (requires fun h -> 
     live h p /\ live h tempBuffer /\ 

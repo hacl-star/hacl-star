@@ -41,7 +41,7 @@ val ecp256dh_i: result: lbuffer uint8 (size 64) -> scalar: lbuffer uint8 (size 3
     )  
   )
 
-
+(* This code is not constant-time on pubKey *)
 val ecp256dh_r: result: lbuffer uint8 (size 64) -> pubKey: lbuffer uint8 (size 64) -> scalar: lbuffer uint8 (size 32) -> 
   Stack uint64
     (requires fun h -> 
