@@ -1,4 +1,4 @@
-# Non-constant-time function in this folder
+# Non-constant-time functions in this folder
 
 ## These functions are not side-channel resistant
 

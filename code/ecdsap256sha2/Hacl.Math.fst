@@ -140,16 +140,20 @@ let lemma_montgomery_mod_inverse_addition2 a =
    prime256 = Zmod(Integer(115792089210356248762697446949407573530086143415290314195533631308867097853951))
    p = 41058363725152142129326129780047268409114441015993725554835256314039467401291
    C = EllipticCurve(prime256, [-3, p])
-   prime_p256_order = C.cardinality()
+   prime_p256_order =/ C.cardinality()
    Z = Integers(prime_p256_order)
    r = Z(inverse_mod(2**256, prime_p256_order))
    r ^ (prime_p256_order - 1)
 *)
-assume
 val lemma_l_ferm: unit -> Lemma
   (let r = modp_inv2_prime (pow2 256) prime_p256_order in
   (pow r (prime_p256_order - 1) % prime_p256_order == 1))
 
+let lemma_l_ferm () =
+  let r = modp_inv2_prime (pow2 256) prime_p256_order in
+  assert_norm (exp (modp_inv2_prime (pow2 256) prime_p256_order) (prime_p256_order - 1)  == 1);
+  lemma_pow_mod_n_is_fpow prime_p256_order r (prime_p256_order - 1)
+  
 
 val lemma_multiplication_not_mod_prime_left: a:nat{a < prime256} -> Lemma
   (requires a * (modp_inv2 (pow2 256)) % prime256 == 0)
