@@ -38,12 +38,9 @@ val eq_u64_nCT:a:uint64 -> b:uint64 -> Tot (r: bool {if uint_v a = uint_v b then
 (* inline_for_extraction noextract *)
 val eq_0_u64: a: uint64 -> Tot (r: bool {if uint_v a = 0 then r == true else r == false})
 
-
-
 val changeEndian: i: felem -> Stack unit 
   (requires fun h -> live h i)
   (ensures fun h0 _ h1 -> modifies1 i h0 h1 /\ as_seq h1 i == Hacl.Spec.ECDSA.changeEndian (as_seq h0 i)) 
-
 
 val toUint64ChangeEndian: i: lbuffer uint8 (32ul) -> o: felem ->  Stack unit
   (requires fun h -> live h i /\ live h o /\ disjoint i o)
@@ -51,8 +48,6 @@ val toUint64ChangeEndian: i: lbuffer uint8 (32ul) -> o: felem ->  Stack unit
     modifies (loc o) h0 h1 /\ 
     as_seq h1 o == Hacl.Spec.ECDSA.changeEndian(Lib.ByteSequence.uints_from_bytes_be #_ #_ #4 (as_seq h0 i))
   )
-
-
 
 val lemma_core_0: a: lbuffer uint64 (size 4) -> h: mem -> Lemma (nat_from_intseq_le (as_seq h a) == as_nat h a)
 
@@ -72,14 +67,6 @@ val bufferToJac: p: lbuffer uint64 (size 8) -> result: point -> Stack unit
     )
   )   
 
-
-(*)
-inline_for_extraction noextract
-val y_2: y: felem -> r: felem -> Stack unit
-  (requires fun h -> as_nat h y < prime256 /\  live h y /\ live h r /\ eq_or_disjoint y r)
-  (ensures fun h0 _ h1 -> modifies (loc r) h0 h1 /\ as_nat h1 r == toDomain_ ((as_nat h0 y) * (as_nat h0 y) % prime))
-*)
-
 inline_for_extraction noextract
 val upload_p256_point_on_curve_constant: x: felem -> Stack unit
   (requires fun h -> live h x)
@@ -87,7 +74,6 @@ val upload_p256_point_on_curve_constant: x: felem -> Stack unit
     as_nat h1 x == toDomain_ (41058363725152142129326129780047268409114441015993725554835256314039467401291) /\
     as_nat h1 x < prime
  )
-
 
 
 (* This code is not side channel resistant *)
@@ -99,8 +85,6 @@ val isPointAtInfinityPublic: p: point -> Stack bool
       r == Hacl.Spec.P256.isPointAtInfinity (x, y, z)
     )
   ) 
-
-
 
 
 (* This code is not side channel resistant *)
@@ -135,9 +119,6 @@ val isCoordinateValid: p: point -> Stack bool
     )  
   )          
 
-
-
-
 (* This code is not side channel resistant *) 
 (* Checks whether the base point * order is point at infinity *)
 val isOrderCorrect: p: point -> tempBuffer: lbuffer uint64 (size 100) -> Stack bool
@@ -155,8 +136,6 @@ val isOrderCorrect: p: point -> tempBuffer: lbuffer uint64 (size 100) -> Stack b
       if Hacl.Spec.P256.isPointAtInfinity (xN, yN, zN) then r == true else r == false
     )
   )  
-
-
 
 (*
 For Bob to authenticate Alice's signature, he must have a copy of her public-key curve point {\displaystyle Q_{A}} Q_{A}. Bob can verify {\displaystyle Q_{A}} Q_{A} is a valid curve point as follows:
