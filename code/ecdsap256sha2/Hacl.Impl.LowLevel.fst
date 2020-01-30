@@ -420,9 +420,9 @@ let mult64_0il x u result temp =
   mul64 f0 u result temp
 
 
-val mult64_c: x: uint64 -> u: uint64 -> cin: uint64 -> result: lbuffer uint64 (size 1) -> temp: lbuffer uint64 (size 1) -> Stack uint64 
+val mult64_c: x: uint64 -> u: uint64 -> cin: uint64{uint_v cin <= 1} -> result: lbuffer uint64 (size 1) -> temp: lbuffer uint64 (size 1) -> Stack uint64 
   (requires fun h -> live h result /\ live h temp /\ disjoint result temp)
-  (ensures fun h0 c2 h1 -> modifies (loc result |+| loc temp) h0 h1 /\ uint_v c2 <= 2 /\
+  (ensures fun h0 c2 h1 -> modifies (loc result |+| loc temp) h0 h1 /\ uint_v c2 <= 1 /\
     (
       let r = Seq.index (as_seq h1 result) 0 in 
       let h1 = Seq.index (as_seq h1 temp) 0 in 

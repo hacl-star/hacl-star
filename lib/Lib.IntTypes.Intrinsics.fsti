@@ -11,7 +11,7 @@ noextract
 val add_carry_u64: cin: uint64 -> x: uint64 -> y: uint64 -> r: lbuffer uint64 (size 1) -> 
   Stack uint64 
     (requires fun h -> live h r /\ uint_v cin <= 1)
-    (ensures fun h0 c h1 -> modifies1 r h0 h1 /\ uint_v c <= 2 /\
+    (ensures fun h0 c h1 -> modifies1 r h0 h1 /\ uint_v c <= 1 /\
       (
 	let r = Seq.index (as_seq h1 r) 0 in 
 	uint_v r + uint_v c * pow2 64 == uint_v x + uint_v y + uint_v cin)
