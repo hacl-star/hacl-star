@@ -17,7 +17,7 @@ open FStar.Tactics
 open FStar.Tactics.Canon 
 
 open FStar.Mul
-open Lib.IntVector.Intrinsics
+open Lib.IntTypes.Intrinsics
 
 #reset-options "--z3rlimit 200"
 

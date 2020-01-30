@@ -16,7 +16,7 @@ open Hacl.Impl.LowLevel
 open FStar.Math.Lemmas
 
 open FStar.Mul
-open Lib.IntVector.Intrinsics
+open Lib.IntTypes.Intrinsics
 
 #reset-options " --z3rlimit 300"
 

@@ -641,6 +641,9 @@ TARGET_H_INCLUDE = -add-include '"kremlin/internal/target.h"'
 
 # Disabled for distributions that don't include vectorized implementations.
 INTRINSIC_FLAGS = -add-include '"libintvector.h"'
+# Disabled for distributions that don't include code based on intrinsics.
+INTRINSIC_INT_FLAGS = -add-include '"libintrinsics.h"'
+
 # Disabled for dist/portable
 OPT_FLAGS = -ccopts -march=native,-mtune=native
 # Disables tests; overriden in Wasm where tests indicate what can be compiled.
@@ -686,6 +689,7 @@ DEFAULT_FLAGS = \
   $(TARGETCONFIG_FLAGS) \
   $(TEST_FLAGS) \
   $(OPT_FLAGS) \
+  $(INTRINSIC_INT_FLAGS) \
   $(INTRINSIC_FLAGS) \
   $(BUNDLE_FLAGS) \
   $(REQUIRED_FLAGS) \
@@ -803,10 +807,11 @@ dist/ccf/Makefile.basic: \
     -bundle EverCrypt.Chacha20Poly1305 \
     -bundle EverCrypt.AEAD
 dist/ccf/Makefile.basic: INTRINSIC_FLAGS=
+dist/ccf/Makefile.basic: INTRINSIC_INT_FLAGS=
 dist/ccf/Makefile.basic: VALE_ASMS := $(filter-out $(HACL_HOME)/secure_api/vale/asm/aes-% dist/vale/poly1305-%,$(VALE_ASMS))
 dist/ccf/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES =
 dist/ccf/Makefile.basic: HAND_WRITTEN_FILES := $(filter-out %/Lib_PrintBuffer.c %_vale_stubs.c,$(HAND_WRITTEN_FILES))
-dist/ccf/Makefile.basic: HAND_WRITTEN_H_FILES := $(filter-out %/libintvector.h,$(HAND_WRITTEN_H_FILES))
+dist/ccf/Makefile.basic: HAND_WRITTEN_H_FILES := $(filter-out %/libintvector.h %/libintrinsics.h,$(HAND_WRITTEN_H_FILES))
 dist/ccf/Makefile.basic: HACL_OLD_FILES =
 dist/ccf/Makefile.basic: POLY_BUNDLE =
 

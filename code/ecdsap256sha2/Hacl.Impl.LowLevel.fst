@@ -19,7 +19,7 @@ open FStar.Tactics
 open FStar.Tactics.Canon 
 
 open Hacl.Spec.P256.Lemmas
-open Lib.IntVector.Intrinsics
+open Lib.IntTypes.Intrinsics
 
 #reset-options "--z3rlimit 400"
 
