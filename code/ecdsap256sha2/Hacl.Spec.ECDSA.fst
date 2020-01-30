@@ -155,9 +155,22 @@ val lemma_swaped_steps: p: nat_prime -> q: nat_prime ->
 
 let lemma_swaped_steps p q = ()
 
-
-val _exp_step: k:  lseq uint8 32 ->  i: nat{i < 256} -> tuple2 nat_prime nat_prime ->
-  Tot (t: tuple2 nat_prime nat_prime)
+val _exp_step: k:  lseq uint8 32 ->  i: nat{i < 256} -> before: tuple2 nat_prime nat_prime ->
+  Tot (t: tuple2 nat_prime nat_prime {
+      let open Lib.RawIntTypes in 
+      
+      let beforeA, beforeB = before in 
+      let a, b = t in 
+      let bit = ith_bit k (255 - i) in 
+      if uint_to_nat bit = 0 then 
+	begin 
+	  a == (beforeA * beforeB) % prime_p256_order /\ 
+	  b == (beforeB * beforeB) % prime_p256_order
+	end
+      else True
+  }
+  )
+    
 
 let _exp_step k i (p, q) = 
   let bit = 255 - i in 
@@ -167,12 +180,70 @@ let _exp_step k i (p, q) =
       _exp_step0 p q 
   else _exp_step1 p q  
 
+
 #reset-options "--z3refresh --z3rlimit 300"
 
 val _exponent_spec: k: lseq uint8 32  -> tuple2 nat_prime nat_prime -> Tot (tuple2 nat_prime nat_prime)
 
 let _exponent_spec k (p, q) = 
+  let open Lib.LoopCombinators in 
   Lib.LoopCombinators.repeati 256 (_exp_step k) (p, q)
+
+val lemma_exponen_spec: k: lseq uint8 32 -> start: tuple2 nat_prime nat_prime {let st0, st1 = start in st0 == 1}   -> index: nat {index < 256} ->
+  Lemma (
+    let start0, start1 = start in 
+    let number = nat_from_bytes_le k in 
+    let newIndex = 256 - index in 
+    let f0, f1 = Lib.LoopCombinators.repeati index (_exp_step k) start in 
+    f0 == pow start1 (FStar.Math.Lib.arithmetic_shift_right number newIndex) % prime_p256_order /\
+    f1 == pow start1 ((FStar.Math.Lib.arithmetic_shift_right number newIndex) + 1) % prime_p256_order
+    )
+
+let rec lemma_exponen_spec k start index = 
+  let open FStar.Math.Lib in 
+  let open FStar.Math.Lemmas in 
+  let open Lib.RawIntTypes in 
+  let f = _exp_step k in 
+  let st0, st1 = start in 
+  let number = nat_from_bytes_le k in 
+  let newIndex = 256 - index in 
+let open Lib.LoopCombinators in 
+  match index with
+  | 0 ->  eq_repeati0 256 (_exp_step k) start;
+    assert_norm (FStar.Math.Lib.arithmetic_shift_right number newIndex == 0)
+  | _ -> begin
+    unfold_repeati 256 f start (index - 1);
+      assert(repeati index f start == f (index - 1) (repeati (index - 1) f start));
+    lemma_exponen_spec k start (index - 1);
+      let z0, z1 = Lib.LoopCombinators.repeati (index - 1) f start in 
+      let f0, f1 = Lib.LoopCombinators.repeati index f start in 
+      
+    assert(z0 == pow st1 (arithmetic_shift_right number (256 - index + 1)) % prime_p256_order);
+    assert(z1 == pow st1 (arithmetic_shift_right number (256 - index + 1) + 1) % prime_p256_order);
+   
+    let bitMask = uint_v (ith_bit k (256 - index)) in 
+    match bitMask with 
+      | 0 -> assert(f0 == (z0 * z0) % prime_p256_order); 
+	assert(f1 == (z0 * z1) % prime_p256_order);
+
+	let a0 = pow st1 (arithmetic_shift_right number (256 - index + 1)) in 
+	let a1 = pow st1 (arithmetic_shift_right number (256 - index + 1) + 1) in 
+	
+	modulo_distributivity_mult a0 a0 prime_p256_order;	
+	modulo_distributivity_mult a0 a1 prime_p256_order;
+	
+	pow_plus st1 (arithmetic_shift_right number (256 - index + 1)) (arithmetic_shift_right number (256 - index + 1));
+	pow_plus st1 (arithmetic_shift_right number (256 - index + 1)) (arithmetic_shift_right number (256 - index + 1) + 1); 
+	
+	assert(f0 == pow st1 (2 * arithmetic_shift_right number (newIndex + 1)) % prime_p256_order);
+	assert(f1 == pow st1 (2 * arithmetic_shift_right number (newIndex + 1) + 1) % prime_p256_order);
+	
+	assume(2 * arithmetic_shift_right number (newIndex + 1) == (FStar.Math.Lib.arithmetic_shift_right number newIndex))
+      | 1 -> admit()
+
+
+
+    end
 
 
 unfold let prime_p256_order_inverse_list: list uint8 = 
@@ -202,10 +273,13 @@ let prime_p256_order_seq: lseq uint8 32 =
 
 open Hacl.Spec.P256.Definitions
 
+
+#reset-options "--z3refresh --z3rlimit  100"
 val exponent_spec: a: nat_prime -> Tot (r: nat_prime {r = pow a (prime_p256_order - 2) % prime_p256_order})
 
 let exponent_spec a = 
-    let a0, _ = _exponent_spec prime_p256_order_inverse_seq (1, a) in
+    let a0, _ = _exponent_spec prime_p256_order_inverse_seq (1, a) in 
+    assume(nat_from_bytes_le prime_p256_order_inverse_seq == prime_p256_order - 2);
     admit();
     a0
 
