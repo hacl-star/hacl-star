@@ -12,7 +12,7 @@ include ../../Makefile.local
 
 #BASE_FLAGS+= -funroll-loops 4
 
-CFLAGS += -I ../../lib/c -march=native -mtune=native -O3
+CFLAGS += -I ../../../lib/c -march=native -mtune=native -O3
 export CFLAGS
 
 # CUSTOMIZE HERE: how to produce binary objects
@@ -23,7 +23,7 @@ dist/libecdsa.a: dist/Makefile.basic
 dist/Makefile.basic: $(filter-out %/prims.krml,$(ALL_KRML_FILES))
 	$(KRML) $^ -o libecdsa.a $(BASE_FLAGS) $(ECDSA_BUNDLE) \
 	  -tmpdir dist \
-	  -add-include '"../../../lib/c/lib_intrinsics.h"' \
+	  -add-include '"lib_intrinsics.h"' \
 	  -skip-compilation
 
 $(HACL_HOME)/tests/ecdsa-common.o: dist/Makefile.basic
