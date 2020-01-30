@@ -22,7 +22,6 @@ val fromDomainPoint: a: tuple3 nat nat nat -> Tot (r: tuple3 nat nat nat
   }
 )
 
-
 noextract
 val toDomain_: a: int -> Tot nat
 
