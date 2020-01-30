@@ -2,7 +2,6 @@
 #define __Int_Intrin_H
 
 #include <sys/types.h>
-#include <immintrin.h>
 #include <x86intrin.h>
 
 #define Lib_IntTypes_Intrinsics_add_carry_u64(x1, x2, x3, x4) \
