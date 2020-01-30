@@ -120,7 +120,7 @@ let split_at_last_empty (a: Hash.alg): Lemma
   ()
 
 #restart-solver
-#push-options "--z3rlimit 40 --using_facts_from '*,-LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2'"
+#push-options "--z3rlimit 40"
 let create_in a r =
   (**) let h0 = ST.get () in
 
