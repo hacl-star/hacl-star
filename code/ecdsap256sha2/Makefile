@@ -23,9 +23,11 @@ dist/libecdsa.a: dist/Makefile.basic
 dist/Makefile.basic: $(filter-out %/prims.krml,$(ALL_KRML_FILES))
 	$(KRML) $^ -o libecdsa.a $(BASE_FLAGS) $(ECDSA_BUNDLE) \
 	  -tmpdir dist \
+	  -add-include '"libintvector.h"' \
 	  -skip-compilation
 
 $(HACL_HOME)/tests/ecdsa-common.o: dist/Makefile.basic
+$(HACL_HOME)/tests/ecdsa-common.o: CFLAGS += -I../../lib/c -march=native -mtune=native -O3
 
 dist/ecdsa-test.exe: $(HACL_HOME)/tests/ecdsa-common.o dist/libecdsa.a
 
