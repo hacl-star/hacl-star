@@ -204,7 +204,7 @@ bool testEcdsaSignature6()
 
 
 
-void testEcdsaVerification0()
+bool testEcdsaVerification0()
    {
 
     const uint8_t mLen = 128;
@@ -243,13 +243,10 @@ void testEcdsaVerification0()
       bool result = Hacl_Impl_ECDSA_ecdsa_p256_sha2_verify (mLen, m , pubKey, r, s);
 
       bool expectedResult = false;
-      if (result == expectedResult)
-        printf("%s\n", "Test4: passed");
-      else
-        printf("%s\n", "Test4: failed");
+      return (result == expectedResult);
 }
 
-void testEcdsaVerification1()
+bool testEcdsaVerification1()
    {
       uint8_t m[128] = {0xe1,  0x13,  0x0a,  0xf6,  0xa3,  0x8c,  0xcb,  0x41,  0x2a,  0x9c,  0x8d,  0x13,  0xe1,  0x5d,  0xbf,  0xc9,  0xe6,  0x9a,  0x16,  0x38,  0x5a,  0xf3,  0xc3,  0xf1,  0xe5,  0xda,  0x95,  0x4f,  0xd5,  0xe7,  0xc4,  0x5f,  0xd7,  0x5e,  0x2b,  0x8c,  0x36,  0x69,  0x92,  0x28,  0xe9,  0x28,  0x40,  0xc0,  0x56,  0x2f,  0xbf,  0x37,  0x72,  0xf0,  0x7e,  0x17,  0xf1,  0xad,  0xd5,  0x65,  0x88,  0xdd,  0x45,  0xf7,  0x45,  0x0e,  0x12,  0x17,  0xad,  0x23,  0x99,  0x22,  0xdd,  0x9c,  0x32,  0x69,  0x5d,  0xc7,  0x1f,  0xf2,  0x42,  0x4c,  0xa0,  0xde,  0xc1,  0x32,  0x1a,  0xa4,  0x70,  0x64,  0xa0,  0x44,  0xb7,  0xfe,  0x3c,  0x2b,  0x97,  0xd0,  0x3c,  0xe4,  0x70,  0xa5,  0x92,  0x30,  0x4c,  0x5e,  0xf2,  0x1e,  0xed,  0x9f,  0x93,  0xda,  0x56,  0xbb,  0x23,  0x2d,  0x1e,  0xeb,  0x00,  0x35,  0xf9,  0xbf,  0x0d,  0xfa,  0xfd,  0xcc,  0x46,  0x06,  0x27,  0x2b,  0x20,  0xa3};
 
@@ -282,14 +279,11 @@ void testEcdsaVerification1()
       bool result = Hacl_Impl_ECDSA_ecdsa_p256_sha2_verify_u8 (mLen, m, (uint8_t *) pubKey, (uint8_t *) r, (uint8_t *) s);
 
       bool expectedResult = true;
-      if (result == expectedResult)
-        printf("%s\n", "Test0: passed");
-      else
-        printf("%s\n", "Test0: failed");
+      return (result == expectedResult);
 }
 
 
-void testEcdsaVerification2()
+bool testEcdsaVerification2()
    {
       uint8_t* m = (uint8_t *) malloc (sizeof (uint8_t) * 128);
       m[0] = 0xe4;
@@ -450,13 +444,10 @@ void testEcdsaVerification2()
       bool result = Hacl_Impl_ECDSA_ecdsa_p256_sha2_verify  (mLen, m , pubKey, r, s);
 
       bool expectedResult = false;
-      if (result == expectedResult)
-        printf("%s\n", "Test1: passed");
-      else
-        printf("%s\n", "Test1: failed");
+      return (result == expectedResult);
 }
 
-void testEcdsaVerification3()
+bool testEcdsaVerification3()
    {
       uint8_t* m = (uint8_t *) malloc (sizeof (uint8_t) * 128);
       m[0] = 0x73;
@@ -619,13 +610,10 @@ void testEcdsaVerification3()
       bool result = Hacl_Impl_ECDSA_ecdsa_p256_sha2_verify  (mLen, m , pubKey, r, s);
 
       bool expectedResult = true;
-      if (result == expectedResult)
-        printf("%s\n", "Test2: passed");
-      else
-        printf("%s\n", "Test2: failed");
+      return (result == expectedResult);
 }
 
-void testEcdsaVerification4()
+bool testEcdsaVerification4()
    {
       uint8_t* m = (uint8_t *) malloc (sizeof (uint8_t) * 128);
       m[0] = 0x60;
@@ -786,10 +774,7 @@ void testEcdsaVerification4()
       bool result = Hacl_Impl_ECDSA_ecdsa_p256_sha2_verify  (mLen, m , pubKey, r, s);
 
       bool expectedResult = true;
-      if (result == expectedResult)
-        printf("%s\n", "Test5: passed");
-      else
-        printf("%s\n", "Test5: failed");
+      return (result == expectedResult);
 }
 
 
@@ -827,11 +812,27 @@ int main()
     return EXIT_FAILURE;
   }
 
-  testEcdsaVerification0();
-  testEcdsaVerification1();
-  testEcdsaVerification2();
-  testEcdsaVerification3();
-  testEcdsaVerification4();
+
+  if (!testEcdsaVerification0()) {
+    printf("Verification test 0 failed\n");
+    return EXIT_FAILURE;
+  }
+  if (!testEcdsaVerification1()) {
+    printf("Verification test 1 failed\n");
+    return EXIT_FAILURE;
+  }
+  if (!testEcdsaVerification2()) {
+    printf("Verification test 2 failed\n");
+    return EXIT_FAILURE;
+  }
+  if (!testEcdsaVerification3()) {
+    printf("Verification test 3 failed\n");
+    return EXIT_FAILURE;
+  }
+  if (!testEcdsaVerification4()) {
+    printf("Verification test 4 failed\n");
+    return EXIT_FAILURE;
+  }
 
   printf("%s\n", "Verification and testing of ECDSA completed");
   return EXIT_SUCCESS;
