@@ -156,21 +156,7 @@ val lemma_swaped_steps: p: nat_prime -> q: nat_prime ->
 let lemma_swaped_steps p q = ()
 
 val _exp_step: k:  lseq uint8 32 ->  i: nat{i < 256} -> before: tuple2 nat_prime nat_prime ->
-  Tot (t: tuple2 nat_prime nat_prime {
-      let open Lib.RawIntTypes in 
-      
-      let beforeA, beforeB = before in 
-      let a, b = t in 
-      let bit = ith_bit k (255 - i) in 
-      if uint_to_nat bit = 0 then 
-	begin 
-	  a == (beforeA * beforeB) % prime_p256_order /\ 
-	  b == (beforeB * beforeB) % prime_p256_order
-	end
-      else True
-  }
-  )
-    
+  Tot (t: tuple2 nat_prime nat_prime)
 
 let _exp_step k i (p, q) = 
   let bit = 255 - i in 
