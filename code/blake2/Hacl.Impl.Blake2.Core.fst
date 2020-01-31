@@ -151,7 +151,14 @@ let ror_row #a #m r1 r2 =
 #push-options "--z3rlimit 50"
 inline_for_extraction
 let permr_row #a #m r1 n =
-  let n0,n1,n2,n3 = n,(n+.1ul)%.4ul,(n+.2ul)%.4ul,(n+.3ul)%.4ul in
+  [@inline_let]
+  let n0 = n in
+  [@inline_let]
+  let n1 = (n+.1ul)%.4ul in
+  [@inline_let]
+  let n2 = (n+.2ul)%.4ul in
+  [@inline_let]
+  let n3 = (n+.3ul)%.4ul in
   match a,m with
   | Spec.Blake2S,M256
   | Spec.Blake2S,M128 ->
