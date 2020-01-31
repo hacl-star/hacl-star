@@ -1,3 +1,5 @@
+open Unsigned
+
 open Utils
 open Shared
 
@@ -16,6 +18,7 @@ module Hacl_Poly1305_32 = Hacl_Poly1305_32_bindings.Bindings(Hacl_Poly1305_32_st
 module Hacl_Poly1305_128 = Hacl_Poly1305_128_bindings.Bindings(Hacl_Poly1305_128_stubs)
 module Hacl_Poly1305_256 = Hacl_Poly1305_256_bindings.Bindings(Hacl_Poly1305_256_stubs)
 module Hacl_HKDF = Hacl_HKDF_bindings.Bindings(Hacl_HKDF_stubs)
+module Hacl_NaCl = Hacl_NaCl_bindings.Bindings(Hacl_NaCl_stubs)
 
 
 module Chacha20_Poly1305_32 : Chacha20_Poly1305 =
@@ -155,3 +158,32 @@ module HKDF_SHA2_512 : HKDF =
     let extract = Hacl_HKDF.hacl_HKDF_extract_sha2_512
   end)
 
+module NaCl = struct
+  open Hacl_NaCl
+
+  let get_result r =
+    if r = UInt32.zero then
+      true
+    else
+    if r = UInt32.max_int then
+      false
+    else
+      failwith "Unknown return value"
+  let box_beforenm k pk sk = get_result @@ hacl_NaCl_crypto_box_beforenm (uint8_ptr k) (uint8_ptr pk) (uint8_ptr sk)
+  module Easy = struct
+    let box ct pt n pk sk = get_result @@ hacl_NaCl_crypto_box_easy (uint8_ptr ct) (uint8_ptr pt) (size_uint32 pt) (uint8_ptr n) (uint8_ptr pk) (uint8_ptr sk)
+    let box_open pt ct n pk sk = get_result @@ hacl_NaCl_crypto_box_open_easy (uint8_ptr pt) (uint8_ptr ct) (size_uint32 ct) (uint8_ptr n) (uint8_ptr pk) (uint8_ptr sk)
+    let box_afternm ct pt n k = get_result @@ hacl_NaCl_crypto_box_easy_afternm (uint8_ptr ct) (uint8_ptr pt) (size_uint32 pt) (uint8_ptr n) (uint8_ptr k)
+    let box_open_afternm pt ct n k = get_result @@ hacl_NaCl_crypto_box_open_easy_afternm (uint8_ptr pt) (uint8_ptr ct) (size_uint32 ct) (uint8_ptr n) (uint8_ptr k)
+    let secretbox ct pt n k = get_result @@ hacl_NaCl_crypto_secretbox_easy (uint8_ptr ct) (uint8_ptr pt) (size_uint32 pt) (uint8_ptr n) (uint8_ptr k)
+    let secretbox_open pt ct n k = get_result @@ hacl_NaCl_crypto_secretbox_open_easy (uint8_ptr pt) (uint8_ptr ct) (size_uint32 ct) (uint8_ptr n) (uint8_ptr k)
+  end
+  module Detached = struct
+    let box ct tag pt n pk sk = get_result @@ hacl_NaCl_crypto_box_detached (uint8_ptr ct) (uint8_ptr tag) (uint8_ptr pt) (size_uint32 pt) (uint8_ptr n) (uint8_ptr pk) (uint8_ptr sk)
+    let box_open pt ct tag n pk sk = get_result @@ hacl_NaCl_crypto_box_open_detached (uint8_ptr pt) (uint8_ptr ct) (uint8_ptr tag) (size_uint32 ct) (uint8_ptr n) (uint8_ptr pk) (uint8_ptr sk)
+    let box_afternm ct tag pt n k = get_result @@ hacl_NaCl_crypto_box_detached_afternm (uint8_ptr ct) (uint8_ptr tag) (uint8_ptr pt) (size_uint32 pt) (uint8_ptr n) (uint8_ptr k)
+    let box_open_afternm pt ct tag n k = get_result @@ hacl_NaCl_crypto_box_open_detached_afternm (uint8_ptr pt) (uint8_ptr ct) (uint8_ptr tag) (size_uint32 ct) (uint8_ptr n) (uint8_ptr k)
+    let secretbox ct tag pt n k = get_result @@ hacl_NaCl_crypto_secretbox_detached (uint8_ptr ct) (uint8_ptr tag) (uint8_ptr pt) (size_uint32 pt) (uint8_ptr n) (uint8_ptr k)
+    let secretbox_open pt ct tag n k = get_result @@ hacl_NaCl_crypto_secretbox_open_detached (uint8_ptr pt) (uint8_ptr ct) (uint8_ptr tag) (size_uint32 ct) (uint8_ptr n) (uint8_ptr k)
+  end
+end

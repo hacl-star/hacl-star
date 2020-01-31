@@ -40,3 +40,23 @@ module Poly1305_256 : MAC
 
 module HKDF_SHA2_256 : HKDF
 module HKDF_SHA2_512 : HKDF
+
+module NaCl : sig
+  val box_beforenm : Bigstring.t -> Bigstring.t -> Bigstring.t -> bool
+  module Easy : sig
+    val box : Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> bool
+    val box_open : Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> bool
+    val box_afternm : Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> bool
+    val box_open_afternm : Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> bool
+    val secretbox : Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> bool
+    val secretbox_open : Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> bool
+  end
+  module Detached : sig
+    val box : Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> bool
+    val box_open : Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> bool
+    val box_afternm : Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> bool
+    val box_open_afternm : Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> bool
+    val secretbox : Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> bool
+    val secretbox_open : Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> bool
+  end
+end
