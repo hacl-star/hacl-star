@@ -5,7 +5,6 @@
 #include <wmmintrin.h>
 #include <smmintrin.h>
 #include <immintrin.h>
-#include <x86intrin.h>
 
 typedef __m128i Lib_IntVector_Intrinsics_vec128;
 

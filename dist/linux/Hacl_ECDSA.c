@@ -24,16 +24,6 @@
 
 #include "Hacl_ECDSA.h"
 
-static bool eq_u64_nCT(u64 a, u64 b)
-{
-  return a == b;
-}
-
-static bool eq_0_u64(u64 a)
-{
-  return eq_u64_nCT(a, (u64)0U);
-}
-
 static u64 isZero_uint64_CT(u64 *f)
 {
   u64 a0 = f[0U];
@@ -68,24 +58,24 @@ static u64 compare_felem(u64 *a, u64 *b)
   return r01 & r23;
 }
 
-static u64 add_carry(u64 cin, u64 x, u64 y, u64 *result1)
+static void copy_conditional(u64 *out, u64 *x, u64 mask)
 {
-  u64 res1 = x + cin;
-  u64 c;
-  if (res1 < cin)
-    c = (u64)1U;
-  else
-    c = (u64)0U;
-  {
-    u64 res = res1 + y;
-    u64 c1;
-    if (res < res1)
-      c1 = c + (u64)1U;
-    else
-      c1 = c;
-    result1[0U] = res;
-    return c1;
-  }
+  u64 out_0 = out[0U];
+  u64 out_1 = out[1U];
+  u64 out_2 = out[2U];
+  u64 out_3 = out[3U];
+  u64 x_0 = x[0U];
+  u64 x_1 = x[1U];
+  u64 x_2 = x[2U];
+  u64 x_3 = x[3U];
+  u64 r_0 = out_0 ^ (mask & (out_0 ^ x_0));
+  u64 r_1 = out_1 ^ (mask & (out_1 ^ x_1));
+  u64 r_2 = out_2 ^ (mask & (out_2 ^ x_2));
+  u64 r_3 = out_3 ^ (mask & (out_3 ^ x_3));
+  out[0U] = r_0;
+  out[1U] = r_1;
+  out[2U] = r_2;
+  out[3U] = r_3;
 }
 
 static u64 add4(u64 *x, u64 *y, u64 *result)
@@ -94,10 +84,10 @@ static u64 add4(u64 *x, u64 *y, u64 *result)
   u64 *r1 = result + (u32)1U;
   u64 *r2 = result + (u32)2U;
   u64 *r3 = result + (u32)3U;
-  u64 cc0 = add_carry((u64)0U, x[0U], y[0U], r0);
-  u64 cc1 = add_carry(cc0, x[1U], y[1U], r1);
-  u64 cc2 = add_carry(cc1, x[2U], y[2U], r2);
-  u64 cc3 = add_carry(cc2, x[3U], y[3U], r3);
+  u64 cc0 = Lib_IntTypes_Intrinsics_add_carry_u64((u64)0U, x[0U], y[0U], r0);
+  u64 cc1 = Lib_IntTypes_Intrinsics_add_carry_u64(cc0, x[1U], y[1U], r1);
+  u64 cc2 = Lib_IntTypes_Intrinsics_add_carry_u64(cc1, x[2U], y[2U], r2);
+  u64 cc3 = Lib_IntTypes_Intrinsics_add_carry_u64(cc2, x[3U], y[3U], r3);
   return cc3;
 }
 
@@ -107,10 +97,10 @@ static u64 add4_with_carry(u64 c, u64 *x, u64 *y, u64 *result)
   u64 *r1 = result + (u32)1U;
   u64 *r2 = result + (u32)2U;
   u64 *r3 = result + (u32)3U;
-  u64 cc = add_carry(c, x[0U], y[0U], r0);
-  u64 cc1 = add_carry(cc, x[1U], y[1U], r1);
-  u64 cc2 = add_carry(cc1, x[2U], y[2U], r2);
-  u64 cc3 = add_carry(cc2, x[3U], y[3U], r3);
+  u64 cc = Lib_IntTypes_Intrinsics_add_carry_u64(c, x[0U], y[0U], r0);
+  u64 cc1 = Lib_IntTypes_Intrinsics_add_carry_u64(cc, x[1U], y[1U], r1);
+  u64 cc2 = Lib_IntTypes_Intrinsics_add_carry_u64(cc1, x[2U], y[2U], r2);
+  u64 cc3 = Lib_IntTypes_Intrinsics_add_carry_u64(cc2, x[3U], y[3U], r3);
   return cc3;
 }
 
@@ -133,28 +123,11 @@ static u64 add4_variables(u64 *x, u64 cin, u64 y0, u64 y1, u64 y2, u64 y3, u64 *
   u64 *r1 = result + (u32)1U;
   u64 *r2 = result + (u32)2U;
   u64 *r3 = result + (u32)3U;
-  u64 cc = add_carry(cin, x[0U], y0, r0);
-  u64 cc1 = add_carry(cc, x[1U], y1, r1);
-  u64 cc2 = add_carry(cc1, x[2U], y2, r2);
-  u64 cc3 = add_carry(cc2, x[3U], y3, r3);
+  u64 cc = Lib_IntTypes_Intrinsics_add_carry_u64(cin, x[0U], y0, r0);
+  u64 cc1 = Lib_IntTypes_Intrinsics_add_carry_u64(cc, x[1U], y1, r1);
+  u64 cc2 = Lib_IntTypes_Intrinsics_add_carry_u64(cc1, x[2U], y2, r2);
+  u64 cc3 = Lib_IntTypes_Intrinsics_add_carry_u64(cc2, x[3U], y3, r3);
   return cc3;
-}
-
-static u64 sub_borrow(u64 cin, u64 x, u64 y, u64 *result1)
-{
-  u64 res = x - y - cin;
-  u64 c;
-  if (eq_u64_nCT(cin, (u64)1U))
-    if (x <= y)
-      c = (u64)1U;
-    else
-      c = (u64)0U;
-  else if (x < y)
-    c = (u64)1U;
-  else
-    c = (u64)0U;
-  result1[0U] = res;
-  return c;
 }
 
 static u64 sub4_il(u64 *x, u64 *y, u64 *result)
@@ -163,10 +136,10 @@ static u64 sub4_il(u64 *x, u64 *y, u64 *result)
   u64 *r1 = result + (u32)1U;
   u64 *r2 = result + (u32)2U;
   u64 *r3 = result + (u32)3U;
-  u64 cc = sub_borrow((u64)0U, x[0U], y[0U], r0);
-  u64 cc1 = sub_borrow(cc, x[1U], y[1U], r1);
-  u64 cc2 = sub_borrow(cc1, x[2U], y[2U], r2);
-  u64 cc3 = sub_borrow(cc2, x[3U], y[3U], r3);
+  u64 cc = Lib_IntTypes_Intrinsics_sub_borrow_u64((u64)0U, x[0U], y[0U], r0);
+  u64 cc1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc, x[1U], y[1U], r1);
+  u64 cc2 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc1, x[2U], y[2U], r2);
+  u64 cc3 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc2, x[3U], y[3U], r3);
   return cc3;
 }
 
@@ -176,10 +149,10 @@ static u64 sub4(u64 *x, u64 *y, u64 *result)
   u64 *r1 = result + (u32)1U;
   u64 *r2 = result + (u32)2U;
   u64 *r3 = result + (u32)3U;
-  u64 cc = sub_borrow((u64)0U, x[0U], y[0U], r0);
-  u64 cc1 = sub_borrow(cc, x[1U], y[1U], r1);
-  u64 cc2 = sub_borrow(cc1, x[2U], y[2U], r2);
-  u64 cc3 = sub_borrow(cc2, x[3U], y[3U], r3);
+  u64 cc = Lib_IntTypes_Intrinsics_sub_borrow_u64((u64)0U, x[0U], y[0U], r0);
+  u64 cc1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc, x[1U], y[1U], r1);
+  u64 cc2 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc1, x[2U], y[2U], r2);
+  u64 cc3 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc2, x[3U], y[3U], r3);
   return cc3;
 }
 
@@ -210,7 +183,7 @@ static u64 mult64_c(u64 x, u64 u, u64 cin, u64 *result, u64 *temp)
   u64 l;
   mul64(x, u, result, temp);
   l = result[0U];
-  return add_carry(cin, l, h, result);
+  return Lib_IntTypes_Intrinsics_add_carry_u64(cin, l, h, result);
 }
 
 static u64 mul1_il(u64 *f, u64 u, u64 *result)
@@ -352,26 +325,6 @@ static void uploadOneImpl(u64 *f)
   f[3U] = (u64)0U;
 }
 
-static void copy_conditional(u64 *out, u64 *x, u64 mask)
-{
-  u64 out_0 = out[0U];
-  u64 out_1 = out[1U];
-  u64 out_2 = out[2U];
-  u64 out_3 = out[3U];
-  u64 x_0 = x[0U];
-  u64 x_1 = x[1U];
-  u64 x_2 = x[2U];
-  u64 x_3 = x[3U];
-  u64 r_0 = out_0 ^ (mask & (out_0 ^ x_0));
-  u64 r_1 = out_1 ^ (mask & (out_1 ^ x_1));
-  u64 r_2 = out_2 ^ (mask & (out_2 ^ x_2));
-  u64 r_3 = out_3 ^ (mask & (out_3 ^ x_3));
-  out[0U] = r_0;
-  out[1U] = r_1;
-  out[2U] = r_2;
-  out[3U] = r_3;
-}
-
 static void toUint64(u8 *i, u64 *o)
 {
   u32 i0;
@@ -410,7 +363,7 @@ static void p256_add(u64 *arg1, u64 *arg2, u64 *out)
   u64 tempBuffer[4U] = { 0U };
   u64 tempBufferForSubborrow = (u64)0U;
   u64 c = sub4_il(out, prime256_buffer, tempBuffer);
-  u64 carry = sub_borrow(c, t, (u64)0U, &tempBufferForSubborrow);
+  u64 carry = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t, (u64)0U, &tempBufferForSubborrow);
   cmovznz4(carry, tempBuffer, out, out);
 }
 
@@ -420,7 +373,7 @@ static void p256_double(u64 *arg1, u64 *out)
   u64 tempBuffer[4U] = { 0U };
   u64 tempBufferForSubborrow = (u64)0U;
   u64 c = sub4_il(out, prime256_buffer, tempBuffer);
-  u64 carry = sub_borrow(c, t, (u64)0U, &tempBufferForSubborrow);
+  u64 carry = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t, (u64)0U, &tempBufferForSubborrow);
   cmovznz4(carry, tempBuffer, out, out);
 }
 
@@ -481,7 +434,8 @@ static void montgomery_multiplication_buffer_by_one(u64 *a, u64 *result)
             u64 cin = round4[4U];
             u64 *x_ = round4;
             u64 c = sub4_il(x_, prime256_buffer, tempBuffer);
-            u64 carry = sub_borrow(c, cin, (u64)0U, &tempBufferForSubborrow);
+            u64
+            carry = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, cin, (u64)0U, &tempBufferForSubborrow);
             cmovznz4(carry, tempBuffer, x_, result);
           }
         }
@@ -536,7 +490,8 @@ static void montgomery_multiplication_buffer(u64 *a, u64 *b, u64 *result)
             u64 cin = round4[4U];
             u64 *x_ = round4;
             u64 c = sub4_il(x_, prime256_buffer, tempBuffer);
-            u64 carry = sub_borrow(c, cin, (u64)0U, &tempBufferForSubborrow);
+            u64
+            carry = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, cin, (u64)0U, &tempBufferForSubborrow);
             cmovznz4(carry, tempBuffer, x_, result);
           }
         }
@@ -593,6 +548,45 @@ static void exponent(u64 *a, u64 *result, u64 *tempBuffer)
   montgomery_multiplication_buffer(buffer_result1, buffer_result3, buffer_result1);
   montgomery_multiplication_buffer(buffer_result1, a, buffer_result1);
   memcpy(result, buffer_result1, (u32)4U * sizeof (buffer_result1[0U]));
+}
+
+static void quatre(u64 *a, u64 *result)
+{
+  montgomery_multiplication_buffer(a, a, result);
+  montgomery_multiplication_buffer(result, result, result);
+}
+
+static void multByTwo(u64 *a, u64 *out)
+{
+  p256_add(a, a, out);
+}
+
+static void multByThree(u64 *a, u64 *result)
+{
+  multByTwo(a, result);
+  p256_add(a, result, result);
+}
+
+static void multByFour(u64 *a, u64 *result)
+{
+  multByTwo(a, result);
+  multByTwo(result, result);
+}
+
+static void multByEight(u64 *a, u64 *result)
+{
+  multByTwo(a, result);
+  multByTwo(result, result);
+  multByTwo(result, result);
+}
+
+static void multByMinusThree(u64 *a, u64 *result)
+{
+  multByThree(a, result);
+  {
+    u64 zeros1[4U] = { 0U };
+    p256_sub(zeros1, result, result);
+  }
 }
 
 static u64 store_high_low_u(u32 high, u32 low)
@@ -809,45 +803,6 @@ static void solinas_reduction_impl(u64 *i, u64 *o)
   p256_sub(o, t61, o);
   p256_sub(o, t71, o);
   p256_sub(o, t81, o);
-}
-
-static void quatre(u64 *a, u64 *result)
-{
-  montgomery_multiplication_buffer(a, a, result);
-  montgomery_multiplication_buffer(result, result, result);
-}
-
-static void multByTwo(u64 *a, u64 *out)
-{
-  p256_add(a, a, out);
-}
-
-static void multByThree(u64 *a, u64 *result)
-{
-  multByTwo(a, result);
-  p256_add(a, result, result);
-}
-
-static void multByFour(u64 *a, u64 *result)
-{
-  multByTwo(a, result);
-  multByTwo(result, result);
-}
-
-static void multByEight(u64 *a, u64 *result)
-{
-  multByTwo(a, result);
-  multByTwo(result, result);
-  multByTwo(result, result);
-}
-
-static void multByMinusThree(u64 *a, u64 *result)
-{
-  multByThree(a, result);
-  {
-    u64 zeros1[4U] = { 0U };
-    p256_sub(zeros1, result, result);
-  }
 }
 
 static void point_double_compute_s_m(u64 *p, u64 *s1, u64 *m, u64 *tempBuffer)
@@ -1228,55 +1183,6 @@ static void secretToPublicWithoutNorm(u64 *result, u8 *scalar, u64 *tempBuffer)
   copy_point(q, result);
 }
 
-static bool isPointAtInfinityPublic(u64 *p)
-{
-  u64 z0 = p[8U];
-  u64 z1 = p[9U];
-  u64 z2 = p[10U];
-  u64 z3 = p[11U];
-  bool z0_zero = eq_0_u64(z0);
-  bool z1_zero = eq_0_u64(z1);
-  bool z2_zero = eq_0_u64(z2);
-  bool z3_zero = eq_0_u64(z3);
-  return z0_zero && z1_zero && z2_zero && z3_zero;
-}
-
-static bool isPointOnCurvePublic(u64 *p)
-{
-  u64 y2Buffer[4U] = { 0U };
-  u64 xBuffer[4U] = { 0U };
-  u64 *x = p;
-  u64 *y = p + (u32)4U;
-  u64 multBuffer0[8U] = { 0U };
-  shift_256_impl(y, multBuffer0);
-  solinas_reduction_impl(multBuffer0, y2Buffer);
-  montgomery_multiplication_buffer(y2Buffer, y2Buffer, y2Buffer);
-  {
-    u64 xToDomainBuffer[4U] = { 0U };
-    u64 minusThreeXBuffer[4U] = { 0U };
-    u64 p256_constant[4U] = { 0U };
-    u64 multBuffer[8U] = { 0U };
-    u64 r;
-    bool z;
-    bool z1;
-    shift_256_impl(x, multBuffer);
-    solinas_reduction_impl(multBuffer, xToDomainBuffer);
-    montgomery_multiplication_buffer(xToDomainBuffer, xToDomainBuffer, xBuffer);
-    montgomery_multiplication_buffer(xBuffer, xToDomainBuffer, xBuffer);
-    multByThree(xToDomainBuffer, minusThreeXBuffer);
-    p256_sub(xBuffer, minusThreeXBuffer, xBuffer);
-    p256_constant[0U] = (u64)15608596021259845087U;
-    p256_constant[1U] = (u64)12461466548982526096U;
-    p256_constant[2U] = (u64)16546823903870267094U;
-    p256_constant[3U] = (u64)15866188208926050356U;
-    p256_add(xBuffer, p256_constant, xBuffer);
-    r = compare_felem(y2Buffer, xBuffer);
-    z = eq_0_u64(r);
-    z1 = !eq_0_u64(r);
-    return z1;
-  }
-}
-
 static u64
 prime256order_buffer[4U] =
   {
@@ -1338,7 +1244,7 @@ static void reduction_prime_2prime_with_carry(u64 *x, u64 *result)
   u64 cin = x[4U];
   u64 *x_ = x;
   u64 c = sub4_il(x_, prime256order_buffer, tempBuffer);
-  u64 carry = sub_borrow(c, cin, (u64)0U, &tempBufferForSubborrow);
+  u64 carry = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, cin, (u64)0U, &tempBufferForSubborrow);
   cmovznz4(carry, tempBuffer, x_, result);
 }
 
@@ -1347,7 +1253,7 @@ static void reduction_prime_2prime_with_carry2(u64 cin, u64 *x, u64 *result)
   u64 tempBuffer[4U] = { 0U };
   u64 tempBufferForSubborrow = (u64)0U;
   u64 c = sub4_il(x, prime256order_buffer, tempBuffer);
-  u64 carry = sub_borrow(c, cin, (u64)0U, &tempBufferForSubborrow);
+  u64 carry = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, cin, (u64)0U, &tempBufferForSubborrow);
   cmovznz4(carry, tempBuffer, x, result);
 }
 
@@ -1380,6 +1286,16 @@ static void felem_add(u64 *arg1, u64 *arg2, u64 *out)
 {
   u64 t = add4(arg1, arg2, out);
   reduction_prime_2prime_with_carry2(t, out, out);
+}
+
+static bool eq_u64_nCT(u64 a, u64 b)
+{
+  return a == b;
+}
+
+static bool eq_0_u64(u64 a)
+{
+  return eq_u64_nCT(a, (u64)0U);
 }
 
 static void changeEndian(u64 *i)
@@ -1421,21 +1337,53 @@ static void bufferToJac(u64 *p, u64 *result)
   result[11U] = (u64)0U;
 }
 
-static bool isMoreThanZeroLessThanOrderMinusOne(u64 *f)
+static bool isPointAtInfinityPublic(u64 *p)
 {
-  u64 tempBuffer[4U] = { 0U };
-  u64 carry = sub4_il(f, prime256order_buffer, tempBuffer);
-  bool less = eq_u64_nCT(carry, (u64)1U);
-  u64 f0 = f[0U];
-  u64 f1 = f[1U];
-  u64 f2 = f[2U];
-  u64 f3 = f[3U];
-  bool z0_zero = eq_0_u64(f0);
-  bool z1_zero = eq_0_u64(f1);
-  bool z2_zero = eq_0_u64(f2);
-  bool z3_zero = eq_0_u64(f3);
-  bool more = z0_zero && z1_zero && z2_zero && z3_zero;
-  return less && !more;
+  u64 z0 = p[8U];
+  u64 z1 = p[9U];
+  u64 z2 = p[10U];
+  u64 z3 = p[11U];
+  bool z0_zero = eq_0_u64(z0);
+  bool z1_zero = eq_0_u64(z1);
+  bool z2_zero = eq_0_u64(z2);
+  bool z3_zero = eq_0_u64(z3);
+  return z0_zero && z1_zero && z2_zero && z3_zero;
+}
+
+static bool isPointOnCurvePublic(u64 *p)
+{
+  u64 y2Buffer[4U] = { 0U };
+  u64 xBuffer[4U] = { 0U };
+  u64 *x = p;
+  u64 *y = p + (u32)4U;
+  u64 multBuffer0[8U] = { 0U };
+  shift_256_impl(y, multBuffer0);
+  solinas_reduction_impl(multBuffer0, y2Buffer);
+  montgomery_multiplication_buffer(y2Buffer, y2Buffer, y2Buffer);
+  {
+    u64 xToDomainBuffer[4U] = { 0U };
+    u64 minusThreeXBuffer[4U] = { 0U };
+    u64 p256_constant[4U] = { 0U };
+    u64 multBuffer[8U] = { 0U };
+    u64 r;
+    bool z;
+    bool z1;
+    shift_256_impl(x, multBuffer);
+    solinas_reduction_impl(multBuffer, xToDomainBuffer);
+    montgomery_multiplication_buffer(xToDomainBuffer, xToDomainBuffer, xBuffer);
+    montgomery_multiplication_buffer(xBuffer, xToDomainBuffer, xBuffer);
+    multByThree(xToDomainBuffer, minusThreeXBuffer);
+    p256_sub(xBuffer, minusThreeXBuffer, xBuffer);
+    p256_constant[0U] = (u64)15608596021259845087U;
+    p256_constant[1U] = (u64)12461466548982526096U;
+    p256_constant[2U] = (u64)16546823903870267094U;
+    p256_constant[3U] = (u64)15866188208926050356U;
+    p256_add(xBuffer, p256_constant, xBuffer);
+    r = compare_felem(y2Buffer, xBuffer);
+    z = eq_0_u64(r);
+    z1 = !eq_0_u64(r);
+    return z1;
+  }
 }
 
 static bool isCoordinateValid(u64 *p)
@@ -1471,9 +1419,7 @@ static bool verifyQValidCurvePoint(u64 *pubKeyAsPoint, u64 *tempBuffer)
   {
     bool belongsToCurve = isPointOnCurvePublic(pubKeyAsPoint);
     bool orderCorrect = isOrderCorrect(pubKeyAsPoint, tempBuffer);
-    if (coordinatesValid && belongsToCurve && orderCorrect)
-      return true;
-    return false;
+    return coordinatesValid && belongsToCurve && orderCorrect;
   }
 }
 
@@ -1617,6 +1563,23 @@ static u64 ecdsa_signature(u8 *result, u32 mLen, u8 *m, u8 *privKey, u8 *k)
   toUint8(r, resultR);
   toUint8(s1, resultS);
   return flag;
+}
+
+static bool isMoreThanZeroLessThanOrderMinusOne(u64 *f)
+{
+  u64 tempBuffer[4U] = { 0U };
+  u64 carry = sub4_il(f, prime256order_buffer, tempBuffer);
+  bool less = eq_u64_nCT(carry, (u64)1U);
+  u64 f0 = f[0U];
+  u64 f1 = f[1U];
+  u64 f2 = f[2U];
+  u64 f3 = f[3U];
+  bool z0_zero = eq_0_u64(f0);
+  bool z1_zero = eq_0_u64(f1);
+  bool z2_zero = eq_0_u64(f2);
+  bool z3_zero = eq_0_u64(f3);
+  bool more = z0_zero && z1_zero && z2_zero && z3_zero;
+  return less && !more;
 }
 
 static bool compare_felem_bool(u64 *a, u64 *b)

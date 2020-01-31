@@ -22,6 +22,7 @@
  */
 
 #include "evercrypt_targetconfig.h"
+#include "lib_intrinsics.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
