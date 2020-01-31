@@ -425,7 +425,7 @@ typedef uint32x4_t Lib_IntVector_Intrinsics_vec128;
 */
 
 #define Lib_IntVector_Intrinsics_vec128_load_le(x0) \
-  (vld1q_u32((uint32_t*) (x0)))
+  (vld1q_u32((const uint32_t*) (x0)))
 
 #define Lib_IntVector_Intrinsics_vec128_store_le(x0, x1) \
   (vst1q_u32((uint32_t*)(x0),(x1)))
@@ -437,10 +437,10 @@ typedef uint32x4_t Lib_IntVector_Intrinsics_vec128;
 */
 
 #define Lib_IntVector_Intrinsics_vec128_load32_be(x0)		\
-  (vrev32q_u8(vld1q_u32((uint32_t*)(x0))))
+  (vrev32q_u8(vld1q_u32((const uint32_t*)(x0))))
 
 #define Lib_IntVector_Intrinsics_vec128_load64_be(x0)		\
-  (vrev64q_u8(vld1q_u32((uint32_t*)(x0))))
+  (vreinterpretq_u32_u64(vrev64q_u8(vld1q_u32((const uint32_t*)(x0)))))
 
 /*
 #define Lib_IntVector_Intrinsics_vec128_store_be(x0, x1)	\
@@ -508,12 +508,12 @@ typedef uint32x4_t Lib_IntVector_Intrinsics_vec128;
   (vdupq_n_u32(x)) /* hi lo */
 
 static inline Lib_IntVector_Intrinsics_vec128 Lib_IntVector_Intrinsics_vec128_load64s(uint64_t x1, uint64_t x2){
-  uint64_t a[2] = {x1,x2};
+  const uint64_t a[2] = {x1,x2};
   return vreinterpretq_u32_u64(vld1q_u64(a));
 }
 
 static inline Lib_IntVector_Intrinsics_vec128 Lib_IntVector_Intrinsics_vec128_load32s(uint32_t x1, uint32_t x2, uint32_t x3, uint32_t x4){
-  uint64_t a[4] = {x1,x2,x3,x4};
+  const uint64_t a[4] = {x1,x2,x3,x4};
   return vld1q_u32(a);
 }
 
