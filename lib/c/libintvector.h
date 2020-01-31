@@ -513,7 +513,7 @@ static inline Lib_IntVector_Intrinsics_vec128 Lib_IntVector_Intrinsics_vec128_lo
 }
 
 static inline Lib_IntVector_Intrinsics_vec128 Lib_IntVector_Intrinsics_vec128_load32s(uint32_t x1, uint32_t x2, uint32_t x3, uint32_t x4){
-  const uint64_t a[4] = {x1,x2,x3,x4};
+  const uint32_t a[4] = {x1,x2,x3,x4};
   return vld1q_u32(a);
 }
 
