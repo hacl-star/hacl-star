@@ -19,7 +19,7 @@ module SPreComp = Hacl.Spec.Gf128.FieldPreComp
 module Lemmas = Hacl.Spec.GF128.Lemmas
 
 
-#set-options "--z3rlimit 25 --max_fuel 1 --max_ifuel 1"
+#set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
 noextract
 let zero = GF.zero #S.gf128

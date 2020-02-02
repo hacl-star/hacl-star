@@ -18,8 +18,9 @@ module Vec = Hacl.Spec.GF128.Vec
 friend Lib.LoopCombinators
 
 
-#set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 1"
+#set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
+let _: squash (inversion Vec.gf128_spec) = allow_inversion Vec.gf128_spec
 
 let as_get_acc #s h ctx = feval h (gsub ctx 0ul (felem_len s))
 

@@ -14,7 +14,9 @@ type gf128_spec =
   | NI
   | PreComp
 
-#reset-options "--z3rlimit 50 --max_fuel 1"
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+
+let _: squash (inversion gf128_spec) = allow_inversion gf128_spec
 
 let elem = Scalar.elem
 let gf128 = Scalar.gf128
