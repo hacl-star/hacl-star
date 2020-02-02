@@ -14,5 +14,5 @@ open Hacl.CTR
 ///
 
 val ctr_equivalence: w:width_t -> k:key -> n:nonce -> c0:counter -> msg:seq uint8 -> Lemma
-  (requires c0 + w <= max_size_t /\ length msg / blocksize + w - 1 <= max_size_t /\ length msg / (w * blocksize) <= max_size_t)
+  (requires c0 + w - 1 <= max_size_t /\ length msg / blocksize + w - 1 <= max_size_t /\ length msg / (w * blocksize) <= max_size_t)
   (ensures  ctr_v #w k n c0 msg `Seq.equal` ctr k n c0 msg)

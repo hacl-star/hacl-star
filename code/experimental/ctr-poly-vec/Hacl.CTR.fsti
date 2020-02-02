@@ -68,12 +68,12 @@ let ctr_v (#w:width_t) (k:key) (n:nonce) (c0:counter) (msg:bytes{length msg / (w
 ///  CTR properties
 ///
 
-val kb_equiv_lemma: #w:width_t -> k:key -> n:nonce -> ctr0:counter -> ctr:counter{ctr0 + w <= max_size_t} -> i:nat{i < w /\ w * ctr + i <= max_size_t} ->
+val kb_equiv_lemma: #w:width_t -> k:key -> n:nonce -> ctr0:counter -> ctr:counter{ctr0 + w - 1 <= max_size_t} -> i:nat{i < w /\ w * ctr + i <= max_size_t} ->
   Lemma (kb (init k n ctr0) (w * ctr + i) == kb (init k n (ctr0 + i)) (w * ctr))
 
 val transpose_state_i: #w:width_t -> st_v:state_v w -> i:nat{i < w} -> state
 
-val init_v_i: #w:width_t -> k:key -> n:nonce -> ctr0:counter{ctr0 + w <= max_size_t} -> i:nat{i < w} ->
+val init_v_i: #w:width_t -> k:key -> n:nonce -> ctr0:counter{ctr0 + w - 1 <= max_size_t} -> i:nat{i < w} ->
   Lemma (transpose_state_i (init_v #w k n ctr0) i == init k n (ctr0 + i))
 
 val kb_v_i: #w:width_t -> ctr:counter{w * ctr <= max_size_t} -> st_v0:state_v w -> i:nat{i < w} -> Lemma

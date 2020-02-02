@@ -44,7 +44,7 @@ val encrypt_block_scalar_lemma_i:
     #w:width_t
   -> k:key
   -> n:nonce
-  -> c0:counter{c0 + w <= max_size_t}
+  -> c0:counter{c0 + w - 1 <= max_size_t}
   -> c:counter{w * c + w - 1 <= max_size_t}
   -> b:block
   -> i:nat{i < w} -> Lemma
@@ -65,7 +65,7 @@ val encrypt_block_lemma_bs_i:
     #w:width_t
   -> k:key
   -> n:nonce
-  -> c0:counter{c0 + w <= max_size_t}
+  -> c0:counter{c0 + w - 1 <= max_size_t}
   -> c:counter{w * c + w - 1 <= max_size_t}
   -> b_v:block_v w
   -> j:nat{j < w * blocksize} -> Lemma
@@ -109,7 +109,7 @@ val encrypt_block_lemma_i:
   -> #len:nat{len / blocksize + w - 1 <= max_size_t /\ len / (w * blocksize) <= max_size_t}
   -> k:key
   -> n:nonce
-  -> c0:counter{c0 + w <= max_size_t}
+  -> c0:counter{c0 + w - 1 <= max_size_t}
   -> i:nat{i <= len}
   -> b_v:block_v w -> Lemma
   (let st_v0 = init_v #w k n c0 in
@@ -141,7 +141,7 @@ val lemma_map_blocks_ctr_vec_equiv_pre:
     #w:width_t
   -> k:key
   -> n:nonce
-  -> c0:counter{c0 + w <= max_size_t}
+  -> c0:counter{c0 + w - 1 <= max_size_t}
   -> msg:seq uint8{length msg / blocksize + w - 1 <= max_size_t /\ length msg / (w * blocksize) <= max_size_t}
   -> i:nat{i <= length msg}
   -> b_v:block_v w -> Lemma
