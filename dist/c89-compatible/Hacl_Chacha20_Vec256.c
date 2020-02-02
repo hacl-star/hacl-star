@@ -24,7 +24,7 @@
 
 #include "Hacl_Chacha20_Vec256.h"
 
-inline static void Hacl_Chacha20_Vec256_double_round_256(Lib_IntVector_Intrinsics_vec256 *st)
+static inline void double_round_256(Lib_IntVector_Intrinsics_vec256 *st)
 {
   Lib_IntVector_Intrinsics_vec256 std0;
   Lib_IntVector_Intrinsics_vec256 std1;
@@ -156,8 +156,8 @@ inline static void Hacl_Chacha20_Vec256_double_round_256(Lib_IntVector_Intrinsic
   st[4U] = Lib_IntVector_Intrinsics_vec256_rotate_left32(std, (uint32_t)7U);
 }
 
-inline static void
-Hacl_Chacha20_Vec256_chacha20_core_256(
+static inline void
+chacha20_core_256(
   Lib_IntVector_Intrinsics_vec256 *k,
   Lib_IntVector_Intrinsics_vec256 *ctx,
   uint32_t ctr
@@ -165,23 +165,23 @@ Hacl_Chacha20_Vec256_chacha20_core_256(
 {
   uint32_t ctr_u32;
   Lib_IntVector_Intrinsics_vec256 cv;
-  memcpy(k, ctx, (uint32_t)16U * sizeof ctx[0U]);
+  memcpy(k, ctx, (uint32_t)16U * sizeof (ctx[0U]));
   ctr_u32 = (uint32_t)8U * ctr;
   cv = Lib_IntVector_Intrinsics_vec256_load32(ctr_u32);
   k[12U] = Lib_IntVector_Intrinsics_vec256_add32(k[12U], cv);
-  Hacl_Chacha20_Vec256_double_round_256(k);
-  Hacl_Chacha20_Vec256_double_round_256(k);
-  Hacl_Chacha20_Vec256_double_round_256(k);
-  Hacl_Chacha20_Vec256_double_round_256(k);
-  Hacl_Chacha20_Vec256_double_round_256(k);
-  Hacl_Chacha20_Vec256_double_round_256(k);
-  Hacl_Chacha20_Vec256_double_round_256(k);
-  Hacl_Chacha20_Vec256_double_round_256(k);
-  Hacl_Chacha20_Vec256_double_round_256(k);
-  Hacl_Chacha20_Vec256_double_round_256(k);
+  double_round_256(k);
+  double_round_256(k);
+  double_round_256(k);
+  double_round_256(k);
+  double_round_256(k);
+  double_round_256(k);
+  double_round_256(k);
+  double_round_256(k);
+  double_round_256(k);
+  double_round_256(k);
   {
     uint32_t i;
-    for (i = (uint32_t)0U; i < (uint32_t)16U; i = i + (uint32_t)1U)
+    for (i = (uint32_t)0U; i < (uint32_t)16U; i++)
     {
       Lib_IntVector_Intrinsics_vec256 *os = k;
       Lib_IntVector_Intrinsics_vec256 x = Lib_IntVector_Intrinsics_vec256_add32(k[i], ctx[i]);
@@ -191,13 +191,8 @@ Hacl_Chacha20_Vec256_chacha20_core_256(
   k[12U] = Lib_IntVector_Intrinsics_vec256_add32(k[12U], cv);
 }
 
-inline static void
-Hacl_Chacha20_Vec256_chacha20_init_256(
-  Lib_IntVector_Intrinsics_vec256 *ctx,
-  uint8_t *k,
-  uint8_t *n1,
-  uint32_t ctr
-)
+static inline void
+chacha20_init_256(Lib_IntVector_Intrinsics_vec256 *ctx, uint8_t *k, uint8_t *n1, uint32_t ctr)
 {
   uint32_t ctx1[16U] = { 0U };
   uint32_t *uu____0 = ctx1;
@@ -207,7 +202,7 @@ Hacl_Chacha20_Vec256_chacha20_init_256(
   Lib_IntVector_Intrinsics_vec256 c12;
   {
     uint32_t i;
-    for (i = (uint32_t)0U; i < (uint32_t)4U; i = i + (uint32_t)1U)
+    for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
     {
       uint32_t *os = uu____0;
       uint32_t x = Hacl_Impl_Chacha20_Vec_chacha20_constants[i];
@@ -217,7 +212,7 @@ Hacl_Chacha20_Vec256_chacha20_init_256(
   uu____1 = ctx1 + (uint32_t)4U;
   {
     uint32_t i;
-    for (i = (uint32_t)0U; i < (uint32_t)8U; i = i + (uint32_t)1U)
+    for (i = (uint32_t)0U; i < (uint32_t)8U; i++)
     {
       uint32_t *os = uu____1;
       uint8_t *bj = k + i * (uint32_t)4U;
@@ -231,7 +226,7 @@ Hacl_Chacha20_Vec256_chacha20_init_256(
   uu____2 = ctx1 + (uint32_t)13U;
   {
     uint32_t i;
-    for (i = (uint32_t)0U; i < (uint32_t)3U; i = i + (uint32_t)1U)
+    for (i = (uint32_t)0U; i < (uint32_t)3U; i++)
     {
       uint32_t *os = uu____2;
       uint8_t *bj = n1 + i * (uint32_t)4U;
@@ -243,7 +238,7 @@ Hacl_Chacha20_Vec256_chacha20_init_256(
   }
   {
     uint32_t i;
-    for (i = (uint32_t)0U; i < (uint32_t)16U; i = i + (uint32_t)1U)
+    for (i = (uint32_t)0U; i < (uint32_t)16U; i++)
     {
       Lib_IntVector_Intrinsics_vec256 *os = ctx;
       uint32_t x = ctx1[i];
@@ -280,202 +275,180 @@ Hacl_Chacha20_Vec256_chacha20_encrypt_256(
     for (_i = 0U; _i < (uint32_t)16U; ++_i)
       ctx[_i] = Lib_IntVector_Intrinsics_vec256_zero;
   }
-  Hacl_Chacha20_Vec256_chacha20_init_256(ctx, key, n1, ctr);
   {
-    uint32_t rem1 = len % ((uint32_t)8U * (uint32_t)64U);
-    uint32_t nb = len / ((uint32_t)8U * (uint32_t)64U);
-    uint32_t rem2 = len % ((uint32_t)8U * (uint32_t)64U);
+    uint32_t rem1;
+    uint32_t nb;
+    uint32_t rem2;
+    chacha20_init_256(ctx, key, n1, ctr);
+    rem1 = len % (uint32_t)512U;
+    nb = len / (uint32_t)512U;
+    rem2 = len % (uint32_t)512U;
     {
-      uint32_t i0;
-      for (i0 = (uint32_t)0U; i0 < nb; i0 = i0 + (uint32_t)1U)
+      uint32_t i;
+      for (i = (uint32_t)0U; i < nb; i++)
       {
-        uint8_t *uu____0 = out + i0 * (uint32_t)8U * (uint32_t)64U;
-        uint8_t *uu____1 = text + i0 * (uint32_t)512U;
+        uint8_t *uu____0 = out + i * (uint32_t)512U;
+        uint8_t *uu____1 = text + i * (uint32_t)512U;
         Lib_IntVector_Intrinsics_vec256 k[16U];
         {
           uint32_t _i;
           for (_i = 0U; _i < (uint32_t)16U; ++_i)
             k[_i] = Lib_IntVector_Intrinsics_vec256_zero;
         }
-        Hacl_Chacha20_Vec256_chacha20_core_256(k, ctx, i0);
+        chacha20_core_256(k, ctx, i);
         {
-          Lib_IntVector_Intrinsics_vec256 bl[16U];
+          Lib_IntVector_Intrinsics_vec256 v00 = k[0U];
+          Lib_IntVector_Intrinsics_vec256 v16 = k[1U];
+          Lib_IntVector_Intrinsics_vec256 v20 = k[2U];
+          Lib_IntVector_Intrinsics_vec256 v30 = k[3U];
+          Lib_IntVector_Intrinsics_vec256 v40 = k[4U];
+          Lib_IntVector_Intrinsics_vec256 v50 = k[5U];
+          Lib_IntVector_Intrinsics_vec256 v60 = k[6U];
+          Lib_IntVector_Intrinsics_vec256 v70 = k[7U];
+          Lib_IntVector_Intrinsics_vec256
+          v0_ = Lib_IntVector_Intrinsics_vec256_interleave_low32(v00, v16);
+          Lib_IntVector_Intrinsics_vec256
+          v1_ = Lib_IntVector_Intrinsics_vec256_interleave_high32(v00, v16);
+          Lib_IntVector_Intrinsics_vec256
+          v2_ = Lib_IntVector_Intrinsics_vec256_interleave_low32(v20, v30);
+          Lib_IntVector_Intrinsics_vec256
+          v3_ = Lib_IntVector_Intrinsics_vec256_interleave_high32(v20, v30);
+          Lib_IntVector_Intrinsics_vec256
+          v4_ = Lib_IntVector_Intrinsics_vec256_interleave_low32(v40, v50);
+          Lib_IntVector_Intrinsics_vec256
+          v5_ = Lib_IntVector_Intrinsics_vec256_interleave_high32(v40, v50);
+          Lib_IntVector_Intrinsics_vec256
+          v6_ = Lib_IntVector_Intrinsics_vec256_interleave_low32(v60, v70);
+          Lib_IntVector_Intrinsics_vec256
+          v7_ = Lib_IntVector_Intrinsics_vec256_interleave_high32(v60, v70);
+          Lib_IntVector_Intrinsics_vec256
+          v0__ = Lib_IntVector_Intrinsics_vec256_interleave_low64(v0_, v2_);
+          Lib_IntVector_Intrinsics_vec256
+          v1__ = Lib_IntVector_Intrinsics_vec256_interleave_high64(v0_, v2_);
+          Lib_IntVector_Intrinsics_vec256
+          v2__ = Lib_IntVector_Intrinsics_vec256_interleave_low64(v1_, v3_);
+          Lib_IntVector_Intrinsics_vec256
+          v3__ = Lib_IntVector_Intrinsics_vec256_interleave_high64(v1_, v3_);
+          Lib_IntVector_Intrinsics_vec256
+          v4__ = Lib_IntVector_Intrinsics_vec256_interleave_low64(v4_, v6_);
+          Lib_IntVector_Intrinsics_vec256
+          v5__ = Lib_IntVector_Intrinsics_vec256_interleave_high64(v4_, v6_);
+          Lib_IntVector_Intrinsics_vec256
+          v6__ = Lib_IntVector_Intrinsics_vec256_interleave_low64(v5_, v7_);
+          Lib_IntVector_Intrinsics_vec256
+          v7__ = Lib_IntVector_Intrinsics_vec256_interleave_high64(v5_, v7_);
+          Lib_IntVector_Intrinsics_vec256
+          v0___ = Lib_IntVector_Intrinsics_vec256_interleave_low128(v0__, v4__);
+          Lib_IntVector_Intrinsics_vec256
+          v1___ = Lib_IntVector_Intrinsics_vec256_interleave_high128(v0__, v4__);
+          Lib_IntVector_Intrinsics_vec256
+          v2___ = Lib_IntVector_Intrinsics_vec256_interleave_low128(v1__, v5__);
+          Lib_IntVector_Intrinsics_vec256
+          v3___ = Lib_IntVector_Intrinsics_vec256_interleave_high128(v1__, v5__);
+          Lib_IntVector_Intrinsics_vec256
+          v4___ = Lib_IntVector_Intrinsics_vec256_interleave_low128(v2__, v6__);
+          Lib_IntVector_Intrinsics_vec256
+          v5___ = Lib_IntVector_Intrinsics_vec256_interleave_high128(v2__, v6__);
+          Lib_IntVector_Intrinsics_vec256
+          v6___ = Lib_IntVector_Intrinsics_vec256_interleave_low128(v3__, v7__);
+          Lib_IntVector_Intrinsics_vec256
+          v7___ = Lib_IntVector_Intrinsics_vec256_interleave_high128(v3__, v7__);
+          Lib_IntVector_Intrinsics_vec256 v0 = v0___;
+          Lib_IntVector_Intrinsics_vec256 v1 = v2___;
+          Lib_IntVector_Intrinsics_vec256 v2 = v4___;
+          Lib_IntVector_Intrinsics_vec256 v3 = v6___;
+          Lib_IntVector_Intrinsics_vec256 v4 = v1___;
+          Lib_IntVector_Intrinsics_vec256 v5 = v3___;
+          Lib_IntVector_Intrinsics_vec256 v6 = v5___;
+          Lib_IntVector_Intrinsics_vec256 v7 = v7___;
+          Lib_IntVector_Intrinsics_vec256 v01 = k[8U];
+          Lib_IntVector_Intrinsics_vec256 v110 = k[9U];
+          Lib_IntVector_Intrinsics_vec256 v21 = k[10U];
+          Lib_IntVector_Intrinsics_vec256 v31 = k[11U];
+          Lib_IntVector_Intrinsics_vec256 v41 = k[12U];
+          Lib_IntVector_Intrinsics_vec256 v51 = k[13U];
+          Lib_IntVector_Intrinsics_vec256 v61 = k[14U];
+          Lib_IntVector_Intrinsics_vec256 v71 = k[15U];
+          Lib_IntVector_Intrinsics_vec256
+          v0_0 = Lib_IntVector_Intrinsics_vec256_interleave_low32(v01, v110);
+          Lib_IntVector_Intrinsics_vec256
+          v1_0 = Lib_IntVector_Intrinsics_vec256_interleave_high32(v01, v110);
+          Lib_IntVector_Intrinsics_vec256
+          v2_0 = Lib_IntVector_Intrinsics_vec256_interleave_low32(v21, v31);
+          Lib_IntVector_Intrinsics_vec256
+          v3_0 = Lib_IntVector_Intrinsics_vec256_interleave_high32(v21, v31);
+          Lib_IntVector_Intrinsics_vec256
+          v4_0 = Lib_IntVector_Intrinsics_vec256_interleave_low32(v41, v51);
+          Lib_IntVector_Intrinsics_vec256
+          v5_0 = Lib_IntVector_Intrinsics_vec256_interleave_high32(v41, v51);
+          Lib_IntVector_Intrinsics_vec256
+          v6_0 = Lib_IntVector_Intrinsics_vec256_interleave_low32(v61, v71);
+          Lib_IntVector_Intrinsics_vec256
+          v7_0 = Lib_IntVector_Intrinsics_vec256_interleave_high32(v61, v71);
+          Lib_IntVector_Intrinsics_vec256
+          v0__0 = Lib_IntVector_Intrinsics_vec256_interleave_low64(v0_0, v2_0);
+          Lib_IntVector_Intrinsics_vec256
+          v1__0 = Lib_IntVector_Intrinsics_vec256_interleave_high64(v0_0, v2_0);
+          Lib_IntVector_Intrinsics_vec256
+          v2__0 = Lib_IntVector_Intrinsics_vec256_interleave_low64(v1_0, v3_0);
+          Lib_IntVector_Intrinsics_vec256
+          v3__0 = Lib_IntVector_Intrinsics_vec256_interleave_high64(v1_0, v3_0);
+          Lib_IntVector_Intrinsics_vec256
+          v4__0 = Lib_IntVector_Intrinsics_vec256_interleave_low64(v4_0, v6_0);
+          Lib_IntVector_Intrinsics_vec256
+          v5__0 = Lib_IntVector_Intrinsics_vec256_interleave_high64(v4_0, v6_0);
+          Lib_IntVector_Intrinsics_vec256
+          v6__0 = Lib_IntVector_Intrinsics_vec256_interleave_low64(v5_0, v7_0);
+          Lib_IntVector_Intrinsics_vec256
+          v7__0 = Lib_IntVector_Intrinsics_vec256_interleave_high64(v5_0, v7_0);
+          Lib_IntVector_Intrinsics_vec256
+          v0___0 = Lib_IntVector_Intrinsics_vec256_interleave_low128(v0__0, v4__0);
+          Lib_IntVector_Intrinsics_vec256
+          v1___0 = Lib_IntVector_Intrinsics_vec256_interleave_high128(v0__0, v4__0);
+          Lib_IntVector_Intrinsics_vec256
+          v2___0 = Lib_IntVector_Intrinsics_vec256_interleave_low128(v1__0, v5__0);
+          Lib_IntVector_Intrinsics_vec256
+          v3___0 = Lib_IntVector_Intrinsics_vec256_interleave_high128(v1__0, v5__0);
+          Lib_IntVector_Intrinsics_vec256
+          v4___0 = Lib_IntVector_Intrinsics_vec256_interleave_low128(v2__0, v6__0);
+          Lib_IntVector_Intrinsics_vec256
+          v5___0 = Lib_IntVector_Intrinsics_vec256_interleave_high128(v2__0, v6__0);
+          Lib_IntVector_Intrinsics_vec256
+          v6___0 = Lib_IntVector_Intrinsics_vec256_interleave_low128(v3__0, v7__0);
+          Lib_IntVector_Intrinsics_vec256
+          v7___0 = Lib_IntVector_Intrinsics_vec256_interleave_high128(v3__0, v7__0);
+          Lib_IntVector_Intrinsics_vec256 v8 = v0___0;
+          Lib_IntVector_Intrinsics_vec256 v9 = v2___0;
+          Lib_IntVector_Intrinsics_vec256 v10 = v4___0;
+          Lib_IntVector_Intrinsics_vec256 v11 = v6___0;
+          Lib_IntVector_Intrinsics_vec256 v12 = v1___0;
+          Lib_IntVector_Intrinsics_vec256 v13 = v3___0;
+          Lib_IntVector_Intrinsics_vec256 v14 = v5___0;
+          Lib_IntVector_Intrinsics_vec256 v15 = v7___0;
+          k[0U] = v0;
+          k[1U] = v8;
+          k[2U] = v1;
+          k[3U] = v9;
+          k[4U] = v2;
+          k[5U] = v10;
+          k[6U] = v3;
+          k[7U] = v11;
+          k[8U] = v4;
+          k[9U] = v12;
+          k[10U] = v5;
+          k[11U] = v13;
+          k[12U] = v6;
+          k[13U] = v14;
+          k[14U] = v7;
+          k[15U] = v15;
           {
-            uint32_t _i;
-            for (_i = 0U; _i < (uint32_t)16U; ++_i)
-              bl[_i] = Lib_IntVector_Intrinsics_vec256_zero;
-          }
-          {
-            uint32_t i;
-            for (i = (uint32_t)0U; i < (uint32_t)16U; i = i + (uint32_t)1U)
+            uint32_t i0;
+            for (i0 = (uint32_t)0U; i0 < (uint32_t)16U; i0++)
             {
-              Lib_IntVector_Intrinsics_vec256 *os = bl;
               Lib_IntVector_Intrinsics_vec256
-              x = Lib_IntVector_Intrinsics_vec256_load_le(uu____1 + i * (uint32_t)8U * (uint32_t)4U);
-              os[i] = x;
-            }
-          }
-          {
-            Lib_IntVector_Intrinsics_vec256 v00 = k[0U];
-            Lib_IntVector_Intrinsics_vec256 v16 = k[1U];
-            Lib_IntVector_Intrinsics_vec256 v20 = k[2U];
-            Lib_IntVector_Intrinsics_vec256 v30 = k[3U];
-            Lib_IntVector_Intrinsics_vec256 v40 = k[4U];
-            Lib_IntVector_Intrinsics_vec256 v50 = k[5U];
-            Lib_IntVector_Intrinsics_vec256 v60 = k[6U];
-            Lib_IntVector_Intrinsics_vec256 v70 = k[7U];
-            Lib_IntVector_Intrinsics_vec256
-            v0_ = Lib_IntVector_Intrinsics_vec256_interleave_low32(v00, v16);
-            Lib_IntVector_Intrinsics_vec256
-            v1_ = Lib_IntVector_Intrinsics_vec256_interleave_high32(v00, v16);
-            Lib_IntVector_Intrinsics_vec256
-            v2_ = Lib_IntVector_Intrinsics_vec256_interleave_low32(v20, v30);
-            Lib_IntVector_Intrinsics_vec256
-            v3_ = Lib_IntVector_Intrinsics_vec256_interleave_high32(v20, v30);
-            Lib_IntVector_Intrinsics_vec256
-            v4_ = Lib_IntVector_Intrinsics_vec256_interleave_low32(v40, v50);
-            Lib_IntVector_Intrinsics_vec256
-            v5_ = Lib_IntVector_Intrinsics_vec256_interleave_high32(v40, v50);
-            Lib_IntVector_Intrinsics_vec256
-            v6_ = Lib_IntVector_Intrinsics_vec256_interleave_low32(v60, v70);
-            Lib_IntVector_Intrinsics_vec256
-            v7_ = Lib_IntVector_Intrinsics_vec256_interleave_high32(v60, v70);
-            Lib_IntVector_Intrinsics_vec256
-            v0__ = Lib_IntVector_Intrinsics_vec256_interleave_low64(v0_, v2_);
-            Lib_IntVector_Intrinsics_vec256
-            v1__ = Lib_IntVector_Intrinsics_vec256_interleave_high64(v0_, v2_);
-            Lib_IntVector_Intrinsics_vec256
-            v2__ = Lib_IntVector_Intrinsics_vec256_interleave_low64(v1_, v3_);
-            Lib_IntVector_Intrinsics_vec256
-            v3__ = Lib_IntVector_Intrinsics_vec256_interleave_high64(v1_, v3_);
-            Lib_IntVector_Intrinsics_vec256
-            v4__ = Lib_IntVector_Intrinsics_vec256_interleave_low64(v4_, v6_);
-            Lib_IntVector_Intrinsics_vec256
-            v5__ = Lib_IntVector_Intrinsics_vec256_interleave_high64(v4_, v6_);
-            Lib_IntVector_Intrinsics_vec256
-            v6__ = Lib_IntVector_Intrinsics_vec256_interleave_low64(v5_, v7_);
-            Lib_IntVector_Intrinsics_vec256
-            v7__ = Lib_IntVector_Intrinsics_vec256_interleave_high64(v5_, v7_);
-            Lib_IntVector_Intrinsics_vec256
-            v0___ = Lib_IntVector_Intrinsics_vec256_interleave_low128(v0__, v4__);
-            Lib_IntVector_Intrinsics_vec256
-            v1___ = Lib_IntVector_Intrinsics_vec256_interleave_high128(v0__, v4__);
-            Lib_IntVector_Intrinsics_vec256
-            v2___ = Lib_IntVector_Intrinsics_vec256_interleave_low128(v1__, v5__);
-            Lib_IntVector_Intrinsics_vec256
-            v3___ = Lib_IntVector_Intrinsics_vec256_interleave_high128(v1__, v5__);
-            Lib_IntVector_Intrinsics_vec256
-            v4___ = Lib_IntVector_Intrinsics_vec256_interleave_low128(v2__, v6__);
-            Lib_IntVector_Intrinsics_vec256
-            v5___ = Lib_IntVector_Intrinsics_vec256_interleave_high128(v2__, v6__);
-            Lib_IntVector_Intrinsics_vec256
-            v6___ = Lib_IntVector_Intrinsics_vec256_interleave_low128(v3__, v7__);
-            Lib_IntVector_Intrinsics_vec256
-            v7___ = Lib_IntVector_Intrinsics_vec256_interleave_high128(v3__, v7__);
-            Lib_IntVector_Intrinsics_vec256 v0 = v0___;
-            Lib_IntVector_Intrinsics_vec256 v1 = v2___;
-            Lib_IntVector_Intrinsics_vec256 v2 = v4___;
-            Lib_IntVector_Intrinsics_vec256 v3 = v6___;
-            Lib_IntVector_Intrinsics_vec256 v4 = v1___;
-            Lib_IntVector_Intrinsics_vec256 v5 = v3___;
-            Lib_IntVector_Intrinsics_vec256 v6 = v5___;
-            Lib_IntVector_Intrinsics_vec256 v7 = v7___;
-            Lib_IntVector_Intrinsics_vec256 v01 = k[8U];
-            Lib_IntVector_Intrinsics_vec256 v110 = k[9U];
-            Lib_IntVector_Intrinsics_vec256 v21 = k[10U];
-            Lib_IntVector_Intrinsics_vec256 v31 = k[11U];
-            Lib_IntVector_Intrinsics_vec256 v41 = k[12U];
-            Lib_IntVector_Intrinsics_vec256 v51 = k[13U];
-            Lib_IntVector_Intrinsics_vec256 v61 = k[14U];
-            Lib_IntVector_Intrinsics_vec256 v71 = k[15U];
-            Lib_IntVector_Intrinsics_vec256
-            v0_0 = Lib_IntVector_Intrinsics_vec256_interleave_low32(v01, v110);
-            Lib_IntVector_Intrinsics_vec256
-            v1_0 = Lib_IntVector_Intrinsics_vec256_interleave_high32(v01, v110);
-            Lib_IntVector_Intrinsics_vec256
-            v2_0 = Lib_IntVector_Intrinsics_vec256_interleave_low32(v21, v31);
-            Lib_IntVector_Intrinsics_vec256
-            v3_0 = Lib_IntVector_Intrinsics_vec256_interleave_high32(v21, v31);
-            Lib_IntVector_Intrinsics_vec256
-            v4_0 = Lib_IntVector_Intrinsics_vec256_interleave_low32(v41, v51);
-            Lib_IntVector_Intrinsics_vec256
-            v5_0 = Lib_IntVector_Intrinsics_vec256_interleave_high32(v41, v51);
-            Lib_IntVector_Intrinsics_vec256
-            v6_0 = Lib_IntVector_Intrinsics_vec256_interleave_low32(v61, v71);
-            Lib_IntVector_Intrinsics_vec256
-            v7_0 = Lib_IntVector_Intrinsics_vec256_interleave_high32(v61, v71);
-            Lib_IntVector_Intrinsics_vec256
-            v0__0 = Lib_IntVector_Intrinsics_vec256_interleave_low64(v0_0, v2_0);
-            Lib_IntVector_Intrinsics_vec256
-            v1__0 = Lib_IntVector_Intrinsics_vec256_interleave_high64(v0_0, v2_0);
-            Lib_IntVector_Intrinsics_vec256
-            v2__0 = Lib_IntVector_Intrinsics_vec256_interleave_low64(v1_0, v3_0);
-            Lib_IntVector_Intrinsics_vec256
-            v3__0 = Lib_IntVector_Intrinsics_vec256_interleave_high64(v1_0, v3_0);
-            Lib_IntVector_Intrinsics_vec256
-            v4__0 = Lib_IntVector_Intrinsics_vec256_interleave_low64(v4_0, v6_0);
-            Lib_IntVector_Intrinsics_vec256
-            v5__0 = Lib_IntVector_Intrinsics_vec256_interleave_high64(v4_0, v6_0);
-            Lib_IntVector_Intrinsics_vec256
-            v6__0 = Lib_IntVector_Intrinsics_vec256_interleave_low64(v5_0, v7_0);
-            Lib_IntVector_Intrinsics_vec256
-            v7__0 = Lib_IntVector_Intrinsics_vec256_interleave_high64(v5_0, v7_0);
-            Lib_IntVector_Intrinsics_vec256
-            v0___0 = Lib_IntVector_Intrinsics_vec256_interleave_low128(v0__0, v4__0);
-            Lib_IntVector_Intrinsics_vec256
-            v1___0 = Lib_IntVector_Intrinsics_vec256_interleave_high128(v0__0, v4__0);
-            Lib_IntVector_Intrinsics_vec256
-            v2___0 = Lib_IntVector_Intrinsics_vec256_interleave_low128(v1__0, v5__0);
-            Lib_IntVector_Intrinsics_vec256
-            v3___0 = Lib_IntVector_Intrinsics_vec256_interleave_high128(v1__0, v5__0);
-            Lib_IntVector_Intrinsics_vec256
-            v4___0 = Lib_IntVector_Intrinsics_vec256_interleave_low128(v2__0, v6__0);
-            Lib_IntVector_Intrinsics_vec256
-            v5___0 = Lib_IntVector_Intrinsics_vec256_interleave_high128(v2__0, v6__0);
-            Lib_IntVector_Intrinsics_vec256
-            v6___0 = Lib_IntVector_Intrinsics_vec256_interleave_low128(v3__0, v7__0);
-            Lib_IntVector_Intrinsics_vec256
-            v7___0 = Lib_IntVector_Intrinsics_vec256_interleave_high128(v3__0, v7__0);
-            Lib_IntVector_Intrinsics_vec256 v8 = v0___0;
-            Lib_IntVector_Intrinsics_vec256 v9 = v2___0;
-            Lib_IntVector_Intrinsics_vec256 v10 = v4___0;
-            Lib_IntVector_Intrinsics_vec256 v11 = v6___0;
-            Lib_IntVector_Intrinsics_vec256 v12 = v1___0;
-            Lib_IntVector_Intrinsics_vec256 v13 = v3___0;
-            Lib_IntVector_Intrinsics_vec256 v14 = v5___0;
-            Lib_IntVector_Intrinsics_vec256 v15 = v7___0;
-            k[0U] = v0;
-            k[1U] = v8;
-            k[2U] = v1;
-            k[3U] = v9;
-            k[4U] = v2;
-            k[5U] = v10;
-            k[6U] = v3;
-            k[7U] = v11;
-            k[8U] = v4;
-            k[9U] = v12;
-            k[10U] = v5;
-            k[11U] = v13;
-            k[12U] = v6;
-            k[13U] = v14;
-            k[14U] = v7;
-            k[15U] = v15;
-            {
-              uint32_t i;
-              for (i = (uint32_t)0U; i < (uint32_t)16U; i = i + (uint32_t)1U)
-              {
-                Lib_IntVector_Intrinsics_vec256 *os = bl;
-                Lib_IntVector_Intrinsics_vec256
-                x = Lib_IntVector_Intrinsics_vec256_xor(bl[i], k[i]);
-                os[i] = x;
-              }
-            }
-            {
-              uint32_t i;
-              for (i = (uint32_t)0U; i < (uint32_t)16U; i = i + (uint32_t)1U)
-              {
-                Lib_IntVector_Intrinsics_vec256_store_le(uu____0 + i * (uint32_t)32U, bl[i]);
-              }
+              x = Lib_IntVector_Intrinsics_vec256_load_le(uu____1 + i0 * (uint32_t)32U);
+              Lib_IntVector_Intrinsics_vec256 y = Lib_IntVector_Intrinsics_vec256_xor(x, k[i0]);
+              Lib_IntVector_Intrinsics_vec256_store_le(uu____0 + i0 * (uint32_t)32U, y);
             }
           }
         }
@@ -483,10 +456,10 @@ Hacl_Chacha20_Vec256_chacha20_encrypt_256(
     }
     if (rem2 > (uint32_t)0U)
     {
-      uint8_t *uu____2 = out + nb * (uint32_t)8U * (uint32_t)64U;
-      uint8_t *uu____3 = text + nb * (uint32_t)8U * (uint32_t)64U;
+      uint8_t *uu____2 = out + nb * (uint32_t)512U;
+      uint8_t *uu____3 = text + nb * (uint32_t)512U;
       uint8_t plain[512U] = { 0U };
-      memcpy(plain, uu____3, rem1 * sizeof uu____3[0U]);
+      memcpy(plain, uu____3, rem1 * sizeof (uu____3[0U]));
       {
         Lib_IntVector_Intrinsics_vec256 k[16U];
         {
@@ -494,188 +467,163 @@ Hacl_Chacha20_Vec256_chacha20_encrypt_256(
           for (_i = 0U; _i < (uint32_t)16U; ++_i)
             k[_i] = Lib_IntVector_Intrinsics_vec256_zero;
         }
-        Hacl_Chacha20_Vec256_chacha20_core_256(k, ctx, nb);
+        chacha20_core_256(k, ctx, nb);
         {
-          Lib_IntVector_Intrinsics_vec256 bl[16U];
-          {
-            uint32_t _i;
-            for (_i = 0U; _i < (uint32_t)16U; ++_i)
-              bl[_i] = Lib_IntVector_Intrinsics_vec256_zero;
-          }
+          Lib_IntVector_Intrinsics_vec256 v00 = k[0U];
+          Lib_IntVector_Intrinsics_vec256 v16 = k[1U];
+          Lib_IntVector_Intrinsics_vec256 v20 = k[2U];
+          Lib_IntVector_Intrinsics_vec256 v30 = k[3U];
+          Lib_IntVector_Intrinsics_vec256 v40 = k[4U];
+          Lib_IntVector_Intrinsics_vec256 v50 = k[5U];
+          Lib_IntVector_Intrinsics_vec256 v60 = k[6U];
+          Lib_IntVector_Intrinsics_vec256 v70 = k[7U];
+          Lib_IntVector_Intrinsics_vec256
+          v0_ = Lib_IntVector_Intrinsics_vec256_interleave_low32(v00, v16);
+          Lib_IntVector_Intrinsics_vec256
+          v1_ = Lib_IntVector_Intrinsics_vec256_interleave_high32(v00, v16);
+          Lib_IntVector_Intrinsics_vec256
+          v2_ = Lib_IntVector_Intrinsics_vec256_interleave_low32(v20, v30);
+          Lib_IntVector_Intrinsics_vec256
+          v3_ = Lib_IntVector_Intrinsics_vec256_interleave_high32(v20, v30);
+          Lib_IntVector_Intrinsics_vec256
+          v4_ = Lib_IntVector_Intrinsics_vec256_interleave_low32(v40, v50);
+          Lib_IntVector_Intrinsics_vec256
+          v5_ = Lib_IntVector_Intrinsics_vec256_interleave_high32(v40, v50);
+          Lib_IntVector_Intrinsics_vec256
+          v6_ = Lib_IntVector_Intrinsics_vec256_interleave_low32(v60, v70);
+          Lib_IntVector_Intrinsics_vec256
+          v7_ = Lib_IntVector_Intrinsics_vec256_interleave_high32(v60, v70);
+          Lib_IntVector_Intrinsics_vec256
+          v0__ = Lib_IntVector_Intrinsics_vec256_interleave_low64(v0_, v2_);
+          Lib_IntVector_Intrinsics_vec256
+          v1__ = Lib_IntVector_Intrinsics_vec256_interleave_high64(v0_, v2_);
+          Lib_IntVector_Intrinsics_vec256
+          v2__ = Lib_IntVector_Intrinsics_vec256_interleave_low64(v1_, v3_);
+          Lib_IntVector_Intrinsics_vec256
+          v3__ = Lib_IntVector_Intrinsics_vec256_interleave_high64(v1_, v3_);
+          Lib_IntVector_Intrinsics_vec256
+          v4__ = Lib_IntVector_Intrinsics_vec256_interleave_low64(v4_, v6_);
+          Lib_IntVector_Intrinsics_vec256
+          v5__ = Lib_IntVector_Intrinsics_vec256_interleave_high64(v4_, v6_);
+          Lib_IntVector_Intrinsics_vec256
+          v6__ = Lib_IntVector_Intrinsics_vec256_interleave_low64(v5_, v7_);
+          Lib_IntVector_Intrinsics_vec256
+          v7__ = Lib_IntVector_Intrinsics_vec256_interleave_high64(v5_, v7_);
+          Lib_IntVector_Intrinsics_vec256
+          v0___ = Lib_IntVector_Intrinsics_vec256_interleave_low128(v0__, v4__);
+          Lib_IntVector_Intrinsics_vec256
+          v1___ = Lib_IntVector_Intrinsics_vec256_interleave_high128(v0__, v4__);
+          Lib_IntVector_Intrinsics_vec256
+          v2___ = Lib_IntVector_Intrinsics_vec256_interleave_low128(v1__, v5__);
+          Lib_IntVector_Intrinsics_vec256
+          v3___ = Lib_IntVector_Intrinsics_vec256_interleave_high128(v1__, v5__);
+          Lib_IntVector_Intrinsics_vec256
+          v4___ = Lib_IntVector_Intrinsics_vec256_interleave_low128(v2__, v6__);
+          Lib_IntVector_Intrinsics_vec256
+          v5___ = Lib_IntVector_Intrinsics_vec256_interleave_high128(v2__, v6__);
+          Lib_IntVector_Intrinsics_vec256
+          v6___ = Lib_IntVector_Intrinsics_vec256_interleave_low128(v3__, v7__);
+          Lib_IntVector_Intrinsics_vec256
+          v7___ = Lib_IntVector_Intrinsics_vec256_interleave_high128(v3__, v7__);
+          Lib_IntVector_Intrinsics_vec256 v0 = v0___;
+          Lib_IntVector_Intrinsics_vec256 v1 = v2___;
+          Lib_IntVector_Intrinsics_vec256 v2 = v4___;
+          Lib_IntVector_Intrinsics_vec256 v3 = v6___;
+          Lib_IntVector_Intrinsics_vec256 v4 = v1___;
+          Lib_IntVector_Intrinsics_vec256 v5 = v3___;
+          Lib_IntVector_Intrinsics_vec256 v6 = v5___;
+          Lib_IntVector_Intrinsics_vec256 v7 = v7___;
+          Lib_IntVector_Intrinsics_vec256 v01 = k[8U];
+          Lib_IntVector_Intrinsics_vec256 v110 = k[9U];
+          Lib_IntVector_Intrinsics_vec256 v21 = k[10U];
+          Lib_IntVector_Intrinsics_vec256 v31 = k[11U];
+          Lib_IntVector_Intrinsics_vec256 v41 = k[12U];
+          Lib_IntVector_Intrinsics_vec256 v51 = k[13U];
+          Lib_IntVector_Intrinsics_vec256 v61 = k[14U];
+          Lib_IntVector_Intrinsics_vec256 v71 = k[15U];
+          Lib_IntVector_Intrinsics_vec256
+          v0_0 = Lib_IntVector_Intrinsics_vec256_interleave_low32(v01, v110);
+          Lib_IntVector_Intrinsics_vec256
+          v1_0 = Lib_IntVector_Intrinsics_vec256_interleave_high32(v01, v110);
+          Lib_IntVector_Intrinsics_vec256
+          v2_0 = Lib_IntVector_Intrinsics_vec256_interleave_low32(v21, v31);
+          Lib_IntVector_Intrinsics_vec256
+          v3_0 = Lib_IntVector_Intrinsics_vec256_interleave_high32(v21, v31);
+          Lib_IntVector_Intrinsics_vec256
+          v4_0 = Lib_IntVector_Intrinsics_vec256_interleave_low32(v41, v51);
+          Lib_IntVector_Intrinsics_vec256
+          v5_0 = Lib_IntVector_Intrinsics_vec256_interleave_high32(v41, v51);
+          Lib_IntVector_Intrinsics_vec256
+          v6_0 = Lib_IntVector_Intrinsics_vec256_interleave_low32(v61, v71);
+          Lib_IntVector_Intrinsics_vec256
+          v7_0 = Lib_IntVector_Intrinsics_vec256_interleave_high32(v61, v71);
+          Lib_IntVector_Intrinsics_vec256
+          v0__0 = Lib_IntVector_Intrinsics_vec256_interleave_low64(v0_0, v2_0);
+          Lib_IntVector_Intrinsics_vec256
+          v1__0 = Lib_IntVector_Intrinsics_vec256_interleave_high64(v0_0, v2_0);
+          Lib_IntVector_Intrinsics_vec256
+          v2__0 = Lib_IntVector_Intrinsics_vec256_interleave_low64(v1_0, v3_0);
+          Lib_IntVector_Intrinsics_vec256
+          v3__0 = Lib_IntVector_Intrinsics_vec256_interleave_high64(v1_0, v3_0);
+          Lib_IntVector_Intrinsics_vec256
+          v4__0 = Lib_IntVector_Intrinsics_vec256_interleave_low64(v4_0, v6_0);
+          Lib_IntVector_Intrinsics_vec256
+          v5__0 = Lib_IntVector_Intrinsics_vec256_interleave_high64(v4_0, v6_0);
+          Lib_IntVector_Intrinsics_vec256
+          v6__0 = Lib_IntVector_Intrinsics_vec256_interleave_low64(v5_0, v7_0);
+          Lib_IntVector_Intrinsics_vec256
+          v7__0 = Lib_IntVector_Intrinsics_vec256_interleave_high64(v5_0, v7_0);
+          Lib_IntVector_Intrinsics_vec256
+          v0___0 = Lib_IntVector_Intrinsics_vec256_interleave_low128(v0__0, v4__0);
+          Lib_IntVector_Intrinsics_vec256
+          v1___0 = Lib_IntVector_Intrinsics_vec256_interleave_high128(v0__0, v4__0);
+          Lib_IntVector_Intrinsics_vec256
+          v2___0 = Lib_IntVector_Intrinsics_vec256_interleave_low128(v1__0, v5__0);
+          Lib_IntVector_Intrinsics_vec256
+          v3___0 = Lib_IntVector_Intrinsics_vec256_interleave_high128(v1__0, v5__0);
+          Lib_IntVector_Intrinsics_vec256
+          v4___0 = Lib_IntVector_Intrinsics_vec256_interleave_low128(v2__0, v6__0);
+          Lib_IntVector_Intrinsics_vec256
+          v5___0 = Lib_IntVector_Intrinsics_vec256_interleave_high128(v2__0, v6__0);
+          Lib_IntVector_Intrinsics_vec256
+          v6___0 = Lib_IntVector_Intrinsics_vec256_interleave_low128(v3__0, v7__0);
+          Lib_IntVector_Intrinsics_vec256
+          v7___0 = Lib_IntVector_Intrinsics_vec256_interleave_high128(v3__0, v7__0);
+          Lib_IntVector_Intrinsics_vec256 v8 = v0___0;
+          Lib_IntVector_Intrinsics_vec256 v9 = v2___0;
+          Lib_IntVector_Intrinsics_vec256 v10 = v4___0;
+          Lib_IntVector_Intrinsics_vec256 v11 = v6___0;
+          Lib_IntVector_Intrinsics_vec256 v12 = v1___0;
+          Lib_IntVector_Intrinsics_vec256 v13 = v3___0;
+          Lib_IntVector_Intrinsics_vec256 v14 = v5___0;
+          Lib_IntVector_Intrinsics_vec256 v15 = v7___0;
+          k[0U] = v0;
+          k[1U] = v8;
+          k[2U] = v1;
+          k[3U] = v9;
+          k[4U] = v2;
+          k[5U] = v10;
+          k[6U] = v3;
+          k[7U] = v11;
+          k[8U] = v4;
+          k[9U] = v12;
+          k[10U] = v5;
+          k[11U] = v13;
+          k[12U] = v6;
+          k[13U] = v14;
+          k[14U] = v7;
+          k[15U] = v15;
           {
             uint32_t i;
-            for (i = (uint32_t)0U; i < (uint32_t)16U; i = i + (uint32_t)1U)
+            for (i = (uint32_t)0U; i < (uint32_t)16U; i++)
             {
-              Lib_IntVector_Intrinsics_vec256 *os = bl;
               Lib_IntVector_Intrinsics_vec256
-              x = Lib_IntVector_Intrinsics_vec256_load_le(plain + i * (uint32_t)8U * (uint32_t)4U);
-              os[i] = x;
+              x = Lib_IntVector_Intrinsics_vec256_load_le(plain + i * (uint32_t)32U);
+              Lib_IntVector_Intrinsics_vec256 y = Lib_IntVector_Intrinsics_vec256_xor(x, k[i]);
+              Lib_IntVector_Intrinsics_vec256_store_le(plain + i * (uint32_t)32U, y);
             }
           }
-          {
-            Lib_IntVector_Intrinsics_vec256 v00 = k[0U];
-            Lib_IntVector_Intrinsics_vec256 v16 = k[1U];
-            Lib_IntVector_Intrinsics_vec256 v20 = k[2U];
-            Lib_IntVector_Intrinsics_vec256 v30 = k[3U];
-            Lib_IntVector_Intrinsics_vec256 v40 = k[4U];
-            Lib_IntVector_Intrinsics_vec256 v50 = k[5U];
-            Lib_IntVector_Intrinsics_vec256 v60 = k[6U];
-            Lib_IntVector_Intrinsics_vec256 v70 = k[7U];
-            Lib_IntVector_Intrinsics_vec256
-            v0_ = Lib_IntVector_Intrinsics_vec256_interleave_low32(v00, v16);
-            Lib_IntVector_Intrinsics_vec256
-            v1_ = Lib_IntVector_Intrinsics_vec256_interleave_high32(v00, v16);
-            Lib_IntVector_Intrinsics_vec256
-            v2_ = Lib_IntVector_Intrinsics_vec256_interleave_low32(v20, v30);
-            Lib_IntVector_Intrinsics_vec256
-            v3_ = Lib_IntVector_Intrinsics_vec256_interleave_high32(v20, v30);
-            Lib_IntVector_Intrinsics_vec256
-            v4_ = Lib_IntVector_Intrinsics_vec256_interleave_low32(v40, v50);
-            Lib_IntVector_Intrinsics_vec256
-            v5_ = Lib_IntVector_Intrinsics_vec256_interleave_high32(v40, v50);
-            Lib_IntVector_Intrinsics_vec256
-            v6_ = Lib_IntVector_Intrinsics_vec256_interleave_low32(v60, v70);
-            Lib_IntVector_Intrinsics_vec256
-            v7_ = Lib_IntVector_Intrinsics_vec256_interleave_high32(v60, v70);
-            Lib_IntVector_Intrinsics_vec256
-            v0__ = Lib_IntVector_Intrinsics_vec256_interleave_low64(v0_, v2_);
-            Lib_IntVector_Intrinsics_vec256
-            v1__ = Lib_IntVector_Intrinsics_vec256_interleave_high64(v0_, v2_);
-            Lib_IntVector_Intrinsics_vec256
-            v2__ = Lib_IntVector_Intrinsics_vec256_interleave_low64(v1_, v3_);
-            Lib_IntVector_Intrinsics_vec256
-            v3__ = Lib_IntVector_Intrinsics_vec256_interleave_high64(v1_, v3_);
-            Lib_IntVector_Intrinsics_vec256
-            v4__ = Lib_IntVector_Intrinsics_vec256_interleave_low64(v4_, v6_);
-            Lib_IntVector_Intrinsics_vec256
-            v5__ = Lib_IntVector_Intrinsics_vec256_interleave_high64(v4_, v6_);
-            Lib_IntVector_Intrinsics_vec256
-            v6__ = Lib_IntVector_Intrinsics_vec256_interleave_low64(v5_, v7_);
-            Lib_IntVector_Intrinsics_vec256
-            v7__ = Lib_IntVector_Intrinsics_vec256_interleave_high64(v5_, v7_);
-            Lib_IntVector_Intrinsics_vec256
-            v0___ = Lib_IntVector_Intrinsics_vec256_interleave_low128(v0__, v4__);
-            Lib_IntVector_Intrinsics_vec256
-            v1___ = Lib_IntVector_Intrinsics_vec256_interleave_high128(v0__, v4__);
-            Lib_IntVector_Intrinsics_vec256
-            v2___ = Lib_IntVector_Intrinsics_vec256_interleave_low128(v1__, v5__);
-            Lib_IntVector_Intrinsics_vec256
-            v3___ = Lib_IntVector_Intrinsics_vec256_interleave_high128(v1__, v5__);
-            Lib_IntVector_Intrinsics_vec256
-            v4___ = Lib_IntVector_Intrinsics_vec256_interleave_low128(v2__, v6__);
-            Lib_IntVector_Intrinsics_vec256
-            v5___ = Lib_IntVector_Intrinsics_vec256_interleave_high128(v2__, v6__);
-            Lib_IntVector_Intrinsics_vec256
-            v6___ = Lib_IntVector_Intrinsics_vec256_interleave_low128(v3__, v7__);
-            Lib_IntVector_Intrinsics_vec256
-            v7___ = Lib_IntVector_Intrinsics_vec256_interleave_high128(v3__, v7__);
-            Lib_IntVector_Intrinsics_vec256 v0 = v0___;
-            Lib_IntVector_Intrinsics_vec256 v1 = v2___;
-            Lib_IntVector_Intrinsics_vec256 v2 = v4___;
-            Lib_IntVector_Intrinsics_vec256 v3 = v6___;
-            Lib_IntVector_Intrinsics_vec256 v4 = v1___;
-            Lib_IntVector_Intrinsics_vec256 v5 = v3___;
-            Lib_IntVector_Intrinsics_vec256 v6 = v5___;
-            Lib_IntVector_Intrinsics_vec256 v7 = v7___;
-            Lib_IntVector_Intrinsics_vec256 v01 = k[8U];
-            Lib_IntVector_Intrinsics_vec256 v110 = k[9U];
-            Lib_IntVector_Intrinsics_vec256 v21 = k[10U];
-            Lib_IntVector_Intrinsics_vec256 v31 = k[11U];
-            Lib_IntVector_Intrinsics_vec256 v41 = k[12U];
-            Lib_IntVector_Intrinsics_vec256 v51 = k[13U];
-            Lib_IntVector_Intrinsics_vec256 v61 = k[14U];
-            Lib_IntVector_Intrinsics_vec256 v71 = k[15U];
-            Lib_IntVector_Intrinsics_vec256
-            v0_0 = Lib_IntVector_Intrinsics_vec256_interleave_low32(v01, v110);
-            Lib_IntVector_Intrinsics_vec256
-            v1_0 = Lib_IntVector_Intrinsics_vec256_interleave_high32(v01, v110);
-            Lib_IntVector_Intrinsics_vec256
-            v2_0 = Lib_IntVector_Intrinsics_vec256_interleave_low32(v21, v31);
-            Lib_IntVector_Intrinsics_vec256
-            v3_0 = Lib_IntVector_Intrinsics_vec256_interleave_high32(v21, v31);
-            Lib_IntVector_Intrinsics_vec256
-            v4_0 = Lib_IntVector_Intrinsics_vec256_interleave_low32(v41, v51);
-            Lib_IntVector_Intrinsics_vec256
-            v5_0 = Lib_IntVector_Intrinsics_vec256_interleave_high32(v41, v51);
-            Lib_IntVector_Intrinsics_vec256
-            v6_0 = Lib_IntVector_Intrinsics_vec256_interleave_low32(v61, v71);
-            Lib_IntVector_Intrinsics_vec256
-            v7_0 = Lib_IntVector_Intrinsics_vec256_interleave_high32(v61, v71);
-            Lib_IntVector_Intrinsics_vec256
-            v0__0 = Lib_IntVector_Intrinsics_vec256_interleave_low64(v0_0, v2_0);
-            Lib_IntVector_Intrinsics_vec256
-            v1__0 = Lib_IntVector_Intrinsics_vec256_interleave_high64(v0_0, v2_0);
-            Lib_IntVector_Intrinsics_vec256
-            v2__0 = Lib_IntVector_Intrinsics_vec256_interleave_low64(v1_0, v3_0);
-            Lib_IntVector_Intrinsics_vec256
-            v3__0 = Lib_IntVector_Intrinsics_vec256_interleave_high64(v1_0, v3_0);
-            Lib_IntVector_Intrinsics_vec256
-            v4__0 = Lib_IntVector_Intrinsics_vec256_interleave_low64(v4_0, v6_0);
-            Lib_IntVector_Intrinsics_vec256
-            v5__0 = Lib_IntVector_Intrinsics_vec256_interleave_high64(v4_0, v6_0);
-            Lib_IntVector_Intrinsics_vec256
-            v6__0 = Lib_IntVector_Intrinsics_vec256_interleave_low64(v5_0, v7_0);
-            Lib_IntVector_Intrinsics_vec256
-            v7__0 = Lib_IntVector_Intrinsics_vec256_interleave_high64(v5_0, v7_0);
-            Lib_IntVector_Intrinsics_vec256
-            v0___0 = Lib_IntVector_Intrinsics_vec256_interleave_low128(v0__0, v4__0);
-            Lib_IntVector_Intrinsics_vec256
-            v1___0 = Lib_IntVector_Intrinsics_vec256_interleave_high128(v0__0, v4__0);
-            Lib_IntVector_Intrinsics_vec256
-            v2___0 = Lib_IntVector_Intrinsics_vec256_interleave_low128(v1__0, v5__0);
-            Lib_IntVector_Intrinsics_vec256
-            v3___0 = Lib_IntVector_Intrinsics_vec256_interleave_high128(v1__0, v5__0);
-            Lib_IntVector_Intrinsics_vec256
-            v4___0 = Lib_IntVector_Intrinsics_vec256_interleave_low128(v2__0, v6__0);
-            Lib_IntVector_Intrinsics_vec256
-            v5___0 = Lib_IntVector_Intrinsics_vec256_interleave_high128(v2__0, v6__0);
-            Lib_IntVector_Intrinsics_vec256
-            v6___0 = Lib_IntVector_Intrinsics_vec256_interleave_low128(v3__0, v7__0);
-            Lib_IntVector_Intrinsics_vec256
-            v7___0 = Lib_IntVector_Intrinsics_vec256_interleave_high128(v3__0, v7__0);
-            Lib_IntVector_Intrinsics_vec256 v8 = v0___0;
-            Lib_IntVector_Intrinsics_vec256 v9 = v2___0;
-            Lib_IntVector_Intrinsics_vec256 v10 = v4___0;
-            Lib_IntVector_Intrinsics_vec256 v11 = v6___0;
-            Lib_IntVector_Intrinsics_vec256 v12 = v1___0;
-            Lib_IntVector_Intrinsics_vec256 v13 = v3___0;
-            Lib_IntVector_Intrinsics_vec256 v14 = v5___0;
-            Lib_IntVector_Intrinsics_vec256 v15 = v7___0;
-            k[0U] = v0;
-            k[1U] = v8;
-            k[2U] = v1;
-            k[3U] = v9;
-            k[4U] = v2;
-            k[5U] = v10;
-            k[6U] = v3;
-            k[7U] = v11;
-            k[8U] = v4;
-            k[9U] = v12;
-            k[10U] = v5;
-            k[11U] = v13;
-            k[12U] = v6;
-            k[13U] = v14;
-            k[14U] = v7;
-            k[15U] = v15;
-            {
-              uint32_t i;
-              for (i = (uint32_t)0U; i < (uint32_t)16U; i = i + (uint32_t)1U)
-              {
-                Lib_IntVector_Intrinsics_vec256 *os = bl;
-                Lib_IntVector_Intrinsics_vec256
-                x = Lib_IntVector_Intrinsics_vec256_xor(bl[i], k[i]);
-                os[i] = x;
-              }
-            }
-            {
-              uint32_t i;
-              for (i = (uint32_t)0U; i < (uint32_t)16U; i = i + (uint32_t)1U)
-              {
-                Lib_IntVector_Intrinsics_vec256_store_le(plain + i * (uint32_t)32U, bl[i]);
-              }
-            }
-            memcpy(uu____2, plain, rem1 * sizeof plain[0U]);
-          }
+          memcpy(uu____2, plain, rem1 * sizeof (plain[0U]));
         }
       }
     }
@@ -698,202 +646,180 @@ Hacl_Chacha20_Vec256_chacha20_decrypt_256(
     for (_i = 0U; _i < (uint32_t)16U; ++_i)
       ctx[_i] = Lib_IntVector_Intrinsics_vec256_zero;
   }
-  Hacl_Chacha20_Vec256_chacha20_init_256(ctx, key, n1, ctr);
   {
-    uint32_t rem1 = len % ((uint32_t)8U * (uint32_t)64U);
-    uint32_t nb = len / ((uint32_t)8U * (uint32_t)64U);
-    uint32_t rem2 = len % ((uint32_t)8U * (uint32_t)64U);
+    uint32_t rem1;
+    uint32_t nb;
+    uint32_t rem2;
+    chacha20_init_256(ctx, key, n1, ctr);
+    rem1 = len % (uint32_t)512U;
+    nb = len / (uint32_t)512U;
+    rem2 = len % (uint32_t)512U;
     {
-      uint32_t i0;
-      for (i0 = (uint32_t)0U; i0 < nb; i0 = i0 + (uint32_t)1U)
+      uint32_t i;
+      for (i = (uint32_t)0U; i < nb; i++)
       {
-        uint8_t *uu____0 = out + i0 * (uint32_t)8U * (uint32_t)64U;
-        uint8_t *uu____1 = cipher + i0 * (uint32_t)512U;
+        uint8_t *uu____0 = out + i * (uint32_t)512U;
+        uint8_t *uu____1 = cipher + i * (uint32_t)512U;
         Lib_IntVector_Intrinsics_vec256 k[16U];
         {
           uint32_t _i;
           for (_i = 0U; _i < (uint32_t)16U; ++_i)
             k[_i] = Lib_IntVector_Intrinsics_vec256_zero;
         }
-        Hacl_Chacha20_Vec256_chacha20_core_256(k, ctx, i0);
+        chacha20_core_256(k, ctx, i);
         {
-          Lib_IntVector_Intrinsics_vec256 bl[16U];
+          Lib_IntVector_Intrinsics_vec256 v00 = k[0U];
+          Lib_IntVector_Intrinsics_vec256 v16 = k[1U];
+          Lib_IntVector_Intrinsics_vec256 v20 = k[2U];
+          Lib_IntVector_Intrinsics_vec256 v30 = k[3U];
+          Lib_IntVector_Intrinsics_vec256 v40 = k[4U];
+          Lib_IntVector_Intrinsics_vec256 v50 = k[5U];
+          Lib_IntVector_Intrinsics_vec256 v60 = k[6U];
+          Lib_IntVector_Intrinsics_vec256 v70 = k[7U];
+          Lib_IntVector_Intrinsics_vec256
+          v0_ = Lib_IntVector_Intrinsics_vec256_interleave_low32(v00, v16);
+          Lib_IntVector_Intrinsics_vec256
+          v1_ = Lib_IntVector_Intrinsics_vec256_interleave_high32(v00, v16);
+          Lib_IntVector_Intrinsics_vec256
+          v2_ = Lib_IntVector_Intrinsics_vec256_interleave_low32(v20, v30);
+          Lib_IntVector_Intrinsics_vec256
+          v3_ = Lib_IntVector_Intrinsics_vec256_interleave_high32(v20, v30);
+          Lib_IntVector_Intrinsics_vec256
+          v4_ = Lib_IntVector_Intrinsics_vec256_interleave_low32(v40, v50);
+          Lib_IntVector_Intrinsics_vec256
+          v5_ = Lib_IntVector_Intrinsics_vec256_interleave_high32(v40, v50);
+          Lib_IntVector_Intrinsics_vec256
+          v6_ = Lib_IntVector_Intrinsics_vec256_interleave_low32(v60, v70);
+          Lib_IntVector_Intrinsics_vec256
+          v7_ = Lib_IntVector_Intrinsics_vec256_interleave_high32(v60, v70);
+          Lib_IntVector_Intrinsics_vec256
+          v0__ = Lib_IntVector_Intrinsics_vec256_interleave_low64(v0_, v2_);
+          Lib_IntVector_Intrinsics_vec256
+          v1__ = Lib_IntVector_Intrinsics_vec256_interleave_high64(v0_, v2_);
+          Lib_IntVector_Intrinsics_vec256
+          v2__ = Lib_IntVector_Intrinsics_vec256_interleave_low64(v1_, v3_);
+          Lib_IntVector_Intrinsics_vec256
+          v3__ = Lib_IntVector_Intrinsics_vec256_interleave_high64(v1_, v3_);
+          Lib_IntVector_Intrinsics_vec256
+          v4__ = Lib_IntVector_Intrinsics_vec256_interleave_low64(v4_, v6_);
+          Lib_IntVector_Intrinsics_vec256
+          v5__ = Lib_IntVector_Intrinsics_vec256_interleave_high64(v4_, v6_);
+          Lib_IntVector_Intrinsics_vec256
+          v6__ = Lib_IntVector_Intrinsics_vec256_interleave_low64(v5_, v7_);
+          Lib_IntVector_Intrinsics_vec256
+          v7__ = Lib_IntVector_Intrinsics_vec256_interleave_high64(v5_, v7_);
+          Lib_IntVector_Intrinsics_vec256
+          v0___ = Lib_IntVector_Intrinsics_vec256_interleave_low128(v0__, v4__);
+          Lib_IntVector_Intrinsics_vec256
+          v1___ = Lib_IntVector_Intrinsics_vec256_interleave_high128(v0__, v4__);
+          Lib_IntVector_Intrinsics_vec256
+          v2___ = Lib_IntVector_Intrinsics_vec256_interleave_low128(v1__, v5__);
+          Lib_IntVector_Intrinsics_vec256
+          v3___ = Lib_IntVector_Intrinsics_vec256_interleave_high128(v1__, v5__);
+          Lib_IntVector_Intrinsics_vec256
+          v4___ = Lib_IntVector_Intrinsics_vec256_interleave_low128(v2__, v6__);
+          Lib_IntVector_Intrinsics_vec256
+          v5___ = Lib_IntVector_Intrinsics_vec256_interleave_high128(v2__, v6__);
+          Lib_IntVector_Intrinsics_vec256
+          v6___ = Lib_IntVector_Intrinsics_vec256_interleave_low128(v3__, v7__);
+          Lib_IntVector_Intrinsics_vec256
+          v7___ = Lib_IntVector_Intrinsics_vec256_interleave_high128(v3__, v7__);
+          Lib_IntVector_Intrinsics_vec256 v0 = v0___;
+          Lib_IntVector_Intrinsics_vec256 v1 = v2___;
+          Lib_IntVector_Intrinsics_vec256 v2 = v4___;
+          Lib_IntVector_Intrinsics_vec256 v3 = v6___;
+          Lib_IntVector_Intrinsics_vec256 v4 = v1___;
+          Lib_IntVector_Intrinsics_vec256 v5 = v3___;
+          Lib_IntVector_Intrinsics_vec256 v6 = v5___;
+          Lib_IntVector_Intrinsics_vec256 v7 = v7___;
+          Lib_IntVector_Intrinsics_vec256 v01 = k[8U];
+          Lib_IntVector_Intrinsics_vec256 v110 = k[9U];
+          Lib_IntVector_Intrinsics_vec256 v21 = k[10U];
+          Lib_IntVector_Intrinsics_vec256 v31 = k[11U];
+          Lib_IntVector_Intrinsics_vec256 v41 = k[12U];
+          Lib_IntVector_Intrinsics_vec256 v51 = k[13U];
+          Lib_IntVector_Intrinsics_vec256 v61 = k[14U];
+          Lib_IntVector_Intrinsics_vec256 v71 = k[15U];
+          Lib_IntVector_Intrinsics_vec256
+          v0_0 = Lib_IntVector_Intrinsics_vec256_interleave_low32(v01, v110);
+          Lib_IntVector_Intrinsics_vec256
+          v1_0 = Lib_IntVector_Intrinsics_vec256_interleave_high32(v01, v110);
+          Lib_IntVector_Intrinsics_vec256
+          v2_0 = Lib_IntVector_Intrinsics_vec256_interleave_low32(v21, v31);
+          Lib_IntVector_Intrinsics_vec256
+          v3_0 = Lib_IntVector_Intrinsics_vec256_interleave_high32(v21, v31);
+          Lib_IntVector_Intrinsics_vec256
+          v4_0 = Lib_IntVector_Intrinsics_vec256_interleave_low32(v41, v51);
+          Lib_IntVector_Intrinsics_vec256
+          v5_0 = Lib_IntVector_Intrinsics_vec256_interleave_high32(v41, v51);
+          Lib_IntVector_Intrinsics_vec256
+          v6_0 = Lib_IntVector_Intrinsics_vec256_interleave_low32(v61, v71);
+          Lib_IntVector_Intrinsics_vec256
+          v7_0 = Lib_IntVector_Intrinsics_vec256_interleave_high32(v61, v71);
+          Lib_IntVector_Intrinsics_vec256
+          v0__0 = Lib_IntVector_Intrinsics_vec256_interleave_low64(v0_0, v2_0);
+          Lib_IntVector_Intrinsics_vec256
+          v1__0 = Lib_IntVector_Intrinsics_vec256_interleave_high64(v0_0, v2_0);
+          Lib_IntVector_Intrinsics_vec256
+          v2__0 = Lib_IntVector_Intrinsics_vec256_interleave_low64(v1_0, v3_0);
+          Lib_IntVector_Intrinsics_vec256
+          v3__0 = Lib_IntVector_Intrinsics_vec256_interleave_high64(v1_0, v3_0);
+          Lib_IntVector_Intrinsics_vec256
+          v4__0 = Lib_IntVector_Intrinsics_vec256_interleave_low64(v4_0, v6_0);
+          Lib_IntVector_Intrinsics_vec256
+          v5__0 = Lib_IntVector_Intrinsics_vec256_interleave_high64(v4_0, v6_0);
+          Lib_IntVector_Intrinsics_vec256
+          v6__0 = Lib_IntVector_Intrinsics_vec256_interleave_low64(v5_0, v7_0);
+          Lib_IntVector_Intrinsics_vec256
+          v7__0 = Lib_IntVector_Intrinsics_vec256_interleave_high64(v5_0, v7_0);
+          Lib_IntVector_Intrinsics_vec256
+          v0___0 = Lib_IntVector_Intrinsics_vec256_interleave_low128(v0__0, v4__0);
+          Lib_IntVector_Intrinsics_vec256
+          v1___0 = Lib_IntVector_Intrinsics_vec256_interleave_high128(v0__0, v4__0);
+          Lib_IntVector_Intrinsics_vec256
+          v2___0 = Lib_IntVector_Intrinsics_vec256_interleave_low128(v1__0, v5__0);
+          Lib_IntVector_Intrinsics_vec256
+          v3___0 = Lib_IntVector_Intrinsics_vec256_interleave_high128(v1__0, v5__0);
+          Lib_IntVector_Intrinsics_vec256
+          v4___0 = Lib_IntVector_Intrinsics_vec256_interleave_low128(v2__0, v6__0);
+          Lib_IntVector_Intrinsics_vec256
+          v5___0 = Lib_IntVector_Intrinsics_vec256_interleave_high128(v2__0, v6__0);
+          Lib_IntVector_Intrinsics_vec256
+          v6___0 = Lib_IntVector_Intrinsics_vec256_interleave_low128(v3__0, v7__0);
+          Lib_IntVector_Intrinsics_vec256
+          v7___0 = Lib_IntVector_Intrinsics_vec256_interleave_high128(v3__0, v7__0);
+          Lib_IntVector_Intrinsics_vec256 v8 = v0___0;
+          Lib_IntVector_Intrinsics_vec256 v9 = v2___0;
+          Lib_IntVector_Intrinsics_vec256 v10 = v4___0;
+          Lib_IntVector_Intrinsics_vec256 v11 = v6___0;
+          Lib_IntVector_Intrinsics_vec256 v12 = v1___0;
+          Lib_IntVector_Intrinsics_vec256 v13 = v3___0;
+          Lib_IntVector_Intrinsics_vec256 v14 = v5___0;
+          Lib_IntVector_Intrinsics_vec256 v15 = v7___0;
+          k[0U] = v0;
+          k[1U] = v8;
+          k[2U] = v1;
+          k[3U] = v9;
+          k[4U] = v2;
+          k[5U] = v10;
+          k[6U] = v3;
+          k[7U] = v11;
+          k[8U] = v4;
+          k[9U] = v12;
+          k[10U] = v5;
+          k[11U] = v13;
+          k[12U] = v6;
+          k[13U] = v14;
+          k[14U] = v7;
+          k[15U] = v15;
           {
-            uint32_t _i;
-            for (_i = 0U; _i < (uint32_t)16U; ++_i)
-              bl[_i] = Lib_IntVector_Intrinsics_vec256_zero;
-          }
-          {
-            uint32_t i;
-            for (i = (uint32_t)0U; i < (uint32_t)16U; i = i + (uint32_t)1U)
+            uint32_t i0;
+            for (i0 = (uint32_t)0U; i0 < (uint32_t)16U; i0++)
             {
-              Lib_IntVector_Intrinsics_vec256 *os = bl;
               Lib_IntVector_Intrinsics_vec256
-              x = Lib_IntVector_Intrinsics_vec256_load_le(uu____1 + i * (uint32_t)8U * (uint32_t)4U);
-              os[i] = x;
-            }
-          }
-          {
-            Lib_IntVector_Intrinsics_vec256 v00 = k[0U];
-            Lib_IntVector_Intrinsics_vec256 v16 = k[1U];
-            Lib_IntVector_Intrinsics_vec256 v20 = k[2U];
-            Lib_IntVector_Intrinsics_vec256 v30 = k[3U];
-            Lib_IntVector_Intrinsics_vec256 v40 = k[4U];
-            Lib_IntVector_Intrinsics_vec256 v50 = k[5U];
-            Lib_IntVector_Intrinsics_vec256 v60 = k[6U];
-            Lib_IntVector_Intrinsics_vec256 v70 = k[7U];
-            Lib_IntVector_Intrinsics_vec256
-            v0_ = Lib_IntVector_Intrinsics_vec256_interleave_low32(v00, v16);
-            Lib_IntVector_Intrinsics_vec256
-            v1_ = Lib_IntVector_Intrinsics_vec256_interleave_high32(v00, v16);
-            Lib_IntVector_Intrinsics_vec256
-            v2_ = Lib_IntVector_Intrinsics_vec256_interleave_low32(v20, v30);
-            Lib_IntVector_Intrinsics_vec256
-            v3_ = Lib_IntVector_Intrinsics_vec256_interleave_high32(v20, v30);
-            Lib_IntVector_Intrinsics_vec256
-            v4_ = Lib_IntVector_Intrinsics_vec256_interleave_low32(v40, v50);
-            Lib_IntVector_Intrinsics_vec256
-            v5_ = Lib_IntVector_Intrinsics_vec256_interleave_high32(v40, v50);
-            Lib_IntVector_Intrinsics_vec256
-            v6_ = Lib_IntVector_Intrinsics_vec256_interleave_low32(v60, v70);
-            Lib_IntVector_Intrinsics_vec256
-            v7_ = Lib_IntVector_Intrinsics_vec256_interleave_high32(v60, v70);
-            Lib_IntVector_Intrinsics_vec256
-            v0__ = Lib_IntVector_Intrinsics_vec256_interleave_low64(v0_, v2_);
-            Lib_IntVector_Intrinsics_vec256
-            v1__ = Lib_IntVector_Intrinsics_vec256_interleave_high64(v0_, v2_);
-            Lib_IntVector_Intrinsics_vec256
-            v2__ = Lib_IntVector_Intrinsics_vec256_interleave_low64(v1_, v3_);
-            Lib_IntVector_Intrinsics_vec256
-            v3__ = Lib_IntVector_Intrinsics_vec256_interleave_high64(v1_, v3_);
-            Lib_IntVector_Intrinsics_vec256
-            v4__ = Lib_IntVector_Intrinsics_vec256_interleave_low64(v4_, v6_);
-            Lib_IntVector_Intrinsics_vec256
-            v5__ = Lib_IntVector_Intrinsics_vec256_interleave_high64(v4_, v6_);
-            Lib_IntVector_Intrinsics_vec256
-            v6__ = Lib_IntVector_Intrinsics_vec256_interleave_low64(v5_, v7_);
-            Lib_IntVector_Intrinsics_vec256
-            v7__ = Lib_IntVector_Intrinsics_vec256_interleave_high64(v5_, v7_);
-            Lib_IntVector_Intrinsics_vec256
-            v0___ = Lib_IntVector_Intrinsics_vec256_interleave_low128(v0__, v4__);
-            Lib_IntVector_Intrinsics_vec256
-            v1___ = Lib_IntVector_Intrinsics_vec256_interleave_high128(v0__, v4__);
-            Lib_IntVector_Intrinsics_vec256
-            v2___ = Lib_IntVector_Intrinsics_vec256_interleave_low128(v1__, v5__);
-            Lib_IntVector_Intrinsics_vec256
-            v3___ = Lib_IntVector_Intrinsics_vec256_interleave_high128(v1__, v5__);
-            Lib_IntVector_Intrinsics_vec256
-            v4___ = Lib_IntVector_Intrinsics_vec256_interleave_low128(v2__, v6__);
-            Lib_IntVector_Intrinsics_vec256
-            v5___ = Lib_IntVector_Intrinsics_vec256_interleave_high128(v2__, v6__);
-            Lib_IntVector_Intrinsics_vec256
-            v6___ = Lib_IntVector_Intrinsics_vec256_interleave_low128(v3__, v7__);
-            Lib_IntVector_Intrinsics_vec256
-            v7___ = Lib_IntVector_Intrinsics_vec256_interleave_high128(v3__, v7__);
-            Lib_IntVector_Intrinsics_vec256 v0 = v0___;
-            Lib_IntVector_Intrinsics_vec256 v1 = v2___;
-            Lib_IntVector_Intrinsics_vec256 v2 = v4___;
-            Lib_IntVector_Intrinsics_vec256 v3 = v6___;
-            Lib_IntVector_Intrinsics_vec256 v4 = v1___;
-            Lib_IntVector_Intrinsics_vec256 v5 = v3___;
-            Lib_IntVector_Intrinsics_vec256 v6 = v5___;
-            Lib_IntVector_Intrinsics_vec256 v7 = v7___;
-            Lib_IntVector_Intrinsics_vec256 v01 = k[8U];
-            Lib_IntVector_Intrinsics_vec256 v110 = k[9U];
-            Lib_IntVector_Intrinsics_vec256 v21 = k[10U];
-            Lib_IntVector_Intrinsics_vec256 v31 = k[11U];
-            Lib_IntVector_Intrinsics_vec256 v41 = k[12U];
-            Lib_IntVector_Intrinsics_vec256 v51 = k[13U];
-            Lib_IntVector_Intrinsics_vec256 v61 = k[14U];
-            Lib_IntVector_Intrinsics_vec256 v71 = k[15U];
-            Lib_IntVector_Intrinsics_vec256
-            v0_0 = Lib_IntVector_Intrinsics_vec256_interleave_low32(v01, v110);
-            Lib_IntVector_Intrinsics_vec256
-            v1_0 = Lib_IntVector_Intrinsics_vec256_interleave_high32(v01, v110);
-            Lib_IntVector_Intrinsics_vec256
-            v2_0 = Lib_IntVector_Intrinsics_vec256_interleave_low32(v21, v31);
-            Lib_IntVector_Intrinsics_vec256
-            v3_0 = Lib_IntVector_Intrinsics_vec256_interleave_high32(v21, v31);
-            Lib_IntVector_Intrinsics_vec256
-            v4_0 = Lib_IntVector_Intrinsics_vec256_interleave_low32(v41, v51);
-            Lib_IntVector_Intrinsics_vec256
-            v5_0 = Lib_IntVector_Intrinsics_vec256_interleave_high32(v41, v51);
-            Lib_IntVector_Intrinsics_vec256
-            v6_0 = Lib_IntVector_Intrinsics_vec256_interleave_low32(v61, v71);
-            Lib_IntVector_Intrinsics_vec256
-            v7_0 = Lib_IntVector_Intrinsics_vec256_interleave_high32(v61, v71);
-            Lib_IntVector_Intrinsics_vec256
-            v0__0 = Lib_IntVector_Intrinsics_vec256_interleave_low64(v0_0, v2_0);
-            Lib_IntVector_Intrinsics_vec256
-            v1__0 = Lib_IntVector_Intrinsics_vec256_interleave_high64(v0_0, v2_0);
-            Lib_IntVector_Intrinsics_vec256
-            v2__0 = Lib_IntVector_Intrinsics_vec256_interleave_low64(v1_0, v3_0);
-            Lib_IntVector_Intrinsics_vec256
-            v3__0 = Lib_IntVector_Intrinsics_vec256_interleave_high64(v1_0, v3_0);
-            Lib_IntVector_Intrinsics_vec256
-            v4__0 = Lib_IntVector_Intrinsics_vec256_interleave_low64(v4_0, v6_0);
-            Lib_IntVector_Intrinsics_vec256
-            v5__0 = Lib_IntVector_Intrinsics_vec256_interleave_high64(v4_0, v6_0);
-            Lib_IntVector_Intrinsics_vec256
-            v6__0 = Lib_IntVector_Intrinsics_vec256_interleave_low64(v5_0, v7_0);
-            Lib_IntVector_Intrinsics_vec256
-            v7__0 = Lib_IntVector_Intrinsics_vec256_interleave_high64(v5_0, v7_0);
-            Lib_IntVector_Intrinsics_vec256
-            v0___0 = Lib_IntVector_Intrinsics_vec256_interleave_low128(v0__0, v4__0);
-            Lib_IntVector_Intrinsics_vec256
-            v1___0 = Lib_IntVector_Intrinsics_vec256_interleave_high128(v0__0, v4__0);
-            Lib_IntVector_Intrinsics_vec256
-            v2___0 = Lib_IntVector_Intrinsics_vec256_interleave_low128(v1__0, v5__0);
-            Lib_IntVector_Intrinsics_vec256
-            v3___0 = Lib_IntVector_Intrinsics_vec256_interleave_high128(v1__0, v5__0);
-            Lib_IntVector_Intrinsics_vec256
-            v4___0 = Lib_IntVector_Intrinsics_vec256_interleave_low128(v2__0, v6__0);
-            Lib_IntVector_Intrinsics_vec256
-            v5___0 = Lib_IntVector_Intrinsics_vec256_interleave_high128(v2__0, v6__0);
-            Lib_IntVector_Intrinsics_vec256
-            v6___0 = Lib_IntVector_Intrinsics_vec256_interleave_low128(v3__0, v7__0);
-            Lib_IntVector_Intrinsics_vec256
-            v7___0 = Lib_IntVector_Intrinsics_vec256_interleave_high128(v3__0, v7__0);
-            Lib_IntVector_Intrinsics_vec256 v8 = v0___0;
-            Lib_IntVector_Intrinsics_vec256 v9 = v2___0;
-            Lib_IntVector_Intrinsics_vec256 v10 = v4___0;
-            Lib_IntVector_Intrinsics_vec256 v11 = v6___0;
-            Lib_IntVector_Intrinsics_vec256 v12 = v1___0;
-            Lib_IntVector_Intrinsics_vec256 v13 = v3___0;
-            Lib_IntVector_Intrinsics_vec256 v14 = v5___0;
-            Lib_IntVector_Intrinsics_vec256 v15 = v7___0;
-            k[0U] = v0;
-            k[1U] = v8;
-            k[2U] = v1;
-            k[3U] = v9;
-            k[4U] = v2;
-            k[5U] = v10;
-            k[6U] = v3;
-            k[7U] = v11;
-            k[8U] = v4;
-            k[9U] = v12;
-            k[10U] = v5;
-            k[11U] = v13;
-            k[12U] = v6;
-            k[13U] = v14;
-            k[14U] = v7;
-            k[15U] = v15;
-            {
-              uint32_t i;
-              for (i = (uint32_t)0U; i < (uint32_t)16U; i = i + (uint32_t)1U)
-              {
-                Lib_IntVector_Intrinsics_vec256 *os = bl;
-                Lib_IntVector_Intrinsics_vec256
-                x = Lib_IntVector_Intrinsics_vec256_xor(bl[i], k[i]);
-                os[i] = x;
-              }
-            }
-            {
-              uint32_t i;
-              for (i = (uint32_t)0U; i < (uint32_t)16U; i = i + (uint32_t)1U)
-              {
-                Lib_IntVector_Intrinsics_vec256_store_le(uu____0 + i * (uint32_t)32U, bl[i]);
-              }
+              x = Lib_IntVector_Intrinsics_vec256_load_le(uu____1 + i0 * (uint32_t)32U);
+              Lib_IntVector_Intrinsics_vec256 y = Lib_IntVector_Intrinsics_vec256_xor(x, k[i0]);
+              Lib_IntVector_Intrinsics_vec256_store_le(uu____0 + i0 * (uint32_t)32U, y);
             }
           }
         }
@@ -901,10 +827,10 @@ Hacl_Chacha20_Vec256_chacha20_decrypt_256(
     }
     if (rem2 > (uint32_t)0U)
     {
-      uint8_t *uu____2 = out + nb * (uint32_t)8U * (uint32_t)64U;
-      uint8_t *uu____3 = cipher + nb * (uint32_t)8U * (uint32_t)64U;
+      uint8_t *uu____2 = out + nb * (uint32_t)512U;
+      uint8_t *uu____3 = cipher + nb * (uint32_t)512U;
       uint8_t plain[512U] = { 0U };
-      memcpy(plain, uu____3, rem1 * sizeof uu____3[0U]);
+      memcpy(plain, uu____3, rem1 * sizeof (uu____3[0U]));
       {
         Lib_IntVector_Intrinsics_vec256 k[16U];
         {
@@ -912,188 +838,163 @@ Hacl_Chacha20_Vec256_chacha20_decrypt_256(
           for (_i = 0U; _i < (uint32_t)16U; ++_i)
             k[_i] = Lib_IntVector_Intrinsics_vec256_zero;
         }
-        Hacl_Chacha20_Vec256_chacha20_core_256(k, ctx, nb);
+        chacha20_core_256(k, ctx, nb);
         {
-          Lib_IntVector_Intrinsics_vec256 bl[16U];
-          {
-            uint32_t _i;
-            for (_i = 0U; _i < (uint32_t)16U; ++_i)
-              bl[_i] = Lib_IntVector_Intrinsics_vec256_zero;
-          }
+          Lib_IntVector_Intrinsics_vec256 v00 = k[0U];
+          Lib_IntVector_Intrinsics_vec256 v16 = k[1U];
+          Lib_IntVector_Intrinsics_vec256 v20 = k[2U];
+          Lib_IntVector_Intrinsics_vec256 v30 = k[3U];
+          Lib_IntVector_Intrinsics_vec256 v40 = k[4U];
+          Lib_IntVector_Intrinsics_vec256 v50 = k[5U];
+          Lib_IntVector_Intrinsics_vec256 v60 = k[6U];
+          Lib_IntVector_Intrinsics_vec256 v70 = k[7U];
+          Lib_IntVector_Intrinsics_vec256
+          v0_ = Lib_IntVector_Intrinsics_vec256_interleave_low32(v00, v16);
+          Lib_IntVector_Intrinsics_vec256
+          v1_ = Lib_IntVector_Intrinsics_vec256_interleave_high32(v00, v16);
+          Lib_IntVector_Intrinsics_vec256
+          v2_ = Lib_IntVector_Intrinsics_vec256_interleave_low32(v20, v30);
+          Lib_IntVector_Intrinsics_vec256
+          v3_ = Lib_IntVector_Intrinsics_vec256_interleave_high32(v20, v30);
+          Lib_IntVector_Intrinsics_vec256
+          v4_ = Lib_IntVector_Intrinsics_vec256_interleave_low32(v40, v50);
+          Lib_IntVector_Intrinsics_vec256
+          v5_ = Lib_IntVector_Intrinsics_vec256_interleave_high32(v40, v50);
+          Lib_IntVector_Intrinsics_vec256
+          v6_ = Lib_IntVector_Intrinsics_vec256_interleave_low32(v60, v70);
+          Lib_IntVector_Intrinsics_vec256
+          v7_ = Lib_IntVector_Intrinsics_vec256_interleave_high32(v60, v70);
+          Lib_IntVector_Intrinsics_vec256
+          v0__ = Lib_IntVector_Intrinsics_vec256_interleave_low64(v0_, v2_);
+          Lib_IntVector_Intrinsics_vec256
+          v1__ = Lib_IntVector_Intrinsics_vec256_interleave_high64(v0_, v2_);
+          Lib_IntVector_Intrinsics_vec256
+          v2__ = Lib_IntVector_Intrinsics_vec256_interleave_low64(v1_, v3_);
+          Lib_IntVector_Intrinsics_vec256
+          v3__ = Lib_IntVector_Intrinsics_vec256_interleave_high64(v1_, v3_);
+          Lib_IntVector_Intrinsics_vec256
+          v4__ = Lib_IntVector_Intrinsics_vec256_interleave_low64(v4_, v6_);
+          Lib_IntVector_Intrinsics_vec256
+          v5__ = Lib_IntVector_Intrinsics_vec256_interleave_high64(v4_, v6_);
+          Lib_IntVector_Intrinsics_vec256
+          v6__ = Lib_IntVector_Intrinsics_vec256_interleave_low64(v5_, v7_);
+          Lib_IntVector_Intrinsics_vec256
+          v7__ = Lib_IntVector_Intrinsics_vec256_interleave_high64(v5_, v7_);
+          Lib_IntVector_Intrinsics_vec256
+          v0___ = Lib_IntVector_Intrinsics_vec256_interleave_low128(v0__, v4__);
+          Lib_IntVector_Intrinsics_vec256
+          v1___ = Lib_IntVector_Intrinsics_vec256_interleave_high128(v0__, v4__);
+          Lib_IntVector_Intrinsics_vec256
+          v2___ = Lib_IntVector_Intrinsics_vec256_interleave_low128(v1__, v5__);
+          Lib_IntVector_Intrinsics_vec256
+          v3___ = Lib_IntVector_Intrinsics_vec256_interleave_high128(v1__, v5__);
+          Lib_IntVector_Intrinsics_vec256
+          v4___ = Lib_IntVector_Intrinsics_vec256_interleave_low128(v2__, v6__);
+          Lib_IntVector_Intrinsics_vec256
+          v5___ = Lib_IntVector_Intrinsics_vec256_interleave_high128(v2__, v6__);
+          Lib_IntVector_Intrinsics_vec256
+          v6___ = Lib_IntVector_Intrinsics_vec256_interleave_low128(v3__, v7__);
+          Lib_IntVector_Intrinsics_vec256
+          v7___ = Lib_IntVector_Intrinsics_vec256_interleave_high128(v3__, v7__);
+          Lib_IntVector_Intrinsics_vec256 v0 = v0___;
+          Lib_IntVector_Intrinsics_vec256 v1 = v2___;
+          Lib_IntVector_Intrinsics_vec256 v2 = v4___;
+          Lib_IntVector_Intrinsics_vec256 v3 = v6___;
+          Lib_IntVector_Intrinsics_vec256 v4 = v1___;
+          Lib_IntVector_Intrinsics_vec256 v5 = v3___;
+          Lib_IntVector_Intrinsics_vec256 v6 = v5___;
+          Lib_IntVector_Intrinsics_vec256 v7 = v7___;
+          Lib_IntVector_Intrinsics_vec256 v01 = k[8U];
+          Lib_IntVector_Intrinsics_vec256 v110 = k[9U];
+          Lib_IntVector_Intrinsics_vec256 v21 = k[10U];
+          Lib_IntVector_Intrinsics_vec256 v31 = k[11U];
+          Lib_IntVector_Intrinsics_vec256 v41 = k[12U];
+          Lib_IntVector_Intrinsics_vec256 v51 = k[13U];
+          Lib_IntVector_Intrinsics_vec256 v61 = k[14U];
+          Lib_IntVector_Intrinsics_vec256 v71 = k[15U];
+          Lib_IntVector_Intrinsics_vec256
+          v0_0 = Lib_IntVector_Intrinsics_vec256_interleave_low32(v01, v110);
+          Lib_IntVector_Intrinsics_vec256
+          v1_0 = Lib_IntVector_Intrinsics_vec256_interleave_high32(v01, v110);
+          Lib_IntVector_Intrinsics_vec256
+          v2_0 = Lib_IntVector_Intrinsics_vec256_interleave_low32(v21, v31);
+          Lib_IntVector_Intrinsics_vec256
+          v3_0 = Lib_IntVector_Intrinsics_vec256_interleave_high32(v21, v31);
+          Lib_IntVector_Intrinsics_vec256
+          v4_0 = Lib_IntVector_Intrinsics_vec256_interleave_low32(v41, v51);
+          Lib_IntVector_Intrinsics_vec256
+          v5_0 = Lib_IntVector_Intrinsics_vec256_interleave_high32(v41, v51);
+          Lib_IntVector_Intrinsics_vec256
+          v6_0 = Lib_IntVector_Intrinsics_vec256_interleave_low32(v61, v71);
+          Lib_IntVector_Intrinsics_vec256
+          v7_0 = Lib_IntVector_Intrinsics_vec256_interleave_high32(v61, v71);
+          Lib_IntVector_Intrinsics_vec256
+          v0__0 = Lib_IntVector_Intrinsics_vec256_interleave_low64(v0_0, v2_0);
+          Lib_IntVector_Intrinsics_vec256
+          v1__0 = Lib_IntVector_Intrinsics_vec256_interleave_high64(v0_0, v2_0);
+          Lib_IntVector_Intrinsics_vec256
+          v2__0 = Lib_IntVector_Intrinsics_vec256_interleave_low64(v1_0, v3_0);
+          Lib_IntVector_Intrinsics_vec256
+          v3__0 = Lib_IntVector_Intrinsics_vec256_interleave_high64(v1_0, v3_0);
+          Lib_IntVector_Intrinsics_vec256
+          v4__0 = Lib_IntVector_Intrinsics_vec256_interleave_low64(v4_0, v6_0);
+          Lib_IntVector_Intrinsics_vec256
+          v5__0 = Lib_IntVector_Intrinsics_vec256_interleave_high64(v4_0, v6_0);
+          Lib_IntVector_Intrinsics_vec256
+          v6__0 = Lib_IntVector_Intrinsics_vec256_interleave_low64(v5_0, v7_0);
+          Lib_IntVector_Intrinsics_vec256
+          v7__0 = Lib_IntVector_Intrinsics_vec256_interleave_high64(v5_0, v7_0);
+          Lib_IntVector_Intrinsics_vec256
+          v0___0 = Lib_IntVector_Intrinsics_vec256_interleave_low128(v0__0, v4__0);
+          Lib_IntVector_Intrinsics_vec256
+          v1___0 = Lib_IntVector_Intrinsics_vec256_interleave_high128(v0__0, v4__0);
+          Lib_IntVector_Intrinsics_vec256
+          v2___0 = Lib_IntVector_Intrinsics_vec256_interleave_low128(v1__0, v5__0);
+          Lib_IntVector_Intrinsics_vec256
+          v3___0 = Lib_IntVector_Intrinsics_vec256_interleave_high128(v1__0, v5__0);
+          Lib_IntVector_Intrinsics_vec256
+          v4___0 = Lib_IntVector_Intrinsics_vec256_interleave_low128(v2__0, v6__0);
+          Lib_IntVector_Intrinsics_vec256
+          v5___0 = Lib_IntVector_Intrinsics_vec256_interleave_high128(v2__0, v6__0);
+          Lib_IntVector_Intrinsics_vec256
+          v6___0 = Lib_IntVector_Intrinsics_vec256_interleave_low128(v3__0, v7__0);
+          Lib_IntVector_Intrinsics_vec256
+          v7___0 = Lib_IntVector_Intrinsics_vec256_interleave_high128(v3__0, v7__0);
+          Lib_IntVector_Intrinsics_vec256 v8 = v0___0;
+          Lib_IntVector_Intrinsics_vec256 v9 = v2___0;
+          Lib_IntVector_Intrinsics_vec256 v10 = v4___0;
+          Lib_IntVector_Intrinsics_vec256 v11 = v6___0;
+          Lib_IntVector_Intrinsics_vec256 v12 = v1___0;
+          Lib_IntVector_Intrinsics_vec256 v13 = v3___0;
+          Lib_IntVector_Intrinsics_vec256 v14 = v5___0;
+          Lib_IntVector_Intrinsics_vec256 v15 = v7___0;
+          k[0U] = v0;
+          k[1U] = v8;
+          k[2U] = v1;
+          k[3U] = v9;
+          k[4U] = v2;
+          k[5U] = v10;
+          k[6U] = v3;
+          k[7U] = v11;
+          k[8U] = v4;
+          k[9U] = v12;
+          k[10U] = v5;
+          k[11U] = v13;
+          k[12U] = v6;
+          k[13U] = v14;
+          k[14U] = v7;
+          k[15U] = v15;
           {
             uint32_t i;
-            for (i = (uint32_t)0U; i < (uint32_t)16U; i = i + (uint32_t)1U)
+            for (i = (uint32_t)0U; i < (uint32_t)16U; i++)
             {
-              Lib_IntVector_Intrinsics_vec256 *os = bl;
               Lib_IntVector_Intrinsics_vec256
-              x = Lib_IntVector_Intrinsics_vec256_load_le(plain + i * (uint32_t)8U * (uint32_t)4U);
-              os[i] = x;
+              x = Lib_IntVector_Intrinsics_vec256_load_le(plain + i * (uint32_t)32U);
+              Lib_IntVector_Intrinsics_vec256 y = Lib_IntVector_Intrinsics_vec256_xor(x, k[i]);
+              Lib_IntVector_Intrinsics_vec256_store_le(plain + i * (uint32_t)32U, y);
             }
           }
-          {
-            Lib_IntVector_Intrinsics_vec256 v00 = k[0U];
-            Lib_IntVector_Intrinsics_vec256 v16 = k[1U];
-            Lib_IntVector_Intrinsics_vec256 v20 = k[2U];
-            Lib_IntVector_Intrinsics_vec256 v30 = k[3U];
-            Lib_IntVector_Intrinsics_vec256 v40 = k[4U];
-            Lib_IntVector_Intrinsics_vec256 v50 = k[5U];
-            Lib_IntVector_Intrinsics_vec256 v60 = k[6U];
-            Lib_IntVector_Intrinsics_vec256 v70 = k[7U];
-            Lib_IntVector_Intrinsics_vec256
-            v0_ = Lib_IntVector_Intrinsics_vec256_interleave_low32(v00, v16);
-            Lib_IntVector_Intrinsics_vec256
-            v1_ = Lib_IntVector_Intrinsics_vec256_interleave_high32(v00, v16);
-            Lib_IntVector_Intrinsics_vec256
-            v2_ = Lib_IntVector_Intrinsics_vec256_interleave_low32(v20, v30);
-            Lib_IntVector_Intrinsics_vec256
-            v3_ = Lib_IntVector_Intrinsics_vec256_interleave_high32(v20, v30);
-            Lib_IntVector_Intrinsics_vec256
-            v4_ = Lib_IntVector_Intrinsics_vec256_interleave_low32(v40, v50);
-            Lib_IntVector_Intrinsics_vec256
-            v5_ = Lib_IntVector_Intrinsics_vec256_interleave_high32(v40, v50);
-            Lib_IntVector_Intrinsics_vec256
-            v6_ = Lib_IntVector_Intrinsics_vec256_interleave_low32(v60, v70);
-            Lib_IntVector_Intrinsics_vec256
-            v7_ = Lib_IntVector_Intrinsics_vec256_interleave_high32(v60, v70);
-            Lib_IntVector_Intrinsics_vec256
-            v0__ = Lib_IntVector_Intrinsics_vec256_interleave_low64(v0_, v2_);
-            Lib_IntVector_Intrinsics_vec256
-            v1__ = Lib_IntVector_Intrinsics_vec256_interleave_high64(v0_, v2_);
-            Lib_IntVector_Intrinsics_vec256
-            v2__ = Lib_IntVector_Intrinsics_vec256_interleave_low64(v1_, v3_);
-            Lib_IntVector_Intrinsics_vec256
-            v3__ = Lib_IntVector_Intrinsics_vec256_interleave_high64(v1_, v3_);
-            Lib_IntVector_Intrinsics_vec256
-            v4__ = Lib_IntVector_Intrinsics_vec256_interleave_low64(v4_, v6_);
-            Lib_IntVector_Intrinsics_vec256
-            v5__ = Lib_IntVector_Intrinsics_vec256_interleave_high64(v4_, v6_);
-            Lib_IntVector_Intrinsics_vec256
-            v6__ = Lib_IntVector_Intrinsics_vec256_interleave_low64(v5_, v7_);
-            Lib_IntVector_Intrinsics_vec256
-            v7__ = Lib_IntVector_Intrinsics_vec256_interleave_high64(v5_, v7_);
-            Lib_IntVector_Intrinsics_vec256
-            v0___ = Lib_IntVector_Intrinsics_vec256_interleave_low128(v0__, v4__);
-            Lib_IntVector_Intrinsics_vec256
-            v1___ = Lib_IntVector_Intrinsics_vec256_interleave_high128(v0__, v4__);
-            Lib_IntVector_Intrinsics_vec256
-            v2___ = Lib_IntVector_Intrinsics_vec256_interleave_low128(v1__, v5__);
-            Lib_IntVector_Intrinsics_vec256
-            v3___ = Lib_IntVector_Intrinsics_vec256_interleave_high128(v1__, v5__);
-            Lib_IntVector_Intrinsics_vec256
-            v4___ = Lib_IntVector_Intrinsics_vec256_interleave_low128(v2__, v6__);
-            Lib_IntVector_Intrinsics_vec256
-            v5___ = Lib_IntVector_Intrinsics_vec256_interleave_high128(v2__, v6__);
-            Lib_IntVector_Intrinsics_vec256
-            v6___ = Lib_IntVector_Intrinsics_vec256_interleave_low128(v3__, v7__);
-            Lib_IntVector_Intrinsics_vec256
-            v7___ = Lib_IntVector_Intrinsics_vec256_interleave_high128(v3__, v7__);
-            Lib_IntVector_Intrinsics_vec256 v0 = v0___;
-            Lib_IntVector_Intrinsics_vec256 v1 = v2___;
-            Lib_IntVector_Intrinsics_vec256 v2 = v4___;
-            Lib_IntVector_Intrinsics_vec256 v3 = v6___;
-            Lib_IntVector_Intrinsics_vec256 v4 = v1___;
-            Lib_IntVector_Intrinsics_vec256 v5 = v3___;
-            Lib_IntVector_Intrinsics_vec256 v6 = v5___;
-            Lib_IntVector_Intrinsics_vec256 v7 = v7___;
-            Lib_IntVector_Intrinsics_vec256 v01 = k[8U];
-            Lib_IntVector_Intrinsics_vec256 v110 = k[9U];
-            Lib_IntVector_Intrinsics_vec256 v21 = k[10U];
-            Lib_IntVector_Intrinsics_vec256 v31 = k[11U];
-            Lib_IntVector_Intrinsics_vec256 v41 = k[12U];
-            Lib_IntVector_Intrinsics_vec256 v51 = k[13U];
-            Lib_IntVector_Intrinsics_vec256 v61 = k[14U];
-            Lib_IntVector_Intrinsics_vec256 v71 = k[15U];
-            Lib_IntVector_Intrinsics_vec256
-            v0_0 = Lib_IntVector_Intrinsics_vec256_interleave_low32(v01, v110);
-            Lib_IntVector_Intrinsics_vec256
-            v1_0 = Lib_IntVector_Intrinsics_vec256_interleave_high32(v01, v110);
-            Lib_IntVector_Intrinsics_vec256
-            v2_0 = Lib_IntVector_Intrinsics_vec256_interleave_low32(v21, v31);
-            Lib_IntVector_Intrinsics_vec256
-            v3_0 = Lib_IntVector_Intrinsics_vec256_interleave_high32(v21, v31);
-            Lib_IntVector_Intrinsics_vec256
-            v4_0 = Lib_IntVector_Intrinsics_vec256_interleave_low32(v41, v51);
-            Lib_IntVector_Intrinsics_vec256
-            v5_0 = Lib_IntVector_Intrinsics_vec256_interleave_high32(v41, v51);
-            Lib_IntVector_Intrinsics_vec256
-            v6_0 = Lib_IntVector_Intrinsics_vec256_interleave_low32(v61, v71);
-            Lib_IntVector_Intrinsics_vec256
-            v7_0 = Lib_IntVector_Intrinsics_vec256_interleave_high32(v61, v71);
-            Lib_IntVector_Intrinsics_vec256
-            v0__0 = Lib_IntVector_Intrinsics_vec256_interleave_low64(v0_0, v2_0);
-            Lib_IntVector_Intrinsics_vec256
-            v1__0 = Lib_IntVector_Intrinsics_vec256_interleave_high64(v0_0, v2_0);
-            Lib_IntVector_Intrinsics_vec256
-            v2__0 = Lib_IntVector_Intrinsics_vec256_interleave_low64(v1_0, v3_0);
-            Lib_IntVector_Intrinsics_vec256
-            v3__0 = Lib_IntVector_Intrinsics_vec256_interleave_high64(v1_0, v3_0);
-            Lib_IntVector_Intrinsics_vec256
-            v4__0 = Lib_IntVector_Intrinsics_vec256_interleave_low64(v4_0, v6_0);
-            Lib_IntVector_Intrinsics_vec256
-            v5__0 = Lib_IntVector_Intrinsics_vec256_interleave_high64(v4_0, v6_0);
-            Lib_IntVector_Intrinsics_vec256
-            v6__0 = Lib_IntVector_Intrinsics_vec256_interleave_low64(v5_0, v7_0);
-            Lib_IntVector_Intrinsics_vec256
-            v7__0 = Lib_IntVector_Intrinsics_vec256_interleave_high64(v5_0, v7_0);
-            Lib_IntVector_Intrinsics_vec256
-            v0___0 = Lib_IntVector_Intrinsics_vec256_interleave_low128(v0__0, v4__0);
-            Lib_IntVector_Intrinsics_vec256
-            v1___0 = Lib_IntVector_Intrinsics_vec256_interleave_high128(v0__0, v4__0);
-            Lib_IntVector_Intrinsics_vec256
-            v2___0 = Lib_IntVector_Intrinsics_vec256_interleave_low128(v1__0, v5__0);
-            Lib_IntVector_Intrinsics_vec256
-            v3___0 = Lib_IntVector_Intrinsics_vec256_interleave_high128(v1__0, v5__0);
-            Lib_IntVector_Intrinsics_vec256
-            v4___0 = Lib_IntVector_Intrinsics_vec256_interleave_low128(v2__0, v6__0);
-            Lib_IntVector_Intrinsics_vec256
-            v5___0 = Lib_IntVector_Intrinsics_vec256_interleave_high128(v2__0, v6__0);
-            Lib_IntVector_Intrinsics_vec256
-            v6___0 = Lib_IntVector_Intrinsics_vec256_interleave_low128(v3__0, v7__0);
-            Lib_IntVector_Intrinsics_vec256
-            v7___0 = Lib_IntVector_Intrinsics_vec256_interleave_high128(v3__0, v7__0);
-            Lib_IntVector_Intrinsics_vec256 v8 = v0___0;
-            Lib_IntVector_Intrinsics_vec256 v9 = v2___0;
-            Lib_IntVector_Intrinsics_vec256 v10 = v4___0;
-            Lib_IntVector_Intrinsics_vec256 v11 = v6___0;
-            Lib_IntVector_Intrinsics_vec256 v12 = v1___0;
-            Lib_IntVector_Intrinsics_vec256 v13 = v3___0;
-            Lib_IntVector_Intrinsics_vec256 v14 = v5___0;
-            Lib_IntVector_Intrinsics_vec256 v15 = v7___0;
-            k[0U] = v0;
-            k[1U] = v8;
-            k[2U] = v1;
-            k[3U] = v9;
-            k[4U] = v2;
-            k[5U] = v10;
-            k[6U] = v3;
-            k[7U] = v11;
-            k[8U] = v4;
-            k[9U] = v12;
-            k[10U] = v5;
-            k[11U] = v13;
-            k[12U] = v6;
-            k[13U] = v14;
-            k[14U] = v7;
-            k[15U] = v15;
-            {
-              uint32_t i;
-              for (i = (uint32_t)0U; i < (uint32_t)16U; i = i + (uint32_t)1U)
-              {
-                Lib_IntVector_Intrinsics_vec256 *os = bl;
-                Lib_IntVector_Intrinsics_vec256
-                x = Lib_IntVector_Intrinsics_vec256_xor(bl[i], k[i]);
-                os[i] = x;
-              }
-            }
-            {
-              uint32_t i;
-              for (i = (uint32_t)0U; i < (uint32_t)16U; i = i + (uint32_t)1U)
-              {
-                Lib_IntVector_Intrinsics_vec256_store_le(plain + i * (uint32_t)32U, bl[i]);
-              }
-            }
-            memcpy(uu____2, plain, rem1 * sizeof plain[0U]);
-          }
+          memcpy(uu____2, plain, rem1 * sizeof (plain[0U]));
         }
       }
     }

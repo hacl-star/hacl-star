@@ -1,0 +1,169 @@
+open Ctypes
+module Bindings(F:Cstubs.FOREIGN) =
+  struct
+    open F
+    module Hacl_Spec_applied = (Hacl_Spec_bindings.Bindings)(Hacl_Spec_stubs)
+    open Hacl_Spec_applied
+    module Hacl_HMAC_DRBG_applied =
+      (Hacl_HMAC_DRBG_bindings.Bindings)(Hacl_HMAC_DRBG_stubs)
+    open Hacl_HMAC_DRBG_applied
+    type everCrypt_DRBG_supported_alg = spec_Hash_Definitions_hash_alg
+    let everCrypt_DRBG_supported_alg =
+      typedef spec_Hash_Definitions_hash_alg "EverCrypt_DRBG_supported_alg" 
+    let everCrypt_DRBG_reseed_interval =
+      foreign_value "EverCrypt_DRBG_reseed_interval" uint32_t 
+    let everCrypt_DRBG_max_output_length =
+      foreign_value "EverCrypt_DRBG_max_output_length" uint32_t 
+    let everCrypt_DRBG_max_length =
+      foreign_value "EverCrypt_DRBG_max_length" uint32_t 
+    let everCrypt_DRBG_max_personalization_string_length =
+      foreign_value "EverCrypt_DRBG_max_personalization_string_length"
+        uint32_t
+      
+    let everCrypt_DRBG_max_additional_input_length =
+      foreign_value "EverCrypt_DRBG_max_additional_input_length" uint32_t 
+    let everCrypt_DRBG_min_length =
+      foreign "EverCrypt_DRBG_min_length"
+        (spec_Hash_Definitions_hash_alg @-> (returning uint32_t))
+      
+    type everCrypt_DRBG_state_s_tags = Unsigned.UInt8.t
+    let everCrypt_DRBG_state_s_tags =
+      typedef uint8_t "EverCrypt_DRBG_state_s_tags" 
+    let everCrypt_DRBG_state_s_tags_EverCrypt_DRBG_SHA1_s =
+      Unsigned.UInt8.of_int 0 
+    let everCrypt_DRBG_state_s_tags_EverCrypt_DRBG_SHA2_256_s =
+      Unsigned.UInt8.of_int 1 
+    let everCrypt_DRBG_state_s_tags_EverCrypt_DRBG_SHA2_384_s =
+      Unsigned.UInt8.of_int 2 
+    let everCrypt_DRBG_state_s_tags_EverCrypt_DRBG_SHA2_512_s =
+      Unsigned.UInt8.of_int 3 
+    type everCrypt_DRBG_state_s = [ `everCrypt_DRBG_state_s ] structure
+    let (everCrypt_DRBG_state_s : [ `everCrypt_DRBG_state_s ] structure typ)
+      = structure "EverCrypt_DRBG_state_s_s" 
+    let everCrypt_DRBG_state_s_tag =
+      field everCrypt_DRBG_state_s "tag" everCrypt_DRBG_state_s_tags 
+    type everCrypt_DRBG_state_s_val = [ `anonymous ] union
+    let (everCrypt_DRBG_state_s_val : [ `anonymous ] union typ) = union "" 
+    let everCrypt_DRBG_state_s_val_case_SHA1_s =
+      field everCrypt_DRBG_state_s_val "case_SHA1_s" hacl_HMAC_DRBG_state 
+    let everCrypt_DRBG_state_s_val_case_SHA2_256_s =
+      field everCrypt_DRBG_state_s_val "case_SHA2_256_s" hacl_HMAC_DRBG_state 
+    let everCrypt_DRBG_state_s_val_case_SHA2_384_s =
+      field everCrypt_DRBG_state_s_val "case_SHA2_384_s" hacl_HMAC_DRBG_state 
+    let everCrypt_DRBG_state_s_val_case_SHA2_512_s =
+      field everCrypt_DRBG_state_s_val "case_SHA2_512_s" hacl_HMAC_DRBG_state 
+    let _ = seal everCrypt_DRBG_state_s_val 
+    let everCrypt_DRBG_state_s_u =
+      field everCrypt_DRBG_state_s "" everCrypt_DRBG_state_s_val 
+    let _ = seal everCrypt_DRBG_state_s 
+    let everCrypt_DRBG_create =
+      foreign "EverCrypt_DRBG_create"
+        (spec_Hash_Definitions_hash_alg @->
+           (returning (ptr everCrypt_DRBG_state_s)))
+      
+    let everCrypt_DRBG_instantiate_sha1 =
+      foreign "EverCrypt_DRBG_instantiate_sha1"
+        ((ptr everCrypt_DRBG_state_s) @->
+           ((ptr uint8_t) @-> (uint32_t @-> (returning bool))))
+      
+    let everCrypt_DRBG_instantiate_sha2_256 =
+      foreign "EverCrypt_DRBG_instantiate_sha2_256"
+        ((ptr everCrypt_DRBG_state_s) @->
+           ((ptr uint8_t) @-> (uint32_t @-> (returning bool))))
+      
+    let everCrypt_DRBG_instantiate_sha2_384 =
+      foreign "EverCrypt_DRBG_instantiate_sha2_384"
+        ((ptr everCrypt_DRBG_state_s) @->
+           ((ptr uint8_t) @-> (uint32_t @-> (returning bool))))
+      
+    let everCrypt_DRBG_instantiate_sha2_512 =
+      foreign "EverCrypt_DRBG_instantiate_sha2_512"
+        ((ptr everCrypt_DRBG_state_s) @->
+           ((ptr uint8_t) @-> (uint32_t @-> (returning bool))))
+      
+    let everCrypt_DRBG_reseed_sha1 =
+      foreign "EverCrypt_DRBG_reseed_sha1"
+        ((ptr everCrypt_DRBG_state_s) @->
+           ((ptr uint8_t) @-> (uint32_t @-> (returning bool))))
+      
+    let everCrypt_DRBG_reseed_sha2_256 =
+      foreign "EverCrypt_DRBG_reseed_sha2_256"
+        ((ptr everCrypt_DRBG_state_s) @->
+           ((ptr uint8_t) @-> (uint32_t @-> (returning bool))))
+      
+    let everCrypt_DRBG_reseed_sha2_384 =
+      foreign "EverCrypt_DRBG_reseed_sha2_384"
+        ((ptr everCrypt_DRBG_state_s) @->
+           ((ptr uint8_t) @-> (uint32_t @-> (returning bool))))
+      
+    let everCrypt_DRBG_reseed_sha2_512 =
+      foreign "EverCrypt_DRBG_reseed_sha2_512"
+        ((ptr everCrypt_DRBG_state_s) @->
+           ((ptr uint8_t) @-> (uint32_t @-> (returning bool))))
+      
+    let everCrypt_DRBG_generate_sha1 =
+      foreign "EverCrypt_DRBG_generate_sha1"
+        ((ptr uint8_t) @->
+           ((ptr everCrypt_DRBG_state_s) @->
+              (uint32_t @->
+                 ((ptr uint8_t) @-> (uint32_t @-> (returning bool))))))
+      
+    let everCrypt_DRBG_generate_sha2_256 =
+      foreign "EverCrypt_DRBG_generate_sha2_256"
+        ((ptr uint8_t) @->
+           ((ptr everCrypt_DRBG_state_s) @->
+              (uint32_t @->
+                 ((ptr uint8_t) @-> (uint32_t @-> (returning bool))))))
+      
+    let everCrypt_DRBG_generate_sha2_384 =
+      foreign "EverCrypt_DRBG_generate_sha2_384"
+        ((ptr uint8_t) @->
+           ((ptr everCrypt_DRBG_state_s) @->
+              (uint32_t @->
+                 ((ptr uint8_t) @-> (uint32_t @-> (returning bool))))))
+      
+    let everCrypt_DRBG_generate_sha2_512 =
+      foreign "EverCrypt_DRBG_generate_sha2_512"
+        ((ptr uint8_t) @->
+           ((ptr everCrypt_DRBG_state_s) @->
+              (uint32_t @->
+                 ((ptr uint8_t) @-> (uint32_t @-> (returning bool))))))
+      
+    let everCrypt_DRBG_uninstantiate_sha1 =
+      foreign "EverCrypt_DRBG_uninstantiate_sha1"
+        ((ptr everCrypt_DRBG_state_s) @-> (returning void))
+      
+    let everCrypt_DRBG_uninstantiate_sha2_256 =
+      foreign "EverCrypt_DRBG_uninstantiate_sha2_256"
+        ((ptr everCrypt_DRBG_state_s) @-> (returning void))
+      
+    let everCrypt_DRBG_uninstantiate_sha2_384 =
+      foreign "EverCrypt_DRBG_uninstantiate_sha2_384"
+        ((ptr everCrypt_DRBG_state_s) @-> (returning void))
+      
+    let everCrypt_DRBG_uninstantiate_sha2_512 =
+      foreign "EverCrypt_DRBG_uninstantiate_sha2_512"
+        ((ptr everCrypt_DRBG_state_s) @-> (returning void))
+      
+    let everCrypt_DRBG_instantiate =
+      foreign "EverCrypt_DRBG_instantiate"
+        ((ptr everCrypt_DRBG_state_s) @->
+           ((ptr uint8_t) @-> (uint32_t @-> (returning bool))))
+      
+    let everCrypt_DRBG_reseed =
+      foreign "EverCrypt_DRBG_reseed"
+        ((ptr everCrypt_DRBG_state_s) @->
+           ((ptr uint8_t) @-> (uint32_t @-> (returning bool))))
+      
+    let everCrypt_DRBG_generate =
+      foreign "EverCrypt_DRBG_generate"
+        ((ptr uint8_t) @->
+           ((ptr everCrypt_DRBG_state_s) @->
+              (uint32_t @->
+                 ((ptr uint8_t) @-> (uint32_t @-> (returning bool))))))
+      
+    let everCrypt_DRBG_uninstantiate =
+      foreign "EverCrypt_DRBG_uninstantiate"
+        ((ptr everCrypt_DRBG_state_s) @-> (returning void))
+      
+  end

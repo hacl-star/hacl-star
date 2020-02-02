@@ -27,7 +27,7 @@
 void Hacl_Hash_MD5_legacy_update_multi(uint32_t *s, uint8_t *blocks, uint32_t n_blocks)
 {
   uint32_t i;
-  for (i = (uint32_t)0U; i < n_blocks; i = i + (uint32_t)1U)
+  for (i = (uint32_t)0U; i < n_blocks; i++)
   {
     uint32_t sz = (uint32_t)64U;
     uint8_t *block = blocks + sz * i;
@@ -65,7 +65,7 @@ Hacl_Hash_MD5_legacy_update_last(
     uint8_t *tmp = tmp_twoblocks;
     uint8_t *tmp_rest = tmp;
     uint8_t *tmp_pad = tmp + rest_len;
-    memcpy(tmp_rest, rest, rest_len * sizeof rest[0U]);
+    memcpy(tmp_rest, rest, rest_len * sizeof (rest[0U]));
     Hacl_Hash_Core_MD5_legacy_pad(total_input_len, tmp_pad);
     Hacl_Hash_MD5_legacy_update_multi(s, tmp, tmp_len / (uint32_t)64U);
   }
@@ -87,11 +87,11 @@ void Hacl_Hash_MD5_legacy_hash(uint8_t *input, uint32_t input_len, uint8_t *dst)
 }
 
 static uint32_t
-Hacl_Hash_Core_MD5__h0[4U] =
+_h0[4U] =
   { (uint32_t)0x67452301U, (uint32_t)0xefcdab89U, (uint32_t)0x98badcfeU, (uint32_t)0x10325476U };
 
 static uint32_t
-Hacl_Hash_Core_MD5__t[64U] =
+_t[64U] =
   {
     (uint32_t)0xd76aa478U, (uint32_t)0xe8c7b756U, (uint32_t)0x242070dbU, (uint32_t)0xc1bdceeeU,
     (uint32_t)0xf57c0fafU, (uint32_t)0x4787c62aU, (uint32_t)0xa8304613U, (uint32_t)0xfd469501U,
@@ -114,9 +114,9 @@ Hacl_Hash_Core_MD5__t[64U] =
 void Hacl_Hash_Core_MD5_legacy_init(uint32_t *s)
 {
   uint32_t i;
-  for (i = (uint32_t)0U; i < (uint32_t)4U; i = i + (uint32_t)1U)
+  for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
   {
-    s[i] = Hacl_Hash_Core_MD5__h0[i];
+    s[i] = _h0[i];
   }
 }
 
@@ -133,7 +133,7 @@ void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
   uint8_t *b0 = x;
   uint32_t u0 = load32_le(b0);
   uint32_t xk0 = u0;
-  uint32_t ti0 = Hacl_Hash_Core_MD5__t[0U];
+  uint32_t ti0 = _t[0U];
   uint32_t
   v10 =
     vb0
@@ -720,7 +720,7 @@ void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
   b1 = x + (uint32_t)4U;
   u1 = load32_le(b1);
   xk1 = u1;
-  ti1 = Hacl_Hash_Core_MD5__t[1U];
+  ti1 = _t[1U];
   v11 =
     vb1
     +
@@ -735,7 +735,7 @@ void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
   b2 = x + (uint32_t)8U;
   u2 = load32_le(b2);
   xk2 = u2;
-  ti2 = Hacl_Hash_Core_MD5__t[2U];
+  ti2 = _t[2U];
   v12 =
     vb2
     +
@@ -750,7 +750,7 @@ void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
   b3 = x + (uint32_t)12U;
   u3 = load32_le(b3);
   xk3 = u3;
-  ti3 = Hacl_Hash_Core_MD5__t[3U];
+  ti3 = _t[3U];
   v13 =
     vb3
     +
@@ -765,7 +765,7 @@ void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
   b4 = x + (uint32_t)16U;
   u4 = load32_le(b4);
   xk4 = u4;
-  ti4 = Hacl_Hash_Core_MD5__t[4U];
+  ti4 = _t[4U];
   v14 =
     vb4
     +
@@ -780,7 +780,7 @@ void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
   b5 = x + (uint32_t)20U;
   u5 = load32_le(b5);
   xk5 = u5;
-  ti5 = Hacl_Hash_Core_MD5__t[5U];
+  ti5 = _t[5U];
   v15 =
     vb5
     +
@@ -795,7 +795,7 @@ void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
   b6 = x + (uint32_t)24U;
   u6 = load32_le(b6);
   xk6 = u6;
-  ti6 = Hacl_Hash_Core_MD5__t[6U];
+  ti6 = _t[6U];
   v16 =
     vb6
     +
@@ -810,7 +810,7 @@ void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
   b7 = x + (uint32_t)28U;
   u7 = load32_le(b7);
   xk7 = u7;
-  ti7 = Hacl_Hash_Core_MD5__t[7U];
+  ti7 = _t[7U];
   v17 =
     vb7
     +
@@ -825,7 +825,7 @@ void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
   b8 = x + (uint32_t)32U;
   u8 = load32_le(b8);
   xk8 = u8;
-  ti8 = Hacl_Hash_Core_MD5__t[8U];
+  ti8 = _t[8U];
   v18 =
     vb8
     +
@@ -840,7 +840,7 @@ void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
   b9 = x + (uint32_t)36U;
   u9 = load32_le(b9);
   xk9 = u9;
-  ti9 = Hacl_Hash_Core_MD5__t[9U];
+  ti9 = _t[9U];
   v19 =
     vb9
     +
@@ -855,7 +855,7 @@ void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
   b10 = x + (uint32_t)40U;
   u10 = load32_le(b10);
   xk10 = u10;
-  ti10 = Hacl_Hash_Core_MD5__t[10U];
+  ti10 = _t[10U];
   v110 =
     vb10
     +
@@ -870,7 +870,7 @@ void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
   b11 = x + (uint32_t)44U;
   u11 = load32_le(b11);
   xk11 = u11;
-  ti11 = Hacl_Hash_Core_MD5__t[11U];
+  ti11 = _t[11U];
   v111 =
     vb11
     +
@@ -885,7 +885,7 @@ void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
   b12 = x + (uint32_t)48U;
   u12 = load32_le(b12);
   xk12 = u12;
-  ti12 = Hacl_Hash_Core_MD5__t[12U];
+  ti12 = _t[12U];
   v112 =
     vb12
     +
@@ -900,7 +900,7 @@ void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
   b13 = x + (uint32_t)52U;
   u13 = load32_le(b13);
   xk13 = u13;
-  ti13 = Hacl_Hash_Core_MD5__t[13U];
+  ti13 = _t[13U];
   v113 =
     vb13
     +
@@ -915,7 +915,7 @@ void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
   b14 = x + (uint32_t)56U;
   u14 = load32_le(b14);
   xk14 = u14;
-  ti14 = Hacl_Hash_Core_MD5__t[14U];
+  ti14 = _t[14U];
   v114 =
     vb14
     +
@@ -930,7 +930,7 @@ void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
   b15 = x + (uint32_t)60U;
   u15 = load32_le(b15);
   xk15 = u15;
-  ti15 = Hacl_Hash_Core_MD5__t[15U];
+  ti15 = _t[15U];
   v115 =
     vb15
     +
@@ -945,7 +945,7 @@ void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
   b16 = x + (uint32_t)4U;
   u16 = load32_le(b16);
   xk16 = u16;
-  ti16 = Hacl_Hash_Core_MD5__t[16U];
+  ti16 = _t[16U];
   v116 =
     vb16
     +
@@ -960,7 +960,7 @@ void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
   b17 = x + (uint32_t)24U;
   u17 = load32_le(b17);
   xk17 = u17;
-  ti17 = Hacl_Hash_Core_MD5__t[17U];
+  ti17 = _t[17U];
   v117 =
     vb17
     +
@@ -975,7 +975,7 @@ void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
   b18 = x + (uint32_t)44U;
   u18 = load32_le(b18);
   xk18 = u18;
-  ti18 = Hacl_Hash_Core_MD5__t[18U];
+  ti18 = _t[18U];
   v118 =
     vb18
     +
@@ -990,7 +990,7 @@ void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
   b19 = x;
   u19 = load32_le(b19);
   xk19 = u19;
-  ti19 = Hacl_Hash_Core_MD5__t[19U];
+  ti19 = _t[19U];
   v119 =
     vb19
     +
@@ -1005,7 +1005,7 @@ void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
   b20 = x + (uint32_t)20U;
   u20 = load32_le(b20);
   xk20 = u20;
-  ti20 = Hacl_Hash_Core_MD5__t[20U];
+  ti20 = _t[20U];
   v120 =
     vb20
     +
@@ -1020,7 +1020,7 @@ void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
   b21 = x + (uint32_t)40U;
   u21 = load32_le(b21);
   xk21 = u21;
-  ti21 = Hacl_Hash_Core_MD5__t[21U];
+  ti21 = _t[21U];
   v121 =
     vb21
     +
@@ -1035,7 +1035,7 @@ void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
   b22 = x + (uint32_t)60U;
   u22 = load32_le(b22);
   xk22 = u22;
-  ti22 = Hacl_Hash_Core_MD5__t[22U];
+  ti22 = _t[22U];
   v122 =
     vb22
     +
@@ -1050,7 +1050,7 @@ void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
   b23 = x + (uint32_t)16U;
   u23 = load32_le(b23);
   xk23 = u23;
-  ti23 = Hacl_Hash_Core_MD5__t[23U];
+  ti23 = _t[23U];
   v123 =
     vb23
     +
@@ -1065,7 +1065,7 @@ void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
   b24 = x + (uint32_t)36U;
   u24 = load32_le(b24);
   xk24 = u24;
-  ti24 = Hacl_Hash_Core_MD5__t[24U];
+  ti24 = _t[24U];
   v124 =
     vb24
     +
@@ -1080,7 +1080,7 @@ void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
   b25 = x + (uint32_t)56U;
   u25 = load32_le(b25);
   xk25 = u25;
-  ti25 = Hacl_Hash_Core_MD5__t[25U];
+  ti25 = _t[25U];
   v125 =
     vb25
     +
@@ -1095,7 +1095,7 @@ void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
   b26 = x + (uint32_t)12U;
   u26 = load32_le(b26);
   xk26 = u26;
-  ti26 = Hacl_Hash_Core_MD5__t[26U];
+  ti26 = _t[26U];
   v126 =
     vb26
     +
@@ -1110,7 +1110,7 @@ void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
   b27 = x + (uint32_t)32U;
   u27 = load32_le(b27);
   xk27 = u27;
-  ti27 = Hacl_Hash_Core_MD5__t[27U];
+  ti27 = _t[27U];
   v127 =
     vb27
     +
@@ -1125,7 +1125,7 @@ void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
   b28 = x + (uint32_t)52U;
   u28 = load32_le(b28);
   xk28 = u28;
-  ti28 = Hacl_Hash_Core_MD5__t[28U];
+  ti28 = _t[28U];
   v128 =
     vb28
     +
@@ -1140,7 +1140,7 @@ void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
   b29 = x + (uint32_t)8U;
   u29 = load32_le(b29);
   xk29 = u29;
-  ti29 = Hacl_Hash_Core_MD5__t[29U];
+  ti29 = _t[29U];
   v129 =
     vb29
     +
@@ -1155,7 +1155,7 @@ void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
   b30 = x + (uint32_t)28U;
   u30 = load32_le(b30);
   xk30 = u30;
-  ti30 = Hacl_Hash_Core_MD5__t[30U];
+  ti30 = _t[30U];
   v130 =
     vb30
     +
@@ -1170,7 +1170,7 @@ void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
   b31 = x + (uint32_t)48U;
   u31 = load32_le(b31);
   xk31 = u31;
-  ti31 = Hacl_Hash_Core_MD5__t[31U];
+  ti31 = _t[31U];
   v131 =
     vb31
     +
@@ -1185,7 +1185,7 @@ void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
   b32 = x + (uint32_t)20U;
   u32 = load32_le(b32);
   xk32 = u32;
-  ti32 = Hacl_Hash_Core_MD5__t[32U];
+  ti32 = _t[32U];
   v132 =
     vb32
     +
@@ -1200,7 +1200,7 @@ void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
   b33 = x + (uint32_t)32U;
   u33 = load32_le(b33);
   xk33 = u33;
-  ti33 = Hacl_Hash_Core_MD5__t[33U];
+  ti33 = _t[33U];
   v133 =
     vb33
     +
@@ -1215,7 +1215,7 @@ void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
   b34 = x + (uint32_t)44U;
   u34 = load32_le(b34);
   xk34 = u34;
-  ti34 = Hacl_Hash_Core_MD5__t[34U];
+  ti34 = _t[34U];
   v134 =
     vb34
     +
@@ -1230,7 +1230,7 @@ void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
   b35 = x + (uint32_t)56U;
   u35 = load32_le(b35);
   xk35 = u35;
-  ti35 = Hacl_Hash_Core_MD5__t[35U];
+  ti35 = _t[35U];
   v135 =
     vb35
     +
@@ -1245,7 +1245,7 @@ void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
   b36 = x + (uint32_t)4U;
   u36 = load32_le(b36);
   xk36 = u36;
-  ti36 = Hacl_Hash_Core_MD5__t[36U];
+  ti36 = _t[36U];
   v136 =
     vb36
     +
@@ -1260,7 +1260,7 @@ void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
   b37 = x + (uint32_t)16U;
   u37 = load32_le(b37);
   xk37 = u37;
-  ti37 = Hacl_Hash_Core_MD5__t[37U];
+  ti37 = _t[37U];
   v137 =
     vb37
     +
@@ -1275,7 +1275,7 @@ void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
   b38 = x + (uint32_t)28U;
   u38 = load32_le(b38);
   xk38 = u38;
-  ti38 = Hacl_Hash_Core_MD5__t[38U];
+  ti38 = _t[38U];
   v138 =
     vb38
     +
@@ -1290,7 +1290,7 @@ void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
   b39 = x + (uint32_t)40U;
   u39 = load32_le(b39);
   xk39 = u39;
-  ti39 = Hacl_Hash_Core_MD5__t[39U];
+  ti39 = _t[39U];
   v139 =
     vb39
     +
@@ -1305,7 +1305,7 @@ void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
   b40 = x + (uint32_t)52U;
   u40 = load32_le(b40);
   xk40 = u40;
-  ti40 = Hacl_Hash_Core_MD5__t[40U];
+  ti40 = _t[40U];
   v140 =
     vb40
     +
@@ -1320,7 +1320,7 @@ void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
   b41 = x;
   u41 = load32_le(b41);
   xk41 = u41;
-  ti41 = Hacl_Hash_Core_MD5__t[41U];
+  ti41 = _t[41U];
   v141 =
     vb41
     +
@@ -1335,7 +1335,7 @@ void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
   b42 = x + (uint32_t)12U;
   u42 = load32_le(b42);
   xk42 = u42;
-  ti42 = Hacl_Hash_Core_MD5__t[42U];
+  ti42 = _t[42U];
   v142 =
     vb42
     +
@@ -1350,7 +1350,7 @@ void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
   b43 = x + (uint32_t)24U;
   u43 = load32_le(b43);
   xk43 = u43;
-  ti43 = Hacl_Hash_Core_MD5__t[43U];
+  ti43 = _t[43U];
   v143 =
     vb43
     +
@@ -1365,7 +1365,7 @@ void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
   b44 = x + (uint32_t)36U;
   u44 = load32_le(b44);
   xk44 = u44;
-  ti44 = Hacl_Hash_Core_MD5__t[44U];
+  ti44 = _t[44U];
   v144 =
     vb44
     +
@@ -1380,7 +1380,7 @@ void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
   b45 = x + (uint32_t)48U;
   u45 = load32_le(b45);
   xk45 = u45;
-  ti45 = Hacl_Hash_Core_MD5__t[45U];
+  ti45 = _t[45U];
   v145 =
     vb45
     +
@@ -1395,7 +1395,7 @@ void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
   b46 = x + (uint32_t)60U;
   u46 = load32_le(b46);
   xk46 = u46;
-  ti46 = Hacl_Hash_Core_MD5__t[46U];
+  ti46 = _t[46U];
   v146 =
     vb46
     +
@@ -1410,7 +1410,7 @@ void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
   b47 = x + (uint32_t)8U;
   u47 = load32_le(b47);
   xk47 = u47;
-  ti47 = Hacl_Hash_Core_MD5__t[47U];
+  ti47 = _t[47U];
   v147 =
     vb47
     +
@@ -1425,7 +1425,7 @@ void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
   b48 = x;
   u48 = load32_le(b48);
   xk48 = u48;
-  ti48 = Hacl_Hash_Core_MD5__t[48U];
+  ti48 = _t[48U];
   v148 =
     vb48
     +
@@ -1440,7 +1440,7 @@ void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
   b49 = x + (uint32_t)28U;
   u49 = load32_le(b49);
   xk49 = u49;
-  ti49 = Hacl_Hash_Core_MD5__t[49U];
+  ti49 = _t[49U];
   v149 =
     vb49
     +
@@ -1455,7 +1455,7 @@ void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
   b50 = x + (uint32_t)56U;
   u50 = load32_le(b50);
   xk50 = u50;
-  ti50 = Hacl_Hash_Core_MD5__t[50U];
+  ti50 = _t[50U];
   v150 =
     vb50
     +
@@ -1470,7 +1470,7 @@ void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
   b51 = x + (uint32_t)20U;
   u51 = load32_le(b51);
   xk51 = u51;
-  ti51 = Hacl_Hash_Core_MD5__t[51U];
+  ti51 = _t[51U];
   v151 =
     vb51
     +
@@ -1485,7 +1485,7 @@ void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
   b52 = x + (uint32_t)48U;
   u52 = load32_le(b52);
   xk52 = u52;
-  ti52 = Hacl_Hash_Core_MD5__t[52U];
+  ti52 = _t[52U];
   v152 =
     vb52
     +
@@ -1500,7 +1500,7 @@ void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
   b53 = x + (uint32_t)12U;
   u53 = load32_le(b53);
   xk53 = u53;
-  ti53 = Hacl_Hash_Core_MD5__t[53U];
+  ti53 = _t[53U];
   v153 =
     vb53
     +
@@ -1515,7 +1515,7 @@ void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
   b54 = x + (uint32_t)40U;
   u54 = load32_le(b54);
   xk54 = u54;
-  ti54 = Hacl_Hash_Core_MD5__t[54U];
+  ti54 = _t[54U];
   v154 =
     vb54
     +
@@ -1530,7 +1530,7 @@ void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
   b55 = x + (uint32_t)4U;
   u55 = load32_le(b55);
   xk55 = u55;
-  ti55 = Hacl_Hash_Core_MD5__t[55U];
+  ti55 = _t[55U];
   v155 =
     vb55
     +
@@ -1545,7 +1545,7 @@ void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
   b56 = x + (uint32_t)32U;
   u56 = load32_le(b56);
   xk56 = u56;
-  ti56 = Hacl_Hash_Core_MD5__t[56U];
+  ti56 = _t[56U];
   v156 =
     vb56
     +
@@ -1560,7 +1560,7 @@ void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
   b57 = x + (uint32_t)60U;
   u57 = load32_le(b57);
   xk57 = u57;
-  ti57 = Hacl_Hash_Core_MD5__t[57U];
+  ti57 = _t[57U];
   v157 =
     vb57
     +
@@ -1575,7 +1575,7 @@ void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
   b58 = x + (uint32_t)24U;
   u58 = load32_le(b58);
   xk58 = u58;
-  ti58 = Hacl_Hash_Core_MD5__t[58U];
+  ti58 = _t[58U];
   v158 =
     vb58
     +
@@ -1590,7 +1590,7 @@ void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
   b59 = x + (uint32_t)52U;
   u59 = load32_le(b59);
   xk59 = u59;
-  ti59 = Hacl_Hash_Core_MD5__t[59U];
+  ti59 = _t[59U];
   v159 =
     vb59
     +
@@ -1605,7 +1605,7 @@ void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
   b60 = x + (uint32_t)16U;
   u60 = load32_le(b60);
   xk60 = u60;
-  ti60 = Hacl_Hash_Core_MD5__t[60U];
+  ti60 = _t[60U];
   v160 =
     vb60
     +
@@ -1620,7 +1620,7 @@ void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
   b61 = x + (uint32_t)44U;
   u61 = load32_le(b61);
   xk61 = u61;
-  ti61 = Hacl_Hash_Core_MD5__t[61U];
+  ti61 = _t[61U];
   v161 =
     vb61
     +
@@ -1635,7 +1635,7 @@ void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
   b62 = x + (uint32_t)8U;
   u62 = load32_le(b62);
   xk62 = u62;
-  ti62 = Hacl_Hash_Core_MD5__t[62U];
+  ti62 = _t[62U];
   v162 =
     vb62
     +
@@ -1650,7 +1650,7 @@ void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
   b63 = x + (uint32_t)36U;
   u = load32_le(b63);
   xk = u;
-  ti = Hacl_Hash_Core_MD5__t[63U];
+  ti = _t[63U];
   v1 =
     vb
     +
@@ -1684,7 +1684,7 @@ void Hacl_Hash_Core_MD5_legacy_pad(uint64_t len, uint8_t *dst)
       <
         ((uint32_t)128U - ((uint32_t)9U + (uint32_t)(len % (uint64_t)(uint32_t)64U)))
         % (uint32_t)64U;
-      i = i + (uint32_t)1U)
+      i++)
     {
       dst2[i] = (uint8_t)0U;
     }
@@ -1703,7 +1703,7 @@ void Hacl_Hash_Core_MD5_legacy_finish(uint32_t *s, uint8_t *dst)
 {
   uint32_t *uu____0 = s;
   uint32_t i;
-  for (i = (uint32_t)0U; i < (uint32_t)4U; i = i + (uint32_t)1U)
+  for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
   {
     store32_le(dst + i * (uint32_t)4U, uu____0[i]);
   }
@@ -1712,7 +1712,7 @@ void Hacl_Hash_Core_MD5_legacy_finish(uint32_t *s, uint8_t *dst)
 void Hacl_Hash_SHA1_legacy_update_multi(uint32_t *s, uint8_t *blocks, uint32_t n_blocks)
 {
   uint32_t i;
-  for (i = (uint32_t)0U; i < n_blocks; i = i + (uint32_t)1U)
+  for (i = (uint32_t)0U; i < n_blocks; i++)
   {
     uint32_t sz = (uint32_t)64U;
     uint8_t *block = blocks + sz * i;
@@ -1750,7 +1750,7 @@ Hacl_Hash_SHA1_legacy_update_last(
     uint8_t *tmp = tmp_twoblocks;
     uint8_t *tmp_rest = tmp;
     uint8_t *tmp_pad = tmp + rest_len;
-    memcpy(tmp_rest, rest, rest_len * sizeof rest[0U]);
+    memcpy(tmp_rest, rest, rest_len * sizeof (rest[0U]));
     Hacl_Hash_Core_SHA1_legacy_pad(total_input_len, tmp_pad);
     Hacl_Hash_SHA1_legacy_update_multi(s, tmp, tmp_len / (uint32_t)64U);
   }
@@ -1775,7 +1775,7 @@ void Hacl_Hash_SHA1_legacy_hash(uint8_t *input, uint32_t input_len, uint8_t *dst
 }
 
 static uint32_t
-Hacl_Hash_Core_SHA1__h0[5U] =
+_h00[5U] =
   {
     (uint32_t)0x67452301U, (uint32_t)0xefcdab89U, (uint32_t)0x98badcfeU, (uint32_t)0x10325476U,
     (uint32_t)0xc3d2e1f0U
@@ -1784,9 +1784,9 @@ Hacl_Hash_Core_SHA1__h0[5U] =
 void Hacl_Hash_Core_SHA1_legacy_init(uint32_t *s)
 {
   uint32_t i;
-  for (i = (uint32_t)0U; i < (uint32_t)5U; i = i + (uint32_t)1U)
+  for (i = (uint32_t)0U; i < (uint32_t)5U; i++)
   {
-    s[i] = Hacl_Hash_Core_SHA1__h0[i];
+    s[i] = _h00[i];
   }
 }
 
@@ -1805,7 +1805,7 @@ void Hacl_Hash_Core_SHA1_legacy_update(uint32_t *h, uint8_t *l)
   uint32_t ste;
   {
     uint32_t i;
-    for (i = (uint32_t)0U; i < (uint32_t)80U; i = i + (uint32_t)1U)
+    for (i = (uint32_t)0U; i < (uint32_t)80U; i++)
     {
       uint32_t v1;
       if (i < (uint32_t)16U)
@@ -1830,7 +1830,7 @@ void Hacl_Hash_Core_SHA1_legacy_update(uint32_t *h, uint8_t *l)
   }
   {
     uint32_t i;
-    for (i = (uint32_t)0U; i < (uint32_t)80U; i = i + (uint32_t)1U)
+    for (i = (uint32_t)0U; i < (uint32_t)80U; i++)
     {
       uint32_t _a = h[0U];
       uint32_t _b = h[1U];
@@ -1882,7 +1882,7 @@ void Hacl_Hash_Core_SHA1_legacy_update(uint32_t *h, uint8_t *l)
   }
   {
     uint32_t i;
-    for (i = (uint32_t)0U; i < (uint32_t)80U; i = i + (uint32_t)1U)
+    for (i = (uint32_t)0U; i < (uint32_t)80U; i++)
     {
       _w[i] = (uint32_t)0U;
     }
@@ -1915,7 +1915,7 @@ void Hacl_Hash_Core_SHA1_legacy_pad(uint64_t len, uint8_t *dst)
       <
         ((uint32_t)128U - ((uint32_t)9U + (uint32_t)(len % (uint64_t)(uint32_t)64U)))
         % (uint32_t)64U;
-      i = i + (uint32_t)1U)
+      i++)
     {
       dst2[i] = (uint8_t)0U;
     }
@@ -1934,7 +1934,7 @@ void Hacl_Hash_Core_SHA1_legacy_finish(uint32_t *s, uint8_t *dst)
 {
   uint32_t *uu____0 = s;
   uint32_t i;
-  for (i = (uint32_t)0U; i < (uint32_t)5U; i = i + (uint32_t)1U)
+  for (i = (uint32_t)0U; i < (uint32_t)5U; i++)
   {
     store32_be(dst + i * (uint32_t)4U, uu____0[i]);
   }
@@ -1943,7 +1943,7 @@ void Hacl_Hash_Core_SHA1_legacy_finish(uint32_t *s, uint8_t *dst)
 void Hacl_Hash_SHA2_update_multi_224(uint32_t *s, uint8_t *blocks, uint32_t n_blocks)
 {
   uint32_t i;
-  for (i = (uint32_t)0U; i < n_blocks; i = i + (uint32_t)1U)
+  for (i = (uint32_t)0U; i < n_blocks; i++)
   {
     uint32_t sz = (uint32_t)64U;
     uint8_t *block = blocks + sz * i;
@@ -1954,7 +1954,7 @@ void Hacl_Hash_SHA2_update_multi_224(uint32_t *s, uint8_t *blocks, uint32_t n_bl
 void Hacl_Hash_SHA2_update_multi_256(uint32_t *s, uint8_t *blocks, uint32_t n_blocks)
 {
   uint32_t i;
-  for (i = (uint32_t)0U; i < n_blocks; i = i + (uint32_t)1U)
+  for (i = (uint32_t)0U; i < n_blocks; i++)
   {
     uint32_t sz = (uint32_t)64U;
     uint8_t *block = blocks + sz * i;
@@ -1965,7 +1965,7 @@ void Hacl_Hash_SHA2_update_multi_256(uint32_t *s, uint8_t *blocks, uint32_t n_bl
 void Hacl_Hash_SHA2_update_multi_384(uint64_t *s, uint8_t *blocks, uint32_t n_blocks)
 {
   uint32_t i;
-  for (i = (uint32_t)0U; i < n_blocks; i = i + (uint32_t)1U)
+  for (i = (uint32_t)0U; i < n_blocks; i++)
   {
     uint32_t sz = (uint32_t)128U;
     uint8_t *block = blocks + sz * i;
@@ -1976,7 +1976,7 @@ void Hacl_Hash_SHA2_update_multi_384(uint64_t *s, uint8_t *blocks, uint32_t n_bl
 void Hacl_Hash_SHA2_update_multi_512(uint64_t *s, uint8_t *blocks, uint32_t n_blocks)
 {
   uint32_t i;
-  for (i = (uint32_t)0U; i < n_blocks; i = i + (uint32_t)1U)
+  for (i = (uint32_t)0U; i < n_blocks; i++)
   {
     uint32_t sz = (uint32_t)128U;
     uint8_t *block = blocks + sz * i;
@@ -2014,7 +2014,7 @@ Hacl_Hash_SHA2_update_last_224(
     uint8_t *tmp = tmp_twoblocks;
     uint8_t *tmp_rest = tmp;
     uint8_t *tmp_pad = tmp + rest_len;
-    memcpy(tmp_rest, rest, rest_len * sizeof rest[0U]);
+    memcpy(tmp_rest, rest, rest_len * sizeof (rest[0U]));
     Hacl_Hash_Core_SHA2_pad_224(total_input_len, tmp_pad);
     Hacl_Hash_SHA2_update_multi_224(s, tmp, tmp_len / (uint32_t)64U);
   }
@@ -2050,7 +2050,7 @@ Hacl_Hash_SHA2_update_last_256(
     uint8_t *tmp = tmp_twoblocks;
     uint8_t *tmp_rest = tmp;
     uint8_t *tmp_pad = tmp + rest_len;
-    memcpy(tmp_rest, rest, rest_len * sizeof rest[0U]);
+    memcpy(tmp_rest, rest, rest_len * sizeof (rest[0U]));
     Hacl_Hash_Core_SHA2_pad_256(total_input_len, tmp_pad);
     Hacl_Hash_SHA2_update_multi_256(s, tmp, tmp_len / (uint32_t)64U);
   }
@@ -2091,7 +2091,7 @@ Hacl_Hash_SHA2_update_last_384(
     uint8_t *tmp = tmp_twoblocks;
     uint8_t *tmp_rest = tmp;
     uint8_t *tmp_pad = tmp + rest_len;
-    memcpy(tmp_rest, rest, rest_len * sizeof rest[0U]);
+    memcpy(tmp_rest, rest, rest_len * sizeof (rest[0U]));
     Hacl_Hash_Core_SHA2_pad_384(total_input_len, tmp_pad);
     Hacl_Hash_SHA2_update_multi_384(s, tmp, tmp_len / (uint32_t)128U);
   }
@@ -2132,7 +2132,7 @@ Hacl_Hash_SHA2_update_last_512(
     uint8_t *tmp = tmp_twoblocks;
     uint8_t *tmp_rest = tmp;
     uint8_t *tmp_pad = tmp + rest_len;
-    memcpy(tmp_rest, rest, rest_len * sizeof rest[0U]);
+    memcpy(tmp_rest, rest, rest_len * sizeof (rest[0U]));
     Hacl_Hash_Core_SHA2_pad_512(total_input_len, tmp_pad);
     Hacl_Hash_SHA2_update_multi_512(s, tmp, tmp_len / (uint32_t)128U);
   }
@@ -2219,21 +2219,21 @@ void Hacl_Hash_SHA2_hash_512(uint8_t *input, uint32_t input_len, uint8_t *dst)
 }
 
 static uint32_t
-Hacl_Hash_Core_SHA2_h224[8U] =
+h224[8U] =
   {
     (uint32_t)0xc1059ed8U, (uint32_t)0x367cd507U, (uint32_t)0x3070dd17U, (uint32_t)0xf70e5939U,
     (uint32_t)0xffc00b31U, (uint32_t)0x68581511U, (uint32_t)0x64f98fa7U, (uint32_t)0xbefa4fa4U
   };
 
 static uint32_t
-Hacl_Hash_Core_SHA2_h256[8U] =
+h256[8U] =
   {
     (uint32_t)0x6a09e667U, (uint32_t)0xbb67ae85U, (uint32_t)0x3c6ef372U, (uint32_t)0xa54ff53aU,
     (uint32_t)0x510e527fU, (uint32_t)0x9b05688cU, (uint32_t)0x1f83d9abU, (uint32_t)0x5be0cd19U
   };
 
 static uint64_t
-Hacl_Hash_Core_SHA2_h384[8U] =
+h384[8U] =
   {
     (uint64_t)0xcbbb9d5dc1059ed8U, (uint64_t)0x629a292a367cd507U, (uint64_t)0x9159015a3070dd17U,
     (uint64_t)0x152fecd8f70e5939U, (uint64_t)0x67332667ffc00b31U, (uint64_t)0x8eb44a8768581511U,
@@ -2241,7 +2241,7 @@ Hacl_Hash_Core_SHA2_h384[8U] =
   };
 
 static uint64_t
-Hacl_Hash_Core_SHA2_h512[8U] =
+h512[8U] =
   {
     (uint64_t)0x6a09e667f3bcc908U, (uint64_t)0xbb67ae8584caa73bU, (uint64_t)0x3c6ef372fe94f82bU,
     (uint64_t)0xa54ff53a5f1d36f1U, (uint64_t)0x510e527fade682d1U, (uint64_t)0x9b05688c2b3e6c1fU,
@@ -2251,36 +2251,36 @@ Hacl_Hash_Core_SHA2_h512[8U] =
 void Hacl_Hash_Core_SHA2_init_224(uint32_t *s)
 {
   uint32_t i;
-  for (i = (uint32_t)0U; i < (uint32_t)8U; i = i + (uint32_t)1U)
+  for (i = (uint32_t)0U; i < (uint32_t)8U; i++)
   {
-    s[i] = Hacl_Hash_Core_SHA2_h224[i];
+    s[i] = h224[i];
   }
 }
 
 void Hacl_Hash_Core_SHA2_init_256(uint32_t *s)
 {
   uint32_t i;
-  for (i = (uint32_t)0U; i < (uint32_t)8U; i = i + (uint32_t)1U)
+  for (i = (uint32_t)0U; i < (uint32_t)8U; i++)
   {
-    s[i] = Hacl_Hash_Core_SHA2_h256[i];
+    s[i] = h256[i];
   }
 }
 
 void Hacl_Hash_Core_SHA2_init_384(uint64_t *s)
 {
   uint32_t i;
-  for (i = (uint32_t)0U; i < (uint32_t)8U; i = i + (uint32_t)1U)
+  for (i = (uint32_t)0U; i < (uint32_t)8U; i++)
   {
-    s[i] = Hacl_Hash_Core_SHA2_h384[i];
+    s[i] = h384[i];
   }
 }
 
 void Hacl_Hash_Core_SHA2_init_512(uint64_t *s)
 {
   uint32_t i;
-  for (i = (uint32_t)0U; i < (uint32_t)8U; i = i + (uint32_t)1U)
+  for (i = (uint32_t)0U; i < (uint32_t)8U; i++)
   {
-    s[i] = Hacl_Hash_Core_SHA2_h512[i];
+    s[i] = h512[i];
   }
 }
 
@@ -2290,7 +2290,7 @@ void Hacl_Hash_Core_SHA2_update_224(uint32_t *hash1, uint8_t *block)
   uint32_t computed_ws[64U] = { 0U };
   {
     uint32_t i;
-    for (i = (uint32_t)0U; i < (uint32_t)64U; i = i + (uint32_t)1U)
+    for (i = (uint32_t)0U; i < (uint32_t)64U; i++)
     {
       if (i < (uint32_t)16U)
       {
@@ -2317,10 +2317,10 @@ void Hacl_Hash_Core_SHA2_update_224(uint32_t *hash1, uint8_t *block)
       }
     }
   }
-  memcpy(hash11, hash1, (uint32_t)8U * sizeof hash1[0U]);
+  memcpy(hash11, hash1, (uint32_t)8U * sizeof (hash1[0U]));
   {
     uint32_t i;
-    for (i = (uint32_t)0U; i < (uint32_t)64U; i = i + (uint32_t)1U)
+    for (i = (uint32_t)0U; i < (uint32_t)64U; i++)
     {
       uint32_t a0 = hash11[0U];
       uint32_t b0 = hash11[1U];
@@ -2361,7 +2361,7 @@ void Hacl_Hash_Core_SHA2_update_224(uint32_t *hash1, uint8_t *block)
   }
   {
     uint32_t i;
-    for (i = (uint32_t)0U; i < (uint32_t)8U; i = i + (uint32_t)1U)
+    for (i = (uint32_t)0U; i < (uint32_t)8U; i++)
     {
       uint32_t xi = hash1[i];
       uint32_t yi = hash11[i];
@@ -2376,7 +2376,7 @@ void Hacl_Hash_Core_SHA2_update_256(uint32_t *hash1, uint8_t *block)
   uint32_t computed_ws[64U] = { 0U };
   {
     uint32_t i;
-    for (i = (uint32_t)0U; i < (uint32_t)64U; i = i + (uint32_t)1U)
+    for (i = (uint32_t)0U; i < (uint32_t)64U; i++)
     {
       if (i < (uint32_t)16U)
       {
@@ -2403,10 +2403,10 @@ void Hacl_Hash_Core_SHA2_update_256(uint32_t *hash1, uint8_t *block)
       }
     }
   }
-  memcpy(hash11, hash1, (uint32_t)8U * sizeof hash1[0U]);
+  memcpy(hash11, hash1, (uint32_t)8U * sizeof (hash1[0U]));
   {
     uint32_t i;
-    for (i = (uint32_t)0U; i < (uint32_t)64U; i = i + (uint32_t)1U)
+    for (i = (uint32_t)0U; i < (uint32_t)64U; i++)
     {
       uint32_t a0 = hash11[0U];
       uint32_t b0 = hash11[1U];
@@ -2447,7 +2447,7 @@ void Hacl_Hash_Core_SHA2_update_256(uint32_t *hash1, uint8_t *block)
   }
   {
     uint32_t i;
-    for (i = (uint32_t)0U; i < (uint32_t)8U; i = i + (uint32_t)1U)
+    for (i = (uint32_t)0U; i < (uint32_t)8U; i++)
     {
       uint32_t xi = hash1[i];
       uint32_t yi = hash11[i];
@@ -2462,7 +2462,7 @@ void Hacl_Hash_Core_SHA2_update_384(uint64_t *hash1, uint8_t *block)
   uint64_t computed_ws[80U] = { 0U };
   {
     uint32_t i;
-    for (i = (uint32_t)0U; i < (uint32_t)80U; i = i + (uint32_t)1U)
+    for (i = (uint32_t)0U; i < (uint32_t)80U; i++)
     {
       if (i < (uint32_t)16U)
       {
@@ -2489,10 +2489,10 @@ void Hacl_Hash_Core_SHA2_update_384(uint64_t *hash1, uint8_t *block)
       }
     }
   }
-  memcpy(hash11, hash1, (uint32_t)8U * sizeof hash1[0U]);
+  memcpy(hash11, hash1, (uint32_t)8U * sizeof (hash1[0U]));
   {
     uint32_t i;
-    for (i = (uint32_t)0U; i < (uint32_t)80U; i = i + (uint32_t)1U)
+    for (i = (uint32_t)0U; i < (uint32_t)80U; i++)
     {
       uint64_t a0 = hash11[0U];
       uint64_t b0 = hash11[1U];
@@ -2533,7 +2533,7 @@ void Hacl_Hash_Core_SHA2_update_384(uint64_t *hash1, uint8_t *block)
   }
   {
     uint32_t i;
-    for (i = (uint32_t)0U; i < (uint32_t)8U; i = i + (uint32_t)1U)
+    for (i = (uint32_t)0U; i < (uint32_t)8U; i++)
     {
       uint64_t xi = hash1[i];
       uint64_t yi = hash11[i];
@@ -2548,7 +2548,7 @@ void Hacl_Hash_Core_SHA2_update_512(uint64_t *hash1, uint8_t *block)
   uint64_t computed_ws[80U] = { 0U };
   {
     uint32_t i;
-    for (i = (uint32_t)0U; i < (uint32_t)80U; i = i + (uint32_t)1U)
+    for (i = (uint32_t)0U; i < (uint32_t)80U; i++)
     {
       if (i < (uint32_t)16U)
       {
@@ -2575,10 +2575,10 @@ void Hacl_Hash_Core_SHA2_update_512(uint64_t *hash1, uint8_t *block)
       }
     }
   }
-  memcpy(hash11, hash1, (uint32_t)8U * sizeof hash1[0U]);
+  memcpy(hash11, hash1, (uint32_t)8U * sizeof (hash1[0U]));
   {
     uint32_t i;
-    for (i = (uint32_t)0U; i < (uint32_t)80U; i = i + (uint32_t)1U)
+    for (i = (uint32_t)0U; i < (uint32_t)80U; i++)
     {
       uint64_t a0 = hash11[0U];
       uint64_t b0 = hash11[1U];
@@ -2619,7 +2619,7 @@ void Hacl_Hash_Core_SHA2_update_512(uint64_t *hash1, uint8_t *block)
   }
   {
     uint32_t i;
-    for (i = (uint32_t)0U; i < (uint32_t)8U; i = i + (uint32_t)1U)
+    for (i = (uint32_t)0U; i < (uint32_t)8U; i++)
     {
       uint64_t xi = hash1[i];
       uint64_t yi = hash11[i];
@@ -2644,7 +2644,7 @@ void Hacl_Hash_Core_SHA2_pad_224(uint64_t len, uint8_t *dst)
       <
         ((uint32_t)128U - ((uint32_t)9U + (uint32_t)(len % (uint64_t)(uint32_t)64U)))
         % (uint32_t)64U;
-      i = i + (uint32_t)1U)
+      i++)
     {
       dst2[i] = (uint8_t)0U;
     }
@@ -2675,7 +2675,7 @@ void Hacl_Hash_Core_SHA2_pad_256(uint64_t len, uint8_t *dst)
       <
         ((uint32_t)128U - ((uint32_t)9U + (uint32_t)(len % (uint64_t)(uint32_t)64U)))
         % (uint32_t)64U;
-      i = i + (uint32_t)1U)
+      i++)
     {
       dst2[i] = (uint8_t)0U;
     }
@@ -2715,7 +2715,7 @@ void Hacl_Hash_Core_SHA2_pad_384(FStar_UInt128_uint128 len, uint8_t *dst)
           ((uint32_t)17U
           + (uint32_t)(FStar_UInt128_uint128_to_uint64(len) % (uint64_t)(uint32_t)128U)))
         % (uint32_t)128U;
-      i = i + (uint32_t)1U)
+      i++)
     {
       dst2[i] = (uint8_t)0U;
     }
@@ -2759,7 +2759,7 @@ void Hacl_Hash_Core_SHA2_pad_512(FStar_UInt128_uint128 len, uint8_t *dst)
           ((uint32_t)17U
           + (uint32_t)(FStar_UInt128_uint128_to_uint64(len) % (uint64_t)(uint32_t)128U)))
         % (uint32_t)128U;
-      i = i + (uint32_t)1U)
+      i++)
     {
       dst2[i] = (uint8_t)0U;
     }
@@ -2782,7 +2782,7 @@ void Hacl_Hash_Core_SHA2_finish_224(uint32_t *s, uint8_t *dst)
 {
   uint32_t *uu____0 = s;
   uint32_t i;
-  for (i = (uint32_t)0U; i < (uint32_t)7U; i = i + (uint32_t)1U)
+  for (i = (uint32_t)0U; i < (uint32_t)7U; i++)
   {
     store32_be(dst + i * (uint32_t)4U, uu____0[i]);
   }
@@ -2792,7 +2792,7 @@ void Hacl_Hash_Core_SHA2_finish_256(uint32_t *s, uint8_t *dst)
 {
   uint32_t *uu____0 = s;
   uint32_t i;
-  for (i = (uint32_t)0U; i < (uint32_t)8U; i = i + (uint32_t)1U)
+  for (i = (uint32_t)0U; i < (uint32_t)8U; i++)
   {
     store32_be(dst + i * (uint32_t)4U, uu____0[i]);
   }
@@ -2802,7 +2802,7 @@ void Hacl_Hash_Core_SHA2_finish_384(uint64_t *s, uint8_t *dst)
 {
   uint64_t *uu____0 = s;
   uint32_t i;
-  for (i = (uint32_t)0U; i < (uint32_t)6U; i = i + (uint32_t)1U)
+  for (i = (uint32_t)0U; i < (uint32_t)6U; i++)
   {
     store64_be(dst + i * (uint32_t)8U, uu____0[i]);
   }
@@ -2812,7 +2812,7 @@ void Hacl_Hash_Core_SHA2_finish_512(uint64_t *s, uint8_t *dst)
 {
   uint64_t *uu____0 = s;
   uint32_t i;
-  for (i = (uint32_t)0U; i < (uint32_t)8U; i = i + (uint32_t)1U)
+  for (i = (uint32_t)0U; i < (uint32_t)8U; i++)
   {
     store64_be(dst + i * (uint32_t)8U, uu____0[i]);
   }

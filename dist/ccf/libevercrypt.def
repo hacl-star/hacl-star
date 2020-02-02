@@ -182,11 +182,13 @@ EXPORTS
   __proj__MT__item__rhs_ok
   __proj__MT__item__rhs
   __proj__MT__item__mroot
+  __proj__MT__item__hash_fun
   merkle_tree_conditions
   offset_of
   mt_free
   mt_insert_pre
   mt_insert
+  mt_create_custom
   mt_create
   init_path
   clear_path
@@ -227,23 +229,6 @@ EXPORTS
   EverCrypt_CTR_init
   EverCrypt_CTR_update_block
   EverCrypt_CTR_free
-  Hacl_Impl_QTesla_abs_
-  Hacl_Impl_QTesla_check_ES
-  Hacl_Impl_QTesla_poly_uniform
-  Hacl_Impl_QTesla_qtesla_keygen
-  Hacl_Impl_QTesla_sample_y
-  Hacl_Impl_QTesla_hash_H
-  Hacl_Impl_QTesla_encode_c
-  Hacl_Impl_QTesla_sparse_mul
-  Hacl_Impl_QTesla_sparse_mul32
-  Hacl_Impl_QTesla_test_rejection
-  Hacl_Impl_QTesla_test_correctness
-  Hacl_Impl_QTesla_qtesla_sign
-  Hacl_Impl_QTesla_test_z
-  Hacl_Impl_QTesla_qtesla_verify
-  Hacl_Impl_QTesla_crypto_sign_keypair
-  Hacl_Impl_QTesla_crypto_sign
-  Hacl_Impl_QTesla_crypto_sign_open
   Hacl_Frodo_KEM_crypto_kem_keypair
   Hacl_Frodo_KEM_crypto_kem_enc
   Hacl_Frodo_KEM_crypto_kem_dec
