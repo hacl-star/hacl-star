@@ -5,6 +5,7 @@ TARGETS = $(filter-out gf128-%, $(patsubst %.c,%.exe,$(wildcard *.c)))
 
 CFLAGS += -I$(KREMLIN_HOME)/include -I../dist/gcc64-only \
   -I$(KREMLIN_HOME)/kremlib/dist/minimal \
+  -I../secure_api/merkle_tree \
   -O3 -march=native -mtune=native
 
 all: $(TARGETS)

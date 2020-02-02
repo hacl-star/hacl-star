@@ -26,7 +26,7 @@ let dom: IX64.arity_ok_stdcall td = []
 let aesni_pre : VSig.vale_pre dom =
   fun (c:V.va_code)
     (va_s0:V.va_state) ->
-      VC.va_req_check_aesni_stdcall c va_s0 IA.win
+      VC.va_req_Check_aesni_stdcall c va_s0 IA.win
 
 [@__reduce__] noextract
 let aesni_post : VSig.vale_post dom =
@@ -34,7 +34,7 @@ let aesni_post : VSig.vale_post dom =
     (va_s0:V.va_state)
     (va_s1:V.va_state)
     (f:V.va_fuel) ->
-      VC.va_ens_check_aesni_stdcall c va_s0 IA.win va_s1 f
+      VC.va_ens_Check_aesni_stdcall c va_s0 IA.win va_s1 f
 
 (* The vale lemma doesn't quite suffice to prove the modifies clause
    expected of the interop layer *)
@@ -50,13 +50,13 @@ let aesni_lemma'
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
        aesni_post code va_s0 va_s1 f))
- = VC.va_lemma_check_aesni_stdcall code va_s0 IA.win
+ = VC.va_lemma_Check_aesni_stdcall code va_s0 IA.win
 
 (* Prove that vm_lemma' has the required type *)
 noextract
 let aesni_lemma = as_t #(VSig.vale_sig_stdcall aesni_pre aesni_post) aesni_lemma'
 noextract
-let code_aesni = VC.va_code_check_aesni_stdcall IA.win
+let code_aesni = VC.va_code_Check_aesni_stdcall IA.win
 
 (* Here's the type expected for the check_aesni wrapper *)
 [@__reduce__] noextract
@@ -75,7 +75,7 @@ let lowstar_aesni_t =
 let sha_pre : VSig.vale_pre dom =
   fun (c:V.va_code)
     (va_s0:V.va_state) ->
-      VC.va_req_check_sha_stdcall c va_s0 IA.win
+      VC.va_req_Check_sha_stdcall c va_s0 IA.win
 
 [@__reduce__] noextract
 let sha_post : VSig.vale_post dom =
@@ -83,7 +83,7 @@ let sha_post : VSig.vale_post dom =
     (va_s0:V.va_state)
     (va_s1:V.va_state)
     (f:V.va_fuel) ->
-      VC.va_ens_check_sha_stdcall c va_s0 IA.win va_s1 f
+      VC.va_ens_Check_sha_stdcall c va_s0 IA.win va_s1 f
 
 open Vale.X64.Machine_s
 open Vale.X64.State
@@ -104,13 +104,13 @@ let sha_lemma'
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
        sha_post code va_s0 va_s1 f))
- = VC.va_lemma_check_sha_stdcall code va_s0 IA.win
+ = VC.va_lemma_Check_sha_stdcall code va_s0 IA.win
 
 (* Prove that vm_lemma' has the required type *)
 noextract
 let sha_lemma = as_t #(VSig.vale_sig_stdcall sha_pre sha_post) sha_lemma'
 noextract
-let code_sha = VC.va_code_check_sha_stdcall IA.win
+let code_sha = VC.va_code_Check_sha_stdcall IA.win
 
 (* Here's the type expected for the check_aesni wrapper *)
 [@__reduce__] noextract
@@ -129,7 +129,7 @@ let lowstar_sha_t =
 let adx_pre : VSig.vale_pre dom =
   fun (c:V.va_code)
     (va_s0:V.va_state) ->
-      VC.va_req_check_adx_bmi2_stdcall c va_s0 IA.win
+      VC.va_req_Check_adx_bmi2_stdcall c va_s0 IA.win
 
 [@__reduce__] noextract
 let adx_post : VSig.vale_post dom =
@@ -137,7 +137,7 @@ let adx_post : VSig.vale_post dom =
     (va_s0:V.va_state)
     (va_s1:V.va_state)
     (f:V.va_fuel) ->
-      VC.va_ens_check_adx_bmi2_stdcall c va_s0 IA.win va_s1 f
+      VC.va_ens_Check_adx_bmi2_stdcall c va_s0 IA.win va_s1 f
 
 (* The vale lemma doesn't quite suffice to prove the modifies clause
    expected of the interop layer *)
@@ -153,13 +153,13 @@ let adx_lemma'
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
        adx_post code va_s0 va_s1 f))
- = VC.va_lemma_check_adx_bmi2_stdcall code va_s0 IA.win
+ = VC.va_lemma_Check_adx_bmi2_stdcall code va_s0 IA.win
 
 (* Prove that vm_lemma' has the required type *)
 noextract
 let adx_lemma = as_t #(VSig.vale_sig_stdcall adx_pre adx_post) adx_lemma'
 noextract
-let code_adx = VC.va_code_check_adx_bmi2_stdcall IA.win
+let code_adx = VC.va_code_Check_adx_bmi2_stdcall IA.win
 
 (* Here's the type expected for the check_adx wrapper *)
 [@__reduce__] noextract
@@ -177,7 +177,7 @@ let lowstar_adx_t =
 let avx_pre : VSig.vale_pre dom =
   fun (c:V.va_code)
     (va_s0:V.va_state) ->
-      VC.va_req_check_avx_stdcall c va_s0 IA.win
+      VC.va_req_Check_avx_stdcall c va_s0 IA.win
 
 [@__reduce__] noextract
 let avx_post : VSig.vale_post dom =
@@ -185,7 +185,7 @@ let avx_post : VSig.vale_post dom =
     (va_s0:V.va_state)
     (va_s1:V.va_state)
     (f:V.va_fuel) ->
-      VC.va_ens_check_avx_stdcall c va_s0 IA.win va_s1 f
+      VC.va_ens_Check_avx_stdcall c va_s0 IA.win va_s1 f
 
 (* The vale lemma doesn't quite suffice to prove the modifies clause
    expected of the interop layer *)
@@ -201,13 +201,13 @@ let avx_lemma'
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
        avx_post code va_s0 va_s1 f))
- = VC.va_lemma_check_avx_stdcall code va_s0 IA.win
+ = VC.va_lemma_Check_avx_stdcall code va_s0 IA.win
 
 (* Prove that vm_lemma' has the required type *)
 noextract
 let avx_lemma = as_t #(VSig.vale_sig_stdcall avx_pre avx_post) avx_lemma'
 noextract
-let code_avx = VC.va_code_check_avx_stdcall IA.win
+let code_avx = VC.va_code_Check_avx_stdcall IA.win
 
 (* Here's the type expected for the check_avx wrapper *)
 [@__reduce__] noextract
@@ -225,7 +225,7 @@ let lowstar_avx_t =
 let avx2_pre : VSig.vale_pre dom =
   fun (c:V.va_code)
     (va_s0:V.va_state) ->
-      VC.va_req_check_avx2_stdcall c va_s0 IA.win
+      VC.va_req_Check_avx2_stdcall c va_s0 IA.win
 
 [@__reduce__] noextract
 let avx2_post : VSig.vale_post dom =
@@ -233,7 +233,7 @@ let avx2_post : VSig.vale_post dom =
     (va_s0:V.va_state)
     (va_s1:V.va_state)
     (f:V.va_fuel) ->
-      VC.va_ens_check_avx2_stdcall c va_s0 IA.win va_s1 f
+      VC.va_ens_Check_avx2_stdcall c va_s0 IA.win va_s1 f
 
 (* The vale lemma doesn't quite suffice to prove the modifies clause
    expected of the interop layer *)
@@ -249,13 +249,13 @@ let avx2_lemma'
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
        avx2_post code va_s0 va_s1 f))
- = VC.va_lemma_check_avx2_stdcall code va_s0 IA.win
+ = VC.va_lemma_Check_avx2_stdcall code va_s0 IA.win
 
 (* Prove that vm_lemma' has the required type *)
 noextract
 let avx2_lemma = as_t #(VSig.vale_sig_stdcall avx2_pre avx2_post) avx2_lemma'
 noextract
-let code_avx2 = VC.va_code_check_avx2_stdcall IA.win
+let code_avx2 = VC.va_code_Check_avx2_stdcall IA.win
 
 (* Here's the type expected for the check_avx wrapper *)
 [@__reduce__] noextract
@@ -273,7 +273,7 @@ let lowstar_avx2_t =
 let movbe_pre : VSig.vale_pre dom =
   fun (c:V.va_code)
     (va_s0:V.va_state) ->
-      VC.va_req_check_movbe_stdcall c va_s0 IA.win
+      VC.va_req_Check_movbe_stdcall c va_s0 IA.win
 
 [@__reduce__] noextract
 let movbe_post : VSig.vale_post dom =
@@ -281,7 +281,7 @@ let movbe_post : VSig.vale_post dom =
     (va_s0:V.va_state)
     (va_s1:V.va_state)
     (f:V.va_fuel) ->
-      VC.va_ens_check_movbe_stdcall c va_s0 IA.win va_s1 f
+      VC.va_ens_Check_movbe_stdcall c va_s0 IA.win va_s1 f
 
 (* The vale lemma doesn't quite suffice to prove the modifies clause
    expected of the interop layer *)
@@ -297,13 +297,13 @@ let movbe_lemma'
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
        movbe_post code va_s0 va_s1 f))
- = VC.va_lemma_check_movbe_stdcall code va_s0 IA.win
+ = VC.va_lemma_Check_movbe_stdcall code va_s0 IA.win
 
 (* Prove that vm_lemma' has the required type *)
 noextract
 let movbe_lemma = as_t #(VSig.vale_sig_stdcall movbe_pre movbe_post) movbe_lemma'
 noextract
-let code_movbe = VC.va_code_check_movbe_stdcall IA.win
+let code_movbe = VC.va_code_Check_movbe_stdcall IA.win
 
 (* Here's the type expected for the check_movbe wrapper *)
 [@__reduce__] noextract
@@ -321,7 +321,7 @@ let lowstar_movbe_t =
 let sse_pre : VSig.vale_pre dom =
   fun (c:V.va_code)
     (va_s0:V.va_state) ->
-      VC.va_req_check_sse_stdcall c va_s0 IA.win
+      VC.va_req_Check_sse_stdcall c va_s0 IA.win
 
 [@__reduce__] noextract
 let sse_post : VSig.vale_post dom =
@@ -329,7 +329,7 @@ let sse_post : VSig.vale_post dom =
     (va_s0:V.va_state)
     (va_s1:V.va_state)
     (f:V.va_fuel) ->
-      VC.va_ens_check_sse_stdcall c va_s0 IA.win va_s1 f
+      VC.va_ens_Check_sse_stdcall c va_s0 IA.win va_s1 f
 
 (* The vale lemma doesn't quite suffice to prove the modifies clause
    expected of the interop layer *)
@@ -345,13 +345,13 @@ let sse_lemma'
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
        sse_post code va_s0 va_s1 f))
- = VC.va_lemma_check_sse_stdcall code va_s0 IA.win
+ = VC.va_lemma_Check_sse_stdcall code va_s0 IA.win
 
 (* Prove that vm_lemma' has the required type *)
 noextract
 let sse_lemma = as_t #(VSig.vale_sig_stdcall sse_pre sse_post) sse_lemma'
 noextract
-let code_sse = VC.va_code_check_sse_stdcall IA.win
+let code_sse = VC.va_code_Check_sse_stdcall IA.win
 
 (* Here's the type expected for the check_sse wrapper *)
 [@__reduce__] noextract
@@ -369,7 +369,7 @@ let lowstar_sse_t =
 let rdrand_pre : VSig.vale_pre dom =
   fun (c:V.va_code)
     (va_s0:V.va_state) ->
-      VC.va_req_check_rdrand_stdcall c va_s0 IA.win
+      VC.va_req_Check_rdrand_stdcall c va_s0 IA.win
 
 [@__reduce__] noextract
 let rdrand_post : VSig.vale_post dom =
@@ -377,7 +377,7 @@ let rdrand_post : VSig.vale_post dom =
     (va_s0:V.va_state)
     (va_s1:V.va_state)
     (f:V.va_fuel) ->
-      VC.va_ens_check_rdrand_stdcall c va_s0 IA.win va_s1 f
+      VC.va_ens_Check_rdrand_stdcall c va_s0 IA.win va_s1 f
 
 (* The vale lemma doesn't quite suffice to prove the modifies clause
    expected of the interop layer *)
@@ -393,13 +393,13 @@ let rdrand_lemma'
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
        rdrand_post code va_s0 va_s1 f))
- = VC.va_lemma_check_rdrand_stdcall code va_s0 IA.win
+ = VC.va_lemma_Check_rdrand_stdcall code va_s0 IA.win
 
 (* Prove that vm_lemma' has the required type *)
 noextract
 let rdrand_lemma = as_t #(VSig.vale_sig_stdcall rdrand_pre rdrand_post) rdrand_lemma'
 noextract
-let code_rdrand = VC.va_code_check_rdrand_stdcall IA.win
+let code_rdrand = VC.va_code_Check_rdrand_stdcall IA.win
 
 (* Here's the type expected for the check_rdrand wrapper *)
 [@__reduce__] noextract

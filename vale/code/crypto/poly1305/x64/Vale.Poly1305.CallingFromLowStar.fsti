@@ -42,7 +42,7 @@ val lemma_hash_init (h0 h1:HS.mem) (ctx_b:PS.uint8_p) (is_zero:bool) : Lemma
     h0_in == h0_out /\ h1_in == h1_out /\ h2_in == h2_out /\
     (is_zero ==>
       h0_in == 0 /\ h1_in == 0 /\ h2_in == 0 /\ modp 0 == 0 /\
-      PM.lowerUpper192_opaque (PM.lowerUpper128_opaque h0_in h1_in) h2_in == 0)
+      PM.lowerUpper192 (PM.lowerUpper128 h0_in h1_in) h2_in == 0)
   ))
 
 val lemma_call_poly1305 (h0 h1:HS.mem) (ctx_b:PS.uint8_p) (inp_b:PS.uint8_p) (src key:bytes) : Lemma
@@ -76,14 +76,14 @@ val lemma_call_poly1305 (h0 h1:HS.mem) (ctx_b:PS.uint8_p) (inp_b:PS.uint8_p) (sr
     let key_r1 = UInt64.v (MH.low_buffer_read TUInt8 TUInt64 h0 ctx_b 4) in
     let key_s0 = UInt64.v (MH.low_buffer_read TUInt8 TUInt64 h0 ctx_b 5) in
     let key_s1 = UInt64.v (MH.low_buffer_read TUInt8 TUInt64 h0 ctx_b 6) in
-    let h_in = lowerUpper192_opaque (lowerUpper128_opaque h0_in h1_in) h2_in in
-    let key_r = lowerUpper128_opaque key_r0 key_r1 in
-    let key_s = lowerUpper128_opaque key_s0 key_s1 in
+    let h_in = lowerUpper192 (lowerUpper128 h0_in h1_in) h2_in in
+    let key_r = lowerUpper128 key_r0 key_r1 in
+    let key_s = lowerUpper128 key_s0 key_s1 in
 
     let h0_out = UInt64.v (MH.low_buffer_read TUInt8 TUInt64 h1 ctx_b 0) in
     let h1_out = UInt64.v (MH.low_buffer_read TUInt8 TUInt64 h1 ctx_b 1) in
     let h2_out = UInt64.v (MH.low_buffer_read TUInt8 TUInt64 h1 ctx_b 2) in
-    let h10 = lowerUpper128_opaque h0_out h1_out in
+    let h10 = lowerUpper128 h0_out h1_out in
     let db = get_downview inp_b in
     math_aux inp_b (readable_words len);
     let inp_mem = seqTo128 (uint64_to_nat_seq (UV.as_seq h1 (UV.mk_buffer db Vale.Interop.Views.up_view64))) in

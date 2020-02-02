@@ -280,7 +280,7 @@ let rec log2_bound n c =
 val log2_div:
   n:nat{n > 1} ->
   Lemma (log2 (n / 2) = log2 n - 1)
-let rec log2_div n = ()
+let log2_div n = ()
 
 val log2c: 
   n:nat -> 
@@ -291,7 +291,7 @@ let log2c n =
 val log2c_div:
   n:nat{n > 0} ->
   Lemma (log2c (n / 2) = log2c n - 1)
-let rec log2c_div n = ()
+let log2c_div n = ()
 
 val log2c_bound:
   n:nat -> c:nat{n < pow2 c} ->
@@ -347,7 +347,7 @@ val mt_hashes_lth_inv_log_converted:
   Lemma (requires mt_hashes_lth_inv 0 j fhs)
         (ensures (log2c_bound j 32;
                   mt_hashes_lth_inv_log j (S.slice fhs 0 (log2c j))))
-let rec mt_hashes_lth_inv_log_converted j fhs =
+let mt_hashes_lth_inv_log_converted j fhs =
   mt_hashes_lth_inv_log_converted_ 0 j fhs
 
 val mt_hashes_inv_log_converted_:

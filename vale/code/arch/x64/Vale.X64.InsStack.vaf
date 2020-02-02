@@ -57,7 +57,7 @@ friend Vale.X64.Stack_i
 #endverbatim
 
 //function operator([]) #[a:Type(0), b:Type(0)](m:FStar.Map.t(a, b), key:a):b extern;
-//function operator([]) (m:mem, b:Vale.X64.Memory.buffer64):fun(int) -> nat64 extern;
+//function operator([]) (m:heap0, b:Vale.X64.Memory.buffer64):fun(int) -> nat64 extern;
 
 #reset-options "--initial_fuel 2 --max_fuel 4 --max_ifuel 2 --z3rlimit 50"
 
@@ -66,6 +66,12 @@ procedure Stack_in(in base:reg64, inline offset:int, inline t:taint) returns(o:o
     reads
         stack;
     extern;
+
+procedure Stack_lemma(ghost base:va_operand, ghost offset:int, ghost t:taint)
+    {:public}
+    {:quick exportOnly}
+{
+}
 
 procedure Pop(out dst:dst_opr64)
     {:public}

@@ -1,29 +1,31 @@
 *~
 *.o
-*.a
 *.d
 *.cm*
 *.so
+*.dll
 *.a
 *.exe
 *.exe.dSYM
-*.cmi
-*.cmx
-*.cmxa
 out.krml
 *.checked
 *.checked.lax
 *.dump
 .extracted
 .*depend*
-code/old/**/*-c
-code/old/**/*-c89
 .evercrypt_config
 code/**/dist
 !code/**/dist/Makefile
+code/old/experimental/aesgcm/aesgcm-c
+code/old/experimental/aesgcm/aesgcm-c89
 *.orig
 .didhelp
 .last_vale_version
 Makefile.config
 .#*
 tests/benchmark/build
+dist/**/lib/*_stubs.ml
+dist/**/lib/*_c_stubs.c
+dist/test # not under version control
+dist/wasm # not under version control FOR NOW
+doc/_build

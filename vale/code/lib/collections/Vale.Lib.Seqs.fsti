@@ -49,3 +49,19 @@ val append_distributes_seq_map (#a #b:Type) (f:a -> b) (s1 s2:seq a) :
 val seq_map_injective (#a #b:Type) (f:a -> b) (s s':seq a) : Lemma
   (requires (forall (x x':a).{:pattern (f x); (f x')} f x == f x' ==> x == x') /\ seq_map f s == seq_map f s')
   (ensures s == s')
+
+val list_to_seq (#a:Type) (l:list a) : Pure (seq a)
+  (requires True)
+  (ensures fun s -> Seq.length s == List.length l)
+
+let rec list_to_seq_post (#a:Type) (l:list a) (s:seq a) (n:nat) : Pure prop
+  (requires n + List.length l == Seq.length s)
+  (ensures fun _ -> True)
+  (decreases l)
+  =
+  match l with
+  | [] -> n == Seq.length s
+  | h::t -> Seq.index s n == h /\ list_to_seq_post t s (n + 1)
+
+val lemma_list_to_seq (#a:Type) (l:list a) : Lemma
+  (ensures norm [zeta; iota; delta_only [`%list_to_seq_post]] (list_to_seq_post l (list_to_seq l) 0))

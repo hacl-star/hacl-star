@@ -31,7 +31,7 @@ open Vale.X64.CPU_Features_s
 open Vale.Lib.Basic
 #endverbatim
 
-procedure check_aesni_support()
+procedure Check_aesni_support()
     {:public}
     {:quick}
     modifies rax; rbx; rcx; rdx; r9; efl;
@@ -66,7 +66,7 @@ procedure check_aesni_support()
     Mov64(rbx, r9);     // Callee-restore
 }
 
-procedure check_sha_support()
+procedure Check_sha_support()
     {:public}
     {:quick}
     modifies rax; rbx; rcx; rdx; r9; efl;
@@ -87,7 +87,7 @@ procedure check_sha_support()
     Mov64(rbx, r9);     // Callee-restore
 }
 
-procedure check_adx_bmi2_support()
+procedure Check_adx_bmi2_support()
     {:public}
     {:quick}
     modifies rax; rbx; rcx; rdx; r9; efl;
@@ -120,7 +120,7 @@ procedure check_adx_bmi2_support()
     Mov64(rbx, r9);     // Callee-restore
 }
 
-procedure check_avx_support()
+procedure Check_avx_support()
     {:public}
     {:quick}
     modifies rax; rbx; rcx; rdx; r9; efl;
@@ -145,7 +145,7 @@ procedure check_avx_support()
     Mov64(rbx, r9);     // Callee-restore
 }
 
-procedure check_avx2_support()
+procedure Check_avx2_support()
     {:public}
     {:quick}
     modifies rax; rbx; rcx; rdx; r9; efl;
@@ -166,7 +166,7 @@ procedure check_avx2_support()
     Mov64(rbx, r9);     // Callee-restore
 }
 
-procedure check_movbe_support()
+procedure Check_movbe_support()
     {:public}
     {:quick}
     modifies rax; rbx; rcx; rdx; r9; efl;
@@ -191,7 +191,7 @@ procedure check_movbe_support()
     Mov64(rbx, r9);     // Callee-restore
 }
 
-procedure check_sse_support()
+procedure Check_sse_support()
     {:public}
     {:quick}
     modifies rax; rbx; rcx; rdx; r9; efl;
@@ -237,7 +237,7 @@ procedure check_sse_support()
     Mov64(rbx, r9);        // Callee-restore
 }
 
-procedure check_rdrand_support()
+procedure Check_rdrand_support()
     {:public}
     {:quick}
     modifies rax; rbx; rcx; rdx; r9; efl;

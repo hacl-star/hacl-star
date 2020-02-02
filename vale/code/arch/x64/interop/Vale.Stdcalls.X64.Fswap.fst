@@ -12,4 +12,4 @@ let lowstar_cswap : lowstar_cswap_t  =
     cswap_dom
     (W.mk_prediction code_cswap cswap_dom [] (cswap_lemma code_cswap IA.win))
 
-let cswap2 = as_normal_t #lowstar_cswap_t lowstar_cswap
+let cswap2_e = as_normal_t #lowstar_cswap_t lowstar_cswap

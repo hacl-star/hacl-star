@@ -25,15 +25,20 @@ val addrs_set_lemma (mem:interop_heap) (x:int)
            let ptrs = ptrs_of_mem mem in
            valid_addr mem x <==>
            (exists (b:b8{List.memP b ptrs}).{:pattern (addrs b)} addrs b <= x /\ x < addrs b + DV.length (get_downview b.bsrc)))
-          [SMTPat (Set.mem x (addrs_set mem))]
 
-let addrs_set_mem (mem:interop_heap) (a:b8) (i:int)
+val addrs_set_lemma_all (_:unit) : Lemma
+  (forall (mem:interop_heap) (x:int).{:pattern (Set.mem x (addrs_set mem))}
+    let addrs = addrs_of_mem mem in
+    let ptrs = ptrs_of_mem mem in
+    valid_addr mem x <==>
+    (exists (b:b8{List.memP b ptrs}).{:pattern (addrs b)} addrs b <= x /\ x < addrs b + DV.length (get_downview b.bsrc)))
+
+val addrs_set_mem (mem:interop_heap) (a:b8) (i:int)
   : Lemma
     (requires (let ptrs = ptrs_of_mem mem in
                let addrs = addrs_of_mem mem in
                List.memP a ptrs /\ i >= addrs a /\ i < addrs a + DV.length (get_downview a.bsrc)))
     (ensures valid_addr mem i)
-  = ()
 
 (* Takes a Low* Hyperstack and a list of buffers and create a vale memory + keep track of the vale addresses *)
 val down_mem: down_mem_t

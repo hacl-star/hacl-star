@@ -500,7 +500,7 @@ val mt_get_path_slice:
                             (S.length p) (S.length p + mt_path_length k j actd))
                           (mt_get_path_ lv hs rhs i j k S.empty actd))
         (decreases (32 - lv))
-let rec mt_get_path_slice lv hs rhs i j k p actd =
+let mt_get_path_slice lv hs rhs i j k p actd =
   mt_get_path_pull lv hs rhs i j k p actd
 
 val mt_get_path:

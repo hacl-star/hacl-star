@@ -246,11 +246,11 @@ let lemma_mod_factor_lo(x0:nat64) (x1:nat64) (y:int) (z:pos) :
   Lemma (requires z < 0x10000000000000000 /\
                   y * z == 0x10000000000000000)
         (ensures ((x0 % z) < pow2_64) /\
-                 lowerUpper128 x0 x1 % z == lowerUpper128 (x0 % z) 0) =
+                 lowerUpper128_def x0 x1 % z == lowerUpper128_def (x0 % z) 0) =
   lemma_mul_pos_pos_is_pos_inverse z y;
   modulo_range_lemma x0 z;
   lemma_mod_factors x0 x1 y z;
-  assert_norm(lowerUpper128 x0 x1 % z == lowerUpper128 (x0 % z) 0)
+  assert_norm(lowerUpper128_def x0 x1 % z == lowerUpper128_def (x0 % z) 0)
 
 let lemma_mod_power2_lo (x0:nat64) (x1:nat64) (y:int) (z:int) =
     assert (z > 0);
@@ -263,7 +263,7 @@ let lemma_mod_power2_lo (x0:nat64) (x1:nat64) (y:int) (z:int) =
     lemma_mod_factor_lo x0 x1 0x10000 0x1000000000000;
     lemma_mod_factor_lo x0 x1 0x100 0x100000000000000;
     lemma_bytes_power2 ();
-    reveal_opaque (lowerUpper128)
+    lowerUpper128_reveal ()
 
 let lemma_power2_add64 (n:nat) =
   pow2_plus 64 n;
@@ -358,13 +358,13 @@ let lemma_mod_breakdown (a:nat) (b:pos) (c:pos) :
 
 let lemma_mod_hi (x0:nat64) (x1:nat64) (z:nat64) =
   let n = 0x10000000000000000 in
-  assert(lowerUpper128 x0 x1 % lowerUpper128 0 z = (x1 * n + x0) % (z * n));
+  assert(lowerUpper128_def x0 x1 % lowerUpper128_def 0 z = (x1 * n + x0) % (z * n));
   lemma_mod_breakdown (x1 * n + x0) n z;
   assert ((x1 * n + x0) % (z * n) == n * (((x1 * n + x0) / n) % z) + (x1 * n + x0) % n);
   lemma_mod_plus x0 x1 n;
   assert (n * (((x1 * n + x0) / n) % z) + (x1 * n + x0) % n == n * (((x1 * n + x0) / n) % z) + x0 % n);
   assert(n * (((x1 * n + x0) / n) % z) + x0 % n == n * (x1 % z) + x0);
-  reveal_opaque(lowerUpper128)
+  lowerUpper128_reveal ()
 
 let lemma_poly_demod (p:pos) (h:int) (x:int) (r:int) =
   distributivity_add_left (h%p) x r; // ((h%p + x)*r)% = ((h%p)*r + x*r)%p
@@ -375,10 +375,10 @@ let lemma_poly_demod (p:pos) (h:int) (x:int) (r:int) =
 
 #reset-options "--z3cliopt smt.QI.EAGER_THRESHOLD=100 --z3cliopt smt.CASE_SPLIT=3 --z3cliopt smt.arith.nl=false --max_fuel 2 --max_ifuel 1 --smtencoding.elim_box true --smtencoding.nl_arith_repr wrapped --smtencoding.l_arith_repr native --z3rlimit 50"
 let lemma_reduce128  (h:int) (h2:nat64) (h1:nat64) (h0:nat64) (g:int) (g2:nat64) (g1:nat64) (g0:nat64) =
-  FStar.Pervasives.reveal_opaque (`%mod2_128) mod2_128;
-  reveal_opaque lowerUpper128;
-  reveal_opaque lowerUpper192;
-  FStar.Pervasives.reveal_opaque (`%modp) modp;
+  reveal_opaque (`%mod2_128) mod2_128;
+  lowerUpper128_reveal ();
+  lowerUpper192_reveal ();
+  reveal_opaque (`%modp) modp;
   assert_norm (mod2_128 (g - 0x400000000000000000000000000000000) == mod2_128 g);
   if (g2<4) then
   begin
@@ -386,8 +386,8 @@ let lemma_reduce128  (h:int) (h2:nat64) (h1:nat64) (h0:nat64) (g:int) (g2:nat64)
     assert(h >= 0);
     assert (modp(h) == h % 0x3fffffffffffffffffffffffffffffffb);
     assert (mod2_128(modp(h)) == mod2_128(h));
-    reveal_opaque lowerUpper128;
-    assert_norm (mod2_128 h == lowerUpper128 h0 h1)
+    lowerUpper128_reveal ();
+    assert_norm (mod2_128 h == lowerUpper128_def h0 h1)
   end
   else
   begin
@@ -402,21 +402,21 @@ let lemma_reduce128  (h:int) (h2:nat64) (h1:nat64) (h0:nat64) (g:int) (g2:nat64)
     assert(mod2_128(h - 0x3fffffffffffffffffffffffffffffffb) ==
                       mod2_128(g - 0x400000000000000000000000000000000));
     assert(mod2_128(g - 0x400000000000000000000000000000000) == mod2_128(g));
-    assert_norm (mod2_128 g == lowerUpper128 g0 g1)
+    assert_norm (mod2_128 g == lowerUpper128_def g0 g1)
   end
 
 let lemma_add_key (old_h0:nat64) (old_h1:nat64) (h_in:int) (key_s0:nat64) (key_s1:nat64) (key_s:int) (h0:nat64) (h1:nat64) =
-  reveal_opaque lowerUpper128;
-  FStar.Pervasives.reveal_opaque (`%mod2_128) mod2_128;
+  lowerUpper128_reveal ();
+  reveal_opaque (`%mod2_128) mod2_128;
   ()
 
 
 let lemma_lowerUpper128_and (x:nat128) (x0:nat64) (x1:nat64) (y:nat128) (y0:nat64) (y1:nat64) (z:nat128) (z0:nat64) (z1:nat64) =
-  reveal_opaque (lowerUpper128);
+  lowerUpper128_reveal ();
   reveal_iand 64 x0 y0;
   reveal_iand 64 x1 y1;
   reveal_iand 128 x y;
   lemma_lowerUpper128_andu x x0 x1 y y0 y1 z z0 z1
 
 let lemma_add_mod128 (x y :int) =
-  FStar.Pervasives.reveal_opaque (`%mod2_128) mod2_128
+  reveal_opaque (`%mod2_128) mod2_128

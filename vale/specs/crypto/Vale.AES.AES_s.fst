@@ -67,29 +67,33 @@ type aes_key_LE (alg:algorithm) : eqtype = s:(seq nat32){is_aes_key_LE alg s}
 let is_aes_key (alg:algorithm) (s:seq nat8) : prop0 = length s == 4 * nk alg
 type aes_key (alg:algorithm) : eqtype = s:(seq nat8){is_aes_key alg s}
 
-let round (state round_key:quad32) =
+let eval_round (state round_key:quad32) =
   let s = sub_bytes state in
   let s = shift_rows_LE s in
   let s = mix_columns_LE s in
   let s = quad32_xor s round_key in
   s
 
-let rec rounds (init:quad32) (round_keys:seq quad32) (n:nat{n < length round_keys}) : quad32 =
+let rec eval_rounds_def (init:quad32) (round_keys:seq quad32) (n:nat{n < length round_keys}) : quad32 =
   if n = 0 then
     init
   else
-    round (rounds init round_keys (n - 1)) (index round_keys n)
+    eval_round (eval_rounds_def init round_keys (n - 1)) (index round_keys n)
+[@"opaque_to_smt"] let eval_rounds = opaque_make eval_rounds_def
+irreducible let eval_rounds_reveal = opaque_revealer (`%eval_rounds) eval_rounds eval_rounds_def
 
-let cipher (alg:algorithm) (input:quad32) (round_keys:seq quad32) : Pure quad32
+let eval_cipher_def (alg:algorithm) (input:quad32) (round_keys:seq quad32) : Pure quad32
   (requires length round_keys == nr alg + 1)
   (ensures fun _ -> True)
   =
   let state = quad32_xor input (index round_keys 0) in
-  let state = rounds state round_keys (nr alg - 1) in
+  let state = eval_rounds_def state round_keys (nr alg - 1) in
   let state = sub_bytes state in
   let state = shift_rows_LE state in
   let state = quad32_xor state (index round_keys (nr alg)) in
   state
+[@"opaque_to_smt"] let eval_cipher = opaque_make eval_cipher_def
+irreducible let eval_cipher_reveal = opaque_revealer (`%eval_cipher) eval_cipher eval_cipher_def
 
 let rec expand_key_def (alg:algorithm) (key:aes_key_LE alg) (size:nat{size <= (nb * ((nr alg) + 1))})
   : (ek_LE:seq nat32 {length ek_LE == size}) =
@@ -109,8 +113,8 @@ let rec expand_key_def (alg:algorithm) (key:aes_key_LE alg) (size:nat{size <= (n
           index w (i - 1)
         in
       append w (create 1 (nat32_xor (index w (i - (nk alg))) temp))
-
-let expand_key = make_opaque expand_key_def
+[@"opaque_to_smt"] let expand_key = opaque_make expand_key_def
+irreducible let expand_key_reveal = opaque_revealer (`%expand_key) expand_key expand_key_def
 
 let rec key_schedule_to_round_keys (rounds:nat) (w:seq nat32 {length w >= 4 * rounds})
   : (round_keys:seq quad32 {length round_keys == rounds}) =
@@ -131,10 +135,9 @@ let aes_encrypt_LE_def (alg:algorithm) (key:seq nat32) (input_LE:quad32) : Pure 
   (requires is_aes_key_LE alg key)
   (ensures fun _ -> True)
   =
-  cipher alg input_LE (key_to_round_keys_LE alg key)
-
-//let aes_encrypt_LE = make_opaque aes_encrypt_LE_def
-unfold let aes_encrypt_LE = aes_encrypt_LE_def
+  eval_cipher_def alg input_LE (key_to_round_keys_LE alg key)
+[@"opaque_to_smt"] let aes_encrypt_LE = opaque_make aes_encrypt_LE_def
+irreducible let aes_encrypt_LE_reveal = opaque_revealer (`%aes_encrypt_LE) aes_encrypt_LE aes_encrypt_LE_def
 
 #push-options "--z3rlimit 20"
 let key_to_round_keys (alg:algorithm) (key:aes_key alg)

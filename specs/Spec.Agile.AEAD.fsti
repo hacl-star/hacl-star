@@ -18,9 +18,6 @@ type alg =
   | AES128_CCM8 // variant with truncated 8-byte tags
   | AES256_CCM8
 
-// BB. Removed after renaming
-let algorithm = alg
-
 let _: squash (inversion alg) = allow_inversion alg
 
 let is_supported_alg (a: alg): bool =
@@ -50,9 +47,6 @@ let key_length (a: alg): nat =
   | AES256_CCM        -> 32
   | AES256_CCM8       -> 32
 
-// BB. Delete after rename
-let size_key = key_length
-
 let tag_length: alg -> nat =
   function
   | AES128_CCM8       ->  8
@@ -63,20 +57,6 @@ let tag_length: alg -> nat =
   | AES128_CCM        -> 16
   | AES256_CCM        -> 16
 
-// BB. Delete after rename
-let size_tag = tag_length
-
-let size_block: alg -> nat =
-  function
-  | AES128_CCM8       -> 16
-  | AES256_CCM8       -> 32
-  | AES128_GCM        -> 16
-  | AES256_GCM        -> 32
-  | CHACHA20_POLY1305 -> 32
-  | AES128_CCM        -> 16
-  | AES256_CCM        -> 32
-
-
 /// No sharing with Spec.Agile.Cipher, since AES-GCM offers IV reduction via the
 /// GHASH function.
 let iv_length (a: supported_alg) (len: nat) =
@@ -84,10 +64,6 @@ let iv_length (a: supported_alg) (len: nat) =
   | AES128_GCM -> len > 0 /\ 8 * len <= pow2 64 - 1
   | AES256_GCM -> len > 0 /\ 8 * len <= pow2 64 - 1
   | CHACHA20_POLY1305 -> len == 12
-
-inline_for_extraction
-let padlen (a:algorithm) (x:nat) : nat =
-  (size_block a - x % (size_block a)) % size_block a
 
 // Maximum length for both plaintexts and additional data.
 //
@@ -104,10 +80,6 @@ let max_length: supported_alg -> nat =
   | CHACHA20_POLY1305 -> pow2 32 - 1 - 16
   | AES128_GCM | AES256_GCM -> pow2 32 - 1
 
-// BB. Delete after rename
-let max_input = max_length
-
-
 let uint8 = Lib.IntTypes.uint8
 
 // Proudly defining this type abbreviation for the tenth time in HACL*!
@@ -116,7 +88,6 @@ let lbytes (l:nat) = b:Seq.seq uint8 { Seq.length b = l }
 // Note: using <= for maximum admissible lengths
 // Note: not indexing the types over their lengths; we can use S.length in specs
 let kv a = lbytes (key_length a)
-let tag a = lbytes (tag_length a)
 let iv a = s:S.seq uint8 { iv_length a (S.length s) }
 let ad a = s:S.seq uint8 { S.length s <= max_length a }
 let plain (a: supported_alg) = s:S.seq uint8 { S.length s <= max_length a }
@@ -128,10 +99,6 @@ let cipher_length #a (p: plain a) =
 // Convenient abbreviations
 let encrypted #a (p: plain a) = c:cipher a { S.length c = cipher_length p }
 let decrypted #a (c: cipher a) = p:plain a { S.length c = cipher_length p }
-
-// BB. 2019/10/18
-// Note: quite inconvenient actually, the mac is not part of the ciphertext
-// and it is not encrypted either...
 
 // Note: no GTot, specs need to be executable for testing
 

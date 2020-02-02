@@ -5,20 +5,20 @@ open Vale.Def.Words_s
 open Vale.Def.Types_s
 open Vale.Arch.MachineHeap_s
 
-val same_mem_get_heap_val (ptr:int) (mem1 mem2:machine_heap) : Lemma
+val same_mem_get_heap_val64 (ptr:int) (mem1 mem2:machine_heap) : Lemma
   (requires get_heap_val64 ptr mem1 == get_heap_val64 ptr mem2)
   (ensures forall i.{:pattern mem1.[i] \/ mem2.[i]} i >= ptr /\ i < ptr + 8 ==> mem1.[i] == mem2.[i])
 
-val frame_update_heap (ptr:int) (v:nat64) (mem:machine_heap) : Lemma (
+val frame_update_heap64 (ptr:int) (v:nat64) (mem:machine_heap) : Lemma (
   let new_mem = update_heap64 ptr v mem in
   forall j.{:pattern mem.[j] \/ new_mem.[j]} j < ptr \/ j >= ptr + 8 ==>
     mem.[j] == new_mem.[j])
 
-val correct_update_get (ptr:int) (v:nat64) (mem:machine_heap) : Lemma (
+val correct_update_get64 (ptr:int) (v:nat64) (mem:machine_heap) : Lemma (
   get_heap_val64 ptr (update_heap64 ptr v mem) == v)
   [SMTPat (get_heap_val64 ptr (update_heap64 ptr v mem))]
 
-val same_domain_update (ptr:int) (v:nat64) (mem:machine_heap) : Lemma
+val same_domain_update64 (ptr:int) (v:nat64) (mem:machine_heap) : Lemma
   (requires valid_addr64 ptr mem)
   (ensures Map.domain mem == Map.domain (update_heap64 ptr v mem))
 

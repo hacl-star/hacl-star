@@ -136,7 +136,7 @@ val chacha20_encrypt_block:
   -> text:lbuffer uint8 (size w *! 64ul) ->
   Stack unit
     (requires (fun h -> live h ctx /\ live h text /\ live h out /\
-      disjoint out ctx /\ disjoint text ctx))
+      disjoint out ctx /\ disjoint text ctx /\ eq_or_disjoint text out))
     (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1 /\
       as_seq h1 out == Spec.chacha20_encrypt_block (as_seq h0 ctx) (v incr) (as_seq h0 text)))
 [@ Meta.Attribute.inline_ ]
@@ -144,6 +144,7 @@ let chacha20_encrypt_block #w ctx out incr text =
   push_frame();
   let k = create 16ul (vec_zero U32 w) in
   chacha20_core k ctx incr;
+  transpose k;
   xor_block out k text;
   pop_frame()
 
@@ -184,17 +185,15 @@ val chacha20_update:
       as_seq h1 out == Spec.chacha20_update (as_seq h0 ctx) (as_seq h0 text)))
 [@ Meta.Attribute.inline_ ]
 let chacha20_update #w ctx len out text =
-  push_frame();
-  assert_norm (range (v len / v (size w *. size 64)) U32);
-  let blocks = len /. (size w *. size 64) in
-  let rem = len %. (size w *. size 64) in
+  assert_norm (range (v len / v (size w *! 64ul)) U32);
+  let blocks = len /. (size w *! 64ul) in
+  let rem = len %. (size w *! 64ul) in
   let h0 = ST.get() in
-  map_blocks h0 len (size w *. 64ul) text out
+  map_blocks h0 len (size w *! 64ul) text out
     (fun h -> Spec.chacha20_encrypt_block (as_seq h0 ctx))
     (fun h -> Spec.chacha20_encrypt_last (as_seq h0 ctx))
-    (fun i -> chacha20_encrypt_block ctx (sub out (i *! (size w *. 64ul)) (size w *. 64ul)) i (sub text (i *! (size w *! 64ul)) (size w *! 64ul)))
-    (fun i -> chacha20_encrypt_last ctx rem (sub out (i *! (size w *. 64ul)) rem) i (sub text (i *! (size w *. 64ul)) rem));
-  pop_frame()
+    (fun i -> chacha20_encrypt_block ctx (sub out (i *! (size w *! 64ul)) (size w *! 64ul)) i (sub text (i *! (size w *! 64ul)) (size w *! 64ul)))
+    (fun i -> chacha20_encrypt_last ctx rem (sub out (i *! (size w *! 64ul)) rem) i (sub text (i *! (size w *! 64ul)) rem))
 
 noextract
 val chacha20_encrypt_vec:

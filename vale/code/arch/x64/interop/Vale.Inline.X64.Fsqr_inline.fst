@@ -50,23 +50,23 @@ let fsqr_dom: IX64.arity_ok 3 td =
 [@__reduce__]
 let fsqr_pre : VSig.vale_pre fsqr_dom =
   fun (c:V.va_code)
-    (tmp:b64)
-    (f1:b64)
     (out:b64)
+    (f1:b64)
+    (tmp:b64)
     (va_s0:V.va_state) ->
-      FW.va_req_fsqr c va_s0
+      FW.va_req_Fsqr c va_s0
         (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out)
 
 [@__reduce__]
 let fsqr_post : VSig.vale_post fsqr_dom =
   fun (c:V.va_code)
-    (tmp:b64)
-    (f1:b64)
     (out:b64)
+    (f1:b64)
+    (tmp:b64)
     (va_s0:V.va_state)
     (va_s1:V.va_state)
     (f:V.va_fuel) ->
-      FW.va_ens_fsqr c va_s0 (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) va_s1 f
+      FW.va_ens_Fsqr c va_s0 (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) va_s1 f
 
 let fsqr_regs_modified: MS.reg_64 -> bool = fun (r:MS.reg_64) ->
   let open MS in
@@ -81,28 +81,28 @@ let fsqr_xmms_modified = fun _ -> false
 let fsqr_lemma'
     (code:V.va_code)
     (_win:bool)
-    (tmp:b64)
-    (f1:b64)
     (out:b64)
+    (f1:b64)
+    (tmp:b64)
     (va_s0:V.va_state)
  : Ghost (V.va_state & V.va_fuel)
      (requires
-       fsqr_pre code tmp f1 out va_s0)
+       fsqr_pre code out f1 tmp va_s0)
      (ensures (fun (va_s1, f) ->
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions va_s0 va_s1 fsqr_regs_modified fsqr_xmms_modified /\
-       fsqr_post code tmp f1 out va_s0 va_s1 f /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer out) /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer f1) /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer tmp) /\
+       fsqr_post code out f1 tmp va_s0 va_s1 f /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_buffer out) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_buffer f1) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_buffer tmp) /\
        ME.buffer_writeable (as_vale_buffer out) /\
        ME.buffer_writeable (as_vale_buffer f1) /\
        ME.buffer_writeable (as_vale_buffer tmp) /\
        ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer out))
                    (ME.loc_union (ME.loc_buffer (as_vale_buffer tmp))
-                                 ME.loc_none)) va_s0.VS.vs_heap va_s1.VS.vs_heap
+                                 ME.loc_none)) (VS.vs_get_vale_heap va_s0) (VS.vs_get_vale_heap va_s1)
  )) =
-   let va_s1, f = FW.va_lemma_fsqr code va_s0 (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) in
+   let va_s1, f = FW.va_lemma_Fsqr code va_s0 (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) in
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 out;
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 f1;
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 tmp;
@@ -110,89 +110,100 @@ let fsqr_lemma'
 
 (* Prove that fsqr_lemma' has the required type *)
 let fsqr_lemma = as_t #(VSig.vale_sig fsqr_regs_modified fsqr_xmms_modified fsqr_pre fsqr_post) fsqr_lemma'
-let code_fsqr = FW.va_code_fsqr ()
+let code_Fsqr = FW.va_code_Fsqr ()
 
 let of_reg (r:MS.reg_64) : option (IX64.reg_nat 3) = match r with
-  | 5 -> Some 0 // rdi
+  | 1 -> Some 0 // rbx
   | 4 -> Some 1 // rsi
-  | 3 -> Some 2 // rdx
+  | 5 -> Some 2 // rdi
   | _ -> None
 
 let of_arg (i:IX64.reg_nat 3) : MS.reg_64 = match i with
-  | 0 -> MS.rRdi
+  | 0 -> MS.rRbx
   | 1 -> MS.rRsi
-  | 2 -> MS.rRdx
+  | 2 -> MS.rRdi
 
 let arg_reg : IX64.arg_reg_relation 3 = IX64.Rel of_reg of_arg
 
 (* Here's the type expected for the fsqr wrapper *)
 [@__reduce__]
-let lowstar_fsqr_t =
+let lowstar_Fsqr_t =
   assert_norm (List.length fsqr_dom + List.length ([]<:list arg) <= 3);
   IX64.as_lowstar_sig_t_weak
     3
     arg_reg
     fsqr_regs_modified
     fsqr_xmms_modified
-    code_fsqr
+    code_Fsqr
     fsqr_dom
     []
     _
     _
     // The boolean here doesn't matter
-    (W.mk_prediction code_fsqr fsqr_dom [] (fsqr_lemma code_fsqr IA.win))
+    (W.mk_prediction code_Fsqr fsqr_dom [] (fsqr_lemma code_Fsqr IA.win))
 
 (* And here's the fsqr wrapper itself *)
-let lowstar_fsqr : lowstar_fsqr_t  =
+let lowstar_Fsqr : lowstar_Fsqr_t  =
   assert_norm (List.length fsqr_dom + List.length ([]<:list arg) <= 3);
   IX64.wrap_weak
     3
     arg_reg
     fsqr_regs_modified
     fsqr_xmms_modified
-    code_fsqr
+    code_Fsqr
     fsqr_dom
-    (W.mk_prediction code_fsqr fsqr_dom [] (fsqr_lemma code_fsqr IA.win))
+    (W.mk_prediction code_Fsqr fsqr_dom [] (fsqr_lemma code_Fsqr IA.win))
 
-let lowstar_fsqr_normal_t : normal lowstar_fsqr_t
-  = as_normal_t #lowstar_fsqr_t lowstar_fsqr
+let lowstar_Fsqr_normal_t : normal lowstar_Fsqr_t
+  = as_normal_t #lowstar_Fsqr_t lowstar_Fsqr
 
 open Vale.AsLowStar.MemoryHelpers
 
-let fsqr_inline tmp f1 out =
+let fsqr out f1 tmp =
     DV.length_eq (get_downview tmp);
     DV.length_eq (get_downview f1);
     DV.length_eq (get_downview out);
     as_vale_buffer_len #TUInt64 #TUInt64 tmp;
     as_vale_buffer_len #TUInt64 #TUInt64 f1;
     as_vale_buffer_len #TUInt64 #TUInt64 out;
-    let x, _ = lowstar_fsqr_normal_t tmp f1 out () in
+    let (x, _) = lowstar_Fsqr_normal_t out f1 tmp () in
     ()
 
+let fsqr_comments : list string = 
+  ["Computes the square of a field element: out <- f * f";
+   "Uses the 8-element buffer tmp for intermediate results"]
+
+let fsqr_names (n:nat) =
+  match n with
+  | 0 -> "out"
+  | 1 -> "f"
+  | 2 -> "tmp"
+  | _ -> ""
+
 let fsqr_code_inline () : FStar.All.ML int =
-  PR.print_inline "fsqr_inline" 0 None (List.length fsqr_dom) fsqr_dom code_fsqr of_arg fsqr_regs_modified
+  PR.print_inline "fsqr" 0 None (List.length fsqr_dom) fsqr_dom fsqr_names code_Fsqr of_arg fsqr_regs_modified fsqr_comments
 
 (* Need to rearrange the order of arguments *)
 [@__reduce__]
 let fsqr2_pre : VSig.vale_pre fsqr_dom =
   fun (c:V.va_code)
-    (tmp:b64)
-    (f1:b64)
     (out:b64)
+    (f1:b64)
+    (tmp:b64)
     (va_s0:V.va_state) ->
-      FW.va_req_fsqr2 c va_s0
+      FW.va_req_Fsqr2 c va_s0
         (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out)
 
 [@__reduce__]
 let fsqr2_post : VSig.vale_post fsqr_dom =
   fun (c:V.va_code)
-    (tmp:b64)
-    (f1:b64)
     (out:b64)
+    (f1:b64)
+    (tmp:b64)
     (va_s0:V.va_state)
     (va_s1:V.va_state)
     (f:V.va_fuel) ->
-      FW.va_ens_fsqr2 c va_s0 (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) va_s1 f
+      FW.va_ens_Fsqr2 c va_s0 (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) va_s1 f
 
 #set-options "--z3rlimit 200"
 
@@ -200,28 +211,28 @@ let fsqr2_post : VSig.vale_post fsqr_dom =
 let fsqr2_lemma'
     (code:V.va_code)
     (_win:bool)
-    (tmp:b64)
-    (f1:b64)
     (out:b64)
+    (f1:b64)
+    (tmp:b64)
     (va_s0:V.va_state)
  : Ghost (V.va_state & V.va_fuel)
      (requires
-       fsqr2_pre code tmp f1 out va_s0)
+       fsqr2_pre code out f1 tmp va_s0)
      (ensures (fun (va_s1, f) ->
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions va_s0 va_s1 fsqr_regs_modified fsqr_xmms_modified /\
-       fsqr2_post code tmp f1 out va_s0 va_s1 f /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer out) /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer f1) /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer tmp) /\
+       fsqr2_post code out f1 tmp va_s0 va_s1 f /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_buffer out) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_buffer f1) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_buffer tmp) /\
        ME.buffer_writeable (as_vale_buffer out) /\
        ME.buffer_writeable (as_vale_buffer f1) /\
        ME.buffer_writeable (as_vale_buffer tmp) /\
        ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer out))
                    (ME.loc_union (ME.loc_buffer (as_vale_buffer tmp))
-                                 ME.loc_none)) va_s0.VS.vs_heap va_s1.VS.vs_heap
+                                 ME.loc_none)) (VS.vs_get_vale_heap va_s0) (VS.vs_get_vale_heap va_s1)
  )) =
-   let va_s1, f = FW.va_lemma_fsqr2 code va_s0 (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) in
+   let va_s1, f = FW.va_lemma_Fsqr2 code va_s0 (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) in
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 out;
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 f1;
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 tmp;
@@ -229,47 +240,61 @@ let fsqr2_lemma'
 
 (* Prove that fsqr2_lemma' has the required type *)
 let fsqr2_lemma = as_t #(VSig.vale_sig fsqr_regs_modified fsqr_xmms_modified fsqr2_pre fsqr2_post) fsqr2_lemma'
-let code_fsqr2 = FW.va_code_fsqr2 ()
+let code_Fsqr2 = FW.va_code_Fsqr2 ()
 
 (* Here's the type expected for the fsqr2 wrapper *)
 [@__reduce__]
-let lowstar_fsqr2_t =
+let lowstar_Fsqr2_t =
   assert_norm (List.length fsqr_dom + List.length ([]<:list arg) <= 3);
   IX64.as_lowstar_sig_t_weak
     3
     arg_reg
     fsqr_regs_modified
     fsqr_xmms_modified
-    code_fsqr2
+    code_Fsqr2
     fsqr_dom
     []
     _
     _
-    (W.mk_prediction code_fsqr2 fsqr_dom [] (fsqr2_lemma code_fsqr2 IA.win))
+    (W.mk_prediction code_Fsqr2 fsqr_dom [] (fsqr2_lemma code_Fsqr2 IA.win))
 
 (* And here's the fsqr2 wrapper itself *)
-let lowstar_fsqr2 : lowstar_fsqr2_t  =
+let lowstar_Fsqr2 : lowstar_Fsqr2_t  =
   assert_norm (List.length fsqr_dom + List.length ([]<:list arg) <= 3);
   IX64.wrap_weak
     3
     arg_reg
     fsqr_regs_modified
     fsqr_xmms_modified
-    code_fsqr2
+    code_Fsqr2
     fsqr_dom
-    (W.mk_prediction code_fsqr2 fsqr_dom [] (fsqr2_lemma code_fsqr2 IA.win))
+    (W.mk_prediction code_Fsqr2 fsqr_dom [] (fsqr2_lemma code_Fsqr2 IA.win))
 
-let lowstar_fsqr2_normal_t : normal lowstar_fsqr2_t
-  = as_normal_t #lowstar_fsqr2_t lowstar_fsqr2
+let lowstar_Fsqr2_normal_t : normal lowstar_Fsqr2_t
+  = as_normal_t #lowstar_Fsqr2_t lowstar_Fsqr2
 
 open Vale.AsLowStar.MemoryHelpers
 
-let fsqr2_inline tmp f1 out =
+let fsqr2 out f1 tmp =
     DV.length_eq (get_downview tmp);
     DV.length_eq (get_downview f1);
     DV.length_eq (get_downview out);
-    let x, _ = lowstar_fsqr2_normal_t tmp f1 out () in
+    let (x, _) = lowstar_Fsqr2_normal_t out f1 tmp () in
     ()
 
+let fsqr2_comments : list string = 
+  ["Computes two field squarings:";
+   "  out[0] <- f[0] * f[0]";
+   "  out[1] <- f[1] * f[1]";
+   "Uses the 16-element buffer tmp for intermediate results"
+  ]
+
+let fsqr2_names (n:nat) : string =
+  match n with
+  | 0 -> "out"
+  | 1 -> "f"
+  | 2 -> "tmp"
+  | _ -> ""
+
 let fsqr2_code_inline () : FStar.All.ML int =
-  PR.print_inline "fsqr2_inline" 0 None (List.length fsqr_dom) fsqr_dom code_fsqr2 of_arg fsqr_regs_modified
+  PR.print_inline "fsqr2" 0 None (List.length fsqr_dom) fsqr_dom fsqr2_names code_Fsqr2 of_arg fsqr_regs_modified fsqr2_comments

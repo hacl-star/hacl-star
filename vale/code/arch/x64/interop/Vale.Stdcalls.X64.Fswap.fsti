@@ -58,7 +58,7 @@ let cswap_pre : VSig.vale_pre cswap_dom =
     (p0:b64)
     (p1:b64)
     (va_s0:V.va_state) ->
-      FU.va_req_cswap2_stdcall c va_s0 IA.win
+      FU.va_req_Cswap2_stdcall c va_s0 IA.win
         (UInt64.v bit) (as_vale_buffer p0) (as_vale_buffer p1)
 
 [@__reduce__] noextract
@@ -70,7 +70,7 @@ let cswap_post : VSig.vale_post cswap_dom =
     (va_s0:V.va_state)
     (va_s1:V.va_state)
     (f:V.va_fuel) ->
-      FU.va_ens_cswap2_stdcall c va_s0 IA.win (UInt64.v bit) (as_vale_buffer p0) (as_vale_buffer p1) va_s1 f
+      FU.va_ens_Cswap2_stdcall c va_s0 IA.win (UInt64.v bit) (as_vale_buffer p0) (as_vale_buffer p1) va_s1 f
 
 #set-options "--z3rlimit 20"
 
@@ -89,15 +89,15 @@ let cswap_lemma'
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
        cswap_post code bit p0 p1 va_s0 va_s1 f /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer p1) /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer p0) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_buffer p1) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_buffer p0) /\
        ME.buffer_writeable (as_vale_buffer p0) /\
        ME.buffer_writeable (as_vale_buffer p1) /\
        ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer p0))
                    (ME.loc_union (ME.loc_buffer (as_vale_buffer p1))
-                                 ME.loc_none)) va_s0.VS.vs_heap va_s1.VS.vs_heap
+                                 ME.loc_none)) (VS.vs_get_vale_heap va_s0) (VS.vs_get_vale_heap va_s1)
  )) =
-   let va_s1, f = FU.va_lemma_cswap2_stdcall code va_s0 IA.win (UInt64.v bit) (as_vale_buffer p0) (as_vale_buffer p1) in
+   let va_s1, f = FU.va_lemma_Cswap2_stdcall code va_s0 IA.win (UInt64.v bit) (as_vale_buffer p0) (as_vale_buffer p1) in
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 p0;
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 p1;
    (va_s1, f)
@@ -106,7 +106,7 @@ let cswap_lemma'
 noextract
 let cswap_lemma = as_t #(VSig.vale_sig_stdcall cswap_pre cswap_post) cswap_lemma'
 noextract
-let code_cswap = FU.va_code_cswap2_stdcall IA.win
+let code_cswap = FU.va_code_Cswap2_stdcall IA.win
 
 (* Here's the type expected for the cswap wrapper *)
 [@__reduce__] noextract
@@ -121,4 +121,4 @@ let lowstar_cswap_t =
     (W.mk_prediction code_cswap cswap_dom [] (cswap_lemma code_cswap IA.win))
 
 [@ (CCConv "stdcall") ]
-val cswap2 : normal lowstar_cswap_t
+val cswap2_e : normal lowstar_cswap_t

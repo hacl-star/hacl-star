@@ -38,7 +38,7 @@ let lemma_hash_init h0 h1 ctx_b is_zero =
     h0_in;
     == {}
     UInt64.v (UV.sel h0 ctx_vb 0);
-    == {UV.get_sel h0 ctx_vb 0; Vale.Def.Opaque_s.reveal_opaque Vale.Interop.Views.get64_def}
+    == {UV.get_sel h0 ctx_vb 0; Vale.Interop.Views.get64_reveal ()}
     le_bytes_to_nat64 (seq_uint8_to_seq_nat8 (slice (DV.as_seq h0 (UV.as_down_buffer ctx_vb)) 0 8));
     == {BF.same_seq_downview8 ctx_b h0}
     nat_from_bytes_le (slice tag0 0 8);
@@ -48,7 +48,7 @@ let lemma_hash_init h0 h1 ctx_b is_zero =
     h0_out;
     == {}
     UInt64.v (UV.sel h1 ctx_vb 0);
-    == {UV.get_sel h1 ctx_vb 0; Vale.Def.Opaque_s.reveal_opaque Vale.Interop.Views.get64_def}
+    == {UV.get_sel h1 ctx_vb 0; Vale.Interop.Views.get64_reveal ()}
     le_bytes_to_nat64 (seq_uint8_to_seq_nat8 (slice (DV.as_seq h1 (UV.as_down_buffer ctx_vb)) 0 8));
     == {BF.same_seq_downview8 ctx_b h1}
     nat_from_bytes_le (slice tag1 0 8);
@@ -72,7 +72,7 @@ let lemma_hash_init h0 h1 ctx_b is_zero =
     h1_in;
     == {}
     UInt64.v (UV.sel h0 ctx_vb 1);
-    == {UV.get_sel h0 ctx_vb 1; Vale.Def.Opaque_s.reveal_opaque Vale.Interop.Views.get64_def}
+    == {UV.get_sel h0 ctx_vb 1; Vale.Interop.Views.get64_reveal ()}
     le_bytes_to_nat64 (seq_uint8_to_seq_nat8 (slice (DV.as_seq h0 (UV.as_down_buffer ctx_vb)) 8 16));
     == {BF.same_seq_downview8 ctx_b h0}
     nat_from_bytes_le (slice tag0 8 16);
@@ -82,7 +82,7 @@ let lemma_hash_init h0 h1 ctx_b is_zero =
     h1_out;
     == {}
     UInt64.v (UV.sel h1 ctx_vb 1);
-    == {UV.get_sel h1 ctx_vb 1; Vale.Def.Opaque_s.reveal_opaque Vale.Interop.Views.get64_def}
+    == {UV.get_sel h1 ctx_vb 1; Vale.Interop.Views.get64_reveal ()}
     le_bytes_to_nat64 (seq_uint8_to_seq_nat8 (slice (DV.as_seq h1 (UV.as_down_buffer ctx_vb)) 8 16));
     == {BF.same_seq_downview8 ctx_b h1}
     nat_from_bytes_le (slice tag1 8 16);
@@ -106,7 +106,7 @@ let lemma_hash_init h0 h1 ctx_b is_zero =
     h2_in;
     == {}
     UInt64.v (UV.sel h0 ctx_vb 2);
-    == {UV.get_sel h0 ctx_vb 2; Vale.Def.Opaque_s.reveal_opaque Vale.Interop.Views.get64_def}
+    == {UV.get_sel h0 ctx_vb 2; Vale.Interop.Views.get64_reveal ()}
     le_bytes_to_nat64 (seq_uint8_to_seq_nat8 (slice (DV.as_seq h0 (UV.as_down_buffer ctx_vb)) 16 24));
     == {BF.same_seq_downview8 ctx_b h0}
     nat_from_bytes_le (slice tag0 16 24);
@@ -116,7 +116,7 @@ let lemma_hash_init h0 h1 ctx_b is_zero =
     h2_out;
     == {}
     UInt64.v (UV.sel h1 ctx_vb 2);
-    == {UV.get_sel h1 ctx_vb 2; Vale.Def.Opaque_s.reveal_opaque Vale.Interop.Views.get64_def}
+    == {UV.get_sel h1 ctx_vb 2; Vale.Interop.Views.get64_reveal ()}
     le_bytes_to_nat64 (seq_uint8_to_seq_nat8 (slice (DV.as_seq h1 (UV.as_down_buffer ctx_vb)) 16 24));
     == {BF.same_seq_downview8 ctx_b h1}
     nat_from_bytes_le (slice tag1 16 24);
@@ -138,8 +138,8 @@ let lemma_hash_init h0 h1 ctx_b is_zero =
   assert_norm (modp 0 == 0);
   if is_zero then
     calc (==) {
-      PM.lowerUpper192_opaque (PM.lowerUpper128_opaque h0_in h1_in) h2_in;
-      == {Vale.Def.Opaque_s.reveal_opaque PM.lowerUpper128; Vale.Def.Opaque_s.reveal_opaque PM.lowerUpper192}
+      PM.lowerUpper192 (PM.lowerUpper128 h0_in h1_in) h2_in;
+      == {PM.lowerUpper128_reveal (); PM.lowerUpper192_reveal ()}
       0;
     }
 
@@ -172,7 +172,7 @@ let lemma_block (h1:HS.mem) (inp_b:B.buffer UInt8.t) (len:nat) (i:nat) : Lemma
   BF.nat_from_bytes_le_is_le_bytes_to_nat64 (slice text j1 (j1 + 8));
   calc (==) {
     UInt64.v (index inp_su (2 * i));
-    == {Vale.Def.Opaque_s.reveal_opaque Vale.Interop.Views.get64_def}
+    == {Vale.Interop.Views.get64_reveal ()}
     UInt64.v (Vale.Interop.Views.get64_def (slice inp_sd j1 (j1 + 8)));
     == {}
     le_bytes_to_nat64 (seq_uint8_to_seq_nat8 (BF.of_bytes (slice text j1 (j1 + 8))));
@@ -182,7 +182,7 @@ let lemma_block (h1:HS.mem) (inp_b:B.buffer UInt8.t) (len:nat) (i:nat) : Lemma
   BF.nat_from_bytes_le_is_le_bytes_to_nat64 (slice text (j1 + 8) (j1 + 16));
   calc (==) {
     UInt64.v (index inp_su (2 * i + 1));
-    == {Vale.Def.Opaque_s.reveal_opaque Vale.Interop.Views.get64_def}
+    == {Vale.Interop.Views.get64_reveal ()}
     UInt64.v (Vale.Interop.Views.get64_def (slice inp_sd (j1 + 8) (j1 + 16)));
     == {}
     le_bytes_to_nat64 (seq_uint8_to_seq_nat8 (BF.of_bytes (slice text (j1 + 8) (j1 + 16))));
@@ -336,13 +336,13 @@ let lemma_call_poly1305 h0 h1 ctx_b inp_b src key =
   let key_r1 = UInt64.v (MH.low_buffer_read TUInt8 TUInt64 h0 ctx_b 4) in
   let key_s0 = UInt64.v (MH.low_buffer_read TUInt8 TUInt64 h0 ctx_b 5) in
   let key_s1 = UInt64.v (MH.low_buffer_read TUInt8 TUInt64 h0 ctx_b 6) in
-  let h_in = lowerUpper192_opaque (lowerUpper128_opaque h0_in h1_in) h2_in in
-  let key_r = lowerUpper128_opaque key_r0 key_r1 in
-  let key_s = lowerUpper128_opaque key_s0 key_s1 in
+  let h_in = lowerUpper192 (lowerUpper128 h0_in h1_in) h2_in in
+  let key_r = lowerUpper128 key_r0 key_r1 in
+  let key_s = lowerUpper128 key_s0 key_s1 in
 
   let h0_out = UInt64.v (MH.low_buffer_read TUInt8 TUInt64 h1 ctx_b 0) in
   let h1_out = UInt64.v (MH.low_buffer_read TUInt8 TUInt64 h1 ctx_b 1) in
-  let h = lowerUpper128_opaque h0_out h1_out in
+  let h = lowerUpper128 h0_out h1_out in
   let db = get_downview inp_b in
   math_aux inp_b (readable_words len);
   let inp_mem = seqTo128 (uint64_to_nat_seq (UV.as_seq h1 (UV.mk_buffer db Vale.Interop.Views.up_view64))) in
@@ -366,7 +366,7 @@ let lemma_call_poly1305 h0 h1 ctx_b inp_b src key =
     key_r0;
     == {}
     UInt64.v (UV.sel h0 ctx_vb 3);
-    == {UV.get_sel h0 ctx_vb 3; Vale.Def.Opaque_s.reveal_opaque Vale.Interop.Views.get64_def}
+    == {UV.get_sel h0 ctx_vb 3; Vale.Interop.Views.get64_reveal ()}
     le_bytes_to_nat64 (seq_uint8_to_seq_nat8 (slice (DV.as_seq h0 (UV.as_down_buffer ctx_vb)) 24 32));
     == {BF.same_seq_downview8 ctx_b h0}
     nat_from_bytes_le (slice (slice key 0 16) 0 8);
@@ -377,7 +377,7 @@ let lemma_call_poly1305 h0 h1 ctx_b inp_b src key =
     key_r1;
     == {}
     UInt64.v (UV.sel h0 ctx_vb 4);
-    == {UV.get_sel h0 ctx_vb 4; Vale.Def.Opaque_s.reveal_opaque Vale.Interop.Views.get64_def}
+    == {UV.get_sel h0 ctx_vb 4; Vale.Interop.Views.get64_reveal ()}
     le_bytes_to_nat64 (seq_uint8_to_seq_nat8 (slice (DV.as_seq h0 (UV.as_down_buffer ctx_vb)) 32 40));
     == {BF.same_seq_downview8 ctx_b h0}
     nat_from_bytes_le (slice (slice key 0 16) 8 16);
@@ -386,8 +386,8 @@ let lemma_call_poly1305 h0 h1 ctx_b inp_b src key =
   calc (==) {
     key_r;
     == {}
-    lowerUpper128_opaque key_r0 key_r1;
-    == {Vale.Def.Opaque_s.reveal_opaque lowerUpper128}
+    lowerUpper128 key_r0 key_r1;
+    == {lowerUpper128_reveal ()}
     nat_from_bytes_le (slice (slice key 0 16) 0 8) + pow2 64 * nat_from_bytes_le (slice (slice key 0 16) 8 16);
     == {BS.nat_from_intseq_le_slice_lemma #LI.U8 #LI.SEC #16 (slice key 0 16) 8}
     nat_from_bytes_le (slice key 0 16);
@@ -400,7 +400,7 @@ let lemma_call_poly1305 h0 h1 ctx_b inp_b src key =
     key_s0;
     == {}
     UInt64.v (UV.sel h0 ctx_vb 5);
-    == {UV.get_sel h0 ctx_vb 5; Vale.Def.Opaque_s.reveal_opaque Vale.Interop.Views.get64_def}
+    == {UV.get_sel h0 ctx_vb 5; Vale.Interop.Views.get64_reveal ()}
     le_bytes_to_nat64 (seq_uint8_to_seq_nat8 (slice (DV.as_seq h0 (UV.as_down_buffer ctx_vb)) 40 48));
     == {BF.same_seq_downview8 ctx_b h0}
     nat_from_bytes_le (slice (slice key 16 32) 0 8);
@@ -411,7 +411,7 @@ let lemma_call_poly1305 h0 h1 ctx_b inp_b src key =
     key_s1;
     == {}
     UInt64.v (UV.sel h0 ctx_vb 6);
-    == {UV.get_sel h0 ctx_vb 6; Vale.Def.Opaque_s.reveal_opaque Vale.Interop.Views.get64_def}
+    == {UV.get_sel h0 ctx_vb 6; Vale.Interop.Views.get64_reveal ()}
     le_bytes_to_nat64 (seq_uint8_to_seq_nat8 (slice (DV.as_seq h0 (UV.as_down_buffer ctx_vb)) 48 56));
     == {BF.same_seq_downview8 ctx_b h0}
     nat_from_bytes_le (slice (slice key 16 32) 8 16);
@@ -420,8 +420,8 @@ let lemma_call_poly1305 h0 h1 ctx_b inp_b src key =
   calc (==) {
     key_s;
     == {}
-    lowerUpper128_opaque key_s0 key_s1;
-    == {Vale.Def.Opaque_s.reveal_opaque lowerUpper128}
+    lowerUpper128 key_s0 key_s1;
+    == {lowerUpper128_reveal ()}
     nat_from_bytes_le (slice (slice key 16 32) 0 8) + pow2 64 * nat_from_bytes_le (slice (slice key 16 32) 8 16);
     == {BS.nat_from_intseq_le_slice_lemma #LI.U8 #LI.SEC #16 (slice key 16 32) 8}
     nat_from_bytes_le (slice key 16 32);
@@ -441,7 +441,7 @@ let lemma_call_poly1305 h0 h1 ctx_b inp_b src key =
     h0_out;
     == {}
     UInt64.v (UV.sel h1 ctx_vb 0);
-    == {UV.get_sel h1 ctx_vb 0; Vale.Def.Opaque_s.reveal_opaque Vale.Interop.Views.get64_def}
+    == {UV.get_sel h1 ctx_vb 0; Vale.Interop.Views.get64_reveal ()}
     le_bytes_to_nat64 (seq_uint8_to_seq_nat8 (slice (DV.as_seq h1 (UV.as_down_buffer ctx_vb)) 0 8));
     == {BF.same_seq_downview8 ctx_b h1}
     nat_from_bytes_le (slice tag 0 8);
@@ -452,7 +452,7 @@ let lemma_call_poly1305 h0 h1 ctx_b inp_b src key =
     h1_out;
     == {}
     UInt64.v (UV.sel h1 ctx_vb 1);
-    == {UV.get_sel h1 ctx_vb 1; Vale.Def.Opaque_s.reveal_opaque Vale.Interop.Views.get64_def}
+    == {UV.get_sel h1 ctx_vb 1; Vale.Interop.Views.get64_reveal ()}
     le_bytes_to_nat64 (seq_uint8_to_seq_nat8 (slice (DV.as_seq h1 (UV.as_down_buffer ctx_vb)) 8 16));
     == {BF.same_seq_downview8 ctx_b h1}
     nat_from_bytes_le (slice tag 8 16);
@@ -461,8 +461,8 @@ let lemma_call_poly1305 h0 h1 ctx_b inp_b src key =
   calc (==) {
     h;
     == {}
-    lowerUpper128_opaque h0_out h1_out;
-    == {Vale.Def.Opaque_s.reveal_opaque lowerUpper128}
+    lowerUpper128 h0_out h1_out;
+    == {lowerUpper128_reveal ()}
     nat_from_bytes_le (slice tag 0 8) + pow2 64 * nat_from_bytes_le (slice tag 8 16);
     == {BS.nat_from_intseq_le_slice_lemma #LI.U8 #LI.SEC #16 tag 8}
     nat_from_bytes_le tag;

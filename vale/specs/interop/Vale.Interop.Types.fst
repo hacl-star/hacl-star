@@ -1,6 +1,8 @@
 module Vale.Interop.Types
 open FStar.Mul
 include Vale.Arch.HeapTypes_s
+module B = LowStar.Buffer
+module IB = LowStar.ImmutableBuffer
 module MB = LowStar.Monotonic.Buffer
 module DV = LowStar.BufferView.Down
 module W = Vale.Def.Words_s
@@ -37,19 +39,21 @@ let down_view (t:base_typ) : DV.view (base_typ_as_type t) UInt8.t = match t with
   | TUInt64 -> Vale.Interop.Views.down_view64
   | TUInt128 -> Vale.Interop.Views.down_view128
 
+let b8_preorder (writeable:bool) (a:Type0) : MB.srel a =
+  match writeable with
+  | true -> B.trivial_preorder a
+  | false -> IB.immutable_preorder a
+
 [@__reduce__]
 noeq
-type b8' =
+type b8 =
 | Buffer:
   #src:base_typ ->
-  #rrel:MB.srel (base_typ_as_type src) ->
-  #rel:MB.srel (base_typ_as_type src) ->
-  bsrc:MB.mbuffer (base_typ_as_type src) rrel rel ->
   writeable:bool ->
-  b8'
-
-// A buffer is considered writeable iff the preorders are trivial
-type b8 = (b:b8'{b.writeable <==> (forall s1 s2. b.rrel s1 s2 /\ b.rel s1 s2)})
+  bsrc:MB.mbuffer (base_typ_as_type src)
+    (b8_preorder writeable (base_typ_as_type src))
+    (b8_preorder writeable (base_typ_as_type src)) ->
+  b8
 
 let disjoint_addr addr1 length1 addr2 length2 =
   (* The first buffer is completely before the second, or the opposite *)
@@ -62,8 +66,11 @@ let get_downview
   (b:MB.mbuffer (base_typ_as_type src) rrel rel) =
   DV.mk_buffer_view b (down_view src)
 
-type addr_map = m:(b8 -> W.nat64){
+[@"opaque_to_smt"]
+let addr_map_pred (m:b8 -> W.nat64) =
   (forall (buf1 buf2:b8).{:pattern (m buf1); (m buf2)}
     MB.disjoint buf1.bsrc buf2.bsrc ==>
     disjoint_addr (m buf1) (DV.length (get_downview buf1.bsrc)) (m buf2) (DV.length (get_downview buf2.bsrc))) /\
-  (forall (b:b8).{:pattern (m b)} m b + DV.length (get_downview b.bsrc) < W.pow2_64)}
+  (forall (b:b8).{:pattern (m b)} m b + DV.length (get_downview b.bsrc) < W.pow2_64)
+
+type addr_map = m:(b8 -> W.nat64){addr_map_pred m}

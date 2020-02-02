@@ -51,7 +51,7 @@ let cswap_pre : VSig.vale_pre cswap_dom =
     (p0:b64)
     (p1:b64)
     (va_s0:V.va_state) ->
-      FU.va_req_cswap2 c va_s0
+      FU.va_req_Cswap2 c va_s0
         (UInt64.v bit) (as_vale_buffer p0) (as_vale_buffer p1)
 
 [@__reduce__]
@@ -63,7 +63,7 @@ let cswap_post : VSig.vale_post cswap_dom =
     (va_s0:V.va_state)
     (va_s1:V.va_state)
     (f:V.va_fuel) ->
-      FU.va_ens_cswap2 c va_s0 (UInt64.v bit) (as_vale_buffer p0) (as_vale_buffer p1) va_s1 f
+      FU.va_ens_Cswap2 c va_s0 (UInt64.v bit) (as_vale_buffer p0) (as_vale_buffer p1) va_s1 f
 
 #set-options "--z3rlimit 50"
 
@@ -89,15 +89,15 @@ let cswap_lemma'
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions va_s0 va_s1 cswap_regs_modified cswap_xmms_modified /\
        cswap_post code bit p0 p1 va_s0 va_s1 f /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer p0) /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer p1) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_buffer p0) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_buffer p1) /\
        ME.buffer_writeable (as_vale_buffer p0) /\
        ME.buffer_writeable (as_vale_buffer p1) /\
        ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer p0))
                    (ME.loc_union (ME.loc_buffer (as_vale_buffer p1))
-                                 ME.loc_none)) va_s0.VS.vs_heap va_s1.VS.vs_heap
+                                 ME.loc_none)) (VS.vs_get_vale_heap va_s0) (VS.vs_get_vale_heap va_s1)
  )) =
-   let va_s1, f = FU.va_lemma_cswap2 code va_s0 (UInt64.v bit) (as_vale_buffer p0) (as_vale_buffer p1) in
+   let va_s1, f = FU.va_lemma_Cswap2 code va_s0 (UInt64.v bit) (as_vale_buffer p0) (as_vale_buffer p1) in
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 p0;
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 p1;
    (va_s1, f)
@@ -105,7 +105,7 @@ let cswap_lemma'
 (* Prove that cswap_lemma' has the required type *)
 let cswap_lemma = as_t #(VSig.vale_sig cswap_regs_modified cswap_xmms_modified cswap_pre cswap_post) cswap_lemma'
 
-let code_cswap = FU.va_code_cswap2 ()
+let code_cswap = FU.va_code_Cswap2 ()
 
 let of_reg (r:MS.reg_64) : option (IX64.reg_nat 3) = match r with
   | 5 -> Some 0 // rdi
@@ -154,11 +154,21 @@ let lowstar_cswap_normal_t : normal lowstar_cswap_t
 
 open Vale.AsLowStar.MemoryHelpers
 
-let cswap2_inline bit p0 p1
+let cswap2 bit p0 p1
   = DV.length_eq (get_downview p0);
     DV.length_eq (get_downview p1);
-    let x, _ = lowstar_cswap_normal_t bit p0 p1 () in
+    let (x, _) = lowstar_cswap_normal_t bit p0 p1 () in
     ()
 
+let cswap_comments : list string = 
+  ["Computes p1 <- bit ? p2 : p1 in constant time"]
+
+let cswap_names (n:nat) : string =
+  match n with
+  | 0 -> "bit"
+  | 1 -> "p1"
+  | 2 -> "p2"
+  | _ -> ""
+
 let cswap2_code_inline () : FStar.All.ML int =
-  PR.print_inline "cswap2_inline" 0 None (List.length cswap_dom) cswap_dom code_cswap of_arg cswap_regs_modified
+  PR.print_inline "cswap2" 0 None (List.length cswap_dom) cswap_dom cswap_names code_cswap of_arg cswap_regs_modified cswap_comments

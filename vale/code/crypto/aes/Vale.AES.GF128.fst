@@ -3,6 +3,7 @@ open FStar.Mul
 open Vale.Arch.TypesNative
 open Vale.Math.Poly2.Bits
 
+#reset-options "--z3rlimit 20"
 let lemma_shift_left_1 a =
   reveal_to_quad32 a;
   reveal_to_quad32 (shift a 1);
@@ -13,12 +14,11 @@ let lemma_shift_left_1 a =
   lemma_index_all ();
   lemma_shift_define a 1;
   lemma_reverse_define_all ();
-  Vale.Def.Opaque_s.reveal_opaque quad32_xor_def;
-  Vale.Def.Opaque_s.reveal_opaque reverse_bytes_nat32_def;
+  quad32_xor_reveal ();
+  reverse_bytes_nat32_reveal ();
   lemma_quad32_vec_equal (to_quad32 (shift a 1)) (quad32_shift_left_1 (to_quad32 a));
   ()
 
-#reset-options "--z3rlimit 20"
 let lemma_shift_2_left_1 lo hi =
   let n = monomial 128 in
   let a = hi *. n +. lo in
@@ -42,14 +42,14 @@ let lemma_shift_2_left_1 lo hi =
   lemma_shift_is_mul (a' /. n) 128;
   let lemma_lo () : Lemma (qlo' == to_quad32 (a' %. n)) =
     lemma_shift_define (a' /. n) 128;
-    Vale.Def.Opaque_s.reveal_opaque quad32_xor_def;
-    Vale.Def.Opaque_s.reveal_opaque reverse_bytes_nat32_def;
+    quad32_xor_reveal ();
+    reverse_bytes_nat32_reveal ();
     lemma_quad32_vec_equal qlo' (to_quad32 (a' %. n))
     in
   let lemma_hi () : Lemma (qhi' == to_quad32 (a' /. n)) =
     lemma_shift_define_forward (a' /. n) 128;
-    Vale.Def.Opaque_s.reveal_opaque quad32_xor_def;
-    Vale.Def.Opaque_s.reveal_opaque reverse_bytes_nat32_def;
+    quad32_xor_reveal ();
+    reverse_bytes_nat32_reveal ();
     lemma_quad32_vec_equal qhi' (to_quad32 (a' /. n))
     in
   lemma_lo ();

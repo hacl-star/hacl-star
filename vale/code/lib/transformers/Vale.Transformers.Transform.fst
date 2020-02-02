@@ -46,6 +46,7 @@ let prints_to_same_code (c1 c2:code) : pbool =
 (* See fsti *)
 let reorder orig hint =
   transformation_result_of_possibly_codes (
+    if code_modifies_ghost orig then Err "code directly modifies ghost state (via ins_Ghost instruction)" else
     let orig' = IR.purge_empty_codes [orig] in
     ts <-- IR.find_transformation_hints orig' [hint];
     transformed <-- IR.perform_reordering_with_hints ts orig';
@@ -72,6 +73,7 @@ let lemma_IR_equiv_states_to_equiv_states (s1 s2:machine_state) :
 
 (* See fsti *)
 let lemma_reorder orig hint transformed va_s0 va_sM va_fM =
+  if code_modifies_ghost orig then (va_sM, va_fM) else
   let orig' = IR.purge_empty_codes [orig] in
   match IR.find_transformation_hints orig' [hint] with
   | Err _ -> va_sM, va_fM

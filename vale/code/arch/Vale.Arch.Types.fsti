@@ -1,6 +1,7 @@
 module Vale.Arch.Types
 
 open FStar.Mul
+open Vale.Def.Opaque_s
 open Vale.Def.Types_s
 open Vale.Lib.Seqs_s
 open Vale.Lib.Seqs
@@ -95,28 +96,28 @@ val lemma_reverse_reverse_bytes_nat32_seq (s:seq nat32) :
 
 unfold let quad32_to_seq (q:quad32) : seq nat32 = four_to_seq_LE q
 
-let insert_nat64_opaque = Vale.Def.Opaque_s.make_opaque insert_nat64
-
 val lemma_insert_nat64_properties (q:quad32) (n:nat64) :
-  Lemma ( (let q' = insert_nat64_opaque q n 0 in
+  Lemma ( (let q' = insert_nat64 q n 0 in
             q'.hi2 == q.hi2 /\
             q'.hi3 == q.hi3) /\
-           (let q' = insert_nat64_opaque q n 1 in
+           (let q' = insert_nat64 q n 1 in
             q'.lo0 == q.lo0 /\
             q'.lo1 == q.lo1))
-  [SMTPat (insert_nat64_opaque q n)]
+  [SMTPat (insert_nat64 q n)]
 
 val lemma_insert_nat64_nat32s (q:quad32) (n0 n1:nat32) :
-  Lemma ( insert_nat64_opaque q (two_to_nat32 (Mktwo n0 n1)) 0 ==
+  Lemma ( insert_nat64 q (two_to_nat32 (Mktwo n0 n1)) 0 ==
           Mkfour n0 n1 q.hi2 q.hi3 /\
-          insert_nat64_opaque q (two_to_nat32 (Mktwo n0 n1)) 1 ==
+          insert_nat64 q (two_to_nat32 (Mktwo n0 n1)) 1 ==
           Mkfour q.lo0 q.lo1 n0 n1 )
 
 let lo64_def (q:quad32) : nat64 = two_to_nat 32 (two_select (four_to_two_two q) 0)
-let hi64_def (q:quad32) : nat64 = two_to_nat 32 (two_select (four_to_two_two q) 1)
+[@"opaque_to_smt"] let lo64 = opaque_make lo64_def
+irreducible let lo64_reveal = opaque_revealer (`%lo64) lo64 lo64_def
 
-let lo64 = Vale.Def.Opaque_s.make_opaque lo64_def
-let hi64 = Vale.Def.Opaque_s.make_opaque hi64_def
+let hi64_def (q:quad32) : nat64 = two_to_nat 32 (two_select (four_to_two_two q) 1)
+[@"opaque_to_smt"] let hi64 = opaque_make hi64_def
+irreducible let hi64_reveal = opaque_revealer (`%hi64) hi64 hi64_def
 
 val lemma_lo64_properties (_:unit) : Lemma
   (forall (q0 q1:quad32).{:pattern lo64 q0; lo64 q1}
@@ -127,7 +128,7 @@ val lemma_hi64_properties (_:unit) : Lemma
     (q0.hi2 == q1.hi2 /\ q0.hi3 == q1.hi3) <==> (hi64 q0 == hi64 q1))
 
 val lemma_reverse_bytes_quad32_64 (src orig final:quad32) : Lemma
-  (requires final == insert_nat64_opaque (insert_nat64_opaque orig (reverse_bytes_nat64 (hi64 src)) 0) (reverse_bytes_nat64 (lo64 src)) 1)
+  (requires final == insert_nat64 (insert_nat64 orig (reverse_bytes_nat64 (hi64 src)) 0) (reverse_bytes_nat64 (lo64 src)) 1)
   (ensures  final == reverse_bytes_quad32 src)
 
 val lemma_equality_check_helper (q:quad32) :
@@ -155,13 +156,13 @@ let lemma_equality_check_helper_2 (q1 q2 cmp:quad32) (tmp1 result1 tmp2 tmp3 res
   ()
 
 val push_pop_xmm (x y:quad32) : Lemma
-  (let x' = insert_nat64_opaque (insert_nat64_opaque y (hi64 x) 1) (lo64 x) 0 in
+  (let x' = insert_nat64 (insert_nat64 y (hi64 x) 1) (lo64 x) 0 in
    x == x')
 
 val lemma_insrq_extrq_relations (x y:quad32) :
-  Lemma (let z = insert_nat64_opaque x (lo64 y) 0 in
+  Lemma (let z = insert_nat64 x (lo64 y) 0 in
          z == Mkfour y.lo0 y.lo1 x.hi2 x.hi3 /\
-        (let z = insert_nat64_opaque x (hi64 y) 1 in
+        (let z = insert_nat64 x (hi64 y) 1 in
          z == Mkfour x.lo0 x.lo1 y.hi2 y.hi3))
 
 val le_bytes_to_nat64_to_bytes (s:nat64) :

@@ -111,7 +111,7 @@ let lemma_quad32_xor_commutes (x y:quad32) :Lemma
   (quad32_xor x y = quad32_xor y x)
   =
   //lemma_nat32_xor_commutes_forall() // REVIEW: Why doesn't this work?
-  Vale.Def.Opaque_s.reveal_opaque quad32_xor_def;
+  quad32_xor_reveal ();
   let Mkfour x0 x1 x2 x3 = x in
   let Mkfour y0 y1 y2 y3 = y in
   lemma_nat32_xor_commutes x0 y0;
@@ -139,7 +139,7 @@ let lemma_nat32_xor_associates (x y z:nat32) : Lemma
 let lemma_quad32_xor_associates (x y z:quad32) : Lemma
   (quad32_xor (quad32_xor x y) z == (quad32_xor x (quad32_xor y z)))
   =
-  Vale.Def.Opaque_s.reveal_opaque quad32_xor_def;
+  quad32_xor_reveal ();
   let Mkfour x0 x1 x2 x3 = x in
   let Mkfour y0 y1 y2 y3 = y in
   let Mkfour z0 z1 z2 z3 = z in
