@@ -16,6 +16,10 @@ open Hacl.Spec.P256.Lemmas
 module H = Spec.Agile.Hash
 module Def = Spec.Hash.Definitions
 
+open FStar.Math.Lemmas 
+open FStar.Math.Lib 
+
+
 (*
 def toB(x):
     for i in range(4):
@@ -94,26 +98,76 @@ print(int(x1) % primeOrder == r)
 let prime = prime_p256_order 
 let nat_prime = (n: nat {n < prime})
 
+#reset-options "--z3refresh --z3rlimit  200"
 
-let ith_bit (k:lbytes 32) (i:nat{i < 256}) : (t: uint64 {uint_v t == 0 \/ uint_v t == 1}) =
-  let q = i / 8 in let r = size (i % 8) in
-  let res = to_u64 ((index k q >>. r) &. u8 1) in 
-  logand_le ((index k q >>. r)) (u8 1);
+val lemma_u8_less: a: uint8 -> Lemma (uint_v a < pow2 8)
+
+let lemma_u8_less a = ()
+
+
+val lemma_scalar_ith: sc: lbytes 32 -> k: nat { k < 32} -> Lemma (
+  uint_v sc.[k] == nat_from_intseq_le sc / pow2 (8 * k) % pow2 8)
+
+let lemma_scalar_ith sc k = 
+  nat_from_intseq_le_slice_lemma sc k;
+  let slSc = slice sc k 32 in 
+    nat_from_intseq_le_slice_lemma slSc 1;
+    nat_from_intseq_le_lemma0  (slice slSc 0 1);
+    assert(nat_from_bytes_le slSc == uint_v sc.[k] + pow2 8 * nat_from_bytes_le (slice slSc 1 (32 - k)));
+    assert(nat_from_bytes_le sc == nat_from_intseq_le (slice sc 0 k) + pow2 (8 * k) * uint_v sc.[k] + pow2 (8 * k) * pow2 8 * nat_from_bytes_le (slice sc (k + 1) 32));
+    
+    assert(nat_from_bytes_le sc / pow2 (8 * k) % pow2 8 == (nat_from_intseq_le (slice sc 0 k) + 
+    pow2 (8 * k) * (uint_v sc.[k] + pow2 8 * nat_from_bytes_le (slice sc (k + 1) 32))) / pow2 (8 * k) % pow2 8);
+    lemma_div_plus (nat_from_intseq_le (slice sc 0 k)) (uint_v sc.[k] + pow2 8 * nat_from_bytes_le (slice sc (k + 1) 32)) (pow2 (8 * k));
+    assert( (nat_from_intseq_le (slice sc 0 k) + 
+    pow2 (8 * k) * (uint_v sc.[k] + pow2 8 * nat_from_bytes_le (slice sc (k + 1) 32))) / pow2 (8 * k) == 
+    nat_from_intseq_le (slice sc 0 k) / pow2 (8 * k) + (uint_v sc.[k] + pow2 8 * nat_from_bytes_le (slice sc (k + 1) 32)));
+    
+    assert(nat_from_bytes_le sc / pow2 (8 * k) % pow2 8 ==  (nat_from_intseq_le (slice sc 0 k) / pow2 (8 * k) + (uint_v sc.[k] + pow2 8 * nat_from_bytes_le (slice sc (k + 1) 32))) % pow2 8);
+
+    assert(nat_from_intseq_le (slice sc 0 k) < pow2 (k * 8));
+    small_div (nat_from_intseq_le (slice sc 0 k)) (pow2 (k * 8));
+    modulo_addition_lemma (uint_v sc.[k]) (pow2 8) (nat_from_bytes_le (slice sc (k + 1) 32));
+    lemma_u8_less sc.[k];
+    FStar.Math.Lemmas.small_mod (uint_v sc.[k]) (pow2 8)
+
+#reset-options "--z3refresh --z3rlimit 300"
+
+val lemma_euclidian_for_ithbit: k: nat ->i: nat -> Lemma (k / (pow2 (8 * (i/8)) * pow2 ( i % 8)) == k / (pow2 i))
+
+let lemma_euclidian_for_ithbit k i = 
+  lemma_div_def i 8;
+  pow2_plus (8 * (i/8)) (i % 8)
+
+val ith_bit: k: lbytes 32 -> i: nat {i < 256} -> Tot (t: uint64 {(uint_v t == 0 \/ uint_v t == 1) /\ uint_v t == (nat_from_intseq_le k) / pow2 i % 2})
+
+let ith_bit k i = 
+  let q = i / 8 in let r = i % 8 in
+  let tmp1 = k.[q] >>. (size r) in 
+  let tmp2 = tmp1 &. u8 1 in 
+  let res = to_u64 tmp2 in 
+  logand_le tmp1 (u8 1);
+  logand_mask tmp1 (u8 1) 1;
+  lemma_scalar_ith k q;
+  let k = nat_from_intseq_le k in 
+  pow2_modulo_division_lemma_1 (k / pow2 (8 * (i/8))) (i % 8) 8;
+  division_multiplication_lemma k (pow2 (8 * (i/8))) (pow2 (i % 8));
+  lemma_euclidian_for_ithbit k i;
+  pow2_modulo_modulo_lemma_1 (k / pow2 i) 1 (8 - (i % 8));
   res
+
 
 let ( *% ) a b = (a * b) % prime
 
 
-val _exp_step0: p: nat_prime -> q: nat_prime -> 
-  Tot (t: tuple2 nat_prime nat_prime {let t0, t1 = t in t0 == (p * p) % prime_p256_order /\ t1 == (p * q) % prime_p256_order})
+val _exp_step0: p: nat_prime -> q: nat_prime -> Tot (t: tuple2 nat_prime nat_prime)
 
 let _exp_step0 r0 r1 = 
   let r1 = r0 *% r1 in 
   let r0 = r0 *% r0 in 
   r0, r1
 
-val _exp_step1: p: nat_prime -> q: nat_prime -> 
-  Tot (t: tuple2 nat_prime nat_prime {let t0, t1 = t in t0 == (p * q) % prime_p256_order /\ t1 == (q * q) % prime_p256_order})
+val _exp_step1: p: nat_prime -> q: nat_prime -> Tot (t: tuple2 nat_prime nat_prime)
 
 let _exp_step1 r0 r1 = 
   let r0 = r0 *% r1 in 
@@ -137,6 +191,7 @@ val conditional_swap: i: uint64 -> p: nat_prime -> q: nat_prime -> Tot (r: tuple
  }
 )
 
+
 #reset-options "--z3refresh --z3rlimit  100"
 
 let conditional_swap i p q = 
@@ -155,9 +210,8 @@ val lemma_swaped_steps: p: nat_prime -> q: nat_prime ->
 
 let lemma_swaped_steps p q = ()
 
-val _exp_step: k:  lseq uint8 32 ->  i: nat{i < 256} -> before: tuple2 nat_prime nat_prime ->
-  Tot (t: tuple2 nat_prime nat_prime)
-
+val _exp_step: k:  lseq uint8 32 ->  i: nat{i < 256} -> before: tuple2 nat_prime nat_prime -> Tot (t: tuple2 nat_prime nat_prime)
+    
 let _exp_step k i (p, q) = 
   let bit = 255 - i in 
   let bit = ith_bit k bit in
@@ -175,7 +229,39 @@ let _exponent_spec k (p, q) =
   let open Lib.LoopCombinators in 
   Lib.LoopCombinators.repeati 256 (_exp_step k) (p, q)
 
-val lemma_exponen_spec: k: lseq uint8 32 -> start: tuple2 nat_prime nat_prime {let st0, st1 = start in st0 == 1}   -> index: nat {index < 256} ->
+
+val lemma_even: index : nat {index <= 256 && index > 0} -> k: lseq uint8 32 {uint_v (ith_bit k (256 - index)) == 0} -> 
+  Lemma (
+    let number = nat_from_bytes_le k in 
+    let newIndex = 256 - index in 
+    2 * arithmetic_shift_right number (newIndex + 1) == arithmetic_shift_right number newIndex)
+
+let lemma_even index k = 
+  let number = nat_from_bytes_le k in 
+  let n = 256 - index in 
+  FStar.Math.Lemmas.pow2_double_mult n;
+  lemma_div_def (number / (pow2 n)) 2;
+  FStar.Math.Lemmas.division_multiplication_lemma number (pow2 n) 2
+
+val lemma_odd: index: nat{index <= 256 && index > 0} -> k: lseq uint8 32 {uint_v (ith_bit k (256 - index)) == 1} -> 
+  Lemma(
+    let number = nat_from_intseq_le k in 
+    let n = 256 - index  in 
+    2 * arithmetic_shift_right number (n + 1) + 1 == arithmetic_shift_right number n)
+
+let lemma_odd index k = 
+  let number = nat_from_bytes_le k in 
+  let n = 256 - index in 
+  let a0 = 2 * arithmetic_shift_right number (n + 1) + 1 in 
+  lemma_div_def (number / (pow2 n)) 2;
+  division_multiplication_lemma number (pow2 n) 2;
+  pow2_double_mult n;
+  assert(arithmetic_shift_right number (n + 1) == number / (pow2 (n + 1)));
+  assert(arithmetic_shift_right number n == 2 * arithmetic_shift_right number (n + 1) + 1)
+
+
+val lemma_exponen_spec: k: lseq uint8 32 -> start: tuple2 nat_prime nat_prime {let st0, st1 = start in st0 == 1}  -> 
+  index: nat {index <= 256} ->
   Lemma (
     let start0, start1 = start in 
     let number = nat_from_bytes_le k in 
@@ -199,19 +285,10 @@ let open Lib.LoopCombinators in
     assert_norm (FStar.Math.Lib.arithmetic_shift_right number newIndex == 0)
   | _ -> begin
     unfold_repeati 256 f start (index - 1);
-      assert(repeati index f start == f (index - 1) (repeati (index - 1) f start));
     lemma_exponen_spec k start (index - 1);
-      let z0, z1 = Lib.LoopCombinators.repeati (index - 1) f start in 
-      let f0, f1 = Lib.LoopCombinators.repeati index f start in 
-      
-    assert(z0 == pow st1 (arithmetic_shift_right number (256 - index + 1)) % prime_p256_order);
-    assert(z1 == pow st1 (arithmetic_shift_right number (256 - index + 1) + 1) % prime_p256_order);
-   
     let bitMask = uint_v (ith_bit k (256 - index)) in 
     match bitMask with 
-      | 0 -> assert(f0 == (z0 * z0) % prime_p256_order); 
-	assert(f1 == (z0 * z1) % prime_p256_order);
-
+      | 0 -> 
 	let a0 = pow st1 (arithmetic_shift_right number (256 - index + 1)) in 
 	let a1 = pow st1 (arithmetic_shift_right number (256 - index + 1) + 1) in 
 	
@@ -221,14 +298,17 @@ let open Lib.LoopCombinators in
 	pow_plus st1 (arithmetic_shift_right number (256 - index + 1)) (arithmetic_shift_right number (256 - index + 1));
 	pow_plus st1 (arithmetic_shift_right number (256 - index + 1)) (arithmetic_shift_right number (256 - index + 1) + 1); 
 	
-	assert(f0 == pow st1 (2 * arithmetic_shift_right number (newIndex + 1)) % prime_p256_order);
-	assert(f1 == pow st1 (2 * arithmetic_shift_right number (newIndex + 1) + 1) % prime_p256_order);
-	
-	assume(2 * arithmetic_shift_right number (newIndex + 1) == (FStar.Math.Lib.arithmetic_shift_right number newIndex))
-      | 1 -> admit()
+	lemma_even index k
+      | 1 -> 
+	let a0 = pow st1 (arithmetic_shift_right number (256 - index + 1)) in 
+	let a1 = pow st1 (arithmetic_shift_right number (256 - index + 1) + 1) in 
 
+	modulo_distributivity_mult a0 a1 prime_p256_order;
+	modulo_distributivity_mult a1 a1 prime_p256_order;
+	pow_plus st1 (arithmetic_shift_right number (256 - index + 1)) (arithmetic_shift_right number (256 - index + 1) + 1);
+	pow_plus st1 (arithmetic_shift_right number (256 - index + 1) + 1) (arithmetic_shift_right number (256 - index + 1) + 1);
 
-
+	lemma_odd index k
     end
 
 
@@ -264,10 +344,10 @@ open Hacl.Spec.P256.Definitions
 val exponent_spec: a: nat_prime -> Tot (r: nat_prime {r = pow a (prime_p256_order - 2) % prime_p256_order})
 
 let exponent_spec a = 
-    let a0, _ = _exponent_spec prime_p256_order_inverse_seq (1, a) in 
-    assume(nat_from_bytes_le prime_p256_order_inverse_seq == prime_p256_order - 2);
-    admit();
-    a0
+  let a0, _ = _exponent_spec prime_p256_order_inverse_seq (1, a) in 
+  lemma_exponen_spec prime_p256_order_inverse_seq (1, a) 256;
+  assume (nat_from_intseq_le prime_p256_order_inverse_seq = prime_p256_order - 2);
+  a0
 
 
 val changeEndian: i: felem_seq -> Tot felem_seq
