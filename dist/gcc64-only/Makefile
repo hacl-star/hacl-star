@@ -99,10 +99,10 @@ OCAMLDEP=ocamlfind dep -I lib -slash
 CFLAGS += -I "$(shell ocamlfind query ctypes)" -I "$(shell ocamlfind c -where)"
 
 # Just names.
-ALL_OCAML=$(patsubst lib_gen/%_gen.ml,%,$(wildcard lib_gen/*_gen.ml))
+ALL_OCAML=$(patsubst lib_gen/%_gen.ml,%,$(wildcard lib_gen/*_gen.ml)) Lib_RandomBuffer_System
 
 ALL_BINDINGS=$(patsubst %,lib/%_bindings.cmx,$(ALL_OCAML))
-ALL_GENERATORS=$(patsubst %.ml,%.exe,$(wildcard lib_gen/*_gen.ml))
+ALL_GENERATORS=$(patsubst %.ml,%.exe,$(wildcard lib_gen/*_gen.ml)) lib_gen/Lib_RandomBuffer_System_gen.exe
 ALL_ML_STUBS=$(patsubst %,lib/%_stubs.cmx,$(ALL_OCAML))
 ALL_C_STUBS=$(patsubst %,lib/%_c_stubs.o,$(ALL_OCAML))
 
@@ -132,6 +132,14 @@ include ctypes.depend
 
 all: libocamlevercrypt.cmxa
 
+lib/Lib_RandomBuffer_System_bindings.cmx:
+	$(OCAMLOPT) -c Lib_RandomBuffer_System_bindings.ml -o lib/Lib_RandomBuffer_System_bindings.cmx
+
+lib_gen/Lib_RandomBuffer_System_gen.cmx: lib/Lib_RandomBuffer_System_bindings.cmx
+	$(OCAMLOPT) -c Lib_RandomBuffer_System_gen.ml lib/Lib_RandomBuffer_System_bindings.cmx -o lib_gen/Lib_RandomBuffer_System_gen.cmx
+
+lib_gen/Lib_RandomBuffer_System_gen.exe: lib/Lib_RandomBuffer_System_bindings.cmx lib_gen/Lib_RandomBuffer_System_gen.cmx
+
 lib_gen/%_gen.exe: libevercrypt.a
 	$(OCAMLOPT) $(filter-out %.a,$^) libevercrypt.a -o $@ $(MLLDFLAGS)
 
@@ -153,7 +161,7 @@ lib/%_stubs.ml lib/%_c_stubs.c: lib_gen/%_gen.exe
 	$(DY)PATH=.:$(OPENSSL_HOME):$$$(DY)PATH $<
 
 # TODO: Have Kremlin generate the correct order or get it from ctypes.depend
-DEPS=lib/Hacl_Hash_stubs.cmx lib/Hacl_Hash_bindings.cmx lib/EverCrypt_AutoConfig2_stubs.cmx lib/EverCrypt_AutoConfig2_bindings.cmx lib/Hacl_Spec_stubs.cmx lib/Hacl_Spec_bindings.cmx lib/EverCrypt_Hash_stubs.cmx lib/EverCrypt_Hash_bindings.cmx lib/Hacl_SHA3_stubs.cmx lib/Hacl_SHA3_bindings.cmx lib/Hacl_Chacha20_stubs.cmx lib/Hacl_Chacha20_bindings.cmx lib/Hacl_Salsa20_stubs.cmx lib/Hacl_Salsa20_bindings.cmx lib/Hacl_Curve25519_64_Slow_stubs.cmx lib/Hacl_Curve25519_64_Slow_bindings.cmx lib/Hacl_Curve25519_64_stubs.cmx lib/Hacl_Curve25519_64_bindings.cmx lib/Hacl_Curve25519_51_stubs.cmx lib/Hacl_Curve25519_51_bindings.cmx lib/Hacl_Ed25519_stubs.cmx lib/Hacl_Ed25519_bindings.cmx lib/Hacl_Poly1305_32_stubs.cmx lib/Hacl_Poly1305_32_bindings.cmx lib/Hacl_Poly1305_128_stubs.cmx lib/Hacl_Poly1305_128_bindings.cmx lib/Hacl_Poly1305_256_stubs.cmx lib/Hacl_Poly1305_256_bindings.cmx lib/Hacl_NaCl_stubs.cmx lib/Hacl_NaCl_bindings.cmx lib/EverCrypt_Error_stubs.cmx lib/EverCrypt_Error_bindings.cmx lib/EverCrypt_CTR_stubs.cmx lib/EverCrypt_CTR_bindings.cmx lib/Hacl_Frodo_KEM_stubs.cmx lib/Hacl_Frodo_KEM_bindings.cmx lib/EverCrypt_OpenSSL_stubs.cmx lib/EverCrypt_OpenSSL_bindings.cmx lib/EverCrypt_Ed25519_stubs.cmx lib/EverCrypt_Ed25519_bindings.cmx lib/Hacl_Chacha20_Vec32_stubs.cmx lib/Hacl_Chacha20_Vec32_bindings.cmx lib/Hacl_Chacha20_Vec128_stubs.cmx lib/Hacl_Chacha20_Vec128_bindings.cmx lib/Hacl_Chacha20Poly1305_128_stubs.cmx lib/Hacl_Chacha20Poly1305_128_bindings.cmx lib/Hacl_Chacha20Poly1305_32_stubs.cmx lib/Hacl_Chacha20Poly1305_32_bindings.cmx lib/Hacl_Chacha20_Vec256_stubs.cmx lib/Hacl_Chacha20_Vec256_bindings.cmx lib/Hacl_Chacha20Poly1305_256_stubs.cmx lib/Hacl_Chacha20Poly1305_256_bindings.cmx lib/EverCrypt_Chacha20Poly1305_stubs.cmx lib/EverCrypt_Chacha20Poly1305_bindings.cmx lib/EverCrypt_AEAD_stubs.cmx lib/EverCrypt_AEAD_bindings.cmx lib/EverCrypt_Vale_stubs.cmx lib/EverCrypt_Vale_bindings.cmx lib/EverCrypt_HMAC_stubs.cmx lib/EverCrypt_HMAC_bindings.cmx lib/EverCrypt_HKDF_stubs.cmx lib/EverCrypt_HKDF_bindings.cmx lib/Hacl_HMAC_stubs.cmx lib/Hacl_HMAC_bindings.cmx lib/Hacl_HKDF_stubs.cmx lib/Hacl_HKDF_bindings.cmx lib/Hacl_HMAC_DRBG_stubs.cmx lib/Hacl_HMAC_DRBG_bindings.cmx lib/EverCrypt_DRBG_stubs.cmx lib/EverCrypt_DRBG_bindings.cmx lib/EverCrypt_Poly1305_stubs.cmx lib/EverCrypt_Poly1305_bindings.cmx lib/EverCrypt_Curve25519_stubs.cmx lib/EverCrypt_Curve25519_bindings.cmx lib/EverCrypt_Cipher_stubs.cmx lib/EverCrypt_Cipher_bindings.cmx lib/EverCrypt_StaticConfig_stubs.cmx lib/EverCrypt_StaticConfig_bindings.cmx
+DEPS=lib/Hacl_Hash_stubs.cmx lib/Hacl_Hash_bindings.cmx lib/EverCrypt_AutoConfig2_stubs.cmx lib/EverCrypt_AutoConfig2_bindings.cmx lib/Hacl_Spec_stubs.cmx lib/Hacl_Spec_bindings.cmx lib/EverCrypt_Hash_stubs.cmx lib/EverCrypt_Hash_bindings.cmx lib/Hacl_SHA3_stubs.cmx lib/Hacl_SHA3_bindings.cmx lib/Hacl_Chacha20_stubs.cmx lib/Hacl_Chacha20_bindings.cmx lib/Hacl_Salsa20_stubs.cmx lib/Hacl_Salsa20_bindings.cmx lib/Hacl_Curve25519_64_Slow_stubs.cmx lib/Hacl_Curve25519_64_Slow_bindings.cmx lib/Hacl_Curve25519_64_stubs.cmx lib/Hacl_Curve25519_64_bindings.cmx lib/Hacl_Curve25519_51_stubs.cmx lib/Hacl_Curve25519_51_bindings.cmx lib/Hacl_Ed25519_stubs.cmx lib/Hacl_Ed25519_bindings.cmx lib/Hacl_Poly1305_32_stubs.cmx lib/Hacl_Poly1305_32_bindings.cmx lib/Hacl_Poly1305_128_stubs.cmx lib/Hacl_Poly1305_128_bindings.cmx lib/Hacl_Poly1305_256_stubs.cmx lib/Hacl_Poly1305_256_bindings.cmx lib/Hacl_NaCl_stubs.cmx lib/Hacl_NaCl_bindings.cmx lib/EverCrypt_Error_stubs.cmx lib/EverCrypt_Error_bindings.cmx lib/EverCrypt_CTR_stubs.cmx lib/EverCrypt_CTR_bindings.cmx lib/Hacl_Frodo_KEM_stubs.cmx lib/Hacl_Frodo_KEM_bindings.cmx lib/EverCrypt_OpenSSL_stubs.cmx lib/EverCrypt_OpenSSL_bindings.cmx lib/EverCrypt_Ed25519_stubs.cmx lib/EverCrypt_Ed25519_bindings.cmx lib/Hacl_Chacha20_Vec32_stubs.cmx lib/Hacl_Chacha20_Vec32_bindings.cmx lib/Hacl_Chacha20_Vec128_stubs.cmx lib/Hacl_Chacha20_Vec128_bindings.cmx lib/Hacl_Chacha20Poly1305_128_stubs.cmx lib/Hacl_Chacha20Poly1305_128_bindings.cmx lib/Hacl_Chacha20Poly1305_32_stubs.cmx lib/Hacl_Chacha20Poly1305_32_bindings.cmx lib/Hacl_Chacha20_Vec256_stubs.cmx lib/Hacl_Chacha20_Vec256_bindings.cmx lib/Hacl_Chacha20Poly1305_256_stubs.cmx lib/Hacl_Chacha20Poly1305_256_bindings.cmx lib/EverCrypt_Chacha20Poly1305_stubs.cmx lib/EverCrypt_Chacha20Poly1305_bindings.cmx lib/EverCrypt_AEAD_stubs.cmx lib/EverCrypt_AEAD_bindings.cmx lib/EverCrypt_Vale_stubs.cmx lib/EverCrypt_Vale_bindings.cmx lib/EverCrypt_HMAC_stubs.cmx lib/EverCrypt_HMAC_bindings.cmx lib/EverCrypt_HKDF_stubs.cmx lib/EverCrypt_HKDF_bindings.cmx lib/Hacl_HMAC_stubs.cmx lib/Hacl_HMAC_bindings.cmx lib/Hacl_HKDF_stubs.cmx lib/Hacl_HKDF_bindings.cmx lib/Hacl_HMAC_DRBG_stubs.cmx lib/Hacl_HMAC_DRBG_bindings.cmx lib/EverCrypt_DRBG_stubs.cmx lib/EverCrypt_DRBG_bindings.cmx lib/EverCrypt_Poly1305_stubs.cmx lib/EverCrypt_Poly1305_bindings.cmx lib/EverCrypt_Curve25519_stubs.cmx lib/EverCrypt_Curve25519_bindings.cmx lib/EverCrypt_Cipher_stubs.cmx lib/EverCrypt_Cipher_bindings.cmx lib/EverCrypt_StaticConfig_stubs.cmx lib/EverCrypt_StaticConfig_bindings.cmx lib/Lib_RandomBuffer_System_stubs.cmx lib/Lib_RandomBuffer_System_bindings.cmx
 
 libocamlevercrypt.cmxa: $(ALL_BINDINGS) $(ALL_ML_STUBS) $(ALL_C_STUBS) libevercrypt.$(SO)
 	ocamlfind mklib -o ocamlevercrypt $(DEPS) $(ALL_C_STUBS) libevercrypt.a -ccopt -L. -cclib -levercrypt $(MLLDFLAGS)
