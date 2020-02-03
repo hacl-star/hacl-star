@@ -40,4 +40,5 @@ let test (v: ed25519_test) t sign verify =
 
 (* TODO: tests for secret_to_public, expand_keys, sign_expanded *)
 let _ =
-  List.iter (fun v -> test v "Hacl.Ed25519" Hacl.Ed25519.sign Hacl.Ed25519.verify) tests
+  List.iter (fun v -> test v "Hacl.Ed25519" Hacl.Ed25519.sign Hacl.Ed25519.verify) tests;
+  List.iter (fun v -> test v "EverCrypt.Ed25519" EverCrypt.Ed25519.sign EverCrypt.Ed25519.verify) tests

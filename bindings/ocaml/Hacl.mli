@@ -1,6 +1,6 @@
 open Unsigned
 
-open Shared
+open SharedDefs
 
 module Chacha20_Poly1305_32 : Chacha20_Poly1305
 module Chacha20_Poly1305_128 : Chacha20_Poly1305

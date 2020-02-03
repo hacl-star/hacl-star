@@ -2,7 +2,8 @@ open Ctypes
 open Unsigned
 
 open Utils
-open Shared
+open SharedDefs
+open SharedFunctors
 
 module Hacl_Spec = Hacl_Spec_bindings.Bindings(Hacl_Spec_stubs)
 
@@ -15,10 +16,12 @@ module EverCrypt_HMAC = EverCrypt_HMAC_bindings.Bindings(EverCrypt_HMAC_stubs)
 module EverCrypt_Poly1305 = EverCrypt_Poly1305_bindings.Bindings(EverCrypt_Poly1305_stubs)
 module EverCrypt_HKDF = EverCrypt_HKDF_bindings.Bindings(EverCrypt_HKDF_stubs)
 module EverCrypt_DRBG = EverCrypt_DRBG_bindings.Bindings(EverCrypt_DRBG_stubs)
+module EverCrypt_Ed25519 = EverCrypt_Ed25519_bindings.Bindings(EverCrypt_Ed25519_stubs)
 
 
 module AutoConfig2 = struct
   open EverCrypt_AutoConfig2
+  let init () = everCrypt_AutoConfig2_init ()
   let has_shaext () = everCrypt_AutoConfig2_has_shaext ()
   let has_aesni () = everCrypt_AutoConfig2_has_aesni ()
   let has_pclmulqdq () = everCrypt_AutoConfig2_has_pclmulqdq ()
@@ -29,26 +32,6 @@ module AutoConfig2 = struct
   let has_sse () = everCrypt_AutoConfig2_has_sse ()
   let has_movbe () = everCrypt_AutoConfig2_has_movbe ()
   let has_rdrand () = everCrypt_AutoConfig2_has_rdrand ()
-  let wants_vale () = everCrypt_AutoConfig2_wants_vale ()
-  let wants_hacl () = everCrypt_AutoConfig2_wants_hacl ()
-  let wants_openssl () = everCrypt_AutoConfig2_wants_openssl ()
-  let wants_bcrypt () = everCrypt_AutoConfig2_wants_bcrypt ()
-  let recall () = everCrypt_AutoConfig2_recall ()
-  let init () = everCrypt_AutoConfig2_init ()
-  let disable_avx2 () = everCrypt_AutoConfig2_disable_avx2 ()
-  let disable_avx () = everCrypt_AutoConfig2_disable_avx ()
-  let disable_bmi2 () = everCrypt_AutoConfig2_disable_bmi2 ()
-  let disable_adx () = everCrypt_AutoConfig2_disable_adx ()
-  let disable_shaext () = everCrypt_AutoConfig2_disable_shaext ()
-  let disable_aesni () = everCrypt_AutoConfig2_disable_aesni ()
-  let disable_pclmulqdq () = everCrypt_AutoConfig2_disable_pclmulqdq ()
-  let disable_sse () = everCrypt_AutoConfig2_disable_sse ()
-  let disable_movbe () = everCrypt_AutoConfig2_disable_movbe ()
-  let disable_rdrand () = everCrypt_AutoConfig2_disable_rdrand ()
-  let disable_vale () = everCrypt_AutoConfig2_disable_vale ()
-  let disable_hacl () = everCrypt_AutoConfig2_disable_hacl ()
-  let disable_openssl () = everCrypt_AutoConfig2_disable_openssl ()
-  let disable_bcrypt () = everCrypt_AutoConfig2_disable_bcrypt ()
 end
 
 module Error = struct
@@ -118,6 +101,15 @@ module Curve25519 : Curve25519 =
     let secret_to_public = EverCrypt_Curve25519.everCrypt_Curve25519_secret_to_public
     let scalarmult = EverCrypt_Curve25519.everCrypt_Curve25519_scalarmult
     let ecdh = EverCrypt_Curve25519.everCrypt_Curve25519_ecdh
+  end)
+
+module Ed25519 : EdDSA =
+  Make_EdDSA (struct
+  let secret_to_public = EverCrypt_Ed25519.everCrypt_Ed25519_secret_to_public
+  let sign = EverCrypt_Ed25519.everCrypt_Ed25519_sign
+  let verify = EverCrypt_Ed25519.everCrypt_Ed25519_verify
+  let expand_keys = EverCrypt_Ed25519.everCrypt_Ed25519_expand_keys
+  let sign_expanded = EverCrypt_Ed25519.everCrypt_Ed25519_sign_expanded
   end)
 
 module Hash = struct
