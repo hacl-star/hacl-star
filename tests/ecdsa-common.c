@@ -252,8 +252,8 @@ bool testEcdsaVerification1()
 
 
       uint32_t mLen = 128;
-      uint64_t* pubKey = (uint64_t *) malloc (sizeof (uint64_t) * 12);
-      uint64_t* r = (uint64_t *) malloc (sizeof (uint64_t) * 4);
+      uint64_t* pubKey = (uint64_t *) malloc (sizeof (uint64_t) * 8);
+      // uint64_t* r = (uint64_t *) malloc (sizeof (uint64_t) * 4);
       uint64_t* s = (uint64_t *) malloc (sizeof (uint64_t) * 4);
 
       pubKey[3] = 0xe424dc61d4bb3cb7ul;
@@ -266,17 +266,21 @@ bool testEcdsaVerification1()
       pubKey[5] = 0x127e5965ac85d124ul;
       pubKey[4] = 0x3d6f60e7dfaee927ul;
 
-      r[3] =  0xbf96b99aa49c705cul;
-      r[2] =  0x910be33142017c64ul;
-      r[1] =  0x2ff540c76349b9daul;
-      r[0] =  0xb72f981fd9347f4ful;
+      // r[3] =  0xbf 96 b9 9a a4 9c 70 5cul;
+      // r[2] =  0x91 0b e3 31 42 01 7c 64ul;
+      // r[1] =  0x2f f5 40 c7 63 49 b9 daul;
+      // r[0] =  0xb7 2f 98 1f d9 34 7f 4f ul;
+
+      uint8_t r[32] = {
+      	0x4f, 0x7f, 0x34, 0xd9, 0x1f, 0x98, 0x2f, 0xb7, 0xda, 0xb9, 0x49, 0x63, 0xc7, 0x40, 0xf5, 0x2f,
+      	0x64, 0x7c, 0x01, 0x42, 0x31, 0xe3, 0x0b, 0x91, 0x5c, 0x70, 0x9c, 0xa4, 0x9a, 0xb9, 0x96, 0xbf};
 
       s[3] =  0x17c55095819089c2ul;
       s[2] =  0xe03b9cd415abdf12ul;
       s[1] =  0x444e323075d98f31ul;
       s[0] =  0x920b9e0f57ec871cul;
 
-      bool result = Hacl_Impl_ECDSA_ecdsa_p256_sha2_verify_u8 (mLen, m, (uint8_t *) pubKey, (uint8_t *) r, (uint8_t *) s);
+      bool result = Hacl_Impl_ECDSA_ecdsa_p256_sha2_verify_u8 (mLen, m, (uint8_t *) pubKey, r, (uint8_t *) s);
 
       bool expectedResult = true;
       return (result == expectedResult);
@@ -834,6 +838,6 @@ int main()
     return EXIT_FAILURE;
   }
 
-  printf("%s\n", "Verification and testing of ECDSA completed");
+  printf("%s\n", "Verification and testing of ECDSA completed successfully");
   return EXIT_SUCCESS;
 }
