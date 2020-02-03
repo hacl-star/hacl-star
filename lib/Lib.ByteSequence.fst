@@ -152,19 +152,9 @@ let rec nat_to_intseq_le_ #t #l len n =
     b
 
 let nat_to_intseq_le = nat_to_intseq_le_
-let nat_to_bytes_be = nat_to_intseq_be_ #U8
-let nat_to_bytes_le = nat_to_intseq_le_ #U8
 
 #reset-options "--z3rlimit 1000 --max_fuel 1 --max_ifuel 0"
 
-val index_nat_to_intseq_le:
-    #t:inttype{unsigned t}
-  -> #l:secrecy_level
-  -> len:size_nat
-  -> n:nat{n < pow2 (bits t * len)}
-  -> i:nat{i < len}
-  -> Lemma (Seq.index (nat_to_intseq_le #t #l len n) i ==
-           uint #t #l (n / pow2 (bits t * i) % pow2 (bits t)))
 let rec index_nat_to_intseq_le #t #l len n i =
   if i = 0 then ()
   else
@@ -187,6 +177,9 @@ let rec index_nat_to_intseq_le #t #l len n i =
     end
 
 #reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
+
+let nat_to_bytes_be = nat_to_intseq_be_ #U8
+let nat_to_bytes_le = nat_to_intseq_le_ #U8
 
 let uint_to_bytes_le #t #l n =
   nat_to_bytes_le (numbytes t) (uint_to_nat n)
