@@ -456,42 +456,42 @@ val ecdsa_verification_u8:
     (requires fun h -> live h pubKey /\ live h r /\ live h s /\ live h m)
     (ensures fun h0 result h1 ->
       assert_norm (pow2 32 < pow2 61);
-      let publicKeyX = nat_from_bytes_le (as_seq h1 (gsub pubKey (size 0) (size 32))) in
-      let publicKeyY = nat_from_bytes_le (as_seq h1 (gsub pubKey (size 32) (size 32))) in
-      let r = nat_from_bytes_le (as_seq h1 r) in
-      let s = nat_from_bytes_le (as_seq h1 s) in
+      let publicKeyX = nat_from_intseq_le (Hacl.Spec.ECDSA.changeEndian (uints_from_bytes_be (as_seq h1 (gsub pubKey (size 0) (size 32))))) in
+      let publicKeyY = nat_from_intseq_le (Hacl.Spec.ECDSA.changeEndian (uints_from_bytes_be (as_seq h1 (gsub pubKey (size 32) (size 32))))) in
+      let r = nat_from_intseq_le (Hacl.Spec.ECDSA.changeEndian (uints_from_bytes_be (as_seq h1 r))) in
+      let s = nat_from_intseq_le (Hacl.Spec.ECDSA.changeEndian (uints_from_bytes_be (as_seq h1 s))) in
       modifies0 h0 h1 /\
       result == Hacl.Spec.ECDSA.ecdsa_verification (publicKeyX, publicKeyY) r s (v mLen) (as_seq h0 m))
 
 let ecdsa_verification_u8 pubKey r s mLen m =
   assert_norm (pow2 32 < pow2 61);
   push_frame();
-  let h0 = ST.get() in
-  let publicKeyAsFelem = create (size 8) (u64 0) in
-  let publicKeyFelemX = sub publicKeyAsFelem (size 0) (size 4) in
-  let publicKeyFelemY = sub publicKeyAsFelem (size 4) (size 4) in
-  let rAsFelem = create (size 4) (u64 0) in
-  let sAsFelem = create (size 4) (u64 0) in
-  let pubKeyX = sub pubKey (size 0) (size 32) in
-  let pubKeyY = sub pubKey (size 32) (size 32) in
+  let h0 = ST.get() in 
+    let publicKeyAsFelem = create (size 8) (u64 0) in
+      let publicKeyFelemX = sub publicKeyAsFelem (size 0) (size 4) in 
+      let publicKeyFelemY = sub publicKeyAsFelem (size 4) (size 4) in 
+    let rAsFelem = create (size 4) (u64 0) in 
+    let sAsFelem = create (size 4) (u64 0) in 
+      let pubKeyX = sub pubKey (size 0) (size 32) in
+      let pubKeyY = sub pubKey (size 32) (size 32) in 
+      
+    toUint64ChangeEndian pubKeyX publicKeyFelemX;
+    toUint64ChangeEndian pubKeyY publicKeyFelemY;
+   
+    toUint64ChangeEndian r rAsFelem;
+    toUint64ChangeEndian s sAsFelem;
 
-  toUint64 pubKeyX publicKeyFelemX;
-  toUint64 pubKeyY publicKeyFelemY;
+  let h1 = ST.get() in 
+      lemma_core_0 publicKeyFelemX h1;
+      uints_from_bytes_le_nat_lemma #U64 #SEC #4 (as_seq h1 pubKeyX);  
+      lemma_core_0 publicKeyFelemY h1;
+      uints_from_bytes_le_nat_lemma #U64 #SEC #4 (as_seq h1 pubKeyY);
 
-  toUint64 r rAsFelem;
-  toUint64 s sAsFelem;
-
-  let h1 = ST.get() in
-  lemma_core_0 publicKeyFelemX h1;
-  uints_from_bytes_le_nat_lemma #U64 #SEC #4 (as_seq h1 pubKeyX);
-  lemma_core_0 publicKeyFelemY h1;
-  uints_from_bytes_le_nat_lemma #U64 #SEC #4 (as_seq h1 pubKeyY);
-
-  lemma_core_0 rAsFelem h1;
-  uints_from_bytes_le_nat_lemma #U64 #SEC #4 (as_seq h1 r);
-  lemma_core_0 sAsFelem h1;
-  uints_from_bytes_le_nat_lemma #U64 #SEC #4 (as_seq h1 s);
-
-  let result = ecdsa_verification publicKeyAsFelem rAsFelem sAsFelem mLen m in
+      lemma_core_0 rAsFelem h1;
+      uints_from_bytes_le_nat_lemma #U64 #SEC #4 (as_seq h1 r);
+      lemma_core_0 sAsFelem h1;
+      uints_from_bytes_le_nat_lemma #U64 #SEC #4 (as_seq h1 s);
+      
+    let result = ecdsa_verification publicKeyAsFelem rAsFelem sAsFelem mLen m in 
   pop_frame();
   result
