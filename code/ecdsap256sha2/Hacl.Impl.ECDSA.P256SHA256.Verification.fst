@@ -409,12 +409,12 @@ val ecdsa_verification_u8: pubKey: lbuffer uint8 (size 64) -> r: lbuffer uint8 (
       )  
     (ensures fun h0 result h1 -> modifies0 h0 h1 /\ 
       (
-	let publicKeyX =  nat_from_bytes_le (as_seq h1 (gsub pubKey (size 0) (size 32))) in 
-	let publicKeyY =  nat_from_bytes_le (as_seq h1 (gsub pubKey (size 32) (size 32))) in 
-	let r = nat_from_bytes_le (as_seq h1 r) in 
-	let s = nat_from_bytes_le (as_seq h1 s) in 
+	let publicKeyX = nat_from_intseq_le (Hacl.Spec.ECDSA.changeEndian (uints_from_bytes_be (as_seq h0 (gsub pubKey (size 0) (size 32))))) in 
+	let publicKeyY = nat_from_intseq_le (Hacl.Spec.ECDSA.changeEndian (uints_from_bytes_be (as_seq h0 (gsub pubKey (size 32) (size 32))))) in 
+	let r = nat_from_intseq_le (Hacl.Spec.ECDSA.changeEndian (uints_from_bytes_be (as_seq h0 r))) in 
+	let s =  nat_from_intseq_le (Hacl.Spec.ECDSA.changeEndian (uints_from_bytes_be (as_seq h0 s))) in 
 	result == Hacl.Spec.ECDSA.ecdsa_verification (publicKeyX, publicKeyY) r s (v mLen) (as_seq h0 m)
-    )
+)
   )
 
 let ecdsa_verification_u8 pubKey r s mLen m = 
@@ -428,11 +428,11 @@ let ecdsa_verification_u8 pubKey r s mLen m =
       let pubKeyX = sub pubKey (size 0) (size 32) in
       let pubKeyY = sub pubKey (size 32) (size 32) in 
       
-    toUint64 pubKeyX publicKeyFelemX;
-    toUint64 pubKeyY publicKeyFelemY;
+    toUint64ChangeEndian pubKeyX publicKeyFelemX;
+    toUint64ChangeEndian pubKeyY publicKeyFelemY;
    
-    toUint64 r rAsFelem;
-    toUint64 s sAsFelem;
+    toUint64ChangeEndian r rAsFelem;
+    toUint64ChangeEndian s sAsFelem;
 
   let h1 = ST.get() in 
       lemma_core_0 publicKeyFelemX h1;
