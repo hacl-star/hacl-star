@@ -4,6 +4,7 @@ open Utils
 open SharedDefs
 open SharedFunctors
 
+module Lib_RandomBuffer_System = Lib_RandomBuffer_System_bindings.Bindings(Lib_RandomBuffer_System_stubs)
 module Hacl_Chacha20Poly1305_32 = Hacl_Chacha20Poly1305_32_bindings.Bindings(Hacl_Chacha20Poly1305_32_stubs)
 module Hacl_Chacha20Poly1305_128 = Hacl_Chacha20Poly1305_128_bindings.Bindings(Hacl_Chacha20Poly1305_128_stubs)
 module Hacl_Chacha20Poly1305_256 = Hacl_Chacha20Poly1305_256_bindings.Bindings(Hacl_Chacha20Poly1305_256_stubs)
@@ -20,6 +21,9 @@ module Hacl_Poly1305_256 = Hacl_Poly1305_256_bindings.Bindings(Hacl_Poly1305_256
 module Hacl_HKDF = Hacl_HKDF_bindings.Bindings(Hacl_HKDF_stubs)
 module Hacl_NaCl = Hacl_NaCl_bindings.Bindings(Hacl_NaCl_stubs)
 
+module RandomBuffer = struct
+  let randombytes buf = Lib_RandomBuffer_System.randombytes (uint8_ptr buf) (size_uint32 buf)
+end
 
 module Chacha20_Poly1305_32 : Chacha20_Poly1305 =
   Make_Chacha20_Poly1305 (struct

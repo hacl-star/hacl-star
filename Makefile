@@ -690,6 +690,7 @@ DEFAULT_FLAGS = \
   $(REQUIRED_FLAGS) \
   $(TARGET_H_INCLUDE)
 
+HAND_WRITTEN_ML_FILES =
 
 # WASM distribution
 # -----------------
@@ -731,6 +732,8 @@ dist/wasm/Makefile.basic: WASMSUPPORT_BUNDLE =
 # Customizations for regular, msvc and gcc flavors.
 dist/gcc-compatible/Makefile.basic: DEFAULT_FLAGS += \
   -ctypes EverCrypt.*,Hacl.*
+dist/gcc-compatible/Makefile.basic: HAND_WRITTEN_ML_FILES += \
+  lib/ml/*_bindings.ml lib/ml/*_gen.ml
 
 dist/msvc-compatible/Makefile.basic: DEFAULT_FLAGS += -falloca -ftail-calls
 
@@ -885,7 +888,7 @@ dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/LICENSE.txt \
   $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_H_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) $(VALE_ASMS) | old-extract-c
 	mkdir -p $(dir $@)
 	[ x"$(HACL_OLD_FILES)" != x ] && cp $(HACL_OLD_FILES) $(patsubst %.c,%.h,$(HACL_OLD_FILES)) $(dir $@) || true
-	cp $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_H_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) $(dir $@)
+	cp $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_H_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) $(HAND_WRITTEN_ML_FILES) $(dir $@)
 	[ x"$(VALE_ASMS)" != x ] && cp $(VALE_ASMS) $(dir $@) || true
 	$(KRML) $(DEFAULT_FLAGS) \
 	  -tmpdir $(dir $@) -skip-compilation \

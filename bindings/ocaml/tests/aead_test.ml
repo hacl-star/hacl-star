@@ -84,6 +84,15 @@ let test_nonagile (v: aead_test) t encrypt decrypt =
       print_result "Failure: decrypted and plaintext do not match"
   else print_result "Decryption error"
 
+let test_random () =
+  let print_result = print_result "Lib.RandomBuffer" in
+  let buf = Bigstring.create 256 in
+  Bigstring.fill buf '\x00';
+  if Hacl.RandomBuffer.randombytes buf then
+    print_result "Success"
+  else
+    print_result "Failure"
+
 let _ =
   EverCrypt.AutoConfig2.init ();
   Printf.printf "has_shaext: %b\n" (EverCrypt.AutoConfig2.has_shaext ());
@@ -96,8 +105,11 @@ let _ =
   Printf.printf "has_sse: %b\n" (EverCrypt.AutoConfig2.has_sse ());
   Printf.printf "has_movbe: %b\n" (EverCrypt.AutoConfig2.has_movbe ());
   Printf.printf "has_rdrand: %b\n" (EverCrypt.AutoConfig2.has_rdrand ());
+
   test_agile chacha20poly1305_test;
   test_nonagile chacha20poly1305_test "Hacl.Chacha20_Poly1305_32" Hacl.Chacha20_Poly1305_32.encrypt Hacl.Chacha20_Poly1305_32.decrypt;
   test_nonagile chacha20poly1305_test "Hacl.Chacha20_Poly1305_128" Hacl.Chacha20_Poly1305_128.encrypt Hacl.Chacha20_Poly1305_128.decrypt;
   test_nonagile chacha20poly1305_test "Hacl.Chacha20_Poly1305_256" Hacl.Chacha20_Poly1305_256.encrypt Hacl.Chacha20_Poly1305_256.decrypt;
-  test_nonagile chacha20poly1305_test "EverCrypt.Chacha20_Poly1305_256" EverCrypt.Chacha20_Poly1305.encrypt EverCrypt.Chacha20_Poly1305.decrypt
+  test_nonagile chacha20poly1305_test "EverCrypt.Chacha20_Poly1305_256" EverCrypt.Chacha20_Poly1305.encrypt EverCrypt.Chacha20_Poly1305.decrypt;
+
+  test_random ()
