@@ -14,6 +14,7 @@ module EverCrypt_Hash = EverCrypt_Hash_bindings.Bindings(EverCrypt_Hash_stubs)
 module EverCrypt_HMAC = EverCrypt_HMAC_bindings.Bindings(EverCrypt_HMAC_stubs)
 module EverCrypt_Poly1305 = EverCrypt_Poly1305_bindings.Bindings(EverCrypt_Poly1305_stubs)
 module EverCrypt_HKDF = EverCrypt_HKDF_bindings.Bindings(EverCrypt_HKDF_stubs)
+module EverCrypt_DRBG = EverCrypt_DRBG_bindings.Bindings(EverCrypt_DRBG_stubs)
 
 
 module AutoConfig2 = struct
@@ -212,3 +213,23 @@ module HKDF_SHA2_512 : HKDF =
     let extract = EverCrypt_HKDF.everCrypt_HKDF_extract_sha2_512
   end)
 
+module DRBG = struct
+  open EverCrypt_DRBG
+
+  type t = everCrypt_DRBG_state_s ptr
+  let instantiate ?(personalization_string=Bigstring.empty) alg =
+    if HMAC.is_supported_alg alg then
+      let st = everCrypt_DRBG_create (Hash.alg_definition alg) in
+      if everCrypt_DRBG_instantiate st (uint8_ptr personalization_string) (size_uint32 personalization_string) then
+        Some st
+      else
+        None
+    else
+      None
+  let reseed ?(additional_input=Bigstring.empty) st =
+    everCrypt_DRBG_reseed st (uint8_ptr additional_input) (size_uint32 additional_input)
+  let generate ?(additional_input=Bigstring.empty) st output =
+    everCrypt_DRBG_generate (uint8_ptr output) st (size_uint32 output) (uint8_ptr additional_input) (size_uint32 additional_input)
+  let uninstantiate st =
+    everCrypt_DRBG_uninstantiate st
+end

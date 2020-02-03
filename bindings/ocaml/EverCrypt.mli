@@ -101,3 +101,11 @@ module HKDF_SHA2_256 : HKDF
 module HKDF_SHA2_384 : HKDF
 
 module HKDF_SHA2_512 : HKDF
+
+module DRBG : sig
+  type t
+  val instantiate : ?personalization_string: Bigstring.t -> Hash.alg -> t option
+  val reseed : ?additional_input: Bigstring.t -> t -> bool
+  val generate : ?additional_input: Bigstring.t -> t -> Bigstring.t -> bool
+  val uninstantiate : t -> unit
+end
