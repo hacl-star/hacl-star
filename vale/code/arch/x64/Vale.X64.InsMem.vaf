@@ -57,7 +57,7 @@ procedure Mem64_in(in h:heaplet, in base:reg64, inline offset:int, ghost b:buffe
     {:operand}
     extern;
 
-procedure Mem64_lemma(ghost h:heaplet_id, ghost base:va_operand, ghost offset:int, ghost b:buffer64, ghost index:int, ghost t:taint)
+procedure Mem64_lemma(ghost h:heaplet_id, ghost base:operand64, ghost offset:int, ghost b:buffer64, ghost index:int, ghost t:taint)
     {:public}
     {:quick exportOnly}
     {:typecheck false}

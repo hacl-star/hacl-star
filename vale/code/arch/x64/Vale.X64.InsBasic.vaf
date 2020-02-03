@@ -88,11 +88,11 @@ operand_type reg64:nat64 :=
 | inout r12 | inout r13 | inout r14 | inout r15
 ;
 operand_type shift_amt64:nat64 := in rcx | const;
-operand_type reg_opr64:nat64 @ va_operand := reg64;
+operand_type reg_opr64:nat64 @ operand64 := reg64;
 operand_type Mem64(in h:heaplet, in base:reg64, inline offset:int, ghost b:buffer64, ghost index:int, inline t:taint):int;
 operand_type Stack(in base:reg64, inline offset:int, inline t:taint):int;
-operand_type dst_opr64:nat64 @ va_operand := reg_opr64 | Mem64 | Stack;
-operand_type opr64:nat64 @ va_operand := dst_opr64 | const;
+operand_type dst_opr64:nat64 @ operand64 := reg_opr64 | Mem64 | Stack;
+operand_type opr64:nat64 @ operand64 := dst_opr64 | const;
 
 operand_type heaplet:vale_heap @ heaplet_id :=
 | inout heap0 | inout heap1 | inout heap2 | inout heap3

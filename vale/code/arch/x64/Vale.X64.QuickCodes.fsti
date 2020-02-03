@@ -200,12 +200,12 @@ let va_qInlineIf (#a:Type) (#c1:code) (#c2:code) (mods:mods_t) (b:bool) (qc1:qui
   QProc (if_code b c1 c2) mods (wp_InlineIf b qc1 qc2 mods) (qInlineIf_proof b qc1 qc2 mods)
 
 noeq type cmp =
-| Cmp_eq : o1:va_operand{not (OMem? o1 || OStack? o1)} -> o2:va_operand{not (OMem? o2 || OStack? o2)} -> cmp
-| Cmp_ne : o1:va_operand{not (OMem? o1 || OStack? o1)} -> o2:va_operand{not (OMem? o2 || OStack? o2)} -> cmp
-| Cmp_le : o1:va_operand{not (OMem? o1 || OStack? o1)} -> o2:va_operand{not (OMem? o2 || OStack? o2)} -> cmp
-| Cmp_ge : o1:va_operand{not (OMem? o1 || OStack? o1)} -> o2:va_operand{not (OMem? o2 || OStack? o2)} -> cmp
-| Cmp_lt : o1:va_operand{not (OMem? o1 || OStack? o1)} -> o2:va_operand{not (OMem? o2 || OStack? o2)} -> cmp
-| Cmp_gt : o1:va_operand{not (OMem? o1 || OStack? o1)} -> o2:va_operand{not (OMem? o2 || OStack? o2)} -> cmp
+| Cmp_eq : o1:operand64{not (OMem? o1 || OStack? o1)} -> o2:operand64{not (OMem? o2 || OStack? o2)} -> cmp
+| Cmp_ne : o1:operand64{not (OMem? o1 || OStack? o1)} -> o2:operand64{not (OMem? o2 || OStack? o2)} -> cmp
+| Cmp_le : o1:operand64{not (OMem? o1 || OStack? o1)} -> o2:operand64{not (OMem? o2 || OStack? o2)} -> cmp
+| Cmp_ge : o1:operand64{not (OMem? o1 || OStack? o1)} -> o2:operand64{not (OMem? o2 || OStack? o2)} -> cmp
+| Cmp_lt : o1:operand64{not (OMem? o1 || OStack? o1)} -> o2:operand64{not (OMem? o2 || OStack? o2)} -> cmp
+| Cmp_gt : o1:operand64{not (OMem? o1 || OStack? o1)} -> o2:operand64{not (OMem? o2 || OStack? o2)} -> cmp
 
 [@va_qattr]
 let cmp_to_ocmp (c:cmp) : ocmp =

@@ -91,7 +91,7 @@ procedure Mem128_in(in h:heaplet, in base:reg64, inline offset:int, inline t:tai
     {:operand}
     extern;
 
-procedure Mem128_lemma(ghost h:heaplet_id, ghost base:va_operand, ghost offset:int, ghost t:taint, ghost b:buffer128, ghost index:int)
+procedure Mem128_lemma(ghost h:heaplet_id, ghost base:operand64, ghost offset:int, ghost t:taint, ghost b:buffer128, ghost index:int)
     {:public}
     {:quick exportOnly}
     {:typecheck false}

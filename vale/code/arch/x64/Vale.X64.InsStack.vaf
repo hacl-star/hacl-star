@@ -67,7 +67,7 @@ procedure Stack_in(in base:reg64, inline offset:int, inline t:taint) returns(o:o
         stack;
     extern;
 
-procedure Stack_lemma(ghost base:va_operand, ghost offset:int, ghost t:taint)
+procedure Stack_lemma(ghost base:operand64, ghost offset:int, ghost t:taint)
     {:public}
     {:quick exportOnly}
 {

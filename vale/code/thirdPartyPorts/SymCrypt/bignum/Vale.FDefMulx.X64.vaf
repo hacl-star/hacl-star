@@ -67,7 +67,7 @@ let make_seq9 (#a:Type0) (v0 v1 v2 v3 v4 v5 v6 v7 v8:a) : seq a =
     if i = 7 then v7 else
     v8)
 
-let operand_reg8 (n:nat) : va_operand = oreg (Reg 0 (8 + n % 8))
+let operand_reg8 (n:nat) : operand64 = oreg (Reg 0 (8 + n % 8))
 #endverbatim
 
 function init_ys(a:nat64, bs:seq(nat64)):seq(nat64) extern;
@@ -101,7 +101,7 @@ ghost procedure lemma_scale_add(
     {:infer_spec}
     extern;
 
-function operand_reg8(n:nat):va_operand extern;
+function operand_reg8(n:nat):operand64 extern;
 
 #reset-options "--z3rlimit 80 --max_fuel 1 --max_ifuel 0"
 
