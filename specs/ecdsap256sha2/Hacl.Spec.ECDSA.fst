@@ -238,7 +238,7 @@ val lemma_exponen_spec: k:lseq uint8 32
     f1 == pow start1 (arithmetic_shift_right number newIndex + 1) % prime_p256_order
   )
 
-#push-options "--fuel 2 --z3rlimit 300"
+#push-options "--fuel 2 --z3rlimit 500"
 
 let rec lemma_exponen_spec k start index =
   let open FStar.Math.Lib in
