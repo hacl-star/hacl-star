@@ -119,13 +119,12 @@ val ecdsa_p256_sha2_verify:
     )
 
 (* This code is not side channel resistant *)
-val ecdsa_verification_u8:
-    pubKey:lbuffer uint8 (size 64)
-  -> r:lbuffer uint8 (size 32)
-  -> s:lbuffer uint8 (size 32)
-  -> mLen:size_t
-  -> m:lbuffer uint8 mLen ->
-  Stack bool
+val ecdsa_p256_sha2_verify_u8:
+    mLen: size_t
+  -> m: lbuffer uint8 mLen
+  -> pubKey: lbuffer uint8 (size 64)
+  -> r: lbuffer uint8 (size 32)
+  -> s: lbuffer uint8 (size 32) ->
     (requires fun h -> live h pubKey /\ live h r /\ live h s /\ live h m)
     (ensures fun h0 result h1 ->
       assert_norm (pow2 32 < pow2 61);
