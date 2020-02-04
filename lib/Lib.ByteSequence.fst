@@ -375,10 +375,81 @@ let rec uints_from_bytes_le_nat_lemma_ #t #l #len b =
     assert (nat_from_intseq_le_ (uints_from_bytes_le #t #l #(len - 1) b1) == nat_from_intseq_le_ b1);
     uints_from_bytes_le_nat_lemma_aux #t #l #len b
   end
-#pop-options
-
+  
 let uints_from_bytes_le_nat_lemma #t #l #len b =
   uints_from_bytes_le_nat_lemma_ #t #l #len b
+
+val uints_from_bytes_be_slice_lemma_lp: 
+      #t:inttype{unsigned t /\ ~(U1? t)} -> #l:secrecy_level -> #len:size_pos{len * numbytes t < pow2 32}
+  -> b:lbytes_l l (len * numbytes t) -> i:nat -> j:nat{i <= j /\ j <= len} -> k:nat{k < j - i} ->
+  Lemma (index (slice (uints_from_bytes_le #t #l #len b) i j) k ==
+         uint_from_bytes_le (sub b ((i + k) * numbytes t) (numbytes t)))
+
+let uints_from_bytes_be_slice_lemma_lp #t #l #len b i j k = 
+  let r = slice (uints_from_bytes_le #t #l #len b) i j in 
+  index_uints_from_bytes_be #t #l #len b (i + k);
+  assert (r.[k] == uint_from_bytes_le (sub b ((i + k) * numbytes t) (numbytes t)))
+
+val uints_from_bytes_be_slice_lemma_rp:
+    #t:inttype{unsigned t /\ ~(U1? t)} 
+    -> #l:secrecy_level 
+    -> #len:size_pos{len * numbytes t < pow2 32}
+    -> b:lbytes_l l (len * numbytes t) 
+    -> i:nat 
+    -> j:nat{i <= j /\ j <= len} 
+    -> k:nat{k < j - i} ->
+    Lemma (index (uints_from_bytes_be #t #l #(j-i) (slice b (i * numbytes t) (j * numbytes t))) k ==
+         uint_from_bytes_be (sub b ((i + k) * numbytes t) (numbytes t)))
+
+let uints_from_bytes_be_slice_lemma_rp #t #l #len b i j k =
+  let b1 = slice b (i * numbytes t) (j * numbytes t) in
+  let r = uints_from_bytes_be #t #l #(j-i) b1 in
+  index_uints_from_bytes_be #t #l #(j-i) b1 k;
+  assert (r.[k] == uint_from_bytes_be (sub b1 (k * numbytes t) (numbytes t)));
+  assert (r.[k] == uint_from_bytes_be (sub b ((i + k) * numbytes t) (numbytes t)))
+
+val uints_from_bytes_be_slice_lemma: #t:inttype{unsigned t /\ ~(U1? t)} -> #l:secrecy_level -> #len:size_pos{len * numbytes t < pow2 32}
+  -> b:lbytes_l l (len * numbytes t) -> i:nat -> j:nat{i <= j /\ j <= len} ->
+  Lemma (slice (uints_from_bytes_be #t #l #len b) i j == uints_from_bytes_be #t #l #(j-i) (slice b (i * numbytes t) (j * numbytes t)))
+
+let uints_from_bytes_be_slice_lemma #t #l #len b i j =
+  FStar.Classical.forall_intro (uints_from_bytes_be_slice_lemma_lp #t #l #len b i j);
+  FStar.Classical.forall_intro (uints_from_bytes_be_slice_lemma_rp #t #l #len b i j);
+  eq_intro (slice (uints_from_bytes_be #t #l #len b) i j) (uints_from_bytes_be #t #l #(j-i) (slice b (i * numbytes t) (j * numbytes t)))
+
+val uints_from_bytes_be_nat_lemma_aux:
+    #t:inttype{unsigned t /\ ~(U1? t)}
+  -> #l:secrecy_level
+  -> #len:size_pos{len * numbytes t < pow2 32}
+  -> b:lbytes_l l (len * numbytes t) ->
+  Lemma (nat_from_intseq_be_ (uints_from_bytes_be #t #l #len b) ==
+        nat_from_intseq_be (uints_from_bytes_be #t #l #(len-1) (slice b (numbytes t) (len * numbytes t))) + pow2 ((len - 1) * bits t) * nat_from_intseq_be_ (slice b 0 (numbytes t)))
+	 
+let uints_from_bytes_be_nat_lemma_aux #t #l #len b =
+  let r = uints_from_bytes_be #t #l #len b in
+  uints_from_bytes_be_slice_lemma #t #l #len b 1 len;
+  nat_from_intseq_be_slice_lemma r 1;
+  assert (nat_from_intseq_be_ r == nat_from_intseq_be (slice r 1 len) + pow2 ((len - 1) * bits t) * uint_v r.[0])
+
+val uints_from_bytes_be_nat_lemma_:
+    #t:inttype{unsigned t /\ ~(U1? t)}
+  -> #l:secrecy_level
+  -> #len:size_nat{len * numbytes t < pow2 32}
+  -> b:lbytes_l l (len * numbytes t) ->
+  Lemma (nat_from_intseq_be_ (uints_from_bytes_be #t #l #len b) == nat_from_intseq_be_ b)
+  
+let rec uints_from_bytes_be_nat_lemma_ #t #l #len b =
+  if len = 0 then ()
+  else begin
+    uints_from_bytes_be_nat_lemma_aux #t #l #len b;
+    nat_from_intseq_be_slice_lemma_ b (numbytes t);
+    uints_from_bytes_be_nat_lemma_ #t #l #(len - 1) (slice b (numbytes t) (len * numbytes t))
+  end
+
+let uints_from_bytes_be_nat_lemma #t #l #len b =
+  uints_from_bytes_be_nat_lemma_ #t #l #len b
+
+#pop-options
 
 val index_uints_to_bytes_le_aux:
     #t:inttype{unsigned t /\ ~(U1? t)}
