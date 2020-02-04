@@ -14,24 +14,20 @@ module B = LowStar.Buffer
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 
 noextract
-let sigver_vectors_tmp = List.Tot.map 
+let sigver_vectors_tmp = List.Tot.map
   (fun x -> h x.msg, h x.qx, h x.qy, h x.r, h x.s, x.result)
   sigver_vectors
 
-#push-options "--lax"
-
-%splice[sigver_vectors_low] 
-  (lowstarize_toplevel "sigver_vectors_tmp" "sigver_vectors_low")
-
 noextract
-let siggen_vectors_tmp = List.Tot.map 
+let siggen_vectors_tmp = List.Tot.map
   (fun x -> h x.msg', h x.d, h x.qx', h x.qy', h x.k, h x.r', h x.s')
   siggen_vectors
 
-%splice[siggen_vectors_low] 
-  (lowstarize_toplevel "siggen_vectors_tmp" "siggen_vectors_low")
+%splice[sigver_vectors_low]
+  (lowstarize_toplevel "sigver_vectors_tmp" "sigver_vectors_low")
 
-#pop-options
+%splice[siggen_vectors_low]
+  (lowstarize_toplevel "siggen_vectors_tmp" "siggen_vectors_low")
 
 // Cheap alternative to friend Lib.IntTypes needed because Test.Lowstarize uses UInt8.t
 assume val declassify_uint8: squash (uint8 == UInt8.t)
@@ -43,7 +39,7 @@ let sigver_vector = vec8 & vec8 & vec8 & vec8 & vec8 & bool
 let siggen_vector = vec8 & vec8 & vec8 & vec8 & vec8 & vec8 & vec8
 
 // This could replace TestLib.compare_and_print
-val compare_and_print: b1:B.buffer UInt8.t -> b2:B.buffer UInt8.t -> len:UInt32.t 
+val compare_and_print: b1:B.buffer UInt8.t -> b2:B.buffer UInt8.t -> len:UInt32.t
   -> Stack bool
   (requires fun h0 -> B.live h0 b1 /\ B.live h0 b2 /\ B.length b1 == v len /\ B.length b2 == v len)
   (ensures  fun h0 _ h1 -> B.modifies B.loc_none h0 h1)
@@ -52,7 +48,7 @@ let compare_and_print b1 b2 len =
   LowStar.Printf.(printf "Expected: %xuy\n" len b1 done);
   LowStar.Printf.(printf "Computed: %xuy\n" len b2 done);
   let b = Lib.ByteBuffer.lbytes_eq #len b1 b2 in
-  if b then 
+  if b then
     LowStar.Printf.(printf "PASS\n" done)
   else
     LowStar.Printf.(printf "FAIL\n" done);
@@ -61,12 +57,12 @@ let compare_and_print b1 b2 len =
 
 let test_sigver (vec:sigver_vector) : Stack unit (requires fun _ -> True) (ensures fun _ _ _ -> True) =
   let max_msg_len = 0 in
-  let LB msg_len msg, 
-      LB qx_len qx, 
-      LB qy_len qy, 
-      LB r_len r, 
-      LB s_len s, 
-      result = vec 
+  let LB msg_len msg,
+      LB qx_len qx,
+      LB qy_len qy,
+      LB r_len r,
+      LB s_len s,
+      result = vec
   in
   B.recall msg;
   B.recall qx;
@@ -84,7 +80,7 @@ let test_sigver (vec:sigver_vector) : Stack unit (requires fun _ -> True) (ensur
     B.blit qy 0ul qxy 32ul 32ul;
     let result' = ecdsa_p256_sha2_verify_u8 msg_len msg qxy r s in
     if result' = result then ()
-    else 
+    else
       begin
       LowStar.Printf.(printf "FAIL\n" done);
       C.exit 1l
@@ -92,6 +88,7 @@ let test_sigver (vec:sigver_vector) : Stack unit (requires fun _ -> True) (ensur
     pop_frame()
     end
 
+(** BEGIN reverse, to workaround wrong byte order. TODO: remove **)
 val reverse_inplace_state: n:size_nat -> i:size_nat{i <= n / 2} -> Type0
 let reverse_inplace_state n i = Lib.Sequence.lseq uint8 n
 
@@ -113,7 +110,7 @@ let reverse_inplace_spec n s =
 val reverse_inplace: n:size_t{0 < v n} -> a:Lib.Buffer.lbuffer uint8 n -> Stack unit
   (requires fun h0 -> Lib.Buffer.live h0 a)
   (ensures  fun h0 _ h1 ->
-    Lib.Buffer.modifies1 a h0 h1 /\ 
+    Lib.Buffer.modifies1 a h0 h1 /\
     Lib.Buffer.as_seq h1 a == reverse_inplace_spec (v n) (Lib.Buffer.as_seq h0 a))
 
 let reverse_inplace n a =
@@ -127,7 +124,7 @@ let reverse_inplace n a =
     (fun i ->
       Lib.LoopCombinators.unfold_repeat_gen (v n / 2)
         (reverse_inplace_state (v n))
-        (reverse_inplace_inner (v n)) 
+        (reverse_inplace_inner (v n))
         (Lib.Buffer.as_seq h0 a) (v i);
       let tmp = a.(i) in
       a.(i) <- a.(n -! i -! size 1);
@@ -135,17 +132,70 @@ let reverse_inplace n a =
     );
   pop_frame()
 
+(** END reverse, to workaround wrong byte order in signing **)
+
+
+val check_bound: b:Lib.Buffer.lbuffer uint8 32ul -> Stack bool
+  (requires fun h -> Lib.Buffer.live h b)
+  (ensures  fun h0 r h1 ->
+    h0 == h1 /\
+    r == (Lib.ByteSequence.nat_from_bytes_le (Lib.Buffer.as_seq h0 b) <
+          Hacl.Spec.ECDSAP256.Definition.prime_p256_order))
+
+let check_bound b =
+  let open FStar.Mul in
+  let open Lib.ByteSequence in
+  let open Hacl.Spec.ECDSAP256.Definition in
+  [@inline_let]
+  let q1 = normalize_term (prime_p256_order % pow2 64) in
+  [@inline_let]
+  let q2 = normalize_term ((prime_p256_order / pow2 64) % pow2 64) in
+  [@inline_let]
+  let q3 = normalize_term ((prime_p256_order / pow2 128) % pow2 64) in
+  [@inline_let]
+  let q4 = normalize_term (((prime_p256_order / pow2 128) / pow2 64) % pow2 64) in
+  assert_norm (pow2 128 * pow2 64 == pow2 192);
+  assert (prime_p256_order == q1 + pow2 64 * q2 + pow2 128 * q3 + pow2 192 * q4);
+  let q1 = mk_int #U64 #PUB q1 in
+  let q2 = mk_int #U64 #PUB q2 in
+  let q3 = mk_int #U64 #PUB q3 in
+  let q4 = mk_int #U64 #PUB q4 in
+
+  let h0 = get () in
+  let x1 = Lib.ByteBuffer.uint_from_bytes_le #U64 (Lib.Buffer.sub b 0ul 8ul) in
+  let x2 = Lib.ByteBuffer.uint_from_bytes_le #U64 (Lib.Buffer.sub b 8ul 8ul) in
+  let x3 = Lib.ByteBuffer.uint_from_bytes_le #U64 (Lib.Buffer.sub b 16ul 8ul) in
+  let x4 = Lib.ByteBuffer.uint_from_bytes_le #U64 (Lib.Buffer.sub b 24ul 8ul) in
+
+  nat_from_intseq_le_slice_lemma (Lib.Buffer.as_seq h0 b) 8;
+  lemma_reveal_uint_to_bytes_le #U64 (Lib.Sequence.slice (Lib.Buffer.as_seq h0 b) 0 8);
+
+  nat_from_intseq_le_slice_lemma (Lib.Sequence.slice (Lib.Buffer.as_seq h0 b) 8 32) 8;
+  lemma_reveal_uint_to_bytes_le #U64 (Lib.Sequence.slice (Lib.Buffer.as_seq h0 b) 8 16);
+
+  nat_from_intseq_le_slice_lemma (Lib.Sequence.slice (Lib.Buffer.as_seq h0 b) 16 32) 8;
+  lemma_reveal_uint_to_bytes_le #U64 (Lib.Sequence.slice (Lib.Buffer.as_seq h0 b) 16 24);
+
+  nat_from_intseq_le_slice_lemma (Lib.Sequence.slice (Lib.Buffer.as_seq h0 b) 24 32) 8;
+  lemma_reveal_uint_to_bytes_le #U64 (Lib.Sequence.slice (Lib.Buffer.as_seq h0 b) 24 32);
+
+  let x1 = Lib.RawIntTypes.u64_to_UInt64 x1 in
+  let x2 = Lib.RawIntTypes.u64_to_UInt64 x2 in
+  let x3 = Lib.RawIntTypes.u64_to_UInt64 x3 in
+  let x4 = Lib.RawIntTypes.u64_to_UInt64 x4 in
+  x4 <. q4 || (x4 =. q4 &&
+    (x3 <. q3 || (x3 =. q3 &&
+      (x2 <. q2 || (x2 =. q2 && x1 <. q1)))))
+
 
 let test_siggen (vec:siggen_vector) : Stack unit (requires fun _ -> True) (ensures fun _ _ _ -> True) =
-  // TODO: remove refinement in msg in signing
-  assert_norm (pow2 32 < pow2 61);
   let max_msg_len = 0 in
   let LB msg_len msg,
       LB d_len d,
-      LB qx_len qx, 
+      LB qx_len qx,
       LB qy_len qy,
       LB k_len k,
-      LB r_len r, 
+      LB r_len r,
       LB s_len s = vec
   in
   B.recall msg;
@@ -156,39 +206,35 @@ let test_siggen (vec:siggen_vector) : Stack unit (requires fun _ -> True) (ensur
   B.recall r;
   B.recall s;
 
+  if not (k_len = 32ul && d_len = 32ul) then
+    C.exit (-1l);
+
+  // TODO: signing uses wrong byte order; this is a temporary workaround.
+  reverse_inplace 32ul d;
+  reverse_inplace 32ul k;
+
+  let bound_k = check_bound k in
+  let bound_d = check_bound d in
+
   // We need to check this at runtime because Low*-ized vectors don't carry any refinements
-  if not (d_len = 32ul && qx_len = 32ul && qy_len = 32ul && k_len = 32ul && r_len = 32ul && s_len = 32ul)
+  if not (bound_k && bound_d &&
+          qx_len = 32ul && qy_len = 32ul && r_len = 32ul && s_len = 32ul)
   then C.exit (-1l)
   else
     begin
     push_frame();
-    let rs = B.alloca (u8 0) 64ul in
+    let rs  = B.alloca (u8 0) 64ul in
     let qxy = B.alloca (u8 0) 64ul in
     B.blit qx 0ul qxy 0ul 32ul;
     B.blit qy 0ul qxy 32ul 32ul;
 
-    // TODO: signing uses wrong byte order; this is a temporary workaround.
-    reverse_inplace 32ul d;
-    reverse_inplace 32ul k;
-
-    // TODO: the disjointness condition of signing need to be weakened
-    assume (let open Lib.Buffer in
-      B.all_disjoint [loc #MUT rs; loc #MUT msg; loc #MUT d; loc #MUT k]);
-    let h = get() in
-    assume (
-      let d: Lib.Buffer.lbuffer uint8 32ul = d in
-      let k: Lib.Buffer.lbuffer uint8 32ul = k in
-      Lib.ByteSequence.nat_from_bytes_le (Lib.Buffer.as_seq h d) <
-        Hacl.Spec.ECDSAP256.Definition.prime_p256_order /\
-      Lib.ByteSequence.nat_from_bytes_le (Lib.Buffer.as_seq h k) <
-        Hacl.Spec.ECDSAP256.Definition.prime_p256_order);
     let flag = ecdsa_p256_sha2_sign rs msg_len msg d k in
-    if Lib.RawIntTypes.u64_to_UInt64 flag = 0uL then 
+    if Lib.RawIntTypes.u64_to_UInt64 flag = 0uL then
       begin
       // TODO: signing uses wrong byte order; this is a temporary workaround.
       reverse_inplace 32ul (B.sub rs 0ul 32ul);
       reverse_inplace 32ul (B.sub rs 32ul 32ul);
-      
+
       let okr = compare_and_print (B.sub rs 0ul 32ul) r 32ul in
       let oks = compare_and_print (B.sub rs 32ul 32ul) s 32ul in
       if okr && oks then
@@ -200,13 +246,13 @@ let test_siggen (vec:siggen_vector) : Stack unit (requires fun _ -> True) (ensur
           C.exit 1l
           end
         end
-      else 
+      else
         begin
         LowStar.Printf.(printf "FAIL: signing\n" done);
         C.exit 1l
         end
       end
-    else 
+    else
       begin
       LowStar.Printf.(printf "FAIL: signing\n" done);
       C.exit 1l
@@ -216,8 +262,8 @@ let test_siggen (vec:siggen_vector) : Stack unit (requires fun _ -> True) (ensur
 
 
 inline_for_extraction noextract
-let test_many #a (label:C.String.t) 
-  (f:a -> Stack unit (fun _ -> True) (fun _ _ _ -> True)) (vec: L.lbuffer a) 
+let test_many #a (label:C.String.t)
+  (f:a -> Stack unit (fun _ -> True) (fun _ _ _ -> True)) (vec: L.lbuffer a)
 =
   C.String.print label;
   C.String.(print !$"\n");
