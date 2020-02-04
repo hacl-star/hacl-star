@@ -1,6 +1,18 @@
 open EverCrypt.Error
 
-let print_result t r = Printf.printf "[%s] %s\n" t r
+type result =
+  | Success
+  | Failure
+
+let test_result t res r =
+  let r = if r <> "" then
+      Printf.sprintf ": %s" r
+    else
+      ""
+  in
+  match res with
+  | Success -> Printf.printf "[%s] Success%s\n" t r
+  | Failure -> failwith (Printf.sprintf "[%s] Failure%s" t r)
 
 let print_error = function
   | UnsupportedAlgorithm -> "Unsupported algorithm"

@@ -30,7 +30,7 @@ let validate_test (v: aead_test) =
 
 let test_agile (v: aead_test) =
   let open EverCrypt.AEAD in
-  let print_result = print_result "EverCrypt.AEAD" in
+  let test_result = test_result "EverCrypt.AEAD" in
 
   validate_test v;
   let ct = Bigstring.create v.msg_len in
@@ -43,26 +43,26 @@ let test_agile (v: aead_test) =
       match encrypt st v.test_iv v.test_ad v.test_pt ct tag with
       | Success () -> begin
           if Bigstring.compare tag v.test_tag = 0 && Bigstring.compare ct v.test_ct = 0 then
-            print_result "Encryption success"
+            test_result Success "Encryption succeeded"
           else
-            print_result "Failure: wrong ciphertext/mac";
+            test_result Failure "wrong ciphertext/mac";
           let dt = Bigstring.create v.msg_len in
           Bigstring.fill dt '\x00';
           match decrypt st v.test_iv v.test_ad ct v.test_tag dt with
           | Success () ->
             if Bigstring.compare v.test_pt dt = 0 then
-              print_result "Decryption success"
+              test_result Success "Decryption succeeded"
             else
-              print_result "Failure: decrypted and plaintext do not match"
-          | Error err -> print_result (Printf.sprintf "Decryption error: %s" (print_error err))
+              test_result Failure "decrypted and plaintext do not match"
+          | Error err -> test_result Failure (Printf.sprintf "Decryption error: %s" (print_error err))
         end
-      | Error err -> print_result (Printf.sprintf "Encryption error: %s" (print_error err))
+      | Error err -> test_result Failure (Printf.sprintf "Encryption error: %s" (print_error err))
     end
-  | Error err -> print_result (Printf.sprintf "Init error: %s" (print_error err))
+  | Error err -> test_result Failure (Printf.sprintf "Init error: %s" (print_error err))
 
 
 let test_nonagile (v: aead_test) t encrypt decrypt =
-  let print_result = print_result t in
+  let test_result = test_result t in
 
   let ct = Bigstring.create v.msg_len in
   let tag = Bigstring.create v.tag_len in
@@ -71,27 +71,27 @@ let test_nonagile (v: aead_test) t encrypt decrypt =
 
   encrypt v.test_key v.test_iv v.test_ad v.test_pt ct tag;
   if Bigstring.compare tag v.test_tag = 0 && Bigstring.compare ct v.test_ct = 0 then
-    print_result "Encryption success"
+    test_result Success "Encryption succeeded"
   else
-    print_result
-      (Printf.sprintf "Failure: wrong ciphertext/mac %d %d \n" (Bigstring.compare ct v.test_ct) (Bigstring.compare tag v.test_tag));
+    test_result Failure
+      (Printf.sprintf "wrong ciphertext/mac %d %d \n" (Bigstring.compare ct v.test_ct) (Bigstring.compare tag v.test_tag));
   let dt = Bigstring.create v.msg_len in
   Bigstring.fill dt '\x00';
   if decrypt v.test_key v.test_iv v.test_ad dt ct tag then
     if Bigstring.compare v.test_pt dt = 0 then
-      print_result "Decryption success"
+      test_result Success "Decryption succeeded"
     else
-      print_result "Failure: decrypted and plaintext do not match"
-  else print_result "Decryption error"
+      test_result Failure "decrypted and plaintext do not match"
+  else test_result Failure "Decryption error"
 
 let test_random () =
-  let print_result = print_result "Lib.RandomBuffer" in
+  let test_result = test_result "Lib.RandomBuffer" in
   let buf = Bigstring.create 256 in
   Bigstring.fill buf '\x00';
   if Hacl.RandomBuffer.randombytes buf then
-    print_result "Success"
+    test_result Success ""
   else
-    print_result "Failure"
+    test_result Failure ""
 
 let _ =
   EverCrypt.AutoConfig2.init ();

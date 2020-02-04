@@ -43,20 +43,20 @@ let test_box (v: box_test) =
   Bigstring.fill ct '\x00';
   Bigstring.fill pt '\x00';
 
-  let print_result = Test_utils.print_result ("Hacl.NaCl.Easy box " ^ v.name) in
+  let test_result = Test_utils.test_result ("Hacl.NaCl.Easy box " ^ v.name) in
   if Hacl.NaCl.Easy.box ct v.pt v.n v.pk v.sk then
     if Bigstring.compare ct v.expected_ct <> 0 then
-      print_result "Failure: ciphertext mismatch"
+      test_result Failure "ciphertext mismatch"
     else
     if Hacl.NaCl.Easy.box_open pt ct v.n v.pk v.sk then
       if Bigstring.compare pt v.pt <> 0 then
-        print_result "Failure: decrypted plaintext mismatch"
+        test_result Failure "decrypted plaintext mismatch"
       else
-        print_result "Success"
+        test_result Success ""
     else
-      print_result "Decryption failure"
+      test_result Failure "Decryption failed"
   else
-    print_result "Encryption failure";
+    test_result Failure "Encryption failed";
 
 
   let ct_detached = Bigstring.create (Bigstring.size v.pt) in
@@ -65,68 +65,68 @@ let test_box (v: box_test) =
   Bigstring.fill tag '\x00';
   Bigstring.fill pt '\x00';
 
-  let print_result = Test_utils.print_result ("Hacl.NaCl.Detached box " ^ v.name) in
+  let test_result = Test_utils.test_result ("Hacl.NaCl.Detached box " ^ v.name) in
   if Hacl.NaCl.Detached.box ct_detached tag v.pt v.n v.pk v.sk then
     let combined_ct = Bigstring.of_string @@ (Bigstring.to_string tag) ^ (Bigstring.to_string ct_detached) in
     if Bigstring.compare combined_ct v.expected_ct <> 0 then
-      print_result "Failure: ciphertext mismatch"
+      test_result Failure "ciphertext mismatch"
     else
     if Hacl.NaCl.Detached.box_open pt ct_detached tag v.n v.pk v.sk then
       if Bigstring.compare pt v.pt <> 0 then
-        print_result "Failure: decrypted plaintext mismatch"
+        test_result Failure "decrypted plaintext mismatch"
       else
-        print_result "Success"
+        test_result Success ""
     else
-      print_result "Decryption failure"
+      test_result Failure "Decryption failed"
   else
-    print_result "Encryption failure";
+    test_result Failure "Encryption failed";
 
   let k = Bigstring.create 32 in
   Bigstring.fill k '\x00';
 
-  let print_result = Test_utils.print_result ("Hacl.NaCl.box_beforenm " ^ v.name) in
+  let test_result = Test_utils.test_result ("Hacl.NaCl.box_beforenm " ^ v.name) in
   if Hacl.NaCl.box_beforenm k v.pk v.sk then
-    print_result "Success"
+    test_result Success ""
   else
-    print_result "Failure";
+    test_result Failure "";
 
   Bigstring.fill ct '\x00';
   Bigstring.fill pt '\x00';
 
-  let print_result = Test_utils.print_result ("Hacl.NaCl.Easy box_afternm " ^ v.name) in
+  let test_result = Test_utils.test_result ("Hacl.NaCl.Easy box_afternm " ^ v.name) in
   if Hacl.NaCl.Easy.box_afternm ct v.pt v.n k then
     if Bigstring.compare ct v.expected_ct <> 0 then
-      print_result "Failure: ciphertext mismatch"
+      test_result Failure "ciphertext mismatch"
     else
     if Hacl.NaCl.Easy.box_open_afternm pt ct v.n k then
       if Bigstring.compare pt v.pt <> 0 then
-        print_result "Failure: decrypted plaintext mismatch"
+        test_result Failure "decrypted plaintext mismatch"
       else
-        print_result "Success"
+        test_result Success ""
     else
-      print_result "Decryption failure"
+      test_result Failure "Decryption failed"
   else
-    print_result "Encryption failure";
+    test_result Failure "Encryption failed";
 
   Bigstring.fill ct_detached '\x00';
   Bigstring.fill tag '\x00';
   Bigstring.fill pt '\x00';
 
-  let print_result = Test_utils.print_result ("Hacl.NaCl.Detached box_afternm " ^ v.name) in
+  let test_result = Test_utils.test_result ("Hacl.NaCl.Detached box_afternm " ^ v.name) in
   if Hacl.NaCl.Detached.box_afternm ct_detached tag v.pt v.n k then
     let combined_ct = Bigstring.of_string @@ (Bigstring.to_string tag) ^ (Bigstring.to_string ct_detached) in
     if Bigstring.compare combined_ct v.expected_ct <> 0 then
-      print_result "Failure: ciphertext mismatch"
+      test_result Failure "ciphertext mismatch"
     else
     if Hacl.NaCl.Detached.box_open_afternm pt ct_detached tag v.n k then
       if Bigstring.compare pt v.pt <> 0 then
-        print_result "Failure: decrypted plaintext mismatch"
+        test_result Failure "decrypted plaintext mismatch"
       else
-        print_result "Success"
+        test_result Success ""
     else
-      print_result "Decryption failure"
+      test_result Failure "Decryption failed"
   else
-    print_result "Encryption failure"
+    test_result Failure "Encryption failed"
 
 let test_secretbox (v: secretbox_test) =
   let ct = Bigstring.create (Bigstring.size v.pt + 16) in
@@ -134,20 +134,20 @@ let test_secretbox (v: secretbox_test) =
   Bigstring.fill ct '\x00';
   Bigstring.fill pt '\x00';
 
-  let print_result = Test_utils.print_result ("Hacl.NaCl.Easy secretbox " ^ v.name) in
+  let test_result = Test_utils.test_result ("Hacl.NaCl.Easy secretbox " ^ v.name) in
   if Hacl.NaCl.Easy.secretbox ct v.pt v.n v.key then
     if Bigstring.compare ct v.expected_ct <> 0 then
-      print_result "Failure: ciphertext mismatch"
+      test_result Failure "ciphertext mismatch"
     else
     if Hacl.NaCl.Easy.secretbox_open pt ct v.n v.key then
       if Bigstring.compare pt v.pt <> 0 then
-        print_result "Failure: decrypted plaintext mismatch"
+        test_result Failure "decrypted plaintext mismatch"
       else
-        print_result "Success"
+        test_result Success ""
     else
-      print_result "Decryption failure"
+      test_result Failure "Decryption failed"
   else
-    print_result "Encryption failure";
+    test_result Failure "Encryption failed";
 
   let ct_detached = Bigstring.create (Bigstring.size v.pt) in
   let tag = Bigstring.create 16 in
@@ -155,21 +155,21 @@ let test_secretbox (v: secretbox_test) =
   Bigstring.fill tag '\x00';
   Bigstring.fill pt '\x00';
 
-  let print_result = Test_utils.print_result ("Hacl.NaCl.Detached secretbox " ^ v.name) in
+  let test_result = Test_utils.test_result ("Hacl.NaCl.Detached secretbox " ^ v.name) in
   if Hacl.NaCl.Detached.secretbox ct_detached tag v.pt v.n v.key then
     let combined_ct = Bigstring.of_string @@ (Bigstring.to_string tag) ^ (Bigstring.to_string ct_detached) in
     if Bigstring.compare combined_ct v.expected_ct <> 0 then
-      print_result "Failure: ciphertext mismatch"
+      test_result Failure "ciphertext mismatch"
     else
     if Hacl.NaCl.Detached.secretbox_open pt ct_detached tag v.n v.key then
       if Bigstring.compare pt v.pt <> 0 then
-        print_result "Failure: decrypted plaintext mismatch"
+        test_result Failure "decrypted plaintext mismatch"
       else
-        print_result "Success"
+        test_result Success ""
     else
-      print_result "Decryption failure"
+      test_result Failure "Decryption failed"
   else
-    print_result "Encryption failure"
+    test_result Failure "Encryption failed"
 
 
 let _ =

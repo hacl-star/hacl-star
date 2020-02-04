@@ -18,7 +18,7 @@ let validate_test (v: poly1305_test) =
   assert (Bigstring.size v.expected = 16)
 
 let test (v: poly1305_test) t mac =
-  let print_result = print_result (t ^ " " ^ v.name) in
+  let test_result = test_result (t ^ " " ^ v.name) in
 
   let tag = Bigstring.create 16 in
   Bigstring.fill tag '\x00';
@@ -26,9 +26,9 @@ let test (v: poly1305_test) t mac =
   mac tag v.key v.msg;
 
   if Bigstring.compare tag v.expected = 0 then
-    print_result "Success"
+    test_result Success ""
   else
-    print_result "Failure"
+    test_result Failure ""
 
 let _ =
   List.iter validate_test tests;

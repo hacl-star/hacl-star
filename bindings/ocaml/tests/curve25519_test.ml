@@ -19,7 +19,7 @@ let tests = [
 ]
 
 let test (v: curve25519_test) t scalarmult ecdh =
-  let print_result = print_result (t ^ " " ^ v.name) in
+  let test_result = test_result (t ^ " " ^ v.name) in
 
   let out_scalarmult = Bigstring.create 32 in
   let out_ecdh = Bigstring.create 32 in
@@ -29,11 +29,11 @@ let test (v: curve25519_test) t scalarmult ecdh =
   scalarmult out_scalarmult v.scalar v.input;
   if ecdh out_ecdh v.scalar v.input then
     if Bigstring.compare out_scalarmult v.expected = 0 && Bigstring.compare out_ecdh v.expected = 0 then
-      print_result "Success"
+      test_result Success ""
     else
-      print_result "Shared scret mismatch"
+      test_result Failure "Shared scret mismatch"
   else
-    print_result "Failure"
+    test_result Failure ""
 
 (* TODO: tests for secret_to_public, internals *)
 let _ =

@@ -95,16 +95,16 @@ let output_len = function
   | SHA3_512 -> 64
 
 let test_agile (v: hash_test) =
-  let print_result = print_result ("EverCrypt.Hash " ^ v.name)  in
+  let test_result = test_result ("EverCrypt.Hash " ^ v.name)  in
   let alg = alg_definition v.alg in
   let output = Bigstring.create (output_len v.alg) in
   Bigstring.fill output '\x00';
 
   EverCrypt.Hash.hash alg output v.plaintext;
   if Bigstring.compare output v.expected = 0 then
-    print_result "One-shot hash: success"
+    test_result Success "one-shot hash"
   else
-    print_result "One-shot hash: failure";
+    test_result Failure "one-shot hash";
 
   Bigstring.fill output '\x00';
   let st = EverCrypt.Hash.init (alg_definition v.alg) in
@@ -112,19 +112,19 @@ let test_agile (v: hash_test) =
   EverCrypt.Hash.finish st output;
   EverCrypt.Hash.free st;
   if Bigstring.compare output v.expected = 0 then
-    print_result "Incremental hash: success"
+    test_result Success "incremental hash"
   else
-    print_result "Incremental hash: failure"
+    test_result Failure "incremental hash"
 
 let test_nonagile (n: string) (v: hash_test) hash =
-  let print_result = print_result (n ^ "." ^ v.name) in
+  let test_result = test_result (n ^ "." ^ v.name) in
   let output = Bigstring.create (output_len v.alg) in
   Bigstring.fill output '\x00';
   hash v.plaintext output;
   if Bigstring.compare output v.expected = 0 then
-    print_result "Success"
+    test_result Success ""
   else
-    print_result "Failure"
+    test_result Failure ""
 
 
 let _ =

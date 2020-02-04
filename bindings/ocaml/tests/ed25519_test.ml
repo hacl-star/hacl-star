@@ -22,7 +22,7 @@ let tests = [
 ]
 
 let test (v: ed25519_test) t sign verify =
-  let print_result = print_result (t ^ " " ^ v.name) in
+  let test_result = test_result (t ^ " " ^ v.name) in
 
   let signature = Bigstring.create 64 in
   Bigstring.fill signature '\x00';
@@ -31,12 +31,12 @@ let test (v: ed25519_test) t sign verify =
   if Bigstring.compare signature v.expected_sig = 0 then
     begin
       if verify v.pk v.msg signature then
-        print_result "Success"
+        test_result Success ""
       else
-        print_result "Failure: verification"
+        test_result Failure "verification"
     end
   else
-    print_result "Failure: signing"
+    test_result Failure "signing"
 
 (* TODO: tests for secret_to_public, expand_keys, sign_expanded *)
 let _ =

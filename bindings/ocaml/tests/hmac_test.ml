@@ -43,7 +43,7 @@ let tests = [
 ]
 
 let test_agile (v: hmac_test) =
-  let print_result = print_result ("Agile EverCrypt.HMAC with " ^ v.name) in
+  let test_result = test_result ("Agile EverCrypt.HMAC with " ^ v.name) in
 
   let tag = Bigstring.create (Bigstring.size v.expected) in
   Bigstring.fill tag '\x00';
@@ -51,25 +51,25 @@ let test_agile (v: hmac_test) =
   if EverCrypt.HMAC.is_supported_alg v.alg then begin
     EverCrypt.HMAC.mac v.alg tag v.key v.data;
     if Bigstring.compare tag v.expected = 0 then
-      print_result "Success"
+      test_result Success ""
     else
-      print_result "Failure: MAC mismatch"
+      test_result Failure "MAC mismatch"
   end
   else
-    print_result "Failure: hash algorithm reported as not supported"
+    test_result Failure "hash algorithm reported as not supported"
 
 let test_nonagile (v: hmac_test) t alg mac =
   if v.alg = alg then
-    let print_result = print_result (t ^ "_" ^ v.name) in
+    let test_result = test_result (t ^ "_" ^ v.name) in
 
     let tag = Bigstring.create (Bigstring.size v.expected) in
     Bigstring.fill tag '\x00';
 
     mac tag v.key v.data;
     if Bigstring.compare tag v.expected = 0 then
-      print_result "Success"
+      test_result Success ""
     else
-      print_result "Failure: MAC mismatch"
+      test_result Failure "MAC mismatch"
 
 
 let _ =

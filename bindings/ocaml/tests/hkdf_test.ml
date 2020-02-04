@@ -16,7 +16,7 @@ let tests = [
 ]
 
 let test_agile (v: hkdf_test) =
-  let print_result = print_result ("Agile EverCrypt.HKDF with " ^ v.name) in
+  let test_result = test_result ("Agile EverCrypt.HKDF with " ^ v.name) in
 
   let prk = Bigstring.create (Bigstring.size v.expected_prk) in
   let okm = Bigstring.create (Bigstring.size v.expected_okm) in
@@ -27,19 +27,19 @@ let test_agile (v: hkdf_test) =
   if EverCrypt.HMAC.is_supported_alg v.alg then begin
     EverCrypt.HKDF.extract v.alg prk v.salt v.ikm;
     if Bigstring.compare prk v.expected_prk <> 0 then
-      print_result "Failure: PRK mismatch";
+      test_result Failure "PRK mismatch";
     EverCrypt.HKDF.expand v.alg okm v.expected_prk v.info;
     if Bigstring.compare okm v.expected_okm <> 0 then
-      print_result "Failure: OKM mismatch";
+      test_result Failure "OKM mismatch";
     if Bigstring.compare prk v.expected_prk = 0 && Bigstring.compare okm v.expected_okm = 0 then
-      print_result "Success"
+      test_result Success ""
   end
   else
-    print_result "Failure: hash algorithm reported as not supported"
+    test_result Failure "hash algorithm reported as not supported"
 
 let test_nonagile (v: hkdf_test) t alg expand extract =
   if v.alg = alg then
-    let print_result = print_result (t ^ "_" ^ v.name) in
+    let test_result = test_result (t ^ "_" ^ v.name) in
 
   let prk = Bigstring.create (Bigstring.size v.expected_prk) in
   let okm = Bigstring.create (Bigstring.size v.expected_okm) in
@@ -48,12 +48,12 @@ let test_nonagile (v: hkdf_test) t alg expand extract =
 
   extract prk v.salt v.ikm;
   if Bigstring.compare prk v.expected_prk <> 0 then
-    print_result "Failure: PRK mismatch";
+    test_result Failure "PRK mismatch";
   expand okm v.expected_prk v.info;
   if Bigstring.compare okm v.expected_okm <> 0 then
-    print_result "Failure: OKM mismatch";
+    test_result Failure "OKM mismatch";
   if Bigstring.compare prk v.expected_prk = 0 && Bigstring.compare okm v.expected_okm = 0 then
-    print_result "Success"
+    test_result Success ""
 
 
 (* TODO: find tests for the other hash functions *)
