@@ -1,4 +1,4 @@
-module Hacl.Math
+module Hacl.Impl.P256.Math
 
 open FStar.Math.Lemmas
 open FStar.Math

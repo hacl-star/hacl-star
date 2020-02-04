@@ -22,7 +22,7 @@ open Hacl.Impl.ECDSA.MontgomeryMultiplication
 open Hacl.Impl.P256.LowLevel
 open Hacl.Impl.P256
 
-open Hacl.Math
+open Hacl.Impl.P256.Math 
 open FStar.Math.Lemmas
 open FStar.Mul
 
