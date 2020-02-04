@@ -1,7 +1,3 @@
-open Ctypes
-open Unsigned
-open Utils
-
 module type Chacha20_Poly1305 = sig
   val encrypt: Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> unit
   val decrypt: Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> bool

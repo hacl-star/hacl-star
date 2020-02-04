@@ -166,4 +166,7 @@ DEPS=lib/Hacl_Hash_stubs.cmx lib/Hacl_Hash_bindings.cmx lib/EverCrypt_AutoConfig
 libocamlevercrypt.cmxa: $(ALL_BINDINGS) $(ALL_ML_STUBS) $(ALL_C_STUBS) libevercrypt.$(SO)
 	ocamlfind mklib -o ocamlevercrypt $(DEPS) $(ALL_C_STUBS) libevercrypt.a -ccopt -L. -cclib -levercrypt $(MLLDFLAGS)
 
+install-evercrypt-ctypes:
+	ocamlfind install evercrypt-ctypes META *\.* lib/* lib_gen/*
+
 endif

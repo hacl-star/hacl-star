@@ -1,5 +1,3 @@
-open EverCrypt.Error
-
 open Test_utils
 
 type curve25519_test =
@@ -29,11 +27,13 @@ let test (v: curve25519_test) t scalarmult ecdh =
   Bigstring.fill out_ecdh '\x00';
 
   scalarmult out_scalarmult v.scalar v.input;
-  ecdh out_ecdh v.scalar v.input;
-  if Bigstring.compare out_scalarmult v.expected = 0 && Bigstring.compare out_ecdh v.expected = 0 then
-    print_result "Success"
+  if ecdh out_ecdh v.scalar v.input then
+    if Bigstring.compare out_scalarmult v.expected = 0 && Bigstring.compare out_ecdh v.expected = 0 then
+      print_result "Success"
+    else
+      print_result "Shared scret mismatch"
   else
-    print_result "Shared scret mismatch"
+    print_result "Failure"
 
 (* TODO: tests for secret_to_public, internals *)
 let _ =
