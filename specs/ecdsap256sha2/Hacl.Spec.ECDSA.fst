@@ -241,9 +241,6 @@ val lemma_exponen_spec: k:lseq uint8 32
 #push-options "--fuel 2 --z3rlimit 500"
 
 let rec lemma_exponen_spec k start index =
-  let open FStar.Math.Lib in
-  let open FStar.Math.Lemmas in
-  let open Lib.RawIntTypes in
   let f = _exp_step k in
   let st0, st1 = start in
   let number = nat_from_bytes_le k in
@@ -251,7 +248,7 @@ let rec lemma_exponen_spec k start index =
   let open Lib.LoopCombinators in
   match index with
   | 0 -> eq_repeati0 256 (_exp_step k) start;
-    assert_norm (FStar.Math.Lib.arithmetic_shift_right number newIndex == 0)
+    assert_norm (arithmetic_shift_right number newIndex == 0)
   | _ ->
     begin
     unfold_repeati 256 f start (index - 1);
