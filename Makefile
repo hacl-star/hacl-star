@@ -926,7 +926,7 @@ dist/evercrypt-external-headers/Makefile.basic: $(ALL_KRML_FILES)
 # Auto-generates a single C test file.
 .PRECIOUS: dist/test/c/%.c
 dist/test/c/%.c: $(ALL_KRML_FILES)
-	cp $(HACL_HOME)/lib/c/lib_intrinsics.h $(dir $@)
+	mkdir -p $(dir $@) && cp $(HACL_HOME)/lib/c/lib_intrinsics.h $(dir $@)
 	$(KRML) -silent \
 	  -tmpdir $(dir $@) -skip-compilation \
 	  -no-prefix $(subst _,.,$*) \
