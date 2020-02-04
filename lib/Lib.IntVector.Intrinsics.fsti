@@ -325,3 +325,57 @@ noextract
 val vec256_smul32: vec256 -> uint32 -> vec256
 
 noextract val bit_mask64: uint64 -> uint64
+
+(* 512-bit Vector Intrinsics *)
+
+val vec512 : Type0
+
+noextract
+val vec512_zero: vec256
+
+noextract
+val vec512_load32s:
+  x15:uint32 -> x14:uint32 -> x13:uint32 -> x12:uint32 ->
+  x11:uint32 -> x10:uint32 -> x9:uint32 -> x8:uint32 ->
+  x7:uint32 -> x6:uint32 -> x5:uint32 -> x4:uint32 ->
+  x3:uint32 -> x2:uint32 -> x1:uint32 -> x0:uint32 -> vec512
+
+noextract
+val vec512_load32: x:uint32 -> vec512
+
+noextract
+val vec512_insert32: vec512 -> uint32 -> size_t -> vec512
+
+noextract
+val vec512_extract32: vec512 -> size_t -> uint32
+
+noextract
+val vec512_add32: vec512 -> vec512 -> vec512
+noextract
+val vec512_sub32: vec512 -> vec512 -> vec512
+noextract
+val vec512_mul32: vec512 -> vec512 -> vec512
+noextract
+val vec512_smul32: vec512 -> uint32 -> vec512
+noextract
+val vec512_xor: vec512 -> vec512 -> vec512
+noextract
+val vec512_and: vec512 -> vec512 -> vec512
+noextract
+val vec512_or: vec512 -> vec512 -> vec512
+noextract
+val vec512_lognot: vec512 -> vec512
+noextract
+val vec512_shift_right32: vec512 -> size_t -> vec512
+noextract
+val vec512_shift_left32: vec512 -> size_t -> vec512
+
+noextract
+val vec512_load_le: b:lbuffer uint8 64ul -> ST vec512
+  (requires fun h -> live h b)
+  (ensures  fun h0 _ h1 -> h1 == h0)
+
+noextract
+val vec512_store_le: b:lbuffer uint8 64ul -> vec512 -> ST unit
+  (requires fun h -> live h b)
+  (ensures  fun h0 _ h1 -> live h1 b /\ modifies (loc b) h0 h1)

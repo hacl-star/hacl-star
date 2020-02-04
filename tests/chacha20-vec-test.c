@@ -34,6 +34,7 @@ static __inline__ cycles cpucycles_end(void)
 extern void Hacl_Chacha20_Vec32_chacha20_encrypt_32(int in_len, uint8_t* out, uint8_t* in, uint8_t* k, uint8_t* n, uint32_t c);
 extern void Hacl_Chacha20_Vec128_chacha20_encrypt_128(int in_len, uint8_t* out, uint8_t* in, uint8_t* k, uint8_t* n, uint32_t c);
 extern void Hacl_Chacha20_Vec256_chacha20_encrypt_256(int in_len, uint8_t* out, uint8_t* in, uint8_t* k, uint8_t* n, uint32_t c);
+extern void Hacl_Chacha20_Vec512_chacha20_encrypt_512(int in_len, uint8_t* out, uint8_t* in, uint8_t* k, uint8_t* n, uint32_t c);
 
 
 #define ROUNDS 100000
@@ -55,7 +56,7 @@ void print_result(uint8_t* comp, uint8_t* exp) {
     printf("%02x",exp[i]);
   printf("\n");
   bool ok = true;
-  for (int i = 0; i < 16; i++)
+  for (int i = 0; i < 114; i++)
     ok = ok & (exp[i] == comp[i]);
   if (ok) printf("Success!\n");
   else printf("**FAILED**\n");
@@ -121,6 +122,10 @@ int main() {
   printf("Chacha20 (256-bit) Result:\n");
   print_result(comp,exp);
 
+  Hacl_Chacha20_Vec512_chacha20_encrypt_512(in_len,comp,in,k,n,1);
+  printf("Chacha20 (512-bit) Result:\n");
+  print_result(comp,exp);
+
   uint64_t len = SIZE;
   uint8_t plain[SIZE];
   uint8_t key[16];
@@ -184,7 +189,18 @@ int main() {
   double diff3 = (double)(t2 - t1)/CLOCKS_PER_SEC;
   uint64_t cyc3 = b - a;
 
+  t1 = clock();
+  a = cpucycles_begin();
+  for (int j = 0; j < ROUNDS; j++) {
+    Hacl_Chacha20_Vec512_chacha20_encrypt_512(SIZE,plain,plain,key,nonce,1);
+  }
+  b = cpucycles_end();
+  t2 = clock();
+  double diff4 = (double)(t2 - t1)/CLOCKS_PER_SEC;
+  uint64_t cyc4 = b - a;
+
   printf("32-bit Chacha20\n"); print_time(diff1,cyc1);
   printf("128-bit Chacha20\n"); print_time(diff2,cyc2);
   printf("256-bit Chacha20\n"); print_time(diff3,cyc3);
+  printf("512-bit Chacha20\n"); print_time(diff4,cyc4);
 }

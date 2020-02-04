@@ -233,3 +233,4 @@ let transpose_lemma_index #w k i =
   | 1 -> ()
   | 4 -> transpose4_lemma k i
   | 8 -> transpose8_lemma k i
+  | 16 -> admit()

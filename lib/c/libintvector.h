@@ -166,22 +166,22 @@ typedef __m128i Lib_IntVector_Intrinsics_vec128;
   (_mm_set_epi64x(x1, x2)) /* hi lo */
 
 #define Lib_IntVector_Intrinsics_vec128_load32(x) \
-  (_mm_set1_epi32(x)) 
+  (_mm_set1_epi32(x))
 
 #define Lib_IntVector_Intrinsics_vec128_load32s(x3, x2, x1, x0) \
   (_mm_set_epi32(x3, x2, x1, x0)) /* hi lo */
 
 #define Lib_IntVector_Intrinsics_vec128_interleave_low32(x1, x2) \
-  (_mm_unpacklo_epi32(x1, x2)) 
+  (_mm_unpacklo_epi32(x1, x2))
 
 #define Lib_IntVector_Intrinsics_vec128_interleave_high32(x1, x2) \
-  (_mm_unpackhi_epi32(x1, x2)) 
+  (_mm_unpackhi_epi32(x1, x2))
 
 #define Lib_IntVector_Intrinsics_vec128_interleave_low64(x1, x2) \
-  (_mm_unpacklo_epi64(x1, x2)) 
+  (_mm_unpacklo_epi64(x1, x2))
 
 #define Lib_IntVector_Intrinsics_vec128_interleave_high64(x1, x2) \
-  (_mm_unpackhi_epi64(x1, x2)) 
+  (_mm_unpackhi_epi64(x1, x2))
 
 
 typedef __m256i Lib_IntVector_Intrinsics_vec256;
@@ -311,7 +311,7 @@ typedef __m256i Lib_IntVector_Intrinsics_vec256;
   (_mm256_set_epi64x(x1,x2,x3,x4)) /* hi lo */
 
 #define Lib_IntVector_Intrinsics_vec256_load32(x) \
-  (_mm256_set1_epi32(x)) 
+  (_mm256_set1_epi32(x))
 
 #define Lib_IntVector_Intrinsics_vec256_load32s(x7,x6,x5,x4,x3, x2, x1, x0) \
   (_mm256_set_epi32(x7, x6, x5, x4, x3, x2, x1, x0)) /* hi lo */
@@ -324,24 +324,78 @@ typedef __m256i Lib_IntVector_Intrinsics_vec256;
   (_mm256_set_m128i((__m128i)x1,(__m128i)x0))
 
 #define Lib_IntVector_Intrinsics_vec256_interleave_low32(x1, x2) \
-  (_mm256_unpacklo_epi32(x1, x2)) 
+  (_mm256_unpacklo_epi32(x1, x2))
 
 #define Lib_IntVector_Intrinsics_vec256_interleave_high32(x1, x2) \
-  (_mm256_unpackhi_epi32(x1, x2)) 
+  (_mm256_unpackhi_epi32(x1, x2))
 
 #define Lib_IntVector_Intrinsics_vec256_interleave_low64(x1, x2) \
-  (_mm256_unpacklo_epi64(x1, x2)) 
+  (_mm256_unpacklo_epi64(x1, x2))
 
 #define Lib_IntVector_Intrinsics_vec256_interleave_high64(x1, x2) \
-  (_mm256_unpackhi_epi64(x1, x2)) 
+  (_mm256_unpackhi_epi64(x1, x2))
 
 #define Lib_IntVector_Intrinsics_vec256_interleave_low128(x1, x2) \
-  (_mm256_permute2x128_si256(x1, x2, 0x20)) 
+  (_mm256_permute2x128_si256(x1, x2, 0x20))
 
 #define Lib_IntVector_Intrinsics_vec256_interleave_high128(x1, x2) \
-  (_mm256_permute2x128_si256(x1, x2, 0x31)) 
+  (_mm256_permute2x128_si256(x1, x2, 0x31))
 
 #define Lib_IntVector_Intrinsics_bit_mask64(x) -((x) & 1)
+
+
+typedef __m512i Lib_IntVector_Intrinsics_vec512;
+
+#define Lib_IntVector_Intrinsics_vec512_zero  \
+  (_mm512_set1_epi16((uint16_t)0))
+
+#define Lib_IntVector_Intrinsics_vec512_load32s(x15,x14,x13,x12,x11,x10,x9,x8,x7,x6,x5,x4,x3,x2,x1,x0) \
+  (_mm512_set_epi32(x15,x14,x13,x12,x11,x10,x9,x8,x7,x6,x5,x4,x3,x2,x1,x0)) /* hi lo */
+
+#define Lib_IntVector_Intrinsics_vec512_load32(x) \
+  (_mm512_set1_epi32(x))
+
+#define Lib_IntVector_Intrinsics_vec512_insert32(x0, x1, x2) \
+  (_mm512_mask_set1_epi32(x0, 1UL << x2, x1)) //TODO : FIX!
+
+#define Lib_IntVector_Intrinsics_vec512_extract32(x0, x1) \
+  (_mm512_cvtsi512_si32(_mm512_alignr_epi32(x0, x0, x1))) //TODO : FIX!
+
+#define Lib_IntVector_Intrinsics_vec512_add32(x0, x1) \
+  (_mm512_add_epi32(x0, x1))
+
+#define Lib_IntVector_Intrinsics_vec512_sub32(x0, x1) \
+  (_mm512_sub_epi32(x0, x1))
+
+#define Lib_IntVector_Intrinsics_vec512_mul32(x0, x1) \
+  (_mm512_mullo_epi32(x0, x1))
+
+#define Lib_IntVector_Intrinsics_vec512_smul32(x0, x1) \
+  (_mm512_mullo_epi32(x0, _mm512_set1_epi32(x1)))
+
+#define Lib_IntVector_Intrinsics_vec512_xor(x0, x1) \
+  (_mm512_xor_si512(x0, x1))
+
+#define Lib_IntVector_Intrinsics_vec512_and(x0, x1) \
+  (_mm512_and_si512(x0, x1))
+
+#define Lib_IntVector_Intrinsics_vec512_or(x0, x1) \
+  (_mm512_or_si512(x0, x1))
+
+#define Lib_IntVector_Intrinsics_vec512_lognot(x0) \
+  (_mm512_xor_si512(x0, _mm512_set1_epi32(-1)))
+
+#define Lib_IntVector_Intrinsics_vec512_shift_left32(x0, x1) \
+  (_mm512_slli_epi32(x0, x1))
+
+#define Lib_IntVector_Intrinsics_vec512_shift_right32(x0, x1) \
+  (_mm512_srli_epi32(x0, x1))
+
+#define Lib_IntVector_Intrinsics_vec512_load_le(x0) \
+  (_mm512_loadu_si512((__m512i*)(x0)))
+
+#define Lib_IntVector_Intrinsics_vec512_store_le(x0, x1) \
+  (_mm512_storeu_si512((__m512i*)(x0), x1))
 
 
 #endif

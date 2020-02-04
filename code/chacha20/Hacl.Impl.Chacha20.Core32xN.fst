@@ -144,6 +144,31 @@ let transpose8 st =
   assert (Lib.Sequence.equal (as_seq h1 st) (create16 v0 v8 v1 v9 v2 v10 v3 v11 v4 v12 v5 v13 v6 v14 v7 v15));
   assert (Lib.Sequence.equal (as_seq h1 st) (Spec.transpose8 (as_seq h0 st)))
 
+
+inline_for_extraction noextract
+val transpose16: st:state 16 ->
+  Stack unit
+    (requires (fun h -> live h st))
+    (ensures (fun h0 _ h1 -> modifies (loc st) h0 h1 /\
+      as_seq h1 st == Spec.transpose16 (as_seq h0 st)))
+let transpose16 st =
+  push_frame ();
+  let st0 = create_state 16 in
+  copy st0 st;
+  let h0 = ST.get () in
+  loop_nospec #h0 16ul st
+  (fun i ->
+    let h0 = ST.get () in
+    loop_nospec #h0 16ul st
+    (fun j ->
+      let y = st0.(j) in
+      let x = st.(i) in
+      st.(i) <- vec_set x j (vec_get y i)
+    )
+  ); admit();
+  pop_frame ()
+
+
 inline_for_extraction noextract
 val transpose:
     #w:lanes
@@ -157,6 +182,7 @@ let transpose #w st =
   | 1 -> transpose1 st
   | 4 -> transpose4 st
   | 8 -> transpose8 st
+  | 16 -> transpose16 st
 
 inline_for_extraction noextract
 val xor_block:
