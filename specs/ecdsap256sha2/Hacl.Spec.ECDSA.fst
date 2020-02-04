@@ -241,9 +241,6 @@ val lemma_exponen_spec: k:lseq uint8 32
 #push-options "--fuel 2 --z3rlimit 300"
 
 let rec lemma_exponen_spec k start index =
-  let open FStar.Math.Lib in
-  let open FStar.Math.Lemmas in
-  let open Lib.RawIntTypes in
   let f = _exp_step k in
   let st0, st1 = start in
   let number = nat_from_bytes_le k in
@@ -251,7 +248,7 @@ let rec lemma_exponen_spec k start index =
   let open Lib.LoopCombinators in
   match index with
   | 0 -> eq_repeati0 256 (_exp_step k) start;
-    assert_norm (FStar.Math.Lib.arithmetic_shift_right number newIndex == 0)
+    assert_norm (arithmetic_shift_right number newIndex == 0)
   | _ ->
     begin
     unfold_repeati 256 f start (index - 1);
@@ -261,24 +258,61 @@ let rec lemma_exponen_spec k start index =
       | 0 ->
         let a0 = pow st1 (arithmetic_shift_right number (256 - index + 1)) in
         let a1 = pow st1 (arithmetic_shift_right number (256 - index + 1) + 1) in
-
-        modulo_distributivity_mult a0 a0 prime_p256_order;
-        modulo_distributivity_mult a0 a1 prime_p256_order;
-
-        pow_plus st1 (arithmetic_shift_right number (256 - index + 1)) (arithmetic_shift_right number (256 - index + 1));
-        pow_plus st1 (arithmetic_shift_right number (256 - index + 1)) (arithmetic_shift_right number (256 - index + 1) + 1);
-
-        lemma_even index k
-      | 1 ->
+	calc (==) {
+	  (a0 % prime_p256_order) * (a0 % prime_p256_order) % prime_p256_order; 
+	  == {modulo_distributivity_mult a0 a0 prime_p256_order}
+	  (a0 * a0) % prime_p256_order; 
+	  == { }
+	  (pow st1 (arithmetic_shift_right number (256 - index + 1)) * pow st1 (arithmetic_shift_right number (256 - index + 1))) % prime_p256_order;   
+	  == {pow_plus st1 (arithmetic_shift_right number (256 - index + 1)) (arithmetic_shift_right number (256 - index + 1))} 
+	  (pow st1 (arithmetic_shift_right number (256 - index + 1) + arithmetic_shift_right number (256 - index + 1))) % prime_p256_order;
+	  == {}
+	  (pow st1 (2 * arithmetic_shift_right number (256 - index + 1))) % prime_p256_order; 
+	  == {lemma_even index k}
+	  pow st1 (arithmetic_shift_right number newIndex) % prime_p256_order;};
+	  
+    	calc (==) {
+	  (a0 % prime_p256_order) * (a1 % prime_p256_order) % prime_p256_order; 
+	  == {modulo_distributivity_mult a0 a1 prime_p256_order}
+	  (a0 * a1) % prime_p256_order; 
+	  == { }
+	  (pow st1 (arithmetic_shift_right number (256 - index + 1)) * pow st1 (arithmetic_shift_right number (256 - index + 1) + 1)) % prime_p256_order;   
+	  == {pow_plus st1 (arithmetic_shift_right number (256 - index + 1)) (arithmetic_shift_right number (256 - index + 1) + 1)} 
+	  (pow st1 (arithmetic_shift_right number (256 - index + 1) + arithmetic_shift_right number (256 - index + 1) + 1)) % prime_p256_order;
+	  == {}
+	  (pow st1 (2* arithmetic_shift_right number (256 - index + 1) + 1)) % prime_p256_order; 
+	  == {lemma_even index k}
+	  (pow st1 (arithmetic_shift_right number (256 - index) + 1)) % prime_p256_order;}
+      | 1 -> 
         let a0 = pow st1 (arithmetic_shift_right number (256 - index + 1)) in
         let a1 = pow st1 (arithmetic_shift_right number (256 - index + 1) + 1) in
 
-        modulo_distributivity_mult a0 a1 prime_p256_order;
-        modulo_distributivity_mult a1 a1 prime_p256_order;
-        pow_plus st1 (arithmetic_shift_right number (256 - index + 1)) (arithmetic_shift_right number (256 - index + 1) + 1);
-        pow_plus st1 (arithmetic_shift_right number (256 - index + 1) + 1) (arithmetic_shift_right number (256 - index + 1) + 1);
+	  calc (==) {
+	  (a1 % prime_p256_order) * (a1 % prime_p256_order) % prime_p256_order; 
+	  == {modulo_distributivity_mult a1 a1 prime_p256_order}
+	  (a1 * a1) % prime_p256_order; 
+	  == { }
+	  (pow st1 (arithmetic_shift_right number (256 - index + 1) + 1) * pow st1 (arithmetic_shift_right number (256 - index + 1) + 1)) % prime_p256_order;   
+	  == {pow_plus st1 (arithmetic_shift_right number (256 - index + 1) + 1) (arithmetic_shift_right number (256 - index + 1) + 1)} 
+	  (pow st1 (arithmetic_shift_right number (256 - index + 1) + 1 + arithmetic_shift_right number (256 - index + 1) + 1)) % prime_p256_order;
+	  == {}
+	  (pow st1 (2 * arithmetic_shift_right number (256 - index + 1) + 2)) % prime_p256_order; 
+	  == {lemma_odd index k}
+	  pow st1 (arithmetic_shift_right number newIndex + 1) % prime_p256_order;};
 
-        lemma_odd index k
+    	calc (==) {
+	  (a0 % prime_p256_order) * (a1 % prime_p256_order) % prime_p256_order; 
+	  == {modulo_distributivity_mult a0 a1 prime_p256_order}
+	  (a0 * a1) % prime_p256_order; 
+	  == { }
+	  (pow st1 (arithmetic_shift_right number (256 - index + 1)) * pow st1 (arithmetic_shift_right number (256 - index + 1) + 1)) % prime_p256_order;   
+	  == {pow_plus st1 (arithmetic_shift_right number (256 - index + 1)) (arithmetic_shift_right number (256 - index + 1) + 1)} 
+	  (pow st1 (arithmetic_shift_right number (256 - index + 1) + arithmetic_shift_right number (256 - index + 1) + 1)) % prime_p256_order;
+	  == {}
+	  (pow st1 (2* arithmetic_shift_right number (256 - index + 1) + 1)) % prime_p256_order;
+	  == {lemma_odd index k}
+	  (pow st1 (arithmetic_shift_right (nat_from_bytes_le k) (256 - index)) % prime_p256_order);
+	  }
     end
 
 #pop-options
@@ -376,6 +410,34 @@ let changeEndian i =
   let o = Lib.Sequence.upd o 1 two in
   let o = Lib.Sequence.upd o 2 one in
           Lib.Sequence.upd o 3 zero
+
+
+val changeEndianLemma: k: lseq uint64 4 -> Lemma 
+  (nat_from_intseq_le (changeEndian k) == nat_from_intseq_be k)
+
+let changeEndianLemma k = 
+  let k0 = changeEndian k in 
+  
+  nat_from_intseq_be_slice_lemma (slice k 2 4) 1;
+  nat_from_intseq_be_slice_lemma (slice k 1 4) 1;
+  nat_from_intseq_be_slice_lemma k 1;
+  
+  nat_from_intseq_be_lemma0 (slice k 0 1);
+  nat_from_intseq_be_lemma0 (slice k 1 2);
+  nat_from_intseq_be_lemma0 (slice k 2 3);
+  nat_from_intseq_be_lemma0 (slice k 3 4);
+  
+  nat_from_intseq_le_slice_lemma (slice k0 2 4) 1;
+  nat_from_intseq_le_slice_lemma (slice k0 1 4) 1;
+  nat_from_intseq_le_slice_lemma k0 1;
+  
+  nat_from_intseq_le_lemma0 (slice k0 0 1);
+  nat_from_intseq_le_lemma0 (slice k0 1 2);
+  nat_from_intseq_le_lemma0 (slice k0 2 3);
+  nat_from_intseq_le_lemma0 (slice k0 3 4);
+
+  assert_norm (pow2 (2 * 64) * pow2 64 == pow2 (3 * 64))
+
 
 
 val verifyQValidCurvePointSpec:

@@ -135,13 +135,13 @@ val ecdsa_p256_sha2_verify_u8:
   -> pubKey: lbuffer uint8 (size 64)
   -> r: lbuffer uint8 (size 32)
   -> s: lbuffer uint8 (size 32) ->
-  Stack bool
+   Stack bool
     (requires fun h -> live h pubKey /\ live h r /\ live h s /\ live h m)
     (ensures fun h0 result h1 ->
-      assert_norm (pow2 32 < pow2 61);
-      let publicKeyX = nat_from_intseq_le (Hacl.Spec.ECDSA.changeEndian (uints_from_bytes_be (as_seq h1 (gsub pubKey (size 0) (size 32))))) in
-      let publicKeyY = nat_from_intseq_le (Hacl.Spec.ECDSA.changeEndian (uints_from_bytes_be (as_seq h1 (gsub pubKey (size 32) (size 32))))) in
-      let r = nat_from_intseq_le (Hacl.Spec.ECDSA.changeEndian (uints_from_bytes_be (as_seq h1 r))) in
-      let s = nat_from_intseq_le (Hacl.Spec.ECDSA.changeEndian (uints_from_bytes_be (as_seq h1 s))) in
+      assert_norm (pow2 32 < pow2 61); 
+      let publicKeyX = nat_from_bytes_be (as_seq h1 (gsub pubKey (size 0) (size 32))) in
+      let publicKeyY = nat_from_bytes_be (as_seq h1 (gsub pubKey (size 32) (size 32))) in
+      let r = nat_from_bytes_be (as_seq h1 r) in
+      let s = nat_from_bytes_be (as_seq h1 s) in
       modifies0 h0 h1 /\
       result == Hacl.Spec.ECDSA.ecdsa_verification (publicKeyX, publicKeyY) r s (v mLen) (as_seq h0 m))
