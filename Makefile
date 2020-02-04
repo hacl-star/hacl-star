@@ -926,6 +926,7 @@ dist/evercrypt-external-headers/Makefile.basic: $(ALL_KRML_FILES)
 # Auto-generates a single C test file.
 .PRECIOUS: dist/test/c/%.c
 dist/test/c/%.c: $(ALL_KRML_FILES)
+	mkdir -p $(dir $@) && cp $(HACL_HOME)/lib/c/lib_intrinsics.h $(dir $@)
 	$(KRML) -silent \
 	  -tmpdir $(dir $@) -skip-compilation \
 	  -no-prefix $(subst _,.,$*) \
@@ -936,6 +937,7 @@ dist/test/c/%.c: $(ALL_KRML_FILES)
 
 dist/test/c/Test.c: KRML_EXTRA=-add-include '"kremlin/internal/compat.h"'
 
+dist/test/c/Hacl_Test_ECDSA.c: KRML_EXTRA=-drop Lib.IntTypes.Intrinsics -add-include '"lib_intrinsics.h"'
 
 ###################################################################################
 # C Compilation (recursive make invocation relying on KreMLin-generated Makefile) #

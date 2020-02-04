@@ -1137,10 +1137,10 @@ static void scalarMultiplicationWithoutNorm(u64 *p, u64 *result, u8 *scalar, u64
 
 static void secretToPublic(u64 *result, u8 *scalar, u64 *tempBuffer)
 {
-  u64 basePoint[12U] = { 0U };
+  u64 basePoint1[12U] = { 0U };
   u64 *q;
   u64 *buff;
-  uploadBasePoint(basePoint);
+  uploadBasePoint(basePoint1);
   q = tempBuffer;
   buff = tempBuffer + (u32)12U;
   zero_buffer(q);
@@ -1150,10 +1150,10 @@ static void secretToPublic(u64 *result, u8 *scalar, u64 *tempBuffer)
     {
       u32 bit0 = (u32)255U - i;
       u64 bit = (u64)(scalar[bit0 / (u32)8U] >> bit0 % (u32)8U & (u8)1U);
-      cswap(bit, q, basePoint);
-      point_add(q, basePoint, basePoint, buff);
+      cswap(bit, q, basePoint1);
+      point_add(q, basePoint1, basePoint1, buff);
       point_double(q, q, buff);
-      cswap(bit, q, basePoint);
+      cswap(bit, q, basePoint1);
     }
   }
   norm(q, result, buff);
@@ -1161,10 +1161,10 @@ static void secretToPublic(u64 *result, u8 *scalar, u64 *tempBuffer)
 
 static void secretToPublicWithoutNorm(u64 *result, u8 *scalar, u64 *tempBuffer)
 {
-  u64 basePoint[12U] = { 0U };
+  u64 basePoint1[12U] = { 0U };
   u64 *q;
   u64 *buff;
-  uploadBasePoint(basePoint);
+  uploadBasePoint(basePoint1);
   q = tempBuffer;
   buff = tempBuffer + (u32)12U;
   zero_buffer(q);
@@ -1174,10 +1174,10 @@ static void secretToPublicWithoutNorm(u64 *result, u8 *scalar, u64 *tempBuffer)
     {
       u32 bit0 = (u32)255U - i;
       u64 bit = (u64)(scalar[bit0 / (u32)8U] >> bit0 % (u32)8U & (u8)1U);
-      cswap(bit, q, basePoint);
-      point_add(q, basePoint, basePoint, buff);
+      cswap(bit, q, basePoint1);
+      point_add(q, basePoint1, basePoint1, buff);
       point_double(q, q, buff);
-      cswap(bit, q, basePoint);
+      cswap(bit, q, basePoint1);
     }
   }
   copy_point(q, result);
@@ -1710,10 +1710,10 @@ static bool ecdsa_verification_u8(u8 *pubKey, u8 *r, u8 *s1, u32 mLen, u8 *m)
   u8 *pubKeyX = pubKey;
   u8 *pubKeyY = pubKey + (u32)32U;
   bool result;
-  toUint64(pubKeyX, publicKeyFelemX);
-  toUint64(pubKeyY, publicKeyFelemY);
-  toUint64(r, rAsFelem);
-  toUint64(s1, sAsFelem);
+  toUint64ChangeEndian(pubKeyX, publicKeyFelemX);
+  toUint64ChangeEndian(pubKeyY, publicKeyFelemY);
+  toUint64ChangeEndian(r, rAsFelem);
+  toUint64ChangeEndian(s1, sAsFelem);
   result = ecdsa_verification(publicKeyAsFelem, rAsFelem, sAsFelem, mLen, m);
   return result;
 }
