@@ -350,3 +350,53 @@ let openBase cs skR input info =
   match AEAD.decrypt #(aead_of_cs cs) k n info c with
   | None -> None
   | Some v -> Some v
+
+
+val send:
+    cs:ciphersuite
+  -> skE:key_dh_secret_s cs
+  -> skI:key_dh_secret_s cs
+  -> pkR:key_dh_public_s cs
+  -> m:bytes{Seq.length m + size_dh_public cs <= max_length cs}
+  -> info:bytes{Seq.length info <= max_info} ->
+  Tot bytes
+
+let send cs skE skI pkR m info =
+  let pkI = DH.secret_to_public (curve_of_cs cs) skI in
+  let pkE = DH.secret_to_public (curve_of_cs cs) skE in
+  let zz1 = DH.scalarmult (curve_of_cs cs) skE pkR in
+  let zz2 = DH.scalarmult (curve_of_cs cs) skI pkR in
+  let k1, n1 = ks_derive cs Base pkR zz1 pkE info None None in
+  let k2, n2 = ks_derive cs Auth pkR zz1 pkE info None (Some pkI) in
+  let c1 = AEAD.encrypt #(aead_of_cs cs) k1 n1 info pkI in
+  let c2 = AEAD.encrypt #(aead_of_cs cs) k2 n2 info m in
+  Seq.append pkE (Seq.append c1 c2)
+
+
+val receive:
+    cs:ciphersuite
+  -> skR:key_dh_secret_s cs
+  -> input:bytes{size_dh_public cs + 2 * size_aead_tag cs <= Seq.length input /\ Seq.length input <= max_size_t}
+  -> info:bytes{Seq.length info <= max_info} ->
+  Tot (option (key_dh_public_s cs & bytes))
+
+#set-options "--z3rlimit 350"
+
+let receive cs skR input info =
+  let pkE = sub #uint8 #(Seq.length input) input 0 (size_dh_public cs) in
+  let c1 = sub #uint8 #(Seq.length input) input (size_dh_public cs) (Seq.length input - 2 * size_aead_tag cs - size_dh_public cs) in
+  let c2 = sub #uint8 #(Seq.length input) input (Seq.length input - size_aead_tag cs ) (size_aead_tag cs) in
+  assert(length c1 <= max_length cs);
+  assert(length c2 <= max_length cs);
+  let pkR = DH.secret_to_public (curve_of_cs cs) skR in
+  let zz1 = DH.scalarmult (curve_of_cs cs) skR pkE in
+  let k1, n1 = ks_derive cs Base pkR zz1 pkE info None None in
+  match AEAD.decrypt #(aead_of_cs cs) k1 n1 info c1 with
+  | None -> None
+  | Some pkI ->
+    admit();
+    let zz2 = DH.scalarmult (curve_of_cs cs) skR pkI in
+    let k2, n2 = ks_derive cs Auth pkR zz2 pkE info None (Some pkI) in
+    match AEAD.decrypt #(aead_of_cs cs) k2 n2 info c2 with
+    | None -> None
+    | Some m -> Some (pkI,m)
