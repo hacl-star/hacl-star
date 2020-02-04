@@ -33,8 +33,10 @@ open Hacl.Impl.ECDSA.P256SHA256.Signature
 open Hacl.Impl.ECDSA.P256SHA256.Verification
 
 
-val ecdsa_p256_sha2_keyGen: result: lbuffer uint8 (size 64) -> privKey: lbuffer uint8 (size 32) ->
-  Stack unit
+val ecdsa_p256_sha2_keyGen: 
+    result: lbuffer uint8 (size 64) 
+  -> privKey: lbuffer uint8 (size 32) 
+  -> Stack unit
     (requires fun h ->
       live h result /\ live h privKey /\
       disjoint result privKey /\
@@ -54,17 +56,23 @@ val ecdsa_p256_sha2_keyGen: result: lbuffer uint8 (size 64) -> privKey: lbuffer 
     )
 
 
-val ecdsa_p256_sha2_sign: result: lbuffer uint8 (size 64) -> mLen: size_t -> m: lbuffer uint8 mLen {uint_v mLen < Spec.Hash.Definitions.max_input_length (Spec.Hash.Definitions.SHA2_256)} ->
-  privKey: lbuffer uint8 (size 32) ->
-  k: lbuffer uint8 (size 32) ->
-  Stack uint64
+val ecdsa_p256_sha2_sign: 
+    result: lbuffer uint8 (size 64) 
+  -> mLen: size_t 
+  -> m: lbuffer uint8 mLen 
+  -> privKey: lbuffer uint8 (size 32) 
+  -> k: lbuffer uint8 (size 32) 
+  -> Stack uint64
   (requires fun h ->
     live h result /\ live h m /\ live h privKey /\ live h k /\
-    LowStar.Monotonic.Buffer.all_disjoint [loc result; loc m; loc privKey; loc k] /\
+    disjoint result m /\
+    disjoint result privKey /\
+    disjoint result k /\
     nat_from_bytes_le (as_seq h privKey) < prime_p256_order /\
     nat_from_bytes_le (as_seq h k) < prime_p256_order
   )
   (ensures fun h0 flag h1 ->
+    assert_norm (pow2 32 < pow2 61);
     modifies (loc result) h0 h1 /\
      (
       let resultR = gsub result (size 0) (size 32) in
@@ -77,10 +85,12 @@ val ecdsa_p256_sha2_sign: result: lbuffer uint8 (size 64) -> mLen: size_t -> m: 
   )
 
 
-val ecdsa_p256_sha2_sign_nist: result: lbuffer uint8 (size 64) -> m: lbuffer uint8 (size 32) ->
-  privKey: lbuffer uint8 (size 32) ->
-  k: lbuffer uint8 (size 32) ->
-  Stack uint64
+val ecdsa_p256_sha2_sign_nist: 
+    result: lbuffer uint8 (size 64) 
+  -> m: lbuffer uint8 (size 32) 
+  -> privKey: lbuffer uint8 (size 32) 
+  -> k: lbuffer uint8 (size 32) 
+  -> Stack uint64
   (requires fun h ->
     live h result /\ live h m /\ live h privKey /\ live h k /\
     LowStar.Monotonic.Buffer.all_disjoint [loc result; loc m; loc privKey; loc k] /\
