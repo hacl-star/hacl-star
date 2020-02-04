@@ -1252,10 +1252,10 @@ scalarMultiplicationWithoutNorm(
 
 static void secretToPublic(uint64_t *result, uint8_t *scalar, uint64_t *tempBuffer)
 {
-  uint64_t basePoint[12U] = { 0U };
+  uint64_t basePoint1[12U] = { 0U };
   uint64_t *q;
   uint64_t *buff;
-  uploadBasePoint(basePoint);
+  uploadBasePoint(basePoint1);
   q = tempBuffer;
   buff = tempBuffer + (uint32_t)12U;
   zero_buffer(q);
@@ -1265,10 +1265,10 @@ static void secretToPublic(uint64_t *result, uint8_t *scalar, uint64_t *tempBuff
     {
       uint32_t bit0 = (uint32_t)255U - i;
       uint64_t bit = (uint64_t)(scalar[bit0 / (uint32_t)8U] >> bit0 % (uint32_t)8U & (uint8_t)1U);
-      cswap(bit, q, basePoint);
-      point_add(q, basePoint, basePoint, buff);
+      cswap(bit, q, basePoint1);
+      point_add(q, basePoint1, basePoint1, buff);
       point_double(q, q, buff);
-      cswap(bit, q, basePoint);
+      cswap(bit, q, basePoint1);
     }
   }
   norm(q, result, buff);
@@ -1276,10 +1276,10 @@ static void secretToPublic(uint64_t *result, uint8_t *scalar, uint64_t *tempBuff
 
 static void secretToPublicWithoutNorm(uint64_t *result, uint8_t *scalar, uint64_t *tempBuffer)
 {
-  uint64_t basePoint[12U] = { 0U };
+  uint64_t basePoint1[12U] = { 0U };
   uint64_t *q;
   uint64_t *buff;
-  uploadBasePoint(basePoint);
+  uploadBasePoint(basePoint1);
   q = tempBuffer;
   buff = tempBuffer + (uint32_t)12U;
   zero_buffer(q);
@@ -1289,10 +1289,10 @@ static void secretToPublicWithoutNorm(uint64_t *result, uint8_t *scalar, uint64_
     {
       uint32_t bit0 = (uint32_t)255U - i;
       uint64_t bit = (uint64_t)(scalar[bit0 / (uint32_t)8U] >> bit0 % (uint32_t)8U & (uint8_t)1U);
-      cswap(bit, q, basePoint);
-      point_add(q, basePoint, basePoint, buff);
+      cswap(bit, q, basePoint1);
+      point_add(q, basePoint1, basePoint1, buff);
       point_double(q, q, buff);
-      cswap(bit, q, basePoint);
+      cswap(bit, q, basePoint1);
     }
   }
   copy_point(q, result);
@@ -1866,10 +1866,10 @@ ecdsa_verification_u8(uint8_t *pubKey, uint8_t *r, uint8_t *s1, uint32_t mLen, u
   uint8_t *pubKeyX = pubKey;
   uint8_t *pubKeyY = pubKey + (uint32_t)32U;
   bool result;
-  toUint64(pubKeyX, publicKeyFelemX);
-  toUint64(pubKeyY, publicKeyFelemY);
-  toUint64(r, rAsFelem);
-  toUint64(s1, sAsFelem);
+  toUint64ChangeEndian(pubKeyX, publicKeyFelemX);
+  toUint64ChangeEndian(pubKeyY, publicKeyFelemY);
+  toUint64ChangeEndian(r, rAsFelem);
+  toUint64ChangeEndian(s1, sAsFelem);
   result = ecdsa_verification(publicKeyAsFelem, rAsFelem, sAsFelem, mLen, m);
   return result;
 }
