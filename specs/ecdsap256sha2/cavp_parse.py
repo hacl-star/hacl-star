@@ -6,21 +6,22 @@ import random
 #import sys
 
 
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Generate ECDSA CAVP test vectors.')
-    parser.add_argument('FILE', type=str, help='CAVP rsp file.')
+    parser.add_argument('FILE_VER', type=str, help='CAVP rsp file.')
+    parser.add_argument('FILE_GEN', type=str, help='CAVP txt file.')
     parser.add_argument('--prob', type=int, choices=range(1,100), default=1, help='Extract each vector with probability 1/prob.')
     args = parser.parse_args()
 
     random.seed()
     
-    rsp = open(args.FILE, 'r')
+    ver = open(args.FILE_VER, 'r')
+    gen = open(args.FILE_GEN, 'r')
     header_field = re.compile('\[P-256,SHA-([^\]]+)\]')
     field = re.compile('[^=]+= (\S+)')
 
-    print("let test_vectors : list vec = [")
-
-    def next_section(line):
+    def next_section(rsp, line):
         while line:
             m = header_field.match(line)
             if m:
@@ -28,52 +29,110 @@ if __name__ == '__main__':
                 return a
             line = rsp.readline()
         return False
+
+    print("let sigver_vectors : list vec_SigVer = [")
    
-    def process_section(a):
-        line = rsp.readline()
+    def process_sigver(a):
+        line = ver.readline()
         while line:
             m = header_field.match(line)
             if m:
                 return line
 
             if a not in {'SHA2_256'}:
-                line = rsp.readline()
+                line = ver.readline()
                 continue
 
             if line[:6] == 'Msg = ':
                 msg = field.match(line).group(1)
              
-                line = rsp.readline()
+                line = ver.readline()
                 qx = field.match(line).group(1)
              
-                line = rsp.readline()
+                line = ver.readline()
                 qy = field.match(line).group(1)
              
-                line = rsp.readline()
+                line = ver.readline()
                 r = field.match(line).group(1)
              
-                line = rsp.readline()
+                line = ver.readline()
                 s = field.match(line).group(1)
              
-                line = rsp.readline()
+                line = ver.readline()
                 result = "true" if field.match(line).group(1) == 'P' else "false"
              
                 if random.random() < 1 / args.prob:
                     print("  { msg = \"%s\";" % msg)
                     print("    qx  = \"%s\";" % qx)
-                    print("    qy = \"%s\";" % qy)
-                    print("    r  = \"%s\";" % r)
-                    print("    s = \"%s\";" % s)
+                    print("    qy  = \"%s\";" % qy)
+                    print("    r   = \"%s\";" % r)
+                    print("    s   = \"%s\";" % s)
                     print("    result = %s;" % result)
-                    print("  } ;")
+                    print("  };")
              
-            line = rsp.readline()
+            line = ver.readline()
    
-    line = rsp.readline()
-    a = next_section(line)
+    line = ver.readline()
+    a = next_section(ver, line)
     while a:
         #print("Processing [P-256,%s]..." % a, file=sys.stderr)
-        process_section(a)
-        a = next_section(line)
+        line = process_sigver(a)
+        a = next_section(ver, line)
+
+    print("]\n")
+
+    ### SigGen.txt
+    print("let siggen_vectors : list vec_SigGen = [")
+
+    def process_siggen(a):
+        line = gen.readline()
+        while line:
+            m = header_field.match(line)
+            if m:
+                return line
+
+            if a not in {'SHA2_256'}:
+                line = gen.readline()
+                continue
+
+            if line[:6] == 'Msg = ':
+                msg = field.match(line).group(1)
+
+                line = gen.readline()
+                d = field.match(line).group(1)
+             
+                line = gen.readline()
+                qx = field.match(line).group(1)
+             
+                line = gen.readline()
+                qy = field.match(line).group(1)
+
+                line = gen.readline()
+                k = field.match(line).group(1)
+
+                line = gen.readline()
+                r = field.match(line).group(1)
+             
+                line = gen.readline()
+                s = field.match(line).group(1)
+             
+                if random.random() < 1 / args.prob:
+                    print("  { msg' = \"%s\";" % msg)
+                    print("    d    = \"%s\";" % d)
+                    print("    qx'  = \"%s\";" % qx)
+                    print("    qy'  = \"%s\";" % qy)
+                    print("    k    = \"%s\";" % k)
+                    print("    r'   = \"%s\";" % r)
+                    print("    s'   = \"%s\";" % s)
+                    print("  };")
+             
+            line = gen.readline()
+
+    line = gen.readline()
+    a = next_section(gen, line)
+    while a:
+        #print("Processing [P-256,%s]..." % a, file=sys.stderr)
+        line = process_siggen(a)
+        a = next_section(gen, line)
 
     print("]")
