@@ -20,7 +20,7 @@ open Hacl.Impl.LowLevel
 open Hacl.Impl.P256.LowLevel
 open Hacl.Impl.P256.MontgomeryMultiplication
 open Hacl.Spec.P256
-open Hacl.Math
+open Hacl.Impl.P256.Math 
 
 open Hacl.Impl.P256.PointAdd
 open Hacl.Impl.P256.PointDouble
