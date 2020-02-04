@@ -356,10 +356,10 @@ typedef __m512i Lib_IntVector_Intrinsics_vec512;
   (_mm512_set1_epi32(x))
 
 #define Lib_IntVector_Intrinsics_vec512_insert32(x0, x1, x2) \
-  (_mm512_mask_set1_epi32(x0, 1UL << x2, x1)) //TODO : FIX!
+  (x2<8? _mm512_inserti32x8(x0,_mm256_insert_epi32(_mm512_extracti32x8_epi32(x0,0),x1,x2),0) : _mm512_inserti32x8(x0,_mm256_insert_epi32(_mm512_extracti32x8_epi32(x0,1),x1,x2-8),1)) //TODO : FIX!
 
 #define Lib_IntVector_Intrinsics_vec512_extract32(x0, x1) \
-  (_mm512_cvtsi512_si32(_mm512_alignr_epi32(x0, x0, x1))) //TODO : FIX!
+  (x1<8? _mm256_extract_epi32(_mm512_extracti32x8_epi32(x0,0),x1) : _mm256_extract_epi32(_mm512_extracti32x8_epi32(x0,1),x1-8)) //TODO : FIX!
 
 #define Lib_IntVector_Intrinsics_vec512_add32(x0, x1) \
   (_mm512_add_epi32(x0, x1))
