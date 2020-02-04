@@ -463,13 +463,6 @@ val ecdsa_verification_u8:
       modifies0 h0 h1 /\
       result == Hacl.Spec.ECDSA.ecdsa_verification (publicKeyX, publicKeyY) r s (v mLen) (as_seq h0 m))
 
-(* absent in ByteSequence for some reason - does it hold?*) 
-
-assume val uints_from_bytes_be_nat_lemma: #t:inttype{unsigned t /\ ~(U1? t)} -> #l:secrecy_level -> #len:size_nat{len * numbytes t < pow2 32}
-  -> b:lbytes_l l (len * numbytes t) ->
-  Lemma (nat_from_intseq_be (uints_from_bytes_be #t #l #len b) == nat_from_bytes_be b)
-
-
 let ecdsa_verification_u8 pubKey r s mLen m =
   assert_norm (pow2 32 < pow2 61);
   push_frame();

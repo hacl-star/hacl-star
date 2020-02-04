@@ -169,6 +169,10 @@ val uints_from_bytes_le_nat_lemma: #t:inttype{unsigned t /\ ~(U1? t)} -> #l:secr
   -> b:lbytes_l l (len * numbytes t) ->
   Lemma (nat_from_intseq_le (uints_from_bytes_le #t #l #len b) == nat_from_bytes_le b)
 
+val uints_from_bytes_be_nat_lemma: #t:inttype{unsigned t /\ ~(U1? t)} -> #l:secrecy_level -> #len:size_nat{len * numbytes t < pow2 32}
+  -> b:lbytes_l l (len * numbytes t) ->
+  Lemma (nat_from_intseq_be (uints_from_bytes_be #t #l #len b) == nat_from_bytes_be b)
+
 val uints_to_bytes_le_nat_lemma: #t:inttype{unsigned t /\ ~(U1? t)} -> #l:secrecy_level -> len:nat{len * numbytes t < pow2 32}
   -> n:nat{n < pow2 (bits t * len)} ->
   Lemma (uints_to_bytes_le #t #l #len (nat_to_intseq_le #t #l len n) == nat_to_bytes_le (len * numbytes t) n)
