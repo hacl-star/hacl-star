@@ -238,7 +238,7 @@ val lemma_exponen_spec: k:lseq uint8 32
     f1 == pow start1 (arithmetic_shift_right number newIndex + 1) % prime_p256_order
   )
 
-#push-options "--fuel 2 --z3rlimit 500"
+#push-options "--fuel 2 --z3rlimit 300"
 
 let rec lemma_exponen_spec k start index =
   let f = _exp_step k in
@@ -258,24 +258,61 @@ let rec lemma_exponen_spec k start index =
       | 0 ->
         let a0 = pow st1 (arithmetic_shift_right number (256 - index + 1)) in
         let a1 = pow st1 (arithmetic_shift_right number (256 - index + 1) + 1) in
-
-        modulo_distributivity_mult a0 a0 prime_p256_order;
-        modulo_distributivity_mult a0 a1 prime_p256_order;
-
-        pow_plus st1 (arithmetic_shift_right number (256 - index + 1)) (arithmetic_shift_right number (256 - index + 1));
-        pow_plus st1 (arithmetic_shift_right number (256 - index + 1)) (arithmetic_shift_right number (256 - index + 1) + 1);
-
-        lemma_even index k
-      | 1 ->
+	calc (==) {
+	  (a0 % prime_p256_order) * (a0 % prime_p256_order) % prime_p256_order; 
+	  == {modulo_distributivity_mult a0 a0 prime_p256_order}
+	  (a0 * a0) % prime_p256_order; 
+	  == { }
+	  (pow st1 (arithmetic_shift_right number (256 - index + 1)) * pow st1 (arithmetic_shift_right number (256 - index + 1))) % prime_p256_order;   
+	  == {pow_plus st1 (arithmetic_shift_right number (256 - index + 1)) (arithmetic_shift_right number (256 - index + 1))} 
+	  (pow st1 (arithmetic_shift_right number (256 - index + 1) + arithmetic_shift_right number (256 - index + 1))) % prime_p256_order;
+	  == {}
+	  (pow st1 (2 * arithmetic_shift_right number (256 - index + 1))) % prime_p256_order; 
+	  == {lemma_even index k}
+	  pow st1 (arithmetic_shift_right number newIndex) % prime_p256_order;};
+	  
+    	calc (==) {
+	  (a0 % prime_p256_order) * (a1 % prime_p256_order) % prime_p256_order; 
+	  == {modulo_distributivity_mult a0 a1 prime_p256_order}
+	  (a0 * a1) % prime_p256_order; 
+	  == { }
+	  (pow st1 (arithmetic_shift_right number (256 - index + 1)) * pow st1 (arithmetic_shift_right number (256 - index + 1) + 1)) % prime_p256_order;   
+	  == {pow_plus st1 (arithmetic_shift_right number (256 - index + 1)) (arithmetic_shift_right number (256 - index + 1) + 1)} 
+	  (pow st1 (arithmetic_shift_right number (256 - index + 1) + arithmetic_shift_right number (256 - index + 1) + 1)) % prime_p256_order;
+	  == {}
+	  (pow st1 (2* arithmetic_shift_right number (256 - index + 1) + 1)) % prime_p256_order; 
+	  == {lemma_even index k}
+	  (pow st1 (arithmetic_shift_right number (256 - index) + 1)) % prime_p256_order;}
+      | 1 -> 
         let a0 = pow st1 (arithmetic_shift_right number (256 - index + 1)) in
         let a1 = pow st1 (arithmetic_shift_right number (256 - index + 1) + 1) in
 
-        modulo_distributivity_mult a0 a1 prime_p256_order;
-        modulo_distributivity_mult a1 a1 prime_p256_order;
-        pow_plus st1 (arithmetic_shift_right number (256 - index + 1)) (arithmetic_shift_right number (256 - index + 1) + 1);
-        pow_plus st1 (arithmetic_shift_right number (256 - index + 1) + 1) (arithmetic_shift_right number (256 - index + 1) + 1);
+	  calc (==) {
+	  (a1 % prime_p256_order) * (a1 % prime_p256_order) % prime_p256_order; 
+	  == {modulo_distributivity_mult a1 a1 prime_p256_order}
+	  (a1 * a1) % prime_p256_order; 
+	  == { }
+	  (pow st1 (arithmetic_shift_right number (256 - index + 1) + 1) * pow st1 (arithmetic_shift_right number (256 - index + 1) + 1)) % prime_p256_order;   
+	  == {pow_plus st1 (arithmetic_shift_right number (256 - index + 1) + 1) (arithmetic_shift_right number (256 - index + 1) + 1)} 
+	  (pow st1 (arithmetic_shift_right number (256 - index + 1) + 1 + arithmetic_shift_right number (256 - index + 1) + 1)) % prime_p256_order;
+	  == {}
+	  (pow st1 (2 * arithmetic_shift_right number (256 - index + 1) + 2)) % prime_p256_order; 
+	  == {lemma_odd index k}
+	  pow st1 (arithmetic_shift_right number newIndex + 1) % prime_p256_order;};
 
-        lemma_odd index k
+    	calc (==) {
+	  (a0 % prime_p256_order) * (a1 % prime_p256_order) % prime_p256_order; 
+	  == {modulo_distributivity_mult a0 a1 prime_p256_order}
+	  (a0 * a1) % prime_p256_order; 
+	  == { }
+	  (pow st1 (arithmetic_shift_right number (256 - index + 1)) * pow st1 (arithmetic_shift_right number (256 - index + 1) + 1)) % prime_p256_order;   
+	  == {pow_plus st1 (arithmetic_shift_right number (256 - index + 1)) (arithmetic_shift_right number (256 - index + 1) + 1)} 
+	  (pow st1 (arithmetic_shift_right number (256 - index + 1) + arithmetic_shift_right number (256 - index + 1) + 1)) % prime_p256_order;
+	  == {}
+	  (pow st1 (2* arithmetic_shift_right number (256 - index + 1) + 1)) % prime_p256_order;
+	  == {lemma_odd index k}
+	  (pow st1 (arithmetic_shift_right (nat_from_bytes_le k) (256 - index)) % prime_p256_order);
+	  }
     end
 
 #pop-options
