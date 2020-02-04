@@ -61,7 +61,6 @@ val ecdsa_p256_sha2_sign: result: lbuffer uint8 (size 64) -> mLen: size_t -> m: 
   (requires fun h ->
     live h result /\ live h m /\ live h privKey /\ live h k /\
     LowStar.Monotonic.Buffer.all_disjoint [loc result; loc m; loc privKey; loc k] /\
-    nat_from_bytes_le (as_seq h m) < prime_p256_order /\
     nat_from_bytes_le (as_seq h privKey) < prime_p256_order /\
     nat_from_bytes_le (as_seq h k) < prime_p256_order
   )
