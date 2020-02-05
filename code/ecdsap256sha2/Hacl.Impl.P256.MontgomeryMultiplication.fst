@@ -368,7 +368,7 @@ val exponent: a: felem ->result: felem -> tempBuffer: lbuffer uint64 (size 20) -
     as_nat h1 result =  toDomain_ ((pow k (prime256-2)) % prime256)))
 
 
-#reset-options "--z3refresh --z3rlimit 200"
+#reset-options " --z3rlimit 200"
 let exponent a result tempBuffer = 
   let h0 = ST.get () in 
   let buffer_norm_1 = Lib.Buffer.sub  tempBuffer (size 0) (size 8) in 

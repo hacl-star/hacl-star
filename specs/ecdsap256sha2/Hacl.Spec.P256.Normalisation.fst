@@ -14,7 +14,7 @@ let prime = prime256
 
 
 open FStar.Mul  
-#reset-options "--z3refresh --z3rlimit 300" 
+#reset-options " --z3rlimit 300" 
 val lemma_norm_as_specification: xD: nat -> yD: nat -> zD: nat -> 
   x3 : nat {x3 == xD * (pow (zD * zD) (prime-2) % prime) % prime}-> 
   y3 : nat {y3 == yD * (pow (zD * zD * zD) (prime -2) % prime) % prime} -> 
