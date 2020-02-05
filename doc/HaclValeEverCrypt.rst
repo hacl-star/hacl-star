@@ -6,7 +6,7 @@ HACL*, Vale, and EverCrypt
 The `hacl-star <https://github.com/project-everest/hacl-star/>`_ repository
 contains code from several related projects developed as part of
 `Project Everest <https://project-everest.github.io/>`_, which aims to build
-and deploy a verified HTTPS stack. These components are arranges as shown below.
+and deploy a verified HTTPS stack. These components are arranged as shown below.
 
 .. image:: /diagram.png
    :width: 80%
