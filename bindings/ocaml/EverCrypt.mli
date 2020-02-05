@@ -45,11 +45,15 @@ module Ed25519 : EdDSA
 
 module Hash : sig
   type t
+  type deprecated_alg =
+    | SHA1
+    | MD5 [@@deprecated]
   type alg =
     | SHA2_224
     | SHA2_256
     | SHA2_384
     | SHA2_512
+    | Legacy of deprecated_alg
   val init : alg -> t
   val update : t -> Bigstring.t -> unit
   val finish : t -> Bigstring.t -> unit

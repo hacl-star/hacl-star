@@ -1,3 +1,5 @@
+open EverCrypt
+
 open Test_utils
 
 type alg =
@@ -9,6 +11,8 @@ type alg =
   | SHA3_256
   | SHA3_384
   | SHA3_512
+  | SHA1
+  | MD5
 
 type hash_test =
   { name: string; alg: alg; plaintext: Bigstring.t; expected: Bigstring.t }
@@ -77,12 +81,30 @@ let test_sha3_512 : hash_test =
     expected = Bigstring.of_string "\xb7\x51\x85\x0b\x1a\x57\x16\x8a\x56\x93\xcd\x92\x4b\x6b\x09\x6e\x08\xf6\x21\x82\x74\x44\xf7\x0d\x88\x4f\x5d\x02\x40\xd2\x71\x2e\x10\xe1\x16\xe9\x19\x2a\xf3\xc9\x1a\x7e\xc5\x76\x47\xe3\x93\x40\x57\x34\x0b\x4c\xf4\x08\xd5\xa5\x65\x92\xf8\x27\x4e\xec\x53\xf0"
 }
 
+let test_sha1 : hash_test =
+  {
+    name = "SHA1 Test 1";
+    alg = SHA1;
+    plaintext = Bigstring.of_string "\x54\x9e\x95\x9e";
+    expected = Bigstring.of_string "\xb7\x8b\xae\x6d\x14\x33\x8f\xfc\xcf\xd5\xd5\xb5\x67\x4a\x27\x5f\x6e\xf9\xc7\x17"
+}
+
+let test_md5 : hash_test =
+  {
+    name = "MD5 Test 1";
+    alg = MD5;
+    plaintext = Bigstring.of_string "\x6d\x65\x73\x73\x61\x67\x65\x20\x64\x69\x67\x65\x73\x74";
+    expected = Bigstring.of_string "\xf9\x6b\x69\x7d\x7c\xb7\x93\x8d\x52\x5a\x2f\x31\xaa\xf1\x61\xd0"
+}
+
 let alg_definition = function
-  | SHA2_224 -> EverCrypt.Hash.SHA2_224
-  | SHA2_256 -> EverCrypt.Hash.SHA2_256
-  | SHA2_384 -> EverCrypt.Hash.SHA2_384
-  | SHA2_512 -> EverCrypt.Hash.SHA2_512
-  | _ -> failwith "Algorithm not supported in EverCrypt.Hash"
+  | SHA2_224 -> Hash.SHA2_224
+  | SHA2_256 -> Hash.SHA2_256
+  | SHA2_384 -> Hash.SHA2_384
+  | SHA2_512 -> Hash.SHA2_512
+  | SHA1 -> Hash.Legacy Hash.SHA1
+  | MD5 -> Hash.Legacy Hash.MD5
+  | _ -> failwith "Algorithm not supported in agile Hashing API"
 
 let output_len = function
   | SHA2_224
@@ -93,24 +115,26 @@ let output_len = function
   | SHA3_384 -> 48
   | SHA2_512
   | SHA3_512 -> 64
+  | SHA1 -> 20
+  | MD5 -> 16
 
 let test_agile (v: hash_test) =
-  let test_result = test_result ("EverCrypt.Hash " ^ v.name)  in
+  let test_result = test_result ("Hash " ^ v.name)  in
   let alg = alg_definition v.alg in
   let output = Bigstring.create (output_len v.alg) in
   Bigstring.fill output '\x00';
 
-  EverCrypt.Hash.hash alg output v.plaintext;
+  Hash.hash alg output v.plaintext;
   if Bigstring.compare output v.expected = 0 then
     test_result Success "one-shot hash"
   else
     test_result Failure "one-shot hash";
 
   Bigstring.fill output '\x00';
-  let st = EverCrypt.Hash.init (alg_definition v.alg) in
-  EverCrypt.Hash.update st v.plaintext;
-  EverCrypt.Hash.finish st output;
-  EverCrypt.Hash.free st;
+  let st = Hash.init (alg_definition v.alg) in
+  Hash.update st v.plaintext;
+  Hash.finish st output;
+  Hash.free st;
   if Bigstring.compare output v.expected = 0 then
     test_result Success "incremental hash"
   else
@@ -144,4 +168,10 @@ let _ =
   test_nonagile "Hacl" test_sha3_512 Hacl.SHA3_512.hash;
 
   test_nonagile "EverCrypt" test_sha2_224 EverCrypt.SHA2_224.hash;
-  test_nonagile "EverCrypt" test_sha2_256 EverCrypt.SHA2_256.hash
+  test_nonagile "EverCrypt" test_sha2_256 EverCrypt.SHA2_256.hash;
+
+  test_agile test_sha1;
+  test_agile test_md5;
+
+  test_nonagile "Hacl" test_sha1 Hacl.SHA1.hash;
+  test_nonagile "Hacl" test_md5 Hacl.MD5.hash

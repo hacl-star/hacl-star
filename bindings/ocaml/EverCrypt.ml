@@ -117,16 +117,22 @@ module Hash = struct
   open EverCrypt_Hash
 
   type t = everCrypt_Hash_Incremental_state_s ptr
+  type deprecated_alg =
+    | SHA1
+    | MD5 [@@deprecated]
   type alg =
     | SHA2_224
     | SHA2_256
     | SHA2_384
     | SHA2_512
+    | Legacy of deprecated_alg
   let alg_definition = function
     | SHA2_224 -> spec_Hash_Definitions_hash_alg_Spec_Hash_Definitions_SHA2_224
     | SHA2_256 -> spec_Hash_Definitions_hash_alg_Spec_Hash_Definitions_SHA2_256
     | SHA2_384 -> spec_Hash_Definitions_hash_alg_Spec_Hash_Definitions_SHA2_384
     | SHA2_512 -> spec_Hash_Definitions_hash_alg_Spec_Hash_Definitions_SHA2_512
+    | Legacy SHA1 -> spec_Hash_Definitions_hash_alg_Spec_Hash_Definitions_SHA1
+    | Legacy MD5 -> spec_Hash_Definitions_hash_alg_Spec_Hash_Definitions_MD5
   let init alg =
     let alg = alg_definition alg in
     let st = everCrypt_Hash_Incremental_create_in alg in

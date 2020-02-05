@@ -34,6 +34,9 @@ module SHA3_256 : HashFunction
 module SHA3_384 : HashFunction
 module SHA3_512 : HashFunction
 
+module MD5 : HashFunction [@@deprecated]
+module SHA1 : HashFunction [@@deprecated]
+
 module HMAC_SHA2_256 : MAC
 module HMAC_SHA2_384 : MAC
 module HMAC_SHA2_512 : MAC

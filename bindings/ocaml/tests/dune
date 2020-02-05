@@ -9,4 +9,4 @@
         nacl_test
         drbg_test)
  (libraries evercrypt bigstring)
- (flags (:standard -open Evercrypt)))
+ (flags (:standard -open Evercrypt -warn-error -3)))

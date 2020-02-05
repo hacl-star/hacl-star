@@ -120,6 +120,16 @@ module SHA3_512 : HashFunction =
     let hash input input_len output = Hacl_SHA3.hacl_SHA3_sha3_512 input_len input output
 end)
 
+module SHA1 : HashFunction =
+  Make_HashFunction (struct
+    let hash = Hacl_Hash.hacl_Hash_SHA1_legacy_hash
+end) [@@deprecated]
+
+module MD5 : HashFunction =
+  Make_HashFunction (struct
+    let hash = Hacl_Hash.hacl_Hash_MD5_legacy_hash
+end) [@@deprecated]
+
 module HMAC_SHA2_256 : MAC =
   Make_HMAC (struct
     let mac = Hacl_HMAC.hacl_HMAC_compute_sha2_256
