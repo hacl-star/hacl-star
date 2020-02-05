@@ -45,7 +45,7 @@ void print_time(clock_t tdiff, cycles cdiff){
   printf("bw %8.2f MB/s\n",(double)count/(((double)tdiff / CLOCKS_PER_SEC) * 1000000.0));
 }
 
-void print_result(uint8_t* comp, uint8_t* exp) {
+bool print_result(uint8_t* comp, uint8_t* exp) {
   printf("computed:");
   for (int i = 0; i < 16; i++)
     printf("%02x",comp[i]);
@@ -59,22 +59,24 @@ void print_result(uint8_t* comp, uint8_t* exp) {
     ok = ok & (exp[i] == comp[i]);
   if (ok) printf("Success!\n");
   else printf("**FAILED**\n");
+  return ok;
 }
 
-void print_test(int in_len, uint8_t* in, uint8_t* key, uint8_t* exp){
+bool print_test(int in_len, uint8_t* in, uint8_t* key, uint8_t* exp){
   uint8_t comp[16] = {0};
 
   Hacl_Poly1305_32_poly1305_mac(comp,in_len,in,key);
   printf("Poly1305 (32-bit) Result:\n");
-  print_result(comp, exp);
+  bool ok = print_result(comp, exp);
 
   Hacl_Poly1305_128_poly1305_mac(comp,in_len,in,key);
   printf("Poly1305 (128-bit) Result:\n");
-  print_result(comp, exp);
+  ok = ok && print_result(comp, exp);
 
   Hacl_Poly1305_256_poly1305_mac(comp,in_len,in,key);
   printf("Poly1305 (256-bit) Result:\n");
-  print_result(comp, exp);
+  ok = ok && print_result(comp, exp);
+  return ok;
 }
 
 int main() {
@@ -88,7 +90,7 @@ int main() {
     0x01, 0x03, 0x80, 0x8a, 0xfb, 0x0d, 0xb2, 0xfd, 0x4a, 0xbf, 0xf6, 0xaf, 0x41, 0x49, 0xf5, 0x1b
   };
   uint8_t exp[16] = {
-    0xa8, 0x06, 0x1d, 0xc1, 0x30, 0x51, 0x36, 0xc6, 0xc2, 0x2b, 0x8b, 0xaf, 0x0c, 0x01, 0x27, 0xa9
+    0xa7, 0x06, 0x1d, 0xc1, 0x30, 0x51, 0x36, 0xc6, 0xc2, 0x2b, 0x8b, 0xaf, 0x0c, 0x01, 0x27, 0xa9
   };
 
   int in_len2 = 16;
@@ -147,9 +149,9 @@ int main() {
     0x26, 0x37, 0x40, 0x8f, 0xe1, 0x30, 0x86, 0xea, 0x73, 0xf9, 0x71, 0xe3, 0x42, 0x5e, 0x28, 0x20
   };
 
-  print_test(in_len,in,key,exp);
-  print_test(in_len2,in2,key2,exp2);
-  print_test(in_len3,in3,key3,exp3);
+  bool ok = print_test(in_len,in,key,exp);
+  ok = print_test(in_len2,in2,key2,exp2) && ok;
+  ok = print_test(in_len3,in3,key3,exp3) && ok;
 
   uint8_t plain[SIZE];
   uint64_t res = 0;
@@ -213,4 +215,7 @@ int main() {
   printf("Poly1305 (32-bit) PERF: %d\n",(int)res); print_time(tdiff1,cdiff1);
   printf("Poly1305 (128-bit) PERF:\n"); print_time(tdiff2,cdiff2);
   printf("Poly1305 (256-bit) PERF:\n"); print_time(tdiff3,cdiff3);
+
+  if (ok) return EXIT_SUCCESS;
+  else return EXIT_FAILURE;
 }

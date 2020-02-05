@@ -14,7 +14,6 @@ export CFLAGS
 
 # CUSTOMIZE HERE: how to produce binary objects
 # An archive with all the compiled code in this directory.
-BLAKE2_BUNDLE=-bundle Hacl.Impl.Blake2.Constants -static-header Hacl.Impl.Blake2.Constants -bundle 'Hacl.Impl.Blake2.\*'
 
 dist/Makefile.basic: $(filter-out %/prims.krml,$(ALL_KRML_FILES))
 	$(KRML) $^  $(BASE_FLAGS) $(BLAKE2_BUNDLE) \
