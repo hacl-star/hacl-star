@@ -11,6 +11,8 @@ open Lib.IntVector
 
 module Spec = Spec.Blake2
 
+#set-options "--max_fuel 0 --max_ifuel 0"
+
 inline_for_extraction
 let zero_element (a:Spec.alg) (m:m_spec) : element_t a m =
   match a,m with
@@ -195,12 +197,10 @@ let permr_row #a #m r1 n =
 let create4_lemma #a x0 x1 x2 x3 =
   let open Lib.Sequence in
   let l : list a = [x0;x1;x2;x3] in
-  assert_norm (List.Tot.index l 0 == x0);
-  assert_norm (List.Tot.index l 1 == x1);
-  assert_norm (List.Tot.index l 2 == x2);
-  assert_norm (List.Tot.index l 3 == x3);
+  assert_norm (List.Tot.length l = 4);
   let s1 : lseq a 4 = of_list l in
   let s2 : lseq a 4 = create4 x0 x1 x2 x3 in
+  Seq.intro_of_list s2 l;
   eq_intro s1 s2
 #pop-options
 

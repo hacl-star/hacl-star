@@ -11,6 +11,8 @@ open Lib.IntVector
 
 module Spec = Spec.Blake2
 
+#set-options "--max_fuel 0 --max_ifuel 0"
+
 type m_spec =
   | M32
   | M128
@@ -145,7 +147,10 @@ val permr_row: #a:Spec.alg -> #m:m_spec -> r1:row_p a m -> n:index_t ->
 				row_v h1 r1 == Spec.( rotr (row_v h0 r1) (v n) )))
 
 val create4_lemma: #a:Type -> x0:a -> x1:a -> x2:a -> x3:a ->
-  Lemma (ensures (Lib.Sequence.createL [x0;x1;x2;x3] == create4 x0 x1 x2 x3))
+  Lemma (ensures (
+    let l = [ x0; x1; x2; x3 ] in
+    assert_norm (List.Tot.length l = 4);
+    Lib.Sequence.createL l == create4 x0 x1 x2 x3))
 	[SMTPat (Lib.Sequence.createL [x0;x1;x2;x3])]
 
 inline_for_extraction
