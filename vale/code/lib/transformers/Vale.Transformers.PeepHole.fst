@@ -45,7 +45,8 @@ let peephole_correct (p:pre_peephole) (is:list ins) (s:machine_state) : GTot Typ
       (eval_inss is s)
       (eval_inss is' s)
 
-type peephole = (p:pre_peephole{forall is s. peephole_correct p is s})
+type peephole = (p:pre_peephole{forall is s. {:pattern (peephole_correct p is s)}
+                                  peephole_correct p is s})
 
 /// Now for the framework portion. This uses the provided [peephole]
 /// to produce a new transformer that is proven correct. We also
@@ -113,6 +114,21 @@ let rec wrap_instructions (is:list ins) : Tot codes =
 /// instructions and tries to apply the peephole transformation to
 /// them.
 
+let rec apply_peephole_to_codes (input_hint:pos) (p:peephole) (cs:codes) :
+  Tot codes
+    (decreases %[num_ins_in_codes cs; cs]) =
+  match cs with
+  | [] -> []
+  | c :: cs' ->
+    match pull_instructions_from_codes cs input_hint with
+    | None -> c :: apply_peephole_to_codes input_hint p cs'
+    | Some (is, cs'') ->
+      match p is with
+      | None -> c :: apply_peephole_to_codes input_hint p cs'
+      | Some is' ->
+        Block (wrap_instructions is') ::
+        apply_peephole_to_codes input_hint p cs''
+
 let rec apply_peephole_to_code (input_hint:pos) (p:peephole) (c:code) :
   Tot code
     (decreases %[num_ins_in_code c; c]) =
@@ -140,21 +156,178 @@ let rec apply_peephole_to_code (input_hint:pos) (p:peephole) (c:code) :
       While c b'
     )
 
-and apply_peephole_to_codes (input_hint:pos) (p:peephole) (cs:codes) :
-  Tot codes
-    (decreases %[num_ins_in_codes cs; cs]) =
-  match cs with
-  | [] -> []
-  | c :: cs' ->
-    match pull_instructions_from_codes cs input_hint with
-    | None -> c :: apply_peephole_to_codes input_hint p cs'
-    | Some (is, cs'') ->
-      match p is with
-      | None -> c :: apply_peephole_to_codes input_hint p cs'
-      | Some is' ->
-        Block (wrap_instructions is') ::
-        apply_peephole_to_codes input_hint p cs''
-
 /// And now, for the proofs!
 
-(* TODO *)
+let rec lemma_wrap_instructions (is:list ins) (s:machine_state) (fuel:nat) :
+  Lemma
+    (requires True)
+    (ensures (
+        equiv_option_states
+          (machine_eval_codes (wrap_instructions is) fuel s)
+          (Some (eval_inss is s)))) =
+  match is with
+  | [] -> ()
+  | i :: is' ->
+    lemma_eval_ins_equiv_states i s ({s with ms_trace = []});
+    let Some s1 = machine_eval_code (Ins i) fuel s in
+    let s2 = machine_eval_ins i s in
+    lemma_wrap_instructions is' s2 fuel;
+    lemma_eval_codes_equiv_states (wrap_instructions is') fuel s1 s2
+
+let rec lemma_pull_instructions_from_codes (cs:codes) (num:pos) (s:machine_state) (fuel:nat) :
+  Lemma
+    (requires (Some? (pull_instructions_from_codes cs num)))
+    (ensures (
+        let Some (is, cs1) = pull_instructions_from_codes cs num in
+        equiv_option_states
+          (machine_eval_codes cs fuel s)
+          (machine_eval_codes cs1 fuel (eval_inss is s))))
+    (decreases %[num_blocks_in_codes cs; num]) =
+  match cs with
+  | [] -> ()
+  | c :: cs' ->
+    match c with
+    | Ins i -> (
+        if num = 1 then (
+          lemma_eval_ins_equiv_states i s ({s with ms_trace = []});
+          assert (equiv_option_states
+                    (machine_eval_code c fuel s)
+                    (Some (machine_eval_ins i s)));
+          assert_norm (machine_eval_ins i s == eval_inss [i] s);
+          assert (equiv_option_states
+                    (machine_eval_code c fuel s)
+                    (Some (eval_inss [i] s)));
+          let Some s1 = machine_eval_code c fuel s in
+          let s2 = eval_inss [i] s in
+          lemma_eval_codes_equiv_states cs' fuel s1 s2
+        ) else (
+          match pull_instructions_from_codes cs' (num - 1) with
+          | None -> ()
+          | Some (is2, cs'') ->
+            lemma_eval_ins_equiv_states i s ({s with ms_trace = []});
+            assert (equiv_option_states
+                      (machine_eval_code c fuel s)
+                      (Some (machine_eval_ins i s)));
+            let Some s1 = machine_eval_code c fuel s in
+            let s2 = machine_eval_ins i s in
+            lemma_eval_codes_equiv_states cs' fuel s1 s2;
+            lemma_pull_instructions_from_codes cs' (num - 1) s2 fuel
+        )
+      )
+    | Block l -> (
+        lemma_pull_instructions_from_codes (l `L.append` cs') num s fuel;
+        lemma_machine_eval_codes_block_to_append l cs' fuel s
+      )
+    | IfElse _ _ _ -> ()
+    | While _ _ -> ()
+
+#push-options "--z3rlimit 10"
+let rec lemma_apply_peephole_to_codes (input_hint:pos) (p:peephole) (cs:codes)
+    (s:machine_state) (fuel:nat) :
+  Lemma
+    (requires True)
+    (ensures (
+        equiv_option_states
+          (machine_eval_codes cs fuel s)
+          (machine_eval_codes (apply_peephole_to_codes input_hint p cs) fuel s)))
+    (decreases %[num_ins_in_codes cs; cs]) =
+  match cs with
+  | [] -> ()
+  | c :: cs' ->
+    match pull_instructions_from_codes cs input_hint with
+    | None -> (
+        match machine_eval_code c fuel s with
+        | None -> ()
+        | Some s1 ->
+          lemma_apply_peephole_to_codes input_hint p cs' s1 fuel
+      )
+    | Some (is, cs'') -> (
+        match p is with
+        | None -> (
+            match machine_eval_code c fuel s with
+            | None -> ()
+            | Some s1 ->
+              lemma_apply_peephole_to_codes input_hint p cs' s1 fuel
+          )
+        | Some is' -> (
+            lemma_pull_instructions_from_codes cs input_hint s fuel;
+            assert (equiv_option_states
+                     (machine_eval_codes cs fuel s)
+                     (machine_eval_codes cs'' fuel (eval_inss is s)));
+            assert (peephole_correct p is s); (* OBSERVE *)
+            assert (equiv_states_or_both_not_ok
+                     (eval_inss is s)
+                     (eval_inss is' s));
+            let s1 = eval_inss is s in
+            let s2 = eval_inss is' s in
+            lemma_wrap_instructions is' s fuel;
+            let s3' = machine_eval_code (Block (wrap_instructions is')) fuel s in
+            if s1.ms_ok then () else lemma_not_ok_propagate_codes cs'' fuel s1;
+            if s1.ms_ok then (
+              let Some s3 = s3' in
+              lemma_eval_codes_equiv_states cs'' fuel s1 s3;
+              lemma_apply_peephole_to_codes input_hint p cs'' s3 fuel
+            ) else (
+              match s3' with
+              | None -> ()
+              | Some s3 ->
+                lemma_not_ok_propagate_codes cs'' fuel s3;
+                assert (equiv_option_states
+                         (machine_eval_codes cs'' fuel s1)
+                         (machine_eval_codes cs'' fuel s3));
+                assert (equiv_option_states
+                         (machine_eval_codes cs fuel s)
+                         (machine_eval_codes cs'' fuel s3));
+                assert (equiv_option_states
+                         (machine_eval_codes cs fuel s)
+                         (machine_eval_codes (Block (wrap_instructions is') :: cs'') fuel s));
+                assert ((apply_peephole_to_codes input_hint p cs) ==
+                             (Block (wrap_instructions is') ::
+                              (apply_peephole_to_codes input_hint p cs'')));
+                lemma_apply_peephole_to_codes input_hint p cs'' s3 fuel;
+                assert (equiv_option_states
+                         (machine_eval_codes cs fuel s)
+                         (machine_eval_codes (apply_peephole_to_codes input_hint p cs) fuel s))
+            )
+          )
+      )
+#pop-options
+
+let rec lemma_apply_peephole_to_code (input_hint:pos) (p:peephole) (c:code)
+    (s:machine_state) (fuel:nat) :
+  Lemma
+    (requires True)
+    (ensures (
+        equiv_option_states
+          (machine_eval_code c fuel s)
+          (machine_eval_code (apply_peephole_to_code input_hint p c) fuel s)))
+    (decreases %[num_ins_in_code c; c]) =
+  match c with
+  | Ins i -> (
+      if input_hint = 1 then (
+        match p [i] with
+        | None -> ()
+        | Some is ->
+          assert (peephole_correct p [i] s); (* OBSERVE *)
+          assert_norm (eval_inss [i] s == machine_eval_ins i s); (* OBSERVE *)
+          lemma_wrap_instructions is s fuel;
+          lemma_eval_ins_equiv_states i s ({s with ms_trace = []})
+      ) else (
+        ()
+      )
+    )
+  | Block l -> (
+      lemma_apply_peephole_to_codes input_hint p l s fuel
+    )
+  | IfElse cc tt ff -> (
+      let (st, b) = machine_eval_ocmp s cc in
+      let s' = {st with ms_trace = (BranchPredicate b)::s.ms_trace} in
+      if b then (
+        lemma_apply_peephole_to_code input_hint p tt s' fuel
+      ) else (
+        lemma_apply_peephole_to_code input_hint p ff s' fuel
+      )
+    )
+  | While cc bb -> (
+      admit ()
+    )
