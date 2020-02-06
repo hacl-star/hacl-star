@@ -7,6 +7,7 @@
         hmac_test
         hkdf_test
         nacl_test
-        drbg_test)
+        drbg_test
+        blake2_test)
  (libraries evercrypt bigstring)
  (flags (:standard -open Evercrypt -warn-error -3)))

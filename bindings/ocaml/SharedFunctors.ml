@@ -75,3 +75,10 @@ module Make_HKDF (Impl: sig
     let expand okm prk info = Impl.expand (uint8_ptr okm) (uint8_ptr prk) (size_uint32 prk) (uint8_ptr info) (size_uint32 info) (size_uint32 okm)
     let extract prk salt ikm = Impl.extract (uint8_ptr prk) (uint8_ptr salt) (size_uint32 salt) (uint8_ptr ikm) (size_uint32 ikm)
 end
+
+module Make_Blake2b (Impl : sig
+    val blake2b : uint32 -> uint8 ptr -> uint32 -> uint8 ptr -> uint32 -> uint8 ptr -> unit
+  end) : Blake2b
+= struct
+  let hash key pt output = Impl.blake2b (size_uint32 output) (uint8_ptr output) (size_uint32 pt) (uint8_ptr pt) (size_uint32 key) (uint8_ptr key)
+end

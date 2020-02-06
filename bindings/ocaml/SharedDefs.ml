@@ -29,3 +29,8 @@ module type HKDF = sig
   val expand: Bigstring.t -> Bigstring.t -> Bigstring.t -> unit
   val extract: Bigstring.t -> Bigstring.t -> Bigstring.t -> unit
 end
+
+module type Blake2b = sig
+  val hash : Bigstring.t -> Bigstring.t -> Bigstring.t -> unit
+end
+

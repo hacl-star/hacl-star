@@ -67,3 +67,6 @@ module NaCl : sig
     val secretbox_open : Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> bool
   end
 end
+
+module Blake2b_32 : Blake2b
+module Blake2b_256 : Blake2b

@@ -20,6 +20,8 @@ module Hacl_Poly1305_128 = Hacl_Poly1305_128_bindings.Bindings(Hacl_Poly1305_128
 module Hacl_Poly1305_256 = Hacl_Poly1305_256_bindings.Bindings(Hacl_Poly1305_256_stubs)
 module Hacl_HKDF = Hacl_HKDF_bindings.Bindings(Hacl_HKDF_stubs)
 module Hacl_NaCl = Hacl_NaCl_bindings.Bindings(Hacl_NaCl_stubs)
+module Hacl_Blake2b_32 = Hacl_Blake2b_32_bindings.Bindings(Hacl_Blake2b_32_stubs)
+module Hacl_Blake2b_256 = Hacl_Blake2b_256_bindings.Bindings(Hacl_Blake2b_256_stubs)
 
 module RandomBuffer = struct
   let randombytes buf = Lib_RandomBuffer_System.randombytes (uint8_ptr buf) (size_uint32 buf)
@@ -201,3 +203,13 @@ module NaCl = struct
     let secretbox_open pt ct tag n k = get_result @@ hacl_NaCl_crypto_secretbox_open_detached (uint8_ptr pt) (uint8_ptr ct) (uint8_ptr tag) (size_uint32 ct) (uint8_ptr n) (uint8_ptr k)
   end
 end
+
+module Blake2b_32 : Blake2b =
+  Make_Blake2b (struct
+    let blake2b = Hacl_Blake2b_32.hacl_Blake2b_32_blake2b
+  end)
+
+module Blake2b_256 : Blake2b =
+  Make_Blake2b (struct
+    let blake2b = Hacl_Blake2b_256.hacl_Blake2b_256_blake2b
+  end)
