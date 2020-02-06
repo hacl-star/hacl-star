@@ -228,46 +228,34 @@ blake2s_update_block(Lib_IntVector_Intrinsics_vec128 *hash, bool flag, u64 totle
                                         *r23 = b + (u32)2U * (u32)1U;
                                         Lib_IntVector_Intrinsics_vec128
                                         *r33 = b + (u32)3U * (u32)1U;
-                                        u32 n00 = (u32)1U;
-                                        u32 n10 = ((u32)1U + (u32)1U) % (u32)4U;
-                                        u32 n20 = ((u32)1U + (u32)2U) % (u32)4U;
-                                        u32 n30 = ((u32)1U + (u32)3U) % (u32)4U;
                                         Lib_IntVector_Intrinsics_vec128 v00 = r13[0U];
                                         Lib_IntVector_Intrinsics_vec128
                                         v1 =
                                           Lib_IntVector_Intrinsics_vec128_shuffle32(v00,
-                                            n00,
-                                            n10,
-                                            n20,
-                                            n30);
+                                            (u32)1U,
+                                            ((u32)1U + (u32)1U) % (u32)4U,
+                                            ((u32)1U + (u32)2U) % (u32)4U,
+                                            ((u32)1U + (u32)3U) % (u32)4U);
                                         r13[0U] = v1;
                                         {
-                                          u32 n01 = (u32)2U;
-                                          u32 n11 = ((u32)2U + (u32)1U) % (u32)4U;
-                                          u32 n21 = ((u32)2U + (u32)2U) % (u32)4U;
-                                          u32 n31 = ((u32)2U + (u32)3U) % (u32)4U;
                                           Lib_IntVector_Intrinsics_vec128 v01 = r23[0U];
                                           Lib_IntVector_Intrinsics_vec128
                                           v10 =
                                             Lib_IntVector_Intrinsics_vec128_shuffle32(v01,
-                                              n01,
-                                              n11,
-                                              n21,
-                                              n31);
+                                              (u32)2U,
+                                              ((u32)2U + (u32)1U) % (u32)4U,
+                                              ((u32)2U + (u32)2U) % (u32)4U,
+                                              ((u32)2U + (u32)3U) % (u32)4U);
                                           r23[0U] = v10;
                                           {
-                                            u32 n02 = (u32)3U;
-                                            u32 n12 = ((u32)3U + (u32)1U) % (u32)4U;
-                                            u32 n22 = ((u32)3U + (u32)2U) % (u32)4U;
-                                            u32 n32 = ((u32)3U + (u32)3U) % (u32)4U;
                                             Lib_IntVector_Intrinsics_vec128 v02 = r33[0U];
                                             Lib_IntVector_Intrinsics_vec128
                                             v11 =
                                               Lib_IntVector_Intrinsics_vec128_shuffle32(v02,
-                                                n02,
-                                                n12,
-                                                n22,
-                                                n32);
+                                                (u32)3U,
+                                                ((u32)3U + (u32)1U) % (u32)4U,
+                                                ((u32)3U + (u32)2U) % (u32)4U,
+                                                ((u32)3U + (u32)3U) % (u32)4U);
                                             r33[0U] = v11;
                                             {
                                               u32 a0 = (u32)0U;
@@ -374,58 +362,37 @@ blake2s_update_block(Lib_IntVector_Intrinsics_vec128 *hash, bool flag, u64 totle
                                                               *r2 = b + (u32)2U * (u32)1U;
                                                               Lib_IntVector_Intrinsics_vec128
                                                               *r3 = b + (u32)3U * (u32)1U;
-                                                              u32 n0 = (u32)3U;
-                                                              u32
-                                                              n13 = ((u32)3U + (u32)1U) % (u32)4U;
-                                                              u32
-                                                              n23 = ((u32)3U + (u32)2U) % (u32)4U;
-                                                              u32
-                                                              n33 = ((u32)3U + (u32)3U) % (u32)4U;
                                                               Lib_IntVector_Intrinsics_vec128
-                                                              v03 = r14[0U];
+                                                              v0 = r14[0U];
                                                               Lib_IntVector_Intrinsics_vec128
                                                               v12 =
-                                                                Lib_IntVector_Intrinsics_vec128_shuffle32(v03,
-                                                                  n0,
-                                                                  n13,
-                                                                  n23,
-                                                                  n33);
+                                                                Lib_IntVector_Intrinsics_vec128_shuffle32(v0,
+                                                                  (u32)3U,
+                                                                  ((u32)3U + (u32)1U) % (u32)4U,
+                                                                  ((u32)3U + (u32)2U) % (u32)4U,
+                                                                  ((u32)3U + (u32)3U) % (u32)4U);
                                                               r14[0U] = v12;
                                                               {
-                                                                u32 n03 = (u32)2U;
-                                                                u32
-                                                                n14 = ((u32)2U + (u32)1U) % (u32)4U;
-                                                                u32
-                                                                n24 = ((u32)2U + (u32)2U) % (u32)4U;
-                                                                u32
-                                                                n34 = ((u32)2U + (u32)3U) % (u32)4U;
                                                                 Lib_IntVector_Intrinsics_vec128
-                                                                v04 = r2[0U];
+                                                                v03 = r2[0U];
                                                                 Lib_IntVector_Intrinsics_vec128
                                                                 v13 =
-                                                                  Lib_IntVector_Intrinsics_vec128_shuffle32(v04,
-                                                                    n03,
-                                                                    n14,
-                                                                    n24,
-                                                                    n34);
+                                                                  Lib_IntVector_Intrinsics_vec128_shuffle32(v03,
+                                                                    (u32)2U,
+                                                                    ((u32)2U + (u32)1U) % (u32)4U,
+                                                                    ((u32)2U + (u32)2U) % (u32)4U,
+                                                                    ((u32)2U + (u32)3U) % (u32)4U);
                                                                 r2[0U] = v13;
                                                                 {
-                                                                  u32 n04 = (u32)1U;
-                                                                  u32
-                                                                  n1 = ((u32)1U + (u32)1U) % (u32)4U;
-                                                                  u32
-                                                                  n2 = ((u32)1U + (u32)2U) % (u32)4U;
-                                                                  u32
-                                                                  n3 = ((u32)1U + (u32)3U) % (u32)4U;
                                                                   Lib_IntVector_Intrinsics_vec128
-                                                                  v0 = r3[0U];
+                                                                  v04 = r3[0U];
                                                                   Lib_IntVector_Intrinsics_vec128
                                                                   v14 =
-                                                                    Lib_IntVector_Intrinsics_vec128_shuffle32(v0,
-                                                                      n04,
-                                                                      n1,
-                                                                      n2,
-                                                                      n3);
+                                                                    Lib_IntVector_Intrinsics_vec128_shuffle32(v04,
+                                                                      (u32)1U,
+                                                                      ((u32)1U + (u32)1U) % (u32)4U,
+                                                                      ((u32)1U + (u32)2U) % (u32)4U,
+                                                                      ((u32)1U + (u32)3U) % (u32)4U);
                                                                   r3[0U] = v14;
                                                                 }
                                                               }

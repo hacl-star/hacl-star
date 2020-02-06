@@ -239,52 +239,34 @@ blake2b_update_block(
                                         *r23 = b + (uint32_t)2U * (uint32_t)1U;
                                         Lib_IntVector_Intrinsics_vec256
                                         *r33 = b + (uint32_t)3U * (uint32_t)1U;
-                                        uint32_t n00 = (uint32_t)1U;
-                                        uint32_t n10 = ((uint32_t)1U + (uint32_t)1U) % (uint32_t)4U;
-                                        uint32_t n20 = ((uint32_t)1U + (uint32_t)2U) % (uint32_t)4U;
-                                        uint32_t n30 = ((uint32_t)1U + (uint32_t)3U) % (uint32_t)4U;
                                         Lib_IntVector_Intrinsics_vec256 v00 = r13[0U];
                                         Lib_IntVector_Intrinsics_vec256
                                         v1 =
                                           Lib_IntVector_Intrinsics_vec256_shuffle64(v00,
-                                            n00,
-                                            n10,
-                                            n20,
-                                            n30);
+                                            (uint32_t)1U,
+                                            ((uint32_t)1U + (uint32_t)1U) % (uint32_t)4U,
+                                            ((uint32_t)1U + (uint32_t)2U) % (uint32_t)4U,
+                                            ((uint32_t)1U + (uint32_t)3U) % (uint32_t)4U);
                                         r13[0U] = v1;
                                         {
-                                          uint32_t n01 = (uint32_t)2U;
-                                          uint32_t
-                                          n11 = ((uint32_t)2U + (uint32_t)1U) % (uint32_t)4U;
-                                          uint32_t
-                                          n21 = ((uint32_t)2U + (uint32_t)2U) % (uint32_t)4U;
-                                          uint32_t
-                                          n31 = ((uint32_t)2U + (uint32_t)3U) % (uint32_t)4U;
                                           Lib_IntVector_Intrinsics_vec256 v01 = r23[0U];
                                           Lib_IntVector_Intrinsics_vec256
                                           v10 =
                                             Lib_IntVector_Intrinsics_vec256_shuffle64(v01,
-                                              n01,
-                                              n11,
-                                              n21,
-                                              n31);
+                                              (uint32_t)2U,
+                                              ((uint32_t)2U + (uint32_t)1U) % (uint32_t)4U,
+                                              ((uint32_t)2U + (uint32_t)2U) % (uint32_t)4U,
+                                              ((uint32_t)2U + (uint32_t)3U) % (uint32_t)4U);
                                           r23[0U] = v10;
                                           {
-                                            uint32_t n02 = (uint32_t)3U;
-                                            uint32_t
-                                            n12 = ((uint32_t)3U + (uint32_t)1U) % (uint32_t)4U;
-                                            uint32_t
-                                            n22 = ((uint32_t)3U + (uint32_t)2U) % (uint32_t)4U;
-                                            uint32_t
-                                            n32 = ((uint32_t)3U + (uint32_t)3U) % (uint32_t)4U;
                                             Lib_IntVector_Intrinsics_vec256 v02 = r33[0U];
                                             Lib_IntVector_Intrinsics_vec256
                                             v11 =
                                               Lib_IntVector_Intrinsics_vec256_shuffle64(v02,
-                                                n02,
-                                                n12,
-                                                n22,
-                                                n32);
+                                                (uint32_t)3U,
+                                                ((uint32_t)3U + (uint32_t)1U) % (uint32_t)4U,
+                                                ((uint32_t)3U + (uint32_t)2U) % (uint32_t)4U,
+                                                ((uint32_t)3U + (uint32_t)3U) % (uint32_t)4U);
                                             r33[0U] = v11;
                                             {
                                               uint32_t a0 = (uint32_t)0U;
@@ -393,76 +375,46 @@ blake2b_update_block(
                                                               *r2 = b + (uint32_t)2U * (uint32_t)1U;
                                                               Lib_IntVector_Intrinsics_vec256
                                                               *r3 = b + (uint32_t)3U * (uint32_t)1U;
-                                                              uint32_t n0 = (uint32_t)3U;
-                                                              uint32_t
-                                                              n13 =
-                                                                ((uint32_t)3U + (uint32_t)1U)
-                                                                % (uint32_t)4U;
-                                                              uint32_t
-                                                              n23 =
-                                                                ((uint32_t)3U + (uint32_t)2U)
-                                                                % (uint32_t)4U;
-                                                              uint32_t
-                                                              n33 =
-                                                                ((uint32_t)3U + (uint32_t)3U)
-                                                                % (uint32_t)4U;
                                                               Lib_IntVector_Intrinsics_vec256
-                                                              v03 = r14[0U];
+                                                              v0 = r14[0U];
                                                               Lib_IntVector_Intrinsics_vec256
                                                               v12 =
-                                                                Lib_IntVector_Intrinsics_vec256_shuffle64(v03,
-                                                                  n0,
-                                                                  n13,
-                                                                  n23,
-                                                                  n33);
+                                                                Lib_IntVector_Intrinsics_vec256_shuffle64(v0,
+                                                                  (uint32_t)3U,
+                                                                  ((uint32_t)3U + (uint32_t)1U)
+                                                                  % (uint32_t)4U,
+                                                                  ((uint32_t)3U + (uint32_t)2U)
+                                                                  % (uint32_t)4U,
+                                                                  ((uint32_t)3U + (uint32_t)3U)
+                                                                  % (uint32_t)4U);
                                                               r14[0U] = v12;
                                                               {
-                                                                uint32_t n03 = (uint32_t)2U;
-                                                                uint32_t
-                                                                n14 =
-                                                                  ((uint32_t)2U + (uint32_t)1U)
-                                                                  % (uint32_t)4U;
-                                                                uint32_t
-                                                                n24 =
-                                                                  ((uint32_t)2U + (uint32_t)2U)
-                                                                  % (uint32_t)4U;
-                                                                uint32_t
-                                                                n34 =
-                                                                  ((uint32_t)2U + (uint32_t)3U)
-                                                                  % (uint32_t)4U;
                                                                 Lib_IntVector_Intrinsics_vec256
-                                                                v04 = r2[0U];
+                                                                v03 = r2[0U];
                                                                 Lib_IntVector_Intrinsics_vec256
                                                                 v13 =
-                                                                  Lib_IntVector_Intrinsics_vec256_shuffle64(v04,
-                                                                    n03,
-                                                                    n14,
-                                                                    n24,
-                                                                    n34);
+                                                                  Lib_IntVector_Intrinsics_vec256_shuffle64(v03,
+                                                                    (uint32_t)2U,
+                                                                    ((uint32_t)2U + (uint32_t)1U)
+                                                                    % (uint32_t)4U,
+                                                                    ((uint32_t)2U + (uint32_t)2U)
+                                                                    % (uint32_t)4U,
+                                                                    ((uint32_t)2U + (uint32_t)3U)
+                                                                    % (uint32_t)4U);
                                                                 r2[0U] = v13;
                                                                 {
-                                                                  uint32_t n04 = (uint32_t)1U;
-                                                                  uint32_t
-                                                                  n1 =
-                                                                    ((uint32_t)1U + (uint32_t)1U)
-                                                                    % (uint32_t)4U;
-                                                                  uint32_t
-                                                                  n2 =
-                                                                    ((uint32_t)1U + (uint32_t)2U)
-                                                                    % (uint32_t)4U;
-                                                                  uint32_t
-                                                                  n3 =
-                                                                    ((uint32_t)1U + (uint32_t)3U)
-                                                                    % (uint32_t)4U;
                                                                   Lib_IntVector_Intrinsics_vec256
-                                                                  v0 = r3[0U];
+                                                                  v04 = r3[0U];
                                                                   Lib_IntVector_Intrinsics_vec256
                                                                   v14 =
-                                                                    Lib_IntVector_Intrinsics_vec256_shuffle64(v0,
-                                                                      n04,
-                                                                      n1,
-                                                                      n2,
-                                                                      n3);
+                                                                    Lib_IntVector_Intrinsics_vec256_shuffle64(v04,
+                                                                      (uint32_t)1U,
+                                                                      ((uint32_t)1U + (uint32_t)1U)
+                                                                      % (uint32_t)4U,
+                                                                      ((uint32_t)1U + (uint32_t)2U)
+                                                                      % (uint32_t)4U,
+                                                                      ((uint32_t)1U + (uint32_t)3U)
+                                                                      % (uint32_t)4U);
                                                                   r3[0U] = v14;
                                                                 }
                                                               }
