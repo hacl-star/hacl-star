@@ -10,8 +10,6 @@ include{:fstar}{:open} "Vale.X64.CPU_Features_s"
 
 module Vale.Curve25519.X64.FastSqr
 
-#reset-options "--z3rlimit 60"
-
 #verbatim{:interface}
 open Vale.Def.Types_s
 open Vale.Arch.Types
@@ -49,13 +47,14 @@ open Vale.Curve25519.FastSqr_helpers
 open Vale.X64.CPU_Features_s
 open Vale.Bignum.Defs
 open Vale.Bignum.X64
+#reset-options "--z3rlimit 60"
 #endverbatim
 
 const int_canon:tactic extern;
 
-#reset-options "--z3rlimit 600"
 procedure Fast_sqr_part1(inline offset:nat, ghost inA_b:buffer64)
     {:quick}
+    {:options z3rlimit(600)}
     lets
         inA_ptr @= rsi;
 
@@ -137,10 +136,9 @@ procedure Fast_sqr_part1(inline offset:nat, ghost inA_b:buffer64)
 
 }
 
-#reset-options "--z3rlimit 400 --max_fuel 0 --max_ifuel 0"
-
 #verbatim
 #restart-solver
+#push-options "--z3rlimit 400 --max_fuel 0 --max_ifuel 0"
 open FStar.Mul
 
 let lemma_fast_sqr_part2 (a0 a1 a2 a3 a4 a5 b2 b3:nat64) : Lemma
@@ -159,7 +157,7 @@ let lemma_fast_sqr_part2 (a0 a1 a2 a3 a4 a5 b2 b3:nat64) : Lemma
   ))
   =
   lemma_add_hi_lo64 0
-
+#pop-options
 #restart-solver
 #endverbatim
 
@@ -171,6 +169,7 @@ ghost procedure lemma_fast_sqr_part2(
 
 procedure Fast_sqr_part2()
     {:quick}
+    {:options z3rlimit(600)}
     reads
         rax; rcx;
 
@@ -202,12 +201,10 @@ procedure Fast_sqr_part2()
     Adcx_64(r13, r13);     Adcx_64(r14, r14);
 }
 
-#reset-options "--z3rlimit 1000"
-#verbatim
-#restart-solver
-#endverbatim
 procedure Fast_sqr_part3(inline offset:nat, ghost dst_b:buffer64, ghost inA_b:buffer64)
     {:quick}
+    {:restartProver}
+    {:options z3rlimit(1000)}
     lets
         dst_ptr @= rdi;
         inA_ptr @= rsi;
@@ -316,10 +313,10 @@ procedure Fast_sqr_part3(inline offset:nat, ghost dst_b:buffer64, ghost inA_b:bu
                     bool_bit(cf(efl)));
 }
 
-#reset-options "--z3rlimit 600"
 procedure Fast_sqr(inline offset:nat, ghost dst_b:buffer64, ghost inA_b:buffer64)
     {:public}
     {:quick}
+    {:options z3rlimit(600)}
     lets
         dst_ptr @= rdi;
         inA_ptr @= rsi;
@@ -413,9 +410,6 @@ procedure Fast_sqr(inline offset:nat, ghost dst_b:buffer64, ghost inA_b:buffer64
               d0, d1, d2, d3, d4, d5, d6, d7, bool_bit(cf(efl)));
 }
 
-
-#reset-options "--z3rlimit 40"
-
 procedure Fast_sqr_stdcall(inline win:bool, ghost dst_b:buffer64, ghost inA_b:buffer64)
     {:public}
     {:quick}
@@ -494,7 +488,6 @@ procedure Fast_sqr_stdcall(inline win:bool, ghost dst_b:buffer64, ghost inA_b:bu
 }
 
 /*
-#reset-options "--z3rlimit 60"
 procedure Fast_sqr_loop(inline offset:nat, ghost dst_b:buffer64, ghost inA_b:buffer64)
     {:quick}
     lets
@@ -556,8 +549,6 @@ procedure Fast_sqr_loop(inline offset:nat, ghost dst_b:buffer64, ghost inA_b:buf
         Sub64(count, 1);
     }
 }
-
-#reset-options "--z3rlimit 40"
 
 procedure Fast_sqr_loop_stdcall(inline win:bool, ghost dst_b:buffer64, ghost inA_b:buffer64)
     {:public}

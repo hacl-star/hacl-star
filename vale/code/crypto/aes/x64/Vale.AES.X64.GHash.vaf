@@ -53,6 +53,7 @@ open Vale.X64.InsAes
 open Vale.X64.QuickCode
 open Vale.X64.QuickCodes
 open Vale.X64.CPU_Features_s
+#reset-options "--z3rlimit 30"
 #endverbatim
 
 #verbatim{:interface}
@@ -68,8 +69,6 @@ let get_last_slice_workaround (s:seq quad32) (start_pos end_pos:int)  =
 //  else
 //    create 1 (Mkfour 0 0 0 0)
 #endverbatim
-
-#reset-options "--z3rlimit 30"
 
 ///////////////////////////
 // GHash
@@ -260,7 +259,6 @@ procedure Compute_ghash_incremental_partial(ghost in_b:buffer128)
     }
 }
 
-#reset-options "--z3rlimit 10"
 // Purely proof work to show that when there are no extra bytes, there's no work left to do
 procedure Ghash_incremental_bytes_no_extra(
         ghost in_b:buffer128,
@@ -327,16 +325,15 @@ procedure Ghash_incremental_bytes_no_extra(
  *     Note that a switch statement will likely be much more efficient than a 16-way if/else,
  *     but Vale currently doesn't support switch statements
  */
-#reset-options "--z3rlimit 40"
 procedure Compute_pad_to_128_bits()
     {:quick}
+    {:options z3rlimit(40)}
     lets io @= xmm2; num_bytes @= rax; tmp @= rcx; mask @= rdx;
-
     reads num_bytes;
     modifies io; tmp; mask; efl;
     requires 
-      sse_enabled;
-      0 < num_bytes < 16;
+        sse_enabled;
+        0 < num_bytes < 16;
     ensures
         let padded_bytes := pad_to_128_bits(slice(le_quad32_to_bytes(old(io)), 0, old(num_bytes)));
         length(padded_bytes) = 16 && io = le_bytes_to_quad32(padded_bytes);
@@ -391,7 +388,6 @@ procedure Compute_pad_to_128_bits()
     }
 }
 
-#reset-options "--z3rlimit 10"
 procedure Ghash_incremental_bytes_register(
         ghost total_bytes:nat,
         ghost old_hash:quad32,
@@ -442,7 +438,6 @@ procedure Ghash_incremental_bytes_register(
     lemma_ghash_incremental_bytes_extra_helper_alt(reverse_bytes_quad32(h), old_hash, old(io), io, completed_quads, final_quad, final_quad_padded, total_bytes);
 }
 
-#reset-options "--z3rlimit 10"
 procedure Ghash_incremental_bytes_extra(
         ghost in_b:buffer128,
         ghost orig_in_ptr:nat64,
@@ -502,7 +497,6 @@ procedure Ghash_incremental_bytes_extra(
     lemma_ghash_incremental_bytes_extra_helper(reverse_bytes_quad32(h), old_io, old(io), io, buffer128_as_seq(heap0, in_b), final_quad, final_quad_padded, orig_num_bytes);
 }
 
-#reset-options "--z3rlimit 10"
 procedure Ghash_incremental_bytes(ghost in_b:buffer128)
     {:quick}
     lets in_ptr @= rax; num_bytes @= r11; io @= xmm1; mask @= xmm8; h @= xmm11;

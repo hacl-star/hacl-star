@@ -53,9 +53,8 @@ open Spec.Hash.Definitions
 open Spec.Loops
 open Vale.X64.Stack
 open Vale.X64.CPU_Features_s
+#reset-options "--z3rlimit 40"
 #endverbatim
-
-#reset-options "--z3rlimit 20"
 
 procedure Preamble(ghost ctx_b:buffer128)
     {:quick}
@@ -102,7 +101,6 @@ procedure Preamble(ghost ctx_b:buffer128)
     assert equal(#(seq(Vale.SHA.SHA_helpers.word))(make_hash(abef, cdgh)), #(seq(Vale.SHA.SHA_helpers.word))(make_ordered_hash(abcd, efgh)));
 }
 
-#reset-options "--z3rlimit 40"
 procedure Loop_rounds_0_15(
         ghost in_b:buffer128,
         ghost k_b:buffer128,
@@ -522,7 +520,6 @@ procedure Loop_rounds(
     lemma_update_multi_quads(buffer128_as_seq(heap0, in_b), hash_orig, offset);
 }
 
-#reset-options "--z3rlimit 40"
 procedure Loop(
         ghost in_b:buffer128,
         ghost k_b:buffer128)
@@ -674,12 +671,13 @@ procedure Sha_update(
     Epilogue(ctx_b);
 }
 
-#reset-options "--z3rlimit 80 --z3refresh"
 procedure Sha_update_bytes(
         ghost ctx_b:buffer128,
         ghost in_b:buffer128,
         ghost k_b:buffer128)
     {:quick}
+    {:restartProver}
+    {:options z3rlimit(80)}
     lets
         tmp_reg @= rax; tbl @= rcx; num @= rdx; ctx @= rdi; inp @= rsi;
         Wi @= xmm0; abef @= xmm1; cdgh @= xmm2;
@@ -736,7 +734,6 @@ procedure Sha_update_bytes(
                                   seq_nat8_to_seq_uint8(le_seq_quad32_to_bytes(input_LE)));
 }
 
-#reset-options "--z3rlimit 80"
 procedure Sha_update_bytes_stdcall(
         inline win:bool,
         ghost ctx_b:buffer128,
@@ -746,6 +743,8 @@ procedure Sha_update_bytes_stdcall(
     {:public}
     {:quick}
     {:exportSpecs}
+    {:restartProver}
+    {:options z3rlimit(80)}
     lets
         ctx_ptr     := if win then rcx else rdi;
         in_ptr      := if win then rdx else rsi;

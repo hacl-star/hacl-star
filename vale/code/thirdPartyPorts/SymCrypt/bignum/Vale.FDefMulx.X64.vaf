@@ -103,28 +103,29 @@ ghost procedure lemma_scale_add(
 
 function operand_reg8(n:nat):operand64 extern;
 
-#reset-options "--z3rlimit 80 --max_fuel 1 --max_ifuel 0"
-
 // Multiply 1-word value "b" by 8-word value "a"
 procedure MulAdd18(
-    inout r0:reg_opr64,
-    inout r1:reg_opr64,
-    inout r2:reg_opr64,
-    inout r3:reg_opr64,
-    inout r4:reg_opr64,
-    inout r5:reg_opr64,
-    inout r6:reg_opr64,
-    inout r7:reg_opr64,
-    ghost regRotate:nat,
-    ghost bA:buffer64,
-    ghost bB:buffer64,
-    ghost bD:buffer64)
+        inout r0:reg_opr64,
+        inout r1:reg_opr64,
+        inout r2:reg_opr64,
+        inout r3:reg_opr64,
+        inout r4:reg_opr64,
+        inout r5:reg_opr64,
+        inout r6:reg_opr64,
+        inout r7:reg_opr64,
+        ghost regRotate:nat,
+        ghost bA:buffer64,
+        ghost bB:buffer64,
+        ghost bD:buffer64)
+    {:options z3rlimit(80), max_fuel(1), max_ifuel(0)}
     lets
         pD @= rdi; pA @= rcx; pB @= rsi; T0 @= rax; T1 @= rbx;
         as := s64(heap0, bA);
         rs:seq(nat64) := make_seq9(r0, r1, r2, r3, r4, r5, r6, r7, 0);
-    reads pD; pA; pB;
-    modifies T0; T1; rdx; efl; heap0; memLayout;
+    reads
+        pD; pA; pB;
+    modifies
+        T0; T1; rdx; efl; heap0; memLayout;
     requires/ensures
         valid_cf(efl) && flag_cf(efl) == 0;
         valid_of(efl) && flag_of(efl) == 0;

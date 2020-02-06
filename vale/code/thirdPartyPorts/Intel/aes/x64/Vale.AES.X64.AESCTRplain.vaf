@@ -52,8 +52,6 @@ open Vale.AES.X64.AESCTR
 open Vale.X64.CPU_Features_s
 #endverbatim
 
-
-#reset-options "--z3rlimit 400"
 // Intel's LOOP_4
 procedure Aes_ctr_loop_body(
         inline alg:algorithm,  // Intel simply passes number of rounds (nr) as a dynamic parameter.  Saves code space but adds extra instructions to the fast path.  Maybe branch predictor is good enough for it not to matter
@@ -71,6 +69,7 @@ procedure Aes_ctr_loop_body(
         ghost icb_BE:quad32,
         ghost iv:quad32)
     {:quick}
+    {:options z3rlimit(400)}
     lets
         plain_ptr @= r9; num_quad_blocks @= rdx; out_ptr @= r10; key_ptr @= r8; iv_lower64 @= rdi;
         const2_1 @= xmm9; const4_3 @= xmm10; mask64 @= xmm0; four @= xmm15;
@@ -228,6 +227,7 @@ procedure Aes_counter_loop(
         ghost keys_b:buffer128)
     {:public}
     {:quick}
+    {:options z3rlimit(400)}
     lets plain_ptr @= r9; num_quad_blocks @= rdx; out_ptr @= r10; key_ptr @= r8; iv_lower64 @= rdi;
          const2_1 @= xmm9; const4_3 @= xmm10; iv @= xmm7; mask @= xmm8; mask64 @= xmm0; four @= xmm15;
          rk1 @= xmm3; rk2 @= xmm4; rk3 @= xmm5; rk4 @= xmm6;        // Round keys

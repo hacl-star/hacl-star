@@ -54,11 +54,10 @@ open Vale.X64.Stack_i
 module I = Vale.X64.Instructions_s
 module S = Vale.X64.Machine_Semantics_s
 friend Vale.X64.Decls
+#reset-options "--initial_fuel 2 --max_fuel 4 --max_ifuel 2 --z3rlimit 50"
 #endverbatim
 
 function buffer128_write(b:buffer128, i:int, v:quad32, h:vale_heap):vale_heap extern;
-
-#reset-options "--initial_fuel 2 --max_fuel 4 --max_ifuel 2 --z3rlimit 50"
 
 var xmm0:quad32  {:state xmm(0)};
 var xmm1:quad32  {:state xmm(1)};
@@ -144,7 +143,9 @@ procedure Pxor(inout dst:xmm, in src:xmm)
 {
 }
 
+#verbatim
 #reset-options "--initial_fuel 4 --max_fuel 4 --max_ifuel 3 --z3rlimit 50"
+#endverbatim
 
 procedure Pand(inout dst:xmm, in src:opr128)
     {:public}
@@ -441,8 +442,9 @@ procedure PinsrdImm(inout dst:xmm, inline immediate:nat32, inline index:nat8, ou
     Pinsrd(dst, tmp, index);
 }
 
-// TODO: get rid of this fuel
+#verbatim
 #reset-options "--initial_fuel 2 --max_fuel 4 --max_ifuel 3 --z3rlimit 50"
+#endverbatim
 procedure Pinsrq(inout dst:xmm, in src:opr64, inline index:nat8)
     {:public}
     {:quick exportOnly}
@@ -470,7 +472,9 @@ procedure PinsrqImm(inout dst:xmm, inline immediate:nat64, inline index:nat8, ou
     Pinsrq(dst, tmp, index);
 }
 
+#verbatim
 #reset-options "--initial_fuel 2 --max_fuel 4 --max_ifuel 2 --z3rlimit 50"
+#endverbatim
 procedure VPslldq4(out dst:xmm, in src:xmm)
     {:public}
     {:quick exportOnly}
@@ -699,7 +703,6 @@ procedure XmmEqual(inout x1:xmm, in x2:xmm)
 }
 
 /*  REVIEW: This version goes through with --ONE, but fails without it for reasons that are unclear
-#reset-options "--z3rlimit 150 --z3refresh"
 procedure XmmEqual(inout x1:xmm, x2:xmm, out tmp:reg_opr64, out result:reg_opr64)
     {:quick exportOnly}
     modifies efl;

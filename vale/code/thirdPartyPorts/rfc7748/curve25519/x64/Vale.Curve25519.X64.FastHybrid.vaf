@@ -10,8 +10,6 @@ include{:fstar}{:open} "Vale.X64.CPU_Features_s"
 
 module Vale.Curve25519.X64.FastHybrid
 
-#reset-options "--z3rlimit 60"
-
 #verbatim{:interface}
 open Vale.Def.Types_s
 open Vale.Arch.Types
@@ -28,7 +26,6 @@ open Vale.X64.QuickCode
 open Vale.X64.QuickCodes
 open Vale.Curve25519.Fast_defs
 open Vale.X64.CPU_Features_s
-
 #endverbatim
 
 #verbatim{:implementation}
@@ -49,13 +46,14 @@ open Vale.Curve25519.Fast_lemmas_external
 open Vale.Curve25519.FastHybrid_helpers
 open Vale.Curve25519.FastUtil_helpers
 open Vale.X64.CPU_Features_s
+#reset-options "--z3rlimit 60"
 #endverbatim
 
 const int_canon:tactic extern;
 
-#reset-options "--z3rlimit 600"
 procedure Fast_mul1(inline offset:nat, ghost inA_b:buffer64)
     {:quick}
+    {:options z3rlimit(600)}
     lets
         inA_ptr @= rsi;
         b @= rdx;
@@ -120,9 +118,9 @@ procedure Fast_mul1(inline offset:nat, ghost inA_b:buffer64)
 }
 
 /*
-#reset-options "--z3rlimit 600"
 procedure Fast_add_after_mul1(ghost dst_b:buffer64, ghost inB_b:buffer64)
     {:quick}
+    {:options z3rlimit(600)}
     lets
         dst_ptr @= rdi;
         inB_ptr @= rcx;
@@ -184,9 +182,9 @@ procedure Fast_add_after_mul1(ghost dst_b:buffer64, ghost inB_b:buffer64)
 }
 */
 
-#reset-options "--z3rlimit 600"
 procedure Fast_add_after_mul1_regs(ghost inB_b:buffer64)
     {:quick}
+    {:options z3rlimit(600)}
     lets
         inB_ptr @= rsi;
 
@@ -245,9 +243,9 @@ procedure Fast_add_after_mul1_regs(ghost inB_b:buffer64)
     Adox64Wrap(carry, tmp0);
 }
 
-#reset-options "--z3rlimit 600"
 procedure Fast_mul1_add(inline offset:nat, ghost inA_b:buffer64)
     {:quick}
+    {:options z3rlimit(600)}
     lets
         inA_ptr @= rsi;
         b @= rdx;
@@ -346,7 +344,6 @@ procedure Fast_mul1_add(inline offset:nat, ghost inA_b:buffer64)
 }
 
 
-#reset-options "--z3rlimit 60"
 procedure Store4(ghost dst_b:buffer64)
     {:quick}
     lets
@@ -375,7 +372,6 @@ procedure Store4(ghost dst_b:buffer64)
     Store64_buffer(heap0, dst_ptr, d3, 24, Secret, dst_b, 3);
 }
 
-#reset-options "--z3rlimit 20"
 procedure Carry_times_38(inout tmp:dst_opr64)
     {:quick exportOnly}
     lets
@@ -394,9 +390,9 @@ procedure Carry_times_38(inout tmp:dst_opr64)
     Cmovc64(carry, tmp);
 }
 
-#reset-options "--z3rlimit 100"
 procedure Carry_pass(inline use_cf:bool, inline offset:nat, ghost dst_b:buffer64)
     {:quick}
+    {:options z3rlimit(100)}
     lets
         dst_ptr @= rdi;
         carry @= rax;
@@ -473,11 +469,10 @@ procedure Carry_pass(inline use_cf:bool, inline offset:nat, ghost dst_b:buffer64
     Store64_buffer(heap0, dst_ptr, a0,  0 + offset*8, Secret, dst_b, 0 + offset);
 }
 
-
-#reset-options "--z3rlimit 600"
 procedure Carry_wide(inline offset:nat, ghost dst_b:buffer64, ghost inA_b:buffer64)
     {:public}
     {:quick}
+    {:options z3rlimit(600)}
     lets
         dst_ptr @= rdi;
         inA_ptr @= rsi;
@@ -618,9 +613,9 @@ procedure Carry_wide_stdcall(inline win:bool, ghost dst_b:buffer64, ghost inA_b:
 }
 */
 
-#reset-options "--z3rlimit 600 --z3seed 2"
 procedure Carry_sub_pass()
     {:quick}
+    {:options z3rlimit(600), z3seed(2)}
     lets
         carry @= rax;
         tmp @= rcx;
@@ -669,9 +664,9 @@ procedure Carry_sub_pass()
 
 }
 
-#reset-options "--z3rlimit 600"
 procedure Fast_add(ghost inA_b:buffer64, ghost inB_b:buffer64)
     {:quick}
+    {:options z3rlimit(600)}
     lets
         inA_ptr @= rsi;
         inB_ptr @= rdx;
@@ -725,9 +720,9 @@ procedure Fast_add(ghost inA_b:buffer64, ghost inB_b:buffer64)
     Adcx64Wrap(d3, Mem64(heap0, inA_ptr, 24, inA_b, 3, Secret));
 }
 
-#reset-options "--z3rlimit 600"
 procedure Fast_sub(ghost inA_b:buffer64, ghost inB_b:buffer64)
     {:quick}
+    {:options z3rlimit(600)}
     lets
         inA_ptr @= rsi;
         inB_ptr @= rdx;
@@ -787,7 +782,6 @@ procedure Fast_sub(ghost inA_b:buffer64, ghost inB_b:buffer64)
 }
 
 
-#reset-options "--z3rlimit 60"
 procedure Fadd(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB_b:buffer64)
     {:public}
     {:quick}
@@ -951,7 +945,6 @@ procedure Fadd_stdcall(
     }
 }
 
-#reset-options "--z3rlimit 60"
 procedure Fsub(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB_b:buffer64)
     {:public}
     {:quick}
@@ -1111,11 +1104,11 @@ procedure Fsub_stdcall(
     }
 }
 
-#reset-options "--z3rlimit 600"
 procedure Fmul1(ghost dst_b:buffer64, ghost inA_b:buffer64, ghost inB:nat64)
     {:public}
     {:quick}
     {:exportSpecs}
+    {:options z3rlimit(600)}
     lets
         dst_ptr @= rdi;
         inA_ptr @= rsi;
@@ -1185,6 +1178,7 @@ procedure Fmul1_stdcall(
     {:public}
     {:quick}
     {:exportSpecs}
+    {:options z3rlimit(600)}
     lets
         dst_ptr @= rdi; inA_ptr @= rsi; b @= rdx;
         dst_in := (if win then rcx else rdi);

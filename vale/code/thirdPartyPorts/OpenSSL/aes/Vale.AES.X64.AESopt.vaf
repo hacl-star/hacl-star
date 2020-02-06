@@ -137,6 +137,7 @@ let scratch_reqs (scratch_b:buffer128) (count:nat) (heap3:vale_heap) (s:seq quad
 #verbatim
 open FStar.Mul
 let add = Vale.Math.Poly2_s.add
+#reset-options "--z3rlimit 30"
 #endverbatim
 
 type six_of(a:Type(0)):Type(0) := tuple(a, a, a, a, a, a);
@@ -230,7 +231,6 @@ procedure Load_one_lsb(inout dst:xmm)
     PinsrqImm(dst, 1, 0, constp);
 }
 
-#reset-options "--z3rlimit 20"
 procedure Handle_ctr32(ghost ctr_BE:quad32)
     {:quick}
     lets
@@ -276,7 +276,6 @@ procedure Handle_ctr32(ghost ctr_BE:quad32)
     VPshufb(T1, T1, Ii);            // # next counter value
 }
 
-#reset-options "--z3rlimit 20"
 procedure Loop6x_ctr_update(
         inline alg:algorithm,
         ghost h_LE:quad32,
@@ -351,7 +350,6 @@ procedure Loop6x_ctr_update(
     }
 }
 
-#reset-options "--z3rlimit 20"
 procedure Loop6x_plain(
         inline alg:algorithm,  // OpenSSL includes the number of rounds (nr) as a dynamic parameter (stored with the key).  Saves code space but adds extra instructions to the fast path.  Maybe branch predictor is good enough for it not to matter
         inline rnd:nat,
@@ -401,7 +399,6 @@ procedure Loop6x_plain(
     commute_sub_bytes_shift_rows_forall();
 }
 
-#reset-options ""
 procedure Loop6x_preamble(
         inline alg:algorithm,  // OpenSSL includes the number of rounds (nr) as a dynamic parameter (stored with the key).  Saves code space but adds extra instructions to the fast path.  Maybe branch predictor is good enough for it not to matter
         ghost h_LE:quad32,
@@ -504,8 +501,6 @@ procedure Loop6x_preamble(
     VPxor(inout5, inout5, rndkey); init_rounds_opaque(inout5, round_keys);
 }
 
-#reset-options ""
-
 procedure Loop6x_reverse128(
         inline in0_offset:nat,
         inline stack_offset:nat,
@@ -591,7 +586,6 @@ procedure load_one_msb()
     insert_nat64_reveal();
 }
 
-#reset-options "--z3rlimit 30"
 procedure Loop6x_final(
         inline alg:algorithm,
         ghost iv_b:buffer128,
@@ -715,7 +709,6 @@ procedure Loop6x_final(
     lemma_incr_msb(ctr_orig, T1, Hkey, 5);
 }
 
-#reset-options ""
 procedure Loop6x_save_output(ghost count:nat, ghost out_b:buffer128)
     {:quick}
     {:public}
@@ -762,7 +755,6 @@ procedure Loop6x_save_output(ghost count:nat, ghost out_b:buffer128)
     Mov128(inout5, Hkey);
 }
 
-#reset-options "--z3rlimit 50 --max_ifuel 0"
 procedure Loop6x_partial(
         inline alg:algorithm,
         ghost h_LE:quad32,
@@ -783,9 +775,10 @@ procedure Loop6x_partial(
         //ghost ctr_BE_orig:quad32,
         ghost ctr_BE:quad32)
     returns(ghost init:quad32_6)
+    {:public}
     {:quick}
     {:transform reorder, Loop6x_partial_expected_code}
-    {:public}
+    {:options z3rlimit(50), max_ifuel(0)}
     lets
 //      inp @= rdi; outp @= rsi; len @= rdx; key @= rcx; ivp @= r8; Xip @= r9;
         inp @= rdi; key @= rcx; ivp @= r8; Xip @= r9;
@@ -956,7 +949,6 @@ procedure Loop6x_partial(
 #verbatim{:interface}
 #reset-options "--z3rlimit 50"
 #endverbatim
-#reset-options "--z3rlimit 100"
 procedure Loop6x(
         inline alg:algorithm,
         ghost h_LE:quad32,
@@ -979,8 +971,9 @@ procedure Loop6x(
         ghost ctr_BE_orig:quad32,
         ghost ctr_BE:quad32)
     returns(ghost y_new:quad32)
-    {:quick}
     {:public}
+    {:quick}
+    {:options z3rlimit(100)}
     lets
         inp @= rdi; outp @= rsi; len @= rdx; key @= rcx; ivp @= r8; Xip @= r9;
         Ii @= xmm0; T1 @= xmm1; T2 @= xmm2; Hkey @= xmm3;

@@ -13,9 +13,8 @@ open Vale.X64.State
 open Vale.X64.Decls
 open Vale.X64.InsBasic
 open Vale.X64.InsMem
-#endverbatim
-
 #reset-options "--z3rlimit 20"
+#endverbatim
 
 procedure Copy16(inline t:taint, ghost bsrc:buffer64, ghost bdst:buffer64)
     requires/ensures

@@ -107,6 +107,7 @@ let aes_reqs
 
 #verbatim
 open Vale.Lib.Basic
+#reset-options "--z3rlimit 20 --max_ifuel 0"
 #endverbatim
 
 function aes_reqs(alg:algorithm, key:seq(nat32), round_keys:seq(quad32), keys_b:buffer128,
@@ -117,7 +118,6 @@ function aes_reqs(alg:algorithm, key:seq(nat32), round_keys:seq(quad32), keys_b:
 // GCM
 ///////////////////////////
 
-#reset-options "--z3rlimit 10 --max_ifuel 0"
 procedure Gcm_extra_bytes(
         inline alg:algorithm,
         ghost inout_b:buffer128,
@@ -280,7 +280,6 @@ procedure Gcm_blocks128(
     Gctr_blocks128(alg, in_b, out_b, key, round_keys, keys_b);
 }
 
-#reset-options "--z3rlimit 1000 --max_ifuel 0"
 procedure Gcm_blocks(
         inline alg:algorithm,
         inline offset:int,
@@ -298,6 +297,7 @@ procedure Gcm_blocks(
         ghost keys_b:buffer128,
         ghost hkeys_b:buffer128)
     {:quick}
+    {:options z3rlimit(1000)}
     lets
         auth_ptr @= rdi; auth_num_bytes @= rsi; auth_len @= rdx; keys_ptr @= rcx; scratch_ptr @= rbp;
         iv_ptr @= r8; Xip @= r9;
@@ -585,7 +585,6 @@ procedure Gcm_blocks(
     ghash_incremental_to_ghash(h_LE, auth_in);
 }
 
-#reset-options "--z3rlimit 60 --max_ifuel 0"
 procedure Gcm_blocks_wrapped(
         inline alg:algorithm,
         inline offset:int,
@@ -605,6 +604,7 @@ procedure Gcm_blocks_wrapped(
         ghost hkeys_b:buffer128,
         ghost expected_tag:seq(nat8))
     {:quick}
+    {:options z3rlimit(60)}
     lets
         auth_ptr @= rdi; auth_num_bytes @= rsi; auth_len @= rdx; keys_ptr @= rcx; scratch_ptr @= rbp;
         iv_ptr @= r8; Xip @= r9; hash @= xmm8;
@@ -761,7 +761,6 @@ procedure Gcm_blocks_wrapped(
 #verbatim{:interface}
 #reset-options "--z3rlimit 100 --max_ifuel 0"
 #endverbatim
-#reset-options "--z3rlimit 1600 --max_ifuel 0"
 procedure Gcm_blocks_decrypt_stdcall(
         inline win:bool,
         inline alg:algorithm,
@@ -791,6 +790,7 @@ procedure Gcm_blocks_decrypt_stdcall(
     {:public}
     {:quick}
     {:exportSpecs}
+    {:options z3rlimit(1600)}
     lets
         auth_ptr :=         if win then rcx else rdi;
         auth_num_bytes :=   if win then rdx else rsi;

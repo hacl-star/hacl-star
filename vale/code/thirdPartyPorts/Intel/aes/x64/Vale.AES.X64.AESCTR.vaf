@@ -406,7 +406,6 @@ procedure Aes_ctr_ghash(
     lemma_ghash_registers(reverse_bytes_quad32(h), hash_init, old(hash), hash0, hash1, hash2, hash, h_in_0, h_in_1, h_in_2, h_in_3, buffer128_as_seq(heap1, out_b), 4*count);
 }
 
-#reset-options "--z3rlimit 800"
 // Intel's LOOP_4
 procedure Aes_ctr_loop_body(
         inline alg:algorithm,  // Intel simply passes number of rounds (nr) as a dynamic parameter.  Saves code space but adds extra instructions to the fast path.  Maybe branch predictor is good enough for it not to matter
@@ -426,6 +425,7 @@ procedure Aes_ctr_loop_body(
 
         ghost hash_init:quad32)
     {:quick}
+    {:options z3rlimit(800)}
     lets
         plain_ptr @= r9; num_quad_blocks @= rdx; out_ptr @= r10; key_ptr @= r8; iv_lower64 @= rdi;
         const2_1 @= xmm9; const4_3 @= xmm10; mask64 @= xmm0; four @= xmm15;
@@ -592,6 +592,7 @@ procedure Aes_counter_loop(
         ghost keys_b:buffer128)
     {:public}
     {:quick}
+    {:options z3rlimit(800)}
     lets
         plain_ptr @= r9; num_quad_blocks @= rdx; out_ptr @= r10; key_ptr @= r8; iv_lower64 @= rdi;
         const2_1 @= xmm9; const4_3 @= xmm10; iv @= xmm7; mask64 @= xmm0; four @= xmm15;

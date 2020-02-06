@@ -34,9 +34,8 @@ open Vale.X64.Stack_i
 module I = Vale.X64.Instructions_s
 module S = Vale.X64.Machine_Semantics_s
 friend Vale.X64.Decls
-#endverbatim
-
 #reset-options "--initial_fuel 5 --max_fuel 5 --max_ifuel 2 --z3rlimit 20"
+#endverbatim
 
 type vale_heap:Type(1) := Vale.X64.Memory.vale_heap;
 type vale_stack:Type(1) := Vale.X64.Stack_i.vale_stack;
@@ -188,11 +187,11 @@ procedure Adc64Wrap(inout dst:dst_opr64, in src:opr64)
 {
 }
 
-#reset-options "--initial_fuel 5 --max_fuel 5 --max_ifuel 2 --z3rlimit 20 --smtencoding.nl_arith_repr boxwrap"
 procedure Adcx64Wrap(inout dst:dst_opr64, in src:opr64)
     {:public}
     {:quick exportOnly}
     {:instruction mk_ins(make_instr(I.ins_Adcx64, dst, src))}
+    {:options smtencoding.nl_arith_repr(boxwrap)}
     requires adx_enabled;
     modifies
         efl;
@@ -206,7 +205,6 @@ procedure Adcx64Wrap(inout dst:dst_opr64, in src:opr64)
     assert old(add_wrap64(add_wrap64(dst, src), (if cf(efl) then 1 else 0)) == (dst + src + (if cf(efl) then 1 else 0)) % pow2_64); // REVIEW: shouldn't be necessary
 }
 
-#reset-options "--initial_fuel 5 --max_fuel 5 --max_ifuel 2 --z3rlimit 20"
 procedure Adox64Wrap(inout dst:dst_opr64, in src:opr64)
     {:public}
     {:quick exportOnly}
@@ -262,16 +260,15 @@ procedure Sbb64(inout dst:dst_opr64, in src:opr64)
 {
 }
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --using_facts_from 'Prims FStar.UInt'"
-
 #verbatim
+#restart-solver
+#push-options "--max_fuel 0 --max_ifuel 0 --using_facts_from 'Prims FStar.UInt'"
 let lemma_fundamental_div_mod (a b:nat64) :
   Lemma (pow2_64 * (FStar.UInt.mul_div #64 a b) + (FStar.UInt.mul_mod #64 a b) == a * b)
   =
   FStar.Math.Lemmas.lemma_div_mod (a * b) pow2_64
+#pop-options
 #endverbatim
-
-#reset-options "--initial_fuel 5 --max_fuel 5 --max_ifuel 2 --z3rlimit 50"
 
 ghost procedure lemma_fundamental_div_mod(ghost a:nat64, ghost b:nat64) {:infer_spec} extern;
 
