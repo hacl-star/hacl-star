@@ -38,7 +38,7 @@ open MerkleTree.New.Low.Datastructures
 
 #set-options "--z3rlimit 10 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
 
-let init_hash (hsz:hash_size_t) = hash_r_alloc #hsz
+let init_hash (hsz:hash_size_t) = hash_r_alloc hsz
 let free_hash (hsz:hash_size_t) = hash_r_free #hsz
 
 noextract inline_for_extraction unfold

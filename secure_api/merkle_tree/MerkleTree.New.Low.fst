@@ -111,7 +111,7 @@ let merkle_tree_conditions (#hsz:hash_size_t) (offset:uint64_t) (i j:uint32_t) (
   V.size_of hs = merkle_tree_size_lg &&
   V.size_of rhs = merkle_tree_size_lg
 
-// The maximum number of currenty held elements in the tree is (2^32 - 1).
+// The maximum number of currently held elements in the tree is (2^32 - 1).
 // cwinter: even when using 64-bit indices, we fail if the underlying 32-bit
 // vector is full; this can be fixed if necessary.
 private inline_for_extraction
@@ -359,7 +359,7 @@ let create_empty_mt #hsz #hash_spec hash_fun r =
   V.loc_vector_within_included hs 0ul (V.size_of hs);
   mt_safe_elts_preserved #hsz 0ul hs 0ul 0ul (V.loc_vector rhs) h0 h1;
   let mroot_region = HST.new_region r in
-  let mroot = Rgl?.r_alloc (hreg hsz) mroot_region in
+  let mroot = Rgl?.r_alloc (hreg hsz) hsz mroot_region in
   let h2 = HST.get () in
   RV.as_seq_preserved hs loc_none h1 h2;
   RV.as_seq_preserved rhs loc_none h1 h2;
@@ -392,7 +392,7 @@ let mt_free mt =
 
 private
 val as_seq_sub_upd:
-  #a:Type0 -> #rg:regional a ->
+  #a:Type0 -> #rst:Type -> #rg:regional rst a ->
   h:HS.mem -> rv:rvector rg ->
   i:uint32_t{i < V.size_of rv} -> v:Rgl?.repr rg ->
   Lemma (requires (RV.rv_inv h rv))
@@ -401,7 +401,7 @@ val as_seq_sub_upd:
                             (RV.as_seq_sub h rv 0ul i)
                             (S.cons v (RV.as_seq_sub h rv (i + 1ul) (V.size_of rv))))))
 #push-options "--z3rlimit 20"
-let as_seq_sub_upd #a #rg h rv i v =
+let as_seq_sub_upd #a #rst #rg h rv i v =
   Seq.Properties.slice_upd (RV.as_seq h rv) 0 (U32.v i) (U32.v i) v;
   Seq.Properties.slice_upd (RV.as_seq h rv) (U32.v i + 1) (U32.v (V.size_of rv)) (U32.v i) v;
   RV.as_seq_seq_slice rg h (V.as_seq h rv)
@@ -673,12 +673,12 @@ let insert_snoc_last_helper #a s v = ()
 
 private
 val rv_inv_rv_elems_reg:
-  #a:Type0 -> #rg:regional a ->
+  #a:Type0 -> #rst:Type -> #rg:regional rst a ->
   h:HS.mem -> rv:rvector rg ->
   i:uint32_t -> j:uint32_t{i <= j && j <= V.size_of rv} ->
   Lemma (requires (RV.rv_inv h rv))
         (ensures (RV.rv_elems_reg h rv i j))
-let rv_inv_rv_elems_reg #a #rg h rv i j = ()
+let rv_inv_rv_elems_reg #a #rst #rg h rv i j = ()
 
 // `insert_` recursively inserts proper hashes to each level `lv` by
 // accumulating a compressed hash. For example, if there are three leaf elements
@@ -1271,7 +1271,7 @@ val init_path:
       S.equal (lift_path h1 mtr p) S.empty))
 let init_path #_ mtr r =
   let nrid = HST.new_region r in
-  B.malloc r (hash_vec_r_alloc nrid) 1ul
+  B.malloc r (hash_vec_r_alloc () nrid) 1ul
 
 val clear_path:
   #hsz:hash_size_t ->
@@ -1562,7 +1562,7 @@ val mt_get_root:
      Rgl?.r_inv (hreg hsz) h1 rt /\
      // correctness
      MTH.mt_get_root (mt_lift h0 mt) (Rgl?.r_repr (hreg hsz) h0 rt) ==
-     (mt_lift h1 mt, Rgl?.r_repr (hreg hsz) h1 rt))))    
+     (mt_lift h1 mt, Rgl?.r_repr (hreg hsz) h1 rt))))
 #push-options "--z3rlimit 150 --initial_fuel 1 --max_fuel 1"
 let mt_get_root #hsz mt rt =
   let mt = CB.cast mt in
@@ -2889,7 +2889,7 @@ let mt_verify #hsz #hash_spec mt k j mtr p rt =
   let j = split_offset (MT?.offset mtv) j in
   let hh0 = HST.get () in
   let nrid = HST.new_region (B.frameOf rt) in
-  let ih = Rgl?.r_alloc (hreg hsz) nrid in
+  let ih = Rgl?.r_alloc (hreg hsz) (Rgl?.state (hreg hsz)) nrid in
   let copy = Cpy?.copy (hcpy #hsz) in
   copy (V.index !*ncp 0ul) ih;
   let hh1 = HST.get () in

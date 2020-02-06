@@ -275,10 +275,11 @@ let deserialize_hash
   (ensures (fun h0 (k, _, h) h1 -> (k ==> Rgl?.r_inv (hreg hash_size) h1 h) /\
                                    loc_disjoint (loc_buffer (CB.cast buf)) (loc_buffer h) /\
                                    modifies B.loc_none h0 h1))
-= if not ok || pos >= sz then (false, pos, Rgl?.dummy (hreg hash_size))
-  else if sz - pos < hash_size then (false, pos, Rgl?.dummy (hreg hash_size))
+= let rg = hreg hash_size in 
+  if not ok || pos >= sz then (false, pos, Rgl?.dummy rg (Rgl?.state rg))
+  else if sz - pos < hash_size then (false, pos, Rgl?.dummy rg (Rgl?.state rg))
   else begin
-    let hash = Rgl?.r_alloc (hreg hash_size) r in
+    let hash = Rgl?.r_alloc rg (Rgl?.state rg) r in
     Lib.RawBuffer.blit (CB.cast buf) pos hash 0ul hash_size;
     (true, pos + hash_size, hash)
   end
@@ -321,13 +322,15 @@ let deserialize_hash_vec
 : HST.ST (bool & uint32_t & hash_vec #hash_size)
   (requires (fun h0 -> CB.live h0 buf))
   (ensures (fun h0 _ h1 -> B.modifies B.loc_none h0 h1))
-= if not ok || pos >= sz then (false, pos, Rgl?.dummy (hvreg hash_size))
+= let rg = hvreg hash_size in
+  if not ok || pos >= sz then (false, pos, Rgl?.dummy rg (Rgl?.state rg))
   else begin
     let ok, pos, n = deserialize_uint32_t ok buf sz pos in
     if not ok then (false, pos, V.alloc_empty hash)
     else if n = 0ul then (true, pos, V.alloc_empty hash)
     else begin
-      let res = V.alloc n (Rgl?.dummy (hreg hash_size)) in
+      let hrg = hreg hash_size in
+      let res = V.alloc n (Rgl?.dummy hrg (Rgl?.state hrg)) in
       let ok, pos = deserialize_hash_vec_i ok buf sz r pos res 0ul in
       (ok, pos, res)
     end
@@ -379,7 +382,8 @@ private let deserialize_hash_vv
     if not ok then (false, pos, V.alloc_empty hash_vec)
     else if n = 0ul then (true, pos, V.alloc_empty hash_vec)
     else begin
-      let res = V.alloc n (Rgl?.dummy (hvreg hash_size)) in
+      let rg = hvreg hash_size in
+      let res = V.alloc n (Rgl?.dummy rg (Rgl?.state rg)) in
       let ok, pos = deserialize_hash_vv_i ok buf sz r pos res 0ul in
       (ok, pos, res)
     end
