@@ -301,7 +301,7 @@ let rec lemma_apply_peephole_to_code (input_hint:pos) (p:peephole) (c:code)
         equiv_option_states
           (machine_eval_code c fuel s)
           (machine_eval_code (apply_peephole_to_code input_hint p c) fuel s)))
-    (decreases %[num_ins_in_code c; c]) =
+    (decreases %[num_ins_in_code c; c; fuel; 1]) =
   match c with
   | Ins i -> (
       if input_hint = 1 then (
@@ -328,6 +328,67 @@ let rec lemma_apply_peephole_to_code (input_hint:pos) (p:peephole) (c:code)
         lemma_apply_peephole_to_code input_hint p ff s' fuel
       )
     )
-  | While cc bb -> (
-      admit ()
+  | While _ _ -> (
+      lemma_apply_peephole_to_code_while input_hint p c s fuel
     )
+
+and lemma_apply_peephole_to_code_while (input_hint:pos) (p:peephole) (c:code{While? c})
+    (s:machine_state) (fuel:nat) :
+  Lemma
+    (requires True)
+    (ensures (
+        equiv_option_states
+          (machine_eval_code c fuel s)
+          (machine_eval_code (apply_peephole_to_code input_hint p c) fuel s)))
+    (decreases %[num_ins_in_code c; c; fuel; 0]) =
+  let c' = apply_peephole_to_code input_hint p c in
+  if fuel = 0 then (
+    assert_norm (machine_eval_code c fuel s == None);
+    assert_norm (machine_eval_code c' fuel s == None)
+  ) else (
+    let While cond body = c in
+    let (s0, b) = machine_eval_ocmp s cond in
+    if not b then (
+      assert_norm (machine_eval_code c fuel s ==
+                   machine_eval_code c' fuel s)
+    ) else (
+      let s0 = {s0 with ms_trace = (BranchPredicate true)::s0.ms_trace} in
+      let body' = apply_peephole_to_code input_hint p body in
+      let s_opt1 = machine_eval_code body (fuel - 1) s0 in
+      let s_opt2 = machine_eval_code body' (fuel - 1) s0 in
+      lemma_apply_peephole_to_code input_hint p body s0 (fuel - 1);
+      assert (equiv_option_states s_opt1 s_opt2);
+      match s_opt1 with
+      | None -> (
+          assert_norm (machine_eval_code c fuel s == None);
+          match s_opt2 with
+          | None -> (
+              assert_norm (machine_eval_code c fuel s ==
+                           machine_eval_code c' fuel s)
+            )
+          | Some s2 -> (
+              assert (~ s2.ms_ok);
+              assert_norm (machine_eval_code c' fuel s == Some s2)
+            )
+        )
+      | Some s1 -> (
+          match s_opt2 with
+          | None -> (
+              assert_norm (machine_eval_code c fuel s == Some s1);
+              assert_norm (machine_eval_code c' fuel s == None)
+            )
+          | Some s2 -> (
+              assert (s1.ms_ok == s2.ms_ok);
+              if not s1.ms_ok then (
+                assert_norm (machine_eval_code c fuel s == Some s1);
+                assert_norm (machine_eval_code c' fuel s == Some s2)
+              ) else (
+                assert_norm (machine_eval_code c fuel s == machine_eval_code c (fuel - 1) s1);
+                assert_norm (machine_eval_code c' fuel s == machine_eval_code c' (fuel - 1) s2);
+                lemma_eval_code_equiv_states c (fuel - 1) s1 s2;
+                lemma_apply_peephole_to_code input_hint p c s2 (fuel - 1)
+              )
+            )
+        )
+    )
+  )
