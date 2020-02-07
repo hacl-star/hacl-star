@@ -39,12 +39,6 @@ let eq_u64_nCT a b =
 
 let eq_0_u64 a = eq_u64_nCT a (u64 0)
 
-
-val changeEndian: i:felem -> Stack unit 
-  (requires fun h -> live h i)
-  (ensures  fun h0 _ h1 -> modifies1 i h0 h1 /\ 
-    as_seq h1 i == Hacl.Spec.ECDSA.changeEndian (as_seq h0 i)) 
-
 let changeEndian i = 
   let zero = index i (size 0) in 
   let one = index i (size 1) in 
@@ -54,7 +48,6 @@ let changeEndian i =
   upd i (size 1) two; 
   upd i (size 2) one;
   upd i (size 3) zero
-
 
 let toUint64ChangeEndian i o = 
   Lib.ByteBuffer.uints_from_bytes_be o i;

@@ -391,7 +391,7 @@ let ecdsa_verification_core publicKeyBuffer hashAsFelem r s mLen m xBuffer tempB
 
 
 (* This code is not side channel resistant *)
-val ecdsa_verification:
+val ecdsa_verification_:
     pubKey:lbuffer uint64 (size 8)
   -> r:lbuffer uint64 (size 4)
   -> s: lbuffer uint64 (size 4)
@@ -408,7 +408,7 @@ val ecdsa_verification:
       modifies0 h0 h1 /\
       result == Hacl.Spec.ECDSA.ecdsa_verification (pubKeyX, pubKeyY) r s (v mLen) (as_seq h0 m))
 
-let ecdsa_verification pubKey r s mLen m =
+let ecdsa_verification_ pubKey r s mLen m =
   assert_norm (pow2 32 < pow2 61);
   push_frame();
   let tempBufferU64 = create (size 120) (u64 0) in
@@ -446,7 +446,7 @@ let ecdsa_verification pubKey r s mLen m =
         end
 
 
-val ecdsa_verification_u8:
+val ecdsa_verification:
     pubKey:lbuffer uint8 (size 64)
   -> r:lbuffer uint8 (size 32)
   -> s:lbuffer uint8 (size 32)
@@ -463,7 +463,7 @@ val ecdsa_verification_u8:
       modifies0 h0 h1 /\
       result == Hacl.Spec.ECDSA.ecdsa_verification (publicKeyX, publicKeyY) r s (v mLen) (as_seq h0 m))
 
-let ecdsa_verification_u8 pubKey r s mLen m =
+let ecdsa_verification pubKey r s mLen m =
   assert_norm (pow2 32 < pow2 61);
   push_frame();
   let h0 = ST.get() in 
@@ -492,7 +492,7 @@ let ecdsa_verification_u8 pubKey r s mLen m =
       lemma_core_0 sAsFelem h1;
       uints_from_bytes_le_nat_lemma #U64 #SEC #4 (as_seq h1 s);
 
-    let result = ecdsa_verification publicKeyAsFelem rAsFelem sAsFelem mLen m in 
+    let result = ecdsa_verification_ publicKeyAsFelem rAsFelem sAsFelem mLen m in 
     pop_frame();
 
     changeEndianLemma (uints_from_bytes_be (as_seq h1 (gsub pubKey (size 0) (size 32))));

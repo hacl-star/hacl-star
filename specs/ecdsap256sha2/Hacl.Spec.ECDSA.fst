@@ -438,6 +438,30 @@ let changeEndianLemma k =
 
   assert_norm (pow2 (2 * 64) * pow2 64 == pow2 (3 * 64))
 
+val changeEndianLemmaI: a: nat {a < pow2 256} -> Lemma 
+  (changeEndian (nat_to_intseq_le 4 a) == nat_to_intseq_be 4 a)
+
+let changeEndianLemmaI a = 
+  let a0 = nat_to_intseq_le #U64 #SEC 4 a in 
+  index_nat_to_intseq_le #U64 #SEC  4 a 0;
+  index_nat_to_intseq_le #U64 #SEC  4 a 1;
+  index_nat_to_intseq_le #U64 #SEC  4 a 2;
+  index_nat_to_intseq_le #U64 #SEC  4 a 3;
+
+  index_nat_to_intseq_be #U64 #SEC 4 a 0;
+  index_nat_to_intseq_be #U64 #SEC 4 a 2;
+  index_nat_to_intseq_be #U64 #SEC 4 a 3;
+  index_nat_to_intseq_be #U64 #SEC 4 a 1;
+  
+
+  assert(Lib.Sequence.index #_ #4 (changeEndian (nat_to_intseq_le #U64 #SEC 4 a)) 3 == Lib.Sequence.index #_ #4 (nat_to_intseq_be #U64 #SEC 4 a) 3);
+  
+  assert(Lib.Sequence.index #_ #4 (changeEndian (nat_to_intseq_le #U64 #SEC 4 a)) 2 == Lib.Sequence.index #_ #4 (nat_to_intseq_be #U64 #SEC 4 a) 2);
+  
+  assert(Lib.Sequence.index #_ #4 (changeEndian (nat_to_intseq_le #U64 #SEC 4 a)) 1 == Lib.Sequence.index #_ #4 (nat_to_intseq_be #U64 #SEC 4 a) 1);
+  
+  assert(Lib.Sequence.index #_ #4 (changeEndian (nat_to_intseq_le #U64 #SEC 4 a)) 0 == Lib.Sequence.index #_ #4 (nat_to_intseq_be #U64 #SEC 4 a) 0);
+  eq_intro (changeEndian (nat_to_intseq_le #U64 #SEC 4 a)) (nat_to_intseq_be 4 a)
 
 
 val verifyQValidCurvePointSpec:
@@ -495,47 +519,46 @@ let ecdsa_verification publicKey r s mLen input =
     end
   end
 
-
-val ecdsa_signature_nist_compliant:
-    input:lseq uint8 32
-  -> privateKey:lseq uint8 32
-  -> k:lseq uint8 32
-  -> tuple3 nat nat uint64
-
-let ecdsa_signature_nist_compliant input privateKey k =
-  let (rxN, ryN, rzN), _ = montgomery_ladder_spec k ((0,0,0), basePoint) in
-  let (xN, _, _) = _norm (rxN, ryN, rzN) in
-  let z = nat_from_bytes_le input in
-  let kFelem = nat_from_bytes_le k in
-  let privateKey = nat_from_bytes_le privateKey in
-  let resultR = xN % prime_p256_order in
-  let resultS = (z + resultR * privateKey) * pow kFelem (prime_p256_order - 2) % prime_p256_order in
-    if resultR = 0 || resultS = 0 then
-      resultR, resultS, u64 (pow2 64 - 1)
-    else
-      resultR, resultS, u64 0
-
-
 val ecdsa_signature:
-    mLen:size_nat{mLen < Def.(max_input_length SHA2_256)}
+    mLen:size_nat
   -> input:lseq uint8 mLen
   -> privateKey:lseq uint8 32
   -> k:lseq uint8 32
   -> tuple3 nat nat uint64
 
 let ecdsa_signature mLen input privateKey k =
-  let (rxN, ryN, rzN), _ = montgomery_ladder_spec k ((0,0,0), basePoint) in
-  let (xN, _, _) = _norm (rxN, ryN, rzN) in
+  assert_norm (pow2 32 < pow2 61); 
+  let (rxN, ryN, rzN), _ = montgomery_ladder_spec k ((0,0,0), basePoint) in 
+  let (xN, _, _) = _norm (rxN, ryN, rzN) in 
 
-  let hashM = Spec.Agile.Hash.hash Def.SHA2_256 input in
-  let hashChanged = changeEndian (uints_from_bytes_be hashM) in
-  let z = nat_from_intseq_le hashChanged % prime_p256_order in
-
-  let kFelem = nat_from_bytes_le k in
-  let privateKey = nat_from_bytes_le privateKey in
-  let resultR = xN % prime_p256_order in
-  let resultS = (z + resultR * privateKey) * pow kFelem (prime_p256_order - 2) % prime_p256_order in
+  let hashM = Spec.Agile.Hash.hash Def.SHA2_256 input in 
+  let z = nat_from_bytes_be hashM % prime_p256_order in 
+      
+  let kFelem = nat_from_bytes_be k in 
+  let privateKeyFelem = nat_from_bytes_be privateKey in 
+  let resultR = xN % prime_p256_order in 
+  let resultS = (z + resultR * privateKeyFelem) * pow kFelem (prime_p256_order - 2) % prime_p256_order in 
     if resultR = 0 || resultS = 0 then
       resultR, resultS, u64 (pow2 64 - 1)
     else
       resultR, resultS, u64 0
+
+
+open FStar.HyperStack
+open FStar.HyperStack.All
+open Lib.Buffer
+
+(* prove and move to ByteSeq *)
+assume val uints_to_bytes_be_nat_lemma: #t:inttype{unsigned t /\ ~(U1? t)} -> #l:secrecy_level -> len:nat{len * numbytes t < pow2 32}
+  -> n:nat{n < pow2 (bits t * len)} ->
+  Lemma (uints_to_bytes_be #t #l #len (nat_to_intseq_be #t #l len n) == nat_to_bytes_be (len * numbytes t) n)
+
+
+val changeEndianLemmaFromBeToLe: a: nat {a < pow2 256} -> h: mem -> b: lbuffer uint8 (size 32) ->
+  Lemma
+    (requires (as_seq h b == uints_to_bytes_be (changeEndian (nat_to_intseq_le 4 a))))
+    (ensures as_seq h b == nat_to_bytes_be 32 a)
+  
+let changeEndianLemmaFromBeToLe a h b = 
+  changeEndianLemmaI a;
+  uints_to_bytes_be_nat_lemma #U64 #SEC 4 a

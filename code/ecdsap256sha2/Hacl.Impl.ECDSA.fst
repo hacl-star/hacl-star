@@ -32,17 +32,13 @@ open Hacl.Impl.ECDSA.P256SHA256.KeyGeneration
 open Hacl.Impl.ECDSA.P256SHA256.Signature
 open Hacl.Impl.ECDSA.P256SHA256.Verification
 
+(* FIPS Complaint? 
 let ecdsa_p256_sha2_keyGen result privKey = 
   key_gen result privKey
+*)
 
 let ecdsa_p256_sha2_sign result mLen m privKey k = 
   ecdsa_signature result mLen m privKey k
 
-let ecdsa_p256_sha2_sign_nist result m privKey k = 
-  ecdsa_signature_nist_compliant result m privKey k
-
 let ecdsa_p256_sha2_verify mLen m pubKey r s =
   ecdsa_verification pubKey r s mLen m
-
-let ecdsa_p256_sha2_verify_u8 mLen m pubKey r s =
-  ecdsa_verification_u8 pubKey r s mLen m

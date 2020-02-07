@@ -815,15 +815,15 @@ val toUint64: i: lbuffer uint8 (32ul) -> o: felem -> Stack unit
   )
 
 let toUint64 i o = 
-  Lib.ByteBuffer.uints_from_bytes_le o i
+  Lib.ByteBuffer.uints_from_bytes_be o i
 
 
 val toUint8: i: felem ->  o: lbuffer uint8 (32ul) -> Stack unit
   (requires fun h -> live h i /\ live h o /\ disjoint i o)
   (ensures fun h0 _ h1 -> 
     modifies (loc o) h0 h1 /\ 
-    as_seq h1 o == Lib.ByteSequence.uints_to_bytes_le #_ #_ #4 (as_seq h0 i)
+    as_seq h1 o == Lib.ByteSequence.uints_to_bytes_be #_ #_ #4 (as_seq h0 i)
   )
 
 let toUint8 i o = 
-  Lib.ByteBuffer.uints_to_bytes_le (size 4) o i
+  Lib.ByteBuffer.uints_to_bytes_be (size 4) o i
