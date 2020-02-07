@@ -7,17 +7,18 @@ open Vale.X64.Machine_s
 open Vale.Def.PossiblyMonad
 open Vale.X64.Decls
 
-open Vale.Def.PossiblyMonad
-
 open Vale.X64.State
 
 open Vale.X64.Lemmas
 open Vale.X64.StateLemmas
+open Vale.Arch.HeapLemmas
 
 friend Vale.X64.Decls
 friend Vale.X64.StateLemmas
 
 module IR = Vale.Transformers.InstructionReorder
+module PH = Vale.Transformers.PeepHole
+module ME = Vale.Transformers.MovbeElim
 
 unfold
 let transformation_result_of_possibly_codes (c:possibly codes) (if_fail:code) =
@@ -111,3 +112,37 @@ let check_if_same_printed_code orig hint =
 (* See fsti *)
 let lemma_check_if_same_printed_code orig hint transformed va_s0 va_sM va_fM =
   va_sM, va_fM
+
+/// Peephole Transformation to replace movbes -> mov + bswap.
+
+let movbe_elim orig =
+  if code_modifies_ghost orig then (
+    {
+      success = ffalse "code directly modifies ghost state (via ins_Ghost instruction)";
+      result = orig;
+    }
+  ) else (
+    {
+      success = ttrue;
+      result = PH.apply_peephole_to_code ME.movbe_elim_input_hint ME.movbe_elim_ph orig;
+    }
+  )
+
+let lemma_movbe_elim orig transformed va_s0 va_sM va_fM =
+  if code_modifies_ghost orig then (va_sM, va_fM) else (
+    PH.lemma_apply_peephole_to_code ME.movbe_elim_input_hint ME.movbe_elim_ph orig
+      va_fM (state_to_S va_s0);
+    let Some s = machine_eval_code orig va_fM (state_to_S va_s0) in
+    let Some s' = machine_eval_code transformed va_fM (state_to_S va_s0) in
+    lemma_IR_equiv_states_to_equiv_states s s';
+    assert (eval_code orig va_s0 va_fM va_sM);
+    assert ({s with ms_trace = []} == (state_to_S va_sM));
+    let va_sM' = state_of_S s' in
+    lemma_to_of s';
+    assert (state_to_S va_sM' == {s' with ms_trace = []});
+    assert (state_to_S va_sM == {s with ms_trace = []});
+    assert (IR.equiv_states ({s with ms_trace = []}) ({s' with ms_trace = []}));
+    assert (equiv_states va_sM va_sM');
+    assert (va_ensure_total transformed va_s0 va_sM' va_fM);
+    va_sM', va_fM
+  )
