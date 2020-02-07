@@ -15,7 +15,7 @@
         "refinement_interpretation_Tm_refine_a5c1b398f96e3506835dfbe23f668463"
       ],
       0,
-      "758071f163d827b2b22486cf7a23f928"
+      "22533c02a6ffa50fd3b3bd477ab04470"
     ],
     [
       "Hacl.Impl.Frodo.Pack.lemma_split",
@@ -46,7 +46,7 @@
         "typing_Lib.Sequence.op_At_Bar", "typing_Lib.Sequence.sub"
       ],
       0,
-      "10966d320f3ca875a8bd63529e441b6c"
+      "75b71f3b3d95b661c9ebe6ef514f9160"
     ],
     [
       "Hacl.Impl.Frodo.Pack.frodo_pack8",
@@ -99,7 +99,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "1296f8a35539f890b5affcfba994014e"
+      "46bfac4963f5dc6860f2c941225e0448"
     ],
     [
       "Hacl.Impl.Frodo.Pack.frodo_pack8",
@@ -271,7 +271,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "91c6cb383db2303bac0937b78a40d98b"
+      "7b8d70e41b87884196fa7299265b96ba"
     ],
     [
       "Hacl.Impl.Frodo.Pack.frodo_pack",
@@ -338,7 +338,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "79b50fdd31d647a390fb184b7456b544"
+      "f3bdff19fa6341cafb4f767972a7977e"
     ],
     [
       "Hacl.Impl.Frodo.Pack.frodo_pack",
@@ -384,7 +384,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "67d206f6af8b0f54c3ad1b333a8d3e8e"
+      "d3e46e1cd4934a9a23587794a25e5ec6"
     ],
     [
       "Hacl.Impl.Frodo.Pack.frodo_pack",
@@ -446,6 +446,7 @@
         "interpretation_Tm_abs_c7bb29bc094a7f59c71fdfeafebefa0d",
         "lemma_FStar.Map.lemma_ContainsDom",
         "lemma_FStar.Seq.Base.lemma_len_append",
+        "lemma_FStar.Seq.Base.lemma_len_slice",
         "lemma_FStar.Seq.Properties.slice_length",
         "lemma_FStar.UInt.pow2_values", "lemma_FStar.UInt32.uv_inv",
         "lemma_Lib.Buffer.as_seq_gsub", "lemma_Lib.Buffer.modifies_sub",
@@ -476,7 +477,6 @@
         "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
         "refinement_interpretation_Tm_refine_096dcb399122345db27f37346c43e5dc",
         "refinement_interpretation_Tm_refine_0ec011aea9f93256a3547ad9f0c667f1",
-        "refinement_interpretation_Tm_refine_124fc0fe33ce339c154d1a596e16caad",
         "refinement_interpretation_Tm_refine_12a0c996bc412dba4057dcb00c925231",
         "refinement_interpretation_Tm_refine_288fffd419394f450ebf29a6cb5759d8",
         "refinement_interpretation_Tm_refine_29df1888085853325a94ea8a11f8d3c0",
@@ -488,16 +488,15 @@
         "refinement_interpretation_Tm_refine_4f55998d39af884394aa07c1f9207799",
         "refinement_interpretation_Tm_refine_4fa8e2dd96f8bb1e23e6574326e9e019",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_68ee6d2c8678eb431259a3d4f412550b",
         "refinement_interpretation_Tm_refine_6e0c40d9b0e603171a74b91b484a6c19",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
         "refinement_interpretation_Tm_refine_7a22ac82553610633db0cd158a7e568f",
+        "refinement_interpretation_Tm_refine_81407705a0828c2c1b1976675443f647",
         "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
         "refinement_interpretation_Tm_refine_87b488a9cf5689c8094f1a153b9356a0",
         "refinement_interpretation_Tm_refine_9d3fd79fd314167f1a9c213a188da3ec",
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
         "refinement_interpretation_Tm_refine_9ff150f589411d5a40376aa0c5e1ca86",
-        "refinement_interpretation_Tm_refine_a3ba4d7df6109617224e9bc6beb04b1b",
         "refinement_interpretation_Tm_refine_a8ac4e0098b50328dadbc05b3b27c877",
         "refinement_interpretation_Tm_refine_a8c1377bbc772c9c0a3fbd5fecf67264",
         "refinement_interpretation_Tm_refine_b550ca9347e0645a53715102a08d8fa1",
@@ -529,12 +528,11 @@
         "typing_LowStar.Monotonic.Buffer.len",
         "typing_LowStar.Monotonic.Buffer.loc_buffer",
         "typing_LowStar.Monotonic.Buffer.mgsub", "typing_Prims.pow2",
-        "typing_Spec.Frodo.Pack.frodo_pack8",
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.PUB@tok",
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "c5c531c9b11f88278813640fe838572d"
+      "4f22d27879686ccd27767628f0d11b58"
     ],
     [
       "Hacl.Impl.Frodo.Pack.frodo_unpack8",
@@ -591,7 +589,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "39ac464e10f97461dee8b959b0b72304"
+      "eb2abebdaef20ae54341c4406d6beb72"
     ],
     [
       "Hacl.Impl.Frodo.Pack.frodo_unpack8",
@@ -776,7 +774,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "ccfa8a8a7024e2b5092208d4abefd4e3"
+      "81e2a20ae995739b9326f25a909337d1"
     ],
     [
       "Hacl.Impl.Frodo.Pack.frodo_unpack_loop",
@@ -842,7 +840,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "ca7418d2dcbed7424f38f4b747375b25"
+      "9e4d41c444193abada4cd2e0d07f645c"
     ],
     [
       "Hacl.Impl.Frodo.Pack.frodo_unpack_loop",
@@ -889,7 +887,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "dcf7f6318bd49d7cfc3dbafd2f0a6abf"
+      "0167941e2c87c72dfddfd5c55fdc7a98"
     ],
     [
       "Hacl.Impl.Frodo.Pack.frodo_unpack_loop",
@@ -1022,7 +1020,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "28030e435451fc1fd3b126969263b83b"
+      "96a77d2677abed8c6ce254d5d613dbbf"
     ],
     [
       "Hacl.Impl.Frodo.Pack.frodo_unpack",
@@ -1078,7 +1076,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "98fe73bc7c23de7709885c7339b06ba9"
+      "0d0d959928e663312f90ab69df6778c9"
     ],
     [
       "Hacl.Impl.Frodo.Pack.frodo_unpack",
@@ -1125,7 +1123,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "a641e2dd6013b28e07fda0396e246aab"
+      "b4d0bb77548fbf6f70f98fe3ad3aede4"
     ],
     [
       "Hacl.Impl.Frodo.Pack.frodo_unpack",
@@ -1220,7 +1218,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "474cccf8646424df8d447fa10295d178"
+      "d91ff397eedaf628e20fb764cf6774af"
     ]
   ]
 ]

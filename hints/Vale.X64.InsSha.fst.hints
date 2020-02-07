@@ -15,7 +15,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "e6253eec278b3a17ff6f6607d4f67773"
+      "6df2310ebcec173b057efc75102df276"
     ],
     [
       "Vale.X64.InsSha.va_lemma_SHA256_rnds2",
@@ -36,7 +36,7 @@
         "typing_Vale.SHA.SHA_helpers.k"
       ],
       0,
-      "ec0f05583d150995b866ae2c89872f70"
+      "795372eefbfe6dd4b2cdc7537e3a342a"
     ],
     [
       "Vale.X64.InsSha.va_lemma_SHA256_rnds2",
@@ -317,7 +317,7 @@
         "typing_tok_Vale.X64.Instruction_s.PreserveFlags@tok", "unit_typing"
       ],
       0,
-      "3c09b44ec711c079ba46299b292079a0"
+      "13d136f888fc3b29db81024d8d21c912"
     ],
     [
       "Vale.X64.InsSha.va_wp_SHA256_rnds2",
@@ -333,7 +333,7 @@
         "typing_Vale.SHA.SHA_helpers.k"
       ],
       0,
-      "f899e1143de36aa2eaf721bf8596dc5f"
+      "824ae3fd74803bb85e5e973b018abc85"
     ],
     [
       "Vale.X64.InsSha.va_wpProof_SHA256_rnds2",
@@ -349,12 +349,12 @@
         "data_typing_intro_Vale.X64.Machine_s.Reg@tok",
         "equality_tok_Vale.X64.QuickCode.Mod_None@tok", "equation_Prims.nat",
         "equation_Vale.Arch.HeapImpl.vale_heaplets",
+        "equation_Vale.X64.Decls.upd_register",
         "equation_Vale.X64.Decls.va_ensure_total",
         "equation_Vale.X64.Decls.va_fuel",
         "equation_Vale.X64.Decls.va_require_total",
         "equation_Vale.X64.Decls.va_state_eq",
         "equation_Vale.X64.Decls.va_upd_ok",
-        "equation_Vale.X64.Decls.va_upd_reg",
         "equation_Vale.X64.InsSha.va_wp_SHA256_rnds2",
         "equation_Vale.X64.Machine_s.n_reg_files",
         "equation_Vale.X64.Machine_s.n_regs",
@@ -412,7 +412,7 @@
         "typing_tok_Vale.X64.QuickCode.Mod_None@tok", "unit_typing"
       ],
       0,
-      "8f6778838bc5297739a23f03fe0064f5"
+      "c10049daa8a0d5596c8e072371421c33"
     ],
     [
       "Vale.X64.InsSha.va_quick_SHA256_rnds2",
@@ -425,7 +425,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "31c8d85c046877e469f37bf3788921a6"
+      "16d535c4705958fd99f62fab0c9213eb"
     ],
     [
       "Vale.X64.InsSha.va_code_SHA256_msg1",
@@ -441,7 +441,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "94769e9a073f05635e80c4e38ac2cd95"
+      "a7a3c28cbbdd79f9a924a4ac180fee88"
     ],
     [
       "Vale.X64.InsSha.va_lemma_SHA256_msg1",
@@ -458,7 +458,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "eb42361da09d08a984ba729c6e97ef8f"
+      "78584550ae43d57d0c00e007d2ad1019"
     ],
     [
       "Vale.X64.InsSha.va_lemma_SHA256_msg1",
@@ -728,7 +728,7 @@
         "typing_tok_Vale.X64.Instruction_s.PreserveFlags@tok", "unit_typing"
       ],
       0,
-      "5d6afad11ea6cae8991f3763ce931c3f"
+      "2a27850e619c1134b4975bae847fba08"
     ],
     [
       "Vale.X64.InsSha.va_wp_SHA256_msg1",
@@ -745,7 +745,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "725f9a008704f2d6da728ece800f5588"
+      "7c676158496f5f43fae1c32f074c3c41"
     ],
     [
       "Vale.X64.InsSha.va_wpProof_SHA256_msg1",
@@ -757,12 +757,12 @@
         "Prims_pretyping_f8666440faa91836cc5a13998af863fc", "bool_inversion",
         "equation_Prims.nat", "equation_Vale.Arch.HeapImpl.vale_heaplets",
         "equation_Vale.SHA.SHA_helpers.counter",
+        "equation_Vale.X64.Decls.upd_register",
         "equation_Vale.X64.Decls.va_ensure_total",
         "equation_Vale.X64.Decls.va_fuel",
         "equation_Vale.X64.Decls.va_require_total",
         "equation_Vale.X64.Decls.va_state_eq",
         "equation_Vale.X64.Decls.va_upd_ok",
-        "equation_Vale.X64.Decls.va_upd_reg",
         "equation_Vale.X64.InsSha.va_wp_SHA256_msg1",
         "equation_Vale.X64.Memory.vale_full_heap_equal",
         "equation_Vale.X64.QuickCode.t_require",
@@ -805,7 +805,7 @@
         "typing_Vale.X64.State.update_reg_xmm", "unit_typing"
       ],
       0,
-      "ed5331e8c410673afe7a743b85a36321"
+      "ab95963f39ce6bc022444cc98a45d20f"
     ],
     [
       "Vale.X64.InsSha.va_quick_SHA256_msg1",
@@ -818,7 +818,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "feca48e643c2eefa62ae6710e0c98939"
+      "f23cef7ad14fd8e9aabffa56aaaaebb9"
     ],
     [
       "Vale.X64.InsSha.va_code_SHA256_msg2",
@@ -834,7 +834,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "d51f534d51fb67698751fb06dbdcb25b"
+      "5fa28c89957ea591a32f49d7474fe6d7"
     ],
     [
       "Vale.X64.InsSha.va_lemma_SHA256_msg2",
@@ -851,7 +851,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "313f8aa48ea51b65f779fe17eb0bbe36"
+      "15e2efd2c79a28a74b1dfbfbbd5832ff"
     ],
     [
       "Vale.X64.InsSha.va_lemma_SHA256_msg2",
@@ -1122,7 +1122,7 @@
         "typing_tok_Vale.X64.Instruction_s.PreserveFlags@tok", "unit_typing"
       ],
       0,
-      "227319d8410418d2806bb85f114a215a"
+      "866ccda815c27c2b92f636276a8a4fa0"
     ],
     [
       "Vale.X64.InsSha.va_wp_SHA256_msg2",
@@ -1139,7 +1139,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "b2cf606e2a80a70c4b5b68bf7abf746b"
+      "df83540438b1b81a920ee527aab2a9d0"
     ],
     [
       "Vale.X64.InsSha.va_wpProof_SHA256_msg2",
@@ -1151,12 +1151,12 @@
         "Prims_pretyping_f8666440faa91836cc5a13998af863fc", "bool_inversion",
         "equation_Prims.nat", "equation_Vale.Arch.HeapImpl.vale_heaplets",
         "equation_Vale.SHA.SHA_helpers.counter",
+        "equation_Vale.X64.Decls.upd_register",
         "equation_Vale.X64.Decls.va_ensure_total",
         "equation_Vale.X64.Decls.va_fuel",
         "equation_Vale.X64.Decls.va_require_total",
         "equation_Vale.X64.Decls.va_state_eq",
         "equation_Vale.X64.Decls.va_upd_ok",
-        "equation_Vale.X64.Decls.va_upd_reg",
         "equation_Vale.X64.InsSha.va_wp_SHA256_msg2",
         "equation_Vale.X64.Memory.vale_full_heap_equal",
         "equation_Vale.X64.QuickCode.t_require",
@@ -1199,7 +1199,7 @@
         "typing_Vale.X64.State.update_reg_xmm", "unit_typing"
       ],
       0,
-      "8e9b5424aacc4ac841ef75f1c7a27ea8"
+      "1639a94f0b3f38d7c187ab805a65f9fc"
     ],
     [
       "Vale.X64.InsSha.va_quick_SHA256_msg2",
@@ -1212,7 +1212,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "80fb3db27e6edfa517fac13fe9045369"
+      "cc4ab4e4ae797c7be8855648b13df049"
     ]
   ]
 ]
