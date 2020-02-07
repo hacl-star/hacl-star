@@ -76,6 +76,15 @@ val index_nat_to_intseq_le:
   -> Lemma (Seq.index (nat_to_intseq_le #t #l len n) i ==
            uint #t #l (n / pow2 (bits t * i) % pow2 (bits t)))
 
+val index_nat_to_intseq_be:
+    #t:inttype{unsigned t}
+  -> #l:secrecy_level
+  -> len:size_nat
+  -> n:nat{n < pow2 (bits t * len)}
+  -> i:nat{i < len}
+  -> Lemma (Seq.index (nat_to_intseq_be #t #l len n) (len - i - 1) ==
+           uint #t #l (n / pow2 (bits t * i) % pow2 (bits t)))
+
 inline_for_extraction
 val nat_to_bytes_be: #l:secrecy_level -> len:nat -> n:nat{n < pow2 (8 * len)}
   -> b:bytes_l l{length b == len /\ n == nat_from_intseq_be #U8 b}
