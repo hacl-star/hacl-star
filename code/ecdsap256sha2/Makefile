@@ -30,11 +30,6 @@ dist/Makefile.basic: $(filter-out %/prims.krml,$(ALL_KRML_FILES))
 	  -no-prefix 'Hacl.Test.ECDSA' \
 	  -skip-compilation
 
-$(HACL_HOME)/tests/ecdsa-common.o: dist/Makefile.basic
-$(HACL_HOME)/tests/ecdsa-common.o: CFLAGS += -I../../lib/c -march=native -mtune=native -O3
-
-dist/ecdsa-test.exe: $(HACL_HOME)/tests/ecdsa-common.o dist/libecdsa.a
-
 dist/test.exe: dist/Hacl_Test_ECDSA.o $(KREMLIN_HOME)/kremlib/dist/generic/libkremlib.a dist/libecdsa.a
 
 %.exe:
