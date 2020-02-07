@@ -379,3 +379,28 @@ noextract
 val vec512_store_le: b:lbuffer uint8 64ul -> vec512 -> ST unit
   (requires fun h -> live h b)
   (ensures  fun h0 _ h1 -> live h1 b /\ modifies (loc b) h0 h1)
+
+
+noextract
+val vec512_interleave_low32: vec512 -> vec512 -> vec512
+
+noextract
+val vec512_interleave_high32: vec512 -> vec512 -> vec512
+
+noextract
+val vec512_interleave_low64: vec512 -> vec512 -> vec512
+
+noextract
+val vec512_interleave_high64: vec512 -> vec512 -> vec512
+
+noextract
+val vec512_interleave_low128: vec512 -> vec512 -> vec512
+
+noextract
+val vec512_interleave_high128: vec512 -> vec512 -> vec512
+
+noextract
+val vec512_interleave_low256: vec512 -> vec512 -> vec512
+
+noextract
+val vec512_interleave_high256: vec512 -> vec512 -> vec512

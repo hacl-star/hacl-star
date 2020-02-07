@@ -397,5 +397,27 @@ typedef __m512i Lib_IntVector_Intrinsics_vec512;
 #define Lib_IntVector_Intrinsics_vec512_store_le(x0, x1) \
   (_mm512_storeu_si512((__m512i*)(x0), x1))
 
+#define Lib_IntVector_Intrinsics_vec512_interleave_low32(x1, x2) \
+  (_mm512_unpacklo_epi32(x1, x2))
 
+#define Lib_IntVector_Intrinsics_vec512_interleave_high32(x1, x2) \
+  (_mm512_unpackhi_epi32(x1, x2))
+
+#define Lib_IntVector_Intrinsics_vec512_interleave_low64(x1, x2) \
+  (_mm512_unpacklo_epi64(x1, x2))
+
+#define Lib_IntVector_Intrinsics_vec512_interleave_high64(x1, x2) \
+  (_mm512_unpackhi_epi64(x1, x2))
+
+#define Lib_IntVector_Intrinsics_vec512_interleave_low128(x1, x2) \
+  (_mm512_shuffle_i32x4(_mm512_shuffle_i32x4(x1, x2, 0x88), _mm512_shuffle_i32x4(x1, x2, 0x88), 0xd8)) //TODO : FIX!
+
+#define Lib_IntVector_Intrinsics_vec512_interleave_high128(x1, x2) \
+  (_mm512_shuffle_i32x4(_mm512_shuffle_i32x4(x1, x2, 0xdd), _mm512_shuffle_i32x4(x1, x2, 0xdd), 0xd8)) //TODO : FIX!
+
+#define Lib_IntVector_Intrinsics_vec512_interleave_low256(x1, x2) \
+  (_mm512_shuffle_i32x4(x1, x2, 0x44))
+
+#define Lib_IntVector_Intrinsics_vec512_interleave_high256(x1, x2) \
+  (_mm512_shuffle_i32x4(x1, x2, 0xee))
 #endif

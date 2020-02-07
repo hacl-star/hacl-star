@@ -155,22 +155,24 @@ let transpose8x8 (vs:uint32xN 8 & uint32xN 8 & uint32xN 8 & uint32xN 8 & uint32x
   let v5' = vec_interleave_high v4 v5 in
   let v6' = vec_interleave_low v6 v7 in
   let v7' = vec_interleave_high v6 v7 in
-  let v0'' = vec_interleave_low_n 4 v0' v2' in
-  let v1'' = vec_interleave_high_n 4 v0' v2' in
-  let v2'' = vec_interleave_low_n 4 v1' v3' in
-  let v3'' = vec_interleave_high_n 4 v1' v3' in
-  let v4'' = vec_interleave_low_n 4 v4' v6' in
-  let v5'' = vec_interleave_high_n 4 v4' v6' in
-  let v6'' = vec_interleave_low_n 4 v5' v7' in
-  let v7'' = vec_interleave_high_n 4 v5' v7' in
-  let v0''' = vec_interleave_low_n 2 v0'' v4'' in
-  let v1''' = vec_interleave_high_n 2 v0'' v4'' in
-  let v2''' = vec_interleave_low_n 2 v1'' v5'' in
-  let v3''' = vec_interleave_high_n 2 v1'' v5'' in
-  let v4''' = vec_interleave_low_n 2 v2'' v6'' in
-  let v5''' = vec_interleave_high_n 2 v2'' v6'' in
-  let v6''' = vec_interleave_low_n 2 v3'' v7'' in
-  let v7''' = vec_interleave_high_n 2 v3'' v7'' in
+
+  let v0'' = vec_interleave_low_n 2 v0' v2' in
+  let v1'' = vec_interleave_high_n 2 v0' v2' in
+  let v2'' = vec_interleave_low_n 2 v1' v3' in
+  let v3'' = vec_interleave_high_n 2 v1' v3' in
+  let v4'' = vec_interleave_low_n 2 v4' v6' in
+  let v5'' = vec_interleave_high_n 2 v4' v6' in
+  let v6'' = vec_interleave_low_n 2 v5' v7' in
+  let v7'' = vec_interleave_high_n 2 v5' v7' in
+
+  let v0''' = vec_interleave_low_n 4 v0'' v4'' in
+  let v1''' = vec_interleave_high_n 4 v0'' v4'' in
+  let v2''' = vec_interleave_low_n 4 v1'' v5'' in
+  let v3''' = vec_interleave_high_n 4 v1'' v5'' in
+  let v4''' = vec_interleave_low_n 4 v2'' v6'' in
+  let v5''' = vec_interleave_high_n 4 v2'' v6'' in
+  let v6''' = vec_interleave_low_n 4 v3'' v7'' in
+  let v7''' = vec_interleave_high_n 4 v3'' v7'' in
   (v0''',v2''',v4''',v6''',v1''',v3''',v5''',v7''')
 
 let transpose8 (st:state 8) : state 8 =

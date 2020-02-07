@@ -285,20 +285,21 @@ let vec_interleave_low (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) =
   | U32,4 -> vec128_interleave_low32 x y
   | U64,2 -> vec128_interleave_low64 x y
   | U32,8 -> vec256_interleave_low32 x y
+  | U32,16 -> vec512_interleave_low32 x y
   | U64,4 -> vec256_interleave_low64 x y
   | U128,2 -> vec256_interleave_low128 x y
 
 let vec_interleave_low_n (#t:v_inttype) (#w:width) (n:width) (x:vec_t t w) (y:vec_t t w) =
   match t,w,n with
   | _,1,_ -> x
+  | _,_,1 -> vec_interleave_low x y
   | U32,4,2 -> vec128_interleave_low64 x y
-  //cast U32 4 (vec_interleave_low (cast U64 2 x) (cast U64 2 y))
-  | U32,8,4 -> vec256_interleave_low64 x y
-  //cast U32 8 (vec_interleave_low (cast U64 4 x) (cast U64 4 y))
-  | U32,8,2 -> vec256_interleave_low128 x y
-  //cast U32 8 (vec_interleave_low (cast U128 2 x) (cast U128 2 y))
+  | U32,8,2 -> vec256_interleave_low64 x y
+  | U32,8,4 -> vec256_interleave_low128 x y
+  | U32,16,2 -> vec512_interleave_low64 x y
+  | U32,16,4 -> vec512_interleave_low128 x y
+  | U32,16,8 -> vec512_interleave_low256 x y
   | U64,4,2 -> vec256_interleave_low128 x y
-  //cast U64 4 (vec_interleave_low (cast U128 2 x) (cast U128 2 y))
   | _ -> admit()
 
 let vec_interleave_low_lemma2 #t v1 v2 = admit()
@@ -306,8 +307,8 @@ let vec_interleave_low_lemma_uint32_4 v1 v2 = admit()
 let vec_interleave_low_lemma_uint32_8 v1 v2 = admit()
 let vec_interleave_low_lemma_uint64_4 v1 v2 = admit()
 let vec_interleave_low_n_lemma_uint32_4_2 v1 v2 = admit()
-let vec_interleave_low_n_lemma_uint32_8_2 v1 v2 = admit()
 let vec_interleave_low_n_lemma_uint32_8_4 v1 v2 = admit()
+let vec_interleave_low_n_lemma_uint32_8_2 v1 v2 = admit()
 let vec_interleave_low_n_lemma_uint64_4_2 v1 v2 = admit()
 
 let vec_interleave_high (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) =
@@ -316,20 +317,21 @@ let vec_interleave_high (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) =
   | U32,4 -> vec128_interleave_high32 x y
   | U64,2 -> vec128_interleave_high64 x y
   | U32,8 -> vec256_interleave_high32 x y
+  | U32,16 -> vec512_interleave_high32 x y
   | U64,4 -> vec256_interleave_high64 x y
   | U128,2 -> vec256_interleave_high128 x y
 
 let vec_interleave_high_n (#t:v_inttype) (#w:width) (n:width) (x:vec_t t w) (y:vec_t t w) =
   match t,w,n with
   | _,1,_ -> x
+  | _,_,1 -> vec_interleave_high x y
   | U32,4,2 -> vec128_interleave_high64 x y
-  //cast U32 4 (vec_interleave_high (cast U64 2 x) (cast U64 2 y))
-  | U32,8,4 -> vec256_interleave_high64 x y
-  //cast U32 8 (vec_interleave_high (cast U64 4 x) (cast U64 4 y))
-  | U32,8,2 -> vec256_interleave_high128 x y
-  //cast U32 8 (vec_interleave_high (cast U128 2 x) (cast U128 2 y))
+  | U32,8,2 -> vec256_interleave_high64 x y
+  | U32,8,4 -> vec256_interleave_high128 x y
+  | U32,16,2 -> vec512_interleave_high64 x y
+  | U32,16,4 -> vec512_interleave_high128 x y
+  | U32,16,8 -> vec512_interleave_high256 x y
   | U64,4,2 -> vec256_interleave_high128 x y
-  //cast U64 4 (vec_interleave_high (cast U128 2 x) (cast U128 2 y))
   | _ -> admit()
 
 let vec_interleave_high_lemma2 #t v1 v2 = admit()
@@ -337,8 +339,8 @@ let vec_interleave_high_lemma_uint32_4 v1 v2 = admit()
 let vec_interleave_high_lemma_uint32_8 v1 v2 = admit()
 let vec_interleave_high_lemma_uint64_4 v1 v2 = admit()
 let vec_interleave_high_n_lemma_uint32_4_2 v1 v2 = admit()
-let vec_interleave_high_n_lemma_uint32_8_2 v1 v2 = admit()
 let vec_interleave_high_n_lemma_uint32_8_4 v1 v2 = admit()
+let vec_interleave_high_n_lemma_uint32_8_2 v1 v2 = admit()
 let vec_interleave_high_n_lemma_uint64_4_2 v1 v2 = admit()
 let vec_shift_right_uint128_small2 v1 s = admit()
 
