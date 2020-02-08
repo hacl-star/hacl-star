@@ -176,6 +176,28 @@ let rec index_nat_to_intseq_le #t #l len n i =
     }
     end
 
+
+let rec index_nat_to_intseq_be #t #l len n i = 
+  if i = 0 then ()
+  else
+    begin
+      let len' = len - 1 in 
+      let i' = i - 1 in 
+      let n' = (n / pow2 (bits t)) in
+      calc (==) {
+      Seq.index (nat_to_intseq_be #t #l len' n') (len' - i' - 1);
+      == {index_nat_to_intseq_be #t #l len' n' i'} 
+      uint (n' / pow2 (bits t * i') % pow2 (bits t)); 
+      == {}
+      uint (n / pow2 (bits t) / pow2 (bits t * i') % pow2 (bits t));
+      == {Math.Lemmas.division_multiplication_lemma n (pow2 (bits t)) (pow2 (bits t * i'))}
+      uint (n / (pow2 (bits t) *  pow2 (bits t * i')) % pow2 (bits t));
+      == {Math.Lemmas.pow2_plus (bits t) (bits t * i')}
+      uint (n / (pow2 (bits t + bits t * i')) % pow2 (bits t)); 
+      == {Math.Lemmas.distributivity_add_right (bits t) 1 (i - 1)}
+      uint (n / (pow2 (bits t * i)) % pow2 (bits t)); }
+    end
+  
 #reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
 
 let nat_to_bytes_be = nat_to_intseq_be_ #U8

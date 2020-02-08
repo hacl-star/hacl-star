@@ -92,7 +92,7 @@ let _norm (p:point_nat): (point_nat) =
 let scalar = lbytes 32
 
 let ith_bit (k:lbytes 32) (i:nat{i < 256}) : uint64 =
-  let q = i / 8 in let r = size (i % 8) in
+  let q = 31 - i / 8 in let r = size (i % 8) in
   to_u64 ((index k q >>. r) &. u8 1)
 
 val _ml_step0: p: point_nat -> q: point_nat -> tuple2 point_nat point_nat
