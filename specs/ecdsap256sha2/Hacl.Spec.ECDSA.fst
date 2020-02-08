@@ -468,7 +468,7 @@ val verifyQValidCurvePointSpec:
   publicKey:tuple3 nat nat nat{~(isPointAtInfinity publicKey)} -> bool
 
 let verifyQValidCurvePointSpec publicKey =
-  let x, y, z = publicKey in
+  let (x: nat), (y:nat), (z:nat) = publicKey in
   x < prime256 &&
   y < prime256 &&
   z < prime256 &&
@@ -485,7 +485,8 @@ let checkCoordinates r s =
 
 
 unfold
-let basePoint: point_nat =
+let basePoint: point_nat_prime =
+  assert_norm (0x6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296 < prime256);
   (0x6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296,
    0x4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5,
    1)
@@ -506,11 +507,11 @@ let ecdsa_verification publicKey r s mLen input =
       begin
       let open Lib.ByteSequence in
       let hashResult = Spec.Agile.Hash.hash Def.SHA2_256 input in
-      let hashNat = nat_from_intseq_le (changeEndian(uints_from_bytes_be hashResult)) % prime_p256_order in
+      let hashNat = nat_from_intseq_le (changeEndian(uints_from_bytes_be hashResult)) % prime_p256_order in 
       let u1 = nat_to_bytes_le 32 (pow s (prime_p256_order - 2) * hashNat % prime_p256_order) in
       let u2 = nat_to_bytes_le 32 (pow s (prime_p256_order - 2) * r % prime_p256_order) in
       let pointAtInfinity = (0, 0, 0) in
-      let u1D, _ = montgomery_ladder_spec u1 (pointAtInfinity, basePoint) in
+      let u1D, _ = montgomery_ladder_spec u1 (pointAtInfinity, basePoint) in admit();
       let u2D, _ = montgomery_ladder_spec u2 (pointAtInfinity, publicJacobian) in
       let sumPoints = _point_add u1D u2D in
       let pointNorm = _norm sumPoints in
@@ -528,9 +529,8 @@ val ecdsa_signature:
 
 let ecdsa_signature mLen input privateKey k =
   assert_norm (pow2 32 < pow2 61); 
-  let (rxN, ryN, rzN), _ = montgomery_ladder_spec k ((0,0,0), basePoint) in 
-  let (xN, _, _) = _norm (rxN, ryN, rzN) in 
-
+  let r, _ = montgomery_ladder_spec k ((0,0,0), basePoint) in 
+  let (xN, _, _) = _norm r in 
   let hashM = Spec.Agile.Hash.hash Def.SHA2_256 input in 
   let z = nat_from_bytes_be hashM % prime_p256_order in 
       

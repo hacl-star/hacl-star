@@ -11,7 +11,7 @@ open Lib.IntTypes
 
 
 noextract
-val fromDomain_: a: int -> Tot nat
+val fromDomain_: a: int -> Tot (a: nat {a < prime256})
 
 noextract
 val fromDomainPoint: a: tuple3 nat nat nat -> Tot (r: tuple3 nat nat nat 

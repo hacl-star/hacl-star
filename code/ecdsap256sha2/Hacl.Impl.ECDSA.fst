@@ -28,7 +28,6 @@ open Hacl.Impl.ECDSA.MontgomeryMultiplication
 
 open Hacl.Impl.P256.Signature.Common
 
-open Hacl.Impl.ECDSA.P256SHA256.KeyGeneration
 open Hacl.Impl.ECDSA.P256SHA256.Signature
 open Hacl.Impl.ECDSA.P256SHA256.Verification
 

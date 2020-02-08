@@ -18,7 +18,7 @@ open Hacl.Spec.P256
 
 let prime = prime256
 
-val lemma_xToSpecification: pxD: nat -> pyD: nat -> pzD: nat -> 
+val lemma_xToSpecification: pxD: nat {pxD < prime256} -> pyD: nat {pyD < prime256} -> pzD: nat  {pzD < prime256} -> 
   s: nat{fromDomain_ s = 4 * pxD * pyD * pyD % prime} -> 
   m: nat{fromDomain_ m = (((-3) * pzD * pzD * pzD * pzD + 3 * pxD * pxD)) % prime} -> 
   x3: nat{
@@ -33,7 +33,7 @@ val lemma_xToSpecification: pxD: nat -> pyD: nat -> pzD: nat ->
 let lemma_xToSpecification pxD pyD pzD s m x3 = ()
 
 
-val lemma_yToSpecification: pxD: nat -> pyD: nat -> pzD: nat ->
+val lemma_yToSpecification: pxD: nat {pxD < prime256} -> pyD: nat {pyD < prime256} -> pzD: nat  {pzD < prime256} ->
   s: nat {s = toDomain_ (4 * pxD * pyD * pyD % prime)} -> 
   m: nat {m = toDomain_ (((-3) * pzD * pzD * pzD * pzD + 3 * pxD * pxD) % prime)} ->
   x3: nat{
@@ -52,7 +52,7 @@ val lemma_yToSpecification: pxD: nat -> pyD: nat -> pzD: nat ->
 let lemma_yToSpecification pxD pyD pzD s m x3 y3 = ()
 
 
-val lemma_zToSpecification: pxD: nat ->  pyD: nat -> pzD: nat -> 
+val lemma_zToSpecification: pxD: nat {pxD < prime256} -> pyD: nat {pyD < prime256} -> pzD: nat  {pzD < prime256} ->
   z3: nat{fromDomain_ z3 = 2 * pyD * pzD % prime} -> 
   Lemma (
     let (xN, yN, zN) = _point_double (pxD, pyD, pzD) in 

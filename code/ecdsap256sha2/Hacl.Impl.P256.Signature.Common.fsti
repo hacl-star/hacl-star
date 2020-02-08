@@ -68,10 +68,11 @@ val isPointAtInfinityPublic: p:point -> Stack bool
 (* This is unused internally and not exposed in the top-level API *)
 val isPointOnCurvePublic: p:point -> Stack bool
   (requires fun h -> live h p /\    
-    as_nat h (gsub p (size 0) (size 4)) < prime /\ 
-    as_nat h (gsub p (size 4) (size 4)) < prime /\
+    as_nat h (gsub p (size 0) (size 4)) < prime256 /\ 
+    as_nat h (gsub p (size 4) (size 4)) < prime256 /\
     as_nat h (gsub p (size 8) (size 4)) == 1)
   (ensures fun h0 r h1 ->
+    assert_norm (1 < prime256);
     modifies0 h0 h1 /\ 
     (let x = gsub p (size 0) (size 4) in 
      let y = gsub p (size 4) (size 4) in 

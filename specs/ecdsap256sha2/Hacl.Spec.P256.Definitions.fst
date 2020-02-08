@@ -12,8 +12,9 @@ open FStar.Mul
 
 
 noextract
-let prime256:pos =
+let prime256: (a: pos {a < pow2 256}) =
   assert_norm (pow2 256 - pow2 224 + pow2 192 + pow2 96 -1 > 0);
+  assert_norm (pow2 256 - pow2 224 + pow2 192 + pow2 96 -1 < pow2 256);
   pow2 256 - pow2 224 + pow2 192 + pow2 96 -1
 
 
@@ -67,6 +68,10 @@ let wide_as_nat4 f =
 
 noextract
 let point_nat = tuple3 nat nat nat
+
+noextract
+let point_nat_prime = (p: point_nat {let (a, b, c) = p in a < prime256 /\ b < prime256 /\ c < prime256})
+
 
 noextract
 let point_seq = Lib.Sequence.lseq uint64 12 

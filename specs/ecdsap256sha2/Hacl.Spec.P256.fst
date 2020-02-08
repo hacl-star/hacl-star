@@ -11,8 +11,9 @@ open Lib.Sequence
 #reset-options " --z3rlimit 100" 
 
 let prime = prime256
+
 noextract
-let _point_double  (p:point_nat) :  (p:point_nat) =
+let _point_double  (p:point_nat_prime) :  (p:point_nat_prime) =
   let x, y, z = p in 
   let s = (4 * x * y * y) % prime256 in 
   let m = ((-3) * z * z * z * z + 3 * x * x) % prime256 in 
@@ -24,7 +25,7 @@ let _point_double  (p:point_nat) :  (p:point_nat) =
 
 
 noextract
-let _point_add (p:point_nat) (q:point_nat) : point_nat = 
+let _point_add (p:point_nat_prime) (q:point_nat_prime) : point_nat_prime = 
   let open FStar.Tactics in 
   let open FStar.Tactics.Canon in 
 
@@ -75,7 +76,7 @@ let isPointAtInfinity p =
     z = 0
 
 
-let _norm (p:point_nat): (point_nat) =
+let _norm (p:point_nat_prime): (point_nat_prime) =
   let (x, y, z) = p in 
   let z2 = z * z in 
   let z2i = modp_inv2_pow z2 in 
@@ -95,14 +96,14 @@ let ith_bit (k:lbytes 32) (i:nat{i < 256}) : uint64 =
   let q = 31 - i / 8 in let r = size (i % 8) in
   to_u64 ((index k q >>. r) &. u8 1)
 
-val _ml_step0: p: point_nat -> q: point_nat -> tuple2 point_nat point_nat
+val _ml_step0: p: point_nat_prime -> q: point_nat_prime -> tuple2 point_nat_prime point_nat_prime
 
 let _ml_step0 r0 r1 = 
   let r0 = _point_add r1 r0 in
   let r1 = _point_double r1 in 
   (r0, r1) 
 
-val _ml_step1: p: point_nat -> q: point_nat -> tuple2 point_nat point_nat
+val _ml_step1: p: point_nat_prime -> q: point_nat_prime -> tuple2 point_nat_prime point_nat_prime
 
 let _ml_step1 r0 r1 = 
   let r1 = _point_add r0 r1 in 
@@ -110,7 +111,7 @@ let _ml_step1 r0 r1 =
   (r0, r1)
 
 
-val _ml_step: k: scalar->  i: nat{i < 256} ->  (tuple2 point_nat point_nat) -> Tot (r: tuple2 point_nat point_nat)
+val _ml_step: k: scalar->  i: nat{i < 256} ->  (tuple2 point_nat_prime point_nat_prime) -> Tot (r: tuple2 point_nat_prime point_nat_prime)
 
 let _ml_step k i (p, q) = 
   let bit = 255 - i in 
@@ -121,29 +122,33 @@ let _ml_step k i (p, q) =
   else _ml_step0 p q  
 
 
-val montgomery_ladder_spec: k: scalar -> tuple2 point_nat point_nat -> Tot (tuple2 point_nat point_nat)
+val montgomery_ladder_spec: k: scalar -> tuple2 point_nat_prime point_nat_prime -> Tot (tuple2 point_nat_prime point_nat_prime)
 
 let montgomery_ladder_spec k (p, q) = 
   Lib.LoopCombinators.repeati 256  (_ml_step k) (p, q)
 
 
-val scalar_multiplication: k: scalar -> p: point_nat -> Tot point_nat
+val scalar_multiplication: k: scalar -> p: point_nat_prime -> Tot point_nat_prime
   
 let scalar_multiplication k p = 
   let pai = (0, 0, 0) in 
   let q, f = montgomery_ladder_spec k (pai, p) in 
   _norm q
 
+noextract
+let basePoint : point_nat_prime = 
+	assert_norm (0x6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296 < prime256);
+	(0x6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296,
+  	0x4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5, 1)
 
-val secret_to_public: k: scalar -> Tot point_nat
+val secret_to_public: k: scalar -> Tot point_nat_prime
 
 let secret_to_public k = 
   let pai = (0, 0, 0) in 
-  let basePoint = (0x6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296, 0x4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5, 1) in 
   let q, f = montgomery_ladder_spec k (pai, basePoint) in 
   _norm q
 
-val isPointOnCurve: p: point_nat -> Tot bool
+val isPointOnCurve: p: point_nat_prime -> Tot bool
 
 let isPointOnCurve p = 
   let (x, y, z) = p in 
