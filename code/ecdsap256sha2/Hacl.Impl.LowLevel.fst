@@ -811,7 +811,7 @@ val toUint64: i: lbuffer uint8 (32ul) -> o: felem -> Stack unit
   (requires fun h -> live h i /\ live h o /\ disjoint i o)
   (ensures fun h0 _ h1 -> 
     modifies (loc o) h0 h1 /\ 
-    as_seq h1 o == Lib.ByteSequence.uints_from_bytes_le (as_seq h0 i)
+    as_seq h1 o == Lib.ByteSequence.uints_from_bytes_be (as_seq h0 i)
   )
 
 let toUint64 i o = 
