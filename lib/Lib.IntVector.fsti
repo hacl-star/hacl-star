@@ -172,18 +172,6 @@ val vec_not_lemma: #t:v_inttype -> #w:width -> v1:vec_t t w -> Lemma
   [SMTPat (vec_v #t #w (vec_not v1))]
 
 inline_for_extraction noextract
-let shift_right_i (#t:v_inttype) (s:shiftval t) (u:uint_t t SEC) : uint_t t SEC = shift_right u s
-
-inline_for_extraction noextract
-let shift_left_i (#t:v_inttype) (s:shiftval t) (u:uint_t t SEC) : uint_t t SEC = shift_left u s
-
-inline_for_extraction noextract
-let rotate_right_i (#t:v_inttype) (s:rotval t) (u:uint_t t SEC) : uint_t t SEC = rotate_right u s
-
-inline_for_extraction noextract
-let rotate_left_i (#t:v_inttype) (s:rotval t) (u:uint_t t SEC) : uint_t t SEC = rotate_left u s
-
-inline_for_extraction noextract
 val vec_shift_right: #t:v_inttype -> #w:width
   -> v1:vec_t t w -> s:shiftval t{t <> U128 \/ uint_v s % 8 == 0} ->
   v2:vec_t t w{vec_v v2 == map (shift_right_i s) (vec_v v1)}
@@ -195,8 +183,12 @@ val vec_shift_left: #t:v_inttype -> #w:width
 
 inline_for_extraction noextract
 val vec_rotate_right: #t:v_inttype -> #w:width
+  -> v1:vec_t t w -> s:rotval t{t <> U128 \/ uint_v s % 8 == 0} -> v2:vec_t t w
+
+val vec_rotate_right_lemma: #t:v_inttype -> #w:width
   -> v1:vec_t t w -> s:rotval t{t <> U128 \/ uint_v s % 8 == 0} ->
-  v2:vec_t t w{vec_v v2 == map (rotate_right_i s) (vec_v v1)}
+  Lemma (ensures (vec_v (vec_rotate_right v1 s) == map (rotate_right_i s) (vec_v v1)))
+	[SMTPat (vec_v (vec_rotate_right #t #w v1 s))]
 
 inline_for_extraction noextract
 val vec_rotate_left: #t:v_inttype -> #w:width
@@ -301,13 +293,26 @@ val vec_shift_right_uint128_small2: v1:vec_t U64 4 -> s:shiftval U128{uint_v s %
 inline_for_extraction noextract
 val vec_permute2: #t:v_inttype -> v1:vec_t t 2
   -> i1:vec_index 2 -> i2:vec_index 2 ->
-  v2:vec_t t 2{vec_v v2 == create2 (vec_v v1).[v i1] (vec_v v1).[v i2]}
+  v2:vec_t t 2
+
+inline_for_extraction noextract
+val vec_permute2_lemma: #t:v_inttype -> v1:vec_t t 2
+  -> i1:vec_index 2 -> i2:vec_index 2 ->
+  Lemma (ensures (vec_v (vec_permute2 v1 i1 i2) == create2 (vec_v v1).[v i1] (vec_v v1).[v i2]))
+	[SMTPat (vec_v (vec_permute2 v1 i1 i2))]
+
 
 inline_for_extraction noextract
 val vec_permute4: #t:v_inttype -> v1:vec_t t 4
   -> i1:vec_index 4 -> i2:vec_index 4 -> i3:vec_index 4 -> i4:vec_index 4 ->
-  v2:vec_t t 4{vec_v v2 == create4 (vec_v v1).[v i1] (vec_v v1).[v i2] (vec_v v1).[v i3] (vec_v v1).[v i4]}
+  v2:vec_t t 4
 
+inline_for_extraction noextract
+val vec_permute4_lemma: #t:v_inttype -> v1:vec_t t 4
+  -> i1:vec_index 4 -> i2:vec_index 4 -> i3:vec_index 4 -> i4:vec_index 4 ->
+  Lemma (ensures (vec_v (vec_permute4 v1 i1 i2 i3 i4) == create4 (vec_v v1).[v i1] (vec_v v1).[v i2] (vec_v v1).[v i3] (vec_v v1).[v i4]))
+	[SMTPat (vec_v (vec_permute4 v1 i1 i2 i3 i4))]
+	 
 inline_for_extraction noextract
 val vec_permute8: #t:v_inttype -> v1:vec_t t 8
   -> i1:vec_index 8 -> i2:vec_index 8 -> i3:vec_index 8 -> i4:vec_index 8

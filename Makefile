@@ -353,7 +353,7 @@ obj/Vale.Lib.Operator.fst: VALE_FLAGS=
 # the files). (Actually, we know, hence this extra touch.)
 %.fst:
 	$(call run-with-log,\
-	  $(MONO) $(VALE_HOME)/bin/vale.exe -fstarText -quickMods \
+	  $(MONO) $(VALE_HOME)/bin/vale.exe -fstarText \
 	    -include $*.types.vaf \
 	    $(VALE_FLAGS) \
 	    -in $< -out $@ -outi $@i && touch -c $@i \
@@ -671,6 +671,7 @@ BUNDLE_FLAGS	=\
   $(HASH_BUNDLE) \
   $(E_HASH_BUNDLE) \
   $(SHA3_BUNDLE) \
+  $(BLAKE2_BUNDLE) \
   $(CHACHA20_BUNDLE) \
   $(SALSA20_BUNDLE) \
   $(CURVE_BUNDLE) \
@@ -834,6 +835,7 @@ dist/mozilla/Makefile.basic: NACLBOX_BUNDLE = -bundle Hacl.NaCl
 dist/mozilla/Makefile.basic: E_HASH_BUNDLE =
 dist/mozilla/Makefile.basic: MERKLE_BUNDLE = -bundle MerkleTree.*
 dist/mozilla/Makefile.basic: CTR_BUNDLE =
+dist/mozilla/Makefile.basic: BLAKE2_BUNDLE = -bundle Hacl.Impl.Blake2.*,Hacl.Blake2b_256,Hacl.Blake2s_128,Hacl.Blake2b_32,Hacl.Blake2s_32
 dist/mozilla/Makefile.basic: SHA3_BUNDLE = -bundle Hacl.SHA3
 dist/mozilla/Makefile.basic: HASH_BUNDLE = -bundle Hacl.Hash.*,Hacl.HKDF,Hacl.HMAC,Hacl.HMAC_DRBG
 dist/mozilla/Makefile.basic: ECDSA_BUNDLE =

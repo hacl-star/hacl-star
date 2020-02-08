@@ -16,6 +16,9 @@ lib_gen/EverCrypt_Hash_gen.exe: lib/Hacl_Spec_bindings.cmx lib/Hacl_Spec_stubs.c
 lib/Hacl_SHA3_bindings.cmx: 
 lib_gen/Hacl_SHA3_gen.cmx: lib/Hacl_SHA3_bindings.cmx
 lib_gen/Hacl_SHA3_gen.exe: lib/Hacl_SHA3_bindings.cmx lib_gen/Hacl_SHA3_gen.cmx 
+lib/Hacl_Impl_Blake2_Constants_bindings.cmx: 
+lib_gen/Hacl_Impl_Blake2_Constants_gen.cmx: lib/Hacl_Impl_Blake2_Constants_bindings.cmx
+lib_gen/Hacl_Impl_Blake2_Constants_gen.exe: lib/Hacl_Impl_Blake2_Constants_bindings.cmx lib_gen/Hacl_Impl_Blake2_Constants_gen.cmx 
 lib/Hacl_Chacha20_bindings.cmx: 
 lib_gen/Hacl_Chacha20_gen.cmx: lib/Hacl_Chacha20_bindings.cmx
 lib_gen/Hacl_Chacha20_gen.exe: lib/Hacl_Chacha20_bindings.cmx lib_gen/Hacl_Chacha20_gen.cmx 
@@ -61,12 +64,24 @@ lib_gen/Hacl_Frodo_KEM_gen.exe: lib/Hacl_Frodo_KEM_bindings.cmx lib_gen/Hacl_Fro
 lib/EverCrypt_OpenSSL_bindings.cmx: 
 lib_gen/EverCrypt_OpenSSL_gen.cmx: lib/EverCrypt_OpenSSL_bindings.cmx
 lib_gen/EverCrypt_OpenSSL_gen.exe: lib/EverCrypt_OpenSSL_bindings.cmx lib_gen/EverCrypt_OpenSSL_gen.cmx 
+lib/Hacl_Blake2b_32_bindings.cmx: 
+lib_gen/Hacl_Blake2b_32_gen.cmx: lib/Hacl_Blake2b_32_bindings.cmx
+lib_gen/Hacl_Blake2b_32_gen.exe: lib/Hacl_Blake2b_32_bindings.cmx lib_gen/Hacl_Blake2b_32_gen.cmx 
 lib/Hacl_Chacha20_Vec32_bindings.cmx: 
 lib_gen/Hacl_Chacha20_Vec32_gen.cmx: lib/Hacl_Chacha20_Vec32_bindings.cmx
 lib_gen/Hacl_Chacha20_Vec32_gen.exe: lib/Hacl_Chacha20_Vec32_bindings.cmx lib_gen/Hacl_Chacha20_Vec32_gen.cmx 
 lib/EverCrypt_Ed25519_bindings.cmx: 
 lib_gen/EverCrypt_Ed25519_gen.cmx: lib/EverCrypt_Ed25519_bindings.cmx
 lib_gen/EverCrypt_Ed25519_gen.exe: lib/EverCrypt_Ed25519_bindings.cmx lib_gen/EverCrypt_Ed25519_gen.cmx 
+lib/Hacl_Blake2b_256_bindings.cmx: 
+lib_gen/Hacl_Blake2b_256_gen.cmx: lib/Hacl_Blake2b_256_bindings.cmx
+lib_gen/Hacl_Blake2b_256_gen.exe: lib/Hacl_Blake2b_256_bindings.cmx lib_gen/Hacl_Blake2b_256_gen.cmx 
+lib/Hacl_Blake2s_32_bindings.cmx: 
+lib_gen/Hacl_Blake2s_32_gen.cmx: lib/Hacl_Blake2s_32_bindings.cmx
+lib_gen/Hacl_Blake2s_32_gen.exe: lib/Hacl_Blake2s_32_bindings.cmx lib_gen/Hacl_Blake2s_32_gen.cmx 
+lib/Hacl_Blake2s_128_bindings.cmx: 
+lib_gen/Hacl_Blake2s_128_gen.cmx: lib/Hacl_Blake2s_128_bindings.cmx
+lib_gen/Hacl_Blake2s_128_gen.exe: lib/Hacl_Blake2s_128_bindings.cmx lib_gen/Hacl_Blake2s_128_gen.cmx 
 lib/Hacl_AES128_bindings.cmx: 
 lib_gen/Hacl_AES128_gen.cmx: lib/Hacl_AES128_bindings.cmx
 lib_gen/Hacl_AES128_gen.exe: lib/Hacl_AES128_bindings.cmx lib_gen/Hacl_AES128_gen.cmx 

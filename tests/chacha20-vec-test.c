@@ -8,6 +8,9 @@
 #include <unistd.h>
 #include <time.h>
 #include <stdbool.h>
+#include "Hacl_Chacha20_Vec32.h"
+#include "Hacl_Chacha20_Vec128.h"
+#include "Hacl_Chacha20_Vec256.h"
 
 typedef uint64_t cycles;
 
@@ -16,9 +19,6 @@ static __inline__ cycles cpucycles_begin(void)
   uint64_t rax,rdx,aux;
   asm volatile ( "rdtscp\n" : "=a" (rax), "=d" (rdx), "=c" (aux) : : );
   return (rdx << 32) + rax;
-  //  unsigned hi, lo;
-  //__asm__ __volatile__ ("CPUID\n\t"  "RDTSC\n\t"  "mov %%edx, %0\n\t"  "mov %%eax, %1\n\t": "=r" (hi), "=r" (lo):: "%rax", "%rbx", "%rcx", "%rdx");
-  //return ( (uint64_t)lo)|( ((uint64_t)hi)<<32 );
 }
 
 static __inline__ cycles cpucycles_end(void)
@@ -26,14 +26,7 @@ static __inline__ cycles cpucycles_end(void)
   uint64_t rax,rdx,aux;
   asm volatile ( "rdtscp\n" : "=a" (rax), "=d" (rdx), "=c" (aux) : : );
   return (rdx << 32) + rax;
-  //  unsigned hi, lo;
-  //__asm__ __volatile__ ("RDTSCP\n\t"  "mov %%edx, %0\n\t"  "mov %%eax, %1\n\t"  "CPUID\n\t": "=r" (hi), "=r" (lo)::     "%rax", "%rbx", "%rcx", "%rdx");
-  //return ( (uint64_t)lo)|( ((uint64_t)hi)<<32 );
 }
-
-extern void Hacl_Chacha20_Vec32_chacha20_encrypt_32(int in_len, uint8_t* out, uint8_t* in, uint8_t* k, uint8_t* n, uint32_t c);
-extern void Hacl_Chacha20_Vec128_chacha20_encrypt_128(int in_len, uint8_t* out, uint8_t* in, uint8_t* k, uint8_t* n, uint32_t c);
-extern void Hacl_Chacha20_Vec256_chacha20_encrypt_256(int in_len, uint8_t* out, uint8_t* in, uint8_t* k, uint8_t* n, uint32_t c);
 
 
 #define ROUNDS 100000
@@ -45,7 +38,7 @@ void print_time(double tdiff, uint64_t cdiff){
   printf("bw %8.2f MB/s\n",(double)count/(tdiff * 1000000.0));
 }
 
-void print_result(uint8_t* comp, uint8_t* exp) {
+bool print_result(uint8_t* comp, uint8_t* exp) {
   printf("computed:");
   for (int i = 0; i < 114; i++)
     printf("%02x",comp[i]);
@@ -59,6 +52,7 @@ void print_result(uint8_t* comp, uint8_t* exp) {
     ok = ok & (exp[i] == comp[i]);
   if (ok) printf("Success!\n");
   else printf("**FAILED**\n");
+  return ok;
 }
 
 
@@ -111,15 +105,15 @@ int main() {
 
   Hacl_Chacha20_Vec32_chacha20_encrypt_32(in_len,comp,in,k,n,1);
   printf("Chacha20 (32-bit) Result:\n");
-  print_result(comp,exp);
+  bool ok = print_result(comp,exp);
 
   Hacl_Chacha20_Vec128_chacha20_encrypt_128(in_len,comp,in,k,n,1);
   printf("Chacha20 (128-bit) Result:\n");
-  print_result(comp,exp);
+  ok = ok && print_result(comp,exp);
 
   Hacl_Chacha20_Vec256_chacha20_encrypt_256(in_len,comp,in,k,n,1);
   printf("Chacha20 (256-bit) Result:\n");
-  print_result(comp,exp);
+  ok = ok && print_result(comp,exp);
 
   uint64_t len = SIZE;
   uint8_t plain[SIZE];
@@ -187,4 +181,8 @@ int main() {
   printf("32-bit Chacha20\n"); print_time(diff1,cyc1);
   printf("128-bit Chacha20\n"); print_time(diff2,cyc2);
   printf("256-bit Chacha20\n"); print_time(diff3,cyc3);
+
+  if (ok) return EXIT_SUCCESS;
+  else return EXIT_FAILURE;
+
 }

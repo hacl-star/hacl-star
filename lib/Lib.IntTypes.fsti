@@ -691,6 +691,19 @@ val rotate_left: #t:inttype -> #l:secrecy_level
   -> rotval t
   -> int_t t l
 
+inline_for_extraction noextract
+let shift_right_i (#t:inttype) (#l:secrecy_level) (s:shiftval t{unsigned t}) (u:uint_t t l) : uint_t t l = shift_right u s
+
+inline_for_extraction noextract
+let shift_left_i (#t:inttype) (#l:secrecy_level) (s:shiftval t{unsigned t}) (u:uint_t t l) : uint_t t l = shift_left u s
+
+inline_for_extraction noextract
+let rotate_right_i (#t:inttype) (#l:secrecy_level) (s:rotval t{unsigned t}) (u:uint_t t l) : uint_t t l = rotate_right u s
+
+inline_for_extraction noextract
+let rotate_left_i (#t:inttype) (#l:secrecy_level) (s:rotval t{unsigned t}) (u:uint_t t l) : uint_t t l = rotate_left u s
+
+
 [@(strict_on_arguments [0])]
 inline_for_extraction
 val ct_abs: #t:inttype{signed t /\ ~(S128? t)} -> #l:secrecy_level

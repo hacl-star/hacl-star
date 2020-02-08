@@ -7,7 +7,7 @@ include{:fstar}{:open} "Vale.Def.Prop_s"
 include{:fstar}{:open} "Vale.Def.Opaque_s"
 include{:fstar}{:open} "Vale.Def.Words_s"
 include{:fstar}{:open} "Vale.Def.Types_s"
-include{:/*TODO*/fstar}{:open} "FStar.Seq.Base"
+include{:fstar}{:open} "FStar.Seq.Base"
 include{:fstar}{:open} "Vale.AES.AES_s"
 include{:fstar}{:open} "Vale.X64.Machine_s"
 include{:fstar}{:open} "Vale.X64.Memory"
@@ -71,6 +71,7 @@ open Vale.Math.Poly2.Lemmas
 open Vale.AES.GF128_s
 open Vale.AES.GF128
 open Vale.AES.GHash
+#reset-options "--z3rlimit 50"
 #endverbatim
 
 #token +. precedence +
@@ -124,8 +125,6 @@ function index_opt_rev(b:bool, len:int, n:int, i:int):int extern;
 function quad32_opt_rev(b:bool, q:quad32):quad32 extern;
 function scratch_b_data(rev_bytes:bool, rev_blocks:bool, scratch_in_b:buffer128, scratch_len:int,
     count:int, heap_s:vale_heap, layout:vale_heap_layout, ptr:int, data:seq(quad32)):prop extern;
-
-#reset-options "--z3rlimit 50"
 
 procedure MulAdd_step(
         inline m:nat,
@@ -233,8 +232,6 @@ procedure MulAdd_step(
         Load128_buffer(heap3, Ii, rbp, 0x30 + 0x10 * m, Secret, scratch_b, 3 + m);
     }
 }
-
-#reset-options "--z3rlimit 20"
 
 procedure MulAdd_unroll_i(
         inline rev_bytes:bool,
@@ -851,7 +848,6 @@ procedure Ghash_buffer_loop_body(
     Sub64(len, 6);
 }
 
-#reset-options "--z3rlimit 20"
 procedure Ghash_buffer(
         ghost hkeys_b:buffer128,
         ghost in_b:buffer128,
