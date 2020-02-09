@@ -326,6 +326,13 @@ let rec nat_from_intlist_le #t #l = function
   | [] -> 0
   | hd :: tl -> v hd + pow2 (bits t) * nat_from_intlist_le tl
 
+val nat_from_intlist_be: #t: inttype{unsigned t} -> #l: secrecy_level 
+  -> b: list (uint_t t l) -> nat
+
+let rec nat_from_intlist_be #t #l = function
+  | [] -> 0
+  | hd :: tl -> pow2 (FStar.List.Tot.Base.length tl * bits t) * v hd + nat_from_intlist_be tl
+
 #pop-options
 
 #push-options "--fuel 1"
@@ -335,7 +342,6 @@ val index_seq_of_list_cons: #a:Type -> x:a -> l:list a -> i:nat{i < List.Tot.len
 
 let index_seq_of_list_cons #a x l i =
   assert (Seq.index (Seq.seq_of_list (x::l)) (i+1) == List.Tot.index (x::l) (i+1))
-
 
 val nat_from_intlist_seq_le: #t:inttype{unsigned t} -> #l:secrecy_level
   -> len:size_nat -> b:list (uint_t t l){List.Tot.length b = len}
@@ -354,6 +360,25 @@ let rec nat_from_intlist_seq_le #t #l len b =
     nat_from_intseq_le_slice_lemma s 1;
     nat_from_intlist_seq_le (len - 1) tl
     end
+
+val nat_from_intlist_seq_be: #t: inttype {unsigned t} -> #l: secrecy_level 
+  -> len: size_nat -> b: list (uint_t t l) {FStar.List.Tot.Base.length b = len} 
+  -> Lemma (nat_from_intlist_be b == nat_from_intseq_be (of_list b))
+
+let rec nat_from_intlist_seq_be #t #l len b = 
+  match b with 
+  | [] -> ()
+  | hd :: tl -> 
+    begin 
+      let s = of_list b in 
+      Classical.forall_intro (index_seq_of_list_cons hd tl);
+      assert (equal (of_list tl) (slice s 1 len));
+      assert (index s 0 == List.Tot.index b 0);
+      nat_from_intlist_seq_be (len - 1) tl;
+      nat_from_intseq_be_lemma0 (slice s 0 1);
+      nat_from_intseq_be_slice_lemma s 1
+      end
+
 
 #pop-options
 
@@ -375,17 +400,17 @@ let prime_p256_order_inverse_seq: s:lseq uint8 32{nat_from_intseq_le s == prime_
 
 unfold let prime_p256_order_list: list uint8 =
  [
-   u8 81;  u8 37;  u8 99;  u8 252; u8 194; u8 202; u8 185; u8 243;
-   u8 132; u8 158; u8 23;  u8 167; u8 173; u8 250; u8 230; u8 188;
-   u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255;
-   u8 0;   u8 0;   u8 0;   u8 0;   u8 255; u8 255; u8 255; u8 255
+  u8 255; u8 255; u8 255; u8 255; u8 0;  u8 0;   u8 0;   u8 0;  
+  u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255;
+  u8 188; u8 230; u8 250; u8 173; u8 167; u8 23; u8 158; u8 132;
+  u8 243; u8 185; u8 202; u8 194; u8 252; u8 99; u8 37; u8 81
  ]
 
 
-let prime_p256_order_seq: s:lseq uint8 32{nat_from_intseq_le s == prime_p256_order} =
+let prime_p256_order_seq: s:lseq uint8 32{nat_from_intseq_be s == prime_p256_order} =
   assert_norm (List.Tot.length prime_p256_order_list == 32);
-  nat_from_intlist_seq_le 32 prime_p256_order_list;
-  assert_norm (nat_from_intlist_le prime_p256_order_list == prime_p256_order);
+  nat_from_intlist_seq_be 32 prime_p256_order_list;
+  assert_norm (nat_from_intlist_be prime_p256_order_list == prime_p256_order);
   of_list prime_p256_order_list
 
 open Hacl.Spec.P256.Definitions
