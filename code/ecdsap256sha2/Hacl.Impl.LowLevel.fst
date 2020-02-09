@@ -294,7 +294,7 @@ let add4_with_carry c x y result =
     cc
 
 
-#reset-options "--z3rlimit 600"
+#reset-options "--z3rlimit 1000"
 val add8: x: widefelem -> y: widefelem -> result: widefelem -> Stack uint64 
   (requires fun h -> live h x /\ live h y /\ live h result /\ eq_or_disjoint x result /\ eq_or_disjoint y result)
   (ensures fun h0 c h1 -> modifies (loc result) h0 h1 /\ v c <= 1 /\ 
@@ -330,22 +330,6 @@ let add8 x y result =
 
       lemma_ll0 (uint_v (Lib.Sequence.index (as_seq h0 a1) 0)) (uint_v (Lib.Sequence.index (as_seq h0 a1) 1)) (uint_v (Lib.Sequence.index (as_seq h0 a1) 2)) (uint_v (Lib.Sequence.index (as_seq h0 a1) 3));
       lemma_ll0 (uint_v (Lib.Sequence.index (as_seq h0 b1) 0)) (uint_v (Lib.Sequence.index (as_seq h0 b1) 1)) (uint_v (Lib.Sequence.index (as_seq h0 b1) 2)) (uint_v (Lib.Sequence.index (as_seq h0 b1) 3));
-
-      assert(wide_as_nat h0 x = as_nat h0 a0 + as_nat h0 a1 * pow2 256);
-      assert(wide_as_nat h0 y = as_nat h0 b0 + as_nat h0 b1 * pow2 256);
-
-      assert(
-	let result_ = as_seq h2 result in 
-	let s0 = Lib.Sequence.index result_ 0 in 
-	let s1 = Lib.Sequence.index result_ 1 in 
-	let s2 = Lib.Sequence.index result_ 2 in 
-	let s3 = Lib.Sequence.index result_ 3 in 
-	let s4 = Lib.Sequence.index result_ 4 in 
-	let s5 = Lib.Sequence.index result_ 5 in 
-	let s6 = Lib.Sequence.index result_ 6 in 
-	let s7 = Lib.Sequence.index result_ 7 in 
-
-	wide_as_nat h2 result = wide_as_nat h0 x + wide_as_nat h0 y - uint_v carry1 * pow2 512);
 
     carry1
 
@@ -827,3 +811,14 @@ val toUint8: i: felem ->  o: lbuffer uint8 (32ul) -> Stack unit
 
 let toUint8 i o = 
   Lib.ByteBuffer.uints_to_bytes_be (size 4) o i
+
+
+val toUint8LE: i: felem ->  o: lbuffer uint8 (32ul) -> Stack unit
+  (requires fun h -> live h i /\ live h o /\ disjoint i o)
+  (ensures fun h0 _ h1 -> 
+    modifies (loc o) h0 h1 /\ 
+    as_seq h1 o == Lib.ByteSequence.uints_to_bytes_le #_ #_ #4 (as_seq h0 i)
+  )
+
+let toUint8LE i o = 
+  Lib.ByteBuffer.uints_to_bytes_le (size 4) o i

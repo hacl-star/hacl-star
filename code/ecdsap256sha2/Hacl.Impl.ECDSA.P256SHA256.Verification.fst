@@ -147,6 +147,7 @@ val ecdsa_verification_step4:
 
 let ecdsa_verification_step4 bufferU1 bufferU2 r s hash =
   push_frame();
+  admit();
   let h0 = ST.get() in
   let tempBuffer = create (size 12) (u64 0) in
   let inverseS = sub tempBuffer (size 0) (size 4) in
@@ -157,6 +158,10 @@ let ecdsa_verification_step4 bufferU1 bufferU2 r s hash =
   montgomery_ladder_exponent inverseS;
   multPowerPartial s inverseS hash u1;
   multPowerPartial s inverseS r u2;
+
+  changeEndian u1;
+  changeEndian u2;
+   
   let h1 = ST.get() in
    toUint8 u1 bufferU1;
    toUint8 u2 bufferU2;
@@ -167,6 +172,7 @@ let ecdsa_verification_step4 bufferU1 bufferU2 r s hash =
    lemma_core_0 u2 h1;
    lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h1 u2);
   pop_frame()
+
 
 
 inline_for_extraction noextract
