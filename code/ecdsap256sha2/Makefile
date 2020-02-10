@@ -2,11 +2,10 @@ HACL_HOME=../..
 
 # CUSTOMIZE HERE: determine what is the main target of this Makefile, e.g. a C
 # test, a Low* test, or just a binary archive (like libcurve.a).
-all: dist/ecdsa-test.exe dist/test.exe
+all: dist/Hacl_Test_ECDSA.exe
 
 test: all
-	dist/ecdsa-test.exe
-	dist/test.exe
+	dist/Hacl_Test_ECDSA.exe
 
 # Defines rules for producing .checked, .krml, .depend, etc.
 include ../../Makefile.local
@@ -30,7 +29,10 @@ dist/Makefile.basic: $(filter-out %/prims.krml,$(ALL_KRML_FILES))
 	  -no-prefix 'Hacl.Test.ECDSA' \
 	  -skip-compilation
 
-dist/test.exe: dist/Hacl_Test_ECDSA.o $(KREMLIN_HOME)/kremlib/dist/generic/libkremlib.a dist/libecdsa.a
+dist/Hacl_Test_ECDSA.o: dist/Makefile.basic
+
+dist/Hacl_Test_ECDSA.exe: dist/Hacl_Test_ECDSA.o \
+	$(KREMLIN_HOME)/kremlib/dist/generic/libkremlib.a dist/libecdsa.a
 
 %.exe:
 	$(CC) $(CFLAGS) -flto $^ -o $@
