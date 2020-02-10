@@ -25,7 +25,7 @@ open Hacl.Impl.LowLevel
 open Hacl.Impl.P256
 open Hacl.Impl.P256.Signature.Common
 
-#reset-options "--z3rlimit 300" 
+#reset-options "--z3rlimit 500" 
 
 let ecp256dh_i result scalar = 
   push_frame();
@@ -39,24 +39,24 @@ let ecp256dh_i result scalar =
 
     secretToPublic resultBuffer scalar tempBuffer; 
     let flag = isPointAtInfinityPrivate resultBuffer in 
-  let h2 = ST.get() in
+  let h0 = ST.get() in
     changeEndian resultBufferX;
     changeEndian resultBufferY;
     
     toUint8 resultBufferX resultX;
     toUint8 resultBufferY resultY;
   
-  let h3 = ST.get() in 
+  let h1 = ST.get() in 
   
-  lemma_core_0 resultBufferX h2;
-  lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h2 resultBufferX);
-  Hacl.Spec.ECDSA.changeEndianLemmaFromBeToLe (as_nat h2 resultBufferX) h3 resultX;
+  lemma_core_0 resultBufferX h0;
+  lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h0 resultBufferX);
+  Hacl.Spec.ECDSA.changeEndianLemmaFromBeToLe (as_nat h0 resultBufferX) h1 resultX;
 
-  lemma_core_0 resultBufferY h2;
-  lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h2 resultBufferY);
-  Hacl.Spec.ECDSA.changeEndianLemmaFromBeToLe (as_nat h2 resultBufferY) h3 resultY;
-  
-  pop_frame(); 
+  lemma_core_0 resultBufferY h0;
+  lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h0 resultBufferY);
+  Hacl.Spec.ECDSA.changeEndianLemmaFromBeToLe (as_nat h0 resultBufferY) h1 resultY;
+  pop_frame();
+ 
     flag
 
 
@@ -65,6 +65,10 @@ val _ecp256dh_r: result: lbuffer uint64 (size 12) -> pubKey: lbuffer uint64 (siz
   Stack uint64 
     (requires fun h -> live h result /\ live h pubKey /\ live h scalar /\ 
       disjoint result pubKey /\ disjoint result scalar /\ disjoint pubKey scalar /\
+      
+      as_nat h (gsub result (size 0) (size 4)) == 0 /\ 
+      as_nat h (gsub result (size 4) (size 4)) == 0 /\ 
+
       Lib.ByteSequence.nat_from_bytes_le (as_seq h scalar) >= 1 /\
       Lib.ByteSequence.nat_from_bytes_le (as_seq h scalar) < Hacl.Spec.ECDSAP256.Definition.prime_p256_order
     )
@@ -74,7 +78,7 @@ val _ecp256dh_r: result: lbuffer uint64 (size 12) -> pubKey: lbuffer uint64 (siz
 	let x3, y3, z3 = point_x_as_nat h1 result, point_y_as_nat h1 result, point_z_as_nat h1 result in 
 	let pointJacX, pointJacY, pointJacZ = toJacobianCoordinates (x, y) in 
 	if not (verifyQValidCurvePointSpec (pointJacX, pointJacY, pointJacZ)) then 
-	  uint_v r = maxint U64
+	  uint_v r = maxint U64 /\ x3 == 0 /\ y3 == 0
 	else 
 	  x3 < prime256 /\ y3 < prime256 /\ z3 < prime256 /\ 
 	  (
@@ -142,6 +146,7 @@ let ecp256dh_r result pubKey scalar =
       uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 pubKeyY);  
 	
 	let flag = _ecp256dh_r resultBufferFelem publicKeyAsFelem scalar in 
+
       let h2 = ST.get() in 	
 
       changeEndian resultBufferFelemX;
