@@ -119,7 +119,7 @@ val nat_to_intseq_be_:
   -> n:nat{n < pow2 (bits t * len)}
   -> Tot (b:seq (int_t t l){length b == len /\ n == nat_from_intseq_be b}) (decreases len)
 let rec nat_to_intseq_be_ #t #l len n =
-  if len = 0 then create len (uint #t #l 0)
+  if len = 0 then Seq.empty
   else
     let len' = len - 1 in
     let tt = uint #t #l (n % modulus t) in
@@ -139,7 +139,7 @@ val nat_to_intseq_le_:
   -> n:nat{n < pow2 (bits t * len)}
   -> Tot (b:seq (uint_t t l){length b == len /\ n == nat_from_intseq_le b}) (decreases len)
 let rec nat_to_intseq_le_ #t #l len n =
-  if len = 0 then create len (uint #t #l 0)
+  if len = 0 then Seq.empty
   else
     let len' = len - 1 in
     let tt = uint #t #l (n % modulus t) in
@@ -153,12 +153,59 @@ let rec nat_to_intseq_le_ #t #l len n =
 
 let nat_to_intseq_le = nat_to_intseq_le_
 
-#reset-options "--z3rlimit 1000 --max_fuel 1 --max_ifuel 0"
+/// These lemmas allow to unfold the definition of nat_to_intseq_{b}e without using
+/// fuel > 0 below, which makes the proof more expensive
+
+val head_nat_to_intseq_le:
+    #t:inttype{unsigned t}
+  -> #l:secrecy_level
+  -> len:size_pos
+  -> n:nat{n < pow2 (bits t * len)}
+  -> Lemma (Seq.index (nat_to_intseq_le #t #l len n) 0 ==
+           uint #t #l (n % pow2 (bits t)))
+
+let head_nat_to_intseq_le #t #l len n = ()
+
+val nat_to_intseq_le_pos:
+    #t:inttype{unsigned t}
+  -> #l:secrecy_level
+  -> len:size_pos
+  -> n:nat{n < pow2 (bits t * len)}
+  -> Lemma (nat_to_intseq_le #t #l len n ==
+           Seq.append (create 1 (uint #t #l (n % modulus t)))
+                      (nat_to_intseq_le (len - 1) (n / modulus t)))
+
+let nat_to_intseq_le_pos #t #l len n = ()
+
+val head_nat_to_intseq_be:
+    #t:inttype{unsigned t}
+  -> #l:secrecy_level
+  -> len:size_pos
+  -> n:nat{n < pow2 (bits t * len)}
+  -> Lemma (Seq.index (nat_to_intseq_be #t #l len n) (len - 1) ==
+           uint #t #l (n % pow2 (bits t)))
+
+let head_nat_to_intseq_be #t #l len n = ()
+
+val nat_to_intseq_be_pos:
+    #t:inttype{unsigned t}
+  -> #l:secrecy_level
+  -> len:size_pos
+  -> n:nat{n < pow2 (bits t * len)}
+  -> Lemma (nat_to_intseq_be #t #l len n ==
+           Seq.append (nat_to_intseq_be (len - 1) (n / modulus t))
+                      (create 1 (uint #t #l (n % modulus t))))
+
+let nat_to_intseq_be_pos #t #l len n = ()
+
+#push-options "--fuel 0 --ifuel 0"
 
 let rec index_nat_to_intseq_le #t #l len n i =
-  if i = 0 then ()
+  if i = 0 then
+    if len = 0 then () else head_nat_to_intseq_le #t #l len n
   else
     begin
+    FStar.Math.Lemmas.lemma_div_lt_nat n (bits t * len) (bits t);
     calc (==) {
       Seq.index (nat_to_intseq_le #t #l (len - 1) (n / modulus t)) (i - 1);
       == { index_nat_to_intseq_le #t #l (len - 1) (n / modulus t) (i - 1) }
@@ -170,35 +217,37 @@ let rec index_nat_to_intseq_le #t #l len n i =
       == { Math.Lemmas.distributivity_add_right (bits t) i (-1) }
       uint (n / pow2 (bits t + (bits t * i - bits t)) % modulus t);
       == { }
-      uint (n / pow2 (bits t * i) % modulus t);
-      == { }
-      uint (n / pow2 (bits t * i) % (pow2 (bits t)));
-    }
+      uint (n / pow2 (bits t * i) % pow2 (bits t));
+    };
+    nat_to_intseq_le_pos #t #l len n
     end
 
 
-let rec index_nat_to_intseq_be #t #l len n i = 
-  if i = 0 then ()
+let rec index_nat_to_intseq_be #t #l len n i =
+  if i = 0 then
+    if len = 0 then () else head_nat_to_intseq_be #t #l len n
   else
     begin
-      let len' = len - 1 in 
-      let i' = i - 1 in 
-      let n' = (n / pow2 (bits t)) in
-      calc (==) {
+    let len' = len - 1 in
+    let i' = i - 1 in
+    let n' = n / pow2 (bits t) in
+    FStar.Math.Lemmas.lemma_div_lt_nat n (bits t * len) (bits t);
+    calc (==) {
       Seq.index (nat_to_intseq_be #t #l len' n') (len' - i' - 1);
-      == {index_nat_to_intseq_be #t #l len' n' i'} 
-      uint (n' / pow2 (bits t * i') % pow2 (bits t)); 
+      == {index_nat_to_intseq_be #t #l len' n' i'}
+      uint (n' / pow2 (bits t * i') % pow2 (bits t));
       == {}
       uint (n / pow2 (bits t) / pow2 (bits t * i') % pow2 (bits t));
       == {Math.Lemmas.division_multiplication_lemma n (pow2 (bits t)) (pow2 (bits t * i'))}
       uint (n / (pow2 (bits t) *  pow2 (bits t * i')) % pow2 (bits t));
       == {Math.Lemmas.pow2_plus (bits t) (bits t * i')}
-      uint (n / (pow2 (bits t + bits t * i')) % pow2 (bits t)); 
+      uint (n / (pow2 (bits t + bits t * i')) % pow2 (bits t));
       == {Math.Lemmas.distributivity_add_right (bits t) 1 (i - 1)}
-      uint (n / (pow2 (bits t * i)) % pow2 (bits t)); }
+      uint (n / (pow2 (bits t * i)) % pow2 (bits t));
+    };
+    nat_to_intseq_be_pos #t #l len n
     end
-  
-#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0"
+
 
 let nat_to_bytes_be = nat_to_intseq_be_ #U8
 let nat_to_bytes_le = nat_to_intseq_le_ #U8
