@@ -277,8 +277,8 @@ let ecdsa_signature result mLen m privKey k =
   lemma_core_0 s h2;
   lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h2 s);
 
-  Hacl.Spec.ECDSA.changeEndianLemmaFromBeToLe (as_nat h2 r) h3 resultR;
-  Hacl.Spec.ECDSA.changeEndianLemmaFromBeToLe (as_nat h2 s) h3 resultS;
+  Hacl.Spec.ECDSA.changeEndian_le_be (as_nat h2 r) h3 resultR;
+  Hacl.Spec.ECDSA.changeEndian_le_be (as_nat h2 s) h3 resultS;
 
   pop_frame(); 
   flag  
