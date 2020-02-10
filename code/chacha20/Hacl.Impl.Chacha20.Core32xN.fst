@@ -229,8 +229,8 @@ let transpose16 st =
   let h0 = ST.get() in
 
   transpose16x16 st1;
-  let (v0,v4,v1,v5,v2,v6,v3,v7) = (st1.(0ul),st1.(1ul),st1.(2ul),st1.(3ul),st1.(4ul),st1.(5ul),st1.(6ul),st1.(7ul)) in
-  let (v8,v12,v9,v13,v10,v14,v11,v15) = (st1.(8ul),st1.(9ul),st1.(10ul),st1.(11ul),st1.(12ul),st1.(13ul),st1.(14ul),st1.(15ul)) in
+  let (v0,v2,v1,v3,v4,v6,v5,v7) = (st1.(0ul),st1.(1ul),st1.(2ul),st1.(3ul),st1.(4ul),st1.(5ul),st1.(6ul),st1.(7ul)) in
+  let (v8,v10,v9,v11,v12,v14,v13,v15) = (st1.(8ul),st1.(9ul),st1.(10ul),st1.(11ul),st1.(12ul),st1.(13ul),st1.(14ul),st1.(15ul)) in
   let h1 = ST.get() in admit();
   assert (modifies (loc st)  h0 h1);
   st.(0ul) <- v0;
