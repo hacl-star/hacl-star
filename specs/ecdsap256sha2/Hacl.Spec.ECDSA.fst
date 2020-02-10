@@ -578,6 +578,13 @@ assume val uints_to_bytes_be_nat_lemma: #t:inttype{unsigned t /\ ~(U1? t)} -> #l
   -> n:nat{n < pow2 (bits t * len)} ->
   Lemma (uints_to_bytes_be #t #l #len (nat_to_intseq_be #t #l len n) == nat_to_bytes_be (len * numbytes t) n)
 
+val changeEndianLemmaFromBeToLe_: a: nat {a < pow2 256} -> Lemma
+  (uints_to_bytes_be (changeEndian (nat_to_intseq_le 4 a)) == nat_to_bytes_be 32 a)
+
+let changeEndianLemmaFromBeToLe_ a =  
+  changeEndianLemmaI a;
+  uints_to_bytes_be_nat_lemma #U64 #SEC 4 a 
+
 
 val changeEndianLemmaFromBeToLe: a: nat {a < pow2 256} -> h: mem -> b: lbuffer uint8 (size 32) ->
   Lemma
@@ -585,5 +592,4 @@ val changeEndianLemmaFromBeToLe: a: nat {a < pow2 256} -> h: mem -> b: lbuffer u
     (ensures as_seq h b == nat_to_bytes_be 32 a)
   
 let changeEndianLemmaFromBeToLe a h b = 
-  changeEndianLemmaI a;
-  uints_to_bytes_be_nat_lemma #U64 #SEC 4 a
+    changeEndianLemmaFromBeToLe_ a

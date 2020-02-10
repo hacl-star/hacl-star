@@ -31,7 +31,9 @@ val eq_0_u64: a: uint64 -> r:bool{r == (uint_v a = 0)}
 val changeEndian: i:felem -> Stack unit 
   (requires fun h -> live h i)
   (ensures  fun h0 _ h1 -> modifies1 i h0 h1 /\ 
-    as_seq h1 i == Hacl.Spec.ECDSA.changeEndian (as_seq h0 i)) 
+    as_seq h1 i == Hacl.Spec.ECDSA.changeEndian (as_seq h0 i) /\
+    as_nat h1 i < pow2 256
+  ) 
 
 val toUint64ChangeEndian: i:lbuffer uint8 (size 32) -> o:felem -> Stack unit
   (requires fun h -> live h i /\ live h o /\ disjoint i o)

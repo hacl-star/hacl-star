@@ -140,37 +140,56 @@ val ecdsa_verification_step4:
       (
 	let p0 =  pow (as_nat h0 s) (prime_p256_order - 2) * as_nat h0 hash % prime_p256_order in 
 	let p1 = pow (as_nat h0 s) (prime_p256_order - 2) * as_nat h0 r % prime_p256_order in 
-	as_seq h1 bufferU1 == uints_to_bytes_be #_ #_ #4 (nat_to_intseq_le #U64 #_ 4 p0) /\
-	as_seq h1 bufferU2 == uints_to_bytes_be #_ #_ #4 (nat_to_intseq_le #U64 #_ 4 p1)
+	as_seq h1 bufferU1 == nat_to_bytes_be 32 p0 /\
+	as_seq h1 bufferU2 == nat_to_bytes_be 32 p1
       )
     )
 
 let ecdsa_verification_step4 bufferU1 bufferU2 r s hash =
   push_frame();
-  admit();
   let h0 = ST.get() in
-  let tempBuffer = create (size 12) (u64 0) in
-  let inverseS = sub tempBuffer (size 0) (size 4) in
-  let u1 = sub tempBuffer (size 4) (size 4) in
-  let u2 = sub tempBuffer (size 8) (size 4) in
+    let tempBuffer = create (size 12) (u64 0) in
+    let inverseS = sub tempBuffer (size 0) (size 4) in
+    let u1 = sub tempBuffer (size 4) (size 4) in
+    let u2 = sub tempBuffer (size 8) (size 4) in
 
-  fromDomainImpl s inverseS;
-  montgomery_ladder_exponent inverseS;
-  multPowerPartial s inverseS hash u1;
-  multPowerPartial s inverseS r u2;
+    fromDomainImpl s inverseS;
+    montgomery_ladder_exponent inverseS;
+    multPowerPartial s inverseS hash u1;
+    multPowerPartial s inverseS r u2;
+  
+  let h1 = ST.get() in 
+    changeEndian u1;
+    changeEndian u2;
+    toUint8 u1 bufferU1;
+    toUint8 u2 bufferU2;
+  
+  let h2 = ST.get() in
 
-  changeEndian u1;
-  changeEndian u2;
-   
-  let h1 = ST.get() in
-   toUint8 u1 bufferU1;
-   toUint8 u2 bufferU2;
-   let h2 = ST.get() in 
-   lemma_core_0 u1 h1;
-   lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h1 u1);
+    calc(==) {
+    as_seq h2 bufferU1;
+    == {}
+    uints_to_bytes_be (Hacl.Spec.ECDSA.changeEndian (as_seq h1 u1));
+    == {lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h1 u1)}
+    uints_to_bytes_be (Hacl.Spec.ECDSA.changeEndian (nat_to_intseq_le 4 (nat_from_intseq_le (as_seq h1 u1))));
+    == {lemma_core_0 u1 h1}
+    uints_to_bytes_be (Hacl.Spec.ECDSA.changeEndian (nat_to_intseq_le 4 (as_nat h1 u1)));
+    == {Hacl.Spec.ECDSA.changeEndianLemmaFromBeToLe_ (as_nat h1 u1)}
+    nat_to_bytes_be 32 (as_nat h1 u1);
+    };
 
-   lemma_core_0 u2 h1;
-   lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h1 u2);
+    calc(==) {
+      as_seq h2 bufferU2;
+      == {}
+      uints_to_bytes_be (Hacl.Spec.ECDSA.changeEndian (as_seq h1 u2));
+      == {lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h1 u2)}
+      uints_to_bytes_be (Hacl.Spec.ECDSA.changeEndian (nat_to_intseq_le 4 (nat_from_intseq_le (as_seq h1 u2))));
+      == {lemma_core_0 u2 h1}
+      uints_to_bytes_be (Hacl.Spec.ECDSA.changeEndian (nat_to_intseq_le 4 (as_nat h1 u2)));
+      == {Hacl.Spec.ECDSA.changeEndianLemmaFromBeToLe_ (as_nat h1 u2)}
+      nat_to_bytes_be 32 (as_nat h1 u2);
+    };
+
   pop_frame()
 
 
