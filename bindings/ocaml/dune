@@ -2,4 +2,5 @@
  (name        evercrypt)
  (public_name evercrypt)
  (libraries evercrypt-ctypes bigstring)
+ (modules_without_implementation SharedDefs)
  (flags (:standard -warn-error -3)))

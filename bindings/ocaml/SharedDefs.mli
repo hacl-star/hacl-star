@@ -33,3 +33,4 @@ end
 module type Blake2b = sig
   val hash : Bigstring.t -> Bigstring.t -> Bigstring.t -> unit
 end
+

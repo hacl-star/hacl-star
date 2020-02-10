@@ -69,15 +69,13 @@ module AEAD = struct
     | AES128_GCM
     | AES256_GCM
     | CHACHA20_POLY1305
+  let alg_definition = function
+    | AES128_GCM -> spec_Agile_AEAD_alg_Spec_Agile_AEAD_AES128_GCM
+    | AES256_GCM -> spec_Agile_AEAD_alg_Spec_Agile_AEAD_AES256_GCM
+    | CHACHA20_POLY1305 -> spec_Agile_AEAD_alg_Spec_Agile_AEAD_CHACHA20_POLY1305
   let init alg key : t result =
     let st = allocate (ptr everCrypt_AEAD_state_s) (from_voidp everCrypt_AEAD_state_s null) in
-    let alg = match alg with
-      | AES128_GCM -> spec_Agile_AEAD_alg_Spec_Agile_AEAD_AES128_GCM
-      | AES256_GCM -> spec_Agile_AEAD_alg_Spec_Agile_AEAD_AES256_GCM
-      | CHACHA20_POLY1305 -> spec_Agile_AEAD_alg_Spec_Agile_AEAD_CHACHA20_POLY1305
-    in
-    match UInt8.to_int
-            (everCrypt_AEAD_create_in alg st (uint8_ptr key)) with
+    match UInt8.to_int (everCrypt_AEAD_create_in (alg_definition alg) st (uint8_ptr key)) with
     | 0 -> Success st
     | n -> error n
   let encrypt st iv ad pt ct tag : unit result =
