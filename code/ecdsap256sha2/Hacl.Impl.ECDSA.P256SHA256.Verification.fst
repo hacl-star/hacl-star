@@ -174,7 +174,7 @@ let ecdsa_verification_step4 bufferU1 bufferU2 r s hash =
     uints_to_bytes_be (Hacl.Spec.ECDSA.changeEndian (nat_to_intseq_le 4 (nat_from_intseq_le (as_seq h1 u1))));
     == {lemma_core_0 u1 h1}
     uints_to_bytes_be (Hacl.Spec.ECDSA.changeEndian (nat_to_intseq_le 4 (as_nat h1 u1)));
-    == { changeEndianLemma_le_be (as_nat h1 u1)}
+    == { changeEndian_le_be (as_nat h1 u1) }
     nat_to_bytes_be 32 (as_nat h1 u1);
     };
 
@@ -186,7 +186,7 @@ let ecdsa_verification_step4 bufferU1 bufferU2 r s hash =
       uints_to_bytes_be (Hacl.Spec.ECDSA.changeEndian (nat_to_intseq_le 4 (nat_from_intseq_le (as_seq h1 u2))));
       == {lemma_core_0 u2 h1}
       uints_to_bytes_be (Hacl.Spec.ECDSA.changeEndian (nat_to_intseq_le 4 (as_nat h1 u2)));
-      == { changeEndianLemma_le_be (as_nat h1 u2)}
+      == { changeEndian_le_be (as_nat h1 u2) }
       nat_to_bytes_be 32 (as_nat h1 u2);
     };
 

@@ -238,7 +238,24 @@ val lemma_exponen_spec: k:lseq uint8 32
     f1 == pow start1 (arithmetic_shift_right number newIndex + 1) % prime_p256_order
   )
 
-#push-options "--fuel 2 --z3rlimit 300"
+#push-options "--fuel 1"
+
+val lemma_exponen_spec_0: k:lseq uint8 32
+  -> start:tuple2 nat_prime nat_prime {let st0, st1 = start in st0 == 1} ->
+  Lemma (
+    let start0, start1 = start in
+    let number = nat_from_bytes_le k in
+    let newIndex = 256 in
+    let f0, f1 = Lib.LoopCombinators.repeati 0 (_exp_step k) start in
+    f0 == pow start1 (arithmetic_shift_right number newIndex) % prime_p256_order /\
+    f1 == pow start1 (arithmetic_shift_right number newIndex + 1) % prime_p256_order
+  )
+
+let lemma_exponen_spec_0 k start =
+  let st0, st1 = start in
+  Lib.LoopCombinators.eq_repeati0 256 (_exp_step k) start
+
+#pop-options
 
 let rec lemma_exponen_spec k start index =
   let f = _exp_step k in
@@ -247,8 +264,7 @@ let rec lemma_exponen_spec k start index =
   let newIndex = 256 - index in
   let open Lib.LoopCombinators in
   match index with
-  | 0 -> eq_repeati0 256 (_exp_step k) start;
-    assert_norm (arithmetic_shift_right number newIndex == 0)
+  | 0 -> lemma_exponen_spec_0 k start
   | _ ->
     begin
     unfold_repeati 256 f start (index - 1);
@@ -315,8 +331,6 @@ let rec lemma_exponen_spec k start index =
 	  }
     end
 
-#pop-options
-
 #push-options "--ifuel 1"
 
 val nat_from_intlist_le: #t:inttype{unsigned t} -> #l:secrecy_level
@@ -378,7 +392,6 @@ let rec nat_from_intlist_seq_be #t #l len b =
       nat_from_intseq_be_lemma0 (slice s 0 1);
       nat_from_intseq_be_slice_lemma s 1
       end
-
 
 #pop-options
 
@@ -489,6 +502,14 @@ let changeEndianLemmaI a =
   eq_intro (changeEndian (nat_to_intseq_le #U64 #SEC 4 a)) (nat_to_intseq_be 4 a)
 
 
+val changeEndian_le_be: a:nat{a < pow2 256} -> Lemma
+  (uints_to_bytes_be (changeEndian (nat_to_intseq_le 4 a)) == nat_to_bytes_be 32 a)
+
+let changeEndian_le_be a =
+  changeEndianLemmaI a;
+  uints_to_bytes_be_nat_lemma #U64 #SEC 4 a
+
+
 val verifyQValidCurvePointSpec:
   publicKey:tuple3 nat nat nat{~(isPointAtInfinity publicKey)} -> bool
 
@@ -571,29 +592,3 @@ let ecdsa_signature mLen input privateKey k =
       resultR, resultS, u64 (pow2 64 - 1)
     else
       resultR, resultS, u64 0
-
-
-open FStar.HyperStack
-open FStar.HyperStack.All
-open Lib.Buffer
-
-(* prove and move to ByteSeq *)
-assume val uints_to_bytes_be_nat_lemma: #t:inttype{unsigned t /\ ~(U1? t)} -> #l:secrecy_level -> len:nat{len * numbytes t < pow2 32}
-  -> n:nat{n < pow2 (bits t * len)} ->
-  Lemma (uints_to_bytes_be #t #l #len (nat_to_intseq_be #t #l len n) == nat_to_bytes_be (len * numbytes t) n)
-
-val changeEndianLemmaFromBeToLe_: a: nat {a < pow2 256} -> Lemma
-  (uints_to_bytes_be (changeEndian (nat_to_intseq_le 4 a)) == nat_to_bytes_be 32 a)
-
-let changeEndianLemmaFromBeToLe_ a =  
-  changeEndianLemmaI a;
-  uints_to_bytes_be_nat_lemma #U64 #SEC 4 a 
-
-
-val changeEndianLemmaFromBeToLe: a: nat {a < pow2 256} -> h: mem -> b: lbuffer uint8 (size 32) ->
-  Lemma
-    (requires (as_seq h b == uints_to_bytes_be (changeEndian (nat_to_intseq_le 4 a))))
-    (ensures as_seq h b == nat_to_bytes_be 32 a)
-  
-let changeEndianLemmaFromBeToLe a h b = 
-    changeEndianLemmaFromBeToLe_ a

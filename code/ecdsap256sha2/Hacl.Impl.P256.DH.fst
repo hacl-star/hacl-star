@@ -50,14 +50,14 @@ let ecp256dh_i result scalar =
   
   lemma_core_0 resultBufferX h2;
   lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h2 resultBufferX);
-  Hacl.Spec.ECDSA.changeEndianLemmaFromBeToLe (as_nat h2 resultBufferX) h3 resultX;
+  changeEndian_le_be (as_nat h2 resultBufferX);
 
   lemma_core_0 resultBufferY h2;
   lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h2 resultBufferY);
-  Hacl.Spec.ECDSA.changeEndianLemmaFromBeToLe (as_nat h2 resultBufferY) h3 resultY;
+  changeEndian_le_be (as_nat h2 resultBufferY);
   
   pop_frame(); 
-    flag
+  flag
 
 
 (* This code is not constant-time on pubKey *)
@@ -134,11 +134,11 @@ let ecp256dh_r result pubKey scalar =
       
       let h1 = ST.get() in 
       lemma_core_0 publicKeyFelemX h1;
-      Hacl.Spec.ECDSA.changeEndianLemma (uints_from_bytes_be (as_seq h0 pubKeyX));
+      changeEndianLemma (uints_from_bytes_be (as_seq h0 pubKeyX));
       uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 pubKeyX);   
 
       lemma_core_0 publicKeyFelemY h1;
-      Hacl.Spec.ECDSA.changeEndianLemma (uints_from_bytes_be (as_seq h0 pubKeyY));
+      changeEndianLemma (uints_from_bytes_be (as_seq h0 pubKeyY));
       uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 pubKeyY);  
 	
 	let flag = _ecp256dh_r resultBufferFelem publicKeyAsFelem scalar in 
@@ -153,11 +153,11 @@ let ecp256dh_r result pubKey scalar =
       
       lemma_core_0 resultBufferFelemX h2;
       lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h2 resultBufferFelemX);
-      Hacl.Spec.ECDSA.changeEndianLemmaFromBeToLe (as_nat h2 resultBufferFelemX) h3 resultX;
+      changeEndian_le_be (as_nat h2 resultBufferFelemX);
 
       lemma_core_0 resultBufferFelemY h2;
       lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h2 resultBufferFelemY);
-      Hacl.Spec.ECDSA.changeEndianLemmaFromBeToLe (as_nat h2 resultBufferFelemY) h3 resultY;
+      changeEndian_le_be (as_nat h2 resultBufferFelemY);
     
       pop_frame();
       flag
