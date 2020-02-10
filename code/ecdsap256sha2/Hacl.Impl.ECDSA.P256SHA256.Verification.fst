@@ -396,11 +396,13 @@ val ecdsa_verification_core:
          assert_norm (pow2 32 < pow2 61);
 	 let hashM = H.hash Def.SHA2_256 (as_seq h0 m) in 
 	 let hashNat = nat_from_bytes_be hashM % prime_p256_order in 
-         let p0 =  pow (as_nat h0 s) (prime_p256_order - 2) * hashNat % prime_p256_order in 
+	 
+         let p0 = pow (as_nat h0 s) (prime_p256_order - 2) * hashNat % prime_p256_order in 
 	 let p1 = pow (as_nat h0 s) (prime_p256_order - 2) * as_nat h0 r % prime_p256_order in 
-	 let bufferU1 = nat_to_bytes_be 32 p0 in
-	 let bufferU2 = nat_to_bytes_be 32 p1 in
-         let pointAtInfinity = (0, 0, 0) in
+
+	 let bufferU1 = nat_to_bytes_be 32 p0  in 
+	 let bufferU2 = nat_to_bytes_be 32 p1 in 
+	 let pointAtInfinity = (0, 0, 0) in
          let u1D, _ = montgomery_ladder_spec bufferU1 (pointAtInfinity, basePoint) in
          let u2D, _ = montgomery_ladder_spec bufferU2 (pointAtInfinity, point_prime_to_coordinates (as_seq h0 publicKeyPoint)) in
          let sumD = _point_add u1D u2D in
@@ -442,7 +444,6 @@ val ecdsa_verification_:
       result == Hacl.Spec.ECDSA.ecdsa_verification (pubKeyX, pubKeyY) r s (v mLen) (as_seq h0 m))
 
 let ecdsa_verification_ pubKey r s mLen m =
-  admit();
   assert_norm (pow2 32 < pow2 61);
   push_frame();
   let tempBufferU64 = create (size 120) (u64 0) in
@@ -498,7 +499,6 @@ val ecdsa_verification:
       result == Hacl.Spec.ECDSA.ecdsa_verification (publicKeyX, publicKeyY) r s (v mLen) (as_seq h0 m))
 
 let ecdsa_verification pubKey r s mLen m =
-admit();
   assert_norm (pow2 32 < pow2 61);
   push_frame();
   let h0 = ST.get() in 
