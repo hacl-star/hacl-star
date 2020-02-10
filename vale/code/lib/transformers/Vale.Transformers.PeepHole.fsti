@@ -55,9 +55,9 @@ let peephole_correct (p:pre_peephole) (is:list ins) (s:machine_state) : GTot Typ
   match p.ph is with
   | None -> True
   | Some is' ->
-    equiv_states_or_both_not_ok
-      (eval_inss is s)
-      (eval_inss is' s)
+    let s1 = eval_inss is s in
+    let s2 = eval_inss is' s in
+    s1.ms_ok ==> equiv_states s1 s2
 
 type peephole = (p:pre_peephole{forall is s. {:pattern (peephole_correct p is s)}
                                   peephole_correct p is s})

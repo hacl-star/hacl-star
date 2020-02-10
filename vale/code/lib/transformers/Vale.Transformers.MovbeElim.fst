@@ -65,9 +65,9 @@ let lemma_movbe_is_mov_bswap (dst src:operand64) (s:machine_state) :
         let movbe = make_instr_annotate ins_MovBe64 (AnnotateMovbe64 ()) dst src in
         let mov = make_instr ins_Mov64 dst src in
         let bswap = make_instr ins_Bswap64 dst in
-        equiv_states_or_both_not_ok
-          (machine_eval_ins movbe s)
-          (machine_eval_ins bswap (machine_eval_ins mov s)))) =
+        let s1 = machine_eval_ins movbe s in
+        let s2 = machine_eval_ins bswap (machine_eval_ins mov s) in
+        s1.ms_ok ==> equiv_states s1 s2)) =
   let movbe = make_instr_annotate ins_MovBe64 (AnnotateMovbe64 ()) dst src in
   let mov = make_instr ins_Mov64 dst src in
   let bswap = make_instr ins_Bswap64 dst in
@@ -79,16 +79,18 @@ let lemma_movbe_is_mov_bswap (dst src:operand64) (s:machine_state) :
     let dst_movbe_v = T.reverse_bytes_nat64 src_v in
     let dst_mov_v = eval_operand dst s_mov in
     let dst_bswap_v = T.reverse_bytes_nat64 dst_mov_v in
-    assume (Vale.X64.CPU_Features_s.movbe_enabled);
-    assert (s_movbe == update_operand64_preserve_flags'' dst dst_movbe_v s s); // this fails now, because there is a "movbe_enabled" check on movbe
-    assert (s_mov == update_operand64_preserve_flags'' dst src_v s s);
-    lemma_update_to_valid_destination_keeps_it_as_valid_src dst s src_v;
-    assert (eval_operand dst s_mov == src_v);
-    assert (valid_src_operand64_and_taint dst s_mov);
-    assert (s_bswap == update_operand64_preserve_flags'' dst dst_bswap_v s_mov s_mov);
-    assert (src_v == dst_mov_v);
-    assert (dst_movbe_v == dst_bswap_v);
-    lemma_double_update_reg dst s s_mov s_bswap s_movbe src_v dst_bswap_v
+    if s_movbe.ms_ok then (
+      assert (Vale.X64.CPU_Features_s.movbe_enabled);
+      assert (s_movbe == update_operand64_preserve_flags'' dst dst_movbe_v s s); // this fails now, because there is a "movbe_enabled" check on movbe
+                                                                                   assert (s_mov == update_operand64_preserve_flags'' dst src_v s s);
+      lemma_update_to_valid_destination_keeps_it_as_valid_src dst s src_v;
+      assert (eval_operand dst s_mov == src_v);
+      assert (valid_src_operand64_and_taint dst s_mov);
+      assert (s_bswap == update_operand64_preserve_flags'' dst dst_bswap_v s_mov s_mov);
+      assert (src_v == dst_mov_v);
+      assert (dst_movbe_v == dst_bswap_v);
+      lemma_double_update_reg dst s s_mov s_bswap s_movbe src_v dst_bswap_v
+    ) else ()
   ) else (
     assert (s_movbe == {s with ms_ok = false});
     assert (s_mov == {s with ms_ok = false});

@@ -199,7 +199,7 @@ let rec lemma_pull_instructions_from_codes (cs:codes) (num:pos) (fuel:nat) (s:ma
 let rec lemma_apply_peephole_to_codes (p:peephole) (cs:codes)
     (fuel:nat) (s:machine_state) :
   Lemma
-    (requires True)
+    (requires (not (erroring_option_state (machine_eval_codes cs fuel s))))
     (ensures (
         equiv_option_states
           (machine_eval_codes cs fuel s)
@@ -229,8 +229,9 @@ let rec lemma_apply_peephole_to_codes (p:peephole) (cs:codes)
                      (machine_eval_codes cs fuel s)
                      (machine_eval_codes cs'' fuel (eval_inss is s)));
             assert (peephole_correct p is s); (* OBSERVE *)
-            assert (equiv_states_or_both_not_ok
-                     (eval_inss is s)
+            assert ((eval_inss is s).ms_ok ==>
+                    equiv_states
+                      (eval_inss is s)
                      (eval_inss is' s));
             let s1 = eval_inss is s in
             let s2 = eval_inss is' s in
@@ -270,7 +271,7 @@ let rec lemma_apply_peephole_to_codes (p:peephole) (cs:codes)
 let rec lemma_apply_peephole_to_code (p:peephole) (c:code)
     (fuel:nat) (s:machine_state) :
   Lemma
-    (requires True)
+    (requires (not (erroring_option_state (machine_eval_code c fuel s))))
     (ensures (
         equiv_option_states
           (machine_eval_code c fuel s)
@@ -309,7 +310,7 @@ let rec lemma_apply_peephole_to_code (p:peephole) (c:code)
 and lemma_apply_peephole_to_code_while (p:peephole) (c:code{While? c})
     (s:machine_state) (fuel:nat) :
   Lemma
-    (requires True)
+    (requires (not (erroring_option_state (machine_eval_code c fuel s))))
     (ensures (
         equiv_option_states
           (machine_eval_code c fuel s)
