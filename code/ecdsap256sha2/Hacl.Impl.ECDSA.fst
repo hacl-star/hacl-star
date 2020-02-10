@@ -28,14 +28,9 @@ open Hacl.Impl.ECDSA.MontgomeryMultiplication
 
 open Hacl.Impl.P256.Signature.Common
 
-open Hacl.Impl.ECDSA.P256SHA256.KeyGeneration
 open Hacl.Impl.ECDSA.P256SHA256.Signature
 open Hacl.Impl.ECDSA.P256SHA256.Verification
 
-(* FIPS Complaint? 
-let ecdsa_p256_sha2_keyGen result privKey = 
-  key_gen result privKey
-*)
 
 let ecdsa_p256_sha2_sign result mLen m privKey k = 
   ecdsa_signature result mLen m privKey k

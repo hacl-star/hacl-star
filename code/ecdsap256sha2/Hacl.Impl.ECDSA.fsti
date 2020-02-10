@@ -28,33 +28,9 @@ open Hacl.Impl.ECDSA.MontgomeryMultiplication
 
 open Hacl.Impl.P256.Signature.Common
 
-open Hacl.Impl.ECDSA.P256SHA256.KeyGeneration
 open Hacl.Impl.ECDSA.P256SHA256.Signature
 open Hacl.Impl.ECDSA.P256SHA256.Verification
 
-(*
-val ecdsa_p256_sha2_keyGen: 
-    result: lbuffer uint8 (size 64) 
-  -> privKey: lbuffer uint8 (size 32) 
-  -> Stack unit
-    (requires fun h ->
-      live h result /\ live h privKey /\
-      disjoint result privKey /\
-      nat_from_bytes_le (as_seq h privKey) < prime_p256_order
-    )
-    (ensures fun h0 _ h1 ->
-      modifies (loc result) h0 h1 /\
-      (
-        let publicKeyX = nat_from_bytes_le (as_seq h1 (gsub result (size 0) (size 32))) in
-        let publicKeyY = nat_from_bytes_le (as_seq h1 (gsub result (size 32) (size 32))) in
-        let xN, yN, _ = secret_to_public (as_seq h0 privKey) in
-        publicKeyX < prime256 /\
-        publicKeyY < prime256 /\
-        publicKeyX == xN /\
-        publicKeyY == yN
-      )
-    )
-*)
 
 val ecdsa_p256_sha2_sign: result: lbuffer uint8 (size 64) -> mLen: size_t -> m: lbuffer uint8 mLen ->
   privKey: lbuffer uint8 (size 32) -> 
