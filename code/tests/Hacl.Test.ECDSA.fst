@@ -88,58 +88,12 @@ let test_sigver (vec:sigver_vector) : Stack unit (requires fun _ -> True) (ensur
     pop_frame()
     end
 
-(** BEGIN reverse, to workaround wrong byte order. TODO: remove **)
-val reverse_inplace_state: n:size_nat -> i:size_nat{i <= n / 2} -> Type0
-let reverse_inplace_state n i = Lib.Sequence.lseq uint8 n
-
-noextract
-val reverse_inplace_inner: n:size_nat -> i:size_nat{i < n / 2}
-  -> reverse_inplace_state n i -> reverse_inplace_state n (i + 1)
-let reverse_inplace_inner n i s =
-  let open Lib.Sequence in
-  let tmp = s.[i] in
-  let s = s.[i] <- s.[n - i - 1] in
-  s.[n - i - 1] <- tmp
-
-noextract
-val reverse_inplace_spec: n:size_nat -> s:Lib.Sequence.lseq uint8 n -> Lib.Sequence.lseq uint8 n
-let reverse_inplace_spec n s =
-    Lib.LoopCombinators.repeat_gen (n / 2) (reverse_inplace_state n)
-      (reverse_inplace_inner n) s
-
-val reverse_inplace: n:size_t{0 < v n} -> a:Lib.Buffer.lbuffer uint8 n -> Stack unit
-  (requires fun h0 -> Lib.Buffer.live h0 a)
-  (ensures  fun h0 _ h1 ->
-    Lib.Buffer.modifies1 a h0 h1 /\
-    Lib.Buffer.as_seq h1 a == reverse_inplace_spec (v n) (Lib.Buffer.as_seq h0 a))
-
-let reverse_inplace n a =
-  let open Lib.Buffer in
-  push_frame();
-  let h0 = get() in
-  loop h0 (n /. size 2) (reverse_inplace_state (v n))
-    (fun h i -> as_seq h a)
-    (fun i -> loc a)
-    (fun h0 -> reverse_inplace_inner (v n))
-    (fun i ->
-      Lib.LoopCombinators.unfold_repeat_gen (v n / 2)
-        (reverse_inplace_state (v n))
-        (reverse_inplace_inner (v n))
-        (Lib.Buffer.as_seq h0 a) (v i);
-      let tmp = a.(i) in
-      a.(i) <- a.(n -! i -! size 1);
-      a.(n -! i -! size 1) <- tmp
-    );
-  pop_frame()
-
-(** END reverse, to workaround wrong byte order in signing **)
-
 
 val check_bound: b:Lib.Buffer.lbuffer uint8 32ul -> Stack bool
   (requires fun h -> Lib.Buffer.live h b)
   (ensures  fun h0 r h1 ->
     h0 == h1 /\
-    r == (Lib.ByteSequence.nat_from_bytes_le (Lib.Buffer.as_seq h0 b) <
+    r == (Lib.ByteSequence.nat_from_bytes_be (Lib.Buffer.as_seq h0 b) <
           Hacl.Spec.ECDSAP256.Definition.prime_p256_order))
 
 let check_bound b =
@@ -155,37 +109,37 @@ let check_bound b =
   [@inline_let]
   let q4 = normalize_term (((prime_p256_order / pow2 128) / pow2 64) % pow2 64) in
   assert_norm (pow2 128 * pow2 64 == pow2 192);
-  assert (prime_p256_order == q1 + pow2 64 * q2 + pow2 128 * q3 + pow2 192 * q4);
+  assert (prime_p256_order == q1 + pow2 64 * q2 + pow2 128 * q3 + pow2 192 * q4); 
   let q1 = mk_int #U64 #PUB q1 in
   let q2 = mk_int #U64 #PUB q2 in
   let q3 = mk_int #U64 #PUB q3 in
   let q4 = mk_int #U64 #PUB q4 in
 
   let h0 = get () in
-  let x1 = Lib.ByteBuffer.uint_from_bytes_le #U64 (Lib.Buffer.sub b 0ul 8ul) in
-  let x2 = Lib.ByteBuffer.uint_from_bytes_le #U64 (Lib.Buffer.sub b 8ul 8ul) in
-  let x3 = Lib.ByteBuffer.uint_from_bytes_le #U64 (Lib.Buffer.sub b 16ul 8ul) in
-  let x4 = Lib.ByteBuffer.uint_from_bytes_le #U64 (Lib.Buffer.sub b 24ul 8ul) in
+  let x1 = Lib.ByteBuffer.uint_from_bytes_be #U64 (Lib.Buffer.sub b 0ul 8ul) in
+  let x2 = Lib.ByteBuffer.uint_from_bytes_be #U64 (Lib.Buffer.sub b 8ul 8ul) in
+  let x3 = Lib.ByteBuffer.uint_from_bytes_be #U64 (Lib.Buffer.sub b 16ul 8ul) in
+  let x4 = Lib.ByteBuffer.uint_from_bytes_be #U64 (Lib.Buffer.sub b 24ul 8ul) in
 
-  nat_from_intseq_le_slice_lemma (Lib.Buffer.as_seq h0 b) 8;
-  lemma_reveal_uint_to_bytes_le #U64 (Lib.Sequence.slice (Lib.Buffer.as_seq h0 b) 0 8);
+  nat_from_intseq_be_slice_lemma (Lib.Buffer.as_seq h0 b) 8;
+  lemma_reveal_uint_to_bytes_be #U64 (Lib.Sequence.slice (Lib.Buffer.as_seq h0 b) 0 8);
 
-  nat_from_intseq_le_slice_lemma (Lib.Sequence.slice (Lib.Buffer.as_seq h0 b) 8 32) 8;
-  lemma_reveal_uint_to_bytes_le #U64 (Lib.Sequence.slice (Lib.Buffer.as_seq h0 b) 8 16);
+  nat_from_intseq_be_slice_lemma (Lib.Sequence.slice (Lib.Buffer.as_seq h0 b) 8 32) 8;
+  lemma_reveal_uint_to_bytes_be #U64 (Lib.Sequence.slice (Lib.Buffer.as_seq h0 b) 8 16);
 
-  nat_from_intseq_le_slice_lemma (Lib.Sequence.slice (Lib.Buffer.as_seq h0 b) 16 32) 8;
-  lemma_reveal_uint_to_bytes_le #U64 (Lib.Sequence.slice (Lib.Buffer.as_seq h0 b) 16 24);
+  nat_from_intseq_be_slice_lemma (Lib.Sequence.slice (Lib.Buffer.as_seq h0 b) 16 32) 8;
+  lemma_reveal_uint_to_bytes_be #U64 (Lib.Sequence.slice (Lib.Buffer.as_seq h0 b) 16 24);
 
-  nat_from_intseq_le_slice_lemma (Lib.Sequence.slice (Lib.Buffer.as_seq h0 b) 24 32) 8;
-  lemma_reveal_uint_to_bytes_le #U64 (Lib.Sequence.slice (Lib.Buffer.as_seq h0 b) 24 32);
+  nat_from_intseq_be_slice_lemma (Lib.Sequence.slice (Lib.Buffer.as_seq h0 b) 24 32) 8;
+  lemma_reveal_uint_to_bytes_be #U64 (Lib.Sequence.slice (Lib.Buffer.as_seq h0 b) 24 32);
 
   let x1 = Lib.RawIntTypes.u64_to_UInt64 x1 in
   let x2 = Lib.RawIntTypes.u64_to_UInt64 x2 in
   let x3 = Lib.RawIntTypes.u64_to_UInt64 x3 in
   let x4 = Lib.RawIntTypes.u64_to_UInt64 x4 in
-  x4 <. q4 || (x4 =. q4 &&
-    (x3 <. q3 || (x3 =. q3 &&
-      (x2 <. q2 || (x2 =. q2 && x1 <. q1)))))
+  x1 <. q4 || (x1 =. q4 &&
+    (x2 <. q3 || (x2 =. q3 &&
+      (x3 <. q2 || (x3 =. q2 && x4 <. q1)))))
 
 
 let test_siggen (vec:siggen_vector) : Stack unit (requires fun _ -> True) (ensures fun _ _ _ -> True) =
@@ -209,10 +163,6 @@ let test_siggen (vec:siggen_vector) : Stack unit (requires fun _ -> True) (ensur
   if not (k_len = 32ul && d_len = 32ul) then
     C.exit (-1l);
 
-  // TODO: signing uses wrong byte order; this is a temporary workaround.
-  reverse_inplace 32ul d;
-  reverse_inplace 32ul k;
-
   let bound_k = check_bound k in
   let bound_d = check_bound d in
 
@@ -231,10 +181,6 @@ let test_siggen (vec:siggen_vector) : Stack unit (requires fun _ -> True) (ensur
     let flag = ecdsa_p256_sha2_sign rs msg_len msg d k in
     if Lib.RawIntTypes.u64_to_UInt64 flag = 0uL then
       begin
-      // TODO: signing uses wrong byte order; this is a temporary workaround.
-      reverse_inplace 32ul (B.sub rs 0ul 32ul);
-      reverse_inplace 32ul (B.sub rs 32ul 32ul);
-
       let okr = compare_and_print (B.sub rs 0ul 32ul) r 32ul in
       let oks = compare_and_print (B.sub rs 32ul 32ul) s 32ul in
       if okr && oks then
