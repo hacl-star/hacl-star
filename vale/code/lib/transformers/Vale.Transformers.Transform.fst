@@ -116,7 +116,7 @@ let lemma_check_if_same_printed_code orig hint transformed va_s0 va_sM va_fM =
 /// Peephole Transformation to replace movbes -> mov + bswap.
 
 let movbe_elim =
-  PH.peephole_transform ME.movbe_elim_input_hint ME.movbe_elim_ph
+  PH.peephole_transform ME.movbe_elim_ph
 
 let lemma_movbe_elim =
-  PH.lemma_peephole_transform ME.movbe_elim_input_hint ME.movbe_elim_ph
+  PH.lemma_peephole_transform ME.movbe_elim_ph

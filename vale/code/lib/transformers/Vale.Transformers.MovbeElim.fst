@@ -11,20 +11,20 @@ open Vale.X64.InsLemmas
 
 open Vale.Transformers.PeepHole
 
-let movbe_elim_input_hint : pos = 1
-
-let movbe_elim_ph (is:list ins) : Tot (option (list ins)) =
-  match is with
-  | [Instr i oprs (AnnotateMovbe64 proof_of_movbe)] ->
-    let oprs:normal (instr_operands_t [out op64] [op64]) =
-      coerce_to_normal #(instr_operands_t [out op64] [op64]) oprs in
-    let (dst, (src, ())) = oprs in
-    if OReg? dst then (
-      let mov = make_instr ins_Mov64 dst src in
-      let bswap = make_instr ins_Bswap64 dst in
-      Some [mov; bswap]
-    ) else None
-  | _ -> None
+let movbe_elim_ph = {
+  ph = (function
+      | [Instr i oprs (AnnotateMovbe64 proof_of_movbe)] ->
+        let oprs:normal (instr_operands_t [out op64] [op64]) =
+          coerce_to_normal #(instr_operands_t [out op64] [op64]) oprs in
+        let (dst, (src, ())) = oprs in
+        if OReg? dst then (
+          let mov = make_instr ins_Mov64 dst src in
+          let bswap = make_instr ins_Bswap64 dst in
+          Some [mov; bswap]
+        ) else None
+      | _ -> None);
+  input_hint = 1;
+}
 
 module T = Vale.Def.Types_s
 module H = Vale.Arch.Heap
@@ -106,7 +106,7 @@ let movbe_elim_correct (is:list ins) (s:machine_state) :
       coerce_to_normal #(instr_operands_t [out op64] [op64]) oprs in
     let (dst, (src, ())) = oprs in
     if OReg? dst then (
-      let Some is' = movbe_elim_ph is in
+      let Some is' = movbe_elim_ph.ph is in
       lemma_movbe_is_mov_bswap dst src s
     ) else ()
   | _ -> ()

@@ -1,21 +1,3 @@
-(**
-
-   This module defines a framework for peephole transformers. It needs
-   to be instantiated with an actual pattern to generate a verified
-   peephole transform. In particular, it needs to be provided a
-   [peephole], and an [input_hint] to obtain a new transformer.
-
-   A [peephole] is a function that converts a list of instructions
-   into (optionally) another list of instructions. It must be proven
-   correct wrt preservation of semantics. The [input_hint] is just a
-   hint to say how many instructions it takes as input.
-
-   Usage:
-
-     let test = peephole_transform test_ih test_ph
-     let lemma_test = lemma_peephole_transform test_ih test_ph
-
-*)
 module Vale.Transformers.PeepHole
 
 open Vale.X64.Decls
@@ -106,28 +88,28 @@ let rec wrap_instructions (is:list ins) : Tot codes =
 /// instructions and tries to apply the peephole transformation to
 /// them.
 
-let rec apply_peephole_to_codes (input_hint:pos) (p:peephole) (cs:codes) :
+let rec apply_peephole_to_codes (p:peephole) (cs:codes) :
   Tot codes
     (decreases %[num_ins_in_codes cs; cs]) =
   match cs with
   | [] -> []
   | c :: cs' ->
-    match pull_instructions_from_codes cs input_hint with
-    | None -> c :: apply_peephole_to_codes input_hint p cs'
+    match pull_instructions_from_codes cs p.input_hint with
+    | None -> c :: apply_peephole_to_codes p cs'
     | Some (is, cs'') ->
-      match p is with
-      | None -> c :: apply_peephole_to_codes input_hint p cs'
+      match p.ph is with
+      | None -> c :: apply_peephole_to_codes p cs'
       | Some is' ->
         Block (wrap_instructions is') ::
-        apply_peephole_to_codes input_hint p cs''
+        apply_peephole_to_codes p cs''
 
-let rec apply_peephole_to_code (input_hint:pos) (p:peephole) (c:code) :
+let rec apply_peephole_to_code (p:peephole) (c:code) :
   Tot code
     (decreases %[num_ins_in_code c; c]) =
   match c with
   | Ins i -> (
-      if input_hint = 1 then (
-        match p [i] with
+      if p.input_hint = 1 then (
+        match p.ph [i] with
         | None -> c
         | Some is -> Block (wrap_instructions is)
       ) else (
@@ -135,16 +117,16 @@ let rec apply_peephole_to_code (input_hint:pos) (p:peephole) (c:code) :
       )
     )
   | Block l -> (
-      let l' = apply_peephole_to_codes input_hint p l in
+      let l' = apply_peephole_to_codes p l in
       Block l'
     )
   | IfElse c t f -> (
-      let t' = apply_peephole_to_code input_hint p t in
-      let f' = apply_peephole_to_code input_hint p f in
+      let t' = apply_peephole_to_code p t in
+      let f' = apply_peephole_to_code p f in
       IfElse c t' f'
     )
   | While c b -> (
-      let b' = apply_peephole_to_code input_hint p b in
+      let b' = apply_peephole_to_code p b in
       While c b'
     )
 
@@ -214,35 +196,35 @@ let rec lemma_pull_instructions_from_codes (cs:codes) (num:pos) (fuel:nat) (s:ma
     | While _ _ -> ()
 
 #push-options "--z3rlimit 10"
-let rec lemma_apply_peephole_to_codes (input_hint:pos) (p:peephole) (cs:codes)
+let rec lemma_apply_peephole_to_codes (p:peephole) (cs:codes)
     (fuel:nat) (s:machine_state) :
   Lemma
     (requires True)
     (ensures (
         equiv_option_states
           (machine_eval_codes cs fuel s)
-          (machine_eval_codes (apply_peephole_to_codes input_hint p cs) fuel s)))
+          (machine_eval_codes (apply_peephole_to_codes p cs) fuel s)))
     (decreases %[num_ins_in_codes cs; cs]) =
   match cs with
   | [] -> ()
   | c :: cs' ->
-    match pull_instructions_from_codes cs input_hint with
+    match pull_instructions_from_codes cs p.input_hint with
     | None -> (
         match machine_eval_code c fuel s with
         | None -> ()
         | Some s1 ->
-          lemma_apply_peephole_to_codes input_hint p cs' fuel s1
+          lemma_apply_peephole_to_codes p cs' fuel s1
       )
     | Some (is, cs'') -> (
-        match p is with
+        match p.ph is with
         | None -> (
             match machine_eval_code c fuel s with
             | None -> ()
             | Some s1 ->
-              lemma_apply_peephole_to_codes input_hint p cs' fuel s1
+              lemma_apply_peephole_to_codes p cs' fuel s1
           )
         | Some is' -> (
-            lemma_pull_instructions_from_codes cs input_hint fuel s;
+            lemma_pull_instructions_from_codes cs p.input_hint fuel s;
             assert (equiv_option_states
                      (machine_eval_codes cs fuel s)
                      (machine_eval_codes cs'' fuel (eval_inss is s)));
@@ -258,7 +240,7 @@ let rec lemma_apply_peephole_to_codes (input_hint:pos) (p:peephole) (cs:codes)
             if s1.ms_ok then (
               let Some s3 = s3' in
               lemma_eval_codes_equiv_states cs'' fuel s1 s3;
-              lemma_apply_peephole_to_codes input_hint p cs'' fuel s3
+              lemma_apply_peephole_to_codes p cs'' fuel s3
             ) else (
               match s3' with
               | None -> ()
@@ -273,31 +255,31 @@ let rec lemma_apply_peephole_to_codes (input_hint:pos) (p:peephole) (cs:codes)
                 assert (equiv_option_states
                          (machine_eval_codes cs fuel s)
                          (machine_eval_codes (Block (wrap_instructions is') :: cs'') fuel s));
-                assert ((apply_peephole_to_codes input_hint p cs) ==
+                assert ((apply_peephole_to_codes p cs) ==
                              (Block (wrap_instructions is') ::
-                              (apply_peephole_to_codes input_hint p cs'')));
-                lemma_apply_peephole_to_codes input_hint p cs'' fuel s3;
+                              (apply_peephole_to_codes p cs'')));
+                lemma_apply_peephole_to_codes p cs'' fuel s3;
                 assert (equiv_option_states
                          (machine_eval_codes cs fuel s)
-                         (machine_eval_codes (apply_peephole_to_codes input_hint p cs) fuel s))
+                         (machine_eval_codes (apply_peephole_to_codes p cs) fuel s))
             )
           )
       )
 #pop-options
 
-let rec lemma_apply_peephole_to_code (input_hint:pos) (p:peephole) (c:code)
+let rec lemma_apply_peephole_to_code (p:peephole) (c:code)
     (fuel:nat) (s:machine_state) :
   Lemma
     (requires True)
     (ensures (
         equiv_option_states
           (machine_eval_code c fuel s)
-          (machine_eval_code (apply_peephole_to_code input_hint p c) fuel s)))
+          (machine_eval_code (apply_peephole_to_code p c) fuel s)))
     (decreases %[num_ins_in_code c; c; fuel; 1]) =
   match c with
   | Ins i -> (
-      if input_hint = 1 then (
-        match p [i] with
+      if p.input_hint = 1 then (
+        match p.ph [i] with
         | None -> ()
         | Some is ->
           assert (peephole_correct p [i] s); (* OBSERVE *)
@@ -309,31 +291,31 @@ let rec lemma_apply_peephole_to_code (input_hint:pos) (p:peephole) (c:code)
       )
     )
   | Block l -> (
-      lemma_apply_peephole_to_codes input_hint p l fuel s
+      lemma_apply_peephole_to_codes p l fuel s
     )
   | IfElse cc tt ff -> (
       let (st, b) = machine_eval_ocmp s cc in
       let s' = {st with ms_trace = (BranchPredicate b)::s.ms_trace} in
       if b then (
-        lemma_apply_peephole_to_code input_hint p tt fuel s'
+        lemma_apply_peephole_to_code p tt fuel s'
       ) else (
-        lemma_apply_peephole_to_code input_hint p ff fuel s'
+        lemma_apply_peephole_to_code p ff fuel s'
       )
     )
   | While _ _ -> (
-      lemma_apply_peephole_to_code_while input_hint p c s fuel
+      lemma_apply_peephole_to_code_while p c s fuel
     )
 
-and lemma_apply_peephole_to_code_while (input_hint:pos) (p:peephole) (c:code{While? c})
+and lemma_apply_peephole_to_code_while (p:peephole) (c:code{While? c})
     (s:machine_state) (fuel:nat) :
   Lemma
     (requires True)
     (ensures (
         equiv_option_states
           (machine_eval_code c fuel s)
-          (machine_eval_code (apply_peephole_to_code input_hint p c) fuel s)))
+          (machine_eval_code (apply_peephole_to_code p c) fuel s)))
     (decreases %[num_ins_in_code c; c; fuel; 0]) =
-  let c' = apply_peephole_to_code input_hint p c in
+  let c' = apply_peephole_to_code p c in
   if fuel = 0 then (
     assert_norm (machine_eval_code c fuel s == None);
     assert_norm (machine_eval_code c' fuel s == None)
@@ -345,10 +327,10 @@ and lemma_apply_peephole_to_code_while (input_hint:pos) (p:peephole) (c:code{Whi
                    machine_eval_code c' fuel s)
     ) else (
       let s0 = {s0 with ms_trace = (BranchPredicate true)::s0.ms_trace} in
-      let body' = apply_peephole_to_code input_hint p body in
+      let body' = apply_peephole_to_code p body in
       let s_opt1 = machine_eval_code body (fuel - 1) s0 in
       let s_opt2 = machine_eval_code body' (fuel - 1) s0 in
-      lemma_apply_peephole_to_code input_hint p body (fuel - 1) s0;
+      lemma_apply_peephole_to_code p body (fuel - 1) s0;
       assert (equiv_option_states s_opt1 s_opt2);
       match s_opt1 with
       | None -> (
@@ -378,7 +360,7 @@ and lemma_apply_peephole_to_code_while (input_hint:pos) (p:peephole) (c:code{Whi
                 assert_norm (machine_eval_code c fuel s == machine_eval_code c (fuel - 1) s1);
                 assert_norm (machine_eval_code c' fuel s == machine_eval_code c' (fuel - 1) s2);
                 lemma_eval_code_equiv_states c (fuel - 1) s1 s2;
-                lemma_apply_peephole_to_code input_hint p c (fuel - 1) s2
+                lemma_apply_peephole_to_code p c (fuel - 1) s2
               )
             )
         )
@@ -388,7 +370,7 @@ and lemma_apply_peephole_to_code_while (input_hint:pos) (p:peephole) (c:code{Whi
 /// Now, for the pièce de résistance, functions that give you
 /// something you can directly use as transformers!
 
-let peephole_transform input_hint p orig =
+let peephole_transform p orig =
   if code_modifies_ghost orig then (
     {
       success = va_ffalse "code directly modifies ghost state (via ins_Ghost instruction)";
@@ -397,13 +379,13 @@ let peephole_transform input_hint p orig =
   ) else (
     {
       success = va_ttrue ();
-      result = apply_peephole_to_code input_hint p orig;
+      result = apply_peephole_to_code p orig;
     }
   )
 
-let lemma_peephole_transform input_hint p orig transformed va_s0 va_sM va_fM =
+let lemma_peephole_transform p orig transformed va_s0 va_sM va_fM =
   if code_modifies_ghost orig then (va_sM, va_fM) else (
-    lemma_apply_peephole_to_code input_hint p orig
+    lemma_apply_peephole_to_code p orig
       va_fM (state_to_S va_s0);
     let Some s = machine_eval_code orig va_fM (state_to_S va_s0) in
     let Some s' = machine_eval_code transformed va_fM (state_to_S va_s0) in
