@@ -320,24 +320,11 @@ static void uploadOneImpl(uint64_t *f)
   f[3U] = (uint64_t)0U;
 }
 
-static void toUint64(uint8_t *i, uint64_t *o)
-{
-  for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)4U; i0++)
-  {
-    uint64_t *os = o;
-    uint8_t *bj = i + i0 * (uint32_t)8U;
-    uint64_t u = load64_le(bj);
-    uint64_t r = u;
-    uint64_t x = r;
-    os[i0] = x;
-  }
-}
-
 static void toUint8(uint64_t *i, uint8_t *o)
 {
   for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)4U; i0++)
   {
-    store64_le(o + i0 * (uint32_t)8U, i[i0]);
+    store64_be(o + i0 * (uint32_t)8U, i[i0]);
   }
 }
 
@@ -1100,7 +1087,9 @@ scalarMultiplicationI(uint64_t *p, uint64_t *result, uint8_t *scalar, uint64_t *
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)256U; i++)
   {
     uint32_t bit0 = (uint32_t)255U - i;
-    uint64_t bit = (uint64_t)(scalar[bit0 / (uint32_t)8U] >> bit0 % (uint32_t)8U & (uint8_t)1U);
+    uint64_t
+    bit =
+      (uint64_t)(scalar[(uint32_t)31U - bit0 / (uint32_t)8U] >> bit0 % (uint32_t)8U & (uint8_t)1U);
     cswap(bit, q, result);
     point_add(q, result, result, buff);
     point_double(q, q, buff);
@@ -1140,32 +1129,15 @@ scalarMultiplicationWithoutNorm(
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)256U; i++)
   {
     uint32_t bit0 = (uint32_t)255U - i;
-    uint64_t bit = (uint64_t)(scalar[bit0 / (uint32_t)8U] >> bit0 % (uint32_t)8U & (uint8_t)1U);
+    uint64_t
+    bit =
+      (uint64_t)(scalar[(uint32_t)31U - bit0 / (uint32_t)8U] >> bit0 % (uint32_t)8U & (uint8_t)1U);
     cswap(bit, q, result);
     point_add(q, result, result, buff);
     point_double(q, q, buff);
     cswap(bit, q, result);
   }
   copy_point(q, result);
-}
-
-static void secretToPublic(uint64_t *result, uint8_t *scalar, uint64_t *tempBuffer)
-{
-  uint64_t basePoint1[12U] = { 0U };
-  uploadBasePoint(basePoint1);
-  uint64_t *q = tempBuffer;
-  uint64_t *buff = tempBuffer + (uint32_t)12U;
-  zero_buffer(q);
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)256U; i++)
-  {
-    uint32_t bit0 = (uint32_t)255U - i;
-    uint64_t bit = (uint64_t)(scalar[bit0 / (uint32_t)8U] >> bit0 % (uint32_t)8U & (uint8_t)1U);
-    cswap(bit, q, basePoint1);
-    point_add(q, basePoint1, basePoint1, buff);
-    point_double(q, q, buff);
-    cswap(bit, q, basePoint1);
-  }
-  norm(q, result, buff);
 }
 
 static void secretToPublicWithoutNorm(uint64_t *result, uint8_t *scalar, uint64_t *tempBuffer)
@@ -1178,7 +1150,9 @@ static void secretToPublicWithoutNorm(uint64_t *result, uint8_t *scalar, uint64_
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)256U; i++)
   {
     uint32_t bit0 = (uint32_t)255U - i;
-    uint64_t bit = (uint64_t)(scalar[bit0 / (uint32_t)8U] >> bit0 % (uint32_t)8U & (uint8_t)1U);
+    uint64_t
+    bit =
+      (uint64_t)(scalar[(uint32_t)31U - bit0 / (uint32_t)8U] >> bit0 % (uint32_t)8U & (uint8_t)1U);
     cswap(bit, q, basePoint1);
     point_add(q, basePoint1, basePoint1, buff);
     point_double(q, q, buff);
@@ -1210,12 +1184,12 @@ order_inverse_buffer[32U] =
 static uint8_t
 order_buffer[32U] =
   {
-    (uint8_t)81U, (uint8_t)37U, (uint8_t)99U, (uint8_t)252U, (uint8_t)194U, (uint8_t)202U,
-    (uint8_t)185U, (uint8_t)243U, (uint8_t)132U, (uint8_t)158U, (uint8_t)23U, (uint8_t)167U,
-    (uint8_t)173U, (uint8_t)250U, (uint8_t)230U, (uint8_t)188U, (uint8_t)255U, (uint8_t)255U,
-    (uint8_t)255U, (uint8_t)255U, (uint8_t)255U, (uint8_t)255U, (uint8_t)255U, (uint8_t)255U,
-    (uint8_t)0U, (uint8_t)0U, (uint8_t)0U, (uint8_t)0U, (uint8_t)255U, (uint8_t)255U, (uint8_t)255U,
-    (uint8_t)255U
+    (uint8_t)255U, (uint8_t)255U, (uint8_t)255U, (uint8_t)255U, (uint8_t)0U, (uint8_t)0U,
+    (uint8_t)0U, (uint8_t)0U, (uint8_t)255U, (uint8_t)255U, (uint8_t)255U, (uint8_t)255U,
+    (uint8_t)255U, (uint8_t)255U, (uint8_t)255U, (uint8_t)255U, (uint8_t)188U, (uint8_t)230U,
+    (uint8_t)250U, (uint8_t)173U, (uint8_t)167U, (uint8_t)23U, (uint8_t)158U, (uint8_t)132U,
+    (uint8_t)243U, (uint8_t)185U, (uint8_t)202U, (uint8_t)194U, (uint8_t)252U, (uint8_t)99U,
+    (uint8_t)37U, (uint8_t)81U
   };
 
 static void add8_without_carry1(uint64_t *t, uint64_t *t1, uint64_t *result)
@@ -1507,42 +1481,6 @@ ecdsa_signature_step6(
 }
 
 static uint64_t
-ecdsa_signature_core_nist_compliant(
-  uint64_t *r,
-  uint64_t *s1,
-  uint8_t *m,
-  uint64_t *privKeyAsFelem,
-  uint8_t *k
-)
-{
-  uint64_t hashAsFelem[4U] = { 0U };
-  uint64_t tempBuffer[100U] = { 0U };
-  uint64_t kAsFelem[4U] = { 0U };
-  uint64_t hashAsFelem1[4U] = { 0U };
-  toUint64(m, hashAsFelem1);
-  toUint64(k, kAsFelem);
-  uint64_t step5Flag = ecdsa_signature_step45(r, k, tempBuffer);
-  ecdsa_signature_step6(s1, kAsFelem, hashAsFelem1, r, privKeyAsFelem);
-  uint64_t sIsZero = isZero_uint64_CT(s1);
-  return step5Flag | sIsZero;
-}
-
-static uint64_t
-ecdsa_signature_nist_compliant(uint8_t *result, uint8_t *m, uint8_t *privKey, uint8_t *k)
-{
-  uint64_t privKeyAsFelem[4U] = { 0U };
-  uint64_t r[4U] = { 0U };
-  uint64_t s1[4U] = { 0U };
-  uint8_t *resultR = result;
-  uint8_t *resultS = result + (uint32_t)32U;
-  toUint64(privKey, privKeyAsFelem);
-  uint64_t flag = ecdsa_signature_core_nist_compliant(r, s1, m, privKeyAsFelem, k);
-  toUint8(r, resultR);
-  toUint8(s1, resultS);
-  return flag;
-}
-
-static uint64_t
 ecdsa_signature_core(
   uint64_t *r,
   uint64_t *s1,
@@ -1555,7 +1493,7 @@ ecdsa_signature_core(
   uint64_t hashAsFelem[4U] = { 0U };
   uint64_t tempBuffer[100U] = { 0U };
   uint64_t kAsFelem[4U] = { 0U };
-  toUint64(k, kAsFelem);
+  toUint64ChangeEndian(k, kAsFelem);
   ecdsa_signature_step12(hashAsFelem, mLen, m);
   uint64_t step5Flag = ecdsa_signature_step45(r, k, tempBuffer);
   ecdsa_signature_step6(s1, kAsFelem, hashAsFelem, r, privKeyAsFelem);
@@ -1571,9 +1509,11 @@ ecdsa_signature(uint8_t *result, uint32_t mLen, uint8_t *m, uint8_t *privKey, ui
   uint64_t s1[4U] = { 0U };
   uint8_t *resultR = result;
   uint8_t *resultS = result + (uint32_t)32U;
-  toUint64(privKey, privKeyAsFelem);
+  toUint64ChangeEndian(privKey, privKeyAsFelem);
   uint64_t flag = ecdsa_signature_core(r, s1, mLen, m, privKeyAsFelem, k);
+  changeEndian(r);
   toUint8(r, resultR);
+  changeEndian(s1);
   toUint8(s1, resultS);
   return flag;
 }
@@ -1640,6 +1580,8 @@ ecdsa_verification_core(
   montgomery_ladder_exponent(inverseS);
   multPowerPartial(inverseS, hashAsFelem, u11);
   multPowerPartial(inverseS, r, u2);
+  changeEndian(u11);
+  changeEndian(u2);
   toUint8(u11, bufferU1);
   toUint8(u2, bufferU2);
   uint64_t pointSum[12U] = { 0U };
@@ -1661,7 +1603,7 @@ ecdsa_verification_core(
 }
 
 static bool
-ecdsa_verification(uint64_t *pubKey, uint64_t *r, uint64_t *s1, uint32_t mLen, uint8_t *m)
+ecdsa_verification_(uint64_t *pubKey, uint64_t *r, uint64_t *s1, uint32_t mLen, uint8_t *m)
 {
   uint64_t tempBufferU64[120U] = { 0U };
   uint64_t *publicKeyBuffer = tempBufferU64;
@@ -1700,7 +1642,7 @@ ecdsa_verification(uint64_t *pubKey, uint64_t *r, uint64_t *s1, uint32_t mLen, u
 }
 
 static bool
-ecdsa_verification_u8(uint8_t *pubKey, uint8_t *r, uint8_t *s1, uint32_t mLen, uint8_t *m)
+ecdsa_verification(uint8_t *pubKey, uint8_t *r, uint8_t *s1, uint32_t mLen, uint8_t *m)
 {
   uint64_t publicKeyAsFelem[8U] = { 0U };
   uint64_t *publicKeyFelemX = publicKeyAsFelem;
@@ -1713,26 +1655,8 @@ ecdsa_verification_u8(uint8_t *pubKey, uint8_t *r, uint8_t *s1, uint32_t mLen, u
   toUint64ChangeEndian(pubKeyY, publicKeyFelemY);
   toUint64ChangeEndian(r, rAsFelem);
   toUint64ChangeEndian(s1, sAsFelem);
-  bool result = ecdsa_verification(publicKeyAsFelem, rAsFelem, sAsFelem, mLen, m);
+  bool result = ecdsa_verification_(publicKeyAsFelem, rAsFelem, sAsFelem, mLen, m);
   return result;
-}
-
-static void key_gen(uint8_t *result, uint8_t *privKey)
-{
-  uint64_t resultAsFelem[12U] = { 0U };
-  uint64_t *resultFelemX = resultAsFelem;
-  uint64_t *resultFelemY = resultAsFelem + (uint32_t)4U;
-  uint64_t tempBuffer[100U] = { 0U };
-  uint8_t *resultX = result;
-  uint8_t *resultY = result + (uint32_t)32U;
-  secretToPublic(resultAsFelem, privKey, tempBuffer);
-  toUint8(resultFelemX, resultX);
-  toUint8(resultFelemY, resultY);
-}
-
-void Hacl_Impl_ECDSA_ecdsa_p256_sha2_keyGen(uint8_t *result, uint8_t *privKey)
-{
-  key_gen(result, privKey);
 }
 
 uint64_t
@@ -1747,31 +1671,8 @@ Hacl_Impl_ECDSA_ecdsa_p256_sha2_sign(
   return ecdsa_signature(result, mLen, m, privKey, k);
 }
 
-uint64_t
-Hacl_Impl_ECDSA_ecdsa_p256_sha2_sign_nist(
-  uint8_t *result,
-  uint8_t *m,
-  uint8_t *privKey,
-  uint8_t *k
-)
-{
-  return ecdsa_signature_nist_compliant(result, m, privKey, k);
-}
-
 bool
 Hacl_Impl_ECDSA_ecdsa_p256_sha2_verify(
-  uint32_t mLen,
-  uint8_t *m,
-  uint64_t *pubKey,
-  uint64_t *r,
-  uint64_t *s1
-)
-{
-  return ecdsa_verification(pubKey, r, s1, mLen, m);
-}
-
-bool
-Hacl_Impl_ECDSA_ecdsa_p256_sha2_verify_u8(
   uint32_t mLen,
   uint8_t *m,
   uint8_t *pubKey,
@@ -1779,6 +1680,6 @@ Hacl_Impl_ECDSA_ecdsa_p256_sha2_verify_u8(
   uint8_t *s1
 )
 {
-  return ecdsa_verification_u8(pubKey, r, s1, mLen, m);
+  return ecdsa_verification(pubKey, r, s1, mLen, m);
 }
 

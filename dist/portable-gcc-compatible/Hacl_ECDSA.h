@@ -36,12 +36,6 @@
 #include "Hacl_Hash.h"
 
 
-/* SNIPPET_START: Hacl_Impl_ECDSA_ecdsa_p256_sha2_keyGen */
-
-void Hacl_Impl_ECDSA_ecdsa_p256_sha2_keyGen(uint8_t *result, uint8_t *privKey);
-
-/* SNIPPET_END: Hacl_Impl_ECDSA_ecdsa_p256_sha2_keyGen */
-
 /* SNIPPET_START: Hacl_Impl_ECDSA_ecdsa_p256_sha2_sign */
 
 uint64_t
@@ -55,35 +49,10 @@ Hacl_Impl_ECDSA_ecdsa_p256_sha2_sign(
 
 /* SNIPPET_END: Hacl_Impl_ECDSA_ecdsa_p256_sha2_sign */
 
-/* SNIPPET_START: Hacl_Impl_ECDSA_ecdsa_p256_sha2_sign_nist */
-
-uint64_t
-Hacl_Impl_ECDSA_ecdsa_p256_sha2_sign_nist(
-  uint8_t *result,
-  uint8_t *m,
-  uint8_t *privKey,
-  uint8_t *k
-);
-
-/* SNIPPET_END: Hacl_Impl_ECDSA_ecdsa_p256_sha2_sign_nist */
-
 /* SNIPPET_START: Hacl_Impl_ECDSA_ecdsa_p256_sha2_verify */
 
 bool
 Hacl_Impl_ECDSA_ecdsa_p256_sha2_verify(
-  uint32_t mLen,
-  uint8_t *m,
-  uint64_t *pubKey,
-  uint64_t *r,
-  uint64_t *s1
-);
-
-/* SNIPPET_END: Hacl_Impl_ECDSA_ecdsa_p256_sha2_verify */
-
-/* SNIPPET_START: Hacl_Impl_ECDSA_ecdsa_p256_sha2_verify_u8 */
-
-bool
-Hacl_Impl_ECDSA_ecdsa_p256_sha2_verify_u8(
   uint32_t mLen,
   uint8_t *m,
   uint8_t *pubKey,
@@ -91,7 +60,7 @@ Hacl_Impl_ECDSA_ecdsa_p256_sha2_verify_u8(
   uint8_t *s1
 );
 
-/* SNIPPET_END: Hacl_Impl_ECDSA_ecdsa_p256_sha2_verify_u8 */
+/* SNIPPET_END: Hacl_Impl_ECDSA_ecdsa_p256_sha2_verify */
 
 #define __Hacl_ECDSA_H_DEFINED
 #endif

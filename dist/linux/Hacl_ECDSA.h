@@ -35,15 +35,9 @@
 #include "Hacl_Hash.h"
 
 
-void Hacl_Impl_ECDSA_ecdsa_p256_sha2_keyGen(u8 *result, u8 *privKey);
-
 u64 Hacl_Impl_ECDSA_ecdsa_p256_sha2_sign(u8 *result, u32 mLen, u8 *m, u8 *privKey, u8 *k);
 
-u64 Hacl_Impl_ECDSA_ecdsa_p256_sha2_sign_nist(u8 *result, u8 *m, u8 *privKey, u8 *k);
-
-bool Hacl_Impl_ECDSA_ecdsa_p256_sha2_verify(u32 mLen, u8 *m, u64 *pubKey, u64 *r, u64 *s1);
-
-bool Hacl_Impl_ECDSA_ecdsa_p256_sha2_verify_u8(u32 mLen, u8 *m, u8 *pubKey, u8 *r, u8 *s1);
+bool Hacl_Impl_ECDSA_ecdsa_p256_sha2_verify(u32 mLen, u8 *m, u8 *pubKey, u8 *r, u8 *s1);
 
 #define __Hacl_ECDSA_H_DEFINED
 #endif

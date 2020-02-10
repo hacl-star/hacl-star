@@ -325,25 +325,11 @@ static void uploadOneImpl(u64 *f)
   f[3U] = (u64)0U;
 }
 
-static void toUint64(u8 *i, u64 *o)
-{
-  u32 i0;
-  for (i0 = (u32)0U; i0 < (u32)4U; i0++)
-  {
-    u64 *os = o;
-    u8 *bj = i + i0 * (u32)8U;
-    u64 u = load64_le(bj);
-    u64 r = u;
-    u64 x = r;
-    os[i0] = x;
-  }
-}
-
 static void toUint8(u64 *i, u8 *o)
 {
   u32 i0;
   for (i0 = (u32)0U; i0 < (u32)4U; i0++)
-    store64_le(o + i0 * (u32)8U, i[i0]);
+    store64_be(o + i0 * (u32)8U, i[i0]);
 }
 
 static u64
@@ -1087,7 +1073,7 @@ static void scalarMultiplicationI(u64 *p, u64 *result, u8 *scalar, u64 *tempBuff
     for (i = (u32)0U; i < (u32)256U; i++)
     {
       u32 bit0 = (u32)255U - i;
-      u64 bit = (u64)(scalar[bit0 / (u32)8U] >> bit0 % (u32)8U & (u8)1U);
+      u64 bit = (u64)(scalar[(u32)31U - bit0 / (u32)8U] >> bit0 % (u32)8U & (u8)1U);
       cswap(bit, q, result);
       point_add(q, result, result, buff);
       point_double(q, q, buff);
@@ -1125,7 +1111,7 @@ static void scalarMultiplicationWithoutNorm(u64 *p, u64 *result, u8 *scalar, u64
     for (i = (u32)0U; i < (u32)256U; i++)
     {
       u32 bit0 = (u32)255U - i;
-      u64 bit = (u64)(scalar[bit0 / (u32)8U] >> bit0 % (u32)8U & (u8)1U);
+      u64 bit = (u64)(scalar[(u32)31U - bit0 / (u32)8U] >> bit0 % (u32)8U & (u8)1U);
       cswap(bit, q, result);
       point_add(q, result, result, buff);
       point_double(q, q, buff);
@@ -1133,30 +1119,6 @@ static void scalarMultiplicationWithoutNorm(u64 *p, u64 *result, u8 *scalar, u64
     }
   }
   copy_point(q, result);
-}
-
-static void secretToPublic(u64 *result, u8 *scalar, u64 *tempBuffer)
-{
-  u64 basePoint1[12U] = { 0U };
-  u64 *q;
-  u64 *buff;
-  uploadBasePoint(basePoint1);
-  q = tempBuffer;
-  buff = tempBuffer + (u32)12U;
-  zero_buffer(q);
-  {
-    u32 i;
-    for (i = (u32)0U; i < (u32)256U; i++)
-    {
-      u32 bit0 = (u32)255U - i;
-      u64 bit = (u64)(scalar[bit0 / (u32)8U] >> bit0 % (u32)8U & (u8)1U);
-      cswap(bit, q, basePoint1);
-      point_add(q, basePoint1, basePoint1, buff);
-      point_double(q, q, buff);
-      cswap(bit, q, basePoint1);
-    }
-  }
-  norm(q, result, buff);
 }
 
 static void secretToPublicWithoutNorm(u64 *result, u8 *scalar, u64 *tempBuffer)
@@ -1173,7 +1135,7 @@ static void secretToPublicWithoutNorm(u64 *result, u8 *scalar, u64 *tempBuffer)
     for (i = (u32)0U; i < (u32)256U; i++)
     {
       u32 bit0 = (u32)255U - i;
-      u64 bit = (u64)(scalar[bit0 / (u32)8U] >> bit0 % (u32)8U & (u8)1U);
+      u64 bit = (u64)(scalar[(u32)31U - bit0 / (u32)8U] >> bit0 % (u32)8U & (u8)1U);
       cswap(bit, q, basePoint1);
       point_add(q, basePoint1, basePoint1, buff);
       point_double(q, q, buff);
@@ -1204,10 +1166,10 @@ order_inverse_buffer[32U] =
 static u8
 order_buffer[32U] =
   {
-    (u8)81U, (u8)37U, (u8)99U, (u8)252U, (u8)194U, (u8)202U, (u8)185U, (u8)243U, (u8)132U, (u8)158U,
-    (u8)23U, (u8)167U, (u8)173U, (u8)250U, (u8)230U, (u8)188U, (u8)255U, (u8)255U, (u8)255U,
-    (u8)255U, (u8)255U, (u8)255U, (u8)255U, (u8)255U, (u8)0U, (u8)0U, (u8)0U, (u8)0U, (u8)255U,
-    (u8)255U, (u8)255U, (u8)255U
+    (u8)255U, (u8)255U, (u8)255U, (u8)255U, (u8)0U, (u8)0U, (u8)0U, (u8)0U, (u8)255U, (u8)255U,
+    (u8)255U, (u8)255U, (u8)255U, (u8)255U, (u8)255U, (u8)255U, (u8)188U, (u8)230U, (u8)250U,
+    (u8)173U, (u8)167U, (u8)23U, (u8)158U, (u8)132U, (u8)243U, (u8)185U, (u8)202U, (u8)194U,
+    (u8)252U, (u8)99U, (u8)37U, (u8)81U
   };
 
 static void add8_without_carry1(u64 *t, u64 *t1, u64 *result)
@@ -1503,38 +1465,6 @@ static void ecdsa_signature_step6(u64 *result, u64 *kFelem, u64 *z, u64 *r, u64 
   montgomery_multiplication_ecdsa_module(zBuffer, kInv, result);
 }
 
-static u64
-ecdsa_signature_core_nist_compliant(u64 *r, u64 *s1, u8 *m, u64 *privKeyAsFelem, u8 *k)
-{
-  u64 hashAsFelem[4U] = { 0U };
-  u64 tempBuffer[100U] = { 0U };
-  u64 kAsFelem[4U] = { 0U };
-  u64 hashAsFelem1[4U] = { 0U };
-  u64 step5Flag;
-  u64 sIsZero;
-  toUint64(m, hashAsFelem1);
-  toUint64(k, kAsFelem);
-  step5Flag = ecdsa_signature_step45(r, k, tempBuffer);
-  ecdsa_signature_step6(s1, kAsFelem, hashAsFelem1, r, privKeyAsFelem);
-  sIsZero = isZero_uint64_CT(s1);
-  return step5Flag | sIsZero;
-}
-
-static u64 ecdsa_signature_nist_compliant(u8 *result, u8 *m, u8 *privKey, u8 *k)
-{
-  u64 privKeyAsFelem[4U] = { 0U };
-  u64 r[4U] = { 0U };
-  u64 s1[4U] = { 0U };
-  u8 *resultR = result;
-  u8 *resultS = result + (u32)32U;
-  u64 flag;
-  toUint64(privKey, privKeyAsFelem);
-  flag = ecdsa_signature_core_nist_compliant(r, s1, m, privKeyAsFelem, k);
-  toUint8(r, resultR);
-  toUint8(s1, resultS);
-  return flag;
-}
-
 static u64 ecdsa_signature_core(u64 *r, u64 *s1, u32 mLen, u8 *m, u64 *privKeyAsFelem, u8 *k)
 {
   u64 hashAsFelem[4U] = { 0U };
@@ -1542,7 +1472,7 @@ static u64 ecdsa_signature_core(u64 *r, u64 *s1, u32 mLen, u8 *m, u64 *privKeyAs
   u64 kAsFelem[4U] = { 0U };
   u64 step5Flag;
   u64 sIsZero;
-  toUint64(k, kAsFelem);
+  toUint64ChangeEndian(k, kAsFelem);
   ecdsa_signature_step12(hashAsFelem, mLen, m);
   step5Flag = ecdsa_signature_step45(r, k, tempBuffer);
   ecdsa_signature_step6(s1, kAsFelem, hashAsFelem, r, privKeyAsFelem);
@@ -1558,9 +1488,11 @@ static u64 ecdsa_signature(u8 *result, u32 mLen, u8 *m, u8 *privKey, u8 *k)
   u8 *resultR = result;
   u8 *resultS = result + (u32)32U;
   u64 flag;
-  toUint64(privKey, privKeyAsFelem);
+  toUint64ChangeEndian(privKey, privKeyAsFelem);
   flag = ecdsa_signature_core(r, s1, mLen, m, privKeyAsFelem, k);
+  changeEndian(r);
   toUint8(r, resultR);
+  changeEndian(s1);
   toUint8(s1, resultS);
   return flag;
 }
@@ -1628,6 +1560,8 @@ ecdsa_verification_core(
     montgomery_ladder_exponent(inverseS);
     multPowerPartial(inverseS, hashAsFelem, u11);
     multPowerPartial(inverseS, r, u2);
+    changeEndian(u11);
+    changeEndian(u2);
     toUint8(u11, bufferU1);
     toUint8(u2, bufferU2);
     {
@@ -1656,7 +1590,7 @@ ecdsa_verification_core(
   }
 }
 
-static bool ecdsa_verification(u64 *pubKey, u64 *r, u64 *s1, u32 mLen, u8 *m)
+static bool ecdsa_verification_(u64 *pubKey, u64 *r, u64 *s1, u32 mLen, u8 *m)
 {
   u64 tempBufferU64[120U] = { 0U };
   u64 *publicKeyBuffer = tempBufferU64;
@@ -1700,7 +1634,7 @@ static bool ecdsa_verification(u64 *pubKey, u64 *r, u64 *s1, u32 mLen, u8 *m)
   return ite;
 }
 
-static bool ecdsa_verification_u8(u8 *pubKey, u8 *r, u8 *s1, u32 mLen, u8 *m)
+static bool ecdsa_verification(u8 *pubKey, u8 *r, u8 *s1, u32 mLen, u8 *m)
 {
   u64 publicKeyAsFelem[8U] = { 0U };
   u64 *publicKeyFelemX = publicKeyAsFelem;
@@ -1714,26 +1648,8 @@ static bool ecdsa_verification_u8(u8 *pubKey, u8 *r, u8 *s1, u32 mLen, u8 *m)
   toUint64ChangeEndian(pubKeyY, publicKeyFelemY);
   toUint64ChangeEndian(r, rAsFelem);
   toUint64ChangeEndian(s1, sAsFelem);
-  result = ecdsa_verification(publicKeyAsFelem, rAsFelem, sAsFelem, mLen, m);
+  result = ecdsa_verification_(publicKeyAsFelem, rAsFelem, sAsFelem, mLen, m);
   return result;
-}
-
-static void key_gen(u8 *result, u8 *privKey)
-{
-  u64 resultAsFelem[12U] = { 0U };
-  u64 *resultFelemX = resultAsFelem;
-  u64 *resultFelemY = resultAsFelem + (u32)4U;
-  u64 tempBuffer[100U] = { 0U };
-  u8 *resultX = result;
-  u8 *resultY = result + (u32)32U;
-  secretToPublic(resultAsFelem, privKey, tempBuffer);
-  toUint8(resultFelemX, resultX);
-  toUint8(resultFelemY, resultY);
-}
-
-void Hacl_Impl_ECDSA_ecdsa_p256_sha2_keyGen(u8 *result, u8 *privKey)
-{
-  key_gen(result, privKey);
 }
 
 u64 Hacl_Impl_ECDSA_ecdsa_p256_sha2_sign(u8 *result, u32 mLen, u8 *m, u8 *privKey, u8 *k)
@@ -1741,18 +1657,8 @@ u64 Hacl_Impl_ECDSA_ecdsa_p256_sha2_sign(u8 *result, u32 mLen, u8 *m, u8 *privKe
   return ecdsa_signature(result, mLen, m, privKey, k);
 }
 
-u64 Hacl_Impl_ECDSA_ecdsa_p256_sha2_sign_nist(u8 *result, u8 *m, u8 *privKey, u8 *k)
-{
-  return ecdsa_signature_nist_compliant(result, m, privKey, k);
-}
-
-bool Hacl_Impl_ECDSA_ecdsa_p256_sha2_verify(u32 mLen, u8 *m, u64 *pubKey, u64 *r, u64 *s1)
+bool Hacl_Impl_ECDSA_ecdsa_p256_sha2_verify(u32 mLen, u8 *m, u8 *pubKey, u8 *r, u8 *s1)
 {
   return ecdsa_verification(pubKey, r, s1, mLen, m);
-}
-
-bool Hacl_Impl_ECDSA_ecdsa_p256_sha2_verify_u8(u32 mLen, u8 *m, u8 *pubKey, u8 *r, u8 *s1)
-{
-  return ecdsa_verification_u8(pubKey, r, s1, mLen, m);
 }
 
