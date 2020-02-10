@@ -3,13 +3,27 @@
    This module defines a framework for peephole transformers. It needs
    to be instantiated with an actual pattern to generate a verified
    peephole transform. In particular, it needs to be provided a
-   [peephole] to obtain a new transformer.
+   [peephole], and an [input_hint] to obtain a new transformer.
 
-   See the movbe elimination transformer for examples of how to use
-   this framework.
+   A [peephole] is a function that converts a list of instructions
+   into (optionally) another list of instructions. It must be proven
+   correct wrt preservation of semantics. The [input_hint] is just a
+   hint to say how many instructions it takes as input.
+
+   Usage:
+
+     let test = peephole_transform test_ih test_ph
+     let lemma_test = lemma_peephole_transform test_ih test_ph
 
 *)
 module Vale.Transformers.PeepHole
+
+open Vale.X64.Decls
+friend Vale.X64.Decls
+
+open Vale.X64.Lemmas
+open Vale.X64.StateLemmas
+open Vale.Transformers.Common
 
 open Vale.X64.Bytes_Code_s
 open Vale.X64.Instruction_s
@@ -25,28 +39,6 @@ open Vale.Transformers.InstructionReorder // open so that we don't
                                           // equivalence etc.
 
 open Vale.X64.InsLemmas
-
-let coerce_to_normal (#a:Type0) (x:a) : y:(normal a){x == y} = x
-
-let rec eval_inss (is:list ins) (s:machine_state) : GTot machine_state =
-  match is with
-  | [] -> s
-  | i :: is' -> eval_inss is' (machine_eval_ins i s)
-
-/// Define what a peephole means, and what it means to be correct.
-
-type pre_peephole = list ins -> Tot (option (list ins))
-
-let peephole_correct (p:pre_peephole) (is:list ins) (s:machine_state) : GTot Type0 =
-  match p is with
-  | None -> True
-  | Some is' ->
-    equiv_states_or_both_not_ok
-      (eval_inss is s)
-      (eval_inss is' s)
-
-type peephole = (p:pre_peephole{forall is s. {:pattern (peephole_correct p is s)}
-                                  peephole_correct p is s})
 
 /// Now for the framework portion. This uses the provided [peephole]
 /// to produce a new transformer that is proven correct. We also
@@ -391,4 +383,39 @@ and lemma_apply_peephole_to_code_while (input_hint:pos) (p:peephole) (c:code{Whi
             )
         )
     )
+  )
+
+/// Now, for the pièce de résistance, functions that give you
+/// something you can directly use as transformers!
+
+let peephole_transform input_hint p orig =
+  if code_modifies_ghost orig then (
+    {
+      success = va_ffalse "code directly modifies ghost state (via ins_Ghost instruction)";
+      result = orig;
+    }
+  ) else (
+    {
+      success = va_ttrue ();
+      result = apply_peephole_to_code input_hint p orig;
+    }
+  )
+
+let lemma_peephole_transform input_hint p orig transformed va_s0 va_sM va_fM =
+  if code_modifies_ghost orig then (va_sM, va_fM) else (
+    lemma_apply_peephole_to_code input_hint p orig
+      va_fM (state_to_S va_s0);
+    let Some s = machine_eval_code orig va_fM (state_to_S va_s0) in
+    let Some s' = machine_eval_code transformed va_fM (state_to_S va_s0) in
+    assert (eval_code orig va_s0 va_fM va_sM);
+    assert ({s with ms_trace = []} == (state_to_S va_sM));
+    let va_sM' = state_of_S s' in
+    lemma_to_of s';
+    assert (state_to_S va_sM' == {s' with ms_trace = []});
+    assert (state_to_S va_sM == {s with ms_trace = []});
+    assert (equiv_states
+              ({s with ms_trace = []}) ({s' with ms_trace = []}));
+    assert (Vale.Transformers.Common.equiv_states va_sM va_sM');
+    assert (va_ensure_total transformed va_s0 va_sM' va_fM);
+    va_sM', va_fM
   )
