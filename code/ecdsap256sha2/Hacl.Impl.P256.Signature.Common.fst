@@ -40,6 +40,9 @@ let eq_u64_nCT a b =
 let eq_0_u64 a = eq_u64_nCT a (u64 0)
 
 let changeEndian i = 
+  assert_norm (pow2 64 * pow2 64 = pow2 (2 * 64));
+  assert_norm (pow2 (2 * 64) * pow2 64 = pow2 (3 * 64));
+  assert_norm (pow2 (3 * 64) * pow2 64 = pow2 (4 * 64));
   let zero = index i (size 0) in 
   let one = index i (size 1) in 
   let two = index i (size 2) in 
