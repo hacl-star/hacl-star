@@ -68,7 +68,6 @@ val ecdsa_signature_step45: x: felem -> k: lbuffer uint8 (size 32) -> tempBuffer
     modifies (loc x |+| loc tempBuffer) h0 h1 /\ 
     as_nat h1 x < prime_p256_order /\ 
     (
-      let basePoint = (0x6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296, 0x4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5, 1) in
       let (rxN, ryN, rzN), _ = montgomery_ladder_spec (as_seq h0 k) ((0,0,0), basePoint) in 
       let (xN, _, _) = _norm (rxN, ryN, rzN) in 
       as_nat h1 x == xN % prime_p256_order /\ 
@@ -186,8 +185,6 @@ val ecdsa_signature_core: r: felem -> s: felem -> mLen: size_t -> m: lbuffer uin
       assert_norm (pow2 32 < pow2 61); 
       let hashM = H.hash Def.SHA2_256 (as_seq h0 m) in 
       let z = nat_from_bytes_be hashM % prime_p256_order in 
-      
-      let basePoint = (0x6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296, 0x4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5, 1) in
       let (rxN, ryN, rzN), _ = montgomery_ladder_spec (as_seq h0 k) ((0,0,0), basePoint) in 
       let (xN, _, _) = _norm (rxN, ryN, rzN) in 
       

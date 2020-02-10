@@ -21,8 +21,8 @@ let prime = prime256
 
 noextract       
 val lemma_pointAddToSpecification: 
-  pxD: nat -> pyD: nat -> pzD: nat -> 
-  qxD: nat -> qyD: nat -> qzD: nat -> 
+  pxD: nat {pxD < prime256} -> pyD: nat{pyD < prime256} -> pzD: nat {pzD < prime256} -> 
+  qxD: nat {qxD < prime256} -> qyD: nat {qyD < prime256} -> qzD: nat {qzD < prime256} -> 
   x3: nat -> y3: nat -> z3: nat -> 
   u1: nat -> u2: nat -> s1: nat -> s2: nat -> 
   h: nat -> r: nat -> 

@@ -90,17 +90,18 @@ let ecdsa_verification_step1 r s =
 
 
 inline_for_extraction noextract
-val ecdsa_verification_step23: hashAsFelem : felem -> mLen: size_t -> m: lbuffer uint8 mLen{uint_v mLen < pow2 61} -> Stack unit
+val ecdsa_verification_step23: hashAsFelem : felem -> mLen: size_t -> m: lbuffer uint8 mLen -> Stack unit
   (requires fun h -> live h hashAsFelem /\ live h m)
-  (ensures  fun h0 _ h1 ->
-    let hashM = H.hash Def.SHA2_256 (as_seq h0 m) in
-    let hashChanged = Hacl.Spec.ECDSA.changeEndian (Lib.ByteSequence.uints_from_bytes_be hashM) in
-    modifies (loc hashAsFelem) h0 h1 /\
-    as_nat h1 hashAsFelem == nat_from_intseq_le hashChanged % prime_p256_order
+  (ensures  fun h0 _ h1 -> modifies (loc hashAsFelem) h0 h1 /\
+  (
+      assert_norm (pow2 32 < pow2 61);
+      let hashM = H.hash Def.SHA2_256 (as_seq h0 m) in 
+      as_nat h1 hashAsFelem == nat_from_bytes_be hashM % prime_p256_order)
   )
 
 let ecdsa_verification_step23 hashAsFelem mLen m =
   push_frame();
+        assert_norm (pow2 32 < pow2 61);
   let h0 = ST.get() in
   let mHash = create (size 32) (u8 0) in
   hash_256 m mLen mHash;
@@ -108,6 +109,8 @@ let ecdsa_verification_step23 hashAsFelem mLen m =
   let h1 = ST.get() in
   lemma_core_0 hashAsFelem h1;
   reduction_prime_2prime_order hashAsFelem hashAsFelem;
+  Hacl.Spec.ECDSA.changeEndianLemma (uints_from_bytes_be #U64 #_ #4 (as_seq h1 mHash));
+  uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 mHash);
   pop_frame()
 
 
@@ -134,12 +137,17 @@ val ecdsa_verification_step4:
     )
     (ensures fun h0 _ h1 ->
       modifies (loc bufferU1 |+| loc bufferU2) h0 h1 /\
-      as_seq h1 bufferU1 == nat_to_bytes_le 32 (pow (as_nat h0 s) (prime_p256_order - 2) * (as_nat h0 hash) % prime_p256_order) /\
-      as_seq h1 bufferU2 == nat_to_bytes_le 32 (pow (as_nat h0 s) (prime_p256_order - 2) * (as_nat h0 r) % prime_p256_order)
+      (
+	let p0 =  pow (as_nat h0 s) (prime_p256_order - 2) * as_nat h0 hash % prime_p256_order in 
+	let p1 = pow (as_nat h0 s) (prime_p256_order - 2) * as_nat h0 r % prime_p256_order in 
+	as_seq h1 bufferU1 == uints_to_bytes_be #_ #_ #4 (nat_to_intseq_le #U64 #_ 4 p0) /\
+	as_seq h1 bufferU2 == uints_to_bytes_be #_ #_ #4 (nat_to_intseq_le #U64 #_ 4 p1)
+      )
     )
 
 let ecdsa_verification_step4 bufferU1 bufferU2 r s hash =
   push_frame();
+  admit();
   let h0 = ST.get() in
   let tempBuffer = create (size 12) (u64 0) in
   let inverseS = sub tempBuffer (size 0) (size 4) in
@@ -150,16 +158,21 @@ let ecdsa_verification_step4 bufferU1 bufferU2 r s hash =
   montgomery_ladder_exponent inverseS;
   multPowerPartial s inverseS hash u1;
   multPowerPartial s inverseS r u2;
+
+  changeEndian u1;
+  changeEndian u2;
+   
   let h1 = ST.get() in
-  lemma_core_0 u1 h1;
-  lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h1 u1);
-  lemma_core_0 u2 h1;
-  lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h1 u2);
-  toUint8 u1 bufferU1;
-  toUint8 u2 bufferU2;
-  uints_to_bytes_le_nat_lemma #U64 #SEC 4 (pow (as_nat h0 s) (prime_p256_order - 2)  * (as_nat h0 hash) % prime_p256_order);
-  uints_to_bytes_le_nat_lemma #U64 #SEC 4 (pow (as_nat h0 s) (prime_p256_order - 2)  * (as_nat h0 r) % prime_p256_order);
+   toUint8 u1 bufferU1;
+   toUint8 u2 bufferU2;
+   let h2 = ST.get() in 
+   lemma_core_0 u1 h1;
+   lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h1 u1);
+
+   lemma_core_0 u2 h1;
+   lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h1 u2);
   pop_frame()
+
 
 
 inline_for_extraction noextract
@@ -360,13 +373,13 @@ val ecdsa_verification_core:
     (ensures fun h0 state h1 ->
       modifies (loc publicKeyPoint |+| loc hashAsFelem |+| loc xBuffer |+| loc tempBuffer) h0 h1 /\
        (
-         assert_norm (pow2 32 < pow2 61 - 1);
-         let hash = H.hash Def.SHA2_256  (as_seq h0 m) in
-         let hashNat = nat_from_intseq_le (Hacl.Spec.ECDSA.changeEndian(Lib.ByteSequence.uints_from_bytes_be hash)) % prime_p256_order in
-         let u1 = pow (as_nat h0 s) (prime_p256_order - 2)  * hashNat % prime_p256_order in
-         let u2 = pow (as_nat h0 s) (prime_p256_order - 2)  * (as_nat h0 r) % prime_p256_order in
-         let bufferU1 = nat_to_bytes_le 32 u1 in
-         let bufferU2 = nat_to_bytes_le 32 u2 in
+         assert_norm (pow2 32 < pow2 61);
+	 let hashM = H.hash Def.SHA2_256 (as_seq h0 m) in 
+	 let hashNat = nat_from_bytes_be hashM % prime_p256_order in 
+         let p0 =  pow (as_nat h0 s) (prime_p256_order - 2) * hashNat % prime_p256_order in 
+	 let p1 = pow (as_nat h0 s) (prime_p256_order - 2) * as_nat h0 r % prime_p256_order in 
+	 let bufferU1 = uints_to_bytes_be #_ #_ #4 (nat_to_intseq_le #U64 #_ 4 p0) in 
+	 let bufferU2 = uints_to_bytes_be #_ #_ #4 (nat_to_intseq_le #U64 #_ 4 p1) in 
          let pointAtInfinity = (0, 0, 0) in
          let u1D, _ = montgomery_ladder_spec bufferU1 (pointAtInfinity, basePoint) in
          let u2D, _ = montgomery_ladder_spec bufferU2 (pointAtInfinity, point_prime_to_coordinates (as_seq h0 publicKeyPoint)) in
@@ -409,6 +422,7 @@ val ecdsa_verification_:
       result == Hacl.Spec.ECDSA.ecdsa_verification (pubKeyX, pubKeyY) r s (v mLen) (as_seq h0 m))
 
 let ecdsa_verification_ pubKey r s mLen m =
+  admit();
   assert_norm (pow2 32 < pow2 61);
   push_frame();
   let tempBufferU64 = create (size 120) (u64 0) in
@@ -464,6 +478,7 @@ val ecdsa_verification:
       result == Hacl.Spec.ECDSA.ecdsa_verification (publicKeyX, publicKeyY) r s (v mLen) (as_seq h0 m))
 
 let ecdsa_verification pubKey r s mLen m =
+admit();
   assert_norm (pow2 32 < pow2 61);
   push_frame();
   let h0 = ST.get() in 

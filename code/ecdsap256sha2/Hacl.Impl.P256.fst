@@ -461,7 +461,7 @@ let montgomery_ladder #a p q scalar tempBuffer =
   let spec_ml h0 = _ml_step (as_seq h0 scalar) in 
 
   [@inline_let] 
-  let acc (h:mem) : GTot (tuple2 point_nat point_nat) = 
+  let acc (h:mem) : GTot (tuple2 point_nat_prime point_nat_prime) = 
   (fromDomainPoint(point_prime_to_coordinates (as_seq h p)), fromDomainPoint(point_prime_to_coordinates (as_seq h q)))  in 
   
   Lib.LoopCombinators.eq_repeati0 256 (spec_ml h0) (acc h0);
