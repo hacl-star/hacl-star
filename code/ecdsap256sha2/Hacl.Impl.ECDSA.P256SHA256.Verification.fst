@@ -313,7 +313,8 @@ val ecdsa_verification_step5:
       point_z_as_nat h pubKeyAsPoint < prime256
     )
     (ensures fun h0 state h1 ->
-      modifies (loc x |+| loc pubKeyAsPoint |+| loc tempBuffer) h0 h1 /\ as_nat h1 x < prime256 /\
+      modifies (loc x |+| loc pubKeyAsPoint |+| loc tempBuffer) h0 h1 /\
+      as_nat h1 x < prime256 /\
       (
         let pointAtInfinity = (0, 0, 0) in
         let u1D, _ = montgomery_ladder_spec (as_seq h0 u1) (pointAtInfinity, basePoint) in
@@ -397,14 +398,14 @@ val ecdsa_verification_core:
 	 let hashNat = nat_from_bytes_be hashM % prime_p256_order in 
          let p0 =  pow (as_nat h0 s) (prime_p256_order - 2) * hashNat % prime_p256_order in 
 	 let p1 = pow (as_nat h0 s) (prime_p256_order - 2) * as_nat h0 r % prime_p256_order in 
-	 let bufferU1 = uints_to_bytes_be #_ #_ #4 (nat_to_intseq_le #U64 #_ 4 p0) in 
-	 let bufferU2 = uints_to_bytes_be #_ #_ #4 (nat_to_intseq_le #U64 #_ 4 p1) in 
+	 let bufferU1 = nat_to_bytes_be 32 p0 in
+	 let bufferU2 = nat_to_bytes_be 32 p1 in
          let pointAtInfinity = (0, 0, 0) in
          let u1D, _ = montgomery_ladder_spec bufferU1 (pointAtInfinity, basePoint) in
          let u2D, _ = montgomery_ladder_spec bufferU2 (pointAtInfinity, point_prime_to_coordinates (as_seq h0 publicKeyPoint)) in
          let sumD = _point_add u1D u2D in
          let (xResult, yResult, zResult) = _norm sumD in
-         state == not(Hacl.Spec.P256.isPointAtInfinity (xResult, yResult, zResult)) /\
+         state == not (Hacl.Spec.P256.isPointAtInfinity (_norm sumD)) /\
          as_nat h1 xBuffer == xResult
       )
   )
@@ -413,7 +414,7 @@ let ecdsa_verification_core publicKeyBuffer hashAsFelem r s mLen m xBuffer tempB
   assert_norm (pow2 32 < pow2 61 - 1);
   push_frame();
   let tempBufferU8 = create (size 64) (u8 0) in
-  let bufferU1 =  sub tempBufferU8 (size 0) (size 32) in
+  let bufferU1 = sub tempBufferU8 (size 0) (size 32) in
   let bufferU2 = sub tempBufferU8 (size 32) (size 32) in
   ecdsa_verification_step23 hashAsFelem mLen m;
   ecdsa_verification_step4  bufferU1 bufferU2 r s hashAsFelem;
