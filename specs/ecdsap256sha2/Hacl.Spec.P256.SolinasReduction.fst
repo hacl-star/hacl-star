@@ -1,4 +1,3 @@
-
 module Hacl.Spec.P256.SolinasReduction
 
 open Lib.IntTypes
@@ -8,7 +7,7 @@ open Hacl.Spec.P256.Definitions
 open FStar.Mul
 open Lib.Sequence
 
-#reset-options "--fuel 0 --ifuel 0 --z3rlimit 200"
+#reset-options "--fuel 0 --ifuel 0 --z3rlimit 300"
 
 let prime = prime256
 
@@ -55,7 +54,7 @@ let c9_reduction c9 =
 
 val c10_reduction: c10: _uint32 -> Lemma
   (c10 * pow2 (10 * 32) % prime ==
-   (-c10 * pow2 (7 * 32) - c10 * pow2 (5 * 32) - c10 * pow2 (4 * 32) + c10 * pow2 32 + c10 * pow2 (2 * 32)) % prime)
+  (-c10 * pow2 (7 * 32) - c10 * pow2 (5 * 32) - c10 * pow2 (4 * 32) + c10 * pow2 32 + c10 * pow2 (2 * 32)) % prime)
 
 let c10_reduction c10 =
   calc (==) {
@@ -74,7 +73,7 @@ let c10_reduction c10 =
 
 val c11_reduction: c11: _uint32 -> Lemma
   (c11 * pow2 (11 * 32) % prime ==
-   (2 * c11 * pow2 (3 * 32) + c11 * pow2 (2 * 32) - c11 - c11 * pow2 (32 * 7) - c11 * pow2 (5 * 32)) % prime)
+  (2 * c11 * pow2 (3 * 32) + c11 * pow2 (2 * 32) - c11 - c11 * pow2 (32 * 7) - c11 * pow2 (5 * 32)) % prime)
 
 let c11_reduction c11  =
   calc (==) {
