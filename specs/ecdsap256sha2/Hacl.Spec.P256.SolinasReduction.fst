@@ -7,12 +7,14 @@ open Hacl.Spec.P256.Definitions
 open FStar.Mul
 open Lib.Sequence
 
+open FStar.Tactics
+open FStar.Tactics.Canon
+
 #reset-options "--fuel 0 --ifuel 0 --z3rlimit 300"
 
 let prime = prime256
 
 let _uint32 = n:nat{n < pow2 32}
-
 
 val c8_reduction: c8: _uint32 -> Lemma
   (c8 * pow2 256 % prime ==
@@ -27,8 +29,7 @@ let c8_reduction c8 =
     c8 * ((pow2 (7 * 32) - pow2 (6 * 32) - pow2 (3 * 32) + 1) % prime) % prime;
     == { lemma_mod_mul_distr_r c8 ((pow2 (7 * 32) - pow2 (6 * 32) - pow2 (3 * 32) + 1)) prime }
     c8 * ((pow2 (7 * 32) - pow2 (6 * 32) - pow2 (3 * 32) + 1)) % prime;
-    == { assert (c8 * (pow2 (7 * 32) - pow2 (6 * 32) - pow2 (3 * 32) + 1) ==
-                 c8 * pow2 (7 * 32) - c8 * pow2 (6 * 32) - c8 * pow2 (3 * 32) + c8) }
+    == { _ by (canon ()) }
     (c8 * pow2 (7 * 32) - c8 * pow2 (6 * 32) - c8 * pow2 (3 * 32) + c8) % prime;
   }
 
@@ -46,8 +47,7 @@ let c9_reduction c9 =
     c9 * ((-pow2 (6 * 32) - pow2 (4 * 32) - pow2 (3 * 32) + pow2 (1 * 32) + 1) % prime) % prime;
     == { lemma_mod_mul_distr_r c9 (-pow2 (6 * 32) - pow2 (4 * 32) - pow2 (3 * 32) + pow2 (1 * 32) + 1) prime }
     c9 * ((-pow2 (6 * 32) - pow2 (4 * 32) - pow2 (3 * 32) + pow2 (1 * 32) + 1)) % prime;
-    == { assert (c9 * ((-pow2 (6 * 32) - pow2 (4 * 32) - pow2 (3 * 32) + pow2 (1 * 32) + 1)) ==
-                 -c9 * pow2 (6 * 32) - c9 * pow2 (4 * 32) - c9 * pow2 (3 * 32) + c9 * pow2 (1 * 32) + c9) }
+    == { _ by (canon ()) }
     (-c9 * pow2 (6 * 32) - c9 * pow2 (4 * 32) - c9 * pow2 (3 * 32) + c9 * pow2 (1 * 32) + c9) % prime;
   }
 
@@ -65,22 +65,18 @@ let c10_reduction c10 =
     c10 * ((-pow2 (7 * 32) - pow2 (5 * 32) - pow2 (4 * 32) + pow2 32 + pow2 (2 * 32)) % prime) % prime;
     == { lemma_mod_mul_distr_r c10 (-pow2 (7 * 32) - pow2 (5 * 32) - pow2 (4 * 32) + pow2 32 + pow2 (2 * 32)) prime }
     c10 * ((-pow2 (7 * 32) - pow2 (5 * 32) - pow2 (4 * 32) + pow2 32 + pow2 (2 * 32))) % prime;
-    == { assert (c10 * ((-pow2 (7 * 32) - pow2 (5 * 32) - pow2 (4 * 32) + pow2 32 + pow2 (2 * 32))) ==
-                 -c10 * pow2 (7 * 32) - c10 * pow2 (5 * 32) - c10 * pow2 (4 * 32) + c10 * pow2 32 + c10 * pow2 (2 * 32)) }
+    == { _ by (canon ()) }
     (-c10 * pow2 (7 * 32) - c10 * pow2 (5 * 32) - c10 * pow2 (4 * 32) + c10 * pow2 32 + c10 * pow2 (2 * 32)) % prime;
   }
 
-val lemma_c11_reduction: c11: _uint32 -> Lemma (
-  (c11 * (2 * pow2 (3 * 32) + pow2 (2 * 32) - 1 - pow2 (7 * 32) - pow2 (5 * 32)) ==
-  2 * c11 * pow2 (3 * 32) + c11 * pow2 (2 * 32) - c11 - c11 * pow2 (7 * 32) - c11 * pow2 (5 * 32)))
-
-let lemma_c11_reduction c11 = ()
 
 val c11_reduction: c11: _uint32 -> Lemma
   (c11 * pow2 (11 * 32) % prime ==
   (2 * c11 * pow2 (3 * 32) + c11 * pow2 (2 * 32) - c11 - c11 * pow2 (32 * 7) - c11 * pow2 (5 * 32)) % prime)
-
-let c11_reduction c11  =
+  
+let c11_reduction c11  =  
+  let open FStar.Tactics in
+  let open FStar.Tactics.Canon in
   calc (==) {
     c11 * pow2 (11 * 32) % prime;
     == { lemma_mod_mul_distr_r c11 (pow2 (11 * 32)) prime }
@@ -89,7 +85,7 @@ let c11_reduction c11  =
     c11 * ((2 * pow2 (3 * 32) + pow2 (2 * 32) - 1 - pow2 (7 * 32) - pow2 (5 * 32)) % prime) % prime;
     == { lemma_mod_mul_distr_r c11 (2 * pow2 (3 * 32) + pow2 (2 * 32) - 1 - pow2 (7 * 32) - pow2 (5 * 32)) prime }
     c11 * ((2 * pow2 (3 * 32) + pow2 (2 * 32) - 1 - pow2 (7 * 32) - pow2 (5 * 32))) % prime;
-    == {lemma_c11_reduction c11}
+    == { _ by (canon ()) }
     (2 * c11 * pow2 (3 * 32) + c11 * pow2 (2 * 32) - c11 - c11 * pow2 (32 * 7) - c11 * pow2 (5 * 32)) % prime;
    }
 
@@ -107,8 +103,7 @@ let c12_reduction c12 =
     c12 * ((2 * pow2 (4 * 32) + 2 * pow2 (3 * 32) - pow2 32 - 1 - pow2 (7 * 32)) % prime) % prime;
     == { lemma_mod_mul_distr_r c12 (2 * pow2 (4 * 32) + 2 * pow2 (3 * 32) - pow2 32 - 1 - pow2 (7 * 32)) prime }
     c12 * (2 * pow2 (4 * 32) + 2 * pow2 (3 * 32) - pow2 32 - 1 - pow2 (7 * 32)) % prime;
-    == { assert (c12 * (2 * pow2 (4 * 32) + 2 * pow2 (3 * 32) - pow2 32 - 1 - pow2 (7 * 32)) ==
-                 2 * c12 * pow2 (4 * 32) + 2 * c12 * pow2 (3 * 32) - c12 * pow2 32 - c12 - c12 * pow2 (7 * 32)) }
+    == { _ by (canon ()) }
     (2 * c12 * pow2 (4 * 32) + 2 * c12 * pow2 (3 * 32) - c12 * pow2 32 - c12 - c12 * pow2 (7 * 32)) % prime;
   }
 
@@ -126,8 +121,7 @@ let c13_reduction c13 =
     c13 * ((2 * pow2 (5 * 32) + 2 * pow2 (4 * 32) + pow2 (3 * 32) + pow2 (6 * 32) - pow2 (2 * 32) - pow2 32 - 1 - pow2 (7 * 32)) % prime) % prime;
     == { lemma_mod_mul_distr_r c13 (2 * pow2 (5 * 32) + 2 * pow2 (4 * 32) + pow2 (3 * 32) + pow2 (6 * 32) - pow2 (2 * 32) - pow2 32 - 1 - pow2 (7 * 32)) prime }
     c13 * (2 * pow2 (5 * 32) + 2 * pow2 (4 * 32) + pow2 (3 * 32) + pow2 (6 * 32) - pow2 (2 * 32) - pow2 32 - 1 - pow2 (7 * 32)) % prime;
-    == { assert (c13 * (2 * pow2 (5 * 32) + 2 * pow2 (4 * 32) + pow2 (3 * 32) + pow2 (6 * 32) - pow2 (2 * 32) - pow2 32 - 1 - pow2 (7 * 32)) ==
-                 2 * c13 * pow2 (5 * 32) + 2 * c13 * pow2 (4 * 32) + c13 * pow2 (3 * 32) + c13 * pow2 (6 * 32) - c13 * pow2 (2 * 32) - c13 * pow2 32 - c13 - c13 * pow2 (7 * 32)) }
+    == { _ by (canon ()) }
     (2 * c13 * pow2 (5 * 32) + 2 * c13 * pow2 (4 * 32) + c13 * pow2 (3 * 32) + c13 * pow2 (6 * 32) - c13 * pow2 (2 * 32) - c13 * pow2 32 - c13 - c13 * pow2 (7 * 32)) % prime;
   }
 
@@ -145,8 +139,7 @@ let c14_reduction c14 =
     c14 * ((2 * pow2 (6 * 32) + 2 * pow2 (5 * 32) + pow2 (6 * 32) + pow2 (4 * 32) - pow2 (2 * 32) - pow2 32 - 1) % prime) % prime;
     == { lemma_mod_mul_distr_r c14 (2 * pow2 (6 * 32) + 2 * pow2 (5 * 32) + pow2 (6 * 32) + pow2 (4 * 32) - pow2 (2 * 32) - pow2 32 - 1) prime }
     c14 * (2 * pow2 (6 * 32) + 2 * pow2 (5 * 32) + pow2 (6 * 32) + pow2 (4 * 32) - pow2 (2 * 32) - pow2 32 - 1) % prime;
-    == { assert (c14 * (2 * pow2 (6 * 32) + 2 * pow2 (5 * 32) + pow2 (6 * 32) + pow2 (4 * 32) - pow2 (2 * 32) - pow2 32 - 1) ==
-                 2 * c14 * pow2 (6 * 32) + 2 * c14 * pow2 (5 * 32) + c14 * pow2 (6 * 32) + c14 * pow2 (4 * 32) - c14 * pow2 (2 * 32) - c14 * pow2 32 - c14) }
+    == { _ by (canon ()) }
     (2 * c14 * pow2 (6 * 32) + 2 * c14 * pow2 (5 * 32) + c14 * pow2 (6 * 32) + c14 * pow2 (4 * 32) - c14 * pow2 (2 * 32) - c14 * pow2 32 - c14) % prime;
   }
 
@@ -164,8 +157,7 @@ let c15_reduction c15 =
     c15 * ((2 * pow2 (7 * 32) + 2 * pow2 (6 * 32) + pow2 (7 * 32) + pow2 (5 * 32) - pow2 (3 * 32) - pow2 (2 * 32) - pow2 32) % prime) % prime;
     == { lemma_mod_mul_distr_r c15 (2 * pow2 (7 * 32) + 2 * pow2 (6 * 32) + pow2 (7 * 32) + pow2 (5 * 32) - pow2 (3 * 32) - pow2 (2 * 32) - pow2 32) prime }
     c15 * (2 * pow2 (7 * 32) + 2 * pow2 (6 * 32) + pow2 (7 * 32) + pow2 (5 * 32) - pow2 (3 * 32) - pow2 (2 * 32) - pow2 32) % prime;
-    == { assert (c15 * (2 * pow2 (7 * 32) + 2 * pow2 (6 * 32) + pow2 (7 * 32) + pow2 (5 * 32) - pow2 (3 * 32) - pow2 (2 * 32) - pow2 32) ==
-                 2 * c15 * pow2 (7 * 32) + 2 * c15 * pow2 (6 * 32) + c15 * pow2 (7 * 32) + c15 * pow2 (5 * 32) - c15 * pow2 (3 * 32) - c15 * pow2 (2 * 32) - c15 * pow2 32) }
+    == { _ by (canon ()) }
     (2 * c15 * pow2 (7 * 32) + 2 * c15 * pow2 (6 * 32) + c15 * pow2 (7 * 32) + c15 * pow2 (5 * 32) - c15 * pow2 (3 * 32) - c15 * pow2 (2 * 32) - c15 * pow2 32) % prime;
   }
 
@@ -239,9 +231,6 @@ val solinas_reduction_nat:
 Lemma (n % prime == (c0_n + c1_n * pow2 32 + c2_n * pow2 (2 * 32) + c3_n * pow2 (3 * 32) + c4_n * pow2 (4 * 32) + c5_n * pow2 (5 * 32) + c6_n * pow2 (6 * 32) + c7_n * pow2 (7 * 32) + c8_n * pow2 256 + c9_n * pow2 288 + c10_n * pow2 (10 * 32)  + c11_n * pow2 (11 * 32) + c12_n * pow2 (12 * 32) + c13_n* pow2 (13 * 32) + c14_n * pow2 (14 * 32) + c15_n * pow2 (15 * 32)) % prime)
 
 let solinas_reduction_nat c0 c1 c2 c3 c4 c5 c6 c7 c8 c9 c10 c11 c12 c13 c14 c15 s0 s1 s2 s3 s4 s5 s6 s7 s8 n =
-  let open FStar.Tactics in
-  let open FStar.Tactics.Canon in
-
   assert_by_tactic (2 * (c11 * pow2 (3 * 32) + c12 * pow2 (4 * 32) + c13 * pow2 (5 * 32) + c14 * pow2 (6 * 32) + c15 * pow2 (7 * 32)) == 2 * c11 * pow2 (3 * 32) + 2 * c12 * pow2 (4 * 32) + 2 * c13 * pow2 (5 * 32) + 2 * c14 * pow2 (6 * 32) + 2 * c15 * pow2 (7 * 32)) canon;
   assert_by_tactic (2 * (c12 * pow2 (3 * 32) + c13 * pow2 (4 * 32) + c14 * pow2 (5 * 32) + c15 * pow2 (6 * 32)) = 2 * c12 * pow2 (3 * 32) + 2 * c13 * pow2 (4 * 32) + 2 * c14 * pow2 (5* 32) + 2* c15 * pow2 (6 * 32)) canon;
 
@@ -346,8 +335,6 @@ val reduce_brackets: r0: nat -> r1: nat -> r2: nat -> r3: nat -> r4: nat -> r5: 
 
 
 let reduce_brackets r0 r1 r2 r3 r4 r5 r6 r7 r8  =
-  let open FStar.Tactics in
-  let open FStar.Tactics.Canon in
   let n = (((((((((r0 + (2 * r1 % prime)) % prime +  (2 * r2 % prime)) % prime) + r3) % prime + r4) % prime - r5) % prime - r6) % prime - r7) % prime - r8) % prime in
 
   lemma_mod_add_distr (- r8) ((((((((r0 + (2 * r1 % prime)) % prime +  (2 * r2 % prime)) % prime) + r3) % prime + r4) % prime - r5) % prime - r6) % prime - r7) prime;
