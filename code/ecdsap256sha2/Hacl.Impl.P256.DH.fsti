@@ -19,12 +19,12 @@ open Hacl.Spec.P256.Lemmas
 open Hacl.Spec.P256.Definitions
 
 open Hacl.Spec.ECDSAP256.Definition
+open Hacl.Spec.DH
 
 open Hacl.Impl.LowLevel
 
 open Hacl.Impl.P256
 open Hacl.Impl.P256.Signature.Common
-
 
 val ecp256dh_i: result: lbuffer uint8 (size 64) -> scalar: lbuffer uint8 (size 32) -> Stack uint64
   (requires fun h -> live h result /\ live h scalar /\ disjoint result scalar /\
@@ -33,10 +33,11 @@ val ecp256dh_i: result: lbuffer uint8 (size 64) -> scalar: lbuffer uint8 (size 3
   )
   (ensures fun h0 r h1 -> modifies (loc result) h0 h1 /\
     (
-      let xN, yN, zN = secret_to_public (as_seq h0 scalar) in 
       let resultX = gsub result (size 0) (size 32) in 
       let resultY = gsub result (size 32) (size 32) in 
-      if isPointAtInfinity (xN, yN, zN) then uint_v r = maxint U64 else uint_v r = 0 /\
+
+      let xN, yN, flag = ecp256_dh_i (as_seq h0 scalar) in 
+      r == flag  /\
       as_seq h1 resultX == nat_to_bytes_be 32 xN /\
       as_seq h1 resultY == nat_to_bytes_be 32 yN 
     )  
