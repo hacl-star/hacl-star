@@ -531,13 +531,17 @@ let ecdsa_verification publicKey r s mLen input =
     else
       begin
       let open Lib.ByteSequence in
-      let hashResult = Spec.Agile.Hash.hash Def.SHA2_256 input in
-      let hashNat = nat_from_intseq_le (changeEndian(uints_from_bytes_be hashResult)) % prime_p256_order in 
-      let u1 = nat_to_bytes_le 32 (pow s (prime_p256_order - 2) * hashNat % prime_p256_order) in
-      let u2 = nat_to_bytes_le 32 (pow s (prime_p256_order - 2) * r % prime_p256_order) in
+      
+      let hashM = Spec.Agile.Hash.hash Def.SHA2_256 input in 
+      let hashNat = nat_from_bytes_be hashM % prime_p256_order in 
+      
+      let u1 = nat_to_bytes_be 32 (pow s (prime_p256_order - 2) * hashNat % prime_p256_order) in
+      let u2 = nat_to_bytes_be 32 (pow s (prime_p256_order - 2) * r % prime_p256_order) in
+      
       let pointAtInfinity = (0, 0, 0) in
-      let u1D, _ = montgomery_ladder_spec u1 (pointAtInfinity, basePoint) in admit();
+      let u1D, _ = montgomery_ladder_spec u1 (pointAtInfinity, basePoint) in 
       let u2D, _ = montgomery_ladder_spec u2 (pointAtInfinity, publicJacobian) in
+      
       let sumPoints = _point_add u1D u2D in
       let pointNorm = _norm sumPoints in
       let x, y, z = pointNorm in
