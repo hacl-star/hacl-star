@@ -70,6 +70,11 @@ let c10_reduction c10 =
     (-c10 * pow2 (7 * 32) - c10 * pow2 (5 * 32) - c10 * pow2 (4 * 32) + c10 * pow2 32 + c10 * pow2 (2 * 32)) % prime;
   }
 
+val lemma_c11_reduction: c11: _uint32 -> Lemma (
+  (c11 * (2 * pow2 (3 * 32) + pow2 (2 * 32) - 1 - pow2 (7 * 32) - pow2 (5 * 32)) ==
+  2 * c11 * pow2 (3 * 32) + c11 * pow2 (2 * 32) - c11 - c11 * pow2 (7 * 32) - c11 * pow2 (5 * 32)))
+
+let lemma_c11_reduction c11 = ()
 
 val c11_reduction: c11: _uint32 -> Lemma
   (c11 * pow2 (11 * 32) % prime ==
@@ -84,8 +89,7 @@ let c11_reduction c11  =
     c11 * ((2 * pow2 (3 * 32) + pow2 (2 * 32) - 1 - pow2 (7 * 32) - pow2 (5 * 32)) % prime) % prime;
     == { lemma_mod_mul_distr_r c11 (2 * pow2 (3 * 32) + pow2 (2 * 32) - 1 - pow2 (7 * 32) - pow2 (5 * 32)) prime }
     c11 * ((2 * pow2 (3 * 32) + pow2 (2 * 32) - 1 - pow2 (7 * 32) - pow2 (5 * 32))) % prime;
-    == { assert (c11 * ((2 * pow2 (3 * 32) + pow2 (2 * 32) - 1 - pow2 (7 * 32) - pow2 (5 * 32))) ==
-                 2 * c11 * pow2 (3 * 32) + c11 * pow2 (2 * 32) - c11 - c11 * pow2 (7 * 32) - c11 * pow2 (5 * 32)) }
+    == {lemma_c11_reduction c11}
     (2 * c11 * pow2 (3 * 32) + c11 * pow2 (2 * 32) - c11 - c11 * pow2 (32 * 7) - c11 * pow2 (5 * 32)) % prime;
    }
 
