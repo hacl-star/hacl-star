@@ -44,6 +44,7 @@ let attributeGetTypeID a =
 	| CKA_UNWRAP identifier _ _ _ -> identifier	
 	| CKA_SIGN identifier _ _ _ -> identifier	
 	| CKA_VERIFY identifier _ _ _ -> identifier	
+	| CKA_VALUE_LEN identifier _ _ _ -> identifier
 	| CKA_STUB identifier _ _ _ -> identifier
 
 
@@ -71,6 +72,7 @@ let attributeGetLength a =
 	| CKA_SIGN _ _ length _ -> length	
 	| CKA_VERIFY _ _ length _ -> length	
 	| CKA_STUB _ _ length _ -> length
+	| _ -> 0
 
 val attributeGetReadOnly: a: attribute_t -> Tot bool
 
