@@ -13,7 +13,7 @@ include{:fstar}{:open} "Vale.X64.Decls"
 include{:fstar}{:open} "Vale.X64.QuickCode"
 include{:fstar}{:open} "Vale.X64.CPU_Features_s"
 include{:fstar}{:open} "Vale.Lib.Seqs"
-include{:/*TODO*/fstar}{:open Seq} "FStar.Seq.Base"
+include{:fstar}{:open Seq} "FStar.Seq.Base"
 
 module Vale.X64.InsMem
 
@@ -45,19 +45,18 @@ module P = Vale.X64.Print_s
 open Vale.X64.Taint_Semantics
 
 friend Vale.X64.Decls
+#reset-options "--initial_fuel 2 --max_fuel 2 --max_ifuel 2 --z3rlimit 20"
 #endverbatim
 
 //function operator([]) #[a:Type(0), b:Type(0)](m:FStar.Map.t(a, b), key:a):b extern;
 //function operator([]) (m:heap0, b:Vale.X64.Memory.buffer64):fun(int) -> nat64 extern;
-
-#reset-options "--initial_fuel 2 --max_fuel 2 --max_ifuel 2 --z3rlimit 20"
 
 procedure Mem64_in(in h:heaplet, in base:reg64, inline offset:int, ghost b:buffer64, ghost index:int, inline t:taint)
     returns(o:opr)
     {:operand}
     extern;
 
-procedure Mem64_lemma(ghost h:heaplet_id, ghost base:va_operand, ghost offset:int, ghost b:buffer64, ghost index:int, ghost t:taint)
+procedure Mem64_lemma(ghost h:heaplet_id, ghost base:operand64, ghost offset:int, ghost b:buffer64, ghost index:int, ghost t:taint)
     {:public}
     {:quick exportOnly}
     {:typecheck false}

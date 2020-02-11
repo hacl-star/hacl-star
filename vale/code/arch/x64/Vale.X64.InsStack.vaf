@@ -54,12 +54,11 @@ open Vale.X64.Taint_Semantics
 
 friend Vale.X64.Decls
 friend Vale.X64.Stack_i
+#reset-options "--initial_fuel 2 --max_fuel 4 --max_ifuel 2 --z3rlimit 50"
 #endverbatim
 
 //function operator([]) #[a:Type(0), b:Type(0)](m:FStar.Map.t(a, b), key:a):b extern;
 //function operator([]) (m:heap0, b:Vale.X64.Memory.buffer64):fun(int) -> nat64 extern;
-
-#reset-options "--initial_fuel 2 --max_fuel 4 --max_ifuel 2 --z3rlimit 50"
 
 procedure Stack_in(in base:reg64, inline offset:int, inline t:taint) returns(o:opr)
     {:operand}
@@ -67,7 +66,7 @@ procedure Stack_in(in base:reg64, inline offset:int, inline t:taint) returns(o:o
         stack;
     extern;
 
-procedure Stack_lemma(ghost base:va_operand, ghost offset:int, ghost t:taint)
+procedure Stack_lemma(ghost base:operand64, ghost offset:int, ghost t:taint)
     {:public}
     {:quick exportOnly}
 {

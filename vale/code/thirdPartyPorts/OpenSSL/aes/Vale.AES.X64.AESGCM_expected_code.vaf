@@ -7,7 +7,7 @@ include{:fstar}{:open} "Vale.Def.Prop_s"
 include{:fstar}{:open} "Vale.Def.Opaque_s"
 include{:fstar}{:open} "Vale.Def.Words_s"
 include{:fstar}{:open} "Vale.Def.Types_s"
-include{:/*TODO*/fstar}{:open} "FStar.Seq.Base"
+include{:fstar}{:open} "FStar.Seq.Base"
 include{:fstar}{:open} "Vale.AES.AES_s"
 include{:fstar}{:open} "Vale.X64.Machine_s"
 include{:fstar}{:open} "Vale.X64.Memory"
@@ -71,9 +71,9 @@ open Vale.AES.GF128_s
 open Vale.AES.GF128
 open Vale.AES.GHash
 open Vale.AES.X64.AESopt2
+#reset-options "--z3rlimit 50"
 #endverbatim
 
-#reset-options " --z3rlimit 50"
 procedure Loop6x_partial_expected_code(
         inline alg:algorithm,
         ghost h_LE:quad32,

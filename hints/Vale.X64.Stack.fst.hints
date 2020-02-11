@@ -1,5 +1,5 @@
 [
-  "ü∂-gÎ–Ë«\f\u0012¥\u0019a©ß‘",
+  "'?kﬁ,’ôh9-G\t$t\u0002õ",
   [
     [
       "Vale.X64.Stack.va_lemma_Callee_save_registers",
@@ -17,11 +17,11 @@
         "equation_Vale.Arch.HeapImpl.vale_heaplets",
         "equation_Vale.Def.Words_s.nat64", "equation_Vale.Def.Words_s.natN",
         "equation_Vale.X64.CPU_Features_s.sse_enabled",
+        "equation_Vale.X64.Decls.upd_register",
         "equation_Vale.X64.Decls.va_ensure_total",
         "equation_Vale.X64.Decls.va_if",
         "equation_Vale.X64.Decls.va_require_total",
         "equation_Vale.X64.Decls.va_state_eq",
-        "equation_Vale.X64.Decls.va_upd_reg",
         "equation_Vale.X64.Decls.va_upd_reg64",
         "equation_Vale.X64.Decls.va_upd_stack",
         "equation_Vale.X64.Decls.va_upd_stackTaint",
@@ -98,7 +98,7 @@
         "unit_typing"
       ],
       0,
-      "ad0e833516576c9e4abeaea0ac596dc9"
+      "30a3a1a309119ebbbc51a019aee4ff90"
     ],
     [
       "Vale.X64.Stack.va_wpProof_Callee_save_registers",
@@ -112,12 +112,12 @@
         "data_typing_intro_Vale.X64.Machine_s.Reg@tok", "equation_Prims.nat",
         "equation_Vale.Arch.HeapImpl.vale_heaplets",
         "equation_Vale.X64.CPU_Features_s.sse_enabled",
+        "equation_Vale.X64.Decls.upd_register",
         "equation_Vale.X64.Decls.va_ensure_total",
         "equation_Vale.X64.Decls.va_if",
         "equation_Vale.X64.Decls.va_require_total",
         "equation_Vale.X64.Decls.va_state_eq",
         "equation_Vale.X64.Decls.va_upd_ok",
-        "equation_Vale.X64.Decls.va_upd_reg",
         "equation_Vale.X64.Decls.va_upd_reg64",
         "equation_Vale.X64.Decls.va_upd_stack",
         "equation_Vale.X64.Decls.va_upd_stackTaint",
@@ -180,7 +180,7 @@
         "unit_typing"
       ],
       0,
-      "f8c6b01ef9bb0bcbb01325cf6cbf4bf4"
+      "04f3ed3ef7ef93ded6f6a8f955a500d2"
     ],
     [
       "Vale.X64.Stack.va_quick_Callee_save_registers",
@@ -192,7 +192,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "1508c77cfe80c3317ec9f98e336b0664"
+      "303be73a15da5cc3eaefe8821a6d675a"
     ],
     [
       "Vale.X64.Stack.va_lemma_Callee_restore_registers",
@@ -213,12 +213,12 @@
         "equation_Vale.Def.Words_s.nat32", "equation_Vale.Def.Words_s.nat64",
         "equation_Vale.Def.Words_s.natN",
         "equation_Vale.X64.CPU_Features_s.sse_enabled",
+        "equation_Vale.X64.Decls.upd_register",
         "equation_Vale.X64.Decls.va_ensure_total",
         "equation_Vale.X64.Decls.va_if",
         "equation_Vale.X64.Decls.va_require_total",
         "equation_Vale.X64.Decls.va_state_eq",
         "equation_Vale.X64.Decls.va_upd_ok",
-        "equation_Vale.X64.Decls.va_upd_reg",
         "equation_Vale.X64.Decls.va_upd_reg64",
         "equation_Vale.X64.Decls.va_upd_stack",
         "equation_Vale.X64.Decls.va_upd_xmm",
@@ -297,7 +297,7 @@
         "unit_typing"
       ],
       0,
-      "4bfd0998c55c21d35fd4eed9c57c13a7"
+      "e949b1ce94e1a9b363078a8a17a7eceb"
     ],
     [
       "Vale.X64.Stack.va_wpProof_Callee_restore_registers",
@@ -312,12 +312,12 @@
         "equation_Vale.Arch.HeapImpl.vale_heaplets",
         "equation_Vale.Def.Words_s.nat64", "equation_Vale.Def.Words_s.natN",
         "equation_Vale.X64.CPU_Features_s.sse_enabled",
+        "equation_Vale.X64.Decls.upd_register",
         "equation_Vale.X64.Decls.va_ensure_total",
         "equation_Vale.X64.Decls.va_if",
         "equation_Vale.X64.Decls.va_require_total",
         "equation_Vale.X64.Decls.va_state_eq",
         "equation_Vale.X64.Decls.va_upd_ok",
-        "equation_Vale.X64.Decls.va_upd_reg",
         "equation_Vale.X64.Decls.va_upd_reg64",
         "equation_Vale.X64.Decls.va_upd_stack",
         "equation_Vale.X64.Decls.va_upd_xmm",
@@ -384,7 +384,7 @@
         "typing_Vale.X64.State.update_reg", "unit_typing"
       ],
       0,
-      "2356a70f4fa3cbfb99a4c3714edd6e8d"
+      "5039b31a14e194b29ea04202645b4afc"
     ],
     [
       "Vale.X64.Stack.va_quick_Callee_restore_registers",
@@ -396,7 +396,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "63c5fc54779322428dcf9c986c966224"
+      "fa1e730f7c7f3089a0bdfe5bbc73cecd"
     ]
   ]
 ]

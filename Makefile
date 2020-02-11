@@ -353,7 +353,7 @@ obj/Vale.Lib.Operator.fst: VALE_FLAGS=
 # the files). (Actually, we know, hence this extra touch.)
 %.fst:
 	$(call run-with-log,\
-	  $(MONO) $(VALE_HOME)/bin/vale.exe -fstarText -quickMods \
+	  $(MONO) $(VALE_HOME)/bin/vale.exe -fstarText \
 	    -include $*.types.vaf \
 	    $(VALE_FLAGS) \
 	    -in $< -out $@ -outi $@i && touch -c $@i \

@@ -12,8 +12,6 @@ include{:fstar}{:open} "Vale.X64.CPU_Features_s"
 
 module Vale.Curve25519.X64.FastWide
 
-#reset-options "--z3rlimit 60"
-
 #verbatim{:interface}
 open Vale.Def.Types_s
 open Vale.Arch.Types
@@ -30,7 +28,6 @@ open Vale.X64.QuickCode
 open Vale.X64.QuickCodes
 open Vale.Curve25519.Fast_defs
 open Vale.X64.CPU_Features_s
-
 #endverbatim
 
 #verbatim{:implementation}
@@ -55,9 +52,8 @@ open Vale.X64.CPU_Features_s
 open Vale.Curve25519.X64.FastMul
 open Vale.Curve25519.X64.FastSqr
 open Vale.Curve25519.X64.FastHybrid
-#endverbatim
-
 #reset-options "--z3rlimit 60"
+#endverbatim
 
 procedure Fmul(
         ghost tmp_b:buffer64,
@@ -252,7 +248,6 @@ procedure Fmul_stdcall(
     Pop_Secret(r12);
 }
 
-#reset-options "--z3rlimit 60"
 procedure Fmul2(
         ghost tmp_b:buffer64,
         ghost inA_b:buffer64,

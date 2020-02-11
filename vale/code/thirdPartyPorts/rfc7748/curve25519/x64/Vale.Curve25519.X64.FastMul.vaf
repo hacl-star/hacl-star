@@ -10,8 +10,6 @@ include{:fstar}{:open} "Vale.X64.CPU_Features_s"
 //include{:fstar}{:open} "Vale.Def.Prop_s"
 module Vale.Curve25519.X64.FastMul
 
-#reset-options "--z3rlimit 60"
-
 #verbatim{:interface}
 open Vale.Def.Types_s
 open Vale.Arch.Types
@@ -47,17 +45,18 @@ open Vale.Curve25519.Fast_defs
 open Vale.Curve25519.Fast_lemmas_external
 open Vale.Curve25519.FastMul_helpers
 open Vale.X64.CPU_Features_s
+#reset-options "--z3rlimit 60"
 #endverbatim
 
 const int_canon:tactic extern;
 
-#reset-options "--z3rlimit 200"
 procedure Fast_multiply_a0b(
         inline offset:nat,
         ghost dst_b:buffer64,
         ghost inA_b:buffer64,
         ghost inB_b:buffer64)
     {:quick}
+    {:options z3rlimit(200)}
     lets
         dst_ptr @= rdi;
         inA_ptr @= rsi;
@@ -186,14 +185,13 @@ procedure Fast_multiply_a0b(
     assert rax < pow2_64 - 1;
 }
 
-
-#reset-options "--z3rlimit 2000"
 procedure Fast_multiply_a1b(
         inline offset:nat,
         ghost dst_b:buffer64,
         ghost inA_b:buffer64,
         ghost inB_b:buffer64)
     {:quick}
+    {:options z3rlimit(2000)}
     lets
         dst_ptr @= rdi;
         inA_ptr @= rsi;
@@ -325,13 +323,13 @@ procedure Fast_multiply_a1b(
     assert pow2_two(a0, a1) * b == a0a1b;   // Conclusion from the lemma
 }
 
-#reset-options "--z3rlimit 800"
 procedure Fast_multiply_a2b(
         inline offset:nat,
         ghost dst_b:buffer64,
         ghost inA_b:buffer64,
         ghost inB_b:buffer64)
     {:quick}
+    {:options z3rlimit(800)}
     lets
         dst_ptr @= rdi;
         inA_ptr @= rsi;
@@ -466,15 +464,13 @@ procedure Fast_multiply_a2b(
 //    assert pow2_three(a0, a1, a2) * b == pow2_seven(d0, d1, d2, d3, r12, r14, rax);
 }
 
-
-
-#reset-options "--z3rlimit 800"
 procedure Fast_multiply_a3b(
         inline offset:nat,
         ghost dst_b:buffer64,
         ghost inA_b:buffer64,
         ghost inB_b:buffer64)
     {:quick}
+    {:options z3rlimit(800)}
     lets
         dst_ptr @= rdi;
         inA_ptr @= rsi;
@@ -622,9 +618,6 @@ procedure Fast_multiply_a3b(
               d3, d4, d5, d6, d7);
 //    assert pow2_four(a0, a1, a2, a3) * b == a0a1a2a3b;   // Conclusion from the lemma.  // PASSES
 }
-
-
-#reset-options "--z3rlimit 40"
 
 procedure Fast_multiply(
         inline offset:nat,

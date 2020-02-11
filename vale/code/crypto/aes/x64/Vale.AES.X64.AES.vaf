@@ -6,7 +6,7 @@ include "Vale.AES.X64.AES128.vaf"
 include "Vale.AES.X64.AES256.vaf"
 include "../../../lib/util/x64/Vale.X64.Stack.vaf"
 include{:fstar}{:open} "Vale.Def.Types_s"
-include{:/*TODO*/fstar}{:open} "FStar.Seq.Base"
+include{:fstar}{:open} "FStar.Seq.Base"
 include{:fstar}{:open} "Vale.AES.AES_s"
 include{:fstar}{:open} "Vale.X64.Machine_s"
 include{:fstar}{:open} "Vale.X64.Memory"
@@ -46,9 +46,8 @@ open Vale.AES.X64.AES256
 open Vale.AES.GCTR
 open Vale.X64.CPU_Features_s
 open Vale.X64.Stack
-#endverbatim
-
 #reset-options "--z3rlimit 20"
+#endverbatim
 
 ///////////////////////////
 // KEY EXPANSION

@@ -4,7 +4,7 @@ include "../../../arch/x64/Vale.X64.InsVector.vaf"
 include "../../../arch/x64/Vale.X64.InsAes.vaf"
 include{:fstar}{:open} "Vale.Def.Opaque_s"
 include{:fstar}{:open} "Vale.Def.Types_s"
-include{:/*TODO*/fstar}{:open} "FStar.Seq.Base"
+include{:fstar}{:open} "FStar.Seq.Base"
 include{:fstar}{:open} "Vale.AES.AES_s"
 include{:fstar}{:open} "Vale.X64.Machine_s"
 include{:fstar}{:open} "Vale.X64.Memory"
@@ -36,9 +36,8 @@ open Vale.X64.QuickCodes
 open Vale.Arch.Types
 open Vale.AES.AES256_helpers
 open Vale.X64.CPU_Features_s
-#endverbatim
-
 #reset-options "--z3rlimit 20"
+#endverbatim
 
 ///////////////////////////
 // KEY EXPANSION

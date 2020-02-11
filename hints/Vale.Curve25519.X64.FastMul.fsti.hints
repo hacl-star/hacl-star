@@ -1,5 +1,5 @@
 [
-  "MÂJ\u0016ı‚≈x[6\\Ì<˚;s",
+  "\t∂ÁØ;@\u0006\u007fq©em\u000f<˝÷",
   [
     [
       "Vale.Curve25519.X64.FastMul.va_lemma_Fast_multiply",
@@ -12,7 +12,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "b2fdbe02dc72350047536af7caff4d7b"
+      "f8f8a41e301f1922caf2ec85ba09843f"
     ],
     [
       "Vale.Curve25519.X64.FastMul.va_wp_Fast_multiply",
@@ -25,7 +25,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "63718ece1cf8649ac2d2fda466ddd555"
+      "5a9d19006c292a5b8ede6051e2f9b90a"
     ],
     [
       "Vale.Curve25519.X64.FastMul.va_quick_Fast_multiply",
@@ -37,7 +37,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "61238438d28736d5e615217a7a69df3d"
+      "ef0e217b1aa0840c2c1489050ede0c83"
     ],
     [
       "Vale.Curve25519.X64.FastMul.va_lemma_Fast_mul_stdcall",
@@ -45,22 +45,16 @@
       1,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "bool_inversion", "eq2-interp",
-        "equality_tok_Vale.X64.Machine_s.Secret@tok", "equation_Prims.nat",
-        "equation_Vale.Def.Words_s.nat64", "equation_Vale.Def.Words_s.natN",
-        "equation_Vale.X64.Decls.va_require_total",
-        "equation_Vale.X64.Decls.validDstAddrs64",
-        "equation_Vale.X64.Decls.validSrcAddrs64",
-        "equation_Vale.X64.Memory.get_vale_heap",
+        "@MaxIFuel_assumption", "@query", "bool_inversion",
+        "equation_Prims.nat", "equation_Vale.Def.Words_s.nat64",
+        "equation_Vale.Def.Words_s.natN",
         "fuel_guarded_inversion_Vale.X64.State.vale_state",
-        "proj_equation_Vale.X64.State.Mkvale_state_vs_memTaint",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_2111fb9198de365561cfa31855f8c970",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "4bab976a00c14c5595157d5504253930"
+      "f0c06b8348abe38b7463788bc6e9cc65"
     ],
     [
       "Vale.Curve25519.X64.FastMul.va_wp_Fast_mul_stdcall",
@@ -75,7 +69,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "53efa9b5ba215e16f835c7e4739c9d1a"
+      "c2ebe88a2e3c09af04225fdc86d2a7e5"
     ],
     [
       "Vale.Curve25519.X64.FastMul.va_quick_Fast_mul_stdcall",
@@ -87,7 +81,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "3fc278a113862497119b18c2ca0ce781"
+      "d23da90f4abbc18765db8b643b077d84"
     ],
     [
       "Vale.Curve25519.X64.FastMul.va_lemma_Fast_mul2_stdcall",
@@ -95,18 +89,11 @@
       1,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "bool_inversion", "eq2-interp",
-        "equality_tok_Vale.X64.Machine_s.Secret@tok",
-        "equation_Vale.X64.Decls.va_require_total",
-        "equation_Vale.X64.Decls.validDstAddrs64",
-        "equation_Vale.X64.Decls.validSrcAddrs64",
-        "equation_Vale.X64.Memory.get_vale_heap",
-        "fuel_guarded_inversion_Vale.X64.State.vale_state",
-        "proj_equation_Vale.X64.State.Mkvale_state_vs_memTaint",
-        "refinement_interpretation_Tm_refine_12858e97eec0ea4a967ef81772c81ae1"
+        "@MaxIFuel_assumption", "@query", "bool_inversion",
+        "fuel_guarded_inversion_Vale.X64.State.vale_state"
       ],
       0,
-      "5c03c16ece9ff2ae23dd16e188a53995"
+      "2112bcf73d0f6f254712f8cf56e78929"
     ],
     [
       "Vale.Curve25519.X64.FastMul.va_wp_Fast_mul2_stdcall",
@@ -115,7 +102,7 @@
       0,
       [ "@query" ],
       0,
-      "c27d43247eba5eae61d9b95eeab5af48"
+      "fe7f872a84d0a8c159f33ba64f919710"
     ],
     [
       "Vale.Curve25519.X64.FastMul.va_quick_Fast_mul2_stdcall",
@@ -127,7 +114,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "992fdc95a3ef70a7e9b752b750d6eb83"
+      "78f95fe042d925fdb82f74bb04866bfc"
     ]
   ]
 ]

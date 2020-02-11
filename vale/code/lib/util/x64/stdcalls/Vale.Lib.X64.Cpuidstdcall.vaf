@@ -1,8 +1,8 @@
 include "../../../../arch/x64/Vale.X64.InsBasic.vaf"
 include "../../../../arch/x64/Vale.X64.InsMem.vaf"
 include "../../../../arch/x64/Vale.X64.InsVector.vaf"
-include {:fstar}{:open} "Vale.Arch.TypesNative"
-include {:fstar}{:open} "Vale.Lib.Meta"
+include{:fstar}{:open} "Vale.Arch.TypesNative"
+include{:fstar}{:open} "Vale.Lib.Meta"
 include "../Vale.Lib.X64.Cpuid.vaf"
 
 module Vale.Lib.X64.Cpuidstdcall
