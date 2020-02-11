@@ -17,11 +17,6 @@ FSTAR_ROOTS += ../tests/Hacl.Test.ECDSA.fst
 CFLAGS += -I ../../../lib/c -march=native -mtune=native -O3
 export CFLAGS
 
-# CUSTOMIZE HERE: how to produce binary objects
-# An archive with all the compiled code in this directory.
-dist/libecdsa.a: dist/Makefile.basic
-	$(MAKE) -C dist -f Makefile.basic
-
 dist/Makefile.basic: $(filter-out %/prims.krml,$(ALL_KRML_FILES))
 	$(KRML) $^ -o libecdsa.a $(BASE_FLAGS) $(ECDSA_BUNDLE) \
 	  -tmpdir dist \
@@ -29,7 +24,13 @@ dist/Makefile.basic: $(filter-out %/prims.krml,$(ALL_KRML_FILES))
 	  -no-prefix 'Hacl.Test.ECDSA' \
 	  -skip-compilation
 
-dist/Hacl_Test_ECDSA.o: dist/Makefile.basic
+# An archive with all the compiled code in this directory.
+# We don't want Hacl_Test_ECDSA.o to be included so we redefine OBJS
+dist/libecdsa.a: dist/Hacl_ECDSA.o
+	$(MAKE) -C dist -f Makefile.basic OBJS=$(notdir $^) $(notdir $@)
+
+dist/%.o: dist/Makefile.basic
+	$(MAKE) -C dist -f Makefile.basic $(notdir $@)
 
 dist/Hacl_Test_ECDSA.exe: dist/Hacl_Test_ECDSA.o \
 	$(KREMLIN_HOME)/kremlib/dist/generic/libkremlib.a dist/libecdsa.a
