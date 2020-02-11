@@ -116,3 +116,33 @@ val lemma_movbe_elim :
          (equiv_states va_sM va_sM') /\
          (va_ensure_total transformed va_s0 va_sM' va_fM') /\
          (va_get_ok va_sM')))
+
+/// Transformation to replace mov + mov -> mov.
+///
+/// This transformation exists simply as a demonstration of the
+/// capability of the peephole transformer to support many-to-*
+/// peephole transformations. In practice, it just behaves as a
+/// trivially-dead code eliminator, where trivially dead means that a
+/// mov into a location is immediately superceded by another move into
+/// that same location, such that that move is independent of the
+/// first.
+
+val mov_mov_elim :
+  orig:va_code ->
+  va_transformation_result
+
+val lemma_mov_mov_elim :
+  orig:va_code ->
+  transformed:va_code ->
+  va_s0:va_state -> va_sM:va_state -> va_fM:va_fuel ->
+  Ghost (va_state & va_fuel)
+    (requires (
+        (va_require_total transformed (mov_mov_elim orig).result va_s0) /\
+        (va_get_ok va_s0) /\
+        (va_ensure_total orig va_s0 va_sM va_fM) /\
+        (va_get_ok va_sM)))
+    (ensures (fun (va_sM', va_fM') ->
+         (va_fM' == va_fM) /\
+         (equiv_states va_sM va_sM') /\
+         (va_ensure_total transformed va_s0 va_sM' va_fM') /\
+         (va_get_ok va_sM')))

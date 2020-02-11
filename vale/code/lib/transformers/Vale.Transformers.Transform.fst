@@ -120,3 +120,11 @@ let movbe_elim =
 
 let lemma_movbe_elim =
   PH.lemma_peephole_transform ME.movbe_elim_ph
+
+/// Transformation to replace mov + mov -> mov.
+
+let mov_mov_elim =
+  PH.peephole_transform Vale.Transformers.MovMovElim.mov_mov_elim_ph
+
+let lemma_mov_mov_elim =
+  PH.lemma_peephole_transform Vale.Transformers.MovMovElim.mov_mov_elim_ph
