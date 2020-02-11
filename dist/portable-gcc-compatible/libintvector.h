@@ -172,22 +172,22 @@ typedef __m128i Lib_IntVector_Intrinsics_vec128;
   (_mm_set_epi64x(x1, x0)) /* hi lo */
 
 #define Lib_IntVector_Intrinsics_vec128_load32(x) \
-  (_mm_set1_epi32(x)) 
+  (_mm_set1_epi32(x))
 
 #define Lib_IntVector_Intrinsics_vec128_load32s(x0, x1, x2, x3) \
   (_mm_set_epi32(x3, x2, x1, x0)) /* hi lo */
 
 #define Lib_IntVector_Intrinsics_vec128_interleave_low32(x1, x2) \
-  (_mm_unpacklo_epi32(x1, x2)) 
+  (_mm_unpacklo_epi32(x1, x2))
 
 #define Lib_IntVector_Intrinsics_vec128_interleave_high32(x1, x2) \
-  (_mm_unpackhi_epi32(x1, x2)) 
+  (_mm_unpackhi_epi32(x1, x2))
 
 #define Lib_IntVector_Intrinsics_vec128_interleave_low64(x1, x2) \
-  (_mm_unpacklo_epi64(x1, x2)) 
+  (_mm_unpacklo_epi64(x1, x2))
 
 #define Lib_IntVector_Intrinsics_vec128_interleave_high64(x1, x2) \
-  (_mm_unpackhi_epi64(x1, x2)) 
+  (_mm_unpackhi_epi64(x1, x2))
 
 // The following functions are only available on machines that support Intel AVX2
 
@@ -336,7 +336,7 @@ typedef __m256i Lib_IntVector_Intrinsics_vec256;
   (_mm256_set_epi64x(x3,x2,x1,x0)) /* hi lo */
 
 #define Lib_IntVector_Intrinsics_vec256_load32(x) \
-  (_mm256_set1_epi32(x)) 
+  (_mm256_set1_epi32(x))
 
 #define Lib_IntVector_Intrinsics_vec256_load32s(x0,x1,x2,x3,x4, x5, x6, x7) \
   (_mm256_set_epi32(x7, x6, x5, x4, x3, x2, x1, x0)) /* hi lo */
@@ -348,22 +348,22 @@ typedef __m256i Lib_IntVector_Intrinsics_vec256;
   (_mm256_set_m128i((__m128i)x1,(__m128i)x0))
 
 #define Lib_IntVector_Intrinsics_vec256_interleave_low32(x1, x2) \
-  (_mm256_unpacklo_epi32(x1, x2)) 
+  (_mm256_unpacklo_epi32(x1, x2))
 
 #define Lib_IntVector_Intrinsics_vec256_interleave_high32(x1, x2) \
-  (_mm256_unpackhi_epi32(x1, x2)) 
+  (_mm256_unpackhi_epi32(x1, x2))
 
 #define Lib_IntVector_Intrinsics_vec256_interleave_low64(x1, x2) \
-  (_mm256_unpacklo_epi64(x1, x2)) 
+  (_mm256_unpacklo_epi64(x1, x2))
 
 #define Lib_IntVector_Intrinsics_vec256_interleave_high64(x1, x2) \
-  (_mm256_unpackhi_epi64(x1, x2)) 
+  (_mm256_unpackhi_epi64(x1, x2))
 
 #define Lib_IntVector_Intrinsics_vec256_interleave_low128(x1, x2) \
-  (_mm256_permute2x128_si256(x1, x2, 0x20)) 
+  (_mm256_permute2x128_si256(x1, x2, 0x20))
 
 #define Lib_IntVector_Intrinsics_vec256_interleave_high128(x1, x2) \
-  (_mm256_permute2x128_si256(x1, x2, 0x31)) 
+  (_mm256_permute2x128_si256(x1, x2, 0x31))
 
 #elif defined(__aarch64__) || defined(_M_ARM64) || defined(__arm__) || defined(_M_ARM)
 #include <arm_neon.h>
@@ -433,7 +433,7 @@ typedef uint32x4_t Lib_IntVector_Intrinsics_vec128;
 /*
 #define Lib_IntVector_Intrinsics_vec128_load_be(x0)		\
   (     Lib_IntVector_Intrinsics_vec128 l = vrev64q_u8(vld1q_u32((uint32_t*)(x0)));
-  
+
 */
 
 #define Lib_IntVector_Intrinsics_vec128_load32_be(x0)		\
