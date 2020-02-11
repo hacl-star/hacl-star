@@ -327,8 +327,8 @@ let mt_preserved mt p h0 h1 =
 #push-options "--z3rlimit 100 --initial_fuel 1 --max_fuel 1 --initial_ifuel 1 --max_ifuel 1"
 private
 val create_empty_mt: 
-  #hash_size:hash_size_t -> 
-  #hash_spec:Ghost.erased (MTS.hash_fun_t #(U32.v hash_size)) -> 
+  hash_size:hash_size_t -> 
+  hash_spec:Ghost.erased (MTS.hash_fun_t #(U32.v hash_size)) -> 
   hash_fun:hash_fun_t #hash_size #hash_spec ->
   r:HST.erid -> 
   HST.ST mt_p
@@ -343,15 +343,17 @@ val create_empty_mt:
      // correctness
      MT?.hash_size dmt = hash_size /\
      MT?.offset dmt = 0UL /\
-     merkle_tree_lift h1 dmt == MTH.create_empty_mt #_ #(Ghost.reveal hash_spec) ()))
-let create_empty_mt #hsz #hash_spec hash_fun r =
+     merkle_tree_lift h1 dmt == MTH.create_empty_mt #_ #(Ghost.reveal hash_spec) ())) 
+let create_empty_mt hsz hash_spec hash_fun r =
+  [@inline_let] let hrg = hreg hsz in
+  [@inline_let] let hvrg = hvreg hsz in
+  [@inline_let] let hvvrg = hvvreg hsz in
   let hs_region = HST.new_region r in
-  let hs = RV.alloc_rid (hvreg hsz) merkle_tree_size_lg hs_region in
+  let hs = RV.alloc_rid hvrg merkle_tree_size_lg hs_region in
   let h0 = HST.get () in
-  assert (RV.as_seq h0 hs == S.create 32 S.empty);
   mt_safe_elts_init #hsz h0 0ul hs;
   let rhs_region = HST.new_region r in
-  let rhs = RV.alloc_rid (hreg hsz) merkle_tree_size_lg rhs_region in
+  let rhs = RV.alloc_rid hrg merkle_tree_size_lg rhs_region in
   let h1 = HST.get () in
   assert (RV.as_seq h1 rhs == S.create 32 (MTH.hash_init #(U32.v hsz)));
   RV.rv_inv_preserved hs (V.loc_vector rhs) h0 h1;
@@ -359,7 +361,7 @@ let create_empty_mt #hsz #hash_spec hash_fun r =
   V.loc_vector_within_included hs 0ul (V.size_of hs);
   mt_safe_elts_preserved #hsz 0ul hs 0ul 0ul (V.loc_vector rhs) h0 h1;
   let mroot_region = HST.new_region r in
-  let mroot = Rgl?.r_alloc (hreg hsz) hsz mroot_region in
+  let mroot = rg_alloc hrg mroot_region in
   let h2 = HST.get () in
   RV.as_seq_preserved hs loc_none h1 h2;
   RV.as_seq_preserved rhs loc_none h1 h2;
@@ -368,7 +370,7 @@ let create_empty_mt #hsz #hash_spec hash_fun r =
   let h3 = HST.get () in
   RV.as_seq_preserved hs loc_none h2 h3;
   RV.as_seq_preserved rhs loc_none h2 h3;
-  Rgl?.r_sep (hreg hsz) mroot loc_none h2 h3;
+  Rgl?.r_sep hrg mroot loc_none h2 h3;
   mt_safe_elts_preserved #hsz 0ul hs 0ul 0ul loc_none h2 h3;
   mt
 #pop-options
@@ -384,7 +386,8 @@ let mt_free mt =
   let mtv = !*mt in
   RV.free (MT?.hs mtv);
   RV.free (MT?.rhs mtv);
-  Rgl?.r_free (hreg (MT?.hash_size mtv)) (MT?.mroot mtv);
+  [@inline_let] let rg = hreg (MT?.hash_size mtv) in
+  rg_free rg (MT?.mroot mtv);
   B.free mt
 #pop-options
 
@@ -392,7 +395,7 @@ let mt_free mt =
 
 private
 val as_seq_sub_upd:
-  #a:Type0 -> #rst:Type -> #rg:regional rst a ->
+  #a:Type0 -> #rst:eqtype -> #rg:regional rst a ->
   h:HS.mem -> rv:rvector rg ->
   i:uint32_t{i < V.size_of rv} -> v:Rgl?.repr rg ->
   Lemma (requires (RV.rv_inv h rv))
@@ -419,7 +422,8 @@ let as_seq_sub_upd #a #rst #rg h rv i v =
 // and pushing its content to `hs[lv]`. For detailed insertion procedure, see
 // `insert_` and `mt_insert`.
 #push-options "--z3rlimit 40 --initial_fuel 1 --max_fuel 1"
-inline_for_extraction private
+private
+inline_for_extraction
 val hash_vv_insert_copy:
   #hsz:hash_size_t ->
   lv:uint32_t{lv < merkle_tree_size_lg} ->
@@ -466,7 +470,7 @@ let hash_vv_insert_copy #hsz lv i j hs v =
 
   /// 1) Insert an element at the level `lv`, where the new vector is not yet
   /// connected to `hs`.
-  let ihv = RV.insert_copy (hcpy #hsz) (V.index hs lv) v in
+  let ihv = RV.insert_copy hcpy (V.index hs lv) v in
   let hh1 = HST.get () in
 
   // 1-0) Basic disjointness conditions
@@ -673,7 +677,7 @@ let insert_snoc_last_helper #a s v = ()
 
 private
 val rv_inv_rv_elems_reg:
-  #a:Type0 -> #rst:Type -> #rg:regional rst a ->
+  #a:Type0 -> #rst:eqtype -> #rg:regional rst a ->
   h:HS.mem -> rv:rvector rg ->
   i:uint32_t -> j:uint32_t{i <= j && j <= V.size_of rv} ->
   Lemma (requires (RV.rv_inv h rv))
@@ -1031,7 +1035,7 @@ val mt_create_custom:
 #push-options "--z3rlimit 40"
 let mt_create_custom hsz hash_spec r init hash_fun =
   let hh0 = HST.get () in
-  let mt = create_empty_mt #hsz #hash_spec hash_fun r in
+  let mt = create_empty_mt hsz hash_spec hash_fun r in
   mt_insert mt init;
   let hh2 = HST.get () in
   mt
@@ -1271,7 +1275,7 @@ val init_path:
       S.equal (lift_path h1 mtr p) S.empty))
 let init_path #_ mtr r =
   let nrid = HST.new_region r in
-  B.malloc r (hash_vec_r_alloc () nrid) 1ul
+  B.malloc r (hash_vec_r_alloc false nrid) 1ul
 
 val clear_path:
   #hsz:hash_size_t ->
@@ -1368,7 +1372,6 @@ let rec construct_rhs #hsz #hash_spec lv hs rhs i j acc actd hash_fun =
   end
   else 
     let ofs = offset_of i in
-    let copy = Cpy?.copy (hcpy #hsz) in  
     begin
     (if j % 2ul = 0ul
     then begin      
@@ -1393,7 +1396,7 @@ let rec construct_rhs #hsz #hash_spec lv hs rhs i j acc actd hash_fun =
     else begin
       if actd
       then begin
-        RV.assign_copy (hcpy #hsz) rhs lv acc;
+        RV.assign_copy hcpy rhs lv acc;
         let hh1 = HST.get () in
         // memory safety
         Rgl?.r_sep (hreg hsz) acc
@@ -1444,7 +1447,7 @@ let rec construct_rhs #hsz #hash_spec lv hs rhs i j acc actd hash_fun =
         mt_safe_elts_head hh0 lv hs i j;
         hash_vv_rv_inv_r_inv hh0 hs lv (j - 1ul - ofs);
         hash_vv_rv_inv_disjoint hh0 hs lv (j - 1ul - ofs) (B.frameOf acc);
-        copy (V.index (V.index hs lv) (j - 1ul - ofs)) acc;
+        Cpy?.copy hcpy (V.index (V.index hs lv) (j - 1ul - ofs)) acc;
         let hh1 = HST.get () in
         // memory safety
         V.loc_vector_within_included hs lv (V.size_of hs);
@@ -1579,7 +1582,7 @@ let mt_get_root #hsz mt rt =
   let hash_fun = MT?.hash_fun mtv in
   if MT?.rhs_ok mtv
   then begin
-    Cpy?.copy (hcpy #hsz) mroot rt;
+    Cpy?.copy hcpy mroot rt;
     let hh1 = HST.get () in
     mt_safe_preserved mt
       (B.loc_all_regions_from false (Rgl?.region_of (hreg hsz) rt)) hh0 hh1;
@@ -1623,7 +1626,7 @@ let mt_get_root #hsz mt rt =
              (Rgl?.r_repr (hreg hsz) hh0 rt) false ==
            (Rgl?.r_repr (hvreg hsz) hh1 rhs, Rgl?.r_repr (hreg hsz) hh1 rt));
 
-    Cpy?.copy (hcpy #hsz) rt mroot;
+    Cpy?.copy hcpy rt mroot;
     let hh2 = HST.get () in
     // memory safety
     RV.rv_inv_preserved
@@ -1697,7 +1700,7 @@ val path_insert:
       V.size_of (B.get h1 p 0) = V.size_of (B.get h0 p 0) + 1ul /\
       S.equal (lift_path h1 mtr p)
               (MTH.path_insert (lift_path h0 mtr p) (Rgl?.r_repr (hreg hsz) h0 hp))))
-#push-options "--z3rlimit 10 --initial_fuel 1 --max_fuel 1"
+#push-options "--z3rlimit 20 --initial_fuel 1 --max_fuel 1"
 let path_insert #hsz mtr p hp =
   let pv = B.index p 0ul in
   let hh0 = HST.get () in
@@ -1990,7 +1993,6 @@ val mt_get_path:
 let mt_get_path #hsz mt idx p root =
   let ncmt = CB.cast mt in
   let mtframe = B.frameOf ncmt in
-  let copy = Cpy?.copy (hcpy #hsz) in
   let hh0 = HST.get () in
   mt_get_root mt root;
 
@@ -2882,6 +2884,7 @@ val mt_verify:
 #pop-options
 #push-options "--z3rlimit 200 --initial_fuel 1 --max_fuel 1 --initial_ifuel 1 --max_ifuel 1"
 let mt_verify #hsz #hash_spec mt k j mtr p rt =
+  let hrg = hreg hsz in
   let ncmt = CB.cast mt in
   let ncp = CB.cast p in
   let mtv = !*ncmt in
@@ -2889,21 +2892,20 @@ let mt_verify #hsz #hash_spec mt k j mtr p rt =
   let j = split_offset (MT?.offset mtv) j in
   let hh0 = HST.get () in
   let nrid = HST.new_region (B.frameOf rt) in
-  let ih = Rgl?.r_alloc (hreg hsz) (Rgl?.state (hreg hsz)) nrid in
-  let copy = Cpy?.copy (hcpy #hsz) in
-  copy (V.index !*ncp 0ul) ih;
+  let ih = rg_alloc hrg nrid in
+  Cpy?.copy hcpy (V.index !*ncp 0ul) ih;
   let hh1 = HST.get () in
   path_safe_preserved
     mtr ncp (B.loc_all_regions_from false (B.frameOf rt)) hh0 hh1;
   path_preserved mtr ncp (B.loc_all_regions_from false (B.frameOf rt)) hh0 hh1;
   lift_path_index hh0 mtr ncp 0ul;
-  assert (Rgl?.r_repr (hreg hsz) hh1 ih == S.index (lift_path hh0 mtr ncp) 0);
+  assert (Rgl?.r_repr hrg hh1 ih == S.index (lift_path hh0 mtr ncp) 0);
   mt_verify_ #hsz #hash_spec k j mtr p 1ul ih false (MT?.hash_fun mtv);
   let hh2 = HST.get () in
-  assert (Rgl?.r_repr (hreg hsz) hh2 ih ==
+  assert (Rgl?.r_repr hrg hh2 ih ==
          MTH.mt_verify_ #(U32.v hsz) #hash_spec (U32.v k) (U32.v j) (lift_path hh1 mtr ncp)
-           1 (Rgl?.r_repr (hreg hsz) hh1 ih) false);
+           1 (Rgl?.r_repr hrg hh1 ih) false);
   let r = Lib.ByteBuffer.lbytes_eq #hsz ih rt in
-  Rgl?.r_free (hreg hsz) ih;
+  rg_free hrg ih;
   r
 #pop-options

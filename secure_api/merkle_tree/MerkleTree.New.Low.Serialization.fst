@@ -276,10 +276,10 @@ let deserialize_hash
                                    loc_disjoint (loc_buffer (CB.cast buf)) (loc_buffer h) /\
                                    modifies B.loc_none h0 h1))
 = let rg = hreg hash_size in 
-  if not ok || pos >= sz then (false, pos, Rgl?.dummy rg (Rgl?.state rg))
-  else if sz - pos < hash_size then (false, pos, Rgl?.dummy rg (Rgl?.state rg))
+  if not ok || pos >= sz then (false, pos, rg_dummy rg)
+  else if sz - pos < hash_size then (false, pos, rg_dummy rg)
   else begin
-    let hash = Rgl?.r_alloc rg (Rgl?.state rg) r in
+    let hash = rg_alloc rg r in
     Lib.RawBuffer.blit (CB.cast buf) pos hash 0ul hash_size;
     (true, pos + hash_size, hash)
   end
@@ -323,14 +323,14 @@ let deserialize_hash_vec
   (requires (fun h0 -> CB.live h0 buf))
   (ensures (fun h0 _ h1 -> B.modifies B.loc_none h0 h1))
 = let rg = hvreg hash_size in
-  if not ok || pos >= sz then (false, pos, Rgl?.dummy rg (Rgl?.state rg))
+  if not ok || pos >= sz then (false, pos, rg_dummy rg)
   else begin
     let ok, pos, n = deserialize_uint32_t ok buf sz pos in
     if not ok then (false, pos, V.alloc_empty hash)
     else if n = 0ul then (true, pos, V.alloc_empty hash)
     else begin
       let hrg = hreg hash_size in
-      let res = V.alloc n (Rgl?.dummy hrg (Rgl?.state hrg)) in
+      let res = V.alloc n (rg_dummy hrg) in
       let ok, pos = deserialize_hash_vec_i ok buf sz r pos res 0ul in
       (ok, pos, res)
     end
@@ -383,7 +383,7 @@ private let deserialize_hash_vv
     else if n = 0ul then (true, pos, V.alloc_empty hash_vec)
     else begin
       let rg = hvreg hash_size in
-      let res = V.alloc n (Rgl?.dummy rg (Rgl?.state rg)) in
+      let res = V.alloc n (rg_dummy rg) in
       let ok, pos = deserialize_hash_vv_i ok buf sz r pos res 0ul in
       (ok, pos, res)
     end
