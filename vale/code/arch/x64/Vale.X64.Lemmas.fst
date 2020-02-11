@@ -8,27 +8,6 @@ open Vale.X64.Bytes_Code_s
 module BS = Vale.X64.Machine_Semantics_s
 module ME = Vale.X64.Memory
 
-val eval_code_eq_all (g:bool) (c:code) (f:fuel) : Lemma
-  (ensures (forall (s1 s2:machine_state).{:pattern (BS.machine_eval_code c f s1); (BS.machine_eval_code c f s2)}
-    state_eq_S g s1 s2 ==>
-    state_eq_opt g (BS.machine_eval_code c f s1) (BS.machine_eval_code c f s2)
-  ))
-  (decreases %[f; c; 1])
-
-val eval_codes_eq_all (g:bool) (cs:codes) (f:fuel) : Lemma
-  (ensures (forall (s1 s2:machine_state).{:pattern (BS.machine_eval_codes cs f s1); (BS.machine_eval_codes cs f s2)}
-    state_eq_S g s1 s2 ==>
-    state_eq_opt g (BS.machine_eval_codes cs f s1) (BS.machine_eval_codes cs f s2)
-  ))
-  (decreases %[f; cs])
-
-val eval_while_eq_all (g:bool) (c:code) (f:fuel) : Lemma
-  (ensures (forall (s1 s2:machine_state).{:pattern (BS.machine_eval_while c f s1); (BS.machine_eval_while c f s2)}
-    While? c /\ state_eq_S g s1 s2 ==>
-    state_eq_opt g (BS.machine_eval_while c f s1) (BS.machine_eval_while c f s2)
-  ))
-  (decreases %[f; c; 0])
-
 #reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 100"
 
 #restart-solver
@@ -173,7 +152,13 @@ let eval_code_eq_ins (i:BS.ins) (f:fuel) (s1 s2:machine_state) : Lemma
 #reset-options "--initial_fuel 2 --max_fuel 2 --z3rlimit 30"
 
 #restart-solver
-let rec eval_code_eq_all g c f =
+let rec eval_code_eq_all (g:bool) (c:code) (f:fuel) : Lemma
+  (ensures (forall (s1 s2:machine_state).{:pattern (BS.machine_eval_code c f s1); (BS.machine_eval_code c f s2)}
+    state_eq_S g s1 s2 ==>
+    state_eq_opt g (BS.machine_eval_code c f s1) (BS.machine_eval_code c f s2)
+  ))
+  (decreases %[f; c; 1])
+  =
   match c with
   | Ins i ->
       let lem (s1 s2:machine_state) : Lemma
@@ -187,11 +172,23 @@ let rec eval_code_eq_all g c f =
   | Block cs -> eval_codes_eq_all g cs f
   | IfElse _ ct cf -> eval_code_eq_all g ct f; eval_code_eq_all g cf f
   | While _ _ -> eval_while_eq_all g c f
-and eval_codes_eq_all g cs f =
+and eval_codes_eq_all (g:bool) (cs:codes) (f:fuel) : Lemma
+  (ensures (forall (s1 s2:machine_state).{:pattern (BS.machine_eval_codes cs f s1); (BS.machine_eval_codes cs f s2)}
+    state_eq_S g s1 s2 ==>
+    state_eq_opt g (BS.machine_eval_codes cs f s1) (BS.machine_eval_codes cs f s2)
+  ))
+  (decreases %[f; cs])
+  =
   match cs with
   | [] -> ()
   | c::cs -> eval_code_eq_all g c f; eval_codes_eq_all g cs f
-and eval_while_eq_all g c f =
+and eval_while_eq_all (g:bool) (c:code) (f:fuel) : Lemma
+  (ensures (forall (s1 s2:machine_state).{:pattern (BS.machine_eval_while c f s1); (BS.machine_eval_while c f s2)}
+    While? c /\ state_eq_S g s1 s2 ==>
+    state_eq_opt g (BS.machine_eval_while c f s1) (BS.machine_eval_while c f s2)
+  ))
+  (decreases %[f; c; 0])
+  =
   if f = 0 then () else
   match c with
   | While _ c_body -> eval_code_eq_all g c_body (f - 1); eval_while_eq_all g c (f - 1)
@@ -242,28 +239,22 @@ let eval_while_eq_t (c:code) (f:fuel) (s1 s2:machine_state) : Lemma
 let eval_code_ts (g:bool) (c:code) (s0:machine_state) (f0:fuel) (s1:machine_state) : Type0 =
   state_eq_opt g (BS.machine_eval_code c f0 s0) (Some s1)
 
-val increase_fuel (g:bool) (c:code) (s0:machine_state) (f0:fuel) (sN:machine_state) (fN:fuel) : Lemma
+let eval_code_ts_b (b:bool) (c:code) (s0:machine_state) (f0:fuel) (s1:machine_state) : Type0 =
+  state_eq_opt b (BS.machine_eval_code c f0 s0) (Some s1)
+
+let rec increase_fuel (g:bool) (c:code) (s0:machine_state) (f0:fuel) (sN:machine_state) (fN:fuel) : Lemma
   (requires eval_code_ts g c s0 f0 sN /\ f0 <= fN)
   (ensures eval_code_ts g c s0 fN sN)
   (decreases %[f0; c])
-
-val increase_fuels (g:bool) (c:codes) (s0:machine_state) (f0:fuel) (sN:machine_state) (fN:fuel) : Lemma
-  (requires eval_code_ts g (Block c) s0 f0 sN /\ f0 <= fN)
-  (ensures eval_code_ts g (Block c) s0 fN sN)
-  (decreases %[f0; c])
-
-let eval_code_ts_b (b:bool) (c:code) (s0:machine_state) (f0:fuel) (s1:machine_state) : Type0 =
-state_eq_opt b (BS.machine_eval_code c f0 s0) (Some s1)
-
-let rec increase_fuel g c s0 f0 sN fN =
+  =
   match c with
   | Ins ins -> ()
   | Block l -> increase_fuels g l s0 f0 sN fN
-  | IfElse b t f ->
-      let (_, b0) = BS.machine_eval_ocmp s0 b in
+  | IfElse cond t f ->
+      let (s0, b0) = BS.machine_eval_ocmp s0 cond in
       if b0 then increase_fuel g t s0 f0 sN fN else increase_fuel g f s0 f0 sN fN
-  | While b c ->
-      let (s1, b0) = BS.machine_eval_ocmp s0 b in
+  | While cond c ->
+      let (s1, b0) = BS.machine_eval_ocmp s0 cond in
       if not b0 then ()
       else
       (
@@ -272,11 +263,14 @@ let rec increase_fuel g c s0 f0 sN fN =
         | None -> ()
         | Some s2 ->
             increase_fuel g c s1 (f0 - 1) s2 (fN - 1);
-            if s2.BS.ms_ok then increase_fuel g (While b c) s2 (f0 - 1) sN (fN - 1)
+            if s2.BS.ms_ok then increase_fuel g (While cond c) s2 (f0 - 1) sN (fN - 1)
             else ()
       )
-
-and increase_fuels g c s0 f0 sN fN =
+and increase_fuels (g:bool) (c:codes) (s0:machine_state) (f0:fuel) (sN:machine_state) (fN:fuel) : Lemma
+  (requires eval_code_ts g (Block c) s0 f0 sN /\ f0 <= fN)
+  (ensures eval_code_ts g (Block c) s0 fN sN)
+  (decreases %[f0; c])
+  =
   match c with
   | [] -> ()
   | h::t ->
@@ -312,7 +306,10 @@ let lemma_empty_total (s0:vale_state) (bN:codes) =
   (s0, 0)
 
 let lemma_ifElse_total (ifb:ocmp) (ct:code) (cf:code) (s0:vale_state) =
-  (eval_ocmp s0 ifb, s0, s0, 0)
+  (eval_ocmp s0 ifb, {s0 with vs_flags = havoc_flags}, s0, 0)
+
+let lemma_havoc_flags : squash (Flags.to_fun havoc_flags == BS.havoc_flags) =
+  assert (FStar.FunctionalExtensionality.feq (Flags.to_fun havoc_flags) BS.havoc_flags)
 
 let lemma_ifElseTrue_total (ifb:ocmp) (ct:code) (cf:code) (s0:vale_state) (f0:fuel) (sM:vale_state) =
   ()
@@ -338,9 +335,10 @@ let lemma_whileTrue_total (b:ocmp) (c:code) (s0:vale_state) (sW:vale_state) (fW:
 
 let lemma_whileFalse_total (b:ocmp) (c:code) (s0:vale_state) (sW:vale_state) (fW:fuel) =
   let f1 = fW + 1 in
+  let s1 = {sW with vs_flags = havoc_flags} in
   assert (state_eq_opt (code_modifies_ghost c) (BS.machine_eval_code (While b c) f1 (state_to_S s0)) (BS.machine_eval_code (While b c) 1 (state_to_S sW)));
-  assert (eval_code (While b c) s0 f1 sW);
-  (sW, f1)
+  assert (eval_code (While b c) s0 f1 s1);
+  (s1, f1)
 
 #restart-solver
 let lemma_whileMerge_total (c:code) (s0:vale_state) (f0:fuel) (sM:vale_state) (fM:fuel) (sN:vale_state) =
@@ -353,8 +351,8 @@ let lemma_whileMerge_total (c:code) (s0:vale_state) (f0:fuel) (sM:vale_state) (f
     =
     let Some sZ = BS.machine_eval_code c f (state_to_S sN) in
     let fZ = if f > fM then f else fM in
-    increase_fuel (code_modifies_ghost c) (While?.whileBody c) (state_to_S sM) fM (state_to_S sN) fZ;
-
+    let sM' = {sM with vs_flags = havoc_flags} in
+    increase_fuel (code_modifies_ghost c) (While?.whileBody c) (state_to_S sM') fM (state_to_S sN) fZ;
     increase_fuel (code_modifies_ghost c) c (state_to_S sN) f sZ fZ;
 
     assert (state_eq_opt g (BS.machine_eval_code c (fZ + 1) (state_to_S sM)) (Some sZ)); // via eval_code for While
