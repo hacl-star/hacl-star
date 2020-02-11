@@ -11,6 +11,9 @@ open Lib.ByteBuffer
 open Lib.IntVector
 
 module Spec = Hacl.Spec.Chacha20.Vec
+module Loop = Lib.LoopCombinators
+module LSeq = Lib.Sequence
+
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
@@ -67,172 +70,136 @@ val sum_state:
       as_seq h1 st == Spec.sum_state (as_seq h0 st) (as_seq h0 ost)))
 let sum_state #w st ost =  map2T (size 16) st ( +| ) st ost
 
+
 inline_for_extraction noextract
-val transpose1: st:state 1 ->
+val transposewxw_i_k: #w:lanes -> m2:size_pos -> j:size_t{v j < m2} -> k:size_t{v k < w / (2 * m2)}
+  -> inp:lbuffer (vec_t U32 w) (size w) ->
   Stack unit
-    (requires (fun h -> live h st))
-    (ensures (fun h0 _ h1 -> modifies (loc st) h0 h1 /\
-      as_seq h1 st == Spec.transpose1 (as_seq h0 st)))
-let transpose1 st = ()
+    (requires fun h -> live h inp /\ w % m2 = 0)
+    (ensures  fun h0 _ h1 -> modifies (loc inp) h0 h1 /\
+      as_seq h1 inp == Spec.transposewxw_i_k m2 (v j) (v k) (as_seq h0 inp))
+
+let transposewxw_i_k #w m2 j k inp =
+  [@inline_let]
+  let m = size (2 * m2) in
+  let inp_kj = inp.(k *! m +! j) in
+  inp.(k *! m +! j) <- vec_interleave_low_n m2 inp_kj inp.(k *! m +! j +! size m2);
+  inp.(k *! m +! j +! size m2) <- vec_interleave_high_n m2 inp_kj inp.(k *! m +! j +! size m2)
 
 
 inline_for_extraction noextract
-val transposewxw_i: w:width -> m2:size_pos -> m:size_t -> km:size_t -> inp:lbuffer (vec_t U32 w) (size w) ->
+val transposewxw_i_f: #w:lanes -> m2:size_pos -> j:size_t{v j < m2}
+  -> inp:lbuffer (vec_t U32 w) (size w) ->
   Stack unit
-  (requires fun h -> live h inp /\ w % m2 = 0 /\ v m == 2 * m2 /\ v km == w / v m)
-  (ensures  fun h0 _ h1 -> modifies (loc inp) h0 h1)
-let transposewxw_i w m2 m km inp =
-  let h1 = ST.get () in
-  loop_nospec #h1 (size m2) inp
-  (fun j ->
-    let h2 = ST.get () in
-    loop_nospec #h2 km inp
-    (fun k ->
-      let inp_kj = inp.(k *! m +! j) in
-      inp.(k *! m +! j) <- vec_interleave_low_n m2 inp_kj inp.(k *! m +! j +! size m2);
-      inp.(k *! m +! j +! size m2) <- vec_interleave_high_n m2 inp_kj inp.(k *! m +! j +! size m2)
-    )
+    (requires fun h -> live h inp /\ w % m2 = 0)
+    (ensures  fun h0 _ h1 -> modifies (loc inp) h0 h1 /\
+      as_seq h1 inp == Spec.transposewxw_i_f m2 (v j) (as_seq h0 inp))
+
+let transposewxw_i_f #w m2 j inp =
+  [@inline_let]
+  let spec h0 = Spec.transposewxw_i_k m2 (v j) in
+  let h0 = ST.get () in
+  loop1 h0 (size (w / (2 * m2))) inp spec
+  (fun k ->
+    Loop.unfold_repeati (w / (2 * m2)) (spec h0) (as_seq h0 inp) (v k);
+    transposewxw_i_k #w m2 j k inp
   )
 
+
+inline_for_extraction noextract
+val transposewxw_i: #w:lanes -> m2:size_pos -> inp:lbuffer (vec_t U32 w) (size w) ->
+  Stack unit
+    (requires fun h -> live h inp /\ w % m2 = 0)
+    (ensures  fun h0 _ h1 -> modifies (loc inp) h0 h1 /\
+      as_seq h1 inp == Loop.repeati m2 (Spec.transposewxw_i_f m2) (as_seq h0 inp))
+
+let transposewxw_i #w m2 inp =
+  [@inline_let]
+  let spec h0 = Spec.transposewxw_i_f m2 in
+  let h0 = ST.get () in
+  loop1 h0 (size m2) inp spec
+  (fun j ->
+    Loop.unfold_repeati m2 (spec h0) (as_seq h0 inp) (v j);
+    transposewxw_i_f #w m2 j inp
+  )
 
 
 inline_for_extraction noextract
 val transpose4x4: inp:lbuffer (vec_t U32 4) 4ul ->
   Stack unit
-  (requires fun h -> live h inp)
-  (ensures  fun h0 _ h1 -> modifies (loc inp) h0 h1)
+    (requires fun h -> live h inp)
+    (ensures  fun h0 _ h1 -> modifies (loc inp) h0 h1 /\
+      as_seq h1 inp == Spec.transposewxw 2 (as_seq h0 inp))
+
 let transpose4x4 inp =
-  transposewxw_i 4 1 2ul 2ul inp;
-  transposewxw_i 4 2 4ul 1ul inp
+  let h0 = ST.get () in
+  Loop.unfold_repeati 2 (Spec.transposewxw_f 2) (as_seq h0 inp) 1;
+  Loop.unfold_repeati 2 (Spec.transposewxw_f 2) (as_seq h0 inp) 0;
+  Loop.eq_repeati0 2 (Spec.transposewxw_f 2) (as_seq h0 inp);
+  transposewxw_i 1 inp;
+  transposewxw_i 2 inp
 
 
 inline_for_extraction noextract
 val transpose8x8: inp:lbuffer (vec_t U32 8) 8ul ->
   Stack unit
-  (requires fun h -> live h inp)
-  (ensures  fun h0 _ h1 -> modifies (loc inp) h0 h1)
+    (requires fun h -> live h inp)
+    (ensures  fun h0 _ h1 -> modifies (loc inp) h0 h1 /\
+      as_seq h1 inp == Spec.transposewxw 3 (as_seq h0 inp))
+
 let transpose8x8 inp =
-  transposewxw_i 8 1 2ul 4ul inp;
-  transposewxw_i 8 2 4ul 2ul inp;
-  transposewxw_i 8 4 8ul 1ul inp
+  let h0 = ST.get () in
+  Loop.unfold_repeati 3 (Spec.transposewxw_f 3) (as_seq h0 inp) 2;
+  Loop.unfold_repeati 3 (Spec.transposewxw_f 3) (as_seq h0 inp) 1;
+  Loop.unfold_repeati 3 (Spec.transposewxw_f 3) (as_seq h0 inp) 0;
+  Loop.eq_repeati0 3 (Spec.transposewxw_f 3) (as_seq h0 inp);
+  transposewxw_i 1 inp;
+  transposewxw_i 2 inp;
+  transposewxw_i 4 inp
 
 
 inline_for_extraction noextract
 val transpose16x16: inp:lbuffer (vec_t U32 16) 16ul ->
   Stack unit
-  (requires fun h -> live h inp)
-  (ensures  fun h0 _ h1 -> modifies (loc inp) h0 h1)
+    (requires fun h -> live h inp)
+    (ensures  fun h0 _ h1 -> modifies (loc inp) h0 h1 /\
+      as_seq h1 inp == Spec.transposewxw 4 (as_seq h0 inp))
+
 let transpose16x16 inp =
-  transposewxw_i 16 1 2ul 8ul inp;
-  transposewxw_i 16 2 4ul 4ul inp;
-  transposewxw_i 16 4 8ul 2ul inp;
-  transposewxw_i 16 8 16ul 1ul inp
-
-
-
-inline_for_extraction noextract
-val transpose4: st:state 4 ->
-  Stack unit
-    (requires (fun h -> live h st))
-    (ensures (fun h0 _ h1 -> modifies (loc st) h0 h1 /\
-      as_seq h1 st == Spec.transpose4 (as_seq h0 st)))
-let transpose4 st =
-  push_frame ();
-  let st1 = create 16ul (vec_zero U32 4) in
-  copy st1 st;
-  let h0 = ST.get() in
-  transpose4x4 (sub st1 0ul 4ul);
-  transpose4x4 (sub st1 4ul 4ul);
-  transpose4x4 (sub st1 8ul 4ul);
-  transpose4x4 (sub st1 12ul 4ul);
-
-  let (v0,v2,v1,v3) = (st1.(0ul),st1.(1ul),st1.(2ul),st1.(3ul)) in
-  let (v4,v6,v5,v7) = (st1.(4ul),st1.(5ul),st1.(6ul),st1.(7ul)) in
-  let (v8,v10,v9,v11) = (st1.(8ul),st1.(9ul),st1.(10ul),st1.(11ul)) in
-  let (v12,v14,v13,v15) = (st1.(12ul),st1.(13ul),st1.(14ul),st1.(15ul)) in
-  admit();
-  st.(0ul) <- v0;
-  st.(1ul) <- v4;
-  st.(2ul) <- v8;
-  st.(3ul) <- v12;
-  st.(4ul) <- v1;
-  st.(5ul) <- v5;
-  st.(6ul) <- v9;
-  st.(7ul) <- v13;
-  let h1 = ST.get() in
-  assert (modifies (loc st) h0 h1);
-  st.(8ul) <- v2;
-  st.(9ul) <- v6;
-  st.(10ul) <- v10;
-  st.(11ul) <- v14;
-  st.(12ul) <- v3;
-  st.(13ul) <- v7;
-  st.(14ul) <- v11;
-  st.(15ul) <- v15;
-  let h1 = ST.get() in
-  assert (modifies (loc st) h0 h1);
-  assert (Lib.Sequence.equal (as_seq h1 st) (Spec.transpose4 (as_seq h0 st)))
-
-inline_for_extraction noextract
-val transpose8: st:state 8 ->
-  Stack unit
-    (requires (fun h -> live h st))
-    (ensures (fun h0 _ h1 -> modifies (loc st) h0 h1 /\
-      as_seq h1 st == Spec.transpose8 (as_seq h0 st)))
-let transpose8 st =
-  push_frame ();
-  let st1 = create 16ul (vec_zero U32 8) in
-  copy st1 st;
-  let h0 = ST.get() in
-
-  transpose8x8 (sub st1 0ul 8ul);
-  transpose8x8 (sub st1 8ul 8ul);
-  let (v0,v2,v1,v3,v4,v6,v5,v7) = (st1.(0ul),st1.(1ul),st1.(2ul),st1.(3ul),st1.(4ul),st1.(5ul),st1.(6ul),st1.(7ul)) in
-  let (v8,v10,v9,v11,v12,v14,v13,v15) = (st1.(8ul),st1.(9ul),st1.(10ul),st1.(11ul),st1.(12ul),st1.(13ul),st1.(14ul),st1.(15ul)) in
-  let h1 = ST.get() in admit();
-  assert (modifies (loc st)  h0 h1);
-  st.(0ul) <- v0;
-  st.(1ul) <- v8;
-  st.(2ul) <- v1;
-  st.(3ul) <- v9;
-  st.(4ul) <- v2;
-  st.(5ul) <- v10;
-  st.(6ul) <- v3;
-  st.(7ul) <- v11;
-  st.(8ul) <- v4;
-  let h1 = ST.get() in
-  assert (modifies (loc st)  h0 h1);
-  st.(9ul) <- v12;
-  st.(10ul) <- v5;
-  st.(11ul) <- v13;
-  st.(12ul) <- v6;
-  st.(13ul) <- v14;
-  st.(14ul) <- v7;
-  st.(15ul) <- v15;
-  let h1 = ST.get() in
-  assert (modifies (loc st)  h0 h1);
-  assert (Lib.Sequence.equal (as_seq h1 st) (create16 v0 v8 v1 v9 v2 v10 v3 v11 v4 v12 v5 v13 v6 v14 v7 v15));
-  assert (Lib.Sequence.equal (as_seq h1 st) (Spec.transpose8 (as_seq h0 st)));
-  pop_frame ()
+  let h0 = ST.get () in
+  Loop.unfold_repeati 4 (Spec.transposewxw_f 4) (as_seq h0 inp) 3;
+  Loop.unfold_repeati 4 (Spec.transposewxw_f 4) (as_seq h0 inp) 2;
+  Loop.unfold_repeati 4 (Spec.transposewxw_f 4) (as_seq h0 inp) 1;
+  Loop.unfold_repeati 4 (Spec.transposewxw_f 4) (as_seq h0 inp) 0;
+  Loop.eq_repeati0 4 (Spec.transposewxw_f 4) (as_seq h0 inp);
+  transposewxw_i 1 inp;
+  transposewxw_i 2 inp;
+  transposewxw_i 4 inp;
+  transposewxw_i 8 inp
 
 
 inline_for_extraction noextract
-val transpose16: st:state 16 ->
+val transpose1: st:state 1 ->
   Stack unit
-    (requires (fun h -> live h st))
-    (ensures (fun h0 _ h1 -> modifies (loc st) h0 h1 /\
-      as_seq h1 st == Spec.transpose16 (as_seq h0 st)))
-let transpose16 st =
-  push_frame ();
-  let st1 = create 16ul (vec_zero U32 16) in
-  copy st1 st;
-  let h0 = ST.get() in
+    (requires fun h -> live h st)
+    (ensures  fun h0 _ h1 -> modifies (loc st) h0 h1 /\
+      as_seq h1 st == Spec.transpose1 (as_seq h0 st))
+let transpose1 st = ()
 
-  transpose16x16 st1;
-  let (v0,v2,v1,v3,v4,v6,v5,v7) = (st1.(0ul),st1.(1ul),st1.(2ul),st1.(3ul),st1.(4ul),st1.(5ul),st1.(6ul),st1.(7ul)) in
-  let (v8,v10,v9,v11,v12,v14,v13,v15) = (st1.(8ul),st1.(9ul),st1.(10ul),st1.(11ul),st1.(12ul),st1.(13ul),st1.(14ul),st1.(15ul)) in
-  let h1 = ST.get() in admit();
-  assert (modifies (loc st)  h0 h1);
+
+inline_for_extraction noextract
+val create16_st: #w:lanes -> st:state w ->
+  v0:uint32xN w -> v1:uint32xN w -> v2:uint32xN w -> v3:uint32xN w ->
+  v4:uint32xN w -> v5:uint32xN w -> v6:uint32xN w -> v7:uint32xN w ->
+  v8:uint32xN w -> v9:uint32xN w -> v10:uint32xN w -> v11:uint32xN w ->
+  v12:uint32xN w -> v13:uint32xN w -> v14:uint32xN w -> v15:uint32xN w ->
+  Stack unit
+    (requires fun h -> live h st)
+    (ensures  fun h0 _ h1 -> modifies (loc st) h0 h1 /\
+      as_seq h1 st == create16 v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15)
+
+let create16_st #w st v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15 =
+  let h0 = ST.get () in
   st.(0ul) <- v0;
   st.(1ul) <- v1;
   st.(2ul) <- v2;
@@ -241,9 +208,11 @@ let transpose16 st =
   st.(5ul) <- v5;
   st.(6ul) <- v6;
   st.(7ul) <- v7;
+  let h1 = ST.get () in
+  assert (modifies (loc st) h0 h1);
+  assert (LSeq.equal (LSeq.sub (as_seq h1 st) 0 8) (LSeq.sub (create16 v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15) 0 8));
+
   st.(8ul) <- v8;
-  let h1 = ST.get() in
-  assert (modifies (loc st)  h0 h1);
   st.(9ul) <- v9;
   st.(10ul) <- v10;
   st.(11ul) <- v11;
@@ -251,9 +220,111 @@ let transpose16 st =
   st.(13ul) <- v13;
   st.(14ul) <- v14;
   st.(15ul) <- v15;
-  let h1 = ST.get() in
-  assert (modifies (loc st)  h0 h1);
-  pop_frame ()
+  let h2 = ST.get () in
+  assert (modifies (loc st) h0 h2);
+  assert (LSeq.equal (LSeq.sub (as_seq h2 st) 0 8) (LSeq.sub (as_seq h1 st) 0 8));
+  assert (LSeq.equal (LSeq.sub (as_seq h2 st) 8 8) (LSeq.sub (create16 v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15) 8 8));
+  Seq.Properties.lemma_split (as_seq h1 st) 8;
+  Seq.Properties.lemma_split (as_seq h2 st) 8;
+  Seq.Properties.lemma_split (create16 v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15) 8;
+  assert (LSeq.equal (as_seq h2 st) (create16 v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15))
+
+
+inline_for_extraction noextract
+val transpose4: st:state 4 ->
+  Stack unit
+    (requires fun h -> live h st)
+    (ensures  fun h0 _ h1 -> modifies (loc st) h0 h1 /\
+      as_seq h1 st == Spec.transpose4 (as_seq h0 st))
+
+let transpose4 st =
+  let h0 = ST.get () in
+  update_sub_f h0 st 0ul 4ul
+    (fun h -> Spec.transposewxw 2 (LSeq.sub (as_seq h0 st) 0 4))
+    (fun _ -> transpose4x4 (sub st 0ul 4ul));
+
+  let (v0,v2,v1,v3) = (st.(0ul),st.(1ul),st.(2ul),st.(3ul)) in
+  LSeq.eq_intro (create4 v0 v2 v1 v3) (Spec.transposewxw 2 (LSeq.sub (as_seq h0 st) 0 4));
+  assert (create4 v0 v2 v1 v3 == Spec.transposewxw 2 (LSeq.sub (as_seq h0 st) 0 4));
+
+  let h1 = ST.get () in
+  update_sub_f h1 st 4ul 4ul
+    (fun h -> Spec.transposewxw 2 (LSeq.sub (as_seq h1 st) 4 4))
+    (fun _ -> transpose4x4 (sub st 4ul 4ul));
+
+  let (v4,v6,v5,v7) = (st.(4ul),st.(5ul),st.(6ul),st.(7ul)) in
+  LSeq.eq_intro (create4 v4 v6 v5 v7) (Spec.transposewxw 2 (LSeq.sub (as_seq h1 st) 4 4));
+  LSeq.eq_intro (LSeq.sub (as_seq h1 st) 4 4) (LSeq.sub (as_seq h0 st) 4 4);
+  assert (create4 v4 v6 v5 v7 == Spec.transposewxw 2 (LSeq.sub (as_seq h0 st) 4 4));
+
+  let h2 = ST.get () in
+  update_sub_f h2 st 8ul 4ul
+    (fun h -> Spec.transposewxw 2 (LSeq.sub (as_seq h2 st) 8 4))
+    (fun _ -> transpose4x4 (sub st 8ul 4ul));
+
+  let (v8,v10,v9,v11) = (st.(8ul),st.(9ul),st.(10ul),st.(11ul)) in
+  LSeq.eq_intro (create4 v8 v10 v9 v11) (Spec.transposewxw 2 (LSeq.sub (as_seq h2 st) 8 4));
+  LSeq.eq_intro (LSeq.sub (as_seq h2 st) 8 4) (LSeq.sub (as_seq h0 st) 8 4);
+  assert (create4 v8 v10 v9 v11 == Spec.transposewxw 2 (LSeq.sub (as_seq h0 st) 8 4));
+
+  let h3 = ST.get () in
+  update_sub_f h3 st 12ul 4ul
+    (fun h -> Spec.transposewxw 2 (LSeq.sub (as_seq h3 st) 12 4))
+    (fun _ -> transpose4x4 (sub st 12ul 4ul));
+
+  let (v12,v14,v13,v15) = (st.(12ul),st.(13ul),st.(14ul),st.(15ul)) in
+  LSeq.eq_intro (create4 v12 v14 v13 v15) (Spec.transposewxw 2 (LSeq.sub (as_seq h3 st) 12 4));
+  LSeq.eq_intro (LSeq.sub (as_seq h3 st) 12 4) (LSeq.sub (as_seq h0 st) 12 4);
+  assert (create4 v12 v14 v13 v15 == Spec.transposewxw 2 (LSeq.sub (as_seq h0 st) 12 4));
+
+  create16_st st v0 v4 v8 v12 v1 v5 v9 v13 v2 v6 v10 v14 v3 v7 v11 v15
+
+
+inline_for_extraction noextract
+val transpose8: st:state 8 ->
+  Stack unit
+    (requires fun h -> live h st)
+    (ensures  fun h0 _ h1 -> modifies (loc st) h0 h1 /\
+      as_seq h1 st == Spec.transpose8 (as_seq h0 st))
+
+let transpose8 st =
+  let h0 = ST.get () in
+  update_sub_f h0 st 0ul 8ul
+    (fun h -> Spec.transposewxw 3 (LSeq.sub (as_seq h0 st) 0 8))
+    (fun _ -> transpose8x8 (sub st 0ul 8ul));
+
+  let (v0,v2,v1,v3,v4,v6,v5,v7) = (st.(0ul),st.(1ul),st.(2ul),st.(3ul),st.(4ul),st.(5ul),st.(6ul),st.(7ul)) in
+  LSeq.eq_intro (create8 v0 v2 v1 v3 v4 v6 v5 v7) (Spec.transposewxw 3 (LSeq.sub (as_seq h0 st) 0 8));
+  LSeq.eq_intro (create8 v0 v1 v2 v3 v4 v5 v6 v7) (Spec.transpose8x8 (LSeq.sub (as_seq h0 st) 0 8));
+  //assert (create8 v0 v2 v1 v3 v4 v6 v5 v7 == Spec.transposewxw 3 (LSeq.sub (as_seq h0 st) 0 8));
+
+  let h1 = ST.get () in
+  update_sub_f h1 st 8ul 8ul
+    (fun h -> Spec.transposewxw 3 (LSeq.sub (as_seq h1 st) 8 8))
+    (fun _ -> transpose8x8 (sub st 8ul 8ul));
+
+  let (v8,v10,v9,v11,v12,v14,v13,v15) = (st.(8ul),st.(9ul),st.(10ul),st.(11ul),st.(12ul),st.(13ul),st.(14ul),st.(15ul)) in
+  LSeq.eq_intro (create8 v8 v10 v9 v11 v12 v14 v13 v15) (Spec.transposewxw 3 (LSeq.sub (as_seq h1 st) 8 8));
+  LSeq.eq_intro (LSeq.sub (as_seq h1 st) 8 8) (LSeq.sub (as_seq h0 st) 8 8);
+  LSeq.eq_intro (create8 v8 v9 v10 v11 v12 v13 v14 v15) (Spec.transpose8x8 (LSeq.sub (as_seq h0 st) 8 8));
+  //assert (create8 v8 v10 v9 v11 v12 v14 v13 v15 == Spec.transposewxw 3 (LSeq.sub (as_seq h0 st) 8 8));
+
+  create16_st st v0 v8 v1 v9 v2 v10 v3 v11 v4 v12 v5 v13 v6 v14 v7 v15
+
+
+inline_for_extraction noextract
+val transpose16: st:state 16 ->
+  Stack unit
+    (requires (fun h -> live h st))
+    (ensures (fun h0 _ h1 -> modifies (loc st) h0 h1 /\
+      as_seq h1 st == Spec.transpose16 (as_seq h0 st)))
+
+let transpose16 st =
+  transpose16x16 st;
+  let (v0,v2,v1,v3,v4,v6,v5,v7) = (st.(0ul),st.(1ul),st.(2ul),st.(3ul),st.(4ul),st.(5ul),st.(6ul),st.(7ul)) in
+  let (v8,v10,v9,v11,v12,v14,v13,v15) = (st.(8ul),st.(9ul),st.(10ul),st.(11ul),st.(12ul),st.(13ul),st.(14ul),st.(15ul)) in
+
+  create16_st st v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15
 
 
 inline_for_extraction noextract
@@ -270,6 +341,7 @@ let transpose #w st =
   | 4 -> transpose4 st
   | 8 -> transpose8 st
   | 16 -> transpose16 st
+
 
 inline_for_extraction noextract
 val xor_block:

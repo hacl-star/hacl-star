@@ -120,68 +120,54 @@ let chacha20_init (#w:lanes) (k:key) (n:nonce) (ctr0:counter) : state w =
   let c = vec_counter U32 w in
   st.[12] <- st.[12] +| c
 
+
+let transposewxw_i_k (#w:lanes) (m2:pos{w % m2 = 0}) (j:nat{j < m2}) (k:nat{k < w / (2 * m2)}) (vs:lseq (uint32xN w) w)  : lseq (uint32xN w) w =
+  let m = 2 * m2 in
+  let vs_kj = vs.[k * m + j] in
+  let vs = vs.[k * m + j] <- vec_interleave_low_n m2 vs_kj vs.[k * m + j + m2] in
+  let vs = vs.[k * m + j + m2] <- vec_interleave_high_n m2 vs_kj vs.[k * m + j + m2] in
+  vs
+
+let transposewxw_i_f (#w:lanes) (m2:pos{w % m2 = 0}) (j:nat{j < m2}) (vs:lseq (uint32xN w) w) : lseq (uint32xN w) w =
+  repeati (w / (2 * m2)) (transposewxw_i_k m2 j) vs
+
+let transposewxw_f (#w:lanes) (n:nat{pow2 n == w}) (i:nat{i < n}) (vs:lseq (uint32xN w) w) =
+  Math.Lemmas.pow2_multiplication_modulo_lemma_1 1 i n;
+  repeati (pow2 i) (transposewxw_i_f (pow2 i)) vs
+
+let transposewxw (#w:lanes{w > 2}) (n:nat{pow2 n == w}) (vs:lseq (uint32xN w) w) : lseq (uint32xN w) w =
+  repeati n (transposewxw_f n) vs
+
+
+let transpose4x4 (vs:lseq (uint32xN 4) 4) : lseq (uint32xN 4) 4 =
+  let vs = transposewxw 2 vs in
+  create4 vs.[0] vs.[2] vs.[1] vs.[3]
+
+let transpose8x8 (vs:lseq (uint32xN 8) 8) : lseq (uint32xN 8) 8 =
+  let vs = transposewxw 3 vs in
+  create8 vs.[0] vs.[2] vs.[1] vs.[3] vs.[4] vs.[6] vs.[5] vs.[7]
+
+let transpose16x16 (vs:lseq (uint32xN 16) 16) : lseq (uint32xN 16) 16 =
+  let vs = transposewxw 4 vs in
+  create16 vs.[0] vs.[2] vs.[1] vs.[3] vs.[4] vs.[6] vs.[5] vs.[7] vs.[8] vs.[10] vs.[9] vs.[11] vs.[12] vs.[14] vs.[13] vs.[15]
+
+
 let transpose1 (st:state 1) : state 1 = st
 
-inline_for_extraction
-let transpose4x4 (vs:uint32xN 4 & uint32xN 4 & uint32xN 4 & uint32xN 4)
-		 : uint32xN 4 & uint32xN 4 & uint32xN 4 & uint32xN 4 =
-  let (v0,v1,v2,v3) = vs in
-  let v0' = vec_interleave_low v0 v1 in
-  let v1' = vec_interleave_high v0 v1 in
-  let v2' = vec_interleave_low v2 v3 in
-  let v3' = vec_interleave_high v2 v3 in
-  let v0'' = vec_interleave_low_n 2 v0' v2' in
-  let v1'' = vec_interleave_high_n 2 v0' v2' in
-  let v2'' = vec_interleave_low_n 2 v1' v3' in
-  let v3'' = vec_interleave_high_n 2 v1' v3' in
-  (v0'',v1'',v2'',v3'')
-
 let transpose4 (st:state 4) : state 4 =
-  let (v0,v1,v2,v3) = transpose4x4 (st.[0],st.[1],st.[2],st.[3]) in
-  let (v4,v5,v6,v7) = transpose4x4 (st.[4],st.[5],st.[6],st.[7]) in
-  let (v8,v9,v10,v11) = transpose4x4 (st.[8],st.[9],st.[10],st.[11]) in
-  let (v12,v13,v14,v15) = transpose4x4 (st.[12],st.[13],st.[14],st.[15]) in
-  create16 v0 v4 v8 v12 v1 v5 v9 v13 v2 v6 v10 v14 v3 v7 v11 v15
-
-inline_for_extraction
-let transpose8x8 (vs:uint32xN 8 & uint32xN 8 & uint32xN 8 & uint32xN 8 & uint32xN 8 & uint32xN 8 & uint32xN 8 & uint32xN 8)
-		 : uint32xN 8 & uint32xN 8 & uint32xN 8 & uint32xN 8 & uint32xN 8 & uint32xN 8 & uint32xN 8 & uint32xN 8 =
-  let (v0,v1,v2,v3,v4,v5,v6,v7) = vs in
-  let v0' = vec_interleave_low v0 v1 in
-  let v1' = vec_interleave_high v0 v1 in
-  let v2' = vec_interleave_low v2 v3 in
-  let v3' = vec_interleave_high v2 v3 in
-  let v4' = vec_interleave_low v4 v5 in
-  let v5' = vec_interleave_high v4 v5 in
-  let v6' = vec_interleave_low v6 v7 in
-  let v7' = vec_interleave_high v6 v7 in
-
-  let v0'' = vec_interleave_low_n 2 v0' v2' in
-  let v1'' = vec_interleave_high_n 2 v0' v2' in
-  let v2'' = vec_interleave_low_n 2 v1' v3' in
-  let v3'' = vec_interleave_high_n 2 v1' v3' in
-  let v4'' = vec_interleave_low_n 2 v4' v6' in
-  let v5'' = vec_interleave_high_n 2 v4' v6' in
-  let v6'' = vec_interleave_low_n 2 v5' v7' in
-  let v7'' = vec_interleave_high_n 2 v5' v7' in
-
-  let v0''' = vec_interleave_low_n 4 v0'' v4'' in
-  let v1''' = vec_interleave_high_n 4 v0'' v4'' in
-  let v2''' = vec_interleave_low_n 4 v1'' v5'' in
-  let v3''' = vec_interleave_high_n 4 v1'' v5'' in
-  let v4''' = vec_interleave_low_n 4 v2'' v6'' in
-  let v5''' = vec_interleave_high_n 4 v2'' v6'' in
-  let v6''' = vec_interleave_low_n 4 v3'' v7'' in
-  let v7''' = vec_interleave_high_n 4 v3'' v7'' in
-  (v0''',v2''',v4''',v6''',v1''',v3''',v5''',v7''')
+  let v0 = transpose4x4 (sub st 0 4) in // 0 1 2 3
+  let v1 = transpose4x4 (sub st 4 4) in // 4 5 6 7
+  let v2 = transpose4x4 (sub st 8 4) in // 8 9 10 11
+  let v3 = transpose4x4 (sub st 12 4) in // 12 13 14 15
+  create16 v0.[0] v1.[0] v2.[0] v3.[0] v0.[1] v1.[1] v2.[1] v3.[1] v0.[2] v1.[2] v2.[2] v3.[2] v0.[3] v1.[3] v2.[3] v3.[3]
 
 let transpose8 (st:state 8) : state 8 =
-  let (v0,v1,v2,v3,v4,v5,v6,v7) = transpose8x8 (st.[0],st.[1],st.[2],st.[3],st.[4],st.[5],st.[6],st.[7]) in
-  let (v8,v9,v10,v11,v12,v13,v14,v15) = transpose8x8 (st.[8],st.[9],st.[10],st.[11],st.[12],st.[13],st.[14],st.[15]) in
-  create16 v0 v8 v1 v9 v2 v10 v3 v11 v4 v12 v5 v13 v6 v14 v7 v15
+  let v0 = transpose8x8 (sub st 0 8) in // 0 1 2 3 4 5 6 7
+  let v1 = transpose8x8 (sub st 8 8) in // 8 9 10 11 12 13 14 15
+  create16 v0.[0] v1.[0] v0.[1] v1.[1] v0.[2] v1.[2] v0.[3] v1.[3] v0.[4] v1.[4] v0.[5] v1.[5] v0.[6] v1.[6] v0.[7] v1.[7]
 
 let transpose16 (st:state 16) : state 16 =
-  admit()
+  transpose16x16 st
 
 let transpose (#w:lanes) (st:state w) : state w =
   match w with
