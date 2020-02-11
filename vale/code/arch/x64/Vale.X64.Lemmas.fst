@@ -331,7 +331,7 @@ let lemma_while_total (b:ocmp) (c:code) (s0:vale_state) =
   (s0, 0)
 
 let lemma_whileTrue_total (b:ocmp) (c:code) (s0:vale_state) (sW:vale_state) (fW:fuel) =
-  (sW, fW)
+  ({sW with vs_flags = havoc_flags}, fW)
 
 let lemma_whileFalse_total (b:ocmp) (c:code) (s0:vale_state) (sW:vale_state) (fW:fuel) =
   let f1 = fW + 1 in
