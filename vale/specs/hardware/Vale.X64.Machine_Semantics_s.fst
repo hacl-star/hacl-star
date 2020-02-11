@@ -37,6 +37,7 @@ noeq type instr_annotation (it:instr_t_record) =
   | AnnotateNewline : equals_instr it (InstrTypeRecord ins_Newline) -> instr_annotation it
   | AnnotateSpace : n:nat{it == (InstrTypeRecord (ins_Space n))} -> instr_annotation it
   | AnnotateMovbe64 : equals_instr it (InstrTypeRecord ins_MovBe64) -> instr_annotation it
+  | AnnotateMov64 : equals_instr it (InstrTypeRecord ins_Mov64) -> instr_annotation it
 
 let ins = BC.instruction_t instr_annotation
 let ocmp = BC.ocmp

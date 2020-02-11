@@ -585,7 +585,7 @@ procedure Store64_buffer128(
         ghost b:buffer128, ghost index:int)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_ins(make_instr(I.ins_Mov64, OMem(tuple(MReg(get_reg(dst), offset), t)), src))}
+    {:instruction mk_ins(make_instr_annotate(I.ins_Mov64, S.AnnotateMov64(), OMem(tuple(MReg(get_reg(dst), offset), t)), src))}
     reads
         memLayout;
     modifies
