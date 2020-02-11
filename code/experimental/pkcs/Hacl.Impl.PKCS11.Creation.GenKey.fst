@@ -1,6 +1,4 @@
-module Hacl.Impl.Creation.GenKey
-
-open Lib.IntTypes
+module Hacl.Impl.PKCS11.Creation.GenKey
 
 open Hacl.Impl.PKCS11.Internal.Types
 open Hacl.Impl.PKCS11.DeviceModule
@@ -28,15 +26,4 @@ val _CKS_GenerateKey:
   pMechanism: _CK_MECHANISM_TYPE ->
   pTemplate: nat -> 
   Tot 
-    ((handler: result uint64
-      {
-	if Inr? handler then 
-	  let excptn = (match handler with Inr a -> a) in 
-	  (* I am kinda lazy to add the others for now *)
-	  excptn == CKR_ARGUMENTS_BAD \/ excptn == CKR_ATTRIBUTE_READ_ONLY
-	  
-	else
-	  True
-	}
-    
-    ) & (device))
+    ((handler: result nat) & (device))
