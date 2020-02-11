@@ -53,8 +53,8 @@ let lemma_movbe_is_mov_bswap (dst src:operand64) (s:machine_state) :
     let dst_bswap_v = T.reverse_bytes_nat64 dst_mov_v in
     if s_movbe.ms_ok then (
       assert (Vale.X64.CPU_Features_s.movbe_enabled);
-      assert (s_movbe == update_operand64_preserve_flags'' dst dst_movbe_v s s); // this fails now, because there is a "movbe_enabled" check on movbe
-                                                                                   assert (s_mov == update_operand64_preserve_flags'' dst src_v s s);
+      assert (s_movbe == update_operand64_preserve_flags'' dst dst_movbe_v s s);
+      assert (s_mov == update_operand64_preserve_flags'' dst src_v s s);
       lemma_update_to_valid_destination_keeps_it_as_valid_src dst s src_v;
       assert (eval_operand dst s_mov == src_v);
       assert (valid_src_operand64_and_taint dst s_mov);
