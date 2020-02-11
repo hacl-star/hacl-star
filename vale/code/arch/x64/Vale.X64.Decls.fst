@@ -41,7 +41,7 @@ let mul_nat_helper x y =
 
 let va_fuel_default () = 0
 
-let lemma_opr_Mem64 (id:heaplet_id) (s:va_state) (base:va_operand) (offset:int) (b:M.buffer64) (index:int) (t:taint) : Lemma
+let lemma_opr_Mem64 (id:heaplet_id) (s:va_state) (base:operand64) (offset:int) (b:M.buffer64) (index:int) (t:taint) : Lemma
   (requires (
     let h = Map16.sel s.vs_heap.vf_heaplets id in
     M.mem_inv s.vs_heap /\
@@ -65,7 +65,7 @@ let lemma_opr_Mem64 (id:heaplet_id) (s:va_state) (base:va_operand) (offset:int) 
   assert (valid_buf_maddr64 (eval_maddr m s) h s.vs_heap.vf_layout b index t);
   M.lemma_load_mem64 b index h
 
-let lemma_opr_Mem128 (id:heaplet_id) (s:va_state) (base:va_operand) (offset:int) (t:taint) (b:M.buffer128) (index:int) : Lemma
+let lemma_opr_Mem128 (id:heaplet_id) (s:va_state) (base:operand64) (offset:int) (t:taint) (b:M.buffer128) (index:int) : Lemma
   (requires (
     let h = Map16.sel s.vs_heap.vf_heaplets id in
     M.mem_inv s.vs_heap /\
@@ -105,6 +105,7 @@ let va_ins_lemma c0 s0 = ()
 
 let eval_ocmp = Lemmas.eval_ocmp
 let valid_ocmp = Lemmas.valid_ocmp
+let havoc_flags = Lemmas.havoc_flags
 
 unfold let va_eval_ins = Lemmas.eval_ins
 

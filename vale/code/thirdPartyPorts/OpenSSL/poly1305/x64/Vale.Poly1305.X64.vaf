@@ -38,8 +38,6 @@ include{:fstar}{:open} "Vale.Poly1305.Util"
 
 module Vale.Poly1305.X64
 
-#reset-options "--z3rlimit 40"
-
 #verbatim{:interface}{:implementation}
 open Vale.Def.Opaque_s
 open Vale.Def.Types_s
@@ -58,6 +56,7 @@ open Vale.X64.QuickCodes
 open Vale.Poly1305.Spec_s
 open Vale.Poly1305.Math
 open Vale.Poly1305.Util
+#reset-options "--z3rlimit 40"
 #endverbatim
 
 procedure Poly1305_multiply(ghost r1:nat64) returns(ghost hh:int)
@@ -376,8 +375,6 @@ procedure Poly1305_blocks(
     Store64_buffer(heap1, ctx, h1, 8, Public, ctx_b, 1);
     Store64_buffer(heap1, ctx, h2, 16, Public, ctx_b, 2);
 }
-
-#reset-options "--z3rlimit 40"
 
 // last 1..15 bytes, in case len is not a multiple of 16
 procedure Poly1305_last_block()

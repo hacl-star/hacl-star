@@ -33,8 +33,14 @@
 
 
 
+/*
+ Prevent F* from removing the use of a variable. 
+*/
 extern void TestLib_touch(s32 uu____11);
 
+/*
+ Check that the two arguments are equal. 
+*/
 extern void TestLib_check(bool uu____26);
 
 extern void TestLib_check8(s8 uu____48, s8 uu____49);
@@ -53,12 +59,27 @@ extern void TestLib_checku32(u32 uu____180, u32 uu____181);
 
 extern void TestLib_checku64(u64 uu____202, u64 uu____203);
 
+/*
+ A test routine that takes a string as its first argument; two buffers to
+ * compare; the length of the buffers; and exits the program if there is a
+ * failure. 
+*/
 extern void TestLib_compare_and_print(C_String_t uu____242, u8 *b1, u8 *b2, u32 l);
 
+/*
+ This function is for testing purposes only: this is an unmanaged, raw
+ * pointer that cannot be freed. 
+*/
 extern u8 *TestLib_unsafe_malloc(u32 l);
 
+/*
+ Prints: "got error code %d" where %d is the first argument 
+*/
 extern void TestLib_perr(u32 uu____281);
 
+/*
+ A human-readable debug message specialized for [clock_t] 
+*/
 extern void TestLib_print_clock_diff(clock_t uu____302, clock_t uu____303);
 
 KRML_DEPRECATED("p_null from TestLib; use LowStar.Buffer.null instead")

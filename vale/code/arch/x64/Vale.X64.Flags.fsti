@@ -6,7 +6,7 @@ open Vale.Def.Prop_s
 open Vale.X64.Machine_s
 open Vale.Lib.Map16
 
-type flag_val_t = option bool
+unfold let flag_val_t = option bool // HACK: this shouldn't have to be unfolded (it has to do with the lambda in FStar.FunctionalExtensionality.(^->))
 
 val t : Type0
 
@@ -14,8 +14,10 @@ val sel (f:flag) (m:t) : flag_val_t
 
 val upd (f:flag) (v:flag_val_t) (m:t) : t
 
+let sel_curry (m:t) (f:flag) : flag_val_t = sel f m
+
 let to_fun (m:t) : (FStar.FunctionalExtensionality.restricted_t flag (fun _ -> flag_val_t)) =
-  FStar.FunctionalExtensionality.on flag (fun (r:flag) -> sel r m)
+  FStar.FunctionalExtensionality.on flag (sel_curry m)
 
 val of_fun (m:flag -> flag_val_t) : Pure t
   (requires True)

@@ -14,7 +14,7 @@ include "../../../arch/x64/Vale.X64.InsBasic.vaf"
 include "../../../arch/x64/Vale.X64.InsMem.vaf"
 include "../../../arch/x64/Vale.X64.InsStack.vaf"
 include "../../../crypto/bignum/Vale.Bignum.X64.vaf"
-include{:/*TODO*/fstar}{:open} "FStar.Seq.Base"
+include{:fstar}{:open} "FStar.Seq.Base"
 include{:fstar}{:open} "Vale.Def.Words_s"
 include{:fstar}{:open} "Vale.Def.Types_s"
 include{:fstar}{:open} "Vale.Arch.Types"
@@ -67,7 +67,7 @@ let make_seq9 (#a:Type0) (v0 v1 v2 v3 v4 v5 v6 v7 v8:a) : seq a =
     if i = 7 then v7 else
     v8)
 
-let operand_reg8 (n:nat) : va_operand = oreg (Reg 0 (8 + n % 8))
+let operand_reg8 (n:nat) : operand64 = oreg (Reg 0 (8 + n % 8))
 #endverbatim
 
 function init_ys(a:nat64, bs:seq(nat64)):seq(nat64) extern;
@@ -101,30 +101,31 @@ ghost procedure lemma_scale_add(
     {:infer_spec}
     extern;
 
-function operand_reg8(n:nat):va_operand extern;
-
-#reset-options "--z3rlimit 80 --max_fuel 1 --max_ifuel 0"
+function operand_reg8(n:nat):operand64 extern;
 
 // Multiply 1-word value "b" by 8-word value "a"
 procedure MulAdd18(
-    inout r0:reg_opr64,
-    inout r1:reg_opr64,
-    inout r2:reg_opr64,
-    inout r3:reg_opr64,
-    inout r4:reg_opr64,
-    inout r5:reg_opr64,
-    inout r6:reg_opr64,
-    inout r7:reg_opr64,
-    ghost regRotate:nat,
-    ghost bA:buffer64,
-    ghost bB:buffer64,
-    ghost bD:buffer64)
+        inout r0:reg_opr64,
+        inout r1:reg_opr64,
+        inout r2:reg_opr64,
+        inout r3:reg_opr64,
+        inout r4:reg_opr64,
+        inout r5:reg_opr64,
+        inout r6:reg_opr64,
+        inout r7:reg_opr64,
+        ghost regRotate:nat,
+        ghost bA:buffer64,
+        ghost bB:buffer64,
+        ghost bD:buffer64)
+    {:options z3rlimit(80), max_fuel(1), max_ifuel(0)}
     lets
         pD @= rdi; pA @= rcx; pB @= rsi; T0 @= rax; T1 @= rbx;
         as := s64(heap0, bA);
         rs:seq(nat64) := make_seq9(r0, r1, r2, r3, r4, r5, r6, r7, 0);
-    reads pD; pA; pB;
-    modifies T0; T1; rdx; efl; heap0; memLayout;
+    reads
+        pD; pA; pB;
+    modifies
+        T0; T1; rdx; efl; heap0; memLayout;
     requires/ensures
         valid_cf(efl) && flag_cf(efl) == 0;
         valid_of(efl) && flag_of(efl) == 0;

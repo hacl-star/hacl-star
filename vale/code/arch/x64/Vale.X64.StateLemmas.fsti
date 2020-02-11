@@ -43,8 +43,8 @@ let state_to_S (s:vale_state) : GTot machine_state =
   let open Ms in
   {
     ms_ok = s.vs_ok;
-    ms_regs = F.on_dom reg (fun r -> Regs.sel r s.vs_regs);
-    ms_flags = F.on_dom flag (fun f -> Flags.sel f s.vs_flags);
+    ms_regs = Regs.to_fun s.vs_regs;
+    ms_flags = Flags.to_fun s.vs_flags;
     ms_heap = coerce s.vs_heap;
     ms_stack = VSS.stack_to_s s.vs_stack;
     ms_stackTaint = s.vs_stackTaint;

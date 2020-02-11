@@ -50,7 +50,7 @@ type machine_stack =
     stack_mem:Map.t int nat8 ->                // Stack contents
     machine_stack
 
-type flag_val_t = option bool
+unfold let flag_val_t = option bool // HACK: this shouldn't have to be unfolded (it has to do with the lambda in FStar.FunctionalExtensionality.(^->))
 
 type flags_t = FStar.FunctionalExtensionality.restricted_t flag (fun _ -> flag_val_t)
 type regs_t = FStar.FunctionalExtensionality.restricted_t reg t_reg
@@ -316,7 +316,8 @@ let update_operand128_preserve_flags'' (o:operand128) (v:quad32) (s_orig s:machi
 let update_operand128_preserve_flags' (o:operand128) (v:quad32) (s:machine_state) : machine_state =
   update_operand128_preserve_flags'' o v s s
 
-let havoc_flags : flags_t = FStar.FunctionalExtensionality.on_dom flag (fun _ -> None)
+let flags_none (f:flag) : flag_val_t = None
+let havoc_flags : flags_t = FStar.FunctionalExtensionality.on_dom flag flags_none
 
 // Default version havocs flags
 let update_operand64' (o:operand64) (ins:ins) (v:nat64) (s:machine_state) : machine_state =
@@ -701,20 +702,15 @@ let machine_eval_ins (i:ins) (s:machine_state) : machine_state =
 
 let machine_eval_ocmp (s:machine_state) (c:ocmp) : machine_state & bool =
   let s = run (check (valid_ocmp c)) s in
-  (s, eval_ocmp s c)
+  ({s with ms_flags = havoc_flags}, eval_ocmp s c)
 
 (*
 These functions return an option state
 None case arises when the while loop runs out of fuel
 *)
-// TODO: IfElse and While should havoc the flags
-val machine_eval_code (c:code) (fuel:nat) (s:machine_state) : Tot (option machine_state)
+let rec machine_eval_code (c:code) (fuel:nat) (s:machine_state) : Tot (option machine_state)
   (decreases %[fuel; c; 1])
-val machine_eval_codes (l:codes) (fuel:nat) (s:machine_state) : Tot (option machine_state)
-  (decreases %[fuel; l])
-val machine_eval_while (c:code{While? c}) (fuel:nat) (s:machine_state) : Tot (option machine_state)
-  (decreases %[fuel; c; 0])
-let rec machine_eval_code c fuel s =
+  =
   match c with
   | Ins ins ->
     let obs = ins_obs ins s in
@@ -728,13 +724,17 @@ let rec machine_eval_code c fuel s =
     if b then machine_eval_code ifTrue fuel s' else machine_eval_code ifFalse fuel s'
   | While _ _ ->
     machine_eval_while c fuel s
-and machine_eval_codes l fuel s =
+and machine_eval_codes (l:codes) (fuel:nat) (s:machine_state) : Tot (option machine_state)
+  (decreases %[fuel; l])
+  =
   match l with
   | [] -> Some s
   | c::tl ->
     let s_opt = machine_eval_code c fuel s in
     if None? s_opt then None else machine_eval_codes tl fuel (Some?.v s_opt)
-and machine_eval_while c fuel s0 =
+and machine_eval_while (c:code{While? c}) (fuel:nat) (s0:machine_state) : Tot (option machine_state)
+  (decreases %[fuel; c; 0])
+  =
   if fuel = 0 then None else
   let While cond body = c in
   let (s0, b) = machine_eval_ocmp s0 cond in

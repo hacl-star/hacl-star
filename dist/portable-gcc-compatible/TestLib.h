@@ -36,12 +36,18 @@
 
 /* SNIPPET_START: TestLib_touch */
 
+/*
+ Prevent F* from removing the use of a variable. 
+*/
 extern void TestLib_touch(int32_t uu____11);
 
 /* SNIPPET_END: TestLib_touch */
 
 /* SNIPPET_START: TestLib_check */
 
+/*
+ Check that the two arguments are equal. 
+*/
 extern void TestLib_check(bool uu____26);
 
 /* SNIPPET_END: TestLib_check */
@@ -96,6 +102,11 @@ extern void TestLib_checku64(uint64_t uu____202, uint64_t uu____203);
 
 /* SNIPPET_START: TestLib_compare_and_print */
 
+/*
+ A test routine that takes a string as its first argument; two buffers to
+ * compare; the length of the buffers; and exits the program if there is a
+ * failure. 
+*/
 extern void
 TestLib_compare_and_print(C_String_t uu____242, uint8_t *b1, uint8_t *b2, uint32_t l);
 
@@ -103,18 +114,28 @@ TestLib_compare_and_print(C_String_t uu____242, uint8_t *b1, uint8_t *b2, uint32
 
 /* SNIPPET_START: TestLib_unsafe_malloc */
 
+/*
+ This function is for testing purposes only: this is an unmanaged, raw
+ * pointer that cannot be freed. 
+*/
 extern uint8_t *TestLib_unsafe_malloc(uint32_t l);
 
 /* SNIPPET_END: TestLib_unsafe_malloc */
 
 /* SNIPPET_START: TestLib_perr */
 
+/*
+ Prints: "got error code %d" where %d is the first argument 
+*/
 extern void TestLib_perr(uint32_t uu____281);
 
 /* SNIPPET_END: TestLib_perr */
 
 /* SNIPPET_START: TestLib_print_clock_diff */
 
+/*
+ A human-readable debug message specialized for [clock_t] 
+*/
 extern void TestLib_print_clock_diff(clock_t uu____302, clock_t uu____303);
 
 /* SNIPPET_END: TestLib_print_clock_diff */

@@ -9,7 +9,7 @@ include{:fstar}{:open} "Vale.Def.Opaque_s"
 include{:fstar}{:open} "Vale.Def.Words_s"
 include{:fstar}{:open} "Vale.Def.Types_s"
 include{:fstar}{:open} "Vale.Arch.Types"
-include{:/*TODO*/fstar}{:open} "FStar.Seq.Base"
+include{:fstar}{:open} "FStar.Seq.Base"
 include{:fstar}{:open} "Vale.AES.AES_s"
 include{:fstar}{:open} "Vale.AES.GCTR_s"
 include{:fstar}{:open} "Vale.AES.GCTR"
@@ -54,9 +54,8 @@ open Vale.X64.QuickCode
 open Vale.X64.QuickCodes
 open Vale.AES.X64.AESCTRplain
 open Vale.X64.CPU_Features_s
-#endverbatim
-
 #reset-options "--z3rlimit 30"
+#endverbatim
 
 ///////////////////////////
 // GCTR encryption
@@ -132,9 +131,6 @@ procedure Gctr_register(
     gctr_encrypt_one_block(icb_BE, old(io), alg, key);
 }
 
-#verbatim
-#restart-solver
-#endverbatim
 procedure Gctr_core(
         inline alg:algorithm,
         ghost in_b:buffer128,
@@ -145,6 +141,7 @@ procedure Gctr_core(
         ghost round_keys:seq(quad32),
         ghost keys_b:buffer128)
     {:quick}
+    {:restartProver}
     lets in_ptr @= rax; out_ptr @= rbx; len @= rcx; icb @= xmm7; mask @= xmm8;
 
     reads
@@ -243,10 +240,6 @@ procedure Gctr_core(
 //    gctr_partial_completed(alg, buffer128_as_seq(heap0, in_b), buffer128_as_seq(heap1, out_b), key, icb_BE);
 }
 
-#reset-options "--z3rlimit 60"
-#verbatim
-#restart-solver
-#endverbatim
 procedure Gctr_core_opt(
         inline alg:algorithm,
         ghost in_b:buffer128,
@@ -255,6 +248,8 @@ procedure Gctr_core_opt(
         ghost round_keys:seq(quad32),
         ghost keys_b:buffer128)
     {:quick}
+    {:restartProver}
+    {:options z3rlimit(60)}
     lets in_ptr @= rax; out_ptr @= rbx; len @= rcx; icb @= xmm7;
 
     reads
@@ -315,8 +310,6 @@ procedure Gctr_core_opt(
     Gctr_core(alg, in_b, out_b, 4*num_quad_blocks, old(icb), key, round_keys, keys_b);
 }
 
-
-#reset-options "--z3rlimit 20"
 procedure Gctr_bytes_extra_work(
         inline alg:algorithm,
         ghost icb_BE:quad32,
@@ -393,7 +386,6 @@ procedure Gctr_bytes_extra_work(
 }
 
 /*
-#reset-options "--z3rlimit 20"
 procedure Gctr_bytes_extra(
         inline alg:algorithm,
         ghost icb_BE:quad32,
@@ -471,7 +463,6 @@ procedure Gctr_bytes_extra(
 }
 */
 
-#reset-options "--z3rlimit 20"
 procedure Gctr_bytes_no_extra(
         inline alg:algorithm,
         ghost icb_BE:quad32,
@@ -529,8 +520,6 @@ procedure Gctr_bytes_no_extra(
 //    assert cipher == gctr_encrypt_LE(icb_BE, make_gctr_plain_LE(plain), alg, key);
 }
 
-
-#reset-options "--z3rlimit 20"
 procedure Gctr_bytes(
         inline alg:algorithm,
         ghost in_b:buffer128,
@@ -603,13 +592,8 @@ procedure Gctr_bytes(
         old(s128(heap0,  in_b)), old(s128(heap2, inout_b)),
         s128    (heap1, out_b) ,     s128(heap2, inout_b),
         old(plain_num_bytes), old(icb));
-
 }
 
-#reset-options "--z3rlimit 80"
-#verbatim
-#restart-solver
-#endverbatim
 procedure Gctr_bytes_stdcall(
         inline win:bool,
         inline alg:algorithm,
@@ -626,6 +610,8 @@ procedure Gctr_bytes_stdcall(
     {:public}
     {:quick}
     {:exportSpecs}
+    {:restartProver}
+    {:options z3rlimit(80)}
     reads
         heap0;
     modifies

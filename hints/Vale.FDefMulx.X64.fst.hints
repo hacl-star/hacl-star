@@ -1,5 +1,5 @@
 [
-  "C9,¹%¦Á_º–ü\u0001_ì\u0019Å",
+  "÷ºÆ\f²oã\u0016\u0001•BiˆÇ\u0004\u000b",
   [
     [
       "Vale.FDefMulx.X64.operand_reg8",
@@ -12,7 +12,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "3fb97eb7ae7aea2b685bee41eb665d04"
+      "78fe65038809a26e784ff069c6641e2c"
     ],
     [
       "Vale.FDefMulx.X64.va_lemma_MulAdd18",
@@ -25,7 +25,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "caaf7cbbdbcb83ffcda10eebe0ab6355"
+      "44a251eba01df43a352d355fe6dd6751"
     ],
     [
       "Vale.FDefMulx.X64.va_lemma_MulAdd18",
@@ -35,6 +35,7 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Vale.Bignum.Lemmas.seq_add_c.fuel_instrumented",
+        "@fuel_correspondence_Vale.Bignum.Lemmas.seq_add_is.fuel_instrumented",
         "@fuel_irrelevance_Vale.Bignum.Lemmas.seq_add_c.fuel_instrumented",
         "@query",
         "FStar.Seq.Base_interpretation_Tm_arrow_44bb45ed5c2534b346e0f58ea5033251",
@@ -55,7 +56,7 @@
         "data_typing_intro_Vale.X64.Machine_s.OReg@tok",
         "data_typing_intro_Vale.X64.Machine_s.Reg@tok",
         "disc_equation_Prims.Cons", "disc_equation_Vale.X64.Machine_s.Block",
-        "disc_equation_Vale.X64.Machine_s.OReg",
+        "disc_equation_Vale.X64.Machine_s.OReg", "eq2-interp",
         "equality_tok_Vale.Arch.HeapTypes_s.Public@tok",
         "equality_tok_Vale.Arch.HeapTypes_s.TUInt64@tok",
         "equation_FStar.Pervasives.Native.fst", "equation_Prims.eqtype",
@@ -78,6 +79,7 @@
         "equation_Vale.FDefMulx.X64.make_seq9",
         "equation_Vale.FDefMulx.X64.operand_reg8",
         "equation_Vale.X64.Decls.state_inv",
+        "equation_Vale.X64.Decls.update_operand",
         "equation_Vale.X64.Decls.va_ensure_total",
         "equation_Vale.X64.Decls.va_is_dst_opr64",
         "equation_Vale.X64.Decls.va_operand_reg_opr64",
@@ -89,7 +91,6 @@
         "equation_Vale.X64.Decls.va_upd_mem_layout",
         "equation_Vale.X64.Decls.va_upd_ok",
         "equation_Vale.X64.Decls.va_upd_reg64",
-        "equation_Vale.X64.Decls.va_update_operand",
         "equation_Vale.X64.Decls.validDstAddrs",
         "equation_Vale.X64.Decls.validDstAddrs64",
         "equation_Vale.X64.Decls.validSrcAddrs",
@@ -121,6 +122,7 @@
         "equation_Vale.X64.State.update_reg_64",
         "equation_Vale.X64.State.valid_src_operand",
         "equation_with_fuel_Vale.Bignum.Lemmas.seq_add_c.fuel_instrumented",
+        "equation_with_fuel_Vale.Bignum.Lemmas.seq_add_is.fuel_instrumented",
         "fuel_guarded_inversion_Vale.Arch.HeapImpl.vale_full_heap",
         "fuel_guarded_inversion_Vale.X64.Machine_s.reg",
         "fuel_guarded_inversion_Vale.X64.State.vale_state",
@@ -137,7 +139,7 @@
         "int_typing",
         "interpretation_Tm_abs_0164eea1042c73aa340ab7021ffdcf15",
         "interpretation_Tm_abs_fb6f5d81877483a74aadba99fc4286e2",
-        "lemma_FStar.Seq.Base.init_index_",
+        "l_and-interp", "lemma_FStar.Seq.Base.init_index_",
         "lemma_FStar.Seq.Base.lemma_eq_elim",
         "lemma_FStar.Seq.Base.lemma_eq_intro",
         "lemma_FStar.Seq.Base.lemma_index_upd1",
@@ -232,11 +234,11 @@
         "typing_Vale.Bignum.X64.flag_cf", "typing_Vale.Bignum.X64.flag_of",
         "typing_Vale.Lib.Map16.sel", "typing_Vale.Lib.Map16.upd",
         "typing_Vale.X64.CPU_Features_s.bmi2_enabled",
+        "typing_Vale.X64.Decls.update_operand",
         "typing_Vale.X64.Decls.va_is_dst_opr64",
         "typing_Vale.X64.Decls.va_upd_flags",
-        "typing_Vale.X64.Decls.va_upd_ok",
-        "typing_Vale.X64.Decls.va_update_operand",
-        "typing_Vale.X64.Decls.valid_cf", "typing_Vale.X64.Decls.valid_of",
+        "typing_Vale.X64.Decls.va_upd_ok", "typing_Vale.X64.Decls.valid_cf",
+        "typing_Vale.X64.Decls.valid_of",
         "typing_Vale.X64.Machine_s.__proj__OReg__item__r",
         "typing_Vale.X64.Memory.buffer_as_seq",
         "typing_Vale.X64.Memory.buffer_read",
@@ -251,7 +253,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt64@tok"
       ],
       0,
-      "5ec828fbf7be95e60a78607b01981e86"
+      "40964bf02805715f27e2adc6099e155f"
     ]
   ]
 ]

@@ -50,7 +50,7 @@ let update_state_mod (m:mod_t) (sM sK:vale_state) : vale_state =
   match m with
   | Mod_None -> sK
   | Mod_ok -> va_update_ok sM sK
-  | Mod_reg r -> va_update_reg r sM sK
+  | Mod_reg r -> update_register r sM sK
   | Mod_flags -> va_update_flags sM sK
   | Mod_mem -> va_update_mem sM sK
   | Mod_mem_layout -> va_update_mem_layout sM sK
@@ -73,7 +73,7 @@ let va_lemma_norm_mods (mods:mods_t) (sM sK:vale_state) : Lemma
   = ()
 
 [@va_qattr qmodattr]
-let va_mod_dst_opr64 (o:va_operand) : mod_t =
+let va_mod_dst_opr64 (o:operand64) : mod_t =
   match o with
   | OConst n -> Mod_None
   | OReg r -> Mod_reg (Reg 0 r)
@@ -81,7 +81,7 @@ let va_mod_dst_opr64 (o:va_operand) : mod_t =
   | OStack _ -> Mod_None // TODO: support destination stack operands
 
 [@va_qattr qmodattr]
-let va_mod_reg_opr64 (o:va_reg_operand) : mod_t =
+let va_mod_reg_opr64 (o:reg_operand) : mod_t =
   match o with
   | OReg r -> Mod_reg (Reg 0 r)
 
