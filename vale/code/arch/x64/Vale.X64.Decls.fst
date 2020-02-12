@@ -105,6 +105,7 @@ let va_ins_lemma c0 s0 = ()
 
 let eval_ocmp = Lemmas.eval_ocmp
 let valid_ocmp = Lemmas.valid_ocmp
+let havoc_flags = Lemmas.havoc_flags
 
 unfold let va_eval_ins = Lemmas.eval_ins
 

@@ -245,18 +245,22 @@ let qIf_proof #a #c1 #c2 b qc1 qc2 mods s0 k =
     | Cmp_lt o1 o2 -> lemma_valid_cmp_lt s0 o1 o2; lemma_cmp_lt s0 o1 o2
     | Cmp_gt o1 o2 -> lemma_valid_cmp_gt s0 o1 o2; lemma_cmp_gt s0 o1 o2
   );
+  let s1 = {s0 with vs_flags = havoc_flags} in
+  update_state_mods_to mods s1 s0;
   if eval_cmp s0 b then
   (
-    let (sM, f0, g) = QProc?.proof qc1 s0 k in
+    let (sM, f0, g) = QProc?.proof qc1 s1 k in
     va_lemma_ifElseTrue_total (cmp_to_ocmp b) c1 c2 s0 f0 sM;
-    update_state_mods_weaken qc1.mods mods sM s0;
+    update_state_mods_weaken qc1.mods mods sM s1;
+    update_state_mods_trans mods s0 s1 sM;
     (sM, f0, g)
   )
   else
   (
-    let (sM, f0, g) = QProc?.proof qc2 s0 k in
+    let (sM, f0, g) = QProc?.proof qc2 s1 k in
     va_lemma_ifElseFalse_total (cmp_to_ocmp b) c1 c2 s0 f0 sM;
-    update_state_mods_weaken qc2.mods mods sM s0;
+    update_state_mods_weaken qc2.mods mods sM s1;
+    update_state_mods_trans mods s0 s1 sM;
     (sM, f0, g)
   )
 
@@ -276,13 +280,16 @@ let rec qWhile_proof_rec
   (decreases (dec s1 g1))
   =
   let ob = cmp_to_ocmp b in
+  let s1' = {s1 with vs_flags = havoc_flags} in
+  update_state_mods_to mods s1' s1;
+  update_state_mods_trans mods s0 s1 s1';
   if eval_cmp s1 b then
   (
     let inv2 = wp_While_inv qc mods inv dec s1 g1 in
     let wp = QProc?.wp (qc g1) in
     let (s2, f2) = va_lemma_whileTrue_total ob c s0 s1 f1 in
     let (sc, fc, gc) = QProc?.proof (qc g1) s2 inv2 in
-    let fN = va_lemma_whileMerge_total (While ob c) s0 f2 s2 fc sc in
+    let fN = va_lemma_whileMerge_total (While ob c) s0 f2 s1 fc sc in
     update_state_mods_weaken (qc g1).mods mods sc s2;
     update_state_mods_trans mods s0 s2 sc;
     qWhile_proof_rec b qc mods inv dec s0 sc gc fN k

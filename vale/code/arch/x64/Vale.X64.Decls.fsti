@@ -475,8 +475,6 @@ unfold let buffers3_disjoint128 (b1 b2 b3:M.buffer128) =
 val eval_code (c:va_code) (s0:va_state) (f0:va_fuel) (sN:va_state) : prop0
 val eval_while_inv (c:va_code) (s0:va_state) (fW:va_fuel) (sW:va_state) : prop0
 
-(* ok for now but no need to actually expose the definition.
-   instead expose lemmas about it *)
 [@va_qattr]
 let va_state_eq (s0:va_state) (s1:va_state) : prop0 = state_eq s0 s1
 
@@ -498,6 +496,8 @@ val eval_ocmp : s:va_state -> c:ocmp -> GTot bool
 unfold let va_evalCond (b:ocmp) (s:va_state) : GTot bool = eval_ocmp s b
 
 val valid_ocmp : c:ocmp -> s:va_state -> GTot bool
+
+val havoc_flags : Flags.t
 
 val lemma_cmp_eq : s:va_state -> o1:operand64{ not (OMem? o1 || OStack? o1) } -> o2:operand64{ not (OMem? o2 || OStack? o2) } -> Lemma
   (requires True)
@@ -583,14 +583,14 @@ val va_lemma_ifElse_total (ifb:ocmp) (ct:va_code) (cf:va_code) (s0:va_state) : G
   (requires True)
   (ensures  (fun (cond, sM, sN, f0) ->
     cond == eval_ocmp s0 ifb /\
-    sM == s0
+    sM == {s0 with vs_flags = havoc_flags}
   ))
 
 val va_lemma_ifElseTrue_total (ifb:ocmp) (ct:va_code) (cf:va_code) (s0:va_state) (f0:va_fuel) (sM:va_state) : Lemma
   (requires
     valid_ocmp ifb s0 /\
     eval_ocmp s0 ifb /\
-    eval_code ct s0 f0 sM
+    eval_code ct ({s0 with vs_flags = havoc_flags}) f0 sM
   )
   (ensures
     eval_code (IfElse ifb ct cf) s0 f0 sM
@@ -600,7 +600,7 @@ val va_lemma_ifElseFalse_total (ifb:ocmp) (ct:va_code) (cf:va_code) (s0:va_state
   (requires
     valid_ocmp ifb s0 /\
     not (eval_ocmp s0 ifb) /\
-    eval_code cf s0 f0 sM
+    eval_code cf ({s0 with vs_flags = havoc_flags}) f0 sM
   )
   (ensures
     eval_code (IfElse ifb ct cf) s0 f0 sM
@@ -618,7 +618,7 @@ val va_lemma_while_total (b:ocmp) (c:va_code) (s0:va_state) : Ghost (va_state & 
 
 val va_lemma_whileTrue_total (b:ocmp) (c:va_code) (s0:va_state) (sW:va_state) (fW:va_fuel) : Ghost (va_state & va_fuel)
   (requires eval_ocmp sW b /\ valid_ocmp b sW)
-  (ensures fun (s1, f1) -> s1 == sW /\ f1 == fW)
+  (ensures fun (s1, f1) -> s1 == {sW with vs_flags = havoc_flags} /\ f1 == fW)
 
 val va_lemma_whileFalse_total (b:ocmp) (c:va_code) (s0:va_state) (sW:va_state) (fW:va_fuel) : Ghost (va_state & va_fuel)
   (requires
@@ -627,19 +627,19 @@ val va_lemma_whileFalse_total (b:ocmp) (c:va_code) (s0:va_state) (sW:va_state) (
     eval_while_inv (While b c) s0 fW sW
   )
   (ensures fun (s1, f1) ->
-    s1 == sW /\
+    s1 == {sW with vs_flags = havoc_flags} /\
     eval_code (While b c) s0 f1 s1
   )
 
 val va_lemma_whileMerge_total (c:va_code) (s0:va_state) (f0:va_fuel) (sM:va_state) (fM:va_fuel) (sN:va_state) : Ghost (fN:va_fuel)
-  (requires
-    While? c /\
+  (requires While? c /\ (
+    let cond = While?.whileCond c in
     sN.vs_ok /\
-    valid_ocmp (While?.whileCond c) sM /\
-    eval_ocmp sM (While?.whileCond c) /\
+    valid_ocmp cond sM /\
+    eval_ocmp sM cond /\
     eval_while_inv c s0 f0 sM /\
-    eval_code (While?.whileBody c) sM fM sN
-  )
+    eval_code (While?.whileBody c) ({sM with vs_flags = havoc_flags}) fM sN
+  ))
   (ensures (fun fN ->
     eval_while_inv c s0 fN sN
   ))

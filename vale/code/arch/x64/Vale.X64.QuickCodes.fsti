@@ -240,9 +240,10 @@ let eval_cmp (s:va_state) (c:cmp) : GTot bool =
 [@va_qattr]
 let wp_If (#a:Type) (#c1:code) (#c2:code) (b:cmp) (qc1:quickCode a c1) (qc2:quickCode a c2) (mods:mods_t) (s0:va_state) (k:va_state -> a -> Type0) : Type0 =
   // REVIEW: this duplicates k
-  valid_cmp b s0 /\
-  (     eval_cmp s0 b  ==> mods_contains mods qc1.mods /\ QProc?.wp qc1 s0 k) /\
-  (not (eval_cmp s0 b) ==> mods_contains mods qc2.mods /\ QProc?.wp qc2 s0 k)
+  valid_cmp b s0 /\ mods_contains1 mods Mod_flags /\
+  (let s1 = va_upd_flags havoc_flags s0 in
+    (     eval_cmp s0 b  ==> mods_contains mods qc1.mods /\ QProc?.wp qc1 s1 k) /\
+    (not (eval_cmp s0 b) ==> mods_contains mods qc2.mods /\ QProc?.wp qc2 s1 k))
 
 val qIf_proof (#a:Type) (#c1:code) (#c2:code) (b:cmp) (qc1:quickCode a c1) (qc2:quickCode a c2) (mods:mods_t) (s0:va_state) (k:va_state -> a -> Type0)
   : Ghost (va_state & va_fuel & a)
@@ -270,15 +271,16 @@ let wp_While_body
     (dec:va_state -> a -> d) (g1:a) (s1:va_state) (k:va_state -> a -> Type0)
     : Type0 =
   valid_cmp b s1 /\
-  (     eval_cmp s1 b  ==> mods_contains mods (qc g1).mods /\ QProc?.wp (qc g1) s1 (wp_While_inv qc mods inv dec s1 g1)) /\
-  (not (eval_cmp s1 b) ==> k s1 g1)
+  (let s1' = va_upd_flags havoc_flags s1 in
+    (     eval_cmp s1 b  ==> mods_contains mods (qc g1).mods /\ QProc?.wp (qc g1) s1' (wp_While_inv qc mods inv dec s1 g1)) /\
+    (not (eval_cmp s1 b) ==> k s1' g1))
 
 [@va_qattr]
 let wp_While
     (#a #d:Type) (#c:code) (b:cmp) (qc:a -> quickCode a c) (mods:mods_t) (inv:va_state -> a -> Type0)
     (dec:va_state -> a -> d) (g0:a) (s0:va_state) (k:va_state -> a -> Type0)
     : Type0 =
-  inv s0 g0 /\ mods_contains mods (qc g0).mods /\
+  inv s0 g0 /\ mods_contains mods (qc g0).mods /\ mods_contains1 mods Mod_flags /\
   // REVIEW: we could get a better WP with forall (...state components...) instead of forall (s1:va_state)
   (forall (s1:va_state) (g1:a). inv s1 g1 ==> wp_While_body b qc mods inv dec g1 s1 k)
 
