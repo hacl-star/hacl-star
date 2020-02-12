@@ -74,17 +74,11 @@ val isPointOnCurvePublic: p:point -> Stack bool
     as_nat h (gsub p (size 4) (size 4)) < prime256 /\
     as_nat h (gsub p (size 8) (size 4)) == 1)
   (ensures fun h0 r h1 ->
-    assert_norm (1 < prime256);
     modifies0 h0 h1 /\ 
-    (let x = gsub p (size 0) (size 4) in 
-     let y = gsub p (size 4) (size 4) in 
-     let x_ = as_nat h0 x in  
-     if r = false 
-     then (as_nat h0 y) * (as_nat h0 y) % prime <> (x_ * x_ * x_ - 3 * x_ + 41058363725152142129326129780047268409114441015993725554835256314039467401291) % prime
-     else (as_nat h0 y) * (as_nat h0 y) % prime == (x_ * x_ * x_ - 3 * x_ + 41058363725152142129326129780047268409114441015993725554835256314039467401291) % prime) /\
      r == isPointOnCurve (as_nat h1 (gsub p (size 0) (size 4)), 
                           as_nat h1 (gsub p (size 4) (size 4)), 
-                          as_nat h1 (gsub p (size 8) (size 4))) )
+                          as_nat h1 (gsub p (size 8) (size 4)))
+  )
 
 (*
 For Bob to authenticate Alice's signature, he must have a copy of her public-key curve point {\displaystyle Q_{A}} Q_{A}. Bob can verify {\displaystyle Q_{A}} Q_{A} is a valid curve point as follows:

@@ -39,6 +39,7 @@ let eq_u64_nCT a b =
 
 let eq_0_u64 a = eq_u64_nCT a (u64 0)
 
+
 let changeEndian i = 
   assert_norm (pow2 64 * pow2 64 = pow2 (2 * 64));
   assert_norm (pow2 (2 * 64) * pow2 64 = pow2 (3 * 64));
@@ -105,7 +106,7 @@ inline_for_extraction noextract
 val upload_p256_point_on_curve_constant: x: felem -> Stack unit
   (requires fun h -> live h x)
   (ensures fun h0 _ h1 -> modifies (loc x) h0 h1 /\ 
-    as_nat h1 x == toDomain_ (41058363725152142129326129780047268409114441015993725554835256314039467401291) /\
+    as_nat h1 x == toDomain_ Hacl.Spec.P256.bCoordinateP256 /\
     as_nat h1 x < prime
  )
 
@@ -118,7 +119,7 @@ let upload_p256_point_on_curve_constant x =
   assert_norm (
     15608596021259845087 + 12461466548982526096 * pow2 64 + 
     16546823903870267094 * pow2 64 * pow2 64 + 
-    15866188208926050356 * pow2 64 * pow2 64 * pow2 64 == (41058363725152142129326129780047268409114441015993725554835256314039467401291 * pow2 256) % prime)
+    15866188208926050356 * pow2 64 * pow2 64 * pow2 64 == (Hacl.Spec.P256.bCoordinateP256 * pow2 256) % prime)
 
 
 val lemma_xcube: x_: nat {x_ < prime} -> Lemma 
@@ -196,26 +197,20 @@ let lemma_modular_multiplication_p256_2_d a b =
 
 
 let isPointOnCurvePublic p = 
-   push_frame(); 
-     let y2Buffer = create (size 4) (u64 0) in 
-     let xBuffer = create (size 4) (u64 0) in 
-       let h0 = ST.get() in 
-     let x = sub p (size 0) (size 4) in 
-     let y = sub p (size 4) (size 4) in 
-     y_2 y y2Buffer;
-     xcube_minus_x x xBuffer;
-       let h1 = ST.get() in 
-     let r = compare_felem y2Buffer xBuffer in 
-     let z = eq_0_u64 r in 
-     assert(if uint_v r = pow2 64 -1 then as_nat h1 y2Buffer == as_nat h1 xBuffer else as_nat h1 y2Buffer <> as_nat h1 xBuffer);
-     lemma_modular_multiplication_p256_2_d ((as_nat h0 y) * (as_nat h0 y) % prime) 
-       (let x_ = as_nat h0 x in (x_ * x_ * x_ - 3 * x_ + 41058363725152142129326129780047268409114441015993725554835256314039467401291) % prime);
-     assert(let x_ = as_nat h0 x in 
-       if uint_v r = pow2 64 - 1 then   
-    (as_nat h0 y) * (as_nat h0 y) % prime ==  (x_ * x_ * x_ - 3 * x_ + 41058363725152142129326129780047268409114441015993725554835256314039467401291) % prime else    
-    (as_nat h0 y) * (as_nat h0 y) % prime <>  (x_ * x_ * x_ - 3 * x_ + 41058363725152142129326129780047268409114441015993725554835256314039467401291) % prime);
-     let z = not(eq_0_u64 r) in 
-     pop_frame();
+  push_frame(); 
+    let y2Buffer = create (size 4) (u64 0) in 
+    let xBuffer = create (size 4) (u64 0) in 
+  let h0 = ST.get() in 
+    let x = sub p (size 0) (size 4) in 
+    let y = sub p (size 4) (size 4) in 
+    y_2 y y2Buffer;
+    xcube_minus_x x xBuffer;
+    
+    lemma_modular_multiplication_p256_2_d ((as_nat h0 y) * (as_nat h0 y) % prime) (let x_ = as_nat h0 x in (x_ * x_ * x_ - 3 * x_ + Hacl.Spec.P256.bCoordinateP256) % prime);
+    
+    let r = compare_felem y2Buffer xBuffer in 
+    let z = not (eq_0_u64 r) in 
+  pop_frame();
      z
 
 

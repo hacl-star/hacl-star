@@ -21,7 +21,7 @@ modulo p = 2^256 - 2^224 + 2^192 + 2^96 - 1 *)
 let prime = prime256
 
 let aCoordinateP256 = -3 
-let bCoordinateP256 = 41058363725152142129326129780047268409114441015993725554835256314039467401291
+let bCoordinateP256 : (a: nat {a < prime256}) = 41058363725152142129326129780047268409114441015993725554835256314039467401291
 
 noextract
 let basePoint : point_nat_prime =
@@ -168,7 +168,7 @@ val isPointOnCurve: point_nat_prime -> bool
 let isPointOnCurve p =
   let (x, y, z) = p in
   (y * y) % prime =
-  (x * x * x - aCoordinateP256 * x + bCoordinateP256) % prime
+  (x * x * x + aCoordinateP256 * x + bCoordinateP256) % prime
 
 
 let point_prime_to_coordinates (p:point_seq) =
