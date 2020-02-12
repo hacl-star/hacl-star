@@ -53,6 +53,7 @@ let changeEndian i =
   upd i (size 2) one;
   upd i (size 3) zero
 
+
 let toUint64ChangeEndian i o = 
   Lib.ByteBuffer.uints_from_bytes_be o i;
   changeEndian o
@@ -73,7 +74,6 @@ let lemma_core_0 a h =
 
 
 let lemma_core_1 a h= 
-  let open Lib.ByteSequence in 
   lemma_core_0 a h;
   lemma_nat_from_to_intseq_le_preserves_value #U64 #SEC 4 (as_seq h a);
   let n = nat_from_intseq_le (as_seq h a) in 
@@ -81,6 +81,7 @@ let lemma_core_1 a h=
   lemma_nat_to_from_bytes_le_preserves_value #SEC (uints_to_bytes_le #U64 #SEC #4 (as_seq h a)) 32 (as_nat h a)
 
 #push-options "--ifuel 1"
+
 
 let bufferToJac p result = 
   let partPoint = sub result (size 0) (size 8) in 
@@ -92,9 +93,11 @@ let bufferToJac p result =
 
 #pop-options
 
+
+(* This code is used for computation of isPointOnCurve routine *)
 inline_for_extraction noextract
 val y_2: y: felem -> r: felem -> Stack unit
-  (requires fun h -> as_nat h y < prime /\  live h y /\ live h r /\ eq_or_disjoint y r)
+  (requires fun h -> as_nat h y < prime /\ live h y /\ live h r /\ eq_or_disjoint y r)
   (ensures fun h0 _ h1 -> modifies (loc r) h0 h1 /\ as_nat h1 r == toDomain_ ((as_nat h0 y) * (as_nat h0 y) % prime))
 
 let y_2 y r = 
@@ -115,39 +118,35 @@ let upload_p256_point_on_curve_constant x =
   upd x (size 1) (u64 12461466548982526096);
   upd x (size 2) (u64 16546823903870267094);
   upd x (size 3) (u64 15866188208926050356);
-    let h1 = ST.get() in 
   assert_norm (
     15608596021259845087 + 12461466548982526096 * pow2 64 + 
     16546823903870267094 * pow2 64 * pow2 64 + 
-    15866188208926050356 * pow2 64 * pow2 64 * pow2 64 == (Hacl.Spec.P256.bCoordinateP256 * pow2 256) % prime)
+    15866188208926050356 * pow2 64 * pow2 64 * pow2 64 == Hacl.Spec.P256.bCoordinateP256 * pow2 256 % prime)
 
 
 val lemma_xcube: x_: nat {x_ < prime} -> Lemma 
-  (((x_ * x_ * x_ % prime) - (3 * x_ % prime)) % prime == (x_ * x_ * x_ - 3* x_) % prime)
+  (((x_ * x_ * x_ % prime) - (3 * x_ % prime)) % prime == (x_ * x_ * x_ - 3 * x_) % prime)
 
 let lemma_xcube x_ = 
   lemma_mod_add_distr (- (3 * x_ % prime)) (x_ * x_ * x_) prime;
   lemma_mod_sub_distr (x_ * x_ * x_ ) (3 * x_) prime
 
 
-val lemma_xcube2: x_ : nat {x_ < prime} -> Lemma 
-  (toDomain_ ((((((x_ * x_ * x_) - (3 * x_)) % prime)) + 41058363725152142129326129780047268409114441015993725554835256314039467401291) % prime) == 
-    toDomain_ ((x_ * x_ * x_ - 3 * x_ + 41058363725152142129326129780047268409114441015993725554835256314039467401291) % prime))
+val lemma_xcube2: x_ : nat {x_ < prime} -> Lemma (toDomain_ (((((x_ * x_ * x_) - (3 * x_)) % prime) + Hacl.Spec.P256.bCoordinateP256) % prime) == toDomain_ ((x_ * x_ * x_  + Hacl.Spec.P256.aCoordinateP256 * x_ + Hacl.Spec.P256.bCoordinateP256) % prime))
 
 let lemma_xcube2 x_ = 
-  lemma_mod_add_distr 41058363725152142129326129780047268409114441015993725554835256314039467401291 ((x_ * x_ * x_) - (3 * x_)) prime;
-  assert(((((x_ * x_ * x_) - (3 * x_)) % prime) + 41058363725152142129326129780047268409114441015993725554835256314039467401291) % prime == (x_ * x_ * x_ - 3 * x_ + 41058363725152142129326129780047268409114441015993725554835256314039467401291) % prime)
+  lemma_mod_add_distr Hacl.Spec.P256.bCoordinateP256 ((x_ * x_ * x_) - (3 * x_)) prime
 
 
 inline_for_extraction noextract
-val xcube_minus_x: x: felem ->r: felem -> Stack unit 
+val xcube_minus_x: x: felem -> r: felem -> Stack unit 
   (requires fun h -> as_nat h x < prime /\ live h x  /\ live h r /\ eq_or_disjoint x r)
   (ensures fun h0 _ h1 -> 
     modifies (loc r) h0 h1 /\
     (
       let x_ = as_nat h0 x in 
-      as_nat h1 r =  toDomain_((x_ * x_ * x_ - 3 * x_ + 41058363725152142129326129780047268409114441015993725554835256314039467401291) % prime))
-  )
+      as_nat h1 r = toDomain_((x_ * x_ * x_ - 3 * x_ + Hacl.Spec.P256.bCoordinateP256) % prime))
+    )
 
 let xcube_minus_x x r = 
   push_frame();
@@ -165,11 +164,10 @@ let xcube_minus_x x r =
   p256_add r p256_constant r;
   pop_frame(); 
   
-    let x_ = as_nat h0 x in 
-    assert_norm (41058363725152142129326129780047268409114441015993725554835256314039467401291 < prime);
-    lemma_xcube x_;
-    lemma_mod_add_distr 41058363725152142129326129780047268409114441015993725554835256314039467401291 ((x_ * x_ * x_) - (3 * x_)) prime;
-    lemma_xcube2 x_
+  let x_ = as_nat h0 x in 
+  lemma_xcube x_;
+  lemma_mod_add_distr Hacl.Spec.P256.bCoordinateP256 ((x_ * x_ * x_) - (3 * x_)) prime;
+  lemma_xcube2 x_
 
 
 let isPointAtInfinityPublic p =  
@@ -184,16 +182,13 @@ let isPointAtInfinityPublic p =
   z0_zero && z1_zero && z2_zero && z3_zero
 
 
-val lemma_modular_multiplication_p256_2_d: a:nat{a < prime256} -> b:nat{b < prime256} -> 
+val lemma_modular_multiplication_p256_2_d: a:nat {a < prime256} -> b:nat {b < prime256} -> 
   Lemma (toDomain_ a = toDomain_ b <==> a == b)
 
 let lemma_modular_multiplication_p256_2_d a b = 
    lemmaToDomain a;
-     assert(toDomain_ a = a * pow2 256 % prime);
    lemmaToDomain b;
-     assert(toDomain_ b = b * pow2 256 % prime);
-   lemma_modular_multiplication_p256_2 a b;
-     assert(toDomain_ a = toDomain_ b ==> a == b)
+   lemma_modular_multiplication_p256_2 a b
 
 
 let isPointOnCurvePublic p = 
@@ -268,10 +263,8 @@ val multByOrder: result: point ->  p: point -> tempBuffer: lbuffer uint64 (size 
   )
 
 let multByOrder result p tempBuffer =
-  push_frame();
   recall_contents order_buffer prime_p256_order_seq;
-  scalarMultiplication p result order_buffer tempBuffer;
-  pop_frame()
+  scalarMultiplication p result order_buffer tempBuffer
 
 
 inline_for_extraction noextract
@@ -317,11 +310,11 @@ val isOrderCorrect: p: point -> tempBuffer: lbuffer uint64 (size 100) -> Stack b
 
 let isOrderCorrect p tempBuffer = 
   push_frame(); 
-  let multResult = create (size 12) (u64 0) in 
-  multByOrder2 multResult p tempBuffer;
-  let result = isPointAtInfinityPublic multResult in  
+    let multResult = create (size 12) (u64 0) in 
+    multByOrder2 multResult p tempBuffer;
+    let result = isPointAtInfinityPublic multResult in  
   pop_frame();
-  result
+    result
 
 
 let verifyQValidCurvePoint pubKeyAsPoint tempBuffer = 
