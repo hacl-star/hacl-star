@@ -11,7 +11,18 @@ open Hacl.Spec.P256.Lemmas
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 
+(*
+Curve NIST-P256
+
+y^2 = x^3-3x+41058363725152142129326129780047268409114441015993725554835256314039467401291
+
+modulo p = 2^256 - 2^224 + 2^192 + 2^96 - 1 *)
+
+let aCoordinateP256 = -3 
+let bCoordinateP256 = 41058363725152142129326129780047268409114441015993725554835256314039467401291
 let prime = prime256
+
+
 
 noextract
 let _point_double (p:point_nat_prime) : point_nat_prime =
@@ -158,7 +169,7 @@ val isPointOnCurve: point_nat_prime -> bool
 let isPointOnCurve p =
   let (x, y, z) = p in
   (y * y) % prime =
-  (x * x * x - 3 * x + 41058363725152142129326129780047268409114441015993725554835256314039467401291) % prime
+  (x * x * x - aCoordinateP256 * x + bCoordinateP256) % prime
 
 
 let point_prime_to_coordinates (p:point_seq) =
