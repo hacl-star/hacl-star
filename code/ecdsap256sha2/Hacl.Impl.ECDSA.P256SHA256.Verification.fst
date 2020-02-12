@@ -138,7 +138,7 @@ val ecdsa_verification_step4:
     (ensures fun h0 _ h1 ->
       modifies (loc bufferU1 |+| loc bufferU2) h0 h1 /\
       (
-	let p0 =  pow (as_nat h0 s) (prime_p256_order - 2) * as_nat h0 hash % prime_p256_order in 
+	let p0 = pow (as_nat h0 s) (prime_p256_order - 2) * as_nat h0 hash % prime_p256_order in 
 	let p1 = pow (as_nat h0 s) (prime_p256_order - 2) * as_nat h0 r % prime_p256_order in 
 	as_seq h1 bufferU1 == nat_to_bytes_be 32 p0 /\
 	as_seq h1 bufferU2 == nat_to_bytes_be 32 p1

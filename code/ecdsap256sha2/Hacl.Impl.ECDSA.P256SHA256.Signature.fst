@@ -100,13 +100,15 @@ let lemma_power_step6 kInv =
   lemma_mod_mul_distr_r (pow kInv (prime_p256_order - 2)) (pow (modp_inv2_prime (pow2 256) prime_p256_order) (prime_p256_order - 2)) prime_p256_order;
 
   lemma_pow_mod_n_is_fpow prime_p256_order (pow2 256 % prime_p256_order) (prime_p256_order - 2);
-  assert_norm(modp_inv2_prime (pow2 256) prime_p256_order = 43790243014242295660885426880012836369732278457577312309071968676491870960761); 
-
-  lemma_pow_mod_n_is_fpow prime_p256_order 43790243014242295660885426880012836369732278457577312309071968676491870960761 (prime_p256_order - 2);
-  assert_norm(exp #prime_p256_order 43790243014242295660885426880012836369732278457577312309071968676491870960761 (prime_p256_order - 2) == pow2 256 % prime_p256_order);
+  
+  let inverse2_256 = 43790243014242295660885426880012836369732278457577312309071968676491870960761 in 
+  assert_norm(modp_inv2_prime (pow2 256) prime_p256_order = inverse2_256); 
+  lemma_pow_mod_n_is_fpow prime_p256_order inverse2_256 (prime_p256_order - 2);
+  assert_norm(exp #prime_p256_order inverse2_256 (prime_p256_order - 2) == pow2 256 % prime_p256_order);
 
   lemma_mod_mul_distr_r (pow kInv (prime_p256_order - 2)) (pow2 256) prime_p256_order;
   lemmaToDomain (pow kInv (prime_p256_order - 2))
+
 
 val ecdsa_signature_step6: result: felem -> kFelem: felem -> z: felem -> r: felem -> da: felem -> Stack unit
   (requires fun h -> 
