@@ -109,12 +109,14 @@ let lemma_reduction1_0 a r =
   lemma_mod_sub_distr a prime256 prime256
 
 
-val lemma_reduction1: a: nat {a < pow2 256} -> r: nat{if a >= prime256 then r = a - prime256 else r = a} -> 
+val lemma_reduction1: a: nat {a < pow2 256} -> r: nat{if a >= prime256 then r = a - prime256 else r = a} ->
   Lemma (r = a % prime256)
 
 let lemma_reduction1 a r = 
   if a >= prime256 then
    lemma_reduction1_0 a r
+  else
+    small_mod r prime256
 
 
 val reduction_prime_2prime_impl: x: felem -> result: felem -> 
