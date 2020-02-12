@@ -435,12 +435,9 @@ let rec lemma_eval_code_equiv_states (c : code) (fuel:nat) (s1 s2 : machine_stat
   | Block l ->
     lemma_eval_codes_equiv_states l fuel s1 s2
   | IfElse ifCond ifTrue ifFalse ->
-    let (st1, b1) = machine_eval_ocmp s1 ifCond in
-    let (st2, b2) = machine_eval_ocmp s2 ifCond in
-    assert (equiv_states st1 st2);
+    let (s1', b1) = machine_eval_ocmp s1 ifCond in
+    let (s2', b2) = machine_eval_ocmp s2 ifCond in
     assert (b1 == b2);
-    let s1' = { st1 with ms_trace = (BranchPredicate b1) :: s1.ms_trace } in
-    let s2' = { st2 with ms_trace = (BranchPredicate b2) :: s2.ms_trace } in
     assert (equiv_states s1' s2');
     if b1 then (
       lemma_eval_code_equiv_states ifTrue fuel s1' s2'
@@ -487,8 +484,6 @@ and lemma_eval_while_equiv_states (c : code{While? c}) (fuel:nat) (s1 s2:machine
     assert (equiv_states s1 s2);
     assert (b1 == b2);
     if not b1 then () else (
-      let s1 = { s1 with ms_trace = (BranchPredicate true) :: s1.ms_trace } in
-      let s2 = { s2 with ms_trace = (BranchPredicate true) :: s2.ms_trace } in
       assert (equiv_states s1 s2);
       let s_opt1 = machine_eval_code body (fuel - 1) s1 in
       let s_opt2 = machine_eval_code body (fuel - 1) s2 in
@@ -1147,8 +1142,7 @@ let rec lemma_not_ok_propagate_code (c:code) (fuel:nat) (s:machine_state) :
   | Block l ->
     lemma_not_ok_propagate_codes l fuel s
   | IfElse ifCond ifTrue ifFalse ->
-    let (st, b) = machine_eval_ocmp s ifCond in
-    let s' = {st with ms_trace = (BranchPredicate b)::s.ms_trace} in
+    let (s', b) = machine_eval_ocmp s ifCond in
     if b then lemma_not_ok_propagate_code ifTrue fuel s' else lemma_not_ok_propagate_code ifFalse fuel s'
   | While _ _ ->
     lemma_not_ok_propagate_while c fuel s
@@ -1175,7 +1169,6 @@ and lemma_not_ok_propagate_while (c:code{While? c}) (fuel:nat) (s:machine_state)
     let While cond body = c in
     let (s, b) = machine_eval_ocmp s cond in
     if not b then () else (
-      let s = { s with ms_trace = (BranchPredicate true) :: s.ms_trace } in
       lemma_not_ok_propagate_code body (fuel - 1) s
     )
   )
@@ -2050,8 +2043,7 @@ let rec lemma_perform_reordering_with_hint (t:transformation_hint) (cs:codes) (f
     | InPlaceIfElse tht thf -> (
         let IfElse cond c_ift c_iff :: xs = cs in
         let Block cs_ift, Block cs_iff = c_ift, c_iff in
-        let (st, b) = machine_eval_ocmp s cond in
-        let s1 = {st with ms_trace = (BranchPredicate b)::s.ms_trace} in
+        let (s1, b) = machine_eval_ocmp s cond in
         if b then (
           assert (Some s' == machine_eval_codes (c_ift :: xs) fuel s1);
           let Some s'' = machine_eval_code c_ift fuel s1 in
@@ -2078,7 +2070,6 @@ let rec lemma_perform_reordering_with_hint (t:transformation_hint) (cs:codes) (f
         let Block cs_body = body in
         let (s0, b) = machine_eval_ocmp s cond in
         if not b then () else (
-          let s0 = {s0 with ms_trace = (BranchPredicate true)::s0.ms_trace} in
           let Some s1 = machine_eval_code body (fuel - 1) s0 in
           if s1.ms_ok then () else lemma_not_ok_propagate_codes xs fuel s1;
           lemma_perform_reordering_with_hints thb cs_body (fuel - 1) s0;
@@ -2161,8 +2152,7 @@ let rec lemma_purge_empty_code (c:code) (fuel:nat) (s:machine_state) :
   match c with
   | Block l -> lemma_purge_empty_codes l fuel s
   | IfElse c t f ->
-    let (st, b) = machine_eval_ocmp s c in
-    let s' = {st with ms_trace = (BranchPredicate b)::s.ms_trace} in
+    let (s', b) = machine_eval_ocmp s c in
     if b then lemma_purge_empty_code t fuel s' else lemma_purge_empty_code f fuel s'
   | While _ _ ->
     lemma_purge_empty_while c fuel s
@@ -2195,7 +2185,6 @@ and lemma_purge_empty_while (c:code{While? c}) (fuel:nat) (s0:machine_state) :
     let (s0, b) = machine_eval_ocmp s0 cond in
     if not b then ()
     else
-      let s0 = {s0 with ms_trace = (BranchPredicate true)::s0.ms_trace} in
       let s_opt = machine_eval_code body (fuel - 1) s0 in
       lemma_purge_empty_code body (fuel - 1) s0;
       match s_opt with

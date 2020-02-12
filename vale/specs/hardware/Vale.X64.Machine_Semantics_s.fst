@@ -701,7 +701,9 @@ let machine_eval_ins (i:ins) (s:machine_state) : machine_state =
 
 let machine_eval_ocmp (s:machine_state) (c:ocmp) : machine_state & bool =
   let s = run (check (valid_ocmp c)) s in
-  ({s with ms_flags = havoc_flags}, eval_ocmp s c)
+  let b = eval_ocmp s c in
+  let s = {s with ms_flags = havoc_flags; ms_trace = (BranchPredicate b)::s.ms_trace} in
+  (s, b)
 
 (*
 These functions return an option state
@@ -718,8 +720,7 @@ let rec machine_eval_code (c:code) (fuel:nat) (s:machine_state) : Tot (option ma
   | Block l ->
     machine_eval_codes l fuel s
   | IfElse ifCond ifTrue ifFalse ->
-    let (st, b) = machine_eval_ocmp s ifCond in
-    let s' = {st with ms_trace = (BranchPredicate b)::s.ms_trace} in
+    let (s', b) = machine_eval_ocmp s ifCond in
     if b then machine_eval_code ifTrue fuel s' else machine_eval_code ifFalse fuel s'
   | While _ _ ->
     machine_eval_while c fuel s
@@ -737,9 +738,8 @@ and machine_eval_while (c:code{While? c}) (fuel:nat) (s0:machine_state) : Tot (o
   if fuel = 0 then None else
   let While cond body = c in
   let (s0, b) = machine_eval_ocmp s0 cond in
-  if not b then Some ({s0 with ms_trace = (BranchPredicate false)::s0.ms_trace})
+  if not b then Some s0
   else
-    let s0 = {s0 with ms_trace = (BranchPredicate true)::s0.ms_trace} in
     let s_opt = machine_eval_code body (fuel - 1) s0 in
     match s_opt with
     | None -> None

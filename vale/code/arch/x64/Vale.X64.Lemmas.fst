@@ -258,7 +258,6 @@ let rec increase_fuel (g:bool) (c:code) (s0:machine_state) (f0:fuel) (sN:machine
       if not b0 then ()
       else
       (
-        let s1 = {s1 with BS.ms_trace = (BranchPredicate true)::s1.BS.ms_trace} in
         match BS.machine_eval_code c (f0 - 1) s1 with
         | None -> ()
         | Some s2 ->
