@@ -428,7 +428,7 @@ let rec lemma_eval_code_equiv_states (c : code) (fuel:nat) (s1 s2 : machine_stat
           machine_eval_code c fuel s1,
           machine_eval_code c fuel s2 in
         equiv_ostates s1'' s2''))
-    (decreases %[fuel; c; 1]) =
+    (decreases %[fuel; c]) =
   match c with
   | Ins ins ->
     lemma_eval_ins_equiv_states ins (filt_state s1) (filt_state s2)
@@ -444,8 +444,8 @@ let rec lemma_eval_code_equiv_states (c : code) (fuel:nat) (s1 s2 : machine_stat
     ) else (
       lemma_eval_code_equiv_states ifFalse fuel s1' s2'
     )
-  | While _ _ ->
-    lemma_eval_while_equiv_states c fuel s1 s2
+  | While cond body ->
+    lemma_eval_while_equiv_states cond body fuel s1 s2
 
 and lemma_eval_codes_equiv_states (cs : codes) (fuel:nat) (s1 s2 : machine_state) :
   Lemma
@@ -469,16 +469,15 @@ and lemma_eval_codes_equiv_states (cs : codes) (fuel:nat) (s1 s2 : machine_state
       let Some s1, Some s2 = s1'', s2'' in
       lemma_eval_codes_equiv_states cs fuel s1 s2
 
-and lemma_eval_while_equiv_states (c : code{While? c}) (fuel:nat) (s1 s2:machine_state) :
+and lemma_eval_while_equiv_states (cond:ocmp) (body:code) (fuel:nat) (s1 s2:machine_state) :
   Lemma
     (requires (equiv_states s1 s2))
     (ensures (
         equiv_ostates
-          (machine_eval_while c fuel s1)
-          (machine_eval_while c fuel s2)))
-    (decreases %[fuel; c; 0]) =
+          (machine_eval_while cond body fuel s1)
+          (machine_eval_while cond body fuel s2)))
+    (decreases %[fuel; body]) =
   if fuel = 0 then () else (
-    let While cond body = c in
     let (s1, b1) = machine_eval_ocmp s1 cond in
     let (s2, b2) = machine_eval_ocmp s2 cond in
     assert (equiv_states s1 s2);
@@ -494,7 +493,7 @@ and lemma_eval_while_equiv_states (c : code{While? c}) (fuel:nat) (s1 s2:machine
       | Some _ ->
         let Some s1, Some s2 = s_opt1, s_opt2 in
         if s1.ms_ok then (
-          lemma_eval_while_equiv_states c (fuel - 1) s1 s2
+          lemma_eval_while_equiv_states cond body (fuel - 1) s1 s2
         ) else ()
     )
   )

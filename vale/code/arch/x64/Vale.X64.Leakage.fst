@@ -298,7 +298,7 @@ val monotone_ok_eval_while: (code:S.code{While? code}) -> (fuel:nat) -> (s:S.mac
 let monotone_ok_eval_while code fuel s =
   let While cond body = code in
   let (s1, b) = machine_eval_ocmp s cond in
-  let r1 = machine_eval_while code fuel s in
+  let r1 = machine_eval_while cond body fuel s in
   if fuel = 0 then () else
   if not b then () else
   match machine_eval_code body (fuel - 1) s1 with

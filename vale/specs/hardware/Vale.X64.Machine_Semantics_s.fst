@@ -710,7 +710,7 @@ These functions return an option state
 None case arises when the while loop runs out of fuel
 *)
 let rec machine_eval_code (c:code) (fuel:nat) (s:machine_state) : Tot (option machine_state)
-  (decreases %[fuel; c; 1])
+  (decreases %[fuel; c])
   =
   match c with
   | Ins ins ->
@@ -722,8 +722,8 @@ let rec machine_eval_code (c:code) (fuel:nat) (s:machine_state) : Tot (option ma
   | IfElse ifCond ifTrue ifFalse ->
     let (s', b) = machine_eval_ocmp s ifCond in
     if b then machine_eval_code ifTrue fuel s' else machine_eval_code ifFalse fuel s'
-  | While _ _ ->
-    machine_eval_while c fuel s
+  | While cond body ->
+    machine_eval_while cond body fuel s
 and machine_eval_codes (l:codes) (fuel:nat) (s:machine_state) : Tot (option machine_state)
   (decreases %[fuel; l])
   =
@@ -732,11 +732,10 @@ and machine_eval_codes (l:codes) (fuel:nat) (s:machine_state) : Tot (option mach
   | c::tl ->
     let s_opt = machine_eval_code c fuel s in
     if None? s_opt then None else machine_eval_codes tl fuel (Some?.v s_opt)
-and machine_eval_while (c:code{While? c}) (fuel:nat) (s0:machine_state) : Tot (option machine_state)
-  (decreases %[fuel; c; 0])
+and machine_eval_while (cond:ocmp) (body:code) (fuel:nat) (s0:machine_state) : Tot (option machine_state)
+  (decreases %[fuel; body])
   =
   if fuel = 0 then None else
-  let While cond body = c in
   let (s0, b) = machine_eval_ocmp s0 cond in
   if not b then Some s0
   else
@@ -744,5 +743,5 @@ and machine_eval_while (c:code{While? c}) (fuel:nat) (s0:machine_state) : Tot (o
     match s_opt with
     | None -> None
     | Some s1 ->
-      if s1.ms_ok then machine_eval_while c (fuel - 1) s1
+      if s1.ms_ok then machine_eval_while cond body (fuel - 1) s1
       else Some s1
