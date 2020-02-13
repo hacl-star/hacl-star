@@ -142,6 +142,7 @@ let rec lemma_wrap_instructions (is:list ins) (fuel:nat) (s:machine_state) :
   match is with
   | [] -> ()
   | i :: is' ->
+    reveal_opaque (`%machine_eval_code_ins) machine_eval_code_ins;
     lemma_eval_ins_equiv_states i s ({s with ms_trace = []});
     let Some s1 = machine_eval_code (Ins i) fuel s in
     let s2 = machine_eval_ins i s in
@@ -162,8 +163,9 @@ let rec lemma_pull_instructions_from_codes (cs:codes) (num:pos) (fuel:nat) (s:ma
   | c :: cs' ->
     match c with
     | Ins i -> (
+        reveal_opaque (`%machine_eval_code_ins) machine_eval_code_ins;
+        lemma_eval_ins_equiv_states i s ({s with ms_trace = []});
         if num = 1 then (
-          lemma_eval_ins_equiv_states i s ({s with ms_trace = []});
           assert (equiv_option_states
                     (machine_eval_code c fuel s)
                     (Some (machine_eval_ins i s)));
@@ -178,7 +180,6 @@ let rec lemma_pull_instructions_from_codes (cs:codes) (num:pos) (fuel:nat) (s:ma
           match pull_instructions_from_codes cs' (num - 1) with
           | None -> ()
           | Some (is2, cs'') ->
-            lemma_eval_ins_equiv_states i s ({s with ms_trace = []});
             assert (equiv_option_states
                       (machine_eval_code c fuel s)
                       (Some (machine_eval_ins i s)));
@@ -277,6 +278,7 @@ let rec lemma_apply_peephole_to_code (p:peephole) (c:code)
           (machine_eval_code c fuel s)
           (machine_eval_code (apply_peephole_to_code p c) fuel s)))
     (decreases %[num_ins_in_code c; c; fuel; 1]) =
+  reveal_opaque (`%machine_eval_code_ins) machine_eval_code_ins;
   match c with
   | Ins i -> (
       if p.input_hint = 1 then (
@@ -327,7 +329,6 @@ and lemma_apply_peephole_to_code_while (p:peephole) (c:code{While? c})
       assert_norm (machine_eval_code c fuel s ==
                    machine_eval_code c' fuel s)
     ) else (
-      let s0 = {s0 with ms_trace = (BranchPredicate true)::s0.ms_trace} in
       let body' = apply_peephole_to_code p body in
       let s_opt1 = machine_eval_code body (fuel - 1) s0 in
       let s_opt2 = machine_eval_code body' (fuel - 1) s0 in
