@@ -154,47 +154,49 @@ let eval_code_eq_ins (i:BS.ins) (f:fuel) (s1 s2:machine_state) : Lemma
 #reset-options "--initial_fuel 2 --max_fuel 2 --z3rlimit 30"
 
 #restart-solver
-let rec eval_code_eq_all (g:bool) (c:code) (f:fuel) : Lemma
-  (ensures (forall (s1 s2:machine_state).{:pattern (BS.machine_eval_code c f s1); (BS.machine_eval_code c f s2)}
-    state_eq_S g s1 s2 ==>
-    state_eq_opt g (BS.machine_eval_code c f s1) (BS.machine_eval_code c f s2)
-  ))
+let rec eval_code_eq_core (g:bool) (c:code) (f:fuel) (s:machine_state) : Lemma
+  (ensures state_eq_opt g (BS.machine_eval_code c f s) (BS.machine_eval_code c f (core_state g s)))
   (decreases %[f; c])
   =
   match c with
-  | Ins i ->
-      let lem (s1 s2:machine_state) : Lemma
-        (requires state_eq_S g s1 s2)
-        (ensures state_eq_opt g (BS.machine_eval_code c f s1) (BS.machine_eval_code c f s2))
-        [SMTPat (BS.machine_eval_code c f s1); SMTPat (BS.machine_eval_code c f s2)]
-        =
-        if g then eval_code_eq_ins i f s1 s2
-        in
-      ()
-  | Block cs -> eval_codes_eq_all g cs f
-  | IfElse _ ct cf -> eval_code_eq_all g ct f; eval_code_eq_all g cf f
-  | While cond body -> eval_while_eq_all g cond body f
-and eval_codes_eq_all (g:bool) (cs:codes) (f:fuel) : Lemma
-  (ensures (forall (s1 s2:machine_state).{:pattern (BS.machine_eval_codes cs f s1); (BS.machine_eval_codes cs f s2)}
-    state_eq_S g s1 s2 ==>
-    state_eq_opt g (BS.machine_eval_codes cs f s1) (BS.machine_eval_codes cs f s2)
-  ))
+  | Ins i -> if g then eval_code_eq_ins i f s (core_state g s)
+  | Block cs -> eval_codes_eq_core g cs f s
+  | IfElse cond ct cf ->
+    let (s', _) = BS.machine_eval_ocmp s cond in
+    let (t', _) = BS.machine_eval_ocmp (core_state g s) cond in
+    eval_code_eq_core g ct f s';
+    eval_code_eq_core g ct f t';
+    eval_code_eq_core g cf f s';
+    eval_code_eq_core g cf f t';
+    ()
+  | While cond body -> eval_while_eq_core g cond body f s
+and eval_codes_eq_core (g:bool) (cs:codes) (f:fuel) (s:machine_state) : Lemma
+  (ensures state_eq_opt g (BS.machine_eval_codes cs f s) (BS.machine_eval_codes cs f (core_state g s)))
   (decreases %[f; cs])
   =
   match cs with
   | [] -> ()
-  | c::cs -> eval_code_eq_all g c f; eval_codes_eq_all g cs f
-and eval_while_eq_all (g:bool) (cond:ocmp) (body:code) (f:fuel) : Lemma
-  (ensures (forall (s1 s2:machine_state).
-    {:pattern (BS.machine_eval_while cond body f s1); (BS.machine_eval_while cond body f s2)}
-    state_eq_S g s1 s2 ==>
-    state_eq_opt g (BS.machine_eval_while cond body f s1) (BS.machine_eval_while cond body f s2)
-  ))
+  | c'::cs' -> (
+      eval_code_eq_core g c' f s;
+      match (machine_eval_code c' f s, machine_eval_code c' f (core_state g s)) with
+      | (None, None) -> ()
+      | (Some s', Some t') -> eval_codes_eq_core g cs' f s'; eval_codes_eq_core g cs' f t'
+    )
+and eval_while_eq_core (g:bool) (cond:ocmp) (body:code) (f:fuel) (s:machine_state) : Lemma
+  (ensures state_eq_opt g (BS.machine_eval_while cond body f s) (BS.machine_eval_while cond body f (core_state g s)))
   (decreases %[f; body])
   =
   if f > 0 then (
-    eval_code_eq_all g body (f - 1);
-    eval_while_eq_all g cond body (f - 1)
+    let (s1, _) = BS.machine_eval_ocmp s cond in
+    let (t1, _) = BS.machine_eval_ocmp (core_state g s) cond in
+    eval_code_eq_core g body (f - 1) s1;
+    eval_code_eq_core g body (f - 1) t1;
+    match (BS.machine_eval_code body (f - 1) s1, BS.machine_eval_code body (f - 1) t1) with
+    | (None, None) -> ()
+    | (Some s2, Some t2) ->
+      eval_while_eq_core g cond body (f - 1) s2;
+      eval_while_eq_core g cond body (f - 1) t2;
+      ()
   )
 
 let eval_code_eq_f (c:code) (f:fuel) (s1 s2:machine_state) : Lemma
@@ -202,48 +204,45 @@ let eval_code_eq_f (c:code) (f:fuel) (s1 s2:machine_state) : Lemma
   (ensures state_eq_opt false (BS.machine_eval_code c f s1) (BS.machine_eval_code c f s2))
   [SMTPat (BS.machine_eval_code c f s1); SMTPat (BS.machine_eval_code c f s2)]
   =
-  eval_code_eq_all false c f
+  eval_code_eq_core false c f s1; eval_code_eq_core false c f s2
 
 let eval_codes_eq_f (cs:codes) (f:fuel) (s1 s2:machine_state) : Lemma
   (requires state_eq_S false s1 s2)
   (ensures state_eq_opt false (BS.machine_eval_codes cs f s1) (BS.machine_eval_codes cs f s2))
   [SMTPat (BS.machine_eval_codes cs f s1); SMTPat (BS.machine_eval_codes cs f s2)]
   =
-  eval_codes_eq_all false cs f
+  eval_codes_eq_core false cs f s1; eval_codes_eq_core false cs f s2
 
 let eval_while_eq_f (cond:ocmp) (body:code) (f:fuel) (s1 s2:machine_state) : Lemma
   (requires state_eq_S false s1 s2)
   (ensures state_eq_opt false (BS.machine_eval_while cond body f s1) (BS.machine_eval_while cond body f s2))
   [SMTPat (BS.machine_eval_while cond body f s1); SMTPat (BS.machine_eval_while cond body f s2)]
   =
-  eval_while_eq_all false cond body f
+  eval_while_eq_core false cond body f s1; eval_while_eq_core false cond body f s2
 
 let eval_code_eq_t (c:code) (f:fuel) (s1 s2:machine_state) : Lemma
   (requires state_eq_S true s1 s2)
   (ensures state_eq_opt true (BS.machine_eval_code c f s1) (BS.machine_eval_code c f s2))
   [SMTPat (BS.machine_eval_code c f s1); SMTPat (BS.machine_eval_code c f s2)]
   =
-  eval_code_eq_all true c f
+  eval_code_eq_core true c f s1; eval_code_eq_core true c f s2
 
 let eval_codes_eq_t (cs:codes) (f:fuel) (s1 s2:machine_state) : Lemma
   (requires state_eq_S true s1 s2)
   (ensures state_eq_opt true (BS.machine_eval_codes cs f s1) (BS.machine_eval_codes cs f s2))
   [SMTPat (BS.machine_eval_codes cs f s1); SMTPat (BS.machine_eval_codes cs f s2)]
   =
-  eval_codes_eq_all true cs f
+  eval_codes_eq_core true cs f s1; eval_codes_eq_core true cs f s2
 
 let eval_while_eq_t (cond:ocmp) (body:code) (f:fuel) (s1 s2:machine_state) : Lemma
   (requires state_eq_S true s1 s2)
   (ensures state_eq_opt true (BS.machine_eval_while cond body f s1) (BS.machine_eval_while cond body f s2))
   [SMTPat (BS.machine_eval_while cond body f s1); SMTPat (BS.machine_eval_while cond body f s2)]
   =
-  eval_while_eq_all true cond body f
+  eval_while_eq_core true cond body f s1; eval_while_eq_core true cond body f s2
 
 let eval_code_ts (g:bool) (c:code) (s0:machine_state) (f0:fuel) (s1:machine_state) : Type0 =
   state_eq_opt g (BS.machine_eval_code c f0 s0) (Some s1)
-
-let eval_code_ts_b (b:bool) (c:code) (s0:machine_state) (f0:fuel) (s1:machine_state) : Type0 =
-  state_eq_opt b (BS.machine_eval_code c f0 s0) (Some s1)
 
 let rec increase_fuel (g:bool) (c:code) (s0:machine_state) (f0:fuel) (sN:machine_state) (fN:fuel) : Lemma
   (requires eval_code_ts g c s0 f0 sN /\ f0 <= fN)

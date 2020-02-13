@@ -1463,6 +1463,7 @@ let lemma_code_exchange_allowed (c1 c2:safely_bounded_code) (fuel:nat) (s:machin
   let s12 = run f2 s1 in
   let s2 = run f2 s in
   let s21 = run f1 s2 in
+  allow_inversion (option machine_state);
   FStar.Classical.move_requires (lemma_not_ok_propagate_code c1 fuel) s;
   FStar.Classical.move_requires (lemma_not_ok_propagate_code c2 fuel) s1;
   FStar.Classical.move_requires (lemma_not_ok_propagate_code c2 fuel) s;

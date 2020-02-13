@@ -34,16 +34,14 @@ and codes_modifies_ghost (cs:codes) : bool =
   | [] -> false
   | c::cs -> code_modifies_ghost c || codes_modifies_ghost cs
 
+let core_state (ignore_ghost:bool) (s:machine_state) : machine_state =
+  {s with
+    BS.ms_trace = [];
+    BS.ms_heap = if ignore_ghost then heap_ignore_ghost_machine s.BS.ms_heap else s.BS.ms_heap;
+  }
+
 let state_eq_S (ignore_ghost:bool) (s1 s2:machine_state) =
-  let s1 = {s1 with
-    BS.ms_trace = [];
-    BS.ms_heap = if ignore_ghost then heap_ignore_ghost_machine s1.BS.ms_heap else s1.BS.ms_heap
-  } in
-  let s2 = {s2 with
-    BS.ms_trace = [];
-    BS.ms_heap = if ignore_ghost then heap_ignore_ghost_machine s2.BS.ms_heap else s2.BS.ms_heap;
-  } in
-  machine_state_eq s1 s2
+  machine_state_eq (core_state ignore_ghost s1) (core_state ignore_ghost s2)
 
 let state_eq_opt (ignore_ghost:bool) (s1 s2:option BS.machine_state) =
   match (s1, s2) with

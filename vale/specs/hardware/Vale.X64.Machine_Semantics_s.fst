@@ -717,31 +717,32 @@ let rec machine_eval_code (c:code) (fuel:nat) (s:machine_state) : Tot (option ma
     let obs = ins_obs ins s in
     // REVIEW: drop trace, then restore trace, to make clear that machine_eval_ins shouldn't depend on trace
     Some ({machine_eval_ins ins ({s with ms_trace = []}) with ms_trace = obs @ s.ms_trace})
-  | Block l ->
-    machine_eval_codes l fuel s
-  | IfElse ifCond ifTrue ifFalse ->
-    let (s', b) = machine_eval_ocmp s ifCond in
-    if b then machine_eval_code ifTrue fuel s' else machine_eval_code ifFalse fuel s'
+  | Block cs ->
+    machine_eval_codes cs fuel s
+  | IfElse cond ct cf ->
+    let (s', b) = machine_eval_ocmp s cond in
+    if b then machine_eval_code ct fuel s' else machine_eval_code cf fuel s'
   | While cond body ->
     machine_eval_while cond body fuel s
-and machine_eval_codes (l:codes) (fuel:nat) (s:machine_state) : Tot (option machine_state)
-  (decreases %[fuel; l])
+and machine_eval_codes (cs:codes) (fuel:nat) (s:machine_state) : Tot (option machine_state)
+  (decreases %[fuel; cs])
   =
-  match l with
+  match cs with
   | [] -> Some s
-  | c::tl ->
-    let s_opt = machine_eval_code c fuel s in
-    if None? s_opt then None else machine_eval_codes tl fuel (Some?.v s_opt)
+  | c'::cs' -> (
+      match machine_eval_code c' fuel s with
+      | None -> None
+      | Some s' -> machine_eval_codes cs' fuel s'
+    )
 and machine_eval_while (cond:ocmp) (body:code) (fuel:nat) (s0:machine_state) : Tot (option machine_state)
   (decreases %[fuel; body])
   =
   if fuel = 0 then None else
-  let (s0, b) = machine_eval_ocmp s0 cond in
-  if not b then Some s0
+  let (s1, b) = machine_eval_ocmp s0 cond in
+  if not b then Some s1
   else
-    let s_opt = machine_eval_code body (fuel - 1) s0 in
-    match s_opt with
+    match machine_eval_code body (fuel - 1) s1 with
     | None -> None
-    | Some s1 ->
-      if s1.ms_ok then machine_eval_while cond body (fuel - 1) s1
-      else Some s1
+    | Some s2 ->
+      if not s2.ms_ok then Some s2 else // propagate failure immediately
+      machine_eval_while cond body (fuel - 1) s2
