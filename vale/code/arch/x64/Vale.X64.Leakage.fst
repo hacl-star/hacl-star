@@ -351,6 +351,8 @@ let rec lemma_code_explicit_leakage_free ts code s1 s2 fuel = match code with
   | Ins ins -> lemma_ins_leakage_free ts ins
   | Block block -> lemma_block_explicit_leakage_free ts block s1 s2 fuel
   | IfElse ifCond ifTrue ifFalse ->
+    reveal_opaque (`%S.valid_ocmp_opaque) S.valid_ocmp_opaque;
+    reveal_opaque (`%S.eval_ocmp_opaque) S.eval_ocmp_opaque;
     let (b_fin, ts_fin) = check_if_code_consumes_fixed_time code ts in
     let (st1, b1) = machine_eval_ocmp s1 ifCond in
     let (st2, b2) = machine_eval_ocmp s2 ifCond in
@@ -379,6 +381,8 @@ and lemma_block_explicit_leakage_free ts block s1 s2 fuel = match block with
     monotone_ok_eval (Block tl) fuel s'2
 
 and lemma_loop_explicit_leakage_free ts code s1 s2 fuel =
+  reveal_opaque (`%S.valid_ocmp_opaque) S.valid_ocmp_opaque;
+  reveal_opaque (`%S.eval_ocmp_opaque) S.eval_ocmp_opaque;
   let ts = normalize_taints ts in
   if fuel = 0 then () else
   let (b_fin, ts_fin) = check_if_code_consumes_fixed_time code ts in

@@ -108,7 +108,7 @@ let eval_mov128_op (o:operand128) (s:machine_state) : quad32 =
   | OMem (m, _) -> eval_mem128 (eval_maddr m s) s
   | OStack (m, _) -> eval_stack128 (eval_maddr m s) s.ms_stack
 
-let eval_ocmp (s:machine_state) (c:ocmp) :bool =
+let eval_ocmp (s:machine_state) (c:ocmp) : bool =
   match c with
   | BC.OEq o1 o2 -> eval_operand o1 s = eval_operand o2 s
   | BC.ONe o1 o2 -> eval_operand o1 s <> eval_operand o2 s
@@ -116,6 +116,8 @@ let eval_ocmp (s:machine_state) (c:ocmp) :bool =
   | BC.OGe o1 o2 -> eval_operand o1 s >= eval_operand o2 s
   | BC.OLt o1 o2 -> eval_operand o1 s < eval_operand o2 s
   | BC.OGt o1 o2 -> eval_operand o1 s > eval_operand o2 s
+[@"opaque_to_smt"]
+let eval_ocmp_opaque (s:machine_state) (c:ocmp) : bool = eval_ocmp s c
 
 let update_reg' (r:reg) (v:t_reg r) (s:machine_state) : machine_state =
   {s with ms_regs = FStar.FunctionalExtensionality.on_dom reg (fun r' -> if r' = r then v else s.ms_regs r')}
@@ -268,6 +270,8 @@ let valid_ocmp (c:ocmp) (s:machine_state) : bool =
   | BC.OGe o1 o2 -> valid_src_operand64_and_taint o1 s && valid_src_operand64_and_taint o2 s
   | BC.OLt o1 o2 -> valid_src_operand64_and_taint o1 s && valid_src_operand64_and_taint o2 s
   | BC.OGt o1 o2 -> valid_src_operand64_and_taint o1 s && valid_src_operand64_and_taint o2 s
+[@"opaque_to_smt"]
+let valid_ocmp_opaque (c:ocmp) (s:machine_state) : bool = valid_ocmp c s
 
 unfold
 let valid_dst_stack64 (rsp:nat64) (ptr:int) (st:machine_stack) : bool =
@@ -700,8 +704,8 @@ let machine_eval_ins (i:ins) (s:machine_state) : machine_state =
   run (machine_eval_ins_st i) s
 
 let machine_eval_ocmp (s:machine_state) (c:ocmp) : machine_state & bool =
-  let s = run (check (valid_ocmp c)) s in
-  let b = eval_ocmp s c in
+  let s = run (check (valid_ocmp_opaque c)) s in
+  let b = eval_ocmp_opaque s c in
   let s = {s with ms_flags = havoc_flags; ms_trace = (BranchPredicate b)::s.ms_trace} in
   (s, b)
 

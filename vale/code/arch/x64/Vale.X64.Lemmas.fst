@@ -153,6 +153,17 @@ let eval_code_eq_ins (i:BS.ins) (f:fuel) (s1 s2:machine_state) : Lemma
 
 #reset-options "--initial_fuel 2 --max_fuel 2 --z3rlimit 30"
 
+let eval_ocmp_eq_core (g:bool) (cond:ocmp) (s:machine_state) : Lemma
+  (ensures (
+    let (s1, b1) = BS.machine_eval_ocmp s cond in
+    let (s2, b2) = BS.machine_eval_ocmp (core_state g s) cond in
+    state_eq_S g s1 s2 /\ b1 == b2
+  ))
+  =
+  reveal_opaque (`%BS.valid_ocmp_opaque) BS.valid_ocmp_opaque;
+  reveal_opaque (`%BS.eval_ocmp_opaque) BS.eval_ocmp_opaque;
+  ()
+
 #restart-solver
 let rec eval_code_eq_core (g:bool) (c:code) (f:fuel) (s:machine_state) : Lemma
   (ensures state_eq_opt g (BS.machine_eval_code c f s) (BS.machine_eval_code c f (core_state g s)))
@@ -162,6 +173,7 @@ let rec eval_code_eq_core (g:bool) (c:code) (f:fuel) (s:machine_state) : Lemma
   | Ins i -> if g then eval_code_eq_ins i f s (core_state g s)
   | Block cs -> eval_codes_eq_core g cs f s
   | IfElse cond ct cf ->
+    eval_ocmp_eq_core g cond s;
     let (s', _) = BS.machine_eval_ocmp s cond in
     let (t', _) = BS.machine_eval_ocmp (core_state g s) cond in
     eval_code_eq_core g ct f s';
@@ -187,6 +199,7 @@ and eval_while_eq_core (g:bool) (cond:ocmp) (body:code) (f:fuel) (s:machine_stat
   (decreases %[f; body])
   =
   if f > 0 then (
+    eval_ocmp_eq_core g cond s;
     let (s1, _) = BS.machine_eval_ocmp s cond in
     let (t1, _) = BS.machine_eval_ocmp (core_state g s) cond in
     eval_code_eq_core g body (f - 1) s1;
@@ -279,12 +292,12 @@ and increase_fuels (g:bool) (c:codes) (s0:machine_state) (f0:fuel) (sN:machine_s
       increase_fuels g t s1 f0 sN fN
     )
 
-let lemma_cmp_eq s o1 o2 = ()
-let lemma_cmp_ne s o1 o2 = ()
-let lemma_cmp_le s o1 o2 = ()
-let lemma_cmp_ge s o1 o2 = ()
-let lemma_cmp_lt s o1 o2 = ()
-let lemma_cmp_gt s o1 o2 = ()
+let lemma_cmp_eq s o1 o2 = reveal_opaque (`%BS.eval_ocmp_opaque) BS.eval_ocmp_opaque
+let lemma_cmp_ne s o1 o2 = reveal_opaque (`%BS.eval_ocmp_opaque) BS.eval_ocmp_opaque
+let lemma_cmp_le s o1 o2 = reveal_opaque (`%BS.eval_ocmp_opaque) BS.eval_ocmp_opaque
+let lemma_cmp_ge s o1 o2 = reveal_opaque (`%BS.eval_ocmp_opaque) BS.eval_ocmp_opaque
+let lemma_cmp_lt s o1 o2 = reveal_opaque (`%BS.eval_ocmp_opaque) BS.eval_ocmp_opaque
+let lemma_cmp_gt s o1 o2 = reveal_opaque (`%BS.eval_ocmp_opaque) BS.eval_ocmp_opaque
 
 let lemma_valid_cmp_eq s o1 o2 = ()
 let lemma_valid_cmp_ne s o1 o2 = ()
@@ -311,10 +324,12 @@ let lemma_havoc_flags : squash (Flags.to_fun havoc_flags == BS.havoc_flags) =
   assert (FStar.FunctionalExtensionality.feq (Flags.to_fun havoc_flags) BS.havoc_flags)
 
 let lemma_ifElseTrue_total (ifb:ocmp) (ct:code) (cf:code) (s0:vale_state) (f0:fuel) (sM:vale_state) =
-  ()
+  reveal_opaque (`%BS.valid_ocmp_opaque) BS.valid_ocmp_opaque;
+  reveal_opaque (`%BS.eval_ocmp_opaque) BS.eval_ocmp_opaque
 
 let lemma_ifElseFalse_total (ifb:ocmp) (ct:code) (cf:code) (s0:vale_state) (f0:fuel) (sM:vale_state) =
-  ()
+  reveal_opaque (`%BS.valid_ocmp_opaque) BS.valid_ocmp_opaque;
+  reveal_opaque (`%BS.eval_ocmp_opaque) BS.eval_ocmp_opaque
 
 let eval_while_inv_temp (c:code) (s0:vale_state) (fW:fuel) (sW:vale_state) : Type0 =
   forall (f:nat).{:pattern BS.machine_eval_code c f (state_to_S sW)}
@@ -333,6 +348,8 @@ let lemma_whileTrue_total (b:ocmp) (c:code) (s0:vale_state) (sW:vale_state) (fW:
   ({sW with vs_flags = havoc_flags}, fW)
 
 let lemma_whileFalse_total (b:ocmp) (c:code) (s0:vale_state) (sW:vale_state) (fW:fuel) =
+  reveal_opaque (`%BS.valid_ocmp_opaque) BS.valid_ocmp_opaque;
+  reveal_opaque (`%BS.eval_ocmp_opaque) BS.eval_ocmp_opaque;
   let f1 = fW + 1 in
   let s1 = {sW with vs_flags = havoc_flags} in
   assert (state_eq_opt (code_modifies_ghost c) (BS.machine_eval_code (While b c) f1 (state_to_S s0)) (BS.machine_eval_code (While b c) 1 (state_to_S sW)));
@@ -341,6 +358,8 @@ let lemma_whileFalse_total (b:ocmp) (c:code) (s0:vale_state) (sW:vale_state) (fW
 
 #restart-solver
 let lemma_whileMerge_total (c:code) (s0:vale_state) (f0:fuel) (sM:vale_state) (fM:fuel) (sN:vale_state) =
+  reveal_opaque (`%BS.valid_ocmp_opaque) BS.valid_ocmp_opaque;
+  reveal_opaque (`%BS.eval_ocmp_opaque) BS.eval_ocmp_opaque;
   let fN:nat = f0 + fM + 1 in
   let g = code_modifies_ghost c in
   let fForall (f:nat) : Lemma

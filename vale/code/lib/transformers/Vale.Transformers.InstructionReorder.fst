@@ -435,6 +435,8 @@ let rec lemma_eval_code_equiv_states (c : code) (fuel:nat) (s1 s2 : machine_stat
   | Block l ->
     lemma_eval_codes_equiv_states l fuel s1 s2
   | IfElse ifCond ifTrue ifFalse ->
+    reveal_opaque (`%valid_ocmp_opaque) valid_ocmp_opaque;
+    reveal_opaque (`%eval_ocmp_opaque) eval_ocmp_opaque;
     let (s1', b1) = machine_eval_ocmp s1 ifCond in
     let (s2', b2) = machine_eval_ocmp s2 ifCond in
     assert (b1 == b2);
@@ -478,6 +480,8 @@ and lemma_eval_while_equiv_states (cond:ocmp) (body:code) (fuel:nat) (s1 s2:mach
           (machine_eval_while cond body fuel s2)))
     (decreases %[fuel; body]) =
   if fuel = 0 then () else (
+    reveal_opaque (`%valid_ocmp_opaque) valid_ocmp_opaque;
+    reveal_opaque (`%eval_ocmp_opaque) eval_ocmp_opaque;
     let (s1, b1) = machine_eval_ocmp s1 cond in
     let (s2, b2) = machine_eval_ocmp s2 cond in
     assert (equiv_states s1 s2);
