@@ -630,6 +630,9 @@ REQUIRED_FLAGS	=\
   -no-prefix 'EverCrypt.Vale' \
   -add-include 'Hacl_Curve25519_64:"curve25519-inline.h"' \
   -no-prefix 'MerkleTree.New.Low' \
+  -no-prefix 'MerkleTree.New.Low.Hashes' \
+  -no-prefix 'MerkleTree.New.Low.Hashfunctions' \
+  -no-prefix 'MerkleTree.New.Low.Datastructures' \
   -no-prefix 'MerkleTree.New.Low.Serialization' \
   -bundle Hacl.Impl.Poly1305.Fields \
   -bundle 'EverCrypt.Spec.*' \
@@ -662,7 +665,7 @@ TARGETCONFIG_FLAGS = -add-include '"evercrypt_targetconfig.h"'
 # that a particular feature be enabled. For a distribution to disable the
 # corresponding feature, one of these variables needs to be overridden.
 E_HASH_BUNDLE=-bundle EverCrypt.Hash+EverCrypt.Hash.Incremental=[rename=EverCrypt_Hash]
-MERKLE_BUNDLE=-bundle 'MerkleTree.New.Low+MerkleTree.New.Low.Serialization=[rename=MerkleTree]'
+MERKLE_BUNDLE=-bundle 'MerkleTree.New.Low.Hashfunctions+MerkleTree.New.Low+MerkleTree.New.Low.Serialization=[rename=MerkleTree]'
 CTR_BUNDLE=-bundle EverCrypt.CTR=EverCrypt.CTR.*
 # Disabled by default, overridden for wasm
 WASMSUPPORT_BUNDLE = -bundle WasmSupport

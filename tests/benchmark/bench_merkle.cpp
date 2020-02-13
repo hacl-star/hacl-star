@@ -9,6 +9,8 @@ extern "C" {
 #include "MerkleTree.h"
 }
 
+static const size_t hash_size = 32;
+
 class MerkleInsert : public Benchmark
 {
   protected:
@@ -26,14 +28,14 @@ class MerkleInsert : public Benchmark
     virtual void bench_setup(const BenchmarkSettings & s)
     {
       Benchmark::bench_setup(s);
-      uint8_t *ih = init_hash();
+      uint8_t *ih = init_hash(hash_size);
       tree = mt_create(ih);
-      free_hash(ih);
+      free_hash(hash_size, ih);
 
       hashes.resize(num_nodes, NULL);
       for (uint64_t i = 0; i < num_nodes; i++)
       {
-        hashes[i] = init_hash();
+        hashes[i] = init_hash(hash_size);
         for (size_t j = 0; j < 8; j++)
            *(hashes[i] + j) = rand() % 8;
       }
@@ -44,10 +46,10 @@ class MerkleInsert : public Benchmark
       for (uint64_t i = 0; i < num_nodes; i++)
       {
         #ifdef _DEBUG
-        if (!mt_insert_pre(tree, hashes[i]))
+        if (!mt_insert_pre(hash_size, tree, hashes[i]))
           throw std::logic_error("precondition violation");
         #endif
-        mt_insert(tree, hashes[i]);
+        mt_insert(hash_size, tree, hashes[i]);
       }
 
     }
@@ -55,7 +57,7 @@ class MerkleInsert : public Benchmark
     virtual void bench_cleanup(const BenchmarkSettings & s)
     {
       for (uint64_t i = 0; i < num_nodes; i++)
-        free_hash(hashes[i]);
+        free_hash(hash_size, hashes[i]);
       mt_free(tree);
       Benchmark::bench_cleanup(s);
     }
@@ -74,7 +76,7 @@ class MerklePathExtraction : public Benchmark
     size_t num_nodes = 0;
     merkle_tree *tree;
     std::vector<uint8_t*> hashes;
-    std::vector<hash_vec*> paths;
+    std::vector<LowStar_Vector_vector_str___uint8_t_*> paths;
     std::vector<uint8_t*> roots;
 
   public:
@@ -87,30 +89,30 @@ class MerklePathExtraction : public Benchmark
     virtual void bench_setup(const BenchmarkSettings & s)
     {
       Benchmark::bench_setup(s);
-      uint8_t *ih = init_hash();
+      uint8_t *ih = init_hash(hash_size);
       tree = mt_create(ih);
-      free_hash(ih);
+      free_hash(hash_size, ih);
 
       hashes.resize(num_nodes, NULL);
       for (uint64_t i = 0; i < num_nodes; i++)
       {
-        uint8_t *hash = init_hash();
-        hashes[i] = init_hash();
+        uint8_t *hash = init_hash(hash_size);
+        hashes[i] = init_hash(hash_size);
         for (size_t j = 0; j < 8; j++)
            *(hashes[i] + j) = rand() % 8;
         #ifdef _DEBUG
-        if (!mt_insert_pre(tree, hashes[i]))
+        if (!mt_insert_pre(hash_size, tree, hashes[i]))
           throw std::logic_error("precondition violation");
         #endif
-        mt_insert(tree, hash);
+        mt_insert(hash_size, tree, hash);
       }
 
       paths.resize(num_nodes);
       roots.resize(num_nodes);
       for (uint64_t i = 0; i < num_nodes; i++)
       {
-        roots[i] = init_hash();
-        paths[i] = init_path();
+        roots[i] = init_hash(hash_size);
+        paths[i] = init_path(hash_size);
       }
     }
 
@@ -130,10 +132,10 @@ class MerklePathExtraction : public Benchmark
     {
       for (uint64_t i = 0; i < num_nodes; i++)
       {
-        clear_path(paths[i]);
-        free_path(paths[i]);
-        free_hash(roots[i]);
-        free_hash(hashes[i]);
+        clear_path(hash_size, paths[i]);
+        free_path(hash_size, paths[i]);
+        free_hash(hash_size, roots[i]);
+        free_hash(hash_size, hashes[i]);
       }
       mt_free(tree);
       Benchmark::bench_cleanup(s);
@@ -153,7 +155,7 @@ class MerklePathVerification : public Benchmark
     size_t num_nodes = 0;
     merkle_tree *tree;
     std::vector<uint8_t*> hashes;
-    std::vector<hash_vec*> paths;
+    std::vector<LowStar_Vector_vector_str___uint8_t_*> paths;
     std::vector<uint8_t*> roots;
     std::vector<uint32_t> js;
 
@@ -167,22 +169,22 @@ class MerklePathVerification : public Benchmark
     virtual void bench_setup(const BenchmarkSettings & s)
     {
       Benchmark::bench_setup(s);
-      uint8_t *ih = init_hash();
+      uint8_t *ih = init_hash(hash_size);
       tree = mt_create(ih);
-      free_hash(ih);
+      free_hash(hash_size, ih);
 
       hashes.resize(num_nodes, NULL);
       for (uint64_t i = 0; i < num_nodes; i++)
       {
-        uint8_t *hash = init_hash();
-        hashes[i] = init_hash();
+        uint8_t *hash = init_hash(hash_size);
+        hashes[i] = init_hash(hash_size);
         for (size_t j = 0; j < 8; j++)
            *(hashes[i] + j) = rand() % 8;
         #ifdef _DEBUG
-        if (!mt_insert_pre(tree, hashes[i]))
+        if (!mt_insert_pre(hash_size, tree, hashes[i]))
           throw std::logic_error("precondition violation");
         #endif
-        mt_insert(tree, hash);
+        mt_insert(hash_size, tree, hash);
       }
 
       paths.resize(num_nodes);
@@ -190,8 +192,8 @@ class MerklePathVerification : public Benchmark
       js.resize(num_nodes);
       for (uint64_t i = 0; i < num_nodes; i++)
       {
-        roots[i] = init_hash();
-        paths[i] = init_path();
+        roots[i] = init_hash(hash_size);
+        paths[i] = init_path(hash_size);
 
         #ifdef _DEBUG
         if (!mt_get_path_pre(tree, i, paths[i], roots[i]))
@@ -222,10 +224,10 @@ class MerklePathVerification : public Benchmark
     {
       for (uint64_t i = 0; i < num_nodes; i++)
       {
-        clear_path(paths[i]);
-        free_path(paths[i]);
-        free_hash(roots[i]);
-        free_hash(hashes[i]);
+        clear_path(hash_size, paths[i]);
+        free_path(hash_size, paths[i]);
+        free_hash(hash_size, roots[i]);
+        free_hash(hash_size, hashes[i]);
       }
       mt_free(tree);
       Benchmark::bench_cleanup(s);
