@@ -265,7 +265,7 @@ val monotone_ok_eval_block: (codes:S.codes) -> (fuel:nat) -> (s:S.machine_state)
 #set-options "--z3rlimit 20 --initial_ifuel 0 --max_ifuel 1 --initial_fuel 2 --max_fuel 2"
 let rec monotone_ok_eval code fuel s =
   match code with
-  | Ins ins -> ()
+  | Ins ins -> reveal_opaque (`%S.machine_eval_code_ins) S.machine_eval_code_ins
   | Block block -> monotone_ok_eval_block block fuel s
   | IfElse ifCond ifTrue ifFalse ->
     let (st, b) = machine_eval_ocmp s ifCond in

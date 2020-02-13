@@ -16,6 +16,13 @@ unfold let obs_args = S.obs_args
 unfold let obs_inouts = S.obs_inouts
 unfold let machine_eval_code = S.machine_eval_code
 
+let reveal_machine_eval_code_ins (i:S.ins) (s:S.machine_state) : Lemma
+  (requires True)
+  (ensures S.machine_eval_code_ins i s == S.machine_eval_code_ins_def i s)
+  [SMTPat (S.machine_eval_code_ins i s)]
+  =
+  reveal_opaque (`%S.machine_eval_code_ins) S.machine_eval_code_ins
+
 let rec check_if_consumes_fixed_time_args
     (args:list instr_operand) (oprs:instr_operands_t_args args) (ts:analysis_taints)
   : Pure bool

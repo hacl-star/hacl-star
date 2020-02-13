@@ -703,6 +703,14 @@ let machine_eval_ins_st (ins:ins) : st unit =
 let machine_eval_ins (i:ins) (s:machine_state) : machine_state =
   run (machine_eval_ins_st i) s
 
+let machine_eval_code_ins_def (i:ins) (s:machine_state) : option machine_state =
+  let obs = ins_obs i s in
+  // REVIEW: drop trace, then restore trace, to make clear that machine_eval_ins shouldn't depend on trace
+  Some ({machine_eval_ins i ({s with ms_trace = []}) with ms_trace = obs @ s.ms_trace})
+[@"opaque_to_smt"]
+let machine_eval_code_ins (i:ins) (s:machine_state) : option machine_state =
+  machine_eval_code_ins_def i s
+
 let machine_eval_ocmp (s:machine_state) (c:ocmp) : machine_state & bool =
   let s = run (check (valid_ocmp_opaque c)) s in
   let b = eval_ocmp_opaque s c in
@@ -717,10 +725,8 @@ let rec machine_eval_code (c:code) (fuel:nat) (s:machine_state) : Tot (option ma
   (decreases %[fuel; c])
   =
   match c with
-  | Ins ins ->
-    let obs = ins_obs ins s in
-    // REVIEW: drop trace, then restore trace, to make clear that machine_eval_ins shouldn't depend on trace
-    Some ({machine_eval_ins ins ({s with ms_trace = []}) with ms_trace = obs @ s.ms_trace})
+  | Ins i ->
+    machine_eval_code_ins i s
   | Block cs ->
     machine_eval_codes cs fuel s
   | IfElse cond ct cf ->

@@ -135,6 +135,7 @@ let eval_code_eq_instr (inst:BS.ins) (f:fuel) (s1 s2:machine_state) : Lemma
   (requires Instr? inst /\ state_eq_S true s1 s2)
   (ensures state_eq_opt true (BS.machine_eval_code (Ins inst) f s1) (BS.machine_eval_code (Ins inst) f s2))
   =
+  reveal_opaque (`%BS.machine_eval_code_ins) BS.machine_eval_code_ins;
   eval_ins_eq_instr inst ({s1 with BS.ms_trace = []}) ({s2 with BS.ms_trace = []})
 
 #restart-solver
@@ -142,6 +143,7 @@ let eval_code_eq_ins (i:BS.ins) (f:fuel) (s1 s2:machine_state) : Lemma
   (requires state_eq_S true s1 s2)
   (ensures state_eq_opt true (BS.machine_eval_code (Ins i) f s1) (BS.machine_eval_code (Ins i) f s2))
   =
+  reveal_opaque (`%BS.machine_eval_code_ins) BS.machine_eval_code_ins;
   if Instr? i then eval_code_eq_instr i f s1 s2
   else (
     assert (Dealloc? i \/ Alloc? i \/ Push? i \/ Pop? i);
@@ -170,7 +172,9 @@ let rec eval_code_eq_core (g:bool) (c:code) (f:fuel) (s:machine_state) : Lemma
   (decreases %[f; c])
   =
   match c with
-  | Ins i -> if g then eval_code_eq_ins i f s (core_state g s)
+  | Ins i ->
+    reveal_opaque (`%BS.machine_eval_code_ins) BS.machine_eval_code_ins;
+    if g then eval_code_eq_ins i f s (core_state g s)
   | Block cs -> eval_codes_eq_core g cs f s
   | IfElse cond ct cf ->
     eval_ocmp_eq_core g cond s;

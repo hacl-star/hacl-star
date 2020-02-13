@@ -55,6 +55,7 @@ let eval_ins (c:code) (s0:vale_state) : Ghost (vale_state & fuel)
   (requires Ins? c)
   (ensures fun (sM, f0) -> eval_code c s0 f0 sM)
   =
+  reveal_opaque (`%BS.machine_eval_code_ins) BS.machine_eval_code_ins;
   let f0 = 0 in
   let (Some sM) = machine_eval_code c f0 (state_to_S s0) in
   lemma_to_of sM;

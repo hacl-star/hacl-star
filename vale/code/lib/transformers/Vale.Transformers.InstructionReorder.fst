@@ -431,6 +431,7 @@ let rec lemma_eval_code_equiv_states (c : code) (fuel:nat) (s1 s2 : machine_stat
     (decreases %[fuel; c]) =
   match c with
   | Ins ins ->
+    reveal_opaque (`%machine_eval_code_ins) machine_eval_code_ins;
     lemma_eval_ins_equiv_states ins (filt_state s1) (filt_state s2)
   | Block l ->
     lemma_eval_codes_equiv_states l fuel s1 s2
@@ -1141,7 +1142,7 @@ let rec lemma_not_ok_propagate_code (c:code) (fuel:nat) (s:machine_state) :
     (ensures (erroring_option_state (machine_eval_code c fuel s)))
     (decreases %[fuel; c; 1]) =
   match c with
-  | Ins _ -> ()
+  | Ins _ -> reveal_opaque (`%machine_eval_code_ins) machine_eval_code_ins
   | Block l ->
     lemma_not_ok_propagate_codes l fuel s
   | IfElse ifCond ifTrue ifFalse ->
@@ -1410,10 +1411,11 @@ let rec lemma_bounded_code (c:safely_bounded_code) (fuel:nat) :
     (decreases %[c]) =
   match c with
   | Ins i ->
+    reveal_opaque (`%machine_eval_code_ins) machine_eval_code_ins;
     lemma_machine_eval_code_Ins_bounded_effects i fuel;
     lemma_bounded_effects_on_functional_extensionality
       (rw_set_of_ins i)
-      (fun s -> (), (Some?.v (machine_eval_code (Ins i) fuel s)))
+      (fun s -> (), (Some?.v (machine_eval_code_ins_def i s)))
       (wrap_sos (machine_eval_code c fuel))
   | Block l ->
     lemma_bounded_codes l fuel;

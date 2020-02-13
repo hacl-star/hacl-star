@@ -488,10 +488,6 @@ let va_require_total (c0:va_code) (c1:va_code) (s0:va_state) : prop0 =
 let va_ensure_total (c0:va_code) (s0:va_state) (s1:va_state) (f1:va_fuel) : prop0 =
   eval_code c0 s0 f1 s1 /\ state_inv s1
 
-val va_ins_lemma (c0:va_code) (s0:va_state) : Lemma
-  (requires True)
-  (ensures True)
-
 val eval_ocmp : s:va_state -> c:ocmp -> GTot bool
 unfold let va_evalCond (b:ocmp) (s:va_state) : GTot bool = eval_ocmp s b
 
