@@ -24,128 +24,144 @@
 
 #include "MerkleTree.h"
 
-uint32_t hash_size = (uint32_t)32U;
-
-static uint8_t *hash_r_alloc()
+static uint8_t *rg_alloc___uint8_t__uint32_t(LowStar_Regional_regional__uint32_t__uint8_t_ rg)
 {
-  KRML_CHECK_SIZE(sizeof (uint8_t), hash_size);
-  uint8_t *buf = KRML_HOST_CALLOC(hash_size, sizeof (uint8_t));
-  return buf;
+  return rg.r_alloc(rg.state);
 }
 
-void hash_r_free(uint8_t *v1)
+uint8_t *init_hash(uint32_t hsz)
 {
-  KRML_HOST_FREE(v1);
-}
-
-void hash_copy(uint8_t *src, uint8_t *dst)
-{
-  memcpy(dst, src, hash_size * sizeof (src[0U]));
-}
-
-#define Cpy 0
-
-typedef uint8_t copyable___uint8_t__tags;
-
-typedef void (*copyable___uint8_t_)(uint8_t *x0, uint8_t *x1);
-
-static void (*hcpy)(uint8_t *x0, uint8_t *x1) = hash_copy;
-
-static LowStar_Vector_vector_str___uint8_t_
-hash_vec_dummy = { .sz = (uint32_t)0U, .cap = (uint32_t)0U, .vs = NULL };
-
-typedef struct regional___uint8_t__s
-{
-  uint8_t *dummy;
-  uint8_t *(*r_alloc)();
-  void (*r_free)(uint8_t *x0);
-}
-regional___uint8_t_;
-
-static LowStar_Vector_vector_str___uint8_t_ alloc_reserve___uint8_t_(uint32_t len, uint8_t *ia)
-{
-  KRML_CHECK_SIZE(sizeof (uint8_t *), len);
-  uint8_t **buf = KRML_HOST_MALLOC(sizeof (uint8_t *) * len);
-  for (uint32_t _i = 0U; _i < len; ++_i)
-    buf[_i] = ia;
-  return ((LowStar_Vector_vector_str___uint8_t_){ .sz = (uint32_t)0U, .cap = len, .vs = buf });
-}
-
-static LowStar_Vector_vector_str___uint8_t_ hash_vec_r_alloc()
-{
-  regional___uint8_t_ x0 = { .dummy = NULL, .r_alloc = hash_r_alloc, .r_free = hash_r_free };
-  uint8_t *ia1 = x0.dummy;
-  return alloc_reserve___uint8_t_((uint32_t)1U, ia1);
-}
-
-static uint8_t *index___uint8_t_(LowStar_Vector_vector_str___uint8_t_ vec, uint32_t i1)
-{
-  return vec.vs[i1];
+  return
+    rg_alloc___uint8_t__uint32_t((
+        (LowStar_Regional_regional__uint32_t__uint8_t_){
+          .state = hsz,
+          .dummy = hash_dummy,
+          .r_alloc = hash_r_alloc,
+          .r_free = hash_r_free
+        }
+      ));
 }
 
 static void
-free_elems___uint8_t_(
-  regional___uint8_t_ rg0,
-  LowStar_Vector_vector_str___uint8_t_ rv0,
-  uint32_t idx0
-)
+rg_free___uint8_t__uint32_t(LowStar_Regional_regional__uint32_t__uint8_t_ rg, uint8_t *v1)
 {
-  regional___uint8_t_ rg = rg0;
-  LowStar_Vector_vector_str___uint8_t_ rv = rv0;
-  uint32_t idx = idx0;
-  while (true)
-  {
-    uint8_t *uu____0 = index___uint8_t_(rv, idx);
-    rg.r_free(uu____0);
-    if (idx != (uint32_t)0U)
-    {
-      idx--;
-    }
-    else
-    {
-      return;
-    }
-  }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
-    __FILE__,
-    __LINE__,
-    "unreachable, returns inserted above");
-  KRML_HOST_EXIT(255U);
+  rg.r_free(rg.state, v1);
 }
 
-static void free___uint8_t_(LowStar_Vector_vector_str___uint8_t_ vec)
+void free_hash(uint32_t hsz, uint8_t *h1)
 {
-  KRML_HOST_FREE(vec.vs);
-}
-
-static void free___uint8_t_0(regional___uint8_t_ rg, LowStar_Vector_vector_str___uint8_t_ rv)
-{
-  if (!(rv.sz == (uint32_t)0U))
-  {
-    free_elems___uint8_t_(rg, rv, rv.sz - (uint32_t)1U);
-  }
-  free___uint8_t_(rv);
-}
-
-void hash_vec_r_free(LowStar_Vector_vector_str___uint8_t_ v1)
-{
-  free___uint8_t_0((
-      (regional___uint8_t_){ .dummy = NULL, .r_alloc = hash_r_alloc, .r_free = hash_r_free }
+  rg_free___uint8_t__uint32_t((
+      (LowStar_Regional_regional__uint32_t__uint8_t_){
+        .state = hsz,
+        .dummy = hash_dummy,
+        .r_alloc = hash_r_alloc,
+        .r_free = hash_r_free
+      }
     ),
-    v1);
+    h1);
 }
 
-uint8_t *(*init_hash)() = hash_r_alloc;
-
-void (*free_hash)(uint8_t *x0) = hash_r_free;
-
-void hash_2(uint8_t *src1, uint8_t *src2, uint8_t *dst)
+void sha256_compress(uint8_t *src1, uint8_t *src2, uint8_t *dst)
 {
+  uint32_t hash_size = (uint32_t)32U;
+  Spec_Hash_Definitions_hash_alg hash_alg = Spec_Hash_Definitions_SHA2_256;
   uint8_t cb[64U] = { 0U };
   memcpy(cb, src1, hash_size * sizeof (src1[0U]));
   memcpy(cb + (uint32_t)32U, src2, hash_size * sizeof (src2[0U]));
-  uint32_t buf[8U] = { 0U };
-  EverCrypt_Hash_state_s s = { .tag = EverCrypt_Hash_SHA2_256_s, { .case_SHA2_256_s = buf } };
+  uint32_t buf0[4U];
+  uint32_t buf1[5U];
+  uint32_t buf2[8U];
+  uint32_t buf3[8U];
+  uint64_t buf4[8U];
+  uint64_t buf[8U];
+  EverCrypt_Hash_state_s s;
+  switch (hash_alg)
+  {
+    case Spec_Hash_Definitions_MD5:
+      {
+        uint32_t init = (uint32_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+        {
+          buf0[i] = init;
+        }
+        s = ((EverCrypt_Hash_state_s){ .tag = EverCrypt_Hash_MD5_s, { .case_MD5_s = buf0 } });
+        break;
+      }
+    case Spec_Hash_Definitions_SHA1:
+      {
+        uint32_t init = (uint32_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < (uint32_t)5U; i++)
+        {
+          buf1[i] = init;
+        }
+        s = ((EverCrypt_Hash_state_s){ .tag = EverCrypt_Hash_SHA1_s, { .case_SHA1_s = buf1 } });
+        break;
+      }
+    case Spec_Hash_Definitions_SHA2_224:
+      {
+        uint32_t init = (uint32_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
+        {
+          buf2[i] = init;
+        }
+        s =
+          (
+            (EverCrypt_Hash_state_s){
+              .tag = EverCrypt_Hash_SHA2_224_s,
+              { .case_SHA2_224_s = buf2 }
+            }
+          );
+        break;
+      }
+    case Spec_Hash_Definitions_SHA2_256:
+      {
+        uint32_t init = (uint32_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
+        {
+          buf3[i] = init;
+        }
+        s =
+          (
+            (EverCrypt_Hash_state_s){
+              .tag = EverCrypt_Hash_SHA2_256_s,
+              { .case_SHA2_256_s = buf3 }
+            }
+          );
+        break;
+      }
+    case Spec_Hash_Definitions_SHA2_384:
+      {
+        uint64_t init = (uint64_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
+        {
+          buf4[i] = init;
+        }
+        s =
+          (
+            (EverCrypt_Hash_state_s){
+              .tag = EverCrypt_Hash_SHA2_384_s,
+              { .case_SHA2_384_s = buf4 }
+            }
+          );
+        break;
+      }
+    case Spec_Hash_Definitions_SHA2_512:
+      {
+        uint64_t init = (uint64_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
+        {
+          buf[i] = init;
+        }
+        s =
+          ((EverCrypt_Hash_state_s){ .tag = EverCrypt_Hash_SHA2_512_s, { .case_SHA2_512_s = buf } });
+        break;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
   EverCrypt_Hash_state_s st = s;
   EverCrypt_Hash_init(&st);
   EverCrypt_Hash_update(&st, cb);
@@ -165,6 +181,11 @@ uint32_t merkle_tree_size_lg = (uint32_t)32U;
 bool uu___is_MT(merkle_tree projectee)
 {
   return true;
+}
+
+uint32_t __proj__MT__item__hash_size(merkle_tree projectee)
+{
+  return projectee.hash_size;
 }
 
 uint64_t __proj__MT__item__offset(merkle_tree projectee)
@@ -258,13 +279,37 @@ alloc_rid__LowStar_Vector_vector_str__uint8_t_(
     );
 }
 
-typedef struct regional__LowStar_Vector_vector_str___uint8_t__s
+typedef struct
+regional__LowStar_Regional_regional__uint32_t__uint8_t__LowStar_Vector_vector_str___uint8_t__s
 {
-  LowStar_Vector_vector_str___uint8_t_ dummy;
-  LowStar_Vector_vector_str___uint8_t_ (*r_alloc)();
-  void (*r_free)(LowStar_Vector_vector_str___uint8_t_ x0);
+  LowStar_Regional_regional__uint32_t__uint8_t_ state;
+  LowStar_Vector_vector_str___uint8_t_
+  (*dummy)(LowStar_Regional_regional__uint32_t__uint8_t_ x0);
+  LowStar_Vector_vector_str___uint8_t_
+  (*r_alloc)(LowStar_Regional_regional__uint32_t__uint8_t_ x0);
+  void
+  (*r_free)(
+    LowStar_Regional_regional__uint32_t__uint8_t_ x0,
+    LowStar_Vector_vector_str___uint8_t_ x1
+  );
 }
-regional__LowStar_Vector_vector_str___uint8_t_;
+regional__LowStar_Regional_regional__uint32_t__uint8_t__LowStar_Vector_vector_str___uint8_t_;
+
+static LowStar_Vector_vector_str___uint8_t_
+rg_dummy__LowStar_Vector_vector_str__uint8_t__LowStar_Regional_regional_uint32_t__uint8_t_(
+  regional__LowStar_Regional_regional__uint32_t__uint8_t__LowStar_Vector_vector_str___uint8_t_ rg
+)
+{
+  return rg.dummy(rg.state);
+}
+
+static LowStar_Vector_vector_str___uint8_t_
+rg_alloc__LowStar_Vector_vector_str__uint8_t__LowStar_Regional_regional_uint32_t__uint8_t_(
+  regional__LowStar_Regional_regional__uint32_t__uint8_t__LowStar_Vector_vector_str___uint8_t_ rg
+)
+{
+  return rg.r_alloc(rg.state);
+}
 
 static void
 assign__LowStar_Vector_vector_str__uint8_t_(
@@ -277,13 +322,15 @@ assign__LowStar_Vector_vector_str__uint8_t_(
 }
 
 static void
-alloc___LowStar_Vector_vector_str__uint8_t_(
-  regional__LowStar_Vector_vector_str___uint8_t_ rg0,
+alloc___LowStar_Vector_vector_str__uint8_t__LowStar_Regional_regional_uint32_t__uint8_t_(
+  regional__LowStar_Regional_regional__uint32_t__uint8_t__LowStar_Vector_vector_str___uint8_t_
+  rg0,
   LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_ rv0,
   uint32_t cidx0
 )
 {
-  regional__LowStar_Vector_vector_str___uint8_t_ rg = rg0;
+  regional__LowStar_Regional_regional__uint32_t__uint8_t__LowStar_Vector_vector_str___uint8_t_
+  rg = rg0;
   LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_ rv = rv0;
   uint32_t cidx = cidx0;
   while (true)
@@ -294,7 +341,9 @@ alloc___LowStar_Vector_vector_str__uint8_t_(
     }
     else
     {
-      LowStar_Vector_vector_str___uint8_t_ v1 = rg.r_alloc();
+      LowStar_Vector_vector_str___uint8_t_
+      v1 =
+        rg_alloc__LowStar_Vector_vector_str__uint8_t__LowStar_Regional_regional_uint32_t__uint8_t_(rg);
       assign__LowStar_Vector_vector_str__uint8_t_(rv, cidx - (uint32_t)1U, v1);
       cidx--;
     }
@@ -307,14 +356,18 @@ alloc___LowStar_Vector_vector_str__uint8_t_(
 }
 
 static LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_
-alloc_rid__LowStar_Vector_vector_str__uint8_t_0(
-  regional__LowStar_Vector_vector_str___uint8_t_ rg,
+alloc_rid__LowStar_Vector_vector_str__uint8_t__LowStar_Regional_regional_uint32_t__uint8_t_(
+  regional__LowStar_Regional_regional__uint32_t__uint8_t__LowStar_Vector_vector_str___uint8_t_ rg,
   uint32_t len
 )
 {
   LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_
-  vec = alloc_rid__LowStar_Vector_vector_str__uint8_t_(len, rg.dummy);
-  alloc___LowStar_Vector_vector_str__uint8_t_(rg, vec, len);
+  vec =
+    alloc_rid__LowStar_Vector_vector_str__uint8_t_(len,
+      rg_dummy__LowStar_Vector_vector_str__uint8_t__LowStar_Regional_regional_uint32_t__uint8_t_(rg));
+  alloc___LowStar_Vector_vector_str__uint8_t__LowStar_Regional_regional_uint32_t__uint8_t_(rg,
+    vec,
+    len);
   return vec;
 }
 
@@ -334,13 +387,13 @@ assign___uint8_t_(LowStar_Vector_vector_str___uint8_t_ vec, uint32_t i1, uint8_t
 }
 
 static void
-alloc____uint8_t_(
-  regional___uint8_t_ rg0,
+alloc____uint8_t__uint32_t(
+  LowStar_Regional_regional__uint32_t__uint8_t_ rg0,
   LowStar_Vector_vector_str___uint8_t_ rv0,
   uint32_t cidx0
 )
 {
-  regional___uint8_t_ rg = rg0;
+  LowStar_Regional_regional__uint32_t__uint8_t_ rg = rg0;
   LowStar_Vector_vector_str___uint8_t_ rv = rv0;
   uint32_t cidx = cidx0;
   while (true)
@@ -351,7 +404,7 @@ alloc____uint8_t_(
     }
     else
     {
-      uint8_t *v1 = rg.r_alloc();
+      uint8_t *v1 = rg_alloc___uint8_t__uint32_t(rg);
       assign___uint8_t_(rv, cidx - (uint32_t)1U, v1);
       cidx--;
     }
@@ -364,19 +417,27 @@ alloc____uint8_t_(
 }
 
 static LowStar_Vector_vector_str___uint8_t_
-alloc_rid___uint8_t_0(regional___uint8_t_ rg, uint32_t len)
+alloc_rid___uint8_t__uint32_t(LowStar_Regional_regional__uint32_t__uint8_t_ rg, uint32_t len)
 {
-  LowStar_Vector_vector_str___uint8_t_ vec = alloc_rid___uint8_t_(len, rg.dummy);
-  alloc____uint8_t_(rg, vec, len);
+  LowStar_Vector_vector_str___uint8_t_
+  vec = alloc_rid___uint8_t_(len, LowStar_Regional_rg_dummy___uint8_t__uint32_t(rg));
+  alloc____uint8_t__uint32_t(rg, vec, len);
   return vec;
 }
 
-static merkle_tree *create_empty_mt(void (*hash_fun)(uint8_t *x0, uint8_t *x1, uint8_t *x2))
+static merkle_tree
+*create_empty_mt(uint32_t hsz, void (*hash_fun)(uint8_t *x0, uint8_t *x1, uint8_t *x2))
 {
   LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_
   hs =
-    alloc_rid__LowStar_Vector_vector_str__uint8_t_0((
-        (regional__LowStar_Vector_vector_str___uint8_t_){
+    alloc_rid__LowStar_Vector_vector_str__uint8_t__LowStar_Regional_regional_uint32_t__uint8_t_((
+        (regional__LowStar_Regional_regional__uint32_t__uint8_t__LowStar_Vector_vector_str___uint8_t_){
+          .state = {
+            .state = hsz,
+            .dummy = hash_dummy,
+            .r_alloc = hash_r_alloc,
+            .r_free = hash_r_free
+          },
           .dummy = hash_vec_dummy,
           .r_alloc = hash_vec_r_alloc,
           .r_free = hash_vec_r_free
@@ -385,18 +446,32 @@ static merkle_tree *create_empty_mt(void (*hash_fun)(uint8_t *x0, uint8_t *x1, u
       (uint32_t)32U);
   LowStar_Vector_vector_str___uint8_t_
   rhs =
-    alloc_rid___uint8_t_0((
-        (regional___uint8_t_){ .dummy = NULL, .r_alloc = hash_r_alloc, .r_free = hash_r_free }
+    alloc_rid___uint8_t__uint32_t((
+        (LowStar_Regional_regional__uint32_t__uint8_t_){
+          .state = hsz,
+          .dummy = hash_dummy,
+          .r_alloc = hash_r_alloc,
+          .r_free = hash_r_free
+        }
       ),
       (uint32_t)32U);
-  regional___uint8_t_ x0 = { .dummy = NULL, .r_alloc = hash_r_alloc, .r_free = hash_r_free };
-  uint8_t *mroot = x0.r_alloc();
+  uint8_t
+  *mroot =
+    rg_alloc___uint8_t__uint32_t((
+        (LowStar_Regional_regional__uint32_t__uint8_t_){
+          .state = hsz,
+          .dummy = hash_dummy,
+          .r_alloc = hash_r_alloc,
+          .r_free = hash_r_free
+        }
+      ));
   KRML_CHECK_SIZE(sizeof (merkle_tree), (uint32_t)1U);
   merkle_tree *mt = KRML_HOST_MALLOC(sizeof (merkle_tree));
   mt[0U]
   =
     (
       (merkle_tree){
+        .hash_size = hsz,
         .offset = (uint64_t)0U,
         .i = (uint32_t)0U,
         .j = (uint32_t)0U,
@@ -420,20 +495,30 @@ index__LowStar_Vector_vector_str__uint8_t_(
 }
 
 static void
-free_elems__LowStar_Vector_vector_str__uint8_t_(
-  regional__LowStar_Vector_vector_str___uint8_t_ rg0,
+rg_free__LowStar_Vector_vector_str__uint8_t__LowStar_Regional_regional_uint32_t__uint8_t_(
+  regional__LowStar_Regional_regional__uint32_t__uint8_t__LowStar_Vector_vector_str___uint8_t_ rg,
+  LowStar_Vector_vector_str___uint8_t_ v1
+)
+{
+  rg.r_free(rg.state, v1);
+}
+
+static void
+free_elems__LowStar_Vector_vector_str__uint8_t__LowStar_Regional_regional_uint32_t__uint8_t_(
+  regional__LowStar_Regional_regional__uint32_t__uint8_t__LowStar_Vector_vector_str___uint8_t_
+  rg0,
   LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_ rv0,
   uint32_t idx0
 )
 {
-  regional__LowStar_Vector_vector_str___uint8_t_ rg = rg0;
+  regional__LowStar_Regional_regional__uint32_t__uint8_t__LowStar_Vector_vector_str___uint8_t_
+  rg = rg0;
   LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_ rv = rv0;
   uint32_t idx = idx0;
   while (true)
   {
-    LowStar_Vector_vector_str___uint8_t_
-    uu____0 = index__LowStar_Vector_vector_str__uint8_t_(rv, idx);
-    rg.r_free(uu____0);
+    rg_free__LowStar_Vector_vector_str__uint8_t__LowStar_Regional_regional_uint32_t__uint8_t_(rg,
+      index__LowStar_Vector_vector_str__uint8_t_(rv, idx));
     if (idx != (uint32_t)0U)
     {
       idx--;
@@ -459,35 +544,102 @@ free__LowStar_Vector_vector_str__uint8_t_(
 }
 
 static void
-free__LowStar_Vector_vector_str__uint8_t_0(
-  regional__LowStar_Vector_vector_str___uint8_t_ rg,
+free__LowStar_Vector_vector_str__uint8_t__LowStar_Regional_regional_uint32_t__uint8_t_(
+  regional__LowStar_Regional_regional__uint32_t__uint8_t__LowStar_Vector_vector_str___uint8_t_ rg,
   LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_ rv
 )
 {
   if (!(rv.sz == (uint32_t)0U))
   {
-    free_elems__LowStar_Vector_vector_str__uint8_t_(rg, rv, rv.sz - (uint32_t)1U);
+    free_elems__LowStar_Vector_vector_str__uint8_t__LowStar_Regional_regional_uint32_t__uint8_t_(rg,
+      rv,
+      rv.sz - (uint32_t)1U);
   }
   free__LowStar_Vector_vector_str__uint8_t_(rv);
+}
+
+static uint8_t *index___uint8_t_(LowStar_Vector_vector_str___uint8_t_ vec, uint32_t i1)
+{
+  return vec.vs[i1];
+}
+
+static void
+free_elems___uint8_t__uint32_t(
+  LowStar_Regional_regional__uint32_t__uint8_t_ rg0,
+  LowStar_Vector_vector_str___uint8_t_ rv0,
+  uint32_t idx0
+)
+{
+  LowStar_Regional_regional__uint32_t__uint8_t_ rg = rg0;
+  LowStar_Vector_vector_str___uint8_t_ rv = rv0;
+  uint32_t idx = idx0;
+  while (true)
+  {
+    rg_free___uint8_t__uint32_t(rg, index___uint8_t_(rv, idx));
+    if (idx != (uint32_t)0U)
+    {
+      idx--;
+    }
+    else
+    {
+      return;
+    }
+  }
+  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+    __FILE__,
+    __LINE__,
+    "unreachable, returns inserted above");
+  KRML_HOST_EXIT(255U);
+}
+
+static void
+free___uint8_t__uint32_t(
+  LowStar_Regional_regional__uint32_t__uint8_t_ rg,
+  LowStar_Vector_vector_str___uint8_t_ rv
+)
+{
+  if (!(rv.sz == (uint32_t)0U))
+  {
+    free_elems___uint8_t__uint32_t(rg, rv, rv.sz - (uint32_t)1U);
+  }
+  LowStar_Vector_free___uint8_t_(rv);
 }
 
 void mt_free(merkle_tree *mt)
 {
   merkle_tree mtv = *mt;
-  free__LowStar_Vector_vector_str__uint8_t_0((
-      (regional__LowStar_Vector_vector_str___uint8_t_){
+  free__LowStar_Vector_vector_str__uint8_t__LowStar_Regional_regional_uint32_t__uint8_t_((
+      (regional__LowStar_Regional_regional__uint32_t__uint8_t__LowStar_Vector_vector_str___uint8_t_){
+        .state = {
+          .state = mtv.hash_size,
+          .dummy = hash_dummy,
+          .r_alloc = hash_r_alloc,
+          .r_free = hash_r_free
+        },
         .dummy = hash_vec_dummy,
         .r_alloc = hash_vec_r_alloc,
         .r_free = hash_vec_r_free
       }
     ),
     mtv.hs);
-  free___uint8_t_0((
-      (regional___uint8_t_){ .dummy = NULL, .r_alloc = hash_r_alloc, .r_free = hash_r_free }
+  free___uint8_t__uint32_t((
+      (LowStar_Regional_regional__uint32_t__uint8_t_){
+        .state = mtv.hash_size,
+        .dummy = hash_dummy,
+        .r_alloc = hash_r_alloc,
+        .r_free = hash_r_free
+      }
     ),
     mtv.rhs);
-  regional___uint8_t_ x0 = { .dummy = NULL, .r_alloc = hash_r_alloc, .r_free = hash_r_free };
-  x0.r_free(mtv.mroot);
+  rg_free___uint8_t__uint32_t((
+      (LowStar_Regional_regional__uint32_t__uint8_t_){
+        .state = mtv.hash_size,
+        .dummy = hash_dummy,
+        .r_alloc = hash_r_alloc,
+        .r_free = hash_r_free
+      }
+    ),
+    mtv.mroot);
   KRML_HOST_FREE(mt);
 }
 
@@ -516,28 +668,27 @@ insert___uint8_t_(LowStar_Vector_vector_str___uint8_t_ vec, uint8_t *v1)
 }
 
 static LowStar_Vector_vector_str___uint8_t_
-insert___uint8_t_0(LowStar_Vector_vector_str___uint8_t_ rv, uint8_t *v1)
+insert___uint8_t__uint32_t(LowStar_Vector_vector_str___uint8_t_ rv, uint8_t *v1)
 {
   LowStar_Vector_vector_str___uint8_t_ irv = insert___uint8_t_(rv, v1);
   return irv;
 }
 
 static LowStar_Vector_vector_str___uint8_t_
-insert_copy___uint8_t_(
-  regional___uint8_t_ rg,
-  void (*cp)(uint8_t *x0, uint8_t *x1),
+insert_copy___uint8_t__uint32_t(
+  LowStar_Regional_regional__uint32_t__uint8_t_ rg,
+  void (*cp)(uint32_t x0, uint8_t *x1, uint8_t *x2),
   LowStar_Vector_vector_str___uint8_t_ rv,
   uint8_t *v1
 )
 {
-  uint8_t *nv = rg.r_alloc();
-  void (*copy)(uint8_t *x0, uint8_t *x1) = cp;
-  copy(v1, nv);
-  return insert___uint8_t_0(rv, nv);
+  uint8_t *nv = rg_alloc___uint8_t__uint32_t(rg);
+  cp(rg.state, v1, nv);
+  return insert___uint8_t__uint32_t(rv, nv);
 }
 
 static void
-assign__LowStar_Vector_vector_str__uint8_t_0(
+assign__LowStar_Vector_vector_str__uint8_t__LowStar_Regional_regional_uint32_t__uint8_t_(
   LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_ rv,
   uint32_t i1,
   LowStar_Vector_vector_str___uint8_t_ v1
@@ -548,6 +699,7 @@ assign__LowStar_Vector_vector_str__uint8_t_0(
 
 static void
 insert_(
+  uint32_t hsz0,
   uint32_t lv0,
   uint32_t j10,
   LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_ hs0,
@@ -555,6 +707,7 @@ insert_(
   void (*hash_fun0)(uint8_t *x0, uint8_t *x1, uint8_t *x2)
 )
 {
+  uint32_t hsz = hsz0;
   uint32_t lv = lv0;
   uint32_t j1 = j10;
   LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_ hs = hs0;
@@ -563,16 +716,21 @@ insert_(
   while (true)
   {
     LowStar_Vector_vector_str___uint8_t_
-    uu____0 = index__LowStar_Vector_vector_str__uint8_t_(hs, lv);
-    LowStar_Vector_vector_str___uint8_t_
     ihv =
-      insert_copy___uint8_t_((
-          (regional___uint8_t_){ .dummy = NULL, .r_alloc = hash_r_alloc, .r_free = hash_r_free }
+      insert_copy___uint8_t__uint32_t((
+          (LowStar_Regional_regional__uint32_t__uint8_t_){
+            .state = hsz,
+            .dummy = hash_dummy,
+            .r_alloc = hash_r_alloc,
+            .r_free = hash_r_free
+          }
         ),
-        hcpy,
-        uu____0,
+        hash_copy,
+        index__LowStar_Vector_vector_str__uint8_t_(hs, lv),
         acc);
-    assign__LowStar_Vector_vector_str__uint8_t_0(hs, lv, ihv);
+    assign__LowStar_Vector_vector_str__uint8_t__LowStar_Regional_regional_uint32_t__uint8_t_(hs,
+      lv,
+      ihv);
     if (j1 % (uint32_t)2U == (uint32_t)1U)
     {
       LowStar_Vector_vector_str___uint8_t_
@@ -595,23 +753,21 @@ insert_(
 
 bool mt_insert_pre(const merkle_tree *mt, uint8_t *v1)
 {
-  merkle_tree *mt1 = (merkle_tree *)mt;
-  merkle_tree uu____0 = *mt1;
-  return
-    uu____0.j
-    < uint32_32_max
-    && uint64_max - uu____0.offset >= (uint64_t)(uu____0.j + (uint32_t)1U);
+  merkle_tree mt1 = *(merkle_tree *)mt;
+  return mt1.j < uint32_32_max && uint64_max - mt1.offset >= (uint64_t)(mt1.j + (uint32_t)1U);
 }
 
 void mt_insert(merkle_tree *mt, uint8_t *v1)
 {
   merkle_tree mtv = *mt;
   LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_ hs = mtv.hs;
-  insert_((uint32_t)0U, mtv.j, hs, v1, mtv.hash_fun);
+  uint32_t hsz1 = mtv.hash_size;
+  insert_(hsz1, (uint32_t)0U, mtv.j, hs, v1, mtv.hash_fun);
   *mt
   =
     (
       (merkle_tree){
+        .hash_size = mtv.hash_size,
         .offset = mtv.offset,
         .i = mtv.i,
         .j = mtv.j + (uint32_t)1U,
@@ -625,24 +781,42 @@ void mt_insert(merkle_tree *mt, uint8_t *v1)
 }
 
 merkle_tree
-*mt_create_custom(uint8_t *init1, void (*hash_fun)(uint8_t *x0, uint8_t *x1, uint8_t *x2))
+*mt_create_custom(
+  uint32_t hsz,
+  uint8_t *init1,
+  void (*hash_fun)(uint8_t *x0, uint8_t *x1, uint8_t *x2)
+)
 {
-  merkle_tree *mt = create_empty_mt(hash_fun);
+  merkle_tree *mt = create_empty_mt(hsz, hash_fun);
   mt_insert(mt, init1);
   return mt;
 }
 
 merkle_tree *mt_create(uint8_t *init1)
 {
-  return mt_create_custom(init1, hash_2);
+  return mt_create_custom((uint32_t)32U, init1, sha256_compress);
 }
 
-LowStar_Vector_vector_str___uint8_t_ *init_path()
+LowStar_Vector_vector_str___uint8_t_ *init_path(uint32_t hsz)
 {
   KRML_CHECK_SIZE(sizeof (LowStar_Vector_vector_str___uint8_t_), (uint32_t)1U);
   LowStar_Vector_vector_str___uint8_t_
   *buf = KRML_HOST_MALLOC(sizeof (LowStar_Vector_vector_str___uint8_t_));
-  buf[0U] = hash_vec_r_alloc();
+  buf[0U]
+  =
+    rg_alloc__LowStar_Vector_vector_str__uint8_t__LowStar_Regional_regional_uint32_t__uint8_t_((
+        (regional__LowStar_Regional_regional__uint32_t__uint8_t__LowStar_Vector_vector_str___uint8_t_){
+          .state = {
+            .state = hsz,
+            .dummy = hash_dummy,
+            .r_alloc = hash_r_alloc,
+            .r_free = hash_r_free
+          },
+          .dummy = hash_vec_dummy,
+          .r_alloc = hash_vec_r_alloc,
+          .r_free = hash_vec_r_free
+        }
+      ));
   return buf;
 }
 
@@ -653,31 +827,33 @@ clear___uint8_t_(LowStar_Vector_vector_str___uint8_t_ vec)
     ((LowStar_Vector_vector_str___uint8_t_){ .sz = (uint32_t)0U, .cap = vec.cap, .vs = vec.vs });
 }
 
-void clear_path(LowStar_Vector_vector_str___uint8_t_ *p1)
+void clear_path(uint32_t uu____3215, LowStar_Vector_vector_str___uint8_t_ *p1)
 {
   *p1 = clear___uint8_t_(*p1);
 }
 
-void free_path(LowStar_Vector_vector_str___uint8_t_ *p1)
+void free_path(uint32_t uu____3362, LowStar_Vector_vector_str___uint8_t_ *p1)
 {
-  free___uint8_t_(*p1);
+  LowStar_Vector_free___uint8_t_(*p1);
   KRML_HOST_FREE(p1);
 }
 
 static void
-assign_copy___uint8_t_(
-  void (*cp)(uint8_t *x0, uint8_t *x1),
+assign_copy___uint8_t__uint32_t(
+  LowStar_Regional_regional__uint32_t__uint8_t_ rg,
+  void (*cp)(uint32_t x0, uint8_t *x1, uint8_t *x2),
   LowStar_Vector_vector_str___uint8_t_ rv,
   uint32_t i1,
   uint8_t *v1
 )
 {
-  void (*copy)(uint8_t *x0, uint8_t *x1) = cp;
-  copy(v1, index___uint8_t_(rv, i1));
+  uint8_t *uu____0 = index___uint8_t_(rv, i1);
+  cp(rg.state, v1, uu____0);
 }
 
 static void
 construct_rhs(
+  uint32_t hsz0,
   uint32_t lv0,
   LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_ hs0,
   LowStar_Vector_vector_str___uint8_t_ rhs0,
@@ -688,6 +864,7 @@ construct_rhs(
   void (*hash_fun0)(uint8_t *x0, uint8_t *x1, uint8_t *x2)
 )
 {
+  uint32_t hsz = hsz0;
   uint32_t lv = lv0;
   LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_ hs = hs0;
   LowStar_Vector_vector_str___uint8_t_ rhs = rhs0;
@@ -698,41 +875,52 @@ construct_rhs(
   void (*hash_fun)(uint8_t *x0, uint8_t *x1, uint8_t *x2) = hash_fun0;
   while (true)
   {
-    uint32_t ofs = offset_of(i1);
-    regional___uint8_t_ x0 = { .dummy = NULL, .r_alloc = hash_r_alloc, .r_free = hash_r_free };
-    void (*copy1)(uint8_t *x0, uint8_t *x1) = hcpy;
     if (j1 == (uint32_t)0U)
     {
       return;
     }
-    else if (j1 % (uint32_t)2U == (uint32_t)0U)
-    {
-      lv++;
-      i1 = i1 / (uint32_t)2U;
-      j1 = j1 / (uint32_t)2U;
-    }
     else
     {
-      if (actd)
+      uint32_t ofs = offset_of(i1);
+      if (j1 % (uint32_t)2U == (uint32_t)0U)
       {
-        regional___uint8_t_
-        unused = { .dummy = NULL, .r_alloc = hash_r_alloc, .r_free = hash_r_free };
-        assign_copy___uint8_t_(hcpy, rhs, lv, acc);
-        hash_fun(index___uint8_t_(index__LowStar_Vector_vector_str__uint8_t_(hs, lv),
-            j1 - (uint32_t)1U - ofs),
-          acc,
-          acc);
+        lv++;
+        i1 = i1 / (uint32_t)2U;
+        j1 = j1 / (uint32_t)2U;
       }
       else
       {
-        copy1(index___uint8_t_(index__LowStar_Vector_vector_str__uint8_t_(hs, lv),
-            j1 - (uint32_t)1U - ofs),
-          acc);
+        if (actd)
+        {
+          assign_copy___uint8_t__uint32_t((
+              (LowStar_Regional_regional__uint32_t__uint8_t_){
+                .state = hsz,
+                .dummy = hash_dummy,
+                .r_alloc = hash_r_alloc,
+                .r_free = hash_r_free
+              }
+            ),
+            hash_copy,
+            rhs,
+            lv,
+            acc);
+          hash_fun(index___uint8_t_(index__LowStar_Vector_vector_str__uint8_t_(hs, lv),
+              j1 - (uint32_t)1U - ofs),
+            acc,
+            acc);
+        }
+        else
+        {
+          hash_copy(hsz,
+            index___uint8_t_(index__LowStar_Vector_vector_str__uint8_t_(hs, lv),
+              j1 - (uint32_t)1U - ofs),
+            acc);
+        }
+        lv++;
+        i1 = i1 / (uint32_t)2U;
+        j1 = j1 / (uint32_t)2U;
+        actd = true;
       }
-      lv++;
-      i1 = i1 / (uint32_t)2U;
-      j1 = j1 / (uint32_t)2U;
-      actd = true;
     }
   }
   KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
@@ -745,7 +933,7 @@ construct_rhs(
 bool mt_get_root_pre(const merkle_tree *mt, uint8_t *rt)
 {
   merkle_tree *mt1 = (merkle_tree *)mt;
-  merkle_tree uu____0 = *mt1;
+  merkle_tree mt2 = *mt1;
   return true;
 }
 
@@ -759,20 +947,20 @@ void mt_get_root(const merkle_tree *mt, uint8_t *rt)
   LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_ hs = mtv.hs;
   LowStar_Vector_vector_str___uint8_t_ rhs = mtv.rhs;
   uint8_t *mroot = mtv.mroot;
+  uint32_t hash_size = mtv.hash_size;
   void (*hash_fun)(uint8_t *x0, uint8_t *x1, uint8_t *x2) = mtv.hash_fun;
   if (mtv.rhs_ok)
   {
-    regional___uint8_t_ x0 = { .dummy = NULL, .r_alloc = hash_r_alloc, .r_free = hash_r_free };
-    hcpy(mroot, rt);
+    hash_copy(hash_size, mroot, rt);
     return;
   }
-  construct_rhs((uint32_t)0U, hs, rhs, i1, j1, rt, false, hash_fun);
-  regional___uint8_t_ x0 = { .dummy = NULL, .r_alloc = hash_r_alloc, .r_free = hash_r_free };
-  hcpy(rt, mroot);
+  construct_rhs(hash_size, (uint32_t)0U, hs, rhs, i1, j1, rt, false, hash_fun);
+  hash_copy(hash_size, rt, mroot);
   *mt1
   =
     (
       (merkle_tree){
+        .hash_size = hash_size,
         .offset = prefix,
         .i = i1,
         .j = j1,
@@ -785,7 +973,7 @@ void mt_get_root(const merkle_tree *mt, uint8_t *rt)
     );
 }
 
-void path_insert(LowStar_Vector_vector_str___uint8_t_ *p1, uint8_t *hp)
+void path_insert(uint32_t hsz, LowStar_Vector_vector_str___uint8_t_ *p1, uint8_t *hp)
 {
   LowStar_Vector_vector_str___uint8_t_ pv = p1[0U];
   LowStar_Vector_vector_str___uint8_t_ ipv = insert___uint8_t_(pv, hp);
@@ -825,6 +1013,7 @@ static uint32_t mt_path_length(uint32_t lv, uint32_t k1, uint32_t j1, bool actd)
 
 static void
 mt_get_path_(
+  uint32_t hsz0,
   uint32_t lv0,
   LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_ hs0,
   LowStar_Vector_vector_str___uint8_t_ rhs0,
@@ -919,17 +1108,17 @@ mt_get_path_pre(
 {
   merkle_tree *mt1 = (merkle_tree *)mt;
   LowStar_Vector_vector_str___uint8_t_ *p2 = (LowStar_Vector_vector_str___uint8_t_ *)p1;
-  merkle_tree uu____0 = *mt1;
-  LowStar_Vector_vector_str___uint8_t_ uu____1 = *p2;
+  merkle_tree mtv = *mt1;
+  LowStar_Vector_vector_str___uint8_t_ uu____0 = *p2;
   return
     idx
-    >= uu____0.offset
-    && idx - uu____0.offset <= offset_range_limit
+    >= mtv.offset
+    && idx - mtv.offset <= offset_range_limit
     &&
-      uu____0.i
-      <= (uint32_t)(idx - uu____0.offset)
-      && (uint32_t)(idx - uu____0.offset) < uu____0.j
-      && uu____1.sz == (uint32_t)0U;
+      mtv.i
+      <= (uint32_t)(idx - mtv.offset)
+      && (uint32_t)(idx - mtv.offset) < mtv.j
+      && uu____0.sz == (uint32_t)0U;
 }
 
 uint32_t
@@ -941,8 +1130,6 @@ mt_get_path(
 )
 {
   merkle_tree *ncmt = (merkle_tree *)mt;
-  regional___uint8_t_ x0 = { .dummy = NULL, .r_alloc = hash_r_alloc, .r_free = hash_r_free };
-  void (*copy1)(uint8_t *x0, uint8_t *x1) = hcpy;
   mt_get_root(mt, root);
   merkle_tree mtv = *ncmt;
   uint32_t idx1 = (uint32_t)(idx - mtv.offset);
@@ -958,52 +1145,73 @@ mt_get_path(
   LowStar_Vector_vector_str___uint8_t_ pv = p1[0U];
   LowStar_Vector_vector_str___uint8_t_ ipv = insert___uint8_t_(pv, ih);
   *p1 = ipv;
-  mt_get_path_((uint32_t)0U, hs, rhs, i1, j1, idx1, p1, false);
+  mt_get_path_(mtv.hash_size, (uint32_t)0U, hs, rhs, i1, j1, idx1, p1, false);
   return j1;
 }
 
 static LowStar_Vector_vector_str___uint8_t_
-flush___uint8_t_(LowStar_Vector_vector_str___uint8_t_ vec, uint8_t *ia, uint32_t i1)
+shrink___uint8_t_(LowStar_Vector_vector_str___uint8_t_ vec, uint32_t new_size)
 {
-  uint32_t fsz = vec.sz - i1;
-  uint32_t asz;
-  if (vec.sz == i1)
-  {
-    asz = (uint32_t)1U;
-  }
-  else
-  {
-    asz = fsz;
-  }
-  uint8_t **vs = vec.vs;
-  KRML_CHECK_SIZE(sizeof (uint8_t *), asz);
-  uint8_t **fvs = KRML_HOST_MALLOC(sizeof (uint8_t *) * asz);
-  for (uint32_t _i = 0U; _i < asz; ++_i)
-    fvs[_i] = ia;
-  memcpy(fvs, vs + i1, fsz * sizeof (vs[0U]));
-  KRML_HOST_FREE(vs);
-  return ((LowStar_Vector_vector_str___uint8_t_){ .sz = fsz, .cap = asz, .vs = fvs });
+  return
+    ((LowStar_Vector_vector_str___uint8_t_){ .sz = new_size, .cap = vec.cap, .vs = vec.vs });
 }
 
 static LowStar_Vector_vector_str___uint8_t_
-flush___uint8_t_0(regional___uint8_t_ rg, LowStar_Vector_vector_str___uint8_t_ rv, uint32_t i1)
+shift_down___uint8_t_(LowStar_Vector_vector_str___uint8_t_ vec, uint32_t i1, uint32_t d)
+{
+  if (i1 + d >= vec.sz)
+  {
+    return vec;
+  }
+  uint8_t *e = index___uint8_t_(vec, i1 + d);
+  assign___uint8_t_(vec, i1, e);
+  if (i1 + d + (uint32_t)1U >= vec.sz)
+  {
+    return vec;
+  }
+  LowStar_Vector_vector_str___uint8_t_ rvec = shift_down___uint8_t_(vec, i1 + (uint32_t)1U, d);
+  return rvec;
+}
+
+static LowStar_Vector_vector_str___uint8_t_
+flush___uint8_t_(LowStar_Vector_vector_str___uint8_t_ vec, uint32_t i1)
+{
+  if (i1 >= vec.sz)
+  {
+    return shrink___uint8_t_(vec, (uint32_t)0U);
+  }
+  uint32_t n_shifted = vec.sz - i1;
+  LowStar_Vector_vector_str___uint8_t_ shifted = shift_down___uint8_t_(vec, (uint32_t)0U, i1);
+  LowStar_Vector_vector_str___uint8_t_ fvec = shrink___uint8_t_(shifted, n_shifted);
+  return fvec;
+}
+
+static LowStar_Vector_vector_str___uint8_t_
+flush___uint8_t__uint32_t(
+  LowStar_Regional_regional__uint32_t__uint8_t_ rg,
+  LowStar_Vector_vector_str___uint8_t_ rv,
+  uint32_t i1
+)
 {
   if (!(i1 == (uint32_t)0U))
   {
-    free_elems___uint8_t_(rg, rv, i1 - (uint32_t)1U);
+    free_elems___uint8_t__uint32_t(rg, rv, i1 - (uint32_t)1U);
   }
-  LowStar_Vector_vector_str___uint8_t_ frv = flush___uint8_t_(rv, rg.dummy, i1);
+  uint8_t *unused = LowStar_Regional_rg_dummy___uint8_t__uint32_t(rg);
+  LowStar_Vector_vector_str___uint8_t_ frv = flush___uint8_t_(rv, i1);
   return frv;
 }
 
 static void
 mt_flush_to_(
+  uint32_t hsz0,
   uint32_t lv0,
   LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_ hs0,
   uint32_t pi0,
   uint32_t i10
 )
 {
+  uint32_t hsz = hsz0;
   uint32_t lv = lv0;
   LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_ hs = hs0;
   uint32_t pi = pi0;
@@ -1023,12 +1231,19 @@ mt_flush_to_(
       hvec = index__LowStar_Vector_vector_str__uint8_t_(hs, lv);
       LowStar_Vector_vector_str___uint8_t_
       flushed =
-        flush___uint8_t_0((
-            (regional___uint8_t_){ .dummy = NULL, .r_alloc = hash_r_alloc, .r_free = hash_r_free }
+        flush___uint8_t__uint32_t((
+            (LowStar_Regional_regional__uint32_t__uint8_t_){
+              .state = hsz,
+              .dummy = hash_dummy,
+              .r_alloc = hash_r_alloc,
+              .r_free = hash_r_free
+            }
           ),
           hvec,
           ofs);
-      assign__LowStar_Vector_vector_str__uint8_t_0(hs, lv, flushed);
+      assign__LowStar_Vector_vector_str__uint8_t__LowStar_Regional_regional_uint32_t__uint8_t_(hs,
+        lv,
+        flushed);
       lv++;
       pi = pi / (uint32_t)2U;
       i1 = i1 / (uint32_t)2U;
@@ -1058,11 +1273,12 @@ void mt_flush_to(merkle_tree *mt, uint64_t idx)
   uint64_t offset1 = mtv.offset;
   uint32_t idx1 = (uint32_t)(idx - offset1);
   LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_ hs = mtv.hs;
-  mt_flush_to_((uint32_t)0U, hs, mtv.i, idx1);
+  mt_flush_to_(mtv.hash_size, (uint32_t)0U, hs, mtv.i, idx1);
   *mt
   =
     (
       (merkle_tree){
+        .hash_size = mtv.hash_size,
         .offset = mtv.offset,
         .i = idx1,
         .j = mtv.j,
@@ -1092,19 +1308,18 @@ void mt_flush(merkle_tree *mt)
 }
 
 static void
-free_elems_from___uint8_t_(
-  regional___uint8_t_ rg0,
+free_elems_from___uint8_t__uint32_t(
+  LowStar_Regional_regional__uint32_t__uint8_t_ rg0,
   LowStar_Vector_vector_str___uint8_t_ rv0,
   uint32_t idx0
 )
 {
-  regional___uint8_t_ rg = rg0;
+  LowStar_Regional_regional__uint32_t__uint8_t_ rg = rg0;
   LowStar_Vector_vector_str___uint8_t_ rv = rv0;
   uint32_t idx = idx0;
   while (true)
   {
-    uint8_t *uu____0 = index___uint8_t_(rv, idx);
-    rg.r_free(uu____0);
+    rg_free___uint8_t__uint32_t(rg, index___uint8_t_(rv, idx));
     if (idx + (uint32_t)1U < rv.sz)
     {
       idx++;
@@ -1122,15 +1337,8 @@ free_elems_from___uint8_t_(
 }
 
 static LowStar_Vector_vector_str___uint8_t_
-shrink___uint8_t_(LowStar_Vector_vector_str___uint8_t_ vec, uint32_t new_size)
-{
-  return
-    ((LowStar_Vector_vector_str___uint8_t_){ .sz = new_size, .cap = vec.cap, .vs = vec.vs });
-}
-
-static LowStar_Vector_vector_str___uint8_t_
-shrink___uint8_t_0(
-  regional___uint8_t_ rg,
+shrink___uint8_t__uint32_t(
+  LowStar_Regional_regional__uint32_t__uint8_t_ rg,
   LowStar_Vector_vector_str___uint8_t_ rv,
   uint32_t new_size
 )
@@ -1140,13 +1348,14 @@ shrink___uint8_t_0(
   {
     return rv;
   }
-  free_elems_from___uint8_t_(rg, rv, new_size);
+  free_elems_from___uint8_t__uint32_t(rg, rv, new_size);
   LowStar_Vector_vector_str___uint8_t_ frv = shrink___uint8_t_(rv, new_size);
   return frv;
 }
 
 static void
 mt_retract_to_(
+  uint32_t hsz0,
   LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_ hs0,
   uint32_t lv0,
   uint32_t i10,
@@ -1154,6 +1363,7 @@ mt_retract_to_(
   uint32_t j10
 )
 {
+  uint32_t hsz = hsz0;
   LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_ hs = hs0;
   uint32_t lv = lv0;
   uint32_t i1 = i10;
@@ -1173,12 +1383,19 @@ mt_retract_to_(
       uint32_t new_len = s - offset_of(i1);
       LowStar_Vector_vector_str___uint8_t_
       retracted =
-        shrink___uint8_t_0((
-            (regional___uint8_t_){ .dummy = NULL, .r_alloc = hash_r_alloc, .r_free = hash_r_free }
+        shrink___uint8_t__uint32_t((
+            (LowStar_Regional_regional__uint32_t__uint8_t_){
+              .state = hsz,
+              .dummy = hash_dummy,
+              .r_alloc = hash_r_alloc,
+              .r_free = hash_r_free
+            }
           ),
           hvec,
           new_len);
-      assign__LowStar_Vector_vector_str__uint8_t_0(hs, lv, retracted);
+      assign__LowStar_Vector_vector_str__uint8_t__LowStar_Regional_regional_uint32_t__uint8_t_(hs,
+        lv,
+        retracted);
       if (lv + (uint32_t)1U < hs.sz)
       {
         lv++;
@@ -1216,11 +1433,12 @@ void mt_retract_to(merkle_tree *mt, uint64_t r)
   uint64_t offset1 = mtv.offset;
   uint32_t r1 = (uint32_t)(r - offset1);
   LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_ hs = mtv.hs;
-  mt_retract_to_(hs, (uint32_t)0U, mtv.i, r1 + (uint32_t)1U, mtv.j);
+  mt_retract_to_(mtv.hash_size, hs, (uint32_t)0U, mtv.i, r1 + (uint32_t)1U, mtv.j);
   *mt
   =
     (
       (merkle_tree){
+        .hash_size = mtv.hash_size,
         .offset = mtv.offset,
         .i = mtv.i,
         .j = r1 + (uint32_t)1U,
@@ -1235,6 +1453,7 @@ void mt_retract_to(merkle_tree *mt, uint64_t r)
 
 static void
 mt_verify_(
+  uint32_t hsz0,
   uint32_t k10,
   uint32_t j10,
   const LowStar_Vector_vector_str___uint8_t_ *p10,
@@ -1308,21 +1527,21 @@ mt_verify_pre(
 {
   merkle_tree *mt1 = (merkle_tree *)mt;
   LowStar_Vector_vector_str___uint8_t_ *p2 = (LowStar_Vector_vector_str___uint8_t_ *)p1;
-  merkle_tree uu____0 = *mt1;
-  LowStar_Vector_vector_str___uint8_t_ uu____1 = *p2;
+  merkle_tree mtv = *mt1;
+  LowStar_Vector_vector_str___uint8_t_ uu____0 = *p2;
   return
     k1
     < j1
-    && k1 >= uu____0.offset && k1 - uu____0.offset <= offset_range_limit
-    && j1 >= uu____0.offset && j1 - uu____0.offset <= offset_range_limit
+    && k1 >= mtv.offset && k1 - mtv.offset <= offset_range_limit
+    && j1 >= mtv.offset && j1 - mtv.offset <= offset_range_limit
     &&
-      uu____1.sz
+      uu____0.sz
       ==
         (uint32_t)1U
         +
           mt_path_length((uint32_t)0U,
-            (uint32_t)(k1 - uu____0.offset),
-            (uint32_t)(j1 - uu____0.offset),
+            (uint32_t)(k1 - mtv.offset),
+            (uint32_t)(j1 - mtv.offset),
             false);
 }
 
@@ -1338,24 +1557,23 @@ mt_verify(
   merkle_tree *ncmt = (merkle_tree *)mt;
   LowStar_Vector_vector_str___uint8_t_ *ncp = (LowStar_Vector_vector_str___uint8_t_ *)p1;
   merkle_tree mtv = *ncmt;
+  uint32_t hsz1 = mtv.hash_size;
+  LowStar_Regional_regional__uint32_t__uint8_t_
+  hrg = { .state = hsz1, .dummy = hash_dummy, .r_alloc = hash_r_alloc, .r_free = hash_r_free };
   uint32_t k2 = (uint32_t)(k1 - mtv.offset);
   uint32_t j2 = (uint32_t)(j1 - mtv.offset);
-  regional___uint8_t_ x00 = { .dummy = NULL, .r_alloc = hash_r_alloc, .r_free = hash_r_free };
-  uint8_t *ih = x00.r_alloc();
-  regional___uint8_t_ x01 = { .dummy = NULL, .r_alloc = hash_r_alloc, .r_free = hash_r_free };
-  void (*copy1)(uint8_t *x0, uint8_t *x1) = hcpy;
-  copy1(index___uint8_t_(*ncp, (uint32_t)0U), ih);
-  mt_verify_(k2, j2, p1, (uint32_t)1U, ih, false, mtv.hash_fun);
+  uint8_t *ih = rg_alloc___uint8_t__uint32_t(hrg);
+  hash_copy(hsz1, index___uint8_t_(*ncp, (uint32_t)0U), ih);
+  mt_verify_(hsz1, k2, j2, p1, (uint32_t)1U, ih, false, mtv.hash_fun);
   uint8_t res = (uint8_t)255U;
-  for (uint32_t i = (uint32_t)0U; i < hash_size; i++)
+  for (uint32_t i = (uint32_t)0U; i < hsz1; i++)
   {
     uint8_t uu____0 = FStar_UInt8_eq_mask(ih[i], rt[i]);
     res = uu____0 & res;
   }
   uint8_t z = res;
   bool r = z == (uint8_t)255U;
-  regional___uint8_t_ x0 = { .dummy = NULL, .r_alloc = hash_r_alloc, .r_free = hash_r_free };
-  x0.r_free(ih);
+  rg_free___uint8_t__uint32_t(hrg, ih);
   return r;
 }
 
@@ -1430,6 +1648,7 @@ static __bool_uint32_t
 
 static __bool_uint32_t
 serialize_hash_i(
+  uint32_t hash_size0,
   bool ok0,
   uint8_t *x0,
   uint8_t *buf10,
@@ -1438,6 +1657,7 @@ serialize_hash_i(
   uint32_t i10
 )
 {
+  uint32_t hash_size = hash_size0;
   bool ok = ok0;
   uint8_t *x = x0;
   uint8_t *buf1 = buf10;
@@ -1477,17 +1697,25 @@ serialize_hash_i(
 }
 
 static __bool_uint32_t
-serialize_hash(bool ok, uint8_t *x, uint8_t *buf1, uint32_t sz, uint32_t pos)
+serialize_hash(
+  uint32_t hash_size,
+  bool ok,
+  uint8_t *x,
+  uint8_t *buf1,
+  uint32_t sz,
+  uint32_t pos
+)
 {
   if (!ok || pos >= sz)
   {
     return ((__bool_uint32_t){ .fst = false, .snd = (uint32_t)0U });
   }
-  return serialize_hash_i(ok, x, buf1, sz, pos, (uint32_t)0U);
+  return serialize_hash_i(hash_size, ok, x, buf1, sz, pos, (uint32_t)0U);
 }
 
 static __bool_uint32_t
 serialize_hash_vec_i(
+  uint32_t hash_size0,
   bool ok0,
   LowStar_Vector_vector_str___uint8_t_ x0,
   uint8_t *buf10,
@@ -1496,6 +1724,7 @@ serialize_hash_vec_i(
   uint32_t i10
 )
 {
+  uint32_t hash_size = hash_size0;
   bool ok = ok0;
   LowStar_Vector_vector_str___uint8_t_ x = x0;
   uint8_t *buf1 = buf10;
@@ -1511,7 +1740,7 @@ serialize_hash_vec_i(
     else
     {
       uint8_t *vi = index___uint8_t_(x, i1);
-      __bool_uint32_t scrut = serialize_hash(ok, vi, buf1, sz, pos);
+      __bool_uint32_t scrut = serialize_hash(hash_size, ok, vi, buf1, sz, pos);
       bool ok1 = scrut.fst;
       uint32_t pos1 = scrut.snd;
       uint32_t j1 = i1 + (uint32_t)1U;
@@ -1536,6 +1765,7 @@ serialize_hash_vec_i(
 
 static __bool_uint32_t
 serialize_hash_vec(
+  uint32_t hash_size,
   bool ok,
   LowStar_Vector_vector_str___uint8_t_ x,
   uint8_t *buf1,
@@ -1552,13 +1782,14 @@ serialize_hash_vec(
   uint32_t pos1 = scrut.snd;
   if (ok1 && x.sz > (uint32_t)0U)
   {
-    return serialize_hash_vec_i(ok1, x, buf1, sz, pos1, (uint32_t)0U);
+    return serialize_hash_vec_i(hash_size, ok1, x, buf1, sz, pos1, (uint32_t)0U);
   }
   return ((__bool_uint32_t){ .fst = ok1, .snd = pos1 });
 }
 
 static uint64_t
 hash_vv_bytes_i(
+  uint32_t hash_size,
   LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_ vv1,
   uint32_t i1
 )
@@ -1568,17 +1799,27 @@ hash_vv_bytes_i(
     return (uint64_t)4U;
   }
   LowStar_Vector_vector_str___uint8_t_ vvi = index__LowStar_Vector_vector_str__uint8_t_(vv1, i1);
-  uint64_t r = (uint64_t)4U + (uint64_t)vvi.sz * (uint64_t)hash_size;
-  uint64_t rest = hash_vv_bytes_i(vv1, i1 + (uint32_t)1U);
-  if (uint64_max - rest < r)
+  uint64_t vs_hs = (uint64_t)vvi.sz * (uint64_t)hash_size;
+  uint64_t r;
+  if (uint64_max - vs_hs >= (uint64_t)4U)
   {
-    return uint64_max;
+    r = vs_hs + (uint64_t)4U;
   }
-  return rest + r;
+  else
+  {
+    r = uint64_max;
+  }
+  uint64_t rest = hash_vv_bytes_i(hash_size, vv1, i1 + (uint32_t)1U);
+  if (uint64_max - r >= rest)
+  {
+    return r + rest;
+  }
+  return uint64_max;
 }
 
 static __bool_uint32_t
 serialize_hash_vv_i(
+  uint32_t hash_size0,
   bool ok0,
   LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_ x0,
   uint8_t *buf10,
@@ -1587,6 +1828,7 @@ serialize_hash_vv_i(
   uint32_t i10
 )
 {
+  uint32_t hash_size = hash_size0;
   bool ok = ok0;
   LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_ x = x0;
   uint8_t *buf1 = buf10;
@@ -1602,7 +1844,7 @@ serialize_hash_vv_i(
     else
     {
       LowStar_Vector_vector_str___uint8_t_ vi = index__LowStar_Vector_vector_str__uint8_t_(x, i1);
-      __bool_uint32_t scrut = serialize_hash_vec(ok, vi, buf1, sz, pos);
+      __bool_uint32_t scrut = serialize_hash_vec(hash_size, ok, vi, buf1, sz, pos);
       bool ok1 = scrut.fst;
       uint32_t pos1 = scrut.snd;
       uint32_t j1 = i1 + (uint32_t)1U;
@@ -1627,6 +1869,7 @@ serialize_hash_vv_i(
 
 static __bool_uint32_t
 serialize_hash_vv(
+  uint32_t hash_size,
   bool ok,
   LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_ x,
   uint8_t *buf1,
@@ -1643,7 +1886,7 @@ serialize_hash_vv(
   uint32_t pos1 = scrut.snd;
   if (x.sz > (uint32_t)0U)
   {
-    return serialize_hash_vv_i(ok1, x, buf1, sz, pos1, (uint32_t)0U);
+    return serialize_hash_vv_i(hash_size, ok1, x, buf1, sz, pos1, (uint32_t)0U);
   }
   return ((__bool_uint32_t){ .fst = ok1, .snd = pos1 });
 }
@@ -1813,26 +2056,41 @@ typedef struct __bool_uint32_t__uint8_t__s
 __bool_uint32_t__uint8_t_;
 
 static __bool_uint32_t__uint8_t_
-deserialize_hash(bool ok, const uint8_t *buf1, uint32_t sz, uint32_t pos)
+deserialize_hash(uint32_t hash_size, bool ok, const uint8_t *buf1, uint32_t sz, uint32_t pos)
 {
+  LowStar_Regional_regional__uint32_t__uint8_t_
+  rg =
+    { .state = hash_size, .dummy = hash_dummy, .r_alloc = hash_r_alloc, .r_free = hash_r_free };
   if (!ok || pos >= sz)
   {
-    regional___uint8_t_ x0 = { .dummy = NULL, .r_alloc = hash_r_alloc, .r_free = hash_r_free };
-    return ((__bool_uint32_t__uint8_t_){ .fst = false, .snd = pos, .thd = x0.dummy });
+    return
+      (
+        (__bool_uint32_t__uint8_t_){
+          .fst = false,
+          .snd = pos,
+          .thd = LowStar_Regional_rg_dummy___uint8_t__uint32_t(rg)
+        }
+      );
   }
   if (sz - pos < hash_size)
   {
-    regional___uint8_t_ x0 = { .dummy = NULL, .r_alloc = hash_r_alloc, .r_free = hash_r_free };
-    return ((__bool_uint32_t__uint8_t_){ .fst = false, .snd = pos, .thd = x0.dummy });
+    return
+      (
+        (__bool_uint32_t__uint8_t_){
+          .fst = false,
+          .snd = pos,
+          .thd = LowStar_Regional_rg_dummy___uint8_t__uint32_t(rg)
+        }
+      );
   }
-  regional___uint8_t_ x0 = { .dummy = NULL, .r_alloc = hash_r_alloc, .r_free = hash_r_free };
-  uint8_t *hash1 = x0.r_alloc();
+  uint8_t *hash1 = rg_alloc___uint8_t__uint32_t(rg);
   memcpy(hash1, (uint8_t *)buf1 + pos, hash_size * sizeof (((uint8_t *)buf1)[0U]));
   return ((__bool_uint32_t__uint8_t_){ .fst = true, .snd = pos + hash_size, .thd = hash1 });
 }
 
 static __bool_uint32_t
 deserialize_hash_vec_i(
+  uint32_t hash_size0,
   bool ok0,
   const uint8_t *buf10,
   uint32_t sz0,
@@ -1841,6 +2099,7 @@ deserialize_hash_vec_i(
   uint32_t i10
 )
 {
+  uint32_t hash_size = hash_size0;
   bool ok = ok0;
   const uint8_t *buf1 = buf10;
   uint32_t sz = sz0;
@@ -1855,7 +2114,7 @@ deserialize_hash_vec_i(
     }
     else
     {
-      __bool_uint32_t__uint8_t_ scrut = deserialize_hash(ok, buf1, sz, pos);
+      __bool_uint32_t__uint8_t_ scrut = deserialize_hash(hash_size, ok, buf1, sz, pos);
       bool ok1 = scrut.fst;
       uint32_t pos1 = scrut.snd;
       uint8_t *h1 = scrut.thd;
@@ -1901,18 +2160,35 @@ typedef struct __bool_uint32_t_LowStar_Vector_vector_str___uint8_t__s
 __bool_uint32_t_LowStar_Vector_vector_str___uint8_t_;
 
 static __bool_uint32_t_LowStar_Vector_vector_str___uint8_t_
-deserialize_hash_vec(bool ok, const uint8_t *buf1, uint32_t sz, uint32_t pos)
+deserialize_hash_vec(
+  uint32_t hash_size,
+  bool ok,
+  const uint8_t *buf1,
+  uint32_t sz,
+  uint32_t pos
+)
 {
+  regional__LowStar_Regional_regional__uint32_t__uint8_t__LowStar_Vector_vector_str___uint8_t_
+  rg =
+    {
+      .state = {
+        .state = hash_size,
+        .dummy = hash_dummy,
+        .r_alloc = hash_r_alloc,
+        .r_free = hash_r_free
+      },
+      .dummy = hash_vec_dummy,
+      .r_alloc = hash_vec_r_alloc,
+      .r_free = hash_vec_r_free
+    };
   if (!ok || pos >= sz)
   {
-    regional__LowStar_Vector_vector_str___uint8_t_
-    scrut = { .dummy = hash_vec_dummy, .r_alloc = hash_vec_r_alloc, .r_free = hash_vec_r_free };
     return
       (
         (__bool_uint32_t_LowStar_Vector_vector_str___uint8_t_){
           .fst = false,
           .snd = pos,
-          .thd = scrut.dummy
+          .thd = rg_dummy__LowStar_Vector_vector_str__uint8_t__LowStar_Regional_regional_uint32_t__uint8_t_(rg)
         }
       );
   }
@@ -1942,9 +2218,13 @@ deserialize_hash_vec(bool ok, const uint8_t *buf1, uint32_t sz, uint32_t pos)
         }
       );
   }
-  regional___uint8_t_ x0 = { .dummy = NULL, .r_alloc = hash_r_alloc, .r_free = hash_r_free };
-  LowStar_Vector_vector_str___uint8_t_ res = alloc___uint8_t_(n1, x0.dummy);
-  __bool_uint32_t scrut = deserialize_hash_vec_i(ok1, buf1, sz, pos1, res, (uint32_t)0U);
+  LowStar_Regional_regional__uint32_t__uint8_t_
+  hrg =
+    { .state = hash_size, .dummy = hash_dummy, .r_alloc = hash_r_alloc, .r_free = hash_r_free };
+  LowStar_Vector_vector_str___uint8_t_
+  res = alloc___uint8_t_(n1, LowStar_Regional_rg_dummy___uint8_t__uint32_t(hrg));
+  __bool_uint32_t
+  scrut = deserialize_hash_vec_i(hash_size, ok1, buf1, sz, pos1, res, (uint32_t)0U);
   bool ok2 = scrut.fst;
   uint32_t pos2 = scrut.snd;
   return
@@ -1953,6 +2233,7 @@ deserialize_hash_vec(bool ok, const uint8_t *buf1, uint32_t sz, uint32_t pos)
 
 static __bool_uint32_t
 deserialize_hash_vv_i(
+  uint32_t hash_size0,
   bool ok0,
   const uint8_t *buf10,
   uint32_t sz0,
@@ -1961,6 +2242,7 @@ deserialize_hash_vv_i(
   uint32_t i10
 )
 {
+  uint32_t hash_size = hash_size0;
   bool ok = ok0;
   const uint8_t *buf1 = buf10;
   uint32_t sz = sz0;
@@ -1976,7 +2258,7 @@ deserialize_hash_vv_i(
     else
     {
       __bool_uint32_t_LowStar_Vector_vector_str___uint8_t_
-      scrut = deserialize_hash_vec(ok, buf1, sz, pos);
+      scrut = deserialize_hash_vec(hash_size, ok, buf1, sz, pos);
       bool ok1 = scrut.fst;
       uint32_t pos1 = scrut.snd;
       LowStar_Vector_vector_str___uint8_t_ hv = scrut.thd;
@@ -2027,7 +2309,13 @@ __bool_uint32_t_LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t__
 __bool_uint32_t_LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_;
 
 static __bool_uint32_t_LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_
-deserialize_hash_vv(bool ok, const uint8_t *buf1, uint32_t sz, uint32_t pos)
+deserialize_hash_vv(
+  uint32_t hash_size,
+  bool ok,
+  const uint8_t *buf1,
+  uint32_t sz,
+  uint32_t pos
+)
 {
   if (!ok || pos >= sz)
   {
@@ -2066,11 +2354,25 @@ deserialize_hash_vv(bool ok, const uint8_t *buf1, uint32_t sz, uint32_t pos)
         }
       );
   }
-  regional__LowStar_Vector_vector_str___uint8_t_
-  scrut1 = { .dummy = hash_vec_dummy, .r_alloc = hash_vec_r_alloc, .r_free = hash_vec_r_free };
+  regional__LowStar_Regional_regional__uint32_t__uint8_t__LowStar_Vector_vector_str___uint8_t_
+  rg =
+    {
+      .state = {
+        .state = hash_size,
+        .dummy = hash_dummy,
+        .r_alloc = hash_r_alloc,
+        .r_free = hash_r_free
+      },
+      .dummy = hash_vec_dummy,
+      .r_alloc = hash_vec_r_alloc,
+      .r_free = hash_vec_r_free
+    };
   LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_
-  res = alloc__LowStar_Vector_vector_str__uint8_t_(n1, scrut1.dummy);
-  __bool_uint32_t scrut = deserialize_hash_vv_i(ok1, buf1, sz, pos1, res, (uint32_t)0U);
+  res =
+    alloc__LowStar_Vector_vector_str__uint8_t_(n1,
+      rg_dummy__LowStar_Vector_vector_str__uint8_t__LowStar_Regional_regional_uint32_t__uint8_t_(rg));
+  __bool_uint32_t
+  scrut = deserialize_hash_vv_i(hash_size, ok1, buf1, sz, pos1, res, (uint32_t)0U);
   bool ok2 = scrut.fst;
   uint32_t pos2 = scrut.snd;
   return
@@ -2088,15 +2390,20 @@ uint64_t mt_serialize_size(const merkle_tree *mt)
   merkle_tree mtv = *(merkle_tree *)mt;
   LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_ hs = mtv.hs;
   LowStar_Vector_vector_str___uint8_t_ rhs = mtv.rhs;
-  uint64_t hs_sz = hash_vv_bytes_i(hs, (uint32_t)0U);
+  uint64_t hs_sz = hash_vv_bytes_i(mtv.hash_size, hs, (uint32_t)0U);
   if (hs_sz < (uint64_t)4294967295U)
   {
-    return
-      (uint64_t)21U
-      + hs_sz
-      + (uint64_t)1U
-      + (uint64_t)4U + (uint64_t)rhs.sz * (uint64_t)hash_size
-      + (uint64_t)hash_size;
+    uint64_t vs_hs = (uint64_t)rhs.sz * (uint64_t)mtv.hash_size;
+    uint64_t ite;
+    if (uint64_max - vs_hs >= (uint64_t)4U)
+    {
+      ite = vs_hs + (uint64_t)4U;
+    }
+    else
+    {
+      ite = uint64_max;
+    }
+    return (uint64_t)21U + hs_sz + (uint64_t)1U + ite + (uint64_t)mtv.hash_size;
   }
   return uint64_max;
 }
@@ -2106,10 +2413,10 @@ uint64_t mt_serialize(const merkle_tree *mt, uint8_t *output, uint64_t sz)
   merkle_tree *mt1 = (merkle_tree *)mt;
   uint32_t sz1 = (uint32_t)sz;
   merkle_tree mtv = *mt1;
-  __bool_uint32_t scrut = serialize_uint8_t(true, (uint8_t)0U, output, sz1, (uint32_t)0U);
+  __bool_uint32_t scrut = serialize_uint8_t(true, (uint8_t)1U, output, sz1, (uint32_t)0U);
   bool ok = scrut.fst;
   uint32_t pos = scrut.snd;
-  __bool_uint32_t scrut0 = serialize_uint32_t(ok, hash_size, output, sz1, pos);
+  __bool_uint32_t scrut0 = serialize_uint32_t(ok, mtv.hash_size, output, sz1, pos);
   bool ok1 = scrut0.fst;
   uint32_t pos1 = scrut0.snd;
   __bool_uint32_t scrut1 = serialize_offset_t(ok1, mtv.offset, output, sz1, pos1);
@@ -2121,16 +2428,16 @@ uint64_t mt_serialize(const merkle_tree *mt, uint8_t *output, uint64_t sz)
   __bool_uint32_t scrut3 = serialize_uint32_t(ok3, mtv.j, output, sz1, pos3);
   bool ok4 = scrut3.fst;
   uint32_t pos4 = scrut3.snd;
-  __bool_uint32_t scrut4 = serialize_hash_vv(ok4, mtv.hs, output, sz1, pos4);
+  __bool_uint32_t scrut4 = serialize_hash_vv(mtv.hash_size, ok4, mtv.hs, output, sz1, pos4);
   bool ok5 = scrut4.fst;
   uint32_t pos5 = scrut4.snd;
   __bool_uint32_t scrut5 = serialize_bool(ok5, mtv.rhs_ok, output, sz1, pos5);
   bool ok6 = scrut5.fst;
   uint32_t pos6 = scrut5.snd;
-  __bool_uint32_t scrut6 = serialize_hash_vec(ok6, mtv.rhs, output, sz1, pos6);
+  __bool_uint32_t scrut6 = serialize_hash_vec(mtv.hash_size, ok6, mtv.rhs, output, sz1, pos6);
   bool ok7 = scrut6.fst;
   uint32_t pos7 = scrut6.snd;
-  __bool_uint32_t scrut7 = serialize_hash(ok7, mtv.mroot, output, sz1, pos7);
+  __bool_uint32_t scrut7 = serialize_hash(mtv.hash_size, ok7, mtv.mroot, output, sz1, pos7);
   bool ok8 = scrut7.fst;
   uint32_t pos8 = scrut7.snd;
   if (ok8)
@@ -2140,49 +2447,58 @@ uint64_t mt_serialize(const merkle_tree *mt, uint8_t *output, uint64_t sz)
   return (uint64_t)0U;
 }
 
-merkle_tree *mt_deserialize(const uint8_t *input, uint64_t sz)
+merkle_tree
+*mt_deserialize(
+  uint32_t hash_size,
+  const uint8_t *input,
+  uint64_t sz,
+  void (*hash_fun)(uint8_t *x0, uint8_t *x1, uint8_t *x2)
+)
 {
   uint32_t sz1 = (uint32_t)sz;
   __bool_uint32_t_uint8_t scrut0 = deserialize_uint8_t(true, input, sz1, (uint32_t)0U);
   bool ok = scrut0.fst;
   uint32_t pos = scrut0.snd;
-  __bool_uint32_t_uint32_t scrut1 = deserialize_uint32_t(ok, input, sz1, pos);
-  bool ok1 = scrut1.fst;
+  uint8_t format_version = scrut0.thd;
+  bool ok1 = ok && format_version == (uint8_t)1U;
+  __bool_uint32_t_uint32_t scrut1 = deserialize_uint32_t(ok1, input, sz1, pos);
+  bool ok2 = scrut1.fst;
   uint32_t pos1 = scrut1.snd;
-  uint32_t hash_size1 = scrut1.thd;
-  __bool_uint32_t_uint64_t scrut2 = deserialize_offset_t(ok1, input, sz1, pos1);
-  bool ok2 = scrut2.fst;
+  uint32_t hsz = scrut1.thd;
+  bool ok3 = ok2 && hsz == hash_size;
+  __bool_uint32_t_uint64_t scrut2 = deserialize_offset_t(ok3, input, sz1, pos1);
+  bool ok4 = scrut2.fst;
   uint32_t pos2 = scrut2.snd;
   uint64_t offset1 = scrut2.thd;
-  __bool_uint32_t_uint32_t scrut3 = deserialize_index_t(ok2, input, sz1, pos2);
-  bool ok3 = scrut3.fst;
+  __bool_uint32_t_uint32_t scrut3 = deserialize_index_t(ok4, input, sz1, pos2);
+  bool ok5 = scrut3.fst;
   uint32_t pos3 = scrut3.snd;
   uint32_t i1 = scrut3.thd;
-  __bool_uint32_t_uint32_t scrut4 = deserialize_index_t(ok3, input, sz1, pos3);
-  bool ok4 = scrut4.fst;
+  __bool_uint32_t_uint32_t scrut4 = deserialize_index_t(ok5, input, sz1, pos3);
+  bool ok6 = scrut4.fst;
   uint32_t pos4 = scrut4.snd;
   uint32_t j1 = scrut4.thd;
   __bool_uint32_t_LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_
-  scrut5 = deserialize_hash_vv(ok4, input, sz1, pos4);
-  bool ok5 = scrut5.fst;
+  scrut5 = deserialize_hash_vv(hash_size, ok6, input, sz1, pos4);
+  bool ok7 = scrut5.fst;
   uint32_t pos5 = scrut5.snd;
   LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_ hs = scrut5.thd;
-  __bool_uint32_t_bool scrut6 = deserialize_bool(ok5, input, sz1, pos5);
-  bool ok6 = scrut6.fst;
+  __bool_uint32_t_bool scrut6 = deserialize_bool(ok7, input, sz1, pos5);
+  bool ok8 = scrut6.fst;
   uint32_t pos6 = scrut6.snd;
   bool rhs_ok = scrut6.thd;
   __bool_uint32_t_LowStar_Vector_vector_str___uint8_t_
-  scrut7 = deserialize_hash_vec(ok6, input, sz1, pos6);
-  bool ok7 = scrut7.fst;
+  scrut7 = deserialize_hash_vec(hash_size, ok8, input, sz1, pos6);
+  bool ok9 = scrut7.fst;
   uint32_t pos7 = scrut7.snd;
   LowStar_Vector_vector_str___uint8_t_ rhs = scrut7.thd;
-  __bool_uint32_t__uint8_t_ scrut = deserialize_hash(ok7, input, sz1, pos7);
-  bool ok8 = scrut.fst;
+  __bool_uint32_t__uint8_t_ scrut = deserialize_hash(hash_size, ok9, input, sz1, pos7);
+  bool ok10 = scrut.fst;
   uint8_t *mroot = scrut.thd;
   if
   (
-    !ok8
-    || hash_size1 != hash_size
+    !ok10
+    || false
     ||
       !(j1
       >= i1
@@ -2199,6 +2515,7 @@ merkle_tree *mt_deserialize(const uint8_t *input, uint64_t sz)
   =
     (
       (merkle_tree){
+        .hash_size = hash_size,
         .offset = offset1,
         .i = i1,
         .j = j1,
@@ -2206,7 +2523,7 @@ merkle_tree *mt_deserialize(const uint8_t *input, uint64_t sz)
         .rhs_ok = rhs_ok,
         .rhs = rhs,
         .mroot = mroot,
-        .hash_fun = hash_2
+        .hash_fun = hash_fun
       }
     );
   return buf;
@@ -2220,12 +2537,14 @@ mt_serialize_path(
   uint64_t sz
 )
 {
+  merkle_tree x0 = *(merkle_tree *)mt;
+  uint32_t hsz1 = x0.hash_size;
   uint32_t sz1 = (uint32_t)sz;
   LowStar_Vector_vector_str___uint8_t_ *ncp = (LowStar_Vector_vector_str___uint8_t_ *)p1;
-  __bool_uint32_t scrut = serialize_uint32_t(true, hash_size, output, sz1, (uint32_t)0U);
+  __bool_uint32_t scrut = serialize_uint32_t(true, hsz1, output, sz1, (uint32_t)0U);
   bool ok = scrut.fst;
   uint32_t pos = scrut.snd;
-  __bool_uint32_t scrut0 = serialize_hash_vec(ok, *ncp, output, sz1, pos);
+  __bool_uint32_t scrut0 = serialize_hash_vec(hsz1, ok, *ncp, output, sz1, pos);
   bool ok1 = scrut0.fst;
   uint32_t pos1 = scrut0.snd;
   if (ok1)
@@ -2235,18 +2554,19 @@ mt_serialize_path(
   return (uint64_t)0U;
 }
 
-LowStar_Vector_vector_str___uint8_t_ *mt_deserialize_path(const uint8_t *input, uint64_t sz)
+LowStar_Vector_vector_str___uint8_t_
+*mt_deserialize_path(uint32_t hsz, const uint8_t *input, uint64_t sz)
 {
   uint32_t sz1 = (uint32_t)sz;
   __bool_uint32_t_uint32_t scrut0 = deserialize_uint32_t(true, input, sz1, (uint32_t)0U);
   bool ok = scrut0.fst;
   uint32_t pos = scrut0.snd;
-  uint32_t hash_size1 = scrut0.thd;
+  uint32_t hash_size = scrut0.thd;
   __bool_uint32_t_LowStar_Vector_vector_str___uint8_t_
-  scrut = deserialize_hash_vec(ok, input, sz1, pos);
+  scrut = deserialize_hash_vec(hsz, ok, input, sz1, pos);
   bool ok1 = scrut.fst;
   LowStar_Vector_vector_str___uint8_t_ hs = scrut.thd;
-  if (!ok1 || hash_size1 != hash_size)
+  if (!ok1 || hash_size != hsz)
   {
     return NULL;
   }

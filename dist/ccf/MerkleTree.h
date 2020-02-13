@@ -31,46 +31,16 @@
 #define __MerkleTree_H
 
 #include "Hacl_Kremlib.h"
+#include "Hacl_Spec.h"
 #include "EverCrypt_Hash.h"
+#include "MerkleTree_New_Low_Datastructures.h"
 
 
-extern uint32_t hash_size;
+uint8_t *init_hash(uint32_t hsz);
 
-typedef uint8_t *hash;
+void free_hash(uint32_t hsz, uint8_t *h1);
 
-void hash_r_free(uint8_t *v1);
-
-void hash_copy(uint8_t *src, uint8_t *dst);
-
-typedef struct LowStar_Vector_vector_str___uint8_t__s
-{
-  uint32_t sz;
-  uint32_t cap;
-  uint8_t **vs;
-}
-LowStar_Vector_vector_str___uint8_t_;
-
-typedef LowStar_Vector_vector_str___uint8_t_ hash_vec;
-
-void hash_vec_r_free(LowStar_Vector_vector_str___uint8_t_ v1);
-
-typedef struct LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t__s
-{
-  uint32_t sz;
-  uint32_t cap;
-  LowStar_Vector_vector_str___uint8_t_ *vs;
-}
-LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_;
-
-typedef LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_ hash_vv;
-
-extern uint8_t *(*init_hash)();
-
-extern void (*free_hash)(uint8_t *x0);
-
-typedef void (*hash_fun_t)(uint8_t *x0, uint8_t *x1, uint8_t *x2);
-
-void hash_2(uint8_t *src1, uint8_t *src2, uint8_t *dst);
+void sha256_compress(uint8_t *src1, uint8_t *src2, uint8_t *dst);
 
 typedef uint32_t index_t;
 
@@ -86,8 +56,17 @@ typedef uint64_t offset_t;
 
 extern uint32_t merkle_tree_size_lg;
 
+typedef struct LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t__s
+{
+  uint32_t sz;
+  uint32_t cap;
+  LowStar_Vector_vector_str___uint8_t_ *vs;
+}
+LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_;
+
 typedef struct merkle_tree_s
 {
+  uint32_t hash_size;
   uint64_t offset;
   uint32_t i;
   uint32_t j;
@@ -100,6 +79,8 @@ typedef struct merkle_tree_s
 merkle_tree;
 
 bool uu___is_MT(merkle_tree projectee);
+
+uint32_t __proj__MT__item__hash_size(merkle_tree projectee);
 
 uint64_t __proj__MT__item__offset(merkle_tree projectee);
 
@@ -143,27 +124,25 @@ bool mt_insert_pre(const merkle_tree *mt, uint8_t *v1);
 void mt_insert(merkle_tree *mt, uint8_t *v1);
 
 merkle_tree
-*mt_create_custom(uint8_t *init1, void (*hash_fun)(uint8_t *x0, uint8_t *x1, uint8_t *x2));
+*mt_create_custom(
+  uint32_t hsz,
+  uint8_t *init1,
+  void (*hash_fun)(uint8_t *x0, uint8_t *x1, uint8_t *x2)
+);
 
 merkle_tree *mt_create(uint8_t *init1);
 
-typedef LowStar_Vector_vector_str___uint8_t_ path;
+LowStar_Vector_vector_str___uint8_t_ *init_path(uint32_t hsz);
 
-typedef LowStar_Vector_vector_str___uint8_t_ *path_p;
+void clear_path(uint32_t uu____3215, LowStar_Vector_vector_str___uint8_t_ *p1);
 
-typedef const LowStar_Vector_vector_str___uint8_t_ *const_path_p;
-
-LowStar_Vector_vector_str___uint8_t_ *init_path();
-
-void clear_path(LowStar_Vector_vector_str___uint8_t_ *p1);
-
-void free_path(LowStar_Vector_vector_str___uint8_t_ *p1);
+void free_path(uint32_t uu____3362, LowStar_Vector_vector_str___uint8_t_ *p1);
 
 bool mt_get_root_pre(const merkle_tree *mt, uint8_t *rt);
 
 void mt_get_root(const merkle_tree *mt, uint8_t *rt);
 
-void path_insert(LowStar_Vector_vector_str___uint8_t_ *p1, uint8_t *hp);
+void path_insert(uint32_t hsz, LowStar_Vector_vector_str___uint8_t_ *p1, uint8_t *hp);
 
 bool
 mt_get_path_pre(
@@ -227,7 +206,13 @@ uint64_t mt_serialize_size(const merkle_tree *mt);
 
 uint64_t mt_serialize(const merkle_tree *mt, uint8_t *output, uint64_t sz);
 
-merkle_tree *mt_deserialize(const uint8_t *input, uint64_t sz);
+merkle_tree
+*mt_deserialize(
+  uint32_t hash_size,
+  const uint8_t *input,
+  uint64_t sz,
+  void (*hash_fun)(uint8_t *x0, uint8_t *x1, uint8_t *x2)
+);
 
 uint64_t
 mt_serialize_path(
@@ -237,7 +222,8 @@ mt_serialize_path(
   uint64_t sz
 );
 
-LowStar_Vector_vector_str___uint8_t_ *mt_deserialize_path(const uint8_t *input, uint64_t sz);
+LowStar_Vector_vector_str___uint8_t_
+*mt_deserialize_path(uint32_t hsz, const uint8_t *input, uint64_t sz);
 
 #define __MerkleTree_H_DEFINED
 #endif
