@@ -46,10 +46,10 @@ class MerkleInsert : public Benchmark
       for (uint64_t i = 0; i < num_nodes; i++)
       {
         #ifdef _DEBUG
-        if (!mt_insert_pre(hash_size, tree, hashes[i]))
+        if (!mt_insert_pre(tree, hashes[i]))
           throw std::logic_error("precondition violation");
         #endif
-        mt_insert(hash_size, tree, hashes[i]);
+        mt_insert(tree, hashes[i]);
       }
 
     }
@@ -101,10 +101,10 @@ class MerklePathExtraction : public Benchmark
         for (size_t j = 0; j < 8; j++)
            *(hashes[i] + j) = rand() % 8;
         #ifdef _DEBUG
-        if (!mt_insert_pre(hash_size, tree, hashes[i]))
+        if (!mt_insert_pre(tree, hashes[i]))
           throw std::logic_error("precondition violation");
         #endif
-        mt_insert(hash_size, tree, hash);
+        mt_insert(tree, hash);
       }
 
       paths.resize(num_nodes);
@@ -181,10 +181,10 @@ class MerklePathVerification : public Benchmark
         for (size_t j = 0; j < 8; j++)
            *(hashes[i] + j) = rand() % 8;
         #ifdef _DEBUG
-        if (!mt_insert_pre(hash_size, tree, hashes[i]))
+        if (!mt_insert_pre(tree, hashes[i]))
           throw std::logic_error("precondition violation");
         #endif
-        mt_insert(hash_size, tree, hash);
+        mt_insert(tree, hash);
       }
 
       paths.resize(num_nodes);
