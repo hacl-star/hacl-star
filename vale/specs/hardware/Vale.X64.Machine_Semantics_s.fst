@@ -110,7 +110,7 @@ let eval_mov128_op (o:operand128) (s:machine_state) : quad32 =
   | OMem (m, _) -> eval_mem128 (eval_maddr m s) s
   | OStack (m, _) -> eval_stack128 (eval_maddr m s) s.ms_stack
 
-let eval_ocmp (s:machine_state) (c:ocmp) :bool =
+let eval_ocmp (s:machine_state) (c:ocmp) : bool =
   match c with
   | BC.OEq o1 o2 -> eval_operand o1 s = eval_operand o2 s
   | BC.ONe o1 o2 -> eval_operand o1 s <> eval_operand o2 s
@@ -118,6 +118,8 @@ let eval_ocmp (s:machine_state) (c:ocmp) :bool =
   | BC.OGe o1 o2 -> eval_operand o1 s >= eval_operand o2 s
   | BC.OLt o1 o2 -> eval_operand o1 s < eval_operand o2 s
   | BC.OGt o1 o2 -> eval_operand o1 s > eval_operand o2 s
+[@"opaque_to_smt"]
+let eval_ocmp_opaque (s:machine_state) (c:ocmp) : bool = eval_ocmp s c
 
 let update_reg' (r:reg) (v:t_reg r) (s:machine_state) : machine_state =
   {s with ms_regs = FStar.FunctionalExtensionality.on_dom reg (fun r' -> if r' = r then v else s.ms_regs r')}
@@ -270,6 +272,8 @@ let valid_ocmp (c:ocmp) (s:machine_state) : bool =
   | BC.OGe o1 o2 -> valid_src_operand64_and_taint o1 s && valid_src_operand64_and_taint o2 s
   | BC.OLt o1 o2 -> valid_src_operand64_and_taint o1 s && valid_src_operand64_and_taint o2 s
   | BC.OGt o1 o2 -> valid_src_operand64_and_taint o1 s && valid_src_operand64_and_taint o2 s
+[@"opaque_to_smt"]
+let valid_ocmp_opaque (c:ocmp) (s:machine_state) : bool = valid_ocmp c s
 
 unfold
 let valid_dst_stack64 (rsp:nat64) (ptr:int) (st:machine_stack) : bool =
@@ -701,50 +705,56 @@ let machine_eval_ins_st (ins:ins) : st unit =
 let machine_eval_ins (i:ins) (s:machine_state) : machine_state =
   run (machine_eval_ins_st i) s
 
+let machine_eval_code_ins_def (i:ins) (s:machine_state) : option machine_state =
+  let obs = ins_obs i s in
+  // REVIEW: drop trace, then restore trace, to make clear that machine_eval_ins shouldn't depend on trace
+  Some ({machine_eval_ins i ({s with ms_trace = []}) with ms_trace = obs @ s.ms_trace})
+[@"opaque_to_smt"]
+let machine_eval_code_ins (i:ins) (s:machine_state) : option machine_state =
+  machine_eval_code_ins_def i s
+
 let machine_eval_ocmp (s:machine_state) (c:ocmp) : machine_state & bool =
-  let s = run (check (valid_ocmp c)) s in
-  ({s with ms_flags = havoc_flags}, eval_ocmp s c)
+  let s = run (check (valid_ocmp_opaque c)) s in
+  let b = eval_ocmp_opaque s c in
+  let s = {s with ms_flags = havoc_flags; ms_trace = (BranchPredicate b)::s.ms_trace} in
+  (s, b)
 
 (*
 These functions return an option state
 None case arises when the while loop runs out of fuel
 *)
 let rec machine_eval_code (c:code) (fuel:nat) (s:machine_state) : Tot (option machine_state)
-  (decreases %[fuel; c; 1])
+  (decreases %[fuel; c])
   =
   match c with
-  | Ins ins ->
-    let obs = ins_obs ins s in
-    // REVIEW: drop trace, then restore trace, to make clear that machine_eval_ins shouldn't depend on trace
-    Some ({machine_eval_ins ins ({s with ms_trace = []}) with ms_trace = obs @ s.ms_trace})
-  | Block l ->
-    machine_eval_codes l fuel s
-  | IfElse ifCond ifTrue ifFalse ->
-    let (st, b) = machine_eval_ocmp s ifCond in
-    let s' = {st with ms_trace = (BranchPredicate b)::s.ms_trace} in
-    if b then machine_eval_code ifTrue fuel s' else machine_eval_code ifFalse fuel s'
-  | While _ _ ->
-    machine_eval_while c fuel s
-and machine_eval_codes (l:codes) (fuel:nat) (s:machine_state) : Tot (option machine_state)
-  (decreases %[fuel; l])
+  | Ins i ->
+    machine_eval_code_ins i s
+  | Block cs ->
+    machine_eval_codes cs fuel s
+  | IfElse cond ct cf ->
+    let (s', b) = machine_eval_ocmp s cond in
+    if b then machine_eval_code ct fuel s' else machine_eval_code cf fuel s'
+  | While cond body ->
+    machine_eval_while cond body fuel s
+and machine_eval_codes (cs:codes) (fuel:nat) (s:machine_state) : Tot (option machine_state)
+  (decreases %[fuel; cs])
   =
-  match l with
+  match cs with
   | [] -> Some s
-  | c::tl ->
-    let s_opt = machine_eval_code c fuel s in
-    if None? s_opt then None else machine_eval_codes tl fuel (Some?.v s_opt)
-and machine_eval_while (c:code{While? c}) (fuel:nat) (s0:machine_state) : Tot (option machine_state)
-  (decreases %[fuel; c; 0])
+  | c'::cs' -> (
+      match machine_eval_code c' fuel s with
+      | None -> None
+      | Some s' -> machine_eval_codes cs' fuel s'
+    )
+and machine_eval_while (cond:ocmp) (body:code) (fuel:nat) (s0:machine_state) : Tot (option machine_state)
+  (decreases %[fuel; body])
   =
   if fuel = 0 then None else
-  let While cond body = c in
-  let (s0, b) = machine_eval_ocmp s0 cond in
-  if not b then Some ({s0 with ms_trace = (BranchPredicate false)::s0.ms_trace})
+  let (s1, b) = machine_eval_ocmp s0 cond in
+  if not b then Some s1
   else
-    let s0 = {s0 with ms_trace = (BranchPredicate true)::s0.ms_trace} in
-    let s_opt = machine_eval_code body (fuel - 1) s0 in
-    match s_opt with
+    match machine_eval_code body (fuel - 1) s1 with
     | None -> None
-    | Some s1 ->
-      if s1.ms_ok then machine_eval_while c (fuel - 1) s1
-      else Some s1
+    | Some s2 ->
+      if not s2.ms_ok then Some s2 else // propagate failure immediately
+      machine_eval_while cond body (fuel - 1) s2

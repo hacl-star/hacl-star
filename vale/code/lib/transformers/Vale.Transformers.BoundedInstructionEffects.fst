@@ -732,7 +732,7 @@ let rec lemma_unchanged_at_trace (locs:locations) (s1 s2:machine_state) trace1 t
     lemma_unchanged_at_trace xs s1 s2 trace1 trace2
 
 let machine_eval_code_Ins i fuel : st unit =
-  (fun s -> (), (Some?.v (machine_eval_code (Ins i) fuel s)))
+  (fun s -> (), (Some?.v (machine_eval_code_ins_def i s)))
 
 let lemma_machine_eval_code_Ins_bounded_effects_aux1 (i:ins) (fuel:nat) s :
   Lemma
