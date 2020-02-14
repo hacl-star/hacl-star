@@ -29,6 +29,7 @@ let rec code_modifies_ghost (c:code) : bool =
   | Block cs -> codes_modifies_ghost cs
   | IfElse _ c1 c2 -> code_modifies_ghost c1 || code_modifies_ghost c2
   | While _ c -> code_modifies_ghost c
+  | Unstructured _ -> true // REVIEW: this is overly conservative
 and codes_modifies_ghost (cs:codes) : bool =
   match cs with
   | [] -> false

@@ -8,6 +8,67 @@ open Vale.X64.Bytes_Code_s
 module BS = Vale.X64.Machine_Semantics_s
 module ME = Vale.X64.Memory
 
+(* Examples (TODO: delete these)
+#reset-options "--initial_fuel 2 --max_fuel 4 --max_ifuel 1 --z3rlimit 20"
+let make_if (cond:ocmp) (ct:code) =
+  let j0 = {jump_cond = JIfFalse cond; jump_target = 2} in
+  let j1 = {jump_cond = JNever; jump_target = 0} in
+  let block0 = (Block [], j0) in
+  let block1 = (ct, j1) in
+  let blocks = [block0; block1] in
+  let cu = Unstructured blocks in
+  cu
+
+let test_if (cond:ocmp) (ct:code) (fuel:nat) (s0:machine_state) : Lemma
+  (requires (
+    let ci = IfElse cond ct (Block []) in
+    let si = BS.machine_eval_code ci fuel s0 in
+    s0.BS.ms_ok /\ Some? si
+  ))
+  (ensures (
+    let ci = IfElse cond ct (Block []) in
+    let cu = make_if cond ct in
+    let Some si = BS.machine_eval_code ci fuel s0 in
+    let Some su = BS.machine_eval_code cu fuel s0 in
+    si == su
+  ))
+  =
+  ()
+
+let make_while (cond:ocmp) (body:code) =
+  let j0 = {jump_cond = JAlways; jump_target = 2} in
+  let j1 = {jump_cond = JNever; jump_target = 0} in
+  let j2 = {jump_cond = JIfTrue cond; jump_target = 1} in
+  let block0 = (Block [], j0) in
+  let block1 = (body, j1) in
+  let block2 = (Block [], j2) in
+  let blocks = [block0; block1; block2] in
+  let cu = Unstructured blocks in
+  cu
+
+let rec test_while (cond:ocmp) (body:code) (fuel:nat) (s0:machine_state) : Lemma
+  (requires (
+    let ci = While cond body in
+    let si = BS.machine_eval_code ci fuel s0 in
+    s0.BS.ms_ok /\ Some? si /\ (Some?.v si).BS.ms_ok
+  ))
+  (ensures (
+    let ci = While cond body in
+    let cu = make_while cond body in
+    let si = BS.machine_eval_code ci fuel s0 in
+    let su = BS.machine_eval_code cu fuel s0 in
+    si == su
+  ))
+  (decreases fuel)
+  =
+  let (si0, bi) = BS.machine_eval_ocmp s0 cond in
+  if (bi && fuel > 0) then (
+    let Some si1 = BS.machine_eval_code body (fuel - 1) si0 in
+    test_while cond body (fuel - 1) si1;
+    ()
+  )
+*)
+
 #reset-options "--initial_fuel 1 --max_fuel 1 --z3rlimit 100"
 
 #restart-solver
@@ -153,7 +214,7 @@ let eval_code_eq_ins (i:BS.ins) (f:fuel) (s1 s2:machine_state) : Lemma
     ()
   )
 
-#reset-options "--initial_fuel 2 --max_fuel 2 --z3rlimit 30"
+#reset-options "--initial_fuel 2 --max_fuel 2 --z3rlimit 100"
 
 let eval_ocmp_eq_core (g:bool) (cond:ocmp) (s:machine_state) : Lemma
   (ensures (
@@ -186,6 +247,7 @@ let rec eval_code_eq_core (g:bool) (c:code) (f:fuel) (s:machine_state) : Lemma
     eval_code_eq_core g cf f t';
     ()
   | While cond body -> eval_while_eq_core g cond body f s
+  | Unstructured blocks -> eval_unstructured_eq_core g blocks 0 f s
 and eval_codes_eq_core (g:bool) (cs:codes) (f:fuel) (s:machine_state) : Lemma
   (ensures state_eq_opt g (BS.machine_eval_codes cs f s) (BS.machine_eval_codes cs f (core_state g s)))
   (decreases %[f; cs])
@@ -215,6 +277,33 @@ and eval_while_eq_core (g:bool) (cond:ocmp) (body:code) (f:fuel) (s:machine_stat
       eval_while_eq_core g cond body (f - 1) t2;
       ()
   )
+and eval_unstructured_eq_core (g:bool) (blocks:list BS.ublock) (n:nat) (f:fuel) (s:machine_state) : Lemma
+  (ensures
+    state_eq_opt g (BS.machine_eval_unstructured blocks n f s) (BS.machine_eval_unstructured blocks n f (core_state g s))
+  )
+  (decreases %[f; blocks; BS.remaining_blocks blocks n])
+  =
+  if n < List.Tot.length blocks then (
+    let (c, j) = BS.list_index blocks n in
+    eval_code_eq_core g c f s;
+    match (BS.machine_eval_code c f s, BS.machine_eval_code c f (core_state g s)) with
+    | (None, None) -> ()
+    | (Some s1, Some t1) ->
+        ( match j.jump_cond with
+          | JIfTrue cond | JIfFalse cond ->
+            eval_ocmp_eq_core g cond s1;
+            eval_ocmp_eq_core g cond t1
+          | _ -> ()
+        );
+        let (s2, jump_taken) = BS.machine_eval_jump_condition s1 j.jump_cond in
+        let (t2, _         ) = BS.machine_eval_jump_condition t1 j.jump_cond in
+        let n' = if jump_taken then j.jump_target else n + 1 in
+        let f':int = if n < n' then f else f - 1 in
+        if f' >= 0 then (
+          eval_unstructured_eq_core g blocks n' f' s2;
+          eval_unstructured_eq_core g blocks n' f' t2
+        )
+  )
 
 let eval_code_eq_f (c:code) (f:fuel) (s1 s2:machine_state) : Lemma
   (requires state_eq_S false s1 s2)
@@ -237,6 +326,13 @@ let eval_while_eq_f (cond:ocmp) (body:code) (f:fuel) (s1 s2:machine_state) : Lem
   =
   eval_while_eq_core false cond body f s1; eval_while_eq_core false cond body f s2
 
+let eval_unstructured_eq_f (blocks:list BS.ublock) (n:nat) (f:fuel) (s1 s2:machine_state) : Lemma
+  (requires state_eq_S false s1 s2)
+  (ensures state_eq_opt false (BS.machine_eval_unstructured blocks n f s1) (BS.machine_eval_unstructured blocks n f s2))
+  [SMTPat (BS.machine_eval_unstructured blocks n f s1); SMTPat (BS.machine_eval_unstructured blocks n f s2)]
+  =
+  eval_unstructured_eq_core false blocks n f s1; eval_unstructured_eq_core false blocks n f s2
+
 let eval_code_eq_t (c:code) (f:fuel) (s1 s2:machine_state) : Lemma
   (requires state_eq_S true s1 s2)
   (ensures state_eq_opt true (BS.machine_eval_code c f s1) (BS.machine_eval_code c f s2))
@@ -257,6 +353,24 @@ let eval_while_eq_t (cond:ocmp) (body:code) (f:fuel) (s1 s2:machine_state) : Lem
   [SMTPat (BS.machine_eval_while cond body f s1); SMTPat (BS.machine_eval_while cond body f s2)]
   =
   eval_while_eq_core true cond body f s1; eval_while_eq_core true cond body f s2
+
+let eval_unstructured_eq_t (blocks:list BS.ublock) (n:nat) (f:fuel) (s1 s2:machine_state) : Lemma
+  (requires state_eq_S true s1 s2)
+  (ensures state_eq_opt true (BS.machine_eval_unstructured blocks n f s1) (BS.machine_eval_unstructured blocks n f s2))
+  [SMTPat (BS.machine_eval_unstructured blocks n f s1); SMTPat (BS.machine_eval_unstructured blocks n f s2)]
+  =
+  eval_unstructured_eq_core true blocks n f s1; eval_unstructured_eq_core true blocks n f s2
+
+let eval_ocmp_eq_t (c:ocmp) (s1 s2:machine_state) : Lemma
+  (requires state_eq_S true s1 s2)
+  (ensures (
+    let (s1', b1) = BS.machine_eval_ocmp s1 c in
+    let (s2', b2) = BS.machine_eval_ocmp s2 c in
+    state_eq_S true s1' s2' /\ b1 == b2
+  ))
+  [SMTPat (BS.machine_eval_ocmp s1 c); SMTPat (BS.machine_eval_ocmp s2 c)]
+  =
+  eval_ocmp_eq_core true c s1; eval_ocmp_eq_core true c s2
 
 let eval_code_ts (g:bool) (c:code) (s0:machine_state) (f0:fuel) (s1:machine_state) : Type0 =
   state_eq_opt g (BS.machine_eval_code c f0 s0) (Some s1)
@@ -282,6 +396,25 @@ let rec increase_fuel (g:bool) (c:code) (s0:machine_state) (f0:fuel) (sN:machine
             if s2.BS.ms_ok then increase_fuel g (While cond c) s2 (f0 - 1) sN (fN - 1)
             else ()
       )
+  | Unstructured blocks -> increase_fuel_unstructured g blocks 0 s0 f0 sN fN
+and increase_fuel_unstructured (g:bool) (blocks:list BS.ublock) (n:nat) (s0:machine_state) (f0:fuel) (sN:machine_state) (fN:fuel) : Lemma
+  (requires state_eq_opt g (BS.machine_eval_unstructured blocks n f0 s0) (Some sN) /\ f0 <= fN)
+  (ensures state_eq_opt g (BS.machine_eval_unstructured blocks n fN s0) (Some sN))
+  (decreases %[f0; blocks; BS.remaining_blocks blocks n])
+  =
+  if n < List.Tot.length blocks then (
+    let (c, jump) = BS.list_index blocks n in
+    match BS.machine_eval_code c f0 s0 with
+    | None -> ()
+    | Some s1 ->
+        increase_fuel g c s0 f0 s1 fN;
+        if s1.BS.ms_ok then (
+          let (s2, jump_taken) = BS.machine_eval_jump_condition s1 jump.jump_cond in
+          let n' = if jump_taken then jump.jump_target else n + 1 in
+          let (f0', fN') = if n < n' then (f0, fN) else (f0 - 1, fN - 1) in
+          increase_fuel_unstructured g blocks n' s2 f0' sN fN'
+        )
+  )
 and increase_fuels (g:bool) (c:codes) (s0:machine_state) (f0:fuel) (sN:machine_state) (fN:fuel) : Lemma
   (requires eval_code_ts g (Block c) s0 f0 sN /\ f0 <= fN)
   (ensures eval_code_ts g (Block c) s0 fN sN)

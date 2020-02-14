@@ -279,6 +279,8 @@ and print_code (c:code) (n:int) (p:printer) : string & int =
     let label2 = p.align() ^ " 16\nL" ^ string_of_int n2 ^ ":\n" in
     let cmp = print_cmp cond n1 p in
     (jmp ^ label1 ^ body_str ^ label2 ^ cmp, n')
+  | Unstructured _ ->
+    ("** NOT IMPLEMENTED **", n)
 
 let print_header (p:printer) =
   print_string (p.header())

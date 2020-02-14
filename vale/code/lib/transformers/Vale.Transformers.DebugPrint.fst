@@ -29,6 +29,7 @@ let rec aux_print_code (c:code) : string =
   | Block l -> "(" ^ aux_print_codes l ^ ")"
   | IfElse _ t f -> "I" ^ aux_print_code t ^ aux_print_code f
   | While _ b -> "W" ^ aux_print_code b
+  | Unstructured _ -> "Unstructured"
 
 and aux_print_codes (c:codes) : string =
   match c with

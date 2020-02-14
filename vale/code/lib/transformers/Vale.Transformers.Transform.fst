@@ -49,10 +49,11 @@ let reorder orig hint =
     if code_modifies_ghost orig then Err "code directly modifies ghost state (via ins_Ghost instruction)" else
     let orig' = IR.purge_empty_codes [orig] in
     ts <-- IR.find_transformation_hints orig' [hint];
+    if not (IR.structureds orig') then Err "Unstructured" else (
     transformed <-- IR.perform_reordering_with_hints ts orig';
     prints_to_same_code (Block transformed) hint;;
     return transformed
-  ) orig
+  )) orig
 
 #push-options "--max_fuel 2 --max_ifuel 1"
 let lemma_code_codes (c:code) (fuel:nat) (s:machine_state) :
@@ -78,6 +79,7 @@ let lemma_reorder orig hint transformed va_s0 va_sM va_fM =
   match IR.find_transformation_hints orig' [hint] with
   | Err _ -> va_sM, va_fM
   | Ok ts ->
+    if not (IR.structureds orig') then (va_sM, va_fM) else
     match IR.perform_reordering_with_hints ts orig' with
     | Err _ -> va_sM, va_fM
     | Ok tr ->

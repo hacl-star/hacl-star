@@ -108,12 +108,24 @@ let operand64:eqtype = operand nat64 reg_64
 [@va_qattr]
 let operand128:eqtype = operand quad32 reg_xmm
 
+type jump_condition (t_ocmp:Type0) =
+| JNever: jump_condition t_ocmp
+| JAlways: jump_condition t_ocmp
+| JIfTrue: t_ocmp -> jump_condition t_ocmp
+| JIfFalse: t_ocmp -> jump_condition t_ocmp
+
+type jump (t_ocmp:Type0) = {
+  jump_cond:jump_condition t_ocmp;
+  jump_target:nat; // index into sequence of labeled blocks, or to end
+}
+
 noeq
 type precode (t_ins:Type0) (t_ocmp:eqtype) : Type0 =
   | Ins: ins:t_ins -> precode t_ins t_ocmp
   | Block: block:list (precode t_ins t_ocmp) -> precode t_ins t_ocmp
   | IfElse: ifCond:t_ocmp -> ifTrue:precode t_ins t_ocmp -> ifFalse:precode t_ins t_ocmp -> precode t_ins t_ocmp
   | While: whileCond:t_ocmp -> whileBody:precode t_ins t_ocmp -> precode t_ins t_ocmp
+  | Unstructured: blocks:list (precode t_ins t_ocmp & jump t_ocmp) -> precode t_ins t_ocmp // labeled blocks with jumps/fallthroughs at the end
 
 type observation:eqtype =
   | BranchPredicate: pred:bool -> observation

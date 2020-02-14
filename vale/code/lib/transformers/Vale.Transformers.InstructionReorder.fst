@@ -116,7 +116,7 @@ let rec lemma_write_same_constants_symmetric (c1 c2:locations_with_values) :
     lemma_write_same_constants_symmetric xs c2;
     lemma_write_same_constants_symmetric xs ys
 
-let rec lemma_write_exchange_allowed_symmetric (w1 w2:locations) (c1 c2:locations_with_values) :
+let lemma_write_exchange_allowed_symmetric (w1 w2:locations) (c1 c2:locations_with_values) :
   Lemma
     (ensures (!!(write_exchange_allowed w1 w2 c1 c2) = !!(write_exchange_allowed w2 w1 c2 c1))) =
   lemma_write_same_constants_symmetric c1 c2
@@ -420,7 +420,21 @@ let filt_state (s:machine_state) =
 
 #push-options "--z3rlimit 10 --max_fuel 1 --max_ifuel 1"
 
-let rec lemma_eval_code_equiv_states (c : code) (fuel:nat) (s1 s2 : machine_state) :
+let rec structured (c:code) : bool =
+  match c with
+  | Ins _ -> true
+  | Block cs -> structureds cs
+  | IfElse _ ct cf -> structured ct && structured cf
+  | While _ body -> structured body
+  | Unstructured _ -> false
+and structureds (cs:codes) : bool =
+  match cs with
+  | [] -> true
+  | c::cs -> structured c && structureds cs
+let code' = c:code{structured c}
+let codes' = cs:codes{structureds cs}
+
+let rec lemma_eval_code_equiv_states (c : code') (fuel:nat) (s1 s2 : machine_state) :
   Lemma
     (requires (equiv_states s1 s2))
     (ensures (
@@ -450,7 +464,7 @@ let rec lemma_eval_code_equiv_states (c : code) (fuel:nat) (s1 s2 : machine_stat
   | While cond body ->
     lemma_eval_while_equiv_states cond body fuel s1 s2
 
-and lemma_eval_codes_equiv_states (cs : codes) (fuel:nat) (s1 s2 : machine_state) :
+and lemma_eval_codes_equiv_states (cs : codes') (fuel:nat) (s1 s2 : machine_state) :
   Lemma
     (requires (equiv_states s1 s2))
     (ensures (
@@ -472,7 +486,7 @@ and lemma_eval_codes_equiv_states (cs : codes) (fuel:nat) (s1 s2 : machine_state
       let Some s1, Some s2 = s1'', s2'' in
       lemma_eval_codes_equiv_states cs fuel s1 s2
 
-and lemma_eval_while_equiv_states (cond:ocmp) (body:code) (fuel:nat) (s1 s2:machine_state) :
+and lemma_eval_while_equiv_states (cond:ocmp) (body:code') (fuel:nat) (s1 s2:machine_state) :
   Lemma
     (requires (equiv_states s1 s2))
     (ensures (
@@ -1065,14 +1079,15 @@ let lemma_feq_bounded_effects (rw:rw_set) (f1 f2:st unit) :
     )
   )
 
-let rec safely_bounded_code_p (c:code) : bool =
+let rec safely_bounded_code_p (c:code) : (b:bool{b ==> structured c}) =
   match c with
   | Ins i -> safely_bounded i
   | Block l -> safely_bounded_codes_p l
   | IfElse c t f -> false (* Temporarily disabled. TODO: Re-enable this. safely_bounded_code_p t && safely_bounded_code_p f *)
   | While c b -> false (* Temporarily disabled. TODO: Re-enable this. safely_bounded_code_p b *)
+  | Unstructured _ -> false
 
-and safely_bounded_codes_p (l:codes) : bool =
+and safely_bounded_codes_p (l:codes) : (b:bool{b ==> structureds l}) =
   match l with
   | [] -> true
   | x :: xs ->
@@ -1136,7 +1151,7 @@ let lemma_instruction_exchange (i1 i2 : ins) (s1 s2 : machine_state) :
 /// Not-ok states lead to erroring states upon execution
 
 #push-options "--initial_fuel 2 --max_fuel 2 --initial_ifuel 1 --max_ifuel 1"
-let rec lemma_not_ok_propagate_code (c:code) (fuel:nat) (s:machine_state) :
+let rec lemma_not_ok_propagate_code (c:code') (fuel:nat) (s:machine_state) :
   Lemma
     (requires (not s.ms_ok))
     (ensures (erroring_option_state (machine_eval_code c fuel s)))
@@ -1151,7 +1166,7 @@ let rec lemma_not_ok_propagate_code (c:code) (fuel:nat) (s:machine_state) :
   | While _ _ ->
     lemma_not_ok_propagate_while c fuel s
 
-and lemma_not_ok_propagate_codes (l:codes) (fuel:nat) (s:machine_state) :
+and lemma_not_ok_propagate_codes (l:codes') (fuel:nat) (s:machine_state) :
   Lemma
     (requires (not s.ms_ok))
     (ensures (erroring_option_state (machine_eval_codes l fuel s)))
@@ -1164,7 +1179,7 @@ and lemma_not_ok_propagate_codes (l:codes) (fuel:nat) (s:machine_state) :
     | None -> ()
     | Some s -> lemma_not_ok_propagate_codes xs fuel s
 
-and lemma_not_ok_propagate_while (c:code{While? c}) (fuel:nat) (s:machine_state) :
+and lemma_not_ok_propagate_while (c:code'{While? c}) (fuel:nat) (s:machine_state) :
   Lemma
     (requires (not s.ms_ok))
     (ensures (erroring_option_state (machine_eval_code c fuel s)))
@@ -1242,7 +1257,7 @@ let lemma_only_affects_to_unchanged_except locs f s : (* REVIEW: Why is this eve
     (requires (only_affects locs f /\ (run f s).ms_ok))
     (ensures (unchanged_except locs s (run f s))) = ()
 
-let lemma_equiv_code_codes (c:code) (cs:codes) (fuel:nat) (s:machine_state) :
+let lemma_equiv_code_codes (c:code') (cs:codes') (fuel:nat) (s:machine_state) :
   Lemma
     (ensures (
         let open Vale.X64.Machine_Semantics_s in
@@ -1271,7 +1286,7 @@ let lemma_equiv_code_codes (c:code) (cs:codes) (fuel:nat) (s:machine_state) :
     lemma_not_ok_propagate_codes (c :: cs) fuel s
   )
 
-let lemma_bounded_effects_code_codes_aux1 (c:code) (cs:codes) (rw:rw_set) (fuel:nat) s a :
+let lemma_bounded_effects_code_codes_aux1 (c:code') (cs:codes') (rw:rw_set) (fuel:nat) s a :
   Lemma
     (requires (
         let open Vale.X64.Machine_Semantics_s in
@@ -1295,7 +1310,7 @@ let lemma_bounded_effects_code_codes_aux1 (c:code) (cs:codes) (rw:rw_set) (fuel:
   assert (equiv_states_or_both_not_ok s_12 s12);
   lemma_only_affects_to_unchanged_except rw.loc_writes f s
 
-let rec lemma_bounded_effects_code_codes_aux2 (c:code) (cs:codes) (fuel:nat) cw s :
+let rec lemma_bounded_effects_code_codes_aux2 (c:code') (cs:codes') (fuel:nat) cw s :
   Lemma
     (requires (
         let open Vale.X64.Machine_Semantics_s in
@@ -1327,7 +1342,7 @@ let lemma_unchanged_at_reads_implies_both_ok_equal (rw:rw_set) (f:st unit) s1 s2
         ((run f s1).ms_ok ==>
          unchanged_at rw.loc_writes (run f s1) (run f s2)))) = ()
 
-let lemma_bounded_effects_code_codes_aux3 (c:code) (cs:codes) (rw:rw_set) (fuel:nat) s1 s2 :
+let lemma_bounded_effects_code_codes_aux3 (c:code') (cs:codes') (rw:rw_set) (fuel:nat) s1 s2 :
   Lemma
     (requires (
         let open Vale.X64.Machine_Semantics_s in
@@ -1354,7 +1369,7 @@ let lemma_bounded_effects_code_codes_aux3 (c:code) (cs:codes) (rw:rw_set) (fuel:
   assert ((run f s2).ms_ok == (run f12 s2).ms_ok);
   lemma_unchanged_at_reads_implies_both_ok_equal rw f s1 s2
 
-let lemma_bounded_effects_code_codes_aux4 (c:code) (cs:codes) (rw:rw_set) (fuel:nat) s1 s2 :
+let lemma_bounded_effects_code_codes_aux4 (c:code') (cs:codes') (rw:rw_set) (fuel:nat) s1 s2 :
   Lemma
     (requires (
         let open Vale.X64.Machine_Semantics_s in
@@ -1380,7 +1395,7 @@ let lemma_bounded_effects_code_codes_aux4 (c:code) (cs:codes) (rw:rw_set) (fuel:
   assert (run f s1 == run f12 s1);
   assert (run f s2 == run f12 s2)
 
-let lemma_bounded_effects_code_codes (c:code) (cs:codes) (rw:rw_set) (fuel:nat) :
+let lemma_bounded_effects_code_codes (c:code') (cs:codes') (rw:rw_set) (fuel:nat) :
   Lemma
     (requires (
         let open Vale.X64.Machine_Semantics_s in
@@ -1485,6 +1500,7 @@ let lemma_code_exchange_allowed (c1 c2:safely_bounded_code) (fuel:nat) (s:machin
 #push-options "--initial_fuel 2 --max_fuel 2 --initial_ifuel 1 --max_ifuel 1"
 let rec bubble_to_top (cs:codes) (i:nat{i < L.length cs}) : possibly (cs':codes{
     let a, b, c = L.split3 cs i in
+    (structureds cs ==> structureds cs') /\
     cs' == L.append a c /\
     L.length cs' = L.length cs - 1
   }) =
@@ -1577,11 +1593,62 @@ let rec is_empty_code (c:code) : bool =
   | Block l -> is_empty_codes l
   | IfElse _ t f -> false
   | While _ c -> false
+  | Unstructured _ -> false
 
 and is_empty_codes (c:codes) : bool =
   match c with
   | [] -> true
   | x :: xs -> is_empty_code x && is_empty_codes xs
+
+let lemma_cons_codes' (c:code) (cs:codes) : Lemma
+  (requires structured c /\ structureds cs)
+  (ensures structureds (c::cs))
+  [SMTPat (c::cs)]
+  =
+  ()
+
+let lemma_single_codes' (c:code) : Lemma
+  (requires structured c)
+  (ensures structureds [c])
+  [SMTPat [c]]
+  =
+  assert (structureds [])
+
+let rec lemma_append_codes' (cs1 cs2:codes) : Lemma
+  (requires structureds cs1 /\ structureds cs2)
+  (ensures structureds (L.append cs1 cs2))
+  [SMTPat (L.append cs1 cs2)]
+  =
+  match cs1 with
+  | [] -> ()
+  | c::cs -> lemma_append_codes' cs cs2
+
+let rec lemma_index_codes' (cs:codes) (n:nat) : Lemma
+  (requires structureds cs /\ n < L.length cs)
+  (ensures structured (L.index cs n))
+  [SMTPat (L.index cs n)]
+  =
+  if n > 0 then lemma_index_codes' (Cons?.tl cs) (n - 1)
+
+let rec lemma_index_split3' (cs:codes) (n:nat) : Lemma
+  (requires structureds cs /\ n < L.length cs)
+  (ensures (
+    let (cs1, c, cs2) = split3 cs n in
+    structureds cs1 /\ structureds cs2 /\ structured c
+  ))
+  [SMTPat (split3 cs n)]
+  =
+  if n > 0 then lemma_index_split3' (Cons?.tl cs) (n - 1)
+
+let rec lemma_index_L_split3' (cs:codes) (n:nat) : Lemma
+  (requires structureds cs /\ n < L.length cs)
+  (ensures (
+    let (cs1, c, cs2) = L.split3 cs n in
+    structureds cs1 /\ structureds cs2 /\ structured c
+  ))
+  [SMTPat (L.split3 cs n)]
+  =
+  if n > 0 then lemma_index_L_split3' (Cons?.tl cs) (n - 1)
 
 let rec perform_reordering_with_hint (t:transformation_hint) (c:codes) : possibly codes =
   match c with
@@ -1676,6 +1743,50 @@ and perform_reordering_with_hints (ts:transformation_hints) (c:codes) : possibly
         return (x :: xs')
       )
 
+#push-options "--initial_fuel 3 --max_fuel 3 --initial_ifuel 1 --max_ifuel 1 --z3rlimit 100"
+let rec lemma_structured_perform_reordering_with_hint (t:transformation_hint) (c:codes') : Lemma
+  (requires Ok? (perform_reordering_with_hint t c))
+  (ensures structureds (Ok?.v (perform_reordering_with_hint t c)))
+  [SMTPat (perform_reordering_with_hint t c)]
+  =
+  match c with
+  | x :: xs ->
+    if is_empty_codes [x] then lemma_structured_perform_reordering_with_hint t xs else (
+      match t with
+      | MoveUpFrom i -> ()
+      | DiveInAt i t' ->
+        FStar.List.Pure.lemma_split3_length c i;
+        let (left, mid, right) = split3 c i in
+        assert (structured mid);
+        let Block l = mid in
+        lemma_structured_perform_reordering_with_hint t' l;
+        let Ok (y :: ys) = perform_reordering_with_hint t' l in
+        L.append_length left [y];
+        ()
+      | InPlaceIfElse tht thf ->
+        let IfElse c (Block t) (Block f) = x in
+        lemma_structured_perform_reordering_with_hints tht t;
+        lemma_structured_perform_reordering_with_hints thf f;
+        ()
+      | InPlaceWhile thb ->
+        let While c (Block b) = x in
+        lemma_structured_perform_reordering_with_hints thb b;
+        ()
+    )
+and lemma_structured_perform_reordering_with_hints (ts:transformation_hints) (c:codes') : Lemma
+  (requires Ok? (perform_reordering_with_hints ts c))
+  (ensures structureds (Ok?.v (perform_reordering_with_hints ts c)))
+  [SMTPat (perform_reordering_with_hints ts c)]
+  =
+  match ts with
+  | [] -> ()
+  | t :: ts' ->
+    lemma_structured_perform_reordering_with_hint t c;
+    let Ok (x :: xs) = perform_reordering_with_hint t c in
+    lemma_structured_perform_reordering_with_hints ts' xs;
+    ()
+#pop-options
+
 (* NOTE: We assume this function since it is not yet exposed. Once
    exposed from the instructions module, we should be able to remove
    it from here.
@@ -1716,6 +1827,7 @@ let rec fully_unblocked_code (c:code) : codes =
   | Block l -> fully_unblocked_codes l
   | IfElse c t f -> [IfElse c (Block (fully_unblocked_code t)) (Block (fully_unblocked_code f))]
   | While c b -> [While c (Block (fully_unblocked_code b))]
+  | Unstructured _ -> []
 
 and fully_unblocked_codes (c:codes) : codes =
   match c with
@@ -1772,6 +1884,7 @@ let rec metric_for_code (c:code) : GTot nat =
     | Block l -> metric_for_codes l
     | IfElse _ t f -> metric_for_code t + metric_for_code f
     | While _ b -> metric_for_code b
+    | Unstructured _ -> 0
   )
 
 and metric_for_codes (c:codes) : GTot nat =
@@ -1884,7 +1997,7 @@ let rec find_transformation_hints (c1 c2:codes) :
 /// identically as per the [equiv_states] relation.
 
 #push-options "--z3rlimit 10 --initial_fuel 3 --max_fuel 3 --initial_ifuel 1 --max_ifuel 1"
-let rec lemma_bubble_to_top (cs : codes) (i:nat{i < L.length cs}) (fuel:nat) (s s' : machine_state) :
+let rec lemma_bubble_to_top (cs : codes') (i:nat{i < L.length cs}) (fuel:nat) (s s' : machine_state) :
   Lemma
     (requires (
         (s'.ms_ok) /\
@@ -1952,6 +2065,7 @@ let rec lemma_is_empty_code (c:code) (fuel:nat) (s:machine_state) :
   | Block l -> lemma_is_empty_codes l fuel s
   | IfElse _ t f -> ()
   | While _ c -> ()
+  | Unstructured _ -> ()
 and lemma_is_empty_codes (cs:codes) (fuel:nat) (s:machine_state) :
   Lemma
     (requires (is_empty_codes cs))
@@ -1965,7 +2079,7 @@ and lemma_is_empty_codes (cs:codes) (fuel:nat) (s:machine_state) :
 
 #restart-solver
 #push-options "--z3rlimit 100 --initial_fuel 3 --max_fuel 3 --initial_ifuel 1 --max_ifuel 1"
-let rec lemma_perform_reordering_with_hint (t:transformation_hint) (cs:codes) (fuel:nat) (s:machine_state) :
+let rec lemma_perform_reordering_with_hint (t:transformation_hint) (cs:codes') (fuel:nat) (s:machine_state) :
   Lemma
     (requires (
         (Ok? (perform_reordering_with_hint t cs)) /\
@@ -1973,6 +2087,7 @@ let rec lemma_perform_reordering_with_hint (t:transformation_hint) (cs:codes) (f
         (Some?.v (machine_eval_codes cs fuel s)).ms_ok))
     (ensures (
         let Ok cs' = perform_reordering_with_hint t cs in
+        structureds cs' /\
         equiv_ostates
           (machine_eval_codes cs fuel s)
           (machine_eval_codes cs' fuel s)))
@@ -1998,6 +2113,7 @@ let rec lemma_perform_reordering_with_hint (t:transformation_hint) (cs:codes) (f
         FStar.List.Pure.lemma_split3_append c i;
         FStar.List.Pure.lemma_split3_length c i;
         let left, mid, right = L.split3 c i in
+        assert (structured mid);
         let Block l = mid in
         let Ok (y :: ys) = perform_reordering_with_hint t' l in
         L.append_length left [y];
@@ -2101,7 +2217,7 @@ let rec lemma_perform_reordering_with_hint (t:transformation_hint) (cs:codes) (f
       )
   )
 
-and lemma_perform_reordering_with_hints (ts:transformation_hints) (cs:codes) (fuel:nat) (s:machine_state) :
+and lemma_perform_reordering_with_hints (ts:transformation_hints) (cs:codes') (fuel:nat) (s:machine_state) :
   Lemma
     (requires (
         (Ok? (perform_reordering_with_hints ts cs)) /\
@@ -2109,6 +2225,7 @@ and lemma_perform_reordering_with_hints (ts:transformation_hints) (cs:codes) (fu
         (Some?.v (machine_eval_codes cs fuel s)).ms_ok))
     (ensures (
         let Ok cs' = perform_reordering_with_hints ts cs in
+        structureds cs' /\
         equiv_ostates
           (machine_eval_codes cs fuel s)
           (machine_eval_codes cs' fuel s)))

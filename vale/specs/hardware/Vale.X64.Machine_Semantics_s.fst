@@ -717,6 +717,25 @@ let machine_eval_ocmp (s:machine_state) (c:ocmp) : machine_state & bool =
   let s = {s with ms_flags = havoc_flags; ms_trace = (BranchPredicate b)::s.ms_trace} in
   (s, b)
 
+let machine_eval_jump_condition (s:machine_state) (c:jump_condition ocmp) : machine_state & bool =
+  match c with
+  | JNever -> (s, false)
+  | JAlways -> (s, true)
+  | JIfTrue c -> machine_eval_ocmp s c
+  | JIfFalse c -> let (s, b) = machine_eval_ocmp s c in (s, not b)
+
+let remaining_blocks (#a:Type0) (blocks:list a) (n:nat) =
+  let l = List.Tot.length blocks in
+  if n > l then 0 else l - n
+
+unfold let ublock = code & (jump ocmp)
+
+let rec list_index (#a:Type) (l:list a) (n:nat) : Pure a
+  (requires n < List.Tot.length l)
+  (ensures fun x -> x == List.Tot.index l n /\ x << l)
+  =
+  match l with h::t -> if n = 0 then h else list_index t (n - 1)
+
 (*
 These functions return an option state
 None case arises when the while loop runs out of fuel
@@ -734,6 +753,8 @@ let rec machine_eval_code (c:code) (fuel:nat) (s:machine_state) : Tot (option ma
     if b then machine_eval_code ct fuel s' else machine_eval_code cf fuel s'
   | While cond body ->
     machine_eval_while cond body fuel s
+  | Unstructured blocks ->
+    machine_eval_unstructured blocks 0 fuel s
 and machine_eval_codes (cs:codes) (fuel:nat) (s:machine_state) : Tot (option machine_state)
   (decreases %[fuel; cs])
   =
@@ -756,3 +777,17 @@ and machine_eval_while (cond:ocmp) (body:code) (fuel:nat) (s0:machine_state) : T
     | Some s2 ->
       if not s2.ms_ok then Some s2 else // propagate failure immediately
       machine_eval_while cond body (fuel - 1) s2
+and machine_eval_unstructured (blocks:list ublock) (n:nat) (fuel:nat) (s0:machine_state)
+  : Tot (option machine_state) (decreases %[fuel; blocks; remaining_blocks blocks n])
+  =
+  if n >= List.Tot.length blocks then Some s0 else // a jump past the last block is a jump to the end label
+  let (c, j) = list_index blocks n in
+  match machine_eval_code c fuel s0 with
+  | None -> None
+  | Some s1 ->
+    if not s1.ms_ok then Some s1 else // propagate failure immediately
+    let (s2, jump_taken) = machine_eval_jump_condition s1 j.jump_cond in
+    let n' = if jump_taken then j.jump_target else n + 1 in
+    let fuel':int = if n < n' then fuel else fuel - 1 in
+    if fuel' < 0 then None else
+    machine_eval_unstructured blocks n' fuel' s2

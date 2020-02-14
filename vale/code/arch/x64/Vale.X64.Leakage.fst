@@ -223,6 +223,7 @@ and check_if_code_consumes_fixed_time (code:S.code) (ts:analysis_taints) : bool 
       (true, combine_analysis_taints tsIfTrue tsIfFalse)
 
   | While cond body -> check_if_loop_consumes_fixed_time code ts
+  | Unstructured _ -> (false, ts) // REVIEW: this is overly conservative
 
 and check_if_loop_consumes_fixed_time c (ts:analysis_taints) : (bool & analysis_taints) =
   let ts = normalize_taints ts in
@@ -250,20 +251,14 @@ and check_if_loop_consumes_fixed_time c (ts:analysis_taints) : (bool & analysis_
       check_if_loop_consumes_fixed_time c combined_ts
     )
 
-val monotone_ok_eval: (code:S.code) -> (fuel:nat) -> (s:S.machine_state) -> Lemma
- (requires True)
- (ensures (let s' = machine_eval_code code fuel s in
-    Some? s' /\ (Some?.v s').S.ms_ok ==> s.S.ms_ok))
- (decreases %[code; 0])
-
-val monotone_ok_eval_block: (codes:S.codes) -> (fuel:nat) -> (s:S.machine_state) -> Lemma
- (requires True)
- (ensures (let s' = machine_eval_codes codes fuel s in
-    Some? s' /\ (Some?.v s').S.ms_ok ==> s.S.ms_ok))
- (decreases %[codes;1])
-
 #set-options "--z3rlimit 20 --initial_ifuel 0 --max_ifuel 1 --initial_fuel 2 --max_fuel 2"
-let rec monotone_ok_eval code fuel s =
+let rec monotone_ok_eval (code:S.code) (fuel:nat) (s:S.machine_state) : Lemma
+  (requires True)
+  (ensures (
+    let s' = machine_eval_code code fuel s in
+    Some? s' /\ (Some?.v s').S.ms_ok ==> s.S.ms_ok))
+  (decreases %[code; 0])
+  =
   match code with
   | Ins ins -> reveal_opaque (`%S.machine_eval_code_ins) S.machine_eval_code_ins
   | Block block -> monotone_ok_eval_block block fuel s
@@ -277,15 +272,34 @@ let rec monotone_ok_eval code fuel s =
     if not b then () else
     monotone_ok_eval body (fuel - 1) st;
     ()
+  | Unstructured blocks -> monotone_ok_eval_unstructured blocks 0 fuel s
 
-and monotone_ok_eval_block block fuel s =
-  match block with
+and monotone_ok_eval_block (codes:S.codes) (fuel:nat) (s:S.machine_state) : Lemma
+  (requires True)
+  (ensures (
+    let s' = machine_eval_codes codes fuel s in
+    Some? s' /\ (Some?.v s').S.ms_ok ==> s.S.ms_ok))
+  (decreases %[codes; 1])
+  =
+  match codes with
   | [] -> ()
   | hd :: tl ->
     let s' = machine_eval_code hd fuel s in
     if None? s' then () else
     monotone_ok_eval_block tl fuel (Some?.v s');
     monotone_ok_eval hd fuel s
+
+and monotone_ok_eval_unstructured (blocks:list S.ublock) (n:nat) (fuel:nat) (s:S.machine_state) : Lemma
+  (requires True)
+  (ensures (
+    let s' = S.machine_eval_unstructured blocks n fuel s in
+    Some? s' /\ (Some?.v s').S.ms_ok ==> s.S.ms_ok))
+  (decreases %[blocks; 1])
+  =
+  if n < List.Tot.length blocks then (
+    let (c, _) = S.list_index blocks n in
+    monotone_ok_eval c fuel s
+  )
 
 val monotone_ok_eval_while: (code:S.code{While? code}) -> (fuel:nat) -> (s:S.machine_state) -> Lemma
   (requires True)
@@ -347,7 +361,8 @@ val lemma_loop_explicit_leakage_free: (ts:analysis_taints) -> (code:S.code{While
   (decreases %[fuel; code; 0])
 
 #reset-options "--initial_ifuel 2 --max_ifuel 2 --initial_fuel 1 --max_fuel 2 --z3rlimit 300"
-let rec lemma_code_explicit_leakage_free ts code s1 s2 fuel = match code with
+let rec lemma_code_explicit_leakage_free ts code s1 s2 fuel =
+  match code with
   | Ins ins -> lemma_ins_leakage_free ts ins
   | Block block -> lemma_block_explicit_leakage_free ts block s1 s2 fuel
   | IfElse ifCond ifTrue ifFalse ->
@@ -364,6 +379,7 @@ let rec lemma_code_explicit_leakage_free ts code s1 s2 fuel = match code with
     monotone_ok_eval ifFalse fuel st2;
     lemma_code_explicit_leakage_free ts ifFalse st1 st2 fuel
   | While _ _ -> lemma_loop_explicit_leakage_free ts code s1 s2 fuel
+  | Unstructured _ -> ()
 
 and lemma_block_explicit_leakage_free ts block s1 s2 fuel = match block with
   | [] -> ()

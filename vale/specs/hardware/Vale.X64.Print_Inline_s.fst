@@ -83,6 +83,7 @@ let rec build_reserved_args (c:code) (reserved:reg_64 -> bool)
       let reservedT = build_reserved_args ifTrue reserved in
       build_reserved_args ifFalse reservedT r
   | While cond body -> build_reserved_args body reserved r
+  | Unstructured _ -> true // TODO
 )
 
 and build_reserved_args_block (l:list code) (reserved:reg_64 -> bool)
@@ -296,6 +297,8 @@ and print_code (c:code) (n:int) (p:P.printer) : string & int =
     let label2 = "    \"" ^ p.P.align() ^ " 16\nL" ^ string_of_int n2 ^ ":\"\n" in
     let cmp = print_cmp cond n1 p in
     jmp ^ label1 ^ body_str ^ label2 ^ cmp, n'
+  | Unstructured _ ->
+    ("** NOT IMPLEMENTED **", n)
 
 let rec print_fn_comments = function
   | [] -> ""
@@ -307,6 +310,7 @@ let rec remove_blank (c:code) : code =
   | Block b -> Block (remove_blanks b)
   | IfElse cond ct cf -> IfElse cond (remove_blank ct) (remove_blank cf)
   | While cond cb -> While cond (remove_blank cb)
+  | Unstructured _ -> c // TODO
 and remove_blanks (b:codes) : codes =
   match b with
   | [] -> []
