@@ -14,7 +14,7 @@
         "fuel_guarded_inversion_Vale.Def.PossiblyMonad.possibly"
       ],
       0,
-      "4cdb11529f081f33f6acee6e812b2cb4"
+      "408fad4ac96ec8e4a00220a6cf154b16"
     ],
     [
       "Vale.Transformers.Transform.prints_to_same_code",
@@ -29,7 +29,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "a017f520a1f6c4ff35c59b648c83ad9a"
+      "c3ada1869db1d617d1f79f973a5c6111"
     ],
     [
       "Vale.Transformers.Transform.lemma_code_codes",
@@ -64,7 +64,7 @@
         "typing_Vale.X64.Machine_Semantics_s.machine_eval_code"
       ],
       0,
-      "dcf0e9462f72897946e85536992c4278"
+      "9e635d8576b1febaad44d3e854aa9b6d"
     ],
     [
       "Vale.Transformers.Transform.lemma_codes_code",
@@ -93,7 +93,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "f529eaeb2687ed6f2181a255f24a70ee"
+      "4821ac369f5350ad785632f9a2da2bb5"
     ],
     [
       "Vale.Transformers.Transform.lemma_IR_equiv_states_to_equiv_states",
@@ -136,7 +136,7 @@
         "typing_Vale.X64.StateLemmas.state_of_S"
       ],
       0,
-      "31b3aec8ebf8b667f0907b281b66d022"
+      "7652a0d164b7433c870756c6b5438398"
     ],
     [
       "Vale.Transformers.Transform.lemma_reorder",
@@ -185,6 +185,7 @@
         "equation_Vale.X64.Decls.va_require_total",
         "equation_Vale.X64.Flags.sel_curry",
         "equation_Vale.X64.Flags.to_fun",
+        "equation_Vale.X64.Lemmas.core_state",
         "equation_Vale.X64.Lemmas.eval_code",
         "equation_Vale.X64.Lemmas.state_eq_S",
         "equation_Vale.X64.Lemmas.state_eq_opt",
@@ -193,7 +194,6 @@
         "equation_Vale.X64.Machine_Semantics_s.flags_t",
         "equation_Vale.X64.Machine_Semantics_s.ins",
         "equation_Vale.X64.Machine_Semantics_s.ocmp",
-        "equation_Vale.X64.Machine_Semantics_s.regs_t",
         "equation_Vale.X64.Machine_s.flag", "equation_Vale.X64.Regs.to_fun",
         "equation_Vale.X64.StateLemmas.machine_state_eq",
         "equation_Vale.X64.StateLemmas.state_of_S",
@@ -256,7 +256,6 @@
         "projection_inverse_Vale.X64.State.Mkvale_state_vs_regs",
         "projection_inverse_Vale.X64.State.Mkvale_state_vs_stack",
         "projection_inverse_Vale.X64.State.Mkvale_state_vs_stackTaint",
-        "refinement_interpretation_Tm_refine_3b1a603d57602642cd8cec1a9fa6b2c7",
         "refinement_interpretation_Tm_refine_423a970236765465eb8eb63b6e1b8f53",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_72758763fd3a331db555502c82719e64",
@@ -272,9 +271,7 @@
         "typing_Vale.X64.Flags.to_fun",
         "typing_Vale.X64.Machine_Semantics_s.__proj__Mkmachine_state__item__ms_flags",
         "typing_Vale.X64.Machine_Semantics_s.__proj__Mkmachine_state__item__ms_ok",
-        "typing_Vale.X64.Machine_Semantics_s.__proj__Mkmachine_state__item__ms_regs",
         "typing_Vale.X64.Machine_Semantics_s.machine_eval_code",
-        "typing_Vale.X64.Regs.of_fun",
         "typing_Vale.X64.State.__proj__Mkvale_state__item__vs_flags",
         "typing_Vale.X64.State.__proj__Mkvale_state__item__vs_ok",
         "typing_Vale.X64.State.__proj__Mkvale_state__item__vs_regs",
@@ -283,7 +280,7 @@
         "typing_Vale.X64.StateLemmas.state_to_S"
       ],
       0,
-      "f72ef1e85330091d9e31f3cf7207389f"
+      "5f9a513c4ccce3e6f6c576adddd73d2f"
     ],
     [
       "Vale.Transformers.Transform.lemma_check_if_same_printed_code",
@@ -304,7 +301,7 @@
         "typing_Vale.X64.State.__proj__Mkvale_state__item__vs_regs"
       ],
       0,
-      "0c43efabdd30fb2f35faeb34f459fb19"
+      "3d9817e1a26cb766654ab185f1f0d0cc"
     ]
   ]
 ]
