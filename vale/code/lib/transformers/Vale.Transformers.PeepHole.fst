@@ -36,6 +36,7 @@ let rec num_ins_in_code (c:code) : nat =
   | Block l -> num_ins_in_codes l
   | IfElse c t f -> num_ins_in_code t + num_ins_in_code f
   | While c b -> num_ins_in_code b
+  | Unstructured _ -> 0
 
 and num_ins_in_codes (c:codes) : nat =
   match c with
@@ -52,12 +53,13 @@ let rec lemma_num_ins_in_codes_append (c1 c2:codes) :
 /// Next, we want to be able to "pull off" some instructions from
 /// given code, and if necessary, "wrap" them back into code.
 
+#push-options "--initial_fuel 2 --max_fuel 2"
 let rec pull_instructions_from_codes (cs:codes) (num:pos) :
   Pure (option (list ins & codes))
     (requires (True))
     (ensures (function
          | None -> True
-         | Some (_, cs') -> num_ins_in_codes cs' < num_ins_in_codes cs))
+         | Some (_, cs') -> num_ins_in_codes cs' < num_ins_in_codes cs /\ (structureds cs ==> structureds cs')))
     (decreases %[num_blocks_in_codes cs; num]) =
   match cs with
   | [] -> None
@@ -78,11 +80,13 @@ let rec pull_instructions_from_codes (cs:codes) (num:pos) :
       pull_instructions_from_codes (l `L.append` cs') num
     | IfElse _ _ _ -> None
     | While _ _ -> None
+    | Unstructured _ -> None
 
-let rec wrap_instructions (is:list ins) : Tot codes =
+let rec wrap_instructions (is:list ins) : Tot codes' =
   match is with
   | [] -> []
   | i :: is' -> Ins i :: wrap_instructions is'
+#pop-options
 
 /// Finally, the implementation that repeatedly finds a group of
 /// instructions and tries to apply the peephole transformation to
@@ -129,6 +133,7 @@ let rec apply_peephole_to_code (p:peephole) (c:code) :
       let b' = apply_peephole_to_code p b in
       While c b'
     )
+  | Unstructured _ -> c
 
 /// And now, for the proofs!
 
@@ -149,7 +154,8 @@ let rec lemma_wrap_instructions (is:list ins) (fuel:nat) (s:machine_state) :
     lemma_wrap_instructions is' fuel s2;
     lemma_eval_codes_equiv_states (wrap_instructions is') fuel s1 s2
 
-let rec lemma_pull_instructions_from_codes (cs:codes) (num:pos) (fuel:nat) (s:machine_state) :
+#push-options "--initial_fuel 2 --max_fuel 2"
+let rec lemma_pull_instructions_from_codes (cs:codes') (num:pos) (fuel:nat) (s:machine_state) :
   Lemma
     (requires (Some? (pull_instructions_from_codes cs num)))
     (ensures (
@@ -195,9 +201,10 @@ let rec lemma_pull_instructions_from_codes (cs:codes) (num:pos) (fuel:nat) (s:ma
       )
     | IfElse _ _ _ -> ()
     | While _ _ -> ()
+#pop-options
 
 #push-options "--z3rlimit 10"
-let rec lemma_apply_peephole_to_codes (p:peephole) (cs:codes)
+let rec lemma_apply_peephole_to_codes (p:peephole) (cs:codes')
     (fuel:nat) (s:machine_state) :
   Lemma
     (requires (not (erroring_option_state (machine_eval_codes cs fuel s))))
@@ -269,7 +276,7 @@ let rec lemma_apply_peephole_to_codes (p:peephole) (cs:codes)
       )
 #pop-options
 
-let rec lemma_apply_peephole_to_code (p:peephole) (c:code)
+let rec lemma_apply_peephole_to_code (p:peephole) (c:code')
     (fuel:nat) (s:machine_state) :
   Lemma
     (requires (not (erroring_option_state (machine_eval_code c fuel s))))
@@ -309,7 +316,7 @@ let rec lemma_apply_peephole_to_code (p:peephole) (c:code)
       lemma_apply_peephole_to_code_while p c s fuel
     )
 
-and lemma_apply_peephole_to_code_while (p:peephole) (c:code{While? c})
+and lemma_apply_peephole_to_code_while (p:peephole) (c:code'{While? c})
     (s:machine_state) (fuel:nat) :
   Lemma
     (requires (not (erroring_option_state (machine_eval_code c fuel s))))
@@ -378,6 +385,11 @@ let peephole_transform p orig =
       success = va_ffalse "code directly modifies ghost state (via ins_Ghost instruction)";
       result = orig;
     }
+  ) else if not (structured orig) then (
+    {
+      success = va_ffalse "unstructured";
+      result = orig;
+    }
   ) else (
     {
       success = va_ttrue ();
@@ -386,7 +398,7 @@ let peephole_transform p orig =
   )
 
 let lemma_peephole_transform p orig transformed va_s0 va_sM va_fM =
-  if code_modifies_ghost orig then (va_sM, va_fM) else (
+  if code_modifies_ghost orig || not (structured orig) then (va_sM, va_fM) else (
     lemma_apply_peephole_to_code p orig
       va_fM (state_to_S va_s0);
     let Some s = machine_eval_code orig va_fM (state_to_S va_s0) in
