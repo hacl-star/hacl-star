@@ -1,5 +1,5 @@
 [
-  "≠°íwÌ\\\\\u0012{±\u0003M:ù‘|",
+  "Â\u0007íN\u0016\u0017&0·0\u0005≈Hñ\u001c3",
   [
     [
       "Vale.Transformers.Transform.transformation_result_of_possibly_codes",
@@ -14,7 +14,7 @@
         "fuel_guarded_inversion_Vale.Def.PossiblyMonad.possibly"
       ],
       0,
-      "408fad4ac96ec8e4a00220a6cf154b16"
+      "e5ca4a33e2a7cd0ea676bcb92d999513"
     ],
     [
       "Vale.Transformers.Transform.prints_to_same_code",
@@ -29,7 +29,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "c3ada1869db1d617d1f79f973a5c6111"
+      "3ea2632d5c1b76d19e3ad11f78b74c32"
     ],
     [
       "Vale.Transformers.Transform.lemma_code_codes",
@@ -64,7 +64,7 @@
         "typing_Vale.X64.Machine_Semantics_s.machine_eval_code"
       ],
       0,
-      "9e635d8576b1febaad44d3e854aa9b6d"
+      "e0b9c12d6fa67b9397f13f1b5a4d430e"
     ],
     [
       "Vale.Transformers.Transform.lemma_codes_code",
@@ -93,7 +93,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "4821ac369f5350ad785632f9a2da2bb5"
+      "214259f3666f712900006807d7553282"
     ],
     [
       "Vale.Transformers.Transform.lemma_IR_equiv_states_to_equiv_states",
@@ -105,8 +105,8 @@
         "FStar.FunctionalExtensionality_interpretation_Tm_arrow_a7d5cc170be69663c495e8582d2bc62a",
         "Vale.X64.Machine_Semantics_s_interpretation_Tm_arrow_6d1d81ae558d658d7d34082785eb5144",
         "equation_FStar.FunctionalExtensionality.restricted_t",
+        "equation_Vale.Transformers.Common.equiv_states",
         "equation_Vale.Transformers.InstructionReorder.equiv_states",
-        "equation_Vale.Transformers.Transform.equiv_states",
         "equation_Vale.X64.Machine_Semantics_s.cf",
         "equation_Vale.X64.Machine_Semantics_s.flags_t",
         "equation_Vale.X64.Machine_Semantics_s.overflow",
@@ -136,7 +136,7 @@
         "typing_Vale.X64.StateLemmas.state_of_S"
       ],
       0,
-      "7652a0d164b7433c870756c6b5438398"
+      "71152ad7e2065f7fa1adb77d82ac4f3a"
     ],
     [
       "Vale.Transformers.Transform.lemma_reorder",
@@ -172,9 +172,9 @@
         "equation_FStar.FunctionalExtensionality.feq",
         "equation_FStar.FunctionalExtensionality.restricted_t",
         "equation_Prims.nat",
+        "equation_Vale.Transformers.Common.equiv_states",
         "equation_Vale.Transformers.InstructionReorder.equiv_states",
         "equation_Vale.Transformers.InstructionReorder.transformation_hints",
-        "equation_Vale.Transformers.Transform.equiv_states",
         "equation_Vale.Transformers.Transform.reorder",
         "equation_Vale.X64.Bytes_Code_s.code_t",
         "equation_Vale.X64.Bytes_Code_s.codes_t",
@@ -280,7 +280,7 @@
         "typing_Vale.X64.StateLemmas.state_to_S"
       ],
       0,
-      "5f9a513c4ccce3e6f6c576adddd73d2f"
+      "80d2ca2aeec065c84a941cbd7b5e8e0d"
     ],
     [
       "Vale.Transformers.Transform.lemma_check_if_same_printed_code",
@@ -288,9 +288,9 @@
       1,
       0,
       [
-        "@query", "eq2-interp", "equation_Prims.nat",
+        "@query", "equation_Prims.nat",
+        "equation_Vale.Transformers.Common.equiv_states",
         "equation_Vale.Transformers.Transform.check_if_same_printed_code",
-        "equation_Vale.Transformers.Transform.equiv_states",
         "equation_Vale.X64.Decls.va_fuel",
         "equation_Vale.X64.Decls.va_require_total",
         "lemma_Vale.X64.Regs.lemma_equal_intro",
@@ -301,7 +301,49 @@
         "typing_Vale.X64.State.__proj__Mkvale_state__item__vs_regs"
       ],
       0,
-      "3d9817e1a26cb766654ab185f1f0d0cc"
+      "adcc389827a437878408c4de2b47f21f"
+    ],
+    [
+      "Vale.Transformers.Transform.movbe_elim",
+      1,
+      1,
+      0,
+      [ "@query", "lemma_Vale.Transformers.MovbeElim.movbe_elim_correct" ],
+      0,
+      "d974168a446ba2e8965b04a6deb78f6d"
+    ],
+    [
+      "Vale.Transformers.Transform.lemma_movbe_elim",
+      1,
+      1,
+      0,
+      [
+        "@query", "equation_Vale.Transformers.Transform.movbe_elim",
+        "lemma_Vale.Transformers.MovbeElim.movbe_elim_correct"
+      ],
+      0,
+      "3e713a4e39a6d109dc1c54b83ff733cc"
+    ],
+    [
+      "Vale.Transformers.Transform.mov_mov_elim",
+      1,
+      1,
+      0,
+      [ "@query", "lemma_Vale.Transformers.MovMovElim.mov_mov_elim_correct" ],
+      0,
+      "b4e0855542ae45c0974268a6e38e9120"
+    ],
+    [
+      "Vale.Transformers.Transform.lemma_mov_mov_elim",
+      1,
+      1,
+      0,
+      [
+        "@query", "equation_Vale.Transformers.Transform.mov_mov_elim",
+        "lemma_Vale.Transformers.MovMovElim.mov_mov_elim_correct"
+      ],
+      0,
+      "cce67ceb274ded3d665dab1d0ad0b398"
     ]
   ]
 ]
