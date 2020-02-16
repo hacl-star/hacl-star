@@ -103,7 +103,7 @@ operand_type heaplet:vale_heap @ heaplet_id :=
 procedure Mov64(inout dst:dst_opr64, in src:opr64)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_ins(make_instr(I.ins_Mov64, dst, src))}
+    {:instruction mk_ins(make_instr_annotate(I.ins_Mov64, S.AnnotateMov64(), dst, src))}
     ensures
         dst == old(src);
 {

@@ -101,7 +101,14 @@ let va_cmp_gt o1 o2 = BC.OGt o1 o2
 let eval_code = Lemmas.eval_code
 let eval_while_inv = Lemmas.eval_while_inv
 
-let va_ins_lemma c0 s0 = ()
+let va_ins_lemma (c0:va_code) (s0:va_state) : Lemma
+  (requires True)
+  (ensures
+    (forall (i:ins) (s:BS.machine_state).{:pattern (BS.machine_eval_code_ins i s)}
+      BS.machine_eval_code_ins i s == BS.machine_eval_code_ins_def i s)
+  )
+  =
+  reveal_opaque (`%BS.machine_eval_code_ins) BS.machine_eval_code_ins
 
 let eval_ocmp = Lemmas.eval_ocmp
 let valid_ocmp = Lemmas.valid_ocmp
