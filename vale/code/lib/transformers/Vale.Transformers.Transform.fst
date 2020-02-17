@@ -7,17 +7,18 @@ open Vale.X64.Machine_s
 open Vale.Def.PossiblyMonad
 open Vale.X64.Decls
 
-open Vale.Def.PossiblyMonad
-
 open Vale.X64.State
 
 open Vale.X64.Lemmas
 open Vale.X64.StateLemmas
+open Vale.Arch.HeapLemmas
 
 friend Vale.X64.Decls
 friend Vale.X64.StateLemmas
 
 module IR = Vale.Transformers.InstructionReorder
+module PH = Vale.Transformers.PeepHole
+module ME = Vale.Transformers.MovbeElim
 
 unfold
 let transformation_result_of_possibly_codes (c:possibly codes) (if_fail:code) =
@@ -111,3 +112,19 @@ let check_if_same_printed_code orig hint =
 (* See fsti *)
 let lemma_check_if_same_printed_code orig hint transformed va_s0 va_sM va_fM =
   va_sM, va_fM
+
+/// Peephole Transformation to replace movbes -> mov + bswap.
+
+let movbe_elim =
+  PH.peephole_transform ME.movbe_elim_ph
+
+let lemma_movbe_elim =
+  PH.lemma_peephole_transform ME.movbe_elim_ph
+
+/// Transformation to replace mov + mov -> mov.
+
+let mov_mov_elim =
+  PH.peephole_transform Vale.Transformers.MovMovElim.mov_mov_elim_ph
+
+let lemma_mov_mov_elim =
+  PH.lemma_peephole_transform Vale.Transformers.MovMovElim.mov_mov_elim_ph
