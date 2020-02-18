@@ -27,29 +27,15 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
-#ifndef __Vale_Inline_H
-#define __Vale_Inline_H
+#ifndef __Hacl_Blake2s_32_H
+#define __Hacl_Blake2s_32_H
+
+#include "Hacl_Kremlib.h"
+#include "Hacl_Blake2b_32.h"
+#include "Hacl_Impl_Blake2_Constants.h"
 
 
+void Hacl_Blake2s_32_blake2s(u32 nn, u8 *output, u32 ll, u8 *d, u32 kk, u8 *k);
 
-
-inline static void cswap2_inline(u64 bit, u64 *p0, u64 *p1);
-
-inline static void fsqr_inline(u64 *tmp, u64 *f1, u64 *out1);
-
-inline static void fsqr2_inline(u64 *tmp, u64 *f1, u64 *out1);
-
-inline static void fmul_inline(u64 *tmp, u64 *f1, u64 *out1, u64 *f2);
-
-inline static void fmul2_inline(u64 *tmp, u64 *f1, u64 *out1, u64 *f2);
-
-inline static void fmul1_inline(u64 *out1, u64 *f1, u64 f2);
-
-inline static u64 add1_inline(u64 *out1, u64 *f1, u64 f2);
-
-inline static void fadd_inline(u64 *out1, u64 *f1, u64 *f2);
-
-inline static void fsub_inline(u64 *out1, u64 *f1, u64 *f2);
-
-#define __Vale_Inline_H_DEFINED
+#define __Hacl_Blake2s_32_H_DEFINED
 #endif

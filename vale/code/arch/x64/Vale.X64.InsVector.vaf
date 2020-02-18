@@ -6,12 +6,13 @@ include{:fstar}{:open} "Vale.Def.Words.Two_s"
 include{:fstar}{:open} "Vale.Def.Words.Four_s"
 include{:fstar}{:open} "Vale.Def.Types_s"
 include{:fstar}{:open} "Vale.Arch.Types"
+include{:fstar}{:open} "Vale.Arch.HeapTypes_s"
 include{:fstar}{:open} "Vale.X64.Machine_s"
 include{:fstar}{:open} "Vale.X64.State"
 include{:fstar}{:open} "Vale.X64.Decls"
 include{:fstar}{:open} "Vale.X64.QuickCode"
 include{:fstar}{:open} "Vale.X64.CPU_Features_s"
-include{:/*TODO*/fstar}{:open Seq} "FStar.Seq.Base"
+include{:fstar}{:open Seq} "FStar.Seq.Base"
 
 module Vale.X64.InsVector
 
@@ -22,6 +23,8 @@ open Vale.Def.Words.Two_s
 open Vale.Def.Words.Four_s
 open Vale.Def.Types_s
 open Vale.Arch.Types
+open Vale.Arch.HeapTypes_s
+open Vale.Arch.HeapImpl
 open Vale.X64.Machine_s
 open Vale.X64.Memory
 open Vale.X64.Stack_i
@@ -32,6 +35,12 @@ open Vale.X64.QuickCodes
 open Vale.X64.InsBasic
 open Vale.X64.InsMem
 open Vale.X64.CPU_Features_s
+
+let buffer128_write (b:buffer128) (i:int) (v:quad32) (h:vale_heap) : Ghost vale_heap
+  (requires buffer_readable h b /\ buffer_writeable b)
+  (ensures fun _ -> True)
+  =
+  buffer_write b i v h
 #endverbatim
 
 #verbatim
@@ -45,9 +54,10 @@ open Vale.X64.Stack_i
 module I = Vale.X64.Instructions_s
 module S = Vale.X64.Machine_Semantics_s
 friend Vale.X64.Decls
+#reset-options "--initial_fuel 2 --max_fuel 4 --max_ifuel 2 --z3rlimit 50"
 #endverbatim
 
-#reset-options "--initial_fuel 2 --max_fuel 4 --max_ifuel 2 --z3rlimit 50"
+function buffer128_write(b:buffer128, i:int, v:quad32, h:vale_heap):vale_heap extern;
 
 var xmm0:quad32  {:state xmm(0)};
 var xmm1:quad32  {:state xmm(1)};
@@ -72,14 +82,34 @@ operand_type xmm:quad32 @ nat4 :=
 | inout xmm8 | inout xmm9 | inout xmm10 | inout xmm11
 | inout xmm12 | inout xmm13 | inout xmm14 | inout xmm15
 ;
-operand_type Mem128(in base:reg64, inline offset:int, inline t:taint, ghost b:buffer128, ghost index:int):quad32;
+operand_type Mem128(in h:heaplet, in base:reg64, inline offset:int, inline t:taint, ghost b:buffer128, ghost index:int):quad32;
 operand_type opr128:quad32 := xmm | Mem128;
 
-procedure Mem128_in(in base:reg64, inline offset:int, inline t:taint, ghost b:buffer128, ghost index:int) returns(o:opr)
+procedure Mem128_in(in h:heaplet, in base:reg64, inline offset:int, inline t:taint, ghost b:buffer128, ghost index:int)
+    returns(o:opr)
     {:operand}
-    reads
-        mem;
     extern;
+
+procedure Mem128_lemma(ghost h:heaplet_id, ghost base:operand64, ghost offset:int, ghost t:taint, ghost b:buffer128, ghost index:int)
+    {:public}
+    {:quick exportOnly}
+    {:typecheck false}
+    lets
+        heap_h := va_get_mem_heaplet(h, this);
+    reads
+        mem; memLayout;
+    requires
+        base is OReg;
+        valid_src_addr(heap_h, b, index);
+        valid_layout_buffer(b, memLayout, heap_h, false);
+        valid_taint_buf128(b, heap_h, memLayout.vl_taint, t);
+        eval_operand(base, this) + offset == buffer_addr(b, heap_h) + 16 * index;
+    ensures
+        valid_operand128(va_opr_code_Mem128(h, base, offset, t), this);
+        load_mem128(buffer_addr(b, heap_h) + 16 * index, mem) == buffer_read(b, index, heap_h);
+{
+    lemma_opr_Mem128(h, this, base, offset, t, b, index);
+}
 
 procedure Paddd(inout dst:xmm, in src:xmm)
     {:public}
@@ -113,7 +143,9 @@ procedure Pxor(inout dst:xmm, in src:xmm)
 {
 }
 
+#verbatim
 #reset-options "--initial_fuel 4 --max_fuel 4 --max_ifuel 3 --z3rlimit 50"
+#endverbatim
 
 procedure Pand(inout dst:xmm, in src:opr128)
     {:public}
@@ -410,8 +442,9 @@ procedure PinsrdImm(inout dst:xmm, inline immediate:nat32, inline index:nat8, ou
     Pinsrd(dst, tmp, index);
 }
 
-// TODO: get rid of this fuel
+#verbatim
 #reset-options "--initial_fuel 2 --max_fuel 4 --max_ifuel 3 --z3rlimit 50"
+#endverbatim
 procedure Pinsrq(inout dst:xmm, in src:opr64, inline index:nat8)
     {:public}
     {:quick exportOnly}
@@ -439,7 +472,9 @@ procedure PinsrqImm(inout dst:xmm, inline immediate:nat64, inline index:nat8, ou
     Pinsrq(dst, tmp, index);
 }
 
+#verbatim
 #reset-options "--initial_fuel 2 --max_fuel 4 --max_ifuel 2 --z3rlimit 50"
+#endverbatim
 procedure VPslldq4(out dst:xmm, in src:xmm)
     {:public}
     {:quick exportOnly}
@@ -481,95 +516,90 @@ procedure Mov128(inout dst:xmm, in src:xmm)
 }
 
 procedure Load128_buffer(
-        out dst:xmm, in src:reg_opr64, inline offset:int, inline t:taint,
+        in h:heaplet, out dst:xmm, in src:reg_opr64, inline offset:int, inline t:taint,
         ghost b:buffer128, ghost index:int)
     {:public}
     {:quick exportOnly}
     {:instruction mk_ins(make_instr(I.ins_Movdqu, OReg(dst), OMem(tuple(MReg(get_reg(src), offset), t))))}
     reads
-        mem; memTaint;
+        memLayout;
     requires
         sse_enabled;
-        valid_src_addr(mem, b, index);
-        valid_taint_buf128(b, mem, memTaint, t);
-        src + offset == buffer_addr(b, mem) + 16 * index;
+        valid_src_addr(h, b, index);
+        valid_layout_buffer(b, memLayout, h, false);
+        valid_taint_buf128(b, h, memLayout.vl_taint, t);
+        src + offset == buffer_addr(b, h) + 16 * index;
     ensures
-        dst == buffer128_read(b, index, mem);
-//        valid_taint_buf128(b, mem, memTaint, t);  // REVIEW: Why is this needed?
+        dst == buffer128_read(b, index, h);
 {
+    low_lemma_load_mem128_full(b, #nat(index), this.vs_heap, t, @h);
 }
 
 procedure LoadBe64_buffer128(
-        out dst:reg_opr64, in src:reg_opr64, inline offset:int, inline t:taint, inline upper:bool,
+        in h:heaplet, out dst:reg_opr64, in src:reg_opr64, inline offset:int, inline t:taint, inline upper:bool,
         ghost b:buffer128, ghost index:int)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_ins(make_instr(I.ins_MovBe64, dst, OMem(tuple(MReg(get_reg(src), offset), t))))}
+    {:instruction mk_ins(make_instr_annotate(I.ins_MovBe64, S.AnnotateMovbe64(), dst, OMem(tuple(MReg(get_reg(src), offset), t))))}
     reads
-        mem; memTaint;
+        memLayout;
     requires
         movbe_enabled;
-        valid_src_addr(mem, b, index);
-        valid_taint_buf128(b, mem, memTaint, t);
-        src + offset == buffer_addr(b, mem) + 16 * index + (if upper then 8 else 0);
+        valid_src_addr(h, b, index);
+        valid_layout_buffer(b, memLayout, h, false);
+        valid_taint_buf128(b, h, memLayout.vl_taint, t);
+        src + offset == buffer_addr(b, h) + 16 * index + (if upper then 8 else 0);
     ensures
-        dst == reverse_bytes_nat64(if upper then hi64(buffer128_read(b, index, mem)) else lo64(buffer128_read(b, index, mem)));
-//        valid_taint_buf128(b, mem, memTaint, t);
+        dst == reverse_bytes_nat64(if upper then hi64(buffer128_read(b, index, h)) else lo64(buffer128_read(b, index, h)));
 {
-    low_lemma_valid_mem128_64(b, #nat(index), mem);
-    low_lemma_load_mem128_lo64(b, #nat(index), mem);
-    low_lemma_load_mem128_hi64(b, #nat(index), mem);
-    lemma_valid_taint128(b, #memTaint_t(memTaint), mem, #nat(index), t);
+    low_lemma_load_mem128_lo_hi_full(b, #nat(index), this.vs_heap, t, @h);
+    low_lemma_load_mem128_lo64(b, #nat(index), this.vs_heap.vf_heap);
+    low_lemma_load_mem128_hi64(b, #nat(index), this.vs_heap.vf_heap);
+    lemma_valid_taint128(b, memLayout.vl_taint, this.vs_heap.vf_heap, #nat(index), t);
 }
 
 procedure Store128_buffer(
-        in dst:reg_opr64, in src:xmm, inline offset:int, inline t:taint, ghost b:buffer128, ghost index:int)
+        inout h:heaplet, in dst:reg_opr64, in src:xmm, inline offset:int, inline t:taint,
+        ghost b:buffer128, ghost index:int)
     {:public}
     {:quick exportOnly}
     {:instruction mk_ins(make_instr(I.ins_Movdqu, OMem(tuple(MReg(get_reg(dst), offset), t)), OReg(src)))}
     reads
-        memTaint;
+        memLayout;
     modifies
         mem;
     requires
         sse_enabled;
-        valid_dst_addr(mem, b, index);
-        valid_taint_buf128(b, mem, memTaint, t);
-        dst + offset == buffer_addr(b, mem) + 16 * index;
+        valid_dst_addr(h, b, index);
+        valid_layout_buffer(b, memLayout, h, true);
+        valid_taint_buf128(b, h, memLayout.vl_taint, t);
+        dst + offset == buffer_addr(b, h) + 16 * index;
     ensures
-        modifies_mem(loc_buffer(b), old(mem), mem);
-        valid_taint_buf128(b, mem, memTaint, t);
-        mem == old(buffer128_write(b, index, src, mem));
+        h == old(buffer128_write(b, index, src, h));
 {
-    low_lemma_store_mem128(b, #nat(index), old(src), old(mem));
-    lemma_valid_taint128(b, old(#memTaint_t(memTaint)), old(mem), #nat(index), t);
-    same_memTaint128(b, old(mem), mem, old(#memTaint_t(memTaint)), #memTaint_t(memTaint));
+    low_lemma_store_mem128_full(b, #nat(index), old(src), old(this).vs_heap, t, @h);
 }
 
 procedure Store64_buffer128(
-        in dst:reg_opr64, in src:reg_opr64, inline offset:int, inline t:taint, inline upper:bool,
+        inout h:heaplet, in dst:reg_opr64, in src:reg_opr64, inline offset:int, inline t:taint, inline upper:bool,
         ghost b:buffer128, ghost index:int)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_ins(make_instr(I.ins_Mov64, OMem(tuple(MReg(get_reg(dst), offset), t)), src))}
+    {:instruction mk_ins(make_instr_annotate(I.ins_Mov64, S.AnnotateMov64(), OMem(tuple(MReg(get_reg(dst), offset), t)), src))}
     reads
-        memTaint;
+        memLayout;
     modifies
         mem;
     requires
-        valid_dst_addr(mem, b, index);
-        valid_taint_buf128(b, mem, memTaint, t);
-        dst + offset == buffer_addr(b, mem) + 16 * index + (if upper then 8 else 0);
+        valid_dst_addr(h, b, index);
+        valid_layout_buffer(b, memLayout, h, true);
+        valid_taint_buf128(b, h, memLayout.vl_taint, t);
+        dst + offset == buffer_addr(b, h) + 16 * index + (if upper then 8 else 0);
     ensures
-        modifies_mem(loc_buffer(b), old(mem), mem);
-        valid_taint_buf128(b, mem, memTaint, t);
-        mem == old(buffer128_write(b, index, insert_nat64(old(buffer128_read(b, index, mem)), src, if upper then 1 else 0), mem));
+        h == old(buffer128_write(b, index, insert_nat64(old(buffer128_read(b, index, h)), src, if upper then 1 else 0), h));
 {
-    low_lemma_valid_mem128_64(b, #nat(index), old(mem));
-    low_lemma_store_mem128_lo64(b, #nat(index), old(src), old(mem));
-    low_lemma_store_mem128_hi64(b, #nat(index), old(src), old(mem));
-    lemma_valid_taint128(b, old(#memTaint_t(memTaint)), old(mem), #nat(index), t);
-    same_memTaint128(b, old(mem), mem, old(#memTaint_t(memTaint)), #memTaint_t(memTaint));
+    low_lemma_store_mem128_lo64_full(b, #nat(index), old(src), old(this).vs_heap, t, @h);
+    low_lemma_store_mem128_hi64_full(b, #nat(index), old(src), old(this).vs_heap, t, @h);
 }
 
 procedure ZeroXmm(inout dst:xmm)
@@ -673,7 +703,6 @@ procedure XmmEqual(inout x1:xmm, in x2:xmm)
 }
 
 /*  REVIEW: This version goes through with --ONE, but fails without it for reasons that are unclear
-#reset-options "--z3rlimit 150 --z3refresh"
 procedure XmmEqual(inout x1:xmm, x2:xmm, out tmp:reg_opr64, out result:reg_opr64)
     {:quick exportOnly}
     modifies efl;

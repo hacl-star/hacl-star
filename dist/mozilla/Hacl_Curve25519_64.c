@@ -24,85 +24,85 @@
 
 #include "Hacl_Curve25519_64.h"
 
-inline static uint64_t add10(uint64_t *out1, uint64_t *f1, uint64_t f2)
+static inline uint64_t add_scalar0(uint64_t *out1, uint64_t *f1, uint64_t f2)
 {
   #if EVERCRYPT_TARGETCONFIG_GCC
-  return add1_inline(out1, f1, f2);
+  return add_scalar(out1, f1, f2);
   #else
-  uint64_t scrut = add1(out1, f1, f2);
+  uint64_t scrut = add_scalar_e(out1, f1, f2);
   return scrut;
   #endif
 }
 
-inline static void fadd(uint64_t *out1, uint64_t *f1, uint64_t *f2)
+static inline void fadd0(uint64_t *out1, uint64_t *f1, uint64_t *f2)
 {
   #if EVERCRYPT_TARGETCONFIG_GCC
-  fadd_inline(out1, f1, f2);
+  fadd(out1, f1, f2);
   #else
-  uint64_t uu____0 = fadd_(out1, f1, f2);
+  uint64_t uu____0 = fadd_e(out1, f1, f2);
   #endif
 }
 
-inline static void fsub(uint64_t *out1, uint64_t *f1, uint64_t *f2)
+static inline void fsub0(uint64_t *out1, uint64_t *f1, uint64_t *f2)
 {
   #if EVERCRYPT_TARGETCONFIG_GCC
-  fsub_inline(out1, f1, f2);
+  fsub(out1, f1, f2);
   #else
-  uint64_t uu____0 = fsub_(out1, f1, f2);
+  uint64_t uu____0 = fsub_e(out1, f1, f2);
   #endif
 }
 
-inline static void fmul(uint64_t *out1, uint64_t *f1, uint64_t *f2, uint64_t *tmp)
+static inline void fmul0(uint64_t *out1, uint64_t *f1, uint64_t *f2, uint64_t *tmp)
 {
   #if EVERCRYPT_TARGETCONFIG_GCC
-  fmul_inline(tmp, f1, out1, f2);
+  fmul(out1, f1, f2, tmp);
   #else
-  uint64_t uu____0 = fmul_(tmp, f1, out1, f2);
+  uint64_t uu____0 = fmul_e(tmp, f1, out1, f2);
   #endif
 }
 
-inline static void fmul20(uint64_t *out1, uint64_t *f1, uint64_t *f2, uint64_t *tmp)
+static inline void fmul20(uint64_t *out1, uint64_t *f1, uint64_t *f2, uint64_t *tmp)
 {
   #if EVERCRYPT_TARGETCONFIG_GCC
-  fmul2_inline(tmp, f1, out1, f2);
+  fmul2(out1, f1, f2, tmp);
   #else
-  uint64_t uu____0 = fmul2(tmp, f1, out1, f2);
+  uint64_t uu____0 = fmul2_e(tmp, f1, out1, f2);
   #endif
 }
 
-inline static void fmul10(uint64_t *out1, uint64_t *f1, uint64_t f2)
+static inline void fmul_scalar0(uint64_t *out1, uint64_t *f1, uint64_t f2)
 {
   #if EVERCRYPT_TARGETCONFIG_GCC
-  fmul1_inline(out1, f1, f2);
+  fmul_scalar(out1, f1, f2);
   #else
-  uint64_t uu____0 = fmul1(out1, f1, f2);
+  uint64_t uu____0 = fmul_scalar_e(out1, f1, f2);
   #endif
 }
 
-inline static void fsqr0(uint64_t *out1, uint64_t *f1, uint64_t *tmp)
+static inline void fsqr0(uint64_t *out1, uint64_t *f1, uint64_t *tmp)
 {
   #if EVERCRYPT_TARGETCONFIG_GCC
-  fsqr_inline(tmp, f1, out1);
+  fsqr(out1, f1, tmp);
   #else
-  uint64_t uu____0 = fsqr(tmp, f1, out1);
+  uint64_t uu____0 = fsqr_e(tmp, f1, out1);
   #endif
 }
 
-inline static void fsqr20(uint64_t *out1, uint64_t *f, uint64_t *tmp)
+static inline void fsqr20(uint64_t *out1, uint64_t *f, uint64_t *tmp)
 {
   #if EVERCRYPT_TARGETCONFIG_GCC
-  fsqr2_inline(tmp, f, out1);
+  fsqr2(out1, f, tmp);
   #else
-  uint64_t uu____0 = fsqr2(tmp, f, out1);
+  uint64_t uu____0 = fsqr2_e(tmp, f, out1);
   #endif
 }
 
-inline static void cswap20(uint64_t bit, uint64_t *p1, uint64_t *p2)
+static inline void cswap20(uint64_t bit, uint64_t *p1, uint64_t *p2)
 {
   #if EVERCRYPT_TARGETCONFIG_GCC
-  cswap2_inline(bit, p1, p2);
+  cswap2(bit, p1, p2);
   #else
-  uint64_t uu____0 = cswap2(bit, p1, p2);
+  uint64_t uu____0 = cswap2_e(bit, p1, p2);
   #endif
 }
 
@@ -121,17 +121,17 @@ static void point_add_and_double(uint64_t *q, uint64_t *p01_tmp1, uint64_t *tmp2
   uint64_t *b = tmp1 + (uint32_t)4U;
   uint64_t *ab = tmp1;
   uint64_t *dc = tmp1 + (uint32_t)8U;
-  fadd(a, x2, z2);
-  fsub(b, x2, z2);
+  fadd0(a, x2, z2);
+  fsub0(b, x2, z2);
   uint64_t *x3 = nq_p1;
   uint64_t *z31 = nq_p1 + (uint32_t)4U;
   uint64_t *d0 = dc;
   uint64_t *c0 = dc + (uint32_t)4U;
-  fadd(c0, x3, z31);
-  fsub(d0, x3, z31);
+  fadd0(c0, x3, z31);
+  fsub0(d0, x3, z31);
   fmul20(dc, dc, ab, tmp2);
-  fadd(x3, d0, c0);
-  fsub(z31, d0, c0);
+  fadd0(x3, d0, c0);
+  fsub0(z31, d0, c0);
   uint64_t *a1 = tmp1;
   uint64_t *b1 = tmp1 + (uint32_t)4U;
   uint64_t *d = tmp1 + (uint32_t)8U;
@@ -144,11 +144,11 @@ static void point_add_and_double(uint64_t *q, uint64_t *p01_tmp1, uint64_t *tmp2
   a1[1U] = c[1U];
   a1[2U] = c[2U];
   a1[3U] = c[3U];
-  fsub(c, d, c);
-  fmul10(b1, c, (uint64_t)121665U);
-  fadd(b1, b1, d);
+  fsub0(c, d, c);
+  fmul_scalar0(b1, c, (uint64_t)121665U);
+  fadd0(b1, b1, d);
   fmul20(nq, dc1, ab1, tmp2);
-  fmul(z3, z3, x1, tmp2);
+  fmul0(z3, z3, x1, tmp2);
 }
 
 static void point_double(uint64_t *nq, uint64_t *tmp1, uint64_t *tmp2)
@@ -161,16 +161,16 @@ static void point_double(uint64_t *nq, uint64_t *tmp1, uint64_t *tmp2)
   uint64_t *c = tmp1 + (uint32_t)12U;
   uint64_t *ab = tmp1;
   uint64_t *dc = tmp1 + (uint32_t)8U;
-  fadd(a, x2, z2);
-  fsub(b, x2, z2);
+  fadd0(a, x2, z2);
+  fsub0(b, x2, z2);
   fsqr20(dc, ab, tmp2);
   a[0U] = c[0U];
   a[1U] = c[1U];
   a[2U] = c[2U];
   a[3U] = c[3U];
-  fsub(c, d, c);
-  fmul10(b, c, (uint64_t)121665U);
-  fadd(b, b, d);
+  fsub0(c, d, c);
+  fmul_scalar0(b, c, (uint64_t)121665U);
+  fadd0(b, b, d);
   fmul20(nq, dc, ab, tmp2);
 }
 
@@ -182,7 +182,7 @@ static void montgomery_ladder(uint64_t *out, uint8_t *key, uint64_t *init1)
   uint64_t *p01 = p01_tmp1_swap;
   uint64_t *p03 = p01;
   uint64_t *p11 = p01 + (uint32_t)8U;
-  memcpy(p11, init1, (uint32_t)8U * sizeof init1[0U]);
+  memcpy(p11, init1, (uint32_t)8U * sizeof (init1[0U]));
   uint64_t *x0 = p03;
   uint64_t *z0 = p03 + (uint32_t)4U;
   x0[0U] = (uint64_t)1U;
@@ -201,7 +201,7 @@ static void montgomery_ladder(uint64_t *out, uint8_t *key, uint64_t *init1)
   cswap20((uint64_t)1U, nq1, nq_p11);
   point_add_and_double(init1, p01_tmp11, tmp2);
   swap1[0U] = (uint64_t)1U;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)251U; i = i + (uint32_t)1U)
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)251U; i++)
   {
     uint64_t *p01_tmp12 = p01_tmp1_swap;
     uint64_t *swap2 = p01_tmp1_swap + (uint32_t)32U;
@@ -225,13 +225,13 @@ static void montgomery_ladder(uint64_t *out, uint8_t *key, uint64_t *init1)
   point_double(nq10, tmp1, tmp2);
   point_double(nq10, tmp1, tmp2);
   point_double(nq10, tmp1, tmp2);
-  memcpy(out, p0, (uint32_t)8U * sizeof p0[0U]);
+  memcpy(out, p0, (uint32_t)8U * sizeof (p0[0U]));
 }
 
 static void fsquare_times(uint64_t *o, uint64_t *inp, uint64_t *tmp, uint32_t n1)
 {
   fsqr0(o, inp, tmp);
-  for (uint32_t i = (uint32_t)0U; i < n1 - (uint32_t)1U; i = i + (uint32_t)1U)
+  for (uint32_t i = (uint32_t)0U; i < n1 - (uint32_t)1U; i++)
   {
     fsqr0(o, o, tmp);
   }
@@ -247,28 +247,28 @@ static void finv(uint64_t *o, uint64_t *i, uint64_t *tmp)
   uint64_t *tmp1 = tmp;
   fsquare_times(a, i, tmp1, (uint32_t)1U);
   fsquare_times(t00, a, tmp1, (uint32_t)2U);
-  fmul(b, t00, i, tmp);
-  fmul(a, b, a, tmp);
+  fmul0(b, t00, i, tmp);
+  fmul0(a, b, a, tmp);
   fsquare_times(t00, a, tmp1, (uint32_t)1U);
-  fmul(b, t00, b, tmp);
+  fmul0(b, t00, b, tmp);
   fsquare_times(t00, b, tmp1, (uint32_t)5U);
-  fmul(b, t00, b, tmp);
+  fmul0(b, t00, b, tmp);
   fsquare_times(t00, b, tmp1, (uint32_t)10U);
-  fmul(c, t00, b, tmp);
+  fmul0(c, t00, b, tmp);
   fsquare_times(t00, c, tmp1, (uint32_t)20U);
-  fmul(t00, t00, c, tmp);
+  fmul0(t00, t00, c, tmp);
   fsquare_times(t00, t00, tmp1, (uint32_t)10U);
-  fmul(b, t00, b, tmp);
+  fmul0(b, t00, b, tmp);
   fsquare_times(t00, b, tmp1, (uint32_t)50U);
-  fmul(c, t00, b, tmp);
+  fmul0(c, t00, b, tmp);
   fsquare_times(t00, c, tmp1, (uint32_t)100U);
-  fmul(t00, t00, c, tmp);
+  fmul0(t00, t00, c, tmp);
   fsquare_times(t00, t00, tmp1, (uint32_t)50U);
-  fmul(t00, t00, b, tmp);
+  fmul0(t00, t00, b, tmp);
   fsquare_times(t00, t00, tmp1, (uint32_t)5U);
   uint64_t *a0 = t1;
   uint64_t *t0 = t1 + (uint32_t)12U;
-  fmul(o, t0, a0, tmp);
+  fmul0(o, t0, a0, tmp);
 }
 
 static void store_felem(uint64_t *b, uint64_t *f)
@@ -276,11 +276,11 @@ static void store_felem(uint64_t *b, uint64_t *f)
   uint64_t f30 = f[3U];
   uint64_t top_bit0 = f30 >> (uint32_t)63U;
   f[3U] = f30 & (uint64_t)0x7fffffffffffffffU;
-  uint64_t carry = add10(f, f, (uint64_t)19U * top_bit0);
+  uint64_t carry = add_scalar0(f, f, (uint64_t)19U * top_bit0);
   uint64_t f31 = f[3U];
   uint64_t top_bit = f31 >> (uint32_t)63U;
   f[3U] = f31 & (uint64_t)0x7fffffffffffffffU;
-  uint64_t carry0 = add10(f, f, (uint64_t)19U * top_bit);
+  uint64_t carry0 = add_scalar0(f, f, (uint64_t)19U * top_bit);
   uint64_t f0 = f[0U];
   uint64_t f1 = f[1U];
   uint64_t f2 = f[2U];
@@ -312,9 +312,9 @@ static void encode_point(uint8_t *o, uint64_t *i)
   uint64_t u64s[4U] = { 0U };
   uint64_t tmp_w[16U] = { 0U };
   finv(tmp, z, tmp_w);
-  fmul(tmp, tmp, x, tmp_w);
+  fmul0(tmp, tmp, x, tmp_w);
   store_felem(u64s, tmp);
-  for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)4U; i0 = i0 + (uint32_t)1U)
+  for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)4U; i0++)
   {
     store64_le(o + i0 * (uint32_t)8U, u64s[i0]);
   }
@@ -324,7 +324,7 @@ void Hacl_Curve25519_64_scalarmult(uint8_t *out, uint8_t *priv, uint8_t *pub)
 {
   uint64_t init1[8U] = { 0U };
   uint64_t tmp[4U] = { 0U };
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i = i + (uint32_t)1U)
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
   {
     uint64_t *os = tmp;
     uint8_t *bj = pub + i * (uint32_t)8U;
@@ -352,7 +352,7 @@ void Hacl_Curve25519_64_scalarmult(uint8_t *out, uint8_t *priv, uint8_t *pub)
 void Hacl_Curve25519_64_secret_to_public(uint8_t *pub, uint8_t *priv)
 {
   uint8_t basepoint[32U] = { 0U };
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)32U; i = i + (uint32_t)1U)
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)32U; i++)
   {
     uint8_t *os = basepoint;
     uint8_t x = g25519[i];
@@ -366,7 +366,7 @@ bool Hacl_Curve25519_64_ecdh(uint8_t *out, uint8_t *priv, uint8_t *pub)
   uint8_t zeros1[32U] = { 0U };
   Hacl_Curve25519_64_scalarmult(out, priv, pub);
   uint8_t res = (uint8_t)255U;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)32U; i = i + (uint32_t)1U)
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)32U; i++)
   {
     uint8_t uu____0 = FStar_UInt8_eq_mask(out[i], zeros1[i]);
     res = uu____0 & res;

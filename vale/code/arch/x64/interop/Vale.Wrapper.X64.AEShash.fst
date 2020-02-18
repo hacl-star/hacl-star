@@ -52,7 +52,7 @@ let aes128_keyhash_init_stdcall key roundkeys_b hkeys_b =
       le_seq_quad32_to_bytes_injective (UV.as_seq h0 ub) (key_to_round_keys_LE AES_128 (Ghost.reveal key))
   in lemma_aux1 ();
 
-  let x, _ = aes128_keyhash_init key roundkeys_b hkeys_b () in
+  let (x, _) = aes128_keyhash_init key roundkeys_b hkeys_b () in
 
   let h1 = get() in
 
@@ -90,7 +90,7 @@ let aes256_keyhash_init_stdcall key roundkeys_b hkeys_b =
       le_seq_quad32_to_bytes_injective (UV.as_seq h0 ub) (key_to_round_keys_LE AES_256 (Ghost.reveal key))
   in lemma_aux1 ();
 
-  let x, _ = aes256_keyhash_init key roundkeys_b hkeys_b () in
+  let (x, _) = aes256_keyhash_init key roundkeys_b hkeys_b () in
 
   let h1 = get() in
 

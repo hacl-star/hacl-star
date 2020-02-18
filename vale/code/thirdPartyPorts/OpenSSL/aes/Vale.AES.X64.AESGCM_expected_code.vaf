@@ -7,7 +7,7 @@ include{:fstar}{:open} "Vale.Def.Prop_s"
 include{:fstar}{:open} "Vale.Def.Opaque_s"
 include{:fstar}{:open} "Vale.Def.Words_s"
 include{:fstar}{:open} "Vale.Def.Types_s"
-include{:/*TODO*/fstar}{:open} "FStar.Seq.Base"
+include{:fstar}{:open} "FStar.Seq.Base"
 include{:fstar}{:open} "Vale.AES.AES_s"
 include{:fstar}{:open} "Vale.X64.Machine_s"
 include{:fstar}{:open} "Vale.X64.Memory"
@@ -71,9 +71,9 @@ open Vale.AES.GF128_s
 open Vale.AES.GF128
 open Vale.AES.GHash
 open Vale.AES.X64.AESopt2
+#reset-options "--z3rlimit 50"
 #endverbatim
 
-#reset-options " --z3rlimit 50"
 procedure Loop6x_partial_expected_code(
         inline alg:algorithm,
         ghost h_LE:quad32,
@@ -138,7 +138,7 @@ procedure Loop6x_partial_expected_code(
         ZeroXmm(Z1);
         PinsrqImm(Z1, 2, 0, constp);
         VPaddd(inout2, Z2, Z1);
-        Load128_buffer(Hkey, Xip, 0x00-0x20, Secret, hkeys_b, 0);   // # $Hkey^1
+        Load128_buffer(heap0, Hkey, Xip, 0x00-0x20, Secret, hkeys_b, 0);   // # $Hkey^1
         VPaddd(inout3, inout1, Z1);
         VPshufb(inout1, inout1, Ii);
         VPaddd(inout4, inout2, Z1);
@@ -154,58 +154,58 @@ procedure Loop6x_partial_expected_code(
 
         Sub64(counter, 256);
     } else {
-        Load128_buffer(Hkey, Xip, 0x00-0x20, Secret, hkeys_b, 0);   // # $Hkey^1
+        Load128_buffer(heap0, Hkey, Xip, 0x00-0x20, Secret, hkeys_b, 0);   // # $Hkey^1
         VPaddd(T1, T2, inout5); // OpenSSL uses VPaddb
         VPxor(inout1, inout1, rndkey);
         VPxor(inout2, inout2, rndkey);
     }
 
-    Store128_buffer(rbp, T1, 0x80, Secret, scratch_b, 8);   // # save next counter value
+    Store128_buffer(heap3, rbp, T1, 0x80, Secret, scratch_b, 8);   // # save next counter value
     VPolyMul(Z1, Z3, Hkey, false, true);
     VPxor(inout3, inout3, rndkey);
-    Load128_buffer(T2, key, 0x10-0x80, Secret, keys_b, 1); // # borrow $T2 for $rndkey
+    Load128_buffer(heap0, T2, key, 0x10-0x80, Secret, keys_b, 1); // # borrow $T2 for $rndkey
     VPolyMul(Z2, Z3, Hkey, true, false);
     VAESNI_enc(inout0, inout0, T2);
-    Load128_buffer(Ii, rbp, 0x30, Secret, scratch_b, 3);     // # I[4]
+    Load128_buffer(heap3, Ii, rbp, 0x30, Secret, scratch_b, 3);     // # I[4]
     VPxor(inout4, inout4, rndkey);
     VPolyMul(T1, Z3, Hkey, false, false);
     VAESNI_enc(inout1, inout1, T2);
     VPxor(inout5, inout5, rndkey);
     VPolyMul(Z3, Z3, Hkey, true, true);
     VAESNI_enc(inout2, inout2, T2);
-    Load128_buffer(Hkey, Xip, 0x10-0x20, Secret, hkeys_b, 1);   // # $Hkey^2
+    Load128_buffer(heap0, Hkey, Xip, 0x10-0x20, Secret, hkeys_b, 1);   // # $Hkey^2
     VAESNI_enc(inout3, inout3, T2);
     VPolyAdd(Z2, Z2, Z1);
     VPolyMul(Z1, Ii, Hkey, false, false);
     VPolyAdd(Xi, Xi, Z0);      // # modulo-scheduled
     VAESNI_enc(inout4, inout4, T2);
     VPolyAdd(Z0, T1, Z1);
-    //Load128_buffer(rndkey, key, 0x20-0x80, Secret, keys_b, 2);      // OpenSSL had this here.  I moved it to one of the Loop6x_step calls
+    //Load128_buffer(heap0, rndkey, key, 0x20-0x80, Secret, keys_b, 2);      // OpenSSL had this here.  I moved it to one of the Loop6x_step calls
     VPolyMul(T1, Ii, Hkey, false, true);
     VAESNI_enc(inout5, inout5, T2);
 
     /* Loop6x_step1 */
 
-    Load128_buffer(rndkey, key, (0x10 * (1 + 1))-0x80, Secret, keys_b, 1 + 1);
+    Load128_buffer(heap0, rndkey, key, (0x10 * (1 + 1))-0x80, Secret, keys_b, 1 + 1);
     VPolyMul(T2, Ii, Hkey, true, false);
     VAESNI_enc(inout0, inout0, rndkey);
-    VPolyAdd(Xi, Xi, Mem128(rbp, 0x10, Secret, scratch_b, 1));  // # modulo-scheduled [vpxor $Z3,$Xi,$Xi]
+    VPolyAdd(Xi, Xi, Mem128(heap3, rbp, 0x10, Secret, scratch_b, 1));  // # modulo-scheduled [vpxor $Z3,$Xi,$Xi]
     VPolyMul(Hkey, Ii, Hkey, true, true);
-    Load128_buffer(Ii, rbp, 0x40, Secret, scratch_b, 4);
+    Load128_buffer(heap3, Ii, rbp, 0x40, Secret, scratch_b, 4);
     VAESNI_enc(inout1, inout1, rndkey);
-    LoadBe64_buffer128(r13, in0, 5*16+8, Secret, true,  in0_b, in0_count*6 + 5);
+    LoadBe64_buffer128(heap1, r13, in0, 5*16+8, Secret, true,  in0_b, in0_count*6 + 5);
     VAESNI_enc(inout2, inout2, rndkey);
-    LoadBe64_buffer128(r12, in0, 5*16,   Secret, false, in0_b, in0_count*6 + 5);
+    LoadBe64_buffer128(heap1, r12, in0, 5*16,   Secret, false, in0_b, in0_count*6 + 5);
     VAESNI_enc(inout3, inout3, rndkey);
-    Store64_buffer128(rbp, r13, 2*16,   Secret, false, scratch_b, 2);  // OpenSSL is further offset by 8 (to account for return addr?)
+    Store64_buffer128(heap3, rbp, r13, 2*16,   Secret, false, scratch_b, 2);  // OpenSSL is further offset by 8 (to account for return addr?)
     VAESNI_enc(inout4, inout4, rndkey);
-    Store64_buffer128(rbp, r12, 2*16+8, Secret, true,  scratch_b, 2);   // OpenSSL is further offset by 8 (to account for return addr?)
-    Load128_buffer(Z1, Xip, 0x30-0x20, Secret, hkeys_b, 3);  // # borrow $Z1 for $Hkey^3
+    Store64_buffer128(heap3, rbp, r12, 2*16+8, Secret, true,  scratch_b, 2);   // OpenSSL is further offset by 8 (to account for return addr?)
+    Load128_buffer(heap0, Z1, Xip, 0x30-0x20, Secret, hkeys_b, 3);  // # borrow $Z1 for $Hkey^3
     VAESNI_enc(inout5, inout5, rndkey);
 
     /* Loop6x_plain */
 
-    Load128_buffer(rndkey, key, 16*(2 + 1)-0x80, Secret, keys_b, 2 + 1);
+    Load128_buffer(heap0, rndkey, key, 16*(2 + 1)-0x80, Secret, keys_b, 2 + 1);
     VPolyAdd(Z2, Z2, T1);
     VPolyMul(T1, Ii, Z1, false, false);
     VAESNI_enc(inout0, inout0, rndkey);
@@ -216,88 +216,88 @@ procedure Loop6x_partial_expected_code(
     VPolyMul(Hkey, Ii, Z1, true, false);
     VAESNI_enc(inout2, inout2, rndkey);
     VPolyMul(Z1, Ii, Z1, true, true);
-    Load128_buffer(Ii, rbp, 0x50, Secret, scratch_b, 5);
+    Load128_buffer(heap3, Ii, rbp, 0x50, Secret, scratch_b, 5);
     VAESNI_enc(inout3, inout3, rndkey);
     VAESNI_enc(inout4, inout4, rndkey);
     VPolyAdd(Z0, Z0, T1);
-    Load128_buffer(T1, Xip, 0x40-0x20, Secret, hkeys_b, 4);  // # borrow $T1 for $Hkey^4
+    Load128_buffer(heap0, T1, Xip, 0x40-0x20, Secret, hkeys_b, 4);  // # borrow $T1 for $Hkey^4
     VAESNI_enc(inout5, inout5, rndkey);
 
     /* Loop6x_step2 */
 
-    Load128_buffer(rndkey, key, (0x10 * (3 + 1))-0x80, Secret, keys_b, 3 + 1);
+    Load128_buffer(heap0, rndkey, key, (0x10 * (3 + 1))-0x80, Secret, keys_b, 3 + 1);
     VPolyAdd(Z2, Z2, T2);
     VPolyMul(T2, Ii, T1, false, false);
     VAESNI_enc(inout0, inout0, rndkey);
     VPolyAdd(Z2, Z2, Hkey);
     VPolyMul(Hkey, Ii, T1, false, true);
     VAESNI_enc(inout1, inout1, rndkey);
-    LoadBe64_buffer128(r13, in0, 4*16+8, Secret, true,  in0_b, in0_count*6 + 4);
+    LoadBe64_buffer128(heap1, r13, in0, 4*16+8, Secret, true,  in0_b, in0_count*6 + 4);
     VPolyAdd(Z3, Z3, Z1);
     VPolyMul(Z1, Ii, T1, true, false);
     VAESNI_enc(inout2, inout2, rndkey);
-    LoadBe64_buffer128(r12, in0, 4*16,   Secret, false, in0_b, in0_count*6 + 4);
+    LoadBe64_buffer128(heap1, r12, in0, 4*16,   Secret, false, in0_b, in0_count*6 + 4);
     VPolyMul(T1, Ii, T1, true, true);
-    Load128_buffer(Ii, rbp, 0x60, Secret, scratch_b, 6); // # I[1]
+    Load128_buffer(heap3, Ii, rbp, 0x60, Secret, scratch_b, 6); // # I[1]
     VAESNI_enc(inout3, inout3, rndkey);
-    Store64_buffer128(rbp, r13, 3*16,   Secret, false, scratch_b, 3);  // OpenSSL is further offset by 8 (to account for return addr?)
+    Store64_buffer128(heap3, rbp, r13, 3*16,   Secret, false, scratch_b, 3);  // OpenSSL is further offset by 8 (to account for return addr?)
     VAESNI_enc(inout4, inout4, rndkey);
-    Store64_buffer128(rbp, r12, 3*16+8, Secret, true,  scratch_b, 3);   // OpenSSL is further offset by 8 (to account for return addr?)
+    Store64_buffer128(heap3, rbp, r12, 3*16+8, Secret, true,  scratch_b, 3);   // OpenSSL is further offset by 8 (to account for return addr?)
     VPolyAdd(Z0, Z0, T2);
-    Load128_buffer(T2, Xip, 0x60-0x20, Secret, hkeys_b, 6);  // # borrow $T1 for $Hkey^5
+    Load128_buffer(heap0, T2, Xip, 0x60-0x20, Secret, hkeys_b, 6);  // # borrow $T1 for $Hkey^5
     VAESNI_enc(inout5, inout5, rndkey);
 
     /* Loop6x_step3 */
 
-    Load128_buffer(rndkey, key, (0x10 * (4 + 1))-0x80, Secret, keys_b, 4 + 1);
+    Load128_buffer(heap0, rndkey, key, (0x10 * (4 + 1))-0x80, Secret, keys_b, 4 + 1);
     VPolyAdd(Z2, Z2, Hkey);
     VPolyMul(Hkey, Ii, T2, false, false);
     VAESNI_enc(inout0, inout0, rndkey);
     VPolyAdd(Z2, Z2, Z1);
     VPolyMul(Z1, Ii, T2, false, true);
     VAESNI_enc(inout1, inout1, rndkey);
-    LoadBe64_buffer128(r13, in0, 3*16+8, Secret, true,  in0_b, in0_count*6 + 3);
+    LoadBe64_buffer128(heap1, r13, in0, 3*16+8, Secret, true,  in0_b, in0_count*6 + 3);
     VPolyAdd(Z3, Z3, T1);
     VPolyMul(T1, Ii, T2, true, false);
-    VPolyAdd(Xi, Xi, Mem128(rbp, 0x70, Secret, scratch_b, 7));  // # accumulate I[0]
+    VPolyAdd(Xi, Xi, Mem128(heap3, rbp, 0x70, Secret, scratch_b, 7));  // # accumulate I[0]
     VAESNI_enc(inout2, inout2, rndkey);
-    LoadBe64_buffer128(r12, in0, 3*16,   Secret, false, in0_b, in0_count*6 + 3);
+    LoadBe64_buffer128(heap1, r12, in0, 3*16,   Secret, false, in0_b, in0_count*6 + 3);
     VPolyMul(T2, Ii, T2, true, true);
     VAESNI_enc(inout3, inout3, rndkey);
-    Store64_buffer128(rbp, r13, 4*16,   Secret, false, scratch_b, 4);  // OpenSSL is further offset by 8 (to account for return addr?)
+    Store64_buffer128(heap3, rbp, r13, 4*16,   Secret, false, scratch_b, 4);  // OpenSSL is further offset by 8 (to account for return addr?)
     VAESNI_enc(inout4, inout4, rndkey);
-    Store64_buffer128(rbp, r12, 4*16+8, Secret, true,  scratch_b, 4);   // OpenSSL is further offset by 8 (to account for return addr?)
+    Store64_buffer128(heap3, rbp, r12, 4*16+8, Secret, true,  scratch_b, 4);   // OpenSSL is further offset by 8 (to account for return addr?)
     VPolyAdd(Z0, Z0, Hkey);
-    Load128_buffer(Hkey, Xip, 0x70-0x20, Secret, hkeys_b, 7);  // # $Hkey^6
+    Load128_buffer(heap0, Hkey, Xip, 0x70-0x20, Secret, hkeys_b, 7);  // # $Hkey^6
     VAESNI_enc(inout5, inout5, rndkey);
 
 
     /* Loop6x_step4 */
 
-    Load128_buffer(rndkey, key, (0x10 * (5 + 1))-0x80, Secret, keys_b, 5 + 1);
+    Load128_buffer(heap0, rndkey, key, (0x10 * (5 + 1))-0x80, Secret, keys_b, 5 + 1);
     VPolyAdd(Z2, Z2, Z1);
     VPolyMul(Z1, Xi, Hkey, false, true);
     VAESNI_enc(inout0, inout0, rndkey);
     VPolyAdd(Z2, Z2, T1);
     VPolyMul(T1, Xi, Hkey, true, false);
     VAESNI_enc(inout1, inout1, rndkey);
-    LoadBe64_buffer128(r13, in0, 2*16+8, Secret, true,  in0_b, in0_count*6 + 2);
+    LoadBe64_buffer128(heap1, r13, in0, 2*16+8, Secret, true,  in0_b, in0_count*6 + 2);
     VPolyAdd(Z3, Z3, T2);
     VPolyMul(T2, Xi, Hkey, false, false);
     VAESNI_enc(inout2, inout2, rndkey);
-    LoadBe64_buffer128(r12, in0, 2*16,   Secret, false, in0_b, in0_count*6 + 2);
+    LoadBe64_buffer128(heap1, r12, in0, 2*16,   Secret, false, in0_b, in0_count*6 + 2);
     VPolyMul(Xi, Xi, Hkey, true, true);
     VAESNI_enc(inout3, inout3, rndkey);
-    Store64_buffer128(rbp, r13, 5*16,   Secret, false, scratch_b, 5);
+    Store64_buffer128(heap3, rbp, r13, 5*16,   Secret, false, scratch_b, 5);
     VAESNI_enc(inout4, inout4, rndkey);
-    Store64_buffer128(rbp, r12, 5*16+8, Secret, true,  scratch_b, 5);   // OpenSSL is further offset by 8 (to account for return addr?)
+    Store64_buffer128(heap3, rbp, r12, 5*16+8, Secret, true,  scratch_b, 5);   // OpenSSL is further offset by 8 (to account for return addr?)
     VPolyAdd(Z2, Z2, Z1);
     VAESNI_enc(inout5, inout5, rndkey);
     VPolyAdd(Z2, Z2, T1);
 
     /* Loop6x_step5 */
 
-    Load128_buffer(rndkey, key, (0x10 * (6 + 1))-0x80, Secret, keys_b, 6 + 1);
+    Load128_buffer(heap0, rndkey, key, (0x10 * (6 + 1))-0x80, Secret, keys_b, 6 + 1);
     VLow64ToHigh(Z1, Z2);
     VPolyAdd(Z0, Z0, T2);
 
@@ -308,23 +308,23 @@ procedure Loop6x_partial_expected_code(
     VPolyAdd(Z3, Z3, Xi);
     VAESNI_enc(inout1, inout1, rndkey);
     VPolyAdd(Z0, Z0, Z1);
-    LoadBe64_buffer128(r13, in0, 1*16+8, Secret, true,  in0_b, in0_count*6 + 1);
+    LoadBe64_buffer128(heap1, r13, in0, 1*16+8, Secret, true,  in0_b, in0_count*6 + 1);
     VAESNI_enc(inout2, inout2, rndkey);
-    LoadBe64_buffer128(r12, in0, 1*16,   Secret, false, in0_b, in0_count*6 + 1);
+    LoadBe64_buffer128(heap1, r12, in0, 1*16,   Secret, false, in0_b, in0_count*6 + 1);
     VSwap(Ii, Z0); // # 1st phase
     VPolyMul(Z0, Z0, Hkey, false, true);
-    Store64_buffer128(rbp, r13, 6*16,   Secret, false, scratch_b, 6);
+    Store64_buffer128(heap3, rbp, r13, 6*16,   Secret, false, scratch_b, 6);
     VAESNI_enc(inout3, inout3, rndkey);
-    Store64_buffer128(rbp, r12, 6*16+8, Secret, true,  scratch_b, 6);   // OpenSSL is further offset by 8 (to account for return addr?)
+    Store64_buffer128(heap3, rbp, r12, 6*16+8, Secret, true,  scratch_b, 6);   // OpenSSL is further offset by 8 (to account for return addr?)
     VAESNI_enc(inout4, inout4, rndkey);
     VAESNI_enc(inout5, inout5, rndkey);
 
     /* Loop6x_round8 */
 
-    Load128_buffer(T1, key, 0x80-0x80, Secret, keys_b, 8); // # borrow $T1 for $rndkey
+    Load128_buffer(heap0, T1, key, 0x80-0x80, Secret, keys_b, 8); // # borrow $T1 for $rndkey
 
     VAESNI_enc(inout0, inout0, T1);
-    Load128_buffer(rndkey, key, 0x90-0x80, Secret, keys_b, 9);
+    Load128_buffer(heap0, rndkey, key, 0x90-0x80, Secret, keys_b, 9);
     VAESNI_enc(inout1, inout1, T1);
     VHigh64ToLow(Z2, Z2);
     VAESNI_enc(inout2, inout2, T1);
@@ -332,15 +332,15 @@ procedure Loop6x_partial_expected_code(
     VAESNI_enc(inout3, inout3, T1);
     VPolyAdd(Z0, Z0, Ii);
 
-    LoadBe64_buffer128(r13, in0, 0*16+8, Secret, true,  in0_b, in0_count*6 + 0);
+    LoadBe64_buffer128(heap1, r13, in0, 0*16+8, Secret, true,  in0_b, in0_count*6 + 0);
     VAESNI_enc(inout4, inout4, T1);
-    LoadBe64_buffer128(r12, in0, 0*16,   Secret, false, in0_b, in0_count*6 + 0);
+    LoadBe64_buffer128(heap1, r12, in0, 0*16,   Secret, false, in0_b, in0_count*6 + 0);
 
     VAESNI_enc(inout5, inout5, T1);
 
     /* Loop6x_round9 */
 
-    Load128_buffer(T1, key, 0xa0-0x80, Secret, keys_b, 10);
+    Load128_buffer(heap0, T1, key, 0xa0-0x80, Secret, keys_b, 10);
 
     inline if (alg = AES_256) {
         VAESNI_enc(inout0, inout0, rndkey);
@@ -355,9 +355,9 @@ procedure Loop6x_partial_expected_code(
         VAESNI_enc(inout2, inout2, T1);
         VAESNI_enc(inout3, inout3, T1);
         VAESNI_enc(inout4, inout4, T1);
-        Load128_buffer(rndkey, key, 0xb0-0x80, Secret, keys_b, 11);
+        Load128_buffer(heap0, rndkey, key, 0xb0-0x80, Secret, keys_b, 11);
         VAESNI_enc(inout5, inout5, T1);
-        Load128_buffer(T1, key, 0xc0-0x80, Secret, keys_b, 12); // # Stop here for AES_196
+        Load128_buffer(heap0, T1, key, 0xc0-0x80, Secret, keys_b, 12); // # Stop here for AES_196
 
         VAESNI_enc(inout0, inout0, rndkey);
         VAESNI_enc(inout1, inout1, rndkey);
@@ -371,24 +371,24 @@ procedure Loop6x_partial_expected_code(
         VAESNI_enc(inout2, inout2, T1);
         VAESNI_enc(inout3, inout3, T1);
         VAESNI_enc(inout4, inout4, T1);
-        Load128_buffer(rndkey, key, 0xd0-0x80, Secret, keys_b, 13);
+        Load128_buffer(heap0, rndkey, key, 0xd0-0x80, Secret, keys_b, 13);
         VAESNI_enc(inout5, inout5, T1);
-        Load128_buffer(T1, key, 0xe0-0x80, Secret, keys_b, 14); // # 256-bit key
+        Load128_buffer(heap0, T1, key, 0xe0-0x80, Secret, keys_b, 14); // # 256-bit key
     }
 
     VAESNI_enc(inout0, inout0, rndkey);
-    Store128_buffer(rbp, Z3, 0x10, Secret, scratch_b, 1);  // # postpone vpxor $Z3,$Xi,$Xi
+    Store128_buffer(heap3, rbp, Z3, 0x10, Secret, scratch_b, 1);  // # postpone vpxor $Z3,$Xi,$Xi
     VSwap(Xi, Z0);  // # 2nd phase
     VAESNI_enc(inout1, inout1, rndkey);
     VPolyMul(Z0, Z0, Hkey, false, true);
-    VPxor(T2, T1, Mem128(inp, 0x00, Secret, in_b, count*6 + 0));
+    VPxor(T2, T1, Mem128(heap1, inp, 0x00, Secret, in_b, count*6 + 0));
     VAESNI_enc(inout2, inout2, rndkey);
-    VPxor(Ii, T1, Mem128(inp, 0x10, Secret, in_b, count*6 + 1));
+    VPxor(Ii, T1, Mem128(heap1, inp, 0x10, Secret, in_b, count*6 + 1));
     VAESNI_enc(inout3, inout3, rndkey);
-    VPxor(Z1, T1, Mem128(inp, 0x20, Secret, in_b, count*6 + 2));
+    VPxor(Z1, T1, Mem128(heap1, inp, 0x20, Secret, in_b, count*6 + 2));
     VAESNI_enc(inout4, inout4, rndkey);
-    VPxor(Z2, T1, Mem128(inp, 0x30, Secret, in_b, count*6 + 3));
+    VPxor(Z2, T1, Mem128(heap1, inp, 0x30, Secret, in_b, count*6 + 3));
     VAESNI_enc(inout5, inout5, rndkey);
-    VPxor(Z3, T1, Mem128(inp, 0x40, Secret, in_b, count*6 + 4));
-    VPxor(Hkey, T1, Mem128(inp, 0x50, Secret, in_b, count*6 + 5));
+    VPxor(Z3, T1, Mem128(heap1, inp, 0x40, Secret, in_b, count*6 + 4));
+    VPxor(Hkey, T1, Mem128(heap1, inp, 0x50, Secret, in_b, count*6 + 5));
 }

@@ -21,35 +21,36 @@
  * SOFTWARE.
  */
 
+#include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include "kremlin/internal/target.h"
 
-#ifndef __Vale_H
-#define __Vale_H
+#ifndef __Hacl_Blake2b_32_H
+#define __Hacl_Blake2b_32_H
+
+#include "Hacl_Kremlib.h"
+#include "Hacl_Impl_Blake2_Constants.h"
 
 
+typedef struct K___uint32_t_uint32_t_s
+{
+  uint32_t fst;
+  uint32_t snd;
+}
+K___uint32_t_uint32_t;
 
+void
+Hacl_Blake2b_32_blake2b(
+  uint32_t nn,
+  uint8_t *output,
+  uint32_t ll,
+  uint8_t *d,
+  uint32_t kk,
+  uint8_t *k
+);
 
-extern u64 add1(u64 *x0, u64 *x1, u64 x2);
-
-extern u64 fadd_(u64 *x0, u64 *x1, u64 *x2);
-
-extern u64 cswap2(u64 x0, u64 *x1, u64 *x2);
-
-extern u64 fsqr(u64 *x0, u64 *x1, u64 *x2);
-
-extern u64 fsqr2(u64 *x0, u64 *x1, u64 *x2);
-
-extern u64 fmul_(u64 *x0, u64 *x1, u64 *x2, u64 *x3);
-
-extern u64 fmul2(u64 *x0, u64 *x1, u64 *x2, u64 *x3);
-
-extern u64 fmul1(u64 *x0, u64 *x1, u64 x2);
-
-extern u64 fsub_(u64 *x0, u64 *x1, u64 *x2);
-
-#define __Vale_H_DEFINED
+#define __Hacl_Blake2b_32_H_DEFINED
 #endif

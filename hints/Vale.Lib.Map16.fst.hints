@@ -1,5 +1,5 @@
 [
-  "T\u0005O€äxæÇ\u0000š—\u0012¶“\u001dW",
+  "yáœZâ\u0004›?\u0003 Ó\u0013ÿè*×",
   [
     [
       "Vale.Lib.Map16.sel2",
@@ -8,7 +8,7 @@
       0,
       [ "@query", "primitive_Prims.op_LessThan" ],
       0,
-      "725f5ee300381209adcbd807da014adf"
+      "f231df148734f97608bdde2048821723"
     ],
     [
       "Vale.Lib.Map16.sel4",
@@ -17,7 +17,7 @@
       0,
       [ "@query", "primitive_Prims.op_LessThan" ],
       0,
-      "50f2721459498092ea75b977428ebdf4"
+      "f52a5ac4574212f89e42eeb9b0e3bf6f"
     ],
     [
       "Vale.Lib.Map16.sel8",
@@ -26,7 +26,7 @@
       0,
       [ "@query", "primitive_Prims.op_LessThan" ],
       0,
-      "ba31f2c2cdea740798ee1aee96b40ae1"
+      "7a03cd7d1959e68defe15a1f567a8c7e"
     ],
     [
       "Vale.Lib.Map16.sel16",
@@ -35,7 +35,7 @@
       0,
       [ "@query", "primitive_Prims.op_LessThan" ],
       0,
-      "f1a57060c6f61b106e04947f9ff6e069"
+      "5f1876a25f290ffeafbc9fba8cc90ce8"
     ],
     [
       "Vale.Lib.Map16.upd2",
@@ -44,7 +44,7 @@
       0,
       [ "@query", "primitive_Prims.op_LessThan" ],
       0,
-      "32473677c13d1a12b150a13617ab9e79"
+      "6acf209c75d8dfe2f78dcc8df1016219"
     ],
     [
       "Vale.Lib.Map16.upd4",
@@ -53,7 +53,7 @@
       0,
       [ "@query", "primitive_Prims.op_LessThan" ],
       0,
-      "3e3b3096995d109a118e81376dea7e3d"
+      "433122a24b2f534f5cfacdbf312fb870"
     ],
     [
       "Vale.Lib.Map16.upd8",
@@ -62,7 +62,7 @@
       0,
       [ "@query", "primitive_Prims.op_LessThan" ],
       0,
-      "fdc6f27995a316d835b8d7fcadc2338a"
+      "b3eb155865fe4c338c78a50c613e30f2"
     ],
     [
       "Vale.Lib.Map16.upd16",
@@ -71,7 +71,7 @@
       0,
       [ "@query", "primitive_Prims.op_LessThan" ],
       0,
-      "3d7000d10cfc6e18386e9340b56f8fd1"
+      "790ba6c16fa9c3cbff421def5fb453d6"
     ],
     [
       "Vale.Lib.Map16.lemma_self16",
@@ -93,7 +93,7 @@
         "typing_Vale.Lib.Map16.upd16"
       ],
       0,
-      "856ffea4d0b62e5d6298efbd5bcffee9"
+      "8b4247417688ec8dfe4d00bc5eb7ec14"
     ],
     [
       "Vale.Lib.Map16.lemma_other16",
@@ -114,7 +114,7 @@
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__2"
       ],
       0,
-      "6584718bb552c28d550ea5661dfdcabf"
+      "eb6853cfa34dc7cb072ba0cbd0a3e6e6"
     ],
     [
       "Vale.Lib.Map16.lemma_equal16",
@@ -134,7 +134,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "3631535e3686bf9802dc42e928ed3f95"
+      "db95fd07397f56c32901bd3c9f7b471c"
     ],
     [
       "Vale.Lib.Map16.lemma_self",
@@ -143,7 +143,7 @@
       0,
       [ "@query" ],
       0,
-      "b64c6d96a88eff6891f04b20690c1e62"
+      "ee6d9b0a8e18033d397ec668a13a8929"
     ],
     [
       "Vale.Lib.Map16.lemma_other",
@@ -152,7 +152,7 @@
       0,
       [ "@query" ],
       0,
-      "680bdf07b6ebb082c0d0f59ceb5b123e"
+      "1aee2876f1f3717964fbd2b0f062cde5"
     ],
     [
       "Vale.Lib.Map16.lemma_equal",
@@ -161,7 +161,7 @@
       0,
       [ "@query" ],
       0,
-      "cf5f202d7ef83867f905266ef88582e1"
+      "29388a297119dd76d2033b30f18fca4b"
     ],
     [
       "Vale.Lib.Map16.lemma_eta16",
@@ -173,7 +173,7 @@
         "int_inversion"
       ],
       0,
-      "d36f1b34371d5c2455ea013185f0afde"
+      "daa800416ba6b9a50b0c9a8a7a7be884"
     ],
     [
       "Vale.Lib.Map16.lemma_eta",
@@ -182,7 +182,146 @@
       0,
       [ "@query" ],
       0,
-      "923be742b29d5f1e153a858655073bca"
+      "f938c9097e92700c7289843d0aa1608a"
+    ],
+    [
+      "Vale.Lib.Map16.lemma_equal_intro",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "eq2-interp",
+        "equation_Vale.Lib.Map16.equal", "equation_Vale.Lib.Map16.map16",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple2"
+      ],
+      0,
+      "8f4ec00bef94ccd36b09c9e33875655e"
+    ],
+    [
+      "Vale.Lib.Map16.lemma_equal_elim",
+      1,
+      1,
+      0,
+      [
+        "@query", "eq2-interp", "equation_Vale.Lib.Map16.equal",
+        "equation_Vale.Lib.Map16.map16"
+      ],
+      0,
+      "cfbdf27fb8dec30e138746b5aabc7847"
+    ],
+    [
+      "Vale.Lib.Map16.init_rec",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_c1af67c741c70cb7b987763d32838ad5"
+      ],
+      0,
+      "da617518fa90e3ee73f0abaf61009d47"
+    ],
+    [
+      "Vale.Lib.Map16.init_rec",
+      2,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "binder_x_bb4e1c9af0265270f8e7a5f250f730e2_3",
+        "binder_x_fe28d8bcde588226b4e538b35321de05_1", "equation_Prims.nat",
+        "function_token_typing_Prims.__cache_version_number__",
+        "int_inversion", "int_typing", "lemma_Vale.Lib.Map16.lemma_other",
+        "lemma_Vale.Lib.Map16.lemma_self", "primitive_Prims.op_Equality",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_6f1639e4a161724de6d4bdcabb0d5551",
+        "refinement_interpretation_Tm_refine_c365eb902b454950de62fba701d9049d",
+        "well-founded-ordering-on-nat"
+      ],
+      0,
+      "5cc40a5f544f42a0f4f471689c7bbd06"
+    ],
+    [
+      "Vale.Lib.Map16.init",
+      1,
+      1,
+      0,
+      [ "@query" ],
+      0,
+      "426be3faea063acce84bdea1291b9a77"
+    ],
+    [
+      "Vale.Lib.Map16.init",
+      2,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "7e96d7f1430808a2e28a4dec683a24d0"
+    ],
+    [
+      "Vale.Lib.Map16.init_ghost_rec",
+      1,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "refinement_interpretation_Tm_refine_c1af67c741c70cb7b987763d32838ad5"
+      ],
+      0,
+      "335a339437cc89283ca06e1477a59328"
+    ],
+    [
+      "Vale.Lib.Map16.init_ghost_rec",
+      2,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "binder_x_bb4e1c9af0265270f8e7a5f250f730e2_3",
+        "binder_x_fe28d8bcde588226b4e538b35321de05_1", "equation_Prims.nat",
+        "function_token_typing_Prims.__cache_version_number__",
+        "int_inversion", "int_typing", "lemma_Vale.Lib.Map16.lemma_other",
+        "lemma_Vale.Lib.Map16.lemma_self", "primitive_Prims.op_Equality",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_6f1639e4a161724de6d4bdcabb0d5551",
+        "refinement_interpretation_Tm_refine_c365eb902b454950de62fba701d9049d",
+        "well-founded-ordering-on-nat"
+      ],
+      0,
+      "97493ce0fd909e4405e0f3441cc9eb3d"
+    ],
+    [
+      "Vale.Lib.Map16.init_ghost",
+      1,
+      1,
+      0,
+      [ "@query" ],
+      0,
+      "61f14bd752904cb6a43f271dbe85fad1"
+    ],
+    [
+      "Vale.Lib.Map16.init_ghost",
+      2,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "3ca1463b2a9ee16e60be1da8755a7bb3"
     ]
   ]
 ]

@@ -21,8 +21,36 @@
  * SOFTWARE.
  */
 
+#include "evercrypt_targetconfig.h"
+#include "libintvector.h"
+#include "kremlin/internal/types.h"
+#include "kremlin/lowstar_endianness.h"
+#include <string.h>
+#include "kremlin/internal/target.h"
 
-#include "Vale.h"
+#ifndef __Hacl_Blake2b_32_H
+#define __Hacl_Blake2b_32_H
 
-typedef u64 __u64___;
+#include "Hacl_Kremlib.h"
+#include "Hacl_Impl_Blake2_Constants.h"
 
+
+typedef struct K___uint32_t_uint32_t_s
+{
+  uint32_t fst;
+  uint32_t snd;
+}
+K___uint32_t_uint32_t;
+
+void
+Hacl_Blake2b_32_blake2b(
+  uint32_t nn,
+  uint8_t *output,
+  uint32_t ll,
+  uint8_t *d,
+  uint32_t kk,
+  uint8_t *k
+);
+
+#define __Hacl_Blake2b_32_H_DEFINED
+#endif

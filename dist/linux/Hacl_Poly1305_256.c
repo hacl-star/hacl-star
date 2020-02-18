@@ -473,8 +473,6 @@ Hacl_Impl_Poly1305_Field32xN_256_fmul_r4_normalize(
   Lib_IntVector_Intrinsics_vec256
   r12344 = Lib_IntVector_Intrinsics_vec256_interleave_low128(v34344, v12124);
   Lib_IntVector_Intrinsics_vec256
-  r123450 = Lib_IntVector_Intrinsics_vec256_smul64(r12340, (u64)5U);
-  Lib_IntVector_Intrinsics_vec256
   r123451 = Lib_IntVector_Intrinsics_vec256_smul64(r12341, (u64)5U);
   Lib_IntVector_Intrinsics_vec256
   r123452 = Lib_IntVector_Intrinsics_vec256_smul64(r12342, (u64)5U);
@@ -1490,7 +1488,7 @@ void Hacl_Poly1305_256_poly1305_update(Lib_IntVector_Intrinsics_vec256 *ctx, u32
       u32 nb = len10 / bs;
       {
         u32 i;
-        for (i = (u32)0U; i < nb; i = i + (u32)1U)
+        for (i = (u32)0U; i < nb; i++)
         {
           u8 *block = text1 + i * bs;
           Lib_IntVector_Intrinsics_vec256 e[5U];
@@ -1752,7 +1750,7 @@ void Hacl_Poly1305_256_poly1305_update(Lib_IntVector_Intrinsics_vec256 *ctx, u32
   rem1 = len1 % (u32)16U;
   {
     u32 i;
-    for (i = (u32)0U; i < nb0; i = i + (u32)1U)
+    for (i = (u32)0U; i < nb0; i++)
     {
       u8 *block = t10 + i * (u32)16U;
       Lib_IntVector_Intrinsics_vec256 e[5U];
@@ -2086,7 +2084,7 @@ void Hacl_Poly1305_256_poly1305_update(Lib_IntVector_Intrinsics_vec256 *ctx, u32
       Lib_IntVector_Intrinsics_vec256 o2;
       Lib_IntVector_Intrinsics_vec256 o3;
       Lib_IntVector_Intrinsics_vec256 o4;
-      memcpy(tmp, last1, rem1 * sizeof last1[0U]);
+      memcpy(tmp, last1, rem1 * sizeof (last1[0U]));
       u0 = load64_le(tmp);
       lo = u0;
       u = load64_le(tmp + (u32)8U);

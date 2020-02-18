@@ -65,9 +65,6 @@ EXPORTS
   Hacl_Curve25519_64_Slow_scalarmult
   Hacl_Curve25519_64_Slow_secret_to_public
   Hacl_Curve25519_64_Slow_ecdh
-  Hacl_Curve25519_64_scalarmult
-  Hacl_Curve25519_64_secret_to_public
-  Hacl_Curve25519_64_ecdh
   Hacl_Impl_Curve25519_Field51_fadd
   Hacl_Impl_Curve25519_Field51_fsub
   Hacl_Impl_Curve25519_Field51_fmul
@@ -78,6 +75,8 @@ EXPORTS
   Hacl_Curve25519_51_scalarmult
   Hacl_Curve25519_51_secret_to_public
   Hacl_Curve25519_51_ecdh
+  Hacl_Impl_ECDSA_ecdsa_p256_sha2_sign
+  Hacl_Impl_ECDSA_ecdsa_p256_sha2_verify
   Hacl_Ed25519_sign
   Hacl_Ed25519_verify
   Hacl_Ed25519_secret_to_public
@@ -118,8 +117,12 @@ EXPORTS
   Hacl_Frodo_KEM_crypto_kem_keypair
   Hacl_Frodo_KEM_crypto_kem_enc
   Hacl_Frodo_KEM_crypto_kem_dec
+  Hacl_Blake2b_32_blake2b
   Hacl_Chacha20_Vec32_chacha20_encrypt_32
   Hacl_Chacha20_Vec32_chacha20_decrypt_32
+  Hacl_Blake2b_256_blake2b
+  Hacl_Blake2s_32_blake2s
+  Hacl_Blake2s_128_blake2s
   Hacl_Chacha20_Vec128_chacha20_encrypt_128
   Hacl_Chacha20_Vec128_chacha20_decrypt_128
   Hacl_Chacha20Poly1305_128_aead_encrypt
@@ -141,6 +144,9 @@ EXPORTS
   Hacl_HMAC_DRBG_instantiate
   Hacl_HMAC_DRBG_reseed
   Hacl_HMAC_DRBG_generate
+  Hacl_Curve25519_64_scalarmult
+  Hacl_Curve25519_64_secret_to_public
+  Hacl_Curve25519_64_ecdh
   Hacl_Chacha20Poly1305_32_aead_encrypt
   Hacl_Chacha20Poly1305_32_aead_decrypt
   Hacl_Chacha20_Vec256_chacha20_encrypt_256

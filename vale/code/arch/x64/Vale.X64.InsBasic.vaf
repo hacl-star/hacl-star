@@ -1,5 +1,6 @@
 include{:fstar}{:open} "Vale.Def.Types_s"
 include{:fstar}{:open} "Vale.Arch.Types"
+include{:fstar}{:open} "Vale.Arch.HeapImpl"
 include{:fstar}{:open} "Vale.X64.Machine_s"
 include{:fstar}{:open} "Vale.X64.State"
 include{:fstar}{:open} "Vale.X64.Decls"
@@ -11,6 +12,7 @@ module Vale.X64.InsBasic
 #verbatim{:interface}
 open FStar.Mul
 open Vale.Def.Types_s
+open Vale.Arch.HeapImpl
 open Vale.Arch.Types
 open Vale.X64.Machine_s
 open Vale.X64.State
@@ -32,9 +34,8 @@ open Vale.X64.Stack_i
 module I = Vale.X64.Instructions_s
 module S = Vale.X64.Machine_Semantics_s
 friend Vale.X64.Decls
-#endverbatim
-
 #reset-options "--initial_fuel 5 --max_fuel 5 --max_ifuel 2 --z3rlimit 20"
+#endverbatim
 
 type vale_heap:Type(1) := Vale.X64.Memory.vale_heap;
 type vale_stack:Type(1) := Vale.X64.Stack_i.vale_stack;
@@ -57,9 +58,26 @@ var r13:nat64 {:state reg64(rR13)};
 var r14:nat64 {:state reg64(rR14)};
 var r15:nat64 {:state reg64(rR15)};
 var efl:Vale.X64.Flags.t {:state flags()};
+var mem_config:int {:state mem_config()};
 var mem:vale_heap {:state mem()};
+var heap0 :vale_heap {:state mem_heaplet(0 )}{:updates mem};
+var heap1 :vale_heap {:state mem_heaplet(1 )}{:updates mem};
+var heap2 :vale_heap {:state mem_heaplet(2 )}{:updates mem};
+var heap3 :vale_heap {:state mem_heaplet(3 )}{:updates mem};
+var heap4 :vale_heap {:state mem_heaplet(4 )}{:updates mem};
+var heap5 :vale_heap {:state mem_heaplet(5 )}{:updates mem};
+var heap6 :vale_heap {:state mem_heaplet(6 )}{:updates mem};
+var heap7 :vale_heap {:state mem_heaplet(7 )}{:updates mem};
+var heap8 :vale_heap {:state mem_heaplet(8 )}{:updates mem};
+var heap9 :vale_heap {:state mem_heaplet(9 )}{:updates mem};
+var heap10:vale_heap {:state mem_heaplet(10)}{:updates mem};
+var heap11:vale_heap {:state mem_heaplet(11)}{:updates mem};
+var heap12:vale_heap {:state mem_heaplet(12)}{:updates mem};
+var heap13:vale_heap {:state mem_heaplet(13)}{:updates mem};
+var heap14:vale_heap {:state mem_heaplet(14)}{:updates mem};
+var heap15:vale_heap {:state mem_heaplet(15)}{:updates mem};
 var stack:vale_stack {:state stack()};
-var memTaint:memtaint {:state memTaint()};
+var memLayout:vale_heap_layout {:state mem_layout()};
 var stackTaint:memtaint {:state stackTaint()};
 
 operand_type reg64:nat64 :=
@@ -69,16 +87,23 @@ operand_type reg64:nat64 :=
 | inout r12 | inout r13 | inout r14 | inout r15
 ;
 operand_type shift_amt64:nat64 := in rcx | const;
-operand_type reg_opr64:nat64 @ va_operand := reg64;
-operand_type Mem(in base:reg64, inline offset:int, ghost b:buffer64, ghost index:int, inline t:taint):int;
+operand_type reg_opr64:nat64 @ operand64 := reg64;
+operand_type Mem64(in h:heaplet, in base:reg64, inline offset:int, ghost b:buffer64, ghost index:int, inline t:taint):int;
 operand_type Stack(in base:reg64, inline offset:int, inline t:taint):int;
-operand_type dst_opr64:nat64 @ va_operand := reg_opr64 | Mem | Stack;
-operand_type opr64:nat64 @ va_operand := dst_opr64 | const;
+operand_type dst_opr64:nat64 @ operand64 := reg_opr64 | Mem64 | Stack;
+operand_type opr64:nat64 @ operand64 := dst_opr64 | const;
+
+operand_type heaplet:vale_heap @ heaplet_id :=
+| inout heap0 | inout heap1 | inout heap2 | inout heap3
+| inout heap4 | inout heap5 | inout heap6 | inout heap7
+| inout heap8 | inout heap9 | inout heap10 | inout heap11
+| inout heap12 | inout heap13 | inout heap14 | inout heap15
+;
 
 procedure Mov64(inout dst:dst_opr64, in src:opr64)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_ins(make_instr(I.ins_Mov64, dst, src))}
+    {:instruction mk_ins(make_instr_annotate(I.ins_Mov64, S.AnnotateMov64(), dst, src))}
     ensures
         dst == old(src);
 {
@@ -162,11 +187,11 @@ procedure Adc64Wrap(inout dst:dst_opr64, in src:opr64)
 {
 }
 
-#reset-options "--initial_fuel 5 --max_fuel 5 --max_ifuel 2 --z3rlimit 20 --smtencoding.nl_arith_repr boxwrap"
 procedure Adcx64Wrap(inout dst:dst_opr64, in src:opr64)
     {:public}
     {:quick exportOnly}
     {:instruction mk_ins(make_instr(I.ins_Adcx64, dst, src))}
+    {:options smtencoding.nl_arith_repr(boxwrap)}
     requires adx_enabled;
     modifies
         efl;
@@ -180,7 +205,6 @@ procedure Adcx64Wrap(inout dst:dst_opr64, in src:opr64)
     assert old(add_wrap64(add_wrap64(dst, src), (if cf(efl) then 1 else 0)) == (dst + src + (if cf(efl) then 1 else 0)) % pow2_64); // REVIEW: shouldn't be necessary
 }
 
-#reset-options "--initial_fuel 5 --max_fuel 5 --max_ifuel 2 --z3rlimit 20"
 procedure Adox64Wrap(inout dst:dst_opr64, in src:opr64)
     {:public}
     {:quick exportOnly}
@@ -236,16 +260,15 @@ procedure Sbb64(inout dst:dst_opr64, in src:opr64)
 {
 }
 
-#reset-options "--max_fuel 0 --max_ifuel 0 --using_facts_from 'Prims FStar.UInt'"
-
 #verbatim
+#restart-solver
+#push-options "--max_fuel 0 --max_ifuel 0 --using_facts_from 'Prims FStar.UInt'"
 let lemma_fundamental_div_mod (a b:nat64) :
   Lemma (pow2_64 * (FStar.UInt.mul_div #64 a b) + (FStar.UInt.mul_mod #64 a b) == a * b)
   =
   FStar.Math.Lemmas.lemma_div_mod (a * b) pow2_64
+#pop-options
 #endverbatim
-
-#reset-options "--initial_fuel 5 --max_fuel 5 --max_ifuel 2 --z3rlimit 50"
 
 ghost procedure lemma_fundamental_div_mod(ghost a:nat64, ghost b:nat64) {:infer_spec} extern;
 
@@ -459,7 +482,39 @@ procedure Nat64Equal(out dst:reg_opr64, inout src:reg_opr64)
 procedure Comment(inline c:string)
     {:public}
     {:quick exportOnly}
-    {:instruction mk_ins(make_instr(I.ins_Comment(c)))}
+    {:instruction mk_ins(make_instr_annotate(I.ins_Comment(c), S.AnnotateComment(c)))}
+{
+    // Do nothing. This is a no-op.
+}
+
+procedure LargeComment(inline c:string)
+    {:public}
+    {:quick exportOnly}
+    {:instruction mk_ins(make_instr_annotate(I.ins_LargeComment(c), S.AnnotateLargeComment(c)))}
+{
+    // Do nothing. This is a no-op.
+}
+
+procedure NoNewline()
+    {:public}
+    {:quick exportOnly}
+    {:instruction mk_ins(make_instr_annotate(I.ins_Space(0), S.AnnotateSpace(0)))}
+{
+    // Do nothing. This is a no-op.
+}
+
+procedure Newline()
+    {:public}
+    {:quick exportOnly}
+    {:instruction mk_ins(make_instr_annotate(I.ins_Newline, S.AnnotateNewline()))}
+{
+    // Do nothing. This is a no-op.
+}
+
+procedure Space(inline n:nat)
+    {:public}
+    {:quick exportOnly}
+    {:instruction mk_ins(make_instr_annotate(I.ins_Space(n), S.AnnotateSpace(n)))}
 {
     // Do nothing. This is a no-op.
 }

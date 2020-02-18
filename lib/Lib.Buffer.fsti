@@ -601,6 +601,36 @@ val loop:
     (requires fun h -> h0 == h)
     (ensures  fun h0 _ h1 -> loop_inv h0 n a_spec refl footprint spec (v n) h1)
 
+
+let loop_refl_inv
+  (h0:mem)
+  (n:size_t)
+  (a_spec: Type)
+  (refl:(mem -> GTot a_spec))
+  (footprint:B.loc)
+  (spec:(mem -> GTot (i:size_nat{i < v n} -> a_spec -> a_spec)))
+  (i:size_nat{i <= v n})
+  (h:mem):
+  Type0
+=
+  modifies footprint h0 h /\
+  refl h == Loop.repeati i (spec h0) (refl h0)
+
+inline_for_extraction noextract
+val loop_refl:
+    h0:mem
+  -> n:size_t
+  -> a_spec:Type
+  -> refl:(mem -> GTot a_spec)
+  -> footprint:Ghost.erased B.loc
+  -> spec:(mem -> GTot (i:size_nat{i < v n} -> a_spec -> a_spec))
+  -> impl:(i:size_t{v i < v n} -> Stack unit
+      (requires loop_refl_inv h0 n a_spec refl footprint spec (v i))
+      (ensures  fun _ _ h -> loop_refl_inv h0 n a_spec refl footprint spec (v i + 1) h)) ->
+  Stack unit
+    (requires fun h -> h0 == h)
+    (ensures  fun h0 _ h1 -> loop_refl_inv h0 n a_spec refl footprint spec (v n) h1)
+
 let loop1_inv
     (h0:mem)
     (n:size_t)
