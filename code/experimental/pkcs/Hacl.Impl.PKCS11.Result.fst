@@ -7,6 +7,7 @@ type exception_t =
   | CKR_OK
   | CKR_ARGUMENTS_BAD 
   | CKR_ATTRIBUTE_READ_ONLY 
+  (*If the supplied template specifies a value for an invalid attribute, then the attempt should fail with the error code CKR_ATTRIBUTE_TYPE_INVALID.  An attribute is valid if it is either one of the attributes described in the Cryptoki specification or an additional vendor-specific attribute supported by the library and token. *)
   | CKR_ATTRIBUTE_TYPE_INVALID
   | CKR_ATTRIBUTE_VALUE_INVALID 
   | CKR_CRYPTOKI_NOT_INITIALIZED 
@@ -33,3 +34,24 @@ type exception_t =
 
 type result 'a = either 'a exception_t
 
+(* The function takes two exceptions and returns one out of them according to the rule:
+if one of the expections is CKR_OK, but not the second -> return the second
+if none of them are CKR_OK, return any
+*)
+
+val exceptionAdd: a: exception_t -> b: exception_t -> Tot (e: exception_t
+  {
+    if CKR_OK? a then e == b else
+    if CKR_OK? b then e == a else
+    e == b
+  }
+)
+
+
+let exceptionAdd a b = 
+  match a with
+  |CKR_OK -> b
+  |_ -> 
+    match b with
+    |CKR_OK -> a
+    |_ -> b

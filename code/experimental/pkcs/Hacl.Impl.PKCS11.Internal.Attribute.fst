@@ -30,11 +30,31 @@ let typeID_type: nat -> void = function
   |_ -> CK_BOOL
 
 
+noeq 
+type attributeD (#t:Type0) = 
+  |A: _type: _CK_ULONG -> pValue: buffer t -> ulValueLen: size_t {length pValue == uint_v ulValueLen} -> attributeD #t
+
+
+val lenAttribute: _CK_ATTRIBUTE_TYPE -> Tot size_t
+
+let lenAttribute a = 
+	match uint_v a with 
+	|0 -> (u64 1)
+	|1 -> (u64 1)
+	|_ -> (u64 1)
+
 noeq
 type attribute = 
   | CKA_CLASS: _type: _CK_ATTRIBUTE_TYPE{uint_v _type = 0} -> pValue: buffer (void_t (typeID_type (uint_v _type))) ->  ulValueLen: size_t {length pValue == uint_v ulValueLen} -> attribute
   | CKA_TOKEN: _type: _CK_ATTRIBUTE_TYPE{uint_v _type = 1} -> pValue: buffer (void_t (typeID_type (uint_v _type))) ->  ulValueLen: size_t {length pValue == uint_v ulValueLen} -> attribute
-  
+
+
+val getAttributeType: a: attribute -> Tot _CK_ATTRIBUTE_TYPE
+
+let getAttributeType a = 
+  match a with 
+  |CKA_CLASS t _ _ -> t
+  |CKA_TOKEN t _ _ -> t 
 
 val isAttributeReadOnly_: _CK_ATTRIBUTE_TYPE -> Tot bool
 
@@ -54,14 +74,21 @@ let isAttributeReadOnly attrType =
   | false -> CKR_ATTRIBUTE_READ_ONLY
   (* add your not true, not false boolean joke here *) 
 
-
-assume val isAttributeReadOnlyBuffer: attribute -> b: buffer exception_t {length b = 1} -> 
+val isAttributeReadOnlyBuffer: attribute -> b: buffer exception_t {length b = 1} -> 
   Stack unit 
-    (requires fun h -> True)
+    (requires fun h -> live h b)
     (ensures fun h0 _ h1 -> True)
 
+let isAttributeReadOnlyBuffer a b = 
+  let t = getAttributeType a in 
+  let e = isAttributeReadOnly t in 
+  let oldException = index b (size 0) in 
+  let newException = exceptionAdd oldException e in 
+  upd b (size 0) newException
+  
+
 val checkAttributes: ulCount: size_t -> pTemplate: buffer attribute{length pTemplate = uint_v ulCount} -> Stack unit
-  (requires fun h -> True)
+  (requires fun h -> live h pTemplate)
   (ensures fun h0 _ h1 -> True)
 
 
