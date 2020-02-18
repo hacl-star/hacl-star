@@ -4,6 +4,7 @@ open Hacl.Impl.PKCS11.Internal.Types
 
 
 type exception_t = 
+  | CKR_OK
   | CKR_ARGUMENTS_BAD 
   | CKR_ATTRIBUTE_READ_ONLY 
   | CKR_ATTRIBUTE_TYPE_INVALID

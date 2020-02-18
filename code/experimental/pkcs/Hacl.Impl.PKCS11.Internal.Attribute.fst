@@ -3,6 +3,13 @@ module Hacl.Impl.PKCS11.Internal.Attribute
 open Lib.IntTypes
 open Hacl.Impl.PKCS11.Internal.Types
 
+open Hacl.Impl.PKCS11.Result
+
+open FStar.HyperStack.All
+open FStar.HyperStack
+module ST = FStar.HyperStack.ST
+
+
 open LowStar.Buffer
 
 (* 
@@ -29,28 +36,40 @@ type attribute =
   | CKA_TOKEN: _type: _CK_ATTRIBUTE_TYPE{uint_v _type = 1} -> pValue: buffer (void_t (typeID_type (uint_v _type))) ->  ulValueLen: size_t {length pValue == uint_v ulValueLen} -> attribute
   
 
+val isAttributeReadOnly_: _CK_ATTRIBUTE_TYPE -> Tot bool
 
-(*
-type attributeSpecification  = 
-	| CKA_CLASS: typeId: _CK_ATTRIBUTE_TYPE{typeId= 0x0ul} -> pValue: seq _CK_OBJECT_CLASS{length pValue = 1} ->  attributeSpecification
-	| CKA_TOKEN: typeId: _CK_ATTRIBUTE_TYPE{typeId= 0x1ul}->  pValue: seq bool-> attributeSpecification
-	| CKA_PRIVATE: typeId: _CK_ATTRIBUTE_TYPE{typeId= 0x2ul} ->  pValue: seq bool-> attributeSpecification
-	| CKA_LABEL: typeId: _CK_ATTRIBUTE_TYPE{typeId= 0x3ul} ->  pValue: seq _CK_ULONG->a: attributeSpecification
-	| CKA_APPLICATION:typeId: _CK_ATTRIBUTE_TYPE{typeId= 0x10ul} ->pValue: seq _CK_ULONG ->a: attributeSpecification
-	| CKA_VALUE:typeId: _CK_ATTRIBUTE_TYPE{typeId= 0x11ul} ->pValue: seq _CK_ULONG ->a: attributeSpecification
-	| CKA_OBJECT_ID:typeId: _CK_ATTRIBUTE_TYPE{typeId= 0x12ul} -> pValue: seq _CK_ULONG ->a: attributeSpecification
-	| CKA_CERTIFICATE_TYPE:typeId: _CK_ATTRIBUTE_TYPE{typeId= 0x80ul} -> pValue: seq _CK_ULONG ->a: attributeSpecification
-	| CKA_ISSUER:typeId: _CK_ATTRIBUTE_TYPE{typeId= 0x81ul} ->pValue: seq _CK_ULONG ->a: attributeSpecification
-	| CKA_SERIAL_NUMBER: typeId: _CK_ATTRIBUTE_TYPE{typeId= 0x82ul}-> pValue: seq _CK_ULONG ->a: attributeSpecification
-	| CKA_KEY_TYPE: typeId: _CK_ATTRIBUTE_TYPE{typeId= 0x100ul} -> pValue: seq _CK_KEY_TYPE_T-> attributeSpecification
-	| CKA_ID: typeId: _CK_ATTRIBUTE_TYPE{typeId= 0x102ul} -> pValue: seq _CK_ULONG->a: attributeSpecification
-	| CKA_SENSITIVE: typeId: _CK_ATTRIBUTE_TYPE{typeId= 0x103ul} ->pValue: seq bool -> attributeSpecification
-	| CKA_ENCRYPT: typeId: _CK_ATTRIBUTE_TYPE{typeId= 0x104ul} ->pValue: (seq bool) ->a: attributeSpecification
-	| CKA_DECRYPT: typeId: _CK_ATTRIBUTE_TYPE{typeId= 0x105ul}->pValue: seq bool ->a: attributeSpecification
-	| CKA_WRAP: typeId: _CK_ATTRIBUTE_TYPE{typeId= 0x106ul} -> pValue: seq _CK_ULONG ->a: attributeSpecification
-	| CKA_UNWRAP: typeId: _CK_ATTRIBUTE_TYPE{typeId= 0x107ul} -> pValue: seq _CK_ULONG->a: attributeSpecification
-	| CKA_SIGN: typeId: _CK_ATTRIBUTE_TYPE{typeId= 0x108ul} -> pValue: seq _CK_ULONG ->a: attributeSpecification
-	| CKA_VERIFY: typeId: _CK_ATTRIBUTE_TYPE{typeId= 0x10Aul} -> pValue: seq _CK_ULONG ->a: attributeSpecification
-	| CKA_VALUE_LEN: typeId: _CK_ATTRIBUTE_TYPE{typeId= 0x161ul} -> pValue: seq _CK_ULONG -> attributeSpecification
-	| CKA_STUB: typeId: _CK_ATTRIBUTE_TYPE{typeId = 0x999ul} -> pValue: seq bool{length pValue = 1} -> attributeSpecification
+let isAttributeReadOnly_ attrType = 
+  let a = uint_v attrType in 
+  match a with
+  | 0 -> true
+  | _ -> false
+  
+
+val isAttributeReadOnly: _CK_ATTRIBUTE_TYPE -> Tot (r: exception_t {CKR_OK? r \/ CKR_ATTRIBUTE_READ_ONLY? r})
+
+let isAttributeReadOnly attrType = 
+  let statusReadOnly = isAttributeReadOnly_ attrType in 
+  match statusReadOnly with 
+  | true -> CKR_OK
+  | false -> CKR_ATTRIBUTE_READ_ONLY
+  (* add your not true, not false boolean joke here *) 
+
+
+assume val isAttributeReadOnlyBuffer: attribute -> b: buffer exception_t {length b = 1} -> 
+  Stack unit 
+    (requires fun h -> True)
+    (ensures fun h0 _ h1 -> True)
+
+val checkAttributes: ulCount: size_t -> pTemplate: buffer attribute{length pTemplate = uint_v ulCount} -> Stack unit
+  (requires fun h -> True)
+  (ensures fun h0 _ h1 -> True)
+
+
+let checkAttributes ulCount pTemplate = 
+  push_frame();
+  [@inline_let]
+  let okException = CKR_OK in 
+  let bTest = LowStar.Buffer.alloca okException (normalize_term 1ul) in  
+  C.Loops.for 0ul ulCount (fun h i -> True) (fun i ->  isAttributeReadOnlyBuffer (index pTemplate i) bTest);
+  pop_frame()
 
