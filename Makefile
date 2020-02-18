@@ -925,17 +925,23 @@ dist/evercrypt-external-headers/Makefile.basic: $(ALL_KRML_FILES)
 	  -tmpdir $(dir $@) \
 	  $^
 
-# Auto-generates a single C test file.
+# Auto-generates a single C test file. Note that this rule will trigger multiple
+# times, for multiple KreMLin invocations in the test/ directory -- this may
+# cause races on shared files (e.g. Makefile.basic, etc.) -- to be investigated.
+# In the meanwhile, we at least try to copy the header for intrinsics just once.
+
+dist/test/c/lib_intrinsics.h:
+	mkdir -p $(dir $@) && cp $(HACL_HOME)/lib/c/lib_intrinsics.h $@
+
 .PRECIOUS: dist/test/c/%.c
-dist/test/c/%.c: $(ALL_KRML_FILES)
-	mkdir -p $(dir $@) && cp $(HACL_HOME)/lib/c/lib_intrinsics.h $(dir $@)
+dist/test/c/%.c: $(ALL_KRML_FILES) dist/test/c/lib_intrinsics.h
 	$(KRML) -silent \
 	  -tmpdir $(dir $@) -skip-compilation \
 	  -no-prefix $(subst _,.,$*) \
 	  -library Hacl,Lib,EverCrypt,EverCrypt.* \
 	  -fparentheses -fcurly-braces -fno-shadow \
 	  -minimal -add-include '"kremlib.h"' \
-	  -bundle '*[rename=$*]' $(KRML_EXTRA) $^
+	  -bundle '*[rename=$*]' $(KRML_EXTRA) $(filter %.krml,$^)
 
 dist/test/c/Test.c: KRML_EXTRA=-add-include '"kremlin/internal/compat.h"'
 
