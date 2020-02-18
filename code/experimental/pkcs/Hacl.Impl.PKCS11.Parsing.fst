@@ -12,8 +12,15 @@ open Hacl.Impl.PKCS11.Result
 
 (* totally wrong, i know, just an example.
 The idealistic is to check whether it is void or not, then to check whether they between each other are equal. I have no idea how to do it for now, so. 
-
 *)
+
+(*
+  Exceptions: 
+  CKR_ATTRIBUTE_TYPE_INVALID -> in parsing the main match to have a value out of possible
+  CKR_ATTRIBUTE_VALUE_INVALID -> in the second match if the checkes are not satisfied (i.e. can't cast to the attribute)
+*)
+
+
 val compareT: t0: Type0 -> t1: Type0 -> Tot bool
 
 let compareT t0 t1 = 
