@@ -1,4 +1,5 @@
 module Vale.Interop.Base
+open Vale.Arch.HeapTypes_s
 include Vale.Interop.Types
 include Vale.Interop.Heap_s
 module MB = LowStar.Monotonic.Buffer
@@ -36,14 +37,10 @@ let default_v_of_typ (t:base_typ) : (base_typ_as_type t) = match t with
 
 
 let imm_to_b8 (src:base_typ) (b:IB.ibuffer (base_typ_as_type src)) : GTot b8 =
-  let x:b8' = Buffer b false in
-  let s1 = Seq.create 1 (default_v_of_typ src) in
-  lemma_seq_neq_intro s1 Seq.empty;
-  Classical.exists_intro (fun s -> ~ (x.rel s Seq.empty)) s1;
-  x
+  Buffer false b
 
 let mut_to_b8 (src:base_typ) (b:B.buffer (base_typ_as_type src)) : GTot b8 =
-  Buffer b true
+  Buffer true b
 
 [@__reduce__]
 let coerce (x:'a{'a == 'b}) : 'b = x
@@ -52,22 +49,22 @@ let coerce (x:'a{'a == 'b}) : 'b = x
 
 type buffer_qualifiers = {
   modified:bool;
-  taint:MS.taint;
+  taint:taint;
   strict_disjointness:bool
 }
 
 [@__reduce__]
 let default_bq = {
-  modified=true;
-  taint=MS.Secret;
-  strict_disjointness=false
+  modified = true;
+  taint = Secret;
+  strict_disjointness = false
 }
 
 [@__reduce__]
 let stack_bq = {
-  modified=true;
-  taint=MS.Public;
-  strict_disjointness=true
+  modified = true;
+  taint = Public;
+  strict_disjointness = true
 }
 
 let valid_base_type = x:base_typ{x <> TUInt128}
@@ -90,7 +87,6 @@ let normal (#a:Type) (x:a) : a =
                  `%BS.Mkmachine_state?.ms_regs;
                  `%BS.Mkmachine_state?.ms_flags;
                  `%BS.Mkmachine_state?.ms_heap;
-                 `%BS.Mkmachine_state?.ms_memTaint;
                  `%BS.Mkmachine_state?.ms_stack;
                  `%BS.Mkmachine_state?.ms_stackTaint;
                  `%BS.Mkmachine_state?.ms_trace;
@@ -388,7 +384,7 @@ let rec args_b8_live (hs:HS.mem) (args:list arg{all_live hs args})
         assert (args_b8 args == args_b8 tl)
       | (| TD_Buffer t _ _, x |) ->
         assert (B.live hs x);
-        assert (args_b8 args == Buffer x true :: args_b8 tl)
+        assert (args_b8 args == Buffer true x :: args_b8 tl)
       | (| TD_ImmBuffer t _ _, x |) ->
         assert (B.live hs x);
         assert (args_b8 args == imm_to_b8 t x :: args_b8 tl)
@@ -456,7 +452,7 @@ let rec disjoint_or_eq_fresh
 let rec write_taint
     (i:nat)
     (mem:interop_heap)
-    (ts:b8 -> GTot MS.taint)
+    (ts:b8 -> GTot taint)
     (b:b8{i <= DV.length (get_downview b.bsrc)})
     (accu:MS.memTaint_t)
   : GTot MS.memTaint_t
@@ -467,7 +463,7 @@ let rec write_taint
 let create_memtaint
     (mem:interop_heap)
     (ps:list b8)
-    (ts:b8 -> GTot MS.taint)
+    (ts:b8 -> GTot taint)
   : GTot MS.memTaint_t
-  = List.Tot.fold_right_gtot ps (write_taint 0 mem ts) (FStar.Map.const MS.Public)
+  = List.Tot.fold_right_gtot ps (write_taint 0 mem ts) (FStar.Map.const Public)
 

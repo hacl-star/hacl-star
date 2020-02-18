@@ -973,7 +973,7 @@ Hacl_Poly1305_128_poly1305_update(
       uint32_t nb = len10 / bs;
       {
         uint32_t i;
-        for (i = (uint32_t)0U; i < nb; i = i + (uint32_t)1U)
+        for (i = (uint32_t)0U; i < nb; i++)
         {
           uint8_t *block = text1 + i * bs;
           Lib_IntVector_Intrinsics_vec128 e[5U];
@@ -1230,7 +1230,7 @@ Hacl_Poly1305_128_poly1305_update(
   rem1 = len1 % (uint32_t)16U;
   {
     uint32_t i;
-    for (i = (uint32_t)0U; i < nb0; i = i + (uint32_t)1U)
+    for (i = (uint32_t)0U; i < nb0; i++)
     {
       uint8_t *block = t10 + i * (uint32_t)16U;
       Lib_IntVector_Intrinsics_vec128 e[5U];
@@ -1564,7 +1564,7 @@ Hacl_Poly1305_128_poly1305_update(
       Lib_IntVector_Intrinsics_vec128 o2;
       Lib_IntVector_Intrinsics_vec128 o3;
       Lib_IntVector_Intrinsics_vec128 o4;
-      memcpy(tmp, last1, rem1 * sizeof last1[0U]);
+      memcpy(tmp, last1, rem1 * sizeof (last1[0U]));
       u0 = load64_le(tmp);
       lo = u0;
       u = load64_le(tmp + (uint32_t)8U);

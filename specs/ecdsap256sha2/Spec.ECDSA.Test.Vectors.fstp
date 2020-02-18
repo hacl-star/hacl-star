@@ -1,0 +1,30 @@
+module Spec.ECDSA.Test.Vectors
+
+open Lib.Meta
+
+#set-options "--fuel 0 --ifuel 0"
+
+///
+/// ECDSA test vectors from NIST CAVP
+/// https://csrc.nist.gov/Projects/Cryptographic-Algorithm-Validation-Program/Digital-Signatures#ecdsa2vs
+///
+
+type vec_SigVer = {
+  msg: hex_string;
+  qx: hex_string;
+  qy: hex_string;
+  r: hex_string;
+  s: hex_string;
+  result: bool;
+}
+
+type vec_SigGen = {
+  msg': hex_string;
+  d: hex_string;
+  qx': hex_string;
+  qy': hex_string;
+  k: hex_string;
+  r': hex_string;
+  s': hex_string;
+}
+

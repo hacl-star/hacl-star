@@ -46,8 +46,6 @@ include Makefile.common
 # Catching setup errors #
 #########################
 
-# This was needed once because of the shortest stem rule. I don't think it's
-# needed anymore, but better be safe.
 ifeq (3.81,$(MAKE_VERSION))
   $(error You seem to be using the OSX antiquated Make version. Hint: brew \
     install make, then invoke gmake instead of make)
@@ -104,7 +102,7 @@ all:
 
 all-unstaged: compile-gcc-compatible compile-msvc-compatible compile-gcc64-only \
   compile-evercrypt-external-headers compile-c89-compatible compile-ccf \
-  compile-portable-gcc-compatible compile-mozilla
+  compile-portable-gcc-compatible compile-mozilla dist/linux/Makefile.basic
 
 # Automatic staging.
 %-staged: .last_vale_version
@@ -121,7 +119,7 @@ all-unstaged: compile-gcc-compatible compile-msvc-compatible compile-gcc64-only 
 	cp $< $@
 
 test: test-staged
-test-unstaged: test-handwritten test-c test-ml
+test-unstaged: test-handwritten test-c test-ml vale_testInline
 
 ifneq ($(OS),Windows_NT)
 test-unstaged: test-benchmark
@@ -355,8 +353,8 @@ obj/Vale.Lib.Operator.fst: VALE_FLAGS=
 # the files). (Actually, we know, hence this extra touch.)
 %.fst:
 	$(call run-with-log,\
-	  $(MONO) $(VALE_HOME)/bin/vale.exe -fstarText -quickMods \
-	    -typecheck -include $*.types.vaf \
+	  $(MONO) $(VALE_HOME)/bin/vale.exe -fstarText \
+	    -include $*.types.vaf \
 	    $(VALE_FLAGS) \
 	    -in $< -out $@ -outi $@i && touch -c $@i \
 	  ,[VALE] $(notdir $*),$(call to-obj-dir,$@))
@@ -507,6 +505,10 @@ obj/vale-curve25519.exe: vale/code/crypto/ecc/curve25519/Main25519.ml
 obj/vale-poly1305.exe: vale/code/crypto/poly1305/x64/PolyMain.ml
 
 obj/inline-vale-curve25519.exe: vale/code/crypto/ecc/curve25519/Inline25519.ml
+obj/inline-vale-testInline.exe: vale/code/test/TestInlineMain.ml
+
+obj/vale_testInline.h: obj/inline-vale-testInline.exe
+	$< > $@
 
 obj/CmdLineParser.ml: vale/code/lib/util/CmdLineParser.ml
 	cp $< $@
@@ -639,6 +641,9 @@ TARGET_H_INCLUDE = -add-include '"kremlin/internal/target.h"'
 
 # Disabled for distributions that don't include vectorized implementations.
 INTRINSIC_FLAGS = -add-include '"libintvector.h"'
+# Disabled for distributions that don't include code based on intrinsics.
+INTRINSIC_INT_FLAGS = -add-include 'Hacl_ECDSA:"lib_intrinsics.h"'
+
 # Disabled for dist/portable
 OPT_FLAGS = -ccopts -march=native,-mtune=native
 # Disables tests; overriden in Wasm where tests indicate what can be compiled.
@@ -666,10 +671,12 @@ BUNDLE_FLAGS	=\
   $(HASH_BUNDLE) \
   $(E_HASH_BUNDLE) \
   $(SHA3_BUNDLE) \
+  $(BLAKE2_BUNDLE) \
   $(CHACHA20_BUNDLE) \
   $(SALSA20_BUNDLE) \
   $(CURVE_BUNDLE) \
   $(CHACHAPOLY_BUNDLE) \
+  $(ECDSA_BUNDLE) \
   $(ED_BUNDLE) \
   $(POLY_BUNDLE) \
   $(NACLBOX_BUNDLE) \
@@ -683,6 +690,7 @@ DEFAULT_FLAGS = \
   $(TARGETCONFIG_FLAGS) \
   $(TEST_FLAGS) \
   $(OPT_FLAGS) \
+  $(INTRINSIC_INT_FLAGS) \
   $(INTRINSIC_FLAGS) \
   $(BUNDLE_FLAGS) \
   $(REQUIRED_FLAGS) \
@@ -745,6 +753,36 @@ dist/c89-compatible/Makefile.basic: DEFAULT_FLAGS += \
   -fc89 -ccopt -std=c89 -ccopt -Wno-typedef-redefinition
 dist/c89-compatible/Makefile.basic: HACL_OLD_FILES := $(subst -c,-c89,$(HACL_OLD_FILES))
 
+# Linux distribution (not compiled on CI)
+# ---------------------------------------
+#
+# We do something unverified and dangerous, i.e. we blast away the whole
+# Field64.Vale HACL* module (which dispatches between inline and extern versions
+# of the ASM) and rely on in-scope declarations from curve25519-inline.h to have
+# i) the same names: this works because Vale.Inline.* is eliminated from the
+#    call-graph (via the -library option), meaning that the subsequent
+#    -no-prefix can use the short names (e.g. fadd) without conflicting with the
+#    inline assembly version of those names
+# ii) the same order of arguments between, say, Field64.Vale.fadd and
+#     Vale.Inline.Fadd.fadd
+dist/linux/Makefile.basic: MERKLE_BUNDLE = -bundle 'MerkleTree.*'
+dist/linux/Makefile.basic: TARGETCONFIG_FLAGS =
+dist/linux/Makefile.basic: DEFAULT_FLAGS += \
+  -fc89-scope -fbuiltin-uint128 -flinux-ints -ccopt -Wno-typedef-redefinition
+dist/linux/Makefile.basic: CTR_BUNDLE =
+dist/linux/Makefile.basic: E_HASH_BUNDLE =
+dist/linux/Makefile.basic: DEFAULT_FLAGS += -bundle 'EverCrypt,EverCrypt.*'
+dist/linux/Makefile.basic: VALE_ASMS := $(filter-out $(HACL_HOME)/secure_api/%,$(VALE_ASMS))
+dist/linux/Makefile.basic: HAND_WRITTEN_FILES := $(filter-out providers/evercrypt/c/%,$(HAND_WRITTEN_FILES))
+dist/linux/Makefile.basic: HAND_WRITTEN_H_FILES := $(filter-out %/evercrypt_targetconfig.h,$(HAND_WRITTEN_H_FILES))
+dist/linux/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES =
+dist/linux/Makefile.basic: BASE_FLAGS := $(filter-out -fcurly-braces,$(BASE_FLAGS))
+dist/linux/Makefile.basic: CURVE_BUNDLE = \
+  $(CURVE_BUNDLE_BASE) \
+  -bundle Hacl.Curve25519_64_Local \
+  -library Hacl.Impl.Curve25519.Field64.Vale \
+  -no-prefix Hacl.Impl.Curve25519.Field64.Vale \
+  -drop Hacl_Curve_Leftovers
 
 # CCF distribution
 # ----------------
@@ -773,9 +811,10 @@ dist/ccf/Makefile.basic: INTRINSIC_FLAGS=
 dist/ccf/Makefile.basic: VALE_ASMS := $(filter-out $(HACL_HOME)/secure_api/vale/asm/aes-% dist/vale/poly1305-%,$(VALE_ASMS))
 dist/ccf/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES =
 dist/ccf/Makefile.basic: HAND_WRITTEN_FILES := $(filter-out %/Lib_PrintBuffer.c %_vale_stubs.c,$(HAND_WRITTEN_FILES))
-dist/ccf/Makefile.basic: HAND_WRITTEN_H_FILES := $(filter-out %/libintvector.h,$(HAND_WRITTEN_H_FILES))
+dist/ccf/Makefile.basic: HAND_WRITTEN_H_FILES := $(filter-out %/libintvector.h %/lib_intrinsics.h,$(HAND_WRITTEN_H_FILES))
 dist/ccf/Makefile.basic: HACL_OLD_FILES =
 dist/ccf/Makefile.basic: POLY_BUNDLE =
+dist/ccf/Makefile.basic: ECDSA_BUNDLE =
 
 # Mozilla distribution
 # --------------------
@@ -796,8 +835,10 @@ dist/mozilla/Makefile.basic: NACLBOX_BUNDLE = -bundle Hacl.NaCl
 dist/mozilla/Makefile.basic: E_HASH_BUNDLE =
 dist/mozilla/Makefile.basic: MERKLE_BUNDLE = -bundle MerkleTree.*
 dist/mozilla/Makefile.basic: CTR_BUNDLE =
+dist/mozilla/Makefile.basic: BLAKE2_BUNDLE = -bundle Hacl.Impl.Blake2.*,Hacl.Blake2b_256,Hacl.Blake2s_128,Hacl.Blake2b_32,Hacl.Blake2s_32
 dist/mozilla/Makefile.basic: SHA3_BUNDLE = -bundle Hacl.SHA3
 dist/mozilla/Makefile.basic: HASH_BUNDLE = -bundle Hacl.Hash.*,Hacl.HKDF,Hacl.HMAC,Hacl.HMAC_DRBG
+dist/mozilla/Makefile.basic: ECDSA_BUNDLE =
 dist/mozilla/Makefile.basic: FRODO_BUNDLE = -bundle Hacl.Frodo.*,Hacl.SHA3,Hacl.Keccak,Frodo.Params
 dist/mozilla/Makefile.basic: \
   BUNDLE_FLAGS += \
@@ -887,6 +928,7 @@ dist/evercrypt-external-headers/Makefile.basic: $(ALL_KRML_FILES)
 # Auto-generates a single C test file.
 .PRECIOUS: dist/test/c/%.c
 dist/test/c/%.c: $(ALL_KRML_FILES)
+	mkdir -p $(dir $@) && cp $(HACL_HOME)/lib/c/lib_intrinsics.h $(dir $@)
 	$(KRML) -silent \
 	  -tmpdir $(dir $@) -skip-compilation \
 	  -no-prefix $(subst _,.,$*) \
@@ -897,6 +939,7 @@ dist/test/c/%.c: $(ALL_KRML_FILES)
 
 dist/test/c/Test.c: KRML_EXTRA=-add-include '"kremlin/internal/compat.h"'
 
+dist/test/c/Hacl_Test_ECDSA.c: KRML_EXTRA=-drop Lib.IntTypes.Intrinsics -add-include '"lib_intrinsics.h"'
 
 ###################################################################################
 # C Compilation (recursive make invocation relying on KreMLin-generated Makefile) #
@@ -961,6 +1004,11 @@ test-handwritten: compile-gcc64-only
 	  LDFLAGS="$(LDFLAGS)" CFLAGS="$(CFLAGS)" \
 	  $(MAKE) -C tests test
 
+obj/vale_testInline.exe: vale/code/test/TestInline.c obj/vale_testInline.h
+	$(CC) $(CFLAGS) $(LDFLAGS) $< -Iobj -o $@
+vale_testInline: obj/vale_testInline.exe
+	@echo "Testing Vale inline assembly printer"
+	$<
 
 #######################
 # OCaml tests (specs) #

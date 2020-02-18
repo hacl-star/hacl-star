@@ -9,7 +9,7 @@ open FStar.Mul
 open Vale.Wrapper.X64.Fadd
 
 inline_for_extraction
-val cswap2
+val cswap2_e
   (bit:UInt64.t{UInt64.v bit <= 1})
   (p0:u512)
   (p1:u512)

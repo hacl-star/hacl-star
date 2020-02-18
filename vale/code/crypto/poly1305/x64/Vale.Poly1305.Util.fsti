@@ -50,21 +50,6 @@ let rec buffers_readable (h:vale_heap) (l:list buffer64) : GTot Type0 (decreases
 
 unfold let modifies_buffer (b:buffer64) (h1 h2:vale_heap) = modifies_mem (loc_buffer b) h1 h2
 
-let validSrcAddrs64 (m:vale_heap) (addr:int) (b:buffer64) (len:int) (memTaint:memtaint) (t:taint) =
-  buffer_readable m b /\
-  len <= buffer_length b /\
-  buffer_addr b m == addr /\
-  valid_taint_buf64 b m memTaint t
-
-let modifies_buffer_specific (b:buffer64) (h1 h2:vale_heap) (start last:nat) : GTot prop0 =
-  modifies_buffer b h1 h2 /\
-  (forall (i:nat).{:pattern (Seq.index (buffer_as_seq h2 b) i)}
-    0 <= i /\ i < buffer_length b /\ (i < start || i > last) ==>
-    buffer64_read b i h1 == buffer64_read b i h2)
-
-unfold let buffers_disjoint (b1 b2:buffer64) =
-  locs_disjoint [loc_buffer b1; loc_buffer b2]
-
 let readable_words (len:nat) =
   ((len + 15) / 16) * 2 // 2 == 16 for rounding /8 for 8-byte words
 

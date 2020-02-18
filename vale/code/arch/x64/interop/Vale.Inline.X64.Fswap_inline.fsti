@@ -22,7 +22,7 @@ let as_nat (b:B.buffer UInt64.t{B.length b == 4}) (h:HS.mem) : GTot nat =
   let s3 = UInt64.v (Seq.index s 3) in
   pow2_four s0 s1 s2 s3
 
-val cswap2_inline
+val cswap2
   (bit:UInt64.t{UInt64.v bit <= 1})
   (p0:u512)
   (p1:u512)

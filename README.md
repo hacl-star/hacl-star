@@ -9,7 +9,7 @@ The code for all of these algorithms is formally verified using the
 safety, functional correctness, and secret independence (resistance to
 some types of timing side-channels).
 
-More detailed documentation on the library and our verification method
+**Documentation**: More detailed documentation on the library and our verification method
 can be found at [hacl-star.github.io](https://hacl-star.github.io).
 
 The code in this repository is divided into three closely-related sub-projects,
@@ -58,7 +58,7 @@ branch, which tracks F\*'s `master` branch. Ongoing developments on new
 cryptographic primitives happen in the [dev](https://github.com/project-everest/hacl-star/tree/dev/)
 branch, which runs a little ahead of master. You can find a current snapshot
 of our C and assembly code in the [dist](dist/) directory; stable releases of the full library
-can be found in the [releases](https://github.com/project-everest/hacl-star/releases) page, including EverCrypt 0.1 (currently in **alpha**).
+can be found in the [releases](https://github.com/project-everest/hacl-star/releases) page.
 
 ## License
 
