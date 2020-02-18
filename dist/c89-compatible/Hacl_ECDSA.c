@@ -1456,7 +1456,6 @@ static bool isPointOnCurvePublic(uint64_t *p)
     uint64_t multBuffer[8U] = { 0U };
     uint64_t r;
     bool z;
-    bool z1;
     shift_256_impl(x, multBuffer);
     solinas_reduction_impl(multBuffer, xToDomainBuffer);
     montgomery_multiplication_buffer(xToDomainBuffer, xToDomainBuffer, xBuffer);
@@ -1469,9 +1468,8 @@ static bool isPointOnCurvePublic(uint64_t *p)
     p256_constant[3U] = (uint64_t)15866188208926050356U;
     p256_add(xBuffer, p256_constant, xBuffer);
     r = compare_felem(y2Buffer, xBuffer);
-    z = eq_0_u64(r);
-    z1 = !eq_0_u64(r);
-    return z1;
+    z = !eq_0_u64(r);
+    return z;
   }
 }
 
@@ -1491,13 +1489,11 @@ static bool isOrderCorrect(uint64_t *p, uint64_t *tempBuffer)
 {
   uint64_t multResult[12U] = { 0U };
   uint64_t pBuffer[12U] = { 0U };
+  bool result;
   memcpy(pBuffer, p, (uint32_t)12U * sizeof (p[0U]));
-  {
-    bool result;
-    scalarMultiplicationI(pBuffer, multResult, order_buffer, tempBuffer);
-    result = isPointAtInfinityPublic(multResult);
-    return result;
-  }
+  scalarMultiplicationI(pBuffer, multResult, order_buffer, tempBuffer);
+  result = isPointAtInfinityPublic(multResult);
+  return result;
 }
 
 static bool verifyQValidCurvePoint(uint64_t *pubKeyAsPoint, uint64_t *tempBuffer)

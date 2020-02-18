@@ -1356,9 +1356,8 @@ static bool isPointOnCurvePublic(uint64_t *p)
   p256_constant[3U] = (uint64_t)15866188208926050356U;
   p256_add(xBuffer, p256_constant, xBuffer);
   uint64_t r = compare_felem(y2Buffer, xBuffer);
-  bool z = eq_0_u64(r);
-  bool z1 = !eq_0_u64(r);
-  return z1;
+  bool z = !eq_0_u64(r);
+  return z;
 }
 
 static bool isCoordinateValid(uint64_t *p)
