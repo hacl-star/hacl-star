@@ -12,7 +12,6 @@ module Bindings(F:Cstubs.FOREIGN) =
                        ((ptr uint8_t) @->
                           ((ptr uint8_t) @->
                              ((ptr uint8_t) @-> (returning void)))))))))
-      
     let hacl_Chacha20Poly1305_256_aead_decrypt =
       foreign "Hacl_Chacha20Poly1305_256_aead_decrypt"
         ((ptr uint8_t) @->
@@ -23,5 +22,4 @@ module Bindings(F:Cstubs.FOREIGN) =
                        ((ptr uint8_t) @->
                           ((ptr uint8_t) @->
                              ((ptr uint8_t) @-> (returning uint32_t)))))))))
-      
   end
