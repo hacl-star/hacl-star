@@ -1,17 +1,17 @@
-module Hacl.Spec.P256.MontgomeryMultiplication.PointDouble
+module Spec.P256.MontgomeryMultiplication.PointDouble
 
 open Lib.IntTypes
 open FStar.Math.Lemmas
 open FStar.Math.Lib
-open Hacl.Spec.P256.Lemmas
-open Hacl.Spec.P256.Definitions
+open Spec.P256.Lemmas
+open Spec.P256.Definitions
 
 open Lib.Sequence
 
-open Hacl.Spec.P256.MontgomeryMultiplication
+open Spec.P256.MontgomeryMultiplication
 open Lib.Loops
 open FStar.Mul
-open Hacl.Spec.P256
+open Spec.P256
 
 
 #set-options "--z3rlimit 300" 

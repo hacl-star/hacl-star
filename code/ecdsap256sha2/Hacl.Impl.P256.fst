@@ -9,17 +9,17 @@ open Hacl.Impl.P256.Arithmetics
 
 open Lib.Buffer
 
-open Hacl.Spec.P256.Lemmas
-open Hacl.Spec.P256.Definitions
+open Spec.P256.Lemmas
+open Spec.P256.Definitions
+open Spec.P256.MontgomeryMultiplication
+open Spec.P256.MontgomeryMultiplication.PointDouble
+open Spec.P256.MontgomeryMultiplication.PointAdd
+open Spec.P256.Normalisation
+open Spec.P256
 open Hacl.Impl.SolinasReduction
-open Hacl.Spec.P256.MontgomeryMultiplication
-open Hacl.Spec.P256.MontgomeryMultiplication.PointDouble
-open Hacl.Spec.P256.MontgomeryMultiplication.PointAdd
-open Hacl.Spec.P256.Normalisation
 open Hacl.Impl.LowLevel
 open Hacl.Impl.P256.LowLevel
 open Hacl.Impl.P256.MontgomeryMultiplication
-open Hacl.Spec.P256
 open Hacl.Impl.P256.Math 
 
 open Hacl.Impl.P256.PointAdd
@@ -32,7 +32,7 @@ open FStar.Tactics.Canon
 
 open FStar.Math.Lemmas
 
-friend Hacl.Spec.P256.MontgomeryMultiplication
+friend Spec.P256.MontgomeryMultiplication
 open FStar.Mul
 
 #reset-options "--z3rlimit 300" 
@@ -196,7 +196,7 @@ val normalisation_update: z2x: felem -> z3y: felem ->p: point ->  resultPoint: p
 
       x1 == fromDomain_(as_nat h0 z2x) /\ y1 == fromDomain_(as_nat h0 z3y)  /\ 
       (
-	if Hacl.Spec.P256.isPointAtInfinity (fromDomain_ x0, fromDomain_ y0, fromDomain_ z0) then  z1 == 0 else z1 == 1
+	if Spec.P256.isPointAtInfinity (fromDomain_ x0, fromDomain_ y0, fromDomain_ z0) then  z1 == 0 else z1 == 1
       ))
   )
 

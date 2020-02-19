@@ -1,4 +1,4 @@
-module Hacl.Spec.ECDSAP256.Definition
+module Spec.ECDSAP256.Definition
 
 open Lib.IntTypes
 open FStar.Math.Lemmas

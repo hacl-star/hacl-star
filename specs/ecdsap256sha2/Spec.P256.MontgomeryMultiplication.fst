@@ -1,11 +1,11 @@
-module Hacl.Spec.P256.MontgomeryMultiplication
+module Spec.P256.MontgomeryMultiplication
 
 open FStar.Math.Lemmas
 open FStar.Math.Lib
 open FStar.Mul
 
-open Hacl.Spec.P256.Lemmas
-open Hacl.Spec.P256.Definitions
+open Spec.P256.Lemmas
+open Spec.P256.Definitions
 
 
 open Lib.IntTypes

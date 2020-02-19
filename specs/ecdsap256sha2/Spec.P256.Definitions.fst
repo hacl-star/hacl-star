@@ -1,4 +1,4 @@
-module Hacl.Spec.P256.Definitions
+module Spec.P256.Definitions
 
 open Lib.IntTypes
 open FStar.Math.Lemmas

@@ -4,7 +4,7 @@ open FStar.Math.Lemmas
 open FStar.Math
 open FStar.Mul
 
-open Hacl.Spec.P256.Lemmas
+open Spec.P256.Lemmas
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 200"
 
