@@ -551,8 +551,9 @@ val lemma_coord: h3: mem -> q: point -> Lemma (
 let lemma_coord h3 q = ()
 
 
-val scalarMultiplicationL: p: point -> result: point -> 
-  scalar: lbuffer uint8 (size 32) -> 
+inline_for_extraction
+val scalarMultiplication_t: #t:buftype -> p: point -> result: point -> 
+  scalar: lbuffer_t t uint8 (size 32) -> 
   tempBuffer: lbuffer uint64 (size 100) ->
   Stack unit
     (requires fun h -> 
@@ -578,7 +579,7 @@ val scalarMultiplicationL: p: point -> result: point ->
 ) 
 
 
-let scalarMultiplicationL p result scalar tempBuffer  = 
+let scalarMultiplication_t #t p result scalar tempBuffer  = 
     let h0 = ST.get() in 
   let q = sub tempBuffer (size 0) (size 12) in 
   zero_buffer q;
@@ -592,53 +593,16 @@ let scalarMultiplicationL p result scalar tempBuffer  =
   norm q result buff; 
     lemma_coord h3 q
 
+let scalarMultiplicationL = scalarMultiplication_t #MUT
 
-val scalarMultiplicationI: p: point -> result: point -> 
-  scalar: ilbuffer uint8 (size 32) -> 
-  tempBuffer: lbuffer uint64 (size 100) ->
-  Stack unit
-    (requires fun h -> 
-      live h p /\ live h result /\ live h scalar /\ live h tempBuffer /\
-    LowStar.Monotonic.Buffer.all_disjoint [loc p; loc tempBuffer; loc scalar; loc result] /\
-    as_nat h (gsub p (size 0) (size 4)) < prime /\ 
-    as_nat h (gsub p (size 4) (size 4)) < prime /\
-    as_nat h (gsub p (size 8) (size 4)) < prime
-    )
-  (ensures fun h0 _ h1 -> 
-    modifies (loc p |+| loc result |+| loc tempBuffer) h0 h1 /\
-  
-    as_nat h1 (gsub result (size 0) (size 4)) < prime256 /\ 
-    as_nat h1 (gsub result (size 4) (size 4)) < prime256 /\
-    as_nat h1 (gsub result (size 8) (size 4)) < prime256 /\
-    
-    (
-      let x3, y3, z3 = point_x_as_nat h1 result, point_y_as_nat h1 result, point_z_as_nat h1 result in 
-      let (xN, yN, zN) = scalar_multiplication (as_seq h0 scalar) (point_prime_to_coordinates (as_seq h0 p)) in 
-      x3 == xN /\ y3 == yN /\ z3 == zN 
-  )
-) 
-
-
-let scalarMultiplicationI p result scalar tempBuffer  = 
-  let h0 = ST.get() in 
-  let q = sub tempBuffer (size 0) (size 12) in 
-  zero_buffer q;
-  let buff = sub tempBuffer (size 12) (size 88) in 
-  pointToDomain p result;
-    let h2 = ST.get() in 
-  montgomery_ladder q result scalar buff;
-    let h3 = ST.get() in 
-    lemma_point_to_domain h0 h2 p result;
-    lemma_pif_to_domain h2 q;
-  norm q result buff; 
-    let h4 = ST.get() in 
-      lemma_coord h3 q
-
+let scalarMultiplicationI = scalarMultiplication_t #IMMUT
+let scalarMultiplicationC = scalarMultiplication_t #CONST
 
 let scalarMultiplication #buf_type p result scalar tempBuffer = 
   match buf_type with 
   |MUT -> scalarMultiplicationL p result scalar tempBuffer 
   |IMMUT -> scalarMultiplicationI p result scalar tempBuffer
+  |CONST -> scalarMultiplicationC p result scalar tempBuffer
 
 
 val uploadBasePoint: p: point -> Stack unit 
