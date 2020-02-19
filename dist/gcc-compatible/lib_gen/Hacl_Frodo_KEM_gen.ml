@@ -8,4 +8,3 @@ let _ =
    Format.printf "#include \"Hacl_Frodo_KEM.h\"\n");
   Cstubs.write_c Format.std_formatter ~prefix:""
     (module Hacl_Frodo_KEM_bindings.Bindings)
-  

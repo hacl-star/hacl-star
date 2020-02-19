@@ -383,7 +383,7 @@ let rec lemma_repeati_vec #a #a_vec w n normalize_n f f_vec acc0_vec =
   end
 
 
-#reset-options "--z3refresh --z3rlimit 300 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 0"
 
 val lemma_repeat_blocks_multi_load_acc:
     #a:Type0
@@ -420,31 +420,35 @@ let lemma_repeat_blocks_multi_load_acc #a #b #b_vec w blocksize inp f normalize_
     Loops.repeati w repeat_bf_t0 acc0;
     (==) { lemma_repeat_blocks_multi #a #b blocksize t0 f acc0 }
     repeat_blocks_multi #a #b blocksize t0 f acc0;
-  };
-  assert (normalize_n acc1 == repeat_blocks_multi #a #b blocksize t0 f acc0)
+  }
 
+#push-options "--z3rlimit 20"
+
+val mul_assoc (a b c:int) : Lemma (a * (b * c) == (a * b) * c)
+let mul_assoc a b c = ()
 
 let lemma_aux1 w blocksize len =
   let sb = w * blocksize in
-  let len1 = len - w * blocksize in
-  FStar.Math.Lemmas.modulo_addition_lemma len sb (- 1);
-  assert (len % sb == len1 % sb);
-
+  let len1 = len - sb in
   calc (==) {
     len1 / blocksize;
-    (==) { FStar.Math.Lemmas.lemma_div_exact len1 sb }
-    (len1 / sb * sb) / blocksize;
-    (==) { FStar.Math.Lemmas.paren_mul_right (len1 / sb) w sb }
-    ((len1 / sb * w) * blocksize) / blocksize;
-    (==) { FStar.Math.Lemmas.multiple_division_lemma (len1 / sb * w) blocksize }
-    len1 / sb * w;
-    (==) { FStar.Math.Lemmas.swap_mul (len1 / sb) w}
+    (==) { FStar.Math.Lemmas.lemma_mod_sub_distr len sb sb;
+           FStar.Math.Lemmas.lemma_div_exact len1 sb }
+    (sb * (len1 / sb)) / blocksize;
+    (==) { FStar.Math.Lemmas.swap_mul (len1 / sb) sb }
+    ((len1 / sb) * (w * blocksize)) / blocksize;
+    == { mul_assoc (len1 / sb) w blocksize }
+    (((len1 / sb) * w) * blocksize) / blocksize;
+    == { FStar.Math.Lemmas.cancel_mul_div ((len1 / sb) * w) blocksize }
+    (len1 / sb) * w;
+    (==) { FStar.Math.Lemmas.swap_mul (len1 / sb) w }
     w * (len1 / sb);
-  };
-  assert (len1 / blocksize == w * (len1 / sb))
+  }
 
+#pop-options
 
-#set-options "--z3rlimit 300 --z3seed 1"
+#push-options "--z3seed 1"
+
 let lemma_repeat_blocks_multi_vec #a #b #b_vec w blocksize inp f f_vec normalize_n load_acc acc0 =
   let len = length inp in
   let len0 = w * blocksize in

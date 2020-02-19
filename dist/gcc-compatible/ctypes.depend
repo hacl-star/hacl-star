@@ -34,6 +34,9 @@ lib_gen/Hacl_Curve25519_64_gen.exe: lib/Hacl_Curve25519_64_bindings.cmx lib_gen/
 lib/Hacl_Curve25519_51_bindings.cmx: 
 lib_gen/Hacl_Curve25519_51_gen.cmx: lib/Hacl_Curve25519_51_bindings.cmx
 lib_gen/Hacl_Curve25519_51_gen.exe: lib/Hacl_Curve25519_51_bindings.cmx lib_gen/Hacl_Curve25519_51_gen.cmx 
+lib/Hacl_ECDSA_bindings.cmx: 
+lib_gen/Hacl_ECDSA_gen.cmx: lib/Hacl_ECDSA_bindings.cmx
+lib_gen/Hacl_ECDSA_gen.exe: lib/Hacl_ECDSA_bindings.cmx lib_gen/Hacl_ECDSA_gen.cmx 
 lib/Hacl_Ed25519_bindings.cmx: 
 lib_gen/Hacl_Ed25519_gen.cmx: lib/Hacl_Ed25519_bindings.cmx
 lib_gen/Hacl_Ed25519_gen.exe: lib/Hacl_Ed25519_bindings.cmx lib_gen/Hacl_Ed25519_gen.cmx 

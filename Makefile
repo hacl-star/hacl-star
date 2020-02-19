@@ -644,6 +644,9 @@ TARGET_H_INCLUDE = -add-include '"kremlin/internal/target.h"'
 
 # Disabled for distributions that don't include vectorized implementations.
 INTRINSIC_FLAGS = -add-include '"libintvector.h"'
+# Disabled for distributions that don't include code based on intrinsics.
+INTRINSIC_INT_FLAGS = -add-include 'Hacl_ECDSA:"lib_intrinsics.h"'
+
 # Disabled for dist/portable
 OPT_FLAGS = -ccopts -march=native,-mtune=native
 # Disables tests; overriden in Wasm where tests indicate what can be compiled.
@@ -676,6 +679,7 @@ BUNDLE_FLAGS	=\
   $(SALSA20_BUNDLE) \
   $(CURVE_BUNDLE) \
   $(CHACHAPOLY_BUNDLE) \
+  $(ECDSA_BUNDLE) \
   $(ED_BUNDLE) \
   $(POLY_BUNDLE) \
   $(NACLBOX_BUNDLE) \
@@ -689,6 +693,7 @@ DEFAULT_FLAGS = \
   $(TARGETCONFIG_FLAGS) \
   $(TEST_FLAGS) \
   $(OPT_FLAGS) \
+  $(INTRINSIC_INT_FLAGS) \
   $(INTRINSIC_FLAGS) \
   $(BUNDLE_FLAGS) \
   $(REQUIRED_FLAGS) \
@@ -810,9 +815,10 @@ dist/ccf/Makefile.basic: INTRINSIC_FLAGS=
 dist/ccf/Makefile.basic: VALE_ASMS := $(filter-out $(HACL_HOME)/secure_api/vale/asm/aes-% dist/vale/poly1305-%,$(VALE_ASMS))
 dist/ccf/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES =
 dist/ccf/Makefile.basic: HAND_WRITTEN_FILES := $(filter-out %/Lib_PrintBuffer.c %_vale_stubs.c,$(HAND_WRITTEN_FILES))
-dist/ccf/Makefile.basic: HAND_WRITTEN_H_FILES := $(filter-out %/libintvector.h,$(HAND_WRITTEN_H_FILES))
+dist/ccf/Makefile.basic: HAND_WRITTEN_H_FILES := $(filter-out %/libintvector.h %/lib_intrinsics.h,$(HAND_WRITTEN_H_FILES))
 dist/ccf/Makefile.basic: HACL_OLD_FILES =
 dist/ccf/Makefile.basic: POLY_BUNDLE =
+dist/ccf/Makefile.basic: ECDSA_BUNDLE =
 
 # Mozilla distribution
 # --------------------
@@ -836,6 +842,7 @@ dist/mozilla/Makefile.basic: CTR_BUNDLE =
 dist/mozilla/Makefile.basic: BLAKE2_BUNDLE = -bundle Hacl.Impl.Blake2.*,Hacl.Blake2b_256,Hacl.Blake2s_128,Hacl.Blake2b_32,Hacl.Blake2s_32
 dist/mozilla/Makefile.basic: SHA3_BUNDLE = -bundle Hacl.SHA3
 dist/mozilla/Makefile.basic: HASH_BUNDLE = -bundle Hacl.Hash.*,Hacl.HKDF,Hacl.HMAC,Hacl.HMAC_DRBG
+dist/mozilla/Makefile.basic: ECDSA_BUNDLE =
 dist/mozilla/Makefile.basic: FRODO_BUNDLE = -bundle Hacl.Frodo.*,Hacl.SHA3,Hacl.Keccak,Frodo.Params
 dist/mozilla/Makefile.basic: \
   BUNDLE_FLAGS += \
@@ -922,19 +929,27 @@ dist/evercrypt-external-headers/Makefile.basic: $(ALL_KRML_FILES)
 	  -tmpdir $(dir $@) \
 	  $^
 
-# Auto-generates a single C test file.
+# Auto-generates a single C test file. Note that this rule will trigger multiple
+# times, for multiple KreMLin invocations in the test/ directory -- this may
+# cause races on shared files (e.g. Makefile.basic, etc.) -- to be investigated.
+# In the meanwhile, we at least try to copy the header for intrinsics just once.
+
+dist/test/c/lib_intrinsics.h:
+	mkdir -p $(dir $@) && cp $(HACL_HOME)/lib/c/lib_intrinsics.h $@
+
 .PRECIOUS: dist/test/c/%.c
-dist/test/c/%.c: $(ALL_KRML_FILES)
+dist/test/c/%.c: $(ALL_KRML_FILES) dist/test/c/lib_intrinsics.h
 	$(KRML) -silent \
 	  -tmpdir $(dir $@) -skip-compilation \
 	  -no-prefix $(subst _,.,$*) \
 	  -library Hacl,Lib,EverCrypt,EverCrypt.* \
 	  -fparentheses -fcurly-braces -fno-shadow \
 	  -minimal -add-include '"kremlib.h"' \
-	  -bundle '*[rename=$*]' $(KRML_EXTRA) $^
+	  -bundle '*[rename=$*]' $(KRML_EXTRA) $(filter %.krml,$^)
 
 dist/test/c/Test.c: KRML_EXTRA=-add-include '"kremlin/internal/compat.h"'
 
+dist/test/c/Hacl_Test_ECDSA.c: KRML_EXTRA=-drop Lib.IntTypes.Intrinsics -add-include '"lib_intrinsics.h"'
 
 ###################################################################################
 # C Compilation (recursive make invocation relying on KreMLin-generated Makefile) #
