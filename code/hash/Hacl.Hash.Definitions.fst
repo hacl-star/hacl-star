@@ -5,6 +5,7 @@ module ST = FStar.HyperStack.ST
 
 module M = LowStar.Modifies
 module B = LowStar.Buffer
+module CB = LowStar.ConstBuffer
 module Spec = Spec.Hash.PadFinish
 
 open Lib.IntTypes
@@ -52,7 +53,7 @@ let hash_len (a: hash_alg): n:size_t { v n = hash_length a } =
 
 inline_for_extraction
 let blocks_t (a: hash_alg) =
-  b:B.buffer uint8 { B.length b % block_length a = 0 }
+  b:CB.const_buffer uint8 { CB.length b % block_length a = 0 }
 
 let hash_t (a: hash_alg) = b:B.buffer uint8 { B.length b = hash_length a }
 
@@ -81,13 +82,13 @@ let init_st (a: hash_alg) = s:state a -> ST.Stack unit
 inline_for_extraction
 let update_st (a: hash_alg) =
   s:state a ->
-  block:B.buffer uint8 { B.length block = block_length a } ->
+  block:CB.const_buffer uint8 { CB.length block = block_length a } ->
   ST.Stack unit
     (requires (fun h ->
-      B.live h s /\ B.live h block /\ B.disjoint s block))
+      B.live h s /\ CB.live h block /\ B.disjoint s (CB.as_mbuf block)))
     (ensures (fun h0 _ h1 ->
       M.(modifies (loc_buffer s) h0 h1) /\
-      Seq.equal (B.as_seq h1 s) (Spec.Agile.Hash.update a (B.as_seq h0 s) (B.as_seq h0 block))))
+      Seq.equal (B.as_seq h1 s) (Spec.Agile.Hash.update a (B.as_seq h0 s) (CB.as_seq h0 block))))
 
 inline_for_extraction
 let pad_st (a: hash_alg) = len:len_t a -> dst:B.buffer uint8 ->
@@ -106,28 +107,28 @@ inline_for_extraction
 let update_multi_st (a: hash_alg) =
   s:state a ->
   blocks:blocks_t a ->
-  n:size_t { B.length blocks = block_length a * v n } ->
+  n:size_t { CB.length blocks = block_length a * v n } ->
   ST.Stack unit
     (requires (fun h ->
-      B.live h s /\ B.live h blocks /\ B.disjoint s blocks))
+      B.live h s /\ CB.live h blocks /\ B.disjoint s (CB.as_mbuf blocks)))
     (ensures (fun h0 _ h1 ->
       B.(modifies (loc_buffer s) h0 h1) /\
       Seq.equal (B.as_seq h1 s)
-        (Spec.Agile.Hash.update_multi a (B.as_seq h0 s) (B.as_seq h0 blocks))))
+        (Spec.Agile.Hash.update_multi a (B.as_seq h0 s) (CB.as_seq h0 blocks))))
 
 inline_for_extraction
 let update_last_st (a: hash_alg) =
   s:state a ->
   prev_len:len_t a { len_v a prev_len % block_length a = 0 } ->
-  input:B.buffer uint8 { B.length input + len_v a prev_len <= max_input_length a } ->
-  input_len:size_t { B.length input = v input_len } ->
+  input:CB.const_buffer uint8 { CB.length input + len_v a prev_len <= max_input_length a } ->
+  input_len:size_t { CB.length input = v input_len } ->
   ST.Stack unit
     (requires (fun h ->
-      B.live h s /\ B.live h input /\ B.disjoint s input))
+      B.live h s /\ CB.live h input /\ B.disjoint s (CB.as_mbuf input)))
     (ensures (fun h0 _ h1 ->
       B.(modifies (loc_buffer s) h0 h1) /\
       Seq.equal (B.as_seq h1 s)
-        (Spec.Hash.Incremental.update_last a (B.as_seq h0 s) (len_v a prev_len) (B.as_seq h0 input))))
+        (Spec.Hash.Incremental.update_last a (B.as_seq h0 s) (len_v a prev_len) (CB.as_seq h0 input))))
 
 inline_for_extraction
 let finish_st (a: hash_alg) = s:state a -> dst:hash_t a -> ST.Stack unit
@@ -141,15 +142,15 @@ let finish_st (a: hash_alg) = s:state a -> dst:hash_t a -> ST.Stack unit
 
 inline_for_extraction
 let hash_st (a: hash_alg) =
-  input:B.buffer uint8 ->
-  input_len:size_t { B.length input = v input_len } ->
+  input:CB.const_buffer uint8 ->
+  input_len:size_t { CB.length input = v input_len } ->
   dst:hash_t a ->
   ST.Stack unit
     (requires (fun h ->
-      B.live h input /\
+      CB.live h input /\
       B.live h dst /\
-      B.disjoint input dst /\
-      B.length input <= max_input_length a))
+      B.disjoint (CB.as_mbuf input) dst /\
+      CB.length input <= max_input_length a))
     (ensures (fun h0 _ h1 ->
       B.(modifies (loc_buffer dst) h0 h1) /\
-      Seq.equal (B.as_seq h1 dst) (Spec.Agile.Hash.hash a (B.as_seq h0 input))))
+      Seq.equal (B.as_seq h1 dst) (Spec.Agile.Hash.hash a (CB.as_seq h0 input))))

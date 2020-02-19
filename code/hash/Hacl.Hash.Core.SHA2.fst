@@ -16,6 +16,7 @@ module SpecLemmas = Spec.SHA2.Lemmas
 module M = LowStar.Modifies
 module S = FStar.Seq
 module B = LowStar.Buffer
+module CB = LowStar.ConstBuffer
 module G = FStar.Ghost
 module HS = FStar.HyperStack
 module ST = FStar.HyperStack.ST
@@ -64,8 +65,7 @@ open Hacl.Hash.Core.SHA2.Constants
 
 (** Alloca *)
 
-#set-options "--max_fuel 1"
-
+#push-options "--max_fuel 1"
 noextract inline_for_extraction
 val alloca: a:sha2_alg -> alloca_st a
 noextract inline_for_extraction
@@ -77,8 +77,7 @@ let alloca a () =
     | SHA2_384 -> Constants.h384_l
     | SHA2_512 -> Constants.h512_l) in
   B.alloca_of_list l
-
-#set-options "--max_fuel 0"
+#pop-options
 
 inline_for_extraction noextract
 let alloca_224: alloca_st SHA2_224 = alloca SHA2_224
@@ -124,23 +123,20 @@ let init_512: init_st SHA2_512 = init SHA2_512
 (** Update *)
 
 inline_for_extraction
-let block_w (a: sha2_alg) =
-  b:B.buffer (word a) { B.length b = Helpers.block_word_length }
-
 let block_b (a: sha2_alg) =
-  b:B.buffer uint8 { FStar.Mul.(B.length b = block_word_length * word_length a) }
+  b:CB.const_buffer uint8 { FStar.Mul.(CB.length b = block_word_length * word_length a) }
 
 inline_for_extraction
 let ws_w (a: sha2_alg) = b:B.buffer (word a) { B.length b = Spec.size_k_w a }
 
 let block_words_be (a: sha2_alg) (h: HS.mem) (b: block_b a) =
-  words_of_bytes a #block_word_length (B.as_seq h b)
+  words_of_bytes a #block_word_length (CB.as_seq h b)
 
 inline_for_extraction
 val ws (a: sha2_alg) (b: block_b a) (ws: ws_w a):
   ST.Stack unit
     (requires (fun h ->
-      B.live h b /\ B.live h ws /\ B.disjoint b ws))
+      CB.live h b /\ B.live h ws /\ B.disjoint (CB.as_mbuf b) ws))
     (ensures (fun h0 _ h1 ->
       let b = block_words_be a h0 b in
       M.(modifies (loc_buffer ws) h0 h1) /\
@@ -150,18 +146,17 @@ inline_for_extraction
 let index_be (a: sha2_alg) (b: block_b a) (i: U32.t):
   ST.Stack (word a)
     (requires (fun h ->
-      B.live h b /\
+      CB.live h b /\
       U32.v i < block_word_length))
     (ensures (fun h0 r h1 ->
        M.(modifies loc_none h0 h1) /\
-       r == S.index (words_of_bytes a #(B.length b / word_length a) (B.as_seq h0 b)) (U32.v i)))
+       r == S.index (words_of_bytes a #(CB.length b / word_length a) (CB.as_seq h0 b)) (U32.v i)))
 =
   match a with
   | SHA2_224 | SHA2_256 -> Lib.ByteBuffer.uint_at_index_be #U32 #SEC #(size block_word_length) b i
   | SHA2_384 | SHA2_512 -> Lib.ByteBuffer.uint_at_index_be #U64 #SEC #(size block_word_length) b i
 
-#set-options "--max_fuel 1 --z3rlimit 20"
-
+#push-options "--max_fuel 1"
 inline_for_extraction
 let ws a b ws =
   let h0 = ST.get () in
@@ -211,8 +206,7 @@ let ws a b ws =
       (**) init_next (B.as_seq h2 ws) (SpecLemmas.ws a (block_words_be a h0 b)) (U32.v i)
   in
   C.Loops.for 0ul (U32.uint_to_t (Spec.size_k_w a)) inv f
-
-#set-options "--max_fuel 0"
+#pop-options
 
 inline_for_extraction
 let words_state (a: sha2_alg) =
@@ -256,7 +250,7 @@ val shuffle_core (a: sha2_alg)
       M.(modifies (loc_buffer hash) h0 h1) /\
       B.as_seq h1 hash == SpecLemmas.shuffle_core a b (B.as_seq h0 hash) (U32.v t)))
 
-#set-options "--max_fuel 1 --z3rlimit 100"
+#push-options "--max_fuel 1 --z3rlimit 100"
 inline_for_extraction
 let shuffle_core a block hash ws t =
   let a0 = hash.(0ul) in
@@ -288,8 +282,8 @@ let shuffle_core a block hash ws t =
   (**) let l = [ t1 +. t2; a0; b0; c0; d0 +. t1; e0; f0; g0 ] in
   (**) assert_norm (List.Tot.length l = 8);
   (**) S.intro_of_list #(word a) (B.as_seq h hash) l
+#pop-options
 
-#reset-options "--max_fuel 2 --z3rlimit 500"
 inline_for_extraction
 val shuffle: a:sha2_alg -> block:G.erased (block_b a) -> hash:words_state a -> ws:ws_w a ->
   ST.Stack unit
@@ -346,8 +340,6 @@ let zero (a: sha2_alg): word a =
   match a with
   | SHA2_224 | SHA2_256 -> u32 0
   | SHA2_384 | SHA2_512 -> u64 0
-
-#set-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
 
 noextract inline_for_extraction
 val update: a:sha2_alg -> update_st a
