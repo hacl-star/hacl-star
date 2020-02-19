@@ -2385,14 +2385,15 @@
         "equality_tok_Spec.Hash.Definitions.SHA2_256@tok",
         "equation_FStar.UInt.add_mod", "equation_Lib.IntTypes.add_mod",
         "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.int_t",
-        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.pub_int_t",
-        "equation_Lib.IntTypes.sec_int_t", "equation_Lib.IntTypes.size_t",
-        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
+        "equation_Lib.IntTypes.pub_int_t", "equation_Lib.IntTypes.sec_int_t",
+        "equation_Lib.IntTypes.size_t", "equation_Lib.IntTypes.unsigned",
+        "equation_Prims.nat",
         "equation_Spec.Hash.Definitions.block_word_length",
         "equation_Spec.Hash.Definitions.is_sha2",
         "equation_Spec.Hash.Definitions.state_word_length",
         "equation_Spec.Hash.Definitions.word",
         "equation_Spec.Hash.Definitions.word_t",
+        "equation_Spec.Hash.Definitions.words_state",
         "equation_Spec.SHA2.Lemmas.shuffle_aux",
         "equation_Spec.SHA2.size_k_w",
         "equation_Vale.Arch.Types.add_wrap_quad32",
@@ -2421,12 +2422,12 @@
         "proj_equation_Vale.Def.Words_s.Mkfour_lo1",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_0d26a30f050a4b0c55b0762dfcb7cab2",
         "refinement_interpretation_Tm_refine_16da5dd636ef303f4b4402f063fe1ef3",
         "refinement_interpretation_Tm_refine_387e6d282145573240ab7b8a4b94cce5",
         "refinement_interpretation_Tm_refine_4303d0c89988fe82aadcf16754a5b20f",
         "refinement_interpretation_Tm_refine_516841552c075993547f605f17f21002",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_71f805b4afa9e3b9d245bdf1470fc7b8",
         "refinement_interpretation_Tm_refine_a4161c172123906d0f0ca043dff400f6",
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
         "refinement_interpretation_Tm_refine_cb97368574c6f45cf8ffde116eb30689",
@@ -2435,19 +2436,18 @@
         "refinement_interpretation_Tm_refine_ff221e859aaa7c48bcc66955577d6f8e",
         "token_correspondence_Lib.IntTypes.add_mod",
         "typing_FStar.Seq.Base.index", "typing_FStar.UInt32.add_mod",
-        "typing_Lib.IntTypes.bits", "typing_Spec.Loops.seq_map2",
+        "typing_Spec.Hash.Definitions.word_t", "typing_Spec.Loops.seq_map2",
         "typing_Vale.Def.Types_s.add_wrap",
-        "typing_Vale.Def.Words_s.__proj__Mkfour__item__hi2",
-        "typing_Vale.Def.Words_s.__proj__Mkfour__item__hi3",
         "typing_Vale.Def.Words_s.__proj__Mkfour__item__lo0",
         "typing_Vale.Def.Words_s.__proj__Mkfour__item__lo1",
         "typing_Vale.SHA.SHA_helpers.make_hash",
         "typing_Vale.SHA.SHA_helpers.update_block",
-        "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U32@tok",
+        "typing_tok_Lib.IntTypes.SEC@tok",
+        "typing_tok_Spec.Hash.Definitions.SHA2_256@tok",
         "well-founded-ordering-on-nat"
       ],
       0,
-      "4eed6b172f11d566f5279688a60eafaf"
+      "0fc4dfa116b1ab627af1a0f016612c95"
     ],
     [
       "Vale.SHA.SHA_helpers.update_multi_quads",
@@ -2476,7 +2476,7 @@
         "typing_FStar.Seq.Base.length", "well-founded-ordering-on-nat"
       ],
       0,
-      "90c0877922f2da2b16840fc307f3d373"
+      "92548b46b73b0cd33721932fc011a226"
     ],
     [
       "Vale.SHA.SHA_helpers.lemma_le_bytes_to_seq_quad32_empty",
@@ -3128,7 +3128,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "f57c3663fc5a41709607cb11b89a38af"
+      "6ff88ceabcb01f9be9cef97dc699c0a3"
     ],
     [
       "Vale.SHA.SHA_helpers.lemma_update_multi_quads",
@@ -3170,11 +3170,11 @@
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_ec52b9f9f8eb4bdfce9c337da9c88747",
+        "refinement_interpretation_Tm_refine_9bc2654de6de8b83c78000f83c14aa16",
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "49588f4397c280d8bcaa3848f86a58ca"
+      "f06fbae2b638655cc27f1fbd02c8b43f"
     ],
     [
       "Vale.SHA.SHA_helpers.lemma_update_multi_quads",
