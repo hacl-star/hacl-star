@@ -159,66 +159,6 @@ val modifies_sub: #t:buftype -> #a:Type0 -> #len:size_t -> b:lbuffer_t t a len
     (ensures  modifies (loc b) h0 h1)
     [SMTPat (modifies (loc (gsub b start n)) h0 h1)]
 
-(** JP: why are all of these needed? only one call site throughout all of HACL* *)
-val modifies0_is_modifies1: #a0:Type0 -> b0:buffer_t MUT a0 -> h0: HS.mem -> h1: HS.mem ->
-  Lemma
-  (requires (live h0 b0))
-  (ensures  (modifies0 h0 h1 ==> modifies1 b0 h0 h1))
-
-val modifies0_is_modifies2: #a0:Type0 -> #a1:Type0 ->
-  b0:buffer_t MUT a0 -> b1:buffer_t MUT a1 -> h0: HS.mem -> h1: HS.mem ->
-  Lemma
-  (requires (live h0 b0 /\ live h0 b1))
-  (ensures  (modifies0 h0 h1 ==> modifies2 b0 b1 h0 h1))
-
-val modifies0_is_modifies3: #a0:Type0 -> #a1:Type0 -> #a2:Type0 ->
-  b0:buffer_t MUT a0 -> b1:buffer_t MUT a1 -> b2:buffer_t MUT a2 -> h0: HS.mem -> h1: HS.mem ->
-  Lemma
-  (requires (live h0 b0 /\ live h0 b1 /\ live h0 b2))
-  (ensures  (modifies0 h0 h1 ==> modifies3 b0 b1 b2 h0 h1))
-
-val modifies0_is_modifies4: #a0:Type0 -> #a1:Type0 -> #a2:Type0 -> #a3:Type0 ->
-  b0:buffer_t MUT a0 -> b1:buffer_t MUT a1 -> b2:buffer_t MUT a2 -> b3:buffer_t MUT a3 -> h0: HS.mem -> h1: HS.mem ->
-  Lemma
-  (requires (live h0 b0 /\ live h0 b1 /\ live h0 b2 /\ live h0 b3))
-  (ensures  (modifies0 h0 h1 ==> modifies4 b0 b1 b2 b3 h0 h1))
-
-val modifies1_is_modifies2: #a0:Type0 -> #a1:Type0 ->
-  b0:buffer_t MUT a0 -> b1:buffer_t MUT a1 -> h0: HS.mem -> h1: HS.mem ->
-  Lemma
-  (requires (live h0 b0 /\ live h0 b1))
-  (ensures  (modifies1 b0 h0 h1 ==> modifies2 b0 b1 h0 h1))
-
-val modifies1_is_modifies3: #a0:Type0 -> #a1:Type0 -> #a2:Type0 ->
-  b0:buffer_t MUT a0 -> b1:buffer_t MUT a1 -> b2:buffer_t MUT a2 -> h0: HS.mem -> h1: HS.mem ->
-  Lemma
-  (requires (live h0 b0 /\ live h0 b1 /\ live h0 b2))
-  (ensures  (modifies1 b0 h0 h1 ==> modifies3 b0 b1 b2 h0 h1))
-
-val modifies1_is_modifies4: #a0:Type0 -> #a1:Type0 -> #a2:Type0 -> #a3:Type0 ->
-  b0:buffer_t MUT a0 -> b1:buffer_t MUT a1 -> b2:buffer_t MUT a2 -> b3:buffer_t MUT a3 -> h0: HS.mem -> h1: HS.mem ->
-  Lemma
-  (requires (live h0 b0 /\ live h0 b1 /\ live h0 b2 /\ live h0 b3))
-  (ensures  (modifies1 b0 h0 h1 ==> modifies4 b0 b1 b2 b3 h0 h1))
-
-val modifies2_is_modifies3: #a0:Type0 -> #a1:Type0 -> #a2:Type0 ->
-  b0:buffer_t MUT a0 -> b1:buffer_t MUT a1 -> b2:buffer_t MUT a2 -> h0: HS.mem -> h1: HS.mem ->
-  Lemma
-  (requires (live h0 b0 /\ live h0 b1 /\ live h0 b2))
-  (ensures  (modifies2 b0 b1 h0 h1 ==> modifies3 b0 b1 b2 h0 h1))
-
-val modifies2_is_modifies4: #a0:Type0 -> #a1:Type0 -> #a2:Type0 -> #a3:Type0 ->
-  b0:buffer_t MUT a0 -> b1:buffer_t MUT a1 -> b2:buffer_t MUT a2 -> b3:buffer_t MUT a3 -> h0: HS.mem -> h1: HS.mem ->
-  Lemma
-  (requires (live h0 b0 /\ live h0 b1 /\ live h0 b2 /\ live h0 b3))
-  (ensures  (modifies2 b0 b1 h0 h1 ==> modifies4 b0 b1 b2 b3 h0 h1))
-
-val modifies3_is_modifies4: #a0:Type0 -> #a1:Type0 -> #a2:Type0 -> #a3:Type0 ->
-  b0:buffer_t MUT a0 -> b1:buffer_t MUT a1 -> b2:buffer_t MUT a2 -> b3:buffer_t MUT a3 -> h0: HS.mem -> h1: HS.mem ->
-  Lemma
-  (requires (live h0 b0 /\ live h0 b1 /\ live h0 b2 /\ live h0 b3))
-  (ensures  (modifies3 b0 b1 b2 h0 h1 ==> modifies4 b0 b1 b2 b3 h0 h1))
-
 inline_for_extraction
 val as_seq_gsub:
     #t:buftype
