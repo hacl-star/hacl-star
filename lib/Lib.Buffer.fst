@@ -78,8 +78,7 @@ let memset #a #blen b init len =
 
 #set-options "--max_fuel 0"
 
-let _: squash (inversion buftype) = allow_inversion buftype
-
+#push-options "--max_ifuel 1"
 let update_sub #t #a #len dst start n src =
   // JP: this as_mbuf ought to go, once we have a version of blit that
   // (correctly) takes a const pointer.
@@ -92,6 +91,7 @@ let update_sub #t #a #len dst start n src =
   FStar.Seq.lemma_eq_intro
     (as_seq h1 dst)
     (Seq.update_sub #a #(v len) (as_seq h0 dst) (v start) (v n) (LMB.as_seq h0 src))
+#pop-options
 
 let update_sub_f #a #len h0 buf start n spec f =
   let tmp = sub buf start n in
