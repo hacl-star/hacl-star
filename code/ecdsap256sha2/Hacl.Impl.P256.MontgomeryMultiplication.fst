@@ -12,13 +12,13 @@ open Lib.Buffer
 open FStar.Math.Lemmas
 open FStar.Mul
 
-open Hacl.Spec.P256.Definitions
-open Hacl.Spec.P256.Lemmas
+open Spec.P256.Definitions
+open Spec.P256.Lemmas
 open Hacl.Impl.LowLevel
 open Hacl.Impl.P256.LowLevel
 
 open Lib.Loops
-open Hacl.Spec.P256.MontgomeryMultiplication
+open Spec.P256.MontgomeryMultiplication
 
 #set-options "--z3rlimit 100"
 

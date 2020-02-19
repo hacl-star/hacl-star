@@ -15,7 +15,7 @@
         "refinement_interpretation_Tm_refine_ae5bc5e47bcfeee1c1f1d89b14e02c69"
       ],
       0,
-      "9d0a6fe3eccc959dfafd66b06a4fdcc6"
+      "15b1d371e17b1a2319816eba6849a3aa"
     ],
     [
       "Hacl.Spec.P256.MontgomeryMultiplication.PointAdd.lemma_pointAddToSpecification",
@@ -41,7 +41,7 @@
         "true_interp"
       ],
       0,
-      "b98690218a5ac9a71839ab28dbe3818f"
+      "1de4d555370b08bd6b2633e4b29f290f"
     ],
     [
       "Hacl.Spec.P256.MontgomeryMultiplication.PointAdd.lemma_pointAddToSpecification",
@@ -49,11 +49,44 @@
       2,
       1,
       [
-        "@query", "primitive_Prims.op_Addition",
-        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0"
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
+        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565", "b2t_def",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "equation_Hacl.Spec.P256.Definitions.prime256",
+        "equation_Hacl.Spec.P256.MontgomeryMultiplication.PointAdd.prime",
+        "equation_Hacl.Spec.P256._point_add", "equation_Lib.IntTypes.minint",
+        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
+        "equation_Prims.pos",
+        "equation_with_fuel_Prims.pow2.fuel_instrumented",
+        "function_token_typing_Prims.__cache_version_number__",
+        "int_inversion", "int_typing",
+        "lemma_Hacl.Spec.P256.MontgomeryMultiplication.lemmaToDomainAndBackIsTheSame",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Equality",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple3__1",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple3__2",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple3__3",
+        "refinement_interpretation_Tm_refine_272deea3d686944b98f0d4989ad439d4",
+        "refinement_interpretation_Tm_refine_3ac5e751ef44caac918155a5404f8937",
+        "refinement_interpretation_Tm_refine_45c7ebd5df9403355f364bcb982f02a6",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_7d84b8f3dff73d3cc195fbe597f5a194",
+        "refinement_interpretation_Tm_refine_ac95d4cd188b572104649ee830d5b17c",
+        "refinement_interpretation_Tm_refine_ae5bc5e47bcfeee1c1f1d89b14e02c69",
+        "refinement_interpretation_Tm_refine_af35d4f602b2d8bcef873f52ae108e4b",
+        "refinement_interpretation_Tm_refine_c7cadf557913bb1ba1daefbf900ca439",
+        "refinement_interpretation_Tm_refine_f09fb129c0e8b25fee282365e256af30",
+        "refinement_interpretation_Tm_refine_f74ef1c67af9d73a9af7c51584df3370",
+        "token_correspondence_Prims.pow2.fuel_instrumented"
       ],
       0,
-      "94b31f9297e9854e41bf01600465cd9d"
+      "607a2217ec3a03a79f3c1e72403ec80b"
     ],
     [
       "Hacl.Spec.P256.MontgomeryMultiplication.PointAdd.lemma_point_add_0",
@@ -67,7 +100,7 @@
         "refinement_interpretation_Tm_refine_7d84b8f3dff73d3cc195fbe597f5a194"
       ],
       0,
-      "72be2a17718f778f0811e612d272d76e"
+      "1720904bbebeec80262db515d14570c0"
     ],
     [
       "Hacl.Spec.P256.MontgomeryMultiplication.PointAdd.lemma_point_add_0",
@@ -76,7 +109,7 @@
       1,
       [ "@query" ],
       0,
-      "f1d9f529f00ba1a148db2700ebb24521"
+      "aec88842078a1606173f37b948e36b94"
     ],
     [
       "Hacl.Spec.P256.MontgomeryMultiplication.PointAdd.lemma_point_add_1",
@@ -90,7 +123,7 @@
         "refinement_interpretation_Tm_refine_7d84b8f3dff73d3cc195fbe597f5a194"
       ],
       0,
-      "35fea47e76ef61959a73610b273c7f00"
+      "009e31b9d2aa3a7029423abf6d5b0f99"
     ],
     [
       "Hacl.Spec.P256.MontgomeryMultiplication.PointAdd.lemma_point_add_1",
@@ -106,7 +139,7 @@
         "refinement_interpretation_Tm_refine_7d84b8f3dff73d3cc195fbe597f5a194"
       ],
       0,
-      "a9c15d304bf6c093c200d62869d6efdc"
+      "30674b58235110819eb1a4f868362a57"
     ]
   ]
 ]

@@ -1,16 +1,15 @@
-module Hacl.Spec.ECDSA
+module Spec.ECDSA
 
 open FStar.Mul
-open Hacl.Spec.ECDSAP256.Definition
-open Hacl.Spec.P256.Lemmas
+open Spec.ECDSAP256.Definition
+open Spec.P256.Lemmas
 
 open Lib.ByteSequence
 open Lib.IntTypes
 open Lib.Sequence
 
 open Spec.Hash
-open Hacl.Spec.P256
-open Hacl.Spec.P256.Lemmas
+open Spec.P256
 
 module Def = Spec.Hash.Definitions
 
@@ -428,7 +427,7 @@ let prime_p256_order_seq: s:lseq uint8 32{nat_from_intseq_be s == prime_p256_ord
   assert_norm (nat_from_intlist_be prime_p256_order_list == prime_p256_order);
   of_list prime_p256_order_list
 
-open Hacl.Spec.P256.Definitions
+open Spec.P256.Definitions
 
 val exponent_spec: a:nat_prime -> r:nat_prime{r = pow a (prime_p256_order - 2) % prime_p256_order}
 
@@ -568,7 +567,7 @@ let ecdsa_verification publicKey r s mLen input =
       let sumPoints = _point_add u1D u2D in
       let pointNorm = _norm sumPoints in
       let x, y, z = pointNorm in
-      if Hacl.Spec.P256.isPointAtInfinity pointNorm then false else x = r
+      if Spec.P256.isPointAtInfinity pointNorm then false else x = r
     end
   end
 

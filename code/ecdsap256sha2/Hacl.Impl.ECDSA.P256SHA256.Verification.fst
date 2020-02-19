@@ -7,18 +7,18 @@ module ST = FStar.HyperStack.ST
 open Lib.IntTypes
 open Lib.Buffer
 
-open Hacl.Spec.P256.Definitions
+open Spec.P256.Definitions
 open Hacl.Impl.LowLevel
 open Hacl.Impl.P256
-open Hacl.Spec.P256.MontgomeryMultiplication
+open Spec.P256.MontgomeryMultiplication
 open Hacl.Impl.ECDSA.MontgomeryMultiplication
 open Hacl.Impl.ECDSA.MM.Exponent
-open Hacl.Spec.P256.Ladder
+open Spec.P256.Ladder
 
-open Hacl.Spec.ECDSAP256.Definition
-open Hacl.Spec.ECDSA
-open Hacl.Spec.P256
-open Hacl.Spec.P256.Lemmas
+open Spec.ECDSAP256.Definition
+open Spec.ECDSA
+open Spec.P256
+open Spec.P256.Lemmas
 
 open Hacl.Impl.P256.PointAdd
 open Hacl.Impl.P256.LowLevel
@@ -109,7 +109,7 @@ let ecdsa_verification_step23 hashAsFelem mLen m =
   let h1 = ST.get() in
   lemma_core_0 hashAsFelem h1;
   reduction_prime_2prime_order hashAsFelem hashAsFelem;
-  Hacl.Spec.ECDSA.changeEndianLemma (uints_from_bytes_be #U64 #_ #4 (as_seq h1 mHash));
+  Spec.ECDSA.changeEndianLemma (uints_from_bytes_be #U64 #_ #4 (as_seq h1 mHash));
   uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 mHash);
   pop_frame()
 
@@ -169,11 +169,11 @@ let ecdsa_verification_step4 bufferU1 bufferU2 r s hash =
     calc(==) {
     as_seq h2 bufferU1;
     == {}
-    uints_to_bytes_be (Hacl.Spec.ECDSA.changeEndian (as_seq h1 u1));
+    uints_to_bytes_be (Spec.ECDSA.changeEndian (as_seq h1 u1));
     == {lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h1 u1)}
-    uints_to_bytes_be (Hacl.Spec.ECDSA.changeEndian (nat_to_intseq_le 4 (nat_from_intseq_le (as_seq h1 u1))));
+    uints_to_bytes_be (Spec.ECDSA.changeEndian (nat_to_intseq_le 4 (nat_from_intseq_le (as_seq h1 u1))));
     == {lemma_core_0 u1 h1}
-    uints_to_bytes_be (Hacl.Spec.ECDSA.changeEndian (nat_to_intseq_le 4 (as_nat h1 u1)));
+    uints_to_bytes_be (Spec.ECDSA.changeEndian (nat_to_intseq_le 4 (as_nat h1 u1)));
     == { changeEndian_le_be (as_nat h1 u1) }
     nat_to_bytes_be 32 (as_nat h1 u1);
     };
@@ -181,11 +181,11 @@ let ecdsa_verification_step4 bufferU1 bufferU2 r s hash =
     calc(==) {
       as_seq h2 bufferU2;
       == {}
-      uints_to_bytes_be (Hacl.Spec.ECDSA.changeEndian (as_seq h1 u2));
+      uints_to_bytes_be (Spec.ECDSA.changeEndian (as_seq h1 u2));
       == {lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h1 u2)}
-      uints_to_bytes_be (Hacl.Spec.ECDSA.changeEndian (nat_to_intseq_le 4 (nat_from_intseq_le (as_seq h1 u2))));
+      uints_to_bytes_be (Spec.ECDSA.changeEndian (nat_to_intseq_le 4 (nat_from_intseq_le (as_seq h1 u2))));
       == {lemma_core_0 u2 h1}
-      uints_to_bytes_be (Hacl.Spec.ECDSA.changeEndian (nat_to_intseq_le 4 (as_nat h1 u2)));
+      uints_to_bytes_be (Spec.ECDSA.changeEndian (nat_to_intseq_le 4 (as_nat h1 u2)));
       == { changeEndian_le_be (as_nat h1 u2) }
       nat_to_bytes_be 32 (as_nat h1 u2);
     };
@@ -322,7 +322,7 @@ val ecdsa_verification_step5:
         let sumD = _point_add u1D u2D in
         let pointNorm = _norm sumD in
         let (xResult, yResult, zResult) = pointNorm in
-        state == not (Hacl.Spec.P256.isPointAtInfinity pointNorm) /\
+        state == not (Spec.P256.isPointAtInfinity pointNorm) /\
         as_nat h1 x == xResult
     )
   )
@@ -407,7 +407,7 @@ val ecdsa_verification_core:
          let u2D, _ = montgomery_ladder_spec bufferU2 (pointAtInfinity, point_prime_to_coordinates (as_seq h0 publicKeyPoint)) in
          let sumD = _point_add u1D u2D in
          let (xResult, yResult, zResult) = _norm sumD in
-         state == not (Hacl.Spec.P256.isPointAtInfinity (_norm sumD)) /\
+         state == not (Spec.P256.isPointAtInfinity (_norm sumD)) /\
          as_nat h1 xBuffer == xResult
       )
   )
@@ -441,7 +441,7 @@ val ecdsa_verification_:
       let r = as_nat h0 r in
       let s = as_nat h0 s in
       modifies0 h0 h1 /\
-      result == Hacl.Spec.ECDSA.ecdsa_verification (pubKeyX, pubKeyY) r s (v mLen) (as_seq h0 m))
+      result == Spec.ECDSA.ecdsa_verification (pubKeyX, pubKeyY) r s (v mLen) (as_seq h0 m))
 
 let ecdsa_verification_ pubKey r s mLen m =
   assert_norm (pow2 32 < pow2 61);
@@ -496,7 +496,7 @@ val ecdsa_verification:
       let r = nat_from_bytes_be (as_seq h1 r) in
       let s = nat_from_bytes_be (as_seq h1 s) in
       modifies0 h0 h1 /\
-      result == Hacl.Spec.ECDSA.ecdsa_verification (publicKeyX, publicKeyY) r s (v mLen) (as_seq h0 m))
+      result == Spec.ECDSA.ecdsa_verification (publicKeyX, publicKeyY) r s (v mLen) (as_seq h0 m))
 
 let ecdsa_verification pubKey r s mLen m =
   assert_norm (pow2 32 < pow2 61);

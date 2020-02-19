@@ -33,7 +33,7 @@ val cswap: bit:uint64{v bit <= 1} -> p:felem -> q:felem
     (ensures  fun h0 _ h1 ->
       modifies (loc p |+| loc q) h0 h1 /\
 	(
-	  let (r0, r1) = Hacl.Spec.ECDSA.conditional_swap bit (as_nat h0 p) (as_nat h0 q) in 
+	  let (r0, r1) = Spec.ECDSA.conditional_swap bit (as_nat h0 p) (as_nat h0 q) in 
 	  let pBefore = as_seq h0 p in let qBefore = as_seq h0 q in 
 	  let pAfter = as_seq h1 p in let qAfter = as_seq h1 q in 
 	  if uint_v bit = 0 then r0 == as_nat h0 p /\ r1 == as_nat h0 q else r0 == as_nat h0 q /\ r1 == as_nat h0 p) /\
@@ -107,7 +107,7 @@ let montgomery_ladder_exponent_step a b scalar i =
   cswap bit a b;
   montgomery_ladder_exponent_step0 a b;
   cswap bit a b;
-  Hacl.Spec.ECDSA.lemma_swaped_steps (fromDomain_ (as_nat h0 a)) (fromDomain_ (as_nat h0 b))
+  Spec.ECDSA.lemma_swaped_steps (fromDomain_ (as_nat h0 a)) (fromDomain_ (as_nat h0 b))
 
 
 inline_for_extraction noextract 
