@@ -35,7 +35,7 @@ open FStar.Math.Lemmas
 friend Spec.P256.MontgomeryMultiplication
 open FStar.Mul
 
-#reset-options "--z3rlimit 300" 
+#set-options "--z3rlimit 150 --max_fuel 0 --max_ifuel 0" 
 let toDomain value result = 
   push_frame();
     let multBuffer = create (size 8) (u64 0) in 
@@ -90,8 +90,6 @@ let copy_point p result = copy result p
  
 
 (* https://crypto.stackexchange.com/questions/43869/point-at-infinity-and-error-handling*)
-#reset-options "--z3rlimit 300" 
-
 val lemma_pointAtInfInDomain: x: nat -> y: nat -> z: nat {z < prime256} -> 
   Lemma (isPointAtInfinity (x, y, z) == isPointAtInfinity ((fromDomain_ x), (fromDomain_ y), (fromDomain_ z)))
 
@@ -201,8 +199,6 @@ val normalisation_update: z2x: felem -> z3y: felem ->p: point ->  resultPoint: p
   )
 
 
-#reset-options "--z3rlimit 400"
-
 let normalisation_update z2x z3y p resultPoint = 
   push_frame(); 
     let zeroBuffer = create (size 4) (u64 0) in 
@@ -220,8 +216,6 @@ let normalisation_update z2x z3y p resultPoint =
     let h2 = ST.get() in 
   pop_frame()
   
- 
-#reset-options "--z3rlimit 500" 
 let norm p resultPoint tempBuffer = 
   let xf = sub p (size 0) (size 4) in 
   let yf = sub p (size 4) (size 4) in 
@@ -267,7 +261,6 @@ let norm p resultPoint tempBuffer =
        point_x_as_nat h3 resultPoint == xN /\ point_y_as_nat h3 resultPoint == yN /\ point_z_as_nat h3 resultPoint == zN)
 
 
-#reset-options "--z3rlimit 500" 
 let normX p result tempBuffer = 
   let xf = sub p (size 0) (size 4) in 
   let yf = sub p (size 4) (size 4) in 
@@ -283,6 +276,7 @@ let normX p result tempBuffer =
   exponent z2f z2f tempBuffer20;
   montgomery_multiplication_buffer z2f xf z2f;
   fromDomain z2f result;
+  assert_norm (prime >= 2);
     power_distributivity (fromDomain_ (as_nat h0 zf) * fromDomain_ (as_nat h0 zf)) (prime -2) prime
 
 
@@ -455,7 +449,6 @@ val montgomery_ladder: #buf_type: buftype->  p: point -> q: point ->
 let montgomery_ladder #a p q scalar tempBuffer =  
   let h0 = ST.get() in 
 
-  modifies0_is_modifies3 p q tempBuffer h0 h0;
 
   [@inline_let]
   let spec_ml h0 = _ml_step (as_seq h0 scalar) in 
