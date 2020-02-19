@@ -37,7 +37,7 @@ open Lib.IntTypes
 open MerkleTree.New.Low.Hashes
 open MerkleTree.New.Low.Datastructures
 open MerkleTree.New.Low.Hashfunctions
-
+open MerkleTree.Vector
 
 #set-options "--z3rlimit 10 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
 
@@ -2165,7 +2165,7 @@ let rec mt_flush_to_ #hsz lv hs pi i j =
     /// not yet connected to `hs`.
     let ofs = oi - opi in
     let hvec = V.index hs lv in
-    let flushed = RV.flush hvec ofs in
+    let flushed:(rvector (hreg hsz)) = flush_inplace hvec ofs in
     let hh1 = HST.get () in
 
     // 1-0) Basic disjointness conditions for `RV.assign`
