@@ -78,6 +78,8 @@ let memset #a #blen b init len =
 
 #set-options "--max_fuel 0"
 
+let _: squash (inversion buftype) = allow_inversion buftype
+
 let update_sub #t #a #len dst start n src =
   // JP: this as_mbuf ought to go, once we have a version of blit that
   // (correctly) takes a const pointer.

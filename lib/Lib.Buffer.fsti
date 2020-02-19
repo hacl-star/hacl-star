@@ -63,7 +63,7 @@ let as_mbuf #ty #a (b: buffer_t ty a): LMB.mbuffer a (pre b) (pre b) =
   applied to a constant ty (must reduce). Doesn't generate a cast (const
   conversion is implicit in C.) *)
 inline_for_extraction
-let as_cbuf #ty #a (b: buffer_t ty a): CB.const_buffer a =
+let as_cbuf #ty #a (b: buffer_t ty a): buffer_t CONST a =
   match ty with
   | IMMUT -> CB.of_ibuffer b
   | MUT -> CB.of_buffer b
