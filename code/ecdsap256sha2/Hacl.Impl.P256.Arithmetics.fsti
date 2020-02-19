@@ -7,15 +7,15 @@ module ST = FStar.HyperStack.ST
 open Lib.IntTypes
 open Lib.Buffer
 
-open Hacl.Spec.P256.Lemmas
-open Hacl.Spec.P256.Definitions
+open Spec.P256.Lemmas
+open Spec.P256.Definitions
 
 open Hacl.Impl.LowLevel
 open Hacl.Impl.P256.LowLevel
 open Hacl.Impl.P256.MontgomeryMultiplication
-open Hacl.Spec.P256
+open Spec.P256
 
-open Hacl.Spec.P256.MontgomeryMultiplication
+open Spec.P256.MontgomeryMultiplication
 
 open FStar.Math.Lemmas
 

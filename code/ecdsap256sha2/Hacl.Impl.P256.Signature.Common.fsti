@@ -8,11 +8,11 @@ open Lib.ByteBuffer
 open Lib.ByteSequence
 open Lib.Buffer
 
-open Hacl.Spec.P256
-open Hacl.Spec.P256.Definitions
+open Spec.P256
+open Spec.P256.Definitions
 
-open Hacl.Spec.ECDSA
-open Hacl.Spec.ECDSAP256.Definition
+open Spec.ECDSA
+open Spec.ECDSAP256.Definition
 
 open Hacl.Impl.P256
 
@@ -29,7 +29,7 @@ val eq_0_u64: a: uint64 -> r:bool{r == (uint_v a = 0)}
 val changeEndian: i:felem -> Stack unit 
   (requires fun h -> live h i)
   (ensures  fun h0 _ h1 -> modifies1 i h0 h1 /\ 
-    as_seq h1 i == Hacl.Spec.ECDSA.changeEndian (as_seq h0 i) /\
+    as_seq h1 i == Spec.ECDSA.changeEndian (as_seq h0 i) /\
     as_nat h1 i < pow2 256
   ) 
 
@@ -37,7 +37,7 @@ val toUint64ChangeEndian: i:lbuffer uint8 (size 32) -> o:felem -> Stack unit
   (requires fun h -> live h i /\ live h o /\ disjoint i o)
   (ensures  fun h0 _ h1 ->
     modifies (loc o) h0 h1 /\
-    as_seq h1 o == Hacl.Spec.ECDSA.changeEndian (uints_from_bytes_be (as_seq h0 i))
+    as_seq h1 o == Spec.ECDSA.changeEndian (uints_from_bytes_be (as_seq h0 i))
   )
 
 val lemma_core_0: a:lbuffer uint64 (size 4) -> h:mem
@@ -61,7 +61,7 @@ val bufferToJac: p:lbuffer uint64 (size 8) -> result:point -> Stack unit
 val isPointAtInfinityPublic: p:point -> Stack bool
   (requires fun h -> live h p)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
-    r == Hacl.Spec.P256.isPointAtInfinity (point_prime_to_coordinates (as_seq h0 p)))
+    r == Spec.P256.isPointAtInfinity (point_prime_to_coordinates (as_seq h0 p)))
 
 (* This code is not side channel resistant *)
 (* This is unused internally and not exposed in the top-level API *)
