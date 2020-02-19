@@ -13,11 +13,11 @@ open FStar.Math.Lemmas
 
 open Hacl.Hash.SHA2
 
-open Hacl.Spec.P256
-open Hacl.Spec.P256.Lemmas
-open Hacl.Spec.P256.Definitions
+open Spec.P256
+open Spec.P256.Lemmas
+open Spec.P256.Definitions
 
-open Hacl.Spec.ECDSAP256.Definition
+open Spec.ECDSAP256.Definition
 
 open Hacl.Impl.LowLevel
 
@@ -49,7 +49,7 @@ val ecdsa_p256_sha2_sign: result: lbuffer uint8 (size 64) -> mLen: size_t -> m: 
      (assert_norm (pow2 32 < pow2 61);
       let resultR = gsub result (size 0) (size 32) in 
       let resultS = gsub result (size 32) (size 32) in 
-      let r, s, flagSpec = Hacl.Spec.ECDSA.ecdsa_signature (uint_v mLen) (as_seq h0 m) (as_seq h0 privKey) (as_seq h0 k) in 
+      let r, s, flagSpec = Spec.ECDSA.ecdsa_signature (uint_v mLen) (as_seq h0 m) (as_seq h0 privKey) (as_seq h0 k) in 
       as_seq h1 resultR == nat_to_bytes_be 32 r /\
       as_seq h1 resultS == nat_to_bytes_be 32 s /\
       flag == flagSpec 
@@ -72,4 +72,4 @@ val ecdsa_p256_sha2_verify:
       let r = nat_from_bytes_be (as_seq h1 r) in
       let s = nat_from_bytes_be (as_seq h1 s) in
       modifies0 h0 h1 /\
-      result == Hacl.Spec.ECDSA.ecdsa_verification (publicKeyX, publicKeyY) r s (v mLen) (as_seq h0 m))
+      result == Spec.ECDSA.ecdsa_verification (publicKeyX, publicKeyY) r s (v mLen) (as_seq h0 m))

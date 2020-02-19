@@ -8,8 +8,8 @@ open Lib.IntTypes
 open Lib.Buffer
 open Lib.ByteSequence
 
-open Hacl.Spec.DH
-open Hacl.Spec.ECDSAP256.Definition
+open Spec.DH
+open Spec.ECDSAP256.Definition
 
 val ecp256dh_i:
     result:lbuffer uint8 (size 64)

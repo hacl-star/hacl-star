@@ -9,8 +9,8 @@ open Lib.Buffer
 
 open FStar.Math.Lemmas
 
-open Hacl.Spec.P256.Lemmas
-open Hacl.Spec.ECDSAP256.Definition
+open Spec.P256.Lemmas
+open Spec.ECDSAP256.Definition
 open Hacl.Impl.LowLevel
 
 open FStar.Tactics

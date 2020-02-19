@@ -1,4 +1,4 @@
-module Hacl.Spec.P256.Ladder
+module Spec.P256.Ladder
 
 open FStar.HyperStack.All
 open FStar.HyperStack
@@ -7,11 +7,11 @@ module ST = FStar.HyperStack.ST
 open Lib.IntTypes
 open Lib.Buffer
 
-open Hacl.Spec.P256.Definitions
-open Hacl.Spec.P256.MontgomeryMultiplication
-open Hacl.Spec.P256.MontgomeryMultiplication.PointAdd 
-open Hacl.Spec.P256.MontgomeryMultiplication.PointDouble
-open Hacl.Spec.P256
+open Spec.P256.Definitions
+open Spec.P256.MontgomeryMultiplication
+open Spec.P256.MontgomeryMultiplication.PointAdd 
+open Spec.P256.MontgomeryMultiplication.PointDouble
+open Spec.P256
 
 
 open FStar.Math.Lemmas

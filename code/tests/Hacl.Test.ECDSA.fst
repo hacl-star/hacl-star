@@ -94,12 +94,12 @@ val check_bound: b:Lib.Buffer.lbuffer uint8 32ul -> Stack bool
   (ensures  fun h0 r h1 ->
     h0 == h1 /\
     r == (Lib.ByteSequence.nat_from_bytes_be (Lib.Buffer.as_seq h0 b) <
-          Hacl.Spec.ECDSAP256.Definition.prime_p256_order))
+          Spec.ECDSAP256.Definition.prime_p256_order))
 
 let check_bound b =
   let open FStar.Mul in
   let open Lib.ByteSequence in
-  let open Hacl.Spec.ECDSAP256.Definition in
+  let open Spec.ECDSAP256.Definition in
   [@inline_let]
   let q1 = normalize_term (prime_p256_order % pow2 64) in
   [@inline_let]

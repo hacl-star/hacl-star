@@ -13,11 +13,11 @@ open FStar.Math.Lemmas
 
 open Hacl.Hash.SHA2
 
-open Hacl.Spec.P256
-open Hacl.Spec.P256.Lemmas
-open Hacl.Spec.P256.Definitions
+open Spec.P256
+open Spec.P256.Lemmas
+open Spec.P256.Definitions
 
-open Hacl.Spec.ECDSAP256.Definition
+open Spec.ECDSAP256.Definition
 
 open Hacl.Impl.LowLevel
 
@@ -54,7 +54,7 @@ let ecdsa_signature_step12 hashAsFelem mLen m  =
   let h1 = ST.get() in 
       lemma_core_0 hashAsFelem h1;
   reduction_prime_2prime_order hashAsFelem hashAsFelem;
-  Hacl.Spec.ECDSA.changeEndianLemma (uints_from_bytes_be #U64 #_ #4 (as_seq h1 mHash));
+  Spec.ECDSA.changeEndianLemma (uints_from_bytes_be #U64 #_ #4 (as_seq h1 mHash));
   uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 mHash);
   pop_frame()
 
@@ -89,10 +89,10 @@ let ecdsa_signature_step45 x k tempBuffer =
 
 
 val lemma_power_step6: kInv: nat -> Lemma 
-  (Hacl.Spec.ECDSA.exponent_spec (fromDomain_ kInv) == toDomain_ (pow kInv (prime_p256_order - 2)))
+  (Spec.ECDSA.exponent_spec (fromDomain_ kInv) == toDomain_ (pow kInv (prime_p256_order - 2)))
 
 let lemma_power_step6 kInv = 
-  let a = Hacl.Spec.ECDSA.exponent_spec (fromDomain_ kInv) in 
+  let a = Spec.ECDSA.exponent_spec (fromDomain_ kInv) in 
   lemmaFromDomain kInv;
 
   power_distributivity (kInv * modp_inv2_prime (pow2 256) prime_p256_order) (prime_p256_order - 2) prime_p256_order;
@@ -212,7 +212,7 @@ let ecdsa_signature_core r s mLen m privKeyAsFelem k =
   ecdsa_signature_step12 hashAsFelem mLen m;
   let h1 = ST.get() in 
   lemma_core_0 kAsFelem h1;
-  Hacl.Spec.ECDSA.changeEndianLemma (uints_from_bytes_be (as_seq h0 k));
+  Spec.ECDSA.changeEndianLemma (uints_from_bytes_be (as_seq h0 k));
   uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h0 k);
   let step5Flag = ecdsa_signature_step45 r k tempBuffer in 
   assert_norm (pow2 32 < pow2 61);
@@ -240,7 +240,7 @@ val ecdsa_signature: result: lbuffer uint8 (size 64) -> mLen: size_t -> m: lbuff
      (assert_norm (pow2 32 < pow2 61);
       let resultR = gsub result (size 0) (size 32) in 
       let resultS = gsub result (size 32) (size 32) in 
-      let r, s, flagSpec = Hacl.Spec.ECDSA.ecdsa_signature (uint_v mLen) (as_seq h0 m) (as_seq h0 privKey) (as_seq h0 k) in 
+      let r, s, flagSpec = Spec.ECDSA.ecdsa_signature (uint_v mLen) (as_seq h0 m) (as_seq h0 privKey) (as_seq h0 k) in 
       as_seq h1 resultR == nat_to_bytes_be 32 r /\
       as_seq h1 resultS == nat_to_bytes_be 32 s /\
       flag == flagSpec 
@@ -262,7 +262,7 @@ let ecdsa_signature result mLen m privKey k =
 
   let h1 = ST.get() in 
   lemma_core_0 privKeyAsFelem h1;
-  Hacl.Spec.ECDSA.changeEndianLemma (uints_from_bytes_be (as_seq h0 privKey));
+  Spec.ECDSA.changeEndianLemma (uints_from_bytes_be (as_seq h0 privKey));
   uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 privKey);    
   let flag = ecdsa_signature_core r s mLen m privKeyAsFelem k in 
 
@@ -279,8 +279,8 @@ let ecdsa_signature result mLen m privKey k =
   lemma_core_0 s h2;
   lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h2 s);
 
-  Hacl.Spec.ECDSA.changeEndian_le_be (as_nat h2 r);
-  Hacl.Spec.ECDSA.changeEndian_le_be (as_nat h2 s);
+  Spec.ECDSA.changeEndian_le_be (as_nat h2 r);
+  Spec.ECDSA.changeEndian_le_be (as_nat h2 s);
 
   pop_frame(); 
   flag  
