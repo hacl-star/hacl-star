@@ -76,24 +76,12 @@ let createL_global #a init =
 let recall_contents #a #len b s =
   B.recall_p (b <: ibuffer a) (cpred s)
 
-(* JP: why triplicate the code? would it not extract if we just cast i to a monotonic buffer?! *)
 let copy #t #a #len o i =
-  match t with
-  | MUT ->
-    let h0 = ST.get () in
-    LowStar.BufferOps.blit (i <: buffer a) 0ul (o <: buffer a) 0ul len;
-    let h1 = ST.get () in
-    assert (Seq.slice (as_seq h1 o) 0 (v len) == Seq.slice (as_seq h0 i) 0 (v len))
-  | IMMUT ->
-    let h0 = ST.get () in
-    LowStar.BufferOps.blit (i <: ibuffer a) 0ul (o <: buffer a) 0ul len;
-    let h1 = ST.get () in
-    assert (Seq.slice (as_seq h1 o) 0 (v len) == Seq.slice (as_seq h0 i) 0 (v len))
-  | CONST ->
-    let h0 = ST.get () in
-    LowStar.BufferOps.blit (CB.cast (i <: cbuffer a)) 0ul (o <: buffer a) 0ul len;
-    let h1 = ST.get () in
-    assert (Seq.slice (as_seq h1 o) 0 (v len) == Seq.slice (as_seq h0 i) 0 (v len))
+  let i = as_mbuf i in
+  let h0 = ST.get () in
+  LowStar.BufferOps.blit i 0ul (o <: buffer a) 0ul len;
+  let h1 = ST.get () in
+  assert (Seq.slice (as_seq h1 o) 0 (v len) == FStar.Seq.slice (LMB.as_seq h0 i) 0 (v len))
 
 let memset #a #blen b init len =
   B.fill #a #(fun _ _ -> True) #(fun _ _ -> True) b init len
@@ -101,34 +89,17 @@ let memset #a #blen b init len =
 #set-options "--max_fuel 0"
 
 let update_sub #t #a #len dst start n src =
-  match t with
-  | MUT ->
-      let h0 = ST.get () in
-      LowStar.BufferOps.blit (src <: buffer a)
-        0ul (dst <: buffer a) (size_to_UInt32 start) (size_to_UInt32 n);
-      let h1 = ST.get () in
-      assert (forall (k:nat{k < v n}). bget h1 dst (v start + k) == bget h0 src k);
-      FStar.Seq.lemma_eq_intro
-        (as_seq h1 dst)
-        (Seq.update_sub #a #(v len) (as_seq h0 dst) (v start) (v n) (as_seq h0 src))
-  | IMMUT ->
-      let h0 = ST.get () in
-      LowStar.BufferOps.blit (src <: ibuffer a)
-        0ul (dst <: buffer a) (size_to_UInt32 start) (size_to_UInt32 n);
-      let h1 = ST.get () in
-      assert (forall (k:nat{k < v n}). bget h1 dst (v start + k) == bget h0 src k);
-      FStar.Seq.lemma_eq_intro
-        (as_seq h1 dst)
-        (Seq.update_sub #a #(v len) (as_seq h0 dst) (v start) (v n) (as_seq h0 src))
-  | CONST ->
-      let h0 = ST.get () in
-      LowStar.BufferOps.blit (CB.cast (src <: cbuffer a))
-        0ul (dst <: buffer a) (size_to_UInt32 start) (size_to_UInt32 n);
-      let h1 = ST.get () in
-      assert (forall (k:nat{k < v n}). bget h1 dst (v start + k) == bget h0 src k);
-      FStar.Seq.lemma_eq_intro
-        (as_seq h1 dst)
-        (Seq.update_sub #a #(v len) (as_seq h0 dst) (v start) (v n) (as_seq h0 src))
+  // JP: this as_mbuf ought to go, once we have a version of blit that
+  // (correctly) takes a const pointer.
+  let src = as_mbuf src in
+  let h0 = ST.get () in
+  LowStar.BufferOps.blit src
+    0ul (dst <: buffer a) (size_to_UInt32 start) (size_to_UInt32 n);
+  let h1 = ST.get () in
+  assert (forall (k:nat{k < v n}). bget h1 dst (v start + k) == LMB.get h0 src k);
+  FStar.Seq.lemma_eq_intro
+    (as_seq h1 dst)
+    (Seq.update_sub #a #(v len) (as_seq h0 dst) (v start) (v n) (LMB.as_seq h0 src))
 
 let update_sub_f #a #len h0 buf start n spec f =
   let tmp = sub buf start n in
