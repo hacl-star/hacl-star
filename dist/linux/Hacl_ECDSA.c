@@ -263,7 +263,7 @@ static void mul(u64 *f, u64 *r, u64 *out)
   b3 = temp + (u32)3U;
   c3 = mul1_add(r, f3, b3, b3);
   temp[7U] = c3;
-  memcpy(out, temp, (u32)8U * sizeof (temp[0U]));
+  memcpy(out, (u64 *)temp, (u32)8U * sizeof (((u64 *)temp)[0U]));
 }
 
 static void cmovznz4(u64 cin, u64 *x, u64 *y, u64 *r)
@@ -379,7 +379,7 @@ static void montgomery_multiplication_buffer_by_one(u64 *a, u64 *result)
   u64 *t_low = t;
   u64 round2[8U] = { 0U };
   u64 round4[8U] = { 0U };
-  memcpy(t_low, a, (u32)4U * sizeof (a[0U]));
+  memcpy(t_low, (u64 *)a, (u32)4U * sizeof (((u64 *)a)[0U]));
   {
     u64 tempRound[8U] = { 0U };
     u64 t20[8U] = { 0U };
@@ -518,14 +518,14 @@ static void exponent(u64 *a, u64 *result, u64 *tempBuffer)
   u64 *buffer_b0;
   u64 *buffer_a;
   u64 *buffer_b;
-  memcpy(buffer_norm_1, a, (u32)4U * sizeof (a[0U]));
+  memcpy(buffer_norm_1, (u64 *)a, (u32)4U * sizeof (((u64 *)a)[0U]));
   buffer_a0 = buffer_norm_1;
   buffer_b0 = buffer_norm_1 + (u32)4U;
   fsquarePowNminusOne((u32)32U, buffer_a0, buffer_b0);
   fsquarePowN((u32)224U, buffer_b0);
-  memcpy(buffer_result2, a, (u32)4U * sizeof (a[0U]));
+  memcpy(buffer_result2, (u64 *)a, (u32)4U * sizeof (((u64 *)a)[0U]));
   fsquarePowN((u32)192U, buffer_result2);
-  memcpy(buffer_norm_3, a, (u32)4U * sizeof (a[0U]));
+  memcpy(buffer_norm_3, (u64 *)a, (u32)4U * sizeof (((u64 *)a)[0U]));
   buffer_a = buffer_norm_3;
   buffer_b = buffer_norm_3 + (u32)4U;
   fsquarePowNminusOne((u32)94U, buffer_a, buffer_b);
@@ -533,7 +533,7 @@ static void exponent(u64 *a, u64 *result, u64 *tempBuffer)
   montgomery_multiplication_buffer(buffer_result1, buffer_result2, buffer_result1);
   montgomery_multiplication_buffer(buffer_result1, buffer_result3, buffer_result1);
   montgomery_multiplication_buffer(buffer_result1, a, buffer_result1);
-  memcpy(result, buffer_result1, (u32)4U * sizeof (buffer_result1[0U]));
+  memcpy(result, (u64 *)buffer_result1, (u32)4U * sizeof (((u64 *)buffer_result1)[0U]));
 }
 
 static void quatre(u64 *a, u64 *result)
@@ -850,9 +850,9 @@ static void point_double(u64 *p, u64 *result, u64 *tempBuffer)
   point_double_compute_y3(pY, y3, x3, s1, m, buffer_for_y3);
   montgomery_multiplication_buffer(pY, pZ, pypz);
   multByTwo(pypz, z3);
-  memcpy(result, x3, (u32)4U * sizeof (x3[0U]));
-  memcpy(result + (u32)4U, y3, (u32)4U * sizeof (y3[0U]));
-  memcpy(result + (u32)8U, z3, (u32)4U * sizeof (z3[0U]));
+  memcpy(result, (u64 *)x3, (u32)4U * sizeof (((u64 *)x3)[0U]));
+  memcpy(result + (u32)4U, (u64 *)y3, (u32)4U * sizeof (((u64 *)y3)[0U]));
+  memcpy(result + (u32)8U, (u64 *)z3, (u32)4U * sizeof (((u64 *)z3)[0U]));
 }
 
 static void
@@ -943,9 +943,9 @@ static void point_add(u64 *p, u64 *q, u64 *result, u64 *tempBuffer)
   montgomery_multiplication_buffer(z1z2, h, z3_out1);
   copy_point_conditional(x3_out1, y3_out1, z3_out1, q, p);
   copy_point_conditional(x3_out1, y3_out1, z3_out1, p, q);
-  memcpy(result, x3_out1, (u32)4U * sizeof (x3_out1[0U]));
-  memcpy(result + (u32)4U, y3_out1, (u32)4U * sizeof (y3_out1[0U]));
-  memcpy(result + (u32)8U, z3_out1, (u32)4U * sizeof (z3_out1[0U]));
+  memcpy(result, (u64 *)x3_out1, (u32)4U * sizeof (((u64 *)x3_out1)[0U]));
+  memcpy(result + (u32)4U, (u64 *)y3_out1, (u32)4U * sizeof (((u64 *)y3_out1)[0U]));
+  memcpy(result + (u32)8U, (u64 *)z3_out1, (u32)4U * sizeof (((u64 *)z3_out1)[0U]));
 }
 
 static void pointToDomain(u64 *p, u64 *result)
@@ -978,7 +978,7 @@ static void fromDomain(u64 *f, u64 *result)
 
 static void copy_point(u64 *p, u64 *result)
 {
-  memcpy(result, p, (u32)12U * sizeof (p[0U]));
+  memcpy(result, (u64 *)p, (u32)12U * sizeof (((u64 *)p)[0U]));
 }
 
 static u64 isPointAtInfinityPrivate(u64 *p)
@@ -1292,7 +1292,7 @@ static void toUint64ChangeEndian(u8 *i, u64 *o)
 static void bufferToJac(u64 *p, u64 *result)
 {
   u64 *partPoint = result;
-  memcpy(partPoint, p, (u32)8U * sizeof (p[0U]));
+  memcpy(partPoint, (u64 *)p, (u32)8U * sizeof (((u64 *)p)[0U]));
   result[8U] = (u64)1U;
   result[9U] = (u64)0U;
   result[10U] = (u64)0U;
@@ -1363,7 +1363,7 @@ static bool isOrderCorrect(u64 *p, u64 *tempBuffer)
   u64 multResult[12U] = { 0U };
   u64 pBuffer[12U] = { 0U };
   bool result;
-  memcpy(pBuffer, p, (u32)12U * sizeof (p[0U]));
+  memcpy(pBuffer, (u64 *)p, (u32)12U * sizeof (((u64 *)p)[0U]));
   scalarMultiplicationI(pBuffer, multResult, order_buffer, tempBuffer);
   result = isPointAtInfinityPublic(multResult);
   return result;
@@ -1412,7 +1412,7 @@ static void montgomery_ladder_exponent(u64 *r)
       cswap0(bit, p, r);
     }
   }
-  memcpy(r, p, (u32)4U * sizeof (p[0U]));
+  memcpy(r, (u64 *)p, (u32)4U * sizeof (((u64 *)p)[0U]));
 }
 
 static void fromDomainImpl(u64 *a, u64 *result)
@@ -1456,7 +1456,7 @@ static void ecdsa_signature_step6(u64 *result, u64 *kFelem, u64 *z, u64 *r, u64 
   montgomery_multiplication_ecdsa_module(r, da, rda);
   fromDomainImpl(z, zBuffer);
   felem_add(rda, zBuffer, zBuffer);
-  memcpy(kInv, kFelem, (u32)4U * sizeof (kFelem[0U]));
+  memcpy(kInv, (u64 *)kFelem, (u32)4U * sizeof (((u64 *)kFelem)[0U]));
   montgomery_ladder_exponent(kInv);
   montgomery_multiplication_ecdsa_module(zBuffer, kInv, result);
 }
@@ -1579,7 +1579,7 @@ ecdsa_verification_core(
       norm(pointSum, pointSum, buff);
       resultIsPAI = isPointAtInfinityPublic(pointSum);
       xCoordinateSum = pointSum;
-      memcpy(xBuffer, xCoordinateSum, (u32)4U * sizeof (xCoordinateSum[0U]));
+      memcpy(xBuffer, (u64 *)xCoordinateSum, (u32)4U * sizeof (((u64 *)xCoordinateSum)[0U]));
       r1 = !resultIsPAI;
       return r1;
     }

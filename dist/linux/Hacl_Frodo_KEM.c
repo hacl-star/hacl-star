@@ -253,7 +253,7 @@ static inline void frodo_pack(u32 n1, u32 n2, u32 d, u16 *a, u8 *res)
     u8 *src;
     store128_be(v16, templong);
     src = v16 + (u32)16U - d;
-    memcpy(r, src, d * sizeof (src[0U]));
+    memcpy(r, (u8 *)src, d * sizeof (((u8 *)src)[0U]));
   }
 }
 
@@ -269,7 +269,7 @@ static inline void frodo_unpack(u32 n1, u32 n2, u32 d, u8 *b, u16 *res)
     u8 src[16U] = { 0U };
     uint128_t u;
     uint128_t templong;
-    memcpy(src + (u32)16U - d, b1, d * sizeof (b1[0U]));
+    memcpy(src + (u32)16U - d, (u8 *)b1, d * sizeof (((u8 *)b1)[0U]));
     u = load128_be(src);
     templong = u;
     r[0U] = (u16)(uint64_t)(templong >> (u32)7U * d) & maskd;
@@ -324,7 +324,7 @@ static inline void frodo_key_encode(u32 b, u8 *a, u16 *res)
     u64 x0;
     u64 x;
     u32 i;
-    memcpy(v8, chunk, b * sizeof (chunk[0U]));
+    memcpy(v8, (u8 *)chunk, b * sizeof (((u8 *)chunk)[0U]));
     u = load64_le(v8);
     x0 = u;
     x = x0;
@@ -358,7 +358,7 @@ static inline void frodo_key_decode(u32 b, u16 *a, u8 *res)
       u8 *tmp;
       store64_le(v8, templong);
       tmp = v8;
-      memcpy(res + i * b, tmp, b * sizeof (tmp[0U]));
+      memcpy(res + i * b, (u8 *)tmp, b * sizeof (((u8 *)tmp)[0U]));
     }
   }
 }
@@ -413,7 +413,7 @@ static inline void crypto_kem_enc_ct(u8 *pk, u8 *g, u8 *coins, u8 *ct)
       frodo_mul_add_sb_plus_e_plus_mu(b, seed_e, coins, sp_matrix, v_matrix);
       frodo_pack((u32)8U, (u32)8U, (u32)15U, v_matrix, c2);
       Lib_Memzero_clear_words_u16((u32)64U, v_matrix);
-      memcpy(ct + c12Len, d, (u32)16U * sizeof (d[0U]));
+      memcpy(ct + c12Len, (u8 *)d, (u32)16U * sizeof (((u8 *)d)[0U]));
       Lib_Memzero_clear_words_u16((u32)512U, sp_matrix);
     }
   }
@@ -429,8 +429,10 @@ static inline void crypto_kem_enc_ss(u8 *g, u8 *ct, u8 *ss)
     {
       u8 *c12 = ct;
       u8 *kd = g + (u32)16U;
-      memcpy(ss_init, c12, (crypto_ciphertextbytes - (u32)16U) * sizeof (c12[0U]));
-      memcpy(ss_init + crypto_ciphertextbytes - (u32)16U, kd, (u32)32U * sizeof (kd[0U]));
+      memcpy(ss_init, (u8 *)c12, (crypto_ciphertextbytes - (u32)16U) * sizeof (((u8 *)c12)[0U]));
+      memcpy(ss_init + crypto_ciphertextbytes - (u32)16U,
+        (u8 *)kd,
+        (u32)32U * sizeof (((u8 *)kd)[0U]));
       {
         u64 s[25U] = { 0U };
         s[0U] = (u64)0x10010001a801U | (u64)(u16)7U << (u32)48U;
@@ -465,8 +467,8 @@ u32 Hacl_Frodo_KEM_crypto_kem_keypair(u8 *pk, u8 *sk)
     b = pk + (u32)16U;
     s_bytes = sk + (u32)16U + crypto_publickeybytes;
     frodo_mul_add_as_plus_e_pack(seed_a, seed_e, b, s_bytes);
-    memcpy(sk, s, (u32)16U * sizeof (s[0U]));
-    memcpy(sk + (u32)16U, pk, crypto_publickeybytes * sizeof (pk[0U]));
+    memcpy(sk, (u8 *)s, (u32)16U * sizeof (((u8 *)s)[0U]));
+    memcpy(sk + (u32)16U, (u8 *)pk, crypto_publickeybytes * sizeof (((u8 *)pk)[0U]));
     return (u32)0U;
   }
 }
@@ -478,8 +480,8 @@ u32 Hacl_Frodo_KEM_crypto_kem_enc(u8 *ct, u8 *ss, u8 *pk)
   {
     u8 g[48U] = { 0U };
     u8 pk_coins[992U] = { 0U };
-    memcpy(pk_coins, pk, crypto_publickeybytes * sizeof (pk[0U]));
-    memcpy(pk_coins + crypto_publickeybytes, coins, bytes_mu * sizeof (coins[0U]));
+    memcpy(pk_coins, (u8 *)pk, crypto_publickeybytes * sizeof (((u8 *)pk)[0U]));
+    memcpy(pk_coins + crypto_publickeybytes, (u8 *)coins, bytes_mu * sizeof (((u8 *)coins)[0U]));
     {
       u64 s[25U] = { 0U };
       s[0U] = (u64)0x10010001a801U | (u64)(u16)3U << (u32)48U;
@@ -523,10 +525,10 @@ u32 Hacl_Frodo_KEM_crypto_kem_dec(u8 *ss, u8 *ct, u8 *sk)
         memset(pk_mu_decode, 0U, pk_mu_decode_len * sizeof (pk_mu_decode[0U]));
         {
           u8 *pk0 = sk + (u32)16U;
-          memcpy(pk_mu_decode, pk0, crypto_publickeybytes * sizeof (pk0[0U]));
+          memcpy(pk_mu_decode, (u8 *)pk0, crypto_publickeybytes * sizeof (((u8 *)pk0)[0U]));
           memcpy(pk_mu_decode + crypto_publickeybytes,
-            mu_decode1,
-            bytes_mu * sizeof (mu_decode1[0U]));
+            (u8 *)mu_decode1,
+            bytes_mu * sizeof (((u8 *)mu_decode1)[0U]));
           {
             u64 s0[25U] = { 0U };
             s0[0U] = (u64)0x10010001a801U | (u64)(u16)3U << (u32)48U;
@@ -593,13 +595,15 @@ u32 Hacl_Frodo_KEM_crypto_kem_dec(u8 *ss, u8 *ct, u8 *sk)
                     {
                       u8 ss_init[ss_init_len];
                       memset(ss_init, 0U, ss_init_len * sizeof (ss_init[0U]));
-                      memcpy(ss_init, c12, (crypto_ciphertextbytes - (u32)16U) * sizeof (c12[0U]));
+                      memcpy(ss_init,
+                        (u8 *)c12,
+                        (crypto_ciphertextbytes - (u32)16U) * sizeof (((u8 *)c12)[0U]));
                       memcpy(ss_init + crypto_ciphertextbytes - (u32)16U,
-                        kp_s,
-                        (u32)16U * sizeof (kp_s[0U]));
+                        (u8 *)kp_s,
+                        (u32)16U * sizeof (((u8 *)kp_s)[0U]));
                       memcpy(ss_init + crypto_ciphertextbytes - (u32)16U + (u32)16U,
-                        d,
-                        (u32)16U * sizeof (d[0U]));
+                        (u8 *)d,
+                        (u32)16U * sizeof (((u8 *)d)[0U]));
                       {
                         u64 s1[25U] = { 0U };
                         s1[0U] = (u64)0x10010001a801U | (u64)(u16)7U << (u32)48U;

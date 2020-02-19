@@ -1564,7 +1564,7 @@ Hacl_Poly1305_128_poly1305_update(
       Lib_IntVector_Intrinsics_vec128 o2;
       Lib_IntVector_Intrinsics_vec128 o3;
       Lib_IntVector_Intrinsics_vec128 o4;
-      memcpy(tmp, last1, rem1 * sizeof (last1[0U]));
+      memcpy(tmp, (uint8_t *)last1, rem1 * sizeof (((uint8_t *)last1)[0U]));
       u0 = load64_le(tmp);
       lo = u0;
       u = load64_le(tmp + (uint32_t)8U);

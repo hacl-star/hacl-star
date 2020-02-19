@@ -54,7 +54,7 @@ static inline void blake2s_update_block(uint32_t *hash, bool flag, uint64_t totl
         mask[1U] = (uint32_t)(totlen >> (uint32_t)32U);
         mask[2U] = wv_14;
         mask[3U] = wv_15;
-        memcpy(b, hash, (uint32_t)4U * (uint32_t)4U * sizeof (hash[0U]));
+        memcpy(b, (uint32_t *)hash, (uint32_t)4U * (uint32_t)4U * sizeof (((uint32_t *)hash)[0U]));
         wv3 = b + (uint32_t)3U * (uint32_t)4U;
         {
           uint32_t i;
@@ -988,7 +988,7 @@ Hacl_Blake2s_32_blake2s(
         r1[3U] = iv7;
         if (!(kk == (uint32_t)0U))
         {
-          memcpy(b0, k, kk * sizeof (k[0U]));
+          memcpy(b0, (uint8_t *)k, kk * sizeof (((uint8_t *)k)[0U]));
           {
             uint64_t totlen = (uint64_t)(uint32_t)0U + (uint64_t)(uint32_t)64U;
             uint8_t *b1 = b0 + (uint32_t)0U * (uint32_t)64U;
@@ -1029,7 +1029,7 @@ Hacl_Blake2s_32_blake2s(
           uint8_t *last1 = d + ll - rem2;
           uint8_t last_block[64U] = { 0U };
           uint64_t totlen;
-          memcpy(last_block, last1, rem2 * sizeof (last1[0U]));
+          memcpy(last_block, (uint8_t *)last1, rem2 * sizeof (((uint8_t *)last1)[0U]));
           totlen = prev0 + (uint64_t)ll;
           blake2s_update_block(h, true, totlen, last_block);
           KRML_CHECK_SIZE(sizeof (uint8_t), (uint32_t)2U * (uint32_t)4U * (uint32_t)4U);
@@ -1059,7 +1059,7 @@ Hacl_Blake2s_32_blake2s(
                 }
               }
               final = b;
-              memcpy(output, final, nn * sizeof (final[0U]));
+              memcpy(output, (uint8_t *)final, nn * sizeof (((uint8_t *)final)[0U]));
               memset(b, 0U, (uint32_t)2U * (uint32_t)4U * (uint32_t)4U * sizeof (b[0U]));
             }
           }

@@ -67,6 +67,7 @@ let recall_contents #a #len b s =
   B.recall_p (b <: ibuffer a) (cpred s)
 
 let copy #t #a #len o i =
+  [@inline_let]
   let i = as_mbuf i in
   let h0 = ST.get () in
   LowStar.BufferOps.blit i 0ul (o <: buffer a) 0ul len;
@@ -82,6 +83,7 @@ let memset #a #blen b init len =
 let update_sub #t #a #len dst start n src =
   // JP: this as_mbuf ought to go, once we have a version of blit that
   // (correctly) takes a const pointer.
+  [@inline_let]
   let src = as_mbuf src in
   let h0 = ST.get () in
   LowStar.BufferOps.blit src

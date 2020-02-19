@@ -45,7 +45,7 @@ Hacl_HKDF_expand_sha2_256(
       uint8_t *text0 = text + tlen;
       uint8_t *tag = text;
       uint8_t *ctr = text + tlen + infolen;
-      memcpy(text + tlen, info, infolen * sizeof (info[0U]));
+      memcpy(text + tlen, (uint8_t *)info, infolen * sizeof (((uint8_t *)info)[0U]));
       {
         uint32_t i;
         for (i = (uint32_t)0U; i < n1; i++)
@@ -59,7 +59,7 @@ Hacl_HKDF_expand_sha2_256(
           {
             Hacl_HMAC_compute_sha2_256(tag, prk, prklen, text, tlen + infolen + (uint32_t)1U);
           }
-          memcpy(output + i * tlen, tag, tlen * sizeof (tag[0U]));
+          memcpy(output + i * tlen, (uint8_t *)tag, tlen * sizeof (((uint8_t *)tag)[0U]));
         }
       }
       if (n1 * tlen < len)
@@ -75,7 +75,7 @@ Hacl_HKDF_expand_sha2_256(
         }
         {
           uint8_t *block = okm + n1 * tlen;
-          memcpy(block, tag, (len - n1 * tlen) * sizeof (tag[0U]));
+          memcpy(block, (uint8_t *)tag, (len - n1 * tlen) * sizeof (((uint8_t *)tag)[0U]));
         }
       }
     }
@@ -115,7 +115,7 @@ Hacl_HKDF_expand_sha2_512(
       uint8_t *text0 = text + tlen;
       uint8_t *tag = text;
       uint8_t *ctr = text + tlen + infolen;
-      memcpy(text + tlen, info, infolen * sizeof (info[0U]));
+      memcpy(text + tlen, (uint8_t *)info, infolen * sizeof (((uint8_t *)info)[0U]));
       {
         uint32_t i;
         for (i = (uint32_t)0U; i < n1; i++)
@@ -129,7 +129,7 @@ Hacl_HKDF_expand_sha2_512(
           {
             Hacl_HMAC_compute_sha2_512(tag, prk, prklen, text, tlen + infolen + (uint32_t)1U);
           }
-          memcpy(output + i * tlen, tag, tlen * sizeof (tag[0U]));
+          memcpy(output + i * tlen, (uint8_t *)tag, tlen * sizeof (((uint8_t *)tag)[0U]));
         }
       }
       if (n1 * tlen < len)
@@ -145,7 +145,7 @@ Hacl_HKDF_expand_sha2_512(
         }
         {
           uint8_t *block = okm + n1 * tlen;
-          memcpy(block, tag, (len - n1 * tlen) * sizeof (tag[0U]));
+          memcpy(block, (uint8_t *)tag, (len - n1 * tlen) * sizeof (((uint8_t *)tag)[0U]));
         }
       }
     }

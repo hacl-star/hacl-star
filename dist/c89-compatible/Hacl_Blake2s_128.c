@@ -65,7 +65,9 @@ blake2s_update_block(
             (uint32_t)(totlen >> (uint32_t)32U),
             wv_14,
             wv_15);
-        memcpy(b, hash, (uint32_t)4U * (uint32_t)1U * sizeof (hash[0U]));
+        memcpy(b,
+          (Lib_IntVector_Intrinsics_vec128 *)hash,
+          (uint32_t)4U * (uint32_t)1U * sizeof (((Lib_IntVector_Intrinsics_vec128 *)hash)[0U]));
         wv3 = b + (uint32_t)3U * (uint32_t)1U;
         wv3[0U] = Lib_IntVector_Intrinsics_vec128_xor(wv3[0U], mask);
         {
@@ -521,7 +523,7 @@ Hacl_Blake2s_128_blake2s(
         r1[0U] = Lib_IntVector_Intrinsics_vec128_load32s(iv4, iv5, iv6, iv7);
         if (!(kk == (uint32_t)0U))
         {
-          memcpy(b0, k, kk * sizeof (k[0U]));
+          memcpy(b0, (uint8_t *)k, kk * sizeof (((uint8_t *)k)[0U]));
           {
             uint64_t totlen = (uint64_t)(uint32_t)0U + (uint64_t)(uint32_t)64U;
             uint8_t *b1 = b0 + (uint32_t)0U * (uint32_t)64U;
@@ -562,7 +564,7 @@ Hacl_Blake2s_128_blake2s(
           uint8_t *last1 = d + ll - rem2;
           uint8_t last_block[64U] = { 0U };
           uint64_t totlen;
-          memcpy(last_block, last1, rem2 * sizeof (last1[0U]));
+          memcpy(last_block, (uint8_t *)last1, rem2 * sizeof (((uint8_t *)last1)[0U]));
           totlen = prev0 + (uint64_t)ll;
           blake2s_update_block(h, true, totlen, last_block);
           KRML_CHECK_SIZE(sizeof (uint8_t), (uint32_t)2U * (uint32_t)4U * (uint32_t)4U);
@@ -575,7 +577,7 @@ Hacl_Blake2s_128_blake2s(
               Lib_IntVector_Intrinsics_vec128_store_le(b + (uint32_t)4U * (uint32_t)4U,
                 (h + (uint32_t)1U * (uint32_t)1U)[0U]);
               final = b;
-              memcpy(output, final, nn * sizeof (final[0U]));
+              memcpy(output, (uint8_t *)final, nn * sizeof (((uint8_t *)final)[0U]));
               memset(b, 0U, (uint32_t)2U * (uint32_t)4U * (uint32_t)4U * sizeof (b[0U]));
             }
           }

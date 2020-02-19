@@ -161,7 +161,7 @@ static inline void poly1305_padded_32(uint64_t *ctx, uint32_t len, uint8_t *text
     uint8_t *last1 = blocks + nb * (uint32_t)16U;
     uint64_t e[5U] = { 0U };
     uint8_t tmp[16U] = { 0U };
-    memcpy(tmp, last1, rem2 * sizeof (last1[0U]));
+    memcpy(tmp, (uint8_t *)last1, rem2 * sizeof (((uint8_t *)last1)[0U]));
     uint64_t u0 = load64_le(tmp);
     uint64_t lo = u0;
     uint64_t u = load64_le(tmp + (uint32_t)8U);
@@ -279,7 +279,7 @@ static inline void poly1305_padded_32(uint64_t *ctx, uint32_t len, uint8_t *text
     acc0[4U] = o4;
   }
   uint8_t tmp[16U] = { 0U };
-  memcpy(tmp, rem1, r * sizeof (rem1[0U]));
+  memcpy(tmp, (uint8_t *)rem1, r * sizeof (((uint8_t *)rem1)[0U]));
   if (r > (uint32_t)0U)
   {
     uint64_t *pre = ctx + (uint32_t)5U;

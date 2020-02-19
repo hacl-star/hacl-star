@@ -63,7 +63,7 @@ secretbox_detached(
   uint8_t *m0 = m;
   uint8_t *m1 = m + mlen0;
   uint8_t block0[32U] = { 0U };
-  memcpy(block0, m0, mlen0 * sizeof (m0[0U]));
+  memcpy(block0, (uint8_t *)m0, mlen0 * sizeof (((uint8_t *)m0)[0U]));
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)32U; i++)
   {
     uint8_t *os = block0;
@@ -72,7 +72,7 @@ secretbox_detached(
   }
   uint8_t *c0 = c;
   uint8_t *c1 = c + mlen0;
-  memcpy(c0, block0, mlen0 * sizeof (block0[0U]));
+  memcpy(c0, (uint8_t *)block0, mlen0 * sizeof (((uint8_t *)block0)[0U]));
   Hacl_Salsa20_salsa20_encrypt(mlen1, c1, m1, subkey, n11, (uint32_t)1U);
   Hacl_Poly1305_32_poly1305_mac(tag, mlen, c, mkey);
 }
@@ -117,7 +117,7 @@ secretbox_open_detached(
     uint8_t *c0 = c;
     uint8_t *c1 = c + mlen0;
     uint8_t block0[32U] = { 0U };
-    memcpy(block0, c0, mlen0 * sizeof (c0[0U]));
+    memcpy(block0, (uint8_t *)c0, mlen0 * sizeof (((uint8_t *)c0)[0U]));
     for (uint32_t i = (uint32_t)0U; i < (uint32_t)32U; i++)
     {
       uint8_t *os = block0;
@@ -126,7 +126,7 @@ secretbox_open_detached(
     }
     uint8_t *m0 = m;
     uint8_t *m1 = m + mlen0;
-    memcpy(m0, block0, mlen0 * sizeof (block0[0U]));
+    memcpy(m0, (uint8_t *)block0, mlen0 * sizeof (((uint8_t *)block0)[0U]));
     Hacl_Salsa20_salsa20_decrypt(mlen1, m1, c1, subkey, n11, (uint32_t)1U);
     return (uint32_t)0U;
   }

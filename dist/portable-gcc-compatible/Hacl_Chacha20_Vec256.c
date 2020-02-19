@@ -137,7 +137,9 @@ chacha20_core_256(
   uint32_t ctr
 )
 {
-  memcpy(k, ctx, (uint32_t)16U * sizeof (ctx[0U]));
+  memcpy(k,
+    (Lib_IntVector_Intrinsics_vec256 *)ctx,
+    (uint32_t)16U * sizeof (((Lib_IntVector_Intrinsics_vec256 *)ctx)[0U]));
   uint32_t ctr_u32 = (uint32_t)8U * ctr;
   Lib_IntVector_Intrinsics_vec256 cv = Lib_IntVector_Intrinsics_vec256_load32(ctr_u32);
   k[12U] = Lib_IntVector_Intrinsics_vec256_add32(k[12U], cv);
@@ -403,7 +405,7 @@ Hacl_Chacha20_Vec256_chacha20_encrypt_256(
     uint8_t *uu____2 = out + nb * (uint32_t)512U;
     uint8_t *uu____3 = text + nb * (uint32_t)512U;
     uint8_t plain[512U] = { 0U };
-    memcpy(plain, uu____3, rem1 * sizeof (uu____3[0U]));
+    memcpy(plain, (uint8_t *)uu____3, rem1 * sizeof (((uint8_t *)uu____3)[0U]));
     Lib_IntVector_Intrinsics_vec256 k[16U];
     for (uint32_t _i = 0U; _i < (uint32_t)16U; ++_i)
       k[_i] = Lib_IntVector_Intrinsics_vec256_zero;
@@ -559,7 +561,7 @@ Hacl_Chacha20_Vec256_chacha20_encrypt_256(
       Lib_IntVector_Intrinsics_vec256 y = Lib_IntVector_Intrinsics_vec256_xor(x, k[i]);
       Lib_IntVector_Intrinsics_vec256_store_le(plain + i * (uint32_t)32U, y);
     }
-    memcpy(uu____2, plain, rem1 * sizeof (plain[0U]));
+    memcpy(uu____2, (uint8_t *)plain, rem1 * sizeof (((uint8_t *)plain)[0U]));
   }
 }
 
@@ -749,7 +751,7 @@ Hacl_Chacha20_Vec256_chacha20_decrypt_256(
     uint8_t *uu____2 = out + nb * (uint32_t)512U;
     uint8_t *uu____3 = cipher + nb * (uint32_t)512U;
     uint8_t plain[512U] = { 0U };
-    memcpy(plain, uu____3, rem1 * sizeof (uu____3[0U]));
+    memcpy(plain, (uint8_t *)uu____3, rem1 * sizeof (((uint8_t *)uu____3)[0U]));
     Lib_IntVector_Intrinsics_vec256 k[16U];
     for (uint32_t _i = 0U; _i < (uint32_t)16U; ++_i)
       k[_i] = Lib_IntVector_Intrinsics_vec256_zero;
@@ -905,7 +907,7 @@ Hacl_Chacha20_Vec256_chacha20_decrypt_256(
       Lib_IntVector_Intrinsics_vec256 y = Lib_IntVector_Intrinsics_vec256_xor(x, k[i]);
       Lib_IntVector_Intrinsics_vec256_store_le(plain + i * (uint32_t)32U, y);
     }
-    memcpy(uu____2, plain, rem1 * sizeof (plain[0U]));
+    memcpy(uu____2, (uint8_t *)plain, rem1 * sizeof (((uint8_t *)plain)[0U]));
   }
 }
 
