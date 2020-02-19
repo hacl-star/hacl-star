@@ -3,82 +3,44 @@ module FStar.Math.Euclid
 open FStar.Mul
 open FStar.Math.Lemmas
 
-#set-options "--fuel 0 --ifuel 0 --z3rlimit 20"
-
-val divides_refl (a:int) : Lemma (a `divides` a) [SMTPat (a `divides` a)]
-let divides_refl a =
-  Classical.exists_intro (fun q -> a = q * a) 1
-
-val divides_0 (a:int) : Lemma (a `divides` 0)
-let divides_0 a =
-  Classical.exists_intro (fun q -> 0 = q * a) 0
-
-val divides_1 (a:int) : Lemma (requires a `divides` 1) (ensures a = 1 \/ a = -1)
-let divides_1 a = ()
-
-val divides_minus (a b:int) : Lemma
-  (requires a `divides` b)
-  (ensures  a `divides` (-b))
-  [SMTPat (a `divides` (-b))]
-let divides_minus a b =
-  Classical.exists_elim (a `divides` (-b))
-    (Squash.get_proof (a `divides` b))
-    (fun q -> Classical.exists_intro (fun q' -> -b = q' * a) (-q))
-
-val divides_opp (a b:int) : Lemma
-  (requires a `divides` b)
-  (ensures (-a) `divides` b)
-let divides_opp a b =
-  Classical.exists_elim ((-a) `divides` b)
-    (Squash.get_proof (a `divides` b))
-    (fun q -> Classical.exists_intro (fun q' -> b = q' * (-a)) (-q))
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 40"
 
 ///
-/// Properties of `is_gcd`
+/// Auxiliary lemmas
 ///
-
-val is_gcd_sym (a b d:int) : Lemma
-  (requires is_gcd a b d)
-  (ensures  is_gcd b a d)
-let is_gcd_sym a b d = ()
-
-val is_gcd_0 (a:int) : Lemma (is_gcd a 0 a)
-let is_gcd_0 a = ()
-
-val is_gcd_1 (a:int) : Lemma (is_gcd a 1 1)
-let is_gcd_1 a = ()
-
-val is_gcd_refl (a:int) : Lemma (is_gcd a a a)
-let is_gcd_refl a = ()
-
-val opp_idempotent (a:int) : Lemma (-(-a) == a)
-let opp_idempotent a = ()
-
-val is_gcd_minus (a b d:int) : Lemma
-  (requires is_gcd a (-b) d)
-  (ensures  is_gcd b a d)
-let is_gcd_minus a b d =
-  opp_idempotent b;
-  divides_minus d (-b)
-
-val is_gcd_opp (a b d:int) : Lemma
-  (requires is_gcd a b d)
-  (ensures  is_gcd b a (-d))
-let is_gcd_opp a b d =
-  divides_opp d a;
-  divides_opp d b
 
 val eq_mult_left (a b:int) : Lemma (requires a = b * a) (ensures a = 0 \/ b = 1)
 let eq_mult_left a b = ()
 
-val eq_mult_one (a b:int) : Lemma 
-  (requires a * b = 1) 
+val eq_mult_one (a b:int) : Lemma
+  (requires a * b = 1)
   (ensures (a = 1 /\ b = 1) \/ (a = -1 /\ b = -1))
 let eq_mult_one a b = ()
 
-val divide_antisym (a b:int) : Lemma
-  (requires a `divides` b /\ b `divides` a)
-  (ensures  a = b \/ a = -b)
+val opp_idempotent (a:int) : Lemma (-(-a) == a)
+let opp_idempotent a = ()
+
+val add_sub_l (a b:int) : Lemma (a - b + b = a)
+let add_sub_l a b = ()
+
+val add_sub_r (a b:int) : Lemma (a + b - b = a)
+let add_sub_r a b = ()
+
+///
+/// Divides relation
+///
+
+let divides_reflexive a =
+  Classical.exists_intro (fun q -> a = q * a) 1
+
+let divides_transitive a b c =
+  if a <> 0 && b <> 0 then
+    Classical.exists_elim (a `divides` c) (Squash.get_proof (exists q1. b = q1 * a))
+      (fun q1 ->
+        Classical.exists_elim (a `divides` c) (Squash.get_proof (exists q2. c = q2 * b))
+          (fun q2 ->
+            Classical.exists_intro (fun q3 -> c = q3 * a) (q1 * q2)))
+
 let divide_antisym a b =
   if a <> 0 then
     Classical.exists_elim (a = b \/ a = -b) (Squash.get_proof (exists q1. b = q1 * a))
@@ -92,16 +54,21 @@ let divide_antisym a b =
             eq_mult_left b (q1 * q2);
             eq_mult_one q1 q2))
 
+let divides_0 a =
+  Classical.exists_intro (fun q -> 0 = q * a) 0
 
-let is_gcd_unique a b c d =
-  assert (d `divides` c);
-  assert (c `divides` d);
-  divide_antisym c d
+let divides_1 a = ()
 
+let divides_minus a b =
+  Classical.exists_elim (a `divides` (-b))
+    (Squash.get_proof (a `divides` b))
+    (fun q -> Classical.exists_intro (fun q' -> -b = q' * a) (-q))
 
-val divides_plus (a b d:int) : Lemma
-  (requires d `divides` a /\ d `divides` b)
-  (ensures  d `divides` (a + b))
+let divides_opp a b =
+  Classical.exists_elim ((-a) `divides` b)
+    (Squash.get_proof (a `divides` b))
+    (fun q -> Classical.exists_intro (fun q' -> b = q' * (-a)) (-q))
+
 let divides_plus a b d =
   Classical.exists_elim (d `divides` (a + b)) (Squash.get_proof (exists q1. a = q1 * d))
     (fun q1 ->
@@ -111,38 +78,64 @@ let divides_plus a b d =
           distributivity_add_left q1 q2 d;
           Classical.exists_intro (fun q -> a + b = q * d) (q1 + q2)))
 
-val divides_sub (a b d:int) : Lemma
-  (requires d `divides` a /\ d `divides` b)
-  (ensures  d `divides` (a - b))
-  [SMTPat (d `divides` (a - b))]
 let divides_sub a b d =
+  Classical.forall_intro_2 (Classical.move_requires_2 divides_minus);
   divides_plus a (-b) d
 
-val divides_mult_right (a b d:int) : Lemma
-  (requires d `divides` b)
-  (ensures  d `divides` (a * b))
-  [SMTPat (d `divides` (a * b))]
 let divides_mult_right a b d =
   Classical.exists_elim (d `divides` (a * b)) (Squash.get_proof (d `divides` b))
     (fun q ->
       paren_mul_right a q d;
       Classical.exists_intro (fun r -> a * b = r * d) (a * q))
 
-val add_sub_idempotent (a b:int) : Lemma (a - b + b = a)
-let add_sub_idempotent a b = ()
+///
+/// GCD
+///
+
+let mod_divides a b =
+  Classical.exists_intro (fun q -> a = q * b) (a / b)
+
+let divides_mod a b =
+  Classical.exists_elim (a % b = 0) (Squash.get_proof (b `divides` a))
+    (fun q -> cancel_mul_div q b)
+
+let is_gcd_unique a b c d =
+  divide_antisym c d
+
+let is_gcd_reflexive a = ()
+
+let is_gcd_symmetric a b d = ()
+
+let is_gcd_0 a = ()
+
+let is_gcd_1 a = ()
+
+let is_gcd_minus a b d =
+  Classical.forall_intro_2 (Classical.move_requires_2 divides_minus);
+  opp_idempotent b
+
+let is_gcd_opp a b d =
+  Classical.forall_intro_2 (Classical.move_requires_2 divides_minus);
+  divides_opp d a;
+  divides_opp d b
+
+let is_gcd_plus a b q d =
+  add_sub_r b (q * a);
+  Classical.forall_intro_3 (Classical.move_requires_3 divides_plus);
+  Classical.forall_intro_3 (Classical.move_requires_3 divides_mult_right);
+  Classical.forall_intro_3 (Classical.move_requires_3 divides_sub)
+
+///
+/// Extended Euclidean algorithm
+///
 
 val is_gcd_for_euclid (a b q d:int) : Lemma
   (requires is_gcd b (a - q * b) d)
   (ensures  is_gcd a b d)
-  [SMTPat (is_gcd b (a - q * b) d)]
+//  [SMTPat (is_gcd b (a - q * b) d)]
 let is_gcd_for_euclid a b q d =
-  add_sub_idempotent a (q * b);
-  Classical.exists_elim (d `divides` a) (Squash.get_proof (exists r. a = r * d + q * b))
-    (fun r ->
-      divides_mult_right r d d ;
-      divides_mult_right q b d ;
-      divides_plus (r * d) (q * b) d)
-
+  add_sub_l a (q * b);
+  is_gcd_plus b (a - q * b) q d
 
 val egcd (a b u1 u2 u3 v1 v2 v3:int) : Pure (int & int & int)
   (requires v3 >= 0 /\
@@ -179,12 +172,12 @@ let rec egcd a b u1 u2 u3 v1 v2 v3 =
     egcd a b u1 u2 u3 v1 v2 v3
     end
 
-
 let euclid_gcd a b =
   if b >= 0 then
     egcd a b 1 0 a 0 1 b
-  else 
+  else
     begin
+    Classical.forall_intro_2 (Classical.move_requires_2 divides_minus);
     Classical.forall_intro (Classical.move_requires (is_gcd_minus a b));
     egcd a b 1 0 a 0 (-1) (-b)
     end
@@ -192,15 +185,13 @@ let euclid_gcd a b =
 val is_gcd_prime_aux (p:pos) (a:pos{a < p}) (d:int) : Lemma
   (requires is_prime p /\ d `divides` p /\ d `divides` a)
   (ensures  d = 1 \/ d = -1)
-let is_gcd_prime_aux p a d = 
-  ()
+let is_gcd_prime_aux p a d = ()
 
 val is_gcd_prime (p:pos{is_prime p}) (a:pos{a < p}) : Lemma (is_gcd p a 1)
 let is_gcd_prime p a =
+  Classical.forall_intro_2 (Classical.move_requires_2 divides_minus);
   Classical.forall_intro (Classical.move_requires (is_gcd_prime_aux p a));
   assert (forall x. x `divides` p /\ x `divides` a ==> x = 1 \/ x = -1 /\ x `divides` 1)
-
-#push-options "--using_facts_from '* -FStar.Math.Euclid'"
 
 let bezout_prime p a =
   let r, s, d = euclid_gcd p a in
@@ -208,6 +199,8 @@ let bezout_prime p a =
   assert (is_gcd p a d);
   is_gcd_prime p a;
   is_gcd_unique p a 1 d;
+  assert (d = 1 \/ d = -1);
+  assert ((-r) * p + (-s) * a == -(r * p + s * a)) by (FStar.Tactics.Canon.canon());
   if d = 1 then r, s else -r, -s
 
 let euclid n a b r s =
@@ -230,7 +223,7 @@ let euclid n a b r s =
     ((r * n * b) % n) % n;
     == { lemma_mod_twice (r * n * b) n }
     (r * n * b) % n;
-    == { swap_mul r n; paren_mul_right n r b }
+    == { _ by (FStar.Tactics.Canon.canon ()) }
     (n * (r * b)) % n;
     == { lemma_mod_mul_distr_l n (r * b) n}
     n % n * (r * b) % n;
@@ -238,6 +231,29 @@ let euclid n a b r s =
     (0 * (r * b)) % n;
     == { assert (0 * (r * b) == 0) }
     0 % n;
-    == { modulo_lemma 0 n }
+    == { small_mod 0 n }
     0;
   }
+
+let euclid_prime p a b r s =
+  let ra, sa, da = euclid_gcd p a in
+  let rb, sb, db = euclid_gcd p b in
+  assert (is_gcd p a da);
+  assert (is_gcd p b db);
+  assert (da `divides` p);
+  assert (da = 1 \/ da = -1 \/ da = p \/ da = -p);
+  if da = 1 then
+    euclid p a b ra sa
+  else if da = -1 then
+    begin
+    assert ((-ra) * p + (-sa) * a == -(ra * p + sa * a)) by (FStar.Tactics.Canon.canon());
+    euclid p a b (-ra) (-sa)
+    end
+  else if da = p then
+    divides_mod a p
+  else
+    begin
+    opp_idempotent p;
+    divides_opp (-p) a;
+    divides_mod a p
+    end

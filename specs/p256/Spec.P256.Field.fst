@@ -4,7 +4,6 @@ open FStar.Mul
 open FStar.Tactics
 open FStar.Algebra.CommMonoid
 open FStar.Tactics.CanonCommSemiring
-open FStar.Math.Euclid
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 20"
 
@@ -160,11 +159,8 @@ let elem_cr: cr elem = CR elem_add_cm elem_mul_cm ( ~% ) add_opp mul_add_distr m
 
 let p256_field () : Tac unit = canon_semiring elem_cr; trefl ()
 
-#set-options "--debug Spec.P256.Field --debug_level Tac"
-
 let test (a b c:elem) (d:elem{d <> zero}) =
-  assert ((a +% b) *% (a +% b) == a *% a +% 2 *% a *% b +% b *% b) by
-  (p256_field ());
+  assert ((a +% b) *% (a +% b) == a *% a +% 2 *% a *% b +% b *% b) by (p256_field ());
   assert ((a +% b) *% (c +% d) == c *% (b +% a) +% a *% d +% b *% d) by (p256_field ());
   assert ((a -% b) *% c == a *% c +% ~%b *% c) by (p256_field ());
   assert (c *% (a /% d) == inverse d *% c *% a) by (p256_field ());
@@ -330,7 +326,7 @@ let mod_mult_congr_aux a b c =
   };
   divides_prime ();
   let r, s = FStar.Math.Euclid.bezout_prime prime c in
-  euclid prime c (a - b) r s
+  FStar.Math.Euclid.euclid prime c (a - b) r s
 
 val mod_mult_congr (a b c:elem) : Lemma
   (requires (a *% c) = (b *% c) /\ c <> 0)
