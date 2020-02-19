@@ -28,13 +28,31 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
-#ifndef __MerkleTree_New_Low_Hashes_H
-#define __MerkleTree_New_Low_Hashes_H
+#ifndef __MerkleTree_New_Low_Hashfunctions_H
+#define __MerkleTree_New_Low_Hashfunctions_H
+
+#include "Hacl_Spec.h"
+#include "EverCrypt_Hash.h"
+#include "MerkleTree_New_Low_Datastructures.h"
 
 
+uint8_t
+*LowStar_Regional_rg_alloc___uint8_t__uint32_t(
+  LowStar_Regional_regional__uint32_t__uint8_t_ rg
+);
 
+uint8_t *MerkleTree_New_Low_Hashfunctions_init_hash(uint32_t hsz);
 
-typedef uint32_t MerkleTree_New_Low_Hashes_hash_size_t;
+void
+LowStar_Regional_rg_free___uint8_t__uint32_t(
+  LowStar_Regional_regional__uint32_t__uint8_t_ rg,
+  uint8_t *v1
+);
 
-#define __MerkleTree_New_Low_Hashes_H_DEFINED
+void MerkleTree_New_Low_Hashfunctions_free_hash(uint32_t hsz, uint8_t *h1);
+
+void
+MerkleTree_New_Low_Hashfunctions_sha256_compress(uint8_t *src1, uint8_t *src2, uint8_t *dst);
+
+#define __MerkleTree_New_Low_Hashfunctions_H_DEFINED
 #endif

@@ -28,13 +28,49 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
-#ifndef __MerkleTree_New_Low_Hashes_H
-#define __MerkleTree_New_Low_Hashes_H
+#ifndef __MerkleTree_New_Low_Serialization_H
+#define __MerkleTree_New_Low_Serialization_H
+
+#include "Hacl_Kremlib.h"
+#include "MerkleTree_New_Low.h"
+#include "MerkleTree_New_Low_Datastructures.h"
+#include "MerkleTree_New_Low_Hashfunctions.h"
 
 
+typedef uint8_t uint8_t;
 
+typedef uint16_t uint16_t;
 
-typedef uint32_t MerkleTree_New_Low_Hashes_hash_size_t;
+typedef uint32_t uint32_t;
 
-#define __MerkleTree_New_Low_Hashes_H_DEFINED
+typedef uint64_t uint64_t;
+
+typedef uint8_t *uint8_p;
+
+typedef const uint8_t *const_uint8_p;
+
+uint64_t mt_serialize_size(const merkle_tree *mt);
+
+uint64_t mt_serialize(const merkle_tree *mt, uint8_t *output, uint64_t sz);
+
+merkle_tree
+*mt_deserialize(
+  uint32_t hash_size,
+  const uint8_t *input,
+  uint64_t sz,
+  void (*hash_fun)(uint8_t *x0, uint8_t *x1, uint8_t *x2)
+);
+
+uint64_t
+mt_serialize_path(
+  const LowStar_Vector_vector_str___uint8_t_ *p1,
+  const merkle_tree *mt,
+  uint8_t *output,
+  uint64_t sz
+);
+
+LowStar_Vector_vector_str___uint8_t_
+*mt_deserialize_path(uint32_t hsz, const uint8_t *input, uint64_t sz);
+
+#define __MerkleTree_New_Low_Serialization_H_DEFINED
 #endif
