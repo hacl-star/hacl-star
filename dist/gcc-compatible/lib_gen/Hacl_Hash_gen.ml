@@ -6,3 +6,4 @@ let _ =
    Format.printf "#include \"Hacl_Hash.h\"\n");
   Cstubs.write_c Format.std_formatter ~prefix:""
     (module Hacl_Hash_bindings.Bindings)
+  
