@@ -772,6 +772,7 @@ dist/linux/Makefile.basic: DEFAULT_FLAGS += \
   -fc89-scope -fbuiltin-uint128 -flinux-ints -ccopt -Wno-typedef-redefinition
 dist/linux/Makefile.basic: CTR_BUNDLE =
 dist/linux/Makefile.basic: E_HASH_BUNDLE =
+dist/linux/Makefile.basic: HPKE_BUNDLE = -bundle Hacl.HPKE.*
 dist/linux/Makefile.basic: DEFAULT_FLAGS += -bundle 'EverCrypt,EverCrypt.*'
 dist/linux/Makefile.basic: VALE_ASMS := $(filter-out $(HACL_HOME)/secure_api/%,$(VALE_ASMS))
 dist/linux/Makefile.basic: HAND_WRITTEN_FILES := $(filter-out providers/evercrypt/c/%,$(HAND_WRITTEN_FILES))
