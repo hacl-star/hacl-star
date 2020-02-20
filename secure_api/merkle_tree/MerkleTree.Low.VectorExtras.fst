@@ -22,6 +22,7 @@ module RV = LowStar.RVector
 
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
 
+inline_for_extraction
 let move_left #a (b: B.buffer a) (dst src: U32.t) (l: U32.t): HST.Stack unit
   (requires fun h0 ->
     B.live h0 b /\
