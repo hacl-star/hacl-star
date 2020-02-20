@@ -5,6 +5,7 @@ open FStar.HyperStack.All
 
 open Lib.Buffer
 open Lib.IntTypes
+open Lib.ByteBuffer
 
 module DH = Spec.Agile.DH
 module S = Spec.Agile.HPKE
@@ -64,15 +65,28 @@ assume val secret_to_public: #a:S.ciphersuite -> secret_to_public_st (S.curve_of
 (** Instantiations for Curve25519 **)
 
 inline_for_extraction noextract
-let secret_to_public_c51 : secret_to_public_st (DH.DH_Curve25519) = admit()
-//  Hacl.Curve25519_51.secret_to_public
+let secret_to_public_c51 : secret_to_public_st (DH.DH_Curve25519) = fun o i ->
+  Hacl.Curve25519_51.secret_to_public o i;
+  0ul
 inline_for_extraction noextract
-let dh_c51 : dh_st (DH.DH_Curve25519) = admit()
-//  Hacl.Curve25519_51.scalarmult
+let dh_c51 : dh_st (DH.DH_Curve25519) = fun o k i ->
+  push_frame();
+  let zeros = create 32ul (u8 0) in
+  Hacl.Curve25519_51.scalarmult o k i;
+  let res = if lbytes_eq o zeros then 1ul else 0ul in
+  pop_frame();
+  res
+
 
 inline_for_extraction noextract
-let secret_to_public_c64 : secret_to_public_st (DH.DH_Curve25519) = admit()
-//  Hacl.Curve25519_64.secret_to_public
+let secret_to_public_c64 : secret_to_public_st (DH.DH_Curve25519) = fun o i ->
+  Hacl.Curve25519_64.secret_to_public o i;
+  0ul
 inline_for_extraction noextract
-let dh_c64 : dh_st (DH.DH_Curve25519) = admit()
-//  Hacl.Curve25519_64.scalarmult
+let dh_c64 : dh_st (DH.DH_Curve25519) = fun o k i ->
+  push_frame();
+  let zeros = create 32ul (u8 0) in
+  Hacl.Curve25519_64.scalarmult o k i;
+  let res = if lbytes_eq o zeros then 1ul else 0ul in
+  pop_frame();
+  res
