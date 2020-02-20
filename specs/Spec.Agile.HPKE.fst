@@ -95,7 +95,7 @@ let encap cs skE pkR =
   let pkE = DH.secret_to_public (curve_of_cs cs) skE in
   let zz = DH.dh (curve_of_cs cs) skE pkR in
   match pkE, zz with
-  | Some pkE, Some zz -> Some (pkE, zz)
+  | Some pkE, Some zz -> Some (zz, pkE)
   | _ -> None
 
 
