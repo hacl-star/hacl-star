@@ -83,6 +83,9 @@ val encap:
     (requires fun h0 ->
       (S.curve_of_cs cs = Spec.Agile.DH.DH_Curve25519 ==>
         Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
+      (S.curve_of_cs cs = Spec.Agile.DH.DH_P256 ==> Lib.ByteSequence.(
+         nat_from_bytes_le (as_seq h0 skE) >= 1 /\
+         nat_from_bytes_le (as_seq h0 skE) < Spec.ECDSAP256.Definition.prime_p256_order)) /\
       live h0 o_zz /\ live h0 o_pkE /\
       live h0 skE /\ live h0 pkR /\
       disjoint o_zz skE /\ disjoint o_zz pkR /\
@@ -114,6 +117,9 @@ val decap:
     (requires fun h0 ->
       (S.curve_of_cs cs = Spec.Agile.DH.DH_Curve25519 ==>
         Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
+      (S.curve_of_cs cs = Spec.Agile.DH.DH_P256 ==> Lib.ByteSequence.(
+         nat_from_bytes_le (as_seq h0 skR) >= 1 /\
+         nat_from_bytes_le (as_seq h0 skR) < Spec.ECDSAP256.Definition.prime_p256_order)) /\
       live h0 o_pkR /\ live h0 pkE /\ live h0 skR /\
       disjoint o_pkR pkE /\ disjoint o_pkR skR)
     (ensures fun h0 result h1 -> modifies (loc o_pkR) h0 h1 /\
@@ -415,6 +421,9 @@ val sealBase_aux
        (requires fun h0 ->
         (S.curve_of_cs cs = Spec.Agile.DH.DH_Curve25519 ==>
           Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
+        (S.curve_of_cs cs = Spec.Agile.DH.DH_P256 ==> Lib.ByteSequence.(
+           nat_from_bytes_le (as_seq h0 skE) >= 1 /\
+           nat_from_bytes_le (as_seq h0 skE) < Spec.ECDSAP256.Definition.prime_p256_order)) /\
          live h0 output /\ live h0 skE /\ live h0 pkR /\
          live h0 m /\ live h0 info /\
          live h0 zz /\ live h0 k /\ live h0 n /\
@@ -480,6 +489,9 @@ val openBase_aux
        (requires fun h0 ->
         (S.curve_of_cs cs = Spec.Agile.DH.DH_Curve25519 ==>
          Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
+        (S.curve_of_cs cs = Spec.Agile.DH.DH_P256 ==> Lib.ByteSequence.(
+          nat_from_bytes_le (as_seq h0 skR) >= 1 /\
+          nat_from_bytes_le (as_seq h0 skR) < Spec.ECDSAP256.Definition.prime_p256_order)) /\
          live h0 output /\ live h0 skR /\
          live h0 input /\ live h0 info /\
          live h0 zz /\ live h0 k /\ live h0 n /\
