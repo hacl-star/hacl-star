@@ -84,10 +84,7 @@ let fromJacobian p =
 val negJ_correct (p:point) : Lemma
   (toJacobian (neg p) == negJ (toJacobian p))
 let negJ_correct p =
-  allow_inversion point;
-  match p with
-  | O -> ()
-  | P x y -> ()
+  allow_inversion point
 
 
 assume
@@ -141,35 +138,30 @@ let doubleJ_correct p =
       by (p256_field ());
     assert (c == 3 *% x *% x -% 3) 
       by (p256_field ());
-    assert (c *% c == 9 *% x *% x *% x *% x +% ~%18 *% x *% x +% 9)
+    assert (c *% c == 9 *% x *% x *% x *% x -% 18 *% x *% x +% 9)
       by (p256_field ());
-    assert (d == 9 *% x *% x *% x *% x +% ~%18 *% x *% x +% 9 +% ~%8 *% x *% y *% y)
+    assert (d == 9 *% x *% x *% x *% x -% 18 *% x *% x +% 9 -% 8 *% x *% y *% y)
+      by (p256_field ());
+    assert (xr ==
+            (9 *% x *% x *% x *% x -% 18 *% x *% x +% 9) *%
+            (inverse (2 *% y) *% inverse (2 *% y)) -% 2 *% x)
       by (p256_field ());
 
     calc (==) {
       xr;
-      == { assert (xr ==
-             (9 *% x *% x *% x *% x +% (6 *% ~%3) *% x *% x +% ~%3 *% ~%3) *%
-             (inverse (2 *% y) *% inverse (2 *% y)) -% 2 *% x)
-           by (p256_field ()); 
-           assert_norm (6 *% ~%3 == ~%18 /\ ~%3 *% ~%3 == 9) 
-         }
-      (9 *% x *% x *% x *% x +% ~%18 *% x *% x +% 9) *%
+      == { }
+      (9 *% x *% x *% x *% x -% 18 *% x *% x +% 9) *%
       (inverse (2 *% y) *% inverse (2 *% y)) -% 2 *% x;
       == { inverse_mul (2 *% y) (2 *% y) }
-      (9 *% x *% x *% x *% x +% ~%18 *% x *% x +% 9) /% (4 *% y *% y) 
-      -% 2 *% x;
-      == { div_plus_l (9 *% x *% x *% x *% x +% ~%18 *% x *% x +% 9)
+      (9 *% x *% x *% x *% x -% 18 *% x *% x +% 9) /% (4 *% y *% y) -% 2 *% x;
+      == { div_plus_l (9 *% x *% x *% x *% x -% 18 *% x *% x +% 9)
                       (4 *% y *% y) (~%(2 *% x)) }
-      (9 *% x *% x *% x *% x +% ~%18 *% x *% x +% 9 +%
-      (4 *% y *% y) *% ~%(2 *% x)) /%
+      (9 *% x *% x *% x *% x -% 18 *% x *% x +% 9 +% (4 *% y *% y) *% ~%(2 *% x)) /%
       (4 *% y *% y);
-      == { assert ((4 *% y *% y) *% (~%2 *% x) == (4 *% ~%2) *% x *% y *% y)
-           by (p256_field ());
-           mul_neg_r x 2;
-           assert_norm (4 *% ~%2 == ~% 8)
+      == { assert ((4 *% y *% y) *% ~%(2 *% x) == ~%(8 *% x *% y *% y))
+           by (p256_field ())
          }
-      (9 *% x *% x *% x *% x +% ~%18 *% x *% x +% 9 +% ~%8 *% x *% y *% y) /%
+      (9 *% x *% x *% x *% x -% 18 *% x *% x +% 9 -% 8 *% x *% y *% y) /%
       (4 *% y *% y);
       == { }
       d /% (4 *% y *% y);

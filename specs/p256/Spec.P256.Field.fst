@@ -157,9 +157,12 @@ let add_opp a = ()
 [@canon_attr]
 let elem_cr: cr elem = CR elem_add_cm elem_mul_cm ( ~% ) add_opp mul_add_distr mul_zero_l
 
-let p256_field () : Tac unit = canon_semiring elem_cr; trefl ()
+let p256_field () : Tac unit =
+  canon_semiring elem_cr;
+  trefl()
 
 let test (a b c:elem) (d:elem{d <> zero}) =
+  assert (6 *% ~%3 == ~%18) by (p256_field ());
   assert ((a +% b) *% (a +% b) == a *% a +% 2 *% a *% b +% b *% b) by (p256_field ());
   assert ((a +% b) *% (c +% d) == c *% (b +% a) +% a *% d +% b *% d) by (p256_field ());
   assert ((a -% b) *% c == a *% c +% ~%b *% c) by (p256_field ());
@@ -308,7 +311,7 @@ let mod_sub_congr a b c d x =
 /// Axiomatizing the divisors of the prime modulus
 /// We could alternative verify a primality certificate
 assume
-val divides_prime : unit -> Lemma (is_prime prime)
+val divides_prime : unit -> Lemma (FStar.Math.Euclid.is_prime prime)
 
 val mod_mult_congr_aux (a b c:elem) : Lemma
   (requires (a *% c) = (b *% c) /\ b < a /\ c <> 0)
