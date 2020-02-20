@@ -661,7 +661,7 @@ TARGETCONFIG_FLAGS = -add-include '"evercrypt_targetconfig.h"'
 # that a particular feature be enabled. For a distribution to disable the
 # corresponding feature, one of these variables needs to be overridden.
 E_HASH_BUNDLE=-bundle EverCrypt.Hash+EverCrypt.Hash.Incremental=[rename=EverCrypt_Hash]
-MERKLE_BUNDLE=-bundle 'MerkleTree+MerkleTree.New.Low+MerkleTree.New.Low.Serialization=[rename=MerkleTree]'
+MERKLE_BUNDLE=-bundle 'MerkleTree+MerkleTree.Low+MerkleTree.Low.Serialization+MerkleTree.Low.Hashfunctions=[rename=MerkleTree]'
 CTR_BUNDLE=-bundle EverCrypt.CTR=EverCrypt.CTR.*
 # Disabled by default, overridden for wasm
 WASMSUPPORT_BUNDLE = -bundle WasmSupport

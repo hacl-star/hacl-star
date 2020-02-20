@@ -1,4 +1,4 @@
-module MerkleTree.Vector
+module MerkleTree.Low.VectorExtras
 
 module B = LowStar.Buffer
 module S = FStar.Seq

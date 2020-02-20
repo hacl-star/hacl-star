@@ -28,21 +28,24 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
-#ifndef __MerkleTree_New_Low_Datastructures_H
-#define __MerkleTree_New_Low_Datastructures_H
+#ifndef __MerkleTree_Low_Datastructures_H
+#define __MerkleTree_Low_Datastructures_H
 
 #include "Hacl_Kremlib.h"
 
 
-uint8_t *hash_dummy(uint32_t uu____14);
+typedef uint32_t MerkleTree_Low_Datastructures_hash_size_t;
 
-uint8_t *hash_r_alloc(uint32_t s);
+uint8_t *MerkleTree_Low_Datastructures_hash_dummy(uint32_t uu____22);
 
-void hash_r_free(uint32_t uu____212, uint8_t *v1);
+uint8_t *MerkleTree_Low_Datastructures_hash_r_alloc(uint32_t s);
 
-void hash_copy(uint32_t s, uint8_t *src, uint8_t *dst);
+void MerkleTree_Low_Datastructures_hash_r_free(uint32_t uu____220, uint8_t *v1);
 
-void (*hcpy(uint32_t hsz))(uint32_t x0, uint8_t *x1, uint8_t *x2);
+void MerkleTree_Low_Datastructures_hash_copy(uint32_t s, uint8_t *src, uint8_t *dst);
+
+void
+(*MerkleTree_Low_Datastructures_hcpy(uint32_t hsz))(uint32_t x0, uint8_t *x1, uint8_t *x2);
 
 typedef struct LowStar_Vector_vector_str___uint8_t__s
 {
@@ -62,7 +65,9 @@ typedef struct LowStar_Regional_regional__uint32_t__uint8_t__s
 LowStar_Regional_regional__uint32_t__uint8_t_;
 
 LowStar_Vector_vector_str___uint8_t_
-hash_vec_dummy(LowStar_Regional_regional__uint32_t__uint8_t_ uu____471);
+MerkleTree_Low_Datastructures_hash_vec_dummy(
+  LowStar_Regional_regional__uint32_t__uint8_t_ uu____479
+);
 
 uint8_t
 *LowStar_Regional_rg_dummy___uint8_t__uint32_t(
@@ -70,15 +75,15 @@ uint8_t
 );
 
 LowStar_Vector_vector_str___uint8_t_
-hash_vec_r_alloc(LowStar_Regional_regional__uint32_t__uint8_t_ s);
+MerkleTree_Low_Datastructures_hash_vec_r_alloc(LowStar_Regional_regional__uint32_t__uint8_t_ s);
 
 void LowStar_Vector_free___uint8_t_(LowStar_Vector_vector_str___uint8_t_ vec);
 
 void
-hash_vec_r_free(
-  LowStar_Regional_regional__uint32_t__uint8_t_ uu____709,
+MerkleTree_Low_Datastructures_hash_vec_r_free(
+  LowStar_Regional_regional__uint32_t__uint8_t_ uu____717,
   LowStar_Vector_vector_str___uint8_t_ v1
 );
 
-#define __MerkleTree_New_Low_Datastructures_H_DEFINED
+#define __MerkleTree_Low_Datastructures_H_DEFINED
 #endif

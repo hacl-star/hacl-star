@@ -1,4 +1,4 @@
-module MerkleTree.New.Low.Hashfunctions
+module MerkleTree.Low.Hashfunctions
 
 open EverCrypt.Helpers
 
@@ -33,8 +33,7 @@ module MTS = MerkleTree.Spec
 
 open Lib.IntTypes
 
-open MerkleTree.New.Low.Hashes
-open MerkleTree.New.Low.Datastructures
+open MerkleTree.Low.Datastructures
 
 #set-options "--z3rlimit 10 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
 

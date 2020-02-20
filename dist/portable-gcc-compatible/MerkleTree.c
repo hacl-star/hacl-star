@@ -24,296 +24,579 @@
 
 #include "MerkleTree.h"
 
-/* SNIPPET_START: rg_alloc___uint8_t__uint32_t */
+/* SNIPPET_START: mt_init_hash */
 
-static uint8_t *rg_alloc___uint8_t__uint32_t(LowStar_Regional_regional__uint32_t__uint8_t_ rg)
+/*
+  Constructors and destructors for hashes
+*/
+inline uint8_t *mt_init_hash(uint32_t hash_size)
 {
-  return rg.r_alloc(rg.state);
+  return MerkleTree_Low_Hashfunctions_init_hash(hash_size);
 }
 
-/* SNIPPET_END: rg_alloc___uint8_t__uint32_t */
+/* SNIPPET_END: mt_init_hash */
 
-/* SNIPPET_START: init_hash */
+/* SNIPPET_START: mt_free_hash */
 
-uint8_t *init_hash(uint32_t hsz)
+inline void mt_free_hash(uint32_t hash_size, uint8_t *h1)
 {
-  return
-    rg_alloc___uint8_t__uint32_t((
-        (LowStar_Regional_regional__uint32_t__uint8_t_){
-          .state = hsz,
-          .dummy = hash_dummy,
-          .r_alloc = hash_r_alloc,
-          .r_free = hash_r_free
-        }
-      ));
+  MerkleTree_Low_Hashfunctions_free_hash(hash_size, h1);
 }
 
-/* SNIPPET_END: init_hash */
+/* SNIPPET_END: mt_free_hash */
 
-/* SNIPPET_START: rg_free___uint8_t__uint32_t */
+/* SNIPPET_START: mt_init_path */
 
-static void
-rg_free___uint8_t__uint32_t(LowStar_Regional_regional__uint32_t__uint8_t_ rg, uint8_t *v1)
+/*
+  Constructors and destructors for paths
+*/
+inline LowStar_Vector_vector_str___uint8_t_ *mt_init_path(uint32_t hash_size)
 {
-  rg.r_free(rg.state, v1);
+  return MerkleTree_Low_init_path(hash_size);
 }
 
-/* SNIPPET_END: rg_free___uint8_t__uint32_t */
+/* SNIPPET_END: mt_init_path */
 
-/* SNIPPET_START: free_hash */
+/* SNIPPET_START: mt_clear_path */
 
-void free_hash(uint32_t hsz, uint8_t *h1)
+inline void mt_clear_path(uint32_t hash_size, LowStar_Vector_vector_str___uint8_t_ *p1)
 {
-  rg_free___uint8_t__uint32_t((
-      (LowStar_Regional_regional__uint32_t__uint8_t_){
-        .state = hsz,
-        .dummy = hash_dummy,
-        .r_alloc = hash_r_alloc,
-        .r_free = hash_r_free
-      }
-    ),
-    h1);
+  MerkleTree_Low_clear_path(hash_size, p1);
 }
 
-/* SNIPPET_END: free_hash */
+/* SNIPPET_END: mt_clear_path */
 
-/* SNIPPET_START: sha256_compress */
+/* SNIPPET_START: mt_free_path */
 
-void sha256_compress(uint8_t *src1, uint8_t *src2, uint8_t *dst)
+inline void mt_free_path(uint32_t hash_size, LowStar_Vector_vector_str___uint8_t_ *p1)
 {
-  uint32_t hash_size = (uint32_t)32U;
-  Spec_Hash_Definitions_hash_alg hash_alg = Spec_Hash_Definitions_SHA2_256;
-  uint8_t cb[64U] = { 0U };
-  memcpy(cb, src1, hash_size * sizeof (src1[0U]));
-  memcpy(cb + (uint32_t)32U, src2, hash_size * sizeof (src2[0U]));
-  uint32_t buf0[4U];
-  uint32_t buf1[5U];
-  uint32_t buf2[8U];
-  uint32_t buf3[8U];
-  uint64_t buf4[8U];
-  uint64_t buf[8U];
-  EverCrypt_Hash_state_s s;
-  switch (hash_alg)
-  {
-    case Spec_Hash_Definitions_MD5:
-      {
-        uint32_t init = (uint32_t)0U;
-        for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
-        {
-          buf0[i] = init;
-        }
-        s = ((EverCrypt_Hash_state_s){ .tag = EverCrypt_Hash_MD5_s, { .case_MD5_s = buf0 } });
-        break;
-      }
-    case Spec_Hash_Definitions_SHA1:
-      {
-        uint32_t init = (uint32_t)0U;
-        for (uint32_t i = (uint32_t)0U; i < (uint32_t)5U; i++)
-        {
-          buf1[i] = init;
-        }
-        s = ((EverCrypt_Hash_state_s){ .tag = EverCrypt_Hash_SHA1_s, { .case_SHA1_s = buf1 } });
-        break;
-      }
-    case Spec_Hash_Definitions_SHA2_224:
-      {
-        uint32_t init = (uint32_t)0U;
-        for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
-        {
-          buf2[i] = init;
-        }
-        s =
-          (
-            (EverCrypt_Hash_state_s){
-              .tag = EverCrypt_Hash_SHA2_224_s,
-              { .case_SHA2_224_s = buf2 }
-            }
-          );
-        break;
-      }
-    case Spec_Hash_Definitions_SHA2_256:
-      {
-        uint32_t init = (uint32_t)0U;
-        for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
-        {
-          buf3[i] = init;
-        }
-        s =
-          (
-            (EverCrypt_Hash_state_s){
-              .tag = EverCrypt_Hash_SHA2_256_s,
-              { .case_SHA2_256_s = buf3 }
-            }
-          );
-        break;
-      }
-    case Spec_Hash_Definitions_SHA2_384:
-      {
-        uint64_t init = (uint64_t)0U;
-        for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
-        {
-          buf4[i] = init;
-        }
-        s =
-          (
-            (EverCrypt_Hash_state_s){
-              .tag = EverCrypt_Hash_SHA2_384_s,
-              { .case_SHA2_384_s = buf4 }
-            }
-          );
-        break;
-      }
-    case Spec_Hash_Definitions_SHA2_512:
-      {
-        uint64_t init = (uint64_t)0U;
-        for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
-        {
-          buf[i] = init;
-        }
-        s =
-          ((EverCrypt_Hash_state_s){ .tag = EverCrypt_Hash_SHA2_512_s, { .case_SHA2_512_s = buf } });
-        break;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
-  EverCrypt_Hash_state_s st = s;
-  EverCrypt_Hash_init(&st);
-  EverCrypt_Hash_update(&st, cb);
-  EverCrypt_Hash_finish(&st, dst);
+  MerkleTree_Low_free_path(hash_size, p1);
 }
 
-/* SNIPPET_END: sha256_compress */
+/* SNIPPET_END: mt_free_path */
 
-/* SNIPPET_START: uint32_32_max */
+/* SNIPPET_START: mt_create */
 
-uint32_t uint32_32_max = (uint32_t)4294967295U;
+/*
+  Construction
 
-/* SNIPPET_END: uint32_32_max */
+  @param[in]  i   The initial hash
+*/
+inline MerkleTree_Low_merkle_tree *mt_create(uint8_t *init1)
+{
+  return MerkleTree_Low_mt_create(init1);
+}
 
-/* SNIPPET_START: uint32_max */
+/* SNIPPET_END: mt_create */
 
-uint64_t uint32_max = (uint64_t)4294967295U;
+/* SNIPPET_START: mt_create_custom */
 
-/* SNIPPET_END: uint32_max */
+/*
+  Construction with custom hash functions
 
-/* SNIPPET_START: uint64_max */
+  @param[in]  hash_size Hash size (in bytes)
+  @param[in]  i   The initial hash
+*/
+inline MerkleTree_Low_merkle_tree
+*mt_create_custom(
+  uint32_t hash_size,
+  uint8_t *i1,
+  void (*hash_fun)(uint8_t *x0, uint8_t *x1, uint8_t *x2)
+)
+{
+  return MerkleTree_Low_mt_create_custom(hash_size, i1, hash_fun);
+}
 
-uint64_t uint64_max = (uint64_t)18446744073709551615U;
+/* SNIPPET_END: mt_create_custom */
 
-/* SNIPPET_END: uint64_max */
+/* SNIPPET_START: mt_free */
 
-/* SNIPPET_START: offset_range_limit */
+/*
+    Destruction
 
-uint64_t offset_range_limit = (uint64_t)4294967295U;
+    @param[in]  mt  The Merkle tree
+*/
+inline void mt_free(MerkleTree_Low_merkle_tree *mt)
+{
+  MerkleTree_Low_mt_free(mt);
+}
 
-/* SNIPPET_END: offset_range_limit */
+/* SNIPPET_END: mt_free */
 
-/* SNIPPET_START: merkle_tree_size_lg */
+/* SNIPPET_START: mt_insert */
 
-uint32_t merkle_tree_size_lg = (uint32_t)32U;
+/*
+  Insertion
 
-/* SNIPPET_END: merkle_tree_size_lg */
+  param[in]  mt  The Merkle tree
+  param[in]  v   The tree does not take ownership of the hash, it makes a copy of its content.
 
-/* SNIPPET_START: uu___is_MT */
+ Note: The content of the hash will be overwritten with an arbitrary value.
+*/
+inline void mt_insert(MerkleTree_Low_merkle_tree *mt, uint8_t *v1)
+{
+  MerkleTree_Low_mt_insert(mt, v1);
+}
 
-bool uu___is_MT(merkle_tree projectee)
+/* SNIPPET_END: mt_insert */
+
+/* SNIPPET_START: mt_insert_pre */
+
+/*
+  Precondition predicate for mt_insert
+*/
+inline bool mt_insert_pre(const MerkleTree_Low_merkle_tree *mt, uint8_t *v1)
+{
+  return MerkleTree_Low_mt_insert_pre(mt, v1);
+}
+
+/* SNIPPET_END: mt_insert_pre */
+
+/* SNIPPET_START: mt_get_root */
+
+/*
+  Getting the Merkle root
+
+  param[in]  mt   The Merkle tree
+  param[out] root The Merkle root returned as a hash pointer
+*/
+inline void mt_get_root(const MerkleTree_Low_merkle_tree *mt, uint8_t *rt)
+{
+  MerkleTree_Low_mt_get_root(mt, rt);
+}
+
+/* SNIPPET_END: mt_get_root */
+
+/* SNIPPET_START: mt_get_root_pre */
+
+/*
+  Precondition predicate for mt_get_root
+*/
+inline bool mt_get_root_pre(const MerkleTree_Low_merkle_tree *mt, uint8_t *rt)
+{
+  return MerkleTree_Low_mt_get_root_pre(mt, rt);
+}
+
+/* SNIPPET_END: mt_get_root_pre */
+
+/* SNIPPET_START: mt_get_path */
+
+/*
+  Getting a Merkle path
+
+  param[in]  mt   The Merkle tree
+  param[in]  idx  The index of the target hash
+  param[out] root The Merkle root
+  param[out] path A resulting Merkle path that contains the leaf hash.
+
+  return The number of elements in the tree
+
+  Notes:
+  - The resulting path contains pointers to hashes in the tree, not copies of
+    the hash values.
+  - idx must be within the currently held indices in the tree (past the
+    last flush index).
+*/
+inline uint32_t
+mt_get_path(
+  const MerkleTree_Low_merkle_tree *mt,
+  uint64_t idx,
+  LowStar_Vector_vector_str___uint8_t_ *p1,
+  uint8_t *root
+)
+{
+  return MerkleTree_Low_mt_get_path(mt, idx, p1, root);
+}
+
+/* SNIPPET_END: mt_get_path */
+
+/* SNIPPET_START: mt_get_path_pre */
+
+/*
+  Precondition predicate for mt_get_path
+*/
+inline bool
+mt_get_path_pre(
+  const MerkleTree_Low_merkle_tree *mt,
+  uint64_t idx,
+  const LowStar_Vector_vector_str___uint8_t_ *p1,
+  uint8_t *root
+)
+{
+  return MerkleTree_Low_mt_get_path_pre(mt, idx, p1, root);
+}
+
+/* SNIPPET_END: mt_get_path_pre */
+
+/* SNIPPET_START: mt_flush */
+
+/*
+  Flush the Merkle tree
+
+  param[in]  mt   The Merkle tree
+*/
+inline void mt_flush(MerkleTree_Low_merkle_tree *mt)
+{
+  MerkleTree_Low_mt_flush(mt);
+}
+
+/* SNIPPET_END: mt_flush */
+
+/* SNIPPET_START: mt_flush_pre */
+
+/*
+  Precondition predicate for mt_flush
+*/
+inline bool mt_flush_pre(const MerkleTree_Low_merkle_tree *mt)
+{
+  return MerkleTree_Low_mt_flush_pre(mt);
+}
+
+/* SNIPPET_END: mt_flush_pre */
+
+/* SNIPPET_START: mt_flush_to */
+
+/*
+  Flush the Merkle tree up to a given index
+ 
+  param[in]  mt   The Merkle tree
+  param[in]  idx  The index up to which to flush the tree
+*/
+inline void mt_flush_to(MerkleTree_Low_merkle_tree *mt, uint64_t idx)
+{
+  MerkleTree_Low_mt_flush_to(mt, idx);
+}
+
+/* SNIPPET_END: mt_flush_to */
+
+/* SNIPPET_START: mt_flush_to_pre */
+
+/*
+  Precondition predicate for mt_flush_to
+*/
+bool mt_flush_to_pre(const MerkleTree_Low_merkle_tree *mt, uint64_t idx)
+{
+  return MerkleTree_Low_mt_flush_to_pre(mt, idx);
+}
+
+/* SNIPPET_END: mt_flush_to_pre */
+
+/* SNIPPET_START: mt_retract_to */
+
+/*
+  Retract the Merkle tree down to a given index
+
+  param[in]  mt   The Merkle tree
+  param[in]  idx  The index to retract the tree to
+
+ Note: The element and idx will remain in the tree.
+*/
+inline void mt_retract_to(MerkleTree_Low_merkle_tree *mt, uint64_t r)
+{
+  MerkleTree_Low_mt_retract_to(mt, r);
+}
+
+/* SNIPPET_END: mt_retract_to */
+
+/* SNIPPET_START: mt_retract_to_pre */
+
+/*
+  Precondition predicate for mt_retract_to
+*/
+inline bool mt_retract_to_pre(const MerkleTree_Low_merkle_tree *mt, uint64_t r)
+{
+  return MerkleTree_Low_mt_retract_to_pre(mt, r);
+}
+
+/* SNIPPET_END: mt_retract_to_pre */
+
+/* SNIPPET_START: mt_verify */
+
+/*
+  Client-side verification
+
+  param[in]  mt   The Merkle tree
+  param[in]  tgt  The index of the target hash
+  param[in]  max  The maximum index + 1 of the tree when the path was generated
+  param[in]  path The Merkle path to verify
+  param[in]  root
+
+  return true if the verification succeeded, false otherwise
+  
+  Note: max - tgt must be less than 2^32.
+*/
+inline bool
+mt_verify(
+  const MerkleTree_Low_merkle_tree *mt,
+  uint64_t k1,
+  uint64_t j1,
+  const LowStar_Vector_vector_str___uint8_t_ *p1,
+  uint8_t *rt
+)
+{
+  return MerkleTree_Low_mt_verify(mt, k1, j1, p1, rt);
+}
+
+/* SNIPPET_END: mt_verify */
+
+/* SNIPPET_START: mt_verify_pre */
+
+/*
+  Precondition predicate for mt_verify
+*/
+inline bool
+mt_verify_pre(
+  const MerkleTree_Low_merkle_tree *mt,
+  uint64_t k1,
+  uint64_t j1,
+  const LowStar_Vector_vector_str___uint8_t_ *p1,
+  uint8_t *rt
+)
+{
+  return MerkleTree_Low_mt_verify_pre(mt, k1, j1, p1, rt);
+}
+
+/* SNIPPET_END: mt_verify_pre */
+
+/* SNIPPET_START: mt_serialize_size */
+
+/*
+  Serialization size
+
+  param[in]  mt   The Merkle tree
+
+  return the number of bytes required to serialize the tree
+*/
+inline uint64_t mt_serialize_size(const MerkleTree_Low_merkle_tree *mt)
+{
+  return MerkleTree_Low_Serialization_mt_serialize_size(mt);
+}
+
+/* SNIPPET_END: mt_serialize_size */
+
+/* SNIPPET_START: mt_serialize */
+
+/*
+  Merkle tree serialization
+
+  param[in]  mt   The Merkle tree
+  param[out] buf  The buffer to serialize the tree into
+  param[in]  len  Length of buf
+
+  return the number of bytes written
+
+  Note: buf must be a buffer of size mt_serialize_size(mt) or larger, but
+  smaller than 2^32 (larger buffers are currently not supported).
+*/
+inline uint64_t
+mt_serialize(const MerkleTree_Low_merkle_tree *mt, uint8_t *output, uint64_t sz)
+{
+  return MerkleTree_Low_Serialization_mt_serialize(mt, output, sz);
+}
+
+/* SNIPPET_END: mt_serialize */
+
+/* SNIPPET_START: mt_deserialize */
+
+/*
+  Merkle tree deserialization
+
+  param[in]  buf  The buffer to deserialize the tree from
+  param[in]  len  Length of buf
+
+  return pointer to the new tree if successful, NULL otherwise
+
+  Note: buf must point to an allocated buffer.
+*/
+inline MerkleTree_Low_merkle_tree
+*mt_deserialize(
+  uint32_t hash_size,
+  const uint8_t *input,
+  uint64_t sz,
+  void (*hash_fun)(uint8_t *x0, uint8_t *x1, uint8_t *x2)
+)
+{
+  return MerkleTree_Low_Serialization_mt_deserialize(hash_size, input, sz, hash_fun);
+}
+
+/* SNIPPET_END: mt_deserialize */
+
+/* SNIPPET_START: mt_serialize_path */
+
+/*
+  Path serialization
+
+  param[in]  path The path
+  param[in]  mt   The Merkle tree the path belongs to
+  param[out] buf  The buffer to serialize the path into
+  param[in]  len  Length of buf
+
+  return the number of bytes written
+*/
+inline uint64_t
+mt_serialize_path(
+  const LowStar_Vector_vector_str___uint8_t_ *p1,
+  const MerkleTree_Low_merkle_tree *mt,
+  uint8_t *output,
+  uint64_t sz
+)
+{
+  return MerkleTree_Low_Serialization_mt_serialize_path(p1, mt, output, sz);
+}
+
+/* SNIPPET_END: mt_serialize_path */
+
+/* SNIPPET_START: mt_deserialize_path */
+
+/*
+  Path deserialization
+
+  param[in]  buf  The buffer to deserialize the path from
+  param[in]  len  Length of buf
+
+  return pointer to the new path if successful, NULL otherwise
+  
+ Note: buf must point to an allocated buffer.
+*/
+inline LowStar_Vector_vector_str___uint8_t_
+*mt_deserialize_path(uint32_t hash_size, const uint8_t *input, uint64_t sz)
+{
+  return MerkleTree_Low_Serialization_mt_deserialize_path(hash_size, input, sz);
+}
+
+/* SNIPPET_END: mt_deserialize_path */
+
+/* SNIPPET_START: MerkleTree_Low_uint32_32_max */
+
+uint32_t MerkleTree_Low_uint32_32_max = (uint32_t)4294967295U;
+
+/* SNIPPET_END: MerkleTree_Low_uint32_32_max */
+
+/* SNIPPET_START: MerkleTree_Low_uint32_max */
+
+uint64_t MerkleTree_Low_uint32_max = (uint64_t)4294967295U;
+
+/* SNIPPET_END: MerkleTree_Low_uint32_max */
+
+/* SNIPPET_START: MerkleTree_Low_uint64_max */
+
+uint64_t MerkleTree_Low_uint64_max = (uint64_t)18446744073709551615U;
+
+/* SNIPPET_END: MerkleTree_Low_uint64_max */
+
+/* SNIPPET_START: MerkleTree_Low_offset_range_limit */
+
+uint64_t MerkleTree_Low_offset_range_limit = (uint64_t)4294967295U;
+
+/* SNIPPET_END: MerkleTree_Low_offset_range_limit */
+
+/* SNIPPET_START: MerkleTree_Low_merkle_tree_size_lg */
+
+uint32_t MerkleTree_Low_merkle_tree_size_lg = (uint32_t)32U;
+
+/* SNIPPET_END: MerkleTree_Low_merkle_tree_size_lg */
+
+/* SNIPPET_START: MerkleTree_Low_uu___is_MT */
+
+bool MerkleTree_Low_uu___is_MT(MerkleTree_Low_merkle_tree projectee)
 {
   return true;
 }
 
-/* SNIPPET_END: uu___is_MT */
+/* SNIPPET_END: MerkleTree_Low_uu___is_MT */
 
-/* SNIPPET_START: __proj__MT__item__hash_size */
+/* SNIPPET_START: MerkleTree_Low___proj__MT__item__hash_size */
 
-uint32_t __proj__MT__item__hash_size(merkle_tree projectee)
+uint32_t MerkleTree_Low___proj__MT__item__hash_size(MerkleTree_Low_merkle_tree projectee)
 {
   return projectee.hash_size;
 }
 
-/* SNIPPET_END: __proj__MT__item__hash_size */
+/* SNIPPET_END: MerkleTree_Low___proj__MT__item__hash_size */
 
-/* SNIPPET_START: __proj__MT__item__offset */
+/* SNIPPET_START: MerkleTree_Low___proj__MT__item__offset */
 
-uint64_t __proj__MT__item__offset(merkle_tree projectee)
+uint64_t MerkleTree_Low___proj__MT__item__offset(MerkleTree_Low_merkle_tree projectee)
 {
   return projectee.offset;
 }
 
-/* SNIPPET_END: __proj__MT__item__offset */
+/* SNIPPET_END: MerkleTree_Low___proj__MT__item__offset */
 
-/* SNIPPET_START: __proj__MT__item__i */
+/* SNIPPET_START: MerkleTree_Low___proj__MT__item__i */
 
-uint32_t __proj__MT__item__i(merkle_tree projectee)
+uint32_t MerkleTree_Low___proj__MT__item__i(MerkleTree_Low_merkle_tree projectee)
 {
   return projectee.i;
 }
 
-/* SNIPPET_END: __proj__MT__item__i */
+/* SNIPPET_END: MerkleTree_Low___proj__MT__item__i */
 
-/* SNIPPET_START: __proj__MT__item__j */
+/* SNIPPET_START: MerkleTree_Low___proj__MT__item__j */
 
-uint32_t __proj__MT__item__j(merkle_tree projectee)
+uint32_t MerkleTree_Low___proj__MT__item__j(MerkleTree_Low_merkle_tree projectee)
 {
   return projectee.j;
 }
 
-/* SNIPPET_END: __proj__MT__item__j */
+/* SNIPPET_END: MerkleTree_Low___proj__MT__item__j */
 
-/* SNIPPET_START: __proj__MT__item__hs */
+/* SNIPPET_START: MerkleTree_Low___proj__MT__item__hs */
 
 LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_
-__proj__MT__item__hs(merkle_tree projectee)
+MerkleTree_Low___proj__MT__item__hs(MerkleTree_Low_merkle_tree projectee)
 {
   return projectee.hs;
 }
 
-/* SNIPPET_END: __proj__MT__item__hs */
+/* SNIPPET_END: MerkleTree_Low___proj__MT__item__hs */
 
-/* SNIPPET_START: __proj__MT__item__rhs_ok */
+/* SNIPPET_START: MerkleTree_Low___proj__MT__item__rhs_ok */
 
-bool __proj__MT__item__rhs_ok(merkle_tree projectee)
+bool MerkleTree_Low___proj__MT__item__rhs_ok(MerkleTree_Low_merkle_tree projectee)
 {
   return projectee.rhs_ok;
 }
 
-/* SNIPPET_END: __proj__MT__item__rhs_ok */
+/* SNIPPET_END: MerkleTree_Low___proj__MT__item__rhs_ok */
 
-/* SNIPPET_START: __proj__MT__item__rhs */
+/* SNIPPET_START: MerkleTree_Low___proj__MT__item__rhs */
 
-LowStar_Vector_vector_str___uint8_t_ __proj__MT__item__rhs(merkle_tree projectee)
+LowStar_Vector_vector_str___uint8_t_
+MerkleTree_Low___proj__MT__item__rhs(MerkleTree_Low_merkle_tree projectee)
 {
   return projectee.rhs;
 }
 
-/* SNIPPET_END: __proj__MT__item__rhs */
+/* SNIPPET_END: MerkleTree_Low___proj__MT__item__rhs */
 
-/* SNIPPET_START: __proj__MT__item__mroot */
+/* SNIPPET_START: MerkleTree_Low___proj__MT__item__mroot */
 
-uint8_t *__proj__MT__item__mroot(merkle_tree projectee)
+uint8_t *MerkleTree_Low___proj__MT__item__mroot(MerkleTree_Low_merkle_tree projectee)
 {
   return projectee.mroot;
 }
 
-/* SNIPPET_END: __proj__MT__item__mroot */
+/* SNIPPET_END: MerkleTree_Low___proj__MT__item__mroot */
 
-/* SNIPPET_START: __proj__MT__item__hash_fun */
+/* SNIPPET_START: MerkleTree_Low___proj__MT__item__hash_fun */
 
 void
-(*__proj__MT__item__hash_fun(merkle_tree projectee))(uint8_t *x0, uint8_t *x1, uint8_t *x2)
+(*MerkleTree_Low___proj__MT__item__hash_fun(MerkleTree_Low_merkle_tree projectee))(
+  uint8_t *x0,
+  uint8_t *x1,
+  uint8_t *x2
+)
 {
   return projectee.hash_fun;
 }
 
-/* SNIPPET_END: __proj__MT__item__hash_fun */
+/* SNIPPET_END: MerkleTree_Low___proj__MT__item__hash_fun */
 
-/* SNIPPET_START: merkle_tree_conditions */
+/* SNIPPET_START: MerkleTree_Low_merkle_tree_conditions */
 
 bool
-merkle_tree_conditions(
+MerkleTree_Low_merkle_tree_conditions(
   uint64_t offset1,
   uint32_t i1,
   uint32_t j1,
@@ -326,16 +609,16 @@ merkle_tree_conditions(
   return
     j1
     >= i1
-    && uint64_max - offset1 >= (uint64_t)j1
+    && MerkleTree_Low_uint64_max - offset1 >= (uint64_t)j1
     && hs.sz == (uint32_t)32U
     && rhs.sz == (uint32_t)32U;
 }
 
-/* SNIPPET_END: merkle_tree_conditions */
+/* SNIPPET_END: MerkleTree_Low_merkle_tree_conditions */
 
-/* SNIPPET_START: offset_of */
+/* SNIPPET_START: MerkleTree_Low_offset_of */
 
-uint32_t offset_of(uint32_t i1)
+uint32_t MerkleTree_Low_offset_of(uint32_t i1)
 {
   if (i1 % (uint32_t)2U == (uint32_t)0U)
   {
@@ -344,7 +627,7 @@ uint32_t offset_of(uint32_t i1)
   return i1 - (uint32_t)1U;
 }
 
-/* SNIPPET_END: offset_of */
+/* SNIPPET_END: MerkleTree_Low_offset_of */
 
 /* SNIPPET_START: alloc_rid__LowStar_Vector_vector_str__uint8_t_ */
 
@@ -486,6 +769,15 @@ static LowStar_Vector_vector_str___uint8_t_ alloc_rid___uint8_t_(uint32_t len, u
 
 /* SNIPPET_END: alloc_rid___uint8_t_ */
 
+/* SNIPPET_START: rg_alloc___uint8_t__uint32_t */
+
+static uint8_t *rg_alloc___uint8_t__uint32_t(LowStar_Regional_regional__uint32_t__uint8_t_ rg)
+{
+  return rg.r_alloc(rg.state);
+}
+
+/* SNIPPET_END: rg_alloc___uint8_t__uint32_t */
+
 /* SNIPPET_START: assign___uint8_t_ */
 
 static void
@@ -531,7 +823,7 @@ alloc_rid___uint8_t__uint32_t(LowStar_Regional_regional__uint32_t__uint8_t_ rg, 
 
 /* SNIPPET_START: create_empty_mt */
 
-static merkle_tree
+static MerkleTree_Low_merkle_tree
 *create_empty_mt(uint32_t hsz, void (*hash_fun)(uint8_t *x0, uint8_t *x1, uint8_t *x2))
 {
   LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_
@@ -540,13 +832,13 @@ static merkle_tree
         (regional__LowStar_Regional_regional__uint32_t__uint8_t__LowStar_Vector_vector_str___uint8_t_){
           .state = {
             .state = hsz,
-            .dummy = hash_dummy,
-            .r_alloc = hash_r_alloc,
-            .r_free = hash_r_free
+            .dummy = MerkleTree_Low_Datastructures_hash_dummy,
+            .r_alloc = MerkleTree_Low_Datastructures_hash_r_alloc,
+            .r_free = MerkleTree_Low_Datastructures_hash_r_free
           },
-          .dummy = hash_vec_dummy,
-          .r_alloc = hash_vec_r_alloc,
-          .r_free = hash_vec_r_free
+          .dummy = MerkleTree_Low_Datastructures_hash_vec_dummy,
+          .r_alloc = MerkleTree_Low_Datastructures_hash_vec_r_alloc,
+          .r_free = MerkleTree_Low_Datastructures_hash_vec_r_free
         }
       ),
       (uint32_t)32U);
@@ -555,9 +847,9 @@ static merkle_tree
     alloc_rid___uint8_t__uint32_t((
         (LowStar_Regional_regional__uint32_t__uint8_t_){
           .state = hsz,
-          .dummy = hash_dummy,
-          .r_alloc = hash_r_alloc,
-          .r_free = hash_r_free
+          .dummy = MerkleTree_Low_Datastructures_hash_dummy,
+          .r_alloc = MerkleTree_Low_Datastructures_hash_r_alloc,
+          .r_free = MerkleTree_Low_Datastructures_hash_r_free
         }
       ),
       (uint32_t)32U);
@@ -566,17 +858,17 @@ static merkle_tree
     rg_alloc___uint8_t__uint32_t((
         (LowStar_Regional_regional__uint32_t__uint8_t_){
           .state = hsz,
-          .dummy = hash_dummy,
-          .r_alloc = hash_r_alloc,
-          .r_free = hash_r_free
+          .dummy = MerkleTree_Low_Datastructures_hash_dummy,
+          .r_alloc = MerkleTree_Low_Datastructures_hash_r_alloc,
+          .r_free = MerkleTree_Low_Datastructures_hash_r_free
         }
       ));
-  KRML_CHECK_SIZE(sizeof (merkle_tree), (uint32_t)1U);
-  merkle_tree *mt = KRML_HOST_MALLOC(sizeof (merkle_tree));
+  KRML_CHECK_SIZE(sizeof (MerkleTree_Low_merkle_tree), (uint32_t)1U);
+  MerkleTree_Low_merkle_tree *mt = KRML_HOST_MALLOC(sizeof (MerkleTree_Low_merkle_tree));
   mt[0U]
   =
     (
-      (merkle_tree){
+      (MerkleTree_Low_merkle_tree){
         .hash_size = hsz,
         .offset = (uint64_t)0U,
         .i = (uint32_t)0U,
@@ -681,6 +973,16 @@ static uint8_t *index___uint8_t_(LowStar_Vector_vector_str___uint8_t_ vec, uint3
 
 /* SNIPPET_END: index___uint8_t_ */
 
+/* SNIPPET_START: rg_free___uint8_t__uint32_t */
+
+static void
+rg_free___uint8_t__uint32_t(LowStar_Regional_regional__uint32_t__uint8_t_ rg, uint8_t *v1)
+{
+  rg.r_free(rg.state, v1);
+}
+
+/* SNIPPET_END: rg_free___uint8_t__uint32_t */
+
 /* SNIPPET_START: free_elems___uint8_t__uint32_t */
 
 static void
@@ -717,47 +1019,47 @@ free___uint8_t__uint32_t(
 
 /* SNIPPET_END: free___uint8_t__uint32_t */
 
-/* SNIPPET_START: mt_free */
+/* SNIPPET_START: MerkleTree_Low_mt_free */
 
-void mt_free(merkle_tree *mt)
+void MerkleTree_Low_mt_free(MerkleTree_Low_merkle_tree *mt)
 {
-  merkle_tree mtv = *mt;
+  MerkleTree_Low_merkle_tree mtv = *mt;
   free__LowStar_Vector_vector_str__uint8_t__LowStar_Regional_regional_uint32_t__uint8_t_((
       (regional__LowStar_Regional_regional__uint32_t__uint8_t__LowStar_Vector_vector_str___uint8_t_){
         .state = {
           .state = mtv.hash_size,
-          .dummy = hash_dummy,
-          .r_alloc = hash_r_alloc,
-          .r_free = hash_r_free
+          .dummy = MerkleTree_Low_Datastructures_hash_dummy,
+          .r_alloc = MerkleTree_Low_Datastructures_hash_r_alloc,
+          .r_free = MerkleTree_Low_Datastructures_hash_r_free
         },
-        .dummy = hash_vec_dummy,
-        .r_alloc = hash_vec_r_alloc,
-        .r_free = hash_vec_r_free
+        .dummy = MerkleTree_Low_Datastructures_hash_vec_dummy,
+        .r_alloc = MerkleTree_Low_Datastructures_hash_vec_r_alloc,
+        .r_free = MerkleTree_Low_Datastructures_hash_vec_r_free
       }
     ),
     mtv.hs);
   free___uint8_t__uint32_t((
       (LowStar_Regional_regional__uint32_t__uint8_t_){
         .state = mtv.hash_size,
-        .dummy = hash_dummy,
-        .r_alloc = hash_r_alloc,
-        .r_free = hash_r_free
+        .dummy = MerkleTree_Low_Datastructures_hash_dummy,
+        .r_alloc = MerkleTree_Low_Datastructures_hash_r_alloc,
+        .r_free = MerkleTree_Low_Datastructures_hash_r_free
       }
     ),
     mtv.rhs);
   rg_free___uint8_t__uint32_t((
       (LowStar_Regional_regional__uint32_t__uint8_t_){
         .state = mtv.hash_size,
-        .dummy = hash_dummy,
-        .r_alloc = hash_r_alloc,
-        .r_free = hash_r_free
+        .dummy = MerkleTree_Low_Datastructures_hash_dummy,
+        .r_alloc = MerkleTree_Low_Datastructures_hash_r_alloc,
+        .r_free = MerkleTree_Low_Datastructures_hash_r_free
       }
     ),
     mtv.mroot);
   KRML_HOST_FREE(mt);
 }
 
-/* SNIPPET_END: mt_free */
+/* SNIPPET_END: MerkleTree_Low_mt_free */
 
 /* SNIPPET_START: insert___uint8_t_ */
 
@@ -846,12 +1148,12 @@ insert_(
     insert_copy___uint8_t__uint32_t((
         (LowStar_Regional_regional__uint32_t__uint8_t_){
           .state = hsz,
-          .dummy = hash_dummy,
-          .r_alloc = hash_r_alloc,
-          .r_free = hash_r_free
+          .dummy = MerkleTree_Low_Datastructures_hash_dummy,
+          .r_alloc = MerkleTree_Low_Datastructures_hash_r_alloc,
+          .r_free = MerkleTree_Low_Datastructures_hash_r_free
         }
       ),
-      hash_copy,
+      MerkleTree_Low_Datastructures_hash_copy,
       index__LowStar_Vector_vector_str__uint8_t_(hs, lv),
       acc);
   assign__LowStar_Vector_vector_str__uint8_t__LowStar_Regional_regional_uint32_t__uint8_t_(hs,
@@ -868,28 +1170,31 @@ insert_(
 
 /* SNIPPET_END: insert_ */
 
-/* SNIPPET_START: mt_insert_pre */
+/* SNIPPET_START: MerkleTree_Low_mt_insert_pre */
 
-bool mt_insert_pre(const merkle_tree *mt, uint8_t *v1)
+bool MerkleTree_Low_mt_insert_pre(const MerkleTree_Low_merkle_tree *mt, uint8_t *v1)
 {
-  merkle_tree mt1 = *(merkle_tree *)mt;
-  return mt1.j < uint32_32_max && uint64_max - mt1.offset >= (uint64_t)(mt1.j + (uint32_t)1U);
+  MerkleTree_Low_merkle_tree mt1 = *(MerkleTree_Low_merkle_tree *)mt;
+  return
+    mt1.j
+    < MerkleTree_Low_uint32_32_max
+    && MerkleTree_Low_uint64_max - mt1.offset >= (uint64_t)(mt1.j + (uint32_t)1U);
 }
 
-/* SNIPPET_END: mt_insert_pre */
+/* SNIPPET_END: MerkleTree_Low_mt_insert_pre */
 
-/* SNIPPET_START: mt_insert */
+/* SNIPPET_START: MerkleTree_Low_mt_insert */
 
-void mt_insert(merkle_tree *mt, uint8_t *v1)
+void MerkleTree_Low_mt_insert(MerkleTree_Low_merkle_tree *mt, uint8_t *v1)
 {
-  merkle_tree mtv = *mt;
+  MerkleTree_Low_merkle_tree mtv = *mt;
   LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_ hs = mtv.hs;
   uint32_t hsz1 = mtv.hash_size;
   insert_(hsz1, (uint32_t)0U, mtv.j, hs, v1, mtv.hash_fun);
   *mt
   =
     (
-      (merkle_tree){
+      (MerkleTree_Low_merkle_tree){
         .hash_size = mtv.hash_size,
         .offset = mtv.offset,
         .i = mtv.i,
@@ -903,36 +1208,39 @@ void mt_insert(merkle_tree *mt, uint8_t *v1)
     );
 }
 
-/* SNIPPET_END: mt_insert */
+/* SNIPPET_END: MerkleTree_Low_mt_insert */
 
-/* SNIPPET_START: mt_create_custom */
+/* SNIPPET_START: MerkleTree_Low_mt_create_custom */
 
-merkle_tree
-*mt_create_custom(
+MerkleTree_Low_merkle_tree
+*MerkleTree_Low_mt_create_custom(
   uint32_t hsz,
   uint8_t *init1,
   void (*hash_fun)(uint8_t *x0, uint8_t *x1, uint8_t *x2)
 )
 {
-  merkle_tree *mt = create_empty_mt(hsz, hash_fun);
-  mt_insert(mt, init1);
+  MerkleTree_Low_merkle_tree *mt = create_empty_mt(hsz, hash_fun);
+  MerkleTree_Low_mt_insert(mt, init1);
   return mt;
 }
 
-/* SNIPPET_END: mt_create_custom */
+/* SNIPPET_END: MerkleTree_Low_mt_create_custom */
 
-/* SNIPPET_START: mt_create */
+/* SNIPPET_START: MerkleTree_Low_mt_create */
 
-merkle_tree *mt_create(uint8_t *init1)
+MerkleTree_Low_merkle_tree *MerkleTree_Low_mt_create(uint8_t *init1)
 {
-  return mt_create_custom((uint32_t)32U, init1, sha256_compress);
+  return
+    MerkleTree_Low_mt_create_custom((uint32_t)32U,
+      init1,
+      MerkleTree_Low_Hashfunctions_sha256_compress);
 }
 
-/* SNIPPET_END: mt_create */
+/* SNIPPET_END: MerkleTree_Low_mt_create */
 
-/* SNIPPET_START: init_path */
+/* SNIPPET_START: MerkleTree_Low_init_path */
 
-LowStar_Vector_vector_str___uint8_t_ *init_path(uint32_t hsz)
+LowStar_Vector_vector_str___uint8_t_ *MerkleTree_Low_init_path(uint32_t hsz)
 {
   KRML_CHECK_SIZE(sizeof (LowStar_Vector_vector_str___uint8_t_), (uint32_t)1U);
   LowStar_Vector_vector_str___uint8_t_
@@ -943,19 +1251,19 @@ LowStar_Vector_vector_str___uint8_t_ *init_path(uint32_t hsz)
         (regional__LowStar_Regional_regional__uint32_t__uint8_t__LowStar_Vector_vector_str___uint8_t_){
           .state = {
             .state = hsz,
-            .dummy = hash_dummy,
-            .r_alloc = hash_r_alloc,
-            .r_free = hash_r_free
+            .dummy = MerkleTree_Low_Datastructures_hash_dummy,
+            .r_alloc = MerkleTree_Low_Datastructures_hash_r_alloc,
+            .r_free = MerkleTree_Low_Datastructures_hash_r_free
           },
-          .dummy = hash_vec_dummy,
-          .r_alloc = hash_vec_r_alloc,
-          .r_free = hash_vec_r_free
+          .dummy = MerkleTree_Low_Datastructures_hash_vec_dummy,
+          .r_alloc = MerkleTree_Low_Datastructures_hash_vec_r_alloc,
+          .r_free = MerkleTree_Low_Datastructures_hash_vec_r_free
         }
       ));
   return buf;
 }
 
-/* SNIPPET_END: init_path */
+/* SNIPPET_END: MerkleTree_Low_init_path */
 
 /* SNIPPET_START: clear___uint8_t_ */
 
@@ -968,24 +1276,24 @@ clear___uint8_t_(LowStar_Vector_vector_str___uint8_t_ vec)
 
 /* SNIPPET_END: clear___uint8_t_ */
 
-/* SNIPPET_START: clear_path */
+/* SNIPPET_START: MerkleTree_Low_clear_path */
 
-void clear_path(uint32_t uu____3215, LowStar_Vector_vector_str___uint8_t_ *p1)
+void MerkleTree_Low_clear_path(uint32_t uu____3215, LowStar_Vector_vector_str___uint8_t_ *p1)
 {
   *p1 = clear___uint8_t_(*p1);
 }
 
-/* SNIPPET_END: clear_path */
+/* SNIPPET_END: MerkleTree_Low_clear_path */
 
-/* SNIPPET_START: free_path */
+/* SNIPPET_START: MerkleTree_Low_free_path */
 
-void free_path(uint32_t uu____3362, LowStar_Vector_vector_str___uint8_t_ *p1)
+void MerkleTree_Low_free_path(uint32_t uu____3362, LowStar_Vector_vector_str___uint8_t_ *p1)
 {
   LowStar_Vector_free___uint8_t_(*p1);
   KRML_HOST_FREE(p1);
 }
 
-/* SNIPPET_END: free_path */
+/* SNIPPET_END: MerkleTree_Low_free_path */
 
 /* SNIPPET_START: assign_copy___uint8_t__uint32_t */
 
@@ -1021,7 +1329,7 @@ construct_rhs(
 {
   if (!(j1 == (uint32_t)0U))
   {
-    uint32_t ofs = offset_of(i1);
+    uint32_t ofs = MerkleTree_Low_offset_of(i1);
     if (j1 % (uint32_t)2U == (uint32_t)0U)
     {
       construct_rhs(hsz,
@@ -1040,12 +1348,12 @@ construct_rhs(
       assign_copy___uint8_t__uint32_t((
           (LowStar_Regional_regional__uint32_t__uint8_t_){
             .state = hsz,
-            .dummy = hash_dummy,
-            .r_alloc = hash_r_alloc,
-            .r_free = hash_r_free
+            .dummy = MerkleTree_Low_Datastructures_hash_dummy,
+            .r_alloc = MerkleTree_Low_Datastructures_hash_r_alloc,
+            .r_free = MerkleTree_Low_Datastructures_hash_r_free
           }
         ),
-        hash_copy,
+        MerkleTree_Low_Datastructures_hash_copy,
         rhs,
         lv,
         acc);
@@ -1056,7 +1364,7 @@ construct_rhs(
     }
     else
     {
-      hash_copy(hsz,
+      MerkleTree_Low_Datastructures_hash_copy(hsz,
         index___uint8_t_(index__LowStar_Vector_vector_str__uint8_t_(hs, lv),
           j1 - (uint32_t)1U - ofs),
         acc);
@@ -1076,23 +1384,23 @@ construct_rhs(
 
 /* SNIPPET_END: construct_rhs */
 
-/* SNIPPET_START: mt_get_root_pre */
+/* SNIPPET_START: MerkleTree_Low_mt_get_root_pre */
 
-bool mt_get_root_pre(const merkle_tree *mt, uint8_t *rt)
+bool MerkleTree_Low_mt_get_root_pre(const MerkleTree_Low_merkle_tree *mt, uint8_t *rt)
 {
-  merkle_tree *mt1 = (merkle_tree *)mt;
-  merkle_tree mt2 = *mt1;
+  MerkleTree_Low_merkle_tree *mt1 = (MerkleTree_Low_merkle_tree *)mt;
+  MerkleTree_Low_merkle_tree mt2 = *mt1;
   return true;
 }
 
-/* SNIPPET_END: mt_get_root_pre */
+/* SNIPPET_END: MerkleTree_Low_mt_get_root_pre */
 
-/* SNIPPET_START: mt_get_root */
+/* SNIPPET_START: MerkleTree_Low_mt_get_root */
 
-void mt_get_root(const merkle_tree *mt, uint8_t *rt)
+void MerkleTree_Low_mt_get_root(const MerkleTree_Low_merkle_tree *mt, uint8_t *rt)
 {
-  merkle_tree *mt1 = (merkle_tree *)mt;
-  merkle_tree mtv = *mt1;
+  MerkleTree_Low_merkle_tree *mt1 = (MerkleTree_Low_merkle_tree *)mt;
+  MerkleTree_Low_merkle_tree mtv = *mt1;
   uint64_t prefix = mtv.offset;
   uint32_t i1 = mtv.i;
   uint32_t j1 = mtv.j;
@@ -1103,15 +1411,15 @@ void mt_get_root(const merkle_tree *mt, uint8_t *rt)
   void (*hash_fun)(uint8_t *x0, uint8_t *x1, uint8_t *x2) = mtv.hash_fun;
   if (mtv.rhs_ok)
   {
-    hash_copy(hash_size, mroot, rt);
+    MerkleTree_Low_Datastructures_hash_copy(hash_size, mroot, rt);
     return;
   }
   construct_rhs(hash_size, (uint32_t)0U, hs, rhs, i1, j1, rt, false, hash_fun);
-  hash_copy(hash_size, rt, mroot);
+  MerkleTree_Low_Datastructures_hash_copy(hash_size, rt, mroot);
   *mt1
   =
     (
-      (merkle_tree){
+      (MerkleTree_Low_merkle_tree){
         .hash_size = hash_size,
         .offset = prefix,
         .i = i1,
@@ -1125,18 +1433,19 @@ void mt_get_root(const merkle_tree *mt, uint8_t *rt)
     );
 }
 
-/* SNIPPET_END: mt_get_root */
+/* SNIPPET_END: MerkleTree_Low_mt_get_root */
 
-/* SNIPPET_START: path_insert */
+/* SNIPPET_START: MerkleTree_Low_path_insert */
 
-void path_insert(uint32_t hsz, LowStar_Vector_vector_str___uint8_t_ *p1, uint8_t *hp)
+void
+MerkleTree_Low_path_insert(uint32_t hsz, LowStar_Vector_vector_str___uint8_t_ *p1, uint8_t *hp)
 {
   LowStar_Vector_vector_str___uint8_t_ pv = p1[0U];
   LowStar_Vector_vector_str___uint8_t_ ipv = insert___uint8_t_(pv, hp);
   *p1 = ipv;
 }
 
-/* SNIPPET_END: path_insert */
+/* SNIPPET_END: MerkleTree_Low_path_insert */
 
 /* SNIPPET_START: mt_path_length_step */
 
@@ -1192,10 +1501,10 @@ mt_get_path_(
   bool actd
 )
 {
-  uint32_t ofs = offset_of(i1);
+  uint32_t ofs = MerkleTree_Low_offset_of(i1);
   if (!(j1 == (uint32_t)0U))
   {
-    uint32_t ofs1 = offset_of(i1);
+    uint32_t ofs1 = MerkleTree_Low_offset_of(i1);
     if (k1 % (uint32_t)2U == (uint32_t)1U)
     {
       uint8_t
@@ -1253,24 +1562,24 @@ mt_get_path_(
 
 /* SNIPPET_END: mt_get_path_ */
 
-/* SNIPPET_START: mt_get_path_pre */
+/* SNIPPET_START: MerkleTree_Low_mt_get_path_pre */
 
 bool
-mt_get_path_pre(
-  const merkle_tree *mt,
+MerkleTree_Low_mt_get_path_pre(
+  const MerkleTree_Low_merkle_tree *mt,
   uint64_t idx,
   const LowStar_Vector_vector_str___uint8_t_ *p1,
   uint8_t *root
 )
 {
-  merkle_tree *mt1 = (merkle_tree *)mt;
+  MerkleTree_Low_merkle_tree *mt1 = (MerkleTree_Low_merkle_tree *)mt;
   LowStar_Vector_vector_str___uint8_t_ *p2 = (LowStar_Vector_vector_str___uint8_t_ *)p1;
-  merkle_tree mtv = *mt1;
+  MerkleTree_Low_merkle_tree mtv = *mt1;
   LowStar_Vector_vector_str___uint8_t_ uu____0 = *p2;
   return
     idx
     >= mtv.offset
-    && idx - mtv.offset <= offset_range_limit
+    && idx - mtv.offset <= MerkleTree_Low_offset_range_limit
     &&
       mtv.i
       <= (uint32_t)(idx - mtv.offset)
@@ -1278,24 +1587,24 @@ mt_get_path_pre(
       && uu____0.sz == (uint32_t)0U;
 }
 
-/* SNIPPET_END: mt_get_path_pre */
+/* SNIPPET_END: MerkleTree_Low_mt_get_path_pre */
 
-/* SNIPPET_START: mt_get_path */
+/* SNIPPET_START: MerkleTree_Low_mt_get_path */
 
 uint32_t
-mt_get_path(
-  const merkle_tree *mt,
+MerkleTree_Low_mt_get_path(
+  const MerkleTree_Low_merkle_tree *mt,
   uint64_t idx,
   LowStar_Vector_vector_str___uint8_t_ *p1,
   uint8_t *root
 )
 {
-  merkle_tree *ncmt = (merkle_tree *)mt;
-  mt_get_root(mt, root);
-  merkle_tree mtv = *ncmt;
+  MerkleTree_Low_merkle_tree *ncmt = (MerkleTree_Low_merkle_tree *)mt;
+  MerkleTree_Low_mt_get_root(mt, root);
+  MerkleTree_Low_merkle_tree mtv = *ncmt;
   uint32_t idx1 = (uint32_t)(idx - mtv.offset);
   uint32_t i1 = mtv.i;
-  uint32_t ofs = offset_of(mtv.i);
+  uint32_t ofs = MerkleTree_Low_offset_of(mtv.i);
   uint32_t j1 = mtv.j;
   LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_ hs = mtv.hs;
   LowStar_Vector_vector_str___uint8_t_ rhs = mtv.rhs;
@@ -1310,76 +1619,25 @@ mt_get_path(
   return j1;
 }
 
-/* SNIPPET_END: mt_get_path */
+/* SNIPPET_END: MerkleTree_Low_mt_get_path */
 
-/* SNIPPET_START: shrink___uint8_t_ */
+/* SNIPPET_START: MerkleTree_Low_VectorExtras_move_left___uint8_t_ */
 
-static LowStar_Vector_vector_str___uint8_t_
-shrink___uint8_t_(LowStar_Vector_vector_str___uint8_t_ vec, uint32_t new_size)
-{
-  return
-    ((LowStar_Vector_vector_str___uint8_t_){ .sz = new_size, .cap = vec.cap, .vs = vec.vs });
-}
-
-/* SNIPPET_END: shrink___uint8_t_ */
-
-/* SNIPPET_START: shift_down___uint8_t_ */
-
-static LowStar_Vector_vector_str___uint8_t_
-shift_down___uint8_t_(LowStar_Vector_vector_str___uint8_t_ vec, uint32_t i1, uint32_t d)
-{
-  if (i1 + d >= vec.sz)
-  {
-    return vec;
-  }
-  uint8_t *e = index___uint8_t_(vec, i1 + d);
-  assign___uint8_t_(vec, i1, e);
-  if (i1 + d + (uint32_t)1U >= vec.sz)
-  {
-    return vec;
-  }
-  LowStar_Vector_vector_str___uint8_t_ rvec = shift_down___uint8_t_(vec, i1 + (uint32_t)1U, d);
-  return rvec;
-}
-
-/* SNIPPET_END: shift_down___uint8_t_ */
-
-/* SNIPPET_START: flush___uint8_t_ */
-
-static LowStar_Vector_vector_str___uint8_t_
-flush___uint8_t_(LowStar_Vector_vector_str___uint8_t_ vec, uint32_t i1)
-{
-  if (i1 >= vec.sz)
-  {
-    return shrink___uint8_t_(vec, (uint32_t)0U);
-  }
-  uint32_t n_shifted = vec.sz - i1;
-  LowStar_Vector_vector_str___uint8_t_ shifted = shift_down___uint8_t_(vec, (uint32_t)0U, i1);
-  LowStar_Vector_vector_str___uint8_t_ fvec = shrink___uint8_t_(shifted, n_shifted);
-  return fvec;
-}
-
-/* SNIPPET_END: flush___uint8_t_ */
-
-/* SNIPPET_START: flush___uint8_t__uint32_t */
-
-static LowStar_Vector_vector_str___uint8_t_
-flush___uint8_t__uint32_t(
-  LowStar_Regional_regional__uint32_t__uint8_t_ rg,
-  LowStar_Vector_vector_str___uint8_t_ rv,
-  uint32_t i1
+void
+MerkleTree_Low_VectorExtras_move_left___uint8_t_(
+  uint8_t **b,
+  uint32_t dst,
+  uint32_t src,
+  uint32_t l
 )
 {
-  if (!(i1 == (uint32_t)0U))
+  for (uint32_t i = (uint32_t)0U; i < l; i++)
   {
-    free_elems___uint8_t__uint32_t(rg, rv, i1 - (uint32_t)1U);
+    b[dst + i] = b[src + i];
   }
-  uint8_t *unused = LowStar_Regional_rg_dummy___uint8_t__uint32_t(rg);
-  LowStar_Vector_vector_str___uint8_t_ frv = flush___uint8_t_(rv, i1);
-  return frv;
 }
 
-/* SNIPPET_END: flush___uint8_t__uint32_t */
+/* SNIPPET_END: MerkleTree_Low_VectorExtras_move_left___uint8_t_ */
 
 /* SNIPPET_START: mt_flush_to_ */
 
@@ -1392,24 +1650,35 @@ mt_flush_to_(
   uint32_t i1
 )
 {
-  uint32_t oi = offset_of(i1);
-  uint32_t opi = offset_of(pi);
+  uint32_t oi = MerkleTree_Low_offset_of(i1);
+  uint32_t opi = MerkleTree_Low_offset_of(pi);
   if (!(oi == opi))
   {
     uint32_t ofs = oi - opi;
     LowStar_Vector_vector_str___uint8_t_ hvec = index__LowStar_Vector_vector_str__uint8_t_(hs, lv);
-    LowStar_Vector_vector_str___uint8_t_
-    flushed =
-      flush___uint8_t__uint32_t((
-          (LowStar_Regional_regional__uint32_t__uint8_t_){
-            .state = hsz,
-            .dummy = hash_dummy,
-            .r_alloc = hash_r_alloc,
-            .r_free = hash_r_free
+    LowStar_Vector_vector_str___uint8_t_ flushed;
+    if (ofs >= hvec.sz)
+    {
+      flushed =
+        (
+          (LowStar_Vector_vector_str___uint8_t_){
+            .sz = (uint32_t)0U,
+            .cap = hvec.cap,
+            .vs = hvec.vs
           }
-        ),
-        hvec,
-        ofs);
+        );
+    }
+    else if (ofs == (uint32_t)0U)
+    {
+      flushed = hvec;
+    }
+    else
+    {
+      uint32_t n_shifted = hvec.sz - ofs;
+      MerkleTree_Low_VectorExtras_move_left___uint8_t_(hvec.vs, (uint32_t)0U, ofs, n_shifted);
+      flushed =
+        ((LowStar_Vector_vector_str___uint8_t_){ .sz = n_shifted, .cap = hvec.cap, .vs = hvec.vs });
+    }
     assign__LowStar_Vector_vector_str__uint8_t__LowStar_Regional_regional_uint32_t__uint8_t_(hs,
       lv,
       flushed);
@@ -1420,26 +1689,26 @@ mt_flush_to_(
 
 /* SNIPPET_END: mt_flush_to_ */
 
-/* SNIPPET_START: mt_flush_to_pre */
+/* SNIPPET_START: MerkleTree_Low_mt_flush_to_pre */
 
-bool mt_flush_to_pre(const merkle_tree *mt, uint64_t idx)
+bool MerkleTree_Low_mt_flush_to_pre(const MerkleTree_Low_merkle_tree *mt, uint64_t idx)
 {
-  merkle_tree *mt1 = (merkle_tree *)mt;
-  merkle_tree mtv = *mt1;
+  MerkleTree_Low_merkle_tree *mt1 = (MerkleTree_Low_merkle_tree *)mt;
+  MerkleTree_Low_merkle_tree mtv = *mt1;
   return
     idx
     >= mtv.offset
-    && idx - mtv.offset <= offset_range_limit
+    && idx - mtv.offset <= MerkleTree_Low_offset_range_limit
     && (uint32_t)(idx - mtv.offset) >= mtv.i && (uint32_t)(idx - mtv.offset) < mtv.j;
 }
 
-/* SNIPPET_END: mt_flush_to_pre */
+/* SNIPPET_END: MerkleTree_Low_mt_flush_to_pre */
 
-/* SNIPPET_START: mt_flush_to */
+/* SNIPPET_START: MerkleTree_Low_mt_flush_to */
 
-void mt_flush_to(merkle_tree *mt, uint64_t idx)
+void MerkleTree_Low_mt_flush_to(MerkleTree_Low_merkle_tree *mt, uint64_t idx)
 {
-  merkle_tree mtv = *mt;
+  MerkleTree_Low_merkle_tree mtv = *mt;
   uint64_t offset1 = mtv.offset;
   uint32_t idx1 = (uint32_t)(idx - offset1);
   LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_ hs = mtv.hs;
@@ -1447,7 +1716,7 @@ void mt_flush_to(merkle_tree *mt, uint64_t idx)
   *mt
   =
     (
-      (merkle_tree){
+      (MerkleTree_Low_merkle_tree){
         .hash_size = mtv.hash_size,
         .offset = mtv.offset,
         .i = idx1,
@@ -1461,31 +1730,31 @@ void mt_flush_to(merkle_tree *mt, uint64_t idx)
     );
 }
 
-/* SNIPPET_END: mt_flush_to */
+/* SNIPPET_END: MerkleTree_Low_mt_flush_to */
 
-/* SNIPPET_START: mt_flush_pre */
+/* SNIPPET_START: MerkleTree_Low_mt_flush_pre */
 
-bool mt_flush_pre(const merkle_tree *mt)
+bool MerkleTree_Low_mt_flush_pre(const MerkleTree_Low_merkle_tree *mt)
 {
-  merkle_tree uu____0 = *(merkle_tree *)mt;
+  MerkleTree_Low_merkle_tree uu____0 = *(MerkleTree_Low_merkle_tree *)mt;
   return uu____0.j > uu____0.i;
 }
 
-/* SNIPPET_END: mt_flush_pre */
+/* SNIPPET_END: MerkleTree_Low_mt_flush_pre */
 
-/* SNIPPET_START: mt_flush */
+/* SNIPPET_START: MerkleTree_Low_mt_flush */
 
-void mt_flush(merkle_tree *mt)
+void MerkleTree_Low_mt_flush(MerkleTree_Low_merkle_tree *mt)
 {
-  merkle_tree mtv = *mt;
+  MerkleTree_Low_merkle_tree mtv = *mt;
   uint64_t off = mtv.offset;
   uint32_t j1 = mtv.j;
   uint32_t j11 = j1 - (uint32_t)1U;
   uint64_t jo = off + (uint64_t)j11;
-  mt_flush_to(mt, jo);
+  MerkleTree_Low_mt_flush_to(mt, jo);
 }
 
-/* SNIPPET_END: mt_flush */
+/* SNIPPET_END: MerkleTree_Low_mt_flush */
 
 /* SNIPPET_START: free_elems_from___uint8_t__uint32_t */
 
@@ -1505,6 +1774,17 @@ free_elems_from___uint8_t__uint32_t(
 }
 
 /* SNIPPET_END: free_elems_from___uint8_t__uint32_t */
+
+/* SNIPPET_START: shrink___uint8_t_ */
+
+static LowStar_Vector_vector_str___uint8_t_
+shrink___uint8_t_(LowStar_Vector_vector_str___uint8_t_ vec, uint32_t new_size)
+{
+  return
+    ((LowStar_Vector_vector_str___uint8_t_){ .sz = new_size, .cap = vec.cap, .vs = vec.vs });
+}
+
+/* SNIPPET_END: shrink___uint8_t_ */
 
 /* SNIPPET_START: shrink___uint8_t__uint32_t */
 
@@ -1542,16 +1822,16 @@ mt_retract_to_(
   if (!(lv >= hs.sz))
   {
     LowStar_Vector_vector_str___uint8_t_ hvec = index__LowStar_Vector_vector_str__uint8_t_(hs, lv);
-    uint32_t old_len = j1 - offset_of(i1);
-    uint32_t new_len = s - offset_of(i1);
+    uint32_t old_len = j1 - MerkleTree_Low_offset_of(i1);
+    uint32_t new_len = s - MerkleTree_Low_offset_of(i1);
     LowStar_Vector_vector_str___uint8_t_
     retracted =
       shrink___uint8_t__uint32_t((
           (LowStar_Regional_regional__uint32_t__uint8_t_){
             .state = hsz,
-            .dummy = hash_dummy,
-            .r_alloc = hash_r_alloc,
-            .r_free = hash_r_free
+            .dummy = MerkleTree_Low_Datastructures_hash_dummy,
+            .r_alloc = MerkleTree_Low_Datastructures_hash_r_alloc,
+            .r_free = MerkleTree_Low_Datastructures_hash_r_free
           }
         ),
         hvec,
@@ -1575,26 +1855,26 @@ mt_retract_to_(
 
 /* SNIPPET_END: mt_retract_to_ */
 
-/* SNIPPET_START: mt_retract_to_pre */
+/* SNIPPET_START: MerkleTree_Low_mt_retract_to_pre */
 
-bool mt_retract_to_pre(const merkle_tree *mt, uint64_t r)
+bool MerkleTree_Low_mt_retract_to_pre(const MerkleTree_Low_merkle_tree *mt, uint64_t r)
 {
-  merkle_tree *mt1 = (merkle_tree *)mt;
-  merkle_tree mtv = *mt1;
+  MerkleTree_Low_merkle_tree *mt1 = (MerkleTree_Low_merkle_tree *)mt;
+  MerkleTree_Low_merkle_tree mtv = *mt1;
   return
     r
     >= mtv.offset
-    && r - mtv.offset <= offset_range_limit
+    && r - mtv.offset <= MerkleTree_Low_offset_range_limit
     && mtv.i <= (uint32_t)(r - mtv.offset) && (uint32_t)(r - mtv.offset) < mtv.j;
 }
 
-/* SNIPPET_END: mt_retract_to_pre */
+/* SNIPPET_END: MerkleTree_Low_mt_retract_to_pre */
 
-/* SNIPPET_START: mt_retract_to */
+/* SNIPPET_START: MerkleTree_Low_mt_retract_to */
 
-void mt_retract_to(merkle_tree *mt, uint64_t r)
+void MerkleTree_Low_mt_retract_to(MerkleTree_Low_merkle_tree *mt, uint64_t r)
 {
-  merkle_tree mtv = *mt;
+  MerkleTree_Low_merkle_tree mtv = *mt;
   uint64_t offset1 = mtv.offset;
   uint32_t r1 = (uint32_t)(r - offset1);
   LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_ hs = mtv.hs;
@@ -1602,7 +1882,7 @@ void mt_retract_to(merkle_tree *mt, uint64_t r)
   *mt
   =
     (
-      (merkle_tree){
+      (MerkleTree_Low_merkle_tree){
         .hash_size = mtv.hash_size,
         .offset = mtv.offset,
         .i = mtv.i,
@@ -1616,7 +1896,7 @@ void mt_retract_to(merkle_tree *mt, uint64_t r)
     );
 }
 
-/* SNIPPET_END: mt_retract_to */
+/* SNIPPET_END: MerkleTree_Low_mt_retract_to */
 
 /* SNIPPET_START: mt_verify_ */
 
@@ -1671,26 +1951,26 @@ mt_verify_(
 
 /* SNIPPET_END: mt_verify_ */
 
-/* SNIPPET_START: mt_verify_pre */
+/* SNIPPET_START: MerkleTree_Low_mt_verify_pre */
 
 bool
-mt_verify_pre(
-  const merkle_tree *mt,
+MerkleTree_Low_mt_verify_pre(
+  const MerkleTree_Low_merkle_tree *mt,
   uint64_t k1,
   uint64_t j1,
   const LowStar_Vector_vector_str___uint8_t_ *p1,
   uint8_t *rt
 )
 {
-  merkle_tree *mt1 = (merkle_tree *)mt;
+  MerkleTree_Low_merkle_tree *mt1 = (MerkleTree_Low_merkle_tree *)mt;
   LowStar_Vector_vector_str___uint8_t_ *p2 = (LowStar_Vector_vector_str___uint8_t_ *)p1;
-  merkle_tree mtv = *mt1;
+  MerkleTree_Low_merkle_tree mtv = *mt1;
   LowStar_Vector_vector_str___uint8_t_ uu____0 = *p2;
   return
     k1
     < j1
-    && k1 >= mtv.offset && k1 - mtv.offset <= offset_range_limit
-    && j1 >= mtv.offset && j1 - mtv.offset <= offset_range_limit
+    && k1 >= mtv.offset && k1 - mtv.offset <= MerkleTree_Low_offset_range_limit
+    && j1 >= mtv.offset && j1 - mtv.offset <= MerkleTree_Low_offset_range_limit
     &&
       uu____0.sz
       ==
@@ -1702,29 +1982,35 @@ mt_verify_pre(
             false);
 }
 
-/* SNIPPET_END: mt_verify_pre */
+/* SNIPPET_END: MerkleTree_Low_mt_verify_pre */
 
-/* SNIPPET_START: mt_verify */
+/* SNIPPET_START: MerkleTree_Low_mt_verify */
 
 bool
-mt_verify(
-  const merkle_tree *mt,
+MerkleTree_Low_mt_verify(
+  const MerkleTree_Low_merkle_tree *mt,
   uint64_t k1,
   uint64_t j1,
   const LowStar_Vector_vector_str___uint8_t_ *p1,
   uint8_t *rt
 )
 {
-  merkle_tree *ncmt = (merkle_tree *)mt;
+  MerkleTree_Low_merkle_tree *ncmt = (MerkleTree_Low_merkle_tree *)mt;
   LowStar_Vector_vector_str___uint8_t_ *ncp = (LowStar_Vector_vector_str___uint8_t_ *)p1;
-  merkle_tree mtv = *ncmt;
+  MerkleTree_Low_merkle_tree mtv = *ncmt;
   uint32_t hsz1 = mtv.hash_size;
   LowStar_Regional_regional__uint32_t__uint8_t_
-  hrg = { .state = hsz1, .dummy = hash_dummy, .r_alloc = hash_r_alloc, .r_free = hash_r_free };
+  hrg =
+    {
+      .state = hsz1,
+      .dummy = MerkleTree_Low_Datastructures_hash_dummy,
+      .r_alloc = MerkleTree_Low_Datastructures_hash_r_alloc,
+      .r_free = MerkleTree_Low_Datastructures_hash_r_free
+    };
   uint32_t k2 = (uint32_t)(k1 - mtv.offset);
   uint32_t j2 = (uint32_t)(j1 - mtv.offset);
   uint8_t *ih = rg_alloc___uint8_t__uint32_t(hrg);
-  hash_copy(hsz1, index___uint8_t_(*ncp, (uint32_t)0U), ih);
+  MerkleTree_Low_Datastructures_hash_copy(hsz1, index___uint8_t_(*ncp, (uint32_t)0U), ih);
   mt_verify_(hsz1, k2, j2, p1, (uint32_t)1U, ih, false, mtv.hash_fun);
   uint8_t res = (uint8_t)255U;
   for (uint32_t i = (uint32_t)0U; i < hsz1; i++)
@@ -1738,7 +2024,7 @@ mt_verify(
   return r;
 }
 
-/* SNIPPET_END: mt_verify */
+/* SNIPPET_END: MerkleTree_Low_mt_verify */
 
 /* SNIPPET_START: __bool_uint32_t */
 
@@ -1964,20 +2250,20 @@ hash_vv_bytes_i(
   LowStar_Vector_vector_str___uint8_t_ vvi = index__LowStar_Vector_vector_str__uint8_t_(vv1, i1);
   uint64_t vs_hs = (uint64_t)vvi.sz * (uint64_t)hash_size;
   uint64_t r;
-  if (uint64_max - vs_hs >= (uint64_t)4U)
+  if (MerkleTree_Low_uint64_max - vs_hs >= (uint64_t)4U)
   {
     r = vs_hs + (uint64_t)4U;
   }
   else
   {
-    r = uint64_max;
+    r = MerkleTree_Low_uint64_max;
   }
   uint64_t rest = hash_vv_bytes_i(hash_size, vv1, i1 + (uint32_t)1U);
-  if (uint64_max - r >= rest)
+  if (MerkleTree_Low_uint64_max - r >= rest)
   {
     return r + rest;
   }
-  return uint64_max;
+  return MerkleTree_Low_uint64_max;
 }
 
 /* SNIPPET_END: hash_vv_bytes_i */
@@ -2264,7 +2550,12 @@ deserialize_hash(uint32_t hash_size, bool ok, const uint8_t *buf1, uint32_t sz, 
 {
   LowStar_Regional_regional__uint32_t__uint8_t_
   rg =
-    { .state = hash_size, .dummy = hash_dummy, .r_alloc = hash_r_alloc, .r_free = hash_r_free };
+    {
+      .state = hash_size,
+      .dummy = MerkleTree_Low_Datastructures_hash_dummy,
+      .r_alloc = MerkleTree_Low_Datastructures_hash_r_alloc,
+      .r_free = MerkleTree_Low_Datastructures_hash_r_free
+    };
   if (!ok || pos >= sz)
   {
     return
@@ -2367,13 +2658,13 @@ deserialize_hash_vec(
     {
       .state = {
         .state = hash_size,
-        .dummy = hash_dummy,
-        .r_alloc = hash_r_alloc,
-        .r_free = hash_r_free
+        .dummy = MerkleTree_Low_Datastructures_hash_dummy,
+        .r_alloc = MerkleTree_Low_Datastructures_hash_r_alloc,
+        .r_free = MerkleTree_Low_Datastructures_hash_r_free
       },
-      .dummy = hash_vec_dummy,
-      .r_alloc = hash_vec_r_alloc,
-      .r_free = hash_vec_r_free
+      .dummy = MerkleTree_Low_Datastructures_hash_vec_dummy,
+      .r_alloc = MerkleTree_Low_Datastructures_hash_vec_r_alloc,
+      .r_free = MerkleTree_Low_Datastructures_hash_vec_r_free
     };
   if (!ok || pos >= sz)
   {
@@ -2414,7 +2705,12 @@ deserialize_hash_vec(
   }
   LowStar_Regional_regional__uint32_t__uint8_t_
   hrg =
-    { .state = hash_size, .dummy = hash_dummy, .r_alloc = hash_r_alloc, .r_free = hash_r_free };
+    {
+      .state = hash_size,
+      .dummy = MerkleTree_Low_Datastructures_hash_dummy,
+      .r_alloc = MerkleTree_Low_Datastructures_hash_r_alloc,
+      .r_free = MerkleTree_Low_Datastructures_hash_r_free
+    };
   LowStar_Vector_vector_str___uint8_t_
   res = alloc___uint8_t_(n1, LowStar_Regional_rg_dummy___uint8_t__uint32_t(hrg));
   __bool_uint32_t
@@ -2543,13 +2839,13 @@ deserialize_hash_vv(
     {
       .state = {
         .state = hash_size,
-        .dummy = hash_dummy,
-        .r_alloc = hash_r_alloc,
-        .r_free = hash_r_free
+        .dummy = MerkleTree_Low_Datastructures_hash_dummy,
+        .r_alloc = MerkleTree_Low_Datastructures_hash_r_alloc,
+        .r_free = MerkleTree_Low_Datastructures_hash_r_free
       },
-      .dummy = hash_vec_dummy,
-      .r_alloc = hash_vec_r_alloc,
-      .r_free = hash_vec_r_free
+      .dummy = MerkleTree_Low_Datastructures_hash_vec_dummy,
+      .r_alloc = MerkleTree_Low_Datastructures_hash_vec_r_alloc,
+      .r_free = MerkleTree_Low_Datastructures_hash_vec_r_free
     };
   LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_
   res =
@@ -2571,11 +2867,11 @@ deserialize_hash_vv(
 
 /* SNIPPET_END: deserialize_hash_vv */
 
-/* SNIPPET_START: mt_serialize_size */
+/* SNIPPET_START: MerkleTree_Low_Serialization_mt_serialize_size */
 
-uint64_t mt_serialize_size(const merkle_tree *mt)
+uint64_t MerkleTree_Low_Serialization_mt_serialize_size(const MerkleTree_Low_merkle_tree *mt)
 {
-  merkle_tree mtv = *(merkle_tree *)mt;
+  MerkleTree_Low_merkle_tree mtv = *(MerkleTree_Low_merkle_tree *)mt;
   LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_ hs = mtv.hs;
   LowStar_Vector_vector_str___uint8_t_ rhs = mtv.rhs;
   uint64_t hs_sz = hash_vv_bytes_i(mtv.hash_size, hs, (uint32_t)0U);
@@ -2583,28 +2879,33 @@ uint64_t mt_serialize_size(const merkle_tree *mt)
   {
     uint64_t vs_hs = (uint64_t)rhs.sz * (uint64_t)mtv.hash_size;
     uint64_t ite;
-    if (uint64_max - vs_hs >= (uint64_t)4U)
+    if (MerkleTree_Low_uint64_max - vs_hs >= (uint64_t)4U)
     {
       ite = vs_hs + (uint64_t)4U;
     }
     else
     {
-      ite = uint64_max;
+      ite = MerkleTree_Low_uint64_max;
     }
     return (uint64_t)21U + hs_sz + (uint64_t)1U + ite + (uint64_t)mtv.hash_size;
   }
-  return uint64_max;
+  return MerkleTree_Low_uint64_max;
 }
 
-/* SNIPPET_END: mt_serialize_size */
+/* SNIPPET_END: MerkleTree_Low_Serialization_mt_serialize_size */
 
-/* SNIPPET_START: mt_serialize */
+/* SNIPPET_START: MerkleTree_Low_Serialization_mt_serialize */
 
-uint64_t mt_serialize(const merkle_tree *mt, uint8_t *output, uint64_t sz)
+uint64_t
+MerkleTree_Low_Serialization_mt_serialize(
+  const MerkleTree_Low_merkle_tree *mt,
+  uint8_t *output,
+  uint64_t sz
+)
 {
-  merkle_tree *mt1 = (merkle_tree *)mt;
+  MerkleTree_Low_merkle_tree *mt1 = (MerkleTree_Low_merkle_tree *)mt;
   uint32_t sz1 = (uint32_t)sz;
-  merkle_tree mtv = *mt1;
+  MerkleTree_Low_merkle_tree mtv = *mt1;
   __bool_uint32_t scrut = serialize_uint8_t(true, (uint8_t)1U, output, sz1, (uint32_t)0U);
   bool ok = scrut.fst;
   uint32_t pos = scrut.snd;
@@ -2639,12 +2940,12 @@ uint64_t mt_serialize(const merkle_tree *mt, uint8_t *output, uint64_t sz)
   return (uint64_t)0U;
 }
 
-/* SNIPPET_END: mt_serialize */
+/* SNIPPET_END: MerkleTree_Low_Serialization_mt_serialize */
 
-/* SNIPPET_START: mt_deserialize */
+/* SNIPPET_START: MerkleTree_Low_Serialization_mt_deserialize */
 
-merkle_tree
-*mt_deserialize(
+MerkleTree_Low_merkle_tree
+*MerkleTree_Low_Serialization_mt_deserialize(
   uint32_t hash_size,
   const uint8_t *input,
   uint64_t sz,
@@ -2698,19 +2999,19 @@ merkle_tree
     ||
       !(j1
       >= i1
-      && uint64_max - offset1 >= (uint64_t)j1
+      && MerkleTree_Low_uint64_max - offset1 >= (uint64_t)j1
       && hs.sz == (uint32_t)32U
       && rhs.sz == (uint32_t)32U)
   )
   {
     return NULL;
   }
-  KRML_CHECK_SIZE(sizeof (merkle_tree), (uint32_t)1U);
-  merkle_tree *buf = KRML_HOST_MALLOC(sizeof (merkle_tree));
+  KRML_CHECK_SIZE(sizeof (MerkleTree_Low_merkle_tree), (uint32_t)1U);
+  MerkleTree_Low_merkle_tree *buf = KRML_HOST_MALLOC(sizeof (MerkleTree_Low_merkle_tree));
   buf[0U]
   =
     (
-      (merkle_tree){
+      (MerkleTree_Low_merkle_tree){
         .hash_size = hash_size,
         .offset = offset1,
         .i = i1,
@@ -2725,19 +3026,19 @@ merkle_tree
   return buf;
 }
 
-/* SNIPPET_END: mt_deserialize */
+/* SNIPPET_END: MerkleTree_Low_Serialization_mt_deserialize */
 
-/* SNIPPET_START: mt_serialize_path */
+/* SNIPPET_START: MerkleTree_Low_Serialization_mt_serialize_path */
 
 uint64_t
-mt_serialize_path(
+MerkleTree_Low_Serialization_mt_serialize_path(
   const LowStar_Vector_vector_str___uint8_t_ *p1,
-  const merkle_tree *mt,
+  const MerkleTree_Low_merkle_tree *mt,
   uint8_t *output,
   uint64_t sz
 )
 {
-  merkle_tree x0 = *(merkle_tree *)mt;
+  MerkleTree_Low_merkle_tree x0 = *(MerkleTree_Low_merkle_tree *)mt;
   uint32_t hsz1 = x0.hash_size;
   uint32_t sz1 = (uint32_t)sz;
   LowStar_Vector_vector_str___uint8_t_ *ncp = (LowStar_Vector_vector_str___uint8_t_ *)p1;
@@ -2754,12 +3055,16 @@ mt_serialize_path(
   return (uint64_t)0U;
 }
 
-/* SNIPPET_END: mt_serialize_path */
+/* SNIPPET_END: MerkleTree_Low_Serialization_mt_serialize_path */
 
-/* SNIPPET_START: mt_deserialize_path */
+/* SNIPPET_START: MerkleTree_Low_Serialization_mt_deserialize_path */
 
 LowStar_Vector_vector_str___uint8_t_
-*mt_deserialize_path(uint32_t hsz, const uint8_t *input, uint64_t sz)
+*MerkleTree_Low_Serialization_mt_deserialize_path(
+  uint32_t hsz,
+  const uint8_t *input,
+  uint64_t sz
+)
 {
   uint32_t sz1 = (uint32_t)sz;
   __bool_uint32_t_uint32_t scrut0 = deserialize_uint32_t(true, input, sz1, (uint32_t)0U);
@@ -2781,5 +3086,150 @@ LowStar_Vector_vector_str___uint8_t_
   return buf;
 }
 
-/* SNIPPET_END: mt_deserialize_path */
+/* SNIPPET_END: MerkleTree_Low_Serialization_mt_deserialize_path */
+
+/* SNIPPET_START: MerkleTree_Low_Hashfunctions_init_hash */
+
+uint8_t *MerkleTree_Low_Hashfunctions_init_hash(uint32_t hsz)
+{
+  return
+    rg_alloc___uint8_t__uint32_t((
+        (LowStar_Regional_regional__uint32_t__uint8_t_){
+          .state = hsz,
+          .dummy = MerkleTree_Low_Datastructures_hash_dummy,
+          .r_alloc = MerkleTree_Low_Datastructures_hash_r_alloc,
+          .r_free = MerkleTree_Low_Datastructures_hash_r_free
+        }
+      ));
+}
+
+/* SNIPPET_END: MerkleTree_Low_Hashfunctions_init_hash */
+
+/* SNIPPET_START: MerkleTree_Low_Hashfunctions_free_hash */
+
+void MerkleTree_Low_Hashfunctions_free_hash(uint32_t hsz, uint8_t *h1)
+{
+  rg_free___uint8_t__uint32_t((
+      (LowStar_Regional_regional__uint32_t__uint8_t_){
+        .state = hsz,
+        .dummy = MerkleTree_Low_Datastructures_hash_dummy,
+        .r_alloc = MerkleTree_Low_Datastructures_hash_r_alloc,
+        .r_free = MerkleTree_Low_Datastructures_hash_r_free
+      }
+    ),
+    h1);
+}
+
+/* SNIPPET_END: MerkleTree_Low_Hashfunctions_free_hash */
+
+/* SNIPPET_START: MerkleTree_Low_Hashfunctions_sha256_compress */
+
+void MerkleTree_Low_Hashfunctions_sha256_compress(uint8_t *src1, uint8_t *src2, uint8_t *dst)
+{
+  uint32_t hash_size = (uint32_t)32U;
+  Spec_Hash_Definitions_hash_alg hash_alg = Spec_Hash_Definitions_SHA2_256;
+  uint8_t cb[64U] = { 0U };
+  memcpy(cb, src1, hash_size * sizeof (src1[0U]));
+  memcpy(cb + (uint32_t)32U, src2, hash_size * sizeof (src2[0U]));
+  uint32_t buf0[4U];
+  uint32_t buf1[5U];
+  uint32_t buf2[8U];
+  uint32_t buf3[8U];
+  uint64_t buf4[8U];
+  uint64_t buf[8U];
+  EverCrypt_Hash_state_s s;
+  switch (hash_alg)
+  {
+    case Spec_Hash_Definitions_MD5:
+      {
+        uint32_t init = (uint32_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+        {
+          buf0[i] = init;
+        }
+        s = ((EverCrypt_Hash_state_s){ .tag = EverCrypt_Hash_MD5_s, { .case_MD5_s = buf0 } });
+        break;
+      }
+    case Spec_Hash_Definitions_SHA1:
+      {
+        uint32_t init = (uint32_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < (uint32_t)5U; i++)
+        {
+          buf1[i] = init;
+        }
+        s = ((EverCrypt_Hash_state_s){ .tag = EverCrypt_Hash_SHA1_s, { .case_SHA1_s = buf1 } });
+        break;
+      }
+    case Spec_Hash_Definitions_SHA2_224:
+      {
+        uint32_t init = (uint32_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
+        {
+          buf2[i] = init;
+        }
+        s =
+          (
+            (EverCrypt_Hash_state_s){
+              .tag = EverCrypt_Hash_SHA2_224_s,
+              { .case_SHA2_224_s = buf2 }
+            }
+          );
+        break;
+      }
+    case Spec_Hash_Definitions_SHA2_256:
+      {
+        uint32_t init = (uint32_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
+        {
+          buf3[i] = init;
+        }
+        s =
+          (
+            (EverCrypt_Hash_state_s){
+              .tag = EverCrypt_Hash_SHA2_256_s,
+              { .case_SHA2_256_s = buf3 }
+            }
+          );
+        break;
+      }
+    case Spec_Hash_Definitions_SHA2_384:
+      {
+        uint64_t init = (uint64_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
+        {
+          buf4[i] = init;
+        }
+        s =
+          (
+            (EverCrypt_Hash_state_s){
+              .tag = EverCrypt_Hash_SHA2_384_s,
+              { .case_SHA2_384_s = buf4 }
+            }
+          );
+        break;
+      }
+    case Spec_Hash_Definitions_SHA2_512:
+      {
+        uint64_t init = (uint64_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
+        {
+          buf[i] = init;
+        }
+        s =
+          ((EverCrypt_Hash_state_s){ .tag = EverCrypt_Hash_SHA2_512_s, { .case_SHA2_512_s = buf } });
+        break;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
+  EverCrypt_Hash_state_s st = s;
+  EverCrypt_Hash_init(&st);
+  EverCrypt_Hash_update(&st, cb);
+  EverCrypt_Hash_finish(&st, dst);
+}
+
+/* SNIPPET_END: MerkleTree_Low_Hashfunctions_sha256_compress */
 

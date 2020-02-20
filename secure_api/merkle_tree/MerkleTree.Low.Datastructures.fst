@@ -1,4 +1,4 @@
-module MerkleTree.New.Low.Datastructures
+module MerkleTree.Low.Datastructures
 
 open FStar.All
 open FStar.Integers
@@ -31,9 +31,10 @@ module MTH = MerkleTree.New.High
 open EverCrypt.Helpers
 open Lib.IntTypes
 
-open MerkleTree.New.Low.Hashes
-
 #set-options "--z3rlimit 10 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
+
+type hash_size_t = n:uint32_t{n > 0ul}
+type hash (#hsz:hash_size_t) = b:B.buffer uint8 { B.len b = hsz \/ B.g_is_null b }
 
 // We cannot use `Low.RVector.Instances`, where we have some general
 // typeclass instances of `regional`, e.g., if `rg:regional a` then

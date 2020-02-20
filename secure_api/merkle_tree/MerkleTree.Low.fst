@@ -1,4 +1,4 @@
-module MerkleTree.New.Low
+module MerkleTree.Low
 
 open EverCrypt.Helpers
 
@@ -34,10 +34,9 @@ module MTS = MerkleTree.Spec
 
 open Lib.IntTypes
 
-open MerkleTree.New.Low.Hashes
-open MerkleTree.New.Low.Datastructures
-open MerkleTree.New.Low.Hashfunctions
-open MerkleTree.Vector
+open MerkleTree.Low.Datastructures
+open MerkleTree.Low.Hashfunctions
+open MerkleTree.Low.VectorExtras
 
 #set-options "--z3rlimit 10 --initial_fuel 0 --max_fuel 0 --initial_ifuel 0 --max_ifuel 0"
 
@@ -422,6 +421,7 @@ let as_seq_sub_upd #a #rst #rg h rv i v =
 // `hash_vv_insert_copy` inserts a hash element at a level `lv`, by copying
 // and pushing its content to `hs[lv]`. For detailed insertion procedure, see
 // `insert_` and `mt_insert`.
+#push-options "--z3rlimit 100 --initial_fuel 1 --max_fuel 1"
 private
 inline_for_extraction
 val hash_vv_insert_copy:
@@ -462,7 +462,6 @@ val hash_vv_insert_copy:
       S.equal (S.index (RV.as_seq h1 hs) (U32.v lv))
       (S.snoc (S.index (RV.as_seq h0 hs) (U32.v lv))
       (Rgl?.r_repr (hreg hsz) h0 v))))
-#push-options "--z3rlimit 100 --initial_fuel 1 --max_fuel 1"
 let hash_vv_insert_copy #hsz lv i j hs v =
   let hh0 = HST.get () in
   mt_safe_elts_rec hh0 lv hs (Ghost.reveal i) j;
@@ -2886,7 +2885,7 @@ val mt_verify:
       b <==> MTH.mt_verify #(U32.v hsz) #hash_spec (U32.v k) (U32.v j)
              (lift_path h0 mtr p) (Rgl?.r_repr (hreg hsz) h0 rt))))
 #pop-options
-#push-options "--z3rlimit 200 --initial_fuel 1 --max_fuel 1 --initial_ifuel 1 --max_ifuel 1"
+#push-options "--z3rlimit 200 --initial_fuel 2 --max_fuel 2 --initial_ifuel 1 --max_ifuel 1"
 let mt_verify #hsz #hash_spec mt k j mtr p rt =
   let ncmt = CB.cast mt in
   let ncp = CB.cast p in

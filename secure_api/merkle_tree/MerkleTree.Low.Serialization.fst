@@ -1,4 +1,4 @@
-module MerkleTree.New.Low.Serialization
+module MerkleTree.Low.Serialization
 
 open FStar.Integers
 open FStar.Mul
@@ -9,7 +9,7 @@ open LowStar.RVector
 open LowStar.Regional
 open LowStar.Regional.Instances
 
-open MerkleTree.New.Low
+open MerkleTree.Low
 
 module HS = FStar.HyperStack
 module HST = FStar.HyperStack.ST
@@ -26,9 +26,8 @@ module U32 = FStar.UInt32
 module U64 = FStar.UInt64
 module U8 = FStar.UInt8
 
-open MerkleTree.New.Low.Hashes
-open MerkleTree.New.Low.Datastructures
-open MerkleTree.New.Low.Hashfunctions
+open MerkleTree.Low.Datastructures
+open MerkleTree.Low.Hashfunctions
 module MTS = MerkleTree.Spec
 
 let uint8_t = U8.t
