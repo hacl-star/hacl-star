@@ -146,7 +146,7 @@ void mt_free_path(uint32_t hash_size, LowStar_Vector_vector_str___uint8_t_ *p1);
 
   @param[in]  i   The initial hash
 */
-MerkleTree_Low_merkle_tree *mt_create(uint8_t *init1);
+MerkleTree_Low_merkle_tree *mt_create(uint8_t *i1);
 
 /* SNIPPET_END: mt_create */
 
@@ -156,7 +156,7 @@ MerkleTree_Low_merkle_tree *mt_create(uint8_t *init1);
   Construction with custom hash functions
 
   @param[in]  hash_size Hash size (in bytes)
-  @param[in]  i   The initial hash
+  @param[in]  i         The initial hash
 */
 MerkleTree_Low_merkle_tree
 *mt_create_custom(
@@ -172,7 +172,7 @@ MerkleTree_Low_merkle_tree
 /*
     Destruction
 
-    @param[in]  mt  The Merkle tree
+  @param[in]  mt  The Merkle tree
 */
 void mt_free(MerkleTree_Low_merkle_tree *mt);
 
@@ -183,8 +183,8 @@ void mt_free(MerkleTree_Low_merkle_tree *mt);
 /*
   Insertion
 
-  param[in]  mt  The Merkle tree
-  param[in]  v   The tree does not take ownership of the hash, it makes a copy of its content.
+  @param[in]  mt  The Merkle tree
+  @param[in]  v   The tree does not take ownership of the hash, it makes a copy of its content.
 
  Note: The content of the hash will be overwritten with an arbitrary value.
 */
@@ -206,10 +206,10 @@ bool mt_insert_pre(const MerkleTree_Low_merkle_tree *mt, uint8_t *v1);
 /*
   Getting the Merkle root
 
-  param[in]  mt   The Merkle tree
-  param[out] root The Merkle root returned as a hash pointer
+  @param[in]  mt   The Merkle tree
+  @param[out] root The Merkle root
 */
-void mt_get_root(const MerkleTree_Low_merkle_tree *mt, uint8_t *rt);
+void mt_get_root(const MerkleTree_Low_merkle_tree *mt, uint8_t *root);
 
 /* SNIPPET_END: mt_get_root */
 
@@ -218,7 +218,7 @@ void mt_get_root(const MerkleTree_Low_merkle_tree *mt, uint8_t *rt);
 /*
   Precondition predicate for mt_get_root
 */
-bool mt_get_root_pre(const MerkleTree_Low_merkle_tree *mt, uint8_t *rt);
+bool mt_get_root_pre(const MerkleTree_Low_merkle_tree *mt, uint8_t *root);
 
 /* SNIPPET_END: mt_get_root_pre */
 
@@ -227,10 +227,10 @@ bool mt_get_root_pre(const MerkleTree_Low_merkle_tree *mt, uint8_t *rt);
 /*
   Getting a Merkle path
 
-  param[in]  mt   The Merkle tree
-  param[in]  idx  The index of the target hash
-  param[out] root The Merkle root
-  param[out] path A resulting Merkle path that contains the leaf hash.
+  @param[in]  mt   The Merkle tree
+  @param[in]  idx  The index of the target hash
+  @param[out] path A resulting Merkle path that contains the leaf hash.
+  @param[out] root The Merkle root
 
   return The number of elements in the tree
 
@@ -244,7 +244,7 @@ uint32_t
 mt_get_path(
   const MerkleTree_Low_merkle_tree *mt,
   uint64_t idx,
-  LowStar_Vector_vector_str___uint8_t_ *p1,
+  LowStar_Vector_vector_str___uint8_t_ *path,
   uint8_t *root
 );
 
@@ -259,7 +259,7 @@ bool
 mt_get_path_pre(
   const MerkleTree_Low_merkle_tree *mt,
   uint64_t idx,
-  const LowStar_Vector_vector_str___uint8_t_ *p1,
+  const LowStar_Vector_vector_str___uint8_t_ *path,
   uint8_t *root
 );
 
@@ -270,7 +270,7 @@ mt_get_path_pre(
 /*
   Flush the Merkle tree
 
-  param[in]  mt   The Merkle tree
+  @param[in]  mt   The Merkle tree
 */
 void mt_flush(MerkleTree_Low_merkle_tree *mt);
 
@@ -289,9 +289,9 @@ bool mt_flush_pre(const MerkleTree_Low_merkle_tree *mt);
 
 /*
   Flush the Merkle tree up to a given index
- 
-  param[in]  mt   The Merkle tree
-  param[in]  idx  The index up to which to flush the tree
+
+  @param[in]  mt   The Merkle tree
+  @param[in]  idx  The index up to which to flush the tree
 */
 void mt_flush_to(MerkleTree_Low_merkle_tree *mt, uint64_t idx);
 
@@ -311,12 +311,12 @@ bool mt_flush_to_pre(const MerkleTree_Low_merkle_tree *mt, uint64_t idx);
 /*
   Retract the Merkle tree down to a given index
 
-  param[in]  mt   The Merkle tree
-  param[in]  idx  The index to retract the tree to
+  @param[in]  mt   The Merkle tree
+  @param[in]  idx  The index to retract the tree to
 
  Note: The element and idx will remain in the tree.
 */
-void mt_retract_to(MerkleTree_Low_merkle_tree *mt, uint64_t r);
+void mt_retract_to(MerkleTree_Low_merkle_tree *mt, uint64_t idx);
 
 /* SNIPPET_END: mt_retract_to */
 
@@ -325,7 +325,7 @@ void mt_retract_to(MerkleTree_Low_merkle_tree *mt, uint64_t r);
 /*
   Precondition predicate for mt_retract_to
 */
-bool mt_retract_to_pre(const MerkleTree_Low_merkle_tree *mt, uint64_t r);
+bool mt_retract_to_pre(const MerkleTree_Low_merkle_tree *mt, uint64_t idx);
 
 /* SNIPPET_END: mt_retract_to_pre */
 
@@ -334,23 +334,23 @@ bool mt_retract_to_pre(const MerkleTree_Low_merkle_tree *mt, uint64_t r);
 /*
   Client-side verification
 
-  param[in]  mt   The Merkle tree
-  param[in]  tgt  The index of the target hash
-  param[in]  max  The maximum index + 1 of the tree when the path was generated
-  param[in]  path The Merkle path to verify
-  param[in]  root
+  @param[in]  mt   The Merkle tree
+  @param[in]  tgt  The index of the target hash
+  @param[in]  max  The maximum index + 1 of the tree when the path was generated
+  @param[in]  path The Merkle path to verify
+  @param[in]  root
 
   return true if the verification succeeded, false otherwise
-  
+
   Note: max - tgt must be less than 2^32.
 */
 bool
 mt_verify(
   const MerkleTree_Low_merkle_tree *mt,
-  uint64_t k1,
-  uint64_t j1,
-  const LowStar_Vector_vector_str___uint8_t_ *p1,
-  uint8_t *rt
+  uint64_t tgt,
+  uint64_t max1,
+  const LowStar_Vector_vector_str___uint8_t_ *path,
+  uint8_t *root
 );
 
 /* SNIPPET_END: mt_verify */
@@ -363,10 +363,10 @@ mt_verify(
 bool
 mt_verify_pre(
   const MerkleTree_Low_merkle_tree *mt,
-  uint64_t k1,
-  uint64_t j1,
-  const LowStar_Vector_vector_str___uint8_t_ *p1,
-  uint8_t *rt
+  uint64_t tgt,
+  uint64_t max1,
+  const LowStar_Vector_vector_str___uint8_t_ *path,
+  uint8_t *root
 );
 
 /* SNIPPET_END: mt_verify_pre */
@@ -376,7 +376,7 @@ mt_verify_pre(
 /*
   Serialization size
 
-  param[in]  mt   The Merkle tree
+  @param[in]  mt   The Merkle tree
 
   return the number of bytes required to serialize the tree
 */
@@ -389,16 +389,16 @@ uint64_t mt_serialize_size(const MerkleTree_Low_merkle_tree *mt);
 /*
   Merkle tree serialization
 
-  param[in]  mt   The Merkle tree
-  param[out] buf  The buffer to serialize the tree into
-  param[in]  len  Length of buf
+  @param[in]  mt   The Merkle tree
+  @param[out] buf  The buffer to serialize the tree into
+  @param[in]  len  Length of buf
 
   return the number of bytes written
 
   Note: buf must be a buffer of size mt_serialize_size(mt) or larger, but
   smaller than 2^32 (larger buffers are currently not supported).
 */
-uint64_t mt_serialize(const MerkleTree_Low_merkle_tree *mt, uint8_t *output, uint64_t sz);
+uint64_t mt_serialize(const MerkleTree_Low_merkle_tree *mt, uint8_t *buf1, uint64_t len);
 
 /* SNIPPET_END: mt_serialize */
 
@@ -407,8 +407,8 @@ uint64_t mt_serialize(const MerkleTree_Low_merkle_tree *mt, uint8_t *output, uin
 /*
   Merkle tree deserialization
 
-  param[in]  buf  The buffer to deserialize the tree from
-  param[in]  len  Length of buf
+  @param[in]  buf  The buffer to deserialize the tree from
+  @param[in]  len  Length of buf
 
   return pointer to the new tree if successful, NULL otherwise
 
@@ -417,8 +417,8 @@ uint64_t mt_serialize(const MerkleTree_Low_merkle_tree *mt, uint8_t *output, uin
 MerkleTree_Low_merkle_tree
 *mt_deserialize(
   uint32_t hash_size,
-  const uint8_t *input,
-  uint64_t sz,
+  const uint8_t *buf1,
+  uint64_t len,
   void (*hash_fun)(uint8_t *x0, uint8_t *x1, uint8_t *x2)
 );
 
@@ -429,19 +429,19 @@ MerkleTree_Low_merkle_tree
 /*
   Path serialization
 
-  param[in]  path The path
-  param[in]  mt   The Merkle tree the path belongs to
-  param[out] buf  The buffer to serialize the path into
-  param[in]  len  Length of buf
+  @param[in]  path The path
+  @param[in]  mt   The Merkle tree the path belongs to
+  @param[out] buf  The buffer to serialize the path into
+  @param[in]  len  Length of buf
 
   return the number of bytes written
 */
 uint64_t
 mt_serialize_path(
-  const LowStar_Vector_vector_str___uint8_t_ *p1,
+  const LowStar_Vector_vector_str___uint8_t_ *path,
   const MerkleTree_Low_merkle_tree *mt,
-  uint8_t *output,
-  uint64_t sz
+  uint8_t *buf1,
+  uint64_t len
 );
 
 /* SNIPPET_END: mt_serialize_path */
@@ -451,15 +451,15 @@ mt_serialize_path(
 /*
   Path deserialization
 
-  param[in]  buf  The buffer to deserialize the path from
-  param[in]  len  Length of buf
+  @param[in]  buf  The buffer to deserialize the path from
+  @param[in]  len  Length of buf
 
   return pointer to the new path if successful, NULL otherwise
-  
+
  Note: buf must point to an allocated buffer.
 */
 LowStar_Vector_vector_str___uint8_t_
-*mt_deserialize_path(uint32_t hash_size, const uint8_t *input, uint64_t sz);
+*mt_deserialize_path(uint32_t hash_size, const uint8_t *buf1, uint64_t len);
 
 /* SNIPPET_END: mt_deserialize_path */
 
