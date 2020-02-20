@@ -683,7 +683,8 @@ BUNDLE_FLAGS	=\
   $(MERKLE_BUNDLE) \
   $(WASMSUPPORT_BUNDLE) \
   $(CTR_BUNDLE) \
-  $(FRODO_BUNDLE)
+  $(FRODO_BUNDLE) \
+  $(HPKE_BUNDLE)
 
 DEFAULT_FLAGS = \
   $(HAND_WRITTEN_LIB_FLAGS) \
@@ -815,6 +816,7 @@ dist/ccf/Makefile.basic: HAND_WRITTEN_H_FILES := $(filter-out %/libintvector.h %
 dist/ccf/Makefile.basic: HACL_OLD_FILES =
 dist/ccf/Makefile.basic: POLY_BUNDLE =
 dist/ccf/Makefile.basic: ECDSA_BUNDLE =
+dist/ccf/Makefile.basic: HPKE_BUNDLE = -bundle Hacl.HPKE.*
 
 # Mozilla distribution
 # --------------------
@@ -838,6 +840,7 @@ dist/mozilla/Makefile.basic: CTR_BUNDLE =
 dist/mozilla/Makefile.basic: BLAKE2_BUNDLE = -bundle Hacl.Impl.Blake2.*,Hacl.Blake2b_256,Hacl.Blake2s_128,Hacl.Blake2b_32,Hacl.Blake2s_32
 dist/mozilla/Makefile.basic: SHA3_BUNDLE = -bundle Hacl.SHA3
 dist/mozilla/Makefile.basic: HASH_BUNDLE = -bundle Hacl.Hash.*,Hacl.HKDF,Hacl.HMAC,Hacl.HMAC_DRBG
+dist/mozilla/Makefile.basic: HPKE_BUNDLE = -bundle Hacl.HPKE.*
 dist/mozilla/Makefile.basic: ECDSA_BUNDLE =
 dist/mozilla/Makefile.basic: FRODO_BUNDLE = -bundle Hacl.Frodo.*,Hacl.SHA3,Hacl.Keccak,Frodo.Params
 dist/mozilla/Makefile.basic: \
