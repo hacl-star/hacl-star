@@ -16,22 +16,12 @@ module HS = FStar.HyperStack
 module Seq = Lib.Sequence
 module ByteSeq = Lib.ByteSequence
 
-#reset-options "--z3rlimit 350 --max_fuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 350 --max_fuel 0 --max_ifuel 0"
 
 let modifies_includes l1 l2 h0 h1 = ()
 let modifies_trans l1 l2 h0 h1 h2 = ()
 let live_sub #t #a #len b start n h = ()
 let modifies_sub #t #a #len b start n h0 h1 = ()
-let modifies0_is_modifies1 #a0 b0 h0 h1 = ()
-let modifies0_is_modifies2 #a0 #a1 b0 b1 h0 h1 = ()
-let modifies0_is_modifies3 #a0 #a1 #a2 b0 b1 b2 h0 h1 = ()
-let modifies0_is_modifies4 #a0 #a1 #a2 #a3 b0 b1 b2 b3 h0 h1 = ()
-let modifies1_is_modifies2 #a0 #a1 b0 b1 h0 h1 = ()
-let modifies1_is_modifies3 #a0 #a1 #a2 b0 b1 b2 h0 h1 = ()
-let modifies1_is_modifies4 #a0 #a1 #a2 #a3 b0 b1 b2 b3 h0 h1 = ()
-let modifies2_is_modifies3 #a0 #a1 #a2 b0 b1 b2 h0 h1 = ()
-let modifies2_is_modifies4 #a0 #a1 #a2 #a3 b0 b1 b2 b3 h0 h1 = ()
-let modifies3_is_modifies4 #a0 #a1 #a2 #a3 b0 b1 b2 b3 h0 h1 = ()
 
 let as_seq_gsub #t #a #len h b start n = ()
 
@@ -65,7 +55,7 @@ let recall #t #a #len b =
 let create #a clen init =
   B.alloca init (normalize_term clen)
 
-#set-options "--max_fuel 1"
+#push-options "--max_fuel 1"
 
 let createL #a init =
   B.alloca_of_list init
@@ -76,59 +66,34 @@ let createL_global #a init =
 let recall_contents #a #len b s =
   B.recall_p (b <: ibuffer a) (cpred s)
 
-(* JP: why triplicate the code? would it not extract if we just cast i to a monotonic buffer?! *)
 let copy #t #a #len o i =
-  match t with
-  | MUT ->
-    let h0 = ST.get () in
-    LowStar.BufferOps.blit (i <: buffer a) 0ul (o <: buffer a) 0ul len;
-    let h1 = ST.get () in
-    assert (Seq.slice (as_seq h1 o) 0 (v len) == Seq.slice (as_seq h0 i) 0 (v len))
-  | IMMUT ->
-    let h0 = ST.get () in
-    LowStar.BufferOps.blit (i <: ibuffer a) 0ul (o <: buffer a) 0ul len;
-    let h1 = ST.get () in
-    assert (Seq.slice (as_seq h1 o) 0 (v len) == Seq.slice (as_seq h0 i) 0 (v len))
-  | CONST ->
-    let h0 = ST.get () in
-    LowStar.BufferOps.blit (CB.cast (i <: cbuffer a)) 0ul (o <: buffer a) 0ul len;
-    let h1 = ST.get () in
-    assert (Seq.slice (as_seq h1 o) 0 (v len) == Seq.slice (as_seq h0 i) 0 (v len))
+  [@inline_let]
+  let i = as_mbuf i in
+  let h0 = ST.get () in
+  LowStar.BufferOps.blit i 0ul (o <: buffer a) 0ul len;
+  let h1 = ST.get () in
+  assert (Seq.slice (as_seq h1 o) 0 (v len) == FStar.Seq.slice (LMB.as_seq h0 i) 0 (v len))
 
 let memset #a #blen b init len =
   B.fill #a #(fun _ _ -> True) #(fun _ _ -> True) b init len
 
-#set-options "--max_fuel 0"
+#pop-options
 
+#push-options "--max_ifuel 1"
 let update_sub #t #a #len dst start n src =
-  match t with
-  | MUT ->
-      let h0 = ST.get () in
-      LowStar.BufferOps.blit (src <: buffer a)
-        0ul (dst <: buffer a) (size_to_UInt32 start) (size_to_UInt32 n);
-      let h1 = ST.get () in
-      assert (forall (k:nat{k < v n}). bget h1 dst (v start + k) == bget h0 src k);
-      FStar.Seq.lemma_eq_intro
-        (as_seq h1 dst)
-        (Seq.update_sub #a #(v len) (as_seq h0 dst) (v start) (v n) (as_seq h0 src))
-  | IMMUT ->
-      let h0 = ST.get () in
-      LowStar.BufferOps.blit (src <: ibuffer a)
-        0ul (dst <: buffer a) (size_to_UInt32 start) (size_to_UInt32 n);
-      let h1 = ST.get () in
-      assert (forall (k:nat{k < v n}). bget h1 dst (v start + k) == bget h0 src k);
-      FStar.Seq.lemma_eq_intro
-        (as_seq h1 dst)
-        (Seq.update_sub #a #(v len) (as_seq h0 dst) (v start) (v n) (as_seq h0 src))
-  | CONST ->
-      let h0 = ST.get () in
-      LowStar.BufferOps.blit (CB.cast (src <: cbuffer a))
-        0ul (dst <: buffer a) (size_to_UInt32 start) (size_to_UInt32 n);
-      let h1 = ST.get () in
-      assert (forall (k:nat{k < v n}). bget h1 dst (v start + k) == bget h0 src k);
-      FStar.Seq.lemma_eq_intro
-        (as_seq h1 dst)
-        (Seq.update_sub #a #(v len) (as_seq h0 dst) (v start) (v n) (as_seq h0 src))
+  // JP: this as_mbuf ought to go, once we have a version of blit that
+  // (correctly) takes a const pointer.
+  [@inline_let]
+  let src = as_mbuf src in
+  let h0 = ST.get () in
+  LowStar.BufferOps.blit src
+    0ul (dst <: buffer a) (size_to_UInt32 start) (size_to_UInt32 n);
+  let h1 = ST.get () in
+  assert (forall (k:nat{k < v n}). bget h1 dst (v start + k) == LMB.get h0 src k);
+  FStar.Seq.lemma_eq_intro
+    (as_seq h1 dst)
+    (Seq.update_sub #a #(v len) (as_seq h0 dst) (v start) (v n) (LMB.as_seq h0 src))
+#pop-options
 
 let update_sub_f #a #len h0 buf start n spec f =
   let tmp = sub buf start n in
@@ -176,7 +141,7 @@ let loop_range_nospec #h0 #a #len start n buf impl =
   let inv h1 j = modifies (loc buf) h0 h1 in
   Lib.Loops.for start (start +. n) inv impl
 
-#set-options "--max_fuel 1"
+#push-options "--max_fuel 1"
 
 let loop h0 n a_spec refl footprint spec impl =
   let inv h i = loop_inv h0 n a_spec refl footprint spec i h in
@@ -194,7 +159,7 @@ let loop2 #b0 #blen0 #b1 #blen1 h0 n acc0 acc1 spec impl =
   let inv h i = loop2_inv #b0 #blen0 #b1 #blen1 h0 n acc0 acc1 spec i h in
   Lib.Loops.for (size 0) n inv impl
 
-#set-options "--max_fuel 0"
+#pop-options
 
 let salloc1_with_inv #a #res h len x footprint spec spec_inv impl =
   let h0 = ST.get() in
@@ -283,13 +248,12 @@ val loopi_blocks_f_nospec:
     (requires fun h -> live h inp /\ live h w /\ disjoint inp w)
     (ensures  fun h0 _ h1 -> modifies (loc w) h0 h1)
 
-#set-options "--z3rlimit 200 --max_fuel 0"
-
 let loopi_blocks_f_nospec #a #b #blen bs inpLen inp f nb i w =
   assert ((v i + 1) * v bs <= v nb * v bs);
   let block = sub inp (i *! bs) bs in
   f i block w
 
+#push-options "--max_ifuel 1"
 let loopi_blocks #a #b #blen bs inpLen inp spec_f spec_l f l w =
   let nb = inpLen /. bs in
   let rem = inpLen %. bs in
@@ -302,6 +266,7 @@ let loopi_blocks #a #b #blen bs inpLen inp spec_f spec_l f l w =
     loopi_blocks_f #a #b #blen bs inpLen inp spec_f f nb i w);
   let last = sub inp (nb *! bs) rem in
   l nb rem last w
+#pop-options
 
 let loopi_blocks_nospec #a #b #blen bs inpLen inp f l w =
   let nb = inpLen /. bs in
@@ -345,7 +310,7 @@ let loop_blocks_f #a #b #blen bs inpLen inp spec_f f nb i w =
   let block = sub inp (i *! bs) bs in
   f block w
 
-#set-options "--z3rlimit 400 --max_fuel 1"
+#push-options "--z3rlimit 400 --max_fuel 1"
 
 let loop_blocks #a #b #blen bs inpLen inp spec_f spec_l f l w =
   let nb = inpLen /. bs in
@@ -412,7 +377,7 @@ let fill_blocks #t h0 len n output a_spec refl footprint spec impl =
   assert(B.loc_includes (B.loc_union (footprint (v n)) (loc output)) (B.loc_union (footprint (v n)) (loc (gsub output 0ul (n *! len)))));
   assert(B.modifies (B.loc_union (footprint (v n)) (loc output)) h0 h1)
 
-#reset-options "--z3rlimit 300 --max_fuel 1"
+#pop-options
 
 let fill_blocks_simple #a h0 bs n output spec_f impl_f =
   [@inline_let]
@@ -440,6 +405,7 @@ let fill_blocks_simple #a h0 bs n output spec_f impl_f =
       (v i * v bs)
   )
 
+#push-options "--max_fuel 1"
 let fillT #a clen o spec_f f =
   let open Seq in
   let h0 = ST.get () in
@@ -481,6 +447,7 @@ let fill #a h0 clen out spec impl =
 	   let h' = ST.get() in
 	   assert (Seq.equal (refl h' (v i + 1)) (spec h0 (v i) (refl h (v i))))
   )
+#pop-options
 
 inline_for_extraction noextract
 val lemma_eq_disjoint:

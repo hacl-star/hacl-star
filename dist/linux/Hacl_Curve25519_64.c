@@ -120,7 +120,7 @@ static void montgomery_ladder(u64 *out, u8 *key, u64 *init1)
   u64 sw0;
   u64 *nq1;
   u64 *tmp1;
-  memcpy(p11, init1, (u32)8U * sizeof (init1[0U]));
+  memcpy(p11, (u64 *)init1, (u32)8U * sizeof (((u64 *)init1)[0U]));
   x0 = p03;
   z0 = p03 + (u32)4U;
   x0[0U] = (u64)1U;
@@ -161,7 +161,7 @@ static void montgomery_ladder(u64 *out, u8 *key, u64 *init1)
   point_double(nq1, tmp1, tmp2);
   point_double(nq1, tmp1, tmp2);
   point_double(nq1, tmp1, tmp2);
-  memcpy(out, p0, (u32)8U * sizeof (p0[0U]));
+  memcpy(out, (u64 *)p0, (u32)8U * sizeof (((u64 *)p0)[0U]));
 }
 
 static void fsquare_times(u64 *o, u64 *inp, u64 *tmp, u32 n1)

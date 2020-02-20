@@ -56,7 +56,9 @@ blake2b_update_block(Lib_IntVector_Intrinsics_vec256 *hash, bool flag, uint128_t
             (uint64_t)(totlen >> (u32)64U),
             wv_14,
             wv_15);
-        memcpy(b, hash, (u32)4U * (u32)1U * sizeof (hash[0U]));
+        memcpy(b,
+          (Lib_IntVector_Intrinsics_vec256 *)hash,
+          (u32)4U * (u32)1U * sizeof (((Lib_IntVector_Intrinsics_vec256 *)hash)[0U]));
         wv3 = b + (u32)3U * (u32)1U;
         wv3[0U] = Lib_IntVector_Intrinsics_vec256_xor(wv3[0U], mask);
         {
@@ -487,7 +489,7 @@ void Hacl_Blake2b_256_blake2b(u32 nn, u8 *output, u32 ll, u8 *d, u32 kk, u8 *k)
         r1[0U] = Lib_IntVector_Intrinsics_vec256_load64s(iv4, iv5, iv6, iv7);
         if (!(kk == (u32)0U))
         {
-          memcpy(b0, k, kk * sizeof (k[0U]));
+          memcpy(b0, (u8 *)k, kk * sizeof (((u8 *)k)[0U]));
           {
             uint128_t totlen = (uint128_t)(u64)(u32)0U + (uint128_t)(u64)(u32)128U;
             u8 *b1 = b0 + (u32)0U * (u32)128U;
@@ -520,7 +522,7 @@ void Hacl_Blake2b_256_blake2b(u32 nn, u8 *output, u32 ll, u8 *d, u32 kk, u8 *k)
           u8 *last1 = d + ll - rem2;
           u8 last_block[128U] = { 0U };
           uint128_t totlen;
-          memcpy(last_block, last1, rem2 * sizeof (last1[0U]));
+          memcpy(last_block, (u8 *)last1, rem2 * sizeof (((u8 *)last1)[0U]));
           totlen = prev0 + (uint128_t)(u64)ll;
           blake2b_update_block(h, true, totlen, last_block);
           KRML_CHECK_SIZE(sizeof (u8), (u32)2U * (u32)4U * (u32)8U);
@@ -533,7 +535,7 @@ void Hacl_Blake2b_256_blake2b(u32 nn, u8 *output, u32 ll, u8 *d, u32 kk, u8 *k)
               Lib_IntVector_Intrinsics_vec256_store_le(b + (u32)4U * (u32)8U,
                 (h + (u32)1U * (u32)1U)[0U]);
               final = b;
-              memcpy(output, final, nn * sizeof (final[0U]));
+              memcpy(output, (u8 *)final, nn * sizeof (((u8 *)final)[0U]));
               memset(b, 0U, (u32)2U * (u32)4U * (u32)8U * sizeof (b[0U]));
             }
           }

@@ -542,7 +542,7 @@ static inline void poly1305_padded_256(Lib_IntVector_Intrinsics_vec256 *ctx, u32
     }
     {
       u8 tmp[16U] = { 0U };
-      memcpy(tmp, last1, rem2 * sizeof (last1[0U]));
+      memcpy(tmp, (u8 *)last1, rem2 * sizeof (((u8 *)last1)[0U]));
       {
         u64 u0 = load64_le(tmp);
         u64 lo = u0;
@@ -755,7 +755,7 @@ static inline void poly1305_padded_256(Lib_IntVector_Intrinsics_vec256 *ctx, u32
   }
   {
     u8 tmp[16U] = { 0U };
-    memcpy(tmp, rem1, r * sizeof (rem1[0U]));
+    memcpy(tmp, (u8 *)rem1, r * sizeof (((u8 *)rem1)[0U]));
     if (r > (u32)0U)
     {
       Lib_IntVector_Intrinsics_vec256 *pre = ctx + (u32)5U;

@@ -92,7 +92,7 @@ static inline void rounds(uint32_t *st)
 
 static inline void chacha20_core(uint32_t *k, uint32_t *ctx, uint32_t ctr)
 {
-  memcpy(k, ctx, (uint32_t)16U * sizeof (ctx[0U]));
+  memcpy(k, (uint32_t *)ctx, (uint32_t)16U * sizeof (((uint32_t *)ctx)[0U]));
   uint32_t ctr_u32 = ctr;
   k[12U] = k[12U] + ctr_u32;
   rounds(k);
@@ -172,9 +172,9 @@ static inline void
 chacha20_encrypt_last(uint32_t *ctx, uint32_t len, uint8_t *out, uint32_t incr1, uint8_t *text)
 {
   uint8_t plain[64U] = { 0U };
-  memcpy(plain, text, len * sizeof (text[0U]));
+  memcpy(plain, (uint8_t *)text, len * sizeof (((uint8_t *)text)[0U]));
   chacha20_encrypt_block(ctx, plain, incr1, plain);
-  memcpy(out, plain, len * sizeof (plain[0U]));
+  memcpy(out, (uint8_t *)plain, len * sizeof (((uint8_t *)plain)[0U]));
 }
 
 static inline void chacha20_update(uint32_t *ctx, uint32_t len, uint8_t *out, uint8_t *text)

@@ -538,7 +538,7 @@ poly1305_padded_128(Lib_IntVector_Intrinsics_vec128 *ctx, uint32_t len, uint8_t 
     }
     {
       uint8_t tmp[16U] = { 0U };
-      memcpy(tmp, last1, rem2 * sizeof (last1[0U]));
+      memcpy(tmp, (uint8_t *)last1, rem2 * sizeof (((uint8_t *)last1)[0U]));
       {
         uint64_t u0 = load64_le(tmp);
         uint64_t lo = u0;
@@ -751,7 +751,7 @@ poly1305_padded_128(Lib_IntVector_Intrinsics_vec128 *ctx, uint32_t len, uint8_t 
   }
   {
     uint8_t tmp[16U] = { 0U };
-    memcpy(tmp, rem1, r * sizeof (rem1[0U]));
+    memcpy(tmp, (uint8_t *)rem1, r * sizeof (((uint8_t *)rem1)[0U]));
     if (r > (uint32_t)0U)
     {
       Lib_IntVector_Intrinsics_vec128 *pre = ctx + (uint32_t)5U;

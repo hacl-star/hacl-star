@@ -324,7 +324,7 @@ static void mul(uint64_t *f, uint64_t *r, uint64_t *out)
   uint64_t *b3 = temp + (uint32_t)3U;
   uint64_t c3 = mul1_add(r, f3, b3, b3);
   temp[7U] = c3;
-  memcpy(out, temp, (uint32_t)8U * sizeof (temp[0U]));
+  memcpy(out, (uint64_t *)temp, (uint32_t)8U * sizeof (((uint64_t *)temp)[0U]));
 }
 
 /* SNIPPET_END: mul */
@@ -496,7 +496,7 @@ static void montgomery_multiplication_buffer_by_one(uint64_t *a, uint64_t *resul
   uint64_t *t_low = t;
   uint64_t round2[8U] = { 0U };
   uint64_t round4[8U] = { 0U };
-  memcpy(t_low, a, (uint32_t)4U * sizeof (a[0U]));
+  memcpy(t_low, (uint64_t *)a, (uint32_t)4U * sizeof (((uint64_t *)a)[0U]));
   uint64_t tempRound[8U] = { 0U };
   uint64_t t20[8U] = { 0U };
   uint64_t t30[8U] = { 0U };
@@ -619,14 +619,14 @@ static void exponent(uint64_t *a, uint64_t *result, uint64_t *tempBuffer)
   uint64_t *buffer_result2 = tempBuffer + (uint32_t)8U;
   uint64_t *buffer_norm_3 = tempBuffer + (uint32_t)12U;
   uint64_t *buffer_result3 = tempBuffer + (uint32_t)16U;
-  memcpy(buffer_norm_1, a, (uint32_t)4U * sizeof (a[0U]));
+  memcpy(buffer_norm_1, (uint64_t *)a, (uint32_t)4U * sizeof (((uint64_t *)a)[0U]));
   uint64_t *buffer_a = buffer_norm_1;
   uint64_t *buffer_b0 = buffer_norm_1 + (uint32_t)4U;
   fsquarePowNminusOne((uint32_t)32U, buffer_a, buffer_b0);
   fsquarePowN((uint32_t)224U, buffer_b0);
-  memcpy(buffer_result2, a, (uint32_t)4U * sizeof (a[0U]));
+  memcpy(buffer_result2, (uint64_t *)a, (uint32_t)4U * sizeof (((uint64_t *)a)[0U]));
   fsquarePowN((uint32_t)192U, buffer_result2);
-  memcpy(buffer_norm_3, a, (uint32_t)4U * sizeof (a[0U]));
+  memcpy(buffer_norm_3, (uint64_t *)a, (uint32_t)4U * sizeof (((uint64_t *)a)[0U]));
   uint64_t *buffer_a0 = buffer_norm_3;
   uint64_t *buffer_b = buffer_norm_3 + (uint32_t)4U;
   fsquarePowNminusOne((uint32_t)94U, buffer_a0, buffer_b);
@@ -634,7 +634,9 @@ static void exponent(uint64_t *a, uint64_t *result, uint64_t *tempBuffer)
   montgomery_multiplication_buffer(buffer_result1, buffer_result2, buffer_result1);
   montgomery_multiplication_buffer(buffer_result1, buffer_result3, buffer_result1);
   montgomery_multiplication_buffer(buffer_result1, a, buffer_result1);
-  memcpy(result, buffer_result1, (uint32_t)4U * sizeof (buffer_result1[0U]));
+  memcpy(result,
+    (uint64_t *)buffer_result1,
+    (uint32_t)4U * sizeof (((uint64_t *)buffer_result1)[0U]));
 }
 
 /* SNIPPET_END: exponent */
@@ -1091,9 +1093,9 @@ static void point_double(uint64_t *p, uint64_t *result, uint64_t *tempBuffer)
   point_double_compute_y3(pY, y3, x3, s1, m, buffer_for_y3);
   montgomery_multiplication_buffer(pY, pZ, pypz);
   multByTwo(pypz, z3);
-  memcpy(result, x3, (uint32_t)4U * sizeof (x3[0U]));
-  memcpy(result + (uint32_t)4U, y3, (uint32_t)4U * sizeof (y3[0U]));
-  memcpy(result + (uint32_t)8U, z3, (uint32_t)4U * sizeof (z3[0U]));
+  memcpy(result, (uint64_t *)x3, (uint32_t)4U * sizeof (((uint64_t *)x3)[0U]));
+  memcpy(result + (uint32_t)4U, (uint64_t *)y3, (uint32_t)4U * sizeof (((uint64_t *)y3)[0U]));
+  memcpy(result + (uint32_t)8U, (uint64_t *)z3, (uint32_t)4U * sizeof (((uint64_t *)z3)[0U]));
 }
 
 /* SNIPPET_END: point_double */
@@ -1184,9 +1186,13 @@ static void point_add(uint64_t *p, uint64_t *q, uint64_t *result, uint64_t *temp
   montgomery_multiplication_buffer(z1z2, h, z3_out1);
   copy_point_conditional(x3_out1, y3_out1, z3_out1, q, p);
   copy_point_conditional(x3_out1, y3_out1, z3_out1, p, q);
-  memcpy(result, x3_out1, (uint32_t)4U * sizeof (x3_out1[0U]));
-  memcpy(result + (uint32_t)4U, y3_out1, (uint32_t)4U * sizeof (y3_out1[0U]));
-  memcpy(result + (uint32_t)8U, z3_out1, (uint32_t)4U * sizeof (z3_out1[0U]));
+  memcpy(result, (uint64_t *)x3_out1, (uint32_t)4U * sizeof (((uint64_t *)x3_out1)[0U]));
+  memcpy(result + (uint32_t)4U,
+    (uint64_t *)y3_out1,
+    (uint32_t)4U * sizeof (((uint64_t *)y3_out1)[0U]));
+  memcpy(result + (uint32_t)8U,
+    (uint64_t *)z3_out1,
+    (uint32_t)4U * sizeof (((uint64_t *)z3_out1)[0U]));
 }
 
 /* SNIPPET_END: point_add */
@@ -1227,7 +1233,7 @@ static void fromDomain(uint64_t *f, uint64_t *result)
 
 static void copy_point(uint64_t *p, uint64_t *result)
 {
-  memcpy(result, p, (uint32_t)12U * sizeof (p[0U]));
+  memcpy(result, (uint64_t *)p, (uint32_t)12U * sizeof (((uint64_t *)p)[0U]));
 }
 
 /* SNIPPET_END: copy_point */
@@ -1644,7 +1650,7 @@ static void toUint64ChangeEndian(uint8_t *i, uint64_t *o)
 static void bufferToJac(uint64_t *p, uint64_t *result)
 {
   uint64_t *partPoint = result;
-  memcpy(partPoint, p, (uint32_t)8U * sizeof (p[0U]));
+  memcpy(partPoint, (uint64_t *)p, (uint32_t)8U * sizeof (((uint64_t *)p)[0U]));
   result[8U] = (uint64_t)1U;
   result[9U] = (uint64_t)0U;
   result[10U] = (uint64_t)0U;
@@ -1726,7 +1732,7 @@ static bool isOrderCorrect(uint64_t *p, uint64_t *tempBuffer)
 {
   uint64_t multResult[12U] = { 0U };
   uint64_t pBuffer[12U] = { 0U };
-  memcpy(pBuffer, p, (uint32_t)12U * sizeof (p[0U]));
+  memcpy(pBuffer, (uint64_t *)p, (uint32_t)12U * sizeof (((uint64_t *)p)[0U]));
   scalarMultiplicationI(pBuffer, multResult, order_buffer, tempBuffer);
   bool result = isPointAtInfinityPublic(multResult);
   return result;
@@ -1785,7 +1791,7 @@ static void montgomery_ladder_exponent(uint64_t *r)
     montgomery_multiplication_ecdsa_module(p, p, p);
     cswap0(bit, p, r);
   }
-  memcpy(r, p, (uint32_t)4U * sizeof (p[0U]));
+  memcpy(r, (uint64_t *)p, (uint32_t)4U * sizeof (((uint64_t *)p)[0U]));
 }
 
 /* SNIPPET_END: montgomery_ladder_exponent */
@@ -1856,7 +1862,7 @@ ecdsa_signature_step6(
   montgomery_multiplication_ecdsa_module(r, da, rda);
   fromDomainImpl(z, zBuffer);
   felem_add(rda, zBuffer, zBuffer);
-  memcpy(kInv, kFelem, (uint32_t)4U * sizeof (kFelem[0U]));
+  memcpy(kInv, (uint64_t *)kFelem, (uint32_t)4U * sizeof (((uint64_t *)kFelem)[0U]));
   montgomery_ladder_exponent(kInv);
   montgomery_multiplication_ecdsa_module(zBuffer, kInv, result);
 }
@@ -1998,7 +2004,9 @@ ecdsa_verification_core(
   norm(pointSum, pointSum, buff);
   bool resultIsPAI = isPointAtInfinityPublic(pointSum);
   uint64_t *xCoordinateSum = pointSum;
-  memcpy(xBuffer, xCoordinateSum, (uint32_t)4U * sizeof (xCoordinateSum[0U]));
+  memcpy(xBuffer,
+    (uint64_t *)xCoordinateSum,
+    (uint32_t)4U * sizeof (((uint64_t *)xCoordinateSum)[0U]));
   bool r1 = !resultIsPAI;
   return r1;
 }
