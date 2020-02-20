@@ -72,4 +72,4 @@ let secret_to_public a kpriv =
   | DH_Curve25519 -> Some (Spec.Curve25519.secret_to_public kpriv)
   | DH_P256 ->
       let xN, yN, res = Spec.DH.ecp256_dh_i kpriv in
-      if (v res = 0) then Some (xN @| yN) else None
+      if v res = 0 then Some (xN @| yN) else None
