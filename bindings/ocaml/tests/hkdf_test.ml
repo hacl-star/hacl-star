@@ -1,7 +1,9 @@
+open SharedDefs
+
 open Test_utils
 
 type hkdf_test =
-  { alg: SharedDefs.alg; name: string ; ikm: Bigstring.t; salt: Bigstring.t; info: Bigstring.t; expected_prk: Bigstring.t; expected_okm: Bigstring.t }
+  { alg: HashDefs.alg; name: string ; ikm: Bigstring.t; salt: Bigstring.t; info: Bigstring.t; expected_prk: Bigstring.t; expected_okm: Bigstring.t }
 
 let tests = [
   {

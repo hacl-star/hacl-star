@@ -47,7 +47,7 @@ module Make_EdDSA (Impl : sig
 end
 
 module Make_HashFunction (Impl : sig
-    val hash_alg : alg option
+    val hash_alg : HashDefs.alg option
     val hash : uint8 ptr -> uint32 -> uint8 ptr -> unit
   end) : HashFunction
 = struct

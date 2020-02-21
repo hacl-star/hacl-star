@@ -1,7 +1,9 @@
+open SharedDefs
+
 open Test_utils
 
 type hmac_test =
-  { alg: SharedDefs.alg; name: string ; key: Bigstring.t ; data: Bigstring.t ; expected: Bigstring.t }
+  { alg: HashDefs.alg; name: string ; key: Bigstring.t ; data: Bigstring.t ; expected: Bigstring.t }
 
 let tests = [
   {

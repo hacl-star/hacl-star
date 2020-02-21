@@ -3,18 +3,17 @@ open Unsigned
 module Hacl_Hash = Hacl_Hash_bindings.Bindings(Hacl_Hash_stubs)
 module Hacl_Spec = Hacl_Spec_bindings.Bindings(Hacl_Spec_stubs)
 
-type deprecated_alg =
-  | SHA1
-  | MD5 [@@deprecated]
-type alg =
-  | SHA2_224
-  | SHA2_256
-  | SHA2_384
-  | SHA2_512
-  | Legacy of deprecated_alg
-
 module HashDefs = struct
   open Hacl_Spec
+  type deprecated_alg =
+    | SHA1
+    | MD5 [@@deprecated]
+  type alg =
+    | SHA2_224
+    | SHA2_256
+    | SHA2_384
+    | SHA2_512
+    | Legacy of deprecated_alg
   let alg_definition = function
     | SHA2_224 -> spec_Hash_Definitions_hash_alg_Spec_Hash_Definitions_SHA2_224
     | SHA2_256 -> spec_Hash_Definitions_hash_alg_Spec_Hash_Definitions_SHA2_256

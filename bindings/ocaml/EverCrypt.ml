@@ -134,13 +134,13 @@ end
 
 module SHA2_224 : HashFunction =
   Make_HashFunction (struct
-    let hash_alg = Some SHA2_224
+    let hash_alg = Some HashDefs.SHA2_224
     let hash = EverCrypt_Hash.everCrypt_Hash_hash_224
 end)
 
 module SHA2_256 : HashFunction =
   Make_HashFunction (struct
-    let hash_alg = Some SHA2_256
+    let hash_alg = Some HashDefs.SHA2_256
     let hash = EverCrypt_Hash.everCrypt_Hash_hash_256
 end)
 

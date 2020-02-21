@@ -1,4 +1,5 @@
 open EverCrypt
+open SharedDefs
 
 open Test_utils
 
@@ -98,12 +99,12 @@ let test_md5 : hash_test =
 }
 
 let alg_definition = function
-  | SHA2_224 -> SharedDefs.SHA2_224
-  | SHA2_256 -> SharedDefs.SHA2_256
-  | SHA2_384 -> SharedDefs.SHA2_384
-  | SHA2_512 -> SharedDefs.SHA2_512
-  | SHA1 -> SharedDefs.Legacy SharedDefs.SHA1
-  | MD5 -> SharedDefs.Legacy SharedDefs.MD5
+  | SHA2_224 -> HashDefs.SHA2_224
+  | SHA2_256 -> HashDefs.SHA2_256
+  | SHA2_384 -> HashDefs.SHA2_384
+  | SHA2_512 -> HashDefs.SHA2_512
+  | SHA1 -> HashDefs.Legacy HashDefs.SHA1
+  | MD5 -> HashDefs.Legacy HashDefs.MD5
   | _ -> failwith "Algorithm not supported in agile Hashing API"
 
 let output_len = function

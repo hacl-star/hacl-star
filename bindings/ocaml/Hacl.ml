@@ -84,25 +84,25 @@ module Ed25519 : EdDSA =
 
 module SHA2_224 : HashFunction =
   Make_HashFunction (struct
-    let hash_alg = Some SHA2_224
+    let hash_alg = Some HashDefs.SHA2_224
     let hash = Hacl_Hash.hacl_Hash_SHA2_hash_224
 end)
 
 module SHA2_256 : HashFunction =
   Make_HashFunction (struct
-    let hash_alg = Some SHA2_256
+    let hash_alg = Some HashDefs.SHA2_256
     let hash = Hacl_Hash.hacl_Hash_SHA2_hash_256
 end)
 
 module SHA2_384 : HashFunction =
   Make_HashFunction (struct
-    let hash_alg = Some SHA2_384
+    let hash_alg = Some HashDefs.SHA2_384
     let hash = Hacl_Hash.hacl_Hash_SHA2_hash_384
 end)
 
 module SHA2_512 : HashFunction =
   Make_HashFunction (struct
-    let hash_alg = Some SHA2_512
+    let hash_alg = Some HashDefs.SHA2_512
     let hash = Hacl_Hash.hacl_Hash_SHA2_hash_512
 end)
 
@@ -132,13 +132,13 @@ end)
 
 module SHA1 : HashFunction =
   Make_HashFunction (struct
-    let hash_alg = Some (Legacy SHA1)
+    let hash_alg = Some HashDefs.(Legacy SHA1)
     let hash = Hacl_Hash.hacl_Hash_SHA1_legacy_hash
 end) [@@deprecated]
 
 module MD5 : HashFunction =
   Make_HashFunction (struct
-    let hash_alg = Some (Legacy MD5)
+    let hash_alg = Some HashDefs.(Legacy MD5)
     let hash = Hacl_Hash.hacl_Hash_MD5_legacy_hash
 end) [@@deprecated]
 
