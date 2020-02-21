@@ -424,14 +424,6 @@ MerkleTree_Low_mt_get_path(
   uint8_t *root
 );
 
-void
-MerkleTree_Low_VectorExtras_move_left___uint8_t_(
-  uint8_t **b,
-  uint32_t dst,
-  uint32_t src,
-  uint32_t l
-);
-
 bool MerkleTree_Low_mt_flush_to_pre(const MerkleTree_Low_merkle_tree *mt, uint64_t idx);
 
 void MerkleTree_Low_mt_flush_to(MerkleTree_Low_merkle_tree *mt, uint64_t idx);

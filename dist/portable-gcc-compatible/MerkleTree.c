@@ -1620,24 +1620,6 @@ MerkleTree_Low_mt_get_path(
 
 /* SNIPPET_END: MerkleTree_Low_mt_get_path */
 
-/* SNIPPET_START: MerkleTree_Low_VectorExtras_move_left___uint8_t_ */
-
-void
-MerkleTree_Low_VectorExtras_move_left___uint8_t_(
-  uint8_t **b,
-  uint32_t dst,
-  uint32_t src,
-  uint32_t l
-)
-{
-  for (uint32_t i = (uint32_t)0U; i < l; i++)
-  {
-    b[dst + i] = b[src + i];
-  }
-}
-
-/* SNIPPET_END: MerkleTree_Low_VectorExtras_move_left___uint8_t_ */
-
 /* SNIPPET_START: mt_flush_to_ */
 
 static void
@@ -1674,7 +1656,11 @@ mt_flush_to_(
     else
     {
       uint32_t n_shifted = hvec.sz - ofs;
-      MerkleTree_Low_VectorExtras_move_left___uint8_t_(hvec.vs, (uint32_t)0U, ofs, n_shifted);
+      for (uint32_t i = (uint32_t)0U; i < n_shifted; i++)
+      {
+        uint8_t *uu____0 = hvec.vs[ofs + i];
+        hvec.vs[(uint32_t)0U + i] = uu____0;
+      }
       flushed =
         ((LowStar_Vector_vector_str___uint8_t_){ .sz = n_shifted, .cap = hvec.cap, .vs = hvec.vs });
     }
