@@ -98,12 +98,12 @@ let test_md5 : hash_test =
 }
 
 let alg_definition = function
-  | SHA2_224 -> Hash.SHA2_224
-  | SHA2_256 -> Hash.SHA2_256
-  | SHA2_384 -> Hash.SHA2_384
-  | SHA2_512 -> Hash.SHA2_512
-  | SHA1 -> Hash.Legacy Hash.SHA1
-  | MD5 -> Hash.Legacy Hash.MD5
+  | SHA2_224 -> SharedDefs.SHA2_224
+  | SHA2_256 -> SharedDefs.SHA2_256
+  | SHA2_384 -> SharedDefs.SHA2_384
+  | SHA2_512 -> SharedDefs.SHA2_512
+  | SHA1 -> SharedDefs.Legacy SharedDefs.SHA1
+  | MD5 -> SharedDefs.Legacy SharedDefs.MD5
   | _ -> failwith "Algorithm not supported in agile Hashing API"
 
 let output_len = function

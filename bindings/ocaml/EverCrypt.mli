@@ -45,15 +45,6 @@ module Ed25519 : EdDSA
 
 module Hash : sig
   type t
-  type deprecated_alg =
-    | SHA1
-    | MD5 [@@deprecated]
-  type alg =
-    | SHA2_224
-    | SHA2_256
-    | SHA2_384
-    | SHA2_512
-    | Legacy of deprecated_alg
   val init : alg -> t
   val update : t -> Bigstring.t -> unit
   val finish : t -> Bigstring.t -> unit
@@ -66,8 +57,8 @@ module SHA2_224 : HashFunction
 module SHA2_256 : HashFunction
 
 module HMAC : sig
-  val is_supported_alg : Hash.alg -> bool
-  val mac : Hash.alg -> Bigstring.t -> Bigstring.t -> Bigstring.t -> unit
+  val is_supported_alg : SharedDefs.alg -> bool
+  val mac : SharedDefs.alg -> Bigstring.t -> Bigstring.t -> Bigstring.t -> unit
 end
 
 module HMAC_SHA2_256 : MAC
@@ -79,8 +70,8 @@ module HMAC_SHA2_512 : MAC
 module Poly1305 : MAC
 
 module HKDF : sig
-  val expand : Hash.alg -> Bigstring.t -> Bigstring.t -> Bigstring.t -> unit
-  val extract : Hash.alg -> Bigstring.t -> Bigstring.t -> Bigstring.t -> unit
+  val expand : SharedDefs.alg -> Bigstring.t -> Bigstring.t -> Bigstring.t -> unit
+  val extract : SharedDefs.alg -> Bigstring.t -> Bigstring.t -> Bigstring.t -> unit
 end
 
 module HKDF_SHA2_256 : HKDF
@@ -91,7 +82,7 @@ module HKDF_SHA2_512 : HKDF
 
 module DRBG : sig
   type t
-  val instantiate : ?personalization_string: Bigstring.t -> Hash.alg -> t option
+  val instantiate : ?personalization_string: Bigstring.t -> SharedDefs.alg -> t option
   val reseed : ?additional_input: Bigstring.t -> t -> bool
   val generate : ?additional_input: Bigstring.t -> t -> Bigstring.t -> bool
   val uninstantiate : t -> unit

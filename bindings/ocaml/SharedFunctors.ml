@@ -47,10 +47,15 @@ module Make_EdDSA (Impl : sig
 end
 
 module Make_HashFunction (Impl : sig
+    val hash_alg : alg option
     val hash : uint8 ptr -> uint32 -> uint8 ptr -> unit
   end) : HashFunction
 = struct
-  let hash input output = Impl.hash (uint8_ptr input) (size_uint32 input) (uint8_ptr output)
+  let hash input output =
+    (match Impl.hash_alg with
+    | Some alg -> assert (Bigstring.size output = HashDefs.digest_len alg)
+    | None -> ());
+    Impl.hash (uint8_ptr input) (size_uint32 input) (uint8_ptr output)
 end
 
 module Make_Poly1305 (Impl : sig

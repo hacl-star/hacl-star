@@ -111,57 +111,45 @@ module Ed25519 : EdDSA =
   end)
 
 module Hash = struct
-  open Hacl_Spec
+  open HashDefs
   open EverCrypt_Hash
 
-  type t = everCrypt_Hash_Incremental_state_s ptr
-  type deprecated_alg =
-    | SHA1
-    | MD5 [@@deprecated]
-  type alg =
-    | SHA2_224
-    | SHA2_256
-    | SHA2_384
-    | SHA2_512
-    | Legacy of deprecated_alg
-  let alg_definition = function
-    | SHA2_224 -> spec_Hash_Definitions_hash_alg_Spec_Hash_Definitions_SHA2_224
-    | SHA2_256 -> spec_Hash_Definitions_hash_alg_Spec_Hash_Definitions_SHA2_256
-    | SHA2_384 -> spec_Hash_Definitions_hash_alg_Spec_Hash_Definitions_SHA2_384
-    | SHA2_512 -> spec_Hash_Definitions_hash_alg_Spec_Hash_Definitions_SHA2_512
-    | Legacy SHA1 -> spec_Hash_Definitions_hash_alg_Spec_Hash_Definitions_SHA1
-    | Legacy MD5 -> spec_Hash_Definitions_hash_alg_Spec_Hash_Definitions_MD5
+  type t = alg * everCrypt_Hash_Incremental_state_s ptr
   let init alg =
-    let alg = alg_definition alg in
-    let st = everCrypt_Hash_Incremental_create_in alg in
+    let alg_spec = alg_definition alg in
+    let st = everCrypt_Hash_Incremental_create_in alg_spec in
     everCrypt_Hash_Incremental_init st;
-    st
+    (alg, st)
   let update st data =
-    everCrypt_Hash_Incremental_update st (uint8_ptr data) (size_uint32 data)
+    everCrypt_Hash_Incremental_update (snd st) (uint8_ptr data) (size_uint32 data)
   let finish st dst =
-    everCrypt_Hash_Incremental_finish st (uint8_ptr dst)
+    assert (Bigstring.size dst = digest_len (fst st));
+    everCrypt_Hash_Incremental_finish (snd st) (uint8_ptr dst)
   let free st =
-    everCrypt_Hash_Incremental_free st
+    everCrypt_Hash_Incremental_free (snd st)
   let hash alg dst input =
+    assert (Bigstring.size dst = digest_len alg);
     everCrypt_Hash_hash (alg_definition alg) (uint8_ptr dst) (uint8_ptr input) (size_uint32 input)
 end
 
 module SHA2_224 : HashFunction =
   Make_HashFunction (struct
+    let hash_alg = Some SHA2_224
     let hash = EverCrypt_Hash.everCrypt_Hash_hash_224
 end)
 
 module SHA2_256 : HashFunction =
   Make_HashFunction (struct
+    let hash_alg = Some SHA2_256
     let hash = EverCrypt_Hash.everCrypt_Hash_hash_256
 end)
 
 module HMAC = struct
   open EverCrypt_HMAC
 
-  let is_supported_alg alg = everCrypt_HMAC_is_supported_alg (Hash.alg_definition alg)
+  let is_supported_alg alg = everCrypt_HMAC_is_supported_alg (HashDefs.alg_definition alg)
   let mac alg dst key data =
-    everCrypt_HMAC_compute (Hash.alg_definition alg) (uint8_ptr dst) (uint8_ptr key) (size_uint32 key) (uint8_ptr data) (size_uint32 data)
+    everCrypt_HMAC_compute (HashDefs.alg_definition alg) (uint8_ptr dst) (uint8_ptr key) (size_uint32 key) (uint8_ptr data) (size_uint32 data)
 end
 
 module HMAC_SHA2_256 : MAC =
@@ -187,8 +175,8 @@ end)
 module HKDF = struct
   open EverCrypt_HKDF
 
-  let expand alg okm prk info = everCrypt_HKDF_expand (Hash.alg_definition alg) (uint8_ptr okm) (uint8_ptr prk) (size_uint32 prk) (uint8_ptr info) (size_uint32 info) (size_uint32 okm)
-  let extract alg prk salt ikm = everCrypt_HKDF_extract (Hash.alg_definition alg) (uint8_ptr prk) (uint8_ptr salt) (size_uint32 salt) (uint8_ptr ikm) (size_uint32 ikm)
+  let expand alg okm prk info = everCrypt_HKDF_expand (HashDefs.alg_definition alg) (uint8_ptr okm) (uint8_ptr prk) (size_uint32 prk) (uint8_ptr info) (size_uint32 info) (size_uint32 okm)
+  let extract alg prk salt ikm = everCrypt_HKDF_extract (HashDefs.alg_definition alg) (uint8_ptr prk) (uint8_ptr salt) (size_uint32 salt) (uint8_ptr ikm) (size_uint32 ikm)
 end
 
 module HKDF_SHA2_256 : HKDF =
@@ -215,7 +203,7 @@ module DRBG = struct
   type t = everCrypt_DRBG_state_s ptr
   let instantiate ?(personalization_string=Bigstring.empty) alg =
     if HMAC.is_supported_alg alg then
-      let st = everCrypt_DRBG_create (Hash.alg_definition alg) in
+      let st = everCrypt_DRBG_create (HashDefs.alg_definition alg) in
       if everCrypt_DRBG_instantiate st (uint8_ptr personalization_string) (size_uint32 personalization_string) then
         Some st
       else

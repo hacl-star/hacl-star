@@ -1,11 +1,11 @@
 open Test_utils
 
 type hkdf_test =
-  { alg: EverCrypt.Hash.alg; name: string ; ikm: Bigstring.t; salt: Bigstring.t; info: Bigstring.t; expected_prk: Bigstring.t; expected_okm: Bigstring.t }
+  { alg: SharedDefs.alg; name: string ; ikm: Bigstring.t; salt: Bigstring.t; info: Bigstring.t; expected_prk: Bigstring.t; expected_okm: Bigstring.t }
 
 let tests = [
   {
-    alg = EverCrypt.Hash.SHA2_256;
+    alg = SHA2_256;
     name = "SHA2_256 Test 1";
     ikm = Bigstring.of_string "\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b\x0b";
     salt = Bigstring.of_string "\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c";
@@ -59,5 +59,5 @@ let test_nonagile (v: hkdf_test) t alg expand extract =
 (* TODO: find tests for the other hash functions *)
 let _ =
   List.iter test_agile tests;
-  List.iter (fun v -> test_nonagile v "EverCrypt.HKDF" EverCrypt.Hash.SHA2_256 EverCrypt.HKDF_SHA2_256.expand EverCrypt.HKDF_SHA2_256.extract) tests;
-  List.iter (fun v -> test_nonagile v "Hacl.HKDF" EverCrypt.Hash.SHA2_256 Hacl.HKDF_SHA2_256.expand Hacl.HKDF_SHA2_256.extract) tests
+  List.iter (fun v -> test_nonagile v "EverCrypt.HKDF" SHA2_256 EverCrypt.HKDF_SHA2_256.expand EverCrypt.HKDF_SHA2_256.extract) tests;
+  List.iter (fun v -> test_nonagile v "Hacl.HKDF" SHA2_256 Hacl.HKDF_SHA2_256.expand Hacl.HKDF_SHA2_256.extract) tests
