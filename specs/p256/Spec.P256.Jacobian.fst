@@ -4,7 +4,7 @@ open FStar.Mul
 open Spec.P256.Field
 open Spec.P256
 
-#set-options "--fuel 0 --ifuel 0 --z3rlimit 60"
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 20"
 
 ///
 /// NIST P-256 operations on Jacobian coordinates
@@ -65,7 +65,7 @@ let negJ (x, y, z) =
 
 
 val toJacobian: point -> pointJ
-let toJacobian p = 
+let toJacobian p =
   allow_inversion point;
   match p with
   | O -> (0, 0, 0)
@@ -97,7 +97,7 @@ val doubleJ_correct (p:point{p <> O}) : Lemma
 let doubleJ_correct p =
   allow_inversion point;
   let P x y = p in
-  if y = 0 then 
+  if y = 0 then
     begin
     calc (==) {
       toJacobian (double p);
@@ -109,13 +109,13 @@ let doubleJ_correct p =
       normJ (doubleJ (toJacobian p));
     }
     end
-  else 
+  else
     begin
     mult_eq_zero 2 y;
     let lambda = (3 *% x *% x -% 3) /% (2 *% y) in
     let xr = lambda *% lambda -% 2 *% x in
-    let yr = lambda *% (x -% xr) -% y in    
-    assert (toJacobian (double p) == (xr, yr, 1)); 
+    let yr = lambda *% (x -% xr) -% y in
+    assert (toJacobian (double p) == (xr, yr, 1));
 
     mul_identity (2 *% y);
     mul_identity 1;
@@ -123,6 +123,7 @@ let doubleJ_correct p =
     let b = 8 *% y *% y *% y *% y in
     let c = 3 *% (x -% 1) *% (x +% 1) in
     let d = c *% c -% 2 *% a in
+
     let xr' = d in
     let yr' = c *% (a -% d) -% b in
     let zr' = 2 *% y in
@@ -131,12 +132,13 @@ let doubleJ_correct p =
     mult_eq_zero zr' zr';
     mult_eq_zero (zr' *% zr') zr';
     let xr'' = xr' /% (zr' *% zr') in
-    let yr'' = yr' /% (zr' *% zr' *% zr') in   
+    let yr'' = yr' /% (zr' *% zr' *% zr') in
     assert (normJ (doubleJ (toJacobian p)) == (xr'', yr'', 1));
-    
-    assert (zr' *% zr' == 4 *% y *% y) 
+
+
+    assert (zr' *% zr' == 4 *% y *% y)
       by (p256_field ());
-    assert (c == 3 *% x *% x -% 3) 
+    assert (c == 3 *% x *% x -% 3)
       by (p256_field ());
     assert (c *% c == 9 *% x *% x *% x *% x -% 18 *% x *% x +% 9)
       by (p256_field ());
@@ -158,9 +160,7 @@ let doubleJ_correct p =
                       (4 *% y *% y) (~%(2 *% x)) }
       (9 *% x *% x *% x *% x -% 18 *% x *% x +% 9 +% (4 *% y *% y) *% ~%(2 *% x)) /%
       (4 *% y *% y);
-      == { assert ((4 *% y *% y) *% ~%(2 *% x) == ~%(8 *% x *% y *% y))
-           by (p256_field ())
-         }
+      == { assert ((4 *% y *% y) *% ~%(2 *% x) == ~%(8 *% x *% y *% y)) by (p256_field ())}
       (9 *% x *% x *% x *% x -% 18 *% x *% x +% 9 -% 8 *% x *% y *% y) /%
       (4 *% y *% y);
       == { }
@@ -170,6 +170,51 @@ let doubleJ_correct p =
       == { }
       xr'';
     };
-    
-    assume (yr == yr'')
-    end
+
+    calc (==) {
+      ((2 *% y) *% (2 *% y)) *%
+      ((3 *% x *% x -% 3) *% (x -% d /% ((2 *% y) *% (2 *% y))) +% (2 *% y) *% ~%y);
+      == { }
+      (4 *% y *% y) *%
+      ((3 *% x *% x -% 3) *% (x -% d /% (4 *% y *% y)) +% (2 *% y) *% ~%y);
+      == {
+        assert (
+          (4 *% y *% y) *%
+          ((3 *% x *% x -% 3) *% (x -% d /% (4 *% y *% y)) +% (2 *% y) *% ~%y) ==
+          c *% (a -% d *% ((4 *% y *% y) /% (4 *% y *% y))) -% b)
+        by (p256_field ())
+      }
+      c *% (a -% d *% ((4 *% y *% y) /% (4 *% y *% y))) -% b;
+      == { mul_inverse (4 *% y *% y) }
+      c *% (a -% d *% one) -% b;
+      == { _ by (p256_field ()) }
+      c *% (a -% d) -% b;
+      == { }
+      yr';
+    };
+
+    calc (==) {
+      yr;
+      == { }
+      ((3 *% x *% x -% 3) /% (2 *% y)) *% (x -% xr) -% y;
+      == { mul_associative (3 *% x *% x -% 3) (inverse (2 *% y)) (x -% xr);
+           mul_commutative (inverse (2 *% y)) (x -% xr);
+           mul_associative (3 *% x *% x -% 3) (x -% xr) (inverse (2 *% y)) }
+      ((3 *% x *% x -% 3) *% (x -% xr)) /% (2 *% y) -% y;
+      == { div_plus_l ((3 *% x *% x -% 3) *% (x -% xr)) (2 *% y) ~%y }
+      ((3 *% x *% x -% 3) *% (x -% xr) +% (2 *% y) *% ~%y) /% (2 *% y);
+      == { }
+      ((3 *% x *% x -% 3) *% (x -% d /% ((2 *% y) *% (2 *% y))) +% (2 *% y) *% ~%y) /% (2 *% y);
+      == { div_mul_eq_l
+            ((3 *% x *% x -% 3) *% (x -% d /% ((2 *% y) *% (2 *% y))) +% (2 *% y) *% ~%y)
+            (2 *% y) ((2 *% y) *% (2 *% y));
+           assert ((((2 *% y) *% (2 *% y)) *% (2 *% y)) == zr' *% zr' *% zr')
+           by (p256_field ())
+         }
+      (((2 *% y) *% (2 *% y)) *%
+       ((3 *% x *% x -% 3) *% (x -% d /% ((2 *% y) *% (2 *% y))) +% (2 *% y) *% ~%y)) /%
+      (zr' *% zr' *% zr');
+      == { }
+      yr'';
+    }
+  end

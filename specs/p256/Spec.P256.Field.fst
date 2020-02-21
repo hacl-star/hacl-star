@@ -606,3 +606,20 @@ val div_plus_l (a b c:elem) : Lemma
 let div_plus_l a b c =
   assert ((a +% b *% c) /% b == a /% b +% (b /% b) *% c) by (p256_field ());
   mul_inverse b
+
+val div_mul_eq_l (a b c:elem) : Lemma
+  (requires b <> 0 /\ c <> 0)
+  (ensures  (mult_eq_zero c b; a /% b == (c *% a) /% (c *% b)))
+let div_mul_eq_l a b c =
+  mult_eq_zero c b;
+  calc (==) {
+    a /% b;
+    == { mul_identity (a *% b) }
+    one *% (a /% b);
+    == { mul_inverse c }
+    (c /% c) *% (a /% b);
+    == { pow_mul_reorder c (inverse c) a (inverse b) }
+    (c *% a) *% (inverse c *% inverse b);
+    == { inverse_mul c b }
+    (c *% a) /% (c *% b);
+  }
