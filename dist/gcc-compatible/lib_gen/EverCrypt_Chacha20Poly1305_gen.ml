@@ -8,3 +8,4 @@ let _ =
    Format.printf "#include \"EverCrypt_Chacha20Poly1305.h\"\n");
   Cstubs.write_c Format.std_formatter ~prefix:""
     (module EverCrypt_Chacha20Poly1305_bindings.Bindings)
+  

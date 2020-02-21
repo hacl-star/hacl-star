@@ -7,4 +7,5 @@ module Bindings(F:Cstubs.FOREIGN) =
         ((ptr uint8_t) @->
            ((ptr uint8_t) @->
               (uint32_t @-> ((ptr uint8_t) @-> (returning void)))))
+      
   end
