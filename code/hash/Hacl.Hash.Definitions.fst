@@ -14,7 +14,7 @@ open FStar.Mul
 (** The low-level types that our clients need to be aware of, in order to
     successfully call this module. *)
 
-inline_for_extraction
+noextract inline_for_extraction
 type state (a: hash_alg) =
   b:B.buffer (word a) { B.length b = state_word_length a }
 
@@ -50,7 +50,7 @@ let hash_len (a: hash_alg): n:size_t { v n = hash_length a } =
   | SHA2_384 -> 48ul
   | SHA2_512 -> 64ul
 
-inline_for_extraction
+noextract inline_for_extraction
 let blocks_t (a: hash_alg) =
   b:B.buffer uint8 { B.length b % block_length a = 0 }
 
@@ -59,7 +59,7 @@ let hash_t (a: hash_alg) = b:B.buffer uint8 { B.length b = hash_length a }
 
 (** The types of all stateful operations for a hash algorithm. *)
 
-inline_for_extraction
+noextract inline_for_extraction
 let alloca_st (a: hash_alg) = unit -> ST.StackInline (state a)
   (requires (fun h ->
     HS.is_stack_region (HS.get_tip h)))
@@ -70,7 +70,7 @@ let alloca_st (a: hash_alg) = unit -> ST.StackInline (state a)
     Seq.equal (B.as_seq h1 s) (Spec.Agile.Hash.init a) /\
     LowStar.Monotonic.Buffer.alloc_post_mem_common s h0 h1 (Spec.Agile.Hash.init a)))
 
-inline_for_extraction
+noextract inline_for_extraction
 let init_st (a: hash_alg) = s:state a -> ST.Stack unit
   (requires (fun h ->
     B.live h s))
@@ -78,7 +78,7 @@ let init_st (a: hash_alg) = s:state a -> ST.Stack unit
     M.(modifies (loc_buffer s) h0 h1) /\
     Seq.equal (B.as_seq h1 s) (Spec.Agile.Hash.init a)))
 
-inline_for_extraction
+noextract inline_for_extraction
 let update_st (a: hash_alg) =
   s:state a ->
   block:B.buffer uint8 { B.length block = block_length a } ->
@@ -89,7 +89,7 @@ let update_st (a: hash_alg) =
       M.(modifies (loc_buffer s) h0 h1) /\
       Seq.equal (B.as_seq h1 s) (Spec.Agile.Hash.update a (B.as_seq h0 s) (B.as_seq h0 block))))
 
-inline_for_extraction
+noextract inline_for_extraction
 let pad_st (a: hash_alg) = len:len_t a -> dst:B.buffer uint8 ->
   ST.Stack unit
     (requires (fun h ->
@@ -102,7 +102,7 @@ let pad_st (a: hash_alg) = len:len_t a -> dst:B.buffer uint8 ->
 
 // Note: we cannot take more than 4GB of data because we are currently
 // constrained by the size of buffers...
-inline_for_extraction
+noextract inline_for_extraction
 let update_multi_st (a: hash_alg) =
   s:state a ->
   blocks:blocks_t a ->
@@ -115,7 +115,7 @@ let update_multi_st (a: hash_alg) =
       Seq.equal (B.as_seq h1 s)
         (Spec.Agile.Hash.update_multi a (B.as_seq h0 s) (B.as_seq h0 blocks))))
 
-inline_for_extraction
+noextract inline_for_extraction
 let update_last_st (a: hash_alg) =
   s:state a ->
   prev_len:len_t a { len_v a prev_len % block_length a = 0 } ->
@@ -129,7 +129,7 @@ let update_last_st (a: hash_alg) =
       Seq.equal (B.as_seq h1 s)
         (Spec.Hash.Incremental.update_last a (B.as_seq h0 s) (len_v a prev_len) (B.as_seq h0 input))))
 
-inline_for_extraction
+noextract inline_for_extraction
 let finish_st (a: hash_alg) = s:state a -> dst:hash_t a -> ST.Stack unit
   (requires (fun h ->
     B.disjoint s dst /\
@@ -139,7 +139,7 @@ let finish_st (a: hash_alg) = s:state a -> dst:hash_t a -> ST.Stack unit
     M.(modifies (loc_buffer dst) h0 h1) /\
     Seq.equal (B.as_seq h1 dst) (Spec.Hash.PadFinish.finish a (B.as_seq h0 s))))
 
-inline_for_extraction
+noextract inline_for_extraction
 let hash_st (a: hash_alg) =
   input:B.buffer uint8 ->
   input_len:size_t { B.length input = v input_len } ->
