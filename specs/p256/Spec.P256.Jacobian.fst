@@ -38,7 +38,7 @@ let doubleJ (x, y, z) =
 
 
 val addJ: p:pointJ -> q:pointJ{let _,_,z = q in z = 1} -> pointJ
-let addJ (xp, yp, zp) (xq, yq, zq) =
+let addJ (xp, yp, zp) (xq, yq, _) =
   let a = xq *% (zp *% zp) in
   let b = yq *% (zp *% zp *% zp) in
   let c = a -% xp in
@@ -87,9 +87,103 @@ let negJ_correct p =
   allow_inversion point
 
 
-assume
 val addJ_correct (p:point) (q:point{p <> q /\ p <> O /\ q <> O}) : Lemma
   (toJacobian (add_neq p q) == normJ (addJ (toJacobian p) (toJacobian q)))
+let addJ_correct p q =
+  allow_inversion point;
+  let P xp yp = p in
+  let P xq yq = q in
+  if xp = xq then
+    begin
+    mul_identity 1;
+    mul_one_r xq;
+    add_opp xq;
+    mul_identity (xq -% xp)
+    end
+  else
+    begin
+    sub_neq xq xp;
+    let lambda = (yq -% yp) /% (xq -% xp) in
+    let xr = lambda *% lambda -% xp -% xq in
+    let yr = lambda *% (xp -% xr) -% yp in
+    assert (toJacobian (add_neq p q) == (xr, yr, 1));
+
+    let c = xq -% xp in
+    let d = yq -% yp in
+    let xr' = d *% d -% (c *% c *% c +% 2 *% xp *% c *% c) in
+    let yr' = d *% (xp *% c *% c -% xr') -% yp *% c *% c *% c in
+    let zr' = xq -% xp in
+    mul_identity 1;
+    mul_one_r xq;
+    mul_one_r yq;
+    mul_identity (xq -% xp);
+    assert (addJ (toJacobian p) (toJacobian q) == (xr', yr', zr'));
+
+    mult_eq_zero zr' zr';
+    mult_eq_zero (zr' *% zr') zr';
+    let xr'' = xr' /% (zr' *% zr') in
+    let yr'' = yr' /% (zr' *% zr' *% zr') in
+    assert (normJ (addJ (toJacobian p) (toJacobian q)) == (xr'', yr'', 1));
+
+    calc (==) {
+      xr;
+      == { assert (xr == (yq *% yq -% 2 *% yp *% yq +% yp *% yp) *%
+                  (inverse zr' *% inverse zr') -% (xp +% xq))
+           by (p256_field ())
+         }
+      (yq *% yq -% 2 *% yp *% yq +% yp *% yp) *% (inverse zr' *% inverse zr') -%
+      (xp +% xq);
+      == { inverse_mul zr' zr' }
+      (yq *% yq -% 2 *% yp *% yq +% yp *% yp) /% (zr' *% zr') -% (xp +% xq);
+      == { div_plus_l (yq *% yq -% 2 *% yp *% yq +% yp *% yp)
+                      (zr' *% zr') ~%(xp +% xq) }
+      (yq *% yq -% 2 *% yp *% yq +% yp *% yp +% (zr' *% zr') *% ~%(xp +% xq)) /%
+      (zr' *% zr');
+      == { assert (xr' ==
+             yq *% yq -% 2 *% yp *% yq +% yp *% yp +% (zr' *% zr') *% ~%(xp +% xq))
+           by (p256_field ())
+         }
+      xr' /% (zr' *% zr');
+      == { }
+      xr'';
+    };
+
+    calc (==) {
+      yr;
+      == { }
+      (d /% c) *% (xp -% xr) -% yp;
+      == { mul_associative d (inverse c) (xp -% xr);
+           mul_commutative (inverse c) (xp -% xr);
+           mul_associative d (xp -% xr) (inverse c) }
+      (d *% (xp -% xr)) /% c -% yp;
+      == { div_plus_l (d *% (xp -% xr)) c ~%yp }
+      (d *% (xp -% xr) +% c *% ~%yp) /% c;
+      == { }
+      (d *% (xp -% xr' /% (c *% c)) +% c *% ~%yp) /% c;
+      == { div_mul_eq_l (d *% (xp -% xr' /% (c *% c)) +% c *% ~%yp) c (c *% c) }
+      (c *% c *% (d *% (xp -% xr' /% (c *% c)) +% c *% ~%yp)) /% (c *% c *% c);
+      == {
+         calc (==) {
+           c *% c *% (d *% (xp -% xr' /% (c *% c)) +% c *% ~%yp);
+           == { assert (
+                  c *% c *% (d *% (xp -% xr' /% (c *% c)) +% c *% ~%yp) ==
+                  d *% (xp *% c *% c -% ((c *% c) /% (c *% c)) *% xr') -%
+                  yp *% c *% c *% c)
+                by (p256_field ())
+              }
+           d *% (xp *% c *% c -% ((c *% c) /% (c *% c)) *% xr') -%
+           yp *% c *% c *% c;
+           == { mul_inverse (c *% c); mul_one_r xr' }
+           d *% (xp *% c *% c -% xr') -% yp *% c *% c *% c;
+           == { }
+           yr';
+         }
+         }
+      yr' /% (c *% c *% c);
+      == { }
+      yr'';
+    }
+    end
 
 
 val doubleJ_correct (p:point{p <> O}) : Lemma
@@ -123,7 +217,7 @@ let doubleJ_correct p =
     let xr' = d in
     let yr' = c *% (a -% d) -% b in
     let zr' = 2 *% y in
-    mul_identity (2 *% y);
+    mul_identity zr';
     mul_identity 1;
     assert (doubleJ (toJacobian p) == (xr', yr', zr'));
 
@@ -133,31 +227,25 @@ let doubleJ_correct p =
     let yr'' = yr' /% (zr' *% zr' *% zr') in
     assert (normJ (doubleJ (toJacobian p)) == (xr'', yr'', 1));
 
-    assert (zr' *% zr' == 4 *% y *% y) by (p256_field ());
-
     calc (==) {
       xr;
       == { assert (xr == (9 *% x *% x *% x *% x -% 18 *% x *% x +% 9) *%
-                  (inverse (2 *% y) *% inverse (2 *% y)) -% 2 *% x)
-           by (p256_field ())      
-         }
-      (9 *% x *% x *% x *% x -% 18 *% x *% x +% 9) *%
-      (inverse (2 *% y) *% inverse (2 *% y)) -% 2 *% x;
-      == { inverse_mul (2 *% y) (2 *% y) }
-      (9 *% x *% x *% x *% x -% 18 *% x *% x +% 9) /% (4 *% y *% y) -% 2 *% x;
-      == { div_plus_l (9 *% x *% x *% x *% x -% 18 *% x *% x +% 9)
-                      (4 *% y *% y) (~%(2 *% x)) }
-      (9 *% x *% x *% x *% x -% 18 *% x *% x +% 9 +% (4 *% y *% y) *% ~%(2 *% x)) /%
-      (4 *% y *% y);
-      == { assert ((4 *% y *% y) *% ~%(2 *% x) == ~%(8 *% x *% y *% y)) by (p256_field ())}
-      (9 *% x *% x *% x *% x -% 18 *% x *% x +% 9 -% 8 *% x *% y *% y) /%
-      (4 *% y *% y);
-      == { assert (d == 9 *% x *% x *% x *% x -% 18 *% x *% x +% 9 -% 8 *% x *% y *% y)
+                         (inverse zr' *% inverse zr') -% 2 *% x)
            by (p256_field ())
          }
-      d /% (4 *% y *% y);
-      == { }
-      d /% (zr' *% zr');
+      (9 *% x *% x *% x *% x -% 18 *% x *% x +% 9) *%
+      (inverse zr' *% inverse zr') -% 2 *% x;
+      == { inverse_mul zr' zr' }
+      (9 *% x *% x *% x *% x -% 18 *% x *% x +% 9) /% (zr' *% zr') -% 2 *% x;
+      == { div_plus_l (9 *% x *% x *% x *% x -% 18 *% x *% x +% 9)
+                      (zr' *% zr') ~%(2 *% x) }
+      (9 *% x *% x *% x *% x -% 18 *% x *% x +% 9 +% (zr' *% zr') *% ~%(2 *% x)) /%
+      (zr' *% zr');
+      == { assert (xr' ==
+             (9 *% x *% x *% x *% x -% 18 *% x *% x +% 9 +% (zr' *% zr') *% ~%(2 *% x)))
+           by (p256_field ())
+         }
+      xr' /% (zr' *% zr');
       == { }
       xr'';
     };
@@ -165,47 +253,40 @@ let doubleJ_correct p =
     calc (==) {
       yr;
       == { }
-      ((3 *% x *% x -% 3) /% (2 *% y)) *% (x -% xr) -% y;
-      == { mul_associative (3 *% x *% x -% 3) (inverse (2 *% y)) (x -% xr);
-           mul_commutative (inverse (2 *% y)) (x -% xr);
-           mul_associative (3 *% x *% x -% 3) (x -% xr) (inverse (2 *% y)) }
-      ((3 *% x *% x -% 3) *% (x -% xr)) /% (2 *% y) -% y;
-      == { div_plus_l ((3 *% x *% x -% 3) *% (x -% xr)) (2 *% y) ~%y }
-      ((3 *% x *% x -% 3) *% (x -% xr) +% (2 *% y) *% ~%y) /% (2 *% y);
+      ((3 *% x *% x -% 3) /% zr') *% (x -% xr) -% y;
+      == { mul_associative (3 *% x *% x -% 3) (inverse zr') (x -% xr);
+           mul_commutative (inverse zr') (x -% xr);
+           mul_associative (3 *% x *% x -% 3) (x -% xr) (inverse zr') }
+      ((3 *% x *% x -% 3) *% (x -% xr)) /% zr' -% y;
+      == { div_plus_l ((3 *% x *% x -% 3) *% (x -% xr)) zr' ~%y }
+      ((3 *% x *% x -% 3) *% (x -% xr) +% zr' *% ~%y) /% zr';
       == { }
-      ((3 *% x *% x -% 3) *% (x -% d /% ((2 *% y) *% (2 *% y))) +% (2 *% y) *% ~%y) /% (2 *% y);
+      ((3 *% x *% x -% 3) *% (x -% d /% (zr' *% zr')) +% zr' *% ~%y) /% zr';
       == { div_mul_eq_l
-            ((3 *% x *% x -% 3) *% (x -% d /% ((2 *% y) *% (2 *% y))) +% (2 *% y) *% ~%y)
-            (2 *% y) ((2 *% y) *% (2 *% y))
+            ((3 *% x *% x -% 3) *% (x -% d /% (zr' *% zr')) +% zr' *% ~%y)
+            zr' (zr' *% zr')
          }
-      ((2 *% y) *% (2 *% y) *%
-       ((3 *% x *% x -% 3) *% (x -% d /% ((2 *% y) *% (2 *% y))) +% (2 *% y) *% ~%y)) /%
+      (zr' *% zr' *% ((3 *% x *% x -% 3) *% (x -% d /% (zr' *% zr')) +% zr' *% ~%y)) /%
       (zr' *% zr' *% zr');
-      == {         
+      == {
          calc (==) {
-           ((2 *% y) *% (2 *% y)) *%
-           ((3 *% x *% x -% 3) *% (x -% d /% ((2 *% y) *% (2 *% y))) +% (2 *% y) *% ~%y);
-           == { }
-           (4 *% y *% y) *%
-           ((3 *% x *% x -% 3) *% (x -% d /% (4 *% y *% y)) +% (2 *% y) *% ~%y);
+           zr' *% zr' *% ((3 *% x *% x -% 3) *% (x -% d /% (zr' *% zr')) +% zr' *% ~%y);
            == {
              assert (
-               (4 *% y *% y) *%
-               ((3 *% x *% x -% 3) *% (x -% d /% (4 *% y *% y)) +% (2 *% y) *% ~%y) ==
-               c *% (a -% d *% ((4 *% y *% y) /% (4 *% y *% y))) -% b)
+               zr' *% zr' *%
+               ((3 *% x *% x -% 3) *% (x -% d /% (zr' *% zr')) +% zr' *% ~%y) ==
+               c *% (a -% d *% ((zr' *% zr') /% (zr' *% zr'))) -% b)
              by (p256_field ())
            }
-           c *% (a -% d *% ((4 *% y *% y) /% (4 *% y *% y))) -% b;
-           == { mul_inverse (4 *% y *% y) }
-           c *% (a -% d *% one) -% b;
-           == { _ by (p256_field ()) }
+           c *% (a -% d *% ((zr' *% zr') /% (zr' *% zr'))) -% b;
+           == { mul_inverse (zr' *% zr'); mul_one_r d }
            c *% (a -% d) -% b;
            == { }
            yr';
          }
-        }
+         }
       yr' /% (zr' *% zr' *% zr');
       == { }
       yr'';
     }
-  end
+    end

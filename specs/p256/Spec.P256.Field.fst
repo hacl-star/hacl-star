@@ -527,9 +527,19 @@ let mul_inverse a =
 
 #pop-options
 
+val mul_one_r (a:elem) : Lemma (a *% one == a)
+let mul_one_r a =
+  mul_commutative a one; mul_identity a
+
 val opp_sub (a b:elem) : Lemma (~%(a -% b) == b -% a)
 let opp_sub a b =
-  assert (~%(a -% b) == b -% a) by (p256_field())
+  assert (~%(a -% b) == b -% a) by (p256_field ())
+
+val sub_zero (a:elem) : Lemma (a -% zero == a)
+let sub_zero a =
+  assert_norm (~%zero == zero);
+  add_commutative a zero;
+  add_identity a
 
 val mul_opp_cancel (a b:elem) : Lemma (~%a *% ~%b == a *% b)
 let mul_opp_cancel a b =
