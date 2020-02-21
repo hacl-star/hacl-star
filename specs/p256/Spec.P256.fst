@@ -164,7 +164,6 @@ let add_slope_eq xp yp xq yq =
     (yp -% yq) /% (xp -% xq);
   }
 
-(* TODO: fragile proof *)
 val add_comm_aux (x xp yp xq yq:elem) : Lemma
   (requires xq <> xp)
   (ensures
@@ -193,7 +192,9 @@ let add_comm_aux x xp yp xq yq =
     l *% (xp -% xq) == yp -% yq;
     <==> { mul_associative (yp -% yq) (inverse (xp -% xq)) (xp -% xq) }
     (yp -% yq) *% (inverse (xp -% xq) *% (xp -% xq)) == yp -% yq;
-    <==> { mul_inverse (xp -% xq); mul_identity (yp -% yq) }
+    <==> { mul_commutative (inverse (xp -% xq)) (xp -% xq); mul_inverse (xp -% xq) }
+    (yp -% yq) *% one == yp -% yq;
+    <==> { mul_identity (yp -% yq) }
     yp -% yq == yp -% yq;
   }
 
