@@ -503,9 +503,89 @@ let inverse_opp a =
 /// which in turn can be proved by induction from Pascal's identity
 ///
 ///   binomial n k + binomial n (k - 1) = binomial (n + 1) k
-///
+
+
+val factorial: n: nat{n >= 0} -> Tot pos
+
+let rec factorial n = 
+  match n with 
+  | 0 -> 1
+  | _ ->  n * factorial (n - 1)
+
+
+val binomial: n: nat -> k: nat{0 <= k /\ k <=n } -> Tot nat
+
+let binomial n k = 
+  factorial n / (factorial k * factorial (n - k))
+
+
+val mult_l: a: int -> b: pos -> c: pos -> Lemma (a / b == (a * c) / (b * c))
+
+let mult_l a b c = 
+  FStar.Math.Lemmas.division_multiplication_lemma (a * c) c b;
+  FStar.Math.Lemmas.multiple_division_lemma a c
+
+assume val div_distr: a: nat -> b: nat -> c: pos -> Lemma (a / c + b/c == (a + b) / c) 
+
+
+#reset-options "--fuel 1 --ifuel 1 --z3rlimit 300"
+
+val pascalIdentity: n: nat -> k: nat {1 <= k /\ k <= n} -> Lemma (binomial n k + binomial n (k - 1) == binomial (n + 1) k)
+
+let pascalIdentity n k = 
+  let b0 = binomial n k in 
+  let b1 = binomial n (k - 1) in 
+  let b2 = binomial (n + 1) k in 
+
+  assert(b2 == (factorial (n + 1)) / (factorial k * (factorial (n + 1 - k))));
+  admit();
+
+  let open FStar.Tactics in 
+  let open FStar.Tactics.Canon in 
+
+  let fk = factorial k in 
+  let fn = factorial n in 
+  let fnk = factorial (n - k) in 
+  let fnk1 = factorial (n - k + 1) in 
+
+
+ calc (==) {
+  b0;
+  == {}
+  factorial n / (fk * fnk);
+  == {mult_l fn (fk * fnk) (n - k + 1)} 
+  (fn * (n - k + 1)) / ((fk * fnk) * (n - k + 1));
+  == {assert_by_tactic ((fk * fnk) * (n - k + 1) == fk * (fnk * (n - k + 1))) canon}
+  (fn * (n - k + 1)) / (fk * (fnk * (n - k + 1)));
+  == {assert (fnk * (n - k + 1) == fnk1)}
+  (fn * (n - k + 1)) / (fk * fnk1);
+  };
+
+  calc (==) {
+  b1;
+  == {}
+  factorial n / (factorial (k - 1) * factorial (n - k + 1));
+  == {mult_l fn (factorial (k - 1) * factorial (n - k + 1)) k} 
+  (factorial n * k) / (factorial (k - 1) * factorial (n - k + 1) * k);
+  == {assert(factorial (k - 1) * k == factorial k)}
+  (factorial n * k / (fk * fnk1));
+  };
+  
+  div_distr (factorial n * (n - k + 1)) (factorial n * k) (fk * fnk1);
+  assert (factorial n * (n - k + 1) + factorial n * k == factorial n * (n + 1));
+  assert (factorial n * (n + 1) == factorial (n + 1));
+  (*QED: *)
+  assert (b0 + b1 = (factorial (n + 1)) / (fk * fnk1))
+
+
+
+
+
 assume
 val fermat (a:elem) : Lemma (pow a (prime - 1) == one)
+
+
+
 
 #push-options "--fuel 1"
 
