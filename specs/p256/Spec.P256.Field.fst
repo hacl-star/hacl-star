@@ -518,7 +518,7 @@ val binomial: n: nat -> k: nat{0 <= k /\ k <=n } -> Tot nat
 let binomial n k = 
   factorial n / (factorial k * factorial (n - k))
 
-
+(* Like this? *)
 val binomial2: n: nat -> k: nat {0 <= k /\ k <= n} -> Tot nat
 
 let rec binomial2 n k = 
