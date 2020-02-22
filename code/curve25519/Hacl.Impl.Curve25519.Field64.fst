@@ -8,7 +8,7 @@ open Lib.Sequence
 open Lib.IntTypes
 open Lib.Buffer
 
-open Hacl.Impl.Curve25519.Fields.Core
+module C = Hacl.Impl.Curve25519.Fields.Core
 
 module ST = FStar.HyperStack.ST
 module LSeq = Lib.Sequence
@@ -92,38 +92,48 @@ let load_felem f u64s =
   f.(2ul) <- u64s.(2ul);
   f.(3ul) <- u64s.(3ul)
 
+// This function is only for M64 fields, but still parametric over any
+// implementation of Core
 val carry_pass_store:
+  #i:C.index -> (
+  let s = C.fst i in
+  let p = C.snd i in
     f:felem
  -> Stack unit
    (requires fun h ->
-      Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled) /\ live h f)
+      s == C.M64 /\ p /\
+      live h f)
    (ensures fun h0 _ h1 ->
      modifies (loc f) h0 h1 /\
-     as_nat h1 f == S.as_nat4 (SC.carry_pass_store (as_tup4 h0 f)))
+     as_nat h1 f == S.as_nat4 (SC.carry_pass_store (as_tup4 h0 f))))
 [@ Meta.Attribute.inline_ ]
-let carry_pass_store f =
+let carry_pass_store #i f =
   let f3 = f.(3ul) in
   let top_bit = f3 >>. 63ul in
   f.(3ul) <- f3 &. u64 0x7fffffffffffffff;
-  let carry = add1 f f (u64 19 *! top_bit) in ()
+  let carry = C.add1 #i f f (u64 19 *! top_bit) in ()
 
+// ibid.
 val store_felem:
+  #i:C.index -> (
+  let s = C.fst i in
+  let p = C.snd i in
     u64s:lbuffer uint64 4ul
   -> f:felem
   -> Stack unit
     (requires fun h ->
-      Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled) /\
+      s == C.M64 /\ p /\
       live h f /\ live h u64s /\ disjoint u64s f)
     (ensures  fun h0 _ h1 ->
       modifies (loc u64s |+| loc f) h0 h1 /\
-      as_seq h1 u64s == BSeq.nat_to_intseq_le 4 (fevalh h0 f))
+      as_seq h1 u64s == BSeq.nat_to_intseq_le 4 (fevalh h0 f)))
 [@ Meta.Attribute.inline_ ]
-let store_felem u64s f =
+let store_felem #i u64s f =
   let h0 = ST.get () in
-  carry_pass_store f;
+  carry_pass_store #i f;
   let h1 = ST.get () in
   SC.lemma_carry_pass_store0 (as_tup4 h0 f);
-  carry_pass_store f;
+  carry_pass_store #i f;
   let h2 = ST.get () in
   SC.lemma_carry_pass_store1 (as_tup4 h1 f);
   let f0 = f.(0ul) in
