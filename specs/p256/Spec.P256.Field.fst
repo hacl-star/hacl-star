@@ -519,6 +519,14 @@ let binomial n k =
   factorial n / (factorial k * factorial (n - k))
 
 
+val binomial2: n: nat -> k: nat {0 <= k /\ k <= n} -> Tot nat
+
+let rec binomial2 n k = 
+  match k with 
+  | n -> 1
+  | _ -> binomial2 (n - 1) k + binomial2 (n - 1) (k - 1)
+
+
 val mult_l: a: int -> b: pos -> c: pos -> Lemma (a / b == (a * c) / (b * c))
 
 let mult_l a b c = 
