@@ -369,6 +369,8 @@ noextract
 val vec512_shift_right32: vec512 -> size_t -> vec512
 noextract
 val vec512_shift_left32: vec512 -> size_t -> vec512
+noextract
+val vec512_rotate_left32: vec512 -> size_t -> vec512
 
 noextract
 val vec512_load_le: b:lbuffer uint8 64ul -> ST vec512

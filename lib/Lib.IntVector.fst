@@ -242,6 +242,7 @@ let vec_rotate_left (#t:v_inttype) (#w:width) (x:vec_t t w) (y:rotval t) =
   match t,w with
   | U32,4 -> vec128_rotate_left32 x y
   | U32,8 -> vec256_rotate_left32 x y
+  | U32,16 -> vec512_rotate_left32 x y
   | _,_ ->  vec_or (vec_shift_left x y) (vec_shift_right x (size (bits t) -. y))
 
 
@@ -279,6 +280,7 @@ let vec_gte_mask (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) =
 
 let cast #t #w t' w' v = v
 
+inline_for_extraction noextract
 let vec_interleave_low_ (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) =
   match t,w with
   | _,1 -> x
@@ -319,6 +321,7 @@ let vec_interleave_low_n_lemma_uint32_16_8 v1 v2 = admit()
 let vec_interleave_low_lemma_uint64_4 v1 v2 = admit()
 let vec_interleave_low_n_lemma_uint64_4_2 v1 v2 = admit()
 
+inline_for_extraction noextract
 let vec_interleave_high_ (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) =
   match t,w with
   | _,1 -> x

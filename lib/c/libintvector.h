@@ -391,6 +391,9 @@ typedef __m512i Lib_IntVector_Intrinsics_vec512;
 #define Lib_IntVector_Intrinsics_vec512_shift_right32(x0, x1) \
   (_mm512_srli_epi32(x0, x1))
 
+#define Lib_IntVector_Intrinsics_vec512_rotate_left32(x0, x1) \
+  (_mm512_rol_epi32(x0, x1))
+
 #define Lib_IntVector_Intrinsics_vec512_load_le(x0) \
   (_mm512_loadu_si512((__m512i*)(x0)))
 
