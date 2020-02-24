@@ -128,22 +128,13 @@ Prims_dtuple2__FStar_Pervasives_either__Prims_int_Hacl_Impl_PKCS11_Result_except
 }
 Prims_dtuple2__FStar_Pervasives_either__Prims_int_Hacl_Impl_PKCS11_Result_exception_t_Hacl_Impl_PKCS11_DeviceModule_device;
 
-typedef struct Hacl_Impl_PKCS11_Internal_Attribute_attributeD__uint32_t_s
-{
-  uint32_t _type;
-  uint32_t *pValue;
-  uint32_t ulValueLen;
-}
-Hacl_Impl_PKCS11_Internal_Attribute_attributeD__uint32_t;
-
 Prims_dtuple2__FStar_Pervasives_either__Prims_int_Hacl_Impl_PKCS11_Result_exception_t_Hacl_Impl_PKCS11_DeviceModule_device
-Hacl_Impl_PKCS11_Creation_GenKey__CKS_GenerateKey(
+Hacl_Impl_PKCS11_Creation_GenKey__CKS_GenerateKey_(
   Hacl_Impl_PKCS11_DeviceModule_device d,
   uint32_t hSession,
   uint32_t pMechanism,
   uint32_t ulCould,
-  Hacl_Impl_PKCS11_Internal_Attribute_attribute *pTemplate,
-  Hacl_Impl_PKCS11_Internal_Attribute_attributeD__uint32_t test
+  Hacl_Impl_PKCS11_Internal_Attribute_attribute *pTemplate
 );
 
 #define __Hacl_Impl_PKCS11_Creation_GenKey_H_DEFINED

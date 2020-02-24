@@ -104,7 +104,7 @@ static void
 checkAttributes(uint32_t ulCount, Hacl_Impl_PKCS11_Internal_Attribute_attribute *pTemplate)
 {
   Hacl_Impl_PKCS11_Result_exception_t bTest = Hacl_Impl_PKCS11_Result_CKR_OK;
-  for (uint32_t i = (uint32_t)0U; i < ulCount; i = i + (uint32_t)1U)
+  for (uint32_t i = (uint32_t)0U; i < ulCount; i++)
   {
     isAttributeReadOnlyBuffer(pTemplate[i], &bTest);
   }
@@ -117,13 +117,12 @@ typedef uint8_t key_tags;
 typedef Hacl_Impl_PKCS11_Internal_Object__object key;
 
 Prims_dtuple2__FStar_Pervasives_either__Prims_int_Hacl_Impl_PKCS11_Result_exception_t_Hacl_Impl_PKCS11_DeviceModule_device
-Hacl_Impl_PKCS11_Creation_GenKey__CKS_GenerateKey(
+Hacl_Impl_PKCS11_Creation_GenKey__CKS_GenerateKey_(
   Hacl_Impl_PKCS11_DeviceModule_device d,
   uint32_t hSession,
   uint32_t pMechanism,
   uint32_t ulCould,
-  Hacl_Impl_PKCS11_Internal_Attribute_attribute *pTemplate,
-  Hacl_Impl_PKCS11_Internal_Attribute_attributeD__uint32_t test
+  Hacl_Impl_PKCS11_Internal_Attribute_attribute *pTemplate
 )
 {
   checkAttributes(ulCould, pTemplate);
