@@ -14,7 +14,7 @@
         "refinement_interpretation_Tm_refine_ff2b90c8f94db4f4bcfea92159681cf1"
       ],
       0,
-      "1e84bd6b941d3592adaa5049c8884f6d"
+      "996548fdef88b47c6c83688d373956a0"
     ],
     [
       "Spec.P256.MontgomeryMultiplication.PointAdd.lemma_pointAddToSpecification",
@@ -39,7 +39,7 @@
         "true_interp"
       ],
       0,
-      "1d502d996a6a6b9173377ca78c8a56d3"
+      "02895d3750e0ba081576f2acb48a28c3"
     ],
     [
       "Spec.P256.MontgomeryMultiplication.PointAdd.lemma_pointAddToSpecification",
@@ -47,18 +47,14 @@
       2,
       1,
       [
-        "@MaxFuel_assumption", "@MaxIFuel_assumption",
-        "@fuel_correspondence_Prims.pow2.fuel_instrumented",
-        "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565", "b2t_def",
         "constructor_distinct_Lib.IntTypes.U32",
         "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.unsigned",
         "equation_Prims.nat", "equation_Prims.pos",
         "equation_Spec.P256.MontgomeryMultiplication.PointAdd.prime",
         "equation_Spec.P256._point_add",
-        "equation_with_fuel_Prims.pow2.fuel_instrumented",
-        "function_token_typing_Prims.__cache_version_number__",
-        "int_inversion", "int_typing",
+        "function_token_typing_Prims.__cache_version_number__", "int_typing",
         "lemma_Spec.P256.MontgomeryMultiplication.lemmaToDomainAndBackIsTheSame",
         "primitive_Prims.op_Addition", "primitive_Prims.op_Equality",
         "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
@@ -78,11 +74,10 @@
         "refinement_interpretation_Tm_refine_c346aebb05d8e53f90988fa43f2593bf",
         "refinement_interpretation_Tm_refine_c5163179d3b68d76bb40b8729cfe6c8a",
         "refinement_interpretation_Tm_refine_f74ef1c67af9d73a9af7c51584df3370",
-        "refinement_interpretation_Tm_refine_ff2b90c8f94db4f4bcfea92159681cf1",
-        "token_correspondence_Prims.pow2.fuel_instrumented"
+        "refinement_interpretation_Tm_refine_ff2b90c8f94db4f4bcfea92159681cf1"
       ],
       0,
-      "eb5e70c5e2c6480b417acc3fbb22eac2"
+      "507f057519bf41db5e3ef8fab799630a"
     ],
     [
       "Spec.P256.MontgomeryMultiplication.PointAdd.lemma_point_add_0",
@@ -96,7 +91,7 @@
         "refinement_interpretation_Tm_refine_7d84b8f3dff73d3cc195fbe597f5a194"
       ],
       0,
-      "119c6de5bdb7016ab34fadc15c1539f2"
+      "295209f169b12527b4301f7e3e690039"
     ],
     [
       "Spec.P256.MontgomeryMultiplication.PointAdd.lemma_point_add_0",
@@ -105,7 +100,7 @@
       1,
       [ "@query" ],
       0,
-      "8fe72bb2d065c70cede6bc2470b37712"
+      "72bada8b08e59ddcabc258425876cf6d"
     ],
     [
       "Spec.P256.MontgomeryMultiplication.PointAdd.lemma_point_add_1",
@@ -119,7 +114,7 @@
         "refinement_interpretation_Tm_refine_7d84b8f3dff73d3cc195fbe597f5a194"
       ],
       0,
-      "3f1a9920a123af9d6ef9311266aeb29b"
+      "51637523446f9730a5b77507e9f191d7"
     ],
     [
       "Spec.P256.MontgomeryMultiplication.PointAdd.lemma_point_add_1",
@@ -135,7 +130,7 @@
         "refinement_interpretation_Tm_refine_7d84b8f3dff73d3cc195fbe597f5a194"
       ],
       0,
-      "34167d60044716953f611911bca53837"
+      "8a9c53c5ac0fae074e74495d26124050"
     ]
   ]
 ]
