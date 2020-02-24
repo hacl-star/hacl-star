@@ -78,7 +78,7 @@ procedure Fast_multiply_a0b(
         dst_ptr; inA_ptr; inB_ptr; memLayout;
 
     modifies
-        rax; rdx; r8; r9; r10; r11; r12; r13; r14;
+        rax; rdx; r8; r9; r10; r11; rbx; r13; r14;
         heap0; efl;
 
     requires
@@ -94,7 +94,7 @@ procedure Fast_multiply_a0b(
     ensures
         let d0 := buffer64_read(dst_b, 0 + offset*2, heap0);
         let d1 := buffer64_read(dst_b, 1 + offset*2, heap0);
-        let a0b := d0 + pow2_64 * d1 + pow2_128 * r12 + pow2_192 * r14 + pow2_256 * rax;
+        let a0b := d0 + pow2_64 * d1 + pow2_128 * rbx + pow2_192 * r14 + pow2_256 * rax;
         a0b == a0 * b;
 
         rax < pow2_64 - 1;
@@ -108,7 +108,7 @@ procedure Fast_multiply_a0b(
 //    "movq   (%1), %%rdx; " /* A[0] */
 //    "mulx   (B),  %%r8,  %%r9; " /* A[0]*B[0] */    "xorl %%r10d, %%r10d ;"                           "movq  %%r8,  (dst) ;"
 //    "mulx  8(B), %%r10, %%r11; " /* A[0]*B[1] */    "adox  %%r9, %%r10 ;"                             "movq %%r10, 8(dst) ;"
-//    "mulx 16(B), %%r12, %%r13; " /* A[0]*B[2] */    "adox %%r11, %%r12 ;"
+//    "mulx 16(B), %%rbx, %%r13; " /* A[0]*B[2] */    "adox %%r11, %%rbx ;"
 //    "mulx 24(B), %%r14, %%rdx; " /* A[0]*B[3] */    "adox %%r13, %%r14 ;"                                                       "movq $0, %%rax ;"
 //    /*******************************************/   "adox %%rdx, %%rax ;"
 
@@ -147,9 +147,9 @@ procedure Fast_multiply_a0b(
     //assert_by_tactic(a0b0b1 == a0 * (b0 + pow2_64 * b1), int_canon);   // FAILS
     Newline();
     NoNewline();    
-    Mulx64(r13, r12, Mem64(heap0, inB_ptr, 16 + offset * 8, inB_b, 2 + offset, Secret));  /* A[0]*B[2] */ 
-    let a0b2_lo := r12; lemma_prod_bounds(r13, r12, a0, b2); 
-    Adox64Wrap(r12, r11);
+    Mulx64(r13, rbx, Mem64(heap0, inB_ptr, 16 + offset * 8, inB_b, 2 + offset, Secret));  /* A[0]*B[2] */ 
+    let a0b2_lo := rbx; lemma_prod_bounds(r13, rbx, a0, b2); 
+    Adox64Wrap(rbx, r11);
 
     let overflow1 := overflow(efl);
     NoNewline();
@@ -165,15 +165,15 @@ procedure Fast_multiply_a0b(
 
     carry := if overflow2 then 1 else 0;
     let carry_new := if overflow(efl) then 1 else 0;
-    //let a0b := d0 + pow2_64 * d1 + pow2_128 * r12 + pow2_192 * r14 + pow2_256 * (rdx + carry);
-    let a0b := d0 + pow2_64 * d1 + pow2_128 * r12 + pow2_192 * r14 + pow2_256 * rax + pow2_320 * carry_new;
+    //let a0b := d0 + pow2_64 * d1 + pow2_128 * rbx + pow2_192 * r14 + pow2_256 * (rdx + carry);
+    let a0b := d0 + pow2_64 * d1 + pow2_128 * rbx + pow2_192 * r14 + pow2_256 * rax + pow2_320 * carry_new;
 
 //    a0b_helper(a0, b0, b1, b2, b3,
 //               d0,      r9,
 //               a0b1_lo, r11,
 //               a0b2_lo, r13,
 //               a0b3_lo, rdx,
-//               d1, r12, r14,
+//               d1, rbx, r14,
 //               overflow0, overflow1, overflow2);
 //    assert a0 * b == a0b;   // PASSES
 
@@ -213,7 +213,7 @@ procedure Fast_multiply_a1b(
         dst_ptr; inA_ptr; inB_ptr; memLayout;
 
     modifies
-        rax; rdx; r8; r9; r10; r11; r12; r13; r14;
+        rax; rdx; r8; r9; r10; r11; rbx; r13; r14;
         heap0; efl;
 
     requires
@@ -230,14 +230,14 @@ procedure Fast_multiply_a1b(
 
         let d0 := buffer64_read(dst_b, 0 + offset*2, heap0);
         let d1 := buffer64_read(dst_b, 1 + offset*2, heap0);
-        let a0b := d0 + pow2_64 * d1 + pow2_128 * r12 + pow2_192 * r14 + pow2_256 * rax;
+        let a0b := d0 + pow2_64 * d1 + pow2_128 * rbx + pow2_192 * r14 + pow2_256 * rax;
         a0b == a0 * b;
 
     ensures
         let d0 := buffer64_read(dst_b, 0 + offset*2, heap0);
         let d1 := buffer64_read(dst_b, 1 + offset*2, heap0);
         let d2 := buffer64_read(dst_b, 2 + offset*2, heap0);
-        pow2_two(a0, a1) * b == pow2_six(d0, d1, d2, r12, r14, rax);
+        pow2_two(a0, a1) * b == pow2_six(d0, d1, d2, rbx, r14, rax);
 
         validSrcAddrs64(heap0, dst_ptr, dst_b, 8 + offset*2, memLayout, Secret);
         modifies_buffer_specific(dst_b, old(heap0), heap0, 0 + offset*2, 8 + offset*2 - 1);
@@ -247,15 +247,15 @@ procedure Fast_multiply_a1b(
 
     let a0b_0 := buffer64_read(dst_b, 0 + offset*2, heap0);
     let a0b_1 := buffer64_read(dst_b, 1 + offset*2, heap0);
-    let a0b_2 := r12;
+    let a0b_2 := rbx;
     let a0b_3 := r14;
     let a0b_4 := rax;
     let a0b := pow2_five(a0b_0, a0b_1, a0b_2, a0b_3, a0b_4);
 //
 //    "movq  8(A), %%rdx; " /* A[1] */
 //    "mulx   (B),  %%r8,  %%r9; " /* A[1]*B[0] */    "xorl %%r10d, %%r10d ;"  "adcx 8(dst),  %%r8 ;"    "movq  %%r8,  8(dst) ;"
-//    "mulx  8(B), %%r10, %%r11; " /* A[1]*B[1] */    "adox  %%r9, %%r10 ;"    "adcx %%r12, %%r10 ;"    "movq %%r10, 16(dst) ;"
-//    "mulx 16(B), %%r12, %%r13; " /* A[1]*B[2] */    "adox %%r11, %%r12 ;"    "adcx %%r14, %%r12 ;"                              "movq $0, %%r8  ;"
+//    "mulx  8(B), %%r10, %%r11; " /* A[1]*B[1] */    "adox  %%r9, %%r10 ;"    "adcx %%rbx, %%r10 ;"    "movq %%r10, 16(dst) ;"
+//    "mulx 16(B), %%rbx, %%r13; " /* A[1]*B[2] */    "adox %%r11, %%rbx ;"    "adcx %%r14, %%rbx ;"                              "movq $0, %%r8  ;"
 //    "mulx 24(B), %%r14, %%rdx; " /* A[1]*B[3] */    "adox %%r13, %%r14 ;"    "adcx %%rax, %%r14 ;"                              "movq $0, %%rax ;"
 //    /*******************************************/   "adox %%rdx, %%rax ;"    "adcx  %%r8, %%rax ;"
 
@@ -275,15 +275,15 @@ procedure Fast_multiply_a1b(
     Space(1);
     Adox64Wrap(r10,  r9);  let a1b_1 := r10;      // At this point, overflow = 0, r9 < 2^64 - 1, and (r10 is <= 1 (so no new overflow), or r11 < 2^64-2)
     Space(1);
-    Adcx64Wrap(r10, r12);
+    Adcx64Wrap(r10, rbx);
     Store64_buffer(heap0, dst_ptr, r10, 16 + offset*16, Secret, dst_b, 2 + offset*2);
 
     NoNewline();
-    Mulx64(r13, r12, Mem64(heap0, inB_ptr, 16 + offset * 8, inB_b, 2 + offset, Secret));  /* A[1]*B[2] */ lemma_prod_bounds(r13, r12, a1, b2);  lemma_overflow(r13, r12, r11, bool_bit(overflow(efl)));
+    Mulx64(r13, rbx, Mem64(heap0, inB_ptr, 16 + offset * 8, inB_b, 2 + offset, Secret));  /* A[1]*B[2] */ lemma_prod_bounds(r13, rbx, a1, b2);  lemma_overflow(r13, rbx, r11, bool_bit(overflow(efl)));
     NoNewline();
-    Adox64Wrap(r12, r11);  let a1b_2 := r12;      // At this point, either r13 < 2^64-2 or (r12 <= 1, and (overflow = 0 or r11 < 2^64 - 2)).  RHS of the first or means no overflow
+    Adox64Wrap(rbx, r11);  let a1b_2 := rbx;      // At this point, either r13 < 2^64-2 or (rbx <= 1, and (overflow = 0 or r11 < 2^64 - 2)).  RHS of the first or means no overflow
     NoNewline();
-    Adcx64Wrap(r12, r14);
+    Adcx64Wrap(rbx, r14);
     Mov64( r8, 0);
 
     NoNewline();
@@ -308,7 +308,7 @@ procedure Fast_multiply_a1b(
     let d2 := buffer64_read(dst_b, 2 + offset*2, heap0);
 
     let a1b := pow2_five(a1b_0, a1b_1, a1b_2, a1b_3, a1b_4);
-    let a0a1b := pow2_seven(d0, d1, d2, r12, r14, rax, carry_bit);
+    let a0a1b := pow2_seven(d0, d1, d2, rbx, r14, rax, carry_bit);
 
     assert_by_tactic(a1 * b == 0 + pow2_four(a1 * b0, a1 * b1, a1 * b2, a1 * b3), int_canon);   // PASSES
     assert a1b == a1 * b;  // PASSES
@@ -318,7 +318,7 @@ procedure Fast_multiply_a1b(
               a0b, a0b_0, a0b_1, a0b_2, a0b_3, a0b_4,
               a1b, a1b_0, a1b_1, a1b_2, a1b_3, a1b_4,
               b, b0, b1, b2, b3,
-              d1, d2, r12, r14, rax,
+              d1, d2, rbx, r14, rax,
               carry_bit);
     assert pow2_two(a0, a1) * b == a0a1b;   // Conclusion from the lemma
 }
@@ -351,7 +351,7 @@ procedure Fast_multiply_a2b(
         dst_ptr; inA_ptr; inB_ptr; memLayout;
 
     modifies
-        rax; rdx; r8; r9; r10; r11; r12; r13; r14;
+        rax; rdx; r8; r9; r10; r11; rbx; r13; r14;
         heap0; efl;
 
     requires
@@ -367,13 +367,13 @@ procedure Fast_multiply_a2b(
         let d0 := buffer64_read(dst_b, 0 + offset*2, heap0);
         let d1 := buffer64_read(dst_b, 1 + offset*2, heap0);
         let d2 := buffer64_read(dst_b, 2 + offset*2, heap0);
-        mul_nats(pow2_two(a0, a1), b) == pow2_six(d0, d1, d2, r12, r14, rax);
+        mul_nats(pow2_two(a0, a1), b) == pow2_six(d0, d1, d2, rbx, r14, rax);
     ensures
         let d0 := buffer64_read(dst_b, 0 + offset*2, heap0);
         let d1 := buffer64_read(dst_b, 1 + offset*2, heap0);
         let d2 := buffer64_read(dst_b, 2 + offset*2, heap0);
         let d3 := buffer64_read(dst_b, 3 + offset*2, heap0);
-        pow2_three(a0, a1, a2) * b == pow2_seven(d0, d1, d2, d3, r12, r14, rax);
+        pow2_three(a0, a1, a2) * b == pow2_seven(d0, d1, d2, d3, rbx, r14, rax);
 
         validSrcAddrs64(heap0, dst_ptr, dst_b, 8 + offset*2, memLayout, Secret);
         modifies_buffer_specific(dst_b, old(heap0), heap0, 0 + offset*2, 8 + offset*2 - 1);
@@ -384,7 +384,7 @@ procedure Fast_multiply_a2b(
     let a0a1b_0 := buffer64_read(dst_b, 0 + offset*2, heap0);
     let a0a1b_1 := buffer64_read(dst_b, 1 + offset*2, heap0);
     let a0a1b_2 := buffer64_read(dst_b, 2 + offset*2, heap0);
-    let a0a1b_3 := r12;
+    let a0a1b_3 := rbx;
     let a0a1b_4 := r14;
     let a0a1b_5 := rax;
     let a0a1b := pow2_six(a0a1b_0, a0a1b_1, a0a1b_2, a0a1b_3, a0a1b_4, a0a1b_5);
@@ -392,8 +392,8 @@ procedure Fast_multiply_a2b(
 //
 //    "movq 16(A), %%rdx; " /* A[2] */
 //    "mulx   (B),  %%r8,  %%r9; " /* A[2]*B[0] */    "xorl %%r10d, %%r10d ;"  "adcx 16(dst), %%r8 ;"    "movq  %%r8, 16(dst) ;"
-//    "mulx  8(B), %%r10, %%r11; " /* A[2]*B[1] */    "adox  %%r9, %%r10 ;"    "adcx %%r12, %%r10 ;"    "movq %%r10, 24(dst) ;"
-//    "mulx 16(B), %%r12, %%r13; " /* A[2]*B[2] */    "adox %%r11, %%r12 ;"    "adcx %%r14, %%r12 ;"                              "movq $0, %%r8  ;"
+//    "mulx  8(B), %%r10, %%r11; " /* A[2]*B[1] */    "adox  %%r9, %%r10 ;"    "adcx %%rbx, %%r10 ;"    "movq %%r10, 24(dst) ;"
+//    "mulx 16(B), %%rbx, %%r13; " /* A[2]*B[2] */    "adox %%r11, %%rbx ;"    "adcx %%r14, %%rbx ;"                              "movq $0, %%r8  ;"
 //    "mulx 24(B), %%r14, %%rdx; " /* A[2]*B[3] */    "adox %%r13, %%r14 ;"    "adcx %%rax, %%r14 ;"                              "movq $0, %%rax ;"
 //    /*******************************************/   "adox %%rdx, %%rax ;"    "adcx  %%r8, %%rax ;"
 
@@ -412,15 +412,15 @@ procedure Fast_multiply_a2b(
     Space(1);
     Adox64Wrap(r10,  r9);  let a2b_1 := r10;
     Space(1);
-    Adcx64Wrap(r10, r12);
+    Adcx64Wrap(r10, rbx);
     Store64_buffer(heap0, dst_ptr, r10, 24 + offset*16, Secret, dst_b, 3 + offset*2);
 
     NoNewline();
-    Mulx64(r13, r12, Mem64(heap0, inB_ptr, 16 + offset * 8, inB_b, 2 + offset, Secret));  /* A[2]*B[2] */ lemma_prod_bounds(r13, r12, a2, b2);  lemma_overflow(r13, r12, r11, bool_bit(overflow(efl)));
+    Mulx64(r13, rbx, Mem64(heap0, inB_ptr, 16 + offset * 8, inB_b, 2 + offset, Secret));  /* A[2]*B[2] */ lemma_prod_bounds(r13, rbx, a2, b2);  lemma_overflow(r13, rbx, r11, bool_bit(overflow(efl)));
     NoNewline();
-    Adox64Wrap(r12, r11);  let a2b_2 := r12;
+    Adox64Wrap(rbx, r11);  let a2b_2 := rbx;
     NoNewline();
-    Adcx64Wrap(r12, r14);
+    Adcx64Wrap(rbx, r14);
     Mov64( r8, 0);
 
     NoNewline();
@@ -448,7 +448,7 @@ procedure Fast_multiply_a2b(
     let d3 := buffer64_read(dst_b, 3 + offset*2, heap0);
 
     let a2b := pow2_five(a2b_0, a2b_1, a2b_2, a2b_3, a2b_4);
-    let a0a1a2b := pow2_seven(d0, d1, d2, d3, r12, r14, rax);
+    let a0a1a2b := pow2_seven(d0, d1, d2, d3, rbx, r14, rax);
 
     assert_by_tactic(a2 * b == 0 + pow2_four(a2 * b0, a2 * b1, a2 * b2, a2 * b3), int_canon);   // PASSES
     //assert a2b == a2 * b;  // PASSES
@@ -457,11 +457,11 @@ procedure Fast_multiply_a2b(
               a0a1b, a0a1b_0, a0a1b_1, a0a1b_2, a0a1b_3, a0a1b_4, a0a1b_5,
               a2b, a2b_0, a2b_1, a2b_2, a2b_3, a2b_4,
               b, b0, b1, b2, b3,
-              d2, d3, r12, r14, rax);
+              d2, d3, rbx, r14, rax);
     //assert pow2_three(a0, a1, a2) * b == a0a1a2b;   // Conclusion from the lemma.  // PASSES
 //    assert d0 == a0a1b_0;       // PASSES
 //    assert d1 == a0a1b_1;       // PASSES
-//    assert pow2_three(a0, a1, a2) * b == pow2_seven(d0, d1, d2, d3, r12, r14, rax);
+//    assert pow2_three(a0, a1, a2) * b == pow2_seven(d0, d1, d2, d3, rbx, r14, rax);
 }
 
 procedure Fast_multiply_a3b(
@@ -492,7 +492,7 @@ procedure Fast_multiply_a3b(
         dst_ptr; inA_ptr; inB_ptr; memLayout;
 
     modifies
-        rax; rdx; r8; r9; r10; r11; r12; r13; r14;
+        rax; rdx; r8; r9; r10; r11; rbx; r13; r14;
         heap0; efl;
 
     requires
@@ -509,7 +509,7 @@ procedure Fast_multiply_a3b(
         let d1 := buffer64_read(dst_b, 1 + offset*2, heap0);
         let d2 := buffer64_read(dst_b, 2 + offset*2, heap0);
         let d3 := buffer64_read(dst_b, 3 + offset*2, heap0);
-        pow2_three(a0, a1, a2) * b == pow2_seven(d0, d1, d2, d3, r12, r14, rax);
+        pow2_three(a0, a1, a2) * b == pow2_seven(d0, d1, d2, d3, rbx, r14, rax);
     ensures
         let d0 := buffer64_read(dst_b, 0 + offset*2, heap0);
         let d1 := buffer64_read(dst_b, 1 + offset*2, heap0);
@@ -531,7 +531,7 @@ procedure Fast_multiply_a3b(
     let a0a1a2b_1 := buffer64_read(dst_b, 1 + offset*2, heap0);
     let a0a1a2b_2 := buffer64_read(dst_b, 2 + offset*2, heap0);
     let a0a1a2b_3 := buffer64_read(dst_b, 3 + offset*2, heap0);
-    let a0a1a2b_4 := r12;
+    let a0a1a2b_4 := rbx;
     let a0a1a2b_5 := r14;
     let a0a1a2b_6 := rax;
     let a0a1a2b := pow2_seven(a0a1a2b_0, a0a1a2b_1, a0a1a2b_2, a0a1a2b_3, a0a1a2b_4, a0a1a2b_5, a0a1a2b_6);
@@ -539,8 +539,8 @@ procedure Fast_multiply_a3b(
 //
 //    "movq 24(A), %%rdx; " /* A[3] */
 //    "mulx   (B),  %%r8,  %%r9; " /* A[3]*B[0] */    "xorl %%r10d, %%r10d ;"  "adcx 24(dst), %%r8 ;"   "movq  %%r8, 24(dst) ;"
-//    "mulx  8(B), %%r10, %%r11; " /* A[3]*B[1] */    "adox  %%r9, %%r10 ;"    "adcx %%r12, %%r10 ;"    "movq %%r10, 32(dst) ;"
-//    "mulx 16(B), %%r12, %%r13; " /* A[3]*B[2] */    "adox %%r11, %%r12 ;"    "adcx %%r14, %%r12 ;"    "movq %%r12, 40(dst) ;"    "movq $0, %%r8  ;"
+//    "mulx  8(B), %%r10, %%r11; " /* A[3]*B[1] */    "adox  %%r9, %%r10 ;"    "adcx %%rbx, %%r10 ;"    "movq %%r10, 32(dst) ;"
+//    "mulx 16(B), %%rbx, %%r13; " /* A[3]*B[2] */    "adox %%r11, %%rbx ;"    "adcx %%r14, %%rbx ;"    "movq %%rbx, 40(dst) ;"    "movq $0, %%r8  ;"
 //    "mulx 24(B), %%r14, %%rdx; " /* A[3]*B[3] */    "adox %%r13, %%r14 ;"    "adcx %%rax, %%r14 ;"    "movq %%r14, 48(dst) ;"    "movq $0, %%rax ;"
 //    /*******************************************/   "adox %%rdx, %%rax ;"    "adcx  %%r8, %%rax ;"    "movq %%rax, 56(dst) ;"
 
@@ -559,17 +559,17 @@ procedure Fast_multiply_a3b(
     Space(1);
     Adox64Wrap(r10,  r9);  let a3b_1 := r10;
     Space(1);
-    Adcx64Wrap(r10, r12);
+    Adcx64Wrap(r10, rbx);
     Store64_buffer(heap0, dst_ptr, r10, 32 + offset*16, Secret, dst_b, 4 + offset*2);
 
     NoNewline(); 
-    Mulx64(r13, r12, Mem64(heap0, inB_ptr, 16 + offset * 8, inB_b, 2 + offset, Secret));  /* A[3]*B[2] */ lemma_prod_bounds(r13, r12, a3, b2);  lemma_overflow(r13, r12, r11, bool_bit(overflow(efl)));
+    Mulx64(r13, rbx, Mem64(heap0, inB_ptr, 16 + offset * 8, inB_b, 2 + offset, Secret));  /* A[3]*B[2] */ lemma_prod_bounds(r13, rbx, a3, b2);  lemma_overflow(r13, rbx, r11, bool_bit(overflow(efl)));
     NoNewline();
-    Adox64Wrap(r12, r11);  let a3b_2 := r12;
+    Adox64Wrap(rbx, r11);  let a3b_2 := rbx;
     NoNewline();
-    Adcx64Wrap(r12, r14);
+    Adcx64Wrap(rbx, r14);
     NoNewline();
-    Store64_buffer(heap0, dst_ptr, r12, 40 + offset * 16, Secret, dst_b, 5 + offset * 2);
+    Store64_buffer(heap0, dst_ptr, rbx, 40 + offset * 16, Secret, dst_b, 5 + offset * 2);
     Mov64( r8, 0);
 
     NoNewline();
@@ -647,7 +647,7 @@ procedure Fast_multiply(
         dst_ptr; inA_ptr; inB_ptr; memLayout;
 
     modifies
-        rax; rdx; r8; r9; r10; r11; r12; r13; r14;
+        rax; rdx; r8; r9; r10; r11; rbx; r13; r14;
         heap0; efl;
 
     requires
@@ -702,7 +702,7 @@ procedure Fast_mul_stdcall(
         inB_in := (if win then r8 else rdx);
     reads memLayout;
     modifies
-        rax; rbx; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r12; r13; r14;
+        rax; rbx; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r13; r14;
         rsp; efl; heap0; stack; stackTaint;
     requires
         rsp == init_rsp(stack);
@@ -748,14 +748,12 @@ procedure Fast_mul_stdcall(
         validSrcAddrs64(heap0, dst_in, dst_b, 8, memLayout, Secret);
 
         rsi == old(rsi);
-        r12 == old(r12);
         r13 == old(r13);
         r14 == old(r14);
         rsp == old(rsp);
 {
     // Store callee-save registers
     Push(rsi);
-    Push(r12);
     Push(r13);
     Push(r14);
 
@@ -775,7 +773,6 @@ procedure Fast_mul_stdcall(
 
     Pop(r14);
     Pop(r13);
-    Pop(r12);
     Pop(rsi);
 }
 
@@ -793,7 +790,7 @@ procedure Fast_mul2_stdcall(
         inB_in := (if win then r8 else rdx);
     reads memLayout;
     modifies
-        rax; rbx; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r12; r13; r14;
+        rax; rbx; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r13; r14;
         rsp; efl; heap0; stack; stackTaint;
     requires
         rsp == init_rsp(stack);
@@ -865,13 +862,11 @@ procedure Fast_mul2_stdcall(
         validSrcAddrs64(heap0, dst_in, dst_b, 16, memLayout, Secret);
 
         rsi == old(rsi);
-        r12 == old(r12);
         r13 == old(r13);
         r14 == old(r14);
         rsp == old(rsp);
 {
     // Store callee-save registers
-    Push(r12);
     Push(r13);
     Push(r14);
 
@@ -897,5 +892,4 @@ procedure Fast_mul2_stdcall(
     }
     Pop(r14);
     Pop(r13);
-    Pop(r12);
 }
