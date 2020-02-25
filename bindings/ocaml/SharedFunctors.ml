@@ -87,3 +87,14 @@ module Make_Blake2b (Impl : sig
 = struct
   let hash key pt output = Impl.blake2b (size_uint32 output) (uint8_ptr output) (size_uint32 pt) (uint8_ptr pt) (size_uint32 key) (uint8_ptr key)
 end
+
+
+module Make_Blake2b_generic
+    (C: Buffer)
+    (Impl : sig
+       val blake2b : uint32 -> C.buf -> uint32 -> C.buf -> uint32 -> C.buf -> unit
+     end)
+= struct
+  type t = C.t
+  let hash key pt output = Impl.blake2b (C.size_uint32 output) (C.ctypes_buf output) (C.size_uint32 pt) (C.ctypes_buf pt) (C.size_uint32 key) (C.ctypes_buf key)
+end

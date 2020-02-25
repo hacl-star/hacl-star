@@ -223,3 +223,13 @@ module Blake2b_256 : Blake2b =
   Make_Blake2b (struct
     let blake2b = Hacl_Blake2b_256.hacl_Blake2b_256_blake2b
   end)
+
+module Blake2b_256_bigstring : Blake2b_bigstring =
+  Make_Blake2b_generic (CBigstring) (struct
+    let blake2b = Hacl_Blake2b_256.hacl_Blake2b_256_blake2b
+end)
+
+module Blake2b_256_bytes : Blake2b_bytes =
+  Make_Blake2b_generic (CBytes) (struct
+    let blake2b = Hacl_Blake2b_256.hacl_Blake2b_256_blake2b_bytes
+  end)

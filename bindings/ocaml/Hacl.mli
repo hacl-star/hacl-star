@@ -70,3 +70,6 @@ end
 
 module Blake2b_32 : Blake2b
 module Blake2b_256 : Blake2b
+
+module Blake2b_256_bigstring : Blake2b_bigstring
+module Blake2b_256_bytes : Blake2b_bytes

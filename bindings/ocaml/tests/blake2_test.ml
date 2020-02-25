@@ -1,7 +1,7 @@
 open Test_utils
 
-type blake2_test =
-  { name: string; plaintext: Bigstring.t; key: Bigstring.t; expected: Bigstring.t }
+type 'a blake2_test =
+  { name: string; plaintext: 'a; key: 'a; expected: 'a }
 
 let tests = [
   {
@@ -12,7 +12,11 @@ let tests = [
   }
 ]
 
-let test (v: blake2_test) n hash =
+let test_to_bytes (v: Bigstring.t blake2_test) : Bytes.t blake2_test =
+  { name = v.name ; plaintext = Bigstring.to_bytes v.plaintext ;
+    key = Bigstring.to_bytes v.key ; expected = Bigstring.to_bytes v.expected }
+
+let test_bigstring (v: Bigstring.t blake2_test) n hash =
   let test_result = test_result (n ^ " " ^ v.name) in
   let output = Bigstring.create 64 in
   Bigstring.fill output '\x00';
@@ -23,7 +27,20 @@ let test (v: blake2_test) n hash =
   else
     test_result Failure "Output mismatch"
 
+let test_bytes (v: Bytes.t blake2_test) n hash =
+  let test_result = test_result (n ^ " " ^ v.name) in
+  let output = Bytes.create 64 in
+
+  hash v.key v.plaintext output;
+  if Bytes.compare output v.expected = 0 then
+    test_result Success ""
+  else
+    test_result Failure "Output mismatch"
+
 
 let _ =
-  List.iter (fun v -> test v "Blake2b_32" Hacl.Blake2b_32.hash) tests;
-  List.iter (fun v -> test v "Blake2b_256" Hacl.Blake2b_256.hash) tests
+  List.iter (fun v -> test_bigstring v "Blake2b_32" Hacl.Blake2b_32.hash) tests;
+  List.iter (fun v -> test_bigstring v "Blake2b_256" Hacl.Blake2b_256.hash) tests;
+
+  List.iter (fun v -> test_bigstring v "Blake2b_256" Hacl.Blake2b_256_bigstring.hash) tests;
+  List.iter (fun v -> test_bytes (test_to_bytes v) "Blake2b_256" Hacl.Blake2b_256_bytes.hash)
