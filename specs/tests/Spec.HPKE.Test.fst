@@ -354,3 +354,62 @@ let test2_nonce = List.Tot.map u8_from_UInt8 [
   0xa5uy; 0xfcuy; 0x13uy; 0xd6uy; 0xd2uy;
   0x9fuy; 0xc7uy
 ]
+
+
+//
+// Main
+//
+#set-options "--ifuel 1"
+let test () =
+
+  IO.print_string "\nTest 1\n";
+  IO.print_string "Ignoring for now, only Base functions exposed\n";
+
+  IO.print_string "\nTest 2\n";
+  IO.print_string "Test setupBaseI\n";
+  let cs2 = test2_ciphersuite in
+  assert_norm (List.Tot.length test2_skE == HPKE.size_dh_key cs2);
+  assert_norm (List.Tot.length test2_pkR == HPKE.size_dh_public cs2);
+  assert_norm (List.Tot.length test2_info <= HPKE.max_info);
+  let res2_setupBaseI = HPKE.setupBaseI cs2 (of_list test2_skE) (of_list test2_pkR) (of_list test2_info) in
+
+  let res2_setupBaseI =
+    if None? res2_setupBaseI then (
+      IO.print_string "setupBaseI returned None\n"; false
+    ) else (
+      let returned_pkE, returned_key, returned_nonce = Some?.v res2_setupBaseI in
+      assert_norm (List.Tot.length test2_pkE == HPKE.size_dh_public cs2);
+      assert_norm (List.Tot.length test2_key == HPKE.size_aead_key cs2);
+      assert_norm (List.Tot.length test2_nonce == HPKE.size_aead_nonce cs2);
+      let r2_a = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b)
+        (of_list test2_pkE) returned_pkE in
+      let r2_b = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b)
+        (of_list test2_key) returned_key in
+      let r2_c = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b)
+        (of_list test2_nonce) returned_nonce in
+      if not r2_a then (
+        IO.print_string "\nExpected pkE :";
+        List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) test2_pkE;
+        IO.print_string "\nComputed pkE :";
+        List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list returned_pkE);
+        IO.print_string "\n");
+      if not r2_b then (
+        IO.print_string "\nExpected key :";
+        List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) test2_key;
+        IO.print_string "\nComputed key :";
+        List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list returned_key);
+        IO.print_string "\n");
+      if not r2_c then (
+        IO.print_string "\nExpected nonce :";
+        List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) test2_nonce;
+        IO.print_string "\nComputed nonce :";
+        List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list returned_nonce);
+        IO.print_string "\n");
+
+      r2_a && r2_b && r2_c
+    )
+  in
+
+  if res2_setupBaseI then IO.print_string "setupBaseI succeeded\n" else IO.print_string "setupBaseI failed\n";
+
+  res2_setupBaseI
