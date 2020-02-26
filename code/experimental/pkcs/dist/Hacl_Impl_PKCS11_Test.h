@@ -25,11 +25,16 @@
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 
-#ifndef __Hacl_Impl_PKCS11_Creation_GenKey_H
-#define __Hacl_Impl_PKCS11_Creation_GenKey_H
+#ifndef __Hacl_Impl_PKCS11_Test_H
+#define __Hacl_Impl_PKCS11_Test_H
 
-#include "Hacl_Lib.h"
 
+
+
+#define Hacl_Impl_PKCS11_Internal_Types_CK_ULONG 0
+#define Hacl_Impl_PKCS11_Internal_Types_CK_BOOL 1
+
+typedef uint8_t Hacl_Impl_PKCS11_Internal_Types_void;
 
 #define Hacl_Impl_PKCS11_Result_CKR_OK 0
 #define Hacl_Impl_PKCS11_Result_CKR_ARGUMENTS_BAD 1
@@ -60,8 +65,17 @@
 
 typedef uint8_t Hacl_Impl_PKCS11_Result_exception_t;
 
+typedef struct Hacl_Impl_PKCS11_Internal_Attribute_attributeD_s
+{
+  uint32_t _type;
+  Hacl_Impl_PKCS11_Internal_Types_void *pValue;
+  uint32_t ulValueLen;
+}
+Hacl_Impl_PKCS11_Internal_Attribute_attributeD;
+
 #define Hacl_Impl_PKCS11_Internal_Attribute_CKA_CLASS 0
 #define Hacl_Impl_PKCS11_Internal_Attribute_CKA_TOKEN 1
+#define Hacl_Impl_PKCS11_Internal_Attribute_CKA_EC_PARAMS 2
 
 typedef uint8_t Hacl_Impl_PKCS11_Internal_Attribute_attribute_tags;
 
@@ -83,6 +97,13 @@ typedef struct Hacl_Impl_PKCS11_Internal_Attribute_attribute_s
       uint32_t ulValueLen;
     }
     case_CKA_TOKEN;
+    struct 
+    {
+      uint32_t _type;
+      void **pValue;
+      uint32_t ulValueLen;
+    }
+    case_CKA_EC_PARAMS;
   }
   ;
 }
@@ -101,41 +122,28 @@ typedef struct Hacl_Impl_PKCS11_DeviceModule_device_s
 {
   uint32_t keyBufferLen;
   Hacl_Impl_PKCS11_Internal_Object__object keys;
+  uint32_t ulCountMechanisms;
+  uint32_t *listSupportedMechanisms;
+  uint32_t ulCountCurves;
+  uint32_t *listSupportedCurves;
 }
 Hacl_Impl_PKCS11_DeviceModule_device;
 
-#define FStar_Pervasives_Inl 0
-#define FStar_Pervasives_Inr 1
-
-typedef uint8_t FStar_Pervasives_either__Prims_int_Hacl_Impl_PKCS11_Result_exception_t_tags;
-
-typedef struct FStar_Pervasives_either__Prims_int_Hacl_Impl_PKCS11_Result_exception_t_s
+typedef struct Prims_dtuple2__Hacl_Impl_PKCS11_Result_exception_t_uint32_t_s
 {
-  FStar_Pervasives_either__Prims_int_Hacl_Impl_PKCS11_Result_exception_t_tags tag;
-  union {
-    Prims_int case_Inl;
-    Hacl_Impl_PKCS11_Result_exception_t case_Inr;
-  }
-  ;
+  Hacl_Impl_PKCS11_Result_exception_t fst;
+  uint32_t snd;
 }
-FStar_Pervasives_either__Prims_int_Hacl_Impl_PKCS11_Result_exception_t;
+Prims_dtuple2__Hacl_Impl_PKCS11_Result_exception_t_uint32_t;
 
-typedef struct
-Prims_dtuple2__FStar_Pervasives_either__Prims_int_Hacl_Impl_PKCS11_Result_exception_t_Hacl_Impl_PKCS11_DeviceModule_device_s
-{
-  FStar_Pervasives_either__Prims_int_Hacl_Impl_PKCS11_Result_exception_t fst;
-  Hacl_Impl_PKCS11_DeviceModule_device snd;
-}
-Prims_dtuple2__FStar_Pervasives_either__Prims_int_Hacl_Impl_PKCS11_Result_exception_t_Hacl_Impl_PKCS11_DeviceModule_device;
-
-Prims_dtuple2__FStar_Pervasives_either__Prims_int_Hacl_Impl_PKCS11_Result_exception_t_Hacl_Impl_PKCS11_DeviceModule_device
-Hacl_Impl_PKCS11_Creation_GenKey__CKS_GenerateKey_(
+Prims_dtuple2__Hacl_Impl_PKCS11_Result_exception_t_uint32_t
+Hacl_Impl_PKCS11_Test_test(
   Hacl_Impl_PKCS11_DeviceModule_device d,
   uint32_t hSession,
   uint32_t pMechanism,
-  uint32_t ulCould,
-  Hacl_Impl_PKCS11_Internal_Attribute_attribute *pTemplate
+  uint32_t ulCount,
+  Hacl_Impl_PKCS11_Internal_Attribute_attributeD *pTemplate
 );
 
-#define __Hacl_Impl_PKCS11_Creation_GenKey_H_DEFINED
+#define __Hacl_Impl_PKCS11_Test_H_DEFINED
 #endif

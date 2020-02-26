@@ -44,13 +44,15 @@ let lenAttribute attrType =
   match a with 
   |0ul -> (size 1) 
   |1ul -> (size 1)
+  |180ul -> (size 1)
   |_ -> (size 1)
 
 noeq
 type attribute = 
   | CKA_CLASS: _type: _CK_ATTRIBUTE_TYPE{uint_v _type = 0} -> pValue: buffer (void_t (typeID_type (uint_v _type))) ->  ulValueLen: size_t {length pValue == uint_v ulValueLen} -> attribute
   | CKA_TOKEN: _type: _CK_ATTRIBUTE_TYPE{uint_v _type = 1} -> pValue: buffer (void_t (typeID_type (uint_v _type))) ->  ulValueLen: size_t {length pValue == uint_v ulValueLen} -> attribute
-
+  (* The next attribute consists either from the params of curve or the id of curve. For now I am gonna support only the last. *)
+  | CKA_EC_PARAMS: _type: _CK_ATTRIBUTE_TYPE{uint_v _type = 0x180} -> pValue: buffer (void_t (typeID_type (uint_v _type))) -> ulValueLen: size_t {length pValue == uint_v ulValueLen} -> attribute
 
 val getAttributeType: a: attribute -> Tot _CK_ATTRIBUTE_TYPE
 
@@ -58,6 +60,7 @@ let getAttributeType a =
   match a with 
   |CKA_CLASS t _ _ -> t
   |CKA_TOKEN t _ _ -> t 
+  |CKA_EC_PARAMS t _ _ -> t
 
 
 val isAttributeReadOnly_: _CK_ATTRIBUTE_TYPE -> Tot bool
@@ -88,7 +91,7 @@ let isAttributeReadOnlyBuffer a b =
   let oldException = index b (size 0) in 
   let newException = exceptionAdd oldException e in 
   upd b (size 0) newException
-  
+
 
 val checkAttributes: ulCount: size_t -> pTemplate: buffer attribute{length pTemplate = uint_v ulCount} -> Stack unit
   (requires fun h -> live h pTemplate)
