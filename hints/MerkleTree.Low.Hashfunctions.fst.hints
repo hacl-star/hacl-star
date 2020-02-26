@@ -8,16 +8,25 @@
       0,
       [ "@query" ],
       0,
-      "44ee00f6546354d8a03d93fdeffab526"
+      "7c80c4f683d2c02ea2929c26ec71ed47"
     ],
     [
       "MerkleTree.Low.Hashfunctions.free_hash",
       1,
       0,
       0,
-      [ "@query" ],
+      [
+        "@MaxIFuel_assumption", "@query", "equation_LowStar.Regional.rg_inv",
+        "equation_MerkleTree.Low.Datastructures.hash",
+        "equation_MerkleTree.Low.Datastructures.hash_size_t",
+        "equation_MerkleTree.Low.Datastructures.hreg",
+        "refinement_interpretation_Tm_refine_3a4be71cbd5b25d784b09bc4fbf76831",
+        "refinement_interpretation_Tm_refine_59238531e6759906db5e681a93c5ccae",
+        "token_correspondence_LowStar.Regional.__proj__Rgl__item__r_inv",
+        "token_correspondence_LowStar.Regional.rg_inv"
+      ],
       0,
-      "f3876370e35c0edac97511b37e10bd20"
+      "db561a8f0398c9cfa385e0415a3a8a8d"
     ],
     [
       "MerkleTree.Low.Hashfunctions.hash_fun_t",
@@ -39,7 +48,7 @@
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec"
       ],
       0,
-      "b265980cdb2169445c64fa4e794e501b"
+      "025eb9f73b7e75137cd6248baa1aa777"
     ],
     [
       "MerkleTree.Low.Hashfunctions.hash_fun_t",
@@ -76,7 +85,7 @@
         "typing_LowStar.Buffer.trivial_preorder"
       ],
       0,
-      "44649aba4c06d007d56c9b9b7ad1ca33"
+      "f74f2adade36651e4b9e3167131106ea"
     ],
     [
       "MerkleTree.Low.Hashfunctions.sha256_compress",
@@ -100,7 +109,7 @@
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec"
       ],
       0,
-      "651abfc24b290aef3bd17eec4612345b"
+      "2b7dadc0107005b58f38be1c60a3f08d"
     ],
     [
       "MerkleTree.Low.Hashfunctions.sha256_compress",
@@ -128,7 +137,7 @@
         "typing_Prims.pow2"
       ],
       0,
-      "2bce742122d64ad8cf31cb47c0ae1323"
+      "63d0ac598aecd0c73fc6fb853c63b023"
     ],
     [
       "MerkleTree.Low.Hashfunctions.sha256_compress",
@@ -336,7 +345,7 @@
         "typing_tok_Spec.Hash.Definitions.SHA2_256@tok"
       ],
       0,
-      "b7790cd11c187c7623777538f62e7688"
+      "adad99e1782d5d1c4902887d84b82d7e"
     ]
   ]
 ]

@@ -189,7 +189,7 @@ val hash_vec_region_of: #hsz:hash_size_t -> v:hash_vec #hsz -> GTot HH.rid
 let hash_vec_region_of #_ v = V.frameOf v
 
 private
-val hash_vec_dummy: (#hsz:hash_size_t) -> hash_vec #hsz
+val hash_vec_dummy: (#hsz:Ghost.erased hash_size_t) -> hash_vec #hsz
 let hash_vec_dummy #_ = V.alloc_empty (hash #_)
 
 noextract
