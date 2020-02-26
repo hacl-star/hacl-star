@@ -160,6 +160,8 @@ endif
 lib/%_stubs.ml lib/%_c_stubs.c: lib_gen/%_gen.exe
 	$(DY)PATH=.:$(OPENSSL_HOME):$$$(DY)PATH $<
 
+CTYPES_DEPS += lib/Lib_RandomBuffer_System_stubs.cmx lib/Lib_RandomBuffer_System_bindings.cmx
+
 libocamlevercrypt.cmxa: $(ALL_BINDINGS) $(ALL_ML_STUBS) $(ALL_C_STUBS) libevercrypt.$(SO)
 	ocamlfind mklib -o ocamlevercrypt $(CTYPES_DEPS) $(ALL_C_STUBS) libevercrypt.a -ccopt -L. -cclib -levercrypt $(MLLDFLAGS)
 

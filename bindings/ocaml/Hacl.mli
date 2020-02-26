@@ -3,7 +3,7 @@ open Unsigned
 open SharedDefs
 
 module RandomBuffer : sig
-  val randombytes : Bigstring.t -> bool
+  val randombytes : Bytes.t -> bool
 end
 
 module Chacha20_Poly1305_32 : Chacha20_Poly1305
@@ -49,27 +49,24 @@ module HKDF_SHA2_256 : HKDF
 module HKDF_SHA2_512 : HKDF
 
 module NaCl : sig
-  val box_beforenm : Bigstring.t -> Bigstring.t -> Bigstring.t -> bool
+  val box_beforenm : Bytes.t -> Bytes.t -> Bytes.t -> bool
   module Easy : sig
-    val box : Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> bool
-    val box_open : Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> bool
-    val box_afternm : Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> bool
-    val box_open_afternm : Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> bool
-    val secretbox : Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> bool
-    val secretbox_open : Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> bool
+    val box : Bytes.t -> Bytes.t -> Bytes.t -> Bytes.t -> Bytes.t -> bool
+    val box_open : Bytes.t -> Bytes.t -> Bytes.t -> Bytes.t -> Bytes.t -> bool
+    val box_afternm : Bytes.t -> Bytes.t -> Bytes.t -> Bytes.t -> bool
+    val box_open_afternm : Bytes.t -> Bytes.t -> Bytes.t -> Bytes.t -> bool
+    val secretbox : Bytes.t -> Bytes.t -> Bytes.t -> Bytes.t -> bool
+    val secretbox_open : Bytes.t -> Bytes.t -> Bytes.t -> Bytes.t -> bool
   end
   module Detached : sig
-    val box : Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> bool
-    val box_open : Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> bool
-    val box_afternm : Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> bool
-    val box_open_afternm : Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> bool
-    val secretbox : Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> bool
-    val secretbox_open : Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> bool
+    val box : Bytes.t -> Bytes.t -> Bytes.t -> Bytes.t -> Bytes.t -> Bytes.t -> bool
+    val box_open : Bytes.t -> Bytes.t -> Bytes.t -> Bytes.t -> Bytes.t -> Bytes.t -> bool
+    val box_afternm : Bytes.t -> Bytes.t -> Bytes.t -> Bytes.t -> Bytes.t -> bool
+    val box_open_afternm : Bytes.t -> Bytes.t -> Bytes.t -> Bytes.t -> Bytes.t -> bool
+    val secretbox : Bytes.t -> Bytes.t -> Bytes.t -> Bytes.t -> Bytes.t -> bool
+    val secretbox_open : Bytes.t -> Bytes.t -> Bytes.t -> Bytes.t -> Bytes.t -> bool
   end
 end
 
 module Blake2b_32 : Blake2b
 module Blake2b_256 : Blake2b
-
-module Blake2b_256_bigstring : Blake2b_bigstring
-module Blake2b_256_bytes : Blake2b_bytes

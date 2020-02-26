@@ -1,9 +1,9 @@
 open Ctypes
 open Unsigned
 
-open Utils
 open SharedDefs
 open SharedFunctors
+open CBytes
 
 module Hacl_Spec = Hacl_Spec_bindings.Bindings(Hacl_Spec_stubs)
 
@@ -75,17 +75,17 @@ module AEAD = struct
     | CHACHA20_POLY1305 -> spec_Agile_AEAD_alg_Spec_Agile_AEAD_CHACHA20_POLY1305
   let init alg key : t result =
     let st = allocate (ptr everCrypt_AEAD_state_s) (from_voidp everCrypt_AEAD_state_s null) in
-    match UInt8.to_int (everCrypt_AEAD_create_in (alg_definition alg) st (uint8_ptr key)) with
+    match UInt8.to_int (everCrypt_AEAD_create_in (alg_definition alg) st (ctypes_buf key)) with
     | 0 -> Success st
     | n -> error n
   let encrypt st iv ad pt ct tag : unit result =
     get_result (everCrypt_AEAD_encrypt (!@st)
-                  (uint8_ptr iv) (size_uint32 iv) (uint8_ptr ad) (size_uint32 ad)
-                  (uint8_ptr pt) (size_uint32 pt) (uint8_ptr ct) (uint8_ptr tag))
+                  (ctypes_buf iv) (size_uint32 iv) (ctypes_buf ad) (size_uint32 ad)
+                  (ctypes_buf pt) (size_uint32 pt) (ctypes_buf ct) (ctypes_buf tag))
   let decrypt st iv ad ct tag dt : unit result =
     get_result (everCrypt_AEAD_decrypt (!@st)
-                  (uint8_ptr iv) (size_uint32 iv) (uint8_ptr ad) (size_uint32 ad)
-                  (uint8_ptr ct) (size_uint32 ct) (uint8_ptr tag) (uint8_ptr dt))
+                  (ctypes_buf iv) (size_uint32 iv) (ctypes_buf ad) (size_uint32 ad)
+                  (ctypes_buf ct) (size_uint32 ct) (ctypes_buf tag) (ctypes_buf dt))
 end
 
 module Chacha20_Poly1305 : Chacha20_Poly1305 =
@@ -121,15 +121,15 @@ module Hash = struct
     everCrypt_Hash_Incremental_init st;
     (alg, st)
   let update st data =
-    everCrypt_Hash_Incremental_update (snd st) (uint8_ptr data) (size_uint32 data)
+    everCrypt_Hash_Incremental_update (snd st) (ctypes_buf data) (size_uint32 data)
   let finish st dst =
-    assert (Bigstring.size dst = digest_len (fst st));
-    everCrypt_Hash_Incremental_finish (snd st) (uint8_ptr dst)
+    assert (CBytes.size dst = digest_len (fst st));
+    everCrypt_Hash_Incremental_finish (snd st) (ctypes_buf dst)
   let free st =
     everCrypt_Hash_Incremental_free (snd st)
   let hash alg dst input =
-    assert (Bigstring.size dst = digest_len alg);
-    everCrypt_Hash_hash (alg_definition alg) (uint8_ptr dst) (uint8_ptr input) (size_uint32 input)
+    assert (CBytes.size dst = digest_len alg);
+    everCrypt_Hash_hash (alg_definition alg) (ctypes_buf dst) (ctypes_buf input) (size_uint32 input)
 end
 
 module SHA2_224 : HashFunction =
@@ -149,7 +149,7 @@ module HMAC = struct
 
   let is_supported_alg alg = everCrypt_HMAC_is_supported_alg (HashDefs.alg_definition alg)
   let mac alg dst key data =
-    everCrypt_HMAC_compute (HashDefs.alg_definition alg) (uint8_ptr dst) (uint8_ptr key) (size_uint32 key) (uint8_ptr data) (size_uint32 data)
+    everCrypt_HMAC_compute (HashDefs.alg_definition alg) (ctypes_buf dst) (ctypes_buf key) (size_uint32 key) (ctypes_buf data) (size_uint32 data)
 end
 
 module HMAC_SHA2_256 : MAC =
@@ -175,8 +175,8 @@ end)
 module HKDF = struct
   open EverCrypt_HKDF
 
-  let expand alg okm prk info = everCrypt_HKDF_expand (HashDefs.alg_definition alg) (uint8_ptr okm) (uint8_ptr prk) (size_uint32 prk) (uint8_ptr info) (size_uint32 info) (size_uint32 okm)
-  let extract alg prk salt ikm = everCrypt_HKDF_extract (HashDefs.alg_definition alg) (uint8_ptr prk) (uint8_ptr salt) (size_uint32 salt) (uint8_ptr ikm) (size_uint32 ikm)
+  let expand alg okm prk info = everCrypt_HKDF_expand (HashDefs.alg_definition alg) (ctypes_buf okm) (ctypes_buf prk) (size_uint32 prk) (ctypes_buf info) (size_uint32 info) (size_uint32 okm)
+  let extract alg prk salt ikm = everCrypt_HKDF_extract (HashDefs.alg_definition alg) (ctypes_buf prk) (ctypes_buf salt) (size_uint32 salt) (ctypes_buf ikm) (size_uint32 ikm)
 end
 
 module HKDF_SHA2_256 : HKDF =
@@ -201,19 +201,19 @@ module DRBG = struct
   open EverCrypt_DRBG
 
   type t = everCrypt_DRBG_state_s ptr
-  let instantiate ?(personalization_string=Bigstring.empty) alg =
+  let instantiate ?(personalization_string=Bytes.empty) alg =
     if HMAC.is_supported_alg alg then
       let st = everCrypt_DRBG_create (HashDefs.alg_definition alg) in
-      if everCrypt_DRBG_instantiate st (uint8_ptr personalization_string) (size_uint32 personalization_string) then
+      if everCrypt_DRBG_instantiate st (ctypes_buf personalization_string) (size_uint32 personalization_string) then
         Some st
       else
         None
     else
       None
-  let reseed ?(additional_input=Bigstring.empty) st =
-    everCrypt_DRBG_reseed st (uint8_ptr additional_input) (size_uint32 additional_input)
-  let generate ?(additional_input=Bigstring.empty) st output =
-    everCrypt_DRBG_generate (uint8_ptr output) st (size_uint32 output) (uint8_ptr additional_input) (size_uint32 additional_input)
+  let reseed ?(additional_input=Bytes.empty) st =
+    everCrypt_DRBG_reseed st (ctypes_buf additional_input) (size_uint32 additional_input)
+  let generate ?(additional_input=Bytes.empty) st output =
+    everCrypt_DRBG_generate (ctypes_buf output) st (size_uint32 output) (ctypes_buf additional_input) (size_uint32 additional_input)
   let uninstantiate st =
     everCrypt_DRBG_uninstantiate st
 end

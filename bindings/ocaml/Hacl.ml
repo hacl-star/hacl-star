@@ -1,8 +1,8 @@
 open Unsigned
 
-open Utils
 open SharedDefs
 open SharedFunctors
+open CBytes
 
 module Lib_RandomBuffer_System = Lib_RandomBuffer_System_bindings.Bindings(Lib_RandomBuffer_System_stubs)
 module Hacl_Chacha20Poly1305_32 = Hacl_Chacha20Poly1305_32_bindings.Bindings(Hacl_Chacha20Poly1305_32_stubs)
@@ -24,7 +24,7 @@ module Hacl_Blake2b_32 = Hacl_Blake2b_32_bindings.Bindings(Hacl_Blake2b_32_stubs
 module Hacl_Blake2b_256 = Hacl_Blake2b_256_bindings.Bindings(Hacl_Blake2b_256_stubs)
 
 module RandomBuffer = struct
-  let randombytes buf = Lib_RandomBuffer_System.randombytes (uint8_ptr buf) (size_uint32 buf)
+  let randombytes buf = Lib_RandomBuffer_System.randombytes (ctypes_buf buf) (size_uint32 buf)
 end
 
 module Chacha20_Poly1305_32 : Chacha20_Poly1305 =
@@ -66,8 +66,11 @@ module Curve25519_64_Slow : Curve25519 =
     let ecdh = Hacl_Curve25519_64_Slow.hacl_Curve25519_64_Slow_ecdh
   end)
 
+(* TODO: needs testing *)
 module Curve25519_51_Internal = struct
+  open Ctypes
   include Curve25519_51
+  let uint64_ptr buf = from_voidp uint64_t (to_voidp (bigarray_start array1 buf))
   let fadd out f1 f2 = Hacl_Curve25519_51.hacl_Impl_Curve25519_Field51_fadd (uint64_ptr out) (uint64_ptr f1) (uint64_ptr f2)
   let fsub out f1 f2 = Hacl_Curve25519_51.hacl_Impl_Curve25519_Field51_fsub (uint64_ptr out) (uint64_ptr f1) (uint64_ptr f2)
   let fmul1 out f1 f2 = Hacl_Curve25519_51.hacl_Impl_Curve25519_Field51_fmul1 (uint64_ptr out) (uint64_ptr f1) f2
@@ -195,22 +198,22 @@ module NaCl = struct
       false
     else
       failwith "Unknown return value"
-  let box_beforenm k pk sk = get_result @@ hacl_NaCl_crypto_box_beforenm (uint8_ptr k) (uint8_ptr pk) (uint8_ptr sk)
+  let box_beforenm k pk sk = get_result @@ hacl_NaCl_crypto_box_beforenm (ctypes_buf k) (ctypes_buf pk) (ctypes_buf sk)
   module Easy = struct
-    let box ct pt n pk sk = get_result @@ hacl_NaCl_crypto_box_easy (uint8_ptr ct) (uint8_ptr pt) (size_uint32 pt) (uint8_ptr n) (uint8_ptr pk) (uint8_ptr sk)
-    let box_open pt ct n pk sk = get_result @@ hacl_NaCl_crypto_box_open_easy (uint8_ptr pt) (uint8_ptr ct) (size_uint32 ct) (uint8_ptr n) (uint8_ptr pk) (uint8_ptr sk)
-    let box_afternm ct pt n k = get_result @@ hacl_NaCl_crypto_box_easy_afternm (uint8_ptr ct) (uint8_ptr pt) (size_uint32 pt) (uint8_ptr n) (uint8_ptr k)
-    let box_open_afternm pt ct n k = get_result @@ hacl_NaCl_crypto_box_open_easy_afternm (uint8_ptr pt) (uint8_ptr ct) (size_uint32 ct) (uint8_ptr n) (uint8_ptr k)
-    let secretbox ct pt n k = get_result @@ hacl_NaCl_crypto_secretbox_easy (uint8_ptr ct) (uint8_ptr pt) (size_uint32 pt) (uint8_ptr n) (uint8_ptr k)
-    let secretbox_open pt ct n k = get_result @@ hacl_NaCl_crypto_secretbox_open_easy (uint8_ptr pt) (uint8_ptr ct) (size_uint32 ct) (uint8_ptr n) (uint8_ptr k)
+    let box ct pt n pk sk = get_result @@ hacl_NaCl_crypto_box_easy (ctypes_buf ct) (ctypes_buf pt) (size_uint32 pt) (ctypes_buf n) (ctypes_buf pk) (ctypes_buf sk)
+    let box_open pt ct n pk sk = get_result @@ hacl_NaCl_crypto_box_open_easy (ctypes_buf pt) (ctypes_buf ct) (size_uint32 ct) (ctypes_buf n) (ctypes_buf pk) (ctypes_buf sk)
+    let box_afternm ct pt n k = get_result @@ hacl_NaCl_crypto_box_easy_afternm (ctypes_buf ct) (ctypes_buf pt) (size_uint32 pt) (ctypes_buf n) (ctypes_buf k)
+    let box_open_afternm pt ct n k = get_result @@ hacl_NaCl_crypto_box_open_easy_afternm (ctypes_buf pt) (ctypes_buf ct) (size_uint32 ct) (ctypes_buf n) (ctypes_buf k)
+    let secretbox ct pt n k = get_result @@ hacl_NaCl_crypto_secretbox_easy (ctypes_buf ct) (ctypes_buf pt) (size_uint32 pt) (ctypes_buf n) (ctypes_buf k)
+    let secretbox_open pt ct n k = get_result @@ hacl_NaCl_crypto_secretbox_open_easy (ctypes_buf pt) (ctypes_buf ct) (size_uint32 ct) (ctypes_buf n) (ctypes_buf k)
   end
   module Detached = struct
-    let box ct tag pt n pk sk = get_result @@ hacl_NaCl_crypto_box_detached (uint8_ptr ct) (uint8_ptr tag) (uint8_ptr pt) (size_uint32 pt) (uint8_ptr n) (uint8_ptr pk) (uint8_ptr sk)
-    let box_open pt ct tag n pk sk = get_result @@ hacl_NaCl_crypto_box_open_detached (uint8_ptr pt) (uint8_ptr ct) (uint8_ptr tag) (size_uint32 ct) (uint8_ptr n) (uint8_ptr pk) (uint8_ptr sk)
-    let box_afternm ct tag pt n k = get_result @@ hacl_NaCl_crypto_box_detached_afternm (uint8_ptr ct) (uint8_ptr tag) (uint8_ptr pt) (size_uint32 pt) (uint8_ptr n) (uint8_ptr k)
-    let box_open_afternm pt ct tag n k = get_result @@ hacl_NaCl_crypto_box_open_detached_afternm (uint8_ptr pt) (uint8_ptr ct) (uint8_ptr tag) (size_uint32 ct) (uint8_ptr n) (uint8_ptr k)
-    let secretbox ct tag pt n k = get_result @@ hacl_NaCl_crypto_secretbox_detached (uint8_ptr ct) (uint8_ptr tag) (uint8_ptr pt) (size_uint32 pt) (uint8_ptr n) (uint8_ptr k)
-    let secretbox_open pt ct tag n k = get_result @@ hacl_NaCl_crypto_secretbox_open_detached (uint8_ptr pt) (uint8_ptr ct) (uint8_ptr tag) (size_uint32 ct) (uint8_ptr n) (uint8_ptr k)
+    let box ct tag pt n pk sk = get_result @@ hacl_NaCl_crypto_box_detached (ctypes_buf ct) (ctypes_buf tag) (ctypes_buf pt) (size_uint32 pt) (ctypes_buf n) (ctypes_buf pk) (ctypes_buf sk)
+    let box_open pt ct tag n pk sk = get_result @@ hacl_NaCl_crypto_box_open_detached (ctypes_buf pt) (ctypes_buf ct) (ctypes_buf tag) (size_uint32 ct) (ctypes_buf n) (ctypes_buf pk) (ctypes_buf sk)
+    let box_afternm ct tag pt n k = get_result @@ hacl_NaCl_crypto_box_detached_afternm (ctypes_buf ct) (ctypes_buf tag) (ctypes_buf pt) (size_uint32 pt) (ctypes_buf n) (ctypes_buf k)
+    let box_open_afternm pt ct tag n k = get_result @@ hacl_NaCl_crypto_box_open_detached_afternm (ctypes_buf pt) (ctypes_buf ct) (ctypes_buf tag) (size_uint32 ct) (ctypes_buf n) (ctypes_buf k)
+    let secretbox ct tag pt n k = get_result @@ hacl_NaCl_crypto_secretbox_detached (ctypes_buf ct) (ctypes_buf tag) (ctypes_buf pt) (size_uint32 pt) (ctypes_buf n) (ctypes_buf k)
+    let secretbox_open pt ct tag n k = get_result @@ hacl_NaCl_crypto_secretbox_open_detached (ctypes_buf pt) (ctypes_buf ct) (ctypes_buf tag) (size_uint32 ct) (ctypes_buf n) (ctypes_buf k)
   end
 end
 
@@ -222,14 +225,4 @@ module Blake2b_32 : Blake2b =
 module Blake2b_256 : Blake2b =
   Make_Blake2b (struct
     let blake2b = Hacl_Blake2b_256.hacl_Blake2b_256_blake2b
-  end)
-
-module Blake2b_256_bigstring : Blake2b_bigstring =
-  Make_Blake2b_generic (CBigstring) (struct
-    let blake2b = Hacl_Blake2b_256.hacl_Blake2b_256_blake2b
-end)
-
-module Blake2b_256_bytes : Blake2b_bytes =
-  Make_Blake2b_generic (CBytes) (struct
-    let blake2b = Hacl_Blake2b_256.hacl_Blake2b_256_blake2b_bytes
   end)

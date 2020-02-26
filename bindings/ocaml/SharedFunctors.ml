@@ -1,96 +1,99 @@
-open Ctypes
 open Unsigned
 
-open Utils
 open SharedDefs
 
-module Make_Chacha20_Poly1305 (Impl : sig
-    val encrypt : uint8 ptr -> uint8 ptr -> uint32 -> uint8 ptr -> uint32 -> uint8 ptr -> uint8 ptr -> uint8 ptr -> unit
-    val decrypt : uint8 ptr -> uint8 ptr -> uint32 -> uint8 ptr -> uint32 -> uint8 ptr -> uint8 ptr -> uint8 ptr -> uint32
-  end) : Chacha20_Poly1305
+module Make_Chacha20_Poly1305_generic (C: Buffer)
+    (Impl : sig
+       val encrypt : C.buf -> C.buf -> uint32 -> C.buf -> uint32 -> C.buf -> C.buf -> C.buf -> unit
+       val decrypt : C.buf -> C.buf -> uint32 -> C.buf -> uint32 -> C.buf -> C.buf -> C.buf -> uint32
+     end)
 = struct
+  type t = C.t
   let encrypt key iv ad pt ct tag =
-    Impl.encrypt (uint8_ptr key) (uint8_ptr iv) (size_uint32 ad) (uint8_ptr ad)
-      (size_uint32 pt) (uint8_ptr pt) (uint8_ptr ct) (uint8_ptr tag)
+    Impl.encrypt (C.ctypes_buf key) (C.ctypes_buf iv) (C.size_uint32 ad) (C.ctypes_buf ad)
+      (C.size_uint32 pt) (C.ctypes_buf pt) (C.ctypes_buf ct) (C.ctypes_buf tag)
 
   let decrypt key iv ad pt ct tag =
-    let result = Impl.decrypt (uint8_ptr key) (uint8_ptr iv) (size_uint32 ad) (uint8_ptr ad)
-        (size_uint32 pt) (uint8_ptr pt) (uint8_ptr ct) (uint8_ptr tag)
+    let result = Impl.decrypt (C.ctypes_buf key) (C.ctypes_buf iv) (C.size_uint32 ad) (C.ctypes_buf ad)
+        (C.size_uint32 pt) (C.ctypes_buf pt) (C.ctypes_buf ct) (C.ctypes_buf tag)
     in
     UInt32.to_int result = 0
 end
 
-module Make_Curve25519 (Impl : sig
-    val secret_to_public : uint8 ptr -> uint8 ptr -> unit
-    val scalarmult : uint8 ptr -> uint8 ptr -> uint8 ptr -> unit
-    val ecdh : uint8 ptr -> uint8 ptr -> uint8 ptr -> bool
-  end) : Curve25519
+module Make_Curve25519_generic (C: Buffer)
+    (Impl : sig
+    val secret_to_public : C.buf -> C.buf -> unit
+    val scalarmult : C.buf -> C.buf -> C.buf -> unit
+    val ecdh : C.buf -> C.buf -> C.buf -> bool
+  end)
 = struct
-  let secret_to_public pub priv = Impl.secret_to_public (uint8_ptr pub) (uint8_ptr priv)
-  let scalarmult shared my_priv their_pub = Impl.scalarmult (uint8_ptr shared) (uint8_ptr my_priv) (uint8_ptr their_pub)
-  let ecdh shared my_priv their_pub = Impl.ecdh (uint8_ptr shared) (uint8_ptr my_priv) (uint8_ptr their_pub)
+  type t = C.t
+  let secret_to_public pub priv = Impl.secret_to_public (C.ctypes_buf pub) (C.ctypes_buf priv)
+  let scalarmult shared my_priv their_pub = Impl.scalarmult (C.ctypes_buf shared) (C.ctypes_buf my_priv) (C.ctypes_buf their_pub)
+  let ecdh shared my_priv their_pub = Impl.ecdh (C.ctypes_buf shared) (C.ctypes_buf my_priv) (C.ctypes_buf their_pub)
 end
 
-module Make_EdDSA (Impl : sig
-  val secret_to_public : uint8 ptr -> uint8 ptr -> unit
-  val sign : uint8 ptr -> uint8 ptr -> uint32 -> uint8 ptr -> unit
-  val verify : uint8 ptr ->uint32 -> uint8 ptr -> uint8 ptr -> bool
-  val expand_keys : uint8 ptr -> uint8 ptr -> unit
-  val sign_expanded : uint8 ptr -> uint8 ptr -> uint32 -> uint8 ptr -> unit
-  end) : EdDSA
+module Make_EdDSA_generic (C: Buffer)
+    (Impl : sig
+  val secret_to_public : C.buf -> C.buf -> unit
+  val sign : C.buf -> C.buf -> uint32 -> C.buf -> unit
+  val verify : C.buf ->uint32 -> C.buf -> C.buf -> bool
+  val expand_keys : C.buf -> C.buf -> unit
+  val sign_expanded : C.buf -> C.buf -> uint32 -> C.buf -> unit
+  end)
 = struct
-  let secret_to_public pub priv = Impl.secret_to_public (uint8_ptr pub) (uint8_ptr priv)
-  let sign signature priv msg = Impl.sign (uint8_ptr signature) (uint8_ptr priv) (size_uint32 msg) (uint8_ptr msg)
-  let verify pub msg signature = Impl.verify (uint8_ptr pub) (size_uint32 msg) (uint8_ptr msg) (uint8_ptr signature)
-  let expand_keys ks priv = Impl.expand_keys (uint8_ptr ks) (uint8_ptr priv)
-  let sign_expanded signature ks msg = Impl.sign_expanded (uint8_ptr signature) (uint8_ptr ks) (size_uint32 msg) (uint8_ptr msg)
+  type t = C.t
+  let secret_to_public pub priv = Impl.secret_to_public (C.ctypes_buf pub) (C.ctypes_buf priv)
+  let sign signature priv msg = Impl.sign (C.ctypes_buf signature) (C.ctypes_buf priv) (C.size_uint32 msg) (C.ctypes_buf msg)
+  let verify pub msg signature = Impl.verify (C.ctypes_buf pub) (C.size_uint32 msg) (C.ctypes_buf msg) (C.ctypes_buf signature)
+  let expand_keys ks priv = Impl.expand_keys (C.ctypes_buf ks) (C.ctypes_buf priv)
+  let sign_expanded signature ks msg = Impl.sign_expanded (C.ctypes_buf signature) (C.ctypes_buf ks) (C.size_uint32 msg) (C.ctypes_buf msg)
 end
 
-module Make_HashFunction (Impl : sig
+module Make_HashFunction_generic (C: Buffer)
+    (Impl : sig
     val hash_alg : HashDefs.alg option
-    val hash : uint8 ptr -> uint32 -> uint8 ptr -> unit
-  end) : HashFunction
+    val hash : C.buf -> uint32 -> C.buf -> unit
+  end)
 = struct
+  type t = C.t
   let hash input output =
     (match Impl.hash_alg with
-    | Some alg -> assert (Bigstring.size output = HashDefs.digest_len alg)
+    | Some alg -> assert (C.size output = HashDefs.digest_len alg)
     | None -> ());
-    Impl.hash (uint8_ptr input) (size_uint32 input) (uint8_ptr output)
+    Impl.hash (C.ctypes_buf input) (C.size_uint32 input) (C.ctypes_buf output)
 end
 
-module Make_Poly1305 (Impl : sig
-    val mac : uint8 ptr -> uint32 -> uint8 ptr -> uint8 ptr -> unit
-  end) : MAC
+module Make_Poly1305_generic (C: Buffer)
+    (Impl : sig
+    val mac : C.buf -> uint32 -> C.buf -> C.buf -> unit
+  end)
 = struct
-  let mac dst key data = Impl.mac (uint8_ptr dst) (size_uint32 data) (uint8_ptr data) (uint8_ptr key)
+  type t = C.t
+  let mac dst key data = Impl.mac (C.ctypes_buf dst) (C.size_uint32 data) (C.ctypes_buf data) (C.ctypes_buf key)
 end
 
-module Make_HMAC (Impl : sig
-    val mac : uint8 ptr -> uint8 ptr -> uint32 -> uint8 ptr -> uint32 -> unit
-  end) : MAC
+module Make_HMAC_generic (C: Buffer)
+    (Impl : sig
+    val mac : C.buf -> C.buf -> uint32 -> C.buf -> uint32 -> unit
+  end)
 = struct
-  let mac dst key data = Impl.mac (uint8_ptr dst) (uint8_ptr key) (size_uint32 key) (uint8_ptr data) (size_uint32 data)
+  type t = C.t
+  let mac dst key data = Impl.mac (C.ctypes_buf dst) (C.ctypes_buf key) (C.size_uint32 key) (C.ctypes_buf data) (C.size_uint32 data)
 end
 
-module Make_HKDF (Impl: sig
-    val expand : uint8 ptr -> uint8 ptr -> uint32 -> uint8 ptr -> uint32 -> uint32 -> unit
-    val extract : uint8 ptr -> uint8 ptr -> uint32 -> uint8 ptr -> uint32 -> unit
-  end) : HKDF
-  = struct
-    let expand okm prk info = Impl.expand (uint8_ptr okm) (uint8_ptr prk) (size_uint32 prk) (uint8_ptr info) (size_uint32 info) (size_uint32 okm)
-    let extract prk salt ikm = Impl.extract (uint8_ptr prk) (uint8_ptr salt) (size_uint32 salt) (uint8_ptr ikm) (size_uint32 ikm)
-end
-
-module Make_Blake2b (Impl : sig
-    val blake2b : uint32 -> uint8 ptr -> uint32 -> uint8 ptr -> uint32 -> uint8 ptr -> unit
-  end) : Blake2b
+module Make_HKDF_generic (C: Buffer)
+    (Impl: sig
+       val expand : C.buf -> C.buf -> uint32 -> C.buf -> uint32 -> uint32 -> unit
+       val extract : C.buf -> C.buf -> uint32 -> C.buf -> uint32 -> unit
+     end)
 = struct
-  let hash key pt output = Impl.blake2b (size_uint32 output) (uint8_ptr output) (size_uint32 pt) (uint8_ptr pt) (size_uint32 key) (uint8_ptr key)
+  type t = C.t
+  let expand okm prk info = Impl.expand (C.ctypes_buf okm) (C.ctypes_buf prk) (C.size_uint32 prk) (C.ctypes_buf info) (C.size_uint32 info) (C.size_uint32 okm)
+  let extract prk salt ikm = Impl.extract (C.ctypes_buf prk) (C.ctypes_buf salt) (C.size_uint32 salt) (C.ctypes_buf ikm) (C.size_uint32 ikm)
 end
 
-
-module Make_Blake2b_generic
-    (C: Buffer)
+module Make_Blake2b_generic (C: Buffer)
     (Impl : sig
        val blake2b : uint32 -> C.buf -> uint32 -> C.buf -> uint32 -> C.buf -> unit
      end)
@@ -98,3 +101,12 @@ module Make_Blake2b_generic
   type t = C.t
   let hash key pt output = Impl.blake2b (C.size_uint32 output) (C.ctypes_buf output) (C.size_uint32 pt) (C.ctypes_buf pt) (C.size_uint32 key) (C.ctypes_buf key)
 end
+
+module Make_Chacha20_Poly1305 = Make_Chacha20_Poly1305_generic (CBytes)
+module Make_Curve25519 = Make_Curve25519_generic (CBytes)
+module Make_EdDSA = Make_EdDSA_generic (CBytes)
+module Make_HashFunction = Make_HashFunction_generic (CBytes)
+module Make_Poly1305 = Make_Poly1305_generic (CBytes)
+module Make_HMAC = Make_HMAC_generic (CBytes)
+module Make_HKDF = Make_HKDF_generic (CBytes)
+module Make_Blake2b = Make_Blake2b_generic (CBytes)

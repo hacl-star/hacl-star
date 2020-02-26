@@ -20,3 +20,8 @@ let print_error = function
   | AuthenticationFailure -> "Authentication failure"
   | InvalidIVLength -> "Invalid IV length"
   | DecodeError -> "Decode error"
+
+let init_bytes len =
+  let buf = Bytes.create len in
+  Bytes.fill buf 0 len '\x00';
+  buf

@@ -1,5 +1,32 @@
 open Unsigned
 
+open Ctypes
+
+module type Buffer = sig
+  type t
+  type buf
+  val size_uint32 : t -> uint32
+  val ctypes_buf : t -> buf
+  val size : t -> int
+end
+
+module CBytes : Buffer with type t = Bytes.t and type buf = Bytes.t Ctypes.ocaml = struct
+  type t = Bytes.t
+  type buf = Bytes.t Ctypes.ocaml
+  let size_uint32 b = Unsigned.UInt32.of_int (Bytes.length b)
+  let ctypes_buf = Ctypes.ocaml_bytes_start
+  let size = Bytes.length
+end
+
+module CBigstring : Buffer with type t = Bigstring.t and type buf = uint8 Ctypes_static.ptr = struct
+  type t = Bigstring.t
+  type buf = uint8 Ctypes_static.ptr
+  let size_uint32 b = Unsigned.UInt32.of_int (Bigstring.size b)
+  let ctypes_buf b = from_voidp uint8_t (to_voidp (bigarray_start array1 b))
+  let size = Bigstring.size
+end
+
+
 module Hacl_Hash = Hacl_Hash_bindings.Bindings(Hacl_Hash_stubs)
 module Hacl_Spec = Hacl_Spec_bindings.Bindings(Hacl_Spec_stubs)
 
@@ -25,67 +52,42 @@ module HashDefs = struct
     UInt32.to_int (Hacl_Hash.hacl_Hash_Definitions_hash_len (alg_definition alg))
 end
 
-module type Chacha20_Poly1305 = sig
-  val encrypt: Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> unit
-  val decrypt: Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> Bigstring.t -> bool
-end
-
-module type Curve25519 = sig
-  val secret_to_public : Bigstring.t -> Bigstring.t -> unit
-  val scalarmult : Bigstring.t -> Bigstring.t -> Bigstring.t -> unit
-  val ecdh : Bigstring.t -> Bigstring.t -> Bigstring.t -> bool
-end
-
-module type EdDSA = sig
-  val secret_to_public : Bigstring.t -> Bigstring.t -> unit
-  val sign : Bigstring.t -> Bigstring.t -> Bigstring.t -> unit
-  val verify : Bigstring.t -> Bigstring.t -> Bigstring.t -> bool
-  val expand_keys : Bigstring.t -> Bigstring.t -> unit
-  val sign_expanded : Bigstring.t -> Bigstring.t -> Bigstring.t -> unit
-end
-
-module type HashFunction = sig
-  val hash : Bigstring.t -> Bigstring.t -> unit
-end
-
-module type MAC = sig
-  val mac : Bigstring.t -> Bigstring.t -> Bigstring.t -> unit
-end
-
-module type HKDF = sig
-  val expand: Bigstring.t -> Bigstring.t -> Bigstring.t -> unit
-  val extract: Bigstring.t -> Bigstring.t -> Bigstring.t -> unit
-end
-
-module type Blake2b = sig
-  val hash : Bigstring.t -> Bigstring.t -> Bigstring.t -> unit
-end
-
-
-(* Experimenting with generically defining both Bytes and Bigstring APIs
- * !!! The C functions take uint8_t* but Ctyes.ocaml_bytes_start creates a reference to a Bytes.t on the
- * OCaml heap as a char*, so as far as I understand this will only work when the char type is unsigned char. *)
-open Ctypes
-
-module type Buffer = sig
+module type Chacha20_Poly1305_generic = sig
   type t
-  type buf
-  val size_uint32 : t -> uint32
-  val ctypes_buf : t -> buf
+  val encrypt: t -> t -> t -> t -> t -> t -> unit
+  val decrypt: t -> t -> t -> t -> t -> t -> bool
 end
 
-module CBigstring : Buffer with type t = Bigstring.t and type buf = uint8 Ctypes_static.ptr = struct
-  type t = Bigstring.t
-  type buf = uint8 Ctypes_static.ptr
-  let size_uint32 b = Unsigned.UInt32.of_int (Bigstring.size b)
-  let ctypes_buf b = from_voidp uint8_t (to_voidp (bigarray_start array1 b))
+module type Curve25519_generic = sig
+  type t
+  val secret_to_public : t -> t -> unit
+  val scalarmult : t -> t -> t -> unit
+  val ecdh : t -> t -> t -> bool
 end
 
-module CBytes : Buffer with type t = Bytes.t and type buf = Bytes.t Ctypes.ocaml = struct
-  type t = Bytes.t
-  type buf = Bytes.t Ctypes.ocaml
-  let size_uint32 b = Unsigned.UInt32.of_int (Bytes.length b)
-  let ctypes_buf = Ctypes.ocaml_bytes_start
+module type EdDSA_generic = sig
+  type t
+  val secret_to_public : t -> t -> unit
+  val sign : t -> t -> t -> unit
+  val verify : t -> t -> t -> bool
+  val expand_keys : t -> t -> unit
+  val sign_expanded : t -> t -> t -> unit
+end
+
+module type HashFunction_generic = sig
+  type t
+  val hash : t -> t -> unit
+end
+
+module type MAC_generic = sig
+  type t
+  val mac : t -> t -> t -> unit
+end
+
+module type HKDF_generic = sig
+  type t
+  val expand: t -> t -> t -> unit
+  val extract: t -> t -> t -> unit
 end
 
 module type Blake2b_generic = sig
@@ -93,5 +95,20 @@ module type Blake2b_generic = sig
   val hash : t -> t -> t -> unit
 end
 
-module type Blake2b_bigstring = Blake2b_generic with type t = CBigstring.t
-module type Blake2b_bytes = Blake2b_generic with type t = CBytes.t
+module type Chacha20_Poly1305 = Chacha20_Poly1305_generic with type t = CBytes.t
+module type Curve25519 = Curve25519_generic with type t = CBytes.t
+module type EdDSA = EdDSA_generic with type t = CBytes.t
+module type HashFunction = HashFunction_generic with type t = CBytes.t
+module type MAC = MAC_generic with type t = CBytes.t
+module type HKDF = HKDF_generic with type t = CBytes.t
+module type Blake2b = Blake2b_generic with type t = CBytes.t
+
+
+
+
+
+
+
+
+
+
