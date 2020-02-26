@@ -228,7 +228,8 @@ val construct_rhs_acc_consistent:
           snd rrf == snd rr)))
         (decreases j)
 
-#push-options "--z3rlimit 250 --initial_ifuel 1 --max_ifuel 1"
+#push-options "--z3rlimit 250 --ifuel 1"
+#push-options "--quake 1/3"
 let rec construct_rhs_acc_consistent #hsz #f lv i j olds hs rhs acc actd =
   assert (j < pow2 (32 - lv));
   assert (j <> 0 ==> j / 2 < pow2 (32 - (lv + 1)));
@@ -309,6 +310,7 @@ let rec construct_rhs_acc_consistent #hsz #f lv i j olds hs rhs acc actd =
       assert (snd rrf == snd rr)
     end
   end
+#pop-options
 
 val construct_rhs_inv_ok:
   #hsz:pos -> #f:MTS.hash_fun_t #hsz ->

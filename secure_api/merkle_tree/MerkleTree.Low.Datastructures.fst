@@ -52,8 +52,8 @@ val hash_region_of: #hsz:hash_size_t -> v:hash #hsz -> GTot HH.rid
 let hash_region_of #_ v = B.frameOf v
 
 private
-val hash_dummy: hsz:hash_size_t -> Tot (hash #hsz)
-let hash_dummy _ = B.null
+val hash_dummy: #hsz:hash_size_t -> Tot (hash #hsz)
+let hash_dummy #_ = B.null
 
 private
 noextract
@@ -112,7 +112,8 @@ val hash_r_alloc_p: #hsz:hash_size_t -> v:hash #hsz -> GTot Type0
 let hash_r_alloc_p #_ v = True
 
 val hash_r_alloc:
-  hsz:hash_size_t ->
+  #hsz':Ghost.erased hash_size_t ->
+  hsz:hash_size_t { hsz == Ghost.reveal hsz' } ->
   r:HST.erid ->
   HST.ST (hash #hsz)
     (requires (fun h0 -> true))
@@ -125,42 +126,26 @@ val hash_r_alloc:
       hash_region_of v = r /\
       hash_r_repr h1 v == Ghost.reveal hash_irepr /\
       B.fresh_loc (B.loc_buffer v) h0 h1))
-let hash_r_alloc s r =
+let hash_r_alloc #_ s r =
   B.malloc r (u8 0) s
 
 val hash_r_free:
-  hsz:hash_size_t ->
+  #hsz:Ghost.erased hash_size_t ->
   v:hash #hsz ->
   HST.ST unit
     (requires fun h0 -> hash_r_inv h0 v)
     (ensures  fun h0 _ h1 ->
       modifies (loc_all_regions_from false (hash_region_of v)) h0 h1)
-let hash_r_free _ v =
+let hash_r_free #_ v =
   B.free v
 
 noextract inline_for_extraction
-val hreg (hsz:hash_size_t): regional hash_size_t (hash #hsz)
+val hreg (hsz:hash_size_t): regional (h:hash_size_t) (hash #hsz)
 let hreg hsz =
-  [@inline_let] let d:(s:hash_size_t{s=hsz} -> Tot (hash #s)) = hash_dummy in
-  [@inline_let] let a:(s:hash_size_t{s=hsz} -> r:HST.erid -> HST.ST (hash #s)
-      (requires (fun h0 -> true))
-      (ensures (fun h0 v h1 ->
-               Set.subset (Map.domain (MHS.get_hmap h0))
-               (Map.domain (MHS.get_hmap h1)) /\
-               modifies loc_none h0 h1 /\
-               hash_r_alloc_p #s v /\
-               hash_r_inv h1 v /\
-               hash_region_of v = r /\
-               hash_r_repr h1 v == Ghost.reveal hash_irepr /\
-               B.fresh_loc (B.loc_buffer v) h0 h1))) = hash_r_alloc in
-  [@inline_let] let f:(s:hash_size_t{s = hsz} -> v:hash #s -> HST.ST unit
-      (requires fun h0 -> hash_r_inv h0 v)
-      (ensures  fun h0 _ h1 ->
-                modifies (loc_all_regions_from false (hash_region_of v)) h0 h1)) = hash_r_free in
-  Rgl hsz
+  Rgl #(h:hash_size_t) #(hash #hsz) hsz
       (hash_region_of #hsz)
       (B.loc_buffer)
-      d
+      (hash_dummy #hsz)
       (hash_r_inv #hsz)
       (hash_r_inv_reg #hsz)
       (hash_repr #hsz)
@@ -168,12 +153,13 @@ let hreg hsz =
       (hash_r_sep #hsz)
       (hash_irepr #hsz)
       (hash_r_alloc_p #hsz)
-      a
-      f
+      (hash_r_alloc #hsz)
+      (hash_r_free #hsz)
 
 private
 val hash_copy:
-  s:hash_size_t ->
+  #s':Ghost.erased hash_size_t ->
+  s:hash_size_t { s == Ghost.reveal s' } ->
   src:hash #s -> dst:hash #s ->
   HST.ST unit
     (requires fun h0 ->
@@ -183,22 +169,13 @@ val hash_copy:
       modifies (loc_all_regions_from false (hash_region_of dst)) h0 h1 /\
       hash_r_inv h1 dst /\
       hash_r_repr h1 dst == hash_r_repr h0 src)
-let hash_copy s src dst =
+let hash_copy #_ s src dst =
   B.blit src 0ul dst 0ul s
 
-inline_for_extraction 
+inline_for_extraction
 val hcpy: hsz:hash_size_t -> copyable #hash_size_t (hash #hsz) (hreg hsz)
-let hcpy hsz = 
-  [@inline_let] let f:(s:hash_size_t{s==Rgl?.state (hreg hsz)} -> src:hash #s -> dst:hash #s ->
-      HST.ST unit
-        (requires fun h0 ->
-          hash_r_inv h0 src /\ hash_r_inv h0 dst /\
-          HH.disjoint (hash_region_of src) (hash_region_of dst))
-        (ensures fun h0 _ h1 ->
-          modifies (loc_all_regions_from false (hash_region_of dst)) h0 h1 /\
-          hash_r_inv h1 dst /\
-          hash_r_repr h1 dst == hash_r_repr h0 src)) = hash_copy in
-  Cpy f
+let hcpy hsz =
+  Cpy (hash_copy #hsz)
 
 type hash_vec (#hsz:hash_size_t) = RV.rvector (hreg hsz)
 
@@ -212,8 +189,8 @@ val hash_vec_region_of: #hsz:hash_size_t -> v:hash_vec #hsz -> GTot HH.rid
 let hash_vec_region_of #_ v = V.frameOf v
 
 private
-val hash_vec_dummy: (#hsz:Ghost.erased hash_size_t) -> rhst hsz -> hash_vec #(Ghost.reveal hsz)
-let hash_vec_dummy #_ _ = V.alloc_empty (hash #_)
+val hash_vec_dummy: (#hsz:hash_size_t) -> hash_vec #hsz
+let hash_vec_dummy #_ = V.alloc_empty (hash #_)
 
 noextract
 val hash_vec_r_inv: #hsz:hash_size_t -> h:HS.mem -> v:hash_vec #hsz -> GTot Type0
@@ -264,8 +241,8 @@ let hash_vec_r_alloc_p #_ v = V.size_of v = 0ul
 
 #push-options "--initial_fuel 1 --max_fuel 1"
 val hash_vec_r_alloc:
-  #hsz:Ghost.erased hash_size_t ->   
-  s:rhst hsz ->
+  #hsz':Ghost.erased hash_size_t ->
+  hsz:hash_size_t { hsz == Ghost.reveal hsz' } ->
   r:HST.erid ->
   HST.ST (v:hash_vec #hsz)
     (requires (fun h0 -> true))
@@ -278,27 +255,30 @@ val hash_vec_r_alloc:
       hash_vec_region_of v = r /\
       hash_vec_r_repr h1 v == Ghost.reveal hash_vec_irepr /\
       B.fresh_loc (V.loc_vector v) h0 h1))
-let hash_vec_r_alloc #_ s r =
+let hash_vec_r_alloc #_ hsz r =
   let nrid = HST.new_region r in
-  V.alloc_reserve 1ul (rg_dummy s) r
+  // Note: here we are not creating a generic parameterized regional, we are
+  // creating a specialized regional vector of hashes, so we don't need to go
+  // through a run-time indirection to figure out what the dummy default element
+  // is; we know it's the one for hashes
+  V.alloc_reserve 1ul (hash_dummy #hsz) r
 #pop-options
 
 val hash_vec_r_free:
-  #hsz:Ghost.erased hash_size_t ->   
-  s:rhst hsz ->
+  #hsz:Ghost.erased hash_size_t ->
   v:hash_vec ->
   HST.ST unit
     (requires (fun h0 -> hash_vec_r_inv h0 v))
     (ensures (fun h0 _ h1 ->
       modifies (loc_all_regions_from false (hash_vec_region_of #hsz v)) h0 h1))
-let hash_vec_r_free #_ _ v =
+let hash_vec_r_free #_ v =
   // RV.free v
   V.free v
 
 noextract inline_for_extraction
-val hvreg (hsz:hash_size_t): regional (rhst hsz) (hash_vec #hsz)
+val hvreg (hsz:hash_size_t): regional hash_size_t (hash_vec #hsz)
 let hvreg hsz =
-  Rgl (hreg hsz)
+  Rgl hsz
       (hash_vec_region_of #hsz)
       V.loc_vector
       (hash_vec_dummy #hsz)
@@ -309,13 +289,15 @@ let hvreg hsz =
       (hash_vec_r_sep #hsz)
       (hash_vec_irepr #hsz)
       (hash_vec_r_alloc_p #hsz)
-      (hash_vec_r_alloc #(Ghost.hide hsz))
-      (hash_vec_r_free #(Ghost.hide hsz))
+      (hash_vec_r_alloc #hsz)
+      (hash_vec_r_free #hsz)
+
+/// 3. A vector of hash vectors is also regional
 
 type hash_vv (hsz:hash_size_t) = RV.rvector (hvreg hsz)
 
 noextract inline_for_extraction
-val hvvreg (hsz:hash_size_t): regional (regional (rhst hsz) (hash_vec #hsz)) (hash_vv hsz)
+val hvvreg (hsz:hash_size_t): regional (regional hash_size_t (hash_vec #hsz)) (hash_vv hsz)
 let hvvreg hsz = RVI.vector_regional (hvreg hsz)
 
 val hash_vec_rv_inv_r_inv:

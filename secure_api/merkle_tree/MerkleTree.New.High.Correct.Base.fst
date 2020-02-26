@@ -521,8 +521,9 @@ val hash_seq_spec_full_even_next:
     (requires j % 2 = 0 /\ mt_hashes_next_rel #_ #f j hs nhs)
     (ensures  S.equal (hash_seq_spec_full #_ #f nhs acc actd)
                       (MTS.mt_next_lv #_ #f #(log2c j) (hash_seq_spec_full #_ #f hs acc actd)))
+
 #restart-solver
-#push-options "--z3rlimit 120 --initial_fuel 2 --max_fuel 2 --initial_ifuel 1 --max_ifuel 1"
+#push-options "--quake 1/3 --z3rlimit 100 --fuel 2 --ifuel 1"
 let hash_seq_spec_full_even_next #hsz #f j hs nhs acc actd =
   log2c_div j;
   mt_hashes_next_rel_lift_even #_ #f j hs nhs;
@@ -530,9 +531,11 @@ let hash_seq_spec_full_even_next #hsz #f j hs nhs acc actd =
   then begin 
     MTS.mt_next_rel_upd_even_pad #_ #f (log2c j)
       (hash_seq_spec #hsz hs) (hash_seq_spec #hsz nhs) (S.length hs / 2) (MTS.HRaw acc);
-    MTS.mt_next_rel_next_lv #_ #f (log2c j)
-      (S.upd (hash_seq_spec #hsz hs) (S.length hs) (MTS.HRaw acc))
-      (S.upd (hash_seq_spec #hsz nhs) (S.length nhs) (MTS.HRaw acc))
+    let n = log2c j in
+    let mt = S.upd (hash_seq_spec #hsz hs) (S.length hs) (MTS.HRaw acc) in
+    let nmt = S.upd (hash_seq_spec #hsz nhs) (S.length nhs) (MTS.HRaw acc) in
+    // assume (MTS.mt_next_rel #_ #f n mt nmt);
+    MTS.mt_next_rel_next_lv #_ #f n mt nmt
   end
   else MTS.mt_next_rel_next_lv #_ #f (log2c j)
          (hash_seq_spec_full #_ #f hs acc actd)
