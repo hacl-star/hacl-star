@@ -42,12 +42,6 @@ let mt_init_path (#hash_size:hash_size_t) (mtr:HH.rid) (r:HST.erid): HST.ST (pat
 [@"c_inline"] let mt_clear_path (hash_size:hash_size_t) (mtr:HH.rid) (p:path_p #hash_size): HST.ST unit pf pt = MTNL.clear_path hash_size mtr p
 [@"c_inline"] let mt_free_path (hash_size:hash_size_t) (p:path_p #hash_size): HST.ST unit pf pt = MTNL.free_path hash_size p
 
-
-[@ (Comment "  Construction
-
-  @param[in]  i   The initial hash") "c_inline"]
-let mt_create (r:HST.erid) (i:hash #32ul): HST.ST mt_p pf pt = MTNL.mt_create r i
-
 [@ (Comment "  Construction with custom hash functions
 
   @param[in]  hash_size Hash size (in bytes)

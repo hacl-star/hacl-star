@@ -42,7 +42,6 @@ open MerkleTree.Low.VectorExtras
 
 type const_pointer (a:Type0) = b:CB.const_buffer a{CB.length b == 1 /\ CB.qual_of b == CB.MUTABLE}
 
-
 /// Low-level Merkle tree data structure
 ///
 // NOTE: because of a lack of 64-bit LowStar.Buffer support, currently
@@ -1041,19 +1040,6 @@ let mt_create_custom hsz hash_spec r init hash_fun =
   let hh2 = HST.get () in
   mt
 #pop-options
-
-val mt_create: r:HST.erid -> init:hash #32ul -> HST.ST mt_p
-   (requires (fun h0 ->
-     Rgl?.r_inv (hreg 32ul) h0 init /\
-     HH.disjoint r (B.frameOf init)))
-   (ensures (fun h0 mt h1 ->
-     // memory safety
-     modifies (loc_union (mt_loc mt) (B.loc_all_regions_from false (B.frameOf init))) h0 h1 /\
-     mt_safe h1 mt /\
-     // correctness
-     MT?.hash_size (B.get h1 mt 0) = 32ul /\
-     mt_lift h1 mt == MTH.mt_create 32 MTH.sha256_compress (Rgl?.r_repr (hreg 32ul) h0 init)))
-let mt_create r init = mt_create_custom 32ul (Ghost.hide MTH.sha256_compress) r init sha256_compress
 
 /// Construction and Destruction of paths
 
