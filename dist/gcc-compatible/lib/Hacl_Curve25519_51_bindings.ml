@@ -16,13 +16,11 @@ module Bindings(F:Cstubs.FOREIGN) =
            ((ptr uint64_t) @-> (uint64_t @-> (returning void))))
     let hacl_Curve25519_51_scalarmult =
       foreign "Hacl_Curve25519_51_scalarmult"
-        ((ptr uint8_t) @->
-           ((ptr uint8_t) @-> ((ptr uint8_t) @-> (returning void))))
+        (ocaml_bytes @-> (ocaml_bytes @-> (ocaml_bytes @-> (returning void))))
     let hacl_Curve25519_51_secret_to_public =
       foreign "Hacl_Curve25519_51_secret_to_public"
-        ((ptr uint8_t) @-> ((ptr uint8_t) @-> (returning void)))
+        (ocaml_bytes @-> (ocaml_bytes @-> (returning void)))
     let hacl_Curve25519_51_ecdh =
       foreign "Hacl_Curve25519_51_ecdh"
-        ((ptr uint8_t) @->
-           ((ptr uint8_t) @-> ((ptr uint8_t) @-> (returning bool))))
+        (ocaml_bytes @-> (ocaml_bytes @-> (ocaml_bytes @-> (returning bool))))
   end

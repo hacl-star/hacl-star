@@ -1470,7 +1470,7 @@ EverCrypt_Hash_Incremental_update(
           KRML_HOST_EXIT(253U);
         }
     }
-    if (len < (sw - sz))
+    if (len < sw - sz)
     {
       update_small(p1, data, len);
       return;

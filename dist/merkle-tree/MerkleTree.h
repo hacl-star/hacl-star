@@ -21,7 +21,7 @@
  * SOFTWARE.
  */
 
-#include "evercrypt_targetconfig.h"
+#include "libintvector.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
@@ -30,10 +30,10 @@
 #ifndef __MerkleTree_H
 #define __MerkleTree_H
 
-#include "Hacl_Kremlib.h"
-#include "Hacl_Spec.h"
-#include "EverCrypt_Hash.h"
 
+
+
+static inline uint8_t FStar_UInt8_eq_mask(uint8_t a, uint8_t b);
 
 typedef struct LowStar_Vector_vector_str___uint8_t__s
 {
@@ -321,15 +321,6 @@ mt_serialize_path(
 */
 LowStar_Vector_vector_str___uint8_t_
 *mt_deserialize_path(uint32_t hash_size, const uint8_t *buf1, uint64_t len);
-
-typedef MerkleTree_Low_merkle_tree *MerkleTree_EverCrypt_mt_p;
-
-/*
-  Construction wired to sha256 from EverCrypt
-
-  @param[in]  init   The initial hash
-*/
-MerkleTree_Low_merkle_tree *MerkleTree_EverCrypt_mt_create(uint8_t *init1);
 
 typedef uint32_t MerkleTree_Low_index_t;
 

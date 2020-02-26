@@ -32,10 +32,17 @@
 #define __MerkleTree_H
 
 #include "Hacl_Kremlib.h"
-#include "MerkleTree_Low_Datastructures.h"
 #include "Hacl_Spec.h"
 #include "EverCrypt_Hash.h"
 
+
+typedef struct LowStar_Vector_vector_str___uint8_t__s
+{
+  uint32_t sz;
+  uint32_t cap;
+  uint8_t **vs;
+}
+LowStar_Vector_vector_str___uint8_t_;
 
 typedef uint32_t hash_size_t;
 
@@ -86,13 +93,6 @@ LowStar_Vector_vector_str___uint8_t_ *mt_init_path(uint32_t hash_size);
 void mt_clear_path(uint32_t hash_size, LowStar_Vector_vector_str___uint8_t_ *p1);
 
 void mt_free_path(uint32_t hash_size, LowStar_Vector_vector_str___uint8_t_ *p1);
-
-/*
-  Construction
-
-  @param[in]  i   The initial hash
-*/
-MerkleTree_Low_merkle_tree *mt_create(uint8_t *i1);
 
 /*
   Construction with custom hash functions
@@ -323,6 +323,15 @@ mt_serialize_path(
 LowStar_Vector_vector_str___uint8_t_
 *mt_deserialize_path(uint32_t hash_size, const uint8_t *buf1, uint64_t len);
 
+typedef MerkleTree_Low_merkle_tree *MerkleTree_EverCrypt_mt_p;
+
+/*
+  Construction wired to sha256 from EverCrypt
+
+  @param[in]  init   The initial hash
+*/
+MerkleTree_Low_merkle_tree *MerkleTree_EverCrypt_mt_create(uint8_t *init1);
+
 typedef uint32_t MerkleTree_Low_index_t;
 
 extern uint32_t MerkleTree_Low_uint32_32_max;
@@ -394,13 +403,11 @@ MerkleTree_Low_merkle_tree
   void (*hash_fun)(uint8_t *x0, uint8_t *x1, uint8_t *x2)
 );
 
-MerkleTree_Low_merkle_tree *MerkleTree_Low_mt_create(uint8_t *init1);
-
 LowStar_Vector_vector_str___uint8_t_ *MerkleTree_Low_init_path(uint32_t hsz);
 
-void MerkleTree_Low_clear_path(uint32_t uu____3659, LowStar_Vector_vector_str___uint8_t_ *p1);
+void MerkleTree_Low_clear_path(uint32_t uu____3633, LowStar_Vector_vector_str___uint8_t_ *p1);
 
-void MerkleTree_Low_free_path(uint32_t uu____3806, LowStar_Vector_vector_str___uint8_t_ *p1);
+void MerkleTree_Low_free_path(uint32_t uu____3780, LowStar_Vector_vector_str___uint8_t_ *p1);
 
 bool MerkleTree_Low_mt_get_root_pre(const MerkleTree_Low_merkle_tree *mt, uint8_t *rt);
 
@@ -502,8 +509,6 @@ LowStar_Vector_vector_str___uint8_t_
 uint8_t *MerkleTree_Low_Hashfunctions_init_hash(uint32_t hsz);
 
 void MerkleTree_Low_Hashfunctions_free_hash(uint32_t hsz, uint8_t *h1);
-
-void MerkleTree_Low_Hashfunctions_sha256_compress(uint8_t *src1, uint8_t *src2, uint8_t *dst);
 
 #define __MerkleTree_H_DEFINED
 #endif

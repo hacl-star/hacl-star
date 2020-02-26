@@ -732,7 +732,7 @@ static void montgomery_ladder(uint64_t *out, uint8_t *key, uint64_t *init1)
 static void fsquare_times(uint64_t *o, uint64_t *inp, uint64_t *tmp, uint32_t n1)
 {
   fsqr_(o, inp);
-  for (uint32_t i = (uint32_t)0U; i < (n1 - (uint32_t)1U); i++)
+  for (uint32_t i = (uint32_t)0U; i < n1 - (uint32_t)1U; i++)
   {
     fsqr_(o, o);
   }

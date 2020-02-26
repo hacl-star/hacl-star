@@ -190,19 +190,11 @@ EXPORTS
   Hacl_NaCl_crypto_box_easy
   Hacl_NaCl_crypto_box_open_easy_afternm
   Hacl_NaCl_crypto_box_open_easy
-  MerkleTree_Low_Datastructures_hash_r_alloc
-  MerkleTree_Low_Datastructures_hash_r_free
-  MerkleTree_Low_Datastructures_hash_copy
-  MerkleTree_Low_Datastructures_hcpy
-  MerkleTree_Low_Datastructures_hash_vec_r_alloc
-  LowStar_Vector_free___uint8_t_
-  MerkleTree_Low_Datastructures_hash_vec_r_free
   mt_init_hash
   mt_free_hash
   mt_init_path
   mt_clear_path
   mt_free_path
-  mt_create
   mt_create_custom
   mt_free
   mt_insert
@@ -224,6 +216,7 @@ EXPORTS
   mt_deserialize
   mt_serialize_path
   mt_deserialize_path
+  MerkleTree_EverCrypt_mt_create
   MerkleTree_Low_uu___is_MT
   MerkleTree_Low___proj__MT__item__hash_size
   MerkleTree_Low___proj__MT__item__offset
@@ -240,7 +233,6 @@ EXPORTS
   MerkleTree_Low_mt_insert_pre
   MerkleTree_Low_mt_insert
   MerkleTree_Low_mt_create_custom
-  MerkleTree_Low_mt_create
   MerkleTree_Low_init_path
   MerkleTree_Low_clear_path
   MerkleTree_Low_free_path
@@ -264,7 +256,6 @@ EXPORTS
   MerkleTree_Low_Serialization_mt_deserialize_path
   MerkleTree_Low_Hashfunctions_init_hash
   MerkleTree_Low_Hashfunctions_free_hash
-  MerkleTree_Low_Hashfunctions_sha256_compress
   EverCrypt_Error_uu___is_Success
   EverCrypt_Error_uu___is_UnsupportedAlgorithm
   EverCrypt_Error_uu___is_InvalidKey

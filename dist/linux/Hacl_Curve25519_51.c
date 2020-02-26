@@ -731,7 +731,7 @@ void Hacl_Curve25519_51_fsquare_times(u64 *o, u64 *inp, uint128_t *tmp, u32 n1)
 {
   u32 i;
   Hacl_Impl_Curve25519_Field51_fsqr(o, inp, tmp);
-  for (i = (u32)0U; i < (n1 - (u32)1U); i++)
+  for (i = (u32)0U; i < n1 - (u32)1U; i++)
     Hacl_Impl_Curve25519_Field51_fsqr(o, o, tmp);
 }
 

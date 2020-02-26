@@ -21,44 +21,19 @@
  * SOFTWARE.
  */
 
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include <string.h>
-#include "kremlin/internal/target.h"
 
-#ifndef __MerkleTree_Low_Datastructures_H
-#define __MerkleTree_Low_Datastructures_H
+#include ".h"
 
-#include "Hacl_Kremlib.h"
+static uint32_t max_uint32 = (uint32_t)4294967295U;
 
+static uint32_t resize_ratio = (uint32_t)2U;
 
-typedef uint32_t MerkleTree_Low_Datastructures_hash_size_t;
-
-uint8_t *MerkleTree_Low_Datastructures_hash_r_alloc(uint32_t s);
-
-void MerkleTree_Low_Datastructures_hash_r_free(uint8_t *v1);
-
-void MerkleTree_Low_Datastructures_hash_copy(uint32_t s, uint8_t *src, uint8_t *dst);
-
-void
-(*MerkleTree_Low_Datastructures_hcpy(uint32_t hsz))(uint32_t x0, uint8_t *x1, uint8_t *x2);
-
-typedef struct LowStar_Vector_vector_str___uint8_t__s
+uint32_t LowStar_Vector_new_capacity(uint32_t cap)
 {
-  uint32_t sz;
-  uint32_t cap;
-  uint8_t **vs;
+  if (cap >= max_uint32 / resize_ratio)
+  {
+    return max_uint32;
+  }
+  return cap * resize_ratio;
 }
-LowStar_Vector_vector_str___uint8_t_;
 
-LowStar_Vector_vector_str___uint8_t_
-MerkleTree_Low_Datastructures_hash_vec_r_alloc(uint32_t hsz);
-
-void LowStar_Vector_free___uint8_t_(LowStar_Vector_vector_str___uint8_t_ vec);
-
-void MerkleTree_Low_Datastructures_hash_vec_r_free(LowStar_Vector_vector_str___uint8_t_ v1);
-
-#define __MerkleTree_Low_Datastructures_H_DEFINED
-#endif

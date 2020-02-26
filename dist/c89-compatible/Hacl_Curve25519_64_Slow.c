@@ -926,7 +926,7 @@ static void fsquare_times(uint64_t *o, uint64_t *inp, uint64_t *tmp, uint32_t n1
 {
   uint32_t i;
   fsqr_(o, inp);
-  for (i = (uint32_t)0U; i < (n1 - (uint32_t)1U); i++)
+  for (i = (uint32_t)0U; i < n1 - (uint32_t)1U; i++)
   {
     fsqr_(o, o);
   }
