@@ -881,6 +881,7 @@ dist/merkle-tree/Makefile.basic: HACL_OLD_FILES =
 dist/merkle-tree/Makefile.basic: HAND_WRITTEN_FILES =
 dist/merkle-tree/Makefile.basic: TARGETCONFIG_FLAGS =
 dist/merkle-tree/Makefile.basic: HAND_WRITTEN_LIB_FLAGS =
+dist/merkle-tree/Makefile.basic: INTRINSIC_FLAGS =
 
 # EVERCRYPT_CONFIG tweaks
 # -----------------------
