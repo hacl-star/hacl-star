@@ -31,31 +31,51 @@ If a call to C_GenerateKey cannot support the precise template supplied to it, i
 The object created by a successful call to C_GenerateKey will have its CKA_LOCAL attribute set to CK_TRUE.
 
 Return values: CKR_ARGUMENTS_BAD, 
-CKR_ATTRIBUTE_READ_ONLY -> val isAttributeReadOnly: _CK_ATTRIBUTE_TYPE -> Tot (r: exception_t {CKR_OK? r \/ CKR_ATTRIBUTE_READ_ONLY? r})
+
+CKR_ATTRIBUTE_READ_ONLY:  val isAttributeReadOnly: _CK_ATTRIBUTE_TYPE -> Tot (r: exception_t {CKR_OK? r \/ CKR_ATTRIBUTE_READ_ONLY? r})
 
 CKR_ATTRIBUTE_TYPE_INVALID - see parsing
 CKR_ATTRIBUTE_VALUE_INVALID - see parsing
 
-CKR_CRYPTOKI_NOT_INITIALIZED, CKR_CURVE_NOT_SUPPORTED, CKR_DEVICE_ERROR, CKR_DEVICE_MEMORY, CKR_DEVICE_REMOVED, CKR_FUNCTION_CANCELED, CKR_FUNCTION_FAILED, CKR_GENERAL_ERROR, CKR_HOST_MEMORY, CKR_MECHANISM_INVALID, CKR_MECHANISM_PARAM_INVALID, CKR_OK, CKR_OPERATION_ACTIVE, CKR_PIN_EXPIRED, CKR_SESSION_CLOSED, CKR_SESSION_HANDLE_INVALID, CKR_SESSION_READ_ONLY, CKR_TEMPLATE_INCOMPLETE, CKR_TEMPLATE_INCONSISTENT, CKR_TOKEN_WRITE_PROTECTED, CKR_USER_NOT_LOGGED_IN.
+CKR_CRYPTOKI_NOT_INITIALIZED:  CKR_CRYPTOKI_NOT_INITIALIZED? e <==> not (getDeviceInitialised d hSession)
+
+
+
+CKR_CURVE_NOT_SUPPORTED, CKR_DEVICE_ERROR, CKR_DEVICE_MEMORY, CKR_DEVICE_REMOVED, CKR_FUNCTION_CANCELED, CKR_FUNCTION_FAILED, CKR_GENERAL_ERROR, CKR_HOST_MEMORY, CKR_MECHANISM_INVALID, CKR_MECHANISM_PARAM_INVALID, CKR_OK, CKR_OPERATION_ACTIVE, CKR_PIN_EXPIRED, CKR_SESSION_CLOSED, CKR_SESSION_HANDLE_INVALID, CKR_SESSION_READ_ONLY, CKR_TEMPLATE_INCOMPLETE, CKR_TEMPLATE_INCONSISTENT, CKR_TOKEN_WRITE_PROTECTED, CKR_USER_NOT_LOGGED_IN.
 
 *)
 
 
+
+val _CKS_GenerateKey_: 
+  d: device -> 
+  hSession: _CK_SESSION_HANDLE {getDeviceInitialised d hSession} ->
+  pMechanism: _CK_MECHANISM_TYPE ->
+  ulCount: size_t -> 
+  pTemplate: buffer attribute {length pTemplate = uint_v ulCount} -> 
+  Stack (
+    (exp: exception_t) & (_CK_OBJECT_HANDLE))
+      (requires fun h -> True)
+      (ensures fun h0 _ h1 -> True)
+
+let _CKS_GenerateKey_ d hSession pMechanism ulCould pTemplate = 
+  (|CKR_OK, (u32 0)|) 
+
+
 val _CKS_GenerateKey: 
-  #t: Type0 -> 
   d: device -> 
   hSession: _CK_SESSION_HANDLE -> 
   pMechanism: _CK_MECHANISM_TYPE -> 
   ulCount: size_t -> 
-  pTemplate: buffer (attributeD #t) {length pTemplate = uint_v ulCount} -> 
+  pTemplate: buffer attributeD {length pTemplate = uint_v ulCount} -> 
   Stack (
     (exp: exception_t) & (_CK_OBJECT_HANDLE))
   (requires fun h -> live h pTemplate)
   (ensures fun h0 _ h1 -> True)
 
-let _CKS_GenerateKey #t d hSession pMechanism ulCount pTemplate = 
+let _CKS_GenerateKey d hSession pMechanism ulCount pTemplate = 
   push_frame();
-  let (|exceptionParsing, parsedAttributes|) = parseAttributes #t ulCount pTemplate in 
+  let (|exceptionParsing, parsedAttributes|) = parseAttributes ulCount pTemplate in 
   if not (CKR_OK? exceptionParsing) then 
     begin 
       pop_frame();
@@ -70,23 +90,7 @@ let _CKS_GenerateKey #t d hSession pMechanism ulCount pTemplate =
       end
   else 
     begin
+      let (|exceptionMain, handler|) =  _CKS_GenerateKey_ d hSession pMechanism ulCount parsedAttributes in
       pop_frame();
-      (|CKR_OK, (u32 0)|)
+      (|exceptionMain, handler|)
     end  
-
-
-val _CKS_GenerateKey_: 
-  d: device -> 
-  hSession: _CK_SESSION_HANDLE {getDeviceInitialised d hSession} ->
-  pMechanism: _CK_MECHANISM_TYPE ->
-  ulCount: size_t -> 
-  pTemplate: buffer attribute {length pTemplate = uint_v ulCount} -> 
-  Stack 
-    ((handler: nat) & (device))
-    (requires fun h -> True)
-    (ensures fun h0 _ h1 -> True)
-
-let _CKS_GenerateKey_ d hSession pMechanism ulCould pTemplate = 
-  let testCall = checkAttributes ulCould pTemplate in 
-
-  (|0, d|) 

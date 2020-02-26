@@ -22,9 +22,10 @@ dist/pkcs11.a: dist/Makefile.basic
 	$(MAKE) -C dist -f Makefile.basic
 
 dist/Makefile.basic: $(filter-out %/prims.krml,$(ALL_KRML_FILES))
-	$(KRML) $^ -o libecdsa.a $(BASE_FLAGS) $(PKCS_BUNDLE) \
-	  -tmpdir dist \
-	  -skip-compilation
+	$(KRML) $^ -o libpkcs.a $(BASE_FLAGS) \
+	-bundle 'Hacl.Impl.PKCS11.Test=Hacl.Impl.PKCS11.Test,Hacl.Impl.PKCS11.*' \
+	-tmpdir dist \
+	-skip-compilation
 
 %.exe:
 	$(CC) $(CFLAGS) -flto $^ -o $@

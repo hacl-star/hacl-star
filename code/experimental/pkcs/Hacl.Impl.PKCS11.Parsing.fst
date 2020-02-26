@@ -36,12 +36,12 @@ NB: I am NOT sure that this code is critical to the work itself, it's more about
 assume val compareT: t0: Type0 -> t1: Type0 -> Tot (t: bool {t0 == t1})
 
 
-assume val parseAttribute: #t: Type0 -> a: attributeD #t -> 
+assume val parseAttribute: a: attributeD -> 
   StackInline (exception_t & attribute)
   (requires fun h -> True)
   (ensures fun h0 _ h1 -> True)
 
-assume val parseAttributes: #t: Type0 -> ulCount: size_t -> pTemplate: buffer (attributeD #t)  {length pTemplate = uint_v ulCount} -> 
+assume val parseAttributes: ulCount: size_t -> pTemplate: buffer (attributeD)  {length pTemplate = uint_v ulCount} -> 
   StackInline 
     (e: exception_t 
       {CKR_ATTRIBUTE_TYPE_INVALID? e \/ CKR_ATTRIBUTE_VALUE_INVALID? e \/ CKR_ARGUMENTS_BAD? e} & buffer attribute)

@@ -9,6 +9,7 @@ open FStar.HyperStack.All
 open FStar.HyperStack
 module ST = FStar.HyperStack.ST
 
+open Lib.RawIntTypes
 
 open LowStar.Buffer
 
@@ -24,6 +25,7 @@ typedef struct CK_ATTRIBUTE {
 typedef CK_ATTRIBUTE CK_PTR CK_ATTRIBUTE_PTR;
 *)
 
+noextract
 unfold
 let typeID_type: nat -> void = function
   |0 -> CK_ULONG
@@ -31,17 +33,18 @@ let typeID_type: nat -> void = function
 
 
 noeq 
-type attributeD (#t:Type0) = 
-  |A: _type: _CK_ULONG -> pValue: buffer t -> ulValueLen: size_t {length pValue == uint_v ulValueLen} -> attributeD #t
+type attributeD  = 
+  |A: _type: _CK_ULONG -> pValue: buffer void -> ulValueLen: size_t {length pValue == uint_v ulValueLen} -> attributeD 
 
 
 val lenAttribute: _CK_ATTRIBUTE_TYPE -> Tot size_t
 
-let lenAttribute a = 
-	match uint_v a with 
-	|0 -> (u64 1)
-	|1 -> (u64 1)
-	|_ -> (u64 1)
+let lenAttribute attrType = 
+  let a = u32_to_UInt32 attrType in 
+  match a with 
+  |0ul -> (size 1) 
+  |1ul -> (size 1)
+  |_ -> (size 1)
 
 noeq
 type attribute = 
@@ -56,14 +59,14 @@ let getAttributeType a =
   |CKA_CLASS t _ _ -> t
   |CKA_TOKEN t _ _ -> t 
 
+
 val isAttributeReadOnly_: _CK_ATTRIBUTE_TYPE -> Tot bool
 
 let isAttributeReadOnly_ attrType = 
-  let a = uint_v attrType in 
-  match a with
-  | 0 -> true
-  | _ -> false
-  
+  let a = u32_to_UInt32 attrType in 
+  match a with 
+  |0ul -> true
+  |_ -> false
 
 val isAttributeReadOnly: _CK_ATTRIBUTE_TYPE -> Tot (r: exception_t {CKR_OK? r \/ CKR_ATTRIBUTE_READ_ONLY? r})
 
