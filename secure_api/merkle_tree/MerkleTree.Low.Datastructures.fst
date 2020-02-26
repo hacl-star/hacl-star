@@ -172,6 +172,18 @@ val hash_copy:
 let hash_copy #_ s src dst =
   B.blit src 0ul dst 0ul s
 
+/// JP: so much stuff happening here. First, single-constructor, single-argument
+/// elimination takes places and Cpy becomes completely eliminated, in favor of
+/// just being a type alias for the underlying function. So now, we have a
+/// function that returns a function pointer.
+///
+/// Next, one might think that the hsz argument is going to be eliminated. It's
+/// not, because there's a hidden implicit argument to Cpy which is (hreg hsz),
+/// meaning that hsz is used at run-time even though Cpy is only using this
+/// argument ghostly. This would be have to be fixed.
+///
+/// Finally, if the inline_for_extraction is removed, there seems to be a
+/// kremlin bug that inserts a void*0. To be fixed.
 inline_for_extraction
 val hcpy: hsz:hash_size_t -> copyable #hash_size_t (hash #hsz) (hreg hsz)
 let hcpy hsz =
