@@ -35,8 +35,6 @@
 
 typedef uint32_t MerkleTree_Low_Datastructures_hash_size_t;
 
-uint8_t *MerkleTree_Low_Datastructures_hash_dummy(uint32_t uu____22);
-
 uint8_t *MerkleTree_Low_Datastructures_hash_r_alloc(uint32_t s);
 
 void MerkleTree_Low_Datastructures_hash_r_free(uint8_t *v1);
@@ -53,8 +51,6 @@ typedef struct LowStar_Vector_vector_str___uint8_t__s
   uint8_t **vs;
 }
 LowStar_Vector_vector_str___uint8_t_;
-
-LowStar_Vector_vector_str___uint8_t_ MerkleTree_Low_Datastructures_hash_vec_dummy();
 
 LowStar_Vector_vector_str___uint8_t_
 MerkleTree_Low_Datastructures_hash_vec_r_alloc(uint32_t hsz);

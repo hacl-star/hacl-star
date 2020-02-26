@@ -51,8 +51,8 @@ noextract
 val hash_region_of: #hsz:hash_size_t -> v:hash #hsz -> GTot HH.rid
 let hash_region_of #_ v = B.frameOf v
 
-private
-val hash_dummy: #hsz:hash_size_t -> Tot (hash #hsz)
+private inline_for_extraction
+val hash_dummy: #hsz:Ghost.erased hash_size_t -> Tot (hash #hsz)
 let hash_dummy #_ = B.null
 
 private
@@ -188,7 +188,7 @@ noextract
 val hash_vec_region_of: #hsz:hash_size_t -> v:hash_vec #hsz -> GTot HH.rid
 let hash_vec_region_of #_ v = V.frameOf v
 
-private
+private inline_for_extraction
 val hash_vec_dummy: (#hsz:Ghost.erased hash_size_t) -> hash_vec #hsz
 let hash_vec_dummy #_ = V.alloc_empty (hash #_)
 
@@ -275,6 +275,14 @@ let hash_vec_r_free #_ v =
   // RV.free v
   V.free v
 
+/// This is nice because the only piece of state that we are keeping is one
+/// word, the hash size, since we are implementing a specialized instance of
+/// RVector over hashes of a known length. We could also, for genericity, make
+/// this a mere application of RVector over hreg, which would be less
+/// implementation effort, at the expense of a bigger run-time cost since there
+/// would be extra space in the struct (which is passed by value!) and also a
+/// run-time indirection to do the lookup of the type class instance for the
+/// elements of the rvector.
 noextract inline_for_extraction
 val hvreg (hsz:hash_size_t): regional hash_size_t (hash_vec #hsz)
 let hvreg hsz =

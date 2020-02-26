@@ -24,15 +24,6 @@
 
 #include "MerkleTree_Low_Datastructures.h"
 
-/* SNIPPET_START: MerkleTree_Low_Datastructures_hash_dummy */
-
-uint8_t *MerkleTree_Low_Datastructures_hash_dummy(uint32_t uu____22)
-{
-  return NULL;
-}
-
-/* SNIPPET_END: MerkleTree_Low_Datastructures_hash_dummy */
-
 /* SNIPPET_START: MerkleTree_Low_Datastructures_hash_r_alloc */
 
 uint8_t *MerkleTree_Low_Datastructures_hash_r_alloc(uint32_t s)
@@ -85,16 +76,6 @@ void (*MerkleTree_Low_Datastructures_hcpy(uint32_t hsz))(uint32_t x0, uint8_t *x
 
 /* SNIPPET_END: MerkleTree_Low_Datastructures_hcpy */
 
-/* SNIPPET_START: MerkleTree_Low_Datastructures_hash_vec_dummy */
-
-LowStar_Vector_vector_str___uint8_t_ MerkleTree_Low_Datastructures_hash_vec_dummy()
-{
-  return
-    ((LowStar_Vector_vector_str___uint8_t_){ .sz = (uint32_t)0U, .cap = (uint32_t)0U, .vs = NULL });
-}
-
-/* SNIPPET_END: MerkleTree_Low_Datastructures_hash_vec_dummy */
-
 /* SNIPPET_START: alloc_reserve___uint8_t_ */
 
 static LowStar_Vector_vector_str___uint8_t_ alloc_reserve___uint8_t_(uint32_t len, uint8_t *ia)
@@ -113,7 +94,7 @@ static LowStar_Vector_vector_str___uint8_t_ alloc_reserve___uint8_t_(uint32_t le
 LowStar_Vector_vector_str___uint8_t_
 MerkleTree_Low_Datastructures_hash_vec_r_alloc(uint32_t hsz)
 {
-  return alloc_reserve___uint8_t_((uint32_t)1U, MerkleTree_Low_Datastructures_hash_dummy(hsz));
+  return alloc_reserve___uint8_t_((uint32_t)1U, NULL);
 }
 
 /* SNIPPET_END: MerkleTree_Low_Datastructures_hash_vec_r_alloc */

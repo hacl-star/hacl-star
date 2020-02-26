@@ -483,14 +483,6 @@ typedef struct regional__uint32_t_LowStar_Vector_vector_str___uint8_t__s
 regional__uint32_t_LowStar_Vector_vector_str___uint8_t_;
 
 static LowStar_Vector_vector_str___uint8_t_
-rg_dummy__LowStar_Vector_vector_str__uint8_t__uint32_t(
-  regional__uint32_t_LowStar_Vector_vector_str___uint8_t_ rg
-)
-{
-  return rg.dummy;
-}
-
-static LowStar_Vector_vector_str___uint8_t_
 rg_alloc__LowStar_Vector_vector_str__uint8_t__uint32_t(
   regional__uint32_t_LowStar_Vector_vector_str___uint8_t_ rg
 )
@@ -532,9 +524,7 @@ alloc_rid__LowStar_Vector_vector_str__uint8_t__uint32_t(
 )
 {
   LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_
-  vec =
-    alloc_rid__LowStar_Vector_vector_str__uint8_t_(len,
-      rg_dummy__LowStar_Vector_vector_str__uint8_t__uint32_t(rg));
+  vec = alloc_rid__LowStar_Vector_vector_str__uint8_t_(len, rg.dummy);
   alloc___LowStar_Vector_vector_str__uint8_t__uint32_t(rg, vec, len);
   return vec;
 }
@@ -556,11 +546,6 @@ typedef struct regional__uint32_t__uint8_t__s
   void (*r_free)(uint8_t *x0);
 }
 regional__uint32_t__uint8_t_;
-
-static uint8_t *rg_dummy___uint8_t__uint32_t(regional__uint32_t__uint8_t_ rg)
-{
-  return rg.dummy;
-}
 
 static uint8_t *rg_alloc___uint8_t__uint32_t(regional__uint32_t__uint8_t_ rg)
 {
@@ -592,8 +577,7 @@ alloc____uint8_t__uint32_t(
 static LowStar_Vector_vector_str___uint8_t_
 alloc_rid___uint8_t__uint32_t(regional__uint32_t__uint8_t_ rg, uint32_t len)
 {
-  LowStar_Vector_vector_str___uint8_t_
-  vec = alloc_rid___uint8_t_(len, rg_dummy___uint8_t__uint32_t(rg));
+  LowStar_Vector_vector_str___uint8_t_ vec = alloc_rid___uint8_t_(len, rg.dummy);
   alloc____uint8_t__uint32_t(rg, vec, len);
   return vec;
 }
@@ -606,7 +590,7 @@ static MerkleTree_Low_merkle_tree
     alloc_rid__LowStar_Vector_vector_str__uint8_t__uint32_t((
         (regional__uint32_t_LowStar_Vector_vector_str___uint8_t_){
           .state = hsz,
-          .dummy = MerkleTree_Low_Datastructures_hash_vec_dummy(),
+          .dummy = { .sz = (uint32_t)0U, .cap = (uint32_t)0U, .vs = NULL },
           .r_alloc = MerkleTree_Low_Datastructures_hash_vec_r_alloc,
           .r_free = MerkleTree_Low_Datastructures_hash_vec_r_free
         }
@@ -617,7 +601,7 @@ static MerkleTree_Low_merkle_tree
     alloc_rid___uint8_t__uint32_t((
         (regional__uint32_t__uint8_t_){
           .state = hsz,
-          .dummy = MerkleTree_Low_Datastructures_hash_dummy(hsz),
+          .dummy = NULL,
           .r_alloc = MerkleTree_Low_Datastructures_hash_r_alloc,
           .r_free = MerkleTree_Low_Datastructures_hash_r_free
         }
@@ -628,7 +612,7 @@ static MerkleTree_Low_merkle_tree
     rg_alloc___uint8_t__uint32_t((
         (regional__uint32_t__uint8_t_){
           .state = hsz,
-          .dummy = MerkleTree_Low_Datastructures_hash_dummy(hsz),
+          .dummy = NULL,
           .r_alloc = MerkleTree_Low_Datastructures_hash_r_alloc,
           .r_free = MerkleTree_Low_Datastructures_hash_r_free
         }
@@ -752,7 +736,7 @@ void MerkleTree_Low_mt_free(MerkleTree_Low_merkle_tree *mt)
   free__LowStar_Vector_vector_str__uint8_t__uint32_t((
       (regional__uint32_t_LowStar_Vector_vector_str___uint8_t_){
         .state = mtv.hash_size,
-        .dummy = MerkleTree_Low_Datastructures_hash_vec_dummy(),
+        .dummy = { .sz = (uint32_t)0U, .cap = (uint32_t)0U, .vs = NULL },
         .r_alloc = MerkleTree_Low_Datastructures_hash_vec_r_alloc,
         .r_free = MerkleTree_Low_Datastructures_hash_vec_r_free
       }
@@ -761,7 +745,7 @@ void MerkleTree_Low_mt_free(MerkleTree_Low_merkle_tree *mt)
   free___uint8_t__uint32_t((
       (regional__uint32_t__uint8_t_){
         .state = mtv.hash_size,
-        .dummy = MerkleTree_Low_Datastructures_hash_dummy(mtv.hash_size),
+        .dummy = NULL,
         .r_alloc = MerkleTree_Low_Datastructures_hash_r_alloc,
         .r_free = MerkleTree_Low_Datastructures_hash_r_free
       }
@@ -770,7 +754,7 @@ void MerkleTree_Low_mt_free(MerkleTree_Low_merkle_tree *mt)
   rg_free___uint8_t__uint32_t((
       (regional__uint32_t__uint8_t_){
         .state = mtv.hash_size,
-        .dummy = MerkleTree_Low_Datastructures_hash_dummy(mtv.hash_size),
+        .dummy = NULL,
         .r_alloc = MerkleTree_Low_Datastructures_hash_r_alloc,
         .r_free = MerkleTree_Low_Datastructures_hash_r_free
       }
@@ -850,7 +834,7 @@ insert_(
     insert_copy___uint8_t__uint32_t((
         (regional__uint32_t__uint8_t_){
           .state = hsz,
-          .dummy = MerkleTree_Low_Datastructures_hash_dummy(hsz),
+          .dummy = NULL,
           .r_alloc = MerkleTree_Low_Datastructures_hash_r_alloc,
           .r_free = MerkleTree_Low_Datastructures_hash_r_free
         }
@@ -858,14 +842,6 @@ insert_(
       MerkleTree_Low_Datastructures_hash_copy,
       uu____0,
       acc);
-  regional__uint32_t_LowStar_Vector_vector_str___uint8_t_
-  unused =
-    {
-      .state = hsz,
-      .dummy = MerkleTree_Low_Datastructures_hash_vec_dummy(),
-      .r_alloc = MerkleTree_Low_Datastructures_hash_vec_r_alloc,
-      .r_free = MerkleTree_Low_Datastructures_hash_vec_r_free
-    };
   assign__LowStar_Vector_vector_str__uint8_t__uint32_t(hs, lv, ihv);
   if (j1 % (uint32_t)2U == (uint32_t)1U)
   {
@@ -938,7 +914,7 @@ LowStar_Vector_vector_str___uint8_t_ *MerkleTree_Low_init_path(uint32_t hsz)
     rg_alloc__LowStar_Vector_vector_str__uint8_t__uint32_t((
         (regional__uint32_t_LowStar_Vector_vector_str___uint8_t_){
           .state = hsz,
-          .dummy = MerkleTree_Low_Datastructures_hash_vec_dummy(),
+          .dummy = { .sz = (uint32_t)0U, .cap = (uint32_t)0U, .vs = NULL },
           .r_alloc = MerkleTree_Low_Datastructures_hash_vec_r_alloc,
           .r_free = MerkleTree_Low_Datastructures_hash_vec_r_free
         }
@@ -953,12 +929,12 @@ clear___uint8_t_(LowStar_Vector_vector_str___uint8_t_ vec)
     ((LowStar_Vector_vector_str___uint8_t_){ .sz = (uint32_t)0U, .cap = vec.cap, .vs = vec.vs });
 }
 
-void MerkleTree_Low_clear_path(uint32_t uu____3151, LowStar_Vector_vector_str___uint8_t_ *p1)
+void MerkleTree_Low_clear_path(uint32_t uu____3659, LowStar_Vector_vector_str___uint8_t_ *p1)
 {
   *p1 = clear___uint8_t_(*p1);
 }
 
-void MerkleTree_Low_free_path(uint32_t uu____3298, LowStar_Vector_vector_str___uint8_t_ *p1)
+void MerkleTree_Low_free_path(uint32_t uu____3806, LowStar_Vector_vector_str___uint8_t_ *p1)
 {
   LowStar_Vector_free___uint8_t_(*p1);
   KRML_HOST_FREE(p1);
@@ -1011,7 +987,7 @@ construct_rhs(
       assign_copy___uint8_t__uint32_t((
           (regional__uint32_t__uint8_t_){
             .state = hsz,
-            .dummy = MerkleTree_Low_Datastructures_hash_dummy(hsz),
+            .dummy = NULL,
             .r_alloc = MerkleTree_Low_Datastructures_hash_r_alloc,
             .r_free = MerkleTree_Low_Datastructures_hash_r_free
           }
@@ -1292,14 +1268,6 @@ mt_flush_to_(
       flushed =
         ((LowStar_Vector_vector_str___uint8_t_){ .sz = n_shifted, .cap = hvec.cap, .vs = hvec.vs });
     }
-    regional__uint32_t_LowStar_Vector_vector_str___uint8_t_
-    unused =
-      {
-        .state = hsz,
-        .dummy = MerkleTree_Low_Datastructures_hash_vec_dummy(),
-        .r_alloc = MerkleTree_Low_Datastructures_hash_vec_r_alloc,
-        .r_free = MerkleTree_Low_Datastructures_hash_vec_r_free
-      };
     assign__LowStar_Vector_vector_str__uint8_t__uint32_t(hs, lv, flushed);
     mt_flush_to_(hsz, lv + (uint32_t)1U, hs, pi / (uint32_t)2U, i1 / (uint32_t)2U);
     return;
@@ -1416,21 +1384,13 @@ mt_retract_to_(
       shrink___uint8_t__uint32_t((
           (regional__uint32_t__uint8_t_){
             .state = hsz,
-            .dummy = MerkleTree_Low_Datastructures_hash_dummy(hsz),
+            .dummy = NULL,
             .r_alloc = MerkleTree_Low_Datastructures_hash_r_alloc,
             .r_free = MerkleTree_Low_Datastructures_hash_r_free
           }
         ),
         hvec,
         new_len);
-    regional__uint32_t_LowStar_Vector_vector_str___uint8_t_
-    unused =
-      {
-        .state = hsz,
-        .dummy = MerkleTree_Low_Datastructures_hash_vec_dummy(),
-        .r_alloc = MerkleTree_Low_Datastructures_hash_vec_r_alloc,
-        .r_free = MerkleTree_Low_Datastructures_hash_vec_r_free
-      };
     assign__LowStar_Vector_vector_str__uint8_t__uint32_t(hs, lv, retracted);
     if ((lv + (uint32_t)1U) < hs.sz)
     {
@@ -1576,7 +1536,7 @@ MerkleTree_Low_mt_verify(
   hrg =
     {
       .state = hsz1,
-      .dummy = MerkleTree_Low_Datastructures_hash_dummy(hsz1),
+      .dummy = NULL,
       .r_alloc = MerkleTree_Low_Datastructures_hash_r_alloc,
       .r_free = MerkleTree_Low_Datastructures_hash_r_free
     };
@@ -2013,31 +1973,17 @@ deserialize_hash(uint32_t hash_size, bool ok, const uint8_t *buf1, uint32_t sz, 
   rg =
     {
       .state = hash_size,
-      .dummy = MerkleTree_Low_Datastructures_hash_dummy(hash_size),
+      .dummy = NULL,
       .r_alloc = MerkleTree_Low_Datastructures_hash_r_alloc,
       .r_free = MerkleTree_Low_Datastructures_hash_r_free
     };
   if (!ok || pos >= sz)
   {
-    return
-      (
-        (__bool_uint32_t__uint8_t_){
-          .fst = false,
-          .snd = pos,
-          .thd = rg_dummy___uint8_t__uint32_t(rg)
-        }
-      );
+    return ((__bool_uint32_t__uint8_t_){ .fst = false, .snd = pos, .thd = rg.dummy });
   }
   if ((sz - pos) < hash_size)
   {
-    return
-      (
-        (__bool_uint32_t__uint8_t_){
-          .fst = false,
-          .snd = pos,
-          .thd = rg_dummy___uint8_t__uint32_t(rg)
-        }
-      );
+    return ((__bool_uint32_t__uint8_t_){ .fst = false, .snd = pos, .thd = rg.dummy });
   }
   uint8_t *hash1 = rg_alloc___uint8_t__uint32_t(rg);
   memcpy(hash1, (uint8_t *)buf1 + pos, hash_size * sizeof (((uint8_t *)buf1)[0U]));
@@ -2102,7 +2048,7 @@ deserialize_hash_vec(
   rg =
     {
       .state = hash_size,
-      .dummy = MerkleTree_Low_Datastructures_hash_vec_dummy(),
+      .dummy = { .sz = (uint32_t)0U, .cap = (uint32_t)0U, .vs = NULL },
       .r_alloc = MerkleTree_Low_Datastructures_hash_vec_r_alloc,
       .r_free = MerkleTree_Low_Datastructures_hash_vec_r_free
     };
@@ -2113,7 +2059,7 @@ deserialize_hash_vec(
         (__bool_uint32_t_LowStar_Vector_vector_str___uint8_t_){
           .fst = false,
           .snd = pos,
-          .thd = rg_dummy__LowStar_Vector_vector_str__uint8_t__uint32_t(rg)
+          .thd = rg.dummy
         }
       );
   }
@@ -2147,12 +2093,11 @@ deserialize_hash_vec(
   hrg =
     {
       .state = hash_size,
-      .dummy = MerkleTree_Low_Datastructures_hash_dummy(hash_size),
+      .dummy = NULL,
       .r_alloc = MerkleTree_Low_Datastructures_hash_r_alloc,
       .r_free = MerkleTree_Low_Datastructures_hash_r_free
     };
-  LowStar_Vector_vector_str___uint8_t_
-  res = alloc___uint8_t_(n1, rg_dummy___uint8_t__uint32_t(hrg));
+  LowStar_Vector_vector_str___uint8_t_ res = alloc___uint8_t_(n1, hrg.dummy);
   __bool_uint32_t
   scrut = deserialize_hash_vec_i(hash_size, ok1, buf1, sz, pos1, res, (uint32_t)0U);
   bool ok2 = scrut.fst;
@@ -2262,14 +2207,12 @@ deserialize_hash_vv(
   rg =
     {
       .state = hash_size,
-      .dummy = MerkleTree_Low_Datastructures_hash_vec_dummy(),
+      .dummy = { .sz = (uint32_t)0U, .cap = (uint32_t)0U, .vs = NULL },
       .r_alloc = MerkleTree_Low_Datastructures_hash_vec_r_alloc,
       .r_free = MerkleTree_Low_Datastructures_hash_vec_r_free
     };
   LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_
-  res =
-    alloc__LowStar_Vector_vector_str__uint8_t_(n1,
-      rg_dummy__LowStar_Vector_vector_str__uint8_t__uint32_t(rg));
+  res = alloc__LowStar_Vector_vector_str__uint8_t_(n1, rg.dummy);
   __bool_uint32_t
   scrut = deserialize_hash_vv_i(hash_size, ok1, buf1, sz, pos1, res, (uint32_t)0U);
   bool ok2 = scrut.fst;
@@ -2491,7 +2434,7 @@ uint8_t *MerkleTree_Low_Hashfunctions_init_hash(uint32_t hsz)
     rg_alloc___uint8_t__uint32_t((
         (regional__uint32_t__uint8_t_){
           .state = hsz,
-          .dummy = MerkleTree_Low_Datastructures_hash_dummy(hsz),
+          .dummy = NULL,
           .r_alloc = MerkleTree_Low_Datastructures_hash_r_alloc,
           .r_free = MerkleTree_Low_Datastructures_hash_r_free
         }
@@ -2503,7 +2446,7 @@ void MerkleTree_Low_Hashfunctions_free_hash(uint32_t hsz, uint8_t *h1)
   rg_free___uint8_t__uint32_t((
       (regional__uint32_t__uint8_t_){
         .state = hsz,
-        .dummy = MerkleTree_Low_Datastructures_hash_dummy(hsz),
+        .dummy = NULL,
         .r_alloc = MerkleTree_Low_Datastructures_hash_r_alloc,
         .r_free = MerkleTree_Low_Datastructures_hash_r_free
       }

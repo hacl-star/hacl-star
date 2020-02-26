@@ -397,9 +397,9 @@ MerkleTree_Low_merkle_tree *MerkleTree_Low_mt_create(uint8_t *init1);
 
 LowStar_Vector_vector_str___uint8_t_ *MerkleTree_Low_init_path(uint32_t hsz);
 
-void MerkleTree_Low_clear_path(uint32_t uu____3151, LowStar_Vector_vector_str___uint8_t_ *p1);
+void MerkleTree_Low_clear_path(uint32_t uu____3659, LowStar_Vector_vector_str___uint8_t_ *p1);
 
-void MerkleTree_Low_free_path(uint32_t uu____3298, LowStar_Vector_vector_str___uint8_t_ *p1);
+void MerkleTree_Low_free_path(uint32_t uu____3806, LowStar_Vector_vector_str___uint8_t_ *p1);
 
 bool MerkleTree_Low_mt_get_root_pre(const MerkleTree_Low_merkle_tree *mt, uint8_t *rt);
 

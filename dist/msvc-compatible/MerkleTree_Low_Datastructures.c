@@ -24,11 +24,6 @@
 
 #include "MerkleTree_Low_Datastructures.h"
 
-uint8_t *MerkleTree_Low_Datastructures_hash_dummy(uint32_t uu____22)
-{
-  return NULL;
-}
-
 uint8_t *MerkleTree_Low_Datastructures_hash_r_alloc(uint32_t s)
 {
   KRML_CHECK_SIZE(sizeof (uint8_t), s);
@@ -57,12 +52,6 @@ void (*MerkleTree_Low_Datastructures_hcpy(uint32_t hsz))(uint32_t x0, uint8_t *x
   return MerkleTree_Low_Datastructures_hash_copy;
 }
 
-LowStar_Vector_vector_str___uint8_t_ MerkleTree_Low_Datastructures_hash_vec_dummy()
-{
-  return
-    ((LowStar_Vector_vector_str___uint8_t_){ .sz = (uint32_t)0U, .cap = (uint32_t)0U, .vs = NULL });
-}
-
 static LowStar_Vector_vector_str___uint8_t_ alloc_reserve___uint8_t_(uint32_t len, uint8_t *ia)
 {
   KRML_CHECK_SIZE(sizeof (uint8_t *), len);
@@ -75,7 +64,7 @@ static LowStar_Vector_vector_str___uint8_t_ alloc_reserve___uint8_t_(uint32_t le
 LowStar_Vector_vector_str___uint8_t_
 MerkleTree_Low_Datastructures_hash_vec_r_alloc(uint32_t hsz)
 {
-  return alloc_reserve___uint8_t_((uint32_t)1U, MerkleTree_Low_Datastructures_hash_dummy(hsz));
+  return alloc_reserve___uint8_t_((uint32_t)1U, NULL);
 }
 
 void LowStar_Vector_free___uint8_t_(LowStar_Vector_vector_str___uint8_t_ vec)
