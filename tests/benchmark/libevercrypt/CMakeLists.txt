@@ -67,7 +67,9 @@ if(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
 endif()
 
 if(EXISTS ${EVERCRYPT_SRC_DIR}/MerkleTree.c)
-  target_sources(evercrypt PRIVATE ${EVERCRYPT_SRC_DIR}/MerkleTree.c)
+  target_sources(evercrypt PRIVATE
+    ${EVERCRYPT_SRC_DIR}/MerkleTree_Low_Datastructures.c
+    ${EVERCRYPT_SRC_DIR}/MerkleTree.c)
 endif()
 if(EXISTS ${EVERCRYPT_SRC_DIR}/LowStar.c)
   target_sources(evercrypt PRIVATE ${EVERCRYPT_SRC_DIR}/LowStar.c)

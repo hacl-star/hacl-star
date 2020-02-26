@@ -1,0 +1,411 @@
+[
+  "\u007f@Ú-zÚ7Ω∏êÛ\u0005%È{\u0001",
+  [
+    [
+      "MerkleTree.mt_init_hash",
+      1,
+      2,
+      1,
+      [
+        "@query", "equation_FStar.Monotonic.HyperStack.mem",
+        "equation_MerkleTree.pf"
+      ],
+      0,
+      "b2ca851d70002d166b765e46e6aa99b1"
+    ],
+    [
+      "MerkleTree.mt_free_hash",
+      1,
+      2,
+      1,
+      [
+        "@query", "equation_FStar.Monotonic.HyperStack.mem",
+        "equation_MerkleTree.pf"
+      ],
+      0,
+      "58746fefc63682eb209c6517891baa8d"
+    ],
+    [
+      "MerkleTree.mt_init_path",
+      1,
+      2,
+      1,
+      [
+        "@query", "equation_FStar.Monotonic.HyperStack.mem",
+        "equation_MerkleTree.pf"
+      ],
+      0,
+      "85138944d8f9590429034160b11f3983"
+    ],
+    [
+      "MerkleTree.mt_clear_path",
+      1,
+      2,
+      1,
+      [
+        "@query", "equation_FStar.Monotonic.HyperStack.mem",
+        "equation_MerkleTree.pf"
+      ],
+      0,
+      "ee276e07befa807c88b4a8d5cc939310"
+    ],
+    [
+      "MerkleTree.mt_free_path",
+      1,
+      2,
+      1,
+      [
+        "@query", "equation_FStar.Monotonic.HyperStack.mem",
+        "equation_MerkleTree.pf"
+      ],
+      0,
+      "d30deba868155b13b825066d23705eb2"
+    ],
+    [
+      "MerkleTree.mt_create_custom",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "b2t_def",
+        "equation_FStar.UInt.fits", "equation_FStar.UInt.gt",
+        "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
+        "equation_FStar.UInt.size", "equation_FStar.UInt.uint_t",
+        "equation_FStar.UInt32.gt",
+        "equation_MerkleTree.Low.Datastructures.hash_size_t",
+        "equation_MerkleTree.hash_size_t", "int_typing",
+        "lemma_FStar.UInt32.vu_inv", "primitive_Prims.op_AmpAmp",
+        "primitive_Prims.op_GreaterThan",
+        "primitive_Prims.op_LessThanOrEqual",
+        "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_Tm_refine_02de1ca607024051b572624909ff5c56",
+        "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec"
+      ],
+      0,
+      "8b0d66bfeeee657c241638835d21557a"
+    ],
+    [
+      "MerkleTree.mt_create_custom",
+      2,
+      2,
+      1,
+      [
+        "@query", "equation_FStar.Monotonic.HyperStack.mem",
+        "equation_MerkleTree.pf"
+      ],
+      0,
+      "da367c8f5658f580d8b307edcbe953b4"
+    ],
+    [
+      "MerkleTree.mt_free",
+      1,
+      2,
+      1,
+      [
+        "@query", "equation_FStar.Monotonic.HyperStack.mem",
+        "equation_MerkleTree.pf"
+      ],
+      0,
+      "e9d765bf50a9256b84ba6d48e068f65f"
+    ],
+    [
+      "MerkleTree.mt_insert",
+      1,
+      2,
+      1,
+      [
+        "@query", "equation_FStar.Monotonic.HyperStack.mem",
+        "equation_MerkleTree.pf"
+      ],
+      0,
+      "51ccf6ef44a792034bc564e3bdf93472"
+    ],
+    [
+      "MerkleTree.mt_insert_pre",
+      1,
+      2,
+      1,
+      [
+        "@query", "equation_FStar.Monotonic.HyperStack.mem",
+        "equation_MerkleTree.pf"
+      ],
+      0,
+      "ad29158f62882dfc7b86867fed9ab69f"
+    ],
+    [
+      "MerkleTree.mt_get_root",
+      1,
+      2,
+      1,
+      [
+        "@query", "equation_FStar.Monotonic.HyperStack.mem",
+        "equation_MerkleTree.pf"
+      ],
+      0,
+      "a83a669e69a43b71b3ad5db8e9b32839"
+    ],
+    [
+      "MerkleTree.mt_get_root_pre",
+      1,
+      2,
+      1,
+      [
+        "@query", "equation_FStar.Monotonic.HyperStack.mem",
+        "equation_MerkleTree.pf"
+      ],
+      0,
+      "e3573b7036effd8ae2035ac3be3d5914"
+    ],
+    [
+      "MerkleTree.mt_get_path",
+      1,
+      2,
+      1,
+      [
+        "@query", "equation_FStar.Monotonic.HyperStack.mem",
+        "equation_MerkleTree.pf"
+      ],
+      0,
+      "f91bbb22c569a4d548ab8ee68359d2ee"
+    ],
+    [
+      "MerkleTree.mt_get_path_pre",
+      1,
+      2,
+      1,
+      [
+        "@query", "equation_FStar.Monotonic.HyperStack.mem",
+        "equation_MerkleTree.pf"
+      ],
+      0,
+      "ba6113ae2ebc6ae5f9c5e19ff59b60f5"
+    ],
+    [
+      "MerkleTree.mt_flush",
+      1,
+      2,
+      1,
+      [
+        "@query", "equation_FStar.Monotonic.HyperStack.mem",
+        "equation_MerkleTree.pf"
+      ],
+      0,
+      "f794d2bf15e91d5523b4216785e2d329"
+    ],
+    [
+      "MerkleTree.mt_flush_pre",
+      1,
+      2,
+      1,
+      [
+        "@query", "equation_FStar.Monotonic.HyperStack.mem",
+        "equation_MerkleTree.pf"
+      ],
+      0,
+      "d9091b4d5a4883d58290fc30897b8c21"
+    ],
+    [
+      "MerkleTree.mt_flush_to",
+      1,
+      2,
+      1,
+      [
+        "@query", "equation_FStar.Monotonic.HyperStack.mem",
+        "equation_MerkleTree.pf"
+      ],
+      0,
+      "00c12ffffa0323ecdbe2c87c5aa03988"
+    ],
+    [
+      "MerkleTree.mt_flush_to_pre",
+      1,
+      2,
+      1,
+      [
+        "@query", "equation_FStar.Monotonic.HyperStack.mem",
+        "equation_MerkleTree.pf"
+      ],
+      0,
+      "01ba060609d4b5068a650eb190d8299a"
+    ],
+    [
+      "MerkleTree.mt_retract_to",
+      1,
+      2,
+      1,
+      [
+        "@query", "equation_FStar.Monotonic.HyperStack.mem",
+        "equation_MerkleTree.pf"
+      ],
+      0,
+      "9267ace5fca48f12e6dc365260f351da"
+    ],
+    [
+      "MerkleTree.mt_retract_to_pre",
+      1,
+      2,
+      1,
+      [
+        "@query", "equation_FStar.Monotonic.HyperStack.mem",
+        "equation_MerkleTree.pf"
+      ],
+      0,
+      "d2ad4c1f9a9a94bb1d0c1c329dffe0a0"
+    ],
+    [
+      "MerkleTree.mt_verify",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "b2t_def",
+        "equation_FStar.UInt.fits", "equation_FStar.UInt.gt",
+        "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
+        "equation_FStar.UInt.size", "equation_FStar.UInt.uint_t",
+        "equation_FStar.UInt32.gt",
+        "equation_MerkleTree.Low.Datastructures.hash_size_t",
+        "equation_MerkleTree.hash_size_t", "int_typing",
+        "lemma_FStar.UInt32.vu_inv", "primitive_Prims.op_AmpAmp",
+        "primitive_Prims.op_GreaterThan",
+        "primitive_Prims.op_LessThanOrEqual",
+        "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_Tm_refine_02de1ca607024051b572624909ff5c56",
+        "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
+        "refinement_kinding_Tm_refine_02de1ca607024051b572624909ff5c56",
+        "typing_FStar.Ghost.reveal"
+      ],
+      0,
+      "98dbd09c8c58ce44c4ac29d32f6ab834"
+    ],
+    [
+      "MerkleTree.mt_verify",
+      2,
+      2,
+      1,
+      [
+        "@query", "equation_FStar.Monotonic.HyperStack.mem",
+        "equation_MerkleTree.pf"
+      ],
+      0,
+      "c28912ab9f66770699e70a6777050e98"
+    ],
+    [
+      "MerkleTree.mt_verify_pre",
+      1,
+      2,
+      1,
+      [
+        "@query", "equation_FStar.Monotonic.HyperStack.mem",
+        "equation_MerkleTree.pf"
+      ],
+      0,
+      "c28445608bd6e3c36883fe9649906783"
+    ],
+    [
+      "MerkleTree.mt_serialize_size",
+      1,
+      2,
+      1,
+      [
+        "@query", "equation_FStar.Monotonic.HyperStack.mem",
+        "equation_MerkleTree.pf"
+      ],
+      0,
+      "7dc43815b465d58e548557c90a882faf"
+    ],
+    [
+      "MerkleTree.mt_serialize",
+      1,
+      2,
+      1,
+      [
+        "@query", "equation_FStar.Monotonic.HyperStack.mem",
+        "equation_MerkleTree.pf"
+      ],
+      0,
+      "dfc0172f413b7b9e409da55f71d99435"
+    ],
+    [
+      "MerkleTree.mt_deserialize",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "b2t_def", "bool_inversion",
+        "bool_typing", "equation_FStar.UInt.fits", "equation_FStar.UInt.gt",
+        "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
+        "equation_FStar.UInt.size", "equation_FStar.UInt.uint_t",
+        "equation_FStar.UInt32.gt", "equation_LowStar.ConstBuffer.as_mbuf",
+        "equation_LowStar.ConstBuffer.length",
+        "equation_LowStar.ConstBuffer.qbuf_pre",
+        "equation_LowStar.Monotonic.Buffer.length",
+        "equation_MerkleTree.Low.Datastructures.hash_size_t",
+        "equation_MerkleTree.Low.Serialization.const_uint8_p",
+        "equation_MerkleTree.Low.Serialization.uint8_t",
+        "equation_MerkleTree.Low.const_pointer",
+        "equation_MerkleTree.hash_size_t",
+        "function_token_typing_FStar.UInt8.t", "int_typing",
+        "lemma_FStar.UInt32.vu_inv", "primitive_Prims.op_AmpAmp",
+        "primitive_Prims.op_GreaterThan",
+        "primitive_Prims.op_LessThanOrEqual",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_02de1ca607024051b572624909ff5c56",
+        "refinement_interpretation_Tm_refine_ae215dc23320c72afef105490c0b13c3",
+        "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
+        "refinement_interpretation_Tm_refine_fa75aa7a63b90c86dd1a5e2888d08dab",
+        "typing_FStar.UInt32.v", "typing_LowStar.ConstBuffer.as_mbuf",
+        "typing_LowStar.ConstBuffer.as_qbuf",
+        "typing_LowStar.ConstBuffer.qbuf_pre",
+        "typing_LowStar.Monotonic.Buffer.len"
+      ],
+      0,
+      "320b119607fdfce2ee546fd4d85a7778"
+    ],
+    [
+      "MerkleTree.mt_deserialize",
+      2,
+      2,
+      1,
+      [
+        "@query", "equation_FStar.Monotonic.HyperStack.mem",
+        "equation_MerkleTree.pf"
+      ],
+      0,
+      "d8d01be27c86c406a3b4f855249712f6"
+    ],
+    [
+      "MerkleTree.mt_serialize_path",
+      1,
+      2,
+      1,
+      [
+        "@query", "equation_FStar.Monotonic.HyperStack.mem",
+        "equation_MerkleTree.pf"
+      ],
+      0,
+      "ac51118a031990725d640b81644e0f46"
+    ],
+    [
+      "MerkleTree.mt_deserialize_path",
+      1,
+      2,
+      1,
+      [ "@query" ],
+      0,
+      "818922f31cebf71f9dd06eb270bdcb60"
+    ],
+    [
+      "MerkleTree.mt_deserialize_path",
+      2,
+      2,
+      1,
+      [
+        "@query", "equation_FStar.Monotonic.HyperStack.mem",
+        "equation_MerkleTree.pf"
+      ],
+      0,
+      "bc56a8afd3bbbb94256aaed630bc23bc"
+    ]
+  ]
+]
