@@ -789,7 +789,7 @@ Hacl_Curve25519_51_fsquare_times(
 )
 {
   Hacl_Impl_Curve25519_Field51_fsqr(o, inp, tmp);
-  for (uint32_t i = (uint32_t)0U; i < n1 - (uint32_t)1U; i++)
+  for (uint32_t i = (uint32_t)0U; i < (n1 - (uint32_t)1U); i++)
   {
     Hacl_Impl_Curve25519_Field51_fsqr(o, o, tmp);
   }

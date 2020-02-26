@@ -36,7 +36,7 @@ uint8_t *MerkleTree_Low_Datastructures_hash_r_alloc(uint32_t s)
   return buf;
 }
 
-void MerkleTree_Low_Datastructures_hash_r_free(uint32_t uu____220, uint8_t *v1)
+void MerkleTree_Low_Datastructures_hash_r_free(uint8_t *v1)
 {
   KRML_HOST_FREE(v1);
 }
@@ -57,10 +57,7 @@ void (*MerkleTree_Low_Datastructures_hcpy(uint32_t hsz))(uint32_t x0, uint8_t *x
   return MerkleTree_Low_Datastructures_hash_copy;
 }
 
-LowStar_Vector_vector_str___uint8_t_
-MerkleTree_Low_Datastructures_hash_vec_dummy(
-  LowStar_Regional_regional__uint32_t__uint8_t_ uu____479
-)
+LowStar_Vector_vector_str___uint8_t_ MerkleTree_Low_Datastructures_hash_vec_dummy()
 {
   return
     ((LowStar_Vector_vector_str___uint8_t_){ .sz = (uint32_t)0U, .cap = (uint32_t)0U, .vs = NULL });
@@ -75,20 +72,10 @@ static LowStar_Vector_vector_str___uint8_t_ alloc_reserve___uint8_t_(uint32_t le
   return ((LowStar_Vector_vector_str___uint8_t_){ .sz = (uint32_t)0U, .cap = len, .vs = buf });
 }
 
-uint8_t
-*LowStar_Regional_rg_dummy___uint8_t__uint32_t(
-  LowStar_Regional_regional__uint32_t__uint8_t_ rg
-)
-{
-  return rg.dummy(rg.state);
-}
-
 LowStar_Vector_vector_str___uint8_t_
-MerkleTree_Low_Datastructures_hash_vec_r_alloc(LowStar_Regional_regional__uint32_t__uint8_t_ s)
+MerkleTree_Low_Datastructures_hash_vec_r_alloc(uint32_t hsz)
 {
-  return
-    alloc_reserve___uint8_t_((uint32_t)1U,
-      LowStar_Regional_rg_dummy___uint8_t__uint32_t(s));
+  return alloc_reserve___uint8_t_((uint32_t)1U, MerkleTree_Low_Datastructures_hash_dummy(hsz));
 }
 
 void LowStar_Vector_free___uint8_t_(LowStar_Vector_vector_str___uint8_t_ vec)
@@ -96,11 +83,7 @@ void LowStar_Vector_free___uint8_t_(LowStar_Vector_vector_str___uint8_t_ vec)
   KRML_HOST_FREE(vec.vs);
 }
 
-void
-MerkleTree_Low_Datastructures_hash_vec_r_free(
-  LowStar_Regional_regional__uint32_t__uint8_t_ uu____717,
-  LowStar_Vector_vector_str___uint8_t_ v1
-)
+void MerkleTree_Low_Datastructures_hash_vec_r_free(LowStar_Vector_vector_str___uint8_t_ v1)
 {
   LowStar_Vector_free___uint8_t_(v1);
 }

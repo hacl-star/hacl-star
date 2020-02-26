@@ -168,7 +168,7 @@ static void fsquare_times(u64 *o, u64 *inp, u64 *tmp, u32 n1)
 {
   u32 i;
   fsqr(o, inp, tmp);
-  for (i = (u32)0U; i < n1 - (u32)1U; i++)
+  for (i = (u32)0U; i < (n1 - (u32)1U); i++)
     fsqr(o, o, tmp);
 }
 

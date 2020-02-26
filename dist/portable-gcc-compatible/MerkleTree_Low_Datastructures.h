@@ -54,7 +54,7 @@ uint8_t *MerkleTree_Low_Datastructures_hash_r_alloc(uint32_t s);
 
 /* SNIPPET_START: MerkleTree_Low_Datastructures_hash_r_free */
 
-void MerkleTree_Low_Datastructures_hash_r_free(uint32_t uu____220, uint8_t *v1);
+void MerkleTree_Low_Datastructures_hash_r_free(uint8_t *v1);
 
 /* SNIPPET_END: MerkleTree_Low_Datastructures_hash_r_free */
 
@@ -83,41 +83,16 @@ LowStar_Vector_vector_str___uint8_t_;
 
 /* SNIPPET_END: LowStar_Vector_vector_str___uint8_t_ */
 
-/* SNIPPET_START: LowStar_Regional_regional__uint32_t__uint8_t_ */
-
-typedef struct LowStar_Regional_regional__uint32_t__uint8_t__s
-{
-  uint32_t state;
-  uint8_t *(*dummy)(uint32_t x0);
-  uint8_t *(*r_alloc)(uint32_t x0);
-  void (*r_free)(uint32_t x0, uint8_t *x1);
-}
-LowStar_Regional_regional__uint32_t__uint8_t_;
-
-/* SNIPPET_END: LowStar_Regional_regional__uint32_t__uint8_t_ */
-
 /* SNIPPET_START: MerkleTree_Low_Datastructures_hash_vec_dummy */
 
-LowStar_Vector_vector_str___uint8_t_
-MerkleTree_Low_Datastructures_hash_vec_dummy(
-  LowStar_Regional_regional__uint32_t__uint8_t_ uu____479
-);
+LowStar_Vector_vector_str___uint8_t_ MerkleTree_Low_Datastructures_hash_vec_dummy();
 
 /* SNIPPET_END: MerkleTree_Low_Datastructures_hash_vec_dummy */
-
-/* SNIPPET_START: LowStar_Regional_rg_dummy___uint8_t__uint32_t */
-
-uint8_t
-*LowStar_Regional_rg_dummy___uint8_t__uint32_t(
-  LowStar_Regional_regional__uint32_t__uint8_t_ rg
-);
-
-/* SNIPPET_END: LowStar_Regional_rg_dummy___uint8_t__uint32_t */
 
 /* SNIPPET_START: MerkleTree_Low_Datastructures_hash_vec_r_alloc */
 
 LowStar_Vector_vector_str___uint8_t_
-MerkleTree_Low_Datastructures_hash_vec_r_alloc(LowStar_Regional_regional__uint32_t__uint8_t_ s);
+MerkleTree_Low_Datastructures_hash_vec_r_alloc(uint32_t hsz);
 
 /* SNIPPET_END: MerkleTree_Low_Datastructures_hash_vec_r_alloc */
 
@@ -129,11 +104,7 @@ void LowStar_Vector_free___uint8_t_(LowStar_Vector_vector_str___uint8_t_ vec);
 
 /* SNIPPET_START: MerkleTree_Low_Datastructures_hash_vec_r_free */
 
-void
-MerkleTree_Low_Datastructures_hash_vec_r_free(
-  LowStar_Regional_regional__uint32_t__uint8_t_ uu____717,
-  LowStar_Vector_vector_str___uint8_t_ v1
-);
+void MerkleTree_Low_Datastructures_hash_vec_r_free(LowStar_Vector_vector_str___uint8_t_ v1);
 
 /* SNIPPET_END: MerkleTree_Low_Datastructures_hash_vec_r_free */
 

@@ -712,7 +712,7 @@ static void montgomery_ladder(uint64_t *out, uint8_t *key, uint64_t *init1)
 void Hacl_Curve25519_51_fsquare_times(uint64_t *o, uint64_t *inp, uint128_t *tmp, uint32_t n1)
 {
   Hacl_Impl_Curve25519_Field51_fsqr(o, inp, tmp);
-  for (uint32_t i = (uint32_t)0U; i < n1 - (uint32_t)1U; i++)
+  for (uint32_t i = (uint32_t)0U; i < (n1 - (uint32_t)1U); i++)
   {
     Hacl_Impl_Curve25519_Field51_fsqr(o, o, tmp);
   }

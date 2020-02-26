@@ -648,13 +648,13 @@ LowStar_Vector_vector_str___uint8_t_ *MerkleTree_Low_init_path(uint32_t hsz);
 
 /* SNIPPET_START: MerkleTree_Low_clear_path */
 
-void MerkleTree_Low_clear_path(uint32_t uu____3215, LowStar_Vector_vector_str___uint8_t_ *p1);
+void MerkleTree_Low_clear_path(uint32_t uu____3151, LowStar_Vector_vector_str___uint8_t_ *p1);
 
 /* SNIPPET_END: MerkleTree_Low_clear_path */
 
 /* SNIPPET_START: MerkleTree_Low_free_path */
 
-void MerkleTree_Low_free_path(uint32_t uu____3362, LowStar_Vector_vector_str___uint8_t_ *p1);
+void MerkleTree_Low_free_path(uint32_t uu____3298, LowStar_Vector_vector_str___uint8_t_ *p1);
 
 /* SNIPPET_END: MerkleTree_Low_free_path */
 
