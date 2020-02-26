@@ -1,6 +1,7 @@
 LIBRARY libevercrypt
 
 EXPORTS
+  Spec_Cipher_Expansion_cipher_alg_of_impl
   Hacl_Hash_MD5_legacy_update_multi
   Hacl_Hash_MD5_legacy_update_last
   Hacl_Hash_MD5_legacy_hash
@@ -43,6 +44,10 @@ EXPORTS
   Hacl_Hash_Core_SHA2_finish_256
   Hacl_Hash_Core_SHA2_finish_384
   Hacl_Hash_Core_SHA2_finish_512
+  Hacl_Hash_Definitions_word_len
+  Hacl_Hash_Definitions_block_len
+  Hacl_Hash_Definitions_hash_word_len
+  Hacl_Hash_Definitions_hash_len
   EverCrypt_AutoConfig2_has_shaext
   EverCrypt_AutoConfig2_has_aesni
   EverCrypt_AutoConfig2_has_pclmulqdq
@@ -73,7 +78,6 @@ EXPORTS
   EverCrypt_AutoConfig2_disable_hacl
   EverCrypt_AutoConfig2_disable_openssl
   EverCrypt_AutoConfig2_disable_bcrypt
-  Spec_Cipher_Expansion_cipher_alg_of_impl
   EverCrypt_Hash_string_of_alg
   EverCrypt_Hash_uu___is_MD5_s
   EverCrypt_Hash___proj__MD5_s__item__p

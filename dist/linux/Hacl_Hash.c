@@ -2636,3 +2636,147 @@ Hacl_Hash_Core_SHA2_Constants_k384_512[80U] =
     (u64)0x5fcb6fab3ad6faecU, (u64)0x6c44198c4a475817U
   };
 
+u32 Hacl_Hash_Definitions_word_len(Spec_Hash_Definitions_hash_alg a)
+{
+  switch (a)
+  {
+    case Spec_Hash_Definitions_MD5:
+      {
+        return (u32)4U;
+      }
+    case Spec_Hash_Definitions_SHA1:
+      {
+        return (u32)4U;
+      }
+    case Spec_Hash_Definitions_SHA2_224:
+      {
+        return (u32)4U;
+      }
+    case Spec_Hash_Definitions_SHA2_256:
+      {
+        return (u32)4U;
+      }
+    case Spec_Hash_Definitions_SHA2_384:
+      {
+        return (u32)8U;
+      }
+    case Spec_Hash_Definitions_SHA2_512:
+      {
+        return (u32)8U;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
+}
+
+u32 Hacl_Hash_Definitions_block_len(Spec_Hash_Definitions_hash_alg a)
+{
+  switch (a)
+  {
+    case Spec_Hash_Definitions_MD5:
+      {
+        return (u32)64U;
+      }
+    case Spec_Hash_Definitions_SHA1:
+      {
+        return (u32)64U;
+      }
+    case Spec_Hash_Definitions_SHA2_224:
+      {
+        return (u32)64U;
+      }
+    case Spec_Hash_Definitions_SHA2_256:
+      {
+        return (u32)64U;
+      }
+    case Spec_Hash_Definitions_SHA2_384:
+      {
+        return (u32)128U;
+      }
+    case Spec_Hash_Definitions_SHA2_512:
+      {
+        return (u32)128U;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
+}
+
+u32 Hacl_Hash_Definitions_hash_word_len(Spec_Hash_Definitions_hash_alg a)
+{
+  switch (a)
+  {
+    case Spec_Hash_Definitions_MD5:
+      {
+        return (u32)4U;
+      }
+    case Spec_Hash_Definitions_SHA1:
+      {
+        return (u32)5U;
+      }
+    case Spec_Hash_Definitions_SHA2_224:
+      {
+        return (u32)7U;
+      }
+    case Spec_Hash_Definitions_SHA2_256:
+      {
+        return (u32)8U;
+      }
+    case Spec_Hash_Definitions_SHA2_384:
+      {
+        return (u32)6U;
+      }
+    case Spec_Hash_Definitions_SHA2_512:
+      {
+        return (u32)8U;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
+}
+
+u32 Hacl_Hash_Definitions_hash_len(Spec_Hash_Definitions_hash_alg a)
+{
+  switch (a)
+  {
+    case Spec_Hash_Definitions_MD5:
+      {
+        return (u32)16U;
+      }
+    case Spec_Hash_Definitions_SHA1:
+      {
+        return (u32)20U;
+      }
+    case Spec_Hash_Definitions_SHA2_224:
+      {
+        return (u32)28U;
+      }
+    case Spec_Hash_Definitions_SHA2_256:
+      {
+        return (u32)32U;
+      }
+    case Spec_Hash_Definitions_SHA2_384:
+      {
+        return (u32)48U;
+      }
+    case Spec_Hash_Definitions_SHA2_512:
+      {
+        return (u32)64U;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
+}
+

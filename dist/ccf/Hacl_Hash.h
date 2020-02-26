@@ -31,6 +31,7 @@
 #define __Hacl_Hash_H
 
 #include "Hacl_Kremlib.h"
+#include "Hacl_Spec.h"
 
 
 void Hacl_Hash_MD5_legacy_update_multi(uint32_t *s, uint8_t *blocks, uint32_t n_blocks);
@@ -156,6 +157,14 @@ void Hacl_Hash_Core_SHA2_finish_512(uint64_t *s, uint8_t *dst);
 extern uint32_t Hacl_Hash_Core_SHA2_Constants_k224_256[64U];
 
 extern uint64_t Hacl_Hash_Core_SHA2_Constants_k384_512[80U];
+
+uint32_t Hacl_Hash_Definitions_word_len(Spec_Hash_Definitions_hash_alg a);
+
+uint32_t Hacl_Hash_Definitions_block_len(Spec_Hash_Definitions_hash_alg a);
+
+uint32_t Hacl_Hash_Definitions_hash_word_len(Spec_Hash_Definitions_hash_alg a);
+
+uint32_t Hacl_Hash_Definitions_hash_len(Spec_Hash_Definitions_hash_alg a);
 
 #define __Hacl_Hash_H_DEFINED
 #endif
