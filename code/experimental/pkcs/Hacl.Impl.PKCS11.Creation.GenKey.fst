@@ -6,6 +6,7 @@ open Hacl.Impl.PKCS11.DeviceModule
 open Hacl.Impl.PKCS11.Session
 
 open Hacl.Impl.PKCS11.Result
+open Hacl.Impl.PKCS11.Parsing
 
 open FStar.HyperStack.All
 open FStar.HyperStack
@@ -31,8 +32,10 @@ The object created by a successful call to C_GenerateKey will have its CKA_LOCAL
 
 Return values: CKR_ARGUMENTS_BAD, 
 CKR_ATTRIBUTE_READ_ONLY -> val isAttributeReadOnly: _CK_ATTRIBUTE_TYPE -> Tot (r: exception_t {CKR_OK? r \/ CKR_ATTRIBUTE_READ_ONLY? r})
+
 CKR_ATTRIBUTE_TYPE_INVALID - see parsing
 CKR_ATTRIBUTE_VALUE_INVALID - see parsing
+
 CKR_CRYPTOKI_NOT_INITIALIZED, CKR_CURVE_NOT_SUPPORTED, CKR_DEVICE_ERROR, CKR_DEVICE_MEMORY, CKR_DEVICE_REMOVED, CKR_FUNCTION_CANCELED, CKR_FUNCTION_FAILED, CKR_GENERAL_ERROR, CKR_HOST_MEMORY, CKR_MECHANISM_INVALID, CKR_MECHANISM_PARAM_INVALID, CKR_OK, CKR_OPERATION_ACTIVE, CKR_PIN_EXPIRED, CKR_SESSION_CLOSED, CKR_SESSION_HANDLE_INVALID, CKR_SESSION_READ_ONLY, CKR_TEMPLATE_INCOMPLETE, CKR_TEMPLATE_INCONSISTENT, CKR_TOKEN_WRITE_PROTECTED, CKR_USER_NOT_LOGGED_IN.
 
 *)
@@ -45,12 +48,31 @@ val _CKS_GenerateKey:
   pMechanism: _CK_MECHANISM_TYPE -> 
   ulCount: size_t -> 
   pTemplate: buffer (attributeD #t) {length pTemplate = uint_v ulCount} -> 
-  Stack 
-    (exception_t & _CK_OBJECT_HANDLE)
-  (requires fun h -> True)
+  Stack (
+    (exp: exception_t) & (_CK_OBJECT_HANDLE))
+  (requires fun h -> live h pTemplate)
   (ensures fun h0 _ h1 -> True)
 
-
+let _CKS_GenerateKey #t d hSession pMechanism ulCount pTemplate = 
+  push_frame();
+  let (|exceptionParsing, parsedAttributes|) = parseAttributes #t ulCount pTemplate in 
+  if not (CKR_OK? exceptionParsing) then 
+    begin 
+      pop_frame();
+      (|exceptionParsing, (u32 0)|)
+    end
+  else
+  let sessionException = sessionVerification d hSession in 
+  if not (CKR_OK? sessionException) then 
+    begin 
+      pop_frame();
+      (|sessionException, (u32 0)|)
+      end
+  else 
+    begin
+      pop_frame();
+      (|CKR_OK, (u32 0)|)
+    end  
 
 
 val _CKS_GenerateKey_: 
@@ -60,11 +82,11 @@ val _CKS_GenerateKey_:
   ulCount: size_t -> 
   pTemplate: buffer attribute {length pTemplate = uint_v ulCount} -> 
   Stack 
-    ((handler: result nat) & (device))
+    ((handler: nat) & (device))
     (requires fun h -> True)
     (ensures fun h0 _ h1 -> True)
 
 let _CKS_GenerateKey_ d hSession pMechanism ulCould pTemplate = 
   let testCall = checkAttributes ulCould pTemplate in 
 
-  (|Inl 0, d|) 
+  (|0, d|) 
