@@ -23,3 +23,9 @@ unfold
 let void_t = function
   |CK_ULONG -> _CK_ULONG
   |CK_BOOL -> _CK_BOOL
+
+
+(* Our internal types *)
+
+(* 0 stands for an error *)
+type _HACL_Curve_ID = _CK_ULONG

@@ -4,6 +4,7 @@ open Lib.IntTypes
 open Hacl.Impl.PKCS11.Internal.Types
 
 open Hacl.Impl.PKCS11.Result
+open Hacl.Impl.PKCS11.External.DER
 
 open FStar.HyperStack.All
 open FStar.HyperStack
@@ -44,7 +45,7 @@ let lenAttribute attrType =
   match a with 
   |0ul -> (size 1) 
   |1ul -> (size 1)
-  |180ul -> (size 1)
+  |180ul -> (size 16)
   |_ -> (size 1)
 
 noeq
@@ -93,10 +94,19 @@ let isAttributeReadOnlyBuffer a b =
   upd b (size 0) newException
 
 
+(* This piece of code should be in the mechanism functionality *)
+val isAttributeEC_PARAMCorrect: a: attribute {CKA_EC_PARAMS? a} -> Stack (((e: exception_t) & (_HACL_Curve_ID)))
+  (requires fun h -> True)
+  (ensures fun h0 _ h1 -> True)
+
+let isAttributeEC_PARAMCorrect a = 
+  let ulCount = CKA_EC_PARAMS?.ulValueLen a in 
+  parseEC_ANSI_962 (CKA_EC_PARAMS?.ulValueLen a) (CKA_EC_PARAMS?.pValue a)
+
+
 val checkAttributes: ulCount: size_t -> pTemplate: buffer attribute{length pTemplate = uint_v ulCount} -> Stack unit
   (requires fun h -> live h pTemplate)
   (ensures fun h0 _ h1 -> True)
-
 
 let checkAttributes ulCount pTemplate = 
   push_frame();

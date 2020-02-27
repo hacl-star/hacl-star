@@ -11,6 +11,8 @@ open Hacl.Impl.PKCS11.Internal.Types
 open Hacl.Impl.PKCS11.Result
 
 open LowStar.Buffer
+open Lib.RawIntTypes
+
 
 (* totally wrong, i know, just an example.
 The idealistic is to check whether it is void or not, then to check whether they between each other are equal. I have no idea how to do it for now, so. 
