@@ -527,6 +527,14 @@ typedef struct regional__uint32_t_LowStar_Vector_vector_str___uint8_t__s
 regional__uint32_t_LowStar_Vector_vector_str___uint8_t_;
 
 static LowStar_Vector_vector_str___uint8_t_
+rg_dummy__LowStar_Vector_vector_str__uint8_t__uint32_t(
+  regional__uint32_t_LowStar_Vector_vector_str___uint8_t_ rg
+)
+{
+  return rg.dummy;
+}
+
+static LowStar_Vector_vector_str___uint8_t_
 rg_alloc__LowStar_Vector_vector_str__uint8_t__uint32_t(
   regional__uint32_t_LowStar_Vector_vector_str___uint8_t_ rg
 )
@@ -568,7 +576,9 @@ alloc_rid__LowStar_Vector_vector_str__uint8_t__uint32_t(
 )
 {
   LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_
-  vec = alloc_rid__LowStar_Vector_vector_str__uint8_t_(len, rg.dummy);
+  vec =
+    alloc_rid__LowStar_Vector_vector_str__uint8_t_(len,
+      rg_dummy__LowStar_Vector_vector_str__uint8_t__uint32_t(rg));
   alloc___LowStar_Vector_vector_str__uint8_t__uint32_t(rg, vec, len);
   return vec;
 }
@@ -590,6 +600,11 @@ typedef struct regional__uint32_t__uint8_t__s
   void (*r_free)(uint8_t *x0);
 }
 regional__uint32_t__uint8_t_;
+
+static uint8_t *rg_dummy___uint8_t__uint32_t(regional__uint32_t__uint8_t_ rg)
+{
+  return rg.dummy;
+}
 
 static uint8_t *rg_alloc___uint8_t__uint32_t(regional__uint32_t__uint8_t_ rg)
 {
@@ -621,7 +636,8 @@ alloc____uint8_t__uint32_t(
 static LowStar_Vector_vector_str___uint8_t_
 alloc_rid___uint8_t__uint32_t(regional__uint32_t__uint8_t_ rg, uint32_t len)
 {
-  LowStar_Vector_vector_str___uint8_t_ vec = alloc_rid___uint8_t_(len, rg.dummy);
+  LowStar_Vector_vector_str___uint8_t_
+  vec = alloc_rid___uint8_t_(len, rg_dummy___uint8_t__uint32_t(rg));
   alloc____uint8_t__uint32_t(rg, vec, len);
   return vec;
 }
@@ -2009,11 +2025,25 @@ deserialize_hash(uint32_t hash_size, bool ok, const uint8_t *buf1, uint32_t sz, 
   rg = { .state = hash_size, .dummy = NULL, .r_alloc = hash_r_alloc, .r_free = hash_r_free };
   if (!ok || pos >= sz)
   {
-    return ((__bool_uint32_t__uint8_t_){ .fst = false, .snd = pos, .thd = rg.dummy });
+    return
+      (
+        (__bool_uint32_t__uint8_t_){
+          .fst = false,
+          .snd = pos,
+          .thd = rg_dummy___uint8_t__uint32_t(rg)
+        }
+      );
   }
   if (sz - pos < hash_size)
   {
-    return ((__bool_uint32_t__uint8_t_){ .fst = false, .snd = pos, .thd = rg.dummy });
+    return
+      (
+        (__bool_uint32_t__uint8_t_){
+          .fst = false,
+          .snd = pos,
+          .thd = rg_dummy___uint8_t__uint32_t(rg)
+        }
+      );
   }
   uint8_t *hash1 = rg_alloc___uint8_t__uint32_t(rg);
   memcpy(hash1, (uint8_t *)buf1 + pos, hash_size * sizeof (((uint8_t *)buf1)[0U]));
@@ -2089,7 +2119,7 @@ deserialize_hash_vec(
         (__bool_uint32_t_LowStar_Vector_vector_str___uint8_t_){
           .fst = false,
           .snd = pos,
-          .thd = rg.dummy
+          .thd = rg_dummy__LowStar_Vector_vector_str__uint8_t__uint32_t(rg)
         }
       );
   }
@@ -2121,7 +2151,8 @@ deserialize_hash_vec(
   }
   regional__uint32_t__uint8_t_
   hrg = { .state = hash_size, .dummy = NULL, .r_alloc = hash_r_alloc, .r_free = hash_r_free };
-  LowStar_Vector_vector_str___uint8_t_ res = alloc___uint8_t_(n1, hrg.dummy);
+  LowStar_Vector_vector_str___uint8_t_
+  res = alloc___uint8_t_(n1, rg_dummy___uint8_t__uint32_t(hrg));
   __bool_uint32_t
   scrut = deserialize_hash_vec_i(hash_size, ok1, buf1, sz, pos1, res, (uint32_t)0U);
   bool ok2 = scrut.fst;
@@ -2236,7 +2267,9 @@ deserialize_hash_vv(
       .r_free = hash_vec_r_free
     };
   LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_
-  res = alloc__LowStar_Vector_vector_str__uint8_t_(n1, rg.dummy);
+  res =
+    alloc__LowStar_Vector_vector_str__uint8_t_(n1,
+      rg_dummy__LowStar_Vector_vector_str__uint8_t__uint32_t(rg));
   __bool_uint32_t
   scrut = deserialize_hash_vv_i(hash_size, ok1, buf1, sz, pos1, res, (uint32_t)0U);
   bool ok2 = scrut.fst;

@@ -463,22 +463,22 @@ LowStar_Vector_vector_str___uint8_t_
 
 /* SNIPPET_END: mt_deserialize_path */
 
-/* SNIPPET_START: MerkleTree_EverCrypt_mt_p */
+/* SNIPPET_START: mt_p0 */
 
-typedef MerkleTree_Low_merkle_tree *MerkleTree_EverCrypt_mt_p;
+typedef MerkleTree_Low_merkle_tree *mt_p0;
 
-/* SNIPPET_END: MerkleTree_EverCrypt_mt_p */
+/* SNIPPET_END: mt_p0 */
 
-/* SNIPPET_START: MerkleTree_EverCrypt_mt_create */
+/* SNIPPET_START: mt_create */
 
 /*
   Construction wired to sha256 from EverCrypt
 
   @param[in]  init   The initial hash
 */
-MerkleTree_Low_merkle_tree *MerkleTree_EverCrypt_mt_create(uint8_t *init1);
+MerkleTree_Low_merkle_tree *mt_create(uint8_t *init1);
 
-/* SNIPPET_END: MerkleTree_EverCrypt_mt_create */
+/* SNIPPET_END: mt_create */
 
 /* SNIPPET_START: MerkleTree_Low_index_t */
 

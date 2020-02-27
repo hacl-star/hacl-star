@@ -3,7 +3,7 @@
 #include <assert.h>
 
 #include "EverCrypt_AutoConfig2.h"
-#include "MerkleTree.Nice.h"
+#include "MerkleTree.h"
 #include "merkle_tree_test.h"
 
 char hs[32U+1];

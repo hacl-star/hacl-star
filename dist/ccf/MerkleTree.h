@@ -322,14 +322,14 @@ mt_serialize_path(
 LowStar_Vector_vector_str___uint8_t_
 *mt_deserialize_path(uint32_t hash_size, const uint8_t *buf1, uint64_t len);
 
-typedef MerkleTree_Low_merkle_tree *MerkleTree_EverCrypt_mt_p;
+typedef MerkleTree_Low_merkle_tree *mt_p0;
 
 /*
   Construction wired to sha256 from EverCrypt
 
   @param[in]  init   The initial hash
 */
-MerkleTree_Low_merkle_tree *MerkleTree_EverCrypt_mt_create(uint8_t *init1);
+MerkleTree_Low_merkle_tree *mt_create(uint8_t *init1);
 
 typedef uint32_t MerkleTree_Low_index_t;
 
