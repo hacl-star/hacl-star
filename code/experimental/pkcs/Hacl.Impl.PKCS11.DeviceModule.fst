@@ -25,3 +25,6 @@ type device =
     ulCountCurves: size_t ->
     listSupportedCurves: buffer _CK_ULONG {length listSupportedCurves == uint_v ulCountCurves} ->
     device
+
+
+assume val isCurveSupported: d: device -> curve: _HACL_Curve_ID ->  Tot bool
