@@ -23,7 +23,7 @@ open MerkleTree.Low.Datastructures
 open Lib.IntTypes
 
 #push-options "--z3rlimit 40 --max_fuel 0"
-let sha256_compress src1 src2 dst =
+let mt_sha256_compress src1 src2 dst =
   let hash_size = 32ul in
   let hash_alg = Spec.Hash.Definitions.SHA2_256 in
   let hh0 = HST.get () in
@@ -69,6 +69,6 @@ let sha256_compress src1 src2 dst =
 
 
 let mt_create r init =
-  mt_create_custom 32ul (MerkleTree.New.High.sha256_compress) r init sha256_compress
+  mt_create_custom 32ul (MerkleTree.New.High.sha256_compress) r init mt_sha256_compress
 
 

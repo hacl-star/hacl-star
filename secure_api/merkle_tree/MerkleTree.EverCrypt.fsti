@@ -17,7 +17,7 @@ let mt_safe = MerkleTree.Low.mt_safe
 let mt_lift = MerkleTree.Low.mt_lift
 
 [@ (Comment "  Default hash function")]
-val sha256_compress: MTLH.hash_fun_t #32ul #(Ghost.hide MTH.sha256_compress)
+val mt_sha256_compress: MTLH.hash_fun_t #32ul #(Ghost.hide MTH.sha256_compress)
 
 [@ (Comment "  Construction wired to sha256 from EverCrypt
 
