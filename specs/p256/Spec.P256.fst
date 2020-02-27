@@ -23,7 +23,7 @@ let b: elem =
   b
 
 val on_curve: elem -> elem -> bool
-let on_curve x y = y *% y = x *% x *% x +% a *% x +% b
+let on_curve x y = y**2 = x**3 +% a *% x +% b
 
 
 /// The points P x y on the curve together with the point at infinity O
@@ -66,18 +66,88 @@ let add_neq p q =
     P xr yr
     end
 
-(** TODO: prove that the result is on the curve when yp <> 0 *)
+
+val double_on_curve: p:point{p <> O /\ (let P _ yp = p in yp <> 0)} ->
+  Lemma (
+    let P xp yp = p in
+    let lambda = (3 *% xp *% xp +% a) /% (2 *% yp) in
+    let xr = lambda *% lambda -% 2 *% xp in
+    let yr = lambda *% (xp -% xr) -% yp in
+    on_curve xr yr)
+let double_on_curve p =
+  let P xp yp = p in
+  mult_eq_zero 2 yp;
+  let lambda = (3 *% xp *% xp +% a) /% (2 *% yp) in
+  let xr = lambda *% lambda -% 2 *% xp in
+  let yr = lambda *% (xp -% xr) -% yp in
+
+  calc (==) {
+    (xr**3 +% a *% xr +% b) *% (2 *% yp)**6;
+    == { assert ((xr**3 +% a *% xr +% b) *% (2 *% yp)**6 ==
+          (((2 *% yp) *% inverse (2 *% yp))**2 *% (a +% 3 *% xp**2)**2 -% 8 *% xp *% yp**2)**3 +%
+          ((2 *% yp) *% inverse (2 *% yp))**2 *% 16 *% yp**4 *% a *% (a +% 3 *% xp**2)**2 -%
+          128 *% a *% xp *% yp**6 +%
+          64 *% yp**6 *% b)
+        by (p256_field ())
+       }
+    (((2 *% yp) *% inverse (2 *% yp))**2 *% (a +% 3 *% xp**2)**2 -% 8 *% xp *% yp**2)**3 +%
+    ((2 *% yp) *% inverse (2 *% yp))**2 *% 16 *% yp**4 *% a *% (a +% 3 *% xp**2)**2 -%
+    128 *% a *% xp *% yp**6 +%
+    64 *% yp**6 *% b;
+    == { mul_inverse (2 *% yp) }
+    (1**2 *% (a +% 3 *% xp**2)**2 -% 8 *% xp *% yp**2)**3 +%
+    1**2 *% 16 *% yp**4 *% a *% (a +% 3 *% xp**2)**2 -%
+    128 *% a *% xp *% yp**6 +%
+    64 *% yp**6 *% b;
+    == { _ by (p256_field ()) }
+    ((a +% 3 *% xp**2)**2 -% 8 *% xp *% yp**2)**3 +%
+    16 *% (yp**2)**2 *% a *% (a +% 3 *% xp**2)**2 -%
+    128 *% a *% xp *% (yp**2)**3 +%
+    64 *% (yp**2)**3 *% b;
+    == { }
+    ((a +% 3 *% xp**2)**2 -% 8 *% xp *% (xp**3 +% a *% xp +% b))**3 +%
+    16 *% (yp**2)**2 *% a *% (a +% 3 *% xp**2)**2 -%
+    128 *% a *% xp *% (xp**3 +% a *% xp +% b)**3 +%
+    64 *% (xp**3 +% a *% xp +% b)**3 *% b;
+  };
+
+  calc (==) {
+    (yr**2) *% (2 *% yp)**6;
+    == { assert(
+          (yr**2) *% (2 *% yp)**6 ==
+          (8 *% yp**4 -% ((2 *% yp) *% inverse (2 *% yp)) *% (12 *% xp *% yp**2 -% ((2 *% yp) *% inverse (2 *% yp))**2 *% (3 *% xp**2 +% a)**2) *% (3 *% xp**2 +% a))**2)
+         by (p256_field ())
+       }
+    (8 *% yp**4 -% ((2 *% yp) *% inverse (2 *% yp)) *% (12 *% xp *% yp**2 -% ((2 *% yp) *% inverse (2 *% yp))**2 *% (3 *% xp**2 +% a)**2) *% (3 *% xp**2 +% a))**2;
+    == { mul_inverse (2 *% yp) }
+    (8 *% yp**4 -% 1 *% (12 *% xp *% yp**2 -% 1**2 *% (3 *% xp**2 +% a)**2) *% (3 *% xp**2 +% a))**2;
+    == { _ by (p256_field ()) }
+    (8 *% (yp**2)**2 -% (12 *% xp *% yp**2 -% (3 *% xp**2 +% a)**2) *% (3 *% xp**2 +% a))**2;
+    == { }
+    (8 *% (xp**3 +% a *% xp +% b)**2 -%
+     (12 *% xp *% (xp**3 +% a *% xp +% b) -%
+     (3 *% xp**2 +% a)**2) *% (3 *% xp**2 +% a))**2;
+    == { _ by (p256_field ()) }
+    ((a +% 3 *% xp**2)**2 -% 8 *% xp *% (xp**3 +% a *% xp +% b))**3 +%
+    16 *% (xp**3 +% a *% xp +% b)**2 *% a *% (a +% 3 *% xp**2)**2 -%
+    128 *% a *% xp *% (xp**3 +% a *% xp +% b)**3 +%
+    64 *% (xp**3 +% a *% xp +% b)**3 *% b;
+  };
+
+  pow_eq_zero (2 *% yp) 6;
+  mod_mult_congr (yr**2) (xr**3 +% a *% xr +% b) ((2 *% yp)**6)
+
 val double: p:point{p <> O} -> point
 let double p =
   let P xp yp = p in
   if yp = 0 then O
   else
     begin
-    assert (2 *% yp <> 0);
+    mult_eq_zero 2 yp;
     let lambda = (3 *% xp *% xp +% a) /% (2 *% yp) in
     let xr = lambda *% lambda -% 2 *% xp in
     let yr = lambda *% (xp -% xr) -% yp in
-    assume (on_curve xr yr);
+    double_on_curve p;
     P xr yr
     end
 
@@ -92,15 +162,9 @@ val neg: point -> point
 let neg = function
   | O -> O
   | P x y ->
-    let open FStar.Math.Lemmas in
-    calc (==) {
-      y *% y;
-      == { neg_mul_left y (-y); neg_mul_right y y }
-      ((-y) * (-y)) % prime;
-      == { mod_mul_distr (-y) (-y) }
-      ((-y) % prime) * ((-y) % prime) % prime;
-    };
-    P x (0 -% y)
+    assert_norm (y**2 == y *% y /\ (~%y)**2 == (~%y) *% (~%y));
+    mul_opp_cancel y y;
+    P x (~%y)
 
 val scalar_multiplication: pos -> point -> point
 let rec scalar_multiplication k p =

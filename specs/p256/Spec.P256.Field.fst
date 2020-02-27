@@ -41,22 +41,34 @@ let ( -% ) (a b:elem) : elem = (a +% ~% b)
 
 // See https://github.com/FStarLang/FStar/issues/1923
 //[@(strict_on_arguments [0;1])]
-val exp: a:elem -> b:nat -> Tot elem (decreases b)
+val exp: elem -> b:nat -> Tot elem (decreases b)
 let rec exp a b =
   if b = 0 then 1
   else
     if b % 2 = 0 then exp (a *% a) (b / 2)
     else a *% exp (a *% a) (b / 2)
 
+// We don't want `pow` to normalize in the proofs below (e.g. `inverse_opp)
+// But we want it to normalize for short exponents.
+// We define an operator `**` for this second use case.
 [@(strict_on_arguments [0;1])]
-val pow: elem -> nat -> elem
+val pow: elem -> pos -> elem
 let rec pow a b =
-  if b = 0 then 1
-  else a *% pow a (b - 1)
+  if b = 1 then a
+  else pow a (b - 1) *% a
+
+[@canon_attr]
+val _pow: elem -> pos -> elem
+let rec _pow a b =
+  if b = 1 then a
+  else _pow a (b - 1) *% a
+
+[@canon_attr]
+let ( ** ) (a:elem) (k:pos) = _pow a k
 
 /// TODO: `exp` to normalize it efficiently, but it should be reverted to `pow`
 //[@(strict_on_arguments [0;1])]
-let ( **% ) (a:elem) (k:nat) = exp a k
+let ( **% ) (a:elem) (k:pos) = exp a k
 
 [@(strict_on_arguments [0])]
 let inverse (x:elem{x <> zero}) : elem = x **% (prime - 2)
@@ -162,6 +174,7 @@ let p256_field () : Tac unit =
   trefl()
 
 let test (a b c:elem) (d:elem{d <> zero}) =
+  assert (a**3 == a *% a *% a) by (p256_field ());
   assert (6 *% ~%3 == ~%18) by (p256_field ());
   assert ((a +% b) *% (a +% b) == a *% a +% 2 *% a *% b +% b *% b) by (p256_field ());
   assert ((a +% b) *% (c +% d) == c *% (b +% a) +% a *% d +% b *% d) by (p256_field ());
@@ -177,6 +190,10 @@ let test (a b c:elem) (d:elem{d <> zero}) =
 val mod_add_distr (a b:int) : Lemma ((a % prime) +% (b % prime) = (a + b) % prime)
 let mod_add_distr a b =
   FStar.Math.Lemmas.modulo_distributivity a b prime
+
+val mul_neg_l (a b:elem) : Lemma (~%a *% b == ~%(a *% b))
+let mul_neg_l a b =
+  assert (~%a *% b == ~%(a *% b)) by (p256_field ())
 
 val mul_neg_r (a b:elem) : Lemma (a *% ~%b == ~%(a *% b))
 let mul_neg_r a b =
@@ -309,7 +326,7 @@ let mod_sub_congr a b c d x =
   assert ((a - x - b) % prime = ((c - x - d) % prime))
 
 /// Axiomatizing the divisors of the prime modulus
-/// We could alternative verify a primality certificate
+/// We could alternatively verify a primality certificate
 assume
 val divides_prime : unit -> Lemma (FStar.Math.Euclid.is_prime prime)
 
@@ -343,30 +360,34 @@ val opp_opp (a:elem) : Lemma (~%(~%a) == a)
 let opp_opp a =
   assert ((~%(~%a) == a)) by (p256_field ())
 
+val mul_opp_cancel (a b:elem) : Lemma (~%a *% ~%b == a *% b)
+let mul_opp_cancel a b =
+  assert (~%a *% ~%b == a *% b) by (p256_field ())
+
 ///
 /// `pow` and `exp`
 ///
 
 #push-options "--fuel 1"
 
-val pow_one (k:nat) : Lemma (pow one k == one)
+val pow_one (k:pos) : Lemma (pow one k == one)
 let rec pow_one = function
-  | 0 -> ()
+  | 1 -> ()
   | k -> pow_one (k-1)
 
-val pow_plus (a:elem) (k m:nat): Lemma
+val pow_plus (a:elem) (k m:pos): Lemma
   (ensures pow a (k + m) == pow a k *% pow a m)
   (decreases k)
 let rec pow_plus a k m =
   match k with
-  | 0 -> ()
+  | 1 -> ()
   | _ ->
     calc (==) {
       pow a (k + m);
       == { }
-      a *% pow a ((k + m) - 1);
+      pow a ((k + m) - 1) *% a;
       == { pow_plus a (k - 1) m }
-      a *% (pow a (k - 1) *% pow a m);
+      (pow a (k - 1) *% pow a m) *% a;
       == { mul_associative a (pow a (k - 1)) (pow a m) }
       pow a k *% pow a m;
     }
@@ -376,10 +397,10 @@ val pow_mul_reorder (a b c d:elem) : Lemma
 let pow_mul_reorder a b c d =
   assert (((a *% b) *% (c *% d) == (a *% c) *% (b *% d))) by (p256_field ())
 
-val pow_mul (a b:elem) (k:nat) : Lemma (pow (a *% b) k == pow a k *% pow b k)
+val pow_mul (a b:elem) (k:pos) : Lemma (pow (a *% b) k == pow a k *% pow b k)
 let rec pow_mul a b k =
   match k with
-  | 0 -> ()
+  | 1 -> ()
   | _ ->
     calc (==) {
       pow (a *% b) k;
@@ -391,11 +412,11 @@ let rec pow_mul a b k =
       pow a k *% pow b k;
     }
 
-val pow_exp (a:elem) (k:nat) : Lemma
+val pow_exp (a:elem) (k:pos) : Lemma
   (ensures exp a k == pow a k)
   (decreases k)
 let rec pow_exp a k =
-  if k = 0 then ()
+  if k = 1 then assert_norm (exp a 1 == a)
   else
     if k % 2 = 0 then
       begin
@@ -421,7 +442,7 @@ let rec pow_exp a k =
         a *% pow (a *% a) (k / 2);
         == { pow_mul a a (k / 2) }
         a *% (pow a (k / 2) *% pow a (k / 2));
-        == { pow_plus a (k / 2) (k / 2) }
+        == { pow_plus a (k / 2) (k / 2); mul_commutative a (pow a (k - 1)) }
         pow a k;
       }
       end
@@ -430,49 +451,49 @@ let rec pow_exp a k =
 
 #push-options "--fuel 2"
 
-val pow_even (a:elem) (k:nat{k % 2 = 0}) : Lemma (pow (~%a) k == pow a k)
+val pow_even (a:elem) (k:pos{k % 2 = 0}) : Lemma (pow (~%a) k == pow a k)
 let rec pow_even a k =
-  if k = 0 then ()
+  if k = 2 then mul_opp_cancel a a
   else
     calc (==) {
       pow (~%a) k;
       == { }
-      (~%a) *% ((~%a) *% pow (~%a) (k - 2));
-      == { mul_associative (~%a) (~%a) (pow (~%a) (k - 2)) }
-      (~%a *% ~%a) *% pow (~%a) (k - 2);
+      (pow (~%a) (k - 2) *% (~%a)) *% (~%a);
+      == { mul_associative (pow (~%a) (k - 2)) (~%a) (~%a) }
+      pow (~%a) (k - 2) *% (~%a *% ~%a);
       == { pow_even a (k - 2) }
-      (~%a *% ~%a) *% pow a (k - 2);
+      pow a (k - 2) *% (~%a *% ~%a);
       == { mul_neg_r (~%a) a }
-      (~%(~%a *% a)) *% pow a (k - 2);
+      pow a (k - 2) *% (~%(~%a *% a));
       == { mul_commutative (~%a) a; mul_neg_r a a }
-      (~%(~%(a *% a))) *% pow a (k - 2);
+      pow a (k - 2) *% (~%(~%(a *% a)));
       == { opp_opp (a *% a) }
-      (a *% a) *% pow a (k - 2);
-      == { mul_associative a a (pow a (k - 2)) }
+      pow a (k - 2) *% (a *% a);
+      == { mul_associative (pow a (k - 2)) a a }
       pow a k;
     }
 
-val pow_odd (a:elem) (k:nat{k % 2 = 1}) : Lemma (pow (~%a) k == ~%(pow a k))
+val pow_odd (a:elem) (k:pos{k % 2 = 1}) : Lemma (pow (~%a) k == ~%(pow a k))
 let rec pow_odd a k =
   if k = 1 then ()
   else
     calc (==) {
       pow (~%a) k;
       == { }
-      (~%a) *% ((~%a) *% pow (~%a) (k - 2));
-      == { mul_associative (~%a) (~%a) (pow (~%a) (k - 2)) }
-      (~%a *% ~%a) *% pow (~%a) (k - 2);
+      (pow (~%a) (k - 2) *% (~%a)) *% (~%a);
+      == { mul_associative (pow (~%a) (k - 2)) (~%a) (~%a) }
+      pow (~%a) (k - 2) *% (~%a *% ~%a);
       == { pow_odd a (k - 2) }
-      (~%a *% ~%a) *% ~%(pow a (k - 2));
+      ~%(pow a (k - 2)) *% (~%a *% ~%a);
       == { mul_neg_r (~%a) a }
-      (~%(~%a *% a)) *% ~%(pow a (k - 2));
+      ~%(pow a (k - 2)) *% (~%(~%a *% a));
       == { mul_commutative (~%a) a; mul_neg_r a a }
-      (~%(~%(a *% a))) *% ~%(pow a (k - 2));
+      ~%(pow a (k - 2)) *% (~%(~%(a *% a)));
       == { opp_opp (a *% a) }
-      (a *% a) *% ~%(pow a (k - 2));
-      == { mul_neg_r (a *% a) (pow a (k - 2)) }
-      ~%((a *% a) *% pow a (k - 2));
-      == { mul_associative a a (pow a (k - 2)) }
+      ~%(pow a (k - 2)) *% (a *% a);
+      == { mul_neg_l (pow a (k - 2)) (a *% a) }
+      ~%(pow a (k - 2) *% (a *% a));
+      == { mul_associative (pow a (k - 2)) a a }
       ~%(pow a k);
     }
 
@@ -504,96 +525,8 @@ let inverse_opp a =
 ///
 ///   binomial n k + binomial n (k - 1) = binomial (n + 1) k
 
-
-val factorial: n: nat{n >= 0} -> Tot pos
-
-let rec factorial n = 
-  match n with 
-  | 0 -> 1
-  | _ ->  n * factorial (n - 1)
-
-
-val binomial: n: nat -> k: nat{0 <= k /\ k <=n } -> Tot nat
-
-let binomial n k = 
-  factorial n / (factorial k * factorial (n - k))
-
-(* Like this? *)
-val binomial2: n: nat -> k: nat {0 <= k /\ k <= n} -> Tot nat
-
-let rec binomial2 n k = 
-  match k with 
-  | n -> 1
-  | _ -> binomial2 (n - 1) k + binomial2 (n - 1) (k - 1)
-
-
-val mult_l: a: int -> b: pos -> c: pos -> Lemma (a / b == (a * c) / (b * c))
-
-let mult_l a b c = 
-  FStar.Math.Lemmas.division_multiplication_lemma (a * c) c b;
-  FStar.Math.Lemmas.multiple_division_lemma a c
-
-assume val div_distr: a: nat -> b: nat -> c: pos -> Lemma (a / c + b/c == (a + b) / c) 
-
-
-#reset-options "--fuel 1 --ifuel 1 --z3rlimit 300"
-
-val pascalIdentity: n: nat -> k: nat {1 <= k /\ k <= n} -> Lemma (binomial n k + binomial n (k - 1) == binomial (n + 1) k)
-
-let pascalIdentity n k = 
-  let b0 = binomial n k in 
-  let b1 = binomial n (k - 1) in 
-  let b2 = binomial (n + 1) k in 
-
-  assert(b2 == (factorial (n + 1)) / (factorial k * (factorial (n + 1 - k))));
-  admit();
-
-  let open FStar.Tactics in 
-  let open FStar.Tactics.Canon in 
-
-  let fk = factorial k in 
-  let fn = factorial n in 
-  let fnk = factorial (n - k) in 
-  let fnk1 = factorial (n - k + 1) in 
-
-
- calc (==) {
-  b0;
-  == {}
-  factorial n / (fk * fnk);
-  == {mult_l fn (fk * fnk) (n - k + 1)} 
-  (fn * (n - k + 1)) / ((fk * fnk) * (n - k + 1));
-  == {assert_by_tactic ((fk * fnk) * (n - k + 1) == fk * (fnk * (n - k + 1))) canon}
-  (fn * (n - k + 1)) / (fk * (fnk * (n - k + 1)));
-  == {assert (fnk * (n - k + 1) == fnk1)}
-  (fn * (n - k + 1)) / (fk * fnk1);
-  };
-
-  calc (==) {
-  b1;
-  == {}
-  factorial n / (factorial (k - 1) * factorial (n - k + 1));
-  == {mult_l fn (factorial (k - 1) * factorial (n - k + 1)) k} 
-  (factorial n * k) / (factorial (k - 1) * factorial (n - k + 1) * k);
-  == {assert(factorial (k - 1) * k == factorial k)}
-  (factorial n * k / (fk * fnk1));
-  };
-  
-  div_distr (factorial n * (n - k + 1)) (factorial n * k) (fk * fnk1);
-  assert (factorial n * (n - k + 1) + factorial n * k == factorial n * (n + 1));
-  assert (factorial n * (n + 1) == factorial (n + 1));
-  (*QED: *)
-  assert (b0 + b1 = (factorial (n + 1)) / (fk * fnk1))
-
-
-
-
-
 assume
 val fermat (a:elem) : Lemma (pow a (prime - 1) == one)
-
-
-
 
 #push-options "--fuel 1"
 
@@ -629,10 +562,6 @@ let sub_zero a =
   add_commutative a zero;
   add_identity a
 
-val mul_opp_cancel (a b:elem) : Lemma (~%a *% ~%b == a *% b)
-let mul_opp_cancel a b =
-  assert (~%a *% ~%b == a *% b) by (p256_field ())
-
 val sub_neq (a b:elem) : Lemma (requires a <> b) (ensures a -% b <> 0)
 let sub_neq a b = ()
 
@@ -646,7 +575,7 @@ let add_congr a b c = ()
 
 val add_sub_congr (a b c d:elem) : Lemma
   (a +% b == c +% d <==> a -% c == d -% b)
-let add_congr_r a b c d =
+let add_sub_congr a b c d =
   calc (<==>) {
     a +% b == c +% d;
     <==> { sub_congr (a +% b) (c +% d) b }
@@ -721,3 +650,48 @@ let div_mul_eq_l a b c =
     == { inverse_mul c b }
     (c *% a) /% (c *% b);
   }
+
+val div_eq (a b c d:elem) : Lemma
+  (requires b <> 0 /\ d <> 0 /\ a *% d == c *% b)
+  (ensures  a /% b == c /% d)
+let div_eq a b c d =
+  mult_eq_zero d b;
+  calc (==) {
+    a /% b;
+    == { div_mul_eq_l a b d }
+    (d *% a) /% (d *% b);
+    == { inverse_mul d b; mul_commutative d a }
+    (c *% b) *% (inverse d *% inverse b);
+    == { assert ((c *% b) *% (inverse d *% inverse b) ==
+                (c *% inverse d) *% (b *% inverse b))
+         by (p256_field()) }
+    (c *% inverse d) *% (b *% inverse b);
+    == { mul_inverse b; mul_one_r (c *% inverse d) }
+    c /% d;
+  }
+
+#push-options "--fuel 1"
+
+val pow_eq_zero (a:elem) (k:pos) : Lemma (a**k == 0 <==> a == 0)
+let rec pow_eq_zero a k =
+  match k with
+  | 1 -> ()
+  | _ ->
+    begin
+    mult_eq_zero a (_pow a (k - 1));
+    pow_eq_zero a (k - 1)
+    end
+
+val pow_inverse (a:elem{a <> 0}) (k:pos) : Lemma
+  (pow_eq_zero a k; (inverse a)**k == inverse (a**k))
+let rec pow_inverse a k =
+  match k with
+  | 1 -> ()
+  | _ ->
+    begin
+    pow_eq_zero a (k-1);
+    inverse_mul a (_pow a (k - 1));
+    pow_inverse a (k - 1)
+    end
+
+#pop-options
