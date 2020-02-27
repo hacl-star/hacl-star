@@ -8,8 +8,6 @@ include $(HACL_HOME)/Makefile.common
 
 all: build/runbenchmark
 
-ifeq (
-
 CMAKE_DEFS+=\
 	-DEVERCRYPT_SRC_DIR=$(HACL_HOME)/dist/gcc64-only \
 	-DKREMLIN_INC=$(KREMLIN_HOME)/include \
