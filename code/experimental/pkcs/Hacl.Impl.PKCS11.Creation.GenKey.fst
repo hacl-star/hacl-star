@@ -5,6 +5,8 @@ open Hacl.Impl.PKCS11.Internal.Attribute
 open Hacl.Impl.PKCS11.DeviceModule
 open Hacl.Impl.PKCS11.Session
 
+open Hacl.Impl.PKCS11.Mechanism
+
 open Hacl.Impl.PKCS11.Result
 open Hacl.Impl.PKCS11.Parsing
 
@@ -93,7 +95,14 @@ let _CKS_GenerateKey d hSession pMechanism ulCount pTemplate =
       end
   else 
     begin
-      let (|exceptionMain, handler|) =  _CKS_GenerateKey_ d hSession pMechanism ulCount parsedAttributes in
-      pop_frame();
-      (|exceptionMain, handler|)
-    end  
+      let mechanismCheckException = mechanismEnforcedAttributeCheck d pMechanism parsedAttributes in 
+      match mechanismCheckException with 
+      |CKR_OK -> 
+	let (|exceptionMain, handler|) =  _CKS_GenerateKey_ d hSession pMechanism ulCount parsedAttributes in
+	pop_frame();
+	(|exceptionMain, handler|)
+      |_ -> 
+	pop_frame(); 
+	(|mechanismCheckException, (u32 0)|)
+    end
+

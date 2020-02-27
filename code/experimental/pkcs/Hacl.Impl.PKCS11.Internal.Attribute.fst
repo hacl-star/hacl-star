@@ -94,3 +94,4 @@ let isAttributeReadOnlyBuffer a b =
   upd b (size 0) newException
 
 
+assume val getAttribute180: buffer attribute -> Tot ((e: exception_t) & size_t)

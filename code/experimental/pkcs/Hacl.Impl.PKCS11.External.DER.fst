@@ -29,7 +29,7 @@ val parseEC_ANSI_962: ulCount: size_t -> p: buffer uint8 {length p == uint_v ulC
 
 let parseEC_ANSI_962 ulCount p = 
   let expectedLength = to_u32 (index p 2ul) in 
-  let sizeToCompare = ulCount - 2 in 
+  let sizeToCompare = ulCount -. 2ul in 
   if expectedLength <> sizeToCompare then 
     (|CKR_CURVE_NOT_SUPPORTED, 0ul|)
   else

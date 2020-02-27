@@ -109,6 +109,13 @@ typedef struct Hacl_Impl_PKCS11_Internal_Attribute_attribute_s
 }
 Hacl_Impl_PKCS11_Internal_Attribute_attribute;
 
+typedef struct Prims_dtuple2__Hacl_Impl_PKCS11_Result_exception_t_uint32_t_s
+{
+  Hacl_Impl_PKCS11_Result_exception_t fst;
+  uint32_t snd;
+}
+Prims_dtuple2__Hacl_Impl_PKCS11_Result_exception_t_uint32_t;
+
 typedef struct Hacl_Impl_PKCS11_Internal_Object__object_s
 {
   uint32_t id;
@@ -128,13 +135,6 @@ typedef struct Hacl_Impl_PKCS11_DeviceModule_device_s
   uint32_t *listSupportedCurves;
 }
 Hacl_Impl_PKCS11_DeviceModule_device;
-
-typedef struct Prims_dtuple2__Hacl_Impl_PKCS11_Result_exception_t_uint32_t_s
-{
-  Hacl_Impl_PKCS11_Result_exception_t fst;
-  uint32_t snd;
-}
-Prims_dtuple2__Hacl_Impl_PKCS11_Result_exception_t_uint32_t;
 
 Prims_dtuple2__Hacl_Impl_PKCS11_Result_exception_t_uint32_t
 Hacl_Impl_PKCS11_Test_test(
