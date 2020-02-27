@@ -22,8 +22,6 @@ open MerkleTree.Low.Datastructures
 
 open Lib.IntTypes
 
-val sha256_compress: MLH.hash_fun_t #32ul #(Ghost.hide MTH.sha256_compress)
-
 #push-options "--z3rlimit 40 --max_fuel 0"
 let sha256_compress src1 src2 dst =
   let hash_size = 32ul in

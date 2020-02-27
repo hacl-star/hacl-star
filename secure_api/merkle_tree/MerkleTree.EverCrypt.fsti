@@ -5,6 +5,7 @@ module B = LowStar.Buffer
 
 module HST = FStar.HyperStack.ST
 module MTH = MerkleTree.New.High
+module MTLH = MerkleTree.Low.Hashfunctions
 module MTLD = MerkleTree.Low.Datastructures
 
 open LowStar.Regional
@@ -14,6 +15,9 @@ let mt_p = MerkleTree.Low.mt_p
 let mt_loc = MerkleTree.Low.mt_loc
 let mt_safe = MerkleTree.Low.mt_safe
 let mt_lift = MerkleTree.Low.mt_lift
+
+[@ (Comment "  Default hash function")]
+val sha256_compress: MTLH.hash_fun_t #32ul #(Ghost.hide MTH.sha256_compress)
 
 [@ (Comment "  Construction wired to sha256 from EverCrypt
 
@@ -29,3 +33,4 @@ val mt_create: r:HST.erid -> init:hash #32ul -> HST.ST mt_p
      // correctness
      MerkleTree.Low.MT?.hash_size (B.get h1 mt 0) = 32ul /\
      mt_lift h1 mt == MTH.mt_create 32 MTH.sha256_compress (Rgl?.r_repr (MTLD.hreg 32ul) h0 init)))
+

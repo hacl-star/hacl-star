@@ -12,6 +12,7 @@ module U64 = FStar.UInt64
 module MTS = MerkleTree.Spec
 module MTNL = MerkleTree.Low
 module MTNLHF = MerkleTree.Low.Hashfunctions
+module MTNLE = MerkleTree.EverCrypt
 module MTNLD = MerkleTree.Low.Datastructures
 module MTNLS = MerkleTree.Low.Serialization
 
@@ -250,3 +251,6 @@ let mt_deserialize_path
   (len:UInt64.t{CB.length buf = U64.v len})
 : HST.ST (B.pointer_or_null (path #hash_size)) pf pt
 = MTNLS.mt_deserialize_path #hash_size rid buf len
+
+[@ (Comment "  Default hash function")]
+let mt_sha256_compress: MTNLHF.hash_fun_t #32ul #(Ghost.hide MTS.sha256_compress) = MTNLE.sha256_compress
