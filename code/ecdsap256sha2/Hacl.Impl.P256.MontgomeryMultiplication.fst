@@ -190,6 +190,58 @@ let montgomery_multiplication_buffer a b result =
   pop_frame()  
 
 
+val montgomery_square_buffer: a: felem -> b: felem -> result: felem ->  Stack unit
+  (requires (fun h -> live h a /\ as_nat h a < prime256 /\ live h b /\ live h result /\ as_nat h b < prime256)) 
+  (ensures (fun h0 _ h1 -> 
+    modifies (loc result) h0 h1 /\  
+    as_nat h1 result = (as_nat h0 a * as_nat h0 b * modp_inv2_prime (pow2 256) prime256) % prime256 /\
+    as_nat h1 result = toDomain_ (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 b) % prime256) /\
+    as_nat h1 result = toDomain_ (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 b)))
+  )
+
+
+let montgomery_square_buffer a b result = 
+  assert_norm(prime256 > 3);
+  push_frame();
+    let t = create (size 8) (u64 0) in 
+    let round2 = create (size 8) (u64 0) in 
+    let round4 = create (size 8) (u64 0) in  
+      let h0 = ST.get() in 
+    mul a b t;  
+      let h1 = ST.get() in 
+      mul_lemma_ (as_nat h0 a) (as_nat h0 b) prime256;
+  montgomery_multiplication_round_twice t round2;
+      let h2 = ST.get() in 
+  montgomery_multiplication_round_twice round2 round4; 
+      let h3 = ST.get() in 
+  lemma_montgomery_mod_inverse_addition2 (wide_as_nat h1 t);
+  lemma_mod_mul_distr_l (wide_as_nat h2 round2) (modp_inv2_prime (pow2 128) prime256) prime256;
+  lemma_mod_mul_distr_l (wide_as_nat h1 t * modp_inv2_prime (pow2 128) prime256) (modp_inv2_prime (pow2 128) prime256) prime256;
+      mul_lemma_2 (wide_as_nat h1 t % pow2 64) (pow2 64 - 1) prime256;
+      mul_lemma_ (as_nat h0 a) (as_nat h0 b) prime256;
+      mul_lemma_1 ( 
+         let round = (wide_as_nat h1 t + prime256 * (wide_as_nat h1 t % pow2 64)) / pow2 64 in  
+   round % pow2 64) (pow2 64) prime256; 
+      mul_lemma_1 ( 
+  let round = (wide_as_nat h1 t + prime256 * (wide_as_nat h1 t % pow2 64)) / pow2 64 in 
+  let round2 = (round + prime256 * (round % pow2 64)) / pow2 64 in 
+  round2 % pow2 64) (pow2 64) prime256; 
+      mul_lemma_1 ( 
+  let round = (wide_as_nat h1 t + prime256 * (wide_as_nat h1 t % pow2 64)) / pow2 64 in 
+  let round2 = (round + prime256 * (round % pow2 64)) / pow2 64 in 
+  let round3 = (round2 + prime256 * (round2 % pow2 64)) / pow2 64 in 
+  round3 % pow2 64) (pow2 64) prime256;  
+      assert_norm((prime256 * pow2 64 + (prime256 * pow2 64 + (prime256 * pow2 64 + ((pow2 64 - 1) * prime256 + prime256 * prime256) / pow2 64) / pow2 64)/ pow2 64) / pow2 64 < 2 * prime256);
+  reduction_prime256_2prime256_8_with_carry_impl round4 result; 
+  lemmaFromDomainToDomain (as_nat h0 a);
+  lemmaFromDomainToDomain (as_nat h0 b);
+  multiplicationInDomainNat #(fromDomain_ (as_nat h0 a)) #(fromDomain_ (as_nat h0 b))  (as_nat h0 a) (as_nat h0 b);
+  inDomain_mod_is_not_mod (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 b));
+  pop_frame()  
+
+
+
+
 #reset-options "--z3rlimit 500" 
 
 val fsquarePowN: n: size_t -> a: felem -> Stack unit 

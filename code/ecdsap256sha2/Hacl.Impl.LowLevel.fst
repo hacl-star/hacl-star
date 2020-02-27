@@ -654,6 +654,168 @@ let mul f r out =
   pop_frame()
 
 
+
+
+
+val sq_0: f:  lbuffer uint64 (size 4) -> u: uint64 -> result: lbuffer uint64 (size 4) -> Stack uint64
+  (requires fun h -> live h result /\ live h f)
+  (ensures fun h0 c h1 -> modifies (loc result) h0 h1 /\ 
+    as_nat h0 f * uint_v u = uint_v c * pow2 256 + as_nat h1 result /\ 
+    as_nat h0 f * uint_v u < pow2 320 /\
+    uint_v c < pow2 64 - 1
+  )
+
+
+let sq_0 f u result = 
+  push_frame();
+
+    assert_norm (pow2 64 * pow2 64 = pow2 128);
+    assert_norm (pow2 64 * pow2 64 * pow2 64 = pow2 192);
+    assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);  
+    assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 320); 
+
+  let temp = create (size 1) (u64 0) in 
+
+  let f0 = index f (size 0) in 
+  let f1 = index f (size 1) in 
+  let f2 = index f (size 2) in 
+  let f3 = index f (size 3) in 
+    
+  let o0 = sub result (size 0) (size 1) in 
+  let o1 = sub result (size 1) (size 1) in 
+  let o2 = sub result (size 2) (size 1) in 
+  let o3 = sub result (size 3) (size 1) in 
+    
+    let h0 = ST.get() in 
+  mult64_0 f u o0 temp;
+    let h1 = ST.get() in 
+  let c1 = mult64_c f1 u (u64 0) o1 temp in 
+    let h2 = ST.get() in 
+  let c2 = mult64_c f2 u c1 o2 temp in 
+    let h3 = ST.get() in 
+  let c3 = mult64_c f3 u c2 o3 temp in 
+    let h4 = ST.get() in 
+  let temp0 = index temp (size 0) in 
+    lemma_low_level0 (uint_v(Seq.index (as_seq h1 o0) 0)) (uint_v (Seq.index (as_seq h2 o1) 0)) (uint_v (Seq.index (as_seq h3 o2) 0)) (uint_v (Seq.index (as_seq h4 o3) 0)) (uint_v f0) (uint_v f1) (uint_v f2) (uint_v f3) (uint_v u) (uint_v (Seq.index (as_seq h2 temp) 0)) (uint_v c1) (uint_v c2) (uint_v c3) (uint_v (Seq.index (as_seq h3 temp) 0)) (uint_v temp0); 
+    
+  mul_lemma_4 (as_nat h0 f) (uint_v u) (pow2 256 - 1) (pow2 64 - 1);
+  assert_norm((pow2 256 - 1) * (pow2 64 - 1) == pow2 320 - pow2 256 - pow2 64 + 1);
+  assert_norm((pow2 320 - pow2 256) / pow2 256 == pow2 64 - 1);
+
+  pop_frame();  
+  c3 +! temp0
+
+
+
+
+val sq1: f1: felem -> u2: uint64 -> f3: felem -> result: felem -> 
+  Stack uint64 
+  (requires fun h -> live h f1 /\ live h f3 /\ live h result /\ eq_or_disjoint f3 result /\ disjoint f1 result)
+  (ensures fun h0 c h1 -> modifies (loc result) h0 h1  /\
+    as_nat h1 result + uint_v c * pow2 256 == as_nat h0 f1 * uint_v u2 + as_nat h0 f3 )
+
+let sq1 f u f3 result = 
+  push_frame();
+ 
+  let result1 = create (size 4) (u64 0) in    
+  let temp = create (size 1) (u64 0) in 
+
+  let f0 = index f (size 0) in 
+  let f1 = index f (size 1) in 
+  let f2 = index f (size 2) in 
+  let f3 = index f (size 3) in 
+    
+  let o0 = sub result1 (size 0) (size 1) in 
+  let o1 = sub result1 (size 1) (size 1) in 
+  let o2 = sub result1 (size 2) (size 1) in 
+  let o3 = sub result1 (size 3) (size 1) in 
+    
+    let h0 = ST.get() in 
+  mult64_0 f u o0 temp;
+    let h1 = ST.get() in 
+  let c1 = mult64_c f1 u (u64 0) o1 temp in 
+    let h2 = ST.get() in 
+  let c2 = mult64_c f2 u c1 o2 temp in 
+    let h3 = ST.get() in 
+  let c3 = mult64_c f3 u c2 o3 temp in 
+    let h4 = ST.get() in 
+  let temp0 = index temp (size 0) in 
+
+  let c = c3 +! temp0 in 
+  let c3 = add4 temp f3 result in 
+  pop_frame();  
+  c +! c3
+
+
+
+
+#reset-options "--z3rlimit 1000"
+val sq: f: felem -> r: felem -> out: widefelem
+  -> Stack unit
+    (requires fun h -> live h out /\ live h f /\ live h r)
+    (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\ wide_as_nat h1 out = as_nat h0 r * as_nat h0 f)
+      
+let sq f r out =
+  push_frame();
+    let temp = create (size 8) (u64 0) in 
+    
+  let f0 = f.(0ul) in
+  let f1 = f.(1ul) in
+  let f2 = f.(2ul) in
+  let f3 = f.(3ul) in
+
+    let h0 = ST.get() in 
+  let b0 = sub temp (size 0) (size 4) in 
+  let c0 = sq_0 r f0 b0 in 
+    upd temp (size 4) c0;
+
+    let h1 = ST.get() in 
+    let bk0 = sub temp (size 0) (size 1) in 
+  let b1 = sub temp (size 1) (size 4) in   
+  let c1 = sq1 r f1 b1 b1 in 
+      upd temp (size 5) c1; 
+
+
+    let h2 = ST.get() in
+      let bk1 = sub temp (size 0) (size 2) in 
+  let b2 = sub temp (size 2) (size 4) in 
+  let c2 = mul1_add r f2 b2 b2 in 
+    upd temp (size 6) c2;
+    
+
+  let bk2 = sub temp (size 0) (size 3) in 
+  let b3 = sub temp (size 3) (size 4) in 
+  let c3 = mul1_add r f3 b3 b3 in 
+    upd temp (size 7) c3;
+
+  copy out temp; 
+  
+  pop_frame()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 val cmovznz4: cin: uint64 -> x: felem -> y: felem -> result: felem ->
   Stack unit
     (requires fun h -> live h x /\ live h y /\ live h result /\ disjoint x result /\ eq_or_disjoint y result)

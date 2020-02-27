@@ -115,7 +115,7 @@ let move_from_jacobian_coordinates u1 u2 s1 s2 p q tempBuffer =
    let z2Cube = sub tempBuffer (size 8) (size 4) in 
    let z1Cube = sub tempBuffer (size 12) (size 4) in  
 
-   montgomery_multiplication_buffer qZ qZ z2Square;
+   montgomery_square_buffer qZ qZ z2Square;
    montgomery_multiplication_buffer pZ pZ z1Square;
    montgomery_multiplication_buffer z2Square qZ z2Cube;
    
