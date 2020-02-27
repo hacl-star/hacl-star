@@ -20,8 +20,12 @@ type device =
   |Device: 
     keyBufferLen: size_t -> 
     keys: Hacl.Impl.PKCS11.KeyType.key ->
+
+    freeMemory: size_t ->
+    
     ulCountMechanisms: size_t ->
     listSupportedMechanisms: buffer _CK_MECHANISM_TYPE {length listSupportedMechanisms == uint_v ulCountMechanisms} ->
+    
     ulCountCurves: size_t ->
     listSupportedCurves: buffer _CK_ULONG {length listSupportedCurves == uint_v ulCountCurves} ->
     device
