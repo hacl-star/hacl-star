@@ -636,6 +636,7 @@ REQUIRED_FLAGS	= \
   -no-prefix 'EverCrypt.Vale' \
   -add-include 'Hacl_Curve25519_64:"curve25519-inline.h"' \
   -no-prefix 'MerkleTree' \
+  -no-prefix 'MerkleTree.EverCrypt' \
   -library EverCrypt.AutoConfig,EverCrypt.OpenSSL,EverCrypt.BCrypt \
   $(BASE_FLAGS)
 
