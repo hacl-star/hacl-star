@@ -302,6 +302,5 @@ export MAKEFLAGS="$MAKEFLAGS -Otarget"
 export_home FSTAR "$(pwd)/FStar"
 cd hacl-star
 rootPath=$(pwd)
-apt install gcc-7 g++-7
 exec_build
 cd ..
