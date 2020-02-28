@@ -286,6 +286,17 @@ val vec_interleave_low_lemma_uint64_4: v1:vec_t U64 4 -> v2:vec_t U64 4 -> Lemma
 val vec_interleave_low_n_lemma_uint64_4_2: v1:vec_t U64 4 -> v2:vec_t U64 4 -> Lemma
   (ensures (vec_v (vec_interleave_low_n 2 v1 v2) == create4 (vec_v v1).[0] (vec_v v1).[1] (vec_v v2).[0] (vec_v v2).[1]))
 
+val vec_interleave_low_lemma_uint64_8: v1:vec_t U64 8 -> v2:vec_t U64 8 -> Lemma
+  (ensures (vec_v (vec_interleave_low v1 v2) ==
+    create8 (vec_v v1).[0] (vec_v v2).[0] (vec_v v1).[2] (vec_v v2).[2] (vec_v v1).[4] (vec_v v2).[4] (vec_v v1).[6] (vec_v v2).[6]))
+
+val vec_interleave_low_n_lemma_uint64_8_2: v1:vec_t U64 8 -> v2:vec_t U64 8 -> Lemma
+  (ensures (vec_v (vec_interleave_low_n 2 v1 v2) ==
+    create8 (vec_v v1).[0] (vec_v v1).[1] (vec_v v2).[0] (vec_v v2).[1] (vec_v v1).[4] (vec_v v1).[5] (vec_v v2).[4] (vec_v v2).[5]))
+
+val vec_interleave_low_n_lemma_uint64_8_4: v1:vec_t U64 8 -> v2:vec_t U64 8 -> Lemma
+  (ensures (vec_v (vec_interleave_low_n 4 v1 v2) ==
+    create8 (vec_v v1).[0] (vec_v v1).[1] (vec_v v1).[2] (vec_v v1).[3] (vec_v v2).[0] (vec_v v2).[1] (vec_v v2).[2] (vec_v v2).[3]))
 
 inline_for_extraction noextract
 val vec_interleave_high_n: #t:v_inttype -> #w:width -> n:width{w % n == 0} -> vec_t t w -> vec_t t w -> vec_t t w
@@ -348,6 +359,17 @@ val vec_interleave_high_lemma_uint64_4: v1:vec_t U64 4 -> v2:vec_t U64 4 -> Lemm
 val vec_interleave_high_n_lemma_uint64_4_2: v1:vec_t U64 4 -> v2:vec_t U64 4 -> Lemma
   (ensures (vec_v (vec_interleave_high_n 2 v1 v2) == create4 (vec_v v1).[2] (vec_v v1).[3] (vec_v v2).[2] (vec_v v2).[3]))
 
+val vec_interleave_high_lemma_uint64_8: v1:vec_t U64 8 -> v2:vec_t U64 8 -> Lemma
+  (ensures (vec_v (vec_interleave_high v1 v2) ==
+    create8 (vec_v v1).[1] (vec_v v2).[1] (vec_v v1).[3] (vec_v v2).[3] (vec_v v1).[5] (vec_v v2).[5] (vec_v v1).[7] (vec_v v2).[7]))
+
+val vec_interleave_high_n_lemma_uint64_8_2: v1:vec_t U64 8 -> v2:vec_t U64 8 -> Lemma
+  (ensures (vec_v (vec_interleave_high_n 2 v1 v2) ==
+    create8 (vec_v v1).[2] (vec_v v1).[3] (vec_v v2).[2] (vec_v v2).[3] (vec_v v1).[6] (vec_v v1).[7] (vec_v v2).[6] (vec_v v2).[7]))
+
+val vec_interleave_high_n_lemma_uint64_8_4: v1:vec_t U64 8 -> v2:vec_t U64 8 -> Lemma
+  (ensures (vec_v (vec_interleave_high_n 4 v1 v2) ==
+    create8 (vec_v v1).[4] (vec_v v1).[5] (vec_v v1).[6] (vec_v v1).[7] (vec_v v2).[4] (vec_v v2).[5] (vec_v v2).[6] (vec_v v2).[7]))
 
 val vec_shift_right_uint128_small2: v1:vec_t U64 4 -> s:shiftval U128{uint_v s % 8 == 0 /\ 0 < uint_v s /\ uint_v s < 64} -> Lemma
   (let v2 = cast U64 4 (vec_shift_right (cast U128 2 v1) s) in

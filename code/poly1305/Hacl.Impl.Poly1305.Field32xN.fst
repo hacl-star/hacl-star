@@ -698,9 +698,12 @@ let load_felem8_le f b =
   let h0 = ST.get () in
   let b1 = vec_load_le U64 8 (sub b 0ul 64ul) in
   let b2 = vec_load_le U64 8 (sub b 64ul 64ul) in
-  let lo = vec_interleave_low b1 b2 in
-  let hi = vec_interleave_high b1 b2 in
-  // FIX
+  let lo0 = vec_interleave_low_n 4 b1 b2 in
+  let hi0 = vec_interleave_high_n 4 b1 b2 in
+  let lo1 = vec_interleave_low_n 2 lo0 hi0 in
+  let hi1 = vec_interleave_high_n 2 lo0 hi0 in
+  let lo = vec_interleave_low lo1 hi1 in
+  let hi = vec_interleave_high lo1 hi1 in
   load_felem f lo hi;
   let h1 = ST.get () in
   admit()

@@ -319,6 +319,8 @@ let vec_interleave_low_n (#t:v_inttype) (#w:width) (n:width) (x:vec_t t w) (y:ve
   | U32,16,4 -> vec512_interleave_low128 x y
   | U32,16,8 -> vec512_interleave_low256 x y
   | U64,4,2 -> vec256_interleave_low128 x y
+  | U64,8,4 -> vec512_interleave_low256 x y
+  | U64,8,2 -> vec512_interleave_low128 x y
   | _ -> admit()
 
 let vec_interleave_low_lemma1 #t #w v1 v2 = ()
@@ -337,6 +339,9 @@ let vec_interleave_low_n_lemma_uint32_16_8 v1 v2 = admit()
 
 let vec_interleave_low_lemma_uint64_4 v1 v2 = admit()
 let vec_interleave_low_n_lemma_uint64_4_2 v1 v2 = admit()
+let vec_interleave_low_lemma_uint64_8 v1 v2 = admit()
+let vec_interleave_low_n_lemma_uint64_8_2 v1 v2 = admit()
+let vec_interleave_low_n_lemma_uint64_8_4 v1 v2 = admit()
 
 inline_for_extraction noextract
 let vec_interleave_high_ (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) =
@@ -361,6 +366,8 @@ let vec_interleave_high_n (#t:v_inttype) (#w:width) (n:width) (x:vec_t t w) (y:v
   | U32,16,4 -> vec512_interleave_high128 x y
   | U32,16,8 -> vec512_interleave_high256 x y
   | U64,4,2 -> vec256_interleave_high128 x y
+  | U64,8,4 -> vec512_interleave_high256 x y
+  | U64,8,2 -> vec512_interleave_high128 x y
   | _ -> admit()
 
 let vec_interleave_high_lemma1 #t #w v1 v2 = ()
@@ -379,6 +386,9 @@ let vec_interleave_high_n_lemma_uint32_16_8 v1 v2 = admit()
 
 let vec_interleave_high_lemma_uint64_4 v1 v2 = admit()
 let vec_interleave_high_n_lemma_uint64_4_2 v1 v2 = admit()
+let vec_interleave_high_lemma_uint64_8 v1 v2 = admit()
+let vec_interleave_high_n_lemma_uint64_8_2 v1 v2 = admit()
+let vec_interleave_high_n_lemma_uint64_8_4 v1 v2 = admit()
 
 let vec_shift_right_uint128_small2 v1 s = admit()
 
