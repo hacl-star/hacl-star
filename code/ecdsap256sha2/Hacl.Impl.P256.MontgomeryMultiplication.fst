@@ -207,7 +207,7 @@ let montgomery_square_buffer a b result =
     let round2 = create (size 8) (u64 0) in 
     let round4 = create (size 8) (u64 0) in  
       let h0 = ST.get() in 
-    mul a b t;  
+    sq a b t;  
       let h1 = ST.get() in 
       mul_lemma_ (as_nat h0 a) (as_nat h0 b) prime256;
   montgomery_multiplication_round_twice t round2;

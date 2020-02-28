@@ -657,16 +657,15 @@ let mul f r out =
 
 
 
-val sq_0: f:  lbuffer uint64 (size 4) -> result: lbuffer uint64 (size 4) -> Stack uint64
+
+
+val sq0: f:  lbuffer uint64 (size 4) -> result: lbuffer uint64 (size 4) -> Stack uint64
   (requires fun h -> live h result /\ live h f)
-  (ensures fun h0 c h1 -> modifies (loc result) h0 h1 (* /\ 
-    as_nat h0 f * uint_v f0 = uint_v c * pow2 256 + as_nat h1 result /\ 
-    as_nat h0 f * uint_v f0 < pow2 320 /\
-    uint_v c < pow2 64 - 1 *)
+  (ensures fun h0 c h1 -> modifies (loc result) h0 h1
   )
 
 
-let sq_0 f result = 
+let sq0 f result = 
   push_frame();
 
     assert_norm (pow2 64 * pow2 64 = pow2 128);
@@ -675,7 +674,7 @@ let sq_0 f result =
     assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 320); 
 
   let temp = create (size 1) (u64 0) in 
-  
+
   let f0 = index f (size 0) in 
   let f1 = index f (size 1) in 
   let f2 = index f (size 2) in 
@@ -686,15 +685,18 @@ let sq_0 f result =
   let o2 = sub result (size 2) (size 1) in 
   let o3 = sub result (size 3) (size 1) in 
     
-  let h0 = ST.get() in 
+    let h0 = ST.get() in 
   mul64 f0 f0 o0 temp;
 
-  let h1 = ST.get() in 
-    
+
+    let h1 = ST.get() in 
+  
+  (*let c1 = mult64_c f1 f0 (u64 0) o1 temp in  *)
+  
   let h = index temp (size 0) in 
-  mul64 f1 f0 result temp;
+  mul64 f1 f0 o1 temp;
   let l = index o1 (size 0) in     
-  let c1 = add_carry_u64 (u64 0) l h result in 
+  let c1 = add_carry_u64 (u64 0) l h o1 in 
 
 
 
@@ -705,58 +707,8 @@ let sq_0 f result =
     let h4 = ST.get() in 
   let temp0 = index temp (size 0) in 
 
-
-admit();
-    lemma_low_level0 (uint_v(Seq.index (as_seq h1 o0) 0)) (uint_v (Seq.index (as_seq h2 o1) 0)) (uint_v (Seq.index (as_seq h3 o2) 0)) (uint_v (Seq.index (as_seq h4 o3) 0)) (uint_v f0) (uint_v f1) (uint_v f2) (uint_v f3) (uint_v f0) (uint_v (Seq.index (as_seq h2 temp) 0)) (uint_v c1) (uint_v c2) (uint_v c3) (uint_v (Seq.index (as_seq h3 temp) 0)) (uint_v temp0); 
-    
-  mul_lemma_4 (as_nat h0 f) (uint_v f0) (pow2 256 - 1) (pow2 64 - 1);
-  assert_norm((pow2 256 - 1) * (pow2 64 - 1) == pow2 320 - pow2 256 - pow2 64 + 1);
-  assert_norm((pow2 320 - pow2 256) / pow2 256 == pow2 64 - 1);
-
   pop_frame();  
   c3 +! temp0
-
-
-
-
-val sq1: f1: felem -> u2: uint64 -> f3: felem -> result: felem -> 
-  Stack uint64 
-  (requires fun h -> live h f1 /\ live h f3 /\ live h result /\ eq_or_disjoint f3 result /\ disjoint f1 result)
-  (ensures fun h0 c h1 -> modifies (loc result) h0 h1  /\
-    as_nat h1 result + uint_v c * pow2 256 == as_nat h0 f1 * uint_v u2 + as_nat h0 f3 )
-
-let sq1 f u f3 result = 
-  push_frame();
- 
-  let result1 = create (size 4) (u64 0) in    
-  let temp = create (size 1) (u64 0) in 
-
-  let f0 = index f (size 0) in 
-  let f1 = index f (size 1) in 
-  let f2 = index f (size 2) in 
-  let f3 = index f (size 3) in 
-    
-  let o0 = sub result1 (size 0) (size 1) in 
-  let o1 = sub result1 (size 1) (size 1) in 
-  let o2 = sub result1 (size 2) (size 1) in 
-  let o3 = sub result1 (size 3) (size 1) in 
-    
-    let h0 = ST.get() in 
-  mult64_0 f u o0 temp;
-    let h1 = ST.get() in 
-  let c1 = mult64_c f1 u (u64 0) o1 temp in 
-    let h2 = ST.get() in 
-  let c2 = mult64_c f2 u c1 o2 temp in 
-    let h3 = ST.get() in 
-  let c3 = mult64_c f3 u c2 o3 temp in 
-    let h4 = ST.get() in 
-  let temp0 = index temp (size 0) in 
-
-  let c = c3 +! temp0 in 
-  let c3 = add4 temp f3 result in 
-  pop_frame();  
-  c +! c3
-
 
 
 
@@ -777,31 +729,48 @@ let sq f r out =
 
     let h0 = ST.get() in 
   let b0 = sub temp (size 0) (size 4) in 
-  let c0 = sq_0 r b0 in 
+  let c0 = sq0 r b0 in 
     upd temp (size 4) c0;
 
     let h1 = ST.get() in 
     let bk0 = sub temp (size 0) (size 1) in 
   let b1 = sub temp (size 1) (size 4) in   
-  let c1 = sq1 r f1 b1 b1 in 
+  let c1 = mul1_add r f1 b1 b1 in 
       upd temp (size 5) c1; 
-
-
     let h2 = ST.get() in
+      assert(Lib.Sequence.index (as_seq h1 bk0) 0 == Lib.Sequence.index (as_seq h1 temp) 0);
+
       let bk1 = sub temp (size 0) (size 2) in 
   let b2 = sub temp (size 2) (size 4) in 
   let c2 = mul1_add r f2 b2 b2 in 
     upd temp (size 6) c2;
     
+    let h3 = ST.get() in 
 
-  let bk2 = sub temp (size 0) (size 3) in 
+    assert(Lib.Sequence.index (as_seq h2 bk1) 0 == Lib.Sequence.index (as_seq h2 temp) 0);
+    assert(Lib.Sequence.index (as_seq h2 bk1) 1 == Lib.Sequence.index (as_seq h2 temp) 1);
+    assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
+
+     let bk2 = sub temp (size 0) (size 3) in 
   let b3 = sub temp (size 3) (size 4) in 
   let c3 = mul1_add r f3 b3 b3 in 
     upd temp (size 7) c3;
 
+    assert(Lib.Sequence.index (as_seq h3 bk2) 0 == Lib.Sequence.index (as_seq h3 temp) 0);
+    assert(Lib.Sequence.index (as_seq h3 bk2) 1 == Lib.Sequence.index (as_seq h3 temp) 1);
+    assert(Lib.Sequence.index (as_seq h3 bk2) 2 == Lib.Sequence.index (as_seq h3 temp) 2);
+
+  assert_by_tactic (as_nat h0 r * (uint_v f2 * pow2 64 * pow2 64) == as_nat h0 r * uint_v f2 * pow2 64 * pow2 64) canon;
+  assert_by_tactic (as_nat h0 r * (uint_v f0) == as_nat h0 r * uint_v f0) canon;
+  assert_by_tactic (as_nat h0 r * (uint_v f1 * pow2 64) == as_nat h0 r * uint_v f1 * pow2 64) canon;
+  assert_by_tactic (as_nat h0 r * (uint_v f3 * pow2 64 * pow2 64 * pow2 64) == as_nat h0 r * uint_v f3 * pow2 64 * pow2 64 * pow2 64) canon;
+
+  dist_lemma_0 (as_nat h0 r) (uint_v f2 * pow2 64 * pow2 64) (uint_v f1 * pow2 64) (uint_v f0) (uint_v f3 * pow2 64 * pow2 64 * pow2 64);
+
   copy out temp; 
   
   pop_frame()
+
 
 
 
