@@ -570,6 +570,96 @@ let fmul_r4_normalize5 (a0, a1, a2, a3, a4) (r10, r11, r12, r13, r14) (r150, r15
   let v24 = vec_add_mod v14 (vec_permute4 v14 1ul 1ul 1ul 1ul) in
   carry_full_felem5 (v20, v21, v22, v23, v24)
 
+
+inline_for_extraction
+val fmul_r8_normalize5:
+    acc:felem5 8
+  -> r:felem5 8
+  -> r_5:felem5 8
+  -> r8:felem5 8
+  -> out:felem5 8
+let fmul_r8_normalize5 (a0, a1, a2, a3, a4) (r10, r11, r12, r13, r14) (r150, r151, r152, r153, r154) (r80, r81, r82, r83, r84) =
+  let (r20, r21, r22, r23, r24) = fmul_r5 (r10, r11, r12, r13, r14) (r10, r11, r12, r13, r14) (r150, r151, r152, r153, r154) in
+  let (r30, r31, r32, r33, r34) = fmul_r5 (r20, r21, r22, r23, r24) (r10, r11, r12, r13, r14) (r150, r151, r152, r153, r154) in
+  let (r40, r41, r42, r43, r44) = fmul_r5 (r30, r31, r32, r33, r34) (r10, r11, r12, r13, r14) (r150, r151, r152, r153, r154) in
+  let (r50, r51, r52, r53, r54) = fmul_r5 (r40, r41, r42, r43, r44) (r10, r11, r12, r13, r14) (r150, r151, r152, r153, r154) in
+  let (r60, r61, r62, r63, r64) = fmul_r5 (r50, r51, r52, r53, r54) (r10, r11, r12, r13, r14) (r150, r151, r152, r153, r154) in
+  let (r70, r71, r72, r73, r74) = fmul_r5 (r60, r61, r62, r63, r64) (r10, r11, r12, r13, r14) (r150, r151, r152, r153, r154) in
+
+  let v210 = vec_interleave_low r20 r10 in
+  let v430 = vec_interleave_low r40 r30 in
+  let v650 = vec_interleave_low r60 r50 in
+  let v870 = vec_interleave_low r80 r70 in
+  let v43210 = vec_interleave_low_n 2 v430 v210 in
+  let v87650 = vec_interleave_low_n 2 v870 v650 in
+  let r810 = vec_interleave_low_n 4 v87650 v43210 in
+
+  let v211 = vec_interleave_low r21 r11 in
+  let v431 = vec_interleave_low r41 r31 in
+  let v651 = vec_interleave_low r61 r51 in
+  let v871 = vec_interleave_low r81 r71 in
+  let v43211 = vec_interleave_low_n 2 v431 v211 in
+  let v87651 = vec_interleave_low_n 2 v871 v651 in
+  let r811 = vec_interleave_low_n 4 v87651 v43211 in
+
+  let v212 = vec_interleave_low r22 r12 in
+  let v432 = vec_interleave_low r42 r32 in
+  let v652 = vec_interleave_low r62 r52 in
+  let v872 = vec_interleave_low r82 r72 in
+  let v43212 = vec_interleave_low_n 2 v432 v212 in
+  let v87652 = vec_interleave_low_n 2 v872 v652 in
+  let r812 = vec_interleave_low_n 4 v87652 v43212 in
+
+  let v213 = vec_interleave_low r23 r13 in
+  let v433 = vec_interleave_low r43 r33 in
+  let v653 = vec_interleave_low r63 r53 in
+  let v873 = vec_interleave_low r83 r73 in
+  let v43213 = vec_interleave_low_n 2 v433 v213 in
+  let v87653 = vec_interleave_low_n 2 v873 v653 in
+  let r813 = vec_interleave_low_n 4 v87653 v43213 in
+
+  let v214 = vec_interleave_low r24 r14 in
+  let v434 = vec_interleave_low r44 r34 in
+  let v654 = vec_interleave_low r64 r54 in
+  let v874 = vec_interleave_low r84 r74 in
+  let v43214 = vec_interleave_low_n 2 v434 v214 in
+  let v87654 = vec_interleave_low_n 2 v874 v654 in
+  let r814 = vec_interleave_low_n 4 v87654 v43214 in
+
+  let (r8150, r8151, r8152, r8153, r8154) = precomp_r5 #8 (r810, r811, r812, r813, r814) in
+  let (o0, o1, o2, o3, o4) = fmul_r5 #8 (a0, a1, a2, a3, a4) (r810, r811, r812, r813, r814) (r8150, r8151, r8152, r8153, r8154) in
+
+  let v00 = vec_interleave_high_n 4 o0 o0 in
+  let v10 = vec_add_mod o0 v00 in
+  let v20 = vec_interleave_high_n 2 v10 v10 in
+  let v30 = vec_add_mod v10 v20 in
+  let v30 = vec_add_mod v30 (vec_interleave_high v30 v30) in
+
+  let v01 = vec_interleave_high_n 4 o1 o1 in
+  let v11 = vec_add_mod o1 v01 in
+  let v21 = vec_interleave_high_n 2 v11 v11 in
+  let v31 = vec_add_mod v11 v21 in
+  let v31 = vec_add_mod v31 (vec_interleave_high v31 v31) in
+
+  let v02 = vec_interleave_high_n 4 o2 o2 in
+  let v12 = vec_add_mod o2 v02 in
+  let v22 = vec_interleave_high_n 2 v12 v12 in
+  let v32 = vec_add_mod v12 v22 in
+  let v32 = vec_add_mod v32 (vec_interleave_high v32 v32) in
+
+  let v03 = vec_interleave_high_n 4 o3 o3 in
+  let v13 = vec_add_mod o3 v03 in
+  let v23 = vec_interleave_high_n 2 v13 v13 in
+  let v33 = vec_add_mod v13 v23 in
+  let v33 = vec_add_mod v33 (vec_interleave_high v33 v33) in
+
+  let v04 = vec_interleave_high_n 4 o4 o4 in
+  let v14 = vec_add_mod o4 v04 in
+  let v24 = vec_interleave_high_n 2 v14 v14 in
+  let v34 = vec_add_mod v14 v24 in
+  let v34 = vec_add_mod v34 (vec_interleave_high v34 v34) in
+  carry_full_felem5 (v30, v31, v32, v33, v34)
+
 noextract
 val set_bit5:
     #w:lanes

@@ -74,7 +74,7 @@ val fmul_r8_normalize:
 let fmul_r8_normalize out p =
   let r = sub p 0ul 5ul in
   let r_5 = sub p 5ul 5ul in
-  let r4 = sub p 10ul 5ul in
+  let r8 = sub p 10ul 5ul in
 
   let a0 = out.(0ul) in
   let a1 = out.(1ul) in
@@ -94,9 +94,14 @@ let fmul_r8_normalize out p =
   let r153 = r_5.(3ul) in
   let r154 = r_5.(4ul) in
 
-  // FIX!!
-  let (o0, o1, o2, o3, o4) = fmul_r5 (a0, a1, a2, a3, a4) (r10, r11, r12, r13, r14)
-    (r150, r151, r152, r153, r154) in
+  let r80 = r8.(0ul) in
+  let r81 = r8.(1ul) in
+  let r82 = r8.(2ul) in
+  let r83 = r8.(3ul) in
+  let r84 = r8.(4ul) in
+
+  let (o0, o1, o2, o3, o4) = fmul_r8_normalize5 (a0, a1, a2, a3, a4) (r10, r11, r12, r13, r14)
+    (r150, r151, r152, r153, r154) (r80, r81, r82, r83, r84) in
   out.(0ul) <- o0;
   out.(1ul) <- o1;
   out.(2ul) <- o2;
