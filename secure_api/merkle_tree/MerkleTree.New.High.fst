@@ -395,7 +395,7 @@ let rec mt_path_length k j actd =
        mt_path_length_step k j actd +
        mt_path_length (k / 2) (j / 2) nactd)
 
-val mt_get_path_step:
+val mt_make_path_step:
   #hsz:pos -> 
   lv:nat{lv <= 32} ->
   hs:hashess #hsz {S.length hs = 32} ->
@@ -408,7 +408,7 @@ val mt_get_path_step:
   p:path #hsz ->
   actd:bool ->
   GTot (path #hsz)
-let mt_get_path_step #hsz lv hs rhs i j k p actd =
+let mt_make_path_step #hsz lv hs rhs i j k p actd =
   let ofs = offset_of i in
   if k % 2 = 1
   then path_insert p (S.index (S.index hs lv) (k - 1 - ofs))
@@ -439,7 +439,7 @@ let rec mt_get_path_ #hsz lv hs rhs i j k p actd =
   let ofs = offset_of i in
   if j = 0 then p
   else
-    (let np = mt_get_path_step lv hs rhs i j k p actd in
+    (let np = mt_make_path_step lv hs rhs i j k p actd in
     mt_get_path_ (lv + 1) hs rhs (i / 2) (j / 2) (k / 2) np
     		 (if j % 2 = 0 then actd else true))
 
@@ -463,7 +463,7 @@ let rec mt_get_path_unchanged #hsz lv hs rhs i j k p actd =
   let ofs = offset_of i in
   if j = 0 then ()
   else
-    (let np = mt_get_path_step lv hs rhs i j k p actd in
+    (let np = mt_make_path_step lv hs rhs i j k p actd in
     assert (S.equal p (S.slice np 0 (S.length p)));
     mt_get_path_unchanged (lv + 1) hs rhs (i / 2) (j / 2) (k / 2) np
       (if j % 2 = 0 then actd else true))
@@ -490,11 +490,11 @@ let rec mt_get_path_pull #hsz lv hs rhs i j k p actd =
   let ofs = offset_of i in
   if j = 0 then ()
   else
-    (let np = mt_get_path_step lv hs rhs i j k p actd in
+    (let np = mt_make_path_step lv hs rhs i j k p actd in
     let nactd = if j % 2 = 0 then actd else true in
     mt_get_path_pull (lv + 1) hs rhs (i / 2) (j / 2) (k / 2) np nactd;
     mt_get_path_pull (lv + 1) hs rhs (i / 2) (j / 2) (k / 2)
-      (mt_get_path_step lv hs rhs i j k S.empty actd) nactd)
+      (mt_make_path_step lv hs rhs i j k S.empty actd) nactd)
 
 #pop-options
 
