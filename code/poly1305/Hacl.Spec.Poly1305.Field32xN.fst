@@ -103,7 +103,7 @@ let as_pfelem5 (f:tup64_5) : pfelem =
   (as_nat5 f) % prime
 
 
-let lanes = w:width{w == 1 \/ w == 2 \/ w == 4}
+let lanes = w:width{w == 1 \/ w == 2 \/ w == 4 \/ w == 8}
 inline_for_extraction
 let uint64xN (w:lanes) = vec_t U64 w
 
@@ -382,26 +382,13 @@ let load_felem5_4 lo hi =
   (o5, o1, o2, o3, o4)
 
 inline_for_extraction noextract
-val load_acc5_2:
-    f:felem5 2
-  -> e:felem5 2
-  -> out:felem5 2
-let load_acc5_2 (f0, f1, f2, f3, f4) (e0, e1, e2, e3, e4) =
-  let f0 = vec_set f0 1ul (u64 0) in
-  let f1 = vec_set f1 1ul (u64 0) in
-  let f2 = vec_set f2 1ul (u64 0) in
-  let f3 = vec_set f3 1ul (u64 0) in
-  let f4 = vec_set f4 1ul (u64 0) in
-  let (f0, f1, f2, f3, f4) = fadd5 (f0, f1, f2, f3, f4) (e0, e1, e2, e3, e4) in
-  (f0, f1, f2, f3, f4)
-
-inline_for_extraction noextract
-val load_acc5_4:
-    f:felem5 4
-  -> e:felem5 4
-  -> out:felem5 4
-let load_acc5_4 (f0, f1, f2, f3, f4) (e0, e1, e2, e3, e4) =
-  let (r0, r1, r2, r3, r4) = (zero 4, zero 4, zero 4, zero 4, zero 4) in
+val load_acc5:
+    #w:lanes
+  -> f:felem5 w
+  -> e:felem5 w
+  -> out:felem5 w
+let load_acc5 #w (f0, f1, f2, f3, f4) (e0, e1, e2, e3, e4) =
+  let (r0, r1, r2, r3, r4) = (zero w, zero w, zero w, zero w, zero w) in
   let r0 = vec_set r0 0ul (vec_get f0 0ul) in
   let r1 = vec_set r1 0ul (vec_get f1 0ul) in
   let r2 = vec_set r2 0ul (vec_get f2 0ul) in

@@ -352,8 +352,14 @@ typedef __m512i Lib_IntVector_Intrinsics_vec512;
 #define Lib_IntVector_Intrinsics_vec512_load32s(x15,x14,x13,x12,x11,x10,x9,x8,x7,x6,x5,x4,x3,x2,x1,x0) \
   (_mm512_set_epi32(x15,x14,x13,x12,x11,x10,x9,x8,x7,x6,x5,x4,x3,x2,x1,x0)) /* hi lo */
 
+#define Lib_IntVector_Intrinsics_vec512_load64s(x7,x6,x5,x4,x3,x2,x1,x0) \
+  (_mm512_set_epi64(x7,x6,x5,x4,x3,x2,x1,x0)) /* hi lo */
+
 #define Lib_IntVector_Intrinsics_vec512_load32(x) \
   (_mm512_set1_epi32(x))
+
+#define Lib_IntVector_Intrinsics_vec512_load64(x) \
+  (_mm512_set1_epi64(x))
 
 #define Lib_IntVector_Intrinsics_vec512_insert32(x0, x1, x2) \
   (x2<8? _mm512_inserti32x8(x0,_mm256_insert_epi32(_mm512_extracti32x8_epi32(x0,0),x1,x2),0) : _mm512_inserti32x8(x0,_mm256_insert_epi32(_mm512_extracti32x8_epi32(x0,1),x1,x2-8),1)) //TODO : FIX!
@@ -361,17 +367,35 @@ typedef __m512i Lib_IntVector_Intrinsics_vec512;
 #define Lib_IntVector_Intrinsics_vec512_extract32(x0, x1) \
   (x1<8? _mm256_extract_epi32(_mm512_extracti32x8_epi32(x0,0),x1) : _mm256_extract_epi32(_mm512_extracti32x8_epi32(x0,1),x1-8)) //TODO : FIX!
 
+#define Lib_IntVector_Intrinsics_vec512_insert64(x0, x1, x2) \
+  (x2<4? _mm512_inserti64x4(x0,_mm256_insert_epi64(_mm512_extracti64x4_epi64(x0,0),x1,x2),0) : _mm512_inserti64x4(x0,_mm256_insert_epi64(_mm512_extracti64x4_epi64(x0,1),x1,x2-4),1)) //TODO : FIX!
+
+#define Lib_IntVector_Intrinsics_vec512_extract64(x0, x1) \
+  (x1<4? _mm256_extract_epi64(_mm512_extracti64x4_epi64(x0,0),x1) : _mm256_extract_epi64(_mm512_extracti64x4_epi64(x0,1),x1-4)) //TODO : FIX!
+
 #define Lib_IntVector_Intrinsics_vec512_add32(x0, x1) \
   (_mm512_add_epi32(x0, x1))
+
+#define Lib_IntVector_Intrinsics_vec512_add64(x0, x1) \
+  (_mm512_add_epi64(x0, x1))
 
 #define Lib_IntVector_Intrinsics_vec512_sub32(x0, x1) \
   (_mm512_sub_epi32(x0, x1))
 
+#define Lib_IntVector_Intrinsics_vec512_sub64(x0, x1) \
+  (_mm512_sub_epi64(x0, x1))
+
 #define Lib_IntVector_Intrinsics_vec512_mul32(x0, x1) \
   (_mm512_mullo_epi32(x0, x1))
 
+#define Lib_IntVector_Intrinsics_vec512_mul64(x0, x1) \
+  (_mm512_mullo_epi64(x0, x1))
+
 #define Lib_IntVector_Intrinsics_vec512_smul32(x0, x1) \
   (_mm512_mullo_epi32(x0, _mm512_set1_epi32(x1)))
+
+#define Lib_IntVector_Intrinsics_vec512_smul64(x0, x1) \
+  (_mm512_mullo_epi64(x0, _mm512_set1_epi64(x1)))
 
 #define Lib_IntVector_Intrinsics_vec512_xor(x0, x1) \
   (_mm512_xor_si512(x0, x1))
@@ -388,11 +412,20 @@ typedef __m512i Lib_IntVector_Intrinsics_vec512;
 #define Lib_IntVector_Intrinsics_vec512_shift_left32(x0, x1) \
   (_mm512_slli_epi32(x0, x1))
 
+#define Lib_IntVector_Intrinsics_vec512_shift_left64(x0, x1) \
+  (_mm512_slli_epi64(x0, x1))
+
 #define Lib_IntVector_Intrinsics_vec512_shift_right32(x0, x1) \
   (_mm512_srli_epi32(x0, x1))
 
+#define Lib_IntVector_Intrinsics_vec512_shift_right64(x0, x1) \
+  (_mm512_srli_epi64(x0, x1))
+
 #define Lib_IntVector_Intrinsics_vec512_rotate_left32(x0, x1) \
   (_mm512_rol_epi32(x0, x1))
+
+#define Lib_IntVector_Intrinsics_vec512_rotate_left64(x0, x1) \
+  (_mm512_rol_epi64x0, x1))
 
 #define Lib_IntVector_Intrinsics_vec512_load_le(x0) \
   (_mm512_loadu_si512((__m512i*)(x0)))

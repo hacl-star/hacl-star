@@ -100,6 +100,8 @@ let load_acc_lemma #w b acc0 r =
   | 1 -> load_acc_lemma1 b acc0 r
   | 2 -> load_acc_lemma2 b acc0 r
   | 4 -> load_acc_lemma4 b acc0 r
+  | 8 -> admit()
+
 
 ///
 ///  val poly_update_nblocks_lemma: #w:lanes -> r:pfelem -> b:block_v w -> acc_v0:elem w -> Lemma
@@ -114,6 +116,7 @@ val poly_update_nblocks_lemma1: r:pfelem -> b:block_v 1 -> acc_v0:elem 1 -> Lemm
    repeat_blocks_multi size_block b (S.poly1305_update1 r size_block) (normalize_n r acc_v0))
 
 let poly_update_nblocks_lemma1 r b acc_v0 =
+  assert (sub b 0 size_block == b);
   let acc0 = normalize_n r acc_v0 in
   let f = S.poly1305_update1 r size_block in
   let nb = size_block / size_block in
@@ -193,6 +196,7 @@ let poly_update_nblocks_lemma #w r b acc_v0 =
   | 1 -> poly_update_nblocks_lemma1 r b acc_v0
   | 2 -> poly_update_nblocks_lemma2 r b acc_v0
   | 4 -> poly_update_nblocks_lemma4 r b acc_v0
+  | 8 -> admit()
 
 
 val repeat_blocks_multi_vec_equiv_pre_lemma: #w:lanes -> r:pfelem -> b:block_v w -> acc_v0:elem w -> Lemma

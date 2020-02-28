@@ -341,22 +341,44 @@ val vec512_load32s:
   x3:uint32 -> x2:uint32 -> x1:uint32 -> x0:uint32 -> vec512
 
 noextract
+val vec512_load64s:
+  x7:uint64 -> x6:uint64 -> x5:uint64 -> x4:uint64 ->
+  x3:uint64 -> x2:uint64 -> x1:uint64 -> x0:uint64 -> vec512
+
+noextract
 val vec512_load32: x:uint32 -> vec512
+
+noextract
+val vec512_load64: x:uint64 -> vec512
 
 noextract
 val vec512_insert32: vec512 -> uint32 -> size_t -> vec512
 
 noextract
+val vec512_insert64: vec512 -> uint64 -> size_t -> vec512
+
+noextract
 val vec512_extract32: vec512 -> size_t -> uint32
+
+noextract
+val vec512_extract64: vec512 -> size_t -> uint64
 
 noextract
 val vec512_add32: vec512 -> vec512 -> vec512
 noextract
+val vec512_add64: vec512 -> vec512 -> vec512
+noextract
 val vec512_sub32: vec512 -> vec512 -> vec512
+noextract
+val vec512_sub64: vec512 -> vec512 -> vec512
 noextract
 val vec512_mul32: vec512 -> vec512 -> vec512
 noextract
+val vec512_mul64: vec512 -> vec512 -> vec512
+noextract
 val vec512_smul32: vec512 -> uint32 -> vec512
+noextract
+val vec512_smul64: vec512 -> uint32 -> vec512
 noextract
 val vec512_xor: vec512 -> vec512 -> vec512
 noextract
@@ -368,9 +390,20 @@ val vec512_lognot: vec512 -> vec512
 noextract
 val vec512_shift_right32: vec512 -> size_t -> vec512
 noextract
+val vec512_shift_right64: vec512 -> size_t -> vec512
+noextract
 val vec512_shift_left32: vec512 -> size_t -> vec512
 noextract
+val vec512_shift_left64: vec512 -> size_t -> vec512
+noextract
 val vec512_rotate_left32: vec512 -> size_t -> vec512
+noextract
+val vec512_rotate_left64: vec512 -> size_t -> vec512
+
+noextract
+val vec512_eq64: vec512 -> vec512 -> vec512
+noextract
+val vec512_gt64: vec512 -> vec512 -> vec512
 
 noextract
 val vec512_load_le: b:lbuffer uint8 64ul -> ST vec512
