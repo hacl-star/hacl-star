@@ -810,13 +810,13 @@ let sq2 f_ f4 result memory tempBuffer =
 
 val sq3: f1: felem -> f3: felem -> result: felem -> memory: lbuffer uint64 (size 12) -> temp: lbuffer uint64 (size 5) -> 
   Stack uint64 
-  (requires fun h -> live h f1 /\ live h f3 /\ live h result /\ eq_or_disjoint f3 result /\ disjoint f1 result)
+  (requires fun h -> live h f1 /\ live h f3 /\ live h result /\ live h memory /\ live h temp /\ eq_or_disjoint f3 result /\ disjoint temp result /\ disjoint f1 result)
   (ensures fun h0 c h1 -> modifies (loc result) h0 h1)
 
 let sq3 f_ f4 result memory tempBuffer = 
-  push_frame();
-    let result_ = create (size 4) (u64 0) in 
-  let temp = create (size 1) (u64 0) in 
+
+  let temp = sub tempBuffer (size 0) (size 1) in 
+  let result_ = sub tempBuffer  (size 1) (size 4) in 
 
   let f0 = index f_ (size 0) in 
   let f1 = index f_ (size 1) in 
@@ -828,64 +828,28 @@ let sq3 f_ f4 result memory tempBuffer =
   let o2 = sub result_ (size 2) (size 1) in 
   let o3 = sub result_ (size 3) (size 1) in 
 
-
- (* mul64 f0 f3 o0 temp; *)
-
   upd o0 (size 0) (index memory (size 4));
   let h = index memory (size 5) in 
 
- 
-  (* let h = index temp (size 0) in  *)
-
-
-
   upd o1 (size 0) (index memory (size 8));
-  
-  (*mul64 f1 f3 o1 temp; *)
   let l = index o1 (size 0) in     
   let c1 = add_carry_u64 (u64 0) l h o1 in 
-
-
-
-
-
-
   let h = index memory (size 9) in 
 
-
-
   upd o2 (size 0) (index memory (size 10));
-  
-  (* mul64 f2 f3 o2 temp; *)
   let l = index o2 (size 0) in     
   let c2 = add_carry_u64 c1 l h o2 in
-
-
-
-
   let h = index memory (size 11) in 
+  
   mul64 f3 f3 o3 temp;
   let l = index o3 (size 0) in     
   let c3 = add_carry_u64 c2 l h o3 in
-
   let temp0 = index temp (size 0) in 
-  
-  let c = c3 +! temp0 in 
 
-
-  let c3 = add4 result_ f4 result in 
+  let c4 = add4 result_ f4 result in 
   admit();
   pop_frame();  
-  c +! c3
-
-
-
-
-
-
-
-
-
+  c3 +! temp0 +! c4
 
 
 #reset-options "--z3rlimit 1000"
@@ -896,13 +860,11 @@ val sq: f: felem -> r: felem -> out: widefelem
       
 let sq f r out =
   push_frame();
-    let temp = create (size 8) (u64 0) in 
 
-    let tb = create (size 5) (u64 0) in 
-
-    let memory = create (size 12) (u64 0) in 
-  
-    
+  let temp = create (size 8) (u64 0) in 
+  let tb = create (size 5) (u64 0) in 
+  let memory = create (size 12) (u64 0) in 
+   
   let f0 = f.(0ul) in
   let f1 = f.(1ul) in
   let f2 = f.(2ul) in
@@ -914,31 +876,30 @@ let sq f r out =
     upd temp (size 4) c0;
 
 
-
-
     let h1 = ST.get() in 
     let bk0 = sub temp (size 0) (size 1) in 
   let b1 = sub temp (size 1) (size 4) in   
   let c1 = sq1 r b1 b1 memory tb in 
       upd temp (size 5) c1; 
+
+
     let h2 = ST.get() in
       assert(Lib.Sequence.index (as_seq h1 bk0) 0 == Lib.Sequence.index (as_seq h1 temp) 0);
-
-      let bk1 = sub temp (size 0) (size 2) in 
+  let bk1 = sub temp (size 0) (size 2) in 
   let b2 = sub temp (size 2) (size 4) in 
   let c2 = sq2 r b2 b2 memory tb in 
     upd temp (size 6) c2;
     
-    let h3 = ST.get() in 
-
+  let h3 = ST.get() in 
     assert(Lib.Sequence.index (as_seq h2 bk1) 0 == Lib.Sequence.index (as_seq h2 temp) 0);
     assert(Lib.Sequence.index (as_seq h2 bk1) 1 == Lib.Sequence.index (as_seq h2 temp) 1);
     assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
-
      let bk2 = sub temp (size 0) (size 3) in 
   let b3 = sub temp (size 3) (size 4) in 
   let c3 = sq3 r b3 b3 memory tb in 
     upd temp (size 7) c3;
+  admit();
+
 
     assert(Lib.Sequence.index (as_seq h3 bk2) 0 == Lib.Sequence.index (as_seq h3 temp) 0);
     assert(Lib.Sequence.index (as_seq h3 bk2) 1 == Lib.Sequence.index (as_seq h3 temp) 1);
@@ -954,30 +915,6 @@ let sq f r out =
   copy out temp; 
   
   pop_frame()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 val cmovznz4: cin: uint64 -> x: felem -> y: felem -> result: felem ->
