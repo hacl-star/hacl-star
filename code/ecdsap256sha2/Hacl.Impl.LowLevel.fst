@@ -657,16 +657,16 @@ let mul f r out =
 
 
 
-val sq_0: f:  lbuffer uint64 (size 4) -> u: uint64 -> result: lbuffer uint64 (size 4) -> Stack uint64
+val sq_0: f:  lbuffer uint64 (size 4) -> result: lbuffer uint64 (size 4) -> Stack uint64
   (requires fun h -> live h result /\ live h f)
-  (ensures fun h0 c h1 -> modifies (loc result) h0 h1 /\ 
-    as_nat h0 f * uint_v u = uint_v c * pow2 256 + as_nat h1 result /\ 
-    as_nat h0 f * uint_v u < pow2 320 /\
-    uint_v c < pow2 64 - 1
+  (ensures fun h0 c h1 -> modifies (loc result) h0 h1 (* /\ 
+    as_nat h0 f * uint_v f0 = uint_v c * pow2 256 + as_nat h1 result /\ 
+    as_nat h0 f * uint_v f0 < pow2 320 /\
+    uint_v c < pow2 64 - 1 *)
   )
 
 
-let sq_0 f u result = 
+let sq_0 f result = 
   push_frame();
 
     assert_norm (pow2 64 * pow2 64 = pow2 128);
@@ -675,7 +675,7 @@ let sq_0 f u result =
     assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 320); 
 
   let temp = create (size 1) (u64 0) in 
-
+  
   let f0 = index f (size 0) in 
   let f1 = index f (size 1) in 
   let f2 = index f (size 2) in 
@@ -686,19 +686,30 @@ let sq_0 f u result =
   let o2 = sub result (size 2) (size 1) in 
   let o3 = sub result (size 3) (size 1) in 
     
-    let h0 = ST.get() in 
-  mult64_0 f u o0 temp;
-    let h1 = ST.get() in 
-  let c1 = mult64_c f1 u (u64 0) o1 temp in 
+  let h0 = ST.get() in 
+  mul64 f0 f0 o0 temp;
+
+  let h1 = ST.get() in 
+    
+  let h = index temp (size 0) in 
+  mul64 f1 f0 result temp;
+  let l = index o1 (size 0) in     
+  let c1 = add_carry_u64 (u64 0) l h result in 
+
+
+
     let h2 = ST.get() in 
-  let c2 = mult64_c f2 u c1 o2 temp in 
+  let c2 = mult64_c f2 f0 c1 o2 temp in 
     let h3 = ST.get() in 
-  let c3 = mult64_c f3 u c2 o3 temp in 
+  let c3 = mult64_c f3 f0 c2 o3 temp in 
     let h4 = ST.get() in 
   let temp0 = index temp (size 0) in 
-    lemma_low_level0 (uint_v(Seq.index (as_seq h1 o0) 0)) (uint_v (Seq.index (as_seq h2 o1) 0)) (uint_v (Seq.index (as_seq h3 o2) 0)) (uint_v (Seq.index (as_seq h4 o3) 0)) (uint_v f0) (uint_v f1) (uint_v f2) (uint_v f3) (uint_v u) (uint_v (Seq.index (as_seq h2 temp) 0)) (uint_v c1) (uint_v c2) (uint_v c3) (uint_v (Seq.index (as_seq h3 temp) 0)) (uint_v temp0); 
+
+
+admit();
+    lemma_low_level0 (uint_v(Seq.index (as_seq h1 o0) 0)) (uint_v (Seq.index (as_seq h2 o1) 0)) (uint_v (Seq.index (as_seq h3 o2) 0)) (uint_v (Seq.index (as_seq h4 o3) 0)) (uint_v f0) (uint_v f1) (uint_v f2) (uint_v f3) (uint_v f0) (uint_v (Seq.index (as_seq h2 temp) 0)) (uint_v c1) (uint_v c2) (uint_v c3) (uint_v (Seq.index (as_seq h3 temp) 0)) (uint_v temp0); 
     
-  mul_lemma_4 (as_nat h0 f) (uint_v u) (pow2 256 - 1) (pow2 64 - 1);
+  mul_lemma_4 (as_nat h0 f) (uint_v f0) (pow2 256 - 1) (pow2 64 - 1);
   assert_norm((pow2 256 - 1) * (pow2 64 - 1) == pow2 320 - pow2 256 - pow2 64 + 1);
   assert_norm((pow2 320 - pow2 256) / pow2 256 == pow2 64 - 1);
 
@@ -766,7 +777,7 @@ let sq f r out =
 
     let h0 = ST.get() in 
   let b0 = sub temp (size 0) (size 4) in 
-  let c0 = sq_0 r f0 b0 in 
+  let c0 = sq_0 r b0 in 
     upd temp (size 4) c0;
 
     let h1 = ST.get() in 
