@@ -660,7 +660,7 @@ let mul f r out =
 
 
 val sq0: f:  lbuffer uint64 (size 4) -> result: lbuffer uint64 (size 4) ->
-  memory: lbuffer uint64 (size 6) -> 
+  memory: lbuffer uint64 (size 12) -> 
 
 Stack uint64
   (requires fun h -> live h result /\ live h f /\ live h memory)
@@ -703,12 +703,21 @@ let sq0 f result memory =
 
   let h = index temp (size 0) in 
   mul64 f0 f2 o2 temp;
-  let l = index o2 (size 0) in     
+  let l = index o2 (size 0) in   
+  
+  upd memory (size 2) l;
+  upd memory (size 3) (index temp (size 0));
+
+
   let c2 = add_carry_u64 c1 l h o2 in
   
   let h = index temp (size 0) in 
   mul64 f0 f3 o3 temp;
   let l = index o3 (size 0) in     
+
+  upd memory (size 4) l;
+  upd memory (size 5) (index temp (size 0));
+
   let c3 = add_carry_u64 c2 l h o3 in
 
   let temp0 = index temp (size 0) in 
@@ -719,7 +728,7 @@ let sq0 f result memory =
 
 
 
-val sq1: f1: felem -> f3: felem -> result: felem ->  memory: lbuffer uint64 (size 6) -> 
+val sq1: f1: felem -> f3: felem -> result: felem ->  memory: lbuffer uint64 (size 12) -> 
   Stack uint64 
   (requires fun h -> live h f1 /\ live h f3 /\ live h result /\ eq_or_disjoint f3 result /\ disjoint f1 result /\ live h memory
   )
@@ -740,9 +749,6 @@ let sq1 f_ f4 result memory =
   let o2 = sub result_ (size 2) (size 1) in 
   let o3 = sub result_ (size 3) (size 1) in 
 
-
-  (* mul64 f0 f1 o0 temp;  *)
-
   upd o0 (size 0) (index memory (size 0));
   let h = index memory (size 1) in 
   admit();
@@ -753,14 +759,26 @@ let sq1 f_ f4 result memory =
   let l = index o1 (size 0) in     
   let c1 = add_carry_u64 (u64 0) l h o1 in 
 
+
+
+
   let h = index temp (size 0) in 
   mul64 f1 f2 o2 temp;
-  let l = index o2 (size 0) in     
-  let c2 = add_carry_u64 c1 l h o2 in
+  let l = index o2 (size 0) in  
   
+  upd memory (size 6) l;
+  upd memory (size 7) (index temp (size 0));
+
+  let c2 = add_carry_u64 c1 l h o2 in
+
+
   let h = index temp (size 0) in 
   mul64 f1 f3 o3 temp;
-  let l = index o3 (size 0) in     
+  let l = index o3 (size 0) in  
+  
+  upd memory (size 8) l;
+  upd memory (size 9) (index temp (size 0));
+
   let c3 = add_carry_u64 c2 l h o3 in
 
   let temp0 = index temp (size 0) in 
@@ -777,12 +795,12 @@ let sq1 f_ f4 result memory =
 
 
 
-val sq2: f1: felem -> f3: felem -> result: felem -> 
+val sq2: f1: felem -> f3: felem -> result: felem  -> memory: lbuffer uint64 (size 12) ->  
   Stack uint64 
   (requires fun h -> live h f1 /\ live h f3 /\ live h result /\ eq_or_disjoint f3 result /\ disjoint f1 result)
   (ensures fun h0 c h1 -> modifies (loc result) h0 h1)
 
-let sq2 f_ f4 result = 
+let sq2 f_ f4 result memory = 
   push_frame();
     let result_ = create (size 4) (u64 0) in 
   let temp = create (size 1) (u64 0) in 
@@ -796,24 +814,40 @@ let sq2 f_ f4 result =
   let o1 = sub result_ (size 1) (size 1) in 
   let o2 = sub result_ (size 2) (size 1) in 
   let o3 = sub result_ (size 3) (size 1) in 
+  
+  upd o0 (size 0) (index memory (size 2));
+  let h = index memory (size 3) in 
 
 
-  mul64 f0 f2 o0 temp;
 
- 
-  let h = index temp (size 0) in 
-  mul64 f1 f2 o1 temp;
+  upd o1 (size 0) (index memory (size 6));
   let l = index o1 (size 0) in     
+  (*let h = index memory (size 7) in *)
+
+
+  (*mul64 f1 f2 o1 temp;
+  let l = index o1 (size 0) in      *)
   let c1 = add_carry_u64 (u64 0) l h o1 in 
 
-  let h = index temp (size 0) in 
+
+
+
+
+
+  let h = index memory (size 7) in 
+  
   mul64 f2 f2 o2 temp;
   let l = index o2 (size 0) in     
   let c2 = add_carry_u64 c1 l h o2 in
   
   let h = index temp (size 0) in 
   mul64 f2 f3 o3 temp;
-  let l = index o3 (size 0) in     
+  let l = index o3 (size 0) in   
+  
+  upd memory (size 10) l;
+  upd memory (size 11) (index temp (size 0));
+
+
   let c3 = add_carry_u64 c2 l h o3 in
 
   let temp0 = index temp (size 0) in 
@@ -831,12 +865,12 @@ let sq2 f_ f4 result =
 
 
 
-val sq3: f1: felem -> f3: felem -> result: felem -> 
+val sq3: f1: felem -> f3: felem -> result: felem -> memory: lbuffer uint64 (size 12) -> 
   Stack uint64 
   (requires fun h -> live h f1 /\ live h f3 /\ live h result /\ eq_or_disjoint f3 result /\ disjoint f1 result)
   (ensures fun h0 c h1 -> modifies (loc result) h0 h1)
 
-let sq3 f_ f4 result = 
+let sq3 f_ f4 result memory = 
   push_frame();
     let result_ = create (size 4) (u64 0) in 
   let temp = create (size 1) (u64 0) in 
@@ -852,20 +886,41 @@ let sq3 f_ f4 result =
   let o3 = sub result_ (size 3) (size 1) in 
 
 
-  mul64 f0 f3 o0 temp;
+ (* mul64 f0 f3 o0 temp; *)
+
+  upd o0 (size 0) (index memory (size 4));
+  let h = index memory (size 5) in 
 
  
-  let h = index temp (size 0) in 
-  mul64 f1 f3 o1 temp;
+  (* let h = index temp (size 0) in  *)
+
+
+
+  upd o1 (size 0) (index memory (size 8));
+  
+  (*mul64 f1 f3 o1 temp; *)
   let l = index o1 (size 0) in     
   let c1 = add_carry_u64 (u64 0) l h o1 in 
 
-  let h = index temp (size 0) in 
-  mul64 f2 f3 o2 temp;
+
+
+
+
+
+  let h = index memory (size 9) in 
+
+
+
+  upd o2 (size 0) (index memory (size 10));
+  
+  (* mul64 f2 f3 o2 temp; *)
   let l = index o2 (size 0) in     
   let c2 = add_carry_u64 c1 l h o2 in
-  
-  let h = index temp (size 0) in 
+
+
+
+
+  let h = index memory (size 11) in 
   mul64 f3 f3 o3 temp;
   let l = index o3 (size 0) in     
   let c3 = add_carry_u64 c2 l h o3 in
@@ -926,7 +981,7 @@ let sq f r out =
 
       let bk1 = sub temp (size 0) (size 2) in 
   let b2 = sub temp (size 2) (size 4) in 
-  let c2 = sq2 r b2 b2 in 
+  let c2 = sq2 r b2 b2 memory in 
     upd temp (size 6) c2;
     
     let h3 = ST.get() in 
@@ -937,7 +992,7 @@ let sq f r out =
 
      let bk2 = sub temp (size 0) (size 3) in 
   let b3 = sub temp (size 3) (size 4) in 
-  let c3 = sq3 r b3 b3 in 
+  let c3 = sq3 r b3 b3 memory in 
     upd temp (size 7) c3;
 
     assert(Lib.Sequence.index (as_seq h3 bk2) 0 == Lib.Sequence.index (as_seq h3 temp) 0);
