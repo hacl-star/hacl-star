@@ -425,7 +425,13 @@ typedef __m512i Lib_IntVector_Intrinsics_vec512;
   (_mm512_rol_epi32(x0, x1))
 
 #define Lib_IntVector_Intrinsics_vec512_rotate_left64(x0, x1) \
-  (_mm512_rol_epi64x0, x1))
+  (_mm512_rol_epi64(x0, x1))
+
+#define Lib_IntVector_Intrinsics_vec512_eq64(x0, x1) \
+  (_mm512_maskz_broadcastq_epi64(_mm512_cmpeq_epi64_mask(x0, x1), _mm_set1_epi8(0xFF))) //TODO : FIX!
+
+#define Lib_IntVector_Intrinsics_vec512_gt64(x0, x1) \
+  (_mm512_maskz_broadcastq_epi64(_mm512_cmpgt_epi64_mask(x0, x1), _mm_set1_epi8(0xFF))) //TODO : FIX!
 
 #define Lib_IntVector_Intrinsics_vec512_load_le(x0) \
   (_mm512_loadu_si512((__m512i*)(x0)))
