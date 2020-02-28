@@ -655,8 +655,31 @@ let mul f r out =
 
 
 val sq0: f:  lbuffer uint64 (size 4) -> result: lbuffer uint64 (size 4) -> memory: lbuffer uint64 (size 12) -> temp: lbuffer uint64 (size 5) -> Stack uint64
-  (requires fun h -> live h result /\ live h f /\ live h memory /\ live h temp /\ disjoint result temp)
-  (ensures fun h0 c h1 -> modifies (loc result) h0 h1)
+  (requires fun h -> live h result /\ live h f /\ live h memory /\ live h temp /\ disjoint result temp
+    /\ disjoint result memory /\ disjoint memory temp 
+ )
+  (ensures fun h0 c h1 -> modifies (loc result |+| loc memory |+| loc temp) h0 h1 /\ 
+    (
+
+      let f = as_seq h0 f in 
+      let f0 = Lib.Sequence.index f 0 in 
+      let f1 = Lib.Sequence.index f 1 in 
+      let f2 = Lib.Sequence.index f 2 in 
+      let f3 = Lib.Sequence.index f 3 in 
+    
+      let memory = as_seq h1 memory in 
+      let m0 = Lib.Sequence.index memory 0 in 
+      let m1 = Lib.Sequence.index memory 1 in 
+      let m2 = Lib.Sequence.index memory 2 in 
+      let m3 = Lib.Sequence.index memory 3 in 
+      let m4 = Lib.Sequence.index memory 4 in 
+      let m5 = Lib.Sequence.index memory 5 in 
+
+      uint_v m0 + uint_v m1 * pow2 64 == uint_v f0 * uint_v f1 /\
+      uint_v m2 + uint_v m3 * pow2 64 == uint_v f0 * uint_v f2 /\
+      uint_v m4 + uint_v m5 * pow2 64 == uint_v f0 * uint_v f3
+    )
+ )
 
 
 let sq0 f result memory temp = 
@@ -680,11 +703,12 @@ let sq0 f result memory temp =
   mul64 f0 f0 o0 temp;
   let h = index temp (size 0) in 
 
-  mul64 f0 f1 o1 temp;
-  let l = index o1 (size 0) in   
-  upd memory (size 0) l;
-  upd memory (size 1) (index temp (size 0));    
-  
+  let h0 = ST.get() in  
+    mul64 f0 f1 o1 temp;
+    let l = index o1 (size 0) in   
+    upd memory (size 0) l;
+    upd memory (size 1) (index temp (size 0));  
+    
   let c1 = add_carry_u64 (u64 0) l h o1 in 
   let h = index temp (size 0) in 
   
@@ -705,7 +729,7 @@ let sq0 f result memory temp =
   let c3 = add_carry_u64 c2 l h o3 in
 
   let temp0 = index temp (size 0) in 
-  admit();
+  assume (uint_v c3 + uint_v temp0 < pow2 32);
   c3 +! temp0
 
 
