@@ -757,22 +757,18 @@ let sq1 f_ f4 result memory tempBuffer =
   let c4 = add4 result_ f4 result in 
   
   admit();
-  pop_frame();  
   c3 +! temp0 +! c4
 
 
-
-
-
-val sq2: f1: felem -> f3: felem -> result: felem  -> memory: lbuffer uint64 (size 12) ->  
+val sq2: f1: felem -> f3: felem -> result: felem  -> memory: lbuffer uint64 (size 12) -> temp: lbuffer uint64 (size 5) -> 
   Stack uint64 
-  (requires fun h -> live h f1 /\ live h f3 /\ live h result /\ eq_or_disjoint f3 result /\ disjoint f1 result)
+  (requires fun h -> live h f1 /\ live h f3 /\ live h result /\ live h temp /\ live h memory /\ eq_or_disjoint f3 result /\ disjoint f1 result /\ disjoint temp result)
   (ensures fun h0 c h1 -> modifies (loc result) h0 h1)
 
-let sq2 f_ f4 result memory = 
-  push_frame();
-    let result_ = create (size 4) (u64 0) in 
-  let temp = create (size 1) (u64 0) in 
+let sq2 f_ f4 result memory tempBuffer = 
+  
+  let temp = sub tempBuffer (size 0) (size 1) in 
+  let result_ = sub tempBuffer  (size 1) (size 4) in 
 
   let f0 = index f_ (size 0) in 
   let f1 = index f_ (size 1) in 
@@ -787,51 +783,29 @@ let sq2 f_ f4 result memory =
   upd o0 (size 0) (index memory (size 2));
   let h = index memory (size 3) in 
 
-
-
   upd o1 (size 0) (index memory (size 6));
   let l = index o1 (size 0) in     
-  (*let h = index memory (size 7) in *)
-
-
-  (*mul64 f1 f2 o1 temp;
-  let l = index o1 (size 0) in      *)
+  
   let c1 = add_carry_u64 (u64 0) l h o1 in 
-
-
-
-
-
-
   let h = index memory (size 7) in 
   
   mul64 f2 f2 o2 temp;
   let l = index o2 (size 0) in     
   let c2 = add_carry_u64 c1 l h o2 in
-  
   let h = index temp (size 0) in 
+  
   mul64 f2 f3 o3 temp;
   let l = index o3 (size 0) in   
-  
   upd memory (size 10) l;
   upd memory (size 11) (index temp (size 0));
 
-
   let c3 = add_carry_u64 c2 l h o3 in
-
   let temp0 = index temp (size 0) in 
-  
-  let c = c3 +! temp0 in 
 
-
-  let c3 = add4 result_ f4 result in 
+  let c4 = add4 result_ f4 result in 
   admit();
   pop_frame();  
-  c +! c3
-
-
-
-
+  c3 +! temp0 +! c4
 
 
 val sq3: f1: felem -> f3: felem -> result: felem -> memory: lbuffer uint64 (size 12) -> 
