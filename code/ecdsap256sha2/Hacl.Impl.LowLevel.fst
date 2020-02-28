@@ -808,12 +808,12 @@ let sq2 f_ f4 result memory tempBuffer =
   c3 +! temp0 +! c4
 
 
-val sq3: f1: felem -> f3: felem -> result: felem -> memory: lbuffer uint64 (size 12) -> 
+val sq3: f1: felem -> f3: felem -> result: felem -> memory: lbuffer uint64 (size 12) -> temp: lbuffer uint64 (size 5) -> 
   Stack uint64 
   (requires fun h -> live h f1 /\ live h f3 /\ live h result /\ eq_or_disjoint f3 result /\ disjoint f1 result)
   (ensures fun h0 c h1 -> modifies (loc result) h0 h1)
 
-let sq3 f_ f4 result memory = 
+let sq3 f_ f4 result memory tempBuffer = 
   push_frame();
     let result_ = create (size 4) (u64 0) in 
   let temp = create (size 1) (u64 0) in 
@@ -926,7 +926,7 @@ let sq f r out =
 
       let bk1 = sub temp (size 0) (size 2) in 
   let b2 = sub temp (size 2) (size 4) in 
-  let c2 = sq2 r b2 b2 memory in 
+  let c2 = sq2 r b2 b2 memory tb in 
     upd temp (size 6) c2;
     
     let h3 = ST.get() in 
@@ -937,7 +937,7 @@ let sq f r out =
 
      let bk2 = sub temp (size 0) (size 3) in 
   let b3 = sub temp (size 3) (size 4) in 
-  let c3 = sq3 r b3 b3 memory in 
+  let c3 = sq3 r b3 b3 memory tb in 
     upd temp (size 7) c3;
 
     assert(Lib.Sequence.index (as_seq h3 bk2) 0 == Lib.Sequence.index (as_seq h3 temp) 0);
