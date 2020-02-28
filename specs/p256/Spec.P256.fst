@@ -50,7 +50,71 @@ let order: n:pos{n < pow2 256} =
 
 #push-options "--ifuel 1" // Or use `allow_inversion point`
 
-(** TODO: prove that the result is on the curve when xp <> xq *)
+val add_on_curve (xp yp xq yq:elem) : Lemma
+  (requires xp <> xq)
+  (ensures
+    (sub_neq xq xp;
+     let lambda = (yq -% yp) /% (xq -% xp) in
+     let xr = lambda *% lambda -% xp -% xq in
+     let yr = lambda *% (xp -% xr) -% yp in
+     on_curve xr yr))
+let add_on_curve xp yp xq yq =
+  sub_neq xq xp;
+  let lambda = (yq -% yp) /% (xq -% xp) in
+  let xr = lambda *% lambda -% xp -% xq in
+  let yr = lambda *% (xp -% xr) -% yp in
+
+  calc (==) {
+    yr**2 *% (xq -% xp)**6;
+    == { assert (
+           yr**2 *% (xq -% xp)**6 ==
+           (((xq -% xp) /% (xq -% xp)) *% (yq -% yp) *%
+            ((xq -% xp)**2 *% 2 *% xp -% ((xq -% xp) /% (xq -% xp))**2 *% (yq -% yp)**2 +%
+            (xq -% xp)**2 *% xq) -% (xq -% xp)**3 *% yp)**2)
+         by (p256_field())
+       }
+    (((xq -% xp) /% (xq -% xp)) *% (yq -% yp) *%
+     ((xq -% xp)**2 *% 2 *% xp -% ((xq -% xp) /% (xq -% xp))**2 *% (yq -% yp)**2 +%
+     (xq -% xp)**2 *% xq) -% (xq -% xp)**3 *% yp)**2;
+    == { assert_norm (1**2 == 1);
+         mul_inverse (xq -% xp);
+         mul_identity (yq -% yp);
+         mul_identity ((yq -% yp)**2) }
+    ((yq -% yp) *% ((xq -% xp)**2 *% 2 *% xp -% 
+     (yq -% yp)**2 +% (xq -% xp)**2 *% xq) -% (xq -% xp)**3 *% yp)**2;
+  };
+
+  calc (==) {
+    (xr**3 +% a *% xr +% b) *% (xq -% xp)**6;
+    == { assert (
+           (xr**3 +% a *% xr +% b) *% (xq -% xp)**6 ==
+           a *% (xq -% xp)**4 *% (((xq -% xp) /% (xq -% xp))**2 *% (yq -% yp)**2) -%
+           a *% (xq -% xp)**6 *% xp -%
+           a *% (xq -% xp)**6 *% xq +%
+           b *% (xq -% xp)**6 +%
+           (((xq -% xp) /% (xq -% xp))**2 *% (yq -% yp)**2 -%
+             (xq -% xp)**2 *% xp -% (xq -% xp)**2 *% xq)**3)
+         by (p256_field())
+    }
+    a *% (xq -% xp)**4 *% (((xq -% xp) /% (xq -% xp))**2 *% (yq -% yp)**2) -%
+    a *% (xq -% xp)**6 *% xp -%
+    a *% (xq -% xp)**6 *% xq +%
+    b *% (xq -% xp)**6 +%
+    (((xq -% xp) /% (xq -% xp))**2 *% (yq -% yp)**2 -%
+      (xq -% xp)**2 *% xp -% (xq -% xp)**2 *% xq)**3;
+    == { assert_norm (1**2 == 1);
+         mul_inverse (xq -% xp);
+         mul_identity ((yq -% yp)**2);
+         mul_identity ((yq -% yp)**2)
+       }
+    a *% (xq -% xp)**4 *% (yq -% yp)**2 -%
+    a *% (xq -% xp)**6 *% xp -%
+    a *% (xq -% xp)**6 *% xq +%
+    b *% (xq -% xp)**6 +%
+    ((yq -% yp)**2 -% (xq -% xp)**2 *% xp -% (xq -% xp)**2 *% xq)**3;
+  };
+  admit()
+
 val add_neq: p:point -> q:point{p <> q /\ p <> O /\ q <> O} -> point
 let add_neq p q =
   let P xp yp = p in
@@ -62,20 +126,19 @@ let add_neq p q =
     let lambda = (yq -% yp) /% (xq -% xp) in
     let xr = lambda *% lambda -% xp -% xq in
     let yr = lambda *% (xp -% xr) -% yp in
-    assume (on_curve xr yr);
+    add_on_curve xp yp xq yq;
     P xr yr
     end
 
 
-val double_on_curve: p:point{p <> O /\ (let P _ yp = p in yp <> 0)} ->
-  Lemma (
-    let P xp yp = p in
-    let lambda = (3 *% xp *% xp +% a) /% (2 *% yp) in
-    let xr = lambda *% lambda -% 2 *% xp in
-    let yr = lambda *% (xp -% xr) -% yp in
-    on_curve xr yr)
-let double_on_curve p =
-  let P xp yp = p in
+val double_on_curve (xp yp:elem) : Lemma
+  (requires yp <> 0)
+  (ensures
+    (let lambda = (3 *% xp *% xp +% a) /% (2 *% yp) in
+     let xr = lambda *% lambda -% 2 *% xp in
+     let yr = lambda *% (xp -% xr) -% yp in
+     on_curve xr yr))
+let double_on_curve xp yp =
   mult_eq_zero 2 yp;
   let lambda = (3 *% xp *% xp +% a) /% (2 *% yp) in
   let xr = lambda *% lambda -% 2 *% xp in
@@ -147,7 +210,7 @@ let double p =
     let lambda = (3 *% xp *% xp +% a) /% (2 *% yp) in
     let xr = lambda *% lambda -% 2 *% xp in
     let yr = lambda *% (xp -% xr) -% yp in
-    double_on_curve p;
+    double_on_curve xp yp;
     P xr yr
     end
 
