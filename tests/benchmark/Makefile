@@ -17,6 +17,8 @@ CMAKE_DEFS+=\
 ifeq ($(OS),Windows_NT)
 # On Cygwin/MSys we require these compilers. The version of cmake that currently comes with Cygwin needs -DCMAKE_AR with a full path to the binary.
 CMAKE_DEFS+=-DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc.exe -DCMAKE_CXX_COMPILER=x86_64-w64-mingw32-g++.exe -DCMAKE_AR=$(shell which x86_64-w64-mingw32-ar.exe) -DUSE_BCRYPT=ON
+else ifneq ($(BUILD_SOURCEBRANCHNAME),)
+CMAKE_DEFS+=-DCMAKE_C_COMPILER=gcc-6 -DCMAKE_CXX_COMPILER=g++-6
 else
 CMAKE_DEFS+=-DCMAKE_C_COMPILER=$(CC) -DCMAKE_CXX_COMPILER=$(CXX)
 endif
