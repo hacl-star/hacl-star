@@ -50,70 +50,88 @@ let order: n:pos{n < pow2 256} =
 
 #push-options "--ifuel 1" // Or use `allow_inversion point`
 
+val add_neq_vieta (x xp xq yp yq:elem) : Lemma
+  (requires xp <> xq /\ on_curve xp yp /\ on_curve xq yq)
+  (ensures
+    (let lambda = (yq -% yp) /% (xq -% xp) in
+     let c = yp -% lambda *% xp in
+     let xr = lambda**2 -% xp -% xq in
+     (x**3 +% a *% x +% b) -% (lambda *% x +% c)**2 == (x -% xp) *% (x -% xq) *% (x -% xr)))
+let add_neq_vieta x xp xq yp yq =
+  sub_neq xq xp;
+  let lambda = (yq -% yp) /% (xq -% xp) in
+  let c = yp -% lambda *% xp in
+  let xr = lambda**2 -% xp -% xq in
+  let z = inverse (xq -% xp) in
+  assert (
+    ((x**3 +% a *% x +% b) -% (lambda *% x +% c)**2 -% (x -% xp) *% (x -% xq) *% (x -% xr)) *% (xq -% xp)**2 ==
+    (yq -% yp)**2 *% (xp -% xq) *% ((x -% xp) *% ((xq -% xp) *% z)**2) +% 
+    2 *% yp *% (yp -% yq) *% ((x -% xp) *% ((xq -% xp) *% z)) *% (xq -% xp) +% 
+    (xq -% xp)**2 *% ((x -% xq) *% xp**2 +% xq *% (x -% xq) *% xp -% yp**2 +% (xq**2 +% a) *% x +% b))
+  by (p256_field());
+  calc (==) {
+    ((x**3 +% a *% x +% b) -% (lambda *% x +% c)**2 -% (x -% xp) *% (x -% xq) *% (x -% xr)) *% (xq -% xp)**2; 
+    == { }
+    (yq -% yp)**2 *% (xp -% xq) *% ((x -% xp) *% ((xq -% xp) *% z)**2) +% 
+    2 *% yp *% (yp -% yq) *% ((x -% xp) *% ((xq -% xp) *% z)) *% (xq -% xp) +% 
+    (xq -% xp)**2 *% ((x -% xq) *% xp**2 +% xq *% (x -% xq) *% xp -% yp**2 +% (xq**2 +% a) *% x +% b);
+    == { assert_norm (1**2 == 1); mul_inverse (xq -% xp); mul_one_r (x -% xp) }
+    (yq -% yp)**2 *% (xp -% xq) *% (x -% xp) +% 
+    2 *% yp *% (yp -% yq) *% (x -% xp) *% (xq -% xp) +% 
+    (xq -% xp)**2 *% ((x -% xq) *% xp**2 +% xq *% (x -% xq) *% xp -% yp**2 +% (xq**2 +% a) *% x +% b);
+    == { _ by (p256_field()) }
+    (xp -% xq) *% (x *% xp**3 -% x *% xq**3 -% xp**3 *% xq +% xp *% xq**3 +% a *% x *% xp -% a *% x *% xq +% (x -% xp) *% yq**2 +% (xq -% x) *% yp**2 +% b *% xp -% b *% xq);
+    == { }
+    (xp -% xq) *% (x *% xp**3 -% x *% xq**3 -% xp**3 *% xq +% xp *% xq**3 +% a *% x *% xp -% a *% x *% xq +% (x -% xp) *% (xq**3 +% a *% xq +% b) +% (xq -% x) *% (xp**3 +% a *% xp +% b) +% b *% xp -% b *% xq);
+    == { _ by (p256_field()) }
+    0 *% (xq -% xp)**2;
+  };
+  pow_eq_zero (xq -% xp) 2;
+  mod_mult_congr 
+    ((x**3 +% a *% x +% b) -% (lambda *% x +% c)**2 -% (x -% xp) *% (x -% xq) *% (x -% xr))
+    0
+    ((xq -% xp)**2);
+  assert ((x**3 +% a *% x +% b) -% (lambda *% x +% c)**2 -% (x -% xp) *% (x -% xq) *% (x -% xr) == 0);
+  add_opp ((x -% xp) *% (x -% xq) *% (x -% xr));
+  sub_congr ((x**3 +% a *% x +% b) -% (lambda *% x +% c)**2) 
+            ((x -% xp) *% (x -% xq) *% (x -% xr))
+            ((x -% xp) *% (x -% xq) *% (x -% xr))
+
 val add_on_curve (xp yp xq yq:elem) : Lemma
-  (requires xp <> xq)
+  (requires xp <> xq /\ on_curve xp yp /\ on_curve xq yq)
   (ensures
     (sub_neq xq xp;
      let lambda = (yq -% yp) /% (xq -% xp) in
-     let xr = lambda *% lambda -% xp -% xq in
+     let xr = lambda**2 -% xp -% xq in
      let yr = lambda *% (xp -% xr) -% yp in
      on_curve xr yr))
 let add_on_curve xp yp xq yq =
   sub_neq xq xp;
   let lambda = (yq -% yp) /% (xq -% xp) in
-  let xr = lambda *% lambda -% xp -% xq in
+  let c = yp -% lambda *% xp in
+  let xr = lambda**2 -% xp -% xq in
   let yr = lambda *% (xp -% xr) -% yp in
 
+  add_neq_vieta xr xp xq yp yq;
+  assert ((xr -% xp) *% (xr -% xq) *% (xr -% xr) == zero) by (p256_field());
+  sub_zero ((xr -% xp) *% (xr -% xq) *% (xr -% xr));
+  add_commutative (xr**3 +% a *% xr +% b) zero;
+  add_identity (xr**3 +% a *% xr +% b);
+  add_identity ((lambda *% xr +% c)**2);
+  add_sub_congr (xr**3 +% a *% xr +% b) zero
+    ((lambda *% xr +% c)**2)  ((xr -% xp) *% (xr -% xq) *% (xr -% xr));
+  assert (xr**3 +% a *% xr +% b == (lambda *% xr +% c)**2);
   calc (==) {
-    yr**2 *% (xq -% xp)**6;
-    == { assert (
-           yr**2 *% (xq -% xp)**6 ==
-           (((xq -% xp) /% (xq -% xp)) *% (yq -% yp) *%
-            ((xq -% xp)**2 *% 2 *% xp -% ((xq -% xp) /% (xq -% xp))**2 *% (yq -% yp)**2 +%
-            (xq -% xp)**2 *% xq) -% (xq -% xp)**3 *% yp)**2)
-         by (p256_field())
-       }
-    (((xq -% xp) /% (xq -% xp)) *% (yq -% yp) *%
-     ((xq -% xp)**2 *% 2 *% xp -% ((xq -% xp) /% (xq -% xp))**2 *% (yq -% yp)**2 +%
-     (xq -% xp)**2 *% xq) -% (xq -% xp)**3 *% yp)**2;
-    == { assert_norm (1**2 == 1);
-         mul_inverse (xq -% xp);
-         mul_identity (yq -% yp);
-         mul_identity ((yq -% yp)**2) }
-    ((yq -% yp) *% ((xq -% xp)**2 *% 2 *% xp -% 
-     (yq -% yp)**2 +% (xq -% xp)**2 *% xq) -% (xq -% xp)**3 *% yp)**2;
-  };
-
-  calc (==) {
-    (xr**3 +% a *% xr +% b) *% (xq -% xp)**6;
-    == { assert (
-           (xr**3 +% a *% xr +% b) *% (xq -% xp)**6 ==
-           a *% (xq -% xp)**4 *% (((xq -% xp) /% (xq -% xp))**2 *% (yq -% yp)**2) -%
-           a *% (xq -% xp)**6 *% xp -%
-           a *% (xq -% xp)**6 *% xq +%
-           b *% (xq -% xp)**6 +%
-           (((xq -% xp) /% (xq -% xp))**2 *% (yq -% yp)**2 -%
-             (xq -% xp)**2 *% xp -% (xq -% xp)**2 *% xq)**3)
-         by (p256_field())
-    }
-    a *% (xq -% xp)**4 *% (((xq -% xp) /% (xq -% xp))**2 *% (yq -% yp)**2) -%
-    a *% (xq -% xp)**6 *% xp -%
-    a *% (xq -% xp)**6 *% xq +%
-    b *% (xq -% xp)**6 +%
-    (((xq -% xp) /% (xq -% xp))**2 *% (yq -% yp)**2 -%
-      (xq -% xp)**2 *% xp -% (xq -% xp)**2 *% xq)**3;
-    == { assert_norm (1**2 == 1);
-         mul_inverse (xq -% xp);
-         mul_identity ((yq -% yp)**2);
-         mul_identity ((yq -% yp)**2)
-       }
-    a *% (xq -% xp)**4 *% (yq -% yp)**2 -%
-    a *% (xq -% xp)**6 *% xp -%
-    a *% (xq -% xp)**6 *% xq +%
-    b *% (xq -% xp)**6 +%
-    ((yq -% yp)**2 -% (xq -% xp)**2 *% xp -% (xq -% xp)**2 *% xq)**3;
-  };
-  admit()
+    yr**2;
+    == { assert_norm (yr**2 == yr *% yr); mul_opp_cancel yr yr }
+    ~%yr *% ~%yr;
+    == { assert_norm ((~%yr)**2 == ~%yr *% ~%yr) }
+    (~%yr)**2;
+    == { assert (lambda *% xr +% c == ~%yr) by (p256_field()) }
+    (lambda *% xr +% c)**2;
+    == { }
+    xr**3 +% a *% xr +% b;
+  }
 
 val add_neq: p:point -> q:point{p <> q /\ p <> O /\ q <> O} -> point
 let add_neq p q =
@@ -124,24 +142,26 @@ let add_neq p q =
     begin
     sub_neq xq xp;
     let lambda = (yq -% yp) /% (xq -% xp) in
-    let xr = lambda *% lambda -% xp -% xq in
+    let xr = lambda**2 -% xp -% xq in
     let yr = lambda *% (xp -% xr) -% yp in
     add_on_curve xp yp xq yq;
     P xr yr
     end
 
 
+#set-options "--z3rlimit 60"
+
 val double_on_curve (xp yp:elem) : Lemma
-  (requires yp <> 0)
+  (requires yp <> 0 /\ on_curve xp yp)
   (ensures
     (let lambda = (3 *% xp *% xp +% a) /% (2 *% yp) in
-     let xr = lambda *% lambda -% 2 *% xp in
+     let xr = lambda**2 -% 2 *% xp in
      let yr = lambda *% (xp -% xr) -% yp in
      on_curve xr yr))
 let double_on_curve xp yp =
   mult_eq_zero 2 yp;
   let lambda = (3 *% xp *% xp +% a) /% (2 *% yp) in
-  let xr = lambda *% lambda -% 2 *% xp in
+  let xr = lambda**2 -% 2 *% xp in
   let yr = lambda *% (xp -% xr) -% yp in
 
   calc (==) {
@@ -162,14 +182,14 @@ let double_on_curve xp yp =
     1**2 *% 16 *% yp**4 *% a *% (a +% 3 *% xp**2)**2 -%
     128 *% a *% xp *% yp**6 +%
     64 *% yp**6 *% b;
-    == { _ by (p256_field ()) }
+    == { _ by (p256_field()) }
     ((a +% 3 *% xp**2)**2 -% 8 *% xp *% yp**2)**3 +%
     16 *% (yp**2)**2 *% a *% (a +% 3 *% xp**2)**2 -%
     128 *% a *% xp *% (yp**2)**3 +%
     64 *% (yp**2)**3 *% b;
     == { }
     ((a +% 3 *% xp**2)**2 -% 8 *% xp *% (xp**3 +% a *% xp +% b))**3 +%
-    16 *% (yp**2)**2 *% a *% (a +% 3 *% xp**2)**2 -%
+    16 *% (xp**3 +% a *% xp +% b)**2 *% a *% (a +% 3 *% xp**2)**2 -%
     128 *% a *% xp *% (xp**3 +% a *% xp +% b)**3 +%
     64 *% (xp**3 +% a *% xp +% b)**3 *% b;
   };
@@ -208,7 +228,7 @@ let double p =
     begin
     mult_eq_zero 2 yp;
     let lambda = (3 *% xp *% xp +% a) /% (2 *% yp) in
-    let xr = lambda *% lambda -% 2 *% xp in
+    let xr = lambda**2 -% 2 *% xp in
     let yr = lambda *% (xp -% xr) -% yp in
     double_on_curve xp yp;
     P xr yr
@@ -338,19 +358,19 @@ let add_comm p q =
       sub_neq xp xq;
       let lambda1 = (yq -% yp) /% (xq -% xp) in
       let lambda2 = (yp -% yq) /% (xp -% xq) in
-      let x1 = lambda1 *% lambda1 -% xp -% xq in
+      let x1 = lambda1**2  -% xp -% xq in
       let y1 = lambda1 *% (xp -% x1) -% yp in
-      let x2 = lambda2 *% lambda2 -% xq -% xp in
+      let x2 = lambda2**2 -% xq -% xp in
       let y2 = lambda2 *% (xq -% x2) -% yq in
       calc (==) {
         x1;
         == { }
-        lambda1 *% lambda1 -% xp -% xq;
+        lambda1**2 -% xp -% xq;
         == { _ by (p256_field ()) }
         lambda1 *% lambda1 -% xq -% xp;
         == { add_slope_eq xp yp xq yq }
         lambda2 *% lambda2 -% xq -% xp;
-        == { }
+        == { assert_norm (lambda2**2 == lambda2 *% lambda2) }
         x2;
       };
       calc (==) {

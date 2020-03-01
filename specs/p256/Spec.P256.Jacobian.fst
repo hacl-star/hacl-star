@@ -104,7 +104,7 @@ let addJ_correct p q =
     begin
     sub_neq xq xp;
     let lambda = (yq -% yp) /% (xq -% xp) in
-    let xr = lambda *% lambda -% xp -% xq in
+    let xr = lambda**2 -% xp -% xq in
     let yr = lambda *% (xp -% xr) -% yp in
     assert (toJacobian (add_neq p q) == (xr, yr, 1));
 
@@ -205,7 +205,7 @@ let doubleJ_correct p =
     begin
     mult_eq_zero 2 y;
     let lambda = (3 *% x *% x -% 3) /% (2 *% y) in
-    let xr = lambda *% lambda -% 2 *% x in
+    let xr = lambda**2 -% 2 *% x in
     let yr = lambda *% (x -% xr) -% y in
     assert (toJacobian (double p) == (xr, yr, 1));
 
