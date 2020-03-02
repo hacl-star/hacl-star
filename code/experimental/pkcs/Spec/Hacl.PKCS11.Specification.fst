@@ -142,13 +142,27 @@ let _ck_attribute_get_type: _CK_ATTRIBUTE_TYPE -> Tot Type0 = function
   |_ -> _CK_ULONG
 
 
+(* I am not sure that the length is stated for all possible types *)
+let _ck_attribute_get_len: _CK_ATTRIBUTE_TYPE -> Tot (a: option nat {Some? a ==> (match a with Some a -> a) < pow2 32}) = function
+  |CKA_CLASS -> Some 1
+  |_ -> None
+
+
 (*/* CK_ATTRIBUTE is a structure that includes the type, length
  * and value of an attribute */
 *)
 
 type _CK_ATTRIBUTE  = 
   |A: 
-    aType: _CK_ATTRIBUTE_TYPE -> pValue: seq (_ck_attribute_get_type aType) -> ulValue: nat{ulValue < pow2 32 /\ length pValue = ulValue} -> _CK_ATTRIBUTE
+    aType: _CK_ATTRIBUTE_TYPE -> pValue: seq (_ck_attribute_get_type aType) 
+    {
+      let len = _ck_attribute_get_len aType in 
+      if Some? len then 
+	length pValue = (match len with Some a -> a)
+      else 
+	True
+    } 
+    -> _CK_ATTRIBUTE
 
 
 type _object = 
@@ -175,11 +189,11 @@ let getObjectAttributeClass obj =
 
 
 type keyEntity = 
-  |Key: element: _object{
-    (let attrs = getObjectAttributeClass element in Some? attrs && 
+  |Key: o: _object{
+    (let attrs = getObjectAttributeClass o in Some? attrs && 
       (
 	let a = (match attrs with Some a -> a) in 
-	let value = Seq.index (CKA_CLASS?.pValue a) 0 in 
+	let value = Seq.index a.pValue 0 in 
 	value = CKO_OTP_KEY || value = CKO_PRIVATE_KEY  || value = CKO_PUBLIC_KEY || value = CKO_SECRET_KEY
       )
     )
