@@ -55,17 +55,17 @@ endif
 ifeq (,$(NOVALE))
 ifneq (hacl-verify,$(MAKECMDGOALS))
 
-ifeq (,$(VALE_HOME))
-  $(error Please define VALE_HOME, possibly using cygpath -m on Windows)
+ifeq (,$(wildcard $(VALE_HOME)))
+  $(error The directory $$VALE_HOME does not exist$(newline)(VALE_HOME=$(VALE_HOME)).$(newline)Hint: ./tools/get_vale.sh if you don't have Vale, yet)
 endif
 
 ifeq (,$(wildcard $(VALE_HOME)/bin/vale.exe))
-  $(error $$VALE_HOME/bin/vale.exe does not exist (VALE_HOME=$(VALE_HOME)))
+  $(error $$VALE_HOME/bin/vale.exe does not exist$(newline)(VALE_HOME=$(VALE_HOME)).$(newline)Hint: ./tools/get_vale.sh if you don't have Vale, yet)
 endif
 
 ifneq ($(shell cat $(VALE_HOME)/bin/.vale_version | tr -d '\r'),$(shell cat vale/.vale_version | tr -d '\r'))
   $(error this repository wants Vale $(shell cat vale/.vale_version) but in \
-    $$VALE_HOME I found $(shell cat $(VALE_HOME)/bin/.vale_version). Hint: ./tools/get_vale.sh)
+    $$VALE_HOME I found $(shell cat $(VALE_HOME)/bin/.vale_version).$(newline)(VALE_HOME=$(VALE_HOME))$(newline)Hint: ./tools/get_vale.sh)
 endif
 
 endif
