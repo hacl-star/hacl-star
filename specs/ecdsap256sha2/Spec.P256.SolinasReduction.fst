@@ -1,9 +1,9 @@
-module Hacl.Spec.P256.SolinasReduction
+module Spec.P256.SolinasReduction
 
 open Lib.IntTypes
 open FStar.Math.Lemmas
 open FStar.Math.Lib
-open Hacl.Spec.P256.Definitions
+open Spec.P256.Definitions
 open FStar.Mul
 open Lib.Sequence
 

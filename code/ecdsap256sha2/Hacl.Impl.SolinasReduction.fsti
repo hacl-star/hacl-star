@@ -9,10 +9,10 @@ open FStar.Math.Lemmas
 open FStar.Math.Lib
 open Lib.Buffer
 
-open Hacl.Spec.P256.SolinasReduction
+open Spec.P256.SolinasReduction
 open Hacl.Impl.LowLevel
 
-open Hacl.Spec.P256.Definitions
+open Spec.P256.Definitions
 open FStar.Mul
 
 

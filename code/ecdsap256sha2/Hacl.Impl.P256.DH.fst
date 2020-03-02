@@ -8,11 +8,11 @@ open Lib.IntTypes
 open Lib.Buffer
 open Lib.ByteSequence
 
-open Hacl.Spec.P256
-open Hacl.Spec.ECDSA
-open Hacl.Spec.P256.Definitions
-open Hacl.Spec.DH
-open Hacl.Spec.ECDSAP256.Definition
+open Spec.P256
+open Spec.ECDSA
+open Spec.P256.Definitions
+open Spec.DH
+open Spec.ECDSAP256.Definition
 
 open Hacl.Impl.LowLevel
 open Hacl.Impl.P256

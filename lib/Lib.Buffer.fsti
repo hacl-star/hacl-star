@@ -8,6 +8,7 @@ open Lib.RawIntTypes
 
 module B = LowStar.Buffer
 module IB = LowStar.ImmutableBuffer
+module CB = LowStar.ConstBuffer
 module LMB = LowStar.Monotonic.Buffer
 
 module U32 = FStar.UInt32
@@ -23,23 +24,29 @@ module Loop = Lib.LoopCombinators
 type buftype =
   | MUT
   | IMMUT
+  | CONST
 
 inline_for_extraction
 let buffer_t (ty:buftype) (a:Type0) =
   match ty with
   | IMMUT -> ib:IB.ibuffer a
   | MUT -> b:B.buffer a
+  | CONST -> cb:CB.const_buffer a
 
-(** Mutable buffer *)
+(** Mutable buffer. Extracted as `a*` *)
 unfold let buffer (a:Type0) = buffer_t MUT a
 
-(** Immutable buffer *)
+(** Immutable buffer. Extracted as `a*`. Enjoys nice properties for recalling contents. *)
 unfold let ibuffer (a:Type0) = buffer_t IMMUT a
+
+(** Const buffer. Either one of the two above. Extracts as `const a*`. *)
+unfold let cbuffer (a:Type0) = buffer_t CONST a
 
 let length (#t:buftype) (#a:Type0) (b:buffer_t t a) =
   match t with
   | MUT -> B.length (b <: buffer a)
   | IMMUT -> IB.length (b <: ibuffer a)
+  | CONST -> CB.length (b <: cbuffer a)
 
 inline_for_extraction
 let lbuffer_t (ty:buftype) (a:Type0) (len:size_t) =
@@ -47,17 +54,20 @@ let lbuffer_t (ty:buftype) (a:Type0) (len:size_t) =
 
 unfold let lbuffer (a:Type0) (len:size_t) = lbuffer_t MUT a len
 unfold let ilbuffer (a:Type0) (len:size_t) = lbuffer_t IMMUT a len
+unfold let clbuffer (a:Type0) (len:size_t) = lbuffer_t CONST a len
 
 //val live: #t:buftype -> #a:Type0 -> h:HS.mem -> b:buffer_t t a -> Type
 let live (#t:buftype) (#a:Type0) (h:HS.mem) (b:buffer_t t a) : Type =
   match t with
   | MUT -> B.live h (b <: buffer a)
   | IMMUT -> IB.live h (b <: ibuffer a)
+  | CONST -> CB.live h (b <: cbuffer a)
 
 let loc (#t:buftype) (#a:Type0) (b:buffer_t t a) : GTot B.loc =
   match t with
   | MUT -> B.loc_buffer (b <: buffer a)
   | IMMUT -> B.loc_buffer (b <: ibuffer a)
+  | CONST -> CB.loc_buffer (b <: cbuffer a)
 
 #set-options "--max_ifuel 0"
 
@@ -67,17 +77,10 @@ let ( |+| ) (l1:B.loc) (l2:B.loc) : GTot B.loc = union l1 l2
 (** Generalized modification clause for Buffer locations *)
 let modifies (s:B.loc) (h1 h2:HS.mem) = B.modifies s h1 h2
 
-(** 2018.16.11 SZ: Doesn't have a pattern and isn't used anywhere in _dev; remove? *)
-val modifies_includes: l1:B.loc -> l2:B.loc -> h0:mem -> h1:mem
-  -> Lemma
-    (requires modifies l1 h0 h1 /\ B.loc_includes l2 l1)
-    (ensures  modifies l2 h0 h1)
-
-(** 2018.16.11 SZ: Doesn't have a pattern and isn't used anywhere in _dev; remove? *)
-val modifies_trans: l1:B.loc ->  l2:B.loc -> h0:mem -> h1:mem -> h2:mem
-  -> Lemma
-    (requires modifies l1 h0 h1 /\ modifies l2 h1 h2)
-    (ensures  modifies (l1 |+| l2) h0 h2)
+(* JP: redefining is generally dangerous; someone may inadvertently write a pattern
+   for the disjoint predicate below, which does not enjoy transitivity, etc. and run
+   into strange behavior. This explains why the SMTPat on mut_immut_disjoint
+   operates over B.loc_disjoint, not disjoint. *)
 
 (** Disjointness clause for Buffers *)
 let disjoint (#t1 #t2:buftype) (#a1 #a2:Type0) (b1:buffer_t t1 a1) (b2:buffer_t t2 a2) =
@@ -121,6 +124,7 @@ let as_seq (#t:buftype) (#a:Type0) (#len:size_t) (h:HS.mem) (b:lbuffer_t t a len
   match t with
   | MUT -> B.as_seq h (b <: buffer a)
   | IMMUT -> IB.as_seq h (b <: ibuffer a)
+  | CONST -> CB.as_seq h (b <: cbuffer a)
 
 (** Ghostly get a sub-buffer of a buffer *)
 let gsub (#t:buftype) (#a:Type0) (#len:size_t) (b:lbuffer_t t a len)
@@ -135,7 +139,13 @@ let gsub (#t:buftype) (#a:Type0) (#len:size_t) (b:lbuffer_t t a len)
     let b = B.gsub (b <: buffer a) start n in
     assert (B.length b == v n);
     (b <: lbuffer a n)
+  | CONST ->
+    let b = CB.gsub (b <: cbuffer a) start n in
+    assert (CB.length b == v n);
+    (b <: clbuffer a n)
 
+(** JP: are these not covered already by standard SMT patterns? is this to avoid
+    having to invert on `buftype`? *)
 val live_sub: #t:buftype -> #a:Type0 -> #len:size_t -> b:lbuffer_t t a len
   -> start:size_t -> n:size_t{v start + v n <= v len} -> h:mem
   -> Lemma
@@ -148,65 +158,6 @@ val modifies_sub: #t:buftype -> #a:Type0 -> #len:size_t -> b:lbuffer_t t a len
     (requires modifies (loc (gsub b start n)) h0 h1)
     (ensures  modifies (loc b) h0 h1)
     [SMTPat (modifies (loc (gsub b start n)) h0 h1)]
-
-val modifies0_is_modifies1: #a0:Type0 -> b0:buffer_t MUT a0 -> h0: HS.mem -> h1: HS.mem ->
-  Lemma
-  (requires (live h0 b0))
-  (ensures  (modifies0 h0 h1 ==> modifies1 b0 h0 h1))
-
-val modifies0_is_modifies2: #a0:Type0 -> #a1:Type0 ->
-  b0:buffer_t MUT a0 -> b1:buffer_t MUT a1 -> h0: HS.mem -> h1: HS.mem ->
-  Lemma
-  (requires (live h0 b0 /\ live h0 b1))
-  (ensures  (modifies0 h0 h1 ==> modifies2 b0 b1 h0 h1))
-
-val modifies0_is_modifies3: #a0:Type0 -> #a1:Type0 -> #a2:Type0 ->
-  b0:buffer_t MUT a0 -> b1:buffer_t MUT a1 -> b2:buffer_t MUT a2 -> h0: HS.mem -> h1: HS.mem ->
-  Lemma
-  (requires (live h0 b0 /\ live h0 b1 /\ live h0 b2))
-  (ensures  (modifies0 h0 h1 ==> modifies3 b0 b1 b2 h0 h1))
-
-val modifies0_is_modifies4: #a0:Type0 -> #a1:Type0 -> #a2:Type0 -> #a3:Type0 ->
-  b0:buffer_t MUT a0 -> b1:buffer_t MUT a1 -> b2:buffer_t MUT a2 -> b3:buffer_t MUT a3 -> h0: HS.mem -> h1: HS.mem ->
-  Lemma
-  (requires (live h0 b0 /\ live h0 b1 /\ live h0 b2 /\ live h0 b3))
-  (ensures  (modifies0 h0 h1 ==> modifies4 b0 b1 b2 b3 h0 h1))
-
-val modifies1_is_modifies2: #a0:Type0 -> #a1:Type0 ->
-  b0:buffer_t MUT a0 -> b1:buffer_t MUT a1 -> h0: HS.mem -> h1: HS.mem ->
-  Lemma
-  (requires (live h0 b0 /\ live h0 b1))
-  (ensures  (modifies1 b0 h0 h1 ==> modifies2 b0 b1 h0 h1))
-
-val modifies1_is_modifies3: #a0:Type0 -> #a1:Type0 -> #a2:Type0 ->
-  b0:buffer_t MUT a0 -> b1:buffer_t MUT a1 -> b2:buffer_t MUT a2 -> h0: HS.mem -> h1: HS.mem ->
-  Lemma
-  (requires (live h0 b0 /\ live h0 b1 /\ live h0 b2))
-  (ensures  (modifies1 b0 h0 h1 ==> modifies3 b0 b1 b2 h0 h1))
-
-val modifies1_is_modifies4: #a0:Type0 -> #a1:Type0 -> #a2:Type0 -> #a3:Type0 ->
-  b0:buffer_t MUT a0 -> b1:buffer_t MUT a1 -> b2:buffer_t MUT a2 -> b3:buffer_t MUT a3 -> h0: HS.mem -> h1: HS.mem ->
-  Lemma
-  (requires (live h0 b0 /\ live h0 b1 /\ live h0 b2 /\ live h0 b3))
-  (ensures  (modifies1 b0 h0 h1 ==> modifies4 b0 b1 b2 b3 h0 h1))
-
-val modifies2_is_modifies3: #a0:Type0 -> #a1:Type0 -> #a2:Type0 ->
-  b0:buffer_t MUT a0 -> b1:buffer_t MUT a1 -> b2:buffer_t MUT a2 -> h0: HS.mem -> h1: HS.mem ->
-  Lemma
-  (requires (live h0 b0 /\ live h0 b1 /\ live h0 b2))
-  (ensures  (modifies2 b0 b1 h0 h1 ==> modifies3 b0 b1 b2 h0 h1))
-
-val modifies2_is_modifies4: #a0:Type0 -> #a1:Type0 -> #a2:Type0 -> #a3:Type0 ->
-  b0:buffer_t MUT a0 -> b1:buffer_t MUT a1 -> b2:buffer_t MUT a2 -> b3:buffer_t MUT a3 -> h0: HS.mem -> h1: HS.mem ->
-  Lemma
-  (requires (live h0 b0 /\ live h0 b1 /\ live h0 b2 /\ live h0 b3))
-  (ensures  (modifies2 b0 b1 h0 h1 ==> modifies4 b0 b1 b2 b3 h0 h1))
-
-val modifies3_is_modifies4: #a0:Type0 -> #a1:Type0 -> #a2:Type0 -> #a3:Type0 ->
-  b0:buffer_t MUT a0 -> b1:buffer_t MUT a1 -> b2:buffer_t MUT a2 -> b3:buffer_t MUT a3 -> h0: HS.mem -> h1: HS.mem ->
-  Lemma
-  (requires (live h0 b0 /\ live h0 b1 /\ live h0 b2 /\ live h0 b3))
-  (ensures  (modifies3 b0 b1 b2 h0 h1 ==> modifies4 b0 b1 b2 b3 h0 h1))
 
 inline_for_extraction
 val as_seq_gsub:
@@ -283,6 +234,7 @@ let bget (#t:buftype) (#a:Type0) (#len:size_t) (h:mem) (b:lbuffer_t t a len)
   match t with
   | MUT -> B.get h (b <: buffer a) i
   | IMMUT -> IB.get h (b <: ibuffer a) i
+  | CONST -> FStar.Seq.index (CB.as_seq h (b <: cbuffer a)) i
 
 (* We don't have access to Lib.Sequence to know `Lib.Sequence.index == FStar.Seq.index` *)
 val bget_as_seq:
@@ -314,6 +266,7 @@ let recallable (#t:buftype) (#a:Type0) (#len:size_t) (b:lbuffer_t t a len) =
   match t with
   | IMMUT ->  B.recallable (b <: ibuffer a)
   | MUT -> B.recallable (b <: buffer a)
+  | CONST -> B.recallable (CB.as_mbuf (b <: cbuffer a))
 
 inline_for_extraction noextract
 val recall:

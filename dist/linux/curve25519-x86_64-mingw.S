@@ -115,8 +115,8 @@ fsub_e:
 .global fmul_scalar_e
 fmul_scalar_e:
   push %rdi
-  push %r12
   push %r13
+  push %rbx
   push %rsi
   mov %rcx, %rdi
   mov %rdx, %rsi
@@ -124,13 +124,13 @@ fmul_scalar_e:
   ;# Compute the raw multiplication of f1*f2
   mulxq 0(%rsi), %r8, %rcx
   ;# f1[0]*f2
-  mulxq 8(%rsi), %r9, %r12
+  mulxq 8(%rsi), %r9, %rbx
   ;# f1[1]*f2
   add %rcx, %r9
   mov $0, %rcx
   mulxq 16(%rsi), %r10, %r13
   ;# f1[2]*f2
-  adcx %r12, %r10
+  adcx %rbx, %r10
   mulxq 24(%rsi), %r11, %rax
   ;# f1[3]*f2
   adcx %r13, %r11
@@ -155,17 +155,17 @@ fmul_scalar_e:
   add %rax, %r8
   movq %r8, 0(%rdi)
   pop %rsi
+  pop %rbx
   pop %r13
-  pop %r12
   pop %rdi
   ret
 
 .global fmul_e
 fmul_e:
-  push %r12
   push %r13
   push %r14
   push %r15
+  push %rbx
   push %rsi
   push %rdi
   mov %rcx, %rdi
@@ -183,8 +183,8 @@ fmul_e:
   adox %r9, %r10
   movq %r10, 8(%rdi)
   
-  mulxq 16(%rcx), %r12, %r13
-  adox %r11, %r12
+  mulxq 16(%rcx), %rbx, %r13
+  adox %r11, %rbx
   mulxq 24(%rcx), %r14, %rdx
   adox %r13, %r14
   mov $0, %rax
@@ -199,11 +199,11 @@ fmul_e:
   movq %r8, 8(%rdi)
   mulxq 8(%rcx), %r10, %r11
   adox %r9, %r10
-  adcx %r12, %r10
+  adcx %rbx, %r10
   movq %r10, 16(%rdi)
-  mulxq 16(%rcx), %r12, %r13
-  adox %r11, %r12
-  adcx %r14, %r12
+  mulxq 16(%rcx), %rbx, %r13
+  adox %r11, %rbx
+  adcx %r14, %rbx
   mov $0, %r8
   mulxq 24(%rcx), %r14, %rdx
   adox %r13, %r14
@@ -221,11 +221,11 @@ fmul_e:
   movq %r8, 16(%rdi)
   mulxq 8(%rcx), %r10, %r11
   adox %r9, %r10
-  adcx %r12, %r10
+  adcx %rbx, %r10
   movq %r10, 24(%rdi)
-  mulxq 16(%rcx), %r12, %r13
-  adox %r11, %r12
-  adcx %r14, %r12
+  mulxq 16(%rcx), %rbx, %r13
+  adox %r11, %rbx
+  adcx %r14, %rbx
   mov $0, %r8
   mulxq 24(%rcx), %r14, %rdx
   adox %r13, %r14
@@ -243,12 +243,12 @@ fmul_e:
   movq %r8, 24(%rdi)
   mulxq 8(%rcx), %r10, %r11
   adox %r9, %r10
-  adcx %r12, %r10
+  adcx %rbx, %r10
   movq %r10, 32(%rdi)
-  mulxq 16(%rcx), %r12, %r13
-  adox %r11, %r12
-  adcx %r14, %r12
-  movq %r12, 40(%rdi)
+  mulxq 16(%rcx), %rbx, %r13
+  adox %r11, %rbx
+  adcx %r14, %rbx
+  movq %rbx, 40(%rdi)
   mov $0, %r8
   mulxq 24(%rcx), %r14, %rdx
   adox %r13, %r14
@@ -269,11 +269,11 @@ fmul_e:
   mulxq 32(%rsi), %r8, %r13
   xor %rcx, %rcx
   adoxq 0(%rsi), %r8
-  mulxq 40(%rsi), %r9, %r12
+  mulxq 40(%rsi), %r9, %rbx
   adcx %r13, %r9
   adoxq 8(%rsi), %r9
   mulxq 48(%rsi), %r10, %r13
-  adcx %r12, %r10
+  adcx %rbx, %r10
   adoxq 16(%rsi), %r10
   mulxq 56(%rsi), %r11, %rax
   adcx %r13, %r11
@@ -298,18 +298,18 @@ fmul_e:
   movq %r8, 0(%rdi)
   pop %rdi
   pop %rsi
+  pop %rbx
   pop %r15
   pop %r14
   pop %r13
-  pop %r12
   ret
 
 .global fmul2_e
 fmul2_e:
-  push %r12
   push %r13
   push %r14
   push %r15
+  push %rbx
   push %rsi
   push %rdi
   mov %rcx, %rdi
@@ -327,8 +327,8 @@ fmul2_e:
   adox %r9, %r10
   movq %r10, 8(%rdi)
   
-  mulxq 16(%rcx), %r12, %r13
-  adox %r11, %r12
+  mulxq 16(%rcx), %rbx, %r13
+  adox %r11, %rbx
   mulxq 24(%rcx), %r14, %rdx
   adox %r13, %r14
   mov $0, %rax
@@ -343,11 +343,11 @@ fmul2_e:
   movq %r8, 8(%rdi)
   mulxq 8(%rcx), %r10, %r11
   adox %r9, %r10
-  adcx %r12, %r10
+  adcx %rbx, %r10
   movq %r10, 16(%rdi)
-  mulxq 16(%rcx), %r12, %r13
-  adox %r11, %r12
-  adcx %r14, %r12
+  mulxq 16(%rcx), %rbx, %r13
+  adox %r11, %rbx
+  adcx %r14, %rbx
   mov $0, %r8
   mulxq 24(%rcx), %r14, %rdx
   adox %r13, %r14
@@ -365,11 +365,11 @@ fmul2_e:
   movq %r8, 16(%rdi)
   mulxq 8(%rcx), %r10, %r11
   adox %r9, %r10
-  adcx %r12, %r10
+  adcx %rbx, %r10
   movq %r10, 24(%rdi)
-  mulxq 16(%rcx), %r12, %r13
-  adox %r11, %r12
-  adcx %r14, %r12
+  mulxq 16(%rcx), %rbx, %r13
+  adox %r11, %rbx
+  adcx %r14, %rbx
   mov $0, %r8
   mulxq 24(%rcx), %r14, %rdx
   adox %r13, %r14
@@ -387,12 +387,12 @@ fmul2_e:
   movq %r8, 24(%rdi)
   mulxq 8(%rcx), %r10, %r11
   adox %r9, %r10
-  adcx %r12, %r10
+  adcx %rbx, %r10
   movq %r10, 32(%rdi)
-  mulxq 16(%rcx), %r12, %r13
-  adox %r11, %r12
-  adcx %r14, %r12
-  movq %r12, 40(%rdi)
+  mulxq 16(%rcx), %rbx, %r13
+  adox %r11, %rbx
+  adcx %r14, %rbx
+  movq %rbx, 40(%rdi)
   mov $0, %r8
   mulxq 24(%rcx), %r14, %rdx
   adox %r13, %r14
@@ -414,8 +414,8 @@ fmul2_e:
   adox %r9, %r10
   movq %r10, 72(%rdi)
   
-  mulxq 48(%rcx), %r12, %r13
-  adox %r11, %r12
+  mulxq 48(%rcx), %rbx, %r13
+  adox %r11, %rbx
   mulxq 56(%rcx), %r14, %rdx
   adox %r13, %r14
   mov $0, %rax
@@ -430,11 +430,11 @@ fmul2_e:
   movq %r8, 72(%rdi)
   mulxq 40(%rcx), %r10, %r11
   adox %r9, %r10
-  adcx %r12, %r10
+  adcx %rbx, %r10
   movq %r10, 80(%rdi)
-  mulxq 48(%rcx), %r12, %r13
-  adox %r11, %r12
-  adcx %r14, %r12
+  mulxq 48(%rcx), %rbx, %r13
+  adox %r11, %rbx
+  adcx %r14, %rbx
   mov $0, %r8
   mulxq 56(%rcx), %r14, %rdx
   adox %r13, %r14
@@ -452,11 +452,11 @@ fmul2_e:
   movq %r8, 80(%rdi)
   mulxq 40(%rcx), %r10, %r11
   adox %r9, %r10
-  adcx %r12, %r10
+  adcx %rbx, %r10
   movq %r10, 88(%rdi)
-  mulxq 48(%rcx), %r12, %r13
-  adox %r11, %r12
-  adcx %r14, %r12
+  mulxq 48(%rcx), %rbx, %r13
+  adox %r11, %rbx
+  adcx %r14, %rbx
   mov $0, %r8
   mulxq 56(%rcx), %r14, %rdx
   adox %r13, %r14
@@ -474,12 +474,12 @@ fmul2_e:
   movq %r8, 88(%rdi)
   mulxq 40(%rcx), %r10, %r11
   adox %r9, %r10
-  adcx %r12, %r10
+  adcx %rbx, %r10
   movq %r10, 96(%rdi)
-  mulxq 48(%rcx), %r12, %r13
-  adox %r11, %r12
-  adcx %r14, %r12
-  movq %r12, 104(%rdi)
+  mulxq 48(%rcx), %rbx, %r13
+  adox %r11, %rbx
+  adcx %r14, %rbx
+  movq %rbx, 104(%rdi)
   mov $0, %r8
   mulxq 56(%rcx), %r14, %rdx
   adox %r13, %r14
@@ -500,11 +500,11 @@ fmul2_e:
   mulxq 32(%rsi), %r8, %r13
   xor %rcx, %rcx
   adoxq 0(%rsi), %r8
-  mulxq 40(%rsi), %r9, %r12
+  mulxq 40(%rsi), %r9, %rbx
   adcx %r13, %r9
   adoxq 8(%rsi), %r9
   mulxq 48(%rsi), %r10, %r13
-  adcx %r12, %r10
+  adcx %rbx, %r10
   adoxq 16(%rsi), %r10
   mulxq 56(%rsi), %r11, %rax
   adcx %r13, %r11
@@ -533,11 +533,11 @@ fmul2_e:
   mulxq 96(%rsi), %r8, %r13
   xor %rcx, %rcx
   adoxq 64(%rsi), %r8
-  mulxq 104(%rsi), %r9, %r12
+  mulxq 104(%rsi), %r9, %rbx
   adcx %r13, %r9
   adoxq 72(%rsi), %r9
   mulxq 112(%rsi), %r10, %r13
-  adcx %r12, %r10
+  adcx %rbx, %r10
   adoxq 80(%rsi), %r10
   mulxq 120(%rsi), %r11, %rax
   adcx %r13, %r11
@@ -562,24 +562,24 @@ fmul2_e:
   movq %r8, 32(%rdi)
   pop %rdi
   pop %rsi
+  pop %rbx
   pop %r15
   pop %r14
   pop %r13
-  pop %r12
   ret
 
 .global fsqr_e
 fsqr_e:
   push %r15
-  push %r12
   push %r13
   push %r14
+  push %r12
   push %rbx
   push %rsi
   push %rdi
   mov %rcx, %rdi
   mov %rdx, %rsi
-  mov %r8, %rbx
+  mov %r8, %r12
   ;# Compute the raw multiplication: tmp <- f * f
   ;# Step 1: Compute all partial products
   movq 0(%rsi), %rdx
@@ -595,11 +595,11 @@ fsqr_e:
   ;# f[3]*f[0]
   movq 24(%rsi), %rdx
   ;# f[3]
-  mulxq 8(%rsi), %r11, %r12
+  mulxq 8(%rsi), %r11, %rbx
   adcx %rcx, %r11
   ;# f[1]*f[3]
   mulxq 16(%rsi), %rax, %r13
-  adcx %rax, %r12
+  adcx %rax, %rbx
   ;# f[2]*f[3]
   movq 8(%rsi), %rdx
   adcx %r15, %r13
@@ -614,12 +614,12 @@ fsqr_e:
   adcx %r8, %r8
   adox %rcx, %r11
   adcx %r9, %r9
-  adox %r15, %r12
+  adox %r15, %rbx
   adcx %r10, %r10
   adox %r15, %r13
   adcx %r11, %r11
   adox %r15, %r14
-  adcx %r12, %r12
+  adcx %rbx, %rbx
   adcx %r13, %r13
   adcx %r14, %r14
   
@@ -647,8 +647,8 @@ fsqr_e:
   adcx %rax, %r11
   movq %r11, 32(%rdi)
   
-  adcx %rcx, %r12
-  movq %r12, 40(%rdi)
+  adcx %rcx, %rbx
+  movq %rbx, 40(%rdi)
   
   movq 24(%rsi), %rdx
   mulx %rdx, %rax, %rcx
@@ -662,18 +662,18 @@ fsqr_e:
   
   ;# Line up pointers
   mov %rdi, %rsi
-  mov %rbx, %rdi
+  mov %r12, %rdi
   ;# Wrap the result back into the field
   ;# Step 1: Compute dst + carry == tmp_hi * 38 + tmp_lo
   mov $38, %rdx
   mulxq 32(%rsi), %r8, %r13
   xor %rcx, %rcx
   adoxq 0(%rsi), %r8
-  mulxq 40(%rsi), %r9, %r12
+  mulxq 40(%rsi), %r9, %rbx
   adcx %r13, %r9
   adoxq 8(%rsi), %r9
   mulxq 48(%rsi), %r10, %r13
-  adcx %r12, %r10
+  adcx %rbx, %r10
   adoxq 16(%rsi), %r10
   mulxq 56(%rsi), %r11, %rax
   adcx %r13, %r11
@@ -699,24 +699,24 @@ fsqr_e:
   pop %rdi
   pop %rsi
   pop %rbx
+  pop %r12
   pop %r14
   pop %r13
-  pop %r12
   pop %r15
   ret
 
 .global fsqr2_e
 fsqr2_e:
   push %r15
-  push %r12
   push %r13
   push %r14
+  push %r12
   push %rbx
   push %rsi
   push %rdi
   mov %rcx, %rdi
   mov %rdx, %rsi
-  mov %r8, %rbx
+  mov %r8, %r12
   ;# Step 1: Compute all partial products
   movq 0(%rsi), %rdx
   ;# f[0]
@@ -731,11 +731,11 @@ fsqr2_e:
   ;# f[3]*f[0]
   movq 24(%rsi), %rdx
   ;# f[3]
-  mulxq 8(%rsi), %r11, %r12
+  mulxq 8(%rsi), %r11, %rbx
   adcx %rcx, %r11
   ;# f[1]*f[3]
   mulxq 16(%rsi), %rax, %r13
-  adcx %rax, %r12
+  adcx %rax, %rbx
   ;# f[2]*f[3]
   movq 8(%rsi), %rdx
   adcx %r15, %r13
@@ -750,12 +750,12 @@ fsqr2_e:
   adcx %r8, %r8
   adox %rcx, %r11
   adcx %r9, %r9
-  adox %r15, %r12
+  adox %r15, %rbx
   adcx %r10, %r10
   adox %r15, %r13
   adcx %r11, %r11
   adox %r15, %r14
-  adcx %r12, %r12
+  adcx %rbx, %rbx
   adcx %r13, %r13
   adcx %r14, %r14
   
@@ -783,8 +783,8 @@ fsqr2_e:
   adcx %rax, %r11
   movq %r11, 32(%rdi)
   
-  adcx %rcx, %r12
-  movq %r12, 40(%rdi)
+  adcx %rcx, %rbx
+  movq %rbx, 40(%rdi)
   
   movq 24(%rsi), %rdx
   mulx %rdx, %rax, %rcx
@@ -810,11 +810,11 @@ fsqr2_e:
   ;# f[3]*f[0]
   movq 56(%rsi), %rdx
   ;# f[3]
-  mulxq 40(%rsi), %r11, %r12
+  mulxq 40(%rsi), %r11, %rbx
   adcx %rcx, %r11
   ;# f[1]*f[3]
   mulxq 48(%rsi), %rax, %r13
-  adcx %rax, %r12
+  adcx %rax, %rbx
   ;# f[2]*f[3]
   movq 40(%rsi), %rdx
   adcx %r15, %r13
@@ -829,12 +829,12 @@ fsqr2_e:
   adcx %r8, %r8
   adox %rcx, %r11
   adcx %r9, %r9
-  adox %r15, %r12
+  adox %r15, %rbx
   adcx %r10, %r10
   adox %r15, %r13
   adcx %r11, %r11
   adox %r15, %r14
-  adcx %r12, %r12
+  adcx %rbx, %rbx
   adcx %r13, %r13
   adcx %r14, %r14
   
@@ -862,8 +862,8 @@ fsqr2_e:
   adcx %rax, %r11
   movq %r11, 96(%rdi)
   
-  adcx %rcx, %r12
-  movq %r12, 104(%rdi)
+  adcx %rcx, %rbx
+  movq %rbx, 104(%rdi)
   
   movq 56(%rsi), %rdx
   mulx %rdx, %rax, %rcx
@@ -877,18 +877,18 @@ fsqr2_e:
   
   ;# Line up pointers
   mov %rdi, %rsi
-  mov %rbx, %rdi
+  mov %r12, %rdi
   
   ;# Step 1: Compute dst + carry == tmp_hi * 38 + tmp_lo
   mov $38, %rdx
   mulxq 32(%rsi), %r8, %r13
   xor %rcx, %rcx
   adoxq 0(%rsi), %r8
-  mulxq 40(%rsi), %r9, %r12
+  mulxq 40(%rsi), %r9, %rbx
   adcx %r13, %r9
   adoxq 8(%rsi), %r9
   mulxq 48(%rsi), %r10, %r13
-  adcx %r12, %r10
+  adcx %rbx, %r10
   adoxq 16(%rsi), %r10
   mulxq 56(%rsi), %r11, %rax
   adcx %r13, %r11
@@ -917,11 +917,11 @@ fsqr2_e:
   mulxq 96(%rsi), %r8, %r13
   xor %rcx, %rcx
   adoxq 64(%rsi), %r8
-  mulxq 104(%rsi), %r9, %r12
+  mulxq 104(%rsi), %r9, %rbx
   adcx %r13, %r9
   adoxq 72(%rsi), %r9
   mulxq 112(%rsi), %r10, %r13
-  adcx %r12, %r10
+  adcx %rbx, %r10
   adoxq 80(%rsi), %r10
   mulxq 120(%rsi), %r11, %rax
   adcx %r13, %r11
@@ -947,9 +947,9 @@ fsqr2_e:
   pop %rdi
   pop %rsi
   pop %rbx
+  pop %r12
   pop %r14
   pop %r13
-  pop %r12
   pop %r15
   ret
 

@@ -1,12 +1,12 @@
-module Hacl.Spec.P256.Normalisation
+module Spec.P256.Normalisation
 
 open Lib.IntTypes
 open Lib.Buffer
 
-open Hacl.Spec.P256.Definitions
-open Hacl.Spec.P256.MontgomeryMultiplication
-open Hacl.Spec.P256
-open Hacl.Spec.P256.Lemmas
+open Spec.P256.Definitions
+open Spec.P256.MontgomeryMultiplication
+open Spec.P256
+open Spec.P256.Lemmas
 
 open FStar.Math.Lemmas
 

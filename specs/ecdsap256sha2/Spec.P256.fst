@@ -1,4 +1,4 @@
-module Hacl.Spec.P256
+module Spec.P256
 
 open FStar.Mul
 
@@ -6,8 +6,8 @@ open Lib.ByteSequence
 open Lib.IntTypes
 open Lib.Sequence
 
-open Hacl.Spec.P256.Definitions
-open Hacl.Spec.P256.Lemmas
+open Spec.P256.Definitions
+open Spec.P256.Lemmas
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 

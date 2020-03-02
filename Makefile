@@ -102,7 +102,8 @@ all:
 
 all-unstaged: compile-gcc-compatible compile-msvc-compatible compile-gcc64-only \
   compile-evercrypt-external-headers compile-c89-compatible compile-ccf \
-  compile-portable-gcc-compatible compile-mozilla dist/linux/Makefile.basic
+  compile-portable-gcc-compatible compile-mozilla dist/linux/Makefile.basic \
+	dist/merkle-tree/Makefile.basic
 
 # Automatic staging.
 %-staged: .last_vale_version
@@ -609,13 +610,18 @@ HAND_WRITTEN_OPTIONAL_FILES = \
 # When extracting our libraries, we purposely don't distribute tests
 #
 # See Makefile.include for the definition of VALE_BUNDLES
-REQUIRED_FLAGS	=\
+REQUIRED_BUNDLES = \
   -bundle Hacl.Poly1305.Field32xN.Lemmas[rename=Hacl_Lemmas] \
-  -drop EverCrypt.TargetConfig \
   -bundle EverCrypt.BCrypt \
   -bundle EverCrypt.OpenSSL \
   -bundle MerkleTree.Spec,MerkleTree.Spec.*,MerkleTree.New.High,MerkleTree.New.High.* \
   $(VALE_BUNDLES) \
+  -bundle Hacl.Impl.Poly1305.Fields \
+  -bundle 'EverCrypt.Spec.*'
+
+REQUIRED_FLAGS	= \
+	$(REQUIRED_BUNDLES) \
+  -drop EverCrypt.TargetConfig \
   -library 'Vale.Stdcalls.*' \
   -no-prefix 'Vale.Stdcalls.*' \
   -static-header 'Vale.Inline.*' \
@@ -629,10 +635,8 @@ REQUIRED_FLAGS	=\
   -no-prefix 'Vale.Inline.X64.Fsqr_inline' \
   -no-prefix 'EverCrypt.Vale' \
   -add-include 'Hacl_Curve25519_64:"curve25519-inline.h"' \
-  -no-prefix 'MerkleTree.New.Low' \
-  -no-prefix 'MerkleTree.New.Low.Serialization' \
-  -bundle Hacl.Impl.Poly1305.Fields \
-  -bundle 'EverCrypt.Spec.*' \
+  -no-prefix 'MerkleTree' \
+  -no-prefix 'MerkleTree.EverCrypt' \
   -library EverCrypt.AutoConfig,EverCrypt.OpenSSL,EverCrypt.BCrypt \
   $(BASE_FLAGS)
 
@@ -662,7 +666,7 @@ TARGETCONFIG_FLAGS = -add-include '"evercrypt_targetconfig.h"'
 # that a particular feature be enabled. For a distribution to disable the
 # corresponding feature, one of these variables needs to be overridden.
 E_HASH_BUNDLE=-bundle EverCrypt.Hash+EverCrypt.Hash.Incremental=[rename=EverCrypt_Hash]
-MERKLE_BUNDLE=-bundle 'MerkleTree.New.Low+MerkleTree.New.Low.Serialization=[rename=MerkleTree]'
+MERKLE_BUNDLE=-bundle 'MerkleTree+MerkleTree.EverCrypt+MerkleTree.Low+MerkleTree.Low.Serialization+MerkleTree.Low.Hashfunctions=MerkleTree.*[rename=MerkleTree]'
 CTR_BUNDLE=-bundle EverCrypt.CTR=EverCrypt.CTR.*
 # Disabled by default, overridden for wasm
 WASMSUPPORT_BUNDLE = -bundle WasmSupport
@@ -835,7 +839,7 @@ dist/mozilla/Makefile.basic: NACLBOX_BUNDLE = -bundle Hacl.NaCl
 dist/mozilla/Makefile.basic: E_HASH_BUNDLE =
 dist/mozilla/Makefile.basic: MERKLE_BUNDLE = -bundle MerkleTree.*
 dist/mozilla/Makefile.basic: CTR_BUNDLE =
-dist/mozilla/Makefile.basic: BLAKE2_BUNDLE = -bundle Hacl.Impl.Blake2.*,Hacl.Blake2b_256,Hacl.Blake2s_128,Hacl.Blake2b_32,Hacl.Blake2s_32
+dist/mozilla/Makefile.basic: BLAKE2_BUNDLE = -bundle Hacl.Impl.Blake2.*,Hacl.Blake2s_256,Hacl.Blake2b_256,Hacl.Blake2s_128,Hacl.Blake2b_32,Hacl.Blake2s_32
 dist/mozilla/Makefile.basic: SHA3_BUNDLE = -bundle Hacl.SHA3
 dist/mozilla/Makefile.basic: HASH_BUNDLE = -bundle Hacl.Hash.*,Hacl.HKDF,Hacl.HMAC,Hacl.HMAC_DRBG
 dist/mozilla/Makefile.basic: ECDSA_BUNDLE =
@@ -864,6 +868,21 @@ dist/mozilla/Makefile.basic: TARGET_H_INCLUDE = -add-include '<stdbool.h>'
 dist/portable-gcc-compatible/Makefile.basic: OPT_FLAGS=-ccopts -mtune=generic
 dist/portable-gcc-compatible/Makefile.basic: DEFAULT_FLAGS += -rst-snippets
 
+# Merkle Tree standalone distribution
+# -----------------------------------
+#
+# Without even cryptography.
+dist/merkle-tree/Makefile.basic: \
+	BUNDLE_FLAGS=-bundle MerkleTree.EverCrypt \
+    -bundle 'MerkleTree+MerkleTree.Low+MerkleTree.Low.Serialization+MerkleTree.Low.Hashfunctions=*[rename=MerkleTree]'
+dist/merkle-tree/Makefile.basic: VALE_ASMS =
+dist/merkle-tree/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES =
+dist/merkle-tree/Makefile.basic: HAND_WRITTEN_H_FILES =
+dist/merkle-tree/Makefile.basic: HACL_OLD_FILES =
+dist/merkle-tree/Makefile.basic: HAND_WRITTEN_FILES =
+dist/merkle-tree/Makefile.basic: TARGETCONFIG_FLAGS =
+dist/merkle-tree/Makefile.basic: HAND_WRITTEN_LIB_FLAGS =
+dist/merkle-tree/Makefile.basic: INTRINSIC_FLAGS =
 
 # EVERCRYPT_CONFIG tweaks
 # -----------------------
@@ -894,7 +913,7 @@ dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/LICENSE.txt \
   $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_H_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) $(VALE_ASMS) | old-extract-c
 	mkdir -p $(dir $@)
 	[ x"$(HACL_OLD_FILES)" != x ] && cp $(HACL_OLD_FILES) $(patsubst %.c,%.h,$(HACL_OLD_FILES)) $(dir $@) || true
-	cp $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_H_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) $(dir $@)
+	[ x"$(HAND_WRITTEN_FILES)" != x ] && cp $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_H_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) $(dir $@) || true
 	[ x"$(VALE_ASMS)" != x ] && cp $(VALE_ASMS) $(dir $@) || true
 	$(KRML) $(DEFAULT_FLAGS) \
 	  -tmpdir $(dir $@) -skip-compilation \

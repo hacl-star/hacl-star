@@ -22,16 +22,6 @@ let modifies_includes l1 l2 h0 h1 = ()
 let modifies_trans l1 l2 h0 h1 h2 = ()
 let live_sub #t #a #len b start n h = ()
 let modifies_sub #t #a #len b start n h0 h1 = ()
-let modifies0_is_modifies1 #a0 b0 h0 h1 = ()
-let modifies0_is_modifies2 #a0 #a1 b0 b1 h0 h1 = ()
-let modifies0_is_modifies3 #a0 #a1 #a2 b0 b1 b2 h0 h1 = ()
-let modifies0_is_modifies4 #a0 #a1 #a2 #a3 b0 b1 b2 b3 h0 h1 = ()
-let modifies1_is_modifies2 #a0 #a1 b0 b1 h0 h1 = ()
-let modifies1_is_modifies3 #a0 #a1 #a2 b0 b1 b2 h0 h1 = ()
-let modifies1_is_modifies4 #a0 #a1 #a2 #a3 b0 b1 b2 b3 h0 h1 = ()
-let modifies2_is_modifies3 #a0 #a1 #a2 b0 b1 b2 h0 h1 = ()
-let modifies2_is_modifies4 #a0 #a1 #a2 #a3 b0 b1 b2 b3 h0 h1 = ()
-let modifies3_is_modifies4 #a0 #a1 #a2 #a3 b0 b1 b2 b3 h0 h1 = ()
 
 let as_seq_gsub #t #a #len h b start n = ()
 
@@ -39,11 +29,13 @@ let sub #t #a #len b start n =
   match t with
   | MUT -> B.sub (b <: buffer a) start n
   | IMMUT -> IB.isub (b <: ibuffer a) start n
+  | CONST -> CB.sub (b <: cbuffer a) start n
 
 let index #t #a #len b i =
   match t with
   | MUT -> B.index (b <: buffer a) i
   | IMMUT -> IB.index (b <: ibuffer a) i
+  | CONST -> CB.index (b <: cbuffer a) i
 
 let upd #a #len b i v =
   let h0 = ST.get() in
@@ -58,6 +50,7 @@ let recall #t #a #len b =
   match t with
   | IMMUT -> B.recall (b <: ibuffer a)
   | MUT -> B.recall (b <: buffer a)
+  | CONST -> B.recall (CB.cast (b <: cbuffer a))
 
 let create #a clen init =
   B.alloca init (normalize_term clen)
@@ -73,6 +66,7 @@ let createL_global #a init =
 let recall_contents #a #len b s =
   B.recall_p (b <: ibuffer a) (cpred s)
 
+(* JP: why triplicate the code? would it not extract if we just cast i to a monotonic buffer?! *)
 let copy #t #a #len o i =
   match t with
   | MUT ->
@@ -85,6 +79,11 @@ let copy #t #a #len o i =
     LowStar.BufferOps.blit (i <: ibuffer a) 0ul (o <: buffer a) 0ul len;
     let h1 = ST.get () in
     assert (Seq.slice (as_seq h1 o) 0 (v len) == Seq.slice (as_seq h0 i) 0 (v len))
+  | CONST ->
+    let h0 = ST.get () in
+    LowStar.BufferOps.blit (CB.cast (i <: cbuffer a)) 0ul (o <: buffer a) 0ul len;
+    let h1 = ST.get () in
+    assert (Seq.slice (as_seq h1 o) 0 (v len) == Seq.slice (as_seq h0 i) 0 (v len))
 
 let memset #a #blen b init len =
   B.fill #a #(fun _ _ -> True) #(fun _ _ -> True) b init len
@@ -94,21 +93,32 @@ let memset #a #blen b init len =
 let update_sub #t #a #len dst start n src =
   match t with
   | MUT ->
-  let h0 = ST.get () in
-  LowStar.BufferOps.blit (src <: buffer a) 0ul (dst <: buffer a) (size_to_UInt32 start) (size_to_UInt32 n);
-  let h1 = ST.get () in
-  assert (forall (k:nat{k < v n}). bget h1 dst (v start + k) == bget h0 src k);
-  FStar.Seq.lemma_eq_intro
-    (as_seq h1 dst)
-    (Seq.update_sub #a #(v len) (as_seq h0 dst) (v start) (v n) (as_seq h0 src))
+      let h0 = ST.get () in
+      LowStar.BufferOps.blit (src <: buffer a)
+        0ul (dst <: buffer a) (size_to_UInt32 start) (size_to_UInt32 n);
+      let h1 = ST.get () in
+      assert (forall (k:nat{k < v n}). bget h1 dst (v start + k) == bget h0 src k);
+      FStar.Seq.lemma_eq_intro
+        (as_seq h1 dst)
+        (Seq.update_sub #a #(v len) (as_seq h0 dst) (v start) (v n) (as_seq h0 src))
   | IMMUT ->
-  let h0 = ST.get () in
-  LowStar.BufferOps.blit (src <: ibuffer a) 0ul (dst <: buffer a) (size_to_UInt32 start) (size_to_UInt32 n);
-  let h1 = ST.get () in
-  assert (forall (k:nat{k < v n}). bget h1 dst (v start + k) == bget h0 src k);
-  FStar.Seq.lemma_eq_intro
-    (as_seq h1 dst)
-    (Seq.update_sub #a #(v len) (as_seq h0 dst) (v start) (v n) (as_seq h0 src))
+      let h0 = ST.get () in
+      LowStar.BufferOps.blit (src <: ibuffer a)
+        0ul (dst <: buffer a) (size_to_UInt32 start) (size_to_UInt32 n);
+      let h1 = ST.get () in
+      assert (forall (k:nat{k < v n}). bget h1 dst (v start + k) == bget h0 src k);
+      FStar.Seq.lemma_eq_intro
+        (as_seq h1 dst)
+        (Seq.update_sub #a #(v len) (as_seq h0 dst) (v start) (v n) (as_seq h0 src))
+  | CONST ->
+      let h0 = ST.get () in
+      LowStar.BufferOps.blit (CB.cast (src <: cbuffer a))
+        0ul (dst <: buffer a) (size_to_UInt32 start) (size_to_UInt32 n);
+      let h1 = ST.get () in
+      assert (forall (k:nat{k < v n}). bget h1 dst (v start + k) == bget h0 src k);
+      FStar.Seq.lemma_eq_intro
+        (as_seq h1 dst)
+        (Seq.update_sub #a #(v len) (as_seq h0 dst) (v start) (v n) (as_seq h0 src))
 
 let update_sub_f #a #len h0 buf start n spec f =
   let tmp = sub buf start n in
@@ -564,7 +574,7 @@ val div_mul_le: b:pos -> a:nat -> Lemma
   ((a / b) * b <= a)
 let div_mul_le b a = ()
 
-#reset-options "--z3rlimit 500 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 2000 --max_fuel 0 --max_ifuel 0"
 
 let map_blocks #t #a h0 len blocksize inp output spec_f spec_l impl_f impl_l =
   div_mul_le (v blocksize) (v len);

@@ -9,16 +9,16 @@ open Hacl.Impl.P256.Arithmetics
 
 open Lib.Buffer
 
-open Hacl.Spec.P256.Lemmas
-open Hacl.Spec.P256.Definitions
+open Spec.P256.Lemmas
+open Spec.P256.Definitions
 open Hacl.Impl.SolinasReduction
-open Hacl.Spec.P256.MontgomeryMultiplication
-open Hacl.Spec.P256.MontgomeryMultiplication.PointDouble
-open Hacl.Spec.P256.MontgomeryMultiplication.PointAdd
+open Spec.P256.MontgomeryMultiplication
+open Spec.P256.MontgomeryMultiplication.PointDouble
+open Spec.P256.MontgomeryMultiplication.PointAdd
 open Hacl.Impl.LowLevel
 open Hacl.Impl.P256.LowLevel
 open Hacl.Impl.P256.MontgomeryMultiplication
-open Hacl.Spec.P256
+open Spec.P256
 open Hacl.Impl.P256.Math 
 
 open FStar.Tactics 
@@ -26,7 +26,7 @@ open FStar.Tactics.Canon
 
 open FStar.Math.Lemmas
 
-friend Hacl.Spec.P256.MontgomeryMultiplication
+friend Spec.P256.MontgomeryMultiplication
 open FStar.Mul
 
 #reset-options "--z3rlimit 300" 
@@ -199,7 +199,7 @@ let point_double p result tempBuffer =
    let pyD = fromDomain_ (as_nat h0 pY) in 
    let pzD = fromDomain_ (as_nat h0 pZ) in 
    
-     Hacl.Spec.P256.MontgomeryMultiplication.PointDouble.lemma_xToSpecification pxD pyD pzD (as_nat hEnd s) (as_nat hEnd m) (as_nat hEnd (gsub result (size 0) (size 4)));
-     Hacl.Spec.P256.MontgomeryMultiplication.PointDouble.lemma_yToSpecification pxD pyD pzD (as_nat hEnd s) (as_nat hEnd m) (as_nat hEnd x3) (as_nat hEnd (gsub result (size 4) (size 4)));
-     Hacl.Spec.P256.MontgomeryMultiplication.PointDouble.lemma_zToSpecification pxD pyD pzD (as_nat hEnd (gsub result (size 8) (size 4)))
+     Spec.P256.MontgomeryMultiplication.PointDouble.lemma_xToSpecification pxD pyD pzD (as_nat hEnd s) (as_nat hEnd m) (as_nat hEnd (gsub result (size 0) (size 4)));
+     Spec.P256.MontgomeryMultiplication.PointDouble.lemma_yToSpecification pxD pyD pzD (as_nat hEnd s) (as_nat hEnd m) (as_nat hEnd x3) (as_nat hEnd (gsub result (size 4) (size 4)));
+     Spec.P256.MontgomeryMultiplication.PointDouble.lemma_zToSpecification pxD pyD pzD (as_nat hEnd (gsub result (size 8) (size 4)))
 

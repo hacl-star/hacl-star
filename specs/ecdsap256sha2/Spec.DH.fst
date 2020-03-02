@@ -1,11 +1,11 @@
-module Hacl.Spec.DH
+module Spec.DH
 
 open Lib.IntTypes
 open Lib.ByteSequence
 open Lib.Sequence
 
-open Hacl.Spec.P256
-open Hacl.Spec.ECDSA
+open Spec.P256
+open Spec.ECDSA
 
 #set-options "--fuel 0 --ifuel 0"
 

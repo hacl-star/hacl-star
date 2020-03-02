@@ -1,4 +1,4 @@
-module Hacl.Spec.P256.Lemmas
+module Spec.P256.Lemmas
 
 open Lib.IntTypes
 open FStar.Math.Lemmas
@@ -6,7 +6,7 @@ open FStar.Math.Lib
 
 open FStar.Mul
 
-open Hacl.Spec.P256.Definitions
+open Spec.P256.Definitions
 
 open FStar.Tactics 
 open FStar.Tactics.Canon 

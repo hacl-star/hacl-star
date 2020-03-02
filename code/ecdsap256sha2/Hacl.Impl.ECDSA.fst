@@ -13,11 +13,11 @@ open FStar.Math.Lemmas
 
 open Hacl.Hash.SHA2
 
-open Hacl.Spec.P256
-open Hacl.Spec.P256.Lemmas
-open Hacl.Spec.P256.Definitions
+open Spec.P256
+open Spec.P256.Lemmas
+open Spec.P256.Definitions
 
-open Hacl.Spec.ECDSAP256.Definition
+open Spec.ECDSAP256.Definition
 
 open Hacl.Impl.LowLevel
 
