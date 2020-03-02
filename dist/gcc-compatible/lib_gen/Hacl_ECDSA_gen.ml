@@ -8,4 +8,3 @@ let _ =
    Format.printf "#include \"Hacl_ECDSA.h\"\n");
   Cstubs.write_c Format.std_formatter ~prefix:""
     (module Hacl_ECDSA_bindings.Bindings)
-  

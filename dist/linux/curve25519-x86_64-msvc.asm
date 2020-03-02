@@ -115,8 +115,8 @@ fsub_e endp
 ALIGN 16
 fmul_scalar_e proc
   push rdi
-  push r12
   push r13
+  push rbx
   push rsi
   mov rdi, rcx
   mov rsi, rdx
@@ -124,13 +124,13 @@ fmul_scalar_e proc
   ;# Compute the raw multiplication of f1*f2
   mulx rcx, r8, qword ptr [rsi + 0]
   ;# f1[0]*f2
-  mulx r12, r9, qword ptr [rsi + 8]
+  mulx rbx, r9, qword ptr [rsi + 8]
   ;# f1[1]*f2
   add r9, rcx
   mov rcx, 0
   mulx r13, r10, qword ptr [rsi + 16]
   ;# f1[2]*f2
-  adcx r10, r12
+  adcx r10, rbx
   mulx rax, r11, qword ptr [rsi + 24]
   ;# f1[3]*f2
   adcx r11, r13
@@ -155,17 +155,17 @@ fmul_scalar_e proc
   add r8, rax
   mov qword ptr [rdi + 0], r8
   pop rsi
+  pop rbx
   pop r13
-  pop r12
   pop rdi
   ret
 fmul_scalar_e endp
 ALIGN 16
 fmul_e proc
-  push r12
   push r13
   push r14
   push r15
+  push rbx
   push rsi
   push rdi
   mov rdi, rcx
@@ -183,8 +183,8 @@ fmul_e proc
   adox r10, r9
   mov qword ptr [rdi + 8], r10
   
-  mulx r13, r12, qword ptr [rcx + 16]
-  adox r12, r11
+  mulx r13, rbx, qword ptr [rcx + 16]
+  adox rbx, r11
   mulx rdx, r14, qword ptr [rcx + 24]
   adox r14, r13
   mov rax, 0
@@ -199,11 +199,11 @@ fmul_e proc
   mov qword ptr [rdi + 8], r8
   mulx r11, r10, qword ptr [rcx + 8]
   adox r10, r9
-  adcx r10, r12
+  adcx r10, rbx
   mov qword ptr [rdi + 16], r10
-  mulx r13, r12, qword ptr [rcx + 16]
-  adox r12, r11
-  adcx r12, r14
+  mulx r13, rbx, qword ptr [rcx + 16]
+  adox rbx, r11
+  adcx rbx, r14
   mov r8, 0
   mulx rdx, r14, qword ptr [rcx + 24]
   adox r14, r13
@@ -221,11 +221,11 @@ fmul_e proc
   mov qword ptr [rdi + 16], r8
   mulx r11, r10, qword ptr [rcx + 8]
   adox r10, r9
-  adcx r10, r12
+  adcx r10, rbx
   mov qword ptr [rdi + 24], r10
-  mulx r13, r12, qword ptr [rcx + 16]
-  adox r12, r11
-  adcx r12, r14
+  mulx r13, rbx, qword ptr [rcx + 16]
+  adox rbx, r11
+  adcx rbx, r14
   mov r8, 0
   mulx rdx, r14, qword ptr [rcx + 24]
   adox r14, r13
@@ -243,12 +243,12 @@ fmul_e proc
   mov qword ptr [rdi + 24], r8
   mulx r11, r10, qword ptr [rcx + 8]
   adox r10, r9
-  adcx r10, r12
+  adcx r10, rbx
   mov qword ptr [rdi + 32], r10
-  mulx r13, r12, qword ptr [rcx + 16]
-  adox r12, r11
-  adcx r12, r14
-  mov qword ptr [rdi + 40], r12
+  mulx r13, rbx, qword ptr [rcx + 16]
+  adox rbx, r11
+  adcx rbx, r14
+  mov qword ptr [rdi + 40], rbx
   mov r8, 0
   mulx rdx, r14, qword ptr [rcx + 24]
   adox r14, r13
@@ -269,11 +269,11 @@ fmul_e proc
   mulx r13, r8, qword ptr [rsi + 32]
   xor rcx, rcx
   adox r8, qword ptr [rsi + 0]
-  mulx r12, r9, qword ptr [rsi + 40]
+  mulx rbx, r9, qword ptr [rsi + 40]
   adcx r9, r13
   adox r9, qword ptr [rsi + 8]
   mulx r13, r10, qword ptr [rsi + 48]
-  adcx r10, r12
+  adcx r10, rbx
   adox r10, qword ptr [rsi + 16]
   mulx rax, r11, qword ptr [rsi + 56]
   adcx r11, r13
@@ -298,18 +298,18 @@ fmul_e proc
   mov qword ptr [rdi + 0], r8
   pop rdi
   pop rsi
+  pop rbx
   pop r15
   pop r14
   pop r13
-  pop r12
   ret
 fmul_e endp
 ALIGN 16
 fmul2_e proc
-  push r12
   push r13
   push r14
   push r15
+  push rbx
   push rsi
   push rdi
   mov rdi, rcx
@@ -327,8 +327,8 @@ fmul2_e proc
   adox r10, r9
   mov qword ptr [rdi + 8], r10
   
-  mulx r13, r12, qword ptr [rcx + 16]
-  adox r12, r11
+  mulx r13, rbx, qword ptr [rcx + 16]
+  adox rbx, r11
   mulx rdx, r14, qword ptr [rcx + 24]
   adox r14, r13
   mov rax, 0
@@ -343,11 +343,11 @@ fmul2_e proc
   mov qword ptr [rdi + 8], r8
   mulx r11, r10, qword ptr [rcx + 8]
   adox r10, r9
-  adcx r10, r12
+  adcx r10, rbx
   mov qword ptr [rdi + 16], r10
-  mulx r13, r12, qword ptr [rcx + 16]
-  adox r12, r11
-  adcx r12, r14
+  mulx r13, rbx, qword ptr [rcx + 16]
+  adox rbx, r11
+  adcx rbx, r14
   mov r8, 0
   mulx rdx, r14, qword ptr [rcx + 24]
   adox r14, r13
@@ -365,11 +365,11 @@ fmul2_e proc
   mov qword ptr [rdi + 16], r8
   mulx r11, r10, qword ptr [rcx + 8]
   adox r10, r9
-  adcx r10, r12
+  adcx r10, rbx
   mov qword ptr [rdi + 24], r10
-  mulx r13, r12, qword ptr [rcx + 16]
-  adox r12, r11
-  adcx r12, r14
+  mulx r13, rbx, qword ptr [rcx + 16]
+  adox rbx, r11
+  adcx rbx, r14
   mov r8, 0
   mulx rdx, r14, qword ptr [rcx + 24]
   adox r14, r13
@@ -387,12 +387,12 @@ fmul2_e proc
   mov qword ptr [rdi + 24], r8
   mulx r11, r10, qword ptr [rcx + 8]
   adox r10, r9
-  adcx r10, r12
+  adcx r10, rbx
   mov qword ptr [rdi + 32], r10
-  mulx r13, r12, qword ptr [rcx + 16]
-  adox r12, r11
-  adcx r12, r14
-  mov qword ptr [rdi + 40], r12
+  mulx r13, rbx, qword ptr [rcx + 16]
+  adox rbx, r11
+  adcx rbx, r14
+  mov qword ptr [rdi + 40], rbx
   mov r8, 0
   mulx rdx, r14, qword ptr [rcx + 24]
   adox r14, r13
@@ -414,8 +414,8 @@ fmul2_e proc
   adox r10, r9
   mov qword ptr [rdi + 72], r10
   
-  mulx r13, r12, qword ptr [rcx + 48]
-  adox r12, r11
+  mulx r13, rbx, qword ptr [rcx + 48]
+  adox rbx, r11
   mulx rdx, r14, qword ptr [rcx + 56]
   adox r14, r13
   mov rax, 0
@@ -430,11 +430,11 @@ fmul2_e proc
   mov qword ptr [rdi + 72], r8
   mulx r11, r10, qword ptr [rcx + 40]
   adox r10, r9
-  adcx r10, r12
+  adcx r10, rbx
   mov qword ptr [rdi + 80], r10
-  mulx r13, r12, qword ptr [rcx + 48]
-  adox r12, r11
-  adcx r12, r14
+  mulx r13, rbx, qword ptr [rcx + 48]
+  adox rbx, r11
+  adcx rbx, r14
   mov r8, 0
   mulx rdx, r14, qword ptr [rcx + 56]
   adox r14, r13
@@ -452,11 +452,11 @@ fmul2_e proc
   mov qword ptr [rdi + 80], r8
   mulx r11, r10, qword ptr [rcx + 40]
   adox r10, r9
-  adcx r10, r12
+  adcx r10, rbx
   mov qword ptr [rdi + 88], r10
-  mulx r13, r12, qword ptr [rcx + 48]
-  adox r12, r11
-  adcx r12, r14
+  mulx r13, rbx, qword ptr [rcx + 48]
+  adox rbx, r11
+  adcx rbx, r14
   mov r8, 0
   mulx rdx, r14, qword ptr [rcx + 56]
   adox r14, r13
@@ -474,12 +474,12 @@ fmul2_e proc
   mov qword ptr [rdi + 88], r8
   mulx r11, r10, qword ptr [rcx + 40]
   adox r10, r9
-  adcx r10, r12
+  adcx r10, rbx
   mov qword ptr [rdi + 96], r10
-  mulx r13, r12, qword ptr [rcx + 48]
-  adox r12, r11
-  adcx r12, r14
-  mov qword ptr [rdi + 104], r12
+  mulx r13, rbx, qword ptr [rcx + 48]
+  adox rbx, r11
+  adcx rbx, r14
+  mov qword ptr [rdi + 104], rbx
   mov r8, 0
   mulx rdx, r14, qword ptr [rcx + 56]
   adox r14, r13
@@ -500,11 +500,11 @@ fmul2_e proc
   mulx r13, r8, qword ptr [rsi + 32]
   xor rcx, rcx
   adox r8, qword ptr [rsi + 0]
-  mulx r12, r9, qword ptr [rsi + 40]
+  mulx rbx, r9, qword ptr [rsi + 40]
   adcx r9, r13
   adox r9, qword ptr [rsi + 8]
   mulx r13, r10, qword ptr [rsi + 48]
-  adcx r10, r12
+  adcx r10, rbx
   adox r10, qword ptr [rsi + 16]
   mulx rax, r11, qword ptr [rsi + 56]
   adcx r11, r13
@@ -533,11 +533,11 @@ fmul2_e proc
   mulx r13, r8, qword ptr [rsi + 96]
   xor rcx, rcx
   adox r8, qword ptr [rsi + 64]
-  mulx r12, r9, qword ptr [rsi + 104]
+  mulx rbx, r9, qword ptr [rsi + 104]
   adcx r9, r13
   adox r9, qword ptr [rsi + 72]
   mulx r13, r10, qword ptr [rsi + 112]
-  adcx r10, r12
+  adcx r10, rbx
   adox r10, qword ptr [rsi + 80]
   mulx rax, r11, qword ptr [rsi + 120]
   adcx r11, r13
@@ -562,24 +562,24 @@ fmul2_e proc
   mov qword ptr [rdi + 32], r8
   pop rdi
   pop rsi
+  pop rbx
   pop r15
   pop r14
   pop r13
-  pop r12
   ret
 fmul2_e endp
 ALIGN 16
 fsqr_e proc
   push r15
-  push r12
   push r13
   push r14
+  push r12
   push rbx
   push rsi
   push rdi
   mov rdi, rcx
   mov rsi, rdx
-  mov rbx, r8
+  mov r12, r8
   ;# Compute the raw multiplication: tmp <- f * f
   ;# Step 1: Compute all partial products
   mov rdx, qword ptr [rsi + 0]
@@ -595,11 +595,11 @@ fsqr_e proc
   ;# f[3]*f[0]
   mov rdx, qword ptr [rsi + 24]
   ;# f[3]
-  mulx r12, r11, qword ptr [rsi + 8]
+  mulx rbx, r11, qword ptr [rsi + 8]
   adcx r11, rcx
   ;# f[1]*f[3]
   mulx r13, rax, qword ptr [rsi + 16]
-  adcx r12, rax
+  adcx rbx, rax
   ;# f[2]*f[3]
   mov rdx, qword ptr [rsi + 8]
   adcx r13, r15
@@ -614,12 +614,12 @@ fsqr_e proc
   adcx r8, r8
   adox r11, rcx
   adcx r9, r9
-  adox r12, r15
+  adox rbx, r15
   adcx r10, r10
   adox r13, r15
   adcx r11, r11
   adox r14, r15
-  adcx r12, r12
+  adcx rbx, rbx
   adcx r13, r13
   adcx r14, r14
   
@@ -647,8 +647,8 @@ fsqr_e proc
   adcx r11, rax
   mov qword ptr [rdi + 32], r11
   
-  adcx r12, rcx
-  mov qword ptr [rdi + 40], r12
+  adcx rbx, rcx
+  mov qword ptr [rdi + 40], rbx
   
   mov rdx, qword ptr [rsi + 24]
   mulx rcx, rax, rdx
@@ -662,18 +662,18 @@ fsqr_e proc
   
   ;# Line up pointers
   mov rsi, rdi
-  mov rdi, rbx
+  mov rdi, r12
   ;# Wrap the result back into the field
   ;# Step 1: Compute dst + carry == tmp_hi * 38 + tmp_lo
   mov rdx, 38
   mulx r13, r8, qword ptr [rsi + 32]
   xor rcx, rcx
   adox r8, qword ptr [rsi + 0]
-  mulx r12, r9, qword ptr [rsi + 40]
+  mulx rbx, r9, qword ptr [rsi + 40]
   adcx r9, r13
   adox r9, qword ptr [rsi + 8]
   mulx r13, r10, qword ptr [rsi + 48]
-  adcx r10, r12
+  adcx r10, rbx
   adox r10, qword ptr [rsi + 16]
   mulx rax, r11, qword ptr [rsi + 56]
   adcx r11, r13
@@ -699,24 +699,24 @@ fsqr_e proc
   pop rdi
   pop rsi
   pop rbx
+  pop r12
   pop r14
   pop r13
-  pop r12
   pop r15
   ret
 fsqr_e endp
 ALIGN 16
 fsqr2_e proc
   push r15
-  push r12
   push r13
   push r14
+  push r12
   push rbx
   push rsi
   push rdi
   mov rdi, rcx
   mov rsi, rdx
-  mov rbx, r8
+  mov r12, r8
   ;# Step 1: Compute all partial products
   mov rdx, qword ptr [rsi + 0]
   ;# f[0]
@@ -731,11 +731,11 @@ fsqr2_e proc
   ;# f[3]*f[0]
   mov rdx, qword ptr [rsi + 24]
   ;# f[3]
-  mulx r12, r11, qword ptr [rsi + 8]
+  mulx rbx, r11, qword ptr [rsi + 8]
   adcx r11, rcx
   ;# f[1]*f[3]
   mulx r13, rax, qword ptr [rsi + 16]
-  adcx r12, rax
+  adcx rbx, rax
   ;# f[2]*f[3]
   mov rdx, qword ptr [rsi + 8]
   adcx r13, r15
@@ -750,12 +750,12 @@ fsqr2_e proc
   adcx r8, r8
   adox r11, rcx
   adcx r9, r9
-  adox r12, r15
+  adox rbx, r15
   adcx r10, r10
   adox r13, r15
   adcx r11, r11
   adox r14, r15
-  adcx r12, r12
+  adcx rbx, rbx
   adcx r13, r13
   adcx r14, r14
   
@@ -783,8 +783,8 @@ fsqr2_e proc
   adcx r11, rax
   mov qword ptr [rdi + 32], r11
   
-  adcx r12, rcx
-  mov qword ptr [rdi + 40], r12
+  adcx rbx, rcx
+  mov qword ptr [rdi + 40], rbx
   
   mov rdx, qword ptr [rsi + 24]
   mulx rcx, rax, rdx
@@ -810,11 +810,11 @@ fsqr2_e proc
   ;# f[3]*f[0]
   mov rdx, qword ptr [rsi + 56]
   ;# f[3]
-  mulx r12, r11, qword ptr [rsi + 40]
+  mulx rbx, r11, qword ptr [rsi + 40]
   adcx r11, rcx
   ;# f[1]*f[3]
   mulx r13, rax, qword ptr [rsi + 48]
-  adcx r12, rax
+  adcx rbx, rax
   ;# f[2]*f[3]
   mov rdx, qword ptr [rsi + 40]
   adcx r13, r15
@@ -829,12 +829,12 @@ fsqr2_e proc
   adcx r8, r8
   adox r11, rcx
   adcx r9, r9
-  adox r12, r15
+  adox rbx, r15
   adcx r10, r10
   adox r13, r15
   adcx r11, r11
   adox r14, r15
-  adcx r12, r12
+  adcx rbx, rbx
   adcx r13, r13
   adcx r14, r14
   
@@ -862,8 +862,8 @@ fsqr2_e proc
   adcx r11, rax
   mov qword ptr [rdi + 96], r11
   
-  adcx r12, rcx
-  mov qword ptr [rdi + 104], r12
+  adcx rbx, rcx
+  mov qword ptr [rdi + 104], rbx
   
   mov rdx, qword ptr [rsi + 56]
   mulx rcx, rax, rdx
@@ -877,18 +877,18 @@ fsqr2_e proc
   
   ;# Line up pointers
   mov rsi, rdi
-  mov rdi, rbx
+  mov rdi, r12
   
   ;# Step 1: Compute dst + carry == tmp_hi * 38 + tmp_lo
   mov rdx, 38
   mulx r13, r8, qword ptr [rsi + 32]
   xor rcx, rcx
   adox r8, qword ptr [rsi + 0]
-  mulx r12, r9, qword ptr [rsi + 40]
+  mulx rbx, r9, qword ptr [rsi + 40]
   adcx r9, r13
   adox r9, qword ptr [rsi + 8]
   mulx r13, r10, qword ptr [rsi + 48]
-  adcx r10, r12
+  adcx r10, rbx
   adox r10, qword ptr [rsi + 16]
   mulx rax, r11, qword ptr [rsi + 56]
   adcx r11, r13
@@ -917,11 +917,11 @@ fsqr2_e proc
   mulx r13, r8, qword ptr [rsi + 96]
   xor rcx, rcx
   adox r8, qword ptr [rsi + 64]
-  mulx r12, r9, qword ptr [rsi + 104]
+  mulx rbx, r9, qword ptr [rsi + 104]
   adcx r9, r13
   adox r9, qword ptr [rsi + 72]
   mulx r13, r10, qword ptr [rsi + 112]
-  adcx r10, r12
+  adcx r10, rbx
   adox r10, qword ptr [rsi + 80]
   mulx rax, r11, qword ptr [rsi + 120]
   adcx r11, r13
@@ -947,9 +947,9 @@ fsqr2_e proc
   pop rdi
   pop rsi
   pop rbx
+  pop r12
   pop r14
   pop r13
-  pop r12
   pop r15
   ret
 fsqr2_e endp

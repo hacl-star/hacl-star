@@ -25,7 +25,7 @@ endif
 build/runbenchmark:
 	mkdir -p $(dir $@) && \
 	cd $(dir $@) && \
-	cmake -DCMAKE_BUILD_TYPE=Release $(CMAKE_DEFS) .. &&  \
+	cmake -DCMAKE_BUILD_TYPE=Debug $(CMAKE_DEFS) .. &&  \
 	$(MAKE) runbenchmark && \
 	./runbenchmark -n 10 && \
 	cd ..
