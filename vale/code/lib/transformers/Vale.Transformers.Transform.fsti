@@ -146,3 +146,28 @@ val lemma_mov_mov_elim :
          (equiv_states va_sM va_sM') /\
          (va_ensure_total transformed va_s0 va_sM' va_fM') /\
          (va_get_ok va_sM')))
+
+/// Transformation to remove all prefetches.
+///
+/// This transformer exists as a way to demonstrate that code with
+/// some prefetches is exactly equivalent to code without.
+
+val prefetch_elim :
+  orig:va_code ->
+  va_transformation_result
+
+val lemma_prefetch_elim :
+  orig:va_code ->
+  transformed:va_code ->
+  va_s0:va_state -> va_sM:va_state -> va_fM:va_fuel ->
+  Ghost (va_state & va_fuel)
+    (requires (
+        (va_require_total transformed (prefetch_elim orig).result va_s0) /\
+        (va_get_ok va_s0) /\
+        (va_ensure_total orig va_s0 va_sM va_fM) /\
+        (va_get_ok va_sM)))
+    (ensures (fun (va_sM', va_fM') ->
+         (va_fM' == va_fM) /\
+         (equiv_states va_sM va_sM') /\
+         (va_ensure_total transformed va_s0 va_sM' va_fM') /\
+         (va_get_ok va_sM')))
