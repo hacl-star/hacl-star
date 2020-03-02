@@ -1,4 +1,6 @@
-module PKCS11.Spec3_13
+module Hacl.PKCS11.Specification
+
+
 open FStar.UInt32
 open FStar.Seq
 open FStar.Option
@@ -8,20 +10,58 @@ open FStar.Seq.Properties
 
 open PKCS11.Spec.Lemmas
 
+
 (* #set-options "--z3rlimit 200 --lax"  *)
 
 #set-options "--z3rlimit 300"
 
-type _CK_MECHANISM_TYPE = nat
 
-type _CK_ULONG = nat
+(* Zero-level types *)
+type uint32_t = (a: nat {a < pow2 32})
 
-type _CK_ATTRIBUTE_TYPE = FStar.UInt32.t
 
+(* First-level types *)
+
+(* 
+/* an unsigned value, at least 32 bits long */
+typedef unsigned long int CK_ULONG; 
+*)
+
+type _CK_ULONG = uint32_t
+
+
+(* Second-level types"*)
+
+(*
+/* CK_MECHANISM_TYPE is a value that identifies a mechanism
+ * type */
+typedef CK_ULONG          CK_MECHANISM_TYPE;*)
+type _CK_MECHANISM_TYPE = _CK_ULONG
+
+(*
+/* CK_ATTRIBUTE_TYPE is a value that identifies an attribute
+ * type */
+typedef CK_ULONG          CK_ATTRIBUTE_TYPE;
+*)
+type _CK_ATTRIBUTE_TYPE = _CK_ULONG
+
+(*
+/* CK_OBJECT_CLASS is a value that identifies the classes (or
+ * types) of objects that Cryptoki recognizes.  It is defined
+ * as follows: */
+typedef CK_ULONG          CK_OBJECT_CLASS;
+*)
 type _CK_OBJECT_CLASS = _CK_ULONG
 
-type _CK_KEY_TYPE_T = _CK_ULONG
+(* /* CK_KEY_TYPE is a value that identifies a key type */
+typedef CK_ULONG          CK_KEY_TYPE;
+*)
+type _CK_KEY_TYPE = _CK_ULONG
 
+(* /* CK_OBJECT_CLASS is a value that identifies the classes (or
+ * types) of objects that Cryptoki recognizes.  It is defined
+ * as follows: */
+typedef CK_ULONG          CK_OBJECT_CLASS; *) 
 type _CK_OBJECT_HANDLE = _CK_ULONG
 
 type _CK_EXCEPTION = _CK_ULONG
