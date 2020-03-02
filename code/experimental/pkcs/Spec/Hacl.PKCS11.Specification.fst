@@ -40,7 +40,16 @@ type _CK_ULONG = uint32_t
 typedef CK_ULONG          CK_MECHANISM_TYPE;*)
 type _CK_MECHANISM_TYPE = _CK_ULONG
 
-assume val _CK_MECHANISM_TYPE__toNat: _CK_MECHANISM_TYPE -> Tot nat
+
+(* This is an example of the implementation *)
+val isMechanismUsedForSignature: mechanism : _CK_MECHANISM_TYPE -> Tot bool
+
+let isMechanismUsedForSignature mechanism = 
+  match mechanism with 
+  |0 -> true
+  |_ -> false
+
+
 
 
 (*
@@ -152,38 +161,69 @@ type keyEntity =
   } -> keyEntity
 
 
-
 type temporalStorage = 
-	|Element: dat: seq FStar.UInt8.t * _CK_ULONG -> temporalStorage
+  |Element: seq FStar.UInt8.t -> temporalStorage
 
-
-
+(* ??? *)
 type mechanismSpecification = 
 	| Mechanism: mechanismID: _CK_MECHANISM_TYPE -> 
 		pParameters: seq FStar.UInt8.t -> 
 		mechanismSpecification
 
-let _SubSessionInit = 0
-let _SubSessionUpd = 1
 
-let _SubSessionVerifyInit = 0
-let _SubSessionUpdInit = 1
+type _SessionState = 
+  |SubsessionSignatureInit
+  |SubsessionSignatureUpdate
+  |SubsessionVerificationInit
+  |SunsessionVerificationUpdate
 
+(* A metadata element represention an ongoing function *)
 type subSession (k: seq keyEntity) (m: seq mechanismSpecification) = 
-	|Signature: id: _CK_SESSION_HANDLE -> 
-		state: _CK_ULONG{state = _SubSessionInit \/ state = _SubSessionUpd} ->
-		pMechanism: _CK_MECHANISM_TYPE{exists (a: nat {a < Seq.length m}). let mechanism = Seq.index m a in 
-			mechanism.mechanismID = pMechanism} ->
-		keyHandler: _CK_OBJECT_HANDLE{Seq.length k > keyHandler}-> 
-		temp: option temporalStorage -> 
-		subSession k m
-	|Verify : 	id: _CK_SESSION_HANDLE -> 
-		state: _CK_ULONG{state = _SubSessionVerifyInit \/ state = _SubSessionUpdInit} ->
-		pMechanism: _CK_MECHANISM_TYPE{exists (a: nat {a < Seq.length m}). let mechanism = Seq.index m a in 
-			mechanism.mechanismID = pMechanism} ->
-		keyHandler: _CK_OBJECT_HANDLE {Seq.length k > keyHandler}-> 
-		temp: option temporalStorage -> 
-		subSession k m
+  |Signature: 
+    (* The session identifier that has caused the operation *)
+    id: _CK_SESSION_HANDLE -> 
+    (* The state of the ongoing session *)
+    state: _SessionState {state = SubsessionSignatureInit \/ state = SubsessionSignatureUpdate} -> 
+    (* The identifier of the mechanism used for the operation *)
+    (* The mechanism requirements: present in the device and to be the signature algorithm *)
+    pMechanism: _CK_MECHANISM_TYPE
+      {exists (a: nat {a < Seq.length m}). let mechanism = Seq.index m a in mechanism.mechanismID = pMechanism /\ isMechanismUsedForSignature pMechanism} ->
+    (* The identifier of the key used for the operation *)
+    (* The key requirement: present in the device and to be a signature key *)
+    keyHandler: _CK_OBJECT_HANDLE{Seq.length k > keyHandler} -> 
+    (* Temporal space for the signature *)
+    temp: option temporalStorage -> subSession k m
+  |Verify : 	
+    (* The session identifier that has caused the operation *)
+    id: _CK_SESSION_HANDLE -> 
+    (* The state of the ongoing session *)
+    state: _SessionState {state = SubsessionVerificationInit \/ state = SunsessionVerificationUpdate} ->
+    (* The identifier of the mechanism used for the operation *)
+    (* The mechanism requirements: present in the device and to be the signature algorithm *)
+    pMechanism: _CK_MECHANISM_TYPE
+      {exists (a: nat {a < Seq.length m}). let mechanism = Seq.index m a in mechanism.mechanismID = pMechanism} ->
+    (* The identifier of the key used for the operation *)
+    (* The key requirement: present in the device and to be a signature key *)
+    keyHandler: _CK_OBJECT_HANDLE {Seq.length k > keyHandler} -> 
+    (* Temporal space for the signature *)
+    temp: option temporalStorage -> subSession k m
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 val subSessionGetID: #ks: seq keyEntity -> #ms: seq mechanismSpecification -> s: subSession ks ms -> Tot _CK_SESSION_HANDLE
 
