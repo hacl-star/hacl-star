@@ -131,23 +131,13 @@ let rec push_pre (inv_bv: bv) (t: term): Tac term =
       fail ("not just an arrow: " ^ term_to_string t)
 
 let rec to_reduce t: Tac _ =
-  match inspect t with
+  match fst (collect_app t) with
   | Tv_FVar fv ->
-      [ term_to_string t ]
+      [ fv_to_string fv ]
   | Tv_Arrow bv c ->
       begin match inspect_comp c with
       | C_Total t _ ->
-          begin match inspect t with
-          | Tv_App hd _ ->
-              begin match inspect hd with
-              | Tv_FVar fv ->
-                  [ term_to_string hd ]
-              | _ ->
-                  []
-              end
-          | _ ->
-              to_reduce t
-          end
+          to_reduce t
       | _ ->
           []
       end

@@ -88,7 +88,6 @@ val encode_point:
   -> i:point s
   -> Stack unit
     (requires fun h0 ->
-      (s = M64 ==> Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
       live h0 o /\ live h0 i /\ disjoint o i /\
       state_inv_t h0 (get_x i) /\ state_inv_t h0 (get_z i))
     (ensures  fun h0 _ h1 -> modifies (loc o) h0 h1 /\
@@ -124,7 +123,6 @@ val cswap2:
   -> p2:felem2 s
   -> Stack unit
     (requires fun h0 ->
-      (s = M64 ==> Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
       live h0 p1 /\ live h0 p2 /\ disjoint p1 p2)
     (ensures  fun h0 _ h1 ->
       modifies (loc p1 |+| loc p2) h0 h1 /\
@@ -146,7 +144,6 @@ val ladder_step:
   -> tmp2:felem_wide2 s
   -> Stack unit
     (requires fun h0 ->
-      (s = M64 ==> Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
       live h0 k /\ live h0 q /\ live h0 p01_tmp1_swap /\ live h0 tmp2 /\
       LowStar.Monotonic.Buffer.all_disjoint [loc k; loc q; loc p01_tmp1_swap; loc tmp2] /\
      (let nq = gsub p01_tmp1_swap 0ul (2ul *! nlimb s) in
@@ -202,7 +199,6 @@ val ladder_step_loop:
   -> tmp2:felem_wide2 s
   -> Stack unit
     (requires fun h0 ->
-      (s = M64 ==> Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
       live h0 k /\ live h0 q /\ live h0 p01_tmp1_swap /\ live h0 tmp2 /\
       LowStar.Monotonic.Buffer.all_disjoint [loc k; loc q; loc p01_tmp1_swap; loc tmp2] /\
      (let nq = gsub p01_tmp1_swap 0ul (2ul *! nlimb s) in
@@ -267,7 +263,6 @@ val ladder0_:
   -> tmp2:felem_wide2 s
   -> Stack unit
     (requires fun h0 ->
-      (s = M64 ==> Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
       live h0 k /\ live h0 q /\ live h0 p01_tmp1_swap /\ live h0 tmp2 /\
       LowStar.Monotonic.Buffer.all_disjoint [loc k; loc q; loc p01_tmp1_swap; loc tmp2] /\
      (let nq = gsub p01_tmp1_swap 0ul (2ul *! nlimb s) in
@@ -313,7 +308,6 @@ val ladder1_:
   -> tmp2:felem_wide2 s
   -> Stack unit
     (requires fun h0 ->
-      (s = M64 ==> Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
       live h0 p01_tmp1 /\ live h0 tmp2 /\ disjoint p01_tmp1 tmp2 /\
      (let nq = gsub p01_tmp1 0ul (2ul *! nlimb s) in
       state_inv_t h0 (get_x nq) /\ state_inv_t h0 (get_z nq)))
@@ -342,7 +336,6 @@ val ladder2_:
   -> tmp2:felem_wide2 s
   -> Stack unit
     (requires fun h0 ->
-      (s = M64 ==> Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
       live h0 k /\ live h0 q /\ live h0 p01_tmp1_swap /\ live h0 tmp2 /\
       LowStar.Monotonic.Buffer.all_disjoint [loc k; loc q; loc p01_tmp1_swap; loc tmp2] /\
      (let nq = gsub p01_tmp1_swap 0ul (2ul *! nlimb s) in
@@ -377,7 +370,6 @@ val ladder3_:
   -> p01:lbuffer (limb s) (4ul *! nlimb s)
   -> Stack unit
     (requires fun h0 ->
-      (s = M64 ==> Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
       live h0 q /\ live h0 p01 /\ disjoint q p01 /\
       fget_z h0 q == 1 /\ state_inv_t h0 (get_x q) /\ state_inv_t h0 (get_z q))
     (ensures  fun h0 _ h1 ->
@@ -420,7 +412,6 @@ val ladder4_:
   -> tmp2:felem_wide2 s
   -> Stack unit
     (requires fun h0 ->
-      (s = M64 ==> Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
       live h0 k /\ live h0 q /\ live h0 p01_tmp1_swap /\ live h0 tmp2 /\
       LowStar.Monotonic.Buffer.all_disjoint [loc k; loc q; loc p01_tmp1_swap; loc tmp2] /\
       fget_z h0 q == 1 /\ state_inv_t h0 (get_x q) /\ state_inv_t h0 (get_z q))
@@ -453,7 +444,6 @@ val montgomery_ladder:
   -> i:point s
   -> Stack unit
     (requires fun h0 ->
-      (s = M64 ==> Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
       live h0 o /\ live h0 k /\ live h0 i /\
       (disjoint o i \/ o == i) /\ disjoint o k /\ disjoint k i /\
       fget_z h0 i == 1 /\ state_inv_t h0 (get_x i) /\ state_inv_t h0 (get_z i))
@@ -480,7 +470,7 @@ let g25519_t = x:ilbuffer byte_t 32ul{witnessed x (Lib.Sequence.of_list S.basepo
 /// Public API
 /// ==========
 
-val scalarmult: (#s: field_spec) -> scalarmult_st s
+val scalarmult: (#s: field_spec) -> scalarmult_st s True
 [@ Meta.Attribute.specialize ]
 let scalarmult #s out priv pub =
   push_frame ();
@@ -490,7 +480,7 @@ let scalarmult #s out priv pub =
   encode_point #s out init;
   pop_frame()
 
-val secret_to_public (#s:field_spec) (g25519: g25519_t): secret_to_public_st s
+val secret_to_public (#s:field_spec) (g25519: g25519_t): secret_to_public_st s True
 [@ Meta.Attribute.specialize ]
 let secret_to_public #s g25519 pub priv =
   push_frame ();
@@ -500,7 +490,7 @@ let secret_to_public #s g25519 pub priv =
   scalarmult #s pub priv basepoint;
   pop_frame()
 
-val ecdh: (#s:field_spec) -> ecdh_st s
+val ecdh: (#s:field_spec) -> ecdh_st s True
 [@ Meta.Attribute.specialize ]
 let ecdh #s out priv pub =
   push_frame ();
