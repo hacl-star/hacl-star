@@ -12,7 +12,6 @@ open PKCS11.Spec.Lemmas
 open Hacl.PKCS.Specification.Constants
 
 
-
 (* #set-options "--z3rlimit 200 --lax"  *)
 
 #set-options "--z3rlimit 300 --ifuel 5 --fuel 5"
@@ -20,7 +19,6 @@ open Hacl.PKCS.Specification.Constants
 
 (* Zero-level types *)
 type uint32_t = a: nat {a < pow2 32}
-
 
 (* First-level types *)
 
@@ -72,7 +70,11 @@ let isMechanismUsedForVerification mechanism =
  * type */
 typedef CK_ULONG          CK_ATTRIBUTE_TYPE;
 *)
-type _CK_ATTRIBUTE_TYPE = _CK_ULONG
+type _CK_ATTRIBUTE_TYPE = 
+  |CKA_CLASS
+  |CKA_PRIVATE
+  |CKA_KEY_TYPE
+  (* and much more *)
 
 (*
 /* CK_OBJECT_CLASS is a value that identifies the classes (or
@@ -135,39 +137,41 @@ type _CKS_MECHANISM_INFO =
   | MecInfo: ulMinKeySize: _CK_ULONG -> ulMaxKeySize: _CK_ULONG -> flags: _CK_FLAGS -> _CKS_MECHANISM_INFO	
 
 
-(* The types are to be checked *)
-type attributeSpecification  = 
-	| CKA_CLASS: typeId: _CK_ATTRIBUTE_TYPE{typeId= 0} -> pValue: seq _CK_OBJECT_CLASS{length pValue = 1} ->  attributeSpecification
-	| CKA_PRIVATE: typeId: _CK_ATTRIBUTE_TYPE{typeId= 2} ->  pValue: seq bool-> attributeSpecification
-	| CKA_VALUE:typeId: _CK_ATTRIBUTE_TYPE{typeId= 11} ->pValue: seq _CK_ULONG ->a: attributeSpecification
-	| CKA_KEY_TYPE: typeId: _CK_ATTRIBUTE_TYPE{typeId= 100} -> pValue: seq _CK_KEY_TYPE-> attributeSpecification
-	| CKA_ID: typeId: _CK_ATTRIBUTE_TYPE{typeId= 102} -> pValue: seq _CK_ULONG->a: attributeSpecification
-	| CKA_SENSITIVE: typeId: _CK_ATTRIBUTE_TYPE{typeId= 103} ->pValue: seq bool -> attributeSpecification
-	| CKA_ENCRYPT: typeId: _CK_ATTRIBUTE_TYPE{typeId= 104} ->pValue: (seq bool) ->a: attributeSpecification
-	| CKA_DECRYPT: typeId: _CK_ATTRIBUTE_TYPE{typeId= 105}->pValue: seq bool ->a: attributeSpecification
-	| CKA_SIGN: typeId: _CK_ATTRIBUTE_TYPE{typeId= 108} -> pValue: seq _CK_ULONG ->a: attributeSpecification
-	| CKA_VERIFY: typeId: _CK_ATTRIBUTE_TYPE{typeId= 0x10A} -> pValue: seq _CK_ULONG ->a: attributeSpecification
-	| CKA_VALUE_LEN: typeId: _CK_ATTRIBUTE_TYPE{typeId= 0x161} -> pValue: seq _CK_ULONG -> attributeSpecification
+let _ck_attribute_get_type: _CK_ATTRIBUTE_TYPE -> Tot Type0 = function
+  |CKA_CLASS -> _CK_OBJECT_CLASS
+  |_ -> _CK_ULONG
 
 
+(*/* CK_ATTRIBUTE is a structure that includes the type, length
+ * and value of an attribute */
+*)
+
+type _CK_ATTRIBUTE  = 
+  |A: 
+    aType: _CK_ATTRIBUTE_TYPE -> pValue: seq (_ck_attribute_get_type aType) -> ulValue: nat{ulValue < pow2 32 /\ length pValue = ulValue} -> _CK_ATTRIBUTE
 
 
 type _object = 
   |O: 
     identifier: _CK_ULONG -> 
     dat: seq FStar.UInt8.t -> 
-    attrs: seq attributeSpecification -> 
+    attrs: seq _CK_ATTRIBUTE-> 
     _object
 
 
 (* The method takes an object and returns whether amongs its attributes there is one that is CKA_CLASS. If the attribute is found that the attribute is returned, otherwise the None is returned *)
 
-val getObjectAttributeClass: obj: _object -> Tot (r: option attributeSpecification
-  {Some? r  ==> (let a = (match r with Some a -> a) in  CKA_CLASS? a)}) 		
+val getObjectAttributeClass: obj: _object -> Tot (r: option _CK_ATTRIBUTE
+  {Some? r  ==>
+    (
+      let a = (match r with Some a -> a) in  
+      a.aType == CKA_CLASS
+   )
+  }  
+)
 
 let getObjectAttributeClass obj = 
-  find_l (fun x -> CKA_CLASS? x) obj.attrs
-
+  find_l (fun x -> x.aType = CKA_CLASS) obj.attrs
 
 
 type keyEntity = 
