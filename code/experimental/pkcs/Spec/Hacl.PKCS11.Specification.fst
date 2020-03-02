@@ -9,15 +9,17 @@ open FStar.Seq.Base
 open FStar.Seq.Properties
 
 open PKCS11.Spec.Lemmas
+open Hacl.PKCS.Specification.Constants
+
 
 
 (* #set-options "--z3rlimit 200 --lax"  *)
 
-#set-options "--z3rlimit 300"
+#set-options "--z3rlimit 300 --ifuel 5 --fuel 5"
 
 
 (* Zero-level types *)
-type uint32_t = (a: nat {a < pow2 32})
+type uint32_t = a: nat {a < pow2 32}
 
 
 (* First-level types *)
@@ -38,6 +40,9 @@ type _CK_ULONG = uint32_t
 typedef CK_ULONG          CK_MECHANISM_TYPE;*)
 type _CK_MECHANISM_TYPE = _CK_ULONG
 
+assume val _CK_MECHANISM_TYPE__toNat: _CK_MECHANISM_TYPE -> Tot nat
+
+
 (*
 /* CK_ATTRIBUTE_TYPE is a value that identifies an attribute
  * type */
@@ -51,7 +56,18 @@ type _CK_ATTRIBUTE_TYPE = _CK_ULONG
  * as follows: */
 typedef CK_ULONG          CK_OBJECT_CLASS;
 *)
-type _CK_OBJECT_CLASS = _CK_ULONG
+type _CK_OBJECT_CLASS = 
+  |CKO_DATA
+  |CKO_CERTIFICATE
+  |CKO_PUBLIC_KEY
+  |CKO_PRIVATE_KEY
+  |CKO_SECRET_KEY
+  |CKO_HW_FEATURE
+  |CKO_DOMAIN_PARAMETERS
+  |CKO_MECHANISM
+  |CKO_OTP_KEY
+  |CKO_VENDOR_DEFINED
+
 
 (* /* CK_KEY_TYPE is a value that identifies a key type */
 typedef CK_ULONG          CK_KEY_TYPE;
@@ -64,62 +80,77 @@ type _CK_KEY_TYPE = _CK_ULONG
 typedef CK_ULONG          CK_OBJECT_CLASS; *) 
 type _CK_OBJECT_HANDLE = _CK_ULONG
 
-type _CK_EXCEPTION = _CK_ULONG
+(*/* at least 32 bits; each bit is a Boolean flag */
+typedef CK_ULONG          CK_FLAGS;
+*)
+type _CK_FLAGS = _CK_ULONG 
 
-type _CK_FLAGS_T = _CK_ULONG
+(*/* CK_SESSION_HANDLE is a Cryptoki-assigned value that
+ * identifies a session */
+typedef CK_ULONG          CK_SESSION_HANDLE;
+*)
 type _CK_SESSION_HANDLE = _CK_ULONG
 
+(* 
+/* CK_MECHANISM_INFO provides information about a particular
+ * mechanism */
+typedef struct CK_MECHANISM_INFO {
+    CK_ULONG    ulMinKeySize;
+    CK_ULONG    ulMaxKeySize;
+    CK_FLAGS    flags;
+} CK_MECHANISM_INFO; *)
+
+
 type _CKS_MECHANISM_INFO = 
-	| MecInfo: flags: seq _CK_ULONG -> _CKS_MECHANISM_INFO	
-
-let _CKO_SECRET_KEY = 4
+  | MecInfo: ulMinKeySize: _CK_ULONG -> ulMaxKeySize: _CK_ULONG -> flags: _CK_FLAGS -> _CKS_MECHANISM_INFO	
 
 
+(* The types are to be checked *)
 type attributeSpecification  = 
-	| CKA_CLASS: typeId: _CK_ATTRIBUTE_TYPE{typeId= 0x0ul} -> pValue: seq _CK_OBJECT_CLASS{length pValue = 1} ->  attributeSpecification
-	| CKA_TOKEN: typeId: _CK_ATTRIBUTE_TYPE{typeId= 0x1ul}->  pValue: seq bool-> attributeSpecification
-	| CKA_PRIVATE: typeId: _CK_ATTRIBUTE_TYPE{typeId= 0x2ul} ->  pValue: seq bool-> attributeSpecification
-	| CKA_LABEL: typeId: _CK_ATTRIBUTE_TYPE{typeId= 0x3ul} ->  pValue: seq _CK_ULONG->a: attributeSpecification
-	| CKA_APPLICATION:typeId: _CK_ATTRIBUTE_TYPE{typeId= 0x10ul} ->pValue: seq _CK_ULONG ->a: attributeSpecification
-	| CKA_VALUE:typeId: _CK_ATTRIBUTE_TYPE{typeId= 0x11ul} ->pValue: seq _CK_ULONG ->a: attributeSpecification
-	| CKA_OBJECT_ID:typeId: _CK_ATTRIBUTE_TYPE{typeId= 0x12ul} -> pValue: seq _CK_ULONG ->a: attributeSpecification
-	| CKA_CERTIFICATE_TYPE:typeId: _CK_ATTRIBUTE_TYPE{typeId= 0x80ul} -> pValue: seq _CK_ULONG ->a: attributeSpecification
-	| CKA_ISSUER:typeId: _CK_ATTRIBUTE_TYPE{typeId= 0x81ul} ->pValue: seq _CK_ULONG ->a: attributeSpecification
-	| CKA_SERIAL_NUMBER: typeId: _CK_ATTRIBUTE_TYPE{typeId= 0x82ul}-> pValue: seq _CK_ULONG ->a: attributeSpecification
-	| CKA_KEY_TYPE: typeId: _CK_ATTRIBUTE_TYPE{typeId= 0x100ul} -> pValue: seq _CK_KEY_TYPE_T-> attributeSpecification
-	| CKA_ID: typeId: _CK_ATTRIBUTE_TYPE{typeId= 0x102ul} -> pValue: seq _CK_ULONG->a: attributeSpecification
-	| CKA_SENSITIVE: typeId: _CK_ATTRIBUTE_TYPE{typeId= 0x103ul} ->pValue: seq bool -> attributeSpecification
-	| CKA_ENCRYPT: typeId: _CK_ATTRIBUTE_TYPE{typeId= 0x104ul} ->pValue: (seq bool) ->a: attributeSpecification
-	| CKA_DECRYPT: typeId: _CK_ATTRIBUTE_TYPE{typeId= 0x105ul}->pValue: seq bool ->a: attributeSpecification
-	| CKA_WRAP: typeId: _CK_ATTRIBUTE_TYPE{typeId= 0x106ul} -> pValue: seq _CK_ULONG ->a: attributeSpecification
-	| CKA_UNWRAP: typeId: _CK_ATTRIBUTE_TYPE{typeId= 0x107ul} -> pValue: seq _CK_ULONG->a: attributeSpecification
-	| CKA_SIGN: typeId: _CK_ATTRIBUTE_TYPE{typeId= 0x108ul} -> pValue: seq _CK_ULONG ->a: attributeSpecification
-	| CKA_VERIFY: typeId: _CK_ATTRIBUTE_TYPE{typeId= 0x10Aul} -> pValue: seq _CK_ULONG ->a: attributeSpecification
-	| CKA_VALUE_LEN: typeId: _CK_ATTRIBUTE_TYPE{typeId= 0x161ul} -> pValue: seq _CK_ULONG -> attributeSpecification
-	| CKA_STUB: typeId: _CK_ATTRIBUTE_TYPE{typeId = 0x999ul} -> pValue: seq bool{length pValue = 1} -> attributeSpecification
+	| CKA_CLASS: typeId: _CK_ATTRIBUTE_TYPE{typeId= 0} -> pValue: seq _CK_OBJECT_CLASS{length pValue = 1} ->  attributeSpecification
+	| CKA_PRIVATE: typeId: _CK_ATTRIBUTE_TYPE{typeId= 2} ->  pValue: seq bool-> attributeSpecification
+	| CKA_VALUE:typeId: _CK_ATTRIBUTE_TYPE{typeId= 11} ->pValue: seq _CK_ULONG ->a: attributeSpecification
+	| CKA_KEY_TYPE: typeId: _CK_ATTRIBUTE_TYPE{typeId= 100} -> pValue: seq _CK_KEY_TYPE-> attributeSpecification
+	| CKA_ID: typeId: _CK_ATTRIBUTE_TYPE{typeId= 102} -> pValue: seq _CK_ULONG->a: attributeSpecification
+	| CKA_SENSITIVE: typeId: _CK_ATTRIBUTE_TYPE{typeId= 103} ->pValue: seq bool -> attributeSpecification
+	| CKA_ENCRYPT: typeId: _CK_ATTRIBUTE_TYPE{typeId= 104} ->pValue: (seq bool) ->a: attributeSpecification
+	| CKA_DECRYPT: typeId: _CK_ATTRIBUTE_TYPE{typeId= 105}->pValue: seq bool ->a: attributeSpecification
+	| CKA_SIGN: typeId: _CK_ATTRIBUTE_TYPE{typeId= 108} -> pValue: seq _CK_ULONG ->a: attributeSpecification
+	| CKA_VERIFY: typeId: _CK_ATTRIBUTE_TYPE{typeId= 0x10A} -> pValue: seq _CK_ULONG ->a: attributeSpecification
+	| CKA_VALUE_LEN: typeId: _CK_ATTRIBUTE_TYPE{typeId= 0x161} -> pValue: seq _CK_ULONG -> attributeSpecification
+
+
 
 
 type _object = 
-	|O: 
-		identifier: _CK_ULONG -> 
-		dat: seq FStar.UInt8.t -> 
-		attrs: seq attributeSpecification -> 
-		_object
+  |O: 
+    identifier: _CK_ULONG -> 
+    dat: seq FStar.UInt8.t -> 
+    attrs: seq attributeSpecification -> 
+    _object
 
-val classAttribute : a: _object -> Tot (a: option attributeSpecification{Some? a  ==> (let a = (match a with Some a -> a) in  CKA_CLASS? a)}) 		
 
-let classAttribute a = 
-	let attrs = a.attrs in 
-	find_l (fun x -> CKA_CLASS? x) attrs
+(* The method takes an object and returns whether amongs its attributes there is one that is CKA_CLASS. If the attribute is found that the attribute is returned, otherwise the None is returned *)
+
+val getObjectAttributeClass: obj: _object -> Tot (r: option attributeSpecification
+  {Some? r  ==> (let a = (match r with Some a -> a) in  CKA_CLASS? a)}) 		
+
+let getObjectAttributeClass obj = 
+  find_l (fun x -> CKA_CLASS? x) obj.attrs
+
+
 
 type keyEntity = 
-	|Key: element: _object{
-		(let attrs = classAttribute element in Some? attrs
-			&& 
-			(let a = (match attrs with Some a -> a) in 
-				let value = Seq.index (CKA_CLASS?.pValue a) 0 in value = _CKO_SECRET_KEY
-		)
-	)} -> keyEntity
+  |Key: element: _object{
+    (let attrs = getObjectAttributeClass element in Some? attrs && 
+      (
+	let a = (match attrs with Some a -> a) in 
+	let value = Seq.index (CKA_CLASS?.pValue a) 0 in 
+	value = CKO_OTP_KEY || value = CKO_PRIVATE_KEY  || value = CKO_PUBLIC_KEY || value = CKO_SECRET_KEY
+      )
+    )
+  } -> keyEntity
+
 
 
 type temporalStorage = 

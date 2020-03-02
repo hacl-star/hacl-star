@@ -1019,7 +1019,7 @@ typedef struct CK_MECHANISM_INFO {
 #define CKF_UNWRAP             0x00040000UL
 #define CKF_DERIVE             0x00080000UL
 
-/* Describe a token's EC capabilities not available in mechanism
+/* Describe a token's EC capabilities not available in mechCKanism
  * information. */
 #define CKF_EC_F_P             0x00100000UL
 #define CKF_EC_F_2M            0x00200000UL
