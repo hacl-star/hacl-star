@@ -51,23 +51,21 @@ let load_felem #s f b =
   | M64 -> F64.load_felem f b
 
 val store_felem:
-    #i:index -> (
-  let s = fst i in
-  let p = snd i in
-    b:lbuffer uint64 4ul
+    #s:field_spec
+  -> b:lbuffer uint64 4ul
   -> f:felem s
   -> Stack unit
     (requires fun h ->
-      p /\
+      (s = M64 ==> Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
       live h f /\ live h b /\ disjoint f b /\ state_inv_t h f)
     (ensures  fun h0 _ h1 ->
       modifies (loc b |+| loc f) h0 h1 /\
-      as_seq h1 b == BSeq.nat_to_intseq_le 4 (feval h0 f)))
+      as_seq h1 b == BSeq.nat_to_intseq_le 4 (feval h0 f))
 [@ Meta.Attribute.specialize ]
-let store_felem #i b f =
-  match i with
-  | M51, _ -> F51.store_felem b f
-  | M64, _ -> F64.store_felem #i b f
+let store_felem #s b f =
+  match s with
+  | M51 -> F51.store_felem b f
+  | M64 -> F64.store_felem b f
 
 inline_for_extraction noextract
 val set_zero:
