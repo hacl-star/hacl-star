@@ -38,7 +38,13 @@ type _CK_ULONG = uint32_t
 /* CK_MECHANISM_TYPE is a value that identifies a mechanism
  * type */
 typedef CK_ULONG          CK_MECHANISM_TYPE;*)
-type _CK_MECHANISM_TYPE = _CK_ULONG
+type _CK_MECHANISM_TYPE = 
+  |CKM_RSA_PKCS_KEY_PAIR_GEN
+  |CKM_DSA
+  |CKM_EC_KEY_PAIR_GEN
+  |CKM_ECDSA
+  |CKM_AES_KEY_GEN
+  (* and traditionally much more *)
 
 
 (* This is an example of the implementation *)
@@ -46,10 +52,19 @@ val isMechanismUsedForSignature: mechanism : _CK_MECHANISM_TYPE -> Tot bool
 
 let isMechanismUsedForSignature mechanism = 
   match mechanism with 
-  |0 -> true
+  |CKM_DSA -> true
+  |CKM_ECDSA -> true
   |_ -> false
 
 
+(* This is an example of the implementation *)
+val isMechanismUsedForVerification: mechanism: _CK_MECHANISM_TYPE -> Tot bool
+
+let isMechanismUsedForVerification mechanism =
+  match mechanism with
+  |CKM_DSA -> true
+  |CKM_ECDSA -> true
+  |_ -> false
 
 
 (*
@@ -81,7 +96,13 @@ type _CK_OBJECT_CLASS =
 (* /* CK_KEY_TYPE is a value that identifies a key type */
 typedef CK_ULONG          CK_KEY_TYPE;
 *)
-type _CK_KEY_TYPE = _CK_ULONG
+type _CK_KEY_TYPE = 
+  |CKK_RSA
+  |CKK_DSA
+  |CKK_DH
+  |CKK_EC 
+  (*and much more *)
+
 
 (* /* CK_OBJECT_CLASS is a value that identifies the classes (or
  * types) of objects that Cryptoki recognizes.  It is defined
