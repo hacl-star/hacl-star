@@ -129,6 +129,7 @@ typedef struct Hacl_Impl_PKCS11_DeviceModule_device_s
 {
   uint32_t keyBufferLen;
   Hacl_Impl_PKCS11_Internal_Object__object keys;
+  uint32_t freeMemory;
   uint32_t ulCountMechanisms;
   uint32_t *listSupportedMechanisms;
   uint32_t ulCountCurves;

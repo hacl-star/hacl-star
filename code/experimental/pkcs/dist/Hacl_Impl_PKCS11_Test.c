@@ -205,6 +205,45 @@ mechanismEnforcedAttributeCheck(
   }
 }
 
+extern bool Hacl_Impl_PKCS11_Mechanism_isMechanismCreation_(uint32_t mechanism);
+
+static Hacl_Impl_PKCS11_Result_exception_t isMechanismCreation(uint32_t mechanism)
+{
+  bool creation = Hacl_Impl_PKCS11_Mechanism_isMechanismCreation_(mechanism);
+  if (creation)
+  {
+    return Hacl_Impl_PKCS11_Result_CKR_OK;
+  }
+  return Hacl_Impl_PKCS11_Result_CKR_FUNCTION_FAILED;
+}
+
+static uint32_t mechanismCreationRequiredMemory(uint32_t mechanism)
+{
+  uint32_t mechanism1 = mechanism;
+  switch (mechanism1)
+  {
+    case 0U:
+      {
+        return (uint32_t)32U;
+      }
+    default:
+      {
+        return (uint32_t)32U;
+      }
+  }
+}
+
+static Hacl_Impl_PKCS11_Result_exception_t
+mechanismCreationHasEnoughMemory(Hacl_Impl_PKCS11_DeviceModule_device d, uint32_t mechanism)
+{
+  uint32_t requiredFreeSpace = mechanismCreationRequiredMemory(mechanism);
+  if (d.freeMemory > requiredFreeSpace)
+  {
+    return Hacl_Impl_PKCS11_Result_CKR_OK;
+  }
+  return Hacl_Impl_PKCS11_Result_CKR_DEVICE_MEMORY;
+}
+
 typedef struct
 dtuple2__Hacl_Impl_PKCS11_Result_exception_t__Hacl_Impl_PKCS11_Internal_Attribute_attribute__s
 {
@@ -257,54 +296,96 @@ _CKS_GenerateKey(
   Hacl_Impl_PKCS11_Internal_Attribute_attributeD *pTemplate
 )
 {
-  dtuple2__Hacl_Impl_PKCS11_Result_exception_t__Hacl_Impl_PKCS11_Internal_Attribute_attribute_
-  scrut = Hacl_Impl_PKCS11_Parsing_parseAttributes(ulCount, pTemplate);
-  Hacl_Impl_PKCS11_Result_exception_t exceptionParsing = scrut.fst;
-  Hacl_Impl_PKCS11_Internal_Attribute_attribute *parsedAttributes = scrut.snd;
-  if (!uu___is_CKR_OK(exceptionParsing))
-  {
-    return
-      (
-        (Prims_dtuple2__Hacl_Impl_PKCS11_Result_exception_t_uint32_t){
-          .fst = exceptionParsing,
-          .snd = (uint32_t)0U
-        }
-      );
-  }
-  Hacl_Impl_PKCS11_Result_exception_t sessionException = sessionVerification(d, hSession);
-  if (!uu___is_CKR_OK(sessionException))
-  {
-    return
-      (
-        (Prims_dtuple2__Hacl_Impl_PKCS11_Result_exception_t_uint32_t){
-          .fst = sessionException,
-          .snd = (uint32_t)0U
-        }
-      );
-  }
-  Hacl_Impl_PKCS11_Result_exception_t
-  mechanismCheckException = mechanismEnforcedAttributeCheck(d, pMechanism, parsedAttributes);
-  switch (mechanismCheckException)
+  Hacl_Impl_PKCS11_Result_exception_t mechanismCreation = isMechanismCreation(pMechanism);
+  switch (mechanismCreation)
   {
     case Hacl_Impl_PKCS11_Result_CKR_OK:
       {
-        Prims_dtuple2__Hacl_Impl_PKCS11_Result_exception_t_uint32_t scrut0 = _CKS_GenerateKey_(d);
-        Hacl_Impl_PKCS11_Result_exception_t exceptionMain = scrut0.fst;
-        uint32_t handler = scrut0.snd;
-        return
-          (
-            (Prims_dtuple2__Hacl_Impl_PKCS11_Result_exception_t_uint32_t){
-              .fst = exceptionMain,
-              .snd = handler
+        Hacl_Impl_PKCS11_Result_exception_t
+        isEnoughMemory = mechanismCreationHasEnoughMemory(d, pMechanism);
+        switch (isEnoughMemory)
+        {
+          case Hacl_Impl_PKCS11_Result_CKR_OK:
+            {
+              dtuple2__Hacl_Impl_PKCS11_Result_exception_t__Hacl_Impl_PKCS11_Internal_Attribute_attribute_
+              scrut = Hacl_Impl_PKCS11_Parsing_parseAttributes(ulCount, pTemplate);
+              Hacl_Impl_PKCS11_Result_exception_t exceptionParsing = scrut.fst;
+              Hacl_Impl_PKCS11_Internal_Attribute_attribute *parsedAttributes = scrut.snd;
+              if (!uu___is_CKR_OK(exceptionParsing))
+              {
+                return
+                  (
+                    (Prims_dtuple2__Hacl_Impl_PKCS11_Result_exception_t_uint32_t){
+                      .fst = exceptionParsing,
+                      .snd = (uint32_t)0U
+                    }
+                  );
+              }
+              Hacl_Impl_PKCS11_Result_exception_t
+              sessionException = sessionVerification(d, hSession);
+              if (!uu___is_CKR_OK(sessionException))
+              {
+                return
+                  (
+                    (Prims_dtuple2__Hacl_Impl_PKCS11_Result_exception_t_uint32_t){
+                      .fst = sessionException,
+                      .snd = (uint32_t)0U
+                    }
+                  );
+              }
+              Hacl_Impl_PKCS11_Result_exception_t
+              mechanismCheckException =
+                mechanismEnforcedAttributeCheck(d,
+                  pMechanism,
+                  parsedAttributes);
+              switch (mechanismCheckException)
+              {
+                case Hacl_Impl_PKCS11_Result_CKR_OK:
+                  {
+                    Prims_dtuple2__Hacl_Impl_PKCS11_Result_exception_t_uint32_t
+                    scrut0 = _CKS_GenerateKey_(d);
+                    Hacl_Impl_PKCS11_Result_exception_t exceptionMain = scrut0.fst;
+                    uint32_t handler = scrut0.snd;
+                    return
+                      (
+                        (Prims_dtuple2__Hacl_Impl_PKCS11_Result_exception_t_uint32_t){
+                          .fst = exceptionMain,
+                          .snd = handler
+                        }
+                      );
+                  }
+                default:
+                  {
+                    return
+                      (
+                        (Prims_dtuple2__Hacl_Impl_PKCS11_Result_exception_t_uint32_t){
+                          .fst = mechanismCheckException,
+                          .snd = (uint32_t)0U
+                        }
+                      );
+                  }
+              }
+              break;
             }
-          );
+          default:
+            {
+              return
+                (
+                  (Prims_dtuple2__Hacl_Impl_PKCS11_Result_exception_t_uint32_t){
+                    .fst = isEnoughMemory,
+                    .snd = (uint32_t)0U
+                  }
+                );
+            }
+        }
+        break;
       }
     default:
       {
         return
           (
             (Prims_dtuple2__Hacl_Impl_PKCS11_Result_exception_t_uint32_t){
-              .fst = mechanismCheckException,
+              .fst = mechanismCreation,
               .snd = (uint32_t)0U
             }
           );
