@@ -141,6 +141,7 @@ type _CK_ATTRIBUTE_TYPE =
   |CKA_SIGN
   |CKA_VERIFY
   |CKA_LOCAL
+  |CKA_SECRET_KEY
   (* and much more *)
 
 (*
@@ -192,6 +193,7 @@ let _ck_attribute_get_type: _CK_ATTRIBUTE_TYPE -> Tot Type0 = function
   |CKA_CLASS -> _CK_OBJECT_CLASS
   |CKA_SIGN -> bool
   |CKA_VERIFY -> bool
+  |CKA_LOCAL -> bool
   |_ -> _CK_ULONG
 
 
@@ -200,6 +202,7 @@ let _ck_attribute_get_len: _CK_ATTRIBUTE_TYPE -> Tot (a: option nat {Some? a ==>
   |CKA_CLASS -> Some 1
   |CKA_SIGN -> Some 1
   |CKA_VERIFY -> Some 1
+  |CKA_LOCAL -> Some 1
   |_ -> None
 
 
@@ -246,7 +249,7 @@ let getObjectAttributeClass obj =
 (* The method takes an object and returns whether it supports signing *)
 (* I will try to look whether I could give the same interface for different object,
 i.e. for mechanisms, keys, etc*)
-val getObjectSignClass: obj: _object -> Tot (r: option _CK_ATTRIBUTE
+val getObjectAttributeSign: obj: _object -> Tot (r: option _CK_ATTRIBUTE
   {Some? r ==> 
     (
       let a = (match r with Some a -> a) in 
@@ -255,12 +258,12 @@ val getObjectSignClass: obj: _object -> Tot (r: option _CK_ATTRIBUTE
   }
 )
 
-let getObjectSignClass obj = 
+let getObjectAttributeSign obj = 
   find_l (fun x -> x.aType = CKA_SIGN) obj.attrs
 
 
 (* The method takes an object and returns whether it supports signing *)
-val getObjectVerifyClass: obj: _object -> Tot (r: option _CK_ATTRIBUTE
+val getObjectAttributeVerify: obj: _object -> Tot (r: option _CK_ATTRIBUTE
   {Some? r ==>
     (
       let a = (match r with Some a -> a) in 
@@ -269,8 +272,22 @@ val getObjectVerifyClass: obj: _object -> Tot (r: option _CK_ATTRIBUTE
   }
 )
 
-let getObjectVerifyClass obj = 
+let getObjectAttributeVerify obj = 
   find_l (fun x -> x.aType = CKA_VERIFY) obj.attrs
+
+
+val getObjectAttributeLocal: obj: _object -> Tot (r: option _CK_ATTRIBUTE
+  {
+    Some? r ==>
+      (
+	let a = (match r with Some a -> a) in 
+	a.aType == CKA_LOCAL
+      )
+  }
+)
+
+let getObjectAttributeLocal obj = 
+  find_l (fun x -> x.aType = CKA_LOCAL) obj.attrs
 
 
 (* Key is an object such that the object has an attribute class such that the attribute value is OTP_KEY, PRIVATE KEY, PUBLIC KEY, or SECRET KEY *)
@@ -323,7 +340,7 @@ type subSession (k: seq keyEntity) (m: seq _CK_MECHANISM) (supMech: seq _CKS_MEC
     keyHandler: _CK_OBJECT_HANDLE{Seq.length k > keyHandler /\
       (
 	let referencedKey = index k keyHandler in 
-	let supportsSigning = getObjectSignClass referencedKey.o in 
+	let supportsSigning = getObjectAttributeSign referencedKey.o in 
 	Some? supportsSigning /\
 	(
 	  let signingAttributeValue = index (match supportsSigning with Some a -> a).pValue 0 in 
@@ -347,7 +364,7 @@ type subSession (k: seq keyEntity) (m: seq _CK_MECHANISM) (supMech: seq _CKS_MEC
     keyHandler: _CK_OBJECT_HANDLE {Seq.length k > keyHandler /\
       (
 	let referencedKey = index k keyHandler in 
-	let supportsVerification = getObjectVerifyClass referencedKey.o in 
+	let supportsVerification = getObjectAttributeVerify referencedKey.o in 
 	Some? supportsVerification /\
 	(
 	  let verificationAttributeValue = index (match supportsVerification with Some a -> a).pValue 0 in 
@@ -587,21 +604,32 @@ let isPresentOnDevice d pMechanism =
       false	  
 
 
-
 val mechanismGetFromDevice: d: device -> pMechanism: _CK_MECHANISM_TYPE{isPresentOnDevice d pMechanism = true} -> 
-	Tot (m: C_K{m.mechanismID = pMechanism})
+  Tot (m: _CK_MECHANISM {m.mechanismID = pMechanism})
 
 let mechanismGetFromDevice d pMechanism = 
-	let mechanisms = d.mechanisms in 
-	let m = find_l (fun x -> x.mechanismID = pMechanism) mechanisms in 
-	match m with 
-	Some m -> m
+  let m = find_l (fun x -> x.mechanismID = pMechanism) d.mechanisms in 
+  match m with 
+  Some m -> m
 
-assume val checkedAttributes: pTemplate : seq attributeSpecification -> Tot bool
 
-assume val keyGeneration: mechanismID: mechanismSpecification -> pTemplate: seq attributeSpecification ->
-	Tot (either (k: keyEntity {let attrs = (k.element).attrs in isAttributeLocal attrs &&  
-		isAttributeSecretKey attrs}) exception_t)
+assume val checkedAttributes: pTemplate : seq _CK_ATTRIBUTE -> Tot bool
+
+assume val keyGeneration: mechanismID: _CK_MECHANISM -> 
+  pTemplate: seq _CK_ATTRIBUTE ->
+  Tot (r: result (k: keyEntity
+    {
+      let attrs = (k.o).attrs in 
+      let attributeLocal = getObjectAttributeLocal k.o in 
+      let attributeClass = getObjectAttributeClass k.o in 
+      Some? attributeLocal /\ Some? attributeClass /\ 
+      index (match attributeLocal with Some a -> a).pValue 0 == true /\
+      index (match attributeClass with Some a -> a).pValue 0 == CKO_SECRET_KEY
+    }
+  )
+)
+
+
 
 val sessionEqual: #ks: seq keyEntity -> #ms: seq mechanismSpecification -> #ks1: seq keyEntity -> #ms1 : seq mechanismSpecification -> 
 	s: subSession ks ms -> s1 : subSession ks1 ms1 -> Tot Type0
