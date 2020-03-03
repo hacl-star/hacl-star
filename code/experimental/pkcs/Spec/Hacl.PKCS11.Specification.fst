@@ -74,6 +74,7 @@ type _CK_ATTRIBUTE_TYPE =
   |CKA_CLASS
   |CKA_PRIVATE
   |CKA_KEY_TYPE
+  |CKA_SIGN
   (* and much more *)
 
 (*
@@ -139,12 +140,14 @@ type _CKS_MECHANISM_INFO =
 
 let _ck_attribute_get_type: _CK_ATTRIBUTE_TYPE -> Tot Type0 = function
   |CKA_CLASS -> _CK_OBJECT_CLASS
+  |CKA_SIGN -> bool
   |_ -> _CK_ULONG
 
 
 (* I am not sure that the length is stated for all possible types *)
 let _ck_attribute_get_len: _CK_ATTRIBUTE_TYPE -> Tot (a: option nat {Some? a ==> (match a with Some a -> a) < pow2 32}) = function
   |CKA_CLASS -> Some 1
+  |CKA_SIGN -> Some 1
   |_ -> None
 
 
@@ -188,6 +191,24 @@ let getObjectAttributeClass obj =
   find_l (fun x -> x.aType = CKA_CLASS) obj.attrs
 
 
+(* The method takes an object and returns whether it supports signing *)
+(* I will try to look whether I could give the same interface for different object,
+i.e. for mechanisms, keys, etc*)
+
+val getObjectSignClass: obj: _object -> Tot (r: option _CK_ATTRIBUTE
+  {Some? r ==> 
+    (
+      let a = (match r with Some a -> a) in 
+      a.aType == CKA_SIGN 
+    )
+  }
+)
+
+let getObjectSignClass obj = 
+  find_l (fun x -> x.aType = CKA_SIGN) obj.attrs
+
+
+(* Key is an object such that the object has an attribute class such that the attribute value is OTP_KEY, PRIVATE KEY, PUBLIC KEY, or SECRET KEY *)
 type keyEntity = 
   |Key: o: _object{
     (let attrs = getObjectAttributeClass o in Some? attrs && 
@@ -203,11 +224,15 @@ type keyEntity =
 type temporalStorage = 
   |Element: seq FStar.UInt8.t -> temporalStorage
 
-(* ??? *)
-type mechanismSpecification = 
-	| Mechanism: mechanismID: _CK_MECHANISM_TYPE -> 
-		pParameters: seq FStar.UInt8.t -> 
-		mechanismSpecification
+
+(*/* CK_MECHANISM is a structure that specifies a particular
+ * mechanism  */
+*)
+
+type _CK_MECHANISM = 
+  | Mechanism: mechanismID: _CK_MECHANISM_TYPE -> 
+    pParameters: seq FStar.UInt8.t -> 
+    _CK_MECHANISM
 
 
 type _SessionState = 
@@ -216,8 +241,9 @@ type _SessionState =
   |SubsessionVerificationInit
   |SunsessionVerificationUpdate
 
+
 (* A metadata element represention an ongoing function *)
-type subSession (k: seq keyEntity) (m: seq mechanismSpecification) = 
+type subSession (k: seq keyEntity) (m: seq _CK_MECHANISM) = 
   |Signature: 
     (* The session identifier that has caused the operation *)
     id: _CK_SESSION_HANDLE -> 
@@ -229,7 +255,17 @@ type subSession (k: seq keyEntity) (m: seq mechanismSpecification) =
       {exists (a: nat {a < Seq.length m}). let mechanism = Seq.index m a in mechanism.mechanismID = pMechanism /\ isMechanismUsedForSignature pMechanism} ->
     (* The identifier of the key used for the operation *)
     (* The key requirement: present in the device and to be a signature key *)
-    keyHandler: _CK_OBJECT_HANDLE{Seq.length k > keyHandler} -> 
+    keyHandler: _CK_OBJECT_HANDLE{Seq.length k > keyHandler /\
+      (
+	let referencedKey = index k keyHandler in 
+	let supportSigning = getObjectSignClass referencedKey.o in 
+	Some? supportSigning /\
+	(
+	  let signingAttributeValue = index (match supportSigning with Some a -> a).pValue 0 in 
+	  signingAttributeValue == true
+	)
+      )
+    } -> 
     (* Temporal space for the signature *)
     temp: option temporalStorage -> subSession k m
   |Verify : 	
