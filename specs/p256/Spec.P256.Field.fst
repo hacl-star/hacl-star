@@ -18,6 +18,11 @@ let prime: p:pos{3 < p /\ p < pow2 256} =
   assert_norm (3 < p /\ p < pow2 256 /\ p = pow2 256 - pow2 224 + pow2 192 + pow2 96 - 1);
   p
 
+/// Axiomatizing the divisors of the prime modulus
+/// We could alternatively verify a primality certificate
+assume
+val divides_prime : unit -> Lemma (FStar.Math.Euclid.is_prime prime)
+
 /// Field element
 let elem = a:nat{a < prime}
 
@@ -66,7 +71,8 @@ let rec _pow a b =
 [@canon_attr]
 let ( ** ) (a:elem) (k:pos) = _pow a k
 
-/// TODO: `exp` to normalize it efficiently, but it should be reverted to `pow`
+/// We use `exp` to normalize it efficiently, but we could use `pow` instead
+/// See `pow_exp` below for a proof of their equivalence
 //[@(strict_on_arguments [0;1])]
 let ( **% ) (a:elem) (k:pos) = exp a k
 
@@ -325,36 +331,12 @@ let mod_sub_congr a b c d x =
   FStar.Math.Lemmas.mod_add_both (a - x) (b - d + c - x) (-b) prime;
   assert ((a - x - b) % prime = ((c - x - d) % prime))
 
-/// Axiomatizing the divisors of the prime modulus
-/// We could alternatively verify a primality certificate
-assume
-val divides_prime : unit -> Lemma (FStar.Math.Euclid.is_prime prime)
-
-val mod_mult_congr_aux (a b c:elem) : Lemma
-  (requires (a *% c) = (b *% c) /\ b < a /\ c <> 0)
-  (ensures  a = b)
-let mod_mult_congr_aux a b c =
-  let open FStar.Math.Lemmas in
-  calc (==>) {
-    (a *% c) == (b *% c);
-    ==> { mod_add_both (a * c) (b * c) (-b * c) prime }
-    (a * c - b * c) % prime == (b * c - b * c) % prime;
-    ==> { swap_mul a c; swap_mul b c; lemma_mul_sub_distr c a b }
-    (c * (a - b)) % prime == (b * c - b * c) % prime;
-    ==> { small_mod 0 prime }
-    (c * (a - b)) % prime == 0;
-  };
-  divides_prime ();
-  let r, s = FStar.Math.Euclid.bezout_prime prime c in
-  FStar.Math.Euclid.euclid prime c (a - b) r s
-
 val mod_mult_congr (a b c:elem) : Lemma
   (requires (a *% c) = (b *% c) /\ c <> 0)
   (ensures  a = b)
 let mod_mult_congr a b c =
-  if a = b then ()
-  else if b < a then mod_mult_congr_aux a b c
-  else mod_mult_congr_aux b a c
+  divides_prime ();
+  FStar.Math.Fermat.mod_mult_congr prime a b c
 
 val opp_opp (a:elem) : Lemma (~%(~%a) == a)
 let opp_opp a =
@@ -497,6 +479,26 @@ let rec pow_odd a k =
       ~%(pow a k);
     }
 
+val pow_pow_mod (a:elem) (k:pos) : Lemma (FStar.Math.Fermat.pow a k % prime == pow a k)
+let rec pow_pow_mod a k =
+  let open FStar.Math.Lemmas in
+  match k with
+  | 1 -> small_mod a prime
+  | _ ->
+    calc (==) {
+      FStar.Math.Fermat.pow a k % prime;
+      == { }
+      (a * FStar.Math.Fermat.pow a (k - 1)) % prime;
+      == { lemma_mod_mul_distr_r a (FStar.Math.Fermat.pow a (k - 1)) prime }
+      (a * (FStar.Math.Fermat.pow a (k - 1) % prime)) % prime;
+      == { pow_pow_mod a (k - 1) }
+      (a * pow a (k - 1)) % prime;
+      == { swap_mul (pow a (k - 1)) a }
+      pow a k % prime;
+      == { small_mod (pow a k) prime }
+      pow a k;
+    }
+
 #pop-options
 
 val inverse_opp (a:elem{a <> zero}) : Lemma (inverse (~%a) == ~%(inverse a))
@@ -511,22 +513,16 @@ let inverse_opp a =
     ~%(inverse a);
   }
 
-/// Fermat's Little Theorem
-///
-/// The easiest is to prove it by induction from the Freshman's dream identity
-///
-///   pow (a +% b) prime = pow a prime +% pow b prime
-///
-/// which follows from the Binomial Theorem
-///
-///   pow (a + b) n = sum_{i=0}^n (binomial n k * pow a (n - i) * pow b i)
-///
-/// which in turn can be proved by induction from Pascal's identity
-///
-///   binomial n k + binomial n (k - 1) = binomial (n + 1) k
+val fermat (a:elem{a <> 0}) : Lemma (pow a (prime - 1) == one)
+let fermat a =
+  pow_pow_mod a (prime - 1);
+  divides_prime ();
+  FStar.Math.Fermat.fermat_alt prime a
 
-assume
-val fermat (a:elem) : Lemma (pow a (prime - 1) == one)
+val mult_eq_zero (a b:elem) : Lemma (a *% b == 0 <==> (a == 0 \/ b == 0))
+let mult_eq_zero a b =
+  if a = 0 || b = 0 then ()
+  else if (a *% b) = 0 then mod_mult_congr a 0 b
 
 #push-options "--fuel 1"
 
@@ -534,17 +530,52 @@ val mul_inverse (a:elem{a <> zero}) : Lemma (a *% inverse a == one)
 let mul_inverse a =
   let open FStar.Math.Lemmas in
   calc (==) {
-    a *% (a *% inverse a);
+    (a *% inverse a) *% a;
     == { pow_exp a (prime - 2) }
-    a *% (a *% pow a (prime - 2));
-    == { }
-    a *% pow a (prime - 1);
+    (a *% pow a (prime - 2)) *% a;
+    == { mul_commutative a (pow a (prime - 2)) }
+    pow a (prime - 1) *% a;
     == { fermat a }
-    a *% one;
-    == { mul_commutative a one; mul_identity a }
-    a;
+    one *% a;
   };
   mod_mult_congr (a *% inverse a) one a
+
+val inverse_mul (a b:elem) : Lemma
+  (requires a <> 0 /\ b <> 0)
+  (ensures  a *% b <> 0 /\ inverse a *% inverse b == inverse (a *% b))
+let inverse_mul a b =
+  mult_eq_zero a b;
+  calc (==) {
+    inverse a *% inverse b;
+    == { pow_exp a (prime - 2); pow_exp b (prime - 2) }
+    pow a (prime - 2) *% pow b (prime - 2);
+    == { pow_mul a b (prime - 2) }
+    pow (a *% b) (prime - 2);
+    == { pow_exp (a *% b) (prime - 2) }
+    inverse (a *% b);
+  }
+
+val pow_eq_zero (a:elem) (k:pos) : Lemma (a**k == 0 <==> a == 0)
+let rec pow_eq_zero a k =
+  match k with
+  | 1 -> ()
+  | _ ->
+    begin
+    mult_eq_zero a (_pow a (k - 1));
+    pow_eq_zero a (k - 1)
+    end
+
+val pow_inverse (a:elem{a <> 0}) (k:pos) : Lemma
+  (pow_eq_zero a k; (inverse a)**k == inverse (a**k))
+let rec pow_inverse a k =
+  match k with
+  | 1 -> ()
+  | _ ->
+    begin
+    pow_eq_zero a (k-1);
+    inverse_mul a (_pow a (k - 1));
+    pow_inverse a (k - 1)
+    end
 
 #pop-options
 
@@ -594,26 +625,6 @@ val opp_add (a b:elem) : Lemma (~%(a +% b) == ~%a +% ~%b)
 let opp_add a b =
   assert (~%(a +% b) == ~%a +% ~%b) by (p256_field ())
 
-val mult_eq_zero (a b:elem) : Lemma (a *% b == 0 <==> (a == 0 \/ b == 0))
-let mult_eq_zero a b =
-  if a = 0 || b = 0 then ()
-  else if (a *% b) = 0 then mod_mult_congr a 0 b
-
-val inverse_mul (a b:elem) : Lemma
-  (requires a <> 0 /\ b <> 0)
-  (ensures  a *% b <> 0 /\ inverse a *% inverse b == inverse (a *% b))
-let inverse_mul a b =
-  mult_eq_zero a b;
-  calc (==) {
-    inverse a *% inverse b;
-    == { pow_exp a (prime - 2); pow_exp b (prime - 2) }
-    pow a (prime - 2) *% pow b (prime - 2);
-    == { pow_mul a b (prime - 2) }
-    pow (a *% b) (prime - 2);
-    == { pow_exp (a *% b) (prime - 2) }
-    inverse (a *% b);
-  }
-
 val mul_opp_1 (a:elem) : Lemma (~%1 *% a == ~%a)
 let mul_opp_1 a =
   assert (~%1 *% a == ~%a) by (p256_field ())
@@ -632,7 +643,8 @@ val div_plus_l (a b c:elem) : Lemma
   (ensures  a /% b +% c == (a +% b *% c) /% b)
 let div_plus_l a b c =
   assert ((a +% b *% c) /% b == a /% b +% (b /% b) *% c) by (p256_field ());
-  mul_inverse b
+  mul_inverse b;
+  mul_identity c
 
 val div_mul_eq_l (a b c:elem) : Lemma
   (requires b <> 0 /\ c <> 0)
@@ -669,29 +681,3 @@ let div_eq a b c d =
     == { mul_inverse b; mul_one_r (c *% inverse d) }
     c /% d;
   }
-
-#push-options "--fuel 1"
-
-val pow_eq_zero (a:elem) (k:pos) : Lemma (a**k == 0 <==> a == 0)
-let rec pow_eq_zero a k =
-  match k with
-  | 1 -> ()
-  | _ ->
-    begin
-    mult_eq_zero a (_pow a (k - 1));
-    pow_eq_zero a (k - 1)
-    end
-
-val pow_inverse (a:elem{a <> 0}) (k:pos) : Lemma
-  (pow_eq_zero a k; (inverse a)**k == inverse (a**k))
-let rec pow_inverse a k =
-  match k with
-  | 1 -> ()
-  | _ ->
-    begin
-    pow_eq_zero a (k-1);
-    inverse_mul a (_pow a (k - 1));
-    pow_inverse a (k - 1)
-    end
-
-#pop-options

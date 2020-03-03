@@ -149,8 +149,6 @@ let add_neq p q =
     end
 
 
-#set-options "--z3rlimit 60"
-
 val double_on_curve (xp yp:elem) : Lemma
   (requires yp <> 0 /\ on_curve xp yp)
   (ensures
