@@ -255,7 +255,7 @@ type _SessionState =
   |SubsessionSignatureInit
   |SubsessionSignatureUpdate
   |SubsessionVerificationInit
-  |SunsessionVerificationUpdate
+  |SubsessionVerificationUpdate
 
 
 (* A metadata element represention an ongoing function *)
@@ -288,7 +288,7 @@ type subSession (k: seq keyEntity) (m: seq _CK_MECHANISM) =
     (* The session identifier that has caused the operation *)
     id: _CK_SESSION_HANDLE -> 
     (* The state of the ongoing session *)
-    state: _SessionState {state = SubsessionVerificationInit \/ state = SunsessionVerificationUpdate} ->
+    state: _SessionState {state = SubsessionVerificationInit \/ state = SubsessionVerificationUpdate} ->
     (* The identifier of the mechanism used for the operation *)
     (* The mechanism requirements: present in the device and to be the signature algorithm *)
     pMechanism: _CK_MECHANISM_TYPE
@@ -310,99 +310,110 @@ type subSession (k: seq keyEntity) (m: seq _CK_MECHANISM) =
     temp: option temporalStorage -> subSession k m
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-val subSessionGetID: #ks: seq keyEntity -> #ms: seq mechanismSpecification -> s: subSession ks ms -> Tot _CK_SESSION_HANDLE
+(* This method takes a subsession and returns the session identifier that created this session *)
+val subSessionGetID: #ks: seq keyEntity -> #ms: seq _CK_MECHANISM -> s: subSession ks ms -> Tot _CK_SESSION_HANDLE
 
 let subSessionGetID #ks #ms s = 
-	match s with 
-	|Signature a _ _ _ _ -> a 
-	|Verify a _ _ _  _  -> a
+  match s with 
+  |Signature a _ _ _ _ -> a 
+  |Verify a _ _ _  _  -> a
 
-val subSessionGetState: #ks: seq keyEntity -> #ms : seq mechanismSpecification -> s: subSession ks ms -> Tot _CK_ULONG
+
+(* This method takes a subsession and returns the session state *)
+val subSessionGetState: #ks: seq keyEntity -> #ms : seq _CK_MECHANISM -> s: subSession ks ms -> Tot _SessionState
 
 let subSessionGetState #ks #ms s = 
-	match s with
-	| Signature _ b _ _ _ -> b
-	| Verify _ b _ _ _  -> b
+  match s with
+  | Signature _ b _ _ _ -> b
+  | Verify _ b _ _ _  -> b
 
-val subSessionSetState: #ks: seq keyEntity -> #ms: seq mechanismSpecification -> s: subSession ks ms -> state : _CK_ULONG 
-	{if Signature? s then state =  _SubSessionInit \/ state = _SubSessionUpd else 
-		state = _SubSessionVerifyInit \/ state = _SubSessionUpdInit} -> 
-		Tot (r: subSession ks ms{subSessionGetState r = state /\ 
-			(if Signature? s then Signature? r else Verify? r ) /\
-			(match s with 
-				|Signature a _ c d e ->
-					begin match r with 
-						|Signature a1 _ c1 d1 e1 -> a = a1 /\ c = c1 /\ d = d1 /\ e = e1
-					end	
-				|Verify a _ c d e ->
-					begin match r with 
-						|Verify a1 _ c1 d1 e1 -> a = a1 /\ c = c1 /\ d = d1 /\ e = e1
-					end	
-			)
-		})
+
+(* This method takes a subsession, a state to set and returns the subsession with updated state *)
+val subSessionSetState: #ks: seq keyEntity -> #ms: seq _CK_MECHANISM -> s: subSession ks ms -> state: _SessionState 
+  {
+    if Signature? s then state = SubsessionSignatureInit  \/ state = SubsessionSignatureUpdate 
+    else 
+      state = SubsessionVerificationInit \/ state = SubsessionVerificationUpdate} -> 
+  Tot (r: subSession ks ms
+    (* The state is the one requested *)
+    {
+      subSessionGetState r = state /\ 
+    (* The type did not change *)
+      (if Signature? s then Signature? r else Verify? r) /\
+    (* Nothing else got changed *)
+      (match s with 
+	|Signature a _ c d e ->
+	  begin 
+	    match r with 
+	      |Signature a1 _ c1 d1 e1 -> a = a1 /\ c = c1 /\ d = d1 /\ e = e1
+	  end	
+	|Verify a _ c d e ->
+	  begin match r with 
+	    |Verify a1 _ c1 d1 e1 -> a = a1 /\ c = c1 /\ d = d1 /\ e = e1
+	  end	
+      )
+    }
+  )
 
 let subSessionSetState #ks #ms s state = 
-	match s with 
-	|Signature a b c d e -> Signature a state c d e 
-	|Verify a b c d e -> Verify a state c d e		
+  match s with 
+  |Signature a b c d e -> Signature a state c d e 
+  |Verify a b c d e -> Verify a state c d e		
 
 
-val subSessionGetStorage: #ks: seq keyEntity -> #ms : seq mechanismSpecification -> s: subSession ks ms -> Tot (option temporalStorage)
+(* This method takes a subsession and returns its storage*)
+val subSessionGetStorage: #ks: seq keyEntity -> #ms : seq _CK_MECHANISM -> s: subSession ks ms -> Tot (option temporalStorage)
 
 let subSessionGetStorage #ks #ms s = 
-	match s with 
-	|Signature _ _ _ _ e -> e 
-	|Verify _ _ _ _ e -> e
+  match s with 
+  |Signature _ _ _ _ e -> e 
+  |Verify _ _ _ _ e -> e
 
-val subSessionSetStorage: #ks: seq keyEntity -> #ms: seq mechanismSpecification -> s: subSession ks ms -> storage: option temporalStorage -> 
-	Tot (r: subSession ks ms {subSessionGetStorage r = storage /\
-		(if Signature? s then Signature? r else Verify? r) /\
-		(match s with 
-				|Signature a b c d e ->
-					begin match r with 
-						|Signature a1 b1 c1 d1 e1 -> a = a1 /\ b = b1/\ c = c1 /\ d = d1 
-					end	
-				|Verify a b c d e ->
-					begin match r with 
-						|Verify a1 b1 c1 d1 e1 -> a = a1 /\b = b1 /\ c = c1 /\ d = d1 
-					end)
-		}
-	)
+
+(* This method takes a subsession, a storage to set and returns *)
+val subSessionSetStorage: #ks: seq keyEntity -> #ms: seq _CK_MECHANISM -> s: subSession ks ms -> storage: option temporalStorage -> 
+  Tot (r: subSession ks ms 
+    {
+      (* The storage is the one requested *)
+      subSessionGetStorage r = storage /\
+      (* The type did not change  *)
+      (if Signature? s then Signature? r else Verify? r) /\
+      (* Nothing else changed *)
+      (match s with 
+	|Signature a b c d _ ->
+	  begin match r with 
+	    |Signature a1 b1 c1 d1 _ -> a = a1 /\ b = b1 /\ c = c1 /\ d = d1 
+	  end	
+	|Verify a b c d _ ->
+	  begin match r with 
+	    |Verify a1 b1 c1 d1 _ -> a = a1 /\b = b1 /\ c = c1 /\ d = d1 
+	  end
+      )
+    }
+  )
 
 let subSessionSetStorage #ks #ms s storage = 
-	match s with 
-	|Signature a b c d e -> Signature a b c d storage
-	|Verify a b c d e -> Verify a b c d storage
+  match s with 
+  |Signature a b c d _ -> Signature a b c d storage
+  |Verify a b c d _ -> Verify a b c d storage
 
-val subSessionGetMechanism: #ks: seq keyEntity -> #ms: seq mechanismSpecification -> s: subSession ks ms -> Tot _CK_MECHANISM_TYPE
+
+(* This method takes a subsession and returns the mechanism used for this subsession *)
+val subSessionGetMechanism: #ks: seq keyEntity -> #ms: seq _CK_MECHANISM -> s: subSession ks ms -> Tot _CK_MECHANISM_TYPE
 
 let subSessionGetMechanism #ks #ms s = 
-	match s with 
-	|Signature _ _  c _ _ -> c
-	|Verify _ _ c _ _ -> c
+  match s with 
+  |Signature _ _  c _ _ -> c
+  |Verify _ _ c _ _ -> c
 
-val subSessionGetKeyHandler: #ks: seq keyEntity -> #ms: seq mechanismSpecification -> s: subSession ks ms -> Tot _CK_OBJECT_HANDLE
+
+(* This method takes a subsession and returns the key handler used for this subsession *)
+val subSessionGetKeyHandler: #ks: seq keyEntity -> #ms: seq _CK_MECHANISM -> s: subSession ks ms -> Tot _CK_OBJECT_HANDLE
 
 let subSessionGetKeyHandler #ks #ms s = 
-	match s with 
-	|Signature _ _ _ d _ -> d 
-	|Verify _ _ _ d _ -> d
+  match s with 
+  |Signature _ _ _ d _ -> d 
+  |Verify _ _ _ d _ -> d
 
 
 type device = 
