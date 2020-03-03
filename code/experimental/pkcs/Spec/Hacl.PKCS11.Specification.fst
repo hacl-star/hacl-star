@@ -45,24 +45,67 @@ type _CK_MECHANISM_TYPE =
   (* and traditionally much more *)
 
 
-(* This is an example of the implementation *)
-val isMechanismUsedForSignature: mechanism : _CK_MECHANISM_TYPE -> Tot bool
+(*/* at least 32 bits; each bit is a Boolean flag */
+typedef CK_ULONG          CK_FLAGS;
+*)
+type _CK_FLAGS_BITS = 
+  |CKF_HW
+  |CKF_SIGN
+  |CKF_VERIFY
 
-let isMechanismUsedForSignature mechanism = 
-  match mechanism with 
-  |CKM_DSA -> true
-  |CKM_ECDSA -> true
-  |_ -> false
+(* Experemental implementation *)
+let _ck_flags_bits_get_bit: _CK_FLAGS_BITS -> Tot nat = function
+  |CKF_HW -> 0
+  |CKF_SIGN -> 1
+  |CKF_VERIFY -> 2
+
+type _CK_FLAGS = _CK_ULONG
+
+(* Not to laugh, I forgot how to write it for nats *)
+assume val logand: nat -> nat -> nat
+
+
+val isBitFlagSet: _CK_FLAGS -> _CK_FLAGS_BITS -> Tot bool
+
+let isBitFlagSet flag bit = 
+  let bit = _ck_flags_bits_get_bit bit in 
+  (logand flag bit) <> 0
+
+
+(* 
+/* CK_MECHANISM_INFO provides information about a particular
+ * mechanism */
+typedef struct CK_MECHANISM_INFO {
+    CK_ULONG    ulMinKeySize;
+    CK_ULONG    ulMaxKeySize;
+    CK_FLAGS    flags;
+} CK_MECHANISM_INFO; *)
+
+
+type _CKS_MECHANISM_INFO = 
+  | MecInfo: ulMinKeySize: _CK_ULONG -> ulMaxKeySize: _CK_ULONG -> flags: _CK_FLAGS -> _CKS_MECHANISM_INFO
+
+(* Experemental implementation *)
+let _map_cks_mechanism_info_to_mechanism: _CK_MECHANISM_TYPE -> _CKS_MECHANISM_INFO = function 
+  |CKM_AES_KEY_GEN -> 
+    MecInfo 0 0 0
+  |_ -> MecInfo 0 0 0 
+
+
+(* This is an example of the implementation *)
+val isMechanismUsedForSignature: mechanism : _CK_MECHANISM_TYPE -> supportedMechanisms: seq _CKS_MECHANISM_INFO -> Tot bool
+
+let isMechanismUsedForSignature mechanism supportedMechanisms = 
+  let mechanismInfo = _map_cks_mechanism_info_to_mechanism mechanism in 
+  isBitFlagSet mechanismInfo.flags CKF_SIGN
 
 
 (* This is an example of the implementation *)
 val isMechanismUsedForVerification: mechanism: _CK_MECHANISM_TYPE -> Tot bool
 
 let isMechanismUsedForVerification mechanism =
-  match mechanism with
-  |CKM_DSA -> true
-  |CKM_ECDSA -> true
-  |_ -> false
+  let mechanismInfo = _map_cks_mechanism_info_to_mechanism mechanism in 
+  isBitFlagSet mechanismInfo.flags CKF_VERIFY
 
 
 (*
@@ -114,29 +157,13 @@ type _CK_KEY_TYPE =
 typedef CK_ULONG          CK_OBJECT_CLASS; *) 
 type _CK_OBJECT_HANDLE = _CK_ULONG
 
-(*/* at least 32 bits; each bit is a Boolean flag */
-typedef CK_ULONG          CK_FLAGS;
-*)
-type _CK_FLAGS = _CK_ULONG 
 
 (*/* CK_SESSION_HANDLE is a Cryptoki-assigned value that
  * identifies a session */
 typedef CK_ULONG          CK_SESSION_HANDLE;
 *)
 type _CK_SESSION_HANDLE = _CK_ULONG
-
-(* 
-/* CK_MECHANISM_INFO provides information about a particular
- * mechanism */
-typedef struct CK_MECHANISM_INFO {
-    CK_ULONG    ulMinKeySize;
-    CK_ULONG    ulMaxKeySize;
-    CK_FLAGS    flags;
-} CK_MECHANISM_INFO; *)
-
-
-type _CKS_MECHANISM_INFO = 
-  | MecInfo: ulMinKeySize: _CK_ULONG -> ulMaxKeySize: _CK_ULONG -> flags: _CK_FLAGS -> _CKS_MECHANISM_INFO	
+	
 
 
 let _ck_attribute_get_type: _CK_ATTRIBUTE_TYPE -> Tot Type0 = function
@@ -259,7 +286,7 @@ type _SessionState =
 
 
 (* A metadata element represention an ongoing function *)
-type subSession (k: seq keyEntity) (m: seq _CK_MECHANISM) = 
+type subSession (k: seq keyEntity) (m: seq _CK_MECHANISM) (supMech: seq _CKS_MECHANISM_INFO) = 
   |Signature: 
     (* The session identifier that has caused the operation *)
     id: _CK_SESSION_HANDLE -> 
@@ -268,7 +295,7 @@ type subSession (k: seq keyEntity) (m: seq _CK_MECHANISM) =
     (* The identifier of the mechanism used for the operation *)
     (* The mechanism requirements: present in the device and to be the signature algorithm *)
     pMechanism: _CK_MECHANISM_TYPE
-      {exists (a: nat {a < Seq.length m}). let mechanism = Seq.index m a in mechanism.mechanismID = pMechanism /\ isMechanismUsedForSignature pMechanism} ->
+      {exists (a: nat {a < Seq.length m}). let mechanism = Seq.index m a in mechanism.mechanismID = pMechanism /\ isMechanismUsedForSignature pMechanism supMech} ->
     (* The identifier of the key used for the operation *)
     (* The key requirement: present in the device and to be a signature key *)
     keyHandler: _CK_OBJECT_HANDLE{Seq.length k > keyHandler /\
@@ -283,7 +310,7 @@ type subSession (k: seq keyEntity) (m: seq _CK_MECHANISM) =
       )
     } -> 
     (* Temporal space for the signature *)
-    temp: option temporalStorage -> subSession k m
+    temp: option temporalStorage -> subSession k m supMech
   |Verify : 	
     (* The session identifier that has caused the operation *)
     id: _CK_SESSION_HANDLE -> 
@@ -307,34 +334,34 @@ type subSession (k: seq keyEntity) (m: seq _CK_MECHANISM) =
       )
     } -> 
     (* Temporal space for the verification *)
-    temp: option temporalStorage -> subSession k m
+    temp: option temporalStorage -> subSession k m supMech
 
 
 (* This method takes a subsession and returns the session identifier that created this session *)
-val subSessionGetID: #ks: seq keyEntity -> #ms: seq _CK_MECHANISM -> s: subSession ks ms -> Tot _CK_SESSION_HANDLE
+val subSessionGetID: #ks: seq keyEntity -> #ms: seq _CK_MECHANISM -> #supMech: seq _CKS_MECHANISM_INFO -> s: subSession ks ms supMech -> Tot _CK_SESSION_HANDLE
 
-let subSessionGetID #ks #ms s = 
+let subSessionGetID #ks #ms #supMech  s = 
   match s with 
   |Signature a _ _ _ _ -> a 
   |Verify a _ _ _  _  -> a
 
 
 (* This method takes a subsession and returns the session state *)
-val subSessionGetState: #ks: seq keyEntity -> #ms : seq _CK_MECHANISM -> s: subSession ks ms -> Tot _SessionState
+val subSessionGetState: #ks: seq keyEntity -> #ms : seq _CK_MECHANISM -> #supMech: seq _CKS_MECHANISM_INFO -> s: subSession ks ms supMech -> Tot _SessionState
 
-let subSessionGetState #ks #ms s = 
+let subSessionGetState #ks #ms #supMech s = 
   match s with
   | Signature _ b _ _ _ -> b
   | Verify _ b _ _ _  -> b
 
 
 (* This method takes a subsession, a state to set and returns the subsession with updated state *)
-val subSessionSetState: #ks: seq keyEntity -> #ms: seq _CK_MECHANISM -> s: subSession ks ms -> state: _SessionState 
+val subSessionSetState: #ks: seq keyEntity -> #ms: seq _CK_MECHANISM -> #supMech: seq _CKS_MECHANISM_INFO -> s: subSession ks ms supMech -> state: _SessionState 
   {
     if Signature? s then state = SubsessionSignatureInit  \/ state = SubsessionSignatureUpdate 
     else 
       state = SubsessionVerificationInit \/ state = SubsessionVerificationUpdate} -> 
-  Tot (r: subSession ks ms
+  Tot (r: subSession ks ms supMech
     (* The state is the one requested *)
     {
       subSessionGetState r = state /\ 
@@ -355,24 +382,24 @@ val subSessionSetState: #ks: seq keyEntity -> #ms: seq _CK_MECHANISM -> s: subSe
     }
   )
 
-let subSessionSetState #ks #ms s state = 
+let subSessionSetState #ks #ms #supMech s state = 
   match s with 
   |Signature a b c d e -> Signature a state c d e 
   |Verify a b c d e -> Verify a state c d e		
 
 
 (* This method takes a subsession and returns its storage*)
-val subSessionGetStorage: #ks: seq keyEntity -> #ms : seq _CK_MECHANISM -> s: subSession ks ms -> Tot (option temporalStorage)
+val subSessionGetStorage: #ks: seq keyEntity -> #ms : seq _CK_MECHANISM -> #supMech: seq _CKS_MECHANISM_INFO -> s: subSession ks ms supMech ->  Tot (option temporalStorage)
 
-let subSessionGetStorage #ks #ms s = 
+let subSessionGetStorage #ks #ms #supMech s = 
   match s with 
   |Signature _ _ _ _ e -> e 
   |Verify _ _ _ _ e -> e
 
 
 (* This method takes a subsession, a storage to set and returns *)
-val subSessionSetStorage: #ks: seq keyEntity -> #ms: seq _CK_MECHANISM -> s: subSession ks ms -> storage: option temporalStorage -> 
-  Tot (r: subSession ks ms 
+val subSessionSetStorage: #ks: seq keyEntity -> #ms: seq _CK_MECHANISM -> #supMech: seq _CKS_MECHANISM_INFO -> s: subSession ks ms supMech -> storage: option temporalStorage -> 
+  Tot (r: subSession ks ms supMech
     {
       (* The storage is the one requested *)
       subSessionGetStorage r = storage /\
@@ -392,37 +419,38 @@ val subSessionSetStorage: #ks: seq keyEntity -> #ms: seq _CK_MECHANISM -> s: sub
     }
   )
 
-let subSessionSetStorage #ks #ms s storage = 
+let subSessionSetStorage #ks #ms #supMech s storage = 
   match s with 
   |Signature a b c d _ -> Signature a b c d storage
   |Verify a b c d _ -> Verify a b c d storage
 
 
 (* This method takes a subsession and returns the mechanism used for this subsession *)
-val subSessionGetMechanism: #ks: seq keyEntity -> #ms: seq _CK_MECHANISM -> s: subSession ks ms -> Tot _CK_MECHANISM_TYPE
+val subSessionGetMechanism: #ks: seq keyEntity -> #ms: seq _CK_MECHANISM -> #supMech: seq _CKS_MECHANISM_INFO -> s: subSession ks ms supMech -> Tot _CK_MECHANISM_TYPE
 
-let subSessionGetMechanism #ks #ms s = 
+let subSessionGetMechanism #ks #ms #supMech s = 
   match s with 
   |Signature _ _  c _ _ -> c
   |Verify _ _ c _ _ -> c
 
 
 (* This method takes a subsession and returns the key handler used for this subsession *)
-val subSessionGetKeyHandler: #ks: seq keyEntity -> #ms: seq _CK_MECHANISM -> s: subSession ks ms -> Tot _CK_OBJECT_HANDLE
+val subSessionGetKeyHandler: #ks: seq keyEntity -> #ms: seq _CK_MECHANISM -> #supMech: seq _CKS_MECHANISM_INFO -> s: subSession ks ms supMech -> Tot _CK_OBJECT_HANDLE
 
-let subSessionGetKeyHandler #ks #ms s = 
+let subSessionGetKeyHandler #ks #ms #supMech s = 
   match s with 
   |Signature _ _ _ d _ -> d 
   |Verify _ _ _ d _ -> d
 
 
 type device = 
-	|Device: 
-		keys: seq keyEntity ->
-		mechanisms: seq mechanismSpecification -> 
-		objects: seq _object -> 
-		subSessions: seq (subSession keys mechanisms) -> 
-	device
+  |Device: 
+    keys: seq keyEntity ->
+    mechanisms: seq _CK_MECHANISM -> 
+    supportedMechanisms: seq _CKS_MECHANISM_INFO -> 
+    objects: seq _object -> 
+    subSessions: seq (subSession keys mechanisms supportedMechanisms) -> 
+  device
 		
 
 (* Internal data *)

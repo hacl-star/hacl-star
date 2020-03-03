@@ -364,7 +364,7 @@ typedef CK_ULONG          CK_KEY_TYPE;
 #define CKK_ARIA                0x00000026UL
 
 /* new for v2.40 */
-#define CKK_SHA512_224_HMAC     0x00000027UL
+#define CKK_SHA512_224_HMAC     0x00000027UL_
 #define CKK_SHA512_256_HMAC     0x00000028UL
 #define CKK_SHA512_T_HMAC       0x00000029UL
 
@@ -1019,7 +1019,7 @@ typedef struct CK_MECHANISM_INFO {
 #define CKF_UNWRAP             0x00040000UL
 #define CKF_DERIVE             0x00080000UL
 
-/* Describe a token's EC capabilities not available in mechCKanism
+/* Describe a token's EC capabilities not available in mechanism
  * information. */
 #define CKF_EC_F_P             0x00100000UL
 #define CKF_EC_F_2M            0x00200000UL
