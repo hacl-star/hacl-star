@@ -9,12 +9,11 @@ open FStar.Seq.Base
 open FStar.Seq.Properties
 
 open PKCS11.Spec.Lemmas
-open Hacl.PKCS.Specification.Constants
 
 
 (* #set-options "--z3rlimit 200 --lax"  *)
 
-#set-options "--z3rlimit 300 --ifuel 5 --fuel 5"
+#set-options "--z3rlimit 300"
 
 
 (* Zero-level types *)
@@ -52,12 +51,18 @@ type _CK_FLAGS_BITS =
   |CKF_HW
   |CKF_SIGN
   |CKF_VERIFY
+  |CKF_GENERATE
+  |CKF_GENERATE_KEY_PAIR
+
 
 (* Experemental implementation *)
 let _ck_flags_bits_get_bit: _CK_FLAGS_BITS -> Tot nat = function
   |CKF_HW -> 0
   |CKF_SIGN -> 1
   |CKF_VERIFY -> 2
+  |CKF_GENERATE -> 3
+  |CKF_GENERATE_KEY_PAIR -> 4
+
 
 type _CK_FLAGS = _CK_ULONG
 
@@ -93,7 +98,23 @@ let _map_cks_mechanism_info_to_mechanism: _CK_MECHANISM_TYPE -> _CKS_MECHANISM_I
 
 
 (* This is an example of the implementation *)
-val isMechanismUsedForSignature: mechanism : _CK_MECHANISM_TYPE -> supportedMechanisms: seq _CKS_MECHANISM_INFO -> Tot bool
+val isMechanismUsedForGenerateKey: mechanism : _CK_MECHANISM_TYPE -> supportedMechanisms: seq _CKS_MECHANISM_INFO -> Tot bool
+
+let isMechanismUsedForGenerateKey mechanism supportedMechanisms = 
+  let mechanismInfo = _map_cks_mechanism_info_to_mechanism mechanism in 
+  isBitFlagSet mechanismInfo.flags CKF_GENERATE
+
+
+(* This is an example of the implementation *)
+val isMechanismUsedForGenerateKeyPair: mechanism : _CK_MECHANISM_TYPE -> supportedMechanisms: seq _CKS_MECHANISM_INFO -> Tot bool
+
+let isMechanismUsedForGenerateKeyPair mechanism supportedMechanisms = 
+  let mechanismInfo = _map_cks_mechanism_info_to_mechanism mechanism in 
+  isBitFlagSet mechanismInfo.flags CKF_GENERATE_KEY_PAIR
+
+
+(* This is an example of the implementation *)
+val isMechanismUsedForSignaturePair: mechanism : _CK_MECHANISM_TYPE -> supportedMechanisms: seq _CKS_MECHANISM_INFO -> Tot bool
 
 let isMechanismUsedForSignature mechanism supportedMechanisms = 
   let mechanismInfo = _map_cks_mechanism_info_to_mechanism mechanism in 
@@ -119,6 +140,7 @@ type _CK_ATTRIBUTE_TYPE =
   |CKA_KEY_TYPE
   |CKA_SIGN
   |CKA_VERIFY
+  |CKA_LOCAL
   (* and much more *)
 
 (*
@@ -451,71 +473,123 @@ type device =
     objects: seq _object -> 
     subSessions: seq (subSession keys mechanisms supportedMechanisms) -> 
   device
-		
 
-(* Internal data *)
-assume val mechanismGetFlags: d: device -> mechanismID: _CK_MECHANISM_TYPE -> Tot _CK_FLAGS_T
+(*
+/* CK_RV is a value that identifies the return value of a
+ * Cryptoki function */
+*)
 
-assume val isFlagKeyGeneration: flags: _CK_FLAGS_T -> Tot bool
+(* The exception type represents all the results except CKR_OK*)
 
-assume val isFlagSign: flags: _CK_FLAGS_T -> Tot bool
+type exception_t = 
+  | CKR_ARGUMENTS_BAD 
+  | CKR_ATTRIBUTE_READ_ONLY 
+  | CKR_ATTRIBUTE_TYPE_INVALID
+  | CKR_ATTRIBUTE_VALUE_INVALID 
+  | CKR_CRYPTOKI_NOT_INITIALIZED 
+  | CKR_CURVE_NOT_SUPPORTED
+  | CKR_DEVICE_ERROR 
+  | CKR_DEVICE_MEMORY 
+  | CKR_DEVICE_REMOVED 
+  | CKR_FUNCTION_CANCELED 
+  | CKR_FUNCTION_FAILED 
+  | CKR_GENERAL_ERROR 
+  | CKR_HOST_MEMORY 
+  | CKR_MECHANISM_INVALID 
+  | CKR_MECHANISM_PARAM_INVALID 
+  | CKR_OPERATION_ACTIVE 
+  | CKR_PIN_EXPIRED 
+  | CKR_SESSION_CLOSED 
+  | CKR_SESSION_HANDLE_INVALID 
+  | CKR_SESSION_READ_ONLY 
+  | CKR_TEMPLATE_INCOMPLETE 
+  | CKR_TEMPLATE_INCONSISTENT 
+  | CKR_TOKEN_WRITE_PROTECTED 
+  | CKR_USER_NOT_LOGGED_IN
 
-assume val isFlagVerify: flags: _CK_FLAGS_T -> Tot bool
-
-assume val isAttributeLocal: attrs: seq attributeSpecification -> Tot bool
-
-assume val isAttributeSecretKey: attrs: seq attributeSpecification -> Tot bool
-
-assume val isAttributeSign: attrs : seq attributeSpecification -> Tot bool
-
-assume val isAttributeVerify: attrs: seq attributeSpecification -> Tot bool
-
-
-type exception_t = _CK_ULONG 
 
 type result 'a = either 'a exception_t
 
 
-val isPresentOnDevice_: d: device -> pMechanism: _CK_MECHANISM_TYPE -> counter: nat{counter < Seq.length d.mechanisms} -> 
-	Tot (r: bool {r = true ==> (exists (a: nat{a < Seq.length d.mechanisms}). let m = Seq.index d.mechanisms a in m.mechanismID = pMechanism) /\ 
-		(Some? (find_l (fun x -> x.mechanismID = pMechanism) d.mechanisms))
-		}
-	)
-	(decreases(Seq.length d.mechanisms - counter))
+val isPresentOnDevice_: d: device -> pMechanism: _CK_MECHANISM_TYPE -> counter: nat {counter < Seq.length d.mechanisms} -> 
+  Tot (r: bool 
+    {
+      r ==> (exists (a: nat {a < Seq.length d.mechanisms}). 
+	let m = Seq.index d.mechanisms a in 
+	m.mechanismID = pMechanism)
+    }
+  )
+  (decreases (length d.mechanisms - counter))
 
-let rec isPresentOnDevice_ d pMechanism counter =
-	let m = Seq.index d.mechanisms counter in 
-	if (m.mechanismID = pMechanism) then 
-		(
-			let f = (fun x -> x.mechanismID = pMechanism) in 
-				assert(Some? (find_l f (Seq.create 1 m)));
-			let a, b' = Seq.split d.mechanisms counter in 
-			let elementCounter, b = Seq.split b' 1 in 
-				assert(Some? (find_l f  elementCounter));
-			find_append_some elementCounter b f; 
-				assert(equal (Seq.append elementCounter b) b');
-			find_append_some_s2 a b' f;
-				assert(equal (Seq.append a b') d.mechanisms);
-				admit();
-			true
-		)
-	else if counter+1 = Seq.length d.mechanisms then false 
-	else 
-		isPresentOnDevice_ d pMechanism (counter +1) 
+let rec isPresentOnDevice_ d pMechanism counter = 
+  let m = index d.mechanisms counter in 
+  if m.mechanismID = pMechanism then 
+     true 
+  else if counter = length d.mechanisms - 1 
+    then false
+  else 
+    isPresentOnDevice_ d pMechanism (counter + 1)
+
+
+val lemma_isPresentOnDevice_aux: s: seq _CK_MECHANISM -> f: (_CK_MECHANISM -> Tot bool) ->
+  Lemma
+    (requires 
+      (exists (a: nat {a < length s}). f (index s a)) /\ not (f (head s)))
+    (ensures 
+      exists (a: nat {a < length (tail s)}). f (index (tail s) a))
+  (decreases (length s))
+
+let rec lemma_isPresentOnDevice_aux s f = 
+  if length s = 0 then ()
+  else 
+    begin
+      assert(not (f (head s)));
+      admit();
+      lemma_isPresentOnDevice_aux (tail s) f
+    end
+
+
+val lemma_isPresentOnDevice: s: seq _CK_MECHANISM -> f: (_CK_MECHANISM -> Tot bool) -> Lemma 
+  (requires 
+    (exists (a: nat {a < length s}). f (index s a)))
+  (ensures
+    (Some? (find_l f s)))
+  (decreases (length s))
+
+let rec lemma_isPresentOnDevice s f = 
+  if Seq.length s = 0 then ()
+  else
+    if f (head s) then ()
+    else 
+      begin
+	lemma_isPresentOnDevice_aux s f;
+	lemma_isPresentOnDevice (tail s) f
+      end
 
 val isPresentOnDevice: d: device -> pMechanism: _CK_MECHANISM_TYPE -> 
-	Tot (r: bool {r = true ==> (exists (a: nat{a < Seq.length d.mechanisms}). let m = Seq.index d.mechanisms a in m.mechanismID = pMechanism) /\ 
-			(Some? (find_l (fun x -> x.mechanismID = pMechanism) d.mechanisms))
-		}
-	)
+  Tot (r: bool
+    {r = true ==>
+      (exists (a: nat{a < Seq.length d.mechanisms}). let m = Seq.index d.mechanisms a in m.mechanismID = pMechanism) /\ 
+      (Some? (find_l (fun x -> x.mechanismID = pMechanism) d.mechanisms))
+    }
+  )
 
 let isPresentOnDevice d pMechanism =
-	if Seq.length d.mechanisms = 0 then false else
-	isPresentOnDevice_ d pMechanism 0
+  if Seq.length d.mechanisms = 0 
+    then false 
+  else
+    let r = isPresentOnDevice_ d pMechanism 0 in 
+    if r = true then begin
+      lemma_isPresentOnDevice (d.mechanisms) (fun x -> x.mechanismID = pMechanism);
+      true
+      end
+    else 
+      false	  
+
 
 
 val mechanismGetFromDevice: d: device -> pMechanism: _CK_MECHANISM_TYPE{isPresentOnDevice d pMechanism = true} -> 
-	Tot (m: mechanismSpecification{m.mechanismID = pMechanism})
+	Tot (m: C_K{m.mechanismID = pMechanism})
 
 let mechanismGetFromDevice d pMechanism = 
 	let mechanisms = d.mechanisms in 
