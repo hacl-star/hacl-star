@@ -75,6 +75,7 @@ type _CK_ATTRIBUTE_TYPE =
   |CKA_PRIVATE
   |CKA_KEY_TYPE
   |CKA_SIGN
+  |CKA_VERIFY
   (* and much more *)
 
 (*
@@ -141,6 +142,7 @@ type _CKS_MECHANISM_INFO =
 let _ck_attribute_get_type: _CK_ATTRIBUTE_TYPE -> Tot Type0 = function
   |CKA_CLASS -> _CK_OBJECT_CLASS
   |CKA_SIGN -> bool
+  |CKA_VERIFY -> bool
   |_ -> _CK_ULONG
 
 
@@ -148,6 +150,7 @@ let _ck_attribute_get_type: _CK_ATTRIBUTE_TYPE -> Tot Type0 = function
 let _ck_attribute_get_len: _CK_ATTRIBUTE_TYPE -> Tot (a: option nat {Some? a ==> (match a with Some a -> a) < pow2 32}) = function
   |CKA_CLASS -> Some 1
   |CKA_SIGN -> Some 1
+  |CKA_VERIFY -> Some 1
   |_ -> None
 
 
@@ -194,7 +197,6 @@ let getObjectAttributeClass obj =
 (* The method takes an object and returns whether it supports signing *)
 (* I will try to look whether I could give the same interface for different object,
 i.e. for mechanisms, keys, etc*)
-
 val getObjectSignClass: obj: _object -> Tot (r: option _CK_ATTRIBUTE
   {Some? r ==> 
     (
@@ -206,6 +208,20 @@ val getObjectSignClass: obj: _object -> Tot (r: option _CK_ATTRIBUTE
 
 let getObjectSignClass obj = 
   find_l (fun x -> x.aType = CKA_SIGN) obj.attrs
+
+
+(* The method takes an object and returns whether it supports signing *)
+val getObjectVerifyClass: obj: _object -> Tot (r: option _CK_ATTRIBUTE
+  {Some? r ==>
+    (
+      let a = (match r with Some a -> a) in 
+      a.aType == CKA_VERIFY
+    )
+  }
+)
+
+let getObjectVerifyClass obj = 
+  find_l (fun x -> x.aType = CKA_VERIFY) obj.attrs
 
 
 (* Key is an object such that the object has an attribute class such that the attribute value is OTP_KEY, PRIVATE KEY, PUBLIC KEY, or SECRET KEY *)
@@ -258,10 +274,10 @@ type subSession (k: seq keyEntity) (m: seq _CK_MECHANISM) =
     keyHandler: _CK_OBJECT_HANDLE{Seq.length k > keyHandler /\
       (
 	let referencedKey = index k keyHandler in 
-	let supportSigning = getObjectSignClass referencedKey.o in 
-	Some? supportSigning /\
+	let supportsSigning = getObjectSignClass referencedKey.o in 
+	Some? supportsSigning /\
 	(
-	  let signingAttributeValue = index (match supportSigning with Some a -> a).pValue 0 in 
+	  let signingAttributeValue = index (match supportsSigning with Some a -> a).pValue 0 in 
 	  signingAttributeValue == true
 	)
       )
@@ -276,11 +292,21 @@ type subSession (k: seq keyEntity) (m: seq _CK_MECHANISM) =
     (* The identifier of the mechanism used for the operation *)
     (* The mechanism requirements: present in the device and to be the signature algorithm *)
     pMechanism: _CK_MECHANISM_TYPE
-      {exists (a: nat {a < Seq.length m}). let mechanism = Seq.index m a in mechanism.mechanismID = pMechanism} ->
+      {exists (a: nat {a < Seq.length m}). let mechanism = Seq.index m a in mechanism.mechanismID = pMechanism /\ isMechanismUsedForVerification pMechanism} ->
     (* The identifier of the key used for the operation *)
     (* The key requirement: present in the device and to be a signature key *)
-    keyHandler: _CK_OBJECT_HANDLE {Seq.length k > keyHandler} -> 
-    (* Temporal space for the signature *)
+    keyHandler: _CK_OBJECT_HANDLE {Seq.length k > keyHandler /\
+      (
+	let referencedKey = index k keyHandler in 
+	let supportsVerification = getObjectVerifyClass referencedKey.o in 
+	Some? supportsVerification /\
+	(
+	  let verificationAttributeValue = index (match supportsVerification with Some a -> a).pValue 0 in 
+	  verificationAttributeValue == true
+	)
+      )
+    } -> 
+    (* Temporal space for the verification *)
     temp: option temporalStorage -> subSession k m
 
 
