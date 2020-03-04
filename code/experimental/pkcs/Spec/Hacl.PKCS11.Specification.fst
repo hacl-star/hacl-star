@@ -630,32 +630,9 @@ assume val keyGeneration: mechanismID: _CK_MECHANISM ->
 )
 
 
-(* whether dependent variable should be also compares to be equal? *)
-
-(* 
-
-
-val sessionEqual: #ks: seq keyEntity -> #ms: seq _CK_MECHANISM -> #supM: seq _CKS_MECHANISM_INFO -> 
-  #ks1: seq keyEntity -> #ms1 : seq _CK_MECHANISM -> #supM1: seq _CKS_MECHANISM_INFO -> 
-  s: subSession ks ms supM -> s1 : subSession ks1 ms1 supM1 -> Tot Type0
-
-let sessionEqual #ks #ms #ks1 #ms1 #supM #supM1 s s1 = 
-  match s with 
-    |Signature a b c d e -> 
-      begin 
-	match s1 with 
-	  |Signature a1 b1 c1 d1 e1 -> a == a1 /\ b == b1 /\ c == c1 /\ d == d1 /\ e == e1
-	  | _ -> False
-      end
-    |Verify a b c d e -> 	
-      begin 
-	match s1 with
-	  | Verify a1 b1 c1 d1 e1 -> a == a1 /\ b == b1 /\ c == c1 /\ d == d1 /\ e == e1
-	  | _ -> False
-      end	
+(* compares two sessions -> The sessions are equal iff the elements are equal. 
+Important, if the list of the key got changed, you can still assess whether the sessions are equal, i.e. it is NOT dependent on the keys, mechanisms, supportedMechanisms etc. At the same time, you can't update a session if the key is not in the key list anymore
 *)
-
-(* compares two sessions -> The sessions are equal iff the dependencies are equal and the elements are equal *)
 val sessionEqual: #ks: seq keyEntity -> #ms: seq _CK_MECHANISM -> #supM: seq _CKS_MECHANISM_INFO -> 
   #ks1: seq keyEntity -> #ms1 : seq _CK_MECHANISM -> #supM1: seq _CKS_MECHANISM_INFO -> 
   s: subSession ks ms supM -> s1 : subSession ks1 ms1 supM1 -> Tot Type0
@@ -665,30 +642,40 @@ let sessionEqual #ks #ms #supM  #ks1 #ms1 #supM1 s s1 =
     |Signature a b c d e -> 
       begin 
 	match s1 with 
-	  |Signature a1 b1 c1 d1 e1 -> ks == ks1 /\ ms == ms1 /\ supM == supM1 /\ a == a1 /\ b == b1 /\ c == c1 /\ d == d1 /\ e == e1
+	  |Signature a1 b1 c1 d1 e1 ->  ms == ms1 /\ supM == supM1 /\ a == a1 /\ b == b1 /\ c == c1 /\ d == d1 /\ e == e1
 	  | _ -> False
       end
     |Verify a b c d e -> 	
       begin 
 	match s1 with
-	  | Verify a1 b1 c1 d1 e1 -> ks == ks1 /\ ms == ms1 /\ supM == supM1 /\ a == a1 /\ b == b1 /\ c == c1 /\ d == d1 /\ e == e1
+	  | Verify a1 b1 c1 d1 e1 ->  ms == ms1 /\ supM == supM1 /\ a == a1 /\ b == b1 /\ c == c1 /\ d == d1 /\ e == e1
 	  | _ -> False
       end	
 
-(* This method recreated the session with the same parameters and dependecies *)
+
+(* This method recreated the session with the same parameters and dependecies, but with different list of the keys *)
+
 val updateSession_: d: device -> 
   s: subSession d.keys d.mechanisms d.supportedMechanisms ->
-  ks: seq keyEntity {Seq.length ks >= Seq.length d.keys \/ subSessionGetKeyHandler s < Seq.length ks} ->
-  ms: seq mechanismSpecification{ms == d.mechanisms} -> 
-  Tot (r: subSession ks ms
+  ks: seq keyEntity {Seq.length ks >= Seq.length d.keys /\
+    (
+      let keyReferenceUsedForOperation = subSessionGetKeyHandler s in 
+      let key = index d.keys keyReferenceUsedForOperation in 
+      let keyInNewKeySet = index ks keyReferenceUsedForOperation in 
+      key == keyInNewKeySet
+    )
+   } ->
+  ms: seq _CK_MECHANISM{ms == d.mechanisms} -> 
+  supM: seq _CKS_MECHANISM_INFO {supM == d.supportedMechanisms} -> 
+  Tot (r: subSession ks ms supM
     {Signature? s ==> Signature? r /\ Verify? s ==> Verify? r /\ sessionEqual s r})	
 
-let updateSession_ d s ks ms = 
-	match s with 
-	| Signature a b c d e -> 
-		let (a: subSession ks ms) = Signature a b c d e in a
-	| Verify a b c d e -> 
-		let (a: subSession ks ms) = Verify a b c d e in a		
+let updateSession_ d s ks ms supM = 
+  match s with 
+  | Signature a b c d e -> 
+    let (a: subSession ks ms supM) = Signature a b c d e in a
+  | Verify a b c d e -> 
+    let (a: subSession ks ms supM) = Verify a b c d e in a		
 
 
 val _updateSession: d: device ->  ks: seq keyEntity -> 
