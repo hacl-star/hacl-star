@@ -16,7 +16,8 @@ let uint32_pow21_to_char_code (u : uint32_pow21) : Char.char_code =
   Lib.RawIntTypes.u32_to_UInt32 u
 
 private
-val list_u8_to_list_char_code: list uint8 -> Tot (list Char.char_code)
+val list_u8_to_list_char_code: l:list uint8
+  -> Tot (l':list Char.char_code{List.length l' = List.length l})
 let list_u8_to_list_char_code l =
   let lu32: list uint32_pow21 = List.Tot.map uint8_to_uint32_pow21 l in
   let plu32: l:list Char.char_code = List.Tot.map uint32_pow21_to_char_code lu32 in
@@ -24,7 +25,7 @@ let list_u8_to_list_char_code l =
 
 #pop-options
 
-val from_string: string -> Tot (seq uint8)
+val from_string: s:string -> Tot (b:seq uint8{length b = FStar.String.strlen s})
 let from_string s =
   let lc = FStar.String.list_of_string s in
   let lu32 = List.Tot.map FStar.Char.u32_of_char lc in
