@@ -39,10 +39,12 @@ open MerkleTree.Low.Datastructures
 let init_hash (hsz:hash_size_t) (r:HST.erid): HST.St (hash #hsz) 
 = rg_alloc (hreg hsz) r
 
-let free_hash (hsz:hash_size_t) (h:hash #hsz): HST.ST unit
+#set-options "--z3rlimit 200 --initial_fuel 2 --max_fuel 2 --initial_ifuel 2 --max_ifuel 2"
+
+let free_hash (#hsz:Ghost.erased hash_size_t) (h:hash #hsz): HST.ST unit
   (requires (fun h0 -> (Rgl?.r_inv (hreg hsz)) h0 h))
   (ensures (fun _ _ _ -> True))
-= rg_free (hreg hsz) h
+= hash_r_free #hsz h
 
 inline_for_extraction
 type hash_fun_t (#hsz:hash_size_t) (#hash_spec:Ghost.erased (MTS.hash_fun_t #(U32.v hsz))) = src1:hash #hsz -> src2:hash #hsz -> dst:hash #hsz -> HST.ST unit
