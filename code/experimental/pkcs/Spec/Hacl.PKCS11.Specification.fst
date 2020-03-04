@@ -904,19 +904,19 @@ val deviceUpdateSessionChangeStatusToUpdated: #ks : seq keyEntity -> #ms : seq _
     {
       forall (ks1:seq keyEntity) (ms1: seq _CK_MECHANISM) (ks2: seq keyEntity) (ms2: seq _CK_MECHANISM) (supM1: seq _CKS_MECHANISM_INFO) (supM2: seq _CKS_MECHANISM_INFO) (s: subSession ks1 ms1 supM1) (s2: subSession ks2 ms2 supM2). (Signature? s == Signature? s2 \/ Verify? s == Verify? s2) /\ subSessionGetID s == subSessionGetID s2 ==> f s == f s2
     }->
-  d: device {count (f #d.keys #d.mechanisms #d.supportedMechanisms) d.subSessions = 1}  -> 
+  d: device {count (f #d.keys) d.subSessions = 1}  -> 
   Tot (resultDevice: device
    { 
-      let session = find_l (f #resultDevice.keys #resultDevice.mechanisms #resultDevice.supportedMechanisms) resultDevice.subSessions in 
-      count (f #resultDevice.keys #resultDevice.mechanisms #resultDevice.supportedMechanisms) resultDevice.subSessions = 1 /\ 
+      let session = find_l (f #resultDevice.keys) resultDevice.subSessions in 
+      count (f #resultDevice.keys) resultDevice.subSessions = 1 /\ 
       Seq.length resultDevice.subSessions = Seq.length d.subSessions /\
       (
-	let sessionIndex = seq_getIndex2 (f #d.keys #d.mechanisms) d.subSessions  in 
-	countMore0IsSome resultDevice.subSessions (f #resultDevice.keys #resultDevice.mechanisms);
+	let sessionIndex = seq_getIndex2 (f #d.keys) d.subSessions  in 
+	countMore0IsSome resultDevice.subSessions (f #resultDevice.keys);
 	let s = match session with Some a -> a in 
 	let previousSessions = d.subSessions in 
-	let previousSession = find_l (f #d.keys #d.mechanisms) previousSessions in 
-	countMore0IsSome previousSessions  (f #d.keys #d.mechanisms #d.supportedMechanisms);
+	let previousSession = find_l (f #d.keys)  previousSessions in 
+	countMore0IsSome previousSessions (f #d.keys);
 	let previousSession = match previousSession with Some a -> a in 
 	
 	subSessionGetState s == 
@@ -936,8 +936,8 @@ let deviceUpdateSessionChangeStatusToUpdated #ks #ms #supM f d =
   let mechanismsPrevious, keysPrevious, objectsPrevious, supportedMechanismsPrevious = d.mechanisms, d.keys, d.objects, d.supportedMechanisms in 
 
   let sessionsPrevious = d.subSessions in 
-  let sessionsToChange = find_l (f #d.keys #d.mechanisms #d.supportedMechanisms) sessionsPrevious in 
-    countMore0IsSome sessionsPrevious (f #d.keys #d.mechanisms #d.supportedMechanisms);
+  let sessionsToChange = find_l (f #d.keys) sessionsPrevious in 
+    countMore0IsSome sessionsPrevious (f #d.keys);
 
   let sessionToChange = match sessionsToChange with |Some a -> a in 
   let sessionChanged = subSessionSetState sessionToChange 
@@ -951,9 +951,9 @@ let deviceUpdateSessionChangeStatusToUpdated #ks #ms #supM f d =
   let sessionChanged = Seq.create 1 sessionChanged in  
 
   let sessionsNew = seq_remove sessionsPrevious (f #keysPrevious #mechanismsPrevious #supportedMechanismsPrevious) in 
-    seq_remove_lemma_count_of_deleted sessionsPrevious (f #keysPrevious #mechanismsPrevious #supportedMechanismsPrevious);
+    seq_remove_lemma_count_of_deleted sessionsPrevious (f #keysPrevious);
   let sessionsUpdated = Seq.append sessionChanged sessionsNew in 
-    lemma_append_count_aux2 (f #keysPrevious #mechanismsPrevious #supportedMechanismsPrevious) sessionChanged sessionsNew;
+    lemma_append_count_aux2 (f #keysPrevious) sessionChanged sessionsNew;
   
   let newDevice = Device keysPrevious mechanismsPrevious supportedMechanismsPrevious objectsPrevious sessionsUpdated in 
   newDevice
