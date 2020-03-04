@@ -3,22 +3,26 @@ module Lib.StringSequence
 open Lib.IntTypes
 open Lib.Sequence
 
-
 #push-options "--z3rlimit 50"
+
+private
+let uint32_pow21 = u:uint32{v u < pow2 21}
+
+private
+let uint8_to_uint32_pow21 (u : uint8) : uint32_pow21 = to_u32 u
+
+private
+let uint32_pow21_to_char_code (u : uint32_pow21) : Char.char_code =
+  Lib.RawIntTypes.u32_to_UInt32 u
 
 private
 val list_u8_to_list_char_code: list uint8 -> Tot (list Char.char_code)
 let list_u8_to_list_char_code l =
-  assert(forall i. v (List.Tot.Base.index l i) < pow2 21);
-  let lu32: list uint32 = List.Tot.map (to_u32) l in
-  let plu32: l:list FStar.UInt32.t = List.Tot.map Lib.RawIntTypes.u32_to_UInt32 lu32 in
-  admit();
-  assert(forall i. v (List.Tot.Base.index plu32 i) < pow2 21);
-  let plu32': l:list Char.char_code = plu32 in
-  plu32'
+  let lu32: list uint32_pow21 = List.Tot.map uint8_to_uint32_pow21 l in
+  let plu32: l:list Char.char_code = List.Tot.map uint32_pow21_to_char_code lu32 in
+  plu32
 
 #pop-options
-
 
 val from_string: string -> Tot (seq uint8)
 let from_string s =
@@ -26,7 +30,6 @@ let from_string s =
   let lu32 = List.Tot.map FStar.Char.u32_of_char lc in
   let lu8 = List.Tot.map to_u8 lu32 in
   FStar.Seq.seq_of_list lu8
-
 
 val to_string: seq uint8 -> Tot string
 let to_string b =
