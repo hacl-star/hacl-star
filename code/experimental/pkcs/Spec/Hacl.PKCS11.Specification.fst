@@ -867,34 +867,35 @@ let deviceUpdateKey d newKey =
   (|resultDevice, handler|)
 
 
-val deviceRemoveSession: #ks: seq keyEntity -> #ms: seq mechanismSpecification ->  hSession : _CK_SESSION_HANDLE -> 
-	f: (#ks: seq keyEntity -> #ms: seq mechanismSpecification -> subSession ks ms -> bool) -> 
-	d: device{count f d.subSessions = 1} ->
-	Tot (resultDevice: device
-		{
-			count f resultDevice.subSessions  = 0 /\
-			Seq.length d.subSessions = Seq.length resultDevice.subSessions + 1  /\
-			(
-				let indexOfSessionToDelete = seq_getIndex2 f d.subSessions in 
-				modifiesSessionsM d resultDevice indexOfSessionToDelete
-			)
-		}
-	)	
+(* This method takes a device, a function f and deletes all the elements that satisfy that function *)
 
-let deviceRemoveSession #ks #ms hSession f d = 
-	let mechanismsPrevious = d.mechanisms in 
-	let keysPrevious = d.keys in 
-	let objectsPrevious = d.objects in 
-	let sessionsPrevious = d.subSessions in 
-	let sessionsNew = seq_remove sessionsPrevious f in 
-		seq_remove_lemma_count_of_deleted sessionsPrevious f;
-	let newDevice = Device keysPrevious mechanismsPrevious objectsPrevious sessionsNew in 
-	let i = seq_getIndex2 f d.subSessions in 
-	let sessionsBeforeA, session_sessionBeforeB = Seq.split d.subSessions i in 
-	let _, sessionsBeforeB = Seq.split session_sessionBeforeB 1 in 
-	let sessionsAfterA, sessionsAfterB = Seq.split newDevice.subSessions i in 
-		seq_remove_unchanged sessionsPrevious f;	
-	newDevice
+(* I left the atomic delete, i.e. not to be able to delete several things at the same time *)
+
+val deviceRemoveSession: #ks: seq keyEntity -> #ms: seq _CK_MECHANISM -> #supM: seq _CKS_MECHANISM_INFO -> 
+  hSession : _CK_SESSION_HANDLE -> 
+  f: (#ks: seq keyEntity -> #ms: seq _CK_MECHANISM -> #supM: seq _CKS_MECHANISM_INFO ->  subSession ks ms supM -> bool) -> 
+  d: device{count f d.subSessions = 1} ->
+  Tot (resultDevice: device
+    {
+      count f resultDevice.subSessions  = 0 /\
+      Seq.length d.subSessions = Seq.length resultDevice.subSessions + 1 /\
+      (
+	let indexOfSessionToDelete = seq_getIndex2 f d.subSessions in 
+	modifiesSessionsM d resultDevice indexOfSessionToDelete
+      )
+    }
+  )	
+
+let deviceRemoveSession #ks #ms #supM hSession f d = 
+  let mechanismsPrevious, keysPrevious, objectsPrevious, supportedMechanismsPrevious = d.mechanisms, d.keys, d.objects, d.supportedMechanisms in 
+  
+  let previousSessions = d.subSessions in 
+  let sessionsNew = seq_remove previousSessions f in 
+    seq_remove_lemma_count_of_deleted previousSessions f;
+    
+  let newDevice = Device keysPrevious mechanismsPrevious supportedMechanismsPrevious objectsPrevious sessionsNew in 
+    seq_remove_unchanged previousSessions f;	
+  newDevice
 
 
 val deviceUpdateSessionChangeStatus: #ks : seq keyEntity -> #ms : seq mechanismSpecification -> 
