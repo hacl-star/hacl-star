@@ -660,9 +660,9 @@ val updateSession_: d: device ->
   ks: seq keyEntity {Seq.length ks >= Seq.length d.keys /\
     (
       let keyReferenceUsedForOperation = subSessionGetKeyHandler s in 
-      let key = index d.keys keyReferenceUsedForOperation in 
+      let keyUsedForOperation = index d.keys keyReferenceUsedForOperation in 
       let keyInNewKeySet = index ks keyReferenceUsedForOperation in 
-      key == keyInNewKeySet
+      keyUsedForOperation == keyInNewKeySet
     )
    } ->
   ms: seq _CK_MECHANISM{ms == d.mechanisms} -> 
@@ -678,56 +678,76 @@ let updateSession_ d s ks ms supM =
     let (a: subSession ks ms supM) = Verify a b c d e in a		
 
 
+(* This method takes all the sessions and updates key set for them *)
 val _updateSession: d: device ->  ks: seq keyEntity -> 
-	ms: seq mechanismSpecification{ms == d.mechanisms} -> 
-	s: seq (subSession d.keys d.mechanisms)
-		{
-			forall (i: nat {i < Seq.length s}). let elem = Seq.index s i in 
-				Seq.length ks >= Seq.length d.keys \/ subSessionGetKeyHandler elem < Seq.length ks
+  ms: seq _CK_MECHANISM{ms == d.mechanisms} -> 
+  supM: seq _CKS_MECHANISM_INFO {supM == d.supportedMechanisms} -> 
+  sessions: seq (subSession d.keys d.mechanisms d.supportedMechanisms)
+  {
+    Seq.length ks >= Seq.length d.keys /\ 
+    (
+      forall (i: nat {i < Seq.length sessions}). 
+	let referencedSession = index sessions i in 
+	let keyReferenceUsedForOperation = subSessionGetKeyHandler referencedSession in 
+	let keyUsedForOperation = index d.keys keyReferenceUsedForOperation in 
+	let keyInNewKeySet = index ks keyReferenceUsedForOperation in 
+	keyUsedForOperation == keyInNewKeySet
+    )
+  } ->
+  counter: nat {counter < Seq.length sessions}->
+  updatedSessions: seq (subSession ks ms supM) 
+  {
+    Seq.length updatedSessions = counter /\
+    (
+      forall (i: nat {i < Seq.length updatedSessions}). (sessionEqual (index sessions i) (index updatedSessions i))
+    )
+  } -> 
+  Tot (
+    newSessions: seq (subSession ks ms supM)
+    {
+      Seq.length sessions = Seq.length newSessions /\
+      (forall (i: nat{i < Seq.length sessions}). sessionEqual (index sessions i) (index newSessions i))
+    }
+  )
+  (decreases (Seq.length sessions - Seq.length updatedSessions))
 
-		} ->
-	counter: nat {counter < Seq.length s}->
-	alreadySeq: seq (subSession ks ms) {Seq.length alreadySeq = counter /\
-		(
-			forall (i: nat {i < Seq.length alreadySeq}). 
-				(sessionEqual (index s i) (index alreadySeq i))
-		)
-	} -> 
-	Tot (snew: (seq (subSession ks ms))
-		{Seq.length s = Seq.length snew /\
-			(forall (i: nat{i < Seq.length s}). sessionEqual (index s i) (index snew i))
-		}
-	)
-	(decreases (Seq.length s - Seq.length alreadySeq))
+let rec _updateSession d ks ms supM sessions counter alreadySeq = 
+  let element = Seq.index sessions counter in 
+  let updatedElement = updateSession_ d element ks ms supM in 
+  let updatedSeq = Seq.append alreadySeq (Seq.create 1 updatedElement) in 
+  if Seq.length sessions = Seq.length updatedSeq	then 
+    updatedSeq 
+  else 
+    _updateSession d ks ms supM sessions (counter + 1) updatedSeq	
 
-let rec _updateSession d ks ms s counter alreadySeq = 
-	let element = Seq.index s counter in 
-	let updatedElement = updateSession_ d element ks ms in 
-	let updatedSeq = Seq.append alreadySeq (Seq.create 1 updatedElement) in 
-	if Seq.length s = Seq.length updatedSeq	then 
-		updatedSeq 
-	else 
-		_updateSession d ks ms s (counter + 1) updatedSeq	
 
-val updateSession: d: device ->  ks: seq keyEntity -> 
-	ms: seq mechanismSpecification{ms == d.mechanisms} -> 
-	s: seq (subSession d.keys d.mechanisms)
-	{
-		forall (i: nat {i < Seq.length s}). let elem = Seq.index s i in 
-			Seq.length ks >= Seq.length d.keys \/ subSessionGetKeyHandler elem < Seq.length ks
-	} ->
-	Tot (snew: (seq (subSession ks ms))
-		{
-			Seq.length s = Seq.length snew /\ 
-			(forall (i: nat{i < Seq.length s}). sessionEqual (index s i) (index snew i))
-		}
-	)
+val updateSession: d: device -> ks: seq keyEntity -> 
+  ms: seq _CK_MECHANISM{ms == d.mechanisms} -> 
+  supM: seq _CKS_MECHANISM_INFO {supM == d.supportedMechanisms} -> 
+  sessions: seq (subSession d.keys d.mechanisms d.supportedMechanisms)
+  {
+    Seq.length ks >= Seq.length d.keys /\ 
+    (
+      forall (i: nat {i < Seq.length sessions}). 
+	let referencedSession = index sessions i in 
+	let keyReferenceUsedForOperation = subSessionGetKeyHandler referencedSession in 
+	let keyUsedForOperation = index d.keys keyReferenceUsedForOperation in 
+	let keyInNewKeySet = index ks keyReferenceUsedForOperation in 
+	keyUsedForOperation == keyInNewKeySet
+    )
+  }  ->
+  Tot (newSessions: (seq (subSession ks ms supM))
+    {
+      Seq.length sessions = Seq.length newSessions /\ 
+      (forall (i: nat{i < Seq.length sessions}). sessionEqual (index sessions i) (index newSessions i))
+    }
+  )
  
-let updateSession d ks ms s = 
-	if Seq.length s = 0 then 
-		Seq.createEmpty 
-	else	
-	_updateSession d ks ms s 0 (Seq.createEmpty)
+let updateSession d ks ms supM sessions = 
+  if Seq.length sessions = 0 then 
+    Seq.empty
+  else	
+    _updateSession d ks ms supM sessions 0 Seq.empty
 
 
 (* Modifies Section*)
