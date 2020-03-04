@@ -484,8 +484,8 @@ let subSessionGetKeyHandler #ks #ms #supMech s =
 
 type device = 
   |Device: 
-    keys: seq keyEntity ->
-    mechanisms: seq _CK_MECHANISM -> 
+    keys: seq keyEntity {Seq.length keys < pow2 32} ->
+    mechanisms: seq _CK_MECHANISM  -> 
     supportedMechanisms: seq _CKS_MECHANISM_INFO -> 
     objects: seq _object -> 
     subSessions: seq (subSession keys mechanisms supportedMechanisms) -> 
@@ -668,7 +668,7 @@ val updateSession_: d: device ->
   ms: seq _CK_MECHANISM{ms == d.mechanisms} -> 
   supM: seq _CKS_MECHANISM_INFO {supM == d.supportedMechanisms} -> 
   Tot (r: subSession ks ms supM
-    {Signature? s ==> Signature? r /\ Verify? s ==> Verify? r /\ sessionEqual s r})	
+    {Signature? s ==> Signature? r /\ Verify? s ==> Verify? r /\ sessionEqual s r })	
 
 let updateSession_ d s ks ms supM = 
   match s with 
@@ -739,6 +739,7 @@ val updateSession: d: device -> ks: seq keyEntity ->
   Tot (newSessions: (seq (subSession ks ms supM))
     {
       Seq.length sessions = Seq.length newSessions /\ 
+      
       (forall (i: nat{i < Seq.length sessions}). sessionEqual (index sessions i) (index newSessions i))
     }
   )
@@ -830,48 +831,40 @@ let modifiesSessionsE dBefore dAfter i =
   (forall (i: nat{i < Seq.length sessionsBeforeB}). sessionEqual (index sessionsBeforeB i) (index sessionsAfterB i))
 
 
-(* Predicate Section*)
+(* This method takes a device, a new key to add and returns a new device with this key inside and the handler of the key.
+   Postconditions: 
+     the number of the keys increased by one;
+     the handler is less than the length of the key storage
+     the getter with the handler returns the same object as it was requested to add
+     nothing except the key[handler] changed
 
-let predicateSessionVerify hSession = (fun #p1 #p2 (x: subSession p1 p2) -> Verify? x && subSessionGetID x = hSession)
-let predicateSessionSignature hSession = (fun #p1 #p2 (x:subSession p1 p2) -> Signature? x && subSessionGetID x = hSession)
-
-val lemma_predicateSignatureForAll: hSession: _CK_SESSION_HANDLE -> Lemma 
-	(ensures (
-		let f = predicateSessionSignature hSession in 
-		forall (ks1:seq keyEntity) (ms1: seq mechanismSpecification) 
-		(ks2: seq keyEntity) (ms2: seq mechanismSpecification) 
-		(s: subSession ks1 ms1) (s2: subSession ks2 ms2). 
-		Signature? s == Signature? s2 /\ subSessionGetID s == subSessionGetID s2 ==> f s == f s2)
-	)
-
-let lemma_predicateSignatureForAll hSession = ()
-
-
-val deviceUpdateKey: d: device -> newKey: keyEntity -> Tot (resultDevice: device
-	{
-		Seq.length resultDevice.keys = Seq.length d.keys + 1 /\
-		Seq.length d.subSessions = Seq.length resultDevice.subSessions
-	} &
-	(handler: _CK_OBJECT_HANDLE
-		{
-			handler < Seq.length resultDevice.keys/\ 
-			Seq.index resultDevice.keys handler = newKey /\
-			modifiesKeysM d resultDevice handler
-		}
-	))
+NB: the key is added to the end of the list
+*)
+val deviceUpdateKey: d: device {Seq.length d.keys < pow2 32 - 1} -> newKey: keyEntity ->
+  Tot (resultDevice: device
+    {
+      Seq.length resultDevice.keys = Seq.length d.keys + 1 /\
+      Seq.length d.subSessions = Seq.length resultDevice.subSessions
+    } &
+    (handler: _CK_OBJECT_HANDLE
+      {
+	handler < Seq.length resultDevice.keys /\ 
+	Seq.index resultDevice.keys handler = newKey /\
+	modifiesKeysM d resultDevice handler
+      }
+    )
+  )
 
 let deviceUpdateKey d newKey = 
-	let mechanismsPrevious = d.mechanisms in 
-	let keysPrevious = d.keys in 
-	let objectsPrevious = d.objects in 
-	let newKey = Seq.create 1 newKey in 
-	let keysNew = Seq.append keysPrevious newKey in
-	let handler = Seq.length keysNew -1 in 
-		lemma_append keysPrevious newKey;
-	let s = d.subSessions in
-	let sessionsUpdated = updateSession d keysNew mechanismsPrevious s in
-	let resultDevice = Device keysNew mechanismsPrevious objectsPrevious sessionsUpdated in 
-	(|resultDevice, handler|)
+  let mechanismsPrevious, keysPrevious, objectsPrevious, supportedMechanismsPrevious = d.mechanisms, d.keys, d.objects, d.supportedMechanisms in 
+  
+  let newKey = Seq.create 1 newKey in 
+  let keysNew = Seq.append keysPrevious newKey in
+  let handler = Seq.length keysNew - 1 in 
+    lemma_append keysPrevious newKey;
+  let sessionsUpdated = updateSession d keysNew mechanismsPrevious supportedMechanismsPrevious d.subSessions in
+  let resultDevice = Device keysNew mechanismsPrevious supportedMechanismsPrevious objectsPrevious sessionsUpdated in 
+  (|resultDevice, handler|)
 
 
 val deviceRemoveSession: #ks: seq keyEntity -> #ms: seq mechanismSpecification ->  hSession : _CK_SESSION_HANDLE -> 
