@@ -58,7 +58,7 @@ let fsub_pre : VSig.vale_pre dom =
     (f1:b64)
     (f2:b64)
     (va_s0:V.va_state) ->
-      FH.va_req_fsub_stdcall c va_s0 IA.win
+      FH.va_req_Fsub_stdcall c va_s0 IA.win
         (as_vale_buffer out) (as_vale_buffer f1) (as_vale_buffer f2)
 
 [@__reduce__] noextract
@@ -70,7 +70,7 @@ let fsub_post : VSig.vale_post dom =
     (va_s0:V.va_state)
     (va_s1:V.va_state)
     (f:V.va_fuel) ->
-      FH.va_ens_fsub_stdcall c va_s0 IA.win (as_vale_buffer out) (as_vale_buffer f1) (as_vale_buffer f2) va_s1 f
+      FH.va_ens_Fsub_stdcall c va_s0 IA.win (as_vale_buffer out) (as_vale_buffer f1) (as_vale_buffer f2) va_s1 f
 
 #set-options "--z3rlimit 100"
 
@@ -89,16 +89,16 @@ let fsub_lemma'
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
        fsub_post code out f1 f2 va_s0 va_s1 f /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer out) /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer f1) /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer f2) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_buffer out) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_buffer f1) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_buffer f2) /\
        ME.buffer_writeable (as_vale_buffer out) /\
        ME.buffer_writeable (as_vale_buffer f1) /\
        ME.buffer_writeable (as_vale_buffer f2) /\
        ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer out))
-                                 ME.loc_none) va_s0.VS.vs_heap va_s1.VS.vs_heap
+                                 ME.loc_none) (VS.vs_get_vale_heap va_s0) (VS.vs_get_vale_heap va_s1)
  )) =
-   let va_s1, f = FH.va_lemma_fsub_stdcall code va_s0 IA.win (as_vale_buffer out) (as_vale_buffer f1) (as_vale_buffer f2) in
+   let va_s1, f = FH.va_lemma_Fsub_stdcall code va_s0 IA.win (as_vale_buffer out) (as_vale_buffer f1) (as_vale_buffer f2) in
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 out;
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 f1;
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 f2;
@@ -108,19 +108,19 @@ let fsub_lemma'
 noextract
 let fsub_lemma = as_t #(VSig.vale_sig_stdcall fsub_pre fsub_post) fsub_lemma'
 noextract
-let code_fsub = FH.va_code_fsub_stdcall IA.win
+let code_Fsub = FH.va_code_Fsub_stdcall IA.win
 
 (* Here's the type expected for the fsub wrapper *)
 [@__reduce__] noextract
-let lowstar_fsub_t =
+let lowstar_Fsub_t =
   assert_norm (List.length dom + List.length ([]<:list arg) <= 4);
   IX64.as_lowstar_sig_t_weak_stdcall
-    code_fsub
+    code_Fsub
     dom
     []
     _
     _
-    (W.mk_prediction code_fsub dom [] (fsub_lemma code_fsub IA.win))
+    (W.mk_prediction code_Fsub dom [] (fsub_lemma code_Fsub IA.win))
 
 [@ (CCConv "stdcall") ]
-val fsub_: normal lowstar_fsub_t
+val fsub_e: normal lowstar_Fsub_t

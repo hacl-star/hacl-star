@@ -9,11 +9,11 @@ open FStar.Mul
 
 #reset-options "--initial_fuel 4 --max_fuel 4 --max_ifuel 0"
 let lemma_expand_key_128_0 (key:aes_key_LE AES_128) =
-  reveal_opaque expand_key_def
+  expand_key_reveal ()
 
 #reset-options "--initial_fuel 1 --max_fuel 1 --max_ifuel 0 --z3rlimit 10"
 let lemma_expand_key_128_i (key:aes_key_LE AES_128) (i:nat) =
-  reveal_opaque expand_key_def;
+  expand_key_reveal ();
   let n = 4 * i in
   // unfold expand_key 4 times (could use fuel, but that unfolds everything):
   let _ = expand_key AES_128 key (n + 1) in
@@ -24,13 +24,14 @@ let lemma_expand_key_128_i (key:aes_key_LE AES_128) (i:nat) =
 
 // expand_key for large 'size' argument agrees with expand_key for smaller 'size' argument
 let rec lemma_expand_append (key:aes_key_LE AES_128) (size1:nat) (size2:nat) =
-  reveal_opaque expand_key_def;
+  expand_key_reveal ();
   if size1 < size2 then lemma_expand_append key size1 (size2 - 1)
 
-#reset-options "--initial_fuel 1 --max_fuel 1 --max_ifuel 0 --z3rlimit 20 --using_facts_from '* -FStar.Seq.Properties'"
+#reset-options "--initial_fuel 1 --max_fuel 1 --max_ifuel 0 --z3rlimit 40 --using_facts_from '* -FStar.Seq.Properties'"
+#restart-solver
 // quad32 key expansion is equivalent to nat32 key expansion
 let rec lemma_expand_key_128 (key:seq nat32) (size:nat) =
-  reveal_opaque expand_key_128_def;
+  expand_key_128_reveal ();
   lemma_expand_append key (4 * size) 44;
   if size = 0 then ()
   else
@@ -46,8 +47,8 @@ let rec lemma_expand_key_128 (key:seq nat32) (size:nat) =
 // SIMD version of round_key_128 is equivalent to scalar round_key_128
 #push-options "--max_fuel 3 --initial_fuel 3 --max_ifuel 3 --initial_ifuel 3"  // REVIEW: Why do we need this?
 let lemma_simd_round_key (prev:quad32) (rcon:nat32) =
-  reveal_opaque quad32_xor_def;
-  reveal_opaque reverse_bytes_nat32_def;
+  quad32_xor_reveal ();
+  reverse_bytes_nat32_reveal ();
   commute_rot_word_sub_word prev.hi3;
   Vale.Arch.Types.xor_lemmas ()
 #pop-options
@@ -56,12 +57,12 @@ let commute_sub_bytes_shift_rows_forall () =
   FStar.Classical.forall_intro commute_sub_bytes_shift_rows
 
 let init_rounds_opaque (init:quad32) (round_keys:seq quad32) =
-  reveal_opaque rounds
+  eval_rounds_reveal ()
 
 #push-options "--max_ifuel 2 --initial_ifuel 2"  // REVIEW: Why do we need this?  Extra inversion to deal with opaque?
 let finish_cipher (alg:algorithm) (input:quad32) (round_keys:seq quad32) =
-  reveal_opaque rounds;
-  reveal_opaque cipher;
+  eval_rounds_reveal ();
+  eval_cipher_reveal ();
   commute_sub_bytes_shift_rows_forall()
 
 
@@ -69,9 +70,9 @@ let finish_cipher_opt (alg:algorithm) (input plain t0 t1 out:quad32) (round_keys
   (requires length round_keys == (nr alg) + 1 /\
             length round_keys > 0 /\ nr alg > 1 /\   // REVIEW: Why are these needed?
             t0 = quad32_xor input (index round_keys 0) /\
-            t1 = rounds_opaque t0 round_keys (nr alg - 1) /\
+            t1 = eval_rounds t0 round_keys (nr alg - 1) /\
             out = quad32_xor (sub_bytes (shift_rows_LE t1)) (quad32_xor plain (index round_keys (nr alg))))
-  (ensures out == quad32_xor plain (cipher_opaque alg input round_keys))
+  (ensures out == quad32_xor plain (eval_cipher alg input round_keys))
   =
   calc (==) {
     out;
@@ -81,14 +82,14 @@ let finish_cipher_opt (alg:algorithm) (input plain t0 t1 out:quad32) (round_keys
     quad32_xor (sub_bytes (shift_rows_LE t1)) (quad32_xor (index round_keys (nr alg)) plain);
     == { Vale.Arch.TypesNative.lemma_quad32_xor_associates (sub_bytes (shift_rows_LE t1)) (index round_keys (nr alg)) plain }
     quad32_xor (quad32_xor (sub_bytes (shift_rows_LE t1)) (index round_keys (nr alg))) plain;
-    == { reveal_opaque rounds;
-         reveal_opaque cipher;
+    == { eval_rounds_reveal ();
+         eval_cipher_reveal ();
          commute_sub_bytes_shift_rows_forall();
-         reveal_opaque quad32_xor_def
+         quad32_xor_reveal ()
        }
-    quad32_xor (cipher_opaque alg input round_keys) plain;
-    == { Vale.Arch.TypesNative.lemma_quad32_xor_commutes plain (cipher_opaque alg input round_keys) }
-    quad32_xor plain (cipher_opaque alg input round_keys);
+    quad32_xor (eval_cipher alg input round_keys) plain;
+    == { Vale.Arch.TypesNative.lemma_quad32_xor_commutes plain (eval_cipher alg input round_keys) }
+    quad32_xor plain (eval_cipher alg input round_keys);
   };
   ()
 #pop-options
@@ -123,12 +124,12 @@ let lemma_add_0x1000000_reverse_mult (n:nat32) (increment:nat) : Lemma
   assert (be_bytes_to_nat32 r_s + increment * 0x1000000 == be_bytes_to_nat32 r_s');
   calc (==) {
      r;
-     == { reveal_opaque reverse_bytes_nat32_def }
+     == { reverse_bytes_nat32_reveal () }
      be_bytes_to_nat32 r_s;
   };
   calc (==) {
     reverse_bytes_nat32 (n+increment);
-    ==  { reveal_opaque reverse_bytes_nat32_def }
+    ==  { reverse_bytes_nat32_reveal () }
     be_bytes_to_nat32 (Vale.Lib.Seqs_s.reverse_seq (nat32_to_be_bytes (n+increment)));
   };
   ()

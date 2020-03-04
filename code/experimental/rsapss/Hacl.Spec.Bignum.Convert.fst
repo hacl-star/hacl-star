@@ -6,7 +6,7 @@ open Lib.IntTypes
 open Lib.Sequence
 open Lib.ByteSequence
 
-open Hacl.Spec.Bignum
+open Hacl.Spec.Bignum.Definitions
 
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
@@ -49,6 +49,9 @@ let bn_to_bytes_be len b =
   let tmp = bn_to_bytes_be_ bnLen b in
   sub tmp (tmpLen - len) len
 
+///
+///  Lemmas
+/// 
 
 val bn_from_bytes_be_lemma: len:size_pos{8 * blocks len 8 <= max_size_t} -> b:lseq uint8 len -> Lemma
   (bn_v (bn_from_bytes_be len b) == nat_from_bytes_be b)

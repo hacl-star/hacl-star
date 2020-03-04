@@ -19,7 +19,7 @@ module Lemmas = Hacl.Spec.GF128.Lemmas
 
 include Hacl.Spec.Gf128.FieldNI
 
-#set-options "--z3rlimit 50 --max_fuel 1 --max_ifuel 1"
+#set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
 inline_for_extraction noextract
 let vec128_zero = vec_zero U128 1
@@ -205,7 +205,7 @@ let fmul x y =
   let (hi,lo) = clmul_wide xe ye in
   let lo = gf128_reduce hi lo in
   x.(size 0) <- lo;
-  gf128_clmud_wide_reduce_lemma xe ye
+  gf128_clmul_wide_reduce_lemma xe ye
 
 
 val load_precompute_r:
@@ -312,4 +312,4 @@ let normalize4 acc x pre =
   let (hi,lo) = clmul_wide4 x1 x2 x3 x4 y1 y2 y3 y4 in
   let lo = gf128_reduce hi lo in
   acc.(size 0) <- lo;
-  gf128_clmud_wide4_reduce_lemma x1 x2 x3 x4 y1 y2 y3 y4
+  gf128_clmul_wide4_reduce_lemma x1 x2 x3 x4 y1 y2 y3 y4

@@ -24,7 +24,7 @@ let gcm_encrypt_tag_length alg key iv plain auth: Lemma
     let c, t = Vale.AES.GCM_s.gcm_encrypt_LE alg key iv plain auth in
     S.length t = 16))
 =
-  Vale.Def.Opaque_s.reveal_opaque (Vale.AES.GCM_s.gcm_encrypt_LE_def alg key iv plain auth)
+  Vale.AES.GCM_s.gcm_encrypt_LE_reveal ()
 
 let gcm_encrypt_cipher_length alg key iv plain auth: Lemma
   (requires
@@ -35,7 +35,7 @@ let gcm_encrypt_cipher_length alg key iv plain auth: Lemma
     let c, t = Vale.AES.GCM_s.gcm_encrypt_LE alg key iv plain auth in
     S.length c = S.length plain))
 =
-  Vale.Def.Opaque_s.reveal_opaque (Vale.AES.GCM_s.gcm_encrypt_LE_def alg key iv plain auth)
+  Vale.AES.GCM_s.gcm_encrypt_LE_reveal ()
 #pop-options
 
 // TODO remove me once seq_uint8_to_seq_nat8 takes Lib.IntTypes.uint8
@@ -77,7 +77,7 @@ let gcm_decrypt_cipher_length alg key iv plain auth tag: Lemma
     let c, t = Vale.AES.GCM_s.gcm_decrypt_LE alg key iv plain auth tag in
     S.length c = S.length plain))
 =
-  Vale.Def.Opaque_s.reveal_opaque (Vale.AES.GCM_s.gcm_decrypt_LE_def alg key iv plain auth tag)
+  Vale.AES.GCM_s.gcm_decrypt_LE_reveal ()
 #pop-options
 
 // Note: bundling cipher and tag together is a pain...

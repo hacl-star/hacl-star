@@ -64,7 +64,7 @@ let sha_pre : VSig.vale_pre dom =
     (num_val:uint64)
     (k_b:ib128)
     (va_s0:V.va_state) ->
-      SH.va_req_sha_update_bytes_stdcall c va_s0 IA.win
+      SH.va_req_Sha_update_bytes_stdcall c va_s0 IA.win
         (as_vale_buffer ctx_b) (as_vale_buffer in_b) (UInt64.v num_val) (as_vale_immbuffer k_b)
 
 (* Need to rearrange the order of arguments *)
@@ -78,7 +78,7 @@ let sha_post : VSig.vale_post dom =
     (va_s0:V.va_state)
     (va_s1:V.va_state)
     (f:V.va_fuel) ->
-      SH.va_ens_sha_update_bytes_stdcall c va_s0 IA.win
+      SH.va_ens_Sha_update_bytes_stdcall c va_s0 IA.win
         (as_vale_buffer ctx_b) (as_vale_buffer in_b) (UInt64.v num_val) (as_vale_immbuffer k_b)
         va_s1 f
 
@@ -105,7 +105,7 @@ let sha_lemma'
        ME.buffer_writeable (as_vale_buffer ctx_b) /\
        ME.buffer_writeable (as_vale_buffer in_b)
  )) =
-   let va_s1, f = SH.va_lemma_sha_update_bytes_stdcall code va_s0 IA.win (as_vale_buffer ctx_b) (as_vale_buffer in_b) (UInt64.v num_val) (as_vale_immbuffer k_b) in
+   let va_s1, f = SH.va_lemma_Sha_update_bytes_stdcall code va_s0 IA.win (as_vale_buffer ctx_b) (as_vale_buffer in_b) (UInt64.v num_val) (as_vale_immbuffer k_b) in
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt32 ME.TUInt128 ctx_b;
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt128 in_b;
    (va_s1, f)
@@ -114,7 +114,7 @@ let sha_lemma'
 noextract
 let sha_lemma = as_t #(VSig.vale_sig_stdcall sha_pre sha_post) sha_lemma'
 noextract
-let code_sha = SH.va_code_sha_update_bytes_stdcall IA.win
+let code_sha = SH.va_code_Sha_update_bytes_stdcall IA.win
 
 #reset-options "--z3rlimit 20"
 

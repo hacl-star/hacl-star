@@ -6,14 +6,14 @@ open Lib.IntTypes
 open Lib.Sequence
 open Lib.LoopCombinators
 
-open Hacl.Spec.Bignum
+open Hacl.Spec.Bignum.Definitions
 open Hacl.Spec.Bignum.Base
-open Hacl.Spec.Bignum.Addition
+open Hacl.Spec.Lib
 
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
-val bn_mul_by_limb_add_f:
+val bn_mul1_add_in_place_f:
     #aLen:size_nat
   -> a:lbignum aLen
   -> l:uint64
@@ -22,22 +22,22 @@ val bn_mul_by_limb_add_f:
   -> c:uint64 ->
   uint64 & uint64 // carry & out
 
-let bn_mul_by_limb_add_f #aLen a l acc i c =
+let bn_mul1_add_in_place_f #aLen a l acc i c =
   mul_carry_add_u64 a.[i] l c acc.[i]
 
 
-val bn_mul_by_limb_add:
+val bn_mul1_add_in_place:
     #aLen:size_nat
   -> a:lbignum aLen
   -> l:uint64
   -> acc:lbignum aLen ->
   uint64 & lbignum aLen
 
-let bn_mul_by_limb_add #aLen a l acc =
-  generate_elems aLen aLen (bn_mul_by_limb_add_f a l acc) (u64 0)
+let bn_mul1_add_in_place #aLen a l acc =
+  generate_elems aLen aLen (bn_mul1_add_in_place_f a l acc) (u64 0)
 
 
-val bn_mul_by_limb_add_shift_j:
+val bn_mul1_lshift_add:
     #aLen:size_nat
   -> #resLen:size_nat
   -> a:lbignum aLen
@@ -46,9 +46,9 @@ val bn_mul_by_limb_add_shift_j:
   -> res:lbignum resLen ->
   uint64 & lbignum resLen
 
-let bn_mul_by_limb_add_shift_j #aLen #resLen a b_j j res =
+let bn_mul1_lshift_add #aLen #resLen a b_j j res =
   let res' = sub res j aLen in
-  let c, res' = bn_mul_by_limb_add #aLen a b_j res' in
+  let c, res' = bn_mul1_add_in_place #aLen a b_j res' in
   let res = update_sub res j aLen res' in
   c, res
 
@@ -63,7 +63,7 @@ val bn_mul_:
   lbignum (aLen + bLen)
 
 let bn_mul_ #aLen #bLen a b j res =
-  let c, res = bn_mul_by_limb_add_shift_j #aLen #(aLen+bLen) a b.[j] j res in
+  let c, res = bn_mul1_lshift_add #aLen #(aLen+bLen) a b.[j] j res in
   res.[aLen + j] <- c
 
 
@@ -81,12 +81,12 @@ let bn_mul #aLen #bLen a b =
 
 
 ///
-///  Lemma (let (c, res1) = bn_mul_by_limb_add #aLen a l res in
+///  Lemma (let (c, res1) = bn_mul1_add_in_place #aLen a l res in
 ///    v c * pow2 (64 * aLen) + bn_v res1 == bn_v res + bn_v a * v l)
 ///
 
 
-val bn_mul_by_limb_add_lemma_loop_step:
+val bn_mul1_add_in_place_lemma_loop_step:
     #aLen:size_nat
   -> a:lbignum aLen
   -> l:uint64
@@ -98,11 +98,11 @@ val bn_mul_by_limb_add_lemma_loop_step:
     v c1 * pow2 (64 * (i - 1)) + bn_v #(i - 1) res1 == eval_ aLen acc (i - 1) + eval_ aLen a (i - 1) * v l))
   (ensures
    (let (c1, res1) = c1_res1 in
-    let (c, res) = generate_elem_f #uint64 #uint64 aLen (bn_mul_by_limb_add_f a l acc) (i - 1) (c1, res1) in
+    let (c, res) = generate_elem_f #uint64 #uint64 aLen (bn_mul1_add_in_place_f a l acc) (i - 1) (c1, res1) in
     v c * pow2 (64 * i) + bn_v #i res == eval_ aLen acc i + eval_ aLen a i * v l))
 
-let bn_mul_by_limb_add_lemma_loop_step #aLen a l acc i (c1, res1) =
-  let (c, res) = generate_elem_f #uint64 #uint64 aLen (bn_mul_by_limb_add_f a l acc) (i - 1) (c1, res1) in
+let bn_mul1_add_in_place_lemma_loop_step #aLen a l acc i (c1, res1) =
+  let (c, res) = generate_elem_f #uint64 #uint64 aLen (bn_mul1_add_in_place_f a l acc) (i - 1) (c1, res1) in
   let c, e = mul_carry_add_u64 a.[i - 1] l c1 acc.[i - 1] in
   assert (v e + v c * pow2 64 == v a.[i - 1] * v l + v c1 + v acc.[i - 1]);
 
@@ -136,19 +136,19 @@ let bn_mul_by_limb_add_lemma_loop_step #aLen a l acc i (c1, res1) =
   assert (v c * pow2 (64 * i) + bn_v #i res == eval_ aLen acc i + eval_ aLen a i * v l)
 
 
-val bn_mul_by_limb_add_lemma_loop:
+val bn_mul1_add_in_place_lemma_loop:
     #aLen:size_nat
   -> a:lbignum aLen
   -> l:uint64
   -> acc:lbignum aLen
   -> i:nat{i <= aLen} -> Lemma
-  (let (c, res) : generate_elem_a uint64 uint64 aLen i = generate_elems aLen i (bn_mul_by_limb_add_f a l acc) (u64 0) in
+  (let (c, res) : generate_elem_a uint64 uint64 aLen i = generate_elems aLen i (bn_mul1_add_in_place_f a l acc) (u64 0) in
    v c * pow2 (64 * i) + bn_v #i res == eval_ aLen acc i + eval_ aLen a i * v l)
 
-let rec bn_mul_by_limb_add_lemma_loop #aLen a l acc i =
-  let (c, res) : generate_elem_a uint64 uint64 aLen i = generate_elems aLen i (bn_mul_by_limb_add_f a l acc) (u64 0) in
+let rec bn_mul1_add_in_place_lemma_loop #aLen a l acc i =
+  let (c, res) : generate_elem_a uint64 uint64 aLen i = generate_elems aLen i (bn_mul1_add_in_place_f a l acc) (u64 0) in
   if i = 0 then begin
-    eq_generate_elems0 #uint64 #uint64 aLen i (bn_mul_by_limb_add_f a l acc) (u64 0);
+    eq_generate_elems0 #uint64 #uint64 aLen i (bn_mul1_add_in_place_f a l acc) (u64 0);
     assert (c == u64 0 /\ res == Seq.empty);
     bn_eval0 #0 res;
     assert_norm (pow2 0 = 1);
@@ -156,53 +156,53 @@ let rec bn_mul_by_limb_add_lemma_loop #aLen a l acc i =
     bn_eval0 acc;
     () end
   else begin
-    let (c1, res1) : generate_elem_a uint64 uint64 aLen (i - 1) = generate_elems aLen (i - 1) (bn_mul_by_limb_add_f a l acc) (u64 0) in
-    generate_elems_unfold #uint64 #uint64 aLen i (bn_mul_by_limb_add_f a l acc) (u64 0) (i - 1);
-    assert (generate_elems #uint64 #uint64 aLen i (bn_mul_by_limb_add_f a l acc) (u64 0) ==
-      generate_elem_f aLen (bn_mul_by_limb_add_f a l acc) (i - 1) (generate_elems #uint64 #uint64 aLen (i - 1) (bn_mul_by_limb_add_f a l acc) (u64 0)));
-    assert ((c, res) == generate_elem_f #uint64 #uint64 aLen (bn_mul_by_limb_add_f a l acc) (i - 1) (c1, res1));
-    bn_mul_by_limb_add_lemma_loop #aLen a l acc (i - 1);
+    let (c1, res1) : generate_elem_a uint64 uint64 aLen (i - 1) = generate_elems aLen (i - 1) (bn_mul1_add_in_place_f a l acc) (u64 0) in
+    generate_elems_unfold #uint64 #uint64 aLen i (bn_mul1_add_in_place_f a l acc) (u64 0) (i - 1);
+    assert (generate_elems #uint64 #uint64 aLen i (bn_mul1_add_in_place_f a l acc) (u64 0) ==
+      generate_elem_f aLen (bn_mul1_add_in_place_f a l acc) (i - 1) (generate_elems #uint64 #uint64 aLen (i - 1) (bn_mul1_add_in_place_f a l acc) (u64 0)));
+    assert ((c, res) == generate_elem_f #uint64 #uint64 aLen (bn_mul1_add_in_place_f a l acc) (i - 1) (c1, res1));
+    bn_mul1_add_in_place_lemma_loop #aLen a l acc (i - 1);
     assert (v c1 * pow2 (64 * (i - 1)) + bn_v #(i - 1) res1 == eval_ aLen acc (i - 1) + eval_ aLen a (i - 1) * v l);
-    bn_mul_by_limb_add_lemma_loop_step #aLen a l acc i (c1, res1);
+    bn_mul1_add_in_place_lemma_loop_step #aLen a l acc i (c1, res1);
     assert (v c * pow2 (64 * i) + bn_v #i res == eval_ aLen acc i + eval_ aLen a i * v l);
     () end
 
 
-val bn_mul_by_limb_add_lemma:
+val bn_mul1_add_in_place_lemma:
     #aLen:size_nat
   -> a:lbignum aLen
   -> l:uint64
   -> acc:lbignum aLen -> Lemma
-  (let (c, res) = bn_mul_by_limb_add #aLen a l acc in
+  (let (c, res) = bn_mul1_add_in_place #aLen a l acc in
    v c * pow2 (64 * aLen) + bn_v res == bn_v acc + bn_v a * v l)
 
-let bn_mul_by_limb_add_lemma #aLen a l acc =
-  let (c, res) = bn_mul_by_limb_add #aLen a l acc in
-  bn_mul_by_limb_add_lemma_loop #aLen a l acc aLen
+let bn_mul1_add_in_place_lemma #aLen a l acc =
+  let (c, res) = bn_mul1_add_in_place #aLen a l acc in
+  bn_mul1_add_in_place_lemma_loop #aLen a l acc aLen
 
 
 ///
-///   Lemma (let (c, res) = bn_mul_by_limb_add_shift_j #aLen #bLen a b j acc in
+///   Lemma (let (c, res) = bn_mul1_lshift_add #aLen #bLen a b j acc in
 ///    v c * pow2 (64 * (aLen + j)) + eval_ (aLen + bLen) res (aLen + j) ==
 ///       eval_ (aLen + bLen) acc (aLen + j) + bn_v a * v b.[j] * pow2 (64 * j))
 ///
 
 
-val bn_mul_by_limb_add_shift_j_lemma:
+val bn_mul1_lshift_add_lemma:
     #aLen:size_nat
   -> #resLen:size_nat
   -> a:lbignum aLen
   -> b_j:uint64
   -> j:size_nat{j + aLen <= resLen}
   -> acc:lbignum resLen -> Lemma
-  (let (c, res) = bn_mul_by_limb_add_shift_j #aLen #resLen a b_j j acc in
+  (let (c, res) = bn_mul1_lshift_add #aLen #resLen a b_j j acc in
    v c * pow2 (64 * (aLen + j)) + eval_ resLen res (aLen + j) ==
    eval_ resLen acc (aLen + j) + bn_v a * v b_j * pow2 (64 * j))
 
-let bn_mul_by_limb_add_shift_j_lemma #aLen #resLen a b_j j acc =
+let bn_mul1_lshift_add_lemma #aLen #resLen a b_j j acc =
   let res1 = sub acc j aLen in
-  let c, res2 = bn_mul_by_limb_add #aLen a b_j res1 in
-  bn_mul_by_limb_add_lemma #aLen a b_j res1;
+  let c, res2 = bn_mul1_add_in_place #aLen a b_j res1 in
+  bn_mul1_add_in_place_lemma #aLen a b_j res1;
   assert (v c * pow2 (64 * aLen) + bn_v res2 == bn_v res1 + bn_v a * v b_j);
   let res = update_sub acc j aLen res2 in
   bn_eval_split_i (sub res 0 (j + aLen)) j;
@@ -245,8 +245,8 @@ val bn_mul_lemma_:
    eval_ (aLen + bLen) acc (aLen + j) + bn_v a * v b.[j] * pow2 (64 * j))
 
 let bn_mul_lemma_ #aLen #bLen a b j acc =
-  let c, res = bn_mul_by_limb_add_shift_j #aLen #(aLen+bLen) a b.[j] j acc in
-  bn_mul_by_limb_add_shift_j_lemma #aLen #(aLen+bLen) a b.[j] j acc;
+  let c, res = bn_mul1_lshift_add #aLen #(aLen+bLen) a b.[j] j acc in
+  bn_mul1_lshift_add_lemma #aLen #(aLen+bLen) a b.[j] j acc;
 
   let res1 = res.[aLen + j] <- c in
   bn_eval_extensionality_j res res1 (aLen + j)
@@ -310,7 +310,7 @@ let rec bn_mul_loop_lemma #aLen #bLen a b i =
   if i = 0 then begin
     eq_repeati0 i (bn_mul_ #aLen #bLen a b) res;
     bn_eval0 b;
-    bn_eval_zeroes res (aLen + i);
+    bn_eval_zeroes (aLen + bLen) (aLen + i);
     () end
   else begin
     unfold_repeati i (bn_mul_ #aLen #bLen a b) res (i - 1);

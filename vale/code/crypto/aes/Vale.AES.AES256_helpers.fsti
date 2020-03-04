@@ -48,8 +48,8 @@ let rec expand_key_256_def (key:seq nat32) (round:nat) : Pure quad32
   if round = 0 then Mkfour key.[0] key.[1] key.[2] key.[3]
   else if round = 1 then Mkfour key.[4] key.[5] key.[6] key.[7]
   else round_key_256 (expand_key_256_def key (round - 2)) (expand_key_256_def key (round - 1)) round
-
-let expand_key_256 = make_opaque expand_key_256_def
+[@"opaque_to_smt"] let expand_key_256 = opaque_make expand_key_256_def
+irreducible let expand_key_256_reveal = opaque_revealer (`%expand_key_256) expand_key_256 expand_key_256_def
 
 // quad32 key expansion is equivalent to nat32 key expansion
 val lemma_expand_key_256 (key:seq nat32) (size:nat) : Lemma

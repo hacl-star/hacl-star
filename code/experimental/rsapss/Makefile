@@ -37,7 +37,7 @@ dist/Hacl_Test_RSAPSS.o: dist/Makefile.basic
 dist/rsapss-test.exe: $(HACL_HOME)/lib/c/Lib_PrintBuffer.o dist/Hacl_Test_RSAPSS.o dist/librsapss.a
 
 %.exe:
-	$(CC) $(CFLAGS) $^ $(KREMLIB_A) -o $@ -L $(KREMLIN_HOME)/kremlib/dist/generic -lkremlib
+	$(CC) $(CFLAGS) $^ -o $@ -L $(KREMLIN_HOME)/kremlib/dist/generic -lkremlib
 
 clean-c:
 	$(MAKE) -C dist/ -f Makefile.basic clean

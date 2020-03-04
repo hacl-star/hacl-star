@@ -98,13 +98,13 @@ let get_ith_bit_lemma0 x i =
 
   calc (==) {
     (v x0 + v x1 * pow2 64) / pow2 (127 - i) % pow2 1;
-    (==) { FStar.Math.Lemmas.pow2_plus 64 (63 - i) }
+    (==) { Math.Lemmas.pow2_plus 64 (63 - i) }
     (v x0 + v x1 * pow2 64) / (pow2 64 * pow2 (63 - i)) % pow2 1;
-    (==) { FStar.Math.Lemmas.division_multiplication_lemma (v x0 + v x1 * pow2 64) (pow2 64) (pow2 (63 - i)) }
+    (==) { Math.Lemmas.division_multiplication_lemma (v x0 + v x1 * pow2 64) (pow2 64) (pow2 (63 - i)) }
     ((v x0 + v x1 * pow2 64) / pow2 64) / pow2 (63 - i) % pow2 1;
-    (==) { FStar.Math.Lemmas.lemma_div_plus (v x0) (v x1) (pow2 64) }
+    (==) { Math.Lemmas.lemma_div_plus (v x0) (v x1) (pow2 64) }
     (v x0 / pow2 64 + v x1) / pow2 (63 - i) % pow2 1;
-    (==) { FStar.Math.Lemmas.small_division_lemma_1 (v x0) (pow2 64) }
+    (==) { Math.Lemmas.small_division_lemma_1 (v x0) (pow2 64) }
     v x1 / pow2 (63 - i) % pow2 1;
   }
 
@@ -127,13 +127,15 @@ let get_ith_bit_lemma1 x i =
 
   calc (==) {
     (v x0 + v x1 * pow2 64) / m % pow2 1;
-    (==) { FStar.Math.Lemmas.pow2_plus (i - 63) (127 - i) }
+    (==) { Math.Lemmas.pow2_plus (i - 63) (127 - i) }
+    (v x0 + v x1 * (k * m)) / m % pow2 1;
+    (==) { Math.Lemmas.paren_mul_right (v x1) k m }
     (v x0 + v x1 * k * m) / m % pow2 1;
-    (==) { FStar.Math.Lemmas.lemma_div_plus (v x0) (v x1 * k) m }
+    (==) { Math.Lemmas.lemma_div_plus (v x0) (v x1 * k) m }
     (v x0 / m + v x1 * k) % pow2 1;
-    (==) { FStar.Math.Lemmas.lemma_mod_plus_distr_r (v x0 / m) (v x1 * k) (pow2 1)}
+    (==) { Math.Lemmas.lemma_mod_plus_distr_r (v x0 / m) (v x1 * k) (pow2 1)}
     (v x0 / m + v x1 * k % pow2 1) % pow2 1;
-    (==) { FStar.Math.Lemmas.pow2_multiplication_modulo_lemma_1 (v x1) 1 (i - 63) }
+    (==) { Math.Lemmas.pow2_multiplication_modulo_lemma_1 (v x1) 1 (i - 63) }
     (v x0 / m) % pow2 1;
     }
 
@@ -184,17 +186,19 @@ let shift_right1_lemma x =
     v r0 + v r1 * pow2 64;
     (==) { logor_disjoint (x0 >>. 1ul) (x1 <<. 63ul) 63 }
     v x0 / pow2 1 + (v x1 * pow2 63) % pow2 64 + v x1 / pow2 1 * pow2 64;
-    (==) { FStar.Math.Lemmas.pow2_multiplication_modulo_lemma_2 (v x1) 64 63 }
+    (==) { Math.Lemmas.pow2_multiplication_modulo_lemma_2 (v x1) 64 63 }
     v x0 / pow2 1 + (v x1 % pow2 1) * pow2 63 + v x1 / pow2 1 * pow2 64;
     (==) { assert_norm (pow2 64 = pow2 1 * pow2 63) }
+    v x0 / pow2 1 + (v x1 % pow2 1) * pow2 63 + v x1 / pow2 1 * (pow2 1 * pow2 63);
+    (==) { Math.Lemmas.paren_mul_right (v x1 / pow2 1) (pow2 1) (pow2 63) }
     v x0 / pow2 1 + (v x1 % pow2 1) * pow2 63 + v x1 / pow2 1 * pow2 1 * pow2 63;
-    (==) { FStar.Math.Lemmas.distributivity_add_left (v x1 % pow2 1) (v x1 / pow2 1) (pow2 63) }
+    (==) { Math.Lemmas.distributivity_add_left (v x1 % pow2 1) (v x1 / pow2 1 * pow2 1) (pow2 63) }
     v x0 / pow2 1 + (v x1 % pow2 1 + v x1 / pow2 1 * pow2 1) * pow2 63;
-    (==) { FStar.Math.Lemmas.euclidean_division_definition (v x1) (pow2 1)}
+    (==) { Math.Lemmas.euclidean_division_definition (v x1) (pow2 1)}
     v x0 / pow2 1 + v x1 * pow2 63;
-    (==) { FStar.Math.Lemmas.lemma_div_plus (v x0) (v x1 * pow2 63) (pow2 1) }
-    (v x0 + v x1 * pow2 64) / pow2 1;
     };
+  Math.Lemmas.lemma_div_plus (v x0) (v x1 * pow2 63) (pow2 1);
+  //  (v x0 + v x1 * pow2 64) / pow2 1;
   assert (v r0 + v r1 * pow2 64 == v rp)
 
 val mask_shift_right_mod_lemma: y:elem_s -> Lemma

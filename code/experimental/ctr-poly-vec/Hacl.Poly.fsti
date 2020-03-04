@@ -10,27 +10,6 @@ module Loops = Lib.LoopCombinators
 #set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
 ///
-///  Local definition of the repeat_blocks function
-///
-
-
-let repeat_blocks_c (#a:Type0) (#b:Type0) (#c:Type0)
-  (blocksize:size_pos)
-  (inp:seq a)
-  (f:(lseq a blocksize -> b -> b))
-  (g:(len:size_nat{len == length inp % blocksize} -> s:lseq a len -> b -> c))
-  (init:b) : c
- =
-   let len = length inp in
-   let nb = len / blocksize in
-   let rem = len % blocksize in
-   let acc = Loops.repeati nb (repeat_blocks_f blocksize inp f nb) init in
-   let last = Seq.slice inp (nb * blocksize) len in
-   let acc = g rem last acc in
-   acc
-
-
-///
 ///  Poly semiring
 ///
 
@@ -64,7 +43,7 @@ let poly_update_last (r:felem) (len:nat{len < blocksize}) (b:lbytes len) (acc:fe
   if len = 0 then acc else (encode_last len b +% acc) *% r
 
 let poly_update (text:bytes) (acc:felem) (r:felem) : felem =
-  repeat_blocks_c #uint8 #felem #felem blocksize text
+  repeat_blocks #uint8 #felem #felem blocksize text
     (poly_update1 r)
     (poly_update_last r)
   acc
@@ -125,22 +104,21 @@ let poly_update_v (#w:lanes) (text:bytes{w * blocksize <= length text}) (acc:fel
 
   let pre = create w (pow_w w r) in
   let text1 = Seq.slice text blocksize_v len in
-  repeat_blocks_c #uint8 #(felem_v w) #felem blocksize_v text1
+  repeat_blocks #uint8 #(felem_v w) #felem blocksize_v text1
     (poly_update_nblocks #w pre)
     (poly_update_last_v #w r)
   acc_v
 
 ///
-///  Poly semiring properties
+///  Poly evaluation properties
 ///
 
-val fadd_identity: a:felem -> Lemma (zero +% a == a)
-val fadd_commutativity: a:felem -> b:felem -> Lemma (a +% b == b +% a)
-val fadd_associativity: a:felem -> b:felem -> c:felem -> Lemma (a +% b +% c == a +% (b +% c))
+val load_acc_v_lemma: #w:lanes -> b:block_v w -> acc0:felem -> r:felem -> Lemma
+  (FStar.Math.Lemmas.cancel_mul_mod w blocksize;
+   normalize_v r (load_acc_v b acc0) == repeat_blocks_multi blocksize b (poly_update1 r) acc0)
 
-val fmul_identity: a:felem -> Lemma (one *% a == a)
-val fmul_commutativity: a:felem -> b:felem -> Lemma (a *% b == b *% a)
-val fmul_associativity: a:felem -> b:felem -> c:felem -> Lemma (a *% b *% c == a *% (b *% c))
 
-val fmul_zero_l: a:felem -> Lemma (zero *% a == zero)
-val fmul_add_distr_l: a:felem -> b:felem -> c:felem -> Lemma ((a +% b) *% c == a *% c +% b *% c)
+val poly_update_nblocks_lemma: #w:lanes -> r:felem -> b:block_v w -> acc_v0:felem_v w -> Lemma
+  (let pre = create w (pow_w w r) in
+  FStar.Math.Lemmas.cancel_mul_mod w blocksize;
+  normalize_v r (poly_update_nblocks #w pre b acc_v0) == repeat_blocks_multi blocksize b (poly_update1 r) (normalize_v r acc_v0))

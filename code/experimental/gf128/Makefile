@@ -36,7 +36,7 @@ dist/gf128-precomp-test.exe: $(HACL_HOME)/tests/gf128-precomp-test.o dist/libgf1
 dist/gf128-ni-test.exe: $(HACL_HOME)/tests/gf128-ni-test.o dist/libgf128.a
 
 %.exe:
-	$(CC) $^ $(KREMLIB_A) -o $@
+	$(CC) $(CFLAGS) $^ -o $@
 
 clean-c:
 	$(MAKE) -C dist/ -f Makefile.basic clean

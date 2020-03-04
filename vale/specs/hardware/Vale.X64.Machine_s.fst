@@ -1,5 +1,6 @@
 module Vale.X64.Machine_s
 open FStar.Mul
+include Vale.Arch.HeapTypes_s
 
 irreducible let va_qattr = ()
 unfold let pow2_32 = Vale.Def.Words_s.pow2_32
@@ -46,10 +47,6 @@ type maddr:eqtype =
   | MConst: n:int -> maddr
   | MReg: r:reg -> offset:int -> maddr
   | MIndex: base:reg -> scale:int -> index:reg -> offset:int -> maddr
-
-type taint:eqtype =
-  | Public
-  | Secret
 
 type tmaddr:eqtype = maddr & taint
 
@@ -122,4 +119,3 @@ type observation:eqtype =
   | BranchPredicate: pred:bool -> observation
   | MemAccess: addr:int -> observation
 
-type memTaint_t = (m:Map.t int taint{Set.equal (Map.domain m) (Set.complement Set.empty)})

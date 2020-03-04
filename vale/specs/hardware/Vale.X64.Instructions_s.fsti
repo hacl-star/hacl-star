@@ -144,7 +144,7 @@ let eval_Palignr_raw (amount:nat8) (src1 src2:quad32) : option quad32 =
     Some (Mkfour src2.hi2 src2.hi3 src1.lo0 src1.lo1)
   else None
 
-let eval_Palignr (amount:nat8) (src1 src2:quad32) : option quad32 = 
+let eval_Palignr (amount:nat8) (src1 src2:quad32) : option quad32 =
   check_ssse3 (eval_Palignr_raw amount src1 src2)
 val ins_Palignr (amount:nat8) :
   instr_dep [inOut opXmm] [opXmm] PreserveFlags (eval_Palignr amount)
@@ -256,7 +256,7 @@ let eval_Pinsrd (index:nat8) (dst:quad32) (src:nat64) : option quad32 =
 val ins_Pinsrd (index:nat8) : instr_dep [inOut opXmm] [op64] PreserveFlags (eval_Pinsrd index)
 
 let eval_Pinsrq (index:nat8) (dst:quad32) (src:nat64) : option quad32 =
-  check_sse4_1 (Some (insert_nat64 dst src (index % 2)))
+  check_sse4_1 (Some (insert_nat64_def dst src (index % 2)))
 val ins_Pinsrq (index:nat8) : instr_dep [inOut opXmm] [op64] PreserveFlags (eval_Pinsrq index)
 
 let eval_Pslldq_raw (count:nat8) (src:quad32) : option quad32 =
@@ -354,5 +354,17 @@ let eval_SHA256_msg2 (src1 src2:quad32) : option quad32 =
   if sha_enabled then Some (sha256_msg2_spec src1 src2) else None
 val ins_SHA256_msg2 : instr_dep [inOut opXmm] [opXmm] PreserveFlags eval_SHA256_msg2
 
+let eval_Ghost : option unit = Some ()
+val ins_Ghost : instr_dep [] [] PreserveFlags eval_Ghost
+
 let eval_Comment : option unit = Some ()
-val ins_Comment : string -> instr_dep [] [] PreserveFlags eval_Comment
+val ins_Comment (_:string) : instr_dep [] [] PreserveFlags eval_Comment
+
+let eval_LargeComment : option unit = Some ()
+val ins_LargeComment (_:string) : instr_dep [] [] PreserveFlags eval_LargeComment
+
+let eval_Newline : option unit = Some ()
+val ins_Newline : instr_dep [] [] PreserveFlags eval_Newline
+
+let eval_Space : option unit = Some ()
+val ins_Space (_:nat) : instr_dep [] [] PreserveFlags eval_Space

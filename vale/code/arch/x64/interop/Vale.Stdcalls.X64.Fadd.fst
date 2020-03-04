@@ -35,16 +35,16 @@ let lowstar_add1 : lowstar_add1_t  =
     dom
     (W.mk_prediction code_add1 dom [] (add1_lemma code_add1 IA.win))
 
-let add1 //: normal lowstar_add1_t
+let add_scalar_e //: normal lowstar_add1_t
   = as_normal_t #lowstar_add1_t lowstar_add1
 
 (* And here's the fadd wrapper itself *)
 let lowstar_fadd : lowstar_fadd_t  =
   assert_norm (List.length fadd_dom + List.length ([]<:list arg) <= 4);
   IX64.wrap_weak_stdcall
-    code_fadd
+    code_Fadd
     fadd_dom
-    (W.mk_prediction code_fadd fadd_dom [] (fadd_lemma code_fadd IA.win))
+    (W.mk_prediction code_Fadd fadd_dom [] (fadd_lemma code_Fadd IA.win))
 
-let fadd_ //: normal lowstar_add1_t
+let fadd_e //: normal lowstar_add1_t
 = as_normal_t #lowstar_fadd_t lowstar_fadd

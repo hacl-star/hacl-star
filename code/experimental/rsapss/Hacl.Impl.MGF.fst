@@ -7,7 +7,7 @@ open FStar.Mul
 open Lib.IntTypes
 open Lib.Buffer
 
-open Hacl.Bignum
+open Hacl.Bignum.Definitions
 
 module ST = FStar.HyperStack.ST
 module S = Spec.RSAPSS
@@ -41,6 +41,7 @@ val counter_to_bytes:
   (requires fun h -> live h counter)
   (ensures  fun h0 _ h1 -> modifies (loc counter) h0 h1 /\
     as_seq h1 counter == BSeq.nat_to_bytes_be 4 (v i))
+
 let counter_to_bytes i c =
   let h0 = ST.get () in
   c.(0ul) <- to_u8 (i >>. 24ul);
@@ -80,7 +81,7 @@ val mgf_sha256:
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_seq h1 res == S.mgf_sha256 #(v len) (as_seq h0 mgfseed) (v maskLen))
 
-[@"c_inline"]
+[@CInline]
 let mgf_sha256 len mgfseed maskLen res =
   push_frame ();
   let mgfseed_counter = create (len +! 4ul) (u8 0) in

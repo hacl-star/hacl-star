@@ -8,11 +8,10 @@ open Lib.IntTypes
 open Lib.Buffer
 open Lib.ByteBuffer
 
-open Hacl.Bignum
+open Hacl.Bignum.Definitions
 
 module ST = FStar.HyperStack.ST
 module LSeq = Lib.Sequence
-module BSeq = Lib.ByteSequence
 
 module S = Hacl.Spec.Bignum.Convert
 
@@ -44,7 +43,7 @@ val bn_from_bytes_be:
   Stack unit
   (requires fun h -> live h b /\ live h res /\ disjoint res b)
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    bn_v h1 res == BSeq.nat_from_bytes_be (as_seq h0 b))
+    as_seq h1 res == S.bn_from_bytes_be (v len) (as_seq h0 b))
 
 [@CInline]
 let bn_from_bytes_be len b res =
@@ -55,7 +54,6 @@ let bn_from_bytes_be len b res =
   let tmp = create tmpLen (u8 0) in
   update_sub tmp (tmpLen -! len) len b;
   bn_from_bytes_be_ bnLen tmp res;
-  S.bn_from_bytes_be_lemma (v len) (as_seq h0 b);
   pop_frame ()
 
 
@@ -89,7 +87,7 @@ val bn_to_bytes_be:
     live h b /\ live h res /\ disjoint res b /\
     bn_v h b < pow2 (8 * v len))
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    as_seq h1 res == BSeq.nat_to_bytes_be (v len) (bn_v h0 b))
+    as_seq h1 res == S.bn_to_bytes_be (v len) (as_seq h0 b))
 
 [@CInline]
 let bn_to_bytes_be len b res =
@@ -100,5 +98,4 @@ let bn_to_bytes_be len b res =
   let tmp = create tmpLen (u8 0) in
   bn_to_bytes_be_ bnLen b tmp;
   copy res (sub tmp (tmpLen -! len) len);
-  S.bn_to_bytes_be_lemma (v len) (as_seq h0 b);
   pop_frame ()

@@ -70,15 +70,12 @@ val gctr_encrypt_empty (icb_BE:quad32) (plain_LE cipher_LE:seq quad32) (alg:algo
     cipher = gctr_encrypt_LE icb_BE (make_gctr_plain_LE plain) alg key
   ))
 
-[@"opaque_to_smt"]
-let aes_encrypt_le = aes_encrypt_LE_def
-
 let aes_encrypt_BE (alg:algorithm) (key:seq nat32) (p_BE:quad32) : Pure quad32
   (requires is_aes_key_LE alg key)
   (ensures fun _ -> True)
   =
   let p_LE = reverse_bytes_quad32 p_BE in
-  aes_encrypt_le alg key p_LE
+  aes_encrypt_LE alg key p_LE
 
 let gctr_registers_def (r0 r1 r2 r3 r4 r5:quad32) (s:seq quad32) (alg:algorithm) (key:seq nat32) (ctr_BE:quad32) (i:int) : prop0 =
   0 <= i /\ i*6 + 5 < length s /\
@@ -89,28 +86,28 @@ let gctr_registers_def (r0 r1 r2 r3 r4 r5:quad32) (s:seq quad32) (alg:algorithm)
   r3 = quad32_xor (index s (i*6 + 3)) (aes_encrypt_BE alg key (inc32lite ctr_BE (6*i + 3))) /\
   r4 = quad32_xor (index s (i*6 + 4)) (aes_encrypt_BE alg key (inc32lite ctr_BE (6*i + 4))) /\
   r5 = quad32_xor (index s (i*6 + 5)) (aes_encrypt_BE alg key (inc32lite ctr_BE (6*i + 5)))
+[@"opaque_to_smt"] let gctr_registers = opaque_make gctr_registers_def
+irreducible let gctr_registers_reveal = opaque_revealer (`%gctr_registers) gctr_registers gctr_registers_def
 
-let gctr_registers = make_opaque gctr_registers_def
-
-let gctr_partial (alg:algorithm) (bound:nat) (plain cipher:seq quad32) (key:seq nat32) (icb:quad32) : prop0 =
+let gctr_partial_def (alg:algorithm) (bound:nat) (plain cipher:seq quad32) (key:seq nat32) (icb:quad32) : prop0 =
   is_aes_key_LE alg key /\
   ( let bound = min bound (min (length plain) (length cipher)) in
     forall j . {:pattern (index cipher j)} 0 <= j /\ j < bound ==>
       index cipher j == quad32_xor (index plain j) (aes_encrypt_BE alg key (inc32 icb j)))
-
-let gctr_partial_opaque = make_opaque gctr_partial
+[@"opaque_to_smt"] let gctr_partial = opaque_make gctr_partial_def
+irreducible let gctr_partial_reveal = opaque_revealer (`%gctr_partial) gctr_partial gctr_partial_def
 
 val gctr_partial_opaque_init (alg:algorithm) (plain cipher:seq quad32) (key:seq nat32) (icb:quad32) : Lemma
   (requires is_aes_key_LE alg key)
-  (ensures gctr_partial_opaque alg 0 plain cipher key icb)
+  (ensures gctr_partial alg 0 plain cipher key icb)
 
 val lemma_gctr_partial_append (alg:algorithm) (b1 b2:nat) (p1 c1 p2 c2:seq quad32) (key:seq nat32) (icb1 icb2:quad32) : Lemma
-  (requires gctr_partial_opaque alg b1 p1 c1 key icb1 /\
-            gctr_partial_opaque alg b2 p2 c2 key icb2 /\
+  (requires gctr_partial alg b1 p1 c1 key icb1 /\
+            gctr_partial alg b2 p2 c2 key icb2 /\
             b1 == length p1 /\ b1 == length c1 /\
             b2 == length p2 /\ b2 == length c2 /\
             icb2 == inc32 icb1 b1)
-  (ensures gctr_partial_opaque alg (b1 + b2) (p1 @| p2) (c1 @| c2) key icb1)
+  (ensures gctr_partial alg (b1 + b2) (p1 @| p2) (c1 @| c2) key icb1)
 
 val gctr_partial_opaque_ignores_postfix (alg:algorithm) (bound:nat32) (plain plain' cipher cipher':seq quad32) (key:seq nat32) (icb:quad32) : Lemma
   (requires is_aes_key_LE alg key /\
@@ -120,14 +117,14 @@ val gctr_partial_opaque_ignores_postfix (alg:algorithm) (bound:nat32) (plain pla
             length cipher' >= bound /\
             slice plain  0 bound == slice plain'  0 bound /\
             slice cipher 0 bound == slice cipher' 0 bound)
-  (ensures gctr_partial_opaque alg bound plain cipher key icb <==> gctr_partial_opaque alg bound plain' cipher' key icb)
+  (ensures gctr_partial alg bound plain cipher key icb <==> gctr_partial alg bound plain' cipher' key icb)
 
 val gctr_partial_extend6 (alg:algorithm) (bound:nat) (plain cipher:seq quad32) (key:seq nat32) (icb:quad32) : Lemma
   (requires length plain >= bound + 6 /\
             length cipher >= bound + 6 /\
             is_aes_key_LE alg key /\
             bound + 6 < pow2_32 /\
-            gctr_partial_opaque alg bound plain cipher key icb /\
+            gctr_partial alg bound plain cipher key icb /\
             index cipher (bound + 0) == quad32_xor (index plain (bound + 0)) (aes_encrypt_BE alg key (inc32lite icb (bound + 0))) /\
             index cipher (bound + 1) == quad32_xor (index plain (bound + 1)) (aes_encrypt_BE alg key (inc32lite icb (bound + 1))) /\
             index cipher (bound + 2) == quad32_xor (index plain (bound + 2)) (aes_encrypt_BE alg key (inc32lite icb (bound + 2))) /\
@@ -135,14 +132,14 @@ val gctr_partial_extend6 (alg:algorithm) (bound:nat) (plain cipher:seq quad32) (
             index cipher (bound + 4) == quad32_xor (index plain (bound + 4)) (aes_encrypt_BE alg key (inc32lite icb (bound + 4))) /\
             index cipher (bound + 5) == quad32_xor (index plain (bound + 5)) (aes_encrypt_BE alg key (inc32lite icb (bound + 5)))
   )
-  (ensures gctr_partial_opaque alg (bound + 6) plain cipher key icb)
+  (ensures gctr_partial alg (bound + 6) plain cipher key icb)
 
 val gctr_partial_completed (alg:algorithm) (plain cipher:seq quad32) (key:seq nat32) (icb:quad32) : Lemma
   (requires
     is_aes_key_LE alg key /\
     length plain == length cipher /\
     length plain < pow2_32 /\
-    gctr_partial alg (length cipher) plain cipher key icb
+    gctr_partial_def alg (length cipher) plain cipher key icb
   )
   (ensures cipher == gctr_encrypt_recursive icb plain alg key 0)
 
@@ -151,7 +148,7 @@ val gctr_partial_opaque_completed (alg:algorithm) (plain cipher:seq quad32) (key
     is_aes_key_LE alg key /\
     length plain == length cipher /\
     length plain < pow2_32 /\
-    gctr_partial_opaque alg (length cipher) plain cipher key icb
+    gctr_partial alg (length cipher) plain cipher key icb
   )
   (ensures cipher == gctr_encrypt_recursive icb plain alg key 0)
 
@@ -202,8 +199,8 @@ val gctr_bytes_helper (alg:algorithm) (key:seq nat32)
            length c_bytes == 1 /\
            is_aes_key_LE alg key /\
 
-          // Ensured by gctr_core_opt
-          gctr_partial alg (length p128) p128 c128 key iv_BE /\
+          // Ensured by Gctr_core_opt
+          gctr_partial_def alg (length p128) p128 c128 key iv_BE /\
           (p_num_bytes > length p128 * 16 ==>
            index c_bytes 0 == gctr_encrypt_block (inc32 iv_BE (length p128)) (index p_bytes 0) alg key 0))
   (ensures (let plain_raw_quads = append p128 p_bytes in

@@ -62,7 +62,7 @@ let vm_pre : VSig.vale_pre vm_dom =
     (dst:b64)
     (src:ib64)
     (va_s0:V.va_state) ->
-      VM.va_req_memcpy c va_s0 IA.win (as_vale_buffer dst) (as_vale_immbuffer src)
+      VM.va_req_Memcpy c va_s0 IA.win (as_vale_buffer dst) (as_vale_immbuffer src)
 
 [@__reduce__]
 let vm_post : VSig.vale_post  vm_dom =
@@ -72,7 +72,7 @@ let vm_post : VSig.vale_post  vm_dom =
     (va_s0:V.va_state)
     (va_s1:V.va_state)
     (f:V.va_fuel) ->
-      VM.va_ens_memcpy c va_s0 IA.win (as_vale_buffer dst) (as_vale_immbuffer src) va_s1 f
+      VM.va_ens_Memcpy c va_s0 IA.win (as_vale_buffer dst) (as_vale_immbuffer src) va_s1 f
 
 module VS = Vale.X64.State
 #reset-options "--print_effect_args --z3rlimit 200"
@@ -93,42 +93,42 @@ let vm_lemma'
       V.eval_code code va_s0 f va_s1 /\
       VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
       vm_post code dst src va_s0 va_s1 f /\
-      ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_immbuffer src) /\
-      ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer dst) /\
+      ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_immbuffer src) /\
+      ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_buffer dst) /\
       ME.buffer_writeable (as_vale_buffer dst) /\
       ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer dst))
-                                ME.loc_none) va_s0.VS.vs_heap va_s1.VS.vs_heap
+                                ME.loc_none) (VS.vs_get_vale_heap va_s0) (VS.vs_get_vale_heap va_s1)
     ))
   = 
-  let va_s1, f = VM.va_lemma_memcpy code va_s0 IA.win (as_vale_buffer dst) (as_vale_immbuffer src) in
+  let va_s1, f = VM.va_lemma_Memcpy code va_s0 IA.win (as_vale_buffer dst) (as_vale_immbuffer src) in
   Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt8 ME.TUInt64 dst;
   (va_s1, f)
 
 (* Prove that vm_lemma' has the required type *)
 let vm_lemma = as_t #(VSig.vale_sig_stdcall vm_pre vm_post) vm_lemma'
 
-let code_memcpy = VM.va_code_memcpy IA.win
+let code_Memcpy = VM.va_code_Memcpy IA.win
 
 (* Here's the type expected for the memcpy wrapper *)
 [@__reduce__]
-let lowstar_memcpy_t =
+let lowstar_Memcpy_t =
   IX64.as_lowstar_sig_t_weak_stdcall
-    code_memcpy
+    code_Memcpy
     vm_dom
     []
     _
     _
-    (W.mk_prediction code_memcpy vm_dom [] (vm_lemma code_memcpy IA.win))
+    (W.mk_prediction code_Memcpy vm_dom [] (vm_lemma code_Memcpy IA.win))
 
 (* And here's the memcpy wrapper itself *)
-let lowstar_memcpy : lowstar_memcpy_t  =
+let lowstar_Memcpy : lowstar_Memcpy_t  =
   IX64.wrap_weak_stdcall
-    code_memcpy
+    code_Memcpy
     vm_dom
-    (W.mk_prediction code_memcpy vm_dom [] (vm_lemma code_memcpy IA.win))
+    (W.mk_prediction code_Memcpy vm_dom [] (vm_lemma code_Memcpy IA.win))
 
-let lowstar_memcpy_normal_t //: normal lowstar_memcpy_t
-  = as_normal_t #lowstar_memcpy_t lowstar_memcpy
+let lowstar_Memcpy_normal_t //: normal lowstar_Memcpy_t
+  = as_normal_t #lowstar_Memcpy_t lowstar_Memcpy
 
 module B = LowStar.Buffer
 module IB = LowStar.ImmutableBuffer
@@ -149,7 +149,7 @@ module T = FStar.Tactics
 module LBV = LowStar.BufferView.Up
 module DV = LowStar.BufferView.Down
 
-let memcpy_test
+let memcpy_Test
   (dst:B.buffer UInt8.t{B.length dst % 8 == 0})
   (src:IB.ibuffer UInt8.t{B.length src % 8 == 0})
   : Stack UInt64.t
@@ -166,7 +166,7 @@ let memcpy_test
 //      B.as_seq h1 dst == B.as_seq h1 src)
 //  by (T.dump "A") (* in case you want to look at the VC *)
   = IB.inhabited_immutable_buffer_is_distinct_from_buffer (UInt8.uint_to_t 0) src dst;
-    let x, _ = lowstar_memcpy_normal_t dst src () in //This is a call to the interop wrapper
+    let (x, _) = lowstar_Memcpy_normal_t dst src () in //This is a call to the interop wrapper
     let h1 = get () in
     // let v = Vale.Interop.Views.up_view64 in
     // assert (DV.length_eq (get_downview dst);
@@ -190,7 +190,7 @@ let aesni_dom : IX64.arity_ok_stdcall td = []
 let aesni_pre : VSig.vale_pre aesni_dom =
   fun (c:V.va_code)
     (va_s0:V.va_state) ->
-      VC.va_req_check_aesni_stdcall c va_s0 IA.win
+      VC.va_req_Check_aesni_stdcall c va_s0 IA.win
 
 [@__reduce__]
 let aesni_post : VSig.vale_post aesni_dom =
@@ -198,7 +198,7 @@ let aesni_post : VSig.vale_post aesni_dom =
     (va_s0:V.va_state)
     (va_s1:V.va_state)
     (f:V.va_fuel) ->
-      VC.va_ens_check_aesni_stdcall c va_s0 IA.win va_s1 f
+      VC.va_ens_Check_aesni_stdcall c va_s0 IA.win va_s1 f
 
 [@__reduce__]
 let with_len (l:list 'a)
@@ -207,7 +207,7 @@ let with_len (l:list 'a)
     (ensures fun m -> m==l /\ List.length m == normalize_term (List.length l))
   = l
 
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit_factor 2"
+#set-options "--max_fuel 0 --max_ifuel 1 --z3rlimit_factor 2"
 (* The vale lemma doesn't quite suffice to prove the modifies clause
    expected of the interop layer *)
 [@__reduce__]
@@ -222,12 +222,14 @@ let aesni_lemma'
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
        aesni_post code va_s0 va_s1 f))
- = VC.va_lemma_check_aesni_stdcall code va_s0 IA.win
+ = VC.va_lemma_Check_aesni_stdcall code va_s0 IA.win
+
+#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit_factor 2"
 
 (* Prove that vm_lemma' has the required type *)
 let aesni_lemma = as_t #(VSig.vale_sig_stdcall aesni_pre aesni_post) aesni_lemma'
 
-let code_aesni = VC.va_code_check_aesni_stdcall IA.win
+let code_aesni = VC.va_code_Check_aesni_stdcall IA.win
 
 (* Here's the type expected for the check_aesni wrapper *)
 [@__reduce__]
@@ -254,13 +256,13 @@ open Vale.X64.CPU_Features_s
 
 #set-options "--print_full_names"
 
-let aesni_test ()
+let aesni_Test ()
   : Stack UInt64.t
     (requires fun h0 -> True)
     (ensures fun h0 ret_val h1 -> (UInt64.v ret_val) =!= 0 ==> aesni_enabled /\ pclmulqdq_enabled)
 //  by (T.dump "A") (* in case you want to look at the VC *)
   =
-  let x, _ = lowstar_aesni_normal_t () in //This is a call to the interop wrapper
+  let (x, _) = lowstar_aesni_normal_t () in //This is a call to the interop wrapper
   x
 
 
@@ -285,7 +287,7 @@ let ta_pre : VSig.vale_pre ta_dom =
     (arg6:ib64)
     (arg7:ib64)
     (va_s0:V.va_state) ->
-      TA.va_req_test c va_s0 IA.win
+      TA.va_req_Test c va_s0 IA.win
       (as_vale_immbuffer arg0)
       (as_vale_immbuffer arg1)
       (as_vale_immbuffer arg2)
@@ -309,7 +311,7 @@ let ta_post : VSig.vale_post ta_dom =
     (va_s0:V.va_state)
     (va_s1:V.va_state)
     (f:V.va_fuel) ->
-      TA.va_ens_test c va_s0 IA.win
+      TA.va_ens_Test c va_s0 IA.win
       (as_vale_immbuffer arg0)
       (as_vale_immbuffer arg1)
       (as_vale_immbuffer arg2)
@@ -343,17 +345,17 @@ let ta_lemma'
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
        ta_post code arg0 arg1 arg2 arg3 arg4 arg5 arg6 arg7 va_s0 va_s1 f /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_immbuffer arg0) /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_immbuffer arg1) /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_immbuffer arg2) /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_immbuffer arg3) /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_immbuffer arg4) /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_immbuffer arg5) /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_immbuffer arg6) /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_immbuffer arg7) /\
-       ME.modifies ME.loc_none va_s0.VS.vs_heap va_s1.VS.vs_heap))
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_immbuffer arg0) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_immbuffer arg1) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_immbuffer arg2) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_immbuffer arg3) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_immbuffer arg4) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_immbuffer arg5) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_immbuffer arg6) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_immbuffer arg7) /\
+       ME.modifies ME.loc_none (VS.vs_get_vale_heap va_s0) (VS.vs_get_vale_heap va_s1)))
  =
- let va_s1, f = TA.va_lemma_test code va_s0 IA.win
+ let va_s1, f = TA.va_lemma_Test code va_s0 IA.win
       (as_vale_immbuffer arg0)
       (as_vale_immbuffer arg1)
       (as_vale_immbuffer arg2)
@@ -368,7 +370,7 @@ let ta_lemma'
 (* Prove that vm_lemma' has the required type *)
 let ta_lemma = as_t #(VSig.vale_sig_stdcall ta_pre ta_post) ta_lemma'
 
-let code_ta = TA.va_code_test IA.win
+let code_ta = TA.va_code_Test IA.win
 
 (* Here's the type expected for the check_aesni wrapper *)
 [@__reduce__]

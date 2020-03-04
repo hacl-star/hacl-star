@@ -37,7 +37,7 @@ let same_seq_downview8 b h =
   let aux (i:nat{i < B.length b}) : Lemma (Seq.index sdb i == Seq.index s i)
     = DV.as_seq_sel h db i;
       DV.get_sel h db i;
-      Vale.Def.Opaque_s.reveal_opaque Vale.Interop.Views.put8_def
+      Vale.Interop.Views.put8_reveal ()
   in
   Classical.forall_intro aux;
   assert (Seq.equal s sdb)
@@ -118,7 +118,7 @@ let nat_from_bytes_le_is_le_bytes_to_nat64 b =
     index s01 0;
     == {}
     index (seq_map (four_to_nat 8) (seq_to_seq_four_LE sn)) 0;
-    == {FStar.Pervasives.reveal_opaque (`%seq_to_seq_four_LE) (seq_to_seq_four_LE #nat8)}
+    == {reveal_opaque (`%seq_to_seq_four_LE) (seq_to_seq_four_LE #nat8)}
     four_to_nat 8 (Mkfour sn.[0] sn.[1] sn.[2] sn.[3]);
     == {nat_from_bytes_le_is_le_bytes_to_nat32 (slice b 0 4)}
     BS.nat_from_bytes_le (slice b 0 4);
@@ -127,14 +127,14 @@ let nat_from_bytes_le_is_le_bytes_to_nat64 b =
     index s01 1;
     == {}
     index (seq_map (four_to_nat 8) (seq_to_seq_four_LE sn)) 1;
-    == {FStar.Pervasives.reveal_opaque (`%seq_to_seq_four_LE) (seq_to_seq_four_LE #nat8)}
+    == {reveal_opaque (`%seq_to_seq_four_LE) (seq_to_seq_four_LE #nat8)}
     four_to_nat 8 (Mkfour sn.[4] sn.[5] sn.[6] sn.[7]);
     == {nat_from_bytes_le_is_le_bytes_to_nat32 (slice b 4 8)}
     BS.nat_from_bytes_le (slice b 4 8);
   };
   calc (==) {
     le_bytes_to_nat64 sn <: int;
-    == {Vale.Def.Opaque_s.reveal_opaque le_bytes_to_nat64_def}
+    == {le_bytes_to_nat64_reveal ()}
     two_to_nat 32 (seq_to_two_LE s01) <: int;
     == {assert_norm (two_to_nat 32 (seq_to_two_LE s01) == index s01 0 + pow2 32 * index s01 1)}
     index s01 0 + pow2 32 * index s01 1;

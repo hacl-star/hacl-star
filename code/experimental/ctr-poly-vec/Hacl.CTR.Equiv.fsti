@@ -6,25 +6,13 @@ open Lib.Sequence
 
 open Hacl.CTR
 
-module Lemmas = Hacl.CTR.Lemmas
 
-
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 \
-              --using_facts_from '-* +Prims +Lib.Sequence +FStar.Seq +Lib.IntTypes +Hacl.CTR +Hacl.CTR.Equiv +Math.Lemmas'"
+#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
 ///
 ///  Specification equivalence lemma
 ///
 
-val ctr_equivalence:
-    w:width_t
-  -> k:key
-  -> n:nonce
-  -> ctr0:counter
-  -> msg:seq uint8 ->
-  Lemma
-  (requires
-    ctr0 + w <= max_size_t /\
-    length msg / blocksize <= max_size_t /\ w * (length msg / (w * blocksize) + 1) <= max_size_t)
-  (ensures
-    ctr_v #w k n ctr0 msg `Seq.equal` ctr k n ctr0 msg)
+val ctr_equivalence: w:width_t -> k:key -> n:nonce -> c0:counter -> msg:seq uint8 -> Lemma
+  (requires c0 + w - 1 <= max_size_t /\ length msg / blocksize + w - 1 <= max_size_t /\ length msg / (w * blocksize) <= max_size_t)
+  (ensures  ctr_v #w k n c0 msg `Seq.equal` ctr k n c0 msg)

@@ -836,18 +836,24 @@ let lemma_0 (x:nat) (y:nat) (c:pos) : Lemma
 
 #pop-options
 
-#set-options "--z3rlimit 700"
+#set-options "--z3rlimit 50"
 
 private
 let lemma_1 (x:nat) (y:nat) (c:pos) : Lemma
   (requires (x - y < c /\ x >= y))
   (ensures  (x - y = (if (x % c) - (y % c) < 0 then c + (x % c) - (y % c)
              else (x % c) - (y % c))))
-  = Math.Lemmas.lemma_div_mod x c;
-    Math.Lemmas.lemma_div_mod y c;
-    Math.Lemmas.distributivity_sub_right c (y/c) (x/c);
-    assert( (x%c) - (y%c) = x - y - c*((x/c) - (y/c)));
+  = calc (==) {
+    (x % c) - (y % c);
+    (==) { Math.Lemmas.lemma_div_mod x c }
+    x - x / c * c - (y % c);
+    (==) { Math.Lemmas.lemma_div_mod y c }
+    x - x / c * c - y + y / c * c;
+    (==) { Math.Lemmas.distributivity_sub_left (y / c) (x / c) c }
+    x - y + (y / c - x / c) * c;
+    };
     lemma_0 x y c
+
 
 val lemma_barrett_reduce':
   x:nat{x < pow2 512} ->
@@ -887,7 +893,7 @@ let lemma_barrett_reduce'' (u:nat) (z:nat) (x:nat) (q:nat) : Lemma
 
 
 
-#reset-options "--z3rlimit 600 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 0"
 
 let lemma_barrett_reduce' x =
   assert_norm (S.q == 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed);
@@ -915,6 +921,7 @@ let lemma_barrett_reduce' x =
     0;
   };
   Math.Lemmas.modulo_lemma (x - q * l) (pow2 264);
+  assert ((x - q * l) % pow2 264 == x - q * l);
   calc (<) {
     x - ((x * m) / pow2 512) * l;
     (<) { lemma_optimized_barrett_reduce2 x }
@@ -926,14 +933,18 @@ let lemma_barrett_reduce' x =
     0;
   };
   Math.Lemmas.modulo_lemma (x - ((x * m) / pow2 512) * l) (pow2 264);
-  Math.Lemmas.lemma_mod_sub x l ((x*m)/pow2 512);
+  assert ((x - ((x * m) / pow2 512) * l) % pow2 264 == x - ((x * m) / pow2 512) * l);
+
+  Math.Lemmas.lemma_mod_sub x l ((x * m) / pow2 512);
+  assert ((x - ((x * m) / pow2 512) * l) % l == x % l);
+
   lemma_1 x (q*l) (pow2 264);
   let r = x % pow2 264 in
   let qml = (((((x / pow2 248) * m) / pow2 264) * l) % pow2 264) in
   let u = if r < qml then pow2 264 + r - qml else r - qml in
   let z = if u < l then u else u - l in
 
-  assert (u < 2 * l);
+  //assert (u < 2 * l);
   Math.Lemmas.modulo_lemma u (pow2 264);
   assert (u == x - q * l);
   lemma_barrett_reduce'' u z x q

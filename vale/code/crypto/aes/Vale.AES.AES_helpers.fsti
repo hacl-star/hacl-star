@@ -39,8 +39,8 @@ let rec expand_key_128_def (key:seq nat32) (round:nat) : Pure quad32
   =
   if round = 0 then Mkfour key.[0] key.[1] key.[2] key.[3]
   else round_key_128 (expand_key_128_def key (round - 1)) round
-
-let expand_key_128 = make_opaque expand_key_128_def
+[@"opaque_to_smt"] let expand_key_128 = opaque_make expand_key_128_def
+irreducible let expand_key_128_reveal = opaque_revealer (`%expand_key_128) expand_key_128 expand_key_128_def
 
 val lemma_expand_key_128_0 (key:aes_key_LE AES_128) : Lemma
   (equal key (expand_key AES_128 key 4))
@@ -91,30 +91,27 @@ val commute_sub_bytes_shift_rows_forall (_:unit) :
     (forall q.{:pattern sub_bytes (shift_rows_LE q) \/ shift_rows_LE (sub_bytes q)}
       sub_bytes (shift_rows_LE q) == shift_rows_LE (sub_bytes q))
 
-let rounds_opaque = make_opaque rounds
-let cipher_opaque = make_opaque cipher
-
 val init_rounds_opaque (init:quad32) (round_keys:seq quad32) :
-  Lemma (length round_keys > 0 ==> rounds_opaque init round_keys 0 == init)
+  Lemma (length round_keys > 0 ==> eval_rounds init round_keys 0 == init)
 
 val finish_cipher (alg:algorithm) (input:quad32) (round_keys:seq quad32) :
   Lemma
     (length round_keys == (nr alg) + 1 ==>
         length round_keys > 0 /\ nr alg > 1 /\   // REVIEW: Why are these needed?
            (let state = quad32_xor input (index round_keys 0) in
-            let state = rounds_opaque state round_keys (nr alg - 1) in
+            let state = eval_rounds state round_keys (nr alg - 1) in
             let state = shift_rows_LE state in
             let state = sub_bytes state in
             let state = quad32_xor state (index round_keys (nr alg)) in
-            state == cipher_opaque alg input round_keys))
+            state == eval_cipher alg input round_keys))
 
 val finish_cipher_opt (alg:algorithm) (input plain t0 t1 out:quad32) (round_keys:seq quad32) : Lemma
   (requires length round_keys == (nr alg) + 1 /\
             length round_keys > 0 /\ nr alg > 1 /\   // REVIEW: Why are these needed?
             t0 = quad32_xor input (index round_keys 0) /\
-            t1 = rounds_opaque t0 round_keys (nr alg - 1) /\
+            t1 = eval_rounds t0 round_keys (nr alg - 1) /\
             out = quad32_xor (sub_bytes (shift_rows_LE t1)) (quad32_xor plain (index round_keys (nr alg))))
-  (ensures out == quad32_xor plain (cipher_opaque alg input round_keys))
+  (ensures out == quad32_xor plain (eval_cipher alg input round_keys))
 
 
 val lemma_incr_msb (orig ctr ctr':quad32) (increment:nat) : Lemma

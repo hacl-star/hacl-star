@@ -46,8 +46,6 @@ include Makefile.common
 # Catching setup errors #
 #########################
 
-# This was needed once because of the shortest stem rule. I don't think it's
-# needed anymore, but better be safe.
 ifeq (3.81,$(MAKE_VERSION))
   $(error You seem to be using the OSX antiquated Make version. Hint: brew \
     install make, then invoke gmake instead of make)
@@ -104,7 +102,7 @@ all:
 
 all-unstaged: compile-gcc-compatible compile-msvc-compatible compile-gcc64-only \
   compile-evercrypt-external-headers compile-c89-compatible compile-ccf \
-  compile-portable-gcc-compatible compile-mozilla
+  compile-portable-gcc-compatible compile-mozilla dist/linux/Makefile.basic
 
 # Automatic staging.
 %-staged: .last_vale_version
@@ -121,7 +119,7 @@ all-unstaged: compile-gcc-compatible compile-msvc-compatible compile-gcc64-only 
 	cp $< $@
 
 test: test-staged
-test-unstaged: test-handwritten test-c test-ml
+test-unstaged: test-handwritten test-c test-ml vale_testInline
 
 ifneq ($(OS),Windows_NT)
 test-unstaged: test-benchmark
@@ -356,7 +354,7 @@ obj/Vale.Lib.Operator.fst: VALE_FLAGS=
 %.fst:
 	$(call run-with-log,\
 	  $(MONO) $(VALE_HOME)/bin/vale.exe -fstarText -quickMods \
-	    -typecheck -include $*.types.vaf \
+	    -include $*.types.vaf \
 	    $(VALE_FLAGS) \
 	    -in $< -out $@ -outi $@i && touch -c $@i \
 	  ,[VALE] $(notdir $*),$(call to-obj-dir,$@))
@@ -507,6 +505,10 @@ obj/vale-curve25519.exe: vale/code/crypto/ecc/curve25519/Main25519.ml
 obj/vale-poly1305.exe: vale/code/crypto/poly1305/x64/PolyMain.ml
 
 obj/inline-vale-curve25519.exe: vale/code/crypto/ecc/curve25519/Inline25519.ml
+obj/inline-vale-testInline.exe: vale/code/test/TestInlineMain.ml
+
+obj/vale_testInline.h: obj/inline-vale-testInline.exe
+	$< > $@
 
 obj/CmdLineParser.ml: vale/code/lib/util/CmdLineParser.ml
 	cp $< $@
@@ -733,7 +735,7 @@ dist/wasm/Makefile.basic: WASMSUPPORT_BUNDLE =
 
 # Customizations for regular, msvc and gcc flavors.
 dist/gcc-compatible/Makefile.basic: DEFAULT_FLAGS += \
-  -ctypes Hacl.NaCl,EverCrypt.Curve25519,Hacl.Ed25519,EverCrypt.DRBG,Hacl.HMAC.DRBG,EverCrypt.HMAC,EverCrypt.AEAD
+  -ctypes EverCrypt.*,Hacl.*
 
 dist/msvc-compatible/Makefile.basic: DEFAULT_FLAGS += -falloca -ftail-calls
 
@@ -750,6 +752,36 @@ dist/c89-compatible/Makefile.basic: DEFAULT_FLAGS += \
   -fc89 -ccopt -std=c89 -ccopt -Wno-typedef-redefinition
 dist/c89-compatible/Makefile.basic: HACL_OLD_FILES := $(subst -c,-c89,$(HACL_OLD_FILES))
 
+# Linux distribution (not compiled on CI)
+# ---------------------------------------
+#
+# We do something unverified and dangerous, i.e. we blast away the whole
+# Field64.Vale HACL* module (which dispatches between inline and extern versions
+# of the ASM) and rely on in-scope declarations from curve25519-inline.h to have
+# i) the same names: this works because Vale.Inline.* is eliminated from the
+#    call-graph (via the -library option), meaning that the subsequent
+#    -no-prefix can use the short names (e.g. fadd) without conflicting with the
+#    inline assembly version of those names
+# ii) the same order of arguments between, say, Field64.Vale.fadd and
+#     Vale.Inline.Fadd.fadd
+dist/linux/Makefile.basic: MERKLE_BUNDLE = -bundle 'MerkleTree.*'
+dist/linux/Makefile.basic: TARGETCONFIG_FLAGS =
+dist/linux/Makefile.basic: DEFAULT_FLAGS += \
+  -fc89-scope -fbuiltin-uint128 -flinux-ints -ccopt -Wno-typedef-redefinition
+dist/linux/Makefile.basic: CTR_BUNDLE =
+dist/linux/Makefile.basic: E_HASH_BUNDLE =
+dist/linux/Makefile.basic: DEFAULT_FLAGS += -bundle 'EverCrypt,EverCrypt.*'
+dist/linux/Makefile.basic: VALE_ASMS := $(filter-out $(HACL_HOME)/secure_api/%,$(VALE_ASMS))
+dist/linux/Makefile.basic: HAND_WRITTEN_FILES := $(filter-out providers/evercrypt/c/%,$(HAND_WRITTEN_FILES))
+dist/linux/Makefile.basic: HAND_WRITTEN_H_FILES := $(filter-out %/evercrypt_targetconfig.h,$(HAND_WRITTEN_H_FILES))
+dist/linux/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES =
+dist/linux/Makefile.basic: BASE_FLAGS := $(filter-out -fcurly-braces,$(BASE_FLAGS))
+dist/linux/Makefile.basic: CURVE_BUNDLE = \
+  $(CURVE_BUNDLE_BASE) \
+  -bundle Hacl.Curve25519_64_Local \
+  -library Hacl.Impl.Curve25519.Field64.Vale \
+  -no-prefix Hacl.Impl.Curve25519.Field64.Vale \
+  -drop Hacl_Curve_Leftovers
 
 # CCF distribution
 # ----------------
@@ -869,7 +901,7 @@ dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/LICENSE.txt \
 	  $(filter %.krml,$^) \
 	  -silent \
 	  -ccopt -Wno-unused \
-	  -warn-error @4-6 \
+	  -warn-error @4-6+22 \
 	  -fparentheses \
 	  $(notdir $(HACL_OLD_FILES)) \
 	  $(notdir $(HAND_WRITTEN_FILES)) \
@@ -970,6 +1002,11 @@ test-handwritten: compile-gcc64-only
 	  LDFLAGS="$(LDFLAGS)" CFLAGS="$(CFLAGS)" \
 	  $(MAKE) -C tests test
 
+obj/vale_testInline.exe: vale/code/test/TestInline.c obj/vale_testInline.h
+	$(CC) $(CFLAGS) $(LDFLAGS) $< -Iobj -o $@
+vale_testInline: obj/vale_testInline.exe
+	@echo "Testing Vale inline assembly printer"
+	$<
 
 #######################
 # OCaml tests (specs) #

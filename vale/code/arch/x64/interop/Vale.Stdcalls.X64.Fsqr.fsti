@@ -58,7 +58,7 @@ let fsqr_pre : VSig.vale_pre fsqr_dom =
     (f1:b64)
     (out:b64)
     (va_s0:V.va_state) ->
-      FW.va_req_fsqr_stdcall c va_s0 IA.win
+      FW.va_req_Fsqr_stdcall c va_s0 IA.win
         (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out)
 
 [@__reduce__] noextract
@@ -70,7 +70,7 @@ let fsqr_post : VSig.vale_post fsqr_dom =
     (va_s0:V.va_state)
     (va_s1:V.va_state)
     (f:V.va_fuel) ->
-      FW.va_ens_fsqr_stdcall c va_s0 IA.win (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) va_s1 f
+      FW.va_ens_Fsqr_stdcall c va_s0 IA.win (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) va_s1 f
 
 #set-options "--z3rlimit 200"
 
@@ -89,17 +89,17 @@ let fsqr_lemma'
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
        fsqr_post code tmp f1 out va_s0 va_s1 f /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer out) /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer f1) /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer tmp) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_buffer out) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_buffer f1) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_buffer tmp) /\
        ME.buffer_writeable (as_vale_buffer out) /\
        ME.buffer_writeable (as_vale_buffer f1) /\
        ME.buffer_writeable (as_vale_buffer tmp) /\
        ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer out))
                    (ME.loc_union (ME.loc_buffer (as_vale_buffer tmp))
-                                 ME.loc_none)) va_s0.VS.vs_heap va_s1.VS.vs_heap
+                                 ME.loc_none)) (VS.vs_get_vale_heap va_s0) (VS.vs_get_vale_heap va_s1)
  )) =
-   let va_s1, f = FW.va_lemma_fsqr_stdcall code va_s0 IA.win (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) in
+   let va_s1, f = FW.va_lemma_Fsqr_stdcall code va_s0 IA.win (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) in
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 out;
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 f1;
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 tmp;
@@ -109,19 +109,19 @@ let fsqr_lemma'
 noextract
 let fsqr_lemma = as_t #(VSig.vale_sig_stdcall fsqr_pre fsqr_post) fsqr_lemma'
 noextract
-let code_fsqr = FW.va_code_fsqr_stdcall IA.win
+let code_Fsqr = FW.va_code_Fsqr_stdcall IA.win
 
 (* Here's the type expected for the fsqr wrapper *)
 [@__reduce__] noextract
-let lowstar_fsqr_t =
+let lowstar_Fsqr_t =
   assert_norm (List.length fsqr_dom + List.length ([]<:list arg) <= 4);
   IX64.as_lowstar_sig_t_weak_stdcall
-    code_fsqr
+    code_Fsqr
     fsqr_dom
     []
     _
     _
-    (W.mk_prediction code_fsqr fsqr_dom [] (fsqr_lemma code_fsqr IA.win))
+    (W.mk_prediction code_Fsqr fsqr_dom [] (fsqr_lemma code_Fsqr IA.win))
 
 (* Need to rearrange the order of arguments *)
 [@__reduce__] noextract
@@ -131,7 +131,7 @@ let fsqr2_pre : VSig.vale_pre fsqr_dom =
     (f1:b64)
     (out:b64)
     (va_s0:V.va_state) ->
-      FW.va_req_fsqr2_stdcall c va_s0 IA.win
+      FW.va_req_Fsqr2_stdcall c va_s0 IA.win
         (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out)
 
 [@__reduce__] noextract
@@ -143,7 +143,7 @@ let fsqr2_post : VSig.vale_post fsqr_dom =
     (va_s0:V.va_state)
     (va_s1:V.va_state)
     (f:V.va_fuel) ->
-      FW.va_ens_fsqr2_stdcall c va_s0 IA.win (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) va_s1 f
+      FW.va_ens_Fsqr2_stdcall c va_s0 IA.win (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) va_s1 f
 
 #set-options "--z3rlimit 200"
 
@@ -162,17 +162,17 @@ let fsqr2_lemma'
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions_stdcall va_s0 va_s1 /\
        fsqr2_post code tmp f1 out va_s0 va_s1 f /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer out) /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer f1) /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer tmp) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_buffer out) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_buffer f1) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_buffer tmp) /\
        ME.buffer_writeable (as_vale_buffer out) /\
        ME.buffer_writeable (as_vale_buffer f1) /\
        ME.buffer_writeable (as_vale_buffer tmp) /\
        ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer out))
                    (ME.loc_union (ME.loc_buffer (as_vale_buffer tmp))
-                                 ME.loc_none)) va_s0.VS.vs_heap va_s1.VS.vs_heap
+                                 ME.loc_none)) (VS.vs_get_vale_heap va_s0) (VS.vs_get_vale_heap va_s1)
  )) =
-   let va_s1, f = FW.va_lemma_fsqr2_stdcall code va_s0 IA.win (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) in
+   let va_s1, f = FW.va_lemma_Fsqr2_stdcall code va_s0 IA.win (as_vale_buffer tmp) (as_vale_buffer f1) (as_vale_buffer out) in
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 out;
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 f1;
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 tmp;
@@ -182,22 +182,22 @@ let fsqr2_lemma'
 noextract
 let fsqr2_lemma = as_t #(VSig.vale_sig_stdcall fsqr2_pre fsqr2_post) fsqr2_lemma'
 noextract
-let code_fsqr2 = FW.va_code_fsqr2_stdcall IA.win
+let code_Fsqr2 = FW.va_code_Fsqr2_stdcall IA.win
 
 (* Here's the type expected for the fsqr2 wrapper *)
 [@__reduce__] noextract
-let lowstar_fsqr2_t =
+let lowstar_Fsqr2_t =
   assert_norm (List.length fsqr_dom + List.length ([]<:list arg) <= 4);
   IX64.as_lowstar_sig_t_weak_stdcall
-    code_fsqr2
+    code_Fsqr2
     fsqr_dom
     []
     _
     _
-    (W.mk_prediction code_fsqr2 fsqr_dom [] (fsqr2_lemma code_fsqr2 IA.win))
+    (W.mk_prediction code_Fsqr2 fsqr_dom [] (fsqr2_lemma code_Fsqr2 IA.win))
 
 [@ (CCConv "stdcall") ]
-val fsqr : normal lowstar_fsqr_t
+val fsqr_e : normal lowstar_Fsqr_t
 
 [@ (CCConv "stdcall") ]
-val fsqr2 : normal lowstar_fsqr2_t
+val fsqr2_e : normal lowstar_Fsqr2_t

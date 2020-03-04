@@ -57,13 +57,13 @@ let lemma_k_reqs_equiv k_b h =
     //Proves
     //assert (k_seq.[i] == Vale.Interop.Views.get128 (Seq.slice down_s (i*16) (i*16+16)));
 
-    Vale.Def.Opaque_s.reveal_opaque Vale.Interop.Views.get128_def;
+    Vale.Interop.Views.get128_reveal ();
     // We get the following by revealing the definition of get128
     // let s_slice = seq_uint8_to_seq_nat8 (Seq.slice down_s (i*16) (i*16+16)) in
     // assert (k_seq.[i] == le_bytes_to_quad32 s_slice);
 
-    Vale.Def.Opaque_s.reveal_opaque le_bytes_to_quad32_def;
-    FStar.Pervasives.reveal_opaque (`%seq_to_seq_four_LE) (seq_to_seq_four_LE #nat8);
+    le_bytes_to_quad32_reveal ();
+    reveal_opaque (`%seq_to_seq_four_LE) (seq_to_seq_four_LE #nat8);
     // Revealing le_bytes_to_quad32 gives us the following
     assert (k_seq.[i] == Mkfour
                  (four_to_nat 8 (seq_to_four_LE (seq_uint8_to_seq_nat8
@@ -81,7 +81,7 @@ let lemma_k_reqs_equiv k_b h =
     DV.put_sel h db (4*(4*i+2));
     DV.put_sel h db (4*(4*i+3));
 
-    Vale.Def.Opaque_s.reveal_opaque Vale.Interop.Views.put32_def;
+    Vale.Interop.Views.put32_reveal ();
 
     // Apply the only lemmas without SMTPat to simplify the following patterns:
     // assert (four_to_nat 8 (
@@ -125,8 +125,8 @@ let simplify_le_bytes_to_hash_uint32 b h =
 
   // Since Seq.length s' == 32, we have the following by def of le_bytes_to_hash
   assert (sf == seq_map nat32_to_word (seq_nat8_to_seq_nat32_LE s'));
-  Vale.Def.Opaque_s.reveal_opaque le_seq_quad32_to_bytes_def;
-  FStar.Pervasives.reveal_opaque (`%seq_four_to_seq_LE) (seq_four_to_seq_LE #nat32);
+  le_seq_quad32_to_bytes_reveal ();
+  reveal_opaque (`%seq_four_to_seq_LE) (seq_four_to_seq_LE #nat32);
   // After revealing the previous def, the seq_nat8_to_seq_nat32_LE_to_nat8 simplifies
   assert (sf == seq_map nat32_to_word (seq_four_to_seq_LE s));
 
@@ -134,10 +134,10 @@ let simplify_le_bytes_to_hash_uint32 b h =
     = let i' = i/4 in
       UV.as_seq_sel h ub i';
       UV.get_sel h ub i';
-      FStar.Pervasives.reveal_opaque (`%seq_to_seq_four_LE) (seq_to_seq_four_LE #nat8);
+      reveal_opaque (`%seq_to_seq_four_LE) (seq_to_seq_four_LE #nat8);
 
-      Vale.Def.Opaque_s.reveal_opaque Vale.Interop.Views.get128_def;
-      Vale.Def.Opaque_s.reveal_opaque le_bytes_to_quad32_def;
+      Vale.Interop.Views.get128_reveal ();
+      le_bytes_to_quad32_reveal ();
       // Revealing these definitions gives us the following
       assert (Vale.Interop.Views.get128 (Seq.slice (DV.as_seq h db)
              (i' * 16) (i' * 16 + 16))
@@ -157,7 +157,7 @@ let simplify_le_bytes_to_hash_uint32 b h =
       DV.put_sel h db (4*(4*i'+2));
       DV.put_sel h db (4*(4*i'+3));
 
-      Vale.Def.Opaque_s.reveal_opaque Vale.Interop.Views.put32_def;
+      Vale.Interop.Views.put32_reveal ();
 
       // Apply the only lemmas without SMTPat to simplify the following patterns:
       // assert (four_to_nat 8 (
@@ -172,7 +172,7 @@ let simplify_le_bytes_to_hash_uint32 b h =
       seq_to_four_to_seq_LE (nat_to_four 8 (UInt32.v (Seq.index s_init (4*i'+2))));
       seq_to_four_to_seq_LE (nat_to_four 8 (UInt32.v (Seq.index s_init (4*i'+3))));
 
-      Vale.Def.Opaque_s.reveal_opaque Vale.Interop.Views.get32_128_def;
+      Vale.Interop.Views.get32_128_reveal ();
       assert (UInt32.uint_to_t (four_select (Seq.index s i') (i%4)) ==
         Seq.index (Seq.slice (B.as_seq h b) (i' * 4) (i'*4+4)) (i%4));
       assert (Seq.index (B.as_seq h b) i ==
@@ -190,7 +190,7 @@ let sha256_update ctx_b in_b num_val k_b =
   lemma_k_reqs_equiv k_b h0;
   math_aux (UInt64.v num_val);
   as_vale_buffer_len #TUInt8 #TUInt128 in_b;
-  let x, _ = Vale.Stdcalls.X64.Sha.sha256_update ctx_b in_b num_val k_b () in
+  let (x, _) = Vale.Stdcalls.X64.Sha.sha256_update ctx_b in_b num_val k_b () in
   let h1 = get() in
   reveal_word();
   simplify_le_bytes_to_hash_uint32 ctx_b h0;

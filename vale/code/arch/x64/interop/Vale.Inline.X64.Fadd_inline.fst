@@ -53,7 +53,7 @@ let add1_pre : VSig.vale_pre dom =
     (f1:b64)
     (f2:uint64)
     (va_s0:V.va_state) ->
-      FU.va_req_fast_add1 c va_s0
+      FU.va_req_Fast_add1 c va_s0
         (as_vale_buffer out) (as_vale_buffer f1) (UInt64.v f2)
 
 [@__reduce__]
@@ -65,7 +65,7 @@ let add1_post : VSig.vale_post dom =
     (va_s0:V.va_state)
     (va_s1:V.va_state)
     (f:V.va_fuel) ->
-      FU.va_ens_fast_add1 c va_s0 (as_vale_buffer out) (as_vale_buffer f1) (UInt64.v f2) va_s1 f
+      FU.va_ens_Fast_add1 c va_s0 (as_vale_buffer out) (as_vale_buffer f1) (UInt64.v f2) va_s1 f
 
 #set-options "--z3rlimit 50"
 
@@ -91,14 +91,14 @@ let add1_lemma'
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions va_s0 va_s1 add1_regs_modified add1_xmms_modified /\
        add1_post code out f1 f2 va_s0 va_s1 f /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer f1) /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer out) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_buffer f1) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_buffer out) /\
        ME.buffer_writeable (as_vale_buffer out) /\
        ME.buffer_writeable (as_vale_buffer f1) /\
        ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer out))
-                                 ME.loc_none) va_s0.VS.vs_heap va_s1.VS.vs_heap
+                                 ME.loc_none) (VS.vs_get_vale_heap va_s0) (VS.vs_get_vale_heap va_s1)
  )) =
-   let va_s1, f = FU.va_lemma_fast_add1 code va_s0 (as_vale_buffer out) (as_vale_buffer f1) (UInt64.v f2) in
+   let va_s1, f = FU.va_lemma_Fast_add1 code va_s0 (as_vale_buffer out) (as_vale_buffer f1) (UInt64.v f2) in
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 out;
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 f1;
    (va_s1, f)
@@ -106,7 +106,7 @@ let add1_lemma'
 (* Prove that add1_lemma' has the required type *)
 let add1_lemma = as_t #(VSig.vale_sig add1_regs_modified add1_xmms_modified add1_pre add1_post) add1_lemma'
 
-let code_add1 = FU.va_code_fast_add1 ()
+let code_add1 = FU.va_code_Fast_add1 ()
 
 let of_reg (r:MS.reg_64) : option (IX64.reg_nat 3) = match r with
   | 5 -> Some 0 // rdi
@@ -155,14 +155,24 @@ let lowstar_add1_normal_t : normal lowstar_add1_t
 
 open Vale.AsLowStar.MemoryHelpers
 
-let add1_inline out f1 f2
+let add_scalar out f1 f2
   = DV.length_eq (get_downview out);
     DV.length_eq (get_downview f1);
-    let x, _ = lowstar_add1_normal_t out f1 f2 () in
+    let (x, _) = lowstar_add1_normal_t out f1 f2 () in
     x
 
+let add1_comments : list string =
+  ["Computes the addition of four-element f1 with value in f2"; "and returns the carry (if any)"]
+
+let add1_names (n:nat) =
+  match n with
+  | 0 -> "out"
+  | 1 -> "f1"
+  | 2 -> "f2"
+  | _ -> ""
+
 let add1_code_inline () : FStar.All.ML int =
-  PR.print_inline "add1_inline" 0 (Some "carry_r") (List.length dom) dom code_add1 of_arg add1_regs_modified
+  PR.print_inline "add_scalar" 0 (Some "carry_r") (List.length dom) dom add1_names code_add1 of_arg add1_regs_modified add1_comments
 
 
 [@__reduce__]
@@ -179,7 +189,7 @@ let fadd_pre : VSig.vale_pre fadd_dom =
     (f1:b64)
     (f2:b64)
     (va_s0:V.va_state) ->
-      FH.va_req_fadd c va_s0
+      FH.va_req_Fadd c va_s0
         (as_vale_buffer out) (as_vale_buffer f1) (as_vale_buffer f2)
 
 [@__reduce__]
@@ -191,7 +201,7 @@ let fadd_post : VSig.vale_post fadd_dom =
     (va_s0:V.va_state)
     (va_s1:V.va_state)
     (f:V.va_fuel) ->
-      FH.va_ens_fadd c va_s0 (as_vale_buffer out) (as_vale_buffer f1) (as_vale_buffer f2) va_s1 f
+      FH.va_ens_Fadd c va_s0 (as_vale_buffer out) (as_vale_buffer f1) (as_vale_buffer f2) va_s1 f
 
 #set-options "--z3rlimit 50"
 
@@ -217,16 +227,16 @@ let fadd_lemma'
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions va_s0 va_s1 fadd_regs_modified fadd_xmms_modified /\
        fadd_post code out f1 f2 va_s0 va_s1 f /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer out) /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer f1) /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer f2) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_buffer out) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_buffer f1) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_buffer f2) /\
        ME.buffer_writeable (as_vale_buffer out) /\
        ME.buffer_writeable (as_vale_buffer f1) /\
        ME.buffer_writeable (as_vale_buffer f2) /\
        ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer out))
-                                 ME.loc_none) va_s0.VS.vs_heap va_s1.VS.vs_heap
+                                 ME.loc_none) (VS.vs_get_vale_heap va_s0) (VS.vs_get_vale_heap va_s1)
  )) =
-   let va_s1, f = FH.va_lemma_fadd code va_s0 (as_vale_buffer out) (as_vale_buffer f1) (as_vale_buffer f2) in
+   let va_s1, f = FH.va_lemma_Fadd code va_s0 (as_vale_buffer out) (as_vale_buffer f1) (as_vale_buffer f2) in
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 out;
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 f1;
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 f2;
@@ -235,7 +245,7 @@ let fadd_lemma'
 (* Prove that add1_lemma' has the required type *)
 let fadd_lemma = as_t #(VSig.vale_sig fadd_regs_modified fadd_xmms_modified fadd_pre fadd_post) fadd_lemma'
 
-let code_fadd = FH.va_code_fadd ()
+let code_Fadd = FH.va_code_Fadd ()
 
 (* Here's the type expected for the fadd wrapper *)
 [@__reduce__]
@@ -246,13 +256,13 @@ let lowstar_fadd_t =
     arg_reg
     fadd_regs_modified
     fadd_xmms_modified
-    code_fadd
+    code_Fadd
     fadd_dom
     []
     _
     _
     // The boolean here doesn't matter
-    (W.mk_prediction code_fadd fadd_dom [] (fadd_lemma code_fadd IA.win))
+    (W.mk_prediction code_Fadd fadd_dom [] (fadd_lemma code_Fadd IA.win))
 
 (* And here's the fadd wrapper itself *)
 let lowstar_fadd : lowstar_fadd_t  =
@@ -262,22 +272,31 @@ let lowstar_fadd : lowstar_fadd_t  =
     arg_reg
     fadd_regs_modified
     fadd_xmms_modified
-    code_fadd
+    code_Fadd
     fadd_dom
-    (W.mk_prediction code_fadd fadd_dom [] (fadd_lemma code_fadd IA.win))
+    (W.mk_prediction code_Fadd fadd_dom [] (fadd_lemma code_Fadd IA.win))
 
 let lowstar_fadd_normal_t : normal lowstar_fadd_t
   = as_normal_t #lowstar_fadd_t lowstar_fadd
 
-let fadd_inline out f1 f2
+let fadd out f1 f2
   = DV.length_eq (get_downview out);
     DV.length_eq (get_downview f1);
     DV.length_eq (get_downview f2);
-    let x, _ = lowstar_fadd_normal_t out f1 f2 () in
+    let (x, _) = lowstar_fadd_normal_t out f1 f2 () in
     ()
 
+let fadd_comments : list string = ["Computes the field addition of two field elements"]
+
+let fadd_names (n:nat) =
+  match n with
+  | 0 -> "out"
+  | 1 -> "f1"
+  | 2 -> "f2"
+  | _ -> ""
+
 let fadd_code_inline () : FStar.All.ML int =
-  PR.print_inline "fadd_inline" 0 None (List.length fadd_dom) fadd_dom code_fadd of_arg fadd_regs_modified
+  PR.print_inline "fadd" 0 None (List.length fadd_dom) fadd_dom fadd_names code_Fadd of_arg fadd_regs_modified fadd_comments
 
 [@__reduce__]
 let fsub_dom: IX64.arity_ok_stdcall td =
@@ -293,7 +312,7 @@ let fsub_pre : VSig.vale_pre fsub_dom =
     (f1:b64)
     (f2:b64)
     (va_s0:V.va_state) ->
-      FH.va_req_fsub c va_s0
+      FH.va_req_Fsub c va_s0
         (as_vale_buffer out) (as_vale_buffer f1) (as_vale_buffer f2)
 
 [@__reduce__]
@@ -305,7 +324,7 @@ let fsub_post : VSig.vale_post fsub_dom =
     (va_s0:V.va_state)
     (va_s1:V.va_state)
     (f:V.va_fuel) ->
-      FH.va_ens_fsub c va_s0 (as_vale_buffer out) (as_vale_buffer f1) (as_vale_buffer f2) va_s1 f
+      FH.va_ens_Fsub c va_s0 (as_vale_buffer out) (as_vale_buffer f1) (as_vale_buffer f2) va_s1 f
 
 #set-options "--z3rlimit 200"
 
@@ -331,16 +350,16 @@ let fsub_lemma'
        V.eval_code code va_s0 f va_s1 /\
        VSig.vale_calling_conventions va_s0 va_s1 fsub_regs_modified fsub_xmms_modified /\
        fsub_post code out f1 f2 va_s0 va_s1 f /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer out) /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer f1) /\
-       ME.buffer_readable VS.(va_s1.vs_heap) (as_vale_buffer f2) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_buffer out) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_buffer f1) /\
+       ME.buffer_readable (VS.vs_get_vale_heap va_s1) (as_vale_buffer f2) /\
        ME.buffer_writeable (as_vale_buffer out) /\
        ME.buffer_writeable (as_vale_buffer f1) /\
        ME.buffer_writeable (as_vale_buffer f2) /\
        ME.modifies (ME.loc_union (ME.loc_buffer (as_vale_buffer out))
-                                 ME.loc_none) va_s0.VS.vs_heap va_s1.VS.vs_heap
+                                 ME.loc_none) (VS.vs_get_vale_heap va_s0) (VS.vs_get_vale_heap va_s1)
  )) =
-   let va_s1, f = FH.va_lemma_fsub code va_s0 (as_vale_buffer out) (as_vale_buffer f1) (as_vale_buffer f2) in
+   let va_s1, f = FH.va_lemma_Fsub code va_s0 (as_vale_buffer out) (as_vale_buffer f1) (as_vale_buffer f2) in
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 out;
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 f1;
    Vale.AsLowStar.MemoryHelpers.buffer_writeable_reveal ME.TUInt64 ME.TUInt64 f2;
@@ -349,46 +368,55 @@ let fsub_lemma'
 (* Prove that fsub_lemma' has the required type *)
 let fsub_lemma = as_t #(VSig.vale_sig fsub_regs_modified fsub_xmms_modified fsub_pre fsub_post) fsub_lemma'
 
-let code_fsub = FH.va_code_fsub ()
+let code_Fsub = FH.va_code_Fsub ()
 
 (* Here's the type expected for the fsub wrapper *)
 [@__reduce__]
-let lowstar_fsub_t =
+let lowstar_Fsub_t =
   assert_norm (List.length fsub_dom + List.length ([]<:list arg) <= 3);
   IX64.as_lowstar_sig_t_weak
     3
     arg_reg
     fsub_regs_modified
     fsub_xmms_modified
-    code_fsub
+    code_Fsub
     fsub_dom
     []
     _
     _
     // The boolean here doesn't matter
-    (W.mk_prediction code_fsub fsub_dom [] (fsub_lemma code_fsub IA.win))
+    (W.mk_prediction code_Fsub fsub_dom [] (fsub_lemma code_Fsub IA.win))
 
 (* And here's the fsub wrapper itself *)
-let lowstar_fsub : lowstar_fsub_t  =
+let lowstar_Fsub : lowstar_Fsub_t  =
   assert_norm (List.length fsub_dom + List.length ([]<:list arg) <= 3);
   IX64.wrap_weak
     3
     arg_reg
     fsub_regs_modified
     fsub_xmms_modified
-    code_fsub
+    code_Fsub
     fsub_dom
-    (W.mk_prediction code_fsub fsub_dom [] (fsub_lemma code_fsub IA.win))
+    (W.mk_prediction code_Fsub fsub_dom [] (fsub_lemma code_Fsub IA.win))
 
-let lowstar_fsub_normal_t : normal lowstar_fsub_t
-  = as_normal_t #lowstar_fsub_t lowstar_fsub
+let lowstar_Fsub_normal_t : normal lowstar_Fsub_t
+  = as_normal_t #lowstar_Fsub_t lowstar_Fsub
 
-let fsub_inline out f1 f2
+let fsub out f1 f2
   = DV.length_eq (get_downview out);
     DV.length_eq (get_downview f1);
     DV.length_eq (get_downview f2);
-    let x, _ = lowstar_fsub_normal_t out f1 f2 () in
+    let (x, _) = lowstar_Fsub_normal_t out f1 f2 () in
     ()
 
+let fsub_comments : list string = ["Computes the field substraction of two field elements"]
+
+let fsub_names (n:nat) =
+  match n with
+  | 0 -> "out"
+  | 1 -> "f1"
+  | 2 -> "f2"
+  | _ -> ""
+
 let fsub_code_inline () : FStar.All.ML int =
-  PR.print_inline "fsub_inline" 0 None (List.length fsub_dom) fsub_dom code_fsub of_arg fsub_regs_modified
+  PR.print_inline "fsub" 0 None (List.length fsub_dom) fsub_dom fsub_names code_Fsub of_arg fsub_regs_modified fsub_comments

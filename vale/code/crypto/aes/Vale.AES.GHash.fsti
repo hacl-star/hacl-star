@@ -106,8 +106,8 @@ let rec ghash_incremental_def (h_LE:quad32) (y_prev:quad32) (x:seq quad32) : Tot
   let x_i = last x in
   let xor_LE = quad32_xor y_i_minus_1 x_i in
   gf128_mul_LE xor_LE h_LE
-
-let ghash_incremental = make_opaque ghash_incremental_def
+[@"opaque_to_smt"] let ghash_incremental = opaque_make ghash_incremental_def
+irreducible let ghash_incremental_reveal = opaque_revealer (`%ghash_incremental) ghash_incremental ghash_incremental_def
 
 val lemma_ghash_incremental_poly (h_LE:quad32) (y_prev:quad32) (x:seq quad32) : Lemma
   (ensures

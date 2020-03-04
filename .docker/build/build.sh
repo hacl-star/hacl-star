@@ -48,7 +48,7 @@ function hacl_test() {
           cd dist
           r=true
           for a in *; do
-            if [[ $a != "kremlin" && $a != "vale" && -d $a ]]; then
+            if [[ $a != "kremlin" && $a != "vale" && $a != "linux" && -d $a ]]; then
               echo "Building snapshot: $a"
               make -C $a -j $threads || r=false
               echo
@@ -146,10 +146,35 @@ function fetch_vale() {
     export_home VALE "$(pwd)/../vale"
 }
 
+function refresh_doc() {
+  git config --global user.name "Dzomo, the Everest Yak"
+  git config --global user.email "everbld@microsoft.com"
+
+  git clone git@github.com:hacl-star/hacl-star.github.io website
+
+  (cd doc && ./ci.sh ../website/)
+
+  pushd website && {
+    git add -A . &&
+    if ! git diff --exit-code HEAD > /dev/null; then
+        git commit -m "[CI] Refresh HACL & EverCrypt doc" &&
+        git push
+    else
+        echo No git diff for the tutorial, not generating a commit
+    fi
+    errcode=$?
+  } &&
+  popd &&
+  return $errcode
+}
+
 function refresh_hacl_hints_dist() {
     # We should not generate hints when building on Windows
     if [[ "$OS" != "Windows_NT" ]]; then
         refresh_hints_dist "git@github.com:mitls/hacl-star.git" "true" "regenerate hints and dist" "."
+        if [[ $branchname == "master" ]] ; then
+          refresh_doc
+        fi
     fi
 }
 

@@ -7,15 +7,16 @@ open FStar.Mul
 open Lib.IntTypes
 open Lib.Buffer
 
+open Hacl.Bignum.Definitions
 open Hacl.Bignum
-open Hacl.Impl.MGF
-open Hacl.Bignum.Comparison
-open Hacl.Bignum.Convert
 open Hacl.Bignum.Exponentiation
+
+open Hacl.Impl.MGF
 
 module ST = FStar.HyperStack.ST
 module S = Spec.RSAPSS
 module LSeq = Lib.Sequence
+
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
@@ -242,7 +243,7 @@ val rsapss_sign:
     disjoint sgnt skey /\ disjoint sgnt r2 /\ disjoint skey r2 /\
    (let nLen = blocks modBits 64ul in
     let n = gsub skey 0ul nLen in
-    bn_v h n > 0 /\ bn_v h r2 == pow2 (2 * 64 * (v nLen + 1)) % bn_v h n))
+    bn_v h n > 0 /\ bn_v h r2 == pow2 (128 * (v nLen + 1)) % bn_v h n))
   (ensures  fun h0 _ h1 -> modifies (loc sgnt) h0 h1)
     //as_seq h1 sgnt == S.rsapss_sign #(v sLen) #(v msgLen) (v modBits) skey_s (as_seq h0 salt) (as_seq h0 msg))
 
@@ -269,7 +270,7 @@ let rsapss_sign modBits eBits dBits skey r2 sLen salt msgLen msg sgnt =
   assume (v (blocks emLen 8ul) == v nLen);
   bn_from_bytes_be emLen em m;
   let h = ST.get () in
-  mod_exp modBits nLen n r2 m dBits d s;
+  bn_mod_exp modBits nLen n r2 m dBits d s;
   assume (8 * v (blocks k 8ul) <= max_size_t);
   assume (v (blocks k 8ul) == v nLen);
   let h1 = ST.get () in
@@ -294,7 +295,7 @@ val rsapss_verify:
     disjoint msg sgnt /\ disjoint pkey r2 /\
    (let nLen = blocks modBits 64ul in
     let n = gsub pkey 0ul nLen in
-    bn_v h n > 0 /\ bn_v h r2 == pow2 (2 * 64 * (v nLen + 1)) % bn_v h n))
+    bn_v h n > 0 /\ bn_v h r2 == pow2 (128 * (v nLen + 1)) % bn_v h n))
   (ensures  fun h0 r h1 -> modifies0 h0 h1)
     //r == S.rsapss_verify #(v msgLen) (v modBits) pkey_s (v sLen) (as_seq h0 msg) (as_seq h0 sgnt))
 
@@ -319,8 +320,8 @@ let rsapss_verify modBits eBits pkey r2 sLen sgnt msgLen msg =
   bn_from_bytes_be k sgnt s;
 
   let res =
-    if (bn_is_less nLen s nLen n) then begin
-      mod_exp modBits nLen n r2 s eBits e m;
+    if (bn_is_less nLen s n) then begin
+      bn_mod_exp modBits nLen n r2 s eBits e m;
       assume (8 * v (blocks emLen 8ul) <= max_size_t);
       assume (v (blocks emLen 8ul) == v nLen);
       let h1 = ST.get () in
