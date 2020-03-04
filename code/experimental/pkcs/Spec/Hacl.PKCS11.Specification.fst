@@ -750,54 +750,84 @@ let updateSession d ks ms supM sessions =
     _updateSession d ks ms supM sessions 0 Seq.empty
 
 
-(* Modifies Section*)
-val modifiesKeysM: dBefore: device -> dAfter: device{Seq.length dBefore.keys + 1 = Seq.length dAfter.keys /\ Seq.length dBefore.subSessions = Seq.length dAfter.subSessions} -> 
-	i: _CK_OBJECT_HANDLE{i < Seq.length dAfter.keys} -> Tot Type0
+(** Modifies Section **)
+
+(* There was only one key changed in the device, that the handler of the key is i. Nothing else changed. M stands for the number of keys increased*)
+val modifiesKeysM: dBefore: device -> 
+  dAfter: device
+    {
+      Seq.length dBefore.keys + 1 = Seq.length dAfter.keys /\ 
+      Seq.length dBefore.subSessions = Seq.length dAfter.subSessions
+    } -> 
+  i: _CK_OBJECT_HANDLE{i < Seq.length dAfter.keys} -> Tot Type0
 
 let modifiesKeysM dBefore dAfter i = 
-	let mechanismsPrevious, keysPrevious, objectsPrevious = dBefore.mechanisms, dBefore.keys, dBefore.objects in 
-	let mechanismsNew, keysNew, objectsNew = dAfter.mechanisms, dAfter.keys, dAfter.objects in 
-	let keysBeforeA, keysBeforeB = Seq.split dBefore.keys i in 
-	let keysAfterA, key_keysAfterB = Seq.split dAfter.keys i in 	
-	let key, keysAfterB = Seq.split key_keysAfterB 1 in 
-	mechanismsPrevious == mechanismsNew /\
-	keysBeforeA == keysAfterA /\ keysBeforeB = keysAfterB /\
-	objectsPrevious == objectsNew /\ 
-	(forall (i: nat{i < Seq.length dBefore.subSessions}). sessionEqual (index dBefore.subSessions i) (index dAfter.subSessions i))
+  let mechanismsPrevious, keysPrevious, objectsPrevious, supportedMechanismsPrevious = dBefore.mechanisms, dBefore.keys, dBefore.objects, dBefore.supportedMechanisms in 
+  let mechanismsNew, keysNew, objectsNew, supportedMechanismsNew = dAfter.mechanisms, dAfter.keys, dAfter.objects, dAfter.supportedMechanisms in 
+  
+  let keysBeforeA, keysBeforeB = Seq.split dBefore.keys i in 
+  let keysAfterA, key_keysAfterB = Seq.split dAfter.keys i in 	
+  let key, keysAfterB = Seq.split key_keysAfterB 1 in 
+
+  mechanismsPrevious == mechanismsNew /\
+  objectsPrevious == objectsNew /\
+  supportedMechanismsPrevious == supportedMechanismsNew /\
+
+  keysBeforeA == keysAfterA /\ keysBeforeB = keysAfterB /\
+  
+  (forall (i: nat{i < Seq.length dBefore.subSessions}). sessionEqual (index dBefore.subSessions i) (index dAfter.subSessions i))
 
 
+(* 
+   There was only one session changed in the device, the index of the session is i. Nothing else changed. 
+*)
 
-val modifiesSessionsM: dBefore: device -> dAfter : device{Seq.length dBefore.subSessions = Seq.length dAfter.subSessions +1} -> 
-	i: nat{i < Seq.length dBefore.subSessions} -> Tot Type0
+val modifiesSessionsM: dBefore: device -> 
+  dAfter: device{Seq.length dBefore.subSessions = Seq.length dAfter.subSessions +1} -> 
+  i: nat{i < Seq.length dBefore.subSessions} -> Tot Type0
 
 let modifiesSessionsM dBefore dAfter i = 
-	let mechanismsPrevious, keysPrevious, objectsPrevious = dBefore.mechanisms, dBefore.keys, dBefore.objects in 
-	let mechanismsNew, keysNew, objectsNew = dAfter.mechanisms, dAfter.keys, dAfter.objects in 
-	let sessionsBeforeA, session_sessionBeforeB = Seq.split dBefore.subSessions i in 
-	let _, sessionsBeforeB = Seq.split session_sessionBeforeB 1 in 
-	let sessionsAfterA, sessionsAfterB = Seq.split dAfter.subSessions i in 
-	mechanismsPrevious == mechanismsNew /\
-	keysPrevious == keysNew /\ 
-	objectsPrevious == objectsNew /\
-	(forall (i: nat{i < Seq.length sessionsBeforeA}). sessionEqual (index sessionsBeforeA i) (index sessionsAfterA i))/\
-	(forall (i: nat{i < Seq.length sessionsBeforeB}). sessionEqual (index sessionsBeforeB i) (index sessionsAfterB i))
+  let mechanismsPrevious, keysPrevious, objectsPrevious, supportedMechanismsPrevious = dBefore.mechanisms, dBefore.keys, dBefore.objects, dBefore.supportedMechanisms in 
+  let mechanismsNew, keysNew, objectsNew, supportedMechanismsNew = dAfter.mechanisms, dAfter.keys, dAfter.objects, dAfter.supportedMechanisms in 
+  
+  let sessionsBeforeA, session_sessionBeforeB = Seq.split dBefore.subSessions i in 
+  let _, sessionsBeforeB = Seq.split session_sessionBeforeB 1 in 
+  let sessionsAfterA, sessionsAfterB = Seq.split dAfter.subSessions i in 
+	
+  mechanismsPrevious == mechanismsNew /\
+  keysPrevious == keysNew /\ 
+  objectsPrevious == objectsNew /\
+  supportedMechanismsPrevious == supportedMechanismsNew /\
+
+  (forall (i: nat{i < Seq.length sessionsBeforeA}). sessionEqual (index sessionsBeforeA i) (index sessionsAfterA i))/\
+  (forall (i: nat{i < Seq.length sessionsBeforeB}). sessionEqual (index sessionsBeforeB i) (index sessionsAfterB i))
 
 
-val modifiesSessionsE: dBefore: device -> dAfter: device{Seq.length dBefore.subSessions = Seq.length dAfter.subSessions} ->
-	i: nat {i < Seq.length dBefore.subSessions} -> Tot Type0
+(* There was only one session changed changed, the handler of the session is i *)
+(*
+   E stands for the same number of elements as it was before
+*)
+
+val modifiesSessionsE: dBefore: device -> 
+  dAfter: device{Seq.length dBefore.subSessions = Seq.length dAfter.subSessions} ->
+  i: nat {i < Seq.length dBefore.subSessions} -> Tot Type0
 
 let modifiesSessionsE dBefore dAfter i = 
-	let mechanismsPrevious, keysPrevious, objectsPrevious = dBefore.mechanisms, dBefore.keys, dBefore.objects in 
-	let mechanismsNew, keysNew, objectsNew = dAfter.mechanisms, dAfter.keys, dAfter.objects in 
-	let sessionsBeforeA, session_sessionBeforeB = Seq.split dBefore.subSessions i in 
-	let _, sessionsBeforeB = Seq.split session_sessionBeforeB 1 in 
-	let sessionsAfterA, session_sessionAfterB = Seq.split dBefore.subSessions i in 
-	let _, sessionsAfterB = Seq.split session_sessionBeforeB 1 in 
-	mechanismsPrevious == mechanismsNew /\
-	keysPrevious == keysNew /\
-	objectsPrevious == objectsNew /\
-	(forall (i: nat{i < Seq.length sessionsBeforeA}). sessionEqual (index sessionsBeforeA i) (index sessionsAfterA i))/\
-	(forall (i: nat{i < Seq.length sessionsBeforeB}). sessionEqual (index sessionsBeforeB i) (index sessionsAfterB i))
+  let mechanismsPrevious, keysPrevious, objectsPrevious, supportedMechanismsPrevious = dBefore.mechanisms, dBefore.keys, dBefore.objects, dBefore.supportedMechanisms in 
+  let mechanismsNew, keysNew, objectsNew, supportedMechanismsNew = dAfter.mechanisms, dAfter.keys, dAfter.objects, dAfter.supportedMechanisms in 
+  
+  let sessionsBeforeA, session_sessionBeforeB = Seq.split dBefore.subSessions i in 
+  let _, sessionsBeforeB = Seq.split session_sessionBeforeB 1 in 
+  let sessionsAfterA, session_sessionAfterB = Seq.split dBefore.subSessions i in 
+  let _, sessionsAfterB = Seq.split session_sessionBeforeB 1 in 
+
+  mechanismsPrevious == mechanismsNew /\
+  keysPrevious == keysNew /\
+  objectsPrevious == objectsNew /\
+  supportedMechanismsPrevious == supportedMechanismsNew /\
+
+  (forall (i: nat{i < Seq.length sessionsBeforeA}). sessionEqual (index sessionsBeforeA i) (index sessionsAfterA i))/\
+  (forall (i: nat{i < Seq.length sessionsBeforeB}). sessionEqual (index sessionsBeforeB i) (index sessionsAfterB i))
 
 
 (* Predicate Section*)
