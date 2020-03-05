@@ -142,6 +142,17 @@ type _CK_ATTRIBUTE_TYPE =
   |CKA_VERIFY
   |CKA_LOCAL
   |CKA_SECRET_KEY
+  |CKA_TOKEN
+  |CKA_MODIFIABLE
+  |CKA_LABEL
+  |CKA_COPYABLE
+  |CKA_DESTROYABLE
+  |CKA_ID
+  |CKA_START_DATE
+  |CKA_END_DATE
+  |CKA_DERIVED
+  |CKA_KEY_GEN_MECHANISM
+  |CKA_ALLOWED_MECHANISMS
   (* and much more *)
 
 (*
@@ -194,7 +205,22 @@ let _ck_attribute_get_type: _CK_ATTRIBUTE_TYPE -> Tot Type0 = function
   |CKA_SIGN -> bool
   |CKA_VERIFY -> bool
   |CKA_LOCAL -> bool
+  |CKA_TOKEN -> bool
+  |CKA_PRIVATE -> bool
+  |CKA_MODIFIABLE -> bool
+  |CKA_LABEL -> uint32_t
+  |CKA_COPYABLE -> bool
+  |CKA_DESTROYABLE -> bool
+  |CKA_KEY_TYPE -> _CK_KEY_TYPE
+  |CKA_ID -> uint32_t
+  |CKA_START_DATE -> uint32_t
+  |CKA_END_DATE -> uint32_t
+  |CKA_DERIVED -> bool
+  |CKA_LOCAL -> bool
+  |CKA_KEY_GEN_MECHANISM -> _CK_MECHANISM_TYPE
+  |CKA_ALLOWED_MECHANISMS -> _CK_MECHANISM_TYPE
   |_ -> _CK_ULONG
+  
 
 
 (* I am not sure that the length is stated for all possible types *)
@@ -203,6 +229,20 @@ let _ck_attribute_get_len: _CK_ATTRIBUTE_TYPE -> Tot (a: option nat {Some? a ==>
   |CKA_SIGN -> Some 1
   |CKA_VERIFY -> Some 1
   |CKA_LOCAL -> Some 1
+  |CKA_TOKEN -> Some 1
+  |CKA_PRIVATE -> Some 1 
+  |CKA_MODIFIABLE -> Some 1
+  |CKA_COPYABLE -> Some 1
+  |CKA_LABEL -> None
+  |CKA_DESTROYABLE -> Some 1
+  |CKA_KEY_TYPE -> Some 1 
+  |CKA_ID -> None
+  |CKA_START_DATE -> Some 3
+  |CKA_END_DATE -> Some 3
+  |CKA_DERIVED -> Some 1
+  |CKA_LOCAL -> Some 1
+  |CKA_KEY_GEN_MECHANISM -> Some 1
+  |CKA_ALLOWED_MECHANISMS -> None
   |_ -> None
 
 
@@ -247,7 +287,8 @@ let getObjectAttributeClass obj =
 (* I will try to look whether I could give the same interface for different object,
 i.e. for mechanisms, keys, etc*)
 val getObjectAttributeSign: obj: _object -> Tot (r: option _CK_ATTRIBUTE
-  {Some? r ==> 
+  {
+  Some? r ==> 
     (
       let a = (match r with Some a -> a) in 
       a.aType == CKA_SIGN 
@@ -287,15 +328,33 @@ let getObjectAttributeLocal obj =
   find_l (fun x -> x.aType = CKA_LOCAL) obj.attrs
 
 
+type storage = 
+  |Storage: o: _object {
+    Some? (find_l (fun x -> x.aType = CKA_TOKEN) o.attrs) /\
+    Some? (find_l (fun x -> x.aType = CKA_PRIVATE) o.attrs) /\
+    Some? (find_l (fun x -> x.aType = CKA_MODIFIABLE) o.attrs) /\
+    Some? (find_l (fun x -> x.aType = CKA_LABEL) o.attrs) /\
+    Some? (find_l (fun x -> x.aType = CKA_COPYABLE) o.attrs) /\
+    Some? (find_l (fun x -> x.aType = CKA_DESTROYABLE) o.attrs)
+  } -> storage
+
+
 (* Key is an object such that the object has an attribute class such that the attribute value is OTP_KEY, PRIVATE KEY, PUBLIC KEY, or SECRET KEY *)
-type keyEntity = 
-  |Key: o: _object{
+type key = 
+  |Key: o: storage{
+    Some? (find_l (fun x -> x.aType = CKA_KEY_TYPE) o.o.attrs) /\
+    Some? (find_l (fun x -> x.aType = CKA_ID) o.o.attrs) /\
+    Some? (find_l (fun x -> x.aType = CKA_END_DATE) o.o.attrs) /\
+    Some? (find_l (fun x -> x.aType = CKA_DERIVED) o.o.attrs) /\
+    Some? (find_l (fun x -> x.aType = CKA_LOCAL) o.o.attrs) /\
+    Some? (find_l (fun x -> x.aType = CKA_KEY_GEN_MECHANISM) o.o.attrs) /\
+    Some? (find_l (fun x -> x.aType = CKA_ALLOWED_MECHANISMS) o.o.attrs) /\
     (
-      let attrClass = getObjectAttributeClass o in 
+      let attrClass = getObjectAttributeClass o.o in 
       let value = Seq.index attrClass.pValue 0 in 
 	value = CKO_OTP_KEY || value = CKO_PRIVATE_KEY  || value = CKO_PUBLIC_KEY || value = CKO_SECRET_KEY
     )
-  } -> keyEntity
+  } -> key
 
 
 type temporalStorage = 
