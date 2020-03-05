@@ -12,14 +12,116 @@ https://eprint.iacr.org/2017/1057.pdf *)
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
-val eea_pow2_odd: a:nat -> n:pos ->
-  Pure (tuple2 nat nat)
+val eea_pow2_odd_k_lemma_d: a:pos -> n:pos -> k1:pos -> Lemma
+  (requires n * k1 % pow2 (a - 1) == 1 /\ n % 2 = 1)
+  (ensures (let d = n * k1 / pow2 (a - 1) in
+    d % 2 == (if n * k1 % pow2 a < pow2 (a - 1) then 0 else 1)))
+
+let eea_pow2_odd_k_lemma_d a n k1 =
+  let d = n * k1 / pow2 (a - 1) in
+  Math.Lemmas.pow2_modulo_division_lemma_1 (n * k1) (a - 1) a;
+  assert (d % 2 == n * k1 % pow2 a / pow2 (a - 1));
+  if d % 2 = 0 then begin
+    Math.Lemmas.small_division_lemma_2 (n * k1 % pow2 a) (pow2 (a - 1));
+    assert (n * k1 % pow2 a < pow2 (a - 1));
+    () end
+
+
+val eea_pow2_odd_k_lemma: a:pos -> n:pos -> k1:pos -> Lemma
+  (requires n * k1 % pow2 (a - 1) == 1 /\ n % 2 = 1)
+  (ensures (let k = if n * k1 % pow2 a < pow2 (a - 1) then k1 else k1 + pow2 (a - 1) in
+    n * k % pow2 a == 1))
+
+let eea_pow2_odd_k_lemma a n k1 =
+  let d = n * k1 / pow2 (a - 1) in
+  let k = if n * k1 % pow2 a < pow2 (a - 1) then k1 else k1 + pow2 (a - 1) in
+  calc (==) {
+    n * k1;
+    (==) { Math.Lemmas.euclidean_division_definition (n * k1) (pow2 (a - 1)) }
+    1 + d * pow2 (a - 1);
+    (==) { Math.Lemmas.euclidean_division_definition d 2 }
+    1 + (d / 2 * 2 + d % 2) * pow2 (a - 1);
+    (==) { Math.Lemmas.distributivity_add_left (d / 2 * 2) (d % 2) (pow2 (a - 1)) }
+    1 + d / 2 * 2 * pow2 (a - 1) + d % 2 * pow2 (a - 1);
+    (==) { Math.Lemmas.pow2_plus 1 (a - 1) }
+    1 + d / 2 * pow2 a + d % 2 * pow2 (a - 1);
+  };
+
+  assert (n * k1 == 1 + d / 2 * pow2 a + d % 2 * pow2 (a - 1));
+  if n * k1 % pow2 a < pow2 (a - 1) then begin
+    eea_pow2_odd_k_lemma_d a n k1;
+    assert (d % 2 = 0);
+    calc (==) {
+      n * k % pow2 a;
+      (==) { }
+      (1 + d / 2 * pow2 a) % pow2 a;
+      (==) { Math.Lemmas.modulo_addition_lemma 1 (pow2 a) (d / 2) }
+      1 % pow2 a;
+      (==) { Math.Lemmas.pow2_le_compat a 1; Math.Lemmas.small_mod 1 (pow2 a) }
+      1;
+    };
+    assert (n * k % pow2 a = 1);
+    () end
+  else begin
+    eea_pow2_odd_k_lemma_d a n k1;
+    assert (d % 2 = 1);
+    assert (n * k1 == 1 + d / 2 * pow2 a + pow2 (a - 1));
+    //assert (n * k == 1 + d / 2 * pow2 a + pow2 (a - 1) + n * pow2 (a - 1));
+    calc (==) {
+      n * k % pow2 a;
+      (==) { Math.Lemmas.distributivity_add_right n k1 (pow2 (a - 1)) }
+      (n * k1 + n * pow2 (a - 1)) % pow2 a;
+      (==) { }
+      (1 + pow2 (a - 1) + n * pow2 (a - 1) + d / 2 * pow2 a) % pow2 a;
+      (==) { Math.Lemmas.modulo_addition_lemma (1 + pow2 (a - 1) + n * pow2 (a - 1)) (pow2 a) (d / 2) }
+      (1 + pow2 (a - 1) + n * pow2 (a - 1)) % pow2 a;
+      (==) { Math.Lemmas.distributivity_add_left 1 n (pow2 (a - 1)) }
+      (1 + (1 + n) * pow2 (a - 1)) % pow2 a;
+      (==) { Math.Lemmas.lemma_div_exact (1 + n) 2 }
+      (1 + (1 + n) / 2 * 2 * pow2 (a - 1)) % pow2 a;
+      (==) { Math.Lemmas.paren_mul_right ((1 + n) / 2) 2 (pow2 (a - 1)) }
+      (1 + (1 + n) / 2 * (2 * pow2 (a - 1))) % pow2 a;
+      (==) { Math.Lemmas.pow2_plus 1 (a - 1)}
+      (1 + (1 + n) / 2 * pow2 a) % pow2 a;
+      (==) { Math.Lemmas.modulo_addition_lemma 1 (pow2 a) ((1 + n) / 2) }
+      1 % pow2 a;
+      (==) { Math.Lemmas.pow2_le_compat a 1; Math.Lemmas.small_mod 1 (pow2 a) }
+      1;
+    };
+    assert (n * k % pow2 a == 1);
+    () end
+
+val eea_pow2_odd_k: a:pos -> n:pos ->
+  Pure pos
+  (requires n % 2 = 1)
+  (ensures  fun k -> n * k % pow2 a == 1)
+
+let rec eea_pow2_odd_k a n =
+  if a = 1 then 1
+  else begin
+    let k1 = eea_pow2_odd_k (a - 1) n in
+    assert (n * k1 % pow2 (a - 1) == 1);
+    let k = if n * k1 % pow2 a < pow2 (a - 1) then k1 else k1 + pow2 (a - 1) in
+    eea_pow2_odd_k_lemma a n k1;
+    assert (n * k % pow2 a == 1);
+    k end
+
+
+val eea_pow2_odd: a:pos -> n:pos ->
+  Pure (tuple2 int int)
   (requires n % 2 = 1)
   (ensures  fun (d, k) -> pow2 a * d == 1 + k * n)
-let eea_pow2_odd a n = admit()
+
+let eea_pow2_odd a n =
+  let k = eea_pow2_odd_k a n in
+  assert (n * k % pow2 a == 1);
+  assert (n * k == n * k / pow2 a * pow2 a + 1);
+  let d = n * k / pow2 a in
+  assert (n * k == d * pow2 a + 1);
+  (- d, - k)
 
 
-val mont_preconditions_d: rLen:nat -> n:pos{n > 1} -> Lemma
+val mont_preconditions_d: rLen:pos -> n:pos{n > 1} -> Lemma
   (requires  n % 2 = 1)
   (ensures  (let d, k = eea_pow2_odd (64 * rLen) n in pow2 (64 * rLen) * d % n == 1))
 
@@ -220,7 +322,7 @@ let rec mont_reduction_loop_lemma rLen n mu i c =
     mont_reduction_lemma_step rLen n mu i c res0 end
 
 
-val mont_reduction_lemma: rLen:nat -> n:pos -> d:nat-> mu:nat -> c:nat -> Lemma
+val mont_reduction_lemma: rLen:nat -> n:pos -> d:int-> mu:nat -> c:nat -> Lemma
   (requires (1 + n * mu) % pow2 64 == 0 /\ pow2 (64 * rLen) * d % n == 1)
   (ensures  mont_reduction rLen n mu c % n == c * d % n)
 
@@ -253,7 +355,7 @@ let mont_reduction_lemma rLen n d mu c =
 ///  Lemma (to_mont rLen n mu a % n == a * pow2 (64 * rLen) % n)
 ///
 
-val lemma_mod_mul_distr3: a:nat -> b:nat -> c:nat -> n:pos -> Lemma
+val lemma_mod_mul_distr3: a:int -> b:int -> c:int -> n:pos -> Lemma
   (a * (b % n) * c % n == a * b * c % n)
 let lemma_mod_mul_distr3 a b c n =
   calc (==) {
@@ -269,7 +371,7 @@ let lemma_mod_mul_distr3 a b c n =
   }
 
 
-val to_mont_lemma: rLen:nat -> n:pos -> d:nat-> mu:nat -> a:nat -> Lemma
+val to_mont_lemma: rLen:nat -> n:pos -> d:int-> mu:nat -> a:nat -> Lemma
   (requires (1 + n * mu) % pow2 64 == 0 /\ pow2 (64 * rLen) * d % n == 1)
   (ensures  to_mont rLen n mu a % n == a * pow2 (64 * rLen) % n)
 
@@ -304,7 +406,7 @@ let to_mont_lemma rLen n d mu a =
 ///  Lemma (from_mont rLen n mu aM % n == aM * d % n)
 ///
 
-val from_mont_lemma: rLen:nat -> n:pos -> d:nat -> mu:nat -> aM:nat -> Lemma
+val from_mont_lemma: rLen:nat -> n:pos -> d:int -> mu:nat -> aM:nat -> Lemma
   (requires (1 + n * mu) % pow2 64 == 0 /\ pow2 (64 * rLen) * d % n == 1)
   (ensures  from_mont rLen n mu aM % n == aM * d % n)
 
@@ -367,7 +469,7 @@ let lemma_fits_aux c r n =
   Math.Lemmas.lemma_div_le (c - n) c r
 
 
-val mont_mult_lemma_fits: rLen:nat -> n:pos -> d:nat-> mu:nat -> c:nat -> Lemma
+val mont_mult_lemma_fits: rLen:nat -> n:pos -> d:int -> mu:nat -> c:nat -> Lemma
   (requires
     (1 + n * mu) % pow2 64 == 0 /\ pow2 (64 * rLen) * d % n == 1 /\
      4 * n < pow2 (64 * rLen) /\ c < 4 * n * n)
@@ -396,7 +498,7 @@ let mont_mult_lemma_fits rLen n d mu c =
 ///  Lemma (to_mont rLen n mu a < 2 * n)
 ///
 
-val to_mont_lemma_fits: rLen:nat -> n:pos -> d:nat-> mu:nat -> a:nat -> Lemma
+val to_mont_lemma_fits: rLen:nat -> n:pos -> d:int -> mu:nat -> a:nat -> Lemma
   (requires
     (1 + n * mu) % pow2 64 == 0 /\ pow2 (64 * rLen) * d % n == 1 /\
     4 * n < pow2 (64 * rLen) /\ a < n)
@@ -425,7 +527,7 @@ let lemma_fits_aux1 aM r n =
   Math.Lemmas.small_division_lemma_1 n r
 
 
-val from_mont_lemma_fits: rLen:nat -> n:pos -> d:nat-> mu:nat -> aM:nat -> Lemma
+val from_mont_lemma_fits: rLen:nat -> n:pos -> d:int -> mu:nat -> aM:nat -> Lemma
   (requires
     (1 + n * mu) % pow2 64 == 0 /\ pow2 (64 * rLen) * d % n == 1 /\
     4 * n < pow2 (64 * rLen) /\ aM < 2 * n)
@@ -454,7 +556,7 @@ let from_mont_lemma_fits rLen n d mu aM =
 ///  Lemma (mont_mul rLen n mu a b < 2 * n)
 ///
 
-val mont_mul_lemma_fits: rLen:nat -> n:pos -> d:nat-> mu:nat -> a:nat -> b:nat -> Lemma
+val mont_mul_lemma_fits: rLen:nat -> n:pos -> d:int -> mu:nat -> a:nat -> b:nat -> Lemma
   (requires
     (1 + n * mu) % pow2 64 == 0 /\ pow2 (64 * rLen) * d % n == 1 /\
     4 * n < pow2 (64 * rLen) /\ a < 2 * n /\ b < 2 * n)

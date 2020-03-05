@@ -407,9 +407,12 @@ let from_mont_lemma #nLen #rLen n mu aM =
 
   let res = sub a' 0 nLen in
   bn_eval_extensionality_j a' res nLen;
-  //assert (eval_ nLen res nLen == eval_ rLen a' nLen);
+  assert (eval_ nLen res nLen == eval_ rLen a' nLen);
   assert (bn_v res == eval_ rLen a' nLen);
-  lemma_top_is_zero #nLen #rLen n a'
+  lemma_top_is_zero #nLen #rLen n a';
+  assert (bn_v a' == eval_ rLen a' nLen);
+  assert (bn_v res == M.mont_reduction rLen (bn_v n) (v mu) (bn_v tmp))
+
 
 ///
 ///  Lemma
