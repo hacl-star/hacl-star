@@ -227,7 +227,9 @@ type _object =
   |O: 
     identifier: _CK_ULONG -> 
     dat: seq FStar.UInt8.t -> 
-    attrs: seq _CK_ATTRIBUTE-> 
+    attrs: seq _CK_ATTRIBUTE 
+      (* Common attributes for all the classes*)
+      {Some? (find_l (fun x -> x.aType = CKA_CLASS) attrs)}  -> 
     _object
 
 
@@ -1061,31 +1063,49 @@ let deviceAddSession  f d newSession =
     lemma_getIndex2 f sessions newSessionUpd;
   updatedDevice
 
+(*
+   Preconditions: the mechanism should be used for key generation.
+   CheckedAttributes: (4.1.1):
+     1) Not type invalid (parsing)
+     2) Not value invalid (parsing)
+     3) Not read only 
+     4) Not incomplete -> fully specify object -> what's the full specification?
+     5) Incosistent: 
+       two difference values for the sae attribute
+       attributes for public/private keys instead of secret keys
+       one attribute - one value
+*)
 
 val _CKS_GenerateKey: d: device ->  
-	hSession: _CK_SESSION_HANDLE -> 
-	pMechanism: _CK_MECHANISM_TYPE{isPresentOnDevice d pMechanism = true /\ 
-		(let flags = mechanismGetFlags d pMechanism in isFlagKeyGeneration flags)} ->
-	pTemplate: seq attributeSpecification{checkedAttributes pTemplate} -> 
-	Pure(
-		(handler: result _CK_OBJECT_HANDLE) & 
-		(resultDevice : device {
-			if Inr? handler then 
-				d = resultDevice else 
-			let handler = (match handler with Inl a -> a) in 	
-			Seq.length resultDevice.keys = Seq.length d.keys + 1 /\
-			Seq.length resultDevice.subSessions = Seq.length d.subSessions /\
-			handler = Seq.length resultDevice.keys -1 /\
-			(
-				let newCreatedKey = Seq.index resultDevice.keys handler in 
-				isAttributeLocal (newCreatedKey.element).attrs 
-			) /\
-			modifiesKeysM d resultDevice handler 
-			}
-		) 
-	)
-	(requires (True))
-	(ensures (fun h -> True))
+  hSession: _CK_SESSION_HANDLE -> 
+  pMechanism: _CK_MECHANISM_TYPE
+    {isPresentOnDevice d pMechanism = true /\ isMechanismUsedForGenerateKey pMechanism d.supportedMechanisms} ->
+  pTemplate: seq _CK_ATTRIBUTE {checkedAttributes pTemplate} -> 
+  Tot(
+    (handler: result _CK_OBJECT_HANDLE) & 
+    (resultDevice : device 
+      {
+	if Inr? handler then 
+	  d = resultDevice else 
+	let handler : nat = (match handler with Inl a -> a) in 
+	Seq.length resultDevice.keys = Seq.length d.keys + 1 /\
+	Seq.length resultDevice.subSessions = Seq.length d.subSessions /\
+	handler = Seq.length resultDevice.keys -1 /\ handler < pow2 32 - 1 /\
+	(
+	  let newCreatedKey = Seq.index resultDevice.keys handler in 
+	  let attributeLocal = getObjectAttributeLocal newCreatedKey.o in 
+	  let attributeClass = getObjectAttributeClass newCreatedKey.o in 
+	  Some? attributeLocal /\ Some? attributeClass /\
+	  index (match attributeLocal with Some a -> a).pValue 0 == true /\
+	  index (match attributeClass with Some a -> a).pValue 0 == CKO_SECRET_KEY
+	) /\
+	modifiesKeysM d resultDevice handler 
+      }
+    ) 
+  )
+
+
+
 
 let _CKS_GenerateKey d hSession pMechanism pTemplate = 
 	let mechanism = mechanismGetFromDevice d pMechanism in 
