@@ -235,17 +235,12 @@ type _object =
 
 (* The method takes an object and returns whether amongs its attributes there is one that is CKA_CLASS. If the attribute is found that the attribute is returned, otherwise the None is returned *)
 
-val getObjectAttributeClass: obj: _object -> Tot (r: option _CK_ATTRIBUTE
-  {Some? r  ==>
-    (
-      let a = (match r with Some a -> a) in  
-      a.aType == CKA_CLASS
-   )
-  }  
-)
+val getObjectAttributeClass: obj: _object -> Tot (r: _CK_ATTRIBUTE { r.aType == CKA_CLASS} )
 
 let getObjectAttributeClass obj = 
-  find_l (fun x -> x.aType = CKA_CLASS) obj.attrs
+  let attributeClass = find_l (fun x -> x.aType = CKA_CLASS) obj.attrs in 
+  match attributeClass with 
+  Some a -> a
 
 
 (* The method takes an object and returns whether it supports signing *)
@@ -295,12 +290,10 @@ let getObjectAttributeLocal obj =
 (* Key is an object such that the object has an attribute class such that the attribute value is OTP_KEY, PRIVATE KEY, PUBLIC KEY, or SECRET KEY *)
 type keyEntity = 
   |Key: o: _object{
-    (let attrs = getObjectAttributeClass o in Some? attrs && 
-      (
-	let a = (match attrs with Some a -> a) in 
-	let value = Seq.index a.pValue 0 in 
+    (
+      let attrClass = getObjectAttributeClass o in 
+      let value = Seq.index attrClass.pValue 0 in 
 	value = CKO_OTP_KEY || value = CKO_PRIVATE_KEY  || value = CKO_PUBLIC_KEY || value = CKO_SECRET_KEY
-      )
     )
   } -> keyEntity
 
@@ -624,9 +617,9 @@ assume val keyGeneration: mechanismID: _CK_MECHANISM ->
       let attrs = (k.o).attrs in 
       let attributeLocal = getObjectAttributeLocal k.o in 
       let attributeClass = getObjectAttributeClass k.o in 
-      Some? attributeLocal /\ Some? attributeClass /\ 
+      Some? attributeLocal /\ 
       index (match attributeLocal with Some a -> a).pValue 0 == true /\
-      index (match attributeClass with Some a -> a).pValue 0 == CKO_SECRET_KEY
+      index attributeClass.pValue 0 == CKO_SECRET_KEY
     }
   )
 )
@@ -1095,9 +1088,9 @@ val _CKS_GenerateKey: d: device ->
 	  let newCreatedKey = Seq.index resultDevice.keys handler in 
 	  let attributeLocal = getObjectAttributeLocal newCreatedKey.o in 
 	  let attributeClass = getObjectAttributeClass newCreatedKey.o in 
-	  Some? attributeLocal /\ Some? attributeClass /\
+	  Some? attributeLocal /\ 
 	  index (match attributeLocal with Some a -> a).pValue 0 == true /\
-	  index (match attributeClass with Some a -> a).pValue 0 == CKO_SECRET_KEY
+	  index attributeClass.pValue 0 == CKO_SECRET_KEY
 	) /\
 	modifiesKeysM d resultDevice handler 
       }
