@@ -314,6 +314,21 @@ let getObjectAttributeClass obj =
 
 
 (* The method takes an object and returns whether it supports signing *)
+
+val getObjectAttributeSign: obj: _object -> Tot (r: option _CK_ATTRIBUTE
+  {Some? r ==>
+    (
+      let a = (match r with Some a -> a) in 
+      a.aType == CKA_SIGN
+    )
+  }
+)
+
+let getObjectAttributeSign obj = 
+  find_l (fun x -> x.aType = CKA_SIGN) obj.attrs
+
+
+
 val getObjectAttributeVerify: obj: _object -> Tot (r: option _CK_ATTRIBUTE
   {Some? r ==>
     (
@@ -449,7 +464,7 @@ type _SessionState =
 
 
 (* A metadata element represention an ongoing function *)
-type subSession (k: seq keyEntity) (m: seq _CK_MECHANISM) (supMech: seq _CKS_MECHANISM_INFO) = 
+type subSession (k: seq key_object) (m: seq _CK_MECHANISM) (supMech: seq _CKS_MECHANISM_INFO) = 
   |Signature: 
     (* The session identifier that has caused the operation *)
     id: _CK_SESSION_HANDLE -> 
@@ -464,7 +479,7 @@ type subSession (k: seq keyEntity) (m: seq _CK_MECHANISM) (supMech: seq _CKS_MEC
     keyHandler: _CK_OBJECT_HANDLE{Seq.length k > keyHandler /\
       (
 	let referencedKey = index k keyHandler in 
-	let supportsSigning = getObjectAttributeSign referencedKey.o in 
+	let supportsSigning = getObjectAttributeSign referencedKey.ko.sto in 
 	Some? supportsSigning /\
 	(
 	  let signingAttributeValue = index (match supportsSigning with Some a -> a).pValue 0 in 
@@ -488,7 +503,7 @@ type subSession (k: seq keyEntity) (m: seq _CK_MECHANISM) (supMech: seq _CKS_MEC
     keyHandler: _CK_OBJECT_HANDLE {Seq.length k > keyHandler /\
       (
 	let referencedKey = index k keyHandler in 
-	let supportsVerification = getObjectAttributeVerify referencedKey.o in 
+	let supportsVerification = getObjectAttributeVerify referencedKey.ko.sto in 
 	Some? supportsVerification /\
 	(
 	  let verificationAttributeValue = index (match supportsVerification with Some a -> a).pValue 0 in 
