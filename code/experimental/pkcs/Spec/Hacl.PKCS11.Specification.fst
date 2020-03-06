@@ -401,9 +401,30 @@ type _CKO_PRIVATE_KEY =
       Some? (find_l (fun x -> x.aType = CKA_WRAP_WITH_TRUSTED) attrs) /\
       Some? (find_l (fun x -> x.aType = CKA_UNWRAP_TEMPLATE) attrs) /\
       Some? (find_l (fun x -> x.aType = CKA_ALWAYS_AUTHENTICATE) attrs) /\
-      Some? (find_l (fun x -> x.aType = CKA_PUBLIC_KEY_INFO) attrs)
+      Some? (find_l (fun x -> x.aType = CKA_PUBLIC_KEY_INFO) attrs) /\
+      index (getObjectAttributeClass prko.ko.sto).pValue 0  = CKO_PRIVATE_KEY
       ) 
    } -> _CKO_PRIVATE_KEY
+
+
+type _CKO_SECRET_KEY = 
+  |SK: sk: key_object {
+    (
+      let attrs = sk.ko.sto.attrs in 
+      Some? (find_l (fun x -> x.aType = CKA_SENSITIVE) attrs) /\
+      Some? (find_l (fun x -> x.aType = CKA_ENCRYPT) attrs) /\
+      Some? (find_l (fun x -> x.aType = CKA_DECRYPT) attrs) /\
+      Some? (find_l (fun x -> x.aType = CKA_SIGN) attrs) /\
+      Some? (find_l (fun x -> x.aType = CKA_VERIFY) attrs) /\
+      Some? (find_l (fun x -> x.aType = CKA_WRAP) attrs) /\
+      Some? (find_l (fun x -> x.aType = CKA_UNWRAP) attrs) /\
+      Some? (find_l (fun x -> x.aType = CKA_EXTRACTABLE) attrs) /\
+      Some? (find_l (fun x -> x.aType = CKA_ALWAYS_SENSITIVE) attrs) /\
+      Some? (find_l (fun x -> x.aType = CKA_NEVER_EXTRACTABLE) attrs) /\
+      index (getObjectAttributeClass sk.ko.sto).pValue 0  = CKO_SECRET_KEY
+    )
+  } -> _CKO_SECRET_KEY
+
 
 
 type temporalStorage = 
