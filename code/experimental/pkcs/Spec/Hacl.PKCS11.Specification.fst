@@ -516,7 +516,7 @@ type subSession (k: seq key_object) (m: seq _CK_MECHANISM) (supMech: seq _CKS_ME
 
 
 (* This method takes a subsession and returns the session identifier that created this session *)
-val subSessionGetID: #ks: seq keyEntity -> #ms: seq _CK_MECHANISM -> #supMech: seq _CKS_MECHANISM_INFO -> s: subSession ks ms supMech -> Tot _CK_SESSION_HANDLE
+val subSessionGetID: #ks: seq key_object -> #ms: seq _CK_MECHANISM -> #supMech: seq _CKS_MECHANISM_INFO -> s: subSession ks ms supMech -> Tot _CK_SESSION_HANDLE
 
 let subSessionGetID #ks #ms #supMech  s = 
   match s with 
@@ -525,7 +525,7 @@ let subSessionGetID #ks #ms #supMech  s =
 
 
 (* This method takes a subsession and returns the session state *)
-val subSessionGetState: #ks: seq keyEntity -> #ms : seq _CK_MECHANISM -> #supMech: seq _CKS_MECHANISM_INFO -> s: subSession ks ms supMech -> Tot _SessionState
+val subSessionGetState: #ks: seq key_object -> #ms : seq _CK_MECHANISM -> #supMech: seq _CKS_MECHANISM_INFO -> s: subSession ks ms supMech -> Tot _SessionState
 
 let subSessionGetState #ks #ms #supMech s = 
   match s with
@@ -534,7 +534,7 @@ let subSessionGetState #ks #ms #supMech s =
 
 
 (* This method takes a subsession, a state to set and returns the subsession with updated state *)
-val subSessionSetState: #ks: seq keyEntity -> #ms: seq _CK_MECHANISM -> #supMech: seq _CKS_MECHANISM_INFO -> s: subSession ks ms supMech -> state: _SessionState 
+val subSessionSetState: #ks: seq key_object-> #ms: seq _CK_MECHANISM -> #supMech: seq _CKS_MECHANISM_INFO -> s: subSession ks ms supMech -> state: _SessionState 
   {
     if Signature? s then state = SubsessionSignatureInit  \/ state = SubsessionSignatureUpdate 
     else 
@@ -567,7 +567,7 @@ let subSessionSetState #ks #ms #supMech s state =
 
 
 (* This method takes a subsession and returns its storage*)
-val subSessionGetStorage: #ks: seq keyEntity -> #ms : seq _CK_MECHANISM -> #supMech: seq _CKS_MECHANISM_INFO -> s: subSession ks ms supMech ->  Tot (option temporalStorage)
+val subSessionGetStorage: #ks: seq key_object-> #ms : seq _CK_MECHANISM -> #supMech: seq _CKS_MECHANISM_INFO -> s: subSession ks ms supMech ->  Tot (option temporalStorage)
 
 let subSessionGetStorage #ks #ms #supMech s = 
   match s with 
@@ -576,7 +576,7 @@ let subSessionGetStorage #ks #ms #supMech s =
 
 
 (* This method takes a subsession, a storage to set and returns *)
-val subSessionSetStorage: #ks: seq keyEntity -> #ms: seq _CK_MECHANISM -> #supMech: seq _CKS_MECHANISM_INFO -> s: subSession ks ms supMech -> storage: option temporalStorage -> 
+val subSessionSetStorage: #ks: seq key_object -> #ms: seq _CK_MECHANISM -> #supMech: seq _CKS_MECHANISM_INFO -> s: subSession ks ms supMech -> storage: option temporalStorage -> 
   Tot (r: subSession ks ms supMech
     {
       (* The storage is the one requested *)
@@ -604,7 +604,7 @@ let subSessionSetStorage #ks #ms #supMech s storage =
 
 
 (* This method takes a subsession and returns the mechanism used for this subsession *)
-val subSessionGetMechanism: #ks: seq keyEntity -> #ms: seq _CK_MECHANISM -> #supMech: seq _CKS_MECHANISM_INFO -> s: subSession ks ms supMech -> Tot _CK_MECHANISM_TYPE
+val subSessionGetMechanism: #ks: seq key_object -> #ms: seq _CK_MECHANISM -> #supMech: seq _CKS_MECHANISM_INFO -> s: subSession ks ms supMech -> Tot _CK_MECHANISM_TYPE
 
 let subSessionGetMechanism #ks #ms #supMech s = 
   match s with 
@@ -613,7 +613,7 @@ let subSessionGetMechanism #ks #ms #supMech s =
 
 
 (* This method takes a subsession and returns the key handler used for this subsession *)
-val subSessionGetKeyHandler: #ks: seq keyEntity -> #ms: seq _CK_MECHANISM -> #supMech: seq _CKS_MECHANISM_INFO -> s: subSession ks ms supMech -> Tot _CK_OBJECT_HANDLE
+val subSessionGetKeyHandler: #ks: seq key_object -> #ms: seq _CK_MECHANISM -> #supMech: seq _CKS_MECHANISM_INFO -> s: subSession ks ms supMech -> Tot _CK_OBJECT_HANDLE
 
 let subSessionGetKeyHandler #ks #ms #supMech s = 
   match s with 
@@ -623,7 +623,7 @@ let subSessionGetKeyHandler #ks #ms #supMech s =
 
 type device = 
   |Device: 
-    keys: seq keyEntity {Seq.length keys < pow2 32} ->
+    keys: seq key_object {Seq.length keys < pow2 32} ->
     mechanisms: seq _CK_MECHANISM  -> 
     supportedMechanisms: seq _CKS_MECHANISM_INFO -> 
     objects: seq _object -> 
@@ -754,16 +754,13 @@ let mechanismGetFromDevice d pMechanism =
 
 assume val checkedAttributes: pTemplate : seq _CK_ATTRIBUTE -> Tot bool
 
+(* external function that returns well formed  *)
 assume val keyGeneration: mechanismID: _CK_MECHANISM -> 
   pTemplate: seq _CK_ATTRIBUTE ->
-  Tot (r: result (k: keyEntity
+  Tot (r: result (k: _CKO_SECRET_KEY
     {
-      let attrs = (k.o).attrs in 
-      let attributeLocal = getObjectAttributeLocal k.o in 
-      let attributeClass = getObjectAttributeClass k.o in 
-      Some? attributeLocal /\ 
-      index (match attributeLocal with Some a -> a).pValue 0 == true /\
-      index attributeClass.pValue 0 == CKO_SECRET_KEY
+      let attributeLocal = getObjectAttributeLocal k.sk.ko.sto in 
+      index (match attributeLocal with Some a -> a).pValue 0 == true
     }
   )
 )
