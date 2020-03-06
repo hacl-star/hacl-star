@@ -913,7 +913,7 @@ dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/LICENSE.txt \
   $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_H_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) $(VALE_ASMS) | old-extract-c
 	mkdir -p $(dir $@)
 	[ x"$(HACL_OLD_FILES)" != x ] && cp $(HACL_OLD_FILES) $(patsubst %.c,%.h,$(HACL_OLD_FILES)) $(dir $@) || true
-	[ x"$(HAND_WRITTEN_FILES)" != x ] && cp $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_H_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) $(dir $@) || true
+	[ x"$(HAND_WRITTEN_FILES)$(HAND_WRITTEN_H_FILES)" != x ] && cp $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_H_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) $(dir $@) || true
 	[ x"$(VALE_ASMS)" != x ] && cp $(VALE_ASMS) $(dir $@) || true
 	$(KRML) $(DEFAULT_FLAGS) \
 	  -tmpdir $(dir $@) -skip-compilation \
