@@ -153,6 +153,25 @@ type _CK_ATTRIBUTE_TYPE =
   |CKA_DERIVED
   |CKA_KEY_GEN_MECHANISM
   |CKA_ALLOWED_MECHANISMS
+  |CKA_SUBJECT
+  |CKA_ENCRYPT
+  |CKA_VERIFY_RECOVER
+  |CKA_WRAP
+  |CKA_TRUSTED
+  |CKA_WRAP_TEMPLATE
+  |CKA_PUBLIC_KEY_INFO
+  |CKA_SENSITIVE
+  |CKA_DECRYPT
+  |CKA_SIGN_RECOVER
+  |CKA_UNWRAP
+  |CKA_EXTRACTABLE
+  |CKA_ALWAYS_SENSITIVE
+  |CKA_NEVER_EXTRACTABLE
+  |CKA_WRAP_WITH_TRUSTED
+  |CKA_UNWRAP_TEMPLATE
+  |CKA_ALWAYS_AUTHENTICATE
+  |CKA_CHECK_VALUE
+  |CKA_
   (* and much more *)
 
 (*
@@ -219,6 +238,19 @@ let _ck_attribute_get_type: _CK_ATTRIBUTE_TYPE -> Tot Type0 = function
   |CKA_LOCAL -> bool
   |CKA_KEY_GEN_MECHANISM -> _CK_MECHANISM_TYPE
   |CKA_ALLOWED_MECHANISMS -> _CK_MECHANISM_TYPE
+  |CKA_SUBJECT -> uint32_t 
+  |CKA_ENCRYPT -> bool 
+  |CKA_DECRYPT -> bool
+  |CKA_VERIFY -> bool
+  |CKA_VERIFY_RECOVER -> bool
+  |CKA_WRAP -> bool
+  |CKA_TRUSTED -> bool
+  |CKA_WRAP_TEMPLATE -> _CK_ATTRIBUTE_TYPE
+  |CKA_PUBLIC_KEY_INFO -> uint32_t
+  |CKA_SENSITIVE -> bool
+  |CKA_DECRYPT -> bool
+  |CKA_SIGN -> bool
+  |CKA_SIGN_RECOVER -> bool
   |_ -> _CK_ULONG
   
 
@@ -265,8 +297,6 @@ type _CK_ATTRIBUTE  =
 
 type _object = 
   |O: 
-    identifier: _CK_ULONG -> 
-    dat: seq FStar.UInt8.t -> 
     attrs: seq _CK_ATTRIBUTE 
       (* Common attributes for all the classes*)
       {Some? (find_l (fun x -> x.aType = CKA_CLASS) attrs)}  -> 
@@ -281,23 +311,6 @@ let getObjectAttributeClass obj =
   let attributeClass = find_l (fun x -> x.aType = CKA_CLASS) obj.attrs in 
   match attributeClass with 
   Some a -> a
-
-
-(* The method takes an object and returns whether it supports signing *)
-(* I will try to look whether I could give the same interface for different object,
-i.e. for mechanisms, keys, etc*)
-val getObjectAttributeSign: obj: _object -> Tot (r: option _CK_ATTRIBUTE
-  {
-  Some? r ==> 
-    (
-      let a = (match r with Some a -> a) in 
-      a.aType == CKA_SIGN 
-    )
-  }
-)
-
-let getObjectAttributeSign obj = 
-  find_l (fun x -> x.aType = CKA_SIGN) obj.attrs
 
 
 (* The method takes an object and returns whether it supports signing *)
@@ -340,7 +353,7 @@ type storage =
 
 
 (* Key is an object such that the object has an attribute class such that the attribute value is OTP_KEY, PRIVATE KEY, PUBLIC KEY, or SECRET KEY *)
-type key = 
+type key_object = 
   |Key: o: storage{
     Some? (find_l (fun x -> x.aType = CKA_KEY_TYPE) o.o.attrs) /\
     Some? (find_l (fun x -> x.aType = CKA_ID) o.o.attrs) /\
@@ -348,13 +361,16 @@ type key =
     Some? (find_l (fun x -> x.aType = CKA_DERIVED) o.o.attrs) /\
     Some? (find_l (fun x -> x.aType = CKA_LOCAL) o.o.attrs) /\
     Some? (find_l (fun x -> x.aType = CKA_KEY_GEN_MECHANISM) o.o.attrs) /\
-    Some? (find_l (fun x -> x.aType = CKA_ALLOWED_MECHANISMS) o.o.attrs) /\
-    (
-      let attrClass = getObjectAttributeClass o.o in 
-      let value = Seq.index attrClass.pValue 0 in 
-	value = CKO_OTP_KEY || value = CKO_PRIVATE_KEY  || value = CKO_PUBLIC_KEY || value = CKO_SECRET_KEY
-    )
-  } -> key
+    Some? (find_l (fun x -> x.aType = CKA_ALLOWED_MECHANISMS) o.o.attrs) 
+  } -> key_object
+
+
+type _CKO_PUBLIC_KEY = 
+  |PK: o: key_object
+    {
+      Some? (find_l (fun x -> x.aType = CKA_SUBJECT) o.o.attrs) /\
+      Some? (find_l (fun x -> x.aType = CKA_ENCRYPT) o.o.attrs) /\
+
 
 
 type temporalStorage = 
