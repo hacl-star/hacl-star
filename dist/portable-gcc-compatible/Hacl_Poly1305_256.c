@@ -26,7 +26,7 @@
 
 /* SNIPPET_START: Hacl_Impl_Poly1305_Field32xN_256_load_acc4 */
 
-inline void
+void
 Hacl_Impl_Poly1305_Field32xN_256_load_acc4(Lib_IntVector_Intrinsics_vec256 *acc, uint8_t *b)
 {
   Lib_IntVector_Intrinsics_vec256 e[5U];
@@ -134,7 +134,7 @@ Hacl_Impl_Poly1305_Field32xN_256_load_acc4(Lib_IntVector_Intrinsics_vec256 *acc,
 
 /* SNIPPET_START: Hacl_Impl_Poly1305_Field32xN_256_fmul_r4_normalize */
 
-inline void
+void
 Hacl_Impl_Poly1305_Field32xN_256_fmul_r4_normalize(
   Lib_IntVector_Intrinsics_vec256 *out,
   Lib_IntVector_Intrinsics_vec256 *p
