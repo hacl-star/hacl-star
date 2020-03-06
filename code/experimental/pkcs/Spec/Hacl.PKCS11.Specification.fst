@@ -342,35 +342,46 @@ let getObjectAttributeLocal obj =
 
 
 type storage = 
-  |Storage: o: _object {
-    Some? (find_l (fun x -> x.aType = CKA_TOKEN) o.attrs) /\
-    Some? (find_l (fun x -> x.aType = CKA_PRIVATE) o.attrs) /\
-    Some? (find_l (fun x -> x.aType = CKA_MODIFIABLE) o.attrs) /\
-    Some? (find_l (fun x -> x.aType = CKA_LABEL) o.attrs) /\
-    Some? (find_l (fun x -> x.aType = CKA_COPYABLE) o.attrs) /\
-    Some? (find_l (fun x -> x.aType = CKA_DESTROYABLE) o.attrs)
+  |Storage: sto: _object {
+    Some? (find_l (fun x -> x.aType = CKA_TOKEN) sto.attrs) /\
+    Some? (find_l (fun x -> x.aType = CKA_PRIVATE) sto.attrs) /\
+    Some? (find_l (fun x -> x.aType = CKA_MODIFIABLE) sto.attrs) /\
+    Some? (find_l (fun x -> x.aType = CKA_LABEL) sto.attrs) /\
+    Some? (find_l (fun x -> x.aType = CKA_COPYABLE) sto.attrs) /\
+    Some? (find_l (fun x -> x.aType = CKA_DESTROYABLE) sto.attrs)
   } -> storage
 
 
 (* Key is an object such that the object has an attribute class such that the attribute value is OTP_KEY, PRIVATE KEY, PUBLIC KEY, or SECRET KEY *)
 type key_object = 
-  |Key: o: storage{
-    Some? (find_l (fun x -> x.aType = CKA_KEY_TYPE) o.o.attrs) /\
-    Some? (find_l (fun x -> x.aType = CKA_ID) o.o.attrs) /\
-    Some? (find_l (fun x -> x.aType = CKA_END_DATE) o.o.attrs) /\
-    Some? (find_l (fun x -> x.aType = CKA_DERIVED) o.o.attrs) /\
-    Some? (find_l (fun x -> x.aType = CKA_LOCAL) o.o.attrs) /\
-    Some? (find_l (fun x -> x.aType = CKA_KEY_GEN_MECHANISM) o.o.attrs) /\
-    Some? (find_l (fun x -> x.aType = CKA_ALLOWED_MECHANISMS) o.o.attrs) 
+  |Key: ko: storage{
+    (
+      let attrs = ko.sto.attrs in 
+      Some? (find_l (fun x -> x.aType = CKA_KEY_TYPE) attrs) /\
+      Some? (find_l (fun x -> x.aType = CKA_ID) attrs) /\
+      Some? (find_l (fun x -> x.aType = CKA_END_DATE) attrs) /\
+      Some? (find_l (fun x -> x.aType = CKA_DERIVED) attrs) /\
+      Some? (find_l (fun x -> x.aType = CKA_LOCAL) attrs) /\
+      Some? (find_l (fun x -> x.aType = CKA_KEY_GEN_MECHANISM) attrs) /\
+      Some? (find_l (fun x -> x.aType = CKA_ALLOWED_MECHANISMS) attrs) 
+    )
   } -> key_object
 
 
 type _CKO_PUBLIC_KEY = 
-  |PK: o: key_object
-    {
-      Some? (find_l (fun x -> x.aType = CKA_SUBJECT) o.o.attrs) /\
-      Some? (find_l (fun x -> x.aType = CKA_ENCRYPT) o.o.attrs) /\
-
+  |PK: pko: key_object {
+      (
+	let attrs = pko.ko.sto.attrs in 
+	Some? (find_l (fun x -> x.aType = CKA_SUBJECT) attrs) /\
+	Some? (find_l (fun x -> x.aType = CKA_ENCRYPT) attrs) /\
+	Some? (find_l (fun x -> x.aType = CKA_VERIFY) attrs) /\
+	Some? (find_l (fun x -> x.aType = CKA_VERIFY_RECOVER) attrs) /\
+	Some? (find_l (fun x -> x.aType = CKA_WRAP) attrs) /\
+	Some? (find_l (fun x -> x.aType = CKA_TRUSTED) attrs) /\
+	Some? (find_l (fun x -> x.aType = CKA_WRAP_TEMPLATE) attrs) /\
+	Some? (find_l (fun x -> x.aType = CKA_PUBLIC_KEY_INFO) attrs)
+      )
+    } -> _CKO_PUBLIC_KEY
 
 
 type temporalStorage = 
