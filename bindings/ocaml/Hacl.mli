@@ -70,3 +70,8 @@ end
 
 module Blake2b_32 : Blake2b
 module Blake2b_256 : Blake2b
+
+module ECDSA : sig
+  val sign : Bytes.t -> Bytes.t -> Bytes.t -> Bytes.t -> bool
+  val verify : Bytes.t -> Bytes.t -> Bytes.t -> bool
+end

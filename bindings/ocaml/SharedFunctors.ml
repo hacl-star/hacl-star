@@ -37,7 +37,7 @@ module Make_EdDSA_generic (C: Buffer)
     (Impl : sig
   val secret_to_public : C.buf -> C.buf -> unit
   val sign : C.buf -> C.buf -> uint32 -> C.buf -> unit
-  val verify : C.buf ->uint32 -> C.buf -> C.buf -> bool
+  val verify : C.buf -> uint32 -> C.buf -> C.buf -> bool
   val expand_keys : C.buf -> C.buf -> unit
   val sign_expanded : C.buf -> C.buf -> uint32 -> C.buf -> unit
   end)

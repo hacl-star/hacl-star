@@ -22,6 +22,7 @@ module Hacl_HKDF = Hacl_HKDF_bindings.Bindings(Hacl_HKDF_stubs)
 module Hacl_NaCl = Hacl_NaCl_bindings.Bindings(Hacl_NaCl_stubs)
 module Hacl_Blake2b_32 = Hacl_Blake2b_32_bindings.Bindings(Hacl_Blake2b_32_stubs)
 module Hacl_Blake2b_256 = Hacl_Blake2b_256_bindings.Bindings(Hacl_Blake2b_256_stubs)
+module Hacl_ECDSA = Hacl_ECDSA_bindings.Bindings(Hacl_ECDSA_stubs)
 
 module RandomBuffer = struct
   let randombytes buf = Lib_RandomBuffer_System.randombytes (ctypes_buf buf) (size_uint32 buf)
@@ -226,3 +227,22 @@ module Blake2b_256 : Blake2b =
   Make_Blake2b (struct
     let blake2b = Hacl_Blake2b_256.hacl_Blake2b_256_blake2b
   end)
+
+module ECDSA = struct
+  let get_result r =
+    if r = UInt64.zero then
+      true
+    else
+    if r = UInt64.max_int then
+      false
+    else
+      failwith "Unknown return value"
+  let sign signature priv msg k =
+    assert (Bytes.length signature = 64);
+    get_result @@ Hacl_ECDSA.hacl_Impl_ECDSA_ecdsa_p256_sha2_sign (ctypes_buf signature) (size_uint32 msg) (ctypes_buf msg) (ctypes_buf priv) (ctypes_buf k)
+  let verify pub msg signature =
+    assert (Bytes.length signature = 64);
+    let r, s = Bytes.sub signature 0 32, Bytes.sub signature 32 32 in
+    Hacl_ECDSA.hacl_Impl_ECDSA_ecdsa_p256_sha2_verify (size_uint32 msg) (ctypes_buf msg) (ctypes_buf pub) (ctypes_buf r) (ctypes_buf s)
+end
+
