@@ -1247,14 +1247,14 @@ val _CKS_GenerateKey: d: device ->
 	let handler : nat = (match handler with Inl a -> a) in 
 	Seq.length resultDevice.keys = Seq.length d.keys + 1 /\
 	Seq.length resultDevice.subSessions = Seq.length d.subSessions /\
-	handler = Seq.length resultDevice.keys -1 /\ handler < pow2 32 - 1 /\
+	handler = Seq.length resultDevice.keys -1 /\
 	(
 	  let newCreatedKey = Seq.index resultDevice.keys handler in 
-	  let attributeLocal = getObjectAttributeLocal newCreatedKey.o in 
-	  let attributeClass = getObjectAttributeClass newCreatedKey.o in 
-	  Some? attributeLocal /\ 
-	  index (match attributeLocal with Some a -> a).pValue 0 == true /\
-	  index attributeClass.pValue 0 == CKO_SECRET_KEY
+	  isKeySecretKey newCreatedKey /\
+	  (
+	    let attributeLocal = getObjectAttributeLocal newCreatedKey.ko.sto  in 
+	    index (match attributeLocal with Some a -> a).pValue 0 == true
+	  )
 	) /\
 	modifiesKeysM d resultDevice handler 
       }
