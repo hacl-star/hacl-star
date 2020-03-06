@@ -294,12 +294,14 @@ type _CK_ATTRIBUTE  =
     } 
     -> _CK_ATTRIBUTE
 
+assume val attrributesConsistent: attrs: seq _CK_ATTRIBUTE -> Tot bool
+
 
 type _object = 
   |O: 
     attrs: seq _CK_ATTRIBUTE 
       (* Common attributes for all the classes*)
-      {Some? (find_l (fun x -> x.aType = CKA_CLASS) attrs)}  -> 
+      {Some? (find_l (fun x -> x.aType = CKA_CLASS) attrs) /\ attrributesConsistent attrs}  -> 
     _object
 
 
@@ -441,9 +443,30 @@ type _CKO_SECRET_KEY =
   } -> _CKO_SECRET_KEY
 
 
-
 type temporalStorage = 
   |Element: seq FStar.UInt8.t -> temporalStorage
+
+
+val isKeySecretKey: k: key_object -> Tot bool
+
+let isKeySecretKey k = 
+  let attrs = k.ko.sto.attrs in 
+  Some? (find_l (fun x -> x.aType = CKA_SENSITIVE) attrs) &&
+  Some? (find_l (fun x -> x.aType = CKA_ENCRYPT) attrs) &&
+  Some? (find_l (fun x -> x.aType = CKA_DECRYPT) attrs) &&
+  Some? (find_l (fun x -> x.aType = CKA_SIGN) attrs) &&
+  Some? (find_l (fun x -> x.aType = CKA_VERIFY) attrs) &&
+  Some? (find_l (fun x -> x.aType = CKA_WRAP) attrs) &&
+  Some? (find_l (fun x -> x.aType = CKA_UNWRAP) attrs) &&
+  Some? (find_l (fun x -> x.aType = CKA_EXTRACTABLE) attrs) &&
+  Some? (find_l (fun x -> x.aType = CKA_ALWAYS_SENSITIVE) attrs) &&
+  Some? (find_l (fun x -> x.aType = CKA_NEVER_EXTRACTABLE) attrs) &&
+  index (getObjectAttributeClass k.ko.sto).pValue 0  = CKO_SECRET_KEY
+    
+
+val castKeyToSecretKey: k: key_object {isKeySecretKey k} -> Tot _CKO_SECRET_KEY
+
+let castKeyToSecretKey k = SK k
 
 
 (*/* CK_MECHANISM is a structure that specifies a particular
@@ -769,8 +792,8 @@ assume val keyGeneration: mechanismID: _CK_MECHANISM ->
 (* compares two sessions -> The sessions are equal iff the elements are equal. 
 Important, if the list of the key got changed, you can still assess whether the sessions are equal, i.e. it is NOT dependent on the keys, mechanisms, supportedMechanisms etc. At the same time, you can't update a session if the key is not in the key list anymore
 *)
-val sessionEqual: #ks: seq keyEntity -> #ms: seq _CK_MECHANISM -> #supM: seq _CKS_MECHANISM_INFO -> 
-  #ks1: seq keyEntity -> #ms1 : seq _CK_MECHANISM -> #supM1: seq _CKS_MECHANISM_INFO -> 
+val sessionEqual: #ks: seq key_object -> #ms: seq _CK_MECHANISM -> #supM: seq _CKS_MECHANISM_INFO -> 
+  #ks1: seq key_object -> #ms1 : seq _CK_MECHANISM -> #supM1: seq _CKS_MECHANISM_INFO -> 
   s: subSession ks ms supM -> s1 : subSession ks1 ms1 supM1 -> Tot Type0
 
 let sessionEqual #ks #ms #supM  #ks1 #ms1 #supM1 s s1 = 
@@ -793,7 +816,7 @@ let sessionEqual #ks #ms #supM  #ks1 #ms1 #supM1 s s1 =
 
 val updateSession_: d: device -> 
   s: subSession d.keys d.mechanisms d.supportedMechanisms ->
-  ks: seq keyEntity {Seq.length ks >= Seq.length d.keys /\
+  ks: seq key_object {Seq.length ks >= Seq.length d.keys /\
     (
       let keyReferenceUsedForOperation = subSessionGetKeyHandler s in 
       let keyUsedForOperation = index d.keys keyReferenceUsedForOperation in 
@@ -811,11 +834,11 @@ let updateSession_ d s ks ms supM =
   | Signature a b c d e -> 
     let (a: subSession ks ms supM) = Signature a b c d e in a
   | Verify a b c d e -> 
-    let (a: subSession ks ms supM) = Verify a b c d e in a		
+    let (a: subSession ks ms supM) = Verify a b c d e in a	
 
 
 (* This method takes all the sessions and updates key set for them *)
-val _updateSession: d: device ->  ks: seq keyEntity -> 
+val _updateSession: d: device ->  ks: seq key_object -> 
   ms: seq _CK_MECHANISM{ms == d.mechanisms} -> 
   supM: seq _CKS_MECHANISM_INFO {supM == d.supportedMechanisms} -> 
   sessions: seq (subSession d.keys d.mechanisms d.supportedMechanisms)
@@ -857,7 +880,7 @@ let rec _updateSession d ks ms supM sessions counter alreadySeq =
     _updateSession d ks ms supM sessions (counter + 1) updatedSeq	
 
 
-val updateSession: d: device -> ks: seq keyEntity -> 
+val updateSession: d: device -> ks: seq key_object -> 
   ms: seq _CK_MECHANISM{ms == d.mechanisms} -> 
   supM: seq _CKS_MECHANISM_INFO {supM == d.supportedMechanisms} -> 
   sessions: seq (subSession d.keys d.mechanisms d.supportedMechanisms)
@@ -976,7 +999,7 @@ let modifiesSessionsE dBefore dAfter i =
 
 NB: the key is added to the end of the list
 *)
-val deviceUpdateKey: d: device {Seq.length d.keys < pow2 32 - 1} -> newKey: keyEntity ->
+val deviceUpdateKey: d: device {Seq.length d.keys < pow2 32 - 1} -> newKey: key_object ->
   Tot (resultDevice: device
     {
       Seq.length resultDevice.keys = Seq.length d.keys + 1 /\
@@ -1007,9 +1030,9 @@ let deviceUpdateKey d newKey =
 
 (* I left the atomic delete, i.e. not to be able to delete several things at the same time *)
 
-val deviceRemoveSession: #ks: seq keyEntity -> #ms: seq _CK_MECHANISM -> #supM: seq _CKS_MECHANISM_INFO -> 
+val deviceRemoveSession: #ks: seq key_object -> #ms: seq _CK_MECHANISM -> #supM: seq _CKS_MECHANISM_INFO -> 
   hSession : _CK_SESSION_HANDLE -> 
-  f: (#ks: seq keyEntity -> #ms: seq _CK_MECHANISM -> #supM: seq _CKS_MECHANISM_INFO ->  subSession ks ms supM -> bool) -> 
+  f: (#ks: seq key_object -> #ms: seq _CK_MECHANISM -> #supM: seq _CKS_MECHANISM_INFO ->  subSession ks ms supM -> bool) -> 
   d: device{count f d.subSessions = 1} ->
   Tot (resultDevice: device
     {
@@ -1035,10 +1058,10 @@ let deviceRemoveSession #ks #ms #supM hSession f d =
 
 (* This method takes a session satisfying the function f and change its status to updated, for both, signature and verification subsessions *)
 
-val deviceUpdateSessionChangeStatusToUpdated: #ks : seq keyEntity -> #ms : seq _CK_MECHANISM -> #supM: seq _CKS_MECHANISM_INFO -> 
-  f: (#ks: seq keyEntity -> #ms: seq _CK_MECHANISM -> #supM : seq _CKS_MECHANISM_INFO -> subSession ks ms supM -> bool)
+val deviceUpdateSessionChangeStatusToUpdated: #ks : seq key_object -> #ms : seq _CK_MECHANISM -> #supM: seq _CKS_MECHANISM_INFO -> 
+  f: (#ks: seq key_object -> #ms: seq _CK_MECHANISM -> #supM : seq _CKS_MECHANISM_INFO -> subSession ks ms supM -> bool)
     {
-      forall (ks1:seq keyEntity) (ms1: seq _CK_MECHANISM) (ks2: seq keyEntity) (ms2: seq _CK_MECHANISM) (supM1: seq _CKS_MECHANISM_INFO) (supM2: seq _CKS_MECHANISM_INFO) (s: subSession ks1 ms1 supM1) (s2: subSession ks2 ms2 supM2). (Signature? s == Signature? s2 \/ Verify? s == Verify? s2) /\ subSessionGetID s == subSessionGetID s2 ==> f s == f s2
+      forall (ks1:seq key_object) (ms1: seq _CK_MECHANISM) (ks2: seq key_object) (ms2: seq _CK_MECHANISM) (supM1: seq _CKS_MECHANISM_INFO) (supM2: seq _CKS_MECHANISM_INFO) (s: subSession ks1 ms1 supM1) (s2: subSession ks2 ms2 supM2). (Signature? s == Signature? s2 \/ Verify? s == Verify? s2) /\ subSessionGetID s == subSessionGetID s2 ==> f s == f s2
     } ->
   d: device {count (f #d.keys) d.subSessions = 1}  -> 
   Tot (resultDevice: device
@@ -1095,10 +1118,10 @@ let deviceUpdateSessionChangeStatusToUpdated #ks #ms #supM f d =
   newDevice
 
 
-val deviceUpdateSessionChangeStorage: #ks : seq keyEntity -> #ms : seq _CK_MECHANISM -> #supM: seq _CKS_MECHANISM_INFO -> 
-  f: (#ks: seq keyEntity -> #ms: seq _CK_MECHANISM -> #supM : seq _CKS_MECHANISM_INFO -> subSession ks ms supM -> bool)
+val deviceUpdateSessionChangeStorage: #ks : seq key_object -> #ms : seq _CK_MECHANISM -> #supM: seq _CKS_MECHANISM_INFO -> 
+  f: (#ks: seq key_object -> #ms: seq _CK_MECHANISM -> #supM : seq _CKS_MECHANISM_INFO -> subSession ks ms supM -> bool)
     {
-      forall (ks1:seq keyEntity) (ms1: seq _CK_MECHANISM) (ks2: seq keyEntity) (ms2: seq _CK_MECHANISM) (supM1: seq _CKS_MECHANISM_INFO) (supM2: seq _CKS_MECHANISM_INFO) (s: subSession ks1 ms1 supM1) (s2: subSession ks2 ms2 supM2). (Signature? s == Signature? s2 \/ Verify? s == Verify? s2) /\ subSessionGetID s == subSessionGetID s2 ==> f s == f s2
+      forall (ks1:seq key_object) (ms1: seq _CK_MECHANISM) (ks2: seq key_object) (ms2: seq _CK_MECHANISM) (supM1: seq _CKS_MECHANISM_INFO) (supM2: seq _CKS_MECHANISM_INFO) (s: subSession ks1 ms1 supM1) (s2: subSession ks2 ms2 supM2). (Signature? s == Signature? s2 \/ Verify? s == Verify? s2) /\ subSessionGetID s == subSessionGetID s2 ==> f s == f s2
     } -> 
   d: device {count (f #d.keys #d.mechanisms) d.subSessions = 1}  -> 
   storage : temporalStorage ->
@@ -1144,8 +1167,8 @@ let deviceUpdateSessionChangeStorage #ks #ms #supM f d storage =
     newDevice
 
 
-assume val lemma_count: #ks: seq keyEntity -> #ms: seq _CK_MECHANISM -> #supM: seq _CKS_MECHANISM_INFO -> 
-  #ks1 : seq keyEntity -> #ms1 : seq _CK_MECHANISM -> #supM1: seq _CKS_MECHANISM_INFO -> 
+assume val lemma_count: #ks: seq key_object -> #ms: seq _CK_MECHANISM -> #supM: seq _CKS_MECHANISM_INFO -> 
+  #ks1 : seq key_object -> #ms1 : seq _CK_MECHANISM -> #supM1: seq _CKS_MECHANISM_INFO -> 
   s: seq (subSession ks ms supM) -> s1: seq (subSession ks1 ms1 supM1)
     {Seq.length s = Seq.length s1} -> 
   f: (subSession ks ms supM -> bool) -> f1: (subSession ks1 ms1 supM1 -> bool) -> 
@@ -1154,7 +1177,7 @@ assume val lemma_count: #ks: seq keyEntity -> #ms: seq _CK_MECHANISM -> #supM: s
     (ensures (count f s = count f1 s1))
 
 
-val deviceAddSession: f: (#ks: seq keyEntity -> #ms: seq _CK_MECHANISM -> #supM: seq _CKS_MECHANISM_INFO -> subSession ks ms supM -> bool) -> 
+val deviceAddSession: f: (#ks: seq key_object -> #ms: seq _CK_MECHANISM -> #supM: seq _CKS_MECHANISM_INFO -> subSession ks ms supM -> bool) -> 
   d: device{count f d.subSessions = 0} -> 
   sessionToAdd: subSession d.keys d.mechanisms d.supportedMechanisms {f sessionToAdd = true} -> 
   Tot (resultDevice: device
