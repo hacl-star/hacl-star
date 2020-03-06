@@ -24,8 +24,7 @@
 
 #include "Hacl_Poly1305_128.h"
 
-inline void
-Hacl_Impl_Poly1305_Field32xN_128_load_acc2(Lib_IntVector_Intrinsics_vec128 *acc, u8 *b)
+void Hacl_Impl_Poly1305_Field32xN_128_load_acc2(Lib_IntVector_Intrinsics_vec128 *acc, u8 *b)
 {
   Lib_IntVector_Intrinsics_vec128 e[5U];
   {
@@ -136,7 +135,7 @@ Hacl_Impl_Poly1305_Field32xN_128_load_acc2(Lib_IntVector_Intrinsics_vec128 *acc,
   }
 }
 
-inline void
+void
 Hacl_Impl_Poly1305_Field32xN_128_fmul_r2_normalize(
   Lib_IntVector_Intrinsics_vec128 *out,
   Lib_IntVector_Intrinsics_vec128 *p

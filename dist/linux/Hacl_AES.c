@@ -24,7 +24,7 @@
 
 #include "Hacl_AES.h"
 
-static uint8_t Crypto_Symmetric_AES_multiply(uint8_t a, uint8_t b)
+static uint8_t multiply(uint8_t a, uint8_t b)
 {
   return
     a
@@ -1314,7 +1314,7 @@ void Crypto_Symmetric_AES_mk_inv_sbox(uint8_t *sbox)
 #pragma optimize("s", on)
 #endif
 
-static uint8_t Crypto_Symmetric_AES_access(uint8_t *sbox, uint8_t i)
+static uint8_t access(uint8_t *sbox, uint8_t i)
 {
   return sbox[(uint32_t)i];
 }
@@ -1323,23 +1323,23 @@ static uint8_t Crypto_Symmetric_AES_access(uint8_t *sbox, uint8_t i)
 #pragma optimize("", on)
 #endif
 
-static void Crypto_Symmetric_AES_subBytes_aux_sbox(uint8_t *state, uint8_t *sbox, uint32_t ctr)
+static void subBytes_aux_sbox(uint8_t *state, uint8_t *sbox, uint32_t ctr)
 {
   if (ctr != (uint32_t)16U)
   {
     uint8_t si = state[ctr];
-    uint8_t si_ = Crypto_Symmetric_AES_access(sbox, si);
+    uint8_t si_ = access(sbox, si);
     state[ctr] = si_;
-    Crypto_Symmetric_AES_subBytes_aux_sbox(state, sbox, ctr + (uint32_t)1U);
+    subBytes_aux_sbox(state, sbox, ctr + (uint32_t)1U);
   }
 }
 
-static void Crypto_Symmetric_AES_subBytes_sbox(uint8_t *state, uint8_t *sbox)
+static void subBytes_sbox(uint8_t *state, uint8_t *sbox)
 {
-  Crypto_Symmetric_AES_subBytes_aux_sbox(state, sbox, (uint32_t)0U);
+  subBytes_aux_sbox(state, sbox, (uint32_t)0U);
 }
 
-static void Crypto_Symmetric_AES_shiftRows(uint8_t *state)
+static void shiftRows(uint8_t *state)
 {
   uint32_t i = (uint32_t)1U;
   uint8_t tmp = state[i];
@@ -1362,41 +1362,28 @@ static void Crypto_Symmetric_AES_shiftRows(uint8_t *state)
   state[i2 + (uint32_t)4U] = tmp3;
 }
 
-static void Crypto_Symmetric_AES_mixColumns_(uint8_t *state, uint32_t c)
+static void mixColumns_(uint8_t *state, uint32_t c)
 {
   uint8_t *s = state + (uint32_t)4U * c;
   uint8_t s0 = s[0U];
   uint8_t s1 = s[1U];
   uint8_t s2 = s[2U];
   uint8_t s3 = s[3U];
-  s[0U] =
-    Crypto_Symmetric_AES_multiply((uint8_t)0x2U,
-      s0)
-    ^ (Crypto_Symmetric_AES_multiply((uint8_t)0x3U, s1) ^ (s2 ^ s3));
-  s[1U] =
-    Crypto_Symmetric_AES_multiply((uint8_t)0x2U,
-      s1)
-    ^ (Crypto_Symmetric_AES_multiply((uint8_t)0x3U, s2) ^ (s3 ^ s0));
-  s[2U] =
-    Crypto_Symmetric_AES_multiply((uint8_t)0x2U,
-      s2)
-    ^ (Crypto_Symmetric_AES_multiply((uint8_t)0x3U, s3) ^ (s0 ^ s1));
-  s[3U] =
-    Crypto_Symmetric_AES_multiply((uint8_t)0x2U,
-      s3)
-    ^ (Crypto_Symmetric_AES_multiply((uint8_t)0x3U, s0) ^ (s1 ^ s2));
+  s[0U] = multiply((uint8_t)0x2U, s0) ^ (multiply((uint8_t)0x3U, s1) ^ (s2 ^ s3));
+  s[1U] = multiply((uint8_t)0x2U, s1) ^ (multiply((uint8_t)0x3U, s2) ^ (s3 ^ s0));
+  s[2U] = multiply((uint8_t)0x2U, s2) ^ (multiply((uint8_t)0x3U, s3) ^ (s0 ^ s1));
+  s[3U] = multiply((uint8_t)0x2U, s3) ^ (multiply((uint8_t)0x3U, s0) ^ (s1 ^ s2));
 }
 
-static void Crypto_Symmetric_AES_mixColumns(uint8_t *state)
+static void mixColumns(uint8_t *state)
 {
-  Crypto_Symmetric_AES_mixColumns_(state, (uint32_t)0U);
-  Crypto_Symmetric_AES_mixColumns_(state, (uint32_t)1U);
-  Crypto_Symmetric_AES_mixColumns_(state, (uint32_t)2U);
-  Crypto_Symmetric_AES_mixColumns_(state, (uint32_t)3U);
+  mixColumns_(state, (uint32_t)0U);
+  mixColumns_(state, (uint32_t)1U);
+  mixColumns_(state, (uint32_t)2U);
+  mixColumns_(state, (uint32_t)3U);
 }
 
-static void
-Crypto_Symmetric_AES_addRoundKey_(uint8_t *state, uint8_t *w, uint32_t round, uint32_t c)
+static void addRoundKey_(uint8_t *state, uint8_t *w, uint32_t round, uint32_t c)
 {
   uint8_t *target = state + (uint32_t)4U * c;
   uint8_t *subkey = w + (uint32_t)16U * round + (uint32_t)4U * c;
@@ -1406,40 +1393,39 @@ Crypto_Symmetric_AES_addRoundKey_(uint8_t *state, uint8_t *w, uint32_t round, ui
   target[3U] = target[3U] ^ subkey[3U];
 }
 
-static void Crypto_Symmetric_AES_addRoundKey(uint8_t *state, uint8_t *w, uint32_t round)
+static void addRoundKey(uint8_t *state, uint8_t *w, uint32_t round)
 {
-  Crypto_Symmetric_AES_addRoundKey_(state, w, round, (uint32_t)0U);
-  Crypto_Symmetric_AES_addRoundKey_(state, w, round, (uint32_t)1U);
-  Crypto_Symmetric_AES_addRoundKey_(state, w, round, (uint32_t)2U);
-  Crypto_Symmetric_AES_addRoundKey_(state, w, round, (uint32_t)3U);
+  addRoundKey_(state, w, round, (uint32_t)0U);
+  addRoundKey_(state, w, round, (uint32_t)1U);
+  addRoundKey_(state, w, round, (uint32_t)2U);
+  addRoundKey_(state, w, round, (uint32_t)3U);
 }
 
-static void
-Crypto_Symmetric_AES_cipher_loop(uint8_t *state, uint8_t *w, uint8_t *sbox, uint32_t round)
+static void cipher_loop(uint8_t *state, uint8_t *w, uint8_t *sbox, uint32_t round)
 {
   if (round != (uint32_t)14U)
   {
-    Crypto_Symmetric_AES_subBytes_sbox(state, sbox);
-    Crypto_Symmetric_AES_shiftRows(state);
-    Crypto_Symmetric_AES_mixColumns(state);
-    Crypto_Symmetric_AES_addRoundKey(state, w, round);
-    Crypto_Symmetric_AES_cipher_loop(state, w, sbox, round + (uint32_t)1U);
+    subBytes_sbox(state, sbox);
+    shiftRows(state);
+    mixColumns(state);
+    addRoundKey(state, w, round);
+    cipher_loop(state, w, sbox, round + (uint32_t)1U);
   }
 }
 
 void Crypto_Symmetric_AES_cipher(uint8_t *out, uint8_t *input, uint8_t *w, uint8_t *sbox)
 {
   uint8_t state[16U] = { 0U };
-  memcpy(state, input, (uint32_t)16U * sizeof input[0U]);
-  Crypto_Symmetric_AES_addRoundKey(state, w, (uint32_t)0U);
-  Crypto_Symmetric_AES_cipher_loop(state, w, sbox, (uint32_t)1U);
-  Crypto_Symmetric_AES_subBytes_sbox(state, sbox);
-  Crypto_Symmetric_AES_shiftRows(state);
-  Crypto_Symmetric_AES_addRoundKey(state, w, (uint32_t)14U);
-  memcpy(out, state, (uint32_t)16U * sizeof state[0U]);
+  memcpy(state, input, (uint32_t)16U * sizeof (input[0U]));
+  addRoundKey(state, w, (uint32_t)0U);
+  cipher_loop(state, w, sbox, (uint32_t)1U);
+  subBytes_sbox(state, sbox);
+  shiftRows(state);
+  addRoundKey(state, w, (uint32_t)14U);
+  memcpy(out, state, (uint32_t)16U * sizeof (state[0U]));
 }
 
-static void Crypto_Symmetric_AES_rotWord(uint8_t *word)
+static void rotWord(uint8_t *word)
 {
   uint8_t w0 = word[0U];
   uint8_t w1 = word[1U];
@@ -1451,15 +1437,15 @@ static void Crypto_Symmetric_AES_rotWord(uint8_t *word)
   word[3U] = w0;
 }
 
-static void Crypto_Symmetric_AES_subWord(uint8_t *word, uint8_t *sbox)
+static void subWord(uint8_t *word, uint8_t *sbox)
 {
-  word[0U] = Crypto_Symmetric_AES_access(sbox, word[0U]);
-  word[1U] = Crypto_Symmetric_AES_access(sbox, word[1U]);
-  word[2U] = Crypto_Symmetric_AES_access(sbox, word[2U]);
-  word[3U] = Crypto_Symmetric_AES_access(sbox, word[3U]);
+  word[0U] = access(sbox, word[0U]);
+  word[1U] = access(sbox, word[1U]);
+  word[2U] = access(sbox, word[2U]);
+  word[3U] = access(sbox, word[3U]);
 }
 
-static uint8_t Crypto_Symmetric_AES_rcon(uint32_t i, uint8_t tmp)
+static uint8_t rcon(uint32_t i, uint8_t tmp)
 {
   if (i == (uint32_t)1U)
   {
@@ -1467,32 +1453,30 @@ static uint8_t Crypto_Symmetric_AES_rcon(uint32_t i, uint8_t tmp)
   }
   else
   {
-    uint8_t tmp1 = Crypto_Symmetric_AES_multiply((uint8_t)0x2U, tmp);
-    return Crypto_Symmetric_AES_rcon(i - (uint32_t)1U, tmp1);
+    uint8_t tmp1 = multiply((uint8_t)0x2U, tmp);
+    return rcon(i - (uint32_t)1U, tmp1);
   }
 }
 
-static void
-Crypto_Symmetric_AES_keyExpansion_aux_0(uint8_t *w, uint8_t *temp, uint8_t *sbox, uint32_t j)
+static void keyExpansion_aux_0(uint8_t *w, uint8_t *temp, uint8_t *sbox, uint32_t j)
 {
-  memcpy(temp, w + (uint32_t)4U * j - (uint32_t)4U, (uint32_t)4U * sizeof w[0U]);
+  memcpy(temp, w + (uint32_t)4U * j - (uint32_t)4U, (uint32_t)4U * sizeof (w[0U]));
   if (j % (uint32_t)8U == (uint32_t)0U)
   {
-    Crypto_Symmetric_AES_rotWord(temp);
-    Crypto_Symmetric_AES_subWord(temp, sbox);
+    rotWord(temp);
+    subWord(temp, sbox);
     uint8_t t0 = temp[0U];
-    uint8_t rc = Crypto_Symmetric_AES_rcon(j / (uint32_t)8U, (uint8_t)1U);
+    uint8_t rc = rcon(j / (uint32_t)8U, (uint8_t)1U);
     uint8_t z = t0 ^ rc;
     temp[0U] = z;
   }
   else if (j % (uint32_t)8U == (uint32_t)4U)
   {
-    Crypto_Symmetric_AES_subWord(temp, sbox);
+    subWord(temp, sbox);
   }
 }
 
-static void
-Crypto_Symmetric_AES_keyExpansion_aux_1(uint8_t *w, uint8_t *temp, uint8_t *sbox, uint32_t j)
+static void keyExpansion_aux_1(uint8_t *w, uint8_t *temp, uint32_t j)
 {
   uint32_t i = (uint32_t)4U * j;
   uint8_t w0 = w[i + (uint32_t)0U - (uint32_t)32U];
@@ -1509,42 +1493,40 @@ Crypto_Symmetric_AES_keyExpansion_aux_1(uint8_t *w, uint8_t *temp, uint8_t *sbox
   w[i + (uint32_t)3U] = t3 ^ w3;
 }
 
-static void
-Crypto_Symmetric_AES_keyExpansion_aux(uint8_t *w, uint8_t *temp, uint8_t *sbox, uint32_t j)
+static void keyExpansion_aux(uint8_t *w, uint8_t *temp, uint8_t *sbox, uint32_t j)
 {
   if (j < (uint32_t)60U)
   {
-    Crypto_Symmetric_AES_keyExpansion_aux_0(w, temp, sbox, j);
-    Crypto_Symmetric_AES_keyExpansion_aux_1(w, temp, sbox, j);
-    Crypto_Symmetric_AES_keyExpansion_aux(w, temp, sbox, j + (uint32_t)1U);
+    keyExpansion_aux_0(w, temp, sbox, j);
+    keyExpansion_aux_1(w, temp, j);
+    keyExpansion_aux(w, temp, sbox, j + (uint32_t)1U);
   }
 }
 
 void Crypto_Symmetric_AES_keyExpansion(uint8_t *key, uint8_t *w, uint8_t *sbox)
 {
   uint8_t temp[4U] = { 0U };
-  memcpy(w, key, (uint32_t)32U * sizeof key[0U]);
-  Crypto_Symmetric_AES_keyExpansion_aux(w, temp, sbox, (uint32_t)8U);
+  memcpy(w, key, (uint32_t)32U * sizeof (key[0U]));
+  keyExpansion_aux(w, temp, sbox, (uint32_t)8U);
 }
 
-static void
-Crypto_Symmetric_AES_invSubBytes_aux_sbox(uint8_t *state, uint8_t *sbox, uint32_t ctr)
+static void invSubBytes_aux_sbox(uint8_t *state, uint8_t *sbox, uint32_t ctr)
 {
   if (!(ctr == (uint32_t)16U))
   {
     uint8_t si = state[ctr];
-    uint8_t si_ = Crypto_Symmetric_AES_access(sbox, si);
+    uint8_t si_ = access(sbox, si);
     state[ctr] = si_;
-    Crypto_Symmetric_AES_invSubBytes_aux_sbox(state, sbox, ctr + (uint32_t)1U);
+    invSubBytes_aux_sbox(state, sbox, ctr + (uint32_t)1U);
   }
 }
 
-static void Crypto_Symmetric_AES_invSubBytes_sbox(uint8_t *state, uint8_t *sbox)
+static void invSubBytes_sbox(uint8_t *state, uint8_t *sbox)
 {
-  Crypto_Symmetric_AES_invSubBytes_aux_sbox(state, sbox, (uint32_t)0U);
+  invSubBytes_aux_sbox(state, sbox, (uint32_t)0U);
 }
 
-static void Crypto_Symmetric_AES_invShiftRows(uint8_t *state)
+static void invShiftRows(uint8_t *state)
 {
   uint32_t i = (uint32_t)3U;
   uint8_t tmp = state[i];
@@ -1567,7 +1549,7 @@ static void Crypto_Symmetric_AES_invShiftRows(uint8_t *state)
   state[i2 + (uint32_t)4U] = tmp3;
 }
 
-static void Crypto_Symmetric_AES_invMixColumns_(uint8_t *state, uint32_t c)
+static void invMixColumns_(uint8_t *state, uint32_t c)
 {
   uint8_t *s = state + (uint32_t)4U * c;
   uint8_t s0 = s[0U];
@@ -1575,81 +1557,56 @@ static void Crypto_Symmetric_AES_invMixColumns_(uint8_t *state, uint32_t c)
   uint8_t s2 = s[2U];
   uint8_t s3 = s[3U];
   s[0U] =
-    Crypto_Symmetric_AES_multiply((uint8_t)0xeU,
+    multiply((uint8_t)0xeU,
       s0)
-    ^
-      (Crypto_Symmetric_AES_multiply((uint8_t)0xbU,
-        s1)
-      ^
-        (Crypto_Symmetric_AES_multiply((uint8_t)0xdU,
-          s2)
-        ^ Crypto_Symmetric_AES_multiply((uint8_t)0x9U, s3)));
+    ^ (multiply((uint8_t)0xbU, s1) ^ (multiply((uint8_t)0xdU, s2) ^ multiply((uint8_t)0x9U, s3)));
   s[1U] =
-    Crypto_Symmetric_AES_multiply((uint8_t)0xeU,
+    multiply((uint8_t)0xeU,
       s1)
-    ^
-      (Crypto_Symmetric_AES_multiply((uint8_t)0xbU,
-        s2)
-      ^
-        (Crypto_Symmetric_AES_multiply((uint8_t)0xdU,
-          s3)
-        ^ Crypto_Symmetric_AES_multiply((uint8_t)0x9U, s0)));
+    ^ (multiply((uint8_t)0xbU, s2) ^ (multiply((uint8_t)0xdU, s3) ^ multiply((uint8_t)0x9U, s0)));
   s[2U] =
-    Crypto_Symmetric_AES_multiply((uint8_t)0xeU,
+    multiply((uint8_t)0xeU,
       s2)
-    ^
-      (Crypto_Symmetric_AES_multiply((uint8_t)0xbU,
-        s3)
-      ^
-        (Crypto_Symmetric_AES_multiply((uint8_t)0xdU,
-          s0)
-        ^ Crypto_Symmetric_AES_multiply((uint8_t)0x9U, s1)));
+    ^ (multiply((uint8_t)0xbU, s3) ^ (multiply((uint8_t)0xdU, s0) ^ multiply((uint8_t)0x9U, s1)));
   s[3U] =
-    Crypto_Symmetric_AES_multiply((uint8_t)0xeU,
+    multiply((uint8_t)0xeU,
       s3)
-    ^
-      (Crypto_Symmetric_AES_multiply((uint8_t)0xbU,
-        s0)
-      ^
-        (Crypto_Symmetric_AES_multiply((uint8_t)0xdU,
-          s1)
-        ^ Crypto_Symmetric_AES_multiply((uint8_t)0x9U, s2)));
+    ^ (multiply((uint8_t)0xbU, s0) ^ (multiply((uint8_t)0xdU, s1) ^ multiply((uint8_t)0x9U, s2)));
 }
 
-static void Crypto_Symmetric_AES_invMixColumns(uint8_t *state)
+static void invMixColumns(uint8_t *state)
 {
-  Crypto_Symmetric_AES_invMixColumns_(state, (uint32_t)0U);
-  Crypto_Symmetric_AES_invMixColumns_(state, (uint32_t)1U);
-  Crypto_Symmetric_AES_invMixColumns_(state, (uint32_t)2U);
-  Crypto_Symmetric_AES_invMixColumns_(state, (uint32_t)3U);
+  invMixColumns_(state, (uint32_t)0U);
+  invMixColumns_(state, (uint32_t)1U);
+  invMixColumns_(state, (uint32_t)2U);
+  invMixColumns_(state, (uint32_t)3U);
 }
 
-static void
-Crypto_Symmetric_AES_inv_cipher_loop(uint8_t *state, uint8_t *w, uint8_t *sbox, uint32_t round)
+static void inv_cipher_loop(uint8_t *state, uint8_t *w, uint8_t *sbox, uint32_t round)
 {
   if (round != (uint32_t)0U)
   {
-    Crypto_Symmetric_AES_invShiftRows(state);
-    Crypto_Symmetric_AES_invSubBytes_sbox(state, sbox);
-    Crypto_Symmetric_AES_addRoundKey(state, w, round);
-    Crypto_Symmetric_AES_invMixColumns(state);
-    Crypto_Symmetric_AES_inv_cipher_loop(state, w, sbox, round - (uint32_t)1U);
+    invShiftRows(state);
+    invSubBytes_sbox(state, sbox);
+    addRoundKey(state, w, round);
+    invMixColumns(state);
+    inv_cipher_loop(state, w, sbox, round - (uint32_t)1U);
   }
 }
 
 void Crypto_Symmetric_AES_inv_cipher(uint8_t *out, uint8_t *input, uint8_t *w, uint8_t *sbox)
 {
   uint8_t state[16U] = { 0U };
-  memcpy(state, input, (uint32_t)16U * sizeof input[0U]);
-  Crypto_Symmetric_AES_addRoundKey(state, w, (uint32_t)14U);
-  Crypto_Symmetric_AES_inv_cipher_loop(state, w, sbox, (uint32_t)13U);
-  Crypto_Symmetric_AES_invShiftRows(state);
-  Crypto_Symmetric_AES_invSubBytes_sbox(state, sbox);
-  Crypto_Symmetric_AES_addRoundKey(state, w, (uint32_t)0U);
-  memcpy(out, state, (uint32_t)16U * sizeof state[0U]);
+  memcpy(state, input, (uint32_t)16U * sizeof (input[0U]));
+  addRoundKey(state, w, (uint32_t)14U);
+  inv_cipher_loop(state, w, sbox, (uint32_t)13U);
+  invShiftRows(state);
+  invSubBytes_sbox(state, sbox);
+  addRoundKey(state, w, (uint32_t)0U);
+  memcpy(out, state, (uint32_t)16U * sizeof (state[0U]));
 }
 
-static uint8_t Crypto_Symmetric_AES128_multiply(uint8_t a, uint8_t b)
+static uint8_t multiply0(uint8_t a, uint8_t b)
 {
   return
     a
@@ -2939,7 +2896,7 @@ void Crypto_Symmetric_AES128_mk_inv_sbox(uint8_t *sbox)
 #pragma optimize("s", on)
 #endif
 
-static uint8_t Crypto_Symmetric_AES128_access(uint8_t *sbox, uint8_t i)
+static uint8_t access0(uint8_t *sbox, uint8_t i)
 {
   return sbox[(uint32_t)i];
 }
@@ -2948,24 +2905,23 @@ static uint8_t Crypto_Symmetric_AES128_access(uint8_t *sbox, uint8_t i)
 #pragma optimize("", on)
 #endif
 
-static void
-Crypto_Symmetric_AES128_subBytes_aux_sbox(uint8_t *state, uint8_t *sbox, uint32_t ctr)
+static void subBytes_aux_sbox0(uint8_t *state, uint8_t *sbox, uint32_t ctr)
 {
   if (ctr != (uint32_t)16U)
   {
     uint8_t si = state[ctr];
-    uint8_t si_ = Crypto_Symmetric_AES128_access(sbox, si);
+    uint8_t si_ = access0(sbox, si);
     state[ctr] = si_;
-    Crypto_Symmetric_AES128_subBytes_aux_sbox(state, sbox, ctr + (uint32_t)1U);
+    subBytes_aux_sbox0(state, sbox, ctr + (uint32_t)1U);
   }
 }
 
-static void Crypto_Symmetric_AES128_subBytes_sbox(uint8_t *state, uint8_t *sbox)
+static void subBytes_sbox0(uint8_t *state, uint8_t *sbox)
 {
-  Crypto_Symmetric_AES128_subBytes_aux_sbox(state, sbox, (uint32_t)0U);
+  subBytes_aux_sbox0(state, sbox, (uint32_t)0U);
 }
 
-static void Crypto_Symmetric_AES128_shiftRows(uint8_t *state)
+static void shiftRows0(uint8_t *state)
 {
   uint32_t i = (uint32_t)1U;
   uint8_t tmp = state[i];
@@ -2988,41 +2944,28 @@ static void Crypto_Symmetric_AES128_shiftRows(uint8_t *state)
   state[i2 + (uint32_t)4U] = tmp3;
 }
 
-static void Crypto_Symmetric_AES128_mixColumns_(uint8_t *state, uint32_t c)
+static void mixColumns_0(uint8_t *state, uint32_t c)
 {
   uint8_t *s = state + (uint32_t)4U * c;
   uint8_t s0 = s[0U];
   uint8_t s1 = s[1U];
   uint8_t s2 = s[2U];
   uint8_t s3 = s[3U];
-  s[0U] =
-    Crypto_Symmetric_AES128_multiply((uint8_t)0x2U,
-      s0)
-    ^ (Crypto_Symmetric_AES128_multiply((uint8_t)0x3U, s1) ^ (s2 ^ s3));
-  s[1U] =
-    Crypto_Symmetric_AES128_multiply((uint8_t)0x2U,
-      s1)
-    ^ (Crypto_Symmetric_AES128_multiply((uint8_t)0x3U, s2) ^ (s3 ^ s0));
-  s[2U] =
-    Crypto_Symmetric_AES128_multiply((uint8_t)0x2U,
-      s2)
-    ^ (Crypto_Symmetric_AES128_multiply((uint8_t)0x3U, s3) ^ (s0 ^ s1));
-  s[3U] =
-    Crypto_Symmetric_AES128_multiply((uint8_t)0x2U,
-      s3)
-    ^ (Crypto_Symmetric_AES128_multiply((uint8_t)0x3U, s0) ^ (s1 ^ s2));
+  s[0U] = multiply0((uint8_t)0x2U, s0) ^ (multiply0((uint8_t)0x3U, s1) ^ (s2 ^ s3));
+  s[1U] = multiply0((uint8_t)0x2U, s1) ^ (multiply0((uint8_t)0x3U, s2) ^ (s3 ^ s0));
+  s[2U] = multiply0((uint8_t)0x2U, s2) ^ (multiply0((uint8_t)0x3U, s3) ^ (s0 ^ s1));
+  s[3U] = multiply0((uint8_t)0x2U, s3) ^ (multiply0((uint8_t)0x3U, s0) ^ (s1 ^ s2));
 }
 
-static void Crypto_Symmetric_AES128_mixColumns(uint8_t *state)
+static void mixColumns0(uint8_t *state)
 {
-  Crypto_Symmetric_AES128_mixColumns_(state, (uint32_t)0U);
-  Crypto_Symmetric_AES128_mixColumns_(state, (uint32_t)1U);
-  Crypto_Symmetric_AES128_mixColumns_(state, (uint32_t)2U);
-  Crypto_Symmetric_AES128_mixColumns_(state, (uint32_t)3U);
+  mixColumns_0(state, (uint32_t)0U);
+  mixColumns_0(state, (uint32_t)1U);
+  mixColumns_0(state, (uint32_t)2U);
+  mixColumns_0(state, (uint32_t)3U);
 }
 
-static void
-Crypto_Symmetric_AES128_addRoundKey_(uint8_t *state, uint8_t *w, uint32_t round, uint32_t c)
+static void addRoundKey_0(uint8_t *state, uint8_t *w, uint32_t round, uint32_t c)
 {
   uint8_t *target = state + (uint32_t)4U * c;
   uint8_t *subkey = w + (uint32_t)16U * round + (uint32_t)4U * c;
@@ -3032,40 +2975,39 @@ Crypto_Symmetric_AES128_addRoundKey_(uint8_t *state, uint8_t *w, uint32_t round,
   target[3U] = target[3U] ^ subkey[3U];
 }
 
-static void Crypto_Symmetric_AES128_addRoundKey(uint8_t *state, uint8_t *w, uint32_t round)
+static void addRoundKey0(uint8_t *state, uint8_t *w, uint32_t round)
 {
-  Crypto_Symmetric_AES128_addRoundKey_(state, w, round, (uint32_t)0U);
-  Crypto_Symmetric_AES128_addRoundKey_(state, w, round, (uint32_t)1U);
-  Crypto_Symmetric_AES128_addRoundKey_(state, w, round, (uint32_t)2U);
-  Crypto_Symmetric_AES128_addRoundKey_(state, w, round, (uint32_t)3U);
+  addRoundKey_0(state, w, round, (uint32_t)0U);
+  addRoundKey_0(state, w, round, (uint32_t)1U);
+  addRoundKey_0(state, w, round, (uint32_t)2U);
+  addRoundKey_0(state, w, round, (uint32_t)3U);
 }
 
-static void
-Crypto_Symmetric_AES128_cipher_loop(uint8_t *state, uint8_t *w, uint8_t *sbox, uint32_t round)
+static void cipher_loop0(uint8_t *state, uint8_t *w, uint8_t *sbox, uint32_t round)
 {
   if (round != (uint32_t)10U)
   {
-    Crypto_Symmetric_AES128_subBytes_sbox(state, sbox);
-    Crypto_Symmetric_AES128_shiftRows(state);
-    Crypto_Symmetric_AES128_mixColumns(state);
-    Crypto_Symmetric_AES128_addRoundKey(state, w, round);
-    Crypto_Symmetric_AES128_cipher_loop(state, w, sbox, round + (uint32_t)1U);
+    subBytes_sbox0(state, sbox);
+    shiftRows0(state);
+    mixColumns0(state);
+    addRoundKey0(state, w, round);
+    cipher_loop0(state, w, sbox, round + (uint32_t)1U);
   }
 }
 
 void Crypto_Symmetric_AES128_cipher(uint8_t *out, uint8_t *input, uint8_t *w, uint8_t *sbox)
 {
   uint8_t state[16U] = { 0U };
-  memcpy(state, input, (uint32_t)16U * sizeof input[0U]);
-  Crypto_Symmetric_AES128_addRoundKey(state, w, (uint32_t)0U);
-  Crypto_Symmetric_AES128_cipher_loop(state, w, sbox, (uint32_t)1U);
-  Crypto_Symmetric_AES128_subBytes_sbox(state, sbox);
-  Crypto_Symmetric_AES128_shiftRows(state);
-  Crypto_Symmetric_AES128_addRoundKey(state, w, (uint32_t)10U);
-  memcpy(out, state, (uint32_t)16U * sizeof state[0U]);
+  memcpy(state, input, (uint32_t)16U * sizeof (input[0U]));
+  addRoundKey0(state, w, (uint32_t)0U);
+  cipher_loop0(state, w, sbox, (uint32_t)1U);
+  subBytes_sbox0(state, sbox);
+  shiftRows0(state);
+  addRoundKey0(state, w, (uint32_t)10U);
+  memcpy(out, state, (uint32_t)16U * sizeof (state[0U]));
 }
 
-static void Crypto_Symmetric_AES128_rotWord(uint8_t *word)
+static void rotWord0(uint8_t *word)
 {
   uint8_t w0 = word[0U];
   uint8_t w1 = word[1U];
@@ -3077,15 +3019,15 @@ static void Crypto_Symmetric_AES128_rotWord(uint8_t *word)
   word[3U] = w0;
 }
 
-static void Crypto_Symmetric_AES128_subWord(uint8_t *word, uint8_t *sbox)
+static void subWord0(uint8_t *word, uint8_t *sbox)
 {
-  word[0U] = Crypto_Symmetric_AES128_access(sbox, word[0U]);
-  word[1U] = Crypto_Symmetric_AES128_access(sbox, word[1U]);
-  word[2U] = Crypto_Symmetric_AES128_access(sbox, word[2U]);
-  word[3U] = Crypto_Symmetric_AES128_access(sbox, word[3U]);
+  word[0U] = access0(sbox, word[0U]);
+  word[1U] = access0(sbox, word[1U]);
+  word[2U] = access0(sbox, word[2U]);
+  word[3U] = access0(sbox, word[3U]);
 }
 
-static uint8_t Crypto_Symmetric_AES128_rcon(uint32_t i, uint8_t tmp)
+static uint8_t rcon0(uint32_t i, uint8_t tmp)
 {
   if (i == (uint32_t)1U)
   {
@@ -3093,42 +3035,30 @@ static uint8_t Crypto_Symmetric_AES128_rcon(uint32_t i, uint8_t tmp)
   }
   else
   {
-    uint8_t tmp1 = Crypto_Symmetric_AES128_multiply((uint8_t)0x2U, tmp);
-    return Crypto_Symmetric_AES128_rcon(i - (uint32_t)1U, tmp1);
+    uint8_t tmp1 = multiply0((uint8_t)0x2U, tmp);
+    return rcon0(i - (uint32_t)1U, tmp1);
   }
 }
 
-static void
-Crypto_Symmetric_AES128_keyExpansion_aux_0(
-  uint8_t *w,
-  uint8_t *temp,
-  uint8_t *sbox,
-  uint32_t j
-)
+static void keyExpansion_aux_00(uint8_t *w, uint8_t *temp, uint8_t *sbox, uint32_t j)
 {
-  memcpy(temp, w + (uint32_t)4U * j - (uint32_t)4U, (uint32_t)4U * sizeof w[0U]);
+  memcpy(temp, w + (uint32_t)4U * j - (uint32_t)4U, (uint32_t)4U * sizeof (w[0U]));
   if (j % (uint32_t)4U == (uint32_t)0U)
   {
-    Crypto_Symmetric_AES128_rotWord(temp);
-    Crypto_Symmetric_AES128_subWord(temp, sbox);
+    rotWord0(temp);
+    subWord0(temp, sbox);
     uint8_t t0 = temp[0U];
-    uint8_t rc = Crypto_Symmetric_AES128_rcon(j / (uint32_t)4U, (uint8_t)1U);
+    uint8_t rc = rcon0(j / (uint32_t)4U, (uint8_t)1U);
     uint8_t z = t0 ^ rc;
     temp[0U] = z;
   }
   else if (j % (uint32_t)4U == (uint32_t)4U)
   {
-    Crypto_Symmetric_AES128_subWord(temp, sbox);
+    subWord0(temp, sbox);
   }
 }
 
-static void
-Crypto_Symmetric_AES128_keyExpansion_aux_1(
-  uint8_t *w,
-  uint8_t *temp,
-  uint8_t *sbox,
-  uint32_t j
-)
+static void keyExpansion_aux_10(uint8_t *w, uint8_t *temp, uint32_t j)
 {
   uint32_t i = (uint32_t)4U * j;
   uint8_t w0 = w[i + (uint32_t)0U - (uint32_t)16U];
@@ -3145,42 +3075,40 @@ Crypto_Symmetric_AES128_keyExpansion_aux_1(
   w[i + (uint32_t)3U] = t3 ^ w3;
 }
 
-static void
-Crypto_Symmetric_AES128_keyExpansion_aux(uint8_t *w, uint8_t *temp, uint8_t *sbox, uint32_t j)
+static void keyExpansion_aux0(uint8_t *w, uint8_t *temp, uint8_t *sbox, uint32_t j)
 {
   if (j < (uint32_t)44U)
   {
-    Crypto_Symmetric_AES128_keyExpansion_aux_0(w, temp, sbox, j);
-    Crypto_Symmetric_AES128_keyExpansion_aux_1(w, temp, sbox, j);
-    Crypto_Symmetric_AES128_keyExpansion_aux(w, temp, sbox, j + (uint32_t)1U);
+    keyExpansion_aux_00(w, temp, sbox, j);
+    keyExpansion_aux_10(w, temp, j);
+    keyExpansion_aux0(w, temp, sbox, j + (uint32_t)1U);
   }
 }
 
 void Crypto_Symmetric_AES128_keyExpansion(uint8_t *key, uint8_t *w, uint8_t *sbox)
 {
   uint8_t temp[4U] = { 0U };
-  memcpy(w, key, (uint32_t)16U * sizeof key[0U]);
-  Crypto_Symmetric_AES128_keyExpansion_aux(w, temp, sbox, (uint32_t)4U);
+  memcpy(w, key, (uint32_t)16U * sizeof (key[0U]));
+  keyExpansion_aux0(w, temp, sbox, (uint32_t)4U);
 }
 
-static void
-Crypto_Symmetric_AES128_invSubBytes_aux_sbox(uint8_t *state, uint8_t *sbox, uint32_t ctr)
+static void invSubBytes_aux_sbox0(uint8_t *state, uint8_t *sbox, uint32_t ctr)
 {
   if (!(ctr == (uint32_t)16U))
   {
     uint8_t si = state[ctr];
-    uint8_t si_ = Crypto_Symmetric_AES128_access(sbox, si);
+    uint8_t si_ = access0(sbox, si);
     state[ctr] = si_;
-    Crypto_Symmetric_AES128_invSubBytes_aux_sbox(state, sbox, ctr + (uint32_t)1U);
+    invSubBytes_aux_sbox0(state, sbox, ctr + (uint32_t)1U);
   }
 }
 
-static void Crypto_Symmetric_AES128_invSubBytes_sbox(uint8_t *state, uint8_t *sbox)
+static void invSubBytes_sbox0(uint8_t *state, uint8_t *sbox)
 {
-  Crypto_Symmetric_AES128_invSubBytes_aux_sbox(state, sbox, (uint32_t)0U);
+  invSubBytes_aux_sbox0(state, sbox, (uint32_t)0U);
 }
 
-static void Crypto_Symmetric_AES128_invShiftRows(uint8_t *state)
+static void invShiftRows0(uint8_t *state)
 {
   uint32_t i = (uint32_t)3U;
   uint8_t tmp = state[i];
@@ -3203,7 +3131,7 @@ static void Crypto_Symmetric_AES128_invShiftRows(uint8_t *state)
   state[i2 + (uint32_t)4U] = tmp3;
 }
 
-static void Crypto_Symmetric_AES128_invMixColumns_(uint8_t *state, uint32_t c)
+static void invMixColumns_0(uint8_t *state, uint32_t c)
 {
   uint8_t *s = state + (uint32_t)4U * c;
   uint8_t s0 = s[0U];
@@ -3211,70 +3139,44 @@ static void Crypto_Symmetric_AES128_invMixColumns_(uint8_t *state, uint32_t c)
   uint8_t s2 = s[2U];
   uint8_t s3 = s[3U];
   s[0U] =
-    Crypto_Symmetric_AES128_multiply((uint8_t)0xeU,
+    multiply0((uint8_t)0xeU,
       s0)
     ^
-      (Crypto_Symmetric_AES128_multiply((uint8_t)0xbU,
-        s1)
-      ^
-        (Crypto_Symmetric_AES128_multiply((uint8_t)0xdU,
-          s2)
-        ^ Crypto_Symmetric_AES128_multiply((uint8_t)0x9U, s3)));
+      (multiply0((uint8_t)0xbU, s1) ^ (multiply0((uint8_t)0xdU, s2) ^ multiply0((uint8_t)0x9U, s3)));
   s[1U] =
-    Crypto_Symmetric_AES128_multiply((uint8_t)0xeU,
+    multiply0((uint8_t)0xeU,
       s1)
     ^
-      (Crypto_Symmetric_AES128_multiply((uint8_t)0xbU,
-        s2)
-      ^
-        (Crypto_Symmetric_AES128_multiply((uint8_t)0xdU,
-          s3)
-        ^ Crypto_Symmetric_AES128_multiply((uint8_t)0x9U, s0)));
+      (multiply0((uint8_t)0xbU, s2) ^ (multiply0((uint8_t)0xdU, s3) ^ multiply0((uint8_t)0x9U, s0)));
   s[2U] =
-    Crypto_Symmetric_AES128_multiply((uint8_t)0xeU,
+    multiply0((uint8_t)0xeU,
       s2)
     ^
-      (Crypto_Symmetric_AES128_multiply((uint8_t)0xbU,
-        s3)
-      ^
-        (Crypto_Symmetric_AES128_multiply((uint8_t)0xdU,
-          s0)
-        ^ Crypto_Symmetric_AES128_multiply((uint8_t)0x9U, s1)));
+      (multiply0((uint8_t)0xbU, s3) ^ (multiply0((uint8_t)0xdU, s0) ^ multiply0((uint8_t)0x9U, s1)));
   s[3U] =
-    Crypto_Symmetric_AES128_multiply((uint8_t)0xeU,
+    multiply0((uint8_t)0xeU,
       s3)
     ^
-      (Crypto_Symmetric_AES128_multiply((uint8_t)0xbU,
-        s0)
-      ^
-        (Crypto_Symmetric_AES128_multiply((uint8_t)0xdU,
-          s1)
-        ^ Crypto_Symmetric_AES128_multiply((uint8_t)0x9U, s2)));
+      (multiply0((uint8_t)0xbU, s0) ^ (multiply0((uint8_t)0xdU, s1) ^ multiply0((uint8_t)0x9U, s2)));
 }
 
-static void Crypto_Symmetric_AES128_invMixColumns(uint8_t *state)
+static void invMixColumns0(uint8_t *state)
 {
-  Crypto_Symmetric_AES128_invMixColumns_(state, (uint32_t)0U);
-  Crypto_Symmetric_AES128_invMixColumns_(state, (uint32_t)1U);
-  Crypto_Symmetric_AES128_invMixColumns_(state, (uint32_t)2U);
-  Crypto_Symmetric_AES128_invMixColumns_(state, (uint32_t)3U);
+  invMixColumns_0(state, (uint32_t)0U);
+  invMixColumns_0(state, (uint32_t)1U);
+  invMixColumns_0(state, (uint32_t)2U);
+  invMixColumns_0(state, (uint32_t)3U);
 }
 
-static void
-Crypto_Symmetric_AES128_inv_cipher_loop(
-  uint8_t *state,
-  uint8_t *w,
-  uint8_t *sbox,
-  uint32_t round
-)
+static void inv_cipher_loop0(uint8_t *state, uint8_t *w, uint8_t *sbox, uint32_t round)
 {
   if (round != (uint32_t)0U)
   {
-    Crypto_Symmetric_AES128_invShiftRows(state);
-    Crypto_Symmetric_AES128_invSubBytes_sbox(state, sbox);
-    Crypto_Symmetric_AES128_addRoundKey(state, w, round);
-    Crypto_Symmetric_AES128_invMixColumns(state);
-    Crypto_Symmetric_AES128_inv_cipher_loop(state, w, sbox, round - (uint32_t)1U);
+    invShiftRows0(state);
+    invSubBytes_sbox0(state, sbox);
+    addRoundKey0(state, w, round);
+    invMixColumns0(state);
+    inv_cipher_loop0(state, w, sbox, round - (uint32_t)1U);
   }
 }
 
@@ -3282,12 +3184,12 @@ void
 Crypto_Symmetric_AES128_inv_cipher(uint8_t *out, uint8_t *input, uint8_t *w, uint8_t *sbox)
 {
   uint8_t state[16U] = { 0U };
-  memcpy(state, input, (uint32_t)16U * sizeof input[0U]);
-  Crypto_Symmetric_AES128_addRoundKey(state, w, (uint32_t)10U);
-  Crypto_Symmetric_AES128_inv_cipher_loop(state, w, sbox, (uint32_t)9U);
-  Crypto_Symmetric_AES128_invShiftRows(state);
-  Crypto_Symmetric_AES128_invSubBytes_sbox(state, sbox);
-  Crypto_Symmetric_AES128_addRoundKey(state, w, (uint32_t)0U);
-  memcpy(out, state, (uint32_t)16U * sizeof state[0U]);
+  memcpy(state, input, (uint32_t)16U * sizeof (input[0U]));
+  addRoundKey0(state, w, (uint32_t)10U);
+  inv_cipher_loop0(state, w, sbox, (uint32_t)9U);
+  invShiftRows0(state);
+  invSubBytes_sbox0(state, sbox);
+  addRoundKey0(state, w, (uint32_t)0U);
+  memcpy(out, state, (uint32_t)16U * sizeof (state[0U]));
 }
 
