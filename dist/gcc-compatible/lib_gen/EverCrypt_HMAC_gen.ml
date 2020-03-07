@@ -8,3 +8,4 @@ let _ =
    Format.printf "#include \"EverCrypt_HMAC.h\"\n");
   Cstubs.write_c Format.std_formatter ~prefix:""
     (module EverCrypt_HMAC_bindings.Bindings)
+  
