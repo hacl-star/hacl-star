@@ -385,7 +385,7 @@
         "typing_Vale.X64.Machine_Semantics_s.machine_eval_codes"
       ],
       0,
-      "0332e307ae07fc863401166fe85f6230"
+      "e65ea663f0bd2904ce0cd1b7ccd3bb57"
     ],
     [
       "Vale.Transformers.PeepHole.lemma_wrap_instructions",
@@ -494,7 +494,7 @@
         "typing_Vale.X64.Machine_Semantics_s.machine_eval_codes"
       ],
       0,
-      "ace320fa2da04a07a390089e86a05ea6"
+      "2bb42a1d3ec7856714c3a9cdeeddfdfc"
     ],
     [
       "Vale.Transformers.PeepHole.lemma_pull_instructions_from_codes",
@@ -649,7 +649,7 @@
         "typing_Vale.X64.Machine_Semantics_s.machine_eval_codes"
       ],
       0,
-      "63d6e83750954974c35a2b33999111ab"
+      "5a268f575c6ebb11f39cf58adcdbf19e"
     ],
     [
       "Vale.Transformers.PeepHole.lemma_apply_peephole_to_codes",
@@ -661,6 +661,7 @@
         "@fuel_correspondence_Vale.Transformers.PeepHole.apply_peephole_to_codes.fuel_instrumented",
         "@fuel_correspondence_Vale.Transformers.PeepHole.eval_inss.fuel_instrumented",
         "@fuel_correspondence_Vale.Transformers.PeepHole.num_ins_in_codes.fuel_instrumented",
+        "@fuel_correspondence_Vale.Transformers.PeepHole.pull_instructions_from_codes.fuel_instrumented",
         "@fuel_correspondence_Vale.Transformers.PeepHole.wrap_instructions.fuel_instrumented",
         "@fuel_correspondence_Vale.X64.Machine_Semantics_s.machine_eval_code.fuel_instrumented",
         "@fuel_correspondence_Vale.X64.Machine_Semantics_s.machine_eval_codes.fuel_instrumented",
@@ -686,6 +687,7 @@
         "disc_equation_FStar.Pervasives.Native.Some",
         "disc_equation_Prims.Cons", "disc_equation_Prims.Nil",
         "equality_tok_Prims.LexTop@tok", "equation_Prims.nat",
+        "equation_Prims.pos",
         "equation_Vale.Transformers.InstructionReorder.equiv_states",
         "equation_Vale.Transformers.PeepHole.peephole",
         "equation_Vale.Transformers.PeepHole.peephole_correct",
@@ -698,6 +700,7 @@
         "equation_Vale.X64.Machine_Semantics_s.ocmp",
         "equation_with_fuel_Vale.Transformers.PeepHole.apply_peephole_to_codes.fuel_instrumented",
         "equation_with_fuel_Vale.Transformers.PeepHole.num_ins_in_codes.fuel_instrumented",
+        "equation_with_fuel_Vale.Transformers.PeepHole.pull_instructions_from_codes.fuel_instrumented",
         "equation_with_fuel_Vale.X64.Machine_Semantics_s.machine_eval_code.fuel_instrumented",
         "equation_with_fuel_Vale.X64.Machine_Semantics_s.machine_eval_codes.fuel_instrumented",
         "fuel_guarded_inversion_FStar.Pervasives.Native.option",
@@ -712,6 +715,7 @@
         "l_imp-interp", "lemma_FStar.Pervasives.invertOption",
         "primitive_Prims.op_Negation",
         "proj_equation_FStar.Pervasives.Native.Some_v",
+        "proj_equation_Vale.Transformers.PeepHole.Mkpre_peephole_input_hint",
         "proj_equation_Vale.Transformers.PeepHole.Mkpre_peephole_ph",
         "proj_equation_Vale.X64.Machine_Semantics_s.Mkmachine_state_ms_ok",
         "projection_inverse_BoxBool_proj_0",
@@ -729,17 +733,20 @@
         "projection_inverse_Vale.X64.Machine_s.Block_t_ocmp",
         "refinement_interpretation_Tm_refine_2cf553ec9082501e522042064a5e3413",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
         "subterm_ordering_Prims.Cons",
         "token_correspondence_Vale.Transformers.PeepHole.__proj__Mkpre_peephole__item__ph",
         "token_correspondence_Vale.Transformers.PeepHole.num_ins_in_code.fuel_instrumented",
-        "token_correspondence_Vale.X64.Machine_Semantics_s.machine_eval_code.fuel_instrumented",
+        "typing_FStar.Pervasives.Native.uu___is_None",
         "typing_FStar.Pervasives.Native.uu___is_Some",
+        "typing_Vale.Transformers.PeepHole.__proj__Mkpre_peephole__item__input_hint",
         "typing_Vale.Transformers.PeepHole.apply_peephole_to_codes",
         "typing_Vale.Transformers.PeepHole.eval_inss",
         "typing_Vale.Transformers.PeepHole.num_ins_in_codes",
         "typing_Vale.Transformers.PeepHole.wrap_instructions",
         "typing_Vale.X64.Decls.ocmp",
         "typing_Vale.X64.Machine_Semantics_s.__proj__Mkmachine_state__item__ms_ok",
+        "typing_Vale.X64.Machine_Semantics_s.machine_eval_code",
         "typing_Vale.X64.Machine_Semantics_s.machine_eval_codes",
         "typing_tok_Prims.LexTop@tok", "unit_inversion", "unit_typing",
         "well-founded-ordering-on-nat"
@@ -779,7 +786,7 @@
         "typing_Vale.X64.Machine_Semantics_s.machine_eval_code"
       ],
       0,
-      "46ee44938e5e03608fb877f61166af5f"
+      "5d13d43ecc922f2336411d47352a0570"
     ],
     [
       "Vale.Transformers.PeepHole.lemma_apply_peephole_to_code",
@@ -938,7 +945,7 @@
         "typing_Vale.X64.Machine_Semantics_s.machine_eval_code"
       ],
       0,
-      "345257f16a0631b051b00f0a624b60ba"
+      "55b13125ece6cea138ddcb28128521d1"
     ],
     [
       "Vale.Transformers.PeepHole.lemma_apply_peephole_to_code",
