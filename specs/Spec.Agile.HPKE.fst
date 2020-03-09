@@ -56,42 +56,21 @@ let size_mode_identifier: size_nat = 1
 val id_kem: cs:ciphersuite -> Tot (lbytes 2)
 let id_kem cs = let dh, _, _ = cs in
   match dh with
-  | DH.DH_P256 ->
-    let l = [u8 0; u8 1] in
-    assert_norm (List.Tot.length l == 2);
-    of_list l
-  | DH.DH_Curve25519 ->
-    let l = [u8 0; u8 2] in
-    assert_norm (List.Tot.length l == 2);
-    of_list l
+  | DH.DH_P256 -> create 1 (u8 0) @| create 1 (u8 1)
+  | DH.DH_Curve25519 -> create 1 (u8 0) @| create 1 (u8 2)
 
 val id_kdf: cs:ciphersuite -> Tot (lbytes 2)
 let id_kdf cs = let _, _, h = cs in
   match h with
-  | Hash.SHA2_256 ->
-    let l = [u8 0; u8 1] in
-    assert_norm (List.Tot.length l == 2);
-    of_list l
-  | Hash.SHA2_512 ->
-    let l = [u8 0; u8 2] in
-    assert_norm (List.Tot.length l == 2);
-    of_list l
+  | Hash.SHA2_256 -> create 1 (u8 0) @| create 1 (u8 1)
+  | Hash.SHA2_512 -> create 1 (u8 0) @| create 1 (u8 2)
 
 val id_aead: cs:ciphersuite -> Tot (lbytes 2)
 let id_aead cs = let _, a, _ = cs in
   match a with
-  | AEAD.AES128_GCM ->
-    let l = [u8 0; u8 1] in
-    assert_norm (List.Tot.length l == 2);
-    of_list l
-  | AEAD.AES256_GCM ->
-    let l = [u8 0; u8 2] in
-    assert_norm (List.Tot.length l == 2);
-    of_list l
-  | AEAD.CHACHA20_POLY1305 ->
-    let l = [u8 0; u8 3] in
-    assert_norm (List.Tot.length l == 2);
-    of_list l
+  | AEAD.AES128_GCM -> create 1 (u8 0) @| create 1 (u8 1)
+  | AEAD.AES256_GCM -> create 1 (u8 0) @| create 1 (u8 2)
+  | AEAD.CHACHA20_POLY1305 -> create 1 (u8 0) @| create 1 (u8 3)
 
 
 val id_of_cs: cs:ciphersuite -> Tot (lbytes size_cs_identifier)
