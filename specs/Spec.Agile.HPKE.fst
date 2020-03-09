@@ -223,6 +223,7 @@ val ks_derive:
   -> opkI:option (key_dh_public_s cs) ->
   Tot (key_aead_s cs & nonce_aead_s cs)
 
+#push-options "--z3rlimit 50"
 let ks_derive cs m pkR zz pkE info opsk opkI =
   let (psk, pskID) =
     match opsk with
@@ -241,7 +242,7 @@ let ks_derive cs m pkR zz pkE info opsk opkI =
   let keyIR = HKDF.expand (hash_of_cs cs) secret info_key (size_aead_key cs) in
   let nonceIR = HKDF.expand (hash_of_cs cs) secret info_nonce (size_aead_nonce cs) in
   keyIR, nonceIR
-
+#pop-options
 
 /// def SetupBaseI(pkR, info):
 ///     zz, enc = Encap(pkR)
