@@ -487,78 +487,78 @@ let test_base_setup
   (pkE:list uint8{List.Tot.length pkE == HPKE.size_dh_public cs})
   (enc:list uint8)
   (zz:list uint8{List.Tot.length zz == HPKE.size_dh_public cs})
-  (context:list uint8) //{List.Tot.length context == 9 + 3 * HPKE.size_dh_public cs + 2 * Hash.size_hash (HPKE.hash_of_cs cs)})
+  (context:list uint8) //{List.Tot.length context == 7 + 3 * HPKE.size_dh_public cs + 2 * Hash.size_hash (HPKE.hash_of_cs cs)})
   (secret:list uint8)
   (key:list uint8{List.Tot.length key == HPKE.size_aead_key cs})
   (nonce:list uint8{List.Tot.length nonce == HPKE.size_aead_nonce cs})
-= IO.print_string "Test encap\n";
-  let encap = HPKE.encap cs (of_list skE) (of_list pkR) in
-  let res_encap =
-    if None? encap then (
-       IO.print_string "encap returned None\n"; false
-    ) else (
-      let (returned_zz, returned_pkE) = Some?.v encap in
-      let r2_a = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b)
-        (of_list pkE) returned_pkE in
-      let r2_b = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b)
-        (of_list zz) returned_zz in
-      if not r2_a then (
-        IO.print_string "\nExpected pkE :";
-        List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) pkE;
-        IO.print_string "\nComputed pkE :";
-        List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list returned_pkE);
-        IO.print_string "\n");
-      if not r2_b then (
-        IO.print_string "\nExpected zz :";
-        List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) zz;
-        IO.print_string "\nComputed zz :";
-        List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list returned_zz);
-        IO.print_string "\n");
-      r2_a && r2_b
-    )
+= // IO.print_string "Test encap\n";
+  // let encap = HPKE.encap cs (of_list skE) (of_list pkR) in
+  // let res_encap =
+  //   if None? encap then (
+  //      IO.print_string "encap returned None\n"; false
+  //   ) else (
+  //     let (returned_zz, returned_pkE) = Some?.v encap in
+  //     let r2_a = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b)
+  //       (of_list pkE) returned_pkE in
+  //     let r2_b = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b)
+  //       (of_list zz) returned_zz in
+  //     if not r2_a then (
+  //       IO.print_string "\nExpected pkE :";
+  //       List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) pkE;
+  //       IO.print_string "\nComputed pkE :";
+  //       List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list returned_pkE);
+  //       IO.print_string "\n");
+  //     if not r2_b then (
+  //       IO.print_string "\nExpected zz :";
+  //       List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) zz;
+  //       IO.print_string "\nComputed zz :";
+  //       List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list returned_zz);
+  //       IO.print_string "\n");
+  //     r2_a && r2_b
+  //   )
 
-  in
+  // in
 
-  IO.print_string "Test ks_derive\n";
+  // IO.print_string "Test ks_derive\n";
 
-  let (psk, pskID) = (HPKE.default_psk cs, HPKE.default_pskId) in
-  let pkI = HPKE.default_pkI cs in
-  let pskID_hash = Hash.hash (HPKE.hash_of_cs cs) pskID in
-  let info_hash = Hash.hash (HPKE.hash_of_cs cs) (of_list info) in
-  let returned_context = HPKE.build_context HPKE.Base cs (of_list pkE) (of_list pkR) pkI pskID_hash info_hash in
-
-
-  IO.print_string "\nExpected context :";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) context;
-  IO.print_string "\nComputed context :";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list returned_context);
-  IO.print_string "\n";
-
-  let returned_secret = HKDF.extract (HPKE.hash_of_cs cs) psk (of_list zz) in
-
-  IO.print_string "\nExpected secret :";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) secret;
-  IO.print_string "\nComputed secret :";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list returned_secret);
-  IO.print_string "\n";
+  // let (psk, pskID) = (HPKE.default_psk cs, HPKE.default_pskId) in
+  // let pkI = HPKE.default_pkI cs in
+  // let pskID_hash = Hash.hash (HPKE.hash_of_cs cs) pskID in
+  // let info_hash = Hash.hash (HPKE.hash_of_cs cs) (of_list info) in
+  // let returned_context = HPKE.build_context HPKE.Base cs (of_list pkE) (of_list pkR) pkI pskID_hash info_hash in
 
 
-  let info_key = Seq.append HPKE.label_key (of_list context) in
-  let info_nonce = Seq.append HPKE.label_nonce (of_list context) in
-  let keyIR = HKDF.expand (HPKE.hash_of_cs cs) returned_secret info_key (HPKE.size_aead_key cs) in
-  let nonceIR = HKDF.expand (HPKE.hash_of_cs cs) returned_secret info_nonce (HPKE.size_aead_nonce cs) in
+  // IO.print_string "\nExpected context :";
+  // List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) context;
+  // IO.print_string "\nComputed context :";
+  // List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list returned_context);
+  // IO.print_string "\n";
 
-  IO.print_string "\nExpected key :";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) key;
-  IO.print_string "\nComputed key :";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list keyIR);
-  IO.print_string "\n";
+  // let returned_secret = HKDF.extract (HPKE.hash_of_cs cs) psk (of_list zz) in
 
-  IO.print_string "\nExpected nonce :";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) nonce;
-  IO.print_string "\nComputed nonce :";
-  List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list nonceIR);
-  IO.print_string "\n";
+  // IO.print_string "\nExpected secret :";
+  // List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) secret;
+  // IO.print_string "\nComputed secret :";
+  // List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list returned_secret);
+  // IO.print_string "\n";
+
+
+  // let info_key = Seq.append HPKE.label_key (of_list context) in
+  // let info_nonce = Seq.append HPKE.label_nonce (of_list context) in
+  // let keyIR = HKDF.expand (HPKE.hash_of_cs cs) returned_secret info_key (HPKE.size_aead_key cs) in
+  // let nonceIR = HKDF.expand (HPKE.hash_of_cs cs) returned_secret info_nonce (HPKE.size_aead_nonce cs) in
+
+  // IO.print_string "\nExpected key :";
+  // List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) key;
+  // IO.print_string "\nComputed key :";
+  // List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list keyIR);
+  // IO.print_string "\n";
+
+  // IO.print_string "\nExpected nonce :";
+  // List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) nonce;
+  // IO.print_string "\nComputed nonce :";
+  // List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list nonceIR);
+  // IO.print_string "\n";
 
 
 
@@ -605,8 +605,6 @@ let test_base_setup
 
   res_setupBaseI
 
-
-
 //
 // Main
 //
@@ -624,7 +622,7 @@ let test () =
   assert_norm (List.Tot.length test1_pkI == HPKE.size_dh_public cs1);
   assert_norm (List.Tot.length test1_pkE == HPKE.size_dh_public cs1);
   assert_norm (List.Tot.length test1_zz == HPKE.size_dh_public cs1);
-  // assert_norm (List.Tot.length test1_context == 9 + 3 * HPKE.size_dh_public cs1 + 2 * Hash.size_hash (HPKE.hash_of_cs cs1));
+  // assert_norm (List.Tot.length test1_context == 7 + 3 * HPKE.size_dh_public cs1 + 2 * Hash.size_hash (HPKE.hash_of_cs cs1));
 
   assert_norm (List.Tot.length test1_key == HPKE.size_aead_key cs1);
   assert_norm (List.Tot.length test1_nonce == HPKE.size_aead_nonce cs1);

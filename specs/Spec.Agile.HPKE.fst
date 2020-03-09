@@ -222,15 +222,13 @@ val build_context:
   -> pkI:key_dh_public_s cs
   -> pskID_hash:bytes{Seq.length pskID_hash = Hash.size_hash (hash_of_cs cs)}
   -> info_hash:bytes{Seq.length info_hash = Hash.size_hash (hash_of_cs cs)} ->
-  Tot (b:bytes{Seq.length b == 9 + 3 * size_dh_public cs + 2 * Hash.size_hash (hash_of_cs cs) })
+  Tot (b:bytes{Seq.length b == 7 + 3 * size_dh_public cs + 2 * Hash.size_hash (hash_of_cs cs) })
 
 let build_context m cs pkE pkR pkI pskID_hash info_hash =
   let pskID_len: lbytes 1 = nat_to_bytes_be 1 (Hash.size_hash (hash_of_cs cs)) in
   let info_len: lbytes 1 = nat_to_bytes_be 1 (Hash.size_hash (hash_of_cs cs)) in
   let context = (id_of_mode m) @| (id_of_cs cs) @| pkE @| pkR @| pkI in
-  let context = Seq.append context pskID_len in
   let context = Seq.append context pskID_hash in
-  let context = Seq.append context info_len in
   let context = Seq.append context info_hash in
   context
 
