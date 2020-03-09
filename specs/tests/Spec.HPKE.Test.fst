@@ -603,7 +603,38 @@ let test_base_setup
 
   if res_setupBaseI then IO.print_string "setupBaseI succeeded\n" else IO.print_string "setupBaseI failed\n";
 
-  res_setupBaseI
+  IO.print_string "Test setupBaseR\n";
+  let setupBaseR = HPKE.setupBaseR cs (of_list pkE) (of_list skR) (of_list info) in
+  let res_setupBaseR =
+    if None? setupBaseR then (
+      IO.print_string "setupBaseR returned None\n"; false
+    ) else (
+      let returned_key, returned_nonce = Some?.v setupBaseR in
+      let r2_a = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b)
+        (of_list key) returned_key in
+      let r2_b = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b)
+        (of_list nonce) returned_nonce in
+      if not r2_a then (
+        IO.print_string "\nExpected key :";
+        List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) key;
+        IO.print_string "\nComputed key :";
+        List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list returned_key);
+        IO.print_string "\n");
+      if not r2_b then (
+        IO.print_string "\nExpected nonce :";
+        List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) nonce;
+        IO.print_string "\nComputed nonce :";
+        List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list returned_nonce);
+        IO.print_string "\n");
+
+      r2_a && r2_b
+    )
+  in
+
+  if res_setupBaseR then IO.print_string "setupBaseR succeeded\n" else IO.print_string "setupBaseR failed\n";
+
+
+  res_setupBaseI && res_setupBaseR
 
 //
 // Main
