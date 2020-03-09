@@ -53,17 +53,49 @@ let size_cs_identifier: size_nat = 6
 inline_for_extraction
 let size_mode_identifier: size_nat = 1
 
-val id_of_cs: cs:ciphersuite -> Tot (lbytes size_cs_identifier)
-let id_of_cs cs =
-  match cs with
-  | DH.DH_Curve25519, AEAD.AES128_GCM,        Hash.SHA2_256 -> create size_cs_identifier (u8 1)
-  | DH.DH_Curve25519, AEAD.CHACHA20_POLY1305, Hash.SHA2_256 -> create size_cs_identifier (u8 2)
-  // | DH.DH_Curve448,   AEAD.AES256_GCM,        Hash.SHA2_512 -> create size_cs_identifier (u8 3)
-  // | DH.DH_Curve448,   AEAD.CHACHA20_POLY1305, Hash.SHA2_512 -> create size_cs_identifier (u8 4)
-  | DH.DH_P256,       AEAD.AES128_GCM,        Hash.SHA2_256 -> create size_cs_identifier (u8 5)
-  | DH.DH_P256,       AEAD.CHACHA20_POLY1305, Hash.SHA2_256 -> create size_cs_identifier (u8 6)
-  | DH.DH_Curve25519, AEAD.CHACHA20_POLY1305, Hash.SHA2_512 -> create size_cs_identifier (u8 7)
+val id_kem: cs:ciphersuite -> Tot (lbytes 2)
+let id_kem cs = let dh, _, _ = cs in
+  match dh with
+  | DH.DH_P256 ->
+    let l = [u8 0; u8 1] in
+    assert_norm (List.Tot.length l == 2);
+    of_list l
+  | DH.DH_Curve25519 ->
+    let l = [u8 0; u8 2] in
+    assert_norm (List.Tot.length l == 2);
+    of_list l
 
+val id_kdf: cs:ciphersuite -> Tot (lbytes 2)
+let id_kdf cs = let _, _, h = cs in
+  match h with
+  | Hash.SHA2_256 ->
+    let l = [u8 0; u8 1] in
+    assert_norm (List.Tot.length l == 2);
+    of_list l
+  | Hash.SHA2_512 ->
+    let l = [u8 0; u8 2] in
+    assert_norm (List.Tot.length l == 2);
+    of_list l
+
+val id_aead: cs:ciphersuite -> Tot (lbytes 2)
+let id_aead cs = let _, a, _ = cs in
+  match a with
+  | AEAD.AES128_GCM ->
+    let l = [u8 0; u8 1] in
+    assert_norm (List.Tot.length l == 2);
+    of_list l
+  | AEAD.AES256_GCM ->
+    let l = [u8 0; u8 2] in
+    assert_norm (List.Tot.length l == 2);
+    of_list l
+  | AEAD.CHACHA20_POLY1305 ->
+    let l = [u8 0; u8 3] in
+    assert_norm (List.Tot.length l == 2);
+    of_list l
+
+
+val id_of_cs: cs:ciphersuite -> Tot (lbytes size_cs_identifier)
+let id_of_cs cs = id_kem cs @| id_kdf cs @| id_aead cs
 
 type mode =
   | Base
