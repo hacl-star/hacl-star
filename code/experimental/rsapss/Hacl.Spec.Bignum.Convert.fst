@@ -107,6 +107,30 @@ let rec bn_v_is_nat_from_intseq_le_lemma len b =
     () end
 
 
+//the following three lemmas were proven in master
+
+assume
+val uints_from_bytes_be_nat_lemma: #t:inttype{unsigned t /\ ~(U1? t)} -> #l:secrecy_level -> #len:size_nat{len * numbytes t < pow2 32}
+  -> b:lbytes_l l (len * numbytes t) ->
+  Lemma (nat_from_intseq_be (uints_from_bytes_be #t #l #len b) == nat_from_bytes_be b)
+
+assume
+val index_nat_to_intseq_be:
+    #t:inttype{unsigned t}
+  -> #l:secrecy_level
+  -> len:size_nat
+  -> n:nat{n < pow2 (bits t * len)}
+  -> i:nat{i < len}
+  -> Lemma (Seq.index (nat_to_intseq_be #t #l len n) (len - i - 1) ==
+           uint #t #l (n / pow2 (bits t * i) % pow2 (bits t)))
+
+assume
+val index_uint_to_bytes_be: #t:inttype{unsigned t} -> #l:secrecy_level -> u:uint_t t l
+  -> Lemma
+    (forall (i:nat{i < numbytes t}). index (uint_to_bytes_be #t #l u) (numbytes t - i - 1) ==
+                              uint #U8 #l (v u / pow2 (8 * i) % pow2 8))
+
+
 val bn_from_bytes_be_lemma_: len:size_nat{8 * len <= max_size_t} -> b:lseq uint8 (8 * len) -> Lemma
   (bn_v (bn_from_bytes_be_ len b) == nat_from_bytes_be b)
 let bn_from_bytes_be_lemma_ len b =
@@ -114,8 +138,9 @@ let bn_from_bytes_be_lemma_ len b =
   bn_from_bytes_be_is_uints_from_bytes_be_reverse len b;
   twice_reverse (uints_from_bytes_be #U64 #SEC #len b);
   assert (bn_v (bn_from_bytes_be_ len b) == nat_from_intseq_be (uints_from_bytes_be #U64 #SEC #len b));
-  assume (nat_from_intseq_be (uints_from_bytes_be #U64 #SEC #len b) == nat_from_bytes_be b)
-  //the uints_from_bytes_be_nat_lemma b lemma from master
+  uints_from_bytes_be_nat_lemma #U64 #SEC #len b;
+  assert (nat_from_intseq_be (uints_from_bytes_be #U64 #SEC #len b) == nat_from_bytes_be b)
+
 
 val lemma_nat_from_bytes_be_zeroes: len:size_nat -> b:lseq uint8 len -> Lemma
   (requires (forall (i:nat). i < len ==> b.[i] == u8 0))
@@ -156,7 +181,79 @@ let bn_from_bytes_be_lemma len b =
   assert (bn_v (bn_from_bytes_be_ bnLen tmp) == nat_from_bytes_be tmp);
   nat_from_bytes_be_eq_lemma len tmpLen b
 
+val index_bn_to_bytes_be_: len:size_nat{8 * len <= max_size_t} -> b:lbignum len -> i:nat{i < 8 * len} ->
+  Lemma ((bn_to_bytes_be_ len b).[i] == uint #U8 #SEC (v b.[len - i / 8 - 1] / pow2 (8 * (7 - i % 8)) % pow2 8))
+let index_bn_to_bytes_be_ len b i =
+  let bi = b.[len - i / 8 - 1] in
+  index_generate_blocks 8 len len (bn_to_bytes_be_f len b) i;
+  assert ((bn_to_bytes_be_ len b).[i] == (uint_to_bytes_be bi).[i % 8]);
+  index_uint_to_bytes_be bi;
+  assert ((uint_to_bytes_be bi).[i % 8] == uint #U8 #SEC (v bi / pow2 (8 * (7 - i % 8)) % pow2 8))
+
+val bn_to_bytes_be_lemma_aux: len:size_pos{8 * len <= max_size_t} -> b:lbignum len{bn_v b < pow2 (64 * len)} -> i:nat{i < 8 * len} -> Lemma
+  (bn_v b / pow2 (8 * (8 * len - i - 1)) % pow2 8 == v b.[len - i / 8 - 1] / pow2 (8 * (7 - i % 8)) % pow2 8)
+let bn_to_bytes_be_lemma_aux len b i =
+  calc (==) {
+    v b.[len - i / 8 - 1] / pow2 (8 * (7 - i % 8)) % pow2 8;
+    (==) { bn_eval_index b (len - i / 8 - 1) }
+    (bn_v b / pow2 (64 * (len - i / 8 - 1)) % pow2 64) / pow2 (8 * (7 - i % 8)) % pow2 8;
+    (==) { Math.Lemmas.pow2_modulo_division_lemma_1 (bn_v b) (64 * (len - i / 8 - 1)) (64 + 64 * (len - i / 8 - 1)) }
+    (bn_v b % pow2 (64 + 64 * (len - i / 8 - 1)) / pow2 (64 * (len - i / 8 - 1))) / pow2 (8 * (7 - i % 8)) % pow2 8;
+    (==) { Math.Lemmas.division_multiplication_lemma (bn_v b % pow2 (64 + 64 * (len - i / 8 - 1))) (pow2 (64 * (len - i / 8 - 1))) (pow2 (8 * (7 - i % 8))) }
+    (bn_v b % pow2 (64 + 64 * (len - i / 8 - 1))) / (pow2 (64 * (len - i / 8 - 1)) * pow2 (8 * (7 - i % 8))) % pow2 8;
+    (==) { Math.Lemmas.pow2_plus (64 * (len - i / 8 - 1)) (8 * (7 - i % 8)) }
+    (bn_v b % pow2 (64 + 64 * (len - i / 8 - 1))) / pow2 (64 * (len - i / 8 - 1) + 8 * (7 - i % 8)) % pow2 8;
+    (==) { Math.Lemmas.paren_mul_right 8 8 (len - i / 8 - 1);
+      Math.Lemmas.distributivity_add_right 8 (8 * (len - i / 8 - 1)) (7 - i % 8) }
+    (bn_v b % pow2 (64 + 64 * (len - i / 8 - 1))) / pow2 (8 * (8 * (len - 1 - i / 8) + 7 - i % 8)) % pow2 8;
+    (==) { Math.Lemmas.distributivity_sub_right 8 (len - 1) (i / 8); Math.Lemmas.euclidean_division_definition i 8 }
+    (bn_v b % pow2 (64 + 64 * (len - i / 8 - 1))) / pow2 (8 * (8 * (len - 1) - i + 7)) % pow2 8;
+    (==) { Math.Lemmas.distributivity_sub_right 8 len 1 }
+    (bn_v b % pow2 (64 + 64 * (len - i / 8 - 1))) / pow2 (8 * (8 * len - 1 - i)) % pow2 8;
+    (==) { Math.Lemmas.pow2_modulo_division_lemma_1 (bn_v b) (8 * (8 * len - 1 - i)) (64 + 64 * (len - i / 8 - 1)) }
+    (bn_v b / pow2 (8 * (8 * len - 1 - i))) % pow2 (64 + 64 * (len - i / 8 - 1) - 8 * (8 * len - 1 - i)) % pow2 8;
+    (==) { Math.Lemmas.pow2_modulo_modulo_lemma_1 (bn_v b / pow2 (8 * (8 * len - 1 - i))) 8 (64 + 64 * (len - i / 8 - 1) - 8 * (8 * len - 1 - i)) }
+    (bn_v b / pow2 (8 * (8 * len - i - 1))) % pow2 8;
+    }
+
+val bn_to_bytes_be_lemma_: len:size_pos{8 * len <= max_size_t} -> b:lbignum len{bn_v b < pow2 (64 * len)} -> Lemma
+  (bn_to_bytes_be_ len b == nat_to_intseq_be #U8 #SEC (8 * len) (bn_v b))
+let bn_to_bytes_be_lemma_ len b =
+  let lemma_aux (i:nat{i < 8 * len}) : Lemma ((bn_to_bytes_be_ len b).[i] == index #uint8 #(8 * len) (nat_to_intseq_be (8 * len) (bn_v b)) i) =
+    let rp = nat_to_intseq_be #U8 #SEC (8 * len) (bn_v b) in
+    index_nat_to_intseq_be #U8 #SEC (8 * len) (bn_v b) (8 * len - i - 1);
+    //assert (index #uint8 #(8 * len) rp i == uint #U8 #SEC (bn_v b / pow2 (8 * (8 * len - i - 1)) % pow2 8));
+    index_bn_to_bytes_be_ len b i;
+    //assert ((bn_to_bytes_be_ len b).[i] == uint #U8 #SEC (v b.[len - i / 8 - 1] / pow2 (8 * (7 - i % 8)) % pow2 8));
+    bn_to_bytes_be_lemma_aux len b i;
+    () in
+  Classical.forall_intro lemma_aux;
+  eq_intro (bn_to_bytes_be_ len b) (nat_to_intseq_be (8 * len) (bn_v b))
 
 val bn_to_bytes_be_lemma: len:size_pos{8 * blocks len 8 <= max_size_t} -> b:lbignum (blocks len 8){bn_v b < pow2 (8 * len)} -> Lemma
-  (bn_to_bytes_be len b == nat_to_bytes_be len (bn_v b))
-let bn_to_bytes_be_lemma len b = admit()
+  (bn_to_bytes_be len b == nat_to_intseq_be #U8 #SEC len (bn_v b))
+let bn_to_bytes_be_lemma len b =
+  let bnLen = blocks len 8 in
+  let tmpLen = 8 * bnLen in
+  let tmp = bn_to_bytes_be_ bnLen b in
+  let res = sub tmp (tmpLen - len) len in
+  assert (bn_v b < pow2 (8 * len));
+  Math.Lemmas.pow2_le_compat (64 * bnLen) (8 * len);
+  assert (bn_v b < pow2 (64 * bnLen));
+  bn_to_bytes_be_lemma_ bnLen b;
+  assert (tmp == nat_to_intseq_be #U8 #SEC (8 * bnLen) (bn_v b));
+
+  let lemma_aux (i:nat{i < len}) :
+    Lemma (index (sub #uint8 #(8 * bnLen) (nat_to_intseq_be #U8 #SEC (8 * bnLen) (bn_v b)) (tmpLen - len) len) i ==
+           index #uint8 #len (nat_to_intseq_be #U8 #SEC len (bn_v b)) i) =
+    let rp = nat_to_intseq_be #U8 #SEC len (bn_v b) in
+    index_nat_to_intseq_be #U8 #SEC len (bn_v b) (len - i - 1);
+    assert (index #uint8 #len rp i == uint #U8 #SEC (bn_v b / pow2 (8 * (len - i - 1)) % pow2 8));
+    let lp = nat_to_intseq_be #U8 #SEC (8 * bnLen) (bn_v b) in
+    assert (index (sub #uint8 #(8 * bnLen) lp (tmpLen - len) len) i == index #uint8 #(8 * bnLen) lp (tmpLen - len + i));
+    index_nat_to_intseq_be #U8 #SEC (8 * bnLen) (bn_v b) (len - i - 1);
+    assert (index #uint8 #(8 * bnLen) lp (tmpLen - len + i) == uint #U8 #SEC (bn_v b / pow2 (8 * (len - i - 1)) % pow2 8));
+    () in
+
+  Classical.forall_intro lemma_aux;
+  eq_intro (nat_to_intseq_be #U8 #SEC len (bn_v b)) res

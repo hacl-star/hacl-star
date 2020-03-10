@@ -94,4 +94,4 @@ val bn_to_bytes_be:
 val bn_to_bytes_be_lemma:
     len:size_pos{8 * (blocks len 8) <= max_size_t}
   -> b:lbignum (blocks len 8){bn_v b < pow2 (8 * len)} ->
-  Lemma (bn_to_bytes_be len b == BSeq.nat_to_bytes_be len (bn_v b))
+  Lemma (bn_to_bytes_be len b == BSeq.nat_to_intseq_be #U8 len (bn_v b))
