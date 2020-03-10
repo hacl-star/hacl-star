@@ -32,9 +32,6 @@ let setupBaseI_st (cs:S.ciphersuite) =
      (requires fun h0 ->
         (S.curve_of_cs cs = Spec.Agile.DH.DH_Curve25519 ==>
           Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
-        (S.curve_of_cs cs = Spec.Agile.DH.DH_P256 ==> Lib.ByteSequence.(
-           nat_from_bytes_le (as_seq h0 skE) >= 1 /\
-           nat_from_bytes_le (as_seq h0 skE) < Spec.ECDSAP256.Definition.prime_p256_order)) /\
         live h0 o_pkE /\ live h0 o_k /\ live h0 o_n /\
         live h0 skE /\ live h0 pkR /\ live h0 info /\
         disjoint o_pkE skE /\ disjoint o_pkE pkR /\ disjoint o_pkE info /\
@@ -64,9 +61,6 @@ let setupBaseR_st (cs:S.ciphersuite) =
      (requires fun h0 ->
         (S.curve_of_cs cs = Spec.Agile.DH.DH_Curve25519 ==>
           Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
-        (S.curve_of_cs cs = Spec.Agile.DH.DH_P256 ==> Lib.ByteSequence.(
-           nat_from_bytes_le (as_seq h0 skR) >= 1 /\
-           nat_from_bytes_le (as_seq h0 skR) < Spec.ECDSAP256.Definition.prime_p256_order)) /\
         live h0 o_key_aead /\ live h0 o_nonce_aead /\
         live h0 pkE /\ live h0 skR /\ live h0 info /\
         disjoint o_key_aead o_nonce_aead)
@@ -94,9 +88,6 @@ let sealBase_st (cs:S.ciphersuite) =
        (requires fun h0 ->
         (S.curve_of_cs cs = Spec.Agile.DH.DH_Curve25519 ==>
          Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
-        (S.curve_of_cs cs = Spec.Agile.DH.DH_P256 ==> Lib.ByteSequence.(
-           nat_from_bytes_le (as_seq h0 skE) >= 1 /\
-           nat_from_bytes_le (as_seq h0 skE) < Spec.ECDSAP256.Definition.prime_p256_order)) /\
          live h0 output /\ live h0 skE /\ live h0 pkR /\
          live h0 m /\ live h0 info /\
          disjoint output pkR /\ disjoint output info /\ disjoint output m /\ disjoint output skE)
@@ -121,9 +112,6 @@ let openBase_st (cs:S.ciphersuite) =
        (requires fun h0 ->
         (S.curve_of_cs cs = Spec.Agile.DH.DH_Curve25519 ==>
           Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
-        (S.curve_of_cs cs = Spec.Agile.DH.DH_P256 ==> Lib.ByteSequence.(
-           nat_from_bytes_le (as_seq h0 skR) >= 1 /\
-           nat_from_bytes_le (as_seq h0 skR) < Spec.ECDSAP256.Definition.prime_p256_order)) /\
          live h0 output /\ live h0 pkE /\ live h0 skR /\
          live h0 m /\ live h0 info /\
          disjoint output info /\ disjoint output m)

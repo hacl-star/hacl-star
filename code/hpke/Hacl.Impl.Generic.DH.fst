@@ -33,9 +33,6 @@ let dh_st (a:DH.algorithm) =
   -> ST UInt32.t
      (requires fun h0 ->
        (a = DH.DH_Curve25519 ==> Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
-       (a = DH.DH_P256 ==> Lib.ByteSequence.(
-           nat_from_bytes_le (as_seq h0 k) >= 1 /\
-           nat_from_bytes_le (as_seq h0 k) < Spec.ECDSAP256.Definition.prime_p256_order)) /\
        live h0 o /\ live h0 k /\ live h0 i /\
        disjoint o i /\ disjoint o k)
      (ensures fun h0 result h1 -> modifies (loc o) h0 h1 /\ (
@@ -52,9 +49,6 @@ let secret_to_public_st (a: DH.algorithm) =
   -> Stack UInt32.t
     (requires fun h0 ->
       (a = DH.DH_Curve25519 ==> Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)) /\
-      (a = DH.DH_P256 ==> Lib.ByteSequence.(
-           nat_from_bytes_le (as_seq h0 i) >= 1 /\
-           nat_from_bytes_le (as_seq h0 i) < Spec.ECDSAP256.Definition.prime_p256_order)) /\
       live h0 o /\ live h0 i /\ disjoint o i)
     (ensures  fun h0 result h1 -> modifies (loc o) h0 h1 /\
       (let output = DH.secret_to_public a (as_seq h0 i) in
