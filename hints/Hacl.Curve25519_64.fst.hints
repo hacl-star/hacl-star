@@ -1,5 +1,5 @@
 [
-  "#‚É\u0016ü*¡Qdy\u0017\u0003óŠ0e",
+  "ÏŒL´«R0HŽ\u0015ê‚Y¯”F",
   [
     [
       "Hacl.Curve25519_64.g25519",
@@ -76,7 +76,116 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "9fe56dfa0ffff51b2267acc9c0f5b65a"
+      "d3ff7b7b1c5f76637d3c69327f5e0318"
+    ],
+    [
+      "Hacl.Curve25519_64.point_add_and_double",
+      1,
+      0,
+      0,
+      [ "@query" ],
+      0,
+      "1c81e08ca59f044f7f55fb6c58fa9b66"
+    ],
+    [
+      "Hacl.Curve25519_64.point_double",
+      1,
+      0,
+      0,
+      [ "@query" ],
+      0,
+      "50592fef97122cca573acb195eec06f1"
+    ],
+    [
+      "Hacl.Curve25519_64.montgomery_ladder",
+      1,
+      0,
+      0,
+      [ "@query" ],
+      0,
+      "fe47889babfdd4517161078736b4780a"
+    ],
+    [
+      "Hacl.Curve25519_64.fsquare_times",
+      1,
+      0,
+      0,
+      [ "@query" ],
+      0,
+      "a59e19e51dc787c5c487f542a1bbc78c"
+    ],
+    [
+      "Hacl.Curve25519_64.finv",
+      1,
+      0,
+      0,
+      [ "@query" ],
+      0,
+      "4d322b87ea2f5b59ad04f18c4b7baa39"
+    ],
+    [
+      "Hacl.Curve25519_64.store_felem",
+      1,
+      0,
+      0,
+      [ "@query" ],
+      0,
+      "0bfb1940af19790b2480abf524e83d24"
+    ],
+    [
+      "Hacl.Curve25519_64.encode_point",
+      1,
+      0,
+      0,
+      [ "@query" ],
+      0,
+      "66d5df0cfdc1a1e96212a2f1926d2a3d"
+    ],
+    [
+      "Hacl.Curve25519_64.scalarmult",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Hacl.Curve25519_64.p",
+        "equation_Hacl.Impl.Curve25519.Field64.Vale.p",
+        "refinement_interpretation_Tm_refine_18df2f1366d3cc65965b0ed5534b8452",
+        "refinement_interpretation_Tm_refine_459b9ab77aac04d52b8dfacb0eefd9b2",
+        "refinement_interpretation_Tm_refine_b64671e12b7bed191ea1ef66664f5256",
+        "refinement_interpretation_Tm_refine_dac39a08e8a2b6d884d0b86408735945"
+      ],
+      0,
+      "476a2c3d7710310d20b19f38156a28eb"
+    ],
+    [
+      "Hacl.Curve25519_64.secret_to_public",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Hacl.Curve25519_64.p",
+        "equation_Hacl.Impl.Curve25519.Field64.Vale.p",
+        "refinement_interpretation_Tm_refine_18df2f1366d3cc65965b0ed5534b8452",
+        "refinement_interpretation_Tm_refine_997c8638bf1359fe14f8495b510217f4",
+        "refinement_interpretation_Tm_refine_9bda0e595d7a218321ae86160750feda",
+        "refinement_interpretation_Tm_refine_dac39a08e8a2b6d884d0b86408735945"
+      ],
+      0,
+      "4062f785f295147cc888fe645ff637b9"
+    ],
+    [
+      "Hacl.Curve25519_64.ecdh",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Hacl.Curve25519_64.p",
+        "equation_Hacl.Impl.Curve25519.Field64.Vale.p",
+        "refinement_interpretation_Tm_refine_18df2f1366d3cc65965b0ed5534b8452",
+        "refinement_interpretation_Tm_refine_dac39a08e8a2b6d884d0b86408735945"
+      ],
+      0,
+      "be4e7666a74ab30503201eea56f1d60d"
     ]
   ]
 ]
