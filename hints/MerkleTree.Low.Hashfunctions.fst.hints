@@ -1,0 +1,95 @@
+[
+  "…@¤¿¸’S8\b$¸Kø”²\u001d",
+  [
+    [
+      "MerkleTree.Low.Hashfunctions.init_hash",
+      1,
+      0,
+      0,
+      [ "@query" ],
+      0,
+      "5093b58b07a5b658d449f207959fe8cd"
+    ],
+    [
+      "MerkleTree.Low.Hashfunctions.free_hash",
+      1,
+      2,
+      2,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_MerkleTree.Low.Datastructures.hash",
+        "equation_MerkleTree.Low.Datastructures.hash_size_t",
+        "equation_MerkleTree.Low.Datastructures.hreg",
+        "lemma_FStar.Ghost.hide_reveal",
+        "proj_equation_LowStar.Regional.Rgl_r_inv",
+        "projection_inverse_LowStar.Regional.Rgl_r_inv",
+        "refinement_interpretation_Tm_refine_843cd6297b28c062237c5d3efaded389",
+        "refinement_interpretation_Tm_refine_8c0551b61a036b536158e72eb516544e",
+        "refinement_kinding_Tm_refine_02de1ca607024051b572624909ff5c56",
+        "token_correspondence_LowStar.Regional.__proj__Rgl__item__r_inv",
+        "token_correspondence_MerkleTree.Low.Datastructures.hash_r_inv"
+      ],
+      0,
+      "841bddecddc0d676f2bc58d47e5c1d9b"
+    ],
+    [
+      "MerkleTree.Low.Hashfunctions.hash_fun_t",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "b2t_def",
+        "equation_FStar.UInt.fits", "equation_FStar.UInt.gt",
+        "equation_FStar.UInt.max_int", "equation_FStar.UInt.min_int",
+        "equation_FStar.UInt.size", "equation_FStar.UInt.uint_t",
+        "equation_FStar.UInt32.gt",
+        "equation_MerkleTree.Low.Datastructures.hash_size_t", "int_typing",
+        "lemma_FStar.UInt32.vu_inv", "primitive_Prims.op_AmpAmp",
+        "primitive_Prims.op_GreaterThan",
+        "primitive_Prims.op_LessThanOrEqual",
+        "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_Tm_refine_02de1ca607024051b572624909ff5c56",
+        "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec"
+      ],
+      0,
+      "0112a4cc82e4cef92d4b91beccbc4183"
+    ],
+    [
+      "MerkleTree.Low.Hashfunctions.hash_fun_t",
+      2,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Lib.IntTypes.uint8",
+        "equation_LowStar.Buffer.buffer",
+        "equation_LowStar.Buffer.trivial_preorder",
+        "equation_MerkleTree.Low.Datastructures.hash",
+        "equation_MerkleTree.Low.Datastructures.hash_r_inv",
+        "equation_MerkleTree.Low.Datastructures.hash_r_repr",
+        "equation_MerkleTree.Low.Datastructures.hash_repr",
+        "equation_MerkleTree.Low.Datastructures.hash_size_t",
+        "equation_MerkleTree.Low.Datastructures.hreg",
+        "equation_MerkleTree.New.High.hash",
+        "function_token_typing_Lib.IntTypes.uint8",
+        "lemma_LowStar.Monotonic.Buffer.freeable_length",
+        "lemma_LowStar.Monotonic.Buffer.length_as_seq",
+        "proj_equation_LowStar.Regional.Rgl_r_inv",
+        "proj_equation_LowStar.Regional.Rgl_r_repr",
+        "proj_equation_LowStar.Regional.Rgl_repr",
+        "projection_inverse_LowStar.Regional.Rgl_r_inv",
+        "projection_inverse_LowStar.Regional.Rgl_r_repr",
+        "projection_inverse_LowStar.Regional.Rgl_repr",
+        "refinement_interpretation_Tm_refine_29c27ac7c716b2238749315b70c9eca3",
+        "refinement_interpretation_Tm_refine_30494f3fd2c285e7cecf228074ade467",
+        "refinement_interpretation_Tm_refine_adba45e2c79a7a6d18ea513e3b9120dc",
+        "token_correspondence_LowStar.Regional.__proj__Rgl__item__r_inv",
+        "token_correspondence_LowStar.Regional.__proj__Rgl__item__r_repr",
+        "token_correspondence_MerkleTree.Low.Datastructures.hash_r_inv",
+        "token_correspondence_MerkleTree.Low.Datastructures.hash_r_repr",
+        "typing_LowStar.Buffer.trivial_preorder"
+      ],
+      0,
+      "6ac31a30f8d9ee250fe6572020e90f9e"
+    ]
+  ]
+]

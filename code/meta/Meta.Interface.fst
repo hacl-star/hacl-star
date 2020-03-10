@@ -166,7 +166,7 @@ let rec visit_function (t_i: term) (st: state) (f_name: name): Tac (state & list
     let f = match f with Some f -> f | None -> fail "unexpected: name not in the environment" in
     if not (has_attr f (`Meta.Attribute.specialize) || has_attr f (`Meta.Attribute.inline_)) then
       let _ = print (st.indent ^ "Not visiting " ^ string_of_name f_name) in
-      // We want to user to specify which nodes should be traversed, otherwise,
+      // We want the user to specify which nodes should be traversed, otherwise,
       // we'd end up visiting the entire F* standard library.
       st, []
     else
@@ -194,6 +194,11 @@ let rec visit_function (t_i: term) (st: state) (f_name: name): Tac (state & list
                 print (st.indent ^ "Found " ^ name ^ ", index of type " ^ term_to_string t);
                 Some bv, name, f_body'
               end else
+                // It can be convenient to specialize over a function without
+                // the index as a parameter. In Curve, this is used to
+                // specialize over store_felem64, a function that is already
+                // specialized for the M64 value of the index, but that still
+                // admits multiple implementations.
                 None, "", f_body
           | _ ->
               fail (string_of_name f_name ^ "is expected to be a function!")

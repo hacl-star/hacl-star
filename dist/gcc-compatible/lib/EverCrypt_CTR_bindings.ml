@@ -34,22 +34,21 @@ module Bindings(F:Cstubs.FOREIGN) =
       foreign "EverCrypt_CTR_create_in"
         (spec_Agile_Cipher_cipher_alg @->
            ((ptr (ptr everCrypt_CTR_state_s)) @->
-              ((ptr uint8_t) @->
-                 ((ptr uint8_t) @->
+              (ocaml_bytes @->
+                 (ocaml_bytes @->
                     (uint32_t @->
                        (uint32_t @-> (returning everCrypt_Error_error_code)))))))
       
     let everCrypt_CTR_init =
       foreign "EverCrypt_CTR_init"
         ((ptr everCrypt_CTR_state_s) @->
-           ((ptr uint8_t) @->
-              ((ptr uint8_t) @->
-                 (uint32_t @-> (uint32_t @-> (returning void))))))
+           (ocaml_bytes @->
+              (ocaml_bytes @-> (uint32_t @-> (uint32_t @-> (returning void))))))
       
     let everCrypt_CTR_update_block =
       foreign "EverCrypt_CTR_update_block"
         ((ptr everCrypt_CTR_state_s) @->
-           ((ptr uint8_t) @-> ((ptr uint8_t) @-> (returning void))))
+           (ocaml_bytes @-> (ocaml_bytes @-> (returning void))))
       
     let everCrypt_CTR_free =
       foreign "EverCrypt_CTR_free"

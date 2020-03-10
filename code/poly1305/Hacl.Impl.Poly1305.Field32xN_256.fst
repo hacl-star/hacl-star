@@ -45,7 +45,6 @@ val load_acc4:
       modifies (loc acc) h0 h1 /\
       felem_fits h1 acc (3, 3, 3, 3, 3) /\
       feval h1 acc == Vec.load_acc4 (as_seq h0 b) (feval h0 acc).[0])
-[@CInline]
 let load_acc4 acc b =
   push_frame();
   let e = create 5ul (zero 4) in
@@ -85,7 +84,6 @@ val fmul_r4_normalize:
       felem_fits h1 out (2, 2, 2, 2, 2) /\
      (let r = feval h0 (gsub p 0ul 5ul) in
       (feval h1 out).[0] == Vec.normalize_4 r.[0] (feval h0 out)))
-[@CInline]
 let fmul_r4_normalize out p =
   let r = sub p 0ul 5ul in
   let r_5 = sub p 5ul 5ul in
