@@ -82,13 +82,14 @@ let test_inline_mov_mul_inputs () : FStar.All.ML unit =
   let c = Block [
     Ins (make_instr ins_Mov64 (OReg rRax) (OReg rRbx));
     Ins (make_instr ins_Mov64 (OReg rRcx) (OReg rR15));
-    Ins (make_instr ins_Mul64 (OReg rRcx));
+    Ins (make_instr ins_IMul64 (OReg rRax) (OReg rRcx));
     ] in
   print_function "test_inline_mov_mul_inputs" (Some "result") args regs_mod c
 
 // This test generates the correct inline assembly code, but only works with gcc >= 9
 // On prior versions, gcc ignores the register asm("rax") annotation, and does not correctly
 // allocate the output "result" into register rax
+(*
 let test_inline_mov_add_input_dummy_mul () : FStar.All.ML unit =
   let args = [
     ("first_arg", TD_Base TUInt64, rR15);
@@ -101,6 +102,7 @@ let test_inline_mov_add_input_dummy_mul () : FStar.All.ML unit =
     Ins (make_instr ins_Add64 (OReg rRax) (OConst 1));
     ] in
   print_function "test_inline_mov_add_input_dummy_mul" (Some "result") args regs_mod c
+*)
 
 let test_inline_comment_add () : FStar.All.ML unit =
   let args = [
