@@ -41,7 +41,7 @@ let mod_inv_u64 n0 =
   let (u, v) = repeat_gen 64 mod_inv_u64_t (mod_inv_u64_f alpha beta) (u64 1, u64 0) in
   v
 
-
+// Replace with `a >> 1 + b >> 1 + a & b & 1`?
 val add_div_2_nooverflow: a:uint64 -> b:uint64 -> Lemma
   (v (((a ^. b) >>. 1ul) +. (a &. b)) == (v a + v b) / 2 % pow2 64)
 let add_div_2_nooverflow a b = admit()
@@ -50,7 +50,17 @@ let add_div_2_nooverflow a b = admit()
 val x_if_u_is_odd: x:uint64 -> u:uint64 -> Lemma
   (let u_is_odd = u64 0 -. (u &. u64 1) in
    v (x &. u_is_odd) == (if v u % 2 = 0 then 0 else v x))
-let x_if_u_is_odd x u = admit()
+
+let x_if_u_is_odd x u =
+  let u_is_odd = u64 0 -. (u &. u64 1) in
+  logand_mask u (u64 1) 1;
+  assert (v (u &. u64 1) == v u % 2);
+  assert (v u_is_odd == (- v u % 2) % pow2 64);
+  assert (v u_is_odd == (if v u % 2 = 0 then 0 else pow2 64 - 1));
+  if v u % 2 = 0 then
+    logand_zeros x
+  else
+    logand_ones x
 
 
 val mod_inv_u64_inv_vb_is_even: n0:uint64 -> i:pos{i <= 64} -> ub0:uint64 -> vb0:uint64 -> Lemma
