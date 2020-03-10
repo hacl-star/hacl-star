@@ -342,7 +342,7 @@ let print_inline
 
   let inputs_use_rax = uses_rax args 0 of_arg in
   if reserved_regs rRax && Some? ret_val then
-    FStar.All.failwith "We require the annotation register uint64_t result(rax), but it would be ignored by gcc < 9" 
+    FStar.All.failwith "We require the annotation register uint64_t result(rax), but it would be ignored by gcc < 9"; 
 
   if inputs_use_rax && Some? ret_val then
     FStar.All.failwith "inputs are not allowed to be passed in rax when there is a return argument";
