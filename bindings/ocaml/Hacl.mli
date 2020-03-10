@@ -28,11 +28,15 @@ module SHA2_256 : HashFunction
 module SHA2_384 : HashFunction
 module SHA2_512 : HashFunction
 
-(* TODO: SHAKE *)
 module SHA3_224 : HashFunction
 module SHA3_256 : HashFunction
 module SHA3_384 : HashFunction
 module SHA3_512 : HashFunction
+module Keccak : sig
+  val keccak : int -> int -> int -> Bytes.t -> Bytes.t -> unit
+  val shake128 : Bytes.t -> Bytes.t -> unit
+  val shake256 : Bytes.t -> Bytes.t -> unit
+end
 
 module MD5 : HashFunction [@@deprecated]
 module SHA1 : HashFunction [@@deprecated]
@@ -75,3 +79,4 @@ module ECDSA : sig
   val sign : Bytes.t -> Bytes.t -> Bytes.t -> Bytes.t -> bool
   val verify : Bytes.t -> Bytes.t -> Bytes.t -> bool
 end
+

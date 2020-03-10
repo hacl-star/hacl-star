@@ -148,6 +148,34 @@ let test_nonagile (n: string) (v: Bytes.t hash_test) hash =
   else
     test_result Failure ""
 
+let test_keccak () =
+  let v = test_sha3_256 in
+  let test_result = test_result "Keccak" in
+  let sha3_256 = Hacl.Keccak.keccak 1088 512 (Char.code '\x06') in
+  let output = Test_utils.init_bytes 32 in
+  sha3_256 v.plaintext output;
+
+  let output_shake128 = Test_utils.init_bytes 16 in
+  Hacl.Keccak.shake128 v.plaintext output_shake128;
+
+  let keccak_128 = Hacl.Keccak.keccak 1344 256 (Char.code '\x1f') in
+  let output_keccak_128 = Test_utils.init_bytes 16 in
+  keccak_128 v.plaintext output_keccak_128;
+
+  let output_shake256 = Test_utils.init_bytes 32 in
+  Hacl.Keccak.shake256 v.plaintext output_shake256;
+
+  let keccak_256 = Hacl.Keccak.keccak 1088 512 (Char.code '\x1f') in
+  let output_keccak_256 = Test_utils.init_bytes 32 in
+  keccak_256 v.plaintext output_keccak_256;
+
+  if Bytes.compare output v.expected = 0 &&
+     Bytes.compare output_shake128 output_keccak_128 = 0 &&
+     Bytes.compare output_shake256 output_keccak_256 = 0 then
+    test_result Success ""
+  else
+    test_result Failure ""
+
 
 let _ =
   test_agile test_sha2_224;
@@ -172,4 +200,6 @@ let _ =
   test_agile test_md5;
 
   test_nonagile "Hacl" test_sha1 Hacl.SHA1.hash;
-  test_nonagile "Hacl" test_md5 Hacl.MD5.hash
+  test_nonagile "Hacl" test_md5 Hacl.MD5.hash;
+
+  test_keccak ()

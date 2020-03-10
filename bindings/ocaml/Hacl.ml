@@ -134,6 +134,15 @@ module SHA3_512 : HashFunction =
     let hash input input_len output = Hacl_SHA3.hacl_SHA3_sha3_512 input_len input output
 end)
 
+module Keccak = struct
+  let keccak rate capacity suffix input output =
+    Hacl_SHA3.hacl_Impl_SHA3_keccak (UInt32.of_int rate) (UInt32.of_int capacity) (size_uint32 input) (ctypes_buf input) (UInt8.of_int suffix) (size_uint32 output) (ctypes_buf output)
+  let shake128 input output =
+    Hacl_SHA3.hacl_SHA3_shake128_hacl (size_uint32 input) (ctypes_buf input) (size_uint32 output) (ctypes_buf output)
+  let shake256 input output =
+    Hacl_SHA3.hacl_SHA3_shake256_hacl (size_uint32 input) (ctypes_buf input) (size_uint32 output) (ctypes_buf output)
+end
+
 module SHA1 : HashFunction =
   Make_HashFunction (struct
     let hash_alg = Some HashDefs.(Legacy SHA1)
@@ -245,4 +254,3 @@ module ECDSA = struct
     let r, s = Bytes.sub signature 0 32, Bytes.sub signature 32 32 in
     Hacl_ECDSA.hacl_Impl_ECDSA_ecdsa_p256_sha2_verify (size_uint32 msg) (ctypes_buf msg) (ctypes_buf pub) (ctypes_buf r) (ctypes_buf s)
 end
-
