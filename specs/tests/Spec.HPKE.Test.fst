@@ -696,6 +696,7 @@ let test_base_setup
 
 let test_encrytion (cs:HPKE.ciphersuite)
   (skE:list uint8{List.Tot.length skE == HPKE.size_dh_key cs})
+  (skR:list uint8{List.Tot.length skR == HPKE.size_dh_key cs})
   (pkR:list uint8{List.Tot.length pkR == HPKE.size_dh_public cs})
   (pkE:list uint8{List.Tot.length pkE == HPKE.size_dh_public cs})
   (plain:list uint8{List.Tot.length plain <= HPKE.max_length cs})
@@ -705,6 +706,8 @@ let test_encrytion (cs:HPKE.ciphersuite)
     List.Tot.length cipher == AEAD.cipher_length #(HPKE.aead_of_cs cs) (of_list plain)})
   =
   let clength = HPKE.size_dh_public cs + List.Tot.length cipher in
+  let expected_pkcipher:lbytes clength = Seq.append (of_list pkE) (of_list cipher) in
+
 
   let sealBase = HPKE.sealBase cs (of_list skE) (of_list pkR) (of_list plain) (of_list aad) in
   let res_sealBase =
@@ -712,7 +715,6 @@ let test_encrytion (cs:HPKE.ciphersuite)
       IO.print_string "sealBase returned None\n"; false
     ) else (
       let returned_pkcipher:lbytes clength = Some?.v sealBase in
-      let expected_pkcipher:lbytes clength = Seq.append (of_list pkE) (of_list cipher) in
       let res = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b)
         expected_pkcipher returned_pkcipher in
       if not res then (
@@ -727,7 +729,28 @@ let test_encrytion (cs:HPKE.ciphersuite)
 
   if res_sealBase then IO.print_string "sealBase succeeded\n" else IO.print_string "sealBase failed\n";
 
-  res_sealBase
+  let openBase = HPKE.openBase cs (of_list skR) expected_pkcipher (of_list aad) in
+  let res_openBase =
+    if None? openBase then (
+      IO.print_string "openBase returned None\n"; false
+    ) else (
+      let returned_plain:lbytes (List.Tot.length plain) = Some?.v openBase in
+      let res = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b)
+        (of_list plain) returned_plain in
+      if not res then (
+        IO.print_string "\nExpected plain :";
+        List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) plain;
+        IO.print_string "\nComputed plain :";
+        List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list returned_plain);
+        IO.print_string "\n");
+       res
+     )
+  in
+
+  if res_openBase then IO.print_string "openBase succeeded\n" else IO.print_string "openBase failed\n";
+
+
+  res_sealBase && res_openBase
 
 
 //
@@ -759,7 +782,7 @@ let test () =
   assert_norm (List.Tot.length test1_plaintext == 29);
   assert_norm (List.Tot.length test1_aad0 <= HPKE.max_info);
 
-  let res_encrypt0 = test_encrytion cs1 test1_skE test1_pkR test1_pkE test1_plaintext
+  let res_encrypt0 = test_encrytion cs1 test1_skE test1_skR test1_pkR test1_pkE test1_plaintext
     test1_aad0 test1_cipher0 in
 
   IO.print_string "\nTest 2\n";
