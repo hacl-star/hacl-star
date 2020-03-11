@@ -43,6 +43,34 @@ friend Spec.Agile.HPKE
 // key: 11cf34f93b3d1e8f2e36f91c5a2d6818
 // nonce: 23acef669d7f3bcc98f6d0ab
 
+// sequence number: 0
+// plaintext: 4265617574792069732074727574682c20747275746820626561757479
+// aad: 436f756e742d30
+// nonce: 23acef669d7f3bcc98f6d0ab
+// ciphertext: 13fc68aef8e2c4591a0dd92c01ffe9573314d881cf71dd5708644ee71848
+// 18e457de3b4d51eb1deb4f0beb35d1
+
+// sequence number: 1
+// plaintext: 4265617574792069732074727574682c20747275746820626561757479
+// aad: 436f756e742d31
+// nonce: 23acef669d7f3bcc98f6d0aa
+// ciphertext: 2d7f0e514ce14abf93b0fcc34347e20d23008465c6f98aedc1f1fa806bfc
+// 07708ff20ae9989bb770b18493f3af
+
+// sequence number: 2
+// plaintext: 4265617574792069732074727574682c20747275746820626561757479
+// aad: 436f756e742d32
+// nonce: 23acef669d7f3bcc98f6d0a9
+// ciphertext: 3fa07d648ba64a5dd3816c2a512937c2a58b8428a1067b5ac15841541d5c
+// 6d28cd415faba7d552d606d6c5f48c
+
+// sequence number: 4
+// plaintext: 4265617574792069732074727574682c20747275746820626561757479
+// aad: 436f756e742d34
+// nonce: 23acef669d7f3bcc98f6d0af
+// ciphertext: 3aeeea18f990589141df055a90f382a8096dbdae8f912291cfeff475ede4
+// f9b023c3ce88f499f5a2dc44454241
+
 let test1_ciphersuite = DH.DH_Curve25519, AEAD.AES128_GCM, Hash.SHA2_256
 
 let test1_info = List.Tot.map u8_from_UInt8 [
@@ -215,6 +243,38 @@ let test1_nonce = List.Tot.map u8_from_UInt8 [
   0x23uy; 0xacuy; 0xefuy; 0x66uy; 0x9duy;
   0x7fuy; 0x3buy; 0xccuy; 0x98uy; 0xf6uy;
   0xd0uy; 0xabuy;
+]
+
+let test1_plaintext = List.Tot.map u8_from_UInt8 [
+  0x42uy; 0x65uy; 0x61uy; 0x75uy; 0x74uy;
+  0x79uy; 0x20uy; 0x69uy; 0x73uy; 0x20uy;
+  0x74uy; 0x72uy; 0x75uy; 0x74uy; 0x68uy;
+  0x2cuy; 0x20uy; 0x74uy; 0x72uy; 0x75uy;
+  0x74uy; 0x68uy; 0x20uy; 0x62uy; 0x65uy;
+  0x61uy; 0x75uy; 0x74uy; 0x79uy;
+]
+
+let test1_aad0 = List.Tot.map u8_from_UInt8 [
+  0x43uy; 0x6fuy; 0x75uy; 0x6euy; 0x74uy;
+  0x2duy; 0x30uy;
+]
+
+let test1_nonce0 = List.Tot.map u8_from_UInt8 [
+  0x23uy; 0xacuy; 0xefuy; 0x66uy; 0x9duy;
+  0x7fuy; 0x3buy; 0xccuy; 0x98uy; 0xf6uy;
+  0xd0uy; 0xabuy;
+]
+
+let test1_cipher0 = List.Tot.map u8_from_UInt8 [
+  0x13uy; 0xfcuy; 0x68uy; 0xaeuy; 0xf8uy;
+  0xe2uy; 0xc4uy; 0x59uy; 0x1auy; 0x0duy;
+  0xd9uy; 0x2cuy; 0x01uy; 0xffuy; 0xe9uy;
+  0x57uy; 0x33uy; 0x14uy; 0xd8uy; 0x81uy;
+  0xcfuy; 0x71uy; 0xdduy; 0x57uy; 0x08uy;
+  0x64uy; 0x4euy; 0xe7uy; 0x18uy; 0x48uy;
+  0x18uy; 0xe4uy; 0x57uy; 0xdeuy; 0x3buy;
+  0x4duy; 0x51uy; 0xebuy; 0x1duy; 0xebuy;
+  0x4fuy; 0x0buy; 0xebuy; 0x35uy; 0xd1uy;
 ]
 
 
