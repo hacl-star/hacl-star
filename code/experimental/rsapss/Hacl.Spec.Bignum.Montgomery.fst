@@ -241,6 +241,11 @@ let mod_inv_u64_lemma n0 =
   };
   assert ((1 + v vb * v n0) % pow2 64 == 0)
 
+//TODO: bn_set_bit
+let precomp_r2_mod_n #nLen n = admit()
+
+let precomp_r2_mod_n_lemma #nLen n = admit()
+
 
 ///
 ///  Low-level specification of Montgomery arithmetic

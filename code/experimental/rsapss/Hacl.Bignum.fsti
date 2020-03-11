@@ -120,6 +120,15 @@ val bn_is_bit_set:
     r == S.bn_is_bit_set (as_seq h0 b) (v i))
 
 
+val bn_bit_set:
+    len:size_t
+  -> b:lbignum len
+  -> i:size_t{v i / 64 < v len} ->
+  Stack unit
+  (requires fun h -> live h b)
+  (ensures  fun h0 _ h1 -> modifies (loc b) h0 h1 /\
+    as_seq h1 b == S.bn_bit_set (as_seq h0 b) (v i))
+
 ///
 ///  Conversion functions for bignum
 ///

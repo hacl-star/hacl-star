@@ -61,6 +61,10 @@ let bn_is_bit_set len input ind =
   let tmp = (tmp >>. j) &. u64 1 in
   eq_u64 tmp (u64 1)
 
+let bn_bit_set len input ind =
+  let i = ind /. 64ul in
+  let j = ind %. 64ul in
+  input.(i) <- input.(i) |. (u64 1 <<. j)
 
 let bn_from_bytes_be len b res =
   Hacl.Bignum.Convert.bn_from_bytes_be len b res

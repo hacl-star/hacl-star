@@ -96,6 +96,72 @@ let bn_is_bit_set_lemma #len b ind =
   };
   assert (v tmp2 == bn_v b / pow2 ind % 2)
 
+[@CInline]
+let bn_bit_set #len input ind =
+  let i = ind / 64 in
+  let j = ind % 64 in
+  let inp = input.[i] <- input.[i] |. (u64 1 <<. size j) in
+  inp
+
+
+val bn_bit_set_lemma_aux: a:nat -> b:nat -> c:nat -> d:nat -> Lemma
+  (requires a + b * pow2 c < pow2 (c + d) /\ a < pow2 c)
+  (ensures  b < pow2 d)
+let bn_bit_set_lemma_aux a b c d =
+  Math.Lemmas.lemma_div_lt_nat (a + b * pow2 c) (c + d) c;
+  assert ((a + b * pow2 c) / pow2 c < pow2 d);
+  Math.Lemmas.lemma_div_plus a b (pow2 c);
+  assert (a / pow2 c + b < pow2 d);
+  Math.Lemmas.small_division_lemma_1 a (pow2 c)
+
+
+let bn_bit_set_lemma #len input ind =
+  let i = ind / 64 in
+  let j = ind % 64 in
+  Math.Lemmas.euclidean_division_definition ind 64;
+  assert (bn_v input < pow2 (i * 64 + j));
+  Math.Lemmas.pow2_lt_compat (i * 64 + 64) (i * 64 + j);
+  bn_eval_split_i #len input (i + 1);
+  assert (bn_v input == bn_v (slice input 0 (i + 1)));
+  bn_eval_split_i #(i + 1) (slice input 0 (i + 1)) i;
+  //Seq.Properties.slice_slice input 0 (i + 1) 0 i;
+  //Seq.Properties.slice_slice input 0 (i + 1) i (i + 1);
+  assert (bn_v input == bn_v (slice input 0 i) + pow2 (i * 64) * bn_v (slice input i (i + 1)));
+  bn_eval_unfold_i #1 (slice input i (i + 1)) 1;
+  bn_eval0 #1 (slice input i (i + 1));
+  assert (bn_v input == bn_v (slice input 0 i) + pow2 (i * 64) * v input.[i]);
+  bn_eval_bound #i (slice input 0 i) i;
+  bn_bit_set_lemma_aux (bn_v (slice input 0 i)) (v input.[i]) (i * 64) j;
+  assert (v input.[i] < pow2 j);
+
+  let b = u64 1 <<. size j in
+  let inp = input.[i] <- input.[i] |. b in
+  FStar.Math.Lemmas.pow2_lt_compat 64 j;
+  FStar.Math.Lemmas.modulo_lemma (pow2 j) (pow2 64);
+  assert (v b == pow2 j);
+  logor_disjoint (input.[i]) b j;
+  assert (v inp.[i] == v input.[i] + v b);
+
+  calc (==) {
+    bn_v inp;
+    (==) { bn_eval_split_i #len inp (i + 1) }
+    bn_v (slice inp 0 (i + 1));
+    (==) { bn_eval_split_i #(i + 1) (slice inp 0 (i + 1)) i }
+    bn_v (slice inp 0 i) + pow2 (i * 64) * bn_v (slice inp i (i + 1));
+    (==) { bn_eval_unfold_i #1 (slice inp i (i + 1)) 1; bn_eval0 #1 (slice inp i (i + 1)) }
+    bn_v (slice inp 0 i) + pow2 (i * 64) * v inp.[i];
+    (==) { bn_eval_extensionality_j input inp i }
+    bn_v (slice input 0 i) + pow2 (i * 64) * v inp.[i];
+    (==) { }
+    bn_v (slice input 0 i) + pow2 (i * 64) * (v input.[i] + v b);
+    (==) { Math.Lemmas.distributivity_add_right (pow2 (i * 64)) (v input.[i]) (v b) }
+    bn_v (slice input 0 i) + pow2 (i * 64) * v input.[i] + pow2 (i * 64) * v b;
+    (==) { Math.Lemmas.pow2_plus (i * 64) j; Math.Lemmas.euclidean_division_definition ind 64 }
+    bn_v (slice input 0 i) + pow2 (i * 64) * v input.[i] + pow2 ind;
+    (==) { }
+    bn_v input + pow2 ind;
+  }
+
 
 let bn_from_bytes_be len b =
   Hacl.Spec.Bignum.Convert.bn_from_bytes_be len b
