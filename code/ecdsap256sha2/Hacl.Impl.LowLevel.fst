@@ -971,41 +971,97 @@ let sq1 f f4 result memory tempBuffer =
   c3 +! h_3 +! c4
 
 
-val sq2: f1: felem -> f3: felem -> result: felem  -> memory: lbuffer uint64 (size 12) -> temp: lbuffer uint64 (size 5) -> 
+val sq2: f: felem -> f4: felem -> result: felem  -> memory: lbuffer uint64 (size 12) -> temp: lbuffer uint64 (size 5) -> 
   Stack uint64 
-  (requires fun h -> live h f1 /\ live h f3 /\ live h result /\ live h temp /\ live h memory /\ eq_or_disjoint f3 result /\ disjoint f1 result /\ disjoint temp result)
-  (ensures fun h0 c h1 -> modifies (loc result) h0 h1)
+  (requires fun h -> live h f /\ live h f4 /\ live h result /\ live h temp /\ live h memory /\ eq_or_disjoint f4 result /\ disjoint f4 memory /\ disjoint f4 temp /\ disjoint f result /\ disjoint temp result /\ disjoint memory temp /\ disjoint memory result /\
+    (
 
-let sq2 f_ f4 result memory tempBuffer = 
+      let f0 = Lib.Sequence.index (as_seq h f) 0 in 
+      let f1 = Lib.Sequence.index (as_seq h f) 1  in 
+      let f2 = Lib.Sequence.index (as_seq h f) 2 in 
+      let f3 = Lib.Sequence.index (as_seq h f) 3 in 
+    
+      let memory = as_seq h memory in 
+      let m2 = Lib.Sequence.index memory 2 in 
+      let m3 = Lib.Sequence.index memory 3 in 
+      let m4 = Lib.Sequence.index memory 4 in 
+      let m5 = Lib.Sequence.index memory 5 in 
+      let m6 = Lib.Sequence.index memory 6 in 
+      let m7 = Lib.Sequence.index memory 7 in 
+      let m8 = Lib.Sequence.index memory 8 in 
+      let m9 = Lib.Sequence.index memory 9 in 
+
+      uint_v m2 + uint_v m3 * pow2 64 == uint_v f0 * uint_v f2 /\
+      uint_v m4 + uint_v m5 * pow2 64 == uint_v f0 * uint_v f3 /\
+      
+      uint_v m6 + uint_v m7 * pow2 64 == uint_v f1 * uint_v f2 /\
+      uint_v m8 + uint_v m9 * pow2 64 == uint_v f1 * uint_v f3   
+    )
+)
+ (ensures fun h0 c h1 -> modifies (loc result |+| loc memory |+| loc temp) h0 h1   /\
+       (
+
+      let f0 = Lib.Sequence.index (as_seq h0 f) 0 in 
+      let f1 = Lib.Sequence.index (as_seq h0 f) 1  in 
+      let f2 = Lib.Sequence.index (as_seq h0 f) 2 in 
+      let f3 = Lib.Sequence.index (as_seq h0 f) 3 in 
+    
+      let memory = as_seq h1 memory in 
+      let m4 = Lib.Sequence.index memory 4 in 
+      let m5 = Lib.Sequence.index memory 5 in 
+      let m8 = Lib.Sequence.index memory 8 in 
+      let m9 = Lib.Sequence.index memory 9 in 
+      let m10 = Lib.Sequence.index memory 10 in 
+      let m11 = Lib.Sequence.index memory 11 in 
+
+      uint_v m4 + uint_v m5 * pow2 64 == uint_v f0 * uint_v f3 /\
+      uint_v m8 + uint_v m9 * pow2 64 == uint_v f1 * uint_v f3 /\ 
+      uint_v m10 + uint_v m11 * pow2 64 == uint_v f2 * uint_v f3
+    )  
+ )
+
+
+let sq2 f f4 result memory tempBuffer = 
+  let h0 = ST.get() in 
+  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
   
   let temp = sub tempBuffer (size 0) (size 1) in 
-  let result_ = sub tempBuffer  (size 1) (size 4) in 
+  let tempBufferResult = sub tempBuffer  (size 1) (size 4) in 
 
-  let f0 = index f_ (size 0) in 
-  let f1 = index f_ (size 1) in 
-  let f2 = index f_ (size 2) in 
-  let f3 = index f_ (size 3) in 
+  let f0 = index f (size 0) in 
+  let f1 = index f (size 1) in 
+  let f2 = index f (size 2) in 
+  let f3 = index f (size 3) in 
     
-  let o0 = sub result_ (size 0) (size 1) in 
-  let o1 = sub result_ (size 1) (size 1) in 
-  let o2 = sub result_ (size 2) (size 1) in 
-  let o3 = sub result_ (size 3) (size 1) in 
-  
-  upd o0 (size 0) (index memory (size 2));
-  let h = index memory (size 3) in 
+  let o0 = sub tempBufferResult (size 0) (size 1) in 
+  let o1 = sub tempBufferResult (size 1) (size 1) in 
+  let o2 = sub tempBufferResult (size 2) (size 1) in 
+  let o3 = sub tempBufferResult (size 3) (size 1) in 
+
+  upd o0 (size 0) (index memory (size 2)); 
+  let h_0 = index memory (size 3) in 
 
   upd o1 (size 0) (index memory (size 6));
+  let h1 = ST.get() in 
+  
+
   let l = index o1 (size 0) in     
-  
-  let c1 = add_carry_u64 (u64 0) l h o1 in 
+  let c1 = add_carry_u64 (u64 0) l h_0 o1 in 
+
+  let h2 = ST.get() in 
+    assert(uint_v (Lib.Sequence.index (as_seq h1 o0) 0) + uint_v h_0 * pow2 64 = uint_v f0 * uint_v f2);
+    assert(uint_v (Lib.Sequence.index (as_seq h1 o1) 0) = uint_v (Lib.Sequence.index (as_seq h0 memory) 6));
+    admit();
+
+ 
   let h = index memory (size 7) in 
-  
+
   mul64 f2 f2 o2 temp;
   let l = index o2 (size 0) in     
   let c2 = add_carry_u64 c1 l h o2 in
   let h = index temp (size 0) in 
   
-  mul64 f2 f3 o3 temp;
+  mul64 f2 f3 o3 temp; 
   let l = index o3 (size 0) in   
   upd memory (size 10) l;
   upd memory (size 11) (index temp (size 0));
@@ -1013,9 +1069,8 @@ let sq2 f_ f4 result memory tempBuffer =
   let c3 = add_carry_u64 c2 l h o3 in
   let temp0 = index temp (size 0) in 
 
-  let c4 = add4 result_ f4 result in 
-  admit();
-  pop_frame();  
+  let c4 = add4 tempBufferResult f4 result in  
+  assume (uint_v c3 + uint_v temp0 + uint_v c4 < pow2 64);
   c3 +! temp0 +! c4
 
 
