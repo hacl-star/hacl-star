@@ -277,7 +277,6 @@ let test1_cipher0 = List.Tot.map u8_from_UInt8 [
   0x4fuy; 0x0buy; 0xebuy; 0x35uy; 0xd1uy;
 ]
 
-
 // DHKEM(P-256), HKDF-SHA256, ChaCha20Poly1305
 // Base Setup
 // mode: 0
@@ -693,8 +692,43 @@ let test_base_setup
 
   if res_setupBaseR then IO.print_string "setupBaseR succeeded\n" else IO.print_string "setupBaseR failed\n";
 
-
   res_setupBaseI && res_setupBaseR
+
+let test_encrytion (cs:HPKE.ciphersuite)
+  (skE:list uint8{List.Tot.length skE == HPKE.size_dh_key cs})
+  (pkR:list uint8{List.Tot.length pkR == HPKE.size_dh_public cs})
+  (pkE:list uint8{List.Tot.length pkE == HPKE.size_dh_public cs})
+  (plain:list uint8{List.Tot.length plain <= HPKE.max_length cs})
+  (aad:list uint8{List.Tot.length aad <= HPKE.max_info})
+  (cipher:list uint8{
+    List.Tot.length cipher + HPKE.size_dh_public cs <= max_size_t /\
+    List.Tot.length cipher == AEAD.cipher_length #(HPKE.aead_of_cs cs) (of_list plain)})
+  =
+  let clength = HPKE.size_dh_public cs + List.Tot.length cipher in
+
+  let sealBase = HPKE.sealBase cs (of_list skE) (of_list pkR) (of_list plain) (of_list aad) in
+  let res_sealBase =
+    if None? sealBase then (
+      IO.print_string "sealBase returned None\n"; false
+    ) else (
+      let returned_pkcipher:lbytes clength = Some?.v sealBase in
+      let expected_pkcipher:lbytes clength = Seq.append (of_list pkE) (of_list cipher) in
+      let res = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b)
+        expected_pkcipher returned_pkcipher in
+      if not res then (
+        IO.print_string "\nExpected pkE + cipher :";
+        List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list expected_pkcipher);
+        IO.print_string "\nComputed pkE + cipher :";
+        List.iter (fun a -> IO.print_string (UInt8.to_string (u8_to_UInt8 a))) (to_list returned_pkcipher);
+        IO.print_string "\n");
+       res
+     )
+  in
+
+  if res_sealBase then IO.print_string "sealBase succeeded\n" else IO.print_string "sealBase failed\n";
+
+  res_sealBase
+
 
 //
 // Main
@@ -721,7 +755,14 @@ let test () =
   let res1 = test_base_setup cs1 test1_info test1_skR test1_skI test1_skE test1_psk test1_pskID
     test1_pkR test1_pkI test1_pkE test1_enc test1_zz test1_context test1_secret test1_key test1_nonce in
 
+  assert_norm (List.Tot.length test1_cipher0 == 45);
+  assert_norm (List.Tot.length test1_plaintext == 29);
+  assert_norm (List.Tot.length test1_aad0 <= HPKE.max_info);
+
+  let res_encrypt0 = test_encrytion cs1 test1_skE test1_pkR test1_pkE test1_plaintext
+    test1_aad0 test1_cipher0 in
+
   IO.print_string "\nTest 2\n";
   IO.print_string "\nTODO: Investigate the length mismatch on public keys for P-256\n";
 
-  res1
+  res1 && res_encrypt0
