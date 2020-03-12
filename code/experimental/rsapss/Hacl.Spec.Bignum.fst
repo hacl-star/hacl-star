@@ -52,14 +52,17 @@ let bn_sub_mask_lemma #len n a =
   assert (n == a ==> v mask == v (ones U64 SEC));
   assert (n =!= a ==> v mask == v (zeros U64 SEC));
   let mod_mask = map (logand mask) n in
-  assert (forall (i:nat{i < len}). mod_mask.[i] == (mask &. n.[i]));
-  assume (bn_v mod_mask == (if bn_v a = bn_v n then bn_v n else 0));
+  bn_mask_lemma n mask;
+  assert (n == a ==> bn_v mod_mask == bn_v n);
+  assert (n =!= a ==> bn_v mod_mask == 0);
 
   let c, res = Hacl.Spec.Bignum.Addition.bn_sub a mod_mask in
   Hacl.Spec.Bignum.Addition.bn_sub_lemma a mod_mask;
   assert (bn_v res - v c * pow2 (64 * len) == bn_v a - bn_v mod_mask);
   bn_eval_bound res len;
-  assert (bn_v res == bn_v a - bn_v mod_mask)
+  assert (bn_v res == bn_v a - bn_v mod_mask);
+
+  Classical.move_requires_2 (bn_eval_inj len) n a
 
 
 [@CInline]
