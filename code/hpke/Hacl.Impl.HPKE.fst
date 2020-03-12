@@ -40,7 +40,7 @@ inline_for_extraction noextract
 let nsize_dh_public (cs:S.ciphersuite) : (s:size_t{v s == S.size_dh_public cs}) =
   match cs with
   | SDH.DH_Curve25519, _, _ -> 32ul
-  | SDH.DH_P256, _, _ -> 64ul
+  | SDH.DH_P256, _, _ -> 65ul
 
 inline_for_extraction noextract
 let nsize_dh_key (cs:S.ciphersuite) : (s:size_t{v s == S.size_dh_key cs}) =
@@ -72,6 +72,41 @@ let combine_error_codes (r1 r2:UInt32.t) : Pure UInt32.t
     assert_norm (UInt32.logor 1ul 1ul == 1ul);
     UInt32.logor r1 r2
 
+inline_for_extraction noextract
+val point_compress:
+     #cs:S.ciphersuite
+  -> pk: key_dh_public cs
+  -> ST (lbuffer uint8 (DH.nsize_public (S.curve_of_cs cs)))
+    (requires fun h -> live h pk)
+    (ensures fun h0 b h1 -> live h1 b /\ h0 == h1 /\
+      (match S.curve_of_cs cs with
+      | SDH.DH_Curve25519 -> b == pk
+      | SDH.DH_P256 -> b == gsub pk 1ul 64ul))
+
+let point_compress #cs pk =
+  match cs with
+  | SDH.DH_Curve25519, _, _ -> pk
+  | SDH.DH_P256, _, _ -> sub pk 1ul 64ul
+
+inline_for_extraction noextract
+val point_decompress:
+     #cs:S.ciphersuite
+  -> b:lbuffer uint8 (DH.nsize_public (S.curve_of_cs cs))
+  -> pk:key_dh_public cs
+  -> ST unit
+    (requires fun h -> live h pk /\ live h b /\
+      (match S.curve_of_cs cs with
+       | SDH.DH_Curve25519 -> b == pk
+       | SDH.DH_P256 -> b == gsub pk 1ul 64ul)
+    )
+    (ensures fun h0 _ h1 -> modifies (loc pk) h0 h1 /\
+      as_seq h1 pk `Seq.equal` S.point_decompress cs (as_seq h0 b))
+
+let point_decompress #cs b pk =
+  match cs with
+  | SDH.DH_Curve25519, _, _ -> ()
+  | SDH.DH_P256, _, _ -> upd pk 0ul (u8 4)
+
 noextract
 val encap:
      #cs:S.ciphersuite
@@ -99,8 +134,12 @@ val encap:
 #push-options "--z3rlimit 100 --fuel 0 --ifuel 0"
 [@ Meta.Attribute.inline_]
 let encap #cs o_zz o_pkE skE pkR =
-  let res1 = DH.secret_to_public #cs o_pkE skE in
-  let res2 = DH.dh #cs o_zz skE pkR in
+  let o_pkE' = point_compress o_pkE in
+  let o_zz' = point_compress o_zz in
+  let res1 = DH.secret_to_public #cs o_pkE' skE in
+  let res2 = DH.dh #cs o_zz' skE (point_compress pkR) in
+  point_decompress o_zz' o_zz;
+  point_decompress o_pkE' o_pkE;
   combine_error_codes res1 res2
 #pop-options
 
@@ -125,7 +164,11 @@ val decap:
     )
 
 [@ Meta.Attribute.inline_ ]
-let decap #cs o_pkR pkE skR = DH.dh #cs o_pkR skR pkE
+let decap #cs o_pkR pkE skR =
+  let o_pkR' = point_compress o_pkR in
+  let res = DH.dh #cs o_pkR' skR (point_compress pkE) in
+  point_decompress o_pkR' o_pkR;
+  res
 
 noextract inline_for_extraction
 val id_kem (cs:S.ciphersuite) (output:lbuffer uint8 2ul):
@@ -373,8 +416,10 @@ let setupBaseI #cs o_pkE o_k o_n skE pkR infolen info =
 let setupBaseR #cs o_key_aead o_nonce_aead pkE skR infolen info =
   push_frame();
   let pkR = create (nsize_dh_public cs) (u8 0) in
+  let pkR' = point_compress pkR in
   let zz = create (nsize_dh_public cs) (u8 0) in
-  let res1 = DH.secret_to_public #cs pkR skR in
+  let res1 = DH.secret_to_public #cs pkR' skR in
+  point_decompress pkR' pkR;
   let res2 = decap zz pkE skR in
   ks_derive_default pkR zz pkE infolen info o_key_aead o_nonce_aead;
   pop_frame();

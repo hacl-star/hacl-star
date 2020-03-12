@@ -126,7 +126,7 @@ let encap cs skE pkR =
   let pkE = DH.secret_to_public (curve_of_cs cs) skE in
   let zz = DH.dh (curve_of_cs cs) skE (point_compress cs pkR) in
   match pkE, zz with
-  | Some pkE, Some zz -> Some (zz, point_decompress cs pkE)
+  | Some pkE, Some zz -> Some (point_decompress cs zz, point_decompress cs pkE)
   | _ -> None
 
 /// def Decap(enc, skR):
@@ -290,7 +290,7 @@ let setupBaseR cs pkE skR info =
   let zz = decap cs pkE skR in
   match pkR, zz with
   | Some pkR, Some zz ->
-    Some (ks_derive cs Base pkR zz pkE info None None)
+    Some (ks_derive cs Base (point_decompress cs pkR) zz pkE info None None)
   | _ -> None
 
 
@@ -313,7 +313,7 @@ let setupAuthI cs skE skI pkR info =
   let res = auth_encap cs skE skI pkR in
   match pkI, res with
   | Some pkI, Some (zz, pkE) ->
-    let k, n = ks_derive cs Auth pkR zz pkE info None (Some (point_compress cs pkI)) in
+    let k, n = ks_derive cs Auth pkR zz pkE info None (Some (point_decompress cs pkI)) in
     Some (pkE, k, n)
   | _ -> None
 
@@ -337,7 +337,7 @@ let setupAuthR cs pkE pkI skR info =
   let zz = auth_decap cs pkE pkI skR in
   match pkR, zz with
   | Some pkR, Some zz ->
-    Some (ks_derive cs Auth (point_compress cs pkR) zz pkE info None (Some pkI))
+    Some (ks_derive cs Auth (point_decompress cs pkR) zz pkE info None (Some pkI))
   | _ -> None
 
 /// def SetupAuthPSKI(pkR, info, psk, pskID, skI):
@@ -360,7 +360,7 @@ let setupAuthPSKI cs skE skI pkR psk pskID info =
   let res = auth_encap cs skE skI pkR in
   match pkI, res with
   | Some pkI, Some (zz, pkE) ->
-    let k, n = ks_derive cs PSKAuth pkR zz pkE info (Some (psk, pskID)) (Some (point_compress cs pkI)) in
+    let k, n = ks_derive cs PSKAuth pkR zz pkE info (Some (psk, pskID)) (Some (point_decompress cs pkI)) in
     Some (pkE, k, n)
   | _ -> None
 
@@ -385,7 +385,7 @@ let setupPSKAuthR cs pkE pkI skR psk pskID info =
   let zz = auth_decap cs pkE pkI skR in
   match pkR, zz with
   | Some pkR, Some zz ->
-    Some (ks_derive cs PSKAuth (point_compress cs pkR) zz pkE info (Some (psk, pskID)) (Some pkI))
+    Some (ks_derive cs PSKAuth (point_decompress cs pkR) zz pkE info (Some (psk, pskID)) (Some pkI))
   | _ -> None
 
 
