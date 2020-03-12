@@ -8,4 +8,3 @@ let _ =
    Format.printf "#include \"Hacl_Curve25519_51.h\"\n");
   Cstubs.write_c Format.std_formatter ~prefix:""
     (module Hacl_Curve25519_51_bindings.Bindings)
-  

@@ -1,6 +1,13 @@
 # This Makefile can be safely included from sub-directories for the purposes of
 # defining the .fst-in targets, as long as the sub-directory defines HACL_HOME.
 
+# Define a newline variable for error messages.
+# The two empty lines are needed.
+define newline
+
+
+endef
+
 HACL_HOME 	?= .
 
 # Put your local configuration (e.g. HACL_HOME, KREMLIN_HOME, etc.) in

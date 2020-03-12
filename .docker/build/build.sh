@@ -48,7 +48,7 @@ function hacl_test() {
           cd dist
           r=true
           for a in *; do
-            if [[ $a != "kremlin" && $a != "vale" && $a != "linux" && -d $a ]]; then
+            if [[ $a != "kremlin" && $a != "vale" && $a != "linux" && $a != "merkle-tree" && -d $a ]]; then
               echo "Building snapshot: $a"
               make -C $a -j $threads || r=false
               echo
@@ -298,6 +298,10 @@ function exec_build() {
 export OCAMLRUNPARAM=b
 export OTHERFLAGS="--use_hints --query_stats"
 export MAKEFLAGS="$MAKEFLAGS -Otarget"
+if [[ "$OS" != "Windows_NT" ]]; then
+    export CC=gcc-7
+    export CXX=g++-7
+fi
 
 export_home FSTAR "$(pwd)/FStar"
 cd hacl-star

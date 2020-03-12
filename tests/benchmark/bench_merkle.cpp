@@ -9,6 +9,25 @@ extern "C" {
 #include "MerkleTree.h"
 }
 
+static const size_t hash_size = 32;
+
+void full_sha256(uint8_t *src1, uint8_t *src2, uint8_t *dst) {
+  uint32_t buf3[8U];
+  uint32_t init = (uint32_t)0U;
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
+    buf3[i] = init;
+  EverCrypt_Hash_state_s st = (
+            (EverCrypt_Hash_state_s){
+              .tag = EverCrypt_Hash_SHA2_256_s,
+              { .case_SHA2_256_s = buf3 }
+            }
+          );
+  EverCrypt_Hash_init(&st);
+  EverCrypt_Hash_update(&st, src1);
+  EverCrypt_Hash_update(&st, src2);
+  EverCrypt_Hash_finish(&st, dst);
+}
+
 class MerkleInsert : public Benchmark
 {
   protected:
@@ -26,14 +45,15 @@ class MerkleInsert : public Benchmark
     virtual void bench_setup(const BenchmarkSettings & s)
     {
       Benchmark::bench_setup(s);
-      uint8_t *ih = init_hash();
+      uint8_t *ih = mt_init_hash(hash_size);
       tree = mt_create(ih);
-      free_hash(ih);
+      // tree = mt_create_custom(32, ih, &full_sha256);
+      mt_free_hash(ih);
 
       hashes.resize(num_nodes, NULL);
       for (uint64_t i = 0; i < num_nodes; i++)
       {
-        hashes[i] = init_hash();
+        hashes[i] = mt_init_hash(hash_size);
         for (size_t j = 0; j < 8; j++)
            *(hashes[i] + j) = rand() % 8;
       }
@@ -55,7 +75,7 @@ class MerkleInsert : public Benchmark
     virtual void bench_cleanup(const BenchmarkSettings & s)
     {
       for (uint64_t i = 0; i < num_nodes; i++)
-        free_hash(hashes[i]);
+        mt_free_hash(hashes[i]);
       mt_free(tree);
       Benchmark::bench_cleanup(s);
     }
@@ -74,7 +94,7 @@ class MerklePathExtraction : public Benchmark
     size_t num_nodes = 0;
     merkle_tree *tree;
     std::vector<uint8_t*> hashes;
-    std::vector<hash_vec*> paths;
+    std::vector<MerkleTree_Low_path*> paths;
     std::vector<uint8_t*> roots;
 
   public:
@@ -87,15 +107,16 @@ class MerklePathExtraction : public Benchmark
     virtual void bench_setup(const BenchmarkSettings & s)
     {
       Benchmark::bench_setup(s);
-      uint8_t *ih = init_hash();
+      uint8_t *ih = mt_init_hash(hash_size);
       tree = mt_create(ih);
-      free_hash(ih);
+      //tree = mt_create_custom(32, ih, &full_sha256);
+      mt_free_hash(ih);
 
       hashes.resize(num_nodes, NULL);
       for (uint64_t i = 0; i < num_nodes; i++)
       {
-        uint8_t *hash = init_hash();
-        hashes[i] = init_hash();
+        uint8_t *hash = mt_init_hash(hash_size);
+        hashes[i] = mt_init_hash(hash_size);
         for (size_t j = 0; j < 8; j++)
            *(hashes[i] + j) = rand() % 8;
         #ifdef _DEBUG
@@ -109,8 +130,8 @@ class MerklePathExtraction : public Benchmark
       roots.resize(num_nodes);
       for (uint64_t i = 0; i < num_nodes; i++)
       {
-        roots[i] = init_hash();
-        paths[i] = init_path();
+        roots[i] = mt_init_hash(hash_size);
+        paths[i] = mt_init_path(hash_size);
       }
     }
 
@@ -130,10 +151,9 @@ class MerklePathExtraction : public Benchmark
     {
       for (uint64_t i = 0; i < num_nodes; i++)
       {
-        clear_path(paths[i]);
-        free_path(paths[i]);
-        free_hash(roots[i]);
-        free_hash(hashes[i]);
+        mt_free_path(paths[i]);
+        mt_free_hash(roots[i]);
+        mt_free_hash(hashes[i]);
       }
       mt_free(tree);
       Benchmark::bench_cleanup(s);
@@ -153,7 +173,7 @@ class MerklePathVerification : public Benchmark
     size_t num_nodes = 0;
     merkle_tree *tree;
     std::vector<uint8_t*> hashes;
-    std::vector<hash_vec*> paths;
+    std::vector<MerkleTree_Low_path*> paths;
     std::vector<uint8_t*> roots;
     std::vector<uint32_t> js;
 
@@ -167,15 +187,16 @@ class MerklePathVerification : public Benchmark
     virtual void bench_setup(const BenchmarkSettings & s)
     {
       Benchmark::bench_setup(s);
-      uint8_t *ih = init_hash();
+      uint8_t *ih = mt_init_hash(hash_size);
       tree = mt_create(ih);
-      free_hash(ih);
+      //tree = mt_create_custom(32, ih, &full_sha256);
+      mt_free_hash(ih);
 
       hashes.resize(num_nodes, NULL);
       for (uint64_t i = 0; i < num_nodes; i++)
       {
-        uint8_t *hash = init_hash();
-        hashes[i] = init_hash();
+        uint8_t *hash = mt_init_hash(hash_size);
+        hashes[i] = mt_init_hash(hash_size);
         for (size_t j = 0; j < 8; j++)
            *(hashes[i] + j) = rand() % 8;
         #ifdef _DEBUG
@@ -190,8 +211,8 @@ class MerklePathVerification : public Benchmark
       js.resize(num_nodes);
       for (uint64_t i = 0; i < num_nodes; i++)
       {
-        roots[i] = init_hash();
-        paths[i] = init_path();
+        roots[i] = mt_init_hash(hash_size);
+        paths[i] = mt_init_path(hash_size);
 
         #ifdef _DEBUG
         if (!mt_get_path_pre(tree, i, paths[i], roots[i]))
@@ -222,10 +243,9 @@ class MerklePathVerification : public Benchmark
     {
       for (uint64_t i = 0; i < num_nodes; i++)
       {
-        clear_path(paths[i]);
-        free_path(paths[i]);
-        free_hash(roots[i]);
-        free_hash(hashes[i]);
+        mt_free_path(paths[i]);
+        mt_free_hash(roots[i]);
+        mt_free_hash(hashes[i]);
       }
       mt_free(tree);
       Benchmark::bench_cleanup(s);

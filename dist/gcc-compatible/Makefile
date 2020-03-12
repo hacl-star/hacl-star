@@ -78,6 +78,8 @@ include Makefile.basic
 
 CFLAGS		+= -Wno-parentheses -Wno-deprecated-declarations -g -std=gnu11 -O3
 
+%_c_stubs.o: CFLAGS += -Wno-pointer-sign
+
 Hacl_Blake2s_128.o Hacl_Poly1305_128.o Hacl_Chacha20_Vec128.o Hacl_Chacha20Poly1305_128.o: CFLAGS += -mavx
 Hacl_Blake2b_256.o Hacl_Poly1305_256.o Hacl_Chacha20_Vec256.o Hacl_Chacha20Poly1305_256.o: CFLAGS += -mavx -mavx2
 
@@ -159,6 +161,10 @@ endif
 
 lib/%_stubs.ml lib/%_c_stubs.c: lib_gen/%_gen.exe
 	$(DY)PATH=.:$(OPENSSL_HOME):$$$(DY)PATH $<
+
+# Compiling these files raises the pointer sign warning because the Ctypes declaration for bytes expects a char*, not a uint8_t*
+# Can be remove once ctypes is upgraded to 0.17
+lib/%_c_stubs.o: CFLAGS += -Wno-pointer-sign
 
 CTYPES_DEPS += lib/Lib_RandomBuffer_System_stubs.cmx lib/Lib_RandomBuffer_System_bindings.cmx
 

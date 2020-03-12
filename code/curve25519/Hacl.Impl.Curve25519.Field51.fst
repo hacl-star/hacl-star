@@ -129,7 +129,7 @@ let copy_felem f1 f2 =
 
 #set-options "--max_fuel 0 --max_ifuel 0"
 
-val fadd: C.(fadd_t M51)
+val fadd: C.(fadd_t M51 True)
 [@ CInline]
 let fadd out f1 f2 =
   let h0 = ST.get () in
@@ -155,7 +155,7 @@ let fadd out f1 f2 =
   FStar.Math.Lemmas.lemma_mod_plus_distr_r
     (as_nat h0 f1 % P.prime) (as_nat h0 f2) P.prime
 
-val fsub: C.(fsub_t M51)
+val fsub: C.(fsub_t M51 True)
 [@ CInline]
 let fsub out f1 f2 =
   let f10 = f1.(0ul) in
@@ -175,7 +175,7 @@ let fsub out f1 f2 =
   out.(4ul) <- f14 +! u64 0x3ffffffffffff8 -! f24;
   lemma_fsub (f10, f11, f12, f13, f14) (f20, f21, f22, f23, f24)
 
-val fmul: C.(fmul_t M51)
+val fmul: C.(fmul_t M51 True)
 [@ CInline]
 let fmul out f1 f2 _ =
   let f10 = f1.(0ul) in
@@ -198,7 +198,7 @@ let fmul out f1 f2 _ =
   out.(3ul) <- o3;
   out.(4ul) <- o4
 
-val fmul2: C.(fmul2_t M51)
+val fmul2: C.(fmul2_t M51 True)
 #set-options "--z3rlimit 100"
 
 [@ CInline]
@@ -243,7 +243,7 @@ let fmul2 out f1 f2 _ =
   out.(8ul) <- o23;
   out.(9ul) <- o24
 
-val fmul1: C.(fmul1_t M51)
+val fmul1: C.(fmul1_t M51 True)
 [@ CInline]
 let fmul1 out f1 f2 =
   let f10 = f1.(0ul) in
@@ -258,7 +258,7 @@ let fmul1 out f1 f2 =
   out.(3ul) <- o3;
   out.(4ul) <- o4
 
-val fsqr: C.(fsqr_t M51)
+val fsqr: C.(fsqr_t M51 True)
 [@ CInline]
 let fsqr out f _ =
   let f0 = f.(0ul) in
@@ -273,7 +273,7 @@ let fsqr out f _ =
   out.(3ul) <- o3;
   out.(4ul) <- o4
 
-val fsqr2: C.(fsqr2_t M51)
+val fsqr2: C.(fsqr2_t M51 True)
 [@ CInline]
 let fsqr2 out f _ =
   let f10 = f.(0ul) in
@@ -356,7 +356,7 @@ let store_felem u64s f =
   Hacl.Impl.Curve25519.Lemmas.lemma_nat_from_uints64_le_4 (as_seq h1 u64s);
   BSeq.lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h1 u64s)
 
-val cswap2: C.(cswap2_t M51)
+val cswap2: C.(cswap2_t M51 True)
 [@ CInline]
 let cswap2 bit p1 p2 =
   let h0 = ST.get () in
