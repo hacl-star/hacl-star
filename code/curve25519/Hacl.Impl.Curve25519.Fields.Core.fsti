@@ -254,8 +254,8 @@ let fmul2_t (s:field_spec) (p: Type0) =
     (requires fun h ->
      p /\
       live h out /\ live h f1 /\ live h f2 /\ live h tmp /\
-      (disjoint out f1) /\
-      (disjoint out f2) /\
+      (disjoint out f1 \/ out == f1) /\
+      (disjoint out f2 \/ out == f2) /\
       (disjoint out tmp) /\
       (disjoint f1 f2 \/ f1 == f2) /\
       disjoint f1 tmp /\
