@@ -781,6 +781,8 @@ let test1 () =
   assert_norm (List.Tot.length test1_plaintext == 29);
   assert_norm (List.Tot.length test1_aad0 <= HPKE.max_info);
 
+  // Cannot be called because Vale has assumed functions in its AES-GCM spec, and
+  // tests on the implementation instead
   // let res_encrypt0 = test_encrytion cs1 test1_skE test1_skR test1_pkR test1_pkE test1_plaintext
   //   test1_aad0 test1_cipher0 in
 
@@ -789,7 +791,6 @@ let test1 () =
 
 let test2 () =
   IO.print_string "\nTest 2\n";
-  IO.print_string "\nTODO: Investigate the length mismatch on public keys for P-256\n";
 
   let cs2 = test2_ciphersuite in
 
@@ -797,6 +798,11 @@ let test2 () =
   assert_norm (List.Tot.length test2_skR == HPKE.size_dh_key cs2);
   assert_norm (List.Tot.length test2_skI == HPKE.size_dh_key cs2);
   assert_norm (List.Tot.length test2_skE == HPKE.size_dh_key cs2);
+
+  assert_norm (List.Tot.length test2_pkR == HPKE.size_dh_public cs2);
+  assert_norm (List.Tot.length test2_pkI == HPKE.size_dh_public cs2);
+  assert_norm (List.Tot.length test2_pkE == HPKE.size_dh_public cs2);
+//  assert_norm (List.Tot.length test2_zz == HPKE.size_dh_public cs2);
 
   true
 

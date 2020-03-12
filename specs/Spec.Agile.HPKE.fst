@@ -90,6 +90,26 @@ let id_of_mode m =
   | Auth -> create 1 (u8 2)
   | PSKAuth -> create 1 (u8 3)
 
+val point_compress:
+    cs:ciphersuite
+  -> pk:key_dh_public_s cs ->
+  Tot (DH.serialized_point (curve_of_cs cs))
+
+let point_compress cs pk = match curve_of_cs cs with
+  | DH.DH_Curve25519 -> pk
+  // Extract the point coordinates by removing the first representation byte
+  | DH.DH_P256 -> sub pk 1 64
+
+val point_decompress:
+    cs:ciphersuite
+  -> pk:DH.serialized_point (curve_of_cs cs) ->
+  Tot (key_dh_public_s cs)
+
+let point_decompress cs pk = match curve_of_cs cs with
+  | DH.DH_Curve25519 -> pk
+  // Add the first representation byte to the point coordinates
+  | DH.DH_P256 -> create 1 (u8 4) @| pk
+
 /// def Encap(pkR):
 ///     skE, pkE = GenerateKeyPair()
 ///     zz = DH(skE, pkR)
@@ -104,11 +124,10 @@ val encap:
 
 let encap cs skE pkR =
   let pkE = DH.secret_to_public (curve_of_cs cs) skE in
-  let zz = DH.dh (curve_of_cs cs) skE pkR in
+  let zz = DH.dh (curve_of_cs cs) skE (point_compress cs pkR) in
   match pkE, zz with
-  | Some pkE, Some zz -> Some (zz, pkE)
+  | Some pkE, Some zz -> Some (zz, point_decompress cs pkE)
   | _ -> None
-
 
 /// def Decap(enc, skR):
 ///      pkE = Unmarshal(enc)
@@ -120,8 +139,10 @@ val decap:
   -> skR: key_dh_secret_s cs ->
   Tot (option (key_dh_public_s cs))
 
-let decap cs pkE skR = DH.dh (curve_of_cs cs) skR pkE
-
+let decap cs pkE skR =
+  match DH.dh (curve_of_cs cs) skR (point_compress cs pkE) with
+  | None -> None
+  | Some zz -> Some (point_decompress cs zz)
 
 /// def AuthEncap(pkR, skI):
 ///      skE, pkE = GenerateKeyPair()
@@ -136,14 +157,15 @@ val auth_encap:
   -> pkR: key_dh_public_s cs ->
   Tot (option (lbytes (2 * size_dh_public cs) & key_dh_public_s cs))
 
+#push-options "--fuel 1 --ifuel 1"
 let auth_encap cs skE skI pkR =
   let pkE = DH.secret_to_public (curve_of_cs cs) skE in
-  let er = DH.dh (curve_of_cs cs) skE pkR in
-  let ir = DH.dh (curve_of_cs cs) skI pkR in
+  let er = DH.dh (curve_of_cs cs) skE (point_compress cs pkR) in
+  let ir = DH.dh (curve_of_cs cs) skI (point_compress cs pkR) in
   match pkE, er, ir with
   | Some pkE, Some er, Some ir ->
-    let zz = concat er ir in
-    Some (zz, pkE)
+    let zz = concat (point_decompress cs er) (point_decompress cs ir) in
+    Some (zz, point_decompress cs pkE)
   | _ -> None
 
 /// def AuthDecap(enc, skR, pkI):
@@ -158,10 +180,10 @@ val auth_decap:
   Tot (option (lbytes (2 * size_dh_public cs)))
 
 let auth_decap cs pkE pkI skR =
-  let re = DH.dh (curve_of_cs cs) skR pkE in
-  let ri = DH.dh (curve_of_cs cs) skR pkI in
+  let re = DH.dh (curve_of_cs cs) skR (point_compress cs pkE) in
+  let ri = DH.dh (curve_of_cs cs) skR (point_compress cs pkI) in
   match re, ri with
-  | Some re, Some ri -> Some (concat re ri)
+  | Some re, Some ri -> Some (concat (point_decompress cs re) (point_decompress cs ri))
   | _ -> None
 
 
@@ -291,7 +313,7 @@ let setupAuthI cs skE skI pkR info =
   let res = auth_encap cs skE skI pkR in
   match pkI, res with
   | Some pkI, Some (zz, pkE) ->
-    let k, n = ks_derive cs Auth pkR zz pkE info None (Some pkI) in
+    let k, n = ks_derive cs Auth pkR zz pkE info None (Some (point_compress cs pkI)) in
     Some (pkE, k, n)
   | _ -> None
 
@@ -315,7 +337,7 @@ let setupAuthR cs pkE pkI skR info =
   let zz = auth_decap cs pkE pkI skR in
   match pkR, zz with
   | Some pkR, Some zz ->
-    Some (ks_derive cs Auth pkR zz pkE info None (Some pkI))
+    Some (ks_derive cs Auth (point_compress cs pkR) zz pkE info None (Some pkI))
   | _ -> None
 
 /// def SetupAuthPSKI(pkR, info, psk, pskID, skI):
@@ -338,7 +360,7 @@ let setupAuthPSKI cs skE skI pkR psk pskID info =
   let res = auth_encap cs skE skI pkR in
   match pkI, res with
   | Some pkI, Some (zz, pkE) ->
-    let k, n = ks_derive cs PSKAuth pkR zz pkE info (Some (psk, pskID)) (Some pkI) in
+    let k, n = ks_derive cs PSKAuth pkR zz pkE info (Some (psk, pskID)) (Some (point_compress cs pkI)) in
     Some (pkE, k, n)
   | _ -> None
 
@@ -363,7 +385,7 @@ let setupPSKAuthR cs pkE pkI skR psk pskID info =
   let zz = auth_decap cs pkE pkI skR in
   match pkR, zz with
   | Some pkR, Some zz ->
-    Some (ks_derive cs PSKAuth pkR zz pkE info (Some (psk, pskID)) (Some pkI))
+    Some (ks_derive cs PSKAuth (point_compress cs pkR) zz pkE info (Some (psk, pskID)) (Some pkI))
   | _ -> None
 
 

@@ -49,7 +49,9 @@ inline_for_extraction
 let size_dh_key (cs:ciphersuite): size_nat = DH.size_key (curve_of_cs cs)
 
 inline_for_extraction
-let size_dh_public (cs:ciphersuite): size_nat = DH.size_public (curve_of_cs cs)
+let size_dh_public (cs:ciphersuite): size_nat = match curve_of_cs cs with
+  | DH.DH_Curve25519 -> DH.size_public DH.DH_Curve25519
+  | DH.DH_P256 -> DH.size_public DH.DH_P256 + 1 // Need the additional byte for representation
 
 inline_for_extraction
 let size_kdf (cs:ciphersuite): size_nat = Hash.size_hash (hash_of_cs cs)
@@ -74,7 +76,6 @@ type key_dh_secret_s (cs:ciphersuite) = lbytes (size_dh_key cs)
 type key_aead_s (cs:ciphersuite) = lbytes (size_aead_key cs)
 type nonce_aead_s (cs:ciphersuite) = lbytes (size_aead_nonce cs)
 type psk_s (cs:ciphersuite) = lbytes (size_psk cs)
-
 
 val setupBaseI:
     cs:ciphersuite
