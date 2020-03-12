@@ -937,10 +937,7 @@ let sq1 f f4 result memory tempBuffer =
     
   calc (==) {
     uint_v f1 * as_nat h0 f;
-    (==)
-    {
-      assert(as_nat h0 f ==  uint_v f0 +  uint_v f1 * pow2 64 + uint_v f2 * pow2 64 * pow2 64 + uint_v f3 * pow2 64 * pow2 64 * pow2 64)
-    }
+    (==) { }
     uint_v f1 * (uint_v f0 +  uint_v f1 * pow2 64 + uint_v f2 * pow2 64 * pow2 64 + uint_v f3 * pow2 64 * pow2 64 * pow2 64);
     (==)
 
@@ -995,7 +992,7 @@ val sq2: f: felem -> f4: felem -> result: felem  -> memory: lbuffer uint64 (size
       uint_v m4 + uint_v m5 * pow2 64 == uint_v f0 * uint_v f3 /\
       
       uint_v m6 + uint_v m7 * pow2 64 == uint_v f1 * uint_v f2 /\
-      uint_v m8 + uint_v m9 * pow2 64 == uint_v f1 * uint_v f3   
+      uint_v m8 + uint_v m9 * pow2 64 == uint_v f1 * uint_v f3 
     )
 )
  (ensures fun h0 c h1 -> modifies (loc result |+| loc memory |+| loc temp) h0 h1   /\
@@ -1016,7 +1013,8 @@ val sq2: f: felem -> f4: felem -> result: felem  -> memory: lbuffer uint64 (size
 
       uint_v m4 + uint_v m5 * pow2 64 == uint_v f0 * uint_v f3 /\
       uint_v m8 + uint_v m9 * pow2 64 == uint_v f1 * uint_v f3 /\ 
-      uint_v m10 + uint_v m11 * pow2 64 == uint_v f2 * uint_v f3
+      uint_v m10 + uint_v m11 * pow2 64 == uint_v f2 * uint_v f3 /\
+      as_nat h1 result + uint_v c * pow2 256 = uint_v f2 * as_nat h0 f + as_nat h0 f4
     )  
  )
 
@@ -1042,36 +1040,60 @@ let sq2 f f4 result memory tempBuffer =
   let h_0 = index memory (size 3) in 
 
   upd o1 (size 0) (index memory (size 6));
-  let h1 = ST.get() in 
   
-
   let l = index o1 (size 0) in     
   let c1 = add_carry_u64 (u64 0) l h_0 o1 in 
+  let h_1 = index memory (size 7) in 
 
-  let h2 = ST.get() in 
-    assert(uint_v (Lib.Sequence.index (as_seq h1 o0) 0) + uint_v h_0 * pow2 64 = uint_v f0 * uint_v f2);
-    assert(uint_v (Lib.Sequence.index (as_seq h1 o1) 0) = uint_v (Lib.Sequence.index (as_seq h0 memory) 6));
-    admit();
-
- 
-  let h = index memory (size 7) in 
 
   mul64 f2 f2 o2 temp;
-  let l = index o2 (size 0) in     
-  let c2 = add_carry_u64 c1 l h o2 in
-  let h = index temp (size 0) in 
-  
+  let l = index o2 (size 0) in 
+
+  let c2 = add_carry_u64 c1 l h_1 o2 in
+  let h_2 = index temp (size 0) in 
+
   mul64 f2 f3 o3 temp; 
   let l = index o3 (size 0) in   
+  
   upd memory (size 10) l;
   upd memory (size 11) (index temp (size 0));
 
-  let c3 = add_carry_u64 c2 l h o3 in
-  let temp0 = index temp (size 0) in 
+  let c3 = add_carry_u64 c2 l h_2 o3 in
+  let h_3 = index temp (size 0) in 
+
+    let h6 = ST.get() in 
+
+    calc (==) {
+
+    uint_v f2 * as_nat h0 f;
+    (==) {}
+    uint_v f2 * (uint_v f0 +  uint_v f1 * pow2 64 + uint_v f2 * pow2 64 * pow2 64 + uint_v f3 * pow2 64 * pow2 64 * pow2 64);
+    (==)
+    {
+      assert_by_tactic (uint_v f2 * (uint_v f0 +  uint_v f1 * pow2 64 + uint_v f2 * pow2 64 * pow2 64 + uint_v f3 * pow2 64 * pow2 64 * pow2 64) == 
+	uint_v f0 * uint_v f2 +  
+	uint_v f1 * uint_v f2 * pow2 64 + 
+	uint_v f2 * uint_v f2 * pow2 64 * pow2 64 + 
+	uint_v f3 * uint_v f2 * pow2 64 * pow2 64 * pow2 64) canon}
+   as_nat h6 tempBufferResult + (uint_v c3 + uint_v h_3) * (pow2 64 * pow2 64 * pow2 64 * pow2 64);
+   (==)
+   {
+     assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256)
+   }
+
+   as_nat h6 tempBufferResult + (uint_v c3 + uint_v h_3) * pow2 256;
+   };
+
 
   let c4 = add4 tempBufferResult f4 result in  
-  assume (uint_v c3 + uint_v temp0 + uint_v c4 < pow2 64);
-  c3 +! temp0 +! c4
+  let h7 = ST.get() in 
+
+  assert_by_tactic (uint_v c4 * pow2 256 + (uint_v c3 + uint_v h_3) * pow2 256 = 
+    (uint_v c4 + uint_v c3 + uint_v h_3) * pow2 256) canon;
+
+  lemma_320_1 (as_nat h7 result) (uint_v c4 + uint_v c3 + uint_v h_3) (uint_v f2) (as_nat h0 f) (as_nat h0 f4);
+
+  c3 +! h_3 +! c4
 
 
 val sq3: f1: felem -> f3: felem -> result: felem -> memory: lbuffer uint64 (size 12) -> temp: lbuffer uint64 (size 5) -> 
