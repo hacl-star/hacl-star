@@ -4,11 +4,26 @@ friend Hacl.Spec.Bignum
 
 #set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
+let bn_add_eq_len aLen a b res =
+  Hacl.Bignum.Addition.bn_add_eq_len aLen a b res
+
+let bn_sub_eq_len aLen a b res =
+  Hacl.Bignum.Addition.bn_sub_eq_len aLen a b res
+
 let bn_add aLen a bLen b res =
   Hacl.Bignum.Addition.bn_add aLen a bLen b res
 
 let bn_sub aLen a bLen b res =
   Hacl.Bignum.Addition.bn_sub aLen a bLen b res
+
+let bn_add_mod_n len n a b res =
+  push_frame ();
+  let tmp = create len (u64 0) in
+  let c0 = bn_add_eq_len len a b res in
+  let c1 = bn_sub_eq_len len res n tmp in
+  let c = c0 -. c1 in
+  map2T len res (Hacl.Spec.Bignum.Definitions.mask_select c) tmp res;
+  pop_frame()
 
 let bn_mul aLen a bLen b res =
   Hacl.Bignum.Multiplication.bn_mul aLen a bLen b res

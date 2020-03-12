@@ -223,6 +223,7 @@ let bn_mask_lemma #len b mask =
     assert (bn_v res == 0) end
   else eq_intro res b
 
+inline_for_extraction noextract
 val mask_select: mask:uint64 -> a:uint64 -> b:uint64 -> uint64
 let mask_select mask a b =
   (mask &. a) |. ((lognot mask) &. b)

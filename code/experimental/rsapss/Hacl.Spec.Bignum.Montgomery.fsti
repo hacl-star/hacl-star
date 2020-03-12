@@ -20,10 +20,10 @@ val mod_inv_u64_lemma: n0:uint64 -> Lemma
   (requires v n0 % 2 == 1)
   (ensures (1 + v n0 * v (mod_inv_u64 n0)) % pow2 64 == 0)
 
-val precomp_r2_mod_n: #nLen:size_nat -> n:lbignum nLen -> lbignum nLen
+val precomp_r2_mod_n: #nLen:size_pos{128 * (nLen + 1) <= max_size_t} -> n:lbignum nLen -> lbignum nLen
 
-val precomp_r2_mod_n_lemma: #nLen:size_nat -> n:lbignum nLen -> Lemma
-  (requires bn_v n > 0)
+val precomp_r2_mod_n_lemma: #nLen:size_pos -> n:lbignum nLen -> Lemma
+  (requires 0 < bn_v n /\ 128 * (nLen + 1) <= max_size_t)
   (ensures  bn_v (precomp_r2_mod_n n) == pow2 (128 * (nLen + 1)) % bn_v n)
 
 ///

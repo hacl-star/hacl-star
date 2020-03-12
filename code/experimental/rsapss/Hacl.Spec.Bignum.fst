@@ -14,6 +14,14 @@ let bn_sub #aLen #bLen a b =
 let bn_sub_lemma #aLen #bLen a b =
   Hacl.Spec.Bignum.Addition.bn_sub_lemma a b
 
+let bn_add_mod_n #len n a b =
+  let c0, res0 = bn_add a b in
+  let c1, res1 = bn_sub res0 n in
+  let c = c0 -. c1 in
+  map2 (mask_select c) res1 res0
+
+let bn_add_mod_n_lemma #len n a b = admit()
+
 let bn_mul #aLen #bLen a b =
   Hacl.Spec.Bignum.Multiplication.bn_mul a b
 

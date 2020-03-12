@@ -16,6 +16,34 @@ module S = Hacl.Spec.Bignum
 #set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
 inline_for_extraction noextract
+val bn_add_eq_len:
+    aLen:size_t
+  -> a:lbignum aLen
+  -> b:lbignum aLen
+  -> res:lbignum aLen ->
+  Stack carry
+  (requires fun h ->
+    live h a /\ live h b /\ live h res /\
+    eq_or_disjoint a b /\ eq_or_disjoint a res /\ eq_or_disjoint b res)
+  (ensures  fun h0 c_out h1 -> modifies (loc res) h0 h1 /\
+    (c_out, as_seq h1 res) == S.bn_add (as_seq h0 a) (as_seq h0 b))
+
+
+inline_for_extraction noextract
+val bn_sub_eq_len:
+    aLen:size_t
+  -> a:lbignum aLen
+  -> b:lbignum aLen
+  -> res:lbignum aLen ->
+  Stack carry
+  (requires fun h ->
+    live h a /\ live h b /\ live h res /\
+    eq_or_disjoint a b /\ eq_or_disjoint a res /\ eq_or_disjoint b res)
+  (ensures  fun h0 c_out h1 -> modifies (loc res) h0 h1 /\
+   (c_out, as_seq h1 res) == S.bn_sub (as_seq h0 a) (as_seq h0 b))
+
+
+inline_for_extraction noextract
 val bn_add:
     aLen:size_t
   -> a:lbignum aLen
@@ -43,6 +71,22 @@ val bn_sub:
     disjoint a b /\ eq_or_disjoint a res /\ disjoint b res)
   (ensures  fun h0 c_out h1 -> modifies (loc res) h0 h1 /\
    (c_out, as_seq h1 res) == S.bn_sub (as_seq h0 a) (as_seq h0 b))
+
+
+inline_for_extraction noextract
+val bn_add_mod_n:
+    len:size_t{v len > 0}
+  -> n:lbignum len
+  -> a:lbignum len
+  -> b:lbignum len
+  -> res:lbignum len ->
+  Stack unit
+  (requires fun h ->
+    live h n /\ live h a /\ live h b /\ live h res /\
+    disjoint n a /\ disjoint n b /\ disjoint n res /\
+    eq_or_disjoint a b /\ eq_or_disjoint a res /\ eq_or_disjoint b res)
+  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_seq h1 res == S.bn_add_mod_n (as_seq h0 n) (as_seq h0 a) (as_seq h0 b))
 
 
 inline_for_extraction noextract

@@ -65,7 +65,7 @@ val bn_sub_eq_len:
   Stack carry
   (requires fun h ->
     live h a /\ live h b /\ live h res /\
-    disjoint a b /\ eq_or_disjoint a res /\ disjoint b res)
+    eq_or_disjoint a b /\ eq_or_disjoint a res /\ eq_or_disjoint b res)
   (ensures  fun h0 c_out h1 -> modifies (loc res) h0 h1 /\
     (let c, r = SL.generate_elems #uint64 #carry (v aLen) (v aLen) (S.bn_sub_f (as_seq h0 a) (as_seq h0 b)) (u64 0) in
     c_out == c /\ as_seq h1 res == r))
@@ -89,7 +89,8 @@ let bn_sub_eq_len aLen a b res =
     let t1 = a.(i) in
     let t2 = b.(i) in
     c.(0ul) <- subborrow_u64_st c.(0ul) t1 t2 (sub res i 1ul);
-    lemma_eq_disjoint aLen aLen 1ul res a c i h0 h1
+    lemma_eq_disjoint aLen aLen 1ul res a c i h0 h1;
+    lemma_eq_disjoint aLen aLen 1ul res b c i h0 h1
   );
   let res = c.(0ul) in
   pop_frame ();
@@ -115,6 +116,7 @@ let bn_sub aLen a bLen b res =
   let h0 = ST.get () in
   let a0 = sub a 0ul bLen in
   let res0 = sub res 0ul bLen in
+  let h1 = ST.get () in
   let c0 = bn_sub_eq_len bLen a0 b res0 in
   let h1 = ST.get () in
   if bLen <. aLen then begin
@@ -175,7 +177,7 @@ val bn_add_eq_len:
   Stack carry
   (requires fun h ->
     live h a /\ live h b /\ live h res /\
-    disjoint a b /\ eq_or_disjoint a res /\ disjoint b res)
+    eq_or_disjoint a b /\ eq_or_disjoint a res /\ eq_or_disjoint b res)
   (ensures  fun h0 c_out h1 -> modifies (loc res) h0 h1 /\
     (let c, r = SL.generate_elems #uint64 #carry (v aLen) (v aLen) (S.bn_add_f (as_seq h0 a) (as_seq h0 b)) (u64 0) in
     c_out == c /\ as_seq h1 res == r))
@@ -199,7 +201,8 @@ let bn_add_eq_len aLen a b res =
     let t1 = a.(i) in
     let t2 = b.(i) in
     c.(0ul) <- addcarry_u64_st c.(0ul) t1 t2 (sub res i 1ul);
-    lemma_eq_disjoint aLen aLen 1ul res a c i h0 h1
+    lemma_eq_disjoint aLen aLen 1ul res a c i h0 h1;
+    lemma_eq_disjoint aLen aLen 1ul res b c i h0 h1
   );
   let res = c.(0ul) in
   pop_frame ();
