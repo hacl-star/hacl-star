@@ -491,6 +491,7 @@ let sealBase #cs skE pkR mlen m infolen info output =
 
 #pop-options
 
+#push-options "--z3rlimit 200 --fuel 0 --ifuel 0"
 noextract
 val openBase_aux
      (#cs:S.ciphersuite)
@@ -535,6 +536,7 @@ let openBase_aux #cs skR inputlen input infolen info output zz k n =
   let res1 = setupBaseR k n pkE skR infolen info in
   let res2 = AEAD.aead_decrypt #cs k n infolen info (clen -. 16ul) output c in
   combine_error_codes res1 res2
+#pop-options
 
 #push-options "--z3rlimit 300 --fuel 0 --ifuel 0"
 [@ Meta.Attribute.specialize]
