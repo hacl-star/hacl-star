@@ -33,19 +33,32 @@ let bn_mod_exp_f #nLen #rLen n mu bBits bLen b i (aM, accM) =
   (aM, accM)
 
 
-let bn_mod_exp modBits nLen n r2 a bBits b =
+val bn_mod_exp_mont:
+    modBits:size_pos
+  -> nLen:size_pos{128 * (nLen + 1) <= max_size_t}
+  -> n:lbignum nLen{nLen == blocks modBits 64}
+  -> a:lbignum nLen
+  -> acc:lbignum nLen
+  -> bBits:size_pos
+  -> b:lbignum (blocks bBits 64) ->
+  lbignum nLen
+let bn_mod_exp_mont modBits nLen n a acc bBits b =
   let rLen = nLen + 1 in
   let bLen = blocks bBits 64 in
-
-  let acc  = create nLen (u64 0) in
-  let acc = acc.[0] <- u64 1 in
   let mu = mod_inv_u64 n.[0] in
 
+  let r2 = precomp_r2_mod_n #nLen modBits n in
   let aM = to_mont n mu r2 a in
   let accM = to_mont n mu r2 acc in
   let (aM, accM) = repeati bBits (bn_mod_exp_f #nLen #rLen n mu bBits bLen b) (aM, accM) in
   let res = from_mont n mu accM in
   bn_sub_mask n res
+
+let bn_mod_exp modBits nLen n a bBits b =
+  let acc  = create nLen (u64 0) in
+  let acc = acc.[0] <- u64 1 in
+  bn_mod_exp_mont modBits nLen n a acc bBits b
+
 
 ///
 ///  Lemma (bn_v (bn_mod_exp modBits nLen n r2 a bBits b) == Spec.RSAPSS.fpow #(bn_v n) (bn_v a) (bn_v b))
@@ -152,21 +165,19 @@ val bn_mod_exp_mont_lemma_aux:
     modBits:size_pos
   -> nLen:size_pos{nLen = (blocks modBits 64) /\ 128 * (nLen + 1) <= max_size_t}
   -> n:lbignum nLen
-  -> r2:lbignum nLen
   -> a:lbignum nLen
   -> bBits:size_pos
   -> b:lbignum (blocks bBits 64) -> Lemma
   (requires
-   (bn_v n % 2 = 1 /\ 1 < bn_v n /\ bn_v n < pow2 (64 * nLen) /\
-    0 < bn_v b /\ bn_v b < pow2 bBits /\ bn_v a < bn_v n /\
-    bn_v r2 == pow2 (128 * (nLen + 1)) % bn_v n))
+    bn_v n % 2 = 1 /\ 1 < bn_v n /\ bn_v n < pow2 (64 * nLen) /\
+    0 < bn_v b /\ bn_v b < pow2 bBits /\ bn_v a < bn_v n /\ pow2 (modBits - 1) < bn_v n)
   (ensures
    (let mu = mod_inv_u64 n.[0] in
-    let res1 = bn_mod_exp modBits nLen n r2 a bBits b in
+    let res1 = bn_mod_exp modBits nLen n a bBits b in
     let res2 = BL.mod_exp_mont_ll (nLen + 1) (bn_v n) (v mu) (bn_v a) bBits (bn_v b) in
     bn_v res1 == res2 /\ bn_v res1 < bn_v n))
 
-let bn_mod_exp_mont_lemma_aux modBits nLen n r2 a bBits b =
+let bn_mod_exp_mont_lemma_aux modBits nLen n a bBits b =
   let rLen = nLen + 1 in
   let bLen = blocks bBits 64 in
 
@@ -182,6 +193,8 @@ let bn_mod_exp_mont_lemma_aux modBits nLen n r2 a bBits b =
   assert (v n.[0] % 2 = 1); // since bn_v n % 2 = 1
   mod_inv_u64_lemma n.[0];
 
+  let r2 = precomp_r2_mod_n modBits n in
+  precomp_r2_mod_n_lemma modBits n;
   let aM0 = to_mont #nLen #rLen n mu r2 a in
   to_mont_lemma #nLen #rLen n mu r2 a;
 
@@ -197,11 +210,12 @@ let bn_mod_exp_mont_lemma_aux modBits nLen n r2 a bBits b =
   bn_sub_mask_lemma n res
 
 
-let bn_mod_exp_lemma modBits nLen n r2 a bBits b =
+let bn_mod_exp_lemma modBits nLen n a bBits b =
   let mu = mod_inv_u64 n.[0] in
-  let res1 = bn_mod_exp modBits nLen n r2 a bBits b in
+  let r2 = precomp_r2_mod_n modBits n in
+  let res1 = bn_mod_exp modBits nLen n a bBits b in
   let res2 = BL.mod_exp_mont_ll (nLen + 1) (bn_v n) (v mu) (bn_v a) bBits (bn_v b) in
-  bn_mod_exp_mont_lemma_aux modBits nLen n r2 a bBits b;
+  bn_mod_exp_mont_lemma_aux modBits nLen n a bBits b;
   assert (bn_v res1 == res2 /\ bn_v res1 < bn_v n);
 
   bn_eval_index n 0;

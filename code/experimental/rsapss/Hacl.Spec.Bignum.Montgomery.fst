@@ -241,11 +241,53 @@ let mod_inv_u64_lemma n0 =
   };
   assert ((1 + v vb * v n0) % pow2 64 == 0)
 
-//TODO: bn_set_bit
-let precomp_r2_mod_n #nLen n = admit()
+val bn_lshift1_mod_n: #len:size_nat -> n:lbignum len -> i:nat -> b:lbignum len -> lbignum len
+let bn_lshift1_mod_n #len n i b = bn_add_mod_n n b b
 
-let precomp_r2_mod_n_lemma #nLen n = admit()
+val bn_lshift1_mod_n_lemma: #len:size_nat -> n:lbignum len -> i:nat -> b:lbignum len -> Lemma
+  (requires 0 < bn_v n /\ bn_v b < bn_v n)
+  (ensures  bn_v (bn_lshift1_mod_n n i b) == 2 * bn_v b % bn_v n)
+let bn_lshift1_mod_n_lemma #len n i b =
+  bn_add_mod_n_lemma n b b
 
+val bn_mul_by_pow2: len:size_nat -> n:lbignum len -> b:lbignum len -> k:nat -> Lemma
+  (requires 0 < bn_v n /\ bn_v b < bn_v n)
+  (ensures  bn_v (repeati k (bn_lshift1_mod_n n) b) == pow2 k * bn_v b % bn_v n)
+let rec bn_mul_by_pow2 len n b k =
+  if k = 0 then eq_repeati0 k (bn_lshift1_mod_n n) b
+  else begin
+    let res = repeati k (bn_lshift1_mod_n n) b in
+    let res0 = repeati (k - 1) (bn_lshift1_mod_n n) b in
+    bn_mul_by_pow2 len n b (k - 1);
+    assert (bn_v res0 == pow2 (k - 1) * bn_v b % bn_v n);
+    unfold_repeati k (bn_lshift1_mod_n n) b (k - 1);
+    assert (res == bn_lshift1_mod_n n (k - 1) res0);
+    bn_lshift1_mod_n_lemma #len n (k - 1) res0;
+    assert (bn_v res == 2 * (pow2 (k - 1) * bn_v b % bn_v n) % bn_v n);
+    Math.Lemmas.lemma_mod_mul_distr_r 2 (pow2 (k - 1) * bn_v b) (bn_v n);
+    assert (bn_v res == 2 * pow2 (k - 1) * bn_v b % bn_v n);
+    Math.Lemmas.pow2_plus 1 (k - 1) end
+
+
+let precomp_r2_mod_n #nLen modBits n =
+  let c = create nLen (u64 0) in
+  let c0 = bn_bit_set c (modBits - 1) in // c0 == pow2 (modBits - 1)
+  // pow2 (128 * (nLen + 1)) / pow2 (modBits - 1) == pow2 (128 * nLen + 129 - modBits)
+
+  repeati (128 * nLen + 129 - modBits) (bn_lshift1_mod_n n) c0
+
+
+let precomp_r2_mod_n_lemma #nLen modBits n =
+  let c = create nLen (u64 0) in
+  let c0 = bn_bit_set c (modBits - 1) in
+  bn_eval_zeroes nLen nLen;
+  bn_bit_set_lemma c (modBits - 1);
+  assert (bn_v c0 == pow2 (modBits - 1));
+  let res = repeati (128 * nLen + 129 - modBits) (bn_lshift1_mod_n n) c0 in
+  bn_mul_by_pow2 nLen n c0 (128 * nLen + 129 - modBits);
+  assert (bn_v res == pow2 (128 * nLen + 129 - modBits) * pow2 (modBits - 1) % bn_v n);
+  Math.Lemmas.pow2_plus (128 * nLen + 129 - modBits) (modBits - 1);
+  assert (bn_v res == pow2 (128 * nLen + 128) % bn_v n)
 
 ///
 ///  Low-level specification of Montgomery arithmetic

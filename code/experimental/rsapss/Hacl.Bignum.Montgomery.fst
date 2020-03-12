@@ -75,6 +75,19 @@ let mod_inv_u64 n0 =
   pop_frame ();
   res
 
+let precomp_r2_mod_n nLen modBits n res =
+  memset res (u64 0) nLen;
+  bn_bit_set nLen res (modBits -! 1ul);
+
+  [@inline_let]
+  let spec h = S.bn_lshift1_mod_n (as_seq h n) in
+
+  let h0 = ST.get () in
+  loop1 h0 (128ul *! nLen +! 129ul -! modBits) res spec
+  (fun i ->
+    Loops.unfold_repeati (128 * v nLen + 129 - v modBits) (spec h0) (as_seq h0 res) (v i);
+    bn_add_mod_n nLen n res res res
+  )
 
 
 inline_for_extraction noextract

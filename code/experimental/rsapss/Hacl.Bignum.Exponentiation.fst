@@ -54,18 +54,32 @@ let bn_mod_exp_ nLen rLen n nInv_u64 bBits bLen b aM accM =
   )
 
 
-#set-options "--z3rlimit 100"
+inline_for_extraction noextract
+val bn_mod_exp_mont:
+    modBits:size_t{v modBits > 0}
+  -> nLen:size_t{0 < v nLen /\ 128 * (v nLen + 1) <= max_size_t /\ v nLen == v (blocks modBits 64ul)}
+  -> n:lbignum nLen
+  -> a:lbignum nLen
+  -> acc:lbignum nLen
+  -> bBits:size_t{v bBits > 0}
+  -> b:lbignum (blocks bBits 64ul)
+  -> res:lbignum nLen ->
+  Stack unit
+  (requires fun h ->
+    live h n /\ live h a /\ live h b /\ live h res /\ live h acc /\
+    disjoint res a /\ disjoint res b /\ disjoint res n /\ disjoint res acc /\
+    disjoint a n /\ disjoint acc n)
+  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_seq h1 res == S.bn_mod_exp_mont (v modBits) (v nLen) (as_seq h0 n) (as_seq h0 a) (as_seq h0 acc) (v bBits) (as_seq h0 b))
 
-[@CInline]
-let bn_mod_exp modBits nLen n r2 a bBits b res =
+let bn_mod_exp_mont modBits nLen n a acc bBits b res =
   push_frame ();
   let rLen = nLen +! 1ul in
   let bLen = blocks bBits 64ul in
+  let nInv_u64 = mod_inv_u64 n.(0ul) in // n * nInv = 1 (mod (pow2 64))
 
-  let acc  = create nLen (u64 0) in
-  acc.(0ul) <- u64 1;
-  let n0 = n.(0ul) in
-  let nInv_u64 = mod_inv_u64 n0 in // n * nInv = 1 (mod (pow2 64))
+  let r2 = create nLen (u64 0) in
+  precomp_r2_mod_n nLen modBits n r2;
 
   let aM   = create rLen (u64 0) in
   let accM = create rLen (u64 0) in
@@ -74,4 +88,13 @@ let bn_mod_exp modBits nLen n r2 a bBits b res =
   bn_mod_exp_ nLen rLen n nInv_u64 bBits bLen b aM accM;
   from_mont nLen rLen n nInv_u64 accM res;
   bn_sub_mask nLen n res;
+  pop_frame ()
+
+
+[@CInline]
+let bn_mod_exp modBits nLen n a bBits b res =
+  push_frame ();
+  let acc  = create nLen (u64 0) in
+  acc.(0ul) <- u64 1;
+  bn_mod_exp_mont modBits nLen n a acc bBits b res;
   pop_frame ()

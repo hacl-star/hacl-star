@@ -20,6 +20,17 @@ val mod_inv_u64: n0:uint64 ->
     r == S.mod_inv_u64 n0)
 
 
+val precomp_r2_mod_n:
+    nLen:size_t{0 < v nLen /\ 128 * (v nLen + 1) <= max_size_t}
+  -> modBits:size_t{0 < v modBits /\ v nLen == v (blocks modBits 64ul)}
+  -> n:lbignum nLen
+  -> res:lbignum nLen ->
+  Stack unit
+  (requires fun h -> live h n /\ live h res /\ disjoint n res)
+  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_seq h1 res == S.precomp_r2_mod_n (v modBits) (as_seq h0 n))
+
+
 val mont_reduction:
     nLen:size_t
   -> rLen:size_t{v rLen = v nLen + 1 /\ v rLen + v rLen <= max_size_t}
