@@ -22,7 +22,7 @@ let bn_add_mod_n len n a b res =
   let c0 = bn_add_eq_len len a b res in
   let c1 = bn_sub_eq_len len res n tmp in
   let c = c0 -. c1 in
-  map2T len res (Hacl.Spec.Bignum.Definitions.mask_select c) tmp res;
+  map2T len res (Hacl.Spec.Bignum.Definitions.mask_select c) res tmp;
   pop_frame()
 
 let bn_mul aLen a bLen b res =
