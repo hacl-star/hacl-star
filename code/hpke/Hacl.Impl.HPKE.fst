@@ -536,7 +536,7 @@ let openBase_aux #cs skR inputlen input infolen info output zz k n =
   let res2 = AEAD.aead_decrypt #cs k n infolen info (clen -. 16ul) output c in
   combine_error_codes res1 res2
 
-#push-options "--z3rlimit 200 --fuel 0 --ifuel 0"
+#push-options "--z3rlimit 300 --fuel 0 --ifuel 0"
 [@ Meta.Attribute.specialize]
 let openBase #cs pkE skR mlen m infolen info output =
   push_frame();
