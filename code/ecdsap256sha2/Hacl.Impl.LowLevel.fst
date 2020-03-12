@@ -1096,25 +1096,53 @@ let sq2 f f4 result memory tempBuffer =
   c3 +! h_3 +! c4
 
 
-val sq3: f1: felem -> f3: felem -> result: felem -> memory: lbuffer uint64 (size 12) -> temp: lbuffer uint64 (size 5) -> 
+val sq3: f: felem -> f4: felem -> result: felem -> memory: lbuffer uint64 (size 12) -> temp: lbuffer uint64 (size 5) -> 
   Stack uint64 
-  (requires fun h -> live h f1 /\ live h f3 /\ live h result /\ live h memory /\ live h temp /\ eq_or_disjoint f3 result /\ disjoint temp result /\ disjoint f1 result)
-  (ensures fun h0 c h1 -> modifies (loc result) h0 h1)
+  (requires fun h -> live h f /\ live h f4 /\ live h result /\ live h temp /\ live h memory /\ eq_or_disjoint f4 result /\ disjoint f4 memory /\ disjoint f4 temp /\ disjoint f result /\ disjoint temp result /\ disjoint memory temp /\ disjoint memory result /\
+  (
 
-let sq3 f_ f4 result memory tempBuffer = 
-
-  let temp = sub tempBuffer (size 0) (size 1) in 
-  let result_ = sub tempBuffer  (size 1) (size 4) in 
-
-  let f0 = index f_ (size 0) in 
-  let f1 = index f_ (size 1) in 
-  let f2 = index f_ (size 2) in 
-  let f3 = index f_ (size 3) in 
+      let f0 = Lib.Sequence.index (as_seq h f) 0 in 
+      let f1 = Lib.Sequence.index (as_seq h f) 1  in 
+      let f2 = Lib.Sequence.index (as_seq h f) 2 in 
+      let f3 = Lib.Sequence.index (as_seq h f) 3 in 
     
-  let o0 = sub result_ (size 0) (size 1) in 
-  let o1 = sub result_ (size 1) (size 1) in 
-  let o2 = sub result_ (size 2) (size 1) in 
-  let o3 = sub result_ (size 3) (size 1) in 
+      let memory = as_seq h memory in 
+      let m4 = Lib.Sequence.index memory 4 in 
+      let m5 = Lib.Sequence.index memory 5 in 
+      let m8 = Lib.Sequence.index memory 8 in 
+      let m9 = Lib.Sequence.index memory 9 in 
+      let m10 = Lib.Sequence.index memory 10 in 
+      let m11 = Lib.Sequence.index memory 11 in 
+
+      uint_v m4 + uint_v m5 * pow2 64 == uint_v f0 * uint_v f3 /\
+      uint_v m8 + uint_v m9 * pow2 64 == uint_v f1 * uint_v f3 /\ 
+      uint_v m10 + uint_v m11 * pow2 64 == uint_v f2 * uint_v f3
+    )  
+)
+  (ensures fun h0 c h1 -> modifies (loc result |+| loc memory |+| loc temp) h0 h1 /\
+    (
+      let f3 = Lib.Sequence.index (as_seq h0 f) 3 in 
+      as_nat h1 result + uint_v c * pow2 256 = uint_v f3 * as_nat h0 f + as_nat h0 f4
+    )
+  )
+
+
+let sq3 f f4 result memory tempBuffer = 
+  let h0 = ST.get() in 
+  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
+  
+  let temp = sub tempBuffer (size 0) (size 1) in 
+  let tempBufferResult = sub tempBuffer  (size 1) (size 4) in 
+
+  let f0 = index f (size 0) in 
+  let f1 = index f (size 1) in 
+  let f2 = index f (size 2) in 
+  let f3 = index f (size 3) in 
+    
+  let o0 = sub tempBufferResult (size 0) (size 1) in 
+  let o1 = sub tempBufferResult (size 1) (size 1) in 
+  let o2 = sub tempBufferResult (size 2) (size 1) in 
+  let o3 = sub tempBufferResult (size 3) (size 1) in 
 
   upd o0 (size 0) (index memory (size 4));
   let h = index memory (size 5) in 
@@ -1132,12 +1160,41 @@ let sq3 f_ f4 result memory tempBuffer =
   mul64 f3 f3 o3 temp;
   let l = index o3 (size 0) in     
   let c3 = add_carry_u64 c2 l h o3 in
-  let temp0 = index temp (size 0) in 
+  let h_3 = index temp (size 0) in 
 
-  let c4 = add4 result_ f4 result in 
-  admit();
-  pop_frame();  
-  c3 +! temp0 +! c4
+    let h6 = ST.get() in 
+
+    calc (==) {
+
+    uint_v f3 * as_nat h0 f;
+    (==) {}
+    uint_v f3 * (uint_v f0 +  uint_v f1 * pow2 64 + uint_v f2 * pow2 64 * pow2 64 + uint_v f3 * pow2 64 * pow2 64 * pow2 64);
+    (==)
+    {
+      assert_by_tactic (uint_v f3 * (uint_v f0 +  uint_v f1 * pow2 64 + uint_v f2 * pow2 64 * pow2 64 + uint_v f3 * pow2 64 * pow2 64 * pow2 64) == 
+	uint_v f0 * uint_v f3 +  
+	uint_v f1 * uint_v f3 * pow2 64 + 
+	uint_v f2 * uint_v f3 * pow2 64 * pow2 64 + 
+	uint_v f3 * uint_v f3 * pow2 64 * pow2 64 * pow2 64) canon}
+   as_nat h6 tempBufferResult + (uint_v c3 + uint_v h_3) * (pow2 64 * pow2 64 * pow2 64 * pow2 64);
+   (==)
+   {
+     assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256)
+   }
+
+   as_nat h6 tempBufferResult + (uint_v c3 + uint_v h_3) * pow2 256;
+   };
+
+
+  let c4 = add4 tempBufferResult f4 result in 
+
+  let h7 = ST.get() in 
+
+  assert_by_tactic (uint_v c4 * pow2 256 + (uint_v c3 + uint_v h_3) * pow2 256 = 
+    (uint_v c4 + uint_v c3 + uint_v h_3) * pow2 256) canon;
+
+  lemma_320_1 (as_nat h7 result) (uint_v c4 + uint_v c3 + uint_v h_3) (uint_v f3) (as_nat h0 f) (as_nat h0 f4);
+  c3 +! h_3 +! c4
 
 
 #reset-options "--z3rlimit 1000"
