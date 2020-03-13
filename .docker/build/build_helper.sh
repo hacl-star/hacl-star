@@ -7,10 +7,6 @@ branchname=$4
 
 export FSTAR_HOME=$(pwd)/FStar
 
-# Add ssh identity
-eval $(ssh-agent)
-ssh-add .ssh/id_rsa
-
 eval $(opam config env)
 
 echo $(date -u "+%Y-%m-%d %H:%M:%S") >> $out_file
@@ -21,9 +17,6 @@ tail_pd=$!
 kill $tail_pd
 
 echo $(date -u "+%Y-%m-%d %H:%M:%S") >> $out_file
-
-eval $(ssh-agent)
-ssh-add -D
 
 # Generate query-stats.
 # List the hints that fail to replay.

@@ -11,15 +11,15 @@ open Lib.IntTypes
 open Lib.Buffer
 
 
-open Hacl.Spec.P256.Lemmas
-open Hacl.Spec.P256.Definitions
-open Hacl.Spec.P256.SolinasReduction
-open Hacl.Spec.P256.MontgomeryMultiplication
-open Hacl.Spec.P256.MontgomeryMultiplication.PointDouble
-open Hacl.Spec.P256.MontgomeryMultiplication.PointAdd
-open Hacl.Spec.P256.Ladder
+open Spec.P256.Lemmas
+open Spec.P256.Definitions
+open Spec.P256.SolinasReduction
+open Spec.P256.MontgomeryMultiplication
+open Spec.P256.MontgomeryMultiplication.PointDouble
+open Spec.P256.MontgomeryMultiplication.PointAdd
+open Spec.P256.Ladder
 
-open Hacl.Spec.P256
+open Spec.P256
 
 open Lib.Loops
 open FStar.Math.Lemmas
@@ -90,11 +90,11 @@ val isPointAtInfinityPrivate: p: point -> Stack uint64
       (uint_v r == 0 \/ uint_v r == maxint U64) /\ 
       (
 	let x, y, z = fromDomainPoint(point_prime_to_coordinates (as_seq h0 p)) in 
-	if Hacl.Spec.P256.isPointAtInfinity (x, y, z) then uint_v r = maxint U64 else uint_v r = 0
+	if Spec.P256.isPointAtInfinity (x, y, z) then uint_v r = maxint U64 else uint_v r = 0
       ) /\
       (
 	let x, y, z = point_prime_to_coordinates (as_seq h0 p) in 
-	if Hacl.Spec.P256.isPointAtInfinity (x, y, z) then uint_v r = maxint U64 else uint_v r = 0
+	if Spec.P256.isPointAtInfinity (x, y, z) then uint_v r = maxint U64 else uint_v r = 0
       )
    )
   )

@@ -10,13 +10,13 @@ open Lib.Buffer
 
 open FStar.Math.Lemmas
 
-open Hacl.Spec.P256.Lemmas
-open Hacl.Spec.ECDSAP256.Definition
-open Hacl.Spec.ECDSA
+open Spec.P256.Lemmas
+open Spec.ECDSAP256.Definition
+open Spec.ECDSA
 open Hacl.Impl.LowLevel
-open Hacl.Spec.P256.Ladder
+open Spec.P256.Ladder
 
-open Hacl.Spec.P256.Lemmas
+open Spec.P256.Lemmas
 
 open FStar.Mul
 

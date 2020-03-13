@@ -70,7 +70,7 @@ procedure Fmul(
         dst_in := r15;
         inB_in := rcx;
     modifies
-        rax; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r12; r13; r14; r15;
+        rax; rbx; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r13; r14; r15;
         efl; heap0; memLayout;
     requires
         adx_enabled && bmi2_enabled;
@@ -149,7 +149,7 @@ procedure Fmul_stdcall(
         dst_in := (if win then r8  else rdx);
         inB_in := (if win then r9  else rcx);
     modifies
-        rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
+        rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r13; r14; r15;
         efl; heap0; memLayout; stack; stackTaint;
     requires
         rsp == init_rsp(stack);
@@ -199,23 +199,21 @@ procedure Fmul_stdcall(
         win ==>  rdi == old(rdi);
         win ==>  rsi == old(rsi);
         win ==>  rsp == old(rsp);
-        win ==>  r12 == old(r12);
         win ==>  r13 == old(r13);
         win ==>  r14 == old(r14);
         win ==>  r15 == old(r15);
         !win ==>  rbx == old(rbx);
         !win ==>  rbp == old(rbp);
-        !win ==>  r12 == old(r12);
         !win ==>  r13 == old(r13);
         !win ==>  r14 == old(r14);
         !win ==>  r15 == old(r15);
 
         rsp == old(rsp);
 {
-    Push_Secret(r12);
     Push_Secret(r13);
     Push_Secret(r14);
     Push_Secret(r15);
+    Push_Secret(rbx);
 
     // Line up the rest of the arguments
     inline if (win)
@@ -242,10 +240,10 @@ procedure Fmul_stdcall(
         Pop_Secret(rsi);
     }
 
+    Pop_Secret(rbx);
     Pop_Secret(r15);
     Pop_Secret(r14);
     Pop_Secret(r13);
-    Pop_Secret(r12);
 }
 
 procedure Fmul2(
@@ -263,7 +261,7 @@ procedure Fmul2(
         dst_in := r15;
         inB_in := rcx;
     modifies
-        rax; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r12; r13; r14; r15;
+        rax; rbx; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r13; r14; r15;
         efl; heap0; memLayout;
     requires
         adx_enabled && bmi2_enabled;
@@ -367,7 +365,7 @@ procedure Fmul2_stdcall(
         dst_in := (if win then r8  else rdx);
         inB_in := (if win then r9  else rcx);
     modifies
-        rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r12; r13; r14; r15;
+        rax; rbx; rcx; rdx; rsi; rdi; rbp; rsp; r8; r9; r10; r11; r13; r14; r15;
         efl; heap0; memLayout; stack; stackTaint;
     requires
         rsp == init_rsp(stack);
@@ -439,23 +437,21 @@ procedure Fmul2_stdcall(
         win ==>  rdi == old(rdi);
         win ==>  rsi == old(rsi);
         win ==>  rsp == old(rsp);
-        win ==>  r12 == old(r12);
         win ==>  r13 == old(r13);
         win ==>  r14 == old(r14);
         win ==>  r15 == old(r15);
         !win ==>  rbx == old(rbx);
         !win ==>  rbp == old(rbp);
-        !win ==>  r12 == old(r12);
         !win ==>  r13 == old(r13);
         !win ==>  r14 == old(r14);
         !win ==>  r15 == old(r15);
 
         rsp == old(rsp);
 {
-    Push_Secret(r12);
     Push_Secret(r13);
     Push_Secret(r14);
     Push_Secret(r15);
+    Push_Secret(rbx);
 
     // Line up the rest of the arguments
     inline if (win)
@@ -482,10 +478,10 @@ procedure Fmul2_stdcall(
         Pop_Secret(rsi);
     }
 
+    Pop_Secret(rbx);
     Pop_Secret(r15);
     Pop_Secret(r14);
     Pop_Secret(r13);
-    Pop_Secret(r12);
 }
 
 procedure Fsqr(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64)
@@ -493,10 +489,10 @@ procedure Fsqr(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64)
     {:quick}
     {:exportSpecs}
     lets
-        tmp_ptr @= rdi; inA_ptr @= rsi; dst_ptr @= rbx;
+        tmp_ptr @= rdi; inA_ptr @= rsi; dst_ptr @= r12;
         tmp_in := rdi;
         inA_in := rsi;
-        dst_in := rbx;
+        dst_in := r12;
     modifies
         rax; rbx; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r12; r13; r14; r15;
         efl; heap0; memLayout;
@@ -531,6 +527,8 @@ procedure Fsqr(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64)
         //   Framing
         //////////////////////////////////////
 
+        old(r12) == r12;
+
         modifies_buffer_2(dst_b, tmp_b, old(mem), mem);
 
 {
@@ -545,7 +543,7 @@ procedure Fsqr(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64)
     Newline();
     Comment("Line up pointers");
     Mov64(inA_ptr, tmp_ptr);
-    Mov64(rdi, rbx);
+    Mov64(rdi, r12);
 
     LargeComment("Wrap the result back into the field");
     Carry_wide(0, dst_b, tmp_b);
@@ -563,7 +561,7 @@ procedure Fsqr_stdcall(
     {:quick}
     {:exportSpecs}
     lets
-        tmp_ptr @= rdi; inA_ptr @= rsi; dst_ptr @= rbx;
+        tmp_ptr @= rdi; inA_ptr @= rsi; dst_ptr @= r12;
         tmp_in := (if win then rcx else rdi);
         inA_in := (if win then rdx else rsi);
         dst_in := (if win then r8  else rdx);
@@ -624,9 +622,9 @@ procedure Fsqr_stdcall(
         rsp == old(rsp);
 {
     Push_Secret(r15);
-    Push_Secret(r12);
     Push_Secret(r13);
     Push_Secret(r14);
+    Push_Secret(r12);
     Push_Secret(rbx);
 
     // Line up the rest of the arguments
@@ -654,9 +652,9 @@ procedure Fsqr_stdcall(
     }
 
     Pop_Secret(rbx);
+    Pop_Secret(r12);
     Pop_Secret(r14);
     Pop_Secret(r13);
-    Pop_Secret(r12);
     Pop_Secret(r15);
 }
 
@@ -665,10 +663,10 @@ procedure Fsqr2(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64
     {:quick}
     {:exportSpecs}
     lets
-        tmp_ptr @= rdi; inA_ptr @= rsi; dst_ptr @= rbx;
+        tmp_ptr @= rdi; inA_ptr @= rsi; dst_ptr @= r12;
         tmp_in := rdi;
         inA_in := rsi;
-        dst_in := rbx;
+        dst_in := r12;
     modifies
         rax; rbx; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r12; r13; r14; r15;
         efl; heap0; memLayout;
@@ -714,6 +712,8 @@ procedure Fsqr2(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64
         //   Framing
         //////////////////////////////////////
 
+        old(r12) == r12;
+
         modifies_buffer_2(dst_b, tmp_b, old(mem), mem);
 {
     CreateHeaplets(list(
@@ -727,7 +727,7 @@ procedure Fsqr2(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64
     Newline();
     Comment("Line up pointers");
     Mov64(inA_ptr, tmp_ptr);
-    Mov64(rdi, rbx);
+    Mov64(rdi, r12);
     Newline();
     Carry_wide(0, dst_b, tmp_b);
     Newline();
@@ -746,7 +746,7 @@ procedure Fsqr2_stdcall(
     {:quick}
     {:exportSpecs}
     lets
-        tmp_ptr @= rdi; inA_ptr @= rsi; dst_ptr @= rbx;
+        tmp_ptr @= rdi; inA_ptr @= rsi; dst_ptr @= r12;
         tmp_in := (if win then rcx else rdi);
         inA_in := (if win then rdx else rsi);
         dst_in := (if win then r8  else rdx);
@@ -818,9 +818,9 @@ procedure Fsqr2_stdcall(
         rsp == old(rsp);
 {
     Push_Secret(r15);
-    Push_Secret(r12);
     Push_Secret(r13);
     Push_Secret(r14);
+    Push_Secret(r12);
     Push_Secret(rbx);
 
     // Line up the rest of the arguments
@@ -848,9 +848,9 @@ procedure Fsqr2_stdcall(
     }
 
     Pop_Secret(rbx);
+    Pop_Secret(r12);
     Pop_Secret(r14);
     Pop_Secret(r13);
-    Pop_Secret(r12);
     Pop_Secret(r15);
 }
 
@@ -871,7 +871,7 @@ procedure Fsqr_loop_stdcall(
         count_in := (if win then r9  else rcx);
     reads memLayout;
     modifies
-        rax; rbx; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r12; r13; r14; r15;
+        rax; rbx; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r13; r14; r15;
         rbp; rsp; efl; heap0; stack;
     requires
         rsp == init_rsp(stack);
@@ -911,7 +911,6 @@ procedure Fsqr_loop_stdcall(
         validSrcAddrs64(mem, dst_in, dst_b, 4, memLayout, Secret);
 
         win ==> rsi == old(rsi);
-        r12 == old(r12);
         r13 == old(r13);
         r14 == old(r14);
         r15 == old(r15);
@@ -922,7 +921,6 @@ procedure Fsqr_loop_stdcall(
     Push(rbp);
     Push(rbx);
     Push(r15);
-    Push(r12);
     Push(r13);
     Push(r14);
 
@@ -995,7 +993,6 @@ procedure Fsqr_loop_stdcall(
 
     Pop(r14);
     Pop(r13);
-    Pop(r12);
     Pop(r15);
     Pop(rbx);
     Pop(rbp);

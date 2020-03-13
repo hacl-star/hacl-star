@@ -5,9 +5,9 @@ module Bindings(F:Cstubs.FOREIGN) =
     let everCrypt_Cipher_chacha20 =
       foreign "EverCrypt_Cipher_chacha20"
         (uint32_t @->
-           ((ptr uint8_t) @->
-              ((ptr uint8_t) @->
-                 ((ptr uint8_t) @->
-                    ((ptr uint8_t) @-> (uint32_t @-> (returning void)))))))
+           (ocaml_bytes @->
+              (ocaml_bytes @->
+                 (ocaml_bytes @->
+                    (ocaml_bytes @-> (uint32_t @-> (returning void)))))))
       
   end

@@ -9,17 +9,17 @@ open Hacl.Impl.P256.Arithmetics
 
 open Lib.Buffer
 
-open Hacl.Spec.P256.Lemmas
-open Hacl.Spec.P256.Definitions
+open Spec.P256.Lemmas
+open Spec.P256.Definitions
+open Spec.P256.MontgomeryMultiplication
+open Spec.P256.MontgomeryMultiplication.PointDouble
+open Spec.P256.MontgomeryMultiplication.PointAdd
+open Spec.P256.Normalisation
+open Spec.P256
 open Hacl.Impl.SolinasReduction
-open Hacl.Spec.P256.MontgomeryMultiplication
-open Hacl.Spec.P256.MontgomeryMultiplication.PointDouble
-open Hacl.Spec.P256.MontgomeryMultiplication.PointAdd
-open Hacl.Spec.P256.Normalisation
 open Hacl.Impl.LowLevel
 open Hacl.Impl.P256.LowLevel
 open Hacl.Impl.P256.MontgomeryMultiplication
-open Hacl.Spec.P256
 open Hacl.Impl.P256.Math 
 
 open Hacl.Impl.P256.PointAdd
@@ -32,10 +32,10 @@ open FStar.Tactics.Canon
 
 open FStar.Math.Lemmas
 
-friend Hacl.Spec.P256.MontgomeryMultiplication
+friend Spec.P256.MontgomeryMultiplication
 open FStar.Mul
 
-#reset-options "--z3rlimit 300" 
+#set-options "--z3rlimit 150 --max_fuel 0 --max_ifuel 0" 
 let toDomain value result = 
   push_frame();
     let multBuffer = create (size 8) (u64 0) in 
@@ -90,8 +90,6 @@ let copy_point p result = copy result p
  
 
 (* https://crypto.stackexchange.com/questions/43869/point-at-infinity-and-error-handling*)
-#reset-options "--z3rlimit 300" 
-
 val lemma_pointAtInfInDomain: x: nat -> y: nat -> z: nat {z < prime256} -> 
   Lemma (isPointAtInfinity (x, y, z) == isPointAtInfinity ((fromDomain_ x), (fromDomain_ y), (fromDomain_ z)))
 
@@ -196,12 +194,10 @@ val normalisation_update: z2x: felem -> z3y: felem ->p: point ->  resultPoint: p
 
       x1 == fromDomain_(as_nat h0 z2x) /\ y1 == fromDomain_(as_nat h0 z3y)  /\ 
       (
-	if Hacl.Spec.P256.isPointAtInfinity (fromDomain_ x0, fromDomain_ y0, fromDomain_ z0) then  z1 == 0 else z1 == 1
+	if Spec.P256.isPointAtInfinity (fromDomain_ x0, fromDomain_ y0, fromDomain_ z0) then  z1 == 0 else z1 == 1
       ))
   )
 
-
-#reset-options "--z3rlimit 400"
 
 let normalisation_update z2x z3y p resultPoint = 
   push_frame(); 
@@ -220,8 +216,6 @@ let normalisation_update z2x z3y p resultPoint =
     let h2 = ST.get() in 
   pop_frame()
   
- 
-#reset-options "--z3rlimit 500" 
 let norm p resultPoint tempBuffer = 
   let xf = sub p (size 0) (size 4) in 
   let yf = sub p (size 4) (size 4) in 
@@ -267,7 +261,6 @@ let norm p resultPoint tempBuffer =
        point_x_as_nat h3 resultPoint == xN /\ point_y_as_nat h3 resultPoint == yN /\ point_z_as_nat h3 resultPoint == zN)
 
 
-#reset-options "--z3rlimit 500" 
 let normX p result tempBuffer = 
   let xf = sub p (size 0) (size 4) in 
   let yf = sub p (size 4) (size 4) in 
@@ -283,6 +276,7 @@ let normX p result tempBuffer =
   exponent z2f z2f tempBuffer20;
   montgomery_multiplication_buffer z2f xf z2f;
   fromDomain z2f result;
+  assert_norm (prime >= 2);
     power_distributivity (fromDomain_ (as_nat h0 zf) * fromDomain_ (as_nat h0 zf)) (prime -2) prime
 
 
@@ -455,7 +449,6 @@ val montgomery_ladder: #buf_type: buftype->  p: point -> q: point ->
 let montgomery_ladder #a p q scalar tempBuffer =  
   let h0 = ST.get() in 
 
-  modifies0_is_modifies3 p q tempBuffer h0 h0;
 
   [@inline_let]
   let spec_ml h0 = _ml_step (as_seq h0 scalar) in 
@@ -551,8 +544,9 @@ val lemma_coord: h3: mem -> q: point -> Lemma (
 let lemma_coord h3 q = ()
 
 
-val scalarMultiplicationL: p: point -> result: point -> 
-  scalar: lbuffer uint8 (size 32) -> 
+inline_for_extraction
+val scalarMultiplication_t: #t:buftype -> p: point -> result: point -> 
+  scalar: lbuffer_t t uint8 (size 32) -> 
   tempBuffer: lbuffer uint64 (size 100) ->
   Stack unit
     (requires fun h -> 
@@ -578,7 +572,7 @@ val scalarMultiplicationL: p: point -> result: point ->
 ) 
 
 
-let scalarMultiplicationL p result scalar tempBuffer  = 
+let scalarMultiplication_t #t p result scalar tempBuffer  = 
     let h0 = ST.get() in 
   let q = sub tempBuffer (size 0) (size 12) in 
   zero_buffer q;
@@ -592,53 +586,16 @@ let scalarMultiplicationL p result scalar tempBuffer  =
   norm q result buff; 
     lemma_coord h3 q
 
+let scalarMultiplicationL = scalarMultiplication_t #MUT
 
-val scalarMultiplicationI: p: point -> result: point -> 
-  scalar: ilbuffer uint8 (size 32) -> 
-  tempBuffer: lbuffer uint64 (size 100) ->
-  Stack unit
-    (requires fun h -> 
-      live h p /\ live h result /\ live h scalar /\ live h tempBuffer /\
-    LowStar.Monotonic.Buffer.all_disjoint [loc p; loc tempBuffer; loc scalar; loc result] /\
-    as_nat h (gsub p (size 0) (size 4)) < prime /\ 
-    as_nat h (gsub p (size 4) (size 4)) < prime /\
-    as_nat h (gsub p (size 8) (size 4)) < prime
-    )
-  (ensures fun h0 _ h1 -> 
-    modifies (loc p |+| loc result |+| loc tempBuffer) h0 h1 /\
-  
-    as_nat h1 (gsub result (size 0) (size 4)) < prime256 /\ 
-    as_nat h1 (gsub result (size 4) (size 4)) < prime256 /\
-    as_nat h1 (gsub result (size 8) (size 4)) < prime256 /\
-    
-    (
-      let x3, y3, z3 = point_x_as_nat h1 result, point_y_as_nat h1 result, point_z_as_nat h1 result in 
-      let (xN, yN, zN) = scalar_multiplication (as_seq h0 scalar) (point_prime_to_coordinates (as_seq h0 p)) in 
-      x3 == xN /\ y3 == yN /\ z3 == zN 
-  )
-) 
-
-
-let scalarMultiplicationI p result scalar tempBuffer  = 
-  let h0 = ST.get() in 
-  let q = sub tempBuffer (size 0) (size 12) in 
-  zero_buffer q;
-  let buff = sub tempBuffer (size 12) (size 88) in 
-  pointToDomain p result;
-    let h2 = ST.get() in 
-  montgomery_ladder q result scalar buff;
-    let h3 = ST.get() in 
-    lemma_point_to_domain h0 h2 p result;
-    lemma_pif_to_domain h2 q;
-  norm q result buff; 
-    let h4 = ST.get() in 
-      lemma_coord h3 q
-
+let scalarMultiplicationI = scalarMultiplication_t #IMMUT
+let scalarMultiplicationC = scalarMultiplication_t #CONST
 
 let scalarMultiplication #buf_type p result scalar tempBuffer = 
   match buf_type with 
   |MUT -> scalarMultiplicationL p result scalar tempBuffer 
   |IMMUT -> scalarMultiplicationI p result scalar tempBuffer
+  |CONST -> scalarMultiplicationC p result scalar tempBuffer
 
 
 val uploadBasePoint: p: point -> Stack unit 

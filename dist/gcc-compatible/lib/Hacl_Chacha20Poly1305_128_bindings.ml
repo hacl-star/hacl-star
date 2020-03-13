@@ -4,24 +4,23 @@ module Bindings(F:Cstubs.FOREIGN) =
     open F
     let hacl_Chacha20Poly1305_128_aead_encrypt =
       foreign "Hacl_Chacha20Poly1305_128_aead_encrypt"
-        ((ptr uint8_t) @->
-           ((ptr uint8_t) @->
+        (ocaml_bytes @->
+           (ocaml_bytes @->
               (uint32_t @->
-                 ((ptr uint8_t) @->
+                 (ocaml_bytes @->
                     (uint32_t @->
-                       ((ptr uint8_t) @->
-                          ((ptr uint8_t) @->
-                             ((ptr uint8_t) @-> (returning void)))))))))
+                       (ocaml_bytes @->
+                          (ocaml_bytes @-> (ocaml_bytes @-> (returning void)))))))))
       
     let hacl_Chacha20Poly1305_128_aead_decrypt =
       foreign "Hacl_Chacha20Poly1305_128_aead_decrypt"
-        ((ptr uint8_t) @->
-           ((ptr uint8_t) @->
+        (ocaml_bytes @->
+           (ocaml_bytes @->
               (uint32_t @->
-                 ((ptr uint8_t) @->
+                 (ocaml_bytes @->
                     (uint32_t @->
-                       ((ptr uint8_t) @->
-                          ((ptr uint8_t) @->
-                             ((ptr uint8_t) @-> (returning uint32_t)))))))))
+                       (ocaml_bytes @->
+                          (ocaml_bytes @->
+                             (ocaml_bytes @-> (returning uint32_t)))))))))
       
   end

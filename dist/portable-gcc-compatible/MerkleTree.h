@@ -32,32 +32,9 @@
 #define __MerkleTree_H
 
 #include "Hacl_Kremlib.h"
+#include "Hacl_Spec.h"
 #include "EverCrypt_Hash.h"
 
-
-/* SNIPPET_START: hash_size */
-
-extern uint32_t hash_size;
-
-/* SNIPPET_END: hash_size */
-
-/* SNIPPET_START: hash */
-
-typedef uint8_t *hash;
-
-/* SNIPPET_END: hash */
-
-/* SNIPPET_START: hash_r_free */
-
-void hash_r_free(uint8_t *v1);
-
-/* SNIPPET_END: hash_r_free */
-
-/* SNIPPET_START: hash_copy */
-
-void hash_copy(uint8_t *src, uint8_t *dst);
-
-/* SNIPPET_END: hash_copy */
 
 /* SNIPPET_START: LowStar_Vector_vector_str___uint8_t_ */
 
@@ -71,17 +48,52 @@ LowStar_Vector_vector_str___uint8_t_;
 
 /* SNIPPET_END: LowStar_Vector_vector_str___uint8_t_ */
 
-/* SNIPPET_START: hash_vec */
+/* SNIPPET_START: hash_size_t */
 
-typedef LowStar_Vector_vector_str___uint8_t_ hash_vec;
+typedef uint32_t hash_size_t;
 
-/* SNIPPET_END: hash_vec */
+/* SNIPPET_END: hash_size_t */
 
-/* SNIPPET_START: hash_vec_r_free */
+/* SNIPPET_START: offset_t */
 
-void hash_vec_r_free(LowStar_Vector_vector_str___uint8_t_ v1);
+typedef uint64_t offset_t;
 
-/* SNIPPET_END: hash_vec_r_free */
+/* SNIPPET_END: offset_t */
+
+/* SNIPPET_START: index_t */
+
+typedef uint32_t index_t;
+
+/* SNIPPET_END: index_t */
+
+/* SNIPPET_START: MerkleTree_Low_path */
+
+typedef struct MerkleTree_Low_path_s
+{
+  uint32_t hash_size;
+  LowStar_Vector_vector_str___uint8_t_ hashes;
+}
+MerkleTree_Low_path;
+
+/* SNIPPET_END: MerkleTree_Low_path */
+
+/* SNIPPET_START: path */
+
+typedef MerkleTree_Low_path path;
+
+/* SNIPPET_END: path */
+
+/* SNIPPET_START: path_p */
+
+typedef MerkleTree_Low_path *path_p;
+
+/* SNIPPET_END: path_p */
+
+/* SNIPPET_START: const_path_p */
+
+typedef const MerkleTree_Low_path *const_path_p;
+
+/* SNIPPET_END: const_path_p */
 
 /* SNIPPET_START: LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_ */
 
@@ -95,82 +107,11 @@ LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_;
 
 /* SNIPPET_END: LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_ */
 
-/* SNIPPET_START: hash_vv */
+/* SNIPPET_START: MerkleTree_Low_merkle_tree */
 
-typedef LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_ hash_vv;
-
-/* SNIPPET_END: hash_vv */
-
-/* SNIPPET_START: init_hash */
-
-extern uint8_t *(*init_hash)();
-
-/* SNIPPET_END: init_hash */
-
-/* SNIPPET_START: free_hash */
-
-extern void (*free_hash)(uint8_t *x0);
-
-/* SNIPPET_END: free_hash */
-
-/* SNIPPET_START: hash_fun_t */
-
-typedef void (*hash_fun_t)(uint8_t *x0, uint8_t *x1, uint8_t *x2);
-
-/* SNIPPET_END: hash_fun_t */
-
-/* SNIPPET_START: hash_2 */
-
-void hash_2(uint8_t *src1, uint8_t *src2, uint8_t *dst);
-
-/* SNIPPET_END: hash_2 */
-
-/* SNIPPET_START: index_t */
-
-typedef uint32_t index_t;
-
-/* SNIPPET_END: index_t */
-
-/* SNIPPET_START: uint32_32_max */
-
-extern uint32_t uint32_32_max;
-
-/* SNIPPET_END: uint32_32_max */
-
-/* SNIPPET_START: uint32_max */
-
-extern uint64_t uint32_max;
-
-/* SNIPPET_END: uint32_max */
-
-/* SNIPPET_START: uint64_max */
-
-extern uint64_t uint64_max;
-
-/* SNIPPET_END: uint64_max */
-
-/* SNIPPET_START: offset_range_limit */
-
-extern uint64_t offset_range_limit;
-
-/* SNIPPET_END: offset_range_limit */
-
-/* SNIPPET_START: offset_t */
-
-typedef uint64_t offset_t;
-
-/* SNIPPET_END: offset_t */
-
-/* SNIPPET_START: merkle_tree_size_lg */
-
-extern uint32_t merkle_tree_size_lg;
-
-/* SNIPPET_END: merkle_tree_size_lg */
-
-/* SNIPPET_START: merkle_tree */
-
-typedef struct merkle_tree_s
+typedef struct MerkleTree_Low_merkle_tree_s
 {
+  uint32_t hash_size;
   uint64_t offset;
   uint32_t i;
   uint32_t j;
@@ -180,82 +121,560 @@ typedef struct merkle_tree_s
   uint8_t *mroot;
   void (*hash_fun)(uint8_t *x0, uint8_t *x1, uint8_t *x2);
 }
-merkle_tree;
+MerkleTree_Low_merkle_tree;
+
+/* SNIPPET_END: MerkleTree_Low_merkle_tree */
+
+/* SNIPPET_START: merkle_tree */
+
+typedef MerkleTree_Low_merkle_tree merkle_tree;
 
 /* SNIPPET_END: merkle_tree */
 
-/* SNIPPET_START: uu___is_MT */
-
-bool uu___is_MT(merkle_tree projectee);
-
-/* SNIPPET_END: uu___is_MT */
-
-/* SNIPPET_START: __proj__MT__item__offset */
-
-uint64_t __proj__MT__item__offset(merkle_tree projectee);
-
-/* SNIPPET_END: __proj__MT__item__offset */
-
-/* SNIPPET_START: __proj__MT__item__i */
-
-uint32_t __proj__MT__item__i(merkle_tree projectee);
-
-/* SNIPPET_END: __proj__MT__item__i */
-
-/* SNIPPET_START: __proj__MT__item__j */
-
-uint32_t __proj__MT__item__j(merkle_tree projectee);
-
-/* SNIPPET_END: __proj__MT__item__j */
-
-/* SNIPPET_START: __proj__MT__item__hs */
-
-LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_
-__proj__MT__item__hs(merkle_tree projectee);
-
-/* SNIPPET_END: __proj__MT__item__hs */
-
-/* SNIPPET_START: __proj__MT__item__rhs_ok */
-
-bool __proj__MT__item__rhs_ok(merkle_tree projectee);
-
-/* SNIPPET_END: __proj__MT__item__rhs_ok */
-
-/* SNIPPET_START: __proj__MT__item__rhs */
-
-LowStar_Vector_vector_str___uint8_t_ __proj__MT__item__rhs(merkle_tree projectee);
-
-/* SNIPPET_END: __proj__MT__item__rhs */
-
-/* SNIPPET_START: __proj__MT__item__mroot */
-
-uint8_t *__proj__MT__item__mroot(merkle_tree projectee);
-
-/* SNIPPET_END: __proj__MT__item__mroot */
-
-/* SNIPPET_START: __proj__MT__item__hash_fun */
-
-void
-(*__proj__MT__item__hash_fun(merkle_tree projectee))(uint8_t *x0, uint8_t *x1, uint8_t *x2);
-
-/* SNIPPET_END: __proj__MT__item__hash_fun */
-
 /* SNIPPET_START: mt_p */
 
-typedef merkle_tree *mt_p;
+typedef MerkleTree_Low_merkle_tree *mt_p;
 
 /* SNIPPET_END: mt_p */
 
 /* SNIPPET_START: const_mt_p */
 
-typedef const merkle_tree *const_mt_p;
+typedef const MerkleTree_Low_merkle_tree *const_mt_p;
 
 /* SNIPPET_END: const_mt_p */
 
-/* SNIPPET_START: merkle_tree_conditions */
+/* SNIPPET_START: mt_init_hash */
+
+/*
+  Constructor for hashes
+*/
+uint8_t *mt_init_hash(uint32_t hash_size);
+
+/* SNIPPET_END: mt_init_hash */
+
+/* SNIPPET_START: mt_free_hash */
+
+/*
+  Destructor for hashes
+*/
+void mt_free_hash(uint8_t *h1);
+
+/* SNIPPET_END: mt_free_hash */
+
+/* SNIPPET_START: mt_init_path */
+
+/*
+  Constructor for paths
+*/
+MerkleTree_Low_path *mt_init_path(uint32_t hash_size);
+
+/* SNIPPET_END: mt_init_path */
+
+/* SNIPPET_START: mt_free_path */
+
+/*
+  Destructor for paths
+*/
+void mt_free_path(MerkleTree_Low_path *p1);
+
+/* SNIPPET_END: mt_free_path */
+
+/* SNIPPET_START: mt_get_path_length */
+
+/*
+  Length of a path
+
+  @param[in] p Path  
+  
+  return The length of the path
+*/
+uint32_t mt_get_path_length(const MerkleTree_Low_path *p1);
+
+/* SNIPPET_END: mt_get_path_length */
+
+/* SNIPPET_START: mt_get_path_step */
+
+/*
+  Get step on a path
+
+  @param[in] p Path
+  @param[in] i Path step index
+  
+  return The hash at step i of p
+*/
+uint8_t *mt_get_path_step(const MerkleTree_Low_path *p1, uint32_t i1);
+
+/* SNIPPET_END: mt_get_path_step */
+
+/* SNIPPET_START: mt_get_path_step_pre */
+
+/*
+  Precondition predicate for mt_get_path_step
+*/
+bool mt_get_path_step_pre(const MerkleTree_Low_path *p1, uint32_t i1);
+
+/* SNIPPET_END: mt_get_path_step_pre */
+
+/* SNIPPET_START: mt_create_custom */
+
+/*
+  Construction with custom hash functions
+
+  @param[in]  hash_size Hash size (in bytes)
+  @param[in]  i         The initial hash
+  
+  return The new Merkle tree
+*/
+MerkleTree_Low_merkle_tree
+*mt_create_custom(
+  uint32_t hash_size,
+  uint8_t *i1,
+  void (*hash_fun)(uint8_t *x0, uint8_t *x1, uint8_t *x2)
+);
+
+/* SNIPPET_END: mt_create_custom */
+
+/* SNIPPET_START: mt_free */
+
+/*
+    Destruction
+
+  @param[in]  mt  The Merkle tree
+*/
+void mt_free(MerkleTree_Low_merkle_tree *mt);
+
+/* SNIPPET_END: mt_free */
+
+/* SNIPPET_START: mt_insert */
+
+/*
+  Insertion
+
+  @param[in]  mt  The Merkle tree
+  @param[in]  v   The tree does not take ownership of the hash, it makes a copy of its content.
+
+ Note: The content of the hash will be overwritten with an arbitrary value.
+*/
+void mt_insert(MerkleTree_Low_merkle_tree *mt, uint8_t *v1);
+
+/* SNIPPET_END: mt_insert */
+
+/* SNIPPET_START: mt_insert_pre */
+
+/*
+  Precondition predicate for mt_insert
+*/
+bool mt_insert_pre(const MerkleTree_Low_merkle_tree *mt, uint8_t *v1);
+
+/* SNIPPET_END: mt_insert_pre */
+
+/* SNIPPET_START: mt_get_root */
+
+/*
+  Getting the Merkle root
+
+  @param[in]  mt   The Merkle tree
+  @param[out] root The Merkle root
+*/
+void mt_get_root(const MerkleTree_Low_merkle_tree *mt, uint8_t *root);
+
+/* SNIPPET_END: mt_get_root */
+
+/* SNIPPET_START: mt_get_root_pre */
+
+/*
+  Precondition predicate for mt_get_root
+*/
+bool mt_get_root_pre(const MerkleTree_Low_merkle_tree *mt, uint8_t *root);
+
+/* SNIPPET_END: mt_get_root_pre */
+
+/* SNIPPET_START: mt_get_path */
+
+/*
+  Getting a Merkle path
+
+  @param[in]  mt   The Merkle tree
+  @param[in]  idx  The index of the target hash
+  @param[out] path A resulting Merkle path that contains the leaf hash.
+  @param[out] root The Merkle root
+
+  return The number of elements in the tree
+
+  Notes:
+  - The resulting path contains pointers to hashes in the tree, not copies of
+    the hash values.
+  - idx must be within the currently held indices in the tree (past the
+    last flush index).
+*/
+uint32_t
+mt_get_path(
+  const MerkleTree_Low_merkle_tree *mt,
+  uint64_t idx,
+  MerkleTree_Low_path *path,
+  uint8_t *root
+);
+
+/* SNIPPET_END: mt_get_path */
+
+/* SNIPPET_START: mt_get_path_pre */
+
+/*
+  Precondition predicate for mt_get_path
+*/
+bool
+mt_get_path_pre(
+  const MerkleTree_Low_merkle_tree *mt,
+  uint64_t idx,
+  const MerkleTree_Low_path *path,
+  uint8_t *root
+);
+
+/* SNIPPET_END: mt_get_path_pre */
+
+/* SNIPPET_START: mt_flush */
+
+/*
+  Flush the Merkle tree
+
+  @param[in]  mt   The Merkle tree
+*/
+void mt_flush(MerkleTree_Low_merkle_tree *mt);
+
+/* SNIPPET_END: mt_flush */
+
+/* SNIPPET_START: mt_flush_pre */
+
+/*
+  Precondition predicate for mt_flush
+*/
+bool mt_flush_pre(const MerkleTree_Low_merkle_tree *mt);
+
+/* SNIPPET_END: mt_flush_pre */
+
+/* SNIPPET_START: mt_flush_to */
+
+/*
+  Flush the Merkle tree up to a given index
+
+  @param[in]  mt   The Merkle tree
+  @param[in]  idx  The index up to which to flush the tree
+*/
+void mt_flush_to(MerkleTree_Low_merkle_tree *mt, uint64_t idx);
+
+/* SNIPPET_END: mt_flush_to */
+
+/* SNIPPET_START: mt_flush_to_pre */
+
+/*
+  Precondition predicate for mt_flush_to
+*/
+bool mt_flush_to_pre(const MerkleTree_Low_merkle_tree *mt, uint64_t idx);
+
+/* SNIPPET_END: mt_flush_to_pre */
+
+/* SNIPPET_START: mt_retract_to */
+
+/*
+  Retract the Merkle tree down to a given index
+
+  @param[in]  mt   The Merkle tree
+  @param[in]  idx  The index to retract the tree to
+
+ Note: The element and idx will remain in the tree.
+*/
+void mt_retract_to(MerkleTree_Low_merkle_tree *mt, uint64_t idx);
+
+/* SNIPPET_END: mt_retract_to */
+
+/* SNIPPET_START: mt_retract_to_pre */
+
+/*
+  Precondition predicate for mt_retract_to
+*/
+bool mt_retract_to_pre(const MerkleTree_Low_merkle_tree *mt, uint64_t idx);
+
+/* SNIPPET_END: mt_retract_to_pre */
+
+/* SNIPPET_START: mt_verify */
+
+/*
+  Client-side verification
+
+  @param[in]  mt   The Merkle tree
+  @param[in]  tgt  The index of the target hash
+  @param[in]  max  The maximum index + 1 of the tree when the path was generated
+  @param[in]  path The Merkle path to verify
+  @param[in]  root
+
+  return true if the verification succeeded, false otherwise
+
+  Note: max - tgt must be less than 2^32.
+*/
+bool
+mt_verify(
+  const MerkleTree_Low_merkle_tree *mt,
+  uint64_t tgt,
+  uint64_t max1,
+  const MerkleTree_Low_path *path,
+  uint8_t *root
+);
+
+/* SNIPPET_END: mt_verify */
+
+/* SNIPPET_START: mt_verify_pre */
+
+/*
+  Precondition predicate for mt_verify
+*/
+bool
+mt_verify_pre(
+  const MerkleTree_Low_merkle_tree *mt,
+  uint64_t tgt,
+  uint64_t max1,
+  const MerkleTree_Low_path *path,
+  uint8_t *root
+);
+
+/* SNIPPET_END: mt_verify_pre */
+
+/* SNIPPET_START: mt_serialize_size */
+
+/*
+  Serialization size
+
+  @param[in]  mt   The Merkle tree
+
+  return the number of bytes required to serialize the tree
+*/
+uint64_t mt_serialize_size(const MerkleTree_Low_merkle_tree *mt);
+
+/* SNIPPET_END: mt_serialize_size */
+
+/* SNIPPET_START: mt_serialize */
+
+/*
+  Merkle tree serialization
+
+  @param[in]  mt   The Merkle tree
+  @param[out] buf  The buffer to serialize the tree into
+  @param[in]  len  Length of buf
+
+  return the number of bytes written
+
+  Note: buf must be a buffer of size mt_serialize_size(mt) or larger, but
+  smaller than 2^32 (larger buffers are currently not supported).
+*/
+uint64_t mt_serialize(const MerkleTree_Low_merkle_tree *mt, uint8_t *buf1, uint64_t len);
+
+/* SNIPPET_END: mt_serialize */
+
+/* SNIPPET_START: mt_deserialize */
+
+/*
+  Merkle tree deserialization
+
+  @param[in]  expected_hash_size Expected hash size to match hash_fun
+  @param[in]  buf  The buffer to deserialize the tree from
+  @param[in]  len  Length of buf
+  @param[in]  hash_fun Hash function
+
+  return pointer to the new tree if successful, NULL otherwise
+
+  Note: buf must point to an allocated buffer.
+*/
+MerkleTree_Low_merkle_tree
+*mt_deserialize(
+  const uint8_t *buf1,
+  uint64_t len,
+  void (*hash_fun)(uint8_t *x0, uint8_t *x1, uint8_t *x2)
+);
+
+/* SNIPPET_END: mt_deserialize */
+
+/* SNIPPET_START: mt_serialize_path */
+
+/*
+  Path serialization
+
+  @param[in]  path The path
+  @param[out] buf  The buffer to serialize the path into
+  @param[in]  len  Length of buf
+
+  return the number of bytes written
+*/
+uint64_t mt_serialize_path(const MerkleTree_Low_path *path, uint8_t *buf1, uint64_t len);
+
+/* SNIPPET_END: mt_serialize_path */
+
+/* SNIPPET_START: mt_deserialize_path */
+
+/*
+  Path deserialization
+
+  @param[in]  buf  The buffer to deserialize the path from
+  @param[in]  len  Length of buf
+
+  return pointer to the new path if successful, NULL otherwise
+
+ Note: buf must point to an allocated buffer.
+*/
+MerkleTree_Low_path
+*mt_deserialize_path(uint32_t hash_size, const uint8_t *buf1, uint64_t len);
+
+/* SNIPPET_END: mt_deserialize_path */
+
+/* SNIPPET_START: mt_p0 */
+
+typedef MerkleTree_Low_merkle_tree *mt_p0;
+
+/* SNIPPET_END: mt_p0 */
+
+/* SNIPPET_START: mt_sha256_compress */
+
+/*
+  Default hash function
+*/
+void mt_sha256_compress(uint8_t *src1, uint8_t *src2, uint8_t *dst);
+
+/* SNIPPET_END: mt_sha256_compress */
+
+/* SNIPPET_START: mt_create */
+
+/*
+  Construction wired to sha256 from EverCrypt
+
+  @param[in]  init   The initial hash
+*/
+MerkleTree_Low_merkle_tree *mt_create(uint8_t *init1);
+
+/* SNIPPET_END: mt_create */
+
+/* SNIPPET_START: MerkleTree_Low_index_t */
+
+typedef uint32_t MerkleTree_Low_index_t;
+
+/* SNIPPET_END: MerkleTree_Low_index_t */
+
+/* SNIPPET_START: MerkleTree_Low_uint32_32_max */
+
+extern uint32_t MerkleTree_Low_uint32_32_max;
+
+/* SNIPPET_END: MerkleTree_Low_uint32_32_max */
+
+/* SNIPPET_START: MerkleTree_Low_uint32_max */
+
+extern uint64_t MerkleTree_Low_uint32_max;
+
+/* SNIPPET_END: MerkleTree_Low_uint32_max */
+
+/* SNIPPET_START: MerkleTree_Low_uint64_max */
+
+extern uint64_t MerkleTree_Low_uint64_max;
+
+/* SNIPPET_END: MerkleTree_Low_uint64_max */
+
+/* SNIPPET_START: MerkleTree_Low_offset_range_limit */
+
+extern uint64_t MerkleTree_Low_offset_range_limit;
+
+/* SNIPPET_END: MerkleTree_Low_offset_range_limit */
+
+/* SNIPPET_START: MerkleTree_Low_offset_t */
+
+typedef uint64_t MerkleTree_Low_offset_t;
+
+/* SNIPPET_END: MerkleTree_Low_offset_t */
+
+/* SNIPPET_START: MerkleTree_Low_merkle_tree_size_lg */
+
+extern uint32_t MerkleTree_Low_merkle_tree_size_lg;
+
+/* SNIPPET_END: MerkleTree_Low_merkle_tree_size_lg */
+
+/* SNIPPET_START: MerkleTree_Low_uu___is_MT */
+
+bool MerkleTree_Low_uu___is_MT(MerkleTree_Low_merkle_tree projectee);
+
+/* SNIPPET_END: MerkleTree_Low_uu___is_MT */
+
+/* SNIPPET_START: MerkleTree_Low___proj__MT__item__hash_size */
+
+uint32_t MerkleTree_Low___proj__MT__item__hash_size(MerkleTree_Low_merkle_tree projectee);
+
+/* SNIPPET_END: MerkleTree_Low___proj__MT__item__hash_size */
+
+/* SNIPPET_START: MerkleTree_Low___proj__MT__item__offset */
+
+uint64_t MerkleTree_Low___proj__MT__item__offset(MerkleTree_Low_merkle_tree projectee);
+
+/* SNIPPET_END: MerkleTree_Low___proj__MT__item__offset */
+
+/* SNIPPET_START: MerkleTree_Low___proj__MT__item__i */
+
+uint32_t MerkleTree_Low___proj__MT__item__i(MerkleTree_Low_merkle_tree projectee);
+
+/* SNIPPET_END: MerkleTree_Low___proj__MT__item__i */
+
+/* SNIPPET_START: MerkleTree_Low___proj__MT__item__j */
+
+uint32_t MerkleTree_Low___proj__MT__item__j(MerkleTree_Low_merkle_tree projectee);
+
+/* SNIPPET_END: MerkleTree_Low___proj__MT__item__j */
+
+/* SNIPPET_START: MerkleTree_Low___proj__MT__item__hs */
+
+LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_
+MerkleTree_Low___proj__MT__item__hs(MerkleTree_Low_merkle_tree projectee);
+
+/* SNIPPET_END: MerkleTree_Low___proj__MT__item__hs */
+
+/* SNIPPET_START: MerkleTree_Low___proj__MT__item__rhs_ok */
+
+bool MerkleTree_Low___proj__MT__item__rhs_ok(MerkleTree_Low_merkle_tree projectee);
+
+/* SNIPPET_END: MerkleTree_Low___proj__MT__item__rhs_ok */
+
+/* SNIPPET_START: MerkleTree_Low___proj__MT__item__rhs */
+
+LowStar_Vector_vector_str___uint8_t_
+MerkleTree_Low___proj__MT__item__rhs(MerkleTree_Low_merkle_tree projectee);
+
+/* SNIPPET_END: MerkleTree_Low___proj__MT__item__rhs */
+
+/* SNIPPET_START: MerkleTree_Low___proj__MT__item__mroot */
+
+uint8_t *MerkleTree_Low___proj__MT__item__mroot(MerkleTree_Low_merkle_tree projectee);
+
+/* SNIPPET_END: MerkleTree_Low___proj__MT__item__mroot */
+
+/* SNIPPET_START: MerkleTree_Low___proj__MT__item__hash_fun */
+
+void
+(*MerkleTree_Low___proj__MT__item__hash_fun(MerkleTree_Low_merkle_tree projectee))(
+  uint8_t *x0,
+  uint8_t *x1,
+  uint8_t *x2
+);
+
+/* SNIPPET_END: MerkleTree_Low___proj__MT__item__hash_fun */
+
+/* SNIPPET_START: MerkleTree_Low_mt_p */
+
+typedef MerkleTree_Low_merkle_tree *MerkleTree_Low_mt_p;
+
+/* SNIPPET_END: MerkleTree_Low_mt_p */
+
+/* SNIPPET_START: MerkleTree_Low_const_mt_p */
+
+typedef const MerkleTree_Low_merkle_tree *MerkleTree_Low_const_mt_p;
+
+/* SNIPPET_END: MerkleTree_Low_const_mt_p */
+
+/* SNIPPET_START: MerkleTree_Low_merkle_tree_conditions */
 
 bool
-merkle_tree_conditions(
+MerkleTree_Low_merkle_tree_conditions(
   uint64_t offset1,
   uint32_t i1,
   uint32_t j1,
@@ -265,256 +684,307 @@ merkle_tree_conditions(
   uint8_t *mroot
 );
 
-/* SNIPPET_END: merkle_tree_conditions */
+/* SNIPPET_END: MerkleTree_Low_merkle_tree_conditions */
 
-/* SNIPPET_START: offset_of */
+/* SNIPPET_START: MerkleTree_Low_offset_of */
 
-uint32_t offset_of(uint32_t i1);
+uint32_t MerkleTree_Low_offset_of(uint32_t i1);
 
-/* SNIPPET_END: offset_of */
+/* SNIPPET_END: MerkleTree_Low_offset_of */
 
-/* SNIPPET_START: mt_free */
+/* SNIPPET_START: MerkleTree_Low_mt_free */
 
-void mt_free(merkle_tree *mt);
+void MerkleTree_Low_mt_free(MerkleTree_Low_merkle_tree *mt);
 
-/* SNIPPET_END: mt_free */
+/* SNIPPET_END: MerkleTree_Low_mt_free */
 
-/* SNIPPET_START: mt_insert_pre */
+/* SNIPPET_START: MerkleTree_Low_mt_insert_pre */
 
-bool mt_insert_pre(const merkle_tree *mt, uint8_t *v1);
+bool MerkleTree_Low_mt_insert_pre(const MerkleTree_Low_merkle_tree *mt, uint8_t *v1);
 
-/* SNIPPET_END: mt_insert_pre */
+/* SNIPPET_END: MerkleTree_Low_mt_insert_pre */
 
-/* SNIPPET_START: mt_insert */
+/* SNIPPET_START: MerkleTree_Low_mt_insert */
 
-void mt_insert(merkle_tree *mt, uint8_t *v1);
+void MerkleTree_Low_mt_insert(MerkleTree_Low_merkle_tree *mt, uint8_t *v1);
 
-/* SNIPPET_END: mt_insert */
+/* SNIPPET_END: MerkleTree_Low_mt_insert */
 
-/* SNIPPET_START: mt_create_custom */
+/* SNIPPET_START: MerkleTree_Low_mt_create_custom */
 
-merkle_tree
-*mt_create_custom(uint8_t *init1, void (*hash_fun)(uint8_t *x0, uint8_t *x1, uint8_t *x2));
+MerkleTree_Low_merkle_tree
+*MerkleTree_Low_mt_create_custom(
+  uint32_t hsz,
+  uint8_t *init1,
+  void (*hash_fun)(uint8_t *x0, uint8_t *x1, uint8_t *x2)
+);
 
-/* SNIPPET_END: mt_create_custom */
+/* SNIPPET_END: MerkleTree_Low_mt_create_custom */
 
-/* SNIPPET_START: mt_create */
+/* SNIPPET_START: MerkleTree_Low_uu___is_Path */
 
-merkle_tree *mt_create(uint8_t *init1);
+bool MerkleTree_Low_uu___is_Path(MerkleTree_Low_path projectee);
 
-/* SNIPPET_END: mt_create */
+/* SNIPPET_END: MerkleTree_Low_uu___is_Path */
 
-/* SNIPPET_START: path */
+/* SNIPPET_START: MerkleTree_Low___proj__Path__item__hash_size */
 
-typedef LowStar_Vector_vector_str___uint8_t_ path;
+uint32_t MerkleTree_Low___proj__Path__item__hash_size(MerkleTree_Low_path projectee);
 
-/* SNIPPET_END: path */
+/* SNIPPET_END: MerkleTree_Low___proj__Path__item__hash_size */
 
-/* SNIPPET_START: path_p */
+/* SNIPPET_START: MerkleTree_Low___proj__Path__item__hashes */
 
-typedef LowStar_Vector_vector_str___uint8_t_ *path_p;
+LowStar_Vector_vector_str___uint8_t_
+MerkleTree_Low___proj__Path__item__hashes(MerkleTree_Low_path projectee);
 
-/* SNIPPET_END: path_p */
+/* SNIPPET_END: MerkleTree_Low___proj__Path__item__hashes */
 
-/* SNIPPET_START: const_path_p */
+/* SNIPPET_START: MerkleTree_Low_path_p */
 
-typedef const LowStar_Vector_vector_str___uint8_t_ *const_path_p;
+typedef MerkleTree_Low_path *MerkleTree_Low_path_p;
 
-/* SNIPPET_END: const_path_p */
+/* SNIPPET_END: MerkleTree_Low_path_p */
 
-/* SNIPPET_START: init_path */
+/* SNIPPET_START: MerkleTree_Low_const_path_p */
 
-LowStar_Vector_vector_str___uint8_t_ *init_path();
+typedef const MerkleTree_Low_path *MerkleTree_Low_const_path_p;
 
-/* SNIPPET_END: init_path */
+/* SNIPPET_END: MerkleTree_Low_const_path_p */
 
-/* SNIPPET_START: clear_path */
+/* SNIPPET_START: MerkleTree_Low_init_path */
 
-void clear_path(LowStar_Vector_vector_str___uint8_t_ *p1);
+MerkleTree_Low_path *MerkleTree_Low_init_path(uint32_t hsz);
 
-/* SNIPPET_END: clear_path */
+/* SNIPPET_END: MerkleTree_Low_init_path */
 
-/* SNIPPET_START: free_path */
+/* SNIPPET_START: MerkleTree_Low_clear_path */
 
-void free_path(LowStar_Vector_vector_str___uint8_t_ *p1);
+void MerkleTree_Low_clear_path(MerkleTree_Low_path *p1);
 
-/* SNIPPET_END: free_path */
+/* SNIPPET_END: MerkleTree_Low_clear_path */
 
-/* SNIPPET_START: mt_get_root_pre */
+/* SNIPPET_START: MerkleTree_Low_free_path */
 
-bool mt_get_root_pre(const merkle_tree *mt, uint8_t *rt);
+void MerkleTree_Low_free_path(MerkleTree_Low_path *p1);
 
-/* SNIPPET_END: mt_get_root_pre */
+/* SNIPPET_END: MerkleTree_Low_free_path */
 
-/* SNIPPET_START: mt_get_root */
+/* SNIPPET_START: MerkleTree_Low_mt_get_root_pre */
 
-void mt_get_root(const merkle_tree *mt, uint8_t *rt);
+bool MerkleTree_Low_mt_get_root_pre(const MerkleTree_Low_merkle_tree *mt, uint8_t *rt);
 
-/* SNIPPET_END: mt_get_root */
+/* SNIPPET_END: MerkleTree_Low_mt_get_root_pre */
 
-/* SNIPPET_START: path_insert */
+/* SNIPPET_START: MerkleTree_Low_mt_get_root */
 
-void path_insert(LowStar_Vector_vector_str___uint8_t_ *p1, uint8_t *hp);
+void MerkleTree_Low_mt_get_root(const MerkleTree_Low_merkle_tree *mt, uint8_t *rt);
 
-/* SNIPPET_END: path_insert */
+/* SNIPPET_END: MerkleTree_Low_mt_get_root */
 
-/* SNIPPET_START: mt_get_path_pre */
+/* SNIPPET_START: MerkleTree_Low_path_insert */
+
+void MerkleTree_Low_path_insert(uint32_t hsz, MerkleTree_Low_path *p1, uint8_t *hp);
+
+/* SNIPPET_END: MerkleTree_Low_path_insert */
+
+/* SNIPPET_START: MerkleTree_Low_mt_get_path_length */
+
+uint32_t MerkleTree_Low_mt_get_path_length(const MerkleTree_Low_path *p1);
+
+/* SNIPPET_END: MerkleTree_Low_mt_get_path_length */
+
+/* SNIPPET_START: MerkleTree_Low_mt_get_path_step_pre */
+
+bool MerkleTree_Low_mt_get_path_step_pre(const MerkleTree_Low_path *p1, uint32_t i1);
+
+/* SNIPPET_END: MerkleTree_Low_mt_get_path_step_pre */
+
+/* SNIPPET_START: MerkleTree_Low_mt_get_path_step */
+
+uint8_t *MerkleTree_Low_mt_get_path_step(const MerkleTree_Low_path *p1, uint32_t i1);
+
+/* SNIPPET_END: MerkleTree_Low_mt_get_path_step */
+
+/* SNIPPET_START: MerkleTree_Low_mt_get_path_pre */
 
 bool
-mt_get_path_pre(
-  const merkle_tree *mt,
+MerkleTree_Low_mt_get_path_pre(
+  const MerkleTree_Low_merkle_tree *mt,
   uint64_t idx,
-  const LowStar_Vector_vector_str___uint8_t_ *p1,
+  const MerkleTree_Low_path *p1,
   uint8_t *root
 );
 
-/* SNIPPET_END: mt_get_path_pre */
+/* SNIPPET_END: MerkleTree_Low_mt_get_path_pre */
 
-/* SNIPPET_START: mt_get_path */
+/* SNIPPET_START: MerkleTree_Low_mt_get_path */
 
 uint32_t
-mt_get_path(
-  const merkle_tree *mt,
+MerkleTree_Low_mt_get_path(
+  const MerkleTree_Low_merkle_tree *mt,
   uint64_t idx,
-  LowStar_Vector_vector_str___uint8_t_ *p1,
+  MerkleTree_Low_path *p1,
   uint8_t *root
 );
 
-/* SNIPPET_END: mt_get_path */
+/* SNIPPET_END: MerkleTree_Low_mt_get_path */
 
-/* SNIPPET_START: mt_flush_to_pre */
+/* SNIPPET_START: MerkleTree_Low_mt_flush_to_pre */
 
-bool mt_flush_to_pre(const merkle_tree *mt, uint64_t idx);
+bool MerkleTree_Low_mt_flush_to_pre(const MerkleTree_Low_merkle_tree *mt, uint64_t idx);
 
-/* SNIPPET_END: mt_flush_to_pre */
+/* SNIPPET_END: MerkleTree_Low_mt_flush_to_pre */
 
-/* SNIPPET_START: mt_flush_to */
+/* SNIPPET_START: MerkleTree_Low_mt_flush_to */
 
-void mt_flush_to(merkle_tree *mt, uint64_t idx);
+void MerkleTree_Low_mt_flush_to(MerkleTree_Low_merkle_tree *mt, uint64_t idx);
 
-/* SNIPPET_END: mt_flush_to */
+/* SNIPPET_END: MerkleTree_Low_mt_flush_to */
 
-/* SNIPPET_START: mt_flush_pre */
+/* SNIPPET_START: MerkleTree_Low_mt_flush_pre */
 
-bool mt_flush_pre(const merkle_tree *mt);
+bool MerkleTree_Low_mt_flush_pre(const MerkleTree_Low_merkle_tree *mt);
 
-/* SNIPPET_END: mt_flush_pre */
+/* SNIPPET_END: MerkleTree_Low_mt_flush_pre */
 
-/* SNIPPET_START: mt_flush */
+/* SNIPPET_START: MerkleTree_Low_mt_flush */
 
-void mt_flush(merkle_tree *mt);
+void MerkleTree_Low_mt_flush(MerkleTree_Low_merkle_tree *mt);
 
-/* SNIPPET_END: mt_flush */
+/* SNIPPET_END: MerkleTree_Low_mt_flush */
 
-/* SNIPPET_START: mt_retract_to_pre */
+/* SNIPPET_START: MerkleTree_Low_mt_retract_to_pre */
 
-bool mt_retract_to_pre(const merkle_tree *mt, uint64_t r);
+bool MerkleTree_Low_mt_retract_to_pre(const MerkleTree_Low_merkle_tree *mt, uint64_t r);
 
-/* SNIPPET_END: mt_retract_to_pre */
+/* SNIPPET_END: MerkleTree_Low_mt_retract_to_pre */
 
-/* SNIPPET_START: mt_retract_to */
+/* SNIPPET_START: MerkleTree_Low_mt_retract_to */
 
-void mt_retract_to(merkle_tree *mt, uint64_t r);
+void MerkleTree_Low_mt_retract_to(MerkleTree_Low_merkle_tree *mt, uint64_t r);
 
-/* SNIPPET_END: mt_retract_to */
+/* SNIPPET_END: MerkleTree_Low_mt_retract_to */
 
-/* SNIPPET_START: mt_verify_pre */
+/* SNIPPET_START: MerkleTree_Low_mt_verify_pre */
 
 bool
-mt_verify_pre(
-  const merkle_tree *mt,
+MerkleTree_Low_mt_verify_pre(
+  const MerkleTree_Low_merkle_tree *mt,
   uint64_t k1,
   uint64_t j1,
-  const LowStar_Vector_vector_str___uint8_t_ *p1,
+  const MerkleTree_Low_path *p1,
   uint8_t *rt
 );
 
-/* SNIPPET_END: mt_verify_pre */
+/* SNIPPET_END: MerkleTree_Low_mt_verify_pre */
 
-/* SNIPPET_START: mt_verify */
+/* SNIPPET_START: MerkleTree_Low_mt_verify */
 
 bool
-mt_verify(
-  const merkle_tree *mt,
+MerkleTree_Low_mt_verify(
+  const MerkleTree_Low_merkle_tree *mt,
   uint64_t k1,
   uint64_t j1,
-  const LowStar_Vector_vector_str___uint8_t_ *p1,
+  const MerkleTree_Low_path *p1,
   uint8_t *rt
 );
 
-/* SNIPPET_END: mt_verify */
+/* SNIPPET_END: MerkleTree_Low_mt_verify */
 
-/* SNIPPET_START: uint8_t */
+/* SNIPPET_START: MerkleTree_Low_Serialization_uint8_t */
 
-typedef uint8_t uint8_t;
+typedef uint8_t MerkleTree_Low_Serialization_uint8_t;
 
-/* SNIPPET_END: uint8_t */
+/* SNIPPET_END: MerkleTree_Low_Serialization_uint8_t */
 
-/* SNIPPET_START: uint16_t */
+/* SNIPPET_START: MerkleTree_Low_Serialization_uint16_t */
 
-typedef uint16_t uint16_t;
+typedef uint16_t MerkleTree_Low_Serialization_uint16_t;
 
-/* SNIPPET_END: uint16_t */
+/* SNIPPET_END: MerkleTree_Low_Serialization_uint16_t */
 
-/* SNIPPET_START: uint32_t */
+/* SNIPPET_START: MerkleTree_Low_Serialization_uint32_t */
 
-typedef uint32_t uint32_t;
+typedef uint32_t MerkleTree_Low_Serialization_uint32_t;
 
-/* SNIPPET_END: uint32_t */
+/* SNIPPET_END: MerkleTree_Low_Serialization_uint32_t */
 
-/* SNIPPET_START: uint64_t */
+/* SNIPPET_START: MerkleTree_Low_Serialization_uint64_t */
 
-typedef uint64_t uint64_t;
+typedef uint64_t MerkleTree_Low_Serialization_uint64_t;
 
-/* SNIPPET_END: uint64_t */
+/* SNIPPET_END: MerkleTree_Low_Serialization_uint64_t */
 
-/* SNIPPET_START: uint8_p */
+/* SNIPPET_START: MerkleTree_Low_Serialization_uint8_p */
 
-typedef uint8_t *uint8_p;
+typedef uint8_t *MerkleTree_Low_Serialization_uint8_p;
 
-/* SNIPPET_END: uint8_p */
+/* SNIPPET_END: MerkleTree_Low_Serialization_uint8_p */
 
-/* SNIPPET_START: const_uint8_p */
+/* SNIPPET_START: MerkleTree_Low_Serialization_const_uint8_p */
 
-typedef const uint8_t *const_uint8_p;
+typedef const uint8_t *MerkleTree_Low_Serialization_const_uint8_p;
 
-/* SNIPPET_END: const_uint8_p */
+/* SNIPPET_END: MerkleTree_Low_Serialization_const_uint8_p */
 
-/* SNIPPET_START: mt_serialize_size */
+/* SNIPPET_START: MerkleTree_Low_Serialization_mt_serialize_size */
 
-uint64_t mt_serialize_size(const merkle_tree *mt);
+uint64_t MerkleTree_Low_Serialization_mt_serialize_size(const MerkleTree_Low_merkle_tree *mt);
 
-/* SNIPPET_END: mt_serialize_size */
+/* SNIPPET_END: MerkleTree_Low_Serialization_mt_serialize_size */
 
-/* SNIPPET_START: mt_serialize */
-
-uint64_t mt_serialize(const merkle_tree *mt, uint8_t *output, uint64_t sz);
-
-/* SNIPPET_END: mt_serialize */
-
-/* SNIPPET_START: mt_deserialize */
-
-merkle_tree *mt_deserialize(const uint8_t *input, uint64_t sz);
-
-/* SNIPPET_END: mt_deserialize */
-
-/* SNIPPET_START: mt_serialize_path */
+/* SNIPPET_START: MerkleTree_Low_Serialization_mt_serialize */
 
 uint64_t
-mt_serialize_path(
-  const LowStar_Vector_vector_str___uint8_t_ *p1,
-  const merkle_tree *mt,
+MerkleTree_Low_Serialization_mt_serialize(
+  const MerkleTree_Low_merkle_tree *mt,
   uint8_t *output,
   uint64_t sz
 );
 
-/* SNIPPET_END: mt_serialize_path */
+/* SNIPPET_END: MerkleTree_Low_Serialization_mt_serialize */
 
-/* SNIPPET_START: mt_deserialize_path */
+/* SNIPPET_START: MerkleTree_Low_Serialization_mt_deserialize */
 
-LowStar_Vector_vector_str___uint8_t_ *mt_deserialize_path(const uint8_t *input, uint64_t sz);
+MerkleTree_Low_merkle_tree
+*MerkleTree_Low_Serialization_mt_deserialize(
+  const uint8_t *input,
+  uint64_t sz,
+  void (*hash_fun)(uint8_t *x0, uint8_t *x1, uint8_t *x2)
+);
 
-/* SNIPPET_END: mt_deserialize_path */
+/* SNIPPET_END: MerkleTree_Low_Serialization_mt_deserialize */
+
+/* SNIPPET_START: MerkleTree_Low_Serialization_mt_serialize_path */
+
+uint64_t
+MerkleTree_Low_Serialization_mt_serialize_path(
+  const MerkleTree_Low_path *p1,
+  uint8_t *output,
+  uint64_t sz
+);
+
+/* SNIPPET_END: MerkleTree_Low_Serialization_mt_serialize_path */
+
+/* SNIPPET_START: MerkleTree_Low_Serialization_mt_deserialize_path */
+
+MerkleTree_Low_path
+*MerkleTree_Low_Serialization_mt_deserialize_path(const uint8_t *input, uint64_t sz);
+
+/* SNIPPET_END: MerkleTree_Low_Serialization_mt_deserialize_path */
+
+/* SNIPPET_START: MerkleTree_Low_Hashfunctions_init_hash */
+
+uint8_t *MerkleTree_Low_Hashfunctions_init_hash(uint32_t hsz);
+
+/* SNIPPET_END: MerkleTree_Low_Hashfunctions_init_hash */
+
+/* SNIPPET_START: MerkleTree_Low_Hashfunctions_free_hash */
+
+void MerkleTree_Low_Hashfunctions_free_hash(uint8_t *h1);
+
+/* SNIPPET_END: MerkleTree_Low_Hashfunctions_free_hash */
 
 #define __MerkleTree_H_DEFINED
 #endif
