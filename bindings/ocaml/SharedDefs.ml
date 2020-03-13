@@ -8,6 +8,7 @@ module type Buffer = sig
   val size_uint32 : t -> uint32
   val ctypes_buf : t -> buf
   val size : t -> int
+  val disjoint : t -> t -> bool
 end
 
 module CBytes : Buffer with type t = Bytes.t and type buf = Bytes.t Ctypes.ocaml = struct
@@ -16,6 +17,7 @@ module CBytes : Buffer with type t = Bytes.t and type buf = Bytes.t Ctypes.ocaml
   let size_uint32 b = Unsigned.UInt32.of_int (Bytes.length b)
   let ctypes_buf = Ctypes.ocaml_bytes_start
   let size = Bytes.length
+  let disjoint b1 b2 = b1 <> b2
 end
 
 module CBigstring : Buffer with type t = Bigstring.t and type buf = uint8 Ctypes_static.ptr = struct
@@ -24,6 +26,7 @@ module CBigstring : Buffer with type t = Bigstring.t and type buf = uint8 Ctypes
   let size_uint32 b = Unsigned.UInt32.of_int (Bigstring.size b)
   let ctypes_buf b = from_voidp uint8_t (to_voidp (bigarray_start array1 b))
   let size = Bigstring.size
+  let disjoint _ _ = true (* TODO: use https://github.com/ocaml/ocaml/pull/8618 once merged *)
 end
 
 
@@ -50,6 +53,10 @@ module HashDefs = struct
     | Legacy MD5 -> spec_Hash_Definitions_hash_alg_Spec_Hash_Definitions_MD5
   let digest_len alg =
     UInt32.to_int (Hacl_Hash.hacl_Hash_Definitions_hash_len (alg_definition alg))
+  let check_digest_len alg len =
+    match alg with
+    | Some alg -> assert (len = digest_len alg)
+    | None -> ()
 end
 
 module type Chacha20_Poly1305_generic = sig

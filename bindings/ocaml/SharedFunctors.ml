@@ -28,9 +28,25 @@ module Make_Curve25519_generic (C: Buffer)
   end)
 = struct
   type t = C.t
-  let secret_to_public pub priv = Impl.secret_to_public (C.ctypes_buf pub) (C.ctypes_buf priv)
-  let scalarmult shared my_priv their_pub = Impl.scalarmult (C.ctypes_buf shared) (C.ctypes_buf my_priv) (C.ctypes_buf their_pub)
-  let ecdh shared my_priv their_pub = Impl.ecdh (C.ctypes_buf shared) (C.ctypes_buf my_priv) (C.ctypes_buf their_pub)
+  let secret_to_public pub priv =
+    assert (C.disjoint pub priv);
+    assert (C.size pub = 32);
+    assert (C.size priv = 32);
+    Impl.secret_to_public (C.ctypes_buf pub) (C.ctypes_buf priv)
+  let scalarmult shared my_priv their_pub =
+    assert (C.disjoint shared my_priv);
+    assert (C.disjoint shared their_pub);
+    assert (C.size shared = 32);
+    assert (C.size my_priv = 32);
+    assert (C.size their_pub = 32);
+    Impl.scalarmult (C.ctypes_buf shared) (C.ctypes_buf my_priv) (C.ctypes_buf their_pub)
+  let ecdh shared my_priv their_pub =
+    assert (C.disjoint shared my_priv);
+    assert (C.disjoint shared their_pub);
+    assert (C.size shared = 32);
+    assert (C.size my_priv = 32);
+    assert (C.size their_pub = 32);
+    Impl.ecdh (C.ctypes_buf shared) (C.ctypes_buf my_priv) (C.ctypes_buf their_pub)
 end
 
 module Make_EdDSA_generic (C: Buffer)
@@ -52,22 +68,21 @@ end
 
 module Make_HashFunction_generic (C: Buffer)
     (Impl : sig
-    val hash_alg : HashDefs.alg option
-    val hash : C.buf -> uint32 -> C.buf -> unit
-  end)
+       val hash_alg : HashDefs.alg option
+       val hash : C.buf -> uint32 -> C.buf -> unit
+     end)
 = struct
   type t = C.t
   let hash input output =
-    (match Impl.hash_alg with
-    | Some alg -> assert (C.size output = HashDefs.digest_len alg)
-    | None -> ());
+    HashDefs.check_digest_len Impl.hash_alg (C.size output);
+    assert (C.disjoint input output);
     Impl.hash (C.ctypes_buf input) (C.size_uint32 input) (C.ctypes_buf output)
 end
 
 module Make_Poly1305_generic (C: Buffer)
     (Impl : sig
-    val mac : C.buf -> uint32 -> C.buf -> C.buf -> unit
-  end)
+       val mac : C.buf -> uint32 -> C.buf -> C.buf -> unit
+     end)
 = struct
   type t = C.t
   let mac dst key data = Impl.mac (C.ctypes_buf dst) (C.size_uint32 data) (C.ctypes_buf data) (C.ctypes_buf key)
@@ -75,22 +90,35 @@ end
 
 module Make_HMAC_generic (C: Buffer)
     (Impl : sig
-    val mac : C.buf -> C.buf -> uint32 -> C.buf -> uint32 -> unit
+       val hash_alg : HashDefs.alg
+       val mac : C.buf -> C.buf -> uint32 -> C.buf -> uint32 -> unit
   end)
 = struct
   type t = C.t
-  let mac dst key data = Impl.mac (C.ctypes_buf dst) (C.ctypes_buf key) (C.size_uint32 key) (C.ctypes_buf data) (C.size_uint32 data)
+  let mac dst key data =
+    assert (HashDefs.digest_len Impl.hash_alg = C.size dst);
+    assert (C.disjoint dst key);
+    Impl.mac (C.ctypes_buf dst) (C.ctypes_buf key) (C.size_uint32 key) (C.ctypes_buf data) (C.size_uint32 data)
 end
 
 module Make_HKDF_generic (C: Buffer)
     (Impl: sig
+       val hash_alg : HashDefs.alg
        val expand : C.buf -> C.buf -> uint32 -> C.buf -> uint32 -> uint32 -> unit
        val extract : C.buf -> C.buf -> uint32 -> C.buf -> uint32 -> unit
      end)
 = struct
   type t = C.t
-  let expand okm prk info = Impl.expand (C.ctypes_buf okm) (C.ctypes_buf prk) (C.size_uint32 prk) (C.ctypes_buf info) (C.size_uint32 info) (C.size_uint32 okm)
-  let extract prk salt ikm = Impl.extract (C.ctypes_buf prk) (C.ctypes_buf salt) (C.size_uint32 salt) (C.ctypes_buf ikm) (C.size_uint32 ikm)
+  let expand okm prk info =
+    assert (C.size okm <= 255 * HashDefs.digest_len Impl.hash_alg);
+    assert (HashDefs.digest_len Impl.hash_alg <= C.size prk);
+    assert (C.disjoint okm prk);
+    Impl.expand (C.ctypes_buf okm) (C.ctypes_buf prk) (C.size_uint32 prk) (C.ctypes_buf info) (C.size_uint32 info) (C.size_uint32 okm)
+  let extract prk salt ikm =
+    assert (C.size prk = HashDefs.digest_len Impl.hash_alg);
+    assert (C.disjoint salt prk);
+    assert (C.disjoint ikm prk);
+    Impl.extract (C.ctypes_buf prk) (C.ctypes_buf salt) (C.size_uint32 salt) (C.ctypes_buf ikm) (C.size_uint32 ikm)
 end
 
 module Make_Blake2b_generic (C: Buffer)

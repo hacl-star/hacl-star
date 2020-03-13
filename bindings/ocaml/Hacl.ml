@@ -157,16 +157,19 @@ end) [@@deprecated]
 
 module HMAC_SHA2_256 : MAC =
   Make_HMAC (struct
+    let hash_alg = HashDefs.SHA2_256
     let mac = Hacl_HMAC.hacl_HMAC_compute_sha2_256
 end)
 
 module HMAC_SHA2_384 : MAC =
   Make_HMAC (struct
+    let hash_alg = HashDefs.SHA2_384
     let mac = Hacl_HMAC.hacl_HMAC_compute_sha2_384
 end)
 
 module HMAC_SHA2_512 : MAC =
   Make_HMAC (struct
+    let hash_alg = HashDefs.SHA2_512
     let mac = Hacl_HMAC.hacl_HMAC_compute_sha2_512
 end)
 
@@ -187,12 +190,14 @@ end)
 
 module HKDF_SHA2_256 : HKDF =
   Make_HKDF (struct
+    let hash_alg = HashDefs.SHA2_256
     let expand = Hacl_HKDF.hacl_HKDF_expand_sha2_256
     let extract = Hacl_HKDF.hacl_HKDF_extract_sha2_256
   end)
 
 module HKDF_SHA2_512 : HKDF =
   Make_HKDF (struct
+    let hash_alg = HashDefs.SHA2_512
     let expand = Hacl_HKDF.hacl_HKDF_expand_sha2_512
     let extract = Hacl_HKDF.hacl_HKDF_extract_sha2_512
   end)
