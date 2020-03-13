@@ -252,17 +252,17 @@ let fmul2_t (s:field_spec) (p: Type0) =
   -> tmp:felem_wide2 s
   -> Stack unit
     (requires fun h ->
-      p /\
+     p /\
       live h out /\ live h f1 /\ live h f2 /\ live h tmp /\
       (disjoint out f1 \/ out == f1) /\
       (disjoint out f2 \/ out == f2) /\
-      (disjoint out tmp \/ out == tmp) /\
+      (disjoint out tmp) /\
       (disjoint f1 f2 \/ f1 == f2) /\
       disjoint f1 tmp /\
       disjoint f2 tmp /\
       fmul2_pre h f1 f2)
     (ensures  fun h0 _ h1 ->
-      modifies (loc out |+| loc tmp) h0 h1 /\ fmul2_fsqr2_post h1 out /\
+     modifies (loc out |+| loc tmp) h0 h1 /\ fmul2_fsqr2_post h1 out /\
      (let out0 = gsub out 0ul (nlimb s) in
       let out1 = gsub out (nlimb s) (nlimb s) in
       let f10 = gsub f1 0ul (nlimb s) in
@@ -350,7 +350,7 @@ let fsqr2_t (s:field_spec) (p: Type0) =
       p /\
       live h out /\ live h f /\ live h tmp /\
       (disjoint out f \/ out == f) /\
-      (disjoint out tmp \/ out == tmp) /\
+      (disjoint out tmp) /\
       disjoint tmp f /\
       fsqr2_pre h f)
     (ensures  fun h0 _ h1 ->
