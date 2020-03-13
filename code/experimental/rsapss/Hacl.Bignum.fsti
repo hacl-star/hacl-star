@@ -11,9 +11,22 @@ open Hacl.Bignum.Base
 open Hacl.Bignum.Definitions
 
 module S = Hacl.Spec.Bignum
+module ST = FStar.HyperStack.ST
+module Loops = Lib.LoopCombinators
 
 
 #set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+
+inline_for_extraction noextract
+val bn_mask_lt:
+    len:size_t
+  -> a:lbignum len
+  -> b:lbignum len ->
+  Stack uint64
+  (requires fun h -> live h a /\ live h b)
+  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
+    v r == v (S.bn_mask_lt (as_seq h0 a) (as_seq h0 b)))
+
 
 inline_for_extraction noextract
 val bn_add_eq_len:
@@ -147,8 +160,8 @@ val bn_is_less:
   -> b:lbignum len ->
   Stack bool
   (requires fun h -> live h a /\ live h b)
-  (ensures  fun h0 r h1 -> h0 == h1 /\ r == (bn_v h0 a < bn_v h0 b))
-
+  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
+    r == S.bn_is_less (as_seq h0 a) (as_seq h0 b))
 
 ///
 ///  Get and set i-th bit of a bignum

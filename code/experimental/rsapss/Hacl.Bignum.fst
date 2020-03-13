@@ -4,6 +4,31 @@ friend Hacl.Spec.Bignum
 
 #set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
+let bn_mask_lt len a b =
+  push_frame ();
+  let acc = create 1ul (u64 0) in
+
+  [@inline_let]
+  let refl h i : GTot uint64 = Lib.Sequence.index (as_seq h acc) 0 in
+  [@inline_let]
+  let footprint i = loc acc in
+  [@inline_let]
+  let spec h = S.bn_mask_lt_f (as_seq h a) (as_seq h b) in
+
+  let h0 = ST.get () in
+  loop h0 len (S.bn_mask_lt_t (v len)) refl footprint spec
+  (fun i ->
+    Loops.unfold_repeat_gen (v len) (S.bn_mask_lt_t (v len)) (spec h0) (refl h0 0) (v i);
+    let beq = eq_mask a.(i) b.(i) in
+    let blt = lt_mask a.(i) b.(i) in
+    acc.(0ul) <-
+      Hacl.Spec.Bignum.Definitions.mask_select beq acc.(0ul)
+      (Hacl.Spec.Bignum.Definitions.mask_select blt (ones U64 SEC) (zeros U64 SEC))
+  );
+  let mask = acc.(0ul) in
+  pop_frame ();
+  mask
+
 let bn_add_eq_len aLen a b res =
   Hacl.Bignum.Addition.bn_add_eq_len aLen a b res
 
@@ -43,31 +68,10 @@ let bn_sub_mask len n a =
   let _ = Hacl.Bignum.Addition.bn_sub len a len mod_mask a in
   pop_frame ()
 
-
-val bn_is_less_:
-    len:size_t
-  -> a:lbignum len
-  -> b:lbignum len
-  -> i:size_t{v i <= v len} ->
-  Stack bool
-  (requires fun h -> live h a /\ live h b)
-  (ensures  fun h0 _ h1 -> h0 == h1)
-
-let rec bn_is_less_ len a b i =
-  if i >. 0ul then
-    let i = i -. 1ul in
-    let t1 = a.(i) in
-    let t2 = b.(i) in
-    (if not (eq_u64 t1 t2) then
-      if lt_u64 t1 t2 then true else false
-    else bn_is_less_ len a b i)
-  else false
-
-
 [@CInline]
-let bn_is_less len a b = admit();
-  bn_is_less_ len a b len
-
+let bn_is_less len a b =
+  let mask = bn_mask_lt len a b in
+  if UInt64.eq (Lib.RawIntTypes.u64_to_UInt64 mask) 0uL then false else true
 
 let bn_is_bit_set len input ind =
   let i = ind /. 64ul in

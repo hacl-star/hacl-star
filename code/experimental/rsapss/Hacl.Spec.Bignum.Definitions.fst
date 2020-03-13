@@ -171,6 +171,8 @@ let rec bn_eval_bound #len b i =
     end
 
 
+#set-options "--max_fuel 0"
+
 val bn_eval_update_sub: len1:size_nat -> b1:lbignum len1 -> len2:size_nat{len1 < len2} ->
   Lemma (let b2 = create len2 (u64 0) in bn_v b1 == bn_v (update_sub b2 0 len1 b1))
 let bn_eval_update_sub len1 b1 len2 =
@@ -198,7 +200,7 @@ let bn_eval_index #len b i =
     (bn_v (slice b i (i + 1)) + pow2 64 * bn_v (slice b (i + 1) len)) % pow2 64;
     (==) { Math.Lemmas.modulo_addition_lemma (bn_v (slice b i (i + 1))) (pow2 64) (bn_v (slice b (i + 1) len)) }
     bn_v (slice b i (i + 1)) % pow2 64;
-    (==) { Seq.lemma_index_slice b i (i + 1) 0 }
+    (==) { bn_eval1 (slice b i (i + 1)); Seq.lemma_index_slice b i (i + 1) 0 }
     v b.[i] % pow2 64;
     (==) { Math.Lemmas.modulo_lemma (v b.[i]) (pow2 64) }
     v b.[i];
@@ -262,3 +264,22 @@ let bn_mask_select_lemma #len a b mask =
 
   Classical.forall_intro lemma_aux;
   if v mask = 0 then eq_intro res b else eq_intro res a
+
+
+val bn_eval_lt: len:size_nat -> a:lbignum len -> b:lbignum len -> k:pos{k <= len} -> Lemma
+  (requires v a.[k - 1] < v b.[k - 1])
+  (ensures  eval_ len a k < eval_ len b k)
+let bn_eval_lt len a b k =
+  calc (==) {
+    eval_ len b k - eval_ len a k;
+    (==) { bn_eval_unfold_i b k }
+    eval_ len b (k - 1) + v b.[k - 1] * pow2 (64 * (k - 1)) - eval_ len a k;
+    (==) { bn_eval_unfold_i a k }
+    eval_ len b (k - 1) + v b.[k - 1] * pow2 (64 * (k - 1)) - eval_ len a (k - 1) - v a.[k - 1] * pow2 (64 * (k - 1));
+    (==) { Math.Lemmas.distributivity_sub_left (v b.[k - 1]) (v a.[k - 1]) (pow2 (64 * (k - 1))) }
+    eval_ len b (k - 1) - eval_ len a (k - 1) + (v b.[k - 1] - v a.[k - 1]) * pow2 (64 * (k - 1));
+  };
+  bn_eval_bound a (k - 1);
+  bn_eval_bound b (k - 1);
+  assert (eval_ len b (k - 1) - eval_ len a (k - 1) > - pow2 (64 * (k - 1)));
+  assert ((v b.[k - 1] - v a.[k - 1]) * pow2 (64 * (k - 1)) >= pow2 (64 * (k - 1)))

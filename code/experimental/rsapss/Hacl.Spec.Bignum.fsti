@@ -13,6 +13,14 @@ module BSeq = Lib.ByteSequence
 
 #set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
+val bn_mask_lt: #len:size_nat -> a:lbignum len -> b:lbignum len -> uint64
+
+val bn_mask_lt_lemma: #len:size_nat -> a:lbignum len -> b:lbignum len -> Lemma
+  (let mask = bn_mask_lt a b in
+   (v mask = 0 \/ v mask = v (ones U64 SEC)) /\
+   (if v mask = 0 then bn_v a >= bn_v b else bn_v a < bn_v b))
+
+
 val bn_add: #aLen:size_nat -> #bLen:size_nat{bLen <= aLen} -> a:lbignum aLen -> b:lbignum bLen -> carry & lbignum aLen
 
 val bn_add_lemma: #aLen:size_nat -> #bLen:size_nat{bLen <= aLen} -> a:lbignum aLen -> b:lbignum bLen ->
@@ -69,6 +77,12 @@ val bn_sub_mask: #len:size_nat -> n:lbignum len -> a:lbignum len -> lbignum len
 val bn_sub_mask_lemma: #len:size_nat -> n:lbignum len -> a:lbignum len -> Lemma
   (requires bn_v a <= bn_v n)
   (ensures  bn_v (bn_sub_mask n a) == (if bn_v a = bn_v n then 0 else bn_v a))
+
+
+val bn_is_less: #len:size_nat -> a:lbignum len -> b:lbignum len -> bool
+
+val bn_is_less_lemma: #len:size_nat -> a:lbignum len -> b:lbignum len -> Lemma
+  (bn_is_less a b == (bn_v a < bn_v b))
 
 
 ///

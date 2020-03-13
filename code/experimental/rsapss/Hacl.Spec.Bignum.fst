@@ -1,6 +1,89 @@
 module Hacl.Spec.Bignum
 
+module Loops = Lib.LoopCombinators
+
 #set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+
+val bn_mask_lt_f: #len:size_nat -> a:lbignum len -> b:lbignum len -> i:nat{i < len} -> acc:uint64 -> uint64
+let bn_mask_lt_f #len a b i acc =
+  let beq = eq_mask a.[i] b.[i] in
+  let blt = lt_mask a.[i] b.[i] in
+  mask_select beq acc (mask_select blt (ones U64 SEC) (zeros U64 SEC))
+
+let bn_mask_lt_t (len:size_nat) (i:nat{i <= len}) = uint64
+
+let bn_mask_lt #len a b =
+  Loops.repeat_gen len (bn_mask_lt_t len) (bn_mask_lt_f #len a b) (u64 0)
+
+// val bn_mask_lt_aux: len:size_nat -> a:lbignum len -> b:lbignum len -> k:pos{k <= len} -> Lemma
+//   (requires v a.[k - 1] <> v b.[k - 1])
+//   (ensures (if v a.[k - 1] < v b.[k - 1] then eval_ len a k < eval_ len b k else eval_ len a k > eval_ len b k))
+// let bn_mask_lt_aux len a b k =
+//   if v a.[k - 1] < v b.[k - 1] then bn_eval_lt len a b k else bn_eval_lt len b a k
+
+val bn_mask_lt_lemma_step:
+  #len:size_nat -> a:lbignum len -> b:lbignum len -> k:pos{k <= len} -> mask0:uint64 -> Lemma
+  (requires
+    (if v mask0 = 0 then eval_ len a (k - 1) >= eval_ len b (k - 1) else eval_ len a (k - 1) < eval_ len b (k - 1)) /\
+    (v mask0 == 0 \/ v mask0 == v (ones U64 SEC)))
+  (ensures (let mask = bn_mask_lt_f #len a b (k - 1) mask0 in
+    (if v mask = 0 then eval_ len a k >= eval_ len b k else eval_ len a k < eval_ len b k) /\
+    (v mask == 0 \/ v mask == v (ones U64 SEC))))
+
+let bn_mask_lt_lemma_step #len a b k mask0 =
+  let mask = bn_mask_lt_f #len a b (k - 1) mask0 in
+  let ai = a.[k - 1] in
+  let bi = b.[k - 1] in
+  let beq = eq_mask ai bi in
+  assert (if v ai = v bi then v beq == v (ones U64 SEC) else v beq == 0);
+  let blt = lt_mask ai bi in
+  assert (if v ai < v bi then v blt == v (ones U64 SEC) else v blt == 0);
+
+  let res0 = mask_select blt (ones U64 SEC) (zeros U64 SEC) in
+  let mask = mask_select beq mask0 res0 in
+  //assert (mask == bn_mask_lt_f #len a b (k - 1) mask0);
+
+  mask_select_lemma blt (ones U64 SEC) (zeros U64 SEC);
+  mask_select_lemma beq mask0 res0;
+
+  if v beq = 0 then begin
+    assert (v mask = v res0);
+    mask_select_lemma blt (ones U64 SEC) (zeros U64 SEC);
+    //assert (v res0 == (if v blt = 0 then 0 else v (ones U64 SEC)));
+    assert (if v mask = 0 then v ai > v bi else v ai < v bi);
+    if v a.[k - 1] < v b.[k - 1] then bn_eval_lt len a b k else bn_eval_lt len b a k;
+    () end
+  else begin
+    assert (v mask = v mask0);
+    //assert (v beq == v (ones U64 SEC));
+    //assert (if v mask = v mask0 then v ai = v bi else v ai <> v bi);
+    assert (v ai == v bi);
+    bn_eval_unfold_i a k;
+    bn_eval_unfold_i b k;
+    () end
+
+
+val bn_mask_lt_lemma_loop:
+  #len:size_nat -> a:lbignum len -> b:lbignum len -> k:nat{k <= len} -> Lemma
+  (let mask = Loops.repeat_gen k (bn_mask_lt_t len) (bn_mask_lt_f #len a b) (u64 0) in
+   (v mask == 0 \/ v mask == v (ones U64 SEC)) /\
+   (if v mask = 0 then eval_ len a k >= eval_ len b k else eval_ len a k < eval_ len b k))
+
+let rec bn_mask_lt_lemma_loop #len a b k =
+  let mask = Loops.repeat_gen k (bn_mask_lt_t len) (bn_mask_lt_f #len a b) (u64 0) in
+  if k = 0 then begin
+    Loops.eq_repeat_gen0 k (bn_mask_lt_t len) (bn_mask_lt_f #len a b) (u64 0);
+    assert (v mask = 0);
+    bn_eval0 a;
+    bn_eval0 b end
+  else begin
+    let mask0 = Loops.repeat_gen (k - 1) (bn_mask_lt_t len) (bn_mask_lt_f #len a b) (u64 0) in
+    Loops.unfold_repeat_gen k (bn_mask_lt_t len) (bn_mask_lt_f #len a b) (u64 0) (k - 1);
+    bn_mask_lt_lemma_loop #len a b (k - 1);
+    bn_mask_lt_lemma_step #len a b k mask0 end
+
+let bn_mask_lt_lemma #len a b =
+  bn_mask_lt_lemma_loop #len a b len
 
 let bn_add #aLen #bLen a b =
   Hacl.Spec.Bignum.Addition.bn_add a b
@@ -100,6 +183,13 @@ let bn_sub_mask_lemma #len n a =
   assert (bn_v res == bn_v a - bn_v mod_mask);
 
   Classical.move_requires_2 (bn_eval_inj len) n a
+
+let bn_is_less #len a b =
+  let mask = bn_mask_lt a b in
+  if UInt64.eq (Lib.RawIntTypes.u64_to_UInt64 mask) 0uL then false else true
+
+let bn_is_less_lemma #len a b =
+  bn_mask_lt_lemma #len a b
 
 
 [@CInline]
