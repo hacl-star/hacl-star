@@ -463,20 +463,20 @@ let blake2_update_last_t (al:Spec.alg) (ms:m_spec) =
    #len:size_t
   -> hash: state_p al ms
   -> prev: Spec.limb_t al{v prev + v len <= Spec.max_limb al}
+  -> rem: size_t {v rem <= v len /\ v rem <= Spec.size_block al}
   -> d: lbuffer uint8 len ->
   Stack unit
     (requires (fun h -> live h hash /\ live h d /\ disjoint hash d))
     (ensures  (fun h0 _ h1 -> modifies (loc hash) h0 h1
-                         /\ state_v h1 hash == Spec.blake2_update_last al (v prev) h0.[|d|] (state_v h0 hash)))
+                         /\ state_v h1 hash == Spec.blake2_update_last al (v prev) (v rem) h0.[|d|] (state_v h0 hash)))
 
 
 inline_for_extraction noextract
 val blake2_update_last: #al:Spec.alg -> #ms:m_spec -> blake2_update_block: blake2_update_block_t al ms -> blake2_update_last_t al ms
 
-let blake2_update_last #al #ms blake2_update_block #len hash prev d =
+let blake2_update_last #al #ms blake2_update_block #len hash prev rem d =
   let h0 = ST.get() in
   push_frame ();
-  let rem = len %. size_block al in
   let last = sub d (len -! rem) rem in
   let h1 = ST.get() in
   let last_block = create (size_block al) (u8 0) in
@@ -485,7 +485,7 @@ let blake2_update_last #al #ms blake2_update_block #len hash prev d =
   as_seq_gsub h1 d (len -! rem) rem;
   assert (as_seq h1 last == Seq.sub (as_seq h1 d) (v len - v rem) (v rem));
   assert (as_seq h1 last == Seq.slice (as_seq h0 d) (v len - v rem) (v len));
-  assert (as_seq h2 last_block == Spec.get_last al (as_seq h0 d));
+  assert (as_seq h2 last_block == Spec.get_last_block al (as_seq h0 d) (v rem));
   let totlen = prev +. (size_to_limb al len) in
   blake2_update_block hash true totlen last_block;
   let h3 = ST.get() in
@@ -605,7 +605,7 @@ let blake2_update_blocks #al #ms #len blake2_update_block hash prev blocks =
   (fun i ->
     Loops.unfold_repeati (v nb) (spec h0) (state_v h0 hash) (v i);
     blake2_update1 #al #ms blake2_update_block #len hash prev blocks i);
-  blake2_update_last #al #ms blake2_update_block #len hash prev blocks
+  blake2_update_last #al #ms blake2_update_block #len hash prev rem blocks
 
 
 inline_for_extraction noextract
