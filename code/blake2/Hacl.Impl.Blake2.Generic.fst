@@ -570,9 +570,9 @@ let split_blocks al len =
   let nb = len /. size_block al in
   let rem = len %. size_block al in
   if rem =. 0ul && nb >. 0ul then
-     let nb' = nb -! 1ul in
-     let rem' = size_block al in
-     (nb',rem')
+      let nb' = nb -! 1ul in
+      let rem' = size_block al in
+      (nb',rem')
   else (nb,rem)
 
 inline_for_extraction noextract
@@ -622,16 +622,22 @@ inline_for_extraction noextract
 val blake2_finish:#al:Spec.alg -> #ms:m_spec -> blake2_finish_t al ms
 
 let blake2_finish #al #ms nn output hash =
-  let h0 = ST.get () in
-  salloc1 h0 (2ul *. (size_row al)) (u8 0) (Ghost.hide (loc output))
-  (fun _ h1 -> live h1 output /\ h1.[|output|] == Spec.blake2_finish al (state_v h0 hash) (v nn))
-  (fun full ->
-    store_row #al #ms (sub full 0ul (size_row al)) (rowi hash 0ul);
-    store_row #al #ms (sub full (size_row al) (size_row al)) (rowi hash 1ul);
-    let h1 = ST.get() in
-    Lib.Sequence.eq_intro (as_seq h1 full) (Lib.Sequence.(as_seq h1 (gsub full 0ul (size_row al)) @| as_seq h1 (gsub full (size_row al) (size_row al))));
-    let final = sub full (size 0) nn in
-    copy output final)
+  let h0 = ST.get() in
+  push_frame ();
+  let full = create (2ul *. size_row al) (u8 0) in
+  let first = sub full 0ul (size_row al) in
+  let second = sub full (size_row al) (size_row al) in
+  let row0 = rowi hash 0ul in
+  let row1 = rowi hash 1ul in
+  store_row first row0;
+  store_row second row1;
+  let h1 = ST.get() in
+  Lib.Sequence.eq_intro (as_seq h1 full)
+	(Lib.Sequence.(as_seq h1 (gsub full 0ul (size_row al)) @|
+		       as_seq h1 (gsub full (size_row al) (size_row al))));
+  let final = sub full (size 0) nn in
+  copy output final;
+  pop_frame()
 
 
 inline_for_extraction noextract
