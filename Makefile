@@ -839,7 +839,7 @@ dist/mozilla/Makefile.basic: NACLBOX_BUNDLE = -bundle Hacl.NaCl
 dist/mozilla/Makefile.basic: E_HASH_BUNDLE =
 dist/mozilla/Makefile.basic: MERKLE_BUNDLE = -bundle MerkleTree.*
 dist/mozilla/Makefile.basic: CTR_BUNDLE =
-dist/mozilla/Makefile.basic: BLAKE2_BUNDLE = -bundle Hacl.Impl.Blake2.*,Hacl.Blake2s_256,Hacl.Blake2b_256,Hacl.Blake2s_128,Hacl.Blake2b_32,Hacl.Blake2s_32
+dist/mozilla/Makefile.basic: BLAKE2_BUNDLE = -bundle Hacl.Impl.Blake2.*,Hacl.Blake2b_256,Hacl.Blake2s_128,Hacl.Blake2b_32,Hacl.Blake2s_32
 dist/mozilla/Makefile.basic: SHA3_BUNDLE = -bundle Hacl.SHA3
 dist/mozilla/Makefile.basic: HASH_BUNDLE = -bundle Hacl.Hash.*,Hacl.HKDF,Hacl.HMAC,Hacl.HMAC_DRBG
 dist/mozilla/Makefile.basic: ECDSA_BUNDLE =
@@ -913,7 +913,7 @@ dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/LICENSE.txt \
   $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_H_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) $(VALE_ASMS) | old-extract-c
 	mkdir -p $(dir $@)
 	[ x"$(HACL_OLD_FILES)" != x ] && cp $(HACL_OLD_FILES) $(patsubst %.c,%.h,$(HACL_OLD_FILES)) $(dir $@) || true
-	[ x"$(HAND_WRITTEN_FILES)" != x ] && cp $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_H_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) $(dir $@) || true
+	[ x"$(HAND_WRITTEN_FILES)$(HAND_WRITTEN_H_FILES)" != x ] && cp $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_H_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) $(dir $@) || true
 	[ x"$(VALE_ASMS)" != x ] && cp $(VALE_ASMS) $(dir $@) || true
 	$(KRML) $(DEFAULT_FLAGS) \
 	  -tmpdir $(dir $@) -skip-compilation \

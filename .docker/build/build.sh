@@ -298,8 +298,10 @@ function exec_build() {
 export OCAMLRUNPARAM=b
 export OTHERFLAGS="--use_hints --query_stats"
 export MAKEFLAGS="$MAKEFLAGS -Otarget"
-export CC=gcc-7
-export CXX=g++-7
+if [[ "$OS" != "Windows_NT" ]]; then
+    export CC=gcc-7
+    export CXX=g++-7
+fi
 
 export_home FSTAR "$(pwd)/FStar"
 cd hacl-star

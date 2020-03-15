@@ -144,6 +144,7 @@ let fmul out f1 f2 tmp =
   ) else
     Vale.Wrapper.X64.Fmul.fmul_e (sub tmp 0ul 8ul) f1 out f2
 
+#push-options "--z3rlimit 500"
 [@ CInline]
 let fmul2 out f1 f2 tmp =
   let h0 = ST.get() in
@@ -153,6 +154,7 @@ let fmul2 out f1 f2 tmp =
     Vale.Inline.X64.Fmul_inline.fmul2 out f1 f2 tmp
   else
     Vale.Wrapper.X64.Fmul.fmul2_e tmp f1 out f2
+#pop-options
 
 [@ CInline]
 let fmul_scalar out f1 f2 =
