@@ -106,31 +106,6 @@ let rec bn_v_is_nat_from_intseq_le_lemma len b =
     assert  (bn_v b == nat_from_intseq_be (reverse b));
     () end
 
-
-//the following three lemmas were proven in master
-
-assume
-val uints_from_bytes_be_nat_lemma: #t:inttype{unsigned t /\ ~(U1? t)} -> #l:secrecy_level -> #len:size_nat{len * numbytes t < pow2 32}
-  -> b:lbytes_l l (len * numbytes t) ->
-  Lemma (nat_from_intseq_be (uints_from_bytes_be #t #l #len b) == nat_from_bytes_be b)
-
-assume
-val index_nat_to_intseq_be:
-    #t:inttype{unsigned t}
-  -> #l:secrecy_level
-  -> len:size_nat
-  -> n:nat{n < pow2 (bits t * len)}
-  -> i:nat{i < len}
-  -> Lemma (Seq.index (nat_to_intseq_be #t #l len n) (len - i - 1) ==
-           uint #t #l (n / pow2 (bits t * i) % pow2 (bits t)))
-
-assume
-val index_uint_to_bytes_be: #t:inttype{unsigned t} -> #l:secrecy_level -> u:uint_t t l
-  -> Lemma
-    (forall (i:nat{i < numbytes t}). index (uint_to_bytes_be #t #l u) (numbytes t - i - 1) ==
-                              uint #U8 #l (v u / pow2 (8 * i) % pow2 8))
-
-
 val bn_from_bytes_be_lemma_: len:size_nat{8 * len <= max_size_t} -> b:lseq uint8 (8 * len) -> Lemma
   (bn_v (bn_from_bytes_be_ len b) == nat_from_bytes_be b)
 let bn_from_bytes_be_lemma_ len b =
@@ -140,7 +115,6 @@ let bn_from_bytes_be_lemma_ len b =
   assert (bn_v (bn_from_bytes_be_ len b) == nat_from_intseq_be (uints_from_bytes_be #U64 #SEC #len b));
   uints_from_bytes_be_nat_lemma #U64 #SEC #len b;
   assert (nat_from_intseq_be (uints_from_bytes_be #U64 #SEC #len b) == nat_from_bytes_be b)
-
 
 val lemma_nat_from_bytes_be_zeroes: len:size_nat -> b:lseq uint8 len -> Lemma
   (requires (forall (i:nat). i < len ==> b.[i] == u8 0))

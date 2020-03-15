@@ -33,7 +33,7 @@ val mgf_sha256_f:
   lbytes (len + 4) & lbytes hLen
 
 let mgf_sha256_f len i mgfseed_counter =
-  let counter = nat_to_bytes_be 4 i in
+  let counter = nat_to_intseq_be 4 i in
   let mgfseed_counter = update_sub mgfseed_counter len 4 counter in
   let block = sha2_256 mgfseed_counter in
   mgfseed_counter, block
@@ -60,7 +60,7 @@ val os2ip: #len: size_nat -> b: lbytes len -> Tot (res: nat{res < pow2 (8 * len)
 let os2ip #len b = nat_from_bytes_be b
 
 val i2osp: #len: size_nat -> n: nat{n < pow2 (8 * len)} -> Tot (lbytes len)
-let i2osp #len n = nat_to_bytes_be len n
+let i2osp #len n = nat_to_intseq_be len n
 
 (* Modular arithmetic *)
 type elem (n:pos) = x:nat{x < n}

@@ -31,7 +31,6 @@ val hash_sha256:
 let hash_sha256 mHash msgLen msg =
   Hacl.Hash.SHA2.hash_256 msg msgLen mHash
 
-
 (* Mask Generation Function *)
 inline_for_extraction noextract
 val counter_to_bytes:
@@ -40,7 +39,7 @@ val counter_to_bytes:
   Stack unit
   (requires fun h -> live h counter)
   (ensures  fun h0 _ h1 -> modifies (loc counter) h0 h1 /\
-    as_seq h1 counter == BSeq.nat_to_bytes_be 4 (v i))
+    as_seq h1 counter == BSeq.nat_to_intseq_be 4 (v i))
 
 let counter_to_bytes i c =
   let h0 = ST.get () in
@@ -49,7 +48,11 @@ let counter_to_bytes i c =
   c.(2ul) <- to_u8 (i >>. 8ul);
   c.(3ul) <- to_u8 i;
   let h1 = ST.get () in
-  assume (as_seq h1 c == BSeq.nat_to_bytes_be 4 (v i))
+  BSeq.index_nat_to_intseq_be #U8 #SEC 4 (v i) 0;
+  BSeq.index_nat_to_intseq_be #U8 #SEC 4 (v i) 1;
+  BSeq.index_nat_to_intseq_be #U8 #SEC 4 (v i) 2;
+  BSeq.index_nat_to_intseq_be #U8 #SEC 4 (v i) 3;
+  LSeq.eq_intro (as_seq h1 c) (BSeq.nat_to_intseq_be 4 (v i))
 
 
 inline_for_extraction noextract
@@ -66,7 +69,7 @@ val mgf_sha256_f:
 let mgf_sha256_f len i mgfseed_counter block =
   let h0 = ST.get () in
   update_sub_f h0 mgfseed_counter len 4ul
-    (fun h -> BSeq.nat_to_bytes_be 4 (v i))
+    (fun h -> BSeq.nat_to_intseq_be 4 (v i))
     (fun _ -> counter_to_bytes i (sub mgfseed_counter len 4ul));
   hash_sha256 block (len +! 4ul) mgfseed_counter
 
