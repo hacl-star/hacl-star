@@ -624,7 +624,8 @@ val blake2_finish:#al:Spec.alg -> #ms:m_spec -> blake2_finish_t al ms
 let blake2_finish #al #ms nn output hash =
   let h0 = ST.get() in
   push_frame ();
-  let full = create (2ul *. size_row al) (u8 0) in
+  let double_row = 2ul *. size_row al in
+  let full = create double_row (u8 0) in
   let first = sub full 0ul (size_row al) in
   let second = sub full (size_row al) (size_row al) in
   let row0 = rowi hash 0ul in
