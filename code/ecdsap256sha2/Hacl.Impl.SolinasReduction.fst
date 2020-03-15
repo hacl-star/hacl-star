@@ -359,8 +359,7 @@ val solinas_reduction_upload: c0: uint32 -> c1: uint32 -> c2: uint32 -> c3: uint
     ))
 
 
-let solinas_reduction_upload c0 c1 c2 c3 c4 c5 c6 c7 c8 c9 c10 c11 c12 c13 c14 c15 tempBuffer  =
-  push_frame();
+let solinas_reduction_upload c0 c1 c2 c3 c4 c5 c6 c7 c8 c9 c10 c11 c12 c13 c14 c15 tempBuffer =
     let t0 = sub tempBuffer (size 0) (size 4) in
     let t1 = sub tempBuffer (size 4) (size 4) in
     let t2 = sub tempBuffer (size 8) (size 4) in
@@ -378,8 +377,7 @@ let solinas_reduction_upload c0 c1 c2 c3 c4 c5 c6 c7 c8 c9 c10 c11 c12 c13 c14 c
     upl_fif_buffer c8 c10 c11 c12 c13 t5;
     upl_six_buffer c9 c11 c12 c13 c14 c15 t6;
     upl_sev_buffer c8 c9 c10 c12 c13 c14 c15 t7;
-    upl_eig_buffer c9 c10 c11 c12 c13 c14 c15 t8;
-  pop_frame()
+    upl_eig_buffer c9 c10 c11 c12 c13 c14 c15 t8
 
 
 inline_for_extraction noextract
