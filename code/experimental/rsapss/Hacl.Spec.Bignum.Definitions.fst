@@ -173,7 +173,7 @@ let rec bn_eval_bound #len b i =
 
 #set-options "--max_fuel 0"
 
-val bn_eval_update_sub: len1:size_nat -> b1:lbignum len1 -> len2:size_nat{len1 < len2} ->
+val bn_eval_update_sub: len1:size_nat -> b1:lbignum len1 -> len2:size_nat{len1 <= len2} ->
   Lemma (let b2 = create len2 (u64 0) in bn_v b1 == bn_v (update_sub b2 0 len1 b1))
 let bn_eval_update_sub len1 b1 len2 =
   let b2 = create len2 (u64 0) in
