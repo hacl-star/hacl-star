@@ -397,20 +397,22 @@ let blake2_update1 a prev m i s =
 val blake2_update_last:
     a:alg
   -> prev:nat
-  -> m:bytes{prev + length m <= max_limb a}
+  -> rem:nat
+  -> m:bytes{prev + length m <= max_limb a /\ rem <= length m /\ rem <= size_block a}
   -> s:state a ->
   Tot (state a)
 
-let get_last (a:alg) (m:bytes) : block_s a =
-  let rem = length m % size_block a in
+let get_last_block (a:alg) (m:bytes) (rem:nat{rem <= length m /\ rem <= size_block a}) : block_s a =
   let last = Seq.slice m (length m - rem) (length m) in
   let last_block = create (size_block a) (u8 0) in
   let last_block = update_sub last_block 0 rem last in
   last_block
 
-let blake2_update_last a prev m s =
-  let totlen = prev + length m in
-  blake2_update_block a true totlen (get_last a m) s
+let blake2_update_last a prev rem m s =
+  let inlen = length m in
+  let totlen = prev + inlen in
+  let last_block = get_last_block a m rem in
+  blake2_update_block a true totlen last_block s
 
 val blake2_update_blocks:
     a:alg
@@ -419,7 +421,7 @@ val blake2_update_blocks:
   -> s:state a ->
   Tot (state a)
 
-let split a len =
+let split (a:alg) (len:nat) : nb_rem:(nat & nat){let (nb,rem) = nb_rem in nb * size_block a + rem == len} =
   let nb = len / size_block a in
   let rem = len % size_block a in
   let nb' = if rem = 0 && nb > 0 then nb - 1 else nb in
@@ -429,7 +431,7 @@ let split a len =
 let blake2_update_blocks a prev m s =
   let (nb,rem) = split a (length m) in
   let s = repeati nb (blake2_update1 a prev m) s in
-  blake2_update_last a prev m s
+  blake2_update_last a prev rem m s
 
 
 val blake2_init_hash:
