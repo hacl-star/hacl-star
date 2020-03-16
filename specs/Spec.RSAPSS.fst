@@ -87,11 +87,18 @@ noeq type rsa_pubkey (modBits:modBits_t) =
 noeq type rsa_privkey (modBits:modBits_t) =
   | Mk_rsa_privkey: pkey:rsa_pubkey modBits -> d:pos -> rsa_privkey modBits
 
-val db_zero: #len: size_pos -> db: lbytes len -> emBits: size_nat -> Tot (lbytes len)
+val db_zero: #len: size_pos -> db: lbytes len -> emBits: size_nat ->
+  Pure (lbytes len)
+  (requires True)
+  (ensures fun res ->
+    (v res.[0] == (if emBits % 8 > 0 then v db.[0] % pow2 (emBits % 8) else v db.[0])))
 let db_zero #len db emBits =
   let msBits = emBits % 8 in
-  if msBits > 0 then
-    db.[0] <- db.[0] &. (u8 0xff >>. size (8 - msBits))
+  if msBits > 0 then begin
+    let r = db.[0] <- db.[0] &. (u8 0xff >>. size (8 - msBits)) in
+    Math.Lemmas.pow2_plus msBits (8 - msBits);
+    logand_mask db.[0] (u8 0xff >>. size (8 - msBits)) msBits;
+    r end
   else db
 
 val pss_encode:
@@ -100,7 +107,9 @@ val pss_encode:
   -> salt: lbytes sLen
   -> msg: lbytes msgLen
   -> emBits: size_pos{hLen + sLen + 2 <= blocks emBits 8} ->
-  Tot (lbytes (blocks emBits 8))
+  Pure (lbytes (blocks emBits 8))
+  (requires True)
+  (ensures fun em -> if emBits % 8 > 0 then v em.[0] < pow2 (emBits % 8) else v em.[0] < pow2 8)
 
 let pss_encode #sLen #msgLen salt msg emBits =
   let mHash = sha2_256 msg in
@@ -128,6 +137,7 @@ let pss_encode #sLen #msgLen salt msg emBits =
   let em = create emLen (u8 0) in
   let em = update_sub em 0 dbLen maskedDB in
   let em = update_sub em dbLen hLen m1Hash in
+  assert (v em.[0] == v maskedDB.[0]);
   em.[emLen - 1] <- u8 0xbc
 
 
@@ -190,6 +200,34 @@ let pss_verify #msgLen sLen msg emBits em =
     else pss_verify_ #msgLen sLen msg emBits em end
 
 
+val os2ip_lemma: emBits:size_pos{hLen + 2 <= blocks emBits 8} -> em:lbytes (blocks emBits 8) -> Lemma
+  (requires (if emBits % 8 > 0 then v em.[0] < pow2 (emBits % 8) else v em.[0] < pow2 8))
+  (ensures  os2ip #(blocks emBits 8) em < pow2 emBits)
+let os2ip_lemma emBits em =
+  let emLen = blocks emBits 8 in
+
+  if emBits % 8 > 0 then begin
+    nat_from_intseq_be_slice_lemma em 1;
+    nat_from_intseq_be_lemma0 (slice em 0 1);
+    assert (nat_from_bytes_be em == nat_from_bytes_be (slice em 1 emLen) + pow2 ((emLen - 1) * 8) * v em.[0]);
+    assert (nat_from_bytes_be em < pow2 ((emLen - 1) * 8) + pow2 ((emLen - 1) * 8) * v em.[0]);
+    calc (<=) {
+      pow2 ((emLen - 1) * 8) + pow2 ((emLen - 1) * 8) * v em.[0];
+      (==) { Math.Lemmas.distributivity_add_right (pow2 (8 * (emLen - 1))) 1 (v em.[0]) }
+      (v em.[0] + 1) * pow2 (8 * (emLen - 1));
+      (<=) { Math.Lemmas.lemma_mult_le_right (pow2 (8 * emLen - 1)) (v em.[0] + 1) (pow2 (emBits % 8)) }
+      pow2 (emBits % 8) * pow2 (8 * (emLen - 1));
+      (==) { Math.Lemmas.pow2_plus (emBits % 8) (8 * (emLen - 1)) }
+      pow2 (emBits % 8 + 8 * ((emBits - 1) / 8));
+      (==) { Math.Lemmas.euclidean_division_definition (emBits - 1) 8 }
+      pow2 (emBits % 8 + (emBits - 1) - (emBits - 1) % 8);
+      (<=) { Math.Lemmas.pow2_le_compat emBits (emBits % 8 + (emBits - 1) - (emBits - 1) % 8) }
+      pow2 emBits;
+    };
+   assert (nat_from_bytes_be em < pow2 emBits) end
+  else Math.Lemmas.pow2_le_compat emBits (8 * emLen)
+
+
 val rsapss_sign:
     #sLen: size_nat{sLen + hLen + 8 <= max_size_t /\ sLen + hLen + 8 < max_input}
   -> #msgLen: size_nat{msgLen < max_input}
@@ -213,7 +251,7 @@ let rsapss_sign #sLen #msgLen modBits skey salt msg =
 
   let em = pss_encode salt msg emBits in
   let m = os2ip #emLen em in
-  assume (m < n);
+  os2ip_lemma emBits em;
   let s = fpow #n m d in
   i2osp #nLen s
 
