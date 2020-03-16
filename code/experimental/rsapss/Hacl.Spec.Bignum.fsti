@@ -110,10 +110,7 @@ val bn_from_bytes_be_lemma: len:size_pos{8 * (blocks len 8) <= max_size_t} -> b:
   Lemma (bn_v (bn_from_bytes_be len b) == BSeq.nat_from_bytes_be b)
 
 
-val bn_to_bytes_be:
-    len:size_pos{8 * (blocks len 8) <= max_size_t}
-  -> b:lbignum (blocks len 8){bn_v b < pow2 (8 * len)} ->
-  lseq uint8 len
+val bn_to_bytes_be: len:size_pos{8 * (blocks len 8) <= max_size_t} -> b:lbignum (blocks len 8) -> lseq uint8 len
 
 val bn_to_bytes_be_lemma:
     len:size_pos{8 * (blocks len 8) <= max_size_t}

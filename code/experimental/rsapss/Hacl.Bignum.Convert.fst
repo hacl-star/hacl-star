@@ -84,8 +84,7 @@ val bn_to_bytes_be:
   -> res:lbuffer uint8 len ->
   Stack unit
   (requires fun h ->
-    live h b /\ live h res /\ disjoint res b /\
-    bn_v h b < pow2 (8 * v len))
+    live h b /\ live h res /\ disjoint res b)
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     as_seq h1 res == S.bn_to_bytes_be (v len) (as_seq h0 b))
 
