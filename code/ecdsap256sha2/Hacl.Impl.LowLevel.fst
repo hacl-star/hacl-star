@@ -294,7 +294,8 @@ let add4_with_carry c x y result =
     cc
 
 
-#reset-options "--z3rlimit 1000"
+#reset-options "--z3rlimit 400"
+
 val add8: x: widefelem -> y: widefelem -> result: widefelem -> Stack uint64 
   (requires fun h -> live h x /\ live h y /\ live h result /\ eq_or_disjoint x result /\ eq_or_disjoint y result)
   (ensures fun h0 c h1 -> modifies (loc result) h0 h1 /\ v c <= 1 /\ 
@@ -594,7 +595,7 @@ let mul1_add f1 u2 f3 result =
   pop_frame();  
   c +! c3
 
-#reset-options "--z3rlimit 1000"
+
 val mul: f: felem -> r: felem -> out: widefelem
   -> Stack unit
     (requires fun h -> live h out /\ live h f /\ live h r)
