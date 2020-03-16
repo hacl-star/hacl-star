@@ -485,7 +485,7 @@ let blake2_update_last #al #ms blake2_update_block #len hash prev rem d =
   as_seq_gsub h1 d (len -! rem) rem;
   assert (as_seq h1 last == Seq.sub (as_seq h1 d) (v len - v rem) (v rem));
   assert (as_seq h1 last == Seq.slice (as_seq h0 d) (v len - v rem) (v len));
-  assert (as_seq h2 last_block == Spec.get_last_block al (as_seq h0 d) (v rem));
+  assert (as_seq h2 last_block == Spec.get_last_padded_block al (as_seq h0 d) (v rem));
   let totlen = prev +. (size_to_limb al len) in
   blake2_update_block hash true totlen last_block;
   let h3 = ST.get() in

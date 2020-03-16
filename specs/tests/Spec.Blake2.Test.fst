@@ -839,6 +839,8 @@ let test () =
   //
   // RESULT
   //
-  if result1 && result2 && result3 && result4 && result5 && result6 then
+  if result1 && result2 && result3 && result4 && result5 && result6 &&
+     result7 && result8 && result9 && result10 && result11 && result12 &&
+     result13 && result14 && result15 && result16 then
   begin IO.print_string "\n\nAll tests successful !\n"; true end
   else begin IO.print_string "\n\nSome test failed !\n"; false end
