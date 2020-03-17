@@ -176,9 +176,9 @@ var HaclWasm = (function() {
         api_obj[key_module] = {}
       }
       api_obj[key_module][key_func] = async function() {
-          var argumentArray = [...arguments];
-          await checkIfInitialized();
-          return callWithProto(api_json[key_module][key_func], argumentArray);
+        var argumentArray = [...arguments];
+        await checkIfInitialized();
+        return callWithProto(api_json[key_module][key_func], argumentArray);
       }
     })
   });

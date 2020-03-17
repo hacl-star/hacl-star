@@ -20,7 +20,7 @@ function hex2buf(hexString) {
   return new Uint8Array(hexString.match(/.{2}/g).map(byte => parseInt(byte, 16)));
 }
 
-async function checkTestVectors(func_sig, func) {
+async function checkTestVectors(func_sig, func, msg) {
   var number_of_tests = Infinity;
   let preprocessing = function(typ, value) {
     if (typ === "buffer") {
@@ -50,6 +50,7 @@ async function checkTestVectors(func_sig, func) {
     number_of_tests = Math.min(number_of_tests, arg.tests.length)
   });
   number_of_tests = Math.min(number_of_tests, func_sig.return.tests.length);
+  console.log("Passing tests for " + msg)
   for (var t = 0; t < number_of_tests; t++) {
     let args = func_sig.args.filter(arg =>
       arg.kind === "input"
@@ -83,7 +84,10 @@ async function checkTestVectors(func_sig, func) {
         throw "Wrong return value ! Expecting " + arg.tests[t] + ", got " + result_val
       }
     })
+    console.log("Test " + t + " passed !");
   }
 }
 
-checkTestVectors(test_vectors.Curve25519_51.ecdh, api.HaclWasm.Curve25519_51.ecdh)
+api.HaclWasm.checkIfInitialized().then(() =>
+  checkTestVectors(test_vectors.Curve25519_51.ecdh, api.HaclWasm.Curve25519_51.ecdh, "Curve25519_51")
+)
