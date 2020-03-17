@@ -1,5 +1,3 @@
-var my_print = console.log;
-
 var fs = require('fs');
 var browser = require('./browser.js')
 var loader = require('./loader.js')
@@ -95,26 +93,48 @@ var HaclWasm = (function() {
     }
     let memory = new Uint32Array(Module.Kremlin.mem.buffer);
     let sp = memory[0];
+    var var_lengths = {};
+    // Populating the variable length arguments by retrieving buffer lengths
+    proto.args.map((arg) => {
+      if (arg.type === "buffer") {
+        if ((arg.size.var_length !== undefined) && (arg.interface_index !== undefined)) {
+          let func_arg = args[arg.interface_index];
+          var_lengths[arg.size.var_length] = func_arg.length;
+        }
+      }
+    });
+    // Retrieving all input buffers and allocating them in the Wasm memory
     let args_pointers = proto.args.map((arg, i) => {
       if (arg.type === "buffer") {
+        var size;
+        if (arg.size.var_length !== undefined) {
+          size = var_lengths[arg.size.var_length]
+        } else {
+          size = arg.size;
+        }
         var argByteBuffer;
         if (arg.kind === "input") {
           let func_arg = args[arg.interface_index];
           argByteBuffer = new Uint8Array(func_arg);
         } else if (arg.kind === "output") {
-          argByteBuffer = new Uint8Array(arg.size);
+          argByteBuffer = new Uint8Array(size);
         }
-        CheckIfByteArray(argByteBuffer, arg.size, proto.name);
+        CheckIfByteArray(argByteBuffer, size, proto.name);
         let pointer = malloc_array(argByteBuffer);
         return {
           "value": pointer,
           "index": i
         };
       }
-      if (protoArg.type === "bool" || protoArg.type === "integer") {
-        let func_arg = args[arg.interface_index];
+      if (arg.type === "bool" || arg.type === "int") {
+        var value;
+        if (arg.var_length !== undefined) {
+          value = var_lengths[arg.var_length];
+        } else {
+          value = args[arg.interface_index];
+        }
         return {
-          "value": func_arg,
+          "value": value,
           "index": i
         };
       }
@@ -129,7 +149,12 @@ var HaclWasm = (function() {
       proto.args[pointer.index].kind === "output"
     ).map(pointer => {
       let protoRet = proto.args[pointer.index];
-      var size = protoRet.size;
+      var size;
+      if (protoRet.size.var_length !== undefined) {
+        size = var_lengths[protoRet.size.var_length];
+      } else {
+        size = protoRet.size;
+      }
       let retBuf = new ArrayBuffer(size);
       (new Uint8Array(retBuf)).set(read_memory(pointer.value, size))
       return retBuf;

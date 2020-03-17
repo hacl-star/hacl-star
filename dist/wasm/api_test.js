@@ -47,13 +47,17 @@ async function checkTestVectors(func_sig, func, msg) {
     throw "Unimplemented !"
   };
   func_sig.args.map(arg => {
-    number_of_tests = Math.min(number_of_tests, arg.tests.length)
+    if (arg.tests !== undefined) {
+      number_of_tests = Math.min(number_of_tests, arg.tests.length)
+    }
   });
-  number_of_tests = Math.min(number_of_tests, func_sig.return.tests.length);
+  if (func_sig.return.tests !== undefined) {
+    number_of_tests = Math.min(number_of_tests, func_sig.return.tests.length);
+  }
   console.log("Passing tests for " + msg)
   for (var t = 0; t < number_of_tests; t++) {
     let args = func_sig.args.filter(arg =>
-      arg.kind === "input"
+      (arg.kind === "input") && (arg.tests !== undefined)
     ).map(arg => {
       return preprocessing(arg.type, arg.tests[t])
     });
@@ -73,13 +77,17 @@ async function checkTestVectors(func_sig, func, msg) {
     func_sig.args.filter(arg =>
       arg.kind === "output"
     ).map((arg, i) => {
-      var correct_i;
+      var result_val;
       if (func_sig.return.type !== "void") {
-        correct_i = i + 1;
+        result_val = result[i + 1];
       } else {
-        correct_i = i;
+        if (Array.isArray(result)) {
+          result_val = result[i];
+        } else {
+          result_val = result;
+        }
       }
-      var result_val = postprocessing(arg.type, result[correct_i]);
+      var result_val = postprocessing(arg.type, result_val);
       if (result_val !== arg.tests[t]) {
         throw "Wrong return value ! Expecting " + arg.tests[t] + ", got " + result_val
       }
@@ -88,6 +96,7 @@ async function checkTestVectors(func_sig, func, msg) {
   }
 }
 
-api.HaclWasm.checkIfInitialized().then(() =>
-  checkTestVectors(test_vectors.Curve25519_51.ecdh, api.HaclWasm.Curve25519_51.ecdh, "Curve25519_51")
-)
+api.HaclWasm.checkIfInitialized().then(async function() {
+  await checkTestVectors(test_vectors.Curve25519_51.ecdh, api.HaclWasm.Curve25519_51.ecdh, "Curve25519_51");
+  await checkTestVectors(test_vectors.Chacha20.encrypt, api.HaclWasm.Chacha20.encrypt, "Chacha20")
+})

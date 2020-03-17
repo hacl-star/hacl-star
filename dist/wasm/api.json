@@ -41,5 +41,65 @@
         ]
       }
     }
+  },
+  "Chacha20": {
+    "encrypt": {
+      "module": "Hacl_Chacha20",
+      "name": "chacha20_encrypt",
+      "args": [{
+          "type": "int",
+          "kind": "input",
+          "var_length": 0
+        }, {
+          "type": "buffer",
+          "kind": "output",
+          "size": {
+            "var_length": 0
+          },
+          "tests": [
+            "6e2e359a2568f98041ba0728dd0d6981e97e7aec1d4360c20a27afccfd9fae0bf91b65c5524733ab8f593dabcd62b3571639d624e65152ab8f530c359f0861d807ca0dbf500d6a6156a38e088a22b65e52bc514d16ccf806818ce91ab77937365af90bbf74a35be6b40b8eedf2785e42874d"
+          ]
+        }, {
+          "type": "buffer",
+          "kind": "input",
+          "interface_index": 0,
+          "size": {
+            "var_length": 0
+          },
+          "tests": [
+            "4c616469657320616e642047656e746c656d656e206f662074686520636c617373206f66202739393a204966204920636f756c64206f6666657220796f75206f6e6c79206f6e652074697020666f7220746865206675747572652c2073756e73637265656e20776f756c642062652069742e"
+          ]
+        },
+        {
+          "type": "buffer",
+          "kind": "input",
+          "size": 32,
+          "interface_index": 1,
+          "tests": [
+            "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+          ]
+        },
+        {
+          "type": "buffer",
+          "kind": "input",
+          "size": 12,
+          "interface_index": 2,
+          "tests" : [
+            "000000000000000000000000"
+          ]
+        },
+        {
+          "type": "int",
+          "kind": "input",
+          "interface_index": 3,
+          "tests": [
+            1
+          ]
+        }
+      ],
+      "return": {
+        "type": "void"
+      }
+    }
   }
 }
