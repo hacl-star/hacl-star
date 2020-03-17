@@ -904,7 +904,7 @@ let carry_reduce_lemma_i #w l cin i =
   FStar.Math.Lemmas.pow2_minus 32 26
 
 
-#push-options "--z3rlimit 200"
+#push-options "--z3rlimit 400"
 val carry_reduce_felem5_fits_lemma_i0:
     #w:lanes
   -> f:felem5 w{acc_inv_t f}
