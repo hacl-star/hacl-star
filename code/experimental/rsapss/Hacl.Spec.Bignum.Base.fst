@@ -57,30 +57,3 @@ let subborrow_u64 c a b =
     else
       (if lt_u64 a b then u64 1 else u64 0) in
   c, res
-
-
-val lemma_mul_carry_add_64: a:uint64 -> b:uint64 -> c:uint64 -> d:uint64 ->
-  Lemma (uint_v a * uint_v b + uint_v c + uint_v d < pow2 128)
-let lemma_mul_carry_add_64 a b c d =
-  let n = pow2 64 in
-  //assert (uint_v a <= n - 1 /\ uint_v b <= n - 1 /\ uint_v c <= n - 1 /\ uint_v d <= n - 1);
-  Math.Lemmas.lemma_mult_le_left (uint_v a) (uint_v b) (n - 1);
-  Math.Lemmas.lemma_mult_le_right (n - 1) (uint_v a) (n - 1);
-  assert (uint_v a * uint_v b + uint_v c + uint_v d <= (n - 1) * (n - 1) + (n - 1) + (n - 1));
-  assert ((n - 1) * (n - 1) + (n - 1) + (n - 1) == n * n - 1);
-  FStar.Math.Lemmas.pow2_plus 64 64
-
-
-inline_for_extraction noextract
-val mul_carry_add_u64: a:uint64 -> b:uint64 -> c:uint64 -> d:uint64 ->
-  Pure (tuple2 uint64 uint64)
-  (requires True)
-  (ensures  fun (c', r) ->
-    uint_v r + uint_v c' * pow2 64 == uint_v a * uint_v b + uint_v c + uint_v d)
-
-let mul_carry_add_u64 a b c d =
-  lemma_mul_carry_add_64 a b c d;
-  let res = mul64_wide a b +! to_u128 #U64 c +! to_u128 #U64 d in
-  let r = to_u64 res in
-  let c' = to_u64 (res >>. 64ul) in
-  c', r

@@ -10,34 +10,47 @@ test: all
 # Defines rules for producing .checked, .krml, .depend, etc.
 include ../../../Makefile.local
 
-CFLAGS += -I $(HACL_HOME)/lib/c
+FSTAR_ROOTS += Hacl.Test.RSAPSS.fst
+
+CFLAGS += -I $(HACL_HOME)/lib/c -march=native -mtune=native -O3
 export CFLAGS
 
 # CUSTOMIZE HERE: how to produce binary objects
 # An archive with all the compiled code in this directory.
 dist/librsapss.a: dist/Makefile.basic
-	$(MAKE) -C dist -f Makefile.basic
+	$(MAKE) -C dist -f Makefile.basic OBJS=$(notdir $^) $(notdir $@)
 
 SHA2_BUNDLE=-bundle Hacl.Hash.SHA2=Hacl.Hash.*
 RSAPSS_BUNDLE=-bundle Hacl.RSAPSS+Hacl.Bignum.Convert=Hacl.Bignum.*,Hacl.Bignum,Hacl.Impl.MGF,Hacl.Impl.RSAPSS[rename=Hacl_RSAPSS]
-RSAPSS_TEST_BUNDLE=-bundle Hacl.RSAPSS.Test
 
-dist/Makefile.basic: $(filter-out %/prims.krml,$(ALL_KRML_FILES))
-	$(KRML) $^ -o librsapss.a $(BASE_FLAGS) $(SHA2_BUNDLE) \
-	  $(RSAPSS_BUNDLE) $(RSAPSS_TEST_BUNDLE) \
+HAND_WRITTEN_C_FILES = c/Hacl_Bignum_Base.c
+
+dist/Makefile.basic: $(filter-out %prims.krml,$(ALL_KRML_FILES)) $(HAND_WRITTEN_C_FILES)
+	mkdir -p $(dir $@)
+	cp $(HAND_WRITTEN_C_FILES) $(dir $@)
+	$(KRML) -tmpdir $(dir $@) -skip-compilation \
+	  $(filter %.krml,$^) \
+	  -bundle Hacl.Bignum.Base= \
+	  $(BASE_FLAGS) $(SHA2_BUNDLE) $(RSAPSS_BUNDLE) \
 	  -no-prefix 'Hacl.Test.RSAPSS' \
-	  -tmpdir dist \
-	  -ccopts -std=gnu11,-g,-O3 \
-	  -add-include '"kremlin/internal/target.h"' \
 	  -add-include '<stdbool.h>' \
-	  -skip-compilation
+	  -add-include '<stdint.h>' \
+	  -add-include '"kremlin/internal/target.h"' \
+	  $(notdir $(HAND_WRITTEN_C_FILES)) \
+	  -o librsapss.a
 
-dist/Hacl_Test_RSAPSS.o: dist/Makefile.basic
+dist/%.o: dist/Makefile.basic
+	$(MAKE) -C dist -f Makefile.basic
 
-dist/rsapss-test.exe: $(HACL_HOME)/lib/c/Lib_PrintBuffer.o dist/Hacl_Test_RSAPSS.o dist/librsapss.a
+dist/rsapss-test.exe: dist/Hacl_Test_RSAPSS.o \
+	$(KREMLIN_HOME)/kremlib/dist/generic/libkremlib.a $(HACL_HOME)/lib/c/Lib_PrintBuffer.o dist/librsapss.a
+
+rsapss-perf-test.exe: test-perf-rsapss.o \
+	$(KREMLIN_HOME)/kremlib/dist/generic/libkremlib.a dist/librsapss.a
+
 
 %.exe:
-	$(CC) $(CFLAGS) $^ -o $@ -L $(KREMLIN_HOME)/kremlib/dist/generic -lkremlib
+	$(CC) $(CFLAGS) $^ -o $@
 
 clean-c:
 	$(MAKE) -C dist/ -f Makefile.basic clean

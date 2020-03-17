@@ -20,6 +20,21 @@ module Loops = Lib.LoopCombinators
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
+val mul_carry_add_u64_st: c_in:uint64 -> a:uint64 -> b:uint64 -> out:lbuffer uint64 1ul ->
+  Stack uint64
+  (requires fun h -> live h out)
+  (ensures  fun h0 c_out h1 -> modifies (loc out) h0 h1 /\
+    (c_out, LSeq.index (as_seq h1 out) 0) == S.mul_carry_add_u64 a b c_in (LSeq.index (as_seq h0 out) 0))
+
+[@CInline]
+let mul_carry_add_u64_st c_in a b out =
+  let d = out.(0ul) in
+  S.lemma_mul_carry_add_64 a b c_in d;
+  let res = mul64_wide a b +! to_u128 #U64 c_in +! to_u128 #U64 out.(0ul) in
+  out.(0ul) <- to_u64 res;
+  to_u64 (res >>. 64ul)
+
+
 inline_for_extraction noextract
 val bn_mul1_add_in_place:
     aLen:size_t
