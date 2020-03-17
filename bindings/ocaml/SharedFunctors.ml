@@ -59,11 +59,28 @@ module Make_EdDSA_generic (C: Buffer)
   end)
 = struct
   type t = C.t
-  let secret_to_public pub priv = Impl.secret_to_public (C.ctypes_buf pub) (C.ctypes_buf priv)
-  let sign signature priv msg = Impl.sign (C.ctypes_buf signature) (C.ctypes_buf priv) (C.size_uint32 msg) (C.ctypes_buf msg)
-  let verify pub msg signature = Impl.verify (C.ctypes_buf pub) (C.size_uint32 msg) (C.ctypes_buf msg) (C.ctypes_buf signature)
-  let expand_keys ks priv = Impl.expand_keys (C.ctypes_buf ks) (C.ctypes_buf priv)
-  let sign_expanded signature ks msg = Impl.sign_expanded (C.ctypes_buf signature) (C.ctypes_buf ks) (C.size_uint32 msg) (C.ctypes_buf msg)
+  let secret_to_public pub priv =
+    assert (C.size pub = 32);
+    assert (C.size priv = 32);
+    assert (C.disjoint pub priv);
+    Impl.secret_to_public (C.ctypes_buf pub) (C.ctypes_buf priv)
+  let sign signature priv msg =
+    assert (C.size priv = 32);
+    assert (C.size signature = 64);
+    Impl.sign (C.ctypes_buf signature) (C.ctypes_buf priv) (C.size_uint32 msg) (C.ctypes_buf msg)
+  let verify pub msg signature =
+    assert (C.size pub = 32);
+    assert (C.size signature = 64);
+    Impl.verify (C.ctypes_buf pub) (C.size_uint32 msg) (C.ctypes_buf msg) (C.ctypes_buf signature)
+  let expand_keys ks priv =
+    assert (C.size ks = 96);
+    assert (C.size priv = 32);
+    assert (C.disjoint ks priv); (* VD: redundant for Bytes, since size is different *)
+    Impl.expand_keys (C.ctypes_buf ks) (C.ctypes_buf priv)
+  let sign_expanded signature ks msg =
+    assert (C.size ks = 96);
+    assert (C.size signature = 64);
+    Impl.sign_expanded (C.ctypes_buf signature) (C.ctypes_buf ks) (C.size_uint32 msg) (C.ctypes_buf msg)
 end
 
 module Make_HashFunction_generic (C: Buffer)
@@ -127,7 +144,12 @@ module Make_Blake2b_generic (C: Buffer)
      end)
 = struct
   type t = C.t
-  let hash key pt output = Impl.blake2b (C.size_uint32 output) (C.ctypes_buf output) (C.size_uint32 pt) (C.ctypes_buf pt) (C.size_uint32 key) (C.ctypes_buf key)
+  let hash key pt output =
+    assert (C.size output > 0);
+    assert (C.disjoint key pt);
+    assert (C.disjoint key output);
+    assert (C.disjoint pt output);
+    Impl.blake2b (C.size_uint32 output) (C.ctypes_buf output) (C.size_uint32 pt) (C.ctypes_buf pt) (C.size_uint32 key) (C.ctypes_buf key)
 end
 
 module Make_Chacha20_Poly1305 = Make_Chacha20_Poly1305_generic (CBytes)

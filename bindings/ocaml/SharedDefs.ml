@@ -8,6 +8,7 @@ module type Buffer = sig
   val size_uint32 : t -> uint32
   val ctypes_buf : t -> buf
   val size : t -> int
+  val equal : t -> t -> bool
   val disjoint : t -> t -> bool
 end
 
@@ -17,6 +18,7 @@ module CBytes : Buffer with type t = Bytes.t and type buf = Bytes.t Ctypes.ocaml
   let size_uint32 b = Unsigned.UInt32.of_int (Bytes.length b)
   let ctypes_buf = Ctypes.ocaml_bytes_start
   let size = Bytes.length
+  let equal = Bytes.equal
   let disjoint b1 b2 = b1 <> b2
 end
 
@@ -26,6 +28,7 @@ module CBigstring : Buffer with type t = Bigstring.t and type buf = uint8 Ctypes
   let size_uint32 b = Unsigned.UInt32.of_int (Bigstring.size b)
   let ctypes_buf b = from_voidp uint8_t (to_voidp (bigarray_start array1 b))
   let size = Bigstring.size
+  let equal = Bigstring.equal
   let disjoint _ _ = true (* TODO: use https://github.com/ocaml/ocaml/pull/8618 once merged *)
 end
 

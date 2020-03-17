@@ -2,7 +2,7 @@ open Unsigned
 
 open SharedDefs
 open SharedFunctors
-open CBytes
+module C = CBytes
 
 module Lib_RandomBuffer_System = Lib_RandomBuffer_System_bindings.Bindings(Lib_RandomBuffer_System_stubs)
 module Hacl_Chacha20Poly1305_32 = Hacl_Chacha20Poly1305_32_bindings.Bindings(Hacl_Chacha20Poly1305_32_stubs)
@@ -25,7 +25,7 @@ module Hacl_Blake2b_256 = Hacl_Blake2b_256_bindings.Bindings(Hacl_Blake2b_256_st
 module Hacl_ECDSA = Hacl_ECDSA_bindings.Bindings(Hacl_ECDSA_stubs)
 
 module RandomBuffer = struct
-  let randombytes buf = Lib_RandomBuffer_System.randombytes (ctypes_buf buf) (size_uint32 buf)
+  let randombytes buf = Lib_RandomBuffer_System.randombytes (C.ctypes_buf buf) (C.size_uint32 buf)
 end
 
 module Chacha20_Poly1305_32 : Chacha20_Poly1305 =
@@ -136,11 +136,11 @@ end)
 
 module Keccak = struct
   let keccak rate capacity suffix input output =
-    Hacl_SHA3.hacl_Impl_SHA3_keccak (UInt32.of_int rate) (UInt32.of_int capacity) (size_uint32 input) (ctypes_buf input) (UInt8.of_int suffix) (size_uint32 output) (ctypes_buf output)
+    Hacl_SHA3.hacl_Impl_SHA3_keccak (UInt32.of_int rate) (UInt32.of_int capacity) (C.size_uint32 input) (C.ctypes_buf input) (UInt8.of_int suffix) (C.size_uint32 output) (C.ctypes_buf output)
   let shake128 input output =
-    Hacl_SHA3.hacl_SHA3_shake128_hacl (size_uint32 input) (ctypes_buf input) (size_uint32 output) (ctypes_buf output)
+    Hacl_SHA3.hacl_SHA3_shake128_hacl (C.size_uint32 input) (C.ctypes_buf input) (C.size_uint32 output) (C.ctypes_buf output)
   let shake256 input output =
-    Hacl_SHA3.hacl_SHA3_shake256_hacl (size_uint32 input) (ctypes_buf input) (size_uint32 output) (ctypes_buf output)
+    Hacl_SHA3.hacl_SHA3_shake256_hacl (C.size_uint32 input) (C.ctypes_buf input) (C.size_uint32 output) (C.ctypes_buf output)
 end
 
 module SHA1 : HashFunction =
@@ -213,22 +213,81 @@ module NaCl = struct
       false
     else
       failwith "Unknown return value"
-  let box_beforenm k pk sk = get_result @@ hacl_NaCl_crypto_box_beforenm (ctypes_buf k) (ctypes_buf pk) (ctypes_buf sk)
+  let check_key_sizes pk sk =
+    assert (C.size pk = 32);
+    assert (C.size sk = 32)
+  let check_easy pt ct n =
+    assert (C.size ct = C.size pt + 16);
+    assert (C.size n = 24);
+    assert (C.disjoint pt ct);
+    assert (C.disjoint n pt);
+    assert (C.disjoint n ct)
+  let check_detached pt ct tag n =
+    assert (C.size ct = C.size pt);
+    assert (C.size tag = 16);
+    assert (C.size n = 24);
+    assert (C.disjoint tag ct);
+    assert (C.disjoint tag pt);
+    assert (C.disjoint n pt);
+    assert (C.disjoint n ct)
+
+  let box_beforenm k pk sk =
+    check_key_sizes pk sk;
+    assert (C.size k = 32);
+    assert (C.disjoint k pk);
+    assert (C.disjoint k sk);
+    get_result @@ hacl_NaCl_crypto_box_beforenm (C.ctypes_buf k) (C.ctypes_buf pk) (C.ctypes_buf sk)
   module Easy = struct
-    let box ct pt n pk sk = get_result @@ hacl_NaCl_crypto_box_easy (ctypes_buf ct) (ctypes_buf pt) (size_uint32 pt) (ctypes_buf n) (ctypes_buf pk) (ctypes_buf sk)
-    let box_open pt ct n pk sk = get_result @@ hacl_NaCl_crypto_box_open_easy (ctypes_buf pt) (ctypes_buf ct) (size_uint32 ct) (ctypes_buf n) (ctypes_buf pk) (ctypes_buf sk)
-    let box_afternm ct pt n k = get_result @@ hacl_NaCl_crypto_box_easy_afternm (ctypes_buf ct) (ctypes_buf pt) (size_uint32 pt) (ctypes_buf n) (ctypes_buf k)
-    let box_open_afternm pt ct n k = get_result @@ hacl_NaCl_crypto_box_open_easy_afternm (ctypes_buf pt) (ctypes_buf ct) (size_uint32 ct) (ctypes_buf n) (ctypes_buf k)
-    let secretbox ct pt n k = get_result @@ hacl_NaCl_crypto_secretbox_easy (ctypes_buf ct) (ctypes_buf pt) (size_uint32 pt) (ctypes_buf n) (ctypes_buf k)
-    let secretbox_open pt ct n k = get_result @@ hacl_NaCl_crypto_secretbox_open_easy (ctypes_buf pt) (ctypes_buf ct) (size_uint32 ct) (ctypes_buf n) (ctypes_buf k)
+    let box ct pt n pk sk =
+      check_key_sizes pk sk;
+      check_easy pt ct n;
+      get_result @@ hacl_NaCl_crypto_box_easy (C.ctypes_buf ct) (C.ctypes_buf pt) (C.size_uint32 pt) (C.ctypes_buf n) (C.ctypes_buf pk) (C.ctypes_buf sk)
+    let box_open pt ct n pk sk =
+      check_key_sizes pk sk;
+      check_easy pt ct n;
+      get_result @@ hacl_NaCl_crypto_box_open_easy (C.ctypes_buf pt) (C.ctypes_buf ct) (C.size_uint32 ct) (C.ctypes_buf n) (C.ctypes_buf pk) (C.ctypes_buf sk)
+    let box_afternm ct pt n k =
+      assert (C.size k = 32);
+      check_easy pt ct n;
+      get_result @@ hacl_NaCl_crypto_box_easy_afternm (C.ctypes_buf ct) (C.ctypes_buf pt) (C.size_uint32 pt) (C.ctypes_buf n) (C.ctypes_buf k)
+    let box_open_afternm pt ct n k =
+      assert (C.size k = 32);
+      check_easy pt ct n;
+      get_result @@ hacl_NaCl_crypto_box_open_easy_afternm (C.ctypes_buf pt) (C.ctypes_buf ct) (C.size_uint32 ct) (C.ctypes_buf n) (C.ctypes_buf k)
+    let secretbox ct pt n k =
+      assert (C.size k = 32);
+      check_easy pt ct n;
+      get_result @@ hacl_NaCl_crypto_secretbox_easy (C.ctypes_buf ct) (C.ctypes_buf pt) (C.size_uint32 pt) (C.ctypes_buf n) (C.ctypes_buf k)
+    let secretbox_open pt ct n k =
+      assert (C.size k = 32);
+      check_easy pt ct n;
+      get_result @@ hacl_NaCl_crypto_secretbox_open_easy (C.ctypes_buf pt) (C.ctypes_buf ct) (C.size_uint32 ct) (C.ctypes_buf n) (C.ctypes_buf k)
   end
   module Detached = struct
-    let box ct tag pt n pk sk = get_result @@ hacl_NaCl_crypto_box_detached (ctypes_buf ct) (ctypes_buf tag) (ctypes_buf pt) (size_uint32 pt) (ctypes_buf n) (ctypes_buf pk) (ctypes_buf sk)
-    let box_open pt ct tag n pk sk = get_result @@ hacl_NaCl_crypto_box_open_detached (ctypes_buf pt) (ctypes_buf ct) (ctypes_buf tag) (size_uint32 ct) (ctypes_buf n) (ctypes_buf pk) (ctypes_buf sk)
-    let box_afternm ct tag pt n k = get_result @@ hacl_NaCl_crypto_box_detached_afternm (ctypes_buf ct) (ctypes_buf tag) (ctypes_buf pt) (size_uint32 pt) (ctypes_buf n) (ctypes_buf k)
-    let box_open_afternm pt ct tag n k = get_result @@ hacl_NaCl_crypto_box_open_detached_afternm (ctypes_buf pt) (ctypes_buf ct) (ctypes_buf tag) (size_uint32 ct) (ctypes_buf n) (ctypes_buf k)
-    let secretbox ct tag pt n k = get_result @@ hacl_NaCl_crypto_secretbox_detached (ctypes_buf ct) (ctypes_buf tag) (ctypes_buf pt) (size_uint32 pt) (ctypes_buf n) (ctypes_buf k)
-    let secretbox_open pt ct tag n k = get_result @@ hacl_NaCl_crypto_secretbox_open_detached (ctypes_buf pt) (ctypes_buf ct) (ctypes_buf tag) (size_uint32 ct) (ctypes_buf n) (ctypes_buf k)
+    let box ct tag pt n pk sk =
+      check_key_sizes pk sk;
+      check_detached pt ct tag n;
+      get_result @@ hacl_NaCl_crypto_box_detached (C.ctypes_buf ct) (C.ctypes_buf tag) (C.ctypes_buf pt) (C.size_uint32 pt) (C.ctypes_buf n) (C.ctypes_buf pk) (C.ctypes_buf sk)
+    let box_open pt ct tag n pk sk =
+      check_key_sizes pk sk;
+      check_detached pt ct tag n;
+      get_result @@ hacl_NaCl_crypto_box_open_detached (C.ctypes_buf pt) (C.ctypes_buf ct) (C.ctypes_buf tag) (C.size_uint32 ct) (C.ctypes_buf n) (C.ctypes_buf pk) (C.ctypes_buf sk)
+    let box_afternm ct tag pt n k =
+      assert (C.size k = 32);
+      check_detached pt ct tag n;
+      get_result @@ hacl_NaCl_crypto_box_detached_afternm (C.ctypes_buf ct) (C.ctypes_buf tag) (C.ctypes_buf pt) (C.size_uint32 pt) (C.ctypes_buf n) (C.ctypes_buf k)
+    let box_open_afternm pt ct tag n k =
+      assert (C.size k = 32);
+      check_detached pt ct tag n;
+      get_result @@ hacl_NaCl_crypto_box_open_detached_afternm (C.ctypes_buf pt) (C.ctypes_buf ct) (C.ctypes_buf tag) (C.size_uint32 ct) (C.ctypes_buf n) (C.ctypes_buf k)
+    let secretbox ct tag pt n k =
+      assert (C.size k = 32);
+      check_detached pt ct tag n;
+      get_result @@ hacl_NaCl_crypto_secretbox_detached (C.ctypes_buf ct) (C.ctypes_buf tag) (C.ctypes_buf pt) (C.size_uint32 pt) (C.ctypes_buf n) (C.ctypes_buf k)
+    let secretbox_open pt ct tag n k =
+      assert (C.size k = 32);
+      check_detached pt ct tag n;
+      get_result @@ hacl_NaCl_crypto_secretbox_open_detached (C.ctypes_buf pt) (C.ctypes_buf ct) (C.ctypes_buf tag) (C.size_uint32 ct) (C.ctypes_buf n) (C.ctypes_buf k)
   end
 end
 
@@ -252,10 +311,10 @@ module ECDSA = struct
     else
       failwith "Unknown return value"
   let sign signature priv msg k =
-    assert (Bytes.length signature = 64);
-    get_result @@ Hacl_ECDSA.hacl_Impl_ECDSA_ecdsa_p256_sha2_sign (ctypes_buf signature) (size_uint32 msg) (ctypes_buf msg) (ctypes_buf priv) (ctypes_buf k)
+    assert (C.size signature = 64);
+    get_result @@ Hacl_ECDSA.hacl_Impl_ECDSA_ecdsa_p256_sha2_sign (C.ctypes_buf signature) (C.size_uint32 msg) (C.ctypes_buf msg) (C.ctypes_buf priv) (C.ctypes_buf k)
   let verify pub msg signature =
-    assert (Bytes.length signature = 64);
+    assert (C.size signature = 64);
     let r, s = Bytes.sub signature 0 32, Bytes.sub signature 32 32 in
-    Hacl_ECDSA.hacl_Impl_ECDSA_ecdsa_p256_sha2_verify (size_uint32 msg) (ctypes_buf msg) (ctypes_buf pub) (ctypes_buf r) (ctypes_buf s)
+    Hacl_ECDSA.hacl_Impl_ECDSA_ecdsa_p256_sha2_verify (C.size_uint32 msg) (C.ctypes_buf msg) (C.ctypes_buf pub) (C.ctypes_buf r) (C.ctypes_buf s)
 end
