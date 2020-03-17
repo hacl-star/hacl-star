@@ -12,33 +12,27 @@ open Lib.LoopCombinators
 val print_nat8_hex: x:nat{x <= maxint U8} -> FStar.All.ML unit
 val print_nat8_hex_pad: x:nat{x <= maxint U8} -> FStar.All.ML unit
 val print_nat8_dec: x:nat{x <= maxint U8} -> FStar.All.ML unit
-val print_nat8_dec_pad: x:nat{x <= maxint U8} -> FStar.All.ML unit
 
 val print_nat32_hex: x:nat{x <= maxint U32} -> FStar.All.ML unit
 val print_nat32_hex_pad: x:nat{x <= maxint U32} -> FStar.All.ML unit
 val print_nat32_dec: x:nat{x <= maxint U32} -> FStar.All.ML unit
-val print_nat32_dec_pad: x:nat{x <= maxint U32} -> FStar.All.ML unit
 
 val print_nat64_hex: x:nat{x <= maxint U64} -> FStar.All.ML unit
 val print_nat64_hex_pad: x:nat{x <= maxint U64} -> FStar.All.ML unit
 val print_nat64_dec: x:nat{x <= maxint U64} -> FStar.All.ML unit
-val print_nat64_dec_pad: x:nat{x <= maxint U64} -> FStar.All.ML unit
 
 
 val print_uint8_hex: uint8 -> FStar.All.ML unit
 val print_uint8_hex_pad: uint8 -> FStar.All.ML unit
 val print_uint8_dec: uint8 -> FStar.All.ML unit
-val print_uint8_dec_pad: uint8 -> FStar.All.ML unit
 
 val print_uint32_hex: uint32 -> FStar.All.ML unit
 val print_uint32_hex_pad: uint32 -> FStar.All.ML unit
 val print_uint32_dec: uint32 -> FStar.All.ML unit
-val print_uint32_dec_pad: uint32 -> FStar.All.ML unit
 
 val print_uint64_hex: uint64 -> FStar.All.ML unit
 val print_uint64_hex_pad: uint64 -> FStar.All.ML unit
 val print_uint64_dec: uint64 -> FStar.All.ML unit
-val print_uint64_dec_pad: uint64 -> FStar.All.ML unit
 
 
 val print_label_nat64: display:bool -> string -> x:nat{x <= maxint U64} -> FStar.All.ML unit

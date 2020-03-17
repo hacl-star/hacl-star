@@ -18,9 +18,6 @@ let print_nat8_hex_pad x =
 let print_nat8_dec x =
   IO.print_uint8_dec (u8_to_UInt8 (u8 x))
 
-let print_nat8_dec_pad x =
-  IO.print_uint8_dec_pad (u8_to_UInt8 (u8 x))
-
 
 let print_nat32_hex x =
   IO.print_uint32 (u32_to_UInt32 (u32 x))
@@ -30,9 +27,6 @@ let print_nat32_hex_pad x =
 
 let print_nat32_dec x =
   IO.print_uint32_dec (u32_to_UInt32 (u32 x))
-
-let print_nat32_dec_pad x =
-  IO.print_uint32_dec_pad (u32_to_UInt32 (u32 x))
 
 
 let print_nat64_hex x =
@@ -44,9 +38,6 @@ let print_nat64_hex_pad x =
 let print_nat64_dec x =
   IO.print_uint64_dec (u64_to_UInt64 (u64 x))
 
-let print_nat64_dec_pad x =
-  IO.print_uint64_dec_pad (u64_to_UInt64 (u64 x))
-
 
 let print_uint8_hex x =
   IO.print_uint8 (u8_to_UInt8 x)
@@ -56,9 +47,6 @@ let print_uint8_hex_pad x =
 
 let print_uint8_dec x =
   IO.print_uint8_dec (u8_to_UInt8 x)
-
-let print_uint8_dec_pad x =
-  IO.print_uint8_dec_pad (u8_to_UInt8 x)
 
 
 let print_uint32_hex x =
@@ -70,9 +58,6 @@ let print_uint32_hex_pad x =
 let print_uint32_dec x =
   IO.print_uint32_dec (u32_to_UInt32 x)
 
-let print_uint32_dec_pad x =
-  IO.print_uint32_dec_pad (u32_to_UInt32 x)
-
 
 let print_uint64_hex x =
   IO.print_uint64 (u64_to_UInt64 x)
@@ -82,9 +67,6 @@ let print_uint64_hex_pad x =
 
 let print_uint64_dec x =
   IO.print_uint64_dec (u64_to_UInt64 x)
-
-let print_uint64_dec_pad x =
-  IO.print_uint64_dec_pad (u64_to_UInt64 x)
 
 
 let print_label_nat64 flag s x =
