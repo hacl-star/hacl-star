@@ -4,7 +4,7 @@ var fs = require('fs');
 var browser = require('./browser.js')
 var loader = require('./loader.js')
 var shell = require('./shell.js')
-
+var api_json = require('./api.json')
 
 // Beginning
 
@@ -61,34 +61,6 @@ var HaclWasm = (function() {
   initialized before each call with the maximum output length (that can
   depend on some input variables).
   */
-
-  const Signatures = {
-    "Curve25519_51": {
-      "ecdh": {
-        "module": "Hacl_Curve25519_51",
-        "name": "ecdh",
-        "args": [{
-            "type": "buffer",
-            "size": 32,
-            "kind": "output",
-          },
-          {
-            "type": "buffer",
-            "size": 32,
-            "kind": "input",
-            "interface_index": 0,
-          },
-          {
-            "type": "buffer",
-            "size": 32,
-            "kind": "input",
-            "interface_index": 1,
-          }
-        ],
-        "return": "bool",
-      }
-    }
-  }
 
   const CheckIfByteArray = function(candidate, length, name) {
     if (!(typeof(candidate) === "object") ||
@@ -166,13 +138,13 @@ var HaclWasm = (function() {
       return_buffers = return_buffers[0]
     }
     memory[0] = sp;
-    if (proto.return === "bool") {
+    if (proto.return.type === "bool") {
       return [call_return === 1, return_buffers];
     }
-    if (proto.return === "integer") {
+    if (proto.return.type === "integer") {
       return [call_return, return_buffers];
     }
-    if (proto.return === "void") {
+    if (proto.return.type === "void") {
       return return_buffers;
     }
     throw "Unimplemented !"
@@ -185,16 +157,35 @@ var HaclWasm = (function() {
       input
     ) {
       await checkIfInitialized();
-      return callWithProto(Signatures.Curve25519_51.ecdh, [
+      console.log(api_json);
+      return callWithProto(api_json.Curve25519_51.ecdh, [
         key,
         input,
       ]);
     }
   }
 
-  return {
+  var checkObj = {
     checkIfInitialized: checkIfInitialized,
+  }
+
+  var api_obj;
+
+  Object.keys(api_json).map(function(key_module, index) {
+    Object.keys(api_json).map(function(key_func, index) {
+      if (api_obj[key_module] === null) {
+        api_obj[key_module] = {}
+      }
+      api_obj[key_module][key_func] =
+    })
+  });
+
+  var restObj = {
     Curve25519_51: Curve25519_51
+  }
+
+  return { ...checkObj,
+    ...restObj
   }
 })();
 
