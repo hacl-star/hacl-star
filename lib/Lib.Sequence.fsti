@@ -348,7 +348,7 @@ val generate_blocks_simple:
  -> blocksize:size_pos
  -> max:nat
  -> n:nat{n <= max}
- -> f:(i:nat{i < max} -> s:lseq a blocksize) ->
+ -> f:(i:nat{i < max} -> lseq a blocksize) ->
  Tot (s:seq a{length s == n * blocksize})
 
 (** The following functions allow us to bridge between unbounded and bounded sequences *)

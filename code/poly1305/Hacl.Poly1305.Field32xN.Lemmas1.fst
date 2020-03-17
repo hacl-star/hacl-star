@@ -56,7 +56,7 @@ let vec_smul_mod_five #w f =
 
 
 noextract
-val carry_wide_felem5_compact: #w:lanes -> inp:felem_wide5 w -> out:felem5 w
+val carry_wide_felem5_compact: #w:lanes -> inp:felem_wide5 w -> felem5 w
 let carry_wide_felem5_compact #w (x0, x1, x2, x3, x4) =
   // m_i <= 4096, x_i <= m_i * max26 * max26
   // felem_wide_fits5 (x0, x1, x2, x3, x4) (m0, m1, m2, m3, m4)
