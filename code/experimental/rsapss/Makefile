@@ -45,8 +45,8 @@ dist/%.o: dist/Makefile.basic
 dist/rsapss-test.exe: dist/Hacl_Test_RSAPSS.o \
 	$(KREMLIN_HOME)/kremlib/dist/generic/libkremlib.a $(HACL_HOME)/lib/c/Lib_PrintBuffer.o dist/librsapss.a
 
-rsapss-perf-test.exe: test-perf-rsapss.o \
-	$(KREMLIN_HOME)/kremlib/dist/generic/libkremlib.a dist/librsapss.a
+rsapss-perf-test.exe: test-perf-rsapss.o $(KREMLIN_HOME)/kremlib/dist/generic/libkremlib.a dist/librsapss.a
+	$(CC) $(CFLAGS) -I $(OPENSSL_HOME)/include -I $(OPENSSL_HOME)/include/crypto -I $(OPENSSL_HOME)/crypto $^ -o $@ $(OPENSSL_HOME)/libcrypto.a -lpthread -ldl
 
 
 %.exe:

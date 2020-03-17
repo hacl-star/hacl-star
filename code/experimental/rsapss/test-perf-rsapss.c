@@ -8,6 +8,15 @@
 #include <unistd.h>
 #include <time.h>
 #include <stdbool.h>
+
+#include "openssl/crypto.h"
+//#include "openssl/digest.h"
+#include "openssl/err.h"
+#include "openssl/evp.h"
+#include "openssl/rsa.h"
+//#include "openssl/opensslv.h"
+#include "openssl/sha.h"
+
 #include "Hacl_RSAPSS.h"
 
 typedef uint64_t cycles;
@@ -114,6 +123,109 @@ hacl_verify(
 
   bool verify_sgnt = Hacl_RSAPSS_rsapss_verify(modBits, pkeyBits, pkey, saltLen, sgnt, msgLen, msg);
   return verify_sgnt;
+}
+
+
+int
+openssl_sign(
+  uint8_t* msg,
+  uint32_t msg_len,
+  uint8_t* kN,
+  const uint32_t kN_len,
+  uint8_t* kE,
+  uint32_t kE_len,
+  uint8_t* kD,
+  uint32_t kD_len,
+  uint8_t* pSignature,
+  size_t sig_len
+)
+{
+  EVP_PKEY *pkey;
+  EVP_MD_CTX *md_ctx = NULL;
+  EVP_PKEY_CTX *pkey_ctx;
+  unsigned char pDigest[32];
+  unsigned digest_len;
+  digest_len = sizeof(pDigest);
+
+  RSA* pRsaKey = RSA_new();
+  BIGNUM *n = BN_new();
+  BIGNUM *e = BN_new();
+  BIGNUM *d = BN_new();
+
+  BN_bin2bn(kN, kN_len, n);
+  BN_bin2bn(kE, kE_len, e);
+  BN_bin2bn(kD, kD_len, d);
+
+  RSA_set0_key(pRsaKey, n, e, d);
+
+  pkey = EVP_PKEY_new();
+  EVP_PKEY_set1_RSA(pkey, pRsaKey);
+
+  md_ctx = EVP_MD_CTX_create();
+  pkey_ctx = EVP_PKEY_CTX_new(pkey, NULL);
+
+
+  int ret =
+    EVP_DigestInit(md_ctx, EVP_sha256()) &&
+    EVP_DigestUpdate(md_ctx, msg, msg_len) &&
+    EVP_DigestFinal(md_ctx, pDigest, &digest_len) &&
+
+    EVP_PKEY_sign_init(pkey_ctx) &&
+    EVP_PKEY_CTX_set_rsa_padding(pkey_ctx, RSA_PKCS1_PSS_PADDING) &&
+    EVP_PKEY_CTX_set_rsa_pss_saltlen(pkey_ctx, 20U) &&
+    EVP_PKEY_CTX_set_rsa_mgf1_md(pkey_ctx, EVP_sha256()) &&
+    EVP_PKEY_sign(pkey_ctx, pSignature, &sig_len, pDigest, digest_len);
+
+  return ret;
+}
+
+
+int
+openssl_verify(
+  uint8_t* msg,
+  uint32_t msg_len,
+  uint8_t* kN,
+  const uint32_t
+  kN_len, uint8_t* kE,
+  uint32_t kE_len,
+  uint8_t* pSignature,
+  size_t sig_len
+)
+{
+  EVP_PKEY *pkey;
+  EVP_MD_CTX *md_ctx = NULL;
+  EVP_PKEY_CTX *pkey_ctx;
+  unsigned char pDigest[32];
+  unsigned digest_len;
+  digest_len = sizeof(pDigest);
+
+  RSA* pRsaKey = RSA_new();
+  BIGNUM *n = BN_new();
+  BIGNUM *e = BN_new();
+
+  BN_bin2bn(kN, kN_len, n);
+  BN_bin2bn(kE, kE_len, e);
+
+  RSA_set0_key(pRsaKey, n, e, NULL);
+
+  pkey = EVP_PKEY_new();
+  EVP_PKEY_set1_RSA(pkey, pRsaKey);
+
+  md_ctx = EVP_MD_CTX_create();
+  pkey_ctx = EVP_PKEY_CTX_new(pkey, NULL);
+
+
+  int ret =
+    EVP_DigestInit(md_ctx, EVP_sha256()) &&
+    EVP_DigestUpdate(md_ctx, msg, msg_len) &&
+    EVP_DigestFinal(md_ctx, pDigest, &digest_len) &&
+
+    EVP_PKEY_verify_init(pkey_ctx) &&
+    EVP_PKEY_CTX_set_rsa_padding(pkey_ctx, RSA_PKCS1_PSS_PADDING) &&
+    EVP_PKEY_CTX_set_signature_md(pkey_ctx, EVP_sha256()) &&
+    EVP_PKEY_verify(pkey_ctx, pSignature, sig_len, pDigest, digest_len);
+
+  return ret;
 }
 
 int main() {
@@ -296,14 +408,26 @@ int main() {
 
   uint8_t sgnt_comp[256U];
   hacl_sign(2048U, test4_n, 24U, test4_e, 2048U, test4_d, 128U, test4_msg, 20U, test4_salt, sgnt_comp);
-  printf("RSAPSS signature:\n");
+  printf("RSAPSS signature HACL*:\n");
   bool ok = print_result(sgnt_comp,test4_sgnt_expected);
 
-  printf("RSAPSS verification:\n");
-  bool res_ver = hacl_verify(2048U, test4_n, 24U, test4_e, 128U, test4_msg, 20U, sgnt_comp);
-  ok = ok && res_ver;
+  openssl_sign(test4_msg, 128U, test4_n, 256U, test4_e, 3U, test4_d, 256U, sgnt_comp, 256U);
+  printf("RSAPSS signature OpenSSL:\n");
+  ok = ok && print_result(sgnt_comp,test4_sgnt_expected);
+
+
+  printf("RSAPSS verification HACL*:\n");
+  bool res_ver = hacl_verify(2048U, test4_n, 24U, test4_e, 128U, test4_msg, 20U, test4_sgnt_expected);
+  //ok = ok && res_ver;
   if (res_ver) printf("Success!\n");
   else printf("**FAILED**\n");
+
+  printf("RSAPSS verification OpenSSL:\n");
+  res_ver = openssl_verify(test4_msg, 128U, test4_n, 256U, test4_e, 3U, test4_sgnt_expected, 256U);
+  //ok = ok && res_ver;
+  if (res_ver) printf("Success!\n");
+  else printf("**FAILED**\n");
+
 
   //uint8_t plain[SIZE];
   //memset(plain,'P',SIZE);
@@ -311,6 +435,7 @@ int main() {
   cycles a,b;
   clock_t t1,t2;
 
+  ok = true;
   for (int j = 0; j < ROUNDS; j++) {
     ok = ok && hacl_sign(2048U, test4_n, 24U, test4_e, 2048U, test4_d, 128U, test4_msg, 20U, test4_salt, comp);
   }
@@ -328,21 +453,54 @@ int main() {
 
 
   for (int j = 0; j < ROUNDS; j++) {
-    ok = ok && hacl_verify(2048U, test4_n, 24U, test4_e, 128U, test4_msg, 20U, sgnt_comp);
+    ok = ok && hacl_verify(2048U, test4_n, 24U, test4_e, 128U, test4_msg, 20U, comp);
   }
 
   t1 = clock();
   a = cpucycles_begin();
   for (int j = 0; j < ROUNDS; j++) {
-    ok = ok && hacl_verify(2048U, test4_n, 24U, test4_e, 128U, test4_msg, 20U, sgnt_comp);
+    ok = ok && hacl_verify(2048U, test4_n, 24U, test4_e, 128U, test4_msg, 20U, comp);
   }
   b = cpucycles_end();
   t2 = clock();
   double diff2 = (double)(t2 - t1)/CLOCKS_PER_SEC;
   uint64_t cyc2 = b - a;
 
+
+  for (int j = 0; j < ROUNDS; j++) {
+    ok = ok && openssl_sign(test4_msg, 128U, test4_n, 256U, test4_e, 3U, test4_d, 256U, comp, 256U);
+  }
+
+  t1 = clock();
+  a = cpucycles_begin();
+  for (int j = 0; j < ROUNDS; j++) {
+    ok = ok && openssl_sign(test4_msg, 128U, test4_n, 256U, test4_e, 3U, test4_d, 256U, comp, 256U);
+  }
+  b = cpucycles_end();
+  t2 = clock();
+  double diff3 = (double)(t2 - t1)/CLOCKS_PER_SEC;
+  uint64_t cyc3 = b - a;
+
+
+
+  for (int j = 0; j < ROUNDS; j++) {
+    ok = ok && openssl_verify(test4_msg, 128U, test4_n, 256U, test4_e, 3U, comp, 256U);
+  }
+
+  t1 = clock();
+  a = cpucycles_begin();
+  for (int j = 0; j < ROUNDS; j++) {
+    ok = ok && openssl_verify(test4_msg, 128U, test4_n, 256U, test4_e, 3U, comp, 256U);
+  }
+  b = cpucycles_end();
+  t2 = clock();
+  double diff4 = (double)(t2 - t1)/CLOCKS_PER_SEC;
+  uint64_t cyc4 = b - a;
+
   printf("\nHACL* RSAPSS signature\n"); print_time(diff1,cyc1);
   printf("\nHACL* RSAPSS verification\n"); print_time(diff2,cyc2);
+  printf("\nOpenSSL RSAPSS signature\n"); print_time(diff3,cyc3);
+  printf("\nOpenSSL RSAPSS verification\n"); print_time(diff4,cyc4);
 
   if (ok) return EXIT_SUCCESS;
   else return EXIT_FAILURE;
