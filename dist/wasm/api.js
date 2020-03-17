@@ -157,7 +157,6 @@ var HaclWasm = (function() {
       input
     ) {
       await checkIfInitialized();
-      console.log(api_json);
       return callWithProto(api_json.Curve25519_51.ecdh, [
         key,
         input,
@@ -169,23 +168,23 @@ var HaclWasm = (function() {
     checkIfInitialized: checkIfInitialized,
   }
 
-  var api_obj;
+  var api_obj = {};
 
-  Object.keys(api_json).map(function(key_module, index) {
-    Object.keys(api_json).map(function(key_func, index) {
-      if (api_obj[key_module] === null) {
+  Object.keys(api_json).map(function(key_module) {
+    Object.keys(api_json[key_module]).map(function(key_func) {
+      if (api_obj[key_module] == null) {
         api_obj[key_module] = {}
       }
-      api_obj[key_module][key_func] =
+      api_obj[key_module][key_func] = async function() {
+          var argumentArray = [...arguments];
+          await checkIfInitialized();
+          return callWithProto(api_json[key_module][key_func], argumentArray);
+      }
     })
   });
 
-  var restObj = {
-    Curve25519_51: Curve25519_51
-  }
-
   return { ...checkObj,
-    ...restObj
+    ...api_obj
   }
 })();
 
