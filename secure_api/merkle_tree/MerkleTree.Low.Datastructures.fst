@@ -140,9 +140,9 @@ let hash_r_free #_ v =
   B.free v
 
 noextract inline_for_extraction
-val hreg (hsz:hash_size_t): regional (h:hash_size_t) (hash #hsz)
+val hreg (hsz:hash_size_t): regional (hash_size_t) (hash #hsz)
 let hreg hsz =
-  Rgl #(h:hash_size_t) #(hash #hsz) hsz
+  Rgl #(hash_size_t) #(hash #hsz) hsz
       (hash_region_of #hsz)
       (B.loc_buffer)
       (hash_dummy #hsz)
@@ -256,7 +256,7 @@ val hash_vec_r_alloc:
   #hsz':Ghost.erased hash_size_t ->
   hsz:hash_size_t { hsz == Ghost.reveal hsz' } ->
   r:HST.erid ->
-  HST.ST (v:hash_vec #hsz)
+  HST.ST (hash_vec #hsz)
     (requires (fun h0 -> true))
     (ensures (fun h0 v h1 ->
       Set.subset (Map.domain (MHS.get_hmap h0))

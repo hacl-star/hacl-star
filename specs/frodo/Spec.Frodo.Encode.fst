@@ -109,7 +109,7 @@ let frodo_key_encode2 b a i res =
 val frodo_key_encode:
     b:size_nat{0 < b /\ b <= 8}
   -> a:lbytes (params_nbar * params_nbar * b / 8)
-  -> res:matrix params_nbar params_nbar
+  -> matrix params_nbar params_nbar
 let frodo_key_encode b a =
   let res = create params_nbar params_nbar in
   Loops.repeati params_nbar (frodo_key_encode2 b a) res
@@ -149,7 +149,7 @@ let frodo_key_decode2 b a i res =
 val frodo_key_decode:
     b:size_nat{0 < b /\ b <= 8}
   -> a:matrix params_nbar params_nbar
-  -> res:lbytes (params_nbar * params_nbar * b / 8)
+  -> lbytes (params_nbar * params_nbar * b / 8)
 let frodo_key_decode b a =
   let resLen = params_nbar * params_nbar * b / 8 in
   let res = Seq.create resLen (u8 0) in

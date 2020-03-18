@@ -12,7 +12,7 @@ let one:elem =
   assert_norm (1 < prime);
   1
 
-val pow: a:elem -> b:nat -> res:elem
+val pow: a:elem -> b:nat -> elem
 let rec pow a b =
   if b = 0 then 1
   else fmul a (pow a (b - 1))
