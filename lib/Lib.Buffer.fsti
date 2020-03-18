@@ -933,7 +933,7 @@ val fill_blocks_simple:
   -> spec:(mem -> GTot (i:size_nat{i < v n} -> Seq.lseq t (v bs)))
   -> impl:(i:size_t{v i < v n} -> Stack unit
       (requires fun h1 ->
-        FStar.Math.Lemmas.lemma_mult_lt_right (v bs) (v i) (v n);
+        FStar.Math.Lemmas.lemma_mult_le_right (v bs) (v i) (v n);
       	(v i + 1) * v bs <= max_size_t /\
         modifies (loc (gsub output 0ul (i *! bs))) h0 h1)
       (ensures  fun h1 _ h2 ->
@@ -1073,7 +1073,7 @@ val map_blocks_multi:
   -> spec_f:(mem -> GTot (i:nat{i < v nb} -> Seq.lseq a (v blocksize) -> Seq.lseq a (v blocksize)))
   -> impl_f:(i:size_t{v i < v nb} -> Stack unit
       (requires fun h1 ->
-        FStar.Math.Lemmas.lemma_mult_lt_right (v blocksize) (v i) (v nb);
+        FStar.Math.Lemmas.lemma_mult_le_right (v blocksize) (v i) (v nb);
         (v i + 1) * v blocksize <= max_size_t /\
         modifies (loc (gsub output 0ul (i *! blocksize))) h0 h1)
       (ensures  fun h1 _ h2 ->
@@ -1100,7 +1100,7 @@ val map_blocks:
   -> spec_l:(mem -> GTot (i:nat{i == v len / v blocksize} -> llen:size_nat{llen < v blocksize} -> Seq.lseq a llen -> Seq.lseq a llen))
   -> impl_f:(i:size_t{v i < v len / v blocksize} -> Stack unit
       (requires fun h1 ->
-        FStar.Math.Lemmas.lemma_mult_lt_right (v blocksize) (v i) (v len / v blocksize);
+        FStar.Math.Lemmas.lemma_mult_le_right (v blocksize) (v i) (v len / v blocksize);
         (v i + 1) * v blocksize <= max_size_t /\
         modifies (loc (gsub output 0ul (i *! blocksize))) h0 h1)
       (ensures  fun h1 _ h2 ->
