@@ -98,5 +98,6 @@ async function checkTestVectors(func_sig, func, msg) {
 
 api.HaclWasm.checkIfInitialized().then(async function() {
   await checkTestVectors(test_vectors.Curve25519_51.ecdh, api.HaclWasm.Curve25519_51.ecdh, "Curve25519_51");
-  await checkTestVectors(test_vectors.Chacha20.encrypt, api.HaclWasm.Chacha20.encrypt, "Chacha20")
+  await checkTestVectors(test_vectors.Chacha20.encrypt, api.HaclWasm.Chacha20.encrypt, "Chacha20 encrypt")
+  await checkTestVectors(test_vectors.Chacha20.decrypt, api.HaclWasm.Chacha20.decrypt, "Chacha20 decrypt")
 })
