@@ -28,8 +28,10 @@ open Hacl.Impl.ECDSA.MontgomeryMultiplication
 
 open Hacl.Impl.P256.Signature.Common
 
+open Hacl.Impl.P256.Compression
 open Hacl.Impl.ECDSA.P256SHA256.Signature
 open Hacl.Impl.ECDSA.P256SHA256.Verification
+
 
 
 val ecdsa_p256_sha2_sign: result: lbuffer uint8 (size 64) -> mLen: size_t -> m: lbuffer uint8 mLen ->
@@ -73,3 +75,13 @@ val ecdsa_p256_sha2_verify:
       let s = nat_from_bytes_be (as_seq h1 s) in
       modifies0 h0 h1 /\
       result == Spec.ECDSA.ecdsa_verification (publicKeyX, publicKeyY) r s (v mLen) (as_seq h0 m))
+
+
+
+val decompressionNotCompressed: notCompressedForm -> result: point -> Stack uint64 
+  (requires fun h -> True)
+  (ensures fun h0 _ h1 -> True)
+
+val decompressionCompressed: compressedForm -> result: point -> Stack uint64 
+  (requires fun h -> True)
+  (ensures fun h0 _ h1 -> True)

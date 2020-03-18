@@ -31,9 +31,18 @@ open Hacl.Impl.P256.Signature.Common
 open Hacl.Impl.ECDSA.P256SHA256.Signature
 open Hacl.Impl.ECDSA.P256SHA256.Verification
 
+open Hacl.Impl.P256.Compression
+
 
 let ecdsa_p256_sha2_sign result mLen m privKey k = 
   ecdsa_signature result mLen m privKey k
 
 let ecdsa_p256_sha2_verify mLen m pubKey r s =
   ecdsa_verification pubKey r s mLen m
+
+
+let decompressionNotCompressed b result = 
+  Hacl.Impl.P256.Compression.decompressionNotCompressed b result
+
+let decompressionCompressed b result = 
+  Hacl.Impl.P256.Compression.decompressionCompressed b result
