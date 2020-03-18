@@ -8,6 +8,7 @@ open Lib.IntTypes
 open Lib.Buffer
 
 open Hacl.Impl.P256
+open Hacl.Impl.P256.MM.Exponent
 
 open Spec.P256.Definitions
 
@@ -61,7 +62,9 @@ let decompressionCompressed b result =
     begin
       let x = sub b (size 1) (size 32) in 
       copy x result;
+      (* to domain *)
       computeYFromX x (sub result (size 32) (size 32)) correctIdentifier2;
+      (* from Domain *)
       true
     end
   else 
