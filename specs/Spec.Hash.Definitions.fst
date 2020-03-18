@@ -187,7 +187,7 @@ let words_of_bytes: a:hash_alg -> Tot (#len:size_nat{FStar.Mul.(len * word_lengt
 (** The data format taken and returned by the hash specifications. *)
 
 (* Input data. *)
-type bytes =  m:Seq.seq uint8
+type bytes = Seq.seq uint8
 
 (* Input data, multiple of a block length. *)
 let bytes_block a =
@@ -210,7 +210,7 @@ let init_t (a: hash_alg) =
 let update_t (a: hash_alg) =
   h:words_state a ->
   l:bytes { Seq.length l = block_length a } ->
-  h':words_state a
+  words_state a
 
 let pad_t (a: hash_alg) =
   l:nat { l <= max_input_length a } ->

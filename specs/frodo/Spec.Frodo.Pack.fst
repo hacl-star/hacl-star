@@ -65,7 +65,7 @@ val frodo_pack:
   -> #n2:size_nat{n1 * n2 <= max_size_t /\ (n1 * n2) % 8 = 0}
   -> d:size_nat{d * ((n1 * n2) / 8) <= max_size_t /\ d <= 16}
   -> a:matrix n1 n2
-  -> res:lbytes (d * ((n1 * n2) / 8))
+  -> lbytes (d * ((n1 * n2) / 8))
 let frodo_pack #n1 #n2 d a =
   Loops.repeat_gen ((n1 * n2) / 8)
     (frodo_pack_state #n1 #n2 d)
