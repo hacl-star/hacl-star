@@ -712,9 +712,28 @@ let uploadB b =
 
 
 let computeYFromX x result sign = 
-  ()
-  (*
   push_frame();
     let aCoordinateBuffer = create (size 4) (u64 0) in 
     let bCoordinateBuffer = create (size 4) (u64 0) in 
+    let tempBuffer = create (size 4) (u64 0) in 
+   
+    uploadA aCoordinateBuffer;
+    uploadB bCoordinateBuffer;
+
+    montgomery_multiplication_buffer aCoordinateBuffer x aCoordinateBuffer;
+
+    cube x tempBuffer;
+    p256_add tempBuffer aCoordinateBuffer tempBuffer;
+    p256_add tempBuffer bCoordinateBuffer tempBuffer;
+
+    uploadZeroImpl aCoordinateBuffer;
+    p256_sub aCoordinateBuffer tempBuffer bCoordinateBuffer;
+
+    cmovznz4 sign bCoordinateBuffer tempBuffer tempBuffer;
+    admit();
+    
+
+
+ pop_frame()   
+    
     

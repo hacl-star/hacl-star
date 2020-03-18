@@ -24,13 +24,6 @@ open FStar.Mul
 
 #reset-options "--z3rlimit 100" 
 
-val cube: a: felem -> result: felem -> Stack unit
-  (requires fun h -> live h a /\ live h result /\ disjoint a result /\ as_nat h a < prime)
-  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ 
-    as_nat h1 result = toDomain_ (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 a) % prime256) /\ 
-    as_nat h1 result = toDomain_ (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 a)))
-
-
 let cube a result = 
   let h0 = ST.get() in 
     montgomery_multiplication_buffer a a result;

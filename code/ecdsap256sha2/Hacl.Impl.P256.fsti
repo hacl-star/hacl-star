@@ -227,11 +227,6 @@ val secretToPublicWithoutNorm: result: point -> scalar: lbuffer uint8 (size 32) 
 	rN == p1))  
 
 
-val computeYFromX: x: felem ->  result: felem -> sign: bool -> Stack unit 
-  (requires fun h -> live h x /\ live h result)
+val computeYFromX: x: felem ->  result: felem -> sign: uint64 -> Stack unit 
+  (requires fun h -> live h x /\ live h result /\ as_nat h x < prime)
   (ensures fun h0 _ h1 -> True)
-
-
-let computeYFromX x result sign = ()
-
-  

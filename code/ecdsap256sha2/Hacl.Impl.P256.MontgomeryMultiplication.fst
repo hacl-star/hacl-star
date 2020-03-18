@@ -458,3 +458,26 @@ let exponent a result tempBuffer =
   lemma_mod_mul_distr_l (power1 * power2 * power3) power4 prime256;
   big_power k ((pow2 32 - 1) * pow2 224) (pow2 192) ((pow2 94 -1 ) * pow2 2) 1;
   assert_norm(((pow2 32 - 1) * pow2 224 + pow2 192 + (pow2 94 -1 ) * pow2 2 + 1) = prime256 - 2)
+
+
+(* sqPower =  (prime + 1) // 4 *)
+val uploadSQpower: a: felem -> Stack unit 
+  (requires fun h -> live h a)
+  (ensures fun h0 _ h1 -> modifies (loc a) h0 h1 /\ as_nat h1 a == 28948022302589062190674361737351893382521535853822578548883407827216774463488)
+
+let uploadSQpower a = 
+  upd a (size 0) (u64 0);
+  upd a (size 1) (u64 1073741824);
+  upd a (size 2) (u64 4611686018427387904);
+  upd a (size 3) (u64 4611686017353646080)
+
+
+val square_root: a: felem -> result: felem -> Stack unit 
+  (requires fun h -> True)
+  (ensures fun h0 _ h1 -> True)
+
+let square_root a result = 
+  push_frame();
+    let sqPower = create (size 4) (u64 0) in 
+    uploadSQpower sqPower;
+    ()

@@ -1427,6 +1427,16 @@ let scalar_bit #buf_type s n =
   to_u64 ((s.(n /. 8ul) >>. (n %. 8ul)) &. u8 1)
 
 
+val uploadZeroImpl: f: felem -> Stack unit 
+  (requires fun h -> live h f)
+  (ensures fun h0 _ h1 -> as_nat h1 f == 0 /\ modifies (loc f) h0 h1)
+
+let uploadZeroImpl f = 
+  upd f (size 0) (u64 0);
+  upd f (size 1) (u64 0);
+  upd f (size 2) (u64 0);
+  upd f (size 3) (u64 0)
+
 val uploadOneImpl: f: felem -> Stack unit
   (requires fun h -> live h f)
   (ensures fun h0 _ h1 -> as_nat h1 f == 1 /\ modifies (loc f) h0 h1)
