@@ -171,11 +171,6 @@ let long = lbuffer uint64 (size 9)
 
 type scalar = lbuffer uint8 (size 32)
 
-val border_felem4: f: felem4 -> Lemma (as_nat4 f < pow2 256)
-
-let border_felem4 (f0, f1, f2, f3) = 
-    assert_norm(as_nat4 (f0, f1, f2, f3) < pow2 256)
-
 noextract
 val as_nat9: f: felem9 -> Tot nat 
 let as_nat9 f = 
